@@ -69,6 +69,7 @@ const int ICON_OFFSET			= GraphicsMisc::ScaleByDPIFactor(2);
 const int ATTRIB_INDENT			= GraphicsMisc::ScaleByDPIFactor(6);
 const int TIP_PADDING			= GraphicsMisc::ScaleByDPIFactor(4);
 const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
+const int LEVEL_INDENT			= GraphicsMisc::ScaleByDPIFactor(16);
 
 const CRect TEXT_BORDER			= CRect(4, 3, 3, 2);
 
@@ -353,6 +354,19 @@ void CKanbanListCtrlArray::SetShowCompletionCheckboxes(BOOL bShow)
 		ASSERT(pList);
 
 		pList->SetShowCompletionCheckboxes(bShow);
+	}
+}
+
+void CKanbanListCtrlArray::SetIndentSubtasks(BOOL bIndent)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->SetIndentSubtasks(bIndent);
 	}
 }
 
@@ -774,9 +788,11 @@ CKanbanListCtrl::CKanbanListCtrl(const CKanbanItemMap& data, const KANBANCOLUMN&
 	m_fonts(fonts),
 	m_aPriorityColors(aPriorityColors),
 	m_bStrikeThruDoneTasks(FALSE),
+	m_bIndentSubtasks(FALSE),
 	m_bTextColorIsBkgnd(FALSE),
 	m_bSelected(FALSE),
 	m_bShowTaskColorAsBar(FALSE),
+	m_bShowCompletionCheckboxes(FALSE),
 	m_bColorBarByPriority(FALSE),
 	m_dwSelectingTask(0),
 	m_nLineHeight(-1),
@@ -940,7 +956,7 @@ BOOL CKanbanListCtrl::NeedVScrollbar() const
 		return FALSE;
 
 	CRect rFirst;
-	GetItemRect(0, rFirst, LVIR_BOUNDS);
+	GetItemRect(0, rFirst, NULL);
 
 	int nDistance = 0;
 
@@ -951,7 +967,7 @@ BOOL CKanbanListCtrl::NeedVScrollbar() const
 	else // > 1
 	{
 		CRect rLast;
-		GetItemRect((nNumItems - 1), rLast, LVIR_BOUNDS);
+		GetItemRect((nNumItems - 1), rLast, NULL);
 
 		nDistance = (rLast.bottom - rFirst.top);
 	}
@@ -1030,6 +1046,14 @@ void CKanbanListCtrl::SetSelected(BOOL bSelected)
 void CKanbanListCtrl::SetShowCompletionCheckboxes(BOOL bShow)
 {
 	m_bShowCompletionCheckboxes = bShow;
+
+	if (GetSafeHwnd())
+		Invalidate(TRUE);
+}
+
+void CKanbanListCtrl::SetIndentSubtasks(BOOL bIndent)
+{
+	m_bIndentSubtasks = bIndent;
 
 	if (GetSafeHwnd())
 		Invalidate(TRUE);
@@ -1232,7 +1256,7 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 		
 				CRect rItem;
-				GetItemRect(nItem, rItem, LVIR_BOUNDS);
+				GetItemRect(nItem, rItem, NULL);
 				rItem.DeflateRect(1, 1);
 
 				// Checkbox
@@ -1439,17 +1463,36 @@ BOOL CKanbanListCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& r
 	return FALSE;
 }
 
-BOOL CKanbanListCtrl::GetItemCheckboxRect(int nItem, CRect& rItem) const
+BOOL CKanbanListCtrl::GetItemCheckboxRect(int nItem, CRect& rItem, const KANBANITEM* pKI) const
 {
 	if (m_bShowCompletionCheckboxes)
 	{
-		GetItemRect(nItem, rItem, LVIR_BOUNDS);
+		GetItemRect(nItem, rItem, pKI);
 
 		return GetItemCheckboxRect(rItem);
 	}
 
 	// else
 	return FALSE;
+}
+
+BOOL CKanbanListCtrl::GetItemRect(int nItem, CRect& rItem, const KANBANITEM* pKI) const
+{
+	if (!CListCtrl::GetItemRect(nItem, rItem, LVIR_BOUNDS))
+		return FALSE;
+
+	if (m_bIndentSubtasks)
+	{
+		if (!pKI)
+			pKI = GetKanbanItem(GetItemData(nItem));
+
+		ASSERT(pKI);
+
+		// Indent to match level
+		rItem.left += (pKI->nLevel * LEVEL_INDENT);
+	}
+
+	return TRUE;
 }
 
 BOOL CKanbanListCtrl::GetItemCheckboxRect(CRect& rItem) const
@@ -1468,9 +1511,9 @@ BOOL CKanbanListCtrl::GetItemCheckboxRect(CRect& rItem) const
 	return FALSE;
 }
 
-BOOL CKanbanListCtrl::GetItemLabelTextRect(int nItem, CRect& rItem, BOOL bEdit) const
+BOOL CKanbanListCtrl::GetItemLabelTextRect(int nItem, CRect& rItem, BOOL bEdit, const KANBANITEM* pKI) const
 {
-	if (!GetItemRect(nItem, rItem, LVIR_BOUNDS))
+	if (!GetItemRect(nItem, rItem, pKI))
 		return FALSE;
 
 	rItem.DeflateRect(1, 1);
@@ -1502,17 +1545,20 @@ BOOL CKanbanListCtrl::GetItemLabelTextRect(int nItem, CRect& rItem, BOOL bEdit) 
 	return TRUE;
 }
 
-BOOL CKanbanListCtrl::GetItemTooltipRect(int nItem, CRect& rTip) const
+BOOL CKanbanListCtrl::GetItemTooltipRect(int nItem, CRect& rTip, const KANBANITEM* pKI) const
 {
-	const KANBANITEM* pKI = m_data.GetItem(GetItemData(nItem));
-
 	if (!pKI)
 	{
-		ASSERT(0);
-		return FALSE;
+		pKI = GetKanbanItem(GetItemData(nItem));
+
+		if (!pKI)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
 	}
 
-	if (!GetItemLabelTextRect(nItem, rTip))
+	if (!GetItemLabelTextRect(nItem, rTip, FALSE, pKI))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -2003,6 +2049,12 @@ int CALLBACK CKanbanListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lP
 			nCompare = CTimeHelper().Compare(pKI1->dTimeSpent, MapUnitsToTHUnits(pKI1->nTimeSpentUnits), 
 											pKI2->dTimeSpent, MapUnitsToTHUnits(pKI2->nTimeSpentUnits));
 			break;
+
+		case IUI_NONE: // Synonymous with IUI_POSITION
+			ASSERT(pSort->bSubtasksBelowParent);
+
+			// Avoid reversal of sign below
+			return ((pKI1->nPosition > pKI2->nPosition) ? 1 : -1);
 		}
 	}
 	
@@ -2090,7 +2142,7 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
 		// Test for checkbox hit
 		CRect rCheckbox;
 
-		if (GetItemCheckboxRect(nHit, rCheckbox) && rCheckbox.PtInRect(point))
+		if (GetItemCheckboxRect(nHit, rCheckbox, NULL) && rCheckbox.PtInRect(point))
 		{
 			ClearSelection();
 			SelectItem(nHit, FALSE);
@@ -2270,14 +2322,15 @@ LRESULT CKanbanListCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
 	{
 		CRect rTip;
 
-		if (GetItemTooltipRect(nItem, rTip))
+		if (GetItemTooltipRect(nItem, rTip, NULL))
 		{
 			pTI->hwnd = GetSafeHwnd();
 			pTI->uId = GetItemData(nItem);
 			pTI->uFlags |= TTF_TRANSPARENT;
 			pTI->lpszText = _tcsdup(GetItemText(nItem, 0)); // MFC will free the duplicated string
 
-			GetItemRect(nItem, &pTI->rect, LVIR_BOUNDS);
+			GetItemRect(nItem, rTip, NULL);
+			pTI->rect = rTip;
 			
 			return pTI->uId;
 		}
@@ -2299,7 +2352,7 @@ void CKanbanListCtrl::OnTooltipShow(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	ASSERT(pKI);
 
 	CRect rTip;
-	VERIFY(GetItemTooltipRect(nItem, rTip));
+	VERIFY(GetItemTooltipRect(nItem, rTip, pKI));
 
 	m_tooltip.SetMaxTipWidth(rTip.Width());
 	m_tooltip.SetFont(m_fonts.GetFont((pKI->dwParentID == 0) ? GMFS_BOLD : 0));

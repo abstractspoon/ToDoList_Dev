@@ -153,7 +153,8 @@ KANBANITEM::KANBANITEM(DWORD dwID)
 	dwParentID(0),
 	nLevel(0),
 	bLocked(FALSE),
-	bSomeSubtaskDone(FALSE)
+	bSomeSubtaskDone(FALSE),
+	nPosition(-1)
 {
 	CDateHelper::ClearDate(dtCreate);
 	CDateHelper::ClearDate(dtDone);
@@ -184,6 +185,7 @@ KANBANITEM& KANBANITEM::operator=(const KANBANITEM& ki)
 	bLocked = ki.bLocked;
 	bHasIcon = ki.bHasIcon;
 	bSomeSubtaskDone = ki.bSomeSubtaskDone;
+	nPosition = ki.nPosition;
 
 	mapAttribValues.Copy(ki.mapAttribValues);
 	
@@ -207,6 +209,7 @@ BOOL KANBANITEM::operator==(const KANBANITEM& ki) const
 			(bHasIcon == ki.bHasIcon) &&
 			(bSomeSubtaskDone == ki.bSomeSubtaskDone) &&
 			(dwParentID == ki.dwParentID) &&
+			(nPosition == ki.nPosition) &&
 			mapAttribValues.MatchAll(ki.mapAttribValues));
 }
 

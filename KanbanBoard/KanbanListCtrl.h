@@ -84,6 +84,7 @@ public:
 	void SetStrikeThruDoneTasks(BOOL bSet = TRUE);
 	void SetColorTaskBarByPriority(BOOL bSet = TRUE);
 	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
+	void SetIndentSubtasks(BOOL bIndent = TRUE);
 
 	void OnDisplayAttributeChanged();
 	int CalcAvailableAttributeWidth(int nListWidth = -1) const;
@@ -104,6 +105,7 @@ protected:
 	BOOL m_bStrikeThruDoneTasks;
 	BOOL m_bSavingToImage;
 	BOOL m_bShowCompletionCheckboxes;
+	BOOL m_bIndentSubtasks;
 
 	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;
@@ -158,11 +160,12 @@ protected:
 	BOOL NeedVScrollbar() const;
 	void RefreshBkgndColor();
 	BOOL HandleLButtonClick(CPoint point);
-	BOOL GetItemCheckboxRect(int nItem, CRect& rItem) const;
+	BOOL GetItemCheckboxRect(int nItem, CRect& rItem, const KANBANITEM* pKI) const;
 	BOOL GetItemCheckboxRect(CRect& rItem) const;
-	BOOL GetItemLabelTextRect(int nItem, CRect& rItem, BOOL bEdit = FALSE) const;
+	BOOL GetItemLabelTextRect(int nItem, CRect& rItem, BOOL bEdit = FALSE, const KANBANITEM* pKI = NULL) const;
 	BOOL InitTooltip();
-	BOOL GetItemTooltipRect(int nItem, CRect& rItem) const;
+	BOOL GetItemTooltipRect(int nItem, CRect& rItem, const KANBANITEM* pKI) const;
+	BOOL GetItemRect(int nItem, CRect& rItem, const KANBANITEM* pKI) const;
 
 	BOOL DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	BOOL DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const;
@@ -206,6 +209,7 @@ public:
 	void SetStrikeThruDoneTasks(BOOL bSet = TRUE);
 	void SetColorTaskBarByPriority(BOOL bSet = TRUE);
 	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
+	void SetIndentSubtasks(BOOL bIndent = TRUE);
 	
 	int GetVisibleCount(BOOL bIncBacklog) const;
 	int GetVisibleTaskCount() const;

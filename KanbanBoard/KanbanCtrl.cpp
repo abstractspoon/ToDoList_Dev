@@ -564,7 +564,7 @@ int CKanbanCtrl::GetTaskTags(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStri
 }
 
 // External interface
-BOOL CKanbanCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib)
+BOOL CKanbanCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib) const
 {
 	switch (nAttrib)
 	{
@@ -603,8 +603,15 @@ BOOL CKanbanCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib)
 }
 
 // External interface
-BOOL CKanbanCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
+BOOL CKanbanCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib) const
 {
+	switch (nAttrib)
+	{
+	case IUI_NONE:
+		return HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
+	}
+
+	// all else
 	return WantEditUpdate(nAttrib);
 }
 
@@ -645,6 +652,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 		pKI->bLocked = pTasks->IsTaskLocked(hTask, true);
 		pKI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 		pKI->bFlag = (pTasks->IsTaskFlagged(hTask, false) ? TRUE : FALSE);
+		pKI->nPosition = pTasks->GetTaskPosition(hTask);
 
 		pKI->SetColor(pTasks->GetTaskTextColor(hTask));
 
@@ -1805,6 +1813,7 @@ CKanbanListCtrl* CKanbanCtrl::AddNewListCtrl(const KANBANCOLUMN& colDef)
 		pList->SetColorTaskBarByPriority(HasOption(KBCF_COLORBARBYPRIORITY));
 		pList->SetShowTaskColorAsBar(HasOption(KBCF_SHOWTASKCOLORASBAR));
 		pList->SetShowCompletionCheckboxes(HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES));
+		pList->SetIndentSubtasks(HasOption(KBCF_INDENTSUBTASKS));
 
 		if (pList->Create(IDC_LISTCTRL, this))
 		{
@@ -2019,6 +2028,10 @@ void CKanbanCtrl::SetOption(DWORD dwOption, BOOL bSet)
 
 			case KBCF_SHOWCOMPLETIONCHECKBOXES:
 				m_aListCtrls.SetShowCompletionCheckboxes(bSet);
+				break;
+
+			case KBCF_INDENTSUBTASKS:
+				m_aListCtrls.SetIndentSubtasks(bSet);
 				break;
 			}
 		}
@@ -2249,14 +2262,15 @@ void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
 	IUI_ATTRIBUTE nOldSort = m_nSortBy;
 	m_nSortBy = nBy;
 
-	if (nBy != IUI_NONE)
+	BOOL bSubtasksBelowParent = HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
+	
+	if ((nBy != IUI_NONE) || bSubtasksBelowParent)
 	{
-		ASSERT(bAscending != -1);
+		ASSERT((nBy == IUI_NONE) || (bAscending != -1));
 		m_bSortAscending = bAscending;
 
 		// do the sort
  		CHoldRedraw hr(*this);
-		BOOL bSubtasksBelowParent = HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
 
 		m_aListCtrls.SortItems(nBy, m_bSortAscending, bSubtasksBelowParent);
 	}

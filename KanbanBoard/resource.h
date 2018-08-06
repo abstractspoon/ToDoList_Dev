@@ -72,6 +72,7 @@
 #define IDC_OPTIONS                     16036
 #define IDC_CUSTOMATTRIBID              16037
 #define IDC_ALWAYSSHOWBACKLOG           16038
+#define IDC_INDENTSUBTASKS              16039
 #define IDC_CUSTOMATTRIB                16040
 #define IDC_FIXEDATTRIBLABEL            16041
 #define IDC_SHOWTASKCOLORASBAR          16042

@@ -72,7 +72,7 @@ END
 IDD_KANBAN_DIALOG DIALOGEX 0, 0, 411, 189
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Attribute to 'track'",IDC_ATTRIBUTES_LABEL,0,2,114,8
     COMBOBOX        IDC_ATTRIBUTES,0,13,105,116,CBS_DROPDOWNLIST | CBS_SORT | 
@@ -153,40 +153,42 @@ BEGIN
                     WS_EX_TRANSPARENT
 END
 
-IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 358
+IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 376
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CONTROL         "S&ort subtasks below their respective parent task",
                     IDC_SORTSUBTASKSBELOWPARENT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,7,330,10
+    CONTROL         "&Indent subtasks",IDC_INDENTSUBTASKS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,22,330,10
     CONTROL         "S&how a task's colour as a vertical bar",
                     IDC_SHOWTASKCOLORASBAR,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,22,330,10
+                    WS_TABSTOP,7,37,330,10
     CONTROL         "Colour &bar by task priority",IDC_COLORBARBYPRIORITY,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,37,321,10
-    LISTBOX         IDC_DISPLAYATTRIBUTES,16,69,312,84,LBS_SORT | 
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,52,321,10
+    LISTBOX         IDC_DISPLAYATTRIBUTES,16,84,312,84,LBS_SORT | 
                     LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
                     LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_HSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Columns",IDC_COLUMNGROUP,7,170,330,8
+    LTEXT           "Columns",IDC_COLUMNGROUP,7,185,330,8
     CONTROL         "Al&ways show 'Backlog' column",IDC_ALWAYSSHOWBACKLOG,
-                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,186,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,201,
                     330,10
-    LTEXT           "Attribute to 'track'",IDC_FIXEDATTRIBLABEL,17,218,307,8
-    COMBOBOX        IDC_ATTRIBUTES,16,229,105,116,CBS_DROPDOWNLIST | 
+    LTEXT           "Attribute to 'track'",IDC_FIXEDATTRIBLABEL,17,233,307,8
+    COMBOBOX        IDC_ATTRIBUTES,16,244,105,116,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CUSTOMATTRIBID,127,229,105,116,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_CUSTOMATTRIBID,127,244,105,116,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     CONTROL         "List1",IDC_COLUMNDEFS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
-                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,248,313,94
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,263,313,94
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,278,231,53,16
-    GROUPBOX        "Fixed column definitions: (optional)",IDC_STATIC,7,204,
+                    WS_VISIBLE,278,246,53,16
+    GROUPBOX        "Fixed column definitions: (optional)",IDC_STATIC,7,218,
                     330,147,0,WS_EX_TRANSPARENT
     GROUPBOX        "Display the following attributes for each task:",
-                    IDC_STATIC,7,54,330,109
+                    IDC_STATIC,7,69,330,109
 END
 
 
@@ -211,7 +213,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 337
         TOPMARGIN, 7
-        BOTTOMMARGIN, 351
+        BOTTOMMARGIN, 369
     END
 END
 #endif    // APSTUDIO_INVOKED

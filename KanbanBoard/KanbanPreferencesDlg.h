@@ -36,6 +36,7 @@ public:
 	BOOL GetAlwaysShowBacklog() const { return m_bAlwaysShowBacklog; }
 	BOOL GetShowTaskColorAsBar() const { return m_bShowTaskColorAsBar; }
 	BOOL GetColorBarByPriority() const { return m_bColorBarByPriority; }
+	BOOL GetIndentSubtasks() const { return m_bIndentSubtasks; }
 	IUI_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const;
 	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const;
 	int SetDisplayAttributes(const CKanbanAttributeArray& aAttrib);
@@ -61,6 +62,7 @@ protected:
 
 	BOOL	m_bSortSubtaskBelowParent;
 	BOOL	m_bColorBarByPriority;
+	BOOL	m_bIndentSubtasks;
 	BOOL	m_bAlwaysShowBacklog;
 	CString	m_sFixedCustomAttribID;
 	IUI_ATTRIBUTE m_nFixedAttrib;
@@ -124,6 +126,7 @@ public:
 	BOOL GetAlwaysShowBacklog() const { return m_page.GetAlwaysShowBacklog(); }
 	BOOL GetShowTaskColorAsBar() const { return m_page.GetShowTaskColorAsBar(); }
 	BOOL GetColorBarByPriority() const { return m_page.GetColorBarByPriority(); }
+	BOOL GetIndentSubtasks() const { return m_page.GetIndentSubtasks(); }
 	IUI_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const { return m_page.GetFixedAttributeToTrack(sCustomID); }
 	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const { return m_page.GetDisplayAttributes(aAttrib); }
 

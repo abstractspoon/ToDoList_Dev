@@ -69,7 +69,7 @@ struct KANBANITEM
 	DWORD dwTaskID, dwParentID;
 	BOOL bDone, bGoodAsDone, bSomeSubtaskDone;
 	BOOL bParent, bFlag;
-	int nPercent, nLevel;
+	int nPercent, nLevel, nPosition;
 	BOOL bLocked, bHasIcon;
 
 	CString sTitle, sPath;

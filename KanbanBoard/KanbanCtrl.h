@@ -81,8 +81,8 @@ public:
 	int GetCustomAttributeIDs(CStringArray& aCustAttribIDs) const;
 	int GetAttributeValues(CKanbanAttributeValueMap& mapValues) const;
 
-	static BOOL WantEditUpdate(IUI_ATTRIBUTE nAttribute);
-	static BOOL WantSortUpdate(IUI_ATTRIBUTE nAttribute);
+	BOOL WantSortUpdate(IUI_ATTRIBUTE nAttribute) const;
+	BOOL WantEditUpdate(IUI_ATTRIBUTE nAttribute) const;
 
 protected:
 	BOOL m_bDragging;
