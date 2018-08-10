@@ -144,6 +144,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ColorBrewerCombobox.cpp" />
     <ClCompile Include="colorbutton.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -696,6 +697,7 @@
     <ClInclude Include="checkcombobox.h" />
     <ClInclude Include="checklistboxex.h" />
     <ClInclude Include="Clipboard.h" />
+    <ClInclude Include="ColorBrewerCombobox.h" />
     <ClInclude Include="colorbutton.h" />
     <ClInclude Include="colorcombobox.h" />
     <ClInclude Include="ComboListboxPositioner.h" />

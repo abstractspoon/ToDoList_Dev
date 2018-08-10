@@ -18,6 +18,7 @@
 #define IDC_SELECTEDTASKDATES           1032
 #define IDC_DRAGMODE                    1033
 #define IDC_SNAPMODES                   1034
+#define IDC_HEATMAP                     1035
 #define IDC_SHOWCALCSTARTDATES          1038
 #define IDC_SHOWCALCDUEDATES            1039
 #define IDC_DYNAMICTASKHEIGHT           1040

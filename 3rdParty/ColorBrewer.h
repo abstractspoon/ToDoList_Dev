@@ -20,14 +20,17 @@
 class CColorBrewerPalette : public CDWordArray
 {
 public:
-	CColorBrewerPalette& operator=(const CColorBrewerPalette& arr)
-	{
-		Copy(arr);
-		return *this;
-	}
+	CColorBrewerPalette& operator=(const CColorBrewerPalette& pal);
+	BOOL operator==(const CColorBrewerPalette& other) const;
 };
 
-typedef CArray<CColorBrewerPalette, CColorBrewerPalette&> CColorBrewerPaletteArray;
+//////////////////////////////////////////////////////////////////////
+
+class CColorBrewerPaletteArray : public CArray<CColorBrewerPalette, CColorBrewerPalette&>
+{
+public:
+	int Find(const CColorBrewerPalette& pal) const;
+};
 
 //////////////////////////////////////////////////////////////////////
 

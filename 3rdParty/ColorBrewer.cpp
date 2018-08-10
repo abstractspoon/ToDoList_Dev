@@ -14,6 +14,46 @@ BYTE TEXTFRIENDLY_TOLERANCE = (255 / 5); // 20%
 
 //////////////////////////////////////////////////////////////////////
 
+CColorBrewerPalette& CColorBrewerPalette::operator=(const CColorBrewerPalette& pal)
+{
+	Copy(pal);
+	return *this;
+}
+
+BOOL CColorBrewerPalette::operator==(const CColorBrewerPalette& other) const
+{
+	int nColor = GetSize();
+
+	if (nColor != other.GetSize())
+		return FALSE;
+
+	while (nColor--)
+	{
+		if (GetAt(nColor) != other[nColor])
+			return FALSE;
+	}
+		
+	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int CColorBrewerPaletteArray::Find(const CColorBrewerPalette& pal) const
+{
+	int nPal = GetSize();
+
+	while (nPal--)
+	{
+		if (GetData()[nPal] == pal)
+			return nPal;
+	}
+
+	// Not found
+	return -1;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 CColorBrewer::CColorBrewer(DWORD dwFlags) : m_dwFlags(dwFlags)
 {
 }

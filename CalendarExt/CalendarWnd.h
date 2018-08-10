@@ -14,6 +14,7 @@
 #include "..\Shared\enstring.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
+#include "..\Shared\ColorBrewerComboBox.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -73,6 +74,7 @@ protected:
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CComboBox m_cbSnapModes;
+	CColorBrewerComboBox m_cbHeatMap;
 
 	CBrush m_brBack;
 	UITHEME m_theme;
