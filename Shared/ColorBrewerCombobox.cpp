@@ -148,7 +148,7 @@ void CColorBrewerComboBox::FillCombo()
 		SetCurSel(m_nInitSel);
 
 	if (nMaxColors > 0)
-		SetDroppedWidth(nMaxColors * (GetItemHeight(0) + 2));
+		SetDroppedWidth((nMaxColors * GetItemHeight(0)) + 5);
 }
 
 int CColorBrewerComboBox::GetSelectedPalette(CColorBrewerPalette& pal) const

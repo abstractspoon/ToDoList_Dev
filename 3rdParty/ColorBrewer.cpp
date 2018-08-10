@@ -111,9 +111,8 @@ int CColorBrewer::GetPalettes(int nNumColors, CColorBrewerPaletteArray& aPalette
 	if (!bAppend)
 		aPalettes.RemoveAll();
 
-	if (nNumColors < 3)
+	if (nNumColors < COLORBREWER_MINCOLORS)
 	{
-		ASSERT(0);
 		return 0;
 	}
 
@@ -155,11 +154,8 @@ int CColorBrewer::GetPalettes(COLORBREWER_PALETTETYPE nType, CColorBrewerPalette
 	if (!bAppend)
 		aPalettes.RemoveAll();
 
-	if ((nNumColors != -1) && (nNumColors < 3))
-	{
-		ASSERT(0);
+	if ((nNumColors != -1) && (nNumColors < COLORBREWER_MINCOLORS))
 		return 0;
-	}
 
 	for (int nGroup = 0; nGroup < COLORBREWER_NUMGROUPS; nGroup++)
 	{
@@ -322,10 +318,10 @@ BOOL CColorBrewer::PaletteMatches(const COLORBREWER_PALETTE& pal, int nNumColors
 	return (pal.nNumColors == nNumColors);
 }
 
-BOOL CColorBrewer::SynthesizePalette(int nNumColors, const COLORBREWER_PALETTEGROUP& groupFrom, CColorBrewerPalette& palTo) const
+BOOL CColorBrewer::SynthesizePalette(int nNumFinalColors, const COLORBREWER_PALETTEGROUP& groupFrom, CColorBrewerPalette& palFinal) const
 {
 	// Sanity checks
-	if (!(m_dwFlags & CBF_SYNTHESIZE))
+	if ((m_dwFlags & CBF_SYNTHESIZE) == 0)
 	{
 		ASSERT(0);
 		return FALSE;
@@ -333,84 +329,56 @@ BOOL CColorBrewer::SynthesizePalette(int nNumColors, const COLORBREWER_PALETTEGR
 
 	// Can only synthesize from a group not having a
 	// native palette with that number of colours
-	if (GroupMatches(groupFrom, nNumColors))
+	if (GroupMatches(groupFrom, nNumFinalColors))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	int nPal = groupFrom.nNumPalettes;
+	const int INTERVALS[] = { 2, 3, 4, 5, 6, 7, 8 };
+	const int NUMINTERVALS = (sizeof(INTERVALS) / sizeof(int));
 
-	while (nPal--)
+	for (int i = 0; i < NUMINTERVALS; i++)
 	{
-		if (SynthesizePalette(nNumColors, groupFrom.nType, groupFrom.palettes[nPal], palTo))
-			return TRUE;
+		int nPal = groupFrom.nNumPalettes;
+
+		while (nPal--)
+		{
+			if (SynthesizePalette(nNumFinalColors, groupFrom.nType, groupFrom.palettes[nPal], palFinal, INTERVALS[i]))
+				return TRUE;
+		}
 	}
 	
 	return FALSE;
 }
 
-BOOL CColorBrewer::SynthesizePalette(int nNumColors, COLORBREWER_PALETTETYPE nTypeFrom, const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& palTo) const
+BOOL CColorBrewer::SynthesizePalette(int nNumFinalColors, COLORBREWER_PALETTETYPE nTypeFrom, const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& palFinal, int nNumIntervals) const
 {
 	switch (nTypeFrom)
 	{
 	case CBPT_SEQUENTIAL:
 		{
-			if (nNumColors % 2) // odd number
+			int nReqColorCount = (((nNumFinalColors + nNumIntervals) / nNumIntervals) + 1);
+
+			if ((((nReqColorCount - 1) * nNumIntervals) + 1) < nNumFinalColors)
+				return FALSE;
+
+			CColorBrewerPalette temp;
+						
+			if (CopyPalette(palFrom, temp) != nReqColorCount)
+				return FALSE;
+
+			palFinal.SetSize(nNumFinalColors);
+
+			for (int nCol = 0; nCol < nNumFinalColors; nCol++)
 			{
-				CColorBrewerPalette temp;
-				int nReqColorCount = ((nNumColors / 2) + 1);
+				int nTempCol = (nCol / nNumIntervals);
+				int nOffset = (nCol % nNumIntervals);
 
-				if (CopyPalette(palFrom, temp) != nReqColorCount)
-					return FALSE;
-
-				palTo.SetSize(nNumColors);
-
-				for (int nCol = 0; nCol < nNumColors; nCol++)
-				{
-					int nTempCol = (nCol / 2);
-
-					switch (nCol % 2)
-					{
-					case 0: // 0, 2, 4, 6, 8, 10, etc
-						palTo[nCol] = temp[nTempCol];
-						break;
-
-					case 1: // 1, 3, 5, 7, 9, 11, etc
-						palTo[nCol] = BlendColors(temp[nTempCol], 1, temp[nTempCol + 1], 1); // 50/50
-						break;
-					}
-				}
-			}
-			else // even number
-			{
-				CColorBrewerPalette temp;
-				int nReqColorCount = ((nNumColors / 3) + 1);
-
-				if (CopyPalette(palFrom, temp) != nReqColorCount)
-					return FALSE;
-
-				palTo.SetSize(nNumColors);
-
-				for (int nCol = 0; nCol < nNumColors; nCol++)
-				{
-					int nTempCol = (nCol / 3);
-
-					switch (nCol % 3)
-					{
-					case 0: // 0, 3, 6, 9, etc
-						palTo[nCol] = temp[nTempCol];
-						break;
-
-					case 1: // 1, 4, 7, 10, etc
-						palTo[nCol] = BlendColors(temp[nTempCol], 2, temp[nTempCol + 1], 1); // 66/33
-						break;
-
-					case 2: // 2, 5, 8, 11, etc
-						palTo[nCol] = BlendColors(temp[nTempCol], 1, temp[nTempCol + 1], 2); // 33/66
-						break;
-					}
-				}
+				palFinal[nCol] = BlendColors(temp[nTempCol], 
+											(nNumIntervals - nOffset), 
+											temp[nTempCol + 1], 
+											nOffset);
 			}
 		}
 		break;
@@ -425,9 +393,8 @@ BOOL CColorBrewer::SynthesizePalette(int nNumColors, COLORBREWER_PALETTETYPE nTy
 		break;
 
 	case CBPT_QUALITATIVE:
-		// Not supported because no colour has any relationship
-		// to those colours adjacent to it and therefore blending
-		// adjacent colours in any way makes no sense
+		// Not supported because no colour has any relationship to its adjacent
+		// colours and therefore blending adjacent colours makes no sense
 		return FALSE;
 
 	default:
@@ -452,6 +419,13 @@ int CColorBrewer::FindPalette(const COLORBREWER_PALETTEGROUP& group, int nNumCol
 
 COLORREF CColorBrewer::BlendColors(COLORREF color1, int nAmount1, COLORREF color2, int nAmount2)
 {
+	if (nAmount1 == 0)
+		return color2;
+
+	if (nAmount2 == 0)
+		return color1;
+
+	// else
 	BYTE nRed = (BYTE)(((GetRValue(color1) * nAmount1) + (GetRValue(color2) * nAmount2)) / (nAmount1 + nAmount2));
 	BYTE nGreen = (BYTE)(((GetGValue(color1) * nAmount1) + (GetGValue(color2) * nAmount2)) / (nAmount1 + nAmount2));
 	BYTE nBlue = (BYTE)(((GetBValue(color1) * nAmount1) + (GetBValue(color2) * nAmount2)) / (nAmount1 + nAmount2));

@@ -2,6 +2,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
+static const int COLORBREWER_MINCOLORS = 3;
 static const int COLORBREWER_MAXCOLORS = 12;
 static const int COLORBREWER_MAXPALETTES = 10;
 

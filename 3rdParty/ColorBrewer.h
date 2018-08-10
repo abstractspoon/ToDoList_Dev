@@ -73,8 +73,8 @@ protected:
 	BOOL PaletteMatches(const COLORBREWER_PALETTE& pal, int nNumColors) const;
 	int FindPalette(const COLORBREWER_PALETTEGROUP& group, int nNumColors) const;
 
-	BOOL SynthesizePalette(int nNumColors, const COLORBREWER_PALETTEGROUP& groupFrom, CColorBrewerPalette& palTo) const;
-	BOOL SynthesizePalette(int nNumColors, COLORBREWER_PALETTETYPE nTypeFrom, const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& palTo) const;
+	BOOL SynthesizePalette(int nNumFinalColors, const COLORBREWER_PALETTEGROUP& groupFrom, CColorBrewerPalette& palFinal) const;
+	BOOL SynthesizePalette(int nNumFinalColors, COLORBREWER_PALETTETYPE nTypeFrom, const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& palFinal, int nNumIntervals) const;
 
 	static BOOL ValidatePalettes();
 	static BOOL ValidateGroup(const COLORBREWER_PALETTEGROUP& group);
