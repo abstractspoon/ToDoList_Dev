@@ -20,6 +20,7 @@
 class CColorBrewerPalette : public CDWordArray
 {
 public:
+	CColorBrewerPalette& operator=(const COLORBREWER_PALETTE& pal);
 	CColorBrewerPalette& operator=(const CColorBrewerPalette& pal);
 	BOOL operator==(const CColorBrewerPalette& other) const;
 };

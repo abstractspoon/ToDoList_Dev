@@ -20,7 +20,7 @@ class CColorBrewerComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
-	CColorBrewerComboBox(DWORD dwBrewerFlags = 0);
+	CColorBrewerComboBox(DWORD dwBrewerFlags = 0, UINT nIDNoneString = 0);
 
 	BOOL Initialize();
 	BOOL Initialize(COLORBREWER_PALETTETYPE nType);
@@ -38,6 +38,7 @@ protected:
 	CColorBrewer m_brewer;
 	CColorBrewerPaletteArray m_aPalettes;
 	int m_nInitSel;
+	CString m_sNone;
 
 // Operations
 public:

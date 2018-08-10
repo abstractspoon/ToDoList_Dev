@@ -13,6 +13,53 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDR_CALENDAR            "ToDoList Calendar"
+    IDS_SNAP_NEARESTHOUR    "Nearest Hour"
+    IDS_SNAP_NEARESTDAY     "Nearest Day"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_SNAP_FREE           "No Snapping"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_SNAP_NEARESTHALFDAY "Nearest Half-Day"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_CAL_GOTOTODAY        "\nScroll To Today"
+    ID_CAL_PREFS            "\nCalendar Preferences"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_HELP                 "\nOnline Help"
+    IDS_NOHEATMAP           "<none>"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // English (U.K.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
@@ -75,29 +122,6 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_CALENDAR            ICON    DISCARDABLE     "res\\icon1.ico"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// String Table
-//
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDR_CALENDAR            "ToDoList Calendar"
-    IDS_SNAP_NEARESTHOUR    "Nearest Hour"
-    IDS_SNAP_NEARESTDAY     "Nearest Day"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_SNAP_FREE           "No Snapping"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_SNAP_NEARESTHALFDAY "Nearest Half-Day"
-END
-
 #endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -327,23 +351,6 @@ END
 
 IDR_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
 IDB_TOOLBAR_STD         BITMAP  MOVEABLE PURE   "RES\\toolbar_std.bmp"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// String Table
-//
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_CAL_GOTOTODAY        "\nScroll To Today"
-    ID_CAL_PREFS            "\nCalendar Preferences"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_HELP                 "\nOnline Help"
-END
-
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 

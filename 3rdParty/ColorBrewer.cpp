@@ -14,6 +14,16 @@ BYTE TEXTFRIENDLY_TOLERANCE = (255 / 5); // 20%
 
 //////////////////////////////////////////////////////////////////////
 
+CColorBrewerPalette& CColorBrewerPalette::operator=(const COLORBREWER_PALETTE& pal)
+{
+	ASSERT(sizeof(DWORD) == sizeof(COLORREF));
+
+	SetSize(pal.nNumColors);
+	CopyMemory(GetData(), pal.crPalette, (pal.nNumColors * sizeof(COLORREF)));
+
+	return *this;
+}
+
 CColorBrewerPalette& CColorBrewerPalette::operator=(const CColorBrewerPalette& pal)
 {
 	Copy(pal);
@@ -367,7 +377,7 @@ BOOL CColorBrewer::SynthesizePalette(int nNumColors, COLORBREWER_PALETTETYPE nTy
 						break;
 
 					case 1: // 1, 3, 5, 7, 9, 11, etc
-						palTo[nCol] = BlendColors(temp[nTempCol], 1, palTo[nTempCol + 1], 1); // 50/50
+						palTo[nCol] = BlendColors(temp[nTempCol], 1, temp[nTempCol + 1], 1); // 50/50
 						break;
 					}
 				}
@@ -393,11 +403,11 @@ BOOL CColorBrewer::SynthesizePalette(int nNumColors, COLORBREWER_PALETTETYPE nTy
 						break;
 
 					case 1: // 1, 4, 7, 10, etc
-						palTo[nCol] = BlendColors(temp[nTempCol], 2, palTo[nTempCol + 1], 1); // 66/33
+						palTo[nCol] = BlendColors(temp[nTempCol], 2, temp[nTempCol + 1], 1); // 66/33
 						break;
 
 					case 2: // 2, 5, 8, 11, etc
-						palTo[nCol] = BlendColors(temp[nTempCol], 1, palTo[nTempCol + 1], 2); // 33/66
+						palTo[nCol] = BlendColors(temp[nTempCol], 1, temp[nTempCol + 1], 2); // 33/66
 						break;
 					}
 				}
@@ -425,7 +435,7 @@ BOOL CColorBrewer::SynthesizePalette(int nNumColors, COLORBREWER_PALETTETYPE nTy
 		return FALSE;
 	}
 
-	return FALSE;
+	return TRUE;
 }
 
 int CColorBrewer::FindPalette(const COLORBREWER_PALETTEGROUP& group, int nNumColors) const
@@ -464,22 +474,17 @@ int CColorBrewer::CopyPalette(const COLORBREWER_PALETTE& pal, CColorBrewerPalett
 
 int CColorBrewer::CopyPalette(const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& aTo) const
 {
-	int nCol = palFrom.nNumColors;
-
 	if (m_dwFlags & CBF_TEXTSAFE)
 	{
-		while (nCol--)
+		for (int nCol = 0; nCol < palFrom.nNumColors; nCol++)
 		{
 			if (IsTextSafeColor(palFrom.crPalette[nCol]))
 				aTo.Add(palFrom.crPalette[nCol]);
 		}
 	}
-	else // all
+	else
 	{
-		ASSERT(sizeof(COLORREF) == sizeof(DWORD));
-
-		aTo.SetSize(nCol);
-		CopyMemory(aTo.GetData(), palFrom.crPalette, (nCol * sizeof(COLORREF)));
+		aTo = palFrom;
 	}
 
 	return aTo.GetSize();

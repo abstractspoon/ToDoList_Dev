@@ -43,6 +43,7 @@
 #define ID_CAL_PREFS                    32775
 #define IDS_SNAP_FREE                   32790
 #define ID_GOTOTODAY                    32795
+#define IDS_NOHEATMAP                   57671
 
 // Next default values for new objects
 // 

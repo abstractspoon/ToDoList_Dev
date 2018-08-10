@@ -5,6 +5,7 @@
 #include "ColorBrewerCombobox.h"
 
 #include "..\shared\GraphicsMisc.h"
+#include "..\shared\DialogHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -15,10 +16,15 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CContentTypeComboBox
 
-CColorBrewerComboBox::CColorBrewerComboBox(DWORD dwBrewerFlags) 
-	: m_nInitSel(0), m_brewer(dwBrewerFlags)
+CColorBrewerComboBox::CColorBrewerComboBox(DWORD dwBrewerFlags, UINT nIDNoneString) 
+	: 
+	m_nInitSel(0), 
+	m_brewer(dwBrewerFlags)
 {
 	SetMinDLUHeight(9);
+
+	if (nIDNoneString)
+		m_sNone.LoadString(nIDNoneString);
 }
 
 CColorBrewerComboBox::~CColorBrewerComboBox()
@@ -121,13 +127,19 @@ void CColorBrewerComboBox::FillCombo()
 	if (COwnerdrawComboBoxBase::GetCount())
 		return;
 
+	if (!m_sNone.IsEmpty())
+	{
+		AddString(m_sNone);
+		SetItemData(0, 0);
+	}
+
 	ASSERT (m_aPalettes.GetSize() > 0);
 	int nMaxColors = 0;
 
 	for (int nPal = 0; nPal < m_aPalettes.GetSize(); nPal++)
 	{
 		int nItem = AddString(_T(""));
-		SetItemData(nItem, nPal);
+		SetItemData(nItem, nPal + 1); // one-based ie. zero is 'non-selected'
 
 		nMaxColors = max(nMaxColors, m_aPalettes[nPal].GetSize());
 	}
@@ -141,11 +153,11 @@ void CColorBrewerComboBox::FillCombo()
 
 int CColorBrewerComboBox::GetSelectedPalette(CColorBrewerPalette& pal) const
 {
-	int nSel = GetCurSel();
+	int nSel = GetCurSel(); // zero-based
 
-	if (nSel != CB_ERR)
+	if (nSel >= 0)
 		pal = m_aPalettes[nSel];
-
+	
 	return nSel;
 }
 
@@ -157,18 +169,18 @@ int CColorBrewerComboBox::SetSelectedPalette(const CColorBrewerPalette& pal)
 	return nSel;
 }
 
-void CColorBrewerComboBox::SetCurSel(int nSel)
+void CColorBrewerComboBox::SetCurSel(int nPal)
 {
 	if (GetSafeHwnd())
-		COwnerdrawComboBoxBase::SetCurSel(nSel);
+		CDialogHelper::SelectItemByData(*this, nPal + 1); // one-based
 	else
-		m_nInitSel = nSel;
+		m_nInitSel = nPal;
 }
 
 int CColorBrewerComboBox::GetCurSel() const
 {
 	if (GetSafeHwnd())
-		return COwnerdrawComboBoxBase::GetCurSel();
+		return ((int)CDialogHelper::GetSelectedItemData(*this) - 1); // zero-based
 	
 	// else
 	return m_nInitSel;
@@ -177,28 +189,30 @@ int CColorBrewerComboBox::GetCurSel() const
 void CColorBrewerComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 										  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
-	if (nItem != CB_ERR)
+	if (nItem == CB_ERR)
+		return;
+
+	int nPalette = ((int)dwItemData - 1); // zero-based
+
+	if (nPalette == -1)
 	{
-		int nPalette = (int)dwItemData;
-	
-		if (nPalette != -1)
-		{
-			const CColorBrewerPalette& palette = m_aPalettes[nPalette];
-			int nNumColors = palette.GetSize();
+		COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
+		return;
+	}
 
-			CRect rColor(rect);
-			//rColor.DeflateRect(2, 2);
-			rColor.right = rColor.left + rColor.Height();
+	const CColorBrewerPalette& palette = m_aPalettes[nPalette];
+	int nNumColors = palette.GetSize();
 
-			for (int nCol = 0; nCol < nNumColors; nCol++)
-			{
-				COLORREF crFill = palette[nCol];
-				COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.3);
+	CRect rColor(rect);
+	rColor.right = rColor.left + rColor.Height();
 
-				GraphicsMisc::DrawRect(&dc, rColor, crFill, crBorder);
-				rColor.OffsetRect(rColor.Width() + 2, 0);
-			}
-		}
+	for (int nCol = 0; nCol < nNumColors; nCol++)
+	{
+		COLORREF crFill = palette[nCol];
+		COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.3);
+
+		GraphicsMisc::DrawRect(&dc, rColor, crFill, crBorder);
+		rColor.OffsetRect(rColor.Width() + 2, 0);
 	}
 }
 
