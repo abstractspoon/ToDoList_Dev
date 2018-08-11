@@ -18,12 +18,13 @@
 #define IDC_SELECTEDTASKDATES           1032
 #define IDC_DRAGMODE                    1033
 #define IDC_SNAPMODES                   1034
-#define IDC_HEATMAP                     1035
+#define IDC_HEATMAPPALETTE              1035
 #define IDC_SHOWCALCSTARTDATES          1038
 #define IDC_SHOWCALCDUEDATES            1039
 #define IDC_DYNAMICTASKHEIGHT           1040
 #define IDC_SHOWOVERDUEASDUETODAY       1041
 #define IDC_HIDEPARENTTASKS             1042
+#define IDC_ENABLEHEATMAP               1043
 #define IDC_SHOWMINICALENDAR            2001
 #define IDC_SHOWTASKSCONTINUOUS         2002
 #define IDC_SHOWSTARTDATES              2003
@@ -51,7 +52,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        32793
 #define _APS_NEXT_COMMAND_VALUE         32799
-#define _APS_NEXT_CONTROL_VALUE         1043
+#define _APS_NEXT_CONTROL_VALUE         1044
 #define _APS_NEXT_SYMED_VALUE           32893
 #endif
 #endif

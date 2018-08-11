@@ -48,9 +48,8 @@ CCalendarWnd::CCalendarWnd()
 	:	
 	m_bReadOnly(FALSE),
 #pragma warning(disable:4355)
-	m_dlgPrefs(this),
+	m_dlgPrefs(this)
 #pragma warning(default:4355)
-	m_cbHeatMap(CBF_SYNTHESIZE, IDS_NOHEATMAP)
 {
 	m_icon.LoadIcon(IDR_CALENDAR);
 }
@@ -65,7 +64,6 @@ void CCalendarWnd::DoDataExchange(CDataExchange* pDX)
 
 	DDX_Control(pDX, IDC_NUMWEEKS, m_cbNumWeeks);
 	DDX_Control(pDX, IDC_SNAPMODES, m_cbSnapModes);
-	DDX_Control(pDX, IDC_HEATMAP, m_cbHeatMap);
 	DDX_Text(pDX, IDC_SELECTEDTASKDATES, m_sSelectedTaskDates);
 }
 
@@ -184,7 +182,6 @@ BOOL CCalendarWnd::OnInitDialog()
 	m_BigCalendar.SetFirstWeekDay(CDateHelper::GetFirstDayOfWeek());
 
 	m_cbNumWeeks.SetCurSel(m_BigCalendar.GetVisibleWeeks() - 1);
-	m_cbHeatMap.Initialize(CBPT_SEQUENTIAL, 10);
 
 	// build snap combobox
 	InitSnapCombo();

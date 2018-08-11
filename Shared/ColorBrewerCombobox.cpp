@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "ColorBrewerCombobox.h"
 
+#include "..\shared\Misc.h"
 #include "..\shared\GraphicsMisc.h"
 #include "..\shared\DialogHelper.h"
 
@@ -18,7 +19,6 @@ static char THIS_FILE[] = __FILE__;
 
 CColorBrewerComboBox::CColorBrewerComboBox(DWORD dwBrewerFlags, UINT nIDNoneString) 
 	: 
-	m_nInitSel(0), 
 	m_brewer(dwBrewerFlags)
 {
 	SetMinDLUHeight(9);
@@ -115,8 +115,12 @@ void CColorBrewerComboBox::RebuildCombo()
 {
 	if (GetSafeHwnd())
 	{
+		int nSel = GetCurSel();
+
 		ResetContent();
 		FillCombo();
+
+		SetCurSel(nSel);
 	}
 }
 
@@ -138,14 +142,11 @@ void CColorBrewerComboBox::FillCombo()
 
 	for (int nPal = 0; nPal < m_aPalettes.GetSize(); nPal++)
 	{
-		int nItem = AddString(_T(""));
+		int nItem = AddString(Misc::Format(nPal));
 		SetItemData(nItem, nPal + 1); // one-based ie. zero is 'non-selected'
 
 		nMaxColors = max(nMaxColors, m_aPalettes[nPal].GetSize());
 	}
-
-	if (m_nInitSel < GetCount())
-		SetCurSel(m_nInitSel);
 
 	if (nMaxColors > 0)
 		SetDroppedWidth((nMaxColors * GetItemHeight(0)) + 5);
@@ -153,37 +154,19 @@ void CColorBrewerComboBox::FillCombo()
 
 int CColorBrewerComboBox::GetSelectedPalette(CColorBrewerPalette& pal) const
 {
-	int nSel = GetCurSel(); // zero-based
+	int nPal = ((int)CDialogHelper::GetSelectedItemData(*this) - 1); // zero-based
 
-	if (nSel >= 0)
-		pal = m_aPalettes[nSel];
+	if (nPal >= 0)
+		pal = m_aPalettes[nPal];
 	
-	return nSel;
+	return nPal;
 }
 
 int CColorBrewerComboBox::SetSelectedPalette(const CColorBrewerPalette& pal)
 {
-	int nSel = m_aPalettes.Find(pal);
-	SetCurSel(nSel);
-
-	return nSel;
-}
-
-void CColorBrewerComboBox::SetCurSel(int nPal)
-{
-	if (GetSafeHwnd())
-		CDialogHelper::SelectItemByData(*this, nPal + 1); // one-based
-	else
-		m_nInitSel = nPal;
-}
-
-int CColorBrewerComboBox::GetCurSel() const
-{
-	if (GetSafeHwnd())
-		return ((int)CDialogHelper::GetSelectedItemData(*this) - 1); // zero-based
+	int nPal = m_aPalettes.Find(pal);
 	
-	// else
-	return m_nInitSel;
+	return CDialogHelper::SelectItemByData(*this, (nPal + 1));
 }
 
 void CColorBrewerComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,

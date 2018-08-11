@@ -35,7 +35,10 @@ enum
 // CCalendarPreferencesPage dialog
 
 CCalendarPreferencesPage::CCalendarPreferencesPage()
-	: CPreferencesPageBase(IDD_PREFERENCES_PAGE)
+	: 
+	CPreferencesPageBase(IDD_PREFERENCES_PAGE),
+	m_cbHeatMapPalette(CBF_SYNTHESIZE/*, IDS_NOHEATMAP*/),
+	m_nSelHeatMapPalette(0)
 {
 	//{{AFX_DATA_INIT(CCalendarPreferencesPage)
 	m_bShowCalcStartDates = FALSE;
@@ -43,6 +46,7 @@ CCalendarPreferencesPage::CCalendarPreferencesPage()
 	m_bAdjustTaskHeights = FALSE;
 	m_bShowDoneDates = FALSE;
 	m_bTreatOverdueAsDueToday = FALSE;
+	m_bEnableHeatMap = FALSE;
 	//}}AFX_DATA_INIT
 	m_bHideParentTasks = TRUE;
 }
@@ -62,9 +66,13 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_SHOWDONEDATES, m_bShowDoneDates);
 	DDX_Check(pDX, IDC_SHOWOVERDUEASDUETODAY, m_bTreatOverdueAsDueToday);
 	DDX_Check(pDX, IDC_HIDEPARENTTASKS, m_bHideParentTasks);
+	DDX_Check(pDX, IDC_ENABLEHEATMAP, m_bEnableHeatMap);
 	//}}AFX_DATA_MAP
 	DDX_Radio(pDX, IDC_USECREATIONFORSTART, m_nCalcMissingStartDates);
 	DDX_Radio(pDX, IDC_USESTARTFORDUE, m_nCalcMissingDueDates);
+	DDX_Control(pDX, IDC_HEATMAPPALETTE, m_cbHeatMapPalette);
+	DDX_CBIndex(pDX, IDC_HEATMAPPALETTE, m_nSelHeatMapPalette);
+
 }
 
 
@@ -73,6 +81,8 @@ BEGIN_MESSAGE_MAP(CCalendarPreferencesPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_SHOWTASKSCONTINUOUS, OnShowTasksContinuous)
 	ON_BN_CLICKED(IDC_SHOWSTARTDATES, OnShowStartDates)
 	ON_BN_CLICKED(IDC_SHOWDUEDATES, OnShowDueDates)
+	ON_BN_CLICKED(IDC_ENABLEHEATMAP, OnEnableHeatmap)
+	ON_BN_CLICKED(IDC_SHOWMINICALENDAR, OnShowMiniCalendar)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -88,7 +98,12 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 	GetDlgItem(IDC_SHOWDUEDATES)->EnableWindow(!m_bShowTasksContinuous);
 	GetDlgItem(IDC_SHOWCALCSTARTDATES)->EnableWindow(m_bShowStartDates);
 	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(m_bShowDueDates);
+	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
+	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
 	
+	m_cbHeatMapPalette.Initialize(CBPT_SEQUENTIAL, 6);
+	m_cbHeatMapPalette.SetCurSel(m_nSelHeatMapPalette);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -130,6 +145,8 @@ void CCalendarPreferencesPage::OnShowDueDates()
 void CCalendarPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	pPrefs->WriteProfileInt(szKey, _T("ShowMiniCalendar"), m_bShowMiniCalendar);
+	pPrefs->WriteProfileInt(szKey, _T("EnableHeatMap"), m_bEnableHeatMap);
+	pPrefs->WriteProfileInt(szKey, _T("HeatMapPalette"), m_nSelHeatMapPalette);
 	pPrefs->WriteProfileInt(szKey, _T("AdjustTaskHeights"), m_bAdjustTaskHeights);
 	pPrefs->WriteProfileInt(szKey, _T("TreatOverdueAsDueToday"), m_bTreatOverdueAsDueToday);
 	pPrefs->WriteProfileInt(szKey, _T("HideParentTasks"), m_bHideParentTasks);
@@ -151,6 +168,8 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bAdjustTaskHeights = pPrefs->GetProfileInt(szKey, _T("AdjustTaskHeights"), FALSE);
 	m_bTreatOverdueAsDueToday = pPrefs->GetProfileInt(szKey, _T("TreatOverdueAsDueToday"), FALSE);
 	m_bHideParentTasks = pPrefs->GetProfileInt(szKey, _T("HideParentTasks"), TRUE);
+	m_bEnableHeatMap = pPrefs->GetProfileInt(szKey, _T("EnableHeatMap"), TRUE);
+	m_nSelHeatMapPalette = pPrefs->GetProfileInt(szKey, _T("HeatMapPalette"), 0);
 
 	m_bShowTasksContinuous = pPrefs->GetProfileInt(szKey, _T("ShowTasksContinuous"), TRUE);
 	m_bShowStartDates = pPrefs->GetProfileInt(szKey, _T("ShowStartDates"), FALSE);
@@ -222,4 +241,20 @@ void CCalendarPreferencesDlg::DoHelp()
 	
 	if (m_pParentWnd)
 		m_pParentWnd->SendMessage(WM_CALENDAR_PREFSHELP);
+}
+
+void CCalendarPreferencesPage::OnEnableHeatmap() 
+{
+	UpdateData();
+
+	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
+	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
+}
+
+void CCalendarPreferencesPage::OnShowMiniCalendar() 
+{
+	UpdateData();
+
+	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
+	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
 }

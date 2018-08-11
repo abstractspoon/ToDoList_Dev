@@ -152,10 +152,10 @@ IDI_HELP_BUTTON         ICON    DISCARDABLE     "res\\help_button.ico"
 IDD_CALENDAR_DIALOG DIALOGEX 0, 0, 536, 271
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
-                    IDC_SELECTEDTASKDATES,332,13,197,12,SS_CENTERIMAGE | 
+                    IDC_SELECTEDTASKDATES,236,13,293,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
     LTEXT           "Dis&play",IDC_STATIC,0,2,79,8
     COMBOBOX        IDC_NUMWEEKS,0,13,79,200,CBS_DROPDOWNLIST | WS_TABSTOP
@@ -163,13 +163,9 @@ BEGIN
     COMBOBOX        IDC_SNAPMODES,87,13,79,161,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Snap Mode",IDC_STATIC,87,2,79,8
-    LTEXT           "Selected Task &Date Range",IDC_STATIC,332,2,197,8
+    LTEXT           "Selected Task &Date Range",IDC_STATIC,236,2,293,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,172,12,62,17
-    COMBOBOX        IDC_HEATMAP,239,13,79,161,CBS_DROPDOWNLIST | 
-                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
-                    WS_TABSTOP
-    LTEXT           "&Heat Map",IDC_STATIC,239,2,79,8
 END
 
 IDD_PREFERENCES_DIALOG DIALOG DISCARDABLE  0, 0, 373, 223
@@ -182,50 +178,55 @@ BEGIN
     CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185
 END
 
-IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 348, 286
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 348, 315
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
     CONTROL         "&Hide parent tasks",IDC_HIDEPARENTTASKS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,7,334,10
     CONTROL         "&Show vertical mini calendar-bar",IDC_SHOWMINICALENDAR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,23,334,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,22,334,10
+    CONTROL         "&Enable heat map",IDC_ENABLEHEATMAP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,18,36,323,10
+    COMBOBOX        IDC_HEATMAPPALETTE,28,50,116,161,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
     CONTROL         "Dynamically adjust the height of tasks to ensure full visibility",
                     IDC_DYNAMICTASKHEIGHT,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,38,334,10
+                    WS_TABSTOP,7,67,334,10
     CONTROL         "Display tasks as continuous between their 'Start' and 'Due' dates",
                     IDC_SHOWTASKSCONTINUOUS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,53,219,10
+                    WS_TABSTOP,7,82,219,10
     CONTROL         "Display task 'Start' dates",IDC_SHOWSTARTDATES,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,68,334,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,97,334,10
     CONTROL         "I&ncluding 'Calculated Start' dates",
                     IDC_SHOWCALCSTARTDATES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,17,83,324,10
+                    WS_TABSTOP,17,112,324,10
     CONTROL         "Display task 'Due' dates",IDC_SHOWDUEDATES,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,98,334,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,127,334,10
     CONTROL         "Incl&uding 'Calculated Due' dates",IDC_SHOWCALCDUEDATES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,113,323,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,142,323,10
     CONTROL         "Display task 'Completion' dates",IDC_SHOWDONEDATES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,128,334,10
-    GROUPBOX        "Calculate missing 'Start' dates as:",IDC_STATIC,7,160,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,157,334,10
+    GROUPBOX        "Calculate missing 'Start' dates as:",IDC_STATIC,7,189,
                     334,62
     CONTROL         "The task's 'Creation' date",IDC_USECREATIONFORSTART,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,16,174,316,10
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,16,203,316,10
     CONTROL         "The task's 'Due' date",IDC_USEDUEFORSTART,"Button",
-                    BS_AUTORADIOBUTTON,16,189,316,10
+                    BS_AUTORADIOBUTTON,16,218,316,10
     CONTROL         "The earlier of the task's 'Due' date and 'Today'.",
                     IDC_USEDUEORTODAYFORSTART,"Button",BS_AUTORADIOBUTTON,16,
-                    204,316,10
-    GROUPBOX        "Calculate missing 'Due' dates as: ",IDC_STATIC,7,228,
+                    233,316,10
+    GROUPBOX        "Calculate missing 'Due' dates as: ",IDC_STATIC,7,257,
                     334,46
     CONTROL         "The task's 'Start' date",IDC_USESTARTFORDUE,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,16,242,316,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,16,271,316,10
     CONTROL         "The later of the task's 'Start' date and 'Today'.",
                     IDC_USESTARTORTODAYFORDUE,"Button",BS_AUTORADIOBUTTON,16,
-                    257,316,10
+                    286,316,10
     CONTROL         "Treat overdue tasks as being due 'Today'",
                     IDC_SHOWOVERDUEASDUETODAY,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,143,334,10
+                    WS_TABSTOP,7,172,334,10
 END
 
 
@@ -256,7 +257,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 341
         TOPMARGIN, 7
-        BOTTOMMARGIN, 279
+        BOTTOMMARGIN, 308
     END
 END
 #endif    // APSTUDIO_INVOKED

@@ -9,6 +9,7 @@
 
 #include "..\shared\groupline.h"
 #include "..\shared\preferencesbase.h"
+#include "..\Shared\ColorBrewerComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -58,11 +59,15 @@ protected:
 	BOOL	m_bAdjustTaskHeights;
 	BOOL	m_bShowDoneDates;
 	BOOL	m_bTreatOverdueAsDueToday;
+	BOOL	m_bEnableHeatMap;
 	//}}AFX_DATA
 	int		m_nCalcMissingStartDates;
 	int		m_nCalcMissingDueDates;
 	BOOL	m_bHideParentTasks;
 
+	CColorBrewerComboBox m_cbHeatMapPalette;
+	int m_nSelHeatMapPalette;
+	
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CCalendarPreferencesPage)
@@ -80,6 +85,8 @@ protected:
 	afx_msg void OnShowTasksContinuous();
 	afx_msg void OnShowStartDates();
 	afx_msg void OnShowDueDates();
+	afx_msg void OnEnableHeatmap();
+	afx_msg void OnShowMiniCalendar();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

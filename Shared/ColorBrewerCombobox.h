@@ -7,8 +7,8 @@
 // contenttypecombobox.h : header file
 //
 
-#include "..\shared\ownerdrawcomboboxbase.h"
-#include "..\3rdParty\ColorBrewer.h"
+#include "ownerdrawcomboboxbase.h"
+#include "ColorBrewer.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CContentTypeComboBox window
@@ -30,14 +30,11 @@ public:
 
 	int GetSelectedPalette(CColorBrewerPalette& palette) const;
 	int SetSelectedPalette(const CColorBrewerPalette& palette);
-	void SetCurSel(int nSel);
-	int GetCurSel() const;	
 
 // Attributes
 protected:
 	CColorBrewer m_brewer;
 	CColorBrewerPaletteArray m_aPalettes;
-	int m_nInitSel;
 	CString m_sNone;
 
 // Operations
