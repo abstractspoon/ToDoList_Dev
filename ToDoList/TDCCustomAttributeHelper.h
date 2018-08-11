@@ -32,10 +32,13 @@ public:
 									CWnd* pParent, UINT nCtrlIDPos,
 									BOOL bMultiSelection);
 
-	static BOOL NeedRebuildEditControls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-										const CTDCCustomControlArray& aControls);
-	static BOOL NeedRebuildFilterControls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-											const CTDCCustomControlArray& aControls);
+	static BOOL NeedRebuildEditControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
+										const CTDCCustomAttribDefinitionArray& aNewAttribDefs, 
+										const CTDCCustomControlArray& aOldControls);
+
+	static BOOL NeedRebuildFilterControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
+											const CTDCCustomAttribDefinitionArray& aNewAttribDefs, 
+											const CTDCCustomControlArray& aOldControls);
 
 	static void CleanupControls(CTDCCustomControlArray& aControls, CWnd* pParent);
 
@@ -53,6 +56,9 @@ public:
 	static BOOL IsCustomColumnEnabled(TDC_COLUMN nColID, const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	static BOOL IsCustomEditControl(UINT nCtrlID);
 	static BOOL IsCustomFilterControl(UINT nCtrlID);
+
+	static CString GetFilterControlTooltip(UINT nCtrlID, CWnd* pParent);
+	static CString GetEditControlTooltip(UINT nCtrlID, CWnd* pParent);
 
 	static BOOL GetAttributeDef(TDC_COLUMN nColID, 
 								const CTDCCustomAttribDefinitionArray& aAttribDefs,
@@ -150,11 +156,13 @@ protected:
 								const CTDCImageList& ilImages, CWnd* pParent, 
 								UINT nCtrlIDPos, UINT nCtrlIDStart, 
 								BOOL bFilter, BOOL bMultiSelectionFilter);
-	static BOOL NeedRebuildControls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-									const CTDCCustomControlArray& aControls, UINT nCtrlIDStart, BOOL bFilter);
+	static BOOL NeedRebuildControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
+									const CTDCCustomAttribDefinitionArray& aNewAttribDefs, 
+									const CTDCCustomControlArray& aOldControls, UINT nCtrlIDStart, BOOL bFilter);
 	static int GetCustomAttributeCtrls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 									CTDCCustomControlArray& aControls, UINT nCtrlIDStart, BOOL bFilter);
 	static BOOL WantControl(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bFilter);
+	static CString GetControlTooltip(UINT nCtrlID, CWnd* pParent);
 };
 
 #endif // !defined(AFX_TDCCUSTOMATTRIBUTEHELPER_H__4044B3B7_1EA0_4279_9620_F2035DAE87DF__INCLUDED_)

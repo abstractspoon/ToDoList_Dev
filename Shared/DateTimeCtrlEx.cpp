@@ -448,7 +448,7 @@ void CDateTimeCtrlEx::OnPaint()
 		CThemed::DrawFrameControl(this, &dc, rCheck, DFC_BUTTON, nState);
 
 		// Clip out our drawing
-		dc.ExcludeClipRect(&dtpi.rcCheck);
+		dc.ExcludeClipRect(rCheck);
 		
 		// default drawing
 		CDateTimeCtrl::DefWindowProc(WM_PAINT, (WPARAM)dc.m_hDC, 0);

@@ -724,7 +724,8 @@ protected:
 	BOOL CreateNewTaskList(BOOL bAddDefTask);
 	BOOL VerifyToDoCtrlPassword() const;
 	BOOL VerifyToDoCtrlPassword(int nIndex) const;
-	
+	BOOL SelectTask(CFilteredToDoCtrl& tdc, DWORD dwTaskID);
+
 	// caller must flush todoctrls if required before calling these
 	BOOL CloseToDoCtrl(int nIndex);
 	TDC_FILE ConfirmSaveTaskList(int nIndex, DWORD dwFlags = 0);

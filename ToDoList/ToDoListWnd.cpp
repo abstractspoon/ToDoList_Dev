@@ -1419,10 +1419,12 @@ void CToDoListWnd::OnQuickFindNext()
 {
 	if (!m_sQuickFind.IsEmpty())
 	{
-		if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTNEXT))
+		CFilteredToDoCtrl& tdc = GetToDoCtrl();
+		
+		if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTNEXT))
 		{
 			// return to start
-			if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTFIRST))
+			if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTFIRST))
 				AfxMessageBox(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
 		}
 	}
@@ -1451,10 +1453,12 @@ void CToDoListWnd::OnQuickFindPrev()
 {
 	if (!m_sQuickFind.IsEmpty())
 	{
-		if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTPREV))
+		CFilteredToDoCtrl& tdc = GetToDoCtrl();
+		
+		if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTPREV))
 		{
 			// return to end
-			if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTLAST))
+			if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTLAST))
 				AfxMessageBox(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
 		}
 	}
@@ -5399,12 +5403,12 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 		
 		// do we have a parent task ?
-		if (tdc.SelectTask(startup.GetParentTaskID()))
+		if (SelectTask(tdc, startup.GetParentTaskID()))
 		{
 			bRes = CreateNewTask(sNewTask, TDC_INSERTATBOTTOMOFSELTASK, FALSE);
 		}
 		// or a sibling task ?
-		else if (tdc.SelectTask(startup.GetSiblingTaskID()))
+		else if (SelectTask(tdc, startup.GetSiblingTaskID()))
 		{
 			bRes = CreateNewTask(sNewTask, TDC_INSERTAFTERSELTASK, FALSE);
 		}	
@@ -5425,21 +5429,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	}
 	else if (startup.GetTaskID())
 	{
-		DWORD dwSelID = startup.GetTaskID();
-
-		bRes = tdc.SelectTask(dwSelID);
-
-		// perhaps the task is filtered out so we toggle 
-		// the filter and try again
-		if (!bRes && tdc.HasAnyFilter() && tdc.HasTask(dwSelID))
-		{
-			tdc.ToggleFilter();
-
-			bRes = tdc.SelectTask(dwSelID);
-			ASSERT(bRes);
-
-			RefreshFilterBarControls();
-		}
+		SelectTask(tdc, startup.GetTaskID());
 	}
 	else if (!startup.IsEmpty(TRUE))
 	{
@@ -10471,17 +10461,33 @@ LRESULT CToDoListWnd::OnFindSelectResult(WPARAM /*wp*/, LPARAM lp)
 	
 	// we can't use pResult->pTDC because it's const
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
-	tdc.SetFocusToTasks();
-	
-	if (tdc.GetSelectedTaskID() != pResult->dwTaskID)
+
+	if (SelectTask(tdc, pResult->dwTaskID))
 	{
-		tdc.SelectTask(pResult->dwTaskID);
+		tdc.SetFocusToTasks();
 
 		Invalidate();
 		UpdateWindow();
 	}
 	
 	return 1L;
+}
+
+BOOL CToDoListWnd::SelectTask(CFilteredToDoCtrl& tdc, DWORD dwTaskID)
+{
+	
+	if (tdc.GetSelectedTaskID() == dwTaskID)
+		return TRUE;
+
+	BOOL bWasFiltered = tdc.HasAnyFilter();
+		
+	if (!tdc.SelectTask(dwTaskID))
+		return FALSE;
+
+	if (bWasFiltered && !tdc.HasAnyFilter())
+		RefreshFilterBarControls();
+
+	return TRUE;
 }
 
 LRESULT CToDoListWnd::OnFindSelectAll(WPARAM /*wp*/, LPARAM /*lp*/)
@@ -11764,7 +11770,7 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 	{
 		ASSERT(dwTaskID);
 
-		bSelected = GetToDoCtrl().SelectTask(dwTaskID);
+		bSelected = SelectTask(GetToDoCtrl(), dwTaskID);
 		bHandled = TRUE; // handled regardless of result
 	}
 	else if (!PathIsRelative(sPath) && FileMisc::FileExists(sPath))
@@ -11781,7 +11787,7 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 				bSelected = TRUE;
 
 				if (dwTaskID)
-					GetToDoCtrl().SelectTask(dwTaskID);
+					SelectTask(GetToDoCtrl(), dwTaskID);
 			}
 			else
 			{
@@ -11799,7 +11805,7 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 				bSelected = TRUE;
 
 				if (dwTaskID)
-					GetToDoCtrl().SelectTask(dwTaskID);
+					SelectTask(GetToDoCtrl(), dwTaskID);
 			}
 			else
 			{
@@ -13162,7 +13168,7 @@ void CToDoListWnd::OnMoveGoToTask()
 	CTDLGoToTaskDlg dialog(tdc);
 
 	if (dialog.DoModal() == IDOK)
-		tdc.SelectTask(dialog.GetTaskID());
+		SelectTask(tdc, dialog.GetTaskID());
 }
 
 void CToDoListWnd::OnUpdateMoveGoToTask(CCmdUI* pCmdUI) 

@@ -178,6 +178,25 @@ BOOL CEnCheckComboBox::IsNoneChecked() const
 	return ((nNone == -1) ? FALSE : GetCheck(nNone));
 }
 
+CString CEnCheckComboBox::FormatCheckedItems(LPCTSTR szSep) const
+{
+	if (IsAnyChecked())
+		return m_sAny;
+
+	CStringArray aChecked;
+	
+	if (!GetChecked(aChecked))
+		return _T("");
+
+	if (aChecked[0].IsEmpty())
+	{
+		ASSERT(IsNoneChecked());
+		aChecked[0] = m_sNone;
+	}
+
+	return Misc::FormatArray(aChecked, szSep);
+}
+
 void CEnCheckComboBox::OnCheckChange(int nIndex)
 {
 	if (m_bMultiSel)
@@ -470,11 +489,14 @@ void CEnCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 {
 	CString sEnText = GetItemText(nItem, sItem);
 
-	if (m_bMultiSel && (nItem != -1))
+	if (m_bMultiSel)
 	{
-		if (!(nItemState & ODS_SELECTED) && !IsAnyIndex(nItem) && IsAnyChecked())
+		if (nItem != -1)
 		{
-			crText = GetSysColor(COLOR_GRAYTEXT);
+			if (!(nItemState & ODS_SELECTED) && !IsAnyIndex(nItem) && IsAnyChecked())
+			{
+				crText = GetSysColor(COLOR_GRAYTEXT);
+			}
 		}
 
 		CCheckComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sEnText, bList, crText);

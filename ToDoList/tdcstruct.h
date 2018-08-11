@@ -456,6 +456,11 @@ struct CTRLITEM
 				(nAttrib == other.nAttrib));
 	}
 
+	BOOL operator!=(const CTRLITEM& other) const
+	{
+		return !(*this == other);
+	}
+	
 	UINT nCtrlID;
 	UINT nLabelID;
 	TDC_ATTRIBUTE nAttrib;
@@ -479,6 +484,11 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 				(sAttribID == other.sAttribID));
 	}
 
+	
+	BOOL operator!=(const CUSTOMATTRIBCTRLITEM& other) const
+	{
+		return !(*this == other);
+	}
 
 	BOOL HasBuddy() const
 	{

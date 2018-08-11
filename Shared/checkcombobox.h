@@ -48,8 +48,8 @@ public:
 	virtual BOOL SetChecked(const CStringArray& aItems);
 	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 	
-	CString FormatCheckedItems(LPCTSTR szSep = NULL) const;
 	CString GetTooltip() const;
+	virtual CString FormatCheckedItems(LPCTSTR szSep = NULL) const;
 
 	virtual int AddUniqueItem(const CString& sItem); // returns index or CB_ERR
     virtual int SelectString(int nStartAfter, LPCTSTR lpszString);

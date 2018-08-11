@@ -55,7 +55,6 @@ public:
 	void FilterToolTipMessage(MSG* pMsg);
 
  	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending);
- 	BOOL IsSorted() const;
 
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }

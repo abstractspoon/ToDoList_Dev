@@ -241,19 +241,19 @@ CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 				ASSERT(pControl->IsKindOf(RUNTIME_CLASS(CComboBox)));
 				CComboBox* pCB = (CComboBox*)pControl;
 
-				// build a combined list of auto-data and default-data
 				CStringArray aListData;
-
-				if (attribDef.GetUniqueListData(aListData))
-					CDialogHelper::SetComboBoxItems(*pCB, aListData);
 				
-				if (bFilter)
+				if (pControl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)))
 				{
-					// prepend empty item
-					pCB->InsertString(0, _T(""));
+					ASSERT(bFilter);
+
+					if (attribDef.GetUniqueListData(aListData))
+						((CEnCheckComboBox*)pCB)->SetStrings(aListData);
 				}
 				else
 				{
+					CDialogHelper::SetComboBoxItems(*pCB, aListData);
+
 					// prepend empty items to single selection lists
 					switch (attribDef.GetListType())
 					{
@@ -404,32 +404,61 @@ void CTDCCustomAttributeHelper::CleanupControls(CTDCCustomControlArray& aControl
 	aControls.RemoveAll();
 }
 
-BOOL CTDCCustomAttributeHelper::NeedRebuildEditControls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-										const CTDCCustomControlArray& aControls)
+BOOL CTDCCustomAttributeHelper::NeedRebuildEditControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
+														const CTDCCustomAttribDefinitionArray& aNewAttribDefs, 
+														const CTDCCustomControlArray& aOldControls)
 {
-	return NeedRebuildControls(aAttribDefs, aControls, IDC_FIRST_CUSTOMEDITFIELD, FALSE);
+	return NeedRebuildControls(aOldAttribDefs, aNewAttribDefs, aOldControls, IDC_FIRST_CUSTOMEDITFIELD, FALSE);
 }
 
-BOOL CTDCCustomAttributeHelper::NeedRebuildFilterControls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-										const CTDCCustomControlArray& aControls)
+BOOL CTDCCustomAttributeHelper::NeedRebuildFilterControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
+														  const CTDCCustomAttribDefinitionArray& aNewAttribDefs, 
+															const CTDCCustomControlArray& aOldControls)
 {
-	return NeedRebuildControls(aAttribDefs, aControls, IDC_FIRST_CUSTOMFILTERFIELD, TRUE);
+	return NeedRebuildControls(aOldAttribDefs, aNewAttribDefs, aOldControls, IDC_FIRST_CUSTOMFILTERFIELD, TRUE);
 }
 
-BOOL CTDCCustomAttributeHelper::NeedRebuildControls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-										const CTDCCustomControlArray& aControls, UINT nCtrlIDStart, BOOL bFilter)
+BOOL CTDCCustomAttributeHelper::NeedRebuildControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
+													const CTDCCustomAttribDefinitionArray& aNewAttribDefs, 
+													const CTDCCustomControlArray& aOldControls, UINT nCtrlIDStart, BOOL bFilter)
 {
 	CTDCCustomControlArray aNewControls;
-	int nNewCtrl = GetCustomAttributeCtrls(aAttribDefs, aNewControls, nCtrlIDStart, bFilter);
+	int nNumNewCtrls = GetCustomAttributeCtrls(aNewAttribDefs, aNewControls, nCtrlIDStart, bFilter);
 
-	if (nNewCtrl != aControls.GetSize())
+	if (nNumNewCtrls != aOldControls.GetSize())
 		return TRUE;
 
-	return !Misc::MatchAllT(aNewControls, aControls, bFilter);
+	// Compare each new item with the old, also checking list data
+	// Order is important
+	for (int nCtrl = 0; nCtrl < nNumNewCtrls; nCtrl++)
+	{
+		const CUSTOMATTRIBCTRLITEM& ctrlNew = aNewControls[nCtrl];
+		const CUSTOMATTRIBCTRLITEM& ctrlOld = aOldControls[nCtrl];
+
+		if (ctrlNew != ctrlOld)
+			return TRUE;
+
+		// Definition indices can be different
+		int nNewDef = aNewAttribDefs.Find(ctrlNew.sAttribID);
+		int nOldDef = aOldAttribDefs.Find(ctrlNew.sAttribID);
+		
+		ASSERT((nNewDef != -1) && (nOldDef != -1));
+
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribNew = aNewAttribDefs[nNewDef];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribOld = aOldAttribDefs[nOldDef];
+
+		if (!Misc::MatchAll(attribNew.aAutoListData, attribOld.aAutoListData) ||
+			!Misc::MatchAll(attribNew.aDefaultListData, attribOld.aDefaultListData))
+		{
+			return TRUE;
+		}
+	}
+
+	return FALSE;
 }
 
 int CTDCCustomAttributeHelper::GetCustomAttributeCtrls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-													CTDCCustomControlArray& aControls, UINT nCtrlIDStart, BOOL bFilter)
+														CTDCCustomControlArray& aControls, UINT nCtrlIDStart, BOOL bFilter)
 {
 	aControls.RemoveAll();
 
@@ -482,27 +511,27 @@ int CTDCCustomAttributeHelper::GetCustomAttributeCtrls(const CTDCCustomAttribDef
 }
 
 BOOL CTDCCustomAttributeHelper::RebuildEditControls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-										CTDCCustomControlArray& aControls, 
-										const CTDCImageList& ilImages, 
-										CWnd* pParent, UINT nCtrlIDPos)
+													CTDCCustomControlArray& aControls, 
+													const CTDCImageList& ilImages, 
+													CWnd* pParent, UINT nCtrlIDPos)
 {
 	return RebuildControls(aAttribDefs, aControls, ilImages, pParent, nCtrlIDPos, IDC_FIRST_CUSTOMEDITFIELD, FALSE, FALSE);
 }
 
 BOOL CTDCCustomAttributeHelper::RebuildFilterControls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-										CTDCCustomControlArray& aControls, 
-										const CTDCImageList& ilImages, 
-										CWnd* pParent, UINT nCtrlIDPos, 
-										BOOL bMultiSelection)
+														CTDCCustomControlArray& aControls, 
+														const CTDCImageList& ilImages, 
+														CWnd* pParent, UINT nCtrlIDPos, 
+														BOOL bMultiSelection)
 {
 	return RebuildControls(aAttribDefs, aControls, ilImages, pParent, nCtrlIDPos, IDC_FIRST_CUSTOMFILTERFIELD, TRUE, bMultiSelection);
 }
 
 BOOL CTDCCustomAttributeHelper::RebuildControls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-														 CTDCCustomControlArray& aControls, 
-														 const CTDCImageList& ilImages,
-														 CWnd* pParent, UINT nCtrlIDPos, UINT nCtrlIDStart, 
-														 BOOL bFilter, BOOL bMultiSelectionFilter)
+												 CTDCCustomControlArray& aControls, 
+												 const CTDCImageList& ilImages,
+												 CWnd* pParent, UINT nCtrlIDPos, UINT nCtrlIDStart, 
+												 BOOL bFilter, BOOL bMultiSelectionFilter)
 {
 	ASSERT_VALID(pParent);
 
@@ -816,6 +845,31 @@ BOOL CTDCCustomAttributeHelper::IsCustomEditControl(UINT nCtrlID)
 BOOL CTDCCustomAttributeHelper::IsCustomFilterControl(UINT nCtrlID)
 {
 	return (nCtrlID >= IDC_FIRST_CUSTOMFILTERFIELD && nCtrlID <= IDC_LAST_CUSTOMFILTERFIELD);
+}
+
+CString CTDCCustomAttributeHelper::GetFilterControlTooltip(UINT nCtrlID, CWnd* pParent)
+{
+	ASSERT(IsCustomFilterControl(nCtrlID));
+
+	return GetControlTooltip(nCtrlID, pParent);
+}
+
+CString CTDCCustomAttributeHelper::GetEditControlTooltip(UINT nCtrlID, CWnd* pParent)
+{
+	ASSERT(IsCustomEditControl(nCtrlID));
+	
+	return GetControlTooltip(nCtrlID, pParent);
+}
+
+CString CTDCCustomAttributeHelper::GetControlTooltip(UINT nCtrlID, CWnd* pParent)
+{
+	CWnd* pCtrl = pParent->GetDlgItem(nCtrlID);
+
+	if (pCtrl && pCtrl->IsKindOf(RUNTIME_CLASS(CCheckComboBox)))
+		return ((CCheckComboBox*)pCtrl)->GetTooltip();
+
+	// else
+	return _T("");
 }
 
 void CTDCCustomAttributeHelper::SaveAutoListDataToDefs(const CWnd* pParent, 

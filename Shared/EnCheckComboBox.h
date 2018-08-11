@@ -30,6 +30,8 @@ public:
 	BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 	int SetCheck(int nIndex, CCB_CHECKSTATE nCheck = CCBC_CHECKED); 
 
+	CString FormatCheckedItems(LPCTSTR szSep = NULL) const;
+
 protected:
 	BOOL m_bMultiSel;
 	CEnString m_sNone, m_sAny;

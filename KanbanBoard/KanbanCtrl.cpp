@@ -2258,27 +2258,21 @@ void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
 	// sort by title instead
 	if ((nBy != IUI_NONE) && (nBy == m_nTrackAttribute))
 		nBy = IUI_TASKNAME;
-
-	IUI_ATTRIBUTE nOldSort = m_nSortBy;
+	
 	m_nSortBy = nBy;
 
 	BOOL bSubtasksBelowParent = HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
 	
-	if ((nBy != IUI_NONE) || bSubtasksBelowParent)
+	if ((m_nSortBy != IUI_NONE) || bSubtasksBelowParent)
 	{
-		ASSERT((nBy == IUI_NONE) || (bAscending != -1));
+		ASSERT((m_nSortBy == IUI_NONE) || (bAscending != -1));
 		m_bSortAscending = bAscending;
 
 		// do the sort
  		CHoldRedraw hr(*this);
 
-		m_aListCtrls.SortItems(nBy, m_bSortAscending, bSubtasksBelowParent);
+		m_aListCtrls.SortItems(m_nSortBy, m_bSortAscending, bSubtasksBelowParent);
 	}
-}
-
-BOOL CKanbanCtrl::IsSorted() const
-{
-	return (m_nSortBy != IUI_NONE);
 }
 
 void CKanbanCtrl::SetReadOnly(bool bReadOnly) 
@@ -2690,6 +2684,12 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 				if (aChangedIDs.GetSize())
 				{
+					// Resort before fixing up selection
+					BOOL bSubtasksBelowParent = HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
+					
+					if ((m_nSortBy != IUI_NONE) || bSubtasksBelowParent)
+						pDestList->Sort(m_nSortBy, m_bSortAscending, bSubtasksBelowParent);
+
 					SelectListCtrl(pDestList, FALSE);
 					SelectTasks(aDragTaskIDs); 
 

@@ -133,6 +133,10 @@ SOURCE=.\colorcombobox.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ComboListboxPositioner.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ContentCtrl.cpp
 # End Source File
 # Begin Source File
@@ -774,6 +778,10 @@ SOURCE=.\colorbutton.h
 # Begin Source File
 
 SOURCE=.\colorcombobox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ComboListboxPositioner.h
 # End Source File
 # Begin Source File
 
