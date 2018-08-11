@@ -4,7 +4,8 @@
 
 #include "stdafx.h"
 #include "ColorBrewer.h"
-#include "ColorDef.h"
+
+#include "..\3rdParty\ColorDef.h"
 
 #include <shlwapi.h>
 

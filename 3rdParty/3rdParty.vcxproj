@@ -123,7 +123,6 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="ColorBrewer.cpp" />
     <ClCompile Include="ColorDef.cpp" />
     <ClCompile Include="ColourPicker.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -262,7 +261,6 @@
     <ClInclude Include="Base64Coder.h" />
     <ClInclude Include="CalendarCtrl.h" />
     <ClInclude Include="ClipboardBackup.h" />
-    <ClInclude Include="ColorBrewer.h" />
     <ClInclude Include="ColorBrewerPalettes.h" />
     <ClInclude Include="ColorDef.h" />
     <ClInclude Include="ColourPicker.h" />

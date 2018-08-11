@@ -125,6 +125,14 @@ SOURCE=.\Clipboard.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ColorBrewer.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ColorBrewerCombobox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\colorbutton.cpp
 # End Source File
 # Begin Source File
@@ -770,6 +778,14 @@ SOURCE=.\checklistboxex.h
 # Begin Source File
 
 SOURCE=.\Clipboard.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ColorBrewer.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ColorBrewerCombobox.h
 # End Source File
 # Begin Source File
 

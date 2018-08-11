@@ -11,7 +11,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-#include "ColorBrewerPalettes.h"
+#include "..\3rdParty\ColorBrewerPalettes.h"
 
 #include <afxtempl.h>
 
