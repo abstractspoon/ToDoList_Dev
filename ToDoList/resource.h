@@ -257,6 +257,7 @@
 #define IDC_ATTRIBUTECOLORS             1033
 #define IDC_SHOWCOMMENTS                1034
 #define IDC_HDIVIDER2                   1034
+#define IDC_PRIORITYSCHEMES             1034
 #define IDC_AUTOSAVE                    1038
 #define IDC_CONFIRMDELETE               1039
 #define IDC_AUTOSAVEONSWITCHTASKLIST    1039
@@ -802,6 +803,7 @@
 #define IDC_MOVEUP                      1515
 #define IDC_MOVEDOWN                    1516
 #define IDC_DELETE                      1517
+#define IDC_SCHEMEPRIORITYCOLORS        1518
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2208,7 +2210,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        312
 #define _APS_NEXT_COMMAND_VALUE         34615
-#define _APS_NEXT_CONTROL_VALUE         1518
+#define _APS_NEXT_CONTROL_VALUE         1519
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

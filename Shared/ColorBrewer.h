@@ -22,7 +22,12 @@ class CColorBrewerPalette : public CDWordArray
 public:
 	CColorBrewerPalette& operator=(const COLORBREWER_PALETTE& pal);
 	CColorBrewerPalette& operator=(const CColorBrewerPalette& pal);
+	CColorBrewerPalette& operator=(const CDWordArray& aColors);
+
 	BOOL operator==(const CColorBrewerPalette& other) const;
+	BOOL operator==(const CDWordArray& aColors) const;
+
+	BOOL Set(const CColorBrewerPalette& palBegin, const CColorBrewerPalette& palEnd, COLORREF crMiddle = CLR_NONE);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -31,6 +36,7 @@ class CColorBrewerPaletteArray : public CArray<CColorBrewerPalette, CColorBrewer
 {
 public:
 	int Find(const CColorBrewerPalette& pal) const;
+	int Find(const CDWordArray& aColors) const;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -73,8 +79,11 @@ protected:
 	BOOL PaletteMatches(const COLORBREWER_PALETTE& pal, int nNumColors) const;
 	int FindPalette(const COLORBREWER_PALETTEGROUP& group, int nNumColors) const;
 
-	BOOL SynthesizePalette(int nNumFinalColors, const COLORBREWER_PALETTEGROUP& groupFrom, CColorBrewerPalette& palFinal) const;
-	BOOL SynthesizePalette(int nNumFinalColors, COLORBREWER_PALETTETYPE nTypeFrom, const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& palFinal, int nNumIntervals) const;
+	BOOL SynthesizePalette(int nNumFinalColors, const COLORBREWER_PALETTEGROUP& groupFrom, 
+							CColorBrewerPalette& palFinal) const;
+	BOOL SynthesizePalette(int nNumFinalColors, COLORBREWER_PALETTETYPE nTypeFrom, 
+							const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& palFinal, 
+							int nNumIntervals) const;
 
 	static BOOL ValidatePalettes();
 	static BOOL ValidateGroup(const COLORBREWER_PALETTEGROUP& group);
@@ -87,6 +96,8 @@ protected:
 	
 	static BOOL IsTextSafeColor(COLORREF color);
 	static int GetTextSafeColorCount(const COLORBREWER_PALETTE& palFrom);
+
+	static BOOL SampleColors(const COLORBREWER_PALETTE& palFrom, int nNumColors, CColorBrewerPalette& aTo);
 };
 
 #endif // !defined(AFX_COLORBREWER_H__B8945E59_E0C7_4C2A_A688_D0F4C2EAD899__INCLUDED_)

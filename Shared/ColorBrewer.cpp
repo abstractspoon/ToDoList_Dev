@@ -31,19 +31,55 @@ CColorBrewerPalette& CColorBrewerPalette::operator=(const CColorBrewerPalette& p
 	return *this;
 }
 
+CColorBrewerPalette& CColorBrewerPalette::operator=(const CDWordArray& aColors)
+{
+	Copy(aColors);
+	return *this;
+}
+
 BOOL CColorBrewerPalette::operator==(const CColorBrewerPalette& other) const
+{
+	return operator==((const CDWordArray&)*this);
+}
+
+BOOL CColorBrewerPalette::operator==(const CDWordArray& aColors) const
 {
 	int nColor = GetSize();
 
-	if (nColor != other.GetSize())
+	if (nColor != aColors.GetSize())
 		return FALSE;
 
 	while (nColor--)
 	{
-		if (GetAt(nColor) != other[nColor])
+		if (GetAt(nColor) != aColors[nColor])
 			return FALSE;
 	}
-		
+
+	return TRUE;
+}
+
+BOOL CColorBrewerPalette::Set(const CColorBrewerPalette& palBegin, const CColorBrewerPalette& palEnd, COLORREF crMiddle)
+{
+	int nNumColors = palBegin.GetSize();
+
+	if (palEnd.GetSize() != nNumColors)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	BOOL bHasMiddle = ((crMiddle == CLR_NONE) ? 0 : 1);
+	SetSize((nNumColors * 2) + bHasMiddle);
+
+	for (int nCol = 0; nCol < nNumColors; nCol++)
+	{
+		SetAt(nCol, palBegin[nCol]);
+		SetAt((nNumColors + nCol + bHasMiddle), palEnd[nCol]);
+	}
+
+	if (bHasMiddle)
+		SetAt(nNumColors, crMiddle);
+
 	return TRUE;
 }
 
@@ -51,11 +87,16 @@ BOOL CColorBrewerPalette::operator==(const CColorBrewerPalette& other) const
 
 int CColorBrewerPaletteArray::Find(const CColorBrewerPalette& pal) const
 {
+	return Find((const CDWordArray&)pal);
+}
+
+int CColorBrewerPaletteArray::Find(const CDWordArray& aColors) const
+{
 	int nPal = GetSize();
 
 	while (nPal--)
 	{
-		if (GetData()[nPal] == pal)
+		if (GetData()[nPal] == aColors)
 			return nPal;
 	}
 
@@ -319,7 +360,8 @@ BOOL CColorBrewer::PaletteMatches(const COLORBREWER_PALETTE& pal, int nNumColors
 	return (pal.nNumColors == nNumColors);
 }
 
-BOOL CColorBrewer::SynthesizePalette(int nNumFinalColors, const COLORBREWER_PALETTEGROUP& groupFrom, CColorBrewerPalette& palFinal) const
+BOOL CColorBrewer::SynthesizePalette(int nNumFinalColors, const COLORBREWER_PALETTEGROUP& groupFrom, 
+										CColorBrewerPalette& palFinal) const
 {
 	// Sanity checks
 	if ((m_dwFlags & CBF_SYNTHESIZE) == 0)
@@ -329,14 +371,14 @@ BOOL CColorBrewer::SynthesizePalette(int nNumFinalColors, const COLORBREWER_PALE
 	}
 
 	// Can only synthesize from a group not having a
-	// native palette with that number of colours
+	// native palette with the same number of final colours
 	if (GroupMatches(groupFrom, nNumFinalColors))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	const int INTERVALS[] = { 2, 3, 4, 5, 6, 7, 8 };
+	const int INTERVALS[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
 	const int NUMINTERVALS = (sizeof(INTERVALS) / sizeof(int));
 
 	for (int i = 0; i < NUMINTERVALS; i++)
@@ -353,15 +395,17 @@ BOOL CColorBrewer::SynthesizePalette(int nNumFinalColors, const COLORBREWER_PALE
 	return FALSE;
 }
 
-BOOL CColorBrewer::SynthesizePalette(int nNumFinalColors, COLORBREWER_PALETTETYPE nTypeFrom, const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& palFinal, int nNumIntervals) const
+BOOL CColorBrewer::SynthesizePalette(int nNumFinalColors, COLORBREWER_PALETTETYPE nTypeFrom, 
+									const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& palFinal, 
+									int nNumIntervals) const
 {
 	switch (nTypeFrom)
 	{
 	case CBPT_SEQUENTIAL:
 		{
-			int nReqColorCount = (((nNumFinalColors + nNumIntervals) / nNumIntervals) + 1);
+			int nReqColorCount = (((nNumFinalColors - 1) / nNumIntervals) + 1);
 
-			if ((((nReqColorCount - 1) * nNumIntervals) + 1) < nNumFinalColors)
+			if ((((nReqColorCount - 1) * nNumIntervals) + 1) != nNumFinalColors)
 				return FALSE;
 
 			CColorBrewerPalette temp;
@@ -376,20 +420,68 @@ BOOL CColorBrewer::SynthesizePalette(int nNumFinalColors, COLORBREWER_PALETTETYP
 				int nTempCol = (nCol / nNumIntervals);
 				int nOffset = (nCol % nNumIntervals);
 
-				palFinal[nCol] = BlendColors(temp[nTempCol], 
-											(nNumIntervals - nOffset), 
-											temp[nTempCol + 1], 
-											nOffset);
+				COLORREF crCol = temp[nTempCol];
+				int nAmountCol = (nNumIntervals - nOffset);
+
+				ASSERT(crCol != 0);
+				ASSERT(crCol != CLR_NONE);
+
+				if (nOffset == 0)
+				{
+					palFinal[nCol] = crCol;
+				}
+				else
+				{
+					COLORREF crNext = temp[nTempCol + 1];
+					int nAmountNext = nOffset;
+
+					palFinal[nCol] = BlendColors(crCol, nAmountCol, crNext, nAmountNext);
+				}
 			}
 		}
 		break;
 
 	case CBPT_DIVERGING:
 		{
-			CColorBrewerPalette temp;
-			int nPalColorCount = CopyPalette(palFrom, temp);
+			int nHalfNumFinalColors = (nNumFinalColors / 2);
+			BOOL bWantPivotColor = (nNumFinalColors % 2);
 
-			// TODO
+			CColorBrewerPalette temp;
+			int nNumPalColors = CopyPalette(palFrom, temp);
+
+			if ((nNumPalColors % 2) != bWantPivotColor)
+				return FALSE;
+
+			// Split 'from' palette into two halfs
+			int nHalfNumPalColors = (nNumPalColors / 2);
+
+			COLORBREWER_PALETTE palBegin = { nHalfNumPalColors, CLR_NONE };
+			COLORBREWER_PALETTE palEnd = { nHalfNumPalColors, CLR_NONE };
+
+			for (int nCol = 0; nCol < palBegin.nNumColors; nCol++)
+			{
+				palBegin.crPalette[nCol] = temp[nCol];
+				palEnd.crPalette[nCol] = temp[nCol + nHalfNumPalColors + bWantPivotColor];
+			}
+
+			palBegin.crPalette[nHalfNumPalColors] = CLR_NONE;
+			palEnd.crPalette[nHalfNumPalColors] = CLR_NONE;
+
+			// Synthesize final two halfs
+			CColorBrewerPalette palFinalBegin, palFinalEnd;
+
+			if (!SynthesizePalette(nHalfNumFinalColors, CBPT_SEQUENTIAL, palBegin, palFinalBegin, nNumIntervals))
+			{
+				return FALSE;
+			}
+
+			if (!SynthesizePalette(nHalfNumFinalColors, CBPT_SEQUENTIAL, palEnd, palFinalEnd, nNumIntervals))
+			{
+				return FALSE;
+			}
+
+			// construct final palette
+			palFinal.Set(palFinalBegin, palFinalEnd, (bWantPivotColor ? temp[nHalfNumPalColors] : CLR_NONE));
 		}
 		break;
 

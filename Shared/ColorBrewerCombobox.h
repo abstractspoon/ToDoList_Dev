@@ -29,8 +29,12 @@ public:
 	BOOL Initialize(LPCTSTR szName, BOOL bPartial = TRUE);
 	BOOL Initialize(const CColorBrewerPaletteArray& aPalettes);
 
+	int GetSelectedPalette() const;
 	int GetSelectedPalette(CColorBrewerPalette& palette) const;
 	int SetSelectedPalette(const CColorBrewerPalette& palette);
+	int SetSelectedPalette(int nPal);
+	int GetSelectedPalette(CDWordArray& aColors) const;
+	int SetSelectedPalette(const CDWordArray& aColors);
 
 // Attributes
 protected:

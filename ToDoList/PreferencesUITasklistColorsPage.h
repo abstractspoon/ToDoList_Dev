@@ -14,6 +14,7 @@
 #include "..\shared\autocombobox.h"
 #include "..\shared\preferencesbase.h"
 #include "..\shared\groupline.h"
+#include "..\shared\ColorBrewerCombobox.h"
 
 #include "..\3rdparty\fontcombobox.h"
 
@@ -82,6 +83,7 @@ protected:
 	CColorComboBox m_cbAttributes;
 	CString	m_sSelAttribValue;
 	CColorComboBox m_cbPriorityColors;
+	CColorBrewerComboBox	m_cbPriorityScheme;
 	BOOL	m_bSpecifyDueColor;
 	BOOL	m_bSpecifyDueTodayColor;
 	BOOL	m_bSpecifyStartColor;
@@ -108,10 +110,11 @@ protected:
 	CColorButton	m_btLowColor;
 	CColorButton	m_btHighColor;
 	BOOL	m_bColorPriority;
-	int		m_bGradientPriorityColors;
+	int		m_nPriorityColorOption;
 	int		m_nSelPriorityColor;
 	BOOL	m_bShowTimeColumn;
 	CDWordArray m_aPriorityColors;
+	CDWordArray m_aPriorityScheme;
 	CAttribColorArray m_aAttribColors;
 	COLORREF m_crLow, m_crHigh;
 	CString m_sTreeFont;

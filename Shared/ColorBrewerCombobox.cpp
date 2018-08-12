@@ -165,19 +165,39 @@ void CColorBrewerComboBox::FillCombo()
 
 int CColorBrewerComboBox::GetSelectedPalette(CColorBrewerPalette& pal) const
 {
-	int nPal = ((int)CDialogHelper::GetSelectedItemData(*this) - 1); // zero-based
-
-	if (nPal >= 0)
-		pal = m_aPalettes[nPal];
-	
-	return nPal;
+	return GetSelectedPalette((CDWordArray&)pal);
 }
 
 int CColorBrewerComboBox::SetSelectedPalette(const CColorBrewerPalette& pal)
 {
-	int nPal = m_aPalettes.Find(pal);
-	
+	return SetSelectedPalette((const CDWordArray&)pal);
+}
+
+int CColorBrewerComboBox::GetSelectedPalette() const
+{
+	return ((int)CDialogHelper::GetSelectedItemData(*this) - 1); // zero-based
+}
+
+int CColorBrewerComboBox::SetSelectedPalette(int nPal)
+{
 	return CDialogHelper::SelectItemByData(*this, (nPal + 1));
+}
+
+int CColorBrewerComboBox::GetSelectedPalette(CDWordArray& aColors) const
+{
+	int nPal = GetSelectedPalette();
+
+	if (nPal >= 0)
+		aColors.Copy(m_aPalettes[nPal]);
+	
+	return nPal;
+}
+
+int CColorBrewerComboBox::SetSelectedPalette(const CDWordArray& aColors)
+{
+	int nPal = m_aPalettes.Find(aColors);
+	
+	return SetSelectedPalette(nPal);
 }
 
 void CColorBrewerComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,

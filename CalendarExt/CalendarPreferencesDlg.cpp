@@ -37,7 +37,7 @@ enum
 CCalendarPreferencesPage::CCalendarPreferencesPage()
 	: 
 	CPreferencesPageBase(IDD_PREFERENCES_PAGE),
-	m_cbHeatMapPalette(CBF_SYNTHESIZE/*, IDS_NOHEATMAP*/),
+	m_cbHeatMapPalette(CBF_SYNTHESIZE),
 	m_nSelHeatMapPalette(0)
 {
 	//{{AFX_DATA_INIT(CCalendarPreferencesPage)
@@ -101,7 +101,7 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
 	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
 	
-	m_cbHeatMapPalette.Initialize(CBPT_SEQUENTIAL, 6);
+	m_cbHeatMapPalette.Initialize(CBPT_SEQUENTIAL, 10);
 	m_cbHeatMapPalette.SetCurSel(m_nSelHeatMapPalette);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
