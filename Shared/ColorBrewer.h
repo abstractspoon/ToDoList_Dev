@@ -85,6 +85,9 @@ protected:
 							const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& palFinal, 
 							int nNumIntervals) const;
 
+	BOOL SampleColors(COLORBREWER_PALETTETYPE nTypeFrom, const COLORBREWER_PALETTE& palFrom, 
+						int nNumColors, CColorBrewerPalette& aTo) const;
+
 	static BOOL ValidatePalettes();
 	static BOOL ValidateGroup(const COLORBREWER_PALETTEGROUP& group);
 	static BOOL ValidatePalette(const COLORBREWER_PALETTE& pal);
@@ -97,7 +100,6 @@ protected:
 	static BOOL IsTextSafeColor(COLORREF color);
 	static int GetTextSafeColorCount(const COLORBREWER_PALETTE& palFrom);
 
-	static BOOL SampleColors(const COLORBREWER_PALETTE& palFrom, int nNumColors, CColorBrewerPalette& aTo);
 };
 
 #endif // !defined(AFX_COLORBREWER_H__B8945E59_E0C7_4C2A_A688_D0F4C2EAD899__INCLUDED_)

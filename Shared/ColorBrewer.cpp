@@ -447,9 +447,11 @@ BOOL CColorBrewer::SynthesizePalette(int nNumFinalColors, COLORBREWER_PALETTETYP
 			BOOL bWantPivotColor = (nNumFinalColors % 2);
 
 			CColorBrewerPalette temp;
-			int nNumPalColors = CopyPalette(palFrom, temp);
 
-			if ((nNumPalColors % 2) != bWantPivotColor)
+			int nNumPalColors = CopyPalette(palFrom, temp);
+			BOOL bHasPivotColor = (nNumPalColors % 2);
+			
+			if (bHasPivotColor != bWantPivotColor)
 				return FALSE;
 
 			// Split 'from' palette into two halfs
@@ -461,7 +463,7 @@ BOOL CColorBrewer::SynthesizePalette(int nNumFinalColors, COLORBREWER_PALETTETYP
 			for (int nCol = 0; nCol < palBegin.nNumColors; nCol++)
 			{
 				palBegin.crPalette[nCol] = temp[nCol];
-				palEnd.crPalette[nCol] = temp[nCol + nHalfNumPalColors + bWantPivotColor];
+				palEnd.crPalette[nCol] = temp[nCol + nHalfNumPalColors + bHasPivotColor];
 			}
 
 			palBegin.crPalette[nHalfNumPalColors] = CLR_NONE;
@@ -496,6 +498,95 @@ BOOL CColorBrewer::SynthesizePalette(int nNumFinalColors, COLORBREWER_PALETTETYP
 	}
 
 	return TRUE;
+}
+
+BOOL CColorBrewer::SampleColors(COLORBREWER_PALETTETYPE nTypeFrom, const COLORBREWER_PALETTE& palFrom, 
+								int nNumColors, CColorBrewerPalette& aTo) const
+{
+	aTo.RemoveAll();
+
+	switch (nTypeFrom)
+	{
+	case CBPT_SEQUENTIAL:
+		{
+			CColorBrewerPalette temp;
+						
+			if (CopyPalette(palFrom, temp) < nNumColors)
+				return FALSE;
+
+			if (temp.GetSize() == nNumColors)
+			{
+				aTo = temp;
+				return TRUE;
+			}
+
+			if (((temp.GetSize() - 1) % nNumColors) != 0)
+				return FALSE;
+
+			int nNumIntervals = ((temp.GetSize() - 1) / nNumColors);
+
+			for (int nCol = 0; nCol < temp.GetSize(); nCol += nNumIntervals)
+				aTo.Add(temp[nCol]);
+		}
+		break;
+
+	case CBPT_DIVERGING:
+		{
+			int nHalfNumColors = (nNumColors / 2);
+			BOOL bWantPivotColor = (nNumColors % 2);
+
+			CColorBrewerPalette temp;
+			int nNumPalColors = CopyPalette(palFrom, temp);
+			BOOL bHasPivotColor = (nNumPalColors % 2);
+
+			if (bHasPivotColor != bWantPivotColor)
+				return FALSE;
+
+			// Split 'from' palette into two halfs
+			int nHalfNumPalColors = (nNumPalColors / 2);
+
+			COLORBREWER_PALETTE palBegin = { nHalfNumPalColors, CLR_NONE };
+			COLORBREWER_PALETTE palEnd = { nHalfNumPalColors, CLR_NONE };
+
+			for (int nCol = 0; nCol < palBegin.nNumColors; nCol++)
+			{
+				palBegin.crPalette[nCol] = temp[nCol];
+				palEnd.crPalette[nCol] = temp[nCol + nHalfNumPalColors + bWantPivotColor];
+			}
+
+			palBegin.crPalette[nHalfNumPalColors] = CLR_NONE;
+			palEnd.crPalette[nHalfNumPalColors] = CLR_NONE;
+
+			// Synthesize final two halfs
+			CColorBrewerPalette aToBegin, aToEnd;
+
+			if (!SampleColors(CBPT_SEQUENTIAL, palBegin, nHalfNumColors, aToBegin))
+			{
+				return FALSE;
+			}
+
+			if (!SampleColors(CBPT_SEQUENTIAL, palEnd, nHalfNumColors, aToEnd))
+			{
+				return FALSE;
+			}
+
+			// construct final palette
+			aTo.Set(aToBegin, aToEnd, (bHasPivotColor ? temp[nHalfNumPalColors] : CLR_NONE));
+		}
+		break;
+
+	case CBPT_QUALITATIVE:
+		// Not supported because no colour has any relationship to its adjacent
+		// colours and therefore blending adjacent colours makes no sense
+		return FALSE;
+
+	default:
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return TRUE;
+
 }
 
 int CColorBrewer::FindPalette(const COLORBREWER_PALETTEGROUP& group, int nNumColors) const
