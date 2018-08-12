@@ -92,6 +92,17 @@ BOOL CColorBrewerComboBox::Initialize(LPCTSTR szName, BOOL bPartial)
 	return TRUE;
 }
 
+BOOL CColorBrewerComboBox::Initialize(const CColorBrewerPaletteArray& aPalettes)
+{
+	if (aPalettes.GetSize() == 0)
+		return FALSE;
+
+	m_aPalettes.Copy(aPalettes);
+
+	RebuildCombo();
+	return TRUE;
+}
+
 int CColorBrewerComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)

@@ -27,6 +27,7 @@ public:
 	BOOL Initialize(COLORBREWER_PALETTETYPE nType, int nNumColors);
 	BOOL Initialize(int nNumColors);
 	BOOL Initialize(LPCTSTR szName, BOOL bPartial = TRUE);
+	BOOL Initialize(const CColorBrewerPaletteArray& aPalettes);
 
 	int GetSelectedPalette(CColorBrewerPalette& palette) const;
 	int SetSelectedPalette(const CColorBrewerPalette& palette);
