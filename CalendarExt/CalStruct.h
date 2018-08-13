@@ -83,7 +83,7 @@ protected:
 typedef CArray<TASKCALITEM*, TASKCALITEM*&> CTaskCalItemArray;
 typedef CArray<const TASKCALITEM*, const TASKCALITEM*&> CTaskCalItemConstArray;
 typedef CMap<DWORD, DWORD, TASKCALITEM*, TASKCALITEM*&> CTaskCalItemMap;
-typedef CMap<double, double, BOOL, BOOL&> CSpecialDateMap;
+typedef CSet<double> CSpecialDateSet;
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -47,6 +47,7 @@ IMPLEMENT_DYNAMIC(CCalendarWnd, CDialog)
 CCalendarWnd::CCalendarWnd()
 	:	
 	m_bReadOnly(FALSE),
+	m_MiniCalendar(m_BigCalendar.Data()),
 #pragma warning(disable:4355)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
@@ -129,7 +130,7 @@ void CCalendarWnd::SetReadOnly(bool bReadOnly)
 {
 	m_bReadOnly = bReadOnly;
 
-	m_BigCalendar.SetReadOnly(bReadOnly);
+	m_BigCalendar.SetReadOnly(bReadOnly ? TRUE : FALSE);
 }
 
 BOOL CCalendarWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd, UINT nID)
@@ -173,7 +174,6 @@ BOOL CCalendarWnd::OnInitDialog()
 
     m_MiniCalendar.SetDate(COleDateTime::GetCurrentTime());
     m_MiniCalendar.SetRowsAndColumns(3, 1);
-	m_MiniCalendar.SetSpecialDaysCallback(CCalendarWnd::IsMiniCalSpecialDateCallback, (DWORD)this);
 	m_MiniCalendar.SetFirstWeekDay(CDateHelper::GetFirstDayOfWeek());
 
 	// create big-calendar ctrl
@@ -284,7 +284,8 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_PREVENTDEPENDENTDRAGGING,			m_BigCalendar.HasOption(TCCO_PREVENTDEPENDENTDRAGGING));
 	Misc::SetFlag(dwOptions, TCCO_SHOWPARENTTASKSASFOLDER,			m_BigCalendar.HasOption(TCCO_SHOWPARENTTASKSASFOLDER));
 
-	m_BigCalendar.SetOptions(dwOptions); 
+	m_BigCalendar.SetOptions(dwOptions);
+	m_MiniCalendar.SetOptions(dwOptions);
 }
 
 void CCalendarWnd::SetUITheme(const UITHEME* pTheme)
@@ -518,14 +519,15 @@ bool CCalendarWnd::PrepareNewTask(ITaskList* pTask) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	return m_BigCalendar.PrepareNewTask(pTask);
+	return (m_BigCalendar.PrepareNewTask(pTask) != FALSE);
 }
 
 void CCalendarWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	m_BigCalendar.UpdateTasks(pTasks, nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes));
+	if (m_BigCalendar.UpdateTasks(pTasks, nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes)) != FALSE)
+		m_MiniCalendar.RecalcSpecialDates();
 
 	UpdateSelectedTaskDates();
 }
@@ -543,16 +545,6 @@ void CCalendarWnd::OnSize(UINT nType, int cx, int cy)
 	if (m_BigCalendar.GetSafeHwnd())
 		ResizeControls(cx, cy);
 }
-
-BOOL CALLBACK CCalendarWnd::IsMiniCalSpecialDateCallback(COleDateTime &dt, DWORD dwUserData)
-{
-	ASSERT(dwUserData);
-
-	CCalendarWnd* pThis = (CCalendarWnd*)dwUserData;
-
-	return pThis->m_BigCalendar.IsSpecialDate(dt);
-}
-
 
 HBRUSH CCalendarWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
 {
@@ -732,7 +724,7 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 		{
 			if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
 			{
-				m_MiniCalendar.Invalidate(); // special dates may have changed
+				m_MiniCalendar.RecalcSpecialDates();
 				return TRUE;
 			}
 		}

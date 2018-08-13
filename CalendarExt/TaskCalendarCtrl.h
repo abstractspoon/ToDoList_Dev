@@ -32,17 +32,16 @@ public:
 	CTaskCalendarCtrl();
 	virtual ~CTaskCalendarCtrl();
 
-	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib);
-	bool PrepareNewTask(ITaskList* pTask) const;
+	BOOL UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib);
+	BOOL PrepareNewTask(ITaskList* pTask) const;
 
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL CanSaveToImage() const;
 	
-	BOOL IsSpecialDate(const COleDateTime& date) const;
 	BOOL CancelDrag();
 	BOOL HasTask(DWORD dwTaskID) const;
 	DWORD HitTest(const CPoint& ptCursor) const;
-	void SetReadOnly(bool bReadOnly) { m_bReadOnly = bReadOnly; }
+	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL SetVisibleWeeks(int nWeeks);
 	void SetStrikeThruDoneTasks(BOOL bStrikeThru);
 	void EnsureVisible(DWORD dwTaskID, BOOL bShowStart);
@@ -58,12 +57,14 @@ public:
 	TCC_SNAPMODE GetSnapMode() const;
 	void SetSnapMode(TCC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }
 
-	void SetOptions(DWORD dwOption);
-	void SetOption(DWORD dwOption, BOOL bSet);
+	BOOL SetOptions(DWORD dwOption);
+	BOOL SetOption(DWORD dwOption, BOOL bSet);
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 
-	bool ProcessMessage(MSG* pMsg);
+	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
+
+	const CTaskCalItemMap& Data() const { return m_mapData; }
 
 	static BOOL WantEditUpdate(IUI_ATTRIBUTE nEditAttribute);
 	static BOOL WantSortUpdate(IUI_ATTRIBUTE nEditAttribute);
@@ -71,7 +72,6 @@ public:
 
 protected:
 	CTaskCalItemMap m_mapData;
-	CSpecialDateMap m_mapSpecial;
 
 	BOOL m_bDraggingStart, m_bDraggingEnd, m_bDragging;
 	BOOL m_bReadOnly;
@@ -147,7 +147,7 @@ protected:
 	BOOL IsTaskCalItemLocked(DWORD dwTaskID) const;
 	BOOL IsTaskCalItemDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 	BOOL TaskCalItemHasDependencies(DWORD dwTaskID) const;
-	bool GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
+	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
 	int GetGridRowFromPoint(const CPoint& point) const;
 	BOOL CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;
@@ -182,7 +182,6 @@ protected:
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void DeleteData();
 	void RecalcDataRange();
-	void RecalcSpecialDates();
 
 	// helpers
 	static int CompareTCItems(const void* pV1, const void* pV2);

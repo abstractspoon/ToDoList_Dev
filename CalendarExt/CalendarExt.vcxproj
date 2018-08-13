@@ -201,6 +201,7 @@ copy unicode_release\CalendarExt.dll ..\todolist\unicode_release /y
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="TaskMiniCalendarCtrl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CalendarExt.rc">
@@ -218,6 +219,7 @@ copy unicode_release\CalendarExt.dll ..\todolist\unicode_release /y
     <ClInclude Include="resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="TaskCalendarCtrl.h" />
+    <ClInclude Include="TaskMiniCalendarCtrl.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\CalendarExt.rc2" />

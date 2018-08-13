@@ -8,6 +8,7 @@
 //
 
 #include "TaskCalendarCtrl.h"
+#include "TaskMiniCalendarCtrl.h"
 #include "calendarpreferencesdlg.h"
 
 #include "..\Shared\menubutton.h"
@@ -17,8 +18,6 @@
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
-
-#include "..\3rdparty\fpsminicalendarctrl.h"
 
 class CCalendarData;
 struct UITHEME;
@@ -67,7 +66,7 @@ public:
 //protected member variables
 protected:
 	CTaskCalendarCtrl m_BigCalendar;
-	CFPSMiniCalendarCtrl m_MiniCalendar;
+	CTaskMiniCalendarCtrl m_MiniCalendar;
 	CComboBox m_cbNumWeeks;
 	CCalendarPreferencesDlg m_dlgPrefs;
 	CEnToolBar m_toolbar;
@@ -104,15 +103,16 @@ protected:
 	afx_msg void OnPreferences();
 	afx_msg void OnSelChangeNumWeeks();
 	afx_msg void OnSelChangeSnapMode();
-	afx_msg void OnBigCalendarNotifyClick(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnBigCalendarNotifyDblClk(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnMiniCalendarNotifyClick(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnMiniCalendarNotifyDblClk(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnNcDestroy();
+
+	afx_msg void OnBigCalendarNotifyClick(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnBigCalendarNotifyDblClk(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnMiniCalendarNotifyClick(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnMiniCalendarNotifyDblClk(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnBigCalendarNotifySelectionChange(WPARAM wp, LPARAM lp);
@@ -130,8 +130,6 @@ protected:
 	void UpdateCalendarCtrlPreferences();
 	void SyncMiniCalendar(BOOL bScroll);
 	void SyncBigCalendar(BOOL bScroll);
-
-	static BOOL CALLBACK IsMiniCalSpecialDateCallback(COleDateTime &dt, DWORD dwUserData);
 };
 
 /////////////////////////////////////////////////////////////////////////////

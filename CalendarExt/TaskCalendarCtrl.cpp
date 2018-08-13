@@ -131,7 +131,7 @@ int CTaskCalendarCtrl::GetDefaultTaskHeight()
 	return DEF_TASK_HEIGHT;
 }
 
-void CTaskCalendarCtrl::SetOption(DWORD dwOption, BOOL bSet)
+BOOL CTaskCalendarCtrl::SetOption(DWORD dwOption, BOOL bSet)
 {
 	if (dwOption)
 	{
@@ -146,25 +146,24 @@ void CTaskCalendarCtrl::SetOption(DWORD dwOption, BOOL bSet)
 		if (m_dwOptions != dwPrev)
 		{
 			RecalcTaskDates();
-
-			if (dwOption & (TCCO_DISPLAYCONTINUOUS | TCCO_DISPLAYSTART | TCCO_DISPLAYDUE | 
-							TCCO_DISPLAYDONE | TCCO_DISPLAYCALCSTART | TCCO_DISPLAYCALCDUE))
-			{
-				RecalcSpecialDates();
-			}
+			return TRUE;
 		}
 	}
+
+	return FALSE;
 }
 
-void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
+BOOL CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
 {
 	if (m_dwOptions != dwOptions)
 	{
 		m_dwOptions = dwOptions;
 
 		RecalcTaskDates();
-		RecalcSpecialDates();
+		return TRUE;
 	}
+
+	return FALSE;
 }
 
 void CTaskCalendarCtrl::RecalcTaskDates()
@@ -183,7 +182,7 @@ void CTaskCalendarCtrl::RecalcTaskDates()
 	}
 }
 
-bool CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTaskList) const
+BOOL CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTaskList) const
 {
 	// give the task a date that will make it appear in the calendar
 	COleDateTime date = ((GetMaxDate().m_dt + GetMinDate().m_dt) / 2);
@@ -255,14 +254,14 @@ BOOL CTaskCalendarCtrl::WantSortUpdate(IUI_ATTRIBUTE nEditAttrib)
 	return FALSE;
 }
 
-void CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
+BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
 
 	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return;
+		return FALSE;
 	}
 
 	BOOL bChange = FALSE;
@@ -294,10 +293,11 @@ void CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	
 	if (bChange)
 	{
-		RecalcSpecialDates();
 		RecalcDataRange();
 		Invalidate(FALSE);
 	}
+
+	return bChange;
 }
 
 void CTaskCalendarCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
@@ -432,12 +432,6 @@ void CTaskCalendarCtrl::NotifyParentDragChange()
 	GetParent()->SendMessage(WM_CALENDAR_DRAGCHANGE, (WPARAM)GetSnapMode(), m_dwSelectedTaskID);
 }
 
-BOOL CTaskCalendarCtrl::IsSpecialDate(const COleDateTime& date) const
-{
-	BOOL bDummy;
-	return m_mapSpecial.Lookup(CDateHelper::GetDateOnly(date).m_dt, bDummy);
-}
-
 void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -468,30 +462,6 @@ void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 			BuildData(pTasks, hSibling, attrib, FALSE);
 
 			hSibling = pTasks->GetNextTask(hSibling);
-		}
-	}
-}
-
-void CTaskCalendarCtrl::RecalcSpecialDates()
-{
-	m_mapSpecial.RemoveAll();
-
-	POSITION pos = m_mapData.GetStartPosition();
-	DWORD dwTaskID = 0;
-	TASKCALITEM* pTCI = NULL;
-
-	while (pos)
-	{
-		m_mapData.GetNextAssoc(pos, dwTaskID, pTCI);
-
-		// process item for special dates
-		if (HasOption(TCCO_DISPLAYDONE) || !pTCI->IsDone(TRUE))
-		{
-			if (pTCI->IsStartDateSet())
-				m_mapSpecial[CDateHelper::GetDateOnly(pTCI->GetAnyStartDate())] = TRUE;
-
-			if (pTCI->IsEndDateSet())
-				m_mapSpecial[CDateHelper::GetDateOnly(pTCI->GetAnyEndDate())] = TRUE;
 		}
 	}
 }
@@ -541,7 +511,6 @@ void CTaskCalendarCtrl::DeleteData()
 	}
 
 	m_mapData.RemoveAll();
-	m_mapSpecial.RemoveAll();
 }
 
 void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
@@ -556,7 +525,7 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 	int nWidth = (rc.Width() / CALENDAR_NUM_COLUMNS);
 	
 	CFont* pOldFont = pDC->SelectObject(&m_DefaultFont);
-	bool bShort = (CDateHelper::CalcLongestDayOfWeekName(pDC) > nWidth);
+	BOOL bShort = (CDateHelper::CalcLongestDayOfWeekName(pDC) > nWidth);
 	CRect rCol(rc);
 	
 	for(int i = 0 ; i < CALENDAR_NUM_COLUMNS; i++)
@@ -1325,7 +1294,7 @@ void CTaskCalendarCtrl::EnsureVisible(DWORD dwTaskID, BOOL bShowStart)
 	}
 }
 
-bool CTaskCalendarCtrl::GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const
+BOOL CTaskCalendarCtrl::GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const
 {
 	// iterate the visible cells for the specified task
 	CTaskCalItemArray aTasks;
@@ -1942,9 +1911,7 @@ BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
 		Invalidate(FALSE);
 
 		// keep parent informed
-		if (NotifyParentDateChange(nDragWhat))
-			RecalcSpecialDates();
-		else
+		if (!NotifyParentDateChange(nDragWhat))
 			*pTCI = m_tciPreDrag;
 
 		NotifyParentDragChange();
@@ -2251,7 +2218,7 @@ int CTaskCalendarCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-bool CTaskCalendarCtrl::ProcessMessage(MSG* /*pMsg*/) 
+BOOL CTaskCalendarCtrl::ProcessMessage(MSG* /*pMsg*/) 
 {
 	return false;
 }

@@ -810,8 +810,8 @@ int CFPSMiniCalendarCtrl::DrawDaysOfWeek(CDC &dc, int iY, int iLeftX, int, int)
 	CPen* pPen = new CPen(PS_SOLID, 1, ::GetSysColor(COLOR_3DSHADOW));
 	CPen* pOldPen = dc.SelectObject(pPen);
 
-	dc.MoveTo(iStartX, iY+3+m_iDaysOfWeekHeight);
-	dc.LineTo(iEndX, iY+3+m_iDaysOfWeekHeight);
+	dc.MoveTo(iStartX-4, iY+3+m_iDaysOfWeekHeight);
+	dc.LineTo(iEndX+4, iY+3+m_iDaysOfWeekHeight);
 
 	dc.SelectObject(pOldPen);
 	delete pPen;
@@ -877,38 +877,22 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 		for (int iDayOfWeek = 1; iDayOfWeek <= 7; iDayOfWeek++)
 		{
 			if (dt.GetMonth() == dtStart.GetMonth() ||
-				(dt > dtStart && iMonthCol == m_iCols && iMonthRow == m_iRows && m_bShowNonMonthDays) ||
-				(dt < dtStart && iMonthCol == 1 && iMonthRow == 1 && m_bShowNonMonthDays))
+				(dt > dtStart && /*iMonthCol == m_iCols && iMonthRow == m_iRows &&*/ m_bShowNonMonthDays) ||
+				(dt < dtStart && /*iMonthCol == 1 && iMonthRow == 1 &&*/ m_bShowNonMonthDays))
 			{
 				BOOL bSelected = IsDateSelected(dt);
+				BOOL bSpecial = IsSpecialDate(dt);
+				BOOL bActiveMonth = (dt.GetMonth() == iMonth);
+
 				CString strText = CStr(dt.GetDay());
 
-				COLORREF cBackColor = m_FontInfo[FMC_FONT_DAYS].m_crBkColor;
-				COLORREF cTextColor = m_FontInfo[FMC_FONT_DAYS].m_crTextColor;
+				COLORREF cBackColor = GetDateBkgndColor(dt, bSelected, bSpecial, bActiveMonth);
+				COLORREF cTextColor = GetDateTextColor(dt, bSelected, bSpecial, bActiveMonth);
 
-				if (dt.GetMonth() != iMonth)
-					cTextColor = m_cNonMonthDayColor;
+				dc.FillSolidRect(iX-2, iY, m_iIndividualDayWidth+5, m_iDaysHeight+2, cBackColor);
 
-				if (bSelected)
-				{
-					cBackColor = ::GetSysColor(COLOR_HIGHLIGHT);
-					cTextColor = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
-
-					dc.FillSolidRect(iX, iY, m_iIndividualDayWidth+5, m_iDaysHeight, cBackColor);
-				}
-
-				if (IsSpecialDate(dt))
-				{
-					if (!bSelected)
-					{
-						cBackColor = m_FontInfo[FMC_FONT_SPECIALDAYS].m_crBkColor;
-						cTextColor = m_FontInfo[FMC_FONT_SPECIALDAYS].m_crTextColor;
-					}
-
-					dc.FillSolidRect(iX, iY, m_iIndividualDayWidth+5, m_iDaysHeight, cBackColor);
-
+				if (bSpecial && bActiveMonth)
 					pOldFont = dc.SelectObject(m_FontInfo[FMC_FONT_SPECIALDAYS].m_pFont);
-				}
 				else
 					pOldFont = dc.SelectObject(m_FontInfo[FMC_FONT_DAYS].m_pFont);
 
@@ -917,7 +901,7 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 				dc.DrawText(strText, CRect(iX, iY, iX+m_iIndividualDayWidth,iY+m_iDaysHeight), DEFTEXTFLAGS);
 
 				if (m_bHighlightToday && IsToday(dt))
-					dc.Draw3dRect(iX, iY, m_iIndividualDayWidth+5, m_iDaysHeight+1, m_crTodayBorder, m_crTodayBorder);
+					dc.Draw3dRect(iX-2, iY, m_iIndividualDayWidth+5, m_iDaysHeight+3, m_crTodayBorder, m_crTodayBorder);
 
 				SetHotSpot(iMonthRow, iMonthCol, iDayCounter, dt, CRect(iX,iY,iX+m_iIndividualDayWidth+5, iY+m_iDaysHeight+2));
 			}
@@ -958,6 +942,48 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 
 	return iReturn;
 
+}
+
+COLORREF CFPSMiniCalendarCtrl::GetDateBkgndColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const
+{
+	COLORREF cBackColor = m_FontInfo[FMC_FONT_DAYS].m_crBkColor;
+
+	if (bActiveMonth)
+	{
+		if (bSelected)
+		{
+			cBackColor = ::GetSysColor(COLOR_HIGHLIGHT);
+		}
+		else if (bSpecial)
+		{
+			cBackColor = m_FontInfo[FMC_FONT_SPECIALDAYS].m_crBkColor;
+		}
+	}
+
+	return cBackColor;
+}
+
+COLORREF CFPSMiniCalendarCtrl::GetDateTextColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const
+{
+	COLORREF cTextColor = m_FontInfo[FMC_FONT_DAYS].m_crTextColor;
+
+	if (bActiveMonth)
+	{
+		if (bSelected)
+		{
+			cTextColor = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
+		}
+		else if (bSpecial)
+		{
+			cTextColor = m_FontInfo[FMC_FONT_SPECIALDAYS].m_crTextColor;
+		}
+	}
+	else
+	{
+		cTextColor = m_cNonMonthDayColor;
+	}
+
+	return cTextColor;
 }
 
 BOOL CFPSMiniCalendarCtrl::IsToday(COleDateTime &dt)
@@ -1929,7 +1955,7 @@ void CFPSMiniCalendarCtrl::SetDate(COleDateTime dt)
 
 // determines whether or not a given date is special.  This function
 // calls a callback function to make this determination
-BOOL CFPSMiniCalendarCtrl::IsSpecialDate(COleDateTime &dt)
+BOOL CFPSMiniCalendarCtrl::IsSpecialDate(const COleDateTime &dt) const
 {
 	if (m_pfuncCallback)
 	{
