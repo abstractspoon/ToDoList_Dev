@@ -11,7 +11,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-BYTE TEXTFRIENDLY_TOLERANCE = (255 / 5); // 20%
+BYTE TEXT_MINLUMINANCE = (255 / 3); // 33%
 
 //////////////////////////////////////////////////////////////////////
 
@@ -653,7 +653,7 @@ BOOL CColorBrewer::IsTextSafeColor(COLORREF color)
 	BYTE nBkgndLum = RGBX(GetSysColor(COLOR_WINDOW)).Luminance();
 	BYTE nColorLum = RGBX(color).Luminance();
 
-	return (abs(nBkgndLum - nColorLum) >= TEXTFRIENDLY_TOLERANCE);
+	return (abs(nBkgndLum - nColorLum) >= TEXT_MINLUMINANCE);
 }
 
 int CColorBrewer::GetTextSafeColorCount(const COLORBREWER_PALETTE& palFrom)
