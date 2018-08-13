@@ -268,7 +268,7 @@ BOOL CPreferencesUITasklistColorsPage::OnInitDialog()
 	CColorBrewer brewer(CBF_SYNTHESIZE | CBF_TEXTSAFE);
 	CColorBrewerPaletteArray aPalettes;
 
-	//brewer.GetPalettes(CBPT_SEQUENTIAL, aPalettes, 11);
+	brewer.GetPalettes(CBPT_SEQUENTIAL, aPalettes, 11);
 	brewer.GetPalettes(CBPT_DIVERGING, aPalettes, 11, TRUE);
 
 	m_cbPriorityScheme.Initialize(aPalettes);
