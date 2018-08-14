@@ -835,6 +835,26 @@ TCHAR Misc::TrimLast(CString& sText)
 	return nLast;
 }
 
+int Misc::Split(const CString& sText, CDWordArray& aValues, TCHAR cDelim, BOOL bAllowEmpty)
+{
+	TCHAR szSep[2] = { cDelim, 0 };
+
+	return Split(sText, aValues, szSep, bAllowEmpty);
+}
+
+int Misc::Split(const CString& sText, CDWordArray& aValues, LPCTSTR szSep, BOOL bAllowEmpty)
+{
+	CStringArray aStrValues;
+	int nNumValues = Split(sText, aStrValues, szSep, bAllowEmpty);
+
+	aValues.SetSize(nNumValues);
+
+	for (int nVal = 0; nVal < nNumValues; nVal++)
+		aValues[nVal] = _ttoi(aStrValues[nVal]);
+
+	return nNumValues;
+}
+
 int Misc::Split(const CString& sText, CStringArray& aValues, TCHAR cDelim, BOOL bAllowEmpty)
 {
 	TCHAR szSep[2] = { cDelim, 0 };

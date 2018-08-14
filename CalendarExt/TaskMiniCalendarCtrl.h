@@ -68,6 +68,7 @@ protected:
 
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 	int GetDateHeat(const COleDateTime& dt) const;
+	void IncrementDateHeat(const COleDateTime& dt);
 
 	void RecalcHeatMap();
 	void RecalcSpecialDates();

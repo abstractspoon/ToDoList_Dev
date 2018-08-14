@@ -11,6 +11,8 @@
 #include "..\shared\preferencesbase.h"
 #include "..\Shared\ColorBrewerComboBox.h"
 
+#include "..\Interfaces\IUIExtension.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 class IPreferences;
@@ -43,6 +45,8 @@ public:
 	BOOL GetCalcMissingDueAsStart() const;
 	BOOL GetCalcMissingDueAsLatestStartAndToday() const;
 
+	BOOL GetEnableHeatMap(CDWordArray& aPalette, IUI_ATTRIBUTE& nAttrib) const;
+	
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
@@ -66,7 +70,7 @@ protected:
 	BOOL	m_bHideParentTasks;
 
 	CColorBrewerComboBox m_cbHeatMapPalette;
-	int m_nSelHeatMapPalette;
+	CDWordArray m_aSelPalette;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -118,6 +122,8 @@ public:
 
 	BOOL GetCalcMissingDueAsStart() const { return m_page.GetCalcMissingDueAsStart(); }
 	BOOL GetCalcMissingDueAsLatestStartAndToday() const { return m_page.GetCalcMissingDueAsLatestStartAndToday(); }
+
+	BOOL GetEnableHeatMap(CDWordArray& aPalette, IUI_ATTRIBUTE& nAttrib) const { return m_page.GetEnableHeatMap(aPalette, nAttrib); }
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }

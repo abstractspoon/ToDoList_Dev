@@ -27,7 +27,10 @@ static char THIS_FILE[] = __FILE__;
 // CTaskMiniCalendarCtrl
 
 CTaskMiniCalendarCtrl::CTaskMiniCalendarCtrl(const CTaskCalItemMap& mapData) 
-	: m_mapData(mapData)
+	: 
+	m_mapData(mapData), 
+	m_nHeatMapAttribute(IUI_NONE), 
+	m_nMaxHeat(0)
 {
 }
 
@@ -93,7 +96,7 @@ void CTaskMiniCalendarCtrl::RecalcSpecialDates()
 
 void CTaskMiniCalendarCtrl::RecalcHeatMap()
 {
-	if (m_mapHeatMap.GetCount() == 0)
+	if (m_mapData.GetCount() == 0)
 		return;
 
 	m_mapHeatMap.RemoveAll();
@@ -106,18 +109,32 @@ void CTaskMiniCalendarCtrl::RecalcHeatMap()
 	{
 		m_mapData.GetNextAssoc(pos, dwTaskID, pTCI);
 
-
-/*
-		if (HasOption(TCCO_DISPLAYDONE) || !pTCI->IsDone(TRUE))
+		switch (m_nHeatMapAttribute)
 		{
-			if (pTCI->IsStartDateSet())
-				m_setSpecialDates.Add(CDateHelper::GetDateOnly(pTCI->GetAnyStartDate()).m_dt);
-
-			if (pTCI->IsEndDateSet())
-				m_setSpecialDates.Add(CDateHelper::GetDateOnly(pTCI->GetAnyEndDate()).m_dt);
+		case IUI_DONEDATE:
+			if (pTCI->IsDone(FALSE))
+				IncrementDateHeat(pTCI->GetDoneDate());
+			break;
 		}
-*/
 	}
+
+	Invalidate();
+}
+
+void CTaskMiniCalendarCtrl::IncrementDateHeat(const COleDateTime& dt)
+{
+	int nNewHeat = (GetDateHeat(dt) + 1);
+
+	m_mapHeatMap[CDateHelper::GetDateOnly(dt)] = nNewHeat;
+	m_nMaxHeat = max(nNewHeat, m_nMaxHeat);
+}
+
+int CTaskMiniCalendarCtrl::GetDateHeat(const COleDateTime& dt) const
+{
+	int nHeat = 0;
+	m_mapHeatMap.Lookup(CDateHelper::GetDateOnly(dt.m_dt), nHeat);
+
+	return nHeat;
 }
 
 BOOL CTaskMiniCalendarCtrl::IsSpecialDate(const COleDateTime& dt) const
@@ -130,10 +147,15 @@ COLORREF CTaskMiniCalendarCtrl::GetDateBkgndColor(const COleDateTime& dt, BOOL b
 	// Handle heat map
  	if (!bSelected && bActiveMonth && m_mapHeatMap.GetCount())
 	{
-		int nColor = ((m_aPalette.GetSize() * GetDateHeat(dt)) / m_nMaxHeat);
-		nColor = min(nColor, m_aPalette.GetSize() - 1);
+		int nHeat = GetDateHeat(dt);
 
- 		return m_aPalette[nColor];
+		if (nHeat)
+		{
+			int nColor = ((m_aPalette.GetSize() * nHeat) / m_nMaxHeat);
+			nColor = min(nColor, m_aPalette.GetSize() - 1);
+
+			return m_aPalette[nColor];
+		}
 	}
 
 	return CFPSMiniCalendarCtrl::GetDateBkgndColor(dt, bSelected, bSpecial, bActiveMonth);
@@ -149,10 +171,17 @@ void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRI
 	ASSERT(aPalette.GetSize());
 	ASSERT(nAttrib != IUI_NONE);
 
-	m_aPalette.Copy(aPalette);
-	m_nHeatMapAttribute = nAttrib;
+	if (nAttrib != m_nHeatMapAttribute)
+	{
+		m_nHeatMapAttribute = nAttrib;
+		RecalcHeatMap();
+	}
+	else if (!Misc::MatchAll(aPalette, m_aPalette, TRUE))
+	{
+		Invalidate();
+	}
 
-	RecalcHeatMap();
+	m_aPalette.Copy(aPalette);
 }
 
 void CTaskMiniCalendarCtrl::DisableHeatMap()
@@ -166,12 +195,4 @@ void CTaskMiniCalendarCtrl::DisableHeatMap()
 
 		Invalidate();
 	}
-}
-
-int CTaskMiniCalendarCtrl::GetDateHeat(const COleDateTime& dt) const
-{
-	int nHeat = 0;
-	m_mapHeatMap.Lookup(CDateHelper::GetDateOnly(dt.m_dt), nHeat);
-
-	return nHeat;
 }

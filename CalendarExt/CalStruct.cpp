@@ -335,6 +335,13 @@ COleDateTime TASKCALITEM::GetAnyEndDate() const
 	return dtDue;
 }
 
+COleDateTime TASKCALITEM::GetDoneDate() const
+{
+	ASSERT(CDateHelper::IsDateSet(dtDone));
+
+	return dtDone;
+}
+
 void TASKCALITEM::MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const
 {
 	MinMax(GetAnyStartDate(), dtMin, dtMax);

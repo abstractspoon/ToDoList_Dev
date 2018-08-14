@@ -286,6 +286,14 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 
 	m_BigCalendar.SetOptions(dwOptions);
 	m_MiniCalendar.SetOptions(dwOptions);
+
+	CDWordArray aHeatMapPalette;
+	IUI_ATTRIBUTE nHeatMapAttrib = IUI_NONE;
+
+	if (m_dlgPrefs.GetEnableHeatMap(aHeatMapPalette, nHeatMapAttrib))
+		m_MiniCalendar.EnableHeatMap(aHeatMapPalette, nHeatMapAttrib);
+	else
+		m_MiniCalendar.DisableHeatMap();
 }
 
 void CCalendarWnd::SetUITheme(const UITHEME* pTheme)

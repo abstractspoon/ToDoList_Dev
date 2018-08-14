@@ -47,6 +47,7 @@ public:
 	void SetDueDate(const COleDateTime& date);
 
 	COleDateTime GetAnyEndDate() const;
+	COleDateTime GetDoneDate() const;
 	BOOL HasAnyEndDate() const;
 
 	COLORREF GetFillColor(BOOL bTextIsBack) const;

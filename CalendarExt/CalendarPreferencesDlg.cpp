@@ -7,6 +7,7 @@
 #include "CalMsg.h"
 
 #include "..\Shared\DialogHelper.h"
+#include "..\Shared\Misc.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -37,8 +38,7 @@ enum
 CCalendarPreferencesPage::CCalendarPreferencesPage()
 	: 
 	CPreferencesPageBase(IDD_PREFERENCES_PAGE),
-	m_cbHeatMapPalette(CBF_SYNTHESIZE),
-	m_nSelHeatMapPalette(0)
+	m_cbHeatMapPalette(CBF_SYNTHESIZE)
 {
 	//{{AFX_DATA_INIT(CCalendarPreferencesPage)
 	m_bShowCalcStartDates = FALSE;
@@ -71,8 +71,11 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_USECREATIONFORSTART, m_nCalcMissingStartDates);
 	DDX_Radio(pDX, IDC_USESTARTFORDUE, m_nCalcMissingDueDates);
 	DDX_Control(pDX, IDC_HEATMAPPALETTE, m_cbHeatMapPalette);
-	DDX_CBIndex(pDX, IDC_HEATMAPPALETTE, m_nSelHeatMapPalette);
 
+	if (pDX->m_bSaveAndValidate)
+		m_cbHeatMapPalette.GetSelectedPalette(m_aSelPalette);
+	else
+		m_cbHeatMapPalette.SetSelectedPalette(m_aSelPalette);
 }
 
 
@@ -102,7 +105,7 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
 	
 	m_cbHeatMapPalette.Initialize(CBPT_SEQUENTIAL, 10);
-	m_cbHeatMapPalette.SetCurSel(m_nSelHeatMapPalette);
+	m_cbHeatMapPalette.SetSelectedPalette(m_aSelPalette);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -146,7 +149,6 @@ void CCalendarPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 {
 	pPrefs->WriteProfileInt(szKey, _T("ShowMiniCalendar"), m_bShowMiniCalendar);
 	pPrefs->WriteProfileInt(szKey, _T("EnableHeatMap"), m_bEnableHeatMap);
-	pPrefs->WriteProfileInt(szKey, _T("HeatMapPalette"), m_nSelHeatMapPalette);
 	pPrefs->WriteProfileInt(szKey, _T("AdjustTaskHeights"), m_bAdjustTaskHeights);
 	pPrefs->WriteProfileInt(szKey, _T("TreatOverdueAsDueToday"), m_bTreatOverdueAsDueToday);
 	pPrefs->WriteProfileInt(szKey, _T("HideParentTasks"), m_bHideParentTasks);
@@ -160,6 +162,9 @@ void CCalendarPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 	pPrefs->WriteProfileInt(szKey, _T("CalcMissingStartDates"), m_nCalcMissingStartDates);
 	pPrefs->WriteProfileInt(szKey, _T("CalcMissingDueDates"), m_nCalcMissingDueDates);
+
+	CString sPalette = Misc::FormatArray(m_aSelPalette, '|');
+	pPrefs->WriteProfileString(szKey, _T("HeatMapPalette"), sPalette);
 }
 
 void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
@@ -169,7 +174,6 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bTreatOverdueAsDueToday = pPrefs->GetProfileInt(szKey, _T("TreatOverdueAsDueToday"), FALSE);
 	m_bHideParentTasks = pPrefs->GetProfileInt(szKey, _T("HideParentTasks"), TRUE);
 	m_bEnableHeatMap = pPrefs->GetProfileInt(szKey, _T("EnableHeatMap"), TRUE);
-	m_nSelHeatMapPalette = pPrefs->GetProfileInt(szKey, _T("HeatMapPalette"), 0);
 
 	m_bShowTasksContinuous = pPrefs->GetProfileInt(szKey, _T("ShowTasksContinuous"), TRUE);
 	m_bShowStartDates = pPrefs->GetProfileInt(szKey, _T("ShowStartDates"), FALSE);
@@ -180,6 +184,20 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 
 	m_nCalcMissingStartDates = pPrefs->GetProfileInt(szKey, _T("CalcMissingStartDates"), CALCSTART_ASCREATION);
 	m_nCalcMissingDueDates = pPrefs->GetProfileInt(szKey, _T("CalcMissingDueDates"), CALCDUE_ASLATESTSTARTANDTODAY);
+
+	CString sPalette = pPrefs->GetProfileString(szKey, _T("HeatMapPalette"));
+	Misc::Split(sPalette, m_aSelPalette, '|');
+}
+
+BOOL CCalendarPreferencesPage::GetEnableHeatMap(CDWordArray& aPalette, IUI_ATTRIBUTE& nAttrib) const
+{
+	if (m_bEnableHeatMap)
+	{
+		aPalette.Copy(m_aSelPalette);
+		nAttrib = IUI_DONEDATE;
+	}
+
+	return m_bEnableHeatMap;
 }
 
 BOOL CCalendarPreferencesPage::GetCalcMissingStartAsCreation() const
