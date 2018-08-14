@@ -527,7 +527,7 @@ void CCalendarWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	if (m_BigCalendar.UpdateTasks(pTasks, nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes)) != FALSE)
-		m_MiniCalendar.RecalcSpecialDates();
+		m_MiniCalendar.OnUpdateTasks();
 
 	UpdateSelectedTaskDates();
 }
@@ -724,7 +724,7 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 		{
 			if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
 			{
-				m_MiniCalendar.RecalcSpecialDates();
+				m_MiniCalendar.OnUpdateTasks();
 				return TRUE;
 			}
 		}

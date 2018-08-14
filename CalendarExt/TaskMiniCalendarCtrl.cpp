@@ -62,6 +62,12 @@ void CTaskMiniCalendarCtrl::SetOptions(DWORD dwOptions)
 	}
 }
 
+void CTaskMiniCalendarCtrl::OnUpdateTasks()
+{
+	RecalcSpecialDates();
+	RecalcHeatMap();
+}
+
 void CTaskMiniCalendarCtrl::RecalcSpecialDates()
 {
 	m_setSpecialDates.RemoveAll();
@@ -74,7 +80,6 @@ void CTaskMiniCalendarCtrl::RecalcSpecialDates()
 	{
 		m_mapData.GetNextAssoc(pos, dwTaskID, pTCI);
 
-		// process item for special dates
 		if (HasOption(TCCO_DISPLAYDONE) || !pTCI->IsDone(TRUE))
 		{
 			if (pTCI->IsStartDateSet())
@@ -86,15 +91,50 @@ void CTaskMiniCalendarCtrl::RecalcSpecialDates()
 	}
 }
 
+void CTaskMiniCalendarCtrl::RecalcHeatMap()
+{
+	if (m_mapHeatMap.GetCount() == 0)
+		return;
+
+	m_mapHeatMap.RemoveAll();
+
+	POSITION pos = m_mapData.GetStartPosition();
+	DWORD dwTaskID = 0;
+	TASKCALITEM* pTCI = NULL;
+
+	while (pos)
+	{
+		m_mapData.GetNextAssoc(pos, dwTaskID, pTCI);
+
+
+/*
+		if (HasOption(TCCO_DISPLAYDONE) || !pTCI->IsDone(TRUE))
+		{
+			if (pTCI->IsStartDateSet())
+				m_setSpecialDates.Add(CDateHelper::GetDateOnly(pTCI->GetAnyStartDate()).m_dt);
+
+			if (pTCI->IsEndDateSet())
+				m_setSpecialDates.Add(CDateHelper::GetDateOnly(pTCI->GetAnyEndDate()).m_dt);
+		}
+*/
+	}
+}
+
 BOOL CTaskMiniCalendarCtrl::IsSpecialDate(const COleDateTime& dt) const
 {
-	return m_setSpecialDates.Has(dt.m_dt);
+	return m_setSpecialDates.Has(CDateHelper::GetDateOnly(dt.m_dt));
 }
 
 COLORREF CTaskMiniCalendarCtrl::GetDateBkgndColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const
 {
-// 	if (!bSelected && bActiveMonth && ((int)dt.m_dt % 2))
-// 		return 255;
+	// Handle heat map
+ 	if (!bSelected && bActiveMonth && m_mapHeatMap.GetCount())
+	{
+		int nColor = ((m_aPalette.GetSize() * GetDateHeat(dt)) / m_nMaxHeat);
+		nColor = min(nColor, m_aPalette.GetSize() - 1);
+
+ 		return m_aPalette[nColor];
+	}
 
 	return CFPSMiniCalendarCtrl::GetDateBkgndColor(dt, bSelected, bSpecial, bActiveMonth);
 }
@@ -102,4 +142,36 @@ COLORREF CTaskMiniCalendarCtrl::GetDateBkgndColor(const COleDateTime& dt, BOOL b
 COLORREF CTaskMiniCalendarCtrl::GetDateTextColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const
 {
 	return CFPSMiniCalendarCtrl::GetDateTextColor(dt, bSelected, bSpecial, bActiveMonth);
+}
+
+void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRIBUTE nAttrib)
+{
+	ASSERT(aPalette.GetSize());
+	ASSERT(nAttrib != IUI_NONE);
+
+	m_aPalette.Copy(aPalette);
+	m_nHeatMapAttribute = nAttrib;
+
+	RecalcHeatMap();
+}
+
+void CTaskMiniCalendarCtrl::DisableHeatMap()
+{
+	if (m_mapHeatMap.GetCount())
+	{
+		m_aPalette.RemoveAll();
+		m_mapHeatMap.RemoveAll();
+		m_nHeatMapAttribute = IUI_NONE;
+		m_nMaxHeat = 0;
+
+		Invalidate();
+	}
+}
+
+int CTaskMiniCalendarCtrl::GetDateHeat(const COleDateTime& dt) const
+{
+	int nHeat = 0;
+	m_mapHeatMap.Lookup(CDateHelper::GetDateOnly(dt.m_dt), nHeat);
+
+	return nHeat;
 }

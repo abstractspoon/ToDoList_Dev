@@ -46,7 +46,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BurndownExt", "..\BurndownE
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlainTextImport", "..\PlainTextImport\PlainTextImport.vcxproj", "{FB36CF4E-ADF0-4851-901F-FF52E7A43D03}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WorkloadExt", "..\WorkloadExt\WorkloadExt.vcxproj", "{45AAF15E-A1F3-FED6-FB46-0AE75B97952C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WorkloadExt", "..\WorkloadExt\WorkloadExt.vcxproj", "{19F9E07E-7448-45EC-101E-8855E65841B1}"
 	ProjectSection(ProjectDependencies) = postProject
 		{95605899-9C90-40D8-8774-D1DA1FCE7464} = {95605899-9C90-40D8-8774-D1DA1FCE7464}
 		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31} = {E15C17B8-C080-492F-BBB8-BF9E84A0EA31}
@@ -142,10 +142,10 @@ Global
 		{FB36CF4E-ADF0-4851-901F-FF52E7A43D03}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{FB36CF4E-ADF0-4851-901F-FF52E7A43D03}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
 		{FB36CF4E-ADF0-4851-901F-FF52E7A43D03}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
-		{45AAF15E-A1F3-FED6-FB46-0AE75B97952C}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{45AAF15E-A1F3-FED6-FB46-0AE75B97952C}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
-		{45AAF15E-A1F3-FED6-FB46-0AE75B97952C}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
-		{45AAF15E-A1F3-FED6-FB46-0AE75B97952C}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{19F9E07E-7448-45EC-101E-8855E65841B1}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{19F9E07E-7448-45EC-101E-8855E65841B1}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{19F9E07E-7448-45EC-101E-8855E65841B1}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{19F9E07E-7448-45EC-101E-8855E65841B1}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

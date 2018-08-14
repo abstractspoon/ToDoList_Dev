@@ -84,6 +84,7 @@ typedef CArray<TASKCALITEM*, TASKCALITEM*&> CTaskCalItemArray;
 typedef CArray<const TASKCALITEM*, const TASKCALITEM*&> CTaskCalItemConstArray;
 typedef CMap<DWORD, DWORD, TASKCALITEM*, TASKCALITEM*&> CTaskCalItemMap;
 typedef CSet<double> CSpecialDateSet;
+typedef CMap<double, double, int, int&> CHeatMap;
 
 /////////////////////////////////////////////////////////////////////////////
 
