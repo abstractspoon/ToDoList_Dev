@@ -105,7 +105,16 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
 	
 	m_cbHeatMapPalette.Initialize(CBPT_SEQUENTIAL, 5);
-	m_cbHeatMapPalette.SetSelectedPalette(m_aSelPalette);
+
+	if (!m_aSelPalette.GetSize())
+	{
+		m_cbHeatMapPalette.SetCurSel(0);
+		m_cbHeatMapPalette.GetSelectedPalette(m_aSelPalette);
+	}
+	else
+	{
+		m_cbHeatMapPalette.SetSelectedPalette(m_aSelPalette);
+	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
