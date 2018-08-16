@@ -45,6 +45,7 @@
 #define IDS_SNAP_FREE                   32790
 #define ID_GOTOTODAY                    32795
 #define IDS_NOHEATMAP                   57671
+#define IDS_MINICAL_TOOLTIP             57672
 
 // Next default values for new objects
 // 

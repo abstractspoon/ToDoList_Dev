@@ -53,6 +53,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_HELP                 "\nOnline Help"
     IDS_NOHEATMAP           "<none>"
+    IDS_MINICAL_TOOLTIP     "%d Tasks"
 END
 
 #endif    // English (U.S.) resources

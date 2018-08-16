@@ -4,16 +4,13 @@
 #include "stdafx.h"
 #include "TaskMiniCalendarCtrl.h"
 #include "CalMsg.h"
+#include "resource.h"
 
 #include "..\Shared\GraphicsMisc.h"
-#include "..\Shared\themed.h"
 #include "..\Shared\DateHelper.h"
-#include "..\Shared\TimeHelper.h"
 #include "..\Shared\misc.h"
 #include "..\Shared\dialoghelper.h"
-#include "..\Shared\holdredraw.h"
-#include "..\Shared\autoflag.h"
-#include "..\Shared\enimagelist.h"
+#include "..\Shared\enstring.h"
 
 #include <math.h>
 
@@ -125,8 +122,10 @@ void CTaskMiniCalendarCtrl::IncrementDateHeat(const COleDateTime& dt)
 {
 	int nNewHeat = (GetDateHeat(dt) + 1);
 
+	// Note: Don't clip to max allowable heat because then we
+	// lose the actual value which we want for tooltips
 	m_mapHeatMap[CDateHelper::GetDateOnly(dt)] = nNewHeat;
-	m_nMaxHeat = max(nNewHeat, m_nMaxHeat);
+	m_nMaxHeat = max(m_nMaxHeat, nNewHeat);
 }
 
 int CTaskMiniCalendarCtrl::GetDateHeat(const COleDateTime& dt) const
@@ -153,7 +152,10 @@ void CTaskMiniCalendarCtrl::GetDateCellColors(const COleDateTime& dt, BOOL bSele
 
 		if (nHeat)
 		{
-			int nColor = ((m_aPalette.GetSize() * nHeat) / m_nMaxHeat);
+			nHeat = min(nHeat, m_nMaxAllowableHeat);
+			int nMaxHeat = min(m_nMaxHeat, m_nMaxAllowableHeat);
+
+			int nColor = ((m_aPalette.GetSize() * nHeat) / nMaxHeat);
 			nColor = min(nColor, m_aPalette.GetSize() - 1);
 
 			if (nColor >= 0)
@@ -165,33 +167,71 @@ void CTaskMiniCalendarCtrl::GetDateCellColors(const COleDateTime& dt, BOOL bSele
 	}
 }
 
-void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRIBUTE nAttrib)
+void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRIBUTE nAttrib, int nMaxAllowableHeat)
 {
 	ASSERT(aPalette.GetSize());
 	ASSERT(nAttrib != IUI_NONE);
 
-	if (nAttrib != m_nHeatMapAttribute)
+	if ((nAttrib != m_nHeatMapAttribute))
 	{
 		m_nHeatMapAttribute = nAttrib;
+
 		RecalcHeatMap();
 	}
-	else if (!Misc::MatchAll(aPalette, m_aPalette, TRUE))
+	else if (!Misc::MatchAll(aPalette, m_aPalette, TRUE) || (nMaxAllowableHeat != m_nMaxAllowableHeat))
 	{
 		Invalidate();
 	}
 
 	m_aPalette.Copy(aPalette);
+	m_nMaxAllowableHeat = nMaxAllowableHeat;
+
+	if (!m_tooltip.GetSafeHwnd())
+		m_tooltip.Create(this, TTS_ALWAYSTIP);
 }
 
 void CTaskMiniCalendarCtrl::DisableHeatMap()
 {
 	if (m_mapHeatMap.GetCount())
 	{
+		m_tooltip.DestroyWindow();
 		m_aPalette.RemoveAll();
 		m_mapHeatMap.RemoveAll();
 		m_nHeatMapAttribute = IUI_NONE;
-		m_nMaxHeat = 0;
+		m_nMaxHeat = m_nMaxAllowableHeat = 0;
 
 		Invalidate();
 	}
+}
+
+BOOL CTaskMiniCalendarCtrl::PreTranslateMessage(MSG* pMsg)
+{
+	m_tooltip.FilterToolTipMessage(pMsg);
+
+	return CFPSMiniCalendarCtrl::PreTranslateMessage(pMsg);
+}
+
+int CTaskMiniCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	const CFPSMiniCalendarCtrlFontHotSpot* pSpot = HitTest(point);
+
+	if (pSpot)
+	{
+		int nHeat = GetDateHeat(pSpot->m_dt);
+
+		if (nHeat > 0)
+		{
+			pTI->hwnd = GetSafeHwnd();
+			pTI->uId = (DWORD)(int)pSpot->m_dt;
+			pTI->uFlags |= TTF_TRANSPARENT;
+			pTI->rect = pSpot->m_rect;
+
+			CEnString sTooltip(IDS_MINICAL_TOOLTIP, nHeat);
+			pTI->lpszText = _tcsdup(sTooltip); // MFC will free the duplicated string
+
+			return (int)pTI->uId;
+		}
+	}
+
+	return -1;
 }

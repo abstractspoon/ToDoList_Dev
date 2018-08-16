@@ -12,12 +12,9 @@
 #include "CalStruct.h"
 #include "CalEnum.h"
 
-#include "..\shared\mapex.h"
 #include "..\shared\tooltipctrlex.h"
-#include "..\shared\fontcache.h"
 
 #include "..\Interfaces\IUIExtension.h"
-#include "..\Interfaces\ITaskList.h"
 
 #include "..\3rdParty\FPSMiniCalendarCtrl.h"
 
@@ -32,21 +29,25 @@ public:
 	CTaskMiniCalendarCtrl(const CTaskCalItemMap& mapData);
 	virtual ~CTaskMiniCalendarCtrl();
 
-	void EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRIBUTE nAttrib);
+	void EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRIBUTE nAttrib, int nMaxAllowableHeat = 10);
 	void DisableHeatMap();
 	void SetOptions(DWORD dwOptions);
 
 	void OnUpdateTasks();
+
+public:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 protected:
 	const CTaskCalItemMap& m_mapData;
 
 	CSpecialDateSet m_setSpecialDates;
 	CHeatMap m_mapHeatMap;
-	IUI_ATTRIBUTE m_nHeatMapAttribute;
-	int m_nMaxHeat;
-	
 	CDWordArray m_aPalette;
+	CToolTipCtrlEx m_tooltip;
+	
+	IUI_ATTRIBUTE m_nHeatMapAttribute;
+	int m_nMaxAllowableHeat, m_nMaxHeat;
 	DWORD m_dwOptions;
 
 	// Generated message map functions
@@ -60,6 +61,7 @@ protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTaskMiniCalendarCtrl)
 	//}}AFX_VIRTUAL
+	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 	// helpers
 	virtual BOOL IsSpecialDate(const COleDateTime& dt) const;

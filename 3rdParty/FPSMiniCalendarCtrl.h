@@ -155,8 +155,8 @@ public:
 	void ScrollLeft(int iCount = 1);
 	void ClearSelections();
 
-	CFPSMiniCalendarCtrlFontHotSpot* HitTest(POINT& pt);
-	CFPSMiniCalendarCtrlCell* HeaderHitTest(POINT& point);
+	CFPSMiniCalendarCtrlFontHotSpot* HitTest(POINT& pt) const;
+	CFPSMiniCalendarCtrlCell* HeaderHitTest(POINT& point) const;
 
 	COleDateTime GetDate();
 	void SetDate(COleDateTime dt);

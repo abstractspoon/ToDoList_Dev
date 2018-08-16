@@ -1634,7 +1634,7 @@ void CFPSMiniCalendarCtrl::SetRowsAndColumns(int iRows, int iCols)
 	}
 }
 
-CFPSMiniCalendarCtrlFontHotSpot* CFPSMiniCalendarCtrl::HitTest(POINT& pt)
+CFPSMiniCalendarCtrlFontHotSpot* CFPSMiniCalendarCtrl::HitTest(POINT& pt) const
 {
 	int iCell = 0;
 	BOOL bFound = FALSE;
@@ -1967,7 +1967,7 @@ void CFPSMiniCalendarCtrl::SetSpecialDaysCallback(funcSPECIALDATE pValue, DWORD 
 	m_dwCallbackData = dwUserData;
 }
 
-CFPSMiniCalendarCtrlCell* CFPSMiniCalendarCtrl::HeaderHitTest(POINT& point)
+CFPSMiniCalendarCtrlCell* CFPSMiniCalendarCtrl::HeaderHitTest(POINT& point) const
 {
 	CFPSMiniCalendarCtrlCell* pReturn = NULL;
 
