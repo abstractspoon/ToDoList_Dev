@@ -142,8 +142,10 @@ BOOL CTaskMiniCalendarCtrl::IsSpecialDate(const COleDateTime& dt) const
 	return m_setSpecialDates.Has(CDateHelper::GetDateOnly(dt.m_dt));
 }
 
-COLORREF CTaskMiniCalendarCtrl::GetDateBkgndColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const
+void CTaskMiniCalendarCtrl::GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd) const
 {
+	CFPSMiniCalendarCtrl::GetDateCellColors(dt, bSelected, bSpecial, bActiveMonth, crText, crBkgnd);
+
 	// Handle heat map
  	if (!bSelected && bActiveMonth && m_mapHeatMap.GetCount())
 	{
@@ -154,16 +156,13 @@ COLORREF CTaskMiniCalendarCtrl::GetDateBkgndColor(const COleDateTime& dt, BOOL b
 			int nColor = ((m_aPalette.GetSize() * nHeat) / m_nMaxHeat);
 			nColor = min(nColor, m_aPalette.GetSize() - 1);
 
-			return m_aPalette[nColor];
+			if (nColor >= 0)
+			{
+				crBkgnd = m_aPalette[nColor];
+				crText = GraphicsMisc::GetBestTextColor(crBkgnd);
+			}
 		}
 	}
-
-	return CFPSMiniCalendarCtrl::GetDateBkgndColor(dt, bSelected, bSpecial, bActiveMonth);
-}
-
-COLORREF CTaskMiniCalendarCtrl::GetDateTextColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const
-{
-	return CFPSMiniCalendarCtrl::GetDateTextColor(dt, bSelected, bSpecial, bActiveMonth);
 }
 
 void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRIBUTE nAttrib)

@@ -324,8 +324,7 @@ protected:
 	CFPSMiniCalendarCtrlFontInfo& GetFontInfo(FMC_FONT_TYPE nFont);
 
 	virtual BOOL IsSpecialDate(const COleDateTime& dt) const;
-	virtual COLORREF GetDateBkgndColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const;
-	virtual COLORREF GetDateTextColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const;
+	virtual void GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd) const;
 
 	// computed values of importance
 	BOOL							m_bFontsCreated;

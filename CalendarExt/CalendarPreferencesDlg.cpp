@@ -104,7 +104,7 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
 	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
 	
-	m_cbHeatMapPalette.Initialize(CBPT_SEQUENTIAL, 10);
+	m_cbHeatMapPalette.Initialize(CBPT_SEQUENTIAL, 5);
 	m_cbHeatMapPalette.SetSelectedPalette(m_aSelPalette);
 
 	return TRUE;  // return TRUE unless you set the focus to a control

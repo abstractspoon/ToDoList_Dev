@@ -63,8 +63,8 @@ protected:
 
 	// helpers
 	virtual BOOL IsSpecialDate(const COleDateTime& dt) const;
-	virtual COLORREF GetDateBkgndColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const;
-	virtual COLORREF GetDateTextColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const;
+	virtual void GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, 
+									BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd) const;
 
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 	int GetDateHeat(const COleDateTime& dt) const;

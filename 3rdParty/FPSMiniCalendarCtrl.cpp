@@ -886,17 +886,21 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 
 				CString strText = CStr(dt.GetDay());
 
-				COLORREF cBackColor = GetDateBkgndColor(dt, bSelected, bSpecial, bActiveMonth);
-				COLORREF cTextColor = GetDateTextColor(dt, bSelected, bSpecial, bActiveMonth);
+				COLORREF cBackColor = CLR_NONE, cTextColor = CLR_NONE;
+				GetDateCellColors(dt, bSelected, bSpecial, bActiveMonth, cTextColor, cBackColor);
+				ASSERT(cTextColor != CLR_NONE);
 
-				dc.FillSolidRect(iX-2, iY, m_iIndividualDayWidth+5, m_iDaysHeight+2, cBackColor);
+				if (cBackColor != CLR_NONE)
+				{
+					dc.SetBkColor(cBackColor);
+					dc.FillSolidRect(iX-2, iY, m_iIndividualDayWidth+5, m_iDaysHeight+2, cBackColor);
+				}
 
 				if (bSpecial && bActiveMonth)
 					pOldFont = dc.SelectObject(m_FontInfo[FMC_FONT_SPECIALDAYS].m_pFont);
 				else
 					pOldFont = dc.SelectObject(m_FontInfo[FMC_FONT_DAYS].m_pFont);
 
-				dc.SetBkColor(cBackColor);
 				dc.SetTextColor(cTextColor);
 				dc.DrawText(strText, CRect(iX, iY, iX+m_iIndividualDayWidth,iY+m_iDaysHeight), DEFTEXTFLAGS);
 
@@ -944,46 +948,29 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 
 }
 
-COLORREF CFPSMiniCalendarCtrl::GetDateBkgndColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const
+void CFPSMiniCalendarCtrl::GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, 
+											 COLORREF& crText, COLORREF& crBkgnd) const
 {
-	COLORREF cBackColor = m_FontInfo[FMC_FONT_DAYS].m_crBkColor;
+	crText = m_FontInfo[FMC_FONT_DAYS].m_crTextColor;
+	crBkgnd = m_FontInfo[FMC_FONT_DAYS].m_crBkColor;
 
 	if (bActiveMonth)
 	{
 		if (bSelected)
 		{
-			cBackColor = ::GetSysColor(COLOR_HIGHLIGHT);
+			crText = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
+			crBkgnd = ::GetSysColor(COLOR_HIGHLIGHT);
 		}
 		else if (bSpecial)
 		{
-			cBackColor = m_FontInfo[FMC_FONT_SPECIALDAYS].m_crBkColor;
-		}
-	}
-
-	return cBackColor;
-}
-
-COLORREF CFPSMiniCalendarCtrl::GetDateTextColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const
-{
-	COLORREF cTextColor = m_FontInfo[FMC_FONT_DAYS].m_crTextColor;
-
-	if (bActiveMonth)
-	{
-		if (bSelected)
-		{
-			cTextColor = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
-		}
-		else if (bSpecial)
-		{
-			cTextColor = m_FontInfo[FMC_FONT_SPECIALDAYS].m_crTextColor;
+			crText = m_FontInfo[FMC_FONT_SPECIALDAYS].m_crTextColor;
+			crBkgnd = m_FontInfo[FMC_FONT_SPECIALDAYS].m_crBkColor;
 		}
 	}
 	else
 	{
-		cTextColor = m_cNonMonthDayColor;
+		crText = m_cNonMonthDayColor;
 	}
-
-	return cTextColor;
 }
 
 BOOL CFPSMiniCalendarCtrl::IsToday(COleDateTime &dt)
