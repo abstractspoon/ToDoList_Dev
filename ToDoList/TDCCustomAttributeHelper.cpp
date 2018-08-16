@@ -242,13 +242,12 @@ CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 				CComboBox* pCB = (CComboBox*)pControl;
 
 				CStringArray aListData;
+				attribDef.GetUniqueListData(aListData);
 				
 				if (pControl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)))
 				{
 					ASSERT(bFilter);
-
-					if (attribDef.GetUniqueListData(aListData))
-						((CEnCheckComboBox*)pCB)->SetStrings(aListData);
+					((CEnCheckComboBox*)pCB)->SetStrings(aListData);
 				}
 				else
 				{
