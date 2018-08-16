@@ -986,27 +986,39 @@ BOOL CCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 void CCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 #endif
 {	
-	COleDateTime newDate = m_DateCurrent;
+	int nInc = ((zDelta < 0) ? 1 : -1);
 
-	if (zDelta < 0)
+	if (GetKeyState(VK_CONTROL) & 0x8000)
 	{
-		if (GetKeyState(VK_CONTROL) & 0x8000)
-		{
-			SetVisibleWeeks(min(m_nVisibleWeeks+1, CALENDAR_MAX_ROWS));
-			GetParent()->SendMessage(WM_CALENDAR_VISIBLEWEEKCHANGE);
-		}
-		else
-			SendMessage(WM_VSCROLL,SB_LINEDOWN);
+		SetVisibleWeeks(min(m_nVisibleWeeks + nInc, CALENDAR_MAX_ROWS));
+		GetParent()->SendMessage(WM_CALENDAR_VISIBLEWEEKCHANGE);
 	}
-	else if (zDelta > 0)
+	else
 	{
-		if (GetKeyState(VK_CONTROL) & 0x8000)
+		int nPos = GetScrollPos(SB_VERT);
+			
+		if (nInc > 0)
 		{
-			SetVisibleWeeks(max(m_nVisibleWeeks-1, 1));
-			GetParent()->SendMessage(WM_CALENDAR_VISIBLEWEEKCHANGE);
+			SendMessage(WM_VSCROLL,SB_LINEDOWN);
+
+			// If we're already at the bottom of the scrollbar, 
+			// we have to notify the parent explicitly
+			if (nPos == m_nVscrollMax)
+			{
+				GetParent()->SendMessage(WM_VSCROLL, SB_LINEDOWN, (LPARAM)GetSafeHwnd());
+			}
 		}
-		else
+		else if (nInc < 0)
+		{
 			SendMessage(WM_VSCROLL,SB_LINEUP);
+
+			// If we're already at the top of the scrollbar, 
+			// we have to notify the parent explicitly
+			if (nPos == 0)
+			{
+				GetParent()->SendMessage(WM_VSCROLL, SB_LINEUP, (LPARAM)GetSafeHwnd());
+			}
+		}
 	}
 	
 #if _MSC_VER >= 1400
