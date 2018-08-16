@@ -905,7 +905,7 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 				dc.DrawText(strText, CRect(iX, iY, iX+m_iIndividualDayWidth,iY+m_iDaysHeight), DEFTEXTFLAGS);
 
 				if (m_bHighlightToday && IsToday(dt))
-					dc.Draw3dRect(iX-2, iY, m_iIndividualDayWidth+5, m_iDaysHeight+3, m_crTodayBorder, m_crTodayBorder);
+					dc.Draw3dRect(iX-2, iY, m_iIndividualDayWidth+5, m_iDaysHeight+2, m_crTodayBorder, m_crTodayBorder);
 
 				SetHotSpot(iMonthRow, iMonthCol, iDayCounter, dt, CRect(iX,iY,iX+m_iIndividualDayWidth+5, iY+m_iDaysHeight+2));
 			}
