@@ -144,13 +144,11 @@ namespace MindMapUIExtension
                 m_SomeSubtasksDone = task.HasSomeSubtasksDone();
 
             if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
-            {
                 m_IsDone = task.IsDone();
-                m_IsGoodAsDone = task.IsGoodAsDone();
-            }
 
 			m_IsParent = task.IsParent();
 			m_IsLocked = task.IsLocked();
+            m_IsGoodAsDone = task.IsGoodAsDone();
 
 			return true;
 		}
