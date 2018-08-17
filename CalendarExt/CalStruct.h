@@ -91,7 +91,7 @@ typedef CSet<double> CSpecialDateSet;
 class CHeatMap
 {
 public:
-	CHeatMap(int nMaxHeatCutoff = 10);
+	CHeatMap(int nMinHeatCutoff = 10);
 
 	void ClearHeat();
 	BOOL HasHeat() const { return m_mapHeat.GetCount(); }
@@ -106,6 +106,11 @@ protected:
 	CMap<double, double, int, int&> m_mapHeat;
 	CDWordArray m_aColorPalette;
 	int m_nMaxHeat, m_nMaxHeatCutoff;
+
+	const int m_nMinHeatCutoff;
+
+protected:
+	void RecalculateMaxHeatCutoff();
 
 };
 
