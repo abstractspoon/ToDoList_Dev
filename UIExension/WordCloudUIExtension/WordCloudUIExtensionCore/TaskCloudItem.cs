@@ -37,10 +37,11 @@ namespace WordCloudUIExtension
 		public List<string> AllocTo;
 		public List<string> Category;
 		public List<string> Tags;
-		public bool HasIcon;
-		public bool IsParent;
-        public bool IsLocked;
-        public bool IsGoodAsDone;
+		public Boolean HasIcon;
+		public Boolean IsParent;
+        public Boolean IsLocked;
+        public Boolean IsGoodAsDone;
+        public Boolean HasSomeSubtasksDone;
 
         private System.Drawing.Color taskTextColor = System.Drawing.Color.Empty;
             
@@ -50,7 +51,7 @@ namespace WordCloudUIExtension
             set { taskTextColor = value; }
         }
 
-        public System.Drawing.Color GetTextColor(bool isSelected, bool taskColorIsBkgnd)
+        public System.Drawing.Color GetTextColor(Boolean isSelected, Boolean taskColorIsBkgnd)
         {
             if (!taskTextColor.IsEmpty)
             {
@@ -68,7 +69,7 @@ namespace WordCloudUIExtension
             return TextColor;
         }
 
-        public System.Drawing.Color GetBackColor(bool isSelected, bool taskColorIsBkgnd)
+        public System.Drawing.Color GetBackColor(Boolean isSelected, Boolean taskColorIsBkgnd)
         {
             if (!taskTextColor.IsEmpty)
             {
@@ -80,7 +81,7 @@ namespace WordCloudUIExtension
             return System.Drawing.Color.Empty;
         }
 
-        public Boolean IsDone(bool includeGoodAsDone)
+        public Boolean IsDone(Boolean includeGoodAsDone)
         {
             if (includeGoodAsDone && IsGoodAsDone)
                 return true;
@@ -96,11 +97,12 @@ namespace WordCloudUIExtension
 		static readonly char[] WordTrim = { '\'', '\"', '{', '}', '(', ')', ':', ';', '.', '[', ']' };
 
 		public void ProcessTaskUpdate(Task task, UIExtension.UpdateType type,
-									  HashSet<UIExtension.TaskAttribute> attribs, bool newTask)
+									  HashSet<UIExtension.TaskAttribute> attribs, Boolean newTask)
 		{
             IsParent = task.IsParent();
             IsLocked = task.IsLocked();
             IsGoodAsDone = task.IsGoodAsDone();
+            HasSomeSubtasksDone = task.HasSomeSubtasksDone();
 
 			if (newTask)
 			{
@@ -181,7 +183,7 @@ namespace WordCloudUIExtension
 			return "";
 		}
 
-		public bool Matches(String words, bool caseSensitive, bool wholeWord, bool titleOnly)
+		public Boolean Matches(String words, Boolean caseSensitive, Boolean wholeWord, Boolean titleOnly)
 		{
 			var searchIn = new List<String> { Title };
 
@@ -196,7 +198,7 @@ namespace WordCloudUIExtension
 
                 while (find >= 0)
                 {
-                    bool match = true;
+                    Boolean match = true;
 
                     if (wholeWord)
                     {
@@ -246,7 +248,7 @@ namespace WordCloudUIExtension
 			return words;
 		}
 
-		public List<string> GetWords(UIExtension.TaskAttribute attrib, IBlacklist exclusions, bool force)
+		public List<string> GetWords(UIExtension.TaskAttribute attrib, IBlacklist exclusions, Boolean force)
 		{
 			if (force || (attrib != m_WordAttribute))
 			{
@@ -288,7 +290,7 @@ namespace WordCloudUIExtension
 			return values;
 		}
 
-		public bool AttributeHasValue(UIExtension.TaskAttribute attrib, String value, IBlacklist exclusions)
+		public Boolean AttributeHasValue(UIExtension.TaskAttribute attrib, String value, IBlacklist exclusions)
 		{
 			var words = GetWords(attrib, exclusions, false);
 

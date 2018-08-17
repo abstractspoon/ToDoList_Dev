@@ -507,6 +507,9 @@ namespace WordCloudUIExtension
 
 			// Add message handlers
 			m_TaskMatchesList.SelectedIndexChanged += new EventHandler(OnTaskMatchesSelChanged);
+            m_TaskMatchesList.EditTaskDone += new EditTaskCompletionEventHandler(OnTaskMatchesEditTaskDone);
+            m_TaskMatchesList.EditTaskIcon += new EditTaskIconEventHandler(OnTaskMatchesEditTaskIcon);
+            m_TaskMatchesList.EditTaskLabel += new EditTaskLabelEventHandler(OnTaskMatchesEditTaskLabel);
 		}
 
 		private void CreateAttributeCombo()
@@ -800,6 +803,21 @@ namespace WordCloudUIExtension
 			if (selTaskId != 0)
 				NotifyParentSelChange(selTaskId);
 		}
+
+        private void OnTaskMatchesEditTaskDone(object sender, UInt32 taskId, bool completed)
+        {
+            // TODO
+        }
+
+        private void OnTaskMatchesEditTaskIcon(object sender, UInt32 taskId)
+        {
+            // TODO
+        }
+
+        private void OnTaskMatchesEditTaskLabel(object sender, UInt32 taskId)
+        {
+            // TODO
+        }
 
 		private void NotifyParentSelChange(UInt32 taskId)
 		{

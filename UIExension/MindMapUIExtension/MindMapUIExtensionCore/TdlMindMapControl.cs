@@ -11,7 +11,7 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace MindMapUIExtension
 {
-	public delegate void EditTaskLabelEventHandler(object sender, UInt32 taskId);
+    public delegate void EditTaskLabelEventHandler(object sender, UInt32 taskId);
     public delegate void EditTaskIconEventHandler(object sender, UInt32 taskId);
     public delegate void EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
 
@@ -741,7 +741,7 @@ namespace MindMapUIExtension
                 Rectangle checkRect = CalcCheckboxRect(rect);
 
                 if (m_ShowCompletionCheckboxes)
-                    CheckBoxRenderer.DrawCheckBox(graphics, new Point(checkRect.Left, checkRect.Top), GetItemCheckboxState(taskItem));
+                    CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetItemCheckboxState(taskItem));
 
 			    // Task icon
                 if (TaskHasIcon(taskItem))

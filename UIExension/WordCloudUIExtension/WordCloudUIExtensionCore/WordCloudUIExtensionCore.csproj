@@ -54,7 +54,9 @@
     </Compile>
     <Compile Include="ColorSchemeComboBox.cs" />
     <Compile Include="TaskCloudItem.cs" />
-    <Compile Include="TaskMatchesListView.cs" />
+    <Compile Include="TaskMatchesListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
