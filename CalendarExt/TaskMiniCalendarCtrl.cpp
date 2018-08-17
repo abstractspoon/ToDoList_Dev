@@ -26,8 +26,7 @@ static char THIS_FILE[] = __FILE__;
 CTaskMiniCalendarCtrl::CTaskMiniCalendarCtrl(const CTaskCalItemMap& mapData) 
 	: 
 	m_mapData(mapData), 
-	m_nHeatMapAttribute(IUI_NONE), 
-	m_nMaxHeat(0)
+	m_nHeatMapAttribute(IUI_NONE)
 {
 }
 
@@ -93,47 +92,8 @@ void CTaskMiniCalendarCtrl::RecalcSpecialDates()
 
 void CTaskMiniCalendarCtrl::RecalcHeatMap()
 {
-	if (m_mapData.GetCount() == 0)
-		return;
-
-	m_mapHeatMap.RemoveAll();
-
-	POSITION pos = m_mapData.GetStartPosition();
-	DWORD dwTaskID = 0;
-	TASKCALITEM* pTCI = NULL;
-
-	while (pos)
-	{
-		m_mapData.GetNextAssoc(pos, dwTaskID, pTCI);
-
-		switch (m_nHeatMapAttribute)
-		{
-		case IUI_DONEDATE:
-			if (pTCI->IsDone(FALSE))
-				IncrementDateHeat(pTCI->GetDoneDate());
-			break;
-		}
-	}
-
-	Invalidate();
-}
-
-void CTaskMiniCalendarCtrl::IncrementDateHeat(const COleDateTime& dt)
-{
-	int nNewHeat = (GetDateHeat(dt) + 1);
-
-	// Note: Don't clip to max allowable heat because then we
-	// lose the actual value which we want for tooltips
-	m_mapHeatMap[CDateHelper::GetDateOnly(dt)] = nNewHeat;
-	m_nMaxHeat = max(m_nMaxHeat, nNewHeat);
-}
-
-int CTaskMiniCalendarCtrl::GetDateHeat(const COleDateTime& dt) const
-{
-	int nHeat = 0;
-	m_mapHeatMap.Lookup(CDateHelper::GetDateOnly(dt.m_dt), nHeat);
-
-	return nHeat;
+	if (m_mapHeatMap.Recalculate(m_mapData, m_nHeatMapAttribute))
+		Invalidate();
 }
 
 BOOL CTaskMiniCalendarCtrl::IsSpecialDate(const COleDateTime& dt) const
@@ -146,45 +106,28 @@ void CTaskMiniCalendarCtrl::GetDateCellColors(const COleDateTime& dt, BOOL bSele
 	CFPSMiniCalendarCtrl::GetDateCellColors(dt, bSelected, bSpecial, bActiveMonth, crText, crBkgnd);
 
 	// Handle heat map
- 	if (!bSelected && bActiveMonth && m_mapHeatMap.GetCount())
+ 	if (!bSelected && bActiveMonth && m_mapHeatMap.HasHeat())
 	{
-		int nHeat = GetDateHeat(dt);
+		crBkgnd = m_mapHeatMap.GetColor(dt);
 
-		if (nHeat)
-		{
-			nHeat = min(nHeat, m_nMaxAllowableHeat);
-			int nMaxHeat = min(m_nMaxHeat, m_nMaxAllowableHeat);
-
-			int nColor = ((m_aPalette.GetSize() * nHeat) / nMaxHeat);
-			nColor = min(nColor, m_aPalette.GetSize() - 1);
-
-			if (nColor >= 0)
-			{
-				crBkgnd = m_aPalette[nColor];
-				crText = GraphicsMisc::GetBestTextColor(crBkgnd);
-			}
-		}
+		if (crBkgnd != CLR_NONE)
+			crText = GraphicsMisc::GetBestTextColor(crBkgnd);
 	}
 }
 
-void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRIBUTE nAttrib, int nMaxAllowableHeat)
+void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRIBUTE nAttrib)
 {
 	ASSERT(aPalette.GetSize());
 	ASSERT(nAttrib != IUI_NONE);
 
-	if ((nAttrib != m_nHeatMapAttribute))
+	if (m_mapHeatMap.SetColorPalette(aPalette))
+		Invalidate();
+
+	if (nAttrib != m_nHeatMapAttribute)
 	{
 		m_nHeatMapAttribute = nAttrib;
-
 		RecalcHeatMap();
 	}
-	else if (!Misc::MatchAll(aPalette, m_aPalette, TRUE) || (nMaxAllowableHeat != m_nMaxAllowableHeat))
-	{
-		Invalidate();
-	}
-
-	m_aPalette.Copy(aPalette);
-	m_nMaxAllowableHeat = nMaxAllowableHeat;
 
 	if (!m_tooltip.GetSafeHwnd())
 		m_tooltip.Create(this, TTS_ALWAYSTIP);
@@ -192,13 +135,11 @@ void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRI
 
 void CTaskMiniCalendarCtrl::DisableHeatMap()
 {
-	if (m_mapHeatMap.GetCount())
+	if (m_mapHeatMap.HasHeat())
 	{
 		m_tooltip.DestroyWindow();
-		m_aPalette.RemoveAll();
-		m_mapHeatMap.RemoveAll();
+		m_mapHeatMap.ClearHeat();
 		m_nHeatMapAttribute = IUI_NONE;
-		m_nMaxHeat = m_nMaxAllowableHeat = 0;
 
 		Invalidate();
 	}
@@ -217,7 +158,7 @@ int CTaskMiniCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 	if (pSpot)
 	{
-		int nHeat = GetDateHeat(pSpot->m_dt);
+		int nHeat = m_mapHeatMap.GetHeat(pSpot->m_dt);
 
 		if (nHeat > 0)
 		{

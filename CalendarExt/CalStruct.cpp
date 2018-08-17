@@ -463,3 +463,103 @@ void TASKCALITEM::ReformatName()
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+CHeatMap::CHeatMap(int nMaxHeatCutoff) 
+	: 
+	m_nMaxHeatCutoff(nMaxHeatCutoff), 
+	m_nMaxHeat(-1)
+{
+}
+
+void CHeatMap::ClearHeat()
+{
+	m_mapHeat.RemoveAll();
+	m_nMaxHeat = -1;
+}
+
+BOOL CHeatMap::SetColorPalette(const CDWordArray& aColors)
+{
+	if (aColors.GetSize() < 5)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (Misc::MatchAll(aColors, m_aColorPalette, TRUE))
+		return FALSE;
+	
+	m_aColorPalette.Copy(aColors);
+	return TRUE;
+}
+
+BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, IUI_ATTRIBUTE nAttrib)
+{
+	if (mapData.GetCount() == 0)
+		return FALSE;
+
+	m_mapHeat.RemoveAll();
+	m_nMaxHeat = -1;
+
+	POSITION pos = mapData.GetStartPosition();
+	DWORD dwTaskID = 0;
+	TASKCALITEM* pTCI = NULL;
+
+	while (pos)
+	{
+		mapData.GetNextAssoc(pos, dwTaskID, pTCI);
+		int nHeat = 0;
+
+		switch (nAttrib)
+		{
+		case IUI_DONEDATE:
+			if (pTCI->IsDone(FALSE))
+				nHeat = Misc::IncrementItemT<double, int>(m_mapHeat, pTCI->GetDoneDate().m_dt);
+			break;
+
+		default:
+			ASSERT(0);
+			return FALSE;
+		}
+
+		if (m_nMaxHeat == -1)
+			m_nMaxHeat = nHeat;
+		else
+			m_nMaxHeat = max(m_nMaxHeat, nHeat);
+	}
+	
+	return TRUE;
+}
+
+int CHeatMap::GetHeat(const COleDateTime& date) const
+{
+	ASSERT(CDateHelper::IsDateSet(date));
+
+	return Misc::GetItemT<double, int>(m_mapHeat, CDateHelper::GetDateOnly(date));
+}
+
+COLORREF CHeatMap::GetColor(const COleDateTime& date) const
+{
+	ASSERT(m_aColorPalette.GetSize() > 5);
+	ASSERT(CDateHelper::IsDateSet(date));
+
+	int nHeat = GetHeat(date);
+
+	if (nHeat > 0)
+	{
+		nHeat = min(nHeat, m_nMaxHeatCutoff);
+		int nMaxHeat = min(m_nMaxHeat, m_nMaxHeatCutoff);
+
+		int nColor = ((m_aColorPalette.GetSize() * nHeat) / nMaxHeat);
+		nColor = min(nColor, m_aColorPalette.GetSize() - 1);
+
+		if (nColor >= 0)
+			return m_aColorPalette[nColor];
+	}
+
+	// else
+	return CLR_NONE;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////

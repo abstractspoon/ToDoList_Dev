@@ -165,6 +165,50 @@ namespace Misc
 		return array.GetData()[nItem];
 	}
 
+	template <class T> 
+	T GetItemStrT(const CMap<CString, LPCTSTR, T, T&>& map, const CString& key)
+	{
+		T value;
+		map.Lookup(key, value);
+
+		return value;
+	}
+
+	template <class T> 
+	T IncrementItemStrT(const CMap<CString, LPCTSTR, T, T&>& map, const CString& key)
+	{
+		T value = 0;
+
+		if (map.Lookup(key, value))
+			map.SetAt(key, (value + 1));
+		else
+			map.SetAt(key, 1);
+
+		return value;
+	}
+
+	template <class T, class S> 
+	S GetItemT(const CMap<T, T, S, S&>& map, T key)
+	{
+		S value;
+		map.Lookup(key, value);
+
+		return value;
+	}
+
+	template <class T, class S> 
+	S IncrementItemT(const CMap<T, T, S, S&>& map, T key)
+	{
+		S value = 0;
+
+		if (map.Lookup(key, value))
+			map.SetAt(key, (value + 1));
+		else
+			map.SetAt(key, 1);
+
+		return value;
+	}
+
 	CString FormatArray(const CDWordArray& array, LPCTSTR szSep = NULL);
 	CString FormatArray(const CDWordArray& array, TCHAR cSep);
 	CString FormatArray(const CStringArray& array, LPCTSTR szSep = NULL, BOOL bIncEmpty = FALSE);

@@ -29,7 +29,7 @@ public:
 	CTaskMiniCalendarCtrl(const CTaskCalItemMap& mapData);
 	virtual ~CTaskMiniCalendarCtrl();
 
-	void EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRIBUTE nAttrib, int nMaxAllowableHeat = 10);
+	void EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRIBUTE nAttrib);
 	void DisableHeatMap();
 	void SetOptions(DWORD dwOptions);
 
@@ -43,11 +43,9 @@ protected:
 
 	CSpecialDateSet m_setSpecialDates;
 	CHeatMap m_mapHeatMap;
-	CDWordArray m_aPalette;
 	CToolTipCtrlEx m_tooltip;
 	
 	IUI_ATTRIBUTE m_nHeatMapAttribute;
-	int m_nMaxAllowableHeat, m_nMaxHeat;
 	DWORD m_dwOptions;
 
 	// Generated message map functions
@@ -69,8 +67,6 @@ protected:
 									BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd) const;
 
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
-	int GetDateHeat(const COleDateTime& dt) const;
-	void IncrementDateHeat(const COleDateTime& dt);
 
 	void RecalcHeatMap();
 	void RecalcSpecialDates();

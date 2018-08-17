@@ -85,7 +85,29 @@ typedef CArray<TASKCALITEM*, TASKCALITEM*&> CTaskCalItemArray;
 typedef CArray<const TASKCALITEM*, const TASKCALITEM*&> CTaskCalItemConstArray;
 typedef CMap<DWORD, DWORD, TASKCALITEM*, TASKCALITEM*&> CTaskCalItemMap;
 typedef CSet<double> CSpecialDateSet;
-typedef CMap<double, double, int, int&> CHeatMap;
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CHeatMap
+{
+public:
+	CHeatMap(int nMaxHeatCutoff = 10);
+
+	void ClearHeat();
+	BOOL HasHeat() const { return m_mapHeat.GetCount(); }
+
+	BOOL SetColorPalette(const CDWordArray& aColors);
+	BOOL Recalculate(const CTaskCalItemMap& mapData, IUI_ATTRIBUTE nAttrib);
+
+	int GetHeat(const COleDateTime& date) const;
+	COLORREF GetColor(const COleDateTime& date) const;
+
+protected:
+	CMap<double, double, int, int&> m_mapHeat;
+	CDWordArray m_aColorPalette;
+	int m_nMaxHeat, m_nMaxHeatCutoff;
+
+};
 
 /////////////////////////////////////////////////////////////////////////////
 
