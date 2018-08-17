@@ -404,6 +404,7 @@ namespace WordCloudUIExtension
 					m_StylesCombo.SelectedIndex = 0;
             }
 
+            // App settings
 			ShowSplitterBar(prefs.GetProfileInt("Preferences", "HidePaneSplitBar", 0) == 0);
 
             string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -423,6 +424,15 @@ namespace WordCloudUIExtension
             {
                 m_WordCloud.SetFont(FontName, 10);
             }
+
+            bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
+            m_TaskMatchesList.TaskColorIsBackground = taskColorIsBkgnd;
+
+            bool showParentsAsFolders = (prefs.GetProfileInt("Preferences", "ShowParentsAsFolders", 0) != 0);
+            m_TaskMatchesList.ShowParentsAsFolders = showParentsAsFolders;
+
+            bool showDoneCheckboxes = (prefs.GetProfileInt("Preferences", "AllowCheckboxAgainstTreeItem", 0) != 0);
+            m_TaskMatchesList.ShowCompletionCheckboxes = showDoneCheckboxes;
 
             UpdateBlacklist();
         }

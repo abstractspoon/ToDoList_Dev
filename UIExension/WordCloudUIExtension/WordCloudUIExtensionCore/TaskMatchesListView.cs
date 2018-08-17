@@ -21,8 +21,12 @@ namespace WordCloudUIExtension
 		private UIExtension.SelectionRect m_SelectionRect;
 		private UIExtension.TaskIcon m_TaskIcons;
 
-		private bool m_TaskMatchesHaveIcons;
         private ImageList m_ilItemHeight;
+
+        private Boolean m_TaskMatchesHaveIcons;
+        private Boolean m_ShowParentAsFolder;
+        private Boolean m_TaskColorIsBkgnd;
+        private Boolean m_ShowCompletionCheckboxes;
 
 		public TaskMatchesListView(IntPtr hwndParent)
 		{
@@ -32,6 +36,45 @@ namespace WordCloudUIExtension
             m_ilItemHeight = new ImageList();
             m_ilItemHeight.ImageSize = new Size(1, Win32.ScaleByDPIFactor(17)); // minimum height
 		}
+
+        public Boolean TaskColorIsBackground
+        {
+            get { return m_TaskColorIsBkgnd; }
+            set
+            {
+                if (m_TaskColorIsBkgnd != value)
+                {
+                    m_TaskColorIsBkgnd = value;
+                    Invalidate();
+                }
+            }
+        }
+
+        public Boolean ShowParentsAsFolders
+        {
+            get { return m_ShowParentAsFolder; }
+            set
+            {
+                if (m_ShowParentAsFolder != value)
+                {
+                    m_ShowParentAsFolder = value;
+                    Invalidate();
+                }
+            }
+        }
+
+        public Boolean ShowCompletionCheckboxes
+        {
+            get { return m_ShowCompletionCheckboxes; }
+            set
+            {
+                if (m_ShowCompletionCheckboxes != value)
+                {
+                    m_ShowCompletionCheckboxes = value;
+                    Invalidate();
+                }
+            }
+        }
 
         private int TextIconOffset
         {
@@ -62,6 +105,7 @@ namespace WordCloudUIExtension
 				this.DoubleBuffered = true;
 				this.HotTracking = false;
                 this.StateImageList = m_ilItemHeight;
+                this.CheckBoxes = true;
 			}
 
             return true;
@@ -81,7 +125,7 @@ namespace WordCloudUIExtension
 			lvItem.Selected = false;
 			lvItem.SubItems.Add(item.Id.ToString());
 
-			if (item.IsParent || item.HasIcon)
+			if ((item.IsParent && m_ShowParentAsFolder) || item.HasIcon)
 			{
 				lvItem.ImageIndex = 1;
 				m_TaskMatchesHaveIcons = true;
@@ -373,26 +417,33 @@ namespace WordCloudUIExtension
 				return;
 
 			// Draw the background
+			var item = (e.Item.Tag as CloudTaskItem);
+
+            var textColor = item.GetTextColor(e.Item.Selected, m_TaskColorIsBkgnd);
+            var backColor = item.GetBackColor(e.Item.Selected, m_TaskColorIsBkgnd);
+
+			Brush textBrush = new SolidBrush(textColor);
+            			
 			if (e.Item.Selected)
-				m_SelectionRect.Draw(Handle, e.Graphics, e.Bounds.X, e.Bounds.Y, e.Bounds.Width, e.Bounds.Height);
-			else
-				e.DrawBackground();
+			{
+                m_SelectionRect.Draw(Handle, e.Graphics, e.Bounds.X, e.Bounds.Y, e.Bounds.Width, e.Bounds.Height);
+            }
+			else if (m_TaskColorIsBkgnd && !backColor.IsEmpty)
+			{
+                using (Brush backBrush = new SolidBrush(backColor))
+                    e.Graphics.FillRectangle(backBrush, e.Bounds);
+            }
+            else
+            {
+                e.DrawBackground();
+            }
 
 			// Draw subitems
 			StringFormat stringFormat = new StringFormat();
 			stringFormat.Alignment = StringAlignment.Near;
 			stringFormat.LineAlignment = StringAlignment.Center;
 			stringFormat.FormatFlags = StringFormatFlags.NoWrap;
-
-			var item = (e.Item.Tag as CloudTaskItem);
-			
-			Brush brush;
-
-			if (e.Item.Selected)
-				brush = new SolidBrush(DrawingColor.AdjustLighting(item.TextColor, -0.3f, true));
-			else
-				brush = new SolidBrush(item.TextColor);
-
+            
 			Rectangle itemRect = new Rectangle(e.Bounds.Location, e.Bounds.Size);
 
 			for (int colIndex = 0; colIndex < e.Item.SubItems.Count; colIndex++)
@@ -421,7 +472,7 @@ namespace WordCloudUIExtension
 				DrawText(e.Graphics, 
 						e.Item.SubItems[colIndex].Text, 
 						itemRect, 
-						brush, 
+						textBrush, 
 						StringAlignment.Near,
 						(colIndex == 0));
 

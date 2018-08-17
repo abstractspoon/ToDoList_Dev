@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
+
 using Gma.CodeCloud.Controls.TextAnalyses.Blacklist;
 
 namespace WordCloudUIExtension
@@ -38,21 +40,55 @@ namespace WordCloudUIExtension
 		public bool HasIcon;
 		public bool IsParent;
         public bool IsLocked;
+        public bool IsGoodAsDone;
 
-        private System.Drawing.Color taskTextColor = new System.Drawing.Color();
-
+        private System.Drawing.Color taskTextColor = System.Drawing.Color.Empty;
+            
         public System.Drawing.Color TextColor
         {
-            get
-            {
-                if (taskTextColor.IsEmpty)
-                    return System.Drawing.SystemColors.WindowText;
-
-                return taskTextColor;
-            }
+            get { return taskTextColor; }
             set { taskTextColor = value; }
         }
 
+        public System.Drawing.Color GetTextColor(bool isSelected, bool taskColorIsBkgnd)
+        {
+            if (!taskTextColor.IsEmpty)
+            {
+                if (isSelected)
+                    return DrawingColor.SetLuminance(TextColor, 0.3f);
+
+                if (taskColorIsBkgnd && !IsDone(true))
+                    return DrawingColor.GetBestTextColor(TextColor);
+            }
+            else
+            {
+                return System.Drawing.SystemColors.WindowText;
+            }
+
+            return TextColor;
+        }
+
+        public System.Drawing.Color GetBackColor(bool isSelected, bool taskColorIsBkgnd)
+        {
+            if (!taskTextColor.IsEmpty)
+            {
+                if (!isSelected && taskColorIsBkgnd && !IsDone(true))
+                    return TextColor;
+            }
+
+            // else
+            return System.Drawing.Color.Empty;
+        }
+
+        public Boolean IsDone(bool includeGoodAsDone)
+        {
+            if (includeGoodAsDone && IsGoodAsDone)
+                return true;
+
+            // else
+            return (DoneDate != String.Empty);
+        }
+        
 		private List<string> m_Words;
 		private UIExtension.TaskAttribute m_WordAttribute;
 
@@ -64,6 +100,7 @@ namespace WordCloudUIExtension
 		{
             IsParent = task.IsParent();
             IsLocked = task.IsLocked();
+            IsGoodAsDone = task.IsGoodAsDone();
 
 			if (newTask)
 			{
