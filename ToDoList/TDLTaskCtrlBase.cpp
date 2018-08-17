@@ -5777,7 +5777,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 		// Multi-selection check lists need special handling
 		if (attribDef.IsMultiList())
 		{
-			CMap<CString, LPCTSTR, int, int> mapCounts;
+			CMap<CString, LPCTSTR, int, int&> mapCounts;
 			POSITION pos = GetFirstSelectedTaskPos();
 
 			while (pos)
@@ -5790,12 +5790,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 					int nItem = data.AsArray(aTaskItems);
 
 					while (nItem--)
-					{
-						int nCount = 0;
-						mapCounts.Lookup(aTaskItems[nItem], nCount);
-
-						mapCounts[aTaskItems[nItem]] = ++nCount;
-					}
+						Misc::IncrementItemStrT(mapCounts, aTaskItems[nItem]);
 				}
 			}
 
@@ -5952,7 +5947,7 @@ int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& 
 int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const
 {
 	int nSelCount = GetSelectedCount();
-	CMap<CString, LPCTSTR, int, int> mapCounts;
+	CMap<CString, LPCTSTR, int, int&> mapCounts;
 
 	POSITION pos = GetFirstSelectedTaskPos();
 
@@ -5964,18 +5959,13 @@ int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& 
 		int nItem = m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems);
 
 		while (nItem--)
-		{
-			int nCount = 0;
-			mapCounts.Lookup(aTaskItems[nItem], nCount);
-
-			mapCounts[aTaskItems[nItem]] = ++nCount;
-		}
+			Misc::IncrementItemStrT(mapCounts, aTaskItems[nItem]);
 	}
 
 	return SplitSelectedTaskArrayMatchCounts(mapCounts, nSelCount, aMatched, aMixed);
 }
 
-int CTDLTaskCtrlBase::SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int>& mapCounts, int nNumTasks, CStringArray& aMatched, CStringArray& aMixed)
+int CTDLTaskCtrlBase::SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks, CStringArray& aMatched, CStringArray& aMixed)
 {
 	aMatched.RemoveAll();
 	aMixed.RemoveAll();

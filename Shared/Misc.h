@@ -175,14 +175,14 @@ namespace Misc
 	}
 
 	template <class T> 
-	T IncrementItemStrT(const CMap<CString, LPCTSTR, T, T&>& map, const CString& key)
+	T IncrementItemStrT(CMap<CString, LPCTSTR, T, T&>& map, const CString& key)
 	{
 		T value = 0;
 
 		if (map.Lookup(key, value))
-			map.SetAt(key, (value + 1));
+			map[key] = (value + 1);
 		else
-			map.SetAt(key, 1);
+			map[key] = 1;
 
 		return value;
 	}
@@ -197,14 +197,14 @@ namespace Misc
 	}
 
 	template <class T, class S> 
-	S IncrementItemT(const CMap<T, T, S, S&>& map, T key)
+	S IncrementItemT(CMap<T, T, S, S&>& map, T key)
 	{
 		S value = 0;
 
 		if (map.Lookup(key, value))
-			map.SetAt(key, (value + 1));
+			map[key] = (value + 1);
 		else
-			map.SetAt(key, 1);
+			map[key] = 1;
 
 		return value;
 	}
