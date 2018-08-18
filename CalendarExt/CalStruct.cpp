@@ -468,8 +468,7 @@ void TASKCALITEM::ReformatName()
 CHeatMap::CHeatMap(int nMinHeatCutoff) 
 	: 
 	m_nMinHeatCutoff(nMinHeatCutoff),
-	m_nMaxHeatCutoff(nMinHeatCutoff), 
-	m_nMaxHeat(-1)
+	m_nMaxHeatCutoff(nMinHeatCutoff) 
 {
 }
 
@@ -477,7 +476,6 @@ void CHeatMap::ClearHeat()
 {
 	m_mapHeat.RemoveAll();
 	m_nMaxHeatCutoff = m_nMinHeatCutoff;
-	m_nMaxHeat = -1;
 }
 
 BOOL CHeatMap::SetColorPalette(const CDWordArray& aColors)
@@ -497,11 +495,10 @@ BOOL CHeatMap::SetColorPalette(const CDWordArray& aColors)
 
 BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, IUI_ATTRIBUTE nAttrib)
 {
+	m_mapHeat.RemoveAll();
+
 	if (mapData.GetCount() == 0)
 		return FALSE;
-
-	m_mapHeat.RemoveAll();
-	m_nMaxHeat = -1;
 
 	POSITION pos = mapData.GetStartPosition();
 	DWORD dwTaskID = 0;
@@ -510,27 +507,44 @@ BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, IUI_ATTRIBUTE nAttrib
 	while (pos)
 	{
 		mapData.GetNextAssoc(pos, dwTaskID, pTCI);
-		int nHeat = 0;
 
 		switch (nAttrib)
 		{
 		case IUI_DONEDATE:
 			if (pTCI->IsDone(FALSE))
-				nHeat = Misc::IncrementItemT<double, int>(m_mapHeat, pTCI->GetDoneDate().m_dt);
+			{
+				COleDateTime dtDone = CDateHelper::GetDateOnly(pTCI->GetDoneDate());
+				Misc::IncrementItemT<double, int>(m_mapHeat, dtDone.m_dt);
+			}
 			break;
 
 		default:
 			ASSERT(0);
 			return FALSE;
 		}
-
-		if (m_nMaxHeat == -1)
-			m_nMaxHeat = nHeat;
-		else
-			m_nMaxHeat = max(m_nMaxHeat, nHeat);
 	}
 
-	RecalculateMaxHeatCutoff();
+	// Calculate the mean and maximum
+	if (m_mapHeat.GetCount() == 0)
+		return FALSE;
+
+	int nTotalHeat = 0, nHeat = 0;
+	double dUnused;
+
+	pos = m_mapHeat.GetStartPosition();
+
+	while (pos)
+	{
+		m_mapHeat.GetNextAssoc(pos, dUnused, nHeat);
+		ASSERT(nHeat);
+
+		nTotalHeat += nHeat;
+	}
+
+	double dMeanHeat = ((double)nTotalHeat / m_mapHeat.GetCount());
+
+	m_nMaxHeatCutoff = Misc::Round(dMeanHeat * 2);
+	m_nMaxHeatCutoff = max(m_nMinHeatCutoff, m_nMaxHeatCutoff);
 	
 	return TRUE;
 }
@@ -539,7 +553,10 @@ int CHeatMap::GetHeat(const COleDateTime& date) const
 {
 	ASSERT(CDateHelper::IsDateSet(date));
 
-	return Misc::GetItemT<double, int>(m_mapHeat, CDateHelper::GetDateOnly(date));
+	int nHeat = 0;
+	m_mapHeat.Lookup(CDateHelper::GetDateOnly(date).m_dt, nHeat);
+
+	return nHeat;
 }
 
 COLORREF CHeatMap::GetColor(const COleDateTime& date) const
@@ -552,9 +569,8 @@ COLORREF CHeatMap::GetColor(const COleDateTime& date) const
 	if (nHeat > 0)
 	{
 		nHeat = min(nHeat, m_nMaxHeatCutoff);
-		int nMaxHeat = min(m_nMaxHeat, m_nMaxHeatCutoff);
 
-		int nColor = ((m_aColorPalette.GetSize() * nHeat) / nMaxHeat);
+		int nColor = ((m_aColorPalette.GetSize() * nHeat) / m_nMaxHeatCutoff);
 		nColor = min(nColor, m_aColorPalette.GetSize() - 1);
 
 		if (nColor >= 0)
@@ -563,32 +579,6 @@ COLORREF CHeatMap::GetColor(const COleDateTime& date) const
 
 	// else
 	return CLR_NONE;
-}
-
-void CHeatMap::RecalculateMaxHeatCutoff()
-{
-	// Calculate the distribution of heat
-	CArray<int, int&> aHeatDistribution;
-
-	POSITION pos = m_mapHeat.GetStartPosition();
-	double dUnused;
-	int nHeat = 0, nNumHeat = 0;
-
-	while (pos)
-	{
-		m_mapHeat.GetNextAssoc(pos, dUnused, nHeat);
-
-		if (nHeat >= aHeatDistribution.GetSize())
-			nNumHeat++;
-
-		Misc::IncrementItemT(aHeatDistribution, nHeat);
-	}
-	
-	// Find the line of best fit
-	// TODO
-
-
-	m_nMaxHeatCutoff = max(m_nMinHeatCutoff, m_nMaxHeatCutoff);
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -180,15 +180,6 @@ namespace Misc
 	}
 
 	template <class T> 
-	T GetItemStrT(const CMap<CString, LPCTSTR, T, T&>& map, const CString& key)
-	{
-		T value;
-		map.Lookup(key, value);
-
-		return value;
-	}
-
-	template <class T> 
 	T IncrementItemStrT(CMap<CString, LPCTSTR, T, T&>& map, const CString& key)
 	{
 		T value = 0;
@@ -197,15 +188,6 @@ namespace Misc
 			map[key] = (value + 1);
 		else
 			map[key] = 1;
-
-		return value;
-	}
-
-	template <class T, class S> 
-	S GetItemT(const CMap<T, T, S, S&>& map, T key)
-	{
-		S value;
-		map.Lookup(key, value);
 
 		return value;
 	}
