@@ -232,25 +232,26 @@ namespace MindMapUIExtension
             this.Controls.Add(m_MindMap);
         }
 
-		void OnMindMapEditTaskLabel(object sender, UInt32 taskId)
+        Boolean OnMindMapEditTaskLabel(object sender, UInt32 taskId)
 		{
 			var notify = new UIExtension.ParentNotify(m_hwndParent);
 
-			notify.NotifyEditLabel();
+			return notify.NotifyEditLabel();
 		}
 
-        void OnMindMapEditTaskCompletion(object sender, UInt32 taskId, bool completed)
+        Boolean OnMindMapEditTaskCompletion(object sender, UInt32 taskId, bool completed)
         {
             var notify = new UIExtension.ParentNotify(m_hwndParent);
 
-            notify.NotifyMod(UIExtension.TaskAttribute.DoneDate, (completed ? DateTime.Now : DateTime.MinValue));
+            return notify.NotifyMod(UIExtension.TaskAttribute.DoneDate, 
+                                    (completed ? DateTime.Now : DateTime.MinValue));
         }
 
-        void OnMindMapEditTaskIcon(object sender, UInt32 taskId)
+        Boolean OnMindMapEditTaskIcon(object sender, UInt32 taskId)
         {
             var notify = new UIExtension.ParentNotify(m_hwndParent);
 
-            notify.NotifyEditIcon();
+            return notify.NotifyEditIcon();
         }
 
 		void OnMindMapSelectionChange(object sender, object itemData)

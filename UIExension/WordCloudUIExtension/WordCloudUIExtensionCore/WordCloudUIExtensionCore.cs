@@ -109,7 +109,7 @@ namespace WordCloudUIExtension
 				if ((selWord == null) ||
 					!words.Exists(x => x.Equals(selWord, StringComparison.CurrentCultureIgnoreCase)))
 				{
-					// If not,  find the item's word with the most occurrence
+					// If not, find the item's word with the most occurrence
 					var matches = m_WordCloud.WeightedWords.Where(a => words.Any(x => x.Equals(a.Text, StringComparison.CurrentCultureIgnoreCase))).SortByOccurrences();
 
 					if (!matches.Any())
@@ -169,7 +169,7 @@ namespace WordCloudUIExtension
 			}
 			else if (changedTaskIds != null)
 			{
-				m_TaskMatchesList.UpdateMatchItemsText(changedTaskIds);
+				m_TaskMatchesList.UpdateMatchItems(changedTaskIds);
 
 				// If the selected match also changed then we may
 				// may need to change the currently selected word
@@ -770,22 +770,26 @@ namespace WordCloudUIExtension
 
 		private String FixupWordCloudSelection(CloudTaskItem selMatch = null)
 		{
+            // Check if the currently selected word is still
+            // present in the currently selected match
 			String selWord = m_WordCloud.SelectedWord;
 
 			if (selMatch == null)
 				selMatch = m_TaskMatchesList.GetSelectedMatch();
 
-			if (selMatch != null)
+			if ((selMatch != null) && (selWord != null))
 			{
 				var words = selMatch.GetWords(m_Attrib, m_ExcludedWords, false);
 
-				if (words.Any())
-				{
-					var matches = m_WordCloud.Match(words, false);
+                // If not, find the first match between the item's text
+                // and the wordcloud contents
+                if (words.Any() && !words.Contains(selWord, StringComparer.InvariantCultureIgnoreCase))
+                {
+                    var matches = m_WordCloud.Match(words, false);
 
-					if (matches.Any())
-						selWord = matches.First().Text;
-				}
+                    if (matches.Any())
+                        selWord = matches.First().Text;
+                }
 			}
 
 			if (selWord == null)
@@ -804,19 +808,26 @@ namespace WordCloudUIExtension
 				NotifyParentSelChange(selTaskId);
 		}
 
-        private void OnTaskMatchesEditTaskDone(object sender, UInt32 taskId, bool completed)
+        private Boolean OnTaskMatchesEditTaskDone(object sender, UInt32 taskId, bool completed)
         {
-            // TODO
+            var notify = new UIExtension.ParentNotify(m_HwndParent);
+
+            return notify.NotifyMod(UIExtension.TaskAttribute.DoneDate,
+                                    (completed ? DateTime.Now : DateTime.MinValue));
         }
 
-        private void OnTaskMatchesEditTaskIcon(object sender, UInt32 taskId)
+        private Boolean OnTaskMatchesEditTaskIcon(object sender, UInt32 taskId)
         {
-            // TODO
+            var notify = new UIExtension.ParentNotify(m_HwndParent);
+
+            return notify.NotifyEditIcon();
         }
 
-        private void OnTaskMatchesEditTaskLabel(object sender, UInt32 taskId)
+        private Boolean OnTaskMatchesEditTaskLabel(object sender, UInt32 taskId)
         {
-            // TODO
+            var notify = new UIExtension.ParentNotify(m_HwndParent);
+
+            return notify.NotifyEditLabel();
         }
 
 		private void NotifyParentSelChange(UInt32 taskId)

@@ -11,9 +11,9 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace MindMapUIExtension
 {
-    public delegate void EditTaskLabelEventHandler(object sender, UInt32 taskId);
-    public delegate void EditTaskIconEventHandler(object sender, UInt32 taskId);
-    public delegate void EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
+    public delegate Boolean EditTaskLabelEventHandler(object sender, UInt32 taskId);
+    public delegate Boolean EditTaskIconEventHandler(object sender, UInt32 taskId);
+    public delegate Boolean EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
 
 	public class MindMapTaskItem
 	{
