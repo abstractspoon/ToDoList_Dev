@@ -5790,7 +5790,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 					int nItem = data.AsArray(aTaskItems);
 
 					while (nItem--)
-						Misc::IncrementItemStrT(mapCounts, aTaskItems[nItem]);
+						Misc::IncrementItemStrT<int>(mapCounts, aTaskItems[nItem]);
 				}
 			}
 
@@ -5959,7 +5959,7 @@ int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& 
 		int nItem = m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems);
 
 		while (nItem--)
-			Misc::IncrementItemStrT(mapCounts, aTaskItems[nItem]);
+			Misc::IncrementItemStrT<int>(mapCounts, aTaskItems[nItem]);
 	}
 
 	return SplitSelectedTaskArrayMatchCounts(mapCounts, nSelCount, aMatched, aMixed);

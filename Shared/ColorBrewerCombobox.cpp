@@ -188,7 +188,7 @@ int CColorBrewerComboBox::GetSelectedPalette(CDWordArray& aColors) const
 	int nPal = GetSelectedPalette();
 
 	if (nPal >= 0)
-		aColors.Copy(m_aPalettes[nPal]);
+		aColors.Copy(m_aPalettes.GetData()[nPal]);
 	
 	return nPal;
 }

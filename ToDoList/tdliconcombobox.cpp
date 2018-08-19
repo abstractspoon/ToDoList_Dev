@@ -28,6 +28,7 @@ CTDLIconComboBox::~CTDLIconComboBox()
 {
 }
 
+IMPLEMENT_DYNAMIC(CTDLIconComboBox, CEnCheckComboBox)
 
 BEGIN_MESSAGE_MAP(CTDLIconComboBox, CEnCheckComboBox)
 	//{{AFX_MSG_MAP(CTDLIconComboBox)

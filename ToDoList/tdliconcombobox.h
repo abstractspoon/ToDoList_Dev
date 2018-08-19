@@ -16,6 +16,8 @@ class CTDCImageList;
 
 class CTDLIconComboBox : public CEnCheckComboBox
 {
+	DECLARE_DYNAMIC(CTDLIconComboBox);
+
 // Construction
 public:
 	CTDLIconComboBox(const CTDCImageList& ilImages, BOOL bMultiSel);

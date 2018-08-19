@@ -165,8 +165,9 @@ namespace Misc
 		return array.GetData()[nItem];
 	}
 
+/*
 	template <class T> 
-	void IncrementItemT(CArray<T, T&>& array, int nItem)
+	T IncrementItemT(CArray<T, T&>& array, int nItem)
 	{
 		ASSERT(nItem >= 0);
 		
@@ -176,18 +177,21 @@ namespace Misc
 		if (nItem >= array.GetSize())
 			array.SetSize(nItem + 1);
 
-		array.GetData()[nItem] += 1;
+		array[nItem] += 1;
+
+		return array[nItem];
 	}
+*/
 
 	template <class T> 
 	T IncrementItemStrT(CMap<CString, LPCTSTR, T, T&>& map, const CString& key)
 	{
-		T value = 0;
+		T value = 1;
 
 		if (map.Lookup(key, value))
-			map[key] = (value + 1);
-		else
-			map[key] = 1;
+			value++;
+
+		map[key] = value;
 
 		return value;
 	}
@@ -195,12 +199,12 @@ namespace Misc
 	template <class T, class S> 
 	S IncrementItemT(CMap<T, T, S, S&>& map, T key)
 	{
-		S value = 0;
+		S value = 1;
 
 		if (map.Lookup(key, value))
-			map[key] = (value + 1);
-		else
-			map[key] = 1;
+			value++;
+
+		map[key] = value;
 
 		return value;
 	}
