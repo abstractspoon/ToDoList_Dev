@@ -67,7 +67,9 @@ public:
 
 	void InitializePreferences(); // one time only
 	int DoModal(int nInitPage = -1);
+	
 	void SetUITheme(const CUIThemeFile& theme);
+	void SetAutoListData(const TDCAUTOLISTDATA& autoListData);
 
 	// CPreferencesGenPage
 	BOOL GetAlwaysOnTop() const { return m_pageGen.GetAlwaysOnTop(); }
@@ -321,7 +323,7 @@ protected:
 	CString m_sPageTitle;
 	CEnStatic m_stCategoryTitle, m_stPageTitle; 
 	CUIThemeFile m_theme;
-	TDCAUTOLISTDATA m_defaultListData;
+	TDCAUTOLISTDATA m_autoListData;
 	BOOL m_bInitDlg;
 
 	CPreferences m_prefs;

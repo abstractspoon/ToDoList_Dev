@@ -230,6 +230,7 @@ BEGIN_MESSAGE_MAP(CFPSMiniCalendarCtrl, CWnd)
 	ON_WM_LBUTTONDBLCLK()
 	//}}AFX_MSG_MAP
 	ON_WM_SIZE()
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 
@@ -325,7 +326,10 @@ void CFPSMiniCalendarCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	CWnd::OnSize(nType, cx, cy);
 
-	SetRowsAndColumns(max(1, (cy / FMC_MINICALENDAR_HEIGHT)), 1);
+	if (!m_bSizeComputed)
+		ComputeSize();
+
+	SetRowsAndColumns(max(1, (cy / m_szMonthSize.cy)), 1);
 }
 
 // computes the size of the special 3d border this control 
@@ -1148,12 +1152,12 @@ void CFPSMiniCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	if (m_rectScrollLeft.PtInRect(point))
 	{
 		m_bScrollTracking = TRUE;
-		ScrollLeft();
+		ScrollPage(-1);
 	}
 	else if (m_rectScrollRight.PtInRect(point))
 	{
 		m_bScrollTracking = TRUE;
-		ScrollRight();
+		ScrollPage(1);
 	}
 	else if (m_rectToday.PtInRect(point))
 	{
@@ -1431,9 +1435,13 @@ void CFPSMiniCalendarCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	else if (m_bScrollTracking)
 	{
 		if (m_rectScrollLeft.PtInRect(point))
-			ScrollLeft();
+		{
+			ScrollPage(-1);
+		}
 		else if (m_rectScrollRight.PtInRect(point))
-			ScrollRight();
+		{
+			ScrollPage(1);
+		}
 	}
 	else if (m_bTodayTracking)
 	{
@@ -1477,52 +1485,51 @@ void CFPSMiniCalendarCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	CWnd::OnMouseMove(nFlags, point);
 }
 
-void CFPSMiniCalendarCtrl::ScrollLeft(int iCount)
-{
-	ASSERT(iCount > 0);
-	ASSERT(iCount < 100);
+#if _MSC_VER >= 1400
+BOOL CFPSMiniCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+#else
+void CFPSMiniCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+#endif
+{	
+	ScrollMonth((zDelta < 0) ? 1 : -1);
 
-	for (int iTry = 1; iTry <= iCount; iTry++)
-	{
-		CWaitCursor cursor;
-		ClearHotSpots();
-
-		for (int iX = 1; iX <= (m_iRows * m_iCols); iX++)
-		{
-			m_iCurrentMonth--;
-			if (m_iCurrentMonth < 1)
-			{
-				m_iCurrentMonth = 12;
-				m_iCurrentYear--;
-			}
-		}
-	}
-	RedrawWindow();
-	FireNotifyHScroll(SB_LEFT);
+#if _MSC_VER >= 1400
+	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
+#else
+	CWnd::OnMouseWheel(nFlags, zDelta, pt);
+#endif
 }
 
-void CFPSMiniCalendarCtrl::ScrollRight(int iCount)
+void CFPSMiniCalendarCtrl::ScrollMonth(int nNumMonths)
 {
-	ASSERT(iCount > 0);
-	ASSERT(iCount < 100);
+	int nInc = ((nNumMonths < 0) ? -1 : 1);
 
-	for (int iTry = 1; iTry <= iCount; iTry++)
+	for (int nMonth = 0; nMonth != nNumMonths; nMonth += nInc)
 	{
-		CWaitCursor cursor;
-		ClearHotSpots();
+		m_iCurrentMonth += nInc;
 
-		for (int iX = 1; iX <= (m_iRows * m_iCols); iX++)
+		if ((nInc < 0) && (m_iCurrentMonth < 1))
 		{
-			m_iCurrentMonth++;
-			if (m_iCurrentMonth > 12)
-			{
-				m_iCurrentMonth = 1;
-				m_iCurrentYear++;
-			}
+			m_iCurrentMonth = 12;
+			m_iCurrentYear--;
+		}
+		else if ((nInc > 0) && (m_iCurrentMonth > 12))
+		{
+			m_iCurrentMonth = 1;
+			m_iCurrentYear++;
 		}
 	}
+	
+	ClearHotSpots();
 	RedrawWindow();
-	FireNotifyHScroll(SB_RIGHT);
+	FireNotifyHScroll((nNumMonths < 0) ? SB_LEFT : SB_RIGHT);
+}
+
+void CFPSMiniCalendarCtrl::ScrollPage(int nNumPages)
+{
+	ASSERT((nNumPages >= -100) && (nNumPages <= 100));
+
+	ScrollMonth(nNumPages * m_iRows * m_iCols);
 }
 
 void CFPSMiniCalendarCtrl::FireTodayButton()

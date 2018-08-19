@@ -31,7 +31,9 @@ public:
 public:
 	int AddColor(COLORREF color, LPCTSTR szDescription = NULL);
 	int InsertColor(int nIndex, COLORREF color, LPCTSTR szDescription = NULL);
+
 	COLORREF SetColor(int nIndex, COLORREF color);
+	COLORREF SetColor(LPCTSTR szDescription, COLORREF color);
 
 // Attributes
 protected:

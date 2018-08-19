@@ -129,3 +129,11 @@ COLORREF CColorComboBox::SetColor(int nIndex, COLORREF color)
 
 	return crOld;
 }
+
+COLORREF CColorComboBox::SetColor(LPCTSTR szDescription, COLORREF color)
+{
+	int nFind = FindStringExact(0, szDescription);
+	ASSERT(nFind != CB_ERR);
+
+	return SetColor(nFind, color);
+}

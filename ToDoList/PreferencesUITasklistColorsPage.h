@@ -44,8 +44,10 @@ class CPreferencesUITasklistColorsPage : public CPreferencesPageBase
 
 // Construction
 public:
-	CPreferencesUITasklistColorsPage(const TDCAUTOLISTDATA& defaultListData);
+	CPreferencesUITasklistColorsPage();
 	~CPreferencesUITasklistColorsPage();
+
+	void SetDefaultListData(const TDCAUTOLISTDATA& defaultListData);
 
 	BOOL GetColorPriority() const { return m_bColorPriority; }
 	int GetTextColorOption() const { return m_nTextColorOption; }
@@ -131,7 +133,7 @@ protected:
 	COLORREF m_crReference;
 	TDC_ATTRIBUTE m_nColorAttribute;
 
-	const TDCAUTOLISTDATA& m_defaultListData;
+	TDCAUTOLISTDATA m_defaultListData;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

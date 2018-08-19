@@ -119,7 +119,6 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	m_pageUI(pMgrUIExt), 
 	m_pageTaskDef(pContentMgr), 
 	m_pageFile2(pExportMgr),
-	m_pageUITasklistColors(m_defaultListData),
 	m_bInitDlg(FALSE)
 {
 	CPreferencesDlgBase::AddPage(&m_pageGen);
@@ -428,7 +427,11 @@ void CPreferencesDlg::OnSelchangedPages(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		}
 		else if (pPage == &m_pageUITasklistColors)
 		{
-			GetDefaultListItems(m_defaultListData);
+			TDCAUTOLISTDATA defaultListData;
+			GetDefaultListItems(defaultListData);
+
+			defaultListData.AppendUnique(m_autoListData);
+			m_pageUITasklistColors.SetDefaultListData(defaultListData);
 		}
 		
 		// update caption
@@ -489,6 +492,11 @@ int CPreferencesDlg::GetDefaultListItems(TDCAUTOLISTDATA& tld) const
 	Misc::AddUniqueItem(tdiDef.sVersion, tld.aVersion);
 
 	return tld.GetSize();
+}
+
+void CPreferencesDlg::SetAutoListData(const TDCAUTOLISTDATA& autoListData)
+{
+	m_autoListData.Copy(autoListData);
 }
 
 LRESULT CPreferencesDlg::OnToolPageTestTool(WPARAM wp, LPARAM lp)

@@ -4890,6 +4890,12 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 	EnableDynamicMenuTranslation(TRUE);
 	
 	ASSERT(m_pPrefs);
+
+	// Pass in the selected tasklist's list data
+	TDCAUTOLISTDATA autoListData;
+	GetToDoCtrl().GetAutoListData(autoListData);
+	m_pPrefs->SetAutoListData(autoListData);
+
 	UINT nRet = m_pPrefs->DoModal(nInitPage);
 	
 	// re-disable dynamic menu translation
@@ -11164,6 +11170,10 @@ void CToDoListWnd::OnEnable(BOOL bEnable)
 	}
 	else
 	{
+		// clear any pressed state
+		m_toolbarMain.Invalidate(FALSE);
+		m_toolbarCustom.Invalidate(FALSE);
+
 		UpdateWindow();
 
 		if (m_bReshowTimeTrackerOnEnable)
