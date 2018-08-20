@@ -33,6 +33,11 @@ enum
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+const int HEATMAP_NUMPALETTECOLORS = 5;
+const COLORBREWER_PALETTETYPE HEATMAP_PALETTETYPE = CBPT_SEQUENTIAL;
+
+/////////////////////////////////////////////////////////////////////////////
 // CCalendarPreferencesPage dialog
 
 CCalendarPreferencesPage::CCalendarPreferencesPage()
@@ -104,17 +109,10 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
 	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
 	
-	m_cbHeatMapPalette.Initialize(CBPT_SEQUENTIAL, 5);
+	m_cbHeatMapPalette.Initialize(HEATMAP_PALETTETYPE, HEATMAP_NUMPALETTECOLORS);
 
-	if (!m_aSelPalette.GetSize())
-	{
-		m_cbHeatMapPalette.SetCurSel(0);
-		m_cbHeatMapPalette.GetSelectedPalette(m_aSelPalette);
-	}
-	else
-	{
-		m_cbHeatMapPalette.SetSelectedPalette(m_aSelPalette);
-	}
+	ASSERT(m_aSelPalette.GetSize());
+	m_cbHeatMapPalette.SetSelectedPalette(m_aSelPalette);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -195,7 +193,14 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_nCalcMissingDueDates = pPrefs->GetProfileInt(szKey, _T("CalcMissingDueDates"), CALCDUE_ASLATESTSTARTANDTODAY);
 
 	CString sPalette = pPrefs->GetProfileString(szKey, _T("HeatMapPalette"));
-	Misc::Split(sPalette, m_aSelPalette, '|');
+
+	if (!sPalette.IsEmpty() || (Misc::Split(sPalette, m_aSelPalette, '|') != HEATMAP_NUMPALETTECOLORS))
+	{
+		CColorBrewerPaletteArray aPalettes;
+		VERIFY(CColorBrewer().GetPalettes(HEATMAP_PALETTETYPE, aPalettes, HEATMAP_NUMPALETTECOLORS));
+
+		m_aSelPalette.Copy(aPalettes[0]);
+	}
 }
 
 BOOL CCalendarPreferencesPage::GetEnableHeatMap(CDWordArray& aPalette, IUI_ATTRIBUTE& nAttrib) const
