@@ -43,7 +43,8 @@ const COLORBREWER_PALETTETYPE HEATMAP_PALETTETYPE = CBPT_SEQUENTIAL;
 CCalendarPreferencesPage::CCalendarPreferencesPage()
 	: 
 	CPreferencesPageBase(IDD_PREFERENCES_PAGE),
-	m_cbHeatMapPalette(CBF_SYNTHESIZE)
+	m_cbHeatMapPalette(CBF_SYNTHESIZE),
+	m_crThemeBkgnd(CLR_NONE)
 {
 	//{{AFX_DATA_INIT(CCalendarPreferencesPage)
 	m_bShowCalcStartDates = FALSE;
@@ -199,7 +200,16 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 		CColorBrewerPaletteArray aPalettes;
 		VERIFY(CColorBrewer().GetPalettes(HEATMAP_PALETTETYPE, aPalettes, HEATMAP_NUMPALETTECOLORS));
 
-		m_aSelPalette.Copy(aPalettes[0]);
+		if (m_crThemeBkgnd != CLR_NONE)
+		{
+			int nPal = CColorBrewer::FindMatchingPalette(m_crThemeBkgnd, aPalettes);
+
+			if (nPal != -1)
+				m_aSelPalette.Copy(aPalettes[nPal]);
+		}
+
+		if (m_aSelPalette.GetSize() == 0)
+			m_aSelPalette.Copy(aPalettes[0]);
 	}
 }
 

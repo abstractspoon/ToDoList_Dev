@@ -49,6 +49,7 @@ public:
 	
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	void SetThemeBkgndColor(COLORREF crBack) { m_crThemeBkgnd = crBack; }
 
 protected:
 // Dialog Data
@@ -71,6 +72,7 @@ protected:
 
 	CColorBrewerComboBox m_cbHeatMapPalette;
 	CDWordArray m_aSelPalette;
+	COLORREF m_crThemeBkgnd;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -127,6 +129,7 @@ public:
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
+	void SetThemeBkgndColor(COLORREF crBack) { m_page.SetThemeBkgndColor(crBack); }
 
 protected:
 	CCalendarPreferencesPage m_page;

@@ -67,6 +67,8 @@ public:
 	// Supports synthesis if nNumColors >= 3
 	int GetPalettes(COLORBREWER_PALETTETYPE nType, CColorBrewerPaletteArray& aPalettes, int nNumColors = -1, BOOL bAppend = FALSE) const;
 
+	static int FindMatchingPalette(COLORREF color, const CColorBrewerPaletteArray& aPalettes);
+
 protected:
 	DWORD m_dwFlags;
 

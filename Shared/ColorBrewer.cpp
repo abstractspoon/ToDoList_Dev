@@ -4,10 +4,12 @@
 
 #include "stdafx.h"
 #include "ColorBrewer.h"
+#include "GraphicsMisc.h"
 
 #include "..\3rdParty\ColorDef.h"
 
 #include <shlwapi.h>
+#include <float.h>
 
 //////////////////////////////////////////////////////////////////////
 
@@ -667,4 +669,31 @@ int CColorBrewer::GetTextSafeColorCount(const COLORBREWER_PALETTE& palFrom)
 	}
 
 	return nCount;
+}
+
+int CColorBrewer::FindMatchingPalette(COLORREF color, const CColorBrewerPaletteArray& aPalettes)
+{
+	int nClosest = -1;
+	double dClosest = DBL_MAX;
+
+	int nPal = aPalettes.GetSize();
+
+	while (nPal--)
+	{
+		const CColorBrewerPalette& pal = aPalettes.GetData()[nPal];
+		int nCol = pal.GetSize();
+
+		while (nCol--)
+		{
+			double dCloseness = GraphicsMisc::CalculateColorCloseness(color, pal[nCol]);
+
+			if (dCloseness < dClosest)
+			{
+				nClosest = nPal;
+				dClosest = dCloseness;
+			}
+		}
+	}
+
+	return nClosest;
 }

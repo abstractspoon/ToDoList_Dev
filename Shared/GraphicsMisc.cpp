@@ -866,7 +866,6 @@ double GraphicsMisc::CalculateColorCloseness(COLORREF crFrom, COLORREF crTo, BOO
 	return (bSquared ? dSquaredCloseness : sqrt(dSquaredCloseness));
 }
 
-
 BOOL GraphicsMisc::ForceIconicRepresentation(HWND hWnd, BOOL bForce)
 {
 #ifndef DWMWA_FORCE_ICONIC_REPRESENTATION
