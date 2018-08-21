@@ -683,7 +683,9 @@ int CColorBrewer::FindMatchingPalette(COLORREF color, const CColorBrewerPaletteA
 		const CColorBrewerPalette& pal = aPalettes.GetData()[nPal];
 		int nCol = pal.GetSize();
 
-		// Get the average 'hue' of each palette
+		// Using the average 'hue' of each palette to compare
+		// with the specified color seems to produce the most
+		// useful results
 		float fPaletteHue = 0;
 
 		while (nCol--)

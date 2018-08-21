@@ -848,7 +848,7 @@ void GraphicsMisc::CalculateColorGradient(COLORREF crFrom, COLORREF crTo, int nN
 	}
 }
 
-double GraphicsMisc::CalculateColorCloseness(COLORREF crFrom, COLORREF crTo, BOOL bSquared)
+double GraphicsMisc::CalculateColorCloseness(COLORREF crFrom, COLORREF crTo)
 {
 	// Algorithm from https://www.compuphase.com/cmetric.htm
 	double dAverageRed = ((GetRValue(crFrom) + GetRValue(crTo)) / 2.0);
@@ -861,9 +861,7 @@ double GraphicsMisc::CalculateColorCloseness(COLORREF crFrom, COLORREF crTo, BOO
 	double dGreenCalc = (4 * (nDiffGreen * nDiffGreen));
 	double dBlueCalc = ((2 + ((255 - dAverageRed) / 256)) * (nDiffBlue * nDiffBlue));
 
-	double dSquaredCloseness = (dRedCalc + dGreenCalc + dBlueCalc);
-
-	return (bSquared ? dSquaredCloseness : sqrt(dSquaredCloseness));
+	return sqrt(dRedCalc + dGreenCalc + dBlueCalc);
 }
 
 BOOL GraphicsMisc::ForceIconicRepresentation(HWND hWnd, BOOL bForce)
