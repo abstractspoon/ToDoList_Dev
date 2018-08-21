@@ -49,7 +49,8 @@ public:
 	
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
-	void SetThemeBkgndColor(COLORREF crBack) { m_crThemeBkgnd = crBack; }
+
+	void SetThemeBkgndColors(COLORREF crLight, COLORREF crDark);
 
 protected:
 // Dialog Data
@@ -129,7 +130,8 @@ public:
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
-	void SetThemeBkgndColor(COLORREF crBack) { m_page.SetThemeBkgndColor(crBack); }
+
+	void SetThemeBkgndColors(COLORREF crLight, COLORREF crDark) { m_page.SetThemeBkgndColors(crLight, crDark); }
 
 protected:
 	CCalendarPreferencesPage m_page;

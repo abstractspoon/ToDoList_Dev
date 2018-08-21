@@ -674,7 +674,7 @@ int CColorBrewer::GetTextSafeColorCount(const COLORBREWER_PALETTE& palFrom)
 int CColorBrewer::FindMatchingPalette(COLORREF color, const CColorBrewerPaletteArray& aPalettes)
 {
 	int nClosest = -1;
-	double dClosest = DBL_MAX;
+	float dClosest = FLT_MAX;
 
 	int nPal = aPalettes.GetSize();
 
@@ -683,15 +683,23 @@ int CColorBrewer::FindMatchingPalette(COLORREF color, const CColorBrewerPaletteA
 		const CColorBrewerPalette& pal = aPalettes.GetData()[nPal];
 		int nCol = pal.GetSize();
 
-		while (nCol--)
-		{
-			double dCloseness = GraphicsMisc::CalculateColorCloseness(color, pal[nCol]);
+		// Get the average 'hue' of each palette
+		float fPaletteHue = 0;
 
-			if (dCloseness < dClosest)
-			{
-				nClosest = nPal;
-				dClosest = dCloseness;
-			}
+		while (nCol--)
+			fPaletteHue += HLSX(pal[nCol]).fHue;
+
+		fPaletteHue /= pal.GetSize();
+
+		float dCloseness = (HLSX(color).fHue - fPaletteHue);
+
+		if (dCloseness < 0)
+			dCloseness += 360.0f;
+
+		if (dCloseness < dClosest)
+		{
+			nClosest = nPal;
+			dClosest = dCloseness;
 		}
 	}
 

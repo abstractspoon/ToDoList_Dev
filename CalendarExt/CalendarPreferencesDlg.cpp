@@ -8,6 +8,7 @@
 
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\Misc.h"
+#include "..\Shared\GraphicsMisc.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -249,6 +250,27 @@ BOOL CCalendarPreferencesPage::GetCalcMissingDueAsLatestStartAndToday() const
 	return (m_nCalcMissingDueDates == CALCDUE_ASLATESTSTARTANDTODAY);
 }
 
+void CCalendarPreferencesPage::OnEnableHeatmap() 
+{
+	UpdateData();
+
+	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
+	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
+}
+
+void CCalendarPreferencesPage::OnShowMiniCalendar() 
+{
+	UpdateData();
+
+	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
+	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
+}
+
+void CCalendarPreferencesPage::SetThemeBkgndColors(COLORREF crLight, COLORREF crDark) 
+{ 
+	m_crThemeBkgnd = GraphicsMisc::Blend(crLight, crDark, 0.5); 
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CCalendarPreferencesDlg dialog
 
@@ -283,20 +305,4 @@ void CCalendarPreferencesDlg::DoHelp()
 	
 	if (m_pParentWnd)
 		m_pParentWnd->SendMessage(WM_CALENDAR_PREFSHELP);
-}
-
-void CCalendarPreferencesPage::OnEnableHeatmap() 
-{
-	UpdateData();
-
-	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
-	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
-}
-
-void CCalendarPreferencesPage::OnShowMiniCalendar() 
-{
-	UpdateData();
-
-	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
-	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
 }

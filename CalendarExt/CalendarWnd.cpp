@@ -307,7 +307,7 @@ void CCalendarWnd::SetUITheme(const UITHEME* pTheme)
 		m_theme = *pTheme;
 		m_brBack.CreateSolidBrush(pTheme->crAppBackLight);
 
-		m_dlgPrefs.SetThemeBkgndColor(pTheme->crAppBackLight);
+		m_dlgPrefs.SetThemeBkgndColors(pTheme->crAppBackLight, pTheme->crAppBackDark);
 
 		m_BigCalendar.SetThemeColour(pTheme->crAppBackDark);
 		m_MiniCalendar.SetHighlightToday(TRUE, pTheme->crAppLinesDark);
