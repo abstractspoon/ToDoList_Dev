@@ -272,6 +272,7 @@ public:
 
 	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const { return m_formatter.GetTaskPath(dwTaskID, nMaxLen); }
 	CString GetTaskTitle(DWORD dwTaskID) const { return m_data.GetTaskTitle(dwTaskID); }
+	CString GetParentTaskTitle(DWORD dwTaskID) const { return m_data.GetTaskTitle(m_data.GetTaskParentID(dwTaskID)); }
 	CString GetTaskComments(DWORD dwTaskID) const { return m_data.GetTaskComments(dwTaskID); }
 	COleDateTime GetTaskDate(DWORD dwID, TDC_DATE nDate) const;
 	BOOL GetTaskTimes(DWORD dwTaskID, double& dTimeEst, TDC_UNITS& nEstUnits, double& dTimeSpent, TDC_UNITS& nSpentUnits) const;

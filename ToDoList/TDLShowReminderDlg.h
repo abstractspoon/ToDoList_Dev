@@ -48,15 +48,15 @@ public:
 	//}}AFX_DATA
 	CString m_sSoundFile;
 	UINT m_nSnoozeMins;
-	int		m_bSnoozeUntil;
+	int m_bSnoozeUntil;
 	DWORD m_dwNextReminderID;
 	BOOL m_bChangingReminders;
 
 	CTDLReminderPeriodComboBox m_cbSnoozeFor;
 	CDateTimeCtrlEx m_dtcSnoozeDate;
 	CTimeComboBox m_cbSnoozeTime;
-	COleDateTime	m_dtSnoozeUntil;
-	CListCtrl	m_lcReminders;
+	COleDateTime m_dtSnoozeUntil;
+	CListCtrl m_lcReminders;
 
 	CTDCReminderMap m_mapReminders;
 

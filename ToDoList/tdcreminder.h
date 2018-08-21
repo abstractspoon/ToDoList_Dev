@@ -26,6 +26,8 @@ struct TDCREMINDER
 	
 	CString FormatWhenString() const;
 	CString GetTaskTitle() const;
+	CString GetParentTitle() const;
+	CString GetTaskListName() const;
 	CString GetTaskComments() const;
 	BOOL IsTaskRecurring() const;
 	BOOL IsTaskDone() const;
@@ -35,8 +37,9 @@ struct TDCREMINDER
 	void Save(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void Load(const IPreferences* pPrefs, LPCTSTR szKey);
 	
-	DWORD dwTaskID;
 	const CFilteredToDoCtrl* pTDC;
+	DWORD dwTaskID;
+
 	COleDateTime dtAbsolute;
 	BOOL bRelative;
 	double dRelativeDaysLeadIn;

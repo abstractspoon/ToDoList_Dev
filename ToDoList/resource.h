@@ -2202,6 +2202,7 @@
 #define IDS_TASKREMINDERDLG_TITLE       58477
 #define IDS_REMINDER_DATENOTSET         58478
 #define IDS_RESET_ELAPSED               58479
+#define IDS_REMINDER_TASKPARENTCOL      58480
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects

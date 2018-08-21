@@ -467,8 +467,10 @@ BOOL CToDoCtrlReminders::BuildRTFContent(const TDCREMINDER& rem, CString& sConte
 	CString sText = rem.GetTaskTitle();
 	int nTitleLen = sText.GetLength();
 
-	sText += _T(" () "); // Placeholder for trailing task link
+	sText += _T("  "); // Where we're going to place the trailing task link
 	sText += _T("\n");
+	sText += '(' + rem.GetParentTitle() + ')';
+	sText += _T("\n\n");
 	sText += rem.FormatWhenString();
 	sText += _T("\n\n");
 	sText += rem.GetTaskComments();
@@ -485,7 +487,7 @@ BOOL CToDoCtrlReminders::BuildRTFContent(const TDCREMINDER& rem, CString& sConte
 	m_rtfFormatter.SetSelectedEffect(cf);
 	
 	// Inject a task link inside the brackets after the tak title
-	m_rtfFormatter.SetCaretPos(nTitleLen + 2);
+	m_rtfFormatter.SetCaretPos(nTitleLen + 1);
 	m_rtfFormatter.SetSelectedWebLink(rem.pTDC->FormatTaskLink(rem.dwTaskID, TRUE), CEnString(IDS_STICKIES_LINK));
 
 	sContent = CString((LPCSTR)(LPCTSTR)m_rtfFormatter.GetRTF());

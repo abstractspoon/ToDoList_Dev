@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,1,1000,2
+ FILEVERSION 7,1,1000,4
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 1, 1000, 2\0"
+            VALUE "FileVersion", "7, 1, 1000, 4\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-18\0"
             VALUE "LegalTrademarks", "\0"
@@ -5435,6 +5435,11 @@ BEGIN
     IDS_CMDLINE_TASKCOPYATTRIB 
                             "-copy <attrib1> <attrib2>\tCopies the value for 'attrib1' to 'attrib2' for the currently selected task"
     IDS_CMDLINE_HELP        "-h, -help, -?\tDisplays a message box showing all the available commandline options"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_REMINDER_TASKPARENTCOL "Parent"
 END
 
 #endif    // English (Australia) resources

@@ -41,12 +41,19 @@ TDCREMINDER::TDCREMINDER()
 CString TDCREMINDER::GetTaskTitle() const
 {
 	ASSERT(pTDC);
+	return (pTDC ? pTDC->GetTaskTitle(dwTaskID) : _T(""));
+}
 
-	if (pTDC)
-		return pTDC->GetTaskTitle(dwTaskID);
+CString TDCREMINDER::GetParentTitle() const
+{
+	ASSERT(pTDC);
+	return (pTDC ? pTDC->GetParentTaskTitle(dwTaskID) : _T(""));
+}
 
-	// else
-	return _T("");
+CString TDCREMINDER::GetTaskListName() const
+{
+	ASSERT(pTDC);
+	return (pTDC ? pTDC->GetFriendlyProjectName() : _T(""));
 }
 
 CString TDCREMINDER::GetTaskComments() const

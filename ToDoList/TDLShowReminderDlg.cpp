@@ -28,6 +28,12 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+#ifndef LVS_EX_DOUBLEBUFFER
+#define LVS_EX_DOUBLEBUFFER 0x00010000
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+
 // for PlaySound
 #pragma comment(lib, "winmm.lib")
 
@@ -39,6 +45,7 @@ double ONE_DAY_IN_MINS = (24.0 * 60);
 enum
 {
 	TASK_COL = 0,
+	TASKPARENT_COL,
 	TASKLIST_COL,
 	WHEN_COL,
 };
@@ -131,11 +138,13 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 	m_cbSnoozeTime.SetItemHeight(-1, dlu.ToPixelsY(10));
 
 	// create list columns
-	m_lcReminders.InsertColumn(TASK_COL, CEnString(IDS_REMINDER_TASKCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(250));
-	m_lcReminders.InsertColumn(TASKLIST_COL, CEnString(IDS_REMINDER_TASKLISTCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(100));
+	m_lcReminders.InsertColumn(TASK_COL, CEnString(IDS_REMINDER_TASKCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(200));
+	m_lcReminders.InsertColumn(TASKPARENT_COL, CEnString(IDS_REMINDER_TASKPARENTCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(75));
+	m_lcReminders.InsertColumn(TASKLIST_COL, CEnString(IDS_REMINDER_TASKLISTCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(75));
 	m_lcReminders.InsertColumn(WHEN_COL, CEnString(IDS_REMINDER_WHENCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(150));
 
 	ListView_SetExtendedListViewStyleEx(m_lcReminders, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+	ListView_SetExtendedListViewStyleEx(m_lcReminders, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
 
 	CThemed::SetWindowTheme(&m_lcReminders, _T("Explorer"));
 
@@ -170,8 +179,9 @@ BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 
 	if (bNewReminder)
 	{
-		CString sTask = rem.GetTaskTitle();
+		CString sTask(rem.GetTaskTitle()), sParent(rem.GetParentTitle());
 		sTask.Replace(_T("&"), _T("&&"));
+		sParent.Replace(_T("&"), _T("&&"));
 		
 		nItem = m_lcReminders.InsertItem(0, sTask);
 		ASSERT(nItem != -1);
@@ -179,6 +189,8 @@ BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 		if (nItem == -1)
 			return FALSE;
 
+		m_lcReminders.SetItemText(nItem, TASKPARENT_COL, sParent);
+		m_lcReminders.SetItemText(nItem, TASKLIST_COL, rem.GetTaskListName());
 		m_lcReminders.SetItemData(nItem, m_dwNextReminderID);
 
 		m_mapReminders[m_dwNextReminderID] = rem;
@@ -190,10 +202,8 @@ BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 		
 		if ((m_lcReminders.GetItemCount() == 1) || (m_lcReminders.GetSelectedCount() == 0))
 			m_lcReminders.SetItemState(nItem, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
-
-		m_lcReminders.SetItemText(nItem, TASKLIST_COL, rem.pTDC->GetFriendlyProjectName());
-		m_lcReminders.SetFocus();
 		
+		m_lcReminders.SetFocus();
 		UpdateTitleText();
 	}
 
