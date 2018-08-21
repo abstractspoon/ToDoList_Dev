@@ -111,6 +111,12 @@ namespace Abstractspoon
 
 				};
 
+				enum class AppCursorType
+				{
+					LockedTask,
+					NoDrag,
+				};
+
 				static TaskAttribute Map(IUI_ATTRIBUTE attrib);
 				static Collections::Generic::HashSet<TaskAttribute>^ Map(const IUI_ATTRIBUTE* pAttrib, int numAttrib);
 				static UpdateType Map(IUI_UPDATETYPE type);
@@ -176,19 +182,8 @@ namespace Abstractspoon
 					System::Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerFocused;
 				};
 
-				ref class AppCursor
-				{
-				public:
-					enum class CursorType
-					{
-						LockedTask,
-						NoDrag,
-					};
-					
-				public:
-					static Windows::Forms::Cursor^ Load(CursorType cursor);
-				};
-
+				static Windows::Forms::Cursor^ AppCursor(AppCursorType cursor);
+				static Windows::Forms::Cursor^ HandCursor();
 			};
 
 			public interface class IUIExtension
