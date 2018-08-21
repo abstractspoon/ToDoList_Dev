@@ -853,9 +853,9 @@ double GraphicsMisc::CalculateColorCloseness(COLORREF crFrom, COLORREF crTo, BOO
 	// Algorithm from https://www.compuphase.com/cmetric.htm
 	double dAverageRed = ((GetRValue(crFrom) + GetRValue(crTo)) / 2.0);
 
-	int nDiffRed = abs(GetRValue(crFrom) - GetRValue(crTo));
-	int nDiffGreen = abs(GetGValue(crFrom) - GetGValue(crTo));
-	int nDiffBlue = abs(GetBValue(crFrom) - GetBValue(crTo));
+	int nDiffRed = (GetRValue(crFrom) - GetRValue(crTo));
+	int nDiffGreen = (GetGValue(crFrom) - GetGValue(crTo));
+	int nDiffBlue = (GetBValue(crFrom) - GetBValue(crTo));
 
 	double dRedCalc = ((2 + (dAverageRed / 256)) * (nDiffRed * nDiffRed));
 	double dGreenCalc = (4 * (nDiffGreen * nDiffGreen));
