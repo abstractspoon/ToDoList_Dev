@@ -1052,7 +1052,7 @@ namespace MindMapUIExtension
                     {
                         cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
                     }
-                    else if (!IsRoot(node) && TaskHasIcon(taskItem) && HitTestIcon(node, e.Location))
+                    else if (taskItem.IsTask && TaskHasIcon(taskItem) && HitTestIcon(node, e.Location))
                     {
                         cursor = UIExtension.HandCursor();
                     }

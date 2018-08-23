@@ -438,11 +438,11 @@ namespace WordCloudUIExtension
 
                     if (item.IsLocked)
                     {
-                        cursor = UIExtension.AppCursor.Load(UIExtension.AppCursor.CursorType.LockedTask);
+                        cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
                     }
                     else if (CalcIconRect(hit.Item.Bounds).Contains(e.Location))
                     {
-                        cursor = Cursors.Hand;
+                        cursor = UIExtension.HandCursor();
                     }
 
                     if (cursor != null)
