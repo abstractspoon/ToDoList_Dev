@@ -189,13 +189,25 @@ int CColorBrewerComboBox::GetSelectedPalette(CDWordArray& aColors) const
 
 	if (nPal >= 0)
 		aColors.Copy(m_aPalettes.GetData()[nPal]);
+	else
+		aColors.RemoveAll();
 	
 	return nPal;
 }
 
 int CColorBrewerComboBox::SetSelectedPalette(const CDWordArray& aColors)
 {
-	int nPal = m_aPalettes.Find(aColors);
+	int nPal = -1;
+
+	if (aColors.GetSize() == 0)
+	{
+		if (m_sNone.IsEmpty())
+			return CB_ERR;
+	}
+	else
+	{
+		nPal = m_aPalettes.Find(aColors);
+	}
 	
 	return SetSelectedPalette(nPal);
 }
