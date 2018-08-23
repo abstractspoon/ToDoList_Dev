@@ -38,14 +38,17 @@ enum
 const int HEATMAP_NUMPALETTECOLORS = 5;
 const COLORBREWER_PALETTETYPE HEATMAP_PALETTETYPE = CBPT_SEQUENTIAL;
 
+const LPCTSTR FIRSTTIME = _T("FirstTime");
+
 /////////////////////////////////////////////////////////////////////////////
 // CCalendarPreferencesPage dialog
 
 CCalendarPreferencesPage::CCalendarPreferencesPage()
 	: 
 	CPreferencesPageBase(IDD_PREFERENCES_PAGE),
-	m_cbHeatMapPalette(CBF_SYNTHESIZE),
-	m_crThemeBkgnd(CLR_NONE)
+	m_cbHeatMapPalette(CBF_SYNTHESIZE, IDS_NOHEATMAP),
+	m_crThemeBkgnd(CLR_NONE),
+	m_nHeatMapAttrib(IUI_DONEDATE)
 {
 	//{{AFX_DATA_INIT(CCalendarPreferencesPage)
 	m_bShowCalcStartDates = FALSE;
@@ -53,7 +56,6 @@ CCalendarPreferencesPage::CCalendarPreferencesPage()
 	m_bAdjustTaskHeights = FALSE;
 	m_bShowDoneDates = FALSE;
 	m_bTreatOverdueAsDueToday = FALSE;
-	m_bEnableHeatMap = FALSE;
 	//}}AFX_DATA_INIT
 	m_bHideParentTasks = TRUE;
 }
@@ -73,16 +75,22 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_SHOWDONEDATES, m_bShowDoneDates);
 	DDX_Check(pDX, IDC_SHOWOVERDUEASDUETODAY, m_bTreatOverdueAsDueToday);
 	DDX_Check(pDX, IDC_HIDEPARENTTASKS, m_bHideParentTasks);
-	DDX_Check(pDX, IDC_ENABLEHEATMAP, m_bEnableHeatMap);
 	//}}AFX_DATA_MAP
 	DDX_Radio(pDX, IDC_USECREATIONFORSTART, m_nCalcMissingStartDates);
 	DDX_Radio(pDX, IDC_USESTARTFORDUE, m_nCalcMissingDueDates);
 	DDX_Control(pDX, IDC_HEATMAPPALETTE, m_cbHeatMapPalette);
+	DDX_Control(pDX, IDC_HEATMAPATTRIBUTE, m_cbHeatMapAttribute);
 
 	if (pDX->m_bSaveAndValidate)
+	{
 		m_cbHeatMapPalette.GetSelectedPalette(m_aSelPalette);
+		m_nHeatMapAttrib = (IUI_ATTRIBUTE)CDialogHelper::GetSelectedItemData(m_cbHeatMapAttribute);
+	}
 	else
+	{
 		m_cbHeatMapPalette.SetSelectedPalette(m_aSelPalette);
+		CDialogHelper::SelectItemByData(m_cbHeatMapAttribute, m_nHeatMapAttrib);
+	}
 }
 
 
@@ -91,9 +99,9 @@ BEGIN_MESSAGE_MAP(CCalendarPreferencesPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_SHOWTASKSCONTINUOUS, OnShowTasksContinuous)
 	ON_BN_CLICKED(IDC_SHOWSTARTDATES, OnShowStartDates)
 	ON_BN_CLICKED(IDC_SHOWDUEDATES, OnShowDueDates)
-	ON_BN_CLICKED(IDC_ENABLEHEATMAP, OnEnableHeatmap)
 	ON_BN_CLICKED(IDC_SHOWMINICALENDAR, OnShowMiniCalendar)
 	//}}AFX_MSG_MAP
+	ON_CBN_SELCHANGE(IDC_HEATMAPPALETTE, OnSelChangeHeatMapPalette)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -103,19 +111,21 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
-	// inter-dependencies
+	m_cbHeatMapPalette.Initialize(HEATMAP_PALETTETYPE, HEATMAP_NUMPALETTECOLORS);
+
+	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMDONE, IUI_DONEDATE);
+	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMDUE, IUI_DUEDATE);
+	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMSTARTED, IUI_STARTDATE);
+
+	UpdateData(FALSE);
+
 	GetDlgItem(IDC_SHOWSTARTDATES)->EnableWindow(!m_bShowTasksContinuous);
 	GetDlgItem(IDC_SHOWDUEDATES)->EnableWindow(!m_bShowTasksContinuous);
 	GetDlgItem(IDC_SHOWCALCSTARTDATES)->EnableWindow(m_bShowStartDates);
 	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(m_bShowDueDates);
-	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
-	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
-	
-	m_cbHeatMapPalette.Initialize(HEATMAP_PALETTETYPE, HEATMAP_NUMPALETTECOLORS);
-
-	ASSERT(m_aSelPalette.GetSize());
-	m_cbHeatMapPalette.SetSelectedPalette(m_aSelPalette);
-
+	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar);
+	GetDlgItem(IDC_HEATMAPATTRIBUTE)->EnableWindow(m_bShowMiniCalendar && m_aSelPalette.GetCount());
+		
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -140,6 +150,13 @@ void CCalendarPreferencesPage::OnShowTasksContinuous()
 	GetDlgItem(IDC_SHOWDUEDATES)->EnableWindow(!m_bShowTasksContinuous);
 }
 
+void CCalendarPreferencesPage::OnSelChangeHeatMapPalette()
+{
+	UpdateData();
+
+	GetDlgItem(IDC_HEATMAPATTRIBUTE)->EnableWindow(m_bShowMiniCalendar && m_aSelPalette.GetCount());
+}
+
 void CCalendarPreferencesPage::OnShowStartDates() 
 {
 	UpdateData();
@@ -157,7 +174,6 @@ void CCalendarPreferencesPage::OnShowDueDates()
 void CCalendarPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	pPrefs->WriteProfileInt(szKey, _T("ShowMiniCalendar"), m_bShowMiniCalendar);
-	pPrefs->WriteProfileInt(szKey, _T("EnableHeatMap"), m_bEnableHeatMap);
 	pPrefs->WriteProfileInt(szKey, _T("AdjustTaskHeights"), m_bAdjustTaskHeights);
 	pPrefs->WriteProfileInt(szKey, _T("TreatOverdueAsDueToday"), m_bTreatOverdueAsDueToday);
 	pPrefs->WriteProfileInt(szKey, _T("HideParentTasks"), m_bHideParentTasks);
@@ -174,6 +190,8 @@ void CCalendarPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 	CString sPalette = Misc::FormatArray(m_aSelPalette, '|');
 	pPrefs->WriteProfileString(szKey, _T("HeatMapPalette"), sPalette);
+
+	pPrefs->WriteProfileInt(szKey, _T("HeatMapAttribute"), m_nHeatMapAttrib);
 }
 
 void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
@@ -182,7 +200,6 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bAdjustTaskHeights = pPrefs->GetProfileInt(szKey, _T("AdjustTaskHeights"), FALSE);
 	m_bTreatOverdueAsDueToday = pPrefs->GetProfileInt(szKey, _T("TreatOverdueAsDueToday"), FALSE);
 	m_bHideParentTasks = pPrefs->GetProfileInt(szKey, _T("HideParentTasks"), TRUE);
-	m_bEnableHeatMap = pPrefs->GetProfileInt(szKey, _T("EnableHeatMap"), TRUE);
 
 	m_bShowTasksContinuous = pPrefs->GetProfileInt(szKey, _T("ShowTasksContinuous"), TRUE);
 	m_bShowStartDates = pPrefs->GetProfileInt(szKey, _T("ShowStartDates"), FALSE);
@@ -194,9 +211,13 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_nCalcMissingStartDates = pPrefs->GetProfileInt(szKey, _T("CalcMissingStartDates"), CALCSTART_ASCREATION);
 	m_nCalcMissingDueDates = pPrefs->GetProfileInt(szKey, _T("CalcMissingDueDates"), CALCDUE_ASLATESTSTARTANDTODAY);
 
-	CString sPalette = pPrefs->GetProfileString(szKey, _T("HeatMapPalette"));
+	CString sPalette = pPrefs->GetProfileString(szKey, _T("HeatMapPalette"), FIRSTTIME);
 
-	if (!sPalette.IsEmpty() || (Misc::Split(sPalette, m_aSelPalette, '|') != HEATMAP_NUMPALETTECOLORS))
+	if (sPalette.IsEmpty())
+	{
+		m_aSelPalette.RemoveAll();
+	}
+	else if ((sPalette == FIRSTTIME) || (Misc::Split(sPalette, m_aSelPalette, '|') != HEATMAP_NUMPALETTECOLORS))
 	{
 		CColorBrewerPaletteArray aPalettes;
 		VERIFY(CColorBrewer().GetPalettes(HEATMAP_PALETTETYPE, aPalettes, HEATMAP_NUMPALETTECOLORS));
@@ -212,17 +233,19 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 		if (m_aSelPalette.GetSize() == 0)
 			m_aSelPalette.Copy(aPalettes[0]);
 	}
+
+	m_nHeatMapAttrib = (IUI_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("HeatMapAttribute"), IUI_DONEDATE);
 }
 
 BOOL CCalendarPreferencesPage::GetEnableHeatMap(CDWordArray& aPalette, IUI_ATTRIBUTE& nAttrib) const
 {
-	if (m_bEnableHeatMap)
-	{
-		aPalette.Copy(m_aSelPalette);
-		nAttrib = IUI_DONEDATE;
-	}
+	if (m_aSelPalette.GetSize() == 0)
+		return FALSE;
 
-	return m_bEnableHeatMap;
+	aPalette.Copy(m_aSelPalette);
+	nAttrib = m_nHeatMapAttrib;
+
+	return TRUE;
 }
 
 BOOL CCalendarPreferencesPage::GetCalcMissingStartAsCreation() const
@@ -250,20 +273,12 @@ BOOL CCalendarPreferencesPage::GetCalcMissingDueAsLatestStartAndToday() const
 	return (m_nCalcMissingDueDates == CALCDUE_ASLATESTSTARTANDTODAY);
 }
 
-void CCalendarPreferencesPage::OnEnableHeatmap() 
-{
-	UpdateData();
-
-	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
-	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
-}
-
 void CCalendarPreferencesPage::OnShowMiniCalendar() 
 {
 	UpdateData();
 
-	GetDlgItem(IDC_ENABLEHEATMAP)->EnableWindow(m_bShowMiniCalendar);
-	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar && m_bEnableHeatMap);
+	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar);
+	GetDlgItem(IDC_HEATMAPATTRIBUTE)->EnableWindow(m_bShowMiniCalendar && m_aSelPalette.GetCount());
 }
 
 void CCalendarPreferencesPage::SetThemeBkgndColors(COLORREF crLight, COLORREF crDark) 

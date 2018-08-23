@@ -54,6 +54,9 @@ BEGIN
     ID_HELP                 "\nOnline Help"
     IDS_NOHEATMAP           "<none>"
     IDS_MINICAL_TOOLTIP     "%d Tasks"
+    IDS_HEATMAP_NUMDONE     "Completion Date"
+    IDS_HEATMAP_NUMDUE      "Due Date"
+    IDS_HEATMAP_NUMSTARTED  "Start Date"
 END
 
 #endif    // English (U.S.) resources
@@ -179,7 +182,7 @@ BEGIN
     CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185
 END
 
-IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 348, 315
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 348, 333
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -187,47 +190,49 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,7,334,10
     CONTROL         "&Show vertical mini calendar-bar",IDC_SHOWMINICALENDAR,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,22,334,10
-    CONTROL         "&Enable heat map",IDC_ENABLEHEATMAP,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,18,36,323,10
-    COMBOBOX        IDC_HEATMAPPALETTE,28,50,116,161,CBS_DROPDOWNLIST | 
+    LTEXT           "Heat-map scheme",IDC_STATIC,19,35,155,8
+    COMBOBOX        IDC_HEATMAPPALETTE,19,46,156,161,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
+    LTEXT           "Heat-map attribute",IDC_ATTRIBUTES_LABEL,184,35,157,8
+    COMBOBOX        IDC_HEATMAPATTRIBUTE,184,46,157,152,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Dynamically adjust the height of tasks to ensure full visibility",
                     IDC_DYNAMICTASKHEIGHT,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,67,334,10
+                    WS_TABSTOP,7,65,334,10
     CONTROL         "Display tasks as continuous between their 'Start' and 'Due' dates",
                     IDC_SHOWTASKSCONTINUOUS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,82,219,10
+                    WS_TABSTOP,7,80,219,10
     CONTROL         "Display task 'Start' dates",IDC_SHOWSTARTDATES,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,97,334,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,95,334,10
     CONTROL         "I&ncluding 'Calculated Start' dates",
                     IDC_SHOWCALCSTARTDATES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,17,112,324,10
+                    WS_TABSTOP,17,110,324,10
     CONTROL         "Display task 'Due' dates",IDC_SHOWDUEDATES,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,127,334,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,125,334,10
     CONTROL         "Incl&uding 'Calculated Due' dates",IDC_SHOWCALCDUEDATES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,142,323,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,140,323,10
     CONTROL         "Display task 'Completion' dates",IDC_SHOWDONEDATES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,157,334,10
-    GROUPBOX        "Calculate missing 'Start' dates as:",IDC_STATIC,7,189,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,155,334,10
+    GROUPBOX        "Calculate missing 'Start' dates as:",IDC_STATIC,7,187,
                     334,62
     CONTROL         "The task's 'Creation' date",IDC_USECREATIONFORSTART,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,16,203,316,10
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,16,201,316,10
     CONTROL         "The task's 'Due' date",IDC_USEDUEFORSTART,"Button",
-                    BS_AUTORADIOBUTTON,16,218,316,10
+                    BS_AUTORADIOBUTTON,16,216,316,10
     CONTROL         "The earlier of the task's 'Due' date and 'Today'.",
                     IDC_USEDUEORTODAYFORSTART,"Button",BS_AUTORADIOBUTTON,16,
-                    233,316,10
-    GROUPBOX        "Calculate missing 'Due' dates as: ",IDC_STATIC,7,257,
+                    231,316,10
+    GROUPBOX        "Calculate missing 'Due' dates as: ",IDC_STATIC,7,255,
                     334,46
     CONTROL         "The task's 'Start' date",IDC_USESTARTFORDUE,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,16,271,316,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,16,269,316,10
     CONTROL         "The later of the task's 'Start' date and 'Today'.",
                     IDC_USESTARTORTODAYFORDUE,"Button",BS_AUTORADIOBUTTON,16,
-                    286,316,10
+                    284,316,10
     CONTROL         "Treat overdue tasks as being due 'Today'",
                     IDC_SHOWOVERDUEASDUETODAY,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,172,334,10
+                    WS_TABSTOP,7,170,334,10
 END
 
 
@@ -258,7 +263,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 341
         TOPMARGIN, 7
-        BOTTOMMARGIN, 308
+        BOTTOMMARGIN, 326
     END
 END
 #endif    // APSTUDIO_INVOKED

@@ -493,11 +493,11 @@ BOOL CHeatMap::SetColorPalette(const CDWordArray& aColors)
 	return TRUE;
 }
 
-BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, IUI_ATTRIBUTE nAttrib)
+BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, IUI_ATTRIBUTE nAttrib, DWORD dwOptions)
 {
 	m_mapHeat.RemoveAll();
 
-	if (mapData.GetCount() == 0)
+	if ((nAttrib == IUI_NONE) || (mapData.GetCount() == 0))
 		return FALSE;
 
 	POSITION pos = mapData.GetStartPosition();
@@ -508,6 +508,9 @@ BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, IUI_ATTRIBUTE nAttrib
 	{
 		mapData.GetNextAssoc(pos, dwTaskID, pTCI);
 
+		if (pTCI->IsParent() && Misc::HasFlag(dwOptions, TCCO_HIDEPARENTTASKS))
+			continue;
+
 		switch (nAttrib)
 		{
 		case IUI_DONEDATE:
@@ -515,6 +518,22 @@ BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, IUI_ATTRIBUTE nAttrib
 			{
 				COleDateTime dtDone = CDateHelper::GetDateOnly(pTCI->GetDoneDate());
 				Misc::IncrementItemT<double, int>(m_mapHeat, dtDone.m_dt);
+			}
+			break;
+
+		case IUI_DUEDATE:
+			if (!pTCI->IsDone(FALSE) && pTCI->HasAnyEndDate())
+			{
+				COleDateTime dtDue = CDateHelper::GetDateOnly(pTCI->GetAnyEndDate());
+				Misc::IncrementItemT<double, int>(m_mapHeat, dtDue.m_dt);
+			}
+			break;
+
+		case IUI_STARTDATE:
+			if (!pTCI->IsDone(FALSE) && pTCI->HasAnyStartDate())
+			{
+				COleDateTime dtStart = CDateHelper::GetDateOnly(pTCI->GetAnyStartDate());
+				Misc::IncrementItemT<double, int>(m_mapHeat, dtStart.m_dt);
 			}
 			break;
 

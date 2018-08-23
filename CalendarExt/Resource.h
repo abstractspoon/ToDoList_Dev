@@ -25,6 +25,7 @@
 #define IDC_SHOWOVERDUEASDUETODAY       1041
 #define IDC_HIDEPARENTTASKS             1042
 #define IDC_ENABLEHEATMAP               1043
+#define IDC_HEATMAPATTRIBUTE            1044
 #define IDC_SHOWMINICALENDAR            2001
 #define IDC_SHOWTASKSCONTINUOUS         2002
 #define IDC_SHOWSTARTDATES              2003
@@ -37,6 +38,7 @@
 #define IDC_SHOWDONEDATES               2010
 #define IDR_TOOLBAR                     16006
 #define IDC_TB_PLACEHOLDER              16024
+#define IDC_ATTRIBUTES_LABEL            16043
 #define IDD_PREFERENCES_DIALOG          17002
 #define IDD_PREFERENCES_PAGE            17003
 #define IDC_PPHOST                      17019
@@ -46,6 +48,9 @@
 #define ID_GOTOTODAY                    32795
 #define IDS_NOHEATMAP                   57671
 #define IDS_MINICAL_TOOLTIP             57672
+#define IDS_HEATMAP_NUMDONE             57673
+#define IDS_HEATMAP_NUMDUE              57674
+#define IDS_HEATMAP_NUMSTARTED          57675
 
 // Next default values for new objects
 // 
@@ -53,7 +58,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        32793
 #define _APS_NEXT_COMMAND_VALUE         32799
-#define _APS_NEXT_CONTROL_VALUE         1044
+#define _APS_NEXT_CONTROL_VALUE         1045
 #define _APS_NEXT_SYMED_VALUE           32893
 #endif
 #endif

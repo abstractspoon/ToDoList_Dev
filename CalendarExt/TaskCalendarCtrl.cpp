@@ -1065,10 +1065,18 @@ int CTaskCalendarCtrl::GetCellTasks(const COleDateTime& dtCell, CTaskCalItemArra
 			// only test for due/done if start not added
 			if (!bAdded)
 			{
-				if (HasOption(TCCO_DISPLAYCALCDUE) || 
-					((HasOption(TCCO_DISPLAYDUE) || HasOption(TCCO_DISPLAYDONE)) && pTCI->IsEndDateSet()))
+				if (HasOption(TCCO_DISPLAYCALCDUE) || (HasOption(TCCO_DISPLAYDUE) && pTCI->IsEndDateSet()))
 				{
 					if (CDateHelper::GetDateOnly(pTCI->GetAnyEndDate()) == dtCell)
+					{
+						aTasks.Add(pTCI);
+						bAdded = TRUE;
+					}
+				}
+
+				if (!bAdded && HasOption(TCCO_DISPLAYDONE) && pTCI->IsDone(FALSE))
+				{
+					if (CDateHelper::GetDateOnly(pTCI->GetDoneDate()) == dtCell)
 						aTasks.Add(pTCI);
 				}
 			}

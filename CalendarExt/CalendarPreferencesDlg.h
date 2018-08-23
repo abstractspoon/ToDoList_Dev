@@ -65,14 +65,15 @@ protected:
 	BOOL	m_bAdjustTaskHeights;
 	BOOL	m_bShowDoneDates;
 	BOOL	m_bTreatOverdueAsDueToday;
-	BOOL	m_bEnableHeatMap;
 	//}}AFX_DATA
 	int		m_nCalcMissingStartDates;
 	int		m_nCalcMissingDueDates;
 	BOOL	m_bHideParentTasks;
 
+	CComboBox m_cbHeatMapAttribute;
 	CColorBrewerComboBox m_cbHeatMapPalette;
 	CDWordArray m_aSelPalette;
+	IUI_ATTRIBUTE m_nHeatMapAttrib;
 	COLORREF m_crThemeBkgnd;
 	
 // Overrides
@@ -92,9 +93,9 @@ protected:
 	afx_msg void OnShowTasksContinuous();
 	afx_msg void OnShowStartDates();
 	afx_msg void OnShowDueDates();
-	afx_msg void OnEnableHeatmap();
 	afx_msg void OnShowMiniCalendar();
 	//}}AFX_MSG
+	afx_msg void OnSelChangeHeatMapPalette();
 	DECLARE_MESSAGE_MAP()
 };
 

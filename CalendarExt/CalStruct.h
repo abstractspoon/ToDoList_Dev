@@ -97,7 +97,7 @@ public:
 	BOOL HasHeat() const { return m_mapHeat.GetCount(); }
 
 	BOOL SetColorPalette(const CDWordArray& aColors);
-	BOOL Recalculate(const CTaskCalItemMap& mapData, IUI_ATTRIBUTE nAttrib);
+	BOOL Recalculate(const CTaskCalItemMap& mapData, IUI_ATTRIBUTE nAttrib, DWORD dwOptions);
 
 	int GetHeat(const COleDateTime& date) const;
 	COLORREF GetColor(const COleDateTime& date) const;

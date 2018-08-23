@@ -58,6 +58,8 @@ void CTaskMiniCalendarCtrl::SetOptions(DWORD dwOptions)
 		{
 			RecalcSpecialDates();
 		}
+	
+		RecalcHeatMap();
 	}
 }
 
@@ -92,7 +94,7 @@ void CTaskMiniCalendarCtrl::RecalcSpecialDates()
 
 void CTaskMiniCalendarCtrl::RecalcHeatMap()
 {
-	if (m_mapHeatMap.Recalculate(m_mapData, m_nHeatMapAttribute))
+	if (m_mapHeatMap.Recalculate(m_mapData, m_nHeatMapAttribute, m_dwOptions))
 		Invalidate();
 }
 
@@ -147,7 +149,8 @@ void CTaskMiniCalendarCtrl::DisableHeatMap()
 
 BOOL CTaskMiniCalendarCtrl::PreTranslateMessage(MSG* pMsg)
 {
-	m_tooltip.FilterToolTipMessage(pMsg);
+	if (m_tooltip.GetSafeHwnd())
+		m_tooltip.FilterToolTipMessage(pMsg);
 
 	return CFPSMiniCalendarCtrl::PreTranslateMessage(pMsg);
 }
