@@ -132,6 +132,10 @@ SOURCE=.\StdAfx.cpp
 
 SOURCE=.\TaskCalendarCtrl.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\TaskMiniCalendarCtrl.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -171,6 +175,10 @@ SOURCE=.\StdAfx.h
 # Begin Source File
 
 SOURCE=.\TaskCalendarCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TaskMiniCalendarCtrl.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
