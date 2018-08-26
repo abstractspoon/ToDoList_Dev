@@ -115,7 +115,15 @@ void CEnRecentFileList::ReadList(const CPreferences& prefs)
 			break;
 
 		sFile = FileMisc::GetFullPath(sFile, FileMisc::GetAppFolder());
-		Add(sFile);
+
+		// MFC 4.2 can throw an exception if this is an inaccessible network drive
+		try
+		{
+			Add(sFile);
+		}
+		catch(...)
+		{
+		}
 	}
 }
 

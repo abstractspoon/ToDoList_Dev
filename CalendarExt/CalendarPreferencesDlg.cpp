@@ -121,8 +121,8 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 
 	GetDlgItem(IDC_SHOWSTARTDATES)->EnableWindow(!m_bShowTasksContinuous);
 	GetDlgItem(IDC_SHOWDUEDATES)->EnableWindow(!m_bShowTasksContinuous);
-	GetDlgItem(IDC_SHOWCALCSTARTDATES)->EnableWindow(m_bShowStartDates);
-	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(m_bShowDueDates);
+	GetDlgItem(IDC_SHOWCALCSTARTDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowStartDates);
+	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowDueDates);
 	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar);
 	GetDlgItem(IDC_HEATMAPATTRIBUTE)->EnableWindow(m_bShowMiniCalendar && m_aSelPalette.GetCount());
 		
@@ -134,20 +134,10 @@ void CCalendarPreferencesPage::OnShowTasksContinuous()
 {
 	UpdateData();
 
-	// inter-dependencies
-	if (m_bShowTasksContinuous)
-	{
-		m_bShowStartDates = FALSE;
-		m_bShowDueDates = FALSE;
-
-		UpdateData(FALSE);
-
-		GetDlgItem(IDC_SHOWCALCSTARTDATES)->EnableWindow(FALSE);
-		GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(FALSE);
-	}
-
 	GetDlgItem(IDC_SHOWSTARTDATES)->EnableWindow(!m_bShowTasksContinuous);
 	GetDlgItem(IDC_SHOWDUEDATES)->EnableWindow(!m_bShowTasksContinuous);
+	GetDlgItem(IDC_SHOWCALCSTARTDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowStartDates);
+	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowDueDates);
 }
 
 void CCalendarPreferencesPage::OnSelChangeHeatMapPalette()
@@ -205,8 +195,8 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bShowStartDates = pPrefs->GetProfileInt(szKey, _T("ShowStartDates"), FALSE);
 	m_bShowDueDates = pPrefs->GetProfileInt(szKey, _T("ShowDueDates"), FALSE);
 	m_bShowDoneDates = pPrefs->GetProfileInt(szKey, _T("ShowDoneDates"), FALSE);
-	m_bShowCalcStartDates = pPrefs->GetProfileInt(szKey, _T("ShowCalcStartDates"), FALSE);
-	m_bShowCalcDueDates = pPrefs->GetProfileInt(szKey, _T("ShowCalcDueDates"), FALSE);
+	m_bShowCalcStartDates = pPrefs->GetProfileInt(szKey, _T("ShowCalcStartDates"), TRUE);
+	m_bShowCalcDueDates = pPrefs->GetProfileInt(szKey, _T("ShowCalcDueDates"), TRUE);
 
 	m_nCalcMissingStartDates = pPrefs->GetProfileInt(szKey, _T("CalcMissingStartDates"), CALCSTART_ASCREATION);
 	m_nCalcMissingDueDates = pPrefs->GetProfileInt(szKey, _T("CalcMissingDueDates"), CALCDUE_ASLATESTSTARTANDTODAY);
