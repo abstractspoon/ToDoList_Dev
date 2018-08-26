@@ -343,7 +343,11 @@ namespace DayViewUIExtension
 			m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(OnDayViewSelectionChanged);
 			m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
 			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
-            m_DayView.MouseClick += new MouseEventHandler(OnDayViewMouseClick);
+
+            // Performing icon editing from a 'MouseUp' or 'MouseClick' event 
+            // causes the edit icon dialog to fail to correctly get focus but
+            // counter-intuitively it works from 'MouseDown'
+            m_DayView.MouseDown += new MouseEventHandler(OnDayViewMouseClick);
 
 			m_DayView.StartDate = DateTime.Now;
             m_DayView.SetFont(FontName, 8);

@@ -969,8 +969,11 @@ namespace MindMapUIExtension
                 }
                 else if (HitTestIcon(node, e.Location))
                 {
-                    if (EditTaskIcon != null)
-                        EditTaskIcon(this, UniqueID(SelectedNode));
+                    // Performing icon editing from a 'MouseUp' or 'MouseClick' event 
+                    // causes the edit icon dialog to fail to correctly get focus but
+                    // counter-intuitively it works from 'MouseDown'
+                    //if (EditTaskIcon != null)
+                    //    EditTaskIcon(this, UniqueID(SelectedNode));
                 }
                 else if (SelectNodeWasPreviouslySelected)
 			    {
@@ -1003,13 +1006,28 @@ namespace MindMapUIExtension
 					{
 						// Cache the previous selected item
 						m_PreviouslySelectedNode = SelectedNode;
+                        m_IgnoreMouseClick = false;
 
 						TreeNode hit = HitTestPositions(e.Location);
 
-						if (hit != null)
-							m_IgnoreMouseClick = HitTestExpansionButton(hit, e.Location);
-						else
-							m_IgnoreMouseClick = false;
+                        if (hit != null)
+                        {
+                            m_IgnoreMouseClick = HitTestExpansionButton(hit, e.Location);
+
+                            // Performing icon editing from a 'MouseUp' or 'MouseClick' event 
+                            // causes the edit icon dialog to fail to correctly get focus but
+                            // counter-intuitively it works from 'MouseDown'
+                            if (!m_IgnoreMouseClick)
+                            {
+                                var taskItem = TaskItem(hit);
+
+                                if (!ReadOnly && !taskItem.IsLocked && HitTestIcon(hit, e.Location))
+                                {
+                                    if (EditTaskIcon != null)
+                                        EditTaskIcon(this, UniqueID(SelectedNode));
+                                }
+                            }
+                        }
 					}
 					break;
 
