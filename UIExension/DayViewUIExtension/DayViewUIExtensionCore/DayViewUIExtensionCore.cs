@@ -174,6 +174,7 @@ namespace DayViewUIExtension
 
 		public void SetReadOnly(bool bReadOnly)
 		{
+            m_DayView.ReadOnly = bReadOnly;
 		}
 
 		public void SavePreferences(Preferences prefs, String key)
@@ -342,8 +343,9 @@ namespace DayViewUIExtension
 			m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(OnDayViewSelectionChanged);
 			m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
 			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
-			m_DayView.StartDate = DateTime.Now;
+            m_DayView.MouseClick += new MouseEventHandler(OnDayViewMouseClick);
 
+			m_DayView.StartDate = DateTime.Now;
             m_DayView.SetFont(FontName, 8);
 
 			Controls.Add(m_DayView);
@@ -507,6 +509,29 @@ namespace DayViewUIExtension
 			m_DayView.Size = dayViewRect.Size;
 
             Invalidate(true);
+        }
+
+        private void OnDayViewMouseClick(object sender, MouseEventArgs e)
+        {
+            if (m_DayView.ReadOnly)
+                return;
+
+            Calendar.Appointment appointment = m_DayView.GetAppointmentAt(e.Location.X, e.Location.Y);
+
+            if (appointment == null)
+                return;
+
+            var taskItem = (appointment as CalendarItem);
+
+            if ((taskItem == null) || taskItem.IsLocked)
+                return;
+
+            if (taskItem.IconRect.Contains(e.Location))
+            {
+                var notify = new UIExtension.ParentNotify(m_HwndParent);
+
+                notify.NotifyEditIcon();
+            }
         }
 
 		private void OnDayViewNewAppointment(object sender, Calendar.NewAppointmentEventArgs args)

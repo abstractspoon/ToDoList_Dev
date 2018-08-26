@@ -361,13 +361,13 @@ namespace DayViewUIExtension
 
 					// Draw appointment icon
 					bool hasIcon = false;
+                    taskItem.IconRect = Rectangle.Empty;
 
                     if (TaskHasIcon(taskItem))
                     {
 						Rectangle rectIcon;
                         int imageSize = Win32.ScaleByDPIFactor(16);
-
-
+                        
 						if (taskItem.IsLongAppt())
 						{
 							int yCentre = ((rect.Top + rect.Bottom + 1) / 2);
@@ -391,7 +391,9 @@ namespace DayViewUIExtension
 							}
 
 							m_TaskIcons.Draw(g, rectIcon.X, rectIcon.Y);
-							hasIcon = true;
+							
+                            hasIcon = true;
+                            taskItem.IconRect = rectIcon;
 
 							rect.Width -= (rectIcon.Right - rect.Left);
 							rect.X = rectIcon.Right;

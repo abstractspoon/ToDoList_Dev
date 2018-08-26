@@ -4,6 +4,7 @@ using System.Text;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
+using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
 using Abstractspoon.Tdl.PluginHelpers;
@@ -40,8 +41,13 @@ namespace DayViewUIExtension
 
 		public String AllocTo { get; set; }
 		public Boolean IsParent { get; set; }
-		public Boolean HasIcon { get; set; }
-		public Boolean IsDone { get; set; }
+        public Boolean HasIcon { get; set; }
+        public Boolean IsDone { get; set; }
+        public Boolean IsLocked { get; set; }
+
+        // This is a hack because the underlying DayView does
+        // not allow overriding the AppointmentView class
+        public Rectangle IconRect { get; set; }
 
 		public override DateTime EndDate
 		{
@@ -109,6 +115,8 @@ namespace DayViewUIExtension
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
 
 		// ----------------------------------------------------------------
+    
+        public Boolean ReadOnly { get; set; }
 
         public TDLDayView(UIExtension.TaskIcon taskIcons)
         {
@@ -156,6 +164,7 @@ namespace DayViewUIExtension
             this.WorkingHourStart = 9;
             this.WorkingMinuteEnd = 0;
             this.WorkingMinuteStart = 0;
+            this.ReadOnly = false;
 
 			this.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnDayViewResolveAppointments);
         }
@@ -381,6 +390,7 @@ namespace DayViewUIExtension
 					item.HasIcon = task.HasIcon();
 
 				item.TaskTextColor = task.GetTextDrawingColor();
+                item.IsLocked = task.IsLocked();
 			}
 			else
 			{
@@ -396,6 +406,7 @@ namespace DayViewUIExtension
 				item.TaskTextColor = task.GetTextDrawingColor();
 				item.DrawBorder = true;
 				item.IsDone = (task.IsDone() || task.IsGoodAsDone());
+                item.IsLocked = task.IsLocked();
 			}
 
 			m_Items[taskID] = item;
@@ -543,5 +554,39 @@ namespace DayViewUIExtension
             Update();
         }
 
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            Calendar.Appointment appointment = GetAppointmentAt(e.Location.X, e.Location.Y);
+
+            if (!ReadOnly && (appointment != null))
+            {
+                var taskItem = (appointment as CalendarItem);
+
+                if (taskItem != null)
+                {
+                    Cursor cursor = null;
+
+                    if (taskItem.IsLocked)
+                    {
+                        cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+                    }
+                    else if (taskItem.IconRect.Contains(e.Location))
+                    {
+                        cursor = UIExtension.HandCursor();
+                    }
+
+                    if (cursor != null)
+                    {
+                        Cursor = cursor;
+                        return;
+                    }
+                }
+            }
+
+            // all else
+            Cursor = Cursors.Arrow;
+        }
 	}
 }
