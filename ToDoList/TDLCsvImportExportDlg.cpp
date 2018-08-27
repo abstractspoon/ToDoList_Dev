@@ -26,7 +26,8 @@ static const CString COMMA(_T(","));
 
 CTDLCsvImportExportDlg::CTDLCsvImportExportDlg(const CString& sFilePath, 
 											   IPreferences* pPrefs, LPCTSTR szKey, CWnd* pParent /*=NULL*/)
-	: CTDLDialog(IDD_CSVIMPORTEXPORT_DIALOG, pParent), 
+	: 
+	CTDLDialog(IDD_CSVIMPORTEXPORT_DIALOG, _T(""), pParent), 
 	m_lcColumnSetup(TRUE), 
 	m_eFilePath(FES_NOBROWSE)
 {
@@ -36,7 +37,8 @@ CTDLCsvImportExportDlg::CTDLCsvImportExportDlg(const CString& sFilePath,
 CTDLCsvImportExportDlg::CTDLCsvImportExportDlg(const CString& sFilePath, 
 											   const CTDCAttributeArray& aExportAttributes, 
 											   IPreferences* pPrefs, LPCTSTR szKey, CWnd* pParent /*=NULL*/)
-	: CTDLDialog(IDD_CSVIMPORTEXPORT_DIALOG, pParent), 
+	: 
+	CTDLDialog(IDD_CSVIMPORTEXPORT_DIALOG, _T(""), pParent), 
 	m_lcColumnSetup(FALSE), 
 	m_eFilePath(FES_NOBROWSE)
 {
@@ -50,7 +52,7 @@ BOOL CTDLCsvImportExportDlg::DoInit(const CString& sFilePath,
 {
 	m_sFilePath = sFilePath; 
 	m_pPrefs = pPrefs;
-	m_sPrefKey.Format(_T("%s\\CsvColumnMapping"), szKey);
+	m_sPrefsKey.Format(_T("%s\\CsvColumnMapping"), szKey);
 	m_sDelim = Misc::GetListSeparator();
 	m_bAlwaysExportTaskIDs = TRUE;
 	m_bImporting = (pExportAttributes ? FALSE : TRUE);
@@ -137,7 +139,7 @@ void CTDLCsvImportExportDlg::InitialiseDelimiter()
 	ASSERT(GetSafeHwnd() == NULL);
 
 	// load last used delimiter
-	CString sUIDelim = m_pPrefs->GetProfileString(m_sPrefKey, _T("Delimiter"));
+	CString sUIDelim = m_pPrefs->GetProfileString(m_sPrefsKey, _T("Delimiter"));
 
 	if (m_bImporting)
 	{
@@ -359,17 +361,17 @@ int CTDLCsvImportExportDlg::LoadMasterColumnMapping()
 {
 	BuildDefaultMasterColumnMapping();
 
-	m_bAlwaysExportTaskIDs = m_pPrefs->GetProfileInt(m_sPrefKey, _T("AlwaysExportTaskIDs"), TRUE);
-	int nColumns = m_pPrefs->GetProfileInt(m_sPrefKey, _T("ColumnCount"), 0);
+	m_bAlwaysExportTaskIDs = m_pPrefs->GetProfileInt(m_sPrefsKey, _T("AlwaysExportTaskIDs"), TRUE);
+	int nColumns = m_pPrefs->GetProfileInt(m_sPrefsKey, _T("ColumnCount"), 0);
 
 	// overwrite with translations unless they are empty names
 	for (int nCol = 0; nCol < nColumns; nCol++)
 	{
 		CString sKey = Misc::MakeKey(_T("ColumnAttrib%d"), nCol);
-		TDC_ATTRIBUTE attrib = (TDC_ATTRIBUTE)m_pPrefs->GetProfileInt(m_sPrefKey, sKey, TDCA_NONE);
+		TDC_ATTRIBUTE attrib = (TDC_ATTRIBUTE)m_pPrefs->GetProfileInt(m_sPrefsKey, sKey, TDCA_NONE);
 		
 		sKey = Misc::MakeKey(_T("ColumnName%d"), nCol);
-		CString sName = m_pPrefs->GetProfileString(m_sPrefKey, sKey);
+		CString sName = m_pPrefs->GetProfileString(m_sPrefsKey, sKey);
 		
 		if (!sName.IsEmpty())
 			SetMasterColumnName(attrib, sName);
@@ -392,27 +394,27 @@ void CTDLCsvImportExportDlg::UpdateMasterColumnMappingFromList()
 
 void CTDLCsvImportExportDlg::SaveMasterColumnMapping() const
 {
-	m_pPrefs->WriteProfileInt(m_sPrefKey, _T("AlwaysExportTaskIDs"), m_bAlwaysExportTaskIDs);
+	m_pPrefs->WriteProfileInt(m_sPrefsKey, _T("AlwaysExportTaskIDs"), m_bAlwaysExportTaskIDs);
 
 	int nColumns = m_aMasterColumnMapping.GetSize();
-	m_pPrefs->WriteProfileInt(m_sPrefKey, _T("ColumnCount"), nColumns);
+	m_pPrefs->WriteProfileInt(m_sPrefsKey, _T("ColumnCount"), nColumns);
 
 	for (int nCol = 0; nCol < nColumns; nCol++)
 	{
 		const TDCATTRIBUTEMAPPING& col = m_aMasterColumnMapping[nCol];
 
 		CString sKey = Misc::MakeKey(_T("ColumnName%d"), nCol);
-		m_pPrefs->WriteProfileString(m_sPrefKey, sKey, col.sColumnName);
+		m_pPrefs->WriteProfileString(m_sPrefsKey, sKey, col.sColumnName);
 		
 		sKey = Misc::MakeKey(_T("ColumnAttrib%d"), nCol);
-		m_pPrefs->WriteProfileInt(m_sPrefKey, sKey, col.nTDCAttrib);
+		m_pPrefs->WriteProfileInt(m_sPrefsKey, sKey, col.nTDCAttrib);
 	}
 
 	// save delimiter if different to default
 	if (m_sDelim == Misc::GetListSeparator())
-		m_pPrefs->WriteProfileString(m_sPrefKey, _T("Delimiter"), _T(""));
+		m_pPrefs->WriteProfileString(m_sPrefsKey, _T("Delimiter"), _T(""));
 	else
-		m_pPrefs->WriteProfileString(m_sPrefKey, _T("Delimiter"), m_sDelim);
+		m_pPrefs->WriteProfileString(m_sPrefsKey, _T("Delimiter"), m_sDelim);
 }
 
 CString CTDLCsvImportExportDlg::GetMasterColumnName(TDC_ATTRIBUTE attrib) const

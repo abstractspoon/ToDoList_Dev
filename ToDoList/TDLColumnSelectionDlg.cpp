@@ -21,7 +21,7 @@ CTDLColumnSelectionDlg::CTDLColumnSelectionDlg(const TDCCOLEDITFILTERVISIBILITY&
 											   const TDCCOLEDITFILTERVISIBILITY& visDefault, 
 											   CWnd* pParent)
 	: 
-	CTDLDialog(CTDLColumnSelectionDlg::IDD, pParent), 
+	CTDLDialog(CTDLColumnSelectionDlg::IDD, _T("ColumnAttributes"), pParent), 
 	m_visColAttrib(vis),
 	m_visDefault(visDefault),
 	m_nAttribShow(vis.GetShowFields())
@@ -32,8 +32,8 @@ CTDLColumnSelectionDlg::CTDLColumnSelectionDlg(const TDCCOLEDITFILTERVISIBILITY&
 	// restore state
 	CPreferences prefs;
 
-	m_bActiveTasklist = prefs.GetProfileInt(_T("ColumnAttributes"), _T("ActiveTasklist"), TRUE);
-	m_bUpdatePrefs = prefs.GetProfileInt(_T("ColumnAttributes"), _T("UpdatePrefs"), FALSE);
+	m_bActiveTasklist = prefs.GetProfileInt(m_sPrefsKey, _T("ActiveTasklist"), TRUE);
+	m_bUpdatePrefs = prefs.GetProfileInt(m_sPrefsKey, _T("UpdatePrefs"), FALSE);
 }
 
 
@@ -78,8 +78,8 @@ void CTDLColumnSelectionDlg::OnOK()
 	// save state
 	CPreferences prefs;
 
-	prefs.WriteProfileInt(_T("ColumnAttributes"), _T("ActiveTasklist"), m_bActiveTasklist);
-	prefs.WriteProfileInt(_T("ColumnAttributes"), _T("UpdatePrefs"), m_bUpdatePrefs);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("ActiveTasklist"), m_bActiveTasklist);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("UpdatePrefs"), m_bUpdatePrefs);
 }
 
 BOOL CTDLColumnSelectionDlg::OnInitDialog() 

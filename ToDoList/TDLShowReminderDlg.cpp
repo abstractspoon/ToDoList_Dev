@@ -54,7 +54,7 @@ enum
 
 CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLShowReminderDlg::IDD, pParent),
+	CTDLDialog(CTDLShowReminderDlg::IDD, _T("ShowReminders"), pParent),
 	m_dwNextReminderID(1),
 	m_dtSnoozeUntil(COleDateTime::GetCurrentTime()),
 	m_bChangingReminders(FALSE)
@@ -64,7 +64,7 @@ CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	//}}AFX_DATA_INIT
 
 	// init snooze value
-	m_nSnoozeMins = CPreferences().GetProfileInt(_T("Reminders"), _T("Snooze"), 5);
+	m_nSnoozeMins = CPreferences().GetProfileInt(m_sPrefsKey, _T("Snooze"), 5);
 }
 
 
@@ -303,7 +303,7 @@ void CTDLShowReminderDlg::OnSnooze()
 
 	// save snooze value for next time
 	if (!m_bSnoozeUntil)
-		CPreferences().WriteProfileInt(_T("Reminders"), _T("Snooze"), GetSnoozeMinutes());
+		CPreferences().WriteProfileInt(m_sPrefsKey, _T("Snooze"), GetSnoozeMinutes());
 
 	CTDCReminderArray aRem;
 
@@ -483,4 +483,24 @@ void CTDLShowReminderDlg::OnDblClkReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 void CTDLShowReminderDlg::HideWindow()
 {
 	ShowWindow(SW_HIDE);
+}
+
+void CTDLShowReminderDlg::OnRepositionControls(int dx, int dy)
+{
+	CTDLDialog::OnRepositionControls(dx, dy);
+
+	CDialogHelper::ResizeChild(&m_lcReminders, dx, dy);
+
+	CDialogHelper::ResizeCtrl(this, IDC_DIVIDER, dx, 0);
+	CDialogHelper::OffsetCtrl(this, IDC_DIVIDER, 0, dy);
+
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZE, dx, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_DISMISS, dx, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_DISMISSANDGOTOTASK, dx, dy);
+
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEOPTIONFOR, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEOPTIONUNTIL, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEFOR, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEUNTILDATE, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEUNTILTIME, 0, dy);
 }

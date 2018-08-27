@@ -200,7 +200,7 @@ int CTDLRecurringTaskEdit::CalcMaxRegularityWidth(CDC* pDC, BOOL bIncOnce)
 #define WM_VALUECHANGE (WM_APP+1)
 
 CTDLRecurringTaskOptionDlg::CTDLRecurringTaskOptionDlg(const TDCRECURRENCE& tr, const COleDateTime& dtDefault, CWnd* pParent /*=NULL*/)
-	: CTDLDialog(IDD_RECURRING_TASK_DIALOG, pParent),
+	: CTDLDialog(IDD_RECURRING_TASK_DIALOG, _T("Recurrence"), pParent),
 	m_pageDaily(tr, dtDefault),
 	m_pageWeekly(tr, dtDefault),
 	m_pageMonthly(tr, dtDefault),

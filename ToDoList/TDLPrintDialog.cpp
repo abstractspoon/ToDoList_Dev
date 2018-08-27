@@ -26,9 +26,9 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView,
 									const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 									BOOL bSupportsExportToImage, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(IDD_PRINT_DIALOG, pParent), 
+	CTDLDialog(IDD_PRINT_DIALOG, _T("Print"), pParent), 
 	m_bPreview(bPreview), 
-	m_dlgTaskSel(_T("Print"), nView),
+	m_dlgTaskSel(m_sPrefsKey, nView),
 	m_sTitle(szTitle), 
 	m_bSupportsExportToImage(bSupportsExportToImage),
 	m_bUseStylesheet(FALSE),
@@ -38,13 +38,13 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView,
 	//}}AFX_DATA_INIT
 	CPreferences prefs;
 
-	m_bDate = prefs.GetProfileInt(_T("Print"), _T("WantDate"), TRUE);
-	m_nExportStyle = (TDLPD_STYLE)prefs.GetProfileInt(_T("Print"), _T("ExportStyle"), TDLPDS_WRAP);
+	m_bDate = prefs.GetProfileInt(m_sPrefsKey, _T("WantDate"), TRUE);
+	m_nExportStyle = (TDLPD_STYLE)prefs.GetProfileInt(m_sPrefsKey, _T("ExportStyle"), TDLPDS_WRAP);
 
 	if (!m_bSupportsExportToImage && (m_nExportStyle == TDLPDS_IMAGE))
 		m_nExportStyle = TDLPDS_WRAP;
 
-	m_cbTitle.Load(prefs, _T("Print"));
+	m_cbTitle.Load(prefs, m_sPrefsKey);
 	m_dlgTaskSel.SetCustomAttributeDefinitions(aAttribDefs);
 
 	InitStylesheet(szStylesheet);
@@ -93,9 +93,9 @@ void CTDLPrintDialog::InitStylesheet(LPCTSTR szStylesheet)
 	CPreferences prefs;
 
 	if (m_sStylesheet.IsEmpty())
-		m_sStylesheet = prefs.GetProfileString(_T("Print"), _T("Stylesheet"));
+		m_sStylesheet = prefs.GetProfileString(m_sPrefsKey, _T("Stylesheet"));
 
-	if (m_sStylesheet.IsEmpty() || prefs.GetProfileInt(_T("Print"), _T("DefaultStylesheet"), FALSE))
+	if (m_sStylesheet.IsEmpty() || prefs.GetProfileInt(m_sPrefsKey, _T("DefaultStylesheet"), FALSE))
 	{
 		CString sDefStylesheet = prefs.GetProfileString(_T("Preferences"), _T("PrintStylesheet"));
 
@@ -116,15 +116,15 @@ void CTDLPrintDialog::OnOK()
 	// save settings
 	CPreferences prefs;
 
-	prefs.WriteProfileInt(_T("Print"), _T("ExportStyle"), (int)m_nExportStyle);
-	prefs.WriteProfileString(_T("Print"), _T("Stylesheet"), m_bUseStylesheet ? m_sStylesheet : _T(""));
+	prefs.WriteProfileInt(m_sPrefsKey, _T("ExportStyle"), (int)m_nExportStyle);
+	prefs.WriteProfileString(m_sPrefsKey, _T("Stylesheet"), m_bUseStylesheet ? m_sStylesheet : _T(""));
 
 	// we store whether this is the same as the default print stylesheet
 	// so we can update as it does
 	CString sDefStylesheet = prefs.GetProfileString(_T("Preferences"), _T("PrintStylesheet"));
-	prefs.WriteProfileInt(_T("Print"), _T("DefaultStylesheet"), (m_sStylesheet.CompareNoCase(sDefStylesheet) == 0));
+	prefs.WriteProfileInt(m_sPrefsKey, _T("DefaultStylesheet"), (m_sStylesheet.CompareNoCase(sDefStylesheet) == 0));
 
-	m_cbTitle.Save(prefs, _T("Print"));
+	m_cbTitle.Save(prefs, m_sPrefsKey);
 }
 
 BOOL CTDLPrintDialog::OnInitDialog() 

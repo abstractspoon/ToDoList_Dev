@@ -53,7 +53,6 @@ protected:
 	CTDCAttributeArray m_aExportAttributes;
 
 	IPreferences* m_pPrefs;
-	CString m_sPrefKey;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

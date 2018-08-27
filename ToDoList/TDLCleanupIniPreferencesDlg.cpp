@@ -29,7 +29,7 @@ LPCTSTR SETTINGSKEY	 = _T("Settings");
 
 CTDLCleanupIniPreferencesDlg::CTDLCleanupIniPreferencesDlg(const CStringArray& aExclusions, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(IDD_CLEANUPINIPREFERENCES_DIALOG, pParent),
+	CTDLDialog(IDD_CLEANUPINIPREFERENCES_DIALOG, _T("CleanupPrefs"), pParent),
 	m_mru(0, _T("MRU"), _T("TaskList%d"), 16)
 {
 	//{{AFX_DATA_INIT(CTDLCleanupIniPreferencesDlg)

@@ -18,7 +18,7 @@ static char THIS_FILE[] = __FILE__;
 
 
 CTDLPrefMigrationDlg::CTDLPrefMigrationDlg(CWnd* pParent /*=NULL*/)
-	: CTDLDialog(CTDLPrefMigrationDlg::IDD, pParent)
+	: CTDLDialog(CTDLPrefMigrationDlg::IDD, _T("PrefsMigration"), pParent)
 {
 	//{{AFX_DATA_INIT(CTDLPrefMigrationDlg)
 		// NOTE: the ClassWizard will add member initialization here
