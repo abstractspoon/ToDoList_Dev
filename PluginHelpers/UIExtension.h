@@ -128,6 +128,15 @@ namespace Abstractspoon
 				public:
 					ParentNotify(IntPtr hwndParent);
 
+					bool AddMod(UIExtension::TaskAttribute nAttribute, DateTime value);
+					bool AddMod(UIExtension::TaskAttribute nAttribute, double value);
+					bool AddMod(UIExtension::TaskAttribute nAttribute, double time, Task::TimeUnits units);
+					bool AddMod(UIExtension::TaskAttribute nAttribute, int value);
+					bool AddMod(UIExtension::TaskAttribute nAttribute, bool value);
+					bool AddMod(UIExtension::TaskAttribute nAttribute, String^ value);
+					bool AddMod(String^ sCustAttribID, String^ value);
+
+					bool NotifyMod();
 					bool NotifyMod(UIExtension::TaskAttribute nAttribute, DateTime value);
 					bool NotifyMod(UIExtension::TaskAttribute nAttribute, double value);
 					bool NotifyMod(UIExtension::TaskAttribute nAttribute, double time, Task::TimeUnits units);
@@ -149,10 +158,15 @@ namespace Abstractspoon
 
 				private:
 					HWND m_hwndParent;
+					IUITASKMOD* m_pTaskMoves;
+					int m_nTaskMoves;
 
 				private:
 					bool DoNotify(const IUITASKMOD* pMod, int numMod);
 					bool DoNotify(const IUITASKMOVE* pMove);
+
+					bool ResizeTaskMods(int nNewSize);
+					bool DeleteTaskMods();
 				};
 
 				ref class TaskIcon

@@ -140,7 +140,11 @@ IUI_HITTEST UIExtension::Map(UIExtension::HitResult test)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-UIExtension::ParentNotify::ParentNotify(IntPtr hwndParent) : m_hwndParent(NULL)
+UIExtension::ParentNotify::ParentNotify(IntPtr hwndParent) 
+	: 
+	m_hwndParent(NULL),
+	m_pTaskMoves(NULL),
+	m_nTaskMoves(0)
 {
 	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
 }
@@ -236,6 +240,19 @@ bool UIExtension::ParentNotify::NotifyCopy(UInt32 taskID, UInt32 parentTaskID, U
 	copy.bCopy = true;
 
 	return DoNotify(&copy);
+}
+
+bool UIExtension::ParentNotify::NotifyMod()
+{
+	if (!m_pTaskMoves || (m_nTaskMoves <= 0))
+		return false;
+
+	if (!IsWindow(m_hwndParent))
+		return false;
+
+	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_MODIFYSELECTEDTASK, m_nTaskMoves, (LPARAM)m_pTaskMoves);
+
+	return (bRet != FALSE);
 }
 
 bool UIExtension::ParentNotify::DoNotify(const IUITASKMOD* pMod, int numMod)
