@@ -157,16 +157,67 @@ namespace Abstractspoon
 					bool NotifyDoHelp(String^ helpID);
 
 				private:
-					HWND m_hwndParent;
-					IUITASKMOD* m_pTaskMoves;
-					int m_nTaskMoves;
+					// Managed version of IUITASKMOD
+					// Note: C++/CLI does not support unions
+					ref class IUITaskMod
+					{
+					public:
+						IUITaskMod(UIExtension::TaskAttribute attrib, DateTime value);
+						IUITaskMod(UIExtension::TaskAttribute attrib, double value);
+						IUITaskMod(UIExtension::TaskAttribute attrib, double time, Task::TimeUnits units);
+						IUITaskMod(UIExtension::TaskAttribute attrib, int value);
+						IUITaskMod(UIExtension::TaskAttribute attrib, bool value);
+						IUITaskMod(UIExtension::TaskAttribute attrib, String^ value);
+
+						IUITaskMod(String^ customAttribId, String^ value);
+
+						bool CopyTo(IUITASKMOD& mod);
+
+					public:
+						UIExtension::TaskAttribute nAttrib;
+						UInt32 dwSelectedTaskID;		
+						String^ szCustomAttribID;
+
+						//union
+						//{
+							int nValue;
+							double dValue;
+							String^ szValue;
+							DateTime tValue;
+							bool bValue;
+							UInt32 crValue;
+						//};
+
+						//union
+						//{
+							Task::TimeUnits nTimeUnits;	
+						//};
+
+					private:
+						enum class DataType
+						{
+							Double,
+							Date,
+							Time,
+							Integer,
+							Bool,
+							Text,
+							Color,
+							Custom,
+						};
+
+						DataType dataType;
+					};
 
 				private:
+					HWND m_hwndParent;
+					List<IUITaskMod^>^ m_TaskMods;
+
+				private:
+					void ClearMods();
+					bool NotifyMod(bool bClearModsAlways);
 					bool DoNotify(const IUITASKMOD* pMod, int numMod);
 					bool DoNotify(const IUITASKMOVE* pMove);
-
-					bool ResizeTaskMods(int nNewSize);
-					bool DeleteTaskMods();
 				};
 
 				ref class TaskIcon
