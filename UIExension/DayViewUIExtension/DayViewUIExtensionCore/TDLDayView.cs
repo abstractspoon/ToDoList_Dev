@@ -559,34 +559,35 @@ namespace DayViewUIExtension
             base.OnMouseMove(e);
 
             Calendar.Appointment appointment = GetAppointmentAt(e.Location.X, e.Location.Y);
+            Cursor = Cursors.Default;
 
             if (!ReadOnly && (appointment != null))
             {
+                // Extra-over cursor handling
+                var selTool = new Calendar.SelectionTool();
+
+                selTool.DayView = this;
+                selTool.UpdateCursor(e, appointment);
+
                 var taskItem = (appointment as CalendarItem);
 
                 if (taskItem != null)
                 {
-                    Cursor cursor = null;
+                    Cursor temp = null;
 
                     if (taskItem.IsLocked)
                     {
-                        cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+                        temp = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
                     }
                     else if (taskItem.IconRect.Contains(e.Location))
                     {
-                        cursor = UIExtension.HandCursor();
+                        temp = UIExtension.HandCursor();
                     }
 
-                    if (cursor != null)
-                    {
-                        Cursor = cursor;
-                        return;
-                    }
+                    if (temp != null)
+                        Cursor = temp;
                 }
             }
-
-            // all else
-            Cursor = Cursors.Arrow;
         }
 	}
 }
