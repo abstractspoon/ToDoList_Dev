@@ -44,6 +44,8 @@ namespace DayViewUIExtension
         public Boolean HasIcon { get; set; }
         public Boolean IsDone { get; set; }
         public Boolean IsLocked { get; set; }
+        public double TimeEstimate { get; set; }
+        public Task.TimeUnits TimeEstUnits { get; set; }
 
         // This is a hack because the underlying DayView does
         // not allow overriding the AppointmentView class
@@ -65,17 +67,59 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public override TimeSpan Length
-		{
-			get
-			{
-				// Handle 'end of day'
-				if (IsEndOfDay(EndDate))
-					return (EndDate.Date.AddDays(1) - StartDate);
+        public override TimeSpan Length
+        {
+            get
+            {
+                // Handle 'end of day'
+                if (IsEndOfDay(EndDate))
+                    return (EndDate.Date.AddDays(1) - StartDate);
 
-				return base.Length;
-			}
-		}
+                return base.Length;
+            }
+        }
+
+        public TimeSpan OriginalLength
+        {
+            get
+            {
+                // Handle 'end of day'
+                if (IsEndOfDay(OrgEndDate))
+                    return (OrgEndDate.Date.AddDays(1) - OrgStartDate);
+
+                return (OrgEndDate - OrgStartDate);
+            }
+        }
+
+        public double LengthAsTimeEstimate(bool original)
+        {
+            var length = (original ? OriginalLength : Length);
+
+            if (TimeEstUnits == Task.TimeUnits.Minutes)
+                return length.TotalMinutes;
+
+            if (TimeEstUnits == Task.TimeUnits.Hours)
+                return length.TotalHours;
+
+            return 0.0;
+        }
+
+        public bool TimeEstimateMatchesOriginalLength
+        {
+            get
+            {
+                return (TimeEstimate == LengthAsTimeEstimate(true));
+            }
+        }
+
+        public bool TimeEstimateIsMinsOrHours
+        {
+            get 
+            { 
+                return ((TimeEstUnits == Task.TimeUnits.Minutes) || 
+                        (TimeEstUnits == Task.TimeUnits.Hours)); 
+            }
+        }
 
 		public static bool IsEndOfDay(DateTime date)
 		{
@@ -380,6 +424,13 @@ namespace DayViewUIExtension
 					item.EndDate = item.OrgEndDate = dueDate;
 				}
 
+                if (attribs.Contains(UIExtension.TaskAttribute.TimeEstimate))
+                {
+                    Task.TimeUnits units = Task.TimeUnits.Unknown;
+                    item.TimeEstimate = task.GetTimeEstimate(ref units);
+                    item.TimeEstUnits = units;
+                }
+
 				if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
 					item.StartDate = item.OrgStartDate = task.GetStartDate();
 
@@ -407,6 +458,10 @@ namespace DayViewUIExtension
 				item.DrawBorder = true;
 				item.IsDone = (task.IsDone() || task.IsGoodAsDone());
                 item.IsLocked = task.IsLocked();
+
+                Task.TimeUnits units = Task.TimeUnits.Unknown;
+                item.TimeEstimate = task.GetTimeEstimate(ref units);
+                item.TimeEstUnits = units;
 			}
 
 			m_Items[taskID] = item;

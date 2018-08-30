@@ -109,6 +109,7 @@ namespace DayViewUIExtension
 				case UIExtension.TaskAttribute.StartDate:
 				case UIExtension.TaskAttribute.AllocTo:
 				case UIExtension.TaskAttribute.Icon:
+                case UIExtension.TaskAttribute.TimeEstimate:
 					return true;
 			}
 
@@ -634,9 +635,21 @@ namespace DayViewUIExtension
 				case Calendar.SelectionTool.Mode.ResizeTop:
 					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
 					{
-						if (notify.NotifyMod(UIExtension.TaskAttribute.StartDate, item.StartDate))
+                        notify.AddMod(UIExtension.TaskAttribute.StartDate, item.StartDate);
+
+                        // Update the Time estimate if it is zero or 
+                        // it used to match the previous date range
+                        bool modifyTimeEst = WantModifyTimeEstimate(item);
+
+                        if (modifyTimeEst)
+                            notify.AddMod(UIExtension.TaskAttribute.TimeEstimate, item.LengthAsTimeEstimate(false), item.TimeEstUnits);
+
+						if (notify.NotifyMod())
 						{
 							item.OrgStartDate = item.StartDate;
+
+                            if (modifyTimeEst)
+                                item.TimeEstimate = item.LengthAsTimeEstimate(false);
 						}
 						else
 						{
@@ -650,9 +663,20 @@ namespace DayViewUIExtension
 				case Calendar.SelectionTool.Mode.ResizeBottom:
 					if ((item.EndDate - item.OrgEndDate).TotalSeconds != 0.0)
 					{
-						if (notify.NotifyMod(UIExtension.TaskAttribute.DueDate, item.EndDate))
+                        notify.AddMod(UIExtension.TaskAttribute.DueDate, item.EndDate);
+
+                        // Update the Time estimate if used to match the previous date range
+                        bool modifyTimeEst = WantModifyTimeEstimate(item);
+
+                        if (modifyTimeEst)
+                            notify.AddMod(UIExtension.TaskAttribute.TimeEstimate, item.LengthAsTimeEstimate(false), item.TimeEstUnits);
+
+						if (notify.NotifyMod())
 						{
 							item.OrgEndDate = item.EndDate;
+
+                            if (modifyTimeEst)
+                                item.TimeEstimate = item.LengthAsTimeEstimate(false);
 						}
 						else
 						{
@@ -663,6 +687,16 @@ namespace DayViewUIExtension
 					break;
 			}
 		}
+
+        protected bool WantModifyTimeEstimate(CalendarItem item)
+        {
+            // Update the Time estimate if it is zero or it used to match the previous date range
+            if ((item.TimeEstimate == 0.0) && item.TimeEstimateIsMinsOrHours)
+                return true;
+
+            // else
+            return item.TimeEstimateMatchesOriginalLength;
+        }
 
         protected int ControlTop
         {
