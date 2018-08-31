@@ -557,9 +557,16 @@ namespace DayViewUIExtension
                         UInt32 prevSelTaskID = m_SelectedTaskID;
 
                         if (args.Appointment != null)
+                        {
                             m_SelectedTaskID = args.Appointment.Id;
+                        }
                         else
-                            m_SelectedTaskID = 0;
+                        {
+                            // Prevent the selection being set to null
+                            // if the previously selected item is still visible
+                            if (m_DayView.IsTaskWithinRange(prevSelTaskID))
+                                m_DayView.SelectTask(prevSelTaskID, true);
+                        }
 
                         if (m_SelectedTaskID != prevSelTaskID)
                             notify.NotifySelChange(m_SelectedTaskID);

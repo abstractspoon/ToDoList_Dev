@@ -213,6 +213,16 @@ namespace DayViewUIExtension
 			this.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnDayViewResolveAppointments);
         }
 
+        public bool IsTaskWithinRange(UInt32 dwTaskID)
+        {
+			CalendarItem item;
+
+			if (m_Items.TryGetValue(dwTaskID, out item))
+                return IsItemWithinRange(item, StartDate, EndDate);
+
+            return false;
+        }
+
 		public bool SelectTask(UInt32 dwTaskID, bool ifInRange)
 		{
 			if ((SelectedAppointment != null) && (SelectedAppointment.Id == dwTaskID))
