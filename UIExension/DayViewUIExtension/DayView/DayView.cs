@@ -800,8 +800,8 @@ namespace Calendar
 
                     if ((click < SelectionStart) || (click > SelectionEnd))
                     {
-                        SelectionStart = click;
-                        SelectionEnd = click.AddMinutes(60);
+                        SelectionStart = new DateTime(click.Year, click.Month, click.Day, click.Hour, 0, 0);
+                        SelectionEnd = SelectionStart.AddMinutes(60);
 
                         redraw = true;
                     }
