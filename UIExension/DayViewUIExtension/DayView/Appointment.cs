@@ -223,7 +223,7 @@ namespace Calendar
 
         public virtual bool IsLongAppt()
         {
-            return (startDate.Day != endDate.Day);
+            return (startDate.Date != endDate.Date);
         }
 
         internal int conflictCount;

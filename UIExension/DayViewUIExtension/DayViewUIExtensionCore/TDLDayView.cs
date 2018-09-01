@@ -138,7 +138,7 @@ namespace DayViewUIExtension
 
 		public override bool IsLongAppt()
 		{
-			return (base.IsLongAppt() || (OrgStartDate.Day != OrgEndDate.Day) ||
+			return (base.IsLongAppt() || (OrgStartDate.Date != OrgEndDate.Date) ||
 					((OrgStartDate.TimeOfDay == TimeSpan.Zero) && IsEndOfDay(OrgEndDate)));
 		}
 
