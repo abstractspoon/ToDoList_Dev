@@ -737,27 +737,27 @@ Boolean Task::SetFlag(Boolean bFlag)
 
 Boolean Task::SetLastModified(DateTime^ dtLastMod)
 {
-	return SETTASKVAL(SetTaskLastModified, Map(dtLastMod));
+	return SETTASKVAL(SetTaskLastModified64, Map(dtLastMod));
 }
 
 Boolean Task::SetDoneDate(DateTime^ dtCompletion)
 {
-	return SETTASKVAL(SetTaskDoneDate, Map(dtCompletion));
+	return SETTASKVAL(SetTaskDoneDate64, Map(dtCompletion));
 }
 
 Boolean Task::SetDueDate(DateTime^ dtDue)
 {
-	return SETTASKVAL(SetTaskDueDate, Map(dtDue));
+	return SETTASKVAL(SetTaskDueDate64, Map(dtDue));
 }
 
 Boolean Task::SetStartDate(DateTime^ dtStart)
 {
-	return SETTASKVAL(SetTaskStartDate, Map(dtStart));
+	return SETTASKVAL(SetTaskStartDate64, Map(dtStart));
 }
 
 Boolean Task::SetCreationDate(DateTime^ dtCreation)
 {
-	return SETTASKVAL(SetTaskCreationDate, Map(dtCreation));
+	return SETTASKVAL(SetTaskCreationDate64, Map(dtCreation));
 }
 
 Boolean Task::SetTimeEstimate(double dTime, TimeUnits cUnits)
