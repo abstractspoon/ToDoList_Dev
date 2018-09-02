@@ -623,34 +623,40 @@ namespace DayViewUIExtension
         {
             base.OnMouseMove(e);
 
-            Calendar.Appointment appointment = GetAppointmentAt(e.Location.X, e.Location.Y);
-            Cursor = Cursors.Default;
+            // Extra-over cursor handling
+            var selTool = ActiveTool as Calendar.SelectionTool;
 
-            if (!ReadOnly && (appointment != null))
+            if (selTool == null)
+                selTool = new Calendar.SelectionTool();
+
+            if (!selTool.IsResizing())
             {
-                // Extra-over cursor handling
-                var selTool = new Calendar.SelectionTool();
+                Calendar.Appointment appointment = GetAppointmentAt(e.Location.X, e.Location.Y);
+                Cursor = Cursors.Default;
 
-                selTool.DayView = this;
-                selTool.UpdateCursor(e, appointment);
-
-                var taskItem = (appointment as CalendarItem);
-
-                if (taskItem != null)
+                if (!ReadOnly && (appointment != null))
                 {
-                    Cursor temp = null;
+                    selTool.DayView = this;
+                    selTool.UpdateCursor(e, appointment);
 
-                    if (taskItem.IsLocked)
-                    {
-                        temp = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
-                    }
-                    else if (taskItem.IconRect.Contains(e.Location))
-                    {
-                        temp = UIExtension.HandCursor();
-                    }
+                    var taskItem = (appointment as CalendarItem);
 
-                    if (temp != null)
-                        Cursor = temp;
+                    if (taskItem != null)
+                    {
+                        Cursor temp = null;
+
+                        if (taskItem.IsLocked)
+                        {
+                            temp = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+                        }
+                        else if (taskItem.IconRect.Contains(e.Location))
+                        {
+                            temp = UIExtension.HandCursor();
+                        }
+
+                        if (temp != null)
+                            Cursor = temp;
+                    }
                 }
             }
         }

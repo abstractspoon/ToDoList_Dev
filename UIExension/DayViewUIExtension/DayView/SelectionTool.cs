@@ -26,6 +26,11 @@ namespace Calendar
 
         private Mode m_mode = Mode.None;
 
+		public Boolean IsResizing()
+		{
+            return (m_mode != Mode.None);
+		}
+
 		public Boolean IsResizingLongAppt()
 		{
 			switch (m_mode)
