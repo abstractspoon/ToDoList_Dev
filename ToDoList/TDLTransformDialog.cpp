@@ -23,7 +23,7 @@ static char THIS_FILE[] = __FILE__;
 CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTSTR szStylesheet, 
 										const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(IDD_TRANSFORM_DIALOG, pParent), 
+	CTDLDialog(IDD_TRANSFORM_DIALOG, _T("Transform"), pParent), 
 	m_dlgTaskSel(_T("Transform"), nView),
 	m_sTitle(szTitle), 
 	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
@@ -33,7 +33,7 @@ CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTST
 	// see what we had last time
 	CPreferences prefs;
 
-	m_bDate = prefs.GetProfileInt(_T("Transform"), _T("WantDate"), TRUE);
+	m_bDate = prefs.GetProfileInt(m_sPrefsKey, _T("WantDate"), TRUE);
 
 	// share same title history as print dialog
 	m_cbTitle.Load(prefs, _T("Print"));
@@ -73,8 +73,8 @@ void CTDLTransformDialog::OnOK()
 
 	CPreferences prefs;
 
-	prefs.WriteProfileString(_T("Transform"), _T("Stylesheet"), m_sStylesheet);
-	prefs.WriteProfileInt(_T("Transform"), _T("WantDate"), m_bDate);
+	prefs.WriteProfileString(m_sPrefsKey, _T("Stylesheet"), m_sStylesheet);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("WantDate"), m_bDate);
 
 	// share same title history as print dialog
 	m_cbTitle.Save(prefs, _T("Print"));
@@ -136,7 +136,7 @@ void CTDLTransformDialog::InitStylesheet(LPCTSTR szStylesheet)
 	m_sStylesheet = szStylesheet;
 
 	if (m_sStylesheet.IsEmpty())
-		m_sStylesheet = CPreferences().GetProfileString(_T("Transform"), _T("Stylesheet"));
+		m_sStylesheet = CPreferences().GetProfileString(m_sPrefsKey, _T("Stylesheet"));
 
 	m_sStylesheet = FileMisc::GetRelativePath(m_sStylesheet, sFolder, FALSE);
 }

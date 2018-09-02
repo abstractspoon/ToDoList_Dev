@@ -244,8 +244,11 @@ BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, LPRECT pRect, UINT nT
 			rImage.right = (rImage.left + size.cx);
 			rImage.bottom = (rImage.top + size.cy);
 		}
+		else
+		{
+			th.DrawParentBackground(pWnd, pDC, (LPRECT)(pClip ? pClip : pRect));
+		}
 		
-		th.DrawParentBackground(pWnd, pDC, (LPRECT)(pClip ? pClip : pRect));
 		th.DrawBackground(pDC, nThPart, nThState, rImage, pClip);
 		
 		return TRUE;

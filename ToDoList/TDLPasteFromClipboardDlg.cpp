@@ -22,13 +22,13 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLPasteFromClipboardDlg::CTDLPasteFromClipboardDlg(const CImportExportMgr& mgr, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(IDD_PASTEIMPORT_DIALOG, pParent),
+	CTDLDialog(IDD_PASTEIMPORT_DIALOG, _T("PasteImporting"), pParent),
 	m_cbFormat(mgr, TRUE, TRUE)
 {
 	//{{AFX_DATA_INIT(CTDLPasteFromClipboardDlg)
 	//}}AFX_DATA_INIT
 
-	m_nFormatOption = CPreferences().GetProfileInt(_T("PasteImporting"), _T("ImportFormat"), 0);
+	m_nFormatOption = CPreferences().GetProfileInt(m_sPrefsKey, _T("ImportFormat"), 0);
 	m_nFormatOption = min(m_nFormatOption, mgr.GetNumImporters());
 }
 
@@ -67,7 +67,7 @@ void CTDLPasteFromClipboardDlg::OnOK()
 {
 	CTDLDialog::OnOK();
 	
-	CPreferences().WriteProfileInt(_T("PasteImporting"), _T("ImportFormat"), m_nFormatOption);
+	CPreferences().WriteProfileInt(m_sPrefsKey, _T("ImportFormat"), m_nFormatOption);
 }
 
 BOOL CTDLPasteFromClipboardDlg::OnInitDialog() 

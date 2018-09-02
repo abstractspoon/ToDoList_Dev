@@ -91,7 +91,7 @@ CEnString CTDLImportOutlookObjectsDlg::CONFIDENTIAL;
 
 CTDLImportOutlookObjectsDlg::CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refItem, LPCTSTR szAltTitle, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(IDD_OUTLOOKMSGIMPORT_DIALOG, pParent), 
+	CTDLDialog(IDD_OUTLOOKMSGIMPORT_DIALOG, _T("ImportOutlook"), pParent), 
 	m_refItem(refItem), 
 	m_bHideUnmapped(FALSE), 
 	m_bHideConfidential(TRUE),

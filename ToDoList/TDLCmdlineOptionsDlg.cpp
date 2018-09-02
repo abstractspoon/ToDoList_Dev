@@ -78,7 +78,7 @@ const int NUM_OPTIONS = sizeof(CMDLINE_OPTIONS) / sizeof(UINT);
 // CTDLCmdlineOptionsDlg dialog
 
 CTDLCmdlineOptionsDlg::CTDLCmdlineOptionsDlg(CWnd* pParent /*=NULL*/)
-	: CTDLDialog(CTDLCmdlineOptionsDlg::IDD, pParent)
+	: CTDLDialog(CTDLCmdlineOptionsDlg::IDD, _T("CmdlineOptions"), pParent)
 {
 	//{{AFX_DATA_INIT(CTDLCmdlineOptionsDlg)
 		// NOTE: the ClassWizard will add member initialization here

@@ -92,7 +92,7 @@ protected:
 	IUI_ATTRIBUTE m_nSortBy;
 	BOOL m_bSortAscending;
 	
-	mutable CMap<DWORD, DWORD, int, int> m_mapVertPos, m_mapTextOffset;
+	mutable CMap<DWORD, DWORD, int, int> m_mapVertPosContinuous, m_mapTextOffset;
 	mutable int m_nMaxDayTaskCount;
 	mutable TCC_SNAPMODE m_nSnapMode;
 
@@ -138,16 +138,23 @@ protected:
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
 
 
+	int RebuildCellTasks(CCalendarCell* pCell) const;
+	const CTaskCalItemArray* GetCellTasks(const CCalendarCell* pCell) const;
+	CTaskCalItemArray* GetCellTasks(CCalendarCell* pCell) const;
+
+	BOOL CalcTaskCellRect(int nTask, const CCalendarCell* pCell, const CRect& rCell, CRect& rTask) const;
+	int GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell) const;
+	BOOL GetTaskIndex(DWORD dwTaskID, const CCalendarCell* pCell) const;
+
 	void ResetPositions();
-	int GetCellTasks(const COleDateTime& dtCell, CTaskCalItemArray& aTasks, BOOL bOrdered = TRUE) const;
-	BOOL CalcTaskCellRect(DWORD dwTaskID, const CCalendarCell* pCell, const CRect& rCell, CRect& rTask) const;
-	int GetTaskVertPos(DWORD dwTaskID, BOOL bVScrolled/* = FALSE*/) const;
+	BOOL IsValidTask(int nTask, const CCalendarCell* pCell) const;
 	int GetTaskTextOffset(DWORD dwTaskID) const;
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
 	BOOL IsTaskCalItemLocked(DWORD dwTaskID) const;
 	BOOL IsTaskCalItemDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 	BOOL TaskCalItemHasDependencies(DWORD dwTaskID) const;
 	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
+	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const;
 	int GetGridRowFromPoint(const CPoint& point) const;
 	BOOL CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;

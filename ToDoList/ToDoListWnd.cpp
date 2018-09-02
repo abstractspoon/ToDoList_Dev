@@ -851,13 +851,6 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 			return -1;
 	}
 
-	// inherited parent task attributes for new tasks
-	CTDCAttributeMap mapParentAttrib;
-	BOOL bUpdateAttrib;
-
-	Prefs().GetParentAttribsUsed(mapParentAttrib, bUpdateAttrib);
-	CFilteredToDoCtrl::SetInheritedParentAttributes(mapParentAttrib, bUpdateAttrib);
-
 	// theme
 	SetUITheme(Prefs().GetUITheme());
 				
@@ -5027,13 +5020,6 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 		if (bRefreshFilter)
 			OnViewRefreshfilter();
 
-		// inherited parent task attributes for new tasks
-		CTDCAttributeMap mapParentAttrib;
-		BOOL bUpdateAttrib;
-
-		newPrefs.GetParentAttribsUsed(mapParentAttrib, bUpdateAttrib);
-		CFilteredToDoCtrl::SetInheritedParentAttributes(mapParentAttrib, bUpdateAttrib);
-				
 		// hotkey
 		UpdateGlobalHotkey();
 		

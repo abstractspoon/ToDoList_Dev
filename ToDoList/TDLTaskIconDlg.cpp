@@ -25,7 +25,7 @@ const LPCTSTR NO_ICON = _T("__NONE__");
 
 CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLTaskIconDlg::IDD, pParent), 
+	CTDLDialog(CTDLTaskIconDlg::IDD, _T("TaskIcons"), pParent), 
 	m_ilIcons(ilIcons), 
 	m_sIconName(sSelName), 
 	m_bMultiSel(FALSE),
@@ -36,7 +36,7 @@ CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sS
 
 CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLTaskIconDlg::IDD, pParent), 
+	CTDLDialog(CTDLTaskIconDlg::IDD, _T("TaskIcons"), pParent), 
 	m_ilIcons(ilIcons), 
 	m_bMultiSel(TRUE),
 	m_bWantNone(FALSE)
@@ -63,8 +63,6 @@ BEGIN_MESSAGE_MAP(CTDLTaskIconDlg, CTDLDialog)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ICONLIST, OnItemchangedIconlist)
 	ON_NOTIFY(LVN_ENDLABELEDIT, IDC_ICONLIST, OnEndlabeleditIconlist)
 	ON_WM_DESTROY()
-	ON_WM_SIZE()
-	ON_WM_GETMINMAXINFO()
 	ON_BN_CLICKED(IDC_EDITLABEL, OnEditlabel)
 	ON_NOTIFY(LVN_BEGINLABELEDIT, IDC_ICONLIST, OnBeginlabeleditIconlist)
 	ON_WM_ERASEBKGND()
@@ -85,24 +83,7 @@ BOOL CTDLTaskIconDlg::OnInitDialog()
 	EnableDisable();
 	m_lcIcons.SetFocus();
 
-	// restore size	
-	CPreferences prefs;
-	int nWidth = prefs.GetProfileInt(_T("TaskIcons"), _T("Width"), -1);
-	int nHeight = prefs.GetProfileInt(_T("TaskIcons"), _T("Height"), -1);
-
-	if ((nWidth > 0) && (nHeight > 0))
-	{
-		MoveWindow(0, 0, nWidth, nHeight);
-		CenterWindow();
-	}
-
 	CThemed::SetWindowTheme(&m_lcIcons, _T("Explorer"));
-
-	// Because we are combining WS_THICKFRAME and WS_SYSMENU
-	// to get a resizing dialog with a close button we also
-	// get a generic system menu icon which we don't really 
-	// want. This call gets rid of the icon.
-	ModifyStyleEx(0, WS_EX_DLGMODALFRAME);
 
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -153,7 +134,7 @@ int CTDLTaskIconDlg::GetIconNames(CStringArray& aSelNames) const
 CString CTDLTaskIconDlg::GetUserIconName(const CString& sImage) const
 {
 	CPreferences prefs;
-	return prefs.GetProfileString(_T("TaskIcons"), sImage);
+	return prefs.GetProfileString(m_sPrefsKey, sImage);
 }
 
 void CTDLTaskIconDlg::EnableDisable()
@@ -186,10 +167,10 @@ void CTDLTaskIconDlg::BuildListCtrl()
 
 			// backwards compatibility
 			sKey.Format(_T("Icon%d"), nImage + 1);
-			sImage = prefs.GetProfileString(_T("TaskIcons"), sKey);
+			sImage = prefs.GetProfileString(m_sPrefsKey, sKey);
 
 			if (sImage.IsEmpty())
-				sImage = prefs.GetProfileString(_T("TaskIcons"), sBaseName, sBaseName);
+				sImage = prefs.GetProfileString(m_sPrefsKey, sBaseName, sBaseName);
 
 			if (sImage != sBaseName)
 				m_mapRenamedItems[sBaseName] = sImage;
@@ -317,27 +298,20 @@ void CTDLTaskIconDlg::OnEndlabeleditIconlist(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLTaskIconDlg::OnDestroy() 
 {
-	CTDLDialog::OnDestroy();
-	
 	// save off any saved names to the preferences
+	// MUST come before OnDestroy because it deletes the prefs key
 	SaveRenamedImages();
 
+	CTDLDialog::OnDestroy();
+	
 	// snapshot the selected icons
 	GetIconNames(m_aIconNames);
-
-	// save current size
-	CRect rWindow;
-	GetWindowRect(rWindow);
-
-	CPreferences prefs;
-	prefs.WriteProfileInt(_T("TaskIcons"), _T("Width"), rWindow.Width());
-	prefs.WriteProfileInt(_T("TaskIcons"), _T("Height"), rWindow.Height());
 }
 
 void CTDLTaskIconDlg::SaveRenamedImages()
 {
 	CPreferences prefs;
-	prefs.DeleteProfileSection(_T("TaskIcons"));
+	prefs.DeleteProfileSection(m_sPrefsKey);
 	
 	if (!m_mapRenamedItems.GetCount())
 		return;
@@ -350,7 +324,7 @@ void CTDLTaskIconDlg::SaveRenamedImages()
 		// don't save the name if it's the same as its default name
 		if (m_mapRenamedItems.Lookup(sBaseName, sRename) && sRename != sBaseName)
 		{
-			prefs.WriteProfileString(_T("TaskIcons"), sBaseName, sRename);
+			prefs.WriteProfileString(m_sPrefsKey, sBaseName, sRename);
 		}
 	}
 
@@ -368,37 +342,17 @@ int CTDLTaskIconDlg::FindListItem(int nImage) const
 	return m_lcIcons.FindItem(&lvfi);
 }
 
-void CTDLTaskIconDlg::OnSize(UINT nType, int cx, int cy) 
+void CTDLTaskIconDlg::OnRepositionControls(int dx, int dy)
 {
-	static CSize sizePrev(0, 0);
-
-	CTDLDialog::OnSize(nType, cx, cy);
+	CTDLDialog::OnRepositionControls(dx, dy);
 	
-	// resize the list-ctrl
-	if (((sizePrev.cx > 0) || (sizePrev.cy > 0)) && m_lcIcons.GetSafeHwnd())
-	{
-		CDialogHelper::ResizeCtrl(this, IDC_ICONLIST, cx - sizePrev.cx, cy - sizePrev.cy);
-		CDialogHelper::ResizeCtrl(this, IDC_DIVIDER, cx - sizePrev.cx, 0);
+	CDialogHelper::ResizeCtrl(this, IDC_ICONLIST, dx, dy);
+	CDialogHelper::ResizeCtrl(this, IDC_DIVIDER, dx, 0);
 
-		CDialogHelper::OffsetCtrl(this, IDC_EDITLABEL, 0, cy - sizePrev.cy);
-		CDialogHelper::OffsetCtrl(this, IDC_DIVIDER, 0, cy - sizePrev.cy);
-		CDialogHelper::OffsetCtrl(this, IDOK, cx - sizePrev.cx, cy - sizePrev.cy);
-		CDialogHelper::OffsetCtrl(this, IDCANCEL, cx - sizePrev.cx, cy - sizePrev.cy);
-
-		Invalidate(FALSE);
-	}
-
-	// keep track of 'previous' size
-	sizePrev.cx = cx;
-	sizePrev.cy = cy;
-}
-
-void CTDLTaskIconDlg::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI) 
-{
-	CTDLDialog::OnGetMinMaxInfo(lpMMI);
-
-	lpMMI->ptMinTrackSize.x = 300;
-	lpMMI->ptMinTrackSize.y = 300;
+	CDialogHelper::OffsetCtrl(this, IDC_EDITLABEL, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_DIVIDER, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDOK, dx, dy);
+	CDialogHelper::OffsetCtrl(this, IDCANCEL, dx, dy);
 }
 
 void CTDLTaskIconDlg::OnEditlabel() 

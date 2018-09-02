@@ -25,7 +25,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLKeyboardShortcutDisplayDlg::CTDLKeyboardShortcutDisplayDlg(const CStringArray& aMapping, TCHAR cDelim, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLKeyboardShortcutDisplayDlg::IDD, pParent), 
+	CTDLDialog(CTDLKeyboardShortcutDisplayDlg::IDD, _T("ShortcutDisplay"), pParent), 
 	m_aMapping(aMapping), 
 	m_cDelim(cDelim)
 {

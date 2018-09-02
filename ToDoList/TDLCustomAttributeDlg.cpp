@@ -12,7 +12,6 @@
 #include "..\shared\enfiledialog.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\misc.h"
-#include "..\shared\preferences.h"
 #include "..\shared\localizer.h"
 #include "..\shared\themed.h"
 
@@ -88,7 +87,7 @@ const UINT NUM_SYMBOLS = sizeof(SYMBOLS) / sizeof(TCHAR);
 
 CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CToDoCtrl& tdc, const CUIThemeFile& theme, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLCustomAttributeDlg::IDD, pParent), 
+	CTDLDialog(CTDLCustomAttributeDlg::IDD, _T("CustomAttributes"), pParent), 
 	m_eTaskfile(FES_NOBROWSE), 
 	m_theme(theme),
 	m_eUniqueID(_T(". \r\n\t"), ME_EXCLUDE),

@@ -42,6 +42,7 @@ public:
 	COleDateTime GetSnoozeUntil() const;
 	int GetListReminderCount() const;
 
+protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLShowReminderDlg)
 	enum { IDD = IDD_SHOWREMINDER_DIALOG };
@@ -60,10 +61,10 @@ public:
 
 	CTDCReminderMap m_mapReminders;
 
+protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLShowReminderDlg)
-	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual int OnInitDialog();
@@ -74,10 +75,10 @@ public:
 	virtual void DoDismissReminder(const TDCREMINDER& /*rem*/, BOOL /*bGotoTask*/) {}
 	virtual void DoGotoTask(const TDCREMINDER& /*rem*/) {}
 	virtual void HideWindow();
+	virtual void OnRepositionControls(int dx, int dy);
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CTDLShowReminderDlg)
 	afx_msg void OnSnooze();
@@ -99,7 +100,7 @@ protected:
 	void EnableControls();
 	void UpdateControls();
 	void UpdateTitleText();
-
+	void UpdateColumnWidths();
 };
 
 //{{AFX_INSERT_LOCATION}}

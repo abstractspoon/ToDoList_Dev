@@ -57,7 +57,7 @@ static int FindFormat(TDCTTL_FORMAT nFormat)
 
 CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sLogPath, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLAnalyseLoggedTimeDlg::IDD, pParent), 
+	CTDLDialog(CTDLAnalyseLoggedTimeDlg::IDD, _T("AnalyseLog"), pParent), 
 	m_sOutputFilePath(sLogPath),
 	m_dtFrom(COleDateTime::GetCurrentTime()),
 	m_dtTo(COleDateTime::GetCurrentTime()),
@@ -69,13 +69,13 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sLogPath, CWnd
 	// restore previous state
 	CPreferences prefs;
 
-	m_nTimePeriod = (TDCTTL_PERIOD)prefs.GetProfileInt(_T("Preferences"), _T("AnalysisTimePeriod"), TTLP_THISMONTH);
-	m_nBreakdown = (TDCTTL_BREAKDOWN)prefs.GetProfileInt(_T("Preferences"), _T("AnalysisBreakdown"), TTLB_BYDAY);
-	m_nOutputFormat = (TDCTTL_FORMAT)prefs.GetProfileInt(_T("Preferences"), _T("preAnalysisOutputFormat"), TTLF_CSV);
-	m_dtFrom = prefs.GetProfileDouble(_T("Preferences"), _T("AnalysisFromDate"), COleDateTime::GetCurrentTime());
-	m_dtTo = prefs.GetProfileDouble(_T("Preferences"), _T("AnalysisToDate"), COleDateTime::GetCurrentTime());
+	m_nTimePeriod = (TDCTTL_PERIOD)prefs.GetProfileInt(m_sPrefsKey, _T("AnalysisTimePeriod"), TTLP_THISMONTH);
+	m_nBreakdown = (TDCTTL_BREAKDOWN)prefs.GetProfileInt(m_sPrefsKey, _T("AnalysisBreakdown"), TTLB_BYDAY);
+	m_nOutputFormat = (TDCTTL_FORMAT)prefs.GetProfileInt(m_sPrefsKey, _T("preAnalysisOutputFormat"), TTLF_CSV);
+	m_dtFrom = prefs.GetProfileDouble(m_sPrefsKey, _T("AnalysisFromDate"), COleDateTime::GetCurrentTime());
+	m_dtTo = prefs.GetProfileDouble(m_sPrefsKey, _T("AnalysisToDate"), COleDateTime::GetCurrentTime());
 
-	CString sFolder = prefs.GetProfileString(_T("Preferences"), _T("AnalysisFolder"));
+	CString sFolder = prefs.GetProfileString(m_sPrefsKey, _T("AnalysisFolder"));
 
 	if (!sFolder.IsEmpty() && FileMisc::FolderExists(sFolder))
 		FileMisc::MakePath(m_sOutputFilePath, NULL, sFolder, FileMisc::GetFileNameFromPath(m_sOutputFilePath));
@@ -155,12 +155,12 @@ void CTDLAnalyseLoggedTimeDlg::OnOK()
 	// save state
 	CPreferences prefs;
 
-	prefs.WriteProfileInt(_T("Preferences"), _T("AnalysisTimePeriod"), m_nTimePeriod);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AnalysisBreakdown"), m_nBreakdown);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AnalysisOutputFormat"), m_nOutputFormat);
-	prefs.WriteProfileDouble(_T("Preferences"), _T("AnalysisFromDate"), m_dtFrom);
-	prefs.WriteProfileDouble(_T("Preferences"), _T("AnalysisToDate"), m_dtTo);
-	prefs.WriteProfileString(_T("Preferences"), _T("AnalysisFolder"), FileMisc::GetFolderFromFilePath(m_sOutputFilePath));
+	prefs.WriteProfileInt(m_sPrefsKey, _T("AnalysisTimePeriod"), m_nTimePeriod);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("AnalysisBreakdown"), m_nBreakdown);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("AnalysisOutputFormat"), m_nOutputFormat);
+	prefs.WriteProfileDouble(m_sPrefsKey, _T("AnalysisFromDate"), m_dtFrom);
+	prefs.WriteProfileDouble(m_sPrefsKey, _T("AnalysisToDate"), m_dtTo);
+	prefs.WriteProfileString(m_sPrefsKey, _T("AnalysisFolder"), FileMisc::GetFolderFromFilePath(m_sOutputFilePath));
 }
 
 void CTDLAnalyseLoggedTimeDlg::OnChangePeriod() 

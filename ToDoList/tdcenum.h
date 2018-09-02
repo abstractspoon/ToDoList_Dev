@@ -916,13 +916,14 @@ enum // custom attribute list types
 
 enum // custom attribute features
 {
-	TDCCAF_SORT				= 0x0001,
-	TDCCAF_ACCUMULATE		= 0x0002, // Numbers only
-	TDCCAF_MINIMIZE			= 0x0004, // Numbers/Dates only
-	TDCCAF_MAXIMIZE			= 0x0008, // Numbers/Dates only
-	TDCCAF_HIDEZERO			= 0x0010, // Numbers only
-	TDCCAF_SHOWTIME			= 0x0020, // Dates only
-	TDCCAF_FILTER			= 0x0040, 
+	TDCCAF_SORT					= 0x0001,
+	TDCCAF_ACCUMULATE			= 0x0002, // Numbers only
+	TDCCAF_MINIMIZE				= 0x0004, // Numbers/Dates only
+	TDCCAF_MAXIMIZE				= 0x0008, // Numbers/Dates only
+	TDCCAF_HIDEZERO				= 0x0010, // Numbers only
+	TDCCAF_SHOWTIME				= 0x0020, // Dates only
+	TDCCAF_FILTER				= 0x0040, 
+	TDCCAF_INHERITPARENTCHANGES	= 0x0080, 
 };
 
 enum TDC_PREPAREPATH 

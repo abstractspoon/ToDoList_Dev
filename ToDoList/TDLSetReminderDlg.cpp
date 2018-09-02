@@ -31,7 +31,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLSetReminderDlg::CTDLSetReminderDlg(CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLSetReminderDlg::IDD, pParent), 
+	CTDLDialog(CTDLSetReminderDlg::IDD, _T("Reminders"), pParent), 
 	m_cbAbsoluteTime(TCB_HALFHOURS),
 	m_cbLeadIn(TDLRPC_SHOWZERO)
 {
@@ -93,10 +93,10 @@ int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, BOOL bNewReminder)
 
 	if (bNewReminder)
 	{
-		m_bRelative = prefs.GetProfileInt(_T("Reminders"), _T("Relative"), TRUE);
-		m_dRelativeLeadIn = prefs.GetProfileDouble(_T("Reminders"), _T("LeadIn"), 0.25); // 15 mins
-		m_bRelativeFromDueDate = prefs.GetProfileInt(_T("Reminders"), _T("RelativeFromDue"), TRUE);
-		m_sSoundFile = prefs.GetProfileString(_T("Reminders"), _T("SoundFile"), m_sSoundFile);
+		m_bRelative = prefs.GetProfileInt(m_sPrefsKey, _T("Relative"), TRUE);
+		m_dRelativeLeadIn = prefs.GetProfileDouble(m_sPrefsKey, _T("LeadIn"), 0.25); // 15 mins
+		m_bRelativeFromDueDate = prefs.GetProfileInt(m_sPrefsKey, _T("RelativeFromDue"), TRUE);
+		m_sSoundFile = prefs.GetProfileString(m_sPrefsKey, _T("SoundFile"), m_sSoundFile);
 
 		if (m_sSoundFile == NO_SOUND)
 		{
@@ -176,10 +176,10 @@ int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, BOOL bNewReminder)
 		// save for next time a new reminder is created
 		CPreferences prefs;
 		
-		prefs.WriteProfileInt(_T("Reminders"), _T("Relative"), m_bRelative);
-		prefs.WriteProfileInt(_T("Reminders"), _T("RelativeFromDue"), m_bRelativeFromDueDate);
-		prefs.WriteProfileDouble(_T("Reminders"), _T("LeadIn"), m_dRelativeLeadIn);
-		prefs.WriteProfileString(_T("Reminders"), _T("SoundFile"), m_sSoundFile.IsEmpty() ? NO_SOUND : m_sSoundFile);
+		prefs.WriteProfileInt(m_sPrefsKey, _T("Relative"), m_bRelative);
+		prefs.WriteProfileInt(m_sPrefsKey, _T("RelativeFromDue"), m_bRelativeFromDueDate);
+		prefs.WriteProfileDouble(m_sPrefsKey, _T("LeadIn"), m_dRelativeLeadIn);
+		prefs.WriteProfileString(m_sPrefsKey, _T("SoundFile"), m_sSoundFile.IsEmpty() ? NO_SOUND : m_sSoundFile);
 	}
 
 	return nRes;

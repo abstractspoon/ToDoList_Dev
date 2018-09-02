@@ -39,9 +39,8 @@ enum IMPORTTO
 // CTDLImportDialog dialog
 
 CTDLImportDialog::CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent /*=NULL*/)
-	: CTDLDialog(CTDLImportDialog::IDD, pParent),
+	: CTDLDialog(CTDLImportDialog::IDD, _T("Importing"), pParent),
 	  m_mgrImportExport(mgr),
-	  m_sizeMin(0, 0),
 	  m_cbFormat(mgr, TRUE),
 	  m_bFileOnly(FALSE),
 	  m_bReadonlyTasklist(bReadonlyTasklist)
@@ -50,17 +49,17 @@ CTDLImportDialog::CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTa
 	//}}AFX_DATA_INIT
 	CPreferences prefs;
 
-	m_bFromClipboard = prefs.GetProfileInt(_T("Importing"), _T("ImportOption"), FALSE);
-	m_sFromFilePath = prefs.GetProfileString(_T("Importing"), _T("ImportFilePath"));
+	m_bFromClipboard = prefs.GetProfileInt(m_sPrefsKey, _T("ImportOption"), FALSE);
+	m_sFromFilePath = prefs.GetProfileString(m_sPrefsKey, _T("ImportFilePath"));
 	m_bMatchByTaskID = FALSE; // always
 
-	m_nFormatOption = prefs.GetProfileInt(_T("Importing"), _T("ImportFormat"), 0);
+	m_nFormatOption = prefs.GetProfileInt(m_sPrefsKey, _T("ImportFormat"), 0);
 	m_nFormatOption = min(m_nFormatOption, mgr.GetNumImporters());
 
 	if (m_bReadonlyTasklist)
 		m_nImportTo = NEWTASKLIST;
 	else
-		m_nImportTo = prefs.GetProfileInt(_T("Importing"), _T("ImportToWhere"), SELECTEDTASK);
+		m_nImportTo = prefs.GetProfileInt(m_sPrefsKey, _T("ImportToWhere"), SELECTEDTASK);
 }
 
 
@@ -95,8 +94,6 @@ BEGIN_MESSAGE_MAP(CTDLImportDialog, CTDLDialog)
 	ON_EN_CHANGE(IDC_FROMCLIPBOARDTEXT, OnChangeClipboardtext)
 	ON_EN_CHANGE(IDC_FROMFILEPATH, OnChangeFilepath)
 	ON_BN_CLICKED(IDC_REFRESHCLIPBOARD, OnRefreshclipboard)
-	ON_WM_SIZE()
-	ON_WM_GETMINMAXINFO()
 	ON_BN_CLICKED(IDC_FROMFILE, OnChangeImportFrom)
 	ON_BN_CLICKED(IDC_MERGETOACTIVETASKLIST, OnChangeMergeTo)
 	ON_BN_CLICKED(IDC_ADDTOACTIVETASKLIST, OnChangeMergeTo)
@@ -199,12 +196,6 @@ BOOL CTDLImportDialog::OnInitDialog()
 
 	EnableOK();
 	
-	// Because we are combining WS_THICKFRAME and WS_SYSMENU
-	// to get a resizing dialog with a close button we also
-	// get a generic system menu icon which we don't really 
-	// want. This call gets rid of the icon.
-	ModifyStyleEx(0, WS_EX_DLGMODALFRAME);
-
 	return FALSE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -225,10 +216,10 @@ void CTDLImportDialog::OnOK()
 	
 	CPreferences prefs;
 	
-	prefs.WriteProfileInt(_T("Importing"), _T("ImportOption"), m_bFromClipboard);
-	prefs.WriteProfileString(_T("Importing"), _T("ImportFilePath"), m_sFromFilePath);
-	prefs.WriteProfileInt(_T("Importing"), _T("ImportToWhere"), m_nImportTo);
-	prefs.WriteProfileInt(_T("Importing"), _T("ImportFormat"), m_nFormatOption);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportOption"), m_bFromClipboard);
+	prefs.WriteProfileString(m_sPrefsKey, _T("ImportFilePath"), m_sFromFilePath);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportToWhere"), m_nImportTo);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportFormat"), m_nFormatOption);
 
 	// retrieve clipboard text
 	if (CurImporterHasFilter())
@@ -352,63 +343,29 @@ void CTDLImportDialog::OnRefreshclipboard()
 	}
 }
 
-void CTDLImportDialog::OnSize(UINT nType, int cx, int cy) 
+void CTDLImportDialog::OnRepositionControls(int dx, int dy)
 {
-	static CSize sizePrev(0, 0);
-
-	// initialize min size
-	if (m_sizeMin.cx == 0 || m_sizeMin.cy == 0)
-	{
-		CRect rWindow;
-		GetWindowRect(rWindow);
-
-		m_sizeMin = rWindow.Size();
-	}
-
-	CTDLDialog::OnSize(nType, cx, cy);
+	CTDLDialog::OnRepositionControls(dx, dx);
 	
-	// move the controls required
-	if (m_eFilePath.GetSafeHwnd() && (sizePrev.cx > 0 || sizePrev.cy > 0))
-	{
-		int nDx = (cx - sizePrev.cx);
-		int nDy = (cy - sizePrev.cy);
+	CDialogHelper::ResizeCtrl(this, IDC_FROMBORDER, dx, dy);
+	CDialogHelper::ResizeCtrl(this, IDC_FROMCLIPBOARDTEXT, dx, dy);
+	CDialogHelper::ResizeCtrl(this, IDC_FROMFILEPATH, dx, 0);
+	CDialogHelper::OffsetCtrl(this, IDC_REFRESHCLIPBOARD, dx, dy);
 
-		CDialogHelper::ResizeCtrl(this, IDC_FROMBORDER, nDx, nDy);
-		CDialogHelper::ResizeCtrl(this, IDC_FROMCLIPBOARDTEXT, nDx, nDy);
-		CDialogHelper::ResizeCtrl(this, IDC_FROMFILEPATH, nDx, 0);
-		CDialogHelper::OffsetCtrl(this, IDC_REFRESHCLIPBOARD, nDx, nDy);
+	CDialogHelper::OffsetCtrl(this, IDC_TOBORDER, dx, 0);
+	CDialogHelper::ResizeCtrl(this, IDC_TOBORDER, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_ADDTOACTIVETASKLIST, dx, 0);
+	CDialogHelper::OffsetCtrl(this, IDC_ADDTOSELECTEDTASK, dx, 0);
+	CDialogHelper::OffsetCtrl(this, IDC_CREATENEWTASKLIST, dx, 0);
 
-		CDialogHelper::OffsetCtrl(this, IDC_TOBORDER, nDx, 0);
-		CDialogHelper::ResizeCtrl(this, IDC_TOBORDER, 0, nDy);
-		CDialogHelper::OffsetCtrl(this, IDC_ADDTOACTIVETASKLIST, nDx, 0);
-		CDialogHelper::OffsetCtrl(this, IDC_ADDTOSELECTEDTASK, nDx, 0);
-		CDialogHelper::OffsetCtrl(this, IDC_CREATENEWTASKLIST, nDx, 0);
+	CDialogHelper::OffsetCtrl(this, IDC_TODIVIDER, dx, 0);
+	CDialogHelper::OffsetCtrl(this, IDC_MERGETOACTIVETASKLIST, dx, 0);
+	CDialogHelper::OffsetCtrl(this, IDC_MERGEBYTITLE, dx, 0);
+	CDialogHelper::OffsetCtrl(this, IDC_MERGEBYTASKID, dx, 0);
+	CDialogHelper::OffsetCtrl(this, IDC_MERGEBYTASKIDWARNING, dx, 0);
 
-		CDialogHelper::OffsetCtrl(this, IDC_TODIVIDER, nDx, 0);
-		CDialogHelper::OffsetCtrl(this, IDC_MERGETOACTIVETASKLIST, nDx, 0);
-		CDialogHelper::OffsetCtrl(this, IDC_MERGEBYTITLE, nDx, 0);
-		CDialogHelper::OffsetCtrl(this, IDC_MERGEBYTASKID, nDx, 0);
-		CDialogHelper::OffsetCtrl(this, IDC_MERGEBYTASKIDWARNING, nDx, 0);
-
-		CDialogHelper::OffsetCtrl(this, IDOK, nDx, nDy);
-		CDialogHelper::OffsetCtrl(this, IDCANCEL, nDx, nDy);
-
-		Invalidate(FALSE);
-		UpdateWindow();
-	}
-
-	// snapshot current size before the change
-	sizePrev.cx = cx;
-	sizePrev.cy = cy;
-}
-
-
-void CTDLImportDialog::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI) 
-{
-	CTDLDialog::OnGetMinMaxInfo(lpMMI);
-
-	lpMMI->ptMinTrackSize.x = m_sizeMin.cx;
-	lpMMI->ptMinTrackSize.y = m_sizeMin.cy;
+	CDialogHelper::OffsetCtrl(this, IDOK, dx, dy);
+	CDialogHelper::OffsetCtrl(this, IDCANCEL, dx, dy);
 }
 
 void CTDLImportDialog::OnChangeMergeTo() 

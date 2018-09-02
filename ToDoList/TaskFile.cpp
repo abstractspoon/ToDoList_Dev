@@ -2066,7 +2066,10 @@ BOOL CTaskFile::SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCu
 		return FALSE;
 
 	if (!HasCustomAttribute(sCustAttribID))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	CXmlItem* pXICustData = pXITask->AddItem(TDL_TASKCUSTOMATTRIBDATA);
 	ASSERT(pXICustData);

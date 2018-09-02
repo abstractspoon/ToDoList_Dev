@@ -342,7 +342,7 @@ public:
 	CString FormatTimeTrackingElapsedTime() const;
 	void ResetTimeTrackingElapsedMinutes();
 
-	static void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
+	void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
 	void SetDefaultTaskAttributes(const TODOITEM& tdi);
 
 	// sort functions

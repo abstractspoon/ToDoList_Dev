@@ -21,19 +21,19 @@ static char THIS_FILE[] = __FILE__;
 CTDLSendTasksDlg::CTDLSendTasksDlg(const CImportExportMgr& mgr, BOOL bSelectedTasks, FTC_VIEW nView, 
 									const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLSendTasksDlg::IDD, pParent), 
+	CTDLDialog(CTDLSendTasksDlg::IDD, _T("SendTasks"), pParent), 
 	m_cbFormat(mgr, FALSE, TRUE),
-	m_dlgTaskSel(_T("SendTasks"), nView)
+	m_dlgTaskSel(m_sPrefsKey, nView)
 {
 	//{{AFX_DATA_INIT(CTDLSendTasksDlg)
 	//}}AFX_DATA_INIT
 
 	CPreferences prefs;
-	m_nSendTasksAsOption = prefs.GetProfileInt(_T("SendTasks"), _T("SendTasksAs"), TDSA_TASKLIST);
+	m_nSendTasksAsOption = prefs.GetProfileInt(m_sPrefsKey, _T("SendTasksAs"), TDSA_TASKLIST);
 
 	int nDefaultFormat = mgr.FindExporter(_T("temp.tdl"));
 
-	m_nFormatOption = prefs.GetProfileInt(_T("SendTasks"), _T("FormatOption"), nDefaultFormat);
+	m_nFormatOption = prefs.GetProfileInt(m_sPrefsKey, _T("FormatOption"), nDefaultFormat);
 	m_nFormatOption = min(m_nFormatOption, mgr.GetNumExporters());
 
 	// bSelected overrides saved state
@@ -85,7 +85,7 @@ void CTDLSendTasksDlg::OnOK()
 	CTDLDialog::OnOK();
 
 	CPreferences prefs;
-	prefs.WriteProfileInt(_T("SendTasks"), _T("SendTasksAs"), m_nSendTasksAsOption);
-	prefs.WriteProfileInt(_T("SendTasks"), _T("FormatOption"), m_nFormatOption);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("SendTasksAs"), m_nSendTasksAsOption);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("FormatOption"), m_nFormatOption);
 }
 

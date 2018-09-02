@@ -17,24 +17,32 @@ class CTDLDialog : public CDialog, protected CDialogHelper
 {
 // Construction
 protected:
-	CTDLDialog(UINT nIDTemplate, CWnd* pParent = NULL);   // standard constructor
+	CTDLDialog(UINT nIDTemplate, LPCTSTR szPrefsKey = NULL, CWnd* pParent = NULL);   // standard constructor
 
 protected:
 	CWinHelpButton m_btnHelp;
+	CSize m_sizeOrg, m_sizePrev;
+	CString m_sPrefsKey;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 
+	virtual void OnRepositionControls(int /*dx*/, int /*dy*/) {}
+
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CTDLDialog)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnDestroy();
 	//}}AFX_MSG
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	BOOL IsResizable() const;
 };
 
 //{{AFX_INSERT_LOCATION}}

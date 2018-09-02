@@ -25,7 +25,7 @@ static const UINT IDC_ASCENDING[3] = { IDC_ASCENDING1, IDC_ASCENDING2, IDC_ASCEN
 
 CTDLMultiSortDlg::CTDLMultiSortDlg(const TDSORTCOLUMNS& sort, const CTDCColumnIDMap& mapVisibleColumns, 
 								   const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
-	: CTDLDialog(CTDLMultiSortDlg::IDD, pParent), 
+	: CTDLDialog(CTDLMultiSortDlg::IDD, _T("MultiSort"), pParent), 
 		m_sort(sort),
 		m_mapVisibleColumns(mapVisibleColumns),
 		m_aAttribDefs(aAttribDefs)

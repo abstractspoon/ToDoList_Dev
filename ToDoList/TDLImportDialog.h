@@ -43,8 +43,8 @@ protected:
 	CString	m_sClipboardText;
 	int		m_bMatchByTaskID;
 	//}}AFX_DATA
+
 	const CImportExportMgr& m_mgrImportExport;
-	CSize m_sizeMin;
 	BOOL m_bReadonlyTasklist;
 	CFont m_fontMonospace;
 	BOOL m_bFileOnly;
@@ -54,8 +54,10 @@ protected:
 	//{{AFX_VIRTUAL(CTDLImportDialog)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
 	virtual void OnOK();
+	//}}AFX_VIRTUAL
+
+	virtual void OnRepositionControls(int dx, int dy);
 
 // Implementation
 protected:
@@ -68,8 +70,6 @@ protected:
 	afx_msg void OnChangeClipboardtext();
 	afx_msg void OnChangeFilepath();
 	afx_msg void OnRefreshclipboard();
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI);
 	afx_msg void OnChangeMergeTo();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

@@ -5,6 +5,8 @@
 #include "resource.h"
 #include "TDLColumnAttribVisibilityListCtrl.h"
 
+#include "..\shared\GraphicsMisc.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -132,11 +134,11 @@ void CTDLColumnAttribVisibilityListCtrl::BuildListCtrl()
 	// build once only
 	if (GetColumnCount() == 0)
 	{
-		AddCol(CEnString(IDS_COLATTRIBNAME), 200);
+		AddCol(CEnString(IDS_COLATTRIBNAME), GraphicsMisc::ScaleByDPIFactor(150));
 
-		SetColumnType(AddCol(CEnString(IDS_COLUMNVISIBILITY), 100), ILCT_CHECK);
-		SetColumnType(AddCol(CEnString(IDS_ATTRIBVISIBILITY), 100), ILCT_CHECK);
-		SetColumnType(AddCol(CEnString(IDS_FILTERVISIBILITY), 100), ILCT_CHECK);
+		SetColumnType(AddCol(CEnString(IDS_COLUMNVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100)), ILCT_CHECK);
+		SetColumnType(AddCol(CEnString(IDS_ATTRIBVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100)), ILCT_CHECK);
+		SetColumnType(AddCol(CEnString(IDS_FILTERVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100)), ILCT_CHECK);
 
 		for (int nItem = 0; nItem < NUM_ITEMS; nItem++)
 		{

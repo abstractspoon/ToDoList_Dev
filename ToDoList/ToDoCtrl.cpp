@@ -195,7 +195,7 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_dTrackedTimeElapsedHours(0),
 	m_dTimeEstimate(0),
 	m_dTimeSpent(0),
-	m_data(m_aStyles),
+	m_data(m_aStyles, m_aCustomAttribDefs),
 	m_dwEditTitleTaskID(0),
 	m_dwLastAddedID(0),
 	m_dwNextUniqueID(1), 
@@ -3381,7 +3381,7 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 
 void CToDoCtrl::SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib)
 {
-	CToDoCtrlData::SetInheritedParentAttributes(mapAttribs, bUpdateAttrib);
+	m_data.SetInheritedParentAttributes(mapAttribs, bUpdateAttrib);
 }
 
 int CToDoCtrl::CheckWantSubtasksCompleted()

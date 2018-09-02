@@ -48,13 +48,14 @@ enum
 	TASKPARENT_COL,
 	TASKLIST_COL,
 	WHEN_COL,
+	NUM_COLS,
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
 CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLShowReminderDlg::IDD, pParent),
+	CTDLDialog(CTDLShowReminderDlg::IDD, _T("ShowReminders"), pParent),
 	m_dwNextReminderID(1),
 	m_dtSnoozeUntil(COleDateTime::GetCurrentTime()),
 	m_bChangingReminders(FALSE)
@@ -64,7 +65,7 @@ CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	//}}AFX_DATA_INIT
 
 	// init snooze value
-	m_nSnoozeMins = CPreferences().GetProfileInt(_T("Reminders"), _T("Snooze"), 5);
+	m_nSnoozeMins = CPreferences().GetProfileInt(m_sPrefsKey, _T("Snooze"), 5);
 }
 
 
@@ -149,6 +150,7 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 	CThemed::SetWindowTheme(&m_lcReminders, _T("Explorer"));
 
 	EnableControls();
+	UpdateColumnWidths();
 
 	return TRUE;
 }
@@ -303,7 +305,7 @@ void CTDLShowReminderDlg::OnSnooze()
 
 	// save snooze value for next time
 	if (!m_bSnoozeUntil)
-		CPreferences().WriteProfileInt(_T("Reminders"), _T("Snooze"), GetSnoozeMinutes());
+		CPreferences().WriteProfileInt(m_sPrefsKey, _T("Snooze"), GetSnoozeMinutes());
 
 	CTDCReminderArray aRem;
 
@@ -483,4 +485,47 @@ void CTDLShowReminderDlg::OnDblClkReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 void CTDLShowReminderDlg::HideWindow()
 {
 	ShowWindow(SW_HIDE);
+}
+
+void CTDLShowReminderDlg::OnRepositionControls(int dx, int dy)
+{
+	CTDLDialog::OnRepositionControls(dx, dy);
+
+	CDialogHelper::ResizeChild(&m_lcReminders, dx, dy);
+
+	CDialogHelper::ResizeCtrl(this, IDC_DIVIDER, dx, 0);
+	CDialogHelper::OffsetCtrl(this, IDC_DIVIDER, 0, dy);
+
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZE, dx, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_DISMISS, dx, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_DISMISSANDGOTOTASK, dx, dy);
+
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEOPTIONFOR, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEOPTIONUNTIL, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEFOR, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEUNTILDATE, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEUNTILTIME, 0, dy);
+
+	UpdateColumnWidths();
+}
+
+void CTDLShowReminderDlg::UpdateColumnWidths()
+{
+	CRect rAvail;
+	m_lcReminders.GetClientRect(rAvail);
+
+	int nCol = (NUM_COLS - 1), nTotalColWidth = 0;
+
+	while (nCol--)
+		nTotalColWidth += m_lcReminders.GetColumnWidth(nCol);
+
+	// The 'when' column is essentially of fixed width so we leave it alone
+	int nAvailWidth = (rAvail.Width() - m_lcReminders.GetColumnWidth(WHEN_COL));
+
+	double dFactor = (double)nAvailWidth / nTotalColWidth;
+
+	nCol = (NUM_COLS - 1);
+
+	while (nCol--)
+		m_lcReminders.SetColumnWidth(nCol, (int)(m_lcReminders.GetColumnWidth(nCol) * dFactor));
 }

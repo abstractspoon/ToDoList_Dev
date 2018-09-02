@@ -20,7 +20,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, double dHours, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLAddLoggedTimeDlg::IDD, pParent), 
+	CTDLDialog(CTDLAddLoggedTimeDlg::IDD, _T("AddLoggedTime"), pParent), 
 	m_cbTimeWhen(TCB_HALFHOURS),
 	m_dLoggedTime(0.0),
 	m_dwTaskID(dwTaskID),
@@ -31,7 +31,7 @@ CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, 
 	//{{AFX_DATA_INIT(CTDLAddLoggedTimeDlg)
 	//}}AFX_DATA_INIT
 	m_dtWhen = COleDateTime::GetCurrentTime();
-	m_nUnits = (TH_UNITS)CPreferences().GetProfileInt(_T("Preferences"), _T("AddLoggedTimeUnits"), THU_MINS);
+	m_nUnits = (TH_UNITS)CPreferences().GetProfileInt(m_sPrefsKey, _T("AddLoggedTimeUnits"), THU_MINS);
 
 	// convert log time from hours to current units
 	m_dLoggedTime = CTimeHelper().GetTime(dHours, THU_HOURS, m_nUnits);
@@ -94,7 +94,7 @@ int CTDLAddLoggedTimeDlg::DoModal(BOOL bShowAddTimeToTimeSpent)
 	if (bShowAddTimeToTimeSpent)
 	{
 		m_bShowAddTimeToTimeSpent = TRUE;
-		m_bAddTimeToTimeSpent = CPreferences().GetProfileInt(_T("Preferences"), _T("AddLoggedTimeToTimeSpent"), TRUE);
+		m_bAddTimeToTimeSpent = CPreferences().GetProfileInt(m_sPrefsKey, _T("AddLoggedTimeToTimeSpent"), TRUE);
 	}
 	else
 	{
@@ -119,11 +119,11 @@ void CTDLAddLoggedTimeDlg::OnOK()
 	CTDLDialog::OnOK();
 
 	CPreferences prefs;
-	prefs.WriteProfileInt(_T("Preferences"), _T("AddLoggedTimeUnits"), m_nUnits);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("AddLoggedTimeUnits"), m_nUnits);
 
 	if (m_bShowAddTimeToTimeSpent)
 	{
-		prefs.WriteProfileInt(_T("Preferences"), _T("AddLoggedTimeToTimeSpent"), m_bAddTimeToTimeSpent);
+		prefs.WriteProfileInt(m_sPrefsKey, _T("AddLoggedTimeToTimeSpent"), m_bAddTimeToTimeSpent);
 
 		// Treat as 'cancel' if 'Apply' button is still disabled
 		if (!GetDlgItem(IDAPPLY)->IsWindowEnabled())

@@ -28,7 +28,7 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 							const CDWordArray& aPriorityColors,
 							CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLFilterDlg::IDD, pParent), 
+	CTDLDialog(CTDLFilterDlg::IDD, _T("Filtering"), pParent), 
 	m_cbCategoryFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
 	m_cbAllocToFilter(bMultiSelFilters, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
 	m_cbAllocByFilter(bMultiSelFilters, IDS_TDC_NOBODY, IDS_TDC_ANYONE),

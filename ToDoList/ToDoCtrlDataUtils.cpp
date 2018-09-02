@@ -2135,9 +2135,9 @@ TDC_UNITS CTDCTaskCalculator::GetBestTimeEstUnits(const TODOITEM* pTDI, const TO
 	ASSERT (pTDS && pTDI);
 
 	if (!pTDS || !pTDI)
-		return m_data.s_nDefTimeEstUnits;
+		return m_data.m_nDefTimeEstUnits;
 
-	TDC_UNITS nUnits = m_data.s_nDefTimeEstUnits;
+	TDC_UNITS nUnits = m_data.m_nDefTimeEstUnits;
 
 	if (pTDI->dTimeEstimate > 0)
 	{
@@ -2160,9 +2160,9 @@ TDC_UNITS CTDCTaskCalculator::GetBestTimeSpentUnits(const TODOITEM* pTDI, const 
 	ASSERT (pTDS && pTDI);
 
 	if (!pTDS || !pTDI)
-		return m_data.s_nDefTimeSpentUnits;
+		return m_data.m_nDefTimeSpentUnits;
 
-	TDC_UNITS nUnits = m_data.s_nDefTimeSpentUnits;
+	TDC_UNITS nUnits = m_data.m_nDefTimeSpentUnits;
 
 	if (pTDI->dTimeSpent > 0)
 	{

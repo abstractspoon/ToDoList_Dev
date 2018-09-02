@@ -738,18 +738,21 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	BOOL SupportsFeature(DWORD dwFeature) const
 	{
-		// sorting works on all data types
-		if (dwFeature == TDCCAF_SORT)
+		switch (dwFeature)
+		{
+		// sorting and inheritance works on all data types
+		case TDCCAF_SORT:
+		case TDCCAF_INHERITPARENTCHANGES:
 			return TRUE;
 
-		if (dwFeature == TDCCAF_FILTER)
-		{
+		case TDCCAF_FILTER:
 			return IsList();
-		}
-		else if (IsMultiList())
-		{
-			// calculations not supported by multi-list types
-			return FALSE;
+
+		default: 
+			// calculations not supported on multi-list types
+			if (IsMultiList())
+				return FALSE;
+			break;
 		}
 
 		DWORD dwDataType = GetDataType();

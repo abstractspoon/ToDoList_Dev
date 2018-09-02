@@ -48,7 +48,7 @@ class CToDoCtrlData
 	friend class CTDCTaskFormatter;
 
 public:
-	CToDoCtrlData(const CWordArray& aStyles);
+	CToDoCtrlData(const CWordArray& aStyles, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs);
 	virtual ~CToDoCtrlData();
 
 	int BuildDataModel(const CTaskFile& tasks, const CTDCSourceControl& ssc);
@@ -220,23 +220,26 @@ public:
 	
 	inline BOOL HasStyle(TDC_STYLE nStyle) const { return m_aStyles[(int)nStyle] ? TRUE : FALSE; }
 	
-	static void SetDefaultCommentsFormat(const CString& format);
-	static void SetDefaultTimeUnits(TDC_UNITS nTimeEstUnits, TDC_UNITS nTimeSpentUnits);
-	static void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
-	static BOOL WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib);
+	void SetDefaultCommentsFormat(const CString& format);
+	void SetDefaultTimeUnits(TDC_UNITS nTimeEstUnits, TDC_UNITS nTimeSpentUnits);
+	void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
+	BOOL WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib) const;
+
 	static DH_UNITS MapUnitsToDHUnits();
 
 protected:
 	CToDoCtrlDataItems m_items; // the real data
-	const CWordArray& m_aStyles; // CToDoCtrl styles
 	CToDoCtrlUndo m_undo;
 	CToDoCtrlDataStructure m_struct;
 	BOOL m_bUndoRedoing;
 
-	static CString s_cfDefault;
-	static TDC_UNITS s_nDefTimeEstUnits, s_nDefTimeSpentUnits;
-	static CTDCAttributeMap s_mapParentAttribs; // inheritable attribs
-	static BOOL s_bUpdateInheritAttrib; // update as changes are made to parents
+	const CWordArray& m_aStyles;
+	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
+
+	CString m_cfDefault;
+	TDC_UNITS m_nDefTimeEstUnits, m_nDefTimeSpentUnits;
+	CTDCAttributeMap m_mapParentAttribs; // inheritable attribs
+	BOOL m_bUpdateInheritAttrib; // update as changes are made to parents
 
 protected:
 	BOOL DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos);
