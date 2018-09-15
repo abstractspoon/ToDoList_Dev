@@ -112,8 +112,6 @@ const DWORD IDD_TODOCTRL_DIALOG = (DWORD)(LPCTSTR)_T("IDD_TODOCTRL_DIALOG");
 
 /////////////////////////////////////////////////////////////////////////////
 
-//const LPCTSTR DEFAULT_UTF8_HEADER = _T("version=\"1.0\" encoding=\"UTF-8\"");
-const LPCTSTR DEFAULT_UNICODE_HEADER = _T("version=\"1.0\" encoding=\"UTF-16\"");
 const LPCTSTR ARCHIVE_ID = _T(".done");
 const LPCTSTR DICTIONARY_URL = _T("https://github.com/abstractspoon/ToDoList_Downloads/wiki/Dictionaries");
 
@@ -6758,14 +6756,9 @@ BOOL CToDoCtrl::ArchiveSelectedTasks(BOOL bRemove)
 	// delete the selected tasks
 	if (bRemove)
 	{
-		TDCSELECTIONCACHE cache;
-		CacheTreeSelection(cache);
-		
-		BOOL bDeleted = DeleteSelectedTask();
+		IMPLEMENT_DATA_UNDO(m_data, TDCUAT_ARCHIVE);
 
-		RestoreTreeSelection(cache);
-
-		return bDeleted;
+		return DeleteSelectedTask(FALSE, TRUE);
 	}
 
 	// else
@@ -8995,24 +8988,12 @@ void CToDoCtrl::SelectItem(HTREEITEM hti)
 
 	if (m_taskTree.GetSafeHwnd()) 
 	{
-		// This is a nasty hack until I can figure out a better method.
-		// The problem is that the auto droplists (category, status, alloc to/by)
-		// rely on focus changes to get them to update, and if any of the
-		// Goto..Task() methods are called there is no change of focus.
-		HWND hFocus = ::GetFocus();
-
-		if (IsChildOrSame(GetSafeHwnd(), hFocus))
-			::SendMessage(hFocus, WM_KILLFOCUS, 0, 0);
-
 		if (!m_taskTree.SelectItem(hti))
 			UpdateControls(); // disable controls
 		
 		UpdateSelectedTaskPath();
 		
-		m_treeDragDrop.EnableDragDrop(CanEditSelectedTask(TDCA_POSITION));
-
-		if (IsChildOrSame(GetSafeHwnd(), hFocus))
-			::SendMessage(hFocus, WM_SETFOCUS, 0, 0);
+		m_treeDragDrop.EnableDragDrop(!IsReadOnly());
 
 		// notify parent
 		GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
@@ -10739,23 +10720,23 @@ void CToDoCtrl::Flush(BOOL bEndTimeTracking) // called to end current editing ac
 		{
 			EndLabelEdit(FALSE);
 		}
-		else if (m_cbCategory.IsChild(pFocus))
+		else if (CDialogHelper::IsChildOrSame(&m_cbCategory, pFocus))
 		{
 			m_cbCategory.Flush();
 		}		
-		else if (m_cbTags.IsChild(pFocus))
+		else if (CDialogHelper::IsChildOrSame(&m_cbTags, pFocus))
 		{
 			m_cbTags.Flush();
 		}		
-		else if (m_cbStatus.IsChild(pFocus))
+		else if (CDialogHelper::IsChildOrSame(&m_cbStatus, pFocus))
 		{
 			m_cbStatus.Flush();
 		}		
-		else if (m_cbAllocBy.IsChild(pFocus))
+		else if (CDialogHelper::IsChildOrSame(&m_cbAllocBy, pFocus))
 		{
 			m_cbAllocBy.Flush();
 		}		
-		else if (m_cbAllocTo.IsChild(pFocus))
+		else if (CDialogHelper::IsChildOrSame(&m_cbAllocTo, pFocus))
 		{
 			m_cbAllocTo.Flush();
 		}

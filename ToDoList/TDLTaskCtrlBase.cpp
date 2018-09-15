@@ -745,24 +745,13 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange()
 void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
 {
 	// we only need to find one visible column
-	BOOL bShow = (m_aCustomAttribDefs.GetSize());
+	BOOL bShow = FALSE;
+	int nItem = m_hdrColumns.GetItemCount();
 	
-	if (!bShow)
-	{
-		int nItem = m_hdrColumns.GetItemCount();
-		
-		while (nItem--)
-		{		
-			TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nItem);
-			
-			// Ignore custom columns because they are always
-			// visible and so we handled it above
-			if (!CTDCCustomAttributeHelper::IsCustomColumn(nColID) && IsColumnShowing(nColID))
-			{
-				bShow = TRUE;
-				break;
-			}
-		}
+	while (nItem-- && !bShow)
+	{		
+		TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nItem);
+		bShow = IsColumnShowing(nColID);
 	}
 	
 	if (bShow)
@@ -2403,6 +2392,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		case TDCC_SUBTASKDONE:
 		case TDCC_TIMEEST:
 		case TDCC_LASTMODBY:
+		case TDCC_COMMENTSSIZE:
 			DrawColumnText(pDC, sTaskColText, rSubItem, pCol->nTextAlignment, crText);
 			break;
 			
@@ -3559,6 +3549,15 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		sTaskColText = m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
 		break;
 
+	case TDCC_COMMENTSSIZE:
+		{
+			DWORD dwByteSize = pTDI->GetCommentsSize();
+
+			if (dwByteSize > 1024)
+				sTaskColText = Misc::Format(dwByteSize / 1024);
+		}
+		break;
+
 	default:
 		// handled during drawing
 		ASSERT(CTDCCustomAttributeHelper::IsCustomColumn(nColID));
@@ -4205,8 +4204,8 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	BOOL bLocked = m_calculator.IsTaskLocked(dwTaskID);
 
 	// Special case
-	if (m_bSourceControlled && (nColID == TDCC_LOCK))
-		return TRUE;
+	//if (m_bSourceControlled && (nColID == TDCC_LOCK))
+	//	return TRUE;
 
 	// Edit operations
 	if (!bReadOnly)
@@ -4958,6 +4957,15 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 	case TDCC_STARTDATE:
 	case TDCC_DONEDATE:
 		nColWidth = CalcMaxDateColWidth(TDC::MapColumnToDate(nColID), pDC);
+		break;
+
+	case TDCC_COMMENTSSIZE:
+		{
+			DWORD dwByteSize = m_find.GetLargestCommentsSize();
+
+			if (dwByteSize > 1024)
+				nColWidth = (1 + (int)log10(dwByteSize / 1024.0));
+		}
 		break;
 
 	default:

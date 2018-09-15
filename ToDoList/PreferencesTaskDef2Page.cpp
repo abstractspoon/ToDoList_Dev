@@ -50,6 +50,7 @@ CPreferencesTaskDef2Page::CPreferencesTaskDef2Page()
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_LOCK, TDCA_LOCK, -1)); 
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_EXTERNALID, TDCA_EXTERNALID, -1)); 
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_TAGS, TDCA_TAGS, -1)); 
+	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_CUSTOMATTRIBS, TDCA_CUSTOMATTRIB, -1)); 
 }
 
 CPreferencesTaskDef2Page::~CPreferencesTaskDef2Page()
@@ -298,7 +299,7 @@ BOOL CPreferencesTaskDef2Page::HasCheckedAttributes() const
 	return FALSE;
 }
 
-int CPreferencesTaskDef2Page::GetParentAttribsUsed(CTDCAttributeMap& mapAttribs, BOOL& bUpdateAttrib) const
+int CPreferencesTaskDef2Page::GetInheritParentAttributes(CTDCAttributeMap& mapAttribs, BOOL& bUpdateAttrib) const
 {
 	mapAttribs.RemoveAll();
 

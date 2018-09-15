@@ -203,9 +203,14 @@ void CPopupEditCtrl::EndEdit(BOOL bCancel, BOOL bIntentional)
 	if (GetSafeHwnd() && IsWindowVisible())
 	{
 		if (bCancel)
+		{
+			Hide();
 			m_pParent->SendMessage(WM_PCANCELEDIT, m_nID, bIntentional);
+		}
 		else
+		{
 			m_pParent->SendMessage(WM_PENDEDIT, m_nID, bIntentional);
+		}
 
 		CleanUp();
 	}

@@ -455,9 +455,8 @@ void CRulerRichEditCtrl::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-void CRulerRichEditCtrl::OnSetFocus(CWnd* pOldWnd) 
+void CRulerRichEditCtrl::OnSetFocus(CWnd* /*pOldWnd*/) 
 {
-	CWnd::OnSetFocus(pOldWnd);
 	m_rtf.SetFocus();
 }
 

@@ -15,6 +15,8 @@
 
 #include <afxtempl.h>
 
+//////////////////////////////////////////////////////////////////////
+
 struct TDCUNDOELEMENT
 {
 	TDCUNDOELEMENT(TDCUNDOELMOP op = TDCUEO_EDIT, DWORD taskID = 0, DWORD parentID = 0, 
@@ -69,7 +71,11 @@ struct TDCUNDOELEMENT
 	TODOITEM tdi;
 };
 
+//////////////////////////////////////////////////////////////////////
+
 typedef CArray<TDCUNDOELEMENT, TDCUNDOELEMENT&> CArrayUndoElements;
+
+//////////////////////////////////////////////////////////////////////
 
 struct TDCUNDOACTION
 {
@@ -115,6 +121,8 @@ struct TDCUNDOACTION
 	TDCUNDOACTIONTYPE nType;
 	CArrayUndoElements aElements;
 };
+
+//////////////////////////////////////////////////////////////////////
 
 class CToDoCtrlUndo  
 {

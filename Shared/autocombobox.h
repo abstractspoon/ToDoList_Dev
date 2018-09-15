@@ -115,7 +115,6 @@ protected:
 	//{{AFX_MSG(CAutoComboBox)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	//}}AFX_MSG
 	afx_msg BOOL OnSelEndCancel();
 	afx_msg BOOL OnSelEndOK();

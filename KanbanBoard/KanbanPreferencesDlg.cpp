@@ -50,13 +50,13 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_nFixedAttrib = (IUI_ATTRIBUTE)GetSelectedItemData(m_cbAttributes);
-		m_sFixedCustomAttribID = GetSelectedItem(m_cbCustomAttributes);
+		m_nFixedAttrib = m_cbAttributes.GetSelectedAttribute();
+		m_sFixedCustomAttribID = m_cbCustomAttributes.GetSelectedAttributeID();
 	}
 	else
 	{
-		SelectItemByData(m_cbAttributes, m_nFixedAttrib);
-		m_cbCustomAttributes.SelectString(-1, m_sFixedCustomAttribID);
+		m_cbAttributes.SetSelectedAttribute(m_nFixedAttrib);
+		m_cbCustomAttributes.SetSelectedAttributeID(m_sFixedCustomAttribID);
 	}
 }
 
@@ -99,12 +99,11 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 	
 	m_mgrGroupLines.AddGroupLine(IDC_COLUMNGROUP, *this);
 	
-	m_cbAttributes.ShowCustomAttribute(m_aCustomAttribIDs.GetSize());
-	SelectItemByData(m_cbAttributes, m_nFixedAttrib);
+	m_cbAttributes.ShowCustomAttribute(m_aCustAttribDefs.GetSize());
+	m_cbAttributes.SetSelectedAttribute(m_nFixedAttrib);
 
-	CLocalizer::EnableTranslation(m_cbCustomAttributes, FALSE);
-	SetComboBoxItems(m_cbCustomAttributes, m_aCustomAttribIDs);
-	m_cbCustomAttributes.SelectString(-1, m_sFixedCustomAttribID);
+	m_cbCustomAttributes.SetAttributeDefinitions(m_aCustAttribDefs);
+	m_cbCustomAttributes.SetSelectedAttributeID(m_sFixedCustomAttribID);
 
 	EnableDisableControls();
 
@@ -423,9 +422,10 @@ void CKanbanPreferencesPage::OnItemchangedColumndefs(NMHDR* /*pNMHDR*/, LRESULT*
 	*pResult = 0;
 }
 
-void CKanbanPreferencesPage::SetCustomAttributeIDs(const CStringArray& aCustomAttribIDs)
+void CKanbanPreferencesPage::SetCustomAttributes(const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
-	m_aCustomAttribIDs.Copy(aCustomAttribIDs);
+	m_aCustAttribDefs.Copy(aCustAttribDefs);
+	m_cbCustomAttributes.SetAttributeDefinitions(aCustAttribDefs);
 }
 
 void CKanbanPreferencesPage::SetAttributeValues(const CKanbanAttributeValueMap& mapValues)
@@ -525,11 +525,11 @@ BEGIN_MESSAGE_MAP(CKanbanPreferencesDlg, CPreferencesDlgBase)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-int CKanbanPreferencesDlg::DoModal(const CStringArray& aCustomAttribIDs, 
+int CKanbanPreferencesDlg::DoModal(const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs, 
 								   const CKanbanAttributeValueMap& mapValues,
 								   const CKanbanAttributeArray& aDisplayAttrib)
 {
-	m_page.SetCustomAttributeIDs(aCustomAttribIDs);
+	m_page.SetCustomAttributes(aCustAttribDefs);
 	m_page.SetAttributeValues(mapValues);
 	m_page.SetDisplayAttributes(aDisplayAttrib);
 	

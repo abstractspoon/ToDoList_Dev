@@ -523,6 +523,13 @@ BOOL CRulerRichEdit::Paste()
 					AppendSourceUrls(sSourceUrl);
 					return TRUE;
 				}
+				else
+				{
+					ASSERT(CClipboard::HasText());
+
+					CUrlRichEditCtrl::PasteSimpleText(s_bPasteSourceUrls);
+					return TRUE;
+				}
 			}
 		}
 

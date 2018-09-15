@@ -190,8 +190,12 @@ void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTa
 
 	// copy across the appropriate attributes
 	pXIDestItem->AddItem(_T("TEXT"), Translate(pSrcTaskFile->GetTaskTitle(hTask)));
-	pXIDestItem->AddItem(_T("MODIFIED"), (int)(pSrcTaskFile->GetTaskLastModified(hTask) * 1000));
-	pXIDestItem->AddItem(_T("CREATED"), (int)(pSrcTaskFile->GetTaskCreationDate(hTask) * 1000));
+
+	time_t tLastMod = pSrcTaskFile->GetTaskLastModified(hTask);
+	pXIDestItem->AddItem(_T("MODIFIED"), (Misc::Format((DWORD)tLastMod) + _T("000")));
+
+	time_t tCreation = pSrcTaskFile->GetTaskCreationDate(hTask);
+	pXIDestItem->AddItem(_T("CREATED"), (Misc::Format((DWORD)tCreation) + _T("000")));
 
 	// FM specific attributes not handled natively by ToDoList
 	pXIDestItem->AddItem(_T("BACKGROUND_COLOR"), pSrcTaskFile->GetTaskMetaData(hTask, _T("FM_BKGNDCOLOR")));
@@ -329,16 +333,5 @@ void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTa
 	}
 }
 
-CString CFMindExporter::FormatDate(time_t tDate)
-{
-	if (tDate)
-	{
-		COleDateTime date(tDate);
-		return CDateHelper::FormatDate(date, DHFD_ISO | DHFD_TIME);
-	}
-
-	// else
-	return "";
-}
 
 

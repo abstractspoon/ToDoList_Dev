@@ -130,9 +130,16 @@ bool CFMindImporter::ImportTask(const CXmlItem* pFMTask, ITASKLISTBASE* pDestTas
 	pDestTaskFile->SetTaskComments(hTask, GetTaskComments(pFMTask));
 
 	// dates
-	pDestTaskFile->SetTaskDoneDate64(hTask, GetAttribValueT(pFMTask, FM_CUSTOMDONEDATE));
-	pDestTaskFile->SetTaskDueDate64(hTask, GetAttribValueT(pFMTask, FM_CUSTOMDUEDATE));
-	pDestTaskFile->SetTaskStartDate64(hTask, GetAttribValueT(pFMTask, FM_CUSTOMSTARTDATE));
+	time64_t tDate;
+
+	if (GetAttribValueT(pFMTask, FM_CUSTOMDONEDATE, tDate))
+		pDestTaskFile->SetTaskDoneDate64(hTask, tDate);
+
+	if (GetAttribValueT(pFMTask, FM_CUSTOMDUEDATE, tDate))
+		pDestTaskFile->SetTaskDueDate64(hTask, tDate);
+
+	if (GetAttribValueT(pFMTask, FM_CUSTOMSTARTDATE, tDate))
+		pDestTaskFile->SetTaskStartDate64(hTask, tDate);
 
 	// times
 	TDC_UNITS cUnits = (TDC_UNITS)GetAttribValueI(pFMTask, FM_CUSTOMTIMEESTUNITS);
@@ -312,13 +319,13 @@ CString CFMindImporter::ExtractContentFromItem(const CXmlItem* pFMItem, BOOL bAn
 // Java Time date to CTime
 time_t CFMindImporter::GetFMDate(const CXmlItem* pFMTask, LPCTSTR szDateField)
 {
+	// Date is Milliseconds from Jan 1, 1970.
 	CString sDate = pFMTask->GetItemValue(szDateField);
 
-	// Date will be in Milliseconds from Jan 1, 1970.
-	// Convert the Milliseconds to Sec
-	time_t tDate = (time_t)(_ttof(sDate) / 1000);
+	// So cull the last 3 digits to get seconds
+	sDate = sDate.Left(sDate.GetLength() - 3);
 
-	return tDate;
+	return (time_t)_ttol(sDate);
 }
 
 // Color Manipulation Code borrowed from - http://www.codeproject.com/gdi/ccolor.asp
@@ -339,15 +346,13 @@ COLORREF CFMindImporter::GetFMColor(const CXmlItem* pFMTask, LPCTSTR szColorFiel
 	return 0;
 }
 
-time64_t CFMindImporter::GetAttribValueT(const CXmlItem* pFMTask, LPCTSTR szAttribName)
+bool CFMindImporter::GetAttribValueT(const CXmlItem* pFMTask, LPCTSTR szAttribName, time64_t& tDate)
 {
-	time64_t tDate = 0;
-
 	if (CDateHelper::DecodeDate(GetAttribValueS(pFMTask, szAttribName), tDate, TRUE))
-		return tDate;
+		return true;
 
 	// else
-	return 0;
+	return false;
 }
 
 CString CFMindImporter::GetAttribValueS( const CXmlItem *pFMTask, LPCTSTR szAttribName)

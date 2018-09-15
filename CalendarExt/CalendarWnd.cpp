@@ -544,7 +544,6 @@ void CCalendarWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, 
 
 void CCalendarWnd::OnSetFocus(CWnd* /*pOldWnd*/)
 {
-	//set focus to big calendar (seems the focus gets lost after switching back to the Calendar window from another app)
 	m_BigCalendar.SetFocus();
 }
 

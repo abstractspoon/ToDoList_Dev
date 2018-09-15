@@ -212,7 +212,7 @@ protected:
 	BOOL BuildColumns();
 	void Release();
 	BOOL CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL bVisible);
-	void SyncColumnSelectionToTasks();
+	void SyncColumnSelectionToTasks(BOOL bUpdateWindow = FALSE);
 	int SaveTreeExpandedState(CPreferences& prefs, const CString& sKey, HTREEITEM hti, int nStart) const; 
 	BOOL SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_ACTION nBy); // internal version
 	int GetListItem(HTREEITEM hti) const;

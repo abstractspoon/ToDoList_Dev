@@ -65,7 +65,13 @@ BOOL CToDoCtrlUndo::EndCurrentAction()
 	int nCurUndo = LastUndoIndex();
 
 	if (curAction.aElements.GetSize() == 0)
+	{
 		m_aUndo.RemoveAt(nCurUndo);
+	}
+	else // clear redo stack
+	{
+		m_aRedo.RemoveAll();
+	}
 
 	return TRUE;
 }

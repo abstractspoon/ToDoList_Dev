@@ -163,7 +163,7 @@ public:
 	static double GetDate(DH_DATE nDate); // 12am
 	static BOOL OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits);
 
-	static CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0);
+	static CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0, TCHAR cDateTimeSep = ' ');
 	static CString FormatCurrentDate(DWORD dwFlags = 0);
 	
 	// DOW = 'day of week'

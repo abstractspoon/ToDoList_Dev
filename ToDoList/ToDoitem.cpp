@@ -591,6 +591,11 @@ COleDateTime TODOITEM::GetDefaultStartDueDate(const COleDateTime& dtCreation, co
 	return dtStartDue;
 }
 
+DWORD TODOITEM::GetCommentsSize() const
+{
+	return ((sComments.GetLength() * sizeof(TCHAR)) + customComments.GetLength());
+}
+
 CString TODOITEM::GetMetaData(const CString& sKey) const
 {
 	CString sData;

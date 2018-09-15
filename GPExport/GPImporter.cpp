@@ -130,11 +130,11 @@ bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITASKLISTBASE* pDestTas
 	pDestTaskFile->SetTaskPercentDone(hTask, (unsigned char)nPercentDone);
 
 	// dates
-	time_t tStart;
+	time64_t tStart;
 	
 	if (CDateHelper::DecodeDate(pXISrcTask->GetItemValue(_T("start")), tStart))
 	{
-		pDestTaskFile->SetTaskStartDate(hTask, tStart);
+		pDestTaskFile->SetTaskStartDate64(hTask, tStart);
 
 		// only add duration to leaf tasks else it'll double up
 		if (!pXISrcTask->HasItem(_T("task")))
@@ -146,24 +146,24 @@ bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITASKLISTBASE* pDestTas
 				if (!MILESTONETAG.IsEmpty())
 					pDestTaskFile->AddTaskTag(hTask, MILESTONETAG);
 
-				pDestTaskFile->SetTaskDueDate(hTask, tStart);
+				pDestTaskFile->SetTaskDueDate64(hTask, tStart);
 			}
 			else if (nDuration > 0)
 			{
-				COleDateTime dtEnd(tStart);
+				COleDateTime dtEnd = CDateHelper::GetDate(tStart);
 				CDateHelper::OffsetDate(dtEnd, (nDuration - 1), DHU_WEEKDAYS); // gp dates are inclusive
 
-				time_t tEnd = 0;
-				VERIFY(CDateHelper::GetTimeT(dtEnd, tEnd));
+				time64_t tEnd = 0;
+				VERIFY(CDateHelper::GetTimeT64(dtEnd, tEnd));
 
 				if (nPercentDone == 100)
 				{
-					pDestTaskFile->SetTaskDoneDate(hTask, tEnd);
+					pDestTaskFile->SetTaskDoneDate64(hTask, tEnd);
 					pDestTaskFile->SetTaskTimeSpent(hTask, nDuration, TDCU_WEEKDAYS);
 				}
 				else
 				{
-					pDestTaskFile->SetTaskDueDate(hTask, tEnd); // gp dates are inclusive
+					pDestTaskFile->SetTaskDueDate64(hTask, tEnd);
 					pDestTaskFile->SetTaskTimeEstimate(hTask, nDuration, TDCU_WEEKDAYS);
 				}
 			}

@@ -39,7 +39,7 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 const int LV_COLPADDING			= 3;
-const int CLIENTCOLWIDTH		= 1000;
+const int CLIENTCOLWIDTH		= GraphicsMisc::ScaleByDPIFactor(1000);
 const UINT TIMER_EDITLABEL		= 42; // List ctrl's internal timer ID for label edits
 
 const COLORREF COMMENTSCOLOR	= RGB(98, 98, 98);
@@ -505,8 +505,11 @@ LRESULT CTDLTaskListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 	return CTDLTaskCtrlBase::WindowProc(hRealWnd, msg, wp, lp);
 }
 
-void CTDLTaskListCtrl::NotifyParentSelChange(SELCHANGE_ACTION /*nAction*/)
+void CTDLTaskListCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
 {
+	if (nAction == SC_BYMOUSE)
+		UpdateAll();
+
 	NMLISTVIEW nmlv = { 0 };
 	
 	nmlv.hdr.code = LVN_ITEMCHANGED;
@@ -695,31 +698,30 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				}
 				else if (Misc::IsKeyPressed(VK_SHIFT)) // bulk-selection
 				{
-					int nAnchor = m_lcTasks.GetSelectionMark();
-					m_lcColumns.SetSelectionMark(nAnchor);
-
-					if (!Misc::IsKeyPressed(VK_CONTROL))
 					{
-						DeselectAll();
-					}
+						CTLSHoldResync hr(*this);
+						
+						int nAnchor = m_lcTasks.GetSelectionMark();
+						m_lcColumns.SetSelectionMark(nAnchor);
 
-					// prevent resyncing
-					CTLSHoldResync hr(*this);
+						if (!Misc::IsKeyPressed(VK_CONTROL))
+							DeselectAll();				
 
-					// Add new items to tree and list
-					int nHit = m_lcTasks.HitTest(lp);
+						// prevent resyncing
+						// Add new items to tree and list
+						int nHit = m_lcTasks.HitTest(lp);
 
-					int nFrom = (nAnchor < nHit) ? nAnchor : nHit;
-					int nTo = (nAnchor < nHit) ? nHit : nAnchor;
+						int nFrom = (nAnchor < nHit) ? nAnchor : nHit;
+						int nTo = (nAnchor < nHit) ? nHit : nAnchor;
 
-					for (int nItem = nFrom; nItem <= nTo; nItem++)
-					{
-						m_lcTasks.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
-						m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
+						for (int nItem = nFrom; nItem <= nTo; nItem++)
+						{
+							m_lcTasks.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
+							m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
+						}
 					}
 
 					NotifyParentSelChange(SC_BYMOUSE);
-
 					return 0; // eat it
 				}
 				else if (CTDLTaskCtrlBase::HandleListLBtnDown(m_lcTasks, lp))
@@ -742,16 +744,13 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			// handle bulk selection here
 			if (Misc::IsKeyPressed(VK_SHIFT)) // bulk-selection
 			{
+				CTLSHoldResync hr(*this);
+				
 				int nAnchor = m_lcColumns.GetSelectionMark();
 				m_lcTasks.SetSelectionMark(nAnchor);
 
 				if (!Misc::IsKeyPressed(VK_CONTROL))
-				{
 					DeselectAll();
-				}
-
-				// prevent resyncing
-				CTLSHoldResync hr(*this);
 
 				// Add new items to tree and list
 				TDC_COLUMN nColID = TDCC_NONE;
@@ -809,10 +808,10 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 
 			if ((nFrom != -1) && (nTo != -1))
 			{
+				CTLSHoldResync hr(*this);
+				
 				if (!Misc::IsKeyPressed(VK_CONTROL))
 					DeselectAll();
-
-				CTLSHoldResync hr(*this);
 
 				for (int nItem = nFrom; nItem <= nTo; nItem++)
 				{
@@ -1155,10 +1154,14 @@ BOOL CTDLTaskListCtrl::SelectItem(int nItem)
 	if ((GetSelectedCount() == 1) && (GetSelectedItem() == nItem))
 		return TRUE;
 
-	CDWordArray aTaskIDs;
-	aTaskIDs.Add(GetTaskID(nItem));
+	CTLSHoldResync hold(*this);
 
-	return SelectTasks(aTaskIDs);
+	DeselectAll();
+
+	m_lcTasks.SetItemState(nItem, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+	m_lcColumns.SetItemState(nItem, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+
+	return TRUE;
 }
 
 BOOL CTDLTaskListCtrl::EnsureSelectionVisible()
@@ -1173,7 +1176,7 @@ BOOL CTDLTaskListCtrl::EnsureSelectionVisible()
 		}
 		else
 		{
-			CHoldRedraw hr(*this);
+			//CHoldRedraw hr(*this);
 			
 			m_lcTasks.EnsureVisible(GetSelectedItem(), FALSE);
 		}
@@ -1308,8 +1311,8 @@ BOOL CTDLTaskListCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 
 void CTDLTaskListCtrl::SetSelectedTasks(const CDWordArray& aTaskIDs, DWORD dwFocusedTaskID)
 {
-	CHoldRedraw hr2(m_lcTasks, 0); 
-	CHoldRedraw hr3(m_lcColumns, 0);
+	// Prevent re-entrancy
+	CTLSHoldResync hr(*this);
 
 	DeselectAll();
 

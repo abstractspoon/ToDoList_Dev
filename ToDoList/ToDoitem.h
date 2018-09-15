@@ -91,6 +91,8 @@ public:
 	BOOL IsLocallyDependentOn(DWORD dwDependID) const;
 	int GetLocalDependencies(CDWordArray& aDependIDs) const;
 	DWORD GetFirstLocalDependency() const;
+
+	DWORD GetCommentsSize() const;
 	
 	static COleDateTimeSpan GetRemainingDueTime(const COleDateTime& date); // in days
 	static BOOL HasTime(const COleDateTime& date);

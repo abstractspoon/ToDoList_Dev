@@ -1282,7 +1282,7 @@ COleDateTime CDateHelper::GetEndOfQuarterCentury(const COleDateTime& date, BOOL 
 	return COleDateTime((nYear + 24), 12, 31, 0, 0, 0);
 }
 
-CString CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags)
+CString CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, TCHAR cDateTimeSep)
 {
 	CString sDate, sTime, sDow;
 	
@@ -1296,7 +1296,7 @@ CString CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags)
 
 		if (!sTime.IsEmpty())
 		{
-			sDate += ' ';
+			sDate += cDateTimeSep;
 			sDate += sTime;
 		}
 	}

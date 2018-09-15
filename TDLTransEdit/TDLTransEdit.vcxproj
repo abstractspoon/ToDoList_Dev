@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
+    <ProjectGuid>{E55B5B3C-2C94-7FFC-AE63-B2080E520531}</ProjectGuid>
     <SccProjectName />
     <SccLocalPath />
     <Keyword>MFCProj</Keyword>

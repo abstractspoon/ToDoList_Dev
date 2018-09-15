@@ -2912,18 +2912,93 @@ void CTabbedToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModT
 
 	if (bMod)
 	{
-		UpdateListView(nAttrib, dwModTaskID);
-		UpdateExtensionViews(nAttrib, dwModTaskID);
+		// For new tasks we want to do as little processing as possible 
+		// so as not to delay the appearance of the title edit field.
+		// So, we don't update 'other' views until we receive a successful 
+		// title edit notification unless they are the active view
+		BOOL bNewSingleTask = ((nAttrib == TDCA_NEWTASK) && dwModTaskID);
+		BOOL bNewTaskTitleEdit = ((nAttrib == TDCA_TASKNAME) && dwModTaskID &&
+									(dwModTaskID == m_dwLastAddedID));
 
-		// Special case: Make sure the task is selected in the 
-		// non-tree view so that the task is visible for label editing
-		if ((nAttrib == TDCA_NEWTASK) && (dwModTaskID != 0))
-			SelectTask(dwModTaskID);
+		switch (GetTaskView())
+		{
+		case FTCV_TASKTREE:
+		case FTCV_UNSET:
+			if (bNewTaskTitleEdit)
+			{
+				UpdateListView(TDCA_NEWTASK, dwModTaskID);
+				UpdateExtensionViews(TDCA_NEWTASK, dwModTaskID);
+			}
+			else if (!bNewSingleTask)
+			{
+				UpdateListView(nAttrib, dwModTaskID);
+				UpdateExtensionViews(nAttrib, dwModTaskID);
+			}
+			break;
+
+		case FTCV_TASKLIST:
+			UpdateListView(nAttrib, dwModTaskID);
+
+			if (bNewTaskTitleEdit)
+			{
+				UpdateExtensionViews(TDCA_NEWTASK, dwModTaskID);
+			}
+			else if (!bNewSingleTask)
+			{
+				UpdateExtensionViews(nAttrib, dwModTaskID);
+			}
+			else
+			{
+				// Ensure new task is selected for label editing
+				SelectTask(dwModTaskID);
+			}
+			break;
+
+		case FTCV_UIEXTENSION1:
+		case FTCV_UIEXTENSION2:
+		case FTCV_UIEXTENSION3:
+		case FTCV_UIEXTENSION4:
+		case FTCV_UIEXTENSION5:
+		case FTCV_UIEXTENSION6:
+		case FTCV_UIEXTENSION7:
+		case FTCV_UIEXTENSION8:
+		case FTCV_UIEXTENSION9:
+		case FTCV_UIEXTENSION10:
+		case FTCV_UIEXTENSION11:
+		case FTCV_UIEXTENSION12:
+		case FTCV_UIEXTENSION13:
+		case FTCV_UIEXTENSION14:
+		case FTCV_UIEXTENSION15:
+		case FTCV_UIEXTENSION16:
+			UpdateExtensionViews(nAttrib, dwModTaskID);
+
+			if (bNewTaskTitleEdit)
+			{
+				UpdateListView(TDCA_NEWTASK, dwModTaskID);
+			}
+			else if (!bNewSingleTask)
+			{
+				UpdateListView(nAttrib, dwModTaskID);
+			}
+			else
+			{
+				// Ensure new task is selected for label editing
+				SelectTask(dwModTaskID);
+			}
+			break;
+		}
 	}
 }
 
 void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 {
+	// Don't do anything if we are not active and we are waiting
+	// for a full task update
+	VIEWDATA* pVData = GetViewData(FTCV_TASKLIST);
+
+	if (!InListView() && pVData->bNeedFullTaskUpdate)
+		return;
+
 	m_taskList.SetModified(nAttrib); // always
 
 	switch (nAttrib)
@@ -2966,12 +3041,11 @@ void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 			CacheTreeSelection(cache);
 
 			RebuildList(NULL);
-
 			RestoreListSelection(cache);
 		}
 		else
 		{
-			GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate = TRUE;
+			pVData->bNeedFullTaskUpdate = TRUE;
 		}
 		break;
 

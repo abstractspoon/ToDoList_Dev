@@ -68,17 +68,17 @@ protected:
 	CKanbanPreferencesDlg m_dlgPrefs;
 	CKanbanAttributeComboBox m_cbAttributes;
 	CKanbanOptionComboBox m_cbOptions;
+	CKanbanCustomAttributeComboBox m_cbCustomAttributes;
 
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
-	CComboBox	m_cbCustomAttributes;
 	CToolTipCtrl m_tooltips;
 
 	BOOL m_bReadOnly;
 	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
-	CString	m_sCustomAttribID;
+	CString	m_sTrackedCustomAttribID;
 	IUI_ATTRIBUTE m_nTrackedAttrib;
 
 // Overrides

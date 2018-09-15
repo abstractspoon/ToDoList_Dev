@@ -197,6 +197,7 @@ protected:
 	static int Compare(const CString& sText1, const CString& sText2, BOOL bCheckEmpty = FALSE);
 	static int Compare(int nNum1, int nNum2);
 	static int Compare(double dNum1, double dNum2);
+	static int Compare(DWORD dwNum1, DWORD dwNum2);
 
 };
 

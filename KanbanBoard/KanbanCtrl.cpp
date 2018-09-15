@@ -704,7 +704,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 			CString sCustValue(pTasks->GetTaskCustomAttributeData(hTask, sCustID, true));
 
 			CStringArray aCustValues;
-			Misc::Split(sCustValue, aCustValues, '\n');
+			Misc::Split(sCustValue, aCustValues, '+');
 
 			pKI->SetTrackedAttributeValues(sCustID, aCustValues);
 
@@ -712,7 +712,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 			CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sCustID);
 			ASSERT(pValues);
 			
-			pValues->AddValue(sCustValue);
+			pValues->AddValues(aCustValues);
 		}
 
 		// Other display-only attributes
@@ -839,7 +839,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 
 					if (!sValue.IsEmpty())
 					{
-						if (Misc::Split(sValue, aValues, '\n') > 1)
+						if (Misc::Split(sValue, aValues, '+') > 1)
 							def.bMultiValue = TRUE;
 					}
 
@@ -979,9 +979,9 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, IUI_A
 	case IUI_PRIORITY:
 	case IUI_RISK:
 		{
-			// create once only
 			CString sAttribID(KANBANITEM::GetAttributeID(nAttribute));
 
+			// create once only
 			if (!m_mapAttributeValues.HasMapping(sAttribID))
 			{
 				CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sAttribID);
@@ -1009,11 +1009,24 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, IUI_A
 			CString sXMLTag(GetXMLTag(nAttribute)); 
 			CString sAttribID(KANBANITEM::GetAttributeID(nAttribute));
 
-			return UpdateGlobalAttributeValues(pTasks, sXMLTag, sAttribID);
+			CStringArray aNewValues;
+			int nValue = pTasks->GetAttributeCount(sXMLTag);
+
+			while (nValue--)
+			{
+				CString sValue(pTasks->GetAttributeItem(sXMLTag, nValue));
+
+				if (!sValue.IsEmpty())
+					aNewValues.Add(sValue);
+			}
+
+			return UpdateGlobalAttributeValues(sAttribID, aNewValues);
 		}
+		break;
 		
 	case IUI_CUSTOMATTRIB:
 		{
+			BOOL bChange = FALSE;
 			int nCustom = pTasks->GetCustomAttributeCount();
 
 			while (nCustom--)
@@ -1022,29 +1035,41 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, IUI_A
 				if (pTasks->IsCustomAttributeEnabled(nCustom))
 				{
 					CString sAttribID(pTasks->GetCustomAttributeID(nCustom));
-					int nDef = m_aCustomAttribDefs.AddDefinition(sAttribID);
+					CString sAttribName(pTasks->GetCustomAttributeLabel(nCustom));
 
-					// Add non-empty values to the map
+					int nDef = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName);
+
+					// Add 'default' values to the map
 					CKanbanValueMap* pDefValues = m_mapGlobalAttributeValues.GetAddMapping(sAttribID);
 					ASSERT(pDefValues);
 
 					pDefValues->RemoveAll();
 
-					CString sDefValues = pTasks->GetCustomAttributeListData(nCustom);
-					CStringArray aDefValues;
+					CString sListData = pTasks->GetCustomAttributeListData(nCustom);
 
-					if (Misc::Split(sDefValues, aDefValues, '\n'))
+					// 'Auto' list values follow 'default' list values
+					//  separated by a TAB
+					CString sDefData(sListData), sAutoData;
+					Misc::Split(sDefData, sAutoData, '\t');
+
+					CStringArray aDefValues;
+					
+					if (Misc::Split(sDefData, aDefValues, '\n'))
 					{
 						pDefValues->SetValues(aDefValues);
 
 						if (aDefValues.GetSize() > 1)
 							m_aCustomAttribDefs.SetMultiValue(nDef);
 					}
-								
-					// Add backlog item
-					pDefValues->AddValue(EMPTY_STR);
+
+					CStringArray aAutoValues;
+					Misc::Split(sAutoData, aAutoValues, '\n');
+
+					bChange |= UpdateGlobalAttributeValues(sAttribID, aAutoValues);
 				}
 			}
+
+			return bChange;
 		}
 		break;
 	}
@@ -1053,19 +1078,10 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, IUI_A
 	return FALSE;
 }
 
-BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, LPCTSTR szXMLTag, LPCTSTR szAttribID)
+BOOL CKanbanCtrl::UpdateGlobalAttributeValues(LPCTSTR szAttribID, const CStringArray& aValues)
 {
 	CKanbanValueMap mapNewValues;
-	
-	int nValue = pTasks->GetAttributeCount(szXMLTag);
-
-	while (nValue--)
-	{
-		CString sValue(pTasks->GetAttributeItem(szXMLTag, nValue));
-
-		if (!sValue.IsEmpty())
-			mapNewValues.AddValue(sValue);
-	}
+	mapNewValues.AddValues(aValues);
 
 	// Add in Backlog value
 	mapNewValues.AddValue(EMPTY_STR);
@@ -1122,11 +1138,6 @@ int CKanbanCtrl::GetAttributeValues(IUI_ATTRIBUTE nAttrib, CStringArray& aValues
 	}
 
 	return aValues.GetSize();
-}
-
-int CKanbanCtrl::GetCustomAttributeIDs(CStringArray& aCustAttribIDs) const
-{
-	return m_aCustomAttribDefs.GetAttributeIDs(aCustAttribIDs);
 }
 
 int CKanbanCtrl::GetAttributeValues(CKanbanAttributeValueMap& mapValues) const
@@ -1393,7 +1404,7 @@ BOOL CKanbanCtrl::IsTracking(const CString& sAttribID) const
 
 BOOL CKanbanCtrl::WantShowColumn(LPCTSTR szValue, const CKanbanItemArrayMap& mapKIArray) const
 {
-	if (HasOption(KBCF_SHOWEMPTYCOLUMNS) && (m_nTrackAttribute != IUI_CUSTOMATTRIB))
+	if (HasOption(KBCF_SHOWEMPTYCOLUMNS))
 		return TRUE;
 
 	if (HasOption(KBCF_ALWAYSSHOWBACKLOG) && Misc::IsEmpty(szValue))

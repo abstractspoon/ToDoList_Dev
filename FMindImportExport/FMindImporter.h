@@ -46,7 +46,7 @@ protected:
 	static int GetAttribValueI(const CXmlItem* pFMTask, LPCTSTR szAttribName);
 	static bool GetAttribValueB(const CXmlItem* pFMTask, LPCTSTR szAttribName);
 	static double GetAttribValueD(const CXmlItem* pFMTask, LPCTSTR szAttribName);
-	static time64_t GetAttribValueT(const CXmlItem* pFMTask, LPCTSTR szAttribName);
+	static bool GetAttribValueT(const CXmlItem* pFMTask, LPCTSTR szAttribName, time64_t& tDate);
 	static CString GetTaskRichContent(const CXmlItem* pFMTask, LPCTSTR szRichType, LPCTSTR szFallback = NULL);
 	static int GetTaskArrayItems(const CXmlItem* pFMTask, LPCTSTR szAttribName, CStringArray& aItems);
 	static CString GetTaskComments(const CXmlItem* pFMTask);

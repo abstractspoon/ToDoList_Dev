@@ -12,6 +12,8 @@
 #include "..\shared\localizer.h"
 #include "..\shared\enstring.h"
 
+#include "..\3rdParty\T64Utils.h"
+
 #include "..\interfaces\ipreferences.h"
 
 #ifdef _DEBUG
@@ -23,7 +25,6 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 const UINT ONEDAY = 24 * 60 * 60;
-const LPCTSTR UTF8_HEADER = _T("version=\"1.0\" encoding=\"UTF-8\"");
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -76,7 +77,7 @@ IIMPORTEXPORT_RESULT CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR 
 		return IIER_CANCELLED;
 
 	CXmlFile fileDest(_T("project"));
-	fileDest.SetXmlHeader(UTF8_HEADER);
+	fileDest.SetXmlHeader(DEFAULT_UTF8_HEADER);
 
 	// export resource allocations
 	ExportResources(pTasks, fileDest.Root());
@@ -120,7 +121,7 @@ IIMPORTEXPORT_RESULT CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPC
 		return IIER_CANCELLED;
 
 	CXmlFile fileDest(_T("project"));
-	fileDest.SetXmlHeader(UTF8_HEADER);
+	fileDest.SetXmlHeader(DEFAULT_UTF8_HEADER);
 
 	// placeholders for tasks
 	CXmlItem* pXITasks = fileDest.AddItem(_T("tasks"));
@@ -248,10 +249,10 @@ bool CGPExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
 	}
 
 	// Dates
-	time_t tStart = 0, tDue = 0, tDone = 0;
+	time64_t tStart = 0, tDue = 0, tDone = 0;
 	GetTaskDates(pSrcTaskFile, hTask, tStart, tDue, tDone);
 	
-	if (tStart)
+	if (tStart != T64Utils::T64_NULL)
 	{
 		// Milestone
 		BOOL bMilestone = FALSE;
@@ -271,8 +272,8 @@ bool CGPExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
 			}
 		}
 
-		COleDateTime start(tStart);
-		pXIDestItem->AddItem(_T("start"), CDateHelper::FormatDate(start, DHFD_ISO));
+		COleDateTime dtStart(CDateHelper::GetDate(tStart));
+		pXIDestItem->AddItem(_T("start"), CDateHelper::FormatDate(dtStart, DHFD_ISO));
 
 		// Duration
 		if (bMilestone)
@@ -283,12 +284,16 @@ bool CGPExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
 		{
 			if (tDone >= tStart) // completion date takes precedence
 			{
-				int nDays = CDateHelper::CalcDaysFromTo(start, tDone, TRUE, TRUE);
+				COleDateTime dtDone = CDateHelper::GetDate(tDone);
+				int nDays = CDateHelper::CalcDaysFromTo(dtStart, dtDone, TRUE, TRUE);
+
 				pXIDestItem->AddItem(_T("duration"), nDays);
 			}
 			else if (tDue >= tStart)
 			{
-				int nDays = CDateHelper::CalcDaysFromTo(start, tDue, TRUE, TRUE);
+				COleDateTime dtDue = CDateHelper::GetDate(tDue);
+				int nDays = CDateHelper::CalcDaysFromTo(dtStart, dtDue, TRUE, TRUE);
+
 				pXIDestItem->AddItem(_T("duration"), nDays);
 			}
 		}
@@ -530,42 +535,48 @@ int CGPExporter::GetGPTaskID(DWORD dwTDLTaskID)
 	return ((int)dwTDLTaskID - 1);
 }
 
-void CGPExporter::GetTaskDates(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, time_t& tEarliestStart, time_t& tLatestDue, time_t& tLatestDone)
+void CGPExporter::GetTaskDates(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, time64_t& tEarliestStart, time64_t& tLatestDue, time64_t& tLatestDone)
 {
 	tEarliestStart = INT_MAX;
 	tLatestDue = tLatestDone = 0;
 
-	time_t tTaskStart = pSrcTaskFile->GetTaskStartDate(hTask, false);
-	time_t tTaskDue = pSrcTaskFile->GetTaskDueDate(hTask, false);
-	time_t tTaskDone = pSrcTaskFile->GetTaskDoneDate(hTask);
+	time64_t tTaskStart = T64Utils::T64_NULL, tTaskDue = T64Utils::T64_NULL, tTaskDone = T64Utils::T64_NULL;
+	
+	BOOL bHasStart = pSrcTaskFile->GetTaskStartDate64(hTask, false, tTaskStart);
+	BOOL bHasDue = pSrcTaskFile->GetTaskDueDate64(hTask, false, tTaskDue);
+	BOOL bHasDone = pSrcTaskFile->GetTaskDoneDate64(hTask, tTaskDone);
 
 	// if we are _not_ a parent make up what we don't have
 	HTASKITEM hTaskChild = pSrcTaskFile->GetFirstTask(hTask);
 
 	if (hTaskChild == NULL)
 	{
-		if (!tTaskStart)
+		if (!bHasStart)
 		{
-			if (tTaskDue)
+			if (bHasDue)
+			{
 				tTaskStart = tTaskDue;
-			else if (tTaskDone)
+			}
+			else if (bHasDone)
+			{
 				tTaskStart = tTaskDone;
-
+			}
 			// else there are no dates so leave as-is
 		}
-
-		// if no due date then make something up
-		if (tTaskStart && !tTaskDue && !tTaskDone)
+		else if (bHasStart && !bHasDue && !bHasDone)
+		{
+			// if no due date then make something up
 			tTaskDue = tTaskStart;
+		}
 	}
 
-	if (tTaskStart)
+	if (tTaskStart != T64Utils::T64_NULL)
 		tEarliestStart = tTaskStart;
 
-	if (tTaskDue)
+	if (tTaskDue != T64Utils::T64_NULL)
 		tLatestDue = tTaskDue;
 
-	if (tTaskDone)
+	if (tTaskDone != T64Utils::T64_NULL)
 		tLatestDone = tTaskDone;
 
 	// check children
@@ -573,13 +584,13 @@ void CGPExporter::GetTaskDates(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTas
 	{
 		GetTaskDates(pSrcTaskFile, hTaskChild, tTaskStart, tTaskDue, tTaskDone); // RECURSIVE call
 
-		if (tTaskStart)
+		if (tTaskStart != T64Utils::T64_NULL)
 			tEarliestStart = min(tTaskStart, tEarliestStart);
 
-		if (tTaskDue)
+		if (tTaskDue != T64Utils::T64_NULL)
 			tLatestDue = max(tTaskDue, tLatestDue);
 
-		if (tTaskDone)
+		if (tTaskDone != T64Utils::T64_NULL)
 			tLatestDone = max(tTaskDone, tLatestDone);
 
 		// next

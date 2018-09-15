@@ -9,6 +9,7 @@
 
 #include "KanbanStruct.h"
 #include "KanbanAttributeComboBox.h"
+#include "KanbanCustomAttributeComboBox.h"
 #include "KanbanFixedColumnListCtrl.h"
 
 #include "..\shared\groupline.h"
@@ -44,7 +45,7 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
-	void SetCustomAttributeIDs(const CStringArray& aCustomAttribIDs);
+	void SetCustomAttributes(const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 	void SetAttributeValues(const CKanbanAttributeValueMap& mapValues);
 
 protected:
@@ -57,7 +58,7 @@ protected:
 	CGroupLineManager m_mgrGroupLines;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
-	CComboBox m_cbCustomAttributes;
+	CKanbanCustomAttributeComboBox m_cbCustomAttributes;
 	CCheckListBoxEx	m_lbDisplayAttrib;
 
 	BOOL	m_bSortSubtaskBelowParent;
@@ -68,7 +69,7 @@ protected:
 	IUI_ATTRIBUTE m_nFixedAttrib;
 
 	CKanbanColumnArray m_aFixedColumnDefs;
-	CStringArray m_aCustomAttribIDs;
+	CKanbanCustomAttributeDefinitionArray m_aCustAttribDefs;
 	CKanbanAttributeValueMap m_mapAttribValues;
 	CKanbanAttributeArray m_aDisplayAttrib;
 
@@ -133,7 +134,7 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
 
-	int DoModal(const CStringArray& aCustomAttribIDs, const CKanbanAttributeValueMap& mapValues, const CKanbanAttributeArray& aDisplayAttrib);
+	int DoModal(const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs, const CKanbanAttributeValueMap& mapValues, const CKanbanAttributeArray& aDisplayAttrib);
 
 protected:
 	CKanbanPreferencesPage m_page;

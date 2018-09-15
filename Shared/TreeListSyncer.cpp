@@ -45,14 +45,19 @@ const int LINUX_VOFFSET_FUDGE	= 2;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-CTLSHoldResync::CTLSHoldResync(CTreeListSyncer& tls) : m_tls(tls)
+CTLSHoldResync::CTLSHoldResync(CTreeListSyncer& tls) : m_tls(tls), m_bResyncHeld(FALSE)
 {
-	m_tls.EnableResync(FALSE, m_tls.PrimaryWnd());
+	if (m_tls.IsResyncEnabled())
+	{
+		m_tls.EnableResync(FALSE, m_tls.PrimaryWnd());
+		m_bResyncHeld = TRUE;
+	}
 }
 
 CTLSHoldResync::~CTLSHoldResync()
 {
-	m_tls.EnableResync(TRUE, m_tls.PrimaryWnd());
+	if (m_bResyncHeld)
+		m_tls.EnableResync(TRUE, m_tls.PrimaryWnd());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -491,8 +496,7 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 		//TraceResync(hwnd, hwndTo);
 #endif
 
-		::UpdateWindow(hwnd);
-		::UpdateWindow(hwndTo);
+		UpdateAll();
 	}
 
 	return bSynced;
@@ -598,8 +602,7 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 		//TraceResync(hwnd, hwndTo);
 #endif
 
-		::UpdateWindow(hwnd);
-		::UpdateWindow(hwndTo);
+		UpdateAll();
 	}
 
 	return bSynced;
@@ -1488,6 +1491,8 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			case LVN_ITEMCHANGED:
 				if (!m_bResyncing)
 				{
+					CAutoFlag af(m_bResyncing, TRUE);
+					
 					NMLISTVIEW* pNMLV = (NMLISTVIEW*)pNMHDR;
 					
 					// only interested in selection changes
@@ -1499,8 +1504,6 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 						if (nNewSelState != nOldSelState)
 						{
 							// temporarily turn off resyncing to prevent re-entrancy
-							CAutoFlag af(m_bResyncing, TRUE);
-
 							if (HasFlag(TLSF_SYNCSELECTION))
 							{
 								// copy the selected/focused state to the other list/tree

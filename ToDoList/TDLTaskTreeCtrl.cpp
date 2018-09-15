@@ -179,7 +179,7 @@ void CTDLTaskTreeCtrl::DeselectAll()
 	TSH().RemoveAll();
 	TCH().SelectItem(NULL);
 
-	m_lcColumns.SetItemState(-1, 0, LVIS_SELECTED);
+	m_lcColumns.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
 }
 
 BOOL CTDLTaskTreeCtrl::SelectAll() 
@@ -306,7 +306,16 @@ void CTDLTaskTreeCtrl::SetExpandedTasks(const CDWordArray& aExpanded)
 
 void CTDLTaskTreeCtrl::RefreshTreeItemMap()
 {
+#ifdef _DEBUG
+	int nPrevCount = m_mapHTItems.GetCount();
+#endif
+
 	TCH().BuildHTIMap(m_mapHTItems);
+
+#ifdef _DEBUG
+	int nNewCount = m_mapHTItems.GetCount();
+	TRACE(_T("CTDLTaskTreeCtrl::RefreshTreeItemMap(%d -> %d)\n"), nPrevCount, nNewCount);
+#endif
 }
 
 HTREEITEM CTDLTaskTreeCtrl::GetItem(DWORD dwTaskID) const
@@ -321,7 +330,10 @@ void CTDLTaskTreeCtrl::OnEndRebuild()
 {
 	CTDLTaskCtrlBase::OnEndRebuild();
 
-	RefreshTreeItemMap();
+	// No need to refresh tree item map because 
+	// InsertTreeItem handles it
+	// RefreshTreeItemMap();
+	
 	ExpandList();
 	RecalcColumnWidths();
 }
@@ -398,6 +410,7 @@ void CTDLTaskTreeCtrl::DeleteAll()
 		m_lcColumns.DeleteAllItems();
 		
 	m_tcTasks.DeleteAllItems();
+	m_mapHTItems.RemoveAll();
 
 	ASSERT(m_lcColumns.GetItemCount() == 0);
 }
@@ -708,14 +721,38 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 	NotifyParentSelChange();
 }
 
-void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
+void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks(BOOL bUpdateWindow)
 {
-	// temporarily turn off resyncing to prevent re-entrancy
-	CTLSHoldResync hr(*this);
-	
-	CHTIList lstHTI;
-	TSH().CopySelection(lstHTI);
+	// Scope hold resync else trailing UpdateWindow will not work
+	{
+		// Prevent re-entrancy
+		CTLSHoldResync hr(*this);
+		
+		m_lcColumns.SetItemState(-1, 0, (LVIS_SELECTED | LVIS_FOCUSED));
+		
+		HTREEITEM htiSel = TSH().GetAnchor();
+		POSITION pos = TSH().GetFirstItemPos();
+		
+		while (pos)
+		{
+			HTREEITEM hti = TSH().GetNextItem(pos);
+			int nItem = GetListItem(hti);
+			
+			if (hti == htiSel)
+			{
+				m_lcColumns.SetItemState(nItem, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
+				m_lcColumns.SetSelectionMark(nItem);
+			}
+			else
+			{
+				m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);
+			}
+		}
+	}
 
+	if (bUpdateWindow)
+	 	m_lcColumns.UpdateWindow();
+/*
 	// build a list of the current list selection
 	CArray<int, int> aItemSel;
 	POSITION pos = m_lcColumns.GetFirstSelectedItemPosition();
@@ -762,6 +799,7 @@ void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
 	}
 
 	m_lcColumns.Invalidate(FALSE);
+*/
 }
 
 void CTDLTaskTreeCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
@@ -928,7 +966,7 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 			if (nEditCol != TDCC_NONE)
 			{
 				// make sure attribute pane is synced
-				SyncColumnSelectionToTasks();
+				SyncColumnSelectionToTasks(TRUE);
 
 				// forward the click
 				NotifyParentOfColumnEditClick(nEditCol, dwTaskID);
@@ -1242,16 +1280,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		switch (msg)
 		{
 #ifdef _DEBUG
-/*
 		case WM_PAINT:
-			{
-				DWORD dwTick = GetTickCount();
-				LRESULT lr = CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
-				TRACE(_T("WM_PAINT(TaskTree - Client Column) took %d ms)\n"), (GetTickCount() - dwTick));
-				return lr;
-			}
 			break;
-*/
 #endif
 
 		case WM_NOTIFY:
@@ -1454,7 +1484,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 
 				// allow parent to handle any focus changes
 				// before we change our selection
-				m_tcTasks.SetFocus();
+				if (!bHadFocus)
+					m_tcTasks.SetFocus();
 
 				// don't change selection if user is expanding an item
 				UINT nHitFlags = 0;
@@ -1614,7 +1645,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		// Handle selection change before column click/dblclk
 		if (bSelChange)
 		{
-			SyncColumnSelectionToTasks();
+			SyncColumnSelectionToTasks(nAction == SC_BYMOUSE);
 			
 			if (!TSH().Matches(lstPrevSel))
 			{
@@ -1661,15 +1692,12 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			// handle bulk selection here
 			if (Misc::IsKeyPressed(VK_SHIFT)) // bulk-selection
 			{
+				CTLSHoldResync hr(*this);
+				
 				int nAnchor = m_lcColumns.GetSelectionMark();
 
 				if (!Misc::IsKeyPressed(VK_CONTROL))
-				{
 					DeselectAll();
-				}
-
-				// prevent resyncing
-				CTLSHoldResync hr(*this);
 
 				// Add new items to tree and list
 				TDC_COLUMN nColID = TDCC_NONE;
@@ -2320,14 +2348,18 @@ DWORD CTDLTaskTreeCtrl::GetTaskParentID(HTREEITEM hti) const
 
 HTREEITEM  CTDLTaskTreeCtrl::InsertItem(DWORD dwTaskID, HTREEITEM htiParent, HTREEITEM htiAfter)
 {
-	return TCH().InsertItem(LPSTR_TEXTCALLBACK, 
-							I_IMAGECALLBACK, 
-							I_IMAGECALLBACK, 
-							dwTaskID, // lParam
-							htiParent, 
-							(htiAfter ? htiAfter : TVI_FIRST),
-							FALSE,
-							FALSE);
+	HTREEITEM htiNew = TCH().InsertItem(LPSTR_TEXTCALLBACK, 
+										I_IMAGECALLBACK, 
+										I_IMAGECALLBACK, 
+										dwTaskID, // lParam
+										htiParent, 
+										(htiAfter ? htiAfter : TVI_FIRST),
+										FALSE,
+										FALSE);
+
+	m_mapHTItems[dwTaskID] = htiNew;
+
+	return htiNew;
 }
 
 BOOL CTDLTaskTreeCtrl::GetInsertLocation(TDC_MOVETASK nDirection, DWORD& dwDest, DWORD& dwDestAfter) const
@@ -2650,15 +2682,24 @@ void CTDLTaskTreeCtrl::SetModified(TDC_ATTRIBUTE nAttrib)
 	// Update bold-states
 	switch (nAttrib)
 	{
+	case TDCA_UNDO:
+		// Already handled in OnUndoRedo
+		ASSERT(m_mapHTItems.GetCount() == m_data.GetTaskCount());
+		break;
+
+	case TDCA_NEWTASK:
+		// Already handled in InsertTreeItem
+		ASSERT(m_mapHTItems.GetCount() == m_data.GetTaskCount());
+		break;
+
 	case TDCA_PASTE:
 	case TDCA_POSITION: // == move
-	case TDCA_UNDO:
-	case TDCA_NEWTASK:
 		RefreshTreeItemMap();
 		RefreshItemBoldState();
 		break;
 
 	case TDCA_DELETE:
+	case TDCA_ARCHIVE:
 		RefreshTreeItemMap();
 		break;
 	}

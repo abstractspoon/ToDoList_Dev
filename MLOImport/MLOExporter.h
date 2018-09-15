@@ -49,6 +49,7 @@ protected:
 	void ExportPlaces(const ITASKLISTBASE* pSrcTaskFile, CXmlItem* pDestPrj);
 
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
+	static CString FormatDate(time64_t tDate);
 };
 
 #endif // !defined(AFX_MLOEXPORTER_H__F588E6B1_3646_4994_99A2_4223FDDA1A31__INCLUDED_)

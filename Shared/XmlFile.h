@@ -16,10 +16,16 @@
 #include "..\3rdparty\stdiofileex.h"
 #include "..\3rdparty\xmlnodewrapper.h"
 
+//////////////////////////////////////////////////////////////////////
+
+const LPCTSTR DEFAULT_UTF8_HEADER		= _T("version=\"1.0\" encoding=\"UTF-8\"");
+const LPCTSTR DEFAULT_UNICODE_HEADER	= _T("version=\"1.0\" encoding=\"UTF-16\"");
+
 /////////////////////////////////////////////////////////////////////////////////////
 
-// global fns for translating text to/from xml representations eg '&lt;' becomes '<' and vice versa
-//CString& XML2TXT(CString& xml);
+// global fns for translating text to/from xml representations 
+// eg '&lt;' becomes '<' and vice versa
+CString& XML2TXT(CString& xml);
 CString& TXT2XML(CString& txt);
 CString& TXT2HTML(CString& txt);
 

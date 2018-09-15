@@ -616,7 +616,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 	}
 	
 	InitItemHeights();
-	RecalcTreeColumns(TRUE);
+	UpdateTreeColumnWidths(TRUE);
 
 	if (EditWantsResort(nUpdate, attrib))
 	{
@@ -1620,7 +1620,7 @@ void CGanttTreeListCtrl::ExpandAll(BOOL bExpand)
 {
 	ExpandItem(NULL, bExpand, TRUE);
 
-	RecalcTreeColumns(TRUE);
+	UpdateTreeColumnWidths(TRUE);
 }
 
 void CGanttTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
@@ -1658,7 +1658,7 @@ void CGanttTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildr
 	m_tree.EnsureVisible(hti);
 
 	EnableResync(TRUE, m_tree);
-	RecalcTreeColumns(TRUE);
+	UpdateTreeColumnWidths(TRUE);
 }
 
 BOOL CGanttTreeListCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const
@@ -2006,7 +2006,7 @@ void CGanttTreeListCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 	if (hwnd == m_treeHeader)
 	{
 		CClientDC dc(&m_tree);
-		RecalcTreeColumnWidth(nCol, &dc);
+		RecalcTreeColumnWidth(nCol, &dc, TRUE);
 
 		SetSplitPos(m_treeHeader.CalcTotalItemsWidth());
 		Resize();
@@ -2192,7 +2192,7 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					break;
 
 				case TVN_ITEMEXPANDED:
-					RecalcTreeColumns(TRUE);
+					UpdateTreeColumnWidths(TRUE);
 					break;
 				}
 				
@@ -5317,7 +5317,7 @@ GTLC_COLUMN CGanttTreeListCtrl::GetColumnID(int nCol) const
 	return (GTLC_COLUMN)m_treeHeader.GetItemData(nCol);
 }
 
-void CGanttTreeListCtrl::ResizeColumnsToFit()
+void CGanttTreeListCtrl::ResizeAttributeColumnsToFit(BOOL bForce)
 {
 	// tree columns (except title column)
 	CClientDC dc(&m_tree);
@@ -5325,7 +5325,7 @@ void CGanttTreeListCtrl::ResizeColumnsToFit()
 
 	for (nCol = 1; nCol < nNumCols; nCol++)
 	{
-		int nColWidth = RecalcTreeColumnWidth(nCol, &dc);
+		int nColWidth = RecalcTreeColumnWidth(nCol, &dc, bForce);
 
 		if (m_treeHeader.IsItemVisible(nCol))
 			nTotalColWidth += nColWidth;
@@ -5371,19 +5371,22 @@ void CGanttTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 	int nTitleColWidth = max(nMinColWidth, (nSplitPos - nRestOfColsWidth));
 
 	m_treeHeader.SetItemWidth(GTLCC_TITLE, nTitleColWidth);
-	m_treeHeader.SetItemTracked(GTLCC_TITLE, TRUE);
+
+	if (m_bSplitting)
+		m_treeHeader.SetItemTracked(GTLCC_TITLE, TRUE);
+
 	m_treeHeader.UpdateWindow();
 
 	m_tree.SendMessage(WM_GTCN_TITLECOLUMNWIDTHCHANGE, nTitleColWidth, (LPARAM)m_tree.GetSafeHwnd());
 }
 
-BOOL CGanttTreeListCtrl::RecalcTreeColumns(BOOL bResize)
+BOOL CGanttTreeListCtrl::UpdateTreeColumnWidths(BOOL bResize)
 {
 	BOOL bNeedRecalc = FALSE;
 
 	int nNumCols = m_treeHeader.GetItemCount(), nCol;
 
-	for (nCol = 1; ((nCol < nNumCols) && !bNeedRecalc); nCol++)
+	for (nCol = 0; ((nCol < nNumCols) && !bNeedRecalc); nCol++)
 	{
 		switch (GetColumnID(nCol))
 		{
@@ -5399,15 +5402,14 @@ BOOL CGanttTreeListCtrl::RecalcTreeColumns(BOOL bResize)
 	{
 		CClientDC dc(&m_tree);
 
-		for (nCol = 1; nCol < nNumCols; nCol++)
+		for (nCol = 0; nCol < nNumCols; nCol++)
 		{
 			switch (GetColumnID(nCol))
 			{
 			case GTLCC_TITLE:
 			case GTLCC_ALLOCTO:
 			case GTLCC_TASKID:
-				if (!m_treeHeader.IsItemTracked(nCol))
-					RecalcTreeColumnWidth(nCol, &dc);
+				RecalcTreeColumnWidth(nCol, &dc, FALSE);
 				break;
 			}
 		}
@@ -5421,10 +5423,13 @@ BOOL CGanttTreeListCtrl::RecalcTreeColumns(BOOL bResize)
 	return FALSE;
 }
 
-int CGanttTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC)
+int CGanttTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)
 {
-	int nColWidth = CalcTreeColumnWidth(nCol, pDC);
+	if (!bForce && m_treeHeader.IsItemTracked(nCol))
+		return m_treeHeader.GetItemWidth(nCol);
 
+	// else
+	int nColWidth = CalcTreeColumnWidth(nCol, pDC);
 	m_treeHeader.SetItemWidth(nCol, nColWidth);
 
 	return nColWidth;
@@ -7412,10 +7417,14 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 	CLockUpdates lock(m_tree);
 
 	// Resize tree header width to suit title text width
-	int nColWidth = m_treeHeader.GetItemWidth(0);
+	int nPrevWidth = m_treeHeader.GetItemWidth(0);
 	BOOL bTracked = m_treeHeader.IsItemTracked(0);
 
-	ResizeColumnsToFit();	
+	CClientDC dc(&m_tree);
+	int nColWidth = CalcTreeColumnWidth(0, &dc);
+
+	m_treeHeader.SetItemWidth(0, nColWidth);
+	Resize();
 
 	// Calculate the date range in scroll units
 	// allow a month's buffer at each end
@@ -7434,7 +7443,7 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage, nFrom, nTo);
 	
 	// Restore title column width
-	m_treeHeader.SetItemWidth(0, nColWidth);
+	m_treeHeader.SetItemWidth(0, nPrevWidth);
 	m_treeHeader.SetItemTracked(0, bTracked);
 
 	Resize();
@@ -7474,7 +7483,7 @@ BOOL CGanttTreeListCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 
 	CalcMinMonthWidths();
 	SetMonthDisplay(m_nMonthDisplay);
-	ResizeColumnsToFit();
+	ResizeAttributeColumnsToFit();
 
 	return TRUE;
 }

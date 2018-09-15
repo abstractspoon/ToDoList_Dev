@@ -33,6 +33,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLUpdate", "..\TDLUpdate\T
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToDoList", "ToDoList.vcxproj", "{255AD27A-87B1-4E26-A6A7-5E5AFB6BFAB5}"
 	ProjectSection(ProjectDependencies) = postProject
+		{E6E08038-E0F9-4822-B47D-85B248CC5833} = {E6E08038-E0F9-4822-B47D-85B248CC5833}
 		{26B386A3-6B16-41A5-8511-149900DD646B} = {26B386A3-6B16-41A5-8511-149900DD646B}
 	EndProjectSection
 EndProject
@@ -45,6 +46,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BurndownExt", "..\BurndownExt\BurndownExt.vcxproj", "{DA896CDC-157D-472E-8F61-87E174E6B80C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlainTextImport", "..\PlainTextImport\PlainTextImport.vcxproj", "{FB36CF4E-ADF0-4851-901F-FF52E7A43D03}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLTransEdit", "..\TDLTransEdit\TDLTransEdit.vcxproj", "{E55B5B3C-2C94-7FFC-AE63-B2080E520531}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WorkloadExt", "..\WorkloadExt\WorkloadExt.vcxproj", "{45AAF15E-A1F3-FED6-FB46-0AE75B97952C}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -142,6 +145,10 @@ Global
 		{FB36CF4E-ADF0-4851-901F-FF52E7A43D03}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{FB36CF4E-ADF0-4851-901F-FF52E7A43D03}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
 		{FB36CF4E-ADF0-4851-901F-FF52E7A43D03}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{E55B5B3C-2C94-7FFC-AE63-B2080E520531}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{E55B5B3C-2C94-7FFC-AE63-B2080E520531}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{E55B5B3C-2C94-7FFC-AE63-B2080E520531}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{E55B5B3C-2C94-7FFC-AE63-B2080E520531}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 		{45AAF15E-A1F3-FED6-FB46-0AE75B97952C}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
 		{45AAF15E-A1F3-FED6-FB46-0AE75B97952C}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{45AAF15E-A1F3-FED6-FB46-0AE75B97952C}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32

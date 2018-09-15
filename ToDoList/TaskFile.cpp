@@ -2046,7 +2046,7 @@ BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CTDCCustomAttr
 		TDCCADATA data;
 		mapData.GetNextAssoc(pos, sTypeID, data);
 
-		VERIFY(SetTaskCustomAttributeData(hTask, sTypeID, data));
+		SetTaskCustomAttributeData(hTask, sTypeID, data);
 	}
 
 	return TRUE;

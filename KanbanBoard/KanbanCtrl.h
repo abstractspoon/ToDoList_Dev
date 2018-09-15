@@ -77,7 +77,7 @@ public:
 	IUI_ATTRIBUTE GetTrackedAttribute() const { return m_nTrackAttribute; }
 	IUI_ATTRIBUTE GetTrackedAttribute(CString& sCustomAttrib) const;
 
-	int GetCustomAttributeIDs(CStringArray& aCustAttribIDs) const;
+	const CKanbanCustomAttributeDefinitionArray& GetCustomAttributeDefinitions() const { return m_aCustomAttribDefs; }
 	int GetAttributeValues(CKanbanAttributeValueMap& mapValues) const;
 
 	BOOL WantSortUpdate(IUI_ATTRIBUTE nAttribute) const;
@@ -201,7 +201,7 @@ protected:
 	BOOL AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, const CSet<IUI_ATTRIBUTE>& attrib);
 	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, IUI_ATTRIBUTE nAttribute);
-	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, LPCTSTR szXMLTag, LPCTSTR szAttribID);
+	BOOL UpdateGlobalAttributeValues(LPCTSTR szAttribID, const CStringArray& aValues);
 
 	BOOL WantShowColumn(LPCTSTR szAttribID, const CKanbanItemArrayMap& mapKIArray) const;
 	BOOL WantShowColumn(const CKanbanListCtrl* pList) const;

@@ -54,7 +54,7 @@ protected:
 	void ExportDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings);
 	bool InitConsts(const ITASKLISTBASE* pTaskFile, bool bSilent, const IPreferences* pPrefs, LPCTSTR szKey);
 
-	static void GetTaskDates(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, time_t& tEarliestStart, time_t& tLatestDue, time_t& tLatestDone);
+	static void GetTaskDates(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, time64_t& tEarliestStart, time64_t& tLatestDue, time64_t& tLatestDone);
 	static int GetGPTaskID(DWORD dwTDLTaskID);
 };
 

@@ -1155,7 +1155,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 	// special case: sort by ID can be optimized
 	if (nSortBy == TDCC_ID)
 	{
-		nCompare = (dwTask1ID - dwTask2ID);
+		nCompare = Compare(dwTask1ID, dwTask2ID);
 	}
 	else
 	{
@@ -1391,7 +1391,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 			break;
 
 		case TDCC_COLOR:
-			nCompare = Compare((int)pTDI1->color, (int)pTDI2->color);
+			nCompare = Compare(pTDI1->color, pTDI2->color);
 			break;
 
 		case TDCC_ALLOCTO:
@@ -1457,7 +1457,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 				DWORD dwPID1 = (pTDS1 ? pTDS1->GetParentTaskID() : 0);
 				DWORD dwPID2 = (pTDS2 ? pTDS2->GetParentTaskID() : 0);
 
-				nCompare = (dwPID1 - dwPID2);
+				nCompare = Compare(dwPID1, dwPID2);
 			}
 			break;
 
@@ -1537,6 +1537,10 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 			}
 			break;
 
+		case TDCC_COMMENTSSIZE:
+			nCompare = Compare(pTDI1->GetCommentsSize(), pTDI2->GetCommentsSize());
+			break;
+
 		default:
 			ASSERT(0);
 			return 0;
@@ -1582,6 +1586,11 @@ int CTDCTaskComparer::Compare(const CString& sText1, const CString& sText2, BOOL
 int CTDCTaskComparer::Compare(int nNum1, int nNum2)
 {
 	return (nNum1 - nNum2);
+}
+
+int CTDCTaskComparer::Compare(DWORD dwNum1, DWORD dwNum2)
+{
+	return (dwNum1 < dwNum2) ? -1 : (dwNum1 > dwNum2) ? 1 : 0;
 }
 
 int CTDCTaskComparer::Compare(double dNum1, double dNum2)

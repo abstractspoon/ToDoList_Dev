@@ -948,9 +948,7 @@ BOOL CTDLCustomAttributeDlg::BuildSymbolPopupMenu(CMenu& menu) const
 void CTDLCustomAttributeDlg::OnNewAttribute() 
 {
 	// add to attrib array
-	TDCCUSTOMATTRIBUTEDEFINITION attrib;
-	attrib.sLabel = CEnString(IDS_CAD_NEWATTRIB);
-	attrib.dwFeatures = TDCCAF_SORT;
+	TDCCUSTOMATTRIBUTEDEFINITION attrib(CEnString(IDS_CAD_NEWATTRIB));
 
 	m_aAttrib.Add(attrib);
 	int nIndex = AddAttributeToListCtrl(attrib, TRUE);

@@ -1094,7 +1094,13 @@ int CKanbanListCtrl::CalcLineHeight() const
 
 int CKanbanListCtrl::AddTask(const KANBANITEM& ki, BOOL bSelect)
 {
-	ASSERT(FindTask(ki.dwTaskID) == -1);
+	int nFind = FindTask(ki.dwTaskID);
+
+	if (nFind != -1)
+	{
+		ASSERT(m_columnDef.aAttribValues.GetSize() > 1);
+		return nFind;
+	}
 
 	int nNewItem = InsertItem(LVIF_TEXT | LVIF_PARAM, 
 								GetItemCount(), 
@@ -2239,9 +2245,14 @@ BOOL CKanbanListCtrl::SaveToImage(CBitmap& bmImage, int nColWidth)
 
 int CKanbanListCtrl::CalcRequiredColumnWidthForImage() const
 {
-	int nMaxItemLength = 0;
-	int nItem = GetItemCount();
+	CClientDC dc(const_cast<CKanbanListCtrl*>(this));
+	float fAveCharWidth = GraphicsMisc::GetAverageCharWidth(&dc);
 
+	int nMinHeaderWidth = ((int)(m_header.GetItemText(0).GetLength() * fAveCharWidth) + (2 * LV_PADDING));
+	
+	int nItem = GetItemCount();
+	int nMaxItemWidth = 0;
+	
 	while (nItem--)
 	{
 		DWORD dwTaskID = GetItemData(nItem);
@@ -2250,21 +2261,21 @@ int CKanbanListCtrl::CalcRequiredColumnWidthForImage() const
 
 		if (pKI)
 		{
-			nMaxItemLength = max(nMaxItemLength, (pKI->sTitle.GetLength() / 2)); // title is on two lines
-
+			int nMaxItemWidth = (int)(pKI->sTitle.GetLength() * fAveCharWidth / 2); // title is on two lines
+			nMaxItemWidth += (pKI->nLevel * LEVEL_INDENT);
+			nMaxItemWidth += (pKI->bHasIcon ? (IMAGE_SIZE + ICON_OFFSET) : 0);
+			
 			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 			{
 				IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
 				CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeDisplayValue(nAttrib), KBCAL_LONG);
 
-				nMaxItemLength = max(nMaxItemLength, sAttrib.GetLength());
+				nMaxItemWidth = max(nMaxItemWidth, ((int)(sAttrib.GetLength() * fAveCharWidth) + ATTRIB_INDENT));
 			}
 		}
 	}
-
-	CClientDC dc(const_cast<CKanbanListCtrl*>(this));
-
-	return ((int)(nMaxItemLength * GraphicsMisc::GetAverageCharWidth(&dc)) + ATTRIB_INDENT);
+	
+	return max(nMinHeaderWidth, nMaxItemWidth);
 }
 
 BOOL CKanbanListCtrl::SelectionHasLockedTasks() const

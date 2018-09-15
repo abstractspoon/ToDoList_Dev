@@ -23,7 +23,14 @@ KANBANCUSTOMATTRIBDEF::KANBANCUSTOMATTRIBDEF() : bMultiValue(FALSE)
 {
 }
 
-int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribID, BOOL bMultiVal)
+BOOL KANBANCUSTOMATTRIBDEF::operator==(const KANBANCUSTOMATTRIBDEF& kca) const
+{
+	return ((sAttribID == kca.sAttribID) &&
+			(sAttribName == kca.sAttribName) &&
+			(bMultiValue == kca.bMultiValue));
+}
+
+int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal)
 {
 	ASSERT(!sAttribID.IsEmpty());
 
@@ -34,13 +41,17 @@ int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribI
 		KANBANCUSTOMATTRIBDEF def;
 
 		def.sAttribID = sAttribID;
+		def.sAttribName = sAttribName;
 		def.bMultiValue = bMultiVal;
 
 		nFind = Add(def);
 	}
 	else
 	{
-		ElementAt(nFind).bMultiValue = bMultiVal;
+		KANBANCUSTOMATTRIBDEF& def = GetData()[nFind];
+
+		def.sAttribName = sAttribName;
+		def.bMultiValue = bMultiVal;
 	}
 
 	return nFind;
@@ -72,17 +83,6 @@ BOOL CKanbanCustomAttributeDefinitionArray::SetMultiValue(int nDef, BOOL bMultiV
 
 	ElementAt(nDef).bMultiValue = bMultiVal;
 	return TRUE;
-}
-
-int CKanbanCustomAttributeDefinitionArray::GetAttributeIDs(CStringArray& aAttribIDs) const
-{
-	int nDef = GetSize();
-	aAttribIDs.SetSize(nDef);
-
-	while (nDef--)
-		aAttribIDs[nDef] = GetAt(nDef).sAttribID;
-
-	return aAttribIDs.GetSize();
 }
 
 //////////////////////////////////////////////////////////////////////

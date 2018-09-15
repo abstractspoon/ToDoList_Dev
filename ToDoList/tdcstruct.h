@@ -556,11 +556,12 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 {
 	friend class CTDCCustomAttribDefinitionArray;
 
-	TDCCUSTOMATTRIBUTEDEFINITION() 
+	TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel = NULL) 
 		: 
+	sLabel(szLabel),
 	dwAttribType(TDCCA_STRING), 
 	nTextAlignment(DT_LEFT), 
-	dwFeatures(TDCCAF_FILTER),
+	dwFeatures(TDCCAF_SORT | TDCCAF_FILTER),
 	nColID(TDCC_NONE),
 	nAttribID(TDCA_NONE),
 	bEnabled(TRUE)
@@ -3065,6 +3066,7 @@ struct TDCCOLEDITVISIBILITY
 		case TDCC_DUETIME:
 		case TDCC_DONETIME:
 		case TDCC_CREATIONTIME:
+		case TDCC_COMMENTSSIZE:
 			return TRUE;
 		}
 

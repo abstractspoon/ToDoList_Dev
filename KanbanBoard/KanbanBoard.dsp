@@ -122,6 +122,10 @@ SOURCE=.\KanbanCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\KanbanCustomAttributeComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\KanbanFixedColumnListCtrl.cpp
 # End Source File
 # Begin Source File
@@ -169,6 +173,10 @@ SOURCE=.\KanbanColors.h
 # Begin Source File
 
 SOURCE=.\KanbanCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\KanbanCustomAttributeComboBox.h
 # End Source File
 # Begin Source File
 

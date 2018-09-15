@@ -9194,7 +9194,9 @@ LRESULT CToDoListWnd::OnPreferencesClearMRU(WPARAM /*wp*/, LPARAM /*lp*/)
 
 LRESULT CToDoListWnd::OnPreferencesEditLanguageFile(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	return FileMisc::Run(*this, _T("TDLTransEdit.exe"), Prefs().GetLanguageFile(), SW_SHOWNORMAL, FileMisc::GetModuleFolder());
+	CString sLangFilePath = Misc::GetQuoted(Prefs().GetLanguageFile());
+
+	return FileMisc::Run(*this, _T("TDLTransEdit.exe"), sLangFilePath, SW_SHOWNORMAL, FileMisc::GetModuleFolder());
 }
 
 void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
@@ -12522,10 +12524,7 @@ void CToDoListWnd::OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo)
 
 void CToDoListWnd::OnViewCycleTaskViews() 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	tdc.SetNextTaskView();
-	tdc.SetFocusToTasks();
+	GetToDoCtrl().SetNextTaskView();
 }
 
 void CToDoListWnd::OnUpdateViewCycleTaskViews(CCmdUI* pCmdUI) 
@@ -12536,22 +12535,18 @@ void CToDoListWnd::OnUpdateViewCycleTaskViews(CCmdUI* pCmdUI)
 void CToDoListWnd::OnViewToggleTreeandList() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	FTC_VIEW nView = tdc.GetTaskView();
 
-	switch (nView)
+	switch (tdc.GetTaskView())
 	{
 	case FTCV_TASKTREE:
-		nView = FTCV_TASKLIST;
+		tdc.SetTaskView(FTCV_TASKLIST);
 		break;
 
 	case FTCV_TASKLIST:
 	default:
-		nView = FTCV_TASKTREE;
+		tdc.SetTaskView(FTCV_TASKTREE);
 		break;
 	}
-
-	tdc.SetTaskView(nView);
-	tdc.SetFocusToTasks();
 }
 
 void CToDoListWnd::OnUpdateViewToggleTreeandList(CCmdUI* pCmdUI) 
@@ -13008,7 +13003,7 @@ void CToDoListWnd::OnViewSaveToImage()
 	sFilePath += tdc.GetTaskViewName();
 	sFilePath += _T(".bmp");
 
-	CFileSaveDialog dialog(IDS_SAVETASKLISTAS_TITLE,
+	CFileSaveDialog dialog(IDS_SAVETASKVIEWTOIMAGE_TITLE,
 							_T("bmp"), 
 							sFilePath, 
 							EOFN_DEFAULTSAVE,

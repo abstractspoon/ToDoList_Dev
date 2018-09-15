@@ -26,19 +26,20 @@ struct KANBANCUSTOMATTRIBDEF
 {
 	KANBANCUSTOMATTRIBDEF();
 
-	CString sAttribID;
+	BOOL operator==(const KANBANCUSTOMATTRIBDEF& kca) const;
+
+	CString sAttribID, sAttribName;
 	BOOL bMultiValue;
 };
 
 class CKanbanCustomAttributeDefinitionArray : public CArray<KANBANCUSTOMATTRIBDEF, KANBANCUSTOMATTRIBDEF&>
 {
 public:
-	int AddDefinition(const CString& sAttribID, BOOL bMultiVal = FALSE);
+	int AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal = FALSE);
 	BOOL HasDefinition(const CString& sAttribID) const;
 	int FindDefinition(const CString& sAttribID) const;
 
 	BOOL SetMultiValue(int nDef, BOOL bMultiVal = TRUE);
-	int GetAttributeIDs(CStringArray& aAttribIDs) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

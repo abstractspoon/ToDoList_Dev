@@ -152,7 +152,7 @@ public:
 	BOOL GetDefaultReminder(UINT& nMinutes, BOOL& bBeforeDue) const { return m_pageTaskDef.GetReminder(nMinutes, bBeforeDue); }
 
 	// CPreferencesTaskDef2Page
-	int GetParentAttribsUsed(CTDCAttributeMap& mapAttribs, BOOL& bUpdateAttrib) const { return m_pageTaskDef2.GetParentAttribsUsed(mapAttribs, bUpdateAttrib); }
+	int GetInheritParentAttributes(CTDCAttributeMap& mapAttribs, BOOL& bUpdateAttrib) const { return m_pageTaskDef2.GetInheritParentAttributes(mapAttribs, bUpdateAttrib); }
 	int GetDefaultListItems(TDCAUTOLISTDATA& tld) const;
 	BOOL GetDefaultListIsReadonly(TDC_ATTRIBUTE nList) const { return m_pageTaskDef2.GetListIsReadonly(nList); }
 
