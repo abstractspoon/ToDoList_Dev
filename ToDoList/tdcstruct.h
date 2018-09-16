@@ -1385,6 +1385,7 @@ struct SEARCHPARAM
 
 		case TDCA_COST:
 		case TDCA_SUBTASKDONE:
+		case TDCA_COMMENTSSIZE:
 			return FT_DOUBLE;
 
 		case TDCA_FLAG:

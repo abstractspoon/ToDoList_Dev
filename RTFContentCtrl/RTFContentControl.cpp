@@ -426,10 +426,17 @@ void CRTFContentControl::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_EDIT_COPYFORMATTING,	'C',		HOTKEYF_CONTROL | HOTKEYF_SHIFT);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_PASTEFORMATTING,	'V',		HOTKEYF_CONTROL | HOTKEYF_SHIFT);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_OUTDENT,			'J',		HOTKEYF_CONTROL | HOTKEYF_SHIFT); 
-	m_mgrShortcuts.AddShortcut(ID_EDIT_COPY,			'C',		HOTKEYF_CONTROL); 
+	m_mgrShortcuts.AddShortcut(ID_EDIT_BULLET,			'L',		HOTKEYF_CONTROL | HOTKEYF_SHIFT); 
+
 	m_mgrShortcuts.AddShortcut(ID_EDIT_COPYASHTML,		'C',		HOTKEYF_CONTROL | HOTKEYF_ALT); 
+
+	m_mgrShortcuts.AddShortcut(ID_EDIT_GROWFONT,		0xBE,		HOTKEYF_CONTROL | HOTKEYF_EXT); 
+	m_mgrShortcuts.AddShortcut(ID_EDIT_SHRINKFONT,		0xBC,		HOTKEYF_CONTROL | HOTKEYF_EXT); 
+
+	m_mgrShortcuts.AddShortcut(ID_EDIT_PASTESIMPLE,		VK_INSERT,	HOTKEYF_SHIFT   | HOTKEYF_EXT); 
+
+	m_mgrShortcuts.AddShortcut(ID_EDIT_COPY,			'C',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_PASTE,			'V',		HOTKEYF_CONTROL); 
-	m_mgrShortcuts.AddShortcut(ID_EDIT_PASTESIMPLE,		VK_INSERT,	HOTKEYF_SHIFT | HOTKEYF_EXT); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_CUT,				'X',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_SELECT_ALL,		'A',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_BOLD,			'B',		HOTKEYF_CONTROL); 
@@ -440,8 +447,6 @@ void CRTFContentControl::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_EDIT_CENTERALIGN,		'E',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_RIGHTALIGN,		'R',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_STRIKETHRU,		0xBD,		HOTKEYF_CONTROL); 
-	m_mgrShortcuts.AddShortcut(ID_EDIT_GROWFONT,		0xBE,		HOTKEYF_CONTROL | HOTKEYF_EXT); 
-	m_mgrShortcuts.AddShortcut(ID_EDIT_SHRINKFONT,		0xBC,		HOTKEYF_CONTROL | HOTKEYF_EXT); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_FINDREPLACE,		'H',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_FIND,			'F',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_INDENT,			'J',		HOTKEYF_CONTROL); 

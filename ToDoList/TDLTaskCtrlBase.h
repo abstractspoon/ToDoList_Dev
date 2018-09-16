@@ -524,10 +524,10 @@ protected:
 	static int CALLBACK SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 
 	static int CALLBACK SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 
 	static int CompareTasks(LPARAM lParam1, 
-						LPARAM lParam2, 
-						const CTDLTaskCtrlBase& base, 
-						const TDSORTCOLUMN& sort, 
-						const TDSORTFLAGS& flags);
+							LPARAM lParam2, 
+							const CTDLTaskCtrlBase& base, 
+							const TDSORTCOLUMN& sort, 
+							const TDSORTFLAGS& flags);
 	
 #ifdef _DEBUG
 	virtual LPCTSTR GetDebugName() const = 0;

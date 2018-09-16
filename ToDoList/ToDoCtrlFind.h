@@ -56,7 +56,7 @@ public:
 	CString GetLongestCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly = TRUE) const;
 
 	DWORD GetLargestReferenceID(BOOL bVisibleOnly = TRUE) const;
-	DWORD GetLargestCommentsSize(BOOL bVisibleOnly = TRUE) const;
+	float GetLargestCommentsSizeInKB(BOOL bVisibleOnly = TRUE) const;
 	int GetLargestFileLinkCount(BOOL bVisibleOnly = TRUE) const;
 
 	BOOL FindVisibleTaskWithDueTime() const;
@@ -91,7 +91,7 @@ protected:
 	static CString GetLongerString(const CString& str1, const CString& str2);
 
 	DWORD GetLargestReferenceID(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
-	DWORD GetLargestCommentsSize(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
+	float GetLargestCommentsSizeInKB(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	int GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	BOOL WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const;
 	

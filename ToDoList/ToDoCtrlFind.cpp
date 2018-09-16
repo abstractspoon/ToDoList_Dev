@@ -80,9 +80,9 @@ DWORD CToDoCtrlFind::GetLargestReferenceID(BOOL bVisibleOnly) const
 	return GetLargestReferenceID(NULL, NULL, bVisibleOnly);
 }
 
-DWORD CToDoCtrlFind::GetLargestCommentsSize(BOOL bVisibleOnly) const
+float CToDoCtrlFind::GetLargestCommentsSizeInKB(BOOL bVisibleOnly) const
 {
-	return GetLargestCommentsSize(NULL, NULL, bVisibleOnly);
+	return GetLargestCommentsSizeInKB(NULL, NULL, bVisibleOnly);
 }
 
 int CToDoCtrlFind::GetLargestFileLinkCount(BOOL bVisibleOnly) const
@@ -292,12 +292,12 @@ DWORD CToDoCtrlFind::GetLargestReferenceID(HTREEITEM hti, const TODOITEM* pTDI, 
 	return dwLargest;
 }
 
-DWORD CToDoCtrlFind::GetLargestCommentsSize(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const
+float CToDoCtrlFind::GetLargestCommentsSizeInKB(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const
 {
 	if (hti && !pTDI)
 		pTDI = GetTask(hti);
 
-	DWORD dwLargest = (pTDI ? pTDI->GetCommentsSize() : 0);
+	float fLargest = (pTDI ? pTDI->GetCommentsSizeInKB() : 0);
 
 	if (WantSearchChildren(hti, bVisibleOnly))
 	{
@@ -306,15 +306,15 @@ DWORD CToDoCtrlFind::GetLargestCommentsSize(HTREEITEM hti, const TODOITEM* pTDI,
 
 		while (htiChild)
 		{
-			DWORD dwChildLargest = GetLargestCommentsSize(htiChild, NULL, bVisibleOnly);
-			dwLargest = max(dwLargest, dwChildLargest);
+			float fChildLargest = GetLargestCommentsSizeInKB(htiChild, NULL, bVisibleOnly);
+			fLargest = max(fLargest, fChildLargest);
 
 			// next
 			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 		}
 	}
 
-	return dwLargest;
+	return fLargest;
 }
 
 int CToDoCtrlFind::GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const

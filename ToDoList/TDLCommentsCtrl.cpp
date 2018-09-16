@@ -520,9 +520,7 @@ void CTDLCommentsCtrl::SetPreferencesFilePath(LPCTSTR szFilePath)
 		LoadPreferences();
 }
 
-void CTDLCommentsCtrl::OnSetFocus(CWnd* pOldWnd)
+void CTDLCommentsCtrl::OnSetFocus(CWnd* /*pOldWnd*/)
 {
-	CRuntimeDlg::OnSetFocus(pOldWnd);
-
 	m_ctrlComments.SetFocus();
 }

@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,1,1000,6
+ FILEVERSION 7,1,1000,7
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 1, 1000, 6\0"
+            VALUE "FileVersion", "7, 1, 1000, 7\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-18\0"
             VALUE "LegalTrademarks", "\0"
@@ -3236,6 +3236,7 @@ BEGIN
         MENUITEM "&Allocated By",               ID_SORTBY_ALLOCBY
         MENUITEM "&Allocated To",               ID_SORTBY_ALLOCTO
         MENUITEM "&Category",                   ID_SORTBY_CATEGORY
+        MENUITEM "Comments Si&ze",              ID_SORTBY_COMMENTSSIZE
         MENUITEM "C&ompleted Date",             ID_SORTBY_DONEDATE
         MENUITEM "C&ompleted Status",           ID_SORTBY_DONE
         MENUITEM "&Cost",                       ID_SORTBY_COST
@@ -5444,7 +5445,7 @@ BEGIN
     IDS_TDLBC_COMMENTSSIZE  "Comments Size"
     IDS_TDC_COLUMN_COMMENTSSIZE "KB"
     IDS_SAVETASKVIEWTOIMAGE_TITLE "Save Task View to Image"
-    IDS_TDLBC_CUSTOMATTRIBS  "Custom Attributes"
+    IDS_TDLBC_CUSTOMATTRIBS "Custom Attributes"
 END
 
 #endif    // English (Australia) resources

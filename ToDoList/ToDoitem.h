@@ -92,7 +92,7 @@ public:
 	int GetLocalDependencies(CDWordArray& aDependIDs) const;
 	DWORD GetFirstLocalDependency() const;
 
-	DWORD GetCommentsSize() const;
+	float GetCommentsSizeInKB() const;
 	
 	static COleDateTimeSpan GetRemainingDueTime(const COleDateTime& date); // in days
 	static BOOL HasTime(const COleDateTime& date);
