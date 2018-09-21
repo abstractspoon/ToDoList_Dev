@@ -24,7 +24,7 @@ CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTST
 										const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_TRANSFORM_DIALOG, _T("Transform"), pParent), 
-	m_dlgTaskSel(_T("Transform"), nView),
+	m_dlgTaskSel(aAttribDefs, _T("Transform"), nView),
 	m_sTitle(szTitle), 
 	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
 {
@@ -37,7 +37,6 @@ CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTST
 
 	// share same title history as print dialog
 	m_cbTitle.Load(prefs, _T("Print"));
-	m_dlgTaskSel.SetCustomAttributeDefinitions(aAttribDefs);
 
 	InitStylesheet(szStylesheet);
 }
@@ -70,6 +69,7 @@ END_MESSAGE_MAP()
 void CTDLTransformDialog::OnOK() 
 {
 	CTDLDialog::OnOK();
+	m_dlgTaskSel.OnOK();
 
 	CPreferences prefs;
 

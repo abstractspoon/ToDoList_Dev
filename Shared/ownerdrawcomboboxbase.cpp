@@ -58,6 +58,21 @@ BOOL COwnerdrawComboBoxBase::SetMinDLUHeight(int nMinDLUHeight)
 	return FALSE;
 }
 
+void COwnerdrawComboBoxBase::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
+											COLORREF& crText, COLORREF& crBack) const
+{
+	BOOL bItemSelected = (nItemState & ODS_SELECTED);
+	BOOL bDisabled = !IsWindowEnabled();
+	BOOL bItemDisabled = (bDisabled || (nItemState & (ODS_GRAYED | ODS_DISABLED)));
+
+	crBack = GetSysColor(bDisabled ? COLOR_3DFACE : (bItemSelected ? COLOR_HIGHLIGHT : COLOR_WINDOW));
+	crText = GetSysColor(bItemDisabled ? COLOR_GRAYTEXT : (bItemSelected ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT));
+
+	// Special case
+	if (IsType(CBS_SIMPLE) && bDisabled)
+		crBack = GetSysColor(COLOR_WINDOW);
+}
+
 void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) 
 {
 	CDC dc;
@@ -65,19 +80,10 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if (!dc.Attach(lpDrawItemStruct->hDC))
 		return;
 
-	int nDC = dc.SaveDC();
+	int nDC = dc.SaveDC(), nItem = (int)lpDrawItemStruct->itemID;
 
-	// initialise colours and fill background
-	BOOL bItemSelected = (lpDrawItemStruct->itemState & ODS_SELECTED);
-	BOOL bDisabled = !IsWindowEnabled();
-	BOOL bItemDisabled = (bDisabled || (lpDrawItemStruct->itemState & (ODS_GRAYED | ODS_DISABLED)));
-
-	COLORREF crBack = GetSysColor(bDisabled ? COLOR_3DFACE : (bItemSelected ? COLOR_HIGHLIGHT : COLOR_WINDOW));
-	COLORREF crText = GetSysColor(bItemDisabled ? COLOR_GRAYTEXT : (bItemSelected ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT));
-
-	// Special case
-	if (IsType(CBS_SIMPLE) && !IsWindowEnabled())
-		crBack = GetSysColor(COLOR_WINDOW);
+	COLORREF crText, crBack;
+	GetItemColors(nItem, lpDrawItemStruct->itemState, lpDrawItemStruct->itemData, crText, crBack);
 
 	CRect rItem(lpDrawItemStruct->rcItem);
 	dc.FillSolidRect(rItem, crBack);
@@ -85,32 +91,24 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	// draw the item
 	rItem.DeflateRect(2, 1);
 
-	if (0 <= (int)lpDrawItemStruct->itemID)	// Any item selected?
+	CString sText;
+
+	if (nItem != CB_ERR) // Any item selected?
 	{
 		// draw text
-		CString sText;
-
 		if (GetStyle() & CBS_HASSTRINGS)
-		{
-			GetLBText(lpDrawItemStruct->itemID, sText);
-		}
-
-		// virtual call
-		DrawItemText(dc, rItem, 
-					lpDrawItemStruct->itemID, 
-					lpDrawItemStruct->itemState,
-					lpDrawItemStruct->itemData, 
-					sText, 
-					TRUE,
-					crText);
+			GetLBText(nItem, sText);
 	}
 	else
 	{
-		CString sText;
 		GetWindowText(sText);
-
-		DrawItemText(dc, rItem, -1, 0, 0, sText, FALSE, crText);
 	}
+
+	// virtual call
+	DrawItemText(dc, rItem, nItem, 
+				lpDrawItemStruct->itemState,
+				lpDrawItemStruct->itemData, 
+				sText, (nItem != CB_ERR), crText);
 
 	// Restore the DC state before focus rect
 	dc.RestoreDC(nDC);

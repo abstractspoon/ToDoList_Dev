@@ -17,7 +17,10 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTimeComboBox
 
-CTimeComboBox::CTimeComboBox(DWORD dwStyle) : m_dwStyle(dwStyle), m_hwndListBox(NULL)
+CTimeComboBox::CTimeComboBox(DWORD dwStyle) 
+	: 
+	m_dwStyle(dwStyle), 
+	m_hwndListBox(NULL)
 {
 }
 
@@ -26,7 +29,7 @@ CTimeComboBox::~CTimeComboBox()
 }
 
 
-BEGIN_MESSAGE_MAP(CTimeComboBox, CComboBox)
+BEGIN_MESSAGE_MAP(CTimeComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CTimeComboBox)
 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
@@ -41,12 +44,12 @@ void CTimeComboBox::PreSubclassWindow()
 {
 	VERIFY(Initialize());
 
-	CComboBox::PreSubclassWindow();
+	COwnerdrawComboBoxBase::PreSubclassWindow();
 }
 
 int CTimeComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
-	if (CComboBox::OnCreate(lpCreateStruct) == -1)
+	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	
 	VERIFY(Initialize());
@@ -135,41 +138,53 @@ void CTimeComboBox::SetStyle(DWORD dwStyle)
 	}
 }
 
-double CTimeComboBox::Get24HourTime() const
+CString CTimeComboBox::GetCurrentTime() const
 {
 	// is this a hack? I'm not sure
 	// but we look at the current Windows message being handled and if it's a
 	// combo sel change then we use the current selection else we use the
 	// window text (it may be an edit change notification)
+	CString sTime;
 	const MSG* pMsg = CWnd::GetCurrentMessage();
 
 	if ((pMsg->message == WM_COMMAND) && 
 		(pMsg->lParam == (LPARAM)GetSafeHwnd()) &&
 		(HIWORD(pMsg->wParam) == CBN_SELCHANGE))
 	{
-		// since the items in the combo are ordered from 1am to 11pm
-		// we can use the selection index as a direct link to the hour
-		int nSel = GetCurSel();
-
-		if (nSel <= 0) // 'no time'
-			return 0;
-
-		// else
-		if (m_dwStyle & TCB_HALFHOURS)
-			return (nSel * 0.5);
-		else
-			return nSel;
+		GetLBText(GetCurSel(), sTime);
 	}
+	else
+	{
+		GetWindowText(sTime);
+	}
+	
+	return Misc::Trim(sTime);
+}
 
-	// else use window text
-	CString sTime;
-	GetWindowText(sTime);
+double CTimeComboBox::Get24HourTime() const
+{
+	CString sTime = GetCurrentTime();
 
-	if (Misc::Trim(sTime).IsEmpty() && !(m_dwStyle & TCB_NOTIME))
-		return -1; // error
+	if (sTime.IsEmpty())
+		return 0.0; // no time
 
 	// else
 	return CTimeHelper::DecodeClockTime(sTime);
+}
+
+double CTimeComboBox::Get24HourTime(int nItem) const
+{
+	// since the items in the combo are ordered from 1am to 11pm
+	// we can use the selection index as a direct link to the hour
+	if (nItem < 0) // 'no time'
+		return 0.0;
+
+	// else
+	if (m_dwStyle & TCB_HALFHOURS)
+		return min(24.0, (nItem * 0.5));
+
+	// else
+	return min(24.0, nItem);
 }
 
 BOOL CTimeComboBox::Set24HourTime(double dTime)
@@ -222,7 +237,7 @@ void CTimeComboBox::OnCaptureChanged(CWnd* pWnd)
 {
 	// Receiving this message tells us that
 	// the listbox is now fully visible
-	CComboBox::OnCaptureChanged(pWnd);
+	COwnerdrawComboBoxBase::OnCaptureChanged(pWnd);
 
 	ScrollListBox();
 }
@@ -232,7 +247,7 @@ HBRUSH CTimeComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	if (nCtlColor == CTLCOLOR_LISTBOX)
 		m_hwndListBox = *pWnd;
 
-	return CComboBox::OnCtlColor(pDC, pWnd, nCtlColor);
+	return COwnerdrawComboBoxBase::OnCtlColor(pDC, pWnd, nCtlColor);
 }
 
 void CTimeComboBox::ScrollListBox()
@@ -267,4 +282,26 @@ void CTimeComboBox::ScrollListBox()
 	}
 	
 	m_hwndListBox = NULL; // always
+}
+
+void CTimeComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
+								COLORREF& crText, COLORREF& crBack) const
+{
+	COwnerdrawComboBoxBase::GetItemColors(nItem, nItemState, dwItemData, crText, crBack);
+
+	if ((m_dwStyle & TCB_HOURSINDAY) && 
+		(nItem != CB_ERR) && 
+		!(nItemState & (ODS_SELECTED | ODS_GRAYED | ODS_DISABLED)) &&
+		!Misc::IsHighContrastActive())
+	{
+		double dTime = Get24HourTime(nItem);
+		CTimeHelper th;
+
+		if ((dTime < th.GetStartOfWorkday(FALSE)) ||
+			(dTime > th.GetEndOfWorkday(FALSE)))
+		{
+			crBack = GetSysColor(COLOR_3DFACE);
+			crText = GetSysColor(COLOR_3DSHADOW);
+		}
+	}
 }

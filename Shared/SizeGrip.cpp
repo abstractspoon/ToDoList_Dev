@@ -5,6 +5,7 @@
 #include "SizeGrip.h"
 
 #include "imageprocessors.h"
+#include "Themed.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -15,7 +16,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CSizeGrip
 
-CSizeGrip::CSizeGrip()
+CSizeGrip::CSizeGrip() : m_crBack(CLR_NONE)
 {
 }
 
@@ -35,11 +36,7 @@ END_MESSAGE_MAP()
 
 void CSizeGrip::OnPaint() 
 {
-	if (!m_bm.GetSafeHandle())
-	{
-		Default();
-	}
-	else
+	if (m_bm.GetSafeHandle())
 	{
 		CPaintDC dc(this); // device context for painting
 
@@ -56,20 +53,44 @@ void CSizeGrip::OnPaint()
 
 			dcMem.SelectObject(pOld);
 		}
+	}
+	else if (CThemed::IsAppThemed() && (m_crBack != CLR_NONE))
+	{
+		CPaintDC dc(this); // device context for painting
+		CThemed th(this, _T("SCROLLBAR"));
+
+		CRect rGrip;
+		GetClientRect(rGrip);
+
+		dc.FillSolidRect(rGrip, m_crBack);
+		th.DrawBackground(&dc, SBP_SIZEBOX, SZB_RIGHTALIGN, rGrip);
 	}	
+	else
+	{
+		Default();
+	}
 }
 
-BOOL CSizeGrip::Initialize(UINT nCtrlID, CWnd* pParent, UINT nBitmapID)
+void CSizeGrip::SetBackgroundColor(COLORREF crBack)
+{
+	m_crBack = crBack;
+
+	if (CThemed::IsAppThemed() && GetSafeHwnd())
+		Invalidate(TRUE);
+}
+
+BOOL CSizeGrip::Initialize(CWnd* pParent, UINT nCtrlID, UINT nBitmapID)
 {
 	if (!pParent || !pParent->GetSafeHwnd())
 		return FALSE;
 
-	CRect rCtrl;
-	pParent->GetClientRect(rCtrl);
-	rCtrl.left = rCtrl.right - 16;
-	rCtrl.top = rCtrl.bottom - 16;
+	CRect rParent;
+	pParent->GetClientRect(rParent);
 
-	if (!Create(WS_CHILD | WS_VISIBLE | SBS_SIZEBOX | SBS_SIZEBOXBOTTOMRIGHTALIGN, rCtrl, pParent, nCtrlID))
+	CRect rGrip;
+	CalcRect(rParent.Width(), rParent.Height(), rGrip);
+
+	if (!Create(WS_CHILD | WS_VISIBLE | SBS_SIZEBOX | SBS_SIZEBOXBOTTOMRIGHTALIGN | WS_CLIPSIBLINGS, rGrip, pParent, nCtrlID))
 		return FALSE;
 
 	if (!m_scParent.HookWindow(*pParent, this))
@@ -97,11 +118,10 @@ LRESULT CSizeGrip::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 		{
 			ShowScrollBar(!(wp & SIZE_MAXIMIZED));
 
-			CRect rCtrl(0, 0, LOWORD(lp), HIWORD(lp));
-			rCtrl.left = rCtrl.right - 16;
-			rCtrl.top = rCtrl.bottom - 16;
+			CRect rGrip;
+			CalcRect(LOWORD(lp), HIWORD(lp), rGrip);
 
-			MoveWindow(rCtrl);
+			MoveWindow(rGrip);
 		}
 		break;
 	}
@@ -120,4 +140,12 @@ BOOL CSizeGrip::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	}
 
 	return CScrollBar::OnSetCursor(pWnd, nHitTest, message);
+}
+
+void CSizeGrip::CalcRect(int nParentWidth, int nParentHeight, CRect& rGrip) const
+{
+	rGrip.left = (nParentWidth - GetSystemMetrics(SM_CXVSCROLL));
+	rGrip.top = (nParentHeight - GetSystemMetrics(SM_CYVSCROLL));
+	rGrip.right = nParentWidth;
+	rGrip.bottom = nParentHeight;
 }

@@ -19,12 +19,14 @@ class CSizeGrip : protected CScrollBar, protected CSubclasser
 public:
 	CSizeGrip();
 
-	BOOL Initialize(UINT nCtrlID, CWnd* pParent, UINT nBitmapID = 0);
+	BOOL Initialize(CWnd* pParent, UINT nCtrlID = (UINT)-1, UINT nBitmapID = 0);
+	void SetBackgroundColor(COLORREF crBack);
 
 // Attributes
 protected:
 	CEnBitmap m_bm;
 	CSubclassWnd m_scParent;
+	COLORREF m_crBack;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -46,6 +48,9 @@ protected:
 
 protected:
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
+
+protected:
+	void CalcRect(int nParentWidth, int nParentHeight, CRect& rGrip) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

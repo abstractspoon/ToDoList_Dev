@@ -65,7 +65,7 @@ CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 		case TDCCA_DATE:
 			if (bBuddy)
 			{
-				pControl = new CTimeComboBox(TCB_HALFHOURS | TCB_NOTIME);
+				pControl = new CTimeComboBox(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY);
 				szClass = WC_COMBOBOX;
 				dwStyle |= (CBS_DROPDOWN | WS_VSCROLL | CBS_AUTOHSCROLL);
 			}
@@ -96,7 +96,7 @@ CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 			break;
 
 		case TDCCA_TIMEPERIOD:
-			pControl = new CTimeEdit();
+			pControl = new CTimeEdit;
 			szClass = WC_EDIT;
 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
 			break;
@@ -1174,6 +1174,8 @@ void CTDCCustomAttributeHelper::UpdateControl(const CWnd* pParent, const CUSTOMA
 				{
 					pDTC->SetTime(date);
 				}
+				pDTC->SetMonthCalStyle(MCS_WEEKNUMBERS);
+
 
 				if (ctrl.HasBuddy() && CDateHelper::DateHasTime(date))
 				{
@@ -1403,7 +1405,9 @@ BOOL CTDCCustomAttributeHelper::AppendFilterRules(const CTDCCustomAttributeDataM
 			if (data.AsArray(aValues))
 			{
 				SEARCHPARAM rule;
+
 				rule.SetCustomAttribute(attribDef.GetAttributeID(), sAttribID, FT_STRING);
+				rule.SetMatchWholeWord(TRUE); // because lists are read-only
 
 				CString sMatchBy = Misc::FormatArray(aValues);
 

@@ -28,7 +28,7 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView,
 	: 
 	CTDLDialog(IDD_PRINT_DIALOG, _T("Print"), pParent), 
 	m_bPreview(bPreview), 
-	m_dlgTaskSel(m_sPrefsKey, nView),
+	m_dlgTaskSel(aAttribDefs, m_sPrefsKey, nView),
 	m_sTitle(szTitle), 
 	m_bSupportsExportToImage(bSupportsExportToImage),
 	m_bUseStylesheet(FALSE),
@@ -45,7 +45,6 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView,
 		m_nExportStyle = TDLPDS_WRAP;
 
 	m_cbTitle.Load(prefs, m_sPrefsKey);
-	m_dlgTaskSel.SetCustomAttributeDefinitions(aAttribDefs);
 
 	InitStylesheet(szStylesheet);
 }
@@ -112,7 +111,8 @@ void CTDLPrintDialog::InitStylesheet(LPCTSTR szStylesheet)
 void CTDLPrintDialog::OnOK() 
 {
 	CTDLDialog::OnOK();
-	
+	m_dlgTaskSel.OnOK();
+
 	// save settings
 	CPreferences prefs;
 

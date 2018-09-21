@@ -33,7 +33,7 @@ CTDLExportDlg::CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, 
 	m_bSingleTaskList(bSingleTaskList), 
 	m_sFilePath(szFilePath), m_sOrgFilePath(szFilePath),
 	m_sFolderPath(szFolderPath), m_sOrgFolderPath(szFolderPath),
-	m_dlgTaskSel(_T("Exporting"), nView, bVisibleColumnsOnly),
+	m_dlgTaskSel(aAttribDefs, _T("Exporting"), nView, bVisibleColumnsOnly),
 	m_eExportPath(FES_COMBOSTYLEBTN | FES_SAVEAS | FES_NOPROMPTOVERWRITE), // parent handles prompting
 	m_nFormatOption(0),
 	m_cbFormat(mgr, FALSE)
@@ -99,8 +99,6 @@ CTDLExportDlg::CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, 
 		m_sExportPath = m_sFolderPath;
 		m_sPathLabel.LoadString(IDS_ED_FOLDER);
 	}
-
-	m_dlgTaskSel.SetCustomAttributeDefinitions(aAttribDefs);
 }
 
 
@@ -315,6 +313,7 @@ void CTDLExportDlg::OnOK()
 	}
 
 	CTDLDialog::OnOK();
+	m_dlgTaskSel.OnOK();
 
 	// make sure extension is right
 	if (bExporterHasFileExt)

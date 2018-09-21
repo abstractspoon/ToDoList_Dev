@@ -62,6 +62,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
+	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
+								COLORREF& crText, COLORREF& crBack) const;	
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 	virtual BOOL HasIcon() const { return FALSE; }

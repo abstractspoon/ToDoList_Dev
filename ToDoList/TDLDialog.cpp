@@ -67,16 +67,21 @@ BOOL CTDLDialog::OnInitDialog()
 	}
 
 	// restore size	
-	if (!m_sPrefsKey.IsEmpty() && IsResizable())
+	if (IsResizable())
 	{
-		CPreferences prefs;
-		int nWidth = prefs.GetProfileInt(m_sPrefsKey, _T("Width"), -1);
-		int nHeight = prefs.GetProfileInt(m_sPrefsKey, _T("Height"), -1);
+		VERIFY(m_sbGrip.Initialize(this));
 
-		if ((nWidth > 0) && (nHeight > 0))
+		if (!m_sPrefsKey.IsEmpty())
 		{
-			MoveWindow(0, 0, nWidth, nHeight);
-			CenterWindow();
+			CPreferences prefs;
+			int nWidth = prefs.GetProfileInt(m_sPrefsKey, _T("Width"), -1);
+			int nHeight = prefs.GetProfileInt(m_sPrefsKey, _T("Height"), -1);
+
+			if ((nWidth > 0) && (nHeight > 0))
+			{
+				MoveWindow(0, 0, nWidth, nHeight);
+				CenterWindow();
+			}
 		}
 	}
 
@@ -93,12 +98,10 @@ void CTDLDialog::OnDestroy()
 	if (!m_sPrefsKey.IsEmpty() && IsResizable())
 	{
 		// save current size
-		CRect rWindow;
-		GetWindowRect(rWindow);
-
 		CPreferences prefs;
-		prefs.WriteProfileInt(m_sPrefsKey, _T("Width"), rWindow.Width());
-		prefs.WriteProfileInt(m_sPrefsKey, _T("Height"), rWindow.Height());
+
+		prefs.WriteProfileInt(m_sPrefsKey, _T("Width"), m_sizePrev.cx);
+		prefs.WriteProfileInt(m_sPrefsKey, _T("Height"), m_sizePrev.cy);
 	}
 }
 
@@ -122,7 +125,7 @@ void CTDLDialog::OnSize(UINT nType, int cx, int cy)
 	CDialog::OnSize(nType, cx, cy);
 
 	// move the controls required
-	if (IsResizable())
+	if (IsResizable() && !IsIconic())
 	{
 		if (m_btnHelp.GetSafeHwnd() && (m_sizePrev.cx > 0 || m_sizePrev.cy > 0))
 		{

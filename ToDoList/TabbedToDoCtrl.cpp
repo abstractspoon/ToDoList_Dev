@@ -5403,12 +5403,12 @@ int CTabbedToDoCtrl::FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttrib, i
 									BOOL bNext, BOOL bCaseSensitive, BOOL bWholeWord) const
 {
 	// build a search query
-	SEARCHPARAMS params;
 	SEARCHPARAM rule(nAttrib, FOP_INCLUDES, sPart);
+	rule.SetMatchWholeWord(bWholeWord);
 
+	SEARCHPARAMS params;
 	params.aRules.Add(rule);
 	params.bCaseSensitive = bCaseSensitive;
-	params.bMatchWholeWord = bWholeWord;
 
 	// we need to do this manually because CListCtrl::FindItem 
 	// only looks at the start of the string

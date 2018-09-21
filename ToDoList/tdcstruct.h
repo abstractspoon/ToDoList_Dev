@@ -1089,13 +1089,13 @@ struct SEARCHPARAM
 	friend struct SEARCHPARAMS;
 
 	SEARCHPARAM(TDC_ATTRIBUTE a = TDCA_NONE, FIND_OPERATOR o = FOP_NONE) : 
-		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), bAnd(TRUE), dwFlags(0), nType(FT_NONE) 
+		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), dwFlags(0), bAnd(TRUE), nType(FT_NONE) 
 	{
 		SetAttribute(a);
 	}
 	
 	SEARCHPARAM(TDC_ATTRIBUTE a, FIND_OPERATOR o, CString s, BOOL and = TRUE, FIND_ATTRIBTYPE ft = FT_NONE) : 
-		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), bAnd(and), dwFlags(0), nType(ft)  
+		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), dwFlags(0), bAnd(and), nType(ft)  
 	{
 		SetAttribute(a);
 
@@ -1104,7 +1104,7 @@ struct SEARCHPARAM
 	}
 	
 	SEARCHPARAM(TDC_ATTRIBUTE a, FIND_OPERATOR o, double d, BOOL and = TRUE) : 
-		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), bAnd(and), dwFlags(0), nType(FT_NONE)  
+		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), dwFlags(0), bAnd(and), nType(FT_NONE)  
 	{
 		SetAttribute(a);
 
@@ -1115,7 +1115,7 @@ struct SEARCHPARAM
 	}
 	
 	SEARCHPARAM(TDC_ATTRIBUTE a, FIND_OPERATOR o, int n, BOOL and = TRUE) : 
-		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), bAnd(and), dwFlags(0), nType(FT_NONE)  
+		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), dwFlags(0), bAnd(and), nType(FT_NONE)  
 	{
 		SetAttribute(a);
 
@@ -1152,7 +1152,7 @@ struct SEARCHPARAM
 		}
 
 		// test rest of attributes
-		if (op == rule.op && bAnd == rule.bAnd && dwFlags == rule.dwFlags)
+		if ((op == rule.op) && (bAnd == rule.bAnd) && (dwFlags == rule.dwFlags))
 		{
 			switch (GetAttribType())
 			{
@@ -1230,9 +1230,9 @@ struct SEARCHPARAM
 		GetAttribType();
 
 		// handle relative dates
-		if (nType == FT_DATE || nType == FT_DATERELATIVE) 
+		if ((nType == FT_DATE) || (nType == FT_DATERELATIVE)) 
 		{
-			dwFlags = (nType == FT_DATERELATIVE);
+			bRelativeDate = (nType == FT_DATERELATIVE);
 		}
 
 		ValidateOperator();
@@ -1242,7 +1242,7 @@ struct SEARCHPARAM
 	TDC_ATTRIBUTE GetAttribute() const { return attrib; }
 	FIND_OPERATOR GetOperator() const { return op; }
 	BOOL GetAnd() const { return bAnd; }
-	DWORD GetFlags() const { return dwFlags; }
+	BOOL GetOr() const { return !bAnd; }
 	BOOL IsCustomAttribute() const { return IsCustomAttribute(attrib); }
 
 	BOOL IsRelativeDate() const
@@ -1276,9 +1276,7 @@ struct SEARCHPARAM
 
 		// handle relative dates
 		if ((nType == FT_DATE) || (nType == FT_DATERELATIVE)) 
-		{
-			dwFlags = (nType == FT_DATERELATIVE);
-		}
+			SetRelativeDate(nType == FT_DATERELATIVE);
 
 		ValidateOperator();
 		return TRUE;
@@ -1290,7 +1288,6 @@ struct SEARCHPARAM
 		ASSERT (!sCustAttribID.IsEmpty());
 
 		return sCustAttribID;
-
 	}
 
 	BOOL SetOperator(FIND_OPERATOR o) 
@@ -1307,7 +1304,7 @@ struct SEARCHPARAM
 	FIND_ATTRIBTYPE GetAttribType() const
 	{
 		if (nType == FT_NONE)
-			nType = GetAttribType(attrib, dwFlags);
+			nType = GetAttribType(attrib, bRelativeDate);
 
 		ASSERT ((nType != FT_NONE) || 
 				(attrib == TDCA_NONE) || 
@@ -1328,7 +1325,7 @@ struct SEARCHPARAM
 			// handle relative dates
 			if ((nType == FT_DATE) || (nType == FT_DATERELATIVE)) 
 			{
-				dwFlags = (nType == FT_DATERELATIVE);
+				bRelativeDate = (nType == FT_DATERELATIVE);
 			}
 		}
 	}
@@ -1487,9 +1484,44 @@ struct SEARCHPARAM
 		bAnd = and;
 	}
 
+	void SetTimeUnits(TDC_UNITS nUnits)
+	{
+		nTimeUnits = nUnits;
+	}
+
+	void SetMatchWholeWord(BOOL bMatchWhole)
+	{
+		bMatchWholeWord = bMatchWhole;
+	}
+
 	void SetFlags(DWORD flags)
 	{
 		dwFlags = flags;
+	}
+
+	void SetRelativeDate(BOOL bRelative)
+	{
+		bRelativeDate = bRelative;
+	}
+
+	DWORD GetFlags() const
+	{
+		return dwFlags;
+	}
+
+	TDC_UNITS GetTimeUnits() const
+	{
+		return nTimeUnits;
+	}
+
+	BOOL GetMatchWholeWord() const
+	{
+		return bMatchWholeWord;
+	}
+
+	BOOL GetRelativeDate() const
+	{
+		return bRelativeDate;
 	}
 
 	void SetValue(const CString& val)
@@ -1665,13 +1697,17 @@ protected:
 	int nValue;
 	double dValue;
 	BOOL bAnd;
-	DWORD dwFlags;
 
+	union
+	{
+		TDC_UNITS nTimeUnits;
+		BOOL bMatchWholeWord;
+		BOOL bRelativeDate;
+		DWORD dwFlags; // Backwards compatibility
+	};
+	
 	mutable FIND_ATTRIBTYPE nType;
-
 };
-
-// ------------------------------------------------------------------------
 
 class CSearchParamArray : public CArray<SEARCHPARAM, SEARCHPARAM&>
 {
@@ -1713,7 +1749,6 @@ struct SEARCHPARAMS
 		bWantAllSubtasks = params.bWantAllSubtasks;
 		bIgnoreFilteredOut = params.bIgnoreFilteredOut;
 		bCaseSensitive = params.bCaseSensitive;
-		bMatchWholeWord = params.bMatchWholeWord;
 
 		aRules.Copy(params.aRules);
 		aAttribDefs.Copy(params.aAttribDefs);
@@ -1734,8 +1769,7 @@ struct SEARCHPARAMS
 				(bIgnoreOverDue == params.bIgnoreOverDue) && 
 				(bIgnoreFilteredOut == params.bIgnoreFilteredOut) && 
 				(bWantAllSubtasks == params.bWantAllSubtasks) &&
-				(bCaseSensitive == params.bCaseSensitive) &&
-				(bMatchWholeWord == params.bMatchWholeWord));
+				(bCaseSensitive == params.bCaseSensitive));
 	}
 
 	void Clear()
@@ -1745,7 +1779,6 @@ struct SEARCHPARAMS
 		bWantAllSubtasks = FALSE;
 		bIgnoreFilteredOut = TRUE;
 		bCaseSensitive = FALSE;
-		bMatchWholeWord = FALSE;
 		
 		aRules.RemoveAll();
 		aAttribDefs.RemoveAll();
@@ -1794,7 +1827,6 @@ struct SEARCHPARAMS
 	BOOL bWantAllSubtasks;
 	BOOL bIgnoreFilteredOut;
 	BOOL bCaseSensitive;
-	BOOL bMatchWholeWord;
 };
 
 struct SEARCHRESULT

@@ -137,6 +137,8 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 
 	CDialog::OnInitDialog();
 
+	VERIFY(m_sbGrip.Initialize(this));
+
 	// build 'Include' combo
 	CLocalizer::EnableTranslation(m_cbInclude, FALSE);
 
@@ -215,6 +217,8 @@ void CTDLFindTasksDlg::SetUITheme(const CUIThemeFile& theme)
 		// cache current theme
 		CUIThemeFile themeCur = m_theme;
 		m_theme = theme;
+
+		m_sbGrip.SetBackgroundColor(theme.crAppBackLight);
 
 		GraphicsMisc::VerifyDeleteObject(m_brBkgnd);
 		m_brBkgnd.CreateSolidBrush(theme.crAppBackLight);

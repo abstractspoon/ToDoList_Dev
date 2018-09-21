@@ -225,7 +225,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 	if (nItem < 0 || nItem > GetRuleCount() || nCol > ANDOR_COL)
 		return NULL;
 
-	const SEARCHPARAM& sp = m_aSearchParams[nItem];
+	const SEARCHPARAM& rule = m_aSearchParams[nItem];
 
 	switch (nCol)
 	{
@@ -233,20 +233,20 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 		return &m_cbAttributes;
 
 	case OPERATOR_COL:
-		if (!sp.AttributeIs(TDCA_NONE))
+		if (!rule.AttributeIs(TDCA_NONE))
 		{
 			return &m_cbOperators;
 		}
 		break;
 
 	case VALUE_COL:
-		if (sp.OperatorIs(FOP_SET) || sp.OperatorIs(FOP_NOT_SET))
+		if (rule.OperatorIs(FOP_SET) || rule.OperatorIs(FOP_NOT_SET))
 		{
 			// handled by operator
 		}
 		else
 		{
-			FIND_ATTRIBTYPE nType = sp.GetAttribType();
+			FIND_ATTRIBTYPE nType = rule.GetAttribType();
 
 			switch (nType)
 			{
@@ -265,7 +265,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 				break;
 
 			default:
-				switch (sp.GetAttribute())
+				switch (rule.GetAttribute())
 				{
 				case TDCA_ALLOCTO:
 				case TDCA_ALLOCBY:
@@ -285,7 +285,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 					{
 						TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-						if (CTDCCustomAttributeHelper::GetAttributeDef(sp.GetAttribute(), m_aAttribDefs, attribDef))
+						if (CTDCCustomAttributeHelper::GetAttributeDef(rule.GetAttribute(), m_aAttribDefs, attribDef))
 						{
 							if (attribDef.IsList())
 							{
@@ -325,7 +325,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 	if (!pEdit)
 		return;
 
-	SEARCHPARAM& sp = m_aSearchParams[nItem];
+	SEARCHPARAM& rule = m_aSearchParams[nItem];
 
 	switch (nCol)
 	{
@@ -336,9 +336,9 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 		break;
 
 	case VALUE_COL:
-		if ((sp.GetOperator() != FOP_SET) && (sp.GetOperator() != FOP_NOT_SET))
+		if ((rule.GetOperator() != FOP_SET) && (rule.GetOperator() != FOP_NOT_SET))
 		{
-			switch (sp.GetAttribType())
+			switch (rule.GetAttribType())
 			{
 			case FT_DATE:
 			case FT_TIMEPERIOD:
@@ -355,23 +355,23 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 
 			case FT_ICON:
 				{
-					BOOL bBrowse = (sp.GetAttribute() == TDCA_ICON);
+					BOOL bBrowse = (rule.GetAttribute() == TDCA_ICON);
 
 					if (!bBrowse)
 					{
 						TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-						if (CTDCCustomAttributeHelper::GetAttributeDef(sp.GetAttribute(), m_aAttribDefs, attribDef))
+						if (CTDCCustomAttributeHelper::GetAttributeDef(rule.GetAttribute(), m_aAttribDefs, attribDef))
 							bBrowse = !attribDef.IsList();
 					}
 					
 					if (bBrowse)
 					{
-						CTDLTaskIconDlg dialog(m_ilIcons, sp.ValueAsString());
+						CTDLTaskIconDlg dialog(m_ilIcons, rule.ValueAsString());
 
 						if (dialog.DoModal() == IDOK)
 						{
-							sp.SetValue(dialog.GetIconName());
+							rule.SetValue(dialog.GetIconName());
 							UpdateValueColumnText(nItem);
 						}
 					}
@@ -384,7 +384,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 				break;
 
 			default:
-				switch (sp.GetAttribute())
+				switch (rule.GetAttribute())
 				{
 				case TDCA_ICON:
 					{
@@ -413,7 +413,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 		return CInputListCtrl::GetCellType(nRow, nCol);
 	}
 
-	const SEARCHPARAM& sp = m_aSearchParams[nRow];
+	const SEARCHPARAM& rule = m_aSearchParams[nRow];
 
 	switch (nCol)
 	{
@@ -421,20 +421,20 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 		return ILCT_DROPLIST;
 
 	case OPERATOR_COL:
-		if (!sp.AttributeIs(TDCA_NONE))
+		if (!rule.AttributeIs(TDCA_NONE))
 		{
 			return ILCT_DROPLIST;
 		}
 		break;
 
 	case VALUE_COL:
-		if (sp.OperatorIs(FOP_SET) || sp.OperatorIs(FOP_NOT_SET))
+		if (rule.OperatorIs(FOP_SET) || rule.OperatorIs(FOP_NOT_SET))
 		{
 			// handled by operator
 		}
 		else
 		{
-			switch (sp.GetAttribType())
+			switch (rule.GetAttribType())
 			{
 			case FT_DATE:
 				return ILCT_DATE;
@@ -447,7 +447,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 					TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 					BOOL bList = FALSE;
 
-					if (CTDCCustomAttributeHelper::GetAttributeDef(sp.GetAttribute(), m_aAttribDefs, attribDef))
+					if (CTDCCustomAttributeHelper::GetAttributeDef(rule.GetAttribute(), m_aAttribDefs, attribDef))
 						bList = attribDef.IsList();
 
 					return (bList ? ILCT_DROPLIST : ILCT_BROWSE);
@@ -468,7 +468,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 
 			default:
 				{
-					TDC_ATTRIBUTE nAttrib = sp.GetAttribute();
+					TDC_ATTRIBUTE nAttrib = rule.GetAttribute();
 
 					switch (nAttrib)
 					{
@@ -550,11 +550,11 @@ BOOL CTDLFindTaskExpressionListCtrl::CanEditSelectedCell() const
 
 void CTDLFindTaskExpressionListCtrl::PrepareEdit(int nRow, int /*nCol*/)
 {
-	const SEARCHPARAM& sp = m_aSearchParams[nRow];
+	const SEARCHPARAM& rule = m_aSearchParams[nRow];
 
 	m_editBox.DeleteAllButtons();
 
-	switch (sp.GetAttribType())
+	switch (rule.GetAttribType())
 	{
 	case FT_STRING:
 		m_editBox.SetMask(_T(""));
@@ -585,9 +585,9 @@ void CTDLFindTaskExpressionListCtrl::PrepareEdit(int nRow, int /*nCol*/)
 
 BOOL CTDLFindTaskExpressionListCtrl::AddRule()
 {
-	SEARCHPARAM sp(TDCA_TASKNAMEORCOMMENTS, FOP_INCLUDES);
+	SEARCHPARAM rule(TDCA_TASKNAMEORCOMMENTS, FOP_INCLUDES);
 
-	int nRow = InsertRule(GetRuleCount(), sp);
+	int nRow = InsertRule(GetRuleCount(), rule);
 
 	// make sure the 'and/or' text of the preceding rule is set
 	RefreshAndOrColumnText();
@@ -629,14 +629,14 @@ void CTDLFindTaskExpressionListCtrl::MoveSelectedRuleUp()
 		GetCurSel(nRow, nCol);
 
 		// save off rule
-		SEARCHPARAM sp = m_aSearchParams[nRow];
+		SEARCHPARAM rule = m_aSearchParams[nRow];
 
 		// delete rule
 		m_aSearchParams.RemoveAt(nRow);
 		DeleteItem(nRow);
 
 		// reinsert rule
-		nRow = InsertRule(nRow - 1, sp);
+		nRow = InsertRule(nRow - 1, rule);
 
 		// sanity check
 		ValidateListData();
@@ -647,14 +647,14 @@ void CTDLFindTaskExpressionListCtrl::MoveSelectedRuleUp()
 	}
 }
 
-int CTDLFindTaskExpressionListCtrl::InsertRule(int nRow, const SEARCHPARAM& sp)
+int CTDLFindTaskExpressionListCtrl::InsertRule(int nRow, const SEARCHPARAM& rule)
 {
-	m_aSearchParams.InsertAt(nRow, SEARCHPARAM(sp));
+	m_aSearchParams.InsertAt(nRow, SEARCHPARAM(rule));
 
-	CString sItem = m_cbAttributes.GetAttributeName(sp);
+	CString sItem = m_cbAttributes.GetAttributeName(rule);
 	int nNew = InsertItem(nRow, sItem);
 
-	SetItemText(nNew, OPERATOR_COL, GetOpName(sp.GetOperator()));
+	SetItemText(nNew, OPERATOR_COL, GetOpName(rule.GetOperator()));
 
 	UpdateValueColumnText(nRow);
 	
@@ -679,14 +679,14 @@ void CTDLFindTaskExpressionListCtrl::MoveSelectedRuleDown()
 		GetCurSel(nRow, nCol);
 
 		// save off rule
-		SEARCHPARAM sp = m_aSearchParams[nRow];
+		SEARCHPARAM rule = m_aSearchParams[nRow];
 
 		// delete rule
 		m_aSearchParams.RemoveAt(nRow);
 		DeleteItem(nRow);
 
 		// reinsert rule
-		nRow = InsertRule(nRow + 1, sp);
+		nRow = InsertRule(nRow + 1, rule);
 	
 		// sanity check
 		ValidateListData();
@@ -709,7 +709,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 	if (!GetRuleCount())
 		return;
 
-	SEARCHPARAM& sp = m_aSearchParams[nRow];
+	SEARCHPARAM& rule = m_aSearchParams[nRow];
 
 	switch (nCol)
 	{
@@ -717,7 +717,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 		{
 			ASSERT (&ctrl == &m_cbAttributes);
 	
-			m_cbAttributes.SelectAttribute(sp);
+			m_cbAttributes.SelectAttribute(rule);
 			CDialogHelper::RefreshMaxDropWidth(m_cbAttributes);
 		}
 		break;
@@ -728,7 +728,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 
 			m_cbOperators.ResetContent();
 			
-			FIND_ATTRIBTYPE nType = sp.GetAttribType();
+			FIND_ATTRIBTYPE nType = rule.GetAttribType();
 			
 			switch (nType)
 			{
@@ -774,7 +774,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 				break;
 			}
 	
-			CDialogHelper::SelectItemByData(m_cbOperators, (DWORD)sp.GetOperator());
+			CDialogHelper::SelectItemByData(m_cbOperators, (DWORD)rule.GetOperator());
 		}
 		break;
 
@@ -782,7 +782,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 		{
 			ASSERT (&ctrl == &m_cbAndOr);
 
-			if (sp.GetAnd())
+			if (rule.GetAnd())
 				m_cbAndOr.SelectString(-1, CEnString(IDS_FP_AND));
 			else
 				m_cbAndOr.SelectString(-1, CEnString(IDS_FP_OR));
@@ -794,32 +794,32 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 		{
 			// if the rule does not yet have a date then set it now to
 			// the current date because that's whats the date ctrl will default to
-			if (!CDateHelper::IsDateSet(sp.ValueAsDate()))
+			if (!CDateHelper::IsDateSet(rule.ValueAsDate()))
 			{
-				sp.SetValue(COleDateTime::GetCurrentTime());
-				SetItemText(nRow, nCol, sp.ValueAsDate().Format(VAR_DATEVALUEONLY));
+				rule.SetValue(COleDateTime::GetCurrentTime());
+				SetItemText(nRow, nCol, rule.ValueAsDate().Format(VAR_DATEVALUEONLY));
 			}
 			else
 			{
-				m_dtcDate.SetTime(sp.ValueAsDouble());
+				m_dtcDate.SetTime(rule.ValueAsDouble());
 			}
 		}
 		else if (&ctrl == &m_eTime)
 		{
-			m_eTime.SetTime(sp.ValueAsDouble(), TDC::MapUnitsToTHUnits((TDC_UNITS)sp.GetFlags()));
+			m_eTime.SetTime(rule.ValueAsDouble(), TDC::MapUnitsToTHUnits(rule.GetTimeUnits()));
 		}
 		else if (&ctrl == &m_cbCustomIcons)
 		{
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-			if (CTDCCustomAttributeHelper::GetAttributeDef(sp.GetAttribute(), m_aAttribDefs, attribDef))
+			if (CTDCCustomAttributeHelper::GetAttributeDef(rule.GetAttribute(), m_aAttribDefs, attribDef))
 			{
 				ASSERT(attribDef.IsList());
 
  				CDialogHelper::SetComboBoxItems(m_cbCustomIcons, attribDef.aDefaultListData);
 
 				CStringArray aIcons;
-				Misc::Split(sp.ValueAsString(), aIcons);
+				Misc::Split(rule.ValueAsString(), aIcons);
 				m_cbCustomIcons.SetChecked(aIcons);
 			}
 
@@ -830,7 +830,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-			if (CTDCCustomAttributeHelper::GetAttributeDef(sp.GetAttribute(), m_aAttribDefs, attribDef))
+			if (CTDCCustomAttributeHelper::GetAttributeDef(rule.GetAttribute(), m_aAttribDefs, attribDef))
 			{
 				if (attribDef.IsList())
 				{
@@ -847,7 +847,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 			}
 			else
 			{
-				switch (sp.GetAttribute())
+				switch (rule.GetAttribute())
 				{
 				case TDCA_CATEGORY: CDialogHelper::SetComboBoxItems(m_cbListValues, m_tldListContents.aCategory); break;
 				case TDCA_ALLOCTO:	CDialogHelper::SetComboBoxItems(m_cbListValues, m_tldListContents.aAllocTo); break;
@@ -858,15 +858,15 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 				}
 			}
 
-			m_cbListValues.SelectString(0, sp.ValueAsString());
+			m_cbListValues.SelectString(0, rule.ValueAsString());
 		}
 		else if (&ctrl == &m_cbPriority)
 		{
-			m_cbPriority.SetSelectedPriority(sp.ValueAsInteger());
+			m_cbPriority.SetSelectedPriority(rule.ValueAsInteger());
 		}
 		else if (&ctrl == &m_cbRisk)
 		{
-			m_cbRisk.SetSelectedRisk(sp.ValueAsInteger());
+			m_cbRisk.SetSelectedRisk(rule.ValueAsInteger());
 		}
 		break;
 	}
@@ -915,23 +915,23 @@ void CTDLFindTaskExpressionListCtrl::OnAttribEditOK()
 
 	if (nRow != CB_ERR)
 	{
-		SEARCHPARAM& sp = m_aSearchParams[nRow];
-		SEARCHPARAM spNew(sp);
+		SEARCHPARAM& rule = m_aSearchParams[nRow];
+		SEARCHPARAM ruleNew(rule);
 
-		if (m_cbAttributes.GetSelectedAttribute(spNew) && (sp != spNew))
+		if (m_cbAttributes.GetSelectedAttribute(ruleNew) && (rule != ruleNew))
 		{
-			sp = spNew;
+			rule = ruleNew;
 
 			// update list text
 			CString sAttrib = m_cbAttributes.GetSelectedAttributeText();
 			SetItemText(nRow, ATTRIB_COL, sAttrib);
 
 			// clear the operator cell text if the operator was no longer valid
-			if (sp.OperatorIs(FOP_NONE))
+			if (rule.OperatorIs(FOP_NONE))
 				SetItemText(nRow, OPERATOR_COL, _T(""));
 
 			// Always clear the text value
-			sp.SetValue(_T(""));
+			rule.SetValue(_T(""));
 			UpdateValueColumnText(nRow);
 			
 			ValidateListData();
@@ -962,15 +962,15 @@ void CTDLFindTaskExpressionListCtrl::OnValueEditOK(NMHDR* pNMHDR, LRESULT* pResu
 
 	ASSERT (nCol == VALUE_COL);
 
-	SEARCHPARAM& sp = m_aSearchParams[nRow];
+	SEARCHPARAM& rule = m_aSearchParams[nRow];
 
-	switch (sp.GetAttribType())
+	switch (rule.GetAttribType())
 	{
 	case FT_STRING:
 	case FT_DATERELATIVE:
 	case FT_INTEGER:
 	case FT_DOUBLE:
-		sp.SetValue(pDispInfo->item.pszText);
+		rule.SetValue(pDispInfo->item.pszText);
 		break;
 		
 	case FT_DATE:
@@ -1064,6 +1064,8 @@ void CTDLFindTaskExpressionListCtrl::OnListValuesEditOK()
 	m_cbListValues.GetChecked(aSel);
 
 	m_aSearchParams[nRow].SetValue(Misc::FormatArray(aSel));
+	m_aSearchParams[nRow].SetMatchWholeWord(TRUE); // because lists are read-only
+
 	UpdateValueColumnText(nRow);
 }
 
@@ -1124,14 +1126,14 @@ void CTDLFindTaskExpressionListCtrl::BuildListCtrl()
 
 	for (int nParam = 0; nParam < GetRuleCount(); nParam++)
 	{
-		const SEARCHPARAM& sp = m_aSearchParams[nParam];
+		const SEARCHPARAM& rule = m_aSearchParams[nParam];
 
 		// attrib
-		CString sAttrib = m_cbAttributes.GetAttributeName(sp);
+		CString sAttrib = m_cbAttributes.GetAttributeName(rule);
 		int nItem = InsertItem(nParam, sAttrib);
 
 		// operator
-		CString sOp = GetOpName(sp.GetOperator());
+		CString sOp = GetOpName(rule.GetOperator());
 		SetItemText(nItem, OPERATOR_COL, sOp);
 
 		// value
@@ -1140,7 +1142,7 @@ void CTDLFindTaskExpressionListCtrl::BuildListCtrl()
 		// and/or (but not for last row)
 		if (nParam < GetRuleCount() - 1)
 		{
-			CEnString sAndOr(sp.GetAnd() ? IDS_FP_AND : IDS_FP_OR);
+			CEnString sAndOr(rule.GetAnd() ? IDS_FP_AND : IDS_FP_OR);
 			SetItemText(nItem, ANDOR_COL, sAndOr);
 		}
 	}
@@ -1158,12 +1160,12 @@ void CTDLFindTaskExpressionListCtrl::RefreshAndOrColumnText()
 {
 	for (int nParam = 0; nParam < GetRuleCount(); nParam++)
 	{
-		const SEARCHPARAM& sp = m_aSearchParams[nParam];
+		const SEARCHPARAM& rule = m_aSearchParams[nParam];
 		
 		// and/or (but not for last row)
 		if (nParam < GetRuleCount() - 1)
 		{
-			CEnString sAndOr(sp.GetAnd() ? IDS_FP_AND : IDS_FP_OR);
+			CEnString sAndOr(rule.GetAnd() ? IDS_FP_AND : IDS_FP_OR);
 			SetItemText(nParam, ANDOR_COL, sAndOr);
 		}
 		else
@@ -1184,30 +1186,30 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 	if (m_aSearchParams.GetSize() < GetItemCount() - 1)
 		return;
 
-	const SEARCHPARAM& sp = m_aSearchParams[nRow];
+	const SEARCHPARAM& rule = m_aSearchParams[nRow];
 	CString sValue;
 		
 	// value (but not boolean)
-	if (sp.GetOperator() != FOP_SET && sp.GetOperator() != FOP_NOT_SET)
+	if (rule.GetOperator() != FOP_SET && rule.GetOperator() != FOP_NOT_SET)
 	{
 		try
 		{
-			switch (sp.GetAttribType())
+			switch (rule.GetAttribType())
 			{
 			case FT_STRING:
 			case FT_DATERELATIVE:
 			case FT_INTEGER:
 			case FT_DOUBLE:
 			case FT_ICON:
-				sValue = sp.ValueAsString();
+				sValue = rule.ValueAsString();
 				break;
 				
 			case FT_DATE:
-				sValue = sp.ValueAsDate().Format(VAR_DATEVALUEONLY);
+				sValue = rule.ValueAsDate().Format(VAR_DATEVALUEONLY);
 				break;
 				
 			case FT_TIMEPERIOD:
-				sValue = CTimeHelper().FormatTime(sp.ValueAsDouble(), TDC::MapUnitsToTHUnits((TDC_UNITS)sp.GetFlags()), 2);
+				sValue = CTimeHelper().FormatTime(rule.ValueAsDouble(), TDC::MapUnitsToTHUnits(rule.GetTimeUnits()), 2);
 				break;
 				
 			case FT_BOOL:
@@ -1305,7 +1307,7 @@ void CTDLFindTaskExpressionListCtrl::OnTimeChange()
 	SEARCHPARAM& rule = m_aSearchParams[nRow];
 
 	rule.SetValue(m_eTime.GetTime());
-	rule.SetFlags(TDC::MapTHUnitsToUnits(m_eTime.GetUnits()));
+	rule.SetTimeUnits(TDC::MapTHUnitsToUnits(m_eTime.GetUnits()));
 
 	UpdateValueColumnText(nRow);
 }
@@ -1316,7 +1318,7 @@ LRESULT CTDLFindTaskExpressionListCtrl::OnTimeUnitsChange(WPARAM /*wp*/, LPARAM 
 	int nRow = GetCurSel();
 	SEARCHPARAM& rule = m_aSearchParams[nRow];
 
-	rule.SetFlags(TDC::MapTHUnitsToUnits(m_eTime.GetUnits()));
+	rule.SetTimeUnits(TDC::MapTHUnitsToUnits(m_eTime.GetUnits()));
 
 	UpdateValueColumnText(nRow);
 
@@ -1474,9 +1476,9 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 {
 	if ((nCol == VALUE_COL) && !IsPrompt(nRow))
 	{
-		const SEARCHPARAM& sp = m_aSearchParams[nRow];
+		const SEARCHPARAM& rule = m_aSearchParams[nRow];
 
-		if (sp.HasIcon())
+		if (rule.HasIcon())
 		{
 			CStringArray aIcons;
 			int nNumIcons = Misc::Split(sText, aIcons);

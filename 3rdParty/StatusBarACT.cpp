@@ -162,6 +162,18 @@ void CStatusBarACT::OnPaint()
 		}
 
 		dc.SelectObject(pOldFont);
+
+		// Draw size grip
+		if (CThemed::IsAppThemed() && (GetStyle() & SBARS_SIZEGRIP))
+		{
+			CThemed th(this, _T("SCROLLBAR"));
+			CRect rGrip(rClient);
+
+			rGrip.left = rGrip.right - 24;
+			rGrip.top = rGrip.bottom - 24;
+
+			th.DrawBackground(&dc, SBP_SIZEBOX, SZB_RIGHTALIGN, rGrip);
+		}
 	}
 }
 

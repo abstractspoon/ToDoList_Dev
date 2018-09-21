@@ -19,9 +19,8 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLAttributeListBox
 
-CTDLAttributeListBox::CTDLAttributeListBox()
+CTDLAttributeListBox::CTDLAttributeListBox(const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
-	// same order as enum
 	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_ALLOCBY,			TDCA_ALLOCBY,		FALSE)); 
 	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_ALLOCTO,			TDCA_ALLOCTO,		TRUE)); 
 	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_CATEGORY,		TDCA_CATEGORY,		FALSE)); 
@@ -52,6 +51,25 @@ CTDLAttributeListBox::CTDLAttributeListBox()
 	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_TIMEEST,			TDCA_TIMEEST,		FALSE)); 
 	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_TIMESPENT,		TDCA_TIMESPENT,		FALSE)); 
 	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_VERSION,			TDCA_VERSION,		FALSE)); 
+
+	// Custom attributes
+	int nIndex = aAttribDefs.GetSize();
+	ATTRIBVIS vis;
+
+	while (nIndex--)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nIndex];
+
+		if (attribDef.bEnabled)
+		{
+			vis.sName.Format(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+			vis.nTDCAttrib = attribDef.GetAttributeID();
+			vis.sCustAttribID = attribDef.sUniqueID;
+			vis.bVisible = TRUE;
+
+			m_aAttribs.Add(vis);
+		}
+	}
 }
 
 CTDLAttributeListBox::~CTDLAttributeListBox()
@@ -68,47 +86,6 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLAttributeListBox message handlers
-
-BOOL CTDLAttributeListBox::SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs)
-{
-	if (GetSafeHwnd())
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	// remove existing custom definitions
-	int nIndex = m_aAttribs.GetSize();
-	
-	while (nIndex--)
-	{
-		TDC_ATTRIBUTE nAttrib = m_aAttribs[nIndex].nTDCAttrib;
-
-		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
-			m_aAttribs.RemoveAt(nIndex);
-	}
-
-	// Append new custom attributes
-	// Note: order doesn't matter because the list will be sorted
-	nIndex = aAttribDefs.GetSize();
-	ATTRIBVIS vis;
-
-	while (nIndex--)
-	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nIndex];
-
-		if (attribDef.bEnabled)
-		{
-			vis.sName.Format(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-			vis.nTDCAttrib = attribDef.GetAttributeID();
-			vis.bVisible = TRUE;
-
-			m_aAttribs.Add(vis);
-		}
-	}
-
-	return TRUE;
-}
 
 void CTDLAttributeListBox::PreSubclassWindow() 
 {
@@ -152,6 +129,8 @@ void CTDLAttributeListBox::SetAllAttributesVisible(BOOL bVisible)
 
 int CTDLAttributeListBox::GetAllAttributes(CTDCAttributeMap& mapAttrib) const
 {
+	mapAttrib.RemoveAll();
+
 	int nIndex = m_aAttribs.GetSize();
 	
 	while (nIndex--)
@@ -169,11 +148,11 @@ BOOL CTDLAttributeListBox::OnReflectCheckChange()
 	
 	while (nIndex--)
 	{
-		TDC_ATTRIBUTE col = (TDC_ATTRIBUTE)GetItemData(nIndex);
-		int nAttrib = FindAttribute(col);
+		TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)GetItemData(nIndex);
+		int nFind = FindAttribute(nAttribID);
 
-		if (nAttrib != -1)
-			m_aAttribs[nAttrib].bVisible = GetCheck(nIndex);
+		if (nFind != -1)
+			m_aAttribs[nFind].bVisible = GetCheck(nIndex);
 	}
 
 	// continue routing
@@ -190,7 +169,7 @@ LRESULT CTDLAttributeListBox::OnInitListBox(WPARAM /*wp*/, LPARAM /*lp*/)
 	{
 		const ATTRIBVIS& cs = m_aAttribs[nIndex];
 
-		int nPos = AddString(cs.sName); // same order as enum
+		int nPos = AddString(cs.sName); 
 		SetCheck(nPos, cs.bVisible ? 1 : 0);
 		SetItemData(nPos, (DWORD)cs.nTDCAttrib);
 	}
@@ -200,7 +179,7 @@ LRESULT CTDLAttributeListBox::OnInitListBox(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0L;
 }
 
-void CTDLAttributeListBox::SetVisibleAttributes(const CTDCAttributeMap& mapAttrib)
+void CTDLAttributeListBox::SetVisibleAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs)
 {
 	int nAttrib = m_aAttribs.GetSize();
 	
@@ -208,14 +187,54 @@ void CTDLAttributeListBox::SetVisibleAttributes(const CTDCAttributeMap& mapAttri
 	{
 		ATTRIBVIS& vis = m_aAttribs[nAttrib];
 
-		vis.bVisible = mapAttrib.Has(vis.nTDCAttrib);
+		if (vis.sCustAttribID.IsEmpty())
+		{
+			vis.bVisible = mapAttrib.Has(vis.nTDCAttrib);
+		}
+		else
+		{
+			ASSERT (CTDCCustomAttributeHelper::IsCustomAttribute(vis.nTDCAttrib));
 
-			if (GetSafeHwnd())
-				SetCheck(nAttrib, vis.bVisible);
+			vis.bVisible = mapCustomAttribIDs.Has(vis.sCustAttribID);
+		}
+		
+		if (GetSafeHwnd())
+			SetCheck(nAttrib, vis.bVisible);
 	}
 }
 
-int CTDLAttributeListBox::GetVisibleAttributes(CTDCAttributeMap& mapAttrib) const
+void CTDLAttributeListBox::GetVisibleAttributes(CTDCAttributeMap& mapAttrib, CStringSet& mapCustomAttribIDs) const
+{
+	mapAttrib.RemoveAll();
+	mapCustomAttribIDs.RemoveAll();
+
+	int nIndex = m_aAttribs.GetSize();
+	
+	while (nIndex--)
+	{
+		const ATTRIBVIS& vis = m_aAttribs[nIndex];
+
+		if (vis.bVisible)
+		{
+			if (vis.sCustAttribID.IsEmpty())
+			{
+				mapAttrib.Add(vis.nTDCAttrib);
+
+				// parent ID
+				if (vis.nTDCAttrib == TDCA_ID)
+					mapAttrib.Add(TDCA_PARENTID);
+			}
+			else
+			{
+				ASSERT (CTDCCustomAttributeHelper::IsCustomAttribute(vis.nTDCAttrib));
+
+				mapCustomAttribIDs.Add(vis.sCustAttribID);
+			}
+		}
+	}
+}
+
+void CTDLAttributeListBox::GetVisibleAttributes(CTDCAttributeMap& mapAttrib) const
 {
 	mapAttrib.RemoveAll();
 
@@ -223,7 +242,7 @@ int CTDLAttributeListBox::GetVisibleAttributes(CTDCAttributeMap& mapAttrib) cons
 	
 	while (nIndex--)
 	{
-		ATTRIBVIS vis = m_aAttribs[nIndex];
+		const ATTRIBVIS& vis = m_aAttribs[nIndex];
 
 		if (vis.bVisible)
 		{
@@ -234,6 +253,4 @@ int CTDLAttributeListBox::GetVisibleAttributes(CTDCAttributeMap& mapAttrib) cons
 				mapAttrib.Add(TDCA_PARENTID);
 		}
 	}
-
-	return mapAttrib.GetCount();
 }

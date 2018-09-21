@@ -32,7 +32,7 @@ static char THIS_FILE[] = __FILE__;
 CTDLSetReminderDlg::CTDLSetReminderDlg(CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLSetReminderDlg::IDD, _T("Reminders"), pParent), 
-	m_cbAbsoluteTime(TCB_HALFHOURS),
+	m_cbAbsoluteTime(TCB_HALFHOURS | TCB_HOURSINDAY),
 	m_cbLeadIn(TDLRPC_SHOWZERO)
 {
 	//{{AFX_DATA_INIT(CTDLSetReminderDlg)

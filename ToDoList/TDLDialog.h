@@ -9,6 +9,7 @@
 
 #include "..\shared\winhelpbutton.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\SizeGrip.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLDialog dialog
@@ -21,6 +22,8 @@ protected:
 
 protected:
 	CWinHelpButton m_btnHelp;
+	CSizeGrip m_sbGrip;
+
 	CSize m_sizeOrg, m_sizePrev;
 	CString m_sPrefsKey;
 

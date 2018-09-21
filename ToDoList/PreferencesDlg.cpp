@@ -204,6 +204,8 @@ BOOL CPreferencesDlg::OnInitDialog()
 	CPreferencesDlgBase::OnInitDialog();
 
 	CPreferencesDlgCopyHookMgr::Initialize(*this);
+
+	m_sbGrip.Initialize(this);
 	
 	// disable translation of category title because
 	// categories will already been translated
@@ -579,6 +581,8 @@ void CPreferencesDlg::ReposContents(CDeferWndMove& dwm, int nDX, int nDY)
 void CPreferencesDlg::SetUITheme(const CUIThemeFile& theme)
 {
 	m_theme = theme;
+
+	m_sbGrip.SetBackgroundColor(theme.crAppBackLight);
 
 	SetTitleThemeColors(m_stPageTitle, theme);
 	SetTitleThemeColors(m_stCategoryTitle, theme);

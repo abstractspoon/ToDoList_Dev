@@ -184,9 +184,9 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_cbFileRef(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS | FES_DISPLAYSIMAGES),
 	m_cbStatus(ACBS_ALLOWDELETE),
 	m_cbTags(ACBS_ALLOWDELETE),
-	m_cbTimeDone(TCB_NOTIME),
-	m_cbTimeDue(TCB_NOTIME),
-	m_cbTimeStart(TCB_NOTIME),
+	m_cbTimeDone(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
+	m_cbTimeDue(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
+	m_cbTimeStart(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	m_cbVersion(ACBS_ALLOWDELETE),
 	m_cfDefault(cfDefault),
 	m_dCost(0),
@@ -5531,24 +5531,21 @@ LRESULT CToDoCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 
 		// set selection to previous task and if that fails then next task
 		if (!GotoNextTask(TDCG_PREV) && !GotoNextTask(TDCG_NEXT))
+		{
 			TSH().RemoveAll();
+		}
 		
 		// then delete and remove from undo
 		{
 			CHoldRedraw hr(m_taskTree);
-
 			m_taskTree.DeleteItem(hti);
+
 			m_data.DeleteTask(m_dwLastAddedID);
 			m_data.DeleteLastUndoAction();
-
-			SetModified(TRUE, TDCA_DELETE, m_dwLastAddedID);
 		}
 
-		// resync fields for selected task
+		SetModified(TRUE, TDCA_DELETE, m_dwLastAddedID);
 		UpdateControls();
-		
-		// notify parent of deletion
-		GetParent()->SendMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)TDCA_DELETE); 
 	}
 
 	SetFocusToTasks();
@@ -7024,7 +7021,7 @@ void CToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModTaskID)
 			}
 		}
 
-		GetParent()->SendMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)nAttrib);
+		GetParent()->PostMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)nAttrib);
 
 		// special cases: 
 		switch (nAttrib)
@@ -10951,12 +10948,12 @@ BOOL CToDoCtrl::SelectTask(const CString& sPart, TDC_SELECTTASK nSelect)
 BOOL CToDoCtrl::SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL /*bFindReplace*/)
 {
-	SEARCHPARAMS params;
 	SEARCHPARAM rule(nAttrib, FOP_INCLUDES, sPart);
+	rule.SetMatchWholeWord(bWholeWord);
 
+	SEARCHPARAMS params;
 	params.aRules.Add(rule);
 	params.bCaseSensitive = bCaseSensitive;
-	params.bMatchWholeWord = bWholeWord;
 
 	HTREEITEM htiStart = NULL; // first item
 	BOOL bForwards = TRUE;

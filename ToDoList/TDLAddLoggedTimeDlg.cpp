@@ -21,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, double dHours, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLAddLoggedTimeDlg::IDD, _T("AddLoggedTime"), pParent), 
-	m_cbTimeWhen(TCB_HALFHOURS),
+	m_cbTimeWhen(TCB_HALFHOURS | TCB_HOURSINDAY),
 	m_dLoggedTime(0.0),
 	m_dwTaskID(dwTaskID),
 	m_sTaskTitle(szTaskTitle),

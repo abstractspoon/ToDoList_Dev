@@ -4725,16 +4725,12 @@ void CTDLTaskCtrlBase::RedrawTasks(BOOL bErase) const
 void CTDLTaskCtrlBase::OnBeginRebuild()
 {
 	EnableResync(FALSE);
-
-	m_lcColumns.SetRedraw(FALSE);
-	::SendMessage(Tasks(), WM_SETREDRAW, 0, 0);
+	OnSetRedraw(FALSE, 0);
 }
 
 void CTDLTaskCtrlBase::OnEndRebuild()
 {
-	m_lcColumns.SetRedraw(TRUE);
-	::SendMessage(Tasks(), WM_SETREDRAW, TRUE, 0);
-
+	OnSetRedraw(TRUE, 0);
 	EnableResync(TRUE, Tasks());
 }
 

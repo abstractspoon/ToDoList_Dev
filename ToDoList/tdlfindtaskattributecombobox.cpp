@@ -46,9 +46,9 @@ void CTDLFindTaskAttributeComboBox::SetCustomAttributes(const CTDCCustomAttribDe
 		BuildCombo();
 }
 
-BOOL CTDLFindTaskAttributeComboBox::SelectAttribute(const SEARCHPARAM& sp)
+BOOL CTDLFindTaskAttributeComboBox::SelectAttribute(const SEARCHPARAM& rule)
 {
-	DWORD dwItemData = EncodeItemData(sp.GetAttribute(), sp.GetFlags());
+	DWORD dwItemData = EncodeItemData(rule.GetAttribute(), rule.GetFlags());
 
 	return (CB_ERR != CDialogHelper::SelectItemByData(*this, dwItemData));
 }
@@ -74,7 +74,7 @@ TDC_ATTRIBUTE CTDLFindTaskAttributeComboBox::GetSelectedAttribute() const
 	return nAttrib;
 }
 
-BOOL CTDLFindTaskAttributeComboBox::GetSelectedAttribute(SEARCHPARAM& sp) const
+BOOL CTDLFindTaskAttributeComboBox::GetSelectedAttribute(SEARCHPARAM& rule) const
 {
 	int nSel = GetCurSel();
 
@@ -92,12 +92,12 @@ BOOL CTDLFindTaskAttributeComboBox::GetSelectedAttribute(SEARCHPARAM& sp) const
 			CString sUniqueID = CTDCCustomAttributeHelper::GetAttributeTypeID(nAttrib, m_aAttribDefs);
 			nType = CTDCCustomAttributeHelper::GetAttributeFindType(sUniqueID, bRelative, m_aAttribDefs);
 
-			sp.SetCustomAttribute(nAttrib, sUniqueID, nType);
+			rule.SetCustomAttribute(nAttrib, sUniqueID, nType);
 		}
 		else
 		{
 			nType = SEARCHPARAM::GetAttribType(nAttrib, bRelative);
-			sp.SetAttribute(nAttrib, nType);
+			rule.SetAttribute(nAttrib, nType);
 		}
 
 		return TRUE;
@@ -138,9 +138,9 @@ void CTDLFindTaskAttributeComboBox::BuildCombo()
 			CDialogHelper::AddString(*this, sAttrib, dwItemData); 
 
 			// is it a date
-			// then add relative version too
 			if (AttributeIsDate(ap.attrib))
 			{
+				// then add relative version too
 				dwItemData = EncodeItemData(ap.attrib, TRUE);
 
 				sAttrib += ' ';
@@ -164,6 +164,7 @@ void CTDLFindTaskAttributeComboBox::BuildCombo()
 		// is it a date
 		if (AttributeIsDate(attrib))
 		{
+			// then add relative version too
 			dwItemData = EncodeItemData(attrib, TRUE);
 			sAttrib.Format(IDS_CUSTOMRELDATECOLUMN, attribDef.sLabel);
 			
@@ -175,10 +176,9 @@ void CTDLFindTaskAttributeComboBox::BuildCombo()
 	CDialogHelper::RefreshMaxDropWidth(*this);
 }
 
-CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& sp) const
+CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule) const
 {
-	TDC_ATTRIBUTE attrib = sp.GetAttribute();
-	BOOL bRelative = sp.GetFlags();
+	TDC_ATTRIBUTE attrib = rule.GetAttribute();
 	CEnString sName;
 
 	switch (attrib)
@@ -197,7 +197,7 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& sp) c
 			{
 				if (m_aAttribDefs[nAttrib].GetAttributeID() == attrib)
 				{
-					if (AttributeIsDate(attrib) && bRelative)
+					if (AttributeIsDate(attrib) && rule.IsRelativeDate())
 					{
 						sName.Format(IDS_CUSTOMRELDATECOLUMN, m_aAttribDefs[nAttrib].sLabel);
 					}
@@ -223,7 +223,7 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& sp) c
 						// handle relative dates
 						sName.LoadString(ATTRIBUTES[nAttrib].nAttribResID);
 
-						if (AttributeIsDate(attrib) && bRelative)
+						if (AttributeIsDate(attrib) && rule.IsRelativeDate())
 						{
 							sName += ' ';
 							sName += CEnString(IDS_TDLBC_RELATIVESUFFIX);

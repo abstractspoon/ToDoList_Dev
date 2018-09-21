@@ -17,6 +17,7 @@
 #include "..\shared\wndprompt.h"
 #include "..\shared\uithemefile.h"
 #include "..\shared\icon.h"
+#include "..\shared\SizeGrip.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -76,6 +77,7 @@ protected:
 	CTDLFindTaskExpressionListCtrl m_lcFindSetup;
 	CTDLFindResultsListCtrl m_lcResults;
 	CEnToolBar m_toolbar;
+	CSizeGrip m_sbGrip;
 
 	CWndPromptManager m_mgrPrompts;
 	CDockManager m_dockMgr;

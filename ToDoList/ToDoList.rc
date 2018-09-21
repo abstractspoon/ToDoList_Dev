@@ -1252,7 +1252,8 @@ BEGIN
     CONTROL         "DateTimePicker1",IDC_ABSOLUTEDATE,"SysDateTimePick32",
                     DTS_RIGHTALIGN | WS_TABSTOP,17,60,97,13
     LTEXT           "&Time",IDC_STATIC,122,48,87,8
-    COMBOBOX        IDC_ABSOLUTETIME,122,60,97,30,CBS_DROPDOWN | WS_VSCROLL | 
+    COMBOBOX        IDC_ABSOLUTETIME,122,60,97,30,CBS_DROPDOWN | 
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "R&emind me ",IDC_STATIC,17,108,84,8
     COMBOBOX        IDC_RELATIVELEADIN,17,120,97,30,CBS_DROPDOWNLIST | 
@@ -1481,7 +1482,8 @@ BEGIN
     LTEXT           "&When:",IDC_STATIC,7,67,64,8
     CONTROL         "DateTimePicker1",IDC_WHENDATE,"SysDateTimePick32",
                     DTS_RIGHTALIGN | WS_TABSTOP,73,65,74,13
-    COMBOBOX        IDC_WHENTIME,155,65,77,30,CBS_DROPDOWN | WS_VSCROLL | 
+    COMBOBOX        IDC_WHENTIME,155,65,77,30,CBS_DROPDOWN | 
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "&Also add time to task's time spent",
                     IDC_ADDTIMETOTIMESPENT,"Button",BS_AUTOCHECKBOX | 

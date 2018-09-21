@@ -33,7 +33,8 @@ class CTaskSelectionDlg : public CDialog
 {
 // Construction
 public:
-	CTaskSelectionDlg(LPCTSTR szRegKey = NULL, FTC_VIEW nView = FTCV_TASKTREE, BOOL bVisibleColumnsOnly = FALSE); 
+	CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+						LPCTSTR szRegKey = NULL, FTC_VIEW nView = FTCV_TASKTREE, BOOL bVisibleColumnsOnly = FALSE); 
 
 	BOOL Create(UINT nIDRefFrame, CWnd* pParent, UINT nID = IDC_STATIC);
 	int DoModal() { ASSERT (0); return IDCANCEL; }
@@ -56,7 +57,6 @@ public:
 	void SetWantWhatTasks(TSD_TASKS nWhat);
 	void SetWantCompletedTasks(BOOL bWant = TRUE);
 	void SetWantInCompleteTasks(BOOL bWant = TRUE);
-	BOOL SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 protected:
 // Dialog Data
@@ -77,14 +77,16 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTaskSelectionDlg)
-	protected:
+public:
+	virtual void OnOK();
+
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
 	virtual BOOL OnInitDialog();
-
 	// Generated message map functions
 	//{{AFX_MSG(CTaskSelectionDlg)
 	afx_msg void OnChangeAttribOption();
@@ -92,7 +94,6 @@ protected:
 	afx_msg void OnChangetasksOption();
 	afx_msg void OnIncludeDone();
 	afx_msg void OnIncludeNotDone();
-	afx_msg void OnDestroy();
 	afx_msg void OnEnable(BOOL bEnable);
 	DECLARE_MESSAGE_MAP()
 

@@ -23,7 +23,7 @@ CTDLSendTasksDlg::CTDLSendTasksDlg(const CImportExportMgr& mgr, BOOL bSelectedTa
 	: 
 	CTDLDialog(CTDLSendTasksDlg::IDD, _T("SendTasks"), pParent), 
 	m_cbFormat(mgr, FALSE, TRUE),
-	m_dlgTaskSel(m_sPrefsKey, nView)
+	m_dlgTaskSel(aAttribDefs, m_sPrefsKey, nView)
 {
 	//{{AFX_DATA_INIT(CTDLSendTasksDlg)
 	//}}AFX_DATA_INIT
@@ -39,8 +39,6 @@ CTDLSendTasksDlg::CTDLSendTasksDlg(const CImportExportMgr& mgr, BOOL bSelectedTa
 	// bSelected overrides saved state
 	if (bSelectedTasks)
 		m_dlgTaskSel.SetWantWhatTasks(TSDT_SELECTED);
-
-	m_dlgTaskSel.SetCustomAttributeDefinitions(aAttribDefs);
 }
 
 
@@ -83,6 +81,7 @@ BOOL CTDLSendTasksDlg::OnInitDialog()
 void CTDLSendTasksDlg::OnOK()
 {
 	CTDLDialog::OnOK();
+	m_dlgTaskSel.OnOK();
 
 	CPreferences prefs;
 	prefs.WriteProfileInt(m_sPrefsKey, _T("SendTasksAs"), m_nSendTasksAsOption);

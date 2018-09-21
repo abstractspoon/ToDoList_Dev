@@ -19,8 +19,12 @@ static char THIS_FILE[] = __FILE__;
 // CTaskSelectionDlg dialog
 
 
-CTaskSelectionDlg::CTaskSelectionDlg(LPCTSTR szRegKey, FTC_VIEW nView, BOOL bVisibleColumnsOnly) : 
-	CDialog(), m_sRegKey(szRegKey), m_nView(nView)
+CTaskSelectionDlg::CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAttribDefs,
+									LPCTSTR szRegKey, FTC_VIEW nView, BOOL bVisibleColumnsOnly) 
+	: 
+	m_lbAttribList(aAttribDefs),
+	m_sRegKey(szRegKey), 
+	m_nView(nView)
 {
 	//{{AFX_DATA_INIT(CTaskSelectionDlg)
 	//}}AFX_DATA_INIT
@@ -42,19 +46,38 @@ CTaskSelectionDlg::CTaskSelectionDlg(LPCTSTR szRegKey, FTC_VIEW nView, BOOL bVis
 	else
 		m_nAttribOption = prefs.GetProfileInt(m_sRegKey, _T("AttributeOption"), TSDA_ALL);
 	
-	CTDCAttributeMap mapAttrib;
+	// Manual attribute selection
 	CString sGroup = m_sRegKey + _T("\\AttribVisibility");
-	int nAttrib = prefs.GetProfileInt(sGroup, _T("Count"), 0);
 
-	while (nAttrib--)
+	if (prefs.HasProfileSection(sGroup))
 	{
-		CString sKey = Misc::MakeKey(_T("att%d"), nAttrib);
-		TDC_ATTRIBUTE att = (TDC_ATTRIBUTE)prefs.GetProfileInt(sGroup, sKey, 0);
+		// Default attributes
+		CTDCAttributeMap mapAttrib;
+		int nAttrib = prefs.GetProfileInt(sGroup, _T("Count"), 0);
 
-		mapAttrib.Add(att);
+		while (nAttrib--)
+		{
+			CString sKey = Misc::MakeKey(_T("att%d"), nAttrib);
+			TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)prefs.GetProfileInt(sGroup, sKey, TDCA_NONE);
+			ASSERT(nAttribID != TDCA_NONE);
+
+			mapAttrib.Add(nAttribID);
+		}
+
+		// Custom attributes
+		CStringSet mapCustAttribIDs;
+		nAttrib = prefs.GetProfileInt(sGroup, _T("CustomCount"), 0);
+
+		while (nAttrib--)
+		{
+			CString sKey = Misc::MakeKey(_T("custom%d"), nAttrib);
+			CString sCustAttribID = prefs.GetProfileString(sGroup, sKey, 0);
+
+			mapCustAttribIDs.Add(sCustAttribID);
+		}
+
+		m_lbAttribList.SetVisibleAttributes(mapAttrib, mapCustAttribIDs);
 	}
-
-	m_lbAttribList.SetVisibleAttributes(mapAttrib);
 }
 
 
@@ -124,15 +147,13 @@ BOOL CTaskSelectionDlg::Create(UINT nIDRefFrame, CWnd* pParent, UINT nID)
 	return FALSE;
 }
 
-void CTaskSelectionDlg::OnDestroy() 
+void CTaskSelectionDlg::OnOK() 
 {
-	UpdateData();
+	CDialog::OnOK();
 	
-	CDialog::OnDestroy();
-	
-	// save settings
+	// Save state
 	CPreferences prefs;
-	
+
 	prefs.WriteProfileInt(m_sRegKey, _T("CompletedTasks"), m_bCompletedTasks);
 	prefs.WriteProfileInt(m_sRegKey, _T("IncompleteTasks"), m_bIncompleteTasks);
 	prefs.WriteProfileInt(m_sRegKey, _T("WhatTasks"), m_nWhatTasks);
@@ -143,8 +164,12 @@ void CTaskSelectionDlg::OnDestroy()
 
 	CString sGroup = m_sRegKey + _T("\\AttribVisibility");
 	CTDCAttributeMap mapAttrib;
+	CStringSet mapCustomAttribIDs;
 
-	prefs.WriteProfileInt(sGroup, _T("Count"), m_lbAttribList.GetVisibleAttributes(mapAttrib));
+	m_lbAttribList.GetVisibleAttributes(mapAttrib, mapCustomAttribIDs);
+
+	// Default attributes
+	prefs.WriteProfileInt(sGroup, _T("Count"), mapAttrib.GetCount());
 
 	int nItem = 0;
 	POSITION pos = mapAttrib.GetStartPosition();
@@ -152,9 +177,19 @@ void CTaskSelectionDlg::OnDestroy()
 	while (pos)
 	{
 		CString sKey = Misc::MakeKey(_T("att%d"), nItem++);
-		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
+		prefs.WriteProfileInt(sGroup, sKey, mapAttrib.GetNext(pos));
+	}
 
-		prefs.WriteProfileInt(sGroup, sKey, nAttrib);
+	// Custom Attributes
+	prefs.WriteProfileInt(sGroup, _T("CustomCount"), mapCustomAttribIDs.GetCount());
+
+	nItem = 0;
+	pos = mapCustomAttribIDs.GetStartPosition();
+
+	while (pos)
+	{
+		CString sKey = Misc::MakeKey(_T("custom%d"), nItem++);
+		prefs.WriteProfileString(sGroup, sKey, mapCustomAttribIDs.GetNext(pos));
 	}
 }
 
@@ -302,9 +337,4 @@ void CTaskSelectionDlg::OnEnable(BOOL bEnable)
 
 	if (bEnable)
 		UpdateEnableStates();
-}
-
-BOOL CTaskSelectionDlg::SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs)
-{
-	return m_lbAttribList.SetCustomAttributeDefinitions(aAttribDefs);
 }

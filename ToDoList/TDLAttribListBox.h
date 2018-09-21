@@ -25,15 +25,14 @@ class CTDLAttributeListBox : public CCheckListBoxEx
 {
 // Construction
 public:
-	CTDLAttributeListBox();
+	CTDLAttributeListBox(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 	void SetAllAttributesVisible(BOOL bVisible = TRUE);
 	int GetAllAttributes(CTDCAttributeMap& mapAttrib) const;
 
-	void SetVisibleAttributes(const CTDCAttributeMap& mapAttrib);
-	int GetVisibleAttributes(CTDCAttributeMap& mapAttrib) const;
-
-	BOOL SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs);
+	void SetVisibleAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs);
+	void GetVisibleAttributes(CTDCAttributeMap& mapAttrib, CStringSet& mapCustomAttribIDs) const;
+	void GetVisibleAttributes(CTDCAttributeMap& mapAttrib) const; // includes custom attributes
 
 // Attributes
 protected:
@@ -48,6 +47,7 @@ protected:
 		}
 
 		CEnString sName;
+		CString sCustAttribID;
 		TDC_ATTRIBUTE nTDCAttrib;
 		BOOL bVisible;
 	};

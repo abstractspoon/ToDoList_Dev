@@ -7,27 +7,31 @@
 // timecombobox.h : header file
 //
 #include "Subclass.h"
+#include "OwnerdrawComboBoxBase.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CTimeComboBox window
 
 enum 
 {
 	TCB_NOTIME		= 0x01,
 	TCB_HALFHOURS	= 0x02,
 	TCB_ISO   		= 0x04,
+	TCB_HOURSINDAY	= 0x08,
 };
 
-class CTimeComboBox : public CComboBox, public CSubclasser
+/////////////////////////////////////////////////////////////////////////////
+// CTimeComboBox window
+
+class CTimeComboBox : public COwnerdrawComboBoxBase, public CSubclasser
 {
 // Construction
 public:
 	CTimeComboBox(DWORD dwStyle = 0);
 	
-	double GetOleTime() const; // 0-1 suitable for COleDateTime, -1 for 'no time'
+	double GetOleTime() const;
 	BOOL SetOleTime(double dTime); // 0-1 suitable for COleDateTime, -1 for 'no time'
 	
-	double Get24HourTime() const; // -1 for 'no time'
+	double Get24HourTime() const;
 	BOOL Set24HourTime(double dTime); // -1 for 'no time'
 	
 	DWORD GetStyle() { return m_dwStyle; }
@@ -60,11 +64,15 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
+								COLORREF& crText, COLORREF& crBack) const;	
 
 protected:
 	void BuildCombo(BOOL bReset = FALSE);
 	BOOL Initialize();
 	void ScrollListBox();
+	CString GetCurrentTime() const;
+	double Get24HourTime(int nItem) const; // -1 for 'no time'
 };
 
 /////////////////////////////////////////////////////////////////////////////

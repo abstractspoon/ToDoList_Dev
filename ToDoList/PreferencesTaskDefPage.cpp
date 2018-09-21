@@ -132,7 +132,7 @@ BOOL CPreferencesTaskDefPage::OnInitDialog()
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTSTATUS, *this, CEnString(IDS_PTDP_STATUSPROMPT));
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTTAGS, *this, CEnString(IDS_PTDP_TAGSPROMPT));
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTCATEGORY, *this, CEnString(IDS_PTDP_CATEGORYPROMPT));
-	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTCREATEDBY, *this, CEnString(IDS_PTDP_NAMEPROMPT));
+	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTCREATEDBY, *this, Misc::GetUserName());
 
 	VERIFY(m_ctrlComments.Create(this, IDC_COMMENTS));
 
@@ -191,7 +191,7 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 	m_sDefStatus = pPrefs->GetProfileString(szKey, _T("DefaultStatus"));
 	m_sDefTags = pPrefs->GetProfileString(szKey, _T("DefaultTags"));
 	m_sDefCategory = pPrefs->GetProfileString(szKey, _T("DefaultCategory"));
-	m_sDefCreatedBy = pPrefs->GetProfileString(szKey, _T("DefaultCreatedBy"), Misc::GetUserName());
+	m_sDefCreatedBy = pPrefs->GetProfileString(szKey, _T("DefaultCreatedBy"));
 	m_crDef = pPrefs->GetProfileInt(szKey, _T("DefaultColor"), 0);
 	m_bUseCreationDateForDefStartDate = pPrefs->GetProfileInt(szKey, _T("UseCreationForDefStartDate"), TRUE);
 	m_bUseCreationTimeForDefStartDate = pPrefs->GetProfileInt(szKey, _T("UseCreationTimeForDefStartDate"), FALSE);
@@ -287,8 +287,12 @@ void CPreferencesTaskDefPage::GetTaskAttributes(TODOITEM& tdiDefault) const
 	tdiDefault.dCost = m_dDefCost;
 	tdiDefault.nPriority = m_nDefPriority;
 	tdiDefault.nRisk = m_nDefRisk;
-	tdiDefault.sCreatedBy = m_sDefCreatedBy;
 	tdiDefault.sIcon = m_sDefIcon;
+
+	if (!m_sDefCreatedBy.IsEmpty())
+		tdiDefault.sCreatedBy = m_sDefCreatedBy;
+	else
+		tdiDefault.sCreatedBy = Misc::GetUserName();
 
 	if (m_bUseCreationDateForDefStartDate)
 	{

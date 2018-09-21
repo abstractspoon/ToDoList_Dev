@@ -28,6 +28,7 @@
 #include "..\shared\uithemefile.h"
 #include "..\shared\enstatic.h"
 #include "..\shared\winhelpbutton.h"
+#include "..\shared\SizeGrip.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -320,8 +321,10 @@ protected:
 	CPreferencesMultiUserPage m_pageMultiUser;
 
 	CTreeCtrl m_tcPages;
-	CString m_sPageTitle;
 	CEnStatic m_stCategoryTitle, m_stPageTitle; 
+	CSizeGrip m_sbGrip;
+
+	CString m_sPageTitle;
 	CUIThemeFile m_theme;
 	TDCAUTOLISTDATA m_autoListData;
 	BOOL m_bInitDlg;
