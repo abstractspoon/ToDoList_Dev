@@ -193,6 +193,10 @@ SOURCE=.\Quantize.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\RangeSlider.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\RegUtil.cpp
 # End Source File
 # Begin Source File
@@ -378,6 +382,10 @@ SOURCE=.\ProgressThread.h
 # Begin Source File
 
 SOURCE=.\Quantize.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\RangeSlider.h
 # End Source File
 # Begin Source File
 

@@ -204,6 +204,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="Quantize.cpp" />
+    <ClCompile Include="RangeSlider.cpp" />
     <ClCompile Include="RegUtil.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -280,6 +281,7 @@
     <ClInclude Include="Html2Rtf.h" />
     <ClInclude Include="Ini.h" />
     <ClInclude Include="Quantize.h" />
+    <ClInclude Include="RangeSlider.h" />
     <ClInclude Include="T64Utils.h" />
     <ClInclude Include="Zlib\IOAPI.H" />
     <ClInclude Include="Zlib\IOWIN32.H" />
