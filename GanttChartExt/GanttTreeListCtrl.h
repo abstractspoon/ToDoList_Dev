@@ -284,7 +284,6 @@ protected:
 	int FindColumn(int nScrollPos) const;
 	int FindColumn(int nMonth, int nYear) const;
 	int FindColumn(const COleDateTime& date) const;
-	int GetDateInMonths(int nMonth, int nYear) const;
 	BOOL GetDateFromScrollPos(int nScrollPos, COleDateTime& date) const;
 	int GetScrollPosFromDate(const COleDateTime& date) const;
 	int GetDrawPosFromDate(const COleDateTime& date) const;

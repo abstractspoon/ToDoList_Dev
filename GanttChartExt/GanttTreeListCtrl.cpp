@@ -6229,11 +6229,6 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date) const
 	return 0;
 }
 
-int CGanttTreeListCtrl::GetDateInMonths(int nMonth, int nYear) const
-{
-	return ((nYear * 12) + (nMonth - 1));
-}
-
 int CGanttTreeListCtrl::FindColumn(int nMonth, int nYear) const
 {	
 	int nMonths = GetDateInMonths(nMonth, nYear);

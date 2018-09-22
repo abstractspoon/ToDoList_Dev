@@ -2014,6 +2014,23 @@ COleDateTime CDateHelper::GetNearestQuarter(const COleDateTime& date, BOOL bEnd)
 	return dtQuarter;
 }
 
+int CDateHelper::GetDateInMonths(int nMonth, int nYear)
+{
+	ASSERT(nYear > 0 && nMonth > 0 && nMonth <= 12);
+
+	return ((nYear * 12) + (nMonth - 1));
+}
+
+int CDateHelper::CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive)
+{
+	ASSERT(dateFrom <= dateTo);
+
+	int nNumMonthsFrom = GetDateInMonths(dateFrom.GetMonth(), dateFrom.GetYear());
+	int nNumMonthsTo = GetDateInMonths(dateTo.GetMonth(), dateTo.GetYear());
+
+	return ((nNumMonthsTo - nNumMonthsFrom) + (bInclusive ? 1 : 0));
+}
+
 void CDateHelper::IncrementMonth(SYSTEMTIME& st, int nBy)
 {
 	// convert month/year to int
