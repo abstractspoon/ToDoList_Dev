@@ -89,8 +89,26 @@ protected:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg UINT OnGetDlgCode();
+	afx_msg void OnCaptureChanged(CWnd* pWnd);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+	enum RS_DRAWREGION
+	{
+		RSDR_BACKGROUND,
+		RSDR_LEFT,
+		RSDR_TOP = RSDR_LEFT,
+		RSDR_LEFTBUTTON,
+		RSDR_TOPBUTTON = RSDR_LEFTBUTTON,
+		RSDR_MIDDLE,
+		RSDR_RIGHTBUTTON,
+		RSDR_BOTTOMBUTTON = RSDR_RIGHTBUTTON,
+		RSDR_RIGHT,
+		RSDR_BOTTOM = RSDR_RIGHT,
+	};
+
+	virtual void DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion) const;
+	virtual void DrawButton(CDC& dc, const CRect& rButton, const CString& sText, BOOL bPressed) const;
 
 	// Data
 	double m_Min, m_Max;           // Outer Edges of the Control

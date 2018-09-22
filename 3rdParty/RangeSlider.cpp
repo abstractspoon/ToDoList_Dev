@@ -70,13 +70,15 @@ CRangeSlider::~CRangeSlider()
 }
 
 // Relay call to create
-void CRangeSlider::Create(DWORD dwStyle, const RECT &rect, CWnd *pParentWnd, UINT nID, CCreateContext *pContext) {
+void CRangeSlider::Create(DWORD dwStyle, const RECT &rect, CWnd *pParentWnd, UINT nID, CCreateContext *pContext) 
+{
 	CWnd::Create(NULL, _T(""), dwStyle, rect, pParentWnd, nID, pContext);
 }
 
 
 // Register the window class, so you can use this class as a custom control.
-BOOL CRangeSlider::RegisterWindowClass(void) {
+BOOL CRangeSlider::RegisterWindowClass(void) 
+{
 	WNDCLASS wndcls;
 	HINSTANCE hInst = AfxGetInstanceHandle();
 
@@ -113,6 +115,7 @@ BEGIN_MESSAGE_MAP(CRangeSlider, CWnd)
 	ON_WM_KEYDOWN()
 	ON_WM_SETFOCUS()
 	ON_WM_GETDLGCODE()
+	ON_WM_CAPTURECHANGED()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -125,15 +128,20 @@ void CRangeSlider::OnPaint()
 	CMemDC dc(&RawDC);
 	dc.SetMapMode(MM_TEXT);
 
-	if (m_bHorizontal) {
+	if (m_bHorizontal) 
+	{
 		OnPaintHorizontal(dc);
-	} else { // Vertical Mode
+	} 
+	else 
+	{
 		OnPaintVertical(dc);
 	}
 }
 
 // Paint in Horizontal Mode.
-void CRangeSlider::OnPaintHorizontal(CDC &dc) {
+/*
+void CRangeSlider::OnPaintHorizontal(CDC &dc) 
+{
 	ASSERT(m_bHorizontal);
 
 		// Calculate Arrow width and x-axis width.
@@ -161,6 +169,7 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc) {
 		// Position of Left and Right
 	int x1 = static_cast<int>((m_Left - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
 	int x2 = static_cast<int>((m_Right - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
+
 	dc.SelectStockObject(BLACK_PEN);
 	CBrush ButtonFace;
 	ButtonFace.CreateSolidBrush(::GetSysColor(COLOR_BTNFACE));
@@ -172,7 +181,8 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc) {
 		dc.Rectangle(&rect);
 		rect.DeflateRect(1,1,2,2);
 			// Make appearance 3D
-		if (!m_bTracking || m_TrackMode!= TRACK_LEFT) {
+		if (!m_bTracking || m_TrackMode!= TRACK_LEFT) 
+		{
 			CPen pen1;
 			pen1.CreatePen(PS_SOLID, 1, ::GetSysColor(COLOR_BTNHIGHLIGHT));
 			dc.SelectObject(pen1);
@@ -189,7 +199,8 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc) {
 			// Draw arrow
 		dc.SelectStockObject(BLACK_PEN);
 		dc.SelectStockObject(BLACK_BRUSH);
-		CPoint poly [] = { 
+		CPoint poly [] = 
+		{ 
 			CPoint(x1 + m_nArrowWidth / 3, dy / 3), 
 			CPoint(x1 + m_nArrowWidth / 3, dy*2/3),
 			CPoint(x1 + m_nArrowWidth*2/3, dy / 2),
@@ -204,7 +215,8 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc) {
 		dc.SelectObject(ButtonFace);
 		dc.Rectangle(&rect);
 			// Make appearance 3D
-		if (!m_bTracking || m_TrackMode!= TRACK_RIGHT) {
+		if (!m_bTracking || m_TrackMode!= TRACK_RIGHT) 
+		{
 			rect.DeflateRect(1,1,2,2);
 			CPen pen1;
 			pen1.CreatePen(PS_SOLID, 1, ::GetSysColor(COLOR_BTNHIGHLIGHT));
@@ -222,7 +234,8 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc) {
 			// Draw Arrow
 		dc.SelectStockObject(BLACK_PEN);
 		dc.SelectStockObject(BLACK_BRUSH);
-		CPoint poly [] = { 
+		CPoint poly [] = 
+		{ 
 			CPoint(m_nArrowWidth + x2 + m_nArrowWidth * 2 / 3,    dy / 3),
 			CPoint(m_nArrowWidth + x2 + m_nArrowWidth * 2 / 3,    dy * 2 / 3),
 			CPoint(m_nArrowWidth + x2 + m_nArrowWidth / 3,        dy / 2),
@@ -242,14 +255,16 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc) {
 	CRect focusRect = rect;
 
 	// Draw Area of InnerMin, Max.
-	if (m_bVisualMinMax) {
+	if (m_bVisualMinMax) 
+	{
 		ASSERT(m_Min <= m_VisualMax);
 		ASSERT(m_VisualMin <= m_VisualMax);
 		ASSERT(m_VisualMax <= m_Max);
 
-			// See wether [InnerMin, InnerMax] geschnitten [Left, Right] is non-empty.
-			// Then Draw
-		if (m_VisualMin < m_Right && m_VisualMax > m_Left) {
+		// See wether [InnerMin, InnerMax] geschnitten [Left, Right] is non-empty.
+		// Then Draw
+		if (m_VisualMin < m_Right && m_VisualMax > m_Left) 
+		{
 			int visualMin = static_cast<int>((m_VisualMin - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
 			int visualMax = static_cast<int>((m_VisualMax - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
 
@@ -276,9 +291,174 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc) {
 	dc.SelectObject(pBr);
 	dc.SelectObject(pPen);
 }
+*/
+void CRangeSlider::OnPaintHorizontal(CDC &dc) 
+{
+	ASSERT(m_bHorizontal);
+
+	// Calculate Arrow width and x-axis width.
+	CRect ClientRect;
+	GetClientRect(&ClientRect);
+
+	// Erase Background.
+	DrawRegion(dc, RSDR_BACKGROUND, ClientRect);
+
+	m_nArrowWidth = ((ClientRect.Height() * 3) / 5);
+	m_dx = (ClientRect.Width() - (2 * m_nArrowWidth) - 1);
+
+	// Check if [Left, Right] is contained in [Min, Max].
+	ASSERT(m_Min <= m_Left);
+	ASSERT(m_Left <= m_Right);
+	ASSERT(m_Right <= m_Max);
+
+	ClientRect.DeflateRect(1, 1);
+
+	// Position of Left and Right
+	CRect rLeft(ClientRect);
+	int x1 = static_cast<int>((m_Left - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
+
+	rLeft.right = rLeft.left + x1;
+	DrawRegion(dc, RSDR_LEFT, rLeft);
+
+	// Draw Left Arrow
+	rLeft.left = rLeft.right;
+	rLeft.right += m_nArrowWidth;
+	DrawRegion(dc, RSDR_LEFTBUTTON, rLeft);
+
+	m_RectLeft = rLeft;
+
+	// Draw Right Arrow
+	CRect rRight(ClientRect);
+	int x2 = static_cast<int>((m_Right - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
+
+	rRight.left = x2 + 2 * m_nArrowWidth;
+	DrawRegion(dc, RSDR_RIGHT, rRight);
+
+	rRight.right = rRight.left;
+	rRight.left -= m_nArrowWidth;
+	DrawRegion(dc, RSDR_RIGHTBUTTON, rRight);
+
+	m_RectRight = rRight;
+	
+	// Draw Area in between.
+	CRect rMiddle(ClientRect);
+	rMiddle.left = rLeft.right;
+	rMiddle.right = rRight.left;
+
+	DrawRegion(dc, RSDR_MIDDLE, rMiddle);
+
+	// Store value for drawing the focus rectangle
+	CRect focusRect = rMiddle;
+
+	// Draw Area of InnerMin, Max.
+	if (m_bVisualMinMax) 
+	{
+		ASSERT(m_Min <= m_VisualMax);
+		ASSERT(m_VisualMin <= m_VisualMax);
+		ASSERT(m_VisualMax <= m_Max);
+
+		// See wether [InnerMin, InnerMax] geschnitten [Left, Right] is non-empty.
+		// Then Draw
+		if (m_VisualMin < m_Right && m_VisualMax > m_Left) 
+		{
+			int visualMin = static_cast<int>((m_VisualMin - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
+			int visualMax = static_cast<int>((m_VisualMax - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
+
+				// Stay in [m_Left, m_Right] intervall.
+
+			visualMin = max(visualMin + m_nArrowWidth, x1 + m_nArrowWidth);
+			visualMax = min(visualMax + m_nArrowWidth, x2 + m_nArrowWidth);
+
+			rMiddle = CRect(visualMin, 1, visualMax, (ClientRect.Height() - 1));
+
+			CBrush br;
+			br.CreateSolidBrush(RGB(255,255,150)); // light yellow;
+			dc.SelectObject(br);
+			dc.SelectStockObject(NULL_PEN);
+			dc.Rectangle(rMiddle);
+			CPen pen;
+			dc.SelectStockObject(HOLLOW_BRUSH);
+		}
+	}
+	if (GetFocus() == this) {
+		focusRect.DeflateRect(3,3);
+		dc.DrawFocusRect(&focusRect);
+	}
+	//dc.SelectObject(pBr);
+	//dc.SelectObject(pPen);
+}
+
+void CRangeSlider::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion) const
+{
+	int nSaveDC = dc.SaveDC();
+
+	switch (nRegion)
+	{
+	case RSDR_BACKGROUND:
+		dc.FillSolidRect(rRegion, ::GetSysColor(COLOR_3DFACE));
+
+		if (GetExStyle() && WS_EX_CLIENTEDGE)
+		{
+			dc.Draw3dRect(rRegion, ::GetSysColor(COLOR_BTNSHADOW), ::GetSysColor(COLOR_BTNHIGHLIGHT));
+		}
+		else if (GetStyle() && WS_BORDER)
+		{
+			dc.SelectStockObject(GRAY_BRUSH);
+			dc.SelectStockObject(BLACK_PEN);
+			dc.Rectangle(rRegion);
+		}
+		break;
+
+	case RSDR_LEFT:  // RSDR_TOP
+	case RSDR_RIGHT: // RSDR_BOTTOM
+		dc.FillSolidRect(rRegion, ::GetSysColor(COLOR_SCROLLBAR));
+		break;
+
+	case RSDR_LEFTBUTTON: // RSDR_TOPBUTTON
+		DrawButton(dc, 
+					rRegion, 
+					(m_bHorizontal ? _T("<") : _T("^")), 
+					(m_bTracking && (m_TrackMode == TRACK_LEFT)));
+		break;
+
+	case RSDR_MIDDLE:
+		DrawButton(dc, 
+					rRegion, 
+					_T(""), 
+					(m_bTracking && (m_TrackMode == TRACK_MIDDLE)));
+		break;
+
+	case RSDR_RIGHTBUTTON: // RSDR_BOTTOMBUTTON
+		DrawButton(dc, 
+					rRegion, 
+					(m_bHorizontal ? _T(">") : _T("V")), 
+					(m_bTracking && (m_TrackMode == TRACK_RIGHT)));
+		break;
+	}
+
+	dc.RestoreDC(nSaveDC);
+}
+
+void CRangeSlider::DrawButton(CDC& dc, const CRect& rButton, const CString& sText, BOOL bPressed) const
+{
+	dc.FillSolidRect(rButton, ::GetSysColor(COLOR_BTNFACE));
+
+	// Make appearance 3D
+	if (!bPressed) 
+		dc.Draw3dRect(rButton, ::GetSysColor(COLOR_BTNHIGHLIGHT), ::GetSysColor(COLOR_BTNSHADOW));
+	else
+		dc.Draw3dRect(rButton, ::GetSysColor(COLOR_BTNSHADOW), ::GetSysColor(COLOR_BTNHIGHLIGHT));
+
+	if (!sText.IsEmpty())
+	{
+		dc.SetBkMode(TRANSPARENT);
+		dc.DrawText(sText, (LPRECT)(LPCRECT)rButton, DT_CENTER | DT_VCENTER);
+	}
+}
 
 // Paint in Vertical Mode.
-void CRangeSlider::OnPaintVertical(CDC &dc) {
+void CRangeSlider::OnPaintVertical(CDC &dc) 
+{
 	ASSERT(!m_bHorizontal);
 	CRect ClientRect;
 	GetClientRect(&ClientRect);
@@ -291,7 +471,7 @@ void CRangeSlider::OnPaintVertical(CDC &dc) {
 	CRect ClipBox;
 	dc.GetClipBox(&ClipBox);
 
-		// Erase Background.
+	// Erase Background.
 	CGdiObject *pBr  = dc.SelectStockObject(GRAY_BRUSH);
 	CGdiObject *pPen = dc.SelectStockObject(BLACK_PEN);
 	dc.Rectangle(&ClipBox);
@@ -386,14 +566,16 @@ void CRangeSlider::OnPaintVertical(CDC &dc) {
 	CRect focusRect = rect;
 
 	// Draw Area of InnerMin, Max.
-	if (m_bVisualMinMax) {
+	if (m_bVisualMinMax) 
+	{
 		ASSERT(m_Min <= m_VisualMax);
 		ASSERT(m_VisualMin <= m_VisualMax);
 		ASSERT(m_VisualMax <= m_Max);
 
 			// See wether [InnerMin, InnerMax] geschnitten [Left, Right] is non-empty.
 			// Then Draw
-		if (m_VisualMin < m_Right && m_VisualMax > m_Left) {
+		if (m_VisualMin < m_Right && m_VisualMax > m_Left) 
+		{
 			int visualMin = static_cast<int>((m_VisualMin - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
 			int visualMax = static_cast<int>((m_VisualMax - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
 
@@ -411,7 +593,8 @@ void CRangeSlider::OnPaintVertical(CDC &dc) {
 			dc.SelectStockObject(HOLLOW_BRUSH);
 		}
 	}
-	if (GetFocus() == this) {
+	if (GetFocus() == this) 
+	{
 		focusRect.DeflateRect(3,3);
 		dc.DrawFocusRect(&focusRect);
 	}
@@ -426,7 +609,8 @@ void CRangeSlider::OnLButtonDown(UINT nFlags, CPoint point)
 	SetFocus();
 	Invalidate();
 
-	if (!m_bTracking) {
+	if (!m_bTracking) 
+	{
 		// Hit Testing into Rects.
 		// Left, Middle or Right?
 		CRect rect;
@@ -436,15 +620,20 @@ void CRangeSlider::OnLButtonDown(UINT nFlags, CPoint point)
 			middleRect = CRect(m_RectLeft.right + 1, 0, m_RectRight.left - 1, rect.bottom);
 		else 
 			middleRect = CRect(0, m_RectLeft.bottom + 1, m_RectLeft.right, m_RectRight.top - 1);
-		if (m_RectLeft.PtInRect(point)) {
+		if (m_RectLeft.PtInRect(point)) 
+		{
 			m_bTracking = TRUE;
 			m_TrackMode = TRACK_LEFT;
 			m_ClickOffset = point - m_RectLeft.CenterPoint();
-		} else if (m_RectRight.PtInRect(point)) {
+		} 
+		else if (m_RectRight.PtInRect(point)) 
+		{
 			m_bTracking = TRUE;
 			m_TrackMode = TRACK_RIGHT;
 			m_ClickOffset = point - m_RectRight.CenterPoint();
-		} else if (middleRect.PtInRect(point)) {
+		} 
+		else if (middleRect.PtInRect(point)) 
+		{
 			m_bTracking = TRUE;
 			m_TrackMode = TRACK_MIDDLE;
 			m_ClickOffset = point - middleRect.CenterPoint();
@@ -457,8 +646,10 @@ void CRangeSlider::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point) 
 {
-	if (m_bTracking) {
+	if (m_bTracking) 
+	{
 		int x = 0;
+
 		if (m_bHorizontal)
 			x = point.x - m_ClickOffset.x;
 		else
@@ -466,47 +657,58 @@ void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point)
 
 		CRect rect;
 		WPARAM changed = 0;
-		switch (m_TrackMode) {
-		case TRACK_LEFT: {
-			double oldLeft = m_Left;
-			m_Left = static_cast<double>(x - m_nArrowWidth / 2) / m_dx * (m_Max - m_Min) + m_Min; 
-			if (m_Left >= m_Right)
-				m_Left = m_Right;
-			if (m_Left <= m_Min)
-				m_Left = m_Min;
 
-			if (oldLeft != m_Left)
-				changed = RS_LEFTCHANGED;
-			rect = m_RectLeft;
-		} break;
-		case TRACK_RIGHT: {
-			double oldRight = m_Right;
-			m_Right = static_cast<double>(x - m_nArrowWidth * 3 / 2) / m_dx * (m_Max - m_Min) + m_Min;
-			if (m_Right <= m_Left)
-				m_Right = m_Left;
-			if (m_Right >= m_Max)
-				m_Right = m_Max;
-			if (oldRight != m_Right)
-				changed = RS_RIGHTCHANGED;
-			rect = m_RectRight;
-		} break;
+		switch (m_TrackMode) 
+		{
+		case TRACK_LEFT: 
+			{
+				double oldLeft = m_Left;
+				m_Left = static_cast<double>(x - m_nArrowWidth / 2) / m_dx * (m_Max - m_Min) + m_Min; 
+				if (m_Left >= m_Right)
+					m_Left = m_Right;
+				if (m_Left <= m_Min)
+					m_Left = m_Min;
+
+				if (oldLeft != m_Left)
+					changed = RS_LEFTCHANGED;
+				rect = m_RectLeft;
+			} 
+			break;
+
+		case TRACK_RIGHT: 
+			{
+				double oldRight = m_Right;
+				m_Right = static_cast<double>(x - m_nArrowWidth * 3 / 2) / m_dx * (m_Max - m_Min) + m_Min;
+				if (m_Right <= m_Left)
+					m_Right = m_Left;
+				if (m_Right >= m_Max)
+					m_Right = m_Max;
+				if (oldRight != m_Right)
+					changed = RS_RIGHTCHANGED;
+				rect = m_RectRight;
+			} 
+			break;
+
 		case TRACK_MIDDLE:
 			{
 				double delta = m_Right - m_Left;
 				ASSERT(delta >= 0.0);
 				m_Left  = static_cast<double>(x - m_nArrowWidth) / m_dx * (m_Max - m_Min) + m_Min - delta/2.0;
 				m_Right = static_cast<double>(x - m_nArrowWidth) / m_dx * (m_Max - m_Min) + m_Min + delta/2.0; 
-				if (m_Left <= m_Min) {
+				if (m_Left <= m_Min) 
+				{
 					m_Left = m_Min;
 					m_Right = m_Left + delta;
 				}
-				if (m_Right >= m_Max) {
+				if (m_Right >= m_Max) 
+				{
 					m_Right = m_Max;
 					m_Left = m_Right - delta;
 				}
 				changed = RS_BOTHCHANGED;
 			}
 			break;
+
 		default:
 			TRACE("Unknown Track Mode\n");
 			ASSERT(FALSE);
@@ -521,13 +723,19 @@ void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point)
 
 void CRangeSlider::OnLButtonUp(UINT nFlags, CPoint point) 
 {
-	if (m_bTracking) {
-		m_bTracking = FALSE;
-		::ReleaseCapture();
-		Invalidate();
-	}
+	if (m_bTracking)
+		ReleaseCapture();
 	
 	CWnd::OnLButtonUp(nFlags, point);
+}
+
+void CRangeSlider::OnCaptureChanged(CWnd* pWnd)
+{
+	if (pWnd != this)
+	{
+		m_bTracking = FALSE;
+		Invalidate();
+	}
 }
 
 void CRangeSlider::SetMinMax(double min, double max) {
@@ -619,8 +827,10 @@ void CRangeSlider::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		Key1 = VK_DOWN; Key2 = VK_UP;
 	}
 	
-	if ((nChar == Key1 || nChar == Key2) && !bCtrl) {
+	if ((nChar == Key1 || nChar == Key2) && !bCtrl) 
+	{
 		double dx = (m_Max - m_Min) / m_dx;
+
 		if (dx != 0.0 ) {
 			int left = static_cast<int>((m_Left - m_Min) / dx + 0.5);
 			int right = static_cast<int>((m_Right - m_Min) / dx + 0.5);
