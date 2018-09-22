@@ -33,26 +33,31 @@ public:
 	void Create(DWORD dwStyle, const RECT &rect, CWnd *pParentWnd, UINT nID, CCreateContext *pContext = NULL);
 // Attributes
 public:
-	void SetMinMax(double min, double max);   //< Set Intervall [Min, Max] of RangeSlider
+	void SetMinMax(double min, double max);   //< Set Interval [Min, Max] of RangeSlider
 	void SetRange(double left, double right); //< Set Selected Range in [Min, Max] 
+	void SetStep(double step = -1); // -1 == no step
 
-	double GetMin(void) { return (m_bInvertedMode) ? -m_Max : m_Min; };    
-	double GetMax(void) { return (m_bInvertedMode) ? -m_Min : m_Max; };
-	double GetLeft(void) { return (m_bInvertedMode) ? -m_Right : m_Left; };
-	double GetRight(void) { return (m_bInvertedMode) ? -m_Left : m_Right; };
+	double GetMin(void) const { return (m_bInvertedMode) ? -m_Max : m_Min; };    
+	double GetMax(void) const { return (m_bInvertedMode) ? -m_Min : m_Max; };
+	double GetLeft(void) const { return (m_bInvertedMode) ? -m_Right : m_Left; };
+	double GetRight(void) const { return (m_bInvertedMode) ? -m_Left : m_Right; };
 
-	void GetMinMax(double &min, double &max) { 
+	void GetMinMax(double &min, double &max) const 
+	{ 
 		min = (m_bInvertedMode) ? -m_Max : m_Min; 
 		max = (m_bInvertedMode) ? -m_Min : m_Max; 
 	};
-	void GetRange(double &left, double &right) { 
+
+	void GetRange(double &left, double &right) const 
+	{ 
 		left = (m_bInvertedMode) ? -m_Right : m_Left; 
 		right = (m_bInvertedMode) ? -m_Left : m_Right; 
 	};
 
-	double GetVisualMin(void) { return (m_bInvertedMode) ? -m_VisualMax : m_VisualMin; }; 
-	double GetVisualMax(void) { return (m_bInvertedMode) ? -m_VisualMin : m_VisualMax; };
-	void GetVisualMinMax(double &VisualMin, double &VisualMax) { 
+	double GetVisualMin(void) const { return (m_bInvertedMode) ? -m_VisualMax : m_VisualMin; }; 
+	double GetVisualMax(void) const { return (m_bInvertedMode) ? -m_VisualMin : m_VisualMax; };
+	void GetVisualMinMax(double &VisualMin, double &VisualMax) const 
+	{ 
 		VisualMin = (m_bInvertedMode) ? -m_VisualMax : m_VisualMin; 
 		VisualMax = (m_bInvertedMode) ? -m_VisualMin : m_VisualMax; 
 	};
@@ -62,13 +67,13 @@ public:
 // Operations
 public:
 	void SetVisualMode(BOOL bVisualMinMax = TRUE);
-	BOOL GetVisualMode(void) { return m_bVisualMinMax; };
+	BOOL GetVisualMode(void) const { return m_bVisualMinMax; };
 
 	void SetVerticalMode(BOOL bVerticalMode = TRUE);
-	BOOL GetVerticalMode(void) { return !m_bHorizontal; };
+	BOOL GetVerticalMode(void) const { return !m_bHorizontal; };
 
 	void SetInvertedMode(BOOL bInvertedMode = TRUE);
-	BOOL GetInvertedMode(void) { return m_bInvertedMode; };
+	BOOL GetInvertedMode(void) const { return m_bInvertedMode; };
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CRangeSlider)
@@ -114,10 +119,12 @@ protected:
 	double m_Min, m_Max;           // Outer Edges of the Control
 	double m_Left, m_Right;        // Position of Arrows
 	double m_VisualMin, m_VisualMax; // Filled Rectangle between Arrows
+	double m_Step;
 
 	// Displaying
 	void Normalize(void);             // Make intervall [Left, Right] containing in [Min, Max]
 	void NormalizeVisualMinMax(void);  // Make intervall [InnerMin, InnerMax] containing in [Min, Max]
+	double NormalizeByStep(double value) const;
 
 	int m_nArrowWidth;          // width of arrow buttons in pixels.
 

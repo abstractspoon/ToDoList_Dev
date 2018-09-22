@@ -63,6 +63,7 @@ CRangeSlider::CRangeSlider()
 	m_bTracking = FALSE;
 	m_bVisualMinMax = FALSE;
 	m_bInvertedMode = FALSE;
+	m_Step = -1;
 }
 
 CRangeSlider::~CRangeSlider()
@@ -646,6 +647,8 @@ void CRangeSlider::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point) 
 {
+	CWnd::OnMouseMove(nFlags, point);
+
 	if (m_bTracking) 
 	{
 		int x = 0;
@@ -658,34 +661,32 @@ void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point)
 		CRect rect;
 		WPARAM changed = 0;
 
+		double oldLeft = m_Left;
+		double oldRight = m_Right;
+
 		switch (m_TrackMode) 
 		{
 		case TRACK_LEFT: 
 			{
-				double oldLeft = m_Left;
 				m_Left = static_cast<double>(x - m_nArrowWidth / 2) / m_dx * (m_Max - m_Min) + m_Min; 
+				m_Left = NormalizeByStep(m_Left);
+
 				if (m_Left >= m_Right)
 					m_Left = m_Right;
 				if (m_Left <= m_Min)
 					m_Left = m_Min;
-
-				if (oldLeft != m_Left)
-					changed = RS_LEFTCHANGED;
-				rect = m_RectLeft;
 			} 
 			break;
 
 		case TRACK_RIGHT: 
 			{
-				double oldRight = m_Right;
 				m_Right = static_cast<double>(x - m_nArrowWidth * 3 / 2) / m_dx * (m_Max - m_Min) + m_Min;
+				m_Right = NormalizeByStep(m_Right);
+
 				if (m_Right <= m_Left)
 					m_Right = m_Left;
 				if (m_Right >= m_Max)
 					m_Right = m_Max;
-				if (oldRight != m_Right)
-					changed = RS_RIGHTCHANGED;
-				rect = m_RectRight;
 			} 
 			break;
 
@@ -693,13 +694,19 @@ void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point)
 			{
 				double delta = m_Right - m_Left;
 				ASSERT(delta >= 0.0);
+
 				m_Left  = static_cast<double>(x - m_nArrowWidth) / m_dx * (m_Max - m_Min) + m_Min - delta/2.0;
+				m_Left = NormalizeByStep(m_Left);
+
 				m_Right = static_cast<double>(x - m_nArrowWidth) / m_dx * (m_Max - m_Min) + m_Min + delta/2.0; 
+				m_Right = NormalizeByStep(m_Right);
+
 				if (m_Left <= m_Min) 
 				{
 					m_Left = m_Min;
 					m_Right = m_Left + delta;
 				}
+
 				if (m_Right >= m_Max) 
 				{
 					m_Right = m_Max;
@@ -714,11 +721,22 @@ void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point)
 			ASSERT(FALSE);
 			break;
 		}
-		::SendMessage(GetParent()->GetSafeHwnd(), RANGE_CHANGED, changed, static_cast<LPARAM>(0));
+
+		if ((oldLeft != m_Left) && (oldRight != m_Right))
+		{
+			GetParent()->SendMessage(RANGE_CHANGED, RS_BOTHCHANGED);
+		}
+		else if (oldLeft != m_Left)
+		{
+			GetParent()->SendMessage(RANGE_CHANGED, RS_LEFTCHANGED);
+		}
+		else if (oldRight != m_Right)
+		{
+			GetParent()->SendMessage(RANGE_CHANGED, RS_RIGHTCHANGED);
+		}
+
 		Invalidate();
 	}
-	
-	CWnd::OnMouseMove(nFlags, point);
 }
 
 void CRangeSlider::OnLButtonUp(UINT nFlags, CPoint point) 
@@ -738,8 +756,10 @@ void CRangeSlider::OnCaptureChanged(CWnd* pWnd)
 	}
 }
 
-void CRangeSlider::SetMinMax(double min, double max) {
-	if (min > max) {
+void CRangeSlider::SetMinMax(double min, double max) 
+{
+	if (min > max) 
+	{
 		double x = max;
 		max = min;
 		min = x;
@@ -747,63 +767,115 @@ void CRangeSlider::SetMinMax(double min, double max) {
 
 	m_Min = (m_bInvertedMode) ? -max : min;
 	m_Max = (m_bInvertedMode) ? -min : max;
+
 	Normalize();
 	Invalidate();
 }
 
-void CRangeSlider::SetRange(double left, double right) {
+void CRangeSlider::SetStep(double step)
+{
+	if (step == m_Step)
+		return;
+
+	if (step == -1)
+	{
+		m_Step = step;
+	}
+	else if ((step > 0.0) && (step <= (m_Max - m_Min)))
+	{
+		m_Step = step;
+	}
+	else
+	{
+		ASSERT(0);
+	}
+
+	Normalize();
+	Invalidate();
+}
+
+void CRangeSlider::SetRange(double left, double right) 
+{
 	m_Left = (m_bInvertedMode) ? -right : left;
 	m_Right = (m_bInvertedMode) ? -left : right;
+
 	Normalize();
 	Invalidate();
 }
 
-void CRangeSlider::NormalizeVisualMinMax(void) {
-		// Exchange if reversed.
-	if (m_VisualMax < m_VisualMin) {
+void CRangeSlider::NormalizeVisualMinMax(void) 
+{
+	// Exchange if reversed.
+	if (m_VisualMax < m_VisualMin) 
+	{
 		double dummy = m_VisualMin;
 		m_VisualMin = m_VisualMax;
 		m_VisualMax = dummy;
 	}
-	if (m_VisualMin < m_Min) {
+	if (m_VisualMin < m_Min) 
+	{
 		m_VisualMin = m_Min;
 		if (m_VisualMax < m_VisualMin) 
 			m_VisualMax = m_VisualMin;
 	}
-	if (m_VisualMax > m_Max) {
+	if (m_VisualMax > m_Max) 
+	{
 		m_VisualMax = m_Max;
 		if (m_VisualMin > m_VisualMax)
 			m_VisualMin = m_VisualMax;
 	}
 }
 
-void CRangeSlider::Normalize(void) {
-	if (m_Left < m_Min) {
+double CRangeSlider::NormalizeByStep(double value) const
+{
+	if (m_Step > 0.0)
+		value = ((int)((value / m_Step) + 0.5) * m_Step);
+
+	return value;
+}
+
+void CRangeSlider::Normalize(void) 
+{
+	double prevLeft = m_Left;
+	double prevRight = m_Right;
+
+	if (m_Left < m_Min) 
 		m_Left = m_Min;
-		::SendMessage(GetParent()->GetSafeHwnd(), RANGE_CHANGED, RS_LEFTCHANGED, 0);
-		if (m_Right < m_Left) {
-			m_Right = m_Left;
-			::SendMessage(GetParent()->GetSafeHwnd(), RANGE_CHANGED, RS_RIGHTCHANGED, 0);
-		}
-	}
-	if (m_Right > m_Max) {
+	else
+		m_Left = NormalizeByStep(m_Left);
+
+	if (m_Right > m_Max) 
 		m_Right = m_Max;
-		::SendMessage(GetParent()->GetSafeHwnd(), RANGE_CHANGED, RS_RIGHTCHANGED, 0);
-		if (m_Left > m_Right) {
-			m_Left = m_Right;
-			::SendMessage(GetParent()->GetSafeHwnd(), RANGE_CHANGED, RS_LEFTCHANGED, 0);
-		}
+	else
+		m_Right = NormalizeByStep(m_Right);
+
+	if (m_Right < m_Left) 
+		m_Right = m_Left;
+
+	if ((prevLeft != m_Left) && (prevRight != m_Right))
+	{
+		GetParent()->SendMessage(RANGE_CHANGED, RS_BOTHCHANGED);
+	}
+	else if (prevLeft != m_Left)
+	{
+		GetParent()->SendMessage(RANGE_CHANGED, RS_LEFTCHANGED);
+	}
+	else if (prevRight != m_Right)
+	{
+		GetParent()->SendMessage(RANGE_CHANGED, RS_RIGHTCHANGED);
 	}
 }
 
-void CRangeSlider::SetVisualMode(BOOL bVisualMinMax) {
+void CRangeSlider::SetVisualMode(BOOL bVisualMinMax) 
+{
 	if (m_bVisualMinMax != bVisualMinMax) 
 		Invalidate();
 
 	m_bVisualMinMax = bVisualMinMax;
 }
 
-void CRangeSlider::SetVisualMinMax(double VisualMin, double VisualMax) {
+void CRangeSlider::SetVisualMinMax(double VisualMin, double VisualMax) 
+{
 	m_VisualMin = (m_bInvertedMode) ? -VisualMax : VisualMin;
 	m_VisualMax = (m_bInvertedMode) ? -VisualMin : VisualMax;
 	NormalizeVisualMinMax();
@@ -821,9 +893,12 @@ void CRangeSlider::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	BOOL bCtrl = (::GetKeyState(VK_CONTROL) & 0x8000)!= 0; // T if Ctrl is pressed.
 
 	UINT Key1, Key2;
-	if (m_bHorizontal) {
+	if (m_bHorizontal) 
+	{
 		Key1 = VK_RIGHT; Key2 = VK_LEFT;
-	} else {
+	} 
+	else 
+	{
 		Key1 = VK_DOWN; Key2 = VK_UP;
 	}
 	
@@ -831,20 +906,25 @@ void CRangeSlider::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
 		double dx = (m_Max - m_Min) / m_dx;
 
-		if (dx != 0.0 ) {
+		if (dx != 0.0 ) 
+		{
 			int left = static_cast<int>((m_Left - m_Min) / dx + 0.5);
 			int right = static_cast<int>((m_Right - m_Min) / dx + 0.5);
 			BOOL bShift = ::GetKeyState(VK_SHIFT) < 0; // T if Shift is pressed.
-			if (nChar == Key2) {
+			if (nChar == Key2) 
+			{
 				if (!bShift) // Shift not pressed => move intervall
 					left--;
 				right--; 
-			} else {
+			} 
+			else 
+			{
 				if (!bShift) // Shift not pressed => move intervall
 					left++;
 				right++;
 			}
-			if (left >= 0 && right <= m_dx) {
+			if (left >= 0 && right <= m_dx) 
+			{
 				m_Left = m_Min + left * dx;
 				m_Right = m_Min + right * dx;
 			}
@@ -874,7 +954,8 @@ void CRangeSlider::OnSetFocus(CWnd* pOldWnd)
 	Invalidate();	
 }
 
-void CRangeSlider::SetVerticalMode(BOOL bVerticalMode) {
+void CRangeSlider::SetVerticalMode(BOOL bVerticalMode) 
+{
 	if (m_bHorizontal != bVerticalMode) 
 		return; 
 
@@ -882,7 +963,8 @@ void CRangeSlider::SetVerticalMode(BOOL bVerticalMode) {
 	Invalidate();
 }
 
-void CRangeSlider::SetInvertedMode(BOOL bInvertedMode) {
+void CRangeSlider::SetInvertedMode(BOOL bInvertedMode) 
+{
 	if (m_bInvertedMode == bInvertedMode)
 		return;
 
