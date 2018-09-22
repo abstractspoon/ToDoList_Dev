@@ -63,11 +63,11 @@
 #define IDC_DISPLAY_LABEL               16026
 #define IDC_SNAPMODES_LABEL             16027
 #define IDC_SELECTEDTASKDATES_LABEL     16028
-#define IDC_SELECTEDDATERANGE_LABEL     16028
+#define IDC_ACTIVEDATERANGE_LABEL       16028
 #define IDC_DECADESAREONEBASED          16029
 #define IDC_COLUMNVISIBILITY            16032
 #define IDC_DISPLAYPARENTSASROLLUPS     16033
-#define IDC_SELECTEDDATERANGE           16034
+#define IDC_ACTIVEDATERANGE             16034
 #define ID_GANTT_GOTOTODAY              32774
 #define ID_GANTT_PREFS                  32775
 #define ID_GANTT_NEWDEPENDS             32776
@@ -112,6 +112,7 @@
 #define IDS_ATTRIB_TASKID               57685
 #define IDS_ATTRIB_DONEDATE             57686
 #define IDS_COL_DONEDATE                57687
+#define IDS_ACTIVEDATERANGE             57688
 
 // Next default values for new objects
 // 
