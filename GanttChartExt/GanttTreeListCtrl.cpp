@@ -48,12 +48,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-const int MAX_YEAR = 2100;
-#else
-const int MAX_YEAR = 2200;
-#endif
-
 const int MIN_COL_WIDTH			= GraphicsMisc::ScaleByDPIFactor(6);
 const int MIN_LABEL_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
 const int DEF_MONTH_WIDTH		= GraphicsMisc::ScaleByDPIFactor(72);
@@ -1449,48 +1443,7 @@ int CGanttTreeListCtrl::GetRequiredListColumnCount() const
 
 int CGanttTreeListCtrl::GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	int nNumMonths = GetNumMonths(nDisplay);
-	int nNumCols = 0;
-
-	switch (nDisplay)
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-		nNumCols = (nNumMonths / (25 * 12));
-		break;
-		
-	case GTLC_DISPLAY_DECADES:
-		nNumCols = (nNumMonths / (10 * 12));
-		break;
-		
-	case GTLC_DISPLAY_YEARS:
-		nNumCols = (nNumMonths / 12);
-		break;
-		
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		nNumCols = (nNumMonths / 3);
-		break;
-		
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
-		nNumCols = nNumMonths;
-		break;
-
-	default:
-		ASSERT(0);
-		break;
-	}
-
-	return (nNumCols + 1);
+	return GetRequiredColumnCount(ActiveDateRange(), nDisplay);
 }
 
 int CGanttTreeListCtrl::GetColumnWidth() const
@@ -1503,41 +1456,6 @@ int CGanttTreeListCtrl::GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay) const
 	return GetColumnWidth(nDisplay, m_nMonthWidth);
 }
 
-int CGanttTreeListCtrl::GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay)
-{
-	switch (nDisplay)
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-		return (25 * 12);
-		
-	case GTLC_DISPLAY_DECADES:
-		return (10 * 12);
-		
-	case GTLC_DISPLAY_YEARS:
-		return 12;
-		
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		return 3;
-		
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
-		return 1;
-	}
-
-	// else
-	ASSERT(0);
-	return 1;
-}
 
 int CGanttTreeListCtrl::GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth)
 {
@@ -4757,20 +4675,6 @@ void CGanttTreeListCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, cons
 	}
 }
 
-BOOL CGanttTreeListCtrl::GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd)
-{
-	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
-	ASSERT(nDaysInMonth);
-
-	if (nDaysInMonth == 0)
-		return FALSE;
-	
-	dtStart.SetDate(nYear, nMonth, 1);
-	dtEnd.m_dt = dtStart.m_dt + nDaysInMonth;
-	
-	return TRUE;
-}
-
 void CGanttTreeListCtrl::DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi)
 {
 	if (!gi.HasDoneDate(HasOption(GTLCF_CALCPARENTDATES)) || gi.IsMilestone(m_sMilestoneTag))
@@ -6233,13 +6137,14 @@ int CGanttTreeListCtrl::FindColumn(int nMonth, int nYear) const
 {	
 	int nMonths = GetDateInMonths(nMonth, nYear);
 	int nNumReqColumns = GetRequiredListColumnCount();
+	int nMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
 
 	for (int i = 1; i <= nNumReqColumns; i++)
 	{
 		// get date for current column
 		VERIFY (GetListColumnDate(i, nMonth, nYear));
 
-		if (nMonths >= GetDateInMonths(nMonth, nYear))
+		if (nMonths >= CDateHelper::GetDateInMonths(nMonth, nYear))
 		{
 			if (i == nNumReqColumns)
 			{
@@ -6249,7 +6154,7 @@ int CGanttTreeListCtrl::FindColumn(int nMonth, int nYear) const
 			{
 				VERIFY (GetListColumnDate(i+1, nMonth, nYear));
 				
-				if (nMonths < GetDateInMonths(nMonth, nYear))
+				if (nMonths < CDateHelper::GetDateInMonths(nMonth, nYear))
 				{
 					return i;
 				}

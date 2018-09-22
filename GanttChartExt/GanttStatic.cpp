@@ -102,3 +102,104 @@ GTLC_HITTEST MapDragToHitTest(GTLC_DRAG nDrag)
 	return GTLCHT_NOWHERE;
 	
 }
+
+/////////////////////////////////////////////////////////////////////////////
+
+int GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay)
+{
+	switch (nDisplay)
+	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		return (25 * 12);
+
+	case GTLC_DISPLAY_DECADES:
+		return (10 * 12);
+
+	case GTLC_DISPLAY_YEARS:
+		return 12;
+
+	case GTLC_DISPLAY_QUARTERS_SHORT:
+	case GTLC_DISPLAY_QUARTERS_MID:
+	case GTLC_DISPLAY_QUARTERS_LONG:
+		return 3;
+
+	case GTLC_DISPLAY_MONTHS_SHORT:
+	case GTLC_DISPLAY_MONTHS_MID:
+	case GTLC_DISPLAY_MONTHS_LONG:
+	case GTLC_DISPLAY_WEEKS_SHORT:
+	case GTLC_DISPLAY_WEEKS_MID:
+	case GTLC_DISPLAY_WEEKS_LONG:
+	case GTLC_DISPLAY_DAYS_SHORT:
+	case GTLC_DISPLAY_DAYS_MID:
+	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
+		return 1;
+	}
+
+	// else
+	ASSERT(0);
+	return 1;
+}
+
+BOOL GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd)
+{
+	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
+	ASSERT(nDaysInMonth);
+
+	if (nDaysInMonth == 0)
+		return FALSE;
+
+	dtStart.SetDate(nYear, nMonth, 1);
+	dtEnd.m_dt = dtStart.m_dt + nDaysInMonth;
+
+	return TRUE;
+}
+
+int GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay)
+{
+	// Note: Doesn't matter when decades start
+	int nNumMonths = dtRange.GetNumMonths(nDisplay);
+	int nNumCols = 0;
+
+	switch (nDisplay)
+	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		nNumCols = (nNumMonths / (25 * 12));
+		break;
+
+	case GTLC_DISPLAY_DECADES:
+		nNumCols = (nNumMonths / (10 * 12));
+		break;
+
+	case GTLC_DISPLAY_YEARS:
+		nNumCols = (nNumMonths / 12);
+		break;
+
+	case GTLC_DISPLAY_QUARTERS_SHORT:
+	case GTLC_DISPLAY_QUARTERS_MID:
+	case GTLC_DISPLAY_QUARTERS_LONG:
+		nNumCols = (nNumMonths / 3);
+		break;
+
+	case GTLC_DISPLAY_MONTHS_SHORT:
+	case GTLC_DISPLAY_MONTHS_MID:
+	case GTLC_DISPLAY_MONTHS_LONG:
+	case GTLC_DISPLAY_WEEKS_SHORT:
+	case GTLC_DISPLAY_WEEKS_MID:
+	case GTLC_DISPLAY_WEEKS_LONG:
+	case GTLC_DISPLAY_DAYS_SHORT:
+	case GTLC_DISPLAY_DAYS_MID:
+	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
+		nNumCols = nNumMonths;
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+
+	// Add 1 for a buffer
+	return (nNumCols + 1);
+}
+

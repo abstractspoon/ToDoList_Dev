@@ -407,7 +407,6 @@ protected:
 	static BOOL CalcDateRect(const CRect& rMonth, int nDaysInMonth, 
 							const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate);
-	static BOOL GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd);
 	static CString GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static int Compare(const CString& sText1, const CString& sText2);
 	static BOOL CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin);
@@ -416,7 +415,6 @@ protected:
 	static void OffsetMonth(int& nMonth, int& nYear, int nNumMonths);
 	static double GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth);
 	static BOOL GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
-	static int GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay);
 	static BOOL IsVerticalDivider(DIV_TYPE nType);
 	static BOOL IsDragging(GTLC_DRAG nDrag);
 	static BOOL IsDraggingEnds(GTLC_DRAG nDrag);

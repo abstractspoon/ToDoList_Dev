@@ -62,4 +62,10 @@ GTLC_HITTEST MapDragToHitTest(GTLC_DRAG nDrag);
 
 /////////////////////////////////////////////////////////////////////////////
 
+BOOL GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd);
+int GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay);
+int GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay);
+
+/////////////////////////////////////////////////////////////////////////////
+
 #endif // !defined(AFX_GANTTSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)
