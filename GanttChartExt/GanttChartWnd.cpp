@@ -79,7 +79,8 @@ void CGanttChartWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_GANTTTREE, m_tree);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplayOptions);
-	DDX_Control(pDX, IDC_SELECTEDDATERANGE, m_sliderDateRange);
+	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
+	DDX_Text(pDX, IDC_ACTIVEDATERANGE_LABEL, m_sActiveDateRange);
 }
 
 BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
@@ -808,11 +809,11 @@ void CGanttChartWnd::Resize(int cx, int cy)
 		m_ctrlGantt.Resize(rGantt);
 
 		// selected task dates takes available space
-		int nOffset = cx - CDialogHelper::GetCtrlRect(this, IDC_SELECTEDDATERANGE).right - 10;
-		CDialogHelper::ResizeCtrl(this, IDC_SELECTEDDATERANGE, nOffset, 0);
+		int nOffset = cx - CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE).right - 10;
+		CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE, nOffset, 0);
 
 		// always redraw the selected task dates
-		GetDlgItem(IDC_SELECTEDDATERANGE)->Invalidate(FALSE);
+		GetDlgItem(IDC_ACTIVEDATERANGE)->Invalidate(FALSE);
 	}
 }
 
@@ -837,8 +838,8 @@ BOOL CGanttChartWnd::OnEraseBkgnd(CDC* pDC)
 	// clip out our children
 	CDialogHelper::ExcludeChild(&m_toolbar, pDC);
 
-	CDialogHelper::ExcludeCtrl(this, IDC_SELECTEDDATERANGE_LABEL, pDC);
-	CDialogHelper::ExcludeCtrl(this, IDC_SELECTEDDATERANGE, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_ACTIVEDATERANGE_LABEL, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_ACTIVEDATERANGE, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_SNAPMODES_LABEL, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_SNAPMODES, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_DISPLAY_LABEL, pDC);
