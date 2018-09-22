@@ -79,7 +79,7 @@ void CGanttChartWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_GANTTTREE, m_tree);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplayOptions);
-	DDX_Text(pDX, IDC_SELECTEDTASKDATES, m_sSelectedTaskDates);
+	DDX_Control(pDX, IDC_SELECTEDDATERANGE, m_sliderDateRange);
 }
 
 BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
@@ -791,6 +791,9 @@ BOOL CGanttChartWnd::OnInitDialog()
 	
 	m_tree.ShowTaskIcons();
 
+	m_sliderDateRange.SetMinMax(0, 1000);
+	m_sliderDateRange.SetRange(0, 1000);
+
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -805,11 +808,11 @@ void CGanttChartWnd::Resize(int cx, int cy)
 		m_ctrlGantt.Resize(rGantt);
 
 		// selected task dates takes available space
-		int nOffset = cx - CDialogHelper::GetCtrlRect(this, IDC_SELECTEDTASKDATES).right;
-		CDialogHelper::ResizeCtrl(this, IDC_SELECTEDTASKDATES, nOffset, 0);
+		int nOffset = cx - CDialogHelper::GetCtrlRect(this, IDC_SELECTEDDATERANGE).right - 10;
+		CDialogHelper::ResizeCtrl(this, IDC_SELECTEDDATERANGE, nOffset, 0);
 
 		// always redraw the selected task dates
-		GetDlgItem(IDC_SELECTEDTASKDATES)->Invalidate(FALSE);
+		GetDlgItem(IDC_SELECTEDDATERANGE)->Invalidate(FALSE);
 	}
 }
 
@@ -834,8 +837,8 @@ BOOL CGanttChartWnd::OnEraseBkgnd(CDC* pDC)
 	// clip out our children
 	CDialogHelper::ExcludeChild(&m_toolbar, pDC);
 
-	CDialogHelper::ExcludeCtrl(this, IDC_SELECTEDTASKDATES_LABEL, pDC);
-	CDialogHelper::ExcludeCtrl(this, IDC_SELECTEDTASKDATES, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_SELECTEDDATERANGE_LABEL, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_SELECTEDDATERANGE, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_SNAPMODES_LABEL, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_SNAPMODES, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_DISPLAY_LABEL, pDC);
@@ -1079,6 +1082,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 
 void CGanttChartWnd::UpdateSelectedTaskDates()
 {
+/*
 	COleDateTime dtStart, dtDue;
 	
 	if (m_ctrlGantt.GetSelectedTaskDates(dtStart, dtDue))
@@ -1103,6 +1107,7 @@ void CGanttChartWnd::UpdateSelectedTaskDates()
 	}
 
 	UpdateData(FALSE);
+*/
 }
 
 LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM wp, LPARAM /*lp*/)

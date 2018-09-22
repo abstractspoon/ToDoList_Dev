@@ -72,9 +72,6 @@ STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
 FONT 8, "Tahoma"
 BEGIN
-    CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
-                    IDC_SELECTEDTASKDATES,351,13,236,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
     LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,151,8
     COMBOBOX        IDC_DISPLAY,0,13,152,118,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
@@ -90,10 +87,12 @@ BEGIN
     COMBOBOX        IDC_SNAPMODES,159,13,79,161,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Snap Mode",IDC_SNAPMODES_LABEL,159,2,79,8
-    LTEXT           "Selected Task &Date Range",IDC_SELECTEDTASKDATES_LABEL,
-                    352,3,235,8
+    LTEXT           "&Visible Date Range",IDC_SELECTEDDATERANGE_LABEL,354,3,
+                    233,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,243,12,106,17
+                    WS_VISIBLE,243,12,106,13
+    CONTROL         "",IDC_SELECTEDDATERANGE,"MFCRangeSlider",WS_TABSTOP,353,
+                    12,112,13
 END
 
 

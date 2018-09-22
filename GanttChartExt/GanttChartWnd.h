@@ -17,6 +17,8 @@
 #include "..\Shared\toolbarhelper.h"
 #include "..\shared\Icon.h"
 
+#include "..\3rdParty\RangeSlider.h"
+
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
 
@@ -73,11 +75,12 @@ protected:
 	CGanttCreateDependsDlg m_dlgDepends;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
+	CRangeSlider m_sliderDateRange;
 
 	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
-	CString m_sSelectedTaskDates;
+	
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, GTLC_SNAPMODE, GTLC_SNAPMODE> m_mapDisplaySnapModes;
 	BOOL m_bReadOnly;
 	BOOL m_bInSelectTask;
