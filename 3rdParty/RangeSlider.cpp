@@ -722,20 +722,34 @@ void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point)
 			break;
 		}
 
-		if ((oldLeft != m_Left) && (oldRight != m_Right))
-		{
-			GetParent()->SendMessage(RANGE_CHANGED, RS_BOTHCHANGED);
-		}
-		else if (oldLeft != m_Left)
-		{
-			GetParent()->SendMessage(RANGE_CHANGED, RS_LEFTCHANGED);
-		}
-		else if (oldRight != m_Right)
-		{
-			GetParent()->SendMessage(RANGE_CHANGED, RS_RIGHTCHANGED);
-		}
+		// Check for change
+		if ((oldLeft == m_Left) && (oldRight == m_Right))
+			return;
 
-		Invalidate();
+		// Validate change
+		if (!IsValidMove(m_Left, m_Right))
+		{
+			m_Left = oldLeft;
+			m_Right = oldRight;
+		}
+		else
+		{
+			if ((oldLeft != m_Left) && (oldRight != m_Right))
+			{
+				GetParent()->SendMessage(RANGE_CHANGED, RS_BOTHCHANGED);
+			}
+			else if (oldLeft != m_Left)
+			{
+				GetParent()->SendMessage(RANGE_CHANGED, RS_LEFTCHANGED);
+			}
+			else if (oldRight != m_Right)
+			{
+				GetParent()->SendMessage(RANGE_CHANGED, RS_RIGHTCHANGED);
+			}
+
+			Invalidate();
+		}
+		
 	}
 }
 

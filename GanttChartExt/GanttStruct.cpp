@@ -17,6 +17,14 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+#ifdef _DEBUG
+const int MAX_YEAR = 2100;
+#else
+const int MAX_YEAR = 2200;
+#endif
+
+//////////////////////////////////////////////////////////////////////
+
 int GANTTDEPENDENCY::STUB = 0;
 
 GANTTDEPENDENCY::GANTTDEPENDENCY() 
@@ -669,9 +677,37 @@ void CGanttItemMap::CalcDateRange(BOOL bCalcParentDates, BOOL bCalcMissingStart,
 
 //////////////////////////////////////////////////////////////////////
 
-GANTTDATERANGE::GANTTDATERANGE() : COleDateTimeRange()
+GANTTDATERANGE::GANTTDATERANGE()
 {
 	m_bInclusive = FALSE; // always
+}
+
+GANTTDATERANGE::GANTTDATERANGE(const GANTTDATERANGE& dtOther)
+{
+	m_bInclusive = FALSE; // always
+
+	if (dtOther.IsValid())
+		Set(dtOther);
+}
+
+GANTTDATERANGE::GANTTDATERANGE(const COleDateTimeRange& dtOther)
+{
+	m_bInclusive = FALSE; // always
+
+	if (dtOther.IsValid())
+		Set(dtOther);
+}
+
+CString GANTTDATERANGE::Format(DWORD dwFlags, TCHAR cDelim) const
+{
+	return COleDateTimeRange::Format(dwFlags, cDelim);
+}
+
+CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, DWORD dwFlags, TCHAR cDelim) const
+{
+	COleDateTimeRange dtRange(GetStart(nDisplay), GetEnd(nDisplay), FALSE);
+
+	return dtRange.Format(dwFlags, cDelim);
 }
 
 BOOL GANTTDATERANGE::IsValid() const
@@ -694,6 +730,33 @@ void GANTTDATERANGE::Add(const COleDateTime& dtStart, const COleDateTime& dtEnd)
 	// bInclusive always FALSE
 	CDateHelper::Min(m_dtStart, dtStart);
 	CDateHelper::Max(m_dtEnd, dtEnd);
+}
+
+int GANTTDATERANGE::GetStartYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
+{
+	return GetStart(nDisplay, bZeroBasedDecades).GetYear();
+}
+
+int GANTTDATERANGE::GetEndYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
+{
+	int nYear = GetEnd(nDisplay, bZeroBasedDecades).GetYear();
+
+	// for now, do not let end year exceed MAX_YEAR
+	return min(nYear, MAX_YEAR);
+}
+
+int GANTTDATERANGE::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const
+{
+	if (!IsValid())
+		return 0;
+
+	// Note: Doesn't matter when decades start
+	COleDateTime dtStart(GetStart(nDisplay)), dtEnd(GetEnd(nDisplay));
+
+	int nNumMonths = CDateHelper::CalcMonthsFromTo(dtStart, dtEnd, TRUE);
+	ASSERT(nNumMonths > 0);
+
+	return nNumMonths;
 }
 
 COleDateTime GANTTDATERANGE::GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
@@ -793,11 +856,52 @@ BOOL GANTTDATERANGE::Contains(const GANTTITEM& gi) const
 	return TRUE;
 }
 
+BOOL GANTTDATERANGE::Contains(const GANTTDATERANGE& dtRange) const
+{
+	if (!IsValid() || !dtRange.IsValid())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if ((dtRange.m_dtStart < m_dtStart) || (dtRange.m_dtStart > m_dtEnd))
+		return FALSE;
+
+	if ((dtRange.m_dtEnd < m_dtStart) || (dtRange.m_dtEnd > m_dtEnd))
+		return FALSE;
+
+	return TRUE;
+}
+
 BOOL GANTTDATERANGE::operator==(const GANTTDATERANGE& dtOther) const
 {
+	return operator==((const COleDateTimeRange&)dtOther);
+}
+
+BOOL GANTTDATERANGE::operator==(const COleDateTimeRange& dtOther) const
+{
+	if (!IsValid() || !dtOther.IsValid())
+		return FALSE;
+
 	ASSERT(!m_bInclusive && !dtOther.m_bInclusive); // always
 
 	return ((m_dtStart == dtOther.m_dtStart) && (m_dtEnd == dtOther.m_dtEnd));
+}
+
+void GANTTDATERANGE::Set(const GANTTDATERANGE& dtOther)
+{
+	ASSERT(!dtOther.m_bInclusive); // always
+	
+	SetStart(dtOther.GetStart());
+	SetEnd(dtOther.GetEnd());
+}
+
+void GANTTDATERANGE::Set(const COleDateTimeRange& dtOther)
+{
+	ASSERT(!dtOther.m_bInclusive); // always
+	
+	SetStart(dtOther.GetStart());
+	SetEnd(dtOther.GetEnd());
 }
 
 void GANTTDATERANGE::SetStart(const COleDateTime& date)

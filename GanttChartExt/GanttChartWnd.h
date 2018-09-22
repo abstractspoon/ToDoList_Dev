@@ -11,13 +11,13 @@
 #include "GanttTreeListCtrl.h"
 #include "GanttPreferencesDlg.h"
 #include "GanttCreateDependsDlg.h"
+#include "GanttDateRangeSlider.h"
 
 #include "..\Shared\tabbedcombobox.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\shared\Icon.h"
-
-#include "..\3rdParty\RangeSlider.h"
+#include "..\shared\EnString.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -75,11 +75,12 @@ protected:
 	CGanttCreateDependsDlg m_dlgDepends;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
-	CRangeSlider m_sliderDateRange;
+	CGanttDateRangeSlider m_sliderDateRange;
 
 	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
+	CEnString m_sActiveDateRange;
 	
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, GTLC_SNAPMODE, GTLC_SNAPMODE> m_mapDisplaySnapModes;
 	BOOL m_bReadOnly;
@@ -136,6 +137,7 @@ protected:
 	afx_msg LRESULT OnGanttGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttEditTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttMoveTask(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnActiveDateRangeChange(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 	// pseudo handlers

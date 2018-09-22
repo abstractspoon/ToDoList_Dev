@@ -136,6 +136,11 @@ public:
 	void GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& aListTracked) const;
 	void SetTreeColumnVisibility(const CDWordArray& aColumnVis);
 
+	void ResetActiveDateRange();
+	BOOL SetActiveDateRange(const GANTTDATERANGE& dtRange);
+	BOOL GetActiveDateRange(GANTTDATERANGE& dtRange) const;
+	BOOL GetDataDateRange(GANTTDATERANGE& dtRange) const;
+
 	static BOOL WantEditUpdate(IUI_ATTRIBUTE nAttrib);
 	static BOOL WantSortUpdate(IUI_ATTRIBUTE nAttrib);
 	static IUI_ATTRIBUTE MapColumnToAttribute(GTLC_COLUMN nCol);
@@ -145,7 +150,7 @@ protected:
 	BOOL m_bReadOnly;
 	BOOL m_bMovingTask;
 
-	GANTTDATERANGE m_dateRange;
+	GANTTDATERANGE m_dtDataRange, m_dtActiveRange;
 	GANTTITEM m_giPreDrag;
 	GANTTSORT m_sort;
 
@@ -400,7 +405,6 @@ protected:
 	static int CALLBACK MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	
-	static int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
 	static BOOL CalcDateRect(const CRect& rMonth, int nMonth, int nYear, 
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate);
@@ -412,7 +416,7 @@ protected:
 	static BOOL CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2);
-	static void OffsetMonth(int& nMonth, int& nYear, int nNumMonths);
+	static int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
 	static double GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth);
 	static BOOL GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
 	static BOOL IsVerticalDivider(DIV_TYPE nType);
@@ -422,6 +426,7 @@ protected:
 private:
 	void PreFixVScrollSyncBug();
 	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp) const;
+	const GANTTDATERANGE& ActiveDateRange() const;
 
 };
 

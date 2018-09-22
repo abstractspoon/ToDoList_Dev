@@ -200,6 +200,6 @@ int GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDi
 	}
 
 	// Add 1 for a buffer
-	return (nNumCols + 1);
+	return nNumCols;
 }
 

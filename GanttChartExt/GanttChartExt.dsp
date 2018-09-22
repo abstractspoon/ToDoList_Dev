@@ -124,6 +124,10 @@ SOURCE=.\GanttCreateDependsDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\GanttDateRangeSlider.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\GanttPreferencesDlg.cpp
 # End Source File
 # Begin Source File
@@ -162,6 +166,10 @@ SOURCE=.\GanttChartWnd.h
 # Begin Source File
 
 SOURCE=.\GanttCreateDependsDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\GanttDateRangeSlider.h
 # End Source File
 # Begin Source File
 

@@ -24,9 +24,13 @@ struct GANTTITEM;
 struct GANTTDATERANGE : protected COleDateTimeRange
 {
 	GANTTDATERANGE();
+	GANTTDATERANGE(const GANTTDATERANGE& dtOther);
+	GANTTDATERANGE(const COleDateTimeRange& dtOther);
 	
 	void Reset();
 	BOOL IsValid() const;
+	CString Format(DWORD dwFlags = 0, TCHAR cDelim = '-') const;
+	CString Format(GTLC_MONTH_DISPLAY nDisplay, DWORD dwFlags = 0, TCHAR cDelim = '-') const;
 
 	void Add(const GANTTITEM& gi);
 	void Add(const COleDateTime& dtStart, const COleDateTime& dtEnd);
@@ -37,6 +41,13 @@ struct GANTTDATERANGE : protected COleDateTimeRange
 	COleDateTime GetStart() const;
 	COleDateTime GetEnd() const;
 
+	int GetStartYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
+	int GetEndYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
+
+	int GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const;
+
+	void Set(const GANTTDATERANGE& dtOther);
+	void Set(const COleDateTimeRange& dtOther);
 	void SetStart(const COleDateTime& date);
 	void SetEnd(const COleDateTime& date);
 
@@ -47,7 +58,10 @@ struct GANTTDATERANGE : protected COleDateTimeRange
 	void ClearEnd();
 
 	BOOL Contains(const GANTTITEM& gi) const;
+	BOOL Contains(const GANTTDATERANGE& dtRange) const;
+
 	BOOL operator==(const GANTTDATERANGE& dtOther) const;
+	BOOL operator==(const COleDateTimeRange& dtOther) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -114,6 +114,7 @@ protected:
 
 	virtual void DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion) const;
 	virtual void DrawButton(CDC& dc, const CRect& rButton, const CString& sText, BOOL bPressed) const;
+	virtual BOOL IsValidMove(double left, double right) const { return TRUE; }
 
 	// Data
 	double m_Min, m_Max;           // Outer Edges of the Control

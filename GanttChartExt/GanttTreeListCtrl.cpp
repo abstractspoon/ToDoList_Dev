@@ -1086,14 +1086,14 @@ void CGanttTreeListCtrl::RecalcDateRange()
 	{
 		RecalcParentDates();
 	
-		GANTTDATERANGE prevRange = m_dateRange;
+		GANTTDATERANGE prevRange = m_dtDataRange;
 
 		m_data.CalcDateRange(HasOption(GTLCF_CALCPARENTDATES),
 							HasOption(GTLCF_CALCMISSINGSTARTDATES),
 							HasOption(GTLCF_CALCMISSINGDUEDATES), 
-							m_dateRange);
+							m_dtDataRange);
 
-		if (!(m_dateRange == prevRange))
+		if (!(m_dtDataRange == prevRange))
 		{
 			ValidateMonthDisplay();
 			UpdateListColumns();
@@ -1232,40 +1232,86 @@ void CGanttTreeListCtrl::IncrementItemPositions(HTREEITEM htiParent, int nFromPo
 	}
 }
 
+BOOL CGanttTreeListCtrl::GetActiveDateRange(GANTTDATERANGE& dtRange) const
+{
+	dtRange = ActiveDateRange();
+
+	return dtRange.IsValid();
+}
+
+BOOL CGanttTreeListCtrl::GetDataDateRange(GANTTDATERANGE& dtRange) const
+{
+	dtRange = m_dtDataRange;
+
+	return dtRange.IsValid();
+}
+
+const GANTTDATERANGE& CGanttTreeListCtrl::ActiveDateRange() const
+{
+	if (m_dtActiveRange.IsValid())
+		return m_dtActiveRange;
+
+	// else
+	return m_dtDataRange;
+}
+
+void CGanttTreeListCtrl::ResetActiveDateRange()
+{
+	if (m_dtActiveRange.IsValid())
+	{
+		m_dtActiveRange.Reset();
+
+		ValidateMonthDisplay();
+		UpdateListColumns();
+	}
+}
+
+BOOL CGanttTreeListCtrl::SetActiveDateRange(const GANTTDATERANGE& dtRange)
+{
+	if (!dtRange.IsValid())
+		return FALSE;
+
+	if (m_dtActiveRange == dtRange)
+		return TRUE;
+
+	if (m_dtDataRange == dtRange)
+	{
+		m_dtActiveRange.Reset();
+	}
+	else
+	{
+		m_dtActiveRange.Set(dtRange);
+	}
+
+	ValidateMonthDisplay();
+	UpdateListColumns();
+
+	return TRUE;
+}
+
 COleDateTime CGanttTreeListCtrl::GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return m_dateRange.GetStart(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
+	return ActiveDateRange().GetStart(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
 }
 
 COleDateTime CGanttTreeListCtrl::GetEndDate(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return m_dateRange.GetEnd(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
+	return ActiveDateRange().GetEnd(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
 }
 
 int CGanttTreeListCtrl::GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return GetStartDate(nDisplay).GetYear();
+	return ActiveDateRange().GetStartYear(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
 }
 
 int CGanttTreeListCtrl::GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	int nYear = GetEndDate(nDisplay).GetYear();
-
-	// for now, do not let end year exceed MAX_YEAR
-	return min(nYear, MAX_YEAR);
+	return ActiveDateRange().GetEndYear(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
 }
 
 int CGanttTreeListCtrl::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	COleDateTime dtStart(GetStartDate(nDisplay)), dtEnd(GetEndDate(nDisplay));
-	
-	int nStartMonth = dtStart.GetMonth(), nStartYear = dtStart.GetYear();
-	int nEndMonth = dtEnd.GetMonth(), nEndYear = dtEnd.GetYear();
-
-	int nNumMonths = ((((nEndYear * 12) + nEndMonth) - ((nStartYear * 12) + nStartMonth)) + 1);
-	ASSERT(nNumMonths > 0);
-
-	return nNumMonths;
+	return ActiveDateRange().GetNumMonths(nDisplay);
 }
 
 void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
@@ -1443,7 +1489,15 @@ int CGanttTreeListCtrl::GetRequiredListColumnCount() const
 
 int CGanttTreeListCtrl::GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return GetRequiredColumnCount(ActiveDateRange(), nDisplay);
+	int nNumCols = GetRequiredColumnCount(ActiveDateRange(), nDisplay);
+	
+	// Add a buffer column to accommodate trailing text except
+	// where an active date range has been set else we'll always
+	// end up with one more columns than that specified
+	if (!m_dtActiveRange.IsValid())
+		nNumCols++;
+
+	return nNumCols;
 }
 
 int CGanttTreeListCtrl::GetColumnWidth() const
@@ -4983,7 +5037,8 @@ BOOL CGanttTreeListCtrl::CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, int nMo
 		return FALSE;
 	}
 
-	int nNumReqColumns = (GetRequiredListColumnCount(nDisplay) + 1);
+	// ignore hidden dummy first column
+	int nNumReqColumns = GetRequiredListColumnCount(nDisplay);
 	int nColWidth = GetColumnWidth(nDisplay, nMonthWidth);
 	int nTotalReqdWidth = (nNumReqColumns * nColWidth);
 	
@@ -5190,6 +5245,7 @@ BOOL CGanttTreeListCtrl::ZoomBy(int nAmount)
 void CGanttTreeListCtrl::RecalcListColumnWidths(int nFromWidth, int nToWidth)
 {
 	// resize the required number of columns
+	// remember to ignore hidden dummy first column
 	int nNumReqColumns = GetRequiredListColumnCount(), i;
 
 	for (i = 1; i <= nNumReqColumns; i++)
@@ -5238,9 +5294,9 @@ void CGanttTreeListCtrl::ResizeAttributeColumnsToFit(BOOL bForce)
 	SetSplitPos(nTotalColWidth);
 	
 	// list columns (except first dummy column)
-	nCol = GetRequiredListColumnCount();
+	nNumCols = GetRequiredListColumnCount();
 	
-	while (--nCol > 0)
+	for (nCol = 1; nCol <= nNumCols; nCol++)
 		m_listHeader.SetItemWidth(nCol, GetColumnWidth());
 
 	Resize();
@@ -5465,6 +5521,7 @@ void CGanttTreeListCtrl::UpdateListColumnsWidthAndText(int nWidth)
 	if (nWidth == -1)
 		nWidth = GetColumnWidth();
 
+	// remember to include hidden dummy first column
 	int nNumReqColumns = (GetRequiredListColumnCount() + 1);
 	BOOL bUsePrevWidth = (m_aPrevColWidths.GetSize() == nNumReqColumns);
 	int nTotalReqdWidth = 0;
@@ -5575,15 +5632,14 @@ void CGanttTreeListCtrl::BuildListColumns()
 	// add other columns
 	int nNumCols = GetRequiredListColumnCount(m_nMonthDisplay);
 
-	for (int i = 0; i < nNumCols; i++)
+	for (int i = 1; i <= nNumCols; i++)
 	{
 		lvc.cx = 0;
 		lvc.fmt = LVCFMT_CENTER | HDF_STRING;
 		lvc.pszText = _T("");
 		lvc.cchTextMax = 50;
 
-		int nCol = m_listHeader.GetItemCount();
-		m_list.InsertColumn(nCol, &lvc);
+		m_list.InsertColumn(i, &lvc);
 	}
 
 	UpdateListColumnsWidthAndText();
@@ -5600,7 +5656,7 @@ void CGanttTreeListCtrl::UpdateListColumns(int nWidth)
 	if (nWidth == -1)
 		nWidth = GetColumnWidth();
 
-	int nNumCols = m_listHeader.GetItemCount();
+	int nNumCols = m_listHeader.GetItemCount(); // includes hidden first column
 	int nReqCols = (GetRequiredListColumnCount(m_nMonthDisplay) + 1);
 	int nDiffCols = (nReqCols - nNumCols);
 
@@ -6135,9 +6191,8 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date) const
 
 int CGanttTreeListCtrl::FindColumn(int nMonth, int nYear) const
 {	
-	int nMonths = GetDateInMonths(nMonth, nYear);
-	int nNumReqColumns = GetRequiredListColumnCount();
 	int nMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
+	int nNumReqColumns = GetRequiredListColumnCount();
 
 	for (int i = 1; i <= nNumReqColumns; i++)
 	{
@@ -6146,7 +6201,7 @@ int CGanttTreeListCtrl::FindColumn(int nMonth, int nYear) const
 
 		if (nMonths >= CDateHelper::GetDateInMonths(nMonth, nYear))
 		{
-			if (i == nNumReqColumns)
+			if (i == nNumReqColumns) // last column
 			{
 				return i;
 			}
@@ -7328,8 +7383,8 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 
 	// Calculate the date range in scroll units
 	// allow a month's buffer at each end
-	COleDateTime dtFrom = CDateHelper::GetStartOfMonth(m_dateRange.GetStart());
-	COleDateTime dtTo = CDateHelper::GetEndOfMonth(m_dateRange.GetEnd());
+	COleDateTime dtFrom = CDateHelper::GetStartOfMonth(ActiveDateRange().GetStart());
+	COleDateTime dtTo = CDateHelper::GetEndOfMonth(ActiveDateRange().GetEnd());
 
 	CDateHelper::IncrementMonth(dtFrom, -1);
 	CDateHelper::IncrementMonth(dtTo, 1);

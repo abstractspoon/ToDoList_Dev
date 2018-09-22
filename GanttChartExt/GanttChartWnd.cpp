@@ -121,6 +121,7 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_GTLC_GETTASKICON, OnGanttGetTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_GTLC_EDITTASKICON, OnGanttEditTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_GTLC_MOVETASK, OnGanttMoveTask)
+	ON_REGISTERED_MESSAGE(RANGE_CHANGED, OnActiveDateRangeChange)
 	ON_CBN_SELCHANGE(IDC_SNAPMODES, OnSelchangeSnapMode)
 END_MESSAGE_MAP()
 
@@ -523,6 +524,17 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	
 	m_ctrlGantt.UpdateTasks(pTasks, nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes));
 
+	GANTTDATERANGE dtDataRange;
+	VERIFY(m_ctrlGantt.GetDataDateRange(dtDataRange));
+
+	GTLC_MONTH_DISPLAY nDisplay = m_ctrlGantt.GetMonthDisplay();
+
+	m_sliderDateRange.SetMonthDisplay(nDisplay);
+	m_sliderDateRange.SetMaxRange(dtDataRange);
+
+	m_sActiveDateRange.Format(IDS_ACTIVEDATERANGE, m_sliderDateRange.FormatSelectedRange());
+	UpdateData(FALSE);
+
 	// Month Display may change for large date ranges
 	BuildDisplayCombo();
 
@@ -791,9 +803,6 @@ BOOL CGanttChartWnd::OnInitDialog()
 	m_ctrlGantt.SetFocus();
 	
 	m_tree.ShowTaskIcons();
-
-	m_sliderDateRange.SetMinMax(0, 1000);
-	m_sliderDateRange.SetRange(0, 1000);
 
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -1398,4 +1407,20 @@ LRESULT CGanttChartWnd::OnGanttMoveTask(WPARAM wp, LPARAM lp)
 LRESULT CGanttChartWnd::OnGanttEditTaskIcon(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKICON, wp, lp);
+}
+
+LRESULT CGanttChartWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	GANTTDATERANGE dtRange;
+	m_sliderDateRange.GetSelectedRange(dtRange);
+
+	if (dtRange.IsValid())
+	{
+		m_ctrlGantt.SetActiveDateRange(dtRange);
+
+		m_sActiveDateRange.Format(IDS_ACTIVEDATERANGE, m_sliderDateRange.FormatSelectedRange());
+		UpdateData(FALSE);
+	}
+
+	return 0L;
 }

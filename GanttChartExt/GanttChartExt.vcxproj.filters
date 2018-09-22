@@ -42,6 +42,9 @@
     <ClCompile Include="GanttStatic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GanttDateRangeSlider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="GanttChartExt.def">
@@ -106,6 +109,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GanttStatic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GanttDateRangeSlider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
