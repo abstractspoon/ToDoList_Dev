@@ -50,10 +50,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLTransEdit", "..\TDLTransEdit\TDLTransEdit.vcxproj", "{E55B5B3C-2C94-7FFC-AE63-B2080E520531}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WorkloadExt", "..\WorkloadExt\WorkloadExt.vcxproj", "{19F9E07E-7448-45EC-101E-8855E65841B1}"
-	ProjectSection(ProjectDependencies) = postProject
-		{95605899-9C90-40D8-8774-D1DA1FCE7464} = {95605899-9C90-40D8-8774-D1DA1FCE7464}
-		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31} = {E15C17B8-C080-492F-BBB8-BF9E84A0EA31}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
