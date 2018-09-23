@@ -75,9 +75,9 @@
 #include "..\shared\soundedit.h"
 #include "..\shared\messagebox.h"
 #include "..\shared\ComboListboxPositioner.h"
+#include "..\shared\sendfiletoEx.h"
 
 #include "..\3rdparty\gui.h"
-#include "..\3rdparty\sendfileto.h"
 
 #include <shlwapi.h>
 #include <windowsx.h>
@@ -12462,7 +12462,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 			sSubject = tdc.GetSelectedTaskTitle() + _T(" - ") + sSubject;
 		}
 
-		CSendFileTo().SendMail(*this, sTo, sSubject, sBody, sAttachment);
+		VERIFY(CSendFileToEx::SendMail(*this, sTo, sSubject, sBody, sAttachment));
 
 		FileMisc::DeleteFile(sFilePath, TRUE);
 	}

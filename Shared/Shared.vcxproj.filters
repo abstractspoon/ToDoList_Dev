@@ -1011,6 +1011,9 @@
     <ClInclude Include="ColorBrewer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SendFileToEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

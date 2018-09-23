@@ -1233,6 +1233,10 @@ SOURCE=.\ScrollingPropertyPageHost.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\SendFileToEx.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ServerDlg.h
 # End Source File
 # Begin Source File

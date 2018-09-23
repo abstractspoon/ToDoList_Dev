@@ -1,8 +1,6 @@
 #ifndef __SENDFILETO_H__
 #define __SENDFILETO_H__
 
-#include "..\shared\misc.h"
-
 #include <mapi.h>
 
 #ifndef ULONG_PTR
@@ -13,10 +11,10 @@ class CSendFileTo
 {
 public:
 	static bool SendMail(HWND hWndParent, 
-						const CString& strTo=_T(""), 
-						const CString& strSubject=_T(""), 
-						const CString& strBody=_T(""), 
-						const CString& strAttachmentFileName=_T(""))
+						const LPCSTR strTo="", 
+						const LPCSTR strSubject="", 
+						const LPCSTR strBody="", 
+						const LPCSTR strAttachmentFileName="")
 	{
 		if (!hWndParent || !::IsWindow(hWndParent))
 			return false;
@@ -37,34 +35,19 @@ public:
 
 		fileDesc.nPosition = (ULONG)-1;
 
-#ifdef _UNICODE
-		recipient.lpszName = (LPSTR)(LPCTSTR)Misc::WideToMultiByte(strTo);
-		fileDesc.lpszPathName = (LPSTR)(LPCTSTR)Misc::WideToMultiByte(strAttachmentFileName);
-		message.lpszSubject = (LPSTR)(LPCTSTR)Misc::WideToMultiByte(strSubject);
-		message.lpszNoteText = (LPSTR)(LPCTSTR)Misc::WideToMultiByte(strBody);
-#else
-		recipient.lpszName = (LPSTR)(LPCTSTR)strTo;
-		fileDesc.lpszPathName = (LPSTR)(LPCTSTR)strAttachmentFileName;
-		message.lpszSubject = (LPSTR)(LPCTSTR)strSubject;
-		message.lpszNoteText = (LPSTR)(LPCTSTR)strBody;
-#endif		
+		recipient.lpszName = (LPSTR)strTo;
+		fileDesc.lpszPathName = (LPSTR)strAttachmentFileName;
+		message.lpszSubject = (LPSTR)strSubject;
+		message.lpszNoteText = (LPSTR)strBody;
 
-		message.nFileCount = strAttachmentFileName.IsEmpty() ? 0 : 1;
-		message.lpFiles = strAttachmentFileName.IsEmpty() ? NULL : &fileDesc;
+		message.nFileCount = (!strAttachmentFileName || !strAttachmentFileName[0]) ? 0 : 1;
+		message.lpFiles = (!strAttachmentFileName || !strAttachmentFileName[0]) ? NULL : &fileDesc;
 
-		message.nRecipCount = strTo.IsEmpty() ? 0 : 1;
-		message.lpRecips = strTo.IsEmpty() ? NULL : &recipient;
+		message.nRecipCount = (!strTo || !strTo[0]) ? 0 : 1;
+		message.lpRecips = (!strTo || !strTo[0]) ? NULL : &recipient;
 		
 		int nError = fnSendMail(0, (ULONG_PTR)hWndParent, &message, MAPI_LOGON_UI|MAPI_DIALOG, 0);
 
-#ifdef _UNICODE
-		// cleanup
-		delete recipient.lpszName;
-		delete fileDesc.lpszPathName;
-		delete message.lpszSubject;
-		delete message.lpszNoteText;
-#endif		
-		
 		if (nError != SUCCESS_SUCCESS && nError != MAPI_USER_ABORT && nError != MAPI_E_LOGIN_FAILURE)
 			return false;
 		

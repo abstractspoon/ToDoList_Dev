@@ -810,6 +810,7 @@
     <ClInclude Include="RuntimeDlg.h" />
     <ClInclude Include="SaveFocus.h" />
     <ClInclude Include="ScrollingPropertyPageHost.h" />
+    <ClInclude Include="SendFileToEx.h" />
     <ClInclude Include="ServerDlg.h" />
     <ClInclude Include="SessionStatusWnd.h" />
     <ClInclude Include="ShortcutManager.h" />
