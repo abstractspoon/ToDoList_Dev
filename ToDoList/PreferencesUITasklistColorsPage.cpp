@@ -206,6 +206,7 @@ BOOL CPreferencesUITasklistColorsPage::OnInitDialog()
 
 	// disable translation of user-entered text
 	CLocalizer::EnableTranslation(m_cbAttributes, FALSE);
+	CLocalizer::EnableTranslation(m_cbTreeFonts, FALSE);
 
 	m_mgrGroupLines.AddGroupLine(IDC_TASKCOLOURGROUP, *this);
 

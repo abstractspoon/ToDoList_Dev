@@ -8,6 +8,7 @@
 #include "..\shared\Misc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\Localizer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -96,7 +97,9 @@ BOOL CPreferencesExportPage::OnInitDialog()
 	
 	m_eLineSpaces.EnableWindow(m_bExportSpaceForNotes);
 	GetDlgItem(IDC_NUMLINESPACETRAIL)->EnableWindow(m_bExportSpaceForNotes);
-	
+
+	CLocalizer::EnableTranslation(m_cbFonts, FALSE);
+		
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }

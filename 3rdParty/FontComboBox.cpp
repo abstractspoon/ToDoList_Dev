@@ -25,8 +25,6 @@
 #include "stdafx.h"
 #include "FontComboBox.h"
 
-#include "..\shared\localizer.h"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -134,8 +132,6 @@ void CFontComboBox::FillCombo()
 
    ============================================================*/
 {
-	CLocalizer::EnableTranslation(*this, FALSE);
-	
 	CClientDC dc( this );		
 	::EnumFonts( dc, 0, ( FONTENUMPROC ) EnumFontProc, ( LPARAM ) this );
 }

@@ -32,6 +32,7 @@
 #include "..\shared\Themed.h"
 #include "..\shared\enstring.h"
 #include "..\shared\colourpopupEx.h"
+#include "..\shared\Localizer.h"
 
 
 #include <tchar.h>
@@ -133,6 +134,7 @@ BOOL CRRECToolBar::Create(CWnd* parent, LPCTSTR szImageFile, COLORREF crMask)
 							CBS_DROPDOWNLIST | CBS_SORT, rect, this, DROPDOWN_FONT))
 			return FALSE;
 
+		CLocalizer::EnableTranslation(m_font, FALSE);
 		m_font.SetFont(CFont::FromHandle((HFONT) ::GetStockObject(DEFAULT_GUI_FONT)));
 		m_font.FillCombo();
 
