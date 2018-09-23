@@ -26,8 +26,6 @@
 #include "stdafx.h"
 #include "FPSMiniCalendarListCtrl.h"
 
-#include "..\Shared\DateHelper.h"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -140,7 +138,7 @@ void CFPSMiniCalendarListCtrl::OnPaint()
 		CRect rectItem;
 
 		if (m_pwndCalendar)
-			strDisplayText = CDateHelper::GetMonthName(iMonth);
+			strDisplayText = m_pwndCalendar->GetMonthName(iMonth);
 
 		strDisplayText += " ";
 		strDisplayText += CStr(iYear);
@@ -336,7 +334,7 @@ void CFPSMiniCalendarListCtrl::AutoConfigure()
 			CString strText;
 
 			if (m_pwndCalendar)
-				strText = CDateHelper::GetMonthName(iMonth);
+				strText = m_pwndCalendar->GetMonthName(iMonth);
 
 			strText += " 0000";
 
