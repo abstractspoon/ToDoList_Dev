@@ -547,6 +547,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="StatusBarACTEx.cpp" />
     <ClCompile Include="StatusBarProgress.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -822,6 +823,7 @@
     <ClInclude Include="SoundEdit.h" />
     <ClInclude Include="SpellCheckDlg.h" />
     <ClInclude Include="SpellChecker.h" />
+    <ClInclude Include="StatusBarACTEx.h" />
     <ClInclude Include="StatusBarProgress.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="StickiesAPI.h" />

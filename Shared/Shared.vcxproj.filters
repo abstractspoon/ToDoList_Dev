@@ -490,6 +490,9 @@
     <ClCompile Include="ColourPickerEx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="StatusBarACTEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ColourPopupEx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1018,6 +1021,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ColourPickerEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StatusBarACTEx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SendFileToEx.h">

@@ -589,6 +589,10 @@ SOURCE=.\SpellChecker.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\StatusBarACTEx.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StatusBarProgress.cpp
 # End Source File
 # Begin Source File
@@ -1278,6 +1282,10 @@ SOURCE=.\SpellCheckDlg.h
 # Begin Source File
 
 SOURCE=.\SpellChecker.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\StatusBarACTEx.h
 # End Source File
 # Begin Source File
 

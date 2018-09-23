@@ -48,8 +48,7 @@
 #include "..\shared\stickieswnd.h"
 #include "..\shared\windowicons.h"
 #include "..\shared\sessionstatuswnd.h"
-
-#include "..\3rdparty\statusbarACT.h"
+#include "..\shared\statusbarACTEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListWnd 
@@ -102,7 +101,7 @@ protected:
 	CFont m_fontTree, m_fontComments; // shared by all tasklists
 	CEnImageList m_ilTabCtrl;
 	CPreferencesDlg* m_pPrefs;
-	CStatusBarACT	m_statusBar;
+	CStatusBarACTEx	m_statusBar;
 	CStatusBarProgress m_sbProgress;
 	CTDLFilterBar m_filterBar;
 	CTDLFindTasksDlg m_findDlg;

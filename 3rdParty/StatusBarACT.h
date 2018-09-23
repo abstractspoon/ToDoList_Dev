@@ -106,7 +106,6 @@ public:
 
 // Attributes
 public:
-	void SetUIColors(COLORREF crBackFrom, COLORREF crBackTo, COLORREF crText, BOOL bGradient, BOOL bGlass);
 
 // Operations
 public:
@@ -167,10 +166,6 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg void OnPaint();
-
-	virtual void DrawRectBkgnd(CDC* pDC, const CRect& rect);
 
 	DECLARE_MESSAGE_MAP()
 };
