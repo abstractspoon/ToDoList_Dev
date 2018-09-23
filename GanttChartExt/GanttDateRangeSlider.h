@@ -10,12 +10,12 @@
 #include "GanttEnum.h"
 #include "GanttStruct.h"
 
-#include "..\3rdParty\RangeSlider.h"
+#include "..\Shared\RangeSliderCtrl.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CGanttDateRangeSlider window
 
-class CGanttDateRangeSlider : public CRangeSlider
+class CGanttDateRangeSlider : public CRangeSliderCtrl
 {
 // Construction
 public:

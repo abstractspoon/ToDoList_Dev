@@ -395,6 +395,7 @@ void CGanttChartWnd::SetUITheme(const UITHEME* pTheme)
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
 		m_ctrlGantt.SetSplitBarColor(m_theme.crAppBackDark);
+		m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
 	}
 }
 

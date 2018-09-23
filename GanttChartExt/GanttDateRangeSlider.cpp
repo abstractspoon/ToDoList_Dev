@@ -14,7 +14,10 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CGanttDateRangeSlider
 
-CGanttDateRangeSlider::CGanttDateRangeSlider() : m_nMonthDisplay(GTLC_DISPLAY_NONE)
+CGanttDateRangeSlider::CGanttDateRangeSlider() 
+	: 
+	CRangeSliderCtrl(TBS_BOTH),
+	m_nMonthDisplay(GTLC_DISPLAY_NONE)
 {
 }
 
@@ -23,7 +26,7 @@ CGanttDateRangeSlider::~CGanttDateRangeSlider()
 }
 
 
-BEGIN_MESSAGE_MAP(CGanttDateRangeSlider, CRangeSlider)
+BEGIN_MESSAGE_MAP(CGanttDateRangeSlider, CRangeSliderCtrl)
 	//{{AFX_MSG_MAP(CGanttDateRangeSlider)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP

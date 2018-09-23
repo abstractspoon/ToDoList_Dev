@@ -140,159 +140,6 @@ void CRangeSlider::OnPaint()
 }
 
 // Paint in Horizontal Mode.
-/*
-void CRangeSlider::OnPaintHorizontal(CDC &dc) 
-{
-	ASSERT(m_bHorizontal);
-
-		// Calculate Arrow width and x-axis width.
-	CRect ClientRect;
-	GetClientRect(&ClientRect);
-
-	int dy = ClientRect.Height();
-	m_nArrowWidth = dy * 3 / 4;
-
-	m_dx = ClientRect.Width() - 2 * m_nArrowWidth;
-
-	CRect ClipBox;
-	dc.GetClipBox(&ClipBox);
-
-		// Erase Background.
-	CGdiObject *pBr = dc.SelectStockObject(GRAY_BRUSH);
-	CGdiObject *pPen = dc.SelectStockObject(BLACK_PEN);
-	dc.Rectangle(&ClipBox);
-
-		// Check if [Left, Right] is contained in [Min, Max].
-	ASSERT(m_Min <= m_Left);
-	ASSERT(m_Left <= m_Right);
-	ASSERT(m_Right <= m_Max);
-
-		// Position of Left and Right
-	int x1 = static_cast<int>((m_Left - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
-	int x2 = static_cast<int>((m_Right - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
-
-	dc.SelectStockObject(BLACK_PEN);
-	CBrush ButtonFace;
-	ButtonFace.CreateSolidBrush(::GetSysColor(COLOR_BTNFACE));
-	dc.SelectObject(ButtonFace);
-	// Draw Left Arrow
-	m_RectLeft = CRect (CPoint(x1,0), CSize(m_nArrowWidth, dy));
-	{ 
-		CRect & rect = m_RectLeft;
-		dc.Rectangle(&rect);
-		rect.DeflateRect(1,1,2,2);
-			// Make appearance 3D
-		if (!m_bTracking || m_TrackMode!= TRACK_LEFT) 
-		{
-			CPen pen1;
-			pen1.CreatePen(PS_SOLID, 1, ::GetSysColor(COLOR_BTNHIGHLIGHT));
-			dc.SelectObject(pen1);
-			dc.MoveTo(rect.left, rect.bottom);
-			dc.LineTo(rect.left, rect.top);
-			dc.LineTo(rect.right, rect.top);
-			CPen pen2;
-			pen2.CreatePen(PS_SOLID, 1, ::GetSysColor(COLOR_BTNSHADOW));
-			dc.SelectObject(pen2);
-			dc.LineTo(rect.right, rect.bottom);
-			dc.LineTo(rect.left, rect.bottom);
-		}
-
-			// Draw arrow
-		dc.SelectStockObject(BLACK_PEN);
-		dc.SelectStockObject(BLACK_BRUSH);
-		CPoint poly [] = 
-		{ 
-			CPoint(x1 + m_nArrowWidth / 3, dy / 3), 
-			CPoint(x1 + m_nArrowWidth / 3, dy*2/3),
-			CPoint(x1 + m_nArrowWidth*2/3, dy / 2),
-		};
-		dc.Polygon(poly, 3);
-	}
-
-	// Draw Right Arrow
-	m_RectRight = CRect(CPoint(m_nArrowWidth + x2, 0), CSize(m_nArrowWidth, dy));
-	{
-		CRect & rect = m_RectRight;
-		dc.SelectObject(ButtonFace);
-		dc.Rectangle(&rect);
-			// Make appearance 3D
-		if (!m_bTracking || m_TrackMode!= TRACK_RIGHT) 
-		{
-			rect.DeflateRect(1,1,2,2);
-			CPen pen1;
-			pen1.CreatePen(PS_SOLID, 1, ::GetSysColor(COLOR_BTNHIGHLIGHT));
-			dc.SelectObject(pen1);
-			dc.MoveTo(rect.left, rect.bottom);
-			dc.LineTo(rect.left, rect.top);
-			dc.LineTo(rect.right, rect.top);
-			CPen pen2;
-			pen2.CreatePen(PS_SOLID, 1, ::GetSysColor(COLOR_BTNSHADOW));
-			dc.SelectObject(pen2);
-			dc.LineTo(rect.right, rect.bottom);
-			dc.LineTo(rect.left, rect.bottom);
-		}
-
-			// Draw Arrow
-		dc.SelectStockObject(BLACK_PEN);
-		dc.SelectStockObject(BLACK_BRUSH);
-		CPoint poly [] = 
-		{ 
-			CPoint(m_nArrowWidth + x2 + m_nArrowWidth * 2 / 3,    dy / 3),
-			CPoint(m_nArrowWidth + x2 + m_nArrowWidth * 2 / 3,    dy * 2 / 3),
-			CPoint(m_nArrowWidth + x2 + m_nArrowWidth / 3,        dy / 2),
-		};
-		dc.Polygon(poly, 3);
-	}
-
-	dc.SelectStockObject(WHITE_BRUSH);
-	// Draw Area in between.
-	CRect rect = CRect(CPoint(m_nArrowWidth + x1 + 1, 1), CPoint (m_nArrowWidth + x2, dy - 1));
-
-	dc.SelectStockObject(NULL_PEN);
-	dc.SelectStockObject(WHITE_BRUSH);
-	dc.Rectangle(&rect);
-
-		// Store value for drawing the focus rectangle
-	CRect focusRect = rect;
-
-	// Draw Area of InnerMin, Max.
-	if (m_bVisualMinMax) 
-	{
-		ASSERT(m_Min <= m_VisualMax);
-		ASSERT(m_VisualMin <= m_VisualMax);
-		ASSERT(m_VisualMax <= m_Max);
-
-		// See wether [InnerMin, InnerMax] geschnitten [Left, Right] is non-empty.
-		// Then Draw
-		if (m_VisualMin < m_Right && m_VisualMax > m_Left) 
-		{
-			int visualMin = static_cast<int>((m_VisualMin - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
-			int visualMax = static_cast<int>((m_VisualMax - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
-
-				// Stay in [m_Left, m_Right] intervall.
-
-			visualMin = max(visualMin + m_nArrowWidth, x1 + m_nArrowWidth);
-			visualMax = min(visualMax + m_nArrowWidth, x2 + m_nArrowWidth);
-
-			rect = CRect(visualMin, 1, visualMax, dy - 1);
-
-			CBrush br;
-			br.CreateSolidBrush(RGB(255,255,150)); // light yellow;
-			dc.SelectObject(br);
-			dc.SelectStockObject(NULL_PEN);
-			dc.Rectangle(&rect);
-			CPen pen;
-			dc.SelectStockObject(HOLLOW_BRUSH);
-		}
-	}
-	if (GetFocus() == this) {
-		focusRect.DeflateRect(3,3);
-		dc.DrawFocusRect(&focusRect);
-	}
-	dc.SelectObject(pBr);
-	dc.SelectObject(pPen);
-}
-*/
 void CRangeSlider::OnPaintHorizontal(CDC &dc) 
 {
 	ASSERT(m_bHorizontal);
@@ -365,8 +212,7 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc)
 			int visualMin = static_cast<int>((m_VisualMin - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
 			int visualMax = static_cast<int>((m_VisualMax - m_Min)/(m_Max - m_Min) * m_dx + 0.5);
 
-				// Stay in [m_Left, m_Right] intervall.
-
+			// Stay in [m_Left, m_Right] intervall.
 			visualMin = max(visualMin + m_nArrowWidth, x1 + m_nArrowWidth);
 			visualMax = min(visualMax + m_nArrowWidth, x2 + m_nArrowWidth);
 
@@ -381,12 +227,12 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc)
 			dc.SelectStockObject(HOLLOW_BRUSH);
 		}
 	}
-	if (GetFocus() == this) {
+	
+	if (GetFocus() == this) 
+	{
 		focusRect.DeflateRect(3,3);
-		dc.DrawFocusRect(&focusRect);
+		DrawRegion(dc, RSDR_FOCUS, focusRect);
 	}
-	//dc.SelectObject(pBr);
-	//dc.SelectObject(pPen);
 }
 
 void CRangeSlider::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion) const
@@ -434,6 +280,10 @@ void CRangeSlider::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegi
 					rRegion, 
 					(m_bHorizontal ? _T(">") : _T("V")), 
 					(m_bTracking && (m_TrackMode == TRACK_RIGHT)));
+		break;
+
+	case RSDR_FOCUS:
+		dc.DrawFocusRect(&rRegion);
 		break;
 	}
 
