@@ -13,16 +13,15 @@
 #include "CalEnum.h"
 
 #include "..\shared\tooltipctrlex.h"
+#include "..\shared\MiniCalendarCtrl.h"
 
 #include "..\Interfaces\IUIExtension.h"
-
-#include "..\3rdParty\FPSMiniCalendarCtrl.h"
 
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CTaskMiniCalendarCtrl : public CFPSMiniCalendarCtrl
+class CTaskMiniCalendarCtrl : public CMiniCalendarCtrl
 {
 // Construction
 public:

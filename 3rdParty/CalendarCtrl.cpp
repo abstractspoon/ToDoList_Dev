@@ -14,8 +14,6 @@
 #include "stdafx.h"
 #include "CalendarCtrl.h"
 
-#include "..\shared\datehelper.h"
-
 #include <math.h>
 
 #ifdef _DEBUG
@@ -24,6 +22,17 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
+COleDateTime NullDate()
+{
+	static COleDateTime null;
+
+	null.m_dt = 0;
+	null.m_status = COleDateTime::null;
+
+	return null;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CCalendarCtrl
@@ -298,9 +307,7 @@ void CCalendarCtrl::DrawHeader(CDC* pDC)
 
 	CRect rcLine(rc);
 	rcLine.top = rcLine.bottom-1;
-
 	int i;
-
 	for(i=0; i<m_nHeaderHeight; i++)
 	{
 		pDC->FillSolidRect(rcLine, GetFadedThemeColour(i*4));
@@ -310,15 +317,24 @@ void CCalendarCtrl::DrawHeader(CDC* pDC)
 
 	CFont* pOldFont = pDC->SelectObject(&m_DefaultFont);
 	int nWidth = rc.Width()/CALENDAR_NUM_COLUMNS;
-	bool bShort = (CDateHelper::CalcLongestDayOfWeekName(pDC) > nWidth);
+	bool bShort = false;
+	for(i=0; i<CALENDAR_NUM_COLUMNS; i++)
+	{
+		CRect txtRect(i*nWidth, 0, (i+1)*nWidth, m_nHeaderHeight);
+		CSize TitleSize(pDC->GetTextExtent(GetDayOfWeekName(m_dayCells[0][i].date)));
+
+		if(TitleSize.cx	> txtRect.Width())
+		{
+			bShort = true;
+			break;
+		}
+	}
 
 	for(i=0 ; i<CALENDAR_NUM_COLUMNS; i++)
 	{
-		CRect txtRect(i*nWidth, 2, (i+1)*nWidth, m_nHeaderHeight);
-		int nDOW = GetDayOfWeek(i);
-		CString sDOW = CDateHelper::GetDayOfWeekName(nDOW, FALSE);
-
-		pDC->DrawText(sDOW, txtRect, DT_CENTER|DT_VCENTER);
+		CString csTitle(GetDayOfWeekName(m_dayCells[0][i].date, bShort));
+		CRect txtRect(i*nWidth, 0, (i+1)*nWidth, m_nHeaderHeight);
+		pDC->DrawText(csTitle, txtRect, DT_CENTER|DT_VCENTER);
 	}
 	pDC->SelectObject(pOldFont);
 }
@@ -418,6 +434,17 @@ void CCalendarCtrl::DrawCellFocus(CDC* pDC, const CCalendarCell* /*pCell*/, cons
 	pDC->DrawFocusRect(rFocus);
 }
 
+CString CCalendarCtrl::GetDayOfWeekName(const COleDateTime& date, BOOL bShort) const
+{
+	CString csTitle(date.Format(_T("%A")));
+	return (bShort ? csTitle.Left(3) : csTitle);
+}
+
+CString CCalendarCtrl::GetMonthName(const COleDateTime& date, BOOL bShort) const
+{
+	return (bShort ? date.Format(_T("%B")) : date.Format(_T("%b")));
+}
+
 void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
 							 BOOL bSelected, BOOL bToday, BOOL bShowMonth)
 {
@@ -472,13 +499,11 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 	
 	if (bShowMonth)
 	{
-		int nMonth = pCell->date.GetMonth();
-
-		csDay.Format(_T("%s %d"), CDateHelper::GetMonthName(nMonth, FALSE), nDay);
+		csDay.Format(_T("%s %d"), GetMonthName(pCell->date, FALSE), nDay);
 		CSize dtSize(pDC->GetTextExtent(csDay));
-		
+
 		if (dtSize.cx>rCell.Width())
-			csDay.Format(_T("%s %d"), CDateHelper::GetMonthName(nMonth, TRUE), nDay);
+			csDay.Format(_T("%s %d"), GetMonthName(pCell->date, TRUE), nDay);
 	}
 	else
 		csDay.Format(_T("%d"), nDay);
@@ -645,7 +670,7 @@ COleDateTime CCalendarCtrl::GetMinDate(int nRow) const
 	if (nRow < 0 || nRow >= m_nVisibleWeeks)
 	{
 		ASSERT(0);
-		return CDateHelper::NullDate();
+		return NullDate();
 	}
 
 	return m_dayCells[nRow][0].date; 
@@ -656,7 +681,7 @@ COleDateTime CCalendarCtrl::GetMaxDate(int nRow) const
 	if (nRow < 0 || nRow >= m_nVisibleWeeks)
 	{
 		ASSERT(0);
-		return CDateHelper::NullDate();
+		return NullDate();
 	}
 
 	// else

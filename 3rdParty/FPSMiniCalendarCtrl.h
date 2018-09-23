@@ -44,7 +44,6 @@
 #define FMC_AUTOSETTINGS		0x0400L
 #define FMC_NO3DBORDER			0x0800L
 #define FMC_NOSHOWNONMONTHDAYS	0x1000L
-#define FMC_SHOWWEEKNUMBERS		0x2000L
 
 // I usually don't use preprocessor macros like this
 // but it makes sense here
@@ -178,14 +177,20 @@ public:
 	void SetDefaultFont(LPCTSTR lpszValue);
 	CString GetDefaultFont() {return m_strDefaultFontName;}
 
+	void SetMonthName(int iMonth, LPCTSTR lpszName);
+	CString GetMonthName(int iMonth);
+
+	void SetDayOfWeekName(int iDayOfWeek, LPCTSTR lpszName);
+	CString GetDayOfWeekName(int iDayOfWeek);
+
+	void SetFirstDayOfWeek(int iDayOfWeek);
+	int GetFirstDayOfWeek();
+
 	void SetCurrentMonthAndYear(int iMonth, int iYear);
 	int GetCurrentMonth() const {return m_iCurrentMonth;}
 	int GetCurrentYear() const {return m_iCurrentYear;}
 	void SetCurrentMonthAndYear(const COleDateTime& date);
 	COleDateTime GetCurrentMonthAndYear() const { return COleDateTime(m_iCurrentYear, m_iCurrentMonth, 1, 0, 0, 0); }
-
-	void SetFirstWeekDay(int nWeekday) { m_iFirstDayOfWeek = nWeekday; }
-	int GetFirstWeekDay() const { return m_iFirstDayOfWeek; }
 
 	void SetMultiSelect(BOOL bValue) {m_bMultiSel = bValue;}
 	BOOL IsMultiSelect() {return m_bMultiSel;}
@@ -208,9 +213,6 @@ public:
 	void SetShow3DBorder(BOOL bValue) {m_bShow3dBorder = bValue;}
 	BOOL GetShow3DBorder() {return m_bShow3dBorder;}
 
-	void SetShowWeekNumbers(BOOL bValue) {m_bShowWeekNumbers = bValue;}
-	BOOL GetShowWeekNumbers() {return m_bShowWeekNumbers;}
-	
 	void SetMaxSize(SIZE size);
 	CSize GetMaxSize() {return m_szMaxSize;}
 
@@ -272,13 +274,14 @@ protected:
 	BOOL							m_bShowTodayButton;
 	BOOL							m_bShowNoneButton;
 	COLORREF						m_cNonMonthDayColor, m_crTodayBorder;
+	CString							m_arMonthNames[12];
+	CString							m_arDaysOfWeekNames[7];
 	int								m_iFirstDayOfWeek;
 	int								m_iRows;
 	int								m_iCols;
 	BOOL							m_bMultiSel;
 	BOOL							m_bShow3dBorder;
 	BOOL							m_bUseAutoSettings;
-	BOOL							m_bShowWeekNumbers;
 	CSize							m_szMaxSize;
 	CString							m_strDefaultFontName;
 	int								m_iDefaultMinFontSize;
@@ -314,14 +317,13 @@ protected:
 	BOOL IsToday(COleDateTime& dt);
 	CString CStr(long lValue);
 	void CreateFontObjects();
-	int DrawHeader(CDC& dc, int iY, int iLeftX, int iRow, int iCol, int iMonth, int iYear);
-	int DrawDays(CDC& dc, int iY, int iLeftX, int iRow, int iCol, int iMonth, int iYear);
-	int DrawDaysOfWeek(CDC& dc, int iY, int iLeftX, int iRow, int iCol);
-	int ComputeTodayNoneHeight();
-	int ComputeWeekNumberWidth();
-	CSize ComputeTotalSize();
-	CSize ComputeSize();
-	CSize Compute3DBorderSize();
+	virtual int DrawHeader(CDC& dc, int iY, int iLeftX, int iRow, int iCol, int iMonth, int iYear);
+	virtual int DrawDays(CDC& dc, int iY, int iLeftX, int iRow, int iCol, int iMonth, int iYear);
+	virtual int DrawDaysOfWeek(CDC& dc, int iY, int iLeftX, int iRow, int iCol);
+	virtual int ComputeTodayNoneHeight();
+	virtual CSize ComputeTotalSize();
+	virtual CSize ComputeSize();
+	virtual CSize Compute3DBorderSize();
 	void FireNoneButton();
 	void FireNotifyDblClick();
 	void FireNotifyClick();

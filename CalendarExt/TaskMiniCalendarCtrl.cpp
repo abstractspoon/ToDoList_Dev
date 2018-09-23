@@ -34,7 +34,7 @@ CTaskMiniCalendarCtrl::~CTaskMiniCalendarCtrl()
 {
 }
 
-BEGIN_MESSAGE_MAP(CTaskMiniCalendarCtrl, CFPSMiniCalendarCtrl)
+BEGIN_MESSAGE_MAP(CTaskMiniCalendarCtrl, CMiniCalendarCtrl)
 	//{{AFX_MSG_MAP(CTaskMiniCalendarCtrl)
 	//}}AFX_MSG_MAP
 
@@ -105,7 +105,7 @@ BOOL CTaskMiniCalendarCtrl::IsSpecialDate(const COleDateTime& dt) const
 
 void CTaskMiniCalendarCtrl::GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd) const
 {
-	CFPSMiniCalendarCtrl::GetDateCellColors(dt, bSelected, bSpecial, bActiveMonth, crText, crBkgnd);
+	CMiniCalendarCtrl::GetDateCellColors(dt, bSelected, bSpecial, bActiveMonth, crText, crBkgnd);
 
 	// Handle heat map
  	if (!bSelected && bActiveMonth && m_mapHeatMap.HasHeat())
@@ -152,7 +152,7 @@ BOOL CTaskMiniCalendarCtrl::PreTranslateMessage(MSG* pMsg)
 	if (m_tooltip.GetSafeHwnd())
 		m_tooltip.FilterToolTipMessage(pMsg);
 
-	return CFPSMiniCalendarCtrl::PreTranslateMessage(pMsg);
+	return CMiniCalendarCtrl::PreTranslateMessage(pMsg);
 }
 
 int CTaskMiniCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const

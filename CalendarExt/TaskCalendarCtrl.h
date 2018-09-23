@@ -15,17 +15,16 @@
 #include "..\shared\mapex.h"
 #include "..\shared\tooltipctrlex.h"
 #include "..\shared\fontcache.h"
+#include "..\shared\CalendarCtrlEx.h"
 
 #include "..\Interfaces\IUIExtension.h"
 #include "..\Interfaces\ITaskList.h"
-
-#include "..\3rdParty\CalendarCtrl.h"
 
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CTaskCalendarCtrl : public CCalendarCtrl
+class CTaskCalendarCtrl : public CCalendarCtrlEx
 {
 // Construction
 public:

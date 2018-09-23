@@ -28,8 +28,6 @@
 #include "FPSMiniCalendarCtrl.h"
 #include "FPSMiniCalendarListCtrl.h"
 
-#include "..\shared\datehelper.h"
-
 #include <locale.h>
 
 #ifdef _DEBUG
@@ -168,7 +166,6 @@ CFPSMiniCalendarCtrl::CFPSMiniCalendarCtrl()
 	m_iHeaderTimerID = 0;
 	m_pHeaderCell = NULL;
 	m_iFirstDayOfWeek = 1;
-	m_bShowWeekNumbers = FALSE;
 
 	m_iCells = 0;
 	m_parCells = NULL;
@@ -195,6 +192,50 @@ CFPSMiniCalendarCtrl::CFPSMiniCalendarCtrl()
 	SetFontInfo(FMC_FONT_DAYSOFWEEK, m_strDefaultFontName, FMC_DEFAULT_FONT_SIZE);
 	SetFontInfo(FMC_FONT_DAYS, m_strDefaultFontName, FMC_DEFAULT_FONT_SIZE);
 	SetFontInfo(FMC_FONT_SPECIALDAYS, m_strDefaultFontName, FMC_DEFAULT_FONT_SIZE, TRUE);
+
+	// set month names
+	setlocale(LC_TIME, "");		// should I be doing this here AND am I doing it right???
+	COleDateTime dtTemp;
+	dtTemp.SetDate(2000, 1, 1); SetMonthName(1, dtTemp.Format(_T("%B")));
+	dtTemp.SetDate(2000, 2, 1); SetMonthName(2, dtTemp.Format(_T("%B")));
+	dtTemp.SetDate(2000, 3, 1); SetMonthName(3, dtTemp.Format(_T("%B")));
+	dtTemp.SetDate(2000, 4, 1); SetMonthName(4, dtTemp.Format(_T("%B")));
+	dtTemp.SetDate(2000, 5, 1); SetMonthName(5, dtTemp.Format(_T("%B")));
+	dtTemp.SetDate(2000, 6, 1); SetMonthName(6, dtTemp.Format(_T("%B")));
+	dtTemp.SetDate(2000, 7, 1); SetMonthName(7, dtTemp.Format(_T("%B")));
+	dtTemp.SetDate(2000, 8, 1); SetMonthName(8, dtTemp.Format(_T("%B")));
+	dtTemp.SetDate(2000, 9, 1); SetMonthName(9, dtTemp.Format(_T("%B")));
+	dtTemp.SetDate(2000, 10, 1); SetMonthName(10, dtTemp.Format(_T("%B")));
+	dtTemp.SetDate(2000, 11, 1); SetMonthName(11, dtTemp.Format(_T("%B")));
+	dtTemp.SetDate(2000, 12, 1); SetMonthName(12, dtTemp.Format(_T("%B")));
+
+	// we need to determine the first-day-of-week to use in the
+	// calendar.  We use the GetLocaleInfo function to do this
+	TCHAR szDayOfWeek[20];
+	int iFirstDayOfWeek = 0;
+	memset(szDayOfWeek, 0, 20);
+	VERIFY(::GetLocaleInfo(LOCALE_USER_DEFAULT,
+							LOCALE_IFIRSTDAYOFWEEK,
+							szDayOfWeek,
+							20) != 0);
+
+	// the return value of GetLocaleInfo is 0=Monday, 6=sunday
+	// therefore we need to convert it to 1=Sunday, 7=Saturday 
+	//    which is the standard for COleDateTime
+	iFirstDayOfWeek = _ttoi(szDayOfWeek) + 2; // move from zero base to 1 base + 1 to accomodate subday being 6
+	if (iFirstDayOfWeek > 7)
+	{
+		ASSERT(iFirstDayOfWeek == 8);		// we should never exceed 8
+		iFirstDayOfWeek = 1;
+	}
+	ASSERT(iFirstDayOfWeek >= 1);
+	ASSERT(iFirstDayOfWeek <= 7);
+
+	// set days of week names
+	if (iFirstDayOfWeek >= 1 && iFirstDayOfWeek <= 7)
+		SetFirstDayOfWeek(iFirstDayOfWeek);
+	else
+		SetFirstDayOfWeek(1);
 }
 
 CFPSMiniCalendarCtrl::~CFPSMiniCalendarCtrl()
@@ -385,30 +426,6 @@ int CFPSMiniCalendarCtrl::ComputeTodayNoneHeight()
 	return iReturn;
 }
 
-int CFPSMiniCalendarCtrl::ComputeWeekNumberWidth()
-{
-	if (m_bShowWeekNumbers)
-	{
-		if (!m_bFontsCreated)
-			CreateFontObjects();
-
-		// allocate a DC to use when testing sizes, etc
-		CClientDC dc(m_hWnd ? this : AfxGetMainWnd());
-
-		// get current font and save for later restoration
-		CFont* pOldFont = dc.SelectObject(m_FontInfo[FMC_FONT_DAYSOFWEEK].m_pFont);
-
-		int nWidth = (dc.GetTextExtent("52").cx + WEEKNUMBERPADDING);
-
-		// cleanup DC
-		dc.SelectObject(pOldFont);
-
-		return nWidth;
-	}
-
-	// else
-	return 0;
-}
 
 // determine size of a given cell based on actual font settings 
 CSize CFPSMiniCalendarCtrl::ComputeSize()
@@ -536,7 +553,7 @@ CSize CFPSMiniCalendarCtrl::ComputeSize()
 	{
 		for (int iMonth = 1; iMonth <= 12; iMonth++)
 		{
-			CString strTest = CDateHelper::GetMonthName(iMonth);
+			CString strTest = GetMonthName(iMonth);
 			strTest += " ";
 			strTest += CStr(iYear);
 
@@ -574,8 +591,6 @@ CSize CFPSMiniCalendarCtrl::ComputeSize()
 	if (iTotalHeight > szReturn.cy)
 		szReturn.cy = iTotalHeight;
 
-	szReturn.cx += ComputeWeekNumberWidth();
-
 	m_szMonthSize = szReturn;
 	m_bSizeComputed = TRUE;
 
@@ -602,9 +617,6 @@ CSize CFPSMiniCalendarCtrl::ComputeTotalSize()
 
 	if (m_bShow3dBorder)
 		size += Compute3DBorderSize();
-
-	if (m_bShowWeekNumbers)
-		size.cx += ComputeWeekNumberWidth();
 
 	return size;
 }
@@ -703,7 +715,7 @@ BOOL CFPSMiniCalendarCtrl::OnEraseBkgnd(CDC*)
 int CFPSMiniCalendarCtrl::DrawHeader(CDC &dc, int iY, int iLeftX, int iMonthRow, int iMonthCol, int iMonth, int iYear)
 {
 	CRect ClientRect;
-	CString strText = CDateHelper::GetMonthName(iMonth);
+	CString strText = GetMonthName(iMonth);
 	strText += " ";
 	strText += CStr(iYear);
 
@@ -787,10 +799,8 @@ int CFPSMiniCalendarCtrl::DrawDaysOfWeek(CDC &dc, int iY, int iLeftX, int, int)
 	GetClientRect(ClientRect);
 
 	// calculate starting X position
-	int nWeekWidth = ComputeWeekNumberWidth();
-	
-	iStartX = ((iLeftX + nWeekWidth/2 + (m_szMonthSize.cx / 2))) - (((m_iIndividualDayWidth*7) + 30) / 2);
-	iEndX = ((iLeftX + nWeekWidth/2 + (m_szMonthSize.cx / 2))) + (((m_iIndividualDayWidth*7) + 30) / 2);
+	iStartX = ((iLeftX + (m_szMonthSize.cx / 2))) - (((m_iIndividualDayWidth*7) + 30) / 2);
+	iEndX = ((iLeftX + (m_szMonthSize.cx / 2))) + (((m_iIndividualDayWidth*7) + 30) / 2);
 
 	iX = iStartX;
 
@@ -804,7 +814,7 @@ int CFPSMiniCalendarCtrl::DrawDaysOfWeek(CDC &dc, int iY, int iLeftX, int, int)
 	for (int i = m_iFirstDayOfWeek; i < (m_iFirstDayOfWeek + 7); i++)
 	{
 		int nDOW = (((i - 1) % 7) + 1);
-		dc.DrawText(CDateHelper::GetDayOfWeekName(nDOW, TRUE), 1, rect, DEFTEXTFLAGS);
+		dc.DrawText(GetDayOfWeekName(nDOW), 1, rect, DEFTEXTFLAGS);
 		rect.OffsetRect(m_iIndividualDayWidth + 5, 0);
 	}
 
@@ -848,10 +858,8 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 	GetClientRect(ClientRect);
 
 	// calculate starting X position
-	int nWeekWidth = ComputeWeekNumberWidth();
-
-	iStartX = ((iLeftX + nWeekWidth/2 + (m_szMonthSize.cx / 2))) - (((m_iIndividualDayWidth*7) + 30) / 2);
-	iEndX = ((iLeftX + nWeekWidth/2 +  + (m_szMonthSize.cx / 2))) + (((m_iIndividualDayWidth*7) + 30) / 2);
+	iStartX = ((iLeftX + (m_szMonthSize.cx / 2))) - (((m_iIndividualDayWidth*7) + 30) / 2);
+	iEndX = ((iLeftX + (m_szMonthSize.cx / 2))) + (((m_iIndividualDayWidth*7) + 30) / 2);
 
 	CFont* pOldFont = dc.SelectObject(m_FontInfo[FMC_FONT_DAYS].m_pFont);
 	dc.SetBkColor(::GetSysColor(COLOR_BTNFACE));
@@ -866,23 +874,11 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 	{
 		int iX = iStartX;
 
-		// Draw week number
-		if (nWeekWidth)
-		{
-			int nWeek = CDateHelper::GetWeekofYear(dt);
-
-			CRect rect((iX - nWeekWidth), iY, (iX - WEEKNUMBERPADDING),iY+m_iDaysHeight);
-
-			dc.SelectObject(m_FontInfo[FMC_FONT_DAYS].m_pFont);
-			dc.SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
-			dc.DrawText(CStr(nWeek), rect, DEFTEXTFLAGS);
-		}
-
 		for (int iDayOfWeek = 1; iDayOfWeek <= 7; iDayOfWeek++)
 		{
 			if (dt.GetMonth() == dtStart.GetMonth() ||
-				(dt > dtStart && /*iMonthCol == m_iCols && iMonthRow == m_iRows &&*/ m_bShowNonMonthDays) ||
-				(dt < dtStart && /*iMonthCol == 1 && iMonthRow == 1 &&*/ m_bShowNonMonthDays))
+				(dt > dtStart && m_bShowNonMonthDays) ||
+				(dt < dtStart && m_bShowNonMonthDays))
 			{
 				BOOL bSelected = IsDateSelected(dt);
 				BOOL bSpecial = IsSpecialDate(dt);
@@ -921,12 +917,6 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 
 		iY += (2 + m_iDaysHeight);
 		iReturn += (2 + m_iDaysHeight);
-	}
-
-	// Draw divider between week numbers and days
-	if (nWeekWidth)
-	{
-		dc.FillSolidRect(iStartX - (WEEKNUMBERPADDING / 2), iStartY, 1, (iY - iStartY), GetSysColor(COLOR_3DDKSHADOW));
 	}
 
 	dc.SelectObject(pOldFont);
@@ -1778,8 +1768,6 @@ int CFPSMiniCalendarCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		SetUseAutoSettings(TRUE);
 	if (lpCreateStruct->style & FMC_NOSHOWNONMONTHDAYS)
 		SetShowNonMonthDays(FALSE);
-	if (lpCreateStruct->style & FMC_SHOWWEEKNUMBERS)
-		SetShowWeekNumbers(TRUE);
 	
 	if (m_bUseAutoSettings)
 		AutoConfigure();
@@ -1898,6 +1886,81 @@ void CFPSMiniCalendarCtrl::SetDefaultFont(LPCTSTR lpszValue)
 
 	if (lpszValue && AfxIsValidString(lpszValue))
 		m_strDefaultFontName = lpszValue;
+}
+
+void CFPSMiniCalendarCtrl::SetMonthName(int iMonth, LPCTSTR lpszName) 
+{
+	ASSERT(iMonth > 0); 
+	ASSERT(iMonth <= 12); 
+	ASSERT(lpszName);
+	ASSERT(AfxIsValidString(lpszName));
+	
+	if (iMonth > 0 && iMonth <= 12) 
+		m_arMonthNames[iMonth-1] = lpszName;
+}
+
+CString CFPSMiniCalendarCtrl::GetMonthName(int iMonth) 
+{
+	ASSERT(iMonth > 0); 
+	ASSERT(iMonth <= 12); 
+	
+	if (iMonth > 0 && iMonth <= 12)
+		return m_arMonthNames[iMonth-1];
+	else
+		return "";
+}
+
+void CFPSMiniCalendarCtrl::SetDayOfWeekName(int iDayOfWeek, LPCTSTR lpszName) 
+{
+	ASSERT(iDayOfWeek > 0); 
+	ASSERT(iDayOfWeek <= 7); 
+	ASSERT(lpszName);
+	ASSERT(AfxIsValidString(lpszName));
+	
+	if (iDayOfWeek > 0 && iDayOfWeek <= 7) 
+		m_arDaysOfWeekNames[iDayOfWeek-1] = lpszName;
+}
+
+CString CFPSMiniCalendarCtrl::GetDayOfWeekName(int iDayOfWeek) 
+{
+	ASSERT(iDayOfWeek > 0); 
+	ASSERT(iDayOfWeek <= 7); 
+	
+	if (iDayOfWeek > 0 && iDayOfWeek <= 7)
+		return m_arDaysOfWeekNames[iDayOfWeek-1];
+	else
+		return "";
+}
+
+void CFPSMiniCalendarCtrl::SetFirstDayOfWeek(int iDayOfWeek)
+{
+	ASSERT(iDayOfWeek > 0); 
+	ASSERT(iDayOfWeek <= 7); 
+	
+	if (iDayOfWeek > 0 && iDayOfWeek <= 7)
+	{
+		m_iFirstDayOfWeek = iDayOfWeek;
+
+		setlocale(LC_TIME, "");			// should I be doing this here AND am I doing it right???
+		COleDateTime dtTemp = COleDateTime::GetCurrentTime();
+
+		// find the specified day of the week
+		while (dtTemp.GetDayOfWeek() != iDayOfWeek)
+			dtTemp += 1;
+
+		for (int iX = 0; iX < 7; iX++)
+		{
+			CString strName = dtTemp.Format(_T("%A")).Left(1);
+			m_arDaysOfWeekNames[iX] = strName;
+
+			dtTemp += 1;
+		}
+	}
+}
+
+int CFPSMiniCalendarCtrl::GetFirstDayOfWeek()
+{
+	return m_iFirstDayOfWeek;
 }
 
 void CFPSMiniCalendarCtrl::SetDateSel(COleDateTime dtBegin, COleDateTime dtEnd)

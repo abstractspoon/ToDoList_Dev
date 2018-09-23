@@ -76,7 +76,7 @@ CTaskCalendarCtrl::~CTaskCalendarCtrl()
 	}
 }
 
-BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrl)
+BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrlEx)
 	//{{AFX_MSG_MAP(CTaskCalendarCtrl)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
@@ -468,7 +468,7 @@ void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 
 BOOL CTaskCalendarCtrl::SetVisibleWeeks(int nWeeks)
 {
-	if (CCalendarCtrl::SetVisibleWeeks(nWeeks))
+	if (CCalendarCtrlEx::SetVisibleWeeks(nWeeks))
 	{
 		// delete text font so it can be recreated
 		// at the right size
@@ -570,7 +570,7 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 
 void CTaskCalendarCtrl::DrawGrid(CDC* pDC)
 {
-	CCalendarCtrl::DrawGrid(pDC);
+	CCalendarCtrlEx::DrawGrid(pDC);
 }
 
 void CTaskCalendarCtrl::DrawCells(CDC* pDC)
@@ -614,20 +614,20 @@ void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 		}
 	}
 
-	CCalendarCtrl::DrawCells(pDC);
+	CCalendarCtrlEx::DrawCells(pDC);
 }
 
 void CTaskCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
 							 BOOL bSelected, BOOL bToday, BOOL bShowMonth)
 {
-	CCalendarCtrl::DrawCell(pDC, pCell, rCell, bSelected, bToday, bShowMonth);
+	CCalendarCtrlEx::DrawCell(pDC, pCell, rCell, bSelected, bToday, bShowMonth);
 }
 
 void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
 										BOOL bSelected, BOOL bToday)
 {
 	// default drawing
-	CCalendarCtrl::DrawCellContent(pDC, pCell, rCell, bSelected, bToday);
+	CCalendarCtrlEx::DrawCellContent(pDC, pCell, rCell, bSelected, bToday);
 
 	// then ours
 	if (!m_nMaxDayTaskCount)
@@ -789,7 +789,7 @@ void CTaskCalendarCtrl::SetStrikeThruDoneTasks(BOOL bStrikeThru)
 
 void CTaskCalendarCtrl::OnSetFocus(CWnd* pFocus)
 {
-	CCalendarCtrl::OnSetFocus(pFocus);
+	CCalendarCtrlEx::OnSetFocus(pFocus);
 
 	UpdateCellScrollBarVisibility();
 	Invalidate(FALSE);
@@ -797,7 +797,7 @@ void CTaskCalendarCtrl::OnSetFocus(CWnd* pFocus)
 
 void CTaskCalendarCtrl::OnKillFocus(CWnd* pFocus)
 {
-	CCalendarCtrl::OnKillFocus(pFocus);
+	CCalendarCtrlEx::OnKillFocus(pFocus);
 
 	UpdateCellScrollBarVisibility();
 	Invalidate(FALSE);
@@ -806,7 +806,7 @@ void CTaskCalendarCtrl::OnKillFocus(CWnd* pFocus)
 void CTaskCalendarCtrl::DrawCellFocus(CDC* /*pDC*/, const CCalendarCell* /*pCell*/, const CRect& /*rCell*/)
 {
 	// we handle the focus during drawing
-	// CCalendarCtrl::DrawCellFocus(pDC, pCell, rCell);
+	// CCalendarCtrlEx::DrawCellFocus(pDC, pCell, rCell);
 }
 
 BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
@@ -915,9 +915,9 @@ void CTaskCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	}
 
 #if _MSC_VER >= 1400
-		return CCalendarCtrl::OnMouseWheel(nFlags, zDelta, pt);
+		return CCalendarCtrlEx::OnMouseWheel(nFlags, zDelta, pt);
 #else
-		CCalendarCtrl::OnMouseWheel(nFlags, zDelta, pt);
+		CCalendarCtrlEx::OnMouseWheel(nFlags, zDelta, pt);
 #endif
 }
 
@@ -963,7 +963,7 @@ void CTaskCalendarCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 
 	int nCurPos = GetScrollPos(SB_VERT);
 	
-	CCalendarCtrl::OnVScroll(nSBCode, nPos, pScrollBar);
+	CCalendarCtrlEx::OnVScroll(nSBCode, nPos, pScrollBar);
 	
 	if (GetScrollPos(SB_VERT) != nCurPos)
 	{
@@ -1621,7 +1621,7 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 
 	// else
-	CCalendarCtrl::OnLButtonDown(nFlags, point);
+	CCalendarCtrlEx::OnLButtonDown(nFlags, point);
 	UpdateWindow();
 }
 
@@ -1831,7 +1831,7 @@ void CTaskCalendarCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	if (!m_bReadOnly && UpdateDragging(point))
 		return;
 
-	CCalendarCtrl::OnMouseMove(nFlags, point);
+	CCalendarCtrlEx::OnMouseMove(nFlags, point);
 }
 
 BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
@@ -1929,7 +1929,7 @@ void CTaskCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	if (!m_bReadOnly && EndDragging(point))
 		return;
 	
-	CCalendarCtrl::OnLButtonUp(nFlags, point);
+	CCalendarCtrlEx::OnLButtonUp(nFlags, point);
 }
 
 BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
@@ -2095,7 +2095,7 @@ BOOL CTaskCalendarCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	}
 	
 	// else
-	return CCalendarCtrl::OnSetCursor(pWnd, nHitTest, message);
+	return CCalendarCtrlEx::OnSetCursor(pWnd, nHitTest, message);
 }
 
 BOOL CTaskCalendarCtrl::SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const
@@ -2181,7 +2181,7 @@ void CTaskCalendarCtrl::OnCaptureChanged(CWnd *pWnd)
 	if (IsDragging() && (pWnd != this))
 		CancelDrag(FALSE);
 	
-	CCalendarCtrl::OnCaptureChanged(pWnd);
+	CCalendarCtrlEx::OnCaptureChanged(pWnd);
 }
 
 void CTaskCalendarCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
@@ -2219,7 +2219,7 @@ void CTaskCalendarCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		break;
 	}
 	
-	CCalendarCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
+	CCalendarCtrlEx::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 BOOL CTaskCalendarCtrl::IsCellScrollBarActive() const
@@ -2269,12 +2269,12 @@ void CTaskCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 	DWORD dwTaskID = HitTest(point);
 	SelectTask(dwTaskID, TRUE);
 	
-	CCalendarCtrl::OnRButtonDown(nFlags, point);
+	CCalendarCtrlEx::OnRButtonDown(nFlags, point);
 }
 
 int CTaskCalendarCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
-	if (CCalendarCtrl::OnCreate(lpCreateStruct) == -1)
+	if (CCalendarCtrlEx::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
 	m_fonts.Initialise(*this);
@@ -2338,7 +2338,7 @@ LRESULT CTaskCalendarCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
 	}
 
 	// else
-	return CCalendarCtrl::OnToolHitTest(point, pTI);
+	return CCalendarCtrlEx::OnToolHitTest(point, pTI);
 }
 
 void CTaskCalendarCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)

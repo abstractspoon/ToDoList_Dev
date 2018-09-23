@@ -169,17 +169,16 @@ BOOL CCalendarWnd::OnInitDialog()
 	}
 
 	// create mini-calendar ctrl
-	m_MiniCalendar.Create(NULL, NULL, WS_CHILD | WS_VISIBLE | FMC_NO3DBORDER | FMC_SHOWWEEKNUMBERS, 
+	m_MiniCalendar.SetShowWeekNumbers(TRUE);
+	m_MiniCalendar.Create(NULL, NULL, WS_CHILD | WS_VISIBLE | FMC_NO3DBORDER, 
                           CRect(0,0,0,0), this, IDC_MINI_CALENDAR);
 
     m_MiniCalendar.SetDate(COleDateTime::GetCurrentTime());
     m_MiniCalendar.SetRowsAndColumns(3, 1);
-	m_MiniCalendar.SetFirstWeekDay(CDateHelper::GetFirstDayOfWeek());
 
 	// create big-calendar ctrl
 	m_BigCalendar.Create(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN, CRect(0,0,0,0), this, IDC_BIG_CALENDAR);
 	m_BigCalendar.EnableMultiSelection(FALSE);
-	m_BigCalendar.SetFirstWeekDay(CDateHelper::GetFirstDayOfWeek());
 
 	m_cbNumWeeks.SetCurSel(m_BigCalendar.GetVisibleWeeks() - 1);
 

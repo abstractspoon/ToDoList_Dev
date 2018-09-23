@@ -110,6 +110,9 @@ protected:
 									BOOL bSelected, BOOL bToday);
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
 
+	virtual CString GetDayOfWeekName(const COleDateTime& date, BOOL bShort = FALSE) const;
+	virtual CString GetMonthName(const COleDateTime& date, BOOL bShort = FALSE) const;
+	
 	bool GetGridCellFromPoint(const CPoint& point, int &nRow, int &nCol) const;
 	bool GetGridCellFromDate(const COleDateTime& date, int &nRow, int &nCol) const;
 	bool GetCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeader = FALSE) const;

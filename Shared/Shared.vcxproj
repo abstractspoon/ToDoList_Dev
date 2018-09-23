@@ -132,6 +132,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="CalendarCtrlEx.cpp" />
     <ClCompile Include="checkcombobox.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -378,6 +379,8 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="MessageBox.cpp" />
+    <ClCompile Include="MiniCalendarCtrl.cpp" />
+    <ClCompile Include="MiniCalendarListCtrl.cpp" />
     <ClCompile Include="Misc.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -698,6 +701,7 @@
     <ClInclude Include="BaseTabCtrl.h" />
     <ClInclude Include="BinaryData.h" />
     <ClInclude Include="browserdlg.h" />
+    <ClInclude Include="CalendarCtrlEx.h" />
     <ClInclude Include="checkcombobox.h" />
     <ClInclude Include="checklistboxex.h" />
     <ClInclude Include="Clipboard.h" />
@@ -775,6 +779,8 @@
     <ClInclude Include="MenuComboBox.h" />
     <ClInclude Include="MenuIconMgr.h" />
     <ClInclude Include="MessageBox.h" />
+    <ClInclude Include="MiniCalendarCtrl.h" />
+    <ClInclude Include="MiniCalendarListCtrl.h" />
     <ClInclude Include="Misc.h" />
     <ClInclude Include="MonthCalCtrlEx.h" />
     <ClInclude Include="monthcombobox.h" />
