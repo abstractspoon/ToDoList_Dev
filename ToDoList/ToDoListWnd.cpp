@@ -1418,7 +1418,7 @@ void CToDoListWnd::OnQuickFindNext()
 		{
 			// return to start
 			if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTFIRST))
-				AfxMessageBox(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
+				CMessageBox::AfxShow(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
 		}
 	}
 }
@@ -1452,7 +1452,7 @@ void CToDoListWnd::OnQuickFindPrev()
 		{
 			// return to end
 			if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTLAST))
-				AfxMessageBox(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
+				CMessageBox::AfxShow(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
 		}
 	}
 }
@@ -1497,7 +1497,7 @@ void CToDoListWnd::ProcessQuickFindTextChange(BOOL bComboSelChange)
 		{
 			if (bComboSelChange)
 			{
-				AfxMessageBox(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind), MB_OK);
+				CMessageBox::AfxShow(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind), MB_OK);
 				m_cbQuickFind.SetFocus();
 			}
 
@@ -3970,7 +3970,7 @@ void CToDoListWnd::OnTrayiconShowDueTasks(UINT nCmdID)
 	if (!DoDueTaskNotification(nTDC, PFP_DUETODAY))
 	{
 		CEnString sMessage(IDS_NODUETODAY, m_mgrToDoCtrls.GetFriendlyProjectName(nTDC));
-		AfxMessageBox(sMessage);//, IDS_DUETASKS_TITLE);
+		CMessageBox::AfxShow(sMessage);//, IDS_DUETASKS_TITLE);
 	}
 }
 
@@ -8996,7 +8996,7 @@ void CToDoListWnd::HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CS
 	}
 
 	if (nMessageID)
-		AfxMessageBox(CEnString(nMessageID, sImportPath), (MB_OK | nIcon));
+		CMessageBox::AfxShow(CEnString(nMessageID, sImportPath), (MB_OK | nIcon));
 }
 
 void CToDoListWnd::HandleExportTasklistError(IIMPORTEXPORT_RESULT nErr)
@@ -10668,7 +10668,7 @@ void CToDoListWnd::OnToolsShowtasksDue(UINT nCmdID)
 	
 	if (!DoDueTaskNotification(GetSelToDoCtrl(), nDueBy))
 	{
-		AfxMessageBox(CEnString(nIDDueBy, m_mgrToDoCtrls.GetFriendlyProjectName(GetSelToDoCtrl())), MB_OK);
+		CMessageBox::AfxShow(CEnString(nIDDueBy, m_mgrToDoCtrls.GetFriendlyProjectName(GetSelToDoCtrl())), MB_OK);
 	}
 }
 
@@ -11862,7 +11862,7 @@ LRESULT CToDoListWnd::OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam)
 
 	if (!ValidateTaskLinkFilePath(sPath))
 	{
-		AfxMessageBox(CEnString(IDS_TASKLISTNOTFOUND, sPath));
+		CMessageBox::AfxShow(CEnString(IDS_TASKLISTNOTFOUND, sPath));
 		return FALSE;
 	}
 
@@ -12969,7 +12969,7 @@ void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 	// Prompt to restart app whenever Regional settings change
 	if ((uFlags == 0) && (StrCmp(lpszSection, _T("intl")) == 0))
 	{
-		if (AfxMessageBox(IDS_RESTARTTOUPDATESETTINGS, 0, MB_YESNO) == IDYES)
+		if (CMessageBox::AfxShow(IDS_RESTARTTOUPDATESETTINGS, MB_YESNO) == IDYES)
 		{
 			DoExit(TRUE);
 			return;
@@ -13052,7 +13052,7 @@ void CToDoListWnd::OnMoveSelectTaskDependencies()
 void CToDoListWnd::OnMoveSelectTaskDependents()
 {
 	if (!GetToDoCtrl().GotoSelectedTaskLocalDependents())
-		AfxMessageBox(IDS_NOTASKSDEPENDENTONSELECTION);
+		CMessageBox::AfxShow(IDS_NOTASKSDEPENDENTONSELECTION);
 }
 
 void CToDoListWnd::OnUpdateMoveSelectTaskDependencies(CCmdUI* pCmdUI)
