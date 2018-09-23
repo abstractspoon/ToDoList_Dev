@@ -4,8 +4,6 @@
 #include "stdafx.h"
 #include "ProgressThread.h"
 
-#include "..\shared\wclassdefines.h"
-
 #define WM_PLAY_PROGRESS_BAR WM_APP
 #define WM_STOP_PROGRESS_BAR (WM_APP+1)
 
@@ -43,7 +41,7 @@ BOOL CProgressThread::InitInstance()
 	// Create static as parent of progress control to prevent
 	// 'real' parent blocking when progress needs to draw its
 	// parent background
-	m_progressParent.CreateEx(WS_EX_NOPARENTNOTIFY, WC_STATIC, NULL, WS_CHILD | WS_VISIBLE | SS_WHITERECT, m_rect, CWnd::FromHandle(m_hwndParent), 0xFFFF);
+	m_progressParent.CreateEx(WS_EX_NOPARENTNOTIFY, _T("Static"), NULL, WS_CHILD | WS_VISIBLE | SS_WHITERECT, m_rect, CWnd::FromHandle(m_hwndParent), 0xFFFF);
 
 	DWORD dwStyle = WS_CHILD | WS_VISIBLE | PBS_SMOOTH | (m_bMarquee ? PBS_MARQUEE : 0);
 	CRect rProgress(0, 0, m_rect.Width(), m_rect.Height());
