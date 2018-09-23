@@ -44,23 +44,23 @@ public:
 
 // Attributes
 public:
-    COLORREF GetColour();
-    void     SetColour(COLORREF crColour); 
+    COLORREF GetColour() const;
+    void SetColour(COLORREF crColour); 
 
-    void     SetDefaultText(LPCTSTR szDefaultText);
-    void     SetCustomText(LPCTSTR szCustomText);
+    void SetDefaultText(LPCTSTR szDefaultText);
+    void SetCustomText(LPCTSTR szCustomText);
 
-    void     SetTrackSelection(BOOL bTracking = TRUE)  { m_bTrackSelection = bTracking; }
-    BOOL     GetTrackSelection()                       { return m_bTrackSelection; }
+	void SetTrackSelection(BOOL bTracking = TRUE) { m_bTrackSelection = bTracking; }
+	BOOL GetTrackSelection() const { return m_bTrackSelection; }
 
-    void     SetSelectionMode(UINT nMode)              { m_nSelectionMode = nMode; }
-    UINT     GetSelectionMode()                        { return m_nSelectionMode; };
+	void SetSelectionMode(UINT nMode) { m_nSelectionMode = nMode; }
+	UINT GetSelectionMode() const { return m_nSelectionMode; };
 
-    void     SetBkColour(COLORREF crColourBk);
-    COLORREF GetBkColour()                             { return m_crColourBk; }
-    
-    void     SetTextColour(COLORREF crColourText);
-    COLORREF GetTextColour()                           { return m_crColourText;}
+	void SetBkColour(COLORREF crColourBk);
+	COLORREF GetBkColour() const { return m_crColourBk; }
+
+	void SetTextColour(COLORREF crColourText);
+	COLORREF GetTextColour() const { return m_crColourText;}
 
 	BOOL GetDroppedState() const { return m_bActive; }
 
@@ -110,6 +110,9 @@ protected:
 	afx_msg UINT OnGetDlgCode();
 
     DECLARE_MESSAGE_MAP()
+
+protected:
+	virtual CColourPopup* NewColourPopup(CPoint pt) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

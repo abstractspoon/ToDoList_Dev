@@ -34,8 +34,6 @@
 #include "ColourPicker.h"
 #include "colordef.h"
 
-#include "..\shared\themed.h"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -168,96 +166,82 @@ void CColourPicker::DoColourPopup()
     m_bActive = TRUE;
     CRect rect;
     GetWindowRect(rect);
-    m_pPopup = new CColourPopup(CPoint(rect.left, rect.bottom),    // Point to display popup
-								 GetColour(),                       // Selected colour
-								 this,                              // parent
-								 0,									// nID
-								 m_strDefaultText,                  // "Default" text area
-								 m_strCustomText);                  // Custom Text
+    m_pPopup = NewColourPopup(CPoint(rect.left, rect.bottom));
 
     CWnd *pParent = GetParent();
     if (pParent)
         pParent->SendMessage(CPN_DROPDOWN, (LPARAM)GetColour(), (WPARAM) GetDlgCtrlID());
 }
 
+CColourPopup* CColourPicker::NewColourPopup(CPoint pt) const 
+{ 
+	return new CColourPopup(pt,					// Point to display popup
+							GetColour(),		// Selected colour
+							const_cast<CColourPicker*>(this),				// parent
+							0,					// nID
+							m_strDefaultText,   // "Default" text area
+							m_strCustomText); 
+}
+
 void CColourPicker::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) 
 {
-    ASSERT(lpDrawItemStruct);
-    
-    CDC*    pDC     = CDC::FromHandle(lpDrawItemStruct->hDC);
-    CRect   rect    = lpDrawItemStruct->rcItem;
-    UINT    state   = lpDrawItemStruct->itemState;
-    CString strText;
+	ASSERT(lpDrawItemStruct);
 
-    CSize Margins(::GetSystemMetrics(SM_CXEDGE), ::GetSystemMetrics(SM_CYEDGE));
+	CDC*    pDC     = CDC::FromHandle(lpDrawItemStruct->hDC);
+	CRect   rect    = lpDrawItemStruct->rcItem;
+	UINT    state   = lpDrawItemStruct->itemState;
+	CString m_strText;
 
-	// border
-	CThemed th(this, _T("EDIT"));
+	CSize Margins(::GetSystemMetrics(SM_CXEDGE), ::GetSystemMetrics(SM_CYEDGE));
 
-	if (th.AreControlsThemed())
-		th.DrawBackground(pDC, EP_EDITTEXT, ETS_NORMAL, rect);
-	else
-	  pDC->DrawEdge(rect, EDGE_SUNKEN, BF_RECT);
+	// Draw arrow
+	if (m_bActive) state |= ODS_SELECTED;
+	pDC->DrawFrameControl(&m_ArrowRect, DFC_SCROLL, DFCS_SCROLLDOWN  | 
+		((state & ODS_SELECTED) ? DFCS_PUSHED : 0) |
+		((state & ODS_DISABLED) ? DFCS_INACTIVE : 0));
 
-    // Draw arrow
-    if (m_bActive) 
-		state |= ODS_SELECTED;
+	pDC->DrawEdge(rect, EDGE_SUNKEN, BF_RECT);
 
-	CThemed::DrawFrameControl(this, pDC, &m_ArrowRect, DFC_SCROLL, DFCS_SCROLLDOWN  | 
-                          ((state & ODS_SELECTED) ? DFCS_PUSHED : 0) |
-                          ((state & ODS_DISABLED) ? DFCS_INACTIVE : 0));
+	// Must reduce the size of the "client" area of the button due to edge thickness.
+	rect.DeflateRect(Margins.cx, Margins.cy);
 
-    // Must reduce the size of the "client" area of the button due to edge thickness.
-    rect.DeflateRect(Margins.cx, Margins.cy);
+	// Fill remaining area with colour
+	rect.right -= m_ArrowRect.Width();
 
-    // figure out text and backgnd colours
-    rect.right -= m_ArrowRect.Width() + 1;
+	CBrush brush( ((state & ODS_DISABLED) || m_crColourBk == CLR_DEFAULT)? 
+		::GetSysColor(COLOR_3DFACE) : m_crColourBk);
+	CBrush* pOldBrush = (CBrush*) pDC->SelectObject(&brush);
+	pDC->SelectStockObject(NULL_PEN);
+	pDC->Rectangle(rect);
+	pDC->SelectObject(pOldBrush);
 
-	BOOL bEnabled = IsWindowEnabled();
-	COLORREF crWindow = ::GetSysColor(bEnabled ? COLOR_WINDOW : COLOR_3DFACE);
-
-	COLORREF crBack = (m_crColourBk == CLR_DEFAULT || !bEnabled) ? crWindow : m_crColourBk;
-	COLORREF crText = m_crColourText;
-
-	if (!bEnabled)
-		crText = GetSysColor(COLOR_GRAYTEXT); 
-	
-	else if (crText == CLR_DEFAULT)
+	// Draw the window text (if any)
+	GetWindowText(m_strText);
+	if (m_strText.GetLength())
 	{
-		if (m_nSelectionMode == CP_MODE_BK)
+		pDC->SetBkMode(TRANSPARENT);
+		if (state & ODS_DISABLED)
 		{
-			// pick best colour for text
-			int nLum = RGBX(crBack).Luminance();
-			crText = (nLum < 128) ? RGB(255, 255, 255) : 0;
+			rect.OffsetRect(1,1);
+			pDC->SetTextColor(::GetSysColor(COLOR_3DHILIGHT));
+			pDC->DrawText(m_strText, rect, DT_CENTER|DT_SINGLELINE|DT_VCENTER);
+			rect.OffsetRect(-1,-1);
+			pDC->SetTextColor(::GetSysColor(COLOR_3DSHADOW));
+			pDC->DrawText(m_strText, rect, DT_CENTER|DT_SINGLELINE|DT_VCENTER);
 		}
 		else
-			crText = GetSysColor(COLOR_WINDOWTEXT);
+		{
+			pDC->SetTextColor((m_crColourText == CLR_DEFAULT)? 0 : m_crColourText);
+			pDC->DrawText(m_strText, rect, DT_CENTER|DT_SINGLELINE|DT_VCENTER);
+		}
 	}
-	
-    GetWindowText(strText);
 
-	if (m_nSelectionMode == CP_MODE_BK)
-		rect.DeflateRect(1, 1); // provide a border
-
-	// draw required color
-	pDC->FillSolidRect(rect, crBack);
-
-	// draw text
-	if (strText.GetLength())
-    {
-		// draw text in required color
-        pDC->SetBkMode(TRANSPARENT);
-
-        COLORREF crOld = pDC->SetTextColor(crText);
-        pDC->DrawText(strText, rect, DT_CENTER|DT_SINGLELINE|DT_VCENTER);
-		pDC->SetTextColor(crOld);
-
-		rect.DeflateRect(1, 1); // provide a border
-    }
-
-    // Draw focus rect
-    if ((state & ODS_FOCUS) && !m_bActive) 
-        pDC->DrawFocusRect(rect);
+	// Draw focus rect
+	if (state & ODS_FOCUS) 
+	{
+		rect.DeflateRect(1,1);
+		pDC->DrawFocusRect(rect);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -273,7 +257,7 @@ void CColourPicker::PreSubclassWindow()
 /////////////////////////////////////////////////////////////////////////////
 // CColourPicker attributes
 
-COLORREF CColourPicker::GetColour()
+COLORREF CColourPicker::GetColour() const
 { 
     return (m_nSelectionMode == CP_MODE_TEXT)? 
         GetTextColour(): GetBkColour(); 

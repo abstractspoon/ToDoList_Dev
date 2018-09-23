@@ -5,8 +5,6 @@
 #pragma once
 #endif // _MSC_VER >= 1000
 
-#include "..\shared\Subclass.h"
-
 // ColourPopup.h : header file
 //
 // Written by Chris Maunder (chrismaunder@codeguru.com)
@@ -44,7 +42,7 @@ typedef struct {
 /////////////////////////////////////////////////////////////////////////////
 // CColourPopup window
 
-class CColourPopup : public CWnd, public CSubclasser
+class CColourPopup : public CWnd
 {
 // Construction
 public:
@@ -52,7 +50,7 @@ public:
     CColourPopup(CPoint p, COLORREF crColour, CWnd* pParentWnd, UINT nID = 0, 
                  LPCTSTR szDefaultText = NULL, LPCTSTR szCustomText = NULL,
 				 BOOL bIgnoreFirstLBtnUp = FALSE);
-    void Initialise();
+	void Initialise();
 
 // Attributes
 public:
@@ -111,8 +109,6 @@ protected:
 	BOOL		   m_bIgnoreFirstLBtnUp;
     BOOL           m_bChildWindowVisible;
 
-	CSubclassWnd   m_scParent;
-
     // Generated message map functions
 protected:
     //{{AFX_MSG(CColourPopup)
@@ -120,9 +116,11 @@ protected:
     afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
     afx_msg void OnPaint();
     afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+    afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
     afx_msg BOOL OnQueryNewPalette();
     afx_msg void OnPaletteChanged(CWnd* pFocusWnd);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
 #if _MFC_VER < 0x0700 
 	afx_msg void OnActivateApp(BOOL bActive, HTASK hTask);
@@ -130,8 +128,6 @@ protected:
 	 afx_msg void OnActivateApp(BOOL bActive, DWORD hTask);
 #endif
     DECLARE_MESSAGE_MAP()
-
-	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 };
 
 /////////////////////////////////////////////////////////////////////////////

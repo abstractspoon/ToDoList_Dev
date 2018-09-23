@@ -121,7 +121,12 @@ CColourPopup::CColourPopup(CPoint p, COLORREF crColour, CWnd* pParentWnd,
 {
     Initialise();
 
-    CColourPopup::Create(p, crColour, pParentWnd, nID, szDefaultText, szCustomText, bIgnoreFirstLBtnUp);
+    m_crColour       = m_crInitialColour = crColour;
+    m_pParent        = pParentWnd;
+    m_strDefaultText = (szDefaultText)? szDefaultText : _T("");
+    m_strCustomText  = (szCustomText)?  szCustomText  : _T("");
+
+    Create(p, crColour, pParentWnd, nID, szDefaultText, szCustomText, bIgnoreFirstLBtnUp);
 }
 
 void CColourPopup::Initialise()
@@ -186,7 +191,6 @@ BOOL CColourPopup::Create(CPoint p, COLORREF crColour, CWnd* pParentWnd,
 						  BOOL bIgnoreFirstLBtnUp/* = FALSE*/)
 {
     ASSERT(pParentWnd && ::IsWindow(pParentWnd->GetSafeHwnd()));
-//    ASSERT(pParentWnd->IsKindOf(RUNTIME_CLASS(CColourPicker)));
 
     m_pParent  = pParentWnd;
     m_crColour = m_crInitialColour = crColour;
@@ -199,7 +203,7 @@ BOOL CColourPopup::Create(CPoint p, COLORREF crColour, CWnd* pParentWnd,
                                               (HBRUSH) (COLOR_BTNFACE+1), 
                                               0);
 
-    if (!CWnd::CreateEx(0, szClassName, _T(""), /*WS_VISIBLE|*/WS_POPUP, 
+    if (!CWnd::CreateEx(0, szClassName, _T(""), WS_POPUP, 
                         p.x, p.y, 100, 100, // size updated soon
                         pParentWnd->GetSafeHwnd(), 0, NULL))
         return FALSE;
@@ -221,14 +225,7 @@ BOOL CColourPopup::Create(CPoint p, COLORREF crColour, CWnd* pParentWnd,
     // Find which cell (if any) corresponds to the initial colour
     FindCellFromColour(crColour);
 
-	pParentWnd->SetFocus();
-	ShowWindow(SW_SHOWNOACTIVATE);
-
-    // Capture all mouse events for the life of this window
-    SetCapture();
-
-	// Hook the parent wnd
-	return m_scParent.HookWindow(*pParentWnd, this);
+    return TRUE;
 }
 
 BEGIN_MESSAGE_MAP(CColourPopup, CWnd)
@@ -237,15 +234,30 @@ BEGIN_MESSAGE_MAP(CColourPopup, CWnd)
     ON_WM_LBUTTONUP()
     ON_WM_PAINT()
     ON_WM_MOUSEMOVE()
+    ON_WM_KEYDOWN()
     ON_WM_QUERYNEWPALETTE()
     ON_WM_PALETTECHANGED()
 	ON_WM_KILLFOCUS()
 	ON_WM_ACTIVATEAPP()
+	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CColourPopup message handlers
+
+int CColourPopup::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CWnd::OnCreate(lpCreateStruct) != 0)
+		return -1;
+
+	ShowWindow(SW_SHOW);
+
+	// Capture all mouse events for the life of this window
+	SetCapture();
+
+	return 0;
+}
 
 // For tooltips
 BOOL CColourPopup::PreTranslateMessage(MSG* pMsg) 
@@ -259,168 +271,162 @@ BOOL CColourPopup::PreTranslateMessage(MSG* pMsg)
     return CWnd::PreTranslateMessage(pMsg);
 }
 
-LRESULT CColourPopup::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+// If an arrow key is pressed, then move the selection
+void CColourPopup::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
-	switch (msg)
+	int row = GetRow(m_nCurrentSel),
+		col = GetColumn(m_nCurrentSel);
+
+	switch (nChar)
 	{
-	case WM_KEYDOWN:
+	case VK_DOWN:
 		{
-			int row = GetRow(m_nCurrentSel),
-				col = GetColumn(m_nCurrentSel);
+			if (row == DEFAULT_BOX_VALUE) 
+				row = col = 0; 
 
-			switch (wp)
+			else if (row == CUSTOM_BOX_VALUE)
 			{
-			case VK_DOWN:
-				{
-					if (row == DEFAULT_BOX_VALUE) 
-						row = col = 0; 
-
-					else if (row == CUSTOM_BOX_VALUE)
-					{
-						if (m_strDefaultText.GetLength())
-							row = col = DEFAULT_BOX_VALUE;
-						else
-							row = col = 0;
-					}
-					else
-					{
-						row++;
-						if (GetIndex(row,col) < 0)
-						{
-							if (m_strCustomText.GetLength())
-								row = col = CUSTOM_BOX_VALUE;
-							else if (m_strDefaultText.GetLength())
-								row = col = DEFAULT_BOX_VALUE;
-							else
-								row = col = 0;
-						}
-					}
-					ChangeSelection(GetIndex(row, col));
-				}
-				return 0L; // eat
-				
-			case VK_UP:
-				{
-					if (row == DEFAULT_BOX_VALUE)
-					{
-						if (m_strCustomText.GetLength())
-							row = col = CUSTOM_BOX_VALUE;
-						else
-						{ 
-							row = GetRow(m_nNumColours-1); 
-							col = GetColumn(m_nNumColours-1); 
-						}
-					}
-					else if (row == CUSTOM_BOX_VALUE)
-					{ 
-						row = GetRow(m_nNumColours-1); 
-						col = GetColumn(m_nNumColours-1); 
-					}
-					else if (row > 0) 
-						row--;
-					else /* row == 0 */
-					{
-						if (m_strDefaultText.GetLength())
-							row = col = DEFAULT_BOX_VALUE;
-						else if (m_strCustomText.GetLength())
-							row = col = CUSTOM_BOX_VALUE;
-						else
-						{ 
-							row = GetRow(m_nNumColours-1); 
-							col = GetColumn(m_nNumColours-1); 
-						}
-					}
-					ChangeSelection(GetIndex(row, col));
-				}
-				return 0L; // eat
-				
-			case VK_RIGHT:
-				{
-					if (row == DEFAULT_BOX_VALUE) 
-						row = col = 0; 
-					
-					else if (row == CUSTOM_BOX_VALUE)
-					{
-						if (m_strDefaultText.GetLength())
-							row = col = DEFAULT_BOX_VALUE;
-						else
-							row = col = 0;
-					}
-					else if (col < m_nNumColumns-1) 
-						col++;
-					else 
-					{ 
-						col = 0; row++;
-					}
-					
-					if (GetIndex(row,col) == INVALID_COLOUR)
-					{
-						if (m_strCustomText.GetLength())
-							row = col = CUSTOM_BOX_VALUE;
-						else if (m_strDefaultText.GetLength())
-							row = col = DEFAULT_BOX_VALUE;
-						else
-							row = col = 0;
-					}
-					
-					ChangeSelection(GetIndex(row, col));
-				}
-				return 0L; // eat
-				
-			case VK_LEFT:
-				{
-					if (row == DEFAULT_BOX_VALUE)
-					{
-						if (m_strCustomText.GetLength())
-							row = col = CUSTOM_BOX_VALUE;
-						else
-						{ 
-							row = GetRow(m_nNumColours-1); 
-							col = GetColumn(m_nNumColours-1); 
-						}
-					}
-					else if (row == CUSTOM_BOX_VALUE)
-					{ 
-						row = GetRow(m_nNumColours-1); 
-						col = GetColumn(m_nNumColours-1); 
-					}
-					else if (col > 0) 
-						col--;
-					else /* col == 0 */
-					{
-						if (row > 0) { row--; col = m_nNumColumns-1; }
-						else 
-						{
-							if (m_strDefaultText.GetLength())
-								row = col = DEFAULT_BOX_VALUE;
-							else if (m_strCustomText.GetLength())
-								row = col = CUSTOM_BOX_VALUE;
-							else
-							{ 
-								row = GetRow(m_nNumColours-1); 
-								col = GetColumn(m_nNumColours-1); 
-							}
-						}
-					}
-					ChangeSelection(GetIndex(row, col));
-				}
-				return 0L; // eat
-				
-			case VK_ESCAPE:
-				m_crColour = m_crInitialColour;
-				EndSelection(CPN_SELENDCANCEL);
-				return 0L; // eat
-				
-			case VK_RETURN:
-			case VK_SPACE:
-				EndSelection(CPN_SELENDOK);
-				return 0L; // eat
+				if (m_strDefaultText.GetLength())
+					row = col = DEFAULT_BOX_VALUE;
+				else
+					row = col = 0;
 			}
+			else
+			{
+				row++;
+				if (GetIndex(row,col) < 0)
+				{
+					if (m_strCustomText.GetLength())
+						row = col = CUSTOM_BOX_VALUE;
+					else if (m_strDefaultText.GetLength())
+						row = col = DEFAULT_BOX_VALUE;
+					else
+						row = col = 0;
+				}
+			}
+			ChangeSelection(GetIndex(row, col));
 		}
-		break;
+		return; // eat
+
+	case VK_UP:
+		{
+			if (row == DEFAULT_BOX_VALUE)
+			{
+				if (m_strCustomText.GetLength())
+					row = col = CUSTOM_BOX_VALUE;
+				else
+				{ 
+					row = GetRow(m_nNumColours-1); 
+					col = GetColumn(m_nNumColours-1); 
+				}
+			}
+			else if (row == CUSTOM_BOX_VALUE)
+			{ 
+				row = GetRow(m_nNumColours-1); 
+				col = GetColumn(m_nNumColours-1); 
+			}
+			else if (row > 0) 
+				row--;
+			else /* row == 0 */
+			{
+				if (m_strDefaultText.GetLength())
+					row = col = DEFAULT_BOX_VALUE;
+				else if (m_strCustomText.GetLength())
+					row = col = CUSTOM_BOX_VALUE;
+				else
+				{ 
+					row = GetRow(m_nNumColours-1); 
+					col = GetColumn(m_nNumColours-1); 
+				}
+			}
+			ChangeSelection(GetIndex(row, col));
+		}
+		return; // eat
+
+	case VK_RIGHT:
+		{
+			if (row == DEFAULT_BOX_VALUE) 
+				row = col = 0; 
+
+			else if (row == CUSTOM_BOX_VALUE)
+			{
+				if (m_strDefaultText.GetLength())
+					row = col = DEFAULT_BOX_VALUE;
+				else
+					row = col = 0;
+			}
+			else if (col < m_nNumColumns-1) 
+				col++;
+			else 
+			{ 
+				col = 0; row++;
+			}
+
+			if (GetIndex(row,col) == INVALID_COLOUR)
+			{
+				if (m_strCustomText.GetLength())
+					row = col = CUSTOM_BOX_VALUE;
+				else if (m_strDefaultText.GetLength())
+					row = col = DEFAULT_BOX_VALUE;
+				else
+					row = col = 0;
+			}
+
+			ChangeSelection(GetIndex(row, col));
+		}
+		return; // eat
+
+	case VK_LEFT:
+		{
+			if (row == DEFAULT_BOX_VALUE)
+			{
+				if (m_strCustomText.GetLength())
+					row = col = CUSTOM_BOX_VALUE;
+				else
+				{ 
+					row = GetRow(m_nNumColours-1); 
+					col = GetColumn(m_nNumColours-1); 
+				}
+			}
+			else if (row == CUSTOM_BOX_VALUE)
+			{ 
+				row = GetRow(m_nNumColours-1); 
+				col = GetColumn(m_nNumColours-1); 
+			}
+			else if (col > 0) 
+				col--;
+			else /* col == 0 */
+			{
+				if (row > 0) { row--; col = m_nNumColumns-1; }
+				else 
+				{
+					if (m_strDefaultText.GetLength())
+						row = col = DEFAULT_BOX_VALUE;
+					else if (m_strCustomText.GetLength())
+						row = col = CUSTOM_BOX_VALUE;
+					else
+					{ 
+						row = GetRow(m_nNumColours-1); 
+						col = GetColumn(m_nNumColours-1); 
+					}
+				}
+			}
+			ChangeSelection(GetIndex(row, col));
+		}
+		return; // eat
+
+	case VK_ESCAPE:
+		m_crColour = m_crInitialColour;
+		EndSelection(CPN_SELENDCANCEL);
+		return; // eat
+
+	case VK_RETURN:
+	case VK_SPACE:
+		EndSelection(CPN_SELENDOK);
+		return; // eat
 	}
 
-	return CSubclasser::ScDefault(m_scParent);
+    CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 // auto-deletion
@@ -503,7 +509,7 @@ void CColourPopup::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 
     DWORD pos = GetMessagePos();
-    point = CPoint((short)LOWORD(pos), (short)HIWORD(pos));
+    point = CPoint(LOWORD(pos), HIWORD(pos));
 
     if (m_WindowRect.PtInRect(point))
         EndSelection(CPN_SELENDOK);
@@ -675,17 +681,17 @@ void CColourPopup::SetWindowSize()
     // window width
     if (m_strCustomText.GetLength()) 
     {
-       if (TextSize.cx > m_WindowRect.Width())
-          m_WindowRect.right = m_WindowRect.left + TextSize.cx;
-       TextSize.cx = m_WindowRect.Width()-2*m_nMargin;
-       
-       // Work out the text area
-       m_CustomTextRect.SetRect(m_nMargin, m_WindowRect.Height(), 
-          m_nMargin+TextSize.cx, 
-          m_WindowRect.Height()+m_nMargin+TextSize.cy);
-       m_WindowRect.bottom += m_CustomTextRect.Height() + 2*m_nMargin;
-    }
-    
+        if (TextSize.cx > m_WindowRect.Width())
+            m_WindowRect.right = m_WindowRect.left + TextSize.cx;
+        TextSize.cx = m_WindowRect.Width()-2*m_nMargin;
+
+        // Work out the text area
+        m_CustomTextRect.SetRect(m_nMargin, m_WindowRect.Height(), 
+                                 m_nMargin+TextSize.cx, 
+                                 m_WindowRect.Height()+m_nMargin+TextSize.cy);
+        m_WindowRect.bottom += m_CustomTextRect.Height() + 2*m_nMargin;
+   }
+
     // Need to check it'll fit on screen: Too far right?
     CRect rWorkArea;
     HMONITOR hMon = MonitorFromRect(m_WindowRect, MONITOR_DEFAULTTONEAREST);

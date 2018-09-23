@@ -487,6 +487,12 @@
     <ClCompile Include="ColorBrewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ColourPickerEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ColourPopupEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h">
@@ -1011,7 +1017,13 @@
     <ClInclude Include="ColorBrewer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ColourPickerEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="SendFileToEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ColourPopupEx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

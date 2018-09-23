@@ -41,8 +41,7 @@
 #include "..\shared\mapex.h"
 #include "..\shared\icon.h"
 #include "..\shared\FindReplace.h"
-
-#include "..\3rdparty\colourpicker.h"
+#include "..\shared\colourpickerEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -458,7 +457,7 @@ protected:
 	CAutoComboBox m_cbStatus;
 	CAutoComboBox m_cbVersion;
 	CCheckComboBox m_cbCategory, m_cbAllocTo, m_cbTags;
-	CColourPicker m_cpColour;
+	CColourPickerEx m_cpColour;
 	CTDLCommentsCtrl m_ctrlComments;
 	CDateTimeCtrlEx m_dtcStart, m_dtcDue, m_dtcDone;
 	CEnEdit m_eExternalID, m_eDependency;

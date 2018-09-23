@@ -154,6 +154,8 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ColourPickerEx.cpp" />
+    <ClCompile Include="ColourPopupEx.cpp" />
     <ClCompile Include="ComboListboxPositioner.cpp" />
     <ClCompile Include="ContentCtrl.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -702,6 +704,8 @@
     <ClInclude Include="ColorBrewerCombobox.h" />
     <ClInclude Include="colorbutton.h" />
     <ClInclude Include="colorcombobox.h" />
+    <ClInclude Include="ColourPickerEx.h" />
+    <ClInclude Include="ColourPopupEx.h" />
     <ClInclude Include="ComboListboxPositioner.h" />
     <ClInclude Include="ContentCtrl.h" />
     <ClInclude Include="ContentMgr.h" />

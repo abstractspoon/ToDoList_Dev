@@ -141,6 +141,14 @@ SOURCE=.\colorcombobox.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ColourPickerEx.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ColourPopupEx.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ComboListboxPositioner.cpp
 # End Source File
 # Begin Source File
@@ -794,6 +802,14 @@ SOURCE=.\colorbutton.h
 # Begin Source File
 
 SOURCE=.\colorcombobox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ColourPickerEx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ColourPopupEx.h
 # End Source File
 # Begin Source File
 
