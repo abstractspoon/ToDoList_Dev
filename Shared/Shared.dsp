@@ -113,6 +113,10 @@ SOURCE=.\browserdlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CalendarCtrlEx.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\checkcombobox.cpp
 # End Source File
 # Begin Source File
@@ -398,6 +402,14 @@ SOURCE=.\MenuIconMgr.cpp
 # Begin Source File
 
 SOURCE=.\MessageBox.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\MiniCalendarCtrl.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\MiniCalendarListCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -781,6 +793,10 @@ SOURCE=.\browserdlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\CalendarCtrlEx.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\checkcombobox.h
 # End Source File
 # Begin Source File
@@ -1086,6 +1102,14 @@ SOURCE=.\MenuIconMgr.h
 # Begin Source File
 
 SOURCE=.\MessageBox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MiniCalendarCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MiniCalendarListCtrl.h
 # End Source File
 # Begin Source File
 

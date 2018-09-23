@@ -15,10 +15,10 @@ public:
 		bool bResult = false;
 
 #ifdef _UNICODE
-		LPCSTR lpszName = (LPCSTR)Misc::WideToMultiByte(strTo);
-		LPCSTR lpszPathName = (LPCSTR)Misc::WideToMultiByte(strAttachmentFileName);
-		LPCSTR lpszSubject = (LPCSTR)Misc::WideToMultiByte(strSubject);
-		LPCSTR lpszNoteText = (LPCSTR)Misc::WideToMultiByte(strBody);
+		LPSTR lpszName = Misc::WideToMultiByte(strTo);
+		LPSTR lpszPathName = Misc::WideToMultiByte(strAttachmentFileName);
+		LPSTR lpszSubject = Misc::WideToMultiByte(strSubject);
+		LPSTR lpszNoteText = Misc::WideToMultiByte(strBody);
 
 		bResult = CSendFileTo::SendMail(hWndParent, lpszName, lpszSubject, lpszNoteText, lpszPathName);
 

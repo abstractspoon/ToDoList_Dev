@@ -606,7 +606,7 @@ void CRangeSlider::OnPaintVertical(CDC &dc)
 
 void CRangeSlider::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	TRACE("Down Point %d, %d\n", point.x, point.y);
+	TRACE(_T("Down Point %d, %d\n"), point.x, point.y);
 	SetFocus();
 	Invalidate();
 
@@ -657,9 +657,6 @@ void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point)
 			x = point.x - m_ClickOffset.x;
 		else
 			x = point.y - m_ClickOffset.y;
-
-		CRect rect;
-		WPARAM changed = 0;
 
 		double oldLeft = m_Left;
 		double oldRight = m_Right;
@@ -712,12 +709,11 @@ void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point)
 					m_Right = m_Max;
 					m_Left = m_Right - delta;
 				}
-				changed = RS_BOTHCHANGED;
 			}
 			break;
 
 		default:
-			TRACE("Unknown Track Mode\n");
+			TRACE(_T("Unknown Track Mode\n"));
 			ASSERT(FALSE);
 			break;
 		}
