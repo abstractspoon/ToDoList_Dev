@@ -5,6 +5,7 @@
 #include "RangeSliderCtrl.h"
 
 #include "Themed.h"
+#include "Misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -15,7 +16,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CRangeSliderCtrl
 
-CRangeSliderCtrl::CRangeSliderCtrl(UINT nThumbStyle) : m_crParentBkgnd(CLR_NONE), m_nThumbStyle(nThumbStyle)
+CRangeSliderCtrl::CRangeSliderCtrl(UINT nThumbStyle) : m_crParentBkgnd(CLR_NONE), m_nSliderDrawStyles(nThumbStyle)
 {
 }
 
@@ -100,14 +101,14 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 			CThemed th(this, _T("TRACKBAR"));
 			int nPart = 0;
 
-			if (m_nThumbStyle & TBS_TOP)
+			if (m_nSliderDrawStyles & TBS_TOP)
 			{
 				if (m_bHorizontal)
 					nPart = TKP_THUMBTOP;
 				else
 					nPart = TKP_THUMBLEFT;
 			}
-			else if (m_nThumbStyle & TBS_BOTH)
+			else if (m_nSliderDrawStyles & TBS_BOTH)
 			{
 				nPart = TKP_THUMB;
 			}
@@ -147,6 +148,21 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 			RegionToTrack(rTrack);
 			
 			th.DrawBackground(&dc, (m_bHorizontal ? PP_CHUNK : PP_CHUNKVERT), 0, rTrack);
+
+			if ((m_nSliderDrawStyles & TBS_NOTICKS) == 0)
+			{
+				int nNumTick = Misc::Round((m_Right - m_Left) / m_Step);
+				double dTickSpacing = ((double)rTrack.Width() / nNumTick);
+
+				// Skip first and last ticks
+				for (int nTick = 1; nTick < nNumTick; nTick++)
+				{
+					int nTickPos = (rButton.left + (int)(nTick * dTickSpacing));
+					CRect rTick(nTickPos, rTrack.bottom, (nTickPos + 1), rTrack.bottom + 4);
+
+					dc.FillSolidRect(rTick, GetSysColor(COLOR_3DSHADOW));
+				}
+			}
 		}
 	}
 	else

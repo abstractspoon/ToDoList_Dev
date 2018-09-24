@@ -18,15 +18,15 @@ class CRangeSliderCtrl : public CRangeSlider
 {
 // Construction
 public:
-	CRangeSliderCtrl(UINT nThumbStyle);
+	CRangeSliderCtrl(UINT nThumbStyle = TBS_BOTTOM | TBS_NOTICKS);
 
 	void SetParentBackgroundColor(COLORREF crBkgnd);
-	void SetThumbStyle(UINT nStyle = TBS_BOTTOM);
+	void SetSliderDrawStyles(UINT nStyle);
 
 protected:
 	CHotTracker m_hotTrack;
 	COLORREF m_crParentBkgnd;
-	UINT m_nThumbStyle;
+	UINT m_nSliderDrawStyles;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
