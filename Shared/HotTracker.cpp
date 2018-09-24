@@ -68,7 +68,7 @@ BOOL CHotTracker::DeleteRect(int nRect)
 	return TRUE;
 }
 
-BOOL CHotTracker::GetRect(int nRect, CRect& rect)
+BOOL CHotTracker::GetRect(int nRect, CRect& rect) const
 {
 	if (nRect < 0 || nRect >= m_aRects.GetSize())
 		return FALSE;
@@ -77,7 +77,7 @@ BOOL CHotTracker::GetRect(int nRect, CRect& rect)
 	return TRUE;
 }
 
-int CHotTracker::HitTest(CPoint ptScreen)
+int CHotTracker::HitTest(CPoint ptScreen) const
 {
 	int nRect = m_aRects.GetSize();
 
@@ -120,6 +120,13 @@ LRESULT CHotTracker::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM /*wp*/, LPAR
 	}
 
 	return Default();
+}
+
+BOOL CHotTracker::IsHot(int nRect) const
+{
+	int nHit = HitTest(::GetMessagePos());
+
+	return ((nHit != -1) && (nRect == nHit));
 }
 
 void CHotTracker::InitTracking()

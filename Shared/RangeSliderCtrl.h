@@ -7,6 +7,8 @@
 // RangeSliderCtrl.h : header file
 //
 
+#include "HotTracker.h"
+
 #include "..\3rdParty\RangeSlider.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -21,10 +23,11 @@ public:
 	void SetParentBackgroundColor(COLORREF crBkgnd);
 	void SetThumbStyle(UINT nStyle = TBS_BOTTOM);
 
-	virtual void DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion) const;
-	virtual void DrawButton(CDC& dc, const CRect& rButton, const CString& sText, BOOL bPressed) const;
+	virtual void DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion);
+	virtual void DrawButton(CDC& dc, RS_DRAWREGION nRegion, const CRect& rButton, const CString& sText, BOOL bPressed);
 
 protected:
+	CHotTracker m_hotTrack;
 	COLORREF m_crParentBkgnd;
 	UINT m_nThumbStyle;
 
@@ -36,15 +39,20 @@ protected:
 // Implementation
 public:
 	virtual ~CRangeSliderCtrl();
+	virtual void PreSubclassWindow();
 
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CRangeSliderCtrl)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg LRESULT OnHotChange(WPARAM wp, LPARAM lp);
+	
 	DECLARE_MESSAGE_MAP()
 
 	void RegionToTrack(CRect& rRegion) const;
+	BOOL Initialize();
 };
 
 /////////////////////////////////////////////////////////////////////////////

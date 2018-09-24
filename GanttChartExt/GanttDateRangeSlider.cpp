@@ -16,7 +16,7 @@ static char THIS_FILE[] = __FILE__;
 
 CGanttDateRangeSlider::CGanttDateRangeSlider() 
 	: 
-	CRangeSliderCtrl(TBS_BOTH),
+	CRangeSliderCtrl(TBS_BOTTOM),
 	m_nMonthDisplay(GTLC_DISPLAY_NONE)
 {
 }

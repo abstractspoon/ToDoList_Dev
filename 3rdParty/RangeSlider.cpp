@@ -171,9 +171,9 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc)
 	// Draw Left Arrow
 	rLeft.left = rLeft.right;
 	rLeft.right += m_nArrowWidth;
-	DrawRegion(dc, RSDR_LEFTBUTTON, rLeft);
 
 	m_RectLeft = rLeft;
+	DrawRegion(dc, RSDR_LEFTBUTTON, rLeft);
 
 	// Draw Right Arrow
 	CRect rRight(ClientRect);
@@ -184,9 +184,9 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc)
 
 	rRight.right = rRight.left;
 	rRight.left -= m_nArrowWidth;
-	DrawRegion(dc, RSDR_RIGHTBUTTON, rRight);
 
 	m_RectRight = rRight;
+	DrawRegion(dc, RSDR_RIGHTBUTTON, rRight);
 	
 	// Draw Area in between.
 	CRect rMiddle(ClientRect);
@@ -235,7 +235,7 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc)
 	}
 }
 
-void CRangeSlider::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion) const
+void CRangeSlider::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion)
 {
 	int nSaveDC = dc.SaveDC();
 
@@ -263,6 +263,7 @@ void CRangeSlider::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegi
 
 	case RSDR_LEFTBUTTON: // RSDR_TOPBUTTON
 		DrawButton(dc, 
+					nRegion,
 					rRegion, 
 					(m_bHorizontal ? _T("<") : _T("^")), 
 					(m_bTracking && (m_TrackMode == TRACK_LEFT)));
@@ -270,6 +271,7 @@ void CRangeSlider::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegi
 
 	case RSDR_MIDDLE:
 		DrawButton(dc, 
+					nRegion,
 					rRegion, 
 					_T(""), 
 					(m_bTracking && (m_TrackMode == TRACK_MIDDLE)));
@@ -277,6 +279,7 @@ void CRangeSlider::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegi
 
 	case RSDR_RIGHTBUTTON: // RSDR_BOTTOMBUTTON
 		DrawButton(dc, 
+					nRegion,
 					rRegion, 
 					(m_bHorizontal ? _T(">") : _T("V")), 
 					(m_bTracking && (m_TrackMode == TRACK_RIGHT)));
@@ -290,7 +293,7 @@ void CRangeSlider::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegi
 	dc.RestoreDC(nSaveDC);
 }
 
-void CRangeSlider::DrawButton(CDC& dc, const CRect& rButton, const CString& sText, BOOL bPressed) const
+void CRangeSlider::DrawButton(CDC& dc, RS_DRAWREGION /*nRegion*/, const CRect& rButton, const CString& sText, BOOL bPressed)
 {
 	dc.FillSolidRect(rButton, ::GetSysColor(COLOR_BTNFACE));
 

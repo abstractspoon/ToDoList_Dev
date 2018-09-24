@@ -113,8 +113,8 @@ protected:
 		RSDR_FOCUS,
 	};
 
-	virtual void DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion) const;
-	virtual void DrawButton(CDC& dc, const CRect& rButton, const CString& sText, BOOL bPressed) const;
+	virtual void DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion);
+	virtual void DrawButton(CDC& dc, RS_DRAWREGION nRegion, const CRect& rButton, const CString& sText, BOOL bPressed);
 	virtual BOOL IsValidMove(double /*left*/, double /*right*/) const { return TRUE; }
 
 	// Data
