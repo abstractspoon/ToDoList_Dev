@@ -919,6 +919,8 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 		m_ctrlGantt.SetSnapMode(nSnap);
 		CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
 
+		m_sliderDateRange.SetMonthDisplay(nDisplay);
+
 		return TRUE;
 	}
 
