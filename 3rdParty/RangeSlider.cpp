@@ -263,26 +263,23 @@ void CRangeSlider::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegi
 
 	case RSDR_LEFTBUTTON: // RSDR_TOPBUTTON
 		DrawButton(dc, 
-					nRegion,
+					BUTTON_LEFT,
 					rRegion, 
-					(m_bHorizontal ? _T("<") : _T("^")), 
-					(m_bTracking && (m_TrackMode == TRACK_LEFT)));
+					(m_bHorizontal ? _T("<") : _T("^")));
 		break;
 
 	case RSDR_MIDDLE:
 		DrawButton(dc, 
-					nRegion,
+					BUTTON_MIDDLE,
 					rRegion, 
-					_T(""), 
-					(m_bTracking && (m_TrackMode == TRACK_MIDDLE)));
+					_T(""));
 		break;
 
 	case RSDR_RIGHTBUTTON: // RSDR_BOTTOMBUTTON
 		DrawButton(dc, 
-					nRegion,
+					BUTTON_RIGHT,
 					rRegion, 
-					(m_bHorizontal ? _T(">") : _T("V")), 
-					(m_bTracking && (m_TrackMode == TRACK_RIGHT)));
+					(m_bHorizontal ? _T(">") : _T("V")));
 		break;
 
 	case RSDR_FOCUS:
@@ -293,12 +290,12 @@ void CRangeSlider::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegi
 	dc.RestoreDC(nSaveDC);
 }
 
-void CRangeSlider::DrawButton(CDC& dc, RS_DRAWREGION /*nRegion*/, const CRect& rButton, const CString& sText, BOOL bPressed)
+void CRangeSlider::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton, const CString& sText)
 {
 	dc.FillSolidRect(rButton, ::GetSysColor(COLOR_BTNFACE));
 
 	// Make appearance 3D
-	if (!bPressed) 
+	if (IsPressed(nBtn)) 
 		dc.Draw3dRect(rButton, ::GetSysColor(COLOR_BTNHIGHLIGHT), ::GetSysColor(COLOR_BTNSHADOW));
 	else
 		dc.Draw3dRect(rButton, ::GetSysColor(COLOR_BTNSHADOW), ::GetSysColor(COLOR_BTNHIGHLIGHT));
@@ -348,7 +345,7 @@ void CRangeSlider::OnPaintVertical(CDC &dc)
 		CRect & rect = m_RectLeft;
 		dc.Rectangle(&rect);
 			// Make appearance 3D
-		if (!m_bTracking || m_TrackMode != TRACK_LEFT) {
+		if (!m_bTracking || m_TrackedButton != BUTTON_LEFT) {
 			rect.DeflateRect(1,1,2,2);
 			CPen pen1;
 			pen1.CreatePen(PS_SOLID, 1, ::GetSysColor(COLOR_BTNHIGHLIGHT));
@@ -382,7 +379,7 @@ void CRangeSlider::OnPaintVertical(CDC &dc)
 		dc.Rectangle(&rect);
 
 			// Make appearance 3D
-		if (!m_bTracking || m_TrackMode != TRACK_RIGHT) {
+		if (!m_bTracking || m_TrackedButton != BUTTON_RIGHT) {
 			rect.DeflateRect(1,1,2,2);
 			CPen pen1;
 			pen1.CreatePen(PS_SOLID, 1, ::GetSysColor(COLOR_BTNHIGHLIGHT));
@@ -477,19 +474,19 @@ void CRangeSlider::OnLButtonDown(UINT nFlags, CPoint point)
 		if (m_RectLeft.PtInRect(point)) 
 		{
 			m_bTracking = TRUE;
-			m_TrackMode = TRACK_LEFT;
+			m_TrackedButton = BUTTON_LEFT;
 			m_ClickOffset = point - m_RectLeft.CenterPoint();
 		} 
 		else if (m_RectRight.PtInRect(point)) 
 		{
 			m_bTracking = TRUE;
-			m_TrackMode = TRACK_RIGHT;
+			m_TrackedButton = BUTTON_RIGHT;
 			m_ClickOffset = point - m_RectRight.CenterPoint();
 		} 
 		else if (middleRect.PtInRect(point)) 
 		{
 			m_bTracking = TRUE;
-			m_TrackMode = TRACK_MIDDLE;
+			m_TrackedButton = BUTTON_MIDDLE;
 			m_ClickOffset = point - middleRect.CenterPoint();
 		}
 		if (m_bTracking)
@@ -514,9 +511,9 @@ void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point)
 		double oldLeft = m_Left;
 		double oldRight = m_Right;
 
-		switch (m_TrackMode) 
+		switch (m_TrackedButton) 
 		{
-		case TRACK_LEFT: 
+		case BUTTON_LEFT: 
 			{
 				m_Left = static_cast<double>(x - m_nArrowWidth / 2) / m_dx * (m_Max - m_Min) + m_Min; 
 				m_Left = NormalizeByStep(m_Left);
@@ -528,7 +525,7 @@ void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point)
 			} 
 			break;
 
-		case TRACK_RIGHT: 
+		case BUTTON_RIGHT: 
 			{
 				m_Right = static_cast<double>(x - m_nArrowWidth * 3 / 2) / m_dx * (m_Max - m_Min) + m_Min;
 				m_Right = NormalizeByStep(m_Right);
@@ -540,7 +537,7 @@ void CRangeSlider::OnMouseMove(UINT nFlags, CPoint point)
 			} 
 			break;
 
-		case TRACK_MIDDLE:
+		case BUTTON_MIDDLE:
 			{
 				double delta = m_Right - m_Left;
 				ASSERT(delta >= 0.0);

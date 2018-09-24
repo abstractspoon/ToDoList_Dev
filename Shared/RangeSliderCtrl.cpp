@@ -13,15 +13,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-enum HOTRECTINDEX
-{
-	HRI_LEFT,
-	HRI_MIDDLE,
-	HRI_RIGHT,
-};
-
-/////////////////////////////////////////////////////////////////////////////
 // CRangeSliderCtrl
 
 CRangeSliderCtrl::CRangeSliderCtrl(UINT nThumbStyle) : m_crParentBkgnd(CLR_NONE), m_nThumbStyle(nThumbStyle)
@@ -85,18 +76,6 @@ void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 		if (CThemed::AreControlsThemed() || (m_crParentBkgnd != CLR_NONE))
 			return;
 
-	case RSDR_MIDDLE:
-		VERIFY(m_hotTrack.UpdateRect(HRI_MIDDLE, rRegion));
-		break;
-
-	case RSDR_LEFTBUTTON:
-		VERIFY(m_hotTrack.UpdateRect(HRI_LEFT, rRegion));
-		break;
-
-	case RSDR_RIGHTBUTTON:
-		VERIFY(m_hotTrack.UpdateRect(HRI_RIGHT, rRegion));
-		break;
-
 	case RSDR_FOCUS:
 		return;
 	}
@@ -105,11 +84,18 @@ void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 	CRangeSlider::DrawRegion(dc, nRegion, rRegion);
 }
 
-void CRangeSliderCtrl::DrawButton(CDC& dc, RS_DRAWREGION nRegion, const CRect& rButton, const CString& sText, BOOL bPressed)
+BOOL CRangeSliderCtrl::IsHot(BUTTON_ID nBtn) const
 {
+	return (!m_bTracking && m_hotTrack.IsHot(nBtn));
+}
+
+void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton, const CString& sText)
+{
+	VERIFY(m_hotTrack.UpdateRect(BUTTON_MIDDLE, rButton));
+
 	if (CThemed::AreControlsThemed())
 	{
-		if ((nRegion == RSDR_LEFTBUTTON) || (nRegion == RSDR_RIGHTBUTTON))
+		if ((nBtn == BUTTON_LEFT) || (nBtn == BUTTON_RIGHT))
 		{
 			CThemed th(this, _T("TRACKBAR"));
 			int nPart = 0;
@@ -134,25 +120,27 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 			}
 			ASSERT(nPart != 0);
 
-			int nState = (bPressed ? TUS_PRESSED : TUS_NORMAL);
-
-			switch (nRegion)
+			int nState = 0;
+			
+			if (IsPressed(nBtn))
 			{
-			case RSDR_LEFTBUTTON:
-				if (!bPressed && m_hotTrack.IsHot(HRI_LEFT))
-					nState = TUS_HOT;
-				break;
-
-			case RSDR_RIGHTBUTTON:
-				if (!bPressed && m_hotTrack.IsHot(HRI_RIGHT))
-					nState = TUS_HOT;
-				break;
+				nState = TUS_PRESSED;
 			}
+			else if (IsHot(nBtn))
+			{
+				nState = TUS_HOT;
+			}
+			else
+			{
+				nState = TUS_NORMAL;
+			}
+			ASSERT(nState != 0);
 
 			th.DrawBackground(&dc, nPart, nState, rButton);
 		}
-		else if (nRegion == RSDR_MIDDLE)
+		else
 		{
+			ASSERT(nBtn = BUTTON_MIDDLE);
 			CThemed th(this, _T("PROGRESS"));
 
 			CRect rTrack(rButton);
@@ -163,7 +151,7 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 	}
 	else
 	{
-		CRangeSlider::DrawButton(dc, nRegion, rButton, sText, bPressed);
+		CRangeSlider::DrawButton(dc, nBtn, rButton, sText);
 	}
 }
 
@@ -213,9 +201,9 @@ BOOL CRangeSliderCtrl::Initialize()
 		if (!m_hotTrack.Initialize(this))
 			return FALSE;
 
-		VERIFY(HRI_LEFT == m_hotTrack.AddRect(m_RectLeft));
-		VERIFY(HRI_MIDDLE == m_hotTrack.AddRect(CRect(m_RectLeft.right, m_RectLeft.top, m_RectRight.left, m_RectRight.bottom)));
-		VERIFY(HRI_RIGHT == m_hotTrack.AddRect(m_RectRight));
+		VERIFY(BUTTON_LEFT == m_hotTrack.AddRect(m_RectLeft));
+		VERIFY(BUTTON_RIGHT == m_hotTrack.AddRect(m_RectRight));
+		VERIFY(BUTTON_MIDDLE == m_hotTrack.AddRect(CRect(m_RectLeft.right, m_RectLeft.top, m_RectRight.left, m_RectRight.bottom)));
 	}
 
 	return TRUE;

@@ -23,9 +23,6 @@ public:
 	void SetParentBackgroundColor(COLORREF crBkgnd);
 	void SetThumbStyle(UINT nStyle = TBS_BOTTOM);
 
-	virtual void DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion);
-	virtual void DrawButton(CDC& dc, RS_DRAWREGION nRegion, const CRect& rButton, const CString& sText, BOOL bPressed);
-
 protected:
 	CHotTracker m_hotTrack;
 	COLORREF m_crParentBkgnd;
@@ -51,8 +48,12 @@ protected:
 	
 	DECLARE_MESSAGE_MAP()
 
+	virtual void DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion);
+	virtual void DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton, const CString& sText);
+
 	void RegionToTrack(CRect& rRegion) const;
 	BOOL Initialize();
+	BOOL IsHot(BUTTON_ID nBtn) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
