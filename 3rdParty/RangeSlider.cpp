@@ -182,7 +182,7 @@ void CRangeSlider::OnPaintHorizontal(CDC &dc)
 	rRight.left = x2 + 2 * m_nArrowWidth;
 	DrawRegion(dc, RSDR_RIGHT, rRight);
 
-	rRight.right = rRight.left;
+	rRight.right = rRight.left + 1;
 	rRight.left -= m_nArrowWidth;
 
 	m_RectRight = rRight;

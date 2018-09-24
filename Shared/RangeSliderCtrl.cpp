@@ -71,7 +71,7 @@ void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 			if (CThemed::AreControlsThemed())
 			{
 				CThemed th(this, _T("TRACKBAR"));
-				th.DrawBackground(&dc, TKP_TRACK, TKS_NORMAL, rTrack);
+				th.DrawBackground(&dc, (m_bHorizontal ? TKP_TRACK : TKP_TRACKVERT), TKS_NORMAL, rTrack);
 			}
 			else
 			{
@@ -86,12 +86,7 @@ void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 			return;
 
 	case RSDR_MIDDLE:
-		{
-			VERIFY(m_hotTrack.UpdateRect(HRI_MIDDLE, rRegion));
-
-			if (CThemed::AreControlsThemed() || (m_crParentBkgnd != CLR_NONE))
-				return;
-		}
+		VERIFY(m_hotTrack.UpdateRect(HRI_MIDDLE, rRegion));
 		break;
 
 	case RSDR_LEFTBUTTON:
@@ -114,46 +109,57 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 {
 	if (CThemed::AreControlsThemed())
 	{
-		CThemed th(this, _T("TRACKBAR"));
-
-		int nPart = TKP_THUMB;
-
-		if (m_nThumbStyle & TBS_TOP)
+		if ((nRegion == RSDR_LEFTBUTTON) || (nRegion == RSDR_RIGHTBUTTON))
 		{
-			if (m_bHorizontal)
-				nPart = TKP_THUMBTOP;
+			CThemed th(this, _T("TRACKBAR"));
+			int nPart = 0;
+
+			if (m_nThumbStyle & TBS_TOP)
+			{
+				if (m_bHorizontal)
+					nPart = TKP_THUMBTOP;
+				else
+					nPart = TKP_THUMBLEFT;
+			}
+			else if (m_nThumbStyle & TBS_BOTH)
+			{
+				nPart = TKP_THUMB;
+			}
 			else
-				nPart = TKP_THUMBLEFT;
+			{
+				if (m_bHorizontal)
+					nPart = TKP_THUMBBOTTOM;
+				else
+					nPart = TKP_THUMBRIGHT;
+			}
+			ASSERT(nPart != 0);
+
+			int nState = (bPressed ? TUS_PRESSED : TUS_NORMAL);
+
+			switch (nRegion)
+			{
+			case RSDR_LEFTBUTTON:
+				if (!bPressed && m_hotTrack.IsHot(HRI_LEFT))
+					nState = TUS_HOT;
+				break;
+
+			case RSDR_RIGHTBUTTON:
+				if (!bPressed && m_hotTrack.IsHot(HRI_RIGHT))
+					nState = TUS_HOT;
+				break;
+			}
+
+			th.DrawBackground(&dc, nPart, nState, rButton);
 		}
-		else if (!(m_nThumbStyle & TBS_BOTH))
+		else if (nRegion == RSDR_MIDDLE)
 		{
-			if (m_bHorizontal)
-				nPart = TKP_THUMBBOTTOM;
-			else
-				nPart = TKP_THUMBRIGHT;
+			CThemed th(this, _T("PROGRESS"));
+
+			CRect rTrack(rButton);
+			RegionToTrack(rTrack);
+			
+			th.DrawBackground(&dc, (m_bHorizontal ? PP_CHUNK : PP_CHUNKVERT), 0, rTrack);
 		}
-
-		int nState = (bPressed ? TUS_PRESSED : TUS_NORMAL);
-
-		switch (nRegion)
-		{
-		case RSDR_MIDDLE:
-			if (!bPressed && m_hotTrack.IsHot(HRI_MIDDLE))
-				nState = TUS_HOT;
-			break;
-
-		case RSDR_LEFTBUTTON:
-			if (!bPressed && m_hotTrack.IsHot(HRI_LEFT))
-				nState = TUS_HOT;
-			break;
-
-		case RSDR_RIGHTBUTTON:
-			if (!bPressed && m_hotTrack.IsHot(HRI_RIGHT))
-				nState = TUS_HOT;
-			break;
-		}
-
-		th.DrawBackground(&dc, nPart, nState, rButton);
 	}
 	else
 	{
