@@ -4528,7 +4528,8 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDE
 		if (!GetTaskStartEndDates(*pGI, dtStart, dtDue))
 			return FALSE;
 
-		nPos = GetScrollPosFromDate(bFrom ? dtStart : dtDue) - m_list.GetScrollPos(SB_HORZ);
+		if (!GetDrawPosFromDate((bFrom ? dtStart : dtDue), nPos))
+			return FALSE;
 	}
 
 	CPoint pt(nPos, ((rItem.top + rItem.bottom) / 2));
@@ -4824,7 +4825,10 @@ BOOL CGanttTreeListCtrl::CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMo
 	else
 		dtDue = gi.dtRange.GetEnd();
 
-	int nEndPos = GetDrawPosFromDate(dtDue);
+	int nEndPos;
+	
+	if (!GetDrawPosFromDate(dtDue, nEndPos))
+		return FALSE;
 
 	// resize to a square
 	rMilestone.DeflateRect(0, 3, 0, 4);
@@ -4857,7 +4861,11 @@ int CGanttTreeListCtrl::GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth)
 			return -1;
 	}
 
-	int nPos = GetDrawPosFromDate(dtDue);
+	int nPos;
+
+	if (!GetDrawPosFromDate(dtDue, nPos))
+		return -1;
+
 	CRect rMilestone;
 
 	if (CalcMilestoneRect(gi, rMonth, rMilestone))
@@ -4866,7 +4874,10 @@ int CGanttTreeListCtrl::GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth)
 	}
 	else if (gi.IsDone(FALSE) && (gi.dtDone > dtDue))
 	{
-		nPos = (GetDrawPosFromDate(gi.dtDone) + (DONE_BOX / 2));
+		if (!GetDrawPosFromDate(gi.dtDone, nPos))
+			return -1;
+
+		nPos += (DONE_BOX / 2);
 	}
 
 	return (nPos + 2);
@@ -5219,7 +5230,10 @@ BOOL CGanttTreeListCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWid
 	// restore scroll-pos
 	if (bRestorePos)
 	{
-		int nScrollPos = GetScrollPosFromDate(dtPos);
+		int nScrollPos;
+		
+		if (!GetScrollPosFromDate(dtPos, nScrollPos))
+			return FALSE;
 
 		// Date was at the centre of the view
 		nScrollPos -= (rClient.Width() / 2);
@@ -5694,8 +5708,8 @@ void CGanttTreeListCtrl::UpdateListColumns(int nWidth)
 	// restore scroll-pos
 	if (bRestorePos)
 	{
-		nScrollPos = GetScrollPosFromDate(dtPos);
-		m_list.Scroll(CSize(nScrollPos - m_list.GetScrollPos(SB_HORZ), 0));
+		if (GetDrawPosFromDate(dtPos, nScrollPos))
+			m_list.Scroll(CSize(nScrollPos, 0));
 	}
 	else
 	{
@@ -6012,26 +6026,29 @@ void CGanttTreeListCtrl::ScrollTo(const COleDateTime& date)
 
 	COleDateTime dateOnly = CDateHelper::GetDateOnly(date);
 
-	int nStartPos = GetScrollPosFromDate(dateOnly);
-	int nEndPos = GetScrollPosFromDate(dateOnly.m_dt + 1.0);
+	int nStartPos, nEndPos;
+	
+	if (GetScrollPosFromDate(dateOnly, nStartPos) &&
+		GetScrollPosFromDate(dateOnly.m_dt + 1.0, nEndPos))
+	{
+		// if it is already visible no need to scroll
+		int nListStart = m_list.GetScrollPos(SB_HORZ);
 
-	// if it is already visible no need to scroll
-	int nListStart = m_list.GetScrollPos(SB_HORZ);
+		CRect rList;
+		m_list.GetClientRect(rList);
 
-	CRect rList;
-	m_list.GetClientRect(rList);
+		if ((nStartPos >= nListStart) && (nEndPos <= (nListStart + rList.Width())))
+			return;
 
-	if ((nStartPos >= nListStart) && (nEndPos <= (nListStart + rList.Width())))
-		return;
+		// deduct current scroll pos for relative move
+		nStartPos -= nListStart;
 
-	// deduct current scroll pos for relative move
-	nStartPos -= nListStart;
+		// and arbitrary offset
+		nStartPos -= 50;
 
-	// and arbitrary offset
-	nStartPos -= 50;
-
-	if (m_list.Scroll(CSize(nStartPos, 0)))
-		Invalidate(FALSE);
+		if (m_list.Scroll(CSize(nStartPos, 0)))
+			Invalidate(FALSE);
+	}
 }
 
 BOOL CGanttTreeListCtrl::GetListColumnRect(int nCol, CRect& rColumn, BOOL bScrolled) const
@@ -6117,12 +6134,16 @@ BOOL CGanttTreeListCtrl::GetDateFromScrollPos(int nScrollPos, COleDateTime& date
 	return GetDateFromScrollPos(nScrollPos, m_nMonthDisplay, nMonth, nYear, rColumn, date);
 }
 
-int CGanttTreeListCtrl::GetDrawPosFromDate(const COleDateTime& date) const
+BOOL CGanttTreeListCtrl::GetDrawPosFromDate(const COleDateTime& date, int& nPos) const
 {
-	return (GetScrollPosFromDate(date) - m_list.GetScrollPos(SB_HORZ));
+	if (!GetScrollPosFromDate(date, nPos))
+		return FALSE;
+	
+	nPos -= m_list.GetScrollPos(SB_HORZ);
+	return TRUE;
 }
 
-int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date) const
+BOOL CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date, int& nPos) const
 {
 	// figure out which column contains 'date'
 	int nCol = FindColumn(date);
@@ -6180,13 +6201,15 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date) const
 			if (nDaysInCol > 0)
 			{
 				double dOffset = ((rColumn.Width() * dDayInCol) / nDaysInCol);
-				return (rColumn.left + (int)dOffset);
+				nPos = (rColumn.left + (int)dOffset);
+
+				return TRUE;
 			}
 		}
 	}
 
 	// else
-	return 0;
+	return FALSE;
 }
 
 int CGanttTreeListCtrl::FindColumn(int nMonth, int nYear) const
@@ -6199,11 +6222,13 @@ int CGanttTreeListCtrl::FindColumn(int nMonth, int nYear) const
 		// get date for current column
 		VERIFY (GetListColumnDate(i, nMonth, nYear));
 
-		if (nMonths >= CDateHelper::GetDateInMonths(nMonth, nYear))
+		int nColMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
+
+		if (nMonths >= nColMonths)
 		{
 			if (i == nNumReqColumns) // last column
 			{
-				return i;
+				return ((nMonths == nColMonths) ? i : -1);
 			}
 			else // get date for next column
 			{
@@ -6456,10 +6481,16 @@ DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTL
 	if (!CDateHelper::DateHasTime(dtDue))
 		dtDue += 1.0;
 
-	rTask.right = GetScrollPosFromDate(dtDue);
-	rTask.left = GetScrollPosFromDate(dtStart);
+	int nFrom, nTo;
+	
+	if (!GetDrawPosFromDate(dtStart, nFrom) ||
+		!GetDrawPosFromDate(dtDue, nTo))
+	{
+		return 0;
+	}
 
-	rTask.OffsetRect(-m_list.GetScrollPos(SB_HORZ), 0);
+	rTask.right = nTo;
+	rTask.left = nFrom;
 
 	// Create 'hit' boxes around the two ends
 	const int nDragTol = GetSystemMetrics(SM_CXDOUBLECLK);
@@ -7389,8 +7420,10 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 	CDateHelper::IncrementMonth(dtFrom, -1);
 	CDateHelper::IncrementMonth(dtTo, 1);
 
-	int nFrom = GetScrollPosFromDate(dtFrom);
-	int nTo = GetScrollPosFromDate(dtTo);
+	int nFrom, nTo;
+	
+	VERIFY(GetScrollPosFromDate(dtFrom, nFrom));
+	VERIFY(GetScrollPosFromDate(dtTo, nTo));
 
 	if (nTo == nFrom)
 		nTo = -1;

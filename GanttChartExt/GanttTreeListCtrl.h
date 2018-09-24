@@ -290,8 +290,8 @@ protected:
 	int FindColumn(int nMonth, int nYear) const;
 	int FindColumn(const COleDateTime& date) const;
 	BOOL GetDateFromScrollPos(int nScrollPos, COleDateTime& date) const;
-	int GetScrollPosFromDate(const COleDateTime& date) const;
-	int GetDrawPosFromDate(const COleDateTime& date) const;
+	BOOL GetScrollPosFromDate(const COleDateTime& date, int& nPos) const;
+	BOOL GetDrawPosFromDate(const COleDateTime& date, int& nPos) const;
 	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
 	void ScrollTo(const COleDateTime& date);
 	void InitItemHeights();
