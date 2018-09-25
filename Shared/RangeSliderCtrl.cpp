@@ -7,6 +7,8 @@
 #include "Themed.h"
 #include "Misc.h"
 
+#include "..\3rdParty\GdiPlus.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -172,6 +174,14 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 			{
 				CThemed th(this, _T("PROGRESS"));
 				th.DrawBackground(&dc, (m_bHorizontal ? PP_CHUNK : PP_CHUNKVERT), 0, rTrack);
+
+/*
+				CGdiPlusBrush brush(RGB(255, 255, 255), 128);
+				CGdiPlusRectF rect(rTrack);
+				CGdiPlusGraphics graphics(dc);
+
+				CGdiPlus::FillRect(graphics, brush, rect);
+*/
 			}
 
 			DrawTicks(dc, rTrack, m_Left, m_Right);

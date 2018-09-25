@@ -193,7 +193,7 @@ protected:
 class CGdiPlusBrush
 {
 public:
-	CGdiPlusBrush(COLORREF color);
+	CGdiPlusBrush(COLORREF color, BYTE alpha = 255);
 	virtual ~CGdiPlusBrush();
 
 	operator gdix_Brush*() const { return m_brush; }

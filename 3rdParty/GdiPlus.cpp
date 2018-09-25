@@ -57,9 +57,9 @@ CGdiPlusPen::~CGdiPlusPen()
 
 //////////////////////////////////////////////////////////////////////
 
-CGdiPlusBrush::CGdiPlusBrush(COLORREF color) : m_brush(NULL)
+CGdiPlusBrush::CGdiPlusBrush(COLORREF color, BYTE alpha) : m_brush(NULL)
 {
-	VERIFY(CGdiPlus::CreateBrush(CGdiPlus::MakeARGB(color), &m_brush));
+	VERIFY(CGdiPlus::CreateBrush(CGdiPlus::MakeARGB(color, alpha), &m_brush));
 }
 
 CGdiPlusBrush::~CGdiPlusBrush()
