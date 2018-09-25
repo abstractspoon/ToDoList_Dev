@@ -111,7 +111,7 @@ BOOL CRangeSliderCtrl::IsHot(BUTTON_ID nBtn) const
 
 void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton, const CString& sText)
 {
-	VERIFY(m_hotTrack.UpdateRect(BUTTON_MIDDLE, rButton));
+	VERIFY(m_hotTrack.UpdateRect(nBtn, rButton));
 
 	if (CThemed::AreControlsThemed())
 	{
