@@ -6469,24 +6469,43 @@ DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTL
 	if (bDragging && HasOption(GTLCF_CALCPARENTDATES) && pGI->bParent)
 		return 0;
 
-	COleDateTime dtStart, dtDue;
+	COleDateTime dtStart, dtEnd;
 	
-	if (!GetTaskStartEndDates(*pGI, dtStart, dtDue))
+	if (!GetTaskStartEndDates(*pGI, dtStart, dtEnd))
 		return 0;
 
 	// Calculate the task rect
 	CRect rTask;
 	VERIFY(GetListItemRect(nItem, rTask));
 
-	if (!CDateHelper::DateHasTime(dtDue))
-		dtDue += 1.0;
+	if (!CDateHelper::DateHasTime(dtEnd))
+		dtEnd += 1.0;
 
+	// One or both of the task's dates may be outside the active range
 	int nFrom, nTo;
-	
-	if (!GetDrawPosFromDate(dtStart, nFrom) ||
-		!GetDrawPosFromDate(dtDue, nTo))
+
+	BOOL bValidFrom = GetDrawPosFromDate(dtStart, nFrom);
+	BOOL bValidTo = GetDrawPosFromDate(dtEnd, nTo);
+
+	if (!bValidFrom && !bValidTo)
+		return FALSE;
+
+	if (!bValidFrom)
 	{
-		return 0;
+		// Start date precedes active range so dummy something up
+		ASSERT(m_dtActiveRange.IsValid() && !m_dtActiveRange.Contains(*pGI));
+
+		nFrom = -1000;
+	}
+	else if (!bValidTo)
+	{
+		// End date exceeds active range so dummy something up
+		ASSERT(m_dtActiveRange.IsValid() && !m_dtActiveRange.Contains(*pGI));
+
+		CRect rClient;
+		GetClientRect(rClient);
+
+		nTo = (rClient.Width() + 1000);
 	}
 
 	rTask.right = nTo;
