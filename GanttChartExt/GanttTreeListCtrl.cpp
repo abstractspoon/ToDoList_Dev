@@ -1274,6 +1274,8 @@ BOOL CGanttTreeListCtrl::SetActiveDateRange(const GANTTDATERANGE& dtRange)
 	if (m_dtActiveRange == dtRange)
 		return TRUE;
 
+	CHoldRedraw hr(m_list);
+
 	if (m_dtDataRange == dtRange)
 	{
 		m_dtActiveRange.Reset();
