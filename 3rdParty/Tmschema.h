@@ -719,6 +719,8 @@ BEGIN_TM_CLASS_PARTS(PROGRESS)
     TM_PART(2, PP, BARVERT)
     TM_PART(3, PP, CHUNK)
     TM_PART(4, PP, CHUNKVERT)
+	TM_PART(11, PP, TRANSPARENTBAR)
+	TM_PART(12, PP, TRANSPARENTBARVERT)
 END_TM_CLASS_PARTS()
 
 //---------------------------------------------------------------------------------------

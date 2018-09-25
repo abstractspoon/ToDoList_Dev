@@ -30,14 +30,14 @@ public:
 	BOOL DeleteRect(int nRect);
 	int GetRectCount() const { return m_aRects.GetSize(); }
 	BOOL GetRect(int nRect, CRect& rect) const;
-	BOOL IsHot(int nRect) const;
+	BOOL IsRectHot(int nRect) const;
+	int HitTestRect(CPoint ptScreen) const;
 
 protected:
 	CArray<CRect, CRect&> m_aRects;
 	int m_nHotRect;
 
 protected:
-	int HitTest(CPoint ptScreen) const;
 	virtual LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 	void InitTracking();
 
