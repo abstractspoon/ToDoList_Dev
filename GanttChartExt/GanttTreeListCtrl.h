@@ -136,7 +136,7 @@ public:
 	void GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& aListTracked) const;
 	void SetTreeColumnVisibility(const CDWordArray& aColumnVis);
 
-	void ResetActiveDateRange();
+	void ClearActiveDateRange();
 	BOOL SetActiveDateRange(const GANTTDATERANGE& dtRange);
 	BOOL GetActiveDateRange(GANTTDATERANGE& dtRange) const;
 	BOOL GetDataDateRange(GANTTDATERANGE& dtRange) const;

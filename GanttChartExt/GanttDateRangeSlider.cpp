@@ -68,25 +68,31 @@ BOOL CGanttDateRangeSlider::SetMaxRange(const GANTTDATERANGE& dtRange)
 		return FALSE;
 	}
 
+	// Work out whether we need to reset the active range
+	BOOL bSetMaxRange = !m_dtMaxRange.IsValid();
+
+	if (!bSetMaxRange)
+		bSetMaxRange = ((m_Left == m_Min) && (m_Right == m_Max));
+
 	int nNumCols = GetRequiredColumnCount(dtRange, m_nMonthDisplay) + 1;
 	ASSERT(nNumCols);
 
 	SetMinMax(0.0, nNumCols);
 	SetStep(1.0);
 
-	BOOL bFirstTime = !m_dtMaxRange.IsValid();
+	if (bSetMaxRange)
+		SetRange(0.0, nNumCols);
+	
 	m_dtMaxRange = dtRange;
 
-	if (bFirstTime)
-	{
-		SetRange(0.0, nNumCols);
-	}
-	else
-	{
-		// TODO
-	}
-
 	return TRUE;
+}
+
+BOOL CGanttDateRangeSlider::GetMaxRange(GANTTDATERANGE& dtRange) const
+{
+	dtRange = m_dtMaxRange;
+
+	return dtRange.IsValid();
 }
 
 CString CGanttDateRangeSlider::FormatSelectedRange() const
@@ -124,7 +130,7 @@ BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange) const
 
 	TRACE(_T("CGanttDateRangeSlider::GetSelectedRange(%s)\n"), dtRange.Format(m_nMonthDisplay));
 
-	return TRUE;
+	return !(dtRange == m_dtMaxRange);
 }
 
 BOOL CGanttDateRangeSlider::SetSelectedRange(const GANTTDATERANGE& dtRange)

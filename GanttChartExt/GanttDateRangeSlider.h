@@ -22,8 +22,10 @@ public:
 	CGanttDateRangeSlider();
 
 	BOOL Initialise(GTLC_MONTH_DISPLAY nDisplay);
-	BOOL SetMaxRange(const GANTTDATERANGE& dtRange);
 	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay);
+
+	BOOL GetMaxRange(GANTTDATERANGE& dtRange) const;
+	BOOL SetMaxRange(const GANTTDATERANGE& dtRange);
 
 	BOOL GetSelectedRange(GANTTDATERANGE& dtRange) const;
 	BOOL SetSelectedRange(const GANTTDATERANGE& dtRange);

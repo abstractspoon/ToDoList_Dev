@@ -1414,16 +1414,15 @@ LRESULT CGanttChartWnd::OnGanttEditTaskIcon(WPARAM wp, LPARAM lp)
 
 LRESULT CGanttChartWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	GANTTDATERANGE dtRange;
-	m_sliderDateRange.GetSelectedRange(dtRange);
+	GANTTDATERANGE dtSel;
 
-	if (dtRange.IsValid())
-	{
-		m_ctrlGantt.SetActiveDateRange(dtRange);
+	if (m_sliderDateRange.GetSelectedRange(dtSel))
+		m_ctrlGantt.SetActiveDateRange(dtSel);
+	else
+		m_ctrlGantt.ClearActiveDateRange();
 
-		m_sActiveDateRange.Format(IDS_ACTIVEDATERANGE, m_sliderDateRange.FormatSelectedRange());
-		UpdateData(FALSE);
-	}
+	m_sActiveDateRange.Format(IDS_ACTIVEDATERANGE, m_sliderDateRange.FormatSelectedRange());
+	UpdateData(FALSE);
 
 	return 0L;
 }

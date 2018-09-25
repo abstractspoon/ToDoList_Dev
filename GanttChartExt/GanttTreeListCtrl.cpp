@@ -1255,7 +1255,7 @@ const GANTTDATERANGE& CGanttTreeListCtrl::ActiveDateRange() const
 	return m_dtDataRange;
 }
 
-void CGanttTreeListCtrl::ResetActiveDateRange()
+void CGanttTreeListCtrl::ClearActiveDateRange()
 {
 	if (m_dtActiveRange.IsValid())
 	{
