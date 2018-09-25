@@ -51,6 +51,7 @@ protected:
 	virtual void DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion);
 	virtual void DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton, const CString& sText);
 
+	void DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, double dTo);
 	void RegionToTrack(CRect& rRegion) const;
 	BOOL Initialize();
 	BOOL IsHot(BUTTON_ID nBtn) const;

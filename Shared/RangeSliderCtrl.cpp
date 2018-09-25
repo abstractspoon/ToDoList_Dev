@@ -73,9 +73,28 @@ void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 		return;
 
 	case RSDR_LEFT:
+		{
+			if (!CThemed::AreControlsThemed() && (m_crParentBkgnd == CLR_NONE))
+				CRangeSlider::DrawRegion(dc, nRegion, rRegion);
+
+			CRect rTrack(rRegion);
+			RegionToTrack(rTrack);
+
+			DrawTicks(dc, rTrack, m_Min, m_Left);
+		}
+		return;
+
 	case RSDR_RIGHT:
-		if (CThemed::AreControlsThemed() || (m_crParentBkgnd != CLR_NONE))
-			return;
+		{
+			if (!CThemed::AreControlsThemed() && (m_crParentBkgnd == CLR_NONE))
+				CRangeSlider::DrawRegion(dc, nRegion, rRegion);
+
+			CRect rTrack(rRegion);
+			RegionToTrack(rTrack);
+
+			DrawTicks(dc, rTrack, m_Right, m_Max);
+		}
+		return;
 
 	case RSDR_FOCUS:
 		return;
@@ -149,25 +168,30 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 			
 			th.DrawBackground(&dc, (m_bHorizontal ? PP_CHUNK : PP_CHUNKVERT), 0, rTrack);
 
-			if ((m_nSliderDrawStyles & TBS_NOTICKS) == 0)
-			{
-				int nNumTick = Misc::Round((m_Right - m_Left) / m_Step);
-				double dTickSpacing = ((double)rTrack.Width() / nNumTick);
-
-				// Skip first and last ticks
-				for (int nTick = 1; nTick < nNumTick; nTick++)
-				{
-					int nTickPos = (rButton.left + (int)(nTick * dTickSpacing));
-					CRect rTick(nTickPos, rTrack.bottom, (nTickPos + 1), rTrack.bottom + 4);
-
-					dc.FillSolidRect(rTick, GetSysColor(COLOR_3DSHADOW));
-				}
-			}
+			DrawTicks(dc, rTrack, m_Left, m_Right);
 		}
 	}
 	else
 	{
 		CRangeSlider::DrawButton(dc, nBtn, rButton, sText);
+	}
+}
+
+void CRangeSliderCtrl::DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, double dTo)
+{
+	if ((m_nSliderDrawStyles & TBS_NOTICKS) == 0)
+	{
+		int nNumTick = Misc::Round((dTo - dFrom) / m_Step);
+		double dTickSpacing = ((double)rTrack.Width() / nNumTick);
+
+		// Skip first and last ticks
+		for (int nTick = 1; nTick < nNumTick; nTick++)
+		{
+			int nTickPos = (rTrack.left + (int)(nTick * dTickSpacing));
+			CRect rTick(nTickPos, rTrack.bottom, (nTickPos + 1), rTrack.bottom + 4);
+
+			dc.FillSolidRect(rTick, GetSysColor(COLOR_3DSHADOW));
+		}
 	}
 }
 
