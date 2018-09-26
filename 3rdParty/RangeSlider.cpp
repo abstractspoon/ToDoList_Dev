@@ -483,7 +483,7 @@ void CRangeSlider::OnLButtonDown(UINT nFlags, CPoint point)
 			m_TrackedButton = BUTTON_RIGHT;
 			m_ClickOffset = point - m_RectRight.CenterPoint();
 		} 
-		else if (middleRect.PtInRect(point)) 
+		else if (middleRect.PtInRect(point) && ((m_Left > m_Min) || (m_Right < m_Max)))
 		{
 			m_bTracking = TRUE;
 			m_TrackedButton = BUTTON_MIDDLE;
