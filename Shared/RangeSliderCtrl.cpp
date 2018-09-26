@@ -61,7 +61,7 @@ void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 
 			CRect rTrack(rRegion);
 			RegionToTrack(rTrack);
-
+				
 			if (CThemed::AreControlsThemed())
 			{
 				CThemed th(this, _T("TRACKBAR"));
@@ -75,6 +75,7 @@ void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 		return;
 
 	case RSDR_LEFT:
+		if (m_Left > m_Min)
 		{
 			if (!CThemed::AreControlsThemed() && (m_crParentBkgnd == CLR_NONE))
 				CRangeSlider::DrawRegion(dc, nRegion, rRegion);
@@ -87,6 +88,7 @@ void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 		return;
 
 	case RSDR_RIGHT:
+		if (m_Right < m_Max)
 		{
 			if (!CThemed::AreControlsThemed() && (m_crParentBkgnd == CLR_NONE))
 				CRangeSlider::DrawRegion(dc, nRegion, rRegion);
@@ -114,6 +116,9 @@ BOOL CRangeSliderCtrl::IsHot(BUTTON_ID nBtn) const
 void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton, const CString& sText)
 {
 	VERIFY(m_hotTrack.UpdateRect(nBtn, rButton));
+
+	BOOL bPressed = IsPressed(nBtn);
+	BOOL bHot = IsHot(nBtn);
 
 	if (CThemed::AreControlsThemed())
 	{
@@ -145,11 +150,11 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 			
 			if (IsWindowEnabled())
 			{
-				if (IsPressed(nBtn))
+				if (bPressed)
 				{
 					nState = TUS_PRESSED;
 				}
-				else if (IsHot(nBtn))
+				else if (bHot)
 				{
 					nState = TUS_HOT;
 				}
@@ -169,19 +174,21 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 
 			CRect rTrack(rButton);
 			RegionToTrack(rTrack);
+			rTrack.InflateRect(1, 0);
 
 			if (IsWindowEnabled())
 			{
 				CThemed th(this, _T("PROGRESS"));
 				th.DrawBackground(&dc, (m_bHorizontal ? PP_CHUNK : PP_CHUNKVERT), 0, rTrack);
 
-/*
-				CGdiPlusBrush brush(RGB(255, 255, 255), 128);
-				CGdiPlusRectF rect(rTrack);
-				CGdiPlusGraphics graphics(dc);
-
-				CGdiPlus::FillRect(graphics, brush, rect);
-*/
+				if (!bHot && !bPressed)
+				{
+					CGdiPlusBrush brush(RGB(255, 255, 255), 128);
+					CGdiPlusRectF rect(rTrack);
+					CGdiPlusGraphics graphics(dc);
+					
+					CGdiPlus::FillRect(graphics, brush, rect);
+				}
 			}
 
 			DrawTicks(dc, rTrack, m_Left, m_Right);
