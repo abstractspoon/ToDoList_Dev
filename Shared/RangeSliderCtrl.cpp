@@ -209,30 +209,12 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 			}
 			break;
 		}
-	}
-	else
-	{
-		// Draw simple buttons
-		UINT nState = 0;
 
-		if (IsWindowEnabled())
-		{
-			if (bPressed)
-			{
-				nState = DFCS_PUSHED;
-			}
-			else if (bHot)
-			{
-				nState = DFCS_HOT;
-			}
-		}
-		else
-		{
-			nState = DFCS_INACTIVE;
-		}
-
-		dc.DrawFrameControl((LPRECT)(LPCRECT)rButton, DFC_BUTTON, nState);
+		return;
 	}
+
+	// else
+	CRangeSlider::DrawButton(dc, nBtn, rButton, sText);
 }
 
 void CRangeSliderCtrl::DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, double dTo)

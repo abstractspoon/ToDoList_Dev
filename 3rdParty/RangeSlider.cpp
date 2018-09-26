@@ -296,9 +296,9 @@ void CRangeSlider::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton, con
 
 	// Make appearance 3D
 	if (IsPressed(nBtn)) 
-		dc.Draw3dRect(rButton, ::GetSysColor(COLOR_BTNHIGHLIGHT), ::GetSysColor(COLOR_BTNSHADOW));
-	else
 		dc.Draw3dRect(rButton, ::GetSysColor(COLOR_BTNSHADOW), ::GetSysColor(COLOR_BTNHIGHLIGHT));
+	else
+		dc.Draw3dRect(rButton, ::GetSysColor(COLOR_BTNHIGHLIGHT), ::GetSysColor(COLOR_BTNSHADOW));
 
 	if (!sText.IsEmpty())
 	{
