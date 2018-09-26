@@ -21,22 +21,22 @@ typedef HTHEME (STDAPICALLTYPE *PFNOPENTHEMEDATA)(HWND hwnd, LPCWSTR pszClassLis
 typedef HRESULT (STDAPICALLTYPE *PFNSETWINDOWTHEME)(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList);
 typedef HRESULT (STDAPICALLTYPE *PFNCLOSETHEMEDATA)(HTHEME hTheme);
 typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMEBACKGROUND)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, 
-														 const RECT *pRect, const RECT *pClipRect);
-typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMEPARENTBACKGROUND)(HWND hWnd, HDC hdc, RECT *pRect);
+														 LPCRECT pRect, LPCRECT pClipRect);
+typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMEPARENTBACKGROUND)(HWND hWnd, HDC hdc, LPCRECT pRect);
 typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMETEXT)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, 
 												   LPCWSTR pszText, int iCharCount, DWORD dwTextFlags, 
-												   DWORD dwTextFlags2, const RECT *pRect);
+												   DWORD dwTextFlags2, LPCRECT pRect);
 typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMEEDGE)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, 
-												   const RECT *pDestRect, UINT uEdge, UINT uFlags, 
+												   LPCRECT pDestRect, UINT uEdge, UINT uFlags, 
 												   RECT *pContentRect);
 typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMEICON)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, 
-												   const RECT *pRect, HIMAGELIST himl, int iImageIndex);
-typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMEBORDER)(HTHEME hTheme, HDC hdc, int iStateId, const RECT *pRect);
+												   LPCRECT pRect, HIMAGELIST himl, int iImageIndex);
+typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMEBORDER)(HTHEME hTheme, HDC hdc, int iStateId, LPCRECT pRect);
 typedef HRESULT (STDAPICALLTYPE *PFNGETTHEMEPARTSIZE)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId,
                                                       RECT *prc, THEMESIZE eSize, SIZE *psz);
 typedef HRESULT (STDAPICALLTYPE *PFNGETTHEMETEXTEXTENT)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, 
 													  LPCWSTR pszText, int iCharCount, DWORD dwTextFlags, 
-													  const RECT *pBoundingRect, RECT *pExtentRect);
+													  LPCRECT pBoundingRect, RECT *pExtentRect);
 typedef HRESULT (STDAPICALLTYPE *PFNGETTHEMECOLOR)(HTHEME hTheme, int iPartId, int iStateId, int iPropID,
 												   COLORREF* pColor);
 typedef HRESULT (STDAPICALLTYPE *PFNGETTHEMEBACKGROUNDCONTENTRECT)(HTHEME hTheme, HDC hdc, int iPartId,
@@ -214,7 +214,7 @@ BOOL CThemed::SetWindowTheme(const CWnd* pWnd, LPCTSTR szAppName)
 	return FALSE;
 }
 
-BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, LPRECT pRect, UINT nType, UINT nState, LPCRECT pClip)
+BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nType, UINT nState, LPCRECT pClip)
 {
 	CThemed th;
 	
@@ -231,7 +231,7 @@ BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, LPRECT pRect, UINT nT
 			return FALSE;
 
 		// Don't scale check boxes
-		CRect rImage(pRect);
+		CRect rImage(rect);
 
 		if (nThPart == BP_CHECKBOX)
 		{
@@ -246,7 +246,7 @@ BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, LPRECT pRect, UINT nT
 		}
 		else
 		{
-			th.DrawParentBackground(pWnd, pDC, (LPRECT)(pClip ? pClip : pRect));
+			th.DrawParentBackground(pWnd, pDC, (pClip ? pClip : rect));
 		}
 		
 		th.DrawBackground(pDC, nThPart, nThState, rImage, pClip);
@@ -255,10 +255,10 @@ BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, LPRECT pRect, UINT nT
 	}
 
 	// else
-	return pDC->DrawFrameControl(pRect, nType, nState);
+	return pDC->DrawFrameControl((LPRECT)(LPCRECT)rect, nType, nState);
 }
 
-BOOL CThemed::DrawEdge(const CWnd* pWnd, CDC* pDC, LPRECT pRect, UINT nType, UINT nState, UINT nEdge, UINT nFlags)
+BOOL CThemed::DrawEdge(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nType, UINT nState, UINT nEdge, UINT nFlags)
 {
 	CThemed th;
 	
@@ -274,13 +274,13 @@ BOOL CThemed::DrawEdge(const CWnd* pWnd, CDC* pDC, LPRECT pRect, UINT nType, UIN
 		if (!th.Open(pWnd, sThClass))
 			return FALSE;
 		
-		th.DrawEdge(pDC, nThPart, nThState, pRect, nEdge, nFlags);
+		th.DrawEdge(pDC, nThPart, nThState, rect, nEdge, nFlags);
 		
 		return TRUE;
 	}
 
 	// else
-	return pDC->DrawFrameControl(pRect, nType, nState);
+	return pDC->DrawFrameControl((LPRECT)(LPCRECT)rect, nType, nState);
 }
 
 BOOL CThemed::DrawBackground(CDC* pDC, int nPart, int nState, const CRect& rect, LPCRECT prClip)
@@ -291,7 +291,7 @@ BOOL CThemed::DrawBackground(CDC* pDC, int nPart, int nState, const CRect& rect,
 	return DrawThemeBackground(*pDC, nPart, nState, rect, prClip);
 }
 
-BOOL CThemed::DrawParentBackground(const CWnd* pWnd, CDC* pDC, LPRECT pRect)
+BOOL CThemed::DrawParentBackground(const CWnd* pWnd, CDC* pDC, LPCRECT pRect)
 {
 	ASSERT (m_hTheme);
 	ASSERT_VALID (pDC);
@@ -490,8 +490,8 @@ BOOL CThemed::CloseThemeData(HTHEME hTheme)
 	return FALSE;
 }
 
-BOOL CThemed::DrawThemeBackground(HDC hdc, int iPartId, int iStateId, const RECT *pRect,
-								  const RECT *pClipRect)
+BOOL CThemed::DrawThemeBackground(HDC hdc, int iPartId, int iStateId, LPCRECT pRect,
+								  LPCRECT pClipRect)
 {
 	if (InitUxTheme() && m_hTheme)
 	{
@@ -504,7 +504,7 @@ BOOL CThemed::DrawThemeBackground(HDC hdc, int iPartId, int iStateId, const RECT
 	return FALSE;
 }
 
-BOOL CThemed::DrawThemeParentBackground(HWND hWnd, HDC hdc, RECT *pRect)
+BOOL CThemed::DrawThemeParentBackground(HWND hWnd, HDC hdc, LPCRECT pRect)
 {
 	if (InitUxTheme() && m_hTheme)
 	{
@@ -518,7 +518,7 @@ BOOL CThemed::DrawThemeParentBackground(HWND hWnd, HDC hdc, RECT *pRect)
 }
 
 BOOL CThemed::DrawThemeText(HDC hdc, int iPartId, int iStateId, LPCWSTR pszText, int iCharCount, 
-							DWORD dwTextFlags, DWORD dwTextFlags2, const RECT *pRect)
+							DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect)
 {
 	if (InitUxTheme() && m_hTheme)
 	{
@@ -531,7 +531,7 @@ BOOL CThemed::DrawThemeText(HDC hdc, int iPartId, int iStateId, LPCWSTR pszText,
 	return FALSE;
 }
 
-BOOL CThemed::DrawThemeEdge(HDC hdc, int iPartId, int iStateId, const RECT *pDestRect, UINT uEdge, 
+BOOL CThemed::DrawThemeEdge(HDC hdc, int iPartId, int iStateId, LPCRECT pDestRect, UINT uEdge, 
 							UINT uFlags, RECT *pContentRect)
 {
 	if (InitUxTheme() && m_hTheme)
@@ -545,7 +545,7 @@ BOOL CThemed::DrawThemeEdge(HDC hdc, int iPartId, int iStateId, const RECT *pDes
 	return FALSE;
 }
 
-BOOL CThemed::DrawThemeIcon(HDC hdc, int iPartId, int iStateId, const RECT *pRect, HIMAGELIST himl, 
+BOOL CThemed::DrawThemeIcon(HDC hdc, int iPartId, int iStateId, LPCRECT pRect, HIMAGELIST himl, 
 							int iImageIndex)
 {
 	if (InitUxTheme() && m_hTheme)
@@ -559,7 +559,7 @@ BOOL CThemed::DrawThemeIcon(HDC hdc, int iPartId, int iStateId, const RECT *pRec
 	return FALSE;
 }
 
-BOOL CThemed::DrawThemeBorder(HDC hdc, int iStateId, const RECT *pRect)
+BOOL CThemed::DrawThemeBorder(HDC hdc, int iStateId, LPCRECT pRect)
 {
 	if (InitUxTheme() && m_hTheme)
 	{
@@ -586,7 +586,7 @@ BOOL CThemed::GetThemePartSize(int iPartId, int iStateId, THEMESIZE eSize, SIZE 
 }
 
 BOOL CThemed::GetThemeTextExtent(HDC hdc, int iPartId, int iStateId, LPCWSTR pszText, int iCharCount, 
-								DWORD dwTextFlags, const RECT *pBoundingRect, RECT *pExtentRect)
+								DWORD dwTextFlags, LPCRECT pBoundingRect, RECT *pExtentRect)
 {
 	if (InitUxTheme() && m_hTheme)
 	{

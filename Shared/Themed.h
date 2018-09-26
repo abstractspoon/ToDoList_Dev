@@ -83,13 +83,13 @@ public:
 	static BOOL IsAppThemed();
 	static BOOL IsWindowsThemed();
 	
-	static BOOL DrawFrameControl(const CWnd* pWnd, CDC* pDC, LPRECT pRect, UINT nType, UINT nState, LPCRECT prClip = NULL);
-	static BOOL DrawEdge(const CWnd* pWnd, CDC* pDC, LPRECT pRect, UINT nType, UINT nState, UINT nEdge, UINT nFlags);
-	static BOOL DrawCaption(const CWnd* pWnd, CDC* pDC, LPRECT pRect, UINT nFlags);
+	static BOOL DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nType, UINT nState, LPCRECT prClip = NULL);
+	static BOOL DrawEdge(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nType, UINT nState, UINT nEdge, UINT nFlags);
+	static BOOL DrawCaption(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nFlags);
 
 	static BOOL SetWindowTheme(const CWnd* pWnd, LPCTSTR szAppName);
 	
-	static HPAINTBUFFER BeginBufferedPaint(HDC, const RECT *, TH_BUFFERFORMAT, TH_PAINTPARAMS *, HDC *);
+	static HPAINTBUFFER BeginBufferedPaint(HDC, LPCRECT , TH_BUFFERFORMAT, TH_PAINTPARAMS *, HDC *);
 	static BOOL GetBufferedPaintBits(HPAINTBUFFER, RGBQUAD **, int*);
 	static BOOL EndBufferedPaint(HPAINTBUFFER, BOOL);
 	
@@ -98,7 +98,7 @@ public:
 	BOOL IsValid() { return (s_hUxTheme && m_hTheme); }
 	BOOL Close();
 	
-	BOOL DrawParentBackground(const CWnd* pWnd, CDC* pDC, LPRECT pRect = NULL);
+	BOOL DrawParentBackground(const CWnd* pWnd, CDC* pDC, LPCRECT pRect = NULL);
 	BOOL DrawBackground(CDC* pDC, int nPart, int nState, const CRect& rect, LPCRECT prClip = NULL);
 	BOOL DrawText(CDC* pDC, int nPart, int nState, const CString& sText, DWORD dwTextFlags, DWORD dwTextFlags2, const CRect& pRect);
 	BOOL DrawEdge(CDC* pDC, int nPart, int nState, const CRect& rDest, UINT nEdge, UINT nFlags, LPRECT prContent = NULL);
@@ -124,19 +124,19 @@ protected:
 	static DWORD GetAppThemeProperties();
 	HTHEME OpenThemeData(HWND hwnd, LPCWSTR pszClassList);
 	BOOL CloseThemeData(HTHEME hTheme);
-	BOOL DrawThemeBackground(HDC hdc, int iPartId, int iStateId, const RECT *pRect, 
-		const RECT *pClipRect);
-	BOOL DrawThemeParentBackground(HWND hWnd, HDC hdc, RECT *pRect);
+	BOOL DrawThemeBackground(HDC hdc, int iPartId, int iStateId, LPCRECT pRect, 
+		LPCRECT pClipRect);
+	BOOL DrawThemeParentBackground(HWND hWnd, HDC hdc, LPCRECT pRect);
 	BOOL DrawThemeText(HDC hdc, int iPartId, int iStateId, LPCWSTR pszText, int iCharCount, 
-		DWORD dwTextFlags, DWORD dwTextFlags2, const RECT *pRect);
-	BOOL DrawThemeEdge(HDC hdc, int iPartId, int iStateId, const RECT *pDestRect, UINT uEdge, 
+		DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect);
+	BOOL DrawThemeEdge(HDC hdc, int iPartId, int iStateId, LPCRECT pDestRect, UINT uEdge, 
 		UINT uFlags, RECT *pContentRect);
-	BOOL DrawThemeIcon(HDC hdc, int iPartId, int iStateId, const RECT *pRect, HIMAGELIST himl, 
+	BOOL DrawThemeIcon(HDC hdc, int iPartId, int iStateId, LPCRECT pRect, HIMAGELIST himl, 
 		int iImageIndex);
-	BOOL DrawThemeBorder(HDC hdc, int iStateId, const RECT *pRect);
+	BOOL DrawThemeBorder(HDC hdc, int iStateId, LPCRECT pRect);
 	BOOL GetThemePartSize(int iPartId, int iStateId, THEMESIZE eSize, SIZE *psz);
 	BOOL GetThemeTextExtent(HDC hdc, int iPartId, int iStateId, LPCWSTR pszText, int iCharCount, 
-		DWORD dwTextFlags, const RECT *pBoundingRect, RECT *pExtentRect);
+		DWORD dwTextFlags, LPCRECT pBoundingRect, RECT *pExtentRect);
 	BOOL GetThemeColor(int iPartId, int iStateId, int iPropId, COLORREF *pColor);
 	BOOL GetThemeBackgroundContentRect(HDC hdc, int iPartId, int iStateId, 
 										LPCRECT pBoundingRect, LPRECT pContentRect);
