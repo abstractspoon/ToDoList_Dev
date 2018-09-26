@@ -27,10 +27,13 @@ CHotTracker::~CHotTracker()
 
 }
 
-BOOL CHotTracker::Initialize(CWnd* pWnd)
+BOOL CHotTracker::Initialize(CWnd* pWnd, BOOL bIncNonClient)
 {
 	if (pWnd && pWnd->GetSafeHwnd() && HookWindow(*pWnd))
+	{
+		m_bIncNonClient = bIncNonClient;
 		return TRUE;
+	}
 
 	return FALSE;
 }
@@ -101,6 +104,18 @@ LRESULT CHotTracker::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM /*wp*/, LPAR
 	{
 	case WM_NCMOUSELEAVE:
 	case WM_MOUSELEAVE:
+		if (m_aRects.GetSize())
+		{
+			if (m_nHotRect != -1)
+			{
+				int nOldHot = m_nHotRect;
+				m_nHotRect = -1;
+
+				SendMessage(WM_HTHOTCHANGE, nOldHot, m_nHotRect);
+			}
+		}
+		break;
+
 	case WM_NCMOUSEMOVE:
 	case WM_MOUSEMOVE:
 		if (m_aRects.GetSize())
@@ -109,12 +124,13 @@ LRESULT CHotTracker::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM /*wp*/, LPAR
 
 			if (nRect != m_nHotRect)
 			{
-				SendMessage(WM_HTHOTCHANGE, m_nHotRect, nRect);
+				int nOldHot = m_nHotRect;
 				m_nHotRect = nRect;
+
+				SendMessage(WM_HTHOTCHANGE, nOldHot, m_nHotRect);
 			}
 
-			if (msg == WM_NCMOUSEMOVE || msg == WM_MOUSEMOVE)
-				InitTracking();
+			InitTracking();
 		}
 		break;
 	}
@@ -124,15 +140,13 @@ LRESULT CHotTracker::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM /*wp*/, LPAR
 
 BOOL CHotTracker::IsRectHot(int nRect) const
 {
-	int nHit = HitTestRect(::GetMessagePos());
-
-	return ((nHit != -1) && (nRect == nHit));
+	return ((m_nHotRect != -1) && (nRect == m_nHotRect));
 }
 
 void CHotTracker::InitTracking()
 {
 	if (m_aRects.GetSize())
-		CDialogHelper::TrackMouseLeave(GetHwnd());
+		CDialogHelper::TrackMouseLeave(GetHwnd(), TRUE, m_bIncNonClient);
 }
 
 void CHotTracker::Reset()

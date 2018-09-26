@@ -20,7 +20,7 @@ public:
 	CHotTracker();
 	virtual ~CHotTracker();
 
-	BOOL Initialize(CWnd* pWnd);
+	BOOL Initialize(CWnd* pWnd, BOOL bIncNonClient = TRUE);
 	BOOL IsInitialized() const { return IsHooked(); }
 	void Reset();
 
@@ -36,6 +36,7 @@ public:
 protected:
 	CArray<CRect, CRect&> m_aRects;
 	int m_nHotRect;
+	BOOL m_bIncNonClient;
 
 protected:
 	virtual LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
