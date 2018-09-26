@@ -1534,6 +1534,21 @@ BOOL CGanttTreeListCtrl::GetListColumnDate(int nCol, int& nMonth, int& nYear) co
 	return (nMonth >= 1 && nMonth <= 12);
 }
 
+BOOL CGanttTreeListCtrl::GetListColumnDate(int nCol, COleDateTime& date, BOOL bEndOfMonth) const
+{
+	int nMonth, nYear;
+
+	if (!GetListColumnDate(nCol, nMonth, nYear))
+		return FALSE;
+
+	date.SetDate(nYear, nMonth, 1);
+
+	if (bEndOfMonth)
+		date = CDateHelper::GetEndOfMonth(date);
+
+	return TRUE;
+}
+
 void CGanttTreeListCtrl::BuildTreeColumns()
 {
 	// delete existing columns
@@ -7434,15 +7449,22 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 	Resize();
 
 	// Calculate the date range in scroll units
-	// allow a month's buffer at each end
+	// allowing a month's buffer at each end is there is space
 	COleDateTime dtFrom = CDateHelper::GetStartOfMonth(ActiveDateRange().GetStart());
 	COleDateTime dtTo = CDateHelper::GetEndOfMonth(ActiveDateRange().GetEnd());
+ 
+	COleDateTime dtStart, dtEnd;
+	
+	VERIFY(GetListColumnDate(1, dtStart));
+	VERIFY(GetListColumnDate(m_listHeader.GetItemCount() - 1, dtEnd, TRUE));
 
-	CDateHelper::IncrementMonth(dtFrom, -1);
-	CDateHelper::IncrementMonth(dtTo, 1);
+	if (CDateHelper::CalcMonthsFromTo(dtStart, dtFrom, FALSE) > 0)
+		CDateHelper::IncrementMonth(dtFrom, -1);
+
+	if (CDateHelper::CalcMonthsFromTo(dtTo, dtEnd, FALSE) > 0)
+		CDateHelper::IncrementMonth(dtTo, 1);
 
 	int nFrom, nTo;
-	
 	VERIFY(GetScrollPosFromDate(dtFrom, nFrom));
 	VERIFY(GetScrollPosFromDate(dtTo, nTo));
 

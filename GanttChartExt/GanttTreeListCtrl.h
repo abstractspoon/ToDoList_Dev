@@ -274,6 +274,7 @@ protected:
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
 	BOOL GetListColumnDate(int nCol, int& nMonth, int& nYear) const;
+	BOOL GetListColumnDate(int nCol, COleDateTime& date, BOOL bEndOfMonth = FALSE) const;
 	void CalcMinMonthWidths();
 	int GetMinMonthWidth(GTLC_MONTH_DISPLAY nDisplay) const;
 	void BuildTreeColumns();

@@ -2021,12 +2021,17 @@ int CDateHelper::GetDateInMonths(int nMonth, int nYear)
 	return ((nYear * 12) + (nMonth - 1));
 }
 
+int CDateHelper::GetDateInMonths(const COleDateTime& date)
+{
+	return GetDateInMonths(date.GetMonth(), date.GetYear());
+}
+
 int CDateHelper::CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive)
 {
 	ASSERT(dateFrom <= dateTo);
 
-	int nNumMonthsFrom = GetDateInMonths(dateFrom.GetMonth(), dateFrom.GetYear());
-	int nNumMonthsTo = GetDateInMonths(dateTo.GetMonth(), dateTo.GetYear());
+	int nNumMonthsFrom = GetDateInMonths(dateFrom);
+	int nNumMonthsTo = GetDateInMonths(dateTo);
 
 	return ((nNumMonthsTo - nNumMonthsFrom) + (bInclusive ? 1 : 0));
 }

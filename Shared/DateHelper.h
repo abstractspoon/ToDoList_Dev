@@ -200,6 +200,7 @@ public:
 	
 	static int CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive);
 	static int GetDateInMonths(int nMonth, int nYear);
+	static int GetDateInMonths(const COleDateTime& date);
 
 	static COleDateTime CalcDate(int nDOW, int nWhich, int nMonth, int nYear);
 	static int CalcDayOfMonth(int nDOW, int nWhich, int nMonth, int nYear);
