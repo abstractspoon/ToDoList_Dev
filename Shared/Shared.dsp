@@ -509,6 +509,10 @@ SOURCE=.\PropertyPageHost.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\RangeSliderCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\RCCtrlParser.cpp
 # End Source File
 # Begin Source File
@@ -1210,6 +1214,10 @@ SOURCE=.\ProgressDlg.h
 # Begin Source File
 
 SOURCE=.\PropertyPageHost.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\RangeSliderCtrl.h
 # End Source File
 # Begin Source File
 
