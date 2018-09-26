@@ -18,7 +18,10 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CRangeSliderCtrl
 
-CRangeSliderCtrl::CRangeSliderCtrl(UINT nThumbStyle) : m_crParentBkgnd(CLR_NONE), m_nSliderDrawStyles(nThumbStyle)
+CRangeSliderCtrl::CRangeSliderCtrl(UINT nThumbStyle) 
+	: 
+	m_crParentBkgnd(CLR_NONE), 
+	m_nSliderDrawStyles(nThumbStyle)
 {
 }
 
@@ -122,81 +125,113 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 
 	if (CThemed::AreControlsThemed())
 	{
-		if ((nBtn == BUTTON_LEFT) || (nBtn == BUTTON_RIGHT))
+		switch (nBtn)
 		{
-			int nPart = 0;
+		case BUTTON_LEFT:
+		case BUTTON_RIGHT:
+			{
+				int nPart = 0;
 
-			if (m_nSliderDrawStyles & TBS_TOP)
-			{
-				if (m_bHorizontal)
-					nPart = TKP_THUMBTOP;
-				else
-					nPart = TKP_THUMBLEFT;
-			}
-			else if (m_nSliderDrawStyles & TBS_BOTH)
-			{
-				nPart = TKP_THUMB;
-			}
-			else
-			{
-				if (m_bHorizontal)
-					nPart = TKP_THUMBBOTTOM;
-				else
-					nPart = TKP_THUMBRIGHT;
-			}
-			ASSERT(nPart != 0);
-
-			int nState = TUS_DISABLED;
-			
-			if (IsWindowEnabled())
-			{
-				if (bPressed)
+				if (m_nSliderDrawStyles & TBS_TOP)
 				{
-					nState = TUS_PRESSED;
+					if (m_bHorizontal)
+						nPart = TKP_THUMBTOP;
+					else
+						nPart = TKP_THUMBLEFT;
 				}
-				else if (bHot)
+				else if (m_nSliderDrawStyles & TBS_BOTH)
 				{
-					nState = TUS_HOT;
+					nPart = TKP_THUMB;
 				}
 				else
 				{
-					nState = TUS_NORMAL;
+					if (m_bHorizontal)
+						nPart = TKP_THUMBBOTTOM;
+					else
+						nPart = TKP_THUMBRIGHT;
 				}
-			}
-			ASSERT(nState != 0);
+				ASSERT(nPart != 0);
 
-			CThemed th(this, _T("TRACKBAR"));
-			th.DrawBackground(&dc, nPart, nState, rButton);
-		}
-		else
-		{
-			ASSERT(nBtn = BUTTON_MIDDLE);
+				int nState = TUS_DISABLED;
 
-			CRect rTrack(rButton);
-			RegionToTrack(rTrack);
-			rTrack.InflateRect(1, 0);
-
-			if (IsWindowEnabled())
-			{
-				CThemed th(this, _T("PROGRESS"));
-				th.DrawBackground(&dc, (m_bHorizontal ? PP_CHUNK : PP_CHUNKVERT), 0, rTrack);
-
-				if (!bHot && !bPressed)
+				if (IsWindowEnabled())
 				{
-					CGdiPlusBrush brush(RGB(255, 255, 255), 128);
-					CGdiPlusRectF rect(rTrack);
-					CGdiPlusGraphics graphics(dc);
-					
-					CGdiPlus::FillRect(graphics, brush, rect);
+					if (bPressed)
+					{
+						nState = TUS_PRESSED;
+					}
+					else if (bHot)
+					{
+						nState = TUS_HOT;
+					}
+					else
+					{
+						nState = TUS_NORMAL;
+					}
 				}
-			}
+				ASSERT(nState != 0);
 
-			DrawTicks(dc, rTrack, m_Left, m_Right);
+				CThemed th(this, _T("TRACKBAR"));
+				th.DrawBackground(&dc, nPart, nState, rButton);
+			}
+			break;
+
+		case BUTTON_MIDDLE:
+			{
+				ASSERT(nBtn = BUTTON_MIDDLE);
+
+				CRect rTrack(rButton);
+				RegionToTrack(rTrack);
+				rTrack.InflateRect(1, 0);
+
+				if (IsWindowEnabled())
+				{
+					CThemed th(this, _T("PROGRESS"));
+					th.DrawBackground(&dc, (m_bHorizontal ? PP_CHUNK : PP_CHUNKVERT), 0, rTrack);
+
+					// Don't display hotness if at full range
+					if (bHot)
+						bHot = !((m_Left == m_Min) && (m_Right == m_Max));
+
+					BOOL bTrackingEnds = (m_bTracking && !bPressed);
+
+					if (!bPressed && (bTrackingEnds || !bHot))
+					{
+						CGdiPlusBrush brush(RGB(255, 255, 255), (bTrackingEnds ? 96 : 128));
+						CGdiPlusRectF rect(rTrack);
+						CGdiPlusGraphics graphics(dc, gdix_SmoothingModeNone);
+
+						CGdiPlus::FillRect(graphics, brush, rect);
+					}
+				}
+
+				DrawTicks(dc, rTrack, m_Left, m_Right);
+			}
+			break;
 		}
 	}
 	else
 	{
-		CRangeSlider::DrawButton(dc, nBtn, rButton, sText);
+		// Draw simple buttons
+		UINT nState = 0;
+
+		if (IsWindowEnabled())
+		{
+			if (bPressed)
+			{
+				nState = DFCS_PUSHED;
+			}
+			else if (bHot)
+			{
+				nState = DFCS_HOT;
+			}
+		}
+		else
+		{
+			nState = DFCS_INACTIVE;
+		}
+
+		dc.DrawFrameControl((LPRECT)(LPCRECT)rButton, DFC_BUTTON, nState);
 	}
 }
 
@@ -261,7 +296,7 @@ BOOL CRangeSliderCtrl::Initialize()
 	{
 		ASSERT(m_hotTrack.GetRectCount() == 0);
 		
-		if (!m_hotTrack.Initialize(this))
+		if (!m_hotTrack.Initialize(this, FALSE))
 			return FALSE;
 
 		VERIFY(BUTTON_LEFT == m_hotTrack.AddRect(m_RectLeft));
