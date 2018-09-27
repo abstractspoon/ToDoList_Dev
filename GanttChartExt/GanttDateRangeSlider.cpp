@@ -90,13 +90,36 @@ BOOL CGanttDateRangeSlider::SetMaxRange(const GANTTDATERANGE& dtRange)
 
 BOOL CGanttDateRangeSlider::GetMaxRange(GANTTDATERANGE& dtRange) const
 {
-	dtRange = m_dtMaxRange;
+	int nNumCols = GanttStatic::GetRequiredColumnCount(dtRange, m_nMonthDisplay) + 1;
+	int nMonthsPerCol = GanttStatic::GetNumMonthsPerColumn(m_nMonthDisplay);
+
+	COleDateTime dtStart(m_dtMaxRange.GetStart());
+
+	COleDateTime dtEnd(m_dtMaxRange.GetStart());
+	CDateHelper::IncrementMonth(dtEnd, (nNumCols - 1) * nMonthsPerCol);
+
+	dtRange.SetStart(dtStart);
+	dtRange.SetEnd(dtEnd);
 
 	return dtRange.IsValid();
 }
 
+BOOL CGanttDateRangeSlider::HasSelectedRange() const
+{
+	if (m_nMonthDisplay == GTLC_DISPLAY_NONE)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return (m_dtMaxRange.IsValid() && ((m_Left > m_Min) || (m_Right < m_Max)));
+}
+
 BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange) const
 {
+	if (!HasSelectedRange())
+		return FALSE;
+
 	int nStartCol = (int)GetLeft();
 	int nEndCol = (int)GetRight();
 
@@ -117,9 +140,7 @@ BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange) const
 	dtRange.SetStart(dtStart);
 	dtRange.SetEnd(dtEnd);
 
-	TRACE(_T("CGanttDateRangeSlider::GetSelectedRange(%s)\n"), dtRange.Format(m_nMonthDisplay, TRUE, FALSE));
-
-	return !(dtRange == m_dtMaxRange);
+	return TRUE;
 }
 
 BOOL CGanttDateRangeSlider::SetSelectedRange(const GANTTDATERANGE& dtRange)

@@ -1099,8 +1099,9 @@ void CGanttChartWnd::UpdateActiveRangeLabel()
 {
 	GANTTDATERANGE dtRange;
 
-	if (m_sliderDateRange.GetSelectedRange(dtRange))
-	{
+	if (!m_sliderDateRange.GetSelectedRange(dtRange))
+		m_sliderDateRange.GetMaxRange(dtRange);
+
 		dtRange.SetStart(dtRange.GetStart(m_ctrlGantt.GetMonthDisplay()));
 		dtRange.SetEnd(dtRange.GetEnd(m_ctrlGantt.GetMonthDisplay()));
 
@@ -1110,7 +1111,6 @@ void CGanttChartWnd::UpdateActiveRangeLabel()
 
 		m_sActiveDateRange.Format(IDS_ACTIVEDATERANGE, sRange);
 		UpdateData(FALSE);
-	}
 }
 
 LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM wp, LPARAM /*lp*/)

@@ -27,6 +27,7 @@ public:
 	BOOL GetMaxRange(GANTTDATERANGE& dtRange) const;
 	BOOL SetMaxRange(const GANTTDATERANGE& dtRange);
 
+	BOOL HasSelectedRange() const;
 	BOOL GetSelectedRange(GANTTDATERANGE& dtRange) const;
 	BOOL SetSelectedRange(const GANTTDATERANGE& dtRange);
 
