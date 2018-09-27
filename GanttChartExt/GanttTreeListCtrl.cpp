@@ -5151,15 +5151,15 @@ BOOL CGanttTreeListCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWid
 	{
 		int nScrollPos;
 		
-		if (!GetScrollPosFromDate(dtPos, nScrollPos))
-			return FALSE;
+		if (GetScrollPosFromDate(dtPos, nScrollPos))
+		{
+			// Date was at the centre of the view
+			nScrollPos -= (rClient.Width() / 2);
+			nScrollPos = max(0, nScrollPos);
 
-		// Date was at the centre of the view
-		nScrollPos -= (rClient.Width() / 2);
-		nScrollPos = max(0, nScrollPos);
-
-		if (nScrollPos)
-			ListView_Scroll(m_list, (nScrollPos - m_list.GetScrollPos(SB_HORZ)), 0);
+			if (nScrollPos)
+				ListView_Scroll(m_list, (nScrollPos - m_list.GetScrollPos(SB_HORZ)), 0);
+		}
 	}
 
 	return TRUE;
