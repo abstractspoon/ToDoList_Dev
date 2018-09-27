@@ -30,8 +30,6 @@ public:
 	BOOL GetSelectedRange(GANTTDATERANGE& dtRange) const;
 	BOOL SetSelectedRange(const GANTTDATERANGE& dtRange);
 
-	CString FormatSelectedRange() const;
-
 protected:
 	GTLC_MONTH_DISPLAY m_nMonthDisplay;
 	GANTTDATERANGE m_dtMaxRange;

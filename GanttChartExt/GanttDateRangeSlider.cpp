@@ -74,7 +74,7 @@ BOOL CGanttDateRangeSlider::SetMaxRange(const GANTTDATERANGE& dtRange)
 	if (!bSetMaxRange)
 		bSetMaxRange = ((m_Left == m_Min) && (m_Right == m_Max));
 
-	int nNumCols = GetRequiredColumnCount(dtRange, m_nMonthDisplay) + 1;
+	int nNumCols = GanttStatic::GetRequiredColumnCount(dtRange, m_nMonthDisplay) + 1;
 	ASSERT(nNumCols);
 
 	SetMinMax(0.0, nNumCols);
@@ -95,17 +95,6 @@ BOOL CGanttDateRangeSlider::GetMaxRange(GANTTDATERANGE& dtRange) const
 	return dtRange.IsValid();
 }
 
-CString CGanttDateRangeSlider::FormatSelectedRange() const
-{
-	CString sRange;
-	GANTTDATERANGE dtRange;
-
-	if (GetSelectedRange(dtRange))
-		sRange = dtRange.Format(m_nMonthDisplay);
-
-	return sRange;
-}
-
 BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange) const
 {
 	int nStartCol = (int)GetLeft();
@@ -117,7 +106,7 @@ BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange) const
 	// the start of the next column
 	nEndCol--;
 	
-	int nMonthsPerCol = GetNumMonthsPerColumn(m_nMonthDisplay);
+	int nMonthsPerCol = GanttStatic::GetNumMonthsPerColumn(m_nMonthDisplay);
 
 	COleDateTime dtStart(m_dtMaxRange.GetStart());
 	CDateHelper::IncrementMonth(dtStart, nStartCol * nMonthsPerCol);
@@ -128,7 +117,7 @@ BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange) const
 	dtRange.SetStart(dtStart);
 	dtRange.SetEnd(dtEnd);
 
-	TRACE(_T("CGanttDateRangeSlider::GetSelectedRange(%s)\n"), dtRange.Format(m_nMonthDisplay));
+	TRACE(_T("CGanttDateRangeSlider::GetSelectedRange(%s)\n"), dtRange.Format(m_nMonthDisplay, TRUE, FALSE));
 
 	return !(dtRange == m_dtMaxRange);
 }
@@ -144,7 +133,7 @@ BOOL CGanttDateRangeSlider::SetSelectedRange(const GANTTDATERANGE& dtRange)
 	int nNumMonthsStart = CDateHelper::CalcMonthsFromTo(m_dtMaxRange.GetStart(), dtRange.GetStart(), TRUE);
 	int nNumMonthsEnd = CDateHelper::CalcMonthsFromTo(m_dtMaxRange.GetStart(), dtRange.GetEnd(), TRUE);
 
-	int nMonthsPerCol = GetNumMonthsPerColumn(m_nMonthDisplay);
+	int nMonthsPerCol = GanttStatic::GetNumMonthsPerColumn(m_nMonthDisplay);
 
 	ASSERT(nNumMonthsStart < nNumMonthsEnd);
 	SetRange(nNumMonthsStart / nMonthsPerCol, nNumMonthsEnd / nMonthsPerCol);

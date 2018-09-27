@@ -879,7 +879,6 @@ void CGanttChartWnd::OnKeyUpGantt(NMHDR* pNMHDR, LRESULT* pResult)
 	case VK_DOWN:
 	case VK_PRIOR:
 	case VK_NEXT:
-		UpdateSelectedTaskDates();
 		SendParentSelectionUpdate();
 		break;
 	}
@@ -895,7 +894,6 @@ void CGanttChartWnd::SendParentSelectionUpdate()
 
 void CGanttChartWnd::OnClickGanttList(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
-	UpdateSelectedTaskDates();
 	SendParentSelectionUpdate();
 
 	*pResult = 0;
@@ -986,8 +984,6 @@ void CGanttChartWnd::OnSelchangedGanttTree(NMHDR* pNMHDR, LRESULT* pResult)
 	if ((pNMTreeView->itemNew.hItem == NULL) && (m_tree.GetCount() != 0))
 		return;
 		
-	UpdateSelectedTaskDates();
-
 	// ignore notifications arising out of SelectTask()
 	if (m_bInSelectTask && (pNMTreeView->action == TVC_UNKNOWN))
 		return;
@@ -1099,7 +1095,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
-void CGanttChartWnd::UpdateSelectedTaskDates()
+void CGanttChartWnd::UpdateActiveRangeLabel()
 {
 	GANTTDATERANGE dtRange;
 
@@ -1124,9 +1120,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM wp, LPARAM /*lp*/)
 	GTLC_MONTH_DISPLAY nDisplay = m_ctrlGantt.GetMonthDisplay();
 
 	m_mapDisplaySnapModes[nDisplay] = nSnap;
-
 	CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
-	UpdateSelectedTaskDates();
 
 	return 0L;
 }
