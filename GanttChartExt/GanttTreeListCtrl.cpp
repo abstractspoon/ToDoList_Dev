@@ -38,6 +38,10 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+using namespace GanttStatic;
+
+//////////////////////////////////////////////////////////////////////
+
 #ifndef GET_WHEEL_DELTA_WPARAM
 #	define GET_WHEEL_DELTA_WPARAM(wParam)  ((short)HIWORD(wParam))
 #endif 
@@ -1371,77 +1375,11 @@ void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
 
 CString CGanttTreeListCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const
 {
-	if (nMonth == 0)
-		return _T("");
-	
-	//else
-	CString sHeader;
-	
-	switch (nDisplay)
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-	case GTLC_DISPLAY_DECADES:
-		{
-			int nStartYear = GetStartYear(nDisplay);
-			int nEndYear = GetEndYear(nDisplay);
-
-			sHeader.Format(_T("%d-%d"), nStartYear, nEndYear);
-		}
-		break;
-
-	case GTLC_DISPLAY_YEARS:
-		sHeader.Format(_T("%d"), nYear);
-		break;
-		
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-		sHeader.Format(_T("Q%d %d"), (1 + ((nMonth-1) / 3)), nYear);
-		break;
-		
-	case GTLC_DISPLAY_QUARTERS_MID:
-		sHeader.Format(_T("%s-%s %d"), 
-			CDateHelper::GetMonthName(nMonth, TRUE),
-			CDateHelper::GetMonthName(nMonth+2, TRUE), 
-			nYear);
-		break;
-		
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		sHeader.Format(_T("%s-%s %d"), 
-			CDateHelper::GetMonthName(nMonth, FALSE),
-			CDateHelper::GetMonthName(nMonth+2, FALSE), 
-			nYear);
-		break;
-		
-	case GTLC_DISPLAY_MONTHS_SHORT:
-		sHeader = FormatDate(COleDateTime(nYear, nMonth, 1, 0, 0, 0), (DHFD_NODAY | DHFD_NOCENTURY));
-		break;
-		
-	case GTLC_DISPLAY_MONTHS_MID:
-		sHeader.Format(_T("%s %d"), CDateHelper::GetMonthName(nMonth, TRUE), nYear);
-		break;
-		
-	case GTLC_DISPLAY_MONTHS_LONG:
-		sHeader.Format(_T("%s %d"), CDateHelper::GetMonthName(nMonth, FALSE), nYear);
-		break;
-
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-		sHeader.Format(_T("%s %d (%s)"), CDateHelper::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_WEEKS));
-		break;
-
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
-		sHeader.Format(_T("%s %d (%s)"), CDateHelper::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_DAYS));
-		break;
-		
-	default:
-		ASSERT(0);
-		break;
-	}
-
-	return sHeader;
+	return GanttStatic::FormatDate(nMonth, 
+									nYear, 
+									nDisplay, 
+									!HasOption(GTLCF_DECADESAREONEBASED), 
+									HasOption(GTLCF_DISPLAYISODATES));
 }
 
 double CGanttTreeListCtrl::GetMonthWidth(int nColWidth) const
@@ -1451,37 +1389,7 @@ double CGanttTreeListCtrl::GetMonthWidth(int nColWidth) const
 
 double CGanttTreeListCtrl::GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth)
 {
-	switch (nDisplay)
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-		return (nColWidth / (25 * 12.0));
-		
-	case GTLC_DISPLAY_DECADES:
-		return (nColWidth / (10 * 12.0));
-		
-	case GTLC_DISPLAY_YEARS:
-		return (nColWidth / 12.0);
-		
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		return (nColWidth / 3.0);
-		
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
-		return (double)nColWidth;
-	}
-
-	ASSERT(0);
-	return 0.0;
+	return (nColWidth / (double)GetNumMonthsPerColumn(nDisplay));
 }
 
 int CGanttTreeListCtrl::GetRequiredListColumnCount() const
@@ -1506,12 +1414,6 @@ int CGanttTreeListCtrl::GetColumnWidth() const
 {
 	return GetColumnWidth(m_nMonthDisplay, m_nMonthWidth);
 }
-
-int CGanttTreeListCtrl::GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay) const
-{
-	return GetColumnWidth(nDisplay, m_nMonthWidth);
-}
-
 
 int CGanttTreeListCtrl::GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth)
 {

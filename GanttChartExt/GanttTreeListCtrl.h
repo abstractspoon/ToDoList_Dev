@@ -263,7 +263,7 @@ protected:
 	void UpdateListColumns(int nWidth = -1);
 	void RecalcListColumnWidths(int nFromWidth, int nToWidth);
 	void UpdateListColumnsWidthAndText(int nWidth = -1);
-	CString FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth = 0, int nYear = 0) const;
+	CString FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const;
 
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HTREEITEM hti);
@@ -280,7 +280,6 @@ protected:
 	void BuildTreeColumns();
 	GTLC_MONTH_DISPLAY GetColumnDisplay(int nColWidth);
 	int GetColumnWidth() const;
-	int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay) const;
 	double GetMonthWidth(int nColWidth) const;
 	int GetRequiredListColumnCount() const;
 	int GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const;

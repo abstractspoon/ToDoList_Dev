@@ -149,7 +149,7 @@ protected:
 	void EnableSplitting(BOOL bEnable = TRUE);
 	void UpdateGanttCtrlPreferences();
 	void SendParentSelectionUpdate();
-	void UpdateSelectedTaskDates();
+	void UpdateActiveRangeLabel();
 	void BuildSnapCombo();
 	void BuildDisplayCombo();
 	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay);

@@ -46,25 +46,29 @@ const int NUM_DISPLAYMODES = (sizeof(DISPLAYMODES) / sizeof(DISPLAYMODES[0]));
 
 /////////////////////////////////////////////////////////////////////////////
 
-GTLC_MONTH_DISPLAY GetPreviousDisplay(GTLC_MONTH_DISPLAY nDisplay);
-GTLC_MONTH_DISPLAY GetNextDisplay(GTLC_MONTH_DISPLAY nDisplay);
-GTLC_MONTH_DISPLAY GetLastDisplay();
-GTLC_MONTH_DISPLAY GetFirstDisplay();
+namespace GanttStatic
+{
+	GTLC_MONTH_DISPLAY GetPreviousDisplay(GTLC_MONTH_DISPLAY nDisplay);
+	GTLC_MONTH_DISPLAY GetNextDisplay(GTLC_MONTH_DISPLAY nDisplay);
+	GTLC_MONTH_DISPLAY GetLastDisplay();
+	GTLC_MONTH_DISPLAY GetFirstDisplay();
 
-int FindDisplay(GTLC_MONTH_DISPLAY nDisplay);
-int CompareDisplays(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DISPLAY nDisplay2);
-BOOL IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay);
+	int FindDisplay(GTLC_MONTH_DISPLAY nDisplay);
+	int CompareDisplays(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DISPLAY nDisplay2);
+	BOOL IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay);
 
-/////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
 
-GTLC_DRAG MapHitTestToDrag(GTLC_HITTEST nHit);
-GTLC_HITTEST MapDragToHitTest(GTLC_DRAG nDrag);
+	GTLC_DRAG MapHitTestToDrag(GTLC_HITTEST nHit);
+	GTLC_HITTEST MapDragToHitTest(GTLC_DRAG nDrag);
 
-/////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
 
-BOOL GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd);
-int GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay);
-int GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay);
+	BOOL GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd);
+	int GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay);
+	int GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay);
+	CString FormatDate(int nMonth, int nYear, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades, BOOL bISO);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

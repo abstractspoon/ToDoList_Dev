@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "GanttStruct.h"
+#include "GanttStatic.h"
 
 #include "..\shared\DateHelper.h"
 #include "..\shared\graphicsMisc.h"
@@ -698,16 +699,17 @@ GANTTDATERANGE::GANTTDATERANGE(const COleDateTimeRange& dtOther)
 		Set(dtOther);
 }
 
-CString GANTTDATERANGE::Format(DWORD dwFlags, TCHAR cDelim) const
+CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades, BOOL bISODates, TCHAR cDelim) const
 {
-	return COleDateTimeRange::Format(dwFlags, cDelim);
-}
+	COleDateTime dtStart(GetStart(nDisplay, bZeroBasedDecades)), dtEnd(GetEnd(nDisplay, bZeroBasedDecades));
 
-CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, DWORD dwFlags, TCHAR cDelim) const
-{
-	COleDateTimeRange dtRange(GetStart(nDisplay), GetEnd(nDisplay), FALSE);
+	CString sStart(GanttStatic::FormatDate(dtStart.GetMonth(), dtStart.GetYear(), nDisplay, bZeroBasedDecades, bISODates));
+	CString sEnd(GanttStatic::FormatDate(dtEnd.GetMonth(), dtEnd.GetYear(), nDisplay, bZeroBasedDecades, bISODates));
 
-	return dtRange.Format(dwFlags, cDelim);
+	CString sRange;
+	sRange.Format(_T("%s %c %s"), sStart, cDelim, sEnd);
+
+	return sRange;
 }
 
 BOOL GANTTDATERANGE::IsValid() const

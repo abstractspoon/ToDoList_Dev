@@ -533,13 +533,11 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	m_sliderDateRange.SetMonthDisplay(nDisplay);
 	m_sliderDateRange.SetMaxRange(dtDataRange);
 
-	m_sActiveDateRange.Format(IDS_ACTIVEDATERANGE, m_sliderDateRange.FormatSelectedRange());
-	UpdateData(FALSE);
 
 	// Month Display may change for large date ranges
 	BuildDisplayCombo();
 
-	UpdateSelectedTaskDates();
+	UpdateActiveRangeLabel();
 }
 
 bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData) 
@@ -919,7 +917,15 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 		m_ctrlGantt.SetSnapMode(nSnap);
 		CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
 
-		m_sliderDateRange.SetMonthDisplay(nDisplay);
+		GANTTDATERANGE dtRange;
+		
+		if (m_ctrlGantt.GetDataDateRange(dtRange))
+		{
+			m_sliderDateRange.SetMonthDisplay(nDisplay);
+			m_sliderDateRange.SetMaxRange(dtRange);
+
+			UpdateActiveRangeLabel();
+		}
 
 		return TRUE;
 	}
@@ -1095,32 +1101,20 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 
 void CGanttChartWnd::UpdateSelectedTaskDates()
 {
-/*
-	COleDateTime dtStart, dtDue;
-	
-	if (m_ctrlGantt.GetSelectedTaskDates(dtStart, dtDue))
+	GANTTDATERANGE dtRange;
+
+	if (m_sliderDateRange.GetSelectedRange(dtRange))
 	{
-		CString sStart, sDue;
+		dtRange.SetStart(dtRange.GetStart(m_ctrlGantt.GetMonthDisplay()));
+		dtRange.SetEnd(dtRange.GetEnd(m_ctrlGantt.GetMonthDisplay()));
 
-		if (CDateHelper::DateHasTime(dtStart))
-			sStart = CDateHelper::FormatDate(dtStart, DHFD_TIME | DHFD_NOSEC);
-		else
-			sStart = CDateHelper::FormatDate(dtStart);
+		CString sRange = dtRange.Format(GTLC_DISPLAY_MONTHS_MID, 
+										!m_ctrlGantt.HasOption(GTLCF_DECADESAREONEBASED), 
+										m_ctrlGantt.HasOption(GTLCF_DISPLAYISODATES));
 
-		if (CDateHelper::DateHasTime(dtDue))
-			sDue = CDateHelper::FormatDate(dtDue, DHFD_TIME | DHFD_NOSEC);
-		else
-			sDue = CDateHelper::FormatDate(dtDue);
-
-		m_sSelectedTaskDates.Format(_T("%s - %s"), sStart, sDue);
+		m_sActiveDateRange.Format(IDS_ACTIVEDATERANGE, sRange);
+		UpdateData(FALSE);
 	}
-	else
-	{
-		m_sSelectedTaskDates.Empty();
-	}
-
-	UpdateData(FALSE);
-*/
 }
 
 LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM wp, LPARAM /*lp*/)
@@ -1215,7 +1209,7 @@ void CGanttChartWnd::BuildDisplayCombo()
 
 		if (!m_ctrlGantt.CanSetMonthDisplay(mode.nDisplay))
 		{
-			int nCurMode = FindDisplay(nCurDisplay);
+			int nCurMode = GanttStatic::FindDisplay(nCurDisplay);
 
 			if (nMode < nCurMode)
 				nCurDisplay = mode.nDisplay;
@@ -1421,8 +1415,7 @@ LRESULT CGanttChartWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
 	else
 		m_ctrlGantt.ClearActiveDateRange();
 
-	m_sActiveDateRange.Format(IDS_ACTIVEDATERANGE, m_sliderDateRange.FormatSelectedRange());
-	UpdateData(FALSE);
+	UpdateActiveRangeLabel();
 
 	return 0L;
 }
