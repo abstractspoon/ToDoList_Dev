@@ -6228,7 +6228,9 @@ int CGanttTreeListCtrl::FindColumn(int nMonth, int nYear) const
 		{
 			if (i == nNumReqColumns) // last column
 			{
-				return ((nMonths == nColMonths) ? i : -1);
+				int nColEndMonths = (nColMonths + GetNumMonthsPerColumn(m_nMonthDisplay) - 1);
+
+				return ((nMonths <= nColEndMonths) ? i : -1);
 			}
 			else // get date for next column
 			{
