@@ -80,7 +80,6 @@ void CGanttChartWnd::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplayOptions);
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
-	DDX_Text(pDX, IDC_ACTIVEDATERANGE_LABEL, m_sActiveDateRange);
 }
 
 BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
@@ -233,6 +232,19 @@ void CGanttChartWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	SaveColumnState(pPrefs, (sKey + _T("\\TreeTracked")), aTreeTracked);
 	SaveColumnState(pPrefs, (sKey + _T("\\ListTracked")), aListTracked);
 
+	// Active date range
+	GANTTDATERANGE dtRange;
+
+	if (m_sliderDateRange.GetSelectedRange(dtRange))
+	{
+		pPrefs->WriteProfileDouble(_T("ActiveRange"), _T("Start"), dtRange.GetStart().m_dt);
+		pPrefs->WriteProfileDouble(_T("ActiveRange"), _T("End"), dtRange.GetEnd().m_dt);
+	}
+	else
+	{
+		pPrefs->DeleteProfileSection(_T("ActiveRange"));
+	}
+
 	m_dlgPrefs.SavePreferences(pPrefs, sKey);
 }
 
@@ -336,8 +348,7 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 
 		m_dlgPrefs.LoadPreferences(pPrefs, sKey);
 		UpdateGanttCtrlPreferences();
-
-
+		
 		// column order
 		CIntArray aTreeOrder, aTreeWidths, aListWidths, aTreeTracked, aListTracked;
 
@@ -359,6 +370,18 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 			LoadColumnState(pPrefs, (sKey + _T("\\ListTracked")), aListTracked))
 		{
 			m_ctrlGantt.SetTrackedColumns(aTreeTracked, aListTracked);
+		}
+
+		// Active range
+		m_dtPrevActiveRange.Reset();
+
+		double dStart = pPrefs->GetProfileDouble(_T("ActiveRange"), _T("Start"), 0);
+		double dEnd = pPrefs->GetProfileDouble(_T("ActiveRange"), _T("End"), -1);
+
+		if (dEnd > dStart)
+		{
+			m_dtPrevActiveRange.SetStart(dStart);
+			m_dtPrevActiveRange.SetEnd(dEnd);
 		}
 		
 		if (GetSafeHwnd())
@@ -533,7 +556,14 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	m_sliderDateRange.SetMonthDisplay(nDisplay);
 	m_sliderDateRange.SetMaxRange(dtDataRange);
 
+	if (m_dtPrevActiveRange.IsValid())
+	{
+		if (m_sliderDateRange.SetSelectedRange(m_dtPrevActiveRange))
+			m_ctrlGantt.SetActiveDateRange(m_dtPrevActiveRange);
 
+		m_dtPrevActiveRange.Reset();
+	}
+		
 	// Month Display may change for large date ranges
 	BuildDisplayCombo();
 
@@ -1099,8 +1129,7 @@ void CGanttChartWnd::UpdateActiveRangeLabel()
 {
 	CString sRange = m_sliderDateRange.FormatRange(!m_ctrlGantt.HasOption(GTLCF_DECADESAREONEBASED));
 
-	m_sActiveDateRange.Format(IDS_ACTIVEDATERANGE, sRange);
-	UpdateData(FALSE);
+	GetDlgItem(IDC_ACTIVEDATERANGE_LABEL)->SetWindowText(CEnString(IDS_ACTIVEDATERANGE, sRange));
 }
 
 LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM wp, LPARAM /*lp*/)

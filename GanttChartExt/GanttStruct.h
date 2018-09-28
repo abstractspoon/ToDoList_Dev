@@ -51,6 +51,11 @@ struct GANTTDATERANGE : protected COleDateTimeRange
 	void SetStart(const COleDateTime& date);
 	void SetEnd(const COleDateTime& date);
 
+	void Set(const GANTTDATERANGE& dtOther, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE);
+	void Set(const COleDateTimeRange& dtOther, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE);
+	void SetStart(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE);
+	void SetEnd(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE);
+
 	BOOL HasStart() const;
 	BOOL HasEnd() const;
 

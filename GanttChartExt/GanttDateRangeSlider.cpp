@@ -88,18 +88,18 @@ BOOL CGanttDateRangeSlider::SetMaxRange(const GANTTDATERANGE& dtRange)
 	return TRUE;
 }
 
-BOOL CGanttDateRangeSlider::GetMaxRange(GANTTDATERANGE& dtRange) const
+BOOL CGanttDateRangeSlider::GetMaxRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const
 {
 	int nNumCols = GanttStatic::GetRequiredColumnCount(m_dtMaxRange, m_nMonthDisplay) + 1;
 	int nMonthsPerCol = GanttStatic::GetNumMonthsPerColumn(m_nMonthDisplay);
 
-	COleDateTime dtStart(m_dtMaxRange.GetStart());
+	COleDateTime dtStart(m_dtMaxRange.GetStart(m_nMonthDisplay, bZeroBasedDecades));
 
-	COleDateTime dtEnd(m_dtMaxRange.GetStart());
+	COleDateTime dtEnd(dtStart);
 	CDateHelper::IncrementMonth(dtEnd, (nNumCols - 1) * nMonthsPerCol);
 
 	dtRange.SetStart(dtStart);
-	dtRange.SetEnd(dtEnd);
+	dtRange.SetEnd(dtEnd, m_nMonthDisplay, bZeroBasedDecades);
 
 	return dtRange.IsValid();
 }
@@ -128,7 +128,7 @@ BOOL CGanttDateRangeSlider::HasSelectedRange() const
 	return (m_dtMaxRange.IsValid() && ((m_Left > m_Min) || (m_Right < m_Max)));
 }
 
-BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange) const
+BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const
 {
 	if (!HasSelectedRange())
 		return FALSE;
@@ -150,26 +150,33 @@ BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange) const
 	COleDateTime dtEnd(m_dtMaxRange.GetStart());
 	CDateHelper::IncrementMonth(dtEnd, nEndCol * nMonthsPerCol);
 
-	dtRange.SetStart(dtStart);
-	dtRange.SetEnd(dtEnd);
+	dtRange.SetStart(dtStart, m_nMonthDisplay, bZeroBasedDecades);
+	dtRange.SetEnd(dtEnd, m_nMonthDisplay, bZeroBasedDecades);
 
 	return TRUE;
 }
 
 BOOL CGanttDateRangeSlider::SetSelectedRange(const GANTTDATERANGE& dtRange)
 {
-	if (!dtRange.IsValid() || !m_dtMaxRange.Contains(dtRange))
+	GANTTDATERANGE dtMax;
+
+	if (!GetMaxRange(dtMax))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	int nNumMonthsStart = CDateHelper::CalcMonthsFromTo(m_dtMaxRange.GetStart(), dtRange.GetStart(), TRUE);
-	int nNumMonthsEnd = CDateHelper::CalcMonthsFromTo(m_dtMaxRange.GetStart(), dtRange.GetEnd(), TRUE);
+	if (!dtRange.IsValid() || !dtMax.Contains(dtRange))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	int nNumMonthsStart = CDateHelper::CalcMonthsFromTo(dtMax.GetStart(), dtRange.GetStart(), FALSE);
+	int nNumMonthsEnd = CDateHelper::CalcMonthsFromTo(dtMax.GetStart(), dtRange.GetEnd(), TRUE);
+	ASSERT(nNumMonthsStart < nNumMonthsEnd);
 
 	int nMonthsPerCol = GanttStatic::GetNumMonthsPerColumn(m_nMonthDisplay);
-
-	ASSERT(nNumMonthsStart < nNumMonthsEnd);
 	SetRange(nNumMonthsStart / nMonthsPerCol, nNumMonthsEnd / nMonthsPerCol);
 
 	return TRUE;

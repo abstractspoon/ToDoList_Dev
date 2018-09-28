@@ -80,11 +80,11 @@ protected:
 	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
-	CEnString m_sActiveDateRange;
 	
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, GTLC_SNAPMODE, GTLC_SNAPMODE> m_mapDisplaySnapModes;
 	BOOL m_bReadOnly;
 	BOOL m_bInSelectTask;
+	GANTTDATERANGE m_dtPrevActiveRange;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

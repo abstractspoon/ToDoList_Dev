@@ -24,11 +24,11 @@ public:
 	BOOL Initialise(GTLC_MONTH_DISPLAY nDisplay);
 	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay);
 
-	BOOL GetMaxRange(GANTTDATERANGE& dtRange) const;
+	BOOL GetMaxRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades = TRUE) const;
 	BOOL SetMaxRange(const GANTTDATERANGE& dtRange);
 
 	BOOL HasSelectedRange() const;
-	BOOL GetSelectedRange(GANTTDATERANGE& dtRange) const;
+	BOOL GetSelectedRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades = TRUE) const;
 	BOOL SetSelectedRange(const GANTTDATERANGE& dtRange);
 
 	CString FormatRange(BOOL bZeroBasedDecades, TCHAR cDelim = '-') const;

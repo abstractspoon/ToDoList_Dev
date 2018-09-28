@@ -205,3 +205,73 @@ int GanttStatic::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONT
 	return nNumCols;
 }
 
+COleDateTime GanttStatic::GetRangeStart(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
+{
+	switch (nDisplay)
+	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		return CDateHelper::GetStartOfQuarterCentury(date, bZeroBasedDecades);
+
+	case GTLC_DISPLAY_DECADES:
+		return CDateHelper::GetStartOfDecade(date, bZeroBasedDecades);
+
+	case GTLC_DISPLAY_YEARS:
+		return CDateHelper::GetStartOfYear(date);
+
+	case GTLC_DISPLAY_QUARTERS_SHORT:
+	case GTLC_DISPLAY_QUARTERS_MID:
+	case GTLC_DISPLAY_QUARTERS_LONG:
+		return CDateHelper::GetStartOfQuarter(date);
+
+	case GTLC_DISPLAY_MONTHS_SHORT:
+	case GTLC_DISPLAY_MONTHS_MID:
+	case GTLC_DISPLAY_MONTHS_LONG:
+	case GTLC_DISPLAY_WEEKS_SHORT:
+	case GTLC_DISPLAY_WEEKS_MID:
+	case GTLC_DISPLAY_WEEKS_LONG:
+	case GTLC_DISPLAY_DAYS_SHORT:
+	case GTLC_DISPLAY_DAYS_MID:
+	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
+		return CDateHelper::GetStartOfMonth(date);
+	}
+
+	ASSERT(0);
+	return date;
+}
+
+COleDateTime GanttStatic::GetRangeEnd(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
+{
+	switch (nDisplay)
+	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		return CDateHelper::GetEndOfQuarterCentury(date, bZeroBasedDecades);
+
+	case GTLC_DISPLAY_DECADES:
+		return CDateHelper::GetEndOfDecade(date, bZeroBasedDecades);
+
+	case GTLC_DISPLAY_YEARS:
+		return CDateHelper::GetEndOfYear(date);
+
+	case GTLC_DISPLAY_QUARTERS_SHORT:
+	case GTLC_DISPLAY_QUARTERS_MID:
+	case GTLC_DISPLAY_QUARTERS_LONG:
+		return CDateHelper::GetEndOfQuarter(date);
+
+	case GTLC_DISPLAY_MONTHS_SHORT:
+	case GTLC_DISPLAY_MONTHS_MID:
+	case GTLC_DISPLAY_MONTHS_LONG:
+	case GTLC_DISPLAY_WEEKS_SHORT:
+	case GTLC_DISPLAY_WEEKS_MID:
+	case GTLC_DISPLAY_WEEKS_LONG:
+	case GTLC_DISPLAY_DAYS_SHORT:
+	case GTLC_DISPLAY_DAYS_MID:
+	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
+		return CDateHelper::GetEndOfMonth(date);
+	}
+
+	ASSERT(0);
+	return date;
+}
+

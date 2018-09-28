@@ -699,7 +699,7 @@ GANTTDATERANGE::GANTTDATERANGE(const COleDateTimeRange& dtOther)
 		Set(dtOther);
 }
 
-CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades, BOOL bISODates, TCHAR cDelim) const
+CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades, BOOL /*bISODates*/, TCHAR cDelim) const
 {
 	COleDateTime dtStart(GetStart(nDisplay, bZeroBasedDecades)), dtEnd(GetEnd(nDisplay, bZeroBasedDecades));
 
@@ -771,37 +771,7 @@ COleDateTime GANTTDATERANGE::GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBas
 	if (CDateHelper::IsDateSet(m_dtStart))
 		dtTemp = m_dtStart;
 
-	switch (nDisplay)
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-		return CDateHelper::GetStartOfQuarterCentury(dtTemp, bZeroBasedDecades);
-
-	case GTLC_DISPLAY_DECADES:
-		return CDateHelper::GetStartOfDecade(dtTemp, bZeroBasedDecades);
-
-	case GTLC_DISPLAY_YEARS:
-		return CDateHelper::GetStartOfYear(dtTemp);
-
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		return CDateHelper::GetStartOfQuarter(dtTemp);
-
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
-		return CDateHelper::GetStartOfMonth(dtTemp);
-	}
-
-	ASSERT(0);
-	return dtTemp;
+	return GanttStatic::GetRangeStart(dtTemp, nDisplay, bZeroBasedDecades);
 }
 
 COleDateTime GANTTDATERANGE::GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
@@ -813,37 +783,7 @@ COleDateTime GANTTDATERANGE::GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBased
 	if (CDateHelper::IsDateSet(m_dtEnd))
 		dtTemp = m_dtEnd;
 
-	switch (nDisplay)
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-		return CDateHelper::GetEndOfQuarterCentury(dtTemp, bZeroBasedDecades);
-
-	case GTLC_DISPLAY_DECADES:
-		return CDateHelper::GetEndOfDecade(dtTemp, bZeroBasedDecades);
-
-	case GTLC_DISPLAY_YEARS:
-		return CDateHelper::GetEndOfYear(dtTemp);
-
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		return CDateHelper::GetEndOfQuarter(dtTemp);
-
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
-		return CDateHelper::GetEndOfMonth(dtTemp);
-	}
-
-	ASSERT(0);
-	return dtTemp;
+	return GanttStatic::GetRangeEnd(dtTemp, nDisplay, bZeroBasedDecades);
 }
 
 BOOL GANTTDATERANGE::Contains(const GANTTITEM& gi) const
@@ -922,6 +862,36 @@ void GANTTDATERANGE::SetEnd(const COleDateTime& date)
 		m_dtEnd = CDateHelper::GetEndOfDay(date);
 	else
 		m_dtEnd = date;
+}
+
+void GANTTDATERANGE::Set(const GANTTDATERANGE& dtOther, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
+{
+	ASSERT(!dtOther.m_bInclusive); // always
+	
+	SetStart(dtOther.GetStart(nDisplay, bZeroBasedDecades));
+	SetEnd(dtOther.GetEnd(nDisplay, bZeroBasedDecades));
+}
+
+void GANTTDATERANGE::Set(const COleDateTimeRange& dtOther, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
+{
+	ASSERT(!dtOther.m_bInclusive); // always
+	
+	SetStart(GanttStatic::GetRangeStart(dtOther.GetStart(), nDisplay, bZeroBasedDecades));
+	SetEnd(GanttStatic::GetRangeEnd(dtOther.GetEnd(), nDisplay, bZeroBasedDecades));
+}
+
+void GANTTDATERANGE::SetStart(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
+{
+	ASSERT(!m_bInclusive); // always
+
+	SetStart(GanttStatic::GetRangeStart(date, nDisplay, bZeroBasedDecades));
+}
+
+void GANTTDATERANGE::SetEnd(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
+{
+	ASSERT(!m_bInclusive); // always
+
+	SetEnd(GanttStatic::GetRangeEnd(date, nDisplay, bZeroBasedDecades));
 }
 
 void GANTTDATERANGE::ClearStart()
