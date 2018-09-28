@@ -111,17 +111,10 @@ CString CGanttDateRangeSlider::FormatRange(BOOL bZeroBasedDecades, TCHAR cDelim)
 	if (!GetSelectedRange(dtRange))
 		VERIFY(GetMaxRange(dtRange));
 
-	COleDateTime dtStart(dtRange.GetStart(m_nMonthDisplay, bZeroBasedDecades));
-	COleDateTime dtEnd(dtRange.GetEnd(m_nMonthDisplay, bZeroBasedDecades));
+	dtRange.SetStart(dtRange.GetStart(m_nMonthDisplay, bZeroBasedDecades));
+	dtRange.SetEnd(dtRange.GetEnd(m_nMonthDisplay, bZeroBasedDecades));
 
-	CString sStart, sEnd;
-	sStart.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
-	sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth(), TRUE), dtEnd.GetYear());
-
-	CString sRange;
-	sRange.Format(_T("%s %c %s"), sStart, cDelim, sEnd);
-
-	return sRange;
+	return dtRange.Format(GTLC_DISPLAY_MONTHS_MID, bZeroBasedDecades, FALSE, cDelim);
 }
 
 BOOL CGanttDateRangeSlider::HasSelectedRange() const
