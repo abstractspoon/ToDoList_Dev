@@ -173,11 +173,11 @@ BOOL CGanttDateRangeSlider::SetSelectedRange(const GANTTDATERANGE& dtRange)
 	}
 
 	int nNumMonthsStart = CDateHelper::CalcMonthsFromTo(dtMax.GetStart(), dtRange.GetStart(), FALSE);
-	int nNumMonthsEnd = CDateHelper::CalcMonthsFromTo(dtMax.GetStart(), dtRange.GetEnd(), TRUE);
+	int nNumMonthsEnd = CDateHelper::CalcMonthsFromTo(dtMax.GetStart(), dtRange.GetEnd(), TRUE); // inclusive
 	ASSERT(nNumMonthsStart < nNumMonthsEnd);
 
 	int nMonthsPerCol = GanttStatic::GetNumMonthsPerColumn(m_nMonthDisplay);
-	SetRange(nNumMonthsStart / nMonthsPerCol, nNumMonthsEnd / nMonthsPerCol);
+	SetRange((nNumMonthsStart / nMonthsPerCol), nNumMonthsEnd / nMonthsPerCol);
 
 	return TRUE;
 }
