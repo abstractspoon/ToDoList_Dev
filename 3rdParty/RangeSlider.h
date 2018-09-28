@@ -96,6 +96,7 @@ protected:
 	afx_msg UINT OnGetDlgCode();
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 	//}}AFX_MSG
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	DECLARE_MESSAGE_MAP()
 
 	enum RS_DRAWREGION
@@ -135,6 +136,7 @@ protected:
 	double m_Step;
 
 	// Displaying
+	CRect RectMiddle() const;
 	void Normalize(void);             // Make intervall [Left, Right] containing in [Min, Max]
 	void NormalizeVisualMinMax(void);  // Make intervall [InnerMin, InnerMax] containing in [Min, Max]
 	double NormalizeByStep(double value) const;

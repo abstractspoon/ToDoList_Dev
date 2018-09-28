@@ -118,6 +118,7 @@ BEGIN_MESSAGE_MAP(CRangeSlider, CWnd)
 	ON_WM_GETDLGCODE()
 	ON_WM_CAPTURECHANGED()
 	//}}AFX_MSG_MAP
+	ON_WM_LBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
 
@@ -454,6 +455,32 @@ void CRangeSlider::OnPaintVertical(CDC &dc)
 }
 
 
+void CRangeSlider::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	CWnd::OnLButtonDblClk(nFlags, point);
+
+	if ((m_Left > m_Min) || (m_Right < m_Max))
+	{
+		if (RectMiddle().PtInRect(point))
+		{
+			SetRange(m_Min, m_Max);
+			GetParent()->SendMessage(RANGE_CHANGED, RS_BOTHCHANGED);
+		}
+	}
+}
+
+CRect CRangeSlider::RectMiddle() const
+{
+	CRect rect;
+	GetClientRect(&rect);
+
+	if (m_bHorizontal)
+		return CRect(m_RectLeft.right + 1, 0, m_RectRight.left - 1, rect.bottom);
+
+	// else vertical
+	return  CRect(0, m_RectLeft.bottom + 1, m_RectLeft.right, m_RectRight.top - 1);
+}
+
 void CRangeSlider::OnLButtonDown(UINT nFlags, CPoint point) 
 {
 	TRACE(_T("Down Point %d, %d\n"), point.x, point.y);
@@ -464,13 +491,6 @@ void CRangeSlider::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		// Hit Testing into Rects.
 		// Left, Middle or Right?
-		CRect rect;
-		GetClientRect(&rect);
-		CRect middleRect (0,0,0,0);
-		if (m_bHorizontal)
-			middleRect = CRect(m_RectLeft.right + 1, 0, m_RectRight.left - 1, rect.bottom);
-		else 
-			middleRect = CRect(0, m_RectLeft.bottom + 1, m_RectLeft.right, m_RectRight.top - 1);
 		if (m_RectLeft.PtInRect(point)) 
 		{
 			m_bTracking = TRUE;
@@ -483,14 +503,65 @@ void CRangeSlider::OnLButtonDown(UINT nFlags, CPoint point)
 			m_TrackedButton = BUTTON_RIGHT;
 			m_ClickOffset = point - m_RectRight.CenterPoint();
 		} 
-		else if (middleRect.PtInRect(point) && ((m_Left > m_Min) || (m_Right < m_Max)))
+		else
 		{
-			m_bTracking = TRUE;
-			m_TrackedButton = BUTTON_MIDDLE;
-			m_ClickOffset = point - middleRect.CenterPoint();
+			CRect rMiddle(RectMiddle());
+			
+			if (rMiddle.PtInRect(point) && ((m_Left > m_Min) || (m_Right < m_Max)))
+			{
+				m_bTracking = TRUE;
+				m_TrackedButton = BUTTON_MIDDLE;
+				m_ClickOffset = point - rMiddle.CenterPoint();
+			}
 		}
+
 		if (m_bTracking)
+		{
 			SetCapture();
+		}
+		else if (m_Step > 0)
+		{
+			CRect rClient;
+			GetClientRect(rClient);
+
+			if (m_Left > m_Min)
+			{
+				CRect rLeft(rClient);
+
+				if (m_bHorizontal)
+					rLeft.right = m_RectLeft.left;
+				else
+					rLeft.bottom = m_RectLeft.top;
+
+				if (rLeft.PtInRect(point))
+				{
+					m_Left = max(m_Min, m_Left - m_Step);
+					Invalidate();
+
+					GetParent()->SendMessage(RANGE_CHANGED, RS_LEFTCHANGED);
+					return;
+				}
+			}
+			
+			if (m_Right < m_Max)
+			{
+				CRect rRight(rClient);
+	
+				if (m_bHorizontal)
+					rRight.left = m_RectRight.right;
+				else
+					rRight.top = m_RectRight.bottom;
+				
+				if (rRight.PtInRect(point))
+				{
+					m_Right = min(m_Max, m_Right + m_Step);
+					Invalidate();
+
+					GetParent()->SendMessage(RANGE_CHANGED, RS_RIGHTCHANGED);
+					return;
+				}
+			}
+		}
 	}
 	CWnd::OnLButtonDown(nFlags, point);
 }
