@@ -67,7 +67,6 @@ namespace GanttStatic
 	BOOL GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd);
 	int GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay);
 	int GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay);
-	CString FormatDate(int nMonth, int nYear, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades, BOOL bISO);
 }
 
 /////////////////////////////////////////////////////////////////////////////

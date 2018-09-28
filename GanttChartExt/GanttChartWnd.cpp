@@ -1097,20 +1097,10 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 
 void CGanttChartWnd::UpdateActiveRangeLabel()
 {
-	GANTTDATERANGE dtRange;
+	CString sRange = m_sliderDateRange.FormatRange(!m_ctrlGantt.HasOption(GTLCF_DECADESAREONEBASED));
 
-	if (!m_sliderDateRange.GetSelectedRange(dtRange))
-		m_sliderDateRange.GetMaxRange(dtRange);
-
-		dtRange.SetStart(dtRange.GetStart(m_ctrlGantt.GetMonthDisplay()));
-		dtRange.SetEnd(dtRange.GetEnd(m_ctrlGantt.GetMonthDisplay()));
-
-		CString sRange = dtRange.Format(GTLC_DISPLAY_MONTHS_MID, 
-										!m_ctrlGantt.HasOption(GTLCF_DECADESAREONEBASED), 
-										m_ctrlGantt.HasOption(GTLCF_DISPLAYISODATES));
-
-		m_sActiveDateRange.Format(IDS_ACTIVEDATERANGE, sRange);
-		UpdateData(FALSE);
+	m_sActiveDateRange.Format(IDS_ACTIVEDATERANGE, sRange);
+	UpdateData(FALSE);
 }
 
 LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM wp, LPARAM /*lp*/)

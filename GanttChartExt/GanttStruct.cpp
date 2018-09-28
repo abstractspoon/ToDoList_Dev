@@ -699,19 +699,6 @@ GANTTDATERANGE::GANTTDATERANGE(const COleDateTimeRange& dtOther)
 		Set(dtOther);
 }
 
-CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades, BOOL bISODates, TCHAR cDelim) const
-{
-	COleDateTime dtStart(GetStart(nDisplay, bZeroBasedDecades)), dtEnd(GetEnd(nDisplay, bZeroBasedDecades));
-
-	CString sStart(GanttStatic::FormatDate(dtStart.GetMonth(), dtStart.GetYear(), nDisplay, bZeroBasedDecades, bISODates));
-	CString sEnd(GanttStatic::FormatDate(dtEnd.GetMonth(), dtEnd.GetYear(), nDisplay, bZeroBasedDecades, bISODates));
-
-	CString sRange;
-	sRange.Format(_T("%s %c %s"), sStart, cDelim, sEnd);
-
-	return sRange;
-}
-
 BOOL GANTTDATERANGE::IsValid() const
 {
 	ASSERT(!m_bInclusive);

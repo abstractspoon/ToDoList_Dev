@@ -90,7 +90,7 @@ BOOL CGanttDateRangeSlider::SetMaxRange(const GANTTDATERANGE& dtRange)
 
 BOOL CGanttDateRangeSlider::GetMaxRange(GANTTDATERANGE& dtRange) const
 {
-	int nNumCols = GanttStatic::GetRequiredColumnCount(dtRange, m_nMonthDisplay) + 1;
+	int nNumCols = GanttStatic::GetRequiredColumnCount(m_dtMaxRange, m_nMonthDisplay) + 1;
 	int nMonthsPerCol = GanttStatic::GetNumMonthsPerColumn(m_nMonthDisplay);
 
 	COleDateTime dtStart(m_dtMaxRange.GetStart());
@@ -102,6 +102,26 @@ BOOL CGanttDateRangeSlider::GetMaxRange(GANTTDATERANGE& dtRange) const
 	dtRange.SetEnd(dtEnd);
 
 	return dtRange.IsValid();
+}
+
+CString CGanttDateRangeSlider::FormatRange(BOOL bZeroBasedDecades, TCHAR cDelim) const
+{
+	GANTTDATERANGE dtRange;
+
+	if (!GetSelectedRange(dtRange))
+		VERIFY(GetMaxRange(dtRange));
+
+	COleDateTime dtStart(dtRange.GetStart(m_nMonthDisplay, bZeroBasedDecades));
+	COleDateTime dtEnd(dtRange.GetEnd(m_nMonthDisplay, bZeroBasedDecades));
+
+	CString sStart, sEnd;
+	sStart.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
+	sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth(), TRUE), dtEnd.GetYear());
+
+	CString sRange;
+	sRange.Format(_T("%s %c %s"), sStart, cDelim, sEnd);
+
+	return sRange;
 }
 
 BOOL CGanttDateRangeSlider::HasSelectedRange() const
