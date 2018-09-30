@@ -91,7 +91,7 @@ public:
 	CString GetLanguageFile() const { return m_pageGen.GetLanguageFile(); }
 	BOOL GetSaveStoragePasswords() const { return m_pageGen.GetSaveStoragePasswords(); }
 	int GetAutoMinimizeFrequency() const { return m_pageGen.GetAutoMinimizeFrequency(); }
-	BOOL GetUseStickies(CString& sStickiesPath) const { return m_pageGen.GetUseStickies(sStickiesPath); }
+	BOOL GetUseStickies(CString& sStickiesPath, BOOL& bShowFullTaskPath) const { return m_pageGen.GetUseStickies(sStickiesPath, bShowFullTaskPath); }
 	BOOL GetReloadTasklists() const { return m_pageGen.GetReloadTasklists(); }
 	BOOL GetEnableRTLInput() const { return m_pageGen.GetEnableRTLInput(); }
 

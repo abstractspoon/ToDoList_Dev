@@ -50,6 +50,12 @@ CString TDCREMINDER::GetParentTitle() const
 	return (pTDC ? pTDC->GetParentTaskTitle(dwTaskID) : _T(""));
 }
 
+CString TDCREMINDER::GetTaskPath() const
+{
+	ASSERT(pTDC);
+	return (pTDC ? pTDC->GetTaskPath(dwTaskID) : _T(""));
+}
+
 CString TDCREMINDER::GetTaskListName() const
 {
 	ASSERT(pTDC);

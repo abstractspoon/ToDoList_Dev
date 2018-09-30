@@ -78,6 +78,7 @@ void CPreferencesGenPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_USESYSTRAY, m_bUseSysTray);
 	DDX_Check(pDX, IDC_CONFIRMDELETE, m_bConfirmDelete);
 	DDX_Check(pDX, IDC_CONFIRMSAVEONEXIT, m_bConfirmSaveOnExit);
+	DDX_Check(pDX, IDC_SHOWFULLPATHINSTICKY, m_bShowFullTaskPathInSticky);
 
 	// custom
 	if (pDX->m_bSaveAndValidate)
@@ -129,6 +130,7 @@ BOOL CPreferencesGenPage::OnInitDialog()
 	GetDlgItem(IDC_NOCHANGETIME)->EnableWindow(m_bMinimizeNoChange);
 	GetDlgItem(IDC_STICKIESPATHLABEL)->EnableWindow(m_bUseStickies);
 	GetDlgItem(IDC_PATHTOSTICKIESEXE)->EnableWindow(m_bUseStickies);
+	GetDlgItem(IDC_SHOWFULLPATHINSTICKY)->EnableWindow(m_bUseStickies);
 
 	// Hide admin indicators for OSes below vista
 	if (COSVersion() < OSV_VISTA)
@@ -214,6 +216,7 @@ void CPreferencesGenPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR sz
 	m_cbLanguages.SelectLanguageFile(sLangFile);
 
 	m_bUseStickies = pPrefs->GetProfileInt(szKey, _T("UseStickies"), FALSE);
+	m_bShowFullTaskPathInSticky = pPrefs->GetProfileInt(szKey, _T("ShowFullTaskPathInSticky"), FALSE);
 	m_sStickiesPath = pPrefs->GetProfileString(szKey, _T("PathToStickies"));
 
 	if (m_sStickiesPath.IsEmpty() && FileMisc::FileExists(DEFAULT_STICKIES_PATH))
@@ -241,11 +244,13 @@ void CPreferencesGenPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) c
 	pPrefs->WriteProfileInt(szKey, _T("SaveStoragePasswords"), m_bSaveStoragePasswords);
 	pPrefs->WriteProfileInt(szKey, _T("MinimizeNoEditTime"), m_nMinimizeNoEditTime);
 	pPrefs->WriteProfileInt(szKey, _T("MinimizeNoEdit"), m_bMinimizeNoChange);
-	pPrefs->WriteProfileInt(szKey, _T("UseStickies"), m_bUseStickies);
 	pPrefs->WriteProfileInt(szKey, _T("ReloadTasklists"), m_bReloadTasklists);
 	pPrefs->WriteProfileInt(szKey, _T("EnableRTLInput"), m_bEnableRTLInput);
 	pPrefs->WriteProfileInt(szKey, _T("EnableTDLExtension"), m_bEnableTDLExtension);
 	pPrefs->WriteProfileInt(szKey, _T("EnableTDLProtocol"), m_bEnableTDLProtocol);
+
+	pPrefs->WriteProfileInt(szKey, _T("UseStickies"), m_bUseStickies);
+	pPrefs->WriteProfileInt(szKey, _T("ShowFullTaskPathInSticky"), m_bShowFullTaskPathInSticky);
 
 	pPrefs->WriteProfileString(szKey, _T("LanguageFile"), m_cbLanguages.GetSelectedLanguageFile(TRUE)); // relative path
 	pPrefs->WriteProfileString(szKey, _T("PathToStickies"), m_sStickiesPath);
@@ -305,13 +310,16 @@ void CPreferencesGenPage::OnUseStickies()
 
 	GetDlgItem(IDC_STICKIESPATHLABEL)->EnableWindow(m_bUseStickies);
 	GetDlgItem(IDC_PATHTOSTICKIESEXE)->EnableWindow(m_bUseStickies);
+	GetDlgItem(IDC_SHOWFULLPATHINSTICKY)->EnableWindow(m_bUseStickies);
 }
 
-BOOL CPreferencesGenPage::GetUseStickies(CString& sStickiesPath) const
+BOOL CPreferencesGenPage::GetUseStickies(CString& sStickiesPath, BOOL& bShowFullTaskPath) const
 { 
 	if (m_bUseStickies && FileMisc::FileExists(m_sStickiesPath))
 	{
 		sStickiesPath = m_sStickiesPath;
+		bShowFullTaskPath = m_bShowFullTaskPathInSticky;
+
 		return TRUE;
 	}
 	

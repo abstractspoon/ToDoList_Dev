@@ -19,9 +19,10 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const double ONE_HOUR	= (1.0 / 24.0);
+const double ONE_HOUR	= (1.0 / 24);
 const double HALF_HOUR	= (ONE_HOUR / 2);
-const float  ONE_SECOND	= (1.0f / (24 * 60 * 60)); // intentionally 'float'
+const double ONE_MINUTE = (1.0 / (24 * 60));
+const float  ONE_SECOND	= (1.0f / (24 * 60 * 60)); // intentionally 'float' for less precision
 const double END_OF_DAY = (1.0 - ONE_SECOND);
 const double START_OF_DAY = ONE_SECOND;
 
@@ -898,7 +899,7 @@ BOOL CDateHelper::Max(COleDateTime& date, const COleDateTime& dtOther)
 	return IsDateSet(date);
 }
 
-int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2)
+int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2, DWORD dwCompareFlags)
 {
 	// Sort Non-dates below others
 	BOOL bHas1 = IsDateSet(date1);
@@ -913,43 +914,34 @@ int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2)
 		return 0;
 	}
 
-	return ((date1 < date2) ? -1 : (date1 > date2) ? 1 : 0);
-}
-
-int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2, 
-			BOOL bIncTime, BOOL bNoTimeMeansEndOfDay)
-{
-	// Sort Non-dates below others
-	BOOL bHas1 = IsDateSet(date1);
-	BOOL bHas2 = IsDateSet(date2);
-
-	if (bHas1 != bHas2)
+	if ((dwCompareFlags & DHC_COMPARETIME) == 0)
 	{
-		return (bHas1 ? -1 : 1);
-	}
-	else if (!bHas1 && !bHas2)
-	{
-		return 0;
+		// Compare dates only
+		double dDateOnly1 = CDateHelper::GetDateOnly(date1).m_dt;
+		double dDateOnly2 = CDateHelper::GetDateOnly(date2).m_dt;
+
+		return ((dDateOnly1 < dDateOnly2) ? -1 : ((dDateOnly1 > dDateOnly2) ? 1 : 0));
 	}
 
-	// Both dates are valid
-	COleDateTime dateTime1(date1), dateTime2(date2);
+	// else include time
+	double dDateTime1(date1.m_dt), dDateTime2(date2.m_dt);
 
-	if (bIncTime)
+	if (dwCompareFlags & DHC_NOTIMEISENDOFDAY)
 	{
-		if (bNoTimeMeansEndOfDay && !CDateHelper::DateHasTime(date1))
-			dateTime1 = CDateHelper::GetEndOfDay(date1);
+		if (!CDateHelper::DateHasTime(date1))
+			dDateTime1 = CDateHelper::GetEndOfDay(date1).m_dt;
 
-		if (bNoTimeMeansEndOfDay && !CDateHelper::DateHasTime(date2))
-			dateTime2 = CDateHelper::GetEndOfDay(date2);
-	}
-	else
-	{
-		dateTime1 = CDateHelper::GetDateOnly(date1);
-		dateTime2 = CDateHelper::GetDateOnly(date2);
+		if (!CDateHelper::DateHasTime(date2))
+			dDateTime2 = CDateHelper::GetEndOfDay(date2).m_dt;
 	}
 
-	return ((dateTime1 < dateTime2) ? -1 : (dateTime1 > dateTime2) ? 1 : 0);
+	if ((dwCompareFlags & DHC_COMPARESECONDS) == 0)
+	{
+		if (fabs(dDateTime1 - dDateTime2) < ONE_MINUTE)
+			return 0;
+	}
+
+	return ((dDateTime1 < dDateTime2) ? -1 : (dDateTime1 > dDateTime2) ? 1 : 0);
 }
 
 BOOL CDateHelper::IsDateSet(const COleDateTime& date)

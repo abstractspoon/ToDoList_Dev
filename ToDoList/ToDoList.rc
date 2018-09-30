@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,1,1000,7
+ FILEVERSION 7,1,1000,8
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 1, 1000, 7\0"
+            VALUE "FileVersion", "7, 1, 1000, 8\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-18\0"
             VALUE "LegalTrademarks", "\0"
@@ -206,7 +206,7 @@ END
 
 IDD_PREFGEN_PAGE DIALOGEX 0, 0, 400, 438
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&Display Language:",IDC_STATIC,7,10,376,10
     CONTROL         "",IDC_LANGUAGE,"ComboBoxEx32",CBS_DROPDOWNLIST | 
@@ -281,6 +281,9 @@ BEGIN
                     387,376,8
     EDITTEXT        IDC_PATHTOSTICKIESEXE,18,398,183,13,ES_AUTOHSCROLL
     PUSHBUTTON      "&Edit...",IDC_EDIT_DISPLAYLANGUAGE,206,22,50,14
+    CONTROL         "Show &full task path in Sticky",
+                    IDC_SHOWFULLPATHINSTICKY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,18,415,104,10
 END
 
 IDD_PREFMULTIUSER_PAGE DIALOG DISCARDABLE  0, 0, 400, 236
@@ -5168,7 +5171,6 @@ BEGIN
     IDS_LOG_STARTTIME       "Start Time"
     IDS_LOG_TIMESPENT       "Time Spent (Hrs)"
     IDS_STICKIES_TITLE      "ToDoList Reminder"
-    IDS_CLEANINGDICTPROGRESS "Cleaning language file..."
     IDS_FINDINCLUDE_PARENTS "Parent Tasks"
     IDS_FINDINCLUDE_FILTEREDOUT "Filtered-out tasks"
 END
@@ -5399,7 +5401,7 @@ BEGIN
     IDS_CMDLINE_IMPORT      "-m <filepath>\tImports the specified file"
     IDS_CMDLINE_COMMANDID   "-cmd <id>\tSends the specified command to ToDoList's main window"
     IDS_CMDLINE_STARTEMPTY  "-e\tStarts ToDoList without reloading any previously open tasklists"
-    IDS_CMDLINE_TASKLINK    "-l <task link>"
+    IDS_CMDLINE_TASKLINK    "-l <task link>\tOpens the specified tasklist and selects the specified task"
     IDS_CMDLINE_SAVEUIVISINTASKLIST 
                             "-z\tStores attribute visibility settings within each tasklist"
     IDS_CMDLINE_NEWTASK     "-nt <title>\tCreates a new task in the active tasklist with the specified title"

@@ -28,7 +28,7 @@ public:
 	CToDoCtrlReminders();
 
 	BOOL Initialize(CWnd* pNotify);
-	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath = NULL);
+	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath);
 
 	BOOL DestroyWindow() { return CTDLShowReminderDlg::DestroyWindow(); }
 	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
@@ -47,13 +47,15 @@ public:
 	BOOL RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
 
+	void CheckReminders();
+
 	static CString FormatWhenString(const TDCREMINDER& rem);
 
 // Attributes
 protected:
 	CWnd* m_pWndNotify;
 	CArray<TDCREMINDER, TDCREMINDER&> m_aReminders;
-	BOOL m_bUseStickies;
+	BOOL m_bUseStickies, m_bShowFullTaskPathInSticky;
 	CString m_sStickiesPath;
 	CStickiesWnd m_stickies;
 	CRichEditBaseCtrl m_rtfFormatter; // For 'Stickies'

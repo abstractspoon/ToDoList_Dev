@@ -24,7 +24,11 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCtrlReminders
 
-CToDoCtrlReminders::CToDoCtrlReminders() : m_pWndNotify(NULL), m_bUseStickies(FALSE)
+CToDoCtrlReminders::CToDoCtrlReminders() 
+	: 
+	m_pWndNotify(NULL), 
+	m_bUseStickies(FALSE),
+	m_bShowFullTaskPathInSticky(FALSE)
 {
 }
 
@@ -64,12 +68,13 @@ BOOL CToDoCtrlReminders::Initialize(CWnd* pNotify)
 	return TRUE;
 }
 
-BOOL CToDoCtrlReminders::UseStickies(BOOL bEnable, LPCTSTR szStickiesPath)
+BOOL CToDoCtrlReminders::UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath)
 {
 	if (!bEnable || FileMisc::FileExists(szStickiesPath))
 	{
 		m_bUseStickies = bEnable;
 		m_sStickiesPath = szStickiesPath;
+		m_bShowFullTaskPathInSticky = bShowFullTaskPath;
 
 		return TRUE;
 	}
@@ -397,18 +402,25 @@ void CToDoCtrlReminders::LoadReminders(const CFilteredToDoCtrl* pTDC)
 
 void CToDoCtrlReminders::OnTimer(UINT nIDEvent) 
 {
-	// prevent re-entrancy
-	AF_NOREENTRANT
-
-	int nRem = m_aReminders.GetSize();
-
-	if (nRem == 0)
+	if (!m_aReminders.GetSize())
 	{
 		KillTimer(1);
 		return;
 	}
 
+	CheckReminders();
+	
+	CTDLShowReminderDlg::OnTimer(nIDEvent);
+}
+
+void CToDoCtrlReminders::CheckReminders()
+{
+	// prevent re-entrancy
+	AF_NOREENTRANT
+
 	// Iterate all the reminders looking for matches
+	int nRem = m_aReminders.GetSize();
+
 	while (nRem--)
 	{
 		TDCREMINDER& rem = m_aReminders[nRem];
@@ -440,8 +452,6 @@ void CToDoCtrlReminders::OnTimer(UINT nIDEvent)
 		if (bDelete)
 			DeleteReminder(nRem);
 	}
-	
-	CTDLShowReminderDlg::OnTimer(nIDEvent);
 }
 
 BOOL CToDoCtrlReminders::InitialiseRTFFormatter()
@@ -464,12 +474,17 @@ BOOL CToDoCtrlReminders::BuildRTFContent(const TDCREMINDER& rem, CString& sConte
 	if (!InitialiseRTFFormatter())
 		return FALSE;
 
-	CString sText = rem.GetTaskTitle();
+	CString sText = rem.GetTaskTitle(), sPath = (m_bShowFullTaskPathInSticky ? rem.GetTaskPath() : rem.GetParentTitle());
 	int nTitleLen = sText.GetLength();
 
 	sText += _T("  "); // Where we're going to place the trailing task link
-	sText += _T("\n");
-	sText += '(' + rem.GetParentTitle() + ')';
+
+	if (!sPath.IsEmpty())
+	{
+		sText += _T("\n");
+		sText += '(' + sPath + ')';
+	}
+
 	sText += _T("\n\n");
 	sText += rem.FormatWhenString();
 	sText += _T("\n\n");

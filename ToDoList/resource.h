@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
+// Microsoft Developer Studio generated include file.
 // Used by ToDoList.rc
 //
 #define IDR_MANIFEST                    1
@@ -160,7 +160,6 @@
 #define IDI_ADD_LOGGED_TIME             308
 #define IDB_OUTLOOKTYPES                309
 #define IDR_FINDTASKS                   310
-#define IDD_DIALOG1                     312
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -804,8 +803,8 @@
 #define IDC_MOVEUP                      1515
 #define IDC_MOVEDOWN                    1516
 #define IDC_DELETE                      1517
+#define IDC_SHOWFULLPATHINSTICKY        1518
 #define IDC_SCHEMEPRIORITYCOLORS        1518
-#define IDC_SLIDER1                     1519
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2059,7 +2058,6 @@
 #define IDS_LOG_STARTTIME               58346
 #define IDS_LOG_TIMESPENT               58347
 #define IDS_STICKIES_TITLE              58348
-#define IDS_CLEANINGDICTPROGRESS        58349
 #define IDS_FINDINCLUDE_PARENTS         58350
 #define IDS_FINDINCLUDE_FILTEREDOUT     58351
 #define IDS_FINDINCLUDE_DONE            58352

@@ -795,7 +795,13 @@ BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 
 BOOL CToDoListWnd::EnableLogging(BOOL bEnable)
 {
-	return FileMisc::EnableLogging(bEnable, _T("Abstractspoon"));
+	BOOL bRes = FileMisc::EnableLogging(bEnable, _T("Abstractspoon"));
+
+	if (bRes && bEnable)
+		FileMisc::LogAppModuleState(FBM_SORTBY_FILENAME);
+
+	return bRes;
+
 }
 
 int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -2348,6 +2354,8 @@ TDC_PREPAREPATH CToDoListWnd::PrepareFilePath(CString& sFilePath, TSM_TASKLISTIN
 
 LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 {
+	const CPreferencesDlg& userPrefs = Prefs();
+	
 	// late initialization
 	CMouseWheelMgr::Initialize();
 	CEditShortcutMgr::Initialize();
@@ -2363,11 +2371,11 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	m_reminders.Initialize(this);
 
 	// with or without Stickies Support
-	const CPreferencesDlg& userPrefs = Prefs();
 	CString sStickiesPath;
+	BOOL bShowFullTaskPathInSticky = FALSE;
 	
-	if (userPrefs.GetUseStickies(sStickiesPath))
-		VERIFY(m_reminders.UseStickies(TRUE, sStickiesPath));
+	if (userPrefs.GetUseStickies(sStickiesPath, bShowFullTaskPathInSticky))
+		VERIFY(m_reminders.UseStickies(TRUE, sStickiesPath, bShowFullTaskPathInSticky));
 	
 	RestoreVisibility();
 	
@@ -3667,8 +3675,12 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		break;
 
 	case TDCA_TASKNAME:
-	case TDCA_NEWTASK:
 		UpdateTimeTrackerTasks(tdc, FALSE);
+		break;
+
+	case TDCA_NEWTASK:
+		if (!tdc.IsTaskLabelEditing())
+			UpdateTimeTrackerTasks(tdc, FALSE);
 		break;
 
 	case TDCA_CUSTOMATTRIBDEFS:
@@ -5061,11 +5073,10 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 
 		// Stickies Support
 		CString sStickiesPath;
+		BOOL bShowFullTaskPathInSticky = FALSE;
+		BOOL bUseStickies = newPrefs.GetUseStickies(sStickiesPath, bShowFullTaskPathInSticky);
 
-		if (newPrefs.GetUseStickies(sStickiesPath))
-			VERIFY(m_reminders.UseStickies(TRUE, sStickiesPath));
-		else
-			m_reminders.UseStickies(FALSE);
+		VERIFY(m_reminders.UseStickies(bUseStickies, sStickiesPath, bShowFullTaskPathInSticky));
 
 		// Content controls
 		m_mgrContent.LoadPreferences(CPreferences(), _T("ContentControls"), TRUE);
@@ -12666,6 +12677,7 @@ void CToDoListWnd::OnEditSetReminder()
 			rem.dwTaskID = aTaskIDs[nTask];
 			m_reminders.SetReminder(rem);
 		}
+		m_reminders.CheckReminders();
 		break;
 		
 	case IDDISMISS:

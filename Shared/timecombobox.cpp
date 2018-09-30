@@ -85,10 +85,9 @@ void CTimeComboBox::BuildCombo(BOOL bReset)
 	{
 		CString sTime;
 		
-		if (!(m_dwStyle & TCB_NOTIME) || (nHour >  0))
+		if (!(m_dwStyle & TCB_NOTIME) || (nHour > 0))
 			sTime = CTimeHelper::FormatClockTime(nHour, 0, 0, FALSE, (m_dwStyle & TCB_ISO));
 		
-		// add empty string representing 'no time'
 		AddString(sTime);
 		
 		if (m_dwStyle & TCB_HALFHOURS)
@@ -174,12 +173,11 @@ double CTimeComboBox::Get24HourTime() const
 
 double CTimeComboBox::Get24HourTime(int nItem) const
 {
-	// since the items in the combo are ordered from 1am to 11pm
-	// we can use the selection index as a direct link to the hour
 	if (nItem < 0) // 'no time'
 		return 0.0;
 
-	// else
+	// since the items in the combo are ordered from 1am to 11pm
+	// we can use the selection index as a direct link to the hour
 	if (m_dwStyle & TCB_HALFHOURS)
 		return min(24.0, (nItem * 0.5));
 
@@ -266,7 +264,7 @@ void CTimeComboBox::ScrollListBox()
 
 	double dCurTime = Get24HourTime();
 
-	if ((dCurTime < 0) || (dCurTime > STARTOFWORKDAY))
+	if ((dCurTime == 0.0) || (dCurTime > STARTOFWORKDAY))
 	{
 		int nCurScrollPos = ::GetScrollPos(m_hwndListBox, SB_VERT);
 		int nMinScrollPos = STARTOFWORKDAY; 
@@ -297,8 +295,9 @@ void CTimeComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
 		double dTime = Get24HourTime(nItem);
 		CTimeHelper th;
 
-		if ((dTime < th.GetStartOfWorkday(FALSE)) ||
-			(dTime > th.GetEndOfWorkday(FALSE)))
+		if ((dTime > 0) &&
+			((dTime < th.GetStartOfWorkday(FALSE)) ||
+			(dTime > th.GetEndOfWorkday(FALSE))))
 		{
 			crBack = GetSysColor(COLOR_3DFACE);
 			crText = GetSysColor(COLOR_3DSHADOW);

@@ -29,6 +29,7 @@ struct TDCREMINDER
 	CString GetParentTitle() const;
 	CString GetTaskListName() const;
 	CString GetTaskComments() const;
+	CString GetTaskPath() const;
 	BOOL IsTaskRecurring() const;
 	BOOL IsTaskDone() const;
 	BOOL TaskExists() const;

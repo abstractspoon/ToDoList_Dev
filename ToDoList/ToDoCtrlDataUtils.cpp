@@ -1556,25 +1556,27 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 
 int CTDCTaskComparer::Compare(const COleDateTime& date1, const COleDateTime& date2, BOOL bIncTime, TDC_DATE nDate)
 {
+	DWORD dwCompareFlags = (bIncTime ? DHC_COMPARETIME : 0);
+
 	switch (nDate)
 	{
 	case TDCD_START:
 		// Default to the beginning of the day
-		return CDateHelper::Compare(date1, date2, bIncTime, FALSE);
+		return CDateHelper::Compare(date1, date2, dwCompareFlags);
 
 	case TDCD_DUE:
 	case TDCD_DONE:
 		// Default to the end of the day
-		return CDateHelper::Compare(date1, date2, bIncTime, TRUE);
+		return CDateHelper::Compare(date1, date2, (dwCompareFlags | DHC_NOTIMEISENDOFDAY));
 
 	case TDCD_CREATE:
 		// Should never end up here but once upon a time
 		// we didn't store the creation time for tasks...
-		return CDateHelper::Compare(date1, date2, bIncTime, FALSE);
+		return CDateHelper::Compare(date1, date2, dwCompareFlags);
 
 	case TDCD_LASTMOD:
 		// Should never end up here
-		return CDateHelper::Compare(date1, date2, bIncTime, FALSE);
+		return CDateHelper::Compare(date1, date2, dwCompareFlags);
 	}
 	
 	// No other values permissible

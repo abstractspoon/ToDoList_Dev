@@ -58,7 +58,7 @@ public:
 	CString GetLanguageFile() const { return m_cbLanguages.GetSelectedLanguageFile(); }
 	BOOL GetSaveStoragePasswords() const { return m_bSaveStoragePasswords; }
 	UINT GetAutoMinimizeFrequency() const { return (m_bMinimizeNoChange ? m_nMinimizeNoEditTime : 0); }
-	BOOL GetUseStickies(CString& sStickiesPath) const;
+	BOOL GetUseStickies(CString& sStickiesPath, BOOL& bShowFullTaskPath) const;
 	BOOL GetReloadTasklists() const { return m_bReloadTasklists; }
 	BOOL GetEnableRTLInput() const { return m_bEnableRTLInput; }
 //	BOOL Get() const { return m_b; }
@@ -95,6 +95,7 @@ public:
 	CFileEdit	m_eStickiesPath;
 	DWORD	m_dwGlobalHotkey;
 	UINT    m_nMinimizeNoEditTime;
+	BOOL	m_bShowFullTaskPathInSticky;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

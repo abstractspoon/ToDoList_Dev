@@ -73,10 +73,13 @@ enum // OLE Days of week
 	DHO_FRIDAY,
 	DHO_SATURDAY,
 };
-// Note: 
-// 1 <= nMonth <= 12
-// 1 <= nDay <= 31
-// 1 <= nDOW <= 7
+
+enum // Compare Flags
+{
+	DHC_COMPARETIME			= 0x01,
+	DHC_COMPARESECONDS		= 0x02, // ignored without DHC_COMPARETIME
+	DHC_NOTIMEISENDOFDAY	= 0x04, // ignored without DHC_COMPARETIME
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -148,6 +151,11 @@ public:
 
 class CDateHelper  
 {
+// Note: 
+// 1 <= nMonth <= 12
+// 1 <= nDay <= 31
+// 1 <= nDOW <= 7
+
 public:
 	static BOOL IsDateSet(const COleDateTime& date);
 	static void ClearDate(COleDateTime& date);
@@ -270,9 +278,7 @@ public:
 	static BOOL Min(COleDateTime& date, const COleDateTime& dtOther);
 	static BOOL Max(COleDateTime& date, const COleDateTime& dtOther);
 
-	static int Compare(const COleDateTime& date1, const COleDateTime& date2);
-	static int Compare(const COleDateTime& date1, const COleDateTime& date2, 
-						BOOL bIncTime, BOOL bNoTimeMeansEndOfDay);
+	static int Compare(const COleDateTime& date1, const COleDateTime& date2, DWORD dwCompareFlags = DHC_COMPARETIME);
 
 protected:
 	static DWORD s_dwWeekend; 
