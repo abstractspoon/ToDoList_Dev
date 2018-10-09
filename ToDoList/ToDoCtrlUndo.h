@@ -19,7 +19,7 @@
 
 struct TDCUNDOELEMENT
 {
-	TDCUNDOELEMENT(TDCUNDOELMOP op = TDCUEO_EDIT, DWORD taskID = 0, DWORD parentID = 0, 
+	TDCUNDOELEMENT(TDC_UNDOELMOP op = TDCUEO_EDIT, DWORD taskID = 0, DWORD parentID = 0, 
 					DWORD prevSiblingID = 0, WORD flags = 0, const TODOITEM* pTDI = NULL) : 
 					nOp(op), 
 					dwTaskID(taskID), 
@@ -62,7 +62,7 @@ struct TDCUNDOELEMENT
 		return !(*this == elm);
 	}
 
-	TDCUNDOELMOP nOp;
+	TDC_UNDOELMOP nOp;
 	DWORD dwTaskID;
 	DWORD dwParentID;
 	DWORD dwPrevSiblingID;
@@ -79,7 +79,7 @@ typedef CArray<TDCUNDOELEMENT, TDCUNDOELEMENT&> CArrayUndoElements;
 
 struct TDCUNDOACTION
 {
-	TDCUNDOACTION(TDCUNDOACTIONTYPE type = TDCUAT_NONE) : nType(type) 
+	TDCUNDOACTION(TDC_UNDOACTIONTYPE type = TDCUAT_NONE) : nType(type) 
 	{
 	}
 	
@@ -118,7 +118,7 @@ struct TDCUNDOACTION
 		return aIDs.GetSize();
 	}
 
-	TDCUNDOACTIONTYPE nType;
+	TDC_UNDOACTIONTYPE nType;
 	CArrayUndoElements aElements;
 };
 
@@ -132,24 +132,24 @@ public:
 
 	void ResetAll();
 
-	BOOL BeginNewAction(TDCUNDOACTIONTYPE nType);
+	BOOL BeginNewAction(TDC_UNDOACTIONTYPE nType);
 	BOOL EndCurrentAction();
-	BOOL ExtendLastAction(TDCUNDOACTIONTYPE nType = TDCUAT_NONE);
+	BOOL ExtendLastAction(TDC_UNDOACTIONTYPE nType = TDCUAT_NONE);
 
-	TDCUNDOACTIONTYPE CurrentAction() const { return m_nActiveAction; }
+	TDC_UNDOACTIONTYPE CurrentAction() const { return m_nActiveAction; }
 	BOOL IsActive() const { return (CurrentAction() != TDCUAT_NONE); }
 
-	BOOL SaveElement(TDCUNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID, DWORD dwPrevSiblingID, 
+	BOOL SaveElement(TDC_UNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID, DWORD dwPrevSiblingID, 
 					 WORD wFlags, const TODOITEM* pTDI);
-	BOOL IsValidElementOperation(TDCUNDOELMOP nOp) const;
+	BOOL IsValidElementOperation(TDC_UNDOELMOP nOp) const;
 
 	int GetLastUndoActionTaskIDs(CDWordArray& aIDs) const;
 	int GetLastRedoActionTaskIDs(CDWordArray& aIDs) const;
 
 	BOOL DeleteLastUndoAction(); // only if no redos exist
 
-	TDCUNDOACTIONTYPE GetLastUndoType() const;
-	TDCUNDOACTIONTYPE GetLastRedoType() const;
+	TDC_UNDOACTIONTYPE GetLastUndoType() const;
+	TDC_UNDOACTIONTYPE GetLastRedoType() const;
 
 	TDCUNDOACTION* UndoLastAction();
 	TDCUNDOACTION* RedoLastAction();
@@ -161,7 +161,7 @@ protected:
 	CArray<TDCUNDOACTION, TDCUNDOACTION&> m_aUndo;
 	CArray<TDCUNDOACTION, TDCUNDOACTION&> m_aRedo;
 
-	TDCUNDOACTIONTYPE m_nActiveAction;
+	TDC_UNDOACTIONTYPE m_nActiveAction;
 
 protected:
 	TDCUNDOACTION& LastUndoAction();

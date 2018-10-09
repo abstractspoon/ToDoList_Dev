@@ -30,7 +30,7 @@ class CDWordSet;
 class CUndoAction
 {
 public:
-	CUndoAction(CToDoCtrlData& data, TDCUNDOACTIONTYPE nType, BOOL bExtendLastAction);
+	CUndoAction(CToDoCtrlData& data, TDC_UNDOACTIONTYPE nType, BOOL bExtendLastAction);
 	~CUndoAction();
 
 protected:
@@ -85,13 +85,13 @@ public:
 	BOOL FixupParentCompletion(DWORD dwParentID, BOOL bClearStatus);
 
 	// undo/redo
-	BOOL BeginNewUndoAction(TDCUNDOACTIONTYPE nType);
+	BOOL BeginNewUndoAction(TDC_UNDOACTIONTYPE nType);
 	BOOL EndCurrentUndoAction();
-	BOOL ExtendLastUndoAction(TDCUNDOACTIONTYPE nType = TDCUAT_NONE);
+	BOOL ExtendLastUndoAction(TDC_UNDOACTIONTYPE nType = TDCUAT_NONE);
 	BOOL UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms);
 	BOOL CanUndoLastAction(BOOL bUndo) const;
 	int GetLastUndoActionTaskIDs(BOOL bUndo, CDWordArray& aIDs) const;
-	TDCUNDOACTIONTYPE GetLastUndoActionType(BOOL bUndo) const;
+	TDC_UNDOACTIONTYPE GetLastUndoActionType(BOOL bUndo) const;
 	BOOL DeleteLastUndoAction();
 
 	// Gets
@@ -260,7 +260,7 @@ protected:
 	BOOL CalcMissingStartDateFromDue(TODOITEM* pTDI) const;
 	BOOL CalcMissingDueDateFromStart(TODOITEM* pTDI) const;
 
-	BOOL AddUndoElement(TDCUNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID = 0, 
+	BOOL AddUndoElement(TDC_UNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID = 0, 
 						DWORD dwPrevSiblingID = 0, WORD wFlags = 0);
 	BOOL SaveEditUndo(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib);
 

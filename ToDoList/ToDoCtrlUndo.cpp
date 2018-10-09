@@ -25,7 +25,7 @@ CToDoCtrlUndo::~CToDoCtrlUndo()
 	ASSERT(m_nActiveAction == TDCUAT_NONE);
 }
 
-BOOL CToDoCtrlUndo::BeginNewAction(TDCUNDOACTIONTYPE nType)
+BOOL CToDoCtrlUndo::BeginNewAction(TDC_UNDOACTIONTYPE nType)
 {
 	// Sanity check
 	if (nType == TDCUAT_NONE)
@@ -76,7 +76,7 @@ BOOL CToDoCtrlUndo::EndCurrentAction()
 	return TRUE;
 }
 
-BOOL CToDoCtrlUndo::ExtendLastAction(TDCUNDOACTIONTYPE nType)
+BOOL CToDoCtrlUndo::ExtendLastAction(TDC_UNDOACTIONTYPE nType)
 {
 	// Sanity checks
 	if (nType == TDCUAT_NONE)
@@ -113,7 +113,7 @@ BOOL CToDoCtrlUndo::DeleteLastUndoAction()
 	return TRUE;
 }
 
-BOOL CToDoCtrlUndo::SaveElement(TDCUNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID, DWORD dwPrevSiblingID, 
+BOOL CToDoCtrlUndo::SaveElement(TDC_UNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID, DWORD dwPrevSiblingID, 
 								WORD wFlags, const TODOITEM* pTDI)
 {
 	if (m_nActiveAction == TDCUAT_NONE)
@@ -137,7 +137,7 @@ BOOL CToDoCtrlUndo::SaveElement(TDCUNDOELMOP nOp, DWORD dwTaskID, DWORD dwParent
 	return TRUE;
 }
 
-BOOL CToDoCtrlUndo::IsValidElementOperation(TDCUNDOELMOP nOp) const
+BOOL CToDoCtrlUndo::IsValidElementOperation(TDC_UNDOELMOP nOp) const
 {
 	ASSERT (m_nActiveAction != TDCUAT_NONE);
 
@@ -256,14 +256,14 @@ const TDCUNDOACTION& CToDoCtrlUndo::LastRedoAction() const
 	return *(m_aRedo.GetData() + LastRedoIndex());
 }
 
-TDCUNDOACTIONTYPE CToDoCtrlUndo::GetLastUndoType() const
+TDC_UNDOACTIONTYPE CToDoCtrlUndo::GetLastUndoType() const
 {
 	ASSERT (CanUndo());
 
 	return (CanUndo() ? LastUndoAction().nType : TDCUAT_NONE);
 }
 
-TDCUNDOACTIONTYPE CToDoCtrlUndo::GetLastRedoType() const
+TDC_UNDOACTIONTYPE CToDoCtrlUndo::GetLastRedoType() const
 {
 	ASSERT (CanRedo());
 

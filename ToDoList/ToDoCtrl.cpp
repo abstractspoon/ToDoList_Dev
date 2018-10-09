@@ -5472,7 +5472,7 @@ LRESULT CToDoCtrl::OnEditEnd(WPARAM /*wParam*/, LPARAM lParam)
 
 		// Special handling: For new tasks we extend the previous undo
 		BOOL bNewTask = (m_dwEditTitleTaskID == m_dwLastAddedID);
-		TDCUNDOACTIONTYPE nAction = (bNewTask ? TDCUAT_ADD : TDCUAT_EDIT);
+		TDC_UNDOACTIONTYPE nAction = (bNewTask ? TDCUAT_ADD : TDCUAT_EDIT);
 
 		IMPLEMENT_DATA_UNDO_EXTEND(m_data, nAction, bNewTask);
 		
@@ -12309,7 +12309,7 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 
 		// get the list of the task IDs that will be undone/redone
 		CDWordArray aTaskIDs;
-		TDCUNDOACTIONTYPE nUndoType = m_data.GetLastUndoActionType(bUndo);
+		TDC_UNDOACTIONTYPE nUndoType = m_data.GetLastUndoActionType(bUndo);
 
 		// but not if the result is that the items in question were deleted
 		if (!(nUndoType == TDCUAT_DELETE && !bUndo) && 

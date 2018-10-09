@@ -850,7 +850,9 @@ enum TDC_REMINDER
 	TDCR_DUEDATE,
 };
 
-enum TDCUNDOELMOP
+/////////////////////////////////////////////////////////////////////////////
+
+enum TDC_UNDOELMOP
 {
 	TDCUEO_EDIT,
 	TDCUEO_ADD,
@@ -858,7 +860,9 @@ enum TDCUNDOELMOP
 	TDCUEO_MOVE,
 };
 
-enum TDCUNDOACTIONTYPE
+/////////////////////////////////////////////////////////////////////////////
+
+enum TDC_UNDOACTIONTYPE
 {
 	TDCUAT_NONE = -1,
 	TDCUAT_EDIT,

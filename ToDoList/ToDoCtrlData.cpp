@@ -58,7 +58,7 @@ enum
 
 //////////////////////////////////////////////////////////////////////
 
-CUndoAction::CUndoAction(CToDoCtrlData& data, TDCUNDOACTIONTYPE nType, BOOL bExtendLastAction) 
+CUndoAction::CUndoAction(CToDoCtrlData& data, TDC_UNDOACTIONTYPE nType, BOOL bExtendLastAction) 
 	: m_data(data), m_bActive(FALSE)
 {
 	if (bExtendLastAction)
@@ -2564,7 +2564,7 @@ TDC_SET CToDoCtrlData::SetTaskFileRefs(DWORD dwTaskID, const CStringArray& aFile
 	return EditTaskArrayAttribute(dwTaskID, pTDI, TDCA_FILEREF, pTDI->aFileLinks, aFileRefs, bAppend, TRUE);
 }
 
-BOOL CToDoCtrlData::BeginNewUndoAction(TDCUNDOACTIONTYPE nType)
+BOOL CToDoCtrlData::BeginNewUndoAction(TDC_UNDOACTIONTYPE nType)
 {
 	return m_undo.BeginNewAction(nType);
 }
@@ -2574,12 +2574,12 @@ BOOL CToDoCtrlData::EndCurrentUndoAction()
 	return m_undo.EndCurrentAction();
 }
 
-BOOL CToDoCtrlData::ExtendLastUndoAction(TDCUNDOACTIONTYPE nType)
+BOOL CToDoCtrlData::ExtendLastUndoAction(TDC_UNDOACTIONTYPE nType)
 {
 	return m_undo.ExtendLastAction(nType);
 }
 
-BOOL CToDoCtrlData::AddUndoElement(TDCUNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID, DWORD dwPrevSiblingID, WORD wFlags)
+BOOL CToDoCtrlData::AddUndoElement(TDC_UNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID, DWORD dwPrevSiblingID, WORD wFlags)
 {
 	if (!m_undo.IsActive())
 		return FALSE;
@@ -2620,7 +2620,7 @@ int CToDoCtrlData::GetLastUndoActionTaskIDs(BOOL bUndo, CDWordArray& aIDs) const
 	return bUndo ? m_undo.GetLastUndoActionTaskIDs(aIDs) : m_undo.GetLastRedoActionTaskIDs(aIDs);
 }
 
-TDCUNDOACTIONTYPE CToDoCtrlData::GetLastUndoActionType(BOOL bUndo) const
+TDC_UNDOACTIONTYPE CToDoCtrlData::GetLastUndoActionType(BOOL bUndo) const
 {
 	return (bUndo ? m_undo.GetLastUndoType() : m_undo.GetLastRedoType());
 }
