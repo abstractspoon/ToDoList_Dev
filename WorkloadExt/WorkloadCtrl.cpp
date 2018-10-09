@@ -3627,11 +3627,11 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 			break;
 
 		case WLCC_STARTDATE:
-			nCompare = CDateHelper::Compare(pWI1->dtRange.m_dtStart, pWI2->dtRange.m_dtStart, TRUE, FALSE);
+			nCompare = CDateHelper::Compare(pWI1->dtRange.m_dtStart, pWI2->dtRange.m_dtStart, DHC_COMPARETIME);
 			break;
 
 		case WLCC_DUEDATE:
-			nCompare = CDateHelper::Compare(pWI1->dtRange.m_dtEnd, pWI2->dtRange.m_dtEnd, TRUE, TRUE);
+			nCompare = CDateHelper::Compare(pWI1->dtRange.m_dtEnd, pWI2->dtRange.m_dtEnd, DHC_COMPARETIME | DHC_NOTIMEISENDOFDAY);
 			break;
 
 		case WLCC_DURATION:
