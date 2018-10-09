@@ -2590,10 +2590,7 @@ int CTDLTaskTreeCtrl::SaveTreeExpandedState(CPreferences& prefs, const CString& 
 
 void CTDLTaskTreeCtrl::SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn)
 {
-	if (bOn)
-		TreeView_SetImageList(m_tcTasks, hil, (bState ? TVSIL_STATE : TVSIL_NORMAL));
-	else
-		TreeView_SetImageList(m_tcTasks, NULL, (bState ? TVSIL_STATE : TVSIL_NORMAL));
+	TreeView_SetImageList(m_tcTasks, (bOn ? hil : NULL), (bState ? TVSIL_STATE : TVSIL_NORMAL));
 }
 
 double CTDLTaskTreeCtrl::CalcSelectedTaskTimeEstimate(TDC_UNITS nUnits) const

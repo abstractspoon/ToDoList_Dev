@@ -558,7 +558,7 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 		
 	// all else (fallback)
 	if (AddListReminder(rem))
-		ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW);
+		ShowWindow();
 
 	// Only flash the titlebar if we are visible and 
 	// our owner is not disabled (showing a modal dialog)

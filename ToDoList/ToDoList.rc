@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,1,1000,8
+ FILEVERSION 7,1,1000,9
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 1, 1000, 8\0"
+            VALUE "FileVersion", "7, 1, 1000, 9\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-18\0"
             VALUE "LegalTrademarks", "\0"
@@ -206,7 +206,7 @@ END
 
 IDD_PREFGEN_PAGE DIALOGEX 0, 0, 400, 438
 STYLE WS_CHILD
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "&Display Language:",IDC_STATIC,7,10,376,10
     CONTROL         "",IDC_LANGUAGE,"ComboBoxEx32",CBS_DROPDOWNLIST | 
@@ -2920,6 +2920,9 @@ BEGIN
         MENUITEM "New T&ask Below Selected Task", 
                                                 ID_NEWTASK_AFTERSELECTEDTASK
         MENUITEM SEPARATOR
+        MENUITEM "New Dependent Tas&k Above Selected Task", 
+                                                ID_NEWTASK_DEPENDENTBEFORESELECTEDTASK
+
         MENUITEM "New &Dependent Task Below Selected Task", 
                                                 ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK
 
@@ -2929,17 +2932,13 @@ BEGIN
                                                 ID_NEWSUBTASK_ATBOTTOM
         MENUITEM SEPARATOR
         MENUITEM "S&plit Selected Task into Two (2) Equal Subtasks", 
-                                                ID_NEWTASK_SPLITTASKINTO_TWO
+                                                ID_SPLITTASKINTO_TWO
         POPUP "Split Selected Tas&k into"
         BEGIN
-            MENUITEM "&Two (2) Equal Subtasks",     ID_NEWTASK_SPLITTASKINTO_TWO
-
-            MENUITEM "T&hree (3) Equal Subtasks",   ID_NEWTASK_SPLITTASKINTO_THREE
-
-            MENUITEM "&Four (4) Equal Subtasks",    ID_NEWTASK_SPLITTASKINTO_FOUR
-
-            MENUITEM "Fi&ve (5) Equal Subtasks",    ID_NEWTASK_SPLITTASKINTO_FIVE
-
+            MENUITEM "&Two (2) Equal Subtasks",     ID_SPLITTASKINTO_TWO
+            MENUITEM "T&hree (3) Equal Subtasks",   ID_SPLITTASKINTO_THREE
+            MENUITEM "&Four (4) Equal Subtasks",    ID_SPLITTASKINTO_FOUR
+            MENUITEM "Fi&ve (5) Equal Subtasks",    ID_SPLITTASKINTO_FIVE
         END
     END
     POPUP "&Edit"
@@ -3158,6 +3157,7 @@ BEGIN
         MENUITEM "&Refresh Filter",             ID_VIEW_REFRESHFILTER
         MENUITEM SEPARATOR
         MENUITEM "Show Time Trac&ker",          ID_VIEW_SHOWTIMETRACKER
+        MENUITEM "Show Reminder &Notification Window", ID_VIEW_SHOWREMINDERS
         MENUITEM SEPARATOR
         POPUP "Task View &Visibility"
         BEGIN
@@ -3540,18 +3540,13 @@ BEGIN
                                                 ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK
 
         MENUITEM SEPARATOR
-        MENUITEM "Split Task(s) into Two (2) Subtasks", 
-                                                ID_NEWTASK_SPLITTASKINTO_TWO
+        MENUITEM "Split Task(s) into Two (2) Subtasks", ID_SPLITTASKINTO_TWO
         POPUP "Split Task(s) into"
         BEGIN
-            MENUITEM "Two (2) Subtasks",            ID_NEWTASK_SPLITTASKINTO_TWO
-
-            MENUITEM "Three (3) Subtasks",          ID_NEWTASK_SPLITTASKINTO_THREE
-
-            MENUITEM "Four (4) Subtasks",           ID_NEWTASK_SPLITTASKINTO_FOUR
-
-            MENUITEM "Five (5) Subtasks",           ID_NEWTASK_SPLITTASKINTO_FIVE
-
+            MENUITEM "Two (2) Subtasks",            ID_SPLITTASKINTO_TWO
+            MENUITEM "Three (3) Subtasks",          ID_SPLITTASKINTO_THREE
+            MENUITEM "Four (4) Subtasks",           ID_SPLITTASKINTO_FOUR
+            MENUITEM "Five (5) Subtasks",           ID_SPLITTASKINTO_FIVE
         END
         MENUITEM SEPARATOR
         MENUITEM "&Toggle Task Expanded State", ID_VIEW_TOGGLETASKEXPANDED

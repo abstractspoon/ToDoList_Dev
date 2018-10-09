@@ -2693,7 +2693,7 @@ struct TDCCOLEDITVISIBILITY
 		nShowFields = TDLSA_ASCOLUMN;
 	}
 
-	BOOL CheckForDiff(const TDCCOLEDITVISIBILITY& vis, 
+	BOOL HasDifferences(const TDCCOLEDITVISIBILITY& vis, 
 						BOOL& bColumnChange, BOOL& bEditChange) const
 	{
 		bColumnChange = !mapVisibleColumns.MatchAll(vis.mapVisibleColumns);
@@ -3179,11 +3179,11 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 		mapVisibleFilters.RemoveAll();
 	}
 
-	BOOL CheckForDiff(const TDCCOLEDITFILTERVISIBILITY& vis, 
+	BOOL HasDifferences(const TDCCOLEDITFILTERVISIBILITY& vis, 
 						BOOL& bColumnChange, BOOL& bEditChange, BOOL& bFilterChange) const
 	{
-		TDCCOLEDITVISIBILITY::CheckForDiff(vis, bColumnChange, bEditChange);
-		bFilterChange = !mapVisibleEdits.MatchAll(vis.mapVisibleEdits);
+		TDCCOLEDITVISIBILITY::HasDifferences(vis, bColumnChange, bEditChange);
+		bFilterChange = !mapVisibleFilters.MatchAll(vis.mapVisibleFilters);
 
 		return (bEditChange || bColumnChange || bFilterChange);
 	}

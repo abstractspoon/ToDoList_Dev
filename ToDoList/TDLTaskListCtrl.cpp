@@ -136,10 +136,7 @@ BOOL CTDLTaskListCtrl::CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL 
 
 void CTDLTaskListCtrl::SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn) 
 {
-	if (bOn)
-		ListView_SetImageList(m_lcTasks, hil, (bState ? LVSIL_STATE : LVSIL_SMALL));
-	else
-		ListView_SetImageList(m_lcTasks, NULL, (bState ? LVSIL_STATE : LVSIL_SMALL));
+	ListView_SetImageList(m_lcTasks, (bOn ? hil : NULL), (bState ? LVSIL_STATE : LVSIL_SMALL));
 }
 
 BOOL CTDLTaskListCtrl::IsListItemSelected(HWND hwnd, int nItem) const

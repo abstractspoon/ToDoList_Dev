@@ -3129,8 +3129,10 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 				mapAttrib.Add((TDC_ATTRIBUTE)nAttrib);
 		}
 
+		if (pExtWnd->WantTaskUpdate(IUI_CUSTOMATTRIB))
+			mapAttrib.Add(TDCA_CUSTOMATTRIB_ALL);
+
 		// Always
-		mapAttrib.Add(TDCA_CUSTOMATTRIB);
 		mapAttrib.Add(TDCA_LOCK);
 		mapAttrib.Add(TDCA_METADATA);
 

@@ -5933,7 +5933,7 @@ void CToDoCtrl::UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges)
 void CToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis)
 {
 	BOOL bColumnChange, bEditChange;
-	BOOL bChange = m_visColEdit.CheckForDiff(vis, bColumnChange, bEditChange);
+	BOOL bChange = m_visColEdit.HasDifferences(vis, bColumnChange, bEditChange);
 
 	if (!bChange)
 		return;
@@ -10477,22 +10477,9 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 		if (aFiles.GetSize())
 		{
 			if (pData->dwTaskID)
-			{
-				// Add file paths to target's existing file Links
-				IMPLEMENT_DATA_UNDO_EDIT(m_data);
+				SelectTask(pData->dwTaskID, FALSE);
 			
-				if (m_data.SetTaskFileRefs(pData->dwTaskID, aFiles, TRUE) == SET_CHANGE)
-				{
-					SetModified(TRUE, TDCA_FILEREF, pData->dwTaskID);
-
-					if (GetSelectedCount() == 1)
-					{
-						GetSelectedTaskFileRefs(m_aFileRefs, FALSE);
-						m_cbFileRef.SetFileList(m_aFileRefs);
-					}
-				}
-			}
-			else
+			if (pData->bImportTasks)
 			{
 				switch (CreateTasksFromOutlookObjects(pData))
 				{
@@ -10505,6 +10492,10 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 				default:
 					break; // all good
 				}
+			}
+			else
+			{
+				SetSelectedTaskFileRefs(aFiles, TRUE, FALSE);
 			}
 		}
 		else

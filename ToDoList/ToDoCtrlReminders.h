@@ -30,6 +30,7 @@ public:
 	BOOL Initialize(CWnd* pNotify);
 	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath);
 
+	void ShowWindow() { CTDLShowReminderDlg::ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW); }
 	BOOL DestroyWindow() { return CTDLShowReminderDlg::DestroyWindow(); }
 	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
 
@@ -46,6 +47,7 @@ public:
 	BOOL RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	BOOL RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
+	BOOL IsEmpty() const { return (GetListReminderCount() == 0); }
 
 	void CheckReminders();
 

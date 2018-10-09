@@ -432,12 +432,14 @@ void CTDLShowReminderDlg::EnableControls()
 {
 	UpdateData();
 	
-	GetDlgItem(IDC_SNOOZEFOR)->EnableWindow(!m_bSnoozeUntil);
-	GetDlgItem(IDC_SNOOZEUNTILDATE)->EnableWindow(m_bSnoozeUntil);
-	GetDlgItem(IDC_SNOOZEUNTILTIME)->EnableWindow(m_bSnoozeUntil);
-
 	int nNumSel = m_lcReminders.GetSelectedCount();
 
+	GetDlgItem(IDC_SNOOZEFOR)->EnableWindow(nNumSel && !m_bSnoozeUntil);
+	GetDlgItem(IDC_SNOOZEUNTILDATE)->EnableWindow(nNumSel && m_bSnoozeUntil);
+	GetDlgItem(IDC_SNOOZEUNTILTIME)->EnableWindow(nNumSel && m_bSnoozeUntil);
+
+	GetDlgItem(IDC_SNOOZEOPTIONFOR)->EnableWindow(nNumSel);
+	GetDlgItem(IDC_SNOOZEOPTIONUNTIL)->EnableWindow(nNumSel);
 	GetDlgItem(IDC_SNOOZE)->EnableWindow(nNumSel);
 	GetDlgItem(IDC_DISMISS)->EnableWindow(nNumSel);
 	GetDlgItem(IDC_DISMISSANDGOTOTASK)->EnableWindow(nNumSel == 1);

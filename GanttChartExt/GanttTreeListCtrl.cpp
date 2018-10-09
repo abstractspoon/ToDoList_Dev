@@ -5961,13 +5961,11 @@ int CGanttTreeListCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GAN
 				// If Task2 is dependent on Task1 then Task1 comes first
 				if (m_data.IsItemDependentOn(*pGI2, dwTaskID1))
 				{
-//					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTaskID2, dwTaskID1, dwTaskID1);
 					nCompare = -1;
 				}
 				// else if Task1 is dependent on Task2 then Task2 comes first
 				else if (m_data.IsItemDependentOn(*pGI1, dwTaskID2))
 				{
-//					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTaskID1, dwTaskID2, dwTaskID2);
 					nCompare = 1;
 				}
 			}
