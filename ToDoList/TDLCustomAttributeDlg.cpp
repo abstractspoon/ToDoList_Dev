@@ -223,7 +223,7 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	OnItemchangedAttriblist(NULL, NULL);
 
 	ListView_SetImageList(m_lcAttributes, m_ilCheck, LVSIL_SMALL);
-	ListView_SetExtendedListViewStyle(m_lcAttributes, LVS_EX_FULLROWSELECT);
+	ListView_SetExtendedListViewStyle(m_lcAttributes, LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
 
 	CThemed::SetWindowTheme(&m_lcAttributes, _T("Explorer"));
 
