@@ -53,6 +53,7 @@ public:
 	void SetVisibleFilters(const CTDCAttributeMap& mapFilters);
 	BOOL FilterMatches(const TDCFILTER& filter) { return (filter == m_filter); }
 	BOOL SetTitleFilterOption(FILTER_TITLE nOption);
+	void ClearCheckboxHistory();
 
 	void EnableMultiSelection(BOOL bEnable);
 	void SetUITheme(const CUIThemeFile& theme);

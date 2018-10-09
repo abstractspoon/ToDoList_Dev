@@ -672,7 +672,7 @@ protected:
 	void StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC nFrom);
 	void StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom);
 
-	void RefreshFilterBarControls();
+	void RefreshFilterBarControls(BOOL bClearCheckboxHistory = FALSE);
 	void RefreshFilterBarAdvancedFilters();
 
 	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);

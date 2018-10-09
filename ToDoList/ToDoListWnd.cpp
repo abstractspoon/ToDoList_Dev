@@ -8000,7 +8000,7 @@ void CToDoListWnd::UpdateMenuIconMgrSourceControlStatus()
 	}
 }
 
-void CToDoListWnd::RefreshFilterBarControls()
+void CToDoListWnd::RefreshFilterBarControls(BOOL bClearCheckboxHistory)
 {
 	if (m_bShowFilterBar)
 	{
@@ -8008,7 +8008,10 @@ void CToDoListWnd::RefreshFilterBarControls()
 
 		m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
 		m_filterBar.RefreshFilterControls(GetToDoCtrl());
-		
+
+		if (bClearCheckboxHistory)
+			m_filterBar.ClearCheckboxHistory();
+				
 		// Determine if a resize if required
 		CRect rFilter, rClient;
 
@@ -11257,9 +11260,7 @@ void CToDoListWnd::OnViewShowfilterbar()
 {
 	m_bShowFilterBar = !m_bShowFilterBar;
 
-	if (m_bShowFilterBar)
-		RefreshFilterBarControls();
-
+	RefreshFilterBarControls();
 	m_filterBar.ShowWindow(m_bShowFilterBar ? SW_SHOW : SW_HIDE);
 
 	Resize();
@@ -11280,8 +11281,7 @@ void CToDoListWnd::OnViewClearfilter()
 	{
 		tdc.ClearFilter();
 	
-		// re-enable the filter controls
-		RefreshFilterBarControls();
+		RefreshFilterBarControls(TRUE); // clear checkbox history
 		UpdateStatusbar();
 	}
 }

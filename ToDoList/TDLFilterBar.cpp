@@ -322,6 +322,21 @@ BOOL CTDLFilterBar::Create(CWnd* pParentWnd, UINT nID, BOOL bVisible)
 	return FALSE;
 }
 
+void CTDLFilterBar::ClearCheckboxHistory()
+{
+	if (m_bMultiSelection)
+	{
+		ASSERT(FilterMatches(TDCFILTER()));
+
+		m_cbAllocByFilter.CheckAll(CCBC_UNCHECKED);
+		m_cbAllocToFilter.CheckAll(CCBC_UNCHECKED);
+		m_cbCategoryFilter.CheckAll(CCBC_UNCHECKED);
+		m_cbStatusFilter.CheckAll(CCBC_UNCHECKED);
+		m_cbTagFilter.CheckAll(CCBC_UNCHECKED);
+		m_cbVersionFilter.CheckAll(CCBC_UNCHECKED);
+	}
+}
+
 void CTDLFilterBar::OnSelchangeFilter() 
 {
 	CString sPrevAdvanced = m_sAdvancedFilter;
