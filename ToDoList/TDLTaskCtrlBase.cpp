@@ -231,7 +231,7 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	BuildColumns();
 	RecalcColumnWidths();
-	OnColumnVisibilityChange();
+	OnColumnVisibilityChange(CTDCColumnIDMap());
 	PostResize();
 
 	// Tooltips for columns
@@ -724,7 +724,7 @@ void CTDLTaskCtrlBase::OnUndoRedo(BOOL /*bUndo*/)
 	PostResync(m_lcColumns, FALSE);
 }
 
-void CTDLTaskCtrlBase::OnColumnVisibilityChange()
+void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChanges)
 {
 	CHoldRedraw hr(m_lcColumns);
 	
@@ -733,13 +733,15 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange()
 	for (int nItem = 1; nItem < nNumCols; nItem++)
 	{		
 		TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nItem);
-
 		m_hdrColumns.ShowItem(nItem, IsColumnShowing(nColID));
 	}
 
 	UpdateAttributePaneVisibility();
-	OnImageListChange();
-	RecalcColumnWidths(FALSE); // FALSE -> standard columns
+
+	if (mapChanges.Has(TDCC_ICON) || mapChanges.Has(TDCC_DONE))
+		OnImageListChange();
+
+	RecalcColumnWidths(mapChanges);
 }
 
 void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
@@ -1014,7 +1016,7 @@ void CTDLTaskCtrlBase::RecalcColumnWidths()
 	RecalcColumnWidths(TRUE); // custom
 }
 
-void CTDLTaskCtrlBase::RecalcColumnWidths(const CSet<TDC_COLUMN>& aColIDs)
+void CTDLTaskCtrlBase::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs)
 {
 	if (aColIDs.Has(TDCC_ALL))
 	{
@@ -1077,6 +1079,22 @@ void CTDLTaskCtrlBase::RecalcColumnWidth(TDC_COLUMN nColID)
 		RecalcColumnWidths();
 		break;
 
+	case TDCC_CREATIONTIME:
+		RecalcColumnWidth(TDCC_CREATIONDATE);
+		break;
+
+	case TDCC_STARTTIME:
+		RecalcColumnWidth(TDCC_STARTDATE);
+		break;
+
+	case TDCC_DUETIME:
+		RecalcColumnWidth(TDCC_DUEDATE);
+		break;
+
+	case TDCC_DONETIME:
+		RecalcColumnWidth(TDCC_DONEDATE);
+		break;
+
 	default:
 		{
 			int nItem = m_hdrColumns.FindItem(nColID);
@@ -1123,7 +1141,7 @@ void CTDLTaskCtrlBase::LoadState(const CPreferences& prefs, const CString& sKey)
 	ASSERT (!sKey.IsEmpty());
 
 	// make sure columns are configured right
-	OnColumnVisibilityChange();
+	OnColumnVisibilityChange(CTDCColumnIDMap());
 	
 	// load column customisations
 	CDWordArray aOrder, aWidths, aTracked;
@@ -4316,7 +4334,7 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 	BOOL bRedrawCols = FALSE, bRedrawTasks = ModCausesTaskTextColorChange(nAttrib);
 	
 	TDC_COLUMN nColID = TDC::MapAttributeToColumn(nAttrib);
-	CSet<TDC_COLUMN> aColIDs;
+	CTDCColumnIDMap aColIDs;
 	
 	switch (nAttrib)
 	{

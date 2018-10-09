@@ -68,7 +68,7 @@ public:
 	CString GetTasklistFolder() const { return m_sTasklistFolder; }
 
 	void OnCustomAttributeChange();
-	void OnColumnVisibilityChange();
+	void OnColumnVisibilityChange(const CTDCColumnIDMap& mapChanges);
 	void OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate);
 	void OnStylesUpdated();
 	void OnUndoRedo(BOOL bUndo);
@@ -89,7 +89,6 @@ public:
 	void RedrawColumns(BOOL bErase = TRUE) const;
 	void RedrawColumn(TDC_COLUMN nColID) const;
 	void RecalcColumnWidth(TDC_COLUMN nColID);
-	void RecalcColumnWidths(const CSet<TDC_COLUMN>& aColIDs);
 	void RecalcColumnWidths();
 	void RecalcAllColumnWidths();
 	
@@ -380,6 +379,7 @@ protected:
 	void UpdateHeaderSorting();
 	CString FormatInfoTip(DWORD dwTaskID, int nMaxLen) const;
 	void RecalcColumnWidths(BOOL bCustom);
+	void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs);
 	const CEnHeaderCtrl& GetColumnHeaderCtrl(TDC_COLUMN nColID) const;
 	BOOL IsVisible() const;
 	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImage = 0, int nCount = 1, int nImageSize = 16) const;

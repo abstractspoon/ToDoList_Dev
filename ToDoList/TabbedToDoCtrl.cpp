@@ -489,11 +489,11 @@ void CTabbedToDoCtrl::OnDestroy()
 	CToDoCtrl::OnDestroy();
 }
 
-void CTabbedToDoCtrl::UpdateVisibleColumns()
+void CTabbedToDoCtrl::UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges)
 {
-	CToDoCtrl::UpdateVisibleColumns();
+	CToDoCtrl::UpdateVisibleColumns(mapChanges);
 
-	m_taskList.OnColumnVisibilityChange();
+	m_taskList.OnColumnVisibilityChange(mapChanges);
 }
 
 IUIExtensionWindow* CTabbedToDoCtrl::GetExtensionWnd(FTC_VIEW nView) const

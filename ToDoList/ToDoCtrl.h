@@ -436,7 +436,7 @@ public:
 
 	virtual void NotifyBeginPreferencesUpdate(BOOL bFirst);
 	virtual void NotifyEndPreferencesUpdate(BOOL bFirst);
-	virtual void UpdateVisibleColumns();
+	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
 	virtual TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	virtual TDC_COLUMN ColumnHitTest(const CPoint& ptScreen) const;
 

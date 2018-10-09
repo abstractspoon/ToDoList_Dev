@@ -96,6 +96,33 @@ public:
 		return TRUE;
 	}
 
+	int GetDifferences(const CSetBase& other, CSetBase& diffs) const
+	{
+		diffs.RemoveAll();
+
+		POSITION pos = other.GetStartPosition();
+
+		while (pos)
+		{
+			KEY val = other.GetNext(pos);
+
+			if (!Has(val))
+				diffs.Add(val);
+		}
+
+		pos = GetStartPosition();
+
+		while (pos)
+		{
+			KEY val = GetNext(pos);
+
+			if (!other.Has(val))
+				diffs.Add(val);
+		}
+
+		return diffs.GetCount();
+	}
+
 	void Append(const CSetBase& other)
 	{
 		POSITION pos = other.GetStartPosition();

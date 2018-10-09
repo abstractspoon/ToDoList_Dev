@@ -5925,18 +5925,9 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 	return FALSE;
 }
 
-void CToDoCtrl::UpdateVisibleColumns()
+void CToDoCtrl::UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges)
 {
-	m_taskTree.OnColumnVisibilityChange();
-	
-	// hide/show controls which may have been affected
-	if (m_visColEdit.GetShowFields() == TDLSA_ASCOLUMN)
-	{
-		UpdateControls(FALSE); // don't update comments
-		
-		// re-align controls
-		Resize();
-	}
+	m_taskTree.OnColumnVisibilityChange(mapChanges);
 }
 
 void CToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis)
@@ -5944,16 +5935,23 @@ void CToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis)
 	BOOL bColumnChange, bEditChange;
 	BOOL bChange = m_visColEdit.CheckForDiff(vis, bColumnChange, bEditChange);
 
+	if (!bChange)
+		return;
+
+	TDCCOLEDITVISIBILITY visPrev = m_visColEdit;
 	m_visColEdit = vis;
 
 	if (bColumnChange)
-		UpdateVisibleColumns();
+	{
+		CTDCColumnIDMap mapChanges;
+		VERIFY(visPrev.GetVisibleColumns().GetDifferences(vis.GetVisibleColumns(), mapChanges));
+
+		UpdateVisibleColumns(mapChanges);
+	}
 		
+	// hide/show controls which may have been affected
 	if (bEditChange)
 	{		
-		if (!bColumnChange)
-			m_taskTree.RecalcColumnWidths();
-
 		Resize();
 		UpdateControls(FALSE); // don't update comments
 	}
