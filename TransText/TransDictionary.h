@@ -76,7 +76,8 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-typedef CMap<CString, LPCTSTR, DICTITEM*, DICTITEM*> CDictionaryItems;
+typedef CMap<CString, LPCTSTR, DICTITEM*, DICTITEM*&> CDictItemMap;
+typedef CArray<DICTITEM*, DICTITEM*&> CDictItemArray;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -118,7 +119,7 @@ public:
 	void IgnoreString(const CString& sText, BOOL bPrepare);
 	BOOL WantIgnore(const CString& sText) const;
 
-	const CDictionaryItems& GetItems() const { return m_mapItems; }
+	const CDictItemMap& GetItems() const { return m_mapItems; }
 
 	static void SetAppVersion(LPCTSTR szAppVer)	{ s_sAppVersion = szAppVer; }
 	static CString GetAppVersion() { return s_sAppVersion; }
@@ -127,7 +128,7 @@ protected:
 	CString m_sDictFile, m_sDictVersion;
 	WORD m_wDictLanguageID;
 	CMapStringToPtr m_mapStringIgnore;
-	CDictionaryItems m_mapItems;
+	CDictItemMap m_mapItems;
 	BOOL m_bDecodeChars;
 
 	static CString s_sAppVersion;

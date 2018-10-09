@@ -73,7 +73,7 @@ BOOL CTDLTransEditListCtrl::RebuildList(const CTransDictionary& dict, BOOL bShow
 		ClearAll(); // selection
 		DeleteAllItems();
 
-		const CDictionaryItems& items = dict.GetItems();
+		const CDictItemMap& items = dict.GetItems();
 		POSITION pos = items.GetStartPosition();
 
 		while (pos)

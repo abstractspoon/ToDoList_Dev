@@ -39,7 +39,8 @@ TLDT_DATA::TLDT_DATA(COleDataObject* pObj, CPoint pt)
 	pObject(pObj), 
 	pFilePaths(NULL), 
 	pOutlookSelection(NULL),
-	ptClient(pt) 
+	ptClient(pt),
+	bImportTasks(FALSE)
 {
 }
 
@@ -132,10 +133,10 @@ void CTaskListDropTarget::ResetDrag(CWnd* pWnd)
 	m_mapTVItems.RemoveAll();
 }
 
-CTaskListDropTarget::TLDT_HITTEST CTaskListDropTarget::DoHitTest(CWnd* pWnd, CPoint point, DWORD& dwHitTaskID)
+CTaskListDropTarget::TLDT_HITTEST CTaskListDropTarget::DoHitTest(CWnd* pWnd, CPoint point, DWORD& dwHitTaskID, BOOL& bImport)
 {
-	TLDT_HITTEST nHitResult = TLDTHT_NONE;
 	dwHitTaskID = 0;
+	bImport = FALSE;
 	
 	if (IS_WND_TYPE(pWnd, CTreeCtrl, WC_TREEVIEW))
 	{
@@ -150,11 +151,18 @@ CTaskListDropTarget::TLDT_HITTEST CTaskListDropTarget::DoHitTest(CWnd* pWnd, CPo
 			VERIFY(::SendMessage(m_hWnd, TVM_GETITEM, 0, (LPARAM)&item));
 
 			dwHitTaskID = item.lParam;
+			bImport = Misc::ModKeysArePressed(MKS_ALT);
+		}
+		else
+		{
+			bImport = TRUE;
 		}
 
-		nHitResult = TLDTHT_TASKVIEW;
+		return TLDTHT_TASKVIEW;
 	}
-	else if (IS_WND_TYPE(pWnd, CListCtrl, WC_LISTVIEW))
+
+	// else
+	if (IS_WND_TYPE(pWnd, CListCtrl, WC_LISTVIEW))
 	{
 		LVHITTESTINFO lvhti = { { point.x, point.y }, 0 };
 		int nHit = ListView_HitTest(pWnd->GetSafeHwnd(), &lvhti);
@@ -167,23 +175,31 @@ CTaskListDropTarget::TLDT_HITTEST CTaskListDropTarget::DoHitTest(CWnd* pWnd, CPo
 			VERIFY(::SendMessage(m_hWnd, LVM_GETITEM, 0, (LPARAM)&lvi));
 
 			dwHitTaskID = lvi.lParam;
+			bImport = Misc::ModKeysArePressed(MKS_ALT);
 		}
-		nHitResult = TLDTHT_TASKVIEW;
-	}
-	else if (IS_WND_TYPE(pWnd, CFileEdit, WC_COMBOBOX))
-	{
-		if (pWnd->GetStyle() & CBS_DROPDOWN)
-			nHitResult = TLDTHT_FILEEDIT;
-	}
-	else if (pWnd->IsKindOf(RUNTIME_CLASS(CDialog)) ||
-	 		pWnd->IsKindOf(RUNTIME_CLASS(CFrameWnd)))
-	{
-		// allow dropping only on titlebar
-		if ((pWnd->GetStyle() & WS_CAPTION) && point.y < 0)
-			nHitResult = TLDTHT_CAPTION;
+		else
+		{
+			bImport = TRUE;
+		}
+
+		return TLDTHT_TASKVIEW;
 	}
 
-	return nHitResult;
+	// else 
+	if (IS_WND_TYPE(pWnd, CFileEdit, WC_COMBOBOX))
+	{
+		if (pWnd->GetStyle() & CBS_DROPDOWN) // must be editable
+			return TLDTHT_FILEEDIT;
+	}
+	else if (pWnd->IsKindOf(RUNTIME_CLASS(CDialog)) || pWnd->IsKindOf(RUNTIME_CLASS(CFrameWnd)))
+	{
+		// allow dropping only on titlebar
+		if ((pWnd->GetStyle() & WS_CAPTION) && (point.y < 0))
+			return TLDTHT_CAPTION;
+	}
+
+	// all else
+	return TLDTHT_NONE;
 }
 
 DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, DWORD /*dwKeyState*/, CPoint point)
@@ -192,7 +208,8 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 		return DROPEFFECT_NONE;
 
 	DWORD dwHitTaskID = 0;
-	TLDT_HITTEST nHitTest = DoHitTest(pWnd, point, dwHitTaskID);
+	BOOL bImport = FALSE;
+	TLDT_HITTEST nHitTest = DoHitTest(pWnd, point, dwHitTaskID, bImport);
 
 	if (nHitTest == TLDTHT_NONE)
 		return DROPEFFECT_NONE;
@@ -260,7 +277,9 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 
 	// Allow parent to veto the drop
 	TLDT_DATA drop(pObject, point);
+
 	drop.dwTaskID = dwHitTaskID;
+	drop.bImportTasks = bImport;
 
 	CStringArray aFilePaths;
 	BOOL bFromText = FALSE;
@@ -286,12 +305,10 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 		switch (nHitTest)
 		{
 		case TLDTHT_TASKVIEW:
-			deResult = GetDropEffect(nHitTest, (drop.dwTaskID != 0));
-			break;
+			return ((drop.dwTaskID && !drop.bImportTasks) ? DROPEFFECT_LINK : DROPEFFECT_COPY);
 
 		case TLDTHT_FILEEDIT:
-			deResult = GetDropEffect(nHitTest);
-			break;
+			return (bFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
 		}
 	}
 	else if ((nHitTest != TLDTHT_NONE) && drop.GetFileCount())
@@ -299,12 +316,10 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 		switch (nHitTest)
 		{
 		case TLDTHT_TASKVIEW:
-			deResult = GetDropEffect(nHitTest, (drop.dwTaskID != 0), bFromText);
-			break;
+			return ((drop.dwTaskID && !drop.bImportTasks) ? DROPEFFECT_LINK : DROPEFFECT_COPY);
 
 		case TLDTHT_FILEEDIT:
-			deResult = GetDropEffect(nHitTest, FALSE, bFromText);
-			break;
+			return (bFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
 
 		case TLDTHT_CAPTION:
 			{
@@ -313,29 +328,14 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 				if (FileMisc::HasExtension(sFilePath, _T(".TDL")) ||
 					FileMisc::HasExtension(sFilePath, _T(".XML")))
 				{
-					deResult = DROPEFFECT_MOVE;
+					return DROPEFFECT_MOVE;
 				}
 			}
 			break;
 		}
 	}
 
-	return deResult;
-}
-
-DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, BOOL bItemHit, BOOL bFromText)
-{
-	switch (nHitTest)
-	{
-	case TLDTHT_TASKVIEW:
-		return (bItemHit ? DROPEFFECT_LINK : DROPEFFECT_COPY);
-
-	case TLDTHT_FILEEDIT:
-		return (bFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
-	}
-
-	// all else
-	ASSERT(0);
+	// All else
 	return DROPEFFECT_NONE;
 }
 
@@ -371,7 +371,7 @@ BOOL CTaskListDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT
 	m_pOwner->SetForegroundWindow();
 
 	TLDT_DATA data(pObject, point);
-	TLDT_HITTEST nHitTest = DoHitTest(pWnd, point, data.dwTaskID);
+	TLDT_HITTEST nHitTest = DoHitTest(pWnd, point, data.dwTaskID, data.bImportTasks);
 
 	if (CMSOutlookHelper::IsOutlookObject(pObject) && InitializeOutlook())
 	{

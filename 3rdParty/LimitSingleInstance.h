@@ -16,16 +16,18 @@
 class CLimitSingleInstance
 {
 protected:
+	CString m_strMutexName;
 	DWORD  m_dwLastError;
 	HANDLE m_hMutex;
 	
 public:
-	CLimitSingleInstance(TCHAR *strMutexName)
+	CLimitSingleInstance(TCHAR *strMutexName) 
+		: 
+		m_strMutexName(strMutexName), 
+		m_hMutex(NULL), 
+		m_dwLastError(0)
 	{
-		//be sure to use a name that is unique for this application otherwise
-		//two apps may think they are the same if they are using same name for
-		//3rd parm to CreateMutex
-		m_hMutex = CreateMutex(NULL, FALSE, strMutexName); //do early
+		m_hMutex = CreateMutex(NULL, FALSE, m_strMutexName); //do early
 		m_dwLastError = GetLastError(); //save for use later...
 	}
 	
@@ -38,8 +40,14 @@ public:
 		}
 	}
 	
-	BOOL IsAnotherInstanceRunning() 
+	BOOL IsAnotherInstanceRunning(BOOL bTryAgain = FALSE) 
 	{
+		if (bTryAgain && (m_hMutex == NULL))
+		{
+			m_hMutex = CreateMutex(NULL, FALSE, m_strMutexName);
+			m_dwLastError = GetLastError();
+		}
+
 		return (ERROR_ALREADY_EXISTS == m_dwLastError);
 	}
 };

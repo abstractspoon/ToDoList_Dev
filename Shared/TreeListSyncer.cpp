@@ -196,7 +196,9 @@ BOOL CTreeListSyncer::Sync(HWND hwndLeft, HWND hwndRight, TLS_LINKAGE nLink, HWN
 	Resync(hwndLeft, hwndRight);
 	
 	// show scrollbars as required
-	ShowVScrollBar(hwndLeft, FALSE);
+	BOOL bShowLeftVScroll = (IsHiding(TLSH_RIGHT) && bRightHadVScroll);
+
+	ShowVScrollBar(hwndLeft, bShowLeftVScroll);
 	ShowVScrollBar(hwndRight, bRightHadVScroll);
 
 	PostResize();
@@ -272,7 +274,9 @@ BOOL CTreeListSyncer::SwapSides()
 	Resync(hwndLeft, hwndRight);
 	
 	// show scrollbars as required
-	ShowVScrollBar(hwndLeft, FALSE);
+	BOOL bShowLeftVScroll = (IsHiding(TLSH_RIGHT) && bRightHadVScroll);
+
+	ShowVScrollBar(hwndLeft, bShowLeftVScroll);
 	ShowVScrollBar(hwndRight, bRightHadVScroll);
 
 	PostResize(TRUE);
@@ -2202,27 +2206,21 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		break;
 		
 	case WM_NCCALCSIZE: 
+		if (!IsHiding(TLSH_RIGHT) && IsLeft(hRealWnd))
 		{
-			// hide VScrollbar first
-			if (IsLeft(hRealWnd))
-			{
-				ShowVScrollBar(hRealWnd, FALSE, FALSE);
-			}
-			
+			ShowVScrollBar(hRealWnd, FALSE, FALSE);
 			// then default behaviour
 		}
 		break;
 		
 	case WM_SIZE: 
+		if (!IsHiding(TLSH_RIGHT) && IsLeft(hRealWnd) && HasVScrollBar(hRealWnd))
 		{
 			// hide VScrollbar after default behaviour
 			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
-			if (IsLeft(hRealWnd) && HasVScrollBar(hRealWnd))
-			{
-				ShowVScrollBar(hRealWnd, FALSE, FALSE);
-			}
+			ShowVScrollBar(hRealWnd, FALSE, FALSE);
 		}
 		break;
 		
@@ -2756,18 +2754,36 @@ void CTreeListSyncer::WindowNeedsScrollBars(HWND hwnd, const CRect& rect, BOOL& 
 	CRect rContent;
 	GetContentSize(hwnd, rContent);
 
+	// Don't need HScroll if this pane is hidden
+	BOOL bHidden = IsHiding(hwnd);
+
+	bNeedHScroll = (!bHidden && (rClient.Width() <= rContent.Width()));
 	bNeedVScroll = (rClient.Height() <= rContent.Height());
-	bNeedHScroll = (rClient.Width() <= rContent.Width());
 
 	// the presence of one scrollbar can cause the need for the other
 	if (bNeedHScroll && !bNeedVScroll)
 	{
 		bNeedVScroll = ((rClient.Height() - nCyScroll) <= rContent.Height());
 	}
-	else if (!bNeedHScroll && bNeedVScroll)
+	else if (!bNeedHScroll && bNeedVScroll && !bHidden)
 	{
 		bNeedHScroll = ((rClient.Width() - nCxScroll) <= rContent.Width());
 	}
+}
+
+BOOL CTreeListSyncer::IsHiding(HWND hwnd) const
+{
+	switch (m_nHidden)
+	{
+	case TLSH_LEFT:
+		return IsLeft(hwnd);
+
+	case TLSH_RIGHT:
+		return IsRight(hwnd);
+	}
+	
+	// All else
+	return FALSE;
 }
 
 void CTreeListSyncer::GetContentSize(HWND hwnd, CRect& rContent) const

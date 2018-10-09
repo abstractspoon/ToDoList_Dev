@@ -972,7 +972,7 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 		return FALSE;
 
 	// build csv file
-	CStringArray aLines, aTranslated, aNeedTranslation;
+	CStringArray aLines;
 
 	// header
 	CString sHeader;
@@ -987,7 +987,8 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 	// column header
 	aLines.Add(CSVCOLUMN_HEADER);
 
-	// dictionary
+	// Split dictionary into two parts
+	CDictItemArray aTranslatedItems, aNeedTranslationItems;
 	POSITION pos = m_mapItems.GetStartPosition();
 
 	while (pos)
@@ -999,24 +1000,47 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 		m_mapItems.GetNextAssoc(pos, sKey, pDI);
 		ASSERT(KeyMatches(sKey, pDI));
 
-		if (pDI->ToCsv(aTransLines, aNeedTransLines))
-		{
-			if (pDI->IsTranslated())
-			{
-				aTranslated.Append(aTransLines);
-				aTranslated.Append(aNeedTransLines);
-			}
-			else
-			{
-				aNeedTranslation.Append(aTransLines);
-				aNeedTranslation.Append(aNeedTransLines);
-			}
-		}
+		if (pDI->IsTranslated())
+			aTranslatedItems.Add(pDI);
+		else
+			aNeedTranslationItems.Add(pDI);
 	}
 
 	// sort by original text to maintain some sort of order
-	Misc::SortArray(aTranslated, CompareProc);
-	Misc::SortArray(aNeedTranslation, CompareProc);
+	qsort(aTranslatedItems.GetData(), aTranslatedItems.GetSize(), sizeof(DICTITEM*), CompareProc);
+	qsort(aNeedTranslationItems.GetData(), aNeedTranslationItems.GetSize(), sizeof(DICTITEM*), CompareProc);
+
+	// Convert to strings
+	CStringArray aTranslated, aNeedTranslation;
+	CStringArray aTransLines, aNeedTransLines;
+
+	int nNumItems = aTranslatedItems.GetSize(), nItem;
+	aTransLines.SetSize(nNumItems);
+
+	for (nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const DICTITEM* pDI = aTranslatedItems[nItem];
+
+		if (pDI->ToCsv(aTransLines, aNeedTransLines))
+		{
+			aTranslated.Append(aTransLines);
+			aTranslated.Append(aNeedTransLines);
+		}
+	}
+
+	nNumItems = aNeedTranslationItems.GetSize();
+	aNeedTransLines.SetSize(nNumItems);
+
+	for (nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const DICTITEM* pDI = aNeedTranslationItems[nItem];
+
+		if (pDI->ToCsv(aTransLines, aNeedTransLines))
+		{
+			aNeedTranslation.Append(aTransLines);
+			aNeedTranslation.Append(aNeedTransLines);
+		}
+	}
 
 	// put NEED_TRANSLATION first
 	if (aNeedTranslation.GetSize() > 0)
@@ -1040,28 +1064,18 @@ int CTransDictionary::CompareProc(const void* pFirst, const void* pSecond)
 {
 	ASSERT(pFirst && pSecond);
 
-	const CString& sFirst = *((CString*)pFirst);
-	const CString& sSecond = *((CString*)pSecond);
+	typedef DICTITEM* LPDICTITEM;
 
-	// compare only between the first set of double-quote (ie the input text only)
-	int nFirstStart = sFirst.Find(_T("\""));
-	int nFirstEnd = sFirst.Find(_T("\"\t"), nFirstStart + 1);
+	// Compare only the input text
+	const DICTITEM* pDIFirst = *(static_cast<const LPDICTITEM*>(pFirst));
+	const DICTITEM* pDISecond = *(static_cast<const LPDICTITEM*>(pSecond));
 
-	int nSecondStart = sSecond.Find(_T("\""));
-	int nSecondEnd = sSecond.Find(_T("\"\t"), nSecondStart + 1);
+	// Sort numbers 'naturally'
+	if (_istdigit(pDIFirst->GetTextIn()[0]) && _istdigit(pDISecond->GetTextIn()[0]))
+		return Misc::NaturalCompare(pDIFirst->GetTextIn(), pDISecond->GetTextIn());
 
-	if ((nFirstEnd - nFirstStart) != (nSecondEnd - nSecondStart)) // not the same input string
-		return _tcscmp((LPCTSTR)sFirst + nFirstStart, (LPCTSTR)sSecond + nSecondStart);
-
-	// else only compare up to the tab chars
-	int nCompare = _tcsncmp((LPCTSTR)sFirst + nFirstStart, (LPCTSTR)sSecond + nSecondStart, nFirstEnd - nFirstStart);
-
-	// if the string is the same make sure the alternatives 
-	// go beneath the primary entry
-	if (nCompare == 0)
-		nCompare = (nFirstStart - nSecondStart);
-
-	return nCompare;
+	// and the rest case-insensitively
+	return pDIFirst->GetTextIn().CompareNoCase(pDISecond->GetTextIn());
 }
 
 BOOL CTransDictionary::HasDictItem(CString& sText) const
@@ -1111,10 +1125,10 @@ DICTITEM* CTransDictionary::GetDictItem(CString& sText, BOOL bAutoCreate)
 		m_mapItems.SetAt(sText, pDI);
 	}
 #ifdef _DEBUG
-	else if (pDI && !pDI->GetTextOut().IsEmpty())
-	{
-		int breakpoint = 0;
-	}
+// 	else if (pDI && !pDI->GetTextOut().IsEmpty())
+// 	{
+// 		int breakpoint = 0;
+// 	}
 #endif
 
 	return pDI;

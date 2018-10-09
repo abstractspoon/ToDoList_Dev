@@ -105,6 +105,7 @@ public:
 	BOOL SetHidden(TLS_HIDE nHide);
 	TLS_HIDE GetHidden() const { return m_nHidden; }
 	BOOL IsHiding() const { return (m_nHidden != TLSH_NONE); }
+	BOOL IsHiding(TLS_HIDE nHide) const { return (m_nHidden == nHide); }
 	
 	void InvalidateAll(BOOL bErase = FALSE, BOOL bUpdate = FALSE);
 	void UpdateAll();
@@ -223,6 +224,7 @@ protected:
 	void Resize(const CRect& rLeft, const CRect& rRight);
 	void RefreshSize();
 	void PostResize(BOOL bForce = FALSE);
+	BOOL IsHiding(HWND hwnd) const;
 
 	virtual BOOL ResyncScrollPos(HWND hwnd, HWND hwndTo);
 	virtual BOOL ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel = TRUE);

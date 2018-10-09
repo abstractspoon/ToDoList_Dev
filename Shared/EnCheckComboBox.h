@@ -22,6 +22,8 @@ public:
 	CEnCheckComboBox(BOOL bMulti = TRUE, UINT nIDNoneString = 0, UINT nIDAnyString = 0);
 	
 	BOOL EnableMultiSelection(BOOL bEnable = TRUE);
+	BOOL IsMultiSelectionEnabled() const { return m_bMultiSel; }
+
 	int SetStrings(const CStringArray& aItems);
 
 	BOOL GetCheck(int nIndex) const;

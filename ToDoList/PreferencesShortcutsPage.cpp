@@ -73,7 +73,6 @@ BEGIN_MESSAGE_MAP(CPreferencesShortcutsPage, CPreferencesPageBase)
 	ON_REGISTERED_MESSAGE(WM_NCG_DRAWITEMCOLUMN, OnGutterDrawItem)
 	ON_REGISTERED_MESSAGE(WM_NCG_POSTDRAWITEM, OnGutterPostDrawItem)
 	ON_REGISTERED_MESSAGE(WM_NCG_RECALCCOLWIDTH, OnGutterRecalcColWidth)
-//	ON_REGISTERED_MESSAGE(WM_NCG_GETITEMCOLORS, OnGutterGetItemColors)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_COMMANDS, OnTreeCustomDraw)
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
@@ -532,21 +531,6 @@ LRESULT CPreferencesShortcutsPage::OnGutterRecalcColWidth(WPARAM /*wParam*/, LPA
 	}
 
 	return FALSE;
-}
-
-LRESULT CPreferencesShortcutsPage::OnGutterGetItemColors(WPARAM /*wParam*/, LPARAM lParam)
-{
-	NCGITEMCOLORS* pColors = (NCGITEMCOLORS*)lParam;
-	HTREEITEM hti = (HTREEITEM)pColors->dwItem;
-
-	if (m_tcCommands.GetSelectedItem() == hti)
-	{
-		pColors->crBack = GetSysColor(COLOR_HIGHLIGHT);
-		pColors->crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
-		pColors->bBackSet = pColors->bTextSet = TRUE;
-	}
-
-	return 0L;
 }
 
 int CPreferencesShortcutsPage::GetLongestShortcutText(HTREEITEM hti, CDC* pDC)

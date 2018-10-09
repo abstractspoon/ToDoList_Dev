@@ -34,6 +34,7 @@ struct TLDT_DATA
 	CStringArray* pFilePaths;
 	OutlookAPI::Selection* pOutlookSelection;
 	CPoint ptClient;
+	BOOL bImportTasks;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -75,13 +76,12 @@ protected:
 		TLDTHT_CAPTION,
 	};
 
-	TLDT_HITTEST DoHitTest(CWnd* pWnd, CPoint point, DWORD& dwHitTaskID);
+	TLDT_HITTEST DoHitTest(CWnd* pWnd, CPoint point, DWORD& dwHitTaskID, BOOL& bImport);
 	BOOL InitializeOutlook();
 	void ResetDrag(CWnd* pWnd);
 
 	static int GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles, BOOL& bFromText);
-	static DROPEFFECT GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bFromText = FALSE);
-	static DROPEFFECT GetDropEffect(TLDT_HITTEST nHitTest, BOOL bItemHit = FALSE, BOOL bFromText = FALSE);
+	static DROPEFFECT GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bFromText);
 };
 
 #endif // !defined(AFX_TASKLISTDROPTARGET_H__56519FB1_2923_45BB_97A2_08B8B1DC7C97__INCLUDED_)

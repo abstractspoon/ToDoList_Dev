@@ -67,7 +67,6 @@ protected:
 	afx_msg LRESULT OnGutterDrawItem(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGutterPostDrawItem(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGutterRecalcColWidth(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnGutterGetItemColors(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	DECLARE_MESSAGE_MAP()

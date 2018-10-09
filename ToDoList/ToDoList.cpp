@@ -36,6 +36,7 @@
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
 #include "..\3rdparty\base64coder.h"
+#include "..\3rdparty\LimitSingleInstance.h"
 
 #include <afxpriv.h>
 
@@ -47,6 +48,12 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
+
+CLimitSingleInstance g_SingleInstanceObj(_T("{3A4EFC98-9BA9-473D-A3CF-6B0FE644470D}")); 
+
+/////////////////////////////////////////////////////////////////////////////
 
 LPCTSTR REGKEY				= _T("AbstractSpoon");
 LPCTSTR APPREGKEY			= _T("Software\\AbstractSpoon\\ToDoList");
@@ -110,8 +117,7 @@ CToDoListApp theApp;
 
 BOOL CToDoListApp::InitInstance()
 {
-	// Set these before anything else
-	CMessageBox::SetAppName(CToDoListWnd::GetTitle(FALSE));
+	// Set this before anything else
 	CWinHelpButton::SetDefaultIcon(GraphicsMisc::LoadIcon(IDI_HELPBUTTON));
 
 	// Remove any old components before they might get loaded
@@ -211,11 +217,27 @@ BOOL CToDoListApp::InitInstance()
 
 BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnCommandLineInfo& cmdInfo)
 {
-	// see if another instance can better handle this than us
-	HWND hwndOtherInst = NULL;
-
+	// See if another instance can better handle this than us
 	TDCFINDWND find;
 	int nNumWnds = FindToDoListWnds(find);
+
+	// If another instance is just starting up or closing down
+	// ie. has no window handle or is blocking we hang around 
+	// for a bit to see what happens
+	if (!nNumWnds && g_SingleInstanceObj.IsAnotherInstanceRunning(TRUE)) 
+	{
+		int nTry = 5;
+		
+		while (nTry-- && !nNumWnds)
+		{
+			Sleep(1000);
+
+			if (!g_SingleInstanceObj.IsAnotherInstanceRunning(TRUE))
+				break; // we're now the only instance
+
+			nNumWnds = FindToDoListWnds(find);
+		}
+	}
 
 	if (!nNumWnds)
 		return FALSE;
@@ -235,6 +257,8 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 	// if there IS a tasklist on the commandline and
 	// we are NOT importing it, see if any other instance 
 	// already has it loaded 
+	HWND hwndOtherInst = NULL;
+
 	if (bHasFilePath && !startup.HasFlag(TLD_IMPORTFILE))
 	{
 		for (int nWnd = 0; nWnd < nNumWnds; nWnd++)

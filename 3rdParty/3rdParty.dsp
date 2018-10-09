@@ -345,6 +345,10 @@ SOURCE=.\Zlib\IOWIN32.H
 # End Source File
 # Begin Source File
 
+SOURCE=.\LimitSingleInstance.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\LockableHeaderCtrl.h
 # End Source File
 # Begin Source File
