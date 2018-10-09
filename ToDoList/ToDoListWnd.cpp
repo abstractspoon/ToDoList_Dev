@@ -11260,7 +11260,9 @@ void CToDoListWnd::OnViewShowfilterbar()
 {
 	m_bShowFilterBar = !m_bShowFilterBar;
 
-	RefreshFilterBarControls();
+	if (m_bShowFilterBar)
+		RefreshFilterBarControls();
+
 	m_filterBar.ShowWindow(m_bShowFilterBar ? SW_SHOW : SW_HIDE);
 
 	Resize();
