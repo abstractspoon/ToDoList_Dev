@@ -686,7 +686,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	inline DWORD GetDataType() const { return (dwAttribType & TDCCA_DATAMASK); }
 	inline DWORD GetListType() const { return (dwAttribType & TDCCA_LISTMASK); }
-	inline BOOL HasFeature(DWORD dwFeature) const { return (dwFeatures & dwFeature); }
+	inline BOOL HasFeature(DWORD dwFeature) const { return SupportsFeature(dwFeature) && (dwFeatures & dwFeature); }
 
 	inline BOOL IsDataType(DWORD dwDataType) const { return (GetDataType() == dwDataType); }
 	inline BOOL IsList() const { return (GetListType() != TDCCA_NOTALIST); }

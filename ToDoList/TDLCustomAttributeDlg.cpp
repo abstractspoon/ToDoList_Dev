@@ -551,6 +551,15 @@ void CTDLCustomAttributeDlg::OnSelchangeDatatype()
 	// update feature combo
 	m_cbFeatures.SetAttributeDefintion(attrib);
 
+	// And features in case they changed
+	m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
+
+	if (attrib.dwFeatures != m_dwFeatures)
+	{
+		attrib.dwFeatures = m_dwFeatures;
+		m_lcAttributes.SetItemText(nSel, COL_FEATURES, FormatFeatureList(m_dwFeatures));
+	}
+	
 	// Update alignment if it changed
 	if (m_nAlignment != (int)attrib.nTextAlignment)
 	{
@@ -619,6 +628,15 @@ void CTDLCustomAttributeDlg::OnSelchangeListtype()
 
 	// update feature combo
 	m_cbFeatures.SetAttributeDefintion(attrib);
+
+	// And features in case they changed
+	m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
+
+	if (attrib.dwFeatures != m_dwFeatures)
+	{
+		attrib.dwFeatures = m_dwFeatures;
+		m_lcAttributes.SetItemText(nSel, COL_FEATURES, FormatFeatureList(m_dwFeatures));
+	}
 
 	EnableControls();
 
