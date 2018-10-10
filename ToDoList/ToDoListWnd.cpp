@@ -241,8 +241,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_CLEANUPINIPREFERENCES, OnUpdateToolsCleanupIniPreferences)
 	ON_COMMAND(ID_TOOLS_TOGGLE_LOGGING, OnToolsToggleLogging)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_TOGGLE_LOGGING, OnUpdateToolsToggleLogging)
-	ON_COMMAND(ID_VIEW_TOGGLEALLTASKEXPANDED, OnViewToggleAllTaskExpanded)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLEALLTASKEXPANDED, OnUpdateViewToggleAllTaskExpanded)
 	ON_COMMAND(ID_EDIT_FINDREPLACEINTASKTITLES, OnEditFindReplaceInTaskTitles)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_FINDREPLACEINTASKTITLES, OnUpdateEditFindReplaceInTaskTitles)
 	ON_COMMAND(ID_VIEW_SHOWREMINDERS, OnViewShowRemindersWindow)
@@ -382,7 +380,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_VIEW_SORTTASKLISTTABS, OnViewSorttasklisttabs)
 	ON_COMMAND(ID_VIEW_STATUS_BAR, OnViewStatusBar)
 	ON_COMMAND(ID_VIEW_TOGGLEFILTER, OnViewTogglefilter)
-	ON_COMMAND(ID_VIEW_TOGGLETASKEXPANDED, OnViewToggletaskexpanded)
 	ON_COMMAND(ID_VIEW_TOGGLETASKSANDCOMMENTS, OnViewToggletasksandcomments)
 	ON_COMMAND(ID_VIEW_TOGGLETREEANDLIST, OnViewToggleTreeandList)
 	ON_COMMAND(ID_VIEW_MAINTOOLBAR, OnViewMainToolbar)
@@ -404,6 +401,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND_RANGE(ID_TRAYICON_SHOWDUETASKS1, ID_TRAYICON_SHOWDUETASKS20, OnTrayiconShowDueTasks)
 	ON_COMMAND_RANGE(ID_VIEW_EXPANDTASK, ID_VIEW_COLLAPSEALL, OnViewExpandTasks)
 	ON_COMMAND_RANGE(ID_VIEW_EXPANDDUE, ID_VIEW_COLLAPSESTARTED, OnViewExpandTasks)
+	ON_COMMAND_RANGE(ID_VIEW_TOGGLEALLTASKEXPANDED, ID_VIEW_TOGGLEALLTASKEXPANDED, OnViewExpandTasks)
+	ON_COMMAND_RANGE(ID_VIEW_TOGGLETASKEXPANDED, ID_VIEW_TOGGLETASKEXPANDED, OnViewExpandTasks)
 	ON_COMMAND_RANGE(ID_WINDOW1, ID_WINDOW16, OnWindow)
 	ON_MESSAGE(WM_UPDATEUDTSINTOOLBAR, OnUpdateUDTsInToolbar)
 	ON_MESSAGE(WM_APPRESTOREFOCUS, OnAppRestoreFocus)
@@ -578,9 +577,10 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SORTTASKLISTTABS, OnUpdateViewSorttasklisttabs)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_STATUS_BAR, OnUpdateViewStatusBar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLEFILTER, OnUpdateViewTogglefilter)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKEXPANDED, OnUpdateViewToggletaskexpanded)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKSANDCOMMENTS, OnUpdateViewToggletasksandcomments)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETREEANDLIST, OnUpdateViewToggleTreeandList)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLEALLTASKEXPANDED, OnUpdateViewExpandTasks)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKEXPANDED, OnUpdateViewExpandTasks)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MAINTOOLBAR, OnUpdateViewMainToolbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_CUSTOMTOOLBAR, OnUpdateViewCustomToolbar)
 	ON_UPDATE_COMMAND_UI(ID_WINDOW1, OnUpdateWindow)
@@ -10861,6 +10861,14 @@ void  CToDoListWnd::OnViewExpandTasks(UINT nCmdID)
 		tdc.ExpandTasks(TDCEC_SELECTED, FALSE);
 		break;
 
+	case ID_VIEW_TOGGLETASKEXPANDED:
+		tdc.ExpandTasks(TDCEC_SELECTED, tdc.CanExpandTasks(TDCEC_SELECTED, TRUE));
+		break;
+
+	case ID_VIEW_TOGGLEALLTASKEXPANDED:
+		tdc.ExpandTasks(TDCEC_ALL, tdc.CanExpandTasks(TDCEC_ALL, TRUE));
+		break;
+
 	case ID_VIEW_EXPANDALL:
 		tdc.ExpandTasks(TDCEC_ALL, TRUE);
 		break;
@@ -10903,6 +10911,16 @@ void  CToDoListWnd::OnUpdateViewExpandTasks(CCmdUI* pCmdUI)
 
 	case ID_VIEW_COLLAPSETASK:
 		bEnable = tdc.CanExpandTasks(TDCEC_SELECTED, FALSE);
+		break;
+
+	case ID_VIEW_TOGGLETASKEXPANDED:
+		bEnable = (tdc.CanExpandTasks(TDCEC_SELECTED, TRUE) || 
+					tdc.CanExpandTasks(TDCEC_SELECTED, FALSE));
+		break;
+
+	case ID_VIEW_TOGGLEALLTASKEXPANDED:
+		bEnable = (tdc.CanExpandTasks(TDCEC_ALL, TRUE) || 
+					tdc.CanExpandTasks(TDCEC_ALL, FALSE));
 		break;
 
 	case ID_VIEW_EXPANDALL:
@@ -13158,36 +13176,6 @@ void CToDoListWnd::OnToolsToggleLogging()
 void CToDoListWnd::OnUpdateToolsToggleLogging(CCmdUI* pCmdUI) 
 {
 	pCmdUI->SetCheck(FileMisc::IsLoggingEnabled());
-}
-
-void CToDoListWnd::OnViewToggletaskexpanded() 
-{
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	
-	tdc.ExpandTasks(TDCEC_SELECTED, tdc.CanExpandTasks(TDCEC_SELECTED, TRUE));
-}
-
-void CToDoListWnd::OnUpdateViewToggletaskexpanded(CCmdUI* pCmdUI) 
-{
-	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	
-	pCmdUI->Enable(tdc.CanExpandTasks(TDCEC_SELECTED, TRUE) || 
-					tdc.CanExpandTasks(TDCEC_SELECTED, FALSE));
-}
-
-void CToDoListWnd::OnViewToggleAllTaskExpanded() 
-{
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	
-	tdc.ExpandTasks(TDCEC_ALL, tdc.CanExpandTasks(TDCEC_ALL, TRUE));
-}
-
-void CToDoListWnd::OnUpdateViewToggleAllTaskExpanded(CCmdUI* pCmdUI) 
-{
-	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	
-	pCmdUI->Enable(tdc.CanExpandTasks(TDCEC_ALL, TRUE) || 
-					tdc.CanExpandTasks(TDCEC_ALL, FALSE));
 }
 
 void CToDoListWnd::OnEditFindReplaceInTaskTitles() 
