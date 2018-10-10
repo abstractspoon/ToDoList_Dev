@@ -365,15 +365,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_TRAYICON_SHOW, OnTrayiconShow)
 	ON_COMMAND(ID_TRAYICON_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_COMMAND(ID_VIEW_CLEARFILTER, OnViewClearfilter)
-	ON_COMMAND(ID_VIEW_COLLAPSEALL, OnViewCollapseall)
-	ON_COMMAND(ID_VIEW_COLLAPSEDUE, OnViewCollapseDuetasks)
-	ON_COMMAND(ID_VIEW_COLLAPSESTARTED, OnViewCollapseStartedtasks)
-	ON_COMMAND(ID_VIEW_COLLAPSETASK, OnViewCollapsetask)
 	ON_COMMAND(ID_VIEW_CYCLETASKVIEWS, OnViewCycleTaskViews)
-	ON_COMMAND(ID_VIEW_EXPANDALL, OnViewExpandall)
-	ON_COMMAND(ID_VIEW_EXPANDDUE, OnViewExpandDuetasks)
-	ON_COMMAND(ID_VIEW_EXPANDSTARTED, OnViewExpandStartedtasks)
-	ON_COMMAND(ID_VIEW_EXPANDTASK, OnViewExpandtask)
 	ON_COMMAND(ID_VIEW_FILTER, OnViewFilter)
 	ON_COMMAND(ID_VIEW_MOVETASKLISTLEFT, OnViewMovetasklistleft)
 	ON_COMMAND(ID_VIEW_MOVETASKLISTRIGHT, OnViewMovetasklistright)
@@ -410,6 +402,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND_RANGE(ID_TOOLS_SHOWTASKS_DUETODAY, ID_TOOLS_SHOWTASKS_DUEENDNEXTMONTH, OnToolsShowtasksDue)
 	ON_COMMAND_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL16, OnUserTool)
 	ON_COMMAND_RANGE(ID_TRAYICON_SHOWDUETASKS1, ID_TRAYICON_SHOWDUETASKS20, OnTrayiconShowDueTasks)
+	ON_COMMAND_RANGE(ID_VIEW_EXPANDTASK, ID_VIEW_COLLAPSEALL, OnViewExpandTasks)
+	ON_COMMAND_RANGE(ID_VIEW_EXPANDDUE, ID_VIEW_COLLAPSESTARTED, OnViewExpandTasks)
 	ON_COMMAND_RANGE(ID_WINDOW1, ID_WINDOW16, OnWindow)
 	ON_MESSAGE(WM_UPDATEUDTSINTOOLBAR, OnUpdateUDTsInToolbar)
 	ON_MESSAGE(WM_APPRESTOREFOCUS, OnAppRestoreFocus)
@@ -567,15 +561,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_TOGGLECHECKIN, OnUpdateToolsToggleCheckin)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_TRANSFORM, OnUpdateExport) // use same text as export
 	ON_UPDATE_COMMAND_UI(ID_VIEW_CLEARFILTER, OnUpdateViewClearfilter)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_COLLAPSEALL, OnUpdateViewCollapseall)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_COLLAPSEDUE, OnUpdateViewCollapseDuetasks)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_COLLAPSESTARTED, OnUpdateViewCollapseStartedtasks)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_COLLAPSETASK, OnUpdateViewCollapsetask)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_CYCLETASKVIEWS, OnUpdateViewCycleTaskViews)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_EXPANDALL, OnUpdateViewExpandall)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_EXPANDDUE, OnUpdateViewExpandDuetasks)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_EXPANDSTARTED, OnUpdateViewExpandStartedtasks)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_EXPANDTASK, OnUpdateViewExpandtask)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_FILTER, OnUpdateViewFilter)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MOVETASKLISTLEFT, OnUpdateViewMovetasklistleft)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MOVETASKLISTRIGHT, OnUpdateViewMovetasklistright)
@@ -609,6 +595,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnUpdateShowTaskView)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SORTBY_ALLCOLUMNS_FIRST, ID_SORTBY_ALLCOLUMNS_LAST, OnUpdateSortBy)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, OnUpdateUserTool)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_EXPANDTASK, ID_VIEW_COLLAPSEALL, OnUpdateViewExpandTasks)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_EXPANDDUE, ID_VIEW_COLLAPSESTARTED, OnUpdateViewExpandTasks)
 	ON_WM_ACTIVATEAPP()
 	ON_WM_CONTEXTMENU()
 	ON_WM_COPYDATA()
@@ -10859,84 +10847,93 @@ void CToDoListWnd::OnUpdateViewPrevSel(CCmdUI* pCmdUI)
 	pCmdUI->Enable(GetToDoCtrl().CanSelectTasksInHistory(FALSE));
 }
 
-void CToDoListWnd::OnViewExpandtask() 
+void  CToDoListWnd::OnViewExpandTasks(UINT nCmdID)
 {
-	GetToDoCtrl().ExpandTasks(TDCEC_SELECTED, TRUE);
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	switch (nCmdID)
+	{
+	case ID_VIEW_EXPANDTASK:
+		tdc.ExpandTasks(TDCEC_SELECTED, TRUE);
+		break;
+
+	case ID_VIEW_COLLAPSETASK:
+		tdc.ExpandTasks(TDCEC_SELECTED, FALSE);
+		break;
+
+	case ID_VIEW_EXPANDALL:
+		tdc.ExpandTasks(TDCEC_ALL, TRUE);
+		break;
+
+	case ID_VIEW_COLLAPSEALL:
+		tdc.ExpandTasks(TDCEC_ALL, FALSE);
+		break;
+
+	case ID_VIEW_EXPANDDUE:
+		tdc.ExpandTasks(TDCEC_DUE, TRUE);
+		break;
+
+	case ID_VIEW_COLLAPSEDUE:
+		tdc.ExpandTasks(TDCEC_DUE, FALSE);
+		break;
+
+	case ID_VIEW_EXPANDSTARTED:
+		tdc.ExpandTasks(TDCEC_STARTED, TRUE);
+		break;
+
+	case ID_VIEW_COLLAPSESTARTED:
+		tdc.ExpandTasks(TDCEC_STARTED, FALSE);
+		break;
+
+	default:
+		ASSERT(0);
+	}
 }
 
-void CToDoListWnd::OnUpdateViewExpandtask(CCmdUI* pCmdUI) 
+void  CToDoListWnd::OnUpdateViewExpandTasks(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(GetToDoCtrl().CanExpandTasks(TDCEC_SELECTED, TRUE));
-}
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	BOOL bEnable = FALSE;
 
-void CToDoListWnd::OnViewCollapsetask() 
-{
-	GetToDoCtrl().ExpandTasks(TDCEC_SELECTED, FALSE);
-}
+	switch (pCmdUI->m_nID)
+	{
+	case ID_VIEW_EXPANDTASK:
+		bEnable = tdc.CanExpandTasks(TDCEC_SELECTED, TRUE);
+		break;
 
-void CToDoListWnd::OnUpdateViewCollapsetask(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().CanExpandTasks(TDCEC_SELECTED, FALSE));
-}
+	case ID_VIEW_COLLAPSETASK:
+		bEnable = tdc.CanExpandTasks(TDCEC_SELECTED, FALSE);
+		break;
 
-void CToDoListWnd::OnViewExpandall() 
-{
-	GetToDoCtrl().ExpandTasks(TDCEC_ALL, TRUE);
-}
+	case ID_VIEW_EXPANDALL:
+		bEnable = tdc.CanExpandTasks(TDCEC_ALL, TRUE);
+		break;
 
-void CToDoListWnd::OnUpdateViewExpandall(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().CanExpandTasks(TDCEC_ALL, TRUE));
-}
+	case ID_VIEW_COLLAPSEALL:
+		bEnable = tdc.CanExpandTasks(TDCEC_ALL, FALSE);
+		break;
 
-void CToDoListWnd::OnViewCollapseall() 
-{
-	GetToDoCtrl().ExpandTasks(TDCEC_ALL, FALSE);
-}
+	case ID_VIEW_EXPANDDUE:
+		bEnable = tdc.CanExpandTasks(TDCEC_DUE, TRUE);
+		break;
 
-void CToDoListWnd::OnUpdateViewCollapseall(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().CanExpandTasks(TDCEC_ALL, FALSE));
-}
+	case ID_VIEW_COLLAPSEDUE:
+		bEnable = tdc.CanExpandTasks(TDCEC_DUE, FALSE);
+		break;
 
-void CToDoListWnd::OnViewExpandDuetasks() 
-{
-	GetToDoCtrl().ExpandTasks(TDCEC_DUE, TRUE);
-}
+	case ID_VIEW_EXPANDSTARTED:
+		bEnable = tdc.CanExpandTasks(TDCEC_STARTED, TRUE);
+		break;
 
-void CToDoListWnd::OnUpdateViewExpandDuetasks(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().CanExpandTasks(TDCEC_DUE, TRUE));
-}
+	case ID_VIEW_COLLAPSESTARTED:
+		bEnable = tdc.CanExpandTasks(TDCEC_STARTED, FALSE);
+		break;
 
-void CToDoListWnd::OnViewCollapseDuetasks() 
-{
-	GetToDoCtrl().ExpandTasks(TDCEC_DUE, FALSE);
-}
+	default:
+		ASSERT(0);
+	}
 
-void CToDoListWnd::OnUpdateViewCollapseDuetasks(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().CanExpandTasks(TDCEC_DUE, FALSE));
-}
-
-void CToDoListWnd::OnViewExpandStartedtasks() 
-{
-	GetToDoCtrl().ExpandTasks(TDCEC_STARTED, TRUE);
-}
-
-void CToDoListWnd::OnUpdateViewExpandStartedtasks(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().CanExpandTasks(TDCEC_STARTED, TRUE));
-}
-
-void CToDoListWnd::OnViewCollapseStartedtasks() 
-{
-	GetToDoCtrl().ExpandTasks(TDCEC_STARTED, FALSE);
-}
-
-void CToDoListWnd::OnUpdateViewCollapseStartedtasks(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().CanExpandTasks(TDCEC_STARTED, FALSE));
+	pCmdUI->Enable(bEnable);
 }
 
 void CToDoListWnd::OnWindow(UINT nCmdID) 
