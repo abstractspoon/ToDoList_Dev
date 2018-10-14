@@ -1207,8 +1207,8 @@
 #define IDS_FOCUS_FILTERBAR             34285
 #define ID_FILE_CHANGEPASSWORD          34285
 #define IDS_FOCUS_TASKS                 34286
-#define ID_VIEW_EXPANDDUE               34287
 #define IDS_UNNAMEDFILTER               34287
+#define ID_VIEW_EXPANDDUE               34287
 #define ID_VIEW_COLLAPSEDUE             34288
 #define ID_VIEW_EXPANDSTARTED           34289
 #define ID_VIEW_COLLAPSESTARTED         34290

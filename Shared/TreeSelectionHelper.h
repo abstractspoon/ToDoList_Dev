@@ -87,13 +87,13 @@ public:
 
 	inline HTREEITEM GetFirstItem() const { return GetCount() ? m_lstSelection.GetHead() : NULL; }
 	inline HTREEITEM GetLastItem() const { return GetCount() ? m_lstSelection.GetTail() : NULL; }
-	inline POSITION GetFirstItemPos() const { return m_lstSelection.GetHeadPosition(); }
+	inline POSITION GetFirstItemPos() const { return GetCount() ? m_lstSelection.GetHeadPosition() : NULL; }
 	inline HTREEITEM GetNextItem(POSITION& pos) const { return m_lstSelection.GetNext(pos); }
 
-	inline int GetCount() const { return m_lstSelection.GetCount(); }
 	inline BOOL HasSingleSelection() const { return (GetCount() == 1); }
-	inline BOOL HasItem(HTREEITEM hti) const { return (m_lstSelection.Find(hti) != NULL); }
+	inline BOOL HasItem(HTREEITEM hti) const { return (GetCount() && (m_lstSelection.Find(hti) != NULL)); }
 	BOOL IsItemSelected(HTREEITEM hti, BOOL bCheckParents) const;
+	int GetCount() const;
 
 	DWORD GetFirstItemData() const;
 	DWORD GetLastItemData() const;
@@ -146,8 +146,8 @@ public:
 	BOOL FixupTreeSelection(); // returns TRUE if the tree selection changed
 	BOOL GetBoundingRect(CRect& rSelection) const;
  
-	void OrderItems();
-	void OrderItems(CHTIList& selection) const;
+	void OrderItems(BOOL bVisibleOnly = TRUE);
+	void OrderItems(CHTIList& selection, BOOL bVisibleOnly = TRUE) const;
 
 	int GetItemTitles(const CHTIList& selection, CStringArray& aTitles) const; 
 	BOOL HasUncheckedItems() const;
@@ -196,12 +196,7 @@ protected:
 	int FindPrevValidSelection() const;
 	int FindNextValidSelection() const;
 
-	void BuildOrderedSelection(const CHTIList& selection, HTREEITEM hti, CHTIList& lstOrdered) const;
-
-	// CURRENTLY UNUSED ----------------------------------------
-	//	BOOL ItemHasUncheckedChildren(HTREEITEM hti) const;
-	//	BOOL HasUncheckedChildren() const;
-	//	BOOL AllItemsHaveParent(HTREEITEM htiParent) const;
+	BOOL BuildOrderedItems(const CHTIList& selection, HTREEITEM hti, BOOL bVisibleOnly, CHTIList& lstOrdered) const;
 };
 
 #endif // !defined(AFX_TREESELECTIONHELPER_H__098294B4_8B41_4369_8522_FE1637BA7EA1__INCLUDED_)

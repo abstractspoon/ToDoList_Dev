@@ -553,6 +553,7 @@ protected:
 	bool SetTaskUChar(HTASKITEM hTask, const CString& sUCharItem, unsigned char cVal);
 	bool SetTaskULong(HTASKITEM hTask, const CString& sULongItem, unsigned long lVal);
 	bool SetTaskInt(HTASKITEM hTask, const CString& sIntItem, int iVal);
+	bool SetTaskPriorityOrRisk(HTASKITEM hTask, const CString& sIntItem, int iVal);
 	bool SetTaskString(HTASKITEM hTask, const CString& sStringItem, const CString& sVal, XI_TYPE nType = XIT_ATTRIB);
 	bool SetTaskDouble(HTASKITEM hTask, const CString& sDoubleItem, double dVal);
 	bool SetTaskTime(HTASKITEM hTask, const CString& sTimeItem, double dTime,
@@ -590,7 +591,6 @@ protected:
 
 	static BOOL SetMetaData(CXmlItem* pXItem, const CMapStringToString& mapMetaData);
 	static int GetMetaData(const CXmlItem* pXItem, CMapStringToString& mapMetaData);
-
 };
 
 #endif // !defined(AFX_TASKFILE_H__BA5D71E7_2770_45FD_A693_A2344B589DF4__INCLUDED_)

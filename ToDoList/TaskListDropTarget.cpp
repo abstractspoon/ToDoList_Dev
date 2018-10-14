@@ -106,7 +106,7 @@ DROPEFFECT CTaskListDropTarget::OnDragEnter(CWnd* pWnd, COleDataObject* pObject,
 	if (IS_WND_TYPE(pWnd, CTreeCtrl, WC_TREEVIEW))
 	{
 		CTreeCtrlHelper tch((CTreeCtrl&)*pWnd);
-		tch.BuildHTIMap(m_mapTVItems);
+		tch.BuildTreeItemMap(m_mapTVItems);
 	}
 
 	return OnDragOver(pWnd, pObject, dwKeyState, point);
@@ -217,8 +217,7 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 	// update drop hilite
 	if (IS_WND_TYPE(pWnd, CTreeCtrl, WC_TREEVIEW))
 	{
-		HTREEITEM htiHit = NULL;
-		m_mapTVItems.Lookup(dwHitTaskID, htiHit);
+		HTREEITEM htiHit = m_mapTVItems.GetItem(dwHitTaskID);
 
 		// check hover time and expand parent tasks appropriately
 		if (dwHitTaskID && (m_dwPrevItem == dwHitTaskID))

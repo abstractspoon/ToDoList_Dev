@@ -6268,30 +6268,40 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 {
 	// check for the existence of a backup file
-	CString sBackup = CFileBackup::BuildBackupPath(sFilePath, FBS_OVERWRITE);
+	CString sBackupPath = CFileBackup::BuildBackupPath(sFilePath, FBS_OVERWRITE);
 	
-	if (FileMisc::FileExists(sBackup))
+	if (FileMisc::FileExists(sBackupPath))
 	{
-		double dBackupSize = FileMisc::GetFileSize(sBackup);
+		FileMisc::LogText(_T("Backup file found: %s"), sBackupPath);
+
+		double dBackupSize = FileMisc::GetFileSize(sBackupPath);
 		
 		// Check for valid backup
 		if (dBackupSize > 0.0)
 		{
+			FileMisc::LogText(_T("  Backup file has non-zero length"));
+
 			double dSize = FileMisc::GetFileSize(sFilePath);
 		
 			if (dSize == 0.0) // definitely a bad save -> copy over backup
 			{
+				FileMisc::LogText(_T("    Taskfile '%s' has zero length, replacing with backup"));
+
 				FileMisc::DeleteFile(sFilePath, TRUE);
-				FileMisc::MoveFile(sBackup, sFilePath);
+				FileMisc::MoveFile(sBackupPath, sFilePath);
 			}
 			else
 			{
+				FileMisc::LogText(_T("    Taskfile has non-zero length"));
+
 				time64_t tMod = FileMisc::GetFileLastModified(sFilePath);
-				time64_t tBackupMod = FileMisc::GetFileLastModified(sBackup);
+				time64_t tBackupMod = FileMisc::GetFileLastModified(sBackupPath);
 
 				if (tMod >= tBackupMod) // file is newer than backup
 				{
-					::DeleteFile(sBackup);
+					FileMisc::LogText(_T("      Taskfile is newer than backup, deleting backup"));
+
+					FileMisc::DeleteFile(sBackupPath, TRUE);
 				}
 				else // Different sizes and dates -> prompt
 				{
@@ -6301,14 +6311,18 @@ BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 					switch (nRet)
 					{
 					case IDYES:
+						FileMisc::LogText(_T("      User confirmed to replace taskfile with backup"));
+
 						FileMisc::DeleteFile(sFilePath, TRUE);
-						FileMisc::MoveFile(sBackup, sFilePath);
+						FileMisc::MoveFile(sBackupPath, sFilePath, TRUE, TRUE);
 						break;
 				
 					case IDNO: // keep the backup just in case
 						{
-							CString sRename = CFileBackup::BuildBackupPath(sBackup);
-							::MoveFile(sBackup, sRename);
+							FileMisc::LogText(_T("      User confirmed to keep taskfile, renaming backup"));
+
+							CString sRename = CFileBackup::BuildBackupPath(sBackupPath);
+							FileMisc::MoveFile(sBackupPath, sRename, TRUE, TRUE);
 						}
 						break;
 				
@@ -6320,8 +6334,9 @@ BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 		}
 		else
 		{
-			// Nothing we can do except delete it
-			FileMisc::DeleteFile(sFilePath, TRUE);
+			FileMisc::LogText(_T("  Backup file has zero length, deleting backup"));
+
+			FileMisc::DeleteFile(sBackupPath, TRUE);
 		}
 	}
 	
@@ -7342,6 +7357,8 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarget, HTREEITEM htiDropAfter)
 {
+	CLockUpdates lu(*this);
+
 	switch (nDrop)
 	{
 	case TDC_DROPCOPY:
@@ -7754,6 +7771,9 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	if (!m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
 		return FALSE;
 
+	CLockUpdates lu(*this);
+	HOLD_REDRAW(*this, m_taskTree);
+	
 	m_taskTree.MoveSelection(nDirection);
 
 	// refresh parent states if moving to the right (adding subtasks)
@@ -12288,8 +12308,9 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 	if (m_data.CanUndoLastAction(bUndo))
 	{
  		CWaitCursor cursor;
- 		CHoldRedraw hr(m_taskTree);
- 		
+		CLockUpdates lu(*this);
+		HOLD_REDRAW(*this, m_taskTree);
+		
 		TDCSELECTIONCACHE cache;
 		CacheTreeSelection(cache);
 
@@ -12354,6 +12375,7 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 			// note: DeleteTask on the Parent will already have disposed of the children
 			// so we can expect hti to be NULL on occasion. ie don't ASSERT it
 			HTREEITEM hti = m_taskTree.GetItem(elm.dwTaskID);
+			ASSERT(hti);
 			
 			if (hti)
 			{
@@ -12367,7 +12389,10 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 		{
 			// find parent item and restore task
 			HTREEITEM htiParent = m_taskTree.GetItem(elm.dwParentID);
+			ASSERT(htiParent || !elm.dwParentID);
+
 			HTREEITEM htiPrevSibling = m_taskTree.GetItem(elm.dwPrevSiblingID);
+			ASSERT(htiPrevSibling || !elm.dwPrevSiblingID);
 			
 			if ((elm.dwParentID && htiParent) || (!elm.dwParentID && !htiParent))
 			{
@@ -12382,9 +12407,14 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 		{
 			// move the task back to it original location
 			HTREEITEM hti = m_taskTree.GetItem(elm.dwTaskID); // current tree item
-			HTREEITEM htiDestParent = m_taskTree.GetItem(elm.dwParentID); // original owner
-			HTREEITEM htiDestPrevSibling = m_taskTree.GetItem(elm.dwPrevSiblingID); // original previous sibling
+			ASSERT(hti);
 
+			HTREEITEM htiDestParent = m_taskTree.GetItem(elm.dwParentID); // original owner
+			ASSERT(htiDestParent || !elm.dwParentID);
+
+			HTREEITEM htiDestPrevSibling = m_taskTree.GetItem(elm.dwPrevSiblingID); // original previous sibling
+			ASSERT(htiDestPrevSibling || !elm.dwPrevSiblingID);
+			
 			if ((elm.dwParentID && htiDestParent) || (!elm.dwParentID && !htiDestParent))
 			{
 				// undo the move

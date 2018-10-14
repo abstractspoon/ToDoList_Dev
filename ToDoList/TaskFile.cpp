@@ -3383,12 +3383,23 @@ bool CTaskFile::SetTaskColor(HTASKITEM hTask, unsigned long nColor)
 			SetTaskString(hTask, TDL_TASKWEBCOLOR, GraphicsMisc::GetWebColor((COLORREF)nColor));
 }
 
+bool CTaskFile::SetTaskPriorityOrRisk(HTASKITEM hTask, const CString& sIntItem, int iVal)
+{
+	if (iVal != TDL_NOPRIORITYORISK)
+		iVal = (char)max(0, min(10, iVal));
+
+	if (!SetTaskInt(hTask, sIntItem, iVal))
+		return false;
+
+	if (iVal == TDL_NOPRIORITYORISK)
+		HideAttribute(hTask, sIntItem, TRUE);
+
+	return true;
+}
+
 bool CTaskFile::SetTaskPriority(HTASKITEM hTask, int nPriority)
 {
-	if (nPriority != FM_NOPRIORITY)
-		nPriority = (char)max(0, min(10, nPriority));
-
-	return SetTaskInt(hTask, TDL_TASKPRIORITY, nPriority);
+	return SetTaskPriorityOrRisk(hTask, TDL_TASKPRIORITY, nPriority);
 }
 
 bool CTaskFile::SetTaskPercentDone(HTASKITEM hTask, unsigned char nPercent)
@@ -3697,18 +3708,12 @@ BOOL CTaskFile::SetTaskLock(HTASKITEM hTask, BOOL bLock, BOOL bCalc)
 
 BOOL CTaskFile::SetTaskHighestPriority(HTASKITEM hTask, int nPriority)
 {
-	if (nPriority != FM_NOPRIORITY)
-		nPriority = (char)max(0, min(10, nPriority));
-
-	return SetTaskInt(hTask, TDL_TASKHIGHESTPRIORITY, nPriority);
+	return SetTaskPriorityOrRisk(hTask, TDL_TASKHIGHESTPRIORITY, nPriority);
 }
 
 BOOL CTaskFile::SetTaskHighestRisk(HTASKITEM hTask, int nRisk)
 {
-	if (nRisk != FM_NORISK)
-		nRisk = (char)max(0, min(10, nRisk));
-
-	return SetTaskInt(hTask, TDL_TASKHIGHESTRISK, nRisk);
+	return SetTaskPriorityOrRisk(hTask, TDL_TASKHIGHESTRISK, nRisk);
 }
 
 BOOL CTaskFile::SetTaskCalcCost(HTASKITEM hTask, double dCost)
@@ -3728,10 +3733,7 @@ bool CTaskFile::SetTaskPosition(HTASKITEM hTask, unsigned long nPos)
 
 bool CTaskFile::SetTaskRisk(HTASKITEM hTask, int nRisk)
 {
-	if (nRisk != FM_NORISK)
-		nRisk = (char)max(-1, min(10, nRisk));
-
-	return SetTaskInt(hTask, TDL_TASKRISK, nRisk);
+	return SetTaskPriorityOrRisk(hTask, TDL_TASKRISK, nRisk);
 }
 
 bool CTaskFile::SetTaskExternalID(HTASKITEM hTask, LPCTSTR szID)

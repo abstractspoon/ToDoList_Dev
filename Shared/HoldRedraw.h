@@ -60,11 +60,14 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////////
 
-class CLockUpdates : protected CRedrawAll
+class CLockUpdates
 {
 public:
-	CLockUpdates(HWND hwnd, DWORD dwFlags = 0);
+	CLockUpdates(HWND hwnd);
 	virtual ~CLockUpdates();
+
+protected:
+	HWND m_hWnd;
 };
 #endif
 

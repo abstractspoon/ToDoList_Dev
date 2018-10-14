@@ -98,9 +98,9 @@ DWORD CDateTimeCtrlEx::SetMonthCalStyle(DWORD dwStyle)
 	}
 
 	// else
-	ASSERT(::IsWindow(m_hWnd)); 
+	ASSERT_VALID(this); 
 	
-	return (DWORD)::SendMessage(m_hWnd, DTM_SETMCSTYLE, 0, (LPARAM)dwStyle); 
+	return (DWORD)SendMessage(DTM_SETMCSTYLE, 0, (LPARAM)dwStyle); 
 }
 
 DWORD CDateTimeCtrlEx::GetMonthCalStyle() const
@@ -335,12 +335,11 @@ LRESULT CDateTimeCtrlEx::OnGetMonthCal(WPARAM wp, LPARAM lp)
 
 BOOL CDateTimeCtrlEx::GetPickerInfo(DATETIMEPICKERINFO& dtpi) const
 {
-	if (COSVersion() >= OSV_VISTA)
+	if (GetSafeHwnd() && (COSVersion() >= OSV_VISTA))
 	{
-		CDateTimeCtrlEx* pThis = const_cast<CDateTimeCtrlEx*>(this);
 		dtpi.cbSize = sizeof(dtpi);
 		
-		return pThis->SendMessage(DTM_GETDATETIMEPICKERINFO, 0, (LPARAM)&dtpi);
+		return ::SendMessage(m_hWnd, DTM_GETDATETIMEPICKERINFO, 0, (LPARAM)&dtpi);
 	}
 
 	return FALSE;

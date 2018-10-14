@@ -40,6 +40,27 @@ public:
 		Lookup(dwItemID, hti);
 		return hti;
 	}
+
+#ifdef _DEBUG
+	void Trace(CTreeCtrl& tree) const
+	{
+		TRACE(_T("CHTIMap::Trace(start)\n"));
+
+		POSITION pos = GetStartPosition();
+		DWORD dwID;
+		HTREEITEM hti = NULL;
+
+		while (pos)
+		{
+			GetNextAssoc(pos, dwID, hti);
+			ASSERT(hti && dwID);
+
+			TRACE(_T("Tree item (id = %ld, label = %s)\n"), dwID, tree.GetItemText(hti));
+		}
+
+		TRACE(_T("CHTIMap::Trace(end)\n"));
+	}
+#endif
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -231,7 +252,7 @@ public:
 	HTREEITEM FindWidestItem(BOOL bExpandedOnly = FALSE, CDC* pDC = NULL) const;
 
 	void EnsureVisibleEx(HTREEITEM hti, BOOL bVPartialOK = TRUE, BOOL bHPartialOK = TRUE);
-	int BuildHTIMap(CHTIMap& mapHTI, BOOL bVisibleOnly = FALSE) const;
+	int BuildTreeItemMap(CHTIMap& mapHTI, BOOL bVisibleOnly = FALSE) const;
 
 	HTREEITEM MoveTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 
 						BOOL bUsesTextCallback = FALSE, BOOL bUsesImageCallback = FALSE);

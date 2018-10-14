@@ -231,7 +231,7 @@ static const int NUM_DATEFILTER = sizeof(DATE_FILTERS) / (2 * sizeof(UINT));
 
 static const TDCATTRIBUTE ATTRIBUTES[] = 
 {
-	{ TDCA_NONE, 0 },
+	{ TDCA_NONE,				0 },
 	{ TDCA_TASKNAME,			IDS_TDLBC_TITLE },
 	{ TDCA_DONEDATE,			IDS_TDLBC_DONEDATE },
 	{ TDCA_DUEDATE,				IDS_TDLBC_DUEDATE },

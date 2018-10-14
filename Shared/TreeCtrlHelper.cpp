@@ -447,7 +447,7 @@ void CTreeCtrlHelper::SetItemIntegral(HTREEITEM hti, int iIntegral)
 
 BOOL CTreeCtrlHelper::IsAnyItemExpanded() const
 {
-	// Check top-level items for first match
+	// Check top-level items for first expanded item
 	HTREEITEM hti = m_tree.GetChildItem(NULL);
 	
 	while (hti)
@@ -463,12 +463,16 @@ BOOL CTreeCtrlHelper::IsAnyItemExpanded() const
 
 BOOL CTreeCtrlHelper::IsAnyItemCollapsed() const
 {
-	// Check top-level items for first match
+	// Check top-level items for first item not FULLY expanded
 	HTREEITEM hti = m_tree.GetChildItem(NULL);
 	
 	while (hti)
 	{
-		if (IsItemExpanded(hti) == 0)
+#ifdef _DEBUG
+		CString sItem = m_tree.GetItemText(hti);
+#endif
+
+		if (!IsItemExpanded(hti, TRUE))
 			return TRUE;
 		
 		hti = TreeView_GetNextItem(m_tree, hti, TVGN_NEXT); // constness
@@ -489,14 +493,14 @@ int CTreeCtrlHelper::IsItemExpanded(HTREEITEM hti, BOOL bFully) const
 	if (!m_tree.ItemHasChildren(hti))
 		return -1;
 
-	// check children (check for first failure)
+	// check children recursively for first failure
 	if (bFully)
 	{
 		HTREEITEM htiChild = m_tree.GetChildItem(hti);
 
 		while (htiChild)
 		{
-			if (IsItemExpanded(htiChild, TRUE) == FALSE)
+			if (!IsItemExpanded(htiChild, TRUE)) // RECURSIVE CALL
 				return FALSE;
 
 			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
@@ -515,15 +519,16 @@ BOOL CTreeCtrlHelper::IsParentItemExpanded(HTREEITEM hti, BOOL bRecursive) const
 	HTREEITEM htiParent = m_tree.GetParentItem(hti);
 
 	if (!htiParent) // root
+	{
 		return TRUE; // always expanded
-
+	}
 	else if (IsItemExpanded(htiParent))
 	{
 		if (!bRecursive)
 			return TRUE;
 
-		// else recursive call
-		return IsParentItemExpanded(htiParent, TRUE);
+		// else
+		return IsParentItemExpanded(htiParent, TRUE); // RECURSIVE CALL
 	}
 
 	// else
@@ -991,7 +996,7 @@ HTREEITEM CTreeCtrlHelper::FindItem(DWORD dwID, HTREEITEM htiStart) const
 	return htiFound;
 }
 
-int CTreeCtrlHelper::BuildHTIMap(CHTIMap& mapHTI, BOOL bVisibleOnly) const
+int CTreeCtrlHelper::BuildTreeItemMap(CHTIMap& mapHTI, BOOL bVisibleOnly) const
 {
 	mapHTI.RemoveAll();
 

@@ -86,10 +86,17 @@ CHoldRedraw::~CHoldRedraw()
 
 // ------------------------------------------------------------------------------
 
-CLockUpdates::CLockUpdates(HWND hwnd, DWORD dwFlags) : CRedrawAll(hwnd, dwFlags)
+CLockUpdates::CLockUpdates(HWND hwnd) : m_hWnd(hwnd)
 {
-	if (m_hWnd)
-		::LockWindowUpdate(m_hWnd);
+	if (!::IsWindowVisible(m_hWnd))
+	{
+		m_hWnd = NULL;
+	}
+	else if (m_hWnd && !::LockWindowUpdate(m_hWnd))
+	{
+		ASSERT(0);
+		m_hWnd = NULL;
+	}
 }
 
 CLockUpdates::~CLockUpdates()

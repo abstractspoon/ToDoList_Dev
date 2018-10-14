@@ -7,6 +7,7 @@
 #include "tdcstatic.h"
 
 #include "..\shared\Localizer.h"
+#include "..\shared\dialoghelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -76,14 +77,28 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 	{
 		const TDCATTRIBUTE& att = ATTRIBUTES[nAttrib];
 
-		// ignore special attributes
-		if (att.attrib == TDCA_NONE || att.attrib == TDCA_COLOR || att.attrib == TDCA_PROJECTNAME ||
-			att.attrib == TDCA_RECURRENCE || att.attrib == TDCA_POSITION||
-			att.attrib == TDCA_TASKNAMEORCOMMENTS || att.attrib == TDCA_ANYTEXTATTRIBUTE)
+		// ignore certain attributes
+		switch (att.attrib)
+		{
+		case TDCA_COLOR:
+		case TDCA_PROJECTNAME:
+		case TDCA_RECURRENCE:
+		case TDCA_POSITION:
+		case TDCA_TASKNAMEORCOMMENTS:
+		case TDCA_ANYTEXTATTRIBUTE:
+		case TDCA_COMMENTSSIZE:
 			continue;
 
-		int nItem = m_cbAttributes.AddString(CEnString(att.nAttribResID)); 
-		m_cbAttributes.SetItemData(nItem, (DWORD)att.attrib); 
+		case TDCA_NONE:
+			// Allow mapping to 'none' when importing
+			if (m_bImporting)
+				CDialogHelper::AddString(m_cbAttributes, _T(""), att.attrib);
+			break;
+
+		default:
+			CDialogHelper::AddString(m_cbAttributes, CEnString(att.nAttribResID), att.attrib);
+			break;
+		}
 	}
 
 	// add custom attribute placeholder if importing
@@ -320,7 +335,8 @@ void CTDLImportExportAttributeMappingListCtrl::OnAttribEditOK()
 		// check that this column ID is not already in use
 		if (m_bOneToOneMapping && 
 			(nAttrib != TDCA_CUSTOMATTRIB_FIRST) && 
-			(nAttrib != TDCA_CUSTOMATTRIB_LAST))
+			(nAttrib != TDCA_CUSTOMATTRIB_LAST) &&
+			(nAttrib != TDCA_NONE))
 		{
 			int nExist = FindRow(nAttrib, nRow);
 
