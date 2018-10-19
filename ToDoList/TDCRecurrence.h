@@ -11,9 +11,13 @@
 
 #include "tdcenum.h"
 
+#include "..\Interfaces\ITaskList.h"
+
+#include "..\Shared\Recurrence.h"
+
 //////////////////////////////////////////////////////////////////////
 
-struct TDCRECURRENCE
+struct TDCRECURRENCE : public CRecurrence
 {
 	//  nRegularity										dwSpecific1				dwSpecific2
 
@@ -46,37 +50,20 @@ struct TDCRECURRENCE
 
 	BOOL Matches(const TDCRECURRENCE& tr, BOOL bIncludeRemainingOccurrences) const;
 
-	BOOL IsRecurring() const;
-	BOOL CanRecur() const;
-	BOOL GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtNext);
-
-	BOOL FitDayToScheme(COleDateTime& dtRecur) const;
-	CString GetRegularityText(BOOL bIncOnce = TRUE) const;
-
-	BOOL SetRegularity(TDI_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
-	TDI_REGULARITY GetRegularity(DWORD& dwSpecific1, DWORD& dwSpecific2) const;
-	TDI_REGULARITY GetRegularity() const;
+	BOOL SetRegularity(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
+	TDC_REGULARITY GetRegularity(DWORD& dwSpecific1, DWORD& dwSpecific2) const;
+	TDC_REGULARITY GetRegularity() const;
 	
-	void ClearOccurrenceCount();
-	BOOL SetOccurrenceCount(int nNumOccur, int nRemainingOccur);
-	int GetOccurrenceCount() const;	
-	int GetRemainingOccurrenceCount() const;
+	CString GetRegularityText(BOOL bIncOnce = TRUE) const;
+	static CString GetRegularityText(TDC_REGULARITY nRegularity, BOOL bIncOnce);
 
-	static CString GetRegularityText(TDI_REGULARITY nRegularity, BOOL bIncOnce);
-
-	TDI_RECURFROMOPTION nRecalcFrom; 
-	TDI_RECURREUSEOPTION nReuse;
+	TDC_RECURFROMOPTION nRecalcFrom; 
+	TDC_RECURREUSEOPTION nReuse;
 	BOOL bPreserveComments;
 
 protected:
-	int nNumOccur, nRemainingOccur;
-	TDI_REGULARITY nRegularity;
-	DWORD dwSpecific1;
-	DWORD dwSpecific2;
-
-protected:
 	BOOL ValidateDay(SYSTEMTIME& st) const;
-	static BOOL IsValidRegularity(TDI_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
+	static BOOL IsValidRegularity(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
 };
 
 
