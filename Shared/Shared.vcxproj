@@ -477,6 +477,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="Recurrence.cpp" />
     <ClCompile Include="Regkey.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -810,6 +811,7 @@
     <ClInclude Include="RangeSliderCtrl.h" />
     <ClInclude Include="RCCtrlParser.h" />
     <ClInclude Include="RecordsetEx.h" />
+    <ClInclude Include="Recurrence.h" />
     <ClInclude Include="Regkey.h" />
     <ClInclude Include="RemoteFile.h" />
     <ClInclude Include="RemoteFileDialog.h" />
