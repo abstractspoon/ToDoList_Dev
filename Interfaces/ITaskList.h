@@ -334,10 +334,10 @@ class ITaskList6 : public ITaskList5
 {
 	// new methods
 public:
-	virtual bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-									DWORD dwSpecific2, bool bRecalcFromDue, int nReuse) = 0;
-	virtual bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-									DWORD& dwSpecific2, bool& bRecalcFromDue, int& nReuse) const = 0;
+	virtual bool SetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY nRegularity, DWORD dwSpecific1, 
+									DWORD dwSpecific2, bool bRecalcFromDue, TDC_RECURREUSEOPTION nReuse) = 0;
+	virtual bool GetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY& nRegularity, DWORD& dwSpecific1, 
+									DWORD& dwSpecific2, bool& bRecalcFromDue, TDC_RECURREUSEOPTION& nReuse) const = 0;
 
 	virtual bool SetTaskVersion(HTASKITEM hTask, LPCWSTR szVersion) = 0;
 	virtual LPCWSTR GetTaskVersion(HTASKITEM hTask) const = 0;
@@ -445,12 +445,12 @@ class ITaskList13 : public ITaskList12
 {
 	// new methods
 public:
-	virtual bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-									DWORD dwSpecific2, int nRecalcFrom, 
-									int nReuse, int nNumOccur) = 0;
-	virtual bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-									DWORD& dwSpecific2, int& nRecalcFrom, 
-									int& nReuse, int& nNumOccur) const = 0;
+	virtual bool SetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY nRegularity, DWORD dwSpecific1, 
+									DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom, 
+									TDC_RECURREUSEOPTION nReuse, int nNumOccur) = 0;
+	virtual bool GetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY& nRegularity, DWORD& dwSpecific1, 
+									DWORD& dwSpecific2, TDC_RECURFROMOPTION& nRecalcFrom, 
+									TDC_RECURREUSEOPTION& nReuse, int& nNumOccur) const = 0;
 
 	virtual LPCWSTR GetTaskSubtaskCompletion(HTASKITEM hTask) const = 0;
 	virtual bool AddCustomAttribute(LPCWSTR szID, LPCWSTR szLabel, LPCWSTR szColumn, bool bList = false) = 0;
@@ -499,11 +499,13 @@ public:
 
 	virtual unsigned long GetCustomAttributeTypeByID(LPCWSTR szID) const = 0;
 
-	virtual bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-									DWORD dwSpecific2, int nRecalcFrom, int nReuse, 
+	virtual bool SetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY nRegularity, 
+									DWORD dwSpecific1, DWORD dwSpecific2, 
+									TDC_RECURFROMOPTION nRecalcFrom, TDC_RECURREUSEOPTION nReuse, 
 									int nNumOccur, int nRemainingOccur, bool bPreserveComments) = 0;
-	virtual bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-									DWORD& dwSpecific2, int& nRecalcFrom, int& nReuse, 
+	virtual bool GetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY& nRegularity, 
+									DWORD& dwSpecific1, DWORD& dwSpecific2, 
+									TDC_RECURFROMOPTION& nRecalcFrom, TDC_RECURREUSEOPTION& nReuse, 
 									int& nNumOccur, int& nRemainingOccur, bool& bPreserveComments) const = 0;
 };
 

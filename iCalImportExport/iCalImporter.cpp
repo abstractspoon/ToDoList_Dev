@@ -94,7 +94,7 @@ struct ICALITEM
 	COleDateTime dtStart, dtDue, dtEnd;
 	unsigned char nPercent;
 	int nPriority;
-	int nRegularity;
+	TDC_REGULARITY nRegularity;
 	DWORD dwRegSpecific1, dwRegSpecific2;
 };
 
@@ -521,7 +521,7 @@ int CiCalImporter::PreProcessFileLines(CStringArray& aLines)
 	return aLines.GetSize();
 }
 
-BOOL CiCalImporter::DecodeRecurrence(const CString& sRecur, int& nRegularity, DWORD& dwSpecific1, DWORD& dwSpecific2)
+BOOL CiCalImporter::DecodeRecurrence(const CString& sRecur, TDC_REGULARITY& nRegularity, DWORD& dwSpecific1, DWORD& dwSpecific2)
 {
 	nRegularity = TDIR_ONCE;
 	dwSpecific1 = dwSpecific2 = 0;

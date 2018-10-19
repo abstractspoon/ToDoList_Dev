@@ -294,12 +294,15 @@ int CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, cons
 		WriteString(fileOut, _T("DESCRIPTION:%s"), sComments);
 
 		// recurrence
-		int nRegularity, nUnused;
+		TDC_REGULARITY nRegularity;
+		int nUnused;
+		TDC_RECURREUSEOPTION nUnused2;
+		TDC_RECURFROMOPTION nUnused3;
 		DWORD dwSpecific1, dwSpecific2;
 		bool bUnused;
 
 		if (pTasks->GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
-										nUnused, nUnused, nUnused, nUnused, bUnused))
+										nUnused3, nUnused2, nUnused, nUnused, bUnused))
 		{
 			WriteString(fileOut, FormatRecurrence(nRegularity, dwSpecific1, dwSpecific2));
 		}

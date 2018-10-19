@@ -106,7 +106,7 @@ protected:
 protected:
 	static int PreProcessFileLines(CStringArray& aLines);
 	static BOOL ExtractDate(const CString& sValue, COleDateTime& date, BOOL bEndDate);
-	static BOOL DecodeRecurrence(const CString& sRecur, int& nRegularity, DWORD& dwSpecific1, DWORD& dwSpecific2);
+	static BOOL DecodeRecurrence(const CString& sRecur, TDC_REGULARITY& nRegularity, DWORD& dwSpecific1, DWORD& dwSpecific2);
 	static DWORD DecodeDayOfMonth(const CString& sDOM);
 
 	enum ICI_STATE

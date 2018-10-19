@@ -149,11 +149,12 @@ bool CFMindImporter::ImportTask(const CXmlItem* pFMTask, ITASKLISTBASE* pDestTas
 	pDestTaskFile->SetTaskTimeSpent(hTask, GetAttribValueD(pFMTask, FM_CUSTOMTIMESPENT), cUnits);
 
 	// recurrence
-	int nRegularity = GetAttribValueI(pFMTask, FM_CUSTOMREGULARITY);
+	TDC_REGULARITY nRegularity = (TDC_REGULARITY)GetAttribValueI(pFMTask, FM_CUSTOMREGULARITY);
+	TDC_RECURFROMOPTION nRecalcFrom = (TDC_RECURFROMOPTION)GetAttribValueI(pFMTask, FM_CUSTOMRECURRECALCFROM);
+	TDC_RECURREUSEOPTION nReuse = (TDC_RECURREUSEOPTION)GetAttribValueI(pFMTask, FM_CUSTOMRECURREUSE);
+
 	DWORD dwSpecific1 = GetAttribValueI(pFMTask, FM_CUSTOMRECURSPEC1);
 	DWORD dwSpecific2 = GetAttribValueI(pFMTask, FM_CUSTOMRECURSPEC2);
-	int nRecalcFrom = GetAttribValueI(pFMTask, FM_CUSTOMRECURRECALCFROM);
-	int nReuse = GetAttribValueI(pFMTask, FM_CUSTOMRECURREUSE);
 	int nNumOccur = GetAttribValueI(pFMTask, FM_CUSTOMNUMOCCUR);
 	int nRemainingOccurs = GetAttribValueI(pFMTask, FM_CUSTOMREMAININGOCCUR);
 	bool bPreserveComments = (GetAttribValueI(pFMTask, FM_CUSTOMPRESERVECOMMENTS) != FALSE);

@@ -253,11 +253,13 @@ public:
 
 	unsigned long GetCustomAttributeTypeByID(LPCTSTR szID) const;
 
-	bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-							DWORD& dwSpecific2, int& bRecalcFrom, int& nReuse, 
+	bool GetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY& nRegularity, 
+							DWORD& dwSpecific1, DWORD& dwSpecific2, 
+							TDC_RECURFROMOPTION& bRecalcFrom, TDC_RECURREUSEOPTION& nReuse, 
 							int& nNumOccur, int& nRemainingOccur, bool& bPreserveComments) const;
-	bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-							DWORD dwSpecific2, int nRecalcFrom, int nReuse, 
+	bool SetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY nRegularity, 
+							DWORD dwSpecific1, DWORD dwSpecific2, 
+							TDC_RECURFROMOPTION nRecalcFrom, TDC_RECURREUSEOPTION nReuse, 
 							int nNumOccur, int nRemainingOccur, bool bPreserveComments);
 
 	//////////////////////////////////////////////////////////////
@@ -284,11 +286,11 @@ public:
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList13 implementation 
-	bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-		DWORD& dwSpecific2, int& nRecalcFrom, int& nReuse, int& nNumOccur) const;
+	bool GetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY& nRegularity, DWORD& dwSpecific1, 
+		DWORD& dwSpecific2, TDC_RECURFROMOPTION& nRecalcFrom, TDC_RECURREUSEOPTION& nReuse, int& nNumOccur) const;
 	
-	bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-		DWORD dwSpecific2, int nRecalcFrom, int nReuse, int nNumOccur);
+	bool SetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY nRegularity, DWORD dwSpecific1, 
+		DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom, TDC_RECURREUSEOPTION nReuse, int nNumOccur);
 
 	LPCTSTR GetTaskSubtaskCompletion(HTASKITEM hTask) const;
 	bool AddCustomAttribute(LPCTSTR szID, LPCTSTR szLabel, LPCWSTR szColumn, bool bList);
@@ -365,12 +367,12 @@ public:
 	//////////////////////////////////////////////////////////////
 	// ITaskList6 implementation 
 	LPCTSTR GetTaskVersion(HTASKITEM hTask) const;
-	bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-							DWORD& dwSpecific2, bool& bRecalcFromDue, int& nReuse) const;
+	bool GetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY& nRegularity, DWORD& dwSpecific1, 
+							DWORD& dwSpecific2, bool& bRecalcFromDue, TDC_RECURREUSEOPTION& nReuse) const;
 
 	bool SetTaskVersion(HTASKITEM hTask, LPCTSTR szVersion);
-	bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-							DWORD dwSpecific2, bool bRecalcFromDue, int nReuse);
+	bool SetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY nRegularity, DWORD dwSpecific1, 
+							DWORD dwSpecific2, bool bRecalcFromDue, TDC_RECURREUSEOPTION nReuse);
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList5 implementation 

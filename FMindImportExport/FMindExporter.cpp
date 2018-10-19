@@ -296,9 +296,12 @@ void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTa
 	ADDCUSTOMATTRIB(FM_CUSTOMTIMESPENTUNITS, nUnits)
 
 	// recurrence
-	int nRegularity = 0, nReuse = 0;
+	TDC_REGULARITY nRegularity;
+	TDC_RECURREUSEOPTION nReuse;
+	TDC_RECURFROMOPTION nRecalcFrom;
+
 	DWORD dwSpecific1 = 0, dwSpecific2 = 0;
-	int nRecalcFrom = 0, nNumOccur = -1, nRemainingOccur = -1;
+	int nNumOccur = -1, nRemainingOccur = -1;
 	bool bPreserveComments = false;
 
 	if (pSrcTaskFile->GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
