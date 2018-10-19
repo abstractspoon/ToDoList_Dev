@@ -3385,13 +3385,13 @@ bool CTaskFile::SetTaskColor(HTASKITEM hTask, unsigned long nColor)
 
 bool CTaskFile::SetTaskPriorityOrRisk(HTASKITEM hTask, const CString& sIntItem, int iVal)
 {
-	if (iVal != TDL_NOPRIORITYORISK)
-		iVal = (char)max(0, min(10, iVal));
+	if (!IsValidPriorityOrRisk(iVal))
+		iVal = (char)max(TDC_MINPRIORITYORISK, min(TDC_MAXPRIORITYORISK, iVal));
 
 	if (!SetTaskInt(hTask, sIntItem, iVal))
 		return false;
 
-	if (iVal == TDL_NOPRIORITYORISK)
+	if (iVal == TDC_NOPRIORITYORISK)
 		HideAttribute(hTask, sIntItem, TRUE);
 
 	return true;

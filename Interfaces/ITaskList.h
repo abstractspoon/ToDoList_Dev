@@ -75,7 +75,21 @@ static bool IsValidUnits(TDC_UNITS nUnits)
 
 enum 
 {
-	TDL_NOPRIORITYORISK	= -2,
+	TDC_NOPRIORITYORISK		= -2,
+	TDC_MINPRIORITYORISK	= 0,
+	TDC_MAXPRIORITYORISK	= 10,
+};
+
+static bool IsValidPriorityOrRisk(int nValue)
+{
+	if (nValue > TDC_MAXPRIORITYORISK)
+		return false;
+
+	if ((nValue < TDC_MINPRIORITYORISK) && (nValue != TDC_NOPRIORITYORISK))
+		return false;
+
+	return true;
+}
 };
 
 /////////////////////////////////////////////////////////////////////////////////
