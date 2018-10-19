@@ -496,8 +496,8 @@ protected:
 	int m_nPercentIncrement;
 	TDCCOLEDITVISIBILITY m_visColEdit;
 	TODOITEM m_tdiDefault;
-	TDI_RECURFROMOPTION m_nDefRecurFrom;
-	TDI_RECURREUSEOPTION m_nDefRecurReuse;
+	TDC_RECURFROMOPTION m_nDefRecurFrom;
+	TDC_RECURREUSEOPTION m_nDefRecurReuse;
 	CDWordArray m_aRecreateTaskIDs;
 	FIND_STATE m_findState;
 	CTDCTimeTracking m_timeTracking;

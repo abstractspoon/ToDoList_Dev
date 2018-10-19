@@ -90,6 +90,60 @@ static bool IsValidPriorityOrRisk(int nValue)
 
 	return true;
 }
+
+/////////////////////////////////////////////////////////////////////////////
+
+enum TDC_REGULARITY
+{
+	// original options
+	TDIR_ONCE,
+	TDIR_DAILY,
+	TDIR_WEEKLY,
+	TDIR_MONTHLY,
+	TDIR_YEARLY,
+
+	TDIR_DAY_EVERY_NDAYS					= TDIR_DAILY,		
+	TDIR_WEEK_SPECIFIC_DOWS_NWEEKS			= TDIR_WEEKLY,	
+	TDIR_MONTH_SPECIFIC_DAY_NMONTHS			= TDIR_MONTHLY,	
+	TDIR_YEAR_SPECIFIC_DAY_MONTH			= TDIR_YEARLY,	
+
+	// new options
+	TDIR_DAY_EVERY_WEEKDAY,
+	TDIR_DAY_RECREATEAFTERNDAYS_DEP,		// deprecated
+	TDIR_WEEK_RECREATEAFTERNWEEKS_DEP,		// deprecated
+	TDIR_MONTH_SPECIFIC_DOW_NMONTHS,
+	TDIR_MONTH_RECREATEAFTERNMONTHS_DEP,	// deprecated
+	TDIR_YEAR_SPECIFIC_DOW_MONTH,
+	TDIR_YEAR_RECREATEAFTERNYEARS_DEP,		// deprecated
+
+	// replace deprecated options
+	TDIR_WEEK_EVERY_NWEEKS,
+	TDIR_MONTH_EVERY_NMONTHS,
+	TDIR_YEAR_EVERY_NYEARS,
+
+	// new option
+	TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS,
+	TDIR_DAY_EVERY_NWEEKDAYS,
+
+	// ADD NEW OPTIONS HERE ONLY!
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+enum TDC_RECURREUSEOPTION
+{
+	TDIRO_REUSE,
+	TDIRO_CREATE,
+	TDIRO_ASK,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+enum TDC_RECURFROMOPTION
+{
+	TDIRO_DONEDATE,
+	TDIRO_DUEDATE,
+	TDIRO_STARTDATE,
 };
 
 /////////////////////////////////////////////////////////////////////////////////

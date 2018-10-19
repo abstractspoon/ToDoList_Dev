@@ -185,7 +185,7 @@ int CTDLRecurringTaskEdit::CalcMaxRegularityWidth(CDC* pDC, BOOL bIncOnce)
 
 	while (nReg--)
 	{
-		CString sRegularity = TDCRECURRENCE::GetRegularityText((TDI_REGULARITY)nReg, bIncOnce);
+		CString sRegularity = TDCRECURRENCE::GetRegularityText((TDC_REGULARITY)nReg, bIncOnce);
 
 		int nItem = pDC->GetTextExtent(sRegularity).cx;
 		nMax = max(nItem, nMax);
@@ -284,10 +284,10 @@ END_MESSAGE_MAP()
 // CRecurringTaskOptionDlg message handlers
 /////////////////////////////////////////////////////////////////////////////
 
-TDI_REGULARITY CTDLRecurringTaskOptionDlg::GetRecurrenceOptions(TDCRECURRENCE& tr) const
+TDC_REGULARITY CTDLRecurringTaskOptionDlg::GetRecurrenceOptions(TDCRECURRENCE& tr) const
 {
-	tr.nRecalcFrom = (TDI_RECURFROMOPTION)m_nRecalcFrom;
-	tr.nReuse = (TDI_RECURREUSEOPTION)m_nReuse;
+	tr.nRecalcFrom = (TDC_RECURFROMOPTION)m_nRecalcFrom;
+	tr.nReuse = (TDC_RECURREUSEOPTION)m_nReuse;
 	tr.bPreserveComments = m_bPreserveComments;
 
 	switch (m_nFrequency)

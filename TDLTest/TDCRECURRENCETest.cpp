@@ -6,6 +6,8 @@
 #include "TDLTest.h"
 #include "TDCRECURRENCETest.h"
 
+#include "..\interfaces\ITasklist.h"
+
 #include "..\todolist\tdcrecurrence.h"
 
 #include "..\shared\datehelper.h"

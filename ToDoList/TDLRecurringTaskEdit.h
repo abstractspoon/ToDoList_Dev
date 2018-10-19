@@ -262,7 +262,7 @@ class CTDLRecurringTaskOptionDlg : public CTDLDialog
 public:
 	CTDLRecurringTaskOptionDlg(const TDCRECURRENCE& tr, const COleDateTime& dtDefault, CWnd* pParent = NULL);   // standard constructor
 
-	TDI_REGULARITY GetRecurrenceOptions(TDCRECURRENCE& tr) const;
+	TDC_REGULARITY GetRecurrenceOptions(TDCRECURRENCE& tr) const;
 
 protected:
 // Dialog Data
@@ -280,7 +280,7 @@ protected:
 	CTDLRecurringTaskMonthlyOptionPage m_pageMonthly;
 	CTDLRecurringTaskYearlyOptionPage m_pageYearly;
 	CPropertyPageHost m_ppHost;
-	TDI_REGULARITY m_nFrequency;
+	TDC_REGULARITY m_nFrequency;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -10625,8 +10625,8 @@ void CToDoCtrl::LoadDefaultRecurrence(const CPreferences& prefs)
 	
 	CString sKey = GetPreferencesKey(); // no subkey
 	
-	m_nDefRecurFrom = (TDI_RECURFROMOPTION)prefs.GetProfileInt(_T("DefaultRecurrence"), _T("RecurFrom"), TDIRO_DUEDATE);
-	m_nDefRecurReuse = (TDI_RECURREUSEOPTION)prefs.GetProfileInt(_T("DefaultRecurrence"), _T("RecurReuse"), TDIRO_REUSE);
+	m_nDefRecurFrom = (TDC_RECURFROMOPTION)prefs.GetProfileInt(_T("DefaultRecurrence"), _T("RecurFrom"), TDIRO_DUEDATE);
+	m_nDefRecurReuse = (TDC_RECURREUSEOPTION)prefs.GetProfileInt(_T("DefaultRecurrence"), _T("RecurReuse"), TDIRO_REUSE);
 }
 
 void CToDoCtrl::SaveSplitPos(CPreferences& prefs) const
