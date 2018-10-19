@@ -215,11 +215,6 @@ void CEnCheckComboBox::OnCheckChange(int nIndex)
 	}
 }
 
-void CEnCheckComboBox::PreSubclassWindow() 
-{
-	CCheckComboBox::PreSubclassWindow();
-}
-
 BOOL CEnCheckComboBox::GetCheck(int nIndex) const
 {
 	if (m_bMultiSel)

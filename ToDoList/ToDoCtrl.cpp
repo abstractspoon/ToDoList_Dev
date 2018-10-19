@@ -7400,6 +7400,7 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 	case TDC_DROPMOVE:
 		{
 			IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
+			HOLD_REDRAW(*this, m_taskTree);
 
 			DWORD dwDestParentID = m_taskTree.GetTaskID(htiDropTarget);
 			DWORD dwDestPrevSiblingID = m_taskTree.GetTaskID(htiDropAfter);

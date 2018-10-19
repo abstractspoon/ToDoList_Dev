@@ -609,6 +609,7 @@ int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSe
 
 	if (nFind == -1)
 	{
+		// Case-insensitive
 		if (!bCaseSensitive)
 		{
 			MakeUpper(sWord);
@@ -621,11 +622,12 @@ int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSe
 			return -1;
 	}
 
+	// else
 	if (bWholeWord) // test whole word
 	{
 		const CString DELIMS("()-\\/{}[]:;,. ?\"'");
 
-		// prior and next chars must be delimeters
+		// prior and next chars must be delimiters
 		TCHAR cPrevChar = ' ', cNextChar = ' ';
 
 		// prev
@@ -833,26 +835,6 @@ TCHAR Misc::TrimLast(CString& sText)
 		sText = sText.Left(sText.GetLength() - 1);
 	
 	return nLast;
-}
-
-int Misc::Split(const CString& sText, CDWordArray& aValues, TCHAR cDelim, BOOL bAllowEmpty)
-{
-	TCHAR szSep[2] = { cDelim, 0 };
-
-	return Split(sText, aValues, szSep, bAllowEmpty);
-}
-
-int Misc::Split(const CString& sText, CDWordArray& aValues, LPCTSTR szSep, BOOL bAllowEmpty)
-{
-	CStringArray aStrValues;
-	int nNumValues = Split(sText, aStrValues, szSep, bAllowEmpty);
-
-	aValues.SetSize(nNumValues);
-
-	for (int nVal = 0; nVal < nNumValues; nVal++)
-		aValues[nVal] = _ttoi(aStrValues[nVal]);
-
-	return nNumValues;
 }
 
 int Misc::Split(const CString& sText, CStringArray& aValues, TCHAR cDelim, BOOL bAllowEmpty)
@@ -1068,7 +1050,20 @@ int Misc::Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive, B
 			if (sArrItem.IsEmpty())
 				return nItem;
 		}
-		else if (Find(szItem, sArrItem, bCaseSensitive, bWholeWord) != -1)
+		else if (bWholeWord)
+		{
+			if (bCaseSensitive)
+			{
+				if (sArrItem.Compare(szItem) == 0)
+					return nItem;
+			}
+			else
+			{
+				if (sArrItem.CompareNoCase(szItem) == 0)
+					return nItem;
+			}
+		}
+		else if (Find(szItem, sArrItem, bCaseSensitive, FALSE) != -1)
 		{
 			return nItem;
 		}

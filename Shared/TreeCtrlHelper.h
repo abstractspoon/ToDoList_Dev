@@ -34,32 +34,14 @@ typedef CMap<HTREEITEM, HTREEITEM, int, int&> CMapIndices;
 class CHTIMap : public CMap<DWORD, DWORD, HTREEITEM, HTREEITEM&>
 {
 public:
-	inline HTREEITEM GetItem(DWORD dwItemID) const
-	{
-		HTREEITEM hti = NULL;
-		Lookup(dwItemID, hti);
-		return hti;
-	}
+	HTREEITEM GetItem(DWORD dwItemID) const;
 
+	int BuildMap(const CTreeCtrl& tree, BOOL bVisibleChildrenOnly = FALSE);
+	void AddItem(const CTreeCtrl& tree, HTREEITEM hti, BOOL bVisibleChildrenOnly = FALSE);
+	void RemoveItem(const CTreeCtrl& tree, HTREEITEM hti);
+	
 #ifdef _DEBUG
-	void Trace(CTreeCtrl& tree) const
-	{
-		TRACE(_T("CHTIMap::Trace(start)\n"));
-
-		POSITION pos = GetStartPosition();
-		DWORD dwID;
-		HTREEITEM hti = NULL;
-
-		while (pos)
-		{
-			GetNextAssoc(pos, dwID, hti);
-			ASSERT(hti && dwID);
-
-			TRACE(_T("Tree item (id = %ld, label = %s)\n"), dwID, tree.GetItemText(hti));
-		}
-
-		TRACE(_T("CHTIMap::Trace(end)\n"));
-	}
+	void Trace(CTreeCtrl& tree) const;
 #endif
 };
 
@@ -252,7 +234,6 @@ public:
 	HTREEITEM FindWidestItem(BOOL bExpandedOnly = FALSE, CDC* pDC = NULL) const;
 
 	void EnsureVisibleEx(HTREEITEM hti, BOOL bVPartialOK = TRUE, BOOL bHPartialOK = TRUE);
-	int BuildTreeItemMap(CHTIMap& mapHTI, BOOL bVisibleOnly = FALSE) const;
 
 	HTREEITEM MoveTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 
 						BOOL bUsesTextCallback = FALSE, BOOL bUsesImageCallback = FALSE);
@@ -265,7 +246,6 @@ protected:
 
 protected:
 	void AddVisibleItemToIndex(HTREEITEM hti) const;
-	void UpdateHTIMapEntry(CHTIMap& mapHTI, HTREEITEM hti, BOOL bVisibleOnly) const;
 	HTREEITEM FindDeepestItem(HTREEITEM htiParent, int& nDepth, BOOL bExpandedOnly) const;
 	HTREEITEM FindWidestItem(HTREEITEM htiParent, int& nWidth, BOOL bExpandedOnly, CDC* pDC) const;
 

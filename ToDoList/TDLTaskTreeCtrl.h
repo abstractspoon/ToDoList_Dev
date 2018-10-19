@@ -105,7 +105,9 @@ public:
 	BOOL GetInsertLocation(TDC_INSERTWHERE nWhere, HTREEITEM& htiDest, HTREEITEM& htiDestAfter) const;
 	BOOL GetInsertLocation(TDC_MOVETASK nDirection, HTREEITEM& htiDest, HTREEITEM& htiDestAfter) const;
 	BOOL GetInsertLocation(TDC_MOVETASK nDirection, DWORD& dwDest, DWORD& dwDestAfter) const;
+	
 	HTREEITEM InsertItem(DWORD dwTaskID, HTREEITEM htiParent, HTREEITEM htiAfter);
+	BOOL DeleteItem(HTREEITEM hti);
 
 	HTREEITEM MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
 	void MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
@@ -118,7 +120,6 @@ public:
 	inline int GetVisibleItemCount() const { return m_tcTasks.GetVisibleCount(); }
 	inline BOOL ItemHasChildren(HTREEITEM hti) const { return m_tcTasks.ItemHasChildren(hti); }
 	inline BOOL ItemHasParent(HTREEITEM hti) const { return (GetParentItem(hti) != NULL); }
-	inline BOOL DeleteItem(HTREEITEM hti) { return m_tcTasks.DeleteItem(hti); }
 	inline HTREEITEM GetChildItem(HTREEITEM htiParent = NULL) const { return m_tcTasks.GetChildItem(htiParent); }
 	inline HTREEITEM GetNextItem(HTREEITEM hti, BOOL bNext = TRUE) const { return m_tcTasks.GetNextItem(hti, (bNext ? TVGN_NEXT : TVGN_PREVIOUS)); }
 	inline HTREEITEM GetParentItem(HTREEITEM hti) const { return m_tcTasks.GetParentItem(hti); }
@@ -143,6 +144,7 @@ public:
 
 	void OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate);
 	void OnStylesUpdated();
+	void OnBeginRebuild();
 	void OnEndRebuild();
 	
 #ifdef _DEBUG
@@ -225,7 +227,6 @@ protected:
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	BOOL TaskHasLockedSubtasks(DWORD dwTaskID) const;
 	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList = TRUE);
-	void RefreshTreeItemMap();
 
 	GM_ITEMSTATE GetTreeItemState(HTREEITEM hti) const;
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;

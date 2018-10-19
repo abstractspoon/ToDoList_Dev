@@ -425,11 +425,6 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 		// are these different?
 		if (htiTreeFirstVis != htiListFirstVis)
 		{
-// #ifdef _DEBUG
-// 			CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(hwnd);
-// 			TRACE (_T("CTreeListSyncer::ResyncScrollPos(tree first vis = %s, list first vis = %s)\n"),
-// 						pTree->GetItemText(htiTreeFirstVis), pTree->GetItemText(htiListFirstVis));
-// #endif
 			// if so, then scroll and move the selection
 			// to the corresponding list item and update the current
 			// tree selection
@@ -495,13 +490,7 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 	}
 	
 	if (bSynced)
-	{
-#ifdef _DEBUG
-		//TraceResync(hwnd, hwndTo);
-#endif
-
 		UpdateAll();
-	}
 
 	return bSynced;
 }
@@ -601,13 +590,7 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 	}
 	
 	if (bSynced)
-	{
-#ifdef _DEBUG
-		//TraceResync(hwnd, hwndTo);
-#endif
-
 		UpdateAll();
-	}
 
 	return bSynced;
 }
@@ -1985,13 +1968,13 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		{
 			ASSERT(hRealWnd == GetTree());
 			ASSERT(hRealWnd == PrimaryWnd());
-			
-			// we only need to handle this if the new item is visible
+
 			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
-			
+
 			HTREEITEM hti = (HTREEITEM)lr;
 
+			// we only need to handle this if the new item is visible
 			if (hti && IsTreeItemVisible(hRealWnd, hti))
 			{
 				const LPTVINSERTSTRUCT pTVI = (const LPTVINSERTSTRUCT)lp;
@@ -2059,7 +2042,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 				if (nItem != -1)
 					ListView_DeleteItem(hwndList, nItem);
 				
-				// finally we fall thru to delete the tree item
+				// finally we fall thru to delete the tree item at the bottom
 			}
 		}
 		break;
@@ -2206,7 +2189,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		break;
 		
 	case WM_NCCALCSIZE: 
-		if (!IsHiding(TLSH_RIGHT) && IsLeft(hRealWnd))
+		if (!IsHiding(TLSH_RIGHT) && IsLeft(hRealWnd) && HasVScrollBar(hRealWnd))
 		{
 			ShowVScrollBar(hRealWnd, FALSE, FALSE);
 			// then default behaviour
@@ -2238,6 +2221,14 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		if (wp & GWL_STYLE)
 		{
 			LPSTYLESTRUCT lpStyleStruct = (LPSTYLESTRUCT)lp;
+
+			// always remove VScrollbar from left window
+			// before 
+			if (!IsHiding(TLSH_RIGHT) && IsLeft(hRealWnd))
+			{
+				lpStyleStruct->styleOld &= ~WS_VSCROLL;
+				lpStyleStruct->styleNew &= ~WS_VSCROLL;
+			}
 			
 			// test for scrollbar visibility changes
 			BOOL bVScrollBefore = (lpStyleStruct->styleOld & WS_VSCROLL);
@@ -2245,10 +2236,6 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			
 			BOOL bHScrollBefore = (lpStyleStruct->styleOld & WS_HSCROLL);
 			BOOL bHScrollNow = (lpStyleStruct->styleNew & WS_HSCROLL);
-			
-			// always remove VScrollbar from left window
-			if (IsLeft(hRealWnd) && bVScrollNow)
-				lpStyleStruct->styleNew &= ~WS_VSCROLL;
 			
 			// force a resize if the horizontal or vertical scrollbar
 			// visibility is changing
@@ -2262,9 +2249,9 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_STYLECHANGED:
 		if ((wp & GWL_STYLE) && IsLeft(hRealWnd))
 		{
+			// check that our left window does not have a VScroll
 			LPSTYLESTRUCT lpStyleStruct = (LPSTYLESTRUCT)lp;
 			
-			// check that our left window does not have a VScroll
 			ASSERT ((lpStyleStruct->styleNew & WS_VSCROLL) == 0);
 		}
 		break;
@@ -2417,6 +2404,17 @@ BOOL CTreeListSyncer::ConvertNonClientToClientMouseMsg(HWND hWnd, UINT& nMsg, WP
 
 BOOL CTreeListSyncer::ShowVScrollBar(HWND hwnd, BOOL bShow, BOOL bRefreshSize)
 {
+	BOOL bHasVScroll = HasVScrollBar(hwnd);
+
+	if ((bHasVScroll && bShow) || (!bHasVScroll && !bShow))
+		return FALSE;
+
+	::ShowScrollBar(hwnd, SB_VERT, bShow);
+ 		
+	if (bRefreshSize)
+		RefreshSize();
+
+/*
 	// see if there's anything to do first
 	DWORD dwStyle = GetStyle(hwnd, FALSE), dwNewStyle(0);
 	
@@ -2427,13 +2425,13 @@ BOOL CTreeListSyncer::ShowVScrollBar(HWND hwnd, BOOL bShow, BOOL bRefreshSize)
 	
 	if (dwNewStyle != dwStyle)
 	{
-		::SetWindowLong(hwnd, GWL_STYLE, dwNewStyle);
-		::ShowScrollBar(hwnd, SB_VERT, bShow);
+ 		::SetWindowLong(hwnd, GWL_STYLE, dwNewStyle);
+ 		::ShowScrollBar(hwnd, SB_VERT, bShow);
 		
 		if (bRefreshSize)
 			RefreshSize();
 	}
-	
+*/
 	return TRUE;
 }
 

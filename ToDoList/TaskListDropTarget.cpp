@@ -104,10 +104,7 @@ DROPEFFECT CTaskListDropTarget::OnDragEnter(CWnd* pWnd, COleDataObject* pObject,
 	ResetDrag(pWnd);
 
 	if (IS_WND_TYPE(pWnd, CTreeCtrl, WC_TREEVIEW))
-	{
-		CTreeCtrlHelper tch((CTreeCtrl&)*pWnd);
-		tch.BuildTreeItemMap(m_mapTVItems);
-	}
+		m_mapTVItems.BuildMap((CTreeCtrl&)*pWnd);
 
 	return OnDragOver(pWnd, pObject, dwKeyState, point);
 }

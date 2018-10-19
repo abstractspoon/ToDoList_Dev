@@ -1005,7 +1005,7 @@ void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 
 void CWorkloadCtrl::RefreshTreeItemMap()
 {
-	TCH().BuildHTIMap(m_mapHTItems);
+	m_mapHTItems.BuildMap(m_tcTasks);
 }
 
 void CWorkloadCtrl::PopulateTotalsLists()

@@ -1173,7 +1173,7 @@ BOOL CToDoListWnd::InitStatusbar()
 
 	static int SB_PANECOUNT = sizeof(SB_PANES) / sizeof(SBACTPANEINFO);
 
-	if (!m_statusBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_BOTTOM | SBARS_SIZEGRIP, IDC_FILENAME))
+	if (!m_statusBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_BOTTOM, IDC_FILENAME))
 		return FALSE;
 
 	// prevent translation because we handle it manually
@@ -7651,11 +7651,11 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 													m_mgrContent, 
 													m_tdiDefault.sCommentsTypeID, 
 													vis);
-	
-	// create somewhere out in space but with a meaningful size
+	// Give it a meaningful maximum size
 	CRect rCtrl;
+	GraphicsMisc::GetAvailableScreenSpace(*this, rCtrl);
 
-	CalcToDoCtrlRect(rCtrl);
+	// and somewhere out in space
 	rCtrl.OffsetRect(-30000, -30000);
 	
 	if (pTDC && pTDC->Create(rCtrl, this, IDC_TODOLIST, bVisible, bEnabled))

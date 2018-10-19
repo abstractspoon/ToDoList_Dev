@@ -23,6 +23,9 @@ public:
 	static void Release();
 
 protected:		
+	BOOL m_bMovingListBox;
+
+protected:		
 	static CComboListboxPositioner& Instance() { return CHookMgr<CComboListboxPositioner>::GetInstance(); }
 	static void FixupListBoxPosition(HWND hwndListbox, const WINDOWPOS& wpos);
 

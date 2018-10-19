@@ -15,6 +15,96 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+HTREEITEM CHTIMap::GetItem(DWORD dwItemID) const
+{
+	HTREEITEM hti = NULL;
+	Lookup(dwItemID, hti);
+	return hti;
+}
+
+int CHTIMap::BuildMap(const CTreeCtrl& tree, BOOL bVisibleChildrenOnly)
+{
+#ifdef _DEBUG
+	DWORD dwTick = GetTickCount();
+#endif
+
+	RemoveAll();
+
+	if (tree.GetCount())
+	{
+		// traverse top-level items
+		HTREEITEM hti = tree.GetChildItem(NULL);
+
+		while (hti)
+		{
+			AddItem(tree, hti, bVisibleChildrenOnly);
+			hti = tree.GetNextItem(hti, TVGN_NEXT);
+		}
+	}
+
+#ifdef _DEBUG
+	TRACE(_T("CHTIMap::BuildMap took %ld ms\n"), GetTickCount() - dwTick);
+#endif
+
+	return GetCount();
+}
+
+void CHTIMap::AddItem(const CTreeCtrl& tree, HTREEITEM hti, BOOL bVisibleChildrenOnly)
+{
+	// update our own mapping
+	SetAt(tree.GetItemData(hti), hti);
+
+	// then our children
+	if (!bVisibleChildrenOnly || (tree.GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED))
+	{
+		HTREEITEM htiChild = tree.GetChildItem(hti);
+
+		while (htiChild)
+		{
+			AddItem(tree, htiChild, bVisibleChildrenOnly);
+			htiChild = tree.GetNextItem(htiChild, TVGN_NEXT);
+		}
+	}
+}
+
+void CHTIMap::RemoveItem(const CTreeCtrl& tree, HTREEITEM hti)
+{
+	// update our own mapping
+	VERIFY(RemoveKey(tree.GetItemData(hti)));
+
+	// then our children
+	HTREEITEM htiChild = tree.GetChildItem(hti);
+
+	while (htiChild)
+	{
+		RemoveItem(tree, htiChild);
+		htiChild = tree.GetNextItem(htiChild, TVGN_NEXT);
+	}
+}
+
+#ifdef _DEBUG
+void CHTIMap::Trace(CTreeCtrl& tree) const
+{
+	TRACE(_T("CHTIMap::Trace(start)\n"));
+
+	POSITION pos = GetStartPosition();
+	DWORD dwID;
+	HTREEITEM hti = NULL;
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwID, hti);
+		ASSERT(hti && dwID);
+
+		TRACE(_T("Tree item (id = %ld, label = %s)\n"), dwID, tree.GetItemText(hti));
+	}
+
+	TRACE(_T("CHTIMap::Trace(end)\n"));
+}
+#endif
+
+//////////////////////////////////////////////////////////////////////
+
 // helper for copying
 struct TCHHCOPY
 {
@@ -468,11 +558,7 @@ BOOL CTreeCtrlHelper::IsAnyItemCollapsed() const
 	
 	while (hti)
 	{
-#ifdef _DEBUG
-		CString sItem = m_tree.GetItemText(hti);
-#endif
-
-		if (!IsItemExpanded(hti, TRUE))
+		if (!IsItemExpanded(hti))
 			return TRUE;
 		
 		hti = TreeView_GetNextItem(m_tree, hti, TVGN_NEXT); // constness
@@ -996,47 +1082,6 @@ HTREEITEM CTreeCtrlHelper::FindItem(DWORD dwID, HTREEITEM htiStart) const
 	return htiFound;
 }
 
-int CTreeCtrlHelper::BuildTreeItemMap(CHTIMap& mapHTI, BOOL bVisibleOnly) const
-{
-	mapHTI.RemoveAll();
-
-	int nTreeCount = m_tree.GetCount();
-
-	if (nTreeCount)
-	{
-		mapHTI.InitHashTable(nTreeCount);
-		
-		// traverse top-level items
-		HTREEITEM hti = m_tree.GetChildItem(NULL);
-		
-		while (hti)
-		{
-			UpdateHTIMapEntry(mapHTI, hti, bVisibleOnly);
-			hti = m_tree.GetNextItem(hti, TVGN_NEXT);
-		}
-	}
-
-	return mapHTI.GetCount();
-}
-
-void CTreeCtrlHelper::UpdateHTIMapEntry(CHTIMap& mapHTI, HTREEITEM hti, BOOL bVisibleOnly) const
-{
-	// update our own mapping
-	mapHTI[m_tree.GetItemData(hti)] = hti;
-	
-	// then our children
-	if (!bVisibleOnly || IsItemExpanded(hti))
-	{
-		HTREEITEM htiChild = m_tree.GetChildItem(hti);
-		
-		while (htiChild)
-		{
-			UpdateHTIMapEntry(mapHTI, htiChild, bVisibleOnly);
-			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
-		}
-	}
-}
-
 HTREEITEM CTreeCtrlHelper::GetFirstItem() const
 {
 	return GetFirstChildItem(NULL);
@@ -1226,11 +1271,24 @@ TCH_WHERE CTreeCtrlHelper::GetMoveTarget(HTREEITEM htiDestParent, HTREEITEM htiD
 HTREEITEM CTreeCtrlHelper::MoveTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 
 									BOOL bUsesTextCallback, BOOL bUsesImageCallback)
 {
+#ifdef _DEBUG
+	DWORD dwTick = GetTickCount();
+#endif
+	
 	HTREEITEM htiCopy = CopyTree(hti, htiDestParent, htiDestPrevSibling, bUsesTextCallback, bUsesImageCallback);
+
+#ifdef _DEBUG
+	TRACE(_T("CTreeCtrlHelper::MoveTree(CopyTree took %ld ms)\n"), GetTickCount() - dwTick);
+	dwTick = GetTickCount();
+#endif
 
 	if (htiCopy)
 	{
 		m_tree.DeleteItem(hti);
+
+#ifdef _DEBUG
+		TRACE(_T("CTreeCtrlHelper::MoveTree(DeleteItem took %ld ms)\n"), GetTickCount() - dwTick);
+#endif
 		return htiCopy;
 	}
 

@@ -165,14 +165,8 @@ BOOL CTDCImageList::AddImage(const CString& sImageFile, CBitmap& bmImage, COLORR
 	}
 
 	int nStartIndex = pImages->GetImageCount();
-
-	if (nStartIndex > nNextNameIndex)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
 	
-	if (pImages->Add(&bmImage, crTransparent))
+	if (pImages->Add(&bmImage, crTransparent) == nStartIndex)
 	{
 		// map the images
 		int nEndIndex = (pImages->GetImageCount() - 1);
@@ -182,6 +176,11 @@ BOOL CTDCImageList::AddImage(const CString& sImageFile, CBitmap& bmImage, COLORR
 		{
 			CString sName = FileMisc::GetFileNameFromPath(sImageFile);
 			pImages->MapImage(nStartIndex, sName);
+		}
+		else if (nStartIndex > nNextNameIndex)
+		{
+			ASSERT(0);
+			return FALSE;
 		}
 		else // map by image index
 		{
