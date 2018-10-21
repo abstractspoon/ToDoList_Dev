@@ -19,9 +19,11 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLTaskIconDlg dialog
 
 const LPCTSTR NO_ICON = _T("__NONE__");
+
+/////////////////////////////////////////////////////////////////////////////
+// CTDLTaskIconDlg dialog
 
 CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem, CWnd* pParent /*=NULL*/)
 	: 
@@ -31,7 +33,7 @@ CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sS
 	m_bMultiSel(FALSE),
 	m_bWantNone(bWantNoneItem)
 {
-
+	ASSERT(m_pParentWnd);
 }
 
 CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, CWnd* pParent /*=NULL*/)
@@ -41,6 +43,8 @@ CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArra
 	m_bMultiSel(TRUE),
 	m_bWantNone(FALSE)
 {
+	ASSERT(m_pParentWnd);
+
 	if (aSelNames.GetSize())
 		m_sIconName = aSelNames[0];
 
@@ -66,6 +70,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskIconDlg, CTDLDialog)
 	ON_BN_CLICKED(IDC_EDITLABEL, OnEditlabel)
 	ON_NOTIFY(LVN_BEGINLABELEDIT, IDC_ICONLIST, OnBeginlabeleditIconlist)
 	ON_WM_ERASEBKGND()
+	ON_BN_CLICKED(IDC_RELOADICONS, OnReloadIcons)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -351,6 +356,7 @@ void CTDLTaskIconDlg::OnRepositionControls(int dx, int dy)
 
 	CDialogHelper::OffsetCtrl(this, IDC_EDITLABEL, 0, dy);
 	CDialogHelper::OffsetCtrl(this, IDC_DIVIDER, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_RELOADICONS, dx, dy);
 	CDialogHelper::OffsetCtrl(this, IDOK, dx, dy);
 	CDialogHelper::OffsetCtrl(this, IDCANCEL, dx, dy);
 }
@@ -406,4 +412,13 @@ CString CTDLTaskIconDlg::GetImageName(int iImage) const
 	}
 
 	return sImage;
+}
+
+void CTDLTaskIconDlg::OnReloadIcons() 
+{
+	if (m_pParentWnd && m_pParentWnd->SendMessage(WM_TDCTI_RELOADICONS))
+	{
+		ListView_SetImageList(m_lcIcons, m_ilIcons, LVSIL_SMALL);
+		BuildListCtrl();
+	}
 }

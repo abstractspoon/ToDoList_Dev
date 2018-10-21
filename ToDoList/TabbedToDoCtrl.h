@@ -200,7 +200,7 @@ protected:
 	afx_msg LRESULT OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView);
 	afx_msg LRESULT OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnColumnEditClick(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRestoreLastTaskView(WPARAM wParam, LPARAM lParam);
 

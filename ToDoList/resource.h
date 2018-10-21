@@ -805,6 +805,8 @@
 #define IDC_DELETE                      1517
 #define IDC_SHOWFULLPATHINSTICKY        1518
 #define IDC_SCHEMEPRIORITYCOLORS        1518
+#define IDC_RELOADICONS                 1519
+#define IDC_COMMENTLABEL                1520
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2218,8 +2220,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        313
-#define _APS_NEXT_COMMAND_VALUE         34615
-#define _APS_NEXT_CONTROL_VALUE         1520
+#define _APS_NEXT_COMMAND_VALUE         34617
+#define _APS_NEXT_CONTROL_VALUE         1521
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

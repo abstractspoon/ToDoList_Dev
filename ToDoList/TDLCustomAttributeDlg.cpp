@@ -21,6 +21,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
 struct TDLCAD_TYPE
 {
 	UINT nIDName;
@@ -81,6 +83,12 @@ static TCHAR SYMBOLS[] =
 	0x25ca,	0x25cf,	0x25e6,	0x266f,
 };
 const UINT NUM_SYMBOLS = sizeof(SYMBOLS) / sizeof(TCHAR);
+
+/////////////////////////////////////////////////////////////////////////////
+
+#ifndef LVS_EX_DOUBLEBUFFER
+#	define LVS_EX_DOUBLEBUFFER (0x00010000)
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomAttributeDlg dialog

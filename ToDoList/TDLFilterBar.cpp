@@ -71,7 +71,6 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 	  m_cbVersionFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
 	  m_cbTagFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
 	  m_nView(FTCV_UNSET),
-	  m_bRefreshBkgndColor(TRUE),
 	  m_crUIBack(CLR_NONE),
 	  m_eStartNextNDays(TRUE, _T("-0123456789")),
 	  m_eDueNextNDays(TRUE, _T("-0123456789")),
@@ -288,6 +287,7 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_WM_CTLCOLOR()
 	ON_WM_HELPINFO()
 	ON_WM_DESTROY()
+	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -978,12 +978,9 @@ void CTDLFilterBar::RefreshUIBkgndBrush()
 				m_brUIBack.CreateSolidBrush(m_crUIBack);
 			
 			Invalidate();
-			m_bRefreshBkgndColor = TRUE;
 			return;
 		}
 	}
-
-	m_bRefreshBkgndColor = FALSE;
 }
 
 COLORREF CTDLFilterBar::CalcUIBkgndColor() const
@@ -1011,20 +1008,22 @@ COLORREF CTDLFilterBar::CalcUIBkgndColor() const
 	return CLR_NONE;
 }
 
-BOOL CTDLFilterBar::OnEraseBkgnd(CDC* pDC) 
+void CTDLFilterBar::OnPaint()
 {
-	int nDC = pDC->SaveDC();
-	
-	// clip out all the child controls to reduce flicker
-	if (!m_bRefreshBkgndColor)
+	CPaintDC dc(this);
+
+	// Paint controls and labels
+	CDialog::DefWindowProc(WM_PAINT, (WPARAM)dc.m_hDC, 0);
+
+	// Fill remaining background
+	if (m_crUIBack != CLR_NONE)
 	{
-		// Fixed
 		int nCtrl = NUMFILTERCTRLS;
 
 		while (nCtrl--)
 		{
-			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nLabelID, pDC, TRUE);
-			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nCtrlID, pDC, TRUE);
+			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nLabelID, &dc, TRUE);
+			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nCtrlID, &dc, TRUE);
 		}
 
 		// Custom
@@ -1032,27 +1031,26 @@ BOOL CTDLFilterBar::OnEraseBkgnd(CDC* pDC)
 
 		while (nCtrl--)
 		{
-			ExcludeCtrl(this, m_aCustomControls[nCtrl].nLabelID, pDC, TRUE);
-			ExcludeCtrl(this, m_aCustomControls[nCtrl].nCtrlID, pDC, TRUE);
+			ExcludeCtrl(this, m_aCustomControls[nCtrl].nLabelID, &dc, TRUE);
+			ExcludeCtrl(this, m_aCustomControls[nCtrl].nCtrlID, &dc, TRUE);
 		}
 
+		CRect rect;
+		dc.GetClipBox(rect);
+		dc.FillSolidRect(rect, m_crUIBack);
 	}
-	m_bRefreshBkgndColor = FALSE;
+}
 
+BOOL CTDLFilterBar::OnEraseBkgnd(CDC* pDC) 
+{
 	if (m_crUIBack != CLR_NONE)
 	{
-		CRect rect;
-		pDC->GetClipBox(rect);
-		pDC->FillSolidRect(rect, m_crUIBack);
+		// Handle background in OnPaint
+		return TRUE;
 	}
-	else
-	{
-		CDialog::OnEraseBkgnd(pDC);
-	}
-	
-	pDC->RestoreDC(nDC);
-		
-	return TRUE;
+
+	// else
+	return CDialog::OnEraseBkgnd(pDC);
 }
 
 HBRUSH CTDLFilterBar::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)

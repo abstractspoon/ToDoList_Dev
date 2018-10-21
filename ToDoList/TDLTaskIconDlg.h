@@ -12,6 +12,11 @@
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
+
+// Sent to parent 
+const static UINT WM_TDCTI_RELOADICONS = ::RegisterWindowMessage(_T("WM_TDCTI_RELOADICONS"));
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLTaskIconDlg dialog
 
 class CTDCImageList;
@@ -64,6 +69,7 @@ protected:
 	afx_msg void OnEditlabel();
 	afx_msg void OnBeginlabeleditIconlist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnReloadIcons();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

@@ -105,7 +105,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_NOTIFY(NM_CLICK, IDC_FTC_TASKLISTLIST, OnListClick)
 	ON_NOTIFY(NM_RCLICK, IDC_FTC_TABCTRL, OnTabCtrlRClick)
 
-	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnColumnEditClick)
+	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPOSTCHANGE, OnPostTabViewChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPRECHANGE, OnPreTabViewChange)
 
@@ -4025,12 +4025,12 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 }
 
 
-LRESULT CTabbedToDoCtrl::OnColumnEditClick(WPARAM wParam, LPARAM lParam)
+LRESULT CTabbedToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 {
 	if (InListView())
 		UpdateTreeSelection();
 
-	return CToDoCtrl::OnColumnEditClick(wParam, lParam);
+	return CToDoCtrl::OnTDCColumnEditClick(wParam, lParam);
 }
 
 void CTabbedToDoCtrl::OnListSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)

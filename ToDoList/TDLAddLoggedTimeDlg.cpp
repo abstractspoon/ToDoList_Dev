@@ -145,6 +145,14 @@ BOOL CTDLAddLoggedTimeDlg::OnInitDialog()
 	{
 		GetDlgItem(IDC_ADDTIMETOTIMESPENT)->EnableWindow(FALSE);
 		GetDlgItem(IDC_ADDTIMETOTIMESPENT)->ShowWindow(SW_HIDE);
+
+		CRect rCheckbox = CDialogHelper::GetCtrlRect(this, IDC_ADDTIMETOTIMESPENT);
+		CRect rComments = CDialogHelper::GetCtrlRect(this, IDC_COMMENT);
+		int nYOffset = (rComments.top - rCheckbox.top);
+
+		CDialogHelper::OffsetCtrl(this, IDC_COMMENTLABEL, 0, -nYOffset);
+		CDialogHelper::OffsetCtrl(this, IDC_COMMENT, 0, -nYOffset);
+		CDialogHelper::ResizeCtrl(this, IDC_COMMENT, 0, nYOffset);
 		
 		GetDlgItem(IDAPPLY)->EnableWindow(FALSE);
 		GetDlgItem(IDAPPLY)->ShowWindow(SW_HIDE);
