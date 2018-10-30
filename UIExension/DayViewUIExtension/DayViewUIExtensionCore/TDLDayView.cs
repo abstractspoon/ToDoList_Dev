@@ -186,7 +186,7 @@ namespace DayViewUIExtension
 
             this.ActiveTool = drawTool;
             this.AllowInplaceEditing = true;
-            this.AllowNew = true;
+            this.AllowNew = false;
             this.AmPmDisplay = true;
             this.Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
                                      System.Windows.Forms.AnchorStyles.Left |
