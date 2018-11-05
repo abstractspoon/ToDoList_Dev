@@ -15,7 +15,6 @@ namespace DayViewUIExtension
 	{
 		private IntPtr m_HwndParent = IntPtr.Zero;
 		private TDLDayView m_DayView;
-		private UInt32 m_SelectedTaskID = 0;
 		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
         private String m_HelpID;
@@ -68,19 +67,7 @@ namespace DayViewUIExtension
 		
 		public bool SelectTask(UInt32 dwTaskID)
 		{
-			// Don't select already selected task
-			if (dwTaskID == m_SelectedTaskID)
-				return true;
-
-			if (m_DayView.SelectTask(dwTaskID, false))
-			{
-				m_SelectedTaskID = dwTaskID;
-				return true;
-			}
-
-			// all else 
-			m_DayView.SelectedAppointment = null;
-			return true;
+            return m_DayView.SelectTask(dwTaskID);
 		}
 
 		public bool SelectTasks(UInt32[] pdwTaskIDs)
@@ -94,9 +81,6 @@ namespace DayViewUIExtension
 								HashSet<UIExtension.TaskAttribute> attribs)
 		{
 			m_DayView.UpdateTasks(tasks, type, attribs);
-
-            // Refresh selection
-            RestoreSelectedItem();
 		}
 
 		public bool WantTaskUpdate(UIExtension.TaskAttribute attrib)
@@ -473,12 +457,6 @@ namespace DayViewUIExtension
 			Controls.Add(m_YearCombo);
 		}
 
-        private void RestoreSelectedItem()
-        {
-            // Restore the selection if it is present in this week
-			m_DayView.SelectTask(m_SelectedTaskID, true);
-        }
-
 		// Message handlers ------------------------------------------------------------------
 		protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
         {
@@ -503,6 +481,7 @@ namespace DayViewUIExtension
 			m_YearCombo.Location = new Point(m_MonthCombo.Right + 10, m_YearCombo.Top);
 			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, m_YearCombo.Top);
 			m_WeekLabel.Location = new Point(m_Toolbar.Right + 10, m_YearCombo.Top);
+            m_WeekLabel.Width = (ClientRectangle.Right - m_WeekLabel.Left);
 			
             Rectangle dayViewRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
 
@@ -553,24 +532,7 @@ namespace DayViewUIExtension
 					break;
 
                 case Calendar.SelectionType.Appointment:
-                    {
-                        UInt32 prevSelTaskID = m_SelectedTaskID;
-
-                        if (args.Appointment != null)
-                        {
-                            m_SelectedTaskID = args.Appointment.Id;
-                        }
-                        else
-                        {
-                            // Prevent the selection being set to null
-                            // if the previously selected item is still visible
-                            if (m_DayView.IsTaskWithinRange(prevSelTaskID))
-                                m_DayView.SelectTask(prevSelTaskID, true);
-                        }
-
-                        if (m_SelectedTaskID != prevSelTaskID)
-                            notify.NotifySelChange(m_SelectedTaskID);
-                    }
+                    notify.NotifySelChange(m_DayView.GetSelectedTaskID());
 					break;
 			}
 		}
@@ -588,8 +550,6 @@ namespace DayViewUIExtension
 
 				m_SettingMonthYear = false;
 			}
-
-			RestoreSelectedItem();
 		}
 
 		private void OnMonthYearSelChanged(object sender, EventArgs args)

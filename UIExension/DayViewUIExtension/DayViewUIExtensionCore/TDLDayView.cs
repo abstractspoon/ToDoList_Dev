@@ -154,9 +154,15 @@ namespace DayViewUIExtension
 	
     public class TDLDayView : Calendar.DayView
     {
-        private TDLRenderer m_Renderer;
+        private UInt32 m_SelectedTaskID = 0;
+
+        private Boolean m_HideParentTasks = true;
+        private Boolean m_HideTasksWithoutTimes = true;
+        private Boolean m_HideTasksSpanningWeekends = false;
+        private Boolean m_HideTasksSpanningDays = false;
 
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
+        private TDLRenderer m_Renderer;
 
 		// ----------------------------------------------------------------
     
@@ -223,39 +229,155 @@ namespace DayViewUIExtension
             return false;
         }
 
-		public bool SelectTask(UInt32 dwTaskID, bool ifInRange)
-		{
-			if ((SelectedAppointment != null) && (SelectedAppointment.Id == dwTaskID))
-				return true;
+        public bool IsTaskDisplayable(UInt32 dwTaskID)
+        {
+            if (dwTaskID == 0)
+                return false;
 
 			CalendarItem item;
 
-			if (m_Items.TryGetValue(dwTaskID, out item))
-			{
-				if (ifInRange)
-				{
-					if (IsItemWithinRange(item, StartDate, EndDate))
-					{
-						SelectedAppointment = item;
-						return true;
-					}
-				}
-				else // change the week to show the task
-				{
-					if (item.StartDate != DateTime.MinValue)
-					{
-						StartDate = item.StartDate;
-						SelectedAppointment = item;
-						ScrollToTop();
+			if (!m_Items.TryGetValue(dwTaskID, out item))
+                return false;
 
-						return true;
-					}
-				}
-			}
+            return IsItemDisplayable(item);
+        }
 
-			// all else 
-			SelectedAppointment = null;
-			return false;
+        public Boolean HideParentTasks
+        {
+            get { return m_HideParentTasks; }
+            set
+            {
+                if (value != m_HideParentTasks)
+                {
+                    m_HideParentTasks = value;
+                    FixupSelection(false);
+                }
+            }
+        }
+
+        public Boolean HideTasksWithoutTimes
+        {
+            get { return m_HideTasksWithoutTimes; }
+            set
+            {
+                if (value != m_HideTasksWithoutTimes)
+                {
+                    m_HideTasksWithoutTimes = value;
+                    FixupSelection(false);
+                }
+            }
+        }
+
+        public Boolean HideTasksSpanningWeekends
+        {
+            get { return m_HideTasksSpanningWeekends; }
+            set
+            {
+                if (value != m_HideTasksSpanningWeekends)
+                {
+                    m_HideTasksSpanningWeekends = value;
+                    FixupSelection(false);
+                }
+            }
+        }
+
+        public Boolean HideTasksSpanningDays
+        {
+            get { return m_HideTasksSpanningDays; }
+            set
+            {
+                if (value != m_HideTasksSpanningDays)
+                {
+                    m_HideTasksSpanningDays = value;
+                    FixupSelection(false);
+                }
+            }
+        }
+
+        public bool IsItemDisplayable(CalendarItem item)
+        {
+            if (item == null)
+                return false;
+
+            if (HideParentTasks && item.IsParent)
+                return false;
+
+            if (!item.HasValidDates())
+                return false;
+
+            if (HideTasksSpanningWeekends)
+            {
+                if (DateUtil.WeekOfYear(item.StartDate) != DateUtil.WeekOfYear(item.EndDate))
+                return false;
+            }
+
+            if (HideTasksSpanningDays)
+            {
+                if (item.StartDate.Date != item.EndDate.Date)
+                return false;
+            }
+
+            if (HideTasksWithoutTimes)
+            {
+                if (CalendarItem.IsStartOfDay(item.StartDate) && CalendarItem.IsEndOfDay(item.EndDate))
+                return false;
+            }
+
+            return true;
+        }
+
+        public UInt32 GetSelectedTaskID()
+        {
+            if (!IsTaskDisplayable(m_SelectedTaskID))
+                return 0;
+            
+            return m_SelectedTaskID;
+        }
+
+        public void FixupSelection(bool scrollToTask)
+        {
+            UInt32 prevSelTaskID = SelectedAppointmentId;
+            UInt32 selTaskID = GetSelectedTaskID();
+
+            if (selTaskID > 0)
+            {
+                CalendarItem item;
+
+                if (m_Items.TryGetValue(selTaskID, out item))
+                {
+                    if (scrollToTask)
+                    {
+                        if (item.StartDate != DateTime.MinValue)
+                        {
+                            StartDate = item.StartDate;
+                            SelectedAppointment = item;
+
+                            ScrollToTop();
+                            return;
+                        }
+                    }
+                    else if (IsItemWithinRange(item, StartDate, EndDate))
+                    {
+                        SelectedAppointment = item;
+                        return;
+                    }
+                }
+            }
+
+            // all else
+            SelectedAppointment = null;
+
+            // Notify parent of changes
+            if (SelectedAppointmentId != prevSelTaskID)
+                RaiseSelectionChanged();
+        }
+
+		public bool SelectTask(UInt32 dwTaskID)
+		{
+            m_SelectedTaskID = dwTaskID;
+            FixupSelection(true);
+
+			return (GetSelectedTaskID() != 0);
 		}
 
         public void GoToToday()
@@ -326,12 +448,7 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-        public Boolean HideParentTasks { get; set; }
-        public Boolean HideTasksWithoutTimes { get; set; }
-        public Boolean HideTasksSpanningWeekends { get; set; }
-        public Boolean HideTasksSpanningDays { get; set; }
-        
-		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
+    	private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
 		{
             if (HideParentTasks && item.IsParent)
                 return false;
@@ -399,9 +516,6 @@ namespace DayViewUIExtension
 				task = task.GetNextTask();
 
 			SelectionStart = SelectionEnd;
-
-            if ((selTaskId != 0) && (SelectedAppointment != null))
-                SelectTask(selTaskId, false);
 
             AdjustScrollbar();
             Invalidate();

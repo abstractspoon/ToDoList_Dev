@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+using Abstractspoon.Tdl.PluginHelpers;
+
 namespace DayViewUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
@@ -37,9 +39,8 @@ namespace DayViewUIExtension
 			set
 			{
 				m_StartDate = value;
-
 				DateTime endDate = m_StartDate.AddDays(this.NumDays);
-
+                
 				if (endDate.Year == m_StartDate.Year)
 				{
 					if (endDate.Month == m_StartDate.Month)
@@ -56,6 +57,9 @@ namespace DayViewUIExtension
 													endDate.ToString("MMMM yyyy"),
 													m_StartDate.Year);
 				}
+
+                String weekNum = String.Format(" (Week {0})", DateUtil.WeekOfYear(m_StartDate));
+                Text = Text + weekNum;
 
 				Invalidate();
 			}
