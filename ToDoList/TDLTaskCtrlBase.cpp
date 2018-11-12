@@ -1163,7 +1163,7 @@ void CTDLTaskCtrlBase::LoadState(const CPreferences& prefs, const CString& sKey)
 	if (aOrder.GetSize() || aWidths.GetSize() || aTracked.GetSize())
 		nSplitPos = prefs.GetProfileInt(sKey, _T("SplitPos"), 300);
 	else
-		SetSplitPos(CalcSplitterPosToFitListColumns());
+		nSplitPos = CalcSplitterPosToFitListColumns();
 
 	ASSERT(nSplitPos > 0);
 	SetSplitPos(nSplitPos);
