@@ -131,39 +131,42 @@ int CTaskCalendarCtrl::GetDefaultTaskHeight()
 	return DEF_TASK_HEIGHT;
 }
 
-BOOL CTaskCalendarCtrl::SetOption(DWORD dwOption, BOOL bSet)
+void CTaskCalendarCtrl::SetOption(DWORD dwOption, BOOL bSet)
 {
 	if (dwOption)
 	{
-		DWORD dwPrev = m_dwOptions;
+		DWORD dwNewOptions = m_dwOptions;
 
 		if (bSet)
-			m_dwOptions |= dwOption;
+			SetOptions(m_dwOptions | dwOption);
 		else
-			m_dwOptions &= ~dwOption;
-
-		// specific handling
-		if (m_dwOptions != dwPrev)
-		{
-			RecalcTaskDates();
-			return TRUE;
-		}
+			SetOptions(m_dwOptions & ~dwOption);
 	}
-
-	return FALSE;
 }
 
-BOOL CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
+BOOL CTaskCalendarCtrl::HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew)
+{
+	return ((dwOld & TCCO_DATEDISPLAYOPTIONS) == (dwNew & TCCO_DATEDISPLAYOPTIONS));
+}
+
+void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
 {
 	if (m_dwOptions != dwOptions)
 	{
+		DWORD dwPrev = m_dwOptions;
 		m_dwOptions = dwOptions;
 
 		RecalcTaskDates();
-		return TRUE;
-	}
 
-	return FALSE;
+		if (!HasSameDateDisplayOptions(m_dwOptions, dwPrev))
+		{
+			FixupSelection(TRUE);
+		}
+		else
+		{
+			FixupSelection(FALSE);
+		}
+	}
 }
 
 void CTaskCalendarCtrl::RecalcTaskDates()
@@ -300,6 +303,17 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	return bChange;
 }
 
+void CTaskCalendarCtrl::FixupSelection(BOOL bScrollToTask)
+{
+	if (m_dwSelectedTaskID)
+	{
+		DWORD dwPrevSelTaskID = m_dwSelectedTaskID;
+		m_dwSelectedTaskID = 0;
+
+		SelectTask(dwPrevSelTaskID, bScrollToTask, TRUE);
+	}
+}
+
 void CTaskCalendarCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 							   CSet<DWORD>& mapIDs, BOOL bAndSiblings)
 {
@@ -378,20 +392,16 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		{
 			TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 			bChange = pTCI->UpdateTask(pTasks, hTask, attrib, m_dwOptions);
+
+			// subtasks
+			HTASKITEM hSubtask = pTasks->GetFirstTask(hTask);
+
+			if (hSubtask)
+				bChange |= UpdateTask(pTasks, hSubtask, nUpdate, attrib, TRUE);
 		}
-		else // must be a parent or a new task
+		else // must be new task
 		{
-			if (!pTasks->IsTaskParent(hTask))
-			{
-				BuildData(pTasks, hTask, attrib, FALSE);
-			}
-			else
-			{
-				HTASKITEM hSubtask = pTasks->GetFirstTask(hTask);
-				ASSERT(hSubtask);
-			
-				bChange = UpdateTask(pTasks, hSubtask, nUpdate, attrib, TRUE);
-			}
+			BuildData(pTasks, hTask, attrib, FALSE);
 		}
 	}
 	
@@ -443,11 +453,13 @@ void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 
 	// sanity check
 	DWORD dwTaskID = pTasks->GetTaskID(hTask);
-	ASSERT(!HasTask(dwTaskID));
 
-	TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, attrib, m_dwOptions);
-	m_mapData[dwTaskID] = pTCI;
-
+	if (!HasTask(dwTaskID))
+	{
+		TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, attrib, m_dwOptions);
+		m_mapData[dwTaskID] = pTCI;
+	}
+	
 	// process children
 	BuildData(pTasks, pTasks->GetFirstTask(hTask), attrib, TRUE);
 
@@ -1501,9 +1513,10 @@ TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID) const
 	ASSERT(dwTaskID);
 	TASKCALITEM* pTCI = NULL;
 
-	m_mapData.Lookup(dwTaskID, pTCI);
-	ASSERT(pTCI);
+	if (!m_mapData.Lookup(dwTaskID, pTCI))
+		return NULL;
 
+	ASSERT(pTCI);
 	return pTCI;
 }
 
@@ -1538,23 +1551,28 @@ BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID) const
 }
 
 // external version
-BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID)
+BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bScroll)
 {
-	return SelectTask(dwTaskID, FALSE);
+	SelectTask(dwTaskID, bScroll, FALSE);
+
+	return (GetSelectedTaskID() != 0);
 }
 
 // internal version
-BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bNotify)
+BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bScroll, BOOL bNotify)
 {
 	if (!HasTask(dwTaskID))
 		return FALSE;
 
-	if (dwTaskID != m_dwSelectedTaskID)
+	if (dwTaskID != GetSelectedTaskID())
 	{
 		m_dwSelectedTaskID = dwTaskID;
 
 		if (bNotify)
-			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, dwTaskID);
+			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, GetSelectedTaskID());
+
+		if (bScroll)
+			ScrollToSelectedTask();
 
 		Invalidate(FALSE);
 		UpdateWindow();
@@ -1563,10 +1581,47 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bNotify)
 	return TRUE;
 }
 
+DWORD CTaskCalendarCtrl::GetSelectedTaskID() const 
+{ 
+	if (!m_dwSelectedTaskID)
+		return 0;
+
+	// Check visibility
+	const TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+
+	if (!pTCI)
+		return 0;
+
+	if (pTCI->IsParent() && HasOption(TCCO_HIDEPARENTTASKS))
+		return 0;
+
+	if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
+		return 0;
+
+	if (!pTCI->HasAnyStartDate() && !pTCI->HasAnyEndDate())
+		return 0;
+
+	if (!HasOption(TCCO_DISPLAYCONTINUOUS))
+	{
+		BOOL bHasStart = (HasOption(TCCO_DISPLAYSTART) && pTCI->IsStartDateSet());
+		BOOL bHasCalcStart = (HasOption(TCCO_DISPLAYCALCSTART) && !pTCI->IsStartDateSet() && pTCI->HasAnyStartDate());
+
+		BOOL bHasEnd = (HasOption(TCCO_DISPLAYDUE) && pTCI->IsEndDateSet());
+		BOOL bHasCalcEnd = (HasOption(TCCO_DISPLAYCALCDUE) && !pTCI->IsEndDateSet() && pTCI->HasAnyEndDate());
+
+		if (!bHasStart && !bHasCalcStart &&	!bHasEnd && !bHasCalcEnd)
+			return 0;
+	}
+	
+	return m_dwSelectedTaskID;
+}
+
 void CTaskCalendarCtrl::ScrollToSelectedTask()
 {
-	if (m_dwSelectedTaskID)
-		ScrollToTask(m_dwSelectedTaskID);
+	DWORD dwSelTaskID = GetSelectedTaskID();
+
+	if (dwSelTaskID)
+		ScrollToTask(dwSelTaskID);
 }
 
 void CTaskCalendarCtrl::ScrollToTask(DWORD dwTaskID)
@@ -1584,17 +1639,37 @@ void CTaskCalendarCtrl::ScrollToTask(DWORD dwTaskID)
 		ASSERT(0);
 		return;
 	}
-	
+
 	COleDateTime dtCellsMin = GetMinDate();
 	COleDateTime dtCellsMax = GetMaxDate();
 
-	if (pTCI->GetAnyEndDate() < dtCellsMin)
+	COleDateTime dtStart = pTCI->GetAnyStartDate();
+	COleDateTime dtEnd = pTCI->GetAnyEndDate();
+	
+	if (dtEnd < dtCellsMin)
 	{
-		Goto(pTCI->GetAnyEndDate());
+		Goto(dtEnd);
 	}
-	else if (pTCI->GetAnyStartDate() > dtCellsMax)
+	else if (dtStart > dtCellsMax)
 	{
-		Goto(pTCI->GetAnyStartDate());
+		Goto(dtStart);
+	}
+	else if (!HasOption(TCCO_DISPLAYCONTINUOUS))
+	{
+		BOOL bHasStart = (HasOption(TCCO_DISPLAYSTART) && pTCI->IsStartDateSet());
+		BOOL bHasCalcStart = (HasOption(TCCO_DISPLAYCALCSTART) && !pTCI->IsStartDateSet() && pTCI->HasAnyStartDate());
+
+		BOOL bHasEnd = (HasOption(TCCO_DISPLAYDUE) && pTCI->IsEndDateSet());
+		BOOL bHasCalcEnd = (HasOption(TCCO_DISPLAYCALCDUE) && !pTCI->IsEndDateSet() && pTCI->HasAnyEndDate());
+
+		if ((dtStart < dtCellsMin) && (bHasStart || bHasCalcStart))
+		{
+			Goto(dtStart);
+		}
+		else if ((dtEnd > dtCellsMax) && (bHasEnd || bHasCalcEnd))
+		{
+			Goto(dtEnd);
+		}
 	}
 
 	// else task is visible
@@ -1609,7 +1684,7 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		m_tooltip.Pop();
 
 		SetFocus();
-		SelectTask(dwSelID, TRUE);
+		SelectTask(dwSelID, FALSE, TRUE);
 
 		const CCalendarCell* pCell = GetCell(point);
 
@@ -1996,7 +2071,7 @@ BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
 
 BOOL CTaskCalendarCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const
 {
-	if ((m_dwSelectedTaskID == 0) || !HasTask(m_dwSelectedTaskID))
+	if (GetSelectedTaskID() == 0)
 		return FALSE;
 
 	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
@@ -2267,7 +2342,7 @@ void CTaskCalendarCtrl::CancelDrag(BOOL bReleaseCapture)
 void CTaskCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point) 
 {
 	DWORD dwTaskID = HitTest(point);
-	SelectTask(dwTaskID, TRUE);
+	SelectTask(dwTaskID, FALSE, TRUE);
 	
 	CCalendarCtrlEx::OnRButtonDown(nFlags, point);
 }

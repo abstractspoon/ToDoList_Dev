@@ -94,6 +94,11 @@ DWORD CKanbanOptionComboBox::GetSelectedOptions() const
 	return m_dwOptions;
 }
 
+BOOL CKanbanOptionComboBox::HasSelectedOption(DWORD dwOption) const
+{
+	return (dwOption && ((m_dwOptions & dwOption) == dwOption)) ? TRUE : FALSE;
+}
+
 void CKanbanOptionComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 	DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {

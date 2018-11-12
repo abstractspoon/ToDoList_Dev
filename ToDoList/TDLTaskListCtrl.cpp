@@ -1207,7 +1207,7 @@ BOOL CTDLTaskListCtrl::IsTaskSelected(DWORD dwTaskID, BOOL bSingly) const
 
 DWORD CTDLTaskListCtrl::GetTaskID(int nItem) const 
 { 
-	if ((nItem == -1) || (m_lcTasks.GetItemCount() == 0))
+	if ((nItem == -1) || (nItem >= m_lcTasks.GetItemCount()))
 		return 0;
 
 	return m_lcTasks.GetItemData(nItem); 
@@ -1371,12 +1371,12 @@ int CTDLTaskListCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcru
 	return cache.aSelTaskIDs.GetSize();
 }
 
-void CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)
+int CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache, BOOL bEnsureSelection)
 {
 	if ((GetItemCount() == 0) || cache.IsEmpty())
 	{
 		DeselectAll();
-		return;
+		return 0;
 	}
 
 	DWORD dwFocusedTaskID = cache.dwFocusedTaskID;
@@ -1385,16 +1385,20 @@ void CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)
 	if (FindTaskItem(dwFocusedTaskID) == -1)
 	{
 		dwFocusedTaskID = 0;
-		int nID = cache.aBreadcrumbs.GetSize();
-		
-		while (nID--)
+
+		if (bEnsureSelection)
 		{
-			dwFocusedTaskID = cache.aBreadcrumbs[nID];
+			int nID = cache.aBreadcrumbs.GetSize();
+		
+			while (nID--)
+			{
+				dwFocusedTaskID = cache.aBreadcrumbs[nID];
 			
-			if (FindTaskItem(dwFocusedTaskID) != -1)
-				break;
-			else
-				dwFocusedTaskID = 0;
+				if (FindTaskItem(dwFocusedTaskID) != -1)
+					break;
+				else
+					dwFocusedTaskID = 0;
+			}
 		}
 	}
 	
@@ -1413,10 +1417,16 @@ void CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)
 		if (cache.dwFirstVisibleTaskID)
 			SetTopIndex(FindTaskItem(cache.dwFirstVisibleTaskID));
 	}
-	else
+	else if (bEnsureSelection)
 	{
 		SelectItem(0);
 	}
+	else
+	{
+		DeselectAll();
+	}
+
+	return m_lcTasks.GetSelectedCount();
 }
 
 void CTDLTaskListCtrl::DeselectAll() 

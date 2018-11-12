@@ -57,7 +57,7 @@ const UINT RELATIVEDATEPLACEHOLDER_BTNID = 1;
 CTDLFindTaskExpressionListCtrl::CTDLFindTaskExpressionListCtrl()
 	:
 	m_dtcDate(MCS_WEEKNUMBERS),
-	m_cbCustomIcons(m_ilIcons, TRUE)
+	m_cbCustomIcons(m_ilIcons, TRUE, FALSE)
 {
 }
 

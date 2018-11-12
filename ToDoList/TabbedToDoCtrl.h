@@ -29,6 +29,7 @@ struct VIEWDATA
 		pExtension(NULL),
 		bNeedFullTaskUpdate(TRUE),
 		bNeedFontUpdate(TRUE),
+		bHasSelectedTask(FALSE),
 		bCanPrepareNewTask(-1)
 	{
 	}
@@ -44,6 +45,7 @@ struct VIEWDATA
 	BOOL bNeedFullTaskUpdate;
 	BOOL bNeedFontUpdate;
 	BOOL bCanPrepareNewTask;
+	BOOL bHasSelectedTask;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -215,6 +217,9 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	// pseudo-handler
+	void OnListSelChanged();
+
 protected:
 	BOOL ModNeedsResort(TDC_ATTRIBUTE nModType) const;
 	BOOL ModCausesColorChange(TDC_ATTRIBUTE nModType) const;
@@ -243,7 +248,6 @@ protected:
 
 	void DrawListColumnHeaderText(CDC* pDC, int nCol, const CRect& rCol, UINT nState);
 	void RemeasureList();
-	void UpdateTreeSelection();
 	void UpdateSelectedTaskPath();
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);
 	int FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttrib, int nStart, BOOL bNext, BOOL bCaseSensitive, BOOL bWholeWord) const;
@@ -255,13 +259,12 @@ protected:
 	void UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0);
 	int GetVisibleTaskViews(CStringArray& aTypeIDs, BOOL bIncListView) const;
 
-	void ResyncListSelection();
-	void ResyncExtensionSelection(FTC_VIEW nView);
+	void SyncListSelectionToTree();
+	void SyncExtensionSelectionToTree(FTC_VIEW nView);
 	BOOL IsItemSelected(int nItem) const;
 	BOOL HasSingleSelectionChanged(DWORD dwSelID) const;
 	DWORD GetSingleSelectedTaskID() const;
 	int CacheListSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
-	void RestoreListSelection(const TDCSELECTIONCACHE& cache);
 
 	int GetListColumnAlignment(int nDTAlign); 
 
@@ -295,6 +298,7 @@ protected:
 	BOOL InExtensionView() const;
 	BOOL IsViewSet() const;
 	BOOL ViewSupportsTaskSelection(FTC_VIEW nView) const;
+	BOOL ViewHasTaskSelection(FTC_VIEW nView) const;
 
 	void UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0);
 	BOOL ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd);
@@ -322,7 +326,6 @@ protected:
 	void UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib);
 	void UpdateExtensionViewsTasks(TDC_ATTRIBUTE nAttrib);
 	BOOL IsExtensionView(HWND hWnd) const;
-	BOOL SelectExtensionTasks(IUIExtensionWindow* pExtWnd, const CDWordArray& aTasks, DWORD dwFocusedTask);
 	BOOL ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
 	void RefreshExtensionViewSort(FTC_VIEW nView);
 	BOOL ExtensionCanSortBy(FTC_VIEW nView, IUI_ATTRIBUTE nBy) const;

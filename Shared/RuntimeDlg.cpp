@@ -230,6 +230,9 @@ BOOL CRuntimeDlg::Create(LPCTSTR szCaption, DWORD dwStyle, DWORD dwExStyle, cons
 	
 	// create modeless dialog
 	AfxHookWindowCreate(this);
+
+	// Save size before WM_INITDIALOG gets sent
+	m_sizeInitial = rect.Size();
 	
 	if (CreateDlgIndirect(RTDLGTEMPLATE(dwStyle, dwExStyle, rect), pParentWnd, NULL) != NULL)
 	{

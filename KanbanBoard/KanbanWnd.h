@@ -80,6 +80,7 @@ protected:
 	UITHEME m_theme;
 	CString	m_sTrackedCustomAttribID;
 	IUI_ATTRIBUTE m_nTrackedAttrib;
+	CDWordArray m_aSelTaskIDs;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

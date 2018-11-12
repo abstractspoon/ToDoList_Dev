@@ -95,7 +95,9 @@ public:
 	void Resize(const CRect& rect, float fLeftProportion);
 	void Resize(const CRect& rect, int nLeftWidth);
 
-	void GetBoundingRect(CRect& rect) const;
+	virtual void GetBoundingRect(CRect& rect) const;
+	virtual BOOL HandleEraseBkgnd(CDC* pDC);
+
 	int GetSplitPos() const { return m_nSplitPos; }
 	void SetSplitPos(int nPos);
 	int GetSplitBarWidth() const { return m_nSplitWidth; }
@@ -110,7 +112,6 @@ public:
 	void InvalidateAll(BOOL bErase = FALSE, BOOL bUpdate = FALSE);
 	void UpdateAll();
 
-	virtual BOOL HandleEraseBkgnd(CDC* pDC);
 	BOOL HasFocus() const;
 	void SetFocus();
 	void Show(BOOL bShow = TRUE);

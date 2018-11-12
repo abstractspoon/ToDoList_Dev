@@ -28,6 +28,13 @@ enum // options
 	TCCO_TREATOVERDUEASDUETODAY					= 0x00008000,
 	TCCO_HIDEPARENTTASKS						= 0x00010000,
 	TCCO_SHOWPARENTTASKSASFOLDER				= 0x00020000,
+
+	TCCO_DATEDISPLAYOPTIONS						= (TCCO_DISPLAYCONTINUOUS | 
+													TCCO_DISPLAYSTART | 
+													TCCO_DISPLAYDUE | 
+													TCCO_DISPLAYDONE | 
+													TCCO_DISPLAYCALCSTART | 
+													TCCO_DISPLAYCALCDUE)
 };
 
 /////////////////////////////////////////////////////////////////////////////

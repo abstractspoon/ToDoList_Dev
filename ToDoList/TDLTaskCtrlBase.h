@@ -190,6 +190,7 @@ public:
 	int HitTestFileLinkColumn(const CPoint& ptScreen) const;
 
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
+	virtual void GetBoundingRect(CRect& rect) const { CWnd::GetClientRect(rect); }
 		
 	void SetFocus() { CTreeListSyncer::SetFocus(); }
 	BOOL HasFocus() const { return CTreeListSyncer::HasFocus(); }

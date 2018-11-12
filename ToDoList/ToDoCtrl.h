@@ -80,8 +80,8 @@ public:
 
 	BOOL Create(const CRect& rect, CWnd* pParentWnd, UINT nID, BOOL bVisible = TRUE, BOOL bEnabled = TRUE);
 
-	TDC_FILE Save(const CString& sFilePath = _T(""));
-	TDC_FILE Save(CTaskFile& tasks/*out*/, const CString& sFilePath = _T(""));
+	TDC_FILE Save(const CString& sFilePath = _T(""), BOOL bFlush = TRUE);
+	TDC_FILE Save(CTaskFile& tasks/*out*/, const CString& sFilePath = _T(""), BOOL bFlush = TRUE);
 
 	BOOL SaveTaskViewToImage(CString& sFilePath);
 	BOOL CanSaveTaskViewToImage() const { return m_taskTree.CanSaveToImage(); }

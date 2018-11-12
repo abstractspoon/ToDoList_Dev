@@ -72,16 +72,15 @@ CThemed::CThemed(const CWnd* pWnd, LPCTSTR szClassList) : m_hWnd(NULL), m_hTheme
 {
 	InitUxTheme();
 	
-	if (pWnd && pWnd->GetSafeHwnd())
-		Open(pWnd, szClassList);
+	if (pWnd)
+		Open(pWnd->GetSafeHwnd(), szClassList);
 }
 
 CThemed::CThemed(HWND hwnd, LPCTSTR szClassList) : m_hWnd(NULL), m_hTheme(NULL)
 {
 	InitUxTheme();
 	
-	if (hwnd)
-		Open(CWnd::FromHandle(hwnd), szClassList);
+	Open(hwnd, szClassList);
 }
 
 CThemed::~CThemed()

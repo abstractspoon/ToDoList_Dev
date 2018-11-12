@@ -40,7 +40,6 @@ public:
 	bool PrepareNewTask(ITaskList* pTask) const;
 
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
-	BOOL SelectTask(DWORD dwTaskID);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 
@@ -88,6 +87,7 @@ protected:
 	BOOL m_bReadOnly;
 	BOOL m_bSortAscending;
 	BOOL m_bStrikeThruDone;
+	BOOL m_bSelectTasks;
 
 	DWORD m_dwOptions;
 	UINT m_nNextColor;
@@ -137,7 +137,7 @@ protected:
 	void Resize(const CRect& rect);
 	void ClearOtherListSelections(const CKanbanListCtrl* pList);
 
-	void RebuildListCtrls(BOOL bRebuildData);
+	void RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate);
 	void RebuildDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray);
 	void RebuildFixedListCtrls(const CKanbanItemArrayMap& mapKIArray);
 	int RemoveOldDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray);

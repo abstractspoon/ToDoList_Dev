@@ -454,8 +454,8 @@ CString CTimeHelper::FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces) c
 	
 	if (nUnits && MAPUNIT2CH.Lookup(nUnits, cUnits))
 	{
-		CString sTemp(sTime);
-		sTime.Format(_T("%s %c"), sTemp, cUnits);
+		sTime += ' ';
+		sTime += cUnits;
 	}
 	
 	return sTime;

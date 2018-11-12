@@ -72,10 +72,12 @@ protected:
 	void GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
 	CString GetItemText(int nItem, const CString& sHint = _T("")) const;
 
+	BOOL HasItemNone() const { return (GetNoneIndex() != CB_ERR); }
 	int GetNoneIndex() const;
 	BOOL IsNoneIndex(int nItem) const;
 	BOOL IsNoneChecked() const;
 
+	BOOL HasItemAny() const { return (GetAnyIndex() != CB_ERR); }
 	int GetAnyIndex() const;
 	BOOL IsAnyIndex(int nItem) const;
 	BOOL IsAnyChecked() const;

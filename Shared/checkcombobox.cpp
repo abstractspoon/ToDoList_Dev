@@ -86,7 +86,7 @@ void CCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nI
 	if (DrawCheckBox(dc, rect, nItem, nItemState, dwItemData, FALSE))
 	{
 		CRect rText(rect);
-		rText.left += CHECKBOX_WIDTH;//CalcCheckBoxWidth(dc);
+		rText.left += CHECKBOX_WIDTH;
 		
 		CAutoComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, TRUE, crText);
 	}
@@ -156,7 +156,7 @@ int CCheckComboBox::CalcCheckBoxWidth(HDC hdc, HWND hwndRef)
 
 int CCheckComboBox::GetExtraListboxWidth() const
 {
-	return (CAutoComboBox::GetExtraListboxWidth() + CHECKBOX_WIDTH/*CalcCheckBoxWidth(NULL, *this)*/);
+	return (CAutoComboBox::GetExtraListboxWidth() + CHECKBOX_WIDTH);
 }
 
 LRESULT CCheckComboBox::OnGetTextLen(WPARAM wParam, LPARAM lParam)

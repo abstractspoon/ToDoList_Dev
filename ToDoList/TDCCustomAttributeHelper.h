@@ -42,9 +42,10 @@ public:
 
 	static void CleanupControls(CTDCCustomControlArray& aControls, CWnd* pParent);
 
-	// -------------------------------------------------------------------------
-
 	static int EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, CWnd* pParent, BOOL bEnable = TRUE);
+	static void ClearFilterCheckboxHistory(const CTDCCustomControlArray& aControls, CWnd* pParent);
+
+	// -------------------------------------------------------------------------
 	
 	static CString GetAttributeTypeID(UINT nCtrlID, const CTDCCustomControlArray& aControls);
 	static CString GetAttributeTypeID(TDC_COLUMN nColID, const CTDCCustomAttribDefinitionArray& aAttribDefs);

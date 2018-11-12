@@ -393,6 +393,7 @@ struct TDCSELECTIONCACHE
 		}
 
 		// else
+		ASSERT(!dwFocusedTaskID);
 		return TRUE;
 	}
 
@@ -894,15 +895,24 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 		return nLongest;
 	}
 
+	static BOOL IsEncodedImageTag(const CString& sImage)
+	{
+		return (sImage.Find(':') != -1);
+	}
+
 	static CString EncodeImageTag(const CString& sImage, const CString& sName) 
 	{ 
-		CString sTag;
-		sTag.Format(_T("%s:%s"), sImage, sName);
-		return sTag;
+		if (IsEncodedImageTag(sImage))
+			return sImage;
+
+		return (sImage + ':' + sName);
 	}
 
 	static BOOL DecodeImageTag(const CString& sTag, CString& sImage, CString& sName)
 	{
+		sImage.Empty();
+		sName.Empty();
+
 		CStringArray aParts;
 		int nNumParts = Misc::Split(sTag, aParts, ':');
 
@@ -917,13 +927,12 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 			break;
 
 		case 0:
-			return FALSE;
+			break;
 		}
 
-		return TRUE;
+		return !sImage.IsEmpty();
 	}
-
-
+	
 	///////////////////////////////////////////////////////////////////////////////
 	CString sUniqueID;
 	CString sColumnTitle;

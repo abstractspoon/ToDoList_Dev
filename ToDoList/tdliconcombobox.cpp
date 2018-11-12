@@ -15,11 +15,15 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+const int IMAGE_WIDTH = GraphicsMisc::ScaleByDPIFactor(16);
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLIconComboBox
 
-CTDLIconComboBox::CTDLIconComboBox(const CTDCImageList& ilImages, BOOL bMultiSel)
+CTDLIconComboBox::CTDLIconComboBox(const CTDCImageList& ilImages, BOOL bMultiSel, BOOL bFilter)
 	:
-	CEnCheckComboBox(bMultiSel),
+	CEnCheckComboBox(bMultiSel, (bFilter ? IDS_TDC_NONE : 0), (bFilter ? IDS_TDC_ANY : 0)),
 	m_ilImages(ilImages)
 {
 }
@@ -47,8 +51,6 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 
 	GraphicsMisc::CentreRect(rImage, rect, FALSE, TRUE);
 
-	const int nImageSize = GetItemHeight(-1);
-
 	CStringArray aImages;
 	int nNumImage = 0;
 	
@@ -60,7 +62,7 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 			DrawCheckBox(dc, rect, nItem, nItemState, dwItemData, FALSE);
 
 			// update image rect
-			rImage.left += nImageSize;
+			rImage.left += IMAGE_WIDTH;
 		}
 
 		aImages.Add(sItem);
@@ -70,7 +72,7 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 	{
 		if (m_bMultiSel)
 		{
-			nNumImage = Misc::Split(m_sText, aImages);
+			nNumImage = Misc::Split(m_sText, aImages, _T(""), HasItemNone());
 		}
 		else if (!sItem.IsEmpty())
 		{
@@ -79,25 +81,55 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 		}
 	}
 
-	for (int nImg = 0; nImg < nNumImage; nImg++)
+	if (nNumImage > 0)
 	{
-		CString sImage, sName;
-		
-		if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(aImages[nImg], sImage, sName))
+		for (int nImg = 0; nImg < nNumImage; nImg++)
 		{
-			// draw image
-			if (m_ilImages.GetSafeHandle() && !sImage.IsEmpty())
+			CString sImage, sName;
+
+			if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(aImages[nImg], sImage, sName))
 			{
-				CPoint pt = rImage.TopLeft();
+				// draw image
+				if (m_ilImages.GetSafeHandle() && !sImage.IsEmpty())
+				{
+					CPoint pt = rImage.TopLeft();
 
-				m_ilImages.Draw(&dc, sImage, pt, ILD_TRANSPARENT);
-				rImage.left += (nImageSize + 2);
+					m_ilImages.Draw(&dc, sImage, pt, ILD_TRANSPARENT);
+					rImage.left += (IMAGE_WIDTH + 2);
+				}
+
+				// draw optional text bypassing base class checkbox drawing
+				if (bList && !sName.IsEmpty())
+				{
+					rImage.left += 2;
+
+					CAutoComboBox::DrawItemText(dc, rImage, nItem, nItemState, dwItemData, sName, bList, crText);
+				}
 			}
+			else if (bList)
+			{
+				// Draw none/any
+				CEnCheckComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
+			}
+			else
+			{
+				ASSERT(nImg == 0);
+				ASSERT(HasItemNone());
 
-			// draw optional text
-			if (bList && !sName.IsEmpty())
-				COwnerdrawComboBoxBase::DrawItemText(dc, rImage, nItem, nItemState, dwItemData, sName, bList, crText);
+				CAutoComboBox::DrawItemText(dc, rImage, nItem, nItemState, dwItemData, m_sNone, bList, crText);
+				rImage.left += (dc.GetTextExtent(m_sNone).cx + 2);
+
+				if (nNumImage > 1)
+				{
+					CAutoComboBox::DrawItemText(dc, rImage, nItem, nItemState, dwItemData, Misc::GetListSeparator(), bList, crText);
+					rImage.left += (dc.GetTextExtent(Misc::GetListSeparator()).cx);
+				}
+			}
 		}
+	}
+	else if (!bList)
+	{
+		CEnCheckComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 	}
 }
 
@@ -123,50 +155,109 @@ CString CTDLIconComboBox::GetSelectedImage() const
 		return sImage;
 	}
 
-	// else
 	return sItem; // empty
 }
 
 int CTDLIconComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) const
 {
 	CStringArray aTemp;
-	int nNumItems = CEnCheckComboBox::GetChecked(aTemp, nCheck);
+	CEnCheckComboBox::GetChecked(aTemp, nCheck);
 
-	aItems.RemoveAll();
-
-	for (int nImg = 0; nImg < nNumItems; nImg++)
-	{
-		CString sImage, sName;
-		TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(aTemp[nImg], sImage, sName);
-
-		aItems.Add(sImage);
-	}
-
-	return aItems.GetSize();
+	return DecodeImageTags(aTemp, aItems);
 }
 
 BOOL CTDLIconComboBox::SetChecked(const CStringArray& aItems)
 {
-	// clear existing checks first but don't update window
-	int nCount = GetCount();
-	
-	for (int i = 0; i < nCount; i++)
-		CCheckComboBox::SetCheck(i, CCBC_UNCHECKED, FALSE);
+	CStringArray aEncodedItems;
+	EncodeImageTags(aItems, aEncodedItems, FALSE);
 
-	// assume that all the correct items have already 
-	// been added to the list
-	int nItem = aItems.GetSize();
+	return CEnCheckComboBox::SetChecked(aEncodedItems);
+}
 
-	while (nItem--)
+BOOL CTDLIconComboBox::SetChecked(const CStringArray& aChecked, const CStringArray& aMixed)
+{
+	CStringArray aEncodedChecked, aEncodedMixed;
+
+	EncodeImageTags(aChecked, aEncodedChecked, FALSE);
+	EncodeImageTags(aMixed, aEncodedMixed, FALSE);
+
+	return CEnCheckComboBox::SetChecked(aEncodedChecked, aEncodedMixed);
+}
+
+int CTDLIconComboBox::SetStrings(const CStringArray& aItems)
+{
+	CStringArray aEncodedItems;
+	EncodeImageTags(aItems, aEncodedItems, TRUE);
+
+	return CEnCheckComboBox::SetStrings(aEncodedItems);
+}
+
+int CTDLIconComboBox::GetItems(CStringArray& aItems) const
+{
+	CStringArray aTemp;
+	CEnCheckComboBox::GetItems(aTemp);
+
+	return DecodeImageTags(aTemp, aItems);
+}
+
+int CTDLIconComboBox::EncodeImageTags(const CStringArray& aImages, CStringArray& aEncodedTags, BOOL bAdding) const
+{
+	int nNumItems = aImages.GetSize();
+	aEncodedTags.RemoveAll();
+
+	for (int nImg = 0; nImg < nNumItems; nImg++)
 	{
-		CString sPartial = TDCCUSTOMATTRIBUTEDEFINITION::EncodeImageTag(aItems[nItem], _T(""));
-		int nIndex = FindString(-1, sPartial);
+		CString sImage;
 
-		if (nIndex != CB_ERR)
-			SetCheck(nIndex, CCBC_CHECKED);
-		else
-			return FALSE;
+		if (!aImages[nImg].IsEmpty())
+		{
+			sImage = TDCCUSTOMATTRIBUTEDEFINITION::EncodeImageTag(aImages[nImg], _T(""));
+
+			if (!bAdding)
+			{
+				// Find the full string corresponding to this partial string
+				int nFull = FindString(-1, sImage);
+
+				if (nFull == -1)
+				{
+					ASSERT(0);
+					continue;
+				}
+
+				CString sFullImage = GetItemText(nFull);
+
+				if (sFullImage.Find(sImage) != 0)
+				{
+					ASSERT(0);
+					continue;
+				}
+
+				sImage = sFullImage;
+			}
+		}
+
+		aEncodedTags.Add(sImage);
 	}
 
-	return TRUE;
+	ASSERT(aEncodedTags.GetSize() == aImages.GetSize());
+	return aEncodedTags.GetSize();
+}
+
+int CTDLIconComboBox::DecodeImageTags(const CStringArray& aImages, CStringArray& aDecodedTags) const
+{
+	int nNumItems = aImages.GetSize();
+	aDecodedTags.RemoveAll();
+
+	for (int nImg = 0; nImg < nNumItems; nImg++)
+	{
+		CString sImage, sUnused;
+
+		if (!aImages[nImg].IsEmpty())
+			TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(aImages[nImg], sImage, sUnused);
+
+		aDecodedTags.Add(sImage);
+	}
+
+	ASSERT(aDecodedTags.GetSize() == aImages.GetSize());
+	return aDecodedTags.GetSize();
 }

@@ -334,6 +334,8 @@ void CTDLFilterBar::ClearCheckboxHistory()
 		m_cbStatusFilter.CheckAll(CCBC_UNCHECKED);
 		m_cbTagFilter.CheckAll(CCBC_UNCHECKED);
 		m_cbVersionFilter.CheckAll(CCBC_UNCHECKED);
+
+		CTDCCustomAttributeHelper::ClearFilterCheckboxHistory(m_aCustomControls, this);
 	}
 }
 

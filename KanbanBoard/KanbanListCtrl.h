@@ -64,10 +64,11 @@ public:
 	BOOL DeleteTask(DWORD dwTaskID);
 
 	int GetSelectedTasks(CDWordArray& aTaskIDs) const;
+	BOOL HasTasks(const CDWordArray& aTaskIDs) const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL SelectTask(DWORD dwTaskID, BOOL bAppend = FALSE);
 	BOOL SelectItem(int nItem, BOOL bFocus, BOOL bAppend = FALSE);
-	BOOL IsSelectingTask() const { return (m_dwSelectingTask != 0); }
+	BOOL IsSelectingTask() const { return (m_dwSelectingTaskID != 0); }
 	void ScrollToSelection();
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	void ClearSelection();
@@ -119,7 +120,7 @@ protected:
 	KANBANCOLUMN m_columnDef;
 	DWORD m_dwDisplay;
 	int m_nLineHeight;
-	DWORD m_dwSelectingTask;
+	DWORD m_dwSelectingTaskID;
 	KBC_ATTRIBLABELS m_nAttribLabelVisiability;
 	
 // Overrides
@@ -166,6 +167,7 @@ protected:
 	BOOL InitTooltip();
 	BOOL GetItemTooltipRect(int nItem, CRect& rItem, const KANBANITEM* pKI) const;
 	BOOL GetItemRect(int nItem, CRect& rItem, const KANBANITEM* pKI) const;
+	BOOL HasTasks(const CDWordArray& aTaskIDs, CArray<int, int>& aItems) const;
 
 	BOOL DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	BOOL DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const;
@@ -192,6 +194,7 @@ public:
 
 	int Find(DWORD dwTaskID) const;
 	int Find(DWORD dwTaskID, int& nItem) const;
+	int Find(const CDWordArray& aTaskIDs) const;
 	int Find(HWND hWnd) const;
 	int Find(const CString& sAttribValue) const;
 	int Find(const CKanbanListCtrl* pList) const;

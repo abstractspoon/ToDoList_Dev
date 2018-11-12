@@ -98,6 +98,7 @@ protected:
 	HICON m_hILarge, m_hISmall;
 	CString m_sSettingsKey;
 	HFONT m_hFont;
+	CSize m_sizeInitial;
 
 	static CMapStringToString s_mapClasses;
 
@@ -145,6 +146,8 @@ protected:
 
 	virtual void SetInitialPos(LPCRECT pRect, DWORD dwStyle);
 	void SaveCurrentPos();
+	BOOL HasInitialSize() const { return (m_sizeInitial.cx && m_sizeInitial.cy); }
+	void ClearInitialSize() { m_sizeInitial.cx  = m_sizeInitial.cy = 0; }
 
 	virtual CPoint GetInitialPos() const { return CPoint(-1, -1); }
 	virtual CString OverrideItemText(UINT /*nIDItem*/) { return ""; }

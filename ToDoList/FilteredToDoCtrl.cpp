@@ -728,7 +728,7 @@ LRESULT CFilteredToDoCtrl::OnRefreshFilter(WPARAM wParam, LPARAM lParam)
 	
 	// resync selection?
 	if (nView == FTCV_TASKLIST)
-		ResyncListSelection();
+		SyncListSelectionToTree();
 	
 	return 0L;
 }
@@ -779,6 +779,7 @@ void CFilteredToDoCtrl::RefreshFilter()
 		SetExtensionsNeedRefilter(TRUE);
 		SetListNeedRefilter(TRUE);
 		RefreshExtensionFilter(nView, TRUE);
+		SyncExtensionSelectionToTree(nView);
 		break;
 	}
 }
@@ -991,16 +992,16 @@ void CFilteredToDoCtrl::RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgres
 		if (bShowProgress)
 			BeginExtensionProgress(pData, IDS_UPDATINGTABBEDVIEW);
 		
+		// clear all update flags
+		pData->bNeedFullTaskUpdate = FALSE;
+		pData->bNeedRefilter = FALSE;
+
 		// update view with filtered tasks
 		CTaskFile tasks;
 		GetAllTasksForExtensionViewUpdate(tasks, pData->mapWantedAttrib);
 
 		UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pData->mapWantedAttrib); 
-
-		// and clear all update flags
-		pData->bNeedFullTaskUpdate = FALSE;
-		pData->bNeedRefilter = FALSE;
-
+		
 		if (bShowProgress)
 			EndExtensionProgress();
 	}
@@ -1091,8 +1092,7 @@ void CFilteredToDoCtrl::RebuildList(const SEARCHPARAMS& filter)
 			m_taskList.InsertItem(res.dwTaskID);
 		}
 
-		// restore selection
-		RestoreListSelection(cache);
+		m_taskList.RestoreSelection(cache, TRUE);
 
 		Resort();
 	}

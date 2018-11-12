@@ -446,25 +446,28 @@ IUI_HITTEST CKanbanWnd::HitTest(const POINT& ptScreen) const
 bool CKanbanWnd::SelectTask(DWORD dwTaskID)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	return (m_ctrlKanban.SelectTask(dwTaskID) != FALSE);
+
+	m_aSelTaskIDs.RemoveAll();
+	m_aSelTaskIDs.Add(dwTaskID);
+
+	return (m_ctrlKanban.SelectTasks(m_aSelTaskIDs) != FALSE);
 }
 
 bool CKanbanWnd::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	CDWordArray aTaskIDs;
+	m_aSelTaskIDs.RemoveAll();
 
 	if (nTaskCount)
 	{
 		ASSERT(pdwTaskIDs);
 	
 		for (int nID = 0; nID < nTaskCount; nID++)
-			aTaskIDs.Add(pdwTaskIDs[nID]);
+			m_aSelTaskIDs.Add(pdwTaskIDs[nID]);
 	}
 
-	return (m_ctrlKanban.SelectTasks(aTaskIDs) != FALSE);
+	return (m_ctrlKanban.SelectTasks(m_aSelTaskIDs) != FALSE);
 }
 
 bool CKanbanWnd::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
@@ -728,21 +731,22 @@ BOOL CKanbanWnd::OnEraseBkgnd(CDC* pDC)
 
 void CKanbanWnd::SendParentSelectionUpdate()
 {
-	CDWordArray aSelIDs;
-	m_ctrlKanban.GetSelectedTaskIDs(aSelIDs);
+	CDWordArray aTaskIDs;
 
-	switch (aSelIDs.GetSize())
+	switch (m_ctrlKanban.GetSelectedTaskIDs(aTaskIDs))
 	{
 	case 0:
 		GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, 0);
 		break;
 			
 	case 1:
-		GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, aSelIDs[0]);
+		VERIFY(GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, aTaskIDs[0]));
+		m_aSelTaskIDs.Copy(aTaskIDs);
 		break;
 		
 	default:
-		GetParent()->SendMessage(WM_IUI_SELECTTASK, (WPARAM)aSelIDs.GetData(), (LPARAM)aSelIDs.GetSize());
+		VERIFY(GetParent()->SendMessage(WM_IUI_SELECTTASK, (WPARAM)aTaskIDs.GetData(), (LPARAM)aTaskIDs.GetSize()));
+		m_aSelTaskIDs.Copy(aTaskIDs);
 	}
 }
 
@@ -974,8 +978,19 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 
 void CKanbanWnd::OnSelchangeOptions() 
 {
-	m_ctrlKanban.SetOption(KBCF_SHOWPARENTTASKS, m_cbOptions.GetCheckByData(KBCF_SHOWPARENTTASKS));
-	m_ctrlKanban.SetOption(KBCF_SHOWEMPTYCOLUMNS, m_cbOptions.GetCheckByData(KBCF_SHOWEMPTYCOLUMNS));
+	m_ctrlKanban.SetOption(KBCF_SHOWEMPTYCOLUMNS, m_cbOptions.HasSelectedOption(KBCF_SHOWEMPTYCOLUMNS));
+
+	BOOL bWasShowingParentTasks = m_ctrlKanban.HasOption(KBCF_SHOWPARENTTASKS);
+	BOOL bIsShowingParentTasks = m_cbOptions.HasSelectedOption(KBCF_SHOWPARENTTASKS);
+
+	m_ctrlKanban.SetOption(KBCF_SHOWPARENTTASKS, bIsShowingParentTasks);
+
+	// Fixup selection if parents are being shown
+	if ((bWasShowingParentTasks || bIsShowingParentTasks) && m_aSelTaskIDs.GetSize())
+	{
+		m_ctrlKanban.SelectTasks(m_aSelTaskIDs);
+		SendParentSelectionUpdate();
+	}
 }
 
 BOOL CKanbanWnd::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResult*/)

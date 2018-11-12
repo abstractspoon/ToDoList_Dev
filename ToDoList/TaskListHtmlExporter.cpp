@@ -39,6 +39,7 @@ CTaskListHtmlExporter::CTaskListHtmlExporter()
 {
 	// override base class ENDL
 	ENDL = "\n";
+	LISTSEPARATOR = (Misc::GetListSeparator() + ' '); // allows wrapping
 }
 
 CTaskListHtmlExporter::~CTaskListHtmlExporter()

@@ -395,7 +395,7 @@ BOOL CEnCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArr
 
 		int nAny = GetAnyIndex();
 
-		if (!aChecked.GetSize() || GetCheck(nAny))
+		if ((nAny != CB_ERR) && (!aChecked.GetSize() || GetCheck(nAny)))
 			return (CCheckComboBox::SetCheck(nAny, CCBC_CHECKED, FALSE) != CB_ERR);
 
 		return CCheckComboBox::SetChecked(aChecked, aMixed);

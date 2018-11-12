@@ -600,8 +600,10 @@ BOOL CToDoCtrl::Create(const CRect& rect, CWnd* pParentWnd, UINT nID, BOOL bVisi
 BOOL CToDoCtrl::OnInitDialog() 
 {
 	// create the tree-list before anything else
-	CRect rect(0, 0, 0, 0);
-	VERIFY(m_taskTree.Create(this, rect, IDC_TASKTREELIST));
+	CRect rCtrl;
+	GraphicsMisc::GetAvailableScreenSpace(*this, rCtrl);
+
+	VERIFY(m_taskTree.Create(this, rCtrl, IDC_TASKTREELIST));
 
 	// create rest of controls
 	CRuntimeDlg::OnInitDialog();
@@ -817,11 +819,22 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 	{
 		if (!cx && !cy)
 		{
-			CRect rClient;
-			GetClientRect(rClient);
-			
-			cx = rClient.right;
-			cy = rClient.bottom;
+			// Ignore resizes until we receive the first proper one
+			if (!HasInitialSize())
+			{
+				CRect rClient;
+				GetClientRect(rClient);
+
+				cx = rClient.right;
+				cy = rClient.bottom;
+
+				TRACE(_T("CToDoCtrl::OnSize[client](%d, %d)\n"), cx, cy);
+			}
+		}
+		else
+		{
+			ClearInitialSize();
+			TRACE(_T("CToDoCtrl::OnSize(%d, %d)\n"), cx, cy);
 		}
 
 		// hide unused controls
@@ -6027,14 +6040,14 @@ BOOL CToDoCtrl::IsColumnOrEditFieldShowing(TDC_COLUMN nColumn, TDC_ATTRIBUTE nAt
 	return (IsColumnShowing(nColumn) || IsEditFieldShowing(nAttrib));
 }
 
-TDC_FILE CToDoCtrl::Save(const CString& sFilePath)
+TDC_FILE CToDoCtrl::Save(const CString& sFilePath, BOOL bFlush)
 {
 	CTaskFile tasks;
 
-	return Save(tasks, sFilePath);
+	return Save(tasks, sFilePath, bFlush);
 }
 
-TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath)
+TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL bFlush)
 {
 	///////////////////////////////////////////////////////////////////////
 	// PERMANENT LOGGING
@@ -6071,6 +6084,9 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath)
 		else
 			sSavePath = m_sLastSavePath;
 	}
+
+	if (bFlush)
+		Flush();
 
 	// check for later changes if it's a network file
 	BOOL bCheckforLaterChanges = (CDriveInfo::IsRemotePath(sFilePath) > 0);
@@ -11103,6 +11119,11 @@ void CToDoCtrl::ValidateCommentsSize()
 
 	int nCommentSize = ((HasStyle(TDCS_SHAREDCOMMENTSHEIGHT) ? s_nCommentsSize : m_nCommentsSize));
 	int nValidCommentSize = max(nMinComments, min(nMaxComments, nCommentSize));
+
+#ifdef _DEBUG
+	if (nCommentSize != nValidCommentSize)
+		TRACE(_T("CToDoCtrl::ValidateCommentsSize(%d -> %d)\n"), nCommentSize, nValidCommentSize);
+#endif
 
 	s_nCommentsSize = m_nCommentsSize = nValidCommentSize;
 }

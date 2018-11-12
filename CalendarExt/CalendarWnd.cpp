@@ -495,19 +495,15 @@ bool CCalendarWnd::SelectTask(DWORD dwTaskID)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	DWORD dwPrevTaskID = m_BigCalendar.GetSelectedTaskID();
-	
-	bool bSet = (m_BigCalendar.SelectTask(dwTaskID) != FALSE);
-
-	if (bSet)
+	if (m_BigCalendar.SelectTask(dwTaskID, TRUE))
 	{
-		m_BigCalendar.ScrollToSelectedTask();
-
 		UpdateSelectedTaskDates();
 		SyncMiniCalendar(TRUE);
+
+		return true;
 	}
 
-	return bSet;
+	return false;
 }
 
 bool CCalendarWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
@@ -743,11 +739,8 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 
 LRESULT CCalendarWnd::OnBigCalendarNotifySelectionChange(WPARAM /*wp*/, LPARAM lp)
 {
-	if (lp)
-	{
-		UpdateSelectedTaskDates();
-		GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, lp);
-	}
+	UpdateSelectedTaskDates();
+	GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, lp);
 
 	return 0L;
 }

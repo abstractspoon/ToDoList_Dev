@@ -69,7 +69,8 @@ CTaskListExporterBase::CTaskListExporterBase()
 	WANTPOS(FALSE), 
 	ROUNDTIMEFRACTIONS(TRUE),
 	ENDL(_T("\r\n")),
-	MULTIFILE(FALSE)
+	MULTIFILE(FALSE),
+	LISTSEPARATOR(_T("+"))
 {
 }
 
@@ -214,14 +215,12 @@ CString CTaskListExporterBase::FormatHeader(const ITASKLISTBASE* pTasks) const
 						sHeader += FormatHeaderItem(nAttrib, sLabel);
 					}
 				}
-
 			}
 			else
 			{
 				CString sLabel = ARRLABELS[nFind];
 				sHeader += FormatHeaderItem(nAttrib, sLabel);
 			}
-			
 		}
 	}
 
@@ -528,7 +527,7 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	int nItemCount = pTasks->fnCount(hTask); \
 	for (int nItem = 0; nItem < nItemCount; nItem++) \
 		aAttribs.Add(pTasks->fnGet(hTask, nItem)); \
-		return FormatAttribute(attrib, sAttribLabel, Misc::FormatArray(aAttribs, '+'));
+		return FormatAttribute(attrib, sAttribLabel, Misc::FormatArray(aAttribs, LISTSEPARATOR));
 
 // -------------------------------------------------------------
 
@@ -570,6 +569,17 @@ CString CTaskListExporterBase::FormatCustomAttributes(const ITASKLISTBASE* pTask
 			CString sLabel = pTasks->GetCustomAttributeLabel(nCust);
 			CString sID = pTasks->GetCustomAttributeID(nCust);
 			CString sValue = pTasks->GetTaskCustomAttributeData(hTask, sID, true); // true -> 'For display'
+
+			if (LISTSEPARATOR != _T("+"))
+			{
+				DWORD dwCustType = pTasks->GetCustomAttributeType(nCust);
+			
+				if (((dwCustType & TDCCA_LISTMASK) == TDCCA_FIXEDMULTILIST) ||
+					((dwCustType & TDCCA_LISTMASK) == TDCCA_AUTOMULTILIST))
+				{
+					sValue.Replace(_T("+"), LISTSEPARATOR);
+				}
+			}
 
 			sCustAttribs += FormatAttribute(TDCA_CUSTOMATTRIB, sLabel, sValue);
 		}

@@ -1200,14 +1200,8 @@ BOOL CTDLFindTasksDlg::LoadSearch(LPCTSTR szName, CSearchParamArray& params, BOO
 				break; // invalid attribute
 			}
 
-			// else try with all available custom attributes
-			if (!CTDCSearchParamHelper::LoadRule(prefs, sRule, m_aAllTDCAttribDefs, rule))
-			{
-				if (!rule.IsCustomAttribute())
-				{
-					break; // invalid attribute
-				}
-			}
+			// retry with all available custom attributes
+			CTDCSearchParamHelper::LoadRule(prefs, sRule, m_aAllTDCAttribDefs, rule);
 		}
 		
 		params.Add(rule);
@@ -1299,6 +1293,8 @@ int CTDLFindTasksDlg::LoadSearches()
 		LoadSearch(_T("_last_search_"));
 		m_sActiveSearch.Empty();
 	}
+
+	RefreshMaxDropWidth(m_cbSearches);
 
 	return m_cbSearches.GetCount();
 }
@@ -1492,16 +1488,13 @@ HBRUSH CTDLFindTasksDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 	
-	if (CThemed::IsAppThemed())
+	if ((nCtlColor == CTLCOLOR_STATIC) && CThemed::IsAppThemed())
 	{
 		ASSERT (m_brBkgnd.GetSafeHandle());
 
-		if (nCtlColor == CTLCOLOR_STATIC)
-		{
-			pDC->SetTextColor(m_theme.crAppText);
-			pDC->SetBkMode(TRANSPARENT);
-			hbr = m_brBkgnd;
-		}
+		pDC->SetTextColor(m_theme.crAppText);
+		pDC->SetBkMode(TRANSPARENT);
+		hbr = m_brBkgnd;
 	}
 	
 	return hbr;

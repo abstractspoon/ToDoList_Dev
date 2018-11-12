@@ -174,13 +174,12 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	BOOL bVisible = (lpCreateStruct->style & WS_VISIBLE);
 	CRect rect(0, 0, lpCreateStruct->cx, lpCreateStruct->cy);
 	
-	if (!CreateTasksWnd(this, rect, bVisible))
+	if (!CreateTasksWnd(this, rect, TRUE))
 		return -1;
 
-	DWORD dwStyle = (WS_CHILD | (bVisible ? WS_VISIBLE : 0));
+	DWORD dwStyle = (WS_CHILD | WS_VISIBLE);
 
 	// Tasks Header ---------------------------------------------------------------------
 	if (!m_hdrTasks.Create((dwStyle | HDS_BUTTONS), rect, this, IDC_TASKTREEHEADER))
@@ -189,6 +188,8 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	// Column List ---------------------------------------------------------------------
+	rect.OffsetRect(rect.Width(), 0);
+
 	if (!m_lcColumns.Create((dwStyle | WS_TABSTOP),	rect, this, IDC_TASKTREECOLUMNS))
 	{
 		return FALSE;
@@ -473,6 +474,8 @@ void CTDLTaskCtrlBase::OnSize(UINT nType, int cx, int cy)
 	
 	if (cx && cy)
 	{
+		//TRACE(_T("%s::OnSize(%d, %d), splitpos = %d\n"), GetDebugName(), cx, cy, GetSplitPos());
+
 		CRect rect(0, 0, cx, cy);
 		CTreeListSyncer::Resize(rect);
 	}
@@ -1154,11 +1157,16 @@ void CTDLTaskCtrlBase::LoadState(const CPreferences& prefs, const CString& sKey)
 	
 	if (prefs.GetProfileArray((sKey + _T("\\ColumnTracked")), aTracked))
 		SetTrackedColumns(aTracked);
+
+	int nSplitPos = 0;
 	
 	if (aOrder.GetSize() || aWidths.GetSize() || aTracked.GetSize())
-		SetSplitPos(prefs.GetProfileInt(sKey, _T("SplitPos"), 300));
+		nSplitPos = prefs.GetProfileInt(sKey, _T("SplitPos"), 300);
 	else
 		SetSplitPos(CalcSplitterPosToFitListColumns());
+
+	ASSERT(nSplitPos > 0);
+	SetSplitPos(nSplitPos);
 
 	RefreshSize();
 

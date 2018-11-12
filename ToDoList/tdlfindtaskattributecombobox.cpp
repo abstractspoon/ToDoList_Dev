@@ -197,7 +197,8 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule)
 			{
 				if (m_aAttribDefs[nAttrib].GetAttributeID() == attrib)
 				{
-					if (AttributeIsDate(attrib) && rule.IsRelativeDate())
+					if (m_aAttribDefs[nAttrib].IsDataType(TDCCA_DATE) && 
+						(rule.GetAttribType() == FT_DATERELATIVE))
 					{
 						sName.Format(IDS_CUSTOMRELDATECOLUMN, m_aAttribDefs[nAttrib].sLabel);
 					}

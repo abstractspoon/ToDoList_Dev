@@ -115,7 +115,7 @@ CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 		switch (dwDataType)
 		{
 		case TDCCA_ICON:
-			pControl = new CTDLIconComboBox(ilImages, bMultiSelectionFilter);
+			pControl = new CTDLIconComboBox(ilImages, bMultiSelectionFilter, TRUE);
 			break;
 
 		default:
@@ -162,7 +162,7 @@ CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 				switch (dwDataType)
 				{
 				case TDCCA_ICON:
-					pControl = new CTDLIconComboBox(ilImages, FALSE);
+					pControl = new CTDLIconComboBox(ilImages, FALSE, FALSE);
 					break;
 				
 				default:
@@ -200,7 +200,7 @@ CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 				switch (dwDataType)
 				{
 				case TDCCA_ICON:
-					pControl = new CTDLIconComboBox(ilImages, TRUE);
+					pControl = new CTDLIconComboBox(ilImages, TRUE, FALSE);
 					break;
 				
 				default:
@@ -246,13 +246,17 @@ CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 				
 				if (pControl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)))
 				{
-					ASSERT(bFilter || pControl->IsKindOf(RUNTIME_CLASS(CTDLIconComboBox)));
+					ASSERT(bFilter || (dwDataType == TDCCA_ICON));
+
 					((CEnCheckComboBox*)pCB)->SetStrings(aListData);
 				}
 				else
 				{
 					CDialogHelper::SetComboBoxItems(*pCB, aListData);
+				}
 
+				if (!bFilter)
+				{
 					// prepend empty items to single selection lists
 					switch (attribDef.GetListType())
 					{
@@ -1363,6 +1367,24 @@ int CTDCCustomAttributeHelper::EnableMultiSelectionFilter(const CTDCCustomContro
 	}
 
 	return nNumFound;
+}
+
+void CTDCCustomAttributeHelper::ClearFilterCheckboxHistory(const CTDCCustomControlArray& aControls, CWnd* pParent)
+{
+	int nCtrl = aControls.GetSize();
+	
+	while (nCtrl--)
+	{
+		const CUSTOMATTRIBCTRLITEM& ctrl = aControls[nCtrl];
+		CWnd* pCtrl = pParent->GetDlgItem(ctrl.nCtrlID);
+
+		if (pCtrl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)))
+		{
+			CEnCheckComboBox* pCombo = (CEnCheckComboBox*)pCtrl;
+
+			pCombo->CheckAll(CCBC_UNCHECKED);
+		}
+	}
 }
 
 BOOL CTDCCustomAttributeHelper::AppendFilterRules(const CTDCCustomAttributeDataMap& mapData, 

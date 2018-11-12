@@ -2741,7 +2741,7 @@ double CTDCTaskCalculator::GetTaskLastModifiedDate(const TODOITEM* pTDI, const T
 {
 	const TODOITEM* pLatest = GetLastModifiedTask(pTDI, pTDS);
 
-	if (!pLatest)
+	if (!pLatest || !CDateHelper::IsDateSet(pTDI->dateLastMod))
 		return 0.0;
 
 	return pLatest->dateLastMod;
@@ -2766,10 +2766,11 @@ const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, co
 		return NULL;
 
 	const TODOITEM* pLatest = pTDI;
-	double dLatest = pTDI->dateLastMod;
 
-	if (m_data.HasStyle(TDCS_USELATESTLASTMODIFIED))
+	if (CDateHelper::IsDateSet(pTDI->dateLastMod) && m_data.HasStyle(TDCS_USELATESTLASTMODIFIED))
 	{
+		double dLatest = pTDI->dateLastMod;
+
 		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 		{
 			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);

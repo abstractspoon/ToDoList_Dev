@@ -34,7 +34,7 @@ protected:
 	BOOL ROUNDTIMEFRACTIONS, WANTPOS, MULTIFILE;
 	CTDCAttributeArray ARRATTRIBUTES;
 	CStringArray ARRLABELS;
-	CString ENDL;
+	CString ENDL, LISTSEPARATOR;
 
 protected:
 	// overridables

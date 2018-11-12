@@ -22,6 +22,7 @@ public:
 	BOOL Initialise(DWORD dwOptions);
 	DWORD GetSelectedOptions() const;
 	void SetSelectedOptions(DWORD dwOptions);
+	BOOL HasSelectedOption(DWORD dwOption) const;
 
 // Attributes
 protected:

@@ -257,10 +257,7 @@ BOOL CTreeListSyncer::SwapSides()
 		CRect rNewLeft;
 		::GetClientRect(hwndLeft, rNewLeft);
 
-		if (rNewLeft.Width() >= MIN_SPLIT_WIDTH)
-			m_nSplitPos = rNewLeft.Width();
-
-		OnNotifySplitterChange(m_nSplitPos);
+		SetSplitPos(rNewLeft.Width());
 	}
 
 	// and any hidden pane

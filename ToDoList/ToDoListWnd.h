@@ -692,7 +692,7 @@ protected:
 	// caller must flush todoctrls if required before calling these
 	BOOL CloseToDoCtrl(int nIndex);
 	TDC_FILE ConfirmSaveTaskList(int nIndex, DWORD dwFlags = 0);
-	TDC_FILE SaveTaskList(int nIndex, LPCTSTR szFilePath = NULL, BOOL bAuto = FALSE); // returns FALSE only if the user was prompted to save and cancelled
+	TDC_FILE SaveTaskList(int nIndex, LPCTSTR szFilePath = NULL, DWORD dwFlags = 0); // returns FALSE only if the user was prompted to save and cancelled
 	TDC_FILE SaveAll(DWORD dwFlags); // returns FALSE only if the user was prompted to save and cancelled
 	
 	void UpdateTooltip();
@@ -723,7 +723,7 @@ protected:
 	BOOL DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartup);
 	void DoInsertDateAndTime(BOOL bDate, BOOL bTime);
 	BOOL DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere);
-	TDC_FILE DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int nIndex, CTaskFile& tasks, LPCTSTR szFilePath = NULL);
+	TDC_FILE DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int nIndex, CTaskFile& tasks, LPCTSTR szFilePath = NULL, BOOL bFlush = TRUE);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
 
 	TDCEXPORTTASKLIST* PrepareNewDueTaskNotification(int nTDC, int nDueBy);

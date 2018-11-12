@@ -109,6 +109,25 @@ BOOL CKanbanListCtrlArray::RemoveAt(int nList)
 	return TRUE;
 }
 
+int CKanbanListCtrlArray::Find(const CDWordArray& aTaskIDs) const
+{
+	ASSERT(aTaskIDs.GetSize());
+
+	int nNumList = GetSize();
+
+	for (int nList = 0; nList < nNumList; nList++)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		if (pList->HasTasks(aTaskIDs))
+			return nList;
+	}
+
+	return -1;
+}
+
+
 int CKanbanListCtrlArray::Find(DWORD dwTaskID) const
 {
 	int nUnused;
@@ -119,9 +138,9 @@ int CKanbanListCtrlArray::Find(DWORD dwTaskID, int& nItem) const
 {
 	if (dwTaskID)
 	{
-		int nList = GetSize();
-		
-		while (nList--)
+		int nNumList = GetSize();
+
+		for (int nList = 0; nList < nNumList; nList++)
 		{
 			CKanbanListCtrl* pList = GetAt(nList);
 			ASSERT(pList);
@@ -141,9 +160,9 @@ int CKanbanListCtrlArray::Find(DWORD dwTaskID, int& nItem) const
 int CKanbanListCtrlArray::Find(const CString& sAttribValue) const
 {
 	CString sAttribValueID(Misc::ToUpper(sAttribValue));
-	int nList = GetSize();
+	int nNumList = GetSize();
 
-	while (nList--)
+	for (int nList = 0; nList < nNumList; nList++)
 	{
 		CKanbanListCtrl* pList = GetAt(nList);
 		ASSERT(pList);
@@ -160,9 +179,9 @@ int CKanbanListCtrlArray::Find(HWND hwnd) const
 {
 	ASSERT(hwnd);
 
-	int nList = GetSize();
+	int nNumList = GetSize();
 
-	while (nList--)
+	for (int nList = 0; nList < nNumList; nList++)
 	{
 		CKanbanListCtrl* pList = GetAt(nList);
 		ASSERT(pList);
@@ -794,7 +813,7 @@ CKanbanListCtrl::CKanbanListCtrl(const CKanbanItemMap& data, const KANBANCOLUMN&
 	m_bShowTaskColorAsBar(FALSE),
 	m_bShowCompletionCheckboxes(FALSE),
 	m_bColorBarByPriority(FALSE),
-	m_dwSelectingTask(0),
+	m_dwSelectingTaskID(0),
 	m_nLineHeight(-1),
 	m_nAttribLabelVisiability(KBCAL_LONG),
 	m_bSavingToImage(FALSE)
@@ -1754,7 +1773,7 @@ int CKanbanListCtrl::GetSelectedTasks(CDWordArray& aItemIDs) const
 		aItemIDs.Add(GetItemData(GetNextSelectedItem(pos)));
 
 	if ((aItemIDs.GetSize() == 0) && IsSelectingTask())
-		aItemIDs.Add(m_dwSelectingTask);
+		aItemIDs.Add(m_dwSelectingTaskID);
 
 	return aItemIDs.GetSize();
 }
@@ -1821,10 +1840,16 @@ BOOL CKanbanListCtrl::SelectItem(int nItem, BOOL bFocus, BOOL bAppend)
 	return FALSE;
 }
 
-BOOL CKanbanListCtrl::SelectTasks(const CDWordArray& aTaskIDs)
+BOOL CKanbanListCtrl::HasTasks(const CDWordArray& aTaskIDs) const
 {
-	// make sure we have all the items first
 	CArray<int, int> aItems;
+	return HasTasks(aTaskIDs, aItems);
+}
+
+BOOL CKanbanListCtrl::HasTasks(const CDWordArray& aTaskIDs, CArray<int, int>& aItems) const
+{
+	if (GetItemCount() < aTaskIDs.GetSize())
+		return FALSE;
 
 	int nID = aTaskIDs.GetSize();
 
@@ -1833,21 +1858,35 @@ BOOL CKanbanListCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 		int nItem = FindTask(aTaskIDs[nID]);
 
 		if (nItem == -1)
+		{
+			aItems.RemoveAll();
 			return FALSE;
+		}
 
 		aItems.Add(nItem);
 	}
+
+	return TRUE;
+}
+
+BOOL CKanbanListCtrl::SelectTasks(const CDWordArray& aTaskIDs)
+{
+	// make sure we have all the items first
+	CArray<int, int> aItems;
+
+	if (!HasTasks(aTaskIDs, aItems))
+		return FALSE;
 
 	// deselect all and reselect
 	ClearSelection();
 
 	if (aItems.GetSize())
 	{
-		nID = aItems.GetSize();
+		int nItem = aItems.GetSize();
 
 		// set the first item to be focused
-		while (nID--)
-			SelectItem(aItems[nID], (nID == 0));
+		while (nItem--)
+			SelectItem(aItems[nItem], (nItem == 0), TRUE);
 	}
 
 	return TRUE;
@@ -1996,7 +2035,7 @@ int CALLBACK CKanbanListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lP
 			break;
 			
 		case IUI_CREATIONDATE:
-			nCompare = CDateHelper::Compare(pKI1->dtCreate, pKI2->dtCreate);
+			nCompare = CDateHelper::Compare(pKI1->dtCreate, pKI2->dtCreate, DHC_COMPARETIME);
 			break;
 			
 		case IUI_CREATEDBY:
@@ -2004,11 +2043,11 @@ int CALLBACK CKanbanListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lP
 			break;
 			
 		case IUI_DONEDATE:
-			nCompare = CDateHelper::Compare(pKI1->dtDone, pKI2->dtDone);
+			nCompare = CDateHelper::Compare(pKI1->dtDone, pKI2->dtDone, (DHC_COMPARETIME | DHC_NOTIMEISENDOFDAY));
 			break;
 			
 		case IUI_DUEDATE:
-			nCompare = CDateHelper::Compare(pKI1->dtDue, pKI2->dtDue);
+			nCompare = CDateHelper::Compare(pKI1->dtDue, pKI2->dtDue, (DHC_COMPARETIME | DHC_NOTIMEISENDOFDAY));
 			break;
 			
 		case IUI_EXTERNALID:
@@ -2031,7 +2070,7 @@ int CALLBACK CKanbanListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lP
 			break;
 			
 		case IUI_LASTMOD:
-			nCompare = CDateHelper::Compare(pKI1->dtLastMod, pKI2->dtLastMod);
+			nCompare = CDateHelper::Compare(pKI1->dtLastMod, pKI2->dtLastMod, DHC_COMPARETIME);
 			break;
 			
 		case IUI_PERCENT:
@@ -2043,7 +2082,7 @@ int CALLBACK CKanbanListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lP
 			break;
 			
 		case IUI_STARTDATE:
-			nCompare = CDateHelper::Compare(pKI1->dtStart, pKI2->dtStart);
+			nCompare = CDateHelper::Compare(pKI1->dtStart, pKI2->dtStart, DHC_COMPARETIME);
 			break;
 			
 		case IUI_TIMEEST:
@@ -2103,7 +2142,7 @@ void CKanbanListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CKanbanListCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	m_dwSelectingTask = 0;
+	m_dwSelectingTaskID = 0;
 
 	CListCtrl::OnLButtonUp(nFlags, point);
 }
@@ -2121,7 +2160,7 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
 {
 	m_tooltip.Pop();
 
-	m_dwSelectingTask = 0;
+	m_dwSelectingTaskID = 0;
 
 	// don't let the selection to be set to -1
 	// when clicking below the last item
@@ -2143,7 +2182,7 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
 	}
 	else
 	{
-		m_dwSelectingTask = GetItemData(nHit);
+		m_dwSelectingTaskID = GetItemData(nHit);
 
 		// Test for checkbox hit
 		CRect rCheckbox;
@@ -2154,7 +2193,7 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
 			SelectItem(nHit, FALSE);
 
 			// Post message to let mouse-click time to process
-			GetParent()->PostMessage(WM_KLCN_CHECKCHANGE, (WPARAM)GetSafeHwnd(), m_dwSelectingTask);
+			GetParent()->PostMessage(WM_KLCN_CHECKCHANGE, (WPARAM)GetSafeHwnd(), m_dwSelectingTaskID);
 		}
 	}
 	
@@ -2211,7 +2250,7 @@ void CKanbanListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		nNext = min(nNext, nLastIndex);
 		nNext = max(nNext, 0);
 
-		m_dwSelectingTask = GetItemData(nNext);
+		m_dwSelectingTaskID = GetItemData(nNext);
 	}
 
 	CListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
@@ -2219,7 +2258,7 @@ void CKanbanListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CKanbanListCtrl::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	m_dwSelectingTask = 0;
+	m_dwSelectingTaskID = 0;
 
 	CListCtrl::OnKeyUp(nChar, nRepCnt, nFlags);
 }

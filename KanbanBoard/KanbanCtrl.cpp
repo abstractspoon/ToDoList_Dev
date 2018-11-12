@@ -92,7 +92,8 @@ CKanbanCtrl::CKanbanCtrl()
 	m_nNextColor(0),
 	m_pSelectedList(NULL),
 	m_nTrackAttribute(IUI_NONE),
-	m_nSortBy(IUI_NONE)
+	m_nSortBy(IUI_NONE),
+	m_bSelectTasks(FALSE)
 {
 
 }
@@ -166,7 +167,7 @@ bool CKanbanCtrl::ProcessMessage(MSG* pMsg)
 			BOOL bHeader = FALSE;
 			CKanbanListCtrl* pList = HitTestListCtrl(ptScreen, &bHeader);
 
-			if (bHeader && pList/* && pList->GetItemCount()*/)
+			if (bHeader && pList)
 				pList->SetFocus();
 		}
 		break;
@@ -287,6 +288,8 @@ const CKanbanListCtrl* CKanbanCtrl::GetSelListCtrl() const
 
 BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 {
+	CAutoFlag af(m_bSelectTasks, TRUE);
+
 	// Check for 'no change'
 	CDWordArray aSelTaskIDs;
 	GetSelectedTaskIDs(aSelTaskIDs);
@@ -301,60 +304,18 @@ BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 		return FALSE;
 	}
 
-	// find the list containing the first item and then
-	// check that all the other items belong to the same list
-	int nItem = -1;
-	CKanbanListCtrl* pList = LocateTask(aTaskIDs[0], nItem, TRUE);
+	int nList = m_aListCtrls.Find(aTaskIDs);
 
-	if (pList && (nItem != -1))
-	{
-		if (!pList->SelectTasks(aTaskIDs))
-			pList = NULL;
-	}
+	if (nList == -1)
+		return FALSE;
+
+	// else
+	SelectListCtrl(m_aListCtrls[nList]);
+	VERIFY(m_pSelectedList->SelectTasks(aTaskIDs));
+
+	ScrollToSelectedTask();
 	
-	ClearOtherListSelections(pList);
-
-	if (pList)
-	{
-		m_pSelectedList = pList;
-		FixupFocus();
-
-		ScrollToSelectedTask();
-	}
-	
-	return (pList != NULL);
-}
-
-BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
-{
-	CDWordArray aTaskIDs;
-	aTaskIDs.Add(dwTaskID);
-
-	return SelectTasks(aTaskIDs);
-/*
-	// Check for 'no change'
-	CDWordArray aSelTaskIDs;
-	GetSelectedTaskIDs(aSelTaskIDs);
-
-	if ((aSelTaskIDs.GetSize() == 1) && (aSelTaskIDs[0] == dwTaskID))
-		return TRUE;
-	
-	int nItem = -1;
-	CKanbanListCtrl* pList = LocateTask(dwTaskID, nItem, TRUE);
-
-	if (pList && (nItem != -1))
-	{
-		m_pSelectedList = pList;
-		pList->SelectItem(nItem, TRUE);
-
-		FixupFocus();
-
-		ScrollToSelectedTask();
-		ClearOtherListSelections(pList);
-	}
-
-	return (pList != NULL);
-*/
+	return TRUE;
 }
 
 BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
@@ -453,46 +414,26 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 	switch (nUpdate)
 	{
 	case IUI_ALL:
-		{
- 			CDWordArray aSelIDs;
-			GetSelectedTaskIDs(aSelIDs);
-
- 			RebuildData(pTasks, attrib);
- 			RebuildListCtrls(TRUE);
-
-			SelectTasks(aSelIDs);
-
-			if (aSelIDs.GetSize())
- 				ScrollToSelectedTask();
-		}
+		RebuildData(pTasks, attrib);
+ 		RebuildListCtrls(TRUE, TRUE);
 		break;
 		
 	case IUI_NEW:
 	case IUI_EDIT:
 		{
-			CDWordArray aSelIDs;
-			GetSelectedTaskIDs(aSelIDs);
-			
  			// update the task(s)
 			BOOL bChange = UpdateGlobalAttributeValues(pTasks, attrib);
 			bChange |= UpdateData(pTasks, pTasks->GetFirstTask(), attrib, TRUE);
 
 			if (bChange)
-				RebuildListCtrls(TRUE);
+				RebuildListCtrls(TRUE, TRUE);
 			else
 				RedrawListCtrls(TRUE);
-			
-			SelectTasks(aSelIDs);
-			
-			if (aSelIDs.GetSize())
-				ScrollToSelectedTask();
 		}
 		break;
 		
 	case IUI_DELETE:
-		{
- 			RemoveDeletedTasks(pTasks);
-		}
+		RemoveDeletedTasks(pTasks);
 		break;
 		
 	default:
@@ -1186,7 +1127,7 @@ void CKanbanCtrl::LoadDefaultAttributeListValues(const IPreferences* pPrefs)
 	LoadDefaultAttributeListValues(pPrefs, _T("TAGS"),		_T("TagList"));
 
 	if (m_nTrackAttribute != IUI_NONE)
-		RebuildListCtrls(FALSE);
+		RebuildListCtrls(FALSE, FALSE);
 }
 
 void CKanbanCtrl::LoadDefaultAttributeListValues(const IPreferences* pPrefs, LPCTSTR szAttribID, LPCTSTR szSubKey)
@@ -1608,7 +1549,7 @@ BOOL CKanbanCtrl::CheckAddBacklogListCtrl()
 	return FALSE;
 }
 
-void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData)
+void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate)
 {
 	if (m_sTrackAttribID.IsEmpty())
 	{
@@ -1617,6 +1558,9 @@ void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData)
 	}
 
 	CHoldRedraw gr(*this, NCR_PAINT | NCR_ERASEBKGND);
+
+	CDWordArray aSelTaskIDs;
+	GetSelectedTaskIDs(aSelTaskIDs);
 	
 	CKanbanItemArrayMap mapKIArray;
 	m_data.BuildTempItemMaps(m_sTrackAttribID, mapKIArray);
@@ -1640,7 +1584,23 @@ void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData)
 	}
 
 	Resize();
-	FixupSelection();
+	
+	// We only need to restore selection if not doing a task update
+	// because the app takes care of that
+	if (!bTaskUpdate)
+	{
+		if (!SelectTasks(aSelTaskIDs))
+
+		if (!m_pSelectedList || !Misc::HasT(m_aListCtrls, m_pSelectedList))
+		{
+			// Find the first list with some items
+			m_pSelectedList = m_aListCtrls.GetFirstNonEmpty();
+
+			// No list has items?
+			if (!m_pSelectedList)
+				m_pSelectedList = m_aListCtrls[0];
+		}
+	}
 }
 
 void CKanbanCtrl::RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray)
@@ -1806,7 +1766,7 @@ BOOL CKanbanCtrl::TrackAttribute(IUI_ATTRIBUTE nAttrib, const CString& sCustomAt
 	m_pSelectedList = NULL;
 	m_aListCtrls.RemoveAll();
 
-	RebuildListCtrls(TRUE);
+	RebuildListCtrls(TRUE, TRUE);
 	Resize();
 
 	return TRUE;
@@ -2007,7 +1967,7 @@ void CKanbanCtrl::SetOption(DWORD dwOption, BOOL bSet)
 			switch (dwOption)
 			{
 			case KBCF_SHOWPARENTTASKS:
-				RebuildListCtrls(TRUE);
+				RebuildListCtrls(TRUE, FALSE);
 				break;
 
 			case KBCF_SORTSUBTASTASKSBELOWPARENTS:
@@ -2018,7 +1978,7 @@ void CKanbanCtrl::SetOption(DWORD dwOption, BOOL bSet)
 			case KBCF_SHOWEMPTYCOLUMNS:
 			case KBCF_ALWAYSSHOWBACKLOG:
 				if (m_aListCtrls.GetSize())
-					RebuildListCtrls(FALSE);
+					RebuildListCtrls(FALSE, FALSE);
 				break;
 
 			case KBCF_TASKTEXTCOLORISBKGND:
@@ -2519,7 +2479,11 @@ BOOL CKanbanCtrl::SelectListCtrl(CKanbanListCtrl* pList, BOOL bNotifyParent)
 	if (pList)
 	{
 		if (pList == m_pSelectedList)
+		{
+			// Make sure header is refreshed
+			m_pSelectedList->SetSelected(TRUE);
 			return TRUE;
+		}
 
 		CKanbanListCtrl* pPrevSelList = m_pSelectedList;
 		m_pSelectedList = pList;
@@ -2530,23 +2494,8 @@ BOOL CKanbanCtrl::SelectListCtrl(CKanbanListCtrl* pList, BOOL bNotifyParent)
 		{
 			ClearOtherListSelections(m_pSelectedList);
 
-			if (m_pSelectedList->GetSelectedCount() == 0)
-			{
-				// Select the first visible item
-				int nFirstVis = m_pSelectedList->GetTopIndex();
-				ASSERT(nFirstVis != -1);
-				
-				m_pSelectedList->SelectItem(nFirstVis, FALSE);
-				m_pSelectedList->Invalidate(TRUE);
-			}
-			else
-			{
-				// Scroll to the current selection
-				POSITION pos = m_pSelectedList->GetFirstSelectedItemPosition();
-				int nFirstSel = m_pSelectedList->GetNextSelectedItem(pos);
-			
-				m_pSelectedList->EnsureVisible(nFirstSel, FALSE);
-			}
+			if (m_pSelectedList->GetSelectedCount())
+				m_pSelectedList->ScrollToSelection();
 
 			if (bNotifyParent)
 				NotifyParentSelectionChange();
@@ -2571,9 +2520,9 @@ BOOL CKanbanCtrl::IsSelectedListCtrl(HWND hWnd) const
 void CKanbanCtrl::OnListItemChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// only interested in selection changes from the selected list 
-	// and occurring outside of a drag'n'drop, because the 'actual' 
+	// and occurring outside of a drag'n'drop or a call to 'SelectTasks', because the 'actual' 
 	// selected task IDs will not change during a drag'n'drop
-	if (!IsDragging() && IsSelectedListCtrl(pNMHDR->hwndFrom))
+	if (!m_bSelectTasks && !IsDragging() && IsSelectedListCtrl(pNMHDR->hwndFrom))
 	{
 		NMLISTVIEW* pNMLV = (NMLISTVIEW*)pNMHDR;
 		
@@ -2891,7 +2840,10 @@ LRESULT CKanbanCtrl::OnListCheckChange(WPARAM /*wp*/, LPARAM lp)
 
 LRESULT CKanbanCtrl::OnSelectTask(WPARAM /*wp*/, LPARAM lp)
 {
-	return SelectTask(lp);
+	CDWordArray aTaskIDs;
+	aTaskIDs.Add(lp);
+
+	return SelectTasks(aTaskIDs);
 }
 
 LRESULT CKanbanCtrl::OnListGetTaskIcon(WPARAM wp, LPARAM lp)

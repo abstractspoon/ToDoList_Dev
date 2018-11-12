@@ -8,6 +8,8 @@
 #include "misc.h"
 #include "graphicsmisc.h"
 
+#include "..\3rdParty\MemDC.h"
+
 /////////////////////////////////////////////////////////////////////////////////////
 
 const UINT WM_REDRAWWEEKNUMBERS = (WM_USER+1);
@@ -212,44 +214,28 @@ void CMonthCalCtrlEx::PreSubclassWindow()
 
 void CMonthCalCtrlEx::OnPaint()
 {
-	CPaintDC dc(this); // device context for painting
-
 	if (m_bWeekNumbers && IsMonthView())
 	{
-		CDC dcTemp;
+		CPaintDC dc(this); // device context for painting
+		CMemDC dcMem(&dc);
 
-		if (dcTemp.CreateCompatibleDC(&dc))
-		{
-			CBitmap bmTemp;
-			CRect rClient;
+		CRect rClient;
+		GetClientRect(rClient);
 
-			GetClientRect(rClient);
+		dcMem.FillSolidRect(rClient, GetSysColor(COLOR_WINDOW));
 
-			if (bmTemp.CreateCompatibleBitmap(&dc, rClient.right, rClient.bottom))
-			{
-				CBitmap* pOld = dcTemp.SelectObject(&bmTemp);
+		// default draw to temp dc
+		DefWindowProc(WM_PAINT, (WPARAM)(HDC)dcMem, 0);
 
-				dcTemp.FillSolidRect(rClient, GetSysColor(COLOR_WINDOW));
-
-				// default draw to temp dc
-				DefWindowProc(WM_PAINT, (WPARAM)(HDC)dcTemp, 0);
-
-				// extra draw
-				DrawWeekNumbers(&dcTemp);
-
-				// blit to screen
-				dc.BitBlt(0, 0, rClient.right, rClient.bottom, &dcTemp, 0, 0, SRCCOPY);
-
-				// cleanup
-				dcTemp.SelectObject(pOld);
-
-				return;
-			}
-		}
+		// extra draw
+		DrawWeekNumbers(&dcMem);
+		return;
 	}
-
-	// else draw to default dc
-	DefWindowProc(WM_PAINT, (WPARAM)(HDC)dc, 0);
+	else
+	{
+		// else draw to default dc
+		Default();
+	}
 }
 
 BOOL CMonthCalCtrlEx::PreTranslateMessage(MSG* pMsg)
