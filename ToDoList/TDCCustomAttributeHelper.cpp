@@ -1078,11 +1078,19 @@ BOOL CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUSTOM
 			break;
 		
 		case TDCCA_FIXEDLIST:
+			// Very special case
 			if (dwDataType == TDCCA_ICON)
-				sText = ((CTDLIconComboBox*)pCtrl)->GetSelectedImage();
-			else
-				pCtrl->GetWindowText(sText);
+			{
+				if (((CComboBox*)pCtrl)->GetCurSel() == -1)
+					return FALSE;
 
+				// else
+				data.Set(((CTDLIconComboBox*)pCtrl)->GetSelectedImage());
+				return TRUE; // can be empty
+			}
+
+			// else
+			pCtrl->GetWindowText(sText);
 			data.Set(sText);
 			break;
 		

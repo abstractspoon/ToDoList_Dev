@@ -2225,9 +2225,13 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 			TDCCADATA data;
 
 			if (m_mapCustomCtrlData.Lookup(sAttribID, data))
+			{
 				SetSelectedTaskCustomAttributeData(sAttribID, data, TRUE);
-			else
+			}
+			else if (GetSelectedCount() == 1)
+			{
 				ClearSelectedTaskCustomAttributeData(sAttribID, TRUE);
+			}
 		}
 	}
 }
