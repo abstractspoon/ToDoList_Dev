@@ -12706,6 +12706,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_PASTE:
 	case TDCA_PROJECTNAME:
 	case TDCA_UNDO:
+	case TDCA_CUSTOMATTRIBDEFS:
 		return (!bSourceControlled || m_ssc.IsTasklistCheckedOut());
 
 	case TDCA_DELETE:
