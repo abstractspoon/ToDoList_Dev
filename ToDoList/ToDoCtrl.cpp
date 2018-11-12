@@ -474,7 +474,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_CONTROL_RANGE(EN_CHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
 	ON_CONTROL_RANGE(CBN_EDITCHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
 	ON_CONTROL_RANGE(CBN_SELCHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
-	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
+	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeCancel)
 	ON_CONTROL_RANGE(BN_CLICKED, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
 END_MESSAGE_MAP()
 
@@ -2225,13 +2225,9 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 			TDCCADATA data;
 
 			if (m_mapCustomCtrlData.Lookup(sAttribID, data))
-			{
 				SetSelectedTaskCustomAttributeData(sAttribID, data, TRUE);
-			}
-			else if (GetSelectedCount() == 1)
-			{
+			else
 				ClearSelectedTaskCustomAttributeData(sAttribID, TRUE);
-			}
 		}
 	}
 }
@@ -2302,9 +2298,23 @@ void CToDoCtrl::OnCustomAttributeChange(UINT nCtrlID)
 
 	if (CTDCCustomAttributeHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
 	{
-		ASSERT(CTDCCustomAttributeHelper::IsCustomAttribute(ctrl.nAttrib));
-
 		UpdateTask(ctrl.nAttrib);
+	}
+}
+
+void CToDoCtrl::OnCustomAttributeCancel(UINT nCtrlID)
+{
+	ASSERT(CTDCCustomAttributeHelper::IsCustomEditControl(nCtrlID));
+
+	CUSTOMATTRIBCTRLITEM ctrl;
+
+	if (CTDCCustomAttributeHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
+	{
+		// Restore previous control values
+		TDCCADATA data;
+		m_mapCustomCtrlData.Lookup(ctrl.sAttribID, data);
+
+		CTDCCustomAttributeHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, data);
 	}
 }
 

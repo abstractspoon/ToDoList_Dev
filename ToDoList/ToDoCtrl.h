@@ -683,6 +683,7 @@ protected:
 	// custom data notifications
 	afx_msg void OnCustomAttributeChange(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomAttributeChange(UINT nCtrlID);
+	afx_msg void OnCustomAttributeCancel(UINT nCtrlID);
 	DECLARE_MESSAGE_MAP()
 
 	// -------------------------------------------------------------------------------
