@@ -720,6 +720,9 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 
 	CHMXDataset& ds = m_dataset[nDatasetIndex];
 
+	if (ds.GetDatasetSize() == 0)
+		return false;
+
 	// let's calc the bar size
 	double dSpacing = (double)m_rectData.Width()/(double)m_nXMax;
 	double nFirstSample, nTemp, nTemp1, nZeroLine;
@@ -846,7 +849,7 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 			CArray<gdix_PointF, gdix_PointF&> points;
 			int nPoints = GetPoints(ds, points, TRUE);
 
-			if (nPoints < 4)
+			if (nPoints > 4)
 			{
 				VERIFY(CGdiPlus::FillPolygon(graphics, brush, points.GetData(), nPoints));
 
