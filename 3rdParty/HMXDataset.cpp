@@ -118,7 +118,7 @@ bool CHMXDataset::SetSize(int nSize)
 	return true;
 }
 
-bool CHMXDataset::GetMinMax(double& nMin, double& nMax) const
+bool CHMXDataset::GetMinMax(double& nMin, double& nMax, bool bDataOnly) const
 {
 	double dMin, dMax, temp;
 
@@ -147,12 +147,12 @@ bool CHMXDataset::GetMinMax(double& nMin, double& nMax) const
 			}
 		}
 
-		if (m_bSetMinTo)
+		if (m_bSetMinTo && !bDataOnly)
 			nMin = min(dMin, m_dSetMinTo);
 		else
 			nMin = dMin;
 
-		if (m_bSetMaxTo)
+		if (m_bSetMaxTo && !bDataOnly)
 			nMax = max(dMax, m_dSetMaxTo);
 		else
 			nMax = dMax;

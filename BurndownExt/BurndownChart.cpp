@@ -167,8 +167,39 @@ void CBurndownChart::BuildBurndownGraph()
 			AddData(0, nNumNotDone);
 		}
 	}
+
+	// Set the maximum Y value to be something 'nice'
+	double dMin, dMax;
+
+	if (GetMinMax(dMin, dMax, true))
+	{
+		ASSERT(dMin == 0.0);
+
+		dMax = CalcMaxYAxisValue(dMax);
+		SetDatasetMax(0, dMax);
+	}
 	
 	CalcDatas();
+}
+
+double CBurndownChart::CalcMaxYAxisValue(double dDataMax) const
+{
+	const double INCREMENTS[] = { 1, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000 };
+	const int NUM_INC = (sizeof(INCREMENTS) / sizeof(INCREMENTS[0]));
+
+	const int nNumTicks = GetYTicks();
+
+	// Find the first tick increment that gives us a range
+	// greater than or equal to dDataMax
+	for (int nInc = 0; nInc < NUM_INC; nInc++)
+	{
+		double dMaxYAxis = (nNumTicks * INCREMENTS[nInc]);
+
+		if (dDataMax <= dMaxYAxis)
+			return dMaxYAxis;
+	}
+
+	return dDataMax;
 }
 
 void CBurndownChart::BuildSprintGraph()
@@ -214,6 +245,18 @@ void CBurndownChart::BuildSprintGraph()
 		double dSpent = m_data.CalcTimeSpentInDays(date, m_nDaysInWeek, m_dHoursInDay);
 		
 		AddData(SPRINT_SPENT, (dTotalEst - dSpent));
+	}
+	
+	// Set the maximum Y value to be something 'nice'
+	double dMin, dMax;
+
+	if (GetMinMax(dMin, dMax, true))
+	{
+		ASSERT(dMin == 0.0);
+
+		dMax = CalcMaxYAxisValue(dMax);
+		SetDatasetMax(SPRINT_EST, dMax);
+		SetDatasetMax(SPRINT_SPENT, dMax);
 	}
 	
 	CalcDatas();

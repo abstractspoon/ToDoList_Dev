@@ -130,8 +130,10 @@ public:
 	virtual bool		ClearData( int nDatasetIndex);
 	virtual void		ClearData();
 	CSize				GetDataArea() const { return m_rectData.Size(); }
+
 	virtual bool		SetDatasetMin(int nDatasetIndex, double dMin);
 	virtual bool		SetDatasetMax(int nDatasetIndex, double dMax);
+	virtual bool		GetMinMax(double& nMin, double& nMax, bool bDataOnly) const;	// get min & max
 
 	// useful global functions
 	virtual bool		CalcDatas();

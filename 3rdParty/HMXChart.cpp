@@ -966,7 +966,6 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&
 //
 bool CHMXChart::CalcDatas()
 {
-	double nTemp1, nTemp2;
 	int f=0, nTemp3;
 
 	GetClientRect(m_rectArea);
@@ -1021,26 +1020,10 @@ bool CHMXChart::CalcDatas()
 	if(m_nXMax == 0)
 		return false;
 
-	// search min & max in first non-empty dataset
-	f = 0;
-	while(!m_dataset[f].GetMinMax(m_nYMin, m_nYMax))
-		f++;
-	
-	// let's search 
-	for(; f<HMX_MAX_DATASET; f++) 
-	{
-		if(m_dataset[f].GetMinMax(nTemp1, nTemp2)) 
-		{
-			m_nYMin = min(m_nYMin ,nTemp1);
-			m_nYMax = max(m_nYMax, nTemp2);
-		}
-	}
+	// Get the min and max of all our datasets
+	GetMinMax(m_nYMin, m_nYMax, false);
 
-	// now I modify m_nYMin & m_nXMax to improve readability
-	m_nYMin -= (m_nYMax - m_nYMin)*0.0; 
-	m_nYMax += (m_nYMax - m_nYMin)*0.0; 
-
-	// whid this 'strange' function I can set m_nYmin & m_nYMax so that 
+	// with this 'strange' function I can set m_nYmin & m_nYMax so that 
 	// they are multiply of m_nRoundY
 	if(m_nRoundY > 0.0) 
 	{
@@ -1058,6 +1041,31 @@ bool CHMXChart::CalcDatas()
 
 	// prevent divide by zero
 	m_nYMax = max(m_nYMax, m_nYMin + 10);
+
+	return true;
+}
+
+bool CHMXChart::GetMinMax(double& nMin, double& nMax, bool bDataOnly) const
+{
+	// Get the min and max of all our datasets
+	int f = 0;
+
+	while((f < HMX_MAX_DATASET) && !m_dataset[f].GetMinMax(nMin, nMax, bDataOnly))
+		f++;
+
+	if (f == HMX_MAX_DATASET)
+		return false;
+
+	double nTemp1, nTemp2;
+	
+	for(; f<HMX_MAX_DATASET; f++) 
+	{
+		if (m_dataset[f].GetMinMax(nTemp1, nTemp2, bDataOnly)) 
+		{
+			nMin = min(nMin, nTemp1);
+			nMax = max(nMax, nTemp2);
+		}
+	}
 
 	return true;
 }

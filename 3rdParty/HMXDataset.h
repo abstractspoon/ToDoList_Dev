@@ -70,7 +70,7 @@ public:
 	virtual bool		GetData( int nCount, double &nSample ) const;	// get data
 	virtual int			GetDatasetSize() const;							// get dataset size (how many points in dataset?)
 
-	virtual bool		GetMinMax( double& nMin, double& nMax ) const;	// get min & max
+	virtual bool		GetMinMax( double& nMin, double& nMax, bool bDataOnly ) const;	// get min & max
 	virtual void		SetMin(double dMin);
 	virtual void		SetMax(double dMax);
 
