@@ -428,7 +428,7 @@ bool CHMXChart::DrawBaseline(CDC & dc)
 	return true;
 }
 
-int CHMXChart::CalcYScaleFontSize(CDC& /*dc*/, BOOL bTitle) const
+int CHMXChart::CalcYScaleFontSize(BOOL bTitle) const
 {
 	int nSize = (m_rectYAxis.Width() / 4);
 
@@ -446,7 +446,7 @@ int CHMXChart::CalcYScaleFontSize(CDC& /*dc*/, BOOL bTitle) const
 	return nSize;
 }
 
-int CHMXChart::CalcXScaleFontSize(CDC& /*dc*/, BOOL bTitle) const
+int CHMXChart::CalcXScaleFontSize(BOOL bTitle) const
 {
 	int nSize = (m_rectXAxis.Height() / 4);
 	
