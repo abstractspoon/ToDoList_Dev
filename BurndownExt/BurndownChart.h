@@ -41,6 +41,7 @@ protected:
 	COleDateTime GetGraphStartDate() const;
 	COleDateTime GetGraphEndDate() const;
 	int CalculateRequiredXScale() const;
+	double CalcYAxisInterval(double dDataMax) const;
 	double CalcMaxYAxisValue(double dDataMax) const;
 
 };

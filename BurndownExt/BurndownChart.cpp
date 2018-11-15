@@ -184,6 +184,11 @@ void CBurndownChart::BuildBurndownGraph()
 
 double CBurndownChart::CalcMaxYAxisValue(double dDataMax) const
 {
+	return (GetYTicks() * CalcYAxisInterval(dDataMax));
+}
+
+double CBurndownChart::CalcYAxisInterval(double dDataMax) const
+{
 	const double INCREMENTS[] = { 1, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000 };
 	const int NUM_INC = (sizeof(INCREMENTS) / sizeof(INCREMENTS[0]));
 
@@ -196,10 +201,10 @@ double CBurndownChart::CalcMaxYAxisValue(double dDataMax) const
 		double dMaxYAxis = (nNumTicks * INCREMENTS[nInc]);
 
 		if (dDataMax <= dMaxYAxis)
-			return dMaxYAxis;
+			return INCREMENTS[nInc];
 	}
 
-	return dDataMax;
+	return 10000;
 }
 
 void CBurndownChart::BuildSprintGraph()
