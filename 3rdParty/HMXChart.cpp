@@ -491,7 +491,7 @@ bool CHMXChart::DrawXScale(CDC & dc)
 	
 	if (nCount)
 	{
-		int nFontSize = CalcXScaleFontSize(dc, FALSE);
+		int nFontSize = CalcXScaleFontSize(FALSE);
 
 		CFont font;
 		font.CreateFont(nFontSize, 0, (m_nXLabelDegrees * 10), 0, FW_NORMAL,
@@ -533,7 +533,7 @@ bool CHMXChart::DrawXScale(CDC & dc)
 	{
 		if (m_fontXScale.GetSafeHandle() == NULL)
 		{
-			int nFontSize = CalcXScaleFontSize(dc, TRUE);
+			int nFontSize = CalcXScaleFontSize(TRUE);
 
 			m_fontXScale.CreateFont(nFontSize, 0, 0, 0, FW_NORMAL,
 								  FALSE, FALSE, FALSE, ANSI_CHARSET,
@@ -575,7 +575,7 @@ bool CHMXChart::DrawYScale(CDC & dc)
 	
 	if (nTicks)
 	{
-		int nFontSize = CalcYScaleFontSize(dc, FALSE);
+		int nFontSize = CalcYScaleFontSize(FALSE);
 
 		// nY is the size of a division
 		double nY = (m_nYMax - m_nYMin)/nTicks, nTemp1, nTemp2;
@@ -609,7 +609,7 @@ bool CHMXChart::DrawYScale(CDC & dc)
 
 	if (!m_strYText.IsEmpty()) 
 	{
-		int nFontSize = CalcYScaleFontSize(dc, TRUE);
+		int nFontSize = CalcYScaleFontSize(TRUE);
 
 		if (m_fontYScale.GetSafeHandle() == NULL)
 		{
