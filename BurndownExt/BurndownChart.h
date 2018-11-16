@@ -2,6 +2,8 @@
 
 #include "BurndownStruct.h"
 
+#include "..\Shared\ToolTipCtrlEx.h"
+
 #include "..\3rdParty\HMXChart.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -18,9 +20,12 @@ public:
 	BOOL SetTimeIntervals(int nDaysInWeek, double dHoursInDay);
 
 	void RebuildGraph(BOOL bUpdateExtents);
+	void FilterToolTipMessage(MSG* pMsg);
 
 protected:
 	const CStatsItemArray& m_data;
+
+	CToolTipCtrlEx m_tooltip; 
 	
 	COleDateTimeRange m_dtExtents;
 	int m_nScale;
@@ -31,6 +36,7 @@ protected:
 protected:
 	void OnSize(UINT nType, int cx, int cy);
 	void PreSubclassWindow();
+	int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 	DECLARE_MESSAGE_MAP()
 

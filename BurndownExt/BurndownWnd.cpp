@@ -240,9 +240,11 @@ bool CBurndownWnd::ProcessMessage(MSG* /*pMsg*/)
 	return false;
 }
 
-void CBurndownWnd::FilterToolTipMessage(MSG* /*pMsg*/)
+void CBurndownWnd::FilterToolTipMessage(MSG* pMsg)
 {
-	// Not yet needed
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	m_graph.FilterToolTipMessage(pMsg);
 }
 
 bool CBurndownWnd::GetLabelEditRect(LPRECT /*pEdit*/)

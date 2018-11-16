@@ -532,6 +532,8 @@ void CBurndownChart::PreSubclassWindow()
 	SetXLabelsAreTicks(true);
 	SetXLabelAngle(45);
 	SetYTicks(10);
+
+	VERIFY(m_tooltip.Create(this));
 }
 
 bool CBurndownChart::DrawHorzLine(CDC& dc)
@@ -562,4 +564,14 @@ bool CBurndownChart::DrawHorzLine(CDC& dc)
 	}
 
 	return CHMXChart::DrawHorzLine(dc);
+}
+
+void CBurndownChart::FilterToolTipMessage(MSG* pMsg)
+{
+	m_tooltip.FilterToolTipMessage(pMsg);
+}
+
+int CBurndownChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	return CHMXChart::OnToolHitTest(point, pTI);
 }
