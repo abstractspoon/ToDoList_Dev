@@ -34,6 +34,8 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	virtual bool DrawHorzLine(CDC& dc);						
+	
 protected:
 	void BuildSprintGraph();
 	void BuildBurndownGraph();
@@ -42,6 +44,7 @@ protected:
 	COleDateTime GetGraphEndDate() const;
 	int CalculateRequiredXScale() const;
 	double CalcYAxisInterval(double dDataMax) const;
+	int GetYSubTicks(double dInterval) const;
 	double CalcMaxYAxisValue(double dDataMax) const;
 
 };

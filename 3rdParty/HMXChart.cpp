@@ -1409,6 +1409,11 @@ bool CHMXChart::SetGridColor(COLORREF clr)
 	return true;
 }
 
+COLORREF CHMXChart::GetGridColor() const
+{
+	return m_clrGrid;
+}
+
 bool CHMXChart::SetDrawDatasetOverGrid(int nDatasetIndex, bool bOverGrid)
 {
 	if (nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)

@@ -38,10 +38,12 @@ const COLORREF COLOR_ORANGE		= RGB(255,  91,  21);
 const COLORREF COLOR_ORANGELINE	= GraphicsMisc::Darker(COLOR_ORANGE, 0.05, FALSE);
 const COLORREF COLOR_ORANGEFILL	= GraphicsMisc::Lighter(COLOR_ORANGE, 0.25, FALSE);
 
-const int    DEF_DAYSINWEEK = 5;
-const double DEF_HOURSINDAY = 8.0;
+const int    DEF_DAYSINWEEK			= 5;
+const double DEF_HOURSINDAY			= 8.0;
 
-const int    LINE_THICKNESS = 1;
+const int    LINE_THICKNESS			= 1;
+const double MIN_SUBINTERVAL_HEIGHT	= GraphicsMisc::ScaleByDPIFactor(10);
+
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -189,22 +191,57 @@ double CBurndownChart::CalcMaxYAxisValue(double dDataMax) const
 
 double CBurndownChart::CalcYAxisInterval(double dDataMax) const
 {
-	const double INCREMENTS[] = { 1, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000 };
-	const int NUM_INC = (sizeof(INCREMENTS) / sizeof(INCREMENTS[0]));
+	const double INTERVALS[] = { 1, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000 };
+	const int NUM_INT = (sizeof(INTERVALS) / sizeof(INTERVALS[0]));
 
-	const int nNumTicks = GetYTicks();
+	int nNumTicks = GetYTicks();
 
 	// Find the first tick increment that gives us a range
 	// greater than or equal to dDataMax
-	for (int nInc = 0; nInc < NUM_INC; nInc++)
+	for (int nInc = 0; nInc < NUM_INT; nInc++)
 	{
-		double dMaxYAxis = (nNumTicks * INCREMENTS[nInc]);
+		double dMaxYAxis = (nNumTicks * INTERVALS[nInc]);
 
 		if (dDataMax <= dMaxYAxis)
-			return INCREMENTS[nInc];
+			return INTERVALS[nInc];
 	}
 
 	return 10000;
+}
+
+int CBurndownChart::GetYSubTicks(double dInterval) const
+{
+	if (dInterval != (int)dInterval)
+	{
+		ASSERT(0);
+		return 1;
+	}
+	else if (dInterval == 1.0)
+	{
+		return 1;
+	}
+	
+	const int SUB_TICKS[] = { 2, 4, 5 };
+	const int NUM_SUBTICKS = (sizeof(SUB_TICKS) / sizeof(SUB_TICKS[0]));
+
+	int nSubTick = NUM_SUBTICKS;
+	int nNumTicks = GetYTicks();
+
+	while (nSubTick--)
+	{
+		double dSubInterval = (dInterval / SUB_TICKS[nSubTick]);
+
+		if (dSubInterval == (int)dSubInterval)
+		{
+			double dSubIntervalInPixels = (m_rectData.Height() / (nNumTicks * SUB_TICKS[nSubTick]));
+
+			if (dSubIntervalInPixels >= MIN_SUBINTERVAL_HEIGHT)
+				return SUB_TICKS[nSubTick];
+		}
+	}
+
+	// else
+	return 1;
 }
 
 void CBurndownChart::BuildSprintGraph()
@@ -495,4 +532,34 @@ void CBurndownChart::PreSubclassWindow()
 	SetXLabelsAreTicks(true);
 	SetXLabelAngle(45);
 	SetYTicks(10);
+}
+
+bool CBurndownChart::DrawHorzLine(CDC& dc)
+{
+	double dInterval = CalcYAxisInterval(m_nYMax);
+	int nNumSubTicks = GetYSubTicks(dInterval);
+
+	if (nNumSubTicks > 1)
+	{
+		CPen penSubGrid(PS_SOLID, 1, GraphicsMisc::Lighter(GetGridColor(), 0.6));
+		CPen* pPenOld = dc.SelectObject(&penSubGrid);
+
+		int nTotalTicks = (GetYTicks() * nNumSubTicks);
+		double nY = ((m_nYMax - m_nYMin)/nTotalTicks);
+	
+		for(int f=0; f<=nTotalTicks; f++) 
+		{
+			if (f % nNumSubTicks)
+			{
+				double nTemp = m_rectData.bottom - (nY*f) * m_rectData.Height()/(m_nYMax-m_nYMin);
+
+				dc.MoveTo(m_rectData.left , (int)nTemp);
+				dc.LineTo(m_rectData.right, (int)nTemp);
+			}
+		}
+
+		dc.SelectObject(pPenOld);
+	}
+
+	return CHMXChart::DrawHorzLine(dc);
 }

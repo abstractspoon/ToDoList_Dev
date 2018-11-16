@@ -104,6 +104,7 @@ public:
 	virtual COLORREF	GetBkGnd() const;
 
 	virtual bool		SetGridColor(COLORREF clr);
+	virtual COLORREF	GetGridColor() const;
 
 	// dataset functions
 	virtual bool		SetDatasetLineColor( int nDatasetIndex, COLORREF clr );
