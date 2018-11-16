@@ -15,6 +15,8 @@
 #define IDS_DISPLAY_SPRINT_YAXIS        6006
 #define IDS_DISPLAY_REMAINING           6006
 #define IDS_DISPLAY_BURNDOWN2           6007
+#define IDS_TOOLTIP_INCOMPLETE          6007
+#define IDS_TOOLTIP_REMAINING           6008
 #define IDR_TOOLBAR                     16006
 #define IDC_TB_PLACEHOLDER              16024
 #define IDD_BURNDOWN_DLG                17000

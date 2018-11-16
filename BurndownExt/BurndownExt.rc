@@ -188,6 +188,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_DISPLAY_INCOMPLETE  "Incomplete Tasks"
     IDS_DISPLAY_REMAINING   "Days Remaining"
+    IDS_TOOLTIP_INCOMPLETE  "%s\n%d Tasks"
+    IDS_TOOLTIP_REMAINING   "%s\n%d Estimated\n%d Actual"
 END
 
 #endif    // English (Australia) resources
