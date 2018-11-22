@@ -44,6 +44,13 @@ const double DEF_HOURSINDAY			= 8.0;
 const int    LINE_THICKNESS			= 1;
 const double MIN_SUBINTERVAL_HEIGHT	= GraphicsMisc::ScaleByDPIFactor(10);
 
+/////////////////////////////////////////////////////////////////////////////
+
+enum 
+{ 
+	SPRINT_EST,
+	SPRINT_SPENT
+};
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -248,12 +255,6 @@ void CBurndownChart::BuildSprintGraph()
 {
 	ClearData();
 
-	enum 
-	{ 
-		SPRINT_EST,
-		SPRINT_SPENT
-	};
-	
 	SetDatasetStyle(SPRINT_EST, HMX_DATASET_STYLE_LINE);
 	SetDatasetMarker(SPRINT_EST, HMX_DATASET_MARKER_NONE);
 	SetDatasetLineColor(SPRINT_EST,  COLOR_REDLINE);
@@ -533,7 +534,13 @@ void CBurndownChart::PreSubclassWindow()
 	SetXLabelAngle(45);
 	SetYTicks(10);
 
-	VERIFY(m_tooltip.Create(this));
+	if (m_tooltip.Create(this))
+	{
+		m_tooltip.SetDelayTime(TTDT_INITIAL, 0);
+		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
+		m_tooltip.SetDelayTime(TTDT_RESHOW, 0);
+		m_tooltip.SetMaxTipWidth(1024); // for '\n' support
+	}
 }
 
 bool CBurndownChart::DrawHorzLine(CDC& dc)
@@ -573,5 +580,55 @@ void CBurndownChart::FilterToolTipMessage(MSG* pMsg)
 
 int CBurndownChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	return CHMXChart::OnToolHitTest(point, pTI);
+	int nHit = HitTest(point);
+
+	if (nHit == -1)
+		return 0;
+
+	double dDate = (GetGraphStartDate().m_dt + nHit);
+
+	CEnString sTooltip;
+
+	switch (m_nChartType)
+	{
+	case BCT_INCOMPLETETASKS:
+		{
+			double dNumTasks;
+			VERIFY(m_dataset[0].GetData(nHit, dNumTasks));
+
+			sTooltip.Format(IDS_TOOLTIP_INCOMPLETE, CDateHelper::FormatDate(dDate), (int)dNumTasks);
+		}
+		break;
+
+	case BCT_REMAININGDAYS:
+		{
+			double dNumEst, dNumSpent;
+			VERIFY(m_dataset[SPRINT_SPENT].GetData(nHit, dNumSpent));
+			VERIFY(m_dataset[SPRINT_EST].GetData(nHit, dNumEst));
+
+			sTooltip.Format(IDS_TOOLTIP_REMAINING, CDateHelper::FormatDate(dDate), (int)dNumEst, (int)dNumSpent);
+		}
+		break;
+	}
+
+	pTI->hwnd = GetSafeHwnd();
+	pTI->uId = MAKELONG(point.x, point.y);
+	pTI->lpszText = _tcsdup(sTooltip); // MFC will free the duplicated string
+	pTI->rect = m_rectData;
+	
+	return (int)pTI->uId;
+}
+
+int CBurndownChart::HitTest(const CPoint& ptClient) const
+{
+	if (!m_rectData.Width() || !m_dtExtents.IsValid())
+		return -1;
+
+	if (!m_rectData.PtInRect(ptClient))
+		return -1;
+
+	int nNumData = m_dataset[0].GetDatasetSize();
+	int nXOffset = (ptClient.x - m_rectData.left);
+
+	return ((nXOffset * nNumData) / m_rectData.Width());
 }
