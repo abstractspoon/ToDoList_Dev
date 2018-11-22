@@ -3139,15 +3139,22 @@ BOOL CToDoCtrlData::IsTaskDone(DWORD dwTaskID) const
 BOOL CToDoCtrlData::IsTaskTimeTrackable(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
+	GET_TDI(dwTaskID, pTDI, FALSE);
 	
 	// not trackable if complete
 	if (pTDI->IsDone())
 		return FALSE;
 
 	// not trackable if a container
-	return (HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !pTDS->HasSubTasks());
+	return (HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !IsTaskParent(dwTaskID));
+}
+
+BOOL CToDoCtrlData::IsTaskParent(DWORD dwTaskID) const
+{
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDS(dwTaskID, pTDS, FALSE);
+	
+	return !pTDS->HasSubTasks();
 }
 
 BOOL CToDoCtrlData::CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDependencyID, 

@@ -12679,6 +12679,25 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_NONE:
 		return FALSE;
 
+	case TDCA_PERCENT:		
+		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
+		{
+			return FALSE;
+		}
+		else if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION))
+		{
+			if (dwTaskID)
+			{
+				if (!m_taskTree.IsTaskSelected(dwTaskID) || m_data.IsTaskParent(dwTaskID))
+					return FALSE;
+			}
+			else if (m_taskTree.SelectionHasSubtasks())
+			{
+				return FALSE;
+			}
+		}
+		// fall thru
+
 	case TDCA_ALLOCBY:		
 	case TDCA_ALLOCTO:		
 	case TDCA_ANYTEXTATTRIBUTE:		
@@ -12698,7 +12717,6 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_FLAG:			
 	case TDCA_ICON:		
 	case TDCA_METADATA:
-	case TDCA_PERCENT:		
 	case TDCA_PRIORITY:		
 	case TDCA_RECURRENCE:	
 	case TDCA_RISK:			
