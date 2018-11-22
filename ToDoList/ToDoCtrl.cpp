@@ -12667,6 +12667,14 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	return FALSE;
 }
 
+BOOL CToDoCtrl::SelectedTaskIsUnlocked(DWORD dwTaskID) const
+{
+	if (dwTaskID)
+		return (m_taskTree.IsTaskSelected(dwTaskID) && !m_data.IsTaskLocked(dwTaskID));
+
+	return m_taskTree.SelectionHasUnlocked();
+}
+
 BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const 
 { 
 	BOOL bSourceControlled = m_ssc.IsSourceControlled();
@@ -12679,8 +12687,12 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_NONE:
 		return FALSE;
 
-	case TDCA_PERCENT:		
-		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
+	case TDCA_PERCENT:
+		if (!SelectedTaskIsUnlocked(dwTaskID))
+		{
+			return FALSE;
+		}
+		else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 		{
 			return FALSE;
 		}
@@ -12696,7 +12708,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 				return FALSE;
 			}
 		}
-		// fall thru
+		return TRUE;
 
 	case TDCA_ALLOCBY:		
 	case TDCA_ALLOCTO:		
@@ -12729,10 +12741,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_TIMEEST:		
 	case TDCA_TIMESPENT:	
 	case TDCA_VERSION:		
-		if (dwTaskID)
-			return (m_taskTree.IsTaskSelected(dwTaskID) && !m_data.IsTaskLocked(dwTaskID));
-
-		return m_taskTree.SelectionHasUnlocked();
+		return SelectedTaskIsUnlocked(dwTaskID);
 
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
