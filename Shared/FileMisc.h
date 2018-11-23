@@ -135,7 +135,7 @@ class CScopedLogTime
 {
 public:
 	CScopedLogTime();	
-	CScopedLogTime(LPCTSTR szScope);	
+	CScopedLogTime(LPCTSTR szScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));	
 	~CScopedLogTime();
 
 	void LogTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));

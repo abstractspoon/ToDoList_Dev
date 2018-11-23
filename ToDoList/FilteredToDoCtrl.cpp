@@ -591,13 +591,9 @@ void CFilteredToDoCtrl::ClearFilter()
 
 void CFilteredToDoCtrl::ToggleFilter()
 {
-	//////////////////////////////////////////////////////////////////////
-	// PERMANENT LOGGING
-	CString sScope;
-	sScope.Format(_T("CFilteredToDoCtrl::ToggleFilter(%s)"), (m_filter.HasAnyFilter() ? _T("off") : _T("on")));
-
-	CScopedLogTime log(sScope);
-	//////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTime log(_T("CFilteredToDoCtrl::ToggleFilter(%s)"), (m_filter.HasAnyFilter() ? _T("off") : _T("on")));
+	///////////////////////////////////////////////////////////////////
 
 	if (m_filter.ToggleFilter())
 		RefreshFilter();

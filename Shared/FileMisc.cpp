@@ -193,10 +193,11 @@ CScopedLogTime::CScopedLogTime()
 	m_dwTickStart = m_dwIntermediateStart = ::GetTickCount();
 }
 
-CScopedLogTime::CScopedLogTime(LPCTSTR szScope) : m_sScope(szScope)
+CScopedLogTime::CScopedLogTime(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3)
 {
-	ASSERT(!m_sScope.IsEmpty());
+	ASSERT(!Misc::IsEmpty(szScope));
 
+	m_sScope.Format(szScope, szArg1, szArg2, szArg3);
 	m_dwTickStart = m_dwIntermediateStart = ::GetTickCount();
 }
 
@@ -204,6 +205,7 @@ CScopedLogTime::~CScopedLogTime()
 {
 	if (FileMisc::IsLoggingEnabled() && !m_sScope.IsEmpty())
 	{
+		// This updates m_dwStart but we don't care
 		FileMisc::LogTimeElapsed(m_dwTickStart, m_sScope);
 	}
 }

@@ -6392,10 +6392,8 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 	
 	SetReadonly(CDriveInfo::IsReadonlyPath(sFilePath) > 0);
 
-	///////////////////////////////////////////////////////////////////
-	CString sScope;
-	sScope.Format(_T("CToDoCtrl::Load(%s)"), sFilePath);
-	CScopedLogTime log(sScope);
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTime log(_T("CToDoCtrl::Load(%s)"), sFilePath);
 	///////////////////////////////////////////////////////////////////
 	
 	if (tasks.Load(sFilePath))
