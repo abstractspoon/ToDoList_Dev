@@ -188,16 +188,33 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-CScopedLogTime::CScopedLogTime(LPCTSTR szScope) 
-	: 
-	m_sScope(szScope), 
-	m_dwTickStart(GetTickCount())
+CScopedLogTime::CScopedLogTime()
 {
+	m_dwTickStart = m_dwIntermediateStart = ::GetTickCount();
+}
+
+CScopedLogTime::CScopedLogTime(LPCTSTR szScope) : m_sScope(szScope)
+{
+	ASSERT(!m_sScope.IsEmpty());
+
+	m_dwTickStart = m_dwIntermediateStart = ::GetTickCount();
 }
 
 CScopedLogTime::~CScopedLogTime()
 {
-	FileMisc::LogTimeElapsed(m_dwTickStart, m_sScope);
+	if (FileMisc::IsLoggingEnabled() && !m_sScope.IsEmpty())
+	{
+		FileMisc::LogTimeElapsed(m_dwTickStart, m_sScope);
+	}
+}
+
+void CScopedLogTime::LogTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3)
+{
+	if (FileMisc::IsLoggingEnabled() && !Misc::IsEmpty(szSubScope))
+	{
+		// This updates m_dwIntermediateStart
+		FileMisc::LogTimeElapsed(m_dwIntermediateStart, szSubScope, szArg1, szArg2, szArg3);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

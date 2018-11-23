@@ -59,6 +59,8 @@ BOOL CStatusBarProgress::BeginProgress(HWND hwndStatusBar, const CString& sPromp
 	if (m_pThread && m_pThread->CreateThread())
 	{
 		pSB->SetPaneText(m_nSBPane, sPrompt);
+
+		m_pThread->SetThreadPriority(THREAD_PRIORITY_LOWEST);
 		m_pThread->Play(100);
 
 		return TRUE;

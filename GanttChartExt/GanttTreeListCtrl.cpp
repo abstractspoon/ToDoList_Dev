@@ -3206,6 +3206,8 @@ void CGanttTreeListCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, con
 		else
 			rItem.DeflateRect(LV_COLPADDING, 2, LV_COLPADDING, 0);
 
+		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, gi, nColID));
+
 		// text color and alignment
 		BOOL bLighter = FALSE; 
 		UINT nFlags = (DT_LEFT | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_tree));
@@ -3252,7 +3254,6 @@ void CGanttTreeListCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, con
 
 		COLORREF crText = GetTreeTextColor(gi, bSelected, bLighter);
 		COLORREF crOldColor = pDC->SetTextColor(crText);
-		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, gi, nColID));
 		
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->DrawText(sItem, rItem, nFlags);

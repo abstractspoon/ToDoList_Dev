@@ -44,7 +44,7 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CPreferencesUIPage)
 	DDX_Check(pDX, IDC_SHOWCOMMENTSALWAYS, m_bShowCommentsAlways);
 	DDX_Check(pDX, IDC_AUTOREPOSCTRLS, m_bAutoReposCtrls);
-	DDX_Check(pDX, IDC_SHAREDCOMMENTSHEIGHT, m_bSharedCommentsHeight);
+	DDX_Check(pDX, IDC_SHAREDCOMMENTSHEIGHT, m_bShareCommentsSize);
 	DDX_Check(pDX, IDC_AUTOHIDETABBAR, m_bAutoHideTabbar);
 	DDX_Check(pDX, IDC_STACKTABBARITEMS, m_bStackTabbarItems);
 	DDX_Check(pDX, IDC_FOCUSTREEONENTER, m_bFocusTreeOnEnter);
@@ -136,7 +136,7 @@ void CPreferencesUIPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 	m_bShowCommentsAlways = pPrefs->GetProfileInt(szKey, _T("ShowCommentsAlways"), FALSE);
 	m_bAutoReposCtrls = pPrefs->GetProfileInt(szKey, _T("AutoReposCtrls"), TRUE);
 	m_bSpecifyToolbarImage = pPrefs->GetProfileInt(szKey, _T("SpecifyToolbarImage"), FALSE);
-	m_bSharedCommentsHeight = pPrefs->GetProfileInt(szKey, _T("SharedCommentsHeight"), TRUE);
+	m_bShareCommentsSize = pPrefs->GetProfileInt(szKey, _T("SharedCommentsHeight"), TRUE);
 	m_bAutoHideTabbar = pPrefs->GetProfileInt(szKey, _T("AutoHideTabbar"), TRUE);
 	m_bStackTabbarItems = pPrefs->GetProfileInt(szKey, _T("StackTabbarItems"), FALSE);
 	m_bFocusTreeOnEnter = pPrefs->GetProfileInt(szKey, _T("FocusTreeOnEnter"), FALSE);
@@ -190,7 +190,7 @@ void CPreferencesUIPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) co
 	pPrefs->WriteProfileInt(szKey, _T("ShowCommentsAlways"), m_bShowCommentsAlways);
 	pPrefs->WriteProfileInt(szKey, _T("AutoReposCtrls"), m_bAutoReposCtrls);
 	pPrefs->WriteProfileInt(szKey, _T("SpecifyToolbarImage"), m_bSpecifyToolbarImage);
-	pPrefs->WriteProfileInt(szKey, _T("SharedCommentsHeight"), m_bSharedCommentsHeight);
+	pPrefs->WriteProfileInt(szKey, _T("SharedCommentsHeight"), m_bShareCommentsSize);
 	pPrefs->WriteProfileInt(szKey, _T("AutoHideTabbar"), m_bAutoHideTabbar);
 	pPrefs->WriteProfileInt(szKey, _T("StackTabbarItems"), m_bStackTabbarItems);
 	pPrefs->WriteProfileInt(szKey, _T("FocusTreeOnEnter"), m_bFocusTreeOnEnter);

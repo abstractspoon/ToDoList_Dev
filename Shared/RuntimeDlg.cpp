@@ -240,9 +240,8 @@ BOOL CRuntimeDlg::Create(LPCTSTR szCaption, DWORD dwStyle, DWORD dwExStyle, cons
 		if (pParentWnd && (dwStyle & WS_CHILD) && !(dwExStyle & WS_EX_NOPARENTNOTIFY))
 			pParentWnd->SendMessage(WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, nID), (LPARAM)GetSafeHwnd());
 
-		// restore position for popup dialogs
-		if (GetStyle() & WS_POPUP)
-			SetInitialPos(rect, dwStyle);
+		// restore position
+		SetInitialPos(rect, dwStyle);
 		
 		// set window text
 		SetWindowText(szCaption);
@@ -265,7 +264,7 @@ BOOL CRuntimeDlg::Create(LPCTSTR szCaption, DWORD dwStyle, DWORD dwExStyle, cons
 void CRuntimeDlg::SetInitialPos(LPCRECT pRect, DWORD dwStyle)
 {
 	// size to fit?
-	if (!pRect || rectAuto.EqualRect(pRect))
+	if ((dwStyle & WS_POPUP) && (!pRect || rectAuto.EqualRect(pRect)))
 	{
 		if (!m_sSettingsKey.IsEmpty())
 		{
@@ -299,12 +298,10 @@ void CRuntimeDlg::SetInitialPos(LPCRECT pRect, DWORD dwStyle)
 				CenterWindow();
 		}
 	}
-	else
+	else if (pRect && !rectAuto.EqualRect(pRect))
 	{
 		MoveWindow(pRect);
 	}
-
-	// 
 }
 
 void CRuntimeDlg::SaveCurrentPos()

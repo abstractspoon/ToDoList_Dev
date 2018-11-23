@@ -207,7 +207,7 @@ public:
 	BOOL GetShowSortMenuAsColumns() const { return m_pageUI.GetShowSortMenuAsColumns(); }
 	BOOL GetShowCommentsAlways() const { return m_pageUI.GetShowCommentsAlways(); }
 	BOOL GetAutoReposCtrls() const { return m_pageUI.GetAutoReposCtrls(); }
-	BOOL GetSharedCommentsHeight() const { return m_pageUI.GetSharedCommentsHeight(); }
+	BOOL GetShareCommentsSize() const { return m_pageUI.GetShareCommentsSize(); }
 	BOOL GetAutoHideTabbar() const { return m_pageUI.GetAutoHideTabbar(); }
 	BOOL SetAutoHideTabbar(BOOL bAutoHide);
 	BOOL GetStackTabbarItems() const { return m_pageUI.GetStackTabbarItems(); }

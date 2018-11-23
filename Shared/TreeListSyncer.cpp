@@ -1475,8 +1475,6 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			case LVN_ITEMCHANGED:
 				if (!m_bResyncing)
 				{
-					CAutoFlag af(m_bResyncing, TRUE);
-					
 					NMLISTVIEW* pNMLV = (NMLISTVIEW*)pNMHDR;
 					
 					// only interested in selection changes
@@ -1488,6 +1486,8 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 						if (nNewSelState != nOldSelState)
 						{
 							// temporarily turn off resyncing to prevent re-entrancy
+							CAutoFlag af(m_bResyncing, TRUE);
+
 							if (HasFlag(TLSF_SYNCSELECTION))
 							{
 								// copy the selected/focused state to the other list/tree

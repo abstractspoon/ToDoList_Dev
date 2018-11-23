@@ -147,7 +147,8 @@ protected:
 	BOOL m_bInNewTask;
 	BOOL m_bSaving;
 	BOOL m_bInTimer;
-	BOOL m_bClosing, m_bEndingSession;
+	BOOL m_bClosing;
+	BOOL m_bEndingSession;
 	BOOL m_bFindShowing;
 	BOOL m_bQueryOpenAllow;
 	BOOL m_bPasswordPrompting;
@@ -159,6 +160,7 @@ protected:
 	BOOL m_bSettingAttribDefs;
 	BOOL m_bPromptLanguageChangeRestartOnActivate;
 	BOOL m_bAllowForcedCheckOut;
+	BOOL m_bIgnoreNextResize;
 	
 	// Generated message map functions
 	//{{AFX_MSG(CToDoListWnd)

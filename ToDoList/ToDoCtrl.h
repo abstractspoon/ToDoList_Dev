@@ -130,6 +130,8 @@ public:
 	CString GetFriendlyProjectName(int nUntitledIndex = -1) const;
 	void SetFilePath(const CString& sPath);
 	CString GetStylesheetPath() const;
+	int GetCommentsSize() const { return m_nCommentsSize; }
+	void SetCommentsSize(int nSize);
 
 	const CTDCCustomAttribDefinitionArray& GetCustomAttributeDefs() const { return m_aCustomAttribDefs; }
 	int GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttrib) const;
@@ -558,8 +560,6 @@ protected:
 	BOOL m_bDelayLoaded;
 	BOOL m_bDeletingTasks;
 	BOOL m_bFindReplacing;
-
-	static int s_nCommentsSize; // TDCS_SHAREDCOMMENTSHEIGHT
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -55,7 +55,7 @@ public:
 	BOOL GetShowSortMenuAsColumns() const { return GetShowEditMenuAsColumns(); }
 	BOOL GetShowCommentsAlways() const { return m_bShowCommentsAlways; }
 	BOOL GetAutoReposCtrls() const { return m_bAutoReposCtrls; }
-	BOOL GetSharedCommentsHeight() const { return m_bSharedCommentsHeight; }
+	BOOL GetShareCommentsSize() const { return m_bShareCommentsSize; }
 	BOOL GetAutoHideTabbar() const { return m_bAutoHideTabbar; }
 	BOOL SetAutoHideTabbar(BOOL bAutoHide);
 	BOOL GetStackTabbarItems() const { return m_bStackTabbarItems; }
@@ -92,7 +92,7 @@ protected:
 	BOOL	m_bShowCommentsAlways;
 	BOOL	m_bAutoReposCtrls;
 	BOOL	m_bSpecifyToolbarImage;
-	BOOL	m_bSharedCommentsHeight;
+	BOOL	m_bShareCommentsSize;
 	BOOL	m_bAutoHideTabbar;
 	BOOL	m_bStackTabbarItems;
 	BOOL	m_bFocusTreeOnEnter;

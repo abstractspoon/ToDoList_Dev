@@ -5634,9 +5634,15 @@ void CTabbedToDoCtrl::SyncExtensionSelectionToTree(FTC_VIEW nView)
 		pVData->bHasSelectedTask = pExt->SelectTask(cache.dwFocusedTaskID);
 
 		if (pVData->bHasSelectedTask)
-			VERIFY(CToDoCtrl::SelectTask(cache.dwFocusedTaskID, FALSE));
+		{
+			bUpdateCtrls = HasSingleSelectionChanged(cache.dwFocusedTaskID);
 
-		bUpdateCtrls = TRUE;
+			VERIFY(CToDoCtrl::SelectTask(cache.dwFocusedTaskID, FALSE));
+		}
+		else
+		{
+			bUpdateCtrls = TRUE;
+		}
 	}
 
 	if (bUpdateCtrls)

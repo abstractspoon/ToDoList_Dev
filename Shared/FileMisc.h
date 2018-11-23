@@ -134,11 +134,14 @@ public:
 class CScopedLogTime
 {
 public:
+	CScopedLogTime();	
 	CScopedLogTime(LPCTSTR szScope);	
 	~CScopedLogTime();
 
+	void LogTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));
+
 protected:
-	DWORD m_dwTickStart;
+	DWORD m_dwTickStart, m_dwIntermediateStart;
 	CString m_sScope;
 };
 

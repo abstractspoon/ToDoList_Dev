@@ -104,7 +104,6 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	styles[TDCS_RESTOREFILTERS] = prefs.GetRestoreTasklistFilters();
 	styles[TDCS_RIGHTSIDECOLUMNS] = prefs.GetShowColumnsOnRight();
 	styles[TDCS_ROUNDTIMEFRACTIONS] = prefs.GetRoundTimeFractions();
-	styles[TDCS_SHAREDCOMMENTSHEIGHT] = prefs.GetSharedCommentsHeight();
 	styles[TDCS_SHOWCOMMENTSALWAYS] = prefs.GetShowCommentsAlways();
 	styles[TDCS_SHOWCOMMENTSINLIST] = prefs.GetShowComments();
 	styles[TDCS_SHOWDATESINISO] = prefs.GetDisplayDatesInISO();

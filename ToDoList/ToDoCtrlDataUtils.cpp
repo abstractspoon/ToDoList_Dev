@@ -933,7 +933,7 @@ BOOL CTDCTaskMatcher::ValueMatches(const TDCCADATA& data, DWORD dwAttribType, co
 			break;
 			
 		case TDCCA_DATE:	
-			bMatch = ValueMatches(data.AsDate(), rule, result, FALSE, TDCD_CUSTOM);
+			bMatch = ValueMatches(data.AsDate(), rule, result, rule.IsNowRelativeDate(), TDCD_CUSTOM);
 			break;
 			
 		case TDCCA_BOOL:	

@@ -193,6 +193,7 @@ CToDoListWnd::CToDoListWnd()
 	m_bSettingAttribDefs(FALSE),
 	m_bReshowTimeTrackerOnEnable(FALSE),
 	m_bPromptLanguageChangeRestartOnActivate(FALSE),
+	m_bIgnoreNextResize(FALSE),
 	m_bAllowForcedCheckOut(FALSE)
 {
 	// must do this before initializing any controls
@@ -2745,12 +2746,13 @@ void CToDoListWnd::RestoreVisibility()
 	
 	if (m_bVisible)
 	{
-		RestorePosition();
-
-		int nShowCmd = (bMaximized ? SW_SHOWMAXIMIZED : 
-						(bMinimized ? SW_SHOWMINIMIZED : SW_SHOW));
+		{
+			CAutoFlag af(m_bIgnoreNextResize, bMaximized);
+			RestorePosition();
+		}
 		
- 		ShowWindow(nShowCmd);
+		int nCmdShow = (bMaximized ? SW_SHOWMAXIMIZED : (bMinimized ? SW_SHOWMINIMIZED : SW_SHOW));
+ 		ShowWindow(nCmdShow);
 
 		if (!bMinimized)
 		{
@@ -6060,6 +6062,14 @@ void CToDoListWnd::OnUpdateReload(CCmdUI* pCmdUI)
 void CToDoListWnd::OnSize(UINT nType, int cx, int cy) 
 {
 	CFrameWnd::OnSize(nType, cx, cy);
+
+	if (m_bIgnoreNextResize)
+	{
+		ASSERT(nType == SIZE_RESTORED);
+		TRACE(_T("CToDoListWnd::OnSize(Ignoring Resize)\n"));
+
+		return;
+	}
 	
 	// ensure m_cbQuickFind is positioned correctly
 	BOOL bVisible = ((m_bVisible > 0) && (nType != SIZE_MINIMIZED) && !m_bStartHidden);
@@ -6088,14 +6098,12 @@ void CToDoListWnd::OnSize(UINT nType, int cx, int cy)
 			m_cbQuickFind.MoveWindow(rNewPos);
 		}
 
-		// topmost?
-		BOOL bMaximized = (nType == SIZE_MAXIMIZED);
-		Resize(cx, cy, bMaximized);
+		Resize(cx, cy, (nType == SIZE_MAXIMIZED));
 		
 		// if not maximized then set topmost if that's the preference
 		// do nothing if no change
 #ifndef _DEBUG
-		BOOL bTopMost = (Prefs().GetAlwaysOnTop() && !bMaximized) ? 1 : 0;
+		BOOL bTopMost = (Prefs().GetAlwaysOnTop() && (nType != SIZE_MAXIMIZED)) ? 1 : 0;
 		BOOL bIsTopMost = (GetExStyle() & WS_EX_TOPMOST) ? 1 : 0;
 		
 		if (bTopMost != bIsTopMost)
@@ -7841,7 +7849,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	int nCurSel = GetSelToDoCtrl();
 
 	// check password if necessary
-	if (m_nLastSelItem != -1 && !VerifyToDoCtrlPassword())
+	if ((m_nLastSelItem != -1) && !VerifyToDoCtrlPassword())
 	{
 		m_tabCtrl.SetCurSel(m_nLastSelItem);
 		return;
@@ -7870,6 +7878,12 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		// update status bar
 		UpdateStatusbar();
 		UpdateCaption();
+
+		if (Prefs().GetShareCommentsSize() && (m_nLastSelItem != -1))
+		{
+			int nCommentsSize = GetToDoCtrl(m_nLastSelItem).GetCommentsSize();
+			tdcShow.SetCommentsSize(nCommentsSize);
+		}
 
 		// make sure size is right
 		CRect rTDC;
@@ -8467,16 +8481,11 @@ void CToDoListWnd::OnEndSession(BOOL bEnding)
 	{
 		///////////////////////////////////////////////////////////////////////
 		// PERMANENT LOGGING
-		DWORD dwTick = GetTickCount();
+		CScopedLogTime log(_T("CToDoListWnd::OnEndSession()"));
 		///////////////////////////////////////////////////////////////////////
 		
 		m_bEndingSession = TRUE;
 		DoExit(FALSE, TRUE);
-
-		///////////////////////////////////////////////////////////////////
-		// PERMANENT LOGGING
-		FileMisc::LogTimeElapsed(dwTick, _T("CToDoListWnd::OnEndSession()"));
-		///////////////////////////////////////////////////////////////////
 	}
 }
 
@@ -10769,16 +10778,17 @@ void CToDoListWnd::OnUpdateSpellcheckTasklist(CCmdUI* pCmdUI)
 TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 {
 	TDC_FILE nSaveAll = TDCF_SUCCESS;
-	int nCtrl = GetTDCCount();
-
-	BOOL bIncUnsaved = Misc::HasFlag(dwFlags, TDLS_INCLUDEUNSAVED);
 	BOOL bClosingWindows = Misc::HasFlag(dwFlags, TDLS_CLOSINGWINDOWS);
-	BOOL bClosingTasklists = Misc::HasFlag(dwFlags, TDLS_CLOSINGTASKLISTS);
 
-	// scoped to end status bar progress
-	// before calling UpdateStatusbar
+	// scoped to end status bar progress before calling UpdateStatusbar
+	if (m_mgrToDoCtrls.AnyIsModified())
 	{
 		DOPROGRESS(IDS_SAVINGPROGRESS);
+
+		BOOL bIncUnsaved = Misc::HasFlag(dwFlags, TDLS_INCLUDEUNSAVED);
+		BOOL bClosingTasklists = Misc::HasFlag(dwFlags, TDLS_CLOSINGTASKLISTS);
+
+		int nCtrl = GetTDCCount();
 
 		while (nCtrl--)
 		{
@@ -10807,7 +10817,7 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 				m_mgrToDoCtrls.UpdateTabItemText(nCtrl);
 		}
 	}
-	
+
 	if (!bClosingWindows)
 	{
 		UpdateCaption();
