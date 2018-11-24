@@ -51,7 +51,7 @@ public:
 	CToDoCtrlData(const CWordArray& aStyles, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs);
 	virtual ~CToDoCtrlData();
 
-	int BuildDataModel(const CTaskFile& tasks, const CTDCSourceControl& ssc);
+	int BuildDataModel(const CTaskFile& tasks);
 	
 	inline int GetTaskCount() const { return m_items.GetCount(); }
 	
@@ -244,7 +244,7 @@ protected:
 
 protected:
 	BOOL DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos);
-	BOOL AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, TODOSTRUCTURE* pTDSParent, BOOL bSourceControlled);
+	BOOL AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, TODOSTRUCTURE* pTDSParent);
 	BOOL RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD dwTaskID);
 	int GetReferencesToTask(DWORD dwTaskID, const TODOSTRUCTURE* pTDS, CDWordArray& aRefIDs) const;
 	BOOL IsTaskReferenced(DWORD dwTaskID, const TODOSTRUCTURE* pTDS) const;

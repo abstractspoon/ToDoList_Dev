@@ -365,7 +365,7 @@ BOOL CToDoCtrlMgr::RefreshFileLastModified(int nIndex)
 
 	// if the tasklist is checked out then always return FALSE because
 	// noone else should be able to modify it (by any means).
-	if (tdci.pTDC->IsTasklistCheckedOut())
+	if (tdci.pTDC->IsCheckedOut())
 		return FALSE;
 
 	// else
@@ -514,7 +514,7 @@ TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex, CString& sCheckedOutTo, BOOL bForce)
 	
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 	
-	TDC_FILE nCheckout = tdc.CheckOutTasklist(sCheckedOutTo, bForce);
+	TDC_FILE nCheckout = tdc.CheckOut(sCheckedOutTo, bForce);
 	
 	if (nCheckout == TDCF_SUCCESS)
 	{
@@ -540,7 +540,7 @@ TDC_FILE CToDoCtrlMgr::CheckIn(int nIndex)
 	
 	TDC_FILE nCheckin = TDCF_SUCCESS;
 	
-	if (tdc.IsTasklistCheckedOut())
+	if (tdc.IsCheckedOut())
 		nCheckin = tdc.CheckIn();
 	
 	if (nCheckin == TDCF_SUCCESS)
@@ -600,7 +600,7 @@ void CToDoCtrlMgr::UpdateToDoCtrlReadOnlyUIState(CFilteredToDoCtrl& tdc)
         bReadOnly = (tdc.CompareFileFormat() == TDCFF_NEWER);
 	
 	if (!bReadOnly)
-		bReadOnly = (tdc.IsSourceControlled() && !tdc.IsTasklistCheckedOut());
+		bReadOnly = (tdc.IsSourceControlled() && !tdc.IsCheckedOut());
 	
 	tdc.SetReadonly(bReadOnly);
 }
@@ -645,7 +645,7 @@ int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 	if (bDelete)
 	{
 		// checkin as our final task
-		if (tdci.bLoaded && tdc.IsTasklistCheckedOut() && Prefs().GetCheckinOnClose())
+		if (tdci.bLoaded && tdc.IsCheckedOut() && Prefs().GetCheckinOnClose())
 			tdc.CheckIn();
 
 		// Save tasklist tab colour if any
@@ -1024,7 +1024,7 @@ int CToDoCtrlMgr::UpdateTabItemImage(int nIndex) const
 	}
 	else if ((tci.bLastStatusReadOnly == 0) && IsSourceControlled(nIndex))
 	{
-		nImage = (tci.pTDC->IsTasklistCheckedOut() ? IM_CHECKEDOUT : IM_CHECKEDIN);	
+		nImage = (tci.pTDC->IsCheckedOut() ? IM_CHECKEDOUT : IM_CHECKEDIN);	
 	}
 
 	// update tab array
@@ -1095,7 +1095,7 @@ BOOL CToDoCtrlMgr::IsCheckedOut(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 	
-	return GetToDoCtrl(nIndex).IsTasklistCheckedOut();
+	return GetToDoCtrl(nIndex).IsCheckedOut();
 }
 
 BOOL CToDoCtrlMgr::IsSourceControlled(int nIndex) const

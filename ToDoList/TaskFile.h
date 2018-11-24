@@ -53,7 +53,8 @@ enum
 	TDL_FILEFORMAT_LOCKING,
 	// insert here when format changes
 
-	TDL_FILEFORMAT_CURRENT
+	TDL_FILEFORMAT_NEXT,
+	TDL_FILEFORMAT_CURRENT = (TDL_FILEFORMAT_NEXT - 1) // ALWAYS LAST
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////

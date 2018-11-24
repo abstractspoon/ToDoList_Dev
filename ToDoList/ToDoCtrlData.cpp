@@ -124,35 +124,18 @@ BOOL CToDoCtrlData::WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib) const
 	return FALSE;
 }
 
-int CToDoCtrlData::BuildDataModel(const CTaskFile& tasks, const CTDCSourceControl& ssc)
+int CToDoCtrlData::BuildDataModel(const CTaskFile& tasks)
 {
 	m_undo.ResetAll();
 	DeleteAllTasks();
 
 	// add top-level items
-	VERIFY(AddTaskToDataModel(tasks, NULL, &m_struct, ssc.IsSourceControlled()));
-/*
-	// Restore checked out tasks
-	CToDoCtrlDataItems tdItems;
+	VERIFY(AddTaskToDataModel(tasks, NULL, &m_struct));
 
-	if (ssc.IsSourceControlled() && ssc.RestoreCheckedOutTasks(tdItems))
-	{
-		DWORD dwTaskID = 0;
-		TODOITEM* pTDI = NULL;
-		POSITION pos = tdItems.GetStartPosition();
-
-		while (pos)
-		{
-			tdItems.GetNextAssoc(pos, dwTaskID, pTDI);
-			m_items.SetTask(dwTaskID, pTDI);
-		}
-	}
-*/
 	return GetTaskCount();
 }
 
-BOOL CToDoCtrlData::AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, 
-										TODOSTRUCTURE* pTDSParent, BOOL bSourceControlled)
+BOOL CToDoCtrlData::AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, TODOSTRUCTURE* pTDSParent)
 {
 	ASSERT(pTDSParent);
 
@@ -183,9 +166,6 @@ BOOL CToDoCtrlData::AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask,
 			TODOITEM* pTDI = NewTask(tasks, hTask);
 			ASSERT(pTDI);
 
-			if (bSourceControlled)
-				pTDI->bLocked = TRUE;
-			
 			m_items.AddTask(dwTaskID, pTDI);
 			
 			// New task becomes the parent
@@ -200,7 +180,7 @@ BOOL CToDoCtrlData::AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask,
 
 	while (hSubtask)
 	{
-		VERIFY(AddTaskToDataModel(tasks, hSubtask, pTDSParent, bSourceControlled));
+		VERIFY(AddTaskToDataModel(tasks, hSubtask, pTDSParent));
 
 		// next task
 		hSubtask = tasks.GetNextTask(hSubtask);

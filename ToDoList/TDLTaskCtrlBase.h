@@ -63,7 +63,6 @@ public:
 	BOOL Create(CWnd* pParentWnd, const CRect& rect, UINT nID, BOOL bVisible = TRUE);
 	void Show(BOOL bShow = TRUE) { CTreeListSyncer::Show(bShow); }
 
-	void SetSourceControlled(BOOL bEnable = TRUE) { m_bSourceControlled = bEnable; }
 	void SetTasklistFolder(LPCTSTR szFolder) { m_sTasklistFolder = szFolder; }
 	CString GetTasklistFolder() const { return m_sTasklistFolder; }
 
@@ -263,7 +262,6 @@ protected:
 
 	BOOL m_bReadOnly;
 	BOOL m_bSortingColumns;
-	BOOL m_bSourceControlled;
 
 	CString m_sCompletionStatus;
 	CString m_sTasksWndPrompt;

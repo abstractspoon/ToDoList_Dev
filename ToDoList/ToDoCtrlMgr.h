@@ -186,7 +186,7 @@ protected:
 					tLastMod = FileMisc::GetFileLastModified(sFilePath);
 				}
 
-				if (pCtrl->IsTasklistCheckedOut())
+				if (pCtrl->IsCheckedOut())
 					bLastCheckoutSuccess = TRUE;
 			}
 			

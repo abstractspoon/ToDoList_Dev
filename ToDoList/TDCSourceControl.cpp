@@ -29,6 +29,7 @@ CTDCSourceControl::~CTDCSourceControl()
 {
 }
 
+/*
 BOOL CTDCSourceControl::Initialise(const CTaskFile& tasks, BOOL bWantCheckout)
 {
 	m_bTasklistSourceControlled = (bWantCheckout || tasks.IsSourceControlled());
@@ -865,3 +866,4 @@ BOOL CTDCSourceControl::AddTasklistToSourceControl(BOOL bAdd)
 
 	return TRUE;
 }
+*/

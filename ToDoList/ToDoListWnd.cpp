@@ -7964,7 +7964,7 @@ void CToDoListWnd::UpdateMenuIconMgrSourceControlStatus()
 		if (tdc.IsSourceControlled())
 		{
 			bNewDisabled = FALSE;
-			bNewCheckedOut = tdc.IsTasklistCheckedOut();
+			bNewCheckedOut = tdc.IsCheckedOut();
 		}
 	}
 
@@ -9677,7 +9677,7 @@ void CToDoListWnd::OnUpdateToolsCheckout(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnToolsToggleCheckin() 
 {
-	if (GetToDoCtrl().IsTasklistCheckedOut())
+	if (GetToDoCtrl().IsCheckedOut())
 		OnToolsCheckin();
 	else
 		OnToolsCheckout();
@@ -9688,7 +9688,7 @@ void CToDoListWnd::OnUpdateToolsToggleCheckin(CCmdUI* pCmdUI)
 	BOOL bEnable = m_mgrToDoCtrls.CanCheckInOut(GetSelToDoCtrl());
 	
 	pCmdUI->Enable(bEnable);
-	pCmdUI->SetCheck((bEnable && GetToDoCtrl().IsTasklistCheckedOut()) ? 1 : 0);
+	pCmdUI->SetCheck((bEnable && GetToDoCtrl().IsCheckedOut()) ? 1 : 0);
 }
 
 void CToDoListWnd::OnToolsCheckin() 

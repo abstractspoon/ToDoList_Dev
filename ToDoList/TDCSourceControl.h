@@ -28,6 +28,7 @@ public:
 	CTDCSourceControl(const CToDoCtrl& tdc);
 	virtual ~CTDCSourceControl();
 
+/*
 	BOOL Initialise(const CTaskFile& tasks, BOOL bWantCheckout = FALSE);
 	void PrepareTasksForSave(CTaskFile& tasks) const;
 
@@ -60,16 +61,16 @@ public:
 	BOOL GetTasklistSourceControlPath(CString& sTasklistSSCPath) const;
 	BOOL GetSourceControlFolder(CString& sSSCFolder) const;
 	BOOL GetTaskSourceControlPath(DWORD dwTaskID, CString& sTaskSSCPath) const;
+*/
 	
 protected:
 	const CToDoCtrl& m_tdc;
-
-	mutable CMap<DWORD, DWORD, COleDateTime, COleDateTime&> m_mapTasksCheckedOut;
 
 	BOOL m_bTasklistCheckedOut;
 	BOOL m_bTasklistSourceControlled;
 	
 protected:
+/*
 	CString GetSourceControlID() const;
 	BOOL GetTasklistPath(CString& sTasklistPath) const;
 	BOOL MatchesOurSourceControlID(const CString& sID) const;
@@ -94,6 +95,7 @@ protected:
 	static BOOL GetSourceControlFolder(LPCTSTR szTasklistPath, CString& sSSCFolder);
 
 	static CString GetCheckedOutTo(LPCTSTR szPath);
+*/
 };
 
 //////////////////////////////////////////////////////////////////////
