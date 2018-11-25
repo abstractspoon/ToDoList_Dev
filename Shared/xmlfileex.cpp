@@ -21,14 +21,18 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CString CXmlFileEx::s_sPasswordExplanation(ENCRYPT_ENTERPWD);
 CString CXmlFileEx::s_sDecryptFailed(ENCRYPT_DECRYPTFAILED);
 
-CString CXmlFileEx::XFE_ENCODEDDATA = _T("ENCODEDDATA");
-CString CXmlFileEx::XFE_ENCODEDDATALEN = _T("DATALEN");
+//////////////////////////////////////////////////////////////////////
+
+const CString CXmlFileEx::XFE_ENCODEDDATA = _T("ENCODEDDATA");
+const CString CXmlFileEx::XFE_ENCODEDDATALEN = _T("DATALEN");
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
 
 CXmlFileEx::CXmlFileEx(const CString& sRootItemName, const CString& sPassword)
 : CXmlFile(sRootItemName), m_pEncryptor(NULL), m_sPassword(sPassword)

@@ -11,13 +11,19 @@
 
 #include "XmlFile.h"
 
+//////////////////////////////////////////////////////////////////////
+
 class IEncryption;
+
+//////////////////////////////////////////////////////////////////////
 
 enum
 {
-	XFL_NOENCRYPTIONDLL	   = XFL_LAST - 1,
+	XFL_NOENCRYPTIONDLL		= XFL_LAST - 1,
 	XFL_UNKNOWNENCRYPTION	= XFL_LAST - 2,
 };
+
+//////////////////////////////////////////////////////////////////////
 
 class CXmlFileEx : public CXmlFile  
 {
@@ -40,8 +46,8 @@ public:
 	
 	static void SetUIStrings(LPCWSTR szPasswordExplanation, LPCWSTR szDecryptFailed);
 
-	static CString XFE_ENCODEDDATA;
-	static CString XFE_ENCODEDDATALEN;
+	const static CString XFE_ENCODEDDATA;
+	const static CString XFE_ENCODEDDATALEN;
 
 protected:
 	IEncryption* m_pEncryptor;

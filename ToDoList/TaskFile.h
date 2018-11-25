@@ -95,7 +95,9 @@ public:
 
 	virtual BOOL LoadEx(IXmlParse* pCallback = NULL);
 	virtual BOOL SaveEx();
+
 	virtual BOOL LoadHeader(LPCTSTR szFilePath, TASKFILE_HEADER* pHeader = NULL);
+	static BOOL LoadHeader(LPCTSTR szFilePath, TASKFILE_HEADER& header);
 
 	void SetHeader(const TASKFILE_HEADER& header);
 	void GetHeader(TASKFILE_HEADER& header) const;

@@ -6084,56 +6084,55 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 	// check for later changes if it's a network file
 	BOOL bCheckforLaterChanges = (CDriveInfo::IsRemotePath(sFilePath) > 0);
 	
-	if (bCheckforLaterChanges && m_nFileVersion > 0) // else its newly created
+	if (bCheckforLaterChanges && (m_nFileVersion > 0)) // else its newly created
 	{
 		if (FileMisc::FileExists(sSavePath)) // file exists (sanity check)
 		{
-			// i was going to use filetimes but these are too unreliable
-			// instead we open the xml file and look at its internal version
-			CTaskFile temp;
-			CXmlParseController xpc(TDL_FILEVERSION);
-			
-			if (temp.Load(sSavePath, &xpc, FALSE)) // FALSE => don't decrypt
+			TASKFILE_HEADER tfh;
+
+			if (CTaskFile::LoadHeader(sSavePath, tfh) &&
+				(tfh.nFileVersion > m_nFileVersion))
 			{
-				if (temp.GetFileVersion() > m_nFileVersion)
+				CEnString sMessage(IDS_TDC_CONFIRMOVERWRITE, sSavePath);
+
+				if (CMessageBox::AfxShow(IDS_TDC_CONFIRMOVERWRITE_TITLE, sMessage, MB_ICONWARNING | MB_YESNO) != IDYES)
 				{
-					CEnString sMessage(IDS_TDC_CONFIRMOVERWRITE, sSavePath);
-					
-					if (CMessageBox::AfxShow(IDS_TDC_CONFIRMOVERWRITE_TITLE, sMessage, MB_ICONWARNING | MB_YESNO) != IDYES)
-					{
-						return TDCF_CANCELLED;
-					}
+					return TDCF_CANCELLED;
 				}
 			}
 		}
 	}
 
 	// prepare task file
+	if (IsModified())
+		m_nFileVersion++;
+
 	BuildTasksForSave(tasks, bFirstSave);
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	log.LogTimeElapsed(_T("CToDoCtrl::BuildTasksForSave(%s)"), sFileName);
 	///////////////////////////////////////////////////////////////////
 
-	// backup the file if opening in read-write
+	// Always backup before overwriting
 	CTempFileBackup backup(sSavePath);
 	
 	// do the save
 	if (tasks.Save(sSavePath, SFEF_UTF16))
 	{
+		SetFilePath(sSavePath);
+
+		m_bModified = FALSE;
+		m_bCheckedOut = tasks.IsCheckedOutTo(GetSourceControlID());
+
 		// PERMANENT LOGGING //////////////////////////////////////////////
 		log.LogTimeElapsed(_T("CTaskFile::Save(%s)"), sFileName);
 		///////////////////////////////////////////////////////////////////
 
-		SetFilePath(sSavePath);
-		m_bModified = FALSE;
-		m_bCheckedOut = tasks.IsCheckedOutTo(GetSourceControlID());
-
 		return TDCF_SUCCESS;
 	}
 
-	// restore the backup
-	backup.RestoreBackup();
+	// Error
+	VERIFY(backup.RestoreBackup());
 	
 	return MapTaskfileError(tasks.GetLastFileError());
 }
@@ -6142,8 +6141,11 @@ TDC_FILE CToDoCtrl::MapTaskfileError(int nFileErr)
 {
 	switch (nFileErr)
 	{
-	case XFL_BADMSXML:
-		return TDCF_BADMSXML;
+	case XFL_CANCELLED:			return TDCF_CANCELLED;
+	case XFL_MISSINGROOT:		return TDCF_NOTTASKLIST;
+	case XFL_BADMSXML:			return TDCF_BADMSXML;
+	case XFL_NOENCRYPTIONDLL:	return TDCF_NOENCRYPTIONDLL;
+	case XFL_UNKNOWNENCRYPTION:	return TDCF_UNKNOWNENCRYPTION;
 		
 	default:
 		// if nFileErr is greater than zero then it represents GetLastError
@@ -6165,17 +6167,13 @@ TDC_FILE CToDoCtrl::MapTaskfileError(int nFileErr)
 	return TDCF_OTHER;
 }
 
-void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks, BOOL bFirstSave)
+void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks, BOOL bFirstSave) const
 {
 	tasks.Reset();
 
 	// get tasklist
 	GetAllTasks(tasks);
 
-	// file header info
-	if (IsModified())
-		m_nFileVersion++;
-	
 	// save globals
 	SaveGlobals(tasks);
 
@@ -6389,23 +6387,20 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 	if (!FileMisc::FileExists(sFilePath))
 		return TDCF_NOTEXIST;
 
-	// set password before opening taskfile
-	tasks.SetPassword(m_sPassword);
-	
 	SetReadonly(CDriveInfo::IsReadonlyPath(sFilePath) > 0);
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	CScopedLogTime log(_T("CToDoCtrl::Load(%s)"), sFilePath);
 	///////////////////////////////////////////////////////////////////
 	
-	if (tasks.Load(sFilePath))
+	if (tasks.Load(sFilePath, NULL, FALSE)) // don't decrypt
 	{
 		m_bSourceControlled = tasks.IsSourceControlled();
 
 		CString sCheckedOutTo = tasks.GetCheckOutTo();
 		m_bCheckedOut = (m_bSourceControlled && (sCheckedOutTo == GetSourceControlID()));
 		
-		if (tasks.Decrypt())
+		if (tasks.Decrypt(m_sPassword))
 		{
 			// save off password
 			m_sPassword = tasks.GetPassword();
@@ -6442,30 +6437,12 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 			}
 			
 			SetModified(FALSE);
-			
 			return TDCF_SUCCESS;
 		}
 	}
 
 	// else do error handling
-	int nFileErr = tasks.GetLastFileError();
-	
-	switch (nFileErr)
-	{
-	case XFL_CANCELLED:			return TDCF_CANCELLED;
-	case XFL_MISSINGROOT:		return TDCF_NOTTASKLIST;
-	case XFL_BADMSXML:			return TDCF_BADMSXML;
-	case XFL_NOENCRYPTIONDLL:	return TDCF_NOENCRYPTIONDLL;
-	case XFL_UNKNOWNENCRYPTION:	return TDCF_UNKNOWNENCRYPTION;
-	}
-
-	// if nFileErr is greater than zero then it represents GetLastError
-	// so we append this to TDCO_OTHER
-	if (nFileErr > 0)
-		return (TDC_FILE)(TDCF_OTHER + nFileErr);
-	
-	// all else
-	return TDCF_OTHER;
+	return MapTaskfileError(tasks.GetLastFileError());
 }
 
 BOOL CToDoCtrl::DelayLoad(const CString& sFilePath, COleDateTime& dtEarliestDue)
@@ -10835,41 +10812,31 @@ TDC_FILE CToDoCtrl::CheckIn()
 		return TDCF_SUCCESS;
 	}
 	
+	// snap shot mod time so we can restore it
+	FILETIME ftMod = { 0 };
+	VERIFY(FileMisc::GetFileLastModified(m_sLastSavePath, ftMod));
+
+	// change check-out state before resaving
+	m_bCheckedOut = FALSE;
+
 	// backup the file
+	CTaskFile file(m_sPassword);
+	BuildTasksForSave(file, FALSE);
+
+	// Always backup before overwriting
 	CTempFileBackup backup(m_sLastSavePath);
-	
-	// scope the task file so it gets closed
-	// before we try to restore the backup
-	int nFileErr = 0;
+	CWaitCursor cursor;
+
+	if (file.Save(m_sLastSavePath, SFEF_UTF16))
 	{
-		CWaitCursor cursor;
-		CTaskFile file(m_sPassword);
-		
-		// snap shot mod time so we can restore it
-		FILETIME ftMod = { 0 };
-		VERIFY(FileMisc::GetFileLastModified(m_sLastSavePath, ftMod));
-		
-		// change check-out state before resaving
-		m_bCheckedOut = FALSE;
-		
-		// resave
-		BuildTasksForSave(file, FALSE);
-		
-		if (file.Save(m_sLastSavePath, SFEF_UTF16))
-		{
-			FileMisc::SetFileLastModified(m_sLastSavePath, ftMod);
-			return TDCF_SUCCESS;
-		}
-		
-		// else
-		nFileErr = file.GetLastFileError();
+		FileMisc::SetFileLastModified(m_sLastSavePath, ftMod);
+		return TDCF_SUCCESS;
 	}
-	
-	// always restore backup on failure
+
+	// Error
 	VERIFY(backup.RestoreBackup());
 	
-	// else someone else or invalid file
-	return MapTaskfileError(nFileErr);
+	return MapTaskfileError(file.GetLastFileError());
 }
 
 TDC_FILE CToDoCtrl::CheckOut()
@@ -10916,22 +10883,23 @@ BOOL CToDoCtrl::AddToSourceControl(BOOL bAdd)
 	// update source control
 	m_bSourceControlled = m_bCheckedOut = bAdd;
 				
-	// resave
-	if (!m_sLastSavePath.IsEmpty())
-	{
-		CTaskFile file;
-		BuildTasksForSave(file, FALSE);
-		
-		if (file.Save(m_sLastSavePath, SFEF_UTF16))
-			return TRUE;
-	}
-	else // not yet saved
-	{
-		return TRUE;
-	}
+	if (m_sLastSavePath.IsEmpty())
+		return TRUE; // not yet saved
+
+	CTaskFile file;
+	BuildTasksForSave(file, FALSE);
 	
-	// else restore previous state
-	m_bSourceControlled = m_bCheckedOut = bAdd;
+	// Always backup before overwriting
+	CTempFileBackup backup(m_sLastSavePath);
+	CWaitCursor cursor;
+
+	if (file.Save(m_sLastSavePath, SFEF_UTF16))
+		return TRUE;
+
+	// Error
+	backup.RestoreBackup();
+	
+	m_bSourceControlled = m_bCheckedOut = !bAdd;
 	
 	return FALSE;
 }
@@ -10956,52 +10924,45 @@ TDC_FILE CToDoCtrl::CheckOut(CString& sCheckedOutTo, BOOL bForce)
 	}
 	
 	// backup the file
-	CTempFileBackup backup(m_sLastSavePath);
 	CWaitCursor cursor;
-	
-	// scope the task file so it gets closed
-	// before we try to restore the backup
-	int nFileErr = 0;
+	CTaskFile file(m_sPassword);
+
+	// No need to decrypt initially
+	if (file.Load(m_sLastSavePath, NULL, FALSE))
 	{
-		CTaskFile file(m_sPassword);
-		
-		if (file.Open(m_sLastSavePath, XF_READ, FALSE) && file.LoadEx())
+		sCheckedOutTo = file.GetCheckOutTo();
+
+		if (sCheckedOutTo.IsEmpty() || bForce)
 		{
-			file.Close();
-			
-			sCheckedOutTo = file.GetCheckOutTo();
-			
-			if (sCheckedOutTo.IsEmpty() || bForce)
+			// load tasks
+			file.Decrypt();
+			LoadTasks(file); // load file
+
+			// update source control
+			m_bCheckedOut = TRUE;
+
+			// resave
+			BuildTasksForSave(file, FALSE);
+
+			// Always backup before overwriting
+			CTempFileBackup backup(m_sLastSavePath);
+			CWaitCursor cursor;
+
+			if (file.Save(m_sLastSavePath, SFEF_UTF16))
 			{
-				// load tasks
-				file.Decrypt();
-				LoadTasks(file); // load file
-				
-				// update source control
-				m_bCheckedOut = TRUE;
-				
-				// resave
-				BuildTasksForSave(file, FALSE);
-				
-				if (file.Save(m_sLastSavePath, SFEF_UTF16))
-				{
-					// update modified time
-					m_dtLastTaskMod = COleDateTime::GetCurrentTime();
-					return TDCF_SUCCESS;
-				}
-				
-				// restore state
-				m_bCheckedOut = FALSE;
+				// update modified time
+				m_dtLastTaskMod = COleDateTime::GetCurrentTime();
+				return TDCF_SUCCESS;
 			}
+	
+			// Error
+			VERIFY(backup.RestoreBackup());
+
+			m_bCheckedOut = FALSE;
 		}
-		
-		nFileErr = file.GetLastFileError();
 	}
 	
-	// always restore backup on failure
-	VERIFY(backup.RestoreBackup());
-	
-	return MapTaskfileError(nFileErr);
+	return MapTaskfileError(file.GetLastFileError());
 }
 
 int CToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const
@@ -12769,7 +12730,8 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_CUSTOMATTRIBDEFS:
 	case TDCA_DELETE:
 	case TDCA_POSITION: // move
-		break;
+	case TDCA_ENCRYPT:
+		return TRUE;
 
 	case TDCA_LOCK:
 		return GetSelectedCount();
