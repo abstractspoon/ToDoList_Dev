@@ -942,6 +942,8 @@ BOOL CXmlFile::Load(const CString& sFilePath, const CString& sRootItemName, IXml
 	if (!bSuccess)
 		m_nFileError = GetLastError();
 
+	ASSERT(GetFileHandle() == (HANDLE)CStdioFileEx::hFileNull);
+
 	return bSuccess;
 }
 
@@ -964,6 +966,8 @@ BOOL CXmlFile::Save(const CString& sFilePath, SFE_FORMAT nFormat)
 	// error handling
 	if (!bSuccess)
 		m_nFileError = GetLastError();
+
+	ASSERT(GetFileHandle() == (HANDLE)CStdioFileEx::hFileNull);
 
 	return bSuccess;
 }
