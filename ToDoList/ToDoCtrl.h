@@ -919,7 +919,7 @@ protected:
 	static void AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems);
 	static BOOL XMLHeaderIsUnicode(LPCTSTR szXmlHeader);
 	static BOOL IsTaskLinkURL(const CString& sLink);
-	static TDC_FILE DoSave(CTaskFile& tasks, const CString& sSavePath);
+	static TDC_FILE SaveTaskfile(CTaskFile& tasks, const CString& sSavePath);
 	static TDC_FILE MapTaskfileError(int nFileErr);
 
 	static void RemoveNonSelectedTasks(CTaskFile& tasks);

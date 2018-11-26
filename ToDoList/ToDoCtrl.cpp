@@ -6114,7 +6114,7 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 	log.LogTimeElapsed(_T("CToDoCtrl::BuildTasksForSave(%s)"), sFileName);
 	///////////////////////////////////////////////////////////////////
 
-	TDC_FILE nResult = DoSave(tasks, sSavePath);
+	TDC_FILE nResult = SaveTaskfile(tasks, sSavePath);
 
 	if (nResult == TDCF_SUCCESS)
 	{
@@ -6128,7 +6128,7 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 }
 
 // static helper
-TDC_FILE CToDoCtrl::DoSave(CTaskFile& tasks, const CString& sSavePath)
+TDC_FILE CToDoCtrl::SaveTaskfile(CTaskFile& tasks, const CString& sSavePath)
 {
 	CScopedLogTime log(_T("CTaskFile::Save(%s)"), FileMisc::GetFileNameFromPath(sSavePath));
 	CWaitCursor cursor;
@@ -6848,7 +6848,7 @@ BOOL CToDoCtrl::ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks
 	file.Encrypt();
 	file.SetHeader(tfh);
 
-	if (!file.Save(sArchivePath, SFEF_UTF16))
+	if (SaveTaskfile(file, sArchivePath) != TDCF_SUCCESS)
 		return FALSE;
 
 	// If the process took longer than 1 second we rename
@@ -10252,7 +10252,7 @@ TDC_FILE CToDoCtrl::CheckIn()
 	BuildTasksForSave(file, FALSE);
 
 	// Always backup before overwriting
-	TDC_FILE nResult = DoSave(file, m_sLastSavePath);
+	TDC_FILE nResult = SaveTaskfile(file, m_sLastSavePath);
 
 	if (nResult == TDCF_SUCCESS)
 		FileMisc::SetFileLastModified(m_sLastSavePath, ftMod);
@@ -10312,7 +10312,7 @@ BOOL CToDoCtrl::AddToSourceControl(BOOL bAdd)
 	CTaskFile file;
 	BuildTasksForSave(file, FALSE);
 	
-	TDC_FILE nResult = DoSave(file, m_sLastSavePath);
+	TDC_FILE nResult = SaveTaskfile(file, m_sLastSavePath);
 
 	if (nResult == TDCF_SUCCESS)
 		return TRUE;
@@ -10340,41 +10340,34 @@ TDC_FILE CToDoCtrl::CheckOut(CString& sCheckedOutTo, BOOL bForce)
 		return TDCF_SUCCESS;
 	}
 	
-	// backup the file
+	// Reload the tasklist in case of changes
 	CWaitCursor cursor;
 	CTaskFile file(m_sPassword);
 
 	// No need to decrypt initially
-	TDC_FILE nResult = TDCF_SUCCESS;
-
 	if (!file.Load(m_sLastSavePath, NULL, FALSE))
-	{
-		nResult = MapTaskfileError(file.GetLastFileError());
-	}
+		return MapTaskfileError(file.GetLastFileError());
+
+	sCheckedOutTo = file.GetCheckOutTo();
+
+	if (!sCheckedOutTo.IsEmpty() && !bForce)
+		return TDCF_OTHER;
+
+	// load tasks
+	file.Decrypt();
+	VERIFY(LoadTasks(file));
+
+	// update source control before resaving
+	m_bCheckedOut = TRUE;
+
+	BuildTasksForSave(file, FALSE);
+
+	TDC_FILE nResult = SaveTaskfile(file, m_sLastSavePath);
+
+	if (nResult == TDCF_SUCCESS)
+		m_dtLastTaskMod = COleDateTime::GetCurrentTime();
 	else
-	{
-		sCheckedOutTo = file.GetCheckOutTo();
-
-		if (sCheckedOutTo.IsEmpty() || bForce)
-		{
-			// load tasks
-			file.Decrypt();
-			VERIFY(LoadTasks(file));
-
-			// update source control
-			m_bCheckedOut = TRUE;
-
-			// resave
-			BuildTasksForSave(file, FALSE);
-
-			nResult = DoSave(file, m_sLastSavePath);
-			
-			if (nResult == TDCF_SUCCESS)
-				m_dtLastTaskMod = COleDateTime::GetCurrentTime();
-			else
-				m_bCheckedOut = FALSE;
-		}
-	}
+		m_bCheckedOut = FALSE;
 	
 	return nResult;
 }
