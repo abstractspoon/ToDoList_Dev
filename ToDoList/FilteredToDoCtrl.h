@@ -131,8 +131,6 @@ protected:
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const;
 
-	void GetCompletedTasks(const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTaskParent, BOOL bSelectedOnly = FALSE) const;
-
 	void SaveSettings() const;
 	void LoadSettings();
 

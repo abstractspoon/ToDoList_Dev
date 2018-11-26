@@ -167,7 +167,6 @@ public:
 	void SetStartedTaskColors(COLORREF crStarted, COLORREF crStartedToday) { m_taskTree.SetStartedTaskColors(crStarted, crStartedToday); }
 	void SetAlternateLineColor(COLORREF color) { m_taskTree.SetAlternateLineColor(color); }
 
-	COLORREF GetPriorityColor(int nPriority) const { return m_taskTree.GetPriorityColor(nPriority); }
 	void GetStartedTaskColors(COLORREF& crStarted, COLORREF& crStartedToday) { m_taskTree.GetStartedTaskColors(crStarted, crStartedToday); }
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) { m_taskTree.GetDueTaskColors(crDue, crDueToday); }
 
@@ -513,6 +512,7 @@ protected:
 	CTDCTaskMatcher m_matcher;
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
+	CTDCTaskExporter m_exporter;
 
 	CStringArray m_aFileRefs;
 	CString m_sTextComments;
@@ -829,17 +829,10 @@ protected:
 	CRect GetSplitterRect() const;
 	BOOL IsSplitterVisible() const;
 	void ValidateCommentsSize();
-	COLORREF GetTaskTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
 	int AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
 	BOOL AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hParentTask, const TDCGETTASKS& filter, BOOL bWantSubtasks = TRUE, DWORD dwParentID = 0) const;
 	BOOL AddTreeItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, const TDCGETTASKS& filter, BOOL bAllParents, BOOL bWantSubtasks) const;
-	BOOL SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter, BOOL bTitleCommentsOnly) const;
-
-	BOOL AddTaskToTaskFile(DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hParentTask, BOOL bIncDuplicateCompletedRecurringSubtasks) const;
-	BOOL AddTaskToTaskFile(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hParentTask, BOOL bIncDuplicateCompletedRecurringSubtasks) const;
-	BOOL AddSubTasksToTaskFile(const TODOSTRUCTURE* pTDSParent, CTaskFile& tasks, HTASKITEM hParentTask, BOOL bIncDuplicateCompletedRecurringSubtasks) const;
-	BOOL SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask) const;
 
 	HTREEITEM PasteTaskToTree(const CTaskFile& tasks, HTASKITEM hTask, HTREEITEM htiParent, HTREEITEM htiAfter, TDC_RESETIDS nResetID, BOOL bAndSubtasks);
 	BOOL PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDest, HTREEITEM htiDestAfter, TDC_RESETIDS nResetID, BOOL bSelectAll);
@@ -924,9 +917,10 @@ protected:
 	
 	static void SetDefaultListContent(CAutoComboBox& combo, const CStringArray& aNewDefs, const CStringArray& aOldDefs, BOOL bAddEmpty = FALSE);
 	static void AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems);
-	static TDC_FILE MapTaskfileError(int nFileErr);
 	static BOOL XMLHeaderIsUnicode(LPCTSTR szXmlHeader);
 	static BOOL IsTaskLinkURL(const CString& sLink);
+	static TDC_FILE DoSave(CTaskFile& tasks, const CString& sSavePath);
+	static TDC_FILE MapTaskfileError(int nFileErr);
 
 	static void RemoveNonSelectedTasks(CTaskFile& tasks);
 	static void RemoveNonSelectedTasks(CTaskFile& tasks, HTASKITEM hTask);

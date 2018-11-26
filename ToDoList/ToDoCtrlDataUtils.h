@@ -17,9 +17,15 @@
 
 class CToDoCtrlData;
 class CBinaryData;
-class TODOSTRUCTURE;
+class CToDoCtrl;
+class CTaskFile;
+class CContentMgr;
+class CTDLTaskCtrlBase;
 
+class TODOSTRUCTURE;
 struct TODOITEM;
+
+typedef void* HTASKITEM;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -199,6 +205,40 @@ protected:
 	static int Compare(double dNum1, double dNum2);
 	static int Compare(DWORD dwNum1, DWORD dwNum2);
 
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CTDCTaskExporter
+{
+public:
+	CTDCTaskExporter(const CToDoCtrlData& data, 
+		const CTDLTaskCtrlBase& colors,
+		const CContentMgr& comments);
+
+	int ExportAllTasks(CTaskFile& tasks, BOOL bIncDuplicateCompletedRecurringSubtasks = TRUE) const;
+	int ExportCompletedTasks(CTaskFile& tasks) const;
+
+	BOOL ExportTask(DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hParentTask, BOOL bIncDuplicateCompletedRecurringSubtasks = TRUE) const;
+	BOOL ExportTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hParentTask, BOOL bIncDuplicateCompletedRecurringSubtasks = TRUE) const;
+	BOOL ExportSubTasks(const TODOSTRUCTURE* pTDSParent, CTaskFile& tasks, HTASKITEM hParentTask, BOOL bIncDuplicateCompletedRecurringSubtasks = TRUE) const;
+
+	BOOL ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask) const;
+	BOOL ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter, BOOL bTitleCommentsOnly) const;
+
+protected:
+	const CToDoCtrlData& m_data;
+	const CTDLTaskCtrlBase& m_colors;
+	const CContentMgr& m_comments;
+
+	CTDCTaskCalculator m_calculator;
+	CTDCTaskFormatter m_formatter;
+
+protected:
+	COLORREF GetTaskTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	COLORREF GetPriorityColor(int nPriority) const;
+
+	void ExportCompletedTasks(const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTaskParent) const;
 };
 
 

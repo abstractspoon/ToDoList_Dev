@@ -378,10 +378,10 @@ BOOL CFilteredToDoCtrl::CopyCurrentSelection() const
 		if (!hTask)
 			return FALSE;
 		
-		SetTaskAttributes(pTDI, pTDS, tasks, hTask, TDCGT_ALL, FALSE);
+		m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, TDCGT_ALL, FALSE);
 
 		// and subtasks
-		AddSubTasksToTaskFile(pTDS, tasks, hTask, TRUE);
+		m_exporter.ExportSubTasks(pTDS, tasks, hTask, TRUE);
 	}
 	
 	// extra processing to identify the originally selected tasks
@@ -459,9 +459,7 @@ int CFilteredToDoCtrl::GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly) 
 		return CTabbedToDoCtrl::GetArchivableTasks(tasks, bSelectedOnly);
 
 	// else process the entire data hierarchy
-	GetCompletedTasks(m_data.GetStructure(), tasks, NULL, FALSE);
-
-	return tasks.GetTaskCount();
+	return m_exporter.ExportCompletedTasks(tasks);
 }
 
 BOOL CFilteredToDoCtrl::RemoveArchivedTask(DWORD dwTaskID)
@@ -480,56 +478,6 @@ BOOL CFilteredToDoCtrl::RemoveArchivedTask(DWORD dwTaskID)
 		m_taskTree.Tree().DeleteItem(hti);
 
 	return m_data.DeleteTask(dwTaskID);
-}
-
-void CFilteredToDoCtrl::GetCompletedTasks(const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTaskParent, BOOL bSelectedOnly) const
-{
-	const TODOITEM* pTDI = NULL;
-
-	if (!pTDS->IsRoot())
-	{
-		DWORD dwTaskID = pTDS->GetTaskID();
-
-		pTDI = m_data.GetTrueTask(dwTaskID);
-		ASSERT(pTDI);
-
-		if (!pTDI)
-			return;
-
-		// we add the task if it is completed or it has children
-		if (pTDI->IsDone() || pTDS->HasSubTasks())
-		{
-			HTASKITEM hTask = tasks.NewTask(_T(""), hTaskParent, dwTaskID, 0);
-			ASSERT(hTask);
-
-			// copy attributes
-			TDCGETTASKS allTasks;
-			SetTaskAttributes(pTDI, pTDS, tasks, hTask, allTasks, FALSE);
-
-			// this task is now the new parent
-			hTaskParent = hTask;
-		}
-	}
-
-	// children
-	if (pTDS->HasSubTasks())
-	{
-		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
-		{
-			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-			GetCompletedTasks(pTDSChild, tasks, hTaskParent, bSelectedOnly); // RECURSIVE call
-		}
-
-		// if no subtasks were added and the parent is not completed 
-		// (and optionally selected) then we remove it
-		if (hTaskParent && tasks.GetFirstTask(hTaskParent) == NULL)
-		{
-			ASSERT(pTDI);
-
-			if (pTDI && !pTDI->IsDone())
-				tasks.DeleteTask(hTaskParent);
-		}
-	}
 }
 
 int CFilteredToDoCtrl::GetFilteredTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const

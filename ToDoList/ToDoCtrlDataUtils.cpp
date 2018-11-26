@@ -6,12 +6,15 @@
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataUtils.h"
 #include "TDCCustomAttributeHelper.h"
+#include "tdlschemadef.h"
+#include "tdlTaskCtrlBase.h"
 
 #include "..\shared\timehelper.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\enstring.h"
+#include "..\shared\ContentMgr.h"
 
 #include <float.h>
 #include <math.h>
@@ -3153,5 +3156,670 @@ CString CTDCTaskFormatter::GetTaskPath(DWORD dwTaskID, int nMaxLen) const
 	}
 
 	return Misc::FormatArray(aElements, _T("\\"));
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+CTDCTaskExporter::CTDCTaskExporter(const CToDoCtrlData& data, 
+	const CTDLTaskCtrlBase& colors,
+	const CContentMgr& comments) 
+	: 
+m_data(data),
+	m_colors(colors),
+	m_comments(comments),
+	m_calculator(m_data),
+	m_formatter(m_data)
+{
+
+}
+
+int CTDCTaskExporter::ExportAllTasks(CTaskFile& tasks, BOOL bIncDuplicateCompletedRecurringSubtasks) const
+{
+	ASSERT(tasks.GetTaskCount() == 0);
+
+	tasks.SetCustomAttributeDefs(m_data.m_aCustomAttribDefs);
+	tasks.EnableISODates(m_data.HasStyle(TDCS_SHOWDATESINISO));
+
+	if (ExportSubTasks(m_data.GetStructure(), tasks, NULL, bIncDuplicateCompletedRecurringSubtasks))
+	{
+		return tasks.GetTaskCount();
+	}
+
+	// else
+	return 0;
+}
+
+BOOL CTDCTaskExporter::ExportSubTasks(const TODOSTRUCTURE* pTDSParent, CTaskFile& tasks, 
+	HTASKITEM hParentTask, BOOL bIncDuplicateCompletedRecurringSubtasks) const
+{
+	const TODOITEM* pTDILastRecurringSubtask = NULL;
+
+	for (int nSubTask = 0; nSubTask < pTDSParent->GetSubTaskCount(); nSubTask++)
+	{
+		const TODOSTRUCTURE* pTDS = pTDSParent->GetSubTask(nSubTask);
+		ASSERT(pTDS);
+
+		if (!pTDS)
+			return FALSE;
+
+		DWORD dwTaskID = pTDS->GetTaskID();
+		ASSERT(dwTaskID);
+
+		if (!dwTaskID)
+			return FALSE;
+
+		const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
+		ASSERT(pTDI);
+
+		if (!pTDI)
+			return FALSE;
+
+		// Ignore duplicate 
+		if (!bIncDuplicateCompletedRecurringSubtasks)
+		{
+			if (pTDI->IsRecurring())
+			{
+				if (pTDILastRecurringSubtask && 
+					pTDI->RecurrenceMatches(*pTDILastRecurringSubtask, FALSE))
+				{
+					continue; // skip over it
+				}
+
+				pTDILastRecurringSubtask = pTDI;
+			}
+			else
+			{
+				pTDILastRecurringSubtask = NULL;
+			}
+		}
+
+		if (!ExportTask(pTDI, pTDS, tasks, hParentTask, bIncDuplicateCompletedRecurringSubtasks))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
+BOOL CTDCTaskExporter::ExportTask(DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hParentTask, BOOL bIncDuplicateCompletedRecurringSubtasks) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+
+	if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return ExportTask(pTDI, pTDS, tasks, hParentTask, bIncDuplicateCompletedRecurringSubtasks);
+}
+
+BOOL CTDCTaskExporter::ExportTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, 
+	HTASKITEM hParentTask, BOOL bIncDuplicateCompletedRecurringSubtasks) const
+{
+	CString sTitle = pTDI->sTitle;
+	DWORD dwTaskID = pTDS->GetTaskID();
+
+	HTASKITEM hTask = tasks.NewTask(sTitle, hParentTask, dwTaskID, 0);
+	ASSERT(hTask);
+
+	if (!hTask)
+		return FALSE;
+
+	// copy all other attributes
+	ExportAllTaskAttributes(pTDI, pTDS, tasks, hTask);
+
+	// copy children
+	return ExportSubTasks(pTDS, tasks, hTask, bIncDuplicateCompletedRecurringSubtasks);
+}
+
+BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask) const
+{
+	if (!pTDI)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// SPECIAL CASE:
+	// if task is a reference we use a bit of sleight of hand
+	// and write the 'true' task's title but nothing else
+	if (pTDI->dwTaskRefID)
+	{
+		tasks.SetTaskTitle(hTask, m_data.GetTaskTitle(pTDI->dwTaskRefID));
+		tasks.SetTaskReferenceID(hTask, pTDI->dwTaskRefID);
+
+		return TRUE;
+	}
+
+	// 'true' tasks
+	tasks.SetTaskAttributes(hTask, *pTDI);
+
+	tasks.SetTaskPosition(hTask, pTDS->GetPosition());
+	tasks.SetTaskPosition(hTask, m_formatter.GetTaskPosition(pTDS));
+
+	// dynamically calculated attributes
+	int nHighestPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE); 
+
+	if (nHighestPriority > pTDI->nPriority)
+		tasks.SetTaskHighestPriority(hTask, nHighestPriority);
+
+	int nHighestRisk = m_calculator.GetTaskHighestRisk(pTDI, pTDS);
+
+	if (nHighestRisk > pTDI->nRisk)
+		tasks.SetTaskHighestRisk(hTask, nHighestRisk);
+
+	// calculated percent
+	int nPercent = m_calculator.GetTaskPercentDone(pTDI, pTDS);
+
+	if (nPercent > 0)
+		tasks.SetTaskCalcCompletion(hTask, nPercent);
+
+	// cost
+	double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
+
+	if (dCost != 0)
+		tasks.SetTaskCalcCost(hTask, dCost);
+
+	// for calc'ed estimate use this item's units if it
+	// has a non-zero time estimate, else its first subtask's units
+	TDC_UNITS nUnits = m_calculator.GetBestTimeEstUnits(pTDI, pTDS);
+	double dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, nUnits);
+
+	if (dTime > 0)
+		tasks.SetTaskCalcTimeEstimate(hTask, dTime, nUnits);
+
+	// for calc'ed spent use this item's units if it
+	// has a non-zero time estimate, else its first subtask's units
+	nUnits = m_calculator.GetBestTimeEstUnits(pTDI, pTDS);
+	dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, nUnits);
+
+	if (dTime != 0)
+		tasks.SetTaskCalcTimeSpent(hTask, dTime, nUnits);
+
+	// due date
+	if (m_data.HasStyle(TDCS_USEEARLIESTDUEDATE) || m_data.HasStyle(TDCS_USELATESTDUEDATE))
+	{
+		double dDate = m_calculator.GetTaskDueDate(pTDI, pTDS);
+
+		if (dDate > 0)
+			tasks.SetTaskCalcDueDate(hTask, dDate);
+	}
+
+	// start date
+	if (m_data.HasStyle(TDCS_USEEARLIESTSTARTDATE) || m_data.HasStyle(TDCS_USELATESTSTARTDATE))
+	{
+		double dDate = m_calculator.GetTaskStartDate(pTDI, pTDS);
+
+		if (dDate > 0)
+			tasks.SetTaskCalcStartDate(hTask, dDate);
+	}
+
+	// runtime text color
+	tasks.SetTaskTextColor(hTask, GetTaskTextColor(pTDI, pTDS));
+
+	// priority color
+	tasks.SetTaskPriorityColor(hTask, GetPriorityColor(nHighestPriority));
+
+	// 'good as done'
+	if (m_calculator.IsTaskDone(pTDI, pTDS))
+		tasks.SetTaskGoodAsDone(hTask, TRUE);
+
+	// subtask completion
+	if (pTDS->HasSubTasks())
+		tasks.SetTaskSubtaskCompletion(hTask, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
+
+	return TRUE;
+}
+
+BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, 
+	HTASKITEM hTask, const TDCGETTASKS& filter, BOOL bTitleCommentsOnly) const
+{
+	ASSERT(pTDI);
+
+	if (!pTDI)
+		return FALSE;
+
+	BOOL bDone = pTDI->IsDone();
+	BOOL bTitleOnly = filter.HasFlag(TDCGTF_TITLESONLY);
+	BOOL bHtmlComments = filter.HasFlag(TDCGTF_HTMLCOMMENTS);
+	BOOL bTextComments = filter.HasFlag(TDCGTF_TEXTCOMMENTS);
+	BOOL bTransform = filter.HasFlag(TDCGTF_TRANSFORM);
+
+	// attributes
+	tasks.SetTaskReferenceID(hTask, pTDI->dwTaskRefID);
+
+	if (pTDS->HasSubTasks())
+		tasks.SetTaskIsParent(hTask);
+
+	// if task is a reference we use a bit of sleight of hand
+	// and write the 'true' task's title but nothing else
+	if (pTDI->dwTaskRefID)
+		tasks.SetTaskTitle(hTask, m_data.GetTaskTitle(pTDI->dwTaskRefID));
+	else
+		tasks.SetTaskTitle(hTask, pTDI->sTitle);
+
+	// hide IDs if not wanted
+	if (bTitleOnly || bTitleCommentsOnly || !filter.WantAttribute(TDCA_ID))
+		tasks.HideAttribute(hTask, TDL_TASKID);
+
+	if (bTitleOnly || bTitleCommentsOnly || !filter.WantAttribute(TDCA_PARENTID))
+		tasks.HideAttribute(hTask, TDL_TASKPARENTID);
+
+	// ignore everything else if we are a reference
+	if (pTDI->dwTaskRefID)
+		return TRUE;
+
+	if (!bTransform)
+		tasks.SetTaskIcon(hTask, pTDI->sIcon);
+
+	// comments
+	if (!bTitleOnly && filter.WantAttribute(TDCA_COMMENTS))
+	{
+		CString sHtml;
+
+		if (bHtmlComments && !pTDI->customComments.IsEmpty())
+		{
+			m_comments.ConvertContentToHtml(pTDI->customComments, 
+				sHtml, 
+				pTDI->sCommentsTypeID, 
+				tasks.GetHtmlCharSet(), 
+				tasks.GetHtmlImageFolder());
+		}
+
+		// to simplify stylesheet design we render all comments
+		// as HTMLCOMMENTS even if they are plain text
+		if (bTransform)
+		{
+			if (sHtml.IsEmpty())
+				sHtml = pTDI->sComments;
+
+			if (!sHtml.IsEmpty())
+			{
+				tasks.SetTaskHtmlComments(hTask, sHtml, bTransform);
+
+				// add dummy COMMENTS entry as a temprary fix in 6.8.8
+				// because stylesheets currently require its presence
+				tasks.SetTaskComments(hTask, pTDI->sComments);
+			}
+		}
+		else // render both HTML _and_ plain text
+		{
+			if (!sHtml.IsEmpty())
+				tasks.SetTaskHtmlComments(hTask, sHtml, bTransform);
+
+			if (!pTDI->sComments.IsEmpty())
+				tasks.SetTaskComments(hTask, pTDI->sComments);
+		}
+	}
+
+	// highest priority, because we need it further down
+	int nHighestPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE);
+
+	if (!(bTitleOnly || bTitleCommentsOnly))
+	{
+		if (filter.WantAttribute(TDCA_POSITION))
+		{
+			tasks.SetTaskPosition(hTask, pTDS->GetPosition());
+			tasks.SetTaskPosition(hTask, m_formatter.GetTaskPosition(pTDS));
+		}
+
+		if (pTDI->bFlagged && filter.WantAttribute(TDCA_FLAG))
+		{
+			tasks.SetTaskFlag(hTask, (pTDI->bFlagged != FALSE));
+
+			if (!pTDI->bFlagged)
+				tasks.SetTaskFlag(hTask, (m_calculator.IsTaskFlagged(pTDI, pTDS) != FALSE), TRUE);
+		}
+
+		if (pTDI->bLocked && filter.WantAttribute(TDCA_LOCK))
+		{
+			tasks.SetTaskLock(hTask, (pTDI->bLocked != FALSE));
+
+			if (!pTDI->bLocked)
+				tasks.SetTaskLock(hTask, (m_calculator.IsTaskLocked(pTDI, pTDS) != FALSE), TRUE);
+		}
+
+		if (pTDI->IsRecurring() && filter.WantAttribute(TDCA_RECURRENCE))
+			tasks.SetTaskRecurrence(hTask, pTDI->trRecurrence);
+
+		if (pTDI->aAllocTo.GetSize() && filter.WantAttribute(TDCA_ALLOCTO))
+			tasks.SetTaskAllocatedTo(hTask, pTDI->aAllocTo);
+
+		if (!pTDI->sAllocBy.IsEmpty() && filter.WantAttribute(TDCA_ALLOCBY))
+			tasks.SetTaskAllocatedBy(hTask, pTDI->sAllocBy);
+
+		if (!pTDI->sStatus.IsEmpty() && filter.WantAttribute(TDCA_STATUS))
+			tasks.SetTaskStatus(hTask, pTDI->sStatus);
+
+		if (!pTDI->sVersion.IsEmpty() && filter.WantAttribute(TDCA_VERSION))
+			tasks.SetTaskVersion(hTask, pTDI->sVersion);
+
+		if (pTDI->aCategories.GetSize() && filter.WantAttribute(TDCA_CATEGORY))
+			tasks.SetTaskCategories(hTask, pTDI->aCategories);
+
+		if (pTDI->aTags.GetSize() && filter.WantAttribute(TDCA_TAGS))
+			tasks.SetTaskTags(hTask, pTDI->aTags);
+
+		if (pTDI->aFileLinks.GetSize() && filter.WantAttribute(TDCA_FILEREF))
+			tasks.SetTaskFileLinks(hTask, pTDI->aFileLinks);
+
+		if (!pTDI->sCreatedBy.IsEmpty() && filter.WantAttribute(TDCA_CREATEDBY))
+			tasks.SetTaskCreatedBy(hTask, pTDI->sCreatedBy);
+
+		if (!pTDI->sExternalID.IsEmpty() && filter.WantAttribute(TDCA_EXTERNALID))
+			tasks.SetTaskExternalID(hTask, pTDI->sExternalID);
+
+		if (pTDI->aDependencies.GetSize() && filter.WantAttribute(TDCA_DEPENDENCY))
+			tasks.SetTaskDependencies(hTask, pTDI->aDependencies);
+
+		if (filter.WantAttribute(TDCA_PATH))
+		{
+			CString sPath = m_formatter.GetTaskPath(pTDI, pTDS);
+
+			if (!sPath.IsEmpty())
+				tasks.SetTaskPath(hTask, sPath);
+		}
+
+		if (filter.WantAttribute(TDCA_PRIORITY))
+		{
+			tasks.SetTaskPriority(hTask, pTDI->nPriority);
+
+			if (nHighestPriority > pTDI->nPriority)
+				tasks.SetTaskHighestPriority(hTask, nHighestPriority);
+		}
+
+		if (filter.WantAttribute(TDCA_RISK))
+		{
+			tasks.SetTaskRisk(hTask, pTDI->nRisk);
+
+			int nHighestRisk = m_calculator.GetTaskHighestRisk(pTDI, pTDS);
+
+			if (nHighestRisk > pTDI->nRisk)
+				tasks.SetTaskHighestRisk(hTask, nHighestRisk);
+		}
+
+		// percent done
+		if (filter.WantAttribute(TDCA_PERCENT))
+		{
+			// don't allow incomplete tasks to be 100%
+			int nPercent = pTDI->IsDone() ? 100 : min(99, pTDI->nPercentDone); 
+			tasks.SetTaskPercentDone(hTask, (unsigned char)nPercent);
+
+			// calculated percent
+			nPercent = m_calculator.GetTaskPercentDone(pTDI, pTDS);
+
+			if (nPercent > 0)
+				tasks.SetTaskCalcCompletion(hTask, nPercent);
+		}
+
+		// cost
+		if (filter.WantAttribute(TDCA_COST))
+		{
+			//if (pTDI->dCost > 0)
+			tasks.SetTaskCost(hTask, pTDI->dCost);
+
+			double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
+
+			//if (dCost > 0)
+			tasks.SetTaskCalcCost(hTask, dCost);
+		}
+
+		// time estimate
+		if (filter.WantAttribute(TDCA_TIMEEST))
+		{
+			if ((pTDI->dTimeEstimate > 0) || (pTDI->nTimeEstUnits != TDCU_HOURS))
+				tasks.SetTaskTimeEstimate(hTask, pTDI->dTimeEstimate, pTDI->nTimeEstUnits);
+
+			// for calc'ed estimate use this item's units if it
+			// has a non-zero time estimate, else its first subtask's units
+			TDC_UNITS nUnits = m_calculator.GetBestTimeEstUnits(pTDI, pTDS);
+			double dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, nUnits);
+
+			if (dTime > 0)
+				tasks.SetTaskCalcTimeEstimate(hTask, dTime, nUnits);
+		}
+
+		// time spent
+		if (filter.WantAttribute(TDCA_TIMESPENT))
+		{
+			if ((pTDI->dTimeSpent != 0) || (pTDI->nTimeSpentUnits != TDCU_HOURS))
+				tasks.SetTaskTimeSpent(hTask, pTDI->dTimeSpent, pTDI->nTimeSpentUnits);
+
+			// for calc'ed spent use this item's units if it
+			// has a non-zero time estimate, else its first subtask's units
+			TDC_UNITS nUnits = m_calculator.GetBestTimeSpentUnits(pTDI, pTDS);
+			double dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, nUnits);
+
+			if (dTime != 0)
+				tasks.SetTaskCalcTimeSpent(hTask, dTime, nUnits);
+		}
+
+		// done date
+		if (bDone)
+		{
+			tasks.SetTaskDoneDate(hTask, pTDI->dateDone);
+			tasks.SetTaskGoodAsDone(hTask, TRUE);
+
+			// hide it if column not visible
+			if (!filter.WantAttribute(TDCA_DONEDATE))
+			{
+				tasks.HideAttribute(hTask, TDL_TASKDONEDATE);
+				tasks.HideAttribute(hTask, TDL_TASKDONEDATESTRING);
+			}
+		}
+		else if (m_calculator.IsTaskDone(pTDI, pTDS))
+		{
+			tasks.SetTaskGoodAsDone(hTask, TRUE);
+		}
+
+		// add due date if we're filtering by due date
+		if (CDateHelper::IsDateSet(filter.dateDueBy) || filter.WantAttribute(TDCA_DUEDATE))
+		{
+			if (pTDI->HasDue())
+			{
+				tasks.SetTaskDueDate(hTask, pTDI->dateDue);
+			}
+			else if (m_data.HasStyle(TDCS_NODUEDATEISDUETODAYORSTART))
+			{
+				COleDateTime dtDue(CDateHelper::GetDate(DHD_TODAY));
+
+				if (CDateHelper::Max(dtDue, pTDI->dateStart))
+					tasks.SetTaskDueDate(hTask, dtDue);
+			}
+		}
+
+		if (filter.WantAttribute(TDCA_DUEDATE) && 
+			(m_data.HasStyle(TDCS_USEEARLIESTDUEDATE) || m_data.HasStyle(TDCS_USELATESTDUEDATE)))
+		{
+			double dDate = m_calculator.GetTaskDueDate(pTDI, pTDS);
+
+			if (dDate > 0)
+				tasks.SetTaskCalcDueDate(hTask, dDate);
+		}
+
+		// start date
+		if (filter.WantAttribute(TDCA_STARTDATE))
+		{
+			if (pTDI->HasStart())
+				tasks.SetTaskStartDate(hTask, pTDI->dateStart);
+
+			if (m_data.HasStyle(TDCS_USEEARLIESTDUEDATE) || m_data.HasStyle(TDCS_USELATESTDUEDATE))
+			{
+				double dDate = m_calculator.GetTaskStartDate(pTDI, pTDS);
+
+				if (dDate > 0)
+					tasks.SetTaskCalcStartDate(hTask, dDate);
+			}
+		}
+
+		// creation date
+		if (pTDI->HasCreation() && filter.WantAttribute(TDCA_CREATIONDATE))
+			tasks.SetTaskCreationDate(hTask, pTDI->dateCreated);
+
+		// modify date
+		if (pTDI->HasLastMod() && filter.WantAttribute(TDCA_LASTMODDATE))
+			tasks.SetTaskLastModified(hTask, pTDI->dateLastMod, _T(""));
+
+		if (!pTDI->sLastModifiedBy.IsEmpty() && filter.WantAttribute(TDCA_LASTMODBY))
+			tasks.SetTaskLastModifiedBy(hTask, pTDI->sLastModifiedBy);
+
+		// subtask completion
+		if (pTDS->HasSubTasks() && filter.WantAttribute(TDCA_SUBTASKDONE))
+			tasks.SetTaskSubtaskCompletion(hTask, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
+
+		// custom comments
+		if (filter.WantAttribute(TDCA_COMMENTS) && !(bHtmlComments || bTextComments))
+		{
+			// Even if it's a text format we still need to write out the comments format
+			// unless there were no comments or the comment type is the same as the default
+			if (CONTENTFORMAT(pTDI->sCommentsTypeID).FormatIsText())
+			{
+				if (!pTDI->sComments.IsEmpty() || (pTDI->sCommentsTypeID != m_data.m_cfDefault))
+					tasks.SetTaskCustomComments(hTask, _T(""), pTDI->sCommentsTypeID);
+			}
+			// else we save the custom comments either if there are any comments or if the
+			// comments type is different from the default
+			else if (!pTDI->customComments.IsEmpty() || (pTDI->sCommentsTypeID != m_data.m_cfDefault))
+			{
+				tasks.SetTaskCustomComments(hTask, pTDI->customComments, pTDI->sCommentsTypeID);
+			}
+		}
+
+		// Metadata
+		if (filter.WantAttribute(TDCA_METADATA))
+			tasks.SetTaskMetaData(hTask, pTDI->GetMetaData());
+
+		// custom data 
+		if (filter.WantAttribute(TDCA_CUSTOMATTRIB_ALL))
+		{
+			tasks.SetTaskCustomAttributeData(hTask, pTDI->GetCustomAttributeValues());
+		}
+		else
+		{
+			int nIndex = m_data.m_aCustomAttribDefs.GetSize();
+
+			while (nIndex--)
+			{
+				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nIndex];
+
+				if (attribDef.bEnabled && filter.WantAttribute(attribDef.GetAttributeID()))
+				{
+					TDCCADATA data;
+
+					if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
+						tasks.SetTaskCustomAttributeData(hTask, attribDef.sUniqueID, data);
+				}
+			}
+		}
+	}
+	else if (bDone)
+	{
+		tasks.SetTaskDoneDate(hTask, pTDI->dateDone);
+		tasks.SetTaskGoodAsDone(hTask, TRUE);
+		tasks.HideAttribute(hTask, TDL_TASKDONEDATE);
+		tasks.HideAttribute(hTask, TDL_TASKDONEDATESTRING);
+	}
+	else if (m_calculator.IsTaskDone(pTDI, pTDS))
+	{
+		tasks.SetTaskGoodAsDone(hTask, TRUE);
+	}
+
+	// assigned task color
+	tasks.SetTaskColor(hTask, pTDI->color);
+
+	// runtime text color
+	tasks.SetTaskTextColor(hTask, GetTaskTextColor(pTDI, pTDS));
+
+	// priority color
+	tasks.SetTaskPriorityColor(hTask, GetPriorityColor(nHighestPriority));
+
+	return TRUE;
+}
+
+COLORREF CTDCTaskExporter::GetTaskTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	COLORREF crText = 0, crBack = CLR_NONE;
+
+	if (m_colors.GetTaskTextColors(pTDI, pTDS, crText, crBack))
+	{
+		if (m_data.HasStyle(TDCS_TASKCOLORISBACKGROUND) && (crBack != CLR_NONE))
+		{
+			return crBack;
+		}
+		else if (crText != CLR_NONE)
+		{
+			return crText;
+		}
+	}
+
+	// all else
+	return 0;
+}
+
+COLORREF CTDCTaskExporter::GetPriorityColor(int nPriority) const 
+{ 
+	return m_colors.GetPriorityColor(nPriority); 
+}
+
+int CTDCTaskExporter::ExportCompletedTasks(CTaskFile& tasks) const
+{
+	ASSERT(tasks.GetTaskCount() == 0);
+
+	ExportCompletedTasks(m_data.GetStructure(), tasks, NULL);
+
+	return tasks.GetTaskCount();
+}
+
+void CTDCTaskExporter::ExportCompletedTasks(const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTaskParent) const
+{
+	const TODOITEM* pTDI = NULL;
+
+	if (!pTDS->IsRoot())
+	{
+		DWORD dwTaskID = pTDS->GetTaskID();
+
+		pTDI = m_data.GetTrueTask(dwTaskID);
+		ASSERT(pTDI);
+
+		if (!pTDI)
+			return;
+
+		// we add the task if it is completed or it has children
+		if (pTDI->IsDone() || pTDS->HasSubTasks())
+		{
+			HTASKITEM hTask = tasks.NewTask(_T(""), hTaskParent, dwTaskID, 0);
+			ASSERT(hTask);
+
+			// copy attributes
+			ExportAllTaskAttributes(pTDI, pTDS, tasks, hTask);
+
+			// this task is now the new parent
+			hTaskParent = hTask;
+		}
+	}
+
+	// children
+	if (pTDS->HasSubTasks())
+	{
+		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
+		{
+			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
+			ExportCompletedTasks(pTDSChild, tasks, hTaskParent); // RECURSIVE call
+		}
+
+		// if no subtasks were added and the parent is not completed 
+		// (and optionally selected) then we remove it
+		if (hTaskParent && tasks.GetFirstTask(hTaskParent) == NULL)
+		{
+			ASSERT(pTDI);
+
+			if (pTDI && !pTDI->IsDone())
+				tasks.DeleteTask(hTaskParent);
+		}
+	}
 }
 
