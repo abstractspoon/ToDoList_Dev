@@ -72,8 +72,8 @@ struct TASKFILE_HEADER
 	BOOL bUnicode;
 	COleDateTime dtEarliestDue;
 	DWORD dwNextID;
+	DWORD nFileVersion;
 	int nFileFormat; // not settable
-	int nFileVersion;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
