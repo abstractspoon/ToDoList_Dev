@@ -265,7 +265,7 @@ public:
 	BOOL IsSelectedTaskReference() const { return m_taskTree.IsSelectedTaskReference(); }
 	DWORD GetSelectedTaskParentID() const { return m_taskTree.GetSelectedTaskParentID(); }
 
-	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const { return m_formatter.GetTaskPath(dwTaskID, nMaxLen); }
+	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const { return m_taskTree.GetTaskPath(dwTaskID, nMaxLen); }
 	CString GetTaskTitle(DWORD dwTaskID) const { return m_data.GetTaskTitle(dwTaskID); }
 	CString GetParentTaskTitle(DWORD dwTaskID) const { return m_data.GetTaskTitle(m_data.GetTaskParentID(dwTaskID)); }
 	CString GetTaskComments(DWORD dwTaskID) const { return m_data.GetTaskComments(dwTaskID); }
@@ -511,7 +511,6 @@ protected:
 	CToDoCtrlData m_data;
 	CTDCTaskMatcher m_matcher;
 	CTDCTaskCalculator m_calculator;
-	CTDCTaskFormatter m_formatter;
 	CTDCTaskExporter m_exporter;
 
 	CStringArray m_aFileRefs;

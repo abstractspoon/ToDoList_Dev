@@ -196,7 +196,6 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_dwLastAddedID(0),
 	m_dwNextUniqueID(1), 
 	m_eTaskName(PEC_AUTODESTROY),
-	m_formatter(m_data),
 	m_hFontComments(NULL),
 	m_hFontTree(NULL),
 	m_matcher(m_data),
