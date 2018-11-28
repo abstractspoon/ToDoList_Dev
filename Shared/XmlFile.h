@@ -214,6 +214,7 @@ public:
 	void CopyFrom(const CXmlFile& file);
 	void Reset();
 	int GetItemCount() const;
+	BOOL IsEmpty() const { return (GetItemCount() == 0); }
 
 	// extended interface
 	BOOL Open(const CString& sFilePath, XF_OPEN nOpenFlags, SFE_FORMAT nFormat = SFEF_AUTODETECT);
