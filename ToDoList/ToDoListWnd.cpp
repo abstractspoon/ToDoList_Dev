@@ -1811,6 +1811,7 @@ BOOL CToDoListWnd::HandleSaveTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist)
 		break;
 		
 	default:
+		ASSERT(nErr >= TDCF_OTHER);
 		sMessage.Format(IDS_UNKNOWNSAVEERROR2, szTasklist, (nErr - (int)TDCF_OTHER));
 		break;
 	}
