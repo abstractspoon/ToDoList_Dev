@@ -166,13 +166,11 @@ UINT CToDoCtrl::WM_TDC_RECREATERECURRINGTASK		= (WM_APP + 3);
 CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault) 
 	: 
 	m_bArchive(FALSE),
-	m_bCheckedOut(FALSE),
 	m_bDelayLoaded(FALSE),
 	m_bDeletingTasks(FALSE),
 	m_bDragDropSubtasksAtTop(TRUE),
 	m_bModified(FALSE), 
 	m_bFindReplacing(FALSE),
-	m_bSourceControlled(FALSE),
 	m_bSplitting(FALSE),
 	m_calculator(m_data),
 	m_cbAllocBy(ACBS_ALLOWDELETE),
@@ -217,7 +215,10 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
 	m_timeTracking(m_data, m_taskTree.TSH()),
 	m_taskTree(m_ilTaskIcons, m_data, m_aStyles, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs),
-	m_exporter(m_data, m_taskTree, m_mgrContent)
+	m_exporter(m_data, m_taskTree, m_mgrContent),
+#pragma warning (disable: 4355)
+	m_ssc(*this)
+#pragma warning (default: 4355)
 {
 	SetBordersDLU(0);
 	
@@ -6043,11 +6044,6 @@ TDC_FILE CToDoCtrl::Save(const CString& sFilePath, BOOL bFlush)
 
 TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL bFlush)
 {
-	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTime log(_T("CToDoCtrl::Save()"));
-	CString sFileName = FileMisc::GetFileNameFromPath(sFilePath);
-	///////////////////////////////////////////////////////////////////////
-	
 	ASSERT (GetSafeHwnd());
 	
 	if (!GetSafeHwnd())
@@ -6063,7 +6059,7 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 	// unless we're saving to another filename or this is our first save
 	BOOL bFirstSave = (!HasFilePath() || !FileMisc::IsSamePath(m_sLastSavePath, sFilePath));
 	
-	if (m_bSourceControlled && !m_bCheckedOut && !bFirstSave)
+	if (m_ssc.IsSourceControlled() && !m_ssc.IsCheckedOut() && !bFirstSave)
 	{
 		return TDCF_SSC_NOTCHECKEDOUT;
 	}
@@ -6109,10 +6105,6 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 
 	BuildTasksForSave(tasks, bFirstSave);
 
-	// PERMANENT LOGGING //////////////////////////////////////////////
-	log.LogTimeElapsed(_T("CToDoCtrl::BuildTasksForSave(%s)"), sFileName);
-	///////////////////////////////////////////////////////////////////
-
 	TDC_FILE nResult = SaveTaskfile(tasks, sSavePath);
 
 	if (nResult == TDCF_SUCCESS)
@@ -6120,7 +6112,6 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 		SetFilePath(sSavePath);
 
 		m_bModified = FALSE;
-		m_bCheckedOut = tasks.IsCheckedOutTo(GetSourceControlID());
 	}
 
 	return nResult;
@@ -6129,7 +6120,7 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 // static helper
 TDC_FILE CToDoCtrl::SaveTaskfile(CTaskFile& tasks, const CString& sSavePath)
 {
-	CScopedLogTime log(_T("CTaskFile::Save(%s)"), FileMisc::GetFileNameFromPath(sSavePath));
+	CScopedLogTime log(_T("CToDoCtrl::SaveTaskfile(%s)"), FileMisc::GetFileNameFromPath(sSavePath));
 	CWaitCursor cursor;
 
 	// Always backup before overwriting
@@ -6178,6 +6169,10 @@ TDC_FILE CToDoCtrl::MapTaskfileError(int nFileErr)
 
 void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks, BOOL bFirstSave) const
 {
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTime log(_T("CToDoCtrl::BuildTasksForSave()"));
+	///////////////////////////////////////////////////////////////////
+
 	tasks.Reset();
 
 	// get tasklist
@@ -6205,16 +6200,10 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks, BOOL bFirstSave) const
 	AppendTaskFileHeader(tasks);
 	
 	// checkout status
-	// if this is a first time save and source control is enabled
-	// then check it out
-	if (m_bSourceControlled)
-	{
-		if (m_bCheckedOut || bFirstSave)
-			tasks.SetCheckedOutTo(GetSourceControlID());
-		else
-			tasks.SetCheckedOutTo(_T(""));
-	}
-	// else CHECKEDOUTTO not added to taskfile
+	m_ssc.PrepareTasksForSave(tasks);
+
+	if (bFirstSave && m_ssc.IsSourceControlled())
+		m_ssc.PreCheckOut(tasks, CString());
 }
 
 void CToDoCtrl::SaveGlobals(CTaskFile& tasks) const
@@ -6404,10 +6393,11 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 	
 	if (tasks.Load(sFilePath, NULL, FALSE)) // don't decrypt
 	{
-		m_bSourceControlled = tasks.IsSourceControlled();
-
-		CString sCheckedOutTo = tasks.GetCheckOutTo();
-		m_bCheckedOut = (m_bSourceControlled && (sCheckedOutTo == GetSourceControlID()));
+		m_ssc.InitialiseState(tasks);
+// 		m_ssc.IsSourceControlled() = tasks.IsSourceControlled();
+// 
+// 		CString sCheckedOutTo = tasks.GetCheckOutTo();
+// 		m_ssc.IsCheckedOut() = (m_ssc.IsSourceControlled() && (sCheckedOutTo == m_ssc.GetSourceControlID()));
 		
 		if (tasks.Decrypt(m_sPassword))
 		{
@@ -6434,15 +6424,20 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 			LoadTasks(tasks);
 			LoadTaskIcons();
 			
-			if (m_bSourceControlled && !m_bCheckedOut && 
-				HasStyle(TDCS_CHECKOUTONLOAD) && sCheckedOutTo.IsEmpty())
+	 		//CString sCheckedOutTo = tasks.GetCheckOutTo();
+
+			if (m_ssc.IsSourceControlled() && HasStyle(TDCS_CHECKOUTONLOAD))
 			{
-				m_bCheckedOut = TRUE;
+				if (m_ssc.PreCheckOut(tasks, CString()) == TDCF_SUCCESS)
+					m_ssc.CheckOut(tasks);
+/*
+				m_ssc.IsCheckedOut() = TRUE;
 				
 				// resave
 				BuildTasksForSave(tasks, FALSE);
 				
-				m_bCheckedOut = tasks.Save(sFilePath, SFEF_UTF16);
+				m_ssc.IsCheckedOut() = tasks.Save(sFilePath, SFEF_UTF16);
+*/
 			}
 			
 			SetModified(FALSE);
@@ -10191,74 +10186,11 @@ void CToDoCtrl::Flush(BOOL bEndTimeTracking) // called to end current editing ac
 		EndTimeTracking(TRUE, FALSE);
 }
 
-CString CToDoCtrl::GetSourceControlID(BOOL bAlternate) const
-{
-	if (HasStyle(TDCS_INCLUDEUSERINCHECKOUT))
-	{
-		if (!bAlternate)
-			return Misc::FormatComputerNameAndUser();
-
-		// else
-		return Misc::GetComputerName();
-	}
-
-	// else
-	if (!bAlternate)
-		return Misc::GetComputerName();
-
-	// else
-	return Misc::FormatComputerNameAndUser();
-}
-
-BOOL CToDoCtrl::MatchesSourceControlID(const CString& sID) const
-{
-	if (sID.IsEmpty())
-		return FALSE;
-
-	return ((GetSourceControlID(FALSE) == sID) ||
-			(GetSourceControlID(TRUE) == sID));
-}
-
 TDC_FILE CToDoCtrl::CheckIn()
 {
-	ASSERT(m_bSourceControlled && m_bCheckedOut);
-
 	Flush(TRUE);
-	
-	if (!m_bSourceControlled)
-	{
-		return TDCF_SSC_NOTSRCCONTROLLED;
-	}
-	else if (!m_bCheckedOut)
-	{
-		return TDCF_SSC_NOTCHECKEDOUT;
-	}
-	else if (m_sLastSavePath.IsEmpty()) // not yet saved
-	{
-		m_bCheckedOut = FALSE;
-		return TDCF_SUCCESS;
-	}
-	
-	// snap shot mod time so we can restore it
-	FILETIME ftMod = { 0 };
-	VERIFY(FileMisc::GetFileLastModified(m_sLastSavePath, ftMod));
 
-	// change check-out state before resaving
-	m_bCheckedOut = FALSE;
-
-	// backup the file
-	CTaskFile file(m_sPassword);
-	BuildTasksForSave(file, FALSE);
-
-	// Always backup before overwriting
-	TDC_FILE nResult = SaveTaskfile(file, m_sLastSavePath);
-
-	if (nResult == TDCF_SUCCESS)
-		FileMisc::SetFileLastModified(m_sLastSavePath, ftMod);
-	else
-		m_bCheckedOut = TRUE;
-
-	return nResult;
+	return m_ssc.CheckIn();
 }
 
 TDC_FILE CToDoCtrl::CheckOut()
@@ -10269,106 +10201,39 @@ TDC_FILE CToDoCtrl::CheckOut()
 
 BOOL CToDoCtrl::IsCheckedOut() const 
 { 
-	return (IsSourceControlled() && m_bCheckedOut); 
+	return m_ssc.IsCheckedOut();
 }
 
 BOOL CToDoCtrl::IsSourceControlled() const 
 { 
-	return m_bSourceControlled; 
+	return m_ssc.IsSourceControlled();
 }
 
 BOOL CToDoCtrl::CanAddToSourceControl(BOOL bAdd) const
 {
-	if (m_bArchive)
-		return FALSE;
-
-	if ((bAdd && m_bSourceControlled) || (!bAdd && !m_bSourceControlled))
-		return FALSE;
-	
-	if (!bAdd && !m_bCheckedOut)
-		return FALSE;
-	
-	return TRUE;
+	return m_ssc.CanAddToSourceControl(bAdd);
 }
 
 BOOL CToDoCtrl::AddToSourceControl(BOOL bAdd)
 {
-	if (m_bArchive)
-		return FALSE;
-
-	if ((bAdd && m_bSourceControlled) || (!bAdd && !m_bSourceControlled))
-		return TRUE;
-	
-	if (!bAdd && !m_bCheckedOut)
-		return FALSE;
-	
-	// update source control
-	m_bSourceControlled = m_bCheckedOut = bAdd;
-				
-	if (m_sLastSavePath.IsEmpty())
-		return TRUE; // not yet saved
-
-	CTaskFile file;
-	BuildTasksForSave(file, FALSE);
-	
-	TDC_FILE nResult = SaveTaskfile(file, m_sLastSavePath);
-
-	if (nResult == TDCF_SUCCESS)
-		return TRUE;
-
-	m_bSourceControlled = m_bCheckedOut = !bAdd;
-	return FALSE;
+	return (m_ssc.AddToSourceControl(bAdd) == TDCF_SUCCESS);
 }
 
 TDC_FILE CToDoCtrl::CheckOut(CString& sCheckedOutTo, BOOL bForce)
 {
-	ASSERT(m_bSourceControlled);
-	
-	if (!m_bSourceControlled)
-		return TDCF_SSC_NOTSRCCONTROLLED;
-	
-	if (m_bDelayLoaded)
-		return TDCF_SSC_DELAYLOADED;
-	
-	if (m_bCheckedOut)
-	{
-		// caller must think we're not checked out
-		ASSERT(0);
-		
-		sCheckedOutTo = GetSourceControlID();
-		return TDCF_SUCCESS;
-	}
-	
-	// Reload the tasklist in case of changes
+	CTaskFile tasks(m_sPassword);
 	CWaitCursor cursor;
-	CTaskFile file(m_sPassword);
 
-	// No need to decrypt initially
-	if (!file.Load(m_sLastSavePath, NULL, FALSE))
-		return MapTaskfileError(file.GetLastFileError());
+	TDC_FILE nResult = m_ssc.PreCheckOut(tasks, sCheckedOutTo, bForce);
 
-	sCheckedOutTo = file.GetCheckOutTo();
-
-	if (!sCheckedOutTo.IsEmpty() && !bForce)
-		return TDCF_OTHER;
+	if (nResult != TDCF_SUCCESS)
+		return nResult;
 
 	// load tasks
-	file.Decrypt();
-	VERIFY(LoadTasks(file));
+	tasks.Decrypt();
+	VERIFY(LoadTasks(tasks));
 
-	// update source control before resaving
-	m_bCheckedOut = TRUE;
-
-	BuildTasksForSave(file, FALSE);
-
-	TDC_FILE nResult = SaveTaskfile(file, m_sLastSavePath);
-
-	if (nResult == TDCF_SUCCESS)
-		m_dtLastTaskMod = COleDateTime::GetCurrentTime();
-	else
-		m_bCheckedOut = FALSE;
-	
-	return nResult;
+	return m_ssc.CheckOut(tasks);
 }
 
 int CToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const

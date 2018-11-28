@@ -11,6 +11,8 @@
 
 #include <afxtempl.h>
 
+#include "tdcenum.h"
+
 //////////////////////////////////////////////////////////////////////
 
 class CToDoCtrl;
@@ -28,74 +30,33 @@ public:
 	CTDCSourceControl(const CToDoCtrl& tdc);
 	virtual ~CTDCSourceControl();
 
-/*
-	BOOL Initialise(const CTaskFile& tasks, BOOL bWantCheckout = FALSE);
+	void InitialiseState(const CTaskFile& tasks);
 	void PrepareTasksForSave(CTaskFile& tasks) const;
 
 	BOOL IsSourceControlled() const;
-	BOOL AddTasklistToSourceControl(BOOL bAdd = TRUE);
-	BOOL CanAddTasklistToSourceControl(BOOL bAdd = TRUE) const;
+	BOOL CanAddToSourceControl(BOOL bAdd = TRUE) const;
+	BOOL CanCheckOut() const;
 
-	BOOL CheckOutTasklist();
-	BOOL CheckOutTasklist(CString& sTasklistCheckedOutTo, BOOL bForce = FALSE);
-	BOOL CheckInTasklist();
+	TDC_FILE AddToSourceControl(BOOL bAdd = TRUE);
+	TDC_FILE CheckOut(const CTaskFile& tasks);
+	TDC_FILE PreCheckOut(CTaskFile& tasks, CString& sCheckedOutTo, BOOL bForce = FALSE) const;
+	TDC_FILE CheckIn();
 
-	BOOL CheckOutTask(DWORD dwTaskID, CString& sTaskCheckedOutTo);
-	BOOL CheckInTask(DWORD dwTaskID, CString& sTasklistCheckedOutTo);
-	BOOL CheckInAllTasks(CString& sTasklistCheckedOutTo);
+	BOOL IsCheckedOut() const;
 
-	BOOL LoadCheckedOutTask(DWORD dwTaskID, TODOITEM& tdi) const;
-	DWORD LoadCheckedOutTask(LPCTSTR szTaskPath, TODOITEM& tdi) const;
-
-	int RestoreCheckedOutTasks(CToDoCtrlDataItems& tdItems) const;
-	BOOL SaveCheckedOutTasks();
-	BOOL HasCheckedOutTasks() const;
-	
-	BOOL IsTasklistCheckedOut() const;
-	BOOL IsTasklistCheckedOut(CString& sTasklistCheckedOutTo) const;
-
-	BOOL IsTaskCheckedOut(DWORD dwTaskID) const;
-	BOOL IsTaskCheckedOut(DWORD dwTaskID, CString& sTaskCheckedOutTo) const;
-	BOOL IsTaskCheckedOutToUs(DWORD dwTaskID) const;
-
-	BOOL GetTasklistSourceControlPath(CString& sTasklistSSCPath) const;
-	BOOL GetSourceControlFolder(CString& sSSCFolder) const;
-	BOOL GetTaskSourceControlPath(DWORD dwTaskID, CString& sTaskSSCPath) const;
-*/
-	
 protected:
 	const CToDoCtrl& m_tdc;
 
-	BOOL m_bTasklistCheckedOut;
-	BOOL m_bTasklistSourceControlled;
-	
+	BOOL m_bCheckedOut;
+	BOOL m_bSourceControlled;
+		
 protected:
-/*
 	CString GetSourceControlID() const;
 	BOOL GetTasklistPath(CString& sTasklistPath) const;
 	BOOL MatchesOurSourceControlID(const CString& sID) const;
-	BOOL SaveCheckedOutTask(DWORD dwTaskID, const TODOITEM& tdi) const;
-	BOOL SaveCheckedOutTask(const CString& sTaskSSCPath, DWORD dwTaskID, 
-							const TODOITEM& tdi, BOOL bPreCheckout) const;
 
-	int DiscardDeletedCheckedOutTasks();
-
-	BOOL HasCheckedOutTask(DWORD dwTaskID) const;
-	COleDateTime GetTaskLastSaveTime(DWORD dwTaskID) const;
-	BOOL TaskModifiedSinceLastSave(DWORD dwTaskID) const;
-
-	static BOOL CreateSentinelFile(LPCTSTR szPath);
-	static BOOL DeleteSentinelFile(LPCTSTR szPath);
 	static BOOL SourceControlIDsMatch(const CString& sID1, const CString& sID2);
-	static BOOL IsSourceControlled(LPCTSTR szPath);
-	static DWORD GetTaskIDFromFilePath(LPCTSTR szPath);
-	static BOOL InitialiseSourceControlFolder(LPCTSTR szTasklistPath);
-	static BOOL CheckOutTasklist(LPCTSTR szTasklistPath, LPCTSTR szXmlHeader, LPCTSTR szSourceControlID, CString& sTasklistCheckedOutTo, BOOL bForce);
-	static BOOL GetSourceControlPath(LPCTSTR szTasklistPath, CString& sTaskSSCPath);
-	static BOOL GetSourceControlFolder(LPCTSTR szTasklistPath, CString& sSSCFolder);
-
-	static CString GetCheckedOutTo(LPCTSTR szPath);
-*/
+	static void PrepareTasksForSave(CTaskFile& tasks, BOOL bSourceControlled, LPCTSTR szCheckedOutTo);
 };
 
 //////////////////////////////////////////////////////////////////////

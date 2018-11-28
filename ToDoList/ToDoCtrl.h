@@ -20,6 +20,7 @@
 #include "tdltasktreectrl.h"
 #include "tdlcommentsctrl.h"
 #include "tdcTimeTracking.h"
+#include "tdcSourceControl.h"
 
 #include "..\shared\runtimedlg.h"
 #include "..\shared\dialoghelper.h"
@@ -71,6 +72,8 @@ namespace OutlookAPI
 
 class CToDoCtrl : public CRuntimeDlg, protected IFindReplaceCmdHandler
 {
+	friend class CTDCSourceControl;
+
 // Construction
 public:
 	CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault);
@@ -496,7 +499,6 @@ protected:
 	TDC_RECURREUSEOPTION m_nDefRecurReuse;
 	CDWordArray m_aRecreateTaskIDs;
 	FIND_STATE m_findState;
-	CTDCTimeTracking m_timeTracking;
 
 	const CContentMgr& m_mgrContent;
 
@@ -509,9 +511,12 @@ protected:
 	COMMENTS_STATE m_nCommentsState;
 
 	CToDoCtrlData m_data;
+
 	CTDCTaskMatcher m_matcher;
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskExporter m_exporter;
+	CTDCTimeTracking m_timeTracking;
+	CTDCSourceControl m_ssc;
 
 	CStringArray m_aFileRefs;
 	CString m_sTextComments;
@@ -534,8 +539,8 @@ protected:
 	TDCRECURRENCE m_tRecurrence;
 	COLORREF m_crColour;
 	CMapStringToString m_mapMetaData;
-	CTDCCustomAttributeDataMap m_mapCustomCtrlData;
 
+	CTDCCustomAttributeDataMap m_mapCustomCtrlData;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 	CTDCCustomControlArray m_aCustomControls;
 
@@ -548,9 +553,7 @@ protected:
 
 	BOOL m_bModified;
 	BOOL m_bArchive;
-	BOOL m_bCheckedOut; // intentionally not a style
 	BOOL m_bSplitting; // dragging comments splitter
-	BOOL m_bSourceControlled;
 	BOOL m_bDragDropSubtasksAtTop;
 	BOOL m_bDelayLoaded;
 	BOOL m_bDeletingTasks;
@@ -674,7 +677,6 @@ protected:
 	afx_msg LRESULT OnCommentsGetTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTaskIconDlgReloadIcons(WPARAM wParam, LPARAM lParam);
 
-
 	// custom data notifications
 	afx_msg void OnCustomAttributeChange(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomAttributeChange(UINT nCtrlID);
@@ -797,8 +799,6 @@ protected:
 	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);
 	UINT MapColumnToCtrlID(TDC_COLUMN nColID) const;
 	TDC_COLUMN MapCtrlIDToColumn(UINT nCtrlID) const;
-	CString GetSourceControlID(BOOL bAlternate = FALSE) const;
-	BOOL MatchesSourceControlID(const CString& sID) const;
 
 	BOOL IsClipboardEmpty(BOOL bCheckID = FALSE) const;
 	CString GetClipboardID() const;
