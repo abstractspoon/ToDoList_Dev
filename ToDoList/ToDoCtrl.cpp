@@ -6084,10 +6084,9 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 	{
 		if (FileMisc::FileExists(sSavePath)) // file exists (sanity check)
 		{
-			TASKFILE_HEADER tfh;
+			CTaskFile temp;
 
-			if (CTaskFile::LoadHeader(sSavePath, tfh) &&
-				(tfh.nFileVersion > m_nFileVersion))
+			if (temp.LoadHeader(sSavePath) && (temp.GetFileVersion() > m_nFileVersion))
 			{
 				CEnString sMessage(IDS_TDC_CONFIRMOVERWRITE, sSavePath);
 

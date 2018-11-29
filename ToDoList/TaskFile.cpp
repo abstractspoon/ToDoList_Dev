@@ -309,25 +309,11 @@ BOOL CTaskFile::LoadContent(const CString& sContent)
 	return FALSE;
 }
 
-BOOL CTaskFile::LoadHeader(LPCTSTR szFilePath, TASKFILE_HEADER* pHeader)
+BOOL CTaskFile::LoadHeader(LPCTSTR szFilePath)
 {
 	CTFHeaderParse tfhp;
 
-	if (Load(szFilePath, &tfhp, FALSE)) // don't decrypt
-	{
-		if (pHeader)
-			GetHeader(*pHeader);
-
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
-}
-
-BOOL CTaskFile::LoadHeader(LPCTSTR szFilePath, TASKFILE_HEADER& header)
-{
-	return CTaskFile().LoadHeader(szFilePath, &header);
+	return Load(szFilePath, &tfhp, FALSE);
 }
 
 void CTaskFile::SetHeader(const TASKFILE_HEADER& header)
