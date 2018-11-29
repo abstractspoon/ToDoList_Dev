@@ -42,6 +42,7 @@ public:
 	// call before standard save
 	virtual BOOL Encrypt(LPCWSTR szPassword = NULL, SFE_FORMAT nFormat = SFEF_AUTODETECT); 
 	virtual BOOL Decrypt(LPCWSTR szPassword = NULL); 
+	BOOL IsEncrypted();
 	static BOOL CanEncrypt(); // false if encryptor dll cannot be loaded
 	
 	static void SetUIStrings(LPCWSTR szPasswordExplanation, LPCWSTR szDecryptFailed);
@@ -59,7 +60,6 @@ protected:
 protected:
 	BOOL Decrypt(LPCWSTR szInput, CString& sOutput, LPCWSTR szPassword);
 	BOOL InitEncryptor();
-	BOOL IsEncrypted();
 	CXmlItem* GetEncryptedBlock();
 	
 };
