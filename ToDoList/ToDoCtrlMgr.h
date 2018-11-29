@@ -142,67 +142,28 @@ public:
 protected:
 	struct TDCITEM
 	{
-		TDCITEM() 
-		{ 
-			pTDC = NULL; 
-			bModified = FALSE; 
-			bLastStatusReadOnly = -1; 
-			tLastMod = 0; 
-			bLastCheckoutSuccess = -1;
-            nPathType = TDCM_UNDEF;
-			nDueStatus = TDCM_NONE;
-			bNeedPrefUpdate = TRUE;
-			nUntitled = -1;
-			bLoaded = TRUE;
-			crTab = CLR_NONE;
-		}
-		
-		TDCITEM(CFilteredToDoCtrl* pCtrl, BOOL loaded, const TSM_TASKLISTINFO* pInfo = NULL) 
-		{ 
-			static int nNextUntitledIndex = 0;
-			nUntitled = (!pCtrl->HasFilePath() ? nNextUntitledIndex++ : -1);
-			
-			pTDC = pCtrl; 
-			bLoaded = loaded;
-			bModified = FALSE; 
-			bLastStatusReadOnly = -1;
-			tLastMod = 0;
-			bLastCheckoutSuccess = -1;
-			nDueStatus = TDCM_NONE;
-			bNeedPrefUpdate = TRUE;
-			crTab = CLR_NONE;
+	public:
+		TDCITEM();
+		TDCITEM(CFilteredToDoCtrl* pCtrl, BOOL loaded, const TSM_TASKLISTINFO* pInfo = NULL);
+		virtual ~TDCITEM();
 
-			if (pInfo && pInfo->HasInfo())
-			{
-				SetStorageDetails(*pInfo);
-			}
-			else
-			{
-				CString sFilePath = pCtrl->GetFilePath();
-				
-				if (!sFilePath.IsEmpty())
-				{
-					bLastStatusReadOnly = (CDriveInfo::IsReadonlyPath(sFilePath) > 0);
-					tLastMod = FileMisc::GetFileLastModified(sFilePath);
-				}
+		TDCM_PATHTYPE GetPathType() const;
+		CString GetFriendlyProjectName() const;
 
-				if (pCtrl->IsCheckedOut())
-					bLastCheckoutSuccess = TRUE;
-			}
-			
-            RefreshPathType();
-		}
+		BOOL UsesStorage() const;
+		void RefreshPathType();
+		void ClearStorageDetails();
+		void SetStorageDetails(const TSM_TASKLISTINFO& info);
 
-		virtual ~TDCITEM()
-		{
-		}
-		
+		static TDCM_PATHTYPE TranslatePathType(int nDriveInfoType);
+	
+	public:
 		CFilteredToDoCtrl* pTDC;
 		BOOL bModified;
 		BOOL bLastStatusReadOnly;
 		time64_t tLastMod;
 		BOOL bLastCheckoutSuccess;
-        TDCM_PATHTYPE nPathType;
+		TDCM_PATHTYPE nPathType;
 		TDCM_DUESTATUS nDueStatus;
 		BOOL bNeedPrefUpdate;
 		int nUntitled; // creation index regardless of actual position
@@ -210,72 +171,6 @@ protected:
 		COLORREF crTab;
 
 		TSM_TASKLISTINFO storageinfo;
-		
-		inline TDCM_PATHTYPE GetPathType() const { return nPathType; }
-        
-		BOOL UsesStorage() const { return !storageinfo.sStorageID.IsEmpty(); }
-
-        void RefreshPathType() 
-        { 
-			// special case
-  			if (UsesStorage())
-			{
-  				nPathType = TDCM_OTHER;
-			}
-  			else
-			{
-				LPCTSTR szFilePath = pTDC->GetFilePath();
-				nPathType = TranslatePathType(CDriveInfo::GetPathType(szFilePath));
-			}
-        }
-		
-		void ClearStorageDetails()
-		{
-			storageinfo.Reset();
-			pTDC->SetAlternatePreferencesKey(_T(""));
-		}
-
-		void SetStorageDetails(const TSM_TASKLISTINFO& info)
-		{
-			if (info.HasInfo())
-			{
-				storageinfo = info;
-				
-				// set filename and alternate pref name to be the display name
-				pTDC->SetFilePath(info.szDisplayName);
-				pTDC->SetAlternatePreferencesKey(info.szDisplayName);
-			}
-			else
-				ClearStorageDetails();
-		}
-
-		CString GetFriendlyProjectName() const 
-		{ 
- 			if (UsesStorage() && pTDC->GetProjectName().IsEmpty())
- 				return storageinfo.szDisplayName;
-
-			// else
-			return pTDC->GetFriendlyProjectName(nUntitled); 
-		}
-
-		static TDCM_PATHTYPE TranslatePathType(int nDriveInfoType)
-		{
-            switch (nDriveInfoType)
-            {
-            case DRIVE_REMOTE:
-                return TDCM_REMOTE;
-				
-            case DRIVE_REMOVABLE:
-            case DRIVE_CDROM:
-                return TDCM_REMOVABLE;
-				
-            case DRIVE_FIXED:
-                return TDCM_FIXED;
-			}
-
-			// all else
-			return TDCM_UNDEF;
-		}
 	};
 	
 	CArray<TDCITEM, TDCITEM&> m_aToDoCtrls;

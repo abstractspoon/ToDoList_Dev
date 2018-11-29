@@ -60,6 +60,135 @@ if (!VALIDINDEX(i))               \
 }
 
 /////////////////////////////////////////////////////////////////////////////
+
+CToDoCtrlMgr::TDCITEM::TDCITEM() 
+{ 
+	pTDC = NULL; 
+	bModified = FALSE; 
+	bLastStatusReadOnly = -1; 
+	tLastMod = 0; 
+	bLastCheckoutSuccess = -1;
+	nPathType = TDCM_UNDEF;
+	nDueStatus = TDCM_NONE;
+	bNeedPrefUpdate = TRUE;
+	nUntitled = -1;
+	bLoaded = TRUE;
+	crTab = CLR_NONE;
+}
+
+CToDoCtrlMgr::TDCITEM::TDCITEM(CFilteredToDoCtrl* pCtrl, BOOL loaded, const TSM_TASKLISTINFO* pInfo) 
+{ 
+	static int nNextUntitledIndex = 0;
+	nUntitled = (!pCtrl->HasFilePath() ? nNextUntitledIndex++ : -1);
+
+	pTDC = pCtrl; 
+	bLoaded = loaded;
+	bModified = FALSE; 
+	bLastStatusReadOnly = -1;
+	tLastMod = 0;
+	bLastCheckoutSuccess = -1;
+	nDueStatus = TDCM_NONE;
+	bNeedPrefUpdate = TRUE;
+	crTab = CLR_NONE;
+
+	if (pInfo && pInfo->HasInfo())
+	{
+		SetStorageDetails(*pInfo);
+	}
+	else
+	{
+		CString sFilePath = pCtrl->GetFilePath();
+
+		if (!sFilePath.IsEmpty())
+		{
+			bLastStatusReadOnly = (CDriveInfo::IsReadonlyPath(sFilePath) > 0);
+			tLastMod = FileMisc::GetFileLastModified(sFilePath);
+		}
+
+		if (pCtrl->IsCheckedOut())
+			bLastCheckoutSuccess = TRUE;
+	}
+
+	RefreshPathType();
+}
+
+CToDoCtrlMgr::TDCITEM::~TDCITEM()
+{
+}
+
+TDCM_PATHTYPE CToDoCtrlMgr::TDCITEM::GetPathType() const 
+{ 
+	return nPathType; 
+}
+
+BOOL CToDoCtrlMgr::TDCITEM::UsesStorage() const 
+{ 
+	return !storageinfo.sStorageID.IsEmpty(); 
+}
+
+void CToDoCtrlMgr::TDCITEM::RefreshPathType() 
+{ 
+	// special case
+	if (UsesStorage())
+	{
+		nPathType = TDCM_OTHER;
+	}
+	else
+	{
+		LPCTSTR szFilePath = pTDC->GetFilePath();
+		nPathType = TranslatePathType(CDriveInfo::GetPathType(szFilePath));
+	}
+}
+
+void CToDoCtrlMgr::TDCITEM::ClearStorageDetails()
+{
+	storageinfo.Reset();
+	pTDC->SetAlternatePreferencesKey(_T(""));
+}
+
+void CToDoCtrlMgr::TDCITEM::SetStorageDetails(const TSM_TASKLISTINFO& info)
+{
+	if (info.HasInfo())
+	{
+		storageinfo = info;
+
+		// set filename and alternate pref name to be the display name
+		pTDC->SetFilePath(info.szDisplayName);
+		pTDC->SetAlternatePreferencesKey(info.szDisplayName);
+	}
+	else
+		ClearStorageDetails();
+}
+
+CString CToDoCtrlMgr::TDCITEM::GetFriendlyProjectName() const 
+{ 
+	if (UsesStorage() && pTDC->GetProjectName().IsEmpty())
+		return storageinfo.szDisplayName;
+
+	// else
+	return pTDC->GetFriendlyProjectName(nUntitled); 
+}
+
+TDCM_PATHTYPE CToDoCtrlMgr::TDCITEM::TranslatePathType(int nDriveInfoType)
+{
+	switch (nDriveInfoType)
+	{
+	case DRIVE_REMOTE:
+		return TDCM_REMOTE;
+
+	case DRIVE_REMOVABLE:
+	case DRIVE_CDROM:
+		return TDCM_REMOVABLE;
+
+	case DRIVE_FIXED:
+		return TDCM_FIXED;
+	}
+
+	// all else
+	return TDCM_UNDEF;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // CToDoCtrlMgr dialog
 
 CToDoCtrlMgr::CToDoCtrlMgr(CTabCtrlEx& tabCtrl) : m_tabCtrl(tabCtrl), m_pPrefs(NULL)
