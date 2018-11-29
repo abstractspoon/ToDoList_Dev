@@ -251,16 +251,6 @@ const CToDoCtrlMgr::TDCITEM& CToDoCtrlMgr::GetTDCItem(int nIndex) const
 	return m_aToDoCtrls.GetData()[nIndex];
 }
 
-BOOL CToDoCtrlMgr::GetFileNameAndExt(int nIndex, CString& sFileName, CString& sExt, BOOL bStrict) const
-{
-	CHECKVALIDINDEXRET(nIndex, FALSE);
-
-	CString sPath = GetFilePath(nIndex, bStrict);
-	FileMisc::SplitPath(sPath, NULL, NULL, &sFileName, &sExt);
-
-	return (!sFileName.IsEmpty() && !sExt.IsEmpty());
-}
-
 CString CToDoCtrlMgr::GetFileName(int nIndex, BOOL bStrict) const
 {
 	CHECKVALIDINDEXRET(nIndex, _T(""));
@@ -662,10 +652,7 @@ TDC_FILE CToDoCtrlMgr::CheckIn(int nIndex)
 	CHECKVALIDINDEXRET(nIndex, TDCF_UNSET);
 	ASSERT(GetLastCheckoutSucceeded(nIndex));
 	
-	TDC_FILE nCheckin = TDCF_SUCCESS;
-	
-	if (IsCheckedOut(nIndex))
-		nCheckin = GetToDoCtrl(nIndex).CheckIn();
+	TDC_FILE nCheckin = GetToDoCtrl(nIndex).CheckIn();
 	
 	if (nCheckin == TDCF_SUCCESS)
 	{
@@ -685,17 +672,13 @@ BOOL CToDoCtrlMgr::CanCheckInOut(int nIndex) const
 
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 	
-	BOOL bCanCheckInOut = tdc.IsSourceControlled();
-	
-	if (bCanCheckInOut)
-	{
-		bCanCheckInOut = (tdc.CompareFileFormat() != TDCFF_NEWER);
-		
-		if (bCanCheckInOut)
-			bCanCheckInOut &= !GetReadOnlyStatus(nIndex);
-	}
+	if (!tdc.IsSourceControlled())
+		return FALSE;
 
-	return bCanCheckInOut;
+	if (tdc.CompareFileFormat() == TDCFF_NEWER)
+		return FALSE;
+
+	return !GetReadOnlyStatus(nIndex);
 }
 
 int CToDoCtrlMgr::GetElapsedMinutesSinceLastMod(int nIndex) const
@@ -930,8 +913,7 @@ BOOL CToDoCtrlMgr::ArchiveDoneTasks(int nIndex)
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
-
+	BOOL bRemoveFlagged = !Prefs().GetDontRemoveFlagged();
 	TDC_ARCHIVE nRemove = TDC_REMOVENONE;
 	
 	if (Prefs().GetRemoveArchivedTasks())
@@ -942,16 +924,16 @@ BOOL CToDoCtrlMgr::ArchiveDoneTasks(int nIndex)
 			nRemove = TDC_REMOVEALL;
 	}
 	
-	return tdc.ArchiveDoneTasks(nRemove, !Prefs().GetDontRemoveFlagged());
+	return GetToDoCtrl(nIndex).ArchiveDoneTasks(nRemove, bRemoveFlagged);
 }
 
 BOOL CToDoCtrlMgr::ArchiveSelectedTasks(int nIndex)
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
+	BOOL bRemove = Prefs().GetRemoveArchivedTasks();
 	
-	return tdc.ArchiveSelectedTasks(Prefs().GetRemoveArchivedTasks());
+	return GetToDoCtrl(nIndex).ArchiveSelectedTasks(bRemove);
 }
 
 CString CToDoCtrlMgr::GetArchivePath(int nIndex) const
@@ -1086,10 +1068,6 @@ BOOL CToDoCtrlMgr::AddToSourceControl(int nIndex, BOOL bAdd)
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	// if removing, try to checkout the tasklist if not already done
-	if (!bAdd && !IsCheckedOut(nIndex) && (CheckOut(nIndex) != TDCF_SUCCESS))
-		return FALSE;
-
 	if (!GetToDoCtrl(nIndex).AddToSourceControl(bAdd))
 		return FALSE;
 
@@ -1186,13 +1164,9 @@ CString CToDoCtrlMgr::GetTabItemTooltip(int nIndex) const
 	{
 	case IM_READONLY:
 		if (tci.pTDC->CompareFileFormat() == TDCFF_NEWER)
-		{
 			sTooltip.LoadString(IDS_STATUSNEWERFORMAT);
-		}
 		else
-		{
 			sTooltip.LoadString(IDS_STATUSREADONLY);
-		}
 		break;
 
 	case IM_CHECKEDIN:
@@ -1312,25 +1286,6 @@ int CToDoCtrlMgr::FindToDoCtrl(const TSM_TASKLISTINFO& info) const
 	return -1;
 }
 
-COleDateTime CToDoCtrlMgr::GetMostRecentEdit() const
-{
-	COleDateTime dtRecent;
-
-	int nCtrl = GetCount();
-	
-	while (nCtrl--)
-	{
-		COleDateTime dtLastEdit = GetTDCItem(nCtrl).pTDC->GetLastTaskModified();
-
-		if (!CDateHelper::IsDateSet(dtRecent))
-			dtRecent = dtLastEdit;
-		else
-			dtRecent = min(dtLastEdit, dtRecent);
-	}
-
-	return dtRecent;	
-}
-
 void CToDoCtrlMgr::PreparePopupMenu(CMenu& menu, UINT nID1, int nMax) const
 {
 	int nTDC = 0;
@@ -1346,26 +1301,6 @@ void CToDoCtrlMgr::PreparePopupMenu(CMenu& menu, UINT nID1, int nMax) const
 	for (; nTDC < nMax; nTDC++)
 		menu.RemoveMenu(nID1 + nTDC, MF_BYCOMMAND);
 
-}
-
-BOOL CToDoCtrlMgr::HasTasks(int nIndex) const
-{
-	CHECKVALIDINDEXRET(nIndex, FALSE);
-	
-	return GetToDoCtrl(nIndex).GetTaskCount();
-}
-
-BOOL CToDoCtrlMgr::AnyHasTasks() const
-{
-	int nCtrl = GetCount();
-	
-	while (nCtrl--)
-	{
-		if (HasTasks(nCtrl))
-			return TRUE;
-	}
-	
-	return FALSE;
 }
 
 BOOL CToDoCtrlMgr::AnyIsModified() const
