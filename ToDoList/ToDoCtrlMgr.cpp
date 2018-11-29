@@ -512,9 +512,7 @@ TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex, CString& sCheckedOutTo, BOOL bForce)
 	CHECKVALIDINDEXRET(nIndex, TDCF_UNSET);
 	ASSERT(CanCheckOut(nIndex));
 	
-	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
-	
-	TDC_FILE nCheckout = tdc.CheckOut(sCheckedOutTo, bForce);
+	TDC_FILE nCheckout = GetToDoCtrl(nIndex).CheckOut(sCheckedOutTo, bForce);
 	
 	if (nCheckout == TDCF_SUCCESS)
 	{
@@ -525,7 +523,7 @@ TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex, CString& sCheckedOutTo, BOOL bForce)
 		UpdateTabItemImage(nIndex);
 	}
 	
-	SetLastCheckoutSucceeded(nIndex, nCheckout == TDCF_SUCCESS);
+	SetLastCheckoutSucceeded(nIndex, (nCheckout == TDCF_SUCCESS));
 	
 	return nCheckout;
 }
@@ -533,15 +531,12 @@ TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex, CString& sCheckedOutTo, BOOL bForce)
 TDC_FILE CToDoCtrlMgr::CheckIn(int nIndex)
 {
 	CHECKVALIDINDEXRET(nIndex, TDCF_UNSET);
-	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
-	
-	// sanity check
 	ASSERT(GetLastCheckoutSucceeded(nIndex));
 	
 	TDC_FILE nCheckin = TDCF_SUCCESS;
 	
-	if (tdc.IsCheckedOut())
-		nCheckin = tdc.CheckIn();
+	if (IsCheckedOut(nIndex))
+		nCheckin = GetToDoCtrl(nIndex).CheckIn();
 	
 	if (nCheckin == TDCF_SUCCESS)
 	{

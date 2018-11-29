@@ -109,8 +109,7 @@ public:
 	virtual BOOL WantTaskContextMenu() const { return TRUE; }
 
 	TDC_FILE CheckIn();
-	TDC_FILE CheckOut();
-	TDC_FILE CheckOut(CString& sCheckedOutTo, BOOL bForce);
+	TDC_FILE CheckOut(CString& sCheckedOutTo, BOOL bForce = FALSE);
 	BOOL IsCheckedOut() const;
 	BOOL IsSourceControlled() const;
 	BOOL AddToSourceControl(BOOL bAdd = TRUE);

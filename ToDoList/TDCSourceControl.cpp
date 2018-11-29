@@ -135,11 +135,12 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 	FILETIME ftMod = { 0 };
 	VERIFY(FileMisc::GetFileLastModified(sTaskfilePath, ftMod));
 
-	// Open the tasklist WITHOUT decrypting
+	// Must be already encrypted
 	ASSERT(tasks.GetPassword().IsEmpty() || tasks.IsEncrypted());
 
 	TDC_FILE nResult = TDCF_UNSET;
 
+	// Open the tasklist WITHOUT decrypting
 	if (tasks.Open(sTaskfilePath, XF_READWRITE, FALSE))
 	{
 		if (tasks.IsEmpty())
@@ -200,18 +201,48 @@ TDC_FILE CTDCSourceControl::CheckIn()
 	CString sTaskfilePath;
 
 	if (!GetTasklistPath(sTaskfilePath))
+	{
+		m_bCheckedOut = FALSE;
 		return TDCF_SUCCESS;
+	}
+
+	CTaskFile tasks(m_tdc.m_sPassword);
+	m_tdc.BuildTasksForSave(tasks);
+
+	return CheckIn(tasks);
+}
+
+TDC_FILE CTDCSourceControl::CheckIn(CTaskFile& tasks)
+{
+	if (!m_bSourceControlled)
+	{
+		ASSERT(0);
+		return TDCF_SSC_NOTSRCCONTROLLED;
+	}
+	else if (!m_bCheckedOut)
+	{
+		ASSERT(0);
+		return TDCF_SSC_NOTCHECKEDOUT;
+	}
+
+	CString sTaskfilePath;
+
+	if (!GetTasklistPath(sTaskfilePath) || tasks.IsEmpty())
+	{
+		ASSERT(0);
+		return TDCF_OTHER;
+	}
+
+	// Must be already encrypted
+	ASSERT(tasks.GetPassword().IsEmpty() || tasks.IsEncrypted());
+
+	tasks.SetCheckedOutTo(_T(""));
 
 	// snap shot mod time so we can restore it
 	FILETIME ftMod = { 0 };
 	VERIFY(FileMisc::GetFileLastModified(sTaskfilePath, ftMod));
 
-	CTaskFile file(m_tdc.m_sPassword);
-	m_tdc.BuildTasksForSave(file);
-
-	file.SetCheckedOutTo(_T(""));
-
-	TDC_FILE nResult = m_tdc.SaveTaskfile(file, sTaskfilePath);
+	TDC_FILE nResult = m_tdc.SaveTaskfile(tasks, sTaskfilePath);
 
 	if (nResult == TDCF_SUCCESS)
 	{

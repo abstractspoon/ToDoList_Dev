@@ -39,6 +39,7 @@ public:
 
 	TDC_FILE AddToSourceControl(BOOL bAdd = TRUE);
 	TDC_FILE CheckIn();
+	TDC_FILE CheckIn(CTaskFile& tasks);
 	TDC_FILE CheckOut(CTaskFile& tasks /*in-out*/, CString& sCheckedOutTo/*out*/, BOOL bForce = FALSE);
 
 	BOOL IsCheckedOut() const;

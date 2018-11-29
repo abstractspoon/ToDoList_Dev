@@ -6392,8 +6392,22 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 	{
 		m_ssc.InitialiseState(tasks);
 
-		if (m_ssc.IsSourceControlled() && HasStyle(TDCS_CHECKOUTONLOAD))
-			m_ssc.CheckOut(tasks, CString());
+		BOOL bWantCheckout = (HasStyle(TDCS_CHECKOUTONLOAD) &&
+								m_ssc.IsSourceControlled() && 
+								!m_ssc.IsCheckedOut());
+
+		if (bWantCheckout)
+		{
+			// Checkout has to happen before the tasks are decrypted
+			// but it will fail if we are currently delay loaded.
+			// And m_bDelayLoaded is not cleared until LoadTasks(...)
+			// which happens only after decryption.
+			// So we temporarily clear m_bDelayLoaded just for this case.
+			CAutoFlag af(m_bDelayLoaded, FALSE);
+
+			// Clear flag if check-out failed
+			bWantCheckout = (m_ssc.CheckOut(tasks, CString()) == TDCF_SUCCESS);
+		}
 
 		if (tasks.Decrypt(m_sPassword))
 		{
@@ -6422,6 +6436,11 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 			
 			SetModified(FALSE);
 			return TDCF_SUCCESS;
+		} 
+		// user cancelled so revert any check-out
+		else if (bWantCheckout)
+		{
+			VERIFY(m_ssc.CheckIn(tasks) == TDCF_SUCCESS);
 		}
 	}
 
@@ -10173,12 +10192,6 @@ TDC_FILE CToDoCtrl::CheckIn()
 	return m_ssc.CheckIn();
 }
 
-TDC_FILE CToDoCtrl::CheckOut()
-{
-	CString sTemp;
-	return CheckOut(sTemp, FALSE);
-}
-
 BOOL CToDoCtrl::IsCheckedOut() const 
 { 
 	return m_ssc.IsCheckedOut();
@@ -10201,19 +10214,19 @@ BOOL CToDoCtrl::AddToSourceControl(BOOL bAdd)
 
 TDC_FILE CToDoCtrl::CheckOut(CString& sCheckedOutTo, BOOL bForce)
 {
-	CTaskFile tasks(m_sPassword);
 	CWaitCursor cursor;
+	CTaskFile tasks(m_sPassword);
 
 	TDC_FILE nResult = m_ssc.CheckOut(tasks, sCheckedOutTo, bForce);
 
-	if (nResult != TDCF_SUCCESS)
-		return nResult;
+	if (nResult == TDCF_SUCCESS)
+	{
+		// load tasks
+		tasks.Decrypt();
+		VERIFY(LoadTasks(tasks));
+	}
 
-	// load tasks
-	tasks.Decrypt();
-	VERIFY(LoadTasks(tasks));
-
-	return TDCF_SUCCESS;
+	return nResult;
 }
 
 int CToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const
