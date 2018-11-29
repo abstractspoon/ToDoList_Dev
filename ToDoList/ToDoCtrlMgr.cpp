@@ -1207,9 +1207,9 @@ CString CToDoCtrlMgr::GetTabItemTooltip(int nIndex) const
 		sTooltip.LoadString(IDS_TABTIP_NOTLOADED);
 		break;
 		
-// 	case IM_TIMETRACKING:	
-// 		sTooltip.LoadString(IDS_TABTIP_TIMETRACKING);
-// 		break;
+	case IM_TIMETRACKING:	
+		sTooltip.LoadString(IDS_TABTIP_TIMETRACKING);
+		break;
 	}
 
 	return sTooltip;

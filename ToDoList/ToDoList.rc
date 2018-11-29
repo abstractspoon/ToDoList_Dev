@@ -5446,6 +5446,7 @@ BEGIN
     IDS_TDC_COLUMN_COMMENTSSIZE "KB"
     IDS_SAVETASKVIEWTOIMAGE_TITLE "Save Task View to Image"
     IDS_TDLBC_CUSTOMATTRIBS "Custom Attributes"
+    IDS_TABTIP_TIMETRACKING "Time Tracking"
 END
 
 #endif    // English (Australia) resources

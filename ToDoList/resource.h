@@ -2213,6 +2213,7 @@
 #define IDS_TDC_COLUMN_COMMENTSSIZE     58483
 #define IDS_SAVETASKVIEWTOIMAGE_TITLE   58484
 #define IDS_TDLBC_CUSTOMATTRIBS         58485
+#define IDS_TABTIP_TIMETRACKING         58486
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects
