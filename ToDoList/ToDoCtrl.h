@@ -911,7 +911,7 @@ protected:
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
 	void SetDefaultComboNames(CAutoComboBox& combo, const CStringArray& aNewNames, 
 								CStringArray& aDefNames, BOOL bReadOnly, BOOL bAddEmpty);
-	void BuildTasksForSave(CTaskFile& tasks, BOOL bFirstSave) const;
+	void BuildTasksForSave(CTaskFile& tasks/*, BOOL bFirstSave*/) const;
 	BOOL SetComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty);
 	
 	static void SetDefaultListContent(CAutoComboBox& combo, const CStringArray& aNewDefs, const CStringArray& aOldDefs, BOOL bAddEmpty = FALSE);

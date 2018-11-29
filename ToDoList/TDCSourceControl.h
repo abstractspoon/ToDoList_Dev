@@ -38,9 +38,8 @@ public:
 	BOOL CanCheckOut() const;
 
 	TDC_FILE AddToSourceControl(BOOL bAdd = TRUE);
-	TDC_FILE CheckOut(const CTaskFile& tasks);
-	TDC_FILE PreCheckOut(CTaskFile& tasks, CString& sCheckedOutTo, BOOL bForce = FALSE) const;
 	TDC_FILE CheckIn();
+	TDC_FILE CheckOut(CTaskFile& tasks /*in-out*/, CString& sCheckedOutTo/*out*/, BOOL bForce = FALSE);
 
 	BOOL IsCheckedOut() const;
 
@@ -56,7 +55,6 @@ protected:
 	BOOL MatchesOurSourceControlID(const CString& sID) const;
 
 	static BOOL SourceControlIDsMatch(const CString& sID1, const CString& sID2);
-	static void PrepareTasksForSave(CTaskFile& tasks, BOOL bSourceControlled, LPCTSTR szCheckedOutTo);
 };
 
 //////////////////////////////////////////////////////////////////////
