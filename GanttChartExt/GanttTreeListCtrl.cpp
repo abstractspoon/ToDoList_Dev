@@ -2741,8 +2741,7 @@ BOOL CGanttTreeListCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint point)
 			SetDropHilite(htiHot, nHotItem);
 			
 			// track when the cursor leaves the tree ctrl
-			TRACKMOUSEEVENT tme = { sizeof(tme), TME_LEAVE, m_tree, 0 };
-			TrackMouseEvent(&tme);
+			CDialogHelper::TrackMouseLeave(m_tree);
 
 			return TRUE; // eat
 		}
