@@ -97,6 +97,8 @@ protected:
 	BOOL m_bEditChange;
 	BOOL m_bNotifyingParent;
 
+	int m_nHotSimpleListItem;
+
 	mutable BOOL m_bDrawing;
 
 	// Overrides
@@ -139,6 +141,7 @@ protected:
 	BOOL DoDeleteListItem(const CPoint& ptList);
 	int HitTestListDeleteBtn(const CPoint& ptList) const;
 	int HitTestList(const CPoint& ptList) const;
+	void RedrawListItem(int nItem) const;
 
 	BOOL AllowDelete() const;
 	BOOL CaseSensitive() const { return Misc::HasFlag(m_dwFlags, ACBS_CASESENSITIVE); }

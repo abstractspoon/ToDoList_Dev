@@ -8,6 +8,7 @@
 #include "misc.h"
 #include "enstring.h"
 #include "graphicsmisc.h"
+#include "dialoghelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -76,7 +77,8 @@ CAutoComboBox::CAutoComboBox(DWORD dwFlags)
 	m_dwFlags(dwFlags), 
 	m_bNotifyingParent(FALSE), 
 	m_bEditChange(FALSE), 
-	m_nDeleteItem(LB_ERR)
+	m_nDeleteItem(LB_ERR),
+	m_nHotSimpleListItem(LB_ERR)
 {
 }
 
@@ -364,9 +366,14 @@ void CAutoComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 		
 		CRect rBtn;
 		VERIFY(GetListDeleteButtonRect(rect, rBtn));
+
+		BOOL bHighlightDeleteBtn = (nItemState & ODS_SELECTED);
+
+		if (!bHighlightDeleteBtn && IsType(CBS_SIMPLE))
+			bHighlightDeleteBtn = (nItem == m_nHotSimpleListItem);
 		
-		// set the color to white-on-red if selected
-		if (nItemState & ODS_SELECTED)
+		// set the color to white-on-red if highlighted
+		if (bHighlightDeleteBtn)
 		{
 			dc.SetTextColor(WHITE);
 			dc.FillSolidRect(rBtn, RED);
@@ -497,9 +504,68 @@ LRESULT CAutoComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 			return 1L; // prevent combo closing
 		}
 		break;
+
+	case WM_MOUSEMOVE:
+		if (IsType(CBS_SIMPLE))
+		{
+			int nHit = HitTestList(lp);
+
+			if (nHit != m_nHotSimpleListItem)
+			{
+				int nPrev = m_nHotSimpleListItem;
+				m_nHotSimpleListItem = nHit;
+
+				int nSel = m_scList.SendMessage(LB_GETCURSEL);
+
+				if ((nPrev != LB_ERR) && (nPrev != nSel))
+					RedrawListItem(nPrev);
+
+				if ((nHit != LB_ERR) && (nHit != nSel))
+				{
+					RedrawListItem(nHit);
+					CDialogHelper::TrackMouseLeave(m_scList.GetHwnd());
+				}
+				else
+				{
+					CDialogHelper::TrackMouseLeave(m_scList.GetHwnd(), FALSE);
+				}
+			}
+		}
+		break;
+
+	case WM_MOUSELEAVE:
+		if (IsType(CBS_SIMPLE))
+		{
+			int nSel = m_scList.SendMessage(LB_GETCURSEL);
+
+			if (m_nHotSimpleListItem != LB_ERR)
+			{
+				int nPrev = m_nHotSimpleListItem;
+				m_nHotSimpleListItem = LB_ERR;
+
+				if (m_nHotSimpleListItem != nSel)
+					RedrawListItem(nPrev);
+			}
+
+			CDialogHelper::TrackMouseLeave(m_scList.GetHwnd(), FALSE);
+		}
+		break;
 	}
 	
 	return CSubclasser::ScDefault(m_scList);
+}
+
+void CAutoComboBox::RedrawListItem(int nItem) const
+{
+	CRect rItem;
+	m_scList.SendMessage(LB_GETITEMRECT, nItem, (LPARAM)(LPRECT)&rItem);
+
+	TRACE(_T("CAutoComboBox::OnListboxMessage(hot = %d)\n"), m_nHotSimpleListItem);
+
+	::InvalidateRect(m_scList.GetHwnd(), rItem, FALSE);
+	::UpdateWindow(m_scList.GetHwnd());
+
+
 }
 
 LRESULT CAutoComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
@@ -589,13 +655,14 @@ int CAutoComboBox::HitTestListDeleteBtn(const CPoint& ptList) const
 	{
 		int nItem = HitTestList(ptList);
 		
-		if ((nItem != LB_ERR) && ::SendMessage(GetListbox(), LB_GETTEXTLEN, nItem, 0))
+		if ((nItem != LB_ERR) && m_scList.SendMessage(LB_GETTEXTLEN, nItem, 0))
 		{
-			CRect rItem, rBtn;
+			CRect rItem;
 			
-			if (LB_ERR != ::SendMessage(GetListbox(), LB_GETITEMRECT, nItem, (LPARAM)(LPRECT)rItem))
+			if (LB_ERR != m_scList.SendMessage(LB_GETITEMRECT, nItem, (LPARAM)(LPRECT)rItem))
 			{
-				rItem.left = rItem.right - SIZE_CLOSEBTN;
+				CRect rBtn;
+				GetListDeleteButtonRect(rItem, rBtn);
 
 				if (rItem.PtInRect(ptList))
 					return nItem;
@@ -609,7 +676,7 @@ int CAutoComboBox::HitTestListDeleteBtn(const CPoint& ptList) const
 
 int CAutoComboBox::HitTestList(const CPoint& ptList) const
 {
-	DWORD dwHit = ::SendMessage(GetListbox(), LB_ITEMFROMPOINT, 0, MAKELPARAM(ptList.x, ptList.y));
+	DWORD dwHit = m_scList.SendMessage(LB_ITEMFROMPOINT, 0, MAKELPARAM(ptList.x, ptList.y));
 
 	if (HIWORD(dwHit))
 		return LB_ERR;
@@ -689,7 +756,8 @@ BOOL CAutoComboBox::AllowDelete() const
 	{
 		if (Misc::HasFlag(m_dwFlags, ACBS_ALLOWDELETE))
 		{
-			return ((GetStyle() & 0xf) != CBS_DROPDOWNLIST);
+			// Edit field must be present
+			return !IsType(CBS_DROPDOWNLIST);
 		}
 	}
 
@@ -739,7 +807,7 @@ BOOL CAutoComboBox::DeleteLBItem(int nItem)
 			GetWindowText(sCurItem);
 
 		// Do the delete
-		::SendMessage(GetSafeHwnd(), CB_DELETESTRING, nItem, 0);
+		DeleteString(nItem);
 		
 		// restore combo selection
 		if (!sCurItem.IsEmpty())
