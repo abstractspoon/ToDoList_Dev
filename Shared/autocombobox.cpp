@@ -543,7 +543,7 @@ LRESULT CAutoComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 				int nPrev = m_nHotSimpleListItem;
 				m_nHotSimpleListItem = LB_ERR;
 
-				if (m_nHotSimpleListItem != nSel)
+				if (nPrev != nSel)
 					RedrawListItem(nPrev);
 			}
 
