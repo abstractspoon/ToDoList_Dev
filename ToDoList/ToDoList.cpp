@@ -66,6 +66,11 @@ LPCTSTR LICENSE_URL			= _T("http://www.abstractspoon.com/wiki/doku.php?id=free-o
 LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=abstractspoon2%40optusnet%2ecom%2eau&item_name=Software"); 
 LPCTSTR FACEBOOK_URL		= _T("https://www.facebook.com/abstr.todolist/"); 
 
+LPCTSTR MSVCR100_X32_URL		= _T("https://www.microsoft.com/en-hk/download/details.aspx?id=8328"); 
+LPCTSTR MSVCR100_X64_URL		= _T("https://www.microsoft.com/en-hk/download/details.aspx?id=13523"); 
+LPCTSTR MSVCR100_MSG		= _T("System File Required|ToDoList requires the 'Microsoft Visual C++ 2010 SP1 Redistributable Package' ")
+								_T("to be installed.\n\nClick 'OK' to visit the appropriate download page or 'Cancel' to quit.");
+
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListApp
 
@@ -117,6 +122,19 @@ CToDoListApp theApp;
 
 BOOL CToDoListApp::InitInstance()
 {
+	// .NET plugins require VS2010 redistributable to be installed
+	if (::LoadLibrary(_T("MSVCR100.dll")) == NULL)
+	{
+		if (DoMessageBox(MSVCR100_MSG, MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
+		{
+			LPCTSTR szUrl = (Misc::Is64BitWindows() ? MSVCR100_X64_URL : MSVCR100_X32_URL);
+			FileMisc::Run(::GetDesktopWindow(), szUrl);
+		}
+
+		// Always quit
+		return FALSE;
+	}
+
 	// Set this before anything else
 	CWinHelpButton::SetDefaultIcon(GraphicsMisc::LoadIcon(IDI_HELPBUTTON));
 

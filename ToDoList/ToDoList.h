@@ -39,7 +39,7 @@ protected:
 	virtual BOOL InitInstance();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void WinHelp(DWORD dwData, UINT nCmd = HELP_CONTEXT);
-	virtual int DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT nIDPrompt);
+	virtual int DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT nIDPrompt = 0);
 	virtual int ExitInstance();
 	//}}AFX_VIRTUAL
 
