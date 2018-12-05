@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "MDContentControlBridge.h"
+#include "HTMLContentControlBridge.h"
 #include "resource.h"
 
 #include <unknwn.h>
@@ -20,7 +20,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace MDContentControl;
+using namespace HTMLContentControl;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
@@ -28,52 +28,52 @@ using namespace System::Runtime::InteropServices;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // REPLACE THIS WITH NEW GUID!
-const LPCWSTR MARKDOWN_GUID = L"BAA4E079-268B-4B9B-B7C8-6D15CCF058A2";
-const LPCWSTR MARKDOWN_NAME = L"Markdown";
+const LPCWSTR HTML_GUID = L"FE0B6B6E-2B61-4AEB-AA0D-98DBE5942F02";
+const LPCWSTR HTML_NAME = L"Html";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CMDContentBridge::CMDContentBridge() : m_hIcon(NULL)
+CHTMLContentBridge::CHTMLContentBridge() : m_hIcon(NULL)
 {
-   HMODULE hMod = LoadLibrary(L"MDContentControlBridge.dll"); // us
+   HMODULE hMod = LoadLibrary(L"HTMLContentControlBridge.dll"); // us
 
-   m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_MARKDOWN));
+   m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_HTML));
 }
 
-CMDContentBridge::~CMDContentBridge()
+CHTMLContentBridge::~CHTMLContentBridge()
 {
    ::DestroyIcon(m_hIcon);
 }
 
-void CMDContentBridge::Release()
+void CHTMLContentBridge::Release()
 {
 	delete this;
 }
 
-void CMDContentBridge::SetLocalizer(ITransText* /*pTT*/)
+void CHTMLContentBridge::SetLocalizer(ITransText* /*pTT*/)
 {
 	// TODO
 }
 
-LPCWSTR CMDContentBridge::GetTypeDescription() const
+LPCWSTR CHTMLContentBridge::GetTypeDescription() const
 {
-	return MARKDOWN_NAME;
+	return HTML_NAME;
 }
 
-HICON CMDContentBridge::GetTypeIcon() const
+HICON CHTMLContentBridge::GetTypeIcon() const
 {
    return m_hIcon;
 }
 
-LPCWSTR CMDContentBridge::GetTypeID() const
+LPCWSTR CHTMLContentBridge::GetTypeID() const
 {
-	return MARKDOWN_GUID;
+	return HTML_GUID;
 }
 
-IContentControl* CMDContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned long nStyle, 
+IContentControl* CHTMLContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned long nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	CMDContentControlBridge* pCtrl = new CMDContentControlBridge();
+	CHTMLContentControlBridge* pCtrl = new CHTMLContentControlBridge();
 
 	if (!pCtrl->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
@@ -84,26 +84,26 @@ IContentControl* CMDContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned l
 	return pCtrl;
 }
 
-void CMDContentBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
+void CHTMLContentBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 	// TODO
 
 }
 
-void CMDContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
+void CHTMLContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
 	// TODO
 }
 
 // returns the length of the html or zero if not supported
-int CMDContentBridge::ConvertToHtml(const unsigned char* pContent, int nLength,
+int CHTMLContentBridge::ConvertToHtml(const unsigned char* pContent, int nLength,
 	LPCWSTR szCharSet, LPWSTR& szHtml, LPCWSTR szImageDir)
 {
 	szHtml = nullptr;
 	return 0;
 }
 
-void CMDContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
+void CHTMLContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
 {
 	delete [] szHtml;
 	szHtml = nullptr;
@@ -113,14 +113,14 @@ void CMDContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-CMDContentControlBridge::CMDContentControlBridge()
+CHTMLContentControlBridge::CHTMLContentControlBridge()
 {
 }
 
-BOOL CMDContentControlBridge::Create(UINT nCtrlID, DWORD nStyle, 
+BOOL CHTMLContentControlBridge::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	m_wnd = gcnew MDContentControl::MDContentControlCore(static_cast<IntPtr>(hwndParent));
+	m_wnd = gcnew HTMLContentControl::HTMLContentControlCore(static_cast<IntPtr>(hwndParent));
 
 	HWND hWnd = GetHwnd();
 
@@ -137,7 +137,7 @@ BOOL CMDContentControlBridge::Create(UINT nCtrlID, DWORD nStyle,
 	return false;
 }
 
-int CMDContentControlBridge::GetContent(unsigned char* pContent) const
+int CHTMLContentControlBridge::GetContent(unsigned char* pContent) const
 {
 	cli::array<Byte>^ content = m_wnd->GetContent();
 	int nLength = content->Length;
@@ -151,7 +151,7 @@ int CMDContentControlBridge::GetContent(unsigned char* pContent) const
 	return nLength;
 }
 
-bool CMDContentControlBridge::SetContent(const unsigned char* pContent, int nLength, bool bResetSelection)
+bool CHTMLContentControlBridge::SetContent(const unsigned char* pContent, int nLength, bool bResetSelection)
 {
 	cli::array<Byte>^ content = gcnew cli::array<Byte>(nLength);
 
@@ -161,13 +161,13 @@ bool CMDContentControlBridge::SetContent(const unsigned char* pContent, int nLen
 	return m_wnd->SetContent(content, bResetSelection);
 }
 
-LPCWSTR CMDContentControlBridge::GetTypeID() const
+LPCWSTR CHTMLContentControlBridge::GetTypeID() const
 {
-	return MARKDOWN_GUID;
+	return HTML_GUID;
 }
 
 // text content if supported. return false if not supported
-int CMDContentControlBridge::GetTextContent(LPWSTR szContent, int nLength) const
+int CHTMLContentControlBridge::GetTextContent(LPWSTR szContent, int nLength) const
 {
 	String^ content = m_wnd->GetTextContent();
 	nLength = content->Length;
@@ -181,60 +181,60 @@ int CMDContentControlBridge::GetTextContent(LPWSTR szContent, int nLength) const
 	return nLength;
 }
 
-bool CMDContentControlBridge::SetTextContent(LPCWSTR szContent, bool bResetSelection)
+bool CHTMLContentControlBridge::SetTextContent(LPCWSTR szContent, bool bResetSelection)
 {
 	msclr::auto_gcroot<String^> content = gcnew String(szContent);
 
 	return m_wnd->SetTextContent(content, bResetSelection);
 }
 
-void CMDContentControlBridge::SetReadOnly(bool bReadOnly)
+void CHTMLContentControlBridge::SetReadOnly(bool bReadOnly)
 {
 
 }
 
-HWND CMDContentControlBridge::GetHwnd() const
+HWND CHTMLContentControlBridge::GetHwnd() const
 {
 	return static_cast<HWND>(m_wnd->Handle.ToPointer());
 }
 
-void CMDContentControlBridge::Release()
+void CHTMLContentControlBridge::Release()
 {
 	::DestroyWindow(GetHwnd());
 	delete this;
 }
 
-bool CMDContentControlBridge::ProcessMessage(MSG* pMsg)
+bool CHTMLContentControlBridge::ProcessMessage(MSG* pMsg)
 {
 	return false;
 }
 
-ISpellCheck* CMDContentControlBridge::GetSpellCheckInterface()
+ISpellCheck* CHTMLContentControlBridge::GetSpellCheckInterface()
 {
 	return nullptr;
 }
 
-bool CMDContentControlBridge::Undo()
+bool CHTMLContentControlBridge::Undo()
 {
 	return false;
 }
 
-bool CMDContentControlBridge::Redo()
+bool CHTMLContentControlBridge::Redo()
 {
 	return false;
 }
 
-void CMDContentControlBridge::SetUITheme(const UITHEME* pTheme)
+void CHTMLContentControlBridge::SetUITheme(const UITHEME* pTheme)
 {
 
 }
 
-void CMDContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
+void CHTMLContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 
 }
 
-void CMDContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
+void CHTMLContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
 {
 
 }

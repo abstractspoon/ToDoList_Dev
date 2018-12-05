@@ -8,13 +8,13 @@
 #include "..\..\..\..\ToDoList_Dev\Interfaces\IContentControl.h"
 
 #include <vcclr.h>
-using namespace MDContentControl;
+using namespace HTMLContentControl;
 
 // This class is exported from ExporterBridge.dll
-class CMDContentBridge : public IContent
+class CHTMLContentBridge : public IContent
 {
 public:
-   CMDContentBridge();
+   CHTMLContentBridge();
 
    LPCWSTR GetTypeID() const;
    LPCWSTR GetTypeDescription() const;
@@ -39,13 +39,13 @@ protected:
    HICON m_hIcon;
 
 protected:
-   ~CMDContentBridge();
+   ~CHTMLContentBridge();
 };
 
-class CMDContentControlBridge : public IContentControl
+class CHTMLContentControlBridge : public IContentControl
 {
 public:
-	CMDContentControlBridge();
+	CHTMLContentControlBridge();
 
    BOOL Create(UINT nCtrlID, DWORD nStyle, 
       long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
@@ -76,7 +76,7 @@ public:
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey);
 
 protected:
-   gcroot<MDContentControlCore^> m_wnd;
+   gcroot<HTMLContentControlCore^> m_wnd;
    //gcroot<System::Windows::Interop::HwndSource^> m_source;
 };
 
@@ -87,6 +87,6 @@ DLL_DECLSPEC int GetInterfaceVersion()
 
 DLL_DECLSPEC IContent* CreateContentInterface()
 {
-   return new CMDContentBridge();
+   return new CHTMLContentBridge();
 }
 

@@ -6,45 +6,45 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 // PLS DON'T ADD OTHER 'USING' STATEMENTS WHILE I AM STILL LEARNING!
 
-namespace MDContentControl
+namespace HTMLContentControl
 {
     [System.ComponentModel.DesignerCategory("")]
-    public class MDContentControlCore : MarkdownEditor.MarkdownSharpEditorForm, IContentControl
+    public class HTMLContentControlCore : ZetaHtmlEditControl.HtmlEditUserControl, IContentControl
     {
         private IntPtr m_hwndParent;
 
-        public MDContentControlCore(IntPtr hwndParent)
+        public HTMLContentControlCore(IntPtr hwndParent)
         {
             m_hwndParent = hwndParent;
 
             InitializeComponent();
 
-            inputTextBox.TextChanged += new System.EventHandler(OnInputTextChanged);
-            inputTextBox.LostFocus += new System.EventHandler(OnInputTextLostFocus);
+//             inputTextBox.TextChanged += new System.EventHandler(OnInputTextChanged);
+//             inputTextBox.LostFocus += new System.EventHandler(OnInputTextLostFocus);
         }
 
         // ITDLContentControl ------------------------------------------------------------------
 
         public Byte[] GetContent()
         {
-            return System.Text.Encoding.Unicode.GetBytes(InputText);
+            return System.Text.Encoding.Unicode.GetBytes(""/*InputText*/);
         }
 
         public bool SetContent(Byte[] content, bool bResetSelection)
         {
-            InputText = System.Text.Encoding.Unicode.GetString(content);
+//             InputText = System.Text.Encoding.Unicode.GetString(content);
             return true;
         }
 
         // text content if supported. return false if not supported
         public String GetTextContent()
         {
-            return OutputText;
+            return "";// OutputText;
         }
 
         public bool SetTextContent(String content, bool bResetSelection)
         {
-            InputText = content;
+//             InputText = content;
             return true;
         }
 
@@ -103,11 +103,12 @@ namespace MDContentControl
         {
             this.SuspendLayout();
             // 
-            // MDContentControlCore
+            // HTMLContentControlCore
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            //this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.ClientSize = new System.Drawing.Size(603, 716);
-            this.Name = "MDContentControlCore";
+            this.Name = "HTMLContentControlCore";
+            this.ResizeRedraw = true;
             this.ResumeLayout(false);
             this.PerformLayout();
         }
