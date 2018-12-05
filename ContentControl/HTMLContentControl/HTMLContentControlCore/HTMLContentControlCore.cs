@@ -13,11 +13,19 @@ namespace HTMLContentControl
     {
         private IntPtr m_hwndParent;
         private UIThemeToolbarRenderer m_toolbarRenderer;
+        private System.Drawing.Font m_ControlsFont;
+
+        // --------------------------------------------------------------------------------------
+
+        private const string FontName = "Tahoma";
+
+        // --------------------------------------------------------------------------------------
 
         public HTMLContentControlCore(IntPtr hwndParent)
         {
             m_hwndParent = hwndParent;
             m_toolbarRenderer = new UIThemeToolbarRenderer();
+            m_ControlsFont = new System.Drawing.Font(FontName, 8);
 
             InitializeComponent();
 
@@ -72,7 +80,8 @@ namespace HTMLContentControl
         {
             m_toolbarRenderer.SetUITheme(theme);
 
-
+            BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+            ToolBar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
         }
 
         public void SetReadOnly(bool bReadOnly)
@@ -102,11 +111,17 @@ namespace HTMLContentControl
             Win32.RemoveClientEdge(Handle);
         }
 
+        protected override void OnPaintBackground(System.Windows.Forms.PaintEventArgs e)
+        {
+            // Do nothing
+        }
+
         private void InitializeComponent()
         {
             this.SuspendLayout();
 
             this.ToolBar.Renderer = m_toolbarRenderer;
+            this.ToolBar.Font = m_ControlsFont;
 
             // 
             // HTMLContentControlCore
@@ -115,6 +130,14 @@ namespace HTMLContentControl
             this.ClientSize = new System.Drawing.Size(603, 716);
             this.Name = "HTMLContentControlCore";
             this.ResizeRedraw = true;
+            this.Margin = new System.Windows.Forms.Padding(0);
+            this.Padding = new System.Windows.Forms.Padding(0);
+            this.Font = m_ControlsFont;
+
+            this.HtmlEditControl.AllowWebBrowserDrop = false;
+            this.HtmlEditControl.CssFontSize = "8pt";
+            this.HtmlEditControl.IsWebBrowserContextMenuEnabled = false;
+
             this.ResumeLayout(false);
             this.PerformLayout();
         }
