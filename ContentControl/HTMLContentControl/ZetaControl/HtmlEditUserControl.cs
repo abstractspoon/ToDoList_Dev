@@ -22,6 +22,17 @@ namespace ZetaHtmlEditControl
         {
             base.OnHandleCreated(e);
             applyFont();
+            
+            foreach (var family in System.Drawing.FontFamily.Families) 
+            { 
+                HTMLcmbFont.Items.Add(family.Name); 
+            }
+
+            HTMLcmbFont.SelectedIndex = HTMLcmbFont.FindStringExact("Tahoma");
+            HTMLcmbFontSize.SelectedIndex = HTMLcmbFontSize.FindStringExact("2");
+
+            HTMLcmbFont.SelectedIndexChanged += HTMLcmbFontSelectedIndexChanged;
+            HTMLcmbFontSize.SelectedIndexChanged += HTMLcmbFontSizeSelectedIndexChanged;
         }
 
 		private void htmlEditControl_UINeedsUpdate(
@@ -73,6 +84,30 @@ namespace ZetaHtmlEditControl
             topToolStrip.Font = Font;
 	    }
 
+        public void HTMLcmbFontSizeSelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                int size = Convert.ToInt32(HTMLcmbFontSize.Text);
+                htmlEditControl.CurrentSelectionText.execCommand(@"fontsize", false, size);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString(), "Error");
+            }
+        }
+        public void HTMLcmbFontSelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                htmlEditControl.CurrentSelectionText.execCommand(@"fontName", false, HTMLcmbFont.SelectedItem.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString(), "Error");
+            }
+        }
+
 	    private void updateButtons()
 		{
 			boldToolStripMenuItem.Enabled = htmlEditControl.CanBold;
@@ -102,9 +137,26 @@ namespace ZetaHtmlEditControl
 			justifyRightToolStripButton.Checked = htmlEditControl.IsJustifyRight;
 
 			textModulesToolStripItem.Visible = htmlEditControl.HasTextModules;
+	
+            // --
 
-            topToolStrip.Refresh();
-            topToolStrip.Update();
+            if (htmlEditControl.CurrentSelectionText != null && htmlEditControl.CurrentSelectionText.text != null)
+            {
+                if (htmlEditControl.CurrentSelectionText.text.Length > 0)
+                {
+                    var name = htmlEditControl.CurrentSelectionText.queryCommandValue("FontName");
+                    int x = HTMLcmbFont.FindStringExact(name.ToString());
+
+                    if (x != -1) 
+                        HTMLcmbFont.SelectedIndex = x;
+
+                    var size = htmlEditControl.CurrentSelectionText.queryCommandValue("FontSize");
+                    x = HTMLcmbFontSize.FindStringExact(size.ToString());
+
+                    if (x != -1) 
+                        HTMLcmbFontSize.SelectedIndex = x;
+                }
+            }
 		}
 
 		private void boldToolStripMenuItem_Click(object sender, EventArgs e)

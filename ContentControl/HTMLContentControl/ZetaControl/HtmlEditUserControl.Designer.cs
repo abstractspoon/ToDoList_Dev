@@ -32,7 +32,8 @@
             this.topToolStrip = new System.Windows.Forms.ToolStrip();
             this.undoToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.textModulesToolStripItem = new System.Windows.Forms.ToolStripDropDownButton();
-            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            this.HTMLcmbFont = new System.Windows.Forms.ToolStripComboBox();
+            this.HTMLcmbFontSize = new System.Windows.Forms.ToolStripComboBox();
             this.boldToolStripMenuItem = new System.Windows.Forms.ToolStripButton();
             this.italicToolStripMenuItem = new System.Windows.Forms.ToolStripButton();
             this.underlineToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -86,7 +87,8 @@
             this.topToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.undoToolStripButton,
             this.textModulesToolStripItem,
-            this.toolStripSeparator7,
+            this.HTMLcmbFont,
+            this.HTMLcmbFontSize,
             this.boldToolStripMenuItem,
             this.italicToolStripMenuItem,
             this.underlineToolStripButton,
@@ -121,10 +123,26 @@
             this.textModulesToolStripItem.Name = "textModulesToolStripItem";
             this.textModulesToolStripItem.DropDownOpening += new System.EventHandler(this.textModulesToolStripItem_DropDownOpening);
             // 
-            // toolStripSeparator7
+            // HTMLcmbFont
             // 
-            this.toolStripSeparator7.Name = "toolStripSeparator7";
-            resources.ApplyResources(this.toolStripSeparator7, "toolStripSeparator7");
+            this.HTMLcmbFont.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            resources.ApplyResources(this.HTMLcmbFont, "HTMLcmbFont");
+            this.HTMLcmbFont.Name = "HTMLcmbFont";
+            // 
+            // HTMLcmbFontSize
+            // 
+            this.HTMLcmbFontSize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            resources.ApplyResources(this.HTMLcmbFontSize, "HTMLcmbFontSize");
+            this.HTMLcmbFontSize.Items.AddRange(new object[] {
+            resources.GetString("HTMLcmbFontSize.Items"),
+            resources.GetString("HTMLcmbFontSize.Items1"),
+            resources.GetString("HTMLcmbFontSize.Items2"),
+            resources.GetString("HTMLcmbFontSize.Items3"),
+            resources.GetString("HTMLcmbFontSize.Items4"),
+            resources.GetString("HTMLcmbFontSize.Items5"),
+            resources.GetString("HTMLcmbFontSize.Items6"),
+            resources.GetString("HTMLcmbFontSize.Items7")});
+            this.HTMLcmbFontSize.Name = "HTMLcmbFontSize";
             // 
             // boldToolStripMenuItem
             // 
@@ -446,9 +464,10 @@
 		private System.Windows.Forms.ToolStripButton justifyCenterToolStripButton;
 		private System.Windows.Forms.ToolStripButton justifyRightToolStripButton;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
-		private System.Windows.Forms.ToolStripButton undoToolStripButton;
-		private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
+        private System.Windows.Forms.ToolStripButton undoToolStripButton;
 		private System.Windows.Forms.ToolStripButton underlineToolStripButton;
 		private System.Windows.Forms.ToolStripDropDownButton textModulesToolStripItem;
+        private System.Windows.Forms.ToolStripComboBox HTMLcmbFont;
+        private System.Windows.Forms.ToolStripComboBox HTMLcmbFontSize;
 	}
 }
