@@ -36,6 +36,11 @@ namespace ZetaHtmlEditControl
 			get { return htmlEditControl; }
 		}
 
+        public ToolStrip ToolBar
+        {
+            get { return topToolStrip; }
+        }
+
 		public bool IsToolbarVisible
 		{
 			get { return topToolStrip.Visible; }

@@ -104,7 +104,7 @@ void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
 	m_PressedFillColor = ColorUtil::DrawingColor::AdjustLighting(m_HotFillColor, -0.1f, false);
 }
 
-void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventArgs^ e)
+bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs^ e)
 {
 	if (ValidColours() && (e->Item->Selected || e->Item->Pressed))
 	{
@@ -112,7 +112,7 @@ void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventAr
 
 		rect->Width--;
 		rect->Height--;
-	
+
 		if (e->Item->Pressed)
 		{
 			Brush^ brush = gcnew SolidBrush(*m_PressedFillColor);
@@ -126,11 +126,24 @@ void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventAr
 
 		Pen^ pen = gcnew Pen(*m_HotBorderColor);
 		e->Graphics->DrawRectangle(pen, *rect);
+
+		return true;
 	}
-	else
-	{
+
+	// Use default renderer
+	return false;
+}
+
+void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventArgs^ e)
+{
+	if (!RenderButtonBackground(e))
 		ToolStripProfessionalRenderer::OnRenderButtonBackground(e);
-	}
+}
+
+void UIThemeToolbarRenderer::OnRenderDropDownButtonBackground(ToolStripItemRenderEventArgs^ e)
+{
+	if (!RenderButtonBackground(e))
+		ToolStripProfessionalRenderer::OnRenderDropDownButtonBackground(e);
 }
 
 bool UIThemeToolbarRenderer::ValidColours()

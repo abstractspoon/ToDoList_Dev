@@ -12,10 +12,12 @@ namespace HTMLContentControl
     public class HTMLContentControlCore : ZetaHtmlEditControl.HtmlEditUserControl, IContentControl
     {
         private IntPtr m_hwndParent;
+        private UIThemeToolbarRenderer m_toolbarRenderer;
 
         public HTMLContentControlCore(IntPtr hwndParent)
         {
             m_hwndParent = hwndParent;
+            m_toolbarRenderer = new UIThemeToolbarRenderer();
 
             InitializeComponent();
 
@@ -68,7 +70,8 @@ namespace HTMLContentControl
 
         public void SetUITheme(UITheme theme)
         {
-            // TODO
+            m_toolbarRenderer.SetUITheme(theme);
+
 
         }
 
@@ -102,6 +105,9 @@ namespace HTMLContentControl
         private void InitializeComponent()
         {
             this.SuspendLayout();
+
+            this.ToolBar.Renderer = m_toolbarRenderer;
+
             // 
             // HTMLContentControlCore
             // 

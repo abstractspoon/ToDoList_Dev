@@ -20,10 +20,12 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace HTMLContentControl;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
+
+using namespace HTMLContentControl;
+using namespace Abstractspoon::Tdl;//::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -226,7 +228,9 @@ bool CHTMLContentControlBridge::Redo()
 
 void CHTMLContentControlBridge::SetUITheme(const UITHEME* pTheme)
 {
+	msclr::auto_gcroot<PluginHelpers::UITheme^> theme = gcnew PluginHelpers::UITheme(pTheme);
 
+	m_wnd->SetUITheme(theme.get());
 }
 
 void CHTMLContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const

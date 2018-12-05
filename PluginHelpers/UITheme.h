@@ -76,6 +76,7 @@ namespace Abstractspoon
 
 			protected:
 				virtual void OnRenderButtonBackground(ToolStripItemRenderEventArgs^ e) override;
+				virtual void OnRenderDropDownButtonBackground(ToolStripItemRenderEventArgs^ e) override;
 
 			private:
 				Color^ m_HotFillColor;
@@ -83,6 +84,7 @@ namespace Abstractspoon
 				Color^ m_PressedFillColor;
 
 				bool ValidColours();
+				bool RenderButtonBackground(ToolStripItemRenderEventArgs^ e);
 			};
 
 		}
