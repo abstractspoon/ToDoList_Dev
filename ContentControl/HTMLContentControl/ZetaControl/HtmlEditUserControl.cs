@@ -120,8 +120,10 @@ namespace ZetaHtmlEditControl
         {
             try
             {
-                int size = Convert.ToInt32(HTMLcmbFontSize.Text);
-                htmlEditControl.CurrentSelectionText.execCommand(@"fontsize", false, size);
+                var selection = htmlEditControl.CurrentSelectionText;
+
+                if (selection != null)
+                    selection.execCommand(@"fontsize", false, HTMLcmbFontSize.SelectedItem);
             }
             catch (Exception ex)
             {
@@ -132,7 +134,10 @@ namespace ZetaHtmlEditControl
         {
             try
             {
-                htmlEditControl.CurrentSelectionText.execCommand(@"fontName", false, HTMLcmbFont.SelectedItem.ToString());
+                var selection = htmlEditControl.CurrentSelectionText;
+
+                if (selection != null)
+                    selection.execCommand(@"fontName", false, HTMLcmbFont.SelectedText);
             }
             catch (Exception ex)
             {
@@ -185,7 +190,7 @@ namespace ZetaHtmlEditControl
                 var size = selection.queryCommandValue("FontSize").ToString();
 
                 if (string.IsNullOrEmpty(size))
-                    size = "1";
+                    size = "2";
 
                 x = HTMLcmbFontSize.FindStringExact(size);
 
