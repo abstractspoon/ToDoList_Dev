@@ -106,19 +106,23 @@ void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
 
 bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs^ e)
 {
-	if (ValidColours() && (e->Item->Selected || e->Item->Pressed))
+	auto item = e->Item;
+	auto button = static_cast<ToolStripButton^>(item);
+	bool checkedButton = (button != nullptr && button->Checked);
+
+	if (ValidColours() && (item->Selected || item->Pressed || checkedButton))
 	{
-		System::Drawing::Rectangle^ rect = gcnew System::Drawing::Rectangle(Point::Empty, e->Item->Size);
+		System::Drawing::Rectangle^ rect = gcnew System::Drawing::Rectangle(Point::Empty, item->Size);
 
 		rect->Width--;
 		rect->Height--;
 
-		if (e->Item->Pressed)
+		if (item->Pressed || checkedButton)
 		{
 			Brush^ brush = gcnew SolidBrush(*m_PressedFillColor);
 			e->Graphics->FillRectangle(brush, *rect);
 		}
-		else if (e->Item->Selected)
+		else if (item->Selected)
 		{
 			Brush^ brush = gcnew SolidBrush(*m_HotFillColor);
 			e->Graphics->FillRectangle(brush, *rect);
