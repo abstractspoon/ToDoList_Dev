@@ -28,17 +28,50 @@ namespace ZetaHtmlEditControl
                 HTMLcmbFont.Items.Add(family.Name); 
             }
 
-            HTMLcmbFont.SelectedIndex = HTMLcmbFont.FindStringExact("Tahoma");
+            HTMLcmbFont.SelectedIndex = HTMLcmbFont.FindStringExact(HtmlEditControl.CssFontName);
             HTMLcmbFontSize.SelectedIndex = HTMLcmbFontSize.FindStringExact("2");
 
             HTMLcmbFont.SelectedIndexChanged += HTMLcmbFontSelectedIndexChanged;
             HTMLcmbFontSize.SelectedIndexChanged += HTMLcmbFontSizeSelectedIndexChanged;
+
+            SetCssFontNameAndSize(HtmlEditControl.CssFontName);
         }
 
-		private void htmlEditControl_UINeedsUpdate(
-			object sender,
-			EventArgs e)
-		{
+        public bool SetCssFontNameAndSize(String fontName, float fontSize = 0, bool points = true)
+        {
+            if (string.IsNullOrEmpty(fontName))
+                return false;
+
+            // Save the current document to update later
+            var docText = HtmlEditControl.DocumentText;
+
+            // Reset the font name selection and then update to the current selection
+            if (HTMLcmbFont.Items.Count > 0)
+            {
+                int fontIndex = HTMLcmbFont.FindStringExact(fontName);
+
+                if (fontIndex == -1)
+                    return false;
+
+                HTMLcmbFont.SelectedIndex = fontIndex;
+
+                updateButtons();
+            }
+
+            HtmlEditControl.CssFontName = fontName;
+
+            if (fontSize > 0)
+                HtmlEditControl.CssFontSize = string.Format((points ? "{0}pt" : "{0}px"), fontSize);
+
+            // Rebuild the document text to update the browser CSS
+            if (!string.IsNullOrEmpty(docText))
+                HtmlEditControl.DocumentText = docText;
+
+            return true;
+        }
+
+		private void htmlEditControl_UINeedsUpdate(object sender, EventArgs e)
+        {
 			updateButtons();
 		}
 
@@ -140,22 +173,21 @@ namespace ZetaHtmlEditControl
 	
             // --
 
-            if (htmlEditControl.CurrentSelectionText != null && htmlEditControl.CurrentSelectionText.text != null)
+            var selection = htmlEditControl.CurrentSelectionText;
+
+            if (selection != null)
             {
-                if (htmlEditControl.CurrentSelectionText.text.Length > 0)
-                {
-                    var name = htmlEditControl.CurrentSelectionText.queryCommandValue("FontName");
-                    int x = HTMLcmbFont.FindStringExact(name.ToString());
+                var name = selection.queryCommandValue("FontName");
+                int x = HTMLcmbFont.FindStringExact(name.ToString());
 
-                    if (x != -1) 
-                        HTMLcmbFont.SelectedIndex = x;
+                if (x != -1)
+                    HTMLcmbFont.SelectedIndex = x;
 
-                    var size = htmlEditControl.CurrentSelectionText.queryCommandValue("FontSize");
-                    x = HTMLcmbFontSize.FindStringExact(size.ToString());
+                var size = selection.queryCommandValue("FontSize");
+                x = HTMLcmbFontSize.FindStringExact(size.ToString());
 
-                    if (x != -1) 
-                        HTMLcmbFontSize.SelectedIndex = x;
-                }
+                if (x != -1)
+                    HTMLcmbFontSize.SelectedIndex = x;
             }
 		}
 

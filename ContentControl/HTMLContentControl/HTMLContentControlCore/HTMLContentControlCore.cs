@@ -105,22 +105,21 @@ namespace HTMLContentControl
             }
 
             String fontName = @"Tahoma";
-            String fontSize = @"8.25";
+            float fontSize = 8.25F;
             
             if (prefs.GetProfileInt("Preferences", "SpecifyCommentsFont", 0) != 0)
             {
                 fontName = prefs.GetProfileString("Preferences", "CommentsFont", "Tahoma");
-                fontSize = prefs.GetProfileString("Preferences", "CommentsFontSize", "8.25");
+                fontSize = prefs.GetProfileInt("Preferences", "CommentsFontSize", 8);
             }
             else if ((prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0) &&
                     (prefs.GetProfileInt("Preferences", "CommentsUseTreeFont", 0) != 0))
             {
                 fontName = prefs.GetProfileString("Preferences", "TreeFont", "Tahoma");
-                fontSize = prefs.GetProfileString("Preferences", "FontSize", "8.25");
+                fontSize = prefs.GetProfileInt("Preferences", "FontSize", 8);
             }
 
-            HtmlEditControl.CssFontName = fontSize;
-            HtmlEditControl.CssFontSize = (fontSize + "pt");
+            SetCssFontNameAndSize(fontName, fontSize);
         }
 
         // --------------------------------------------------------------------
@@ -129,7 +128,7 @@ namespace HTMLContentControl
         {
             base.OnHandleCreated(e);
  
-            HtmlEditControl.SetDocumentText(@"<P></p>", @"C:\", true);
+            HtmlEditControl.SetDocumentText(@"", @"C:\", true);
         }
 
         protected override void OnResize(System.EventArgs e)
