@@ -70,7 +70,7 @@ public:
 	bool Redo() { return CUrlRichEditCtrl::Redo() != 0; }
 	void SetUITheme(const UITHEME* /*pTheme*/) {}
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
-	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
 
 	// global settings
 	static void SetPasteSourceUrls(BOOL bPasteUrls) { s_bPasteSourceUrls = bPasteUrls; }

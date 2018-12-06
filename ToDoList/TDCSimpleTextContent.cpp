@@ -627,14 +627,17 @@ void CTDLSimpleTextContentCtrl::SavePreferences(IPreferences* pPrefs, LPCTSTR sz
 	pPrefs->WriteProfileInt(szKey, _T("WordWrap"), m_bWordWrap);
 }
 
-void CTDLSimpleTextContentCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
+void CTDLSimpleTextContentCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly)
 {
-	BOOL bWordWrap = pPrefs->GetProfileInt(szKey, _T("WordWrap"), TRUE);
+	if (!bAppOnly)
+	{
+		BOOL bWordWrap = pPrefs->GetProfileInt(szKey, _T("WordWrap"), TRUE);
 
-	// we need to post the wordwrap initialization else the richedit
-	// get very confused about something and doesn't repaint properly
-	// when resizing
-	PostMessage(WM_SETWORDWRAP, bWordWrap, (LPARAM)GetSafeHwnd());
+		// we need to post the wordwrap initialization else the richedit
+		// get very confused about something and doesn't repaint properly
+		// when resizing
+		PostMessage(WM_SETWORDWRAP, bWordWrap, (LPARAM)GetSafeHwnd());
+	}
 }
 
 LRESULT CTDLSimpleTextContentCtrl::OnSetWordWrap(WPARAM wp, LPARAM lp)

@@ -116,14 +116,14 @@ void CContentCtrl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	}
 }
 
-void CContentCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
+void CContentCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOOL bAppOnly)
 {
 	if (m_pContentCtrl && !Misc::IsEmpty(szKey))
 	{
 		CString sKey;
 		sKey.Format(_T("%s\\%s"), szKey, GetTypeID());
 		
-		m_pContentCtrl->LoadPreferences(pPrefs, sKey);
+		m_pContentCtrl->LoadPreferences(pPrefs, sKey, (bAppOnly != FALSE));
 	}
 }
 

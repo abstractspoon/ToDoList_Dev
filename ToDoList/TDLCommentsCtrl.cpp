@@ -287,8 +287,8 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 
 	if (m_ctrlComments.GetContentFormat() == cf)
 	{
-		LoadPreferences();
 		m_bFirstLoadCommentsPrefs = m_sPrefsFilePath.IsEmpty();
+		LoadPreferences(!m_bFirstLoadCommentsPrefs);
 
 		return FALSE;
 	}
@@ -313,7 +313,7 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 	if (CWinClasses::IsEditControl(m_ctrlComments))
 		m_mgrPrompts.SetEditPrompt(m_ctrlComments, m_sCommentsPrompt);
 	
-	LoadPreferences();
+	LoadPreferences(FALSE);
 
 	return TRUE;
 }
@@ -474,12 +474,12 @@ void CTDLCommentsCtrl::SavePreferences() const
 	m_ctrlComments.SavePreferences(prefs, sKey); 
 }
 
-void CTDLCommentsCtrl::LoadPreferences() 
+void CTDLCommentsCtrl::LoadPreferences(BOOL bAppOnly) 
 { 
 	CPreferences prefs;
 	CString sKey = GetPreferencesKey();
 
-	m_ctrlComments.LoadPreferences(prefs, sKey); 
+	m_ctrlComments.LoadPreferences(prefs, sKey, bAppOnly); 
 }
 
 CString CTDLCommentsCtrl::GetPreferencesKey() const
@@ -517,7 +517,7 @@ void CTDLCommentsCtrl::SetPreferencesFilePath(LPCTSTR szFilePath)
 	m_sPrefsFilePath = szFilePath; 
 
 	if (!m_sPrefsFilePath.IsEmpty())
-		LoadPreferences();
+		LoadPreferences(FALSE);
 }
 
 void CTDLCommentsCtrl::OnSetFocus(CWnd* /*pOldWnd*/)

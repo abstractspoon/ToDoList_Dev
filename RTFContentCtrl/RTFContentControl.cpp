@@ -635,34 +635,37 @@ void CRTFContentControl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) co
 	m_dlgPrefs.SavePreferences(pPrefs, sKey);
 }
 
-void CRTFContentControl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
+void CRTFContentControl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	CString sKey(szKey);
-	
-	ShowToolbar(pPrefs->GetProfileInt(sKey, _T("ShowToolbar"), m_showToolbar));
-	ShowRuler(pPrefs->GetProfileInt(sKey, _T("ShowRuler"), m_showRuler));
-	SetWordWrap(pPrefs->GetProfileInt(sKey, _T("WordWrap"), TRUE));
-	SetLockColours(pPrefs->GetProfileInt(sKey, _T("LockColours"), TRUE));
-
-	COLORREF crText = CLR_DEFAULT, crBack = CLR_DEFAULT;
-
-	if (HasLockedColours())
+	if (!bAppOnly)
 	{
-		crText = (COLORREF)pPrefs->GetProfileInt(sKey, _T("ForegroundColour"), CLR_DEFAULT);
-		crBack = (COLORREF)pPrefs->GetProfileInt(sKey, _T("BackgroundColour"), CLR_DEFAULT);
+		AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+		CString sKey(szKey);
+	
+		ShowToolbar(pPrefs->GetProfileInt(sKey, _T("ShowToolbar"), m_showToolbar));
+		ShowRuler(pPrefs->GetProfileInt(sKey, _T("ShowRuler"), m_showRuler));
+		SetWordWrap(pPrefs->GetProfileInt(sKey, _T("WordWrap"), TRUE));
+		SetLockColours(pPrefs->GetProfileInt(sKey, _T("LockColours"), TRUE));
+
+		COLORREF crText = CLR_DEFAULT, crBack = CLR_DEFAULT;
+
+		if (HasLockedColours())
+		{
+			crText = (COLORREF)pPrefs->GetProfileInt(sKey, _T("ForegroundColour"), CLR_DEFAULT);
+			crBack = (COLORREF)pPrefs->GetProfileInt(sKey, _T("BackgroundColour"), CLR_DEFAULT);
+		}
+		m_toolbar.SetFontColor(crText, TRUE);
+		m_toolbar.SetFontColor(crBack, FALSE);
+
+		m_dlgPrefs.LoadPreferences(pPrefs, sKey);
+
+		RE_PASTE nLinkOption = (RE_PASTE)pPrefs->GetProfileInt(sKey, _T("FileLinkOption"), REP_ASIMAGE);
+		BOOL bLinkOptionIsDefault = pPrefs->GetProfileInt(sKey, _T("FileLinkOptionIsDefault"), FALSE);
+		BOOL bReduceImageColors = pPrefs->GetProfileInt(sKey, _T("ReduceImageColors"), TRUE);
+
+		m_rtf.SetFileLinkOption(nLinkOption, bLinkOptionIsDefault, bReduceImageColors);
 	}
-	m_toolbar.SetFontColor(crText, TRUE);
-	m_toolbar.SetFontColor(crBack, FALSE);
-
-	m_dlgPrefs.LoadPreferences(pPrefs, sKey);
-
-	RE_PASTE nLinkOption = (RE_PASTE)pPrefs->GetProfileInt(sKey, _T("FileLinkOption"), REP_ASIMAGE);
-	BOOL bLinkOptionIsDefault = pPrefs->GetProfileInt(sKey, _T("FileLinkOptionIsDefault"), FALSE);
-	BOOL bReduceImageColors = pPrefs->GetProfileInt(sKey, _T("ReduceImageColors"), TRUE);
-
-	m_rtf.SetFileLinkOption(nLinkOption, bLinkOptionIsDefault, bReduceImageColors);
 }
 
 void CRTFContentControl::OnStyleChanging(int nStyleType, LPSTYLESTRUCT lpStyleStruct)

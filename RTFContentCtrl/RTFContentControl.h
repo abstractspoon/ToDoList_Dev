@@ -45,7 +45,7 @@ public:
 	bool Redo();
 	void SetUITheme(const UITHEME* pTheme);
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
-	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
 
 	// global settings
 	static void SetPasteSourceUrls(BOOL bPasteUrls) { CRulerRichEdit::SetPasteSourceUrls(bPasteUrls); }

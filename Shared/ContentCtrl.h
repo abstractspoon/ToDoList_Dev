@@ -69,7 +69,7 @@ public:
 	void SetUITheme(const CUIThemeFile& theme);
 	
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
-	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOOL bAppOnly);
 
 protected:
 	IContentControl* m_pContentCtrl;

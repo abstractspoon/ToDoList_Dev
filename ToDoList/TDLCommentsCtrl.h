@@ -102,7 +102,7 @@ protected:
 	BOOL UpdateControlFormat();
 	CString GetPreferencesKey() const;
 	void SavePreferences() const;
-	void LoadPreferences();
+	void LoadPreferences(BOOL bAppOnly);
 
 public:
 	afx_msg void OnEnable(BOOL bEnable);
