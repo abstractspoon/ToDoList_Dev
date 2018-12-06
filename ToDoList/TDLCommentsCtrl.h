@@ -29,6 +29,7 @@ public:
 	virtual ~CTDLCommentsCtrl();
 
 	BOOL Create(CWnd* pParent, UINT nID, const CRect& rPos = CRect(0, 0, 0, 0));
+
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetDefaultCommentsFont(HFONT hFont);
 	void SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCommentsState);
@@ -48,6 +49,7 @@ public:
 
 	BOOL ProcessMessage(MSG* pMsg) { return m_ctrlComments.ProcessMessage(pMsg); }
 	BOOL HasFocus() const { return m_ctrlComments.HasFocus(); }
+	void UpdateAppPreferences();
 
 	ISpellCheck* GetSpellCheckInterface() { return m_ctrlComments.GetSpellCheckInterface(); }
 

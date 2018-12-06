@@ -524,3 +524,8 @@ void CTDLCommentsCtrl::OnSetFocus(CWnd* /*pOldWnd*/)
 {
 	m_ctrlComments.SetFocus();
 }
+
+void CTDLCommentsCtrl::UpdateAppPreferences()
+{
+	LoadPreferences(TRUE);
+}

@@ -12460,4 +12460,6 @@ void CToDoCtrl::NotifyEndPreferencesUpdate(BOOL bFirst)
 {
 	if (bFirst)
 		m_taskTree.AdjustSplitterToFitAttributeColumns();
+
+	m_ctrlComments.UpdateAppPreferences();
 }
