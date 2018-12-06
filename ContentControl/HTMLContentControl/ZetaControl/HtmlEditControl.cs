@@ -314,8 +314,8 @@ namespace ZetaHtmlEditControl
 
         private string _tmpFolderPath = string.Empty;
         private int _objectID = 1;
-        private const string CssFontStyle =
-            @"font-family: Segoe UI, Tahoma, Verdana, Arial; font-size: {font-size}; ";
+        private const string _cssDefFontStyle = @"font-family: Segoe UI, Tahoma, Verdana, Arial; font-size: {font-size}; ";
+        private const string _cssFontStyle = @"font-family: {font-name}, Segoe UI, Tahoma, Verdana, Arial; font-size: {font-size}; ";
 
         private string _cssText = _defaultCssText;
         private string _htmlTemplate = _defaultHtmlTemplate;
@@ -663,20 +663,35 @@ namespace ZetaHtmlEditControl
         {
             if (!string.IsNullOrEmpty(cssText) && cssText.Contains(@"{font-style}"))
             {
-                var result = cssText.Replace(@"{font-style}", CssFontStyle);
-                result = result.Replace(@"{font-size}", CssFontSize);
-                return result;
+                var fontStyle = CssFontStyle;
+                cssText = cssText.Replace(@"{font-style}", fontStyle);
             }
-            else
-            {
-                return cssText;
-            }
+
+            return cssText;
         }
 
         public string CssFontSize
         {
             get { return string.IsNullOrEmpty(_cssFontSize) ? getCssFontSizeWithUnit() : _cssFontSize; }
             set { _cssFontSize = value; }
+        }
+
+        public string CssFontName
+        {
+            get { return _cssFontName; }
+            set { _cssFontName = value; }
+        }
+
+        public string CssFontStyle
+        {
+            get 
+            {
+                string fontStyle = (string.IsNullOrEmpty(_cssFontName) ? 
+                                    _cssDefFontStyle : 
+                                    _cssFontStyle.Replace(@"{font-name}", _cssFontName));
+
+                return fontStyle.Replace(@"{font-size}", CssFontSize);
+            }
         }
 
         private string getCssFontSizeWithUnit()
@@ -1506,7 +1521,7 @@ namespace ZetaHtmlEditControl
         private bool _everLoadedTextModules;
         private TextModuleInfo[] _textModules;
         private IExternalInformationProvider _externalInformationProvider;
-        private string _cssFontSize;
+        private string _cssFontSize = @"8.25pt", _cssFontName = @"Tahoma";
 
         //private string myClipboard
         //{

@@ -9,7 +9,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace HTMLContentControl
 {
     [System.ComponentModel.DesignerCategory("")]
-    public class HTMLContentControlCore : ZetaHtmlEditControl.HtmlEditUserControl, IContentControl
+    public class HTMLContentControlCore : ZetaHtmlEditControl.HtmlEditUserControl, IContentControlWnd
     {
         private IntPtr m_hwndParent;
         private UIThemeToolbarRenderer m_toolbarRenderer;
@@ -98,15 +98,45 @@ namespace HTMLContentControl
 
         public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
-            // TODO
+            if (!appOnly)
+            {
+                // private settings
+                // TODO
+            }
 
+            String fontName = @"Tahoma";
+            String fontSize = @"8.25";
+            
+            if (prefs.GetProfileInt("Preferences", "SpecifyCommentsFont", 0) != 0)
+            {
+                fontName = prefs.GetProfileString("Preferences", "CommentsFont", "Tahoma");
+                fontSize = prefs.GetProfileString("Preferences", "CommentsFontSize", "8.25");
+            }
+            else if ((prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0) &&
+                    (prefs.GetProfileInt("Preferences", "CommentsUseTreeFont", 0) != 0))
+            {
+                fontName = prefs.GetProfileString("Preferences", "TreeFont", "Tahoma");
+                fontSize = prefs.GetProfileString("Preferences", "FontSize", "8.25");
+            }
+
+            HtmlEditControl.CssFontName = fontSize;
+            HtmlEditControl.CssFontSize = (fontSize + "pt");
         }
 
         // --------------------------------------------------------------------
 
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+ 
+            HtmlEditControl.SetDocumentText(@"<P></p>", @"C:\", true);
+        }
+
         protected override void OnResize(System.EventArgs e)
         {
             base.OnResize(e);
+
+            ToolBar.Width = ClientSize.Width;
 
             Win32.RemoveClientEdge(Handle);
         }
@@ -136,6 +166,7 @@ namespace HTMLContentControl
 
             this.HtmlEditControl.AllowWebBrowserDrop = false;
             this.HtmlEditControl.CssFontSize = "8pt";
+            this.HtmlEditControl.CssFontName = "Tahoma";
             this.HtmlEditControl.IsWebBrowserContextMenuEnabled = false;
 
             this.ResumeLayout(false);
@@ -144,14 +175,14 @@ namespace HTMLContentControl
 
         private void OnInputTextChanged(object sender, EventArgs e)
         {
-			ContentControl.ParentNotify notify = new ContentControl.ParentNotify(m_hwndParent);
+			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
 
             notify.NotifyChange();
         }
 
         private void OnInputTextLostFocus(object sender, EventArgs e)
         {
-			ContentControl.ParentNotify notify = new ContentControl.ParentNotify(m_hwndParent);
+			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
 
             notify.NotifyKillFocus();
         }

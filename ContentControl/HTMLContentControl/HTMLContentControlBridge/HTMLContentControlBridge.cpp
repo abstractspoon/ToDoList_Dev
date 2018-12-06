@@ -10,8 +10,8 @@
 #include <msclr\auto_gcroot.h>
 
 #include "..\..\..\..\ToDoList_Dev\Interfaces\ITransText.h"
-#include "..\..\..\..\ToDoList_Dev\Interfaces\IPreferences.h"
 #include "..\..\..\..\ToDoList_Dev\Interfaces\UITheme.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\IPreferences.h"
 #include "..\..\..\..\ToDoList_Dev\Interfaces\ISpellcheck.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -20,12 +20,12 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+using namespace HTMLContentControl;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 
-using namespace HTMLContentControl;
-using namespace Abstractspoon::Tdl;//::PluginHelpers;
+using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -228,7 +228,7 @@ bool CHTMLContentControlBridge::Redo()
 
 void CHTMLContentControlBridge::SetUITheme(const UITHEME* pTheme)
 {
-	msclr::auto_gcroot<PluginHelpers::UITheme^> theme = gcnew PluginHelpers::UITheme(pTheme);
+	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);
 
 	m_wnd->SetUITheme(theme.get());
 }
@@ -238,7 +238,10 @@ void CHTMLContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR sz
 
 }
 
-void CHTMLContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
+void CHTMLContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
+	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
+	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);
 }

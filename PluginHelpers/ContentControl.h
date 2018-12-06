@@ -14,7 +14,7 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
-			public ref class ContentControl
+			public ref class ContentControlWnd
 			{
 			public:
 				ref class ParentNotify
@@ -32,7 +32,7 @@ namespace Abstractspoon
 				};
 			};
 
-			public interface class IContentControl
+			public interface class IContentControlWnd
 			{
 				// custom/binary data format
 				cli::array<Byte>^ GetContent();

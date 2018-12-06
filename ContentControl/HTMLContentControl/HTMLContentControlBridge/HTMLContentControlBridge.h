@@ -73,7 +73,7 @@ public:
    void SetUITheme(const UITHEME* pTheme);
 
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
-   void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey);
+   void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
 
 protected:
    gcroot<HTMLContentControlCore^> m_wnd;

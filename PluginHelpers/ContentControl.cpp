@@ -14,18 +14,18 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-ContentControl::ParentNotify::ParentNotify(IntPtr hwndParent) : m_hwndParent(NULL), m_hwndFrom(NULL)
+ContentControlWnd::ParentNotify::ParentNotify(IntPtr hwndParent) : m_hwndParent(NULL), m_hwndFrom(NULL)
 {
 	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
 }
 
-ContentControl::ParentNotify::ParentNotify(IntPtr hwndParent, IntPtr hwndFrom) : m_hwndParent(NULL), m_hwndFrom(NULL)
+ContentControlWnd::ParentNotify::ParentNotify(IntPtr hwndParent, IntPtr hwndFrom) : m_hwndParent(NULL), m_hwndFrom(NULL)
 {
 	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
 	m_hwndFrom = static_cast<HWND>(hwndFrom.ToPointer());
 }
 
-bool ContentControl::ParentNotify::NotifyChange()
+bool ContentControlWnd::ParentNotify::NotifyChange()
 {
 	if (!IsWindow(m_hwndParent))
 		return false;
@@ -34,7 +34,7 @@ bool ContentControl::ParentNotify::NotifyChange()
 	return true;
 }
 
-bool ContentControl::ParentNotify::NotifyKillFocus()
+bool ContentControlWnd::ParentNotify::NotifyKillFocus()
 {
 	if (!IsWindow(m_hwndParent))
 		return false;

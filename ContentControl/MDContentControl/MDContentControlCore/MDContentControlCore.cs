@@ -9,7 +9,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace MDContentControl
 {
     [System.ComponentModel.DesignerCategory("")]
-    public class MDContentControlCore : MarkdownEditor.MarkdownSharpEditorForm, IContentControl
+    public class MDContentControlCore : MarkdownEditor.MarkdownSharpEditorForm, IContentControlWnd
     {
         private IntPtr m_hwndParent;
 
@@ -114,14 +114,14 @@ namespace MDContentControl
 
         private void OnInputTextChanged(object sender, EventArgs e)
         {
-			ContentControl.ParentNotify notify = new ContentControl.ParentNotify(m_hwndParent);
+			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
 
             notify.NotifyChange();
         }
 
         private void OnInputTextLostFocus(object sender, EventArgs e)
         {
-			ContentControl.ParentNotify notify = new ContentControl.ParentNotify(m_hwndParent);
+			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
 
             notify.NotifyKillFocus();
         }

@@ -25,6 +25,8 @@ using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 
+using namespace Abstractspoon::Tdl::PluginHelpers;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // REPLACE THIS WITH NEW GUID!
@@ -234,7 +236,7 @@ void CMDContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKe
 
 }
 
-void CMDContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
+void CMDContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
 
 }
