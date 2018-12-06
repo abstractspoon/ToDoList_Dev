@@ -64,8 +64,7 @@ namespace ZetaHtmlEditControl
                 HtmlEditControl.CssFontSize = string.Format((points ? "{0}pt" : "{0}px"), fontSize);
 
             // Rebuild the document text to update the browser CSS
-            if (!string.IsNullOrEmpty(docText))
-                HtmlEditControl.DocumentText = docText;
+            HtmlEditControl.DocumentText = docText;
 
             return true;
         }
@@ -177,14 +176,18 @@ namespace ZetaHtmlEditControl
 
             if (selection != null)
             {
-                var name = selection.queryCommandValue("FontName");
-                int x = HTMLcmbFont.FindStringExact(name.ToString());
+                var name = selection.queryCommandValue("FontName").ToString();
+                int x = HTMLcmbFont.FindStringExact(name);
 
                 if (x != -1)
                     HTMLcmbFont.SelectedIndex = x;
 
-                var size = selection.queryCommandValue("FontSize");
-                x = HTMLcmbFontSize.FindStringExact(size.ToString());
+                var size = selection.queryCommandValue("FontSize").ToString();
+
+                if (string.IsNullOrEmpty(size))
+                    size = "1";
+
+                x = HTMLcmbFontSize.FindStringExact(size);
 
                 if (x != -1)
                     HTMLcmbFontSize.SelectedIndex = x;
