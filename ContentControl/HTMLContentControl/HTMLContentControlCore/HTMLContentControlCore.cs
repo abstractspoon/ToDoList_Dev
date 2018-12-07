@@ -29,32 +29,37 @@ namespace HTMLContentControl
 
             InitializeComponent();
 
-//             inputTextBox.TextChanged += new System.EventHandler(OnInputTextChanged);
-//             inputTextBox.LostFocus += new System.EventHandler(OnInputTextLostFocus);
+            HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
+            HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
         }
 
         // ITDLContentControl ------------------------------------------------------------------
 
         public Byte[] GetContent()
         {
-            return System.Text.Encoding.Unicode.GetBytes(""/*InputText*/);
+            var html = HtmlEditControl.DocumentText;
+
+            return System.Text.Encoding.Unicode.GetBytes(html);
         }
 
         public bool SetContent(Byte[] content, bool bResetSelection)
         {
-//             InputText = System.Text.Encoding.Unicode.GetString(content);
+            var html = System.Text.Encoding.Unicode.GetString(content);
+            HtmlEditControl.DocumentText = html;
+
             return true;
         }
 
         // text content if supported. return false if not supported
         public String GetTextContent()
         {
-            return "";// OutputText;
+            return HtmlEditControl.TextOnlyFromDocumentBody;
         }
 
         public bool SetTextContent(String content, bool bResetSelection)
         {
-//             InputText = content;
+            HtmlEditControl.SetDocumentText(content);
+
             return true;
         }
 
@@ -152,6 +157,15 @@ namespace HTMLContentControl
             this.ToolBar.Renderer = m_toolbarRenderer;
             this.ToolBar.Font = m_ControlsFont;
 
+            if (Win32.WantScaleByDPIFactor())
+            {
+                int imageSize = Win32.ScaleByDPIFactor(16);
+
+                this.ToolBar.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
+                this.ToolBar.AutoSize = false;
+                this.ToolBar.Height = (imageSize + 10);
+            }
+            
             // 
             // HTMLContentControlCore
             // 
