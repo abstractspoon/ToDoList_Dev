@@ -217,9 +217,6 @@
   <data name="HTMLcmbFontSize.Items6" xml:space="preserve">
     <value>7</value>
   </data>
-  <data name="HTMLcmbFontSize.Items7" xml:space="preserve">
-    <value>8</value>
-  </data>
   <data name="HTMLcmbFontSize.Size" type="System.Drawing.Size, System.Drawing">
     <value>75, 21</value>
   </data>
@@ -757,7 +754,7 @@
     <value>panel1</value>
   </data>
   <data name="&gt;&gt;htmlEditControl.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>0</value>
   </data>
   <data name="panel1.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Fill</value>

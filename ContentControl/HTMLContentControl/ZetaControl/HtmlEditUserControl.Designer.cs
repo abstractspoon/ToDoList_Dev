@@ -140,8 +140,7 @@
             resources.GetString("HTMLcmbFontSize.Items3"),
             resources.GetString("HTMLcmbFontSize.Items4"),
             resources.GetString("HTMLcmbFontSize.Items5"),
-            resources.GetString("HTMLcmbFontSize.Items6"),
-            resources.GetString("HTMLcmbFontSize.Items7")});
+            resources.GetString("HTMLcmbFontSize.Items6")});
             this.HTMLcmbFontSize.Name = "HTMLcmbFontSize";
             // 
             // boldToolStripMenuItem
@@ -403,6 +402,7 @@
             // htmlEditControl
             // 
             this.htmlEditControl.AllowWebBrowserDrop = false;
+            this.htmlEditControl.CssFontName = "Tahoma";
             this.htmlEditControl.CssFontSize = "8.25pt";
             resources.ApplyResources(this.htmlEditControl, "htmlEditControl");
             this.htmlEditControl.IsWebBrowserContextMenuEnabled = false;

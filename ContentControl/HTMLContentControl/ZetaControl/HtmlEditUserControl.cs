@@ -47,8 +47,16 @@ namespace ZetaHtmlEditControl
             if (string.IsNullOrEmpty(fontName))
                 return false;
 
+            if ((HtmlEditControl.CssFontName == fontName) &&
+                ((fontSize == 0) || (HtmlEditControl.CssFontSize == FormatFontSize(fontSize, points))))
+            {
+                // no change
+                return true;
+            }
+
             // Save the current document to update later
             var docText = HtmlEditControl.DocumentText;
+            var selection = HtmlEditControl.CurrentSelectionText;
 
             // Reset the font name selection and then update to the current selection
             if (HTMLcmbFont.Items.Count > 0)
@@ -66,12 +74,17 @@ namespace ZetaHtmlEditControl
             HtmlEditControl.CssFontName = fontName;
 
             if (fontSize > 0)
-                HtmlEditControl.CssFontSize = string.Format((points ? "{0}pt" : "{0}px"), fontSize);
+                HtmlEditControl.CssFontSize = FormatFontSize(fontSize, points);
 
             // Rebuild the document text to update the browser CSS
             HtmlEditControl.DocumentText = docText;
 
             return true;
+        }
+
+        private String FormatFontSize(float fontSize, bool points)
+        {
+            return string.Format((points ? "{0}pt" : "{0}px"), fontSize);
         }
 
 		private void htmlEditControl_UINeedsUpdate(object sender, EventArgs e)

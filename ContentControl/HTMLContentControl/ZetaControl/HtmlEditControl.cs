@@ -352,22 +352,25 @@ namespace ZetaHtmlEditControl
             }
         }
 
-        private static string _defaultCssText = @"body { {font-style}; margin: 4px; line-height: 110%; } 
-			li { margin-bottom: 5pt; } 
-			a { color: blue; } 
-			table { {font-style}; } 
-			tr { {font-style}; } 
-			th { padding:1px; border-top: 2px inset #777; border-right: 2px inset #fff; border-bottom: 2px inset #aaa; border-left: 2px inset #fff; font-weight: bold; {font-style}; } 
-			td { padding: 1px; border: 2px inset #fff; {font-style}; }";
+        private static string _defaultCssText = 
+@"body { {font-style}; margin: 4px; line-height: 110%; } 
+li { margin-bottom: 5pt; } 
+a { color: blue; } 
+table { {font-style}; } 
+tr { {font-style}; } 
+th { padding:1px; border-top: 2px inset #777; border-right: 2px inset #fff; border-bottom: 2px inset #aaa; border-left: 2px inset #fff; font-weight: bold; {font-style}; } 
+td { padding: 1px; border: 2px inset #fff; {font-style}; }";
+
         private static string _defaultHtmlTemplate =
-            @"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Transitional//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"">
-			<html xmlns=""http://www.w3.org/1999/xhtml"">
-				<head>
-					<meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"" />
-					<style type=""text/css"">##CSS##</style>
-				</head>
-				<body spellcheck=""true"">##BODY##</body>
-			</html>";
+@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Transitional//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"">
+<html xmlns=""http://www.w3.org/1999/xhtml"">
+	<head>
+        <meta http-equiv=""X-UA-Compatible"" content=""IE=9; charset=utf-8"" /> 
+		<!--meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"" /-->
+		<style type=""text/css"">##CSS##</style>
+	</head>
+	<body spellcheck=""true"">##BODY##</body>
+</html>";
 
         // ------------------------------------------------------------------
         #endregion
