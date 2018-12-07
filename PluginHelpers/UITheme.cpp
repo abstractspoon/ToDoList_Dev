@@ -107,8 +107,8 @@ void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
 bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs^ e)
 {
 	auto item = e->Item;
-	auto button = static_cast<ToolStripButton^>(item);
-	bool checkedButton = (button != nullptr && button->Checked);
+	auto button = dynamic_cast<ToolStripButton^>(item);
+	bool checkedButton = ((button != nullptr) && button->Checked);
 
 	if (ValidColours() && (item->Selected || item->Pressed || checkedButton))
 	{
