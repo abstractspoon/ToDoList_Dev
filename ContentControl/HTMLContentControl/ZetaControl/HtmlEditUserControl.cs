@@ -18,6 +18,11 @@ namespace ZetaHtmlEditControl
 			htmlEditControl.UINeedsUpdate += htmlEditControl_UINeedsUpdate;
 		}
 
+        protected override void OnGotFocus(EventArgs e)
+        {
+            htmlEditControl.Focus();
+        }
+
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
