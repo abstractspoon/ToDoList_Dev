@@ -514,10 +514,12 @@ void CTDLCommentsCtrl::OnEnable(BOOL bEnable)
 
 void CTDLCommentsCtrl::SetPreferencesFilePath(LPCTSTR szFilePath) 
 { 
-	m_sPrefsFilePath = szFilePath; 
+	if (!Misc::IsEmpty(szFilePath) && (m_sPrefsFilePath != szFilePath))
+	{
+		m_sPrefsFilePath = szFilePath; 
 
-	if (!m_sPrefsFilePath.IsEmpty())
 		LoadPreferences(FALSE);
+	}
 }
 
 void CTDLCommentsCtrl::OnSetFocus(CWnd* /*pOldWnd*/)
