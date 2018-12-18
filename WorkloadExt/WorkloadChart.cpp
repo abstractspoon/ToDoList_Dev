@@ -83,8 +83,7 @@ int CWorkloadChart::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	SetDatasetStyle(0, HMX_DATASET_STYLE_VBAR);
 	SetDatasetMin(0, 0.0);
 	SetDatasetMax(0, 100.0);
-	SetDatasetSizeFactor(0, 5);
-	SetDrawDatasetOverGrid(0, false);
+	SetDatasetSizeFactor(0, 5); // width factor for vertical bar
 
 	SetYText(CEnString(IDS_PERCENTLOADPERPERSON));
 

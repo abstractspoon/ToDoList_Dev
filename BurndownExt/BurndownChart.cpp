@@ -153,7 +153,6 @@ void CBurndownChart::BuildBurndownGraph()
 	SetDatasetFillColor(0, COLOR_GREENFILL);
 	SetDatasetSizeFactor(0, LINE_THICKNESS);
 	SetDatasetMin(0, 0.0);
-	SetDrawDatasetOverGrid(0, false);
 
 	// build the graph
 	COleDateTime dtStart = GetGraphStartDate();
@@ -260,14 +259,12 @@ void CBurndownChart::BuildSprintGraph()
 	SetDatasetLineColor(SPRINT_EST,  COLOR_REDLINE);
 	SetDatasetSizeFactor(SPRINT_EST, LINE_THICKNESS);
 	SetDatasetMin(SPRINT_EST, 0.0);
-	SetDrawDatasetOverGrid(SPRINT_EST, true);
 	
 	SetDatasetStyle(SPRINT_SPENT, HMX_DATASET_STYLE_AREALINE);
 	SetDatasetLineColor(SPRINT_SPENT, COLOR_YELLOWLINE);
 	SetDatasetFillColor(SPRINT_SPENT, COLOR_YELLOWFILL);
 	SetDatasetSizeFactor(SPRINT_SPENT, LINE_THICKNESS);
 	SetDatasetMin(SPRINT_SPENT, 0.0);
-	SetDrawDatasetOverGrid(SPRINT_SPENT, false);
 	
 	// build the graph
 	COleDateTime dtStart = GetGraphStartDate();

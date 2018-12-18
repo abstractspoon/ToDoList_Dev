@@ -121,9 +121,6 @@ public:
 	virtual bool		SetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER nMarker );
 	virtual bool		GetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER& nMarker ) const;
 	
-	virtual bool		SetDrawDatasetOverGrid(int nDatasetIndex, bool bOverGrid = true);
-	virtual bool		WantDrawDatasetOverGrid(int nDatasetIndex) const;
-
 	virtual bool		AddData( int nDatasetIndex, double nData );
 	virtual bool		SetData( int nDatasetIndex, int nIndex, double nData );
 	virtual bool 		GetData( int nDatasetIndex, int nIndex, double& nData ) const;
@@ -160,8 +157,8 @@ protected:
 	virtual bool DrawBaseline( CDC& dc );					
 	virtual bool DrawXScale( CDC& dc );						
 	virtual bool DrawYScale( CDC& dc );						
-	virtual bool DrawDataset(CDC &dc, int nDatasetIndex);	
-	virtual bool DrawDatasets(CDC &dc, bool bOverGrid);						
+	virtual bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);	
+	virtual bool DrawDatasets(CDC &dc);						
 
 	virtual COLORREF GetLineColor(int nDatasetIndex, double dValue) const;
 	virtual COLORREF GetFillColor(int nDatasetIndex, double dValue) const;

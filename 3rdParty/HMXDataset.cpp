@@ -23,7 +23,6 @@ CHMXDataset::CHMXDataset()
 	m_crLine = RGB(0, 0, 0);
 	m_crFill = CLR_NONE;
 	m_nMarker = HMX_DATASET_MARKER_NONE;
-	m_bDrawOverGrid = false;
 
 	m_bSetMinTo = m_bSetMaxTo = false;
 	m_dSetMinTo = m_dSetMaxTo = -1;
@@ -199,16 +198,3 @@ HMX_DATASET_STYLE CHMXDataset::GetStyle() const
 	return m_nStyle;
 }
 
-bool CHMXDataset::SetDrawOverGrid(bool bOverGrid)
-{
-	if (bOverGrid == m_bDrawOverGrid)
-		return false;
-
-	m_bDrawOverGrid = bOverGrid;
-	return true;
-}
-
-bool CHMXDataset::WantDrawOverGrid() const
-{
-	return m_bDrawOverGrid;
-}
