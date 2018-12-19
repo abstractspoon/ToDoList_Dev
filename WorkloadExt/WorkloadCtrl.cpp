@@ -632,16 +632,10 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 
 	case IUI_NEW:
 	case IUI_EDIT:
-		{
-			m_tcTasks.SetRedraw(FALSE);
-			m_lcColumns.SetRedraw(FALSE);
-		}
-		break;
-
 	case IUI_DELETE:
 		{
-			m_tcTasks.SetRedraw(FALSE);
-			m_lcColumns.SetRedraw(FALSE);
+			m_tcTasks.SetRedraw(TRUE);
+			m_lcColumns.SetRedraw(TRUE);
 		}
 		break;
 
