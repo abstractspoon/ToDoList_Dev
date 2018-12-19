@@ -557,35 +557,28 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		return;
 	}
 
+	// Two stage update to avoid redrawing when in
+	// partially updated state
+	CDWordArray aExpanded;
+	GetExpandedState(aExpanded);
+
+	DWORD dwSelID = GetSelectedTaskID();
+
+	// Stage 1: Update the data structures
 	switch (nUpdate)
 	{
 	case IUI_ALL:
-		{
-			CWorkloadLockUpdates glu(this, TRUE, TRUE);
-			
-			CDWordArray aExpanded;
-			GetExpandedState(aExpanded);
-			
-			DWORD dwSelID = GetSelectedTaskID();
-			
-			RebuildTree(pTasks);
+		LockWindowUpdate();
+		EnableResync(FALSE);
 
-			// Odd bug: The very last tree item will sometimes not scroll into view. 
-			// Expanding and collapsing an item is enough to resolve the issue. 
-			// First time only though.
-			if (aExpanded.GetSize() == 0)
-				PreFixVScrollSyncBug();
-			
-			SetExpandedState(aExpanded);
-			SelectTask(dwSelID);
-		}
+		RebuildTree(pTasks);
 		break;
 		
 	case IUI_NEW:
 	case IUI_EDIT:
 		{
-			CHoldRedraw hr(m_tcTasks);
-			CHoldRedraw hr2(m_lcColumns);
+			m_tcTasks.SetRedraw(FALSE);
+			m_lcColumns.SetRedraw(FALSE);
 			
 			// update the task(s)
 			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE))
@@ -600,8 +593,8 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		
 	case IUI_DELETE:
 		{
-			CHoldRedraw hr(m_tcTasks);
-			CHoldRedraw hr2(m_lcColumns);
+			m_tcTasks.SetRedraw(FALSE);
+			m_lcColumns.SetRedraw(FALSE);
 		
 			RemoveDeletedTasks(pTasks);
 		}
@@ -609,6 +602,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		
 	default:
 		ASSERT(0);
+		return;
 	}
 
 	InitItemHeights();
@@ -616,7 +610,46 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	FixupListSortColumn();
 	RecalcTreeColumns(TRUE);
 	RecalcAllocationTotals();
-	
+
+	// Stage 2: Restore rendering
+	switch (nUpdate)
+	{
+	case IUI_ALL:
+		{
+			// Odd bug: The very last tree item will sometimes not scroll into view. 
+			// Expanding and collapsing an item is enough to resolve the issue. 
+			// First time only though.
+			if (aExpanded.GetSize() == 0)
+				PreFixVScrollSyncBug();
+
+			SetExpandedState(aExpanded);
+			SelectTask(dwSelID);
+
+			UnlockWindowUpdate();
+			EnableResync(TRUE, m_tcTasks);
+		}
+		break;
+
+	case IUI_NEW:
+	case IUI_EDIT:
+		{
+			m_tcTasks.SetRedraw(FALSE);
+			m_lcColumns.SetRedraw(FALSE);
+		}
+		break;
+
+	case IUI_DELETE:
+		{
+			m_tcTasks.SetRedraw(FALSE);
+			m_lcColumns.SetRedraw(FALSE);
+		}
+		break;
+
+	default:
+		ASSERT(0);
+		return;
+	}
+		
 	if (EditWantsResort(nUpdate, attrib))
 	{
 		ASSERT(m_sort.IsSorting());
