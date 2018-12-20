@@ -768,6 +768,8 @@ LRESULT CWorkloadWnd::OnWorkloadNotifySelChange(WPARAM /*wp*/, LPARAM /*lp*/)
 
 LRESULT CWorkloadWnd::OnWorkloadEditTaskTitle(WPARAM /*wp*/, LPARAM /*lp*/)
 {
+	ASSERT(!m_bReadOnly);
+
 	// notify app to edit
 	GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE);
 
@@ -822,6 +824,8 @@ void CWorkloadWnd::OnShowWindow(BOOL bShow, UINT nStatus)
 
 LRESULT CWorkloadWnd::OnWorkloadNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp) 
 {
+	ASSERT(!m_bReadOnly);
+
 	IUITASKMOD mod = { IUI_DONEDATE, 0 };
 
 	if (lp) // done/not done
@@ -886,6 +890,8 @@ void CWorkloadWnd::OnWorkloadEditAllocations()
 
 LRESULT CWorkloadWnd::OnWorkloadEditTaskAllocations(WPARAM /*wp*/, LPARAM lp)
 {
+	ASSERT(!m_bReadOnly);
+
 	if (CanEditSelectedTaskAllocations((DWORD)lp))
 	{
 		OnWorkloadEditAllocations();
@@ -904,6 +910,9 @@ void CWorkloadWnd::OnUpdateWorkloadEditAllocations(CCmdUI* pCmdUI)
 
 BOOL CWorkloadWnd::CanEditSelectedTaskAllocations(DWORD dwTaskID) const
 {
+	if (m_bReadOnly)
+		return FALSE;
+
 	if (dwTaskID && (dwTaskID != m_ctrlWorkload.GetSelectedTaskID()))
 	{
 		ASSERT(0);

@@ -1874,7 +1874,8 @@ void CWorkloadCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = TRUE; // cancel our edit
 	
 	// notify app to edit
-	CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKTITLE);
+	if (!m_bReadOnly)
+		CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKTITLE);
 }
 
 void CWorkloadCtrl::OnEndDragTreeHeader(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
@@ -2464,9 +2465,9 @@ void CWorkloadCtrl::SetDropHilite(HTREEITEM hti, int nItem)
 
 BOOL CWorkloadCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint /*point*/)
 {
-	if (!m_bReadOnly)
-	{
-	}
+// 	if (!m_bReadOnly)
+// 	{
+// 	}
 
 	// not handled
 	return FALSE;
@@ -2480,9 +2481,9 @@ BOOL CWorkloadCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 	if (nFlags & TVHT_ONITEMBUTTON)
 		return FALSE;
 
-	if (!m_bReadOnly)
-	{
-	}
+// 	if (!m_bReadOnly)
+// 	{
+// 	}
 
 	if (!(nFlags & TVHT_ONITEMBUTTON))
 	{
@@ -2594,6 +2595,9 @@ BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT /*nFlags*/, CPoint point)
 	}
 
 	// else
+	if (m_bReadOnly)
+		return FALSE;
+
 	return CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKALLOCATIONS, 0, GetTaskID(nHit));
 }
 
