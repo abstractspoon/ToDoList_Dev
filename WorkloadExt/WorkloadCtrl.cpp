@@ -3437,7 +3437,7 @@ int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 		break;
 
 	case WLCC_DURATION:
-		nColWidth = pDC->GetTextExtent(CEnString(_T("%d Days"), GetLongestVisibleDuration(NULL))).cx;
+		nColWidth = pDC->GetTextExtent(CEnString(IDS_ALLOCATION_FORMAT, GetLongestVisibleDuration(NULL))).cx;
 		break;
 		
 	case WLCC_PERCENT: 

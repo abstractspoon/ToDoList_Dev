@@ -105,7 +105,7 @@ BOOL COleDateTimeRange::Set(const COleDateTime& dtStart, const COleDateTime& dtE
 
 	m_dtStart = dtStart;
 	m_dtEnd = dtEnd;
-	m_bInclusive = (bInclusive && !CDateHelper::DateHasTime(dtEnd));
+	m_bInclusive = (bInclusive || CDateHelper::IsEndOfDay(dtEnd));
 
 	return IsValid();
 }
