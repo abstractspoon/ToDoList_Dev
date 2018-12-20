@@ -255,8 +255,8 @@ void CBurndownChart::BuildSprintGraph()
 	ClearData();
 
 	SetDatasetStyle(SPRINT_EST, HMX_DATASET_STYLE_AREALINE);
-	SetDatasetLineColor(SPRINT_EST,  COLOR_REDLINE);
-	SetDatasetFillColor(SPRINT_EST,  COLOR_REDLINE);
+	SetDatasetLineColor(SPRINT_EST,  COLOR_BLUELINE);
+	SetDatasetFillColor(SPRINT_EST,  COLOR_BLUEFILL);
 	SetDatasetSizeFactor(SPRINT_EST, LINE_THICKNESS);
 	SetDatasetMin(SPRINT_EST, 0.0);
 	
