@@ -2359,6 +2359,13 @@ void CTabbedToDoCtrl::NotifyBeginPreferencesUpdate(BOOL bFirst)
 	// nothing else for us to do
 }
 
+void CTabbedToDoCtrl::AdjustSplitterToFitAttributeColumns() 
+{ 
+	CToDoCtrl::AdjustSplitterToFitAttributeColumns();
+
+	m_taskList.AdjustSplitterToFitAttributeColumns();
+}
+
 void CTabbedToDoCtrl::NotifyEndPreferencesUpdate(BOOL bFirst)
 {
 	// base class

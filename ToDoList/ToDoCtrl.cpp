@@ -6044,6 +6044,11 @@ TDC_FILE CToDoCtrl::Save(const CString& sFilePath, BOOL bFlush)
 
 TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL bFlush)
 {
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTime log(_T("CToDoCtrl::Save()"));
+	CString sFileName = FileMisc::GetFileNameFromPath(sFilePath);
+	///////////////////////////////////////////////////////////////////////
+	
 	ASSERT (GetSafeHwnd());
 	
 	if (!GetSafeHwnd())
@@ -6120,7 +6125,9 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 // static helper
 TDC_FILE CToDoCtrl::SaveTaskfile(CTaskFile& tasks, const CString& sSavePath)
 {
+	// PERMANENT LOGGING //////////////////////////////////////////////
 	CScopedLogTime log(_T("CToDoCtrl::SaveTaskfile(%s)"), FileMisc::GetFileNameFromPath(sSavePath));
+	///////////////////////////////////////////////////////////////////
 	CWaitCursor cursor;
 
 	// Always backup before overwriting

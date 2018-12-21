@@ -134,6 +134,7 @@ public:
 	void SetMaxInfotipCommentsLength(int nLength);
 	void EndTimeTracking(BOOL bAllowConfirm) { CToDoCtrl::EndTimeTracking(bAllowConfirm); }
 	void BeginTimeTracking(DWORD dwTaskID) { CToDoCtrl::BeginTimeTracking(dwTaskID); }
+	void AdjustSplitterToFitAttributeColumns();
 
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual void RebuildCustomAttributeUI();

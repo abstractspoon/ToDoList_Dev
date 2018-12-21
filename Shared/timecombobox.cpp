@@ -8,6 +8,8 @@
 #include "localizer.h"
 #include "holdredraw.h"
 
+#include <math.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -115,7 +117,7 @@ double CTimeComboBox::GetOleTime() const
 BOOL CTimeComboBox::SetOleTime(double dTime)
 {
 	// truncate to extract the time only component if it has one
-	dTime -= (int)dTime;
+	dTime = fabs(dTime - (int)dTime);
 
 	if (dTime <= 0)
 	{

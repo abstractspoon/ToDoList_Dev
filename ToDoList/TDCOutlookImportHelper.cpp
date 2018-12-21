@@ -217,8 +217,6 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 		case TDCA_COMMENTS:
 			if (!tdi.sComments.IsEmpty())
 				tdi.sComments += '\n';
-// 			else
-// 				tdi.sCommentsTypeID = m_cfDefault;
 
 			// special case:
 			if (oaType == OA_ENTRYID)
@@ -236,23 +234,23 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 			break;
 			
 		case TDCA_STARTDATE: 
-			CDateHelper::DecodeDate(sData, tdi.dateStart);
+			CDateHelper::DecodeDate(sData, tdi.dateStart, TRUE); // include time
 			break;
 			
 		case TDCA_DUEDATE: 
-			CDateHelper::DecodeDate(sData, tdi.dateDue);
+			CDateHelper::DecodeDate(sData, tdi.dateDue, TRUE); // include time
 			break;
 			
 		case TDCA_DONEDATE: 
-			CDateHelper::DecodeDate(sData, tdi.dateDone);
+			CDateHelper::DecodeDate(sData, tdi.dateDone, TRUE); // include time
 			break;
 			
 		case TDCA_LASTMODDATE: 
-			CDateHelper::DecodeDate(sData, tdi.dateLastMod);
+			CDateHelper::DecodeDate(sData, tdi.dateLastMod, TRUE); // include time
 			break;
 			
 		case TDCA_CREATIONDATE: 
-			CDateHelper::DecodeDate(sData, tdi.dateCreated);
+			CDateHelper::DecodeDate(sData, tdi.dateCreated, TRUE); // include time
 			break;
 			
 		case TDCA_PRIORITY: 

@@ -13,7 +13,6 @@
 #include "tdcenum.h"
 #include "todoctrlundo.h"
 #include "todoitem.h"
-#include "tdcsourcecontrol.h"
 
 #include <afxtempl.h>
 

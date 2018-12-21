@@ -1650,6 +1650,14 @@ void CDateHelper::GetMonthNames(BOOL bShort, CStringArray& aMonths)
 COleDateTime CDateHelper::GetTimeOnly(const COleDateTime& date)
 {
 	double dTime = (date.m_dt - GetDateOnly(date));
+	
+	if (date.m_dt < 0.0)
+	{
+		ASSERT((dTime <= 0.0) && (dTime > -1.0));
+		dTime = -dTime;
+	}
+
+	ASSERT((dTime >= 0) && (dTime < 1.0));
 
 	if (dTime < START_OF_DAY)
 		return 0.0;
@@ -1664,7 +1672,7 @@ BOOL CDateHelper::DateHasTime(const COleDateTime& date)
 
 COleDateTime CDateHelper::GetDateOnly(const COleDateTime& date)
 {
-	return floor(date.m_dt);
+	return (double)((int)date.m_dt);
 }
 
 void CDateHelper::SplitDate(const COleDateTime& date, double& dDateOnly, double& dTimeOnly)
@@ -1677,8 +1685,11 @@ COleDateTime CDateHelper::MakeDate(const COleDateTime& dtDateOnly, const COleDat
 {
 	double dDateOnly = GetDateOnly(dtDateOnly);
 	double dTimeOnly = GetTimeOnly(dtTimeOnly);
+
+	if (dDateOnly < 0.0)
+		return (dDateOnly - dTimeOnly);
 	
-	return dDateOnly + dTimeOnly;
+	return (dDateOnly + dTimeOnly);
 }
 
 int CDateHelper::CalcDayOfMonth(int nDOW, int nWhich, int nMonth, int nYear)

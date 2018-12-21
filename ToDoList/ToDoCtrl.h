@@ -418,6 +418,7 @@ public:
 	// misc
 	void Spellcheck();
 	void SetMaxInfotipCommentsLength(int nLength) { m_taskTree.SetMaxInfotipCommentsLength(nLength); }
+	void AdjustSplitterToFitAttributeColumns() { m_taskTree.AdjustSplitterToFitAttributeColumns(); }
 	COleDateTime GetLastTaskModified() const { return m_dtLastTaskMod; }
 	void RedrawReminders();
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos, BOOL bResize);

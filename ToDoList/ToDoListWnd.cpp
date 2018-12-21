@@ -99,6 +99,7 @@ static char THIS_FILE[] = __FILE__;
 const int BEVEL = 3; // DON'T SCALE
 const int MAX_NUM_TOOLS = 50;
 const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
+const int MRU_MAX_ITEM_LEN = 128;
 
 const int QUICKFIND_HEIGHT = GraphicsMisc::ScaleByDPIFactor(200);
 const int QUICKFIND_VOFFSET = (GraphicsMisc::WantDPIScaling() ? (GraphicsMisc::ScaleByDPIFactor(2) - 1) : 0);
@@ -163,7 +164,7 @@ CToDoListWnd::CToDoListWnd()
 	: 
 	CFrameWnd(), 
 	m_bVisible(-1), 
-	m_mruList(0, _T("MRU"), _T("TaskList%d"), 16, AFX_ABBREV_FILENAME_LEN, CEnString(IDS_RECENTFILES)),
+	m_mruList(0, _T("MRU"), _T("TaskList%d"), 16, MRU_MAX_ITEM_LEN, CEnString(IDS_RECENTFILES)),
 	m_nLastSelItem(-1), 
 	m_nMaxState(TDCMS_NORMAL), 
 	m_nPrevMaxState(TDCMS_NORMAL),
@@ -2088,6 +2089,8 @@ void CToDoListWnd::UpdateStatusbar()
 
 void CToDoListWnd::OnLoad() 
 {
+	ASSERT(IsWindowVisible());
+
 	CPreferences prefs;
 	CFileOpenDialog dialog(IDS_OPENTASKLIST_TITLE, 
 							GetDefaultFileExt(TRUE), 
@@ -2866,8 +2869,8 @@ BOOL CToDoListWnd::CreateNewTaskList(BOOL bAddDefTask)
 			pNew->DeleteAllTasks();
 		}
 		
-		// clear modified flag
 		pNew->SetModified(FALSE);
+		pNew->AdjustSplitterToFitAttributeColumns();
 	}
 
 	return (pNew != NULL);
@@ -7005,7 +7008,8 @@ void CToDoListWnd::OnTimerCheckoutStatus(int nCtrl, BOOL bForceCheckRemote)
 		if (!bCheckedOut && userPrefs.GetKeepTryingToCheckout())
 		{
 			// we only try to check if the previous checkout failed
-			if (!m_mgrToDoCtrls.GetLastCheckoutSucceeded(nCtrl) && m_mgrToDoCtrls.CheckOut(nCtrl))
+			if (!m_mgrToDoCtrls.GetLastCheckoutSucceeded(nCtrl) && 
+				(m_mgrToDoCtrls.CheckOut(nCtrl) == TDCF_SUCCESS))
 			{
 				// notify the user
 				sCheckedOutFiles += m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl);
@@ -7018,7 +7022,8 @@ void CToDoListWnd::OnTimerCheckoutStatus(int nCtrl, BOOL bForceCheckRemote)
 		{
 			int nMin = m_mgrToDoCtrls.GetElapsedMinutesSinceLastMod(nCtrl);
 			
-			if ((nMin >= userPrefs.GetAutoCheckinFrequency()) && m_mgrToDoCtrls.CheckIn(nCtrl))
+			if ((nMin >= userPrefs.GetAutoCheckinFrequency()) && 
+				(m_mgrToDoCtrls.CheckIn(nCtrl) == TDCF_SUCCESS))
 			{
 				// notify the user
 				sCheckedInFiles += m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl);
@@ -7669,7 +7674,9 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 	}
 	
 	// else
+	CPreferences prefs;
 	TDCCOLEDITFILTERVISIBILITY vis;
+
 	Prefs().GetDefaultColumnEditFilterVisibility(vis);
 	
 	CFilteredToDoCtrl* pTDC = new CFilteredToDoCtrl(m_mgrUIExtensions, 
@@ -7678,7 +7685,31 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 													vis);
 	// Give it a meaningful maximum size
 	CRect rCtrl;
-	GraphicsMisc::GetAvailableScreenSpace(*this, rCtrl);
+	BOOL bMaximized = IsZoomed();
+
+	if (m_bReloading)
+	{
+		int nDefShowState = AfxGetApp()->m_nCmdShow;
+		bMaximized = ((nDefShowState == SW_SHOWMAXIMIZED) || prefs.GetProfileInt(_T("Pos"), _T("Maximized"), FALSE));
+
+		if (bMaximized)
+		{
+			GraphicsMisc::GetAvailableScreenSpace(*this, rCtrl);
+		}
+		else
+		{
+			rCtrl.left = prefs.GetProfileInt(_T("Pos"), _T("Left"), -1);
+			rCtrl.top = prefs.GetProfileInt(_T("Pos"), _T("Top"), -1);
+			rCtrl.right = prefs.GetProfileInt(_T("Pos"), _T("Right"), -1);
+			rCtrl.bottom = prefs.GetProfileInt(_T("Pos"), _T("Bottom"), -1);
+		}
+	}
+	else
+	{
+		GetClientRect(rCtrl);
+	}
+
+	CalcToDoCtrlRect(rCtrl, rCtrl.Width(), rCtrl.Height(), bMaximized);
 
 	// and somewhere out in space
 	rCtrl.OffsetRect(-30000, -30000);
@@ -7703,8 +7734,6 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 		{
 			// Extensions are 'lazy' loaded so this is the first chance
 			// to allow them to load global preferences
-			CPreferences prefs;
-			
 			m_mgrUIExtensions.LoadPreferences(prefs, _T("UIExtensions"));
 			m_mgrContent.LoadPreferences(prefs, _T("ContentControls"), FALSE);
 		}

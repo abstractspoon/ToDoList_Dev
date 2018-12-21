@@ -165,7 +165,7 @@ BOOL CToDoCtrlData::AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, 
 		{
 			TODOITEM* pTDI = NewTask(tasks, hTask);
 			ASSERT(pTDI);
-
+			
 			m_items.AddTask(dwTaskID, pTDI);
 			
 			// New task becomes the parent
@@ -1922,9 +1922,7 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 	
 	// Convert 'end of day' to whole days
 	if (bDateIsSet && IsEndOfDay(dtDate))
-	{
 		dtDate = CDateHelper::GetDateOnly(dtDate);
-	}
 	
 	const COleDateTime dtCur = pTDI->GetDate(nDate);
 	
@@ -3284,7 +3282,7 @@ BOOL CToDoCtrlData::IsEndOfDay(const COleDateTime& date)
 {
 	ASSERT(CDateHelper::IsDateSet(date));
 	
-	return (!CDateHelper::DateHasTime(date) || (date >= CDateHelper::GetEndOfDay(date)));
+	return (!CDateHelper::DateHasTime(date) || CDateHelper::IsEndOfDay(date));
 }
 
 COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits)
