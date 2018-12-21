@@ -178,13 +178,13 @@ public:
 	static BOOL FormatDate(const COleDateTime& date, DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow);
 	static BOOL FormatCurrentDate(DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow);
 
-	static BOOL DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAndTime = FALSE);
-	static BOOL DecodeDate(const CString& sDate, double& date, BOOL bAndTime = FALSE);
+	static BOOL DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAndTime);
+	static BOOL DecodeDate(const CString& sDate, double& date, BOOL bAndTime);
 #if _MSC_VER < 1400
-	static BOOL DecodeDate(const CString& sDate, time_t& date, BOOL bAndTime = FALSE);
+	static BOOL DecodeDate(const CString& sDate, time_t& date, BOOL bAndTime);
 #endif
-	static BOOL DecodeDate(const CString& sDate, time64_t& date, BOOL bAndTime = FALSE);
-	static BOOL DecodeISODate(const CString& sDate, COleDateTime& date, BOOL bAndTime = FALSE);
+	static BOOL DecodeDate(const CString& sDate, time64_t& date, BOOL bAndTime);
+	static BOOL DecodeISODate(const CString& sDate, COleDateTime& date, BOOL bAndTime);
 
 	static BOOL DecodeOffset(LPCTSTR szDate, double& dAmount, DH_UNITS& nUnits, BOOL bMustHaveSign = TRUE);
 	static BOOL DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bForceWeekday, BOOL bMustHaveSign = TRUE);

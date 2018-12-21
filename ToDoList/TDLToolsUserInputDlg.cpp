@@ -245,7 +245,7 @@ BOOL CTDLToolsUserInputDlg::OnInitDialog()
 			{
 				COleDateTime date;
 
-				if (CDateHelper::DecodeISODate(tuii.sDefValue, date))
+				if (CDateHelper::DecodeDate(tuii.sDefValue, date, FALSE))
 				{
 					SYSTEMTIME sysTime = { 0 };
 					

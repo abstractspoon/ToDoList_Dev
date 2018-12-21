@@ -132,7 +132,7 @@ bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITASKLISTBASE* pDestTas
 	// dates
 	time64_t tStart;
 	
-	if (CDateHelper::DecodeDate(pXISrcTask->GetItemValue(_T("start")), tStart))
+	if (CDateHelper::DecodeDate(pXISrcTask->GetItemValue(_T("start")), tStart, FALSE)) // exclude time
 	{
 		pDestTaskFile->SetTaskStartDate64(hTask, tStart);
 

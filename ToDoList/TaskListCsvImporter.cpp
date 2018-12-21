@@ -354,27 +354,27 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 		break;
 
 	case TDCA_STARTDATE: 
-		if (CDateHelper::DecodeDate(sValue, t64, TRUE))
+		if (CDateHelper::DecodeDate(sValue, t64, TRUE)) // include time
 			pTasks->SetTaskStartDate64(hTask, t64);
 		break;
 
 	case TDCA_DUEDATE: 
-		if (CDateHelper::DecodeDate(sValue, t64, TRUE))
+		if (CDateHelper::DecodeDate(sValue, t64, TRUE)) // include time
 			pTasks->SetTaskDueDate64(hTask, t64);
 		break;
 
 	case TDCA_DONEDATE: 
-		if (CDateHelper::DecodeDate(sValue, t64, TRUE))
+		if (CDateHelper::DecodeDate(sValue, t64, TRUE)) // include time
 			pTasks->SetTaskDoneDate64(hTask, t64);
 		break;
 
 	case TDCA_LASTMODDATE: 
-		if (CDateHelper::DecodeDate(sValue, t64, TRUE))
+		if (CDateHelper::DecodeDate(sValue, t64, TRUE)) // include time
 			pTasks->SetTaskLastModified64(hTask, t64);
 		break;
 
 	case TDCA_CREATIONDATE: 
-		if (CDateHelper::DecodeDate(sValue, t64, FALSE))
+		if (CDateHelper::DecodeDate(sValue, t64, TRUE)) // include time
 			pTasks->SetTaskCreationDate64(hTask, t64);
 		break;
 

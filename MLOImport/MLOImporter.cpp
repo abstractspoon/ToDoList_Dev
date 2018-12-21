@@ -149,7 +149,7 @@ time64_t CMLOImporter::GetDate(const CXmlItem* pXIMLOTask, LPCTSTR szDateField) 
 	CString sDate = pXIMLOTask->GetItemValue(szDateField);
 	time64_t date = 0;
 	
-	if (!CDateHelper::DecodeDate(sDate, date))
+	if (!CDateHelper::DecodeDate(sDate, date, TRUE)) // include time
 		date = 0;
 	
 	return date;
