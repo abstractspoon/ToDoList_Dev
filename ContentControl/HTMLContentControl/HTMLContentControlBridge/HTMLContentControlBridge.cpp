@@ -101,8 +101,17 @@ void CHTMLContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szK
 int CHTMLContentBridge::ConvertToHtml(const unsigned char* pContent, int nLength,
 	LPCWSTR szCharSet, LPWSTR& szHtml, LPCWSTR szImageDir)
 {
-	szHtml = nullptr;
-	return 0;
+	if (nLength == 0)
+		return 0;
+
+	// pContent is the body
+	int nCharLen = ((nLength / 2) + 1);
+	szHtml = new WCHAR[nCharLen];
+
+	ZeroMemory(szHtml, nCharLen * sizeof(WCHAR));
+	CopyMemory(szHtml, pContent, nLength);
+	
+	return nCharLen;
 }
 
 void CHTMLContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
