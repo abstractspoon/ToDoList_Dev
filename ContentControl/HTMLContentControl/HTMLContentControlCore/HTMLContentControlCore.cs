@@ -14,6 +14,7 @@ namespace HTMLContentControl
         private IntPtr m_hwndParent;
         private UIThemeToolbarRenderer m_toolbarRenderer;
         private System.Drawing.Font m_ControlsFont;
+        private Boolean m_SettingContent = false;
 
         // --------------------------------------------------------------------------------------
 
@@ -44,8 +45,20 @@ namespace HTMLContentControl
 
         public bool SetContent(Byte[] content, bool bResetSelection)
         {
-            var html = System.Text.Encoding.Unicode.GetString(content);
-            HtmlEditControl.DocumentText = html;
+            m_SettingContent = true;
+
+            try
+            {
+                var html = System.Text.Encoding.Unicode.GetString(content);
+                HtmlEditControl.DocumentText = html;
+            }
+            // catch (Exception exception)
+            // {
+            // }
+            finally
+            {
+                m_SettingContent = false;
+            }
 
             return true;
         }
@@ -58,7 +71,19 @@ namespace HTMLContentControl
 
         public bool SetTextContent(String content, bool bResetSelection)
         {
-            HtmlEditControl.SetDocumentText(content);
+            m_SettingContent = true;
+
+            try
+            {
+                HtmlEditControl.SetDocumentText(content);
+            }
+            // catch (Exception exception)
+            // {
+            // }
+            finally
+            {
+                m_SettingContent = false;
+            }
 
             return true;
         }
@@ -188,9 +213,12 @@ namespace HTMLContentControl
 
         private void OnInputTextChanged(object sender, EventArgs e)
         {
-			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
+            if (!m_SettingContent)
+            {
+                ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
 
-            notify.NotifyChange();
+                notify.NotifyChange();
+            }
         }
 
         private void OnInputTextLostFocus(object sender, EventArgs e)

@@ -99,12 +99,12 @@ void CHTMLContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szK
 
 // returns the length of the html or zero if not supported
 int CHTMLContentBridge::ConvertToHtml(const unsigned char* pContent, int nLength,
-	LPCWSTR szCharSet, LPWSTR& szHtml, LPCWSTR szImageDir)
+	LPCWSTR /*szCharSet*/, LPWSTR& szHtml, LPCWSTR szImageDir)
 {
 	if (nLength == 0)
 		return 0;
 
-	// pContent is the body
+	// pContent is already the HTML body
 	int nCharLen = ((nLength / 2) + 1);
 	szHtml = new WCHAR[nCharLen];
 

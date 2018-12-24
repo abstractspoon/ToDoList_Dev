@@ -1501,6 +1501,7 @@ td { padding: 1px; border: 2px inset #fff; {font-style}; }";
                     //{
                     //    myClipboard = s;
                     //}
+                    var prevCache = _tmpCacheTextChange;
                     _tmpCacheTextChange = s;
 
                     if (TextChanged != null)

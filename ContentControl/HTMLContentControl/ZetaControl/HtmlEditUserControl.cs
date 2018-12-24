@@ -8,6 +8,7 @@ namespace ZetaHtmlEditControl
 	{
 		private readonly float _initialTopHeight;
 		private bool _textModulesFilled;
+        private bool _updatingButtons = false;
 
 		public HtmlEditUserControl()
 		{
@@ -17,6 +18,11 @@ namespace ZetaHtmlEditControl
 
 			htmlEditControl.UINeedsUpdate += htmlEditControl_UINeedsUpdate;
 		}
+
+        public Boolean IsUpdatingButtons
+        {
+            get { return _updatingButtons; }
+        }   
 
         protected override void OnGotFocus(EventArgs e)
         {
@@ -136,6 +142,9 @@ namespace ZetaHtmlEditControl
 
         public void HTMLcmbFontSizeSelectedIndexChanged(object sender, EventArgs e)
         {
+            if (IsUpdatingButtons)
+                return;
+
             try
             {
                 var selection = htmlEditControl.CurrentSelectionText;
@@ -150,6 +159,9 @@ namespace ZetaHtmlEditControl
         }
         public void HTMLcmbFontSelectedIndexChanged(object sender, EventArgs e)
         {
+            if (IsUpdatingButtons)
+                return;
+
             try
             {
                 var selection = htmlEditControl.CurrentSelectionText;
@@ -165,55 +177,67 @@ namespace ZetaHtmlEditControl
 
 	    private void updateButtons()
 		{
-			boldToolStripMenuItem.Enabled = htmlEditControl.CanBold;
-			italicToolStripMenuItem.Enabled = htmlEditControl.CanItalic;
-			underlineToolStripButton.Enabled = htmlEditControl.CanUnderline;
-			bullettedListToolStripMenuItem.Enabled = htmlEditControl.CanBullettedList;
-			numberedListToolStripMenuItem.Enabled = htmlEditControl.CanOrderedList;
-			indentToolStripMenuItem.Enabled = htmlEditControl.CanIndent;
-			outdentToolStripMenuItem.Enabled = htmlEditControl.CanOutdent;
-			insertTableToolStripMenuItem.Enabled = htmlEditControl.CanInsertTable;
-			foreColorToolStripMenuItem.Enabled = htmlEditControl.CanForeColor;
-			backColorToolStripMenuItem.Enabled = htmlEditControl.CanBackColor;
-			undoToolStripButton.Enabled = htmlEditControl.CanUndo;
-			justifyLeftToolStripButton.Enabled = htmlEditControl.CanJustifyLeft;
-			justifyCenterToolStripButton.Enabled = htmlEditControl.CanJustifyCenter;
-			justifyRightToolStripButton.Enabled = htmlEditControl.CanJustifyRight;
+            _updatingButtons = true;
 
-			// --
-
-			boldToolStripMenuItem.Checked = htmlEditControl.IsBold;
-			italicToolStripMenuItem.Checked = htmlEditControl.IsItalic;
-			underlineToolStripButton.Checked = htmlEditControl.IsUnderline;
-			numberedListToolStripMenuItem.Checked = htmlEditControl.IsBullettedList;
-			bullettedListToolStripMenuItem.Checked = htmlEditControl.IsOrderedList;
-			justifyLeftToolStripButton.Checked = htmlEditControl.IsJustifyLeft;
-			justifyCenterToolStripButton.Checked = htmlEditControl.IsJustifyCenter;
-			justifyRightToolStripButton.Checked = htmlEditControl.IsJustifyRight;
-
-			textModulesToolStripItem.Visible = htmlEditControl.HasTextModules;
-	
-            // --
-
-            var selection = htmlEditControl.CurrentSelectionText;
-
-            if (selection != null)
+            try
             {
-                var name = selection.queryCommandValue("FontName").ToString();
-                int x = HTMLcmbFont.FindStringExact(name);
+                boldToolStripMenuItem.Enabled = htmlEditControl.CanBold;
+                italicToolStripMenuItem.Enabled = htmlEditControl.CanItalic;
+                underlineToolStripButton.Enabled = htmlEditControl.CanUnderline;
+                bullettedListToolStripMenuItem.Enabled = htmlEditControl.CanBullettedList;
+                numberedListToolStripMenuItem.Enabled = htmlEditControl.CanOrderedList;
+                indentToolStripMenuItem.Enabled = htmlEditControl.CanIndent;
+                outdentToolStripMenuItem.Enabled = htmlEditControl.CanOutdent;
+                insertTableToolStripMenuItem.Enabled = htmlEditControl.CanInsertTable;
+                foreColorToolStripMenuItem.Enabled = htmlEditControl.CanForeColor;
+                backColorToolStripMenuItem.Enabled = htmlEditControl.CanBackColor;
+                undoToolStripButton.Enabled = htmlEditControl.CanUndo;
+                justifyLeftToolStripButton.Enabled = htmlEditControl.CanJustifyLeft;
+                justifyCenterToolStripButton.Enabled = htmlEditControl.CanJustifyCenter;
+                justifyRightToolStripButton.Enabled = htmlEditControl.CanJustifyRight;
 
-                if (x != -1)
-                    HTMLcmbFont.SelectedIndex = x;
+                // --
 
-                var size = selection.queryCommandValue("FontSize").ToString();
+                boldToolStripMenuItem.Checked = htmlEditControl.IsBold;
+                italicToolStripMenuItem.Checked = htmlEditControl.IsItalic;
+                underlineToolStripButton.Checked = htmlEditControl.IsUnderline;
+                numberedListToolStripMenuItem.Checked = htmlEditControl.IsBullettedList;
+                bullettedListToolStripMenuItem.Checked = htmlEditControl.IsOrderedList;
+                justifyLeftToolStripButton.Checked = htmlEditControl.IsJustifyLeft;
+                justifyCenterToolStripButton.Checked = htmlEditControl.IsJustifyCenter;
+                justifyRightToolStripButton.Checked = htmlEditControl.IsJustifyRight;
 
-                if (string.IsNullOrEmpty(size))
-                    size = "2";
+                textModulesToolStripItem.Visible = htmlEditControl.HasTextModules;
 
-                x = HTMLcmbFontSize.FindStringExact(size);
+                // --
 
-                if (x != -1)
-                    HTMLcmbFontSize.SelectedIndex = x;
+                var selection = htmlEditControl.CurrentSelectionText;
+
+                if (selection != null)
+                {
+                    var name = selection.queryCommandValue("FontName").ToString();
+                    int x = HTMLcmbFont.FindStringExact(name);
+
+                    if (x != -1)
+                        HTMLcmbFont.SelectedIndex = x;
+
+                    var size = selection.queryCommandValue("FontSize").ToString();
+
+                    if (string.IsNullOrEmpty(size))
+                        size = "2";
+
+                    x = HTMLcmbFontSize.FindStringExact(size);
+
+                    if (x != -1)
+                        HTMLcmbFontSize.SelectedIndex = x;
+                }
+            }
+            // catch (Exception exception)
+            // {
+            // }
+            finally
+            {
+                _updatingButtons = false;
             }
 		}
 
