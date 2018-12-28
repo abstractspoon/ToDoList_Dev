@@ -603,6 +603,9 @@
   <data name="foreColorToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>29, 20</value>
   </data>
+  <data name="foreColorToolStripMenuItem.Text" xml:space="preserve">
+    <value>Foreground Colour</value>
+  </data>
   <data name="BackColorNoneToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>108, 22</value>
   </data>
@@ -698,6 +701,9 @@
   </data>
   <data name="backColorToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>29, 20</value>
+  </data>
+  <data name="backColorToolStripMenuItem.Text" xml:space="preserve">
+    <value>Background Colour</value>
   </data>
   <data name="topToolStrip.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
