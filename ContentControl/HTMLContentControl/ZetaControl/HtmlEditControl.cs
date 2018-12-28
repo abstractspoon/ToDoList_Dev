@@ -29,6 +29,7 @@ namespace ZetaHtmlEditControl
     {
         private const int WmKeydown = 0x100;
         private const int WmSyskeydown = 0x104;
+        private const int WmDocumentComplete = 0x400;
 
         private void setMenuShortcutKeys()
         {
@@ -1481,7 +1482,6 @@ td { padding: 1px; border: 2px inset #fff; {font-style}; }";
         }
 
         private string _tmpCacheTextChange = string.Empty;
-        //private bool _returnTextClipboard;
 
         private void timerTextChange_Tick(
             object sender,
@@ -1493,23 +1493,28 @@ td { padding: 1px; border: 2px inset #fff; {font-style}; }";
 
                 if (_tmpCacheTextChange != s)
                 {
-                    //if (_returnTextClipboard)
-                    //{
-                    //    _returnTextClipboard = false;
-                    //}
-                    //else
-                    //{
-                    //    myClipboard = s;
-                    //}
-                    var prevCache = _tmpCacheTextChange;
                     _tmpCacheTextChange = s;
 
                     if (TextChanged != null)
                     {
-                        TextChanged(this, new EventArgs());
+                        if (!_ignoreNextChange)
+                            TextChanged(this, new EventArgs());
+
+                        _ignoreNextChange = false;
                     }
                 }
             }
+        }
+
+        // Hack to ignore a spurious change that occurs
+        // after content has been set on the control
+        private bool _ignoreNextChange = false;
+
+        protected override void OnDocumentCompleted(WebBrowserDocumentCompletedEventArgs e)
+        {
+            base.OnDocumentCompleted(e);
+
+            _ignoreNextChange = true;
         }
 
         public new event EventHandler TextChanged;
@@ -1662,6 +1667,9 @@ td { padding: 1px; border: 2px inset #fff; {font-style}; }";
 
         [DllImport(@"kernel32.dll", CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
         private static extern int GlobalSize(HandleRef handle);
+
+        [DllImport(@"user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern bool PostMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
 
         // ------------------------------------------------------------------
         #endregion
