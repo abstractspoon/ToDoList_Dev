@@ -1411,6 +1411,24 @@ td { padding: 1px; border: 2px inset #fff; {font-style}; }";
             }
         }
 
+        public bool Undo()
+        {
+            if (!CanUndo)
+                return false;
+
+            ExecuteUndo();
+            return true;
+        }
+
+        public bool Redo()
+        {
+            if (!CanRedo)
+                return false;
+
+            ExecuteRedo();
+            return true;
+        }
+
         private void ExecuteRedo()
         {
             if (Document != null) Document.ExecCommand(@"Redo", false, null);
@@ -1493,6 +1511,7 @@ td { padding: 1px; border: 2px inset #fff; {font-style}; }";
 
                 if (_tmpCacheTextChange != s)
                 {
+                    var prevText = _tmpCacheTextChange;
                     _tmpCacheTextChange = s;
 
                     if (TextChanged != null)
@@ -1758,6 +1777,14 @@ td { padding: 1px; border: 2px inset #fff; {font-style}; }";
             get
             {
                 return DomDocument.queryCommandEnabled(@"Undo");
+            }
+        }
+
+        public bool CanRedo
+        {
+            get
+            {
+                return DomDocument.queryCommandEnabled(@"Redo");
             }
         }
 

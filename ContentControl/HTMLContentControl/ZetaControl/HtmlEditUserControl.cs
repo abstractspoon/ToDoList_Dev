@@ -208,6 +208,7 @@ namespace ZetaHtmlEditControl
                 justifyRightToolStripButton.Checked = htmlEditControl.IsJustifyRight;
 
                 textModulesToolStripItem.Visible = htmlEditControl.HasTextModules;
+                undoToolStripButton.Visible = false;
 
                 // --
 

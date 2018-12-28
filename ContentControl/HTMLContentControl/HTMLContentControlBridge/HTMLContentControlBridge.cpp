@@ -201,7 +201,7 @@ bool CHTMLContentControlBridge::SetTextContent(LPCWSTR szContent, bool bResetSel
 
 void CHTMLContentControlBridge::SetReadOnly(bool bReadOnly)
 {
-
+	m_wnd->SetReadOnly(bReadOnly);
 }
 
 HWND CHTMLContentControlBridge::GetHwnd() const
@@ -217,7 +217,7 @@ void CHTMLContentControlBridge::Release()
 
 bool CHTMLContentControlBridge::ProcessMessage(MSG* pMsg)
 {
-	return false;
+	return m_wnd->ProcessMessage((IntPtr)pMsg->hwnd, pMsg->message, pMsg->wParam, pMsg->lParam, pMsg->time, pMsg->pt.x, pMsg->pt.y);
 }
 
 ISpellCheck* CHTMLContentControlBridge::GetSpellCheckInterface()
@@ -227,12 +227,12 @@ ISpellCheck* CHTMLContentControlBridge::GetSpellCheckInterface()
 
 bool CHTMLContentControlBridge::Undo()
 {
-	return false;
+	return m_wnd->Undo();
 }
 
 bool CHTMLContentControlBridge::Redo()
 {
-	return false;
+	return m_wnd->Redo();
 }
 
 void CHTMLContentControlBridge::SetUITheme(const UITHEME* pTheme)

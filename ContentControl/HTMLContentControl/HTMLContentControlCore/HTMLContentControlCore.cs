@@ -96,14 +96,12 @@ namespace HTMLContentControl
 
         public bool Undo()
         {
-            // TODO
-            return false;
+            return HtmlEditControl.Undo();
         }
 
         public bool Redo()
         {
-            // TODO
-            return false;
+            return HtmlEditControl.Redo();
         }
 
         public void SetUITheme(UITheme theme)
