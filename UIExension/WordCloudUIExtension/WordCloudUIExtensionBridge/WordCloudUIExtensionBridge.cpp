@@ -186,15 +186,18 @@ bool CWordCloudUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 
 bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 {
-	if (!pData)
-		return false;
-
 	switch (nCmd)
 	{
+	case IUI_SETFOCUS:
+		return m_wnd->Focus();
+
 	case IUI_SELECTTASK:
-		return m_wnd->SelectTask(pData->dwTaskID);
+		if (pData)
+			return m_wnd->SelectTask(pData->dwTaskID);
+		break;
 
 	case IUI_GETNEXTTASK:
+		if (pData)
 		{
 			UInt32 taskID = 0;
 
@@ -207,6 +210,7 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 		break;
 
 	case IUI_GETPREVTASK:
+		if (pData)
 		{
 			UInt32 taskID = 0;
 
@@ -223,7 +227,9 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
-		return DoAppSelectCommand(nCmd, pData->select);
+		if (pData)
+			return DoAppSelectCommand(nCmd, pData->select);
+		break;
 
 	case IUI_SAVETOIMAGE:
 		if (pData)
@@ -264,6 +270,9 @@ bool CWordCloudUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, con
 	case IUI_SELECTLASTTASK:
 	case IUI_SAVETOIMAGE:
 		return true;
+
+	case IUI_SETFOCUS:
+		return !m_wnd->Focused;
 	}
 
 	// all else

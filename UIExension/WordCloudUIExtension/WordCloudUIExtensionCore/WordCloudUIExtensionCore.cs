@@ -84,6 +84,11 @@ namespace WordCloudUIExtension
 
 		// IUIExtension ------------------------------------------------------------------
 
+        public override Boolean Focused
+        {
+            get { return (base.Focused || m_WordCloud.Focused || m_TaskMatchesList.Focused); }
+        }
+
 		public bool SelectTask(UInt32 taskId)
 		{
 			if (m_Attrib == UIExtension.TaskAttribute.Unknown)

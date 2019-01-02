@@ -312,7 +312,7 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 		return true;
 
 	case IUI_SETFOCUS:
-		return m_wnd->Focused;
+		return !m_wnd->Focused;
 
 	case IUI_MOVETASK:
 		if (pData)
