@@ -735,15 +735,17 @@ namespace DayViewUIExtension
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            base.OnMouseMove(e);
-
-            // Extra-over cursor handling
             var selTool = ActiveTool as Calendar.SelectionTool;
 
             if (selTool == null)
                 selTool = new Calendar.SelectionTool();
 
-            if (!selTool.IsResizing())
+            if (selTool.IsResizing())
+            {
+                if (!ReadOnly)
+                    base.OnMouseMove(e);
+            }
+            else // Extra-over cursor handling
             {
                 Calendar.Appointment appointment = GetAppointmentAt(e.Location.X, e.Location.Y);
                 Cursor = Cursors.Default;
