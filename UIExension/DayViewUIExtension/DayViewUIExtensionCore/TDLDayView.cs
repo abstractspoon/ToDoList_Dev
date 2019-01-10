@@ -216,7 +216,10 @@ namespace DayViewUIExtension
             this.WorkingMinuteStart = 0;
             this.ReadOnly = false;
 
-			this.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnDayViewResolveAppointments);
+			this.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnResolveAppointments);
+            this.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnSelectionChanged);
+            this.WeekChange += new Calendar.WeekChangeEventHandler(OnWeekChanged);
+
         }
 
         public bool IsTaskWithinRange(UInt32 dwTaskID)
@@ -703,10 +706,9 @@ namespace DayViewUIExtension
 			m_Renderer.DrawAppointment(g, rect, appointment, isSelected, gripRect);
 		}
 
-		private void OnDayViewResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
+		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
 		{
-			System.Collections.Generic.List<Calendar.Appointment> appts =
-				new System.Collections.Generic.List<Calendar.Appointment>();
+			var appts =	new System.Collections.Generic.List<Calendar.Appointment>();
 
 			foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> item in m_Items)
 			{
@@ -716,6 +718,16 @@ namespace DayViewUIExtension
 
 			args.Appointments = appts;
 		}
+
+        private void OnSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
+        {
+            m_SelectedTaskID = args.Appointment.Id;
+        }
+
+        private void OnWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
+        {
+            FixupSelection(false);
+        }
 
         protected override void OnGotFocus(EventArgs e)
         {
