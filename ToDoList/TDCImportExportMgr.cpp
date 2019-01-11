@@ -47,7 +47,6 @@ CTDCImportExportMgr::~CTDCImportExportMgr()
 
 void CTDCImportExportMgr::Initialize() const
 {
-	// add html and text exporters first
 	if (!m_bInitialized)
 	{
 		CImportExportMgr::Initialize();
@@ -56,15 +55,15 @@ void CTDCImportExportMgr::Initialize() const
 		CTDCImportExportMgr* pMgr = const_cast<CTDCImportExportMgr*>(this);
 
 		// exporters
-		pMgr->AddExporter(new CTaskListHtmlExporter);
-		pMgr->AddExporter(new CTaskListTxtExporter);
-		pMgr->AddExporter(new CTaskListCsvExporter);
-		pMgr->AddExporter(new CTaskListTdlExporter);
+		pMgr->AddExporter(new CTaskListHtmlExporter, TDCET_HTML);
+		pMgr->AddExporter(new CTaskListTxtExporter, TDCET_TXT);
+		pMgr->AddExporter(new CTaskListCsvExporter, TDCET_CSV);
+		pMgr->AddExporter(new CTaskListTdlExporter, TDCET_TDL);
 
 		// importers
-		pMgr->AddImporter(new CTaskListCsvImporter);
-		pMgr->AddImporter(new CTaskListTdlImporter);
-		pMgr->AddImporter(new CTaskListOutlookImporter);
+		pMgr->AddImporter(new CTaskListCsvImporter, TDCIT_CSV);
+		pMgr->AddImporter(new CTaskListTdlImporter, TDCIT_TDL);
+		pMgr->AddImporter(new CTaskListOutlookImporter, TDCIT_OUTLOOK);
 	}
 }
 

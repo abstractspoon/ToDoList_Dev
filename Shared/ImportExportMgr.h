@@ -62,8 +62,8 @@ protected:
 protected:
 	virtual void Initialize() const;
 
-	BOOL AddImporter(IImportTasklist* pImporter);
-	BOOL AddExporter(IExportTasklist* pExporter);
+	BOOL AddImporter(IImportTasklist* pImporter, int nPos = -1);
+	BOOL AddExporter(IExportTasklist* pExporter, int nPos = -1);
 
 	static CString& FormatExtension(CString& sExt, BOOL bWithDot);
 };

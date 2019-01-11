@@ -111,7 +111,7 @@ void CImportExportMgr::Initialize() const
 	}
 }
 
-BOOL CImportExportMgr::AddImporter(IImportTasklist* pImporter)
+BOOL CImportExportMgr::AddImporter(IImportTasklist* pImporter, int nPos)
 {
 	if (!pImporter || (FindImporterByType(pImporter->GetTypeID()) != -1))
 	{
@@ -120,12 +120,16 @@ BOOL CImportExportMgr::AddImporter(IImportTasklist* pImporter)
 	}
 
 	pImporter->SetLocalizer(CLocalizer::GetLocalizer());
-	m_aImporters.Add(pImporter);
+
+	if (nPos < 0 || nPos >= m_aImporters.GetSize())
+		m_aImporters.Add(pImporter);
+	else
+		m_aImporters.InsertAt(nPos, pImporter);
 
 	return TRUE;
 }
 
-BOOL CImportExportMgr::AddExporter(IExportTasklist* pExporter)
+BOOL CImportExportMgr::AddExporter(IExportTasklist* pExporter, int nPos)
 {
 	if (!pExporter || (FindExporterByType(pExporter->GetTypeID()) != -1))
 	{
@@ -134,7 +138,11 @@ BOOL CImportExportMgr::AddExporter(IExportTasklist* pExporter)
 	}
 
 	pExporter->SetLocalizer(CLocalizer::GetLocalizer());
-	m_aExporters.Add(pExporter);
+
+	if (nPos < 0 || nPos >= m_aExporters.GetSize())
+		m_aExporters.Add(pExporter);
+	else
+		m_aExporters.InsertAt(nPos, pExporter);
 
 	return TRUE;
 }
@@ -301,15 +309,13 @@ CString CImportExportMgr::GetExporterTypeID(int nExporter) const
 {
 	Initialize(); // initialize on demand
 
-	CString sFilter;
-
 	if (nExporter >= 0 && nExporter < m_aExporters.GetSize())
 	{
 		ASSERT (m_aExporters[nExporter] != NULL);
-		sFilter = m_aExporters[nExporter]->GetTypeID();
+		return m_aExporters[nExporter]->GetTypeID();
 	}
 
-	return Misc::Trim(sFilter);
+	return _T("");
 }
 
 HICON CImportExportMgr::GetExporterIcon(int nExporter) const
