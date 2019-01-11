@@ -46,7 +46,7 @@ void CSampleImpExpBridge::SetLocalizer(ITransText* pTT)
 		m_pTT = pTT;
 }
 
-HICON CSampleImpExpBridge::GetIcon(void) const
+HICON CSampleImpExpBridge::GetIcon() const
 {
 	return m_hIcon;
 }
@@ -64,6 +64,11 @@ LPCWSTR CSampleImpExpBridge::GetFileFilter() const
 LPCWSTR CSampleImpExpBridge::GetFileExtension() const
 {
 	return L"smp";
+}
+
+LPCWSTR CSampleImpExpBridge::GetTypeID() const
+{
+	return L"F0D68A9A-EEA3-4D2A-9242-86CF893CE8B0";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

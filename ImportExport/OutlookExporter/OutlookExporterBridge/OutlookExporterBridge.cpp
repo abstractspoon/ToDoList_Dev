@@ -47,7 +47,7 @@ void COutlookExporterBridge::SetLocalizer(ITransText* pTT)
 		m_pTT = pTT;
 }
 
-HICON COutlookExporterBridge::GetIcon(void) const
+HICON COutlookExporterBridge::GetIcon() const
 {
 	return m_hIcon;
 }
@@ -65,6 +65,11 @@ LPCWSTR COutlookExporterBridge::GetFileFilter() const
 LPCWSTR COutlookExporterBridge::GetFileExtension() const
 {
 	return NULL; // Outlook has no file
+}
+
+LPCWSTR COutlookExporterBridge::GetTypeID() const
+{
+	return L"85D6AC7D-2D7D-4ACE-B776-C215FA181C33";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

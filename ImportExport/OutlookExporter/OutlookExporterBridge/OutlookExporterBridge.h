@@ -16,11 +16,12 @@ public:
    void Release(); // releases the interface
 
    void SetLocalizer(ITransText* pTT);
-   HICON GetIcon(void) const;
+   HICON GetIcon() const;
 
    LPCWSTR GetMenuText() const;
    LPCWSTR GetFileFilter() const;
    LPCWSTR GetFileExtension() const;
+   LPCWSTR GetTypeID() const;
 
    IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey);
    IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey);

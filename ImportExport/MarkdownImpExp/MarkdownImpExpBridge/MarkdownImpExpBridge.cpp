@@ -43,7 +43,7 @@ void CMarkdownImpExpBridge::SetLocalizer(ITransText* /*pTT*/)
 	// TODO
 }
 
-HICON CMarkdownImpExpBridge::GetIcon(void) const
+HICON CMarkdownImpExpBridge::GetIcon() const
 {
 	// TODO
 	return NULL;
@@ -62,6 +62,11 @@ LPCWSTR CMarkdownImpExpBridge::GetFileFilter() const
 LPCWSTR CMarkdownImpExpBridge::GetFileExtension() const
 {
 	return L"md";
+}
+
+LPCWSTR CMarkdownImpExpBridge::GetTypeID() const
+{
+	return L"49A52D2D-7661-49AF-949A-E60066B300FC";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
