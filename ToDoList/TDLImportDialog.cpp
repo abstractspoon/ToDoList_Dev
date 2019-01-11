@@ -61,7 +61,7 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 		int nFormat = prefs.GetProfileInt(m_sPrefsKey, _T("ImportFormat"), -1);
 
 		if (nFormat != -1)
-			m_sFormatTypeID = mgr.GetExporterTypeID(nFormat);
+			m_sFormatTypeID = mgr.GetImporterTypeID(nFormat);
 		else
 			m_sFormatTypeID = mgr.GetTypeID(TDCET_CSV);
 	}
@@ -210,14 +210,14 @@ BOOL CTDLImportDialog::OnInitDialog()
 
 BOOL CTDLImportDialog::CurImporterHasFilter() const
 {
-	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
 
 	return m_mgrImportExport.ImporterHasFileExtension(nFormat);
 }
 
 CString CTDLImportDialog::GetCurImporterFilter() const
 {
-	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
 
 	return m_mgrImportExport.GetImporterFileFilter(nFormat);
 }
@@ -273,7 +273,7 @@ CString CTDLImportDialog::GetImportClipboardText() const
 
 void CTDLImportDialog::OnSelchangeFormatoptions() 
 {
-	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
 	BOOL bHadFilter = m_mgrImportExport.ImporterHasFileExtension(nFormat);
 
 	UpdateData(TRUE);
