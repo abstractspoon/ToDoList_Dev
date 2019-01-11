@@ -1986,7 +1986,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	// So if user either wants 'Filtered Tasks' or 'Html Comments' or
 	// only 'Visible Columns' we need to grab the tasks again.
 	BOOL bFiltered = (userPrefs.GetSaveExportFilteredOnly() && tdc.HasAnyFilter());
-	BOOL bHtmlComments = (userPrefs.GetSaveExportTypeID() == HTMLEXPORT_TYPEID);
+	BOOL bHtmlComments = (userPrefs.GetSaveExportTypeID() == CTDCImportExportMgr::GetTypeID(TDCET_HTML));
 
 	pExport->sStylesheet = userPrefs.GetSaveExportStylesheet();
 	BOOL bTransform = GetStylesheetPath(tdc, pExport->sStylesheet);
@@ -3733,7 +3733,7 @@ BOOL CToDoListWnd::Export2Html(const CTaskFile& tasks, const CString& sFilePath,
 	}
 	
 	// else default export
-	return (m_mgrImportExport.ExportTaskListToHtml(&tasks, sFilePath) == IIER_SUCCESS);
+	return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, TDCET_HTML) == IIER_SUCCESS);
 }
 
 void CToDoListWnd::OnSaveas() 
@@ -4673,18 +4673,13 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 			
 	// prepare structure
 	int nExporter = -1;
-	CString sFileExt;
 	
 	if (userPrefs.GetDisplayDueTasksInHtml())
-	{
-		nExporter = m_mgrImportExport.FindExporterByType(HTMLEXPORT_TYPEID);
-		sFileExt = _T("html");
-	}
+		nExporter = m_mgrImportExport.GetExporter(TDCET_HTML);
 	else
-	{
-		nExporter = m_mgrImportExport.FindExporterByType(TXTEXPORT_TYPEID);
-		sFileExt = _T("txt");
-	}
+		nExporter = m_mgrImportExport.GetExporter(TDCET_TXT);
+
+	CString sFileExt = m_mgrImportExport.GetExporterFileExtension(nExporter, FALSE);
 
 	TDCEXPORTTASKLIST* pExport = new TDCEXPORTTASKLIST(GetSafeHwnd(), tdc.GetFilePath(), nExporter);
 	ASSERT(pExport);
@@ -5896,11 +5891,11 @@ void CToDoListWnd::CopySelectedTasksToClipboard(TDC_TASKS2CLIPBOARD nAsFormat)
 	switch (nAsFormat)
 	{	
 	case TDCTC_ASHTML:
-		sTasks = m_mgrImportExport.ExportTaskListToHtml(&tasks);
+		sTasks = m_mgrImportExport.ExportTaskList(&tasks, TDCET_HTML);
 		break;
 		
 	case TDCTC_ASTEXT:
-		sTasks = m_mgrImportExport.ExportTaskListToText(&tasks);
+		sTasks = m_mgrImportExport.ExportTaskList(&tasks, TDCET_TXT);
 		break;
 		
 	case TDCTC_ASLINK:
@@ -9864,7 +9859,7 @@ void CToDoListWnd::OnExport()
 	// export
 	DOPROGRESS(IDS_EXPORTPROGRESS);
 	
-	BOOL bHtmlComments = (nFormat == m_mgrImportExport.FindExporterByType(HTMLEXPORT_TYPEID));
+	BOOL bHtmlComments = (nFormat == m_mgrImportExport.GetExporter(TDCET_HTML));
 
 	if ((nTDCCount == 1) || !dialog.GetExportAllTasklists())
 	{
@@ -12445,7 +12440,9 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		GetTasks(tdc, FALSE, FALSE, dialog.GetTaskSelection(), tasks, NULL);
 
 		// Export them
-		int nFormat = dialog.GetExportFormat();
+		int nFormat = m_mgrImportExport.FindExporterByType(dialog.GetExportFormatTypeID());
+		ASSERT(nFormat != -1);
+
 		CString sFilePath = FileMisc::GetTempFilePath(_T("tdl.email"), m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE));
 
 		if (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nFormat, FALSE) != IIER_SUCCESS)

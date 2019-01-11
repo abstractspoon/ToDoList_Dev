@@ -5,7 +5,6 @@
 #include "resource.h"
 #include "PreferencesFile2Page.h"
 #include "TDCImportExportMgr.h"
-#include "TasklistHTMLExporter.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\dialoghelper.h"
@@ -347,7 +346,7 @@ CString CPreferencesFile2Page::GetSaveExportTypeID() const
 		return m_sOtherExportTypeID;
 
 	// else
-	return HTMLEXPORT_TYPEID;
+	return CTDCImportExportMgr::GetTypeID(TDCET_HTML);
 }
 
 BOOL CPreferencesFile2Page::GetSaveExportExtension(CString& sExt) const
@@ -356,7 +355,7 @@ BOOL CPreferencesFile2Page::GetSaveExportExtension(CString& sExt) const
 
 	CString sExportTypeID = GetSaveExportTypeID();
 
-	if (sExportTypeID == HTMLEXPORT_TYPEID)
+	if (sExportTypeID == CTDCImportExportMgr::GetTypeID(TDCET_HTML))
 	{
 		CXslFile xsl;
 		

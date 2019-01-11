@@ -32,7 +32,7 @@ public:
 					const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);   // standard constructor
 
 	TD_SENDAS GetSendAs() const { return (TD_SENDAS)m_nSendTasksAsOption; }
-	int GetExportFormat() { return m_nFormatOption; }
+	CString GetExportFormatTypeID() { return m_sFormatTypeID; }
 
 	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
 
@@ -42,7 +42,7 @@ protected:
 	//{{AFX_DATA(CTDLSendTasksDlg)
 	enum { IDD = IDD_SENDTASKS_DIALOG };
 	int		m_nSendTasksAsOption;
-	int		m_nFormatOption;
+	CString		m_sFormatTypeID;
 	//}}AFX_DATA
 	CTDLImportExportComboBox m_cbFormat;
 

@@ -5,8 +5,6 @@
 #include "resource.h"
 #include "TDLSendTasksDlg.h"
 
-#include "TaskListTdlExporter.h"
-
 #include "..\shared\preferences.h"
 #include "..\shared\dialoghelper.h"
 
@@ -31,12 +29,9 @@ CTDLSendTasksDlg::CTDLSendTasksDlg(const CImportExportMgr& mgr, BOOL bSelectedTa
 	//}}AFX_DATA_INIT
 
 	CPreferences prefs;
+
 	m_nSendTasksAsOption = prefs.GetProfileInt(m_sPrefsKey, _T("SendTasksAs"), TDSA_TASKLIST);
-
-	int nDefaultFormat = mgr.FindExporterByType(TDLEXPORT_TYPEID);
-
-	m_nFormatOption = prefs.GetProfileInt(m_sPrefsKey, _T("FormatOption"), nDefaultFormat);
-	m_nFormatOption = min(m_nFormatOption, mgr.GetNumExporters());
+	m_sFormatTypeID = prefs.GetProfileString(m_sPrefsKey, _T("ExportTypeID"), CTDCImportExportMgr::GetTypeID(TDCET_TDL));
 
 	// bSelected overrides saved state
 	if (bSelectedTasks)
@@ -54,11 +49,11 @@ void CTDLSendTasksDlg::DoDataExchange(CDataExchange* pDX)
 
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_nFormatOption = GetSelectedItemData(m_cbFormat);
+		m_sFormatTypeID = m_cbFormat.GetSelectedTypeID();
 	}
 	else
 	{
-		SelectItemByData(m_cbFormat, m_nFormatOption);
+		m_cbFormat.SetSelectedTypeID(m_sFormatTypeID);
 	}
 }
 
@@ -87,6 +82,6 @@ void CTDLSendTasksDlg::OnOK()
 
 	CPreferences prefs;
 	prefs.WriteProfileInt(m_sPrefsKey, _T("SendTasksAs"), m_nSendTasksAsOption);
-	prefs.WriteProfileInt(m_sPrefsKey, _T("FormatOption"), m_nFormatOption);
+	prefs.WriteProfileString(m_sPrefsKey, _T("ExportTypeID"), m_sFormatTypeID);
 }
 

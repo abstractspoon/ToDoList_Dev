@@ -17,35 +17,34 @@
 
 //////////////////////////////////////////////////////////////////////
 
+enum TDC_EXPORT_TASKLIST
+{
+	TDCET_HTML,
+	TDCET_CSV,
+	TDCET_TXT,
+	TDCET_TDL,
+};
+
+enum TDC_IMPORT_TASKLIST
+{
+	TDCIT_CSV,
+	TDCIT_TDL,
+	TDCIT_OUTLOOK,
+};
+
+/////////////////////////////////////////////////////////////////////
+
 class CTDCImportExportMgr : public CImportExportMgr  
 {
 public:
 	CTDCImportExportMgr();
 	virtual ~CTDCImportExportMgr();
 
-	BOOL ExportTaskListToHtml(const ITaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent = FALSE) const;
-	BOOL ExportTaskListsToHtml(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent = FALSE) const;
-	CString ExportTaskListToHtml(const ITaskList* pSrcTasks, BOOL bSilent = FALSE) const;
-	CString ExportTaskListsToHtml(const IMultiTaskList* pSrcTasks, BOOL bSilent = FALSE) const;
-
-	BOOL ExportTaskListToText(const ITaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent = FALSE) const;
-	BOOL ExportTaskListsToText(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent = FALSE) const;
-	CString ExportTaskListToText(const ITaskList* pSrcTasks, BOOL bSilent = FALSE) const;
-	CString ExportTaskListsToText(const IMultiTaskList* pSrcTasks, BOOL bSilent = FALSE) const;
-
-	BOOL ExportTaskListToCsv(const ITaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent = FALSE) const;
-	BOOL ExportTaskListsToCsv(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent = FALSE) const;
-	CString ExportTaskListToCsv(const ITaskList* pSrcTasks, BOOL bSilent = FALSE) const;
-	CString ExportTaskListsToCsv(const IMultiTaskList* pSrcTasks, BOOL bSilent = FALSE) const;
-
-	BOOL ExportTaskListToTdl(const ITaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent = FALSE) const;
-	BOOL ExportTaskListsToTdl(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent = FALSE) const;
-	CString ExportTaskListToTdl(const ITaskList* pSrcTasks, BOOL bSilent = FALSE) const;
-	CString ExportTaskListsToTdl(const IMultiTaskList* pSrcTasks, BOOL bSilent = FALSE) const;
-
-	BOOL ImportTaskListFromCsv(LPCTSTR szSrcFile, ITaskList* pDestTasks, BOOL bSilent = FALSE) const;
-	BOOL ImportTaskListFromTdl(LPCTSTR szSrcFile, ITaskList* pDestTasks, BOOL bSilent = FALSE) const;
-	BOOL ImportTaskListFromOutlook(LPCTSTR szSrcFile, ITaskList* pDestTasks, BOOL bSilent = FALSE) const;
+	BOOL ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, TDC_IMPORT_TASKLIST nFormat, BOOL bSilent = FALSE) const;
+	BOOL ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, TDC_EXPORT_TASKLIST nFormat, BOOL bSilent = FALSE) const;
+	BOOL ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, TDC_EXPORT_TASKLIST nFormat, BOOL bSilent = FALSE) const;
+	CString ExportTaskList(const ITaskList* pSrcTasks, TDC_EXPORT_TASKLIST nFormat, BOOL bSilent = FALSE) const;
+	CString ExportTaskLists(const IMultiTaskList* pSrcTasks, TDC_EXPORT_TASKLIST nFormat, BOOL bSilent = FALSE) const;
 
 	IIMPORTEXPORT_RESULT ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, int nByImporter, BOOL bSilent = FALSE) const; 
 	IIMPORTEXPORT_RESULT ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs = NULL) const;
@@ -55,9 +54,17 @@ public:
 	IIMPORTEXPORT_RESULT ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, LPCTSTR szTypeID, BOOL bSilent, IPreferences* pPrefs = NULL) const;
 	IIMPORTEXPORT_RESULT ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, LPCTSTR szTypeID, BOOL bSilent, IPreferences* pPrefs = NULL) const;
 
+	int GetImporter(TDC_IMPORT_TASKLIST nFormat) const;
+	int GetExporter(TDC_EXPORT_TASKLIST nFormat) const;
+
+	static LPCTSTR GetTypeID(TDC_IMPORT_TASKLIST nFormat);
+	static LPCTSTR GetTypeID(TDC_EXPORT_TASKLIST nFormat);
+
 protected:
 	void Initialize() const;
 
+	CString ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szTypeID, BOOL bSilent) const;
+	CString ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szTypeID, BOOL bSilent) const;
 };
 
 #endif // !defined(AFX_TDIMPORTEXPORTMGR_H__0810C7FB_A895_4035_BEFA_B7097ABC2A7B__INCLUDED_)
