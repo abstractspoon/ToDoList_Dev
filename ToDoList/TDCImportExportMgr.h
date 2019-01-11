@@ -60,6 +60,9 @@ public:
 	static LPCTSTR GetTypeID(TDC_IMPORT_TASKLIST nFormat);
 	static LPCTSTR GetTypeID(TDC_EXPORT_TASKLIST nFormat);
 
+	static BOOL IsFormat(LPCTSTR szTypeID, TDC_IMPORT_TASKLIST nFormat);
+	static BOOL IsFormat(LPCTSTR szTypeID, TDC_EXPORT_TASKLIST nFormat);
+
 protected:
 	void Initialize() const;
 

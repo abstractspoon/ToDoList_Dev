@@ -1986,12 +1986,12 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	// So if user either wants 'Filtered Tasks' or 'Html Comments' or
 	// only 'Visible Columns' we need to grab the tasks again.
 	BOOL bFiltered = (userPrefs.GetSaveExportFilteredOnly() && tdc.HasAnyFilter());
-	BOOL bHtmlComments = (userPrefs.GetSaveExportTypeID() == CTDCImportExportMgr::GetTypeID(TDCET_HTML));
+	BOOL bHtmlComments = CTDCImportExportMgr::IsFormat(userPrefs.GetSaveExportTypeID(), TDCET_HTML);
 
 	pExport->sStylesheet = userPrefs.GetSaveExportStylesheet();
 	BOOL bTransform = GetStylesheetPath(tdc, pExport->sStylesheet);
 
-	if (bFiltered || userPrefs.GetSaveExportTypeID() || !userPrefs.GetExportAllAttributes())
+	if (bFiltered || userPrefs.GetSaveExport() || !userPrefs.GetExportAllAttributes())
 	{
 		TSD_TASKS nWhatTasks = bFiltered ? TSDT_FILTERED : TSDT_ALL;
 		TDCGETTASKS filter;

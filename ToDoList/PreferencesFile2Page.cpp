@@ -342,7 +342,7 @@ CString CPreferencesFile2Page::GetSaveExportTypeID() const
 	if (!m_bAutoExport)
 		return _T("");
 	
-	if (m_bOtherExport)
+	if (m_bOtherExport && !m_sOtherExportTypeID.IsEmpty())
 		return m_sOtherExportTypeID;
 
 	// else
@@ -355,7 +355,7 @@ BOOL CPreferencesFile2Page::GetSaveExportExtension(CString& sExt) const
 
 	CString sExportTypeID = GetSaveExportTypeID();
 
-	if (sExportTypeID == CTDCImportExportMgr::GetTypeID(TDCET_HTML))
+	if (CTDCImportExportMgr::IsFormat(sExportTypeID, TDCET_HTML))
 	{
 		CXslFile xsl;
 		
