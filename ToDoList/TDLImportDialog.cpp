@@ -38,7 +38,7 @@ enum IMPORTTO
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportDialog dialog
 
-CTDLImportDialog::CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent /*=NULL*/)
+CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent /*=NULL*/)
 	: CTDLDialog(CTDLImportDialog::IDD, _T("Importing"), pParent),
 	  m_mgrImportExport(mgr),
 	  m_cbFormat(mgr, TRUE),
@@ -53,8 +53,18 @@ CTDLImportDialog::CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTa
 	m_sFromFilePath = prefs.GetProfileString(m_sPrefsKey, _T("ImportFilePath"));
 	m_bMatchByTaskID = FALSE; // always
 
-	m_nFormatOption = prefs.GetProfileInt(m_sPrefsKey, _T("ImportFormat"), 0);
-	m_nFormatOption = min(m_nFormatOption, mgr.GetNumImporters());
+	m_sFormatTypeID = prefs.GetProfileString(m_sPrefsKey, _T("ImporterTypeID"));
+
+	// backwards compat
+	if (m_sFormatTypeID.IsEmpty())
+	{
+		int nFormat = prefs.GetProfileInt(m_sPrefsKey, _T("ImportFormat"), -1);
+
+		if (nFormat != -1)
+			m_sFormatTypeID = mgr.GetExporterTypeID(nFormat);
+		else
+			m_sFormatTypeID = mgr.GetTypeID(TDCET_CSV);
+	}
 
 	if (m_bReadonlyTasklist)
 		m_nImportTo = NEWTASKLIST;
@@ -76,14 +86,9 @@ void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 
 	if (pDX->m_bSaveAndValidate)
-	{
-		int nIndex = m_cbFormat.GetCurSel();
-		m_nFormatOption = m_cbFormat.GetItemData(nIndex);
-	}
+		m_sFormatTypeID = m_cbFormat.GetSelectedTypeID();
 	else
-	{
-		SelectItemByData(m_cbFormat, m_nFormatOption);
-	}
+		m_cbFormat.SetSelectedTypeID(m_sFormatTypeID);
 }
 
 
@@ -112,10 +117,13 @@ int CTDLImportDialog::DoModal(LPCTSTR szFilePath)
 		m_sFromFilePath = szFilePath;
 		m_bFileOnly = TRUE;
 
-		m_nFormatOption = m_mgrImportExport.FindImporterByPath(szFilePath);
+		int nFormat = m_mgrImportExport.FindImporterByPath(szFilePath);
 
-		if (m_nFormatOption == -1)
+		if (nFormat == -1)
 			return IDCANCEL;
+
+		// else
+		m_sFormatTypeID = m_mgrImportExport.GetImporterTypeID(nFormat);
 
 		m_bFromClipboard = FALSE;
 		m_sClipboardText.Empty();
@@ -202,12 +210,16 @@ BOOL CTDLImportDialog::OnInitDialog()
 
 BOOL CTDLImportDialog::CurImporterHasFilter() const
 {
-	return m_mgrImportExport.ImporterHasFileExtension(m_nFormatOption);
+	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+
+	return m_mgrImportExport.ImporterHasFileExtension(nFormat);
 }
 
 CString CTDLImportDialog::GetCurImporterFilter() const
 {
-	return m_mgrImportExport.GetImporterFileFilter(m_nFormatOption);
+	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+
+	return m_mgrImportExport.GetImporterFileFilter(nFormat);
 }
 
 void CTDLImportDialog::OnOK()
@@ -219,16 +231,16 @@ void CTDLImportDialog::OnOK()
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportOption"), m_bFromClipboard);
 	prefs.WriteProfileString(m_sPrefsKey, _T("ImportFilePath"), m_sFromFilePath);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportToWhere"), m_nImportTo);
-	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportFormat"), m_nFormatOption);
+	prefs.WriteProfileString(m_sPrefsKey, _T("ImporterTypeID"), m_sFormatTypeID);
 
 	// retrieve clipboard text
 	if (CurImporterHasFilter())
 		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->GetWindowText(m_sClipboardText);
 }
 
-int CTDLImportDialog::GetImporterIndex() const
+CString CTDLImportDialog::GetFormatTypeID() const
 {
-	return m_nFormatOption;
+	return m_sFormatTypeID;
 }
 
 TDLID_IMPORTTO CTDLImportDialog::GetImportTo() const
@@ -261,7 +273,8 @@ CString CTDLImportDialog::GetImportClipboardText() const
 
 void CTDLImportDialog::OnSelchangeFormatoptions() 
 {
-	BOOL bHadFilter = m_mgrImportExport.ImporterHasFileExtension(m_nFormatOption);
+	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+	BOOL bHadFilter = m_mgrImportExport.ImporterHasFileExtension(nFormat);
 
 	UpdateData(TRUE);
 	

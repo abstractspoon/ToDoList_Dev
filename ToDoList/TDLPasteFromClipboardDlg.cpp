@@ -20,7 +20,7 @@ static char THIS_FILE[] = __FILE__;
 // CTDLPasteFromClipboardDlg dialog
 
 
-CTDLPasteFromClipboardDlg::CTDLPasteFromClipboardDlg(const CImportExportMgr& mgr, CWnd* pParent /*=NULL*/)
+CTDLPasteFromClipboardDlg::CTDLPasteFromClipboardDlg(const CTDCImportExportMgr& mgr, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_PASTEIMPORT_DIALOG, _T("PasteImporting"), pParent),
 	m_cbFormat(mgr, TRUE, TRUE)
@@ -28,8 +28,20 @@ CTDLPasteFromClipboardDlg::CTDLPasteFromClipboardDlg(const CImportExportMgr& mgr
 	//{{AFX_DATA_INIT(CTDLPasteFromClipboardDlg)
 	//}}AFX_DATA_INIT
 
-	m_nFormatOption = CPreferences().GetProfileInt(m_sPrefsKey, _T("ImportFormat"), 0);
-	m_nFormatOption = min(m_nFormatOption, mgr.GetNumImporters());
+	CPreferences prefs;
+
+	m_sFormatTypeID = prefs.GetProfileString(m_sPrefsKey, _T("ImportTypeID"));
+
+	// backwards compat
+	if (m_sFormatTypeID.IsEmpty())
+	{
+		int nFormat = prefs.GetProfileInt(m_sPrefsKey, _T("ImportOption"), -1);
+
+		if (nFormat != -1)
+			m_sFormatTypeID = mgr.GetImporterTypeID(nFormat);
+		else
+			m_sFormatTypeID = mgr.GetTypeID(TDCIT_CSV);
+	}
 }
 
 
@@ -43,14 +55,9 @@ void CTDLPasteFromClipboardDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 
 	if (pDX->m_bSaveAndValidate)
-	{
-		int nIndex = m_cbFormat.GetCurSel();
-		m_nFormatOption = m_cbFormat.GetItemData(nIndex);
-	}
+		m_sFormatTypeID = m_cbFormat.GetSelectedTypeID();
 	else
-	{
-		SelectItemByData(m_cbFormat, m_nFormatOption);
-	}
+		m_cbFormat.SetSelectedTypeID(m_sFormatTypeID);
 }
 
 
@@ -67,7 +74,7 @@ void CTDLPasteFromClipboardDlg::OnOK()
 {
 	CTDLDialog::OnOK();
 	
-	CPreferences().WriteProfileInt(m_sPrefsKey, _T("ImportFormat"), m_nFormatOption);
+	CPreferences().WriteProfileString(m_sPrefsKey, _T("ImportTypeID"), m_sFormatTypeID);
 }
 
 BOOL CTDLPasteFromClipboardDlg::OnInitDialog() 

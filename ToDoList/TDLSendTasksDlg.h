@@ -10,8 +10,7 @@
 #include "TaskSelectionDlg.h"
 #include "TDLDialog.h"
 #include "tdlimportexportcombobox.h"
-
-#include "..\shared\importexportmgr.h"
+#include "TDCimportexportmgr.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -28,11 +27,11 @@ class CTDLSendTasksDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLSendTasksDlg(const CImportExportMgr& mgr, BOOL bSelectedTasks, FTC_VIEW nView, 
+	CTDLSendTasksDlg(const CTDCImportExportMgr& mgr, BOOL bSelectedTasks, FTC_VIEW nView, 
 					const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);   // standard constructor
 
 	TD_SENDAS GetSendAs() const { return (TD_SENDAS)m_nSendTasksAsOption; }
-	CString GetExportFormatTypeID() { return m_sFormatTypeID; }
+	CString GetFormatTypeID() { return m_sFormatTypeID; }
 
 	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
 

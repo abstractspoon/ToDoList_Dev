@@ -11,7 +11,6 @@
 #include "TDLDialog.h"
 
 #include "..\shared\fileedit.h"
-#include "..\shared\importexportmgr.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportDialog dialog
@@ -20,11 +19,11 @@ class CTDLImportDialog : public CTDLDialog
 {
 // Construction
 public:
-	CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent = NULL);   // standard constructor
+	CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent = NULL);   // standard constructor
 
 	int DoModal(LPCTSTR szFilePath = NULL);
 
-	int GetImporterIndex() const; 
+	CString GetFormatTypeID() const;
 	TDLID_IMPORTTO GetImportTo() const;
 	BOOL GetImportFromClipboard() const;
 	CString GetImportFilePath() const;
@@ -39,7 +38,7 @@ protected:
 	int		m_bFromClipboard;
 	CString	m_sFromFilePath;
 	int		m_nImportTo;
-	int		m_nFormatOption;
+	CString	m_sFormatTypeID;
 	CString	m_sClipboardText;
 	int		m_bMatchByTaskID;
 	//}}AFX_DATA

@@ -7,7 +7,8 @@
 // tdlimportexportcombobox.h : header file
 //
 
-#include "..\shared\importexportmgr.h"
+#include "TDCimportexportmgr.h"
+
 #include "..\shared\sysimagelist.h"
 #include "..\shared\ownerdrawcomboboxbase.h"
 
@@ -18,7 +19,7 @@ class CTDLImportExportComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
-	CTDLImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly = FALSE);
+	CTDLImportExportComboBox(const CTDCImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly = FALSE);
 
 	void SetFileBasedOnly(BOOL bFileBased);
 
@@ -26,7 +27,7 @@ public:
 	int SetSelectedTypeID(LPCTSTR szTypeID);
 
 protected:
-	const CImportExportMgr& m_mgrImpExp;
+	const CTDCImportExportMgr& m_mgrImpExp;
 	BOOL m_bImporting, m_bFileBasedOnly;
 	CSysImageList m_ilImages;
 

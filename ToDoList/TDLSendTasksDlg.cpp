@@ -18,7 +18,7 @@ static char THIS_FILE[] = __FILE__;
 // CTDLSendTasksDlg dialog
 
 
-CTDLSendTasksDlg::CTDLSendTasksDlg(const CImportExportMgr& mgr, BOOL bSelectedTasks, FTC_VIEW nView, 
+CTDLSendTasksDlg::CTDLSendTasksDlg(const CTDCImportExportMgr& mgr, BOOL bSelectedTasks, FTC_VIEW nView, 
 									const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLSendTasksDlg::IDD, _T("SendTasks"), pParent), 
@@ -31,7 +31,18 @@ CTDLSendTasksDlg::CTDLSendTasksDlg(const CImportExportMgr& mgr, BOOL bSelectedTa
 	CPreferences prefs;
 
 	m_nSendTasksAsOption = prefs.GetProfileInt(m_sPrefsKey, _T("SendTasksAs"), TDSA_TASKLIST);
-	m_sFormatTypeID = prefs.GetProfileString(m_sPrefsKey, _T("ExportTypeID"), CTDCImportExportMgr::GetTypeID(TDCET_TDL));
+	m_sFormatTypeID = prefs.GetProfileString(m_sPrefsKey, _T("FormatTypeID"));
+
+	// backwards compat
+	if (m_sFormatTypeID.IsEmpty())
+	{
+		int nFormat = prefs.GetProfileInt(m_sPrefsKey, _T("FormatOption"), -1);
+
+		if (nFormat != -1)
+			m_sFormatTypeID = mgr.GetExporterTypeID(nFormat);
+		else
+			m_sFormatTypeID = mgr.GetTypeID(TDCET_TDL);
+	}
 
 	// bSelected overrides saved state
 	if (bSelectedTasks)

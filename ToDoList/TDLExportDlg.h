@@ -12,7 +12,6 @@
 #include "TDLDialog.h"
 
 #include "..\shared\fileedit.h"
-#include "..\shared\importexportmgr.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CExportDlg dialog
@@ -23,12 +22,12 @@ class CTDLExportDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, FTC_VIEW nView, 
+	CTDLExportDlg(const CTDCImportExportMgr& mgr, BOOL bSingleTaskList, FTC_VIEW nView, 
 				BOOL bVisibleColumnsOnly, LPCTSTR szFilePath, LPCTSTR szFolderPath, 
 				const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);
 
 	BOOL GetExportAllTasklists();
-	int GetExportFormat() { return m_nFormatOption; }
+	CString GetFormatTypeID() { return m_sFormatTypeID; }
 	CString GetExportPath(); // can be folder or path
 	BOOL GetExportOneFile() { return (m_bSingleTaskList || m_bExportOneFile); }
 
@@ -48,7 +47,7 @@ protected:
 	BOOL m_bSingleTaskList; 
 	CString m_sFolderPath, m_sFilePath, m_sOrgFilePath, m_sOrgFolderPath, m_sMultiFilePath;
 	const CImportExportMgr& m_mgrImportExport;
-	int m_nFormatOption;
+	CString m_sFormatTypeID;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -73,7 +72,7 @@ protected:
 
 	void EnableOK();
 
-	void ReplaceExtension(CString& sPathName, int nFormat);
+	void ReplaceExtension(CString& sPathName, LPCTSTR szFormatTypeID);
 };
 
 //{{AFX_INSERT_LOCATION}}

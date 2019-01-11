@@ -24,9 +24,14 @@ static char THIS_FILE[] = __FILE__;
 
 enum { ACTIVETASKLIST, ALLTASKLISTS };
 
-CTDLExportDlg::CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, FTC_VIEW nView, 
-					   BOOL bVisibleColumnsOnly, LPCTSTR szFilePath, LPCTSTR szFolderPath, 
-					   const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
+CTDLExportDlg::CTDLExportDlg(const CTDCImportExportMgr& mgr, 
+							BOOL bSingleTaskList, 
+							FTC_VIEW nView, 
+							BOOL bVisibleColumnsOnly, 
+							LPCTSTR szFilePath, 
+							LPCTSTR szFolderPath, 
+							const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+							CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_EXPORT_DIALOG, _T("Exporting"), pParent), 
 	m_mgrImportExport(mgr),
@@ -35,7 +40,6 @@ CTDLExportDlg::CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, 
 	m_sFolderPath(szFolderPath), m_sOrgFolderPath(szFolderPath),
 	m_dlgTaskSel(aAttribDefs, _T("Exporting"), nView, bVisibleColumnsOnly),
 	m_eExportPath(FES_COMBOSTYLEBTN | FES_SAVEAS | FES_NOPROMPTOVERWRITE), // parent handles prompting
-	m_nFormatOption(0),
 	m_cbFormat(mgr, FALSE)
 {
 	//{{AFX_DATA_INIT(CExportDlg)
@@ -48,9 +52,18 @@ CTDLExportDlg::CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, 
 	m_sMultiFilePath = prefs.GetProfileString(m_sPrefsKey, _T("LastMultiFilePath"));
 
 	m_nExportOption = m_bSingleTaskList ? ACTIVETASKLIST : prefs.GetProfileInt(m_sPrefsKey, _T("ExportOption"), ACTIVETASKLIST);
-	
-	m_nFormatOption = prefs.GetProfileInt(m_sPrefsKey, _T("FormatOption"), 0);
-	m_nFormatOption = min(m_nFormatOption, mgr.GetNumExporters());
+	m_sFormatTypeID = prefs.GetProfileString(m_sPrefsKey, _T("ExporterTypeID"));
+
+	// backwards compat
+	if (m_sFormatTypeID.IsEmpty())
+	{
+		int nFormat = prefs.GetProfileInt(m_sPrefsKey, _T("FormatOption"), -1);
+
+		if (nFormat != -1)
+			m_sFormatTypeID = mgr.GetExporterTypeID(nFormat);
+		else
+			m_sFormatTypeID = mgr.GetTypeID(TDCET_TDL);
+	}
 
 	if (m_sFolderPath.IsEmpty())
 	{
@@ -68,7 +81,7 @@ CTDLExportDlg::CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, 
 
 		FileMisc::MakePath(m_sMultiFilePath, sDrive, sFolder, CEnString(IDS_TDC_MULTIFILE));
 	}
-	ReplaceExtension(m_sMultiFilePath, m_nFormatOption);
+	ReplaceExtension(m_sMultiFilePath, m_sFormatTypeID);
 
 	if ((m_sFilePath.IsEmpty() || PathIsRelative(m_sFilePath)) && !m_sFolderPath.IsEmpty())
 	{
@@ -81,7 +94,7 @@ CTDLExportDlg::CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, 
 		
 		FileMisc::MakePath(m_sFilePath, NULL, m_sFolderPath, sFName);
 	}
-	ReplaceExtension(m_sFilePath, m_nFormatOption);
+	ReplaceExtension(m_sFilePath, m_sFormatTypeID);
 
 	// prepare initial export path
 	if (m_bSingleTaskList || m_nExportOption == ACTIVETASKLIST) 
@@ -116,12 +129,11 @@ void CTDLExportDlg::DoDataExchange(CDataExchange* pDX)
 
 	if (pDX->m_bSaveAndValidate)
 	{
-		int nIndex = m_cbFormat.GetCurSel();
-		m_nFormatOption = m_cbFormat.GetItemData(nIndex);
+		m_sFormatTypeID = m_cbFormat.GetSelectedTypeID();
 	}
 	else
 	{
-		SelectItemByData(m_cbFormat, m_nFormatOption);
+		m_cbFormat.SetSelectedTypeID(m_sFormatTypeID);
 	}
 }
 
@@ -148,9 +160,11 @@ BOOL CTDLExportDlg::OnInitDialog()
 	GetDlgItem(IDC_TASKLISTOPTIONS)->EnableWindow(!m_bSingleTaskList);
 	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_nExportOption == ALLTASKLISTS);
 
-	m_eExportPath.SetFilter(m_mgrImportExport.GetExporterFileFilter(m_nFormatOption));
+	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+	
+	m_eExportPath.SetFilter(m_mgrImportExport.GetExporterFileFilter(nFormat));
 	m_eExportPath.EnableStyle(FES_FOLDERS, (m_nExportOption == ALLTASKLISTS && !m_bExportOneFile));
-	m_eExportPath.EnableWindow(m_mgrImportExport.ExporterHasFileExtension(m_nFormatOption));
+	m_eExportPath.EnableWindow(m_mgrImportExport.ExporterHasFileExtension(nFormat));
 
 	EnableOK();
 	
@@ -187,7 +201,7 @@ void CTDLExportDlg::OnSelchangeTasklistoptions()
 		if (m_bExportOneFile)
 		{
 			m_sExportPath = m_sMultiFilePath;
-			ReplaceExtension(m_sExportPath, m_nFormatOption);
+			ReplaceExtension(m_sExportPath, m_sFormatTypeID);
 		}
 		else
 			m_sExportPath = m_sFolderPath;
@@ -195,7 +209,7 @@ void CTDLExportDlg::OnSelchangeTasklistoptions()
 	else
 	{
 		m_sExportPath = m_sFilePath;
-		ReplaceExtension(m_sExportPath, m_nFormatOption);
+		ReplaceExtension(m_sExportPath, m_sFormatTypeID);
 	}
 
 	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_nExportOption == ALLTASKLISTS);
@@ -208,13 +222,15 @@ void CTDLExportDlg::OnSelchangeFormatoptions()
 	UpdateData();
 
 	// check exporter has a file extension
-	if (m_mgrImportExport.ExporterHasFileExtension(m_nFormatOption))
+	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+
+	if (m_mgrImportExport.ExporterHasFileExtension(nFormat))
 	{
 		// enable path edit
 		m_eExportPath.EnableWindow(TRUE);
 
 		// check file extension is correct
-		m_eExportPath.SetFilter(m_mgrImportExport.GetExporterFileFilter(m_nFormatOption));
+		m_eExportPath.SetFilter(m_mgrImportExport.GetExporterFileFilter(nFormat));
 
 		if (m_nExportOption == ACTIVETASKLIST || m_bExportOneFile)
 		{
@@ -226,7 +242,7 @@ void CTDLExportDlg::OnSelchangeFormatoptions()
 					m_sExportPath = m_sOrgFilePath;
 			}
 
-			ReplaceExtension(m_sExportPath, m_nFormatOption);
+			ReplaceExtension(m_sExportPath, m_sFormatTypeID);
 			UpdateData(FALSE);
 		}
 		else if (m_sExportPath.IsEmpty())
@@ -239,8 +255,10 @@ void CTDLExportDlg::OnSelchangeFormatoptions()
 	}
 }
 
-void CTDLExportDlg::ReplaceExtension(CString& sPathName, int nFormat)
+void CTDLExportDlg::ReplaceExtension(CString& sPathName, LPCTSTR szFormatTypeID)
 {
+	int nFormat = m_mgrImportExport.FindExporterByType(szFormatTypeID);
+
 	if (!m_mgrImportExport.ExporterHasFileExtension(nFormat))
 		return;
 	
@@ -251,7 +269,8 @@ void CTDLExportDlg::ReplaceExtension(CString& sPathName, int nFormat)
 
 void CTDLExportDlg::OnOK()
 {
-	BOOL bExporterHasFileExt = m_mgrImportExport.ExporterHasFileExtension(m_nFormatOption);
+	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+	BOOL bExporterHasFileExt = m_mgrImportExport.ExporterHasFileExtension(nFormat);
 
 	if (bExporterHasFileExt)
 	{
@@ -319,12 +338,12 @@ void CTDLExportDlg::OnOK()
 	if (bExporterHasFileExt)
 	{
 		if (m_nExportOption == ACTIVETASKLIST || m_bExportOneFile)
-			ReplaceExtension(m_sExportPath, m_nFormatOption);
+			ReplaceExtension(m_sExportPath, m_sFormatTypeID);
 	}
 
 	CPreferences prefs;
 
-	prefs.WriteProfileInt(m_sPrefsKey, _T("FormatOption"), m_nFormatOption);
+	prefs.WriteProfileString(m_sPrefsKey, _T("ExporterTypeID"), m_sFormatTypeID);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ExportOneFile"), m_bExportOneFile);
 
 	if (!m_bSingleTaskList)
@@ -374,7 +393,7 @@ void CTDLExportDlg::OnExportonefile()
 		m_sExportPath = m_sFilePath;
 
 	if (m_nExportOption == ACTIVETASKLIST || m_bExportOneFile)
-		ReplaceExtension(m_sExportPath, m_nFormatOption);
+		ReplaceExtension(m_sExportPath, m_sFormatTypeID);
 
 	UpdateData(FALSE);
 }
@@ -384,8 +403,11 @@ void CTDLExportDlg::EnableOK()
 	Misc::Trim(m_sExportPath);
 	BOOL bEnable = FALSE;
 
-	if (m_nFormatOption != -1)
-		bEnable = (!m_sExportPath.IsEmpty() || !m_mgrImportExport.ExporterHasFileExtension(m_nFormatOption));
+	if (!m_sFormatTypeID.IsEmpty())
+	{
+		int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+		bEnable = (!m_sExportPath.IsEmpty() || !m_mgrImportExport.ExporterHasFileExtension(nFormat));
+	}
 
 	GetDlgItem(IDOK)->EnableWindow(bEnable);
 }
@@ -403,7 +425,9 @@ void CTDLExportDlg::OnChangeExportpath()
 
 CString CTDLExportDlg::GetExportPath()
 {
-	if (m_mgrImportExport.ExporterHasFileExtension(m_nFormatOption))
+	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+
+	if (m_mgrImportExport.ExporterHasFileExtension(nFormat))
 		return m_sExportPath;
 
 	// else

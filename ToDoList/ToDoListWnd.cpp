@@ -5791,7 +5791,7 @@ BOOL CToDoListWnd::DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere)
 		return FALSE;
 	
 	BOOL bFromClipboard = TRUE;
-	int nImporter = dialog.GetImporterIndex();
+	int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
 	CString sImportFrom = dialog.GetClipboardText();
 
 	return ImportTasks(bFromClipboard, sImportFrom, nImporter, nWhere);
@@ -8686,7 +8686,7 @@ LRESULT CToDoListWnd::OnToDoCtrlImportDropFiles(WPARAM wp, LPARAM lp)
 			{
 				// check file can be opened
 				TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
-				int nImporter = dialog.GetImporterIndex();
+				int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
 
 				ImportTasks(FALSE, sFilePath, nImporter, nImportTo);
 			}
@@ -8732,7 +8732,7 @@ void CToDoListWnd::OnImportTasklist()
 		{
 			// check file can be opened
 			TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
-			int nImporter = dialog.GetImporterIndex();
+			int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
 			BOOL bFromClipboard = dialog.GetImportFromClipboard();
 			CString sImportFrom = (bFromClipboard ? dialog.GetImportClipboardText() : 
 													dialog.GetImportFilePath());
@@ -9818,7 +9818,7 @@ void CToDoListWnd::OnExport()
 			return;
 
 		sExportPath = dialog.GetExportPath();
-		nFormat = dialog.GetExportFormat();
+		nFormat = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
 
 		UINT nMsgFlags = (MB_OKCANCEL | MB_ICONWARNING);
 
@@ -12440,7 +12440,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		GetTasks(tdc, FALSE, FALSE, dialog.GetTaskSelection(), tasks, NULL);
 
 		// Export them
-		int nFormat = m_mgrImportExport.FindExporterByType(dialog.GetExportFormatTypeID());
+		int nFormat = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
 		ASSERT(nFormat != -1);
 
 		CString sFilePath = FileMisc::GetTempFilePath(_T("tdl.email"), m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE));

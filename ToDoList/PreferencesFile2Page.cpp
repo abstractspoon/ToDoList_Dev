@@ -222,12 +222,14 @@ void CPreferencesFile2Page::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_sOtherExportTypeID = pPrefs->GetProfileString(szKey, _T("OtherExporterTypeID"));
 
 	// Backwards compat
-	if (m_sOtherExportTypeID.IsEmpty())
+	if (m_sOtherExportTypeID.IsEmpty() && m_pExportMgr)
 	{
 		int nOtherExporter = pPrefs->GetProfileInt(szKey, _T("OtherExporter"), -1);
 
 		if (nOtherExporter != -1)
 			m_sOtherExportTypeID = m_pExportMgr->GetExporterTypeID(nOtherExporter);
+		else
+			m_sOtherExportTypeID = m_pExportMgr->GetTypeID(TDCET_TXT);
 	}
 
 	// these are dependent on the values they control for backward compat
@@ -364,7 +366,7 @@ BOOL CPreferencesFile2Page::GetSaveExportExtension(CString& sExt) const
 		else
 			sExt = _T(".html");
 	}
-	else
+	else if (m_pExportMgr)
 	{
 		int nExporter = m_pExportMgr->FindExporterByType(sExportTypeID);
 

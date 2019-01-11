@@ -19,10 +19,10 @@ class CTDLPasteFromClipboardDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLPasteFromClipboardDlg(const CImportExportMgr& mgr, CWnd* pParent = NULL);   // standard constructor
+	CTDLPasteFromClipboardDlg(const CTDCImportExportMgr& mgr, CWnd* pParent = NULL);   // standard constructor
 
 	CString GetClipboardText() const { return m_sClipboardText; }
-	int GetImporterIndex() const { return m_nFormatOption; } 
+	CString GetFormatTypeID() const { return m_sFormatTypeID; } 
 
 protected:
 // Dialog Data
@@ -31,7 +31,7 @@ protected:
 	CString	m_sClipboardText;
 	//}}AFX_DATA
 
-	int	m_nFormatOption;
+	CString	m_sFormatTypeID;
 	CFont m_fontMonospace;
 
 protected:

@@ -17,7 +17,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportExportComboBox
 
-CTDLImportExportComboBox::CTDLImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly)
+CTDLImportExportComboBox::CTDLImportExportComboBox(const CTDCImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly)
 	: 
 	COwnerdrawComboBoxBase(11),
 	m_mgrImpExp(mgrImpExp), 
@@ -171,12 +171,10 @@ CString CTDLImportExportComboBox::GetSelectedTypeID() const
 		return _T("");
 
 	int nImpExp = (int)CDialogHelper::GetSelectedItemData(*this);
-
-	if (m_bImporting)
-		return m_mgrImpExp.GetImporterTypeID(nImpExp);
-
-	// else
-	return m_mgrImpExp.GetExporterTypeID(nImpExp);
+		
+	return (m_bImporting ? 
+			m_mgrImpExp.GetImporterTypeID(nImpExp) :
+			m_mgrImpExp.GetExporterTypeID(nImpExp));
 }
 
 int CTDLImportExportComboBox::SetSelectedTypeID(LPCTSTR szTypeID)
@@ -191,6 +189,10 @@ int CTDLImportExportComboBox::SetSelectedTypeID(LPCTSTR szTypeID)
 			nImpExp = m_mgrImpExp.FindExporterByType(szTypeID);
 	}
 
-	SetCurSel(nImpExp);
+	if (nImpExp == CB_ERR)
+		SetCurSel(CB_ERR);
+	else
+		CDialogHelper::SelectItemByData(*this, nImpExp);
+
 	return nImpExp;
 }
