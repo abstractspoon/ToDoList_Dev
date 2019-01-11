@@ -9,11 +9,19 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 #include "TaskListExporterBase.h"
 #include "TDLCsvImportExportDlg.h"
 
 #include "..\Interfaces\Itasklist.h"
 #include "..\Interfaces\IImportExport.h"
+
+//////////////////////////////////////////////////////////////////////
+
+static const LPCTSTR CSVEXPORT_TYPEID = _T("CF68988D_FBBD_431D_BB56_464E8737D993");
+
+//////////////////////////////////////////////////////////////////////
 
 class CTaskListCsvExporter : public IExportTasklist, protected CTaskListExporterBase  
 {
@@ -27,6 +35,7 @@ public:
 	LPCTSTR GetMenuText() const { return _T("Spreadsheet"); }
 	LPCTSTR GetFileFilter() const { return _T("Spreadsheet Files (*.csv)|*.csv||"); }
 	LPCTSTR GetFileExtension() const { return _T("csv"); }
+	LPCTSTR GetTypeID() const { return CSVEXPORT_TYPEID; }
 	HICON GetIcon() const { return NULL; }
 
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

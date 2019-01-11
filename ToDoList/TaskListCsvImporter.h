@@ -15,6 +15,12 @@
 #include "..\Interfaces\IImportExport.h"
 #include "..\Interfaces\Itasklist.h"
 
+//////////////////////////////////////////////////////////////////////
+
+static const LPCTSTR CSVIMPORT_TYPEID = _T("ADF211CB_FBD2_42A2_AD51_DFF58E566753");
+
+//////////////////////////////////////////////////////////////////////
+
 class CTaskListCsvImporter : public IImportTasklist  
 {
 public:
@@ -27,6 +33,7 @@ public:
 	LPCTSTR GetMenuText() const { return _T("Spreadsheet"); }
 	LPCTSTR GetFileFilter() const { return _T("Spreadsheet Files (*.csv)|*.csv||"); }
 	LPCTSTR GetFileExtension() const { return _T("csv"); }
+	LPCTSTR GetTypeID() const { return CSVIMPORT_TYPEID; }
 	HICON GetIcon() const { return NULL; }
 
 	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

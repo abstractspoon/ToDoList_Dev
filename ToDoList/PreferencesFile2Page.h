@@ -39,7 +39,7 @@ public:
 	BOOL GetAutoSaveOnSwitchApp() const { return m_bAutoSaveOnSwitchApp; }
 	CString GetSaveExportFolderPath() const;
 	BOOL GetAutoExport() const { return m_bAutoExport; }
-	int GetSaveExporter() const;
+	CString GetSaveExportTypeID() const;
 	BOOL GetSaveExportExtension(CString& sExt) const;
 	BOOL GetSaveExportFilteredOnly() const { return m_bAutoExport && m_bExportFilteredOnly; }
 	BOOL GetAutoSaveOnRunTools() const { return m_bAutoSaveOnRunTools; }
@@ -74,7 +74,7 @@ protected:
 	BOOL	m_bAutoSaveOnSwitchTasklist;
 	BOOL	m_bAutoSaveOnSwitchApp;
 	int		m_bOtherExport;
-	int		m_nOtherExporter;
+	CString	m_sOtherExportTypeID;
 	BOOL	m_bUseStylesheetForSaveExport;
 	const CTDCImportExportMgr* m_pExportMgr;
 	CString	m_sSaveExportStylesheet;

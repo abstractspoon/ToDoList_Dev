@@ -14,6 +14,12 @@
 #include "..\Interfaces\Itasklist.h"
 #include "..\Interfaces\IImportExport.h"
 
+//////////////////////////////////////////////////////////////////////
+
+static const LPCTSTR TXTEXPORT_TYPEID = _T("CF68988D_FBBD_431D_BB56_464E8737D993");
+
+//////////////////////////////////////////////////////////////////////
+
 class CTaskListTxtExporter : public IExportTasklist, protected CTaskListExporterBase  
 {
 public:
@@ -26,6 +32,7 @@ public:
 	LPCTSTR GetMenuText() const { return _T("Plain Text"); }
 	LPCTSTR GetFileFilter() const { return _T("Text Files (*.txt)|*.txt||"); }
 	LPCTSTR GetFileExtension() const { return _T("txt"); }
+	LPCTSTR GetTypeID() const { return TXTEXPORT_TYPEID; }
 	HICON GetIcon() const { return NULL; }
 
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

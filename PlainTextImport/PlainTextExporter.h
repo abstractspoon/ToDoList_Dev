@@ -26,6 +26,7 @@ public:
 	LPCTSTR GetMenuText() const { return _T("Outline"); }
 	LPCTSTR GetFileFilter() const { return _T("Text Files (*.txt)|*.txt||"); }
 	LPCTSTR GetFileExtension() const { return _T("txt"); }
+	LPCWSTR GetTypeID() const { return _T("69016DB3_5424_49DF_A877_962E83BC6E6B"); }
 	HICON GetIcon() const { return NULL; }
 	
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

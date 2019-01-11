@@ -29,6 +29,7 @@ public:
 	LPCTSTR GetMenuText() const { return _T("My Life Organized"); }
 	LPCTSTR GetFileFilter() const { return _T("MLO Task Files (*.ml, *.xml)|*.ml;*.xml||"); }
 	LPCTSTR GetFileExtension() const { return _T("ml"); }
+	LPCWSTR GetTypeID() const { return _T("E1C1DB38_D45E_481E_8D91_7D8455C5155E"); }
 	HICON GetIcon() const { return m_icon; }
 	
 	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

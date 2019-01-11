@@ -22,6 +22,9 @@ public:
 
 	void SetFileBasedOnly(BOOL bFileBased);
 
+	CString GetSelectedTypeID() const;
+	int SetSelectedTypeID(LPCTSTR szTypeID);
+
 protected:
 	const CImportExportMgr& m_mgrImpExp;
 	BOOL m_bImporting, m_bFileBasedOnly;

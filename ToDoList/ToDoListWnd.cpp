@@ -1958,8 +1958,9 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 	CString sTDCPath = tdc.GetFilePath();
+	int nExporter = m_mgrImportExport.FindExporterByType(userPrefs.GetSaveExportTypeID());
 
-	TDCEXPORTTASKLIST* pExport = new TDCEXPORTTASKLIST(GetSafeHwnd(), sTDCPath, userPrefs.GetSaveExporter());
+	TDCEXPORTTASKLIST* pExport = new TDCEXPORTTASKLIST(GetSafeHwnd(), sTDCPath, nExporter);
 	ASSERT(pExport);
 
 	pExport->nPurpose = TDCTEP_EXPORTAFTERSAVE;
@@ -1985,12 +1986,12 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	// So if user either wants 'Filtered Tasks' or 'Html Comments' or
 	// only 'Visible Columns' we need to grab the tasks again.
 	BOOL bFiltered = (userPrefs.GetSaveExportFilteredOnly() && tdc.HasAnyFilter());
-	BOOL bHtmlComments = userPrefs.GetSaveExporter();
+	BOOL bHtmlComments = (userPrefs.GetSaveExportTypeID() == HTMLEXPORT_TYPEID);
 
 	pExport->sStylesheet = userPrefs.GetSaveExportStylesheet();
 	BOOL bTransform = GetStylesheetPath(tdc, pExport->sStylesheet);
 
-	if (bFiltered || userPrefs.GetSaveExporter() || !userPrefs.GetExportAllAttributes())
+	if (bFiltered || userPrefs.GetSaveExportTypeID() || !userPrefs.GetExportAllAttributes())
 	{
 		TSD_TASKS nWhatTasks = bFiltered ? TSDT_FILTERED : TSDT_ALL;
 		TDCGETTASKS filter;
@@ -4676,12 +4677,12 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 	
 	if (userPrefs.GetDisplayDueTasksInHtml())
 	{
-		nExporter = EXPTOHTML;
+		nExporter = m_mgrImportExport.FindExporterByType(HTMLEXPORT_TYPEID);
 		sFileExt = _T("html");
 	}
 	else
 	{
-		nExporter = EXPTOTXT;
+		nExporter = m_mgrImportExport.FindExporterByType(TXTEXPORT_TYPEID);
 		sFileExt = _T("txt");
 	}
 
@@ -5719,7 +5720,7 @@ BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
 
 BOOL CToDoListWnd::ImportFile(LPCTSTR szFilePath, BOOL bSilent)
 {
-	int nImporter = m_mgrImportExport.FindImporter(szFilePath);
+	int nImporter = m_mgrImportExport.FindImporterByPath(szFilePath);
 
 	if (nImporter == -1)
 		return FALSE;
@@ -8716,7 +8717,7 @@ LRESULT CToDoListWnd::OnToDoCtrlCanImportDropFiles(WPARAM wp, LPARAM lp)
 		{
 			CString sFilePath = pFiles->GetAt(nFile);
 
-			if (m_mgrImportExport.FindImporter(sFilePath) != -1)
+			if (m_mgrImportExport.FindImporterByPath(sFilePath) != -1)
 				return TRUE;
 		}
 	}
@@ -9863,7 +9864,7 @@ void CToDoListWnd::OnExport()
 	// export
 	DOPROGRESS(IDS_EXPORTPROGRESS);
 	
-	BOOL bHtmlComments = (nFormat == EXPTOHTML);
+	BOOL bHtmlComments = (nFormat == m_mgrImportExport.FindExporterByType(HTMLEXPORT_TYPEID));
 
 	if ((nTDCCount == 1) || !dialog.GetExportAllTasklists())
 	{

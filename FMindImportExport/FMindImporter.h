@@ -31,6 +31,7 @@ public:
 	LPCTSTR GetMenuText() const { return _T("FreeMind"); }
 	LPCTSTR GetFileFilter() const { return _T("FreeMind Files (*.mm)|*.mm||"); }
 	LPCTSTR GetFileExtension() const { return _T("mm"); }
+	LPCWSTR GetTypeID() const { return _T("48AE3CCE_E042_432D_B5DB_D7E310CF99CE"); }
 	HICON GetIcon() const { return m_icon; }
 
 	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

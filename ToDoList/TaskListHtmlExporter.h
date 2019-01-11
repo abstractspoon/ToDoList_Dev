@@ -9,10 +9,18 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 #include "TaskListExporterBase.h"
 
 #include "..\Interfaces\Itasklist.h"
 #include "..\Interfaces\IImportExport.h"
+
+//////////////////////////////////////////////////////////////////////
+
+static const LPCTSTR HTMLEXPORT_TYPEID = _T("E4FD92AB_2BF2_40E3_9C8E_5018A72AEA89");
+
+//////////////////////////////////////////////////////////////////////
 
 class CTaskListHtmlExporter : public IExportTasklist, protected CTaskListExporterBase  
 {
@@ -26,6 +34,7 @@ public:
 	LPCTSTR GetMenuText() const { return _T("Web Page"); }
 	LPCTSTR GetFileFilter() const { return _T("Web Pages (*.html)|*.html||"); }
 	LPCTSTR GetFileExtension() const { return _T("html"); }
+	LPCTSTR GetTypeID() const { return HTMLEXPORT_TYPEID; }
 	HICON GetIcon() const { return NULL; }
 
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

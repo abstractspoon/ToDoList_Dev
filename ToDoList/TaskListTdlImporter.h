@@ -12,6 +12,12 @@
 #include "..\Interfaces\Itasklist.h"
 #include "..\Interfaces\IImportExport.h"
 
+//////////////////////////////////////////////////////////////////////
+
+static const LPCTSTR TDLIMPORT_TYPEID = _T("ADF211CB_FBD2_42A2_AD51_DFF58E566753");
+
+//////////////////////////////////////////////////////////////////////
+
 class CTaskListTdlImporter : public IImportTasklist  
 {
 public:
@@ -24,6 +30,7 @@ public:
 	LPCTSTR GetMenuText() const { return _T("ToDoList"); }
 	LPCTSTR GetFileFilter() const { return _T("Tasklists (*.tdl)|*.tdl||"); }
 	LPCTSTR GetFileExtension() const { return _T("tdl"); }
+	LPCTSTR GetTypeID() const { return TDLIMPORT_TYPEID; }
 	HICON GetIcon() const { return NULL; }
 
 	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

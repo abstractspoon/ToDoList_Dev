@@ -9,12 +9,13 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 #include "ToDoitem.h"
 
 #include "..\SHARED\ImportExportMgr.h"
 
-enum { EXPTOHTML, EXPTOTXT, EXPTOCSV, EXPTOTDL };
-enum { IMPFROMCSV, IMPFROMTDL, IMPFROMOUTLOOK };
+//////////////////////////////////////////////////////////////////////
 
 class CTDCImportExportMgr : public CImportExportMgr  
 {
@@ -49,6 +50,10 @@ public:
 	IIMPORTEXPORT_RESULT ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, int nByImporter, BOOL bSilent = FALSE) const; 
 	IIMPORTEXPORT_RESULT ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs = NULL) const;
 	IIMPORTEXPORT_RESULT ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs = NULL) const;
+
+	IIMPORTEXPORT_RESULT ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, LPCTSTR szTypeID, BOOL bSilent = FALSE) const; 
+	IIMPORTEXPORT_RESULT ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, LPCTSTR szTypeID, BOOL bSilent, IPreferences* pPrefs = NULL) const;
+	IIMPORTEXPORT_RESULT ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, LPCTSTR szTypeID, BOOL bSilent, IPreferences* pPrefs = NULL) const;
 
 protected:
 	void Initialize() const;

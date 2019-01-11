@@ -91,6 +91,7 @@ public:
 	LPCTSTR GetMenuText() const { return _T("iCalendar"); }
 	LPCTSTR GetFileFilter() const { return _T("iCalendar Files (*.ics)|*.ics||"); }
 	LPCTSTR GetFileExtension() const { return _T("ics"); }
+	LPCWSTR GetTypeID() const { return _T("36D6AF21_80EA_4361_85E9_B9BCDB38F913"); }
 	HICON GetIcon() const { return m_icon; }
 
 	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

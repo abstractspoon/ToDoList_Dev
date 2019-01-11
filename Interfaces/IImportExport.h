@@ -168,6 +168,7 @@ public:
 	virtual LPCWSTR GetMenuText() const = 0;
 	virtual LPCWSTR GetFileFilter() const = 0;
 	virtual LPCWSTR GetFileExtension() const = 0;
+	virtual LPCWSTR GetTypeID() const = 0;
 	virtual HICON GetIcon() const = 0;
 
 	virtual IIMPORTEXPORT_RESULT Import(LPCWSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
@@ -185,6 +186,7 @@ public:
 	virtual LPCWSTR GetMenuText() const = 0;
 	virtual LPCWSTR GetFileFilter() const = 0;
 	virtual LPCWSTR GetFileExtension() const = 0;
+	virtual LPCWSTR GetTypeID() const = 0;
 	virtual HICON GetIcon() const = 0;
 
 	virtual IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;

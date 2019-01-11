@@ -112,7 +112,7 @@ int CTDLImportDialog::DoModal(LPCTSTR szFilePath)
 		m_sFromFilePath = szFilePath;
 		m_bFileOnly = TRUE;
 
-		m_nFormatOption = m_mgrImportExport.FindImporter(szFilePath);
+		m_nFormatOption = m_mgrImportExport.FindImporterByPath(szFilePath);
 
 		if (m_nFormatOption == -1)
 			return IDCANCEL;

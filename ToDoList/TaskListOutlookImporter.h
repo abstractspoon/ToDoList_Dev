@@ -19,7 +19,7 @@ class ITransText;
 
 //////////////////////////////////////////////////////////////////////
 
-const LPCTSTR OUTLOOK_METADATAKEY = _T("MSO_956F3091_A2DD_4E1D_B5F7_F58BAD300F0F");
+static const LPCTSTR OUTLOOKIMPORT_TYPEID = _T("C35841C7_32A6_4705_A061_24A85C3A0223");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -35,6 +35,7 @@ public:
 	LPCTSTR GetMenuText() const { return _T("Microsoft Outlook"); }
 	LPCTSTR GetFileFilter() const { return NULL; }
 	LPCTSTR GetFileExtension() const { return NULL; }
+	LPCTSTR GetTypeID() const { return OUTLOOKIMPORT_TYPEID; }
 	HICON GetIcon() const { return m_icon; }
 	
 	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

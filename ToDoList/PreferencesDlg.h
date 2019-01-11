@@ -132,7 +132,7 @@ public:
 	BOOL GetAutoSaveOnSwitchTasklist() const { return m_pageFile2.GetAutoSaveOnSwitchTasklist(); }
 	BOOL GetAutoSaveOnSwitchApp() const { return m_pageFile2.GetAutoSaveOnSwitchApp(); }
 	BOOL GetSaveExport() const { return m_pageFile2.GetAutoExport(); }
-	int GetSaveExporter() const { return m_pageFile2.GetSaveExporter(); }
+	CString GetSaveExportTypeID() const { return m_pageFile2.GetSaveExportTypeID(); }
 	BOOL GetSaveExportExtension(CString& sExt) const { return m_pageFile2.GetSaveExportExtension(sExt); }
 	CString GetSaveExportFolderPath() const { return m_pageFile2.GetSaveExportFolderPath(); }
 	CString GetSaveExportStylesheet() const { return m_pageFile2.GetSaveExportStylesheet(); }

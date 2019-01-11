@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "PreferencesFile2Page.h"
 #include "TDCImportExportMgr.h"
+#include "TasklistHTMLExporter.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\dialoghelper.h"
@@ -55,7 +56,6 @@ CPreferencesFile2Page::CPreferencesFile2Page(const CTDCImportExportMgr* pExportM
 	m_bAutoSaveOnSwitchTasklist = FALSE;
 	m_bAutoSaveOnSwitchApp = FALSE;
 	m_bOtherExport = FALSE;
-	m_nOtherExporter = -1;
 	m_bUseStylesheetForSaveExport = FALSE;
 }
 
@@ -93,22 +93,25 @@ void CPreferencesFile2Page::DoDataExchange(CDataExchange* pDX)
 	// custom
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_nOtherExporter = (int)GetSelectedItemData(m_cbOtherExporters);
+		m_sOtherExportTypeID = m_cbOtherExporters.GetSelectedTypeID();
 		m_nKeepBackups = GetSelectedItemAsValue(m_cbKeepBackups);
 	}
-	else if (CB_ERR == SelectItemByValue(m_cbKeepBackups, m_nKeepBackups))
+	else
 	{
-		SelectItemByData(m_cbOtherExporters, m_nOtherExporter);
+		m_cbOtherExporters.SetSelectedTypeID(m_sOtherExportTypeID);
 
-		if (m_nKeepBackups == 0) // all
+		if (CB_ERR == SelectItemByValue(m_cbKeepBackups, m_nKeepBackups))
 		{
-			// select last string in listbox
-			m_cbKeepBackups.SetCurSel(m_cbKeepBackups.GetCount() - 1);
-		}
-		else
-		{
-			m_nKeepBackups = 10;
-			m_cbKeepBackups.SelectString(-1, _T("10"));
+			if (m_nKeepBackups == 0) // all
+			{
+				// select last string in listbox
+				m_cbKeepBackups.SetCurSel(m_cbKeepBackups.GetCount() - 1);
+			}
+			else
+			{
+				m_nKeepBackups = 10;
+				m_cbKeepBackups.SelectString(-1, _T("10"));
+			}
 		}
 	}
 }
@@ -160,7 +163,7 @@ BOOL CPreferencesFile2Page::OnInitDialog()
 	GetDlgItem(IDC_OTHEREXPORTERS)->EnableWindow(m_bAutoExport && m_bOtherExport);
 	GetDlgItem(IDC_EXPORTFILTERED)->EnableWindow(m_bAutoExport);
 
-	SelectItemByData(m_cbOtherExporters, m_nOtherExporter);
+	m_cbOtherExporters.SetSelectedTypeID(m_sOtherExportTypeID);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -214,9 +217,19 @@ void CPreferencesFile2Page::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_bAutoSaveOnSwitchTasklist = pPrefs->GetProfileInt(szKey, _T("AutoSaveOnSwitchTasklist"), FALSE);
 	m_bAutoSaveOnSwitchApp = pPrefs->GetProfileInt(szKey, _T("AutoSaveOnSwitchApp"), FALSE);
 	m_bOtherExport = pPrefs->GetProfileInt(szKey, _T("OtherExport"), FALSE);
-	m_nOtherExporter = pPrefs->GetProfileInt(szKey, _T("OtherExporter"), 1);
 	m_bExportFilteredOnly = pPrefs->GetProfileInt(szKey, _T("ExportFilteredOnly"), FALSE);
 	m_bAutoSaveOnRunTools = pPrefs->GetProfileInt(szKey, _T("AutoSaveOnRunTools"), TRUE);
+
+	m_sOtherExportTypeID = pPrefs->GetProfileString(szKey, _T("OtherExporterTypeID"));
+
+	// Backwards compat
+	if (m_sOtherExportTypeID.IsEmpty())
+	{
+		int nOtherExporter = pPrefs->GetProfileInt(szKey, _T("OtherExporter"), -1);
+
+		if (nOtherExporter != -1)
+			m_sOtherExportTypeID = m_pExportMgr->GetExporterTypeID(nOtherExporter);
+	}
 
 	// these are dependent on the values they control for backward compat
 	m_bUseStylesheetForSaveExport = pPrefs->GetProfileInt(szKey, _T("UseStylesheetForSaveExport"), !m_sSaveExportStylesheet.IsEmpty());
@@ -251,15 +264,16 @@ void CPreferencesFile2Page::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey)
 	pPrefs->WriteProfileInt(szKey, _T("AutoSaveFrequency"), m_nAutoSaveFrequency);
 	pPrefs->WriteProfileInt(szKey, _T("AutoHtmlExport"), m_bAutoExport);
 	pPrefs->WriteProfileInt(szKey, _T("ExportToFolder"), m_bExportToFolder);
-	pPrefs->WriteProfileString(szKey, _T("ExportFolderPath"), m_sExportFolderPath);
 	pPrefs->WriteProfileInt(szKey, _T("UseStylesheetForSaveExport"), m_bUseStylesheetForSaveExport);
-	pPrefs->WriteProfileString(szKey, _T("SaveExportStylesheet"), m_sSaveExportStylesheet);
 	pPrefs->WriteProfileInt(szKey, _T("AutoSaveOnSwitchTasklist"), m_bAutoSaveOnSwitchTasklist);
 	pPrefs->WriteProfileInt(szKey, _T("AutoSaveOnSwitchApp"), m_bAutoSaveOnSwitchApp);
 	pPrefs->WriteProfileInt(szKey, _T("OtherExport"), m_bOtherExport);
-	pPrefs->WriteProfileInt(szKey, _T("OtherExporter"), m_nOtherExporter);
 	pPrefs->WriteProfileInt(szKey, _T("ExportFilteredOnly"), m_bExportFilteredOnly);
 	pPrefs->WriteProfileInt(szKey, _T("AutoSaveOnRunTools"), m_bAutoSaveOnRunTools);
+
+	pPrefs->WriteProfileString(szKey, _T("ExportFolderPath"), m_sExportFolderPath);
+	pPrefs->WriteProfileString(szKey, _T("SaveExportStylesheet"), m_sSaveExportStylesheet);
+	pPrefs->WriteProfileString(szKey, _T("OtherExporterTypeID"), m_sOtherExportTypeID);
 
 //	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
@@ -324,23 +338,25 @@ CString CPreferencesFile2Page::GetSaveExportFolderPath() const
 	return _T("");
 }
 
-int CPreferencesFile2Page::GetSaveExporter() const 
+CString CPreferencesFile2Page::GetSaveExportTypeID() const 
 { 
 	if (!m_bAutoExport)
-		return -1;
+		return _T("");
 	
 	if (m_bOtherExport)
-		return m_nOtherExporter;
+		return m_sOtherExportTypeID;
 
 	// else
-	return EXPTOHTML;
+	return HTMLEXPORT_TYPEID;
 }
 
 BOOL CPreferencesFile2Page::GetSaveExportExtension(CString& sExt) const
 {
 	sExt.Empty();
 
-	if (GetSaveExporter() == EXPTOHTML)
+	CString sExportTypeID = GetSaveExportTypeID();
+
+	if (sExportTypeID == HTMLEXPORT_TYPEID)
 	{
 		CXslFile xsl;
 		
@@ -351,7 +367,7 @@ BOOL CPreferencesFile2Page::GetSaveExportExtension(CString& sExt) const
 	}
 	else
 	{
-		int nExporter = GetSaveExporter();
+		int nExporter = m_pExportMgr->FindExporterByType(sExportTypeID);
 
 		if (nExporter != -1)
 			sExt = m_pExportMgr->GetExporterFileExtension(nExporter, TRUE);

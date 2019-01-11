@@ -35,20 +35,24 @@ public:
 	CString GetImporterFileExtension(int nImporter, BOOL bWithDot) const;
 	BOOL ImporterHasFileExtension(int nImporter) const;
 	CString GetImporterFileFilter(int nImporter) const;
+	CString GetImporterTypeID(int nImporter) const;
 	HICON GetImporterIcon(int nImporter) const;
 	
 	CString GetExporterMenuText(int nExporter) const;
 	CString GetExporterFileExtension(int nExporter, BOOL bWithDot) const;
 	BOOL ExporterHasFileExtension(int nExporter) const;
 	CString GetExporterFileFilter(int nExporter) const;
+	CString GetExporterTypeID(int nExporter) const;
 	HICON GetExporterIcon(int nExporter) const;
 	
 	IIMPORTEXPORT_RESULT ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, int nByImporter, BOOL bSilent, IPreferences* pPrefs) const;
 	IIMPORTEXPORT_RESULT ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const;
 	IIMPORTEXPORT_RESULT ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const;
 	
-	int FindImporter(LPCTSTR szFilePath) const;
-	int FindExporter(LPCTSTR szFilePath) const;
+	int FindImporterByPath(LPCTSTR szFilePath) const;
+	int FindExporterByPath(LPCTSTR szFilePath) const;
+	int FindImporterByType(LPCTSTR szTypeID) const;
+	int FindExporterByType(LPCTSTR szTypeID) const;
 	
 protected:
 	BOOL m_bInitialized;
@@ -58,8 +62,10 @@ protected:
 protected:
 	virtual void Initialize() const;
 
-	static CString& FormatExtension(CString& sExt, BOOL bWithDot);
+	BOOL AddImporter(IImportTasklist* pImporter);
+	BOOL AddExporter(IExportTasklist* pExporter);
 
+	static CString& FormatExtension(CString& sExt, BOOL bWithDot);
 };
 
 //////////////////////////////////////////////////////////////////////

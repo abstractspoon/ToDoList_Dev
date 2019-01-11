@@ -32,6 +32,7 @@ public:
 	LPCTSTR GetMenuText() const;
 	LPCTSTR GetFileFilter() const;
 	LPCTSTR GetFileExtension() const;
+	LPCWSTR GetTypeID() const { return _T("F588E6B1_3646_4994_99A2_4223FDDA1A31"); }
 	HICON GetIcon() const { return m_icon; }
 
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

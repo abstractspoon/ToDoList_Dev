@@ -96,18 +96,12 @@ void CImportExportMgr::Initialize() const
 					IImportTasklist* pImporter = CreateImportInterface(sDllPath);
 					
 					if (pImporter)
-					{
-						pImporter->SetLocalizer(CLocalizer::GetLocalizer());
-						pMgr->m_aImporters.Add(pImporter);
-					}
+						pMgr->AddImporter(pImporter);
 					
 					IExportTasklist* pExporter = CreateExportInterface(sDllPath);
 					
 					if (pExporter)
-					{
-						pExporter->SetLocalizer(CLocalizer::GetLocalizer());
-						pMgr->m_aExporters.Add(pExporter);
-					}
+						pMgr->AddExporter(pExporter);
 				}
 			}
 			catch (...)
@@ -115,6 +109,34 @@ void CImportExportMgr::Initialize() const
 			}
 		}
 	}
+}
+
+BOOL CImportExportMgr::AddImporter(IImportTasklist* pImporter)
+{
+	if (!pImporter || (FindImporterByType(pImporter->GetTypeID()) != -1))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	pImporter->SetLocalizer(CLocalizer::GetLocalizer());
+	m_aImporters.Add(pImporter);
+
+	return TRUE;
+}
+
+BOOL CImportExportMgr::AddExporter(IExportTasklist* pExporter)
+{
+	if (!pExporter || (FindExporterByType(pExporter->GetTypeID()) != -1))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	pExporter->SetLocalizer(CLocalizer::GetLocalizer());
+	m_aExporters.Add(pExporter);
+
+	return TRUE;
 }
 
 void CImportExportMgr::UpdateLocalizer()
@@ -197,6 +219,21 @@ CString CImportExportMgr::GetImporterFileFilter(int nImporter) const
 	return Misc::Trim(sFilter);
 }
 
+CString CImportExportMgr::GetImporterTypeID(int nImporter) const
+{
+	Initialize(); // initialize on demand
+
+	CString sFilter;
+
+	if (nImporter >= 0 && nImporter < m_aImporters.GetSize())
+	{
+		ASSERT (m_aImporters[nImporter] != NULL);
+		sFilter = m_aImporters[nImporter]->GetTypeID();
+	}
+
+	return Misc::Trim(sFilter);
+}
+
 HICON CImportExportMgr::GetImporterIcon(int nImporter) const
 {
 	Initialize(); // initialize on demand
@@ -260,6 +297,21 @@ CString CImportExportMgr::GetExporterFileFilter(int nExporter) const
 	return Misc::Trim(sFilter);
 }
 
+CString CImportExportMgr::GetExporterTypeID(int nExporter) const
+{
+	Initialize(); // initialize on demand
+
+	CString sFilter;
+
+	if (nExporter >= 0 && nExporter < m_aExporters.GetSize())
+	{
+		ASSERT (m_aExporters[nExporter] != NULL);
+		sFilter = m_aExporters[nExporter]->GetTypeID();
+	}
+
+	return Misc::Trim(sFilter);
+}
+
 HICON CImportExportMgr::GetExporterIcon(int nExporter) const
 {
 	Initialize(); // initialize on demand
@@ -314,7 +366,7 @@ IIMPORTEXPORT_RESULT CImportExportMgr::ExportTaskLists(const IMultiTaskList* pSr
 	return IIER_BADFORMAT;
 }
 
-int CImportExportMgr::FindImporter(LPCTSTR szFilePath) const
+int CImportExportMgr::FindImporterByPath(LPCTSTR szFilePath) const
 {
 	CString sExt = FileMisc::GetExtension(szFilePath, FALSE);
 
@@ -334,7 +386,7 @@ int CImportExportMgr::FindImporter(LPCTSTR szFilePath) const
 	return nImporter; // match or -1
 }
 
-int CImportExportMgr::FindExporter(LPCTSTR szFilePath) const
+int CImportExportMgr::FindExporterByPath(LPCTSTR szFilePath) const
 {
 	CString sExt = FileMisc::GetExtension(szFilePath, FALSE);
 
@@ -348,6 +400,42 @@ int CImportExportMgr::FindExporter(LPCTSTR szFilePath) const
 	while (nExporter--)
 	{
 		if (GetExporterFileExtension(nExporter, FALSE).CompareNoCase(sExt) == 0) // match
+			break;
+	}
+	
+	return nExporter; // match or -1
+}
+
+int CImportExportMgr::FindImporterByType(LPCTSTR szTypeID) const
+{
+	if (Misc::IsEmpty(szTypeID))
+		return -1;
+
+	Initialize(); // initialize on demand
+
+	int nImporter = m_aImporters.GetSize();
+
+	while (nImporter--)
+	{
+		if (GetImporterTypeID(nImporter).CompareNoCase(szTypeID) == 0) // match
+			break;
+	}
+	
+	return nImporter; // match or -1
+}
+
+int CImportExportMgr::FindExporterByType(LPCTSTR szTypeID) const
+{
+	if (Misc::IsEmpty(szTypeID))
+		return -1;
+
+	Initialize(); // initialize on demand
+
+	int nExporter = m_aExporters.GetSize();
+
+	while (nExporter--)
+	{
+		if (GetExporterTypeID(nExporter).CompareNoCase(szTypeID) == 0) // match
 			break;
 	}
 	

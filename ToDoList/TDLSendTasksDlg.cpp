@@ -5,6 +5,8 @@
 #include "resource.h"
 #include "TDLSendTasksDlg.h"
 
+#include "TaskListTdlExporter.h"
+
 #include "..\shared\preferences.h"
 #include "..\shared\dialoghelper.h"
 
@@ -31,7 +33,7 @@ CTDLSendTasksDlg::CTDLSendTasksDlg(const CImportExportMgr& mgr, BOOL bSelectedTa
 	CPreferences prefs;
 	m_nSendTasksAsOption = prefs.GetProfileInt(m_sPrefsKey, _T("SendTasksAs"), TDSA_TASKLIST);
 
-	int nDefaultFormat = mgr.FindExporter(_T("temp.tdl"));
+	int nDefaultFormat = mgr.FindExporterByType(TDLEXPORT_TYPEID);
 
 	m_nFormatOption = prefs.GetProfileInt(m_sPrefsKey, _T("FormatOption"), nDefaultFormat);
 	m_nFormatOption = min(m_nFormatOption, mgr.GetNumExporters());

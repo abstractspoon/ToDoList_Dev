@@ -4,7 +4,9 @@
 #include "stdafx.h"
 #include "tdlimportexportcombobox.h"
 
+#include "..\Shared\Misc.h"
 #include "..\Shared\GraphicsMisc.h"
+#include "..\Shared\DialogHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -131,8 +133,7 @@ void CTDLImportExportComboBox::BuildCombo()
 			else
 				sItem = sMenu;
 
-			int nItem = AddString(sItem);
-			SetItemData(nItem, nImpExp);
+			CDialogHelper::AddString(*this, sItem, nImpExp);
 		}
 	}
 }
@@ -162,4 +163,34 @@ HICON CTDLImportExportComboBox::GetImpExpIcon(int nImpExp) const
 
 	// else
 	return m_mgrImpExp.GetExporterIcon(nImpExp);
+}
+
+CString CTDLImportExportComboBox::GetSelectedTypeID() const
+{
+	if (GetCurSel() == CB_ERR)
+		return _T("");
+
+	int nImpExp = (int)CDialogHelper::GetSelectedItemData(*this);
+
+	if (m_bImporting)
+		return m_mgrImpExp.GetImporterTypeID(nImpExp);
+
+	// else
+	return m_mgrImpExp.GetExporterTypeID(nImpExp);
+}
+
+int CTDLImportExportComboBox::SetSelectedTypeID(LPCTSTR szTypeID)
+{
+	int nImpExp = CB_ERR;
+
+	if (!Misc::IsEmpty(szTypeID))
+	{
+		if (m_bImporting)
+			nImpExp = m_mgrImpExp.FindImporterByType(szTypeID);
+		else
+			nImpExp = m_mgrImpExp.FindExporterByType(szTypeID);
+	}
+
+	SetCurSel(nImpExp);
+	return nImpExp;
 }
