@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_TASKLISTTDLIMPORTER_H__ADF211CB_FBD2_42A2_AD51_DFF58E566753__INCLUDED_)
-#define AFX_TASKLISTTDLIMPORTER_H__ADF211CB_FBD2_42A2_AD51_DFF58E566753__INCLUDED_
+#if !defined(AFX_TASKLISTTDLIMPORTER_H__81861E57_83AA_4618_8C75_AA7AF34F8F23__INCLUDED_)
+#define AFX_TASKLISTTDLIMPORTER_H__81861E57_83AA_4618_8C75_AA7AF34F8F23__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -14,7 +14,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-static const LPCTSTR TDLIMPORT_TYPEID = _T("ADF211CB_FBD2_42A2_AD51_DFF58E566753");
+static const LPCTSTR TDLIMPORT_TYPEID = _T("81861E57-83AA-4618-8C75-AA7AF34F8F23");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -37,4 +37,4 @@ public:
 
 };
 
-#endif // !defined(AFX_TASKLISTCSVImPORTER_H__ADF211CB_FBD2_42A2_AD51_DFF58E566753__INCLUDED_)
+#endif // !defined(AFX_TASKLISTTDLIMPORTER_H__81861E57_83AA_4618_8C75_AA7AF34F8F23__INCLUDED_)

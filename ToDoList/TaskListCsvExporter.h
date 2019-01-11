@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_TASKLISTCSVEXPORTER2_H__CF68988D_FBBD_431D_BB56_464E8737D993__INCLUDED_)
-#define AFX_TASKLISTCSVEXPORTER2_H__CF68988D_FBBD_431D_BB56_464E8737D993__INCLUDED_
+#if !defined(AFX_TASKLISTCSVEXPORTER_H__7B199F98_746F_49DE_9C1D_3141281996F5__INCLUDED_)
+#define AFX_TASKLISTCSVEXPORTER_H__7B199F98_746F_49DE_9C1D_3141281996F5__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -19,7 +19,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-static const LPCTSTR CSVEXPORT_TYPEID = _T("CF68988D_FBBD_431D_BB56_464E8737D993");
+static const LPCTSTR CSVEXPORT_TYPEID = _T("7B199F98-746F-49DE-9C1D-3141281996F5");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -64,4 +64,4 @@ protected:
 	void CheckAddIDField(TDC_ATTRIBUTE nAttrib);
 };
 
-#endif // !defined(AFX_TASKLISTTXTEXPORTER_H__CF68988D_FBBD_431D_BB56_464E8737D993__INCLUDED_)
+#endif // !defined(AFX_TASKLISTCSVEXPORTER_H__7B199F98_746F_49DE_9C1D_3141281996F5__INCLUDED_)

@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_TASKLISTTDLEXPORTER_H__ADF211CB_FBD2_42A2_AD51_DFF58E566753__INCLUDED_)
-#define AFX_TASKLISTTDLEXPORTER_H__ADF211CB_FBD2_42A2_AD51_DFF58E566753__INCLUDED_
+#if !defined(AFX_TASKLISTTDLEXPORTER_H__1FA1C0DA_B381_4F41_BCAB_CD1BB6FF3FC6__INCLUDED_)
+#define AFX_TASKLISTTDLEXPORTER_H__1FA1C0DA_B381_4F41_BCAB_CD1BB6FF3FC6__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -17,7 +17,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-static const LPCTSTR TDLEXPORT_TYPEID = _T("ADF211CB_FBD2_42A2_AD51_DFF58E566753");
+static const LPCTSTR TDLEXPORT_TYPEID = _T("1FA1C0DA-B381-4F41-BCAB-CD1BB6FF3FC6");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -46,4 +46,4 @@ protected:
 	static void BuildReverseIDMap(const CID2IDMap& mapIDs, CID2IDMap& mapReverseIDs);
 };
 
-#endif // !defined(AFX_TASKLISTCSVEXPORTER_H__ADF211CB_FBD2_42A2_AD51_DFF58E566753__INCLUDED_)
+#endif // !defined(AFX_TASKLISTTDLEXPORTER_H__1FA1C0DA_B381_4F41_BCAB_CD1BB6FF3FC6__INCLUDED_)

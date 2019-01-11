@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_PLAINTEXTIMPORTER_H__E1C1DB38_D45E_481E_8D91_7D8455C5155E__INCLUDED_)
-#define AFX_PLAINTEXTIMPORTER_H__E1C1DB38_D45E_481E_8D91_7D8455C5155E__INCLUDED_
+#if !defined(AFX_PLAINTEXTIMPORTER_H__36A40C31_D9DD_4235_9720_5F16FA66C677__INCLUDED_)
+#define AFX_PLAINTEXTIMPORTER_H__36A40C31_D9DD_4235_9720_5F16FA66C677__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -23,7 +23,7 @@ public:
 	LPCTSTR GetMenuText() const { return _T("Outline"); }
 	LPCTSTR GetFileFilter() const { return _T("Text Files (*.txt)|*.txt||"); }
 	LPCTSTR GetFileExtension() const { return _T("txt"); }
-	LPCWSTR GetTypeID() const { return _T("E1C1DB38_D45E_481E_8D91_7D8455C5155E"); }
+	LPCWSTR GetTypeID() const { return _T("36A40C31-D9DD-4235-9720-5F16FA66C677"); }
 	HICON GetIcon() const { return NULL; }
 	
 	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
@@ -39,4 +39,4 @@ protected:
 	BOOL GetTitleComments(const CString& sLine, CString& sTitle, CString& sComments);
 };
 
-#endif // !defined(AFX_PLAINTEXTIMPORTER_H__E1C1DB38_D45E_481E_8D91_7D8455C5155E__INCLUDED_)
+#endif // !defined(AFX_PLAINTEXTIMPORTER_H__36A40C31_D9DD_4235_9720_5F16FA66C677__INCLUDED_)

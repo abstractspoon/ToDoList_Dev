@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_GPEXPORTER_H__F588E6B1_3646_4994_99A2_4223FDDA1A31__INCLUDED_)
-#define AFX_GPEXPORTER_H__F588E6B1_3646_4994_99A2_4223FDDA1A31__INCLUDED_
+#if !defined(AFX_GPEXPORTER_H__BD28EDEE_0F1F_4AC9_B083_9A033E473181__INCLUDED_)
+#define AFX_GPEXPORTER_H__BD28EDEE_0F1F_4AC9_B083_9A033E473181__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -32,7 +32,7 @@ public:
 	LPCTSTR GetMenuText() const;
 	LPCTSTR GetFileFilter() const;
 	LPCTSTR GetFileExtension() const;
-	LPCWSTR GetTypeID() const { return _T("F588E6B1_3646_4994_99A2_4223FDDA1A31"); }
+	LPCWSTR GetTypeID() const { return _T("BD28EDEE-0F1F-4AC9-B083-9A033E473181"); }
 	HICON GetIcon() const { return m_icon; }
 
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
@@ -59,4 +59,4 @@ protected:
 	static int GetGPTaskID(DWORD dwTDLTaskID);
 };
 
-#endif // !defined(AFX_GPEXPORTER_H__F588E6B1_3646_4994_99A2_4223FDDA1A31__INCLUDED_)
+#endif // !defined(AFX_GPEXPORTER_H__BD28EDEE_0F1F_4AC9_B083_9A033E473181__INCLUDED_)
