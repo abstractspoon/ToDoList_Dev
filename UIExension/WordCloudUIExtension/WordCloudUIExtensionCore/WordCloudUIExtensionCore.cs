@@ -417,6 +417,29 @@ namespace WordCloudUIExtension
 
             m_UserIgnoreFilePath = Path.Combine(appPath, "WordCloud.Ignore.txt");
 
+            try
+            {
+                var file = File.OpenWrite(m_UserIgnoreFilePath);
+                file.Close();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                var folderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                m_UserIgnoreFilePath = Path.Combine(folderPath, "Abstractspoon\\ToDoList\\WordCloud.Ignore.txt");
+
+                try
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(m_UserIgnoreFilePath));
+
+                    var file = File.OpenWrite(m_UserIgnoreFilePath);
+                    file.Close();
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    m_UserIgnoreFilePath = null;
+                }
+            }
+
             m_LangIgnoreFilePath = Path.Combine(appPath, "Resources\\Translations", language);
             m_LangIgnoreFilePath = Path.ChangeExtension(m_LangIgnoreFilePath, "WordCloud.Ignore.txt");
 
@@ -473,11 +496,17 @@ namespace WordCloudUIExtension
 		{
 			CommonBlacklist blacklist = new CommonBlacklist();
 
-			int numWords = blacklist.Append(m_UserIgnoreFilePath);
-			numWords += blacklist.Append(m_LangIgnoreFilePath);
+            try
+            {
+                int numWords = blacklist.Append(m_UserIgnoreFilePath);
+                numWords += blacklist.Append(m_LangIgnoreFilePath);
 
-			m_ExcludedWords = blacklist;
-			UpdateWeightedWords(true);
+                m_ExcludedWords = blacklist;
+                UpdateWeightedWords(true);
+            }
+            catch (Exception)
+            {
+            }
 		}
 
 		private void CreateWordCloud()
@@ -738,7 +767,7 @@ namespace WordCloudUIExtension
 
 		private void OnWordCloudMouseClick(object sender, MouseEventArgs e)
 		{
-			if ((e.Button == MouseButtons.Right) && m_WordCloud.HasItemUnderMouse())
+			if (!String.IsNullOrEmpty(m_UserIgnoreFilePath) && (e.Button == MouseButtons.Right) && m_WordCloud.HasItemUnderMouse())
 			{
 				var menu = new ContextMenuStrip();
 
@@ -760,11 +789,17 @@ namespace WordCloudUIExtension
 			if (item != null)
 			{
 				// Look for user-defined 'Ignore' file
-				string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-				string ignoreFile = Path.Combine(appPath, "WordCloud.Ignore.txt");
-
-				File.AppendAllText(ignoreFile, item.Tag.ToString() + Environment.NewLine);
-				UpdateBlacklist();
+                try
+                {
+                    File.AppendAllText(m_UserIgnoreFilePath, item.Tag.ToString() + Environment.NewLine);
+				    UpdateBlacklist();
+                }
+                catch (Exception /*exception*/)
+                {
+                }
+                finally
+                {
+                }
 			}
 		}
 
