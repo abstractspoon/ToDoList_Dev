@@ -95,6 +95,8 @@ static bool IsValidPriorityOrRisk(int nValue)
 
 enum TDC_REGULARITY
 {
+	TDIR_NONE = -1, // error
+
 	// original options
 	TDIR_ONCE,
 	TDIR_DAILY,
