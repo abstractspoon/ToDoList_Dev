@@ -271,7 +271,7 @@ SOURCE=.\TDCImportExportMgr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCMergeToDoList.cpp
+SOURCE=.\TDCMergeTasklist.cpp
 # End Source File
 # Begin Source File
 
@@ -516,6 +516,10 @@ SOURCE=.\TDLQuickFindComboBox.cpp
 # Begin Source File
 
 SOURCE=.\TDLRecurringTaskEdit.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLRegularityComboBox.cpp
 # End Source File
 # Begin Source File
 
@@ -804,6 +808,10 @@ SOURCE=.\TaskTimeLog.h
 # Begin Source File
 
 SOURCE=.\TDCAnonymizeTasklist.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tdccustomattribdata.h
 # End Source File
 # Begin Source File
 
@@ -1099,6 +1107,10 @@ SOURCE=.\TDLRecurringTaskEdit.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDLRegularityComboBox.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLReminderPeriodComboBox.h
 # End Source File
 # Begin Source File
@@ -1204,6 +1216,10 @@ SOURCE=.\ToDoCtrl.h
 # Begin Source File
 
 SOURCE=.\ToDoCtrlData.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ToDoCtrlDataDefines.h
 # End Source File
 # Begin Source File
 

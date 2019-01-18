@@ -258,6 +258,10 @@ SOURCE=.\res\toolbar.bmp
 
 SOURCE=.\res\toolbar_std.bmp
 # End Source File
+# Begin Source File
+
+SOURCE=.\res\XPcheckboxes.bmp
+# End Source File
 # End Group
 # Begin Source File
 

@@ -437,6 +437,10 @@ SOURCE=.\StdioFileEx.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\T64Utils.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\TemplateSmartPtr.h
 # End Source File
 # Begin Source File

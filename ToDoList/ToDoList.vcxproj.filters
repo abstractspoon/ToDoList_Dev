@@ -109,9 +109,6 @@
     <ClCompile Include="TDCImageList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDCMergeToDoList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TDCSearchParamHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -404,6 +401,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TDLToolbarButtonListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCMergeTasklist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLRegularityComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -871,6 +874,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PreferencesUICustomToolbarPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToDoCtrlDataDefines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLRegularityComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
