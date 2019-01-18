@@ -140,7 +140,7 @@ void CFileComboBox::ResizeEdit()
 		GetClientRect(rCombo);
 
 		CRect rEdit(rCombo);
-		rEdit.DeflateRect(2, 3, 2, 3);
+		rEdit.DeflateRect(1, 3, 2, 3);
 		rEdit.right -= GetSystemMetrics(SM_CXVSCROLL);
 		m_fileEdit.MoveWindow(rEdit, FALSE);
 	}

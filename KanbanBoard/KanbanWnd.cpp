@@ -740,12 +740,12 @@ void CKanbanWnd::SendParentSelectionUpdate()
 		break;
 			
 	case 1:
-		VERIFY(GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, aTaskIDs[0]));
+		GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, aTaskIDs[0]);
 		m_aSelTaskIDs.Copy(aTaskIDs);
 		break;
 		
 	default:
-		VERIFY(GetParent()->SendMessage(WM_IUI_SELECTTASK, (WPARAM)aTaskIDs.GetData(), (LPARAM)aTaskIDs.GetSize()));
+		GetParent()->SendMessage(WM_IUI_SELECTTASK, (WPARAM)aTaskIDs.GetData(), (LPARAM)aTaskIDs.GetSize());
 		m_aSelTaskIDs.Copy(aTaskIDs);
 	}
 }

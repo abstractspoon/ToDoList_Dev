@@ -41,6 +41,7 @@ enum
 	PRIORITY_ID,
 	RISK_ID,
 	CUSTOMICON_ID,
+	RECURRENCE_ID,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -85,6 +86,8 @@ BEGIN_MESSAGE_MAP(CTDLFindTaskExpressionListCtrl, CInputListCtrl)
 	ON_CBN_SELENDOK(PRIORITY_ID, OnPriorityEditOK)
 	ON_CBN_SELENDCANCEL(RISK_ID, OnRiskEditCancel)
 	ON_CBN_SELENDOK(RISK_ID, OnRiskEditOK)
+	ON_CBN_SELENDCANCEL(RECURRENCE_ID, OnRecurrenceEditCancel)
+	ON_CBN_SELENDOK(RECURRENCE_ID, OnRecurrenceEditOK)
 	ON_CBN_SELCHANGE(CUSTOMICON_ID, OnCustomIconEditChange)
 	ON_NOTIFY_REFLECT(LVN_ENDLABELEDIT, OnValueEditOK)
 	ON_NOTIFY_REFLECT_EX(LVN_ITEMCHANGED, OnSelItemChanged)
@@ -110,6 +113,7 @@ void CTDLFindTaskExpressionListCtrl::PreSubclassWindow()
 	CreateControl(m_cbPriority, PRIORITY_ID, FALSE);
 	CreateControl(m_cbRisk, RISK_ID, FALSE);
 	CreateControl(m_cbCustomIcons, CUSTOMICON_ID, FALSE);
+	CreateControl(m_cbRecurrence, RECURRENCE_ID, FALSE);
 
 	CInputListCtrl::PreSubclassWindow(); // we need combo to be created first
 
@@ -280,6 +284,9 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 
 				case TDCA_RISK:
 					return &m_cbRisk;
+
+				case TDCA_RECURRENCE:
+					return &m_cbRecurrence;
 
 				default:
 					{
@@ -520,7 +527,8 @@ BOOL CTDLFindTaskExpressionListCtrl::IsEditing() const
 			m_cbListValues.IsWindowVisible() ||
 			m_cbPriority.IsWindowVisible() ||
 			m_cbRisk.IsWindowVisible() ||
-			m_cbCustomIcons.IsWindowVisible());
+			m_cbCustomIcons.IsWindowVisible() ||
+			m_cbRecurrence.IsWindowVisible());
 }
 
 BOOL CTDLFindTaskExpressionListCtrl::CanEditSelectedCell() const
@@ -728,50 +736,58 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 
 			m_cbOperators.ResetContent();
 			
-			FIND_ATTRIBTYPE nType = rule.GetAttribType();
-			
-			switch (nType)
+			if (rule.AttributeIs(TDCA_RECURRENCE))
 			{
-			case FT_STRING:
-			case FT_ICON:
-				AddOperatorToCombo(FOP_SET);
-				AddOperatorToCombo(FOP_NOT_SET);
 				AddOperatorToCombo(FOP_EQUALS);
 				AddOperatorToCombo(FOP_NOT_EQUALS);
-				AddOperatorToCombo(FOP_INCLUDES);
-				AddOperatorToCombo(FOP_NOT_INCLUDES);
-				break;
+			}
+			else
+			{
+				FIND_ATTRIBTYPE nType = rule.GetAttribType();
+				
+				switch (nType)
+				{
+				case FT_STRING:
+				case FT_ICON:
+					AddOperatorToCombo(FOP_SET);
+					AddOperatorToCombo(FOP_NOT_SET);
+					AddOperatorToCombo(FOP_EQUALS);
+					AddOperatorToCombo(FOP_NOT_EQUALS);
+					AddOperatorToCombo(FOP_INCLUDES);
+					AddOperatorToCombo(FOP_NOT_INCLUDES);
+					break;
 
-			case FT_INTEGER:
-			case FT_DOUBLE:
-			case FT_TIMEPERIOD:
-				AddOperatorToCombo(FOP_SET);
-				AddOperatorToCombo(FOP_NOT_SET);
-				AddOperatorToCombo(FOP_EQUALS);
-				AddOperatorToCombo(FOP_NOT_EQUALS);
-				AddOperatorToCombo(FOP_GREATER);
-				AddOperatorToCombo(FOP_GREATER_OR_EQUAL);
-				AddOperatorToCombo(FOP_LESS);
-				AddOperatorToCombo(FOP_LESS_OR_EQUAL);
-				break;
+				case FT_INTEGER:
+				case FT_DOUBLE:
+				case FT_TIMEPERIOD:
+					AddOperatorToCombo(FOP_SET);
+					AddOperatorToCombo(FOP_NOT_SET);
+					AddOperatorToCombo(FOP_EQUALS);
+					AddOperatorToCombo(FOP_NOT_EQUALS);
+					AddOperatorToCombo(FOP_GREATER);
+					AddOperatorToCombo(FOP_GREATER_OR_EQUAL);
+					AddOperatorToCombo(FOP_LESS);
+					AddOperatorToCombo(FOP_LESS_OR_EQUAL);
+					break;
 
-			case FT_DATE:
-				AddOperatorToCombo(FOP_SET);
-				AddOperatorToCombo(FOP_NOT_SET);
-				// fall thru
-			case FT_DATERELATIVE:
-				AddOperatorToCombo(FOP_EQUALS);
-				AddOperatorToCombo(FOP_NOT_EQUALS);
-				AddOperatorToCombo(FOP_AFTER);
-				AddOperatorToCombo(FOP_ON_OR_AFTER);
-				AddOperatorToCombo(FOP_BEFORE);
-				AddOperatorToCombo(FOP_ON_OR_BEFORE);
-				break;
+				case FT_DATE:
+					AddOperatorToCombo(FOP_SET);
+					AddOperatorToCombo(FOP_NOT_SET);
+					// fall thru
+				case FT_DATERELATIVE:
+					AddOperatorToCombo(FOP_EQUALS);
+					AddOperatorToCombo(FOP_NOT_EQUALS);
+					AddOperatorToCombo(FOP_AFTER);
+					AddOperatorToCombo(FOP_ON_OR_AFTER);
+					AddOperatorToCombo(FOP_BEFORE);
+					AddOperatorToCombo(FOP_ON_OR_BEFORE);
+					break;
 
-			case FT_BOOL:
-				AddOperatorToCombo(FOP_SET);
-				AddOperatorToCombo(FOP_NOT_SET);
-				break;
+				case FT_BOOL:
+					AddOperatorToCombo(FOP_SET);
+					AddOperatorToCombo(FOP_NOT_SET);
+					break;
+				}
 			}
 	
 			CDialogHelper::SelectItemByData(m_cbOperators, (DWORD)rule.GetOperator());
@@ -867,6 +883,10 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 		else if (&ctrl == &m_cbRisk)
 		{
 			m_cbRisk.SetSelectedRisk(rule.ValueAsInteger());
+		}
+		else if (&ctrl == &m_cbRecurrence)
+		{
+			m_cbRecurrence.SetSelectedRegularity((TDC_REGULARITY)rule.ValueAsInteger());
 		}
 		break;
 	}
@@ -1105,6 +1125,24 @@ void CTDLFindTaskExpressionListCtrl::OnRiskEditOK()
 	UpdateValueColumnText(nRow);
 }
 
+void CTDLFindTaskExpressionListCtrl::OnRecurrenceEditCancel()
+{
+	HideControl(m_cbRecurrence);
+}
+
+void CTDLFindTaskExpressionListCtrl::OnRecurrenceEditOK()
+{
+	HideControl(m_cbRecurrence);
+
+	// update value
+	int nRow = GetCurSel();
+	int nRegularity = m_cbRecurrence.GetSelectedRegularity();
+
+	// keep data store synched
+	m_aSearchParams[nRow].SetValue(nRegularity);
+	UpdateValueColumnText(nRow);
+}
+
 void CTDLFindTaskExpressionListCtrl::OnCustomIconEditChange()
 {
 	HideControl(m_cbCustomIcons);
@@ -1194,27 +1232,34 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 	{
 		try
 		{
-			switch (rule.GetAttribType())
+			if (rule.AttributeIs(TDCA_RECURRENCE))
 			{
-			case FT_STRING:
-			case FT_DATERELATIVE:
-			case FT_INTEGER:
-			case FT_DOUBLE:
-			case FT_ICON:
-				sValue = rule.ValueAsString();
-				break;
-				
-			case FT_DATE:
-				sValue = rule.ValueAsDate().Format(VAR_DATEVALUEONLY);
-				break;
-				
-			case FT_TIMEPERIOD:
-				sValue = CTimeHelper().FormatTime(rule.ValueAsDouble(), TDC::MapUnitsToTHUnits(rule.GetTimeUnits()), 2);
-				break;
-				
-			case FT_BOOL:
-				// handled by operator
-				break;
+				sValue = m_cbRecurrence.GetRegularity((TDC_REGULARITY)rule.ValueAsInteger());
+			}
+			else
+			{
+				switch (rule.GetAttribType())
+				{
+				case FT_INTEGER:
+				case FT_STRING:
+				case FT_DATERELATIVE:
+				case FT_DOUBLE:
+				case FT_ICON:
+					sValue = rule.ValueAsString();
+					break;
+					
+				case FT_DATE:
+					sValue = rule.ValueAsDate().Format(VAR_DATEVALUEONLY);
+					break;
+					
+				case FT_TIMEPERIOD:
+					sValue = CTimeHelper().FormatTime(rule.ValueAsDouble(), TDC::MapUnitsToTHUnits(rule.GetTimeUnits()), 2);
+					break;
+					
+				case FT_BOOL:
+					// handled by operator
+					break;
+				}
 			}
 		}
 		catch (...)
@@ -1295,9 +1340,12 @@ void CTDLFindTaskExpressionListCtrl::HideAllControls(const CWnd* pWndIgnore)
 
 	if (!pWndIgnore || (pWndIgnore != &m_cbRisk))
 		HideControl(m_cbRisk);
-
+	
 	if (!pWndIgnore || (pWndIgnore != &m_cbCustomIcons))
 		HideControl(m_cbCustomIcons);
+
+	if (!pWndIgnore || (pWndIgnore != &m_cbRecurrence))
+		HideControl(m_cbRecurrence);
 }
 
 void CTDLFindTaskExpressionListCtrl::OnTimeChange()

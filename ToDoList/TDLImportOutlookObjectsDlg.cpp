@@ -301,6 +301,18 @@ int CTDLImportOutlookObjectsDlg::GetColumnMapping(CTDCAttributeMapping& aMapping
 	aMapping.Copy(m_aMasterMapping);
 	RemoveUnwantedAttributes(aMapping);
 
+	// If the email body is mapped to the comments, move it
+	// to the bottom of the list so that any other attributes
+	// to be added to the comments get processed first
+	int nBody = aMapping.Find((DWORD)OA_BODY);
+
+	if ((nBody != -1) && (aMapping[nBody].nTDCAttrib == TDCA_COMMENTS))
+	{
+		TDCATTRIBUTEMAPPING body = aMapping[nBody]; // copy
+		aMapping.RemoveAt(nBody);
+		aMapping.Add(body);
+	}
+
 	return aMapping.GetSize();
 }
 

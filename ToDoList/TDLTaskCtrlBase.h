@@ -247,8 +247,6 @@ public:
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
 	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);
 
-	void AdjustSplitterToFitAttributeColumns();
-
 protected:
 	CListCtrl m_lcColumns;
 	CEnHeaderCtrl m_hdrColumns, m_hdrTasks;
@@ -301,6 +299,7 @@ protected:
 
 private:
 	BOOL m_bBoundSelecting;
+	BOOL m_bAutoFitSplitter;
 
 protected:
 	// Virtual function overrides
@@ -473,6 +472,7 @@ protected:
 	BOOL WantDrawColumnTime(TDC_DATE nDate, BOOL bCustomWantsTime = FALSE) const;
 	int CalcSplitterPosToFitListColumns() const;
 	void UpdateAttributePaneVisibility();
+	void AdjustSplitterToFitAttributeColumns();
 
 	BOOL NeedDrawColumnSelection() { return (HasFocus() && (GetFocus() != &m_lcColumns)); }
 	void RepackageAndSendToParent(UINT msg, WPARAM wp, LPARAM lp);

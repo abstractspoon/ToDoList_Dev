@@ -148,9 +148,8 @@ HICON CTDCToolsHelper::GetToolIcon(CSysImageList& sil, const USERTOOL& tool)
 
 	// Check valid tool path. Note: could also be url
 	CString sToolPath, sIconPath;
-	VERIFY(GetToolPaths(tool, sToolPath, sIconPath));
-
-	if (FileMisc::FileExists(sToolPath) || FileMisc::FileExists(sIconPath) || ::PathIsURL(sToolPath))
+	
+	if (GetToolPaths(tool, sToolPath, sIconPath))
 	{
 		if (tool.sIconPath.IsEmpty())
 		{

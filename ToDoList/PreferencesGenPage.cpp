@@ -9,6 +9,8 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\webmisc.h"
+#include "..\shared\fileregister.h"
 #include "..\shared\localizer.h"
 
 #ifdef _DEBUG
@@ -40,7 +42,6 @@ CPreferencesGenPage::CPreferencesGenPage() :
 {
 	//{{AFX_DATA_INIT(CPreferencesGenPage)
 	//}}AFX_DATA_INIT
-
 }
 
 CPreferencesGenPage::~CPreferencesGenPage()
@@ -71,8 +72,10 @@ void CPreferencesGenPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_USESTICKIES, m_bUseStickies);
 	DDX_Text(pDX, IDC_PATHTOSTICKIESEXE, m_sStickiesPath);
 	DDX_Check(pDX, IDC_RELOADTASKLISTS, m_bReloadTasklists);
-	DDX_Control(pDX, IDC_PATHTOSTICKIESEXE, m_eStickiesPath);
 	DDX_Check(pDX, IDC_ENABLERTLINPUT, m_bEnableRTLInput);
+	DDX_Control(pDX, IDC_PATHTOSTICKIESEXE, m_eStickiesPath);
+	DDX_Text(pDX, IDC_TDLEXTENSIONHANDLER, m_sTDLExtensionHandler);
+	DDX_Text(pDX, IDC_TDLPROTOCOLHANDLER, m_sTDLProtocolHandler);
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_ALWAYSONTOP, m_bAlwaysOnTop);
 	DDX_Check(pDX, IDC_USESYSTRAY, m_bUseSysTray);
@@ -121,6 +124,18 @@ END_MESSAGE_MAP()
 BOOL CPreferencesGenPage::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
+
+	m_sTDLExtensionHandler = CFileRegister::GetRegisteredAppPath(_T("tdl"));
+
+	if (m_sTDLExtensionHandler.IsEmpty())
+		m_sTDLExtensionHandler = CEnString(IDS_HANDLERNOTINSTALLED);
+
+	m_sTDLProtocolHandler = WebMisc::GetRegisteredProtocolAppPath(_T("tdl"));
+	
+	if (m_sTDLProtocolHandler.IsEmpty())
+		m_sTDLProtocolHandler = CEnString(IDS_HANDLERNOTINSTALLED);
+
+	UpdateData(FALSE);
 
 	GetDlgItem(IDC_SYSTRAYOPTION)->EnableWindow(m_bUseSysTray);
 	GetDlgItem(IDC_TOGGLETRAYVISIBILITY)->EnableWindow(m_bUseSysTray);

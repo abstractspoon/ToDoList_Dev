@@ -38,6 +38,8 @@ namespace WebMisc
 	BOOL RegisterProtocol(LPCTSTR szProtocol, LPCTSTR szAppName, LPCTSTR szCommand);
 	BOOL UnregisterProtocol(LPCTSTR szProtocol);
 	BOOL IsProtocolRegistered(LPCTSTR szProtocol, LPCTSTR szAppName = NULL, LPCTSTR szCommand = NULL);
+	CString GetRegisteredProtocolCommand(LPCTSTR szProtocol);
+	CString GetRegisteredProtocolAppPath(LPCTSTR szProtocol, BOOL bFilenameOnly = FALSE);
 
 }
 

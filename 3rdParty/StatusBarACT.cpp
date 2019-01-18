@@ -111,7 +111,7 @@ BOOL CStatusBarACT::PreTranslateMessage(MSG* pMsg)
 
 // returns index under point, where point is client co-ords
 // returns -1 if no pane is under the point
-int CStatusBarACT::HitTest(CPoint point)
+int CStatusBarACT::HitTest(CPoint ptClient) const
 {
 	CStatusBarCtrl& bar = GetStatusBarCtrl();
 	int nMax = bar.GetParts(0, NULL);
@@ -119,7 +119,7 @@ int CStatusBarACT::HitTest(CPoint point)
 	{
 		CRect rc;
 		GetItemRect(nIndex, &rc);
-		if (rc.PtInRect(point))
+		if (rc.PtInRect(ptClient))
 			return nIndex;
 	}
 	return -1;

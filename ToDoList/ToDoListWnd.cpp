@@ -399,7 +399,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnShowTaskView)
 	ON_COMMAND_RANGE(ID_SORTBY_ALLCOLUMNS_FIRST, ID_SORTBY_ALLCOLUMNS_LAST, OnSortBy)
 	ON_COMMAND_RANGE(ID_TOOLS_SHOWTASKS_DUETODAY, ID_TOOLS_SHOWTASKS_DUEENDNEXTMONTH, OnToolsShowtasksDue)
-	ON_COMMAND_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL16, OnUserTool)
+	ON_COMMAND_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, OnUserTool)
 	ON_COMMAND_RANGE(ID_TRAYICON_SHOWDUETASKS1, ID_TRAYICON_SHOWDUETASKS20, OnTrayiconShowDueTasks)
 	ON_COMMAND_RANGE(ID_VIEW_EXPANDTASK, ID_VIEW_COLLAPSEALL, OnViewExpandTasks)
 	ON_COMMAND_RANGE(ID_VIEW_EXPANDDUE, ID_VIEW_COLLAPSESTARTED, OnViewExpandTasks)
@@ -2833,7 +2833,7 @@ void CToDoListWnd::RestorePosition()
 
 		// make sure it fits the screen
 		CRect rScreen;
-		VERIFY(GraphicsMisc::GetAvailableScreenSpace(rect, rScreen));
+		VERIFY(GraphicsMisc::GetAvailableScreenSpace(rect, rScreen, MONITOR_DEFAULTTOPRIMARY));
 
 		if (rect.Height() > rScreen.Height())
 			rect.bottom = rScreen.Height();
@@ -2871,7 +2871,6 @@ BOOL CToDoListWnd::CreateNewTaskList(BOOL bAddDefTask)
 		}
 		
 		pNew->SetModified(FALSE);
-		pNew->AdjustSplitterToFitAttributeColumns();
 	}
 
 	return (pNew != NULL);
@@ -3199,7 +3198,7 @@ LRESULT CToDoListWnd::OnToDoListRefreshPrefs(WPARAM /*wp*/, LPARAM /*lp*/)
 	m_mgrToDoCtrls.SetAllNeedPreferenceUpdate(TRUE);
 	
 	// then update active tasklist
-	UpdateActiveToDoCtrlPreferences();
+	CheckUpdateActiveToDoCtrlPreferences();
 
 	return 0;
 }
@@ -4993,7 +4992,7 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 			m_findDlg.RefreshUserPreferences();
 		
 		// active tasklist userPrefs
-		UpdateActiveToDoCtrlPreferences();
+		CheckUpdateActiveToDoCtrlPreferences();
 		UpdateTimeTrackerPreferences();
 
 		// then refresh filter bar for any new default cats, statuses, etc
@@ -7688,24 +7687,21 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 		int nDefShowState = AfxGetApp()->m_nCmdShow;
 		bMaximized = ((nDefShowState == SW_SHOWMAXIMIZED) || prefs.GetProfileInt(_T("Pos"), _T("Maximized"), FALSE));
 
+		rCtrl.left = prefs.GetProfileInt(_T("Pos"), _T("Left"), -1);
+		rCtrl.top = prefs.GetProfileInt(_T("Pos"), _T("Top"), -1);
+		rCtrl.right = prefs.GetProfileInt(_T("Pos"), _T("Right"), -1);
+		rCtrl.bottom = prefs.GetProfileInt(_T("Pos"), _T("Bottom"), -1);
+
 		if (bMaximized)
-		{
-			GraphicsMisc::GetAvailableScreenSpace(*this, rCtrl);
-		}
-		else
-		{
-			rCtrl.left = prefs.GetProfileInt(_T("Pos"), _T("Left"), -1);
-			rCtrl.top = prefs.GetProfileInt(_T("Pos"), _T("Top"), -1);
-			rCtrl.right = prefs.GetProfileInt(_T("Pos"), _T("Right"), -1);
-			rCtrl.bottom = prefs.GetProfileInt(_T("Pos"), _T("Bottom"), -1);
-		}
+			GraphicsMisc::GetAvailableScreenSpace(CRect(rCtrl), rCtrl);
 	}
 	else
 	{
 		GetClientRect(rCtrl);
 	}
 
-	CalcToDoCtrlRect(rCtrl, rCtrl.Width(), rCtrl.Height(), bMaximized);
+	if (rCtrl.IsRectEmpty() || !CalcToDoCtrlRect(rCtrl, rCtrl.Width(), rCtrl.Height(), bMaximized))
+		VERIFY(GraphicsMisc::GetPrimaryMonitorScreenSpace(rCtrl));
 
 	// and somewhere out in space
 	rCtrl.OffsetRect(-30000, -30000);
@@ -7724,7 +7720,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 		pTDC->SetUITheme(m_theme);
 		
 		// rest of runtime preferences
-		UpdateToDoCtrlPreferences(pTDC, TRUE);
+		UpdateToDoCtrlPreferences(pTDC);
 
 		if (bFirstTDC)
 		{
@@ -7896,7 +7892,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		}
 
 		CFilteredToDoCtrl& tdcShow = GetToDoCtrl(nCurSel);
-		UpdateToDoCtrlPreferences(&tdcShow, FALSE);
+		UpdateToDoCtrlPreferences(&tdcShow);
 
 		// update the filter selection
  		RefreshFilterBarControls();
@@ -8347,7 +8343,7 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 	m_tabCtrl.UpdateWindow();
 	
 	if (!m_bClosing)
-		UpdateActiveToDoCtrlPreferences();
+		CheckUpdateActiveToDoCtrlPreferences();
 	
 	const CPreferencesDlg& userPrefs = Prefs();
 
@@ -8414,7 +8410,7 @@ void CToDoListWnd::UpdateAeroFeatures()
 		GraphicsMisc::ForceIconicRepresentation(*this, !bEnable);
 }
 
-void CToDoListWnd::UpdateActiveToDoCtrlPreferences()
+void CToDoListWnd::CheckUpdateActiveToDoCtrlPreferences()
 {
 	// check if this has already been done since the last userPrefs change
 	int nSel = GetSelToDoCtrl();
@@ -8423,7 +8419,7 @@ void CToDoListWnd::UpdateActiveToDoCtrlPreferences()
 	{
 		CFilteredToDoCtrl& tdc = GetToDoCtrl(nSel);
 
-		UpdateToDoCtrlPreferences(&tdc, FALSE);
+		UpdateToDoCtrlPreferences(&tdc);
 
 		// and filter bar relies on this tdc's visible columns
 		m_filterBar.SetVisibleFilters(tdc.GetVisibleFilterFields());
@@ -8433,14 +8429,14 @@ void CToDoListWnd::UpdateActiveToDoCtrlPreferences()
 	}
 }
 
-void CToDoListWnd::UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pTDC, BOOL bFirst)
+void CToDoListWnd::UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pTDC)
 {
 	const CPreferencesDlg& userPrefs = Prefs();
 	CFilteredToDoCtrl& tdc = *pTDC;
 
 	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(tdc, userPrefs, m_tdiDefault, 
 												m_bShowProjectName, m_bShowTreeListBar, 
-												m_fontMain, m_fontTree, m_fontComments, bFirst);
+												m_fontMain, m_fontTree, m_fontComments);
 }
 
 void CToDoListWnd::OnSaveall() 

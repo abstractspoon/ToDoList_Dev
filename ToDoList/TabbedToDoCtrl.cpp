@@ -57,6 +57,16 @@ const UINT DEFTEXTFLAGS   = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_N
 
 //////////////////////////////////////////////////////////////////////
 
+enum // ProcessUIExtensionMod
+{
+	UIEXTMOD_SUCCESS		= 0x1,
+	UIEXTMOD_DEPENDCHANGE	= 0x2,
+	UIEXTMOD_OFFSETDATES	= 0x4,
+	UIEXTMOD_INHERITATTRIB	= 0x8,
+};
+
+//////////////////////////////////////////////////////////////////////
+
 UINT CTabbedToDoCtrl::WM_TDC_RESTORELASTTASKVIEW = (WM_TDC_RECREATERECURRINGTASK + 1);
 
 //////////////////////////////////////////////////////////////////////
@@ -151,7 +161,7 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 
 	// create the list-list before anything else
 	CRect rCtrl;
-	GraphicsMisc::GetAvailableScreenSpace(*this, rCtrl);
+	VERIFY(GraphicsMisc::GetPrimaryMonitorScreenSpace(rCtrl));
 
 	VERIFY(m_taskList.Create(this, rCtrl, IDC_FTC_TASKLISTLIST, FALSE)); // !visible
 	
@@ -1425,14 +1435,14 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID
 	return TRUE;
 }
 
-BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDependChange, BOOL& bMoveTask)
+DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 {
 	DWORD dwTaskID = mod.dwSelectedTaskID;
 
 	if (!CanEditSelectedTask(mod, dwTaskID))
 	{
 		ASSERT(0);
-		return FALSE;
+		return 0;
 	}
 
 	if (dwTaskID)
@@ -1445,6 +1455,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDepend
 	}
 	
 	CStringArray aValues;
+	DWORD dwResults = 0; 
 	BOOL bChange = FALSE;
 	
 	switch (mod.nAttrib)
@@ -1606,10 +1617,13 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDepend
 			else
 				bChange = SetSelectedTaskDate(TDCD_DUE, date);
 
-			if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
-				bDependChange = bChange;
-			else
-				bMoveTask = bChange;
+			if (bChange)
+			{
+				if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+					dwResults |= UIEXTMOD_DEPENDCHANGE;
+				else
+					dwResults |= UIEXTMOD_OFFSETDATES;
+			}
 		}
 		break;
 		
@@ -1667,7 +1681,8 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDepend
 			else 
 				bChange = SetSelectedTaskDependencies(aValues);
 	
-			bDependChange = bChange;
+			if (bChange)
+				dwResults |= UIEXTMOD_DEPENDCHANGE;
 		}
 		break;
 		
@@ -1678,10 +1693,13 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDepend
 
 			bChange = ExtensionMoveTaskStartAndDueDates(GetSelectedTaskID(), CDateHelper::GetDate(mod.tValue));
 
-			if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
-				bDependChange = bChange;
-			else
-				bMoveTask = bChange;
+			if (bChange)
+			{
+				if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+					dwResults |= UIEXTMOD_DEPENDCHANGE;
+				else
+					dwResults |= UIEXTMOD_OFFSETDATES;
+			}
 		}
 		break;
 
@@ -1722,7 +1740,19 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDepend
 		break;
 	}
 
-	return bChange;
+	if (bChange)
+	{
+		if (m_data.WantUpdateInheritedAttibute(TDC::MapIUIAttributeToAttribute(mod.nAttrib)))
+			dwResults |= UIEXTMOD_INHERITATTRIB;
+
+		dwResults |= UIEXTMOD_SUCCESS;
+	}
+	else
+	{
+		ASSERT(dwResults == 0);
+	}
+
+	return dwResults;
 }
 
 BOOL CTabbedToDoCtrl::ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart)
@@ -1772,7 +1802,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 	// Aggregate all mods as a single edit
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-	BOOL bDependChange = FALSE, bMoveTask = FALSE, bSuccess = TRUE;
+	DWORD dwResults = UIEXTMOD_SUCCESS;
 	
 	try
 	{
@@ -1781,7 +1811,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 
 		ASSERT(nNumMod > 0);
 
-		for (int nMod = 0; ((nMod < nNumMod) && bSuccess); nMod++)
+		for (int nMod = 0; ((nMod < nNumMod) && (dwResults & UIEXTMOD_SUCCESS)); nMod++)
 		{
 			const IUITASKMOD& mod = pMods[nMod];
 
@@ -1789,10 +1819,16 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 			// back to itself
 			m_nExtModifyingAttrib = mod.nAttrib;
 
-			if (!ProcessUIExtensionMod(mod, bDependChange, bMoveTask))
+			DWORD dwModResults = ProcessUIExtensionMod(mod);
+
+			if (dwModResults & UIEXTMOD_SUCCESS)
+			{
+				dwResults |= dwModResults;
+			}
+			else
 			{
 				ASSERT(0);
-				bSuccess = FALSE;
+				dwResults = 0;
 			}
 
 			m_nExtModifyingAttrib = IUI_NONE;
@@ -1801,15 +1837,15 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 	catch (...)
 	{
 		ASSERT(0);
-		bSuccess = FALSE;
+		dwResults = 0;
 	}
 
-	if (bSuccess)
+	if (dwResults & UIEXTMOD_SUCCESS)
 	{
 		// since we prevented changes being propagated back to the active view
 		// we may need to update more than the selected task as a consequence
-		// of dependency changes or task moves
-		if (bDependChange)
+		// of dependency changes, task moves or inherited attributes
+		if (dwResults & UIEXTMOD_DEPENDCHANGE)
 		{
 			VIEWDATA* pVData = NULL;
 			IUIExtensionWindow* pExtWnd = NULL;
@@ -1824,13 +1860,17 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 			if (GetAllTasksForExtensionViewUpdate(tasks, pVData->mapWantedAttrib))
 				UpdateExtensionView(pExtWnd, tasks, IUI_EDIT, pVData->mapWantedAttrib);
 		}
-		else if (bMoveTask)
+		else if (dwResults & UIEXTMOD_OFFSETDATES)
 		{
 			UpdateExtensionViewsSelection(TDCA_DUEDATE);
 		}
+		else if (dwResults & UIEXTMOD_INHERITATTRIB)
+		{
+			UpdateExtensionViewsSelection(TDCA_ALL);
+		}
 	}
 	
-	return bSuccess;
+	return (dwResults & UIEXTMOD_SUCCESS);
 }
 
 LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lParam)
@@ -2351,28 +2391,10 @@ void CTabbedToDoCtrl::SetAlternateLineColor(COLORREF color)
 	CToDoCtrl::SetAlternateLineColor(color);
 }
 
-void CTabbedToDoCtrl::NotifyBeginPreferencesUpdate(BOOL bFirst)
+void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 {
 	// base class
-	CToDoCtrl::NotifyBeginPreferencesUpdate(bFirst);
-
-	// nothing else for us to do
-}
-
-void CTabbedToDoCtrl::AdjustSplitterToFitAttributeColumns() 
-{ 
-	CToDoCtrl::AdjustSplitterToFitAttributeColumns();
-
-	m_taskList.AdjustSplitterToFitAttributeColumns();
-}
-
-void CTabbedToDoCtrl::NotifyEndPreferencesUpdate(BOOL bFirst)
-{
-	// base class
-	CToDoCtrl::NotifyEndPreferencesUpdate(bFirst);
-
-	if (bFirst)
-		m_taskList.AdjustSplitterToFitAttributeColumns();
+	CToDoCtrl::NotifyEndPreferencesUpdate();
 
 	// notify extension windows
 	if (HasAnyExtensionViews())
@@ -3394,7 +3416,8 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 				dwFlags |= TDCGSTF_ALLPARENTS;
 
 			// DONT include subtasks UNLESS the completion date has changed
-			if (nAttrib != TDCA_DONEDATE)
+			// OR this is an inherited attribute
+			if ((nAttrib != TDCA_DONEDATE) && !m_data.WantUpdateInheritedAttibute(nAttrib))
 				dwFlags |= TDCGSTF_NOTSUBTASKS;
 		}
 	}

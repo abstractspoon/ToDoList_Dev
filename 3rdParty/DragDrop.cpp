@@ -473,7 +473,7 @@ CImageList* CDragDropData::CreateDragImage(CWnd* pWnd, CRect& rc)
 	// create image list and add bitmap to it
 	CImageList *pil = new CImageList();
 
-	pil->Create(sz.cx, sz.cy, ILC_COLOR24|ILC_MASK, 0, 1);
+	pil->Create(sz.cx, sz.cy, ILC_COLOR32|ILC_MASK, 0, 1);
 	pil->Add(&m_bitmap, crMask);
     
 	return pil;

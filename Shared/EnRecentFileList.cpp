@@ -151,3 +151,10 @@ int CEnRecentFileList::GetFileNames(CStringArray& aFileNames) const
 
 	return aFileNames.GetSize();
 }
+
+BOOL CEnRecentFileList::GetDisplayName(CString& strName, int nIndex,
+	LPCTSTR lpszCurDir, int nCurDir, BOOL bAtLeastName) const
+{
+	// Prevent CWD tasklists becoming relative
+	return CRecentFileList::GetDisplayName(strName, nIndex, lpszCurDir, -1, bAtLeastName);
+}

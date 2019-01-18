@@ -60,7 +60,7 @@ public:
 	TODOITEM* NewTask(const CTaskFile& tasks, HTASKITEM hTask, const TODOITEM* pTDIRef = NULL) const;
 
 	BOOL AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID);
-	BOOL DeleteTask(DWORD dwTaskID);
+	BOOL DeleteTask(DWORD dwTaskID, BOOL bWithUndo);
 	void DeleteAllTasks();
 
 	const TODOSTRUCTURE* LocateTask(DWORD dwTaskID) const;
@@ -243,7 +243,7 @@ protected:
 	BOOL m_bUpdateInheritAttrib; // update as changes are made to parents
 
 protected:
-	BOOL DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos);
+	BOOL DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos, BOOL bWithUndo);
 	BOOL AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, TODOSTRUCTURE* pTDSParent);
 	BOOL RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD dwTaskID);
 	int GetReferencesToTask(DWORD dwTaskID, const TODOSTRUCTURE* pTDS, CDWordArray& aRefIDs) const;
@@ -313,7 +313,6 @@ protected:
 	BOOL Locate(DWORD dwParentID, DWORD dwPrevSiblingID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
 	int MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwSrcPrevSiblingID, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
 	BOOL SetTaskModified(DWORD dwTaskID);
-	BOOL AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID, BOOL bWantUndo);
 
 	BOOL GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
 	TDC_SET SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data);

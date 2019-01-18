@@ -269,6 +269,7 @@ BOOL WebMisc::TrimFileProtocol(CString& sFilePath)
 
 	return FALSE;
 }
+
 BOOL WebMisc::RegisterProtocol(LPCTSTR szProtocol, LPCTSTR szAppName, LPCTSTR szCommand)
 {
 	if (!IsProtocolRegistered(szProtocol, szAppName, szCommand))
@@ -333,21 +334,58 @@ BOOL WebMisc::IsProtocolRegistered(LPCTSTR szProtocol, LPCTSTR szAppName, LPCTST
 		reg.Close();
 	}
 	
-	CString sTemp;
-	sTemp.Format(_T("%s\\shell\\open\\command"), szProtocol);
+	CString sCommand = GetRegisteredProtocolCommand(szProtocol);
 
-	if (reg.Open(HKEY_CLASSES_ROOT, sTemp, TRUE) != ERROR_SUCCESS)
-		return FALSE;
-
-	if ((reg.Read(_T(""), sTemp) != ERROR_SUCCESS) || sTemp.IsEmpty())
+	if (sCommand.IsEmpty())
 		return FALSE;
 
 	// optional test
 	if (!Misc::IsEmpty(szCommand))
-		return (sTemp.CompareNoCase(szCommand) == 0);
+		return (sCommand.CompareNoCase(szCommand) == 0);
 
 	// else
 	return TRUE;
+}
+
+CString WebMisc::GetRegisteredProtocolCommand(LPCTSTR szProtocol)
+{
+	CString sCommand;
+
+	if (CRegKey2::KeyExists(HKEY_CLASSES_ROOT, szProtocol))
+	{
+		CString sTemp;
+		sTemp.Format(_T("%s\\shell\\open\\command"), szProtocol);
+
+		CRegKey2 reg;
+		
+		if (reg.Open(HKEY_CLASSES_ROOT, sTemp, TRUE) == ERROR_SUCCESS)
+		{
+			if (reg.Read(_T(""), sCommand) != ERROR_SUCCESS)
+				sCommand.Empty();
+		}
+	}
+
+	return sCommand;
+}
+
+CString WebMisc::GetRegisteredProtocolAppPath(LPCTSTR szProtocol, BOOL bFilenameOnly)
+{
+	CString sAppPath = GetRegisteredProtocolCommand(szProtocol);
+
+	if (!sAppPath.IsEmpty())
+	{
+		int nEnd = Misc::ToLower(sAppPath).Find(_T(".exe"));
+
+		if (nEnd != -1)
+		{
+			sAppPath = sAppPath.Left(nEnd + 4);
+
+			if (bFilenameOnly)
+				sAppPath = FileMisc::GetFileNameFromPath(sAppPath);
+		}
+	}
+
+	return sAppPath;
 }
 
 BOOL WebMisc::GetPageTitle(const CString& sPageHtml, CString& sTitle)

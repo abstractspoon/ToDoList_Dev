@@ -122,6 +122,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 	m_comparer(data),
 	m_calculator(data),
 	m_formatter(data),
+	m_bAutoFitSplitter(TRUE),
 	m_imageIcons(16, 16)
 {
 	// build one time column map
@@ -473,10 +474,11 @@ void CTDLTaskCtrlBase::OnSize(UINT nType, int cx, int cy)
 	
 	if (cx && cy)
 	{
-		//TRACE(_T("%s::OnSize(%d, %d), splitpos = %d\n"), GetDebugName(), cx, cy, GetSplitPos());
-
 		CRect rect(0, 0, cx, cy);
 		CTreeListSyncer::Resize(rect);
+
+		if (m_bAutoFitSplitter)
+			AdjustSplitterToFitAttributeColumns();
 	}
 }
 
@@ -744,6 +746,9 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChange
 		OnImageListChange();
 
 	RecalcColumnWidths(mapChanges);
+
+	if (m_bAutoFitSplitter)
+		AdjustSplitterToFitAttributeColumns();
 }
 
 void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
@@ -1132,7 +1137,8 @@ void CTDLTaskCtrlBase::SaveState(CPreferences& prefs, const CString& sKey) const
 	prefs.WriteProfileArray((sKey + _T("\\ColumnWidth")), aWidths);
 	prefs.WriteProfileArray((sKey + _T("\\ColumnTracked")), aTracked);
 
-	prefs.WriteProfileInt(sKey, _T("SplitPos"), GetSplitPos());
+	if (!m_bAutoFitSplitter)
+		prefs.WriteProfileInt(sKey, _T("SplitPos"), GetSplitPos());
 	
 	m_sort.SaveState(prefs, sKey);
 }
@@ -1157,14 +1163,14 @@ void CTDLTaskCtrlBase::LoadState(const CPreferences& prefs, const CString& sKey)
 	if (prefs.GetProfileArray((sKey + _T("\\ColumnTracked")), aTracked))
 		SetTrackedColumns(aTracked);
 
-	int nSplitPos = 0;
-	
-	if (aOrder.GetSize() || aWidths.GetSize() || aTracked.GetSize())
-		nSplitPos = prefs.GetProfileInt(sKey, _T("SplitPos"), 300);
-	else
-		nSplitPos = CalcSplitterPosToFitListColumns();
+	int nSplitPos = prefs.GetProfileInt(sKey, _T("SplitPos"), -1);
 
-	SetSplitPos(nSplitPos);
+	if (nSplitPos > 0)
+	{
+		m_bAutoFitSplitter = FALSE;
+		SetSplitPos(nSplitPos);
+	}
+
 	RefreshSize();
 
 	m_sort.LoadState(prefs, sKey);
@@ -1713,6 +1719,9 @@ DWORD CTDLTaskCtrlBase::GetNextSelectedTaskID(POSITION& pos) const
 
 void CTDLTaskCtrlBase::OnNotifySplitterChange(int /*nSplitPos*/)
 {
+	if (IsSplitting())
+		m_bAutoFitSplitter = FALSE;
+
 	InvalidateAll(TRUE);
 }
 
@@ -3655,6 +3664,8 @@ LRESULT CTDLTaskCtrlBase::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			if (GetSplitterRect(rSplitter) && rSplitter.PtInRect(ptCursor))
 			{
 				AdjustSplitterToFitAttributeColumns();
+				m_bAutoFitSplitter = TRUE;
+
 				return 0L; // eat
 			}
 		}

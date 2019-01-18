@@ -144,7 +144,7 @@ public:
 	BOOL SetHandCursor(UINT nCursorID, BOOL bTryDefault = TRUE);
 	void AutoFitPane(int nIndex);
 	int GetPaneCount() const { return m_adwFlags.GetSize(); }
-	int HitTest(CPoint point);
+	int HitTest(CPoint ptClient) const;
 
 	virtual ~CStatusBarACT();
 

@@ -294,23 +294,19 @@ BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 	CDWordArray aSelTaskIDs;
 	GetSelectedTaskIDs(aSelTaskIDs);
 
-	if (Misc::MatchAll(aSelTaskIDs, aTaskIDs))
+	int nPrevSel = m_aListCtrls.Find(m_pSelectedList);
+	int nNewSel = m_aListCtrls.Find(aTaskIDs);
+	
+	if ((nPrevSel == nNewSel) && Misc::MatchAll(aSelTaskIDs, aTaskIDs))
 		return TRUE;
 	
 	ClearOtherListSelections(NULL);
 
-	if (aTaskIDs.GetSize() == 0)
-	{
-		return FALSE;
-	}
-
-	int nList = m_aListCtrls.Find(aTaskIDs);
-
-	if (nList == -1)
+	if ((nNewSel == -1) || (aTaskIDs.GetSize() == 0))
 		return FALSE;
 
 	// else
-	SelectListCtrl(m_aListCtrls[nList]);
+	SelectListCtrl(m_aListCtrls[nNewSel], FALSE);
 	VERIFY(m_pSelectedList->SelectTasks(aTaskIDs));
 
 	ScrollToSelectedTask();
@@ -1234,45 +1230,50 @@ BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nAttrib, const CString& sNewValue)
 {
-#ifdef _DEBUG
+	CStringArray aNewValues;
+
 	switch (nAttrib)
 	{
 	case IUI_PRIORITY:
 	case IUI_RISK:
+		if (!sNewValue.IsEmpty())
+			aNewValues.Add(sNewValue);
+		break;
+
 	case IUI_ALLOCBY:
 	case IUI_STATUS:
 	case IUI_VERSION:
+		aNewValues.Add(sNewValue);
 		break;
 
 	default:
 		ASSERT(0);
 		break;
 	}
-#endif
-
-	CStringArray aNewValues;
-
-	if (!sNewValue.IsEmpty())
-		aNewValues.Add(sNewValue);
-
+	
 	return UpdateTrackableTaskAttribute(pKI, KANBANITEM::GetAttributeID(nAttrib), aNewValues);
 }
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nAttrib, const CStringArray& aNewValues)
 {
-#ifdef _DEBUG
 	switch (nAttrib)
 	{
 	case IUI_ALLOCTO:
 	case IUI_CATEGORY:
 	case IUI_TAGS:
+		if (aNewValues.GetSize() == 0)
+		{
+			CStringArray aTemp;
+			aTemp.Add(_T(""));
+
+			return UpdateTrackableTaskAttribute(pKI, nAttrib, aTemp); // RECURSIVE CALL
+		}
 		break;
 
 	default:
 		ASSERT(0);
-		break;
+		return FALSE;
 	}
-#endif
 
 	return UpdateTrackableTaskAttribute(pKI, KANBANITEM::GetAttributeID(nAttrib), aNewValues);
 }
@@ -1297,19 +1298,26 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 		// Remove any list item whose current value is not found in the new values
 		int nVal = aCurValues.GetSize();
 		
+		// Special case: Item needs removing from backlog
+		if (nVal == 0)
+		{
+			aCurValues.Add(_T(""));
+			nVal++;
+		}
+
 		while (nVal--)
 		{
 			if (!Misc::Contains(aCurValues[nVal], aNewValues))
 			{
 				CKanbanListCtrl* pCurList = GetListCtrl(aCurValues[nVal]);
 				ASSERT(pCurList);
-				
+
 				if (pCurList)
 				{
 					VERIFY(pCurList->DeleteTask(pKI->dwTaskID));
 					bChange |= (pCurList->GetItemCount() == 0);
 				}
-				
+
 				// Remove from list to speed up later searching
 				aCurValues.RemoveAt(nVal);
 			}
@@ -2444,6 +2452,8 @@ BOOL CKanbanCtrl::NotifyParentAttibuteChange(const CDWordArray& aTaskIDs)
 
 void CKanbanCtrl::NotifyParentSelectionChange()
 {
+	ASSERT(!m_bSelectTasks);
+
 	GetParent()->SendMessage(WM_KBC_SELECTIONCHANGE, 0, 0);
 }
 

@@ -707,8 +707,8 @@ protected:
 	void UpdateTimeTrackerPreferences();
 	void UpdateWindowIcons();
 
-	void UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pCtrl, BOOL bFirst);
-	void UpdateActiveToDoCtrlPreferences();
+	void UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pCtrl);
+	void CheckUpdateActiveToDoCtrlPreferences();
 	const CPreferencesDlg& Prefs() const;
 	void ResetPrefs();
 	

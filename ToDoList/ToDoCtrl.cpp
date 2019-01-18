@@ -1648,7 +1648,7 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 	case IDC_TIMESPENT:
 		if (bEnable)
 		{
-			if (!bEditTime || m_timeTracking.IsTrackingTask(dwTaskID))
+			if (!bEditTime || (dwTaskID && m_timeTracking.IsTrackingTask(dwTaskID)))
 				nCtrlState = RTCS_READONLY;
 		}
 		break;
@@ -5165,7 +5165,7 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 	}
 	else // cleanup
 	{
-		m_data.DeleteTask(m_dwNextUniqueID);
+		m_data.DeleteTask(m_dwNextUniqueID, FALSE); // FALSE == no undo
 	}
 	
 	return htiNew;
@@ -5344,7 +5344,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 			DWORD dwTaskID = m_taskTree.GetTaskID(hti);
 
 			m_taskTree.DeleteItem(hti);
-			m_data.DeleteTask(dwTaskID);
+			m_data.DeleteTask(dwTaskID, TRUE); // TRUE == with undo
 		}
 		
 		// Note: CToDoCtrlData ought to have already cleaned up the data
@@ -5574,7 +5574,7 @@ LRESULT CToDoCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 			CHoldRedraw hr(m_taskTree);
 			m_taskTree.DeleteItem(hti);
 
-			m_data.DeleteTask(m_dwLastAddedID);
+			m_data.DeleteTask(m_dwLastAddedID, FALSE); // FALSE == no undo
 			m_data.DeleteLastUndoAction();
 		}
 
@@ -6739,7 +6739,7 @@ BOOL CToDoCtrl::RemoveArchivedTask(DWORD dwTaskID)
 		return FALSE;
 	
 	m_taskTree.DeleteItem(hti);
-	m_data.DeleteTask(dwTaskID);
+	m_data.DeleteTask(dwTaskID, TRUE); // TRUE == with undo
 
 	return TRUE;
 }
@@ -6843,6 +6843,8 @@ BOOL CToDoCtrl::ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks
 		tfh.sXmlHeader = m_sXmlHeader;
 		tfh.sXslHeader = m_sXslHeader;
 	}
+
+	SaveCustomAttributeDefinitions(file);
 	
 	file.Merge(tasks, TRUE, TRUE);
 	file.Encrypt();
@@ -6853,6 +6855,7 @@ BOOL CToDoCtrl::ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks
 
 	// If the process took longer than 1 second we rename
 	// the archive so that next time it'll start afresh
+#ifndef _DEBUG
 	if ((GetTickCount() - dwStartTick) > 1000)
 	{
 		int nSuffix = 1;
@@ -6872,6 +6875,7 @@ BOOL CToDoCtrl::ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks
 		
 		FileMisc::MoveFile(sArchivePath, sNewPath);
 	}
+#endif
 
 	return TRUE;
 }
@@ -6930,7 +6934,10 @@ HTREEITEM CToDoCtrl::PasteTaskToTree(const CTaskFile& tasks, HTASKITEM hTask, HT
 		
 		// add this item to data structure
 		m_data.AddTask(dwTaskID, pTDI, dwParentID, dwPrevTaskID);
-		
+
+		// And update inherited attributes
+		m_data.ApplyLastInheritedChangeFromParent(dwTaskID, TDCA_ALL);
+				
 		// add this item to tree
 		hti = InsertTreeItem(pTDI, dwTaskID, htiParent, htiAfter);
 	}
@@ -12459,14 +12466,3 @@ BOOL CToDoCtrl::SaveTaskViewToImage(CString& sFilePath)
 	return FALSE;
 }
 
-void CToDoCtrl::NotifyBeginPreferencesUpdate(BOOL /*bFirst*/)
-{
-}
-
-void CToDoCtrl::NotifyEndPreferencesUpdate(BOOL bFirst)
-{
-	if (bFirst)
-		m_taskTree.AdjustSplitterToFitAttributeColumns();
-
-	m_ctrlComments.UpdateAppPreferences();
-}

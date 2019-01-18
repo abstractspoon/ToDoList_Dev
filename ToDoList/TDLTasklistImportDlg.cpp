@@ -93,7 +93,7 @@ BOOL CTDLTasklistImportDlg::OnInitDialog()
 
 	if (m_tdc.Create(rToDoCtrl, this, IDC_TODOCTRL+1))
 	{
-		CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(m_tdc, CPreferencesDlg(), FALSE, FALSE, TRUE);
+		CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(m_tdc, CPreferencesDlg(), FALSE, FALSE);
 
 		m_nLoadRes = m_tdc.Load(m_sFilePath);
 

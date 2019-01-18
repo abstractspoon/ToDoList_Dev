@@ -194,6 +194,20 @@ int CKanbanListCtrlArray::Find(HWND hwnd) const
 	return -1;
 }
 
+int CKanbanListCtrlArray::Find(const CKanbanListCtrl* pList) const
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		if (GetAt(nList) == pList)
+			return nList;
+	}
+
+	// not found
+	return -1;
+}
+
 CKanbanListCtrl* CKanbanListCtrlArray::Get(DWORD dwTaskID) const
 {
 	int nUnused;

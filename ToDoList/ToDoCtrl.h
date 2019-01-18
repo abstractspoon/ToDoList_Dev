@@ -169,6 +169,7 @@ public:
 	void SetStartedTaskColors(COLORREF crStarted, COLORREF crStartedToday) { m_taskTree.SetStartedTaskColors(crStarted, crStartedToday); }
 	void SetAlternateLineColor(COLORREF color) { m_taskTree.SetAlternateLineColor(color); }
 
+	COLORREF GetPriorityColor(int nPriority) const { return m_taskTree.GetPriorityColor(nPriority); }
 	void GetStartedTaskColors(COLORREF& crStarted, COLORREF& crStartedToday) { m_taskTree.GetStartedTaskColors(crStarted, crStartedToday); }
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) { m_taskTree.GetDueTaskColors(crDue, crDueToday); }
 
@@ -418,7 +419,6 @@ public:
 	// misc
 	void Spellcheck();
 	void SetMaxInfotipCommentsLength(int nLength) { m_taskTree.SetMaxInfotipCommentsLength(nLength); }
-	void AdjustSplitterToFitAttributeColumns() { m_taskTree.AdjustSplitterToFitAttributeColumns(); }
 	COleDateTime GetLastTaskModified() const { return m_dtLastTaskMod; }
 	void RedrawReminders();
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos, BOOL bResize);
@@ -433,8 +433,8 @@ public:
 	void SetAlternatePreferencesKey(const CString& sKey) { m_sAltPrefsKey = sKey; }
 	CString GetPreferencesKey(const CString& sSubKey = _T("")) const;
 
-	virtual void NotifyBeginPreferencesUpdate(BOOL bFirst);
-	virtual void NotifyEndPreferencesUpdate(BOOL bFirst);
+	virtual void NotifyBeginPreferencesUpdate() { /* do nothing */ }
+	virtual void NotifyEndPreferencesUpdate() { /* do nothing */ }
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
 	virtual TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	virtual TDC_COLUMN ColumnHitTest(const CPoint& ptScreen) const;

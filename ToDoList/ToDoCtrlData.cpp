@@ -115,6 +115,10 @@ BOOL CToDoCtrlData::WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib) const
 
 			return attribDef.HasFeature(TDCCAF_INHERITPARENTCHANGES);
 		}
+		else if ((nAttrib == TDCA_ALL) && !m_mapParentAttribs.IsEmpty())
+		{
+			return TRUE;
+		}
 
 		// else
 		return m_mapParentAttribs.Has(nAttrib);
@@ -391,7 +395,7 @@ const TODOSTRUCTURE* CToDoCtrlData::LocateTask(DWORD dwTaskID) const
 	return m_struct.FindTask(dwTaskID);
 }
 
-BOOL CToDoCtrlData::AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID, BOOL bWantUndo) 
+BOOL CToDoCtrlData::AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID) 
 { 
 	if (!dwTaskID || !pTDI)
 	{
@@ -419,14 +423,9 @@ BOOL CToDoCtrlData::AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DW
 		return FALSE;
 	}
 	
-	VERIFY(!bWantUndo || AddUndoElement(TDCUEO_ADD, dwTaskID, dwParentID, dwPrevSiblingID));
+	VERIFY(m_bUndoRedoing || AddUndoElement(TDCUEO_ADD, dwTaskID, dwParentID, dwPrevSiblingID));
 
 	return TRUE;
-}
-
-BOOL CToDoCtrlData::AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID) 
-{ 
-	return AddTask(dwTaskID, pTDI, dwParentID, dwPrevSiblingID, TRUE);
 }
 
 void CToDoCtrlData::DeleteAllTasks()
@@ -442,7 +441,7 @@ void CToDoCtrlData::DeleteAllTasks()
 
 		// delete all top-level tasks
 		while (m_struct.GetSubTaskCount())
-			DeleteTask(&m_struct, 0);
+			DeleteTask(&m_struct, 0, TRUE); // TRUE == with undo
 	}
 
 	ASSERT(GetTaskCount() == 0);
@@ -1036,7 +1035,7 @@ BOOL CToDoCtrlData::IsReferenceToTask(DWORD dwTestID, DWORD dwTaskID) const
 	return (GetTaskReferenceID(dwTestID) == dwTaskID);
 }
 
-BOOL CToDoCtrlData::DeleteTask(DWORD dwTaskID)
+BOOL CToDoCtrlData::DeleteTask(DWORD dwTaskID, BOOL bWithUndo)
 {
 	if (dwTaskID)
 	{
@@ -1051,21 +1050,23 @@ BOOL CToDoCtrlData::DeleteTask(DWORD dwTaskID)
 
 		// delete the task itself so that we don't have to worry
 		// about checking if it has a reference to itself
-		return DeleteTask(pTDSParent, nPos);
+		return DeleteTask(pTDSParent, nPos, bWithUndo);
 	}
 
 	// else
 	return FALSE;
 }
 
-BOOL CToDoCtrlData::DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos)
+BOOL CToDoCtrlData::DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos, BOOL bWithUndo)
 {
+	ASSERT(!bWithUndo || !m_bUndoRedoing);
+
 	TODOSTRUCTURE* pTDS = pTDSParent->GetSubTask(nPos);
 	ASSERT(pTDS);
 	
 	// do children first to ensure entire branch is deleted
 	while (pTDS->GetSubTaskCount() > 0)
-		DeleteTask(pTDS, 0);
+		DeleteTask(pTDS, 0, bWithUndo);
 
 	// is this task a reference?
 	DWORD dwTaskID = pTDS->GetTaskID();
@@ -1075,7 +1076,7 @@ BOOL CToDoCtrlData::DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos)
 	DWORD dwParentID = pTDSParent->GetTaskID();
 	DWORD dwPrevSiblingID = nPos ? pTDSParent->GetSubTaskID(nPos - 1) : 0;
 	
-	AddUndoElement(TDCUEO_DELETE, dwTaskID, dwParentID, dwPrevSiblingID);
+	VERIFY (!bWithUndo || AddUndoElement(TDCUEO_DELETE, dwTaskID, dwParentID, dwPrevSiblingID));
 	
 	// then this item
 	m_items.DeleteTask(dwTaskID);
@@ -1118,7 +1119,7 @@ BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD 
 			// references
 			if (pTDIChild->dwTaskRefID == dwTaskID)
 			{
-				DeleteTask(pTDSParent, nChild);
+				DeleteTask(pTDSParent, nChild, TRUE); // TRUE == with undo
 				bRemoved = TRUE;
 			}
 		}
@@ -1526,6 +1527,8 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 											  TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
 {
+	ASSERT(m_undo.IsActive());
+
 	ASSERT(pTDI && pTDS);
 	
 	if (!pTDI || !pTDS)
@@ -1543,7 +1546,8 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDI, const TODOST
 BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const TODOSTRUCTURE* pTDSParent, 
 											int nChildPos, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
 {
-	
+	ASSERT(m_undo.IsActive());
+
 	if (!pTDIParent || !pTDSParent || (nChildPos < 0) || (nChildPos >= pTDSParent->GetSubTaskCount()))
 	{
 		ASSERT(0);
@@ -2560,7 +2564,10 @@ BOOL CToDoCtrlData::ExtendLastUndoAction(TDC_UNDOACTIONTYPE nType)
 BOOL CToDoCtrlData::AddUndoElement(TDC_UNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID, DWORD dwPrevSiblingID, WORD wFlags)
 {
 	if (!m_undo.IsActive())
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
 	const TODOITEM* pTDI = GetTask(dwTaskID);
 	ASSERT (pTDI);
@@ -2633,7 +2640,7 @@ BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 		nInc = -1;
 	}
 	
-	// copy the structre because we're going to be changing it and we need 
+	// copy the structure because we're going to be changing it and we need 
 	// to be able to lookup the original previous sibling IDs for undo info
 	CToDoCtrlDataStructure tdsCopy(m_struct);
 	
@@ -2661,7 +2668,7 @@ BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 			TDCUNDOELEMENT elmRet(TDCUEO_DELETE, elm.dwTaskID);
 			aElms.Add(elmRet);
 			
-			DeleteTask(elm.dwTaskID);
+			DeleteTask(elm.dwTaskID, FALSE); // FALSE == no undo
 		}
 		else if ((elm.nOp == TDCUEO_DELETE && bUndo) || (elm.nOp == TDCUEO_ADD && !bUndo))
 		{
@@ -2678,7 +2685,7 @@ BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 			else
 			{
 				TODOITEM* pTDI = NewTask(elm.tdi);
-				AddTask(elm.dwTaskID, pTDI, elm.dwParentID, elm.dwPrevSiblingID, FALSE);
+				AddTask(elm.dwTaskID, pTDI, elm.dwParentID, elm.dwPrevSiblingID);
 			}
 		}
 		else if (elm.nOp == TDCUEO_MOVE)
@@ -2693,7 +2700,9 @@ BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 			elm.dwPrevSiblingID = tdsCopy.GetPreviousTaskID(elm.dwTaskID);
 		}
 		else
+		{
 			return FALSE;
+		}
 	}
 	
 	return TRUE;
@@ -2746,12 +2755,12 @@ int CToDoCtrlData::MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwS
 	DWORD dwTaskID = pTDSSrcParent->GetSubTaskID(nSrcPos);
 	DWORD dwSrcParentID = pTDSSrcParent->GetTaskID();
 
-	// check if there's anyhting to do
+	// check if there's anything to do
 	if ((pTDSSrcParent == pTDSDestParent) && (nSrcPos == nDestPos))
 		return -1;
 	
 	// save undo info
-	AddUndoElement(TDCUEO_MOVE, dwTaskID, dwSrcParentID, dwSrcPrevSiblingID);
+	VERIFY(m_bUndoRedoing || AddUndoElement(TDCUEO_MOVE, dwTaskID, dwSrcParentID, dwSrcPrevSiblingID));
 	
 	int nPos = pTDSSrcParent->MoveSubTask(nSrcPos, pTDSDestParent, nDestPos);
 	

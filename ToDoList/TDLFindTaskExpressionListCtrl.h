@@ -14,6 +14,7 @@
 #include "tdlriskcombobox.h"
 #include "tdcimagelist.h"
 #include "tdlIconComboBox.h"
+#include "TDLRegularityComboBox.h"
 
 #include "..\shared\InputListCtrl.h"
 #include "..\shared\timeedit.h"
@@ -57,6 +58,7 @@ protected:
 	CComboBox						m_cbOperators;
 	CTDLFindTaskAttributeComboBox	m_cbAttributes;
 	CComboBox						m_cbAndOr;
+	CTDLRegularityComboBox			m_cbRecurrence;
 	CDateTimeCtrlEx					m_dtcDate;
 	CTimeEdit						m_eTime;
 	CCheckComboBox					m_cbListValues;
@@ -103,6 +105,8 @@ protected:
 	afx_msg void OnPriorityEditOK();
 	afx_msg void OnRiskEditCancel();
 	afx_msg void OnRiskEditOK();
+	afx_msg void OnRecurrenceEditCancel();
+	afx_msg void OnRecurrenceEditOK();
 	afx_msg void OnCustomIconEditChange();
 	afx_msg void OnValueEditOK(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnSelItemChanged(NMHDR* pNMHDR, LRESULT* pResult);

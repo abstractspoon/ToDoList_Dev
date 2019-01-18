@@ -134,12 +134,10 @@ public:
 	void SetMaxInfotipCommentsLength(int nLength);
 	void EndTimeTracking(BOOL bAllowConfirm) { CToDoCtrl::EndTimeTracking(bAllowConfirm); }
 	void BeginTimeTracking(DWORD dwTaskID) { CToDoCtrl::BeginTimeTracking(dwTaskID); }
-	void AdjustSplitterToFitAttributeColumns();
 
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual void RebuildCustomAttributeUI();
-	virtual void NotifyBeginPreferencesUpdate(BOOL bFirst);
-	virtual void NotifyEndPreferencesUpdate(BOOL bFirst);
+	virtual void NotifyEndPreferencesUpdate();
 
 	// override these so we can notify extensions of color changes
 	void SetPriorityColors(const CDWordArray& aColors);
@@ -321,7 +319,7 @@ protected:
 	void SetExtensionsNeedTaskUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
 	void SetExtensionsNeedFontUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
 	void SetListViewNeedFontUpdate(BOOL bUpdate);
-	BOOL ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDependChange, BOOL& bMoveTask);
+	DWORD ProcessUIExtensionMod(const IUITASKMOD& mod);
 	int GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttrib) const;
 	CString GetExtensionPrefsSubKey(const IUIExtensionWindow* pExtWnd);
 	void UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib);

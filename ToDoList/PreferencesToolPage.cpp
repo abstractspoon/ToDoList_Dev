@@ -177,6 +177,8 @@ int CPreferencesToolPage::AddListTool(const USERTOOL& tool, int nPos, BOOL bRebu
 
 void CPreferencesToolPage::OnNewTool() 
 {
+	ASSERT(m_lcTools.GetItemCount() < m_nMaxNumTools);
+
 	int nIndex = m_lcTools.InsertItem(m_lcTools.GetItemCount(), CEnString(IDS_PTP_NEWTOOL), -1);
 	m_lcTools.SetItemText(nIndex, 2, MapCmdIDToPlaceholder(ID_TOOLARG_PATHNAME));
 
@@ -191,7 +193,7 @@ void CPreferencesToolPage::OnNewTool()
 
 void CPreferencesToolPage::OnUpdateCmdUINewTool(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(TRUE);
+	pCmdUI->Enable(m_lcTools.GetItemCount() < m_nMaxNumTools);
 }
 
 void CPreferencesToolPage::OnDeleteTool() 
@@ -244,6 +246,7 @@ void CPreferencesToolPage::OnUpdateCmdUIEditToolName(CCmdUI* pCmdUI)
 
 void CPreferencesToolPage::OnCopyTool() 
 {
+	ASSERT(m_lcTools.GetItemCount() < m_nMaxNumTools);
 	int nSel = GetCurSel();
 	
 	if (nSel != -1)
@@ -265,7 +268,7 @@ void CPreferencesToolPage::OnCopyTool()
 
 void CPreferencesToolPage::OnUpdateCmdUICopyTool(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(GetCurSel() != -1);
+	pCmdUI->Enable((GetCurSel() != -1) && (m_lcTools.GetItemCount() < m_nMaxNumTools));
 }
 
 void CPreferencesToolPage::OnMoveToolUp() 
@@ -416,12 +419,9 @@ void CPreferencesToolPage::OnChangeToolpath()
 
 void CPreferencesToolPage::RebuildListCtrlImages()
 {
-	// remove any existing images
-	m_ilSys.GetImageList()->DeleteImageList();
 	m_ilSys.Initialize();
 	m_lcTools.SetImageList(m_ilSys.GetImageList(), LVSIL_SMALL);
 
-	// Re-add images
 	int nTool = m_lcTools.GetItemCount();
 
 	while (nTool--)
@@ -725,15 +725,16 @@ void CPreferencesToolPage::OnImportTools()
 		{
 			CIni ini(dialog.GetPathName());
 
-			int nTools = ini.GetInt(_T("Tools"), _T("ToolCount"), 0);
+			int nNumTools = ini.GetInt(_T("Tools"), _T("ToolCount"), 0);
+			nNumTools = min(nNumTools, m_nMaxNumTools);
 
-			if (!nTools)
+			if (!nNumTools)
 			{
 				bContinue = (AfxMessageBox(IDS_INIHASNOTOOLS, MB_YESNO) == IDYES);
 			}
 			else
 			{
-				for (int nTool = 0; nTool < nTools; nTool++)
+				for (int nTool = 0; nTool < nNumTools; nTool++)
 				{
 					CString sKey = Misc::MakeKey(_T("Tools\\Tool%d"), nTool + 1);
 					USERTOOL ut;
@@ -765,6 +766,7 @@ void CPreferencesToolPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR /
 {
 	// load tools
 	int nToolCount = pPrefs->GetProfileInt(_T("Tools"), _T("ToolCount"), 0);
+	nToolCount = min(nToolCount, m_nMaxNumTools);
 
 	for (int nTool = 1; nTool <= nToolCount; nTool++)
 	{

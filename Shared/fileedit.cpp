@@ -212,7 +212,7 @@ void CFileEdit::OnPaint()
 
 			CSize sizeText = dc.GetTextExtent(sText);
 
-			if (sizeText.cx <= rClient.Width() - 4) // -2 allows for later DeflateRect
+			if (sizeText.cx <= rClient.Width() - 4)
 			{
 				DefWindowProc(WM_PAINT, (WPARAM)(HDC)dc, 0);
 			}
@@ -231,8 +231,7 @@ void CFileEdit::OnPaint()
 				
 				::FillRect(dc, rClient, hBkgnd);
 				
-				rClient.DeflateRect(1, 1);
-				rClient.right -= 2;
+				rClient.DeflateRect(4, 1, 1, 1);
 				
 				dc.SetBkMode(TRANSPARENT);
 				
@@ -259,10 +258,10 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	// default
 	CEnEdit::NcPaint(pDC, rWindow);
 
-	// file icon
-	CRect rIcon = GetIconRect();
-	rIcon.OffsetRect(-rWindow.TopLeft());
+	if (m_bParentIsCombo == -1) // first time init
+		m_bParentIsCombo = CWinClasses::IsClass(*GetParent(), WC_COMBOBOX);
 	
+	// Background color
 	HBRUSH hBkgnd = NULL;
 	
 	if (!IsWindowEnabled() || (GetStyle() & ES_READONLY))
@@ -272,6 +271,10 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	
 	if (!hBkgnd || hBkgnd == GetStockObject(NULL_BRUSH))
 		hBkgnd = ::GetSysColorBrush(COLOR_WINDOW);
+	
+	// file icon
+	CRect rIcon = GetIconRect();
+	rIcon.OffsetRect(-rWindow.TopLeft());
 	
 	pDC->FillRect(rIcon, CBrush::FromHandle(hBkgnd));
 	
@@ -284,9 +287,6 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	sFilePath.TrimRight();
 
 	// adjust pos if parent is not a combo
-	if (m_bParentIsCombo == -1) // first time init
-		m_bParentIsCombo = CWinClasses::IsClass(*GetParent(), WC_COMBOBOX);
-	
 	if (!m_bParentIsCombo)
 	{
 		rIcon.top++;

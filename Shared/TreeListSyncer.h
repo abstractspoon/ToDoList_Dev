@@ -258,6 +258,7 @@ protected:
 	BOOL GetHScrollDeadSpace(CRect& rDead) const;
 	void AdjustForBorder(CRect& rLeft, CRect& rRight) const;
 	BOOL PtInSplitter(const CPoint& pt, BOOL bScreen = FALSE) const;
+	BOOL IsSplitting() { return m_bSplitting; }
 
 	// callbacks for derived classes
 	virtual BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
@@ -289,7 +290,6 @@ private:
 	void BuildTreeListSortMap(HWND hwndTree, HWND hwndList, CSortMap& map);
 	void BuildTreeListSortMap(HWND hwndTree, HWND hwndList, HTREEITEM hti, CSortMap& map, int& nIndex);
 	void SortTreeItem(HWND hwndTree, HTREEITEM hti, PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, BOOL bRecursive);
-
 	void BuildListListSortMap(HWND hwndPrimary, HWND hwndList, CSortMap& map);
 
 	static int CALLBACK SortListProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);

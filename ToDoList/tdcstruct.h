@@ -1383,6 +1383,7 @@ struct SEARCHPARAM
 		case TDCA_ID:
 		case TDCA_PARENTID:
 		case TDCA_POSITION:
+		case TDCA_RECURRENCE: 
 			return FT_INTEGER;
 
 		case TDCA_TIMEEST:
@@ -1409,7 +1410,6 @@ struct SEARCHPARAM
 		case TDCA_LASTMODDATE:
 			return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
 
-	//	case TDCA_RECURRENCE: 
 		}
 
 		// custom attribute type must be set explicitly by caller

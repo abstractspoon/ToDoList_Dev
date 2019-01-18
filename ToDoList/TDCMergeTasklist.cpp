@@ -41,7 +41,19 @@ int CTDCMergeTasklist::Merge(const CXmlItem* pXISrc, CXmlItem* pXIDest)
 {
 	// all the external methods end up here
 	m_pXIDestRoot = pXIDest;
-	m_dwNextID = pXIDest->GetItemValueI(TDL_NEXTUNIQUEID);
+
+	if (pXIDest->HasItem(TDL_NEXTUNIQUEID))
+	{
+		m_dwNextID = pXIDest->GetItemValueI(TDL_NEXTUNIQUEID);
+	}
+	else if (pXISrc->HasItem(TDL_NEXTUNIQUEID))
+	{
+		m_dwNextID = pXISrc->GetItemValueI(TDL_NEXTUNIQUEID);
+	}
+	else
+	{
+		m_dwNextID = 1;
+	}
 
 	int nRes = MergeTasks(pXISrc, pXIDest);
 
@@ -244,9 +256,11 @@ int CTDCMergeTasklist::MergeTasksByTitle(const CXmlItem* pXISrc, CXmlItem* pXIDe
 
 BOOL CTDCMergeTasklist::MergeAttributes(const CXmlItem* pXISrc, CXmlItem* pXIDest)
 {
+	const CXmlItem* pXIDestMod = pXIDest->GetItem(TDL_TASKLASTMOD);
+
+#ifndef _DEBUG
 	// don't merge if the source is older than the dest
 	const CXmlItem* pXISrcMod = pXISrc->GetItem(TDL_TASKLASTMOD);
-	const CXmlItem* pXIDestMod = pXIDest->GetItem(TDL_TASKLASTMOD);
 
 	if (pXISrcMod && pXIDestMod)
 	{
@@ -254,10 +268,13 @@ BOOL CTDCMergeTasklist::MergeAttributes(const CXmlItem* pXISrc, CXmlItem* pXIDes
 			return FALSE;
 	}
 	else if (pXIDestMod)
+	{
 		return FALSE;
+	}
+#endif
 
 	BOOL bChange = FALSE;
-	POSITION pos = pXISrc->GetFirstItemPos();
+	POSITION pos = pXISrc->GetFirstItemPos(); // first child
 
 	while (pos)
 	{
@@ -278,13 +295,72 @@ BOOL CTDCMergeTasklist::MergeAttributes(const CXmlItem* pXISrc, CXmlItem* pXIDes
 		// if not then add it
 		if (!pXIDestAttrib)
 		{
-			pXIDest->AddItem(*pXISrcAttrib, FALSE);
+			pXIDest->AddItem(*pXISrcAttrib, TRUE);
 			bChange = TRUE;
 		}
-		// else update it
-		else
+		else if (pXISrcAttrib->GetSibling())
 		{
-			// update value
+			// May be more than one value in any order so check
+			// for differences and if found delete the existing values 
+			// and recopy
+			BOOL bMatch = (pXISrcAttrib->GetSiblingCount() == pXIDestAttrib->GetSiblingCount());
+
+			if (bMatch)
+			{
+				if (pXISrcAttrib->NameMatches(TDL_TASKCUSTOMATTRIBDATA))
+				{
+					ASSERT (pXISrcAttrib->GetItemCount() >= 2);
+
+					while (pXISrcAttrib)
+					{
+						LPCTSTR szCustomAttribID = pXISrcAttrib->GetItemValue(TDL_TASKCUSTOMATTRIBID);
+						CXmlItem* pXIDestAttribID = pXIDestAttrib->FindItem(TDL_TASKCUSTOMATTRIBID, szCustomAttribID);
+					
+						if (!pXIDestAttribID)
+						{
+							bMatch = FALSE;
+							break;
+						}
+
+						// else check value and update in place
+						pXIDestAttrib = pXIDestAttribID->GetParent();
+						ASSERT(pXIDestAttrib);
+
+						if (!pXIDestAttrib->ItemValueMatches(pXISrcAttrib, TDL_TASKCUSTOMATTRIBVALUE))
+						{
+							pXIDestAttrib->SetItemValue(TDL_TASKCUSTOMATTRIBVALUE, pXISrcAttrib->GetItemValue(TDL_TASKCUSTOMATTRIBVALUE));
+							bChange = TRUE;
+						}
+
+						pXISrcAttrib = pXISrcAttrib->GetSibling();
+					}
+				}
+				else // simple values, no children (eg. Category, Alloc To, etc)
+				{
+					ASSERT (pXISrcAttrib->GetItemCount() == 0);
+
+					while (pXISrcAttrib)
+					{
+						if (!pXIDestAttrib->FindItem(szAttrib, pXISrcAttrib->GetValue(), FALSE))
+						{
+							bMatch = FALSE;
+							break;
+						}
+
+						pXISrcAttrib = pXISrcAttrib->GetSibling();
+					}
+				}
+			}
+			
+			if (!bMatch)
+			{
+				pXIDest->DeleteItem(pXISrcAttrib->GetName()); // deletes siblings too
+				pXIDest->AddItem(*pXISrcAttrib, TRUE);
+				bChange = TRUE;
+			}
+		}
+		else // update value
+		{
 			if (!pXIDestAttrib->ValueMatches(pXISrcAttrib, FALSE))
 			{
 				pXIDestAttrib->SetValue(pXISrcAttrib->GetValue());

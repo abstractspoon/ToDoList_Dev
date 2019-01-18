@@ -108,7 +108,7 @@ protected:
 	const TODOITEM* GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
 	static double GetBestDate(double dBest, double dDate, BOOL bEarliest);
-	static double GetCalculationValue(const TDCCADATA& data, TDC_UNITS nUnits);
+	static double GetCalculationValue(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDC_UNITS nUnits);
 
 };
 
@@ -172,6 +172,7 @@ protected:
 	BOOL ValueMatches(double dValue, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
 	BOOL ValueMatches(int nValue, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
 	BOOL ValueMatches(const CString& sComments, const CBinaryData& customComments, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
+	BOOL ValueMatches(const TDCRECURRENCE& trRecurrence, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
 
 	BOOL ValueMatches(const CString& sText, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bCaseSensitive) const;
 	BOOL ValueMatches(const TDCCADATA& data, DWORD dwAttribType, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bCaseSensitive) const;

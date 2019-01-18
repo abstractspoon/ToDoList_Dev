@@ -205,13 +205,16 @@ namespace GraphicsMisc
 	BOOL EnableAeroPeek(HWND hWnd, BOOL bEnable = TRUE);
 	BOOL EnableFlip3D(HWND hWnd, BOOL bEnable = TRUE);
 	BOOL GetExtendedFrameBounds(HWND hWnd, CRect& rBounds);
+	BOOL ChangeWindowMessageFilter(UINT nMessage, BOOL bOn);
 
 	BOOL DwmSetWindowAttribute(HWND hWnd, DWORD dwAttrib, LPCVOID pData, DWORD dwDataSize);
 	BOOL DwmGetWindowAttribute(HWND hWnd, DWORD dwAttrib, PVOID pData, DWORD dwDataSize);
 
-	BOOL GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen);
-	BOOL GetAvailableScreenSpace(HWND hWnd, CRect& rScreen);
-	void GetTotalAvailableScreenSpace(CRect& rScreen);
+	BOOL GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen, UINT nFallback = MONITOR_DEFAULTTONULL);
+	BOOL GetAvailableScreenSpace(HWND hWnd, CRect& rScreen, UINT nFallback = MONITOR_DEFAULTTONULL);
+	BOOL GetTotalAvailableScreenSpace(CRect& rScreen);
+	BOOL GetPrimaryMonitorScreenSpace(CRect& rScreen);
+	BOOL GetMonitorAvailableScreenSpace(HMONITOR hMon, CRect& rScreen);
 
 	void DrawGradient(CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder);
 	void DrawGlass(CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder);

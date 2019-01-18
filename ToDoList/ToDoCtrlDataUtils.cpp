@@ -506,6 +506,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			bMatch = ArrayMatches(pTDI->aDependencies, rule, resTask, FALSE); // Ignore case
 			break;
 
+		case TDCA_RECURRENCE:
+			bMatch = ValueMatches(pTDI->trRecurrence, rule, resTask);
+			break;
+
 		case TDCA_POSITION:
 			// Position is 1-based in the UI, but 0-based internally
 			bMatch = ValueMatches((pTDS->GetPosition() + 1), rule, resTask);
@@ -652,6 +656,56 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	
 	return bMatches;
 }
+
+BOOL CTDCTaskMatcher::ValueMatches(const TDCRECURRENCE& trRecurrence, const SEARCHPARAM& rule, SEARCHRESULT& result) const
+{
+	BOOL bMatch = FALSE;
+	TDC_REGULARITY nRegularity = trRecurrence.GetRegularity();
+
+	switch (nRegularity)
+	{
+	case TDIR_DAY_EVERY_WEEKDAY:
+	case TDIR_DAY_EVERY_NDAYS:   
+	case TDIR_DAY_EVERY_NWEEKDAYS:   
+		bMatch = ValueMatches(TDIR_DAILY, rule, result);
+		break;
+		
+	case TDIR_WEEK_EVERY_NWEEKS:
+	case TDIR_WEEK_SPECIFIC_DOWS_NWEEKS:  
+		bMatch = ValueMatches(TDIR_WEEKLY, rule, result);
+		break;
+		
+	case TDIR_MONTH_SPECIFIC_DOW_NMONTHS:
+	case TDIR_MONTH_EVERY_NMONTHS:
+	case TDIR_MONTH_SPECIFIC_DAY_NMONTHS: 
+	case TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS: 
+		bMatch = ValueMatches(TDIR_MONTHLY, rule, result);
+		break;
+		
+	case TDIR_YEAR_SPECIFIC_DOW_MONTH:
+	case TDIR_YEAR_EVERY_NYEARS:
+	case TDIR_YEAR_SPECIFIC_DAY_MONTH:  
+		bMatch = ValueMatches(TDIR_YEARLY, rule, result);
+		break;
+		
+	case TDIR_ONCE:
+	default:
+		bMatch = ValueMatches(TDIR_ONCE, rule, result);
+		break;
+	}
+
+	if (bMatch)
+	{
+		// Replace the last result with the actual regularity text
+		ASSERT(result.aMatched.GetSize() > 0);
+
+		CString sRegularity = trRecurrence.GetRegularityText(nRegularity, TRUE);
+		Misc::ReplaceLastT(result.aMatched, sRegularity);
+	}
+
+	return bMatch;
+}
+
 
 BOOL CTDCTaskMatcher::ValueMatches(const CString& sComments, const CBinaryData& customComments, 
 									const SEARCHPARAM& rule, SEARCHRESULT& result) const
@@ -1017,7 +1071,6 @@ BOOL CTDCTaskMatcher::ValueMatches(double dValue, const SEARCHPARAM& rule, SEARC
 BOOL CTDCTaskMatcher::ValueMatches(int nValue, const SEARCHPARAM& rule, SEARCHRESULT& result) const
 {
 	BOOL bMatch = FALSE;
-	BOOL bPriorityRisk = (rule.AttributeIs(TDCA_PRIORITY) || rule.AttributeIs(TDCA_RISK));
 	int nSearchVal = rule.ValueAsInteger();
 	
 	switch (rule.GetOperator())
@@ -1633,17 +1686,17 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUS
 	return FALSE;
 }
 
-double CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, TDC_UNITS nUnits)
+double CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDC_UNITS nUnits)
 {
 	double dValue = DBL_NULL;
 
-	if (IsValidUnits(nUnits))
+	if (IsValidUnits(nUnits) && attribDef.IsDataType(TDCCA_TIMEPERIOD))
 	{
 		TDC_UNITS nTaskUnits;
 		dValue = data.AsTimePeriod(nTaskUnits);
 
 		// Convert to requested units
-		if ((dValue != 0.0) && nTaskUnits != nUnits)
+		if ((dValue != 0.0) && IsValidUnits(nTaskUnits) && (nTaskUnits != nUnits))
 		{
 			dValue = CTimeHelper().GetTime(dValue, 
 				TDC::MapUnitsToTHUnits(nTaskUnits), 
@@ -1676,7 +1729,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE));
 
 		// our value
-		dCalcValue = GetCalculationValue(data, nUnits);
+		dCalcValue = GetCalculationValue(data, attribDef, nUnits);
 
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -1700,7 +1753,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		if (data.IsEmpty())
 			dCalcValue = -DBL_MAX;
 		else
-			dCalcValue = GetCalculationValue(data, nUnits);
+			dCalcValue = GetCalculationValue(data, attribDef, nUnits);
 
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -1724,7 +1777,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		if (data.IsEmpty())
 			dCalcValue = DBL_MAX;
 		else
-			dCalcValue = GetCalculationValue(data, nUnits);
+			dCalcValue = GetCalculationValue(data, attribDef, nUnits);
 
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -1742,7 +1795,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 	}
 	else
 	{
-		dCalcValue = GetCalculationValue(data, nUnits);
+		dCalcValue = GetCalculationValue(data, attribDef, nUnits);
 	}
 
 	if (dCalcValue == DBL_NULL)

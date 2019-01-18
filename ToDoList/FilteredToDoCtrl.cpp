@@ -477,7 +477,8 @@ BOOL CFilteredToDoCtrl::RemoveArchivedTask(DWORD dwTaskID)
 	if (hti)
 		m_taskTree.Tree().DeleteItem(hti);
 
-	return m_data.DeleteTask(dwTaskID);
+	return m_data.DeleteTask(dwTaskID, TRUE); // TRUE == with undo
+
 }
 
 int CFilteredToDoCtrl::GetFilteredTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const

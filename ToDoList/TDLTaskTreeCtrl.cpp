@@ -1647,7 +1647,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
 				}
 
-				m_tcTasks.Invalidate();
 				return 0; // eat it
 			}
 			break;

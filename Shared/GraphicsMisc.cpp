@@ -945,6 +945,28 @@ BOOL GraphicsMisc::DwmGetWindowAttribute(HWND hWnd, DWORD dwAttrib, PVOID pData,
 	return FALSE;
 }
 
+BOOL GraphicsMisc::ChangeWindowMessageFilter(UINT nMessage, BOOL bOn)
+{
+#ifndef MSGFLT_ADD
+#	define MSGFLT_ADD 1
+#	define MSGFLT_REMOVE 2
+#endif
+
+	HMODULE hMod = ::LoadLibrary(_T("User32.dll"));
+	
+	if (hMod)
+	{
+		typedef BOOL (WINAPI *PFNCHANGEWINDOWMESSAGEFILTER)(UINT, DWORD);
+		PFNCHANGEWINDOWMESSAGEFILTER pFn = (PFNCHANGEWINDOWMESSAGEFILTER)::GetProcAddress(hMod, "ChangeWindowMessageFilter");
+		
+		if (pFn)
+			return pFn(nMessage, (bOn ? MSGFLT_ADD : MSGFLT_REMOVE));
+	}
+
+	// All else
+	return FALSE;
+}
+
 int GraphicsMisc::DrawAnsiSymbol(CDC* pDC, char cSymbol, const CRect& rText, UINT nFlags, CFont* pFont)
 {
 	if (cSymbol == 0)
@@ -1318,18 +1340,48 @@ BOOL GraphicsMisc::DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nStat
 	return TRUE;
 }
 
-BOOL GraphicsMisc::GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen)
+BOOL GraphicsMisc::GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen, UINT nFallback)
 {
-	if (rWnd.IsRectEmpty())
-		return FALSE;
+	HMONITOR hMon = MonitorFromRect(rWnd, nFallback);
 
-	// Test for intersection with any monitor
-	HMONITOR hMon = MonitorFromRect(rWnd, MONITOR_DEFAULTTONULL);
+	if (hMon && GetMonitorAvailableScreenSpace(hMon, rScreen))
+		return TRUE;
 
-	if (hMon == NULL)
-		return FALSE;
+	// else
+	if (nFallback == MONITOR_DEFAULTTOPRIMARY)
+		return GetPrimaryMonitorScreenSpace(rScreen);
 
-	// Find nearest monitor
+	return FALSE;
+}
+
+BOOL GraphicsMisc::GetAvailableScreenSpace(HWND hWnd, CRect& rScreen, UINT nFallback)
+{
+	if (hWnd != NULL)
+	{
+		CRect rWnd;
+		::GetWindowRect(hWnd, rWnd);
+
+		return GetAvailableScreenSpace(rWnd, rScreen, nFallback);
+	}
+
+	// all else
+	if (nFallback == MONITOR_DEFAULTTOPRIMARY)
+		return GetPrimaryMonitorScreenSpace(rScreen);
+
+	rScreen.SetRectEmpty();
+	return FALSE;
+}
+
+BOOL GraphicsMisc::GetPrimaryMonitorScreenSpace(CRect& rScreen)
+{
+	HMONITOR hMon = MonitorFromWindow(NULL, MONITOR_DEFAULTTOPRIMARY);
+	ASSERT(hMon);
+
+	return GetMonitorAvailableScreenSpace(hMon, rScreen);
+}
+
+BOOL GraphicsMisc::GetMonitorAvailableScreenSpace(HMONITOR hMon, CRect& rScreen)
+{
 	MONITORINFO mi = { sizeof(MONITORINFO), 0 };
 	
 	if (GetMonitorInfo(hMon, &mi))
@@ -1340,27 +1392,19 @@ BOOL GraphicsMisc::GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen)
 
 	// else
 	ASSERT(0);
+	rScreen.SetRectEmpty();
+
 	return FALSE;
 }
 
-BOOL GraphicsMisc::GetAvailableScreenSpace(HWND hWnd, CRect& rScreen)
-{
-	if (hWnd == NULL)
-		return FALSE;
-
-	// else
-	CRect rWnd;
-	::GetWindowRect(hWnd, rWnd);
-
-	return GetAvailableScreenSpace(rWnd, rScreen);
-}
-
-void GraphicsMisc::GetTotalAvailableScreenSpace(CRect& rScreen)
+BOOL GraphicsMisc::GetTotalAvailableScreenSpace(CRect& rScreen)
 {
 	rScreen.left = GetSystemMetrics(SM_XVIRTUALSCREEN);
 	rScreen.top = GetSystemMetrics(SM_YVIRTUALSCREEN);
 	rScreen.right = (rScreen.left + GetSystemMetrics(SM_CXVIRTUALSCREEN));
 	rScreen.bottom = (rScreen.top + GetSystemMetrics(SM_CYVIRTUALSCREEN));
+
+	return !rScreen.IsRectEmpty();
 }
 
 void GraphicsMisc::DrawHorzLine(CDC* pDC, int nXFrom, int nXTo, int nYPos, COLORREF crFrom, COLORREF crTo)

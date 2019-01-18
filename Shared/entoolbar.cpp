@@ -153,7 +153,7 @@ BOOL CEnToolBar::SetImage(CEnBitmapEx* pBitmap, COLORREF crMask)
 
 	m_ilNormal.DeleteImageList();
 	
-	if (m_ilNormal.Create(m_sizeImage.cx, m_sizeImage.cy, ILC_COLOR24 | ILC_MASK, 0, 1)) 
+	if (m_ilNormal.Create(m_sizeImage.cx, m_sizeImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1)) 
 	{
 		m_ilNormal.Add(pBitmap, crMask);
 		m_ilNormal.ScaleByDPIFactor();
@@ -239,7 +239,7 @@ void CEnToolBar::RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask)
 		
 		// button size
 		m_ilDisabled.DeleteImageList();
-		m_ilDisabled.Create(m_sizeImage.cx, m_sizeImage.cy, ILC_COLOR24 | ILC_MASK, 0, 1);
+		m_ilDisabled.Create(m_sizeImage.cx, m_sizeImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1);
 		m_ilDisabled.Add(pBitmap, crMask);
 		m_ilDisabled.ScaleByDPIFactor();
 		
@@ -257,7 +257,7 @@ void CEnToolBar::RefreshDisabledImageList()
 	int nImageSize = m_ilNormal.GetImageSize();
 
 	m_ilDisabled.DeleteImageList();
-	m_ilDisabled.Create(nImageSize, nImageSize, ILC_COLOR24 | ILC_MASK, 0, 1);
+	m_ilDisabled.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1);
 
 	// Work directly off the icons
 	COLORREF crMask = RGB(255, 0, 255);

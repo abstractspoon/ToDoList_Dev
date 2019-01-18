@@ -333,6 +333,8 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 void CTDLTaskListCtrl::OnNotifySplitterChange(int nSplitPos)
 {
+	CTDLTaskCtrlBase::OnNotifySplitterChange(nSplitPos);
+
 	// if split width exceeds client column width
 	// extend column width to suit
 	if (IsRight(m_lcTasks))
@@ -351,8 +353,6 @@ void CTDLTaskListCtrl::OnNotifySplitterChange(int nSplitPos)
 	{
 		m_lcTasks.SetColumnWidth(0, CLIENTCOLWIDTH);
 	}
-
-	InvalidateAll(TRUE);
 }
 
 int CTDLTaskListCtrl::InsertItem(DWORD dwTaskID, int nPos)
@@ -741,29 +741,33 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			// handle bulk selection here
 			if (Misc::IsKeyPressed(VK_SHIFT)) // bulk-selection
 			{
-				CTLSHoldResync hr(*this);
-				
-				int nAnchor = m_lcColumns.GetSelectionMark();
-				m_lcTasks.SetSelectionMark(nAnchor);
-
-				if (!Misc::IsKeyPressed(VK_CONTROL))
-					DeselectAll();
-
-				// Add new items to tree and list
-				TDC_COLUMN nColID = TDCC_NONE;
-				int nHit = HitTestColumnsItem(lp, TRUE, nColID);
-
-				int nFrom = (nAnchor < nHit) ? nAnchor : nHit;
-				int nTo = (nAnchor < nHit) ? nHit : nAnchor;
-
-				for (int nItem = nFrom; nItem <= nTo; nItem++)
+				// Scope the resync to re-enable before notifying
+				// the parent else redraw issues abound
 				{
-					m_lcTasks.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
-					m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
+					CTLSHoldResync hr(*this);
+					
+					int nAnchor = m_lcColumns.GetSelectionMark();
+					m_lcTasks.SetSelectionMark(nAnchor);
+
+					if (!Misc::IsKeyPressed(VK_CONTROL))
+						DeselectAll();
+
+					// Add new items to tree and list
+					TDC_COLUMN nColID = TDCC_NONE;
+					int nHit = HitTestColumnsItem(lp, TRUE, nColID);
+
+					int nFrom = (nAnchor < nHit) ? nAnchor : nHit;
+					int nTo = (nAnchor < nHit) ? nHit : nAnchor;
+
+					for (int nItem = nFrom; nItem <= nTo; nItem++)
+					{
+						m_lcTasks.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
+						m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
+					}
+
 				}
 				
 				NotifyParentSelChange(SC_BYMOUSE);
-
 				return 0; // eat it
 			}
 			

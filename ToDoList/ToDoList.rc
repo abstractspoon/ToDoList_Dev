@@ -5447,6 +5447,7 @@ BEGIN
     IDS_SAVETASKVIEWTOIMAGE_TITLE "Save Task View to Image"
     IDS_TDLBC_CUSTOMATTRIBS "Custom Attributes"
     IDS_TABTIP_TIMETRACKING "Time Tracking"
+    IDS_HANDLERNOTINSTALLED "(handler not installed)"
 END
 
 #endif    // English (Australia) resources

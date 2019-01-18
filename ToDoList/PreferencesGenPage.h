@@ -91,6 +91,8 @@ public:
 	CString	m_sStickiesPath;
 	BOOL	m_bReloadTasklists;
 	BOOL	m_bEnableRTLInput;
+	CString	m_sTDLExtensionHandler;
+	CString	m_sTDLProtocolHandler;
 	//}}AFX_DATA
 	CFileEdit	m_eStickiesPath;
 	DWORD	m_dwGlobalHotkey;
