@@ -7,6 +7,7 @@
 #include "filemisc.h"
 #include "binarydata.h"
 #include "localizer.h"
+#include "osversion.h"
 
 #include "..\Interfaces\IContentControl.h"
 
@@ -82,6 +83,10 @@ void CContentMgr::Initialize() const
 			{
 				if (IsContentDll(sDllPath))
 				{
+					// Avoid instantiating Non-native (C#) modules on Linux
+					if ((COSVersion() == OSV_LINUX) && !FileMisc::IsNativeModule(sDllPath))
+						continue;
+
 					int nDllVer = 0;
 					IContent* pContent = CreateContentInterface(sDllPath, &nDllVer);
 
