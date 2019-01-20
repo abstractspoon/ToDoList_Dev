@@ -146,6 +146,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HTMLContentControlBridge", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZetaControl", "ContentControl\HTMLContentControl\ZetaControl\ZetaControl.csproj", "{B00AE765-8212-43FD-8E70-768A6C20EE93}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSHTMLEditorControl", "ContentControl\HTMLContentControl\MSHtmlEditorControl\MSHTMLEditorControl.csproj", "{5873DE0F-6853-4C8E-91A4-7A6861069A9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -470,6 +472,18 @@ Global
 		{B00AE765-8212-43FD-8E70-768A6C20EE93}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{B00AE765-8212-43FD-8E70-768A6C20EE93}.Release|Win32.ActiveCfg = Release|Any CPU
 		{B00AE765-8212-43FD-8E70-768A6C20EE93}.Release|x86.ActiveCfg = Release|Any CPU
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Release|Win32.ActiveCfg = Release|Any CPU
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -510,5 +524,6 @@ Global
 		{8A0B2029-7325-4527-9483-38DDC1F3B011} = {197E2D6E-7618-41D5-B9C0-C553C59B93ED}
 		{ECA8069A-97C6-4BE3-9BA2-D028709A05AA} = {197E2D6E-7618-41D5-B9C0-C553C59B93ED}
 		{B00AE765-8212-43FD-8E70-768A6C20EE93} = {197E2D6E-7618-41D5-B9C0-C553C59B93ED}
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A} = {197E2D6E-7618-41D5-B9C0-C553C59B93ED}
 	EndGlobalSection
 EndGlobal

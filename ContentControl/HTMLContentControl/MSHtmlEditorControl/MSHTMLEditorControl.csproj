@@ -1,0 +1,265 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5873DE0F-6853-4C8E-91A4-7A6861069A9A}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>Resources\HtmlEditor.ico</ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>MSDN.HtmlEditorControl</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>MSDN.Html.Editor</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.mshtml">
+      <Name>Microsoft.mshtml</Name>
+      <HintPath>..\..\..\..\Program Files\Microsoft.NET\Primary Interop Assemblies\Microsoft.mshtml.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Web">
+      <Name>System.Web</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Forms\EditHtmlForm.Designer.cs">
+      <DependentUpon>EditHtmlForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\EnterHrefForm.Designer.cs">
+      <DependentUpon>EnterHrefForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\EnterImageForm.Designer.cs">
+      <DependentUpon>EnterImageForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FindReplaceForm.Designer.cs">
+      <DependentUpon>FindReplaceForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FontAttributeForm.Designer.cs">
+      <DependentUpon>FontAttributeForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TablePropertyForm.Designer.cs">
+      <DependentUpon>TablePropertyForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HtmlEditorControl.Designer.cs">
+      <DependentUpon>HtmlEditorControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Forms\EditHtmlForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\EnterHrefForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\EnterImageForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FindReplaceForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FontAttributeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HtmlEditorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Classes\HtmlEditorEvents.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\HtmlEnumerations.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\HtmlFontProperty.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\HtmlTableProperty.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\IOleCommandTarget.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Forms\TablePropertyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\EditHtmlForm.resx">
+      <DependentUpon>EditHtmlForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\EnterHrefForm.resx">
+      <DependentUpon>EnterHrefForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\EnterImageForm.resx">
+      <DependentUpon>EnterImageForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FindReplaceForm.resx">
+      <DependentUpon>FindReplaceForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FontAttributeForm.resx">
+      <DependentUpon>FontAttributeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HtmlEditorControl.resx">
+      <DependentUpon>HtmlEditorControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TablePropertyForm.resx">
+      <DependentUpon>TablePropertyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\HtmlEditor.bmp" />
+    <Content Include="Resources\HtmlEditor.ico" />
+    <Content Include="Resources\ToolbarBold.bmp" />
+    <Content Include="Resources\ToolbarCopy.bmp" />
+    <Content Include="Resources\ToolBarCut.bmp" />
+    <Content Include="Resources\ToolbarDelete.bmp" />
+    <None Include="Resources\ToolbarFileOpen.bmp" />
+    <None Include="Resources\ToolbarFileSave.bmp" />
+    <Content Include="Resources\ToolbarFind.bmp" />
+    <Content Include="Resources\ToolbarFontColor.bmp" />
+    <Content Include="Resources\ToolbarFontDown.bmp" />
+    <Content Include="Resources\ToolbarFontNormal.bmp" />
+    <Content Include="Resources\ToolbarFontStyle.bmp" />
+    <Content Include="Resources\ToolbarFontUp.bmp" />
+    <Content Include="Resources\ToolbarImage.bmp" />
+    <Content Include="Resources\ToolbarItalic.bmp" />
+    <Content Include="Resources\ToolbarJustifyCenter.bmp" />
+    <Content Include="Resources\ToolbarJustifyLeft.bmp" />
+    <Content Include="Resources\ToolbarJustifyRight.bmp" />
+    <Content Include="Resources\ToolbarLine.bmp" />
+    <Content Include="Resources\ToolbarListOrdered.bmp" />
+    <Content Include="Resources\ToolbarListUnordered.bmp" />
+    <Content Include="Resources\ToolbarPaste.bmp" />
+    <None Include="Resources\ToolbarPrint.bmp" />
+    <Content Include="Resources\ToolbarProperties.bmp" />
+    <Content Include="Resources\ToolbarRedo.bmp" />
+    <Content Include="Resources\ToolbarTabInsert.bmp" />
+    <Content Include="Resources\ToolbarTable.bmp" />
+    <Content Include="Resources\ToolbarTabRemove.bmp" />
+    <Content Include="Resources\ToolbarUnderline.bmp" />
+    <Content Include="Resources\ToolbarUndo.bmp" />
+    <Content Include="Resources\ToolbarWebLink.bmp" />
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
