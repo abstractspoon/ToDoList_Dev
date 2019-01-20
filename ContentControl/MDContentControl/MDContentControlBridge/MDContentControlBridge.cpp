@@ -187,7 +187,7 @@ bool CMDContentControlBridge::SetTextContent(LPCWSTR szContent, bool bResetSelec
 {
 	msclr::auto_gcroot<String^> content = gcnew String(szContent);
 
-	return m_wnd->SetTextContent(content, bResetSelection);
+	return m_wnd->SetTextContent(content.get(), bResetSelection);
 }
 
 void CMDContentControlBridge::SetReadOnly(bool bReadOnly)

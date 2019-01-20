@@ -196,7 +196,7 @@ bool CHTMLContentControlBridge::SetTextContent(LPCWSTR szContent, bool bResetSel
 {
 	msclr::auto_gcroot<String^> content = gcnew String(szContent);
 
-	return m_wnd->SetTextContent(content, bResetSelection);
+	return m_wnd->SetTextContent(content.get(), bResetSelection);
 }
 
 void CHTMLContentControlBridge::SetReadOnly(bool bReadOnly)
