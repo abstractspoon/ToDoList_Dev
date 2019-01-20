@@ -200,41 +200,45 @@
 			string text)
 		{
 			//if (!string.IsNullOrEmpty(text))
-			{
-				response.ContentType = @"text/html";
+            try
+            {
+                response.ContentType = @"text/html";
 
-				if (!string.IsNullOrEmpty(request.Headers[@"if-Modified-Since"]))
-				{
+                if (!string.IsNullOrEmpty(request.Headers[@"if-Modified-Since"]))
+                {
 #pragma warning disable 162
-					response.Status = HttpStatusCode.OK;
+                    response.Status = HttpStatusCode.OK;
 #pragma warning restore 162
-				}
+                }
 
-				addNeverCache(response);
+                addNeverCache(response);
 
-				if (request.Method != @"Headers" && response.Status != HttpStatusCode.NotModified)
-				{
-					Trace.WriteLine(
-						string.Format(
-							@"[Web server] Sending text for URL '{0}': '{1}'.",
-							request.Uri.AbsolutePath,
-							text));
+                if (request.Method != @"Headers" && response.Status != HttpStatusCode.NotModified)
+                {
+                    Trace.WriteLine(
+                        string.Format(
+                            @"[Web server] Sending text for URL '{0}': '{1}'.",
+                            request.Uri.AbsolutePath,
+                            text));
 
-					var buffer2 = getBytesWithBom(text);
+                    var buffer2 = getBytesWithBom(text);
 
-					response.ContentLength = buffer2.Length;
-					response.SendHeaders();
+                    response.ContentLength = buffer2.Length;
+                    response.SendHeaders();
 
-					response.SendBody(buffer2, 0, buffer2.Length);
-				}
-				else
-				{
-					response.ContentLength = 0;
-					response.SendHeaders();
+                    response.SendBody(buffer2, 0, buffer2.Length);
+                }
+                else
+                {
+                    response.ContentLength = 0;
+                    response.SendHeaders();
 
-					Trace.WriteLine(@"[Web server] Not sending.");
-				}
-			}
+                    Trace.WriteLine(@"[Web server] Not sending.");
+                }
+            }
+            catch (Exception e)
+            {
+            }
 		}
 
 		private static byte[] getBytesWithBom(string text)

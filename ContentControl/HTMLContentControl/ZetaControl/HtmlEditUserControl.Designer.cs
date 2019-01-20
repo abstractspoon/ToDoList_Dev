@@ -401,7 +401,7 @@
             // 
             // htmlEditControl
             // 
-            this.htmlEditControl.AllowWebBrowserDrop = false;
+            //this.htmlEditControl.AllowWebBrowserDrop = false;
             this.htmlEditControl.CssFontName = "Tahoma";
             this.htmlEditControl.CssFontSize = "8.25pt";
             resources.ApplyResources(this.htmlEditControl, "htmlEditControl");

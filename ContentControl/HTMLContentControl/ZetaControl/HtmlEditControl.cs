@@ -408,7 +408,7 @@ td { padding: 1px; border: 2px inset #fff; {font-style}; }";
         {
             InitializeComponent();
 
-            AllowWebBrowserDrop = false;
+            //AllowWebBrowserDrop = false;
 
             Navigate(@"about:blank");
 
@@ -3607,6 +3607,14 @@ td { padding: 1px; border: 2px inset #fff; {font-style}; }";
             {
                 UINeedsUpdate(this, EventArgs.Empty);
             }
+        }
+
+        protected override void OnVisibleChanged(EventArgs e)
+        {
+            base.OnVisibleChanged(e);
+
+            if (this.Visible && AllowWebBrowserDrop)
+                AllowWebBrowserDrop = false;
         }
 
         /// <summary>

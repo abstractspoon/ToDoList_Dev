@@ -38,4 +38,4 @@ using System.Security.Permissions;
 
 // http://www.tutorials.de/forum/net-caf/260346-assembly-verursacht-securityexception.html
 /*[assembly: SecurityPermission( SecurityAction.RequestMinimum, Assertion = true, Unrestricted = true )]*/
-[assembly: AllowPartiallyTrustedCallers]
+//[assembly: AllowPartiallyTrustedCallers]
