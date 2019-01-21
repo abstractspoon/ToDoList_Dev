@@ -111,7 +111,7 @@ namespace HTMLContentControl
             m_toolbarRenderer.SetUITheme(theme);
 
             BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-            //ToolBar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+            m_HtmlEditControl.ToolBar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
         }
 
         public void SetReadOnly(bool bReadOnly)
@@ -179,19 +179,6 @@ namespace HTMLContentControl
         private void InitializeComponent()
         {
             this.SuspendLayout();
-
-            //this.ToolBar.Renderer = m_toolbarRenderer;
-            //this.ToolBar.Font = m_ControlsFont;
-
-            if (Win32.WantScaleByDPIFactor())
-            {
-                int imageSize = Win32.ScaleByDPIFactor(16);
-
-                //this.ToolBar.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
-                //this.ToolBar.AutoSize = false;
-                //this.ToolBar.Height = (imageSize + 10);
-            }
-            
             // 
             // HTMLContentControlCore
             // 
@@ -203,6 +190,19 @@ namespace HTMLContentControl
             this.Font = m_ControlsFont;
 
             this.m_HtmlEditControl = new MSDN.Html.Editor.HtmlEditorControl();
+
+            this.m_HtmlEditControl.ToolBar.Renderer = m_toolbarRenderer;
+            this.m_HtmlEditControl.ToolBar.Font = m_ControlsFont;
+
+            if (Win32.WantScaleByDPIFactor())
+            {
+                int imageSize = Win32.ScaleByDPIFactor(16);
+
+                this.m_HtmlEditControl.ToolBar.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
+                this.m_HtmlEditControl.ToolBar.AutoSize = false;
+                this.m_HtmlEditControl.ToolBar.Height = (imageSize + 10);
+            }
+            
             this.m_HtmlEditControl.ToolbarDock = DockStyle.Top;
             this.m_HtmlEditControl.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
 //             this.m_HtmlEditControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)

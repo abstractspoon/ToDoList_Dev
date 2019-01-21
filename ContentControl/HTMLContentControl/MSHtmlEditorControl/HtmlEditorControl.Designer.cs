@@ -142,6 +142,7 @@
             resources.ApplyResources(this.browserPanel, "browserPanel");
             this.browserPanel.Name = "browserPanel";
             this.browserPanel.Resize += new System.EventHandler(this.browserPanelResize);
+            this.browserPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             // 
             // editorWebBrowser
             // 

@@ -3868,9 +3868,13 @@ namespace MSDN.Html.Editor
                 if (_toolbarVisible)
                 {
                     if (_toolbarDock == DockStyle.Top)
-                        this.browserPanel.Top = this.toolstripEditor.Height;
+                    {
+                        this.browserPanel.Top = this.toolstripEditor.Bottom;
+                    }
                     else
+                    {
                         this.browserPanel.Top = 0;
+                    }
                 }
                 else
                 {
@@ -3893,11 +3897,17 @@ namespace MSDN.Html.Editor
             this.editorWebBrowser.Height = Math.Max(0, this.browserPanel.Height - (_borderSize * ((_toolbarDock == DockStyle.Left || _toolbarDock == DockStyle.Right) ? 2 : 1)));
             this.editorWebBrowser.Width = Math.Max(0, this.browserPanel.Width - (_borderSize * ((_toolbarDock == DockStyle.Top || _toolbarDock == DockStyle.Bottom) ? 2 : 1)));
 
+            this.Update();
         } //SetBrowserPanelSize
 
         #endregion
 
         #region Toolbar Processing Operations
+
+        public System.Windows.Forms.ToolStrip ToolBar 
+        {
+            get { return toolstripEditor; }
+        }
 
         /// <summary>
         /// General Tool Strip processing method
