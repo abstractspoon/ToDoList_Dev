@@ -12,11 +12,12 @@ namespace HTMLContentControl
     [System.ComponentModel.DesignerCategory("")]
     public class HTMLContentControlCore : System.Windows.Forms.Panel, IContentControlWnd
     {
-        private IntPtr m_hwndParent;
-        private UIThemeToolbarRenderer m_toolbarRenderer;
+        private IntPtr m_HwndParent;
         private System.Drawing.Font m_ControlsFont;
         private Boolean m_SettingContent = false;
-        private MSDN.Html.Editor.HtmlEditorControl m_HtmlEditControl;
+        private TDLHtmlEditorControl m_HtmlEditControl;
+        private Translator m_Trans;
+        private String m_HelpID;
 
         // --------------------------------------------------------------------------------------
 
@@ -24,12 +25,13 @@ namespace HTMLContentControl
 
         // --------------------------------------------------------------------------------------
 
-        public HTMLContentControlCore(IntPtr hwndParent)
+        public HTMLContentControlCore(IntPtr hwndParent, Translator trans, String helpID)
         {
-            m_hwndParent = hwndParent;
-            m_toolbarRenderer = new UIThemeToolbarRenderer();
+            m_HwndParent = hwndParent;
             m_ControlsFont = new System.Drawing.Font(FontName, 8);
-
+            m_Trans = trans;
+            m_HelpID = helpID;
+            
             InitializeComponent();
 
             //HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
@@ -108,11 +110,8 @@ namespace HTMLContentControl
 
         public void SetUITheme(UITheme theme)
         {
-            m_toolbarRenderer.SetUITheme(theme);
-
-            BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-            m_HtmlEditControl.ToolBar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-        }
+            m_HtmlEditControl.SetUITheme(theme);
+       }
 
         public void SetReadOnly(bool bReadOnly)
         {
@@ -165,9 +164,6 @@ namespace HTMLContentControl
         {
             base.OnResize(e);
 
-//             if (this.m_HtmlEditControl != null)
-//                 this.m_HtmlEditControl.SetBr = this.ClientSize;
-
             Win32.RemoveClientEdge(Handle);
         }
 
@@ -189,52 +185,22 @@ namespace HTMLContentControl
             this.Padding = new System.Windows.Forms.Padding(0);
             this.Font = m_ControlsFont;
 
-            this.m_HtmlEditControl = new MSDN.Html.Editor.HtmlEditorControl();
-
-            this.m_HtmlEditControl.ToolBar.Renderer = m_toolbarRenderer;
-            this.m_HtmlEditControl.ToolBar.Font = m_ControlsFont;
-
-            if (Win32.WantScaleByDPIFactor())
-            {
-                int imageSize = Win32.ScaleByDPIFactor(16);
-
-                this.m_HtmlEditControl.ToolBar.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
-                this.m_HtmlEditControl.ToolBar.AutoSize = false;
-                this.m_HtmlEditControl.ToolBar.Height = (imageSize + 10);
-            }
-            
-            this.m_HtmlEditControl.ToolbarDock = DockStyle.Top;
-            this.m_HtmlEditControl.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
-//             this.m_HtmlEditControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-//                          | System.Windows.Forms.AnchorStyles.Left)
-//                          | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_HtmlEditControl.InnerText = "Carl Nolan";
+            this.m_HtmlEditControl = new TDLHtmlEditorControl(m_ControlsFont, m_Trans);
             this.m_HtmlEditControl.Location = new System.Drawing.Point(0, 0);
             this.m_HtmlEditControl.Name = "m_HtmlEditControl";
-            this.m_HtmlEditControl.TabIndex = 26;
             this.m_HtmlEditControl.Size = this.ClientSize;
-            this.m_HtmlEditControl.BorderStyle = System.Windows.Forms.BorderStyle.None;// FixedSingle;
-            this.m_HtmlEditControl.BorderSize = 0;
 
             this.Controls.Add(this.m_HtmlEditControl);
-            //this.m_HtmlEditControl.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(this.htmlEditorControl_HtmlNavigation); 
-
-//             this.HtmlEditControl.AllowWebBrowserDrop = false;
-//             this.HtmlEditControl.CssFontSize = "8pt";
-//             this.HtmlEditControl.CssFontName = "Tahoma";
-//             this.HtmlEditControl.IsWebBrowserContextMenuEnabled = false;
 
             this.ResumeLayout(false);
             this.PerformLayout();
-
-            //this.OnResize(new EventArgs());
         }
 
         private void OnInputTextChanged(object sender, EventArgs e)
         {
             if (!m_SettingContent)
             {
-                ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
+                ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent);
 
                 notify.NotifyChange();
             }
@@ -242,7 +208,7 @@ namespace HTMLContentControl
 
         private void OnInputTextLostFocus(object sender, EventArgs e)
         {
-			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
+			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent);
 
             notify.NotifyKillFocus();
         }

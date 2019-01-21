@@ -25,8 +25,7 @@ public:
 
    IContentControl* CreateCtrl(unsigned short nCtrlID, unsigned long nStyle, 
       long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
-
-
+   
    // returns the length of the html or zero if not supported
    int ConvertToHtml(const unsigned char* pContent, int nLength,
       LPCWSTR szCharSet, LPWSTR& szHtml, LPCWSTR szImageDir);
@@ -37,6 +36,7 @@ public:
 
 protected:
    HICON m_hIcon;
+   ITransText* m_pTT;
 
 protected:
    ~CHTMLContentBridge();
@@ -45,7 +45,7 @@ protected:
 class CHTMLContentControlBridge : public IContentControl
 {
 public:
-	CHTMLContentControlBridge();
+	CHTMLContentControlBridge(ITransText* pTT);
 
    BOOL Create(UINT nCtrlID, DWORD nStyle, 
       long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
@@ -77,7 +77,7 @@ public:
 
 protected:
    gcroot<HTMLContentControlCore^> m_wnd;
-   //gcroot<System::Windows::Interop::HwndSource^> m_source;
+   ITransText* m_pTT;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

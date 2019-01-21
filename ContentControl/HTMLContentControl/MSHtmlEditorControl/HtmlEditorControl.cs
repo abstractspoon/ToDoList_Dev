@@ -3886,7 +3886,7 @@ namespace MSDN.Html.Editor
             }
             else if (_toolbarDock == DockStyle.Left || _toolbarDock == DockStyle.Right)
             {
-                this.browserPanel.Left = 0;
+                //this.browserPanel.Left = 0;
                 this.browserPanel.Width = (_toolbarVisible) ? Math.Max(0, this.Width - this.toolstripEditor.Width) : this.Width;
                 this.browserPanel.Height = this.Height;
             }
@@ -3894,8 +3894,8 @@ namespace MSDN.Html.Editor
             // define the web browser within the browser panel
             this.editorWebBrowser.Left = (_toolbarDock == DockStyle.Left) ? 0 : (int)_borderSize;
             this.editorWebBrowser.Top = (_toolbarDock == DockStyle.Top) ? 0 : (int)_borderSize;
-            this.editorWebBrowser.Height = Math.Max(0, this.browserPanel.Height - (_borderSize * ((_toolbarDock == DockStyle.Left || _toolbarDock == DockStyle.Right) ? 2 : 1)));
-            this.editorWebBrowser.Width = Math.Max(0, this.browserPanel.Width - (_borderSize * ((_toolbarDock == DockStyle.Top || _toolbarDock == DockStyle.Bottom) ? 2 : 1)));
+            this.editorWebBrowser.Height = Math.Max(0, this.browserPanel.Height);// - (_borderSize * ((_toolbarDock == DockStyle.Left || _toolbarDock == DockStyle.Right) ? 2 : 1)));
+            this.editorWebBrowser.Width = Math.Max(0, this.browserPanel.Width);// - (_borderSize * ((_toolbarDock == DockStyle.Top || _toolbarDock == DockStyle.Bottom) ? 2 : 1)));
 
             this.Update();
         } //SetBrowserPanelSize
@@ -3907,6 +3907,11 @@ namespace MSDN.Html.Editor
         public System.Windows.Forms.ToolStrip ToolBar 
         {
             get { return toolstripEditor; }
+        }
+
+        public System.Windows.Forms.Panel BrowserPanel
+        {
+            get { return browserPanel; }
         }
 
         /// <summary>

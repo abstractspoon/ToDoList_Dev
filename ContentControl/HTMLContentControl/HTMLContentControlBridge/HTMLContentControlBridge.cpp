@@ -35,7 +35,7 @@ const LPCWSTR HTML_NAME = L"Html";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CHTMLContentBridge::CHTMLContentBridge() : m_hIcon(NULL)
+CHTMLContentBridge::CHTMLContentBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
    HMODULE hMod = LoadLibrary(L"HTMLContentControlBridge.dll"); // us
 
@@ -52,9 +52,10 @@ void CHTMLContentBridge::Release()
 	delete this;
 }
 
-void CHTMLContentBridge::SetLocalizer(ITransText* /*pTT*/)
+void CHTMLContentBridge::SetLocalizer(ITransText* pTT)
 {
-	// TODO
+	if (m_pTT == nullptr)
+		m_pTT = pTT;
 }
 
 LPCWSTR CHTMLContentBridge::GetTypeDescription() const
@@ -75,7 +76,7 @@ LPCWSTR CHTMLContentBridge::GetTypeID() const
 IContentControl* CHTMLContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned long nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	CHTMLContentControlBridge* pCtrl = new CHTMLContentControlBridge();
+	CHTMLContentControlBridge* pCtrl = new CHTMLContentControlBridge(m_pTT);
 
 	if (!pCtrl->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
@@ -124,14 +125,18 @@ void CHTMLContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-CHTMLContentControlBridge::CHTMLContentControlBridge()
+CHTMLContentControlBridge::CHTMLContentControlBridge(ITransText* pTT)
+	: m_pTT(pTT)
 {
 }
 
 BOOL CHTMLContentControlBridge::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	m_wnd = gcnew HTMLContentControl::HTMLContentControlCore(static_cast<IntPtr>(hwndParent));
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+	msclr::auto_gcroot<String^> helpID = gcnew String(HTML_GUID);
+
+	m_wnd = gcnew HTMLContentControl::HTMLContentControlCore(static_cast<IntPtr>(hwndParent), trans.get(), helpID.get());
 
 	HWND hWnd = GetHwnd();
 
