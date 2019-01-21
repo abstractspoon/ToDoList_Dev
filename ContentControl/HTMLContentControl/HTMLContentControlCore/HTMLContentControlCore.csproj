@@ -64,6 +64,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MSHtmlEditorControl\MSHTMLEditorControl.csproj">
+      <Project>{5873DE0F-6853-4C8E-91A4-7A6861069A9A}</Project>
+      <Name>MSHTMLEditorControl</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ZetaControl\ZetaControl.csproj">
       <Project>{B00AE765-8212-43FD-8E70-768A6C20EE93}</Project>
       <Name>ZetaControl</Name>

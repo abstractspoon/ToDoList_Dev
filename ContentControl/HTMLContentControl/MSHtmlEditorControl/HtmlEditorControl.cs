@@ -1620,7 +1620,7 @@ namespace MSDN.Html.Editor
                 dialog.ReadOnly = false;
                 dialog.SetCaption(HTML_TITLE_EDIT);
                 DefineDialogProperties(dialog);
-                if (dialog.ShowDialog(this.ParentForm) == DialogResult.OK)
+                if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
                     this.InnerHtml = dialog.HTML;
                 }
@@ -1640,7 +1640,7 @@ namespace MSDN.Html.Editor
                 dialog.ReadOnly = true;
                 dialog.SetCaption(HTML_TITLE_VIEW);
                 DefineDialogProperties(dialog);
-                dialog.ShowDialog(this.ParentForm);
+                dialog.ShowDialog(/*this.ParentForm*/);
             }
 
         } //HtmlContentsView
@@ -2088,7 +2088,7 @@ namespace MSDN.Html.Editor
                 DefineDialogProperties(dialog);
                 // based on the user interaction perform the neccessary action
                 // after one has a valid image href
-                if (dialog.ShowDialog(this.ParentForm) == DialogResult.OK)
+                if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
                     imageHref = dialog.ImageLink;
                     imageText = dialog.ImageText;
@@ -2164,7 +2164,7 @@ namespace MSDN.Html.Editor
                     dialog.HrefText = hrefText;
                     dialog.HrefLink = hrefLink;
                     DefineDialogProperties(dialog);
-                    DialogResult result = dialog.ShowDialog(this.ParentForm);
+                    DialogResult result = dialog.ShowDialog(/*this.ParentForm*/);
                     // based on the user interaction perform the neccessary action
                     // after one has a valid href
                     if (result == DialogResult.Yes)
@@ -2267,7 +2267,7 @@ namespace MSDN.Html.Editor
                 dialog.ReadOnly = false;
                 dialog.SetCaption(PASTE_TITLE_HTML);
                 DefineDialogProperties(dialog);
-                if (dialog.ShowDialog(this.ParentForm) == DialogResult.OK)
+                if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
                     this.SelectedHtml = dialog.HTML;
                 }
@@ -2288,7 +2288,7 @@ namespace MSDN.Html.Editor
                 dialog.ReadOnly = false;
                 dialog.SetCaption(PASTE_TITLE_TEXT);
                 DefineDialogProperties(dialog);
-                if (dialog.ShowDialog(this.ParentForm) == DialogResult.OK)
+                if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
                     this.SelectedText = dialog.HTML;
                 }
@@ -2456,7 +2456,7 @@ namespace MSDN.Html.Editor
             {
                 DefineDialogProperties(dialog);
                 dialog.HtmlFont = GetFontAttributes();
-                if (dialog.ShowDialog(this.ParentForm) == DialogResult.OK)
+                if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
                     HtmlFontProperty font = dialog.HtmlFont;
                     FormatFontAttributes(new HtmlFontProperty(font.Name, font.Size, font.Bold, font.Italic, font.Underline, font.Strikeout, font.Subscript, font.Superscript));
@@ -2480,7 +2480,7 @@ namespace MSDN.Html.Editor
                 colorDialog.AllowFullOpen = true;
                 colorDialog.Color = GetFontColor();
                 colorDialog.CustomColors = _customColors;
-                if (colorDialog.ShowDialog(this.ParentForm) == DialogResult.OK)
+                if (colorDialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
                     _customColors = colorDialog.CustomColors;
                     FormatFontColor(colorDialog.Color);
@@ -2714,7 +2714,7 @@ namespace MSDN.Html.Editor
                        new FindReplaceAllDelegate(this.FindReplaceAll) ))
             {
                 DefineDialogProperties(dialog);
-                DialogResult result = dialog.ShowDialog(this.ParentForm);
+                DialogResult result = dialog.ShowDialog(/*this.ParentForm*/);
             }
 
         } //FindReplacePrompt
@@ -3040,7 +3040,7 @@ namespace MSDN.Html.Editor
                 dialog.TableProperties = tableProperties;
                 DefineDialogProperties(dialog);
                 // based on the user interaction perform the neccessary action
-                if (dialog.ShowDialog(this.ParentForm) == DialogResult.OK)
+                if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
                     tableProperties = dialog.TableProperties;
                     if (table == null) TableInsert(tableProperties);
@@ -3782,11 +3782,11 @@ namespace MSDN.Html.Editor
         private void DefineDialogProperties(Form dialog)
         {
             // set ambient control properties
-            dialog.Font = this.ParentForm.Font;
-            dialog.ForeColor = this.ParentForm.ForeColor;
-            dialog.BackColor = this.ParentForm.BackColor;
-            dialog.Cursor = this.ParentForm.Cursor;
-            dialog.RightToLeft = this.ParentForm.RightToLeft;
+//             dialog.Font = this.ParentForm.Font;
+//             dialog.ForeColor = this.ParentForm.ForeColor;
+//             dialog.BackColor = this.ParentForm.BackColor;
+//             dialog.Cursor = this.ParentForm.Cursor;
+//             dialog.RightToLeft = this.ParentForm.RightToLeft;
 
             // define location and control style as system
             dialog.StartPosition = FormStartPosition.CenterParent;
@@ -3865,11 +3865,24 @@ namespace MSDN.Html.Editor
             // define the browser panel to fill the remaining space
             if (_toolbarDock == DockStyle.Top || _toolbarDock == DockStyle.Bottom)
             {
+                if (_toolbarVisible)
+                {
+                    if (_toolbarDock == DockStyle.Top)
+                        this.browserPanel.Top = this.toolstripEditor.Height;
+                    else
+                        this.browserPanel.Top = 0;
+                }
+                else
+                {
+                    this.browserPanel.Top = 0;
+                }
+
                 this.browserPanel.Width = this.Width;
                 this.browserPanel.Height = (_toolbarVisible) ? Math.Max(0, this.Height - this.toolstripEditor.Height) : this.Height;
             }
             else if (_toolbarDock == DockStyle.Left || _toolbarDock == DockStyle.Right)
             {
+                this.browserPanel.Left = 0;
                 this.browserPanel.Width = (_toolbarVisible) ? Math.Max(0, this.Width - this.toolstripEditor.Width) : this.Width;
                 this.browserPanel.Height = this.Height;
             }
