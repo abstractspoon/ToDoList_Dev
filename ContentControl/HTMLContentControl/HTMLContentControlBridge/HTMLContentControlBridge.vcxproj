@@ -123,11 +123,6 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unico
   <ItemGroup>
     <None Include="res\html.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ZetaControl\ZetaControl.csproj">
-      <Project>{b00ae765-8212-43fd-8e70-768a6c20ee93}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

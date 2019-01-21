@@ -60,7 +60,7 @@ namespace MSDN.Html.Editor
     /// </summary>
     [DefaultProperty("InnerText")]
     [ToolboxBitmap(typeof(HtmlEditorControl), "Resources.HtmlEditor.bmp")]
-    public sealed partial class HtmlEditorControl : UserControl
+    public partial class HtmlEditorControl : UserControl
     {
         #region Public Events
 
