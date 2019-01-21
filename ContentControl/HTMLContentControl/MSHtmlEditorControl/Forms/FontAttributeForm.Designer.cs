@@ -41,87 +41,96 @@ namespace MSDN.Html.Editor
             this.labelName = new System.Windows.Forms.Label();
             this.labelSample = new System.Windows.Forms.Label();
             this.SuspendLayout();
-// 
-// bCancel
-// 
+            // 
+            // bCancel
+            // 
             this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.bCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.bCancel.Location = new System.Drawing.Point(240, 200);
             this.bCancel.Name = "bCancel";
+            this.bCancel.Size = new System.Drawing.Size(75, 23);
             this.bCancel.TabIndex = 0;
             this.bCancel.Text = "Cancel";
-// 
-// bApply
-// 
+            // 
+            // bApply
+            // 
             this.bApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bApply.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.bApply.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.bApply.Location = new System.Drawing.Point(160, 200);
             this.bApply.Name = "bApply";
+            this.bApply.Size = new System.Drawing.Size(75, 23);
             this.bApply.TabIndex = 1;
             this.bApply.Text = "Apply";
-// 
-// checkBold
-// 
+            // 
+            // checkBold
+            // 
+            this.checkBold.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.checkBold.Location = new System.Drawing.Point(160, 64);
             this.checkBold.Name = "checkBold";
             this.checkBold.Size = new System.Drawing.Size(104, 16);
             this.checkBold.TabIndex = 2;
             this.checkBold.Text = "Bold";
             this.checkBold.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
-// 
-// checkUnderline
-// 
+            // 
+            // checkUnderline
+            // 
+            this.checkUnderline.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.checkUnderline.Location = new System.Drawing.Point(160, 96);
             this.checkUnderline.Name = "checkUnderline";
             this.checkUnderline.Size = new System.Drawing.Size(104, 16);
             this.checkUnderline.TabIndex = 3;
             this.checkUnderline.Text = "Underline";
             this.checkUnderline.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
-// 
-// checkItalic
-// 
+            // 
+            // checkItalic
+            // 
+            this.checkItalic.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.checkItalic.Location = new System.Drawing.Point(160, 80);
             this.checkItalic.Name = "checkItalic";
             this.checkItalic.Size = new System.Drawing.Size(104, 16);
             this.checkItalic.TabIndex = 4;
             this.checkItalic.Text = "Italic";
             this.checkItalic.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
-// 
-// labelSize
-// 
+            // 
+            // labelSize
+            // 
             this.labelSize.Location = new System.Drawing.Point(160, 8);
             this.labelSize.Name = "labelSize";
             this.labelSize.Size = new System.Drawing.Size(120, 16);
             this.labelSize.TabIndex = 6;
             this.labelSize.Text = "Font Size";
-// 
-// checkStrikeout
-// 
+            // 
+            // checkStrikeout
+            // 
+            this.checkStrikeout.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.checkStrikeout.Location = new System.Drawing.Point(160, 112);
             this.checkStrikeout.Name = "checkStrikeout";
             this.checkStrikeout.Size = new System.Drawing.Size(104, 16);
             this.checkStrikeout.TabIndex = 7;
             this.checkStrikeout.Text = "Strikeout";
             this.checkStrikeout.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
-// 
-// checkSubscript
-// 
+            // 
+            // checkSubscript
+            // 
+            this.checkSubscript.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.checkSubscript.Location = new System.Drawing.Point(160, 144);
             this.checkSubscript.Name = "checkSubscript";
             this.checkSubscript.Size = new System.Drawing.Size(104, 16);
             this.checkSubscript.TabIndex = 8;
             this.checkSubscript.Text = "Subscript";
-// 
-// checkSuperscript
-// 
+            // 
+            // checkSuperscript
+            // 
             this.checkSuperscript.Location = new System.Drawing.Point(160, 160);
             this.checkSuperscript.Name = "checkSuperscript";
             this.checkSuperscript.Size = new System.Drawing.Size(104, 16);
             this.checkSuperscript.TabIndex = 9;
             this.checkSuperscript.Text = "Superscript";
-// 
-// listFontName
-// 
+            // 
+            // listFontName
+            // 
             this.listFontName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.Simple;
             this.listFontName.FormattingEnabled = true;
             this.listFontName.Location = new System.Drawing.Point(16, 24);
@@ -129,10 +138,11 @@ namespace MSDN.Html.Editor
             this.listFontName.Size = new System.Drawing.Size(121, 160);
             this.listFontName.TabIndex = 10;
             this.listFontName.SelectedIndexChanged += new System.EventHandler(this.FontSelectionChanged);
-// 
-// listFontSize
-// 
+            // 
+            // listFontSize
+            // 
             this.listFontSize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.listFontSize.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.listFontSize.FormattingEnabled = true;
             this.listFontSize.Items.AddRange(new object[] {
             "Default",
@@ -145,18 +155,19 @@ namespace MSDN.Html.Editor
             "7 : 36 points"});
             this.listFontSize.Location = new System.Drawing.Point(160, 24);
             this.listFontSize.Name = "listFontSize";
+            this.listFontSize.Size = new System.Drawing.Size(121, 21);
             this.listFontSize.TabIndex = 11;
-// 
-// labelName
-// 
+            // 
+            // labelName
+            // 
             this.labelName.Location = new System.Drawing.Point(16, 8);
             this.labelName.Name = "labelName";
             this.labelName.Size = new System.Drawing.Size(120, 16);
             this.labelName.TabIndex = 12;
             this.labelName.Text = "Font Name";
-// 
-// labelSample
-// 
+            // 
+            // labelSample
+            // 
             this.labelSample.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.labelSample.Location = new System.Drawing.Point(16, 192);
             this.labelSample.Name = "labelSample";
@@ -164,9 +175,9 @@ namespace MSDN.Html.Editor
             this.labelSample.TabIndex = 13;
             this.labelSample.Text = "Sample AaZa";
             this.labelSample.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-// 
-// FontAttributeForm
-// 
+            // 
+            // FontAttributeForm
+            // 
             this.AcceptButton = this.bApply;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;

@@ -36,80 +36,85 @@ namespace MSDN.Html.Editor
             this.labelAlign = new System.Windows.Forms.Label();
             this.listAlign = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
-// 
-// bInsert
-// 
+            // 
+            // bInsert
+            // 
             this.bInsert.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bInsert.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.bInsert.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.bInsert.Location = new System.Drawing.Point(264, 106);
             this.bInsert.Name = "bInsert";
             this.bInsert.Size = new System.Drawing.Size(80, 23);
             this.bInsert.TabIndex = 4;
             this.bInsert.Text = "Insert Image";
-// 
-// bCancel
-// 
+            // 
+            // bCancel
+            // 
             this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.bCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.bCancel.Location = new System.Drawing.Point(352, 106);
             this.bCancel.Name = "bCancel";
+            this.bCancel.Size = new System.Drawing.Size(75, 23);
             this.bCancel.TabIndex = 5;
             this.bCancel.Text = "Cancel";
-// 
-// labelText
-// 
+            // 
+            // labelText
+            // 
             this.labelText.Location = new System.Drawing.Point(8, 40);
             this.labelText.Name = "labelText";
             this.labelText.Size = new System.Drawing.Size(32, 23);
             this.labelText.TabIndex = 3;
             this.labelText.Text = "Text:";
-// 
-// labelHref
-// 
+            // 
+            // labelHref
+            // 
             this.labelHref.Location = new System.Drawing.Point(8, 8);
             this.labelHref.Name = "labelHref";
             this.labelHref.Size = new System.Drawing.Size(32, 23);
             this.labelHref.TabIndex = 4;
             this.labelHref.Text = "Href:";
-// 
-// hrefText
-// 
-            this.hrefText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            // 
+            // hrefText
+            // 
+            this.hrefText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.hrefText.Location = new System.Drawing.Point(48, 40);
             this.hrefText.Name = "hrefText";
             this.hrefText.Size = new System.Drawing.Size(376, 20);
             this.hrefText.TabIndex = 2;
-// 
-// hrefLink
-// 
-            this.hrefLink.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            // 
+            // hrefLink
+            // 
+            this.hrefLink.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.hrefLink.Location = new System.Drawing.Point(48, 8);
             this.hrefLink.Name = "hrefLink";
             this.hrefLink.Size = new System.Drawing.Size(376, 20);
             this.hrefLink.TabIndex = 1;
-// 
-// labelAlign
-// 
+            // 
+            // labelAlign
+            // 
             this.labelAlign.Location = new System.Drawing.Point(8, 80);
             this.labelAlign.Name = "labelAlign";
             this.labelAlign.Size = new System.Drawing.Size(32, 23);
             this.labelAlign.TabIndex = 7;
             this.labelAlign.Text = "Align:";
-// 
-// listAlign
-// 
+            // 
+            // listAlign
+            // 
             this.listAlign.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.listAlign.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.listAlign.FormattingEnabled = true;
             this.listAlign.Location = new System.Drawing.Point(48, 80);
             this.listAlign.Name = "listAlign";
+            this.listAlign.Size = new System.Drawing.Size(121, 21);
             this.listAlign.TabIndex = 3;
-// 
-// EnterImageForm
-// 
+            // 
+            // EnterImageForm
+            // 
             this.AcceptButton = this.bInsert;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;

@@ -93,6 +93,7 @@ namespace MSDN.Html.Editor
             // 
             this.bCancel.BackColor = System.Drawing.SystemColors.Control;
             this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.bCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.bCancel.Location = new System.Drawing.Point(344, 80);
             this.bCancel.Name = "bCancel";
             this.bCancel.Size = new System.Drawing.Size(75, 23);
@@ -111,6 +112,7 @@ namespace MSDN.Html.Editor
             // bFindNext
             // 
             this.bFindNext.BackColor = System.Drawing.SystemColors.Control;
+            this.bFindNext.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.bFindNext.Location = new System.Drawing.Point(264, 80);
             this.bFindNext.Name = "bFindNext";
             this.bFindNext.Size = new System.Drawing.Size(75, 23);
@@ -138,6 +140,7 @@ namespace MSDN.Html.Editor
             // bReplaceAll
             // 
             this.bReplaceAll.BackColor = System.Drawing.SystemColors.Control;
+            this.bReplaceAll.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.bReplaceAll.Location = new System.Drawing.Point(176, 80);
             this.bReplaceAll.Name = "bReplaceAll";
             this.bReplaceAll.Size = new System.Drawing.Size(75, 23);
@@ -149,6 +152,7 @@ namespace MSDN.Html.Editor
             // bReplace
             // 
             this.bReplace.BackColor = System.Drawing.SystemColors.Control;
+            this.bReplace.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.bReplace.Location = new System.Drawing.Point(96, 80);
             this.bReplace.Name = "bReplace";
             this.bReplace.Size = new System.Drawing.Size(75, 23);
@@ -160,6 +164,7 @@ namespace MSDN.Html.Editor
             // bOptions
             // 
             this.bOptions.BackColor = System.Drawing.SystemColors.Control;
+            this.bOptions.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.bOptions.Location = new System.Drawing.Point(8, 80);
             this.bOptions.Name = "bOptions";
             this.bOptions.Size = new System.Drawing.Size(80, 23);
@@ -170,6 +175,7 @@ namespace MSDN.Html.Editor
             // 
             // optionMatchCase
             // 
+            this.optionMatchCase.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.optionMatchCase.Location = new System.Drawing.Point(8, 8);
             this.optionMatchCase.Name = "optionMatchCase";
             this.optionMatchCase.Size = new System.Drawing.Size(240, 24);
@@ -178,6 +184,7 @@ namespace MSDN.Html.Editor
             // 
             // optionMatchWhole
             // 
+            this.optionMatchWhole.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.optionMatchWhole.Location = new System.Drawing.Point(8, 32);
             this.optionMatchWhole.Name = "optionMatchWhole";
             this.optionMatchWhole.Size = new System.Drawing.Size(240, 24);

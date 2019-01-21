@@ -65,27 +65,31 @@ namespace MSDN.Html.Editor
             this.groupTable.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericBorderSize)).BeginInit();
             this.SuspendLayout();
-// 
-// bCancel
-// 
+            // 
+            // bCancel
+            // 
             this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.bCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.bCancel.Location = new System.Drawing.Point(320, 304);
             this.bCancel.Name = "bCancel";
+            this.bCancel.Size = new System.Drawing.Size(75, 23);
             this.bCancel.TabIndex = 0;
             this.bCancel.Text = "Cancel";
-// 
-// bInsert
-// 
+            // 
+            // bInsert
+            // 
             this.bInsert.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bInsert.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.bInsert.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.bInsert.Location = new System.Drawing.Point(240, 304);
             this.bInsert.Name = "bInsert";
+            this.bInsert.Size = new System.Drawing.Size(75, 23);
             this.bInsert.TabIndex = 1;
             this.bInsert.Text = "Insert";
-// 
-// groupCaption
-// 
+            // 
+            // groupCaption
+            // 
             this.groupCaption.Controls.Add(this.listCaptionLocation);
             this.groupCaption.Controls.Add(this.labelLocation);
             this.groupCaption.Controls.Add(this.listCaptionAlignment);
@@ -98,58 +102,60 @@ namespace MSDN.Html.Editor
             this.groupCaption.TabIndex = 2;
             this.groupCaption.TabStop = false;
             this.groupCaption.Text = "Caption Properties";
-// 
-// listCaptionLocation
-// 
+            // 
+            // listCaptionLocation
+            // 
             this.listCaptionLocation.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.listCaptionLocation.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.listCaptionLocation.FormattingEnabled = true;
             this.listCaptionLocation.Location = new System.Drawing.Point(264, 56);
             this.listCaptionLocation.Name = "listCaptionLocation";
             this.listCaptionLocation.Size = new System.Drawing.Size(104, 21);
             this.listCaptionLocation.TabIndex = 8;
-// 
-// labelLocation
-// 
+            // 
+            // labelLocation
+            // 
             this.labelLocation.Location = new System.Drawing.Point(200, 56);
             this.labelLocation.Name = "labelLocation";
             this.labelLocation.Size = new System.Drawing.Size(64, 23);
             this.labelLocation.TabIndex = 7;
             this.labelLocation.Text = "Location :";
-// 
-// listCaptionAlignment
-// 
+            // 
+            // listCaptionAlignment
+            // 
             this.listCaptionAlignment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.listCaptionAlignment.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.listCaptionAlignment.FormattingEnabled = true;
             this.listCaptionAlignment.Location = new System.Drawing.Point(80, 56);
             this.listCaptionAlignment.Name = "listCaptionAlignment";
             this.listCaptionAlignment.Size = new System.Drawing.Size(104, 21);
             this.listCaptionAlignment.TabIndex = 6;
-// 
-// labelCaptionAlign
-// 
+            // 
+            // labelCaptionAlign
+            // 
             this.labelCaptionAlign.Location = new System.Drawing.Point(8, 56);
             this.labelCaptionAlign.Name = "labelCaptionAlign";
             this.labelCaptionAlign.Size = new System.Drawing.Size(64, 23);
             this.labelCaptionAlign.TabIndex = 5;
             this.labelCaptionAlign.Text = "Alignment :";
-// 
-// labelCaption
-// 
+            // 
+            // labelCaption
+            // 
             this.labelCaption.Location = new System.Drawing.Point(8, 24);
             this.labelCaption.Name = "labelCaption";
             this.labelCaption.Size = new System.Drawing.Size(64, 23);
             this.labelCaption.TabIndex = 1;
             this.labelCaption.Text = "Caption :";
-// 
-// textTableCaption
-// 
+            // 
+            // textTableCaption
+            // 
             this.textTableCaption.Location = new System.Drawing.Point(80, 24);
             this.textTableCaption.Name = "textTableCaption";
             this.textTableCaption.Size = new System.Drawing.Size(288, 20);
             this.textTableCaption.TabIndex = 0;
-// 
-// groupLayout
-// 
+            // 
+            // groupLayout
+            // 
             this.groupLayout.Controls.Add(this.numericCellSpacing);
             this.groupLayout.Controls.Add(this.labelSpacing);
             this.groupLayout.Controls.Add(this.numericCellPadding);
@@ -163,103 +169,105 @@ namespace MSDN.Html.Editor
             this.groupLayout.TabIndex = 3;
             this.groupLayout.TabStop = false;
             this.groupLayout.Text = "Cell Properties";
-// 
-// numericCellSpacing
-// 
+            // 
+            // numericCellSpacing
+            // 
             this.numericCellSpacing.Location = new System.Drawing.Point(256, 64);
             this.numericCellSpacing.Name = "numericCellSpacing";
             this.numericCellSpacing.Size = new System.Drawing.Size(56, 20);
             this.numericCellSpacing.TabIndex = 6;
-// 
-// labelSpacing
-// 
+            // 
+            // labelSpacing
+            // 
             this.labelSpacing.Location = new System.Drawing.Point(168, 64);
             this.labelSpacing.Name = "labelSpacing";
             this.labelSpacing.Size = new System.Drawing.Size(80, 23);
             this.labelSpacing.TabIndex = 5;
             this.labelSpacing.Text = "Cell Spacing :";
-// 
-// numericCellPadding
-// 
+            // 
+            // numericCellPadding
+            // 
             this.numericCellPadding.Location = new System.Drawing.Point(96, 64);
             this.numericCellPadding.Name = "numericCellPadding";
             this.numericCellPadding.Size = new System.Drawing.Size(56, 20);
             this.numericCellPadding.TabIndex = 4;
-// 
-// labelPadding
-// 
+            // 
+            // labelPadding
+            // 
             this.labelPadding.Location = new System.Drawing.Point(8, 64);
             this.labelPadding.Name = "labelPadding";
             this.labelPadding.Size = new System.Drawing.Size(80, 23);
             this.labelPadding.TabIndex = 3;
             this.labelPadding.Text = "Cell Padding :";
-// 
-// numericColumns
-// 
+            // 
+            // numericColumns
+            // 
             this.numericColumns.Location = new System.Drawing.Point(192, 24);
             this.numericColumns.Name = "numericColumns";
             this.numericColumns.Size = new System.Drawing.Size(56, 20);
             this.numericColumns.TabIndex = 2;
-// 
-// numericRows
-// 
+            // 
+            // numericRows
+            // 
             this.numericRows.Location = new System.Drawing.Point(128, 24);
             this.numericRows.Name = "numericRows";
             this.numericRows.Size = new System.Drawing.Size(56, 20);
             this.numericRows.TabIndex = 1;
-// 
-// labelRowColumn
-// 
+            // 
+            // labelRowColumn
+            // 
             this.labelRowColumn.Location = new System.Drawing.Point(8, 24);
             this.labelRowColumn.Name = "labelRowColumn";
             this.labelRowColumn.Size = new System.Drawing.Size(112, 23);
             this.labelRowColumn.TabIndex = 0;
             this.labelRowColumn.Text = "Rows and Columns :";
-// 
-// groupPercentPixel
-// 
+            // 
+            // groupPercentPixel
+            // 
             this.groupPercentPixel.Controls.Add(this.radioWidthPixel);
             this.groupPercentPixel.Controls.Add(this.radioWidthPercent);
             this.groupPercentPixel.Location = new System.Drawing.Point(152, 48);
             this.groupPercentPixel.Name = "groupPercentPixel";
             this.groupPercentPixel.Size = new System.Drawing.Size(144, 32);
             this.groupPercentPixel.TabIndex = 9;
-// 
-// radioWidthPixel
-// 
+            // 
+            // radioWidthPixel
+            // 
+            this.radioWidthPixel.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.radioWidthPixel.Location = new System.Drawing.Point(80, 8);
             this.radioWidthPixel.Name = "radioWidthPixel";
             this.radioWidthPixel.Size = new System.Drawing.Size(56, 24);
             this.radioWidthPixel.TabIndex = 1;
             this.radioWidthPixel.Text = "Pixels";
             this.radioWidthPixel.CheckedChanged += new System.EventHandler(this.MeasurementOptionChanged);
-// 
-// radioWidthPercent
-// 
+            // 
+            // radioWidthPercent
+            // 
+            this.radioWidthPercent.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.radioWidthPercent.Location = new System.Drawing.Point(8, 8);
             this.radioWidthPercent.Name = "radioWidthPercent";
             this.radioWidthPercent.Size = new System.Drawing.Size(64, 24);
             this.radioWidthPercent.TabIndex = 0;
             this.radioWidthPercent.Text = "Percent";
             this.radioWidthPercent.CheckedChanged += new System.EventHandler(this.MeasurementOptionChanged);
-// 
-// numericTableWidth
-// 
+            // 
+            // numericTableWidth
+            // 
             this.numericTableWidth.Location = new System.Drawing.Point(72, 56);
             this.numericTableWidth.Name = "numericTableWidth";
             this.numericTableWidth.Size = new System.Drawing.Size(64, 20);
             this.numericTableWidth.TabIndex = 8;
-// 
-// labelWidth
-// 
+            // 
+            // labelWidth
+            // 
             this.labelWidth.Location = new System.Drawing.Point(8, 56);
             this.labelWidth.Name = "labelWidth";
             this.labelWidth.Size = new System.Drawing.Size(56, 23);
             this.labelWidth.TabIndex = 7;
             this.labelWidth.Text = "Width :";
-// 
-// groupTable
-// 
+            // 
+            // groupTable
+            // 
             this.groupTable.Controls.Add(this.listTextAlignment);
             this.groupTable.Controls.Add(this.labelBorderAlign);
             this.groupTable.Controls.Add(this.labelBorderSize);
@@ -273,41 +281,42 @@ namespace MSDN.Html.Editor
             this.groupTable.TabIndex = 4;
             this.groupTable.TabStop = false;
             this.groupTable.Text = "Table Properties";
-// 
-// listTextAlignment
-// 
+            // 
+            // listTextAlignment
+            // 
             this.listTextAlignment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.listTextAlignment.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.listTextAlignment.FormattingEnabled = true;
             this.listTextAlignment.Location = new System.Drawing.Point(256, 24);
             this.listTextAlignment.Name = "listTextAlignment";
             this.listTextAlignment.Size = new System.Drawing.Size(104, 21);
             this.listTextAlignment.TabIndex = 6;
-// 
-// labelBorderAlign
-// 
+            // 
+            // labelBorderAlign
+            // 
             this.labelBorderAlign.Location = new System.Drawing.Point(192, 24);
             this.labelBorderAlign.Name = "labelBorderAlign";
             this.labelBorderAlign.Size = new System.Drawing.Size(64, 23);
             this.labelBorderAlign.TabIndex = 5;
             this.labelBorderAlign.Text = "Alignment :";
-// 
-// labelBorderSize
-// 
+            // 
+            // labelBorderSize
+            // 
             this.labelBorderSize.Location = new System.Drawing.Point(8, 24);
             this.labelBorderSize.Name = "labelBorderSize";
             this.labelBorderSize.Size = new System.Drawing.Size(56, 23);
             this.labelBorderSize.TabIndex = 4;
             this.labelBorderSize.Text = "Border :";
-// 
-// numericBorderSize
-// 
+            // 
+            // numericBorderSize
+            // 
             this.numericBorderSize.Location = new System.Drawing.Point(72, 24);
             this.numericBorderSize.Name = "numericBorderSize";
             this.numericBorderSize.Size = new System.Drawing.Size(104, 20);
             this.numericBorderSize.TabIndex = 3;
-// 
-// TablePropertyForm
-// 
+            // 
+            // TablePropertyForm
+            // 
             this.AcceptButton = this.bInsert;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
