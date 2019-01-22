@@ -34,15 +34,15 @@ namespace HTMLContentControl
             
             InitializeComponent();
 
-            //HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
-            //HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
+            m_HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
+            m_HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
         }
 
         // ITDLContentControl ------------------------------------------------------------------
 
         public Byte[] GetContent()
         {
-            var html = "";// HtmlEditControl.DocumentText;
+            var html = m_HtmlEditControl.InnerHtml;
 
             return System.Text.Encoding.Unicode.GetBytes(html);
         }
@@ -54,7 +54,7 @@ namespace HTMLContentControl
             try
             {
                 var html = System.Text.Encoding.Unicode.GetString(content);
-                //HtmlEditControl.DocumentText = html;
+                m_HtmlEditControl.InnerHtml = html;
             }
             // catch (Exception exception)
             // {
@@ -70,7 +70,7 @@ namespace HTMLContentControl
         // text content if supported. return false if not supported
         public String GetTextContent()
         {
-            return "";// HtmlEditControl.TextOnlyFromDocumentBody;
+            return m_HtmlEditControl.InnerText;
         }
 
         public bool SetTextContent(String content, bool bResetSelection)
@@ -79,7 +79,7 @@ namespace HTMLContentControl
 
             try
             {
-                //HtmlEditControl.SetDocumentText(content);
+                m_HtmlEditControl.InnerText = content;
             }
             // catch (Exception exception)
             // {

@@ -14,19 +14,23 @@ namespace HTMLContentControl
         private UIThemeToolbarRenderer m_toolbarRenderer;
         private System.Drawing.Font m_ControlsFont;
         private Translator m_Trans;
+        private Timer m_TextChangeTimer;
+        private String m_PrevTextChange = "";
+
+        // ---------------------------------------------------------------
+
+        public new event EventHandler TextChanged;
 
         // ---------------------------------------------------------------
 
         public TDLHtmlEditorControl(System.Drawing.Font font, Translator trans)
         {
-            m_toolbarRenderer = new UIThemeToolbarRenderer();
             m_ControlsFont = font;
             m_Trans = trans;
+            m_toolbarRenderer = new UIThemeToolbarRenderer();
+            m_TextChangeTimer = new Timer();
 
             InitializeComponent();
-
-            //HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
-            //HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
         }
 
         public void SetUITheme(UITheme theme)
@@ -45,20 +49,40 @@ namespace HTMLContentControl
             if (Win32.WantScaleByDPIFactor())
             {
                 int imageSize = Win32.ScaleByDPIFactor(16);
-
                 this.ToolBar.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
-                this.ToolBar.AutoSize = false;
-                //this.ToolBar.Height = (imageSize + 10);
             }
 
             this.ToolbarDock = DockStyle.Top;
             this.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
-            this.InnerText = "Carl Nolan";
+            this.InnerText = "";
             this.TabIndex = 26;
             this.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.BorderSize = 0;
+
+            m_TextChangeTimer.Tick += OnTextChangeTimer;
+
+            m_TextChangeTimer.Interval = 200;
+            m_TextChangeTimer.Start();
         }
 
+        private void OnTextChangeTimer(object sender, EventArgs e)
+        {
+            if (!IsDisposed)
+            {
+                var s = InnerHtml ?? string.Empty;
+
+                if ((m_PrevTextChange.Length != s.Length) || 
+                    (m_PrevTextChange != s))
+                {
+                    m_PrevTextChange = s;
+
+                    if (TextChanged != null)
+                    {
+                        TextChanged(this, new EventArgs());
+                    }
+                }
+            }
+        }
 
 
     }
