@@ -84,6 +84,25 @@ namespace HTMLContentControl
             }
         }
 
+        new public string InnerHtml
+        {
+            get { return base.InnerHtml; }
+            set
+            {
+                m_PrevTextChange = value;
+                base.InnerHtml = value;
+            }
+        }
+
+        new public string InnerText
+        {
+            get { return base.InnerText; }
+            set
+            {
+                base.InnerText = value;
+                m_PrevTextChange = InnerHtml;
+            }
+        }
 
     }
 
