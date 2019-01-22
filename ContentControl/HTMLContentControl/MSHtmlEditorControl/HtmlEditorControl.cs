@@ -440,21 +440,6 @@ namespace MSDN.Html.Editor
         } //DocumentSelectionChange
 
         /// <summary>
-        /// Method to perform the process of change
-        /// </summary>
-        private void DocumentChange(object sender, EventArgs e)
-        {
-            // if not in readonly mode process the selection change
-            if (!_readOnly)
-            {
-                int a = 0;
-                //FormatSelectionChange();
-            }
-
-        } //DocumentSelectionChange
-
-
-        /// <summary>
         /// Method to perform the process of key being pressed
         /// </summary>
         private void DocumentKeyPress(object sender, EventArgs e)
@@ -609,8 +594,7 @@ namespace MSDN.Html.Editor
             // so define the event handler for the context menu
             this.editorWebBrowser.Document.ContextMenuShowing += new HtmlElementEventHandler(DocumentContextMenu);
             this.editorWebBrowser.Document.AttachEventHandler("onselectionchange", DocumentSelectionChange);
-            //this.editorWebBrowser.Document.AttachEventHandler("onkeydown", DocumentKeyPress);
-            this.editorWebBrowser.Document.AttachEventHandler("onchange", DocumentChange);
+            this.editorWebBrowser.Document.AttachEventHandler("onkeydown", DocumentKeyPress);
 
             // signalled complete
             codeNavigate = false;
