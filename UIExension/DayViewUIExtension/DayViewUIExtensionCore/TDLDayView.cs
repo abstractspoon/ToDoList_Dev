@@ -721,7 +721,8 @@ namespace DayViewUIExtension
 
         private void OnSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
         {
-            m_SelectedTaskID = args.Appointment.Id;
+            if (args.Appointment != null)
+                m_SelectedTaskID = args.Appointment.Id;
         }
 
         private void OnWeekChanged(object sender, Calendar.WeekChangeEventArgs args)

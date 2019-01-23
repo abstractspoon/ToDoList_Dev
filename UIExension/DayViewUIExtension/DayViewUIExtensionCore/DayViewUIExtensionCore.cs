@@ -532,7 +532,8 @@ namespace DayViewUIExtension
 					break;
 
                 case Calendar.SelectionType.Appointment:
-                    notify.NotifySelChange(args.Appointment.Id);
+                    if (args.Appointment != null)
+                        notify.NotifySelChange(args.Appointment.Id);
 					break;
 			}
 		}
