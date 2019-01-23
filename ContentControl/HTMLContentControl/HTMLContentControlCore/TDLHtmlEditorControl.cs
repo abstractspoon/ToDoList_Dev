@@ -138,6 +138,13 @@ namespace HTMLContentControl
             return true;
         }
 
+        protected override void DefineDialogProperties(Form dialog)
+        {
+            base.DefineDialogProperties(dialog);
+
+            // TODO
+        }
+
     }
 
     

@@ -3765,7 +3765,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method to ensure dialog resembles the user form characteristics
         /// </summary>
-        private void DefineDialogProperties(Form dialog)
+        protected virtual void DefineDialogProperties(Form dialog)
         {
             // set ambient control properties
 //             dialog.Font = this.ParentForm.Font;
