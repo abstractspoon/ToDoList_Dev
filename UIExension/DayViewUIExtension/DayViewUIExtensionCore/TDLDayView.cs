@@ -755,8 +755,8 @@ namespace DayViewUIExtension
 
             if (selTool.IsResizing())
             {
-                if (!ReadOnly)
-                    base.OnMouseMove(e);
+                if (ReadOnly)
+                    return;
             }
             else // Extra-over cursor handling
             {
@@ -788,6 +788,8 @@ namespace DayViewUIExtension
                     }
                 }
             }
+
+            base.OnMouseMove(e);
         }
 	}
 }
