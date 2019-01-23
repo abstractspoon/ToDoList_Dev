@@ -16,6 +16,7 @@ namespace HTMLContentControl
         private Translator m_Trans;
         private Timer m_TextChangeTimer;
         private String m_PrevTextChange = "";
+        private Boolean m_SettingContent = false;
 
         // ---------------------------------------------------------------
 
@@ -70,13 +71,13 @@ namespace HTMLContentControl
             if (!IsDisposed)
             {
                 var s = InnerHtml ?? string.Empty;
+                var p = m_PrevTextChange ?? string.Empty;
 
-                if ((m_PrevTextChange.Length != s.Length) || 
-                    (m_PrevTextChange != s))
+                if ((p.Length != s.Length) || (p != s))
                 {
                     m_PrevTextChange = s;
 
-                    if (TextChanged != null)
+                    if (!m_SettingContent && !IsLoading && !IsNavigating && (TextChanged != null))
                     {
                         TextChanged(this, new EventArgs());
                     }
@@ -84,24 +85,57 @@ namespace HTMLContentControl
             }
         }
 
-        new public string InnerHtml
+        public Byte[] GetContent()
         {
-            get { return base.InnerHtml; }
-            set
-            {
-                m_PrevTextChange = value;
-                base.InnerHtml = value;
-            }
+            return System.Text.Encoding.Unicode.GetBytes(InnerHtml);
         }
 
-        new public string InnerText
+        public bool SetContent(Byte[] content, bool bResetSelection)
         {
-            get { return base.InnerText; }
-            set
+            m_SettingContent = true;
+
+            try
             {
-                base.InnerText = value;
+                var html = System.Text.Encoding.Unicode.GetString(content).TrimEnd('\0').Trim();
+
+                InnerHtml = html;
                 m_PrevTextChange = InnerHtml;
             }
+            // catch (Exception exception)
+            // {
+            // }
+            finally
+            {
+                m_SettingContent = false;
+            }
+
+            return true;
+        }
+
+        // text content if supported. return false if not supported
+        public String GetTextContent()
+        {
+            return InnerText;
+        }
+
+        public bool SetTextContent(String content, bool bResetSelection)
+        {
+            m_SettingContent = true;
+
+            try
+            {
+                InnerText = content;
+                m_PrevTextChange = InnerHtml;
+            }
+            // catch (Exception exception)
+            // {
+            // }
+            finally
+            {
+                m_SettingContent = false;
+            }
+
+            return true;
         }
 
     }

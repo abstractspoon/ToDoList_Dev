@@ -286,6 +286,8 @@ namespace MSDN.Html.Editor
         // find and replace internal text range
         private mshtmlTextRange _findRange;
 
+        protected bool IsLoading { get { return loading; } }
+        protected bool IsNavigating { get { return codeNavigate; } }
 
         /// <summary>
         /// Private control constructor defining all default values

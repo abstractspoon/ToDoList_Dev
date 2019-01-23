@@ -14,7 +14,6 @@ namespace HTMLContentControl
     {
         private IntPtr m_HwndParent;
         private System.Drawing.Font m_ControlsFont;
-        private Boolean m_SettingContent = false;
         private TDLHtmlEditorControl m_HtmlEditControl;
         private Translator m_Trans;
         private String m_HelpID;
@@ -42,54 +41,23 @@ namespace HTMLContentControl
 
         public Byte[] GetContent()
         {
-            var html = m_HtmlEditControl.InnerHtml;
-
-            return System.Text.Encoding.Unicode.GetBytes(html);
+            return m_HtmlEditControl.GetContent();
         }
 
         public bool SetContent(Byte[] content, bool bResetSelection)
         {
-            m_SettingContent = true;
-
-            try
-            {
-                var html = System.Text.Encoding.Unicode.GetString(content);
-                m_HtmlEditControl.InnerHtml = html;
-            }
-            // catch (Exception exception)
-            // {
-            // }
-            finally
-            {
-                m_SettingContent = false;
-            }
-
-            return true;
+            return m_HtmlEditControl.SetContent(content, bResetSelection);
         }
 
         // text content if supported. return false if not supported
         public String GetTextContent()
         {
-            return m_HtmlEditControl.InnerText;
+            return m_HtmlEditControl.GetTextContent();
         }
 
         public bool SetTextContent(String content, bool bResetSelection)
         {
-            m_SettingContent = true;
-
-            try
-            {
-                m_HtmlEditControl.InnerText = content;
-            }
-            // catch (Exception exception)
-            // {
-            // }
-            finally
-            {
-                m_SettingContent = false;
-            }
-
-            return true;
+            return m_HtmlEditControl.SetTextContent(content, bResetSelection);
         }
 
         public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
@@ -198,12 +166,9 @@ namespace HTMLContentControl
 
         private void OnInputTextChanged(object sender, EventArgs e)
         {
-            if (!m_SettingContent)
-            {
-                ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent);
+            ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent);
 
-                notify.NotifyChange();
-            }
+            notify.NotifyChange();
         }
 
         private void OnInputTextLostFocus(object sender, EventArgs e)
