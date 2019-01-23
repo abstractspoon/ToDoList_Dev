@@ -37,5 +37,23 @@ String^ Translator::Translate(String^ sText)
 	return sTextOut;
 }
 
+void Translator::Translate(System::Windows::Forms::Form^ window)
+{
+	// Window title
+	// TODO
+
+	Translate(window->Controls);
+}
+
+void Translator::Translate(System::Windows::Forms::ToolStripItemCollection^ items)
+{
+	// TODO
+}
+
+void Translator::Translate(System::Windows::Forms::Control::ControlCollection^ items)
+{
+	// TODO
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

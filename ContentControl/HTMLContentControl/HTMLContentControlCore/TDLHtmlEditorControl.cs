@@ -142,7 +142,7 @@ namespace HTMLContentControl
         {
             base.DefineDialogProperties(dialog);
 
-            // TODO
+            m_Trans.Translate(dialog);
         }
 
     }
