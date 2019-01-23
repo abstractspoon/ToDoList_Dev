@@ -172,7 +172,7 @@
     <value>Bottom</value>
   </data>
   <data name="toolstripTextCut.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripTextCut.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -181,7 +181,7 @@
     <value>Cut</value>
   </data>
   <data name="toolstripTextCopy.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripTextCopy.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -190,7 +190,7 @@
     <value>Copy</value>
   </data>
   <data name="toolstripTextPaste.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripTextPaste.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -202,7 +202,7 @@
     <value>6, 23</value>
   </data>
   <data name="toolstripEditUndo.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripEditUndo.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -211,7 +211,7 @@
     <value>Edit Undo</value>
   </data>
   <data name="toolstripEditRedo.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripEditRedo.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -223,7 +223,7 @@
     <value>6, 23</value>
   </data>
   <data name="toolstripFormatBold.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripFormatBold.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -232,7 +232,7 @@
     <value>Bold</value>
   </data>
   <data name="toolstripFormatUnderline.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripFormatUnderline.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -241,7 +241,7 @@
     <value>Underline</value>
   </data>
   <data name="toolstripFormatItalic.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripFormatItalic.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -250,7 +250,7 @@
     <value>Italic</value>
   </data>
   <data name="toolstripFontDialog.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripFontDialog.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -259,7 +259,7 @@
     <value>Edit Font</value>
   </data>
   <data name="toolstripFontNormal.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripFontNormal.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -268,7 +268,7 @@
     <value>Normal</value>
   </data>
   <data name="toolstripColorDialog.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripColorDialog.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -277,7 +277,7 @@
     <value>Edit Color</value>
   </data>
   <data name="toolstripFontIncrease.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripFontIncrease.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -286,7 +286,7 @@
     <value>Increase Font</value>
   </data>
   <data name="toolstripFontDecrease.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripFontDecrease.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -298,7 +298,7 @@
     <value>6, 23</value>
   </data>
   <data name="toolstripJustifyLeft.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripJustifyLeft.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -307,7 +307,7 @@
     <value>Justify Left</value>
   </data>
   <data name="toolstripJustifyCenter.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripJustifyCenter.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -316,7 +316,7 @@
     <value>Justify Center</value>
   </data>
   <data name="toolstripJustifyRight.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripJustifyRight.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -325,7 +325,7 @@
     <value>Justify Right</value>
   </data>
   <data name="toolstripFontIndent.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripFontIndent.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -334,7 +334,7 @@
     <value>Indent</value>
   </data>
   <data name="toolstripFontOutdent.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripFontOutdent.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -346,7 +346,7 @@
     <value>6, 23</value>
   </data>
   <data name="toolstripListOrdered.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripListOrdered.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -355,7 +355,7 @@
     <value>Insert Ordered List</value>
   </data>
   <data name="toolstripListUnordered.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripListUnordered.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -367,7 +367,7 @@
     <value>6, 23</value>
   </data>
   <data name="toolstripInsertLine.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripInsertLine.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -376,7 +376,7 @@
     <value>Insert Line</value>
   </data>
   <data name="toolstripInsertTable.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripInsertTable.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -385,7 +385,7 @@
     <value>Insert Table</value>
   </data>
   <data name="toolstripInsertImage.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripInsertImage.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -394,7 +394,7 @@
     <value>Insert Image</value>
   </data>
   <data name="toolstripInsertLink.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripInsertLink.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -406,7 +406,7 @@
     <value>6, 23</value>
   </data>
   <data name="toolstripFindReplace.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripFindReplace.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -415,7 +415,7 @@
     <value>Find &amp; Replace</value>
   </data>
   <data name="toolstripDocumentPrint.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="toolstripDocumentPrint.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
@@ -448,7 +448,7 @@
     <value>131, 12</value>
   </metadata>
   <data name="contextTableModify.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextTableModify.Size" type="System.Drawing.Size, System.Drawing">
     <value>133, 22</value>
@@ -469,7 +469,7 @@
     <value>Delete Row</value>
   </data>
   <data name="contextTable.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextTable.Size" type="System.Drawing.Size, System.Drawing">
     <value>108, 22</value>
@@ -478,7 +478,7 @@
     <value>Table</value>
   </data>
   <data name="contextEditUndo.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextEditUndo.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+Z</value>
@@ -490,7 +490,7 @@
     <value>Undo Typing</value>
   </data>
   <data name="contextEditRedo.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextEditRedo.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+Y</value>
@@ -505,7 +505,7 @@
     <value>201, 6</value>
   </data>
   <data name="contextEditCut.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextEditCut.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+X</value>
@@ -517,7 +517,7 @@
     <value>Cut</value>
   </data>
   <data name="contextEditCopy.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextEditCopy.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+C</value>
@@ -529,7 +529,7 @@
     <value>Copy</value>
   </data>
   <data name="contextEditPaste.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextEditPaste.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+V</value>
@@ -544,7 +544,7 @@
     <value>201, 6</value>
   </data>
   <data name="contextEditFindReplace.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextEditFindReplace.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+F</value>
@@ -574,7 +574,7 @@
     <value>Select All</value>
   </data>
   <data name="contextEditDelete.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextEditDelete.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Del</value>
@@ -592,7 +592,7 @@
     <value>Edit</value>
   </data>
   <data name="contextDocumentOpen.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextDocumentOpen.Size" type="System.Drawing.Size, System.Drawing">
     <value>134, 22</value>
@@ -601,7 +601,7 @@
     <value>Open</value>
   </data>
   <data name="contextDocumentSave.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextDocumentSave.Size" type="System.Drawing.Size, System.Drawing">
     <value>134, 22</value>
@@ -613,7 +613,7 @@
     <value>131, 6</value>
   </data>
   <data name="contextDocumentPrint.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextDocumentPrint.Size" type="System.Drawing.Size, System.Drawing">
     <value>134, 22</value>
@@ -658,7 +658,7 @@
     <value>105, 6</value>
   </data>
   <data name="contextFormatFontDialog.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextFormatFontDialog.Size" type="System.Drawing.Size, System.Drawing">
     <value>167, 22</value>
@@ -667,7 +667,7 @@
     <value>Font Dialog</value>
   </data>
   <data name="contextFormatColorDialog.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextFormatColorDialog.Size" type="System.Drawing.Size, System.Drawing">
     <value>167, 22</value>
@@ -685,7 +685,7 @@
     <value>Normal</value>
   </data>
   <data name="contextFormatBold.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextFormatBold.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+B</value>
@@ -697,7 +697,7 @@
     <value>Bold</value>
   </data>
   <data name="contextFormatItalic.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextFormatItalic.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+I</value>
@@ -709,7 +709,7 @@
     <value>Italic</value>
   </data>
   <data name="contextFormatUnderline.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextFormatUnderline.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+U</value>
@@ -742,7 +742,7 @@
     <value>164, 6</value>
   </data>
   <data name="contextFormatIncrease.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextFormatIncrease.Size" type="System.Drawing.Size, System.Drawing">
     <value>167, 22</value>
@@ -751,7 +751,7 @@
     <value>Font Increase</value>
   </data>
   <data name="contextFormatDecrease.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextFormatDecrease.Size" type="System.Drawing.Size, System.Drawing">
     <value>167, 22</value>
@@ -760,7 +760,7 @@
     <value>Font Decrease</value>
   </data>
   <data name="contextFormatIndent.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextFormatIndent.Size" type="System.Drawing.Size, System.Drawing">
     <value>167, 22</value>
@@ -769,7 +769,7 @@
     <value>Insert Indent</value>
   </data>
   <data name="contextFormatOutdent.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextFormatOutdent.Size" type="System.Drawing.Size, System.Drawing">
     <value>167, 22</value>
@@ -781,7 +781,7 @@
     <value>164, 6</value>
   </data>
   <data name="contextFormatListOrdered.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextFormatListOrdered.Size" type="System.Drawing.Size, System.Drawing">
     <value>167, 22</value>
@@ -790,7 +790,7 @@
     <value>Ordered List</value>
   </data>
   <data name="contextFormatListUnordered.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextFormatListUnordered.Size" type="System.Drawing.Size, System.Drawing">
     <value>167, 22</value>
@@ -805,7 +805,7 @@
     <value>Format</value>
   </data>
   <data name="contextJustifyLeft.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextJustifyLeft.Size" type="System.Drawing.Size, System.Drawing">
     <value>109, 22</value>
@@ -814,7 +814,7 @@
     <value>Left</value>
   </data>
   <data name="contextJustifyCenter.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextJustifyCenter.Size" type="System.Drawing.Size, System.Drawing">
     <value>109, 22</value>
@@ -823,7 +823,7 @@
     <value>Center</value>
   </data>
   <data name="contextJustifyRight.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextJustifyRight.Size" type="System.Drawing.Size, System.Drawing">
     <value>109, 22</value>
@@ -838,7 +838,7 @@
     <value>Justify</value>
   </data>
   <data name="contextFormattingNormal.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextFormattingNormal.Size" type="System.Drawing.Size, System.Drawing">
     <value>129, 22</value>
@@ -892,7 +892,7 @@
     <value>105, 6</value>
   </data>
   <data name="contextInsertLine.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextInsertLine.Size" type="System.Drawing.Size, System.Drawing">
     <value>123, 22</value>
@@ -901,7 +901,7 @@
     <value>Line</value>
   </data>
   <data name="contextInsertLink.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextInsertLink.Size" type="System.Drawing.Size, System.Drawing">
     <value>123, 22</value>
@@ -910,7 +910,7 @@
     <value>Web Link</value>
   </data>
   <data name="contextInsertImage.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextInsertImage.Size" type="System.Drawing.Size, System.Drawing">
     <value>123, 22</value>
@@ -931,7 +931,7 @@
     <value>Html</value>
   </data>
   <data name="contextInsertTable.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Silver</value>
+    <value>Magenta</value>
   </data>
   <data name="contextInsertTable.Size" type="System.Drawing.Size, System.Drawing">
     <value>123, 22</value>
