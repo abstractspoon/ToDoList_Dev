@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Drawing;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -87,7 +88,9 @@ namespace HTMLContentControl
 
         public Byte[] GetContent()
         {
-            return System.Text.Encoding.Unicode.GetBytes(InnerHtml);
+            var html = InnerHtml ?? String.Empty;
+
+            return System.Text.Encoding.Unicode.GetBytes(html);
         }
 
         public bool SetContent(Byte[] content, bool bResetSelection)
@@ -115,7 +118,7 @@ namespace HTMLContentControl
         // text content if supported. return false if not supported
         public String GetTextContent()
         {
-            return InnerText;
+            return InnerText ?? String.Empty;
         }
 
         public bool SetTextContent(String content, bool bResetSelection)
@@ -142,7 +145,19 @@ namespace HTMLContentControl
         {
             base.DefineDialogProperties(dialog);
 
+            // Translate first as this may change size
             m_Trans.Translate(dialog);
+
+            // Centre dialogs over our client area
+            dialog.StartPosition = FormStartPosition.Manual;
+
+            Rectangle parentPos = RectangleToScreen(Bounds);
+            Point parentCentre = new Point((parentPos.Right + parentPos.Left) / 2, (parentPos.Bottom + parentPos.Top) / 2);
+
+            int dialogLeft = (parentCentre.X - (dialog.Width / 2));
+            int dialogTop = (parentCentre.Y - (dialog.Height / 2));
+
+            dialog.Location = new Point(dialogLeft, dialogTop);
         }
 
     }

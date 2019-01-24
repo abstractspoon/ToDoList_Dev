@@ -188,7 +188,7 @@ int CHTMLContentControlBridge::GetTextContent(LPWSTR szContent, int nLength) con
 	String^ content = m_wnd->GetTextContent();
 	nLength = content->Length;
 
-	if (szContent != nullptr)
+	if (szContent && nLength)
 	{
 		Abstractspoon::Tdl::PluginHelpers::MarshalledString msContent(content);
 		CopyMemory(szContent, msContent, (nLength * sizeof(WCHAR)));

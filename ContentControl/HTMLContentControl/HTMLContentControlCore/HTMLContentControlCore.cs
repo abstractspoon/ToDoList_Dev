@@ -73,7 +73,7 @@ namespace HTMLContentControl
 
         public bool Redo()
         {
-            return false;// HtmlEditControl.Redo();
+            return m_HtmlEditControl.EditRedo();
         }
 
         public void SetUITheme(UITheme theme)
@@ -83,8 +83,7 @@ namespace HTMLContentControl
 
         public void SetReadOnly(bool bReadOnly)
         {
-            // TODO
-
+            m_HtmlEditControl.ReadOnly = bReadOnly;
         }
 
         public void SavePreferences(Preferences prefs, String key)

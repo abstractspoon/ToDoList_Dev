@@ -437,6 +437,8 @@ namespace MSDN.Html.Editor
             if (!_readOnly)
             {
                 FormatSelectionChange();
+
+
             }
 
         } //DocumentSelectionChange
@@ -1720,20 +1722,38 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method to undo former commands
         /// </summary>
-        public void EditUndo()
+        public bool EditUndo()
         {
             //this.editorWebBrowser.ExecWB(SHDocVw.OLECMDID.OLECMDID_UNDO, PROMPT_USER_NO, ref EMPTY_PARAMETER, ref EMPTY_PARAMETER);
-            ExecuteCommandDocument(HTML_COMMAND_TEXT_UNDO);
+            return ExecuteCommandDocument(HTML_COMMAND_TEXT_UNDO);
+
+        } //EditUndo
+
+        /// <summary>
+        /// Method to undo former commands
+        /// </summary>
+        public bool CanEditUndo()
+        {
+            return ExecuteQueryDocument(HTML_COMMAND_TEXT_UNDO);
+
+        } //EditUndo
+
+        /// <summary>
+        /// Method to undo former commands
+        /// </summary>
+        public bool EditRedo()
+        {
+            //this.editorWebBrowser.ExecWB(SHDocVw.OLECMDID.OLECMDID_UNDO, PROMPT_USER_NO, ref EMPTY_PARAMETER, ref EMPTY_PARAMETER);
+            return ExecuteCommandDocument(HTML_COMMAND_TEXT_REDO);
 
         } //EditUndo
 
         /// <summary>
         /// Method to redo former undo
         /// </summary>
-        public void EditRedo()
+        public bool CanEditRedo()
         {
-            //this.editorWebBrowser.ExecWB(SHDocVw.OLECMDID.OLECMDID_REDO, PROMPT_USER_NO, ref EMPTY_PARAMETER, ref EMPTY_PARAMETER);
-            ExecuteCommandDocument(HTML_COMMAND_TEXT_REDO);
+            return ExecuteQueryDocument(HTML_COMMAND_TEXT_REDO);
 
         } //EditRedo
 
@@ -1746,6 +1766,10 @@ namespace MSDN.Html.Editor
         /// </summary>
         private void FormatSelectionChange()
         {
+            //this.toolstripEditUndo.Enabled = CanEditUndo();
+            //this.contextEditUndo.Enabled = CanEditUndo();
+
+
             // review the bold state of the selected text
             if (ExecuteCommandQuery(HTML_COMMAND_BOLD))
             {
@@ -3447,9 +3471,6 @@ namespace MSDN.Html.Editor
         /// </summary>
         private bool ExecuteCommandQuery(mshtmlTextRange range, string command)
         {
-            // set the initial state as false
-            bool retValue = false;
-
             try
             {
                 if (range != null)
@@ -3460,7 +3481,7 @@ namespace MSDN.Html.Editor
                         if (range.queryCommandEnabled(command))
                         {
                             // mark the selection with the appropriate tag
-                            retValue = range.queryCommandState(command);
+                            return range.queryCommandState(command);
                         }
                     }
                 }
@@ -3471,8 +3492,8 @@ namespace MSDN.Html.Editor
                 throw new HtmlEditorException("Unknown MSHTML Error.", command, ex);
             }
 
-            // return the value
-            return retValue;
+            // all elsee
+            return false;
 
         } // ExecuteCommandQuery
 
@@ -3480,18 +3501,18 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Executes the execCommand on the selected range
         /// </summary>
-        private void ExecuteCommandRange(string command, object data)
+        private bool ExecuteCommandRange(string command, object data)
         {
             // obtain the selected range object and execute command
             mshtmlTextRange range = GetTextRange();
-            ExecuteCommandRange(range, command, data);
+            return ExecuteCommandRange(range, command, data);
 
         } // ExecuteCommandRange
 
         /// <summary>
         /// Executes the execCommand on the selected range (given the range)
         /// </summary>
-        private void ExecuteCommandRange(mshtmlTextRange range, string command, object data)
+        private bool ExecuteCommandRange(mshtmlTextRange range, string command, object data)
         {
             try
             {
@@ -3503,7 +3524,7 @@ namespace MSDN.Html.Editor
                         if (range.queryCommandEnabled(command))
                         {
                             // mark the selection with the appropriate tag
-                            range.execCommand(command, false, data);
+                            return range.execCommand(command, false, data);
                         }
                     }
                 }
@@ -3514,31 +3535,46 @@ namespace MSDN.Html.Editor
                 throw new HtmlEditorException("Unknown MSHTML Error.", command, ex);
             }
 
+            // all else
+            return false;
         } // ExecuteCommandRange
 
 
         /// <summary>
         /// Executes the execCommand on the document
         /// </summary>
-        private void ExecuteCommandDocument(string command)
+        private bool ExecuteCommandDocument(string command)
         {
-            ExecuteCommandDocument(command, false);
+            return ExecuteCommandDocument(command, false);
 
         } // ExecuteCommandDocument
+
+        protected bool ExecuteQueryDocument(string command)
+        {
+            try
+            {
+                return document.queryCommandEnabled(command);
+            }
+            catch (Exception ex)
+            {
+                // Unknown error so inform user
+                throw new HtmlEditorException("Unknown MSHTML Error.", command, ex);
+            }
+        }
 
         /// <summary>
         /// Executes the execCommand on the document with a system prompt
         /// </summary>
-        private void ExecuteCommandDocumentPrompt(string command)
+        protected bool ExecuteCommandDocumentPrompt(string command)
         {
-            ExecuteCommandDocument(command, true);
+            return ExecuteCommandDocument(command, true);
 
         } // ExecuteCommandDocumentPrompt
 
         /// <summary>
         /// Executes the execCommand on the document with a system prompt
         /// </summary>
-        private void ExecuteCommandDocument(string command, bool prompt)
+        private bool ExecuteCommandDocument(string command, bool prompt)
         {
             try
             {
@@ -3549,7 +3585,7 @@ namespace MSDN.Html.Editor
                     // Test fails with a COM exception if command is Print
 
                     // execute the given command
-                    document.execCommand(command, prompt, null);
+                    return document.execCommand(command, prompt, null);
                 }
             }
             catch (Exception ex)
@@ -3558,13 +3594,15 @@ namespace MSDN.Html.Editor
                 throw new HtmlEditorException("Unknown MSHTML Error.", command, ex);
             }
 
+            // all else
+            return false;
         } // ExecuteCommandDocumentPrompt
 
 
         /// <summary>
         /// Determines the value of the command
         /// </summary>
-        private object QueryCommandRange(string command)
+        protected object QueryCommandRange(string command)
         {
             // obtain the selected range object and execute command
             mshtmlTextRange range = GetTextRange();
