@@ -45,6 +45,8 @@ namespace HTMLContentControl
 
         private void InitializeComponent()
         {
+            HideUnwantedFeatures();
+
             this.ToolBar.Renderer = m_toolbarRenderer;
             this.ToolBar.Font = m_ControlsFont;
 
@@ -68,6 +70,43 @@ namespace HTMLContentControl
 
             m_TextChangeTimer.Interval = 200;
             m_TextChangeTimer.Start();
+        }
+
+        void HideUnwantedFeatures()
+        {
+            // whole 'Document' submenu
+            HideCommand("contextDocument", ContextMenu.Items);
+
+            HideCommand("toolstripDocumentPrint", ToolBar.Items);
+            HideCommand("contextDocumentPrint", ContextMenu.Items);
+
+            // TODO
+        }
+
+        bool HideCommand(String commandId, ToolStripItemCollection items)
+        {
+            foreach (ToolStripItem cmd in items)
+            {
+                if (cmd.Name == commandId)
+                {
+                    cmd.Visible = false;
+                    cmd.Enabled = false;
+
+                    return true;
+                }
+                else
+                {
+                    var menu = (cmd as ToolStripMenuItem);
+
+                    if ((menu != null) && menu.HasDropDownItems)
+                    {
+                        if (HideCommand(commandId, menu.DropDownItems))
+                            return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private void OnTextChangeTimer(object sender, EventArgs e)
