@@ -2475,7 +2475,7 @@ void CKanbanCtrl::OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 
 	// Ignore focus changes during drag and drop
-	if (!IsDragging() && !IsSelectedListCtrl(pNMHDR->hwndFrom))
+	if ((m_bReadOnly || !IsDragging()) && !IsSelectedListCtrl(pNMHDR->hwndFrom))
 	{
 		CKanbanListCtrl* pList = GetListCtrl(pNMHDR->hwndFrom);
 		ASSERT(pList);
