@@ -134,7 +134,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unico
     <ResourceCompile Include="DayViewUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="dayview.ico" />
+    <None Include="res\dayview.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

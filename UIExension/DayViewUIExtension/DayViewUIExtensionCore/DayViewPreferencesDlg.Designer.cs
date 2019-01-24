@@ -31,9 +31,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DayViewPreferencesDlg));
             this.panel1 = new System.Windows.Forms.Panel();
             this.m_HideParentTasks = new System.Windows.Forms.CheckBox();
-            this.m_HideTasksSpanningDays = new System.Windows.Forms.CheckBox();
-            this.m_HideTasksSpanningWeekends = new System.Windows.Forms.CheckBox();
             this.m_HideTasksWithoutTimes = new System.Windows.Forms.CheckBox();
+            this.m_HideTasksSpanningWeekends = new System.Windows.Forms.CheckBox();
+            this.m_HideTasksSpanningDays = new System.Windows.Forms.CheckBox();
             this.BtnCancel = new System.Windows.Forms.Button();
             this.BtnOK = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
@@ -139,7 +139,7 @@
             this.MinimizeBox = false;
             this.Name = "DayViewPreferencesDlg";
             this.Padding = new System.Windows.Forms.Padding(10);
-			this.ShowInTaskbar = false;
+            this.ShowInTaskbar = false;
             this.Text = "Week Planner Preferences";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

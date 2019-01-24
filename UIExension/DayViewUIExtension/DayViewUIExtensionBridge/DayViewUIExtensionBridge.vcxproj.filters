@@ -42,7 +42,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="dayview.ico">
+    <None Include="res\dayview.ico">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

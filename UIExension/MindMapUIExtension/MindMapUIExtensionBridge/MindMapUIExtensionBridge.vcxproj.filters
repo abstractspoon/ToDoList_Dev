@@ -45,9 +45,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="icon1.ico">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\MindMap.ico">
       <Filter>Resource Files</Filter>
     </None>

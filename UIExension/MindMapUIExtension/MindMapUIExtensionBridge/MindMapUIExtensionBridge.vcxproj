@@ -132,7 +132,6 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unico
     <ResourceCompile Include="MindMapUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="icon1.ico" />
     <None Include="res\MindMap.ico" />
   </ItemGroup>
   <ItemGroup>
