@@ -16,18 +16,9 @@ namespace DayViewUIExtension
         public DayViewPreferencesDlg(Translator trans)
         {
             InitializeComponent();
-
-            this.Text = trans.Translate(this.Text);
-
-            m_HideParentTasks.Text = trans.Translate(m_HideParentTasks.Text);
-            m_HideTasksWithoutTimes.Text = trans.Translate(m_HideTasksWithoutTimes.Text);
-            m_HideTasksSpanningWeekends.Text = trans.Translate(m_HideTasksSpanningWeekends.Text);
-            m_HideTasksSpanningDays.Text = trans.Translate(m_HideTasksSpanningDays.Text);
-
-            BtnCancel.Text = trans.Translate(BtnCancel.Text);
-            BtnOK.Text = trans.Translate(BtnOK.Text);
-            
             ScaleByDPIFactor();
+
+            trans.Translate(this);
         }
 
         public void SavePreferences(Preferences prefs, String key)

@@ -40,19 +40,50 @@ String^ Translator::Translate(String^ sText)
 void Translator::Translate(System::Windows::Forms::Form^ window)
 {
 	// Window title
-	// TODO
+	window->Text = Translate(window->Text);
 
+	// children
 	Translate(window->Controls);
 }
 
 void Translator::Translate(System::Windows::Forms::ToolStripItemCollection^ items)
 {
-	// TODO
+	int nItem = items->Count;
+
+	while (nItem--)
+	{
+		System::Windows::Forms::ToolStripItem^ tsi = items[nItem];
+
+		tsi->Text = Translate(tsi->Text);
+		tsi->ToolTipText = Translate(tsi->ToolTipText);
+
+		// children
+		System::Windows::Forms::ToolStripMenuItem^ tsmi = 
+			dynamic_cast<System::Windows::Forms::ToolStripMenuItem^>(tsi);
+
+		if ((tsmi != nullptr) && tsmi->HasDropDownItems)
+		{
+			Translate(tsmi->DropDownItems);
+		}
+	}
 }
 
 void Translator::Translate(System::Windows::Forms::Control::ControlCollection^ items)
 {
-	// TODO
+	int nItem = items->Count;
+
+	while (nItem--)
+	{
+		System::Windows::Forms::Control^ ctrl = items[nItem];
+
+		// Avoid translating dynamic content
+		// TODO
+
+		ctrl->Text = Translate(ctrl->Text);
+
+		// children
+		Translate(ctrl->Controls);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

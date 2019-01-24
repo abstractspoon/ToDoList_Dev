@@ -61,6 +61,9 @@ namespace HTMLContentControl
             this.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.BorderSize = 0;
 
+            m_Trans.Translate(ToolBar.Items);
+            m_Trans.Translate(ContextMenu.Items);
+
             m_TextChangeTimer.Tick += OnTextChangeTimer;
 
             m_TextChangeTimer.Interval = 200;

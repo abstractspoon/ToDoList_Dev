@@ -288,6 +288,7 @@ namespace MSDN.Html.Editor
 
         protected bool IsLoading { get { return loading; } }
         protected bool IsNavigating { get { return codeNavigate; } }
+        protected ContextMenuStrip ContextMenu { get { return contextEditor; } }
 
         /// <summary>
         /// Private control constructor defining all default values
