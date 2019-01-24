@@ -37,6 +37,7 @@ namespace WordCloudUIExtension
 		{
             base.MinFontSize = 10;
 			base.MaxFontSize = 30;
+            base.BackColor = SystemColors.Window;
 
 			this.DoubleBuffered = true;
 
