@@ -158,6 +158,10 @@ namespace HTMLContentControl
             int dialogTop = (parentCentre.Y - (dialog.Height / 2));
 
             dialog.Location = new Point(dialogLeft, dialogTop);
+
+            // Add icon for identification
+            dialog.ShowIcon = true;
+            dialog.Icon = HTMLContentControlCore.html;
         }
 
     }

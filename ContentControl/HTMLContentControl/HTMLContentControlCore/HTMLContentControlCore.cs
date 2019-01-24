@@ -10,7 +10,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace HTMLContentControl
 {
     [System.ComponentModel.DesignerCategory("")]
-    public class HTMLContentControlCore : System.Windows.Forms.Panel, IContentControlWnd
+    public partial class HTMLContentControlCore : System.Windows.Forms.Panel, IContentControlWnd
     {
         private IntPtr m_HwndParent;
         private System.Drawing.Font m_ControlsFont;

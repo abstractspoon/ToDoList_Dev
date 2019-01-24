@@ -196,7 +196,7 @@ namespace MSDN.Html.Editor
             this.Controls.Add(this.checkBold);
             this.Controls.Add(this.bApply);
             this.Controls.Add(this.bCancel);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
