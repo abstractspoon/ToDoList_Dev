@@ -115,6 +115,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unico
     <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="CommandHandling.h" />
     <ClInclude Include="DateUtil.h" />
+    <ClInclude Include="DPIScaling.h" />
     <ClInclude Include="PluginHelpers.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -138,6 +139,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unico
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="DPIScaling.cpp" />
     <ClCompile Include="PluginHelpers.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

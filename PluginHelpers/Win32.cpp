@@ -81,37 +81,6 @@ int Win32::GetHScrollPos(IntPtr hWnd)
 	return ::GetScrollPos(GetHwnd(hWnd), SB_HORZ);
 }
 
-bool Win32::WantScaleByDPIFactor()
-{
-	return (ScaleByDPIFactor(16) != 16);
-}
-
-int Win32::ScaleByDPIFactor(int nValue)
-{
-	return ::MulDiv(nValue, GetSystemDPI(), 96);
-}
-
-Drawing::Point Win32::ScalePointByDPIFactor(Drawing::Point^ point)
-{
-	Drawing::Point^ scaled = gcnew Drawing::Point(ScaleByDPIFactor(point->X), ScaleByDPIFactor(point->Y));
-
-	return *scaled;
-}
-
-Drawing::Size Win32::ScaleSizeByDPIFactor(Drawing::Size^ size)
-{
-	Drawing::Size^ scaled = gcnew Drawing::Size(ScaleByDPIFactor(size->Width), ScaleByDPIFactor(size->Height));
-
-	return *scaled;
-}
-
-Drawing::Rectangle Win32::ScaleRectByDPIFactor(Drawing::Rectangle^ rect)
-{
-	Drawing::Rectangle^ scaled = gcnew Drawing::Rectangle(ScalePointByDPIFactor(rect->Location), ScaleSizeByDPIFactor(rect->Size));
-
-	return *scaled;
-}
-
 int Win32::GetSystemDPI()
 {
 	static int nDPI = 0;

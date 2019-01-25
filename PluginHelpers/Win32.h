@@ -30,11 +30,6 @@ namespace Abstractspoon
 				static int GetHScrollPos(IntPtr hWnd);
 				static int GetVScrollPos(IntPtr hWnd);
 
-				static bool WantScaleByDPIFactor();
-				static int ScaleByDPIFactor(int nValue);
-				static Drawing::Point ScalePointByDPIFactor(Drawing::Point^ point);
-				static Drawing::Size ScaleSizeByDPIFactor(Drawing::Size^ size);
-				static Drawing::Rectangle ScaleRectByDPIFactor(Drawing::Rectangle^ rect);
 				static int GetSystemDPI();
 			};
 

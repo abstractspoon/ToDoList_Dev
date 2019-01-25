@@ -1,0 +1,33 @@
+#pragma once
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+using namespace System;
+using namespace System::Runtime::InteropServices;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct UITHEME;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace Abstractspoon
+{
+	namespace Tdl
+	{
+		namespace PluginHelpers
+		{
+			public ref class DPIScaling
+			{
+			public:
+				static bool WantScaleByDPIFactor();
+				static int ScaleByDPIFactor(int nValue);
+				static Drawing::Point ScalePointByDPIFactor(Drawing::Point^ point);
+				static Drawing::Size ScaleSizeByDPIFactor(Drawing::Size^ size);
+				static Drawing::Rectangle ScaleRectByDPIFactor(Drawing::Rectangle^ rect);
+			};
+		}
+	}
+}
+////////////////////////////////////////////////////////////////////////////////////////////////
+
