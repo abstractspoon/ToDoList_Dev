@@ -109,6 +109,31 @@ namespace HTMLContentControl
             return false;
         }
 
+        bool ProcessMenuShortcut(Keys keyPress, ToolStripItemCollection items)
+        {
+            foreach (ToolStripItem cmd in items)
+            {
+                var menu = (cmd as ToolStripMenuItem);
+
+                if ((menu != null) && menu.Enabled)
+                {
+                    if (menu.ShortcutKeys == keyPress)
+                    {
+                        // do command
+                        menu.PerformClick();
+                        return true;
+                    }
+                    else  if (menu.HasDropDownItems)
+                    {
+                        if (ProcessMenuShortcut(keyPress, menu.DropDownItems))
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private void OnTextChangeTimer(object sender, EventArgs e)
         {
             if (!IsDisposed)
@@ -205,6 +230,34 @@ namespace HTMLContentControl
             dialog.ShowIcon = true;
             dialog.Icon = HTMLContentControlCore.html;
         }
+
+        public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
+        {
+            // Handle keyboard shortcuts
+            if ((message == 0x0100) || (message == 0x0104) && (Control.ModifierKeys != Keys.None))
+            {
+                Keys keyPress = (Keys)wParam;
+
+                if (keyPress == Keys.ControlKey)
+                    return false;
+                
+                var modifiers = Control.ModifierKeys;
+
+                if ((modifiers & Keys.Control) == Keys.Control)
+                    keyPress |= Keys.Control;
+
+                if ((modifiers & Keys.Shift) == Keys.Shift)
+                    keyPress |= Keys.Shift;
+
+                if ((modifiers & Keys.Alt) == Keys.Alt)
+                    keyPress |= Keys.Alt;
+
+                return ProcessMenuShortcut(keyPress, ContextMenu.Items);
+            }
+
+            return false;
+        }
+
 
     }
 

@@ -62,8 +62,7 @@ namespace HTMLContentControl
 
         public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
-            // TODO
-            return false;
+            return m_HtmlEditControl.ProcessMessage(hwnd, message, wParam, lParam, time, xPos, yPos);
         }
 
         public bool Undo()
