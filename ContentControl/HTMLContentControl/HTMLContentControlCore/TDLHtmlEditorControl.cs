@@ -45,7 +45,7 @@ namespace HTMLContentControl
 
         private void InitializeComponent()
         {
-            HideUnwantedFeatures();
+            InitialiseFeatures();
 
             this.ToolBar.Renderer = m_toolbarRenderer;
             this.ToolBar.Font = m_ControlsFont;
@@ -72,14 +72,17 @@ namespace HTMLContentControl
             m_TextChangeTimer.Start();
         }
 
-        void HideUnwantedFeatures()
+        void InitialiseFeatures()
         {
-            // whole 'Document' submenu
+            // remove whole 'Document' submenu
             CommandHandling.HideCommand("contextDocument", ContextMenu.Items);
-
-            CommandHandling.HideCommand("toolstripDocumentPrint", ToolBar.Items);
             CommandHandling.HideCommand("contextDocumentPrint", ContextMenu.Items);
 
+            CommandHandling.HideCommand("toolstripDocumentPrint", ToolBar.Items);
+// 
+//             CommandHandling.SetMenuShortcut("contextFormatStrikeout", Keys.Control | Keys.Subtract, ContextMenu.Items);
+//             CommandHandling.SetMenuShortcut("contextFormatIncrease", Keys.Control | Keys.Decimal, ContextMenu.Items);
+//             CommandHandling.SetMenuShortcut("contextFormatDecrease", Keys.Control | Keys.Oemcomma, ContextMenu.Items);
             // TODO
         }
 

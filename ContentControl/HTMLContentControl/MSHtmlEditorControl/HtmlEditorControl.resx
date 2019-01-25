@@ -451,19 +451,19 @@
     <value>Magenta</value>
   </data>
   <data name="contextTableModify.Size" type="System.Drawing.Size, System.Drawing">
-    <value>133, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextTableModify.Text" xml:space="preserve">
     <value>Properties</value>
   </data>
   <data name="contextTableInsertRow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>133, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextTableInsertRow.Text" xml:space="preserve">
     <value>Insert Row</value>
   </data>
   <data name="contextTableDeleteRow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>133, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextTableDeleteRow.Text" xml:space="preserve">
     <value>Delete Row</value>
@@ -472,7 +472,7 @@
     <value>Magenta</value>
   </data>
   <data name="contextTable.Size" type="System.Drawing.Size, System.Drawing">
-    <value>108, 22</value>
+    <value>127, 22</value>
   </data>
   <data name="contextTable.Text" xml:space="preserve">
     <value>Table</value>
@@ -586,7 +586,7 @@
     <value>Delete</value>
   </data>
   <data name="contextEdit.Size" type="System.Drawing.Size, System.Drawing">
-    <value>108, 22</value>
+    <value>127, 22</value>
   </data>
   <data name="contextEdit.Text" xml:space="preserve">
     <value>Edit</value>
@@ -595,7 +595,7 @@
     <value>Magenta</value>
   </data>
   <data name="contextDocumentOpen.Size" type="System.Drawing.Size, System.Drawing">
-    <value>134, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextDocumentOpen.Text" xml:space="preserve">
     <value>Open</value>
@@ -604,64 +604,64 @@
     <value>Magenta</value>
   </data>
   <data name="contextDocumentSave.Size" type="System.Drawing.Size, System.Drawing">
-    <value>134, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextDocumentSave.Text" xml:space="preserve">
     <value>Save As</value>
   </data>
   <data name="toolStripSeparator9.Size" type="System.Drawing.Size, System.Drawing">
-    <value>131, 6</value>
+    <value>149, 6</value>
   </data>
   <data name="contextDocumentPrint.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
   <data name="contextDocumentPrint.Size" type="System.Drawing.Size, System.Drawing">
-    <value>134, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextDocumentPrint.Text" xml:space="preserve">
     <value>Print</value>
   </data>
   <data name="toolStripSeparator10.Size" type="System.Drawing.Size, System.Drawing">
-    <value>131, 6</value>
+    <value>149, 6</value>
   </data>
   <data name="contextDocumentToolbar.Size" type="System.Drawing.Size, System.Drawing">
-    <value>134, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextDocumentToolbar.Text" xml:space="preserve">
     <value>Toolbar</value>
   </data>
   <data name="contextDocumentScrollbar.Size" type="System.Drawing.Size, System.Drawing">
-    <value>134, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextDocumentScrollbar.Text" xml:space="preserve">
     <value>Scrollbar</value>
   </data>
   <data name="contextDocumentWordwrap.Size" type="System.Drawing.Size, System.Drawing">
-    <value>134, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextDocumentWordwrap.Text" xml:space="preserve">
     <value>Word Wrap</value>
   </data>
   <data name="contextDocumentOverwrite.Size" type="System.Drawing.Size, System.Drawing">
-    <value>134, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextDocumentOverwrite.Text" xml:space="preserve">
     <value>Overwrite</value>
   </data>
   <data name="contextDocument.Size" type="System.Drawing.Size, System.Drawing">
-    <value>108, 22</value>
+    <value>127, 22</value>
   </data>
   <data name="contextDocument.Text" xml:space="preserve">
     <value>Document</value>
   </data>
   <data name="toolStripSeparator7.Size" type="System.Drawing.Size, System.Drawing">
-    <value>105, 6</value>
+    <value>124, 6</value>
   </data>
   <data name="contextFormatFontDialog.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
   <data name="contextFormatFontDialog.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatFontDialog.Text" xml:space="preserve">
     <value>Font Dialog</value>
@@ -670,16 +670,16 @@
     <value>Magenta</value>
   </data>
   <data name="contextFormatColorDialog.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatColorDialog.Text" xml:space="preserve">
     <value>Font Color</value>
   </data>
   <data name="toolStripSeparator11.Size" type="System.Drawing.Size, System.Drawing">
-    <value>164, 6</value>
+    <value>221, 6</value>
   </data>
   <data name="contextFormatNormal.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatNormal.Text" xml:space="preserve">
     <value>Normal</value>
@@ -691,7 +691,7 @@
     <value>Ctrl+B</value>
   </data>
   <data name="contextFormatBold.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatBold.Text" xml:space="preserve">
     <value>Bold</value>
@@ -703,7 +703,7 @@
     <value>Ctrl+I</value>
   </data>
   <data name="contextFormatItalic.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatItalic.Text" xml:space="preserve">
     <value>Italic</value>
@@ -715,37 +715,37 @@
     <value>Ctrl+U</value>
   </data>
   <data name="contextFormatUnderline.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatUnderline.Text" xml:space="preserve">
     <value>Underline</value>
   </data>
   <data name="contextFormatSuperscript.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatSuperscript.Text" xml:space="preserve">
     <value>Superscript</value>
   </data>
   <data name="contextFormatSubscript.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatSubscript.Text" xml:space="preserve">
     <value>Subscript</value>
   </data>
   <data name="contextFormatStrikeout.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatStrikeout.Text" xml:space="preserve">
     <value>Strikeout</value>
   </data>
   <data name="toolStripSeparator12.Size" type="System.Drawing.Size, System.Drawing">
-    <value>164, 6</value>
+    <value>221, 6</value>
   </data>
   <data name="contextFormatIncrease.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
   <data name="contextFormatIncrease.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatIncrease.Text" xml:space="preserve">
     <value>Font Increase</value>
@@ -754,7 +754,7 @@
     <value>Magenta</value>
   </data>
   <data name="contextFormatDecrease.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatDecrease.Text" xml:space="preserve">
     <value>Font Decrease</value>
@@ -762,8 +762,11 @@
   <data name="contextFormatIndent.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
+  <data name="contextFormatIndent.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+    <value>Ctrl+J</value>
+  </data>
   <data name="contextFormatIndent.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatIndent.Text" xml:space="preserve">
     <value>Insert Indent</value>
@@ -771,20 +774,23 @@
   <data name="contextFormatOutdent.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
+  <data name="contextFormatOutdent.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+    <value>Ctrl+Shift+J</value>
+  </data>
   <data name="contextFormatOutdent.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatOutdent.Text" xml:space="preserve">
     <value>Remove Indent</value>
   </data>
   <data name="toolStripSeparator13.Size" type="System.Drawing.Size, System.Drawing">
-    <value>164, 6</value>
+    <value>221, 6</value>
   </data>
   <data name="contextFormatListOrdered.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
   <data name="contextFormatListOrdered.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatListOrdered.Text" xml:space="preserve">
     <value>Ordered List</value>
@@ -793,13 +799,13 @@
     <value>Magenta</value>
   </data>
   <data name="contextFormatListUnordered.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 22</value>
+    <value>224, 22</value>
   </data>
   <data name="contextFormatListUnordered.Text" xml:space="preserve">
     <value>Unordered List</value>
   </data>
   <data name="contextFormat.Size" type="System.Drawing.Size, System.Drawing">
-    <value>108, 22</value>
+    <value>127, 22</value>
   </data>
   <data name="contextFormat.Text" xml:space="preserve">
     <value>Format</value>
@@ -807,8 +813,11 @@
   <data name="contextJustifyLeft.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
+  <data name="contextJustifyLeft.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+    <value>Ctrl+L</value>
+  </data>
   <data name="contextJustifyLeft.Size" type="System.Drawing.Size, System.Drawing">
-    <value>109, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextJustifyLeft.Text" xml:space="preserve">
     <value>Left</value>
@@ -816,8 +825,11 @@
   <data name="contextJustifyCenter.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
+  <data name="contextJustifyCenter.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+    <value>Ctrl+E</value>
+  </data>
   <data name="contextJustifyCenter.Size" type="System.Drawing.Size, System.Drawing">
-    <value>109, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextJustifyCenter.Text" xml:space="preserve">
     <value>Center</value>
@@ -825,14 +837,17 @@
   <data name="contextJustifyRight.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
+  <data name="contextJustifyRight.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+    <value>Ctrl+R</value>
+  </data>
   <data name="contextJustifyRight.Size" type="System.Drawing.Size, System.Drawing">
-    <value>109, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextJustifyRight.Text" xml:space="preserve">
     <value>Right</value>
   </data>
   <data name="contextJustify.Size" type="System.Drawing.Size, System.Drawing">
-    <value>108, 22</value>
+    <value>127, 22</value>
   </data>
   <data name="contextJustify.Text" xml:space="preserve">
     <value>Justify</value>
@@ -841,61 +856,64 @@
     <value>Magenta</value>
   </data>
   <data name="contextFormattingNormal.Size" type="System.Drawing.Size, System.Drawing">
-    <value>129, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextFormattingNormal.Text" xml:space="preserve">
     <value>Normal</value>
   </data>
   <data name="contextFormattingHeading1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>129, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextFormattingHeading1.Text" xml:space="preserve">
     <value>Heading 1</value>
   </data>
   <data name="contextFormattingHeading2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>129, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextFormattingHeading2.Text" xml:space="preserve">
     <value>Heading 2</value>
   </data>
   <data name="contextFormattingHeading3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>129, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextFormattingHeading3.Text" xml:space="preserve">
     <value>Heading 3</value>
   </data>
   <data name="contextFormattingHeading4.Size" type="System.Drawing.Size, System.Drawing">
-    <value>129, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextFormattingHeading4.Text" xml:space="preserve">
     <value>Heading 4</value>
   </data>
   <data name="contextFormattingHeading5.Size" type="System.Drawing.Size, System.Drawing">
-    <value>129, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextFormattingHeading5.Text" xml:space="preserve">
     <value>Heading 5</value>
   </data>
   <data name="contextFormattingFormatted.Size" type="System.Drawing.Size, System.Drawing">
-    <value>129, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextFormattingFormatted.Text" xml:space="preserve">
     <value>Formatted</value>
   </data>
   <data name="contextFormatting.Size" type="System.Drawing.Size, System.Drawing">
-    <value>108, 22</value>
+    <value>127, 22</value>
   </data>
   <data name="contextFormatting.Text" xml:space="preserve">
     <value>Formatting</value>
   </data>
   <data name="toolStripSeparator8.Size" type="System.Drawing.Size, System.Drawing">
-    <value>105, 6</value>
+    <value>124, 6</value>
   </data>
   <data name="contextInsertLine.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
+  <data name="contextInsertLine.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+    <value>Ctrl+H</value>
+  </data>
   <data name="contextInsertLine.Size" type="System.Drawing.Size, System.Drawing">
-    <value>123, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextInsertLine.Text" xml:space="preserve">
     <value>Line</value>
@@ -904,7 +922,7 @@
     <value>Magenta</value>
   </data>
   <data name="contextInsertLink.Size" type="System.Drawing.Size, System.Drawing">
-    <value>123, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextInsertLink.Text" xml:space="preserve">
     <value>Web Link</value>
@@ -913,19 +931,19 @@
     <value>Magenta</value>
   </data>
   <data name="contextInsertImage.Size" type="System.Drawing.Size, System.Drawing">
-    <value>123, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextInsertImage.Text" xml:space="preserve">
     <value>Image</value>
   </data>
   <data name="contextInsertText.Size" type="System.Drawing.Size, System.Drawing">
-    <value>123, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextInsertText.Text" xml:space="preserve">
     <value>Text</value>
   </data>
   <data name="contextInsertHtml.Size" type="System.Drawing.Size, System.Drawing">
-    <value>123, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextInsertHtml.Text" xml:space="preserve">
     <value>Html</value>
@@ -934,19 +952,19 @@
     <value>Magenta</value>
   </data>
   <data name="contextInsertTable.Size" type="System.Drawing.Size, System.Drawing">
-    <value>123, 22</value>
+    <value>152, 22</value>
   </data>
   <data name="contextInsertTable.Text" xml:space="preserve">
     <value>Table</value>
   </data>
   <data name="contextInsert.Size" type="System.Drawing.Size, System.Drawing">
-    <value>108, 22</value>
+    <value>127, 22</value>
   </data>
   <data name="contextInsert.Text" xml:space="preserve">
     <value>Insert</value>
   </data>
   <data name="contextEditor.Size" type="System.Drawing.Size, System.Drawing">
-    <value>109, 170</value>
+    <value>128, 192</value>
   </data>
   <data name="&gt;&gt;contextEditor.Name" xml:space="preserve">
     <value>contextEditor</value>
