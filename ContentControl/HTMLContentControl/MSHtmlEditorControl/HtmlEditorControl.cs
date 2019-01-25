@@ -128,7 +128,8 @@ namespace MSDN.Html.Editor
         private const string HTML_COMMAND_INDENT = "Indent";
         private const string HTML_COMMAND_OUTDENT = "Outdent";
         private const string HTML_COMMAND_INSERT_LINE = "InsertHorizontalRule";
-        private const string HTML_COMMAND_INSERT_LIST = "Insert{0}List"; // replace with (Un)Ordered
+        private const string HTML_COMMAND_INSERT_LISTUNORDERED = "InsertUnorderedList";
+        private const string HTML_COMMAND_INSERT_LISTORDERED = "InsertOrderedList";
         private const string HTML_COMMAND_INSERT_IMAGE = "InsertImage";
         private const string HTML_COMMAND_INSERT_LINK = "CreateLink";
         private const string HTML_COMMAND_REMOVE_LINK = "Unlink";
@@ -1994,9 +1995,16 @@ namespace MSDN.Html.Editor
         /// <param name="listtype"></param>
         public void FormatList(HtmlListType listtype)
         {
-            string command = string.Format(HTML_COMMAND_INSERT_LIST, listtype.ToString());
-            ExecuteCommandRange(command, null);
+            switch (listtype)
+            {
+                case HtmlListType.Ordered:
+                    ExecuteCommandRange(HTML_COMMAND_INSERT_LISTORDERED, null);
+                    break;
 
+                case HtmlListType.Unordered:
+                    ExecuteCommandRange(HTML_COMMAND_INSERT_LISTUNORDERED, null);
+                    break;
+            }
         } //FormatList
 
 

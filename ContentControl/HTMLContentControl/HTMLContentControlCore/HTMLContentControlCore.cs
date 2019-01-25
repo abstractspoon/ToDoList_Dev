@@ -67,7 +67,7 @@ namespace HTMLContentControl
 
         public bool Undo()
         {
-            return false;// HtmlEditControl.Undo();
+            return m_HtmlEditControl.EditUndo();
         }
 
         public bool Redo()
@@ -118,6 +118,13 @@ namespace HTMLContentControl
         }
 
         // --------------------------------------------------------------------
+
+        protected override void OnGotFocus(EventArgs e)
+        {
+            base.OnGotFocus(e);
+
+            m_HtmlEditControl.Focus();
+        }
 
         protected override void OnHandleCreated(EventArgs e)
         {

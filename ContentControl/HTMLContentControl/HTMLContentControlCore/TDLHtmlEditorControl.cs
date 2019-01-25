@@ -62,6 +62,7 @@ namespace HTMLContentControl
             this.TabIndex = 26;
             this.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.BorderSize = 0;
+            this.NavigateAction = MSDN.Html.Editor.NavigateActionOption.NewWindow;
 
             m_Trans.Translate(ToolBar.Items);
             m_Trans.Translate(ContextMenu.Items);
