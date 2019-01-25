@@ -75,63 +75,12 @@ namespace HTMLContentControl
         void HideUnwantedFeatures()
         {
             // whole 'Document' submenu
-            HideCommand("contextDocument", ContextMenu.Items);
+            CommandHandling.HideCommand("contextDocument", ContextMenu.Items);
 
-            HideCommand("toolstripDocumentPrint", ToolBar.Items);
-            HideCommand("contextDocumentPrint", ContextMenu.Items);
+            CommandHandling.HideCommand("toolstripDocumentPrint", ToolBar.Items);
+            CommandHandling.HideCommand("contextDocumentPrint", ContextMenu.Items);
 
             // TODO
-        }
-
-        bool HideCommand(String commandId, ToolStripItemCollection items)
-        {
-            foreach (ToolStripItem cmd in items)
-            {
-                if (cmd.Name == commandId)
-                {
-                    cmd.Visible = false;
-                    cmd.Enabled = false;
-
-                    return true;
-                }
-                else
-                {
-                    var menu = (cmd as ToolStripMenuItem);
-
-                    if ((menu != null) && menu.HasDropDownItems)
-                    {
-                        if (HideCommand(commandId, menu.DropDownItems))
-                            return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        bool ProcessMenuShortcut(Keys keyPress, ToolStripItemCollection items)
-        {
-            foreach (ToolStripItem cmd in items)
-            {
-                var menu = (cmd as ToolStripMenuItem);
-
-                if ((menu != null) && menu.Enabled)
-                {
-                    if (menu.ShortcutKeys == keyPress)
-                    {
-                        // do command
-                        menu.PerformClick();
-                        return true;
-                    }
-                    else  if (menu.HasDropDownItems)
-                    {
-                        if (ProcessMenuShortcut(keyPress, menu.DropDownItems))
-                            return true;
-                    }
-                }
-            }
-
-            return false;
         }
 
         private void OnTextChangeTimer(object sender, EventArgs e)
@@ -252,7 +201,7 @@ namespace HTMLContentControl
                 if ((modifiers & Keys.Alt) == Keys.Alt)
                     keyPress |= Keys.Alt;
 
-                return ProcessMenuShortcut(keyPress, ContextMenu.Items);
+                return CommandHandling.ProcessMenuShortcut(keyPress, ContextMenu.Items);
             }
 
             return false;
