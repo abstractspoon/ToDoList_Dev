@@ -44,7 +44,7 @@ namespace WordCloudUIExtension
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 
             m_ilItemHeight = new ImageList();
-            m_ilItemHeight.ImageSize = new Size(1, Win32.ScaleByDPIFactor(17)); // minimum height
+            m_ilItemHeight.ImageSize = new Size(1, DPIScaling.Scale(17)); // minimum height
 		}
 
         public Boolean TaskColorIsBackground
@@ -98,7 +98,7 @@ namespace WordCloudUIExtension
 
         private int ImageSize
         {
-            get { return Win32.ScaleByDPIFactor(16); }
+            get { return DPIScaling.Scale(16); }
         }
 
 		public bool Initialise(Translator trans)

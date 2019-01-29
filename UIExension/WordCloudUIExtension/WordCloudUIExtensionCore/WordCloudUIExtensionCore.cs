@@ -35,7 +35,7 @@ namespace WordCloudUIExtension
 		private const int MatchListDefaultWidth = 200;
         private const string FontName = "Tahoma";
 
-        private static int MinSplitWidth = Win32.ScaleByDPIFactor(25 * 2);
+        private static int MinSplitWidth = DPIScaling.Scale(25 * 2);
 
         // -------------------------------------------------------------
 
@@ -77,7 +77,7 @@ namespace WordCloudUIExtension
 			m_Splitting = false;
 			m_InitialSplitPos = -1;
 			m_SplitterColor = Color.Gray;
-			m_SplitterWidth = Win32.ScaleByDPIFactor(6);
+            m_SplitterWidth = DPIScaling.Scale(6);
 
 			InitializeComponent();
 		}
@@ -467,7 +467,7 @@ namespace WordCloudUIExtension
 
 		void ShowSplitterBar(bool show = true)
 		{
-			int newSplitterWidth = (show ? Win32.ScaleByDPIFactor(6) : 1);
+            int newSplitterWidth = (show ? DPIScaling.Scale(6) : 1);
 
 			if (newSplitterWidth != m_SplitterWidth)
 			{

@@ -7,39 +7,35 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+using namespace System;
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool DPIScaling::WantScaleByDPIFactor()
+bool DPIScaling::WantScaling()
 {
-	return (ScaleByDPIFactor(16) != 16);
+	return (Win32::GetSystemDPI() != 96);
 }
 
-int DPIScaling::ScaleByDPIFactor(int nValue)
+int DPIScaling::Scale(int nValue)
 {
 	return ::MulDiv(nValue, Win32::GetSystemDPI(), 96);
 }
 
-Drawing::Point DPIScaling::ScalePointByDPIFactor(Drawing::Point^ point)
+Drawing::Point DPIScaling::Scale(Drawing::Point point)
 {
-	Drawing::Point^ scaled = gcnew Drawing::Point(ScaleByDPIFactor(point->X), ScaleByDPIFactor(point->Y));
-
-	return *scaled;
+	return Drawing::Point(Scale(point.X), Scale(point.Y));
 }
 
-Drawing::Size DPIScaling::ScaleSizeByDPIFactor(Drawing::Size^ size)
+Drawing::Size DPIScaling::Scale(Drawing::Size size)
 {
-	Drawing::Size^ scaled = gcnew Drawing::Size(ScaleByDPIFactor(size->Width), ScaleByDPIFactor(size->Height));
-
-	return *scaled;
+	return Drawing::Size(Scale(size.Width), Scale(size.Height));
 }
 
-Drawing::Rectangle DPIScaling::ScaleRectByDPIFactor(Drawing::Rectangle^ rect)
+Drawing::Rectangle DPIScaling::Scale(Drawing::Rectangle rect)
 {
-	Drawing::Rectangle^ scaled = gcnew Drawing::Rectangle(ScalePointByDPIFactor(rect->Location), ScaleSizeByDPIFactor(rect->Size));
-
-	return *scaled;
+	return Drawing::Rectangle(Scale(rect.Location), Scale(rect.Size));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

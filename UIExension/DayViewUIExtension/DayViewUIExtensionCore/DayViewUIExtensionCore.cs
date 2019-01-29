@@ -345,8 +345,8 @@ namespace DayViewUIExtension
 			m_WeekLabel = new DayViewWeekLabel();
 
 			m_WeekLabel.Font = new Font(FontName, 14);
-			m_WeekLabel.Location = new Point(m_Toolbar.Right, Win32.ScaleByDPIFactor(LabelTop));
-			m_WeekLabel.Size = new Size(Win32.ScaleByDPIFactor(350), m_Toolbar.Height);
+            m_WeekLabel.Location = new Point(m_Toolbar.Right, DPIScaling.Scale(LabelTop));
+            m_WeekLabel.Size = new Size(DPIScaling.Scale(350), m_Toolbar.Height);
 			m_WeekLabel.TextAlign = ContentAlignment.MiddleLeft;
 
 			Controls.Add(m_WeekLabel);
@@ -367,9 +367,9 @@ namespace DayViewUIExtension
 			m_Toolbar.GripStyle = ToolStripGripStyle.Hidden;
             m_Toolbar.ImageList = m_TBImageList;
 
-            if (Win32.WantScaleByDPIFactor())
+            if (DPIScaling.WantScaling())
             {
-                int imageSize = Win32.ScaleByDPIFactor(16);
+                int imageSize = DPIScaling.Scale(16);
 
                 m_Toolbar.ImageScalingSize = new Size(imageSize, imageSize);
                 m_Toolbar.AutoSize = false;
@@ -437,8 +437,8 @@ namespace DayViewUIExtension
 			m_MonthCombo = new DayViewMonthComboBox();
 
 			m_MonthCombo.Font = m_ControlsFont;
-			m_MonthCombo.Location = Win32.ScalePointByDPIFactor(new Point(0, ComboTop));
-			m_MonthCombo.Size = Win32.ScaleSizeByDPIFactor(new Size(100, 16));
+            m_MonthCombo.Location = DPIScaling.Scale(new Point(0, ComboTop));
+            m_MonthCombo.Size = DPIScaling.Scale(new Size(100, 16));
 			
 			m_MonthCombo.SelectedMonth = DateTime.Now.Month;
 			m_MonthCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
@@ -448,8 +448,8 @@ namespace DayViewUIExtension
 			m_YearCombo = new DayViewYearComboBox();
 
 			m_YearCombo.Font = m_ControlsFont;
-			m_YearCombo.Location = Win32.ScalePointByDPIFactor(new Point(105, ComboTop));
-			m_YearCombo.Size = Win32.ScaleSizeByDPIFactor(new Size(100, 16));
+            m_YearCombo.Location = DPIScaling.Scale(new Point(105, ComboTop));
+            m_YearCombo.Size = DPIScaling.Scale(new Size(100, 16));
 
 			m_YearCombo.SelectedYear = DateTime.Now.Year;
 			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);

@@ -48,21 +48,21 @@ namespace DayViewUIExtension
 
         protected void ScaleByDPIFactor()
         {
-            if (Win32.WantScaleByDPIFactor())
+            if (DPIScaling.WantScaling())
             {
                 SuspendLayout();
 
-                this.Bounds = Win32.ScaleRectByDPIFactor(this.Bounds);
+                this.Bounds = DPIScaling.Scale(this.Bounds);
                 this.Width -= 10;
                 this.Height -= 20;
 
-                this.panel1.Bounds = Win32.ScaleRectByDPIFactor(this.panel1.Bounds);
-                this.m_HideParentTasks.Bounds = Win32.ScaleRectByDPIFactor(this.m_HideParentTasks.Bounds);
-                this.m_HideTasksWithoutTimes.Bounds = Win32.ScaleRectByDPIFactor(this.m_HideTasksWithoutTimes.Bounds);
-                this.m_HideTasksSpanningWeekends.Bounds = Win32.ScaleRectByDPIFactor(this.m_HideTasksSpanningWeekends.Bounds);
-                this.m_HideTasksSpanningDays.Bounds = Win32.ScaleRectByDPIFactor(this.m_HideTasksSpanningDays.Bounds);
-                this.BtnCancel.Bounds = Win32.ScaleRectByDPIFactor(this.BtnCancel.Bounds);
-                this.BtnOK.Bounds = Win32.ScaleRectByDPIFactor(this.BtnOK.Bounds);
+                this.panel1.Bounds = DPIScaling.Scale(this.panel1.Bounds);
+                this.m_HideParentTasks.Bounds = DPIScaling.Scale(this.m_HideParentTasks.Bounds);
+                this.m_HideTasksWithoutTimes.Bounds = DPIScaling.Scale(this.m_HideTasksWithoutTimes.Bounds);
+                this.m_HideTasksSpanningWeekends.Bounds = DPIScaling.Scale(this.m_HideTasksSpanningWeekends.Bounds);
+                this.m_HideTasksSpanningDays.Bounds = DPIScaling.Scale(this.m_HideTasksSpanningDays.Bounds);
+                this.BtnCancel.Bounds = DPIScaling.Scale(this.BtnCancel.Bounds);
+                this.BtnOK.Bounds = DPIScaling.Scale(this.BtnOK.Bounds);
 
                 // Make sure border is the same all the way around
 //                 int leftBorder = this.panel1.Left;

@@ -449,7 +449,7 @@ namespace MindMapUIExtension
 
         override protected int ScaleByDPIFactor(int value)
         {
-            return Win32.ScaleByDPIFactor(value);
+            return DPIScaling.Scale(value);
         }
 
         private bool RefreshItemFont(TreeNode node, Boolean andChildren)

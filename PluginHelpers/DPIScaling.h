@@ -2,11 +2,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace System;
-using namespace System::Runtime::InteropServices;
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
 struct UITHEME;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -20,11 +15,11 @@ namespace Abstractspoon
 			public ref class DPIScaling
 			{
 			public:
-				static bool WantScaleByDPIFactor();
-				static int ScaleByDPIFactor(int nValue);
-				static Drawing::Point ScalePointByDPIFactor(Drawing::Point^ point);
-				static Drawing::Size ScaleSizeByDPIFactor(Drawing::Size^ size);
-				static Drawing::Rectangle ScaleRectByDPIFactor(Drawing::Rectangle^ rect);
+				static bool WantScaling();
+				static int Scale(int nValue);
+				static System::Drawing::Point Scale(System::Drawing::Point point);
+				static System::Drawing::Size Scale(System::Drawing::Size size);
+				static System::Drawing::Rectangle Scale(System::Drawing::Rectangle rect);
 			};
 		}
 	}

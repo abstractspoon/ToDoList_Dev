@@ -50,9 +50,9 @@ namespace HTMLContentControl
             this.ToolBar.Renderer = m_toolbarRenderer;
             this.ToolBar.Font = m_ControlsFont;
 
-            if (Win32.WantScaleByDPIFactor())
+            if (DPIScaling.WantScaling())
             {
-                int imageSize = Win32.ScaleByDPIFactor(16);
+                int imageSize = DPIScaling.Scale(16);
                 this.ToolBar.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
             }
 

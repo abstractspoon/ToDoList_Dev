@@ -366,7 +366,7 @@ namespace DayViewUIExtension
                     if (TaskHasIcon(taskItem))
                     {
 						Rectangle rectIcon;
-                        int imageSize = Win32.ScaleByDPIFactor(16);
+                        int imageSize = DPIScaling.Scale(16);
                         
 						if (taskItem.IsLongAppt())
 						{
