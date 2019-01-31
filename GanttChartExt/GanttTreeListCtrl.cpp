@@ -6663,10 +6663,14 @@ BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 	if (!DragDetect(m_list, ptScreen))
 		return FALSE;
 
-	// Ensure the gantt item has valid dates
 	GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 	
+	// cache the original task and the start point
+	m_giPreDrag = *pGI;
+	m_ptDragStart = ptCursor;
+
+	// Ensure the gantt item has valid dates
 	COleDateTime dtStart, dtDue;
 	GetTaskStartEndDates(*pGI, dtStart, dtDue);
 	
@@ -6688,10 +6692,6 @@ BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 		pGI->SetStartDate(dtStart, TRUE);
 	}
 	
-	// cache the original task and the start point
-	m_giPreDrag = *pGI;
-	m_ptDragStart = ptCursor;
-
 	// Start dragging
 	m_nDragging = nDrag;
 	m_dtDragMin = m_data.CalcMaxDependencyDate(m_giPreDrag);

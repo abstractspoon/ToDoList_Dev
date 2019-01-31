@@ -43,7 +43,7 @@ void CiCalExporter::SetLocalizer(ITransText* /*pTT*/)
 void CiCalExporter::WriteHeader(CStdioFileEx& fileOut)
 {
 	WriteString(fileOut, _T("BEGIN:VCALENDAR"));
-	WriteString(fileOut, _T("PRODID:iCalExporter (c) AbstractSpoon 2009-14"));
+	WriteString(fileOut, _T("PRODID:iCalExporter (c) AbstractSpoon 2009-19"));
 	WriteString(fileOut, _T("VERSION:2.0"));
 }
 

@@ -49,7 +49,7 @@ BEGIN
             VALUE "FileDescription", "ToDoList\0"
             VALUE "FileVersion", "7, 1, 1000, 11\0"
             VALUE "InternalName", "ToDoList\0"
-            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-18\0"
+            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-19\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "ToDoList.exe\0"
             VALUE "PrivateBuild", "\0"
@@ -204,7 +204,7 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,18,280,366,10
 END
 
-IDD_PREFGEN_PAGE DIALOGEX 0, 0, 400, 438
+IDD_PREFGEN_PAGE DIALOGEX 0, 0, 400, 457
 STYLE WS_CHILD
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
@@ -251,35 +251,35 @@ BEGIN
                     WS_TABSTOP,7,235,355,10
     CONTROL         "&Enable 'tdl://' as a url protocol",
                     IDC_ENABLETDLPROTOCOL,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,250,353,10
-    ICON            IDI_VISTASHIELD,IDC_VISTASHIELD2,372,235,20,20,
+                    WS_TABSTOP,7,260,353,10
+    ICON            IDI_VISTASHIELD,IDC_VISTASHIELD2,372,235,21,20,
                     SS_RIGHTJUST | SS_REALSIZEIMAGE
-    ICON            IDI_VISTASHIELD,IDC_VISTASHIELD,372,250,20,20,
+    ICON            IDI_VISTASHIELD,IDC_VISTASHIELD,372,260,21,20,
                     SS_RIGHTJUST | SS_REALSIZEIMAGE,WS_EX_TRANSPARENT
     CONTROL         "En&able delayed loading of tasklists",
                     IDC_ENABLEDELAYEDLOADING,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,265,386,10
+                    WS_TABSTOP,7,287,386,10
     CONTROL         "&Keep track of most recently used (MRU) tasklists",
                     IDC_ADDFILESTOMRU,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,281,386,10
-    PUSHBUTTON      "Clear M&RU",IDC_CLEARMRU,17,292,62,14
+                    WS_TABSTOP,7,303,386,10
+    PUSHBUTTON      "Clear M&RU",IDC_CLEARMRU,17,314,62,14
     CONTROL         "&Automatically check for updates on startup",
                     IDC_CHECKFORUPDATES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,315,386,10
+                    WS_TABSTOP,7,337,386,10
     CONTROL         "&Save passwords between sessions, for tasklists stored in other repositories (Open From..., Save To...)",
                     IDC_SAVEOTHERPASSWORDS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,330,386,10
+                    WS_TABSTOP,7,352,386,10
     CONTROL         "Minimise ToDoList after the following period of inactivity:",
                     IDC_MINIMIZEONNOEDIT,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,345,375,10
-    COMBOBOX        IDC_NOCHANGETIME,18,357,183,111,CBS_DROPDOWNLIST | 
+                    WS_TABSTOP,7,367,375,10
+    COMBOBOX        IDC_NOCHANGETIME,18,379,183,111,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Display &reminders using 'Stickies' (by Zhorn Software)",
                     IDC_USESTICKIES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    375,387,10
+                    397,387,10
     LTEXT           "Path to Stickies executable:",IDC_STICKIESPATHLABEL,18,
-                    387,376,8
-    EDITTEXT        IDC_PATHTOSTICKIESEXE,18,398,183,13,ES_AUTOHSCROLL
+                    409,376,8
+    EDITTEXT        IDC_PATHTOSTICKIESEXE,18,420,183,13,ES_AUTOHSCROLL
     PUSHBUTTON      "&Edit...",IDC_EDIT_DISPLAYLANGUAGE,206,22,50,14
     CONTROL         "Show &full task path in Sticky",
                     IDC_SHOWFULLPATHINSTICKY,"Button",BS_AUTOCHECKBOX | 
@@ -1844,8 +1844,8 @@ BEGIN
                     LVS_SINGLESEL | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | 
                     WS_BORDER | WS_TABSTOP,7,45,318,110
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,209,318,1
-    ICON            IDR_MAINFRAME_STD,IDC_STATIC,7,8,21,20
-    ICON            IDI_ABSTRACTSPOON,IDC_STATIC,304,7,21,20
+    ICON            IDR_MAINFRAME_STD,IDC_STATIC,7,8,20,20
+    ICON            IDI_ABSTRACTSPOON,IDC_STATIC,304,7,20,20
     LTEXT           "Static",IDC_LICENSE,71,161,254,8
     LTEXT           "A simple and effective way to keep on top of your daily tasks",
                     IDC_STATIC,34,20,267,8
@@ -1859,7 +1859,7 @@ BEGIN
     LTEXT           "License:",IDC_STATIC,7,161,27,8
     EDITTEXT        IDC_TITLE,34,7,173,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
                     WS_BORDER
-    LTEXT           "(c) Abstractspoon 2003-18",IDC_STATIC,213,7,87,8
+    LTEXT           "(c) Abstractspoon 2003-19",IDC_STATIC,213,7,87,8
 END
 
 IDD_SHOWREMINDER_DIALOG DIALOG DISCARDABLE  0, 0, 337, 231

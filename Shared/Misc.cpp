@@ -604,44 +604,57 @@ int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSe
 	CString sWord(sSearchFor), sText(sSearchIn);
 	Trim(sWord);
 
-	// Case sensitive search first
-	int nFind = sText.Find(sWord, iStart);
+	int nFind = -1;
 
-	if (nFind == -1)
+	while (iStart < sSearchIn.GetLength())
 	{
-		// Case-insensitive
-		if (!bCaseSensitive)
-		{
-			MakeUpper(sWord);
-			MakeUpper(sText);
-
-			nFind = sText.Find(sWord, iStart);
-		}
+		// Case sensitive search first
+		nFind = sText.Find(sWord, iStart);
 
 		if (nFind == -1)
-			return -1;
+		{
+			// Case-insensitive
+			if (!bCaseSensitive)
+			{
+				MakeUpper(sWord);
+				MakeUpper(sText);
+
+				nFind = sText.Find(sWord, iStart);
+			}
+
+			if (nFind == -1)
+				return -1;
+		}
+
+		// update search start before we modify 'nFind'
+		iStart = nFind + sWord.GetLength();
+
+		// else
+		if (bWholeWord) // test whole word
+		{
+			const CString DELIMS("()-\\/{}[]:;,. ?\"'");
+
+			// prior and next chars must be delimiters
+			TCHAR cPrevChar = ' ', cNextChar = ' ';
+
+			// prev
+			if (nFind > 0)
+				cPrevChar = sText[nFind - 1];
+
+			// next
+			if ((nFind + sWord.GetLength()) < sText.GetLength())
+				cNextChar = sText[nFind + sWord.GetLength()];
+
+			if ((DELIMS.Find(cPrevChar) == -1) || (DELIMS.Find(cNextChar) == -1))
+				nFind = -1;
+		}
+
+		if (nFind != -1)
+			break;
+
+		// else keep going
 	}
-
-	// else
-	if (bWholeWord) // test whole word
-	{
-		const CString DELIMS("()-\\/{}[]:;,. ?\"'");
-
-		// prior and next chars must be delimiters
-		TCHAR cPrevChar = ' ', cNextChar = ' ';
-
-		// prev
-		if (nFind > 0)
-			cPrevChar = sText[nFind - 1];
-
-		// next
-		if ((nFind + sWord.GetLength()) < sText.GetLength())
-			cNextChar = sText[nFind + sWord.GetLength()];
-
-		if ((DELIMS.Find(cPrevChar) == -1) || (DELIMS.Find(cNextChar) == -1))
-			nFind = -1;
-	}
-
+	
 	return nFind;
 }
 

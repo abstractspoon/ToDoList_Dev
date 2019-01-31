@@ -7055,39 +7055,17 @@ void CToDoListWnd::OnNeedTooltipText(NMHDR* pNMHDR, LRESULT* pResult)
 	static CString sTipText;
 	sTipText.Empty();
 
-	switch (pNMHDR->idFrom)
+	if ((pNMHDR->idFrom >= ID_TOOLS_USERTOOL1) && (pNMHDR->idFrom <= ID_TOOLS_USERTOOL50))
 	{
-	case ID_TOOLS_USERTOOL1:
-	case ID_TOOLS_USERTOOL2:
-	case ID_TOOLS_USERTOOL3:
-	case ID_TOOLS_USERTOOL4:
-	case ID_TOOLS_USERTOOL5:
-	case ID_TOOLS_USERTOOL6:
-	case ID_TOOLS_USERTOOL7:
-	case ID_TOOLS_USERTOOL8:
-	case ID_TOOLS_USERTOOL9:
-	case ID_TOOLS_USERTOOL10:
-	case ID_TOOLS_USERTOOL11:
-	case ID_TOOLS_USERTOOL12:
-	case ID_TOOLS_USERTOOL13:
-	case ID_TOOLS_USERTOOL14:
-	case ID_TOOLS_USERTOOL15:
-	case ID_TOOLS_USERTOOL16:
-		{
-			USERTOOL ut;
+		USERTOOL ut;
 
-			if (Prefs().GetUserTool(pNMHDR->idFrom - ID_TOOLS_USERTOOL1, ut))
-				sTipText = ut.sToolName;
-		}
-		break;
-
-	default:
+		if (Prefs().GetUserTool(pNMHDR->idFrom - ID_TOOLS_USERTOOL1, ut))
+			sTipText = ut.sToolName;
+	}
+	else if ((pNMHDR->idFrom >= 0) && (pNMHDR->idFrom < (UINT)m_mgrToDoCtrls.GetCount()))
+	{
 		// tab control popups
-		if (pNMHDR->idFrom >= 0 && pNMHDR->idFrom < (UINT)m_mgrToDoCtrls.GetCount())
-		{
-			sTipText = m_mgrToDoCtrls.GetTabItemTooltip(pNMHDR->idFrom);
-		}
-		break;
+		sTipText = m_mgrToDoCtrls.GetTabItemTooltip(pNMHDR->idFrom);
 	}
 
 	if (!sTipText.IsEmpty())

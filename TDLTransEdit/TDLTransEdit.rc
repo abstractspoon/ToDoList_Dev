@@ -77,7 +77,7 @@ BEGIN
             VALUE "FileDescription", "TDLTransEdit\0"
             VALUE "FileVersion", "1, 0, 0, 2\0"
             VALUE "InternalName", "TDLTransEdit\0"
-            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2016-17\0"
+            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2016-19\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "TDLTransEdit.exe\0"
             VALUE "PrivateBuild", "\0"

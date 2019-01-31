@@ -1472,6 +1472,10 @@ void CToDoCtrlData::ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRI
 
 void CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib)
 {
+	// Exclude references and undo operations
+	if (m_bUndoRedoing || IsTaskReference(dwTaskID))
+		return;
+
 	// special case: 
 	if (nAttrib == TDCA_ALL)
 	{
@@ -1511,7 +1515,8 @@ void CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRI
 
 BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
 {
-	if (dwTaskID)
+	// Exclude references
+	if (dwTaskID && !IsTaskReference(dwTaskID))
 	{
 		const TODOITEM* pTDI = NULL;
 		const TODOSTRUCTURE* pTDS = NULL;
@@ -1529,10 +1534,12 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDI, const TODOST
 {
 	ASSERT(m_undo.IsActive());
 
-	ASSERT(pTDI && pTDS);
-	
-	if (!pTDI || !pTDS)
+	// Exclude references
+	if (!pTDI || pTDI->dwTaskRefID || !pTDS)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
 	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 	{
@@ -1555,8 +1562,12 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 	}
 
 	DWORD dwSubtaskID = pTDSParent->GetSubTaskID(nChildPos);
-	TODOITEM* pTDIChild = NULL;
 
+	// Exclude references
+	if (IsTaskReference(dwSubtaskID))
+		return FALSE;
+
+	TODOITEM* pTDIChild = NULL;
 	GET_TDI(dwSubtaskID, pTDIChild, FALSE);
 
 	// save undo data
@@ -2102,12 +2113,26 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
 	// Sanity checks
-	if (!(pTDI->HasStart() && (pTDI->HasDue() || (pTDI->dTimeEstimate > 0.0))))
+	if (!pTDI->HasStart())
 	{
 		ASSERT(0);
 		return SET_FAILED;
 	}
-
+	else if (pTDI->HasDue())
+	{
+		if (pTDI->dateDue <= pTDI->dateStart)
+		{
+			ASSERT(0);
+			return SET_FAILED;
+		}
+	}
+	else if (pTDI->dTimeEstimate <= 0.0)
+	{
+		ASSERT(0);
+		return SET_FAILED;
+	}
+	
+	// check for no change
 	if (dtNewStart == pTDI->dateStart)
 	{
 		ASSERT(0);
@@ -2119,12 +2144,16 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 	if (pTDI->aDependencies.GetSize() && HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
 		return SET_NOCHANGE;
 	
-	// Cache current time estimate before doing anything
-	double dDuration = pTDI->dTimeEstimate;
+	// Calculate duration
+	double dDuration = 0.0;
 	
-	if (dDuration == 0.0)
+	if (pTDI->HasDue())
 		dDuration = CalcDuration(pTDI->dateStart, pTDI->dateDue, pTDI->nTimeEstUnits);
-
+	else
+		dDuration = pTDI->dTimeEstimate;
+	
+	ASSERT(dDuration > 0.0);
+	
 	// recalc due date
 	COleDateTime dtStart(dtNewStart);
 	COleDateTime dtNewDue = AddDuration(dtStart, dDuration, pTDI->nTimeEstUnits);
@@ -2777,9 +2806,7 @@ int CToDoCtrlData::MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwS
 		{
 			SetTaskModified(dwDestParentID);
 
-			// And update inherited attributes unless we are undoing
-			if (!m_bUndoRedoing)
-				ApplyLastInheritedChangeFromParent(dwTaskID, TDCA_ALL);
+			ApplyLastInheritedChangeFromParent(dwTaskID, TDCA_ALL);
 		}
 	}
 	
@@ -3306,26 +3333,33 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 	
 	switch (nUnits)
 	{
-	case TDCU_MINS:
-	case TDCU_HOURS:
+	case TDCU_DAYS:
 	case TDCU_WEEKS:
 	case TDCU_MONTHS:
 	case TDCU_YEARS:
 		{
-			CTimeHelper thAllDay(24.0, 7.0);
+			// work in days
+			if (nUnits != TDCU_DAYS)
+			{
+				dDuration = CTimeHelper(24.0, 7.0).GetTime(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_DAYS);
+				nUnits = TDCU_DAYS;
+			}
 
-			double dDays = thAllDay.GetTime(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_DAYS);
-			dateDue.m_dt += dDays;
+			dateDue.m_dt += dDuration;
 		}
 		break;
 
-	case TDCU_DAYS:
-		dateDue.m_dt += dDuration;
-		break;
-
+	case TDCU_MINS:
+	case TDCU_HOURS:
 	case TDCU_WEEKDAYS:
 		{
-			// handle workdays
+			// work in weekdays
+			if (nUnits != TDCU_WEEKDAYS)
+			{
+				dDuration = CTimeHelper().GetTime(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_WEEKDAYS);
+				nUnits = TDCU_WEEKDAYS;
+			}
+
 			if (CDateHelper::HasWeekend())
 			{
 				// Adjust start date if it falls on a weekend
@@ -3410,6 +3444,89 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	}
 
 	double dDuration = (dateDue.m_dt - dateStart.m_dt); // in days
+
+	switch (nUnits)
+	{
+	case TDCU_DAYS:
+	case TDCU_WEEKS:
+	case TDCU_MONTHS:
+	case TDCU_YEARS:
+		// Work in days
+		{
+			// handle 'whole' of due date
+			if (IsEndOfDay(dateDue))
+				dDuration += 1.0;
+
+			if (nUnits != TDCU_DAYS)
+			{
+				CTimeHelper thAllDay(24.0, 7.0);
+				dDuration = thAllDay.GetTime(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
+			}
+		}
+		break;
+
+	default:
+		// Work in weekdays
+		{
+			if (CDateHelper::HasWeekend())
+			{
+				// process each whole or part day  
+				double dDayStart(dateStart);
+				dDuration = 0.0;
+
+				while (dDayStart < dateDue)
+				{
+					// determine the end of this day
+					double dDayEnd = (CDateHelper::GetDateOnly(dDayStart).m_dt + 1.0);
+
+					if (!CDateHelper::IsWeekend(dDayStart))
+					{
+						dDuration += (min(dDayEnd, dateDue) - dDayStart); // in days
+					}
+
+					// next day
+					dDayStart = dDayEnd;
+				}
+
+				// handle 'whole' of due date
+				if (!CDateHelper::IsWeekend(dateDue) && IsEndOfDay(dateDue))
+					dDuration += 1.0;
+			}
+			else if (IsEndOfDay(dateDue))
+			{
+				dDuration += 1.0;
+			}
+
+			if (nUnits != TDCU_WEEKDAYS)
+			{
+				CTimeHelper thAllDay;
+				dDuration = thAllDay.GetTime(dDuration, THU_WEEKDAYS, TDC::MapUnitsToTHUnits(nUnits));
+			}
+		}
+		break;
+	}
+
+	return dDuration;
+}
+
+/*
+double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits)
+{
+	// Sanity checks
+	if (!CDateHelper::IsDateSet(dateStart) || !CDateHelper::IsDateSet(dateDue))
+	{
+		ASSERT(0);
+		return 0.0;
+	}
+
+	// End date must be greater then start date
+	if (!IsValidDateRange(dateStart, dateDue))
+	{
+		ASSERT(0);
+		return 0.0;
+	}
+
+	double dDuration = (dateDue.m_dt - dateStart.m_dt); // in days
 	
 	switch (nUnits)
 	{
@@ -3464,6 +3581,7 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 
 	return dDuration;
 }
+*/
 
 void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate)
 {

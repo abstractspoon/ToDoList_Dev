@@ -10,6 +10,7 @@
 #include "TDCRecurrenceTest.h"
 #include "FileMiscTest.h"
 #include "DateHelperTest.h"
+#include "TimeHelperTest.h"
 
 using namespace std; // for console output
 
@@ -75,6 +76,8 @@ void DoTests(const CTestUtils& utils)
 	CFileMiscTest(utils).Run();
 	
 	CDateHelperTest(utils).Run();
+
+	CTimeHelperTest(utils).Run();
 
 	// More...
 }

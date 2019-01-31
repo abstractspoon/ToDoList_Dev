@@ -49,7 +49,7 @@ BEGIN
             VALUE "FileDescription", "RTFContentCtrl DLL\0"
             VALUE "FileVersion", "1, 0, 0, 2\0"
             VALUE "InternalName", "RTFContentCtrl\0"
-            VALUE "LegalCopyright", "Copyright © AbstractSpoon 2005 & Johan Rosengren © 2005\0"
+            VALUE "LegalCopyright", "Copyright © AbstractSpoon 2005-2019 & Johan Rosengren © 2005\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "RTFContentCtrl.DLL\0"
             VALUE "PrivateBuild", "\0"

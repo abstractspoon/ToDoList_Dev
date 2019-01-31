@@ -62,11 +62,12 @@ BOOL FIND_STATE::Initialise(CWnd* pParent,
 		DestroyDialog();
 	}
 
-	CString strFind(szFind);
+	CString strPrev(strFind);
+	strFind = szFind;
 
 	// if selection is empty or spans multiple lines use old find text
 	if (strFind.IsEmpty() || (strFind.FindOneOf(_T("\n\r")) != -1))
-		strFind = strFind;
+		strFind = strPrev;
 
 	pFindReplaceDlg = pCmdHandler->NewFindReplaceDlg();
 	ASSERT(pFindReplaceDlg != NULL);

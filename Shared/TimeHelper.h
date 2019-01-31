@@ -59,11 +59,6 @@ public:
 	CString FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFlags = HMS_DECIMALPLACES) const;
 	CString FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces) const;
 	CString FormatTime(double dTime, int nDecPlaces) const;
-
-	void CalculatePartWorkdays(const COleDateTime& dtStart, const COleDateTime& dtEnd,
-								double& dPartStartDay, double& dPartEndDay, BOOL bInDays = TRUE) const;
-
-	THU_WORKDAYPERIOD GetWorkdayPeriod(const COleDateTime& date) const;
 	double GetStartOfWorkday(BOOL bInDays = TRUE) const;
 	double GetStartOfWorkdayLunch(BOOL bInDays = TRUE) const;
 	double GetEndOfWorkday(BOOL bInDays = TRUE) const;
@@ -108,10 +103,15 @@ protected:
 								double dLeftOverMultiplier, BOOL bDecPlaces, TCHAR cDelim);
 	static CString FormatTimeHMS(int nTime, TH_UNITS nUnits);
 
-	static BOOL IsWeekdays(TH_UNITS nUnits);
 	static BOOL IsValidUnit(TH_UNITS nUnits);
 	static BOOL RemovePM(CString& sTime);
 	static BOOL RemoveAM(CString& sTime);
+
+	// Not currently used anywhere
+	void CalculatePartWorkdays(const COleDateTime& dtStart, const COleDateTime& dtEnd,
+		double& dPartStartDay, double& dPartEndDay, BOOL bInDays = TRUE) const;
+
+	THU_WORKDAYPERIOD GetWorkdayPeriod(const COleDateTime& date) const;
 };
 
 #endif // !defined(AFX_TIMEHELPER_H__BA0C1E67_FAAA_4E65_8EF3_01B011ACFBBC__INCLUDED_)
