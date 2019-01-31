@@ -96,6 +96,7 @@ BOOL FIND_STATE::Initialise(CWnd* pParent,
 
 	bFindOnly = bFind;
 
+	pFindReplaceDlg->CenterWindow(pParent);
 	pFindReplaceDlg->SetActiveWindow();
 	pFindReplaceDlg->ShowWindow(SW_SHOW);
 
@@ -176,7 +177,7 @@ void FIND_STATE::AdjustDialogPosition(const CRect& rExcludeScreen, BOOL bUpDown)
 		{
 			// Move find dialog above or below the exclusion rect
 			// depending on where there is most space. Ideally stay
-			// on the same if possible
+			// on the same side if possible
 			BOOL bMoveAbove = (rExcludeScreen.CenterPoint().y > rDlg.CenterPoint().y);
 
 			// Check for space
@@ -195,7 +196,7 @@ void FIND_STATE::AdjustDialogPosition(const CRect& rExcludeScreen, BOOL bUpDown)
 		{
 			// Move find dialog left or right of the exclusion rect
 			// depending on where there is most space. Ideally stay
-			// on the same if possible
+			// on the same side if possible
 			BOOL bMoveLeft = (rExcludeScreen.CenterPoint().x > rDlg.CenterPoint().x);
 
 			// Check for space
