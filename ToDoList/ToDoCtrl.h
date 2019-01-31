@@ -517,7 +517,7 @@ protected:
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskExporter m_exporter;
 	CTDCTimeTracking m_timeTracking;
-	CTDCSourceControl m_ssc;
+	CTDCSourceControl m_sourceControl;
 
 	CStringArray m_aFileRefs;
 	CString m_sTextComments;

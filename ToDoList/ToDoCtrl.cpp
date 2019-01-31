@@ -217,7 +217,7 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_taskTree(m_ilTaskIcons, m_data, m_aStyles, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs),
 	m_exporter(m_data, m_taskTree, m_mgrContent),
 #pragma warning (disable: 4355)
-	m_ssc(*this)
+	m_sourceControl(*this)
 #pragma warning (default: 4355)
 {
 	SetBordersDLU(0);
@@ -6062,7 +6062,7 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 	
 	// can't save if not checked-out
 	// unless we're saving to another filename or this is our first save
-	if (m_ssc.IsSourceControlled() && !m_ssc.IsCheckedOut())
+	if (m_sourceControl.IsSourceControlled() && !m_sourceControl.IsCheckedOut())
 	{
 		BOOL bFirstSave = (!HasFilePath() || !FileMisc::IsSamePath(m_sLastSavePath, sFilePath));
 		
@@ -6207,7 +6207,7 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 	AppendTaskFileHeader(tasks);
 	
 	// checkout status
-	m_ssc.PrepareTasksForSave(tasks);
+	m_sourceControl.PrepareTasksForSave(tasks);
 }
 
 void CToDoCtrl::SaveGlobals(CTaskFile& tasks) const
@@ -6397,11 +6397,11 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 	
 	if (tasks.Load(sFilePath, NULL, FALSE)) // don't decrypt
 	{
-		m_ssc.InitialiseState(tasks);
+		m_sourceControl.InitialiseState(tasks);
 
 		BOOL bWantCheckout = (HasStyle(TDCS_CHECKOUTONLOAD) &&
-								m_ssc.IsSourceControlled() && 
-								!m_ssc.IsCheckedOut());
+								m_sourceControl.IsSourceControlled() && 
+								!m_sourceControl.IsCheckedOut());
 
 		if (bWantCheckout)
 		{
@@ -6413,7 +6413,7 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 			CAutoFlag af(m_bDelayLoaded, FALSE);
 
 			// Clear flag if check-out failed
-			bWantCheckout = (m_ssc.CheckOut(tasks, CString()) == TDCF_SUCCESS);
+			bWantCheckout = (m_sourceControl.CheckOut(tasks, CString()) == TDCF_SUCCESS);
 		}
 
 		if (tasks.Decrypt(m_sPassword))
@@ -6447,7 +6447,7 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 		// user cancelled so revert any check-out
 		else if (bWantCheckout)
 		{
-			VERIFY(m_ssc.CheckIn(tasks) == TDCF_SUCCESS);
+			VERIFY(m_sourceControl.CheckIn(tasks) == TDCF_SUCCESS);
 		}
 	}
 
@@ -10203,27 +10203,27 @@ TDC_FILE CToDoCtrl::CheckIn()
 {
 	Flush(TRUE);
 
-	return m_ssc.CheckIn();
+	return m_sourceControl.CheckIn();
 }
 
 BOOL CToDoCtrl::IsCheckedOut() const 
 { 
-	return m_ssc.IsCheckedOut();
+	return m_sourceControl.IsCheckedOut();
 }
 
 BOOL CToDoCtrl::IsSourceControlled() const 
 { 
-	return m_ssc.IsSourceControlled();
+	return m_sourceControl.IsSourceControlled();
 }
 
 BOOL CToDoCtrl::CanAddToSourceControl(BOOL bAdd) const
 {
-	return m_ssc.CanAddToSourceControl(bAdd);
+	return m_sourceControl.CanAddToSourceControl(bAdd);
 }
 
 BOOL CToDoCtrl::AddToSourceControl(BOOL bAdd)
 {
-	return (m_ssc.AddToSourceControl(bAdd) == TDCF_SUCCESS);
+	return (m_sourceControl.AddToSourceControl(bAdd) == TDCF_SUCCESS);
 }
 
 TDC_FILE CToDoCtrl::CheckOut(CString& sCheckedOutTo, BOOL bForce)
@@ -10231,7 +10231,7 @@ TDC_FILE CToDoCtrl::CheckOut(CString& sCheckedOutTo, BOOL bForce)
 	CWaitCursor cursor;
 	CTaskFile tasks(m_sPassword);
 
-	TDC_FILE nResult = m_ssc.CheckOut(tasks, sCheckedOutTo, bForce);
+	TDC_FILE nResult = m_sourceControl.CheckOut(tasks, sCheckedOutTo, bForce);
 
 	if (nResult == TDCF_SUCCESS)
 	{
