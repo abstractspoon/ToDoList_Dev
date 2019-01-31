@@ -21,6 +21,7 @@
 #include "tdlcommentsctrl.h"
 #include "tdcTimeTracking.h"
 #include "tdcSourceControl.h"
+#include "tdcFindReplace.h"
 
 #include "..\shared\runtimedlg.h"
 #include "..\shared\dialoghelper.h"
@@ -70,7 +71,7 @@ namespace OutlookAPI
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCtrl dialog
 
-class CToDoCtrl : public CRuntimeDlg, protected IFindReplaceCmdHandler
+class CToDoCtrl : public CRuntimeDlg
 {
 	friend class CTDCSourceControl;
 	friend class CTDCFindReplace;
@@ -499,7 +500,6 @@ protected:
 	TDC_RECURFROMOPTION m_nDefRecurFrom;
 	TDC_RECURREUSEOPTION m_nDefRecurReuse;
 	CDWordArray m_aRecreateTaskIDs;
-	FIND_STATE m_findState;
 
 	const CContentMgr& m_mgrContent;
 
@@ -518,6 +518,7 @@ protected:
 	CTDCTaskExporter m_exporter;
 	CTDCTimeTracking m_timeTracking;
 	CTDCSourceControl m_sourceControl;
+	CTDCFindReplace m_findReplace;
 
 	CStringArray m_aFileRefs;
 	CString m_sTextComments;
@@ -558,7 +559,6 @@ protected:
 	BOOL m_bDragDropSubtasksAtTop;
 	BOOL m_bDelayLoaded;
 	BOOL m_bDeletingTasks;
-	BOOL m_bFindReplacing;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -669,7 +669,6 @@ protected:
 	afx_msg LRESULT OnEditEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnFindReplaceMsg(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsDoHelp(WPARAM wParam, LPARAM lParam);
@@ -677,6 +676,12 @@ protected:
 	afx_msg LRESULT OnApplyAddLoggedTime(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsGetTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTaskIconDlgReloadIcons(WPARAM wParam, LPARAM lParam);
+
+	afx_msg LRESULT OnFindReplaceMsg(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFindReplaceSelectTask(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFindReplaceSelectedTask(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFindReplaceAllTasks(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFindReplaceGetExclusionRect(WPARAM wParam, LPARAM lParam);
 
 	// custom data notifications
 	afx_msg void OnCustomAttributeChange(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
@@ -748,17 +753,11 @@ protected:
 	virtual BOOL RemoveArchivedTask(DWORD dwTaskID);
 	virtual HTREEITEM RebuildTree(const void* pContext = NULL);
 	virtual BOOL WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const;
-	virtual void AdjustFindReplaceDialogPosition(BOOL bFirstTime);
 
 	virtual BOOL SelectTask(DWORD dwTaskID, BOOL bTrue);
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue);
 	virtual BOOL SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
 
-	// IFindReplace
-	virtual void OnFindNext(const CString& sFind, BOOL bNext, BOOL bCase, BOOL bWord);
-	virtual void OnReplaceSel(const CString& sFind, const CString& szReplace, BOOL bNext, BOOL bCase, BOOL bWord);
-	virtual void OnReplaceAll(const CString& sFind, const CString& sReplace, BOOL bCase, BOOL bWord);
-	
 	// -------------------------------------------------------------------------------
 	
 	void UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags = 0);
@@ -772,7 +771,7 @@ protected:
 	int GetNextPercentDone(int nPercent, BOOL bUp);
 	BOOL ShowLabelEdit(const CRect& rPos);
 	BOOL UpdateCommentsFont(BOOL bResendComments);
-	BOOL ReplaceSelectedTaskTitle(const CString& sFind, const CString& sReplace, BOOL bCase, BOOL bWord);
+	BOOL FindReplaceSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib);
 
 	// internal versions so we can tell how we've been called
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments, BOOL bInternal);
@@ -843,8 +842,6 @@ protected:
 	void LoadSplitPos(const CPreferences& prefs);
 	void SaveDefaultRecurrence(CPreferences& prefs) const;
 	void LoadDefaultRecurrence(const CPreferences& prefs);
-	void SaveFindReplace(CPreferences& prefs) const;
-	void LoadFindReplace(const CPreferences& prefs);
 
 	void ToggleTimeTracking(HTREEITEM hti);
 	BOOL AddTimeToTaskLogFile(DWORD dwTaskID, double dHours, const COleDateTime& dtWhen, const CString& sComment, BOOL bTracked);

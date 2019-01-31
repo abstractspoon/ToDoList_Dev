@@ -3742,7 +3742,7 @@ void CTabbedToDoCtrl::ResortSelectedTaskParents()
 
 BOOL CTabbedToDoCtrl::ModNeedsResort(TDC_ATTRIBUTE nModType) const
 {
-	if (!HasStyle(TDCS_RESORTONMODIFY) || m_bFindReplacing)
+	if (!HasStyle(TDCS_RESORTONMODIFY) || m_findReplace.IsReplacing())
 		return FALSE;
 
 	VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);

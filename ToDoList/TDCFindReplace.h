@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 class CToDoCtrl;
+class CPreferences;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -25,16 +26,26 @@ const UINT WM_TDCFR_GETEXCLUSIONRECT	= ::RegisterWindowMessage(_T("WM_TDCFR_GETE
 /////////////////////////////////////////////////////////////////////////////
 // CTDCFindReplace dialog
 
-class CTDCFindReplace : public FIND_STATE, protected IFindReplaceCmdHandler
+class CTDCFindReplace : protected FIND_STATE, protected IFindReplaceCmdHandler
 {
 // Construction
 public:
 	CTDCFindReplace(const CToDoCtrl& tdc);
 	virtual ~CTDCFindReplace();
 
-	BOOL DoFindReplace(TDC_ATTRIBUTE nAttrib, CWnd* pParent);
-	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const;
+	BOOL DoFindReplace(TDC_ATTRIBUTE nAttrib);
+	void HandleCmd(WPARAM wParam, LPARAM lParam);
+	void DestroyDialog();
+	
+	void SaveState(CPreferences& prefs) const;
+	void LoadState(const CPreferences& prefs);
 
+	CString GetSearchFor() const { return strFind; }
+	CString GetReplaceWith() const { return strReplace; }
+	TDC_ATTRIBUTE GetAttribute() const { return m_nAttribute; }
+
+	BOOL WantCaseSensitive() const { return bCaseSensitive; }
+	BOOL WantWholeWord() const { return bWholeWord; }
 	BOOL IsReplacing() const { return m_bReplacing; }
 
 protected:

@@ -24,14 +24,8 @@ CTDCFindReplace::~CTDCFindReplace()
 {
 }
 
-BOOL CTDCFindReplace::DoFindReplace(TDC_ATTRIBUTE nAttrib, CWnd* pParent)
+BOOL CTDCFindReplace::DoFindReplace(TDC_ATTRIBUTE nAttrib)
 {
-	if (nAttrib != TDCA_TASKNAME)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
 	BOOL bFindOnly = !m_tdc.CanEditSelectedTask(nAttrib);
 	CEnString sTitle(bFindOnly ? IDS_FINDINTASKTITLES : IDS_REPLACEINTASKTITLES);
 
@@ -39,16 +33,37 @@ BOOL CTDCFindReplace::DoFindReplace(TDC_ATTRIBUTE nAttrib, CWnd* pParent)
 	DWORD dwSelTaskID = m_tdc.GetSelectedTaskID();
 	CString sFind(m_tdc.GetTaskTitle(dwSelTaskID));
 	
-	VERIFY(Initialise(pParent, this, bFindOnly, sTitle, sFind));
+	VERIFY(Initialise((CWnd*)&m_tdc, this, bFindOnly, sTitle, sFind));
 	VERIFY(SelectNextTask(TDC_SELECTNEXTINCLCURRENT));
 	
 	AdjustDialogPosition(TRUE);
 	return TRUE;
 }
 
-BOOL CTDCFindReplace::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
+void CTDCFindReplace::HandleCmd(WPARAM wParam, LPARAM lParam)
 {
-	return ((nAttrib == TDCA_TASKNAME) && (m_tdc.GetTaskCount() > 0));
+	FIND_STATE::HandleCmd(this, wParam, lParam);
+}
+
+void CTDCFindReplace::DestroyDialog()
+{
+	FIND_STATE::DestroyDialog();
+}
+
+void CTDCFindReplace::SaveState(CPreferences& prefs) const
+{
+	CString sKey = m_tdc.GetPreferencesKey(_T("FindReplace"));
+
+	prefs.WriteProfileInt(sKey, _T("CaseSensitive"), bCaseSensitive);
+	prefs.WriteProfileInt(sKey, _T("MatchWholeWord"), bWholeWord);
+}
+
+void CTDCFindReplace::LoadState(const CPreferences& prefs)
+{
+	CString sKey = m_tdc.GetPreferencesKey(_T("FindReplace"));
+
+	bCaseSensitive = prefs.GetProfileInt(sKey, _T("CaseSensitive"), TRUE);
+	bWholeWord = prefs.GetProfileInt(sKey, _T("MatchWholeWord"), TRUE);
 }
 
 void CTDCFindReplace::AdjustDialogPosition(BOOL bFirstTime)
