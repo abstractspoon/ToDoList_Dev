@@ -73,6 +73,7 @@ namespace OutlookAPI
 class CToDoCtrl : public CRuntimeDlg, protected IFindReplaceCmdHandler
 {
 	friend class CTDCSourceControl;
+	friend class CTDCFindReplace;
 
 // Construction
 public:

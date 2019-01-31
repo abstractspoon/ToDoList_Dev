@@ -12,17 +12,17 @@
 //////////////////////////////////////////////////////////////////////
 
 #define IMPLEMENT_DATA_UNDO(data, type)	\
-	CUndoAction ua(m_data, type, FALSE)
+	CUndoAction ua(data, type, FALSE)
 
 //////////////////////////////////////////////////////////////////////
 
 #define IMPLEMENT_DATA_UNDO_EDIT(data)	\
-	CUndoAction ua(m_data, TDCUAT_EDIT, FALSE)
+	CUndoAction ua(data, TDCUAT_EDIT, FALSE)
 
 //////////////////////////////////////////////////////////////////////
 
 #define IMPLEMENT_DATA_UNDO_EXTEND(data, type, extend)	\
-	CUndoAction ua(m_data, type, extend)
+	CUndoAction ua(data, type, extend)
 
 //////////////////////////////////////////////////////////////////////
 

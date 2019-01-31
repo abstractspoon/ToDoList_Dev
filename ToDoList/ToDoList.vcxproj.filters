@@ -409,6 +409,9 @@
     <ClCompile Include="TDLRegularityComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDCFindReplace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Interfaces\IContentControl.h">
@@ -880,6 +883,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDLRegularityComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCFindReplace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
