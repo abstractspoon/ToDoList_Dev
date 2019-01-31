@@ -118,7 +118,7 @@ int CRTFContentCtrlApp::ConvertToHtml(const unsigned char* pContent, int nLength
 		}
 		else
 		{
-			return 0;
+			nLength = 0;
 		}
 	}
 

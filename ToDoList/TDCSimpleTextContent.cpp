@@ -90,7 +90,11 @@ int CTDCSimpleTextContent::ConvertToHtml(const unsigned char* /*pContent*/, int 
 { 
 	return 0; // not supported
 }
-void CTDCSimpleTextContent::FreeHtmlBuffer(LPTSTR& /*szHtml*/) {}
+
+void CTDCSimpleTextContent::FreeHtmlBuffer(LPTSTR& /*szHtml*/) 
+{
+	// not required
+}
 
 void CTDCSimpleTextContent::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const 
 {
@@ -167,6 +171,174 @@ bool CTDLSimpleTextContentCtrl::SetTextContent(LPCTSTR szContent, bool bResetSel
 		SetSel(0, 0);
 
 	return true; 
+}
+
+int CTDLSimpleTextContentCtrl::GetContent(unsigned char* /*pContent*/) const 
+{ 
+	return 0; 
+}
+
+bool CTDLSimpleTextContentCtrl::SetContent(const unsigned char* /*pContent*/, int /*nLength*/, bool /*bResetSelection*/) 
+{ 
+	return false; 
+}
+
+void CTDLSimpleTextContentCtrl::SetReadOnly(bool bReadOnly)
+{
+	CUrlRichEditCtrl::SetReadOnly(bReadOnly);
+
+	SetBackgroundColor(!bReadOnly, GetSysColor(COLOR_3DFACE));
+}
+
+HWND CTDLSimpleTextContentCtrl::GetHwnd() const 
+{ 
+	return GetSafeHwnd(); 
+}
+
+LPCTSTR CTDLSimpleTextContentCtrl::GetTypeID() const 
+{ 
+	return _T("PLAIN_TEXT"); 
+}
+
+bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg) 
+{
+	if (!IsWindowEnabled())
+		return false;
+
+	// process editing shortcuts
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+		BOOL bAlt = Misc::IsKeyPressed(VK_MENU);
+		BOOL bEnabled = !(GetStyle() & ES_READONLY);
+
+		if (bCtrl && !bAlt)
+		{
+			switch (pMsg->wParam)
+			{
+			case 'c': 
+			case 'C':
+				CopySimpleText();
+				return TRUE;
+
+			case 'v':
+			case 'V':
+				Paste();
+				return TRUE;
+
+			case 'x':
+			case 'X':
+				CutSimpleText();
+				return TRUE;
+
+			case 'a':
+			case 'A':
+				SetSel(0, -1);
+				return TRUE;
+
+			case 'h':
+			case 'H':
+				if (bEnabled)
+				{
+					DoEditReplace(IDS_REPLACE_TITLE);
+					return TRUE;
+				}
+				// else fall thru
+
+			case 'f':
+			case 'F':
+				DoEditFind(IDS_FIND_TITLE);
+				return TRUE;
+
+			case 'z':
+			case 'Z':
+				return TRUE;
+
+			case 'y':
+			case 'Y':
+				return TRUE;
+			}
+		}
+		else if (bEnabled && (pMsg->wParam == VK_TAB))
+		{
+			CHARRANGE cr;
+			GetSel(cr);
+
+			// if nothing is selected then just insert tabs
+			CString sSel = _T("\t");
+
+			if (cr.cpMax > cr.cpMin)
+			{
+				sSel += GetTextRange(cr);
+
+				// and insert a tab character after every subsequent carriage return
+				int nNumReplace = sSel.Replace(_T("\r"), _T("\r\t"));
+
+				// bump selection by 'nNumReplace' to account for the tabs
+				cr.cpMax += nNumReplace;
+			}
+
+			// bump selection by 1 to account for the tab
+			cr.cpMin++;
+			cr.cpMax++;
+
+			ReplaceSel(sSel, TRUE);
+			SetSel(cr);
+
+			return TRUE;
+		}
+	}
+
+	return false;
+}
+
+void CTDLSimpleTextContentCtrl::FilterToolTipMessage(MSG* /*pMsg*/) 
+{
+	// Not supported
+}
+
+ISpellCheck* CTDLSimpleTextContentCtrl::GetSpellCheckInterface() 
+{ 
+	return &m_reSpellCheck; 
+}
+
+bool CTDLSimpleTextContentCtrl::Undo() 
+{ 
+	return (CUrlRichEditCtrl::Undo() != 0); 
+}
+
+bool CTDLSimpleTextContentCtrl::Redo() 
+{ 
+	return (CUrlRichEditCtrl::Redo() != 0); 
+}
+
+void CTDLSimpleTextContentCtrl::SetUITheme(const UITHEME* /*pTheme*/) 
+{
+	// Not supported
+}
+
+void CTDLSimpleTextContentCtrl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
+{
+	pPrefs->WriteProfileInt(szKey, _T("WordWrap"), m_bWordWrap);
+}
+
+void CTDLSimpleTextContentCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly)
+{
+	if (!bAppOnly)
+	{
+		BOOL bWordWrap = pPrefs->GetProfileInt(szKey, _T("WordWrap"), TRUE);
+
+		// we need to post the wordwrap initialization else the richedit
+		// get very confused about something and doesn't repaint properly
+		// when resizing
+		PostMessage(WM_SETWORDWRAP, bWordWrap, (LPARAM)GetSafeHwnd());
+	}
+}
+
+bool CTDLSimpleTextContentCtrl::Replace(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
+{
+	// TODO
+	return false;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -246,13 +418,6 @@ BOOL CTDLSimpleTextContentCtrl::OnKillFocus()
 		GetParent()->SendMessage(WM_ICC_KILLFOCUS);
 	
 	return FALSE;
-}
-
-void CTDLSimpleTextContentCtrl::SetReadOnly(bool bReadOnly)
-{
-	CUrlRichEditCtrl::SetReadOnly(bReadOnly);
-
-	SetBackgroundColor(!bReadOnly, GetSysColor(COLOR_3DFACE));
 }
 
 void CTDLSimpleTextContentCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
@@ -622,24 +787,6 @@ void CTDLSimpleTextContentCtrl::PreSubclassWindow()
 	CUrlRichEditCtrl::PreSubclassWindow();
 }
 
-void CTDLSimpleTextContentCtrl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
-{
-	pPrefs->WriteProfileInt(szKey, _T("WordWrap"), m_bWordWrap);
-}
-
-void CTDLSimpleTextContentCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly)
-{
-	if (!bAppOnly)
-	{
-		BOOL bWordWrap = pPrefs->GetProfileInt(szKey, _T("WordWrap"), TRUE);
-
-		// we need to post the wordwrap initialization else the richedit
-		// get very confused about something and doesn't repaint properly
-		// when resizing
-		PostMessage(WM_SETWORDWRAP, bWordWrap, (LPARAM)GetSafeHwnd());
-	}
-}
-
 LRESULT CTDLSimpleTextContentCtrl::OnSetWordWrap(WPARAM wp, LPARAM lp)
 {
 	UNREFERENCED_PARAMETER (lp);
@@ -662,98 +809,6 @@ int CTDLSimpleTextContentCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CUrlRichEditCtrl::EnableInlineSpellChecking(s_bInlineSpellChecking);
 	
 	return 0;
-}
-
-bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg) 
-{
-	if (!IsWindowEnabled())
-		return false;
-
-	// process editing shortcuts
-	if (pMsg->message == WM_KEYDOWN)
-	{
-		BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-		BOOL bAlt = Misc::IsKeyPressed(VK_MENU);
-		BOOL bEnabled = !(GetStyle() & ES_READONLY);
-
-		if (bCtrl && !bAlt)
-		{
-			switch (pMsg->wParam)
-			{
-			case 'c': 
-			case 'C':
-				CopySimpleText();
-				return TRUE;
-				
-			case 'v':
-			case 'V':
-				Paste();
-				return TRUE;
-				
-			case 'x':
-			case 'X':
-				CutSimpleText();
-				return TRUE;
-				
-			case 'a':
-			case 'A':
-				SetSel(0, -1);
-				return TRUE;
-				
-			case 'h':
-			case 'H':
-				if (bEnabled)
-				{
-					DoEditReplace(IDS_REPLACE_TITLE);
-					return TRUE;
-				}
-				// else fall thru
-				
-			case 'f':
-			case 'F':
-				DoEditFind(IDS_FIND_TITLE);
-				return TRUE;
-				
-			case 'z':
-			case 'Z':
-				return TRUE;
-				
-			case 'y':
-			case 'Y':
-				return TRUE;
-			}
-		}
-		else if (bEnabled && (pMsg->wParam == VK_TAB))
-		{
-			CHARRANGE cr;
-			GetSel(cr);
-			
-			// if nothing is selected then just insert tabs
-			CString sSel = _T("\t");
-
-			if (cr.cpMax > cr.cpMin)
-			{
-				sSel += GetTextRange(cr);
-
-				// and insert a tab character after every subsequent carriage return
-				int nNumReplace = sSel.Replace(_T("\r"), _T("\r\t"));
-
-				// bump selection by 'nNumReplace' to account for the tabs
-				cr.cpMax += nNumReplace;
-			}
-			
-			// bump selection by 1 to account for the tab
-			cr.cpMin++;
-			cr.cpMax++;
-
-			ReplaceSel(sSel, TRUE);
-			SetSel(cr);
-
-			return TRUE;
-		}
-	}
-
-	return false;
 }
 
 BOOL CTDLSimpleTextContentCtrl::OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult)

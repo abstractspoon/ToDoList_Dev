@@ -50,7 +50,7 @@ public:
 	BOOL ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0);
 
 	operator HWND() const;
-	HWND GetSafeHwnd() const { return *this; }
+	HWND GetSafeHwnd() const;
 
 	UINT GetDlgCtrlID() { return ::GetDlgCtrlID(*this); }
 
@@ -70,6 +70,8 @@ public:
 	
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOOL bAppOnly);
+
+	BOOL Replace(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, BOOL bCaseSensitive, BOOL bWholeWord);
 
 protected:
 	IContentControl* m_pContentCtrl;

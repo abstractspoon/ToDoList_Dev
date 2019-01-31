@@ -55,22 +55,22 @@ public:
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 
 	// IContentControl implementation
-	// supports plain text content only
-	int GetTextContent(LPTSTR szContent, int nLength) const;
+	int GetContent(unsigned char* pContent) const;
+	bool SetContent(const unsigned char* pContent, int nLength, bool bResetSelection);
+	LPCWSTR GetTypeID() const;
+	int GetTextContent(LPTSTR szContent, int nLength = -1) const;
 	bool SetTextContent(LPCTSTR szContent, bool bResetSelection);
-	int GetContent(unsigned char* /*pContent*/) const { return 0; }
-	bool SetContent(const unsigned char* /*pContent*/, int /*nLength*/, bool /*bResetSelection*/) { return false; }
 	void SetReadOnly(bool bReadOnly);
-	HWND GetHwnd() const { return GetSafeHwnd(); }
-	LPCTSTR GetTypeID() const { return _T("PLAIN_TEXT"); }
+	HWND GetHwnd() const;
 	bool ProcessMessage(MSG* pMsg);
-	void FilterToolTipMessage(MSG* /*pMsg*/) {}
-	ISpellCheck* GetSpellCheckInterface() { return &m_reSpellCheck; }
-	bool Undo() { return CUrlRichEditCtrl::Undo() != 0; }
-	bool Redo() { return CUrlRichEditCtrl::Redo() != 0; }
-	void SetUITheme(const UITHEME* /*pTheme*/) {}
-	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
-	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
+	void FilterToolTipMessage(MSG* pMsg);
+	ISpellCheck* GetSpellCheckInterface();
+	bool Undo();
+	bool Redo();
+	void SetUITheme(const UITHEME* pTheme);
+	void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
+	void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
+	bool Replace(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord);
 
 	// global settings
 	static void SetPasteSourceUrls(BOOL bPasteUrls) { s_bPasteSourceUrls = bPasteUrls; }

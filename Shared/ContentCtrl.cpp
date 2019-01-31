@@ -45,6 +45,11 @@ CContentCtrl::~CContentCtrl()
 
 CContentCtrl::operator HWND() const
 { 
+	return GetSafeHwnd();
+}
+
+HWND CContentCtrl::GetSafeHwnd() const
+{ 
 	if (m_pContentCtrl)
 		return m_pContentCtrl->GetHwnd();
 	
@@ -166,6 +171,15 @@ BOOL CContentCtrl::Redo()
 {
 	if (m_pContentCtrl)
 		return m_pContentCtrl->Redo();
+
+	// else
+	return FALSE;
+}
+
+BOOL CContentCtrl::Replace(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, BOOL bCaseSensitive, BOOL bWholeWord)
+{
+	if (m_pContentCtrl)
+		return m_pContentCtrl->Replace(szSearchFor, szReplaceWith, (bCaseSensitive != FALSE), (bWholeWord != FALSE));
 
 	// else
 	return FALSE;
