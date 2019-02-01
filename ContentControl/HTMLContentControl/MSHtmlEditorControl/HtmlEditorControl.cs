@@ -2833,19 +2833,28 @@ namespace MSDN.Html.Editor
 
         /// <summary>
         /// Method to replace all the occurrence of the given string with the other
-        /// Uses false case for the search options
+        /// Uses false case for the reset range
         /// </summary>
-        public int FindReplaceAll(string findText, string replaceText)
+        protected int FindReplaceAll(string findText, string replaceText, bool matchWhole, bool matchCase)
         {
-            return FindReplaceAll(findText, replaceText, false, false);
+            return FindReplaceAll(findText, replaceText, matchWhole, matchCase, false);
 
         } //FindReplaceAll
 
         /// <summary>
         /// Method to replace all the occurrences of the given string with the other
         /// </summary>
-        public int FindReplaceAll(string findText, string replaceText, bool matchWhole, bool matchCase)
+        public int FindReplaceAll(string findText, string replaceText, bool matchWhole, bool matchCase, bool resetRange)
         {
+            if (resetRange)
+            {
+                _findRange = (mshtmlTextRange)body.createTextRange();
+            }
+            else if (_findRange == null)
+            {
+                return 0;
+            }
+            
             int found = 0;
             mshtmlTextRange replaceRange = null;
 

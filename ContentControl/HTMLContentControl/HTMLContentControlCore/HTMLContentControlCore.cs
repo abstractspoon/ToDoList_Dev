@@ -62,7 +62,7 @@ namespace HTMLContentControl
 
         public int FindReplaceAll(string findText, string replaceText, bool matchWhole, bool matchCase)
         {
-            return m_HtmlEditControl.FindReplaceAll(findText, replaceText, matchWhole, matchCase);
+            return m_HtmlEditControl.FindReplaceAll(findText, replaceText, matchWhole, matchCase, true);
         }
 
         public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)

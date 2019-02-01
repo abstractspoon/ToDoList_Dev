@@ -182,7 +182,7 @@ bool CHTMLContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace
 	msclr::auto_gcroot<String^> find = gcnew String(szFind);
 	msclr::auto_gcroot<String^> replace = gcnew String(szReplace);
 
-	return (m_wnd->FindReplaceAll(find, replace, bWholeWord, bCaseSensitive) > 0);
+	return (m_wnd->FindReplaceAll(find.get(), replace.get(), bWholeWord, bCaseSensitive) > 0);
 }
 
 LPCWSTR CHTMLContentControlBridge::GetTypeID() const
