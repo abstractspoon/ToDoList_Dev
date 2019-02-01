@@ -16,7 +16,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-CTDCFindReplace::CTDCFindReplace(const CToDoCtrl& tdc) : m_tdc(tdc)
+CTDCFindReplace::CTDCFindReplace(const CToDoCtrl& tdc) : m_tdc(tdc), m_nAttribute(TDCA_NONE)
 {
 }
 
@@ -33,10 +33,18 @@ BOOL CTDCFindReplace::DoFindReplace(TDC_ATTRIBUTE nAttrib)
 	DWORD dwSelTaskID = m_tdc.GetSelectedTaskID();
 	CString sFind(m_tdc.GetTaskTitle(dwSelTaskID));
 	
-	VERIFY(Initialise((CWnd*)&m_tdc, this, bFindOnly, sTitle, sFind));
+	if (!Initialise((CWnd*)&m_tdc, this, bFindOnly, sTitle, sFind))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// else
+	m_nAttribute = nAttrib;
+
 	VERIFY(SelectNextTask(TDC_SELECTNEXTINCLCURRENT));
-	
 	AdjustDialogPosition(TRUE);
+
 	return TRUE;
 }
 
