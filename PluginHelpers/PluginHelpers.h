@@ -31,7 +31,8 @@ namespace Abstractspoon
 				LPCWSTR m_wszGlobal;
 			};
 
-			typedef MarshalledString MS;
+#define MS(x) MarshalledString(x)
+
 		}
 	}
 }

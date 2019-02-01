@@ -177,6 +177,12 @@ bool CHTMLContentControlBridge::SetContent(const unsigned char* pContent, int nL
 	return m_wnd->SetContent(content, bResetSelection);
 }
 
+bool CHTMLContentControlBridge::ReplaceAll(LPCWSTR szSearchFor, LPCWSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
+{
+	// TODO
+	return false;
+}
+
 LPCWSTR CHTMLContentControlBridge::GetTypeID() const
 {
 	return HTML_GUID;
@@ -190,7 +196,7 @@ int CHTMLContentControlBridge::GetTextContent(LPWSTR szContent, int nLength) con
 
 	if (szContent && nLength)
 	{
-		Abstractspoon::Tdl::PluginHelpers::MarshalledString msContent(content);
+		MarshalledString msContent(content);
 		CopyMemory(szContent, msContent, (nLength * sizeof(WCHAR)));
 	}
 

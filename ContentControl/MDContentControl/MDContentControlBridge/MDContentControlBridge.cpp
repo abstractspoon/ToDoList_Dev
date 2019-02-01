@@ -176,7 +176,7 @@ int CMDContentControlBridge::GetTextContent(LPWSTR szContent, int nLength) const
 
 	if (szContent != nullptr)
 	{
-		Abstractspoon::Tdl::PluginHelpers::MarshalledString msContent(content);
+		MarshalledString msContent(content);
 		CopyMemory(szContent, msContent, (nLength * sizeof(WCHAR)));
 	}
 
@@ -188,6 +188,12 @@ bool CMDContentControlBridge::SetTextContent(LPCWSTR szContent, bool bResetSelec
 	msclr::auto_gcroot<String^> content = gcnew String(szContent);
 
 	return m_wnd->SetTextContent(content.get(), bResetSelection);
+}
+
+bool CMDContentControlBridge::ReplaceAll(LPCWSTR szSearchFor, LPCWSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
+{
+	// TODO
+	return false;
 }
 
 void CMDContentControlBridge::SetReadOnly(bool bReadOnly)

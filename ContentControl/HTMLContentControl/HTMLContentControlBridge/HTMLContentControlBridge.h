@@ -58,6 +58,8 @@ public:
    int GetTextContent(LPWSTR szContent, int nLength = -1) const;
    bool SetTextContent(LPCWSTR szContent, bool bResetSelection);
 
+   bool ReplaceAll(LPCWSTR szSearchFor, LPCWSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord);
+
    void SetReadOnly(bool bReadOnly);
    HWND GetHwnd() const;
 
