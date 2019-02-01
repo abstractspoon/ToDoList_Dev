@@ -39,13 +39,14 @@ void FIND_STATE::UpdateState(const CString& sFind, const CString& sReplace, BOOL
 	strReplace = sReplace;
 }
 
-BOOL FIND_STATE::Initialise(CWnd* pParent, 
+BOOL FIND_STATE::Initialise(HWND hwndParent, 
 							IFindReplaceCmdHandler* pCmdHandler, 
 							BOOL bFind, 
 							LPCTSTR szTitle,
 							LPCTSTR szFind)
 {
-	ASSERT(pParent);
+	CWnd* pParent = CWnd::FromHandle(hwndParent);
+	ASSERT_VALID(pParent);
 	ASSERT(pCmdHandler);
 
 	if (pFindReplaceDlg != NULL)

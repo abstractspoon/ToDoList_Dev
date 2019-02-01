@@ -656,7 +656,7 @@ void CRichEditBaseCtrl::AdjustFindDialogPosition()
 void CRichEditBaseCtrl::DoEditFindReplace(BOOL bFindOnly, UINT nIDTitle)
 {
 	CEnString sTitle(nIDTitle), sSelText(GetSelText());
-	VERIFY(m_findState.Initialise(this, this, bFindOnly, sTitle, sSelText));
+	VERIFY(m_findState.Initialise(*this, this, bFindOnly, sTitle, sSelText));
 }
 
 void CRichEditBaseCtrl::OnFindNext(const CString& sFind, BOOL bNext, BOOL bCase, BOOL bWord)
@@ -703,8 +703,8 @@ void CRichEditBaseCtrl::OnReplaceAll(const CString& sFind, const CString& sRepla
 
 	ReplaceAll(m_findState.strFind, 
 				m_findState.strReplace, 
-				m_findState.bCaseSensitive, 
-				m_findState.bWholeWord);
+				m_findState.bCaseSensitive != FALSE, 
+				m_findState.bWholeWord != FALSE);
 }
 
 int CRichEditBaseCtrl::ReplaceAll(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)

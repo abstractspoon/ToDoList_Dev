@@ -29,11 +29,7 @@ BOOL CTDCFindReplace::DoFindReplace(TDC_ATTRIBUTE nAttrib)
 	BOOL bFindOnly = !m_tdc.CanEditSelectedTask(nAttrib);
 	CEnString sTitle(bFindOnly ? IDS_FINDINTASKTITLES : IDS_REPLACEINTASKTITLES);
 
-	// There may be multiple tasks selected so initialise with the first
-	DWORD dwSelTaskID = m_tdc.GetSelectedTaskID();
-	CString sFind(m_tdc.GetTaskTitle(dwSelTaskID));
-	
-	if (!Initialise((CWnd*)&m_tdc, this, bFindOnly, sTitle, sFind))
+	if (!Initialise(m_tdc, this, bFindOnly, sTitle))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -42,8 +38,11 @@ BOOL CTDCFindReplace::DoFindReplace(TDC_ATTRIBUTE nAttrib)
 	// else
 	m_nAttribute = nAttrib;
 
-	VERIFY(SelectNextTask(TDC_SELECTNEXTINCLCURRENT));
-	AdjustDialogPosition(TRUE);
+	if (!strFind.IsEmpty())
+	{
+		VERIFY(SelectNextTask(TDC_SELECTNEXTINCLCURRENT));
+		AdjustDialogPosition(TRUE);
+	}
 
 	return TRUE;
 }
