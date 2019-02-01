@@ -122,7 +122,8 @@ public:
 
 	void DoEditFind(UINT nIDTitle = 0);
 	void DoEditReplace(UINT nIDTitle = 0);
-	
+	int ReplaceAll(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord);
+
 	BOOL Undo();
 	BOOL Redo();
 

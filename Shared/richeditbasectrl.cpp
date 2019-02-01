@@ -701,16 +701,30 @@ void CRichEditBaseCtrl::OnReplaceAll(const CString& sFind, const CString& sRepla
 	// Update state information for next time
 	m_findState.UpdateState(sFind, sReplace, TRUE, bCase, bWord);
 
+	ReplaceAll(m_findState.strFind, 
+				m_findState.strReplace, 
+				m_findState.bCaseSensitive, 
+				m_findState.bWholeWord);
+}
+
+int CRichEditBaseCtrl::ReplaceAll(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
+{
+	int nNumReplaced = 0;
+
 	// start searching at the beginning of the text so that we know to stop at the end
 	SetSel(0, 0);
 
 	CWaitCursor wait;
 
-	while (FindText(FALSE))
-		ReplaceSel(m_findState.strReplace, TRUE);
+	while (FindText(szSearchFor, TRUE, bCaseSensitive, bWholeWord, FALSE))
+	{
+		ReplaceSel(szReplaceWith, TRUE);
+		nNumReplaced++;
+	}
 
-	TextNotFound(m_findState.strFind);
 	HideSelection(FALSE, FALSE);
+
+	return nNumReplaced;
 }
 
 LRESULT CRichEditBaseCtrl::OnFindReplaceMsg(WPARAM wParam, LPARAM lParam)
