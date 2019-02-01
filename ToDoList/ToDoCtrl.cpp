@@ -10889,10 +10889,10 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute()
 			break;
 
 		case TDCA_COMMENTS:
-			if (m_ctrlComments.ReplaceContent(m_findReplace.GetSearchFor(), 
-												m_findReplace.GetReplaceWith(), 
-												m_findReplace.WantCaseSensitive(), 
-												m_findReplace.WantWholeWord()))
+			if (m_ctrlComments.ReplaceAll(m_findReplace.GetSearchFor(), 
+											m_findReplace.GetReplaceWith(), 
+											m_findReplace.WantCaseSensitive(), 
+											m_findReplace.WantWholeWord()))
 			{
 				UpdateComments(TRUE);
 

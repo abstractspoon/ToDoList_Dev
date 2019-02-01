@@ -351,10 +351,9 @@ void CRTFContentControl::SetReadOnly(bool bReadOnly)
 	CRulerRichEditCtrl::SetReadOnly((BOOL)bReadOnly);
 }
 
-bool CRTFContentControl::ReplaceContent(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
+bool CRTFContentControl::ReplaceAll(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
 {
-	// TODO
-	return false;
+	return (m_rtf.ReplaceAll(szSearchFor, szReplaceWith, bCaseSensitive, bWholeWord) > 0);
 }
 
 void CRTFContentControl::EnableMenuItem(CMenu* pMenu, UINT nCmdID, BOOL bEnable)

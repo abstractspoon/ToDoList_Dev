@@ -176,10 +176,10 @@ BOOL CContentCtrl::Redo()
 	return FALSE;
 }
 
-BOOL CContentCtrl::ReplaceContent(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, BOOL bCaseSensitive, BOOL bWholeWord)
+BOOL CContentCtrl::ReplaceAll(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, BOOL bCaseSensitive, BOOL bWholeWord)
 {
 	if (m_pContentCtrl)
-		return m_pContentCtrl->ReplaceContent(szSearchFor, szReplaceWith, (bCaseSensitive != FALSE), (bWholeWord != FALSE));
+		return m_pContentCtrl->ReplaceAll(szSearchFor, szReplaceWith, (bCaseSensitive != FALSE), (bWholeWord != FALSE));
 
 	// else
 	return FALSE;

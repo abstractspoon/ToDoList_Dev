@@ -43,7 +43,7 @@ public:
 	BOOL GetContent(CString& sTextContent, CBinaryData& customContent) const;
 	BOOL SetContent(const CString& sTextContent, const CBinaryData& customContent, BOOL bResetSelection);
 	void ClearContent();
-	BOOL ReplaceContent(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, BOOL bCaseSensitive, BOOL bWholeWord);
+	BOOL ReplaceAll(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, BOOL bCaseSensitive, BOOL bWholeWord);
 
 	BOOL Undo() { return m_ctrlComments.Undo(); }
 	BOOL Redo() { return m_ctrlComments.Redo(); }

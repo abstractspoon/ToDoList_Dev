@@ -155,7 +155,7 @@ public:
 	virtual int GetTextContent(LPWSTR szContent, int nLength = -1) const = 0;
 	virtual bool SetTextContent(LPCWSTR szContent, bool bResetSelection) = 0;
 
-	virtual bool ReplaceContent(LPCWSTR szSearchFor, LPCWSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord) = 0;
+	virtual bool ReplaceAll(LPCWSTR szSearchFor, LPCWSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord) = 0;
 
 	virtual void SetReadOnly(bool bReadOnly) = 0;
 	virtual HWND GetHwnd() const = 0;

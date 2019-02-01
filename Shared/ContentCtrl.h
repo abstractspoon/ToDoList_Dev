@@ -39,7 +39,7 @@ public:
 	BOOL SetContent(const CBinaryData& sContent, BOOL bResetSelection);
 	BOOL SetTextContent(LPCTSTR szContent, BOOL bResetSelection);
 	BOOL IsSettingContent() const { return m_bSettingContent; }
-	BOOL ReplaceContent(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, BOOL bCaseSensitive, BOOL bWholeWord);
+	BOOL ReplaceAll(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, BOOL bCaseSensitive, BOOL bWholeWord);
 
 	LPCTSTR GetTypeID() const;
 	BOOL IsFormat(const CONTENTFORMAT& cf) const;
