@@ -678,7 +678,7 @@ protected:
 	afx_msg LRESULT OnTaskIconDlgReloadIcons(WPARAM wParam, LPARAM lParam);
 
 	afx_msg LRESULT OnFindReplaceMsg(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnFindReplaceSelectTask(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFindReplaceSelectNextTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFindReplaceSelectedTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFindReplaceAllTasks(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFindReplaceGetExclusionRect(WPARAM wParam, LPARAM lParam);

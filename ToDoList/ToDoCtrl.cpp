@@ -10776,7 +10776,7 @@ BOOL CToDoCtrl::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
 	return ((nAttrib == TDCA_TASKNAME) && (GetTaskCount() > 0));
 }
 
-LRESULT CToDoCtrl::OnFindReplaceSelectTask(WPARAM wParam, LPARAM lParam)
+LRESULT CToDoCtrl::OnFindReplaceSelectNextTask(WPARAM wParam, LPARAM lParam)
 {
 	return SelectTask(m_findReplace.GetSearchFor(), 
 						(TDC_SELECTTASK)lParam,
