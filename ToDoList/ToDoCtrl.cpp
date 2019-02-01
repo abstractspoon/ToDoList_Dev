@@ -10766,29 +10766,12 @@ BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker)
 
 BOOL CToDoCtrl::DoFindReplace(TDC_ATTRIBUTE nAttrib)
 {
-	if (!CanDoFindReplace(nAttrib))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
 	return m_findReplace.DoFindReplace(nAttrib);
 }
 
 BOOL CToDoCtrl::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
 {
-	if (GetTaskCount() == 0)
-		return FALSE;
-
-	switch (nAttrib)
-	{
-	case TDCA_TASKNAME:
-	case TDCA_COMMENTS:
-		return TRUE;
-	}
-
-	ASSERT(0);
-	return FALSE;
+	return m_findReplace.CanDoFindReplace(nAttrib);
 }
 
 LRESULT CToDoCtrl::OnFindReplaceSelectNextTask(WPARAM wParam, LPARAM /*lParam*/)
@@ -10843,16 +10826,31 @@ LRESULT CToDoCtrl::OnFindReplaceGetExclusionRect(WPARAM wParam, LPARAM lParam)
 {
 	ASSERT(lParam);
 
-	BOOL bFirstTime = wParam;
+	BOOL bFirstTime = wParam, bUpdown = bFirstTime;
 	CRect rExclude;
 
-	if (bFirstTime)
-		m_taskTree.Tree().GetWindowRect(rExclude);
-	else
-		GetLabelEditRect(rExclude);
+	switch (m_findReplace.GetAttribute())
+	{
+	case TDCA_TASKNAME:
+		if (bFirstTime)
+			m_taskTree.Tree().GetWindowRect(rExclude);
+		else
+			GetLabelEditRect(rExclude);
+		break;
 
+	case TDCA_COMMENTS:
+		m_ctrlComments.GetWindowRect(rExclude);
+
+		bUpdown = (m_nCommentsPos == TDCUIL_BOTTOM);
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+	
 	*((LPRECT)lParam) = rExclude;
-	return 0;
+	return bUpdown;
 }
 
 LRESULT CToDoCtrl::OnFindReplaceMsg(WPARAM wParam, LPARAM lParam)

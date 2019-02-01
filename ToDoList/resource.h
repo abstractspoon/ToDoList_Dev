@@ -2218,6 +2218,8 @@
 #define IDS_TDLBC_CUSTOMATTRIBS         58485
 #define IDS_HANDLERNOTINSTALLED         58486
 #define IDS_TABTIP_TIMETRACKING         58487
+#define IDS_REPLACEINTASKCOMMENTS       58488
+#define IDS_FINDINTASKCOMMENTS          58489
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects

@@ -34,6 +34,8 @@ public:
 	virtual ~CTDCFindReplace();
 
 	BOOL DoFindReplace(TDC_ATTRIBUTE nAttrib);
+	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const;
+
 	void HandleCmd(WPARAM wParam, LPARAM lParam);
 	void DestroyDialog();
 	
@@ -62,6 +64,7 @@ protected:
 
 	virtual void AdjustDialogPosition(BOOL bFirstTime);
 
+	BOOL Initialise(TDC_ATTRIBUTE nAttrib);
 	BOOL SelectNextTask(TDC_SELECTTASK nSelect) const;
 };
 

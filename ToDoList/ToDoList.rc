@@ -5454,6 +5454,8 @@ BEGIN
     IDS_TDLBC_CUSTOMATTRIBS "Custom Attributes"
     IDS_HANDLERNOTINSTALLED "(handler not installed)"
     IDS_TABTIP_TIMETRACKING "Time Tracking"
+    IDS_REPLACEINTASKCOMMENTS "Replace in Task Comments"
+    IDS_FINDINTASKCOMMENTS  "Find in Task Comments"
 END
 
 #endif    // English (Australia) resources

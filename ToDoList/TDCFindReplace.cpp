@@ -24,18 +24,68 @@ CTDCFindReplace::~CTDCFindReplace()
 {
 }
 
+BOOL CTDCFindReplace::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
+{
+	if (m_tdc.GetTaskCount() == 0)
+		return FALSE;
+
+	switch (nAttrib)
+	{
+	case TDCA_TASKNAME:
+	case TDCA_COMMENTS:
+		return TRUE;
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
+
 BOOL CTDCFindReplace::DoFindReplace(TDC_ATTRIBUTE nAttrib)
 {
-	BOOL bFindOnly = !m_tdc.CanEditSelectedTask(nAttrib);
-	CEnString sTitle(bFindOnly ? IDS_FINDINTASKTITLES : IDS_REPLACEINTASKTITLES);
-
-	if (!Initialise(m_tdc, this, bFindOnly, sTitle))
+	// Sanity check
+	if (!CanDoFindReplace(nAttrib))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	// else
+	return Initialise(nAttrib);
+}
+
+BOOL CTDCFindReplace::Initialise(TDC_ATTRIBUTE nAttrib)
+{
+	if (nAttrib != m_nAttribute)
+	{
+		DestroyDialog();
+		strFind.Empty();
+	}
+
+	CEnString sTitle;
+	
+	switch (nAttrib)
+	{
+	case TDCA_TASKNAME:
+		sTitle.LoadString(bFindOnly ? IDS_FINDINTASKTITLES : IDS_REPLACEINTASKTITLES);
+		break;
+
+	case TDCA_COMMENTS:
+		sTitle.LoadString(bFindOnly ? IDS_FINDINTASKCOMMENTS : IDS_REPLACEINTASKCOMMENTS);
+		break;
+
+	default:
+		ASSERT(0);
+		return FALSE;
+	}
+
+	BOOL bFindOnly = !m_tdc.CanEditSelectedTask(nAttrib);
+
+	if (!FIND_STATE::Initialise(m_tdc, this, bFindOnly, sTitle))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	m_nAttribute = nAttrib;
 
 	if (!strFind.IsEmpty())
@@ -76,9 +126,9 @@ void CTDCFindReplace::LoadState(const CPreferences& prefs)
 void CTDCFindReplace::AdjustDialogPosition(BOOL bFirstTime)
 {
 	CRect rExclude(0, 0, 0, 0);
-	::SendMessage(m_tdc, WM_TDCFR_GETEXCLUSIONRECT, bFirstTime, (LPARAM)&rExclude);
+	BOOL bUpDown = ::SendMessage(m_tdc, WM_TDCFR_GETEXCLUSIONRECT, bFirstTime, (LPARAM)&rExclude);
 
-	FIND_STATE::AdjustDialogPosition(rExclude, !bFirstTime);
+	FIND_STATE::AdjustDialogPosition(rExclude, bUpDown);
 }
 
 void CTDCFindReplace::OnFindNext(const CString& sFind, BOOL bNext, BOOL bCase, BOOL bWord)
