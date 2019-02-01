@@ -177,7 +177,7 @@ bool CHTMLContentControlBridge::SetContent(const unsigned char* pContent, int nL
 	return m_wnd->SetContent(content, bResetSelection);
 }
 
-bool CHTMLContentControlBridge::ReplaceAll(LPCWSTR szSearchFor, LPCWSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
+bool CHTMLContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord)
 {
 	// TODO
 	return false;
