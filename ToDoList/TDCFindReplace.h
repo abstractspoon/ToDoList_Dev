@@ -18,7 +18,7 @@ class CPreferences;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT WM_TDCFR_SELECTTASK			= ::RegisterWindowMessage(_T("WM_TDCFR_SELECTNEXTTASK")); // wParam = TDC_ATTRIBUTE, lParam = TDC_SELECTTASK
+const UINT WM_TDCFR_SELECTNEXTTASK		= ::RegisterWindowMessage(_T("WM_TDCFR_SELECTNEXTTASK")); // wParam = TDC_ATTRIBUTE, lParam = TDC_SELECTTASK
 const UINT WM_TDCFR_REPLACESELTASK		= ::RegisterWindowMessage(_T("WM_TDCFR_REPLACESELTASK")); // wParam = TDC_ATTRIBUTE
 const UINT WM_TDCFR_REPLACEALLTASKS		= ::RegisterWindowMessage(_T("WM_TDCFR_REPLACEALLTASKS")); // wParam = TDC_ATTRIBUTE
 const UINT WM_TDCFR_GETEXCLUSIONRECT	= ::RegisterWindowMessage(_T("WM_TDCFR_GETEXCLUSIONRECT")); // wParam = 'First time', lParam = LPRECT

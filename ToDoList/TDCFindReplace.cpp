@@ -95,7 +95,7 @@ void CTDCFindReplace::OnFindNext(const CString& sFind, BOOL bNext, BOOL bCase, B
 
 BOOL CTDCFindReplace::SelectNextTask(TDC_SELECTTASK nSelectWhat) const
 {
-	return ::SendMessage(m_tdc, WM_TDCFR_SELECTTASK, m_nAttribute, nSelectWhat);
+	return ::SendMessage(m_tdc, WM_TDCFR_SELECTNEXTTASK, m_nAttribute, nSelectWhat);
 }
 
 void CTDCFindReplace::OnReplaceSel(const CString& sFind, const CString& sReplace, 
