@@ -3086,8 +3086,12 @@ BEGIN
         MENUITEM "Select A&ll",                 ID_EDIT_SELECTALL
         MENUITEM SEPARATOR
         MENUITEM "&Find Tasks...",              ID_EDIT_FINDTASKS
+        MENUITEM SEPARATOR
         MENUITEM "Find/&Replace in Task Titles...", 
                                                 ID_EDIT_FINDREPLACEINTASKTITLES
+
+        MENUITEM "Find/R&eplace in Task Comments...", 
+                                                ID_EDIT_FINDREPLACEINTASKCOMMENTS
 
         MENUITEM SEPARATOR
         MENUITEM "&Quick Find",                 ID_EDIT_QUICKFIND
@@ -5448,8 +5452,8 @@ BEGIN
     IDS_TDC_COLUMN_COMMENTSSIZE "KB"
     IDS_SAVETASKVIEWTOIMAGE_TITLE "Save Task View to Image"
     IDS_TDLBC_CUSTOMATTRIBS "Custom Attributes"
-    IDS_TABTIP_TIMETRACKING "Time Tracking"
     IDS_HANDLERNOTINSTALLED "(handler not installed)"
+    IDS_TABTIP_TIMETRACKING "Time Tracking"
 END
 
 #endif    // English (Australia) resources

@@ -184,6 +184,8 @@ protected:
 	afx_msg void OnUpdateEditFindReplaceInTaskTitles(CCmdUI* pCmdUI);
 	afx_msg void OnViewShowRemindersWindow();
 	afx_msg void OnUpdateViewShowRemindersWindow(CCmdUI* pCmdUI);
+	afx_msg void OnEditFindReplaceInTaskComments();
+	afx_msg void OnUpdateEditFindReplaceInTaskComments(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg void OnViewShowTimeTracker();
 	afx_msg BOOL OnQueryOpen();
