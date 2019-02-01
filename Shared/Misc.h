@@ -372,8 +372,8 @@ namespace Misc
 
 	CString& MakeUpper(CString& sText);
 	CString& MakeLower(CString& sText);
-	void MakeUpper(CStringArray& aText);
-	void MakeLower(CStringArray& aText);
+	CStringArray& MakeUpper(CStringArray& aText);
+	CStringArray& MakeLower(CStringArray& aText);
 	CString ToUpper(LPCTSTR szText);
 	CString ToLower(LPCTSTR szText);
  	TCHAR ToUpper(TCHAR cText);

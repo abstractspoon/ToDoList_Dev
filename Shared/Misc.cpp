@@ -1821,20 +1821,24 @@ TCHAR Misc::ToggleCase(TCHAR cText)
 	return cText;
 }
 
-void Misc::MakeUpper(CStringArray& aText)
+CStringArray& Misc::MakeUpper(CStringArray& aText)
 {
 	int nItem = aText.GetSize();
 	
 	while (nItem--)
 		MakeUpper(aText[nItem]);
+
+	return aText;
 }
 
-void Misc::MakeLower(CStringArray& aText)
+CStringArray& Misc::MakeLower(CStringArray& aText)
 {
 	int nItem = aText.GetSize();
 
 	while (nItem--)
 		MakeLower(aText[nItem]);
+
+	return aText;
 }
 
 int Misc::ParseSearchString(LPCTSTR szSearch, CStringArray& aWords)
