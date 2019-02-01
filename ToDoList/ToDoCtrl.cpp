@@ -10777,7 +10777,18 @@ BOOL CToDoCtrl::DoFindReplace(TDC_ATTRIBUTE nAttrib)
 
 BOOL CToDoCtrl::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
 {
-	return ((nAttrib == TDCA_TASKNAME) && (GetTaskCount() > 0));
+	if (GetTaskCount() == 0)
+		return FALSE;
+
+	switch (nAttrib)
+	{
+	case TDCA_TASKNAME:
+	case TDCA_COMMENTS:
+		return TRUE;
+	}
+
+	ASSERT(0);
+	return FALSE;
 }
 
 LRESULT CToDoCtrl::OnFindReplaceSelectNextTask(WPARAM wParam, LPARAM /*lParam*/)
