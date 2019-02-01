@@ -39,6 +39,7 @@ public:
 	BOOL SetContent(const CBinaryData& sContent, BOOL bResetSelection);
 	BOOL SetTextContent(LPCTSTR szContent, BOOL bResetSelection);
 	BOOL IsSettingContent() const { return m_bSettingContent; }
+	BOOL ReplaceContent(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, BOOL bCaseSensitive, BOOL bWholeWord);
 
 	LPCTSTR GetTypeID() const;
 	BOOL IsFormat(const CONTENTFORMAT& cf) const;
@@ -70,8 +71,6 @@ public:
 	
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOOL bAppOnly);
-
-	BOOL Replace(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, BOOL bCaseSensitive, BOOL bWholeWord);
 
 protected:
 	IContentControl* m_pContentCtrl;

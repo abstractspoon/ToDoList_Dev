@@ -351,7 +351,7 @@ void CRTFContentControl::SetReadOnly(bool bReadOnly)
 	CRulerRichEditCtrl::SetReadOnly((BOOL)bReadOnly);
 }
 
-bool CRTFContentControl::Replace(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
+bool CRTFContentControl::ReplaceContent(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
 {
 	// TODO
 	return false;

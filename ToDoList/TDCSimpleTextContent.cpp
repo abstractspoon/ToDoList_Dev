@@ -335,7 +335,7 @@ void CTDLSimpleTextContentCtrl::LoadPreferences(const IPreferences* pPrefs, LPCT
 	}
 }
 
-bool CTDLSimpleTextContentCtrl::Replace(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
+bool CTDLSimpleTextContentCtrl::ReplaceContent(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
 {
 	// TODO
 	return false;
