@@ -602,39 +602,33 @@ int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSe
 		return -1;
 
 	CString sWord(sSearchFor), sText(sSearchIn);
-	Trim(sWord);
+
+	if (bWholeWord)
+		Trim(sWord); // because whitespace is a delimiter
+
+	if (!bCaseSensitive)
+	{
+		MakeUpper(sText);
+		MakeUpper(sWord);
+	}
 
 	int nFind = -1;
 
-	while (iStart < sSearchIn.GetLength())
+	while ((iStart < sSearchIn.GetLength()) && (nFind == -1))
 	{
-		// Case sensitive search first
 		nFind = sText.Find(sWord, iStart);
 
 		if (nFind == -1)
-		{
-			// Case-insensitive
-			if (!bCaseSensitive)
-			{
-				MakeUpper(sWord);
-				MakeUpper(sText);
+			break;
 
-				nFind = sText.Find(sWord, iStart);
-			}
-
-			if (nFind == -1)
-				return -1;
-		}
-
-		// update search start before we modify 'nFind'
+		// update search start before we might need to modify 'nFind'
+		// This is also the first char pos after the end of 'sWord'
 		iStart = nFind + sWord.GetLength();
 
-		// else
-		if (bWholeWord) // test whole word
+		if (bWholeWord)
 		{
-			const CString DELIMS("()-\\/{}[]:;,. ?\"'");
-
-			// prior and next chars must be delimiters
+			// Test prior and next chars for delimiters
+			const CString DELIMS("()-\\/{}[]:;,. ?\"'\n\r\t");
 			TCHAR cPrevChar = ' ', cNextChar = ' ';
 
 			// prev
@@ -642,8 +636,8 @@ int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSe
 				cPrevChar = sText[nFind - 1];
 
 			// next
-			if ((nFind + sWord.GetLength()) < sText.GetLength())
-				cNextChar = sText[nFind + sWord.GetLength()];
+			if (iStart < sText.GetLength())
+				cNextChar = sText[iStart];
 
 			if ((DELIMS.Find(cPrevChar) == -1) || (DELIMS.Find(cNextChar) == -1))
 				nFind = -1;
