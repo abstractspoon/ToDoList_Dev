@@ -103,7 +103,7 @@ void CTDCFindReplace::OnFindNext(const CString& sFind, BOOL bNext, BOOL bCase, B
 
 BOOL CTDCFindReplace::SelectNextTask(TDC_SELECTTASK nSelectWhat) const
 {
-	return ::SendMessage(m_tdc, WM_TDCFR_SELECTNEXTTASK, m_nAttribute, nSelectWhat);
+	return ::SendMessage(m_tdc, WM_TDCFR_SELECTNEXTTASK, nSelectWhat, 0);
 }
 
 void CTDCFindReplace::OnReplaceSel(const CString& sFind, const CString& sReplace, 
@@ -116,7 +116,7 @@ void CTDCFindReplace::OnReplaceSel(const CString& sFind, const CString& sReplace
 	// Update state information for next time
 	UpdateState(sFind, sReplace, bNext, bCase, bWord);
 
-	if (::SendMessage(m_tdc, WM_TDCFR_REPLACESELTASK, m_nAttribute, 0))
+	if (::SendMessage(m_tdc, WM_TDCFR_REPLACESELTASK, 0, 0))
 		OnFindNext(sFind, bNext, bCase, bWord);
 
 	MessageBeep(MB_ICONHAND);
@@ -131,7 +131,7 @@ void CTDCFindReplace::OnReplaceAll(const CString& sFind, const CString& sReplace
 	// Update state information for next time
 	UpdateState(sFind, sReplace, TRUE, bCase, bWord);
 
-	::SendMessage(m_tdc, WM_TDCFR_REPLACEALLTASKS, m_nAttribute, 0);
+	::SendMessage(m_tdc, WM_TDCFR_REPLACEALLTASKS, 0, 0);
 }
 
 

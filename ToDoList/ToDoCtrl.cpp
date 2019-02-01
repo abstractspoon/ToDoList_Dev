@@ -10780,21 +10780,21 @@ BOOL CToDoCtrl::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
 	return ((nAttrib == TDCA_TASKNAME) && (GetTaskCount() > 0));
 }
 
-LRESULT CToDoCtrl::OnFindReplaceSelectNextTask(WPARAM wParam, LPARAM lParam)
+LRESULT CToDoCtrl::OnFindReplaceSelectNextTask(WPARAM wParam, LPARAM /*lParam*/)
 {
 	return SelectTask(m_findReplace.GetSearchFor(), 
-						(TDC_SELECTTASK)lParam,
-						(TDC_ATTRIBUTE)wParam,
+						(TDC_SELECTTASK)wParam,
+						m_findReplace.GetAttribute(),
 						m_findReplace.WantCaseSensitive(), 
 						m_findReplace.WantWholeWord(), TRUE);
 }
 
-LRESULT CToDoCtrl::OnFindReplaceSelectedTask(WPARAM wParam, LPARAM /*lParam*/)
+LRESULT CToDoCtrl::OnFindReplaceSelectedTask(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	return FindReplaceSelectedTaskAttribute((TDC_ATTRIBUTE)wParam);
+	return FindReplaceSelectedTaskAttribute();
 }
 
-LRESULT CToDoCtrl::OnFindReplaceAllTasks(WPARAM wParam, LPARAM /*lParam*/)
+LRESULT CToDoCtrl::OnFindReplaceAllTasks(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	// Treat as a single edit
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
@@ -10802,7 +10802,7 @@ LRESULT CToDoCtrl::OnFindReplaceAllTasks(WPARAM wParam, LPARAM /*lParam*/)
 	// Start at the beginning
 	if (SelectTask(m_findReplace.GetSearchFor(), 
 					TDC_SELECTFIRST, 
-					(TDC_ATTRIBUTE)wParam, 
+					m_findReplace.GetAttribute(),
 					m_findReplace.WantCaseSensitive(), 
 					m_findReplace.WantWholeWord(), 
 					TRUE))
@@ -10811,12 +10811,12 @@ LRESULT CToDoCtrl::OnFindReplaceAllTasks(WPARAM wParam, LPARAM /*lParam*/)
 		{
 			ASSERT(GetSelectedCount() == 1);
 
-			if (!FindReplaceSelectedTaskAttribute((TDC_ATTRIBUTE)wParam))
+			if (!FindReplaceSelectedTaskAttribute())
 				break;
 		} 
 		while (SelectTask(m_findReplace.GetSearchFor(), 
 							TDC_SELECTNEXT, 
-							(TDC_ATTRIBUTE)wParam, 
+							m_findReplace.GetAttribute(),
 							m_findReplace.WantCaseSensitive(), 
 							m_findReplace.WantWholeWord(), 
 							TRUE));
@@ -10850,10 +10850,9 @@ LRESULT CToDoCtrl::OnFindReplaceMsg(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
+BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute()
 {
-	ASSERT(m_findReplace.IsReplacing());
-	ASSERT(m_findReplace.GetAttribute() == nAttrib);
+	TDC_ATTRIBUTE nAttrib = m_findReplace.GetAttribute();
 
 	// TODO
 	CString sSelTitle = GetSelectedTaskTitle();
