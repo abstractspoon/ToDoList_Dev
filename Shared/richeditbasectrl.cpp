@@ -701,10 +701,7 @@ void CRichEditBaseCtrl::OnReplaceAll(const CString& sFind, const CString& sRepla
 	// Update state information for next time
 	m_findState.UpdateState(sFind, sReplace, TRUE, bCase, bWord);
 
-	ReplaceAll(m_findState.strFind, 
-				m_findState.strReplace, 
-				m_findState.bCaseSensitive != FALSE, 
-				m_findState.bWholeWord != FALSE);
+	ReplaceAll(sFind, sReplace, (bCase != FALSE), (bWord != FALSE));
 }
 
 int CRichEditBaseCtrl::ReplaceAll(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
