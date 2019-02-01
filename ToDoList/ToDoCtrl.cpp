@@ -10854,19 +10854,53 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute()
 {
 	TDC_ATTRIBUTE nAttrib = m_findReplace.GetAttribute();
 
-	// TODO
-	CString sSelTitle = GetSelectedTaskTitle();
+	if (!m_findReplace.IsReplacing() ||	!CanEditSelectedTask(nAttrib))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	CString sSelAttrib;
+
+	switch (nAttrib)
+	{
+	case TDCA_TASKNAME:
+		sSelAttrib = GetSelectedTaskTitle();
+		break;
+
+	case TDCA_COMMENTS:
+		sSelAttrib = GetSelectedTaskComments();
+		break;
+	}
 
 	if (Misc::Replace(m_findReplace.GetSearchFor(), 
 						m_findReplace.GetReplaceWith(), 
-						sSelTitle, 
+						sSelAttrib, 
 						m_findReplace.WantCaseSensitive(), 
 						m_findReplace.WantWholeWord()))
 	{
-		Misc::Trim(sSelTitle);
+		Misc::Trim(sSelAttrib);
 
-		if (SetSelectedTaskTitle(sSelTitle))
-			return TRUE;
+		switch (nAttrib)
+		{
+		case TDCA_TASKNAME:
+			if (SetSelectedTaskTitle(sSelAttrib))
+				return TRUE;
+			break;
+
+		case TDCA_COMMENTS:
+			if (m_ctrlComments.ReplaceContent(m_findReplace.GetSearchFor(), 
+												m_findReplace.GetReplaceWith(), 
+												m_findReplace.WantCaseSensitive(), 
+												m_findReplace.WantWholeWord()))
+			{
+				UpdateComments(TRUE);
+
+				if (SetSelectedTaskComments(m_sTextComments, m_customComments, TRUE))
+					return TRUE;
+			}
+			break;
+		}
 	}
 
 	MessageBeep(MB_ICONHAND);
