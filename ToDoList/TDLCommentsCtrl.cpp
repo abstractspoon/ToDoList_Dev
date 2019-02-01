@@ -441,9 +441,9 @@ void CTDLCommentsCtrl::ClearContent()
 	m_ctrlComments.SetTextContent(_T(""), FALSE);
 }
 
-BOOL CTDLCommentsCtrl::ReplaceAll(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, BOOL bCaseSensitive, BOOL bWholeWord)
+BOOL CTDLCommentsCtrl::FindReplaceAll(LPCTSTR szFind, LPCTSTR szReplace, BOOL bCaseSensitive, BOOL bWholeWord)
 {
-	return m_ctrlComments.ReplaceAll(szSearchFor, szReplaceWith, bCaseSensitive, bWholeWord);
+	return m_ctrlComments.FindReplaceAll(szFind, szReplace, bCaseSensitive, bWholeWord);
 }
 
 BOOL CTDLCommentsCtrl::GetSelectedFormat(CONTENTFORMAT& cf) const

@@ -704,7 +704,7 @@ void CRichEditBaseCtrl::OnReplaceAll(const CString& sFind, const CString& sRepla
 	ReplaceAll(sFind, sReplace, (bCase != FALSE), (bWord != FALSE));
 }
 
-int CRichEditBaseCtrl::ReplaceAll(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord)
+int CRichEditBaseCtrl::ReplaceAll(LPCTSTR szFind, LPCTSTR szReplace, bool bCaseSensitive, bool bWholeWord)
 {
 	int nNumReplaced = 0;
 
@@ -713,9 +713,9 @@ int CRichEditBaseCtrl::ReplaceAll(LPCTSTR szSearchFor, LPCTSTR szReplaceWith, bo
 
 	CWaitCursor wait;
 
-	while (FindText(szSearchFor, TRUE, bCaseSensitive, bWholeWord, FALSE))
+	while (FindText(szFind, TRUE, bCaseSensitive, bWholeWord, FALSE))
 	{
-		ReplaceSel(szReplaceWith, TRUE);
+		ReplaceSel(szReplace, TRUE);
 		nNumReplaced++;
 	}
 
