@@ -179,8 +179,10 @@ bool CHTMLContentControlBridge::SetContent(const unsigned char* pContent, int nL
 
 bool CHTMLContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord)
 {
-	// TODO
-	return false;
+	msclr::auto_gcroot<String^> find = gcnew String(szFind);
+	msclr::auto_gcroot<String^> replace = gcnew String(szReplace);
+
+	return (m_wnd->FindReplaceAll(find, replace, bWholeWord, bCaseSensitive) > 0);
 }
 
 LPCWSTR CHTMLContentControlBridge::GetTypeID() const
