@@ -917,9 +917,6 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 	CDlgUnits dlu(this);
 	const int CTRLHEIGHT = dlu.FromPixelsY(GetDefaultControlHeight());
 	
-	int nCtrlHeight = dlu.ToPixelsY(CTRLHEIGHT + LABELHEIGHT + CTRLVSPACING);
-	int nCtrlWidth = dlu.ToPixelsX(CTRLLEN + CTRLHSPACING);
-	
 	if (HasStyle(TDCS_AUTOREPOSCTRLS))
 	{
 		int nAvailHeight = -1, nAvailWidth = -1;
@@ -942,13 +939,18 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 			break;
 		}
 
+		int nCtrlWidth = dlu.ToPixelsX(CTRLLEN + CTRLHSPACING);
+	
 		if (nAvailHeight > 0)
 		{
+			int nCtrlHeightDLU = (CTRLHEIGHT + LABELHEIGHT + CTRLVSPACING);
+			int nAvailHeightDLU = dlu.FromPixelsY(nAvailHeight);
+
 			// To account of the 'extra' CTRLVSPACING that will occur
 			// after the last column we add it into our calculations
-			nAvailHeight += dlu.ToPixelsY(CTRLVSPACING);
+			nAvailHeightDLU += CTRLVSPACING;
 
-			nRows = max(2, nAvailHeight / nCtrlHeight);
+			nRows = max(2, nAvailHeightDLU / nCtrlHeightDLU);
 			nCols = (nVisibleCtrls / nRows) + ((nVisibleCtrls % nRows) ? 1 : 0);
 
 			// recalc actual rows used
@@ -956,11 +958,14 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 		}
 		else if (nAvailWidth > 0)
 		{
+			int nCtrlWidthDLU = (CTRLLEN + CTRLHSPACING);
+			int nAvailWidthDLU = dlu.FromPixelsX(nAvailWidth);
+
 			// To account of the 'extra' CTRLHSPACING that will occur
 			// after the last column we add it into our calculations
-			nAvailWidth += dlu.ToPixelsX(CTRLHSPACING);
+			nAvailWidthDLU += CTRLHSPACING;
 
-			nCols = max(2, nAvailWidth / nCtrlWidth);
+			nCols = max(2, nAvailWidthDLU / nCtrlWidthDLU);
 			nRows = (nVisibleCtrls / nCols) + ((nVisibleCtrls % nCols) ? 1 : 0);
 		}
 	}
