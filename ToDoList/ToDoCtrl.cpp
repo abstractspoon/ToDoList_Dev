@@ -912,10 +912,9 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 	nCols = nRows = 2;
 	BOOL bStackedWithComments = GetStackCommentsAndControls();
 	BOOL bStackCommentsAbove = HasStyle(TDCS_STACKCOMMENTSABOVEEDITS);
-
-	CDlgUnits dlu(this);
 	
 	// To handle DPI scaling better simply use the height of the category combo
+	CDlgUnits dlu(this);
 	const int CTRLHEIGHT = dlu.FromPixelsY(GetDefaultControlHeight());
 	
 	int nCtrlHeight = dlu.ToPixelsY(CTRLHEIGHT + LABELHEIGHT + CTRLVSPACING);
@@ -930,26 +929,16 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 		case TDCUIL_RIGHT: // vertical
 		case TDCUIL_LEFT: // vertical
 			if (bStackedWithComments && bPreserveSplitPos)
-			{
 				nAvailWidth = m_nCommentsSize;
-			}
 			else
-			{
 				nAvailHeight = rAvailable.Height();
-			}
 			break;
 			
 		case TDCUIL_BOTTOM: // horizontal
 			if (bStackedWithComments && bPreserveSplitPos)
-			{
 				nAvailHeight = m_nCommentsSize;
-			}
 			else
-			{
-				// To account of the 'extra' CTRLHSPACING that will occur
-				// after the last column we add it into our calculations
 				nAvailWidth = rAvailable.Width();
-			}
 			break;
 		}
 
@@ -1003,8 +992,8 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 	// of the 'extra' spacing above
 	rRequired = rAvailable;
 	
-	int nRequiredWidth = ((nCols * nCtrlWidth) - dlu.ToPixelsX(CTRLHSPACING));
-	int nRequiredHeight = ((nRows * nCtrlHeight) - dlu.ToPixelsY(CTRLVSPACING));
+	int nRequiredWidth = dlu.ToPixelsX((nCols * CTRLLEN) - CTRLHSPACING);
+	int nRequiredHeight = dlu.ToPixelsY((nRows * (CTRLHEIGHT + LABELHEIGHT + CTRLVSPACING)) - CTRLVSPACING);
 
 	switch (m_nControlsPos)
 	{
@@ -1201,17 +1190,11 @@ void CToDoCtrl::ReposControls(CDeferWndMove* pDWM, CRect& rAvailable, BOOL bSpli
 		const CTRLITEM& ctrl = aControls[nCtrl];
 		ASSERT(IsCtrlShowing(ctrl));
 		
-		// if we're at the start of the line then just move ctrls
-		// else we must check whether there's enough space to fit
-		if (nXPosDLU > 0) // we're not the first
+		if ((nCtrl != 0) && ((nCtrl % nCols) == 0))
 		{
-			// do we fit?
-			if ((nXPosDLU + CTRLLEN) > nWidthDLU) // no
-			{
-				// move to next line
-				nXPosDLU = 0;
-				nYPosDLU += (CTRLVSPACING + LABELHEIGHT + CTRLHEIGHT);
-			}
+			// move to next line
+			nXPosDLU = 0;
+			nYPosDLU += (CTRLVSPACING + LABELHEIGHT + CTRLHEIGHT);
 		}
 		
 		CRect rCtrlDLU(nXPosDLU, nYPosDLU, nXPosDLU + CTRLLEN, nYPosDLU + LABELHEIGHT);
