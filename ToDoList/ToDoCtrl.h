@@ -815,8 +815,7 @@ protected:
 	CWnd* GetAttributeCtrl(TDC_ATTRIBUTE nAttrib) const;
 	int GetDefaultControlHeight() const;
 
-	void ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CDlgUnits* pDLU, 
-						const CRect& rItem, int nClientRight);
+	void ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CRect& rItem, int nClientRight);
 	void ReposControls(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/, BOOL bSplitting);
 	void ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/);
 	BOOL IsCommentsVisible(BOOL bActually = FALSE) const;

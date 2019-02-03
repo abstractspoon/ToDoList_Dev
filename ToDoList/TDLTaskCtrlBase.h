@@ -381,7 +381,7 @@ protected:
 	void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs);
 	const CEnHeaderCtrl& GetColumnHeaderCtrl(TDC_COLUMN nColID) const;
 	BOOL IsVisible() const;
-	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImage = 0, int nCount = 1, int nImageSize = 16) const;
+	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize = 16, int nImage = 0, int nCount = 1) const;
 	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0, int nCount = 1) const;
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);

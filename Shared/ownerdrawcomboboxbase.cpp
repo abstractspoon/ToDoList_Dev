@@ -17,10 +17,8 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase
 
-COwnerdrawComboBoxBase::COwnerdrawComboBoxBase(int nMinDLUHeight) 
+COwnerdrawComboBoxBase::COwnerdrawComboBoxBase() 
 	: 
-	m_bItemHeightSet(FALSE), 
-	m_nMinDLUHeight((nMinDLUHeight > 0) ? nMinDLUHeight : 9),
 	m_nMaxTextWidth(-1)
 {
 }
@@ -36,27 +34,11 @@ BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
-	ON_WM_DESTROY()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase message handlers
-
-BOOL COwnerdrawComboBoxBase::SetMinDLUHeight(int nMinDLUHeight)
-{
-	ASSERT(GetSafeHwnd() == NULL);
-	ASSERT(m_bItemHeightSet == FALSE);
-	ASSERT(nMinDLUHeight > 0);
-
-	if (!GetSafeHwnd() && !m_bItemHeightSet && (nMinDLUHeight > 0))
-	{
-		m_nMinDLUHeight = nMinDLUHeight;
-		return TRUE;
-	}
-
-	return FALSE;
-}
 
 void COwnerdrawComboBoxBase::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
 											COLORREF& crText, COLORREF& crBack) const
@@ -153,8 +135,6 @@ BOOL COwnerdrawComboBoxBase::PreCreateWindow(CREATESTRUCT& cs)
 LRESULT COwnerdrawComboBoxBase::OnSetFont(WPARAM , LPARAM)
 {
 	Default();
-	
-	m_bItemHeightSet = FALSE;
 	InitItemHeight();
 	
 	return 0;
@@ -164,22 +144,34 @@ void COwnerdrawComboBoxBase::InitItemHeight()
 {
 	ASSERT(GetSafeHwnd());
 
-	if (!m_bItemHeightSet) 
-	{
-		m_bItemHeightSet = TRUE;
-		
-		SetItemHeight(-1, CalcMinItemHeight(FALSE)); 
-		SetItemHeight(0, CalcMinItemHeight(TRUE)); 
-	}
+	SetItemHeight(-1, CalcMinItemHeight(FALSE)); 
+	SetItemHeight(0, CalcMinItemHeight(TRUE)); 
 }
 
 int COwnerdrawComboBoxBase::CalcMinItemHeight(BOOL bList) const
 {
-	CDlgUnits dlu(GetParent(), TRUE);
-	int nMinHeight = dlu.ToPixelsY(m_nMinDLUHeight);
+	int nMinHeight = GraphicsMisc::GetFontPixelSize(*this);
 	
-	if (bList && HasIcon())
-		nMinHeight = max(nMinHeight, GraphicsMisc::ScaleByDPIFactor(16));
+	if (bList)
+	{
+		int nMinDLUHeight = CDlgUnits(GetParent()).ToPixelsY(10);
+		nMinHeight = max(nMinHeight, nMinDLUHeight);
+
+		if (HasIcon())
+		{
+			int nMinDPIHeight = GraphicsMisc::ScaleByDPIFactor(16);
+			nMinHeight = max(nMinHeight, nMinDPIHeight);
+		}
+	}
+	else
+	{
+		int nFudge = 0;
+
+		if (GraphicsMisc::WantDPIScaling())
+			nFudge = GraphicsMisc::ScaleByDPIFactor(2);
+
+		nMinHeight += (nFudge + (2*GetSystemMetrics(SM_CYEDGE)));
+	}
 
 	return nMinHeight;
 }
@@ -204,14 +196,6 @@ int COwnerdrawComboBoxBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	InitItemHeight();
 	return 0;
-}
-
-void COwnerdrawComboBoxBase::OnDestroy()
-{
-	// reset flag in case we get reused
-	m_bItemHeightSet = FALSE;
-
-	CComboBox::OnDestroy();
 }
 
 void COwnerdrawComboBoxBase::RefreshDropWidth()
@@ -245,7 +229,7 @@ void COwnerdrawComboBoxBase::RefreshDropWidth(BOOL bRecalc)
 		nWidth = min(nWidth, nMaxWidth);
 	
 	SetDroppedWidth(nWidth + GetExtraListboxWidth());
-	
+
 }
 
 BOOL COwnerdrawComboBoxBase::IsType(UINT nComboType) const
@@ -256,7 +240,7 @@ BOOL COwnerdrawComboBoxBase::IsType(UINT nComboType) const
 int COwnerdrawComboBoxBase::GetExtraListboxWidth() const
 {
 	// space for icon
-	return (HasIcon() ? 18 : 0);
+	return (HasIcon() ? GraphicsMisc::ScaleByDPIFactor(18) : 0);
 }
 
 int COwnerdrawComboBoxBase::FindStringExact(int nIndexStart, LPCTSTR lpszFind) const

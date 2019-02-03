@@ -580,7 +580,9 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 
 					// draw text
 					DrawColumnText(pDC, pTDI->sTitle, rItem, DT_LEFT, crText, TRUE);
-
+#ifdef _DEBUG
+					GraphicsMisc::DrawRect(pDC, rItem, CLR_NONE, 255);
+#endif
 					// cleanup
 					pDC->SelectObject(pOldFont);
 
@@ -1718,7 +1720,7 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_TITLERECT nArea, CRec
 	case TDCTR_LABEL:
 		if (pDC && szTitle)
 		{
-			rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx + 6);
+			rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx);
 			rect.right = min(rect.right, nHdrWidth);
 		}
 		else

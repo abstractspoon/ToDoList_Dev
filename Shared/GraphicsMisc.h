@@ -135,7 +135,7 @@ namespace GraphicsMisc
 	int GetFontPixelSize(HFONT hFont);
 	int GetFontPointSize(HWND hWnd);
 	int GetFontPixelSize(HWND hWnd);
-	HFONT GetFont(HWND hWnd);
+	HFONT GetFont(HWND hWnd, BOOL bFallback = TRUE);
 	BOOL SameFont(HFONT hFont, LPCTSTR szFaceName, int nPoint);
 	BOOL SameFontNameSize(HFONT hFont1, HFONT hFont2);
 	CFont& WingDings();

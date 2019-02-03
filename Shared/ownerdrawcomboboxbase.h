@@ -16,21 +16,15 @@ class COwnerdrawComboBoxBase : public CComboBox
 
 // Construction
 public:
-	COwnerdrawComboBoxBase(int nMinDLUHeight = 9);
+	COwnerdrawComboBoxBase();
 
-	BOOL SetMinDLUHeight(int nMinDLUHeight);
-	int GetMinDluHeight() const { return m_nMinDLUHeight; }
 	void RefreshDropWidth();
 
     int FindStringExact(int nIndexStart, const CString& sItem, BOOL bCaseSensitive) const;
     int FindStringExact(int nIndexStart, LPCTSTR lpszFind) const;
 
 // Attributes
-protected:
-	BOOL m_bItemHeightSet;
-
 private:
-	int m_nMinDLUHeight;
 	int m_nMaxTextWidth;
 
 // Operations
@@ -56,7 +50,6 @@ protected:
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnDestroy();
 	afx_msg LRESULT OnSetFont(WPARAM , LPARAM);
 
 	DECLARE_MESSAGE_MAP()

@@ -14,6 +14,8 @@
 #include "graphicsmisc.h"
 #include "preferences.h"
 
+#include <afxpriv.h> // for CDialogTemplate
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -23,7 +25,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CRuntimeDlg
 
-class RTDLGTEMPLATE : private DLGTEMPLATE
+class RTDLGTEMPLATE : public DLGTEMPLATE
 {
 public:
 	RTDLGTEMPLATE(DWORD dwStyle, DWORD dwExStyle, const CRect& rect)
@@ -215,12 +217,21 @@ BOOL CRuntimeDlg::OnInitDialog()
 
 BOOL CRuntimeDlg::Create(LPCTSTR szCaption, DWORD dwStyle, DWORD dwExStyle, const CRect& rect, CWnd* pParentWnd, UINT nID)
 {
+	RTDLGTEMPLATE rtDlgTemp(dwStyle, dwExStyle, rect);
+	CDialogTemplate dlgTemp(&rtDlgTemp);
+
 	// cache and remove visibility
 	BOOL bVisible = (dwStyle & WS_VISIBLE);
 	dwStyle &= ~WS_VISIBLE;
 	
 	// remove DS_SETFONT (not supported)
-	dwStyle &= ~DS_SETFONT;
+	if ((dwStyle & DS_SETFONT) && pParentWnd && GraphicsMisc::GetFont(*pParentWnd, FALSE))
+	{
+		CString sFont;
+		int nSize = GraphicsMisc::GetFontNameAndPointSize(*pParentWnd, sFont);
+
+		dlgTemp.SetFont(sFont, (WORD)nSize);
+	}
 	
 	if (dwStyle & WS_CHILD)
 	{
@@ -234,7 +245,15 @@ BOOL CRuntimeDlg::Create(LPCTSTR szCaption, DWORD dwStyle, DWORD dwExStyle, cons
 	// Save size before WM_INITDIALOG gets sent
 	m_sizeInitial = rect.Size();
 	
-	if (CreateDlgIndirect(RTDLGTEMPLATE(dwStyle, dwExStyle, rect), pParentWnd, NULL) != NULL)
+	HGLOBAL hTemplate = dlgTemp.Detach();
+	LPCDLGTEMPLATE hDlgTemplate = (DLGTEMPLATE*)GlobalLock(hTemplate);
+
+	BOOL bCreated = CreateDlgIndirect(hDlgTemplate, pParentWnd, NULL);
+
+	GlobalUnlock(hTemplate);
+	GlobalFree(hTemplate);
+
+	if (bCreated)
 	{
 		// notify parent if we're a child window
 		if (pParentWnd && (dwStyle & WS_CHILD) && !(dwExStyle & WS_EX_NOPARENTNOTIFY))
@@ -254,11 +273,9 @@ BOOL CRuntimeDlg::Create(LPCTSTR szCaption, DWORD dwStyle, DWORD dwExStyle, cons
 		// reshow?
 		if (bVisible)
 			ShowWindow(SW_SHOW);
-		
-		return TRUE;
 	}
 	
-	return FALSE;
+	return bCreated;
 }
 
 void CRuntimeDlg::SetInitialPos(LPCRECT pRect, DWORD dwStyle)

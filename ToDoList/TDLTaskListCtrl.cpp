@@ -311,8 +311,9 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				
 				// draw text
 				DrawColumnText(pDC, pTDI->sTitle, rItem, DT_LEFT, crText, TRUE);
-				rItem.right = (rItem.left + pDC->GetTextExtent(pTDI->sTitle).cx + LV_COLPADDING);
-				
+#ifdef _DEBUG
+				GraphicsMisc::DrawRect(pDC, rItem, CLR_NONE, 255);
+#endif
 				// cleanup
 				pDC->SelectObject(pOldFont);
 
@@ -1040,7 +1041,7 @@ BOOL CTDLTaskListCtrl::GetItemTitleRect(int nItem, TDC_TITLERECT nArea, CRect& r
 	case TDCTR_LABEL:
 		if (pDC && szTitle)
 		{
-			rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx + LV_COLPADDING);
+			rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx);
 			rect.right = min(rect.right + 3, nHdrWidth);
 		}
 		else

@@ -76,12 +76,13 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int CTRLHEIGHT		= 13; // dlu
-const int CTRLVSPACING		= 5;  // dlu
-const int CTRLHSPACING		= 4;  // dlu
-const int CTRLLABELLEN		= 70; // dlu
-const int CTRLCTRLLEN		= 70; // dlu
-const int COMMENTSTYPELEN	= 85; // dlu
+// In DLU
+const int CTRLHEIGHT		= 13;
+const int LABELHEIGHT		= 8; 
+const int CTRLHSPACING		= 6; 
+const int CTRLVSPACING		= 4; 
+const int CTRLLEN			= 75;
+const int COMMENTSTYPELEN	= 85;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -90,10 +91,11 @@ const int MIDNIGHTPERIOD	= 60000; // 1 minute
 
 /////////////////////////////////////////////////////////////////////////////
 
-const unsigned short SPLITSIZE				= 6; 
-const unsigned short DEFCOMMENTSIZE			= 260;
-const unsigned short MINNONCOMMENTHEIGHT	= 250; // what's above the comment section
-const unsigned short MINNONCOMMENTWIDTH		= 350; // what's to the left of the comment section
+const int SPLITSIZE				= GraphicsMisc::ScaleByDPIFactor(6); 
+const int DEFCOMMENTSIZE		= GraphicsMisc::ScaleByDPIFactor(260);
+const int MINNONCOMMENTHEIGHT	= GraphicsMisc::ScaleByDPIFactor(250); // what's above the comment section
+const int MINNONCOMMENTWIDTH	= GraphicsMisc::ScaleByDPIFactor(350); // what's to the left of the comment section
+const int COMBODROPHEIGHT		= GraphicsMisc::ScaleByDPIFactor(200);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -104,7 +106,6 @@ const COLORREF MAGENTA	= RGB(255, 0, 255);
 /////////////////////////////////////////////////////////////////////////////
 
 const UINT  DAYINSECS		= 24 * 60 * 60;
-const int   COMBODROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
 const int	DECIMALS = 4;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -592,7 +593,7 @@ BOOL CToDoCtrl::Create(const CRect& rect, CWnd* pParentWnd, UINT nID, BOOL bVisi
 	DWORD dwStyle = (WS_CHILD | (bVisible ? WS_VISIBLE : 0) | (bEnabled ? 0 : WS_DISABLED) | WS_TABSTOP);
 	CLocalizer::IgnoreString(_T("ToDoCtrl"));
 	
-	return CRuntimeDlg::Create(_T("ToDoCtrl"), dwStyle, WS_EX_CONTROLPARENT, rect, pParentWnd, nID);
+	return CRuntimeDlg::Create(_T("ToDoCtrl"), dwStyle | DS_SETFONT, WS_EX_CONTROLPARENT, rect, pParentWnd, nID);
 }
 
 BOOL CToDoCtrl::OnInitDialog() 
@@ -914,8 +915,11 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 
 	CDlgUnits dlu(this);
 	
-	int nCtrlHeight = dlu.ToPixelsY(2 * CTRLHEIGHT + CTRLVSPACING);
-	int nCtrlWidth = dlu.ToPixelsX(CTRLCTRLLEN + CTRLHSPACING);
+	// To handle DPI scaling better simply use the height of the category combo
+	const int CTRLHEIGHT = dlu.FromPixelsY(GetDefaultControlHeight());
+	
+	int nCtrlHeight = dlu.ToPixelsY(CTRLHEIGHT + LABELHEIGHT + CTRLVSPACING);
+	int nCtrlWidth = dlu.ToPixelsX(CTRLLEN + CTRLHSPACING);
 	
 	if (HasStyle(TDCS_AUTOREPOSCTRLS))
 	{
@@ -995,7 +999,6 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 		}
 	}
 	
-	// Calc ctrl rect
 	// remembering to take account of the 'taking-account' 
 	// of the 'extra' spacing above
 	rRequired = rAvailable;
@@ -1182,34 +1185,55 @@ void CToDoCtrl::ReposControls(CDeferWndMove* pDWM, CRect& rAvailable, BOOL bSpli
 	
 	ASSERT(nVisibleCtrls);
 	
+	// Note: All calculations are performed in DLU until just before the move
+	// is performed. This ensures that we minimize the risk of rounding errors.
 	CDlgUnits dlu(this);
-	CRect rItem(rCtrls);
 
-	rItem.bottom = rItem.top + dlu.ToPixelsY(2 * CTRLHEIGHT);
-	rItem.right = rItem.left + dlu.ToPixelsX(CTRLCTRLLEN);
-	
-	int nCol = 0;
-	int nRightEdge = rCtrls.right;
-	
+	int nXPosDLU = 0, nYPosDLU = 0;
+	int nWidthDLU = dlu.FromPixelsX(rCtrls.Width());
+
+	// To handle DPI scaling better simply use the height of the category combo
+	int nActualCtrlHeight = GetDefaultControlHeight();
+	const int CTRLHEIGHT = dlu.FromPixelsY(nActualCtrlHeight);
+
 	for (int nCtrl = 0; nCtrl < aControls.GetSize(); nCtrl++)
 	{
 		const CTRLITEM& ctrl = aControls[nCtrl];
 		ASSERT(IsCtrlShowing(ctrl));
 		
-		ReposControl(ctrl, pDWM, &dlu, rItem, nRightEdge);
-		
-		nCol++;
-		
-		// if we've passed the column count, reset to next row
-		if (nCol >= nCols)
+		// if we're at the start of the line then just move ctrls
+		// else we must check whether there's enough space to fit
+		if (nXPosDLU > 0) // we're not the first
 		{
-			nCol = 0;
-			rItem.OffsetRect(-(rItem.left - rCtrls.left), dlu.ToPixelsY(2 * CTRLHEIGHT + CTRLVSPACING));
+			// do we fit?
+			if ((nXPosDLU + CTRLLEN) > nWidthDLU) // no
+			{
+				// move to next line
+				nXPosDLU = 0;
+				nYPosDLU += (CTRLVSPACING + LABELHEIGHT + CTRLHEIGHT);
+			}
 		}
-		else // offset to next column
-		{
-			rItem.OffsetRect(dlu.ToPixelsX(CTRLCTRLLEN + CTRLHSPACING), 0);
-		}
+		
+		CRect rCtrlDLU(nXPosDLU, nYPosDLU, nXPosDLU + CTRLLEN, nYPosDLU + LABELHEIGHT);
+		CRect rCtrl = rCtrlDLU;
+		
+		dlu.ToPixels(rCtrl);
+		rCtrl.OffsetRect(rCtrls.TopLeft());
+
+		pDWM->MoveWindow(GetDlgItem(ctrl.nLabelID), rCtrl);
+		
+		// move ctrl
+		rCtrlDLU.OffsetRect(0, LABELHEIGHT);
+		rCtrl = rCtrlDLU;
+		
+		dlu.ToPixels(rCtrl);
+		rCtrl.bottom = (rCtrl.top + nActualCtrlHeight);
+
+		rCtrl.OffsetRect(rCtrls.TopLeft());
+		ReposControl(ctrl, pDWM, rCtrl, rCtrls.right);
+		
+		// update XPos for the control
+		nXPosDLU = rCtrlDLU.right + CTRLHSPACING;
 	}
 }
 
@@ -1249,19 +1273,10 @@ int CToDoCtrl::GetControls(CTDCControlArray& aControls, BOOL bVisible) const
 	return aControls.GetSize();
 }
 
-void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CDlgUnits* pDLU, 
+void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 							 const CRect& rItem, int nClientRight)
 {
-	// move label
-	CRect rLabel(rItem);
-	rLabel.bottom = rLabel.top + pDLU->ToPixelsY(CTRLHEIGHT);
-
-	pDWM->MoveWindow(GetDlgItem(ctrl.nLabelID), rLabel);
-				
-	// move control
 	CRect rCtrl(rItem);
-	rCtrl.top += pDLU->ToPixelsY(CTRLHEIGHT);
-	rCtrl.bottom = (rCtrl.top + GetDefaultControlHeight());
 
 	// some special cases
 	switch (ctrl.nCtrlID)
@@ -1304,7 +1319,7 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CD
 				return; 
 
 			// else
-			rCtrl.bottom += 200; // combo box drop height
+			rCtrl.bottom += COMBODROPHEIGHT;
 		}
 		break;
 
@@ -1326,7 +1341,7 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CD
 						return; 
 					
 					// else
-					rCtrl.bottom += 200; // combo box drop height
+					rCtrl.bottom += COMBODROPHEIGHT;
 				}
 			}
 		}
@@ -10360,12 +10375,12 @@ int CToDoCtrl::CalcMinCommentSize() const
 		case TDCUIL_RIGHT: // vertical
 		case TDCUIL_LEFT:
 			// two column widths
-			nMinCommentsSize = (dlu.ToPixelsX((2 * CTRLCTRLLEN) + CTRLHSPACING) + 1);
+			nMinCommentsSize = (dlu.ToPixelsX((2 * CTRLLEN) + CTRLHSPACING) + 1);
 			break;
 			
 		case TDCUIL_BOTTOM: // horizontal
 			// two row height
-			nMinCommentsSize = dlu.ToPixelsY(2* ((2 * CTRLHEIGHT) + CTRLVSPACING));
+			nMinCommentsSize = (2 * (GetDefaultControlHeight() + dlu.ToPixelsY(LABELHEIGHT))) + dlu.ToPixelsY(CTRLVSPACING);
 			break;
 
 		default:

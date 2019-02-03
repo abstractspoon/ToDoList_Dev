@@ -24,7 +24,6 @@ const int IMAGESIZE = GraphicsMisc::ScaleByDPIFactor(16);
 CTDLContentTypeComboBox::CTDLContentTypeComboBox(const CContentMgr* pContentMgr) : 
 	m_pContentMgr(pContentMgr), m_nInitSel(0)
 {
-	SetMinDLUHeight(11);
 }
 
 CTDLContentTypeComboBox::~CTDLContentTypeComboBox()

@@ -136,6 +136,10 @@ SOURCE=.\TDLTestBase.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TimeHelperTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ToDoCtrlDataTest.cpp
 # End Source File
 # End Group
@@ -177,6 +181,10 @@ SOURCE=.\TDLTest.h
 # Begin Source File
 
 SOURCE=.\TDLTestBase.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TimeHelperTest.h
 # End Source File
 # Begin Source File
 

@@ -434,11 +434,16 @@ int GraphicsMisc::GetFontPixelSize(HWND hWnd)
 	return GetFontPixelSize(GetFont(hWnd));
 }
 
-HFONT GraphicsMisc::GetFont(HWND hWnd)
+HFONT GraphicsMisc::GetFont(HWND hWnd, BOOL bFallback)
 {
 	ASSERT(hWnd);
 
-	return (HFONT)::SendMessage(hWnd, WM_GETFONT, 0, 0);
+	HFONT hFont = (HFONT)::SendMessage(hWnd, WM_GETFONT, 0, 0);
+
+	if ((hFont == NULL) && bFallback)
+		hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+
+	return hFont;
 }
 
 BOOL GraphicsMisc::SameFont(HFONT hFont, LPCTSTR szFaceName, int nPoint)

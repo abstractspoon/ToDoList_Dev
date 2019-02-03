@@ -28,11 +28,11 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int CTRLXSPACING = 6; // dlu
-const int CTRLYSPACING = 2; // dlu
-const int CTRLLABELLEN = 45;
-const int CTRLLEN = 75;
-const int CTRLHEIGHT = 13;
+// In DLU
+const int CTRLHSPACING	= 6;
+const int CTRLVSPACING	= 4;
+const int CTRLLEN		= 75;
+const int LABELHEIGHT	= 8;
 
 static CTRLITEM FILTERCTRLS[] = 
 {
@@ -313,7 +313,7 @@ BOOL CTDLFilterBar::Create(CWnd* pParentWnd, UINT nID, BOOL bVisible)
 		SetDlgCtrlID(nID);
 		SetWindowText(_T("FilterBar"));
 
-		ModifyStyle(WS_CLIPCHILDREN, 0, 0);
+		ModifyStyle(WS_CLIPCHILDREN, WS_TABSTOP, 0);
 		ShowWindow(bVisible ? SW_SHOW : SW_HIDE);
 
 		return TRUE;
@@ -692,14 +692,18 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 
 	// Note: All calculations are performed in DLU until just before the move
 	// is performed. This ensures that we minimize the risk of rounding errors.
-	CDlgUnits dlu(*this);
+	CDlgUnits dlu(this);
 
 	// Don't disable visible labels if the background color is not gray
 	// because embossed text looks 'wrong' over a colour
 	BOOL bNonGrayBkgnd = ((m_crUIBack != CLR_NONE) && !RGBX(m_crUIBack).IsGray());
 	
-	int nXPosDLU = 0, nYPosDLU = 0;
-	int nWidthDLU = dlu.FromPixelsX(nWidth), nCtrlHeightDLU = CTRLHEIGHT;
+	int nXPosDLU = 0, nYPosDLU = CTRLVSPACING;
+	int nWidthDLU = dlu.FromPixelsX(nWidth);
+	
+	// To handle DPI scaling better simply use the height of the category combo
+	int nActualCtrlHeight = GetChildHeight(&m_cbCategoryFilter);
+	const int CTRLHEIGHT = dlu.FromPixelsY(nActualCtrlHeight);
 
 	CTDCControlArray aControls;
 	int nNumCtrls = GetControls(aControls);
@@ -708,7 +712,6 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 
 	for (int nCtrl = 0; nCtrl < nNumCtrls; nCtrl++)
 	{
-		CRect rCtrl, rCtrlDLU;
 		const CTRLITEM& fc = aControls[nCtrl];
 		
 		// display this control only if the corresponding column
@@ -746,45 +749,39 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 				{
 					// move to next line
 					nXPosDLU = 0;
-					nYPosDLU += CTRLYSPACING + (2 * nCtrlHeightDLU);
+					nYPosDLU += (CTRLVSPACING + LABELHEIGHT + CTRLHEIGHT);
 				}
 			}
 			
 			// move label
-			rCtrlDLU.left = nXPosDLU;
-			rCtrlDLU.right = nXPosDLU + CTRLLEN;
-			rCtrlDLU.top = nYPosDLU;
-			rCtrlDLU.bottom = nYPosDLU + nCtrlHeightDLU;
+			CRect rCtrlDLU(nXPosDLU, nYPosDLU, nXPosDLU + CTRLLEN, nYPosDLU + LABELHEIGHT);
+			CRect rCtrl = rCtrlDLU;
 
-			rCtrl = rCtrlDLU;
 			dlu.ToPixels(rCtrl);
 			
 			if (fc.nLabelID && !bCalcOnly)
 				dwm.MoveWindow(GetDlgItem(fc.nLabelID), rCtrl);
 			
-			// update YPos for the ctrl
-			rCtrlDLU.OffsetRect(0, nCtrlHeightDLU);
-			
 			// move ctrl
+			rCtrlDLU.OffsetRect(0, LABELHEIGHT);
 			rCtrl = rCtrlDLU;
+			
 			dlu.ToPixels(rCtrl);
+			rCtrl.bottom = (rCtrl.top + nActualCtrlHeight);
 			
 			if (!bCalcOnly)
 			{
-				// To handle DPI scaling better simply use the height of the category combo
-				rCtrl.bottom = (rCtrl.top + GetChildHeight(&m_cbCategoryFilter));
-				
 				// add 200 to combo dropdowns
 				CWnd* pCtrl = GetDlgItem(fc.nCtrlID);
 				
 				if (CWinClasses::IsComboBox(*pCtrl))
-					rCtrl.bottom += 200;
+					rCtrl.bottom += GraphicsMisc::ScaleByDPIFactor(200);
 				
 				dwm.MoveWindow(pCtrl, rCtrl);
 			}
 			
 			// update XPos for the control
-			nXPosDLU = rCtrlDLU.right + CTRLXSPACING;
+			nXPosDLU = rCtrlDLU.right + CTRLHSPACING;
 		}
 
 		// show/hide and enable as appropriate
@@ -824,7 +821,7 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 	}
 
 	// update bottom of filter bar
-	nYPosDLU += (2 * nCtrlHeightDLU) + 2;
+	nYPosDLU += (LABELHEIGHT + CTRLHEIGHT + CTRLVSPACING);
 
 	return dlu.ToPixelsY(nYPosDLU);
 }

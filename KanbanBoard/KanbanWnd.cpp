@@ -53,7 +53,6 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 #pragma warning(default:4355)
 {
 	m_icon.LoadIcon(IDR_KANBAN);
-	m_cbOptions.SetMinDLUHeight(10);
 }
 
 CKanbanWnd::~CKanbanWnd()

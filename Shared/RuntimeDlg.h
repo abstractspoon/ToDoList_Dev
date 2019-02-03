@@ -37,7 +37,7 @@ public:
 // Operations
 protected: // intended to be used only from a derived class
 
-	#define RTD_DEFSTYLE (WS_VISIBLE | WS_POPUPWINDOW  | WS_CAPTION | DS_CENTER)
+	#define RTD_DEFSTYLE (WS_VISIBLE | WS_POPUPWINDOW  | WS_CAPTION | DS_CENTER | DS_SETFONT)
 	#define RTD_DEFEXSTYLE (WS_EX_DLGMODALFRAME)
 
 	virtual int DoModal(LPCTSTR szCaption, 

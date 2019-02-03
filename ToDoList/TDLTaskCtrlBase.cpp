@@ -2687,7 +2687,9 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 												
 				if (nIcon >= 0)
 				{
-					CPoint pt(CalcColumnIconTopLeft(rSubItem));
+					int nImageSize = m_ilTaskIcons.GetImageSize();
+					CPoint pt(CalcColumnIconTopLeft(rSubItem, nImageSize));
+
 					m_ilTaskIcons.Draw(pDC, nIcon, pt, ILD_TRANSPARENT);
 				}
 			}
@@ -2825,8 +2827,8 @@ void CTDLTaskCtrlBase::DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect&
 		if (iImage != TDCC_NONE)
 		{
 			int nImageSize = m_ilColSymbols.GetImageSize();
+			CPoint ptDraw(CalcColumnIconTopLeft(rect, nImageSize, iImage));
 
-			CPoint ptDraw(CalcColumnIconTopLeft(rect, iImage, 1, nImageSize));
 			m_ilColSymbols.Draw(pDC, iImage, ptDraw, ILD_TRANSPARENT);
 		}
 	}
@@ -2835,7 +2837,7 @@ void CTDLTaskCtrlBase::DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect&
 void CTDLTaskCtrlBase::DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_CHECK nCheck)
 {
 	int nImageSize = m_ilCheckboxes.GetImageSize();
-	CPoint pt(CalcColumnIconTopLeft(rSubItem, 0, 1, nImageSize));
+	CPoint pt(CalcColumnIconTopLeft(rSubItem, nImageSize));
 				
 	// if the line height is odd, move one pixel down
 	// to avoid collision with selection rect
@@ -2845,7 +2847,7 @@ void CTDLTaskCtrlBase::DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_
 	m_ilCheckboxes.Draw(pDC, nImage, pt, ILD_TRANSPARENT);
 }
 
-CPoint CTDLTaskCtrlBase::CalcColumnIconTopLeft(const CRect& rSubItem, int nImage, int nCount, int nImageSize) const
+CPoint CTDLTaskCtrlBase::CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize, int nImage, int nCount) const
 {
 	CRect rImage(rSubItem.TopLeft(), CSize(nImageSize, nImageSize));
 	GraphicsMisc::CentreRect(rImage, rSubItem, (nCount == 1), TRUE);
@@ -2860,7 +2862,7 @@ BOOL CTDLTaskCtrlBase::CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int
 {
 	int nImageSize = m_ilFileRef.GetImageSize();
 
-	rIcon = CRect(CalcColumnIconTopLeft(rSubItem, nImage, nCount, nImageSize), CSize(nImageSize, nImageSize));
+	rIcon = CRect(CalcColumnIconTopLeft(rSubItem, nImageSize, nImage, nCount), CSize(nImageSize, nImageSize));
 
 	// we always draw the first icon
 	if ((nImage == 0) || (rIcon.right <= rSubItem.right))
@@ -3204,18 +3206,21 @@ void CTDLTaskCtrlBase::DrawColumnText(CDC* pDC, const CString& sText, const CRec
 	CRect rText(rect);
 	CPoint ptText(0, rText.top);
 	
-	switch (nAlign)
+	if (!bTaskTitle)
 	{
-	case DT_LEFT:
-		rText.left += LV_COLPADDING;
-		break;
-		
-	case DT_RIGHT:
-		rText.right -= LV_COLPADDING;
-		break;
-		
-	case DT_CENTER:
-		break;
+		switch (nAlign)
+		{
+		case DT_LEFT:
+			rText.left += LV_COLPADDING;
+			break;
+			
+		case DT_RIGHT:
+			rText.right -= LV_COLPADDING;
+			break;
+			
+		case DT_CENTER:
+			break;
+		}
 	}
 	
 	UINT nFlags = (nAlign | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(Tasks()));

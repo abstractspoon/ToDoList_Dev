@@ -102,7 +102,7 @@ const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
 const int MRU_MAX_ITEM_LEN = 128;
 
 const int QUICKFIND_HEIGHT = GraphicsMisc::ScaleByDPIFactor(200);
-const int QUICKFIND_VOFFSET = (GraphicsMisc::WantDPIScaling() ? (GraphicsMisc::ScaleByDPIFactor(2) - 1) : 0);
+const int QUICKFIND_VOFFSET = (GraphicsMisc::ScaleByDPIFactor(1) - 1);
 
 #ifdef _DEBUG
 const UINT ONE_MINUTE = 10000;
@@ -210,7 +210,6 @@ CToDoListWnd::CToDoListWnd()
 	CFilteredToDoCtrl::EnableExtendedSelection(FALSE, TRUE);
 
 	m_bAutoMenuEnable = FALSE;
-	m_cbQuickFind.SetMinDLUHeight(8);
 	m_nFlags |= WF_STAYACTIVE;
 }
 
@@ -886,6 +885,8 @@ void CToDoListWnd::InitUIFont()
 
 	if (m_fontMain.Attach(hFontUI))
 		CDialogHelper::SetFont(this, m_fontMain); // will update all child controls
+	else
+		GraphicsMisc::VerifyDeleteObject(hFontUI);
 }
 
 void CToDoListWnd::InitShortcutManager()
@@ -1303,7 +1304,7 @@ BOOL CToDoListWnd::InitMainToolbar()
 	}
 	
 	// resize the toolbar in one row so that our subsequent calculations work
-	m_toolbarMain.MoveWindow(0, 2, 1000, 32); 
+	m_toolbarMain.Resize(1000, CPoint(0, 2)); 
 	
 	// insert combobox for quick Find after Find Tasks button
 	int nPos = m_toolbarMain.CommandToIndex(ID_EDIT_FINDTASKS) + 1;
@@ -1316,8 +1317,8 @@ BOOL CToDoListWnd::InitMainToolbar()
 	
 	TBBUTTONINFO tbi;
 	tbi.cbSize = sizeof( TBBUTTONINFO );
-	tbi.cx = 150;
-	tbi.dwMask = TBIF_SIZE;  // By index
+	tbi.cx = (WORD)GraphicsMisc::ScaleByDPIFactor(150);
+	tbi.dwMask = TBIF_SIZE;
 	
 	m_toolbarMain.GetToolBarCtrl().SetButtonInfo(nPos + 1, &tbi);
 	
@@ -1328,7 +1329,7 @@ BOOL CToDoListWnd::InitMainToolbar()
 	rect.bottom += QUICKFIND_HEIGHT;
 	
 	if (!m_cbQuickFind.Create(WS_CHILD | WS_VSCROLL | WS_VISIBLE | CBS_AUTOHSCROLL | 
-		CBS_DROPDOWN, rect, &m_toolbarMain, IDC_QUICKFIND))
+		CBS_DROPDOWN | CBS_OWNERDRAWFIXED, rect, &m_toolbarMain, IDC_QUICKFIND))
 	{
 		return FALSE;
 	}
@@ -1339,7 +1340,6 @@ BOOL CToDoListWnd::InitMainToolbar()
 	if (CPreferences().GetProfileArray(_T("QuickFind"), aItems))
 		m_cbQuickFind.AddUniqueItems(aItems);
 
-	m_cbQuickFind.SetFont(&m_fontMain);
 	m_mgrPrompts.SetComboEditPrompt(m_cbQuickFind, IDS_QUICKFIND);
 	
 	m_tbHelperMain.Initialize(&m_toolbarMain, this, &m_mgrShortcuts);
@@ -6073,32 +6073,11 @@ void CToDoListWnd::OnSize(UINT nType, int cx, int cy)
 		return;
 	}
 	
-	// ensure m_cbQuickFind is positioned correctly
 	BOOL bVisible = ((m_bVisible > 0) && (nType != SIZE_MINIMIZED) && !m_bStartHidden);
 
 	if (bVisible && m_toolbarMain.GetSafeHwnd())
 	{
 		TRACE(_T("CToDoListWnd::OnSize(%d, %d)\n"), cx, cy);
-
-		int nPos = m_toolbarMain.CommandToIndex(ID_EDIT_FINDTASKS) + 2;
-
-		CRect rNewPos;
-		m_toolbarMain.GetItemRect(nPos, rNewPos);
-		m_toolbarMain.ClientToScreen(rNewPos);
-
-		// check if it needs to be moved
-		CRect rPrevPos;
-		m_cbQuickFind.CWnd::GetWindowRect(rPrevPos);
-
-		if (rNewPos.TopLeft() != rPrevPos.TopLeft())
-		{
-			m_toolbarMain.ScreenToClient(rNewPos);
-
-			rNewPos.top += QUICKFIND_VOFFSET;
-			rNewPos.bottom = rNewPos.top + QUICKFIND_HEIGHT;
-
-			m_cbQuickFind.MoveWindow(rNewPos);
-		}
 
 		Resize(cx, cy, (nType == SIZE_MAXIMIZED));
 		
@@ -6218,6 +6197,27 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 	// toolbar
 	if (m_bShowMainToolbar) // showing toolbar
 		rTaskList.top += m_toolbarMain.Resize(cx);
+
+	// ensure m_cbQuickFind is positioned correctly
+	int nPos = m_toolbarMain.CommandToIndex(ID_EDIT_FINDTASKS) + 2;
+	
+	CRect rNewPos;
+	m_toolbarMain.GetItemRect(nPos, rNewPos);
+	m_toolbarMain.ClientToScreen(rNewPos);
+	
+	// check if it needs to be moved
+	CRect rPrevPos;
+	m_cbQuickFind.CWnd::GetWindowRect(rPrevPos);
+	
+	if (rNewPos.TopLeft() != rPrevPos.TopLeft())
+	{
+		m_toolbarMain.ScreenToClient(rNewPos);
+		
+		rNewPos.top += QUICKFIND_VOFFSET;
+		rNewPos.bottom = rNewPos.top + QUICKFIND_HEIGHT;
+		
+		m_cbQuickFind.MoveWindow(rNewPos);
+	}
 
 	// Attempt to put the custom toolbar on the same line
 	if (m_toolbarCustom.GetSafeHwnd() && m_bShowCustomToolbar)

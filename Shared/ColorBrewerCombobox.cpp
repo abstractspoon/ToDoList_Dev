@@ -21,8 +21,6 @@ CColorBrewerComboBox::CColorBrewerComboBox(DWORD dwBrewerFlags, UINT nIDNoneStri
 	: 
 	m_brewer(dwBrewerFlags)
 {
-	SetMinDLUHeight(9);
-
 	if (nIDNoneString)
 		m_sNone.LoadString(nIDNoneString);
 }
