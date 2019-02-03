@@ -939,8 +939,6 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 			break;
 		}
 
-		int nCtrlWidth = dlu.ToPixelsX(CTRLLEN + CTRLHSPACING);
-	
 		if (nAvailHeight > 0)
 		{
 			int nCtrlHeightDLU = (CTRLHEIGHT + LABELHEIGHT + CTRLVSPACING);
