@@ -25,8 +25,7 @@ public:
 
    IContentControl* CreateCtrl(unsigned short nCtrlID, unsigned long nStyle, 
       long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
-
-
+   
    // returns the length of the html or zero if not supported
    int ConvertToHtml(const unsigned char* pContent, int nLength,
       LPCWSTR szCharSet, LPWSTR& szHtml, LPCWSTR szImageDir);
