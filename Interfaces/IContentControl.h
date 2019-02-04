@@ -18,7 +18,9 @@
 #	define DLL_DECLSPEC __declspec(dllimport)
 #endif 
 
-#define ICONTENTCTRL_VERSION 0x0003
+//////////////////////////////////////////////////////////////////////
+
+const UINT ICONTENTCTRL_VERSION = 3;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -78,23 +80,32 @@ static IContent* CreateContentInterface(LPCWSTR szDllPath, int* pVer = 0)
 		{
 			try
 			{
-				// check version
-				PFNGETVERSION pVersion = (PFNGETVERSION)GetProcAddress(hDll, "GetInterfaceVersion");
-				int nInterfaceVer = ICONTENTCTRL_VERSION;
-
-				// pass version back to caller
-				if (pVer)
-					*pVer = pVersion ? pVersion() : 0;
-
-				if (!nInterfaceVer || (pVersion && pVersion() >= nInterfaceVer))
+				if (ICONTENTCTRL_VERSION == 0)
+				{
 					pInterface = pCreate();
+				}
+				else
+				{
+					// check version
+					PFNGETVERSION pVersion = (PFNGETVERSION)GetProcAddress(hDll, "GetInterfaceVersion");
+
+					if (pVersion != NULL)
+					{
+						// pass version back to caller
+						if (pVer)
+							*pVer = pVersion();
+
+						if (pVersion() == ICONTENTCTRL_VERSION)
+							pInterface = pCreate();
+					}
+				}
 			}
 			catch (...)
 			{
 			}
 		}
 
-		if (hDll && !pInterface)
+		if (!pInterface)
 			FreeLibrary(hDll);
     }
 	
@@ -108,7 +119,10 @@ static BOOL IsContentDll(LPCWSTR szDllPath)
     if (hDll)
     {
 		PFNCREATECONTENT pCreate = (PFNCREATECONTENT)GetProcAddress(hDll, "CreateContentInterface");
-		FreeLibrary(hDll);
+
+		// Only free the library if we're NOT just about to reload it
+		if (pCreate == NULL)
+			FreeLibrary(hDll);
 
 		return (pCreate != NULL);
 	}

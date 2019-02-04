@@ -27,7 +27,9 @@
 #	define DLL_DECLSPEC __declspec(dllimport)
 #endif 
 
-#define ISPELLCHECK_VERSION 0x0000
+/////////////////////////////////////////////////////////////////////////////////
+
+const UINT ISPELLCHECK_VERSION = 0;
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -61,7 +63,7 @@ static ISpellChecker* CreateSpellCheckerInterface(LPCWSTR szDllPath, LPCWSTR szA
 		{
 			try
 			{
-				if (!ISPELLCHECK_VERSION)
+				if (ISPELLCHECK_VERSION == 0)
 				{
 					pInterface = pCreate(szAffPath, szDicPath);
 				}
@@ -70,7 +72,7 @@ static ISpellChecker* CreateSpellCheckerInterface(LPCWSTR szDllPath, LPCWSTR szA
 					// check version
 					PFNGETVERSION pVersion = (PFNGETVERSION)GetProcAddress(hDll, "GetInterfaceVersion");
 					
-					if (pVersion && pVersion() >= ISPELLCHECK_VERSION)
+					if ((pVersion != NULL) && (pVersion() == ISPELLCHECK_VERSION))
 						pInterface = pCreate(szAffPath, szDicPath);
 				}
 			}
@@ -80,6 +82,9 @@ static ISpellChecker* CreateSpellCheckerInterface(LPCWSTR szDllPath, LPCWSTR szA
 		}
     }
 	
+	if (pInterface == NULL)
+		FreeLibrary(hDll);
+
     return pInterface;
 }
 
@@ -90,7 +95,10 @@ static BOOL IsSpellCheckDll(LPCWSTR szDllPath)
     if (hDll)
     {
         PFNCREATE pCreate = (PFNCREATE)GetProcAddress(hDll, "CreateSpellCheckerInterface");
-		FreeLibrary(hDll);
+		
+		// Only free the library if we're NOT just about to reload it
+		if (pCreate == NULL)
+			FreeLibrary(hDll);
 
 		return (NULL != pCreate);
 	}

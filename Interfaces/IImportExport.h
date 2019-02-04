@@ -20,7 +20,9 @@
 #	define DLL_DECLSPEC __declspec(dllimport)
 #endif 
 
-const UINT IIMPORTEXPORT_VERSION = 3;
+//////////////////////////////////////////////////////////////////////
+
+const UINT IIMPORTEXPORT_VERSION = 4;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -60,7 +62,7 @@ static IImportTasklist* CreateImportInterface(LPCWSTR szDllPath)
 		{
 			try
 			{
-				if (!IIMPORTEXPORT_VERSION)
+				if (IIMPORTEXPORT_VERSION == 0)
 				{
 					pInterface = pCreate();
 				}
@@ -69,7 +71,7 @@ static IImportTasklist* CreateImportInterface(LPCWSTR szDllPath)
 					// check version
 					PFNGETVERSION pVersion = (PFNGETVERSION)GetProcAddress(hDll, "GetInterfaceVersion");
 
-					if (pVersion && pVersion() >= IIMPORTEXPORT_VERSION)
+					if ((pVersion != NULL) && (pVersion() == IIMPORTEXPORT_VERSION))
 						pInterface = pCreate();
 				}
 			}
@@ -78,7 +80,7 @@ static IImportTasklist* CreateImportInterface(LPCWSTR szDllPath)
 			}
 		}
 
-		if (hDll && !pInterface)
+		if (pInterface == NULL)
 			FreeLibrary(hDll);
     }
 	
@@ -98,7 +100,7 @@ static IExportTasklist* CreateExportInterface(LPCWSTR szDllPath)
 		{
 			try
 			{
-				if (!IIMPORTEXPORT_VERSION)
+				if (IIMPORTEXPORT_VERSION == 0)
 				{
 					pInterface = pCreate();
 				}
@@ -107,7 +109,7 @@ static IExportTasklist* CreateExportInterface(LPCWSTR szDllPath)
 					// check version
 					PFNGETVERSION pVersion = (PFNGETVERSION)GetProcAddress(hDll, "GetInterfaceVersion");
 
-					if (pVersion && pVersion() >= IIMPORTEXPORT_VERSION)
+					if ((pVersion != NULL) && (pVersion() == IIMPORTEXPORT_VERSION))
 						pInterface = pCreate();
 				}
 			}
@@ -116,7 +118,7 @@ static IExportTasklist* CreateExportInterface(LPCWSTR szDllPath)
 			}
 		}
 
-		if (hDll && !pInterface)
+		if (pInterface == NULL)
 			FreeLibrary(hDll);
     }
 	
@@ -132,12 +134,14 @@ static BOOL IsImportExportDll(LPCWSTR szDllPath)
         PFNCREATEEXPORT pCreateExp = NULL;
 		PFNCREATEIMPORT pCreateImp = (PFNCREATEIMPORT)GetProcAddress(hDll, "CreateImportInterface");
 
-		if (!pCreateImp)
+		if (pCreateImp == NULL)
 			pCreateExp = (PFNCREATEEXPORT)GetProcAddress(hDll, "CreateExportInterface");
 
-		FreeLibrary(hDll);
+		// Only free the library if we're NOT just about to reload it
+		if ((pCreateImp == NULL) && (pCreateExp == NULL))
+			FreeLibrary(hDll);
 
-		return (pCreateImp || pCreateExp);
+		return ((pCreateImp != NULL) || (pCreateExp != NULL));
 	}
 
 	return FALSE;

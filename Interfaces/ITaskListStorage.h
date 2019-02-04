@@ -22,7 +22,9 @@
 #	define DLL_DECLSPEC __declspec(dllimport)
 #endif 
 
-#define ITASKLISTSTORAGE_VERSION 0x0000
+//////////////////////////////////////////////////////////////////////
+
+const UINT ITASKLISTSTORAGE_VERSION = 0;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -66,7 +68,7 @@ static ITasklistStorage* CreateTasklistStorageInterface(LPCWSTR szDllPath)
 				{
 					PFNGETVERSION pVersion = (PFNGETVERSION)GetProcAddress(hDll, "GetInterfaceVersion");
 
-					if (pVersion && pVersion() >= ITASKLISTSTORAGE_VERSION)
+					if ((pVersion != NULL) && (pVersion() == ITASKLISTSTORAGE_VERSION))
 						pInterface = pCreate();
 				}
 			}
@@ -75,7 +77,7 @@ static ITasklistStorage* CreateTasklistStorageInterface(LPCWSTR szDllPath)
 			}
 		}
 
-		if (hDll && !pInterface)
+		if (pInterface == NULL)
 			FreeLibrary(hDll);
     }
 	
@@ -89,7 +91,10 @@ static BOOL IsTasklistStorageDll(LPCWSTR szDllPath)
     if (hDll)
     {
 		PFNCREATEHANDLER pCreate = (PFNCREATEHANDLER)GetProcAddress(hDll, "CreateTasklistStorageInterface");
-		FreeLibrary(hDll);
+
+		// Only free the library if we're NOT just about to reload it
+		if (pCreate == NULL)
+			FreeLibrary(hDll);
 
 		return (pCreate != NULL);
 	}

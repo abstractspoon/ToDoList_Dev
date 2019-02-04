@@ -24,8 +24,9 @@
 #	define DLL_DECLSPEC __declspec(dllimport)
 #endif 
 
-// Change this value when new interface methods get added
-#define IUIEXTENSION_VERSION 0x0002
+//////////////////////////////////////////////////////////////////////
+
+const UINT IUIEXTENSION_VERSION = 2;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -72,7 +73,7 @@ static IUIExtension* CreateUIExtensionInterface(LPCWSTR szDllPath)
 					// check version
 					PFNGETVERSION pVersion = (PFNGETVERSION)GetProcAddress(hDll, "GetInterfaceVersion");
 
-					if (pVersion && pVersion() >= IUIEXTENSION_VERSION)
+					if ((pVersion != NULL) && (pVersion() == IUIEXTENSION_VERSION))
 						pInterface = pCreate();
 				}
 			}
@@ -81,7 +82,7 @@ static IUIExtension* CreateUIExtensionInterface(LPCWSTR szDllPath)
 			}
 		}
 
-		if (hDll && !pInterface)
+		if (pInterface == NULL)
 			FreeLibrary(hDll);
     }
 	
@@ -94,10 +95,13 @@ static BOOL IsUIExtensionDll(LPCWSTR szDllPath)
 	
     if (hDll)
     {
-		PFNCREATEUIEXT pCreateImp = (PFNCREATEUIEXT)GetProcAddress(hDll, "CreateUIExtensionInterface");
-		FreeLibrary(hDll);
+		PFNCREATEUIEXT pCreate = (PFNCREATEUIEXT)GetProcAddress(hDll, "CreateUIExtensionInterface");
 
-		return (pCreateImp != NULL);
+		// Only free the library if we're NOT just about to reload it
+		if (pCreate == NULL)
+			FreeLibrary(hDll);
+
+		return (pCreate != NULL);
 	}
 
 	return FALSE;

@@ -24,7 +24,7 @@
 
 /////////////////////////////////////////////////////////////////////////////////
 
-#define IFILEHANDLER_VERSION 0x0000
+const UINT IFILEHANDLER_VERSION = 0;
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -55,24 +55,31 @@ static IFileHandler* CreateFileHandlerInterface(LPCWSTR szDllPath)
     {
         PFNCREATEHANDLER pCreate = (PFNCREATEHANDLER)GetProcAddress(hDll, "CreateFileHandlerInterface");
 		
-        if (pCreate)
+		if (pCreate)
 		{
-			// check version
-			PFNGETVERSION pVersion = (PFNGETVERSION)GetProcAddress(hDll, "GetInterfaceVersion");
-
-			if (!IIMPORTEXPORT_VERSION || (pVersion && pVersion() >= IFILEHANDLER_VERSION))
+			try
 			{
-				try
+				if (IIMPORTEXPORT_VERSION == 0)
 				{
 					pInterface = pCreate();
 				}
-				catch (...)
+				else
 				{
+					// check version
+					PFNGETVERSION pVersion = (PFNGETVERSION)GetProcAddress(hDll, "GetInterfaceVersion");
+
+					if ((pVersion != NULL) && (pVersion() == IFILEHANDLER_VERSION))
+					{
+						pInterface = pCreate();
+					}
 				}
+			}
+			catch (...)
+			{
 			}
 		}
 
-		if (hDll && !pInterface)
+		if (pInterface == NULL)
 			FreeLibrary(hDll);
     }
 	
@@ -86,7 +93,10 @@ static BOOL IsFileHandlerDll(LPCWSTR szDllPath)
     if (hDll)
     {
 		PFNCREATEHANDLER pCreate = (PFNCREATEHANDLER)GetProcAddress(hDll, "CreateFileHandlerInterface");
-		FreeLibrary(hDll);
+	
+		// Only free the library if we're NOT just about to reload it
+		if (pCreate == NULL)
+			FreeLibrary(hDll);
 
 		return (pCreate != NULL);
 	}

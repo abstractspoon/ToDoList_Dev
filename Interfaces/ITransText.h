@@ -20,7 +20,7 @@
 
 /////////////////////////////////////////////////////////////////////////////////
 
-const UINT ITRANSTEXT_VERSION = 0x0000;
+const UINT ITRANSTEXT_VERSION = 0;
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -74,7 +74,7 @@ static ITransText* CreateTransTextInterface(LPCWSTR szDllPath, LPCWSTR szTransFi
 					// check version
 					PFNGETVERSION pVersion = (PFNGETVERSION)GetProcAddress(hDll, "GetInterfaceVersion");
 
-					if ((pVersion && pVersion() >= ITRANSTEXT_VERSION))
+					if ((pVersion != NULL) && (pVersion() == ITRANSTEXT_VERSION))
 						pInterface = pCreate(szTransFile, nOption);
 				}
 			}
@@ -83,6 +83,9 @@ static ITransText* CreateTransTextInterface(LPCWSTR szDllPath, LPCWSTR szTransFi
 			}
 		}
     }
+
+	if (pInterface == NULL)
+		FreeLibrary(hDll);
 	
     return pInterface;
 }
@@ -94,7 +97,10 @@ static BOOL IsTransTextDll(LPCWSTR szDllPath)
     if (hDll)
     {
         PFNCREATETTI pCreate = (PFNCREATETTI)GetProcAddress(hDll, "CreateTransTextInterface");
-		FreeLibrary(hDll);
+	
+		// Only free the library if we're NOT just about to reload it
+		if (pCreate == NULL)
+			FreeLibrary(hDll);
 
 		return (NULL != pCreate);
 	}
