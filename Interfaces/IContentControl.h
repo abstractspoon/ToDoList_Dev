@@ -18,7 +18,7 @@
 #	define DLL_DECLSPEC __declspec(dllimport)
 #endif 
 
-#define ICONTENTCTRL_VERSION 0x0002
+#define ICONTENTCTRL_VERSION 0x0003
 
 //////////////////////////////////////////////////////////////////////
 
