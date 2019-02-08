@@ -140,6 +140,11 @@ BOOL CPreferencesShortcutsPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesShortcutsPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos)
 {
 	// delete the debug menu in release build

@@ -168,6 +168,11 @@ BOOL CPreferencesFile2Page::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesFile2Page::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 LRESULT CPreferencesFile2Page::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 {
 	switch (wParam)

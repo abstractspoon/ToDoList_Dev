@@ -63,6 +63,11 @@ BOOL CPreferencesUICustomToolbarPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesUICustomToolbarPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR /*szKey*/)
 {
 	// load tools

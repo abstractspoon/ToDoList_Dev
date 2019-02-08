@@ -120,6 +120,11 @@ BOOL CPreferencesUIPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesUIPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 void CPreferencesUIPage::OnStackEditFieldsAndComments() 
 {
 	UpdateData();

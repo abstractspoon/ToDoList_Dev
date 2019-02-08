@@ -143,6 +143,11 @@ BOOL CPreferencesTaskDefPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesTaskDefPage::::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 BOOL CPreferencesTaskDefPage::GetReminder(UINT& nMinutes, BOOL& bBeforeDue) const
 {
 	if (m_nDefReminderLeadin == TDLRPC_NOREMINDER)

@@ -98,6 +98,11 @@ BOOL CPreferencesFilePage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesFilePage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 void CPreferencesFilePage::OnRemovearchiveditems() 
 {
 	UpdateData();

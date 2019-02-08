@@ -62,6 +62,11 @@ BOOL CPreferencesUIVisibilityPage::OnInitDialog()
 	return TRUE;
 }
 
+void CPreferencesUIVisibilityPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 void CPreferencesUIVisibilityPage::GetColumnAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
 {
 	m_lcVisibility.GetVisibility(vis);

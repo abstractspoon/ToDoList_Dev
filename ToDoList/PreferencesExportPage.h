@@ -55,15 +55,17 @@ protected:
 // Overrides
 	// ClassWizard generate virtual function overrides
 	//{{AFX_VIRTUAL(CPreferencesExportPage)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	virtual void OnFirstShow();
 
 // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CPreferencesExportPage)
-	virtual BOOL OnInitDialog();
 	afx_msg void OnChangeTextIndentType();
 	afx_msg void OnExportspacefornotes();
 	//}}AFX_MSG

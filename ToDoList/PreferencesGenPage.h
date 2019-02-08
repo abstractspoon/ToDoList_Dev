@@ -102,16 +102,18 @@ public:
 // Overrides
 	// ClassWizard generate virtual function overrides
 	//{{AFX_VIRTUAL(CPreferencesGenPage)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	virtual void OnFirstShow();
 
 // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CPreferencesGenPage)
 	afx_msg void OnUseSystray();
-	virtual BOOL OnInitDialog();
 	afx_msg void OnSpecifyglobalhotkey();
 	afx_msg void OnMultiinstance();
 	afx_msg void OnClearMRU();

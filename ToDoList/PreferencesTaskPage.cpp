@@ -105,6 +105,11 @@ BOOL CPreferencesTaskPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesTaskPage::::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 double CPreferencesTaskPage::GetHoursInOneDay() const
 {
 	double dHours = Misc::Atof(m_sHoursInDay);

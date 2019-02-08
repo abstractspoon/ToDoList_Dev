@@ -167,6 +167,11 @@ BOOL CPreferencesGenPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesGenPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 void CPreferencesGenPage::OnUseSystray() 
 {
 	UpdateData();

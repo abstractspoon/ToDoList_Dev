@@ -41,10 +41,12 @@ protected:
 	// ClassWizard generate virtual function overrides
 	//{{AFX_VIRTUAL(CPreferencesToolbarPage)
 	//}}AFX_VIRTUAL
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+protected:
 	virtual void OnOK();
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
+	virtual void OnFirstShow();
 
 // Implementation
 protected:

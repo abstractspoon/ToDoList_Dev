@@ -48,6 +48,7 @@ protected:
 
 protected:
 	virtual BOOL OnInitDialog();
+   virtual void OnFirstShow();
 	
 protected:
 	afx_msg void OnControlChange(UINT nID = -1);

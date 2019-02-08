@@ -124,6 +124,11 @@ BOOL CPreferencesTaskDef2Page::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesPageBase::::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 void CPreferencesTaskDef2Page::OnOK() 
 {
 	CPreferencesPageBase::OnOK();

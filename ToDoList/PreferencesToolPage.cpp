@@ -146,6 +146,11 @@ BOOL CPreferencesToolPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesToolPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 int CPreferencesToolPage::AddListTool(const USERTOOL& tool, int nPos, BOOL bRebuildImages)
 {
 	// special case

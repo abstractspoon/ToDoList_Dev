@@ -61,11 +61,13 @@ protected:
 // Overrides
 	// ClassWizard generate virtual function overrides
 	//{{AFX_VIRTUAL(CPreferencesToolPage)
-	public:
-	virtual void OnOK();
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
+
+protected:
+	virtual void OnOK();
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	virtual void OnFirstShow();
 
 // Implementation
 protected:
@@ -88,7 +90,6 @@ protected:
 
 	afx_msg void OnEndlabeleditToollist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemchangedToollist(NMHDR* pNMHDR, LRESULT* pResult);
-	virtual BOOL OnInitDialog();
 	afx_msg void OnChangeToolpath();
 	afx_msg void OnKeydownToollist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnChangeCmdline();

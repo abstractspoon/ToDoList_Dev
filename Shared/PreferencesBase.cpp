@@ -87,12 +87,16 @@ void CPreferencesPageBase::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CPropertyPage::OnShowWindow(bShow, nStatus);
 
-	// resize controls to fit text
-	if (m_bFirstShow)
-	{
-		m_bFirstShow = FALSE;
-		ResizeButtonStaticTextFieldsToFit(this);
-	}
+   if (m_bFirstShow)
+   {
+      m_bFirstShow = FALSE;
+      OnFirstShow();
+   }
+}
+
+void CPreferencesPageBase::OnFirstShow()
+{
+   ResizeButtonStaticTextFieldsToFit(this);
 }
 
 HBRUSH CPreferencesPageBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)

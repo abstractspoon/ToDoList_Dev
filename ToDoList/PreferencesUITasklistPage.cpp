@@ -104,6 +104,11 @@ BOOL CPreferencesUITasklistPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesUITasklistPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 int CPreferencesUITasklistPage::GetMaxInfoTipCommentsLength() const
 {
 	if (m_bShowInfoTips)

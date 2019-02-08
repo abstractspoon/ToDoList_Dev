@@ -99,6 +99,11 @@ BOOL CPreferencesMultiUserPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesMultiUserPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 int CPreferencesMultiUserPage::GetReadonlyReloadOption() const
 { 
 	if (!m_bPromptReloadOnWritable)

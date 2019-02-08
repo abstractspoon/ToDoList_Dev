@@ -116,6 +116,11 @@ void CPreferencesTaskCalcPage::OnAveragepercentChange()
 	CPreferencesPageBase::OnControlChange();
 }
 
+void CPreferencesTaskCalcPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 void CPreferencesTaskCalcPage::OnUsehighestpriority() 
 {
 	UpdateData();

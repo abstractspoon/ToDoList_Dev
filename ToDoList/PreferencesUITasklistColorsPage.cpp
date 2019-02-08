@@ -307,6 +307,11 @@ BOOL CPreferencesUITasklistColorsPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesUITasklistColorsPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 void CPreferencesUITasklistColorsPage::OnLowprioritycolor() 
 {
 	m_crLow = m_btLowColor.GetColor();

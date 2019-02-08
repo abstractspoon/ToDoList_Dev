@@ -92,9 +92,12 @@ protected:
 // Overrides
 	// ClassWizard generate virtual function overrides
 	//{{AFX_VIRTUAL(CPreferencesUITasklistPage)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	virtual void OnFirstShow();
 
 // Implementation
 protected:
@@ -104,19 +107,15 @@ protected:
 	afx_msg void OnShowinfotips();
 	afx_msg void OnLimitinfotipcomments();
 	afx_msg void OnLimitcolwidths();
-	afx_msg void OnTreecheckboxes();
 	afx_msg void OnShowparentsasfolders();
-	afx_msg void OnTreetaskicons();
 	afx_msg void OnAppendTextToDateTimePaste();
 	//}}AFX_MSG
-	virtual BOOL OnInitDialog();
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
-	void SaveColumns() const;
 };
 
 //{{AFX_INSERT_LOCATION}}

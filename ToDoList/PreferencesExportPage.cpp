@@ -104,6 +104,11 @@ BOOL CPreferencesExportPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CPreferencesExportPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+}
+
 void CPreferencesExportPage::OnChangeTextIndentType() 
 {
 	UpdateData();
