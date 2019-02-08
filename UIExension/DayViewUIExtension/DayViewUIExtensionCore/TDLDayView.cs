@@ -17,26 +17,51 @@ namespace DayViewUIExtension
 
 		// --------------------
 
-		public DateTime OrgStartDate { get; set; }
-		public DateTime OrgEndDate { get; set; }
+		private DateTime m_OrgStartDate = NullDate;
+		private DateTime m_OrgEndDate = NullDate;
+		private DateTime m_PrevDueDate = NullDate;
 
-		private System.Drawing.Color taskTextColor;
+		private Color m_TaskTextColor = Color.Empty;
+
+		// --------------------
 
 		public Boolean HasTaskTextColor
 		{
-			get { return !taskTextColor.IsEmpty; }
+			get { return !m_TaskTextColor.IsEmpty; }
 		}
 
-		public System.Drawing.Color TaskTextColor
+		public Color TaskTextColor
 		{
 			get
 			{
-				if (taskTextColor.IsEmpty)
+				if (m_TaskTextColor.IsEmpty)
 					return base.TextColor;
 
-				return taskTextColor;
+				return m_TaskTextColor;
 			}
-			set { taskTextColor = value; }
+			set { m_TaskTextColor = value; }
+		}
+
+		public void UpdateOriginalDates()
+		{
+			m_OrgStartDate = StartDate;
+			m_OrgEndDate = EndDate;
+		}
+
+		public void RestoreOriginalDates()
+		{
+			StartDate = m_OrgStartDate;
+			EndDate = m_OrgEndDate;
+		}
+
+		public bool EndDateDiffersFromOriginal()
+		{
+			return ((EndDate - m_OrgEndDate).TotalSeconds != 0.0);
+		}
+
+		public bool StartDateDiffersFromOriginal()
+		{
+			return ((StartDate - m_OrgStartDate).TotalSeconds != 0.0);
 		}
 
 		public String AllocTo { get; set; }
@@ -84,10 +109,10 @@ namespace DayViewUIExtension
             get
             {
                 // Handle 'end of day'
-                if (IsEndOfDay(OrgEndDate))
-                    return (OrgEndDate.Date.AddDays(1) - OrgStartDate);
+                if (IsEndOfDay(m_OrgEndDate))
+                    return (m_OrgEndDate.Date.AddDays(1) - m_OrgStartDate);
 
-                return (OrgEndDate - OrgStartDate);
+                return (m_OrgEndDate - m_OrgStartDate);
             }
         }
 
@@ -138,8 +163,8 @@ namespace DayViewUIExtension
 
 		public override bool IsLongAppt()
 		{
-			return (base.IsLongAppt() || (OrgStartDate.Date != OrgEndDate.Date) ||
-					((OrgStartDate.TimeOfDay == TimeSpan.Zero) && IsEndOfDay(OrgEndDate)));
+			return (base.IsLongAppt() || (m_OrgStartDate.Date != m_OrgEndDate.Date) ||
+					((m_OrgStartDate.TimeOfDay == TimeSpan.Zero) && IsEndOfDay(m_OrgEndDate)));
 		}
 
 		public bool HasValidDates()
@@ -148,11 +173,97 @@ namespace DayViewUIExtension
 					(EndDate != NullDate) &&
 					(EndDate > StartDate));
 		}
+
+		public bool UpdateTaskAttributes(Task task,
+							   UIExtension.UpdateType type,
+							   System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
+		{
+			if (!task.IsValid())
+				return false;
+
+			UInt32 taskID = task.GetID();
+
+			if (attribs != null)
+			{
+				if (attribs.Contains(UIExtension.TaskAttribute.Title))
+					Title = task.GetTitle();
+
+				if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
+				{
+					m_PrevDueDate = task.GetDueDate(); // always
+
+					if (!IsDone)
+						EndDate = m_PrevDueDate;
+				}
+
+				if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
+				{
+					bool wasDone = IsDone;
+					IsDone = (task.IsDone() || task.IsGoodAsDone());
+
+					if (IsDone)
+					{
+						if (!wasDone)
+							m_PrevDueDate = EndDate;
+
+						EndDate = task.GetDoneDate();
+					}
+					else if (wasDone && !IsDone)
+					{
+						EndDate = m_PrevDueDate;
+					}
+				}
+
+				if (attribs.Contains(UIExtension.TaskAttribute.TimeEstimate))
+				{
+					Task.TimeUnits units = Task.TimeUnits.Unknown;
+					TimeEstimate = task.GetTimeEstimate(ref units);
+					TimeEstUnits = units;
+				}
+
+				if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
+					StartDate = task.GetStartDate();
+
+				if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
+					AllocTo = String.Join(", ", task.GetAllocatedTo());
+
+				if (attribs.Contains(UIExtension.TaskAttribute.Icon))
+					HasIcon = task.HasIcon();
+
+				TaskTextColor = task.GetTextDrawingColor();
+				IsLocked = task.IsLocked();
+			}
+			else
+			{
+				Title = task.GetTitle();
+				AllocTo = String.Join(", ", task.GetAllocatedTo());
+				HasIcon = task.HasIcon();
+				Id = taskID;
+				IsParent = task.IsParent();
+				TaskTextColor = task.GetTextDrawingColor();
+				DrawBorder = true;
+				IsLocked = task.IsLocked();
+
+				Task.TimeUnits units = Task.TimeUnits.Unknown;
+				TimeEstimate = task.GetTimeEstimate(ref units);
+				TimeEstUnits = units;
+
+				StartDate = task.GetStartDate();
+				IsDone = (task.IsDone() || task.IsGoodAsDone());
+
+				m_PrevDueDate = task.GetDueDate();
+				EndDate = (IsDone ? task.GetDoneDate() : m_PrevDueDate);
+			}
+
+			UpdateOriginalDates();
+
+			return true;
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////
-	
-    public class TDLDayView : Calendar.DayView
+
+	public class TDLDayView : Calendar.DayView
     {
         private UInt32 m_SelectedTaskID = 0;
 
@@ -536,59 +647,12 @@ namespace DayViewUIExtension
 
 			if (m_Items.TryGetValue(taskID, out item))
 			{
-				if (attribs.Contains(UIExtension.TaskAttribute.Title))
-					item.Title = task.GetTitle();
-
-				if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
-				{
-					item.EndDate = item.OrgEndDate = task.GetDoneDate();
-					item.IsDone = (task.IsDone() || task.IsGoodAsDone());
-				}
-
-				if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
-				{
-					DateTime dueDate = GetEditableDueDate(task.GetDueDate());
-					item.EndDate = item.OrgEndDate = dueDate;
-				}
-
-                if (attribs.Contains(UIExtension.TaskAttribute.TimeEstimate))
-                {
-                    Task.TimeUnits units = Task.TimeUnits.Unknown;
-                    item.TimeEstimate = task.GetTimeEstimate(ref units);
-                    item.TimeEstUnits = units;
-                }
-
-				if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
-					item.StartDate = item.OrgStartDate = task.GetStartDate();
-
-				if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
-					item.AllocTo = String.Join(", ", task.GetAllocatedTo());
-
-				if (attribs.Contains(UIExtension.TaskAttribute.Icon))
-					item.HasIcon = task.HasIcon();
-
-				item.TaskTextColor = task.GetTextDrawingColor();
-                item.IsLocked = task.IsLocked();
+				item.UpdateTaskAttributes(task, type, attribs);
 			}
 			else
 			{
 				item = new CalendarItem();
-
-				item.Title = task.GetTitle();
-				item.EndDate = item.OrgEndDate = GetEditableDueDate(task.GetDueDate());
-				item.StartDate = item.OrgStartDate = task.GetStartDate();
-				item.AllocTo = String.Join(", ", task.GetAllocatedTo());
-				item.HasIcon = task.HasIcon();
-				item.Id = taskID;
-				item.IsParent = task.IsParent();
-				item.TaskTextColor = task.GetTextDrawingColor();
-				item.DrawBorder = true;
-				item.IsDone = (task.IsDone() || task.IsGoodAsDone());
-                item.IsLocked = task.IsLocked();
-
-                Task.TimeUnits units = Task.TimeUnits.Unknown;
-                item.TimeEstimate = task.GetTimeEstimate(ref units);
-                item.TimeEstUnits = units;
+				item.UpdateTaskAttributes(task, type, null);
 			}
 
 			m_Items[taskID] = item;
@@ -600,19 +664,6 @@ namespace DayViewUIExtension
 				subtask = subtask.GetNextTask();
 
 			return true;
-		}
-
-		private DateTime GetEditableDueDate(DateTime dueDate)
-		{
-			// Whole days
-			if ((dueDate != DateTime.MinValue) && (dueDate.Date == dueDate))
-			{
-				// return end-of-day
-				return dueDate.AddDays(1).AddSeconds(-1);
-			}
-
-			// else
-			return dueDate;
 		}
 
 		public Boolean TaskColorIsBackground
