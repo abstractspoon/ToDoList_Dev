@@ -139,6 +139,7 @@ public:
 
 	void Redraw();
 	void RedrawItem(DWORD dwItem);
+	BOOL IsRedrawing() const { return m_bSetRedraw; }
 
 	void RecalcGutter(BOOL bForceRedraw = TRUE);
 	BOOL RecalcColumn(UINT nColID); // TRUE if the gutter changed width

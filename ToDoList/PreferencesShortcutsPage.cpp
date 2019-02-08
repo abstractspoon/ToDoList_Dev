@@ -91,35 +91,33 @@ BOOL CPreferencesShortcutsPage::OnInitDialog()
 	if (m_pShortcutMgr)
 	{
 		m_tcCommands.SendMessage(WM_NULL);
+		m_tcCommands.SetRedraw(FALSE);
 
 		CWaitCursor cursor;
 		HTREEITEM htiFirst = NULL;
 
-		{
-			CHoldRedraw hr(m_tcCommands);
-			CEnMenu menu;
-			
-			if (menu.LoadMenu(IDR_MAINFRAME, NULL, TRUE, TRUE))
-			{
-				menu.TranslateDynamicMenuItems(ID_FILE_MRU_FILE1, ID_FILE_MRU_FILE16, _T("Recent Tasklist %d"));
-				menu.TranslateDynamicMenuItems(ID_WINDOW1, ID_WINDOW16, _T("Window %d"));
-				menu.TranslateDynamicMenuItems(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, _T("User Defined Tool %d"));
-				menu.TranslateDynamicMenuItems(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, _T("3rd Party Storage %d"));
-				menu.TranslateDynamicMenuItems(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, _T("3rd Party Storage %d"));
-				menu.TranslateDynamicMenuItems(ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16, _T("Task View Visibility %d"));
+		CEnMenu menu;
 
-				for (int nPos = 0; nPos < (int)menu.GetMenuItemCount(); nPos++)
-				{
-					HTREEITEM hti = AddMenuItem(NULL, &menu, nPos);
-					
-					if (!htiFirst)
-						htiFirst = hti;
-				}
+		if (menu.LoadMenu(IDR_MAINFRAME, NULL, TRUE, TRUE))
+		{
+			menu.TranslateDynamicMenuItems(ID_FILE_MRU_FILE1, ID_FILE_MRU_FILE16, _T("Recent Tasklist %d"));
+			menu.TranslateDynamicMenuItems(ID_WINDOW1, ID_WINDOW16, _T("Window %d"));
+			menu.TranslateDynamicMenuItems(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, _T("User Defined Tool %d"));
+			menu.TranslateDynamicMenuItems(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, _T("3rd Party Storage %d"));
+			menu.TranslateDynamicMenuItems(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, _T("3rd Party Storage %d"));
+			menu.TranslateDynamicMenuItems(ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16, _T("Task View Visibility %d"));
+
+			for (int nPos = 0; nPos < (int)menu.GetMenuItemCount(); nPos++)
+			{
+				HTREEITEM hti = AddMenuItem(NULL, &menu, nPos);
+
+				if (!htiFirst)
+					htiFirst = hti;
 			}
 		}
 		
-		m_tcCommands.TCH().ExpandAll();
-		m_tcCommands.RecalcGutter();
+		m_tcCommands.ExpandAll();
+		m_tcCommands.SetRedraw(TRUE);
 
 		if (m_bShowCommandIDs)
 			AddCommandIDsToTree(TVI_ROOT, TRUE);
@@ -138,11 +136,6 @@ BOOL CPreferencesShortcutsPage::OnInitDialog()
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPreferencesShortcutsPage::OnFirstShow()
-{
-	CPreferencesPageBase::OnFirstShow();
 }
 
 HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos)
@@ -189,7 +182,7 @@ HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMen
 				if (pSubMenu)
 				{
 					for (int nSubPos = 0; nSubPos < (int)pSubMenu->GetMenuItemCount(); nSubPos++)
-						m_tcCommands.Expand(AddMenuItem(hti, pSubMenu, nSubPos), TVE_EXPAND);
+						AddMenuItem(hti, pSubMenu, nSubPos);
 				}
 			}
 			else if (!IsMiscCommandID(nCmdID)) // fixes a bug where misc ids were being saved

@@ -526,6 +526,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ScopedTimer.cpp" />
     <ClCompile Include="ScrollingPropertyPageHost.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -824,6 +825,7 @@
     <ClInclude Include="RTLStyleMgr.h" />
     <ClInclude Include="RuntimeDlg.h" />
     <ClInclude Include="SaveFocus.h" />
+    <ClInclude Include="ScopedTimer.h" />
     <ClInclude Include="ScrollingPropertyPageHost.h" />
     <ClInclude Include="SendFileToEx.h" />
     <ClInclude Include="ServerDlg.h" />

@@ -1456,25 +1456,29 @@ void CToDoCtrlData::ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRI
 		{
 			// FALSE means do not apply if parent is blank
 			TDC_ATTRIBUTE nAttrib = m_mapParentAttribs.GetNext(pos);
-			ApplyLastChangeToSubtasks(dwTaskID, nAttrib, FALSE);
+			
+			if (!ApplyLastChangeToSubtasks(dwTaskID, nAttrib, FALSE))
+				return FALSE;
 		}
 	}
 	else if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib) &&
 			WantUpdateInheritedAttibute(TDCA_CUSTOMATTRIB))
 	{
-		ApplyLastChangeToSubtasks(dwTaskID, nAttrib);
+		return ApplyLastChangeToSubtasks(dwTaskID, nAttrib);
 	}
 	else if (WantUpdateInheritedAttibute(nAttrib))
 	{
-		ApplyLastChangeToSubtasks(dwTaskID, nAttrib);
+		return ApplyLastChangeToSubtasks(dwTaskID, nAttrib);
 	}
+
+	return TRUE; // not an error
 }
 
-void CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib)
+BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib)
 {
 	// Exclude references and undo operations
 	if (m_bUndoRedoing || IsTaskReference(dwTaskID))
-		return;
+		return TRUE; // not an error
 
 	// special case: 
 	if (nAttrib == TDCA_ALL)
@@ -1484,7 +1488,9 @@ void CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRI
 		while (pos)
 		{
 			TDC_ATTRIBUTE nAttrib = m_mapParentAttribs.GetNext(pos);
-			ApplyLastInheritedChangeFromParent(dwTaskID, nAttrib);
+
+			if (!ApplyLastInheritedChangeFromParent(dwTaskID, nAttrib))
+				return FALSE;
 		}
 	}
 	else if (WantUpdateInheritedAttibute(nAttrib))
@@ -1502,15 +1508,18 @@ void CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRI
 			if (!GetTask(dwParentID, pTDIParent, pTDSParent))
 			{
 				ASSERT(0);
-				return;
+				return FALSE;
 			}
 
 			int nPos = pTDSParent->GetSubTaskPosition(dwTaskID);
 			ASSERT(nPos != -1);
 
-			ApplyLastChangeToSubtask(pTDIParent, pTDSParent, nPos, nAttrib, FALSE);
+			if (!ApplyLastChangeToSubtask(pTDIParent, pTDSParent, nPos, nAttrib, FALSE))
+				return FALSE;
 		}
 	}
+
+	return TRUE;
 }
 
 BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
@@ -1523,6 +1532,8 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 
 		if (GetTask(dwTaskID, pTDI, pTDS))
 			return ApplyLastChangeToSubtasks(pTDI, pTDS, nAttrib, bIncludeBlank);
+		else
+			ASSERT(0);
 	}
 
 	// else
@@ -1565,7 +1576,7 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 
 	// Exclude references
 	if (IsTaskReference(dwSubtaskID))
-		return FALSE;
+		return TRUE; // not an error
 
 	TODOITEM* pTDIChild = NULL;
 	GET_TDI(dwSubtaskID, pTDIChild, FALSE);

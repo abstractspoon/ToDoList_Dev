@@ -8,6 +8,7 @@
 #include "..\shared\treectrlhelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
+#include "..\shared\autoflag.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -36,7 +37,8 @@ COrderedTreeCtrl::COrderedTreeCtrl(DWORD dwGutterStyles) :
 	m_bShowingPosColumn(TRUE), 
 	m_crGridlines(OTC_GRIDCOLOR),
 	m_crAltLines(CLR_NONE),
-	m_bWantInit(FALSE)
+	m_bWantInit(FALSE),
+	m_bExpandingAll(FALSE)
 {
 	AddGutterColumn(OTC_POSCOLUMNID, _T("Pos")); // for the pos string
 	
@@ -585,9 +587,19 @@ void COrderedTreeCtrl::PostNcDrawItem(CDC* pDC, DWORD /*dwItem*/, const CRect& r
 		pDC->FillSolidRect(rItem.left, rItem.bottom - 1, rItem.Width(), 1, m_crGridlines);
 }
 
+void COrderedTreeCtrl::ExpandAll()
+{
+	CAutoFlag af(m_bExpandingAll, TRUE);
+
+	TCH().ExpandAll();
+	m_gutter.RecalcGutter();
+
+}
+
 BOOL COrderedTreeCtrl::OnItemexpanding(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
-	SetRedraw(FALSE);
+	if (!m_bExpandingAll)
+		SetRedraw(FALSE);
 
 	*pResult = 0;
 	return FALSE;
@@ -595,8 +607,11 @@ BOOL COrderedTreeCtrl::OnItemexpanding(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 BOOL COrderedTreeCtrl::OnItemexpanded(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
-	m_gutter.RecalcGutter();
-	SetRedraw(TRUE);
+	if (!m_bExpandingAll)
+	{
+		m_gutter.RecalcGutter();
+		SetRedraw(TRUE);
+	}
 	
 	*pResult = 0;
 	return FALSE;

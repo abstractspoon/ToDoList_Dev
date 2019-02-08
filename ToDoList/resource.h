@@ -26,6 +26,7 @@
 #define IDS_TDLBC_LASTMODBY             75
 #define IDS_OA_DURATION                 76
 #define IDS_OA_ENDDATE                  77
+#define IDS_TDC_EDITPROMPT_UNKNOWNFORMAT 78
 #define IDD_ABOUTBOX                    100
 #define IDC_TODOLIST                    101
 #define IDC_TRAYICON                    102

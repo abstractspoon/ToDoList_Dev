@@ -66,6 +66,7 @@ public:
 	const CTreeCtrlHelper& TCH() const { return m_ht; }
 
 	CString FormatPosition(DWORD dwItem, DWORD dwParentItem, int nLevel = -1, int nPos = -1);
+	void ExpandAll();
 
 protected:
 	CNcGutter m_gutter;
@@ -74,6 +75,7 @@ protected:
 	BOOL m_bWantInit;
 	CTreeCtrlHelper m_ht;
 	CMapUIntToString m_mapTooltips;
+	BOOL m_bExpandingAll;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -388,7 +388,9 @@ void CTDLCsvImportExportDlg::UpdateMasterColumnMappingFromList()
 
 	for (int nRow = 0; nRow < nListRows; nRow++)
 	{
-		SetMasterColumnName(aListMapping[nRow].nTDCAttrib, aListMapping[nRow].sColumnName);
+		const TDCATTRIBUTEMAPPING& mapping = aListMapping[nRow];
+
+		SetMasterColumnName(mapping.nTDCAttrib, mapping.sColumnName);
 	}
 }
 
@@ -446,14 +448,14 @@ void CTDLCsvImportExportDlg::SetMasterColumnAttribute(LPCTSTR szColumn, TDC_ATTR
 void CTDLCsvImportExportDlg::SetMasterColumnName(TDC_ATTRIBUTE attrib, LPCTSTR szColumn)
 {
 	// prevent setting the master mapping to an empty name
-	if (!Misc::IsEmpty(szColumn))
+	if ((attrib != TDCA_NONE) && !Misc::IsEmpty(szColumn))
 	{
 		// check if the column name is already in use
 		int nNameCol = FindMasterColumn(szColumn);
 		int nAttribCol = FindMasterColumn(attrib);
 
 		// and clear if it is
-		if (nNameCol != -1 && nNameCol != nAttribCol)
+		if ((nNameCol != -1) && (nNameCol != nAttribCol))
 			m_aMasterColumnMapping[nNameCol].sColumnName.Empty();
 
 		// and set new name

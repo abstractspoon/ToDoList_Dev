@@ -5353,6 +5353,7 @@ BEGIN
     IDS_TDLBC_LASTMODBY     "Last Modified By"
     IDS_OA_DURATION         "Duration"
     IDS_OA_ENDDATE          "End Date"
+    IDS_TDC_EDITPROMPT_UNKNOWNFORMAT "<unknown format>"
 END
 
 STRINGTABLE DISCARDABLE 

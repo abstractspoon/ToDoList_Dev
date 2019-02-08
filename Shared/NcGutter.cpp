@@ -416,11 +416,11 @@ void CNcGutter::Redraw()
 
 void CNcGutter::RecalcGutter(BOOL bForceRedraw)
 {
-	int nCurWidth = GetGutterWidth();
-	int nNewWidth = RecalcGutterWidth();
-
 	if (IsHooked())
 	{
+		int nCurWidth = GetGutterWidth();
+		int nNewWidth = RecalcGutterWidth();
+
 		if ((nNewWidth != nCurWidth) || m_bFirstRecalc)
 		{
 			m_bFirstRecalc = FALSE;
