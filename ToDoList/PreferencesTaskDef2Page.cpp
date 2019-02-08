@@ -103,9 +103,9 @@ void CPreferencesTaskDef2Page::OnFirstShow()
 {
 	CPreferencesPageBase::OnFirstShow();
 	
-	m_mgrGroupLines.AddGroupLine(IDC_DEFGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_INHERITGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_DROPLISTGROUP, *this);
+	AddGroupLine(IDC_DEFGROUP);
+	AddGroupLine(IDC_INHERITGROUP);
+	AddGroupLine(IDC_DROPLISTGROUP);
 
 	GetDlgItem(IDC_INHERITATTRIBUTES)->EnableWindow(m_bInheritParentAttributes);
 	GetDlgItem(IDC_UPDATEINHERITATTRIB)->EnableWindow(m_bInheritParentAttributes);

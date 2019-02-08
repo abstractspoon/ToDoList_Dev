@@ -123,7 +123,7 @@ void CPreferencesTaskDefPage::OnFirstShow()
 {
 	CPreferencesPageBase::OnFirstShow();
 	
-	m_mgrGroupLines.AddGroupLine(IDC_DEFGROUP, *this);
+	AddGroupLine(IDC_DEFGROUP);
 
 	GetDlgItem(IDC_DEFREMINDERDATE)->EnableWindow(m_nDefReminderLeadin != TDLRPC_NOREMINDER);
 	GetDlgItem(IDC_USECREATIONTIMEFORDEFSTARTDATE)->EnableWindow(m_bUseCreationDateForDefStartDate);	

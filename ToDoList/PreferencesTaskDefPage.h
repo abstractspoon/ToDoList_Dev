@@ -23,7 +23,6 @@
 #include "..\shared\timeedit.h"
 #include "..\shared\wndPrompt.h"
 #include "..\shared\autocombobox.h"
-#include "..\shared\groupline.h"
 #include "..\shared\maskedit.h"
 #include "..\Shared\iconbutton.h"
 #include "..\Shared\binarydata.h"
@@ -82,7 +81,6 @@ protected:
 	BOOL	m_bUseCreationTimeForDefStartDate;
 	BOOL	m_bUseCreationDateForDefDueDate;
 	CWndPromptManager m_mgrPrompts;
-	CGroupLineManager m_mgrGroupLines;
 	CTDCImageList m_ilTaskIcons;
 	UINT m_nDefReminderLeadin;
 

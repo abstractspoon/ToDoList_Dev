@@ -8,7 +8,6 @@
 //
 
 #include "..\shared\timeedit.h"
-#include "..\shared\groupline.h"
 #include "..\shared\preferencesbase.h"
 
 enum PTCP_CALCTIMEREMAINING

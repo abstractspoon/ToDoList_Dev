@@ -7,7 +7,6 @@
 // PreferencesMultiUserPage.h : header file
 //
 
-#include "..\shared\groupline.h"
 #include "..\shared\preferencesbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -66,7 +65,6 @@ protected:
 	BOOL	m_bPromptReloadOnWritable;
 	BOOL	m_bPromptReloadOnTimestamp;
 	UINT    m_nCheckinNoEditTime;
-	CGroupLineManager m_mgrGroupLines;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

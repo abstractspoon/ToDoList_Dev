@@ -21,7 +21,6 @@
 #include "..\shared\timeedit.h"
 #include "..\shared\wndPrompt.h"
 #include "..\shared\autocombobox.h"
-#include "..\shared\groupline.h"
 #include "..\shared\maskedit.h"
 #include "..\Shared\checklistboxex.h"
 #include "..\Shared\iconbutton.h"
@@ -68,7 +67,6 @@ protected:
 	BOOL	m_bInheritParentAttributes;
 	int		m_nSelAttribUse;
 	CWndPromptManager m_mgrPrompts;
-	CGroupLineManager m_mgrGroupLines;
 
 	struct ATTRIBPREF
 	{

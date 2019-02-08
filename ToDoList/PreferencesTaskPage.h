@@ -7,7 +7,6 @@
 // PreferencesTaskPage.h : header file
 //
 
-#include "..\shared\groupline.h"
 #include "..\shared\preferencesbase.h"
 #include "..\shared\DayOfWeekchecklistbox.h"
 #include "..\shared\SoundEdit.h"
@@ -64,7 +63,6 @@ protected:
 	BOOL	m_bTrackHibernated;
 	BOOL	m_bEndTrackingOnReminder;
 
-	CGroupLineManager m_mgrGroupLines;
 	DWORD	m_dwWeekends;
 	CDayOfWeekCheckListBox m_lbWeekends;
 

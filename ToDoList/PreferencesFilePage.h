@@ -8,7 +8,6 @@
 //
 
 #include "..\shared\fileedit.h"
-#include "..\shared\groupline.h"
 #include "..\shared\preferencesbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -76,7 +75,6 @@ protected:
 	BOOL	m_bNotifyReadOnly;
 	BOOL	m_bRemoveArchivedTasks;
 	BOOL	m_bRemoveOnlyOnAbsoluteCompletion;
-	CGroupLineManager m_mgrGroupLines;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

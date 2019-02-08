@@ -100,8 +100,8 @@ void CPreferencesMultiUserPage::OnFirstShow()
 	GetDlgItem(IDC_READONLYRELOADOPTION)->EnableWindow(m_bPromptReloadOnWritable);
 	GetDlgItem(IDC_TIMESTAMPRELOADOPTION)->EnableWindow(m_bPromptReloadOnTimestamp);
 
-	m_mgrGroupLines.AddGroupLine(IDC_CHECKGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_SSCGROUP, *this);
+	AddGroupLine(IDC_CHECKGROUP);
+	AddGroupLine(IDC_SSCGROUP);
 }
 
 int CPreferencesMultiUserPage::GetReadonlyReloadOption() const

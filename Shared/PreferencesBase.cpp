@@ -99,6 +99,11 @@ void CPreferencesPageBase::OnFirstShow()
    ResizeButtonStaticTextFieldsToFit(this);
 }
 
+BOOL CPreferencesPageBase::AddGroupLine(UINT nIDStatic)
+{
+	return m_mgrGroupLines.AddGroupLine(nIDStatic, GetSafeHwnd());
+}
+
 HBRUSH CPreferencesPageBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);

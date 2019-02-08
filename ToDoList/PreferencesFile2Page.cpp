@@ -147,8 +147,8 @@ void CPreferencesFile2Page::OnFirstShow()
 {
 	CPreferencesPageBase::OnFirstShow();
 
-	m_mgrGroupLines.AddGroupLine(IDC_BACKUPGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_SAVEGROUP, *this);
+	AddGroupLine(IDC_BACKUPGROUP);
+	AddGroupLine(IDC_SAVEGROUP);
 	
 	GetDlgItem(IDC_BACKUPLOCATION)->EnableWindow(m_bBackupOnSave);
 	GetDlgItem(IDC_BACKUPLOCATIONLABEL)->EnableWindow(m_bBackupOnSave);

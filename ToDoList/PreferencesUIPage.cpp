@@ -101,12 +101,12 @@ void CPreferencesUIPage::OnFirstShow()
 {
 	CPreferencesPageBase::OnFirstShow();
 
-	m_mgrGroupLines.AddGroupLine(IDC_TOOLBARGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_SORTGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_TABBARGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_COMMENTSGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_FILTERGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_TASKVIEWSGROUP, *this);
+	AddGroupLine(IDC_TOOLBARGROUP);
+	AddGroupLine(IDC_SORTGROUP);
+	AddGroupLine(IDC_TABBARGROUP);
+	AddGroupLine(IDC_COMMENTSGROUP);
+	AddGroupLine(IDC_FILTERGROUP);
+	AddGroupLine(IDC_TASKVIEWSGROUP);
 
 	GetDlgItem(IDC_STACKCOMMENTSABOVEFIELDS)->EnableWindow(m_bStackEditFieldsAndComments);
 

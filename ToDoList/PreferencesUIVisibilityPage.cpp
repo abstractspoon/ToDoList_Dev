@@ -63,7 +63,7 @@ void CPreferencesUIVisibilityPage::OnFirstShow()
 {
 	CPreferencesPageBase::OnFirstShow();
 
-	m_groupLineList.Initialize(::GetDlgItem(*this, IDC_LISTLABEL));
+	AddGroupLine(IDC_LISTLABEL);
 	m_lcVisibility.SetCurSel(0, 0);
 }
 

@@ -10,7 +10,6 @@
 #include "TDLTaskViewListBox.h"
 #include "tdlthemecombobox.h"
 
-#include "..\shared\groupline.h"
 #include "..\shared\preferencesbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -123,7 +122,6 @@ protected:
 	PUIP_LOCATION	m_nCtrlsPos;
 
 	const CUIExtensionMgr* m_pMgrUIExt;
-	CGroupLineManager m_mgrGroupLines;
 	CTDLThemeComboBox m_cbThemes;
 
 // Overrides

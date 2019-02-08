@@ -97,8 +97,8 @@ void CPreferencesTaskPage::OnFirstShow()
 {
 	CPreferencesPageBase::OnFirstShow();
 
-	m_mgrGroupLines.AddGroupLine(IDC_TRACKGROUP, *this); 
-	m_mgrGroupLines.AddGroupLine(IDC_TIMEGROUP, *this); 
+	AddGroupLine(IDC_TRACKGROUP); 
+	AddGroupLine(IDC_TIMEGROUP); 
 
 	GetDlgItem(IDC_LOGTASKSEPARATELY)->EnableWindow(m_bLogTime);
 	GetDlgItem(IDC_NOTIFYTIMETRACKINGFREQUENCY)->EnableWindow(m_bTrackReminder);

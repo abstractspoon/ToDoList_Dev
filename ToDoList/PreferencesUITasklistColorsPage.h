@@ -13,7 +13,6 @@
 #include "..\shared\colorcombobox.h"
 #include "..\shared\autocombobox.h"
 #include "..\shared\preferencesbase.h"
-#include "..\shared\groupline.h"
 #include "..\shared\ColorBrewerCombobox.h"
 
 #include "..\3rdparty\fontcombobox.h"
@@ -128,7 +127,6 @@ protected:
 	COLORREF m_crAltLine;
 	COLORREF m_crDue, m_crDueToday;
 	COLORREF m_crStart, m_crStartToday;
-	CGroupLineManager m_mgrGroupLines;
 	COLORREF m_crFlagged;
 	COLORREF m_crReference;
 	TDC_ATTRIBUTE m_nColorAttribute;

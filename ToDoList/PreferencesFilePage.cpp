@@ -88,10 +88,10 @@ void CPreferencesFilePage::OnFirstShow()
 {
 	CPreferencesPageBase::OnFirstShow();
 
-	m_mgrGroupLines.AddGroupLine(IDC_LOADGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_ARCHIVEGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_SWITCHGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_DUEGROUP, *this);
+	AddGroupLine(IDC_LOADGROUP);
+	AddGroupLine(IDC_ARCHIVEGROUP);
+	AddGroupLine(IDC_SWITCHGROUP);
+	AddGroupLine(IDC_DUEGROUP);
 
 	GetDlgItem(IDC_REMOVEONLYONABSCOMPLETION)->EnableWindow(m_bRemoveArchivedTasks);
 	GetDlgItem(IDC_DONTREMOVEFLAGGED)->EnableWindow(m_bRemoveArchivedTasks);

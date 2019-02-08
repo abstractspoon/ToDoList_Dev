@@ -216,7 +216,7 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 {
 	CPreferencesPageBase::OnFirstShow();
 
-	m_mgrGroupLines.AddGroupLine(IDC_TASKCOLOURGROUP, *this);
+	AddGroupLine(IDC_TASKCOLOURGROUP);
 
 	GetDlgItem(IDC_GRADIENTPRIORITYCOLORS)->EnableWindow(m_bColorPriority);
 	GetDlgItem(IDC_INDIVIDUALPRIORITYCOLORS)->EnableWindow(m_bColorPriority);

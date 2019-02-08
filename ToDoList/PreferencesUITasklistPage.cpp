@@ -99,8 +99,8 @@ void CPreferencesUITasklistPage::OnFirstShow()
 {
 	CPreferencesPageBase::OnFirstShow();
 
-	m_mgrGroupLines.AddGroupLine(IDC_DATETIMEGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_OTHERGROUP, *this);
+	AddGroupLine(IDC_DATETIMEGROUP);
+	AddGroupLine(IDC_OTHERGROUP);
 
 	GetDlgItem(IDC_DISPLAYFIRSTCOMMENTLINE)->EnableWindow(m_bShowComments);
 	GetDlgItem(IDC_LIMITINFOTIPCOMMENTS)->EnableWindow(m_bShowInfoTips);

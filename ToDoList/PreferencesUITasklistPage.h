@@ -9,7 +9,6 @@
 
 #include "TDLColumnListBox.h"
 
-#include "..\shared\groupline.h"
 #include "..\shared\preferencesbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -87,7 +86,6 @@ protected:
 	BOOL	m_bHidePercentForDoneTasks;
 	BOOL	m_bAllowCheckboxAgainstTreeItem;
 	BOOL	m_bHidePaneSplitBar;
-	CGroupLineManager m_mgrGroupLines;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

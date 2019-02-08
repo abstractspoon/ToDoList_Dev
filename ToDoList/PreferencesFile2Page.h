@@ -10,7 +10,6 @@
 #include "TDLImportExportComboBox.h"
 
 #include "..\shared\fileedit.h"
-#include "..\shared\groupline.h"
 #include "..\shared\preferencesbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -59,7 +58,6 @@ protected:
 	BOOL	m_bAutoSaveOnRunTools;
 	int		m_nBackupFolderType;
 	//}}AFX_DATA
-	CGroupLineManager m_mgrGroupLines;
 
 	// saving	
 	CTDLImportExportComboBox m_cbOtherExporters;
