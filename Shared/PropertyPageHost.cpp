@@ -208,15 +208,40 @@ BOOL CPropertyPageHost::EnsurePageCreated(int nIndex)
 
 BOOL CPropertyPageHost::CreateAllPages()
 {
+	if (!PagesAreAllCreated())
+	{
+		int nPage = m_aPages.GetSize();
+
+		while (nPage--)
+		{
+			if (!EnsurePageCreated(nPage))
+				return FALSE;
+		}
+
+		UpdatePageSize(m_nSelIndex, TRUE);
+	}
+
+	return TRUE;
+}
+
+BOOL CPropertyPageHost::PagesAreAllCreated() const
+{
 	int nPage = m_aPages.GetSize();
 
 	while (nPage--)
 	{
-		if (!EnsurePageCreated(nPage))
-			return FALSE;
-	}
+		const CPropertyPage* pPage = GetPage(nPage);
 
-	UpdatePageSize(m_nSelIndex, TRUE);
+		if (!pPage)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+		else if (!pPage->GetSafeHwnd())
+		{
+			return FALSE;
+		}
+	}
 
 	return TRUE;
 }

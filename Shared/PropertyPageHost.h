@@ -75,6 +75,7 @@ public:
 	BOOL GetOrgPageSize(int nIndex, LPSIZE pSize) const;
 
 	BOOL CreateAllPages();
+	BOOL PagesAreAllCreated() const;
 
 	BOOL EnsurePageCreated(int nIndex);
 	BOOL EnsurePageCreated(const CPropertyPage* pPage);

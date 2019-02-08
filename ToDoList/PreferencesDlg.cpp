@@ -16,6 +16,7 @@
 #include "..\shared\themed.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\HookMgr.h"
+#include "..\shared\holdredraw.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -76,12 +77,10 @@ protected:
 		case WM_MBUTTONDOWN:
 			{
 				HWND hwndHit = CDialogHelper::GetWindowFromPoint(::GetParent(info.hwnd), info.pt);
-
 #ifdef _DEBUG
 				CString sMouseClass = CWinClasses::GetClass(info.hwnd);
 				CString sHitClass = CWinClasses::GetClass(hwndHit);
 #endif
-
 				if (CDialogHelper::IsChildOrSame(m_hwndNotify, hwndHit))
 				{
 					::SendMessage(m_hwndNotify, WM_COPY, ::GetDlgCtrlID(hwndHit), (LPARAM)hwndHit);
@@ -100,6 +99,7 @@ protected:
 // default priority colors
 const COLORREF PRIORITYLOWCOLOR = RGB(30, 225, 0);
 const COLORREF PRIORITYHIGHCOLOR = RGB(255, 0, 0);
+
 const UINT IDC_TOPOFPAGE = (UINT)-1; // pseudo control ID
 
 const TCHAR PATHDELIM = '>';
@@ -119,8 +119,11 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	m_pageUI(pMgrUIExt), 
 	m_pageTaskDef(pContentMgr), 
 	m_pageFile2(pExportMgr),
+	m_iconSearch(IDI_UPDATE_FILTER, 16),
 	m_bInitDlg(FALSE)
 {
+	m_eSearchText.AddButton(1, m_iconSearch, _T("Update Search"));
+
 	CPreferencesDlgBase::AddPage(&m_pageGen);
 	CPreferencesDlgBase::AddPage(&m_pageMultiUser);
 	CPreferencesDlgBase::AddPage(&m_pageFile);
@@ -158,7 +161,8 @@ void CPreferencesDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_PAGE_TITLE, m_sPageTitle);
 	DDX_Control(pDX, IDC_PAGE_TITLE, m_stPageTitle);
-	DDX_Control(pDX, IDC_CATEGORY_TITLE, m_stCategoryTitle);
+	DDX_Text(pDX, IDC_SEARCH, m_sSearchText);
+	DDX_Control(pDX, IDC_SEARCH, m_eSearchText);
 }
 
 BEGIN_MESSAGE_MAP(CPreferencesDlg, CPreferencesDlgBase)
@@ -168,6 +172,7 @@ BEGIN_MESSAGE_MAP(CPreferencesDlg, CPreferencesDlgBase)
 	//}}AFX_MSG_MAP
 	ON_WM_ERASEBKGND()
 	ON_WM_DESTROY()
+	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnUpdateSearch)
 	ON_REGISTERED_MESSAGE(WM_PTP_TESTTOOL, OnToolPageTestTool)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnGenPageClearMRU)
 	ON_REGISTERED_MESSAGE(WM_PGP_EDITLANGFILE, OnGenPageEditLangFile)
@@ -214,46 +219,9 @@ BOOL CPreferencesDlg::OnInitDialog()
 	m_tcPages.SetIndent(0);
 	CThemed::SetWindowTheme(&m_tcPages, _T("Explorer"));
 
-	// add pages to tree control
-	AddPage(&m_pageGen,					IDS_PREF_GEN);
-	AddPage(&m_pageMultiUser,			IDS_PREF_MULTIUSER);
-	AddPage(&m_pageMultiUser,			IDS_PREF_MULTIUSERFILE,			IDC_TOPOFPAGE);
-	AddPage(&m_pageMultiUser,			IDS_PREF_MULTIUSERSS,			IDC_SSCGROUP);
-	AddPage(&m_pageFile,				IDS_PREF_FILE,					IDC_TOPOFPAGE);
-	AddPage(&m_pageFile,				IDS_PREF_FILELOAD,				IDC_LOADGROUP);
-	AddPage(&m_pageFile,				IDS_PREF_FILEARCHIVE,			IDC_ARCHIVEGROUP);
-	AddPage(&m_pageFile,				IDS_PREF_FILESWITCH,			IDC_SWITCHGROUP);
-	AddPage(&m_pageFile,				IDS_PREF_FILENOTIFY,			IDC_DUEGROUP);
-	AddPage(&m_pageFile2,				IDS_PREF_FILEMORE,				IDC_TOPOFPAGE);
-	AddPage(&m_pageFile2,				IDS_PREF_FILEBACKUP,			IDC_BACKUPGROUP);
-	AddPage(&m_pageFile2,				IDS_PREF_FILESAVE,				IDC_SAVEGROUP);
-	AddPage(&m_pageUI,					IDS_PREF_UI,					IDC_TOPOFPAGE);
-	AddPage(&m_pageUI,					IDS_PREF_UIFILTERING,			IDC_FILTERGROUP);
-	AddPage(&m_pageUI,					IDS_PREF_UISORTING,				IDC_SORTGROUP);
-	AddPage(&m_pageUI,					IDS_PREF_UITOOLBAR,				IDC_TOOLBARGROUP);
-	AddPage(&m_pageUI,					IDS_PREF_UICOMMENTS,			IDC_COMMENTSGROUP);
-	AddPage(&m_pageUI,					IDS_PREF_UITABBAR,				IDC_TABBARGROUP);
-	AddPage(&m_pageUI,					IDS_PREF_TASKVIEWVISIBILITY,	IDC_TASKVIEWSGROUP);
-	AddPage(&m_pageUICustomToolbar,		IDS_PREF_TOOLBAR);
-	AddPage(&m_pageUIVisibility,		IDS_PREF_UIVISIBILITY);
-	AddPage(&m_pageUITasklist,			IDS_PREF_UITASK);
-	AddPage(&m_pageUITasklistColors,	IDS_PREF_UITASKCOLOR);
-	AddPage(&m_pageTask,				IDS_PREF_TASK,					IDC_TOPOFPAGE);
-	AddPage(&m_pageTask,				IDS_PREF_TIMETRACK,				IDC_TRACKGROUP);
-	AddPage(&m_pageTask,				IDS_PREF_TASKTIME,				IDC_TIMEGROUP);
-	AddPage(&m_pageTaskCalc,			IDS_PREF_TASKCALCS);
-	AddPage(&m_pageTaskDef,				IDS_PREF_TASKDEFATTRIB,			IDC_TOPOFPAGE);
-	AddPage(&m_pageTaskDef2,			IDS_PREF_TASKDEFINHERIT,		IDC_TOPOFPAGE);
-	AddPage(&m_pageTaskDef2,			IDS_PREF_TASKDEFLISTS,			IDC_DROPLISTGROUP);
-	AddPage(&m_pageExport,				IDS_PREF_EXPORT);
-	AddPage(&m_pageTools,				IDS_PREF_TOOLS);
-	AddPage(&m_pageShortcuts,			IDS_PREF_SHORTCUT); 
-	
-	SynchronizeTree();
-
 	GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
 
-	m_tcPages.SetFocus();
+	AddPagesToTree(FALSE); // all pages
 
 	return FALSE;  // return TRUE unless you set the focus to a control
 }
@@ -308,6 +276,7 @@ void CPreferencesDlg::SynchronizeTree()
 	{
 		m_tcPages.SelectItem(htiMap);
 		m_tcPages.EnsureVisible(htiMap);
+		m_tcPages.SetFocus();
 	}
 }
 
@@ -328,65 +297,135 @@ BOOL CPreferencesDlg::PreTranslateMessage(MSG* pMsg)
 	return CPreferencesDlgBase::PreTranslateMessage(pMsg);
 }
 
-void CPreferencesDlg::AddPage(CPreferencesPageBase* pPage, UINT nIDPath, UINT nIDSection)
+void CPreferencesDlg::AddPagesToTree(BOOL bDoSearch)
 {
-	CEnString sPath(nIDPath);
-	
-	if (FindPage(pPage) != -1) 
+	m_tcPages.DeleteAllItems();
+	m_mapHTIToSection.RemoveAll();
+	m_mapPP2HTI.RemoveAll();
+
+	AddPageToTree(&m_pageGen, IDS_PREF_GEN, IDC_TOPOFPAGE, bDoSearch);
+
+	if (AddPageToTree(&m_pageMultiUser, IDS_PREF_MULTIUSER, IDC_TOPOFPAGE, bDoSearch))
 	{
-		HTREEITEM htiParent = TVI_ROOT; // default
-		CString sParent(sPath);
-		
-		while (Misc::Split(sParent, sPath, PATHDELIM))
-		{
-			// see if parent already exists
-			HTREEITEM htiParentParent = htiParent;
-			htiParent = m_tcPages.GetChildItem(htiParentParent);
-			
-			while (htiParent)
-			{
-				if (sParent.CompareNoCase(m_tcPages.GetItemText(htiParent)) == 0)
-					break;
-				
-				htiParent = m_tcPages.GetNextItem(htiParent, TVGN_NEXT);
-			}
-			
-			if (!htiParent)
-			{
-				htiParent = m_tcPages.InsertItem(sParent, htiParentParent);
-				
-				// embolden root items
-				if (htiParentParent == TVI_ROOT)
-					m_tcPages.SetItemState(htiParent, TVIS_BOLD, TVIS_BOLD);
-			}
-
-			// next
-			sParent = sPath;
-		}
-		
-		HTREEITEM hti = m_tcPages.InsertItem(sPath, htiParent); // whatever's left
-		m_tcPages.EnsureVisible(hti);
-		
-		// embolden root items
-		if (htiParent == TVI_ROOT)
-			m_tcPages.SetItemState(hti, TVIS_BOLD, TVIS_BOLD);
-		
-		// map both ways
-		m_tcPages.SetItemData(hti, (DWORD)pPage);
-
-		// don't remap the page if already done
-		HTREEITEM htiMap = NULL;
-		
-		if (!m_mapPP2HTI.Lookup(pPage, htiMap))
-			m_mapPP2HTI[pPage] = hti;
-
-		// map the treeitem to its section if it has one
-		if (nIDSection)
-			m_mapHTIToSection[hti] = nIDSection;
-
-		// set page background to window back
-		pPage->SetBackgroundColor(GetSysColor(COLOR_WINDOW));
+		AddPageToTree(&m_pageMultiUser, IDS_PREF_MULTIUSERFILE, IDC_TOPOFPAGE, FALSE);
+		AddPageToTree(&m_pageMultiUser, IDS_PREF_MULTIUSERSS, IDC_SSCGROUP, FALSE);
 	}
+
+	if (AddPageToTree(&m_pageFile, IDS_PREF_FILE, IDC_TOPOFPAGE, bDoSearch))
+	{
+		AddPageToTree(&m_pageFile, IDS_PREF_FILELOAD, IDC_LOADGROUP, FALSE);
+		AddPageToTree(&m_pageFile, IDS_PREF_FILEARCHIVE, IDC_ARCHIVEGROUP, FALSE);
+		AddPageToTree(&m_pageFile, IDS_PREF_FILESWITCH, IDC_SWITCHGROUP, FALSE);
+		AddPageToTree(&m_pageFile, IDS_PREF_FILENOTIFY, IDC_DUEGROUP, FALSE);
+	}
+
+	if (AddPageToTree(&m_pageFile2, IDS_PREF_FILEMORE, IDC_TOPOFPAGE, bDoSearch))
+	{
+		AddPageToTree(&m_pageFile2, IDS_PREF_FILEBACKUP, IDC_BACKUPGROUP, FALSE);
+		AddPageToTree(&m_pageFile2, IDS_PREF_FILESAVE, IDC_SAVEGROUP, FALSE);
+	}
+
+	if (AddPageToTree(&m_pageUI, IDS_PREF_UI, IDC_TOPOFPAGE, bDoSearch))
+	{
+		AddPageToTree(&m_pageUI, IDS_PREF_UIFILTERING, IDC_FILTERGROUP, FALSE);
+		AddPageToTree(&m_pageUI, IDS_PREF_UISORTING, IDC_SORTGROUP, FALSE);
+		AddPageToTree(&m_pageUI, IDS_PREF_UITOOLBAR, IDC_TOOLBARGROUP, FALSE);
+		AddPageToTree(&m_pageUI, IDS_PREF_UICOMMENTS, IDC_COMMENTSGROUP, FALSE);
+		AddPageToTree(&m_pageUI, IDS_PREF_UITABBAR, IDC_TABBARGROUP, FALSE);
+		AddPageToTree(&m_pageUI, IDS_PREF_TASKVIEWVISIBILITY, IDC_TASKVIEWSGROUP, FALSE);
+	}
+
+	AddPageToTree(&m_pageUICustomToolbar, IDS_PREF_TOOLBAR, IDC_TOPOFPAGE, bDoSearch);
+	AddPageToTree(&m_pageUIVisibility, IDS_PREF_UIVISIBILITY, IDC_TOPOFPAGE, bDoSearch);
+	AddPageToTree(&m_pageUITasklist, IDS_PREF_UITASK, IDC_TOPOFPAGE, bDoSearch);
+	AddPageToTree(&m_pageUITasklistColors, IDS_PREF_UITASKCOLOR, IDC_TOPOFPAGE, bDoSearch);
+
+	if (AddPageToTree(&m_pageTask, IDS_PREF_TASK, IDC_TOPOFPAGE, bDoSearch))
+	{
+		AddPageToTree(&m_pageTask, IDS_PREF_TIMETRACK, IDC_TRACKGROUP, FALSE);
+		AddPageToTree(&m_pageTask, IDS_PREF_TASKTIME, IDC_TIMEGROUP, FALSE);
+	}
+
+	AddPageToTree(&m_pageTaskCalc, IDS_PREF_TASKCALCS, IDC_TOPOFPAGE, bDoSearch);
+	AddPageToTree(&m_pageTaskDef, IDS_PREF_TASKDEFATTRIB, IDC_TOPOFPAGE, bDoSearch);
+	
+	if (AddPageToTree(&m_pageTaskDef2, IDS_PREF_TASKDEFINHERIT, IDC_TOPOFPAGE, bDoSearch))
+		AddPageToTree(&m_pageTaskDef2, IDS_PREF_TASKDEFLISTS, IDC_DROPLISTGROUP, FALSE);
+
+	AddPageToTree(&m_pageExport, IDS_PREF_EXPORT, IDC_TOPOFPAGE, bDoSearch);
+	AddPageToTree(&m_pageTools, IDS_PREF_TOOLS, IDC_TOPOFPAGE, bDoSearch);
+	AddPageToTree(&m_pageShortcuts, IDS_PREF_SHORTCUT, IDC_TOPOFPAGE, bDoSearch);
+
+	SynchronizeTree();
+}
+
+BOOL CPreferencesDlg::AddPageToTree(CPreferencesPageBase* pPage, UINT nIDPath, UINT nIDSection, BOOL bDoSearch)
+{
+	if (FindPage(pPage) == -1) 
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (bDoSearch && !m_sSearchText.IsEmpty() && !pPage->ContainsControlText(m_sSearchText))
+		return FALSE;
+
+	// else
+	CEnString sPath(nIDPath);
+	HTREEITEM htiParent = TVI_ROOT; // default
+	CString sParent(sPath);
+
+	while (Misc::Split(sParent, sPath, PATHDELIM))
+	{
+		// see if parent already exists
+		HTREEITEM htiParentParent = htiParent;
+		htiParent = m_tcPages.GetChildItem(htiParentParent);
+
+		while (htiParent)
+		{
+			if (sParent.CompareNoCase(m_tcPages.GetItemText(htiParent)) == 0)
+				break;
+
+			htiParent = m_tcPages.GetNextItem(htiParent, TVGN_NEXT);
+		}
+
+		if (!htiParent)
+		{
+			htiParent = m_tcPages.InsertItem(sParent, htiParentParent);
+
+			// embolden root items
+			if (htiParentParent == TVI_ROOT)
+				m_tcPages.SetItemState(htiParent, TVIS_BOLD, TVIS_BOLD);
+		}
+
+		// next
+		sParent = sPath;
+	}
+
+	HTREEITEM hti = m_tcPages.InsertItem(sPath, htiParent); // whatever's left
+	m_tcPages.EnsureVisible(hti);
+
+	// embolden root items
+	if (htiParent == TVI_ROOT)
+		m_tcPages.SetItemState(hti, TVIS_BOLD, TVIS_BOLD);
+
+	// map both ways
+	m_tcPages.SetItemData(hti, (DWORD)pPage);
+
+	// don't remap the page if already done
+	HTREEITEM htiMap = NULL;
+
+	if (!m_mapPP2HTI.Lookup(pPage, htiMap))
+		m_mapPP2HTI[pPage] = hti;
+
+	// map the treeitem to its section if it has one
+	if (nIDSection)
+		m_mapHTIToSection[hti] = nIDSection;
+
+	// set page background to window back
+	pPage->SetBackgroundColor(GetSysColor(COLOR_WINDOW));
+
+	return TRUE;
 }
 
 void CPreferencesDlg::OnSelchangedPages(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
@@ -406,6 +445,8 @@ void CPreferencesDlg::OnSelchangedPages(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	
 	if (pPage && CPreferencesDlgBase::SetActivePage(pPage))
 	{
+		UpdateData(); // make sure search text is not overwritten
+
 		// move to the section
 		if (nIDSection == IDC_TOPOFPAGE) // pseudo control ID
 		{
@@ -585,7 +626,6 @@ void CPreferencesDlg::SetUITheme(const CUIThemeFile& theme)
 	m_sbGrip.SetBackgroundColor(theme.crAppBackLight);
 
 	SetTitleThemeColors(m_stPageTitle, theme);
-	SetTitleThemeColors(m_stCategoryTitle, theme);
 	
 	if (GetSafeHwnd())
 		Invalidate(TRUE);
@@ -671,3 +711,34 @@ FILTER_TITLE CPreferencesDlg::GetTitleFilterOption() const
 	return FT_FILTERONTITLEONLY;
 }
 
+LRESULT CPreferencesDlg::OnUpdateSearch(WPARAM wParam, LPARAM lParam)
+{
+	ASSERT(wParam == IDC_SEARCH);
+	ASSERT(lParam == 1);
+
+	UNREFERENCED_PARAMETER(wParam);
+	UNREFERENCED_PARAMETER(lParam);
+
+	if (!m_ppHost.PagesAreAllCreated())
+	{
+		CHoldRedraw hr2(m_ppHost);
+		CHoldRedraw hr3(m_stPageTitle);
+
+		CWaitCursor cursor;
+
+		VERIFY(m_ppHost.CreateAllPages());
+	}
+
+	CHoldRedraw hr(m_tcPages);
+
+	UpdateData();
+	AddPagesToTree(TRUE);
+
+	if (!m_tcPages.GetCount())
+		AddPagesToTree(FALSE); // add all pages
+
+	m_tcPages.SelectItem(m_tcPages.GetChildItem(NULL));
+	Resize();
+
+	return 0L;
+}

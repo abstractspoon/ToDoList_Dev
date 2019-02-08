@@ -74,15 +74,25 @@ CWnd* CPreferencesPageBase::GetDlgItem(UINT nID) const
 BOOL CPreferencesPageBase::ContainsControlText(LPCTSTR szText) const
 {
 	ASSERT_VALID(this);
+	
+	if (Misc::IsEmpty(szText))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	const CWnd* pChild = GetWindow(GW_CHILD);
+	int nChild = 0;
 
 	while (pChild)
 	{
-		if (Misc::Find(szText, GetCtrlText(pChild)) != -1)
+		CString sCtrlText = GetCtrlText(pChild);
+
+		if (Misc::Find(szText, sCtrlText, FALSE) != -1)
 			return TRUE;
 
 		pChild = pChild->GetNextWindow();
+		nChild++;
 	}
 
 	return FALSE;

@@ -29,6 +29,8 @@
 #include "..\shared\enstatic.h"
 #include "..\shared\winhelpbutton.h"
 #include "..\shared\SizeGrip.h"
+#include "..\shared\EnEdit.h"
+#include "..\shared\Icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -302,6 +304,7 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesDlg)
+	enum { IDD = IDD_PREFERENCES };
 	//}}AFX_DATA
 	CPreferencesGenPage m_pageGen;
 	CPreferencesFilePage m_pageFile;
@@ -321,9 +324,12 @@ protected:
 	CPreferencesMultiUserPage m_pageMultiUser;
 
 	CTreeCtrl m_tcPages;
-	CEnStatic m_stCategoryTitle, m_stPageTitle; 
+	CEnStatic m_stPageTitle; 
 	CSizeGrip m_sbGrip;
+	CEnEdit m_eSearchText;
+	CIcon m_iconSearch;
 
+	CString	m_sSearchText;
 	CString m_sPageTitle;
 	CUIThemeFile m_theme;
 	TDCAUTOLISTDATA m_autoListData;
@@ -349,6 +355,7 @@ protected:
 	afx_msg void OnSelchangedPages(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnApply();
 	//}}AFX_MSG
+	afx_msg LRESULT OnUpdateSearch(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToolPageTestTool(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGenPageClearMRU(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGenPageEditLangFile(WPARAM wp, LPARAM lp);
@@ -359,7 +366,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void AddPage(CPreferencesPageBase* pPage, UINT nIDPath, UINT nIDSection = 0);
+	void AddPagesToTree(BOOL bDoSearch);
+	BOOL AddPageToTree(CPreferencesPageBase* pPage, UINT nIDPath, UINT nIDSection, BOOL bDoSearch);
 	BOOL SetActivePage(int nPage); // override
 	CString GetItemPath(HTREEITEM hti) const;
 	void SynchronizeTree();

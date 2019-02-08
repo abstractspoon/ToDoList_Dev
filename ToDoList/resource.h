@@ -809,6 +809,7 @@
 #define IDC_RELOADICONS                 1519
 #define IDC_COMMENTLABEL                1520
 #define IDC_TDLEXTENSIONHANDLER         1521
+#define IDC_SEARCH                      1521
 #define IDC_TDLPROTOCOLHANDLER          1522
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
@@ -2229,7 +2230,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        313
 #define _APS_NEXT_COMMAND_VALUE         34618
-#define _APS_NEXT_CONTROL_VALUE         1521
+#define _APS_NEXT_CONTROL_VALUE         1522
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif
