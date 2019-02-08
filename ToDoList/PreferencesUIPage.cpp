@@ -92,6 +92,14 @@ END_MESSAGE_MAP()
 BOOL CPreferencesUIPage::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
+	
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPreferencesUIPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
 
 	m_mgrGroupLines.AddGroupLine(IDC_TOOLBARGROUP, *this);
 	m_mgrGroupLines.AddGroupLine(IDC_SORTGROUP, *this);
@@ -115,14 +123,6 @@ BOOL CPreferencesUIPage::OnInitDialog()
 	}
 	
 	m_lbTaskViews.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
-	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPreferencesUIPage::OnFirstShow()
-{
-	CPreferencesPageBase::OnFirstShow();
 }
 
 void CPreferencesUIPage::OnStackEditFieldsAndComments() 

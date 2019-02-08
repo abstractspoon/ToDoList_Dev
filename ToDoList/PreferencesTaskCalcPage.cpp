@@ -89,14 +89,19 @@ BOOL CPreferencesTaskCalcPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPreferencesTaskCalcPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+
 	GetDlgItem(IDC_INCLUDEDONEINAVERAGECALC)->EnableWindow(m_bAveragePercentSubCompletion);
 	GetDlgItem(IDC_WEIGHTPERCENTCALCBYNUMSUB)->EnableWindow(m_bAveragePercentSubCompletion);
 	GetDlgItem(IDC_INCLUDEDONEINPRIORITYCALC)->EnableWindow(m_bUseHighestPriority);
 
 	OnChangeCompletionStatus();
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CPreferencesTaskCalcPage::OnAveragepercentChange() 
@@ -114,11 +119,6 @@ void CPreferencesTaskCalcPage::OnAveragepercentChange()
 	}
 
 	CPreferencesPageBase::OnControlChange();
-}
-
-void CPreferencesTaskCalcPage::OnFirstShow()
-{
-	CPreferencesPageBase::OnFirstShow();
 }
 
 void CPreferencesTaskCalcPage::OnUsehighestpriority() 

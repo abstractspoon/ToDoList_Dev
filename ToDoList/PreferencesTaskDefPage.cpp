@@ -114,6 +114,14 @@ END_MESSAGE_MAP()
 BOOL CPreferencesTaskDefPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPreferencesTaskDefPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
 	
 	m_mgrGroupLines.AddGroupLine(IDC_DEFGROUP, *this);
 
@@ -138,14 +146,6 @@ BOOL CPreferencesTaskDefPage::OnInitDialog()
 
 	// Delay initialisation of comments until after any font changes
 	PostMessage(WM_PTDP_INITCOMMENTS);
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPreferencesTaskDefPage::::OnFirstShow()
-{
-	CPreferencesPageBase::OnFirstShow();
 }
 
 BOOL CPreferencesTaskDefPage::GetReminder(UINT& nMinutes, BOOL& bBeforeDue) const

@@ -104,6 +104,14 @@ END_MESSAGE_MAP()
 BOOL CPreferencesToolPage::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
+	
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPreferencesToolPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
 
 	VERIFY(InitializeToolbar());
 
@@ -141,14 +149,6 @@ BOOL CPreferencesToolPage::OnInitDialog()
 
 	EnableControls();
 	m_toolbar.RefreshButtonStates(FALSE);
-	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPreferencesToolPage::OnFirstShow()
-{
-	CPreferencesPageBase::OnFirstShow();
 }
 
 int CPreferencesToolPage::AddListTool(const USERTOOL& tool, int nPos, BOOL bRebuildImages)

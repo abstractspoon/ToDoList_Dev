@@ -108,7 +108,6 @@ protected:
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CPreferencesTaskDefPage)
-	virtual BOOL OnInitDialog();
 	afx_msg void OnSetdefaulticon();
 	afx_msg void OnSelchangeReminder();
 	afx_msg void OnUseCreationDateForDefStartDate();

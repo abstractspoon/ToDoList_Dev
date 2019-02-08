@@ -80,6 +80,14 @@ BOOL CPreferencesFilePage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPreferencesFilePage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+
 	m_mgrGroupLines.AddGroupLine(IDC_LOADGROUP, *this);
 	m_mgrGroupLines.AddGroupLine(IDC_ARCHIVEGROUP, *this);
 	m_mgrGroupLines.AddGroupLine(IDC_SWITCHGROUP, *this);
@@ -93,14 +101,6 @@ BOOL CPreferencesFilePage::OnInitDialog()
 	GetDlgItem(IDC_USESTYLESHEETFORDUEITEMS)->EnableWindow(m_bDisplayDueTasksInHtml);
 	GetDlgItem(IDC_DUETASKSTYLESHEET)->EnableWindow(m_bDisplayDueTasksInHtml && m_bUseStyleSheetForDueTasks);
 	GetDlgItem(IDC_DUETASKPERSON)->EnableWindow(m_bOnlyShowDueTasksForPerson);
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPreferencesFilePage::OnFirstShow()
-{
-	CPreferencesPageBase::OnFirstShow();
 }
 
 void CPreferencesFilePage::OnRemovearchiveditems() 

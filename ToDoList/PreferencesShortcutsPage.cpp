@@ -83,6 +83,14 @@ END_MESSAGE_MAP()
 BOOL CPreferencesShortcutsPage::OnInitDialog()  
 {
 	CPreferencesPageBase::OnInitDialog();
+	
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPreferencesShortcutsPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
 
 	// show the 'copy all' button
 	GetDlgItem(IDC_COPYALL)->ShowWindow(m_bShowCommandIDs ? SW_SHOW : SW_HIDE);
@@ -133,9 +141,6 @@ BOOL CPreferencesShortcutsPage::OnInitDialog()
 		// the hotkey control does a less than perfect job of respecting these
 		m_hkNew.SetRules(0, 0);
 	}
-	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos)

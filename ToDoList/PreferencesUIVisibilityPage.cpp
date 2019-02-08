@@ -56,15 +56,15 @@ BOOL CPreferencesUIVisibilityPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
-	m_groupLineList.Initialize(::GetDlgItem(*this, IDC_LISTLABEL));
-	m_lcVisibility.SetCurSel(0, 0);
-
 	return TRUE;
 }
 
 void CPreferencesUIVisibilityPage::OnFirstShow()
 {
 	CPreferencesPageBase::OnFirstShow();
+
+	m_groupLineList.Initialize(::GetDlgItem(*this, IDC_LISTLABEL));
+	m_lcVisibility.SetCurSel(0, 0);
 }
 
 void CPreferencesUIVisibilityPage::GetColumnAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const

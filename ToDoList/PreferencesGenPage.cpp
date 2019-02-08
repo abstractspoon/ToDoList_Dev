@@ -125,6 +125,14 @@ BOOL CPreferencesGenPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPreferencesGenPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+
 	m_sTDLExtensionHandler = CFileRegister::GetRegisteredAppPath(_T("tdl"));
 
 	if (m_sTDLExtensionHandler.IsEmpty())
@@ -162,14 +170,6 @@ BOOL CPreferencesGenPage::OnInitDialog()
 		GetDlgItem(IDC_EDIT_DISPLAYLANGUAGE)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_EDIT_DISPLAYLANGUAGE)->EnableWindow(FALSE);
 	}
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPreferencesGenPage::OnFirstShow()
-{
-	CPreferencesPageBase::OnFirstShow();
 }
 
 void CPreferencesGenPage::OnUseSystray() 

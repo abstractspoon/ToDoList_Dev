@@ -207,6 +207,14 @@ BOOL CPreferencesUITasklistColorsPage::OnInitDialog()
 	// disable translation of user-entered text
 	CLocalizer::EnableTranslation(m_cbAttributes, FALSE);
 	CLocalizer::EnableTranslation(m_cbTreeFonts, FALSE);
+	
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPreferencesUITasklistColorsPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
 
 	m_mgrGroupLines.AddGroupLine(IDC_TASKCOLOURGROUP, *this);
 
@@ -302,14 +310,6 @@ BOOL CPreferencesUITasklistColorsPage::OnInitDialog()
 		m_btAttribColor.SetColor(m_aAttribColors[nColor].color);
 
 	UpdateData(FALSE);
-	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPreferencesUITasklistColorsPage::OnFirstShow()
-{
-	CPreferencesPageBase::OnFirstShow();
 }
 
 void CPreferencesUITasklistColorsPage::OnLowprioritycolor() 

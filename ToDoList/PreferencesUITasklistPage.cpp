@@ -91,6 +91,14 @@ BOOL CPreferencesUITasklistPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPreferencesUITasklistPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
+
 	m_mgrGroupLines.AddGroupLine(IDC_DATETIMEGROUP, *this);
 	m_mgrGroupLines.AddGroupLine(IDC_OTHERGROUP, *this);
 
@@ -99,14 +107,6 @@ BOOL CPreferencesUITasklistPage::OnInitDialog()
 	GetDlgItem(IDC_INFOTIPCOMMENTSMAX)->EnableWindow(m_bShowInfoTips && m_bLimitInfoTipCommentsLength);
 	GetDlgItem(IDC_COLWIDTHS)->EnableWindow(m_bLimitColumnWidths);
 	GetDlgItem(IDC_DATETIMETRAILTEXT)->EnableWindow(m_bAppendTextToDateTimePaste);
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPreferencesUITasklistPage::OnFirstShow()
-{
-	CPreferencesPageBase::OnFirstShow();
 }
 
 int CPreferencesUITasklistPage::GetMaxInfoTipCommentsLength() const

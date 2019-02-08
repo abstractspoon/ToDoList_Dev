@@ -94,6 +94,14 @@ END_MESSAGE_MAP()
 BOOL CPreferencesTaskDef2Page::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPreferencesTaskDef2Page::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
 	
 	m_mgrGroupLines.AddGroupLine(IDC_DEFGROUP, *this);
 	m_mgrGroupLines.AddGroupLine(IDC_INHERITGROUP, *this);
@@ -112,21 +120,12 @@ BOOL CPreferencesTaskDef2Page::OnInitDialog()
 		m_lbInheritAttrib.SetCheck(nIndex, m_aAttribPrefs[nItem].bUse ? 1 : 0);
 	}
 
-	// init edit prompts()
 	m_mgrPrompts.SetEditPrompt(IDC_ALLOCTOLIST, *this, CEnString(IDS_PTDP_NAMEPROMPT));
 	m_mgrPrompts.SetEditPrompt(IDC_ALLOCBYLIST, *this, CEnString(IDS_PTDP_NAMEPROMPT));
 	m_mgrPrompts.SetEditPrompt(IDC_STATUSLIST, *this, CEnString(IDS_PTDP_STATUSPROMPT));
 	m_mgrPrompts.SetEditPrompt(IDC_CATEGORYLIST, *this, CEnString(IDS_PTDP_CATEGORYPROMPT));
  	m_mgrPrompts.SetEditPrompt(IDC_VERSIONLIST, *this, CEnString(IDS_PTDP_VERSIONPROMPT));
  	m_mgrPrompts.SetEditPrompt(IDC_TAGLIST, *this, CEnString(IDS_PTDP_TAGSPROMPT));
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPreferencesPageBase::::OnFirstShow()
-{
-	CPreferencesPageBase::OnFirstShow();
 }
 
 void CPreferencesTaskDef2Page::OnOK() 

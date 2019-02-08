@@ -88,13 +88,6 @@ BOOL CPreferencesMultiUserPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
-	GetDlgItem(IDC_NOCHANGETIME)->EnableWindow(m_bCheckinNoChange);
-	GetDlgItem(IDC_READONLYRELOADOPTION)->EnableWindow(m_bPromptReloadOnWritable);
-	GetDlgItem(IDC_TIMESTAMPRELOADOPTION)->EnableWindow(m_bPromptReloadOnTimestamp);
-
-	m_mgrGroupLines.AddGroupLine(IDC_CHECKGROUP, *this);
-	m_mgrGroupLines.AddGroupLine(IDC_SSCGROUP, *this);
-
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -102,6 +95,13 @@ BOOL CPreferencesMultiUserPage::OnInitDialog()
 void CPreferencesMultiUserPage::OnFirstShow()
 {
 	CPreferencesPageBase::OnFirstShow();
+
+	GetDlgItem(IDC_NOCHANGETIME)->EnableWindow(m_bCheckinNoChange);
+	GetDlgItem(IDC_READONLYRELOADOPTION)->EnableWindow(m_bPromptReloadOnWritable);
+	GetDlgItem(IDC_TIMESTAMPRELOADOPTION)->EnableWindow(m_bPromptReloadOnTimestamp);
+
+	m_mgrGroupLines.AddGroupLine(IDC_CHECKGROUP, *this);
+	m_mgrGroupLines.AddGroupLine(IDC_SSCGROUP, *this);
 }
 
 int CPreferencesMultiUserPage::GetReadonlyReloadOption() const

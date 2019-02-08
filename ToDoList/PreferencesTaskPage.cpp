@@ -88,6 +88,14 @@ END_MESSAGE_MAP()
 BOOL CPreferencesTaskPage::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
+	
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPreferencesTaskPage::OnFirstShow()
+{
+	CPreferencesPageBase::OnFirstShow();
 
 	m_mgrGroupLines.AddGroupLine(IDC_TRACKGROUP, *this); 
 	m_mgrGroupLines.AddGroupLine(IDC_TIMEGROUP, *this); 
@@ -100,14 +108,6 @@ BOOL CPreferencesTaskPage::OnInitDialog()
 	CDialogHelper::RefreshMaxColumnWidth(m_lbWeekends);
 
 	UpdateData(FALSE);
-	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPreferencesTaskPage::::OnFirstShow()
-{
-	CPreferencesPageBase::OnFirstShow();
 }
 
 double CPreferencesTaskPage::GetHoursInOneDay() const

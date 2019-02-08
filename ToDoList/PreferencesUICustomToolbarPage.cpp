@@ -56,8 +56,6 @@ END_MESSAGE_MAP()
 BOOL CPreferencesUICustomToolbarPage::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
-	
-	EnableDisableButtons();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -66,6 +64,8 @@ BOOL CPreferencesUICustomToolbarPage::OnInitDialog()
 void CPreferencesUICustomToolbarPage::OnFirstShow()
 {
 	CPreferencesPageBase::OnFirstShow();
+	
+	EnableDisableButtons();
 }
 
 void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR /*szKey*/)
