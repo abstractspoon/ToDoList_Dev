@@ -5,6 +5,7 @@
 #include "PreferencesBase.h"
 #include "graphicsmisc.h"
 #include "deferwndmove.h"
+#include "misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -68,6 +69,48 @@ CWnd* CPreferencesPageBase::GetDlgItem(UINT nID) const
 	// else
 	wnd.m_hWnd = NULL;
 	return &wnd;
+}
+
+BOOL CPreferencesPageBase::ContainsControlText(LPCTSTR szText) const
+{
+	ASSERT_VALID(this);
+
+	const CWnd* pChild = GetWindow(GW_CHILD);
+
+	while (pChild)
+	{
+		if (Misc::Find(szText, GetCtrlText(pChild)) != -1)
+			return TRUE;
+
+		pChild = pChild->GetNextWindow();
+	}
+
+	return FALSE;
+}
+
+BOOL CPreferencesPageBase::ContainsControlText(const CStringArray& aText, BOOL bFindOneOf) const
+{
+	if (aText.GetSize() == 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	for (int nItem = 0; nItem < aText.GetSize(); nItem++)
+	{
+		if (ContainsControlText(aText[nItem]))
+		{
+			if (bFindOneOf)
+				return TRUE;
+		}
+		else
+		{
+			if (!bFindOneOf)
+				return FALSE;
+		}
+	}
+
+	return FALSE;
 }
 
 BOOL CPreferencesPageBase::OnEraseBkgnd(CDC* pDC)
