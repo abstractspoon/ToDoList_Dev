@@ -161,6 +161,7 @@
 #define IDI_ADD_LOGGED_TIME             308
 #define IDB_OUTLOOKTYPES                309
 #define IDR_FINDTASKS                   310
+#define IDI_SEARCH_PREFS                313
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -2222,13 +2223,14 @@
 #define IDS_TABTIP_TIMETRACKING         58487
 #define IDS_REPLACEINTASKCOMMENTS       58488
 #define IDS_FINDINTASKCOMMENTS          58489
+#define IDS_SEARCHPREFS_PROMPT          58490
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        313
+#define _APS_NEXT_RESOURCE_VALUE        314
 #define _APS_NEXT_COMMAND_VALUE         34618
 #define _APS_NEXT_CONTROL_VALUE         1522
 #define _APS_NEXT_SYMED_VALUE           108

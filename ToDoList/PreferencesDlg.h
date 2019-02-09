@@ -328,6 +328,7 @@ protected:
 	CSizeGrip m_sbGrip;
 	CEnEdit m_eSearchText;
 	CIcon m_iconSearch;
+	CWndPromptManager m_mgrPrompts;
 
 	CString	m_sSearchText;
 	CString m_sPageTitle;

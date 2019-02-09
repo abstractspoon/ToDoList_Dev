@@ -71,7 +71,7 @@ CWnd* CPreferencesPageBase::GetDlgItem(UINT nID) const
 	return &wnd;
 }
 
-BOOL CPreferencesPageBase::ContainsControlText(LPCTSTR szText) const
+BOOL CPreferencesPageBase::ContainsUIText(LPCTSTR szText) const
 {
 	ASSERT_VALID(this);
 	
@@ -98,7 +98,7 @@ BOOL CPreferencesPageBase::ContainsControlText(LPCTSTR szText) const
 	return FALSE;
 }
 
-BOOL CPreferencesPageBase::ContainsControlText(const CStringArray& aText, BOOL bFindOneOf) const
+BOOL CPreferencesPageBase::ContainsUIText(const CStringArray& aText, BOOL bFindOneOf) const
 {
 	if (aText.GetSize() == 0)
 	{
@@ -108,7 +108,7 @@ BOOL CPreferencesPageBase::ContainsControlText(const CStringArray& aText, BOOL b
 
 	for (int nItem = 0; nItem < aText.GetSize(); nItem++)
 	{
-		if (ContainsControlText(aText[nItem]))
+		if (ContainsUIText(aText[nItem]))
 		{
 			if (bFindOneOf)
 				return TRUE;

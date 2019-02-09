@@ -119,10 +119,10 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	m_pageUI(pMgrUIExt), 
 	m_pageTaskDef(pContentMgr), 
 	m_pageFile2(pExportMgr),
-	m_iconSearch(IDI_UPDATE_FILTER, 16),
+	m_iconSearch(IDI_SEARCH_PREFS, 16),
 	m_bInitDlg(FALSE)
 {
-	m_eSearchText.AddButton(1, m_iconSearch, _T("Update Search"));
+	m_eSearchText.AddButton(1, m_iconSearch, CEnString(IDS_SEARCHPREFS_PROMPT));
 
 	CPreferencesDlgBase::AddPage(&m_pageGen);
 	CPreferencesDlgBase::AddPage(&m_pageMultiUser);
@@ -211,6 +211,8 @@ BOOL CPreferencesDlg::OnInitDialog()
 	CPreferencesDlgCopyHookMgr::Initialize(*this);
 
 	m_sbGrip.Initialize(this);
+
+	m_mgrPrompts.SetEditPrompt(m_eSearchText, _T("Search Preferences"));
 	
 	// disable translation of category title because
 	// categories will already been translated
@@ -367,8 +369,14 @@ BOOL CPreferencesDlg::AddPageToTree(CPreferencesPageBase* pPage, UINT nIDPath, U
 		return FALSE;
 	}
 
-	if (bDoSearch && !m_sSearchText.IsEmpty() && !pPage->ContainsControlText(m_sSearchText))
-		return FALSE;
+	if (bDoSearch && !m_sSearchText.IsEmpty())
+	{
+		CStringArray aSearchTerms;
+		Misc::Split(m_sSearchText, aSearchTerms, ' ');
+
+		if (!pPage->ContainsUIText(aSearchTerms))
+			return FALSE;
+	}
 
 	// else
 	CEnString sPath(nIDPath);

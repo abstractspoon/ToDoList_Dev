@@ -2632,6 +2632,7 @@ IDI_TIMETRACK_STD       ICON    DISCARDABLE     "res\\app_timetrack.ico"
 IDI_STYLE_IMAGE         ICON    DISCARDABLE     "res\\style_image.ico"
 IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "res\\plus.ico"
 IDI_RESET_ELAPSED       ICON    DISCARDABLE     "res\\reset_elapsed.ico"
+IDI_SEARCH_PREFS        ICON    DISCARDABLE     "res\\search_prefs.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -5456,6 +5457,7 @@ BEGIN
     IDS_TABTIP_TIMETRACKING "Time Tracking"
     IDS_REPLACEINTASKCOMMENTS "Replace in Task Comments"
     IDS_FINDINTASKCOMMENTS  "Find in Task Comments"
+    IDS_SEARCHPREFS_PROMPT  "Search Preferences"
 END
 
 #endif    // English (Australia) resources
