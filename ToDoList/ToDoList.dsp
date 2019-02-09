@@ -1379,6 +1379,10 @@ SOURCE=.\res\reset_elapsed.ico
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\search_prefs.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\shield.ico
 # End Source File
 # Begin Source File
