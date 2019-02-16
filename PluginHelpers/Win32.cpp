@@ -99,21 +99,8 @@ int Win32::GetSystemDPI()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-DlgUnits::DlgUnits(IntPtr hWnd) 
-	: 
-	m_hWnd(Win32::GetHwnd(hWnd)),
-	m_DlgBaseUnitsX(0),
-	m_DlgBaseUnitsY(0)
+DlgUnits::DlgUnits(IntPtr hWnd) : m_hWnd(Win32::GetHwnd(hWnd))
 {
-}
-
-DlgUnits::DlgUnits() : m_hWnd(NULL)
-{
-	m_hWnd = NULL;
-	DWORD dwDLBU = ::GetDialogBaseUnits();
-
-	m_DlgBaseUnitsX = LOWORD(dwDLBU);
-	m_DlgBaseUnitsY = HIWORD(dwDLBU);
 }
 
 int DlgUnits::ToPixelsX(int x)
@@ -141,11 +128,6 @@ void DlgUnits::ToPixels(int& x, int& y)
 
 		x = rect.right;
 		y = rect.bottom;
-	}
-	else
-	{
-		x = MulDiv(x, m_DlgBaseUnitsX, 4);
-		y = MulDiv(y, m_DlgBaseUnitsY, 8);
 	}
 }
 

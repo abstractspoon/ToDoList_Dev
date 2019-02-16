@@ -37,7 +37,6 @@ namespace Abstractspoon
 			{
 			public:
 				DlgUnits(IntPtr hWnd);
-				DlgUnits();
 
 				int ToPixelsX(int x);
 				int ToPixelsY(int y);
@@ -45,7 +44,6 @@ namespace Abstractspoon
 
 			protected:
 				HWND m_hWnd;
-				int m_DlgBaseUnitsX, m_DlgBaseUnitsY;
 			};
 		}
 	}
