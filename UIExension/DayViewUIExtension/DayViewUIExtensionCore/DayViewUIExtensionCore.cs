@@ -378,7 +378,9 @@ namespace DayViewUIExtension
 
 			m_TBRenderer = new UIThemeToolbarRenderer();
 			m_Toolbar.Renderer = m_TBRenderer;
-	
+
+			Toolbars.FixupButtonSizes(m_Toolbar);
+
 			var btn1 = new ToolStripButton();
 			btn1.ImageIndex = 0;
 			btn1.Click += new EventHandler(OnGoToToday);

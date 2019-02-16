@@ -45,7 +45,7 @@ namespace HTMLContentControl
 
         private void InitializeComponent()
         {
-            InitialiseFeatures();
+			InitialiseFeatures();
 
             this.ToolBar.Renderer = m_toolbarRenderer;
             this.ToolBar.Font = m_ControlsFont;
@@ -55,6 +55,8 @@ namespace HTMLContentControl
                 int imageSize = DPIScaling.Scale(16);
                 this.ToolBar.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
             }
+
+			Toolbars.FixupButtonSizes(this.ToolBar);
 
             this.ToolbarDock = DockStyle.Top;
             this.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;

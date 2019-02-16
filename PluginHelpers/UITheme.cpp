@@ -95,13 +95,18 @@ UIThemeToolbarRenderer::UIThemeToolbarRenderer()
 	m_HotFillColor = nullptr;
 	m_HotBorderColor = nullptr;
 	m_PressedFillColor = nullptr;
+	m_BkgndLightColor = nullptr;
+	m_BkgndDarkColor = nullptr;
 }
 
 void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
 {
+	m_BkgndLightColor = theme->GetAppDrawingColor(UITheme::AppColor::ToolbarLight);
+	m_BkgndDarkColor = theme->GetAppDrawingColor(UITheme::AppColor::ToolbarDark);
 	m_HotFillColor = theme->GetAppDrawingColor(UITheme::AppColor::ToolbarHot);
-	m_HotBorderColor = ColorUtil::DrawingColor::AdjustLighting(m_HotFillColor, -0.2f, false);
-	m_PressedFillColor = ColorUtil::DrawingColor::AdjustLighting(m_HotFillColor, -0.1f, false);
+
+	m_HotBorderColor = ColorUtil::DrawingColor::AdjustLighting(m_HotFillColor, -0.3f, false);
+	m_PressedFillColor = ColorUtil::DrawingColor::AdjustLighting(m_HotFillColor, -0.15f, false);
 }
 
 bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs^ e)
@@ -141,13 +146,13 @@ bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs
 void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventArgs^ e)
 {
 	if (!RenderButtonBackground(e))
-		ToolStripProfessionalRenderer::OnRenderButtonBackground(e);
+		BaseToolbarRenderer::OnRenderButtonBackground(e);
 }
 
 void UIThemeToolbarRenderer::OnRenderDropDownButtonBackground(ToolStripItemRenderEventArgs^ e)
 {
 	if (!RenderButtonBackground(e))
-		ToolStripProfessionalRenderer::OnRenderDropDownButtonBackground(e);
+		BaseToolbarRenderer::OnRenderDropDownButtonBackground(e);
 }
 
 bool UIThemeToolbarRenderer::ValidColours()
@@ -157,3 +162,16 @@ bool UIThemeToolbarRenderer::ValidColours()
 			(m_PressedFillColor != nullptr));
 }
 
+void UIThemeToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow)
+{
+	if ((m_BkgndLightColor != nullptr) && 
+		(m_BkgndDarkColor != nullptr) && 
+		(*m_BkgndLightColor != *m_BkgndDarkColor))
+	{
+		auto gradientBrush = gcnew Drawing2D::LinearGradientBrush(*rowRect, *m_BkgndLightColor, *m_BkgndDarkColor, Drawing2D::LinearGradientMode::Vertical);
+
+		g->FillRectangle(gradientBrush, *rowRect);
+	}
+
+	DrawRowDivider(g, rowRect, firstRow, lastRow);
+}
