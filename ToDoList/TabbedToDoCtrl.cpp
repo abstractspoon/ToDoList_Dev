@@ -1936,10 +1936,9 @@ void CTabbedToDoCtrl::RebuildCustomAttributeUI()
 
 void CTabbedToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos)
 {
+	// Tab control takes care of active view including tree
 	CRect rView;
 	m_tabViews.Resize(rPos, pDWM, rView);
-
-	CToDoCtrl::ReposTaskTree(pDWM, rView);
 }
 
 void CTabbedToDoCtrl::UpdateTasklistVisibility()

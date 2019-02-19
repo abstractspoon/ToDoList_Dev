@@ -63,21 +63,21 @@ CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CTDCToolsCmdlineParser& tcp)
 				tuii.pCtrl = new CFileEdit;
 				tuii.nStyle = ES_AUTOHSCROLL | ES_LEFT | WS_TABSTOP;
 				tuii.sizeDLU.cx = 130;
-				tuii.sizeDLU.cy = 14;
+				tuii.sizeDLU.cy = 13;
 				break;
 
 			case CLAT_USERFOLDER:
 				tuii.pCtrl = new CFileEdit(FES_FOLDERS);
 				tuii.nStyle = ES_AUTOHSCROLL | ES_LEFT | WS_TABSTOP;
 				tuii.sizeDLU.cx = 130;
-				tuii.sizeDLU.cy = 14;
+				tuii.sizeDLU.cy = 13;
 				break;
 
 			case CLAT_USERTEXT:
 				tuii.pCtrl = new CEdit;
 				tuii.nStyle = ES_AUTOHSCROLL | ES_LEFT | WS_TABSTOP;
 				tuii.sizeDLU.cx = 130;
-				tuii.sizeDLU.cy = 14;
+				tuii.sizeDLU.cy = 13;
 				break;
 
 			case CLAT_USERDATE:

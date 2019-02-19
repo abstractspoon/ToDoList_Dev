@@ -6159,35 +6159,47 @@ BOOL CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date, int& nPo
 			switch (m_nMonthDisplay)
 			{
 			case GTLC_DISPLAY_QUARTERCENTURIES:
-				// Column == 25 years
-				nDaysInCol = (int)(DAYS_IN_YEAR * 25);
-				dDayInCol = (int)(((nYear - GetStartYear(m_nMonthDisplay)) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
+				{
+					// Column == 25 years
+					nDaysInCol = (int)(DAYS_IN_YEAR * 25);
+					int nStartYear = CDateHelper::GetStartOfQuarterCentury(date, !HasOption(GTLCF_DECADESAREONEBASED)).GetYear();
+					dDayInCol = (int)(((nYear - nStartYear) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
+				}
 				break;
 
 			case GTLC_DISPLAY_DECADES:
-				// Column == 10 years
-				nDaysInCol = (int)(DAYS_IN_YEAR * 10);
-				dDayInCol = (int)(((nYear - GetStartYear(m_nMonthDisplay)) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
+				{
+					// Column == 10 years
+					nDaysInCol = (int)(DAYS_IN_YEAR * 10);
+					int nStartYear = CDateHelper::GetStartOfDecade(date, !HasOption(GTLCF_DECADESAREONEBASED)).GetYear();
+					dDayInCol = (int)(((nYear - nStartYear) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
+				}
 				break;
 
 			case GTLC_DISPLAY_YEARS:
-				// Column == 12 months
-				nDaysInCol = (int)DAYS_IN_YEAR;
-				dDayInCol = ((int)((nMonth - 1) * DAYS_IN_MONTH) + nDay);
+				{
+					// Column == 12 months
+					nDaysInCol = (int)DAYS_IN_YEAR;
+					dDayInCol = ((int)((nMonth - 1) * DAYS_IN_MONTH) + nDay);
+				}
 				break;
 				
 			case GTLC_DISPLAY_QUARTERS_SHORT:
 			case GTLC_DISPLAY_QUARTERS_MID:
 			case GTLC_DISPLAY_QUARTERS_LONG:
-				// Column == 3 months
-				nDaysInCol = (int)(DAYS_IN_MONTH * 3);
-				dDayInCol = ((int)(((nMonth - 1) % 3) * DAYS_IN_MONTH) + nDay);
+				{
+					// Column == 3 months
+					nDaysInCol = (int)(DAYS_IN_MONTH * 3);
+					dDayInCol = ((int)(((nMonth - 1) % 3) * DAYS_IN_MONTH) + nDay);
+				}
 				break;
 
 			default: 
-				// Column == Month
-				nDaysInCol = CDateHelper::GetDaysInMonth(nMonth, nYear);
-				dDayInCol = ((nDay - 1) + CDateHelper::GetTimeOnly(date));
+				{
+					// Column == Month
+					nDaysInCol = CDateHelper::GetDaysInMonth(nMonth, nYear);
+					dDayInCol = ((nDay - 1) + CDateHelper::GetTimeOnly(date));
+				}
 				break;
 			}
 

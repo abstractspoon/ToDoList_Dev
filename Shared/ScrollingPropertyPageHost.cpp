@@ -265,11 +265,14 @@ BOOL CScrollingPropertyPageHost::ScrollTo(LONG nPos)
 		// if there's a change then update scrollbar and scroll page
 		if (nPos != si.nPos)
 		{
+			CPropertyPage* pPage = GetActivePage();
 			CRect rPage;
-			GetPageRect(m_nSelIndex, rPage);
 			
+			GetPageRect(m_nSelIndex, rPage);
 			rPage.OffsetRect(0, (si.nPos - nPos));
-			GetActivePage()->MoveWindow(rPage);
+
+			pPage->MoveWindow(rPage);
+			pPage->UpdateWindow();
 			
 			si.nPos = nPos;
 			return m_scroll.SetScrollInfo(&si, TRUE);

@@ -5759,19 +5759,7 @@ void CToDoListWnd::OnUpdateEditCut(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnEditPasteSub() 
 {
-	CWaitCursor wait;
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	if (tdc.CanPasteTasks(TDCP_ONSELTASK, FALSE))
-	{
-		tdc.PasteTasks(TDCP_ONSELTASK, FALSE);
-	}
-	else if (CanImportPasteFromClipboard())
-	{
-		DoImportPasteFromClipboard(TDIT_ADDTOSELECTEDTASK);
-	}
-
-	UpdateTimeTrackerTasks(tdc, FALSE);
+	OnEditPaste(TDCP_ONSELTASK, TDIT_ADDTOSELECTEDTASK);
 }
 
 void CToDoListWnd::OnUpdateEditPasteSub(CCmdUI* pCmdUI) 
@@ -5779,45 +5767,14 @@ void CToDoListWnd::OnUpdateEditPasteSub(CCmdUI* pCmdUI)
 	pCmdUI->Enable(CanPasteTasks(TDCP_ONSELTASK, FALSE));
 }
 
-BOOL CToDoListWnd::DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere)
-{
-	if (!CanImportPasteFromClipboard())
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	CTDLPasteFromClipboardDlg dialog(m_mgrImportExport);
-
-	if (dialog.DoModal() != IDOK)
-		return FALSE;
-	
-	BOOL bFromClipboard = TRUE;
-	int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
-	CString sImportFrom = dialog.GetClipboardText();
-
-	return ImportTasks(bFromClipboard, sImportFrom, nImporter, nWhere);
-}
-
 void CToDoListWnd::OnEditPasteAfter() 
 {
-	CWaitCursor wait;
+	int nSelCount = GetToDoCtrl().GetSelectedCount();
 	
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nSelCount = tdc.GetSelectedCount();
+	TDC_PASTE nPasteWhere = ((nSelCount == 0) ? TDCP_ATBOTTOM : TDCP_BELOWSELTASK);
+	TDLID_IMPORTTO nImportWhere = TDIT_ADDBELOWSELECTEDTASK;
 	
-	TDC_PASTE nWhere = ((nSelCount == 0) ? TDCP_ATBOTTOM : TDCP_BELOWSELTASK);
-	
-	if (tdc.CanPasteTasks(nWhere, FALSE))
-	{
-		tdc.PasteTasks(nWhere, FALSE);
-	}
-	else if (CanImportPasteFromClipboard())
-	{
-		DoImportPasteFromClipboard(TDIT_ADDBELOWSELECTEDTASK);
-	}
-
-	UpdateTimeTrackerTasks(tdc, FALSE);
+	OnEditPaste(nPasteWhere, nImportWhere);
 }
 
 void CToDoListWnd::OnUpdateEditPasteAfter(CCmdUI* pCmdUI) 
@@ -5832,6 +5789,24 @@ void CToDoListWnd::OnUpdateEditPasteAfter(CCmdUI* pCmdUI)
 	}
 
 	pCmdUI->Enable(CanPasteTasks(nWhere, FALSE));	
+}
+
+void CToDoListWnd::OnEditPaste(TDC_PASTE nPasteWhere, TDLID_IMPORTTO nImportWhere)
+{
+	CWaitCursor wait;
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	if (tdc.CanPasteTasks(nPasteWhere, FALSE))
+	{
+		tdc.PasteTasks(nPasteWhere, FALSE);
+	}
+	else if (CanImportPasteFromClipboard())
+	{
+		DoImportPasteFromClipboard(nImportWhere);
+	}
+
+	RefreshFilterBarControls(FALSE);
+	UpdateTimeTrackerTasks(tdc, FALSE);
 }
 
 void CToDoListWnd::OnEditPasteAsRef() 
@@ -5866,6 +5841,26 @@ BOOL CToDoListWnd::CanImportPasteFromClipboard() const
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 	return (!tdc.IsReadOnly() && CTaskClipboard::IsEmpty() && Misc::ClipboardHasText());
+}
+
+BOOL CToDoListWnd::DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere)
+{
+	if (!CanImportPasteFromClipboard())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	CTDLPasteFromClipboardDlg dialog(m_mgrImportExport);
+
+	if (dialog.DoModal() != IDOK)
+		return FALSE;
+
+	BOOL bFromClipboard = TRUE;
+	int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
+	CString sImportFrom = dialog.GetClipboardText();
+
+	return ImportTasks(bFromClipboard, sImportFrom, nImporter, nWhere);
 }
 
 void CToDoListWnd::OnEditCopyastext() 

@@ -28,17 +28,14 @@ static char THIS_FILE[] = __FILE__;
 class RTDLGTEMPLATE : public DLGTEMPLATE
 {
 public:
-	RTDLGTEMPLATE(DWORD dwStyle, DWORD dwExStyle, const CRect& rect)
+	RTDLGTEMPLATE(DWORD dwStyle, DWORD dwExStyle, const CRect& rectDLU = CRuntimeDlg::rectAuto)
 	{
 		style = dwStyle;
 		dwExtendedStyle = dwExStyle;
-		x = (short)rect.left;
-		y = (short)rect.top;
-		cx = (short)rect.Width();
-		cy = (short)rect.Height();
-		
-		CDlgUnits().FromPixels(x, y);
-		CDlgUnits().FromPixels(cx, cy);
+		x = (short)rectDLU.left;
+		y = (short)rectDLU.top;
+		cx = (short)rectDLU.Width();
+		cy = (short)rectDLU.Height();
 		
 		cdit = 0; // always 0
 		wMenu = 0; // always 0
@@ -217,20 +214,25 @@ BOOL CRuntimeDlg::OnInitDialog()
 
 BOOL CRuntimeDlg::Create(LPCTSTR szCaption, DWORD dwStyle, DWORD dwExStyle, const CRect& rect, CWnd* pParentWnd, UINT nID)
 {
-	RTDLGTEMPLATE rtDlgTemp(dwStyle, dwExStyle, rect);
+	RTDLGTEMPLATE rtDlgTemp(dwStyle, dwExStyle);
 	CDialogTemplate dlgTemp(&rtDlgTemp);
 
 	// cache and remove visibility
 	BOOL bVisible = (dwStyle & WS_VISIBLE);
 	dwStyle &= ~WS_VISIBLE;
 	
-	// remove DS_SETFONT (not supported)
-	if ((dwStyle & DS_SETFONT) && pParentWnd && GraphicsMisc::GetFont(*pParentWnd, FALSE))
+	// Handle DS_SETFONT
+	if (pParentWnd && (dwStyle & DS_SETFONT))
 	{
-		CString sFont;
-		int nSize = GraphicsMisc::GetFontNameAndPointSize(*pParentWnd, sFont);
+		HFONT hFont = GraphicsMisc::GetFont(*pParentWnd, FALSE);
 
-		dlgTemp.SetFont(sFont, (WORD)nSize);
+		if (hFont)
+		{
+			CString sFont;
+			int nSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFont);
+
+			dlgTemp.SetFont(sFont, (WORD)nSize);
+		}
 	}
 	
 	if (dwStyle & WS_CHILD)

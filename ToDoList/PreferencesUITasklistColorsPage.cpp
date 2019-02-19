@@ -36,6 +36,7 @@ const COLORREF FLAGGEDCOLOR			= RGB(128, 64, 0);
 const COLORREF REFERENCECOLOR		= RGB(128, 0, 64);
 
 const int DEFFONTSIZE = 8;
+const TDC_ATTRIBUTE DEFCOLORATTRIB = TDCA_CATEGORY;
 
 enum
 {
@@ -54,7 +55,7 @@ CPreferencesUITasklistColorsPage::CPreferencesUITasklistColorsPage()
 	CPreferencesPageBase(CPreferencesUITasklistColorsPage::IDD),
 	m_nTextColorOption(COLOROPT_DEFAULT), 
 	m_cbAttributes(CCBS_DRAWNOCOLOR, ACBS_ALLOWDELETE), 
-	m_nColorAttribute(TDCA_NONE)
+	m_nColorAttribute(DEFCOLORATTRIB)
 
 {
 	//{{AFX_DATA_INIT(CPreferencesUITasklistColorsPage)
@@ -123,7 +124,14 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 	{
 		m_nTreeFontSize = GetSelectedItemAsValue(m_cbTreeFontSize);
 		m_nCommentsFontSize = GetSelectedItemAsValue(m_cbCommentsFontSize);
-		m_nColorAttribute = (TDC_ATTRIBUTE)GetSelectedItemData(m_cbColorByAttribute);
+
+		if (m_cbColorByAttribute.GetCount())
+		{
+			if (m_cbColorByAttribute.GetCurSel() == CB_ERR)
+				m_nColorAttribute = DEFCOLORATTRIB;
+			else
+				m_nColorAttribute = (TDC_ATTRIBUTE)GetSelectedItemData(m_cbColorByAttribute);
+		}
 		
 		m_cbPriorityScheme.GetSelectedPalette(m_aPriorityScheme);
 	}
@@ -141,7 +149,8 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 			SelectItemByValue(m_cbCommentsFontSize, m_nCommentsFontSize);
 		}
 
-		SelectItemByData(m_cbColorByAttribute, m_nColorAttribute);
+		if (m_cbColorByAttribute.GetCount())
+			SelectItemByData(m_cbColorByAttribute, m_nColorAttribute);
 
 		if (m_aPriorityScheme.GetSize())
 			m_cbPriorityScheme.SetSelectedPalette(m_aPriorityScheme);
@@ -233,9 +242,11 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	GetDlgItem(IDC_SPECIFYCOMMENTSFONT)->EnableWindow(!m_bCommentsUseTreeFont || !m_bSpecifyTreeFont);
 
 	BOOL bColorByAttrib = (m_nTextColorOption == COLOROPT_ATTRIB);
+	BOOL bHasAttrib = (m_nColorAttribute != TDCA_NONE);
+
 	GetDlgItem(IDC_ATTRIBUTETOCOLORBY)->EnableWindow(bColorByAttrib);
-	GetDlgItem(IDC_ATTRIBUTECOLORS)->EnableWindow(bColorByAttrib);
-	GetDlgItem(IDC_POPULATEATTRIBLIST)->EnableWindow(bColorByAttrib);
+	GetDlgItem(IDC_ATTRIBUTECOLORS)->EnableWindow(bColorByAttrib && bHasAttrib);
+	GetDlgItem(IDC_POPULATEATTRIBLIST)->EnableWindow(bColorByAttrib && bHasAttrib);
 
 	BOOL bEnableCommentsFont = m_bSpecifyCommentsFont && (!m_bSpecifyTreeFont || !m_bCommentsUseTreeFont);
 	GetDlgItem(IDC_COMMENTSFONTSIZE)->EnableWindow(bEnableCommentsFont);
@@ -252,7 +263,7 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	m_btStartTodayColor.EnableWindow(m_bSpecifyStartTodayColor);
 	m_btDueColor.EnableWindow(m_bSpecifyDueColor);
 	m_btDueTodayColor.EnableWindow(m_bSpecifyDueTodayColor);
-	m_btAttribColor.EnableWindow(bColorByAttrib && !m_sSelAttribValue.IsEmpty());
+	m_btAttribColor.EnableWindow(bColorByAttrib && bHasAttrib && !m_sSelAttribValue.IsEmpty());
 	m_btFlaggedColor.EnableWindow(m_bSpecifyFlaggedColor);
 	m_btReferenceColor.EnableWindow(m_bSpecifyReferenceColor);
 	
@@ -415,15 +426,17 @@ void CPreferencesUITasklistColorsPage::GetDueTaskColors(COLORREF& crDue, COLORRE
 
 TDC_ATTRIBUTE CPreferencesUITasklistColorsPage::GetAttributeColors(CTDCColorMap& colors) const
 {
-	ASSERT(m_nColorAttribute != TDCA_NONE);
-
-	int nColor = m_aAttribColors.GetSize();
 	colors.RemoveAll();
 
-	while (nColor--)
+	if (m_nColorAttribute != TDCA_NONE)
 	{
-		const ATTRIBCOLOR& color = m_aAttribColors[nColor];
-		colors.AddColor(color.sAttrib, color.color);
+		int nColor = m_aAttribColors.GetSize();
+
+		while (nColor--)
+		{
+			const ATTRIBCOLOR& color = m_aAttribColors[nColor];
+			colors.AddColor(color.sAttrib, color.color);
+		}
 	}
 
 	return m_nColorAttribute;
@@ -668,7 +681,7 @@ void CPreferencesUITasklistColorsPage::OnChangeTextColorOption()
 
 	// if the text color option is COLOROPT_PRIORITY and 
 	// the user has got priority coloring turned off then switch it on
-	if (!m_bColorPriority && m_nTextColorOption == COLOROPT_PRIORITY)
+	if (!m_bColorPriority && (m_nTextColorOption == COLOROPT_PRIORITY))
 	{
 		m_bColorPriority = TRUE;
 		UpdateData(FALSE);
@@ -677,12 +690,13 @@ void CPreferencesUITasklistColorsPage::OnChangeTextColorOption()
 	}
 
 	BOOL bColorByAttrib = (m_nTextColorOption == COLOROPT_ATTRIB);
+	BOOL bHasAttrib = (m_nColorAttribute != TDCA_NONE);
 
 	GetDlgItem(IDC_ATTRIBUTETOCOLORBY)->EnableWindow(bColorByAttrib);
-	GetDlgItem(IDC_ATTRIBUTECOLORS)->EnableWindow(bColorByAttrib);
-	GetDlgItem(IDC_POPULATEATTRIBLIST)->EnableWindow(bColorByAttrib);
+	GetDlgItem(IDC_ATTRIBUTECOLORS)->EnableWindow(bColorByAttrib && bHasAttrib);
+	GetDlgItem(IDC_POPULATEATTRIBLIST)->EnableWindow(bColorByAttrib && bHasAttrib);
 
-	m_btAttribColor.EnableWindow(bColorByAttrib && !m_sSelAttribValue.IsEmpty());
+	m_btAttribColor.EnableWindow(bColorByAttrib && bHasAttrib && !m_sSelAttribValue.IsEmpty());
 
 	CPreferencesPageBase::OnControlChange();
 }

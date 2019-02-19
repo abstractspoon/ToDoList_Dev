@@ -26,6 +26,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+const COLORREF HILITE_COLOUR = RGB(255, 255, 64); // yellow
+
 /////////////////////////////////////////////////////////////////////////////
 // Private class for tracking mouse middle-button clicking
 // so we can copy the clicked items text to the clipboard
@@ -120,7 +122,8 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	m_pageTaskDef(pContentMgr), 
 	m_pageFile2(pExportMgr),
 	m_iconSearch(IDI_SEARCH_PREFS, 16),
-	m_bInitDlg(FALSE)
+	m_bInitialisingDialog(FALSE),
+	m_bBuildingTree(FALSE)
 {
 	m_eSearchText.AddButton(1, m_iconSearch, CEnString(IDS_SEARCHPREFS_PROMPT));
 
@@ -161,15 +164,15 @@ void CPreferencesDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_PAGE_TITLE, m_sPageTitle);
 	DDX_Control(pDX, IDC_PAGE_TITLE, m_stPageTitle);
-	DDX_Text(pDX, IDC_SEARCH, m_sSearchText);
 	DDX_Control(pDX, IDC_SEARCH, m_eSearchText);
 }
 
 BEGIN_MESSAGE_MAP(CPreferencesDlg, CPreferencesDlgBase)
 	//{{AFX_MSG_MAP(CPreferencesDlg)
-	ON_NOTIFY(TVN_SELCHANGED, IDC_PAGES, OnSelchangedPages)
+	ON_NOTIFY(TVN_SELCHANGED, IDC_PAGES, OnTreeSelChanged)
 	ON_BN_CLICKED(IDC_APPLY, OnApply)
 	//}}AFX_MSG_MAP
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_PAGES, OnTreeCustomDraw)
 	ON_WM_ERASEBKGND()
 	ON_WM_DESTROY()
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnUpdateSearch)
@@ -198,13 +201,13 @@ void CPreferencesDlg::LoadPreferences(const IPreferences* prefs, LPCTSTR szKey)
 {
 	// 'Temporary' hack to prevent prefs being reloaded 
 	// by base class in OnInitDialog
-	if (!m_bInitDlg)
+	if (!m_bInitialisingDialog)
 		CPreferencesDlgBase::LoadPreferences(prefs, szKey);
 }
 
 BOOL CPreferencesDlg::OnInitDialog() 
 {
-	CAutoFlag af(m_bInitDlg, TRUE);
+	CAutoFlag af(m_bInitialisingDialog, TRUE);
 
 	CPreferencesDlgBase::OnInitDialog();
 
@@ -274,12 +277,12 @@ void CPreferencesDlg::SynchronizeTree()
 {
 	HTREEITEM htiMap = NULL;
 	
-	if (m_mapPP2HTI.Lookup(GetActivePage(), htiMap))
-	{
-		m_tcPages.SelectItem(htiMap);
-		m_tcPages.EnsureVisible(htiMap);
-		m_tcPages.SetFocus();
-	}
+	if (!m_mapPP2HTI.Lookup(GetActivePage(), htiMap))
+		htiMap = m_tcPages.GetChildItem(NULL);
+
+	m_tcPages.SelectItem(htiMap);
+	m_tcPages.EnsureVisible(htiMap);
+	m_tcPages.SetFocus();
 }
 
 BOOL CPreferencesDlg::PreTranslateMessage(MSG* pMsg) 
@@ -289,11 +292,21 @@ BOOL CPreferencesDlg::PreTranslateMessage(MSG* pMsg)
 		return FALSE;
 
 	// F1 handling
-	if ((pMsg->message == WM_KEYDOWN) && 
-		(pMsg->wParam == VK_F1) &&
-		CDialogHelper::IsChildOrSame(::GetParent(*this), pMsg->hwnd))
+	if (((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_SYSKEYDOWN)) && 
+		CDialogHelper::IsChildOrSame(*this, pMsg->hwnd))
 	{
-		OnHelp();
+		switch (pMsg->wParam)
+		{
+			case VK_F1:
+				OnHelp();
+				break;
+
+			case 'F':
+			case 'f':
+				if (Misc::ModKeysArePressed(MKS_CTRL))
+					m_eSearchText.SetFocus();
+				break;
+		}
 	}
 	
 	return CPreferencesDlgBase::PreTranslateMessage(pMsg);
@@ -301,62 +314,67 @@ BOOL CPreferencesDlg::PreTranslateMessage(MSG* pMsg)
 
 void CPreferencesDlg::AddPagesToTree(BOOL bDoSearch)
 {
-	m_tcPages.DeleteAllItems();
-	m_mapHTIToSection.RemoveAll();
-	m_mapPP2HTI.RemoveAll();
-
-	AddPageToTree(&m_pageGen, IDS_PREF_GEN, IDC_TOPOFPAGE, bDoSearch);
-
-	if (AddPageToTree(&m_pageMultiUser, IDS_PREF_MULTIUSER, IDC_TOPOFPAGE, bDoSearch))
+	// scope to allow SynchroniseTree to work
 	{
-		AddPageToTree(&m_pageMultiUser, IDS_PREF_MULTIUSERFILE, IDC_TOPOFPAGE, FALSE);
-		AddPageToTree(&m_pageMultiUser, IDS_PREF_MULTIUSERSS, IDC_SSCGROUP, FALSE);
+		CAutoFlag af(m_bBuildingTree, TRUE);
+
+		m_tcPages.DeleteAllItems();
+		m_mapHTIToSection.RemoveAll();
+		m_mapPP2HTI.RemoveAll();
+
+		AddPageToTree(&m_pageGen, IDS_PREF_GEN, IDC_TOPOFPAGE, bDoSearch);
+
+		if (AddPageToTree(&m_pageMultiUser, IDS_PREF_MULTIUSER, IDC_TOPOFPAGE, bDoSearch))
+		{
+			AddPageToTree(&m_pageMultiUser, IDS_PREF_MULTIUSERFILE, IDC_TOPOFPAGE, FALSE);
+			AddPageToTree(&m_pageMultiUser, IDS_PREF_MULTIUSERSS, IDC_SSCGROUP, FALSE);
+		}
+
+		if (AddPageToTree(&m_pageFile, IDS_PREF_FILE, IDC_TOPOFPAGE, bDoSearch))
+		{
+			AddPageToTree(&m_pageFile, IDS_PREF_FILELOAD, IDC_LOADGROUP, FALSE);
+			AddPageToTree(&m_pageFile, IDS_PREF_FILEARCHIVE, IDC_ARCHIVEGROUP, FALSE);
+			AddPageToTree(&m_pageFile, IDS_PREF_FILESWITCH, IDC_SWITCHGROUP, FALSE);
+			AddPageToTree(&m_pageFile, IDS_PREF_FILENOTIFY, IDC_DUEGROUP, FALSE);
+		}
+
+		if (AddPageToTree(&m_pageFile2, IDS_PREF_FILEMORE, IDC_TOPOFPAGE, bDoSearch))
+		{
+			AddPageToTree(&m_pageFile2, IDS_PREF_FILEBACKUP, IDC_BACKUPGROUP, FALSE);
+			AddPageToTree(&m_pageFile2, IDS_PREF_FILESAVE, IDC_SAVEGROUP, FALSE);
+		}
+
+		if (AddPageToTree(&m_pageUI, IDS_PREF_UI, IDC_TOPOFPAGE, bDoSearch))
+		{
+			AddPageToTree(&m_pageUI, IDS_PREF_UIFILTERING, IDC_FILTERGROUP, FALSE);
+			AddPageToTree(&m_pageUI, IDS_PREF_UISORTING, IDC_SORTGROUP, FALSE);
+			AddPageToTree(&m_pageUI, IDS_PREF_UITOOLBAR, IDC_TOOLBARGROUP, FALSE);
+			AddPageToTree(&m_pageUI, IDS_PREF_UICOMMENTS, IDC_COMMENTSGROUP, FALSE);
+			AddPageToTree(&m_pageUI, IDS_PREF_UITABBAR, IDC_TABBARGROUP, FALSE);
+			AddPageToTree(&m_pageUI, IDS_PREF_TASKVIEWVISIBILITY, IDC_TASKVIEWSGROUP, FALSE);
+		}
+
+		AddPageToTree(&m_pageUICustomToolbar, IDS_PREF_TOOLBAR, IDC_TOPOFPAGE, bDoSearch);
+		AddPageToTree(&m_pageUIVisibility, IDS_PREF_UIVISIBILITY, IDC_TOPOFPAGE, bDoSearch);
+		AddPageToTree(&m_pageUITasklist, IDS_PREF_UITASK, IDC_TOPOFPAGE, bDoSearch);
+		AddPageToTree(&m_pageUITasklistColors, IDS_PREF_UITASKCOLOR, IDC_TOPOFPAGE, bDoSearch);
+
+		if (AddPageToTree(&m_pageTask, IDS_PREF_TASK, IDC_TOPOFPAGE, bDoSearch))
+		{
+			AddPageToTree(&m_pageTask, IDS_PREF_TIMETRACK, IDC_TRACKGROUP, FALSE);
+			AddPageToTree(&m_pageTask, IDS_PREF_TASKTIME, IDC_TIMEGROUP, FALSE);
+		}
+
+		AddPageToTree(&m_pageTaskCalc, IDS_PREF_TASKCALCS, IDC_TOPOFPAGE, bDoSearch);
+		AddPageToTree(&m_pageTaskDef, IDS_PREF_TASKDEFATTRIB, IDC_TOPOFPAGE, bDoSearch);
+
+		if (AddPageToTree(&m_pageTaskDef2, IDS_PREF_TASKDEFINHERIT, IDC_TOPOFPAGE, bDoSearch))
+			AddPageToTree(&m_pageTaskDef2, IDS_PREF_TASKDEFLISTS, IDC_DROPLISTGROUP, FALSE);
+
+		AddPageToTree(&m_pageExport, IDS_PREF_EXPORT, IDC_TOPOFPAGE, bDoSearch);
+		AddPageToTree(&m_pageTools, IDS_PREF_TOOLS, IDC_TOPOFPAGE, bDoSearch);
+		AddPageToTree(&m_pageShortcuts, IDS_PREF_SHORTCUT, IDC_TOPOFPAGE, bDoSearch);
 	}
-
-	if (AddPageToTree(&m_pageFile, IDS_PREF_FILE, IDC_TOPOFPAGE, bDoSearch))
-	{
-		AddPageToTree(&m_pageFile, IDS_PREF_FILELOAD, IDC_LOADGROUP, FALSE);
-		AddPageToTree(&m_pageFile, IDS_PREF_FILEARCHIVE, IDC_ARCHIVEGROUP, FALSE);
-		AddPageToTree(&m_pageFile, IDS_PREF_FILESWITCH, IDC_SWITCHGROUP, FALSE);
-		AddPageToTree(&m_pageFile, IDS_PREF_FILENOTIFY, IDC_DUEGROUP, FALSE);
-	}
-
-	if (AddPageToTree(&m_pageFile2, IDS_PREF_FILEMORE, IDC_TOPOFPAGE, bDoSearch))
-	{
-		AddPageToTree(&m_pageFile2, IDS_PREF_FILEBACKUP, IDC_BACKUPGROUP, FALSE);
-		AddPageToTree(&m_pageFile2, IDS_PREF_FILESAVE, IDC_SAVEGROUP, FALSE);
-	}
-
-	if (AddPageToTree(&m_pageUI, IDS_PREF_UI, IDC_TOPOFPAGE, bDoSearch))
-	{
-		AddPageToTree(&m_pageUI, IDS_PREF_UIFILTERING, IDC_FILTERGROUP, FALSE);
-		AddPageToTree(&m_pageUI, IDS_PREF_UISORTING, IDC_SORTGROUP, FALSE);
-		AddPageToTree(&m_pageUI, IDS_PREF_UITOOLBAR, IDC_TOOLBARGROUP, FALSE);
-		AddPageToTree(&m_pageUI, IDS_PREF_UICOMMENTS, IDC_COMMENTSGROUP, FALSE);
-		AddPageToTree(&m_pageUI, IDS_PREF_UITABBAR, IDC_TABBARGROUP, FALSE);
-		AddPageToTree(&m_pageUI, IDS_PREF_TASKVIEWVISIBILITY, IDC_TASKVIEWSGROUP, FALSE);
-	}
-
-	AddPageToTree(&m_pageUICustomToolbar, IDS_PREF_TOOLBAR, IDC_TOPOFPAGE, bDoSearch);
-	AddPageToTree(&m_pageUIVisibility, IDS_PREF_UIVISIBILITY, IDC_TOPOFPAGE, bDoSearch);
-	AddPageToTree(&m_pageUITasklist, IDS_PREF_UITASK, IDC_TOPOFPAGE, bDoSearch);
-	AddPageToTree(&m_pageUITasklistColors, IDS_PREF_UITASKCOLOR, IDC_TOPOFPAGE, bDoSearch);
-
-	if (AddPageToTree(&m_pageTask, IDS_PREF_TASK, IDC_TOPOFPAGE, bDoSearch))
-	{
-		AddPageToTree(&m_pageTask, IDS_PREF_TIMETRACK, IDC_TRACKGROUP, FALSE);
-		AddPageToTree(&m_pageTask, IDS_PREF_TASKTIME, IDC_TIMEGROUP, FALSE);
-	}
-
-	AddPageToTree(&m_pageTaskCalc, IDS_PREF_TASKCALCS, IDC_TOPOFPAGE, bDoSearch);
-	AddPageToTree(&m_pageTaskDef, IDS_PREF_TASKDEFATTRIB, IDC_TOPOFPAGE, bDoSearch);
-	
-	if (AddPageToTree(&m_pageTaskDef2, IDS_PREF_TASKDEFINHERIT, IDC_TOPOFPAGE, bDoSearch))
-		AddPageToTree(&m_pageTaskDef2, IDS_PREF_TASKDEFLISTS, IDC_DROPLISTGROUP, FALSE);
-
-	AddPageToTree(&m_pageExport, IDS_PREF_EXPORT, IDC_TOPOFPAGE, bDoSearch);
-	AddPageToTree(&m_pageTools, IDS_PREF_TOOLS, IDC_TOPOFPAGE, bDoSearch);
-	AddPageToTree(&m_pageShortcuts, IDS_PREF_SHORTCUT, IDC_TOPOFPAGE, bDoSearch);
 
 	SynchronizeTree();
 }
@@ -369,23 +387,40 @@ BOOL CPreferencesDlg::AddPageToTree(CPreferencesPageBase* pPage, UINT nIDPath, U
 		return FALSE;
 	}
 
-	if (bDoSearch && !m_sSearchText.IsEmpty())
-	{
-		CStringArray aSearchTerms;
-		Misc::Split(m_sSearchText, aSearchTerms, ' ');
+	CStringArray aPath;
+	VERIFY(Misc::Split(CEnString(nIDPath), aPath, PATHDELIM) >= 1);
 
-		if (!pPage->ContainsUIText(aSearchTerms))
-			return FALSE;
+	if (bDoSearch)
+	{
+		if (m_aSearchTerms.GetSize())
+		{
+			// Check path first
+			int nPath = aPath.GetSize();
+
+			while (nPath--)
+			{
+				if (CPreferencesPageBase::UITextContainsOneOf(aPath[nPath], m_aSearchTerms))
+					break;
+			}
+
+			if (!pPage->HighlightUIText(m_aSearchTerms, HILITE_COLOUR) && (nPath == -1))
+				return FALSE;
+		}
+		else
+		{
+			pPage->ClearHighlights();
+		}
 	}
 
-	// else
-	CEnString sPath(nIDPath);
+	// Add parent 'folders' first
 	HTREEITEM htiParent = TVI_ROOT; // default
-	CString sParent(sPath);
+	int nNumPath = aPath.GetSize();
 
-	while (Misc::Split(sParent, sPath, PATHDELIM))
+	for (int nPath = 0; nPath < (nNumPath - 1); nPath++)
 	{
 		// see if parent already exists
+		const CString& sParent = aPath[nPath];
+
 		HTREEITEM htiParentParent = htiParent;
 		htiParent = m_tcPages.GetChildItem(htiParentParent);
 
@@ -405,12 +440,11 @@ BOOL CPreferencesDlg::AddPageToTree(CPreferencesPageBase* pPage, UINT nIDPath, U
 			if (htiParentParent == TVI_ROOT)
 				m_tcPages.SetItemState(htiParent, TVIS_BOLD, TVIS_BOLD);
 		}
-
-		// next
-		sParent = sPath;
 	}
 
-	HTREEITEM hti = m_tcPages.InsertItem(sPath, htiParent); // whatever's left
+	// Add actual 'leaf' page
+	CString sPage = aPath[nNumPath - 1];
+	HTREEITEM hti = m_tcPages.InsertItem(sPage, htiParent);
 	m_tcPages.EnsureVisible(hti);
 
 	// embolden root items
@@ -436,8 +470,11 @@ BOOL CPreferencesDlg::AddPageToTree(CPreferencesPageBase* pPage, UINT nIDPath, U
 	return TRUE;
 }
 
-void CPreferencesDlg::OnSelchangedPages(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
+	if (m_bBuildingTree)
+		return;
+
 	HTREEITEM htiSel = m_tcPages.GetSelectedItem();
 	
 	// Get the section of the item FIRST
@@ -453,17 +490,20 @@ void CPreferencesDlg::OnSelchangedPages(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	
 	if (pPage && CPreferencesDlgBase::SetActivePage(pPage))
 	{
-		UpdateData(); // make sure search text is not overwritten
+		CWnd* pScrollTo = NULL;
 
-		// move to the section
-		if (nIDSection == IDC_TOPOFPAGE) // pseudo control ID
-		{
+		// If searching, move to the first match
+		if (m_aSearchTerms.GetSize())
+			pScrollTo = pPage->GetFirstHighlightedItem();
+
+		// else move to the section
+		if ((pScrollTo == NULL) && (nIDSection > 0))
+			pScrollTo = pPage->GetDlgItem(nIDSection);
+
+		if (pScrollTo)
+			m_ppHost.ScrollTo(pScrollTo);
+		else
 			m_ppHost.ScrollToTop();
-		}
-		else if (nIDSection)
-		{
-			m_ppHost.ScrollTo(pPage->GetDlgItem(nIDSection));
-		}
 
 		// special page handling
 		if (pPage == &m_pageTaskDef)
@@ -488,6 +528,8 @@ void CPreferencesDlg::OnSelchangedPages(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		// update caption
 		m_sPageTitle = GetItemPath(htiSel);
 		UpdateData(FALSE);
+
+		UpdatePageTitleTextColors();
 	}
 	
 	m_tcPages.SetFocus();
@@ -632,17 +674,27 @@ void CPreferencesDlg::SetUITheme(const CUIThemeFile& theme)
 	m_theme = theme;
 
 	m_sbGrip.SetBackgroundColor(theme.crAppBackLight);
-
-	SetTitleThemeColors(m_stPageTitle, theme);
+	m_stPageTitle.SetBkgndColors(theme.crStatusBarLight, theme.crStatusBarDark);
+	m_stPageTitle.SetBkgndStyle(theme.HasGlass(), theme.HasGradient());
+	
+	UpdatePageTitleTextColors();
 	
 	if (GetSafeHwnd())
 		Invalidate(TRUE);
 }
 
-void CPreferencesDlg::SetTitleThemeColors(CEnStatic& stTitle, const CUIThemeFile& theme)
+void CPreferencesDlg::UpdatePageTitleTextColors()
 {
-	stTitle.SetColors(theme.crStatusBarText, theme.crStatusBarLight, theme.crStatusBarDark, 
-						theme.HasGlass(), theme.HasGradient(), FALSE);
+	COLORREF crText = m_theme.crStatusBarText, crBack = CLR_NONE;
+
+	if (m_aSearchTerms.GetSize() &&
+		CPreferencesPageBase::UITextContainsOneOf(m_sPageTitle, m_aSearchTerms))
+	{
+		crText = 0;
+		crBack = HILITE_COLOUR;
+	}
+
+	m_stPageTitle.SetTextColors(crText, crBack);
 }
 
 BOOL CPreferencesDlg::OnEraseBkgnd(CDC* pDC)
@@ -734,19 +786,81 @@ LRESULT CPreferencesDlg::OnUpdateSearch(WPARAM wParam, LPARAM lParam)
 
 		CWaitCursor cursor;
 
-		VERIFY(m_ppHost.CreateAllPages());
+		// Forcibly create all pages and translate them
+		if (CLocalizer::IsInitialized())
+		{
+			int nPage = m_ppHost.GetPageCount();
+
+			while (nPage--)
+			{
+				CPropertyPage* pPage = m_ppHost.GetPage(nPage);
+				ASSERT(pPage);
+
+				if (!pPage->GetSafeHwnd())
+				{
+					if (!EnsurePageCreated(nPage))
+						return FALSE;
+
+					// Showing the page triggers translation
+					pPage->ShowWindow(SW_SHOWNOACTIVATE);
+					pPage->ShowWindow(SW_HIDE);
+				}
+			}
+		}
+		else
+		{
+			VERIFY(m_ppHost.CreateAllPages());
+		}
 	}
 
 	CHoldRedraw hr(m_tcPages);
+	
+	CString sSearchText = GetCtrlText(&m_eSearchText);
+	CStringArray aSearchText;
 
-	UpdateData();
-	AddPagesToTree(TRUE);
+	Misc::Split(sSearchText, aSearchText, ' ');
 
-	if (!m_tcPages.GetCount())
-		AddPagesToTree(FALSE); // add all pages
+	if (!Misc::MatchAll(aSearchText, m_aSearchTerms))
+	{
+		m_aSearchTerms.Copy(aSearchText);
 
-	m_tcPages.SelectItem(m_tcPages.GetChildItem(NULL));
-	Resize();
+		AddPagesToTree(TRUE);
+
+		if (!m_tcPages.GetCount())
+			AddPagesToTree(FALSE); // add all pages
+
+		Resize();
+	}
 
 	return 0L;
 }
+
+void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = CDRF_DODEFAULT; // catch all
+
+	NMTVCUSTOMDRAW* pTVCD = (NMTVCUSTOMDRAW*)pNMHDR;
+	HTREEITEM hti = (HTREEITEM)pTVCD->nmcd.dwItemSpec;
+
+	switch (pTVCD->nmcd.dwDrawStage)
+	{
+		case CDDS_PREPAINT:
+			if (m_aSearchTerms.GetSize())
+				*pResult = CDRF_NOTIFYITEMDRAW;
+			break;
+
+		case CDDS_ITEMPREPAINT:
+			if (m_aSearchTerms.GetSize())
+			{
+				CString sPage = m_tcPages.GetItemText(hti);
+
+				if (CPreferencesPageBase::UITextContainsOneOf(sPage, m_aSearchTerms))
+				{
+					pTVCD->clrTextBk = HILITE_COLOUR;
+					*pResult = CDRF_NEWFONT;
+				}
+			}
+			break;
+	}
+}
+

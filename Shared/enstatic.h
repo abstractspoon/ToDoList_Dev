@@ -18,13 +18,15 @@ public:
 
 	void EnableGripper(BOOL bEnable = TRUE);
 	BOOL SetFontStyle(BOOL bBold, BOOL bItalic = FALSE, BOOL bUnderline = FALSE, BOOL bStrikeThru = FALSE);
-	void SetColors(COLORREF crText, COLORREF crBkFrom, COLORREF crBkTo, BOOL bGlass, BOOL bGradient, BOOL bHorz = TRUE);
+	void SetTextColors(COLORREF crTextFore, COLORREF crTextBack = CLR_NONE);
+	void SetBkgndColors(COLORREF crBackFrom, COLORREF crBackTo = CLR_NONE);
+	void SetBkgndStyle(BOOL bGlass, BOOL bGradient, BOOL bHorz = FALSE);
 
 // Attributes
 protected:
 	BOOL m_bGripper;
 	CFont m_font;
-	COLORREF m_crText, m_crBackFrom, m_crBackTo;
+	COLORREF m_crTextFore, m_crTextBack, m_crBackFrom, m_crBackTo;
 	BOOL m_bGlass, m_bGradient, m_bHorz;
 
 // Overrides

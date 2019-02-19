@@ -5,6 +5,7 @@
 #include "StylesheetParamConfigDlg.h"
 #include "misc.h"
 #include "filemisc.h"
+#include "Graphicsmisc.h"
 
 #include <shlwapi.h>
 
@@ -16,12 +17,12 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT LIST_CX	= 300;
-const UINT LIST_CY	= 200;
-const UINT SPACING	= 7; 
-const UINT BORDER	= 7; 
-const UINT BTN_CX	= 50;
-const UINT BTN_CY	= 14;
+const UINT LIST_CX	= GraphicsMisc::ScaleByDPIFactor(300);
+const UINT LIST_CY	= GraphicsMisc::ScaleByDPIFactor(200);
+const UINT SPACING	= GraphicsMisc::ScaleByDPIFactor(7);
+const UINT BORDER	= GraphicsMisc::ScaleByDPIFactor(7);
+const UINT BTN_CX	= GraphicsMisc::ScaleByDPIFactor(50);
+const UINT BTN_CY	= GraphicsMisc::ScaleByDPIFactor(14);
 
 const UINT IDC_LIST	= 1000;
 

@@ -13,6 +13,8 @@
 
 #include "..\Interfaces\IPreferences.h"
 
+#include <afxtempl.h>
+
 /////////////////////////////////////////////////////////////////////////////
 
 const UINT WM_PPB_CTRLCHANGE = ::RegisterWindowMessage(_T("WM_PPB_CTRLCHANGE"));
@@ -40,14 +42,25 @@ public:
 	void SetBackgroundColor(COLORREF color);
 	CWnd* GetDlgItem(UINT nID) const;
 	UINT GetHelpID() const { return m_nHelpID; }
-	BOOL ContainsUIText(LPCTSTR szText) const;
-	BOOL ContainsUIText(const CStringArray& aText, BOOL bFindOneOf = TRUE) const;
+	BOOL UITextContains(LPCTSTR szSearch) const;
+	BOOL UITextContainsOneOf(const CStringArray& aSearch) const;
+	BOOL HighlightUIText(const CStringArray& aSearch, COLORREF crHighlight);
+	void ClearHighlights();
+	CWnd* GetFirstHighlightedItem() const;
+
+	static BOOL UITextContainsOneOf(const CWnd* pWnd, const CStringArray& aSearch);
+	static BOOL UITextContainsOneOf(const CString& sUIText, const CStringArray& aSearch);
 
 protected:
-	HBRUSH m_brush;
+	HBRUSH m_brBack;
 	COLORREF m_crback;
 	BOOL m_bFirstShow;
 	UINT m_nHelpID;
+
+	CArray<HWND, HWND&> m_aHighlightedCtrls;
+	HBRUSH m_brHighlight;
+	COLORREF m_crHighlight;
+
 	CGroupLineManager m_mgrGroupLines;
 
 protected:
@@ -64,7 +77,9 @@ protected:
 
 protected:
 	BOOL AddGroupLine(UINT nIDStatic);
-
+	int FindMatchingCtrls(const CWnd* pWnd, const CStringArray& aSearch, CArray<HWND, HWND&>& aMatching) const;
+	
+	BOOL GetHighlightRect(HWND hwnd, CRect& rHighlight) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -78,7 +78,7 @@ static char THIS_FILE[] = __FILE__;
 
 // In DLU
 const int CTRLHEIGHT		= 13;
-const int LABELHEIGHT		= 8; 
+const int LABELHEIGHT		= 9; 
 const int CTRLHSPACING		= 6; 
 const int CTRLVSPACING		= 4; 
 const int CTRLLEN			= 75;
@@ -96,6 +96,7 @@ const int DEFCOMMENTSIZE		= GraphicsMisc::ScaleByDPIFactor(260);
 const int MINNONCOMMENTHEIGHT	= GraphicsMisc::ScaleByDPIFactor(250); // what's above the comment section
 const int MINNONCOMMENTWIDTH	= GraphicsMisc::ScaleByDPIFactor(350); // what's to the left of the comment section
 const int COMBODROPHEIGHT		= GraphicsMisc::ScaleByDPIFactor(200);
+const int MINSTACKEDCOMMENTSIZE = GraphicsMisc::ScaleByDPIFactor(60);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -876,12 +877,16 @@ int CToDoCtrl::GetDefaultControlHeight() const
 void CToDoCtrl::ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable)
 {
 	// project name
-	CRect rProject = GetCtrlRect(IDC_PROJECTNAME), rLabel(rProject); 
-	rProject.bottom = (rProject.top + GetDefaultControlHeight());
+	CRect rLabel = GetCtrlRect(IDC_PROJECTLABEL); 
+	CRect rProject = GetCtrlRect(IDC_PROJECTNAME); 
 
-	rLabel.OffsetRect(-rLabel.left, 0);
-	rLabel.right = rProject.left;
+	int nOffset = (rAvailable.left - rLabel.left);
 
+	rLabel.OffsetRect(nOffset, 0);
+	rProject.left += nOffset;
+
+	rLabel.top = rProject.top;
+	rLabel.bottom = rProject.bottom;
 	rProject.right = rAvailable.right;
 
 	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTLABEL), rLabel);
@@ -915,10 +920,14 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 	BOOL bStackedWithComments = GetStackCommentsAndControls();
 	BOOL bStackCommentsAbove = HasStyle(TDCS_STACKCOMMENTSABOVEEDITS);
 	
-	// To handle DPI scaling better simply use the height of the category combo
 	CDlgUnits dlu(this);
-	const int CTRLHEIGHT = dlu.FromPixelsY(GetDefaultControlHeight());
-	
+
+	const int nCtrlHeight = GetDefaultControlHeight();
+	const int nLabelHeight = dlu.ToPixelsY(LABELHEIGHT);
+	const int nVSpacing = dlu.ToPixelsY(CTRLVSPACING);
+	const int nCtrlWidth = dlu.ToPixelsX(CTRLLEN);
+	const int nHSpacing = dlu.ToPixelsX(CTRLHSPACING);
+
 	if (HasStyle(TDCS_AUTOREPOSCTRLS))
 	{
 		int nAvailHeight = -1, nAvailWidth = -1;
@@ -943,14 +952,11 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 
 		if (nAvailHeight > 0)
 		{
-			int nCtrlHeightDLU = (CTRLHEIGHT + LABELHEIGHT + CTRLVSPACING);
-			int nAvailHeightDLU = dlu.FromPixelsY(nAvailHeight);
-
-			// To account of the 'extra' CTRLVSPACING that will occur
+			// Account of the 'extra' CTRLVSPACING that will occur
 			// after the last column we add it into our calculations
-			nAvailHeightDLU += CTRLVSPACING;
+			nAvailHeight += nVSpacing;
 
-			nRows = max(2, nAvailHeightDLU / nCtrlHeightDLU);
+			nRows = max(2, nAvailHeight / (nCtrlHeight + nLabelHeight + nVSpacing));
 			nCols = (nVisibleCtrls / nRows) + ((nVisibleCtrls % nRows) ? 1 : 0);
 
 			// recalc actual rows used
@@ -958,14 +964,11 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 		}
 		else if (nAvailWidth > 0)
 		{
-			int nCtrlWidthDLU = (CTRLLEN + CTRLHSPACING);
-			int nAvailWidthDLU = dlu.FromPixelsX(nAvailWidth);
-
-			// To account of the 'extra' CTRLHSPACING that will occur
+			// Account of the 'extra' CTRLHSPACING that will occur
 			// after the last column we add it into our calculations
-			nAvailWidthDLU += CTRLHSPACING;
+			nAvailWidth += nHSpacing;
 
-			nCols = max(2, nAvailWidthDLU / nCtrlWidthDLU);
+			nCols = max(2, nAvailWidth / (nCtrlWidth + nHSpacing));
 			nRows = (nVisibleCtrls / nCols) + ((nVisibleCtrls % nCols) ? 1 : 0);
 		}
 	}
@@ -997,8 +1000,8 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 	// of the 'extra' spacing above
 	rRequired = rAvailable;
 	
-	int nRequiredWidth = dlu.ToPixelsX((nCols * CTRLLEN) - CTRLHSPACING);
-	int nRequiredHeight = dlu.ToPixelsY((nRows * (CTRLHEIGHT + LABELHEIGHT + CTRLVSPACING)) - CTRLVSPACING);
+	int nRequiredWidth = ((nCols * (nCtrlWidth + nHSpacing)) - nHSpacing);
+	int nRequiredHeight = ((nRows * (nCtrlHeight + nLabelHeight + nVSpacing)) - nVSpacing);
 
 	switch (m_nControlsPos)
 	{
@@ -1082,8 +1085,6 @@ void CToDoCtrl::ReposControls(CDeferWndMove* pDWM, CRect& rAvailable, BOOL bSpli
 	if (!bSplitting && bStackCommentsAndControls)
 	{
 		BOOL bStackCommentsAbove = HasStyle(TDCS_STACKCOMMENTSABOVEEDITS);
-
-		const int MIN_STACKED_COMMENT_SIZE = 60;
 		CRect rStackedAvail(rAvailable);
 
 		switch (m_nControlsPos)
@@ -1092,34 +1093,34 @@ void CToDoCtrl::ReposControls(CDeferWndMove* pDWM, CRect& rAvailable, BOOL bSpli
 		case TDCUIL_LEFT:
 			if (bStackCommentsAbove)
 			{
-				bCtrlsFit = ((rCtrls.top - rAvailable.top) >= MIN_STACKED_COMMENT_SIZE);
+				bCtrlsFit = ((rCtrls.top - rAvailable.top) >= MINSTACKEDCOMMENTSIZE);
 
 				if (!bCtrlsFit)
-					rStackedAvail.top += MIN_STACKED_COMMENT_SIZE;
+					rStackedAvail.top += MINSTACKEDCOMMENTSIZE;
 			}
 			else
 			{
-				bCtrlsFit = ((rAvailable.bottom - rCtrls.bottom) >= MIN_STACKED_COMMENT_SIZE);
+				bCtrlsFit = ((rAvailable.bottom - rCtrls.bottom) >= MINSTACKEDCOMMENTSIZE);
 
 				if (!bCtrlsFit)
-					rStackedAvail.bottom -= MIN_STACKED_COMMENT_SIZE;
+					rStackedAvail.bottom -= MINSTACKEDCOMMENTSIZE;
 			}
 			break;
 			
 		case TDCUIL_BOTTOM: // horizontal
 			if (bStackCommentsAbove)
 			{
-				bCtrlsFit = ((rCtrls.left - rAvailable.left) >= MIN_STACKED_COMMENT_SIZE);
+				bCtrlsFit = ((rCtrls.left - rAvailable.left) >= MINSTACKEDCOMMENTSIZE);
 
 				if (!bCtrlsFit)
-					rStackedAvail.left += MIN_STACKED_COMMENT_SIZE;
+					rStackedAvail.left += MINSTACKEDCOMMENTSIZE;
 			}
 			else
 			{
-				bCtrlsFit = ((rAvailable.right - rCtrls.right) >= MIN_STACKED_COMMENT_SIZE);
+				bCtrlsFit = ((rAvailable.right - rCtrls.right) >= MINSTACKEDCOMMENTSIZE);
 
 				if (!bCtrlsFit)
-					rStackedAvail.right -= MIN_STACKED_COMMENT_SIZE;
+					rStackedAvail.right -= MINSTACKEDCOMMENTSIZE;
 			}
 			break;
 		}
@@ -1179,16 +1180,16 @@ void CToDoCtrl::ReposControls(CDeferWndMove* pDWM, CRect& rAvailable, BOOL bSpli
 	
 	ASSERT(nVisibleCtrls);
 	
-	// Note: All calculations are performed in DLU until just before the move
-	// is performed. This ensures that we minimize the risk of rounding errors.
 	CDlgUnits dlu(this);
 
-	int nXPosDLU = 0, nYPosDLU = 0;
-	int nWidthDLU = dlu.FromPixelsX(rCtrls.Width());
+	const int nCtrlHeight = GetDefaultControlHeight();
+	const int nLabelHeight = dlu.ToPixelsY(LABELHEIGHT);
+	const int nVSpacing = dlu.ToPixelsY(CTRLVSPACING);
+	const int nCtrlWidth = dlu.ToPixelsX(CTRLLEN);
+	const int nHSpacing = dlu.ToPixelsX(CTRLHSPACING);
 
-	// To handle DPI scaling better simply use the height of the category combo
-	int nActualCtrlHeight = GetDefaultControlHeight();
-	const int CTRLHEIGHT = dlu.FromPixelsY(nActualCtrlHeight);
+	int nXPos = 0, nYPos = 0;
+	int nWidth = rCtrls.Width();
 
 	for (int nCtrl = 0; nCtrl < aControls.GetSize(); nCtrl++)
 	{
@@ -1198,30 +1199,24 @@ void CToDoCtrl::ReposControls(CDeferWndMove* pDWM, CRect& rAvailable, BOOL bSpli
 		if ((nCtrl != 0) && ((nCtrl % nCols) == 0))
 		{
 			// move to next line
-			nXPosDLU = 0;
-			nYPosDLU += (CTRLVSPACING + LABELHEIGHT + CTRLHEIGHT);
+			nXPos = 0;
+			nYPos += (nCtrlHeight + nLabelHeight + nVSpacing);
 		}
 		
-		CRect rCtrlDLU(nXPosDLU, nYPosDLU, nXPosDLU + CTRLLEN, nYPosDLU + LABELHEIGHT);
-		CRect rCtrl = rCtrlDLU;
-		
-		dlu.ToPixels(rCtrl);
+		// Move label
+		CRect rCtrl(nXPos, nYPos, nXPos + nCtrlWidth, nYPos + nLabelHeight);
 		rCtrl.OffsetRect(rCtrls.TopLeft());
 
 		pDWM->MoveWindow(GetDlgItem(ctrl.nLabelID), rCtrl);
 		
 		// move ctrl
-		rCtrlDLU.OffsetRect(0, LABELHEIGHT);
-		rCtrl = rCtrlDLU;
-		
-		dlu.ToPixels(rCtrl);
-		rCtrl.bottom = (rCtrl.top + nActualCtrlHeight);
+		rCtrl.OffsetRect(0, nLabelHeight);
+		rCtrl.bottom = (rCtrl.top + nCtrlHeight);
 
-		rCtrl.OffsetRect(rCtrls.TopLeft());
 		ReposControl(ctrl, pDWM, rCtrl, rCtrls.right);
 		
 		// update XPos for the control
-		nXPosDLU = rCtrlDLU.right + CTRLHSPACING;
+		nXPos += (nCtrlWidth + nHSpacing);
 	}
 }
 
@@ -1448,7 +1443,8 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 						rComments.top = rCtrls.top;
 						rComments.bottom = rCtrls.top + m_nCommentsSize;
 
-						rAvailable.bottom = rComments.top - SPLITSIZE;
+						const int PADDING = (SPLITSIZE / 2);
+						rAvailable.bottom = rComments.top - (SPLITSIZE + PADDING);
 					}
 					break;
 				}
@@ -1481,7 +1477,8 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 					rComments.left = rAvailable.left;
 					rComments.top = rAvailable.bottom - m_nCommentsSize;
 
-					rAvailable.bottom = rComments.top - SPLITSIZE;
+					const int PADDING = (SPLITSIZE / 2);
+					rAvailable.bottom = rComments.top - (SPLITSIZE + PADDING);
 				}
 				break;
 			}
@@ -5982,6 +5979,7 @@ void CToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis)
 	// hide/show controls which may have been affected
 	if (bEditChange || (bColumnChange && (vis.GetShowFields() == TDLSA_ASCOLUMN)))
 	{		
+		Invalidate();
 		Resize();
 		UpdateControls(FALSE); // don't update comments
 	}
@@ -8313,75 +8311,100 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 
 	CTaskFile tasks;
 
-	if (CTaskClipboard::GetTasks(tasks, sClipID))
+	if (!CTaskClipboard::GetTasks(tasks, sClipID))
+		return FALSE;
+
+	// else
+	HTREEITEM htiDest = NULL, htiDestAfter = NULL;
+	
+	switch (nWhere)
 	{
-		HTREEITEM htiDest = NULL, htiDestAfter = NULL;
-
-		switch (nWhere)
-		{
-		case TDCP_ONSELTASK:
-			htiDest = m_taskTree.GetTreeSelectedItem();
-			htiDestAfter = TVI_FIRST;
-			break;
-
-		case TDCP_BELOWSELTASK:
-			htiDestAfter = m_taskTree.GetTreeSelectedItem();
-			
-			if (!htiDestAfter)
-				htiDestAfter = TVI_LAST;
-			else
-				htiDest = m_taskTree.GetParentItem(htiDestAfter);
-			break;
-
-		case TDCP_ATBOTTOM:
+	case TDCP_ONSELTASK:
+		htiDest = m_taskTree.GetTreeSelectedItem();
+		htiDestAfter = TVI_FIRST;
+		break;
+		
+	case TDCP_BELOWSELTASK:
+		htiDestAfter = m_taskTree.GetTreeSelectedItem();
+		
+		if (!htiDestAfter)
 			htiDestAfter = TVI_LAST;
-			break;
-		}
-			
-		if (bAsRef)
-		{
-			// remove tasks not originally selected
-			RemoveNonSelectedTasks(tasks);
-
-			// pre-process the tasks to add themselves
-			// as a reference, and then to clear the task ID
-			// so that it gets a newly allocated one
-			PrepareTaskIDsForPasteAsRef(tasks);
-		}
 		else
+			htiDest = m_taskTree.GetParentItem(htiDestAfter);
+		break;
+		
+	case TDCP_ATBOTTOM:
+		htiDestAfter = TVI_LAST;
+		break;
+	}
+	
+	if (bAsRef)
+	{
+		// remove tasks not originally selected
+		RemoveNonSelectedTasks(tasks);
+		
+		// pre-process the tasks to add themselves
+		// as a reference, and then to clear the task ID
+		// so that it gets a newly allocated one
+		PrepareTaskIDsForPasteAsRef(tasks);
+	}
+	else
+	{
+		// pre-process task IDs if the tasks did *not* originate 
+		// from us (or our archive) and we're not empty
+		TDC_RESETIDS nResetID = TDCR_YES;
+		
+		if (CTaskClipboard::ClipIDMatches(sClipID) ||
+			(bCheckArchive && CTaskClipboard::ClipIDMatches(sArchiveID)))
 		{
-			// pre-process task IDs if the tasks did *not* originate 
-			// from us (or our archive) and we're not empty
-			TDC_RESETIDS nResetID = TDCR_YES;
-			
-			if (CTaskClipboard::ClipIDMatches(sClipID) ||
-				(bCheckArchive && CTaskClipboard::ClipIDMatches(sArchiveID)))
-			{
-				nResetID = TDCR_CHECK;
-			}
-			else if (GetTaskCount() == 0)
-			{
-				nResetID = TDCR_NO;
-			}
-
-			// and fix up the dependencies of the tasks
-			// and the creation date
-			PrepareTasksForPaste(tasks, nResetID, TRUE);
+			nResetID = TDCR_CHECK;
 		}
-
-		IMPLEMENT_DATA_UNDO(m_data, TDCUAT_PASTE);
-		HOLD_REDRAW(*this, m_taskTree);
-
-		// no need to re-check IDs as we've already done it
-		if (PasteTasksToTree(tasks, htiDest, htiDestAfter, TDCR_NO, TRUE))
+		else if (GetTaskCount() == 0)
 		{
-			FixupParentCompletion(GetTaskID(htiDest));
-			return TRUE;
+			nResetID = TDCR_NO;
+		}
+		
+		// and fix up the dependencies of the tasks
+		// and the creation date
+		PrepareTasksForPaste(tasks, nResetID, TRUE);
+	}
+		
+	// Merge in any custom attributes we don't already have
+	CTDCCustomAttribDefinitionArray aOrgAttribDefs, aPasteAttribDefs;
+	aOrgAttribDefs.Copy(m_aCustomAttribDefs);
+	
+	BOOL bRebuildCustomUI = (tasks.GetCustomAttributeDefs(aPasteAttribDefs) &&
+								m_aCustomAttribDefs.Append(aPasteAttribDefs));
+	
+	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_PASTE);
+	{
+		HOLD_REDRAW(*this, m_taskTree);
+			
+		// no need to re-check IDs as we've already done it
+		if (!PasteTasksToTree(tasks, htiDest, htiDestAfter, TDCR_NO, TRUE))
+		{
+			if (bRebuildCustomUI)
+			{
+				m_aCustomAttribDefs.Copy(aOrgAttribDefs);
+			}
+			
+			return FALSE;
 		}
 	}
 
-   // else
-   return FALSE;
+	FixupParentCompletion(GetTaskID(htiDest));
+	
+	if (bRebuildCustomUI)
+	{
+		RebuildCustomAttributeUI();
+		
+		CTDCCustomAttributeDataMap mapData;
+		
+		if (GetSelectedTaskCustomAttributeData(mapData))
+			CTDCCustomAttributeHelper::UpdateControls(this, m_aCustomControls, m_aCustomAttribDefs, mapData);
+	}
+	
+	return TRUE;
 }
 
 BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent, HTREEITEM htiDestAfter, 

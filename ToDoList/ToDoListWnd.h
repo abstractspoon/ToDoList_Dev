@@ -572,6 +572,7 @@ protected:
 	void OnTimerTimeTrackReminder();
 	void OnTimerAutoMinimize();
 
+	void OnEditPaste(TDC_PASTE nPasteWhere, TDLID_IMPORTTO nImportWhere);
 	void OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags);
 	void OnEditUndoRedo(BOOL bUndo);
 	void OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo);

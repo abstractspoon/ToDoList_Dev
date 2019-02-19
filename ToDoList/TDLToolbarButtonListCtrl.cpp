@@ -8,6 +8,7 @@
 
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\enmenu.h"
+#include "..\Shared\GraphicsMisc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -90,10 +91,10 @@ void CTDLToolbarButtonListCtrl::InitState()
 		m_cbMenuItems.Initialise(IDR_MAINFRAME, IDS_TOOLBARMENUSEPARATOR);
 	}
 
-	AddCol(_T("Menu Item"), 350);
+	AddCol(_T("Menu Item"), GraphicsMisc::ScaleByDPIFactor(350));
 	SetColumnType(MENUID_COL, ILCT_DROPLIST);
 
-	AddCol(_T("Image"), 75);
+	AddCol(_T("Image"), GraphicsMisc::ScaleByDPIFactor(75));
 	SetColumnType(IMAGE_COL, ILCT_BROWSE);
 
 	SetAutoRowPrompt(CEnString(IDS_NEW_TOOLBARBUTTON));

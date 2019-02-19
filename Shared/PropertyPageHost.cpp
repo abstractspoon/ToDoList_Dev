@@ -176,14 +176,7 @@ BOOL CPropertyPageHost::EnsurePageCreated(int nIndex)
 		pPage->ModifyStyleEx(0, WS_EX_CONTROLPARENT | DS_CONTROL);
 
 		// make sure the page is a child and modify it if necessary
-		pPage->ModifyStyle(WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW, 0);
-
-		if (!(pPage->GetStyle() & WS_CHILD))
-		{
-			pPage->ModifyStyle(0, WS_CHILD);
-			pPage->SetParent(this);
-			ASSERT (pPage->GetParent() == this);
-		}
+		pPage->ModifyStyle(WS_POPUPWINDOW | WS_OVERLAPPEDWINDOW, WS_CHILD);
 
 		// set font to our parent's font
 		CWnd* pOurParent = GetParent();
@@ -196,6 +189,7 @@ BOOL CPropertyPageHost::EnsurePageCreated(int nIndex)
 
 		// and our parent
 		pPage->SetParent(this);
+		ASSERT(pPage->GetParent() == this);
 
 		// snapshot the pages original size
 		CRect rOrg;
@@ -301,8 +295,10 @@ BOOL CPropertyPageHost::SetActivePage(int nIndex, BOOL bAndFocus)
 			if (pCtrl)
 				pCtrl->SetFocus();
 		}
-		else
+		else if (pFocus)
+		{
 			pFocus->SetFocus();
+		}
 
 		m_nSelIndex = nIndex;
 	}
@@ -380,7 +376,7 @@ BOOL CPropertyPageHost::PreTranslateMessage(MSG* pMsg)
 		if (pActive->PreTranslateMessage(pMsg))
 			return TRUE;
 		
-		else if (pActive->IsDialogMessage(pMsg)) 
+		if (pActive->IsDialogMessage(pMsg)) 
 			return TRUE;
 	}
 	

@@ -16,26 +16,27 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CDlgUnits::CDlgUnits(HWND hWnd, BOOL bDlgParent) 
-	: m_hWnd(NULL), m_dlgBaseUnits(0)
+CDlgUnits::CDlgUnits(HWND hWnd, BOOL bDlgParent) : m_hWnd(NULL)
 {
-	Initialise(hWnd, bDlgParent);
+	VERIFY(Initialise(hWnd, bDlgParent));
 }
 
-CDlgUnits::CDlgUnits(const CWnd* pWnd, BOOL bDlgParent) 
-	: m_hWnd(NULL), m_dlgBaseUnits(0)
+CDlgUnits::CDlgUnits(const CWnd* pWnd, BOOL bDlgParent)	: m_hWnd(NULL)
 {
-	Initialise((pWnd ? pWnd->GetSafeHwnd() : NULL), bDlgParent);
+	VERIFY(Initialise(*pWnd, bDlgParent));
 }
 
 CDlgUnits::~CDlgUnits()
 {
 }
 
-void CDlgUnits::Initialise(HWND hWnd, BOOL bDlgParent)
+BOOL CDlgUnits::Initialise(HWND hWnd, BOOL bDlgParent)
 {
+	if (!hWnd || !IsWindow(hWnd))
+		return FALSE;
+
 	// Figure out what hWnd we are really interested in
-	if (hWnd && bDlgParent)
+	if (bDlgParent)
 	{
 		HWND hwndDlg(hWnd);
 
@@ -46,19 +47,8 @@ void CDlgUnits::Initialise(HWND hWnd, BOOL bDlgParent)
 			hWnd = hwndDlg;
 	}
 
-	// Get the dialog units for that window
-	if (!hWnd || !CWinClasses::IsDialog(hWnd))
-	{
-		DWORD dwDLBU = ::GetDialogBaseUnits();
-		
-		m_dlgBaseUnits.cx = LOWORD(dwDLBU);
-		m_dlgBaseUnits.cy = HIWORD(dwDLBU);
-	}
-	else
-	{
-		m_hWnd = hWnd;
-		m_dlgBaseUnits.cx = m_dlgBaseUnits.cy = 0;
-	}
+	m_hWnd = hWnd;
+	return TRUE;
 }
 
 int CDlgUnits::ToPixelsX(int x) const
@@ -95,19 +85,13 @@ int CDlgUnits::FromPixelsY(int y) const
 
 void CDlgUnits::ToPixels(long& x, long& y) const
 {
-	if (m_hWnd)
-	{
-		CRect rect(0, 0, x, y);
-		MapDialogRect(m_hWnd, rect);
+	ASSERT(m_hWnd);
 
-		x = rect.right;
-		y = rect.bottom;
-	}
-	else
-	{
-		x = MulDiv(x, m_dlgBaseUnits.cx, 4);
-		y = MulDiv(y, m_dlgBaseUnits.cy, 8);
-	}
+	CRect rect(0, 0, x, y);
+	MapDialogRect(m_hWnd, rect);
+
+	x = rect.right;
+	y = rect.bottom;
 }
 
 void CDlgUnits::ToPixels(int& x, int& y) const
@@ -146,20 +130,14 @@ void CDlgUnits::ToPixels(SIZE& size) const
 
 void CDlgUnits::FromPixels(long& x, long& y) const
 {
-	if (m_hWnd)
-	{
-		// this is a bit messy because there is no MapDialogRect() in reverse
-		CRect rect(0, 0, 1000, 1000);
-		MapDialogRect(m_hWnd, rect);
+	ASSERT(m_hWnd);
 
-		x = MulDiv(x, 1000, rect.right);
-		y = MulDiv(y, 1000, rect.right);
-	}
-	else
-	{
-		x = MulDiv(x, 4, m_dlgBaseUnits.cx);
-		y = MulDiv(y, 8, m_dlgBaseUnits.cy);
-	}
+	// this is a bit messy because there is no MapDialogRect() in reverse
+	CRect rect(0, 0, 1000, 1000);
+	MapDialogRect(m_hWnd, rect);
+
+	x = MulDiv(x, 1000, rect.right);
+	y = MulDiv(y, 1000, rect.right);
 }
 
 void CDlgUnits::FromPixels(int& x, int& y) const

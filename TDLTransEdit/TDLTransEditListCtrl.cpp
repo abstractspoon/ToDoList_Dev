@@ -9,6 +9,7 @@
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\misc.h"
+#include "..\shared\Graphicsmisc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -40,9 +41,9 @@ END_MESSAGE_MAP()
 
 void CTDLTransEditListCtrl::Initialise()
 {
-	AddCol(_T("English Text"), 300);
-	AddCol(_T("Translated Text"), 300);
-	AddCol(_T("UI Hint"), 100);
+	AddCol(_T("English Text"), GraphicsMisc::ScaleByDPIFactor(300));
+	AddCol(_T("Translated Text"), GraphicsMisc::ScaleByDPIFactor(300));
+	AddCol(_T("UI Hint"), GraphicsMisc::ScaleByDPIFactor(100));
 
 	DisableColumnEditing(0, TRUE);
 	DisableColumnEditing(2, TRUE);

@@ -1065,13 +1065,18 @@ int CDialogHelper::AddString(CComboBox& combo, LPCTSTR szItem, DWORD dwItemData)
 	return nIndex;
 }
 
-CString CDialogHelper::GetCtrlText(const CWnd* pWnd)
+CString CDialogHelper::GetCtrlText(const CWnd* pWnd, BOOL bStripAccelerator)
 {
 	ASSERT_VALID(pWnd);
 	CString sText;
 
 	if (pWnd)
+	{
 		pWnd->GetWindowText(sText);
+
+		if (bStripAccelerator)
+			CAcceleratorString::RemoveAccelerator(sText);
+	}
 
 	return sText;
 }
@@ -1170,7 +1175,7 @@ BOOL CDialogHelper::SetCtrlsText(CWnd* pParent, const CStringArray& aItems, cons
 	return TRUE;
 }
 
-int CDialogHelper::GetCtrlsText(const CWnd* pParent, CStringArray& aItems)
+int CDialogHelper::GetCtrlsText(const CWnd* pParent, CStringArray& aItems, BOOL bStripAccelerator)
 {
 	ASSERT_VALID(pParent);
 
@@ -1180,17 +1185,17 @@ int CDialogHelper::GetCtrlsText(const CWnd* pParent, CStringArray& aItems)
 
 	while (pChild)
 	{
-		aItems.Add(GetCtrlText(pChild));
+		aItems.Add(GetCtrlText(pChild, bStripAccelerator));
 		pChild = pChild->GetNextWindow();
 	}
 
 	return aItems.GetSize();
 }
 
-int CDialogHelper::GetCtrlsText(const CWnd* pParent, CStringArray& aItems, LPCTSTR szClass)
+int CDialogHelper::GetCtrlsText(const CWnd* pParent, CStringArray& aItems, LPCTSTR szClass, BOOL bStripAccelerator)
 {
 	if (Misc::IsEmpty(szClass))
-		return GetCtrlsText(pParent, aItems);
+		return GetCtrlsText(pParent, aItems, bStripAccelerator);
 
 	// else
 	LPCTSTR szClasses[] = { szClass };
@@ -1198,7 +1203,7 @@ int CDialogHelper::GetCtrlsText(const CWnd* pParent, CStringArray& aItems, LPCTS
 	return GetCtrlsText(pParent, aItems, szClasses, 1);
 }
 
-int CDialogHelper::GetCtrlsText(const CWnd* pParent, CStringArray& aItems, const LPCTSTR szClasses[], int nNumClasses)
+int CDialogHelper::GetCtrlsText(const CWnd* pParent, CStringArray& aItems, const LPCTSTR szClasses[], int nNumClasses, BOOL bStripAccelerator)
 {
 	ASSERT_VALID(pParent);
 	ASSERT(nNumClasses);
@@ -1208,7 +1213,7 @@ int CDialogHelper::GetCtrlsText(const CWnd* pParent, CStringArray& aItems, const
 	while (pChild)
 	{
 		if (CtrlMatchesClassFilters(pChild, szClasses, nNumClasses))
-			aItems.Add(GetCtrlText(pChild));
+			aItems.Add(GetCtrlText(pChild, bStripAccelerator));
 
 		pChild = pChild->GetNextWindow();
 	}
@@ -1686,6 +1691,17 @@ void CDialogHelper::EnableAllCtrls(const CWnd* pParent, BOOL bEnable)
 	while (pChild)
 	{
 		pChild->EnableWindow(bEnable);
+		pChild = pChild->GetNextWindow();
+	}
+}
+
+void CDialogHelper::InvalidateAllCtrls(const CWnd* pParent, BOOL bErase)
+{
+	CWnd* pChild = pParent->GetWindow(GW_CHILD);
+
+	while (pChild)
+	{
+		pChild->Invalidate(bErase);
 		pChild = pChild->GetNextWindow();
 	}
 }

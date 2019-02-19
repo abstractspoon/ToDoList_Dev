@@ -92,7 +92,7 @@ CRemoteFileDialog::CRemoteFileDialog(CFtpConnection* pConnection, LPCTSTR szServ
 
 	AddRCControl(_T("SCROLLBAR"), _T(""), _T(""), SBS_RIGHTALIGN, 0,270,160,8,16, IDC_GRIPPER);
     AddRCControl(_T("LTEXT"), _T(""), _T("Current Folder:"), 0, 0,0,7,70,8,IDC_CURFOLDERLABEL);
-    AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_AUTOHSCROLL | ES_READONLY, 0,74,4,198,14,IDC_CURRENTFOLDER);
+    AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_AUTOHSCROLL | ES_READONLY, 0,74,4,198,13,IDC_CURRENTFOLDER);
     AddRCControl(_T("LTEXT"), _T(""), _T("Files of &type:"), 0, 0,0,164,70,8,IDC_FILETYPESLABEL);
     AddRCControl(_T("LTEXT"), _T(""), _T("Remote file &name:"), 0, 0,0,146,70,8,IDC_FILENAMELABEL);
     AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP, 0,74,163,154,100,IDC_FILETYPES);

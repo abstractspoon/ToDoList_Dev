@@ -330,11 +330,13 @@ protected:
 	CIcon m_iconSearch;
 	CWndPromptManager m_mgrPrompts;
 
-	CString	m_sSearchText;
+	CStringArray m_aSearchTerms;
 	CString m_sPageTitle;
 	CUIThemeFile m_theme;
 	TDCAUTOLISTDATA m_autoListData;
-	BOOL m_bInitDlg;
+
+	BOOL m_bInitialisingDialog;
+	BOOL m_bBuildingTree;
 
 	CPreferences m_prefs;
 	CMap<CPreferencesPageBase*, CPreferencesPageBase*, HTREEITEM, HTREEITEM&> m_mapPP2HTI;
@@ -353,9 +355,10 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CPreferencesDlg)
 	virtual BOOL OnInitDialog();
-	afx_msg void OnSelchangedPages(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTreeSelChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnApply();
 	//}}AFX_MSG
+	afx_msg void OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnUpdateSearch(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToolPageTestTool(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGenPageClearMRU(WPARAM wp, LPARAM lp);
@@ -377,8 +380,7 @@ protected:
 	virtual void ReposContents(CDeferWndMove& dwm, int nDX, int nDY);
 	virtual void LoadPreferences(const IPreferences* prefs, LPCTSTR szKey);
 
-	static void SetTitleThemeColors(CEnStatic& stTitle, const CUIThemeFile& theme);
-
+	void UpdatePageTitleTextColors();
 };
 
 //{{AFX_INSERT_LOCATION}}

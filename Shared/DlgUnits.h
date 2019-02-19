@@ -12,7 +12,7 @@
 class CDlgUnits  
 {
 public:
-	CDlgUnits(HWND hWnd = NULL, BOOL bDlgParent = FALSE);
+	CDlgUnits(HWND hWnd, BOOL bDlgParent = FALSE);
 	CDlgUnits(const CWnd* pWnd, BOOL bDlgParent = FALSE);
 	virtual ~CDlgUnits();
 
@@ -35,11 +35,10 @@ public:
 	void FromPixels(SIZE& size) const;
 
 protected:
-	CSize m_dlgBaseUnits;
 	HWND m_hWnd;
 
 protected:
-	void Initialise(HWND hWnd, BOOL bDlgParent);
+	BOOL Initialise(HWND hWnd, BOOL bDlgParent);
 
 };
 

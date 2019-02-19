@@ -47,17 +47,17 @@ public:
 	static BOOL IsChildOrSame(const CWnd* pWnd, const CWnd* pChild);
 	static BOOL CtrlWantsEnter(HWND hwnd);
 	static CString GetCtrlLabel(const CWnd* pWnd, BOOL bStripAccelerator = TRUE);
-	static CString GetCtrlText(const CWnd* pWnd);
+	static CString GetCtrlText(const CWnd* pWnd, BOOL bStripAccelerator = TRUE);
 	static HWND GetWindowFromPoint(HWND hwndParent, POINT ptScreen);
 
 	static int GetCtrlsCount(const CWnd* pParent, LPCTSTR szClass = NULL);
 	static int GetCtrlIDs(const CWnd* pParent, CUIntArray& aCtrlIDs, LPCTSTR szClass = NULL);
 	static void RemoveCtrlID(UINT nCtrlID, CUIntArray& aCtrlIDs);
-	static int GetCtrlsText(const CWnd* pParent, CStringArray& aItems);
-	static int GetCtrlsText(const CWnd* pParent, CStringArray& aItems, LPCTSTR szClass);
+	static int GetCtrlsText(const CWnd* pParent, CStringArray& aItems, BOOL bStripAccelerator = TRUE);
+	static int GetCtrlsText(const CWnd* pParent, CStringArray& aItems, LPCTSTR szClass, BOOL bStripAccelerator = TRUE);
 	static BOOL SetCtrlsText(CWnd* pParent, const CStringArray& aItems);
 	static BOOL SetCtrlsText(CWnd* pParent, const CStringArray& aItems, LPCTSTR szClass);
-	static int GetCtrlsText(const CWnd* pParent, CStringArray& aItems, const LPCTSTR szClasses[], int nNumClasses);
+	static int GetCtrlsText(const CWnd* pParent, CStringArray& aItems, const LPCTSTR szClasses[], int nNumClasses, BOOL bStripAccelerator = TRUE);
 	static BOOL SetCtrlsText(CWnd* pParent, const CStringArray& aItems, const LPCTSTR szClasses[], int nNumClasses);
 
 	static int GetCtrlAccelerators(const CWnd* pParent, CString& sAccelerators);
@@ -145,6 +145,7 @@ public:
 	static void ExcludeChild(const CWnd* pChild, CDC* pDC, BOOL bIgnoreCorners = FALSE);
 
 	static void EnableAllCtrls(const CWnd* pParent, BOOL bEnable = TRUE);
+	static void InvalidateAllCtrls(const CWnd* pParent, BOOL bErase = TRUE);
 
 	static BOOL TrackMouseLeave(HWND hWnd, BOOL bEnable = TRUE, BOOL bIncludeNonClient = TRUE);
 	

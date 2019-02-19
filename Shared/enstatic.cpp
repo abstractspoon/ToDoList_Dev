@@ -18,7 +18,13 @@ static char THIS_FILE[] = __FILE__;
 const int GRIPPERSIZE = 16;
 
 CEnStatic::CEnStatic(BOOL bEnableGripper) 
-	: m_bGripper(bEnableGripper ? 1 : 0), m_crBackFrom(CLR_NONE), m_crBackTo(CLR_NONE), m_crText(CLR_NONE)
+	: 
+	m_bGripper(bEnableGripper ? 1 : 0), 
+	m_crBackFrom(CLR_NONE), 
+	m_crBackTo(CLR_NONE), 
+	m_crTextFore(CLR_NONE),
+	m_crTextBack(CLR_NONE),
+	m_bHorz(FALSE)
 {
 }
 
@@ -112,9 +118,22 @@ void CEnStatic::OnPaint()
 				CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, GetSafeHwnd());
 				UINT nFlags = (DT_VCENTER | DT_SINGLELINE | GetHorzTextAlignment());
 
-				if (HasTextColor())
-					dc.SetTextColor(m_crText);
+				if (m_crTextFore != CLR_NONE)
+					dc.SetTextColor(m_crTextFore);
 
+				if (m_crTextBack != CLR_NONE)
+				{
+					// Paint a slightly bigger bkgnd rect
+					CSize sizeText = dc.GetTextExtent(sText);
+					CRect rBack(rText);
+
+					rBack.DeflateRect(0, ((rText.Height() - sizeText.cy) / 2));
+					rBack.right = rBack.left + sizeText.cx;
+					rBack.InflateRect(2, 2);
+
+					dc.FillSolidRect(rBack, m_crTextBack);
+				}
+				
 				dc.SetBkMode(TRANSPARENT);
 				dc.DrawText(sText, rText, nFlags);
 				dc.SelectObject(pOldFont);
@@ -122,8 +141,11 @@ void CEnStatic::OnPaint()
 		}
 		else // default
 		{
-			if (HasTextColor())
-				dc.SetTextColor(m_crText);
+			if (m_crTextFore != CLR_NONE)
+				dc.SetTextColor(m_crTextFore);
+
+			if (m_crTextBack != CLR_NONE)
+				dc.SetBkColor(m_crTextBack);
 
 			DefWindowProc(WM_PAINT, (WPARAM)(HDC)dc, 0);
 		}
@@ -227,8 +249,9 @@ BOOL CEnStatic::DrawColorBkgnd(CDC* pDC)
 		if (HasVaryingBackColor())
 		{
 			GM_GRADIENT nType = GraphicsMisc::GetGradientType(m_bGlass, m_bGradient);
+			COLORREF crBkTo = ((m_crBackTo == CLR_NONE) ? m_crBackFrom : m_crBackTo);
 
-			return GraphicsMisc::DrawGradient(nType, pDC, rClient, m_crBackFrom, m_crBackTo, m_bHorz);
+			return GraphicsMisc::DrawGradient(nType, pDC, rClient, m_crBackFrom, crBkTo, m_bHorz);
 		}
 
 		// else
@@ -242,7 +265,7 @@ BOOL CEnStatic::DrawColorBkgnd(CDC* pDC)
 
 BOOL CEnStatic::HasTextColor() const
 {
-	return (m_crText != CLR_NONE);
+	return (m_crTextFore != CLR_NONE) || (m_crTextBack != CLR_NONE);
 }
 
 BOOL CEnStatic::HasBackColor() const
@@ -291,19 +314,38 @@ void CEnStatic::OnWindowPosChanging(WINDOWPOS FAR* lpwndpos)
 	InvalidateRect(GetGripperRect(), FALSE);
 }
 
-void CEnStatic::SetColors(COLORREF crText, COLORREF crBkFrom, COLORREF crBkTo, BOOL bGlass, BOOL bGradient, BOOL bHorz)
+void CEnStatic::SetTextColors(COLORREF crTextFore, COLORREF crTextBack)
 {
+	if ((crTextFore == m_crTextFore) && (crTextBack == m_crTextBack))
+		return;
+
+	m_crTextFore = crTextFore;
+	m_crTextBack = crTextBack;
+
+	if (GetSafeHwnd())
+		Invalidate(TRUE);
+}
+
+void CEnStatic::SetBkgndColors(COLORREF crBkFrom, COLORREF crBkTo)
+{
+	if ((crBkFrom == m_crBackFrom) && (crBkTo == m_crBackTo))
+		return;
+
+	m_crBackFrom = crBkFrom;
+	m_crBackTo = crBkTo;
+
+	if (GetSafeHwnd())
+		Invalidate(TRUE);
+}
+
+void CEnStatic::SetBkgndStyle(BOOL bGlass, BOOL bGradient, BOOL bHorz)
+{
+	if ((bGradient == m_bGradient) && (bGlass == m_bGlass) && (bHorz == m_bHorz))
+		return;
+
 	m_bGlass = bGlass;
 	m_bGradient = bGradient;
 	m_bHorz = bHorz;
-
-	m_crText = crText;
-	m_crBackFrom = crBkFrom;
-
-	if ((!bGlass && !bGradient) || (crBkTo == CLR_NONE))
-		m_crBackTo = crBkFrom;
-	else
-		m_crBackTo = crBkTo;
 
 	if (GetSafeHwnd())
 		Invalidate(TRUE);
