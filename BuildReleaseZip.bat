@@ -74,7 +74,6 @@ REM IF ERRORLEVEL 1 goto CONTINUE
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Calendar.DayView.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\WordCloudUIExtensionCore.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\WordCloudUIExtensionBridge.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\TagCloud.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Gma.CodeCloud.Controls.dll
 REM :CONTINUE
  
