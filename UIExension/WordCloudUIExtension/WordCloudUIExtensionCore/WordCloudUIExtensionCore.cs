@@ -628,7 +628,7 @@ namespace WordCloudUIExtension
 		protected override void OnPaint(PaintEventArgs e)
         {
 			// border around Word cloud and Task match list
-            Rectangle border = new Rectangle(Location.X, ControlTop, Size.Width, (Size.Height - ControlTop));
+            Rectangle border = new Rectangle(ClientRectangle.Left, ControlTop, ClientRectangle.Width, (ClientRectangle.Height - ControlTop));
 
             ControlPaint.DrawBorder(e.Graphics, border, Color.DarkGray, ButtonBorderStyle.Solid);
 
