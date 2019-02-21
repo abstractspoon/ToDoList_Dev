@@ -184,6 +184,8 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 		AddView(m_mgrUIExt.GetUIExtension(nExt));
 	}
 
+	SetVisibleTaskViews(s_aDefTaskViews);
+
 	return FALSE;
 }
 
