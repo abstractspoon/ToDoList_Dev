@@ -56,6 +56,7 @@ IIMPORTEXPORT_RESULT CTaskListHtmlExporter::ExportOutput(LPCTSTR szDestFilePath,
 	sHtmlOutput += _T("<style type=\"text/css\">");
 	sHtmlOutput += _T("@media print { thead {display: table-header-group;} }");
 	sHtmlOutput += _T("body { line-height: 1.0; }");
+	sHtmlOutput += _T("table { border-collapse: collapse; }");
 	sHtmlOutput += _T("</style>\n");
 	sHtmlOutput += CHARSET;
 	sHtmlOutput += _T("</head>\n<body>\n");
@@ -188,7 +189,7 @@ CString CTaskListHtmlExporter::FormatTitle(const ITASKLISTBASE* pTasks) const
 	
 	if (EXPORTSTYLE == STYLE_TABLE)
 	{
-		sTitleBlock += _T("<table border=\"0\">\n");
+		sTitleBlock += _T("<table border=\"1\">\n");
 	}
 
 	return sTitleBlock;
