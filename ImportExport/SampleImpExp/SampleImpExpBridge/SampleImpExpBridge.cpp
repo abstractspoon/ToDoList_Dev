@@ -82,7 +82,7 @@ IIMPORTEXPORT_RESULT CSampleImpExpBridge::Export(const ITaskList* pSrcTaskFile, 
 	msclr::auto_gcroot<SampleImpExpCore^> expCore = gcnew SampleImpExpCore(trans.get());
 	
 	// do the export
-	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey)))
+	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
 		return IIER_SUCCESS;
 
 	// else

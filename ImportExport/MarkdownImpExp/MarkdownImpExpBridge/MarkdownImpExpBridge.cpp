@@ -87,7 +87,7 @@ IIMPORTEXPORT_RESULT CMarkdownImpExpBridge::Export(const ITaskList* pSrcTaskFile
 	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
 	
 	// do the export
-	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey)))
+	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
 		return IIER_SUCCESS;
 
 	return IIER_OTHER;
