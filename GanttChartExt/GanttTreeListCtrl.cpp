@@ -6906,6 +6906,7 @@ double CGanttTreeListCtrl::CalcMinDragDuration() const
 	if (CalcMinDragDuration(GetSnapMode(), dMin))
 		return dMin;
 
+	// Handle 'Free' (no snapping)
 	switch (m_nMonthDisplay)
 	{
 	case GTLC_DISPLAY_QUARTERCENTURIES:
@@ -6938,9 +6939,11 @@ double CGanttTreeListCtrl::CalcMinDragDuration() const
 
 	default:
 		ASSERT(0);
-		dMin = 1.0;
+		VERIFY(CalcMinDragDuration(GTLCSM_NEARESTHOUR, dMin));
 		break;
 	}
+
+	ASSERT(dMin > 0.0);
 
 	return dMin;
 }
@@ -6964,13 +6967,20 @@ BOOL CGanttTreeListCtrl::CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin)
 	case GTLCSM_NEARESTHALFHOUR:		dMin = (1.0 / 48);	break;
 
 	case GTLCSM_FREE:
-		break;
+		return FALSE;
 
 	default:
 		ASSERT(0);
+		return FALSE;
 	}
 
-	return (dMin > 0.0);
+	ASSERT(dMin > 0.0);
+
+	// Handle whole days
+	if (dMin == (int)dMin)
+		dMin = CDateHelper::GetEndOfPreviousDay(dMin).m_dt;
+
+	return TRUE;
 }
 
 void CGanttTreeListCtrl::RedrawList(BOOL bErase)
