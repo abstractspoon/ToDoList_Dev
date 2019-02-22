@@ -2131,7 +2131,7 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 	}
 	else if (pTDI->HasDue())
 	{
-		if (pTDI->dateDue <= pTDI->dateStart)
+		if (pTDI->dateDue < pTDI->dateStart)
 		{
 			ASSERT(0);
 			return SET_FAILED;
