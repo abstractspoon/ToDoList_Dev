@@ -17,9 +17,12 @@ namespace HTMLReportExporter
 
         public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
         {
-            // Possibly display a dialog to get input on how to 
-            // map ToDoList task attributes to the output format
-            // TODO
+			if (!bSilent)
+			{
+				// Display a dialog to get the report parameters
+				// TODO
+
+			}
 
             // Process the tasks
             Task task = srcTasks.GetFirstTask();
