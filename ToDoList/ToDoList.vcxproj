@@ -156,6 +156,7 @@ copy unicode_debug\ToDoList.pdb ..\..\todolist_Plugins\debug /y
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
+      <AdditionalDependencies>Interfaces.lib</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -167,6 +168,9 @@ mkdir ..\..\ToDoList_Plugins\release
 copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
 </Command>
     </PostBuildEvent>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FilteredToDoCtrl.cpp">
@@ -735,16 +739,6 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="ToDoitem.h" />
     <ClInclude Include="ToDoList.h" />
     <ClInclude Include="ToDoListWnd.h" />
-    <ClInclude Include="..\Interfaces\IContentControl.h" />
-    <ClInclude Include="..\Interfaces\IEncryption.h" />
-    <ClInclude Include="..\Interfaces\IFileStorage.h" />
-    <ClInclude Include="..\Interfaces\IImportExport.h" />
-    <ClInclude Include="..\Interfaces\IPreferences.h" />
-    <ClInclude Include="..\Interfaces\ISpellCheck.h" />
-    <ClInclude Include="..\Interfaces\ITaskList.h" />
-    <ClInclude Include="..\Interfaces\ITaskListStorage.h" />
-    <ClInclude Include="..\Interfaces\ITransText.h" />
-    <ClInclude Include="..\Interfaces\IUIExtension.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\abstractspoon.ico" />
@@ -821,6 +815,9 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ProjectReference Include="..\3rdParty\3rdParty.vcxproj">
       <Project>{e15c17b8-c080-492f-bbb8-bf9e84a0ea31}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Interfaces\Interfaces.vcxproj">
+      <Project>{a234e4e0-47de-4d77-bdba-ee17c021c95d}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Shared\Shared.vcxproj">
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>

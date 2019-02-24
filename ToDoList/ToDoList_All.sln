@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3rdParty", "..\3rdParty\3rdParty.vcxproj", "{E15C17B8-C080-492F-BBB8-BF9E84A0EA31}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EncryptDecrypt", "..\EncryptDecrypt\EncryptDecrypt.vcxproj", "{BB8151EB-F79E-4F32-BB83-840A4814C93F}"
@@ -31,8 +33,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLUpdate", "..\TDLUpdate\T
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToDoList", "ToDoList.vcxproj", "{255AD27A-87B1-4E26-A6A7-5E5AFB6BFAB5}"
 	ProjectSection(ProjectDependencies) = postProject
-		{E6E08038-E0F9-4822-B47D-85B248CC5833} = {E6E08038-E0F9-4822-B47D-85B248CC5833}
-		{26B386A3-6B16-41A5-8511-149900DD646B} = {26B386A3-6B16-41A5-8511-149900DD646B}
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D} = {A234E4E0-47DE-4D77-BDBA-EE17C021C95D}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iCalImportExport", "..\iCalImportExport\iCalImportExport.vcxproj", "{D234B740-1BB7-4ECA-88D0-242692B9A7BF}"
@@ -48,6 +49,12 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLTransEdit", "..\TDLTransEdit\TDLTransEdit.vcxproj", "{E55B5B3C-2C94-7FFC-AE63-B2080E520531}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WorkloadExt", "..\WorkloadExt\WorkloadExt.vcxproj", "{19F9E07E-7448-45EC-101E-8855E65841B1}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Interfaces", "..\Interfaces\Interfaces.vcxproj", "{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{95605899-9C90-40D8-8774-D1DA1FCE7464} = {95605899-9C90-40D8-8774-D1DA1FCE7464}
+		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31} = {E15C17B8-C080-492F-BBB8-BF9E84A0EA31}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -143,6 +150,10 @@ Global
 		{19F9E07E-7448-45EC-101E-8855E65841B1}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{19F9E07E-7448-45EC-101E-8855E65841B1}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
 		{19F9E07E-7448-45EC-101E-8855E65841B1}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

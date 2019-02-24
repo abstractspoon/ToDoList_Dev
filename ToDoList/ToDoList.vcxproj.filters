@@ -405,36 +405,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Interfaces\IContentControl.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Interfaces\ITaskListStorage.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Interfaces\IEncryption.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Interfaces\IFileStorage.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Interfaces\IImportExport.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Interfaces\IPreferences.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Interfaces\ISpellCheck.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Interfaces\ITaskList.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Interfaces\ITransText.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Interfaces\IUIExtension.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
     <ClInclude Include="FilteredToDoCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1086,9 +1056,6 @@
     <Filter Include="Resource Files">
       <UniqueIdentifier>{a65eff4e-0845-4ec5-80ce-7109a3a56e5f}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Interfaces">
-      <UniqueIdentifier>{e698842a-dea5-46e6-952c-fbfa4cb21911}</UniqueIdentifier>
     </Filter>
     <Filter Include="Debug">
       <UniqueIdentifier>{2b469877-c242-4c54-86fc-f2a28fa0296b}</UniqueIdentifier>

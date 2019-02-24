@@ -158,15 +158,6 @@
     <ClCompile Include="ColourPickerEx.cpp" />
     <ClCompile Include="ColourPopupEx.cpp" />
     <ClCompile Include="ComboListboxPositioner.cpp" />
-    <ClCompile Include="ContentCtrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="ContentMgr.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="ContentTypeCombobox.cpp" />
     <ClCompile Include="CopyWndContents.cpp" />
     <ClCompile Include="custombutton.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -343,15 +334,6 @@
     </ClCompile>
     <ClCompile Include="IconCache.cpp" />
     <ClCompile Include="ImageProcessors.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="ImportExportComboBox.cpp" />
-    <ClCompile Include="ImportExportMgr.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="ImportExportUIHelper.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -597,10 +579,6 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="TasklistStorageMgr.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="Themed.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -639,15 +617,6 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="TreeSelectionHelper.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="UIExtensionHelper.cpp" />
-    <ClCompile Include="UIExtensionMgr.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="UIThemeFile.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -718,9 +687,6 @@
     <ClInclude Include="ColourPickerEx.h" />
     <ClInclude Include="ColourPopupEx.h" />
     <ClInclude Include="ComboListboxPositioner.h" />
-    <ClInclude Include="ContentCtrl.h" />
-    <ClInclude Include="ContentMgr.h" />
-    <ClInclude Include="ContentTypeCombobox.h" />
     <ClInclude Include="CopyWndContents.h" />
     <ClInclude Include="custombutton.h" />
     <ClInclude Include="DatabaseEx.h" />
@@ -774,9 +740,6 @@
     <ClInclude Include="iconbutton.h" />
     <ClInclude Include="IconCache.h" />
     <ClInclude Include="ImageProcessors.h" />
-    <ClInclude Include="ImportExportComboBox.h" />
-    <ClInclude Include="ImportExportMgr.h" />
-    <ClInclude Include="ImportExportUIHelper.h" />
     <ClInclude Include="InputListCtrl.h" />
     <ClInclude Include="LightBox.h" />
     <ClInclude Include="LimitSingleInstance.h" />
@@ -854,7 +817,6 @@
     <ClInclude Include="tabbedcombobox.h" />
     <ClInclude Include="TabbedPropertyPageHost.h" />
     <ClInclude Include="tabctrlex.h" />
-    <ClInclude Include="TaskListStorageMgr.h" />
     <ClInclude Include="Themed.h" />
     <ClInclude Include="timecombobox.h" />
     <ClInclude Include="TimeEdit.h" />
@@ -866,10 +828,6 @@
     <ClInclude Include="TreeDragDropHelper.h" />
     <ClInclude Include="TreeListSyncer.h" />
     <ClInclude Include="TreeSelectionHelper.h" />
-    <ClInclude Include="UIExtensionHelper.h" />
-    <ClInclude Include="UIExtensionMgr.h" />
-    <ClInclude Include="UITHEME.h" />
-    <ClInclude Include="UIThemeFile.h" />
     <ClInclude Include="Unzipper.h" />
     <ClInclude Include="urlricheditctrl.h" />
     <ClInclude Include="VersionInfo.h" />
