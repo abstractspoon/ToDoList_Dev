@@ -317,12 +317,12 @@ void CTDLSimpleTextContentCtrl::SetUITheme(const UITHEME* /*pTheme*/)
 	// Not supported
 }
 
-void CTDLSimpleTextContentCtrl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
+void CTDLSimpleTextContentCtrl::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 	pPrefs->WriteProfileInt(szKey, _T("WordWrap"), m_bWordWrap);
 }
 
-void CTDLSimpleTextContentCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly)
+void CTDLSimpleTextContentCtrl::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
 	if (!bAppOnly)
 	{

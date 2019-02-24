@@ -7,7 +7,8 @@
 // contenttypecombobox.h : header file
 //
 
-#include "..\shared\ownerdrawcomboboxbase.h"
+#include "ownerdrawcomboboxbase.h"
+#include "icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CContentTypeComboBox window
@@ -15,16 +16,14 @@
 class CContentMgr;
 class CONTENTFORMAT;
 
-class CTDLContentTypeComboBox : public COwnerdrawComboBoxBase
+class CContentTypeComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
-	CTDLContentTypeComboBox(const CContentMgr* pContentMgr);
+	CContentTypeComboBox(const CContentMgr* pContentMgr, UINT nNullIconID);
 
 	int GetSelectedFormat(CONTENTFORMAT& cf) const;
 	int SetSelectedFormat(const CONTENTFORMAT& cf);
-	void SetCurSel(int nSel);
-	int GetCurSel() const;	
 
 	int GetCount() const;
 	BOOL IsInitialized() const { return (m_pContentMgr != NULL); }
@@ -32,8 +31,8 @@ public:
 // Attributes
 protected:
 	const CContentMgr* m_pContentMgr;
-	int m_nInitSel;
 	CImageList m_ilContent;
+	CIcon m_iconNull;
 
 // Operations
 public:
@@ -47,7 +46,7 @@ public:
 
 // Implementation
 public:
-	virtual ~CTDLContentTypeComboBox();
+	virtual ~CContentTypeComboBox();
 
 	// Generated message map functions
 protected:

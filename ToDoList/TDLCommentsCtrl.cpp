@@ -34,7 +34,7 @@ IMPLEMENT_DYNAMIC(CTDLCommentsCtrl, CRuntimeDlg)
 CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CContentMgr* pMgrContent)
 	:
 	m_pMgrContent(pMgrContent), 
-	m_cbCommentsFmt(pMgrContent),
+	m_cbCommentsFmt(pMgrContent, IDI_NULL),
 	m_bFirstLoadCommentsPrefs(TRUE),
 	m_hDefaultFont(NULL),
 	m_bReadOnly(FALSE)

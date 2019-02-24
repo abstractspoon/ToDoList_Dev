@@ -2,11 +2,10 @@
 //
 
 #include "stdafx.h"
-#include "tdlcontenttypecombobox.h"
-#include "resource.h"
-
-#include "..\shared\ContentMgr.h"
-#include "..\shared\GraphicsMisc.h"
+#include "contenttypecombobox.h"
+#include "ContentMgr.h"
+#include "GraphicsMisc.h"
+#include "DialogHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -21,17 +20,17 @@ const int IMAGESIZE = GraphicsMisc::ScaleByDPIFactor(16);
 /////////////////////////////////////////////////////////////////////////////
 // CContentTypeComboBox
 
-CTDLContentTypeComboBox::CTDLContentTypeComboBox(const CContentMgr* pContentMgr) : 
-	m_pContentMgr(pContentMgr), m_nInitSel(0)
+CContentTypeComboBox::CContentTypeComboBox(const CContentMgr* pContentMgr, UINT nNullIconID) :
+	m_pContentMgr(pContentMgr), m_iconNull(nNullIconID, 16)
 {
 }
 
-CTDLContentTypeComboBox::~CTDLContentTypeComboBox()
+CContentTypeComboBox::~CContentTypeComboBox()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLContentTypeComboBox, COwnerdrawComboBoxBase)
+BEGIN_MESSAGE_MAP(CContentTypeComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CContentTypeComboBox)
 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
@@ -40,7 +39,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CContentTypeComboBox message handlers
 
-int CTDLContentTypeComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+int CContentTypeComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -53,7 +52,7 @@ int CTDLContentTypeComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CTDLContentTypeComboBox::FillCombo()
+void CContentTypeComboBox::FillCombo()
 {
 	if (COwnerdrawComboBoxBase::GetCount())
 		return;
@@ -67,24 +66,21 @@ void CTDLContentTypeComboBox::FillCombo()
 		for (int nContent = 0; nContent < m_pContentMgr->GetNumContent(); nContent++)
 		{
 			CString sItem = m_pContentMgr->GetContentDescription(nContent);
-			int nItem = AddString(sItem);
-
-			SetItemData(nItem, nContent);
+			VERIFY(CDialogHelper::AddString(*this, sItem, nContent) != CB_ERR);
 
 			HICON hIcon = m_pContentMgr->GetContentIcon(nContent);
 
 			if (hIcon == NULL)
-				hIcon = AfxGetApp()->LoadIcon(IDI_NULL);
+				hIcon = m_iconNull;
 
 			VERIFY(m_ilContent.Add(hIcon) == nContent);
 		}
 	}
 
-	if (m_nInitSel < GetCount())
-		SetCurSel(m_nInitSel);
+	SetCurSel(0);
 }
 
-void CTDLContentTypeComboBox::PreSubclassWindow() 
+void CContentTypeComboBox::PreSubclassWindow() 
 {
 	if (m_pContentMgr)
 		FillCombo();
@@ -92,26 +88,31 @@ void CTDLContentTypeComboBox::PreSubclassWindow()
 	COwnerdrawComboBoxBase::PreSubclassWindow();
 }
 
-int CTDLContentTypeComboBox::GetSelectedFormat(CONTENTFORMAT& cf) const
+int CContentTypeComboBox::GetSelectedFormat(CONTENTFORMAT& cf) const
 {
 	int nSel = GetCurSel();
 
 	if (nSel != CB_ERR)
-		cf = m_pContentMgr->GetContentFormat(nSel);
+	{
+		int nContent = GetItemData(nSel);
+		cf = m_pContentMgr->GetContentFormat(nContent);
+	}
 
 	return nSel;
 }
 
-int CTDLContentTypeComboBox::SetSelectedFormat(const CONTENTFORMAT& cf)
+int CContentTypeComboBox::SetSelectedFormat(const CONTENTFORMAT& cf)
 {
-	int nSel = m_pContentMgr ? m_pContentMgr->FindContent(cf) : CB_ERR;
+	int nContent = (m_pContentMgr ? m_pContentMgr->FindContent(cf) : -1);
 
-	SetCurSel(nSel);
+	if (nContent != -1)
+		return CDialogHelper::SelectItemByData(*this, nContent);
 
-	return nSel;
+	// else
+	return SetCurSel(CB_ERR);
 }
 
-int CTDLContentTypeComboBox::GetCount() const
+int CContentTypeComboBox::GetCount() const
 {
 	if (m_pContentMgr)
 		return m_pContentMgr->GetNumContent();
@@ -120,24 +121,7 @@ int CTDLContentTypeComboBox::GetCount() const
 	return COwnerdrawComboBoxBase::GetCount();
 }
 
-void CTDLContentTypeComboBox::SetCurSel(int nSel)
-{
-	if (GetSafeHwnd())
-		COwnerdrawComboBoxBase::SetCurSel(nSel);
-	else
-		m_nInitSel = nSel;
-}
-
-int CTDLContentTypeComboBox::GetCurSel() const
-{
-	if (GetSafeHwnd())
-		return COwnerdrawComboBoxBase::GetCurSel();
-	
-	// else
-	return m_nInitSel;
-}
-
-void CTDLContentTypeComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+void CContentTypeComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 										  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
 	// Draw image

@@ -5,8 +5,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "tdlcontenttypecombobox.h"
 
+#include "..\shared\contenttypecombobox.h"
 #include "..\shared\runtimedlg.h"
 #include "..\shared\contentctrl.h"
 #include "..\Shared\binarydata.h"
@@ -58,7 +58,7 @@ public:
 protected:
 	const CContentMgr* m_pMgrContent;
 
-	CTDLContentTypeComboBox	m_cbCommentsFmt;
+	CContentTypeComboBox	m_cbCommentsFmt;
 	CContentCtrl m_ctrlComments;
 	CUIThemeFile m_theme;
 	CBrush m_brBack;

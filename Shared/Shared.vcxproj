@@ -166,6 +166,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ContentTypeCombobox.cpp" />
     <ClCompile Include="CopyWndContents.cpp" />
     <ClCompile Include="custombutton.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -718,6 +719,7 @@
     <ClInclude Include="ComboListboxPositioner.h" />
     <ClInclude Include="ContentCtrl.h" />
     <ClInclude Include="ContentMgr.h" />
+    <ClInclude Include="ContentTypeCombobox.h" />
     <ClInclude Include="CopyWndContents.h" />
     <ClInclude Include="custombutton.h" />
     <ClInclude Include="DatabaseEx.h" />

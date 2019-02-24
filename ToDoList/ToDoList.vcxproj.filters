@@ -334,9 +334,6 @@
     <ClCompile Include="TDLImportOutlookObjectSetupListCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDLContentTypeCombobox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TDCToDoCtrlPreferenceHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -805,9 +802,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TdcRecurrence.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TDLContentTypeCombobox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCToDoCtrlPreferenceHelper.h">
