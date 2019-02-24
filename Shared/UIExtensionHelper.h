@@ -64,8 +64,8 @@ class CUIExtensionHelper
 public:
 	CUIExtensionHelper(UINT nFirstMenuID, int nMaxNumExtensions);
 
-	void UpdateExtensionVisibility(CMenu* pMenu, const CUIExtensionMgr& mgr, const CStringArray& aTypeIDs) const;
-	BOOL ProcessExtensionMenuCmd(UINT nCmdID, const CUIExtensionMgr& mgr, CStringArray& aTypeIDs) const;
+	void UpdateExtensionVisibilityState(CMenu* pMenu, const CUIExtensionMgr& mgr, const CStringArray& aTypeIDs) const;
+	BOOL ProcessExtensionVisibilityMenuCmd(UINT nCmdID, const CUIExtensionMgr& mgr, CStringArray& aTypeIDs) const;
 
 protected:
 	UINT m_nFirstMenuID;

@@ -98,7 +98,7 @@ CUIExtensionHelper::CUIExtensionHelper(UINT nFirstMenuID, int nMaxNumExtensions)
 
 }
 
-void CUIExtensionHelper::UpdateExtensionVisibility(CMenu* pMenu, const CUIExtensionMgr& mgr, const CStringArray& aTypeIDs) const
+void CUIExtensionHelper::UpdateExtensionVisibilityState(CMenu* pMenu, const CUIExtensionMgr& mgr, const CStringArray& aTypeIDs) const
 {
 	ASSERT(pMenu);
 
@@ -130,7 +130,7 @@ void CUIExtensionHelper::UpdateExtensionVisibility(CMenu* pMenu, const CUIExtens
 	}
 }
 
-BOOL CUIExtensionHelper::ProcessExtensionMenuCmd(UINT nCmdID, const CUIExtensionMgr& mgr, CStringArray& aTypeIDs) const
+BOOL CUIExtensionHelper::ProcessExtensionVisibilityMenuCmd(UINT nCmdID, const CUIExtensionMgr& mgr, CStringArray& aTypeIDs) const
 {
 	int nExt = (nCmdID - m_nFirstMenuID);
 

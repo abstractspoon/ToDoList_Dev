@@ -7163,7 +7163,7 @@ void CToDoListWnd::OnShowTaskView(UINT nCmdID)
 			{
 				CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
 
-				if (helper.ProcessExtensionMenuCmd(nCmdID, m_mgrUIExtensions, aTypeIDs))
+				if (helper.ProcessExtensionVisibilityMenuCmd(nCmdID, m_mgrUIExtensions, aTypeIDs))
 					tdc.SetVisibleTaskViews(aTypeIDs);
 			}
 		}
@@ -7405,7 +7405,7 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 			GetToDoCtrl().GetVisibleTaskViews(aTypeIDs);
 			
 			CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
-			helper.UpdateExtensionVisibility(CMenu::FromHandle(hMenuUIExt), m_mgrUIExtensions, aTypeIDs);
+			helper.UpdateExtensionVisibilityState(CMenu::FromHandle(hMenuUIExt), m_mgrUIExtensions, aTypeIDs);
 		} 
 	}
 	else // all other sub-menus

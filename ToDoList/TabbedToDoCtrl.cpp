@@ -4041,7 +4041,7 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		GetVisibleTaskViews(aTypeIDs, TRUE);
 
 		CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
-		helper.UpdateExtensionVisibility(pPopup, m_mgrUIExt, aTypeIDs);
+		helper.UpdateExtensionVisibilityState(pPopup, m_mgrUIExt, aTypeIDs);
 
 		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON, 
 										ptCursor.x, ptCursor.y, 0, GetSafeHwnd(), NULL);
@@ -4060,7 +4060,7 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 			break;
 			
 		default:
-			if (helper.ProcessExtensionMenuCmd(nCmdID, m_mgrUIExt, aTypeIDs))
+			if (helper.ProcessExtensionVisibilityMenuCmd(nCmdID, m_mgrUIExt, aTypeIDs))
 				SetVisibleTaskViews(aTypeIDs);
 			break;
 		}
