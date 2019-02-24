@@ -14,7 +14,8 @@
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\enstring.h"
-#include "..\shared\ContentMgr.h"
+
+#include "..\Interfaces\ContentMgr.h"
 
 #include <float.h>
 #include <math.h>

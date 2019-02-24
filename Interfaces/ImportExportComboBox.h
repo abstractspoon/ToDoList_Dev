@@ -8,8 +8,9 @@
 //
 
 #include "importexportmgr.h"
-#include "sysimagelist.h"
-#include "ownerdrawcomboboxbase.h"
+
+#include "..\shared\sysimagelist.h"
+#include "..\shared\ownerdrawcomboboxbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportExportComboBox window

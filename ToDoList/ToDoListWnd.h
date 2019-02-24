@@ -39,16 +39,17 @@
 #include "..\shared\tabbedcombobox.h"
 #include "..\shared\deferWndMove.h"
 #include "..\shared\enBrowserctrl.h"
-#include "..\shared\UIExtensionMgr.h"
 #include "..\shared\menuiconmgr.h"
 #include "..\shared\autocombobox.h"
-#include "..\shared\uithemefile.h"
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\StatusbarProgress.h"
 #include "..\shared\stickieswnd.h"
 #include "..\shared\windowicons.h"
 #include "..\shared\sessionstatuswnd.h"
 #include "..\shared\statusbarACTEx.h"
+
+#include "..\Interfaces\UIExtensionMgr.h"
+#include "..\Interfaces\uithemefile.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListWnd 

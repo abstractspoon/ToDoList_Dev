@@ -5,7 +5,6 @@
 #include "resource.h"
 #include "TDLCommentsCtrl.h"
 
-#include "..\shared\contentMgr.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dlgunits.h"
 #include "..\shared\misc.h"
@@ -15,6 +14,7 @@
 #include "..\shared\winclasses.h"
 #include "..\shared\wclassdefines.h"
 
+#include "..\Interfaces\contentMgr.h"
 #include "..\interfaces\icontentcontrol.h"
 
 /////////////////////////////////////////////////////////////////////////////

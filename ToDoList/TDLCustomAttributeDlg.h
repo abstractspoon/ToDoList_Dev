@@ -19,7 +19,8 @@
 #include "..\shared\menubutton.h"
 #include "..\shared\iconbutton.h"
 #include "..\shared\checklistboxex.h"
-#include "..\shared\uithemefile.h"
+
+#include "..\Interfaces\uithemefile.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomAttributeDlg dialog

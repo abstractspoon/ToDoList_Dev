@@ -13,11 +13,13 @@
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\preferences.h"
-#include "..\shared\uithemefile.h"
 
 #include "..\3rdParty\Base64Coder.h"
 
+#include "..\Interfaces\uithemefile.h"
 #include "..\interfaces\icontentcontrol.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

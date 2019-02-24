@@ -75,9 +75,10 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\ComboListboxPositioner.h"
 #include "..\shared\sendfiletoEx.h"
-#include "..\shared\uiextensionhelper.h"
 
 #include "..\3rdparty\gui.h"
+
+#include "..\Interfaces\uiextensionhelper.h"
 
 #include <shlwapi.h>
 #include <windowsx.h>
@@ -87,6 +88,8 @@
 
 #pragma warning(disable: 4201)
 #include <Mmsystem.h> 
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -157,18 +157,6 @@ SOURCE=.\ComboListboxPositioner.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ContentCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\ContentMgr.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\ContentTypeCombobox.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\CopyWndContents.cpp
 # End Source File
 # Begin Source File
@@ -366,18 +354,6 @@ SOURCE=.\IconCache.cpp
 # Begin Source File
 
 SOURCE=.\ImageProcessors.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\ImportExportComboBox.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\ImportExportMgr.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\ImportExportUIHelper.cpp
 # End Source File
 # Begin Source File
 
@@ -665,10 +641,6 @@ SOURCE=.\tabctrlex.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TasklistStorageMgr.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\Themed.cpp
 # End Source File
 # Begin Source File
@@ -710,18 +682,6 @@ SOURCE=.\TreeListSyncer.cpp
 # Begin Source File
 
 SOURCE=.\TreeSelectionHelper.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\UIExtensionHelper.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\UIExtensionMgr.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\UIThemeFile.cpp
 # End Source File
 # Begin Source File
 
@@ -854,18 +814,6 @@ SOURCE=.\ColourPopupEx.h
 # Begin Source File
 
 SOURCE=.\ComboListboxPositioner.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ContentCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ContentMgr.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ContentTypeCombobox.h
 # End Source File
 # Begin Source File
 
@@ -1078,18 +1026,6 @@ SOURCE=.\IconCache.h
 # Begin Source File
 
 SOURCE=.\ImageProcessors.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ImportExportComboBox.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ImportExportMgr.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ImportExportUIHelper.h
 # End Source File
 # Begin Source File
 
@@ -1397,10 +1333,6 @@ SOURCE=.\tabctrlex.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListStorageMgr.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Themed.h
 # End Source File
 # Begin Source File
@@ -1442,18 +1374,6 @@ SOURCE=.\TreeListSyncer.h
 # Begin Source File
 
 SOURCE=.\TreeSelectionHelper.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\UIExtensionHelper.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\UIExtensionMgr.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\UIThemeFile.h
 # End Source File
 # Begin Source File
 

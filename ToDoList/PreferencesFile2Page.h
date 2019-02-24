@@ -7,9 +7,10 @@
 // PreferencesFilePage.h : header file
 //
 
-#include "..\Shared\ImportExportComboBox.h"
 #include "..\shared\fileedit.h"
 #include "..\shared\preferencesbase.h"
+
+#include "..\Interfaces\ImportExportComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesFile2Page dialog

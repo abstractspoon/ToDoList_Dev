@@ -7,8 +7,11 @@
 #include "tdcenum.h"
 
 #include "..\shared\holdredraw.h"
-#include "..\shared\uithemefile.h"
 #include "..\shared\filemisc.h"
+
+#include "..\Interfaces\uithemefile.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

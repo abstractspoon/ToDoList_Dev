@@ -10,8 +10,8 @@
 #include "TaskSelectionDlg.h"
 #include "TDLDialog.h"
 
-#include "..\Shared\ImportExportComboBox.h"
-#include "..\shared\importexportmgr.h"
+#include "..\Interfaces\ImportExportComboBox.h"
+#include "..\Interfaces\importexportmgr.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

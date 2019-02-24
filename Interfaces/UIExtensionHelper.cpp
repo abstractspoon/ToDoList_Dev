@@ -5,8 +5,9 @@
 #include "stdafx.h"
 #include "UIExtensionHelper.h"
 #include "UIExtensionMgr.h"
-#include "misc.h"
-#include "enmenu.h"
+
+#include "..\shared\misc.h"
+#include "..\shared\enmenu.h"
 
 #include <afxtempl.h>
 

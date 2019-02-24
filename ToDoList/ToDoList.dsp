@@ -1518,54 +1518,6 @@ SOURCE=.\Unicode_Release\Rtf2HtmlBridge.dll
 # End Source File
 # End Group
 # End Group
-# Begin Group "Interfaces"
-
-# PROP Default_Filter "*.h"
-# Begin Source File
-
-SOURCE=..\Interfaces\IContentControl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\IEncryption.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\IFileStorage.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\IImportExport.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\IPreferences.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\ISpellCheck.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\ITaskList.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\ITaskListStorage.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\ITransText.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\IUIExtension.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\UITHEME.h
-# End Source File
-# End Group
 # Begin Source File
 
 SOURCE=.\ToDoList.vcxproj

@@ -11,8 +11,9 @@
 #include "TDLDialog.h"
 
 #include "..\shared\fileedit.h"
-#include "..\shared\importexportmgr.h"
-#include "..\Shared\ImportExportComboBox.h"
+
+#include "..\Interfaces\importexportmgr.h"
+#include "..\Interfaces\ImportExportComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CExportDlg dialog

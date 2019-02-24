@@ -4,10 +4,11 @@
 
 #include "stdafx.h"
 #include "ContentMgr.h"
-#include "filemisc.h"
-#include "binarydata.h"
-#include "localizer.h"
-#include "osversion.h"
+
+#include "..\shared\filemisc.h"
+#include "..\shared\binarydata.h"
+#include "..\shared\localizer.h"
+#include "..\shared\osversion.h"
 
 #include "..\Interfaces\IContentControl.h"
 

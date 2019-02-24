@@ -4,11 +4,12 @@
 
 #include "stdafx.h"
 #include "Preferences.h"
-#include "misc.h"
-#include "filemisc.h"
-#include "driveinfo.h"
-#include "regkey.h"
-#include "autoflag.h"
+
+#include "..\shared\misc.h"
+#include "..\shared\filemisc.h"
+#include "..\shared\driveinfo.h"
+#include "..\shared\regkey.h"
+#include "..\shared\autoflag.h"
 
 #include "..\3rdparty\stdiofileex.h"
 

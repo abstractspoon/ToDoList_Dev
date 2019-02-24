@@ -4,8 +4,9 @@
 #include "stdafx.h"
 #include "contenttypecombobox.h"
 #include "ContentMgr.h"
-#include "GraphicsMisc.h"
-#include "DialogHelper.h"
+
+#include "..\shared\GraphicsMisc.h"
+#include "..\shared\DialogHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -4,9 +4,10 @@
 
 #include "stdafx.h"
 #include "TasklistStorageMgr.h"
-#include "filemisc.h"
-#include "misc.h"
-#include "localizer.h"
+
+#include "..\shared\filemisc.h"
+#include "..\shared\misc.h"
+#include "..\shared\localizer.h"
 
 #include "..\Interfaces\ITaskList.h"
 #include "..\Interfaces\ITasklistStorage.h"

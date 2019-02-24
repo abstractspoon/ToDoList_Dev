@@ -34,16 +34,17 @@
 #include "..\shared\timeedit.h"
 #include "..\shared\TreeDragDropHelper.h"
 #include "..\shared\wndPrompt.h"
-#include "..\shared\contentmgr.h"
 #include "..\shared\encheckcombobox.h"
 #include "..\shared\timecombobox.h"
 #include "..\shared\popupeditctrl.h"
-#include "..\shared\uithemefile.h"
 #include "..\shared\datetimectrlex.h"
 #include "..\shared\mapex.h"
 #include "..\shared\icon.h"
 #include "..\shared\FindReplace.h"
 #include "..\shared\colourpickerEx.h"
+
+#include "..\Interfaces\uithemefile.h"
+#include "..\Interfaces\contentmgr.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

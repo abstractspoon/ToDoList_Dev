@@ -8,7 +8,8 @@
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\dialoghelper.h"
-#include "..\shared\importexportmgr.h"
+
+#include "..\Interfaces\importexportmgr.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -4,10 +4,11 @@
 
 #include "stdafx.h"
 #include "UIThemeFile.h"
-#include "xmlfile.h"
-#include "filemisc.h"
-#include "misc.h"
-#include "graphicsmisc.h"
+
+#include "..\shared\xmlfile.h"
+#include "..\shared\filemisc.h"
+#include "..\shared\misc.h"
+#include "..\shared\graphicsmisc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

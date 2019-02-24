@@ -18,9 +18,10 @@
 #include "..\shared\encheckcombobox.h"
 #include "..\shared\enedit.h"
 #include "..\shared\wndprompt.h"
-#include "..\shared\uithemefile.h"
 #include "..\shared\datetimectrlex.h"
 #include "..\shared\icon.h"
+
+#include "..\Interfaces\uithemefile.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CFilterBar dialog

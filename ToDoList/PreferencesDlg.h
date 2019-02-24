@@ -25,12 +25,13 @@
 #include "preferencestaskcalcpage.h"
 
 #include "..\shared\preferencesbase.h"
-#include "..\shared\uithemefile.h"
 #include "..\shared\enstatic.h"
 #include "..\shared\winhelpbutton.h"
 #include "..\shared\SizeGrip.h"
 #include "..\shared\EnEdit.h"
 #include "..\shared\Icon.h"
+
+#include "..\Interfaces\uithemefile.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

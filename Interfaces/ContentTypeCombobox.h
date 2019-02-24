@@ -7,8 +7,8 @@
 // contenttypecombobox.h : header file
 //
 
-#include "ownerdrawcomboboxbase.h"
-#include "icon.h"
+#include "..\shared\ownerdrawcomboboxbase.h"
+#include "..\shared\icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CContentTypeComboBox window

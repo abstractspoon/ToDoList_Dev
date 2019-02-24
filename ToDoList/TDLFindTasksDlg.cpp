@@ -17,9 +17,10 @@
 #include "..\shared\themed.h"
 #include "..\shared\dlgunits.h"
 #include "..\shared\autoflag.h"
-#include "..\shared\uithemefile.h"
 #include "..\shared\localizer.h"
 #include "..\shared\osversion.h"
+
+#include "..\Interfaces\uithemefile.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

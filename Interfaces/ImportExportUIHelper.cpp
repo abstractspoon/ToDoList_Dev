@@ -5,8 +5,9 @@
 #include "stdafx.h"
 #include "ImportExportUIHelper.h"
 #include "ImportExportmgr.h"
-#include "sysimagelist.h"
-#include "MenuIconMgr.h"
+
+#include "..\shared\sysimagelist.h"
+#include "..\shared\MenuIconMgr.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

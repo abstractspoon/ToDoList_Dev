@@ -6,7 +6,11 @@
 #include "EnRecentFileList.h"
 #include "FileMisc.h"
 
+#include "..\Interfaces\IPreferences.h"
+
 #include <shlwapi.h>
+
+//////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -78,10 +82,10 @@ void CEnRecentFileList::RemoveAll(BOOL bClearProfile)
 		CRecentFileList::WriteList();
 }
 
-void CEnRecentFileList::WriteList(CPreferences& prefs, BOOL bRelativeToExe) const
+void CEnRecentFileList::WriteList(IPreferences* pPrefs, BOOL bRelativeToExe) const
 {
 	// always delete the MRU and then rebuild it
-	prefs.DeleteProfileSection(_T("MRU"));
+	pPrefs->DeleteProfileSection(_T("MRU"));
 
 	for (int nFile = 0; nFile < GetSize(); nFile++)
 	{
@@ -96,11 +100,11 @@ void CEnRecentFileList::WriteList(CPreferences& prefs, BOOL bRelativeToExe) cons
 		if (bRelativeToExe)
 			FileMisc::MakeRelativePath(sFile, FileMisc::GetAppFolder(), FALSE);
 
-		prefs.WriteProfileString(_T("MRU"), sItem, sFile);
+		pPrefs->WriteProfileString(_T("MRU"), sItem, sFile);
 	}
 }
 
-void CEnRecentFileList::ReadList(const CPreferences& prefs)
+void CEnRecentFileList::ReadList(const IPreferences* pPrefs)
 {
 	RemoveAll(FALSE);
 
@@ -109,7 +113,7 @@ void CEnRecentFileList::ReadList(const CPreferences& prefs)
 		CString sItem, sFile;
 		sItem.Format(m_strEntryFormat, nFile + 1);
 		
-		sFile = prefs.GetProfileString(_T("MRU"), sItem);
+		sFile = pPrefs->GetProfileString(_T("MRU"), sItem);
 
 		if (sFile.IsEmpty())
 			break;

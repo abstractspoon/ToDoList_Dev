@@ -6,12 +6,13 @@
 #endif // _MSC_VER > 1000
 
 
-#include "..\shared\contenttypecombobox.h"
 #include "..\shared\runtimedlg.h"
-#include "..\shared\contentctrl.h"
 #include "..\Shared\binarydata.h"
-#include "..\Shared\UIThemeFile.h"
 #include "..\shared\wndPrompt.h"
+
+#include "..\Interfaces\UIThemeFile.h"
+#include "..\Interfaces\contentctrl.h"
+#include "..\Interfaces\contenttypecombobox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // PreferencesTaskDefPage.h : header file

@@ -13,8 +13,9 @@
 
 #include "..\shared\filemisc.h"
 #include "..\shared\driveinfo.h"
-#include "..\shared\taskliststoragemgr.h"
 #include "..\shared\browserdlg.h"
+
+#include "..\Interfaces\taskliststoragemgr.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

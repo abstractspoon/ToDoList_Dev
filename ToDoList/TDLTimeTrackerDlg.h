@@ -8,7 +8,6 @@
 
 #include "..\shared\DialogHelper.h"
 #include "..\shared\mapex.h"
-#include "..\shared\uithemefile.h"
 #include "..\shared\iconbutton.h"
 #include "..\shared\WndPrompt.h"
 #include "..\shared\entoolbar.h"
@@ -16,6 +15,8 @@
 #include "..\shared\subclass.h"
 #include "..\shared\icon.h"
 #include "..\shared\enedit.h"
+
+#include "..\Interfaces\uithemefile.h"
 
 /////////////////////////////////////////////////////////////////////////
 

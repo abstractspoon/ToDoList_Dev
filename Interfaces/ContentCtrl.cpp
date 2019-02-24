@@ -4,12 +4,13 @@
 
 #include "stdafx.h"
 #include "ContentCtrl.h"
-#include "autoflag.h"
-#include "misc.h"
-#include "binarydata.h"
 #include "uithemefile.h"
-#include "tooltipctrlex.h"
-#include "dialoghelper.h"
+
+#include "..\shared\autoflag.h"
+#include "..\shared\misc.h"
+#include "..\shared\binarydata.h"
+#include "..\shared\tooltipctrlex.h"
+#include "..\shared\dialoghelper.h"
 
 #include "..\Interfaces\IContentControl.h"
 #include "..\Interfaces\ISpellCheck.h"

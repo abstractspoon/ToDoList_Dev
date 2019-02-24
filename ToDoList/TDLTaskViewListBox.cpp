@@ -6,11 +6,14 @@
 #include "TDLTaskViewListBox.h"
 
 #include "..\shared\DialogHelper.h"
-#include "..\shared\UIExtensionMgr.h"
 #include "..\shared\EnString.h"
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\icon.h"
+
+#include "..\Interfaces\UIExtensionMgr.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

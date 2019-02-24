@@ -9,7 +9,7 @@
 
 #include "TDLDialog.h"
 
-#include "..\Shared\ImportExportComboBox.h"
+#include "..\Interfaces\ImportExportComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

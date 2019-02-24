@@ -15,7 +15,8 @@
 
 #include "..\shared\misc.h"
 #include "..\shared\subclass.h"
-#include "..\shared\UIExtensionMgr.h"
+
+#include "..\Interfaces\UIExtensionMgr.h"
 
 #include <afxtempl.h>
 

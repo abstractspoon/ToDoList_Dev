@@ -15,9 +15,10 @@
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\wndprompt.h"
-#include "..\shared\uithemefile.h"
 #include "..\shared\icon.h"
 #include "..\shared\SizeGrip.h"
+
+#include "..\Interfaces\uithemefile.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

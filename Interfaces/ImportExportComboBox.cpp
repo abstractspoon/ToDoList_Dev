@@ -3,9 +3,10 @@
 
 #include "stdafx.h"
 #include "importexportcombobox.h"
-#include "GraphicsMisc.h"
-#include "Misc.h"
-#include "DialogHelper.h"
+
+#include "..\shared\GraphicsMisc.h"
+#include "..\shared\Misc.h"
+#include "..\shared\DialogHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

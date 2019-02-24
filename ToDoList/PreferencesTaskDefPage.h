@@ -15,9 +15,6 @@
 #include "tdcenumcontainers.h"
 #include "tdlcommentsctrl.h"
 
-#include <afxtempl.h>
-
-#include "..\shared\contentMgr.h"
 #include "..\shared\preferencesbase.h"
 #include "..\shared\colorbutton.h"
 #include "..\shared\timeedit.h"
@@ -26,6 +23,10 @@
 #include "..\shared\maskedit.h"
 #include "..\Shared\iconbutton.h"
 #include "..\Shared\binarydata.h"
+
+#include "..\Interfaces\contentMgr.h"
+
+#include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskDefPage dialog

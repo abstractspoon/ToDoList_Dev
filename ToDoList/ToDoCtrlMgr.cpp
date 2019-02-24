@@ -12,8 +12,9 @@
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\preferences.h"
-#include "..\shared\ContentMgr.h"
-#include "..\shared\uiextensionmgr.h"
+
+#include "..\Interfaces\ContentMgr.h"
+#include "..\Interfaces\uiextensionmgr.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -9,7 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "..\shared\contentmgr.h"
+#include "..\Interfaces\contentmgr.h"
 
 class CTDLContentMgr : public CContentMgr  
 {

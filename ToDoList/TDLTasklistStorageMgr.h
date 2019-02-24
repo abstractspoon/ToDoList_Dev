@@ -11,7 +11,7 @@
 
 #include "taskfile.h"
 
-#include "..\shared\TaskListStorageMgr.h"
+#include "..\Interfaces\TaskListStorageMgr.h"
 
 class CTDLTasklistStorageMgr : public CTasklistStorageMgr  
 {
