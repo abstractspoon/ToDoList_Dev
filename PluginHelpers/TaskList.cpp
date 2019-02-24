@@ -7,6 +7,7 @@
 #include "UIExtension.h"
 #include "ColorUtil.h"
 
+#include "..\..\ToDoList_Dev\ToDoList\tdlschemadef.h"
 #include "..\..\ToDoList_Dev\Interfaces\ITasklist.h"
 #include "..\..\ToDoList_Dev\3rdParty\T64Utils.h"
 
@@ -42,6 +43,79 @@ TaskList::TaskList() : m_pTaskList(nullptr), m_pConstTaskList(nullptr)
 bool TaskList::IsValid()
 {
 	return (m_pConstTaskList || m_pTaskList);
+}
+
+int TaskList::GetAttributeList(Collections::Generic::HashSet<TaskList::TaskAttribute>^ attribs)
+{
+	attribs->Clear();
+
+	if (IsValid())
+	{
+		Task^ task = GetFirstTask();
+
+		while (task->IsValid())
+		{
+			BuildAttributeList(task, attribs);
+
+			task = task->GetNextTask();
+		}
+	}
+
+	return attribs->Count;
+}
+
+void TaskList::BuildAttributeList(Task^ task, Collections::Generic::HashSet<TaskList::TaskAttribute>^ attribs)
+{
+#define ADDATTRIB(attrib, id) AddAttributeToList(attrib, gcnew String(id), task, attribs)
+
+	ADDATTRIB(TaskAttribute::Position,			TDL_TASKPOS);
+	ADDATTRIB(TaskAttribute::Title,				TDL_TASKTITLE);
+	ADDATTRIB(TaskAttribute::Id,				TDL_TASKID);
+	ADDATTRIB(TaskAttribute::ParentId,			TDL_TASKPARENTID);
+	ADDATTRIB(TaskAttribute::Path,				TDL_TASKPATH);
+	ADDATTRIB(TaskAttribute::Priority,			TDL_TASKPRIORITY);
+	ADDATTRIB(TaskAttribute::Risk,				TDL_TASKRISK);
+	ADDATTRIB(TaskAttribute::Percent,			TDL_TASKPERCENTDONE);
+	ADDATTRIB(TaskAttribute::TimeEstimate,		TDL_TASKTIMEESTIMATE);
+	ADDATTRIB(TaskAttribute::TimeSpent,			TDL_TASKTIMESPENT);
+	ADDATTRIB(TaskAttribute::CreationDate,		TDL_TASKCREATIONDATESTRING);
+	ADDATTRIB(TaskAttribute::CreatedBy,			TDL_TASKCREATEDBY);
+	ADDATTRIB(TaskAttribute::LastModifiedDate,	TDL_TASKLASTMODSTRING);
+	ADDATTRIB(TaskAttribute::LastModifiedBy,	TDL_TASKLASTMODBY);
+	ADDATTRIB(TaskAttribute::StartDate,			TDL_TASKSTARTDATESTRING);	
+	ADDATTRIB(TaskAttribute::DueDate,			TDL_TASKDUEDATESTRING);
+	ADDATTRIB(TaskAttribute::DoneDate,			TDL_TASKDONEDATESTRING);
+	ADDATTRIB(TaskAttribute::Recurrence,		TDL_TASKRECURRENCE);
+	ADDATTRIB(TaskAttribute::AllocatedTo,		TDL_TASKALLOCTO);
+	ADDATTRIB(TaskAttribute::AllocatedBy,		TDL_TASKALLOCBY);
+	ADDATTRIB(TaskAttribute::Status,			TDL_TASKSTATUS);
+	ADDATTRIB(TaskAttribute::Category,			TDL_TASKCATEGORY);
+	ADDATTRIB(TaskAttribute::Tags,				TDL_TASKTAG);
+	ADDATTRIB(TaskAttribute::ExternalId,		TDL_TASKEXTERNALID);
+	ADDATTRIB(TaskAttribute::Cost,				TDL_TASKCOST);
+	ADDATTRIB(TaskAttribute::Version,			TDL_TASKVERSION);
+	ADDATTRIB(TaskAttribute::Flag,				TDL_TASKFLAG);
+	ADDATTRIB(TaskAttribute::Dependency,		TDL_TASKDEPENDENCY);
+	ADDATTRIB(TaskAttribute::FileLink,			TDL_TASKFILEREFPATH);
+	ADDATTRIB(TaskAttribute::SubtaskDone,		TDL_TASKSUBTASKDONE);
+	ADDATTRIB(TaskAttribute::Comments,			TDL_TASKCOMMENTS);
+
+	// subtasks
+	Task^ subtask = task->GetFirstSubtask();
+
+	while (subtask->IsValid())
+	{
+		BuildAttributeList(subtask, attribs);
+
+		subtask = subtask->GetNextTask();
+	}
+}
+
+void TaskList::AddAttributeToList(TaskList::TaskAttribute attrib, String^ attribId, Task^ task, 
+								  Collections::Generic::HashSet<TaskList::TaskAttribute>^ attribs)
+{
+	if (!attribs->Contains(attrib) && task->HasAttribute(attribId))
+		attribs->Add(attrib);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -233,6 +307,11 @@ String^ Task::GetComments()
 	return GETTASKSTR(GetTaskComments);
 }
 
+String^ Task::GetHtmlComments()
+{
+	return GETTASKSTR_ARG(GetTaskAttribute, TDL_TASKHTMLCOMMENTS);
+}
+
 String^ Task::GetAllocatedBy()
 {
 	return GETTASKSTR(GetTaskAllocatedBy);
@@ -345,6 +424,24 @@ UInt32 Task::GetPosition()
 	return GETTASKVAL(GetTaskPosition, 0);
 }
 
+String^ Task::GetPath(String^ delimiter)
+{
+	String^ path = nullptr;
+	Task^ parentTask = GetParentTask();
+
+	while (parentTask->IsValid())
+	{
+		if (String::IsNullOrEmpty(path))
+			path = parentTask->GetTitle();
+		else
+			path = (parentTask->GetTitle() + delimiter + path);
+
+		parentTask = parentTask->GetParentTask();
+	}
+
+	return (path ? path : "");
+}
+
 UInt32 Task::GetPriority()
 {
 	return GETTASKVAL_ARG(GetTaskPriority, FALSE, 0);
@@ -410,6 +507,36 @@ List<String^>^ Task::GetFileReference()
 	return items;
 }
 
+String^ Task::GetAllocatedTo(String^ delimiter)
+{
+	return FormatList(GetAllocatedTo(), delimiter);
+}
+
+String^ Task::GetCategory(String^ delimiter)
+{
+	return FormatList(GetCategory(), delimiter);
+}
+
+String^ Task::GetTag(String^ delimiter)
+{
+	return FormatList(GetTag(), delimiter);
+}
+
+String^ Task::GetDependency(String^ delimiter)
+{
+	return FormatList(GetDependency(), delimiter);
+}
+
+String^ Task::GetFileReference(String^ delimiter)
+{
+	return FormatList(GetFileReference(), delimiter);
+}
+
+String^ Task::FormatList(List<String^>^ items, String^ delimiter)
+{
+	return "";
+}
+
 Byte Task::GetPercentDone()
 {
 	return GETTASKVAL_ARG(GetTaskPercentDone, FALSE, 0);
@@ -420,7 +547,7 @@ double Task::GetCost()
 	return GETTASKVAL_ARG(GetTaskCost, FALSE, 0);
 }
 
-DateTime Task::GetLastModified()
+DateTime Task::GetLastModifiedDate()
 {
 	__int64 date = 0;
 	
@@ -493,6 +620,16 @@ String^ Task::GetStartDateString()
 String^ Task::GetCreationDateString()
 {
 	return GETTASKSTR(GetTaskCreationDateString);
+}
+
+String^ Task::GetLastModifiedDateString()
+{
+	return "";//GETTASKSTR(GetTaskLastModifiedBy);
+}
+
+String^ Task::GetLastModifiedBy()
+{
+	return GETTASKSTR(GetTaskLastModifiedBy);
 }
 
 Boolean Task::IsDone()

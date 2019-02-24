@@ -61,6 +61,7 @@ namespace Abstractspoon
 
 				String^ GetTitle();
 				String^ GetComments();
+				String^ GetHtmlComments();
 				String^ GetAllocatedBy();
 				String^ GetStatus();
 				String^ GetWebColor();
@@ -69,6 +70,7 @@ namespace Abstractspoon
 				String^ GetExternalID();
 				String^ GetCreatedBy();
 				String^ GetPositionString();
+				String^ GetPath(String^ delimiter);
 
 				String^ GetIcon();
 				Boolean HasIcon();
@@ -91,10 +93,16 @@ namespace Abstractspoon
 				List<String^>^ GetDependency();
 				List<String^>^ GetFileReference();
 
+				String^ GetAllocatedTo(String^ delimiter);
+				String^ GetCategory(String^ delimiter);
+				String^ GetTag(String^ delimiter);
+				String^ GetDependency(String^ delimiter);
+				String^ GetFileReference(String^ delimiter);
+
 				Byte GetPercentDone();
 				double GetCost();
 
-				DateTime GetLastModified();
+				DateTime GetLastModifiedDate();
 				DateTime GetDoneDate();
 				DateTime GetDueDate();
 				DateTime GetStartDate();
@@ -104,6 +112,8 @@ namespace Abstractspoon
 				String^ GetDueDateString();
 				String^ GetStartDateString();
 				String^ GetCreationDateString();
+				String^ GetLastModifiedDateString();
+				String^ GetLastModifiedBy();
 
 				Boolean IsDone();
 				Boolean IsDue();
@@ -116,12 +126,14 @@ namespace Abstractspoon
 				double GetTimeEstimate(TimeUnits% cUnits);
 				double GetTimeSpent(TimeUnits% cUnits);
 
-				Boolean GetRecurrence(); // TODO
+				String^ GetAttribute(String^ sAttrib);
 				Boolean HasAttribute(String^ sAttrib);
 
-				String^ GetAttribute(String^ sAttrib);
 				String^ GetCustomAttributeData(String^ sID);
 				String^ GetMetaData(String^ sKey);
+
+				// TODO
+				Boolean GetRecurrence();
 
 				// SETTERS -----------------------------------------------------
 
@@ -176,12 +188,53 @@ namespace Abstractspoon
 
 			private: // -------------------------------------------------------
 				Task();
+
+				String^ FormatList(List<String^>^ items, String^ delimiter);
 			};
 
 			////////////////////////////////////////////////////////////////////////////////////////////////
 
 			public ref class TaskList
 			{
+			public:
+				enum class TaskAttribute
+				{
+					Unknown = -1,
+
+					Title = 0,
+					Position,
+					Id,
+					ParentId,
+					Path,
+					Priority,
+					Risk,
+					Percent,
+					TimeEstimate,
+					TimeSpent,
+					CreationDate,
+					CreatedBy,
+					LastModifiedDate,
+					LastModifiedBy,
+					StartDate,
+					DueDate,
+					DoneDate,
+					Recurrence,
+					AllocatedTo,
+					AllocatedBy,
+					Status,
+					Category,
+					Tags,
+					ExternalId,
+					Cost,
+					Version,
+					Flag,
+					Dependency,
+					FileLink,
+					SubtaskDone,
+					Comments,
+					HtmlComments,
+				};
+
 			public:
 				TaskList(ITaskList* pTaskList);        // GET & SET
 				TaskList(const ITaskList* pTaskList);  // GET ONLY
@@ -210,12 +263,19 @@ namespace Abstractspoon
 				Boolean SetMetaData(String^ sKey, String^ sValue);
 				Boolean ClearMetaData(String^ sKey);
 
+				int GetAttributeList(Collections::Generic::HashSet<TaskList::TaskAttribute>^ attribs);
+
 			private: // -------------------------------------------------------
 				ITaskList16* m_pTaskList;
 				const ITaskList16* m_pConstTaskList;
 
 			private: // -------------------------------------------------------
 				TaskList();
+
+				void BuildAttributeList(Task^ task, Collections::Generic::HashSet<TaskList::TaskAttribute>^ attribs);
+				void AddAttributeToList(TaskList::TaskAttribute attrib, String^ attribId, Task^ task,
+												  Collections::Generic::HashSet<TaskList::TaskAttribute>^ attribs);
+
 			};
 		}
 	}

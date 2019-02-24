@@ -29,7 +29,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-CHTMLReportExporterBridge::CHTMLReportExporterBridge()
+CHTMLReportExporterBridge::CHTMLReportExporterBridge() : m_pTT(nullptr)
 {
 }
 
