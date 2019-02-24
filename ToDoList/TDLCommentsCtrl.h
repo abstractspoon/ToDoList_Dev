@@ -58,7 +58,7 @@ public:
 protected:
 	const CContentMgr* m_pMgrContent;
 
-	CContentTypeComboBox	m_cbCommentsFmt;
+	CContentTypeComboBox m_cbCommentsFmt;
 	CContentCtrl m_ctrlComments;
 	CUIThemeFile m_theme;
 	CBrush m_brBack;
