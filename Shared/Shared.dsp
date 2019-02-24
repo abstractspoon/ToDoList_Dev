@@ -165,6 +165,10 @@ SOURCE=.\ContentMgr.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ContentTypeCombobox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CopyWndContents.cpp
 # End Source File
 # Begin Source File
@@ -709,6 +713,10 @@ SOURCE=.\TreeSelectionHelper.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\UIExtensionHelper.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\UIExtensionMgr.cpp
 # End Source File
 # Begin Source File
@@ -854,6 +862,10 @@ SOURCE=.\ContentCtrl.h
 # Begin Source File
 
 SOURCE=.\ContentMgr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ContentTypeCombobox.h
 # End Source File
 # Begin Source File
 
@@ -1430,6 +1442,10 @@ SOURCE=.\TreeListSyncer.h
 # Begin Source File
 
 SOURCE=.\TreeSelectionHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\UIExtensionHelper.h
 # End Source File
 # Begin Source File
 

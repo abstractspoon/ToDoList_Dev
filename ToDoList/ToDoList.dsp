@@ -323,10 +323,6 @@ SOURCE=.\TDCToolsHelper.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCUIExtensionHelper.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\TDCWebUpdateScript.cpp
 # End Source File
 # Begin Source File
@@ -372,10 +368,6 @@ SOURCE=.\TDLCommentsCtrl.cpp
 # Begin Source File
 
 SOURCE=.\TDLContentMgr.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\TDLContentTypeCombobox.cpp
 # End Source File
 # Begin Source File
 
@@ -911,10 +903,6 @@ SOURCE=.\TDCToolsHelper.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCUIExtensionHelper.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\TDCWebUpdateScript.h
 # End Source File
 # Begin Source File
@@ -960,10 +948,6 @@ SOURCE=.\TDLCommentsCtrl.h
 # Begin Source File
 
 SOURCE=.\TDLContentMgr.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\TDLContentTypeCombobox.h
 # End Source File
 # Begin Source File
 
