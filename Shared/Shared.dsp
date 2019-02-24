@@ -525,6 +525,10 @@ SOURCE=.\RecordsetEx.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\Recurrence.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Regkey.cpp
 # End Source File
 # Begin Source File
@@ -1230,6 +1234,10 @@ SOURCE=.\RCCtrlParser.h
 # Begin Source File
 
 SOURCE=.\RecordsetEx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Recurrence.h
 # End Source File
 # Begin Source File
 
