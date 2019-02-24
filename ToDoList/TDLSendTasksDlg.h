@@ -9,8 +9,9 @@
 
 #include "TaskSelectionDlg.h"
 #include "TDLDialog.h"
-#include "tdlimportexportcombobox.h"
-#include "TDCimportexportmgr.h"
+
+#include "..\Shared\ImportExportComboBox.h"
+#include "..\shared\importexportmgr.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -43,7 +44,7 @@ protected:
 	int		m_nSendTasksAsOption;
 	CString		m_sFormatTypeID;
 	//}}AFX_DATA
-	CTDLImportExportComboBox m_cbFormat;
+	CImportExportComboBox m_cbFormat;
 
 // Overrides
 	virtual void OnOK();

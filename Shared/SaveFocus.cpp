@@ -19,12 +19,39 @@ CSaveFocus::CSaveFocus() : m_hwnd(NULL), m_bEdit(FALSE)
 		::SendMessage(m_hwnd, EM_GETSEL, (WPARAM)&m_crSel.cpMin, (LPARAM)&m_crSel.cpMax);
 	else
 		m_crSel.cpMax = m_crSel.cpMin = 0;
+
+#ifdef _DEBUG
+// 	if (m_hwnd)
+// 	{
+// 		CString sFocus;
+// 		CWnd::FromHandle(m_hwnd)->GetWindowText(sFocus);
+// 		TRACE(_T("CSaveFocus(%s = %s)\n"), CWinClasses::GetClassEx(m_hwnd), sFocus.Left(100));
+// 	}
+#endif
+
 }
 
 CSaveFocus::~CSaveFocus()
 {
-	if (::IsWindow(m_hwnd) && ::IsWindowEnabled(m_hwnd))
+	RestoreFocus();
+}
+
+BOOL CSaveFocus::RestoreFocus()
+{
+	if (!(::IsWindow(m_hwnd) && ::IsWindowEnabled(m_hwnd) && ::IsWindowVisible(m_hwnd)))
 	{
+		m_hwnd = NULL;
+		return FALSE;
+	}
+	
+	if (::GetFocus() != m_hwnd)
+	{
+#ifdef _DEBUG
+// 		CString sFocus;
+// 		CWnd::FromHandle(m_hwnd)->GetWindowText(sFocus);
+// 		TRACE(_T("~CSaveFocus(%s = %s)\n"), CWinClasses::GetClassEx(m_hwnd), sFocus.Left(100));
+#endif
+
 		::SetFocus(m_hwnd);
 
 		if (m_bEdit)
@@ -36,4 +63,7 @@ CSaveFocus::~CSaveFocus()
 				::SendMessage(m_hwnd, EM_SETSEL, (WPARAM)m_crSel.cpMin, (LPARAM)m_crSel.cpMax);
 		}
 	}
+
+	m_hwnd = NULL;
+	return TRUE;
 }

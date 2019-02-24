@@ -57,10 +57,6 @@ const UINT ONE_MINUTE = 60000;
 const UINT TEN_MINUTES = (ONE_MINUTE * 10);
 
 //////////////////////////////////////////////////////////////////////
-
-const UINT WM_TDC_REFRESHFILTER	= (WM_APP + 11);
-
-//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -86,7 +82,6 @@ BEGIN_MESSAGE_MAP(CFilteredToDoCtrl, CTabbedToDoCtrl)
 	//}}AFX_MSG_MAP
 	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPRECHANGE, OnPreTabViewChange)
 	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TASKTREELIST, OnTreeExpandItem)
-	ON_MESSAGE(WM_TDC_REFRESHFILTER, OnRefreshFilter)
 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnEditChangeDueTime)
 END_MESSAGE_MAP()
 
@@ -653,31 +648,6 @@ BOOL CFilteredToDoCtrl::SetAdvancedFilter(const TDCADVANCEDFILTER& filter)
 	return FALSE;
 }
 
-LRESULT CFilteredToDoCtrl::OnRefreshFilter(WPARAM wParam, LPARAM lParam)
-{
-	BOOL bUndo = lParam;
-	FTC_VIEW nView = (FTC_VIEW)wParam;
-
-	if (nView == FTCV_TASKTREE)
-	{
-		// This will also refresh the list view if it is active
-		RefreshFilter();
-	}
-	else if (nView == FTCV_TASKLIST || bUndo)
-	{
-		// if undoing then we must also refresh the list filter because
-		// otherwise ResyncListSelection will fail in the case where
-		// we are undoing a delete because the undone item will not yet be in the list.
-		RefreshListFilter();
-	}
-	
-	// resync selection?
-	if (nView == FTCV_TASKLIST)
-		SyncListSelectionToTree();
-	
-	return 0L;
-}
-
 BOOL CFilteredToDoCtrl::FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom, DWORD dwCustomFlags, DWORD dwIgnoreFlags) const
 {
 	return m_filter.FilterMatches(filter, szCustom, dwCustomFlags, dwIgnoreFlags);
@@ -1190,8 +1160,8 @@ void CFilteredToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwMo
 	{
 		if (ModNeedsRefilter(nAttrib, FTCV_TASKTREE, dwModTaskID))
 		{
-			// Refresh the tree filter.
-			SendMessage(WM_TDC_REFRESHFILTER, FTCV_TASKTREE, (nAttrib == TDCA_UNDO));
+			// This will also refresh the list view if it is active
+			RefreshFilter();
 
 			// Note: This will also have refreshed the list filter if active
 			bListRefiltered = (GetTaskView() == FTCV_TASKLIST);
@@ -1199,11 +1169,12 @@ void CFilteredToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwMo
 		}
 		else if (ModNeedsRefilter(nAttrib, FTCV_TASKLIST, dwModTaskID))
 		{
-			// Refresh the list filter if active, or mark as needing refilter
-			if (InListView())
+			// if undoing then we must also refresh the list filter because
+			// otherwise ResyncListSelection will fail in the case where
+			// we are undoing a delete because the undone item will not yet be in the list.
+			if (InListView() || (nAttrib == TDCA_UNDO))
 			{
-				SendMessage(WM_TDC_REFRESHFILTER, FTCV_TASKLIST, (nAttrib == TDCA_UNDO));
-				bListRefiltered = TRUE;
+				RefreshListFilter();
 			}
 			else
 			{
@@ -1218,6 +1189,8 @@ void CFilteredToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwMo
 	CAutoFlag af2(m_bIgnoreExtensionUpdate, bTreeRefiltered);
 
 	CTabbedToDoCtrl::SetModified(bMod, nAttrib, dwModTaskID);
+
+	SyncActiveViewSelectionToTree();
 }
 
 void CFilteredToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)

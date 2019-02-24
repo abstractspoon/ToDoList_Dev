@@ -447,10 +447,6 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="tdlimportexportcombobox.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="TDLImportOutlookDlg.cpp" />
     <ClCompile Include="TDLImportOutlookObjectsDlg.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -693,7 +689,6 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLFindTasksDlg.h" />
     <ClInclude Include="tdliconcombobox.h" />
     <ClInclude Include="TDLImportDialog.h" />
-    <ClInclude Include="tdlimportexportcombobox.h" />
     <ClInclude Include="TDLImportOutlookDlg.h" />
     <ClInclude Include="TDLImportOutlookObjectsDlg.h" />
     <ClInclude Include="TDLImportOutlookObjectSetupListCtrl.h" />

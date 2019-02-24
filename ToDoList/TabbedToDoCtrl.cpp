@@ -5536,43 +5536,48 @@ BOOL CTabbedToDoCtrl::SelectTasks(const CDWordArray& aTasks, BOOL bTrue)
 		ASSERT((m_aRecreatedRecurringTasks.GetSize() == 0) ||
 				(&m_aRecreatedRecurringTasks == &aTasks));
 
-		FTC_VIEW nView = GetTaskView();
-
-		switch (nView)
-		{
-		case FTCV_TASKTREE:
-		case FTCV_UNSET:
-			break;
-
-		case FTCV_TASKLIST:
-			SyncListSelectionToTree();
-			break;
-
-		case FTCV_UIEXTENSION1:
-		case FTCV_UIEXTENSION2:
-		case FTCV_UIEXTENSION3:
-		case FTCV_UIEXTENSION4:
-		case FTCV_UIEXTENSION5:
-		case FTCV_UIEXTENSION6:
-		case FTCV_UIEXTENSION7:
-		case FTCV_UIEXTENSION8:
-		case FTCV_UIEXTENSION9:
-		case FTCV_UIEXTENSION10:
-		case FTCV_UIEXTENSION11:
-		case FTCV_UIEXTENSION12:
-		case FTCV_UIEXTENSION13:
-		case FTCV_UIEXTENSION14:
-		case FTCV_UIEXTENSION15:
-		case FTCV_UIEXTENSION16:
-			SyncExtensionSelectionToTree(nView);
-			break;
-
-		default:
-			ASSERT(0);
-		}
+		SyncActiveViewSelectionToTree();
 	}
 
 	return bRes;
+}
+
+void CTabbedToDoCtrl::SyncActiveViewSelectionToTree()
+{
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		break;
+
+	case FTCV_TASKLIST:
+		SyncListSelectionToTree();
+		break;
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		SyncExtensionSelectionToTree(nView);
+		break;
+
+	default:
+		ASSERT(0);
+	}
 }
 
 void CTabbedToDoCtrl::SyncListSelectionToTree()
@@ -5687,43 +5692,8 @@ void CTabbedToDoCtrl::SelectTasksInHistory(BOOL bForward)
 		// let CToDoCtrl do it's thing
 		CToDoCtrl::SelectTasksInHistory(bForward);
 
-		// extra processing
-		FTC_VIEW nView = GetTaskView();
-
-		switch (nView)
-		{
-		case FTCV_TASKTREE:
-		case FTCV_UNSET:
-			// handled above
-			break;
-
-		case FTCV_TASKLIST:
-			// then update our own selection
-			SyncListSelectionToTree();
-			break;
-
-		case FTCV_UIEXTENSION1:
-		case FTCV_UIEXTENSION2:
-		case FTCV_UIEXTENSION3:
-		case FTCV_UIEXTENSION4:
-		case FTCV_UIEXTENSION5:
-		case FTCV_UIEXTENSION6:
-		case FTCV_UIEXTENSION7:
-		case FTCV_UIEXTENSION8:
-		case FTCV_UIEXTENSION9:
-		case FTCV_UIEXTENSION10:
-		case FTCV_UIEXTENSION11:
-		case FTCV_UIEXTENSION12:
-		case FTCV_UIEXTENSION13:
-		case FTCV_UIEXTENSION14:
-		case FTCV_UIEXTENSION15:
-		case FTCV_UIEXTENSION16:
-			SyncExtensionSelectionToTree(nView);
-			break;
-
-		default:
-			ASSERT(0);
-		}
+		// then update our own selection
+		SyncActiveViewSelectionToTree();
 	}
 }
 

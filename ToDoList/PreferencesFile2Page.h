@@ -7,8 +7,7 @@
 // PreferencesFilePage.h : header file
 //
 
-#include "TDLImportExportComboBox.h"
-
+#include "..\Shared\ImportExportComboBox.h"
 #include "..\shared\fileedit.h"
 #include "..\shared\preferencesbase.h"
 
@@ -60,7 +59,7 @@ protected:
 	//}}AFX_DATA
 
 	// saving	
-	CTDLImportExportComboBox m_cbOtherExporters;
+	CImportExportComboBox m_cbOtherExporters;
 	//CComboBox	m_cbOtherExporters;
 	CFileEdit	m_eSaveExportStylesheet;
 	CFileEdit	m_eExportFolderPath;

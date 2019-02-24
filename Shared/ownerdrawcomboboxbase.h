@@ -63,9 +63,9 @@ protected:
 	virtual UINT GetDrawEllipsis() const { return DT_END_ELLIPSIS; }
 	virtual int GetMaxDropWidth() const { return -1; } // no limit
 	virtual int GetExtraListboxWidth() const;
+	virtual int CalcMinItemHeight(BOOL bList) const;
 
 	void InitItemHeight();
-	int CalcMinItemHeight(BOOL bList) const;
 	BOOL IsType(UINT nComboType) const;
 	void RefreshDropWidth(BOOL bRecalc);
 

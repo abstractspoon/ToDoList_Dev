@@ -15,6 +15,8 @@ public:
 	CSaveFocus();
 	virtual ~CSaveFocus();
 
+	BOOL RestoreFocus();
+
 protected:
 	HWND m_hwnd;
 	CHARRANGE m_crSel;

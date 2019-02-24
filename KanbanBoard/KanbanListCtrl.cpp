@@ -2203,11 +2203,17 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
 
 		if (GetItemCheckboxRect(nHit, rCheckbox, NULL) && rCheckbox.PtInRect(point))
 		{
+			BOOL bWantFocus = (GetFocus() != this);
+
 			ClearSelection();
-			SelectItem(nHit, FALSE);
+			SelectItem(nHit, bWantFocus);
+
+			if (bWantFocus)
+				SetFocus();
 
 			// Post message to let mouse-click time to process
 			GetParent()->PostMessage(WM_KLCN_CHECKCHANGE, (WPARAM)GetSafeHwnd(), m_dwSelectingTaskID);
+			return TRUE;
 		}
 	}
 	

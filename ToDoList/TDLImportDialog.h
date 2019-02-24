@@ -7,10 +7,15 @@
 // TDLImportDialog.h : header file
 //
 
-#include "tdlimportexportcombobox.h"
 #include "TDLDialog.h"
 
 #include "..\shared\fileedit.h"
+#include "..\shared\importexportmgr.h"
+#include "..\Shared\ImportExportComboBox.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTDCImportExportMgr;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportDialog dialog
@@ -34,7 +39,7 @@ protected:
 	//{{AFX_DATA(CTDLImportDialog)
 	enum { IDD = IDD_IMPORT_DIALOG };
 	CFileEdit	m_eFilePath;
-	CTDLImportExportComboBox m_cbFormat;
+	CImportExportComboBox m_cbFormat;
 	int		m_bFromClipboard;
 	CString	m_sFromFilePath;
 	int		m_nImportTo;

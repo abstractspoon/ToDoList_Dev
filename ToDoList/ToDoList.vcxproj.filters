@@ -205,9 +205,6 @@
     <ClCompile Include="TDLImportDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tdlimportexportcombobox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TDLImportOutlookObjectsDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -676,9 +673,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDLImportDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tdlimportexportcombobox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDLImportOutlookObjectsDlg.h">

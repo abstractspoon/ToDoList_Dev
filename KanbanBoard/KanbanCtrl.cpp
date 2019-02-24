@@ -1595,18 +1595,19 @@ void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate)
 	
 	// We only need to restore selection if not doing a task update
 	// because the app takes care of that
-	if (!bTaskUpdate)
+	if (!bTaskUpdate && aSelTaskIDs.GetSize())
 	{
 		if (!SelectTasks(aSelTaskIDs))
-
-		if (!m_pSelectedList || !Misc::HasT(m_aListCtrls, m_pSelectedList))
 		{
-			// Find the first list with some items
-			m_pSelectedList = m_aListCtrls.GetFirstNonEmpty();
+			if (!m_pSelectedList || !Misc::HasT(m_aListCtrls, m_pSelectedList))
+			{
+				// Find the first list with some items
+				m_pSelectedList = m_aListCtrls.GetFirstNonEmpty();
 
-			// No list has items?
-			if (!m_pSelectedList)
-				m_pSelectedList = m_aListCtrls[0];
+				// No list has items?
+				if (!m_pSelectedList)
+					m_pSelectedList = m_aListCtrls[0];
+			}
 		}
 	}
 }
@@ -2831,15 +2832,16 @@ LRESULT CKanbanCtrl::OnListCheckChange(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(!m_bReadOnly);
 
-	const KANBANITEM* pKI = m_data.GetItem(lp);
+	DWORD dwTaskID = lp;
+	const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
 	ASSERT(pKI);
 
 	if (pKI)
 	{
 		LRESULT lr = GetParent()->SendMessage(WM_KBC_COMPLETIONCHANGE, (WPARAM)GetSafeHwnd(), !pKI->IsDone(FALSE));
 
-		if (lr)
-			PostMessage(WM_KCM_SELECTTASK, 0, lp);
+		if (lr && m_data.HasItem(dwTaskID))
+			PostMessage(WM_KCM_SELECTTASK, 0, dwTaskID);
 
 		return lr;
 	}

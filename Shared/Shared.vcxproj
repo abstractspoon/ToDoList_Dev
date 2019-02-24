@@ -345,6 +345,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ImportExportComboBox.cpp" />
     <ClCompile Include="ImportExportMgr.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -770,6 +771,7 @@
     <ClInclude Include="iconbutton.h" />
     <ClInclude Include="IconCache.h" />
     <ClInclude Include="ImageProcessors.h" />
+    <ClInclude Include="ImportExportComboBox.h" />
     <ClInclude Include="ImportExportMgr.h" />
     <ClInclude Include="ImportExportUIHelper.h" />
     <ClInclude Include="InputListCtrl.h" />

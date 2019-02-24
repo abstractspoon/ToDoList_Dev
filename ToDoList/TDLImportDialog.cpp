@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "tdcenum.h"
 #include "TDLImportDialog.h"
+#include "TDCImportExportMgr.h"
 
 #include "../shared/enstring.h"
 #include "../shared/misc.h"

@@ -8,10 +8,11 @@
 //
 
 #include "TaskSelectionDlg.h"
-#include "tdlimportexportcombobox.h"
 #include "TDLDialog.h"
 
 #include "..\shared\fileedit.h"
+#include "..\shared\importexportmgr.h"
+#include "..\Shared\ImportExportComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CExportDlg dialog
@@ -36,7 +37,7 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CExportDlg)
-	CTDLImportExportComboBox m_cbFormat;
+	CImportExportComboBox m_cbFormat;
 	CFileEdit	m_eExportPath;
 	int		m_nExportOption;
 	CString	m_sExportPath;

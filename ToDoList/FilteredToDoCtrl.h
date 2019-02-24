@@ -12,8 +12,6 @@
 #include "TabbedToDoCtrl.h"
 #include "TDCFilter.h"
 
-//#include "..\shared\misc.h"
-
 /////////////////////////////////////////////////////////////////////////////
 
 struct VIEWDATA2 : public VIEWDATA
@@ -109,7 +107,6 @@ protected:
 	afx_msg void OnTimer(UINT nIDEvent);
 	//}}AFX_MSG
 	afx_msg void OnTreeExpandItem(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg LRESULT OnRefreshFilter(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnEditChangeDueTime();
 	afx_msg LRESULT OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView);
 
@@ -138,7 +135,6 @@ protected:
 	void RefreshTreeFilter();
 	void RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgress = FALSE);
 	BOOL IsFilterSet(FTC_VIEW nView) const;
-	BOOL IsFilterSet(const TDCFILTER& filter, FTC_VIEW nView) const;
 	BOOL FiltersMatch(const TDCFILTER& filter1, const TDCFILTER& filter2, FTC_VIEW nView) const;
 	BOOL FilterMatches(const TDCFILTER& filter, FTC_VIEW nView) const;
 	void SetExtensionsNeedRefilter(BOOL bRefilter, FTC_VIEW nIgnore = FTCV_UNSET);

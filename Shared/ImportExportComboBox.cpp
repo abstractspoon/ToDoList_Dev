@@ -2,11 +2,10 @@
 //
 
 #include "stdafx.h"
-#include "tdlimportexportcombobox.h"
-
-#include "..\Shared\Misc.h"
-#include "..\Shared\GraphicsMisc.h"
-#include "..\Shared\DialogHelper.h"
+#include "importexportcombobox.h"
+#include "GraphicsMisc.h"
+#include "Misc.h"
+#include "DialogHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,7 +16,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportExportComboBox
 
-CTDLImportExportComboBox::CTDLImportExportComboBox(const CTDCImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly)
+CImportExportComboBox::CImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly)
 	: 
 	m_mgrImpExp(mgrImpExp), 
 	m_bImporting(bImport), 
@@ -25,12 +24,12 @@ CTDLImportExportComboBox::CTDLImportExportComboBox(const CTDCImportExportMgr& mg
 {
 }
 
-CTDLImportExportComboBox::~CTDLImportExportComboBox()
+CImportExportComboBox::~CImportExportComboBox()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLImportExportComboBox, COwnerdrawComboBoxBase)
+BEGIN_MESSAGE_MAP(CImportExportComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CTDLImportExportComboBox)
 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
@@ -39,7 +38,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportExportComboBox message handlers
 
-void CTDLImportExportComboBox::SetFileBasedOnly(BOOL bFileBased)
+void CImportExportComboBox::SetFileBasedOnly(BOOL bFileBased)
 {
 	m_bFileBasedOnly = bFileBased;
 
@@ -50,14 +49,14 @@ void CTDLImportExportComboBox::SetFileBasedOnly(BOOL bFileBased)
 	}
 }
 
-void CTDLImportExportComboBox::PreSubclassWindow() 
+void CImportExportComboBox::PreSubclassWindow() 
 {
 	BuildCombo();
 	
 	COwnerdrawComboBoxBase::PreSubclassWindow();
 }
 
-int CTDLImportExportComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+int CImportExportComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -67,7 +66,7 @@ int CTDLImportExportComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CTDLImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
+void CImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
 	int nImpExp = (int)dwItemData;
@@ -111,7 +110,14 @@ void CTDLImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nIte
 	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
 
-void CTDLImportExportComboBox::BuildCombo()
+int CImportExportComboBox::CalcMinItemHeight(BOOL bList) const
+{
+	int nMinHeight = COwnerdrawComboBoxBase::CalcMinItemHeight(bList);
+
+	return (nMinHeight + 2); // icon padding
+}
+
+void CImportExportComboBox::BuildCombo()
 {
 	// once only
 	if (GetCount())
@@ -137,7 +143,7 @@ void CTDLImportExportComboBox::BuildCombo()
 	}
 }
 
-CString CTDLImportExportComboBox::GetImpExpMenuText(int nImpExp) const
+CString CImportExportComboBox::GetImpExpMenuText(int nImpExp) const
 {
 	if (m_bImporting)
 		return m_mgrImpExp.GetImporterMenuText(nImpExp);
@@ -146,7 +152,7 @@ CString CTDLImportExportComboBox::GetImpExpMenuText(int nImpExp) const
 	return m_mgrImpExp.GetExporterMenuText(nImpExp);
 }
 
-CString CTDLImportExportComboBox::GetImpExpFileExtension(int nImpExp) const
+CString CImportExportComboBox::GetImpExpFileExtension(int nImpExp) const
 {
 	if (m_bImporting)
 		return m_mgrImpExp.GetImporterFileExtension(nImpExp, FALSE);
@@ -155,7 +161,7 @@ CString CTDLImportExportComboBox::GetImpExpFileExtension(int nImpExp) const
 	return m_mgrImpExp.GetExporterFileExtension(nImpExp, FALSE);
 }
 
-HICON CTDLImportExportComboBox::GetImpExpIcon(int nImpExp) const
+HICON CImportExportComboBox::GetImpExpIcon(int nImpExp) const
 {
 	if (m_bImporting)
 		return m_mgrImpExp.GetImporterIcon(nImpExp);
@@ -164,7 +170,7 @@ HICON CTDLImportExportComboBox::GetImpExpIcon(int nImpExp) const
 	return m_mgrImpExp.GetExporterIcon(nImpExp);
 }
 
-CString CTDLImportExportComboBox::GetSelectedTypeID() const
+CString CImportExportComboBox::GetSelectedTypeID() const
 {
 	if (GetCurSel() == CB_ERR)
 		return _T("");
@@ -176,7 +182,7 @@ CString CTDLImportExportComboBox::GetSelectedTypeID() const
 			m_mgrImpExp.GetExporterTypeID(nImpExp));
 }
 
-int CTDLImportExportComboBox::SetSelectedTypeID(LPCTSTR szTypeID)
+int CImportExportComboBox::SetSelectedTypeID(LPCTSTR szTypeID)
 {
 	int nImpExp = CB_ERR;
 

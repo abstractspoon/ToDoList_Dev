@@ -7,19 +7,18 @@
 // tdlimportexportcombobox.h : header file
 //
 
-#include "TDCimportexportmgr.h"
-
-#include "..\shared\sysimagelist.h"
-#include "..\shared\ownerdrawcomboboxbase.h"
+#include "importexportmgr.h"
+#include "sysimagelist.h"
+#include "ownerdrawcomboboxbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportExportComboBox window
 
-class CTDLImportExportComboBox : public COwnerdrawComboBoxBase
+class CImportExportComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
-	CTDLImportExportComboBox(const CTDCImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly = FALSE);
+	CImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly = FALSE);
 
 	void SetFileBasedOnly(BOOL bFileBased);
 
@@ -27,7 +26,8 @@ public:
 	int SetSelectedTypeID(LPCTSTR szTypeID);
 
 protected:
-	const CTDCImportExportMgr& m_mgrImpExp;
+	const CImportExportMgr& m_mgrImpExp;
+
 	BOOL m_bImporting, m_bFileBasedOnly;
 	CSysImageList m_ilImages;
 
@@ -40,7 +40,7 @@ protected:
 
 // Implementation
 public:
-	virtual ~CTDLImportExportComboBox();
+	virtual ~CImportExportComboBox();
 
 	// Generated message map functions
 protected:
@@ -52,7 +52,8 @@ protected:
 protected:
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-	BOOL HasIcon() const { return TRUE; }
+	virtual BOOL HasIcon() const { return TRUE; }
+	virtual int CalcMinItemHeight(BOOL bList) const;
 
 	void BuildCombo();
 	CString GetImpExpMenuText(int nImpExp) const;

@@ -7,8 +7,13 @@
 // TDLPasteFromClipboardDlg.h : header file
 //
 
-#include "tdlimportexportcombobox.h"
 #include "TDLDialog.h"
+
+#include "..\Shared\ImportExportComboBox.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTDCImportExportMgr;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPasteFromClipboardDlg dialog
@@ -27,7 +32,7 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLPasteFromClipboardDlg)
-	CTDLImportExportComboBox	m_cbFormat;
+	CImportExportComboBox	m_cbFormat;
 	CString	m_sClipboardText;
 	//}}AFX_DATA
 

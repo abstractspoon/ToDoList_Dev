@@ -890,6 +890,7 @@ BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 	BOOL bWasTracking = pTTL->IsTracking();
 
 	VERIFY(m_aTasklists.UpdateTracking(pTTL));
+	ASSERT((bWasTracking && !pTTL->IsTracking()) || (!bWasTracking && pTTL->IsTracking()));
 
 	// If we've just started tracking, switch to that tasklist
 	// and show the dialog if required
@@ -927,6 +928,9 @@ BOOL CTDLTimeTrackerDlg::IsTrackingSelectedTasklistAndTask() const
 
 void CTDLTimeTrackerDlg::UpdateButtonState()
 {
+	if (!IsWindowVisible() || m_bCollapsed)
+		return;
+
 	BOOL bEnable = ((m_cbTasklists.GetCurSel() != CB_ERR) &&
 					(m_cbTasks.GetCurSel() != CB_ERR));
 	
@@ -948,7 +952,7 @@ void CTDLTimeTrackerDlg::UpdateButtonState()
 
 void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC)
 {
-	if (!IsSelectedTasklist(pTDC))
+	if (!IsWindowVisible() || !IsSelectedTasklist(pTDC))
 		return;
 
 	DWORD dwSelTaskID = GetSelectedTaskID();
@@ -1241,6 +1245,13 @@ void CTDLTimeTrackerDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 		CenterWindow(m_pWndNotify);
 		m_bCentreOnShow = FALSE;
 	}
+
+	if (bShow)
+	{
+		UpdateButtonState();
+		UpdateTaskTime(GetSelectedTasklist());
+	}
+
 }
 
 void CTDLTimeTrackerDlg::OnDestroy()

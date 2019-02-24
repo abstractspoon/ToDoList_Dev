@@ -50,7 +50,6 @@ public:
 	BOOL Create(UINT nID, CWnd* pParentWnd);
 	int AddTask(const KANBANITEM& ki, BOOL bSelect);
 	void RefreshColumnTitle();
-	void SetDoneTaskAttributes(COLORREF color, BOOL bStrikeThru);
 	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent);
 	
 	BOOL SaveToImage(CBitmap& bmImage, int nColWidth);
@@ -136,7 +135,6 @@ public:
 protected:
 	//{{AFX_MSG(CKanbanListCtrl)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	//}}AFX_MSG
 	afx_msg void OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);

@@ -487,6 +487,9 @@
     <ClCompile Include="ColorBrewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ImportExportComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ColourPickerEx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1060,6 +1063,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Recurrence.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImportExportComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

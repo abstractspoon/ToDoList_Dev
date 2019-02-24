@@ -245,8 +245,6 @@ protected:
 	virtual void OnStylesUpdated();
 	virtual void OnTaskIconsChanged();
 
-	void DrawListColumnHeaderText(CDC* pDC, int nCol, const CRect& rCol, UINT nState);
-	void RemeasureList();
 	void UpdateSelectedTaskPath();
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);
 	int FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttrib, int nStart, BOOL bNext, BOOL bCaseSensitive, BOOL bWholeWord) const;
@@ -258,14 +256,12 @@ protected:
 	void UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0);
 	int GetVisibleTaskViews(CStringArray& aTypeIDs, BOOL bIncListView) const;
 
+	void SyncActiveViewSelectionToTree();
 	void SyncListSelectionToTree();
 	void SyncExtensionSelectionToTree(FTC_VIEW nView);
-	BOOL IsItemSelected(int nItem) const;
 	BOOL HasSingleSelectionChanged(DWORD dwSelID) const;
 	DWORD GetSingleSelectedTaskID() const;
 	int CacheListSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
-
-	int GetListColumnAlignment(int nDTAlign); 
 
 	VIEWDATA* GetActiveViewData() const;
 	VIEWDATA* GetViewData(FTC_VIEW nView) const;

@@ -6007,7 +6007,7 @@ void CGanttTreeListCtrl::ScrollToTask(DWORD dwTaskID)
 	
 	if (GetTaskStartEndDates(*pGI, dtStart, dtDue))
 	{
-		ScrollTo(dtStart);
+		ScrollTo(pGI->IsMilestone(m_sMilestoneTag) ? dtDue : dtStart);
 	}
 	else if (pGI->HasDoneDate(HasOption(GTLCF_CALCPARENTDATES)))
 	{

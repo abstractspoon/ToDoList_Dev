@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLPasteFromClipboardDlg.h"
+#include "TDCImportExportMgr.h"
 
 #include "../shared/preferences.h"
 #include "../shared/dialoghelper.h"
