@@ -520,6 +520,9 @@
     <ClCompile Include="ContentTypeCombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UIExtensionHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h">
@@ -1078,6 +1081,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ContentTypeCombobox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UIExtensionHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

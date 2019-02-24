@@ -30,7 +30,6 @@
 #include "tdccustomattributehelper.h"
 #include "tdlwelcomewizard.h"
 #include "tdlpastefromclipboarddlg.h"
-#include "tdcuiextensionhelper.h"
 #include "tdlanalyseloggedtimedlg.h"
 #include "tasktimelog.h"
 #include "TDLAboutDlg.h"
@@ -76,6 +75,7 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\ComboListboxPositioner.h"
 #include "..\shared\sendfiletoEx.h"
+#include "..\shared\uiextensionhelper.h"
 
 #include "..\3rdparty\gui.h"
 
@@ -7161,7 +7161,9 @@ void CToDoListWnd::OnShowTaskView(UINT nCmdID)
 			
 			if (tdc.GetVisibleTaskViews(aTypeIDs))
 			{
-				if (CTDCUIExtensionHelper::ProcessViewVisibilityMenuCmd(nCmdID, m_mgrUIExtensions, aTypeIDs))
+				CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
+
+				if (helper.ProcessExtensionMenuCmd(nCmdID, m_mgrUIExtensions, aTypeIDs))
 					tdc.SetVisibleTaskViews(aTypeIDs);
 			}
 		}
@@ -7402,7 +7404,8 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 			CStringArray aTypeIDs;
 			GetToDoCtrl().GetVisibleTaskViews(aTypeIDs);
 			
-			CTDCUIExtensionHelper::PrepareViewVisibilityMenu(CMenu::FromHandle(hMenuUIExt), m_mgrUIExtensions, aTypeIDs);
+			CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
+			helper.UpdateExtensionVisibility(CMenu::FromHandle(hMenuUIExt), m_mgrUIExtensions, aTypeIDs);
 		} 
 	}
 	else // all other sub-menus

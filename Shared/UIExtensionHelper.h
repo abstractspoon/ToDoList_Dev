@@ -15,39 +15,39 @@
 
 struct TDSORTCOLUMN;
 
-class CTDCUIExtensionAppCmdData : public IUIAPPCOMMANDDATA
+class CUIExtensionAppCmdData : public IUIAPPCOMMANDDATA
 {
 public:
 	// IUI_SAVETOIMAGE
-	CTDCUIExtensionAppCmdData(LPCWSTR szImagePath);
+	CUIExtensionAppCmdData(LPCWSTR szImagePath);
 
 	// IUI_SORT
 	// IUI_TOGGLABLESORT
-	CTDCUIExtensionAppCmdData(IUI_ATTRIBUTE nSortCol, BOOL bAscending);
+	CUIExtensionAppCmdData(IUI_ATTRIBUTE nSortCol, BOOL bAscending);
 
 	// IUI_SELECTTASK
 	// IUI_GETNEXTTASK
 	// IUI_GETNEXTTOPLEVELTASK
 	// IUI_GETPREVTASK
 	// IUI_GETPREVTOPLEVELTASK, 
-	CTDCUIExtensionAppCmdData(DWORD dwTaskID);
+	CUIExtensionAppCmdData(DWORD dwTaskID);
 
 	// IUI_SETTASKFONT
-	CTDCUIExtensionAppCmdData(HFONT hFont);
+	CUIExtensionAppCmdData(HFONT hFont);
 
 	// IUI_MOVETASK
-	CTDCUIExtensionAppCmdData(DWORD dwSelTaskID, 
+	CUIExtensionAppCmdData(DWORD dwSelTaskID, 
 								DWORD dwParentID, 
 								DWORD dwAfterSiblingID);
 	// IUI_MULTISORT
-	CTDCUIExtensionAppCmdData(const TDSORTCOLUMN* pCols);
+	CUIExtensionAppCmdData(const IUIMULTISORT& sortCols);
 
 	// IUI_SELECTFIRSTTASK
 	// IUI_SELECTNEXTTASK
 	// IUI_SELECTNEXTTASKINCLCURRENT
 	// IUI_SELECTPREVTASK
 	// IUI_SELECTLASTTASK
-	CTDCUIExtensionAppCmdData(IUI_ATTRIBUTE nAttrib, 
+	CUIExtensionAppCmdData(IUI_ATTRIBUTE nAttrib, 
 								BOOL bFindReplace, 
 								LPCWSTR szWords, 
 								BOOL bCaseSensitive, 
@@ -59,11 +59,17 @@ public:
 class CStringArray;
 class CUIExtensionMgr;
 
-class CTDCUIExtensionHelper  
+class CUIExtensionHelper  
 {
 public:
-	static void PrepareViewVisibilityMenu(CMenu* pMenu, const CUIExtensionMgr& mgr, const CStringArray& aTypeIDs);
-	static BOOL ProcessViewVisibilityMenuCmd(UINT nCmdID, const CUIExtensionMgr& mgr, CStringArray& aTypeIDs);
+	CUIExtensionHelper(UINT nFirstMenuID, int nMaxNumExtensions);
+
+	void UpdateExtensionVisibility(CMenu* pMenu, const CUIExtensionMgr& mgr, const CStringArray& aTypeIDs) const;
+	BOOL ProcessExtensionMenuCmd(UINT nCmdID, const CUIExtensionMgr& mgr, CStringArray& aTypeIDs) const;
+
+protected:
+	UINT m_nFirstMenuID;
+	int m_nMaxNumExtensions;
 
 };
 

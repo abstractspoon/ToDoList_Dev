@@ -642,6 +642,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="UIExtensionHelper.cpp" />
     <ClCompile Include="UIExtensionMgr.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -865,6 +866,7 @@
     <ClInclude Include="TreeDragDropHelper.h" />
     <ClInclude Include="TreeListSyncer.h" />
     <ClInclude Include="TreeSelectionHelper.h" />
+    <ClInclude Include="UIExtensionHelper.h" />
     <ClInclude Include="UIExtensionMgr.h" />
     <ClInclude Include="UITHEME.h" />
     <ClInclude Include="UIThemeFile.h" />

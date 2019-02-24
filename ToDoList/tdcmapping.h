@@ -13,6 +13,7 @@
 #include "tdcenum.h"
 #include "tdcenumcontainers.h"
 #include "tdcswitch.h"
+#include "tdcsort.h"
 
 #include "..\Interfaces\ITasklist.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -727,6 +728,18 @@ namespace TDC
 		TDC_ATTRIBUTE nAttrib = MapColumnToAttribute(nColumn);
 
 		return MapAttributeToIUIAttribute(nAttrib);
+	}
+
+	static void MapSortColumnsToIUIMultiSort(const TDSORTCOLUMN* pSortCols, IUIMULTISORT& multiSort)
+	{
+		multiSort.nAttrib1 = TDC::MapColumnToIUIAttribute(pSortCols[0].nBy);
+		multiSort.bAscending1 = (pSortCols[0].bAscending != FALSE);
+
+		multiSort.nAttrib2 = TDC::MapColumnToIUIAttribute(pSortCols[1].nBy);
+		multiSort.bAscending2 = (pSortCols[1].bAscending != FALSE);
+
+		multiSort.nAttrib3 = TDC::MapColumnToIUIAttribute(pSortCols[2].nBy);
+		multiSort.bAscending3 = (pSortCols[2].bAscending != FALSE);
 	}
 
 	static IUI_ATTRIBUTE MapColumnToIUIEdit(TDC_COLUMN nCol)

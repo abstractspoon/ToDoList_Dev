@@ -3,14 +3,10 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "resource.h"
-#include "TDCUIExtensionHelper.h"
-#include "TDCStruct.h"
-#include "TDCMapping.h"
-
-#include "..\Shared\UIExtensionMgr.h"
-#include "..\Shared\misc.h"
-#include "..\Shared\enmenu.h"
+#include "UIExtensionHelper.h"
+#include "UIExtensionMgr.h"
+#include "misc.h"
+#include "enmenu.h"
 
 #include <afxtempl.h>
 
@@ -23,14 +19,14 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 // IUI_SAVETOIMAGE
-CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(LPCWSTR szImagePath)
+CUIExtensionAppCmdData::CUIExtensionAppCmdData(LPCWSTR szImagePath)
 {
 	lstrcpyn(szFilePath, szImagePath, MAX_PATH);
 }
 
 // IUI_SORT
 // IUI_TOGGLABLESORT
-CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(IUI_ATTRIBUTE nSortCol, BOOL bAscending)
+CUIExtensionAppCmdData::CUIExtensionAppCmdData(IUI_ATTRIBUTE nSortCol, BOOL bAscending)
 {
 	ASSERT(bAscending != -1);
 
@@ -43,19 +39,19 @@ CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(IUI_ATTRIBUTE nSortCol, BOO
 // IUI_GETNEXTTOPLEVELTASK
 // IUI_GETPREVTASK
 // IUI_GETPREVTOPLEVELTASK, 
-CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(DWORD taskID)
+CUIExtensionAppCmdData::CUIExtensionAppCmdData(DWORD taskID)
 {
 	dwTaskID = taskID;
 }
 
 // IUI_SETTASKFONT
-CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(HFONT font)
+CUIExtensionAppCmdData::CUIExtensionAppCmdData(HFONT font)
 {
 	hFont = font;
 }
 
 // IUI_MOVETASK
-CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(DWORD dwSelTaskID, 
+CUIExtensionAppCmdData::CUIExtensionAppCmdData(DWORD dwSelTaskID, 
 	DWORD dwParentID, 
 	DWORD dwAfterSiblingID)
 {
@@ -66,16 +62,9 @@ CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(DWORD dwSelTaskID,
 }
 
 // IUI_MULTISORT
-CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(const TDSORTCOLUMN* pCols)
+CUIExtensionAppCmdData::CUIExtensionAppCmdData(const IUIMULTISORT& sortCols)
 {
-	sort.nAttrib1 = TDC::MapColumnToIUIAttribute(pCols[0].nBy);
-	sort.bAscending1 = (pCols[0].bAscending != FALSE);
-
-	sort.nAttrib2 = TDC::MapColumnToIUIAttribute(pCols[1].nBy);
-	sort.bAscending2 = (pCols[1].bAscending != FALSE);
-
-	sort.nAttrib3 = TDC::MapColumnToIUIAttribute(pCols[2].nBy);
-	sort.bAscending3 = (pCols[2].bAscending != FALSE);
+	sort = sortCols;
 }
 
 // IUI_SELECTFIRSTTASK
@@ -83,7 +72,7 @@ CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(const TDSORTCOLUMN* pCols)
 // IUI_SELECTNEXTTASKINCLCURRENT
 // IUI_SELECTPREVTASK
 // IUI_SELECTLASTTASK
-CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(IUI_ATTRIBUTE nAttrib, 
+CUIExtensionAppCmdData::CUIExtensionAppCmdData(IUI_ATTRIBUTE nAttrib, 
 	BOOL bFindReplace, 
 	LPCWSTR szWords, 
 	BOOL bCaseSensitive, 
@@ -101,25 +90,33 @@ CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(IUI_ATTRIBUTE nAttrib,
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-void CTDCUIExtensionHelper::PrepareViewVisibilityMenu(CMenu* pMenu, const CUIExtensionMgr& mgr, const CStringArray& aTypeIDs)
+CUIExtensionHelper::CUIExtensionHelper(UINT nFirstMenuID, int nMaxNumExtensions) 
+	: 
+	m_nFirstMenuID(nFirstMenuID),
+	m_nMaxNumExtensions(nMaxNumExtensions)
+{
+
+}
+
+void CUIExtensionHelper::UpdateExtensionVisibility(CMenu* pMenu, const CUIExtensionMgr& mgr, const CStringArray& aTypeIDs) const
 {
 	ASSERT(pMenu);
 
 	// cache position of first item
-	int nPos = CEnMenu::GetMenuItemPos(*pMenu, ID_SHOWVIEW_UIEXTENSION1);
+	int nPos = CEnMenu::GetMenuItemPos(*pMenu, m_nFirstMenuID);
 
 	// delete all extension items
 	int nExt = 16;
 
 	while (nExt--)
-		pMenu->DeleteMenu(ID_SHOWVIEW_UIEXTENSION1 + nExt, MF_BYCOMMAND);
+		pMenu->DeleteMenu(m_nFirstMenuID + nExt, MF_BYCOMMAND);
 	
 	// re-add and tick those that are visible
-	int nNumExt = mgr.GetNumUIExtensions();
+	int nNumExt = min(m_nMaxNumExtensions, mgr.GetNumUIExtensions());
 	
 	for (nExt = 0; nExt < nNumExt; nExt++)
 	{
-		UINT nMenuID = (ID_SHOWVIEW_UIEXTENSION1 + nExt);
+		UINT nMenuID = (m_nFirstMenuID + nExt);
 		
 		// text
 		CString sUIExt = mgr.GetUIExtensionMenuText(nExt);
@@ -133,11 +130,11 @@ void CTDCUIExtensionHelper::PrepareViewVisibilityMenu(CMenu* pMenu, const CUIExt
 	}
 }
 
-BOOL CTDCUIExtensionHelper::ProcessViewVisibilityMenuCmd(UINT nCmdID, const CUIExtensionMgr& mgr, CStringArray& aTypeIDs)
+BOOL CUIExtensionHelper::ProcessExtensionMenuCmd(UINT nCmdID, const CUIExtensionMgr& mgr, CStringArray& aTypeIDs) const
 {
-	int nExt = (nCmdID - ID_SHOWVIEW_UIEXTENSION1);
+	int nExt = (nCmdID - m_nFirstMenuID);
 
-	if (nExt >= 0 && nExt < 16)
+	if (nExt >= 0 && nExt < m_nMaxNumExtensions)
 	{
 		CString sTypeID = mgr.GetUIExtensionTypeID(nExt);
 		int nFind = Misc::Find(sTypeID, aTypeIDs, FALSE, FALSE);

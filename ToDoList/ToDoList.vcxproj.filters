@@ -121,9 +121,6 @@
     <ClCompile Include="TDCToolsHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDCUIExtensionHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TDCWebUpdateScript.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -591,9 +588,6 @@
     <ClInclude Include="TDCToolsHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TDCUIExtensionHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TDCWebUpdateScript.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -874,6 +868,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCFindReplace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdcsort.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
