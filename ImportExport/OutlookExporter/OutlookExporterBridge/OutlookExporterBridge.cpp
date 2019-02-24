@@ -29,7 +29,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-COutlookExporterBridge::COutlookExporterBridge() : m_hIcon(NULL)
+COutlookExporterBridge::COutlookExporterBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
 	HMODULE hMod = LoadLibrary(L"OutlookExporterBridge.dll"); // us
 
