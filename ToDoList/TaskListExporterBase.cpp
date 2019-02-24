@@ -604,7 +604,7 @@ void CTaskListExporterBase::BuildAttribList(const ITASKLISTBASE* pTasks, HTASKIT
 		CheckAddAttribtoList(pTasks, hTask, TDCA_TIMESPENT,		TDL_TASKTIMESPENT);
 		CheckAddAttribtoList(pTasks, hTask, TDCA_CREATIONDATE,	TDL_TASKCREATIONDATESTRING);
 		CheckAddAttribtoList(pTasks, hTask, TDCA_CREATEDBY,		TDL_TASKCREATEDBY);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_LASTMODDATE,		TDL_TASKLASTMODSTRING);
+		CheckAddAttribtoList(pTasks, hTask, TDCA_LASTMODDATE,	TDL_TASKLASTMODSTRING);
 		CheckAddAttribtoList(pTasks, hTask, TDCA_LASTMODBY,		TDL_TASKLASTMODBY);
 		CheckAddAttribtoList(pTasks, hTask, TDCA_STARTDATE,		TDL_TASKSTARTDATESTRING);
 		CheckAddAttribtoList(pTasks, hTask, TDCA_DUEDATE,		TDL_TASKDUEDATESTRING);
