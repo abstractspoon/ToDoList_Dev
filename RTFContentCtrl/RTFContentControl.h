@@ -11,12 +11,12 @@
 #include "rtfpreferencesdlg.h"
 
 #include "..\shared\toolbarhelper.h"
-#include "..\shared\richeditspellcheck.h"
 #include "..\shared\subclass.h"
 #include "..\shared\menuiconmgr.h"
 #include "..\shared\ShortcutManager.h"
 
 #include "..\Interfaces\IContentControl.h"
+#include "..\Interfaces\richeditspellcheck.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

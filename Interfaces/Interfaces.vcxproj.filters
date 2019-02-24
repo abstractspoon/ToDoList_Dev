@@ -44,6 +44,15 @@
     <ClCompile Include="UIThemeFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SpellCheckDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpellChecker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RichEditSpellCheck.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ContentCtrl.h">
@@ -110,6 +119,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UIThemeFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpellChecker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpellCheckDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RichEditSpellCheck.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

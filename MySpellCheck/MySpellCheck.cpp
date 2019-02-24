@@ -3,9 +3,8 @@
 
 #include "stdafx.h"
 
-#include "..\shared\spellchecker.h"
-
 #include "..\Interfaces\ispellcheck.h"
+#include "..\Interfaces\spellchecker.h"
 
 BOOL APIENTRY DllMain( HANDLE /*hModule*/, 
                        DWORD  /*ul_reason_for_call*/, 

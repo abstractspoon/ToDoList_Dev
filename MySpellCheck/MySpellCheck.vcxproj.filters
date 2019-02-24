@@ -39,9 +39,6 @@
     <ClCompile Include="..\3rdParty\myspell\mythes.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\SpellChecker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="StdAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

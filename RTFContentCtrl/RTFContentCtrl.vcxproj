@@ -246,6 +246,9 @@ copy unicode_release\rtfcontentctrl.dll ..\todolist\unicode_release /y
       <Project>{e15c17b8-c080-492f-bbb8-bf9e84a0ea31}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="..\Interfaces\Interfaces.vcxproj">
+      <Project>{a234e4e0-47de-4d77-bdba-ee17c021c95d}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Shared\Shared.vcxproj">
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

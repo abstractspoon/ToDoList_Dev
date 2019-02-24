@@ -486,10 +486,6 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="RichEditSpellCheck.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="RoundCorner.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -529,14 +525,6 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="SoundEdit.cpp" />
-    <ClCompile Include="SpellCheckDlg.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="SpellChecker.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="StatusBarACTEx.cpp" />
     <ClCompile Include="StatusBarProgress.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -784,7 +772,6 @@
     <ClInclude Include="Regkey.h" />
     <ClInclude Include="RemoteFile.h" />
     <ClInclude Include="RemoteFileDialog.h" />
-    <ClInclude Include="richeditbasectrl.h" />
     <ClInclude Include="RichEditHelper.h" />
     <ClInclude Include="RichEditNcBorder.h" />
     <ClInclude Include="RichEditSpellCheck.h" />
@@ -801,8 +788,6 @@
     <ClInclude Include="ShortcutManager.h" />
     <ClInclude Include="SizeGrip.h" />
     <ClInclude Include="SoundEdit.h" />
-    <ClInclude Include="SpellCheckDlg.h" />
-    <ClInclude Include="SpellChecker.h" />
     <ClInclude Include="StatusBarACTEx.h" />
     <ClInclude Include="StatusBarProgress.h" />
     <ClInclude Include="StdAfx.h" />

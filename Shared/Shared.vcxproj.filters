@@ -268,9 +268,6 @@
     <ClCompile Include="RichEditNcBorder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RichEditSpellCheck.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RoundCorner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -296,12 +293,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SizeGrip.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SpellCheckDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SpellChecker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="StatusBarProgress.cpp">
@@ -774,9 +765,6 @@
     <ClInclude Include="RemoteFileDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="richeditbasectrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RichEditNcBorder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -808,12 +796,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SizeGrip.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SpellCheckDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SpellChecker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StatusBarProgress.h">

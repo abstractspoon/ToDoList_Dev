@@ -4,7 +4,8 @@
 
 #include "stdafx.h"
 #include "RichEditSpellCheck.h"
-#include "RichEditBaseCtrl.h"
+
+#include "..\Shared\RichEditBaseCtrl.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

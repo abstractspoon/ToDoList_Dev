@@ -9,8 +9,8 @@
 
 #include "..\shared\icon.h"
 #include "..\shared\urlricheditctrl.h"
-#include "..\shared\richeditspellcheck.h"
 
+#include "..\Interfaces\richeditspellcheck.h"
 #include "..\Interfaces\IContentControl.h"
 
 /////////////////////////////////////////////////////////////////////////////

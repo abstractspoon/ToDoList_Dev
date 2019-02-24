@@ -30,7 +30,6 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\driveinfo.h"
 #include "..\shared\toolbarhelper.h"
-#include "..\shared\spellcheckdlg.h"
 #include "..\shared\passworddialog.h"
 #include "..\shared\winclasses.h"
 #include "..\shared\wclassdefines.h"
@@ -53,13 +52,14 @@
 #include "..\shared\mapex.h"
 #include "..\shared\messagebox.h"
 
-#include "..\interfaces\IContentControl.h"
-
 #include "..\3rdparty\msoutl.h"
 #include "..\3rdparty\shellicons.h"
 #include "..\3rdparty\colordef.h"
 #include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\gdiplus.h"
+
+#include "..\interfaces\spellcheckdlg.h"
+#include "..\interfaces\IContentControl.h"
 
 #include <Windowsx.h>
 #include <float.h>
@@ -67,6 +67,8 @@
 #include <math.h>
 #include <afxpriv.h>
 #include <shlwapi.h>
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

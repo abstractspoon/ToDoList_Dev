@@ -12,7 +12,6 @@
 #include "..\shared\wclassdefines.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\richedithelper.h"
-#include "..\shared\richeditspellcheck.h"
 #include "..\shared\misc.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\enstring.h"
@@ -24,6 +23,7 @@
 
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\ITaskList.h"
+#include "..\Interfaces\richeditspellcheck.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

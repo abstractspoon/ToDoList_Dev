@@ -3,15 +3,17 @@
 
 #include "stdafx.h"
 #include "SpellCheckDlg.h"
-#include "enfiledialog.h"
-#include "stringres.h"
-#include "filemisc.h"
-#include "preferences.h"
-#include "richedithelper.h"
-#include "enstring.h"
-#include "localizer.h"
+#include "ispellcheck.h"
 
-#include "..\Interfaces\ispellcheck.h"
+#include "..\Shared\enfiledialog.h"
+#include "..\Shared\stringres.h"
+#include "..\Shared\filemisc.h"
+#include "..\Shared\preferences.h"
+#include "..\Shared\richedithelper.h"
+#include "..\Shared\enstring.h"
+#include "..\Shared\localizer.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
