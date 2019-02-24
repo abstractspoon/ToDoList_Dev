@@ -46,7 +46,7 @@ public:
 	
 	virtual BOOL Continue(LPCTSTR szItem, LPCTSTR /*szValue*/) const
 	{
-		if (TDL_TASK.CompareNoCase(szItem) == 0)
+		if (lstrcmpi(TDL_TASK, szItem) == 0)
 			return FALSE; // stop
 		
 #ifndef NO_TL_ENCRYPTDECRYPT
