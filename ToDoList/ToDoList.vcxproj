@@ -168,9 +168,6 @@ mkdir ..\..\ToDoList_Plugins\release
 copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
 </Command>
     </PostBuildEvent>
-    <ProjectReference>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
-    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FilteredToDoCtrl.cpp">

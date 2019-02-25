@@ -881,7 +881,7 @@ void CRTFContentControl::OnEditPasteasRef()
 
 	if (pClip4)
 	{
-		sFileName = pClip4->GetAttribute(_T("FILENAME"));
+		sFileName = pClip4->GetAttribute(TDL_FILENAME);
 		sFileName.Replace(_T(" "), _T("%20"));
 	}
 	else // get the clipboard for just this tasklist

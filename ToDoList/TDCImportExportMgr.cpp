@@ -29,10 +29,7 @@ static char THIS_FILE[]=__FILE__;
 const LPCTSTR PREF_KEY = _T("Preferences");
 const LPCTSTR EMPTY_STR = _T("");
 
-///////////////////////////////////////////////////////////////////////
 
-#define ExportTaskListTo(FUNCTION)											\
-																			\
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
