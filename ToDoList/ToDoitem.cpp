@@ -3,14 +3,15 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-#include <math.h>
-
 #include "ToDoitem.h"
 #include "tdcmapping.h"
 
 #include "..\shared\DateHelper.h"
 #include "..\shared\misc.h"
+
+#include <math.h>
+
+//////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #undef THIS_FILE

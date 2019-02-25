@@ -15,7 +15,11 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CColorButton
 
-CColorButton::CColorButton(BOOL bRoundRect) : m_color(CLR_NONE), m_bRoundRect(bRoundRect)
+CColorButton::CColorButton(BOOL bRoundRect) 
+	: 
+	m_color(CLR_NONE), 
+	m_bRoundRect(bRoundRect),
+	m_dlgColor(m_color, CC_FULLOPEN | CC_RGBINIT)
 {
 }
 
@@ -61,16 +65,26 @@ void CColorButton::SetColor(COLORREF color)
 
 BOOL CColorButton::DoAction()
 {
-	CEnColorDialog dialog(m_color, CC_FULLOPEN | CC_RGBINIT);
+	m_dlgColor.SetCurrentColor(m_color);
 
-	if (dialog.DoModal() == IDOK)
+	if (m_dlgColor.DoModal() == IDOK)
 	{
-		m_color = dialog.m_cc.rgbResult;
+		m_color = m_dlgColor.m_cc.rgbResult;
 	
 		Invalidate();
 		UpdateWindow();
 	}
 
 	return FALSE; // always notify parent
+}
+
+void CColorButton::LoadPreferences(const IPreferences* pPrefs)
+{
+	m_dlgColor.LoadPreferences(pPrefs);
+}
+
+void CColorButton::SavePreferences(IPreferences* pPrefs) const
+{
+	m_dlgColor.SavePreferences(pPrefs);
 }
 

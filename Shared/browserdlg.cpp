@@ -20,7 +20,8 @@ static char THIS_FILE[] = __FILE__;
 
 
 CBrowserDlg::CBrowserDlg(BOOL bBrowser, LPCTSTR szSettingsKey) 
-: CRuntimeDlg(NULL, szSettingsKey), m_bBrowser(bBrowser), m_bHideOnClose(FALSE)
+	: 
+	CRuntimeDlg(NULL, NULL, szSettingsKey), m_bBrowser(bBrowser), m_bHideOnClose(FALSE)
 {
 	//{{AFX_DATA_INIT(CBrowserDlg)
 		// NOTE: the ClassWizard will add member initialization here

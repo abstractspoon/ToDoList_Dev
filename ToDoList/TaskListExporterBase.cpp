@@ -9,12 +9,15 @@
 #include "tdcstatic.h"
 
 #include "..\shared\xmlfile.h"
-#include "..\shared\preferences.h"
 #include "..\shared\enstring.h"
 #include "..\shared\timehelper.h"
 #include "..\shared\filemisc.h"
 
+#include "..\Interfaces\Preferences.h"
+
 #include <locale.h>
+
+//////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #undef THIS_FILE

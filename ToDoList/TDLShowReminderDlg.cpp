@@ -9,16 +9,19 @@
 
 #include "..\Shared\enstring.h"
 #include "..\Shared\graphicsmisc.h"
-#include "..\Shared\preferences.h"
 #include "..\Shared\localizer.h"
 #include "..\Shared\themed.h"
 #include "..\Shared\autoflag.h"
 #include "..\Shared\dlgunits.h"
 
+#include "..\Interfaces\Preferences.h"
+
 #pragma warning(push)
 #pragma warning(disable: 4201)
 #include <Mmsystem.h>
 #pragma warning(pop)
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

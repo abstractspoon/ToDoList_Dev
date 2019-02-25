@@ -11,8 +11,11 @@
 #include "..\Shared\filemisc.h"
 #include "..\Shared\dialoghelper.h"
 #include "..\Shared\themed.h"
-#include "..\Shared\preferences.h"
 #include "..\Shared\EnString.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

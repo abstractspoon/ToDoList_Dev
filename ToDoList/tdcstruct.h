@@ -21,7 +21,8 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\encommandlineinfo.h"
 #include "..\shared\enstring.h"
-#include "..\shared\preferences.h"
+
+#include "..\Interfaces\preferences.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 

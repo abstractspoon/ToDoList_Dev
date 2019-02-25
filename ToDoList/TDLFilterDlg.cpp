@@ -8,8 +8,11 @@
 #include "TDCCustomAttributeHelper.h"
 
 #include "..\shared\enstring.h"
-#include "..\shared\preferences.h"
 #include "..\shared\localizer.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

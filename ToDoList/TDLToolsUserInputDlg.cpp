@@ -6,10 +6,13 @@
 #include "tdlToolsUserInputDlg.h"
 
 #include "..\shared\fileedit.h"
-#include "..\shared\preferences.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\datetimectrlex.h"
 #include "..\shared\datehelper.h"
+
+#include "..\Interfaces\preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

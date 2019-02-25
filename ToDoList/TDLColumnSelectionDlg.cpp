@@ -5,7 +5,7 @@
 #include "resource.h"
 #include "TDLColumnSelectionDlg.h"
 
-#include "../shared/preferences.h"
+#include "../Interfaces/preferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

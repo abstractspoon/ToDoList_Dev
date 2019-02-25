@@ -13,9 +13,12 @@
 #include "..\shared\enmenu.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\themed.h"
-#include "..\shared\preferences.h"
 
 #include "..\3rdparty\ini.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

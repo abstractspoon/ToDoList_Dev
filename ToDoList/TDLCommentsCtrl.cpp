@@ -9,13 +9,13 @@
 #include "..\shared\dlgunits.h"
 #include "..\shared\misc.h"
 #include "..\shared\themed.h"
-#include "..\shared\preferences.h"
 #include "..\shared\enstring.h"
 #include "..\shared\winclasses.h"
 #include "..\shared\wclassdefines.h"
 
 #include "..\Interfaces\contentMgr.h"
 #include "..\interfaces\icontentcontrol.h"
+#include "..\Interfaces\Preferences.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

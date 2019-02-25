@@ -8,6 +8,10 @@
 //
 
 /////////////////////////////////////////////////////////////////////////////
+
+class IPreferences;
+
+/////////////////////////////////////////////////////////////////////////////
 // CEnColorDialog dialog
 
 class CEnColorDialog : public CColorDialog
@@ -18,7 +22,14 @@ public:
 	CEnColorDialog(COLORREF clrInit = 0, DWORD dwFlags = 0, CWnd* pParentWnd = NULL);
 	~CEnColorDialog();
 
-	int DoModal();
+	int DoModal(IPreferences* pPrefs = NULL);
+	void SetCurrentColor(COLORREF clr);
+
+	void LoadPreferences(const IPreferences* pPrefs);
+	void SavePreferences(IPreferences* pPrefs) const;
+
+protected:
+	BOOL m_bHasPrefs;
 
 protected:
 	BOOL OnInitDialog();

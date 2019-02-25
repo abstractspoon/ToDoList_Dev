@@ -3,7 +3,7 @@
 #include "TDCSearchParamHelper.h"
 #include "TDCCustomAttributeHelper.h"
 
-#include "..\shared\preferences.h"
+#include "..\Interfaces\Preferences.h"
 
 /////////////////////////////////////////////////////////////////////////
 

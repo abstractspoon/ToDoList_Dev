@@ -7,10 +7,13 @@
 #include "TDLStylesheetParamConfigDlg.h"
 
 #include "..\shared\enstring.h"
-#include "..\shared\preferences.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
 #include "..\shared\DateHelper.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

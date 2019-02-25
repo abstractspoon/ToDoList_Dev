@@ -11,9 +11,10 @@
 #include "../shared/misc.h"
 #include "../shared/filemisc.h"
 #include "../shared/graphicsmisc.h"
-#include "../shared/preferences.h"
 #include "../shared/dialoghelper.h"
 #include "../shared/clipboard.h"
+
+#include "../Interfaces/preferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

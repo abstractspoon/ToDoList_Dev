@@ -6,11 +6,14 @@
 #include "TDLTaskIconDlg.h"
 #include "TDCImageList.h"
 
-#include "..\shared\Preferences.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\themed.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

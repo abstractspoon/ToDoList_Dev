@@ -5,7 +5,9 @@
 #include "resource.h"
 #include "TDLOffsetDatesDlg.h"
 
-#include "..\shared\Preferences.h"
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -15,7 +17,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // COffsetDatesDlg dialog
-
 
 CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent /*=NULL*/)
 	: CTDLDialog(CTDLOffsetDatesDlg::IDD, _T("OffsetDates"), pParent)

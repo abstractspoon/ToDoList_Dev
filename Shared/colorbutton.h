@@ -8,6 +8,11 @@
 //
 
 #include "custombutton.h"
+#include "encolordialog.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
+class IPreferences;
 
 /////////////////////////////////////////////////////////////////////////////
 // CColorButton window
@@ -21,9 +26,14 @@ public:
 	COLORREF GetColor() { return m_color; }
 	void SetColor(COLORREF color);
 
+	void LoadPreferences(const IPreferences* pPrefs);
+	void SavePreferences(IPreferences* pPrefs) const;
+
 protected:
 	COLORREF m_color;
 	BOOL m_bRoundRect;
+
+	CEnColorDialog m_dlgColor;
 
 protected:
 	virtual BOOL DoAction();

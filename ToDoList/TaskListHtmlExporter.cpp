@@ -8,7 +8,7 @@
 #include "tdlrecurringtaskedit.h"
 
 #include "..\shared\xmlfile.h"
-#include "..\shared\preferences.h"
+#include "..\Interfaces\Preferences.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\graphicsmisc.h"
 

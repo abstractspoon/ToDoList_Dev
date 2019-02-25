@@ -26,12 +26,14 @@
 #include "..\shared\wclassdefines.h"
 #include "..\shared\mousewheelmgr.h"
 
-#include "..\Interfaces\iuiextension.h"
-
 #include "..\3rdparty\shellicons.h"
+
+#include "..\Interfaces\iuiextension.h"
 
 #include <float.h> // for DBL_MAX
 #include <math.h>  // for fabs()
+
+//////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #undef THIS_FILE

@@ -8,10 +8,13 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\dialoghelper.h"
-#include "..\shared\preferences.h"
 #include "..\shared\misc.h"
 
+#include "..\Interfaces\Preferences.h"
+
 #include <shlwapi.h>
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

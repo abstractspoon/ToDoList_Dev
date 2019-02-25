@@ -6,9 +6,8 @@
 #include "TDCCustomAttributeHelper.h"
 
 #include "..\shared\Misc.h"
-#include "..\shared\preferences.h"
 
-#include "..\Interfaces\IPreferences.h"
+#include "..\Interfaces\Preferences.h"
 
 //////////////////////////////////////////////////////////////////////
 

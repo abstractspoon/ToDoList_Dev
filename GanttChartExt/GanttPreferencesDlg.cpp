@@ -29,7 +29,13 @@ const COLORREF DEF_DEFAULTCOLOR			= RGB(70, 135, 245);
 // CGanttPreferencesPage dialog
 
 CGanttPreferencesPage::CGanttPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
-	: CPreferencesPageBase(IDD_PREFERENCES_PAGE)
+	: 
+	CPreferencesPageBase(IDD_PREFERENCES_PAGE),
+	m_btNonWorkingHoursColor(NULL), 
+	m_btWeekendColor(NULL), 
+	m_btTodayColor(NULL),
+	m_btParentColor(NULL), 
+	m_btDefaultColor(NULL)
 {
 	//{{AFX_DATA_INIT(CGanttPreferencesPage)
 	//}}AFX_DATA_INIT

@@ -13,12 +13,15 @@
 #include "..\shared\enstring.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\filemisc.h"
-#include "..\shared\preferences.h"
 #include "..\shared\misc.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\messagebox.h"
 
+#include "..\Interfaces\Preferences.h"
+
 #include <shlwapi.h>
+
+//////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #undef THIS_FILE

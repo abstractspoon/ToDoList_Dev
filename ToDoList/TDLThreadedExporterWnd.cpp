@@ -4,13 +4,15 @@
 #include "stdafx.h"
 #include "TDLThreadedExporterWnd.h"
 #include "TDCImportExportMgr.h"
-
 #include "tdcmsg.h"
 #include "tdcstruct.h"
 
-#include "..\shared\Preferences.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

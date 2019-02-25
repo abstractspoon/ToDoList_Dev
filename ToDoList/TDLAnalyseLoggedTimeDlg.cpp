@@ -10,7 +10,10 @@
 #include "..\Shared\misc.h"
 #include "..\Shared\filemisc.h"
 #include "..\Shared\DateHelper.h"
-#include "..\Shared\preferences.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

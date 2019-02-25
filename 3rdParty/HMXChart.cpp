@@ -7,11 +7,15 @@
 
 #include <math.h>
 
+/////////////////////////////////////////////////////////////////////////////
+
 #define HMX_AREA_MARGINS	80		// fraction of area
 #define HMX_AREA_TITLE		10		// fraction of area
 #define HMX_AREA_YAXIS		7		// percentage
 #define HMX_AREA_XAXIS		10		// percentage
 #define HMX_AREA_MINAXIS	50		// pixels
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

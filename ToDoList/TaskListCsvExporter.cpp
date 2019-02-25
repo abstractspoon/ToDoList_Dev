@@ -7,13 +7,16 @@
 #include "tdlschemadef.h"
 #include "tdlrecurringtaskedit.h"
 
-#include "..\shared\Preferences.h"
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
 
 #include "..\3rdparty\stdiofileex.h"
 
+#include "..\Interfaces\Preferences.h"
+
 #include <locale.h>
+
+////////////////////////////////////////////////////////////////////// 
 
 #ifdef _DEBUG
 #undef THIS_FILE

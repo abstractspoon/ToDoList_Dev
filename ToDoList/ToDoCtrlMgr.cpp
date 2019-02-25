@@ -11,10 +11,12 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
-#include "..\shared\preferences.h"
 
+#include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\ContentMgr.h"
 #include "..\Interfaces\uiextensionmgr.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

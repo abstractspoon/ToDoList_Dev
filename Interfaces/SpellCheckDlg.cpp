@@ -8,10 +8,11 @@
 #include "..\Shared\enfiledialog.h"
 #include "..\Shared\stringres.h"
 #include "..\Shared\filemisc.h"
-#include "..\Shared\preferences.h"
 #include "..\Shared\richedithelper.h"
 #include "..\Shared\enstring.h"
 #include "..\Shared\localizer.h"
+
+#include "..\Interfaces\IPreferences.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -28,15 +29,15 @@ CMap<UINT, UINT, CString, CString&> CSpellCheckDlg::s_mapText;
 
 /////////////////////////////////////////////////////////////////////////////
 
-CSpellCheckDlg::CSpellCheckDlg(const CString& sDictionaryPath, ISpellCheck* pSpellCheck, const CString& sText, CWnd* /*pParent*/) : 
+CSpellCheckDlg::CSpellCheckDlg(CWnd* /*pParent*/) :
 	m_pSpellChecker(NULL), 
 	m_reSpellCheck(m_reText),
-    m_sSelDictionary(sDictionaryPath), 
+	m_pPrefs(NULL),
 	m_stURL(_T("http://wiki.services.openoffice.org/wiki/Dictionaries")),
 	m_bMadeChanges(FALSE),
 	m_ptTopLeft(-1, -1)
 {
-	InitDialog(pSpellCheck, sText);
+	InitDialog(NULL/*pSpellCheck*/, _T("")/*sText*/);
 
 	if (!m_sSelDictionary.IsEmpty())
 		FileMisc::MakeRelativePath(m_sSelDictionary, FileMisc::GetAppFolder(), FALSE);
@@ -137,8 +138,16 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CSpellCheckDlg message handlers
 
-int CSpellCheckDlg::DoModal(BOOL bEndOnNoErrors) 
+int CSpellCheckDlg::DoModal(IPreferences* pPrefs, BOOL bEndOnNoErrors)
 { 
+	if (!pPrefs)
+	{
+		ASSERT(0);
+		return IDCANCEL;
+	}
+
+	// else
+	m_pPrefs = pPrefs;
 	m_bEndOnNoErrors = bEndOnNoErrors;
 
 	// turn off centering if we saved the last position
@@ -147,7 +156,10 @@ int CSpellCheckDlg::DoModal(BOOL bEndOnNoErrors)
 	if (m_ptTopLeft.x != -1 || m_ptTopLeft.y != -1)
 		dwFlags &= ~DS_CENTER;
 
-	return CRuntimeDlg::DoModal(GetItemText(SCD_TITLE, _T("Spell Checking")), dwFlags); 
+	int nRes = CRuntimeDlg::DoModal(GetItemText(SCD_TITLE, _T("Spell Checking")), dwFlags); 
+
+	m_pPrefs = NULL;
+	return nRes;
 }
 
 BOOL CSpellCheckDlg::InitDictionary(const CString& sDict)
@@ -329,10 +341,8 @@ BOOL CSpellCheckDlg::OnInitDialog()
 	CLocalizer::EnableTranslation(::GetDlgItem(*this, IDC_SCD_MISSPELTWORD), FALSE);
 
 	// init spell checker dll path
-	CPreferences prefs;
-
 #ifndef _DEBUG
-	m_sEnginePath = prefs.GetProfileString(_T("SpellChecker"), _T("EnginePath"), _T("MySpellCheck.dll"));
+	m_sEnginePath = m_pPrefs->GetProfileString(_T("SpellChecker"), _T("EnginePath"), _T("MySpellCheck.dll"));
 #else
 	m_sEnginePath = _T("MySpellCheck.dll");
 #endif
@@ -351,14 +361,14 @@ BOOL CSpellCheckDlg::OnInitDialog()
 	m_bMadeChanges = FALSE;
 
 	// reload dictionary list
-	int nDicCount = prefs.GetProfileInt(_T("SpellChecker"), _T("DictionaryCount"), 0);
+	int nDicCount = m_pPrefs->GetProfileInt(_T("SpellChecker"), _T("DictionaryCount"), 0);
 
 	for (int nDic = 0; nDic < nDicCount; nDic++)
 	{
 		CString sKey;
 		sKey.Format(_T("Dictionary%d"), nDic);
 
-		CString sDict = prefs.GetProfileString(_T("SpellChecker"), sKey);
+		CString sDict = m_pPrefs->GetProfileString(_T("SpellChecker"), sKey);
 		FileMisc::MakeRelativePath(sDict, FileMisc::GetAppFolder(), FALSE);
 
 		CString sPath = FileMisc::GetFullPath(sDict, FileMisc::GetAppFolder());
@@ -372,7 +382,7 @@ BOOL CSpellCheckDlg::OnInitDialog()
 
 	if (m_sSelDictionary.IsEmpty())
 	{
-		m_sSelDictionary = prefs.GetProfileString(_T("SpellChecker"), _T("ActiveDictionary"));
+		m_sSelDictionary = m_pPrefs->GetProfileString(_T("SpellChecker"), _T("ActiveDictionary"));
 		FileMisc::MakeRelativePath(m_sSelDictionary, FileMisc::GetAppFolder(), FALSE);
 	}
 
@@ -392,7 +402,7 @@ BOOL CSpellCheckDlg::OnInitDialog()
 
 			CFileOpenDialog dialog(sTitle, _T("dll"), m_sEnginePath, OFN_PATHMUSTEXIST, sFilter);
 
-			if (dialog.DoModal(prefs) == IDOK)
+			if (dialog.DoModal(m_pPrefs) == IDOK)
 				m_sEnginePath = dialog.GetPathName();
 			else
 				bCancel = TRUE;
@@ -561,8 +571,6 @@ void CSpellCheckDlg::OnRestart()
 
 void CSpellCheckDlg::OnDestroy() 
 {
-	CPreferences prefs;
-
 	m_pSpellCheck->ClearSelection();
 
 	// save position
@@ -576,12 +584,12 @@ void CSpellCheckDlg::OnDestroy()
 	
 	CRuntimeDlg::OnDestroy();
 	
-	prefs.WriteProfileString(_T("SpellChecker"), _T("EnginePath"), m_sEnginePath);
-	prefs.WriteProfileString(_T("SpellChecker"), _T("ActiveDictionary"), m_sSelDictionary);
+	m_pPrefs->WriteProfileString(_T("SpellChecker"), _T("EnginePath"), m_sEnginePath);
+	m_pPrefs->WriteProfileString(_T("SpellChecker"), _T("ActiveDictionary"), m_sSelDictionary);
 
 	// save dictionary list
 	int nDicCount = m_cbDictionaries.GetCount();
-	prefs.WriteProfileInt(_T("SpellChecker"), _T("DictionaryCount"), nDicCount);
+	m_pPrefs->WriteProfileInt(_T("SpellChecker"), _T("DictionaryCount"), nDicCount);
 
 	for (int nDic = 0; nDic < nDicCount; nDic++)
 	{
@@ -591,7 +599,7 @@ void CSpellCheckDlg::OnDestroy()
 		CString sPath;
 		m_cbDictionaries.GetLBText(nDic, sPath);
 
-		prefs.WriteProfileString(_T("SpellChecker"), sKey, sPath);
+		m_pPrefs->WriteProfileString(_T("SpellChecker"), sKey, sPath);
 	}
 }
 

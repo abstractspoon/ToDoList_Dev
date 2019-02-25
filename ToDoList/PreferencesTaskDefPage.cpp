@@ -12,12 +12,12 @@
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
-#include "..\shared\preferences.h"
 
 #include "..\3rdParty\Base64Coder.h"
 
 #include "..\Interfaces\uithemefile.h"
 #include "..\interfaces\icontentcontrol.h"
+#include "..\Interfaces\Preferences.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -212,6 +212,8 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 	m_nDefReminderLeadin = pPrefs->GetProfileInt(szKey, _T("DefaultReminderLeadin"), TDLRPC_NOREMINDER);
 	m_bReminderBeforeDue = pPrefs->GetProfileInt(szKey, _T("ReminderBeforeDue"), TRUE);
 	
+	m_btDefColor.LoadPreferences(pPrefs);
+
 	// comments format
 	m_cfDefault = pPrefs->GetProfileString(szKey, _T("DefaultCommentsFormatID"));
 
@@ -255,6 +257,8 @@ void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKe
 	pPrefs->WriteProfileInt(szKey, _T("DefaultTimeSpentUnits"), m_eTimeSpent.GetUnits());
 	pPrefs->WriteProfileInt(szKey, _T("DefaultReminderLeadin"), m_nDefReminderLeadin);
 	pPrefs->WriteProfileInt(szKey, _T("ReminderBeforeDue"), m_bReminderBeforeDue);
+
+	m_btDefColor.SavePreferences(pPrefs);
 	
 	// comments format
 	if (m_pMgrContent)

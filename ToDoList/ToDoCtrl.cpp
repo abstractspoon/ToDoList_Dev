@@ -41,7 +41,7 @@
 #include "..\shared\stringres.h"
 #include "..\shared\treectrlhelper.h"
 #include "..\shared\filemisc.h"
-#include "..\shared\preferences.h"
+#include "..\Interfaces\Preferences.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\enmenu.h"
@@ -10724,7 +10724,7 @@ BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOO
 			pSpellChecker->SetSpellCheck(m_ctrlComments.GetSpellCheckInterface());
 		}
 		
-		int nRet = pSpellChecker->DoModal(TRUE);
+		int nRet = pSpellChecker->DoModal(CPreferences(), TRUE);
 		UpdateWindow();
 			
 		if ((nRet == IDOK) && CanEditSelectedTask(TDCA_TASKNAMEORCOMMENTS))

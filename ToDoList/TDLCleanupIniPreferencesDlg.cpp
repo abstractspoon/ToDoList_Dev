@@ -5,10 +5,13 @@
 #include "resource.h"
 #include "TDLCleanupIniPreferencesDlg.h"
 
-#include "..\Shared\Preferences.h"
 #include "..\Shared\misc.h"
 #include "..\Shared\filemisc.h"
 #include "..\Shared\EnString.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

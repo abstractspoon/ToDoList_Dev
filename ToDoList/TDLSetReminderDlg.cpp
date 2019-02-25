@@ -9,12 +9,15 @@
 
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
-#include "..\shared\preferences.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\Shared\localizer.h"
 
+#include "..\Interfaces\Preferences.h"
+
 #pragma warning(disable: 4201)
 #include <Mmsystem.h> 
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

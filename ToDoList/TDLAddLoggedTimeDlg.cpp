@@ -7,7 +7,10 @@
 
 #include "..\shared\DateHelper.h"
 #include "..\Shared\localizer.h"
-#include "..\Shared\preferences.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

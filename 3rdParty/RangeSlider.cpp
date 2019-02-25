@@ -32,17 +32,20 @@ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "stdafx.h"
-//#include "RangeCtrl.h"
 #include "RangeSlider.h"
 #include "MemDC.h"
 
 #include <math.h> // for fabs
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
 
 #define RANGESLIDER_CLASSNAME _T("MFCRangeSlider")
 

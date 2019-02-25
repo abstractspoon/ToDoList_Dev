@@ -33,6 +33,8 @@
 #include <float.h> // for DBL_MAX
 #include <math.h>  // for fabs()
 
+//////////////////////////////////////////////////////////////////////
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;

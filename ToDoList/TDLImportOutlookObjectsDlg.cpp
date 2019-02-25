@@ -5,11 +5,14 @@
 #include "resource.h"
 #include "TDLImportOutlookObjectsDlg.h"
 
-#include "..\shared\preferences.h"
 #include "..\shared\MSoutlookhelper.h"
 #include "..\shared\misc.h"
 
 #include "..\3rdparty\msoutl.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

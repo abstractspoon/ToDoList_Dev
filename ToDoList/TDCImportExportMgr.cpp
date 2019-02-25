@@ -14,7 +14,7 @@
 #include "tdlschemadef.h"
 
 #include "..\shared\filemisc.h"
-#include "..\shared\preferences.h"
+#include "..\Interfaces\Preferences.h"
 #include "..\shared\datehelper.h"
 
 #ifdef _DEBUG

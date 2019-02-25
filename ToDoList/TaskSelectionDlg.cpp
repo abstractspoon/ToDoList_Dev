@@ -5,9 +5,12 @@
 #include "resource.h"
 #include "TaskSelectionDlg.h"
 
-#include "..\shared\Preferences.h"
 #include "..\shared\misc.h"
 #include "..\shared\dialoghelper.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

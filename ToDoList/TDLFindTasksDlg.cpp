@@ -13,14 +13,16 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
-#include "..\shared\preferences.h"
 #include "..\shared\themed.h"
 #include "..\shared\dlgunits.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\localizer.h"
 #include "..\shared\osversion.h"
 
+#include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\uithemefile.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

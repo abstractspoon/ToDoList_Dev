@@ -9,7 +9,10 @@
 
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
-#include "..\shared\preferences.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

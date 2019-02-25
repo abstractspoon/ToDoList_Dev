@@ -3149,9 +3149,15 @@ void CToDoListWnd::OnEditTaskcolor()
 	if (!tdc.IsReadOnly() && tdc.HasSelection())
 	{
 		CEnColorDialog dialog(tdc.GetSelectedTaskColor(), CC_FULLOPEN | CC_RGBINIT);
+
+		CPreferences prefs;
+		dialog.LoadPreferences(prefs);
 		
 		if (dialog.DoModal() == IDOK)
+		{
+			dialog.SavePreferences(prefs);
 			tdc.SetSelectedTaskColor(dialog.GetColor());
+		}
 	}
 }
 

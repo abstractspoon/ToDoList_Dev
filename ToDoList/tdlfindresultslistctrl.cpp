@@ -6,18 +6,23 @@
 #include "tdlfindresultslistctrl.h"
 #include "FilteredToDoCtrl.h"
 
-#include "..\shared\preferences.h"
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\osversion.h"
 
 #include "..\3rdparty\shellicons.h"
 
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifndef LVS_EX_LABELTIP
 #define LVS_EX_LABELTIP     0x00004000

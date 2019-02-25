@@ -117,6 +117,7 @@
     <ClCompile Include="ImportExportComboBox.cpp" />
     <ClCompile Include="ImportExportMgr.cpp" />
     <ClCompile Include="ImportExportUIHelper.cpp" />
+    <ClCompile Include="Preferences.cpp" />
     <ClCompile Include="RichEditSpellCheck.cpp" />
     <ClCompile Include="SpellCheckDlg.cpp" />
     <ClCompile Include="SpellChecker.cpp" />
@@ -143,6 +144,7 @@
     <ClInclude Include="ITaskListStorage.h" />
     <ClInclude Include="ITransText.h" />
     <ClInclude Include="IUIExtension.h" />
+    <ClInclude Include="Preferences.h" />
     <ClInclude Include="RichEditSpellCheck.h" />
     <ClInclude Include="SpellCheckDlg.h" />
     <ClInclude Include="SpellChecker.h" />

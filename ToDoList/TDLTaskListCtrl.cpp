@@ -11,22 +11,19 @@
 #include "tdccustomattributehelper.h"
 #include "tdcimagelist.h"
 
-/////////////////////////////////////////////////////////////////////////////
-
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\timehelper.h"
 #include "..\shared\misc.h"
-#include "..\shared\preferences.h"
 #include "..\shared\themed.h"
 #include "..\shared\osversion.h"
 
+#include "..\Interfaces\Preferences.h"
+
 #include "..\3rdparty\colordef.h"
 
-/////////////////////////////////////////////////////////////////////////////
-
-#include <MATH.H>
+#include <math.h>
 
 /////////////////////////////////////////////////////////////////////////////
 

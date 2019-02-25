@@ -17,7 +17,6 @@
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\enstring.h"
-#include "..\shared\preferences.h"
 #include "..\shared\binarydata.h"
 #include "..\shared\mswordhelper.h"
 #include "..\shared\enmenu.h"
@@ -25,6 +24,7 @@
 #include "..\shared\clipboard.h"
 #include "..\shared\localizer.h"
 
+#include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\itasklist.h"
 
@@ -33,6 +33,8 @@
 #include "..\3rdparty\clipboardbackup.h"
 
 #include <afxpriv.h>
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

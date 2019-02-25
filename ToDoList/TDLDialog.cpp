@@ -5,7 +5,9 @@
 #include "resource.h"
 #include "TDLDialog.h"
 
-#include "..\Shared\Preferences.h"
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

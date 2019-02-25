@@ -12,9 +12,17 @@
 #include "filemisc.h"
 #include "misc.h"
 #include "graphicsmisc.h"
-#include "preferences.h"
+
+#include "..\Interfaces\IPreferences.h"
 
 #include <afxpriv.h> // for CDialogTemplate
+
+/////////////////////////////////////////////////////////////////////////////
+// private mfc functions we need to access
+extern void AFXAPI AfxHookWindowCreate(CWnd* pWnd);
+extern BOOL AFXAPI AfxUnhookWindowCreate();
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -60,9 +68,10 @@ private:
 const CRect CRuntimeDlg::rectAuto = CRect(0, 0, 0, 0);
 CMapStringToString CRuntimeDlg::s_mapClasses;
 
-CRuntimeDlg::CRuntimeDlg(CWnd* pParentWnd, LPCTSTR szSettingsKey) 
+CRuntimeDlg::CRuntimeDlg(CWnd* pParentWnd, IPreferences* pPrefs, LPCTSTR szSettingsKey)
 : 
 	CDialog((LPCTSTR)NULL, pParentWnd),
+	m_pPrefs(pPrefs),
 	m_sSettingsKey(szSettingsKey), 
 	m_hILarge(NULL), 
 	m_hISmall(NULL), 
@@ -70,6 +79,8 @@ CRuntimeDlg::CRuntimeDlg(CWnd* pParentWnd, LPCTSTR szSettingsKey)
 	m_rBorders(0),
 	m_hFont(NULL)
 {
+	ASSERT((!m_pPrefs && m_sSettingsKey.IsEmpty()) || (!m_pPrefs && m_sSettingsKey.IsEmpty()));
+
 	if (!s_mapClasses.GetCount())
 		BuildClassMap();
 	
@@ -91,10 +102,6 @@ END_MESSAGE_MAP()
 // CRuntimeDlg message handlers
 
 IMPLEMENT_DYNAMIC(CRuntimeDlg, CDialog)
-
-// private mfc functions we need to access
-extern void AFXAPI AfxHookWindowCreate(CWnd* pWnd);
-extern BOOL AFXAPI AfxUnhookWindowCreate();
 
 void CRuntimeDlg::OnCancel()
 {
@@ -285,15 +292,14 @@ void CRuntimeDlg::SetInitialPos(LPCRECT pRect, DWORD dwStyle)
 	// size to fit?
 	if ((dwStyle & WS_POPUP) && (!pRect || rectAuto.EqualRect(pRect)))
 	{
-		if (!m_sSettingsKey.IsEmpty())
+		if (m_pPrefs && !m_sSettingsKey.IsEmpty())
 		{
 			CRect rect;
-			CPreferences prefs;
 
-			rect.left = prefs.GetProfileInt(m_sSettingsKey, _T("left"), rectAuto.left);
-			rect.right = prefs.GetProfileInt(m_sSettingsKey, _T("right"), rectAuto.right);
-			rect.top = prefs.GetProfileInt(m_sSettingsKey, _T("top"), rectAuto.top);
-			rect.bottom = prefs.GetProfileInt(m_sSettingsKey, _T("bottom"), rectAuto.bottom);
+			rect.left = m_pPrefs->GetProfileInt(m_sSettingsKey, _T("left"), rectAuto.left);
+			rect.right = m_pPrefs->GetProfileInt(m_sSettingsKey, _T("right"), rectAuto.right);
+			rect.top = m_pPrefs->GetProfileInt(m_sSettingsKey, _T("top"), rectAuto.top);
+			rect.bottom = m_pPrefs->GetProfileInt(m_sSettingsKey, _T("bottom"), rectAuto.bottom);
 			
 			if (rect == rectAuto) // first time
 			{
@@ -325,16 +331,15 @@ void CRuntimeDlg::SetInitialPos(LPCRECT pRect, DWORD dwStyle)
 
 void CRuntimeDlg::SaveCurrentPos()
 {
-	if (!m_sSettingsKey.IsEmpty())
+	if (m_pPrefs && !m_sSettingsKey.IsEmpty())
 	{
 		CRect rect;
 		GetWindowRect(rect);
 		
-		CPreferences prefs;
-		prefs.WriteProfileInt(m_sSettingsKey, _T("left"), rect.left);
-		prefs.WriteProfileInt(m_sSettingsKey, _T("right"), rect.right);
-		prefs.WriteProfileInt(m_sSettingsKey, _T("top"), rect.top);
-		prefs.WriteProfileInt(m_sSettingsKey, _T("bottom"), rect.bottom);
+		m_pPrefs->WriteProfileInt(m_sSettingsKey, _T("left"), rect.left);
+		m_pPrefs->WriteProfileInt(m_sSettingsKey, _T("right"), rect.right);
+		m_pPrefs->WriteProfileInt(m_sSettingsKey, _T("top"), rect.top);
+		m_pPrefs->WriteProfileInt(m_sSettingsKey, _T("bottom"), rect.bottom);
 	}
 }
 

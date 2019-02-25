@@ -12,9 +12,10 @@
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dlgunits.h"
-#include "..\shared\preferences.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\localizer.h"
+
+#include "..\Interfaces\Preferences.h"
 
 /////////////////////////////////////////////////////////////////////////
 

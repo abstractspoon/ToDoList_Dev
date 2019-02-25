@@ -11,7 +11,8 @@
 #include "..\shared\misc.h"
 #include "..\shared\mapex.h"
 #include "..\shared\enstring.h"
-#include "..\shared\preferences.h"
+
+#include "..\Interfaces\preferences.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 

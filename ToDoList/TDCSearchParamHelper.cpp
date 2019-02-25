@@ -6,7 +6,9 @@
 #include "TDCSearchParamHelper.h"
 #include "TDCCustomattributehelper.h"
 
-#include "..\shared\Preferences.h"
+#include "..\Interfaces\Preferences.h"
+
+//////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #undef THIS_FILE

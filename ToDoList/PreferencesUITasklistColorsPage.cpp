@@ -56,7 +56,6 @@ CPreferencesUITasklistColorsPage::CPreferencesUITasklistColorsPage()
 	m_nTextColorOption(COLOROPT_DEFAULT), 
 	m_cbAttributes(CCBS_DRAWNOCOLOR, ACBS_ALLOWDELETE), 
 	m_nColorAttribute(DEFCOLORATTRIB)
-
 {
 	//{{AFX_DATA_INIT(CPreferencesUITasklistColorsPage)
 	//}}AFX_DATA_INIT
@@ -943,6 +942,21 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	m_bSpecifyFlaggedColor = pPrefs->GetProfileInt(szKey, _T("FlaggedColor"), FALSE);
 	m_bSpecifyReferenceColor = pPrefs->GetProfileInt(szKey, _T("ReferenceColor"), FALSE);
 
+	m_btFilteredColor.LoadPreferences(pPrefs);
+	m_btAttribColor.LoadPreferences(pPrefs);
+	m_btDoneColor.LoadPreferences(pPrefs);
+	m_btGridlineColor.LoadPreferences(pPrefs);
+	m_btDueColor.LoadPreferences(pPrefs);
+	m_btDueTodayColor.LoadPreferences(pPrefs);
+	m_btStartColor.LoadPreferences(pPrefs);
+	m_btStartTodayColor.LoadPreferences(pPrefs);
+	m_btFlaggedColor.LoadPreferences(pPrefs);
+	m_btReferenceColor.LoadPreferences(pPrefs);
+	m_btSetColor.LoadPreferences(pPrefs);
+	m_btLowColor.LoadPreferences(pPrefs);
+	m_btHighColor.LoadPreferences(pPrefs);
+	m_btAltLineColor.LoadPreferences(pPrefs);
+
 	// colors
 	CString sColorKey(szKey);
 	sColorKey += _T("\\Colors");
@@ -1126,6 +1140,21 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPC
 	pPrefs->WriteProfileInt(szKey, _T("AlternateLineColor"), m_bAlternateLineColor);
 	pPrefs->WriteProfileInt(szKey, _T("FlaggedColor"), m_bSpecifyFlaggedColor);
 	pPrefs->WriteProfileInt(szKey, _T("ReferenceColor"), m_bSpecifyReferenceColor);
+
+	m_btFilteredColor.SavePreferences(pPrefs);
+	m_btAttribColor.SavePreferences(pPrefs);
+	m_btDoneColor.SavePreferences(pPrefs);
+	m_btGridlineColor.SavePreferences(pPrefs);
+	m_btDueColor.SavePreferences(pPrefs);
+	m_btDueTodayColor.SavePreferences(pPrefs);
+	m_btStartColor.SavePreferences(pPrefs);
+	m_btStartTodayColor.SavePreferences(pPrefs);
+	m_btFlaggedColor.SavePreferences(pPrefs);
+	m_btReferenceColor.SavePreferences(pPrefs);
+	m_btSetColor.SavePreferences(pPrefs);
+	m_btLowColor.SavePreferences(pPrefs);
+	m_btHighColor.SavePreferences(pPrefs);
+	m_btAltLineColor.SavePreferences(pPrefs);
 
 	pPrefs->WriteProfileInt(sColorKey, _T("Gridlines"), m_crGridlines);
 	pPrefs->WriteProfileInt(sColorKey, _T("TaskDone"), m_crDone);

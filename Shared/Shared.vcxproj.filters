@@ -232,9 +232,6 @@
     <ClCompile Include="popupListboxctrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Preferences.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PreferencesBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -736,9 +733,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="popupListboxctrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Preferences.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PreferencesBase.h">

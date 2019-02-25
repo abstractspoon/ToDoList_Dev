@@ -15,7 +15,6 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\enstring.h"
-#include "..\shared\preferences.h"
 #include "..\shared\deferwndmove.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\holdredraw.h"
@@ -24,9 +23,12 @@
 #include "..\shared\savefocus.h"
 #include "..\shared\filemisc.h"
 
+#include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\IUIExtension.h"
 
 #include <math.h>
+
+//////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #undef THIS_FILE

@@ -11,9 +11,11 @@
 #include "dialoghelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CRuntimeDlg window
 
-enum { RD_TITLE = 0 };
+class IPreferences;
+
+/////////////////////////////////////////////////////////////////////////////
+// CRuntimeDlg window
 
 class CRuntimeDlg : public CDialog, public CDialogHelper
 {
@@ -21,7 +23,7 @@ class CRuntimeDlg : public CDialog, public CDialogHelper
 
 // Construction
 public:
-	CRuntimeDlg(CWnd* pParentWnd = NULL, LPCTSTR szSettingsKey = NULL);
+	CRuntimeDlg(CWnd* pParentWnd = NULL, IPreferences* pPrefs = NULL, LPCTSTR szSettingsKey = NULL);
 
 	// do not use
 	int DoModal() { ASSERT(0); return -1; } 
@@ -99,6 +101,8 @@ protected:
 	CString m_sSettingsKey;
 	HFONT m_hFont;
 	CSize m_sizeInitial;
+
+	IPreferences* m_pPrefs;
 
 	static CMapStringToString s_mapClasses;
 

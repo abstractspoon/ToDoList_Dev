@@ -16,7 +16,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\enstring.h"
-#include "..\shared\preferences.h"
+#include "..\Interfaces\Preferences.h"
 #include "..\shared\deferwndmove.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\holdredraw.h"

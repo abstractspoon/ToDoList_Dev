@@ -5,8 +5,11 @@
 #include "resource.h"
 #include "TDLSendTasksDlg.h"
 
-#include "..\shared\preferences.h"
 #include "..\shared\dialoghelper.h"
+
+#include "..\Interfaces\Preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

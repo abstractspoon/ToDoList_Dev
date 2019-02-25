@@ -25,7 +25,6 @@
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\autoflag.h"
-#include "..\shared\preferences.h"
 #include "..\shared\localizer.h"
 #include "..\shared\fileregister.h"
 #include "..\shared\osversion.h"
@@ -38,10 +37,14 @@
 #include "..\3rdparty\base64coder.h"
 #include "..\3rdparty\LimitSingleInstance.h"
 
+#include "..\Interfaces\Preferences.h"
+
 #include <afxpriv.h>
 
 #include <shlwapi.h>
 #pragma comment(lib, "shlwapi.lib")
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

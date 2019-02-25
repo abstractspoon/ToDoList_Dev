@@ -6,14 +6,17 @@
 #include "ToDoCtrlReminders.h"
 #include "filteredToDoCtrl.h"
 
-#include "..\shared\preferences.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\scopedtimer.h"
 #include "..\shared\richedithelper.h"
 
+#include "..\Interfaces\Preferences.h"
+
 #include <math.h>
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

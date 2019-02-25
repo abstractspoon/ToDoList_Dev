@@ -6,10 +6,13 @@
 #include "TDLPasteFromClipboardDlg.h"
 #include "TDCImportExportMgr.h"
 
-#include "../shared/preferences.h"
 #include "../shared/dialoghelper.h"
 #include "../shared/misc.h"
 #include "../shared/graphicsmisc.h"
+
+#include "../Interfaces/preferences.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
