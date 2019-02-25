@@ -149,6 +149,7 @@
     <ClInclude Include="SpellCheckDlg.h" />
     <ClInclude Include="SpellChecker.h" />
     <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="TaskfileSchemaDef.h" />
     <ClInclude Include="TaskListStorageMgr.h" />
     <ClInclude Include="UIExtensionHelper.h" />
     <ClInclude Include="UIExtensionMgr.h" />

@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "TaskListCsvImporter.h"
-#include "tdlschemadef.h"
 #include "resource.h"
 #include "tdlrecurringtaskedit.h"
 #include "TDLCsvImportExportDlg.h"
@@ -15,6 +14,7 @@
 #include "..\shared\filemisc.h"
 
 #include "..\Interfaces\Preferences.h"
+#include "..\Interfaces\TaskfileSchemaDef.h"
 
 #include <locale.h>
 

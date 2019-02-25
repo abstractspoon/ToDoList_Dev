@@ -684,9 +684,6 @@
     <ClInclude Include="TDLRiskComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tdlschemadef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TDLSendTasksDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>

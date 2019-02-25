@@ -11,11 +11,14 @@
 #include "tasklisttdlexporter.h"
 #include "tasklisttdlimporter.h"
 #include "tasklistoutlookimporter.h"
-#include "tdlschemadef.h"
 
 #include "..\shared\filemisc.h"
-#include "..\Interfaces\Preferences.h"
 #include "..\shared\datehelper.h"
+
+#include "..\Interfaces\Preferences.h"
+#include "..\Interfaces\TaskfileSchemaDef.h"
+
+///////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #undef THIS_FILE

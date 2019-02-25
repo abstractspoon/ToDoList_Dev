@@ -4,18 +4,21 @@
 
 #include "stdafx.h"
 #include "TasklistHtmlExporter.h"
-#include "tdlschemadef.h"
 #include "tdlrecurringtaskedit.h"
 
 #include "..\shared\xmlfile.h"
-#include "..\Interfaces\Preferences.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\graphicsmisc.h"
 
 #include "..\3rdparty\stdiofileex.h"
 
+#include "..\Interfaces\Preferences.h"
+#include "..\Interfaces\TaskfileSchemaDef.h"
+
 #include <locale.h>
 #include <Shlwapi.h>
+
+//////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #undef THIS_FILE

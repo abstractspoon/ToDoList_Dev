@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "ToDoCtrl.h"
-#include "tdlschemadef.h"
 #include "taskfile.h"
 #include "taskclipboard.h"
 #include "tdcmsg.h"
@@ -60,6 +59,7 @@
 
 #include "..\interfaces\spellcheckdlg.h"
 #include "..\interfaces\IContentControl.h"
+#include "..\Interfaces\TaskfileSchemaDef.h"
 
 #include <Windowsx.h>
 #include <float.h>

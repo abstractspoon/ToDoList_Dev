@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "TDCSimpleTextContent.h"
 #include "tdcmsg.h"
-#include "tdlschemadef.h"
 #include "resource.h"
 
 #include "..\shared\toolbarhelper.h"
@@ -24,6 +23,9 @@
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\ITaskList.h"
 #include "..\Interfaces\richeditspellcheck.h"
+#include "..\Interfaces\TaskfileSchemaDef.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

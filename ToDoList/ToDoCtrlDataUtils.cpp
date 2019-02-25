@@ -6,7 +6,6 @@
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataUtils.h"
 #include "TDCCustomAttributeHelper.h"
-#include "tdlschemadef.h"
 #include "tdlTaskCtrlBase.h"
 
 #include "..\shared\timehelper.h"
@@ -16,6 +15,7 @@
 #include "..\shared\enstring.h"
 
 #include "..\Interfaces\ContentMgr.h"
+#include "..\Interfaces\TaskfileSchemaDef.h"
 
 #include <float.h>
 #include <math.h>

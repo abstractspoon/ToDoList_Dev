@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "TaskListcsvExporter.h"
-#include "tdlschemadef.h"
 #include "tdlrecurringtaskedit.h"
 
 #include "..\shared\enstring.h"
@@ -13,6 +12,7 @@
 #include "..\3rdparty\stdiofileex.h"
 
 #include "..\Interfaces\Preferences.h"
+#include "..\Interfaces\TaskfileSchemaDef.h"
 
 #include <locale.h>
 

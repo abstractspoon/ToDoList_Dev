@@ -706,7 +706,6 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLReminderPeriodComboBox.h" />
     <ClInclude Include="TDLReuseRecurringTaskDlg.h" />
     <ClInclude Include="TDLRiskComboBox.h" />
-    <ClInclude Include="tdlschemadef.h" />
     <ClInclude Include="TDLSendTasksDlg.h" />
     <ClInclude Include="TDLSetReminderDlg.h" />
     <ClInclude Include="TDLShowReminderDlg.h" />

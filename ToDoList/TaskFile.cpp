@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "TaskFile.h"
-#include "tdlschemadef.h"
 #include "tdcmergetasklist.h"
 #include "tdcstruct.h"
 #include "todoitem.h"
@@ -19,6 +18,8 @@
 #include "..\shared\xslfile.h"
 
 #include "..\3rdparty\Base64Coder.h"
+
+#include "..\Interfaces\TaskfileSchemaDef.h"
 
 #include <math.h>
 

@@ -136,6 +136,9 @@
     <ClInclude Include="Preferences.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TaskfileSchemaDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Interfaces.vcxproj" />

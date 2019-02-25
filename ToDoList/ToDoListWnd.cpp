@@ -12,7 +12,6 @@
 #include "tasklisttxtexporter.h"
 #include "tdcmsg.h"
 #include "tdcmapping.h"
-#include "tdlschemadef.h"
 #include "tdlprintdialog.h"
 #include "tdltransformdialog.h"
 #include "tdstringres.h"
@@ -79,6 +78,7 @@
 
 #include "..\Interfaces\spellcheckdlg.h"
 #include "..\Interfaces\uiextensionhelper.h"
+#include "..\Interfaces\TaskfileSchemaDef.h"
 
 #include <shlwapi.h>
 #include <windowsx.h>

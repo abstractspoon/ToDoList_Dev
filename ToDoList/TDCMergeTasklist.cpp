@@ -4,8 +4,11 @@
 
 #include "stdafx.h"
 #include "tdcMergeTasklist.h"
-#include "tdlschemadef.h"
 #include "Taskfile.h"
+
+#include "..\Interfaces\TaskfileSchemaDef.h"
+
+//////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #undef THIS_FILE
