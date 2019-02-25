@@ -484,8 +484,6 @@ public:
 	bool SetTaskFileLinkPath(HTASKITEM hTask, LPCTSTR szFileRefpath);
 
 	bool SetTaskColor(HTASKITEM hTask, unsigned long nColor);
-	bool SetTaskWebColor(HTASKITEM hTask, unsigned long nColor);
-
 	bool SetTaskPriority(HTASKITEM hTask, int nPriority);
 	bool SetTaskPercentDone(HTASKITEM hTask, unsigned char nPercent);
 
