@@ -16,7 +16,7 @@
 #include "..\shared\datehelper.h"
 
 #include "..\Interfaces\Preferences.h"
-#include "..\Interfaces\TaskfileSchemaDef.h"
+#include "..\Interfaces\TasklistSchemaDef.h"
 
 ///////////////////////////////////////////////////////////////////////
 

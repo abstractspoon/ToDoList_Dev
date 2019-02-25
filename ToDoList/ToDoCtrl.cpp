@@ -59,7 +59,7 @@
 
 #include "..\interfaces\spellcheckdlg.h"
 #include "..\interfaces\IContentControl.h"
-#include "..\Interfaces\TaskfileSchemaDef.h"
+#include "..\Interfaces\TasklistSchemaDef.h"
 
 #include <Windowsx.h>
 #include <float.h>

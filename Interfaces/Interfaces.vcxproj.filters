@@ -136,7 +136,7 @@
     <ClInclude Include="Preferences.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TaskfileSchemaDef.h">
+    <ClInclude Include="TasklistSchemaDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

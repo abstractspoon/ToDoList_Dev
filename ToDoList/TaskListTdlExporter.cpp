@@ -9,7 +9,7 @@
 
 #include "..\shared\filemisc.h"
 
-#include "..\Interfaces\TaskfileSchemaDef.h"
+#include "..\Interfaces\TasklistSchemaDef.h"
 
 //////////////////////////////////////////////////////////////////////
 

@@ -6,7 +6,7 @@
 #include "tdcMergeTasklist.h"
 #include "Taskfile.h"
 
-#include "..\Interfaces\TaskfileSchemaDef.h"
+#include "..\Interfaces\TasklistSchemaDef.h"
 
 //////////////////////////////////////////////////////////////////////
 

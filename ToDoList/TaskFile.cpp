@@ -19,7 +19,7 @@
 
 #include "..\3rdparty\Base64Coder.h"
 
-#include "..\Interfaces\TaskfileSchemaDef.h"
+#include "..\Interfaces\TasklistSchemaDef.h"
 
 #include <math.h>
 

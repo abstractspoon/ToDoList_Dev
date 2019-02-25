@@ -78,7 +78,7 @@
 
 #include "..\Interfaces\spellcheckdlg.h"
 #include "..\Interfaces\uiextensionhelper.h"
-#include "..\Interfaces\TaskfileSchemaDef.h"
+#include "..\Interfaces\TasklistSchemaDef.h"
 
 #include <shlwapi.h>
 #include <windowsx.h>

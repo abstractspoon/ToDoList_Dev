@@ -15,7 +15,7 @@
 #include "..\shared\enstring.h"
 
 #include "..\Interfaces\ContentMgr.h"
-#include "..\Interfaces\TaskfileSchemaDef.h"
+#include "..\Interfaces\TasklistSchemaDef.h"
 
 #include <float.h>
 #include <math.h>

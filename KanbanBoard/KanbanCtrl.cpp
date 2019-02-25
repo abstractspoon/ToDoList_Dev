@@ -26,7 +26,7 @@
 
 #include "..\Interfaces\iuiextension.h"
 #include "..\Interfaces\ipreferences.h"
-#include "..\Interfaces\TaskfileSchemaDef.h"
+#include "..\Interfaces\TasklistSchemaDef.h"
 
 #include <float.h> // for DBL_MAX
 #include <math.h>  // for fabs()

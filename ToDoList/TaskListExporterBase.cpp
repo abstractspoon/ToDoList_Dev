@@ -13,7 +13,7 @@
 #include "..\shared\filemisc.h"
 
 #include "..\Interfaces\Preferences.h"
-#include "..\Interfaces\TaskfileSchemaDef.h"
+#include "..\Interfaces\TasklistSchemaDef.h"
 
 #include <locale.h>
 

@@ -23,7 +23,7 @@
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\ITaskList.h"
 #include "..\Interfaces\richeditspellcheck.h"
-#include "..\Interfaces\TaskfileSchemaDef.h"
+#include "..\Interfaces\TasklistSchemaDef.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

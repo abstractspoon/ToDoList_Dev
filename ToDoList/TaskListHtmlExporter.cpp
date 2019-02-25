@@ -13,7 +13,7 @@
 #include "..\3rdparty\stdiofileex.h"
 
 #include "..\Interfaces\Preferences.h"
-#include "..\Interfaces\TaskfileSchemaDef.h"
+#include "..\Interfaces\TasklistSchemaDef.h"
 
 #include <locale.h>
 #include <Shlwapi.h>
