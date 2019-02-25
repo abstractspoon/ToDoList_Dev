@@ -10,8 +10,6 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\datehelper.h"
 
-#include "..\todolist\tdcenum.h"
-
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;

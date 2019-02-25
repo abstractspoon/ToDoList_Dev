@@ -4,8 +4,6 @@
 #include "stdafx.h"
 #include "TaskCalendarCtrl.h"
 
-#include "..\todolist\tdcenum.h"
-
 #include "..\Shared\GraphicsMisc.h"
 #include "..\Shared\themed.h"
 #include "..\Shared\DateHelper.h"

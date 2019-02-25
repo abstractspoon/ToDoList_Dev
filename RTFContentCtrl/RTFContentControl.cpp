@@ -7,9 +7,6 @@
 #include "CreateFileLinkDlg.h"
 #include "RTFPreferencesDlg.h"
 
-#include "..\todolist\tdcmsg.h"
-#include "..\todolist\tdlschemadef.h"
-
 #include "..\shared\enfiledialog.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\richedithelper.h"
@@ -695,7 +692,7 @@ LRESULT CRTFContentControl::OnCustomUrl(WPARAM wp, LPARAM lp)
 	CString sUrl((LPCTSTR)lp);
 	sUrl.MakeLower();
 
-	if (sUrl.Find(TDL_LINK) != -1 || sUrl.Find(TDL_EXTENSION) != -1)
+	if (sUrl.Find(TDL_LINK) != -1 || sUrl.Find(_T(".tdl")) != -1)
 		return GetParent()->SendMessage(WM_ICC_TASKLINK, 0, lp);
 
 	return OnFailedUrl(wp, lp);
@@ -884,11 +881,13 @@ void CRTFContentControl::OnEditPasteasRef()
 
 	if (pClip4)
 	{
-		sFileName = pClip4->GetAttribute(TDL_FILENAME);
+		sFileName = pClip4->GetAttribute(_T("FILENAME"));
 		sFileName.Replace(_T(" "), _T("%20"));
 	}
 	else // get the clipboard for just this tasklist
+	{
 		pClipboard = (ITaskList*)GetParent()->SendMessage(WM_ICC_GETCLIPBOARD, 0, TRUE);
+	}
 
 	if (pClipboard && pClipboard->GetFirstTask())
 	{

@@ -5,7 +5,7 @@
 #include "TDLTransEdit.h"
 #include "TDLTransEditDlg.h"
 
-#include "..\todolist\tdcenum.h"
+//#include "..\todolist\tdcenum.h"
 
 #include "..\transtext\transtextutils.h"
 

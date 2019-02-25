@@ -9,9 +9,6 @@
 #include "Kanbanlistctrl.h"
 #include "KanbanMsg.h"
 
-#include "..\todolist\tdcenum.h"
-#include "..\todolist\tdlschemadef.h"
-
 #include "..\shared\DialogHelper.h"
 #include "..\shared\DateHelper.h"
 #include "..\shared\holdredraw.h"
@@ -29,6 +26,8 @@
 
 #include "..\Interfaces\iuiextension.h"
 #include "..\Interfaces\ipreferences.h"
+
+#include "..\todolist\tdlschemadef.h"
 
 #include <float.h> // for DBL_MAX
 #include <math.h>  // for fabs()

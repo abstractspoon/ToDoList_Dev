@@ -11,9 +11,8 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
-//#include "..\shared\localizer.h"
 
-//#include "..\todolist\tdlschemadef.h"
+//////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #undef THIS_FILE
