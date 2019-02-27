@@ -139,7 +139,7 @@ namespace Abstractspoon
 				// TODO
 				Boolean GetRecurrence();
 
-				// SETTERS -----------------------------------------------------
+				// SETTERS ----------------------------------------------------
 
 				Task^ NewSubtask(String^ sTitle);
 
@@ -179,6 +179,8 @@ namespace Abstractspoon
 				Boolean ClearCustomAttributeData(String^ sID);
 				Boolean SetMetaData(String^ sKey, String^ sValue);
 				Boolean ClearMetaData(String^ sKey);
+
+				// MISC -------------------------------------------------------
 
 				static TimeUnits Map(TDC_UNITS units);
 				static TDC_UNITS Map(TimeUnits units);
