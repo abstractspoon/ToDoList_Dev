@@ -72,7 +72,7 @@ IUI_ATTRIBUTE UIExtension::Map(UIExtension::TaskAttribute attrib)
 	case UIExtension::TaskAttribute::Color:				return IUI_COLOR;		
 	case UIExtension::TaskAttribute::AllocBy:			return IUI_ALLOCTO;		
 	case UIExtension::TaskAttribute::AllocTo:			return IUI_ALLOCBY;		
-	case UIExtension::TaskAttribute::Status:				return IUI_STATUS;		
+	case UIExtension::TaskAttribute::Status:			return IUI_STATUS;		
 	case UIExtension::TaskAttribute::Category:			return IUI_CATEGORY;	
 	case UIExtension::TaskAttribute::Percent:			return IUI_PERCENT;		
 	case UIExtension::TaskAttribute::TimeEstimate:		return IUI_TIMEEST;		
@@ -83,18 +83,18 @@ IUI_ATTRIBUTE UIExtension::Map(UIExtension::TaskAttribute attrib)
 	case UIExtension::TaskAttribute::CreationDate:		return IUI_CREATIONDATE;
 	case UIExtension::TaskAttribute::CreatedBy:			return IUI_CREATEDBY;	
 	case UIExtension::TaskAttribute::Risk:				return IUI_RISK;		
-	case UIExtension::TaskAttribute::ExternalId:			return IUI_EXTERNALID;	
+	case UIExtension::TaskAttribute::ExternalId:		return IUI_EXTERNALID;	
 	case UIExtension::TaskAttribute::Cost:				return IUI_COST;		
-	case UIExtension::TaskAttribute::Dependency:			return IUI_DEPENDENCY;	
-	case UIExtension::TaskAttribute::Recurrence:			return IUI_RECURRENCE;	
+	case UIExtension::TaskAttribute::Dependency:		return IUI_DEPENDENCY;	
+	case UIExtension::TaskAttribute::Recurrence:		return IUI_RECURRENCE;	
 	case UIExtension::TaskAttribute::Version:			return IUI_VERSION;		
 	case UIExtension::TaskAttribute::Position:			return IUI_POSITION;	
-	case UIExtension::TaskAttribute::Id:					return IUI_ID;			
+	case UIExtension::TaskAttribute::Id:				return IUI_ID;			
 	case UIExtension::TaskAttribute::LastModified:		return IUI_LASTMOD;		
 	case UIExtension::TaskAttribute::Icon:				return IUI_ICON;		
 	case UIExtension::TaskAttribute::Tag:				return IUI_TAGS;		
 	case UIExtension::TaskAttribute::CustomAttribute:	return IUI_CUSTOMATTRIB;
-	case UIExtension::TaskAttribute::OffsetTask:			return IUI_OFFSETTASK;	
+	case UIExtension::TaskAttribute::OffsetTask:		return IUI_OFFSETTASK;	
 		//  case IUI_
 	}
 
