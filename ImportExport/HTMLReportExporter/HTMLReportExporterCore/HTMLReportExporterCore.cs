@@ -87,7 +87,7 @@ namespace HTMLReportExporter
 			m_Trans = trans;
 		}
 
-		public bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
+		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
 			tasks.GetAttributeList(Attribs);
 
@@ -180,6 +180,16 @@ namespace HTMLReportExporter
 
 
 			return true;
+		}
+
+		protected String GetDepthIndent(int depth)
+		{
+			String depthIndent = "";
+
+			while (depth-- > 0)
+				depthIndent = (depthIndent + Indent);
+
+			return depthIndent;
 		}
 
 		public bool Export(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
@@ -341,12 +351,12 @@ namespace HTMLReportExporter
 		{
 			PreExportTask(depth, html);
 
-			// This tasks attributes
+			// This task's attributes
 			bool firstAttrib = true;
 
 			foreach (var attrib in AttribOrder)
 			{
-				if (ExportTaskAttribute(task, attrib, firstAttrib, html))
+				if (ExportTaskAttribute(task, attrib, firstAttrib, depth, html))
 					firstAttrib = false;
 			}
 
@@ -422,12 +432,14 @@ namespace HTMLReportExporter
 
 		// ----------------------
 
-		protected bool ExportTaskAttribute(Task task, TaskList.TaskAttribute attrib, bool first, HtmlTextWriter html)
+		protected bool ExportTaskAttribute(Task task, TaskList.TaskAttribute attrib, bool first, int depth, HtmlTextWriter html)
 		{
 			if (!Attribs.Contains(attrib))
 				return false;
 
 			PreExportTaskAttribute(first, html);
+
+			var attribVal = GetAttributeValue(task, attrib);
 
 			switch (Style)
 			{
@@ -435,30 +447,152 @@ namespace HTMLReportExporter
 					if (attrib == TaskList.TaskAttribute.Comments)
 					{
 						html.WriteLine();
-						html.Write(GetAttributeValue(task, attrib));
+						html.Write(attribVal);
 					}
 					else
 					{
 						if (!first)
 							html.Write(" | ");
 
-						html.Write("{0}: {1}", GetAttributeName(attrib), GetAttributeValue(task, attrib));
+						html.Write("{0}: {1}", GetAttributeName(attrib), attribVal);
 					}
 					break;
 
 				case RenderStyle.Table:
-					html.Write(GetAttributeValue(task, attrib));
+					html.Write(attribVal);
 					break;
 
 				case RenderStyle.Paragraph:
-					html.Write("{0}: {1}", GetAttributeName(attrib), GetAttributeValue(task, attrib));
+					html.Write("{0}: {1}", GetAttributeName(attrib), attribVal);
 					break;
 			}
 
 			PostExportTaskAttribute(first, html);
 			return true;
 		}
-		
+
+		protected String FormatTaskAttribute(Task task, TaskList.TaskAttribute attrib, int depth)
+		{
+			var attribVal = GetAttributeValue(task, attrib);
+
+			// extra processing
+			String textColor = task.GetTextForeWebColor();
+			String backColor = task.GetTextBackWebColor();
+			
+			bool bColor = true;
+			bool bStrikeThru = (StrikeThruDone && (task.IsDone() || task.IsGoodAsDone()));
+			bool bBlockQuote = false;
+			bool wantIndent = false;
+
+			switch (attrib)
+			{
+				case TaskList.TaskAttribute.Position:
+					wantIndent = (Style == RenderStyle.Table);
+					break;
+
+				case TaskList.TaskAttribute.Title:
+					wantIndent = ((Style == RenderStyle.Table) && !Attribs.Contains(TaskList.TaskAttribute.Position));
+					break;
+
+				case TaskList.TaskAttribute.Priority:
+					{
+/*
+						int nPriority = task.GetPriority(hTask, TRUE);
+						String sPriority;
+
+						if (nPriority >= 0)
+						{
+							String sPriorityCol = pTasks->GetTaskPriorityWebColor(hTask);
+							sPriority.Format(_T("<font color='%s'>%d</font>"), sPriorityCol, nPriority);
+
+							sItem = FormatAttribute(nAttrib, sAttribLabel, sPriority, FALSE); // FALSE = Don't encode
+						}
+*/
+					}
+					break;
+
+				case TaskList.TaskAttribute.FileLink:
+/*
+					if (!sItem.IsEmpty())
+					{
+						// do it over creating a link for each file ref
+						String sFileRefs;
+						int nNumFileRefs = pTasks->GetTaskFileLinkCount(hTask);
+
+						for (int nFile = 0; nFile < nNumFileRefs; nFile++)
+						{
+							String sFilePath = pTasks->GetTaskFileLink(hTask, nFile), sFileName;
+
+							if (PathIsURL(sFilePath))
+							{
+								sFileName = sFilePath;
+							}
+							else
+							{
+								sFileName = FileMisc::GetFileNameFromPath(sFilePath);
+
+								// handle the absence of a filename
+								if (sFileName.IsEmpty())
+									sFileName = sFilePath;
+							}
+
+							String sFileRef;
+							sFileRef.Format(_T("<a href=\"%s\">%s</a>"), sFilePath, sFileName);
+
+							if (!sFileRefs.IsEmpty())
+								sFileRefs += ' ';
+
+							sFileRefs += sFileRef;
+						}
+
+						sItem = FormatAttribute(nAttrib, sAttribLabel, sFileRefs, FALSE); // FALSE = Don't encode
+						bColor = FALSE;
+					}
+*/
+					break;
+
+				case TaskList.TaskAttribute.Comments:
+/*
+					if (pTasks->TaskHasAttribute(hTask, TDL_TASKHTMLCOMMENTS))
+					{
+						sItem = pTasks->GetTaskAttribute(hTask, TDL_TASKHTMLCOMMENTS);
+						sItem.TrimRight();
+
+						// note: we reset the font after the comments because the font
+						// face and size may well have been changed
+						if (!sItem.IsEmpty())
+							sItem += DEFAULTFONT;
+
+						bColor = FALSE;
+						bStrikeThru = FALSE;
+						bBlockQuote = (EXPORTSTYLE != STYLE_TABLE);
+					}
+					else if (!sItem.IsEmpty())
+					{
+						// Note: Comments have already been HTML encoded
+
+						// replace carriage returns with <br>
+						sItem.Replace(ENDL, _T("<br>"));
+
+						// replace tab characters with multiple &nbsp;
+						sItem.Replace(_T("\t"), TAB);
+
+						sTextColor = pTasks->IsTaskDone(hTask) ? COMMENTS_DONECOLOR : _T("#606060");
+						sBackColor.Empty();
+						bStrikeThru = FALSE;
+					}
+*/
+					break;
+			}
+
+			if (wantIndent)
+			{
+				attribVal = (GetDepthIndent(depth) + attribVal);
+			}
+
+			return attribVal;
+		}
+
 		protected void PreExportTaskAttribute(bool first, HtmlTextWriter html)
 		{
 			switch (Style)
@@ -602,10 +736,7 @@ namespace HTMLReportExporter
 				case TaskList.TaskAttribute.Title:				return task.GetTitle();
 				case TaskList.TaskAttribute.Position:			return task.GetPositionString();
 				case TaskList.TaskAttribute.Id:					return task.GetID().ToString();
-				case TaskList.TaskAttribute.ParentId:			return task.GetParentID().ToString();
 				case TaskList.TaskAttribute.Path:				return task.GetPath(@"\");
-				case TaskList.TaskAttribute.Priority:			return task.GetPriority().ToString();
-				case TaskList.TaskAttribute.Risk:				return task.GetRisk().ToString();
 				case TaskList.TaskAttribute.Percent:			return task.GetPercentDone().ToString();
 				case TaskList.TaskAttribute.TimeEstimate:		return "";// task.GetTimeEstimate();
 				case TaskList.TaskAttribute.TimeSpent:			return "";// task.GetTimeSpent();
@@ -617,18 +748,63 @@ namespace HTMLReportExporter
 				case TaskList.TaskAttribute.DueDate:			return task.GetDueDateString();
 				case TaskList.TaskAttribute.DoneDate:			return task.GetDoneDateString();
 				case TaskList.TaskAttribute.Recurrence:			return "";// task.GetRecurrence();
-				case TaskList.TaskAttribute.AllocatedTo:		return task.GetAllocatedTo("+");
 				case TaskList.TaskAttribute.AllocatedBy:		return task.GetAllocatedBy();
 				case TaskList.TaskAttribute.Status:				return task.GetStatus();
-				case TaskList.TaskAttribute.Category:			return task.GetCategory("+");
-				case TaskList.TaskAttribute.Tags:				return task.GetTag("+");
 				case TaskList.TaskAttribute.ExternalId:			return task.GetExternalID();
 				case TaskList.TaskAttribute.Cost:				return task.GetCost().ToString();
 				case TaskList.TaskAttribute.Version:			return task.GetVersion();
 				case TaskList.TaskAttribute.Flag:				return task.IsFlagged().ToString();
-				case TaskList.TaskAttribute.Dependency:			return task.GetDependency("+");
-				case TaskList.TaskAttribute.FileLink:			return task.GetFileReference("+");
 				case TaskList.TaskAttribute.SubtaskDone:		return "";// task.GetSubtaskDoneString();
+
+				case TaskList.TaskAttribute.AllocatedTo:		return task.FormatAllocatedTo("+");
+				case TaskList.TaskAttribute.Category:			return task.FormatCategory("+");
+				case TaskList.TaskAttribute.Tags:				return task.FormatTag("+");
+				case TaskList.TaskAttribute.Dependency:			return task.FormatDependency("+");
+				case TaskList.TaskAttribute.FileLink:			return task.FormatFileReference("+");
+					
+				case TaskList.TaskAttribute.Priority:
+					{
+						Int32 priority = task.GetPriority(/*true*/);
+
+						switch (priority)
+						{
+							case -1:
+								return "";
+
+							case -2:
+								return m_Trans.Translate("<none>");
+						}
+
+						return priority.ToString();
+					}
+					break;
+
+
+				case TaskList.TaskAttribute.Risk:
+					{
+						Int32 priority = task.GetRisk(/*true*/);
+
+						switch (priority)
+						{
+							case -1:
+								return "";
+
+							case -2:
+								return m_Trans.Translate("<none>");
+						}
+
+						return priority.ToString();
+					}
+					break;
+
+				case TaskList.TaskAttribute.ParentId:
+					{
+						UInt32 parentId = task.GetParentID();
+
+						if (parentId != 0)
+							return parentId.ToString();
+					}
+					break;
 
 				case TaskList.TaskAttribute.Comments:
 					{

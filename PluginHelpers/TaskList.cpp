@@ -328,11 +328,6 @@ String^ Task::GetWebColor()
 	return GETTASKSTR(GetTaskWebColor);
 }
 
-String^ Task::GetPriorityWebColor()
-{
-	return GETTASKSTR(GetTaskPriorityWebColor);
-}
-
 String^ Task::GetVersion()
 {
 	return GETTASKSTR(GetTaskVersion);
@@ -420,6 +415,21 @@ System::Windows::Media::Color Task::GetPriorityMediaColor()
 	return ColorUtil::MediaColor::GetColor(color);
 }
 
+String^ Task::GetTextForeWebColor()
+{
+	return GETTASKSTR_ARG(GetTaskAttribute, TDL_TASKTEXTWEBCOLOR);
+}
+
+String^ Task::GetTextBackWebColor()
+{
+	return GETTASKSTR_ARG(GetTaskAttribute, TDL_TASKBACKWEBCOLOR);
+}
+
+String^ Task::GetPriorityWebColor()
+{
+	return GETTASKSTR(GetTaskPriorityWebColor);
+}
+
 UInt32 Task::GetPosition()
 {
 	return GETTASKVAL(GetTaskPosition, 0);
@@ -443,14 +453,14 @@ String^ Task::GetPath(String^ delimiter)
 	return (path ? path : "");
 }
 
-UInt32 Task::GetPriority()
+Int32 Task::GetPriority(/*bool calculated*/)
 {
-	return GETTASKVAL_ARG(GetTaskPriority, FALSE, 0);
+	return GETTASKVAL_ARG(GetTaskPriority, false/*calculated*/, -2);
 }
 
-UInt32 Task::GetRisk()
+Int32 Task::GetRisk(/*bool calculated*/)
 {
-	return GETTASKVAL_ARG(GetTaskRisk, FALSE, 0);
+	return GETTASKVAL_ARG(GetTaskRisk, false/*calculated*/, -2);
 }
 
 List<String^>^ Task::GetAllocatedTo()
@@ -508,34 +518,34 @@ List<String^>^ Task::GetFileReference()
 	return items;
 }
 
-String^ Task::GetAllocatedTo(String^ delimiter)
+String^ Task::FormatAllocatedTo(String^ delimiter)
 {
 	return FormatList(GetAllocatedTo(), delimiter);
 }
 
-String^ Task::GetCategory(String^ delimiter)
+String^ Task::FormatCategory(String^ delimiter)
 {
 	return FormatList(GetCategory(), delimiter);
 }
 
-String^ Task::GetTag(String^ delimiter)
+String^ Task::FormatTag(String^ delimiter)
 {
 	return FormatList(GetTag(), delimiter);
 }
 
-String^ Task::GetDependency(String^ delimiter)
+String^ Task::FormatDependency(String^ delimiter)
 {
 	return FormatList(GetDependency(), delimiter);
 }
 
-String^ Task::GetFileReference(String^ delimiter)
+String^ Task::FormatFileReference(String^ delimiter)
 {
 	return FormatList(GetFileReference(), delimiter);
 }
 
 String^ Task::FormatList(List<String^>^ items, String^ delimiter)
 {
-	return "";
+	return String::Join(delimiter, items);
 }
 
 Byte Task::GetPercentDone()

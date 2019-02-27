@@ -65,7 +65,6 @@ namespace Abstractspoon
 				String^ GetAllocatedBy();
 				String^ GetStatus();
 				String^ GetWebColor();
-				String^ GetPriorityWebColor();
 				String^ GetVersion();
 				String^ GetExternalID();
 				String^ GetCreatedBy();
@@ -79,13 +78,18 @@ namespace Abstractspoon
 				UInt32 GetParentID();
 				UInt32 GetColor();
 				UInt32 GetPosition();
-				UInt32 GetPriority();
-				UInt32 GetRisk();
+				
+				Int32 GetPriority(/*bool calculated*/);
+				Int32 GetRisk(/*bool calculated*/);
 
 				System::Drawing::Color GetTextDrawingColor();
 				System::Windows::Media::Color GetTextMediaColor();
 				System::Drawing::Color GetPriorityDrawingColor();
 				System::Windows::Media::Color GetPriorityMediaColor();
+
+				String^ GetTextForeWebColor();
+				String^ GetTextBackWebColor();
+				String^ GetPriorityWebColor();
 
 				List<String^>^ GetAllocatedTo();
 				List<String^>^ GetCategory();
@@ -93,11 +97,11 @@ namespace Abstractspoon
 				List<String^>^ GetDependency();
 				List<String^>^ GetFileReference();
 
-				String^ GetAllocatedTo(String^ delimiter);
-				String^ GetCategory(String^ delimiter);
-				String^ GetTag(String^ delimiter);
-				String^ GetDependency(String^ delimiter);
-				String^ GetFileReference(String^ delimiter);
+				String^ FormatAllocatedTo(String^ delimiter);
+				String^ FormatCategory(String^ delimiter);
+				String^ FormatTag(String^ delimiter);
+				String^ FormatDependency(String^ delimiter);
+				String^ FormatFileReference(String^ delimiter);
 
 				Byte GetPercentDone();
 				double GetCost();
