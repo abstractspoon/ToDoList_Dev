@@ -90,7 +90,7 @@ namespace SampleUIExtension
             if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
             {
                 attrib.Add("Alloc To");
-                value.Add(String.Join(", ", task.GetAllocatedTo()));
+                value.Add(task.FormatAllocatedTo(", "));
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.AllocBy))
@@ -108,7 +108,7 @@ namespace SampleUIExtension
             if (attribs.Contains(UIExtension.TaskAttribute.Category))
             {
                 attrib.Add("Category");
-                value.Add(String.Join(", ", task.GetCategory()));
+                value.Add(task.FormatCategory(", "));
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.Percent))
@@ -136,7 +136,7 @@ namespace SampleUIExtension
             if (attribs.Contains(UIExtension.TaskAttribute.FileReference))
             {
                 attrib.Add("File Reference");
-                value.Add(String.Join(", ", task.GetFileReference()));
+                value.Add(task.FormatFileReference(", "));
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.Comments))
@@ -184,7 +184,7 @@ namespace SampleUIExtension
             if (attribs.Contains(UIExtension.TaskAttribute.Dependency))
             {
                 attrib.Add("Dependency");
-                value.Add(String.Join(", ", task.GetDependency()));
+                value.Add(task.FormatDependency(", "));
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.Recurrence))
@@ -226,7 +226,7 @@ namespace SampleUIExtension
             if (attribs.Contains(UIExtension.TaskAttribute.Tag))
             {
                 attrib.Add("Tag");
-                value.Add(String.Join(", ", task.GetTag()));
+                value.Add(task.FormatTag(", "));
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.CustomAttribute))
