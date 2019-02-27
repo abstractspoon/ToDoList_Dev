@@ -19,6 +19,41 @@ namespace HTMLReportExporter
 		static String Space = @"&nbsp;";
 		static String Endl = @"\n";
 
+		static List<TaskList.TaskAttribute> AttribOrder = new List<TaskList.TaskAttribute>()
+		{
+			TaskList.TaskAttribute.Position,
+			TaskList.TaskAttribute.Title,
+			TaskList.TaskAttribute.Id,
+			TaskList.TaskAttribute.ParentId,
+			TaskList.TaskAttribute.Path,
+			TaskList.TaskAttribute.Priority,
+			TaskList.TaskAttribute.Risk,
+			TaskList.TaskAttribute.Percent,
+			TaskList.TaskAttribute.TimeEstimate,
+			TaskList.TaskAttribute.TimeSpent,
+			TaskList.TaskAttribute.CreationDate,
+			TaskList.TaskAttribute.CreatedBy,
+			TaskList.TaskAttribute.LastModifiedDate,
+			TaskList.TaskAttribute.LastModifiedBy,
+			TaskList.TaskAttribute.StartDate,
+			TaskList.TaskAttribute.DueDate,
+			TaskList.TaskAttribute.DoneDate,
+			TaskList.TaskAttribute.Recurrence,
+			TaskList.TaskAttribute.AllocatedTo,
+			TaskList.TaskAttribute.AllocatedBy,
+			TaskList.TaskAttribute.Status,
+			TaskList.TaskAttribute.Category,
+			TaskList.TaskAttribute.Tags,
+			TaskList.TaskAttribute.ExternalId,
+			TaskList.TaskAttribute.Cost,
+			TaskList.TaskAttribute.Version,
+			TaskList.TaskAttribute.Flag,
+			TaskList.TaskAttribute.Dependency,
+			TaskList.TaskAttribute.FileLink,
+			TaskList.TaskAttribute.SubtaskDone,
+			TaskList.TaskAttribute.Comments,
+		};
+
 		enum RenderStyle
 		{
 			Wrap,
@@ -42,6 +77,8 @@ namespace HTMLReportExporter
 		private int CommentsPercentWidth = 30;
 		private RenderStyle Style = DefRenderStyle;
 		private HashSet<TaskList.TaskAttribute> Attribs = new HashSet<TaskList.TaskAttribute>();
+
+
 
 		// --------------------------------------------------------------------------------------
 
@@ -199,6 +236,11 @@ namespace HTMLReportExporter
 			html.RenderBeginTag(HtmlTextWriterTag.Meta);
 			html.RenderEndTag(); // Meta
 
+			html.AddAttribute("http-equiv", "X-UA-Compatible");
+			html.AddAttribute("content", "IE=edge");
+			html.RenderBeginTag(HtmlTextWriterTag.Meta);
+			html.RenderEndTag(); // Meta
+
 			html.RenderBeginTag(HtmlTextWriterTag.Title);
 			html.Write(tasks.GetReportTitle());
 			html.RenderEndTag(); // Title
@@ -210,9 +252,24 @@ namespace HTMLReportExporter
 		{
 			html.RenderBeginTag(HtmlTextWriterTag.Body);
 
-			html.RenderBeginTag(HtmlTextWriterTag.H1);
-			html.Write(tasks.GetReportTitle());
-			html.RenderEndTag(); // H1
+			var reportTitle = tasks.GetReportTitle();
+			var reportDate = tasks.GetReportDate();
+
+			if (!String.IsNullOrWhiteSpace(reportTitle))
+			{
+				html.Write(DefaultFont);
+				html.RenderBeginTag(HtmlTextWriterTag.H2);
+				html.Write(tasks.GetReportTitle());
+				html.RenderEndTag(); // H2
+				html.WriteLine();
+				html.Write(reportDate);
+			}
+			else
+			{
+				html.Write(DefaultFont);
+				html.Write(reportDate);
+				html.WriteLine();
+			}
 
 			ExportTasks(tasks, html);
 
@@ -250,7 +307,7 @@ namespace HTMLReportExporter
 			{
 				case RenderStyle.Wrap:
 				case RenderStyle.Paragraph:
-					// do nothing
+					// Do nothing
 					break;
 
 				case RenderStyle.Table:
@@ -258,7 +315,7 @@ namespace HTMLReportExporter
 					html.RenderBeginTag(HtmlTextWriterTag.Table);
 
 					// Build table header
-
+					// TODO
 					break;
 			}
 		}
@@ -284,42 +341,34 @@ namespace HTMLReportExporter
 		{
 			PreExportTask(depth, html);
 
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Position,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Title,				html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Id,				html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.ParentId,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Path,				html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Priority,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Risk,				html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Percent,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.TimeEstimate,		html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.TimeSpent,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.CreationDate,		html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.CreatedBy,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.LastModifiedDate,	html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.LastModifiedBy,	html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.StartDate,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.DueDate,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.DoneDate,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Recurrence,		html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.AllocatedTo,		html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.AllocatedBy,		html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Status,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Category,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Tags,				html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.ExternalId,		html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Cost,				html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Version,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Flag,				html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Dependency,		html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.FileLink,			html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.SubtaskDone,		html);
-			ExportTaskAttribute(task, TaskList.TaskAttribute.Comments,			html);
-			// TODO
+			// This tasks attributes
+			bool firstAttrib = true;
 
-			PostExportTask(depth, html);
+			foreach (var attrib in AttribOrder)
+			{
+				if (ExportTaskAttribute(task, attrib, firstAttrib, html))
+					firstAttrib = false;
+			}
 
-			return ExportTaskChildren(task, depth, html);
+			// Are children part of the task itself?
+			switch (Style)
+			{
+				case RenderStyle.Wrap:
+				case RenderStyle.Paragraph:
+					// Yes
+					if (!ExportTaskChildren(task, depth, html))
+						return false;
+
+					PostExportTask(depth, html);
+					break;
+
+				case RenderStyle.Table:
+					// No
+					PostExportTask(depth, html);
+					return ExportTaskChildren(task, depth, html);
+			}
+
+			return true;
 		}
 
 		protected void PreExportTask(int depth, HtmlTextWriter html)
@@ -328,11 +377,19 @@ namespace HTMLReportExporter
 			{
 				case RenderStyle.Wrap:
 				case RenderStyle.Paragraph:
-					if (depth > 0)
-						html.RenderBeginTag(HtmlTextWriterTag.Li);
+					if (Attribs.Contains(TaskList.TaskAttribute.Position))
+					{
+						if (depth > 0)
+							html.RenderBeginTag(HtmlTextWriterTag.Blockquote);
+					}
 					else
-						html.RenderBeginTag(HtmlTextWriterTag.P);
-				break;
+					{
+						if (depth > 0)
+							html.RenderBeginTag(HtmlTextWriterTag.Li);
+						else
+							html.RenderBeginTag(HtmlTextWriterTag.P);
+					}
+					break;
 
 				case RenderStyle.Table:
 					html.RenderBeginTag(HtmlTextWriterTag.Tr);
@@ -346,7 +403,15 @@ namespace HTMLReportExporter
 			{
 				case RenderStyle.Wrap:
 				case RenderStyle.Paragraph:
-					html.RenderEndTag(); // P or Li
+					if (Attribs.Contains(TaskList.TaskAttribute.Position))
+					{
+						if (depth > 0)
+							html.RenderEndTag(); // Blockquote
+					}
+					else
+					{
+						html.RenderEndTag(); // P or Li
+					}
 					break;
 
 				case RenderStyle.Table:
@@ -357,29 +422,44 @@ namespace HTMLReportExporter
 
 		// ----------------------
 
-		protected void ExportTaskAttribute(Task task, TaskList.TaskAttribute attrib, HtmlTextWriter html)
+		protected bool ExportTaskAttribute(Task task, TaskList.TaskAttribute attrib, bool first, HtmlTextWriter html)
 		{
-			if (Attribs.Contains(attrib))
+			if (!Attribs.Contains(attrib))
+				return false;
+
+			PreExportTaskAttribute(first, html);
+
+			switch (Style)
 			{
-				PreExportTaskAttribute(html);
-
-				switch (Style)
-				{
-					case RenderStyle.Wrap:
-					case RenderStyle.Paragraph:
-						html.Write("{0}: {1}", GetAttributeName(attrib), GetAttributeValue(task, attrib));
-						break;
-
-					case RenderStyle.Table:
+				case RenderStyle.Wrap:
+					if (attrib == TaskList.TaskAttribute.Comments)
+					{
+						html.WriteLine();
 						html.Write(GetAttributeValue(task, attrib));
-						break;
-				}
+					}
+					else
+					{
+						if (!first)
+							html.Write(" | ");
 
-				PostExportTaskAttribute(html);
+						html.Write("{0}: {1}", GetAttributeName(attrib), GetAttributeValue(task, attrib));
+					}
+					break;
+
+				case RenderStyle.Table:
+					html.Write(GetAttributeValue(task, attrib));
+					break;
+
+				case RenderStyle.Paragraph:
+					html.Write("{0}: {1}", GetAttributeName(attrib), GetAttributeValue(task, attrib));
+					break;
 			}
+
+			PostExportTaskAttribute(first, html);
+			return true;
 		}
 		
-		protected void PreExportTaskAttribute(HtmlTextWriter html)
+		protected void PreExportTaskAttribute(bool first, HtmlTextWriter html)
 		{
 			switch (Style)
 			{
@@ -397,7 +477,7 @@ namespace HTMLReportExporter
 			}
 		}
 
-		protected void PostExportTaskAttribute(HtmlTextWriter html)
+		protected void PostExportTaskAttribute(bool first, HtmlTextWriter html)
 		{
 			switch (Style)
 			{
@@ -449,7 +529,10 @@ namespace HTMLReportExporter
 			{
 				case RenderStyle.Wrap:
 				case RenderStyle.Paragraph:
-					html.RenderBeginTag(HtmlTextWriterTag.Ul);
+					if (Attribs.Contains(TaskList.TaskAttribute.Position))
+						html.RenderBeginTag(HtmlTextWriterTag.Blockquote);
+					else
+						html.RenderBeginTag(HtmlTextWriterTag.Ul);
 					break;
 
 				case RenderStyle.Table:
@@ -464,7 +547,7 @@ namespace HTMLReportExporter
 			{
 				case RenderStyle.Wrap:
 				case RenderStyle.Paragraph:
-					html.RenderEndTag(); // ul
+					html.RenderEndTag(); // ul or blockquote
 					break;
 
 				case RenderStyle.Table:

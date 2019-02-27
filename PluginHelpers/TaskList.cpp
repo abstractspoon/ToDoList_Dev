@@ -7,9 +7,10 @@
 #include "UIExtension.h"
 #include "ColorUtil.h"
 
-#include "..\..\ToDoList_Dev\ToDoList\tdlschemadef.h"
-#include "..\..\ToDoList_Dev\Interfaces\ITasklist.h"
 #include "..\..\ToDoList_Dev\3rdParty\T64Utils.h"
+
+#include "..\..\ToDoList_Dev\Interfaces\ITasklist.h"
+#include "..\..\ToDoList_Dev\Interfaces\TasklistSchemaDef.h"
 
 #include <OleAuto.h>
 #include <time.h>
