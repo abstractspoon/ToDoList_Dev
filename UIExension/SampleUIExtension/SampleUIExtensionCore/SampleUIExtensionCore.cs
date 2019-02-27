@@ -66,19 +66,19 @@ namespace SampleUIExtension
             if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
             {
                 attrib.Add("Due Date");
-                value.Add(task.GetDueDateString());
+                value.Add(task.GetDueDateString(false));
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
             {
                 attrib.Add("Start Date");
-                value.Add(task.GetStartDateString());
+                value.Add(task.GetStartDateString(false));
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.Priority))
             {
                 attrib.Add("Priority");
-                value.Add(task.GetPriority().ToString());
+                value.Add(task.GetPriority(false).ToString());
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.Color))
@@ -114,7 +114,7 @@ namespace SampleUIExtension
             if (attribs.Contains(UIExtension.TaskAttribute.Percent))
             {
                 attrib.Add("Percent");
-                value.Add(task.GetPercentDone().ToString());
+                value.Add(task.GetPercentDone(false).ToString());
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.TimeEstimate))
@@ -122,7 +122,7 @@ namespace SampleUIExtension
                 attrib.Add("Time Estimate");
 
                 Task.TimeUnits units = Task.TimeUnits.Hours;
-                value.Add(task.GetTimeEstimate(ref units).ToString() + units);
+                value.Add(task.GetTimeEstimate(ref units, false).ToString() + units);
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.TimeSpent))
@@ -130,7 +130,7 @@ namespace SampleUIExtension
                 attrib.Add("Time Spent");
 
                 Task.TimeUnits units = Task.TimeUnits.Hours;
-                value.Add(task.GetTimeSpent(ref units).ToString() + units);
+                value.Add(task.GetTimeSpent(ref units, false).ToString() + units);
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.FileReference))
@@ -148,7 +148,7 @@ namespace SampleUIExtension
             if (attribs.Contains(UIExtension.TaskAttribute.Flag))
             {
                 attrib.Add("Flag");
-                value.Add(task.IsFlagged().ToString());
+                value.Add(task.IsFlagged(false).ToString());
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.CreationDate))
@@ -166,7 +166,7 @@ namespace SampleUIExtension
             if (attribs.Contains(UIExtension.TaskAttribute.Risk))
             {
                 attrib.Add("Risk");
-                value.Add(task.GetRisk().ToString());
+                value.Add(task.GetRisk(false).ToString());
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.ExternalId))
@@ -178,7 +178,7 @@ namespace SampleUIExtension
             if (attribs.Contains(UIExtension.TaskAttribute.Cost))
             {
                 attrib.Add("Cost");
-                value.Add(task.GetCost().ToString());
+                value.Add(task.GetCost(false).ToString());
             }
 
             if (attribs.Contains(UIExtension.TaskAttribute.Dependency))
@@ -198,8 +198,7 @@ namespace SampleUIExtension
                 attrib.Add("Version");
                 value.Add(task.GetVersion());
             }
-
-
+			
             if (attribs.Contains(UIExtension.TaskAttribute.Position))
             {
                 attrib.Add("Position");

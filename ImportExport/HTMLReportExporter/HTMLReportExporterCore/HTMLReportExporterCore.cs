@@ -737,23 +737,23 @@ namespace HTMLReportExporter
 				case TaskList.TaskAttribute.Position:			return task.GetPositionString();
 				case TaskList.TaskAttribute.Id:					return task.GetID().ToString();
 				case TaskList.TaskAttribute.Path:				return task.GetPath(@"\");
-				case TaskList.TaskAttribute.Percent:			return task.GetPercentDone().ToString();
+				case TaskList.TaskAttribute.Percent:			return task.GetPercentDone(false).ToString();
 				case TaskList.TaskAttribute.TimeEstimate:		return "";// task.GetTimeEstimate();
 				case TaskList.TaskAttribute.TimeSpent:			return "";// task.GetTimeSpent();
 				case TaskList.TaskAttribute.CreationDate:		return task.GetCreationDateString();
 				case TaskList.TaskAttribute.CreatedBy:			return task.GetCreatedBy();
 				case TaskList.TaskAttribute.LastModifiedDate:	return task.GetLastModifiedDateString();
 				case TaskList.TaskAttribute.LastModifiedBy:		return task.GetLastModifiedBy();
-				case TaskList.TaskAttribute.StartDate:			return task.GetStartDateString();
-				case TaskList.TaskAttribute.DueDate:			return task.GetDueDateString();
+				case TaskList.TaskAttribute.StartDate:			return task.GetStartDateString(false);
+				case TaskList.TaskAttribute.DueDate:			return task.GetDueDateString(false);
 				case TaskList.TaskAttribute.DoneDate:			return task.GetDoneDateString();
 				case TaskList.TaskAttribute.Recurrence:			return "";// task.GetRecurrence();
 				case TaskList.TaskAttribute.AllocatedBy:		return task.GetAllocatedBy();
 				case TaskList.TaskAttribute.Status:				return task.GetStatus();
 				case TaskList.TaskAttribute.ExternalId:			return task.GetExternalID();
-				case TaskList.TaskAttribute.Cost:				return task.GetCost().ToString();
+				case TaskList.TaskAttribute.Cost:				return task.GetCost(false).ToString();
 				case TaskList.TaskAttribute.Version:			return task.GetVersion();
-				case TaskList.TaskAttribute.Flag:				return task.IsFlagged().ToString();
+				case TaskList.TaskAttribute.Flag:				return task.IsFlagged(false).ToString();
 				case TaskList.TaskAttribute.SubtaskDone:		return "";// task.GetSubtaskDoneString();
 
 				case TaskList.TaskAttribute.AllocatedTo:		return task.FormatAllocatedTo("+");
@@ -764,7 +764,7 @@ namespace HTMLReportExporter
 					
 				case TaskList.TaskAttribute.Priority:
 					{
-						Int32 priority = task.GetPriority(/*true*/);
+						Int32 priority = task.GetPriority(false);
 
 						switch (priority)
 						{
@@ -782,7 +782,7 @@ namespace HTMLReportExporter
 
 				case TaskList.TaskAttribute.Risk:
 					{
-						Int32 priority = task.GetRisk(/*true*/);
+						Int32 priority = task.GetRisk(false);
 
 						switch (priority)
 						{

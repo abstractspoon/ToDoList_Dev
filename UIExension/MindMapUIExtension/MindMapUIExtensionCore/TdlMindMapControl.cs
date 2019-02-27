@@ -54,12 +54,12 @@ namespace MindMapUIExtension
 			m_ParentID = task.GetParentID();
 			m_TextColor = task.GetTextDrawingColor();
 			m_HasIcon = (task.GetIcon().Length > 0);
-			m_IsFlagged = task.IsFlagged();
+			m_IsFlagged = task.IsFlagged(false);
 			m_IsParent = task.IsParent();
             m_IsDone = task.IsDone();
             m_IsGoodAsDone = task.IsGoodAsDone();
             m_SomeSubtasksDone = task.HasSomeSubtasksDone();
-			m_IsLocked = task.IsLocked();
+			m_IsLocked = task.IsLocked(true);
 		}
         
 		public void FixupParentID(MindMapTaskItem parent)
@@ -135,7 +135,7 @@ namespace MindMapUIExtension
 				m_HasIcon = (task.GetIcon().Length > 0);
 
 			if (attribs.Contains(UIExtension.TaskAttribute.Flag))
-				m_IsFlagged = task.IsFlagged();
+				m_IsFlagged = task.IsFlagged(false);
 
 			if (attribs.Contains(UIExtension.TaskAttribute.Color))
 				m_TextColor = task.GetTextDrawingColor();
@@ -147,7 +147,7 @@ namespace MindMapUIExtension
                 m_IsDone = task.IsDone();
 
 			m_IsParent = task.IsParent();
-			m_IsLocked = task.IsLocked();
+			m_IsLocked = task.IsLocked(true);
             m_IsGoodAsDone = task.IsGoodAsDone();
 
 			return true;

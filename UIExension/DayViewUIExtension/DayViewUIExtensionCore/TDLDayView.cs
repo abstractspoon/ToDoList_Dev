@@ -190,7 +190,7 @@ namespace DayViewUIExtension
 
 				if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
 				{
-					m_PrevDueDate = task.GetDueDate(); // always
+					m_PrevDueDate = task.GetDueDate(false); // always
 
 					if (!IsDone)
 						EndDate = m_PrevDueDate;
@@ -217,12 +217,12 @@ namespace DayViewUIExtension
 				if (attribs.Contains(UIExtension.TaskAttribute.TimeEstimate))
 				{
 					Task.TimeUnits units = Task.TimeUnits.Unknown;
-					TimeEstimate = task.GetTimeEstimate(ref units);
+					TimeEstimate = task.GetTimeEstimate(ref units, false);
 					TimeEstUnits = units;
 				}
 
 				if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
-					StartDate = task.GetStartDate();
+					StartDate = task.GetStartDate(false);
 
 				if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
 					AllocTo = String.Join(", ", task.GetAllocatedTo());
@@ -231,7 +231,7 @@ namespace DayViewUIExtension
 					HasIcon = task.HasIcon();
 
 				TaskTextColor = task.GetTextDrawingColor();
-				IsLocked = task.IsLocked();
+				IsLocked = task.IsLocked(true);
 			}
 			else
 			{
@@ -242,16 +242,16 @@ namespace DayViewUIExtension
 				IsParent = task.IsParent();
 				TaskTextColor = task.GetTextDrawingColor();
 				DrawBorder = true;
-				IsLocked = task.IsLocked();
+				IsLocked = task.IsLocked(true);
 
 				Task.TimeUnits units = Task.TimeUnits.Unknown;
-				TimeEstimate = task.GetTimeEstimate(ref units);
+				TimeEstimate = task.GetTimeEstimate(ref units, false);
 				TimeEstUnits = units;
 
-				StartDate = task.GetStartDate();
+				StartDate = task.GetStartDate(false);
 				IsDone = (task.IsDone() || task.IsGoodAsDone());
 
-				m_PrevDueDate = task.GetDueDate();
+				m_PrevDueDate = task.GetDueDate(false);
 				EndDate = (IsDone ? task.GetDoneDate() : m_PrevDueDate);
 			}
 

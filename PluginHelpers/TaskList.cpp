@@ -453,14 +453,14 @@ String^ Task::GetPath(String^ delimiter)
 	return (path ? path : "");
 }
 
-Int32 Task::GetPriority(/*bool calculated*/)
+Int32 Task::GetPriority(bool calculated)
 {
-	return GETTASKVAL_ARG(GetTaskPriority, false/*calculated*/, -2);
+	return GETTASKVAL_ARG(GetTaskPriority, calculated, -2);
 }
 
-Int32 Task::GetRisk(/*bool calculated*/)
+Int32 Task::GetRisk(bool calculated)
 {
-	return GETTASKVAL_ARG(GetTaskRisk, false/*calculated*/, -2);
+	return GETTASKVAL_ARG(GetTaskRisk, calculated, -2);
 }
 
 List<String^>^ Task::GetAllocatedTo()
@@ -548,14 +548,14 @@ String^ Task::FormatList(List<String^>^ items, String^ delimiter)
 	return String::Join(delimiter, items);
 }
 
-Byte Task::GetPercentDone()
+Byte Task::GetPercentDone(bool calculated)
 {
-	return GETTASKVAL_ARG(GetTaskPercentDone, FALSE, 0);
+	return GETTASKVAL_ARG(GetTaskPercentDone, calculated, 0);
 }
 
-double Task::GetCost()
+double Task::GetCost(bool calculated)
 {
-	return GETTASKVAL_ARG(GetTaskCost, FALSE, 0);
+	return GETTASKVAL_ARG(GetTaskCost, calculated, 0);
 }
 
 DateTime Task::GetLastModifiedDate()
@@ -580,22 +580,22 @@ DateTime Task::GetDoneDate()
 	return DateTime::MinValue;
 }
 
-DateTime Task::GetDueDate()
+DateTime Task::GetDueDate(bool calculated)
 {
 	__int64 date = 0;
 	
-	if (GETTASKDATE_ARG(GetTaskDueDate64, FALSE, false))
+	if (GETTASKDATE_ARG(GetTaskDueDate64, calculated, false))
 		return Map(date);
 
 	// else
 	return DateTime::MinValue;
 }
 
-DateTime Task::GetStartDate()
+DateTime Task::GetStartDate(bool calculated)
 {
 	__int64 date = 0;
 	
-	if (GETTASKDATE_ARG(GetTaskStartDate64, FALSE, false))
+	if (GETTASKDATE_ARG(GetTaskStartDate64, calculated, false))
 		return Map(date);
 
 	// else
@@ -618,14 +618,14 @@ String^ Task::GetDoneDateString()
 	return GETTASKSTR(GetTaskDoneDateString);
 }
 
-String^ Task::GetDueDateString()
+String^ Task::GetDueDateString(bool calculated)
 {
-	return GETTASKSTR_ARG(GetTaskDueDateString, FALSE);
+	return GETTASKSTR_ARG(GetTaskDueDateString, calculated);
 }
 
-String^ Task::GetStartDateString()
+String^ Task::GetStartDateString(bool calculated)
 {
-	return GETTASKSTR_ARG(GetTaskStartDateString, FALSE);
+	return GETTASKSTR_ARG(GetTaskStartDateString, calculated);
 }
 
 String^ Task::GetCreationDateString()
@@ -664,9 +664,9 @@ Boolean Task::HasSomeSubtasksDone()
 	return (szSubtasks && *szSubtasks && (szSubtasks[0] != '0'));
 }
 
-Boolean Task::IsFlagged()
+Boolean Task::IsFlagged(bool calculated)
 {
-	return GETTASKVAL_ARG(IsTaskFlagged, FALSE, false);
+	return GETTASKVAL_ARG(IsTaskFlagged, calculated, false);
 }
 
 Boolean Task::IsParent()
@@ -674,30 +674,30 @@ Boolean Task::IsParent()
 	return GETTASKVAL(IsTaskParent, false);
 }
 
-Boolean Task::IsLocked()
+Boolean Task::IsLocked(bool calculated)
 {
-	return GETTASKVAL_ARG(IsTaskLocked, FALSE, false);
+	return GETTASKVAL_ARG(IsTaskLocked, calculated, false);
 }
 
 // ---------------------------------------------------------
 
-double Task::GetTimeEstimate(TimeUnits% cUnits)
+double Task::GetTimeEstimate(TimeUnits% cUnits, bool calculated)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
 
-	double dTime = (m_pConstTaskList ? m_pConstTaskList->GetTaskTimeEstimate(m_hTask, nUnits, FALSE) :
-		(m_pTaskList ? m_pTaskList->GetTaskTimeEstimate(m_hTask, nUnits, FALSE) : 0.0));
+	double dTime = (m_pConstTaskList ? m_pConstTaskList->GetTaskTimeEstimate(m_hTask, nUnits, calculated) :
+		(m_pTaskList ? m_pTaskList->GetTaskTimeEstimate(m_hTask, nUnits, calculated) : 0.0));
 
 	cUnits = Map(nUnits);
 	return dTime;
 }
 
-double Task::GetTimeSpent(TimeUnits% cUnits)
+double Task::GetTimeSpent(TimeUnits% cUnits, bool calculated)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
 
-	double dTime = (m_pConstTaskList ? m_pConstTaskList->GetTaskTimeSpent(m_hTask, nUnits, FALSE) :
-		(m_pTaskList ? m_pTaskList->GetTaskTimeSpent(m_hTask, nUnits, FALSE) : 0.0));
+	double dTime = (m_pConstTaskList ? m_pConstTaskList->GetTaskTimeSpent(m_hTask, nUnits, calculated) :
+		(m_pTaskList ? m_pTaskList->GetTaskTimeSpent(m_hTask, nUnits, calculated) : 0.0));
 
 	cUnits = Map(nUnits);
 	return dTime;

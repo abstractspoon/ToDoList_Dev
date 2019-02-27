@@ -100,7 +100,7 @@ namespace WordCloudUIExtension
 									  HashSet<UIExtension.TaskAttribute> attribs, Boolean newTask)
 		{
             IsParent = task.IsParent();
-            IsLocked = task.IsLocked();
+            IsLocked = task.IsLocked(true);
             IsGoodAsDone = task.IsGoodAsDone();
             HasSomeSubtasksDone = task.HasSomeSubtasksDone();
 
@@ -108,8 +108,8 @@ namespace WordCloudUIExtension
 			{
 				Title = task.GetTitle();
 				DoneDate = SplitDate(task.GetDoneDateString());
-				DueDate = SplitDate(task.GetDueDateString());
-				StartDate = SplitDate(task.GetStartDateString());
+				DueDate = SplitDate(task.GetDueDateString(false));
+				StartDate = SplitDate(task.GetStartDateString(false));
 				AllocTo = task.GetAllocatedTo();
 				AllocBy = task.GetAllocatedBy();
 				Status = task.GetStatus();
@@ -132,10 +132,10 @@ namespace WordCloudUIExtension
 					DoneDate = SplitDate(task.GetDoneDateString());
 
 				if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
-					DueDate = SplitDate(task.GetDueDateString());
+					DueDate = SplitDate(task.GetDueDateString(false));
 
 				if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
-					StartDate = SplitDate(task.GetStartDateString());
+					StartDate = SplitDate(task.GetStartDateString(false));
 
 				if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
 					AllocTo = task.GetAllocatedTo();

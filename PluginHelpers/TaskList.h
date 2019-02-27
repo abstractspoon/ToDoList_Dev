@@ -79,8 +79,8 @@ namespace Abstractspoon
 				UInt32 GetColor();
 				UInt32 GetPosition();
 				
-				Int32 GetPriority(/*bool calculated*/);
-				Int32 GetRisk(/*bool calculated*/);
+				Int32 GetPriority(bool calculated);
+				Int32 GetRisk(bool calculated);
 
 				System::Drawing::Color GetTextDrawingColor();
 				System::Windows::Media::Color GetTextMediaColor();
@@ -103,18 +103,18 @@ namespace Abstractspoon
 				String^ FormatDependency(String^ delimiter);
 				String^ FormatFileReference(String^ delimiter);
 
-				Byte GetPercentDone();
-				double GetCost();
+				Byte GetPercentDone(bool calculated);
+				double GetCost(bool calculated);
 
-				DateTime GetLastModifiedDate();
 				DateTime GetDoneDate();
-				DateTime GetDueDate();
-				DateTime GetStartDate();
+				DateTime GetDueDate(bool calculated);
+				DateTime GetStartDate(bool calculated);
 				DateTime GetCreationDate();
+				DateTime GetLastModifiedDate();
 
 				String^ GetDoneDateString();
-				String^ GetDueDateString();
-				String^ GetStartDateString();
+				String^ GetDueDateString(bool calculated);
+				String^ GetStartDateString(bool calculated);
 				String^ GetCreationDateString();
 				String^ GetLastModifiedDateString();
 				String^ GetLastModifiedBy();
@@ -123,12 +123,12 @@ namespace Abstractspoon
 				Boolean IsDue();
 				Boolean IsGoodAsDone();
 				Boolean HasSomeSubtasksDone();
-				Boolean IsFlagged();
+				Boolean IsFlagged(bool calculated);
 				Boolean IsParent();
-				Boolean IsLocked();
+				Boolean IsLocked(bool calculated);
 
-				double GetTimeEstimate(TimeUnits% cUnits);
-				double GetTimeSpent(TimeUnits% cUnits);
+				double GetTimeEstimate(TimeUnits% cUnits, bool calculated);
+				double GetTimeSpent(TimeUnits% cUnits, bool calculated);
 
 				String^ GetAttribute(String^ sAttrib);
 				Boolean HasAttribute(String^ sAttrib);
