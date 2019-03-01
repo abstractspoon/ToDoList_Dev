@@ -104,20 +104,20 @@ void CPreferencesMultiUserPage::OnFirstShow()
 	AddGroupLine(IDC_SSCGROUP);
 }
 
-int CPreferencesMultiUserPage::GetReadonlyReloadOption() const
+RELOAD_OPTION CPreferencesMultiUserPage::GetReadonlyReloadOption() const
 { 
 	if (!m_bPromptReloadOnWritable)
 		return RO_NO;
 	else
-		return m_nReadonlyReloadOption + 1; 
+		return (RELOAD_OPTION)(m_nReadonlyReloadOption + 1); 
 }
 
-int CPreferencesMultiUserPage::GetTimestampReloadOption() const 
+RELOAD_OPTION CPreferencesMultiUserPage::GetTimestampReloadOption() const
 { 
 	if (!m_bPromptReloadOnTimestamp)
 		return RO_NO;
 	else
-		return m_nTimestampReloadOption + 1; 
+		return (RELOAD_OPTION)(m_nTimestampReloadOption + 1); 
 }
 
 void CPreferencesMultiUserPage::OnPromptreloadonwritable() 

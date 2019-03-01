@@ -831,13 +831,13 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 				cx = rClient.right;
 				cy = rClient.bottom;
 
-				TRACE(_T("CToDoCtrl::OnSize[client](%d, %d)\n"), cx, cy);
+				//TRACE(_T("CToDoCtrl::OnSize[client](%d, %d)\n"), cx, cy);
 			}
 		}
 		else
 		{
 			ClearInitialSize();
-			TRACE(_T("CToDoCtrl::OnSize(%d, %d)\n"), cx, cy);
+			//TRACE(_T("CToDoCtrl::OnSize(%d, %d)\n"), cx, cy);
 		}
 
 		ValidateCommentsSize();
@@ -10420,8 +10420,8 @@ void CToDoCtrl::ValidateCommentsSize()
 	int nValidCommentSize = max(nMinComments, min(nMaxComments, m_nCommentsSize));
 
 #ifdef _DEBUG
-	if (m_nCommentsSize != nValidCommentSize)
-		TRACE(_T("CToDoCtrl::ValidateCommentsSize(%d -> %d)\n"), m_nCommentsSize, nValidCommentSize);
+// 	if (m_nCommentsSize != nValidCommentSize)
+// 		TRACE(_T("CToDoCtrl::ValidateCommentsSize(%d -> %d)\n"), m_nCommentsSize, nValidCommentSize);
 #endif
 
 	m_nCommentsSize = nValidCommentSize;

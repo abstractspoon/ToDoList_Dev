@@ -56,11 +56,12 @@ IIMPORTEXPORT_RESULT CTaskListHtmlExporter::ExportOutput(LPCTSTR szDestFilePath,
 	
 	sHtmlOutput += DOCTYPE;
 	sHtmlOutput += _T("<html>\n<head>\n");
-	sHtmlOutput += _T("<style type=\"text/css\">");
-	sHtmlOutput += _T("@media print { thead {display: table-header-group;} }");
-	sHtmlOutput += _T("body { line-height: 1.0; }");
-	sHtmlOutput += _T("table { border-collapse: collapse; }");
+	sHtmlOutput += _T("<style type=\"text/css\">\n");
+	sHtmlOutput += _T("@media print { thead {display: table-header-group;} }\n");
+	sHtmlOutput += _T("body { line-height: 1.0; }\n");
+	sHtmlOutput += _T("table { border-collapse: collapse; }\n");
 	sHtmlOutput += _T("</style>\n");
+	sHtmlOutput += _T("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n");
 	sHtmlOutput += CHARSET;
 	sHtmlOutput += _T("</head>\n<body>\n");
 	sHtmlOutput += sOutput;

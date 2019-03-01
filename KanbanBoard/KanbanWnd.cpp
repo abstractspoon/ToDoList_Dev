@@ -480,7 +480,8 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, co
 	CSet<IUI_ATTRIBUTE> attrib(pAttributes, nNumAttributes);
 	
 	m_ctrlKanban.UpdateTasks(pTasks, nUpdate, attrib);
-
+	m_ctrlKanban.GetSelectedTaskIDs(m_aSelTaskIDs);
+	
 	// Update custom attribute combo
 	const CKanbanCustomAttributeDefinitionArray& aCustDefs = m_ctrlKanban.GetCustomAttributeDefinitions();
 

@@ -12,14 +12,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesMultiUserPage dialog
 
-enum // source control
-{
-	STSS_NONE,
-	STSS_LANONLY,
-	STSS_ALL,
-};
-
-enum // reload
+enum RELOAD_OPTION 
 {
 	RO_NO,
 	RO_ASK,
@@ -36,8 +29,8 @@ public:
 	CPreferencesMultiUserPage();
 	~CPreferencesMultiUserPage();
 
-	int GetReadonlyReloadOption() const;
-	int GetTimestampReloadOption() const;
+	RELOAD_OPTION GetReadonlyReloadOption() const;
+	RELOAD_OPTION GetTimestampReloadOption() const;
 	BOOL GetAutoCheckOut() const { return m_bAutoCheckOut; }
 	BOOL GetKeepTryingToCheckout() const { return m_bKeepTryingToCheckout; }
 	BOOL GetCheckinOnClose() const { return m_bCheckinOnClose; }

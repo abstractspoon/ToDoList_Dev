@@ -88,6 +88,7 @@ protected:
 	BOOL m_bSortAscending;
 	BOOL m_bStrikeThruDone;
 	BOOL m_bSelectTasks;
+	BOOL m_bSettingListFocus;
 
 	DWORD m_dwOptions;
 	UINT m_nNextColor;
@@ -112,12 +113,12 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnCustomDrawList(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListItemChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListEditLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnListCheckChange(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnListWantFocus(WPARAM wp, LPARAM lp);
+	afx_msg void OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnListGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
@@ -128,9 +129,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD dwTaskID, BOOL bSelected);
-	GM_ITEMSTATE GetItemState(int nItem) const;
-	
 	void RedrawListCtrls(BOOL bErase = FALSE);
 	void RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	void Resize();
@@ -168,14 +166,12 @@ protected:
 
 	BOOL SelectListCtrl(CKanbanListCtrl* pList, BOOL bNotifyParent = TRUE);
 	BOOL IsSelectedListCtrl(HWND hWnd) const;
-	void FixupSelection();
-	void FixupFocus();
+	void FixupSelectedList();
+	void FixupListFocus();
 	BOOL DeleteListCtrl(int nList);
 	BOOL HasFocus() const;
-
-	DWORD GetTaskID(HTREEITEM hti) const;
-	DWORD GetTaskID(int nItem) const;
-	DWORD GetListTaskID(DWORD nItemData) const;
+	BOOL SelectClosestAdjacentItemToSelection(int nAdjacentList);
+	BOOL SelectNextItem(int nIncrement);
 
 	inline BOOL UsingFixedColumns() const { return m_aColumnDefs.GetSize(); }
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }
@@ -206,8 +202,6 @@ protected:
 	BOOL WantShowColumn(LPCTSTR szAttribID, const CKanbanItemArrayMap& mapKIArray) const;
 	BOOL WantShowColumn(const CKanbanListCtrl* pList) const;
 
-	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
-	static int GetTaskValues(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_ATTRIBUTE nAttribID, CStringArray& aValues);
 	static int GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
 	static int GetTaskCategories(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
 	static int GetTaskTags(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);

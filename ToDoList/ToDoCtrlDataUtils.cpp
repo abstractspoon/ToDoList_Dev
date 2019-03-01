@@ -1565,13 +1565,13 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 				// If Task2 is dependent on Task1 then Task1 comes first
 				if (m_data.IsTaskLocallyDependentOn(dwTask2ID, dwTask1ID, FALSE))
 				{
-					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTask2ID, dwTask1ID, dwTask1ID);
+					//TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTask2ID, dwTask1ID, dwTask1ID);
 					nCompare = -1;
 				}
 				// else if Task1 is dependent on Task2 then Task2 comes first
 				else if (m_data.IsTaskLocallyDependentOn(dwTask1ID, dwTask2ID, FALSE))
 				{
-					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTask1ID, dwTask2ID, dwTask2ID);
+					//TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTask1ID, dwTask2ID, dwTask2ID);
 					nCompare = 1;
 				}
 			}

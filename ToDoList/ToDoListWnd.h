@@ -167,7 +167,6 @@ protected:
 	//{{AFX_MSG(CToDoListWnd)
 	afx_msg void OnEditSetTasklistTabColor();
 	afx_msg void OnEditClearTasklistTabColor();
-	afx_msg void OnUpdateEditSetTasklistTabColor(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditClearTasklistTabColor(CCmdUI* pCmdUI);
 	afx_msg void OnViewIncrementTaskViewFontSize();
 	afx_msg void OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI);
@@ -238,7 +237,6 @@ protected:
 	afx_msg void OnSysColorChange();
 	afx_msg void OnTabctrlPreferences();
 	afx_msg void OnTasklistSelectColumns();
-	afx_msg void OnToolsCheckforupdates();
 	afx_msg void OnToolsCopyTasklistPath();
 	afx_msg void OnToolsTransformactivetasklist();
 	afx_msg void OnUpdateAddtimetologfile(CCmdUI* pCmdUI);
@@ -383,7 +381,6 @@ protected:
 	afx_msg LRESULT OnToDoCtrlImportDropFiles(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlCanImportDropFiles(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifyListChange(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnToDoCtrlNotifyMinWidthChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifyTimeTrack(WPARAM wp, LPARAM lp);
@@ -511,7 +508,6 @@ protected:
 	afx_msg void OnUpdateSBSelectionCount(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSBTaskCount(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSave(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateSaveToWeb(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSaveall(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSaveas(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSetPriority(CCmdUI* pCmdUI);
@@ -528,7 +524,6 @@ protected:
  	afx_msg void OnUpdateToolsRemovefromsourcecontrol(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateToolsToggleCheckin(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateUserTool(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateUserUIExtension(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewMovetasklistleft(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewMovetasklistright(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewNext(CCmdUI* pCmdUI);
@@ -540,7 +535,6 @@ protected:
 	afx_msg void OnUpdateViewMainToolbar(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewCustomToolbar(CCmdUI* pCmdUI);
 	afx_msg void OnUserTool(UINT nCmdID);
-	afx_msg void OnUserUIExtension(UINT nCmdID);
 	afx_msg void OnViewMovetasklistleft();
 	afx_msg void OnViewMovetasklistright();
 	afx_msg void OnViewNext();
@@ -570,7 +564,6 @@ protected:
 	void OnTimerAutoSave();
 	void OnTimerDueItems(int nCtrl = -1);
 	void OnTimerTimeTracking();
-	void OnTimerTimeTrackReminder();
 	void OnTimerAutoMinimize();
 
 	void OnEditPaste(TDC_PASTE nPasteWhere, TDLID_IMPORTTO nImportWhere);
@@ -619,7 +612,6 @@ protected:
 	BOOL CanImportPasteFromClipboard() const;
 
 	BOOL ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL bStartup);
-	void CheckMinWidth();
 	void MinimizeToTray();
 	void Show(BOOL bAllowToggle);
 	void RefreshPauseTimeTracking();
@@ -643,7 +635,7 @@ protected:
 	BOOL GetAutoArchiveOptions(TDC_ARCHIVE& nRemove, BOOL& bRemoveFlagged) const;
 	BOOL ValidateTaskLinkFilePath(CString& sPath) const;
 	BOOL WantCheckRemoteFiles(int nCtrl, int nInterval, int& nElapsed) const;
-	BOOL WantCheckReloadFiles(int nOption) const;
+	BOOL WantCheckReloadFiles(RELOAD_OPTION nOption) const;
 
 	BOOL HandleReservedShortcut(DWORD dwShortcut);
 	BOOL SendShortcutCommand(UINT nCmdID);
@@ -675,8 +667,6 @@ protected:
 	void ShowFindDialog(BOOL bShow = TRUE);
 	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
 	
-	void PrepareToolbar(int nOption);
-	void SetToolbarOption(int nOption);
 	void UpdateUDTsInMainToolbar();
 	void PopulateToolArgs(USERTOOLARGS& args) const;
 

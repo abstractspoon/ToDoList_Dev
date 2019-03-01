@@ -19,8 +19,9 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT WM_KLCN_CHECKCHANGE = (WM_APP+1); // WPARAM = HWND, LPARAM = Task ID
-const UINT WM_KLCN_GETTASKICON = (WM_APP+2); // WPARAM = TaskID, LPARAM = int* (imageIndex), return HIMAGELIST
+const UINT WM_KLCN_CHECKCHANGE	= (WM_APP+1); // WPARAM = HWND, LPARAM = Task ID
+const UINT WM_KLCN_GETTASKICON	= (WM_APP+2); // WPARAM = TaskID, LPARAM = int* (imageIndex), return HIMAGELIST
+const UINT WM_KLCN_WANTFOCUS	= (WM_APP+3); // WPARAM = HWND, LPARAM = 0L
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrl window
@@ -67,9 +68,12 @@ public:
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL SelectTask(DWORD dwTaskID, BOOL bAppend = FALSE);
 	BOOL SelectItem(int nItem, BOOL bFocus, BOOL bAppend = FALSE);
-	BOOL IsSelectingTask() const { return (m_dwSelectingTaskID != 0); }
+	BOOL IsSelectingTask() const { return (m_dwSelectingTaskID != 0) && m_data.HasItem(m_dwSelectingTaskID); }
 	void ScrollToSelection();
+
 	BOOL GetLabelEditRect(LPRECT pEdit);
+	BOOL GetItemBounds(int nItem, LPRECT lpRect) const;
+
 	void ClearSelection();
 	void SetSelected(BOOL bSelected);
 	int GetFirstSelectedItem() const;

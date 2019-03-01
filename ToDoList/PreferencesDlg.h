@@ -99,8 +99,8 @@ public:
 	BOOL GetEnableRTLInput() const { return m_pageGen.GetEnableRTLInput(); }
 
 	// CPreferencesMultiUserPage
-	int GetReadonlyReloadOption() const { return m_pageMultiUser.GetReadonlyReloadOption(); }
-	int GetTimestampReloadOption() const { return m_pageMultiUser.GetTimestampReloadOption(); }
+	RELOAD_OPTION GetReadonlyReloadOption() const { return m_pageMultiUser.GetReadonlyReloadOption(); }
+	RELOAD_OPTION GetTimestampReloadOption() const { return m_pageMultiUser.GetTimestampReloadOption(); }
 	BOOL GetAutoCheckOut() const { return m_pageMultiUser.GetAutoCheckOut(); }
 	BOOL GetKeepTryingToCheckout() const { return m_pageMultiUser.GetKeepTryingToCheckout(); }
 	BOOL GetCheckinOnClose() const { return m_pageMultiUser.GetCheckinOnClose(); }

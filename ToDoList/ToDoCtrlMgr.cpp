@@ -527,6 +527,44 @@ void CToDoCtrlMgr::SetDueItemStatus(int nIndex, TDCM_DUESTATUS nStatus)
 	GetTDCItem(nIndex).nDueStatus = nStatus;
 }
 
+BOOL CToDoCtrlMgr::RefreshDueItemStatus()
+{
+	BOOL bChanged = FALSE;
+
+	for (int nCtrl = 0; nCtrl <= GetCount(); nCtrl++)
+		bChanged |= RefreshDueItemStatus(nCtrl);
+
+	return bChanged;
+}
+
+BOOL CToDoCtrlMgr::RefreshDueItemStatus(int nIndex)
+{
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+
+	if (IsLoaded(nIndex))
+	{
+		const CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
+		TDCM_DUESTATUS nStatus = TDCM_NONE;
+
+		if (tdc.HasOverdueTasks()) // takes priority
+		{
+			nStatus = TDCM_PAST;
+		}
+		else if (tdc.HasDueTodayTasks())
+		{
+			nStatus = TDCM_TODAY;
+		}
+
+		if (nStatus != GetDueItemStatus(nIndex))
+		{
+			SetDueItemStatus(nIndex, nStatus);
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
 BOOL CToDoCtrlMgr::ShowDueTaskNotification(int nIndex, LPCTSTR szFilePath, BOOL bBrowser)
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
@@ -1316,6 +1354,19 @@ BOOL CToDoCtrlMgr::AnyIsModified() const
 			return TRUE;
 	}
 	
+	return FALSE;
+}
+
+BOOL CToDoCtrlMgr::AnyIsSourceControlled() const
+{
+	int nCtrl = GetCount();
+
+	while (nCtrl--)
+	{
+		if (GetToDoCtrl(nCtrl).IsSourceControlled())
+			return TRUE;
+	}
+
 	return FALSE;
 }
 

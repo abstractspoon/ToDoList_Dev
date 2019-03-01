@@ -1955,7 +1955,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 							dtEnd = CDateHelper::GetStartOfNextDay(dtEnd);
 
 						double dDuration = (dtEnd.m_dt - dtStart.m_dt);
-						TRACE(_T("CTaskCalendarCtrl::UpdateDragging(duration = %f)\n"), dDuration);
+						//TRACE(_T("CTaskCalendarCtrl::UpdateDragging(duration = %f)\n"), dDuration);
 						
 						pTCI->SetStartDate(dtDrag);
 

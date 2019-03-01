@@ -2821,7 +2821,7 @@ void CToDoListWnd::RestorePosition()
 			wp.ptMinPosition.x = -1;
 			wp.ptMinPosition.y = -1;
 			
-			TRACE(_T("CToDoListWnd::SetWindowPlacement(%d, %d)\n"), rect.Width(), rect.Height());
+			//TRACE(_T("CToDoListWnd::SetWindowPlacement(%d, %d)\n"), rect.Width(), rect.Height());
 			SetWindowPlacement(&wp);
 		}
 		else
@@ -3320,7 +3320,9 @@ void CToDoListWnd::ShowFindDialog(BOOL bShow)
 			m_findDlg.Show(FALSE);
 		}
 		else
+		{
 			m_bFindShowing = FALSE;
+		}
 	}
 }
 
@@ -6072,7 +6074,7 @@ void CToDoListWnd::OnSize(UINT nType, int cx, int cy)
 	if (m_bIgnoreNextResize)
 	{
 		ASSERT(nType == SIZE_RESTORED);
-		TRACE(_T("CToDoListWnd::OnSize(Ignoring Resize)\n"));
+		//TRACE(_T("CToDoListWnd::OnSize(Ignoring Resize)\n"));
 
 		return;
 	}
@@ -6081,7 +6083,7 @@ void CToDoListWnd::OnSize(UINT nType, int cx, int cy)
 
 	if (bVisible && m_toolbarMain.GetSafeHwnd())
 	{
-		TRACE(_T("CToDoListWnd::OnSize(%d, %d)\n"), cx, cy);
+		//TRACE(_T("CToDoListWnd::OnSize(%d, %d)\n"), cx, cy);
 
 		Resize(cx, cy, (nType == SIZE_MAXIMIZED));
 		
@@ -6705,39 +6707,15 @@ LPARAM CToDoListWnd::OnToDoCtrlNotifyTimeTrackReminder(WPARAM wParam, LPARAM lPa
 void CToDoListWnd::OnTimerDueItems(int nCtrl)
 {
 	AF_NOREENTRANT // macro helper
-		
-	int nFrom = (nCtrl == -1) ? 0 : nCtrl;
-	int nTo = (nCtrl == -1) ? GetTDCCount() - 1 : nCtrl;
-	BOOL bRepaint = FALSE;
-	
-	for (nCtrl = nFrom; nCtrl <= nTo; nCtrl++)
-	{
-		// first we search for overdue items on each tasklist and if that
-		// fails to find anything we then search for items due today
-		// but only if the tasklist is fully loaded
-		if (m_mgrToDoCtrls.IsLoaded(nCtrl))
-		{
-			CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
-			TDCM_DUESTATUS nStatus = TDCM_NONE;
-			
-			if (tdc.HasOverdueTasks()) // takes priority
-			{
-				nStatus = TDCM_PAST;
-			}
-			else if (tdc.HasDueTodayTasks())
-			{
-				nStatus = TDCM_TODAY;
-			}
-			
-			if (nStatus != m_mgrToDoCtrls.GetDueItemStatus(nCtrl))
-			{
-				m_mgrToDoCtrls.SetDueItemStatus(nCtrl, nStatus);
-				bRepaint = TRUE;
-			}
-		}
-	}
 
-	if (bRepaint)
+	BOOL bRepaintTabs = FALSE;
+
+	if (nCtrl == -1)
+		bRepaintTabs = m_mgrToDoCtrls.RefreshDueItemStatus();
+	else
+		bRepaintTabs = m_mgrToDoCtrls.RefreshDueItemStatus(nCtrl);
+
+	if (bRepaintTabs)
 		m_tabCtrl.Invalidate(FALSE);
 }
 
@@ -6747,7 +6725,7 @@ void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl, BOOL bForceCheckRemote)
 
 	// Don't distract the user unnecessarily
 	const CPreferencesDlg& userPrefs = Prefs();
-	int nReloadOption = userPrefs.GetReadonlyReloadOption();
+	RELOAD_OPTION nReloadOption = userPrefs.GetReadonlyReloadOption();
 
 	if (!WantCheckReloadFiles(nReloadOption))
 		return;
@@ -6775,11 +6753,11 @@ void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl, BOOL bForceCheckRemote)
 		// don't check removable drives
 		int nType = m_mgrToDoCtrls.GetFilePathType(nCtrl);
 		
-        if (nType == TDCM_UNDEF || nType == TDCM_REMOVABLE)
+        if ((nType == TDCM_UNDEF) || (nType == TDCM_REMOVABLE))
 			continue;
 		
 		// check remote files?
-		if (!bCheckRemoteFiles && nType == TDCM_REMOTE)
+		if (!bCheckRemoteFiles && (nType == TDCM_REMOTE))
 			continue;
 				
 		if (m_mgrToDoCtrls.RefreshReadOnlyStatus(nCtrl))
@@ -6830,7 +6808,7 @@ void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl, BOOL bForceCheckRemote)
 	}
 }
 
-BOOL CToDoListWnd::WantCheckReloadFiles(int nOption) const
+BOOL CToDoListWnd::WantCheckReloadFiles(RELOAD_OPTION nOption) const
 {
 	switch (nOption)
 	{
@@ -6855,7 +6833,7 @@ void CToDoListWnd::OnTimerTimestampChange(int nCtrl, BOOL bForceCheckRemote)
 		
 	// Don't distract the user unnecessarily
 	const CPreferencesDlg& userPrefs = Prefs();
-	int nReloadOption = userPrefs.GetTimestampReloadOption();
+	RELOAD_OPTION nReloadOption = userPrefs.GetTimestampReloadOption();
 
 	if (!WantCheckReloadFiles(nReloadOption))
 		return;
@@ -6977,6 +6955,9 @@ BOOL CToDoListWnd::WantCheckRemoteFiles(int nCtrl, int nInterval, int& nElapsed)
 
 void CToDoListWnd::OnTimerCheckoutStatus(int nCtrl, BOOL bForceCheckRemote)
 {
+	if (!m_mgrToDoCtrls.AnyIsSourceControlled())
+		return;
+
 	AF_NOREENTRANT // macro helper
 		
 	// work out whether we should check remote files or not
@@ -10790,11 +10771,13 @@ void CToDoListWnd::OnUpdateSpellcheckTasklist(CCmdUI* pCmdUI)
 
 TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 {
+	if (!m_mgrToDoCtrls.AnyIsModified())
+		return TDCF_SUCCESS;
+
 	TDC_FILE nSaveAll = TDCF_SUCCESS;
 	BOOL bClosingWindows = Misc::HasFlag(dwFlags, TDLS_CLOSINGWINDOWS);
 
 	// scoped to end status bar progress before calling UpdateStatusbar
-	if (m_mgrToDoCtrls.AnyIsModified())
 	{
 		DOPROGRESS(IDS_SAVINGPROGRESS);
 
@@ -11105,10 +11088,6 @@ LRESULT CToDoListWnd::OnAppRestoreFocus(WPARAM /*wp*/, LPARAM lp)
 {
 	HWND hWnd = (HWND)lp;
 	
-#ifdef _DEBUG
-	CString sClass = CWinClasses::GetClass(hWnd);
-#endif
-
 	if (GetTDCCount() && (hWnd == GetToDoCtrl().GetSafeHwnd()))
 	{
 		GetToDoCtrl().SetFocusToTasks();
@@ -11116,9 +11095,9 @@ LRESULT CToDoListWnd::OnAppRestoreFocus(WPARAM /*wp*/, LPARAM lp)
 	else if (::IsWindowEnabled(hWnd) && ::IsWindowVisible(hWnd) && (::GetFocus() != hWnd))
 	{
 #ifdef _DEBUG
-		CString sFocus;
-		CWnd::FromHandle(hWnd)->GetWindowText(sFocus);
-		TRACE(_T("OnAppRestoreFocus(%s = %s)\n"), CWinClasses::GetClassEx(hWnd), sFocus.Left(100));
+// 		CString sFocus, sClass = CWinClasses::GetClassEx(hWnd);
+// 		CWnd::FromHandle(hWnd)->GetWindowText(sFocus);
+// 		TRACE(_T("OnAppRestoreFocus(%s = %s)\n"), sClass, sFocus.Left(100));
 #endif
 
 		::SetFocus(hWnd);

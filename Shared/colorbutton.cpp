@@ -13,13 +13,16 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+CEnColorDialog CColorButton::s_dlgColor(CLR_NONE, CC_FULLOPEN | CC_RGBINIT);
+
+/////////////////////////////////////////////////////////////////////////////
 // CColorButton
 
 CColorButton::CColorButton(BOOL bRoundRect) 
 	: 
 	m_color(CLR_NONE), 
-	m_bRoundRect(bRoundRect),
-	m_dlgColor(m_color, CC_FULLOPEN | CC_RGBINIT)
+	m_bRoundRect(bRoundRect)
 {
 }
 
@@ -65,11 +68,11 @@ void CColorButton::SetColor(COLORREF color)
 
 BOOL CColorButton::DoAction()
 {
-	m_dlgColor.SetCurrentColor(m_color);
+	s_dlgColor.SetCurrentColor(m_color);
 
-	if (m_dlgColor.DoModal() == IDOK)
+	if (s_dlgColor.DoModal() == IDOK)
 	{
-		m_color = m_dlgColor.m_cc.rgbResult;
+		m_color = s_dlgColor.m_cc.rgbResult;
 	
 		Invalidate();
 		UpdateWindow();
@@ -80,11 +83,11 @@ BOOL CColorButton::DoAction()
 
 void CColorButton::LoadPreferences(const IPreferences* pPrefs)
 {
-	m_dlgColor.LoadPreferences(pPrefs);
+	s_dlgColor.LoadPreferences(pPrefs);
 }
 
-void CColorButton::SavePreferences(IPreferences* pPrefs) const
+void CColorButton::SavePreferences(IPreferences* pPrefs)
 {
-	m_dlgColor.SavePreferences(pPrefs);
+	s_dlgColor.SavePreferences(pPrefs);
 }
 

@@ -147,11 +147,6 @@ SOURCE=..\3rdParty\myspell\mythes.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\Shared\SpellChecker.cpp
-# SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
-
 SOURCE=.\StdAfx.cpp
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File

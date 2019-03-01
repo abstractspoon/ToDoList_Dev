@@ -43,13 +43,15 @@ TDL_WEBUPDATE_RESULT CTDLWebUpdater::DoUpdate(const CString& sAppFolder, const C
 {
 	if (WebMisc::IsOnline())
 	{
-#ifdef _DEBUG
+#ifndef _DEBUG
+		UNREFERENCED_PARAMETER(bDownloadOnly);
+#else
 		if (bDownloadOnly)
 		{
 			m_sDownloadFile = FileMisc::GetTempFilePath();
-
+			
 			DoProgressDialog(_T(""), bDownloadOnly);
-
+			
 			return TDLWUR_SUCCESS;
 		}
 #endif
@@ -305,7 +307,9 @@ TDL_WEBUPDATE_RESULT CTDLWebUpdater::LogError(const CString& sAppFolder) const
 
 BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bDownloadOnly)
 {
-#ifdef _DEBUG
+#ifndef _DEBUG
+	UNREFERENCED_PARAMETER(bDownloadOnly);
+#else
 	if (!bDownloadOnly)
 #endif
 	{

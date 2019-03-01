@@ -21,13 +21,14 @@
 #include "..\shared\clipboard.h"
 #include "..\shared\localizer.h"
 
-#include "..\Interfaces\Preferences.h"
-#include "..\Interfaces\uitheme.h"
-#include "..\Interfaces\itasklist.h"
-
 #include "..\3rdparty\compression.h"
 #include "..\3rdparty\zlib\zlib.h"
 #include "..\3rdparty\clipboardbackup.h"
+
+#include "..\Interfaces\Preferences.h"
+#include "..\Interfaces\uitheme.h"
+#include "..\Interfaces\itasklist.h"
+#include "..\Interfaces\TasklistSchemaDef.h"
 
 #include <afxpriv.h>
 
