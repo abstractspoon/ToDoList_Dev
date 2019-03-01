@@ -883,19 +883,21 @@ void CToDoCtrl::ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable)
 	CRect rProject = GetCtrlRect(IDC_PROJECTNAME); 
 
 	int nOffset = (rAvailable.left - rLabel.left);
+	int nHeight = GetDefaultControlHeight();
 
-	rLabel.OffsetRect(nOffset, 0);
 	rProject.left += nOffset;
-
+	rProject.right = rAvailable.right;
+	rProject.bottom = rProject.top + nHeight;
+	
+	rLabel.OffsetRect(nOffset, 0);
 	rLabel.top = rProject.top;
 	rLabel.bottom = rProject.bottom;
-	rProject.right = rAvailable.right;
 
 	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTLABEL), rLabel);
 	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTNAME), rProject);
 
 	if (m_nMaxState != TDCMS_MAXTASKLIST && HasStyle(TDCS_SHOWPROJECTNAME))
-		rAvailable.top = rProject.bottom + 5;
+		rAvailable.top = rProject.bottom + CDlgUnits(this).ToPixelsY(2);
 	else
 		rAvailable.top = rProject.top;
 }
@@ -1395,15 +1397,10 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 				case TDCUIL_RIGHT: // vertical
 					{
 						if (bStackCommentsAbove)
-						{
-							rComments.top += 2;
-							rComments.bottom = rCtrls.top;
-						}
+							rComments.bottom = rCtrls.top - SPLITSIZE;
 						else
-						{
-							rComments.bottom -= 2;
 							rComments.top = rCtrls.bottom + SPLITSIZE;
-						}
+
 						rComments.left = rAvailable.right - m_nCommentsSize;
 						rComments.right = rCtrls.right;
 
@@ -1414,15 +1411,10 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 				case TDCUIL_LEFT: // vertical
 					{
 						if (bStackCommentsAbove)
-						{
-							rComments.top += 2;
-							rComments.bottom = rCtrls.top;
-						}
+							rComments.bottom = rCtrls.top - SPLITSIZE;
 						else
-						{
-							rComments.bottom -= 2;
 							rComments.top = rCtrls.bottom + SPLITSIZE;
-						}
+
 						rComments.left = rAvailable.left;
 						rComments.right = rAvailable.left + m_nCommentsSize;
 
@@ -1433,15 +1425,10 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 				case TDCUIL_BOTTOM: // horizontal
 					{
 						if (bStackCommentsAbove)
-						{
-							rComments.left += 2;
 							rComments.right = rCtrls.left - SPLITSIZE;
-						}
 						else
-						{
-							rComments.right -= 2;
 							rComments.left = rCtrls.right + SPLITSIZE;
-						}
+
 						rComments.top = rCtrls.top;
 						rComments.bottom = rCtrls.top + m_nCommentsSize;
 
@@ -1458,7 +1445,6 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 			{
 			case TDCUIL_RIGHT: // vertical
 				{
-					rComments.top += 2;
 					rComments.left = rAvailable.right - m_nCommentsSize;
 
 					rAvailable.right = rComments.left - SPLITSIZE;
@@ -1467,7 +1453,6 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 				
 			case TDCUIL_LEFT:
 				{
-					rComments.top += 2;
 					rComments.right = rAvailable.left + m_nCommentsSize;
 
 					rAvailable.left = rComments.right + SPLITSIZE;
