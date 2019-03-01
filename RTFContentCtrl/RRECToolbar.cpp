@@ -29,6 +29,7 @@
 #include "resource.h"
 #include "ids.h"
 
+#include "..\shared\GraphicsMisc.h"
 #include "..\shared\Themed.h"
 #include "..\shared\enstring.h"
 #include "..\shared\colourpopupEx.h"
@@ -47,6 +48,10 @@ static char THIS_FILE[] = __FILE__;
 extern UINT urm_SETCURRENTFONTNAME;
 extern UINT urm_SETCURRENTFONTSIZE;
 extern UINT urm_SETCURRENTFONTCOLOR;
+
+/////////////////////////////////////////////////////////////////////////////
+
+const int COMBO_VOFFSET = (GraphicsMisc::ScaleByDPIFactor(1) - 1);
 
 /////////////////////////////////////////////////////////////////////////////
 // CRRECToolBar
@@ -119,7 +124,7 @@ BOOL CRRECToolBar::Create(CWnd* parent, LPCTSTR szImageFile, COLORREF crMask)
 
 		TBBUTTONINFO tbi;
 		tbi.cbSize = sizeof(TBBUTTONINFO);
-		tbi.cx = FONT_COMBO_WIDTH;
+		tbi.cx = (WORD)GraphicsMisc::ScaleByDPIFactor(FONT_COMBO_WIDTH);
 		tbi.dwMask = TBIF_SIZE;  // By index
 
 		// The font name combo
@@ -128,7 +133,7 @@ BOOL CRRECToolBar::Create(CWnd* parent, LPCTSTR szImageFile, COLORREF crMask)
 
 		rect.left++;
 		rect.top++;		
-		rect.bottom += COMBO_HEIGHT;
+		rect.bottom += GraphicsMisc::ScaleByDPIFactor(COMBO_HEIGHT);
 
 		if (!m_font.Create(WS_CHILD | WS_VSCROLL |	WS_VISIBLE | CBS_AUTOHSCROLL | 
 							CBS_DROPDOWNLIST | CBS_SORT, rect, this, DROPDOWN_FONT))
@@ -137,14 +142,15 @@ BOOL CRRECToolBar::Create(CWnd* parent, LPCTSTR szImageFile, COLORREF crMask)
 		CLocalizer::EnableTranslation(m_font, FALSE);
 		m_font.SetFont(CFont::FromHandle((HFONT) ::GetStockObject(DEFAULT_GUI_FONT)));
 		m_font.FillCombo();
+		m_font.SetMaxWidth(GraphicsMisc::ScaleByDPIFactor(FONT_COMBO_WIDTH));
 
 		// The font size combo
-		tbi.cx = COMBO_WIDTH;
+		tbi.cx = (WORD)GraphicsMisc::ScaleByDPIFactor(COMBO_WIDTH);
 		GetToolBarCtrl().SetButtonInfo(FONT_SIZE_ID, &tbi);
 		GetItemRect(FONT_SIZE_POS, &rect);
 
 		rect.top++;		
-		rect.bottom += COMBO_HEIGHT;
+		rect.bottom += GraphicsMisc::ScaleByDPIFactor(COMBO_HEIGHT);
 		
 		if (!m_size.Create(WS_CHILD | WS_VISIBLE | CBS_AUTOHSCROLL | CBS_DROPDOWNLIST | 
 							CBS_HASSTRINGS, rect, this, DROPDOWN_SIZE))
@@ -368,16 +374,13 @@ void CRRECToolBar::OnSize(UINT nType, int cx, int cy)
  		CRect rect;
 		GetItemRect(FONT_NAME_POS, &rect);
 
-		rect.left++;
-		rect.top++;		
-		rect.bottom += COMBO_HEIGHT;
-
 		int nNewWidth = FONT_COMBO_WIDTH - max(0, DEFCTRLSWIDTH - cx);
 		nNewWidth = max(nNewWidth, MIN_FONT_COMBO_WIDTH);
 
 		if (nNewWidth != rect.Width())
 		{
 			rect.right = rect.left + nNewWidth;
+			rect.top += COMBO_VOFFSET;
 			rect.bottom += COMBO_HEIGHT;
 			m_font.MoveWindow(rect);
 			
@@ -387,7 +390,7 @@ void CRRECToolBar::OnSize(UINT nType, int cx, int cy)
 			
 			// move the other two items to suit their toolbar rects
 			GetItemRect(FONT_SIZE_POS, &rect);
-			rect.top++;		
+			rect.top += COMBO_VOFFSET;
 			rect.bottom += COMBO_HEIGHT;
 			m_size.MoveWindow(rect);
 		}
