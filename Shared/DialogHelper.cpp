@@ -8,6 +8,7 @@
 #include "winclasses.h"
 #include "wclassdefines.h"
 #include "misc.h"
+#include "Graphicsmisc.h"
 #include "runtimedlg.h"
 #include "enstring.h"
 #include "AcceleratorString.h"
@@ -873,7 +874,7 @@ int CDialogHelper::RefreshMaxColumnWidth(CListBox& list, CDC* pDCRef)
 
 		// if we are a check-listbox then add space for the checkbox
 		if (list.IsKindOf(RUNTIME_CLASS(CCheckListBox)))
-			nWidth += 16;
+			nWidth += GraphicsMisc::ScaleByDPIFactor(16);
 
 		list.SetColumnWidth(nWidth);
 	}

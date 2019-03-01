@@ -147,6 +147,21 @@ BOOL CAutoComboBox::OnEditChange()
 {
 	m_bEditChange = TRUE;
 
+	if (GetDroppedState())
+	{
+		int nSelStart = -1, nSelEnd = -1;
+		m_scEdit.SendMessage(EM_GETSEL, (WPARAM)&nSelStart, (LPARAM)&nSelEnd);
+
+		BOOL bEndInputAtCaret = (nSelEnd > nSelStart);
+
+		CString sItem = GetInputAtCaret(GetEditText(), nSelStart, bEndInputAtCaret);
+
+		int nMatch = FindString(-1, sItem);
+
+		if (nMatch != CB_ERR)
+			m_scList.SendMessage(LB_SETCURSEL, nMatch, 0);
+	}
+
 	return FALSE; // pass to parent
 }
 
@@ -456,7 +471,6 @@ int CAutoComboBox::GetItems(CStringArray& aItems) const
     return aItems.GetSize();
 }
 
-// this handles messages destined for the dropped listbox
 LRESULT CAutoComboBox::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (m_scEdit.GetHwnd() == hRealWnd)
@@ -564,8 +578,6 @@ void CAutoComboBox::RedrawListItem(int nItem) const
 
 	::InvalidateRect(m_scList.GetHwnd(), rItem, FALSE);
 	::UpdateWindow(m_scList.GetHwnd());
-
-
 }
 
 LRESULT CAutoComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
@@ -663,7 +675,8 @@ int CAutoComboBox::HitTestListDeleteBtn(const CPoint& ptList) const
 			{
 				CRect rBtn;
 				GetListDeleteButtonRect(rItem, rBtn);
-
+				rItem.InflateRect(2, 2);
+				
 				if (rItem.PtInRect(ptList))
 					return nItem;
 			}
@@ -690,6 +703,17 @@ int CAutoComboBox::GetCurSel() const
 	CAutoFlag af(m_bDrawing, FALSE);
 	
 	return CComboBox::GetCurSel();
+}
+
+CString CAutoComboBox::GetEditText() const
+{
+	if (!m_scEdit.IsValid())
+		return _T("");
+
+	CString sEdit;
+	m_scEdit.GetCWnd()->GetWindowText(sEdit);
+
+	return sEdit;
 }
 
 void CAutoComboBox::HandleReturnKey()

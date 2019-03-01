@@ -129,29 +129,11 @@ BOOL CCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT /*
 
 	CRect rCheck(rect);
 	rCheck.left = 0;
-	rCheck.right = (rCheck.left + CHECKBOX_WIDTH/*CalcCheckBoxWidth(dc)*/);
+	rCheck.right = (rCheck.left + CHECKBOX_WIDTH);
 	
 	CThemed::DrawFrameControl(CWnd::FromHandle(GetListbox()), &dc, rCheck, DFC_BUTTON, nCheckState);
 
 	return TRUE;
-}
-
-int CCheckComboBox::CalcCheckBoxWidth(HDC hdc, HWND hwndRef)
-{
-	ASSERT(hdc || hwndRef);
-
-	BOOL bFreeDC = (hdc == NULL);
-	hdc = (hdc ? hdc : ::GetDC(hwndRef));
-
-	ASSERT(hdc);
-
-	TEXTMETRIC metrics;
-	GetTextMetrics(hdc, &metrics);
-
-	if (bFreeDC)
-		::ReleaseDC(hwndRef, hdc);
-
-	return (metrics.tmHeight + metrics.tmExternalLeading + 6);
 }
 
 int CCheckComboBox::GetExtraListboxWidth() const
@@ -505,9 +487,7 @@ BOOL CCheckComboBox::OnEditchange()
 		GetDlgItem(1001)->GetWindowText(m_sText);
 	}
 
-	m_bEditChange = TRUE;
-	
-	return FALSE; // pass to parent
+	return CAutoComboBox::OnEditChange();
 }
 
 BOOL CCheckComboBox::OnDropdown() 
@@ -892,4 +872,9 @@ BOOL CCheckComboBox::ToggleCheck(int nItem)
 	}
 
 	return SetCheck(nItem, nCheck);
+}
+
+CString CCheckComboBox::GetInputAtCaret(const CString& sText, int nCaretPos, BOOL bEndInputAtCaret) const
+{
+	return Misc::GetValueAtPos(sText, nCaretPos, bEndInputAtCaret, Misc::GetListSeparator());
 }

@@ -2310,3 +2310,37 @@ BOOL Misc::IsQuoted(LPCTSTR szText)
 
 //////////////////////////////////////////////////////////////
 
+CString Misc::GetValueAtPos(const CString& sText, int nPos, BOOL bEndWordAtPos, LPCTSTR szSep)
+{
+	CString sValue;
+	CStringArray aValues;
+
+	if (Split(sText, aValues, szSep, FALSE))
+	{
+		int nSearchStart = 0;
+
+		for (int nVal = 0; nVal < aValues.GetSize(); nVal++)
+		{
+			sValue = aValues[nVal];
+
+			int nValStart = sText.Find(sValue, nSearchStart);
+			ASSERT(nValStart != -1);
+
+			int nValEnd = (nValStart + sValue.GetLength());
+
+			if (nPos <= nValEnd)
+			{
+				if (bEndWordAtPos)
+					sValue = sValue.Left(nPos - nValStart);
+
+				break;
+			}
+
+			nSearchStart = (nValStart + sValue.GetLength());
+		}
+
+		Trim(sValue);
+	}
+
+	return sValue;
+}
