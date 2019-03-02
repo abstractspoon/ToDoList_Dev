@@ -40,7 +40,6 @@
 #include "..\shared\deferWndMove.h"
 #include "..\shared\enBrowserctrl.h"
 #include "..\shared\menuiconmgr.h"
-#include "..\shared\autocombobox.h"
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\StatusbarProgress.h"
 #include "..\shared\stickieswnd.h"
