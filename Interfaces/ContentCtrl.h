@@ -46,7 +46,8 @@ public:
 	CONTENTFORMAT GetContentFormat() const;
 
 	BOOL SetReadOnly(BOOL bReadOnly);
-	
+	void MoveWindow(const CRect& rect, BOOL bRepaint);
+
 	BOOL ModifyStyle(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0);
 	BOOL ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0);
 
