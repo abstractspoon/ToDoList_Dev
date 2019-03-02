@@ -189,7 +189,7 @@ CToDoListWnd::CToDoListWnd()
 	m_bReloading(FALSE),
 	m_hwndLastFocus(NULL),
 	m_bStartHidden(FALSE),
-	m_cbQuickFind(ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
+	m_cbQuickFind(ACBS_ALLOWDELETE | ACBS_ADDTOSTART | ACBS_AUTOCOMPLETE),
 	m_bShowTasklistBar(TRUE), 
 	m_bShowTreeListBar(TRUE),
 	m_bEndingSession(FALSE),

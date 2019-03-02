@@ -78,7 +78,9 @@ CAutoComboBox::CAutoComboBox(DWORD dwFlags)
 	m_bNotifyingParent(FALSE), 
 	m_bEditChange(FALSE), 
 	m_nDeleteItem(LB_ERR),
-	m_nHotSimpleListItem(LB_ERR)
+	m_bSkipAutoComplete(FALSE),
+	m_nHotSimpleListItem(LB_ERR),
+	m_nAutoCompleteMatch(LB_ERR)
 {
 }
 
@@ -100,6 +102,7 @@ BEGIN_MESSAGE_MAP(CAutoComboBox, COwnerdrawComboBoxBase)
 	ON_CONTROL_REFLECT_EX(CBN_CLOSEUP, OnCloseUp)
 	ON_CONTROL_REFLECT_EX(CBN_DROPDOWN, OnDropDown)
 	ON_CONTROL_REFLECT_EX(CBN_EDITCHANGE, OnEditChange)
+	ON_CONTROL_REFLECT_EX(CBN_EDITUPDATE, OnEditUpdate)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -121,6 +124,8 @@ int CAutoComboBox::SetStrings(const CStringArray& aItems)
 
 BOOL CAutoComboBox::OnCloseUp()
 {
+	m_nAutoCompleteMatch = LB_ERR;
+
 	// notify parent of (possible) selection change
 	if (m_bEditChange)
 	{
@@ -143,30 +148,59 @@ BOOL CAutoComboBox::OnDropDown()
 	return FALSE; // pass to parent
 }
 
-BOOL CAutoComboBox::OnEditChange()
+BOOL CAutoComboBox::OnEditUpdate()
 {
-	m_bEditChange = TRUE;
+	m_nAutoCompleteMatch = LB_ERR;
 
-	if (GetDroppedState())
+	if (Misc::HasFlag(m_dwFlags, ACBS_AUTOCOMPLETE) && !m_bSkipAutoComplete)
 	{
-		int nSelStart = -1, nSelEnd = -1;
-		m_scEdit.SendMessage(EM_GETSEL, (WPARAM)&nSelStart, (LPARAM)&nSelEnd);
+		CString sText = GetEditText();
+		int nCaretPos = LOWORD(m_scEdit.SendMessage(EM_GETSEL));
 
-		BOOL bEndInputAtCaret = (nSelEnd > nSelStart);
+		m_nAutoCompleteMatch = UpdateEditAutoComplete(GetEditText(), nCaretPos);
 
-		CString sItem = GetInputAtCaret(GetEditText(), nSelStart, bEndInputAtCaret);
-
-		int nMatch = FindString(-1, sItem);
-
-		if (nMatch != CB_ERR)
-			m_scList.SendMessage(LB_SETCURSEL, nMatch, 0);
+		if ((m_nAutoCompleteMatch != LB_ERR) && GetDroppedState())
+			m_scList.Invalidate();
 	}
 
 	return FALSE; // pass to parent
 }
 
+int CAutoComboBox::UpdateEditAutoComplete(const CString& sText, int nCaretPos)
+{
+	ASSERT(Misc::HasFlag(m_dwFlags, ACBS_AUTOCOMPLETE));
+	ASSERT(!m_bSkipAutoComplete);
+
+	CString sInput = sText.Left(nCaretPos);
+	int nMatch = FindString(-1, sInput);
+
+	if (nMatch != CB_ERR)
+	{
+		CString sMatch;
+		GetLBText(nMatch, sMatch);
+
+		::SetWindowText(GetEdit(), sMatch);
+
+		int nStart = sText.Find(sInput);
+		ASSERT(nStart >= 0);
+
+		m_scEdit.SendMessage(EM_SETSEL, (WPARAM)(nStart + sInput.GetLength()), (LPARAM)-1);
+	}
+
+	return nMatch;
+}
+
+BOOL CAutoComboBox::OnEditChange()
+{
+	m_bEditChange = TRUE;
+	
+	return FALSE; // pass to parent
+}
+
 BOOL CAutoComboBox::OnSelEndOK()
 {
+	m_nAutoCompleteMatch = LB_ERR;
+
 	OnSelChange();
 	HandleReturnKey();
 
@@ -175,6 +209,8 @@ BOOL CAutoComboBox::OnSelEndOK()
 
 BOOL CAutoComboBox::OnSelEndCancel()
 {
+	m_nAutoCompleteMatch = LB_ERR;
+
 	// eat this unless we sent it explicitly
 	return (!m_bNotifyingParent);
 }
@@ -364,9 +400,29 @@ BOOL CAutoComboBox::GetListDeleteButtonRect(const CRect& rItem, CRect& rBtn) con
 	return TRUE;
 }
 
+void CAutoComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
+								  COLORREF& crText, COLORREF& crBack) const
+{
+	if (IsAutoCompleteMatch(nItem))
+		nItemState |= ODS_SELECTED;
+
+	return COwnerdrawComboBoxBase::GetItemColors(nItem, nItemState, dwItemData, crText, crBack);
+}
+
+BOOL CAutoComboBox::IsAutoCompleteMatch(int nItem) const
+{
+	return (Misc::HasFlag(m_dwFlags, ACBS_AUTOCOMPLETE) &&
+			(nItem != -1) &&
+			(m_nAutoCompleteMatch == nItem) &&
+			(GetCurSel() == CB_ERR));
+}
+
 void CAutoComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
+	if (bList && IsAutoCompleteMatch(nItem))
+		nItemState |= ODS_SELECTED;
+
 	COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 
 	// draw 'delete' mark for non-empty deletable list items
@@ -586,15 +642,27 @@ LRESULT CAutoComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 	{
 	case WM_KEYDOWN:
 		{
+			m_bSkipAutoComplete = FALSE;
+
 			switch (wp)
 			{
+			case VK_BACK:
+				// else the just deleted selection will be restored
+				m_bSkipAutoComplete = TRUE;
+				break;
+
 			case VK_DELETE:
-				if (AllowDelete() && GetDroppedState() && Misc::IsKeyPressed(VK_CONTROL))
 				{
-					if (DeleteLBItem(m_scList.SendMessage(LB_GETCURSEL)))
+					// else the just deleted selection will be restored
+					m_bSkipAutoComplete = TRUE;
+
+					if (AllowDelete() && GetDroppedState() && Misc::IsKeyPressed(VK_CONTROL))
 					{
-						// eat message else it'll go to the edit window
-						return 0L;
+						if (DeleteLBItem(m_scList.SendMessage(LB_GETCURSEL)))
+						{
+							// eat message else it'll go to the edit window
+							return 0L;
+						}
 					}
 				}
 				break;

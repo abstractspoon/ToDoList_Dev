@@ -874,7 +874,46 @@ BOOL CCheckComboBox::ToggleCheck(int nItem)
 	return SetCheck(nItem, nCheck);
 }
 
-CString CCheckComboBox::GetInputAtCaret(const CString& sText, int nCaretPos, BOOL bEndInputAtCaret) const
+int CCheckComboBox::UpdateEditAutoComplete(const CString& sText, int nCaretPos)
 {
-	return Misc::GetValueAtPos(sText, nCaretPos, bEndInputAtCaret, Misc::GetListSeparator());
+	CStringArray aValues;
+	int nMatch = CB_ERR;
+
+	if (Misc::Split(sText, aValues))
+	{
+		int nSearchStart = 0;
+
+		for (int nVal = 0; nVal < aValues.GetSize(); nVal++)
+		{
+			const CString& sValue = aValues[nVal];
+
+			int nValStart = sText.Find(sValue, nSearchStart);
+			ASSERT(nValStart != -1);
+
+			int nValEnd = (nValStart + sValue.GetLength());
+
+			if ((nValStart < nCaretPos) && (nCaretPos <= nValEnd))
+			{
+				CString sInput = sValue.Left(nCaretPos - nValStart);
+				nMatch = FindString(-1, sInput);
+
+				if (nMatch != CB_ERR)
+				{
+					CString sMatch;
+					GetLBText(nMatch, sMatch);
+
+					CString sNewText = sText.Left(nValStart) + sMatch + sText.Mid(nValEnd);
+					::SetWindowText(GetEdit(), sNewText);
+
+					m_scEdit.SendMessage(EM_SETSEL, (WPARAM)(nValStart + sInput.GetLength()), (LPARAM)nValStart + sMatch.GetLength());
+				}
+
+				break; // always
+			}
+
+			nSearchStart = (nValStart + sValue.GetLength());
+		}
+	}
+
+	return nMatch;
 }

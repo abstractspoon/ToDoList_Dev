@@ -136,7 +136,7 @@ CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 			}
 			else
 			{
-				pControl = new CAutoComboBox(ACBS_ALLOWDELETE);
+				pControl = new CAutoComboBox(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE);
 				szClass = WC_COMBOBOX;
 				dwStyle |= (CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL);
 
@@ -174,7 +174,7 @@ CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 		
 		case TDCCA_AUTOMULTILIST:
 			{
-				pControl = new CCheckComboBox(ACBS_ALLOWDELETE);
+				pControl = new CCheckComboBox(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE);
 				szClass = WC_COMBOBOX;
 				dwStyle |= (CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL);
 
