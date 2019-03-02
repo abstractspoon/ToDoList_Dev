@@ -222,8 +222,6 @@ namespace Misc
  	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim = TRUE);
 	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim = TRUE);
 
-	CString GetValueAtPos(const CString& sText, int nPos, BOOL bEndWordAtPos, LPCTSTR szSep = _T(" "));
-
 	template <class T, class S> 
 	int FindT(const T& array, const S& toFind)
 	{
