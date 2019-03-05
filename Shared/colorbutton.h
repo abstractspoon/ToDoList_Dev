@@ -26,14 +26,15 @@ public:
 	COLORREF GetColor() { return m_color; }
 	void SetColor(COLORREF color);
 
-	void LoadPreferences(const IPreferences* pPrefs);
-	void SavePreferences(IPreferences* pPrefs) const;
+	static void LoadPreferences(const IPreferences* pPrefs);
+	static void SavePreferences(IPreferences* pPrefs);
 
 protected:
 	COLORREF m_color;
 	BOOL m_bRoundRect;
 
-	CEnColorDialog m_dlgColor;
+	// Only one button can be actioned at one time
+	static CEnColorDialog s_dlgColor;
 
 protected:
 	virtual BOOL DoAction();

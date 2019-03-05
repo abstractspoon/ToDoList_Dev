@@ -5658,6 +5658,7 @@ void CTabbedToDoCtrl::SyncExtensionSelectionToTree(FTC_VIEW nView)
 	CacheTreeSelection(cache);
 
 	BOOL bUpdateCtrls = FALSE;
+	BOOL bHadSelectedTask = pVData->bHasSelectedTask;
 
 	if (cache.IsEmpty())
 	{
@@ -5679,7 +5680,10 @@ void CTabbedToDoCtrl::SyncExtensionSelectionToTree(FTC_VIEW nView)
 
 		if (pVData->bHasSelectedTask)
 		{
-			bUpdateCtrls = HasSingleSelectionChanged(cache.dwFocusedTaskID);
+			if (!bHadSelectedTask)
+				bUpdateCtrls = TRUE;
+			else
+				bUpdateCtrls = HasSingleSelectionChanged(cache.dwFocusedTaskID);
 
 			VERIFY(CToDoCtrl::SelectTask(cache.dwFocusedTaskID, FALSE));
 		}

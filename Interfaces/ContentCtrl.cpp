@@ -223,6 +223,11 @@ BOOL CContentCtrl::SetReadOnly(BOOL bReadOnly)
 	return FALSE;
 }
 
+void CContentCtrl::MoveWindow(const CRect& rect, BOOL bRepaint)
+{
+	::MoveWindow(GetSafeHwnd(), rect.left, rect.top, rect.Width(), rect.Height(), bRepaint);
+}
+
 BOOL CContentCtrl::PostMessage(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pContentCtrl)

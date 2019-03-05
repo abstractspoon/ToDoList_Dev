@@ -477,10 +477,6 @@ SOURCE=.\popupListboxctrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\Preferences.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\PreferencesBase.cpp
 # End Source File
 # Begin Source File
@@ -533,10 +529,6 @@ SOURCE=.\RichEditNcBorder.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\RichEditSpellCheck.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\RoundCorner.cpp
 # End Source File
 # Begin Source File
@@ -582,14 +574,6 @@ SOURCE=.\SizeGrip.cpp
 # Begin Source File
 
 SOURCE=.\soundedit.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\SpellCheckDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\SpellChecker.cpp
 # End Source File
 # Begin Source File
 
@@ -1157,10 +1141,6 @@ SOURCE=.\popupListboxctrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Preferences.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\PreferencesBase.h
 # End Source File
 # Begin Source File
@@ -1213,10 +1193,6 @@ SOURCE=.\RichEditNcBorder.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\RichEditSpellCheck.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\RoundCorner.h
 # End Source File
 # Begin Source File
@@ -1266,14 +1242,6 @@ SOURCE=.\SizeGrip.h
 # Begin Source File
 
 SOURCE=.\soundedit.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\SpellCheckDlg.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\SpellChecker.h
 # End Source File
 # Begin Source File
 

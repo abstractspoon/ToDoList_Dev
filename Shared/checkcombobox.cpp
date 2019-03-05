@@ -129,29 +129,11 @@ BOOL CCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT /*
 
 	CRect rCheck(rect);
 	rCheck.left = 0;
-	rCheck.right = (rCheck.left + CHECKBOX_WIDTH/*CalcCheckBoxWidth(dc)*/);
+	rCheck.right = (rCheck.left + CHECKBOX_WIDTH);
 	
 	CThemed::DrawFrameControl(CWnd::FromHandle(GetListbox()), &dc, rCheck, DFC_BUTTON, nCheckState);
 
 	return TRUE;
-}
-
-int CCheckComboBox::CalcCheckBoxWidth(HDC hdc, HWND hwndRef)
-{
-	ASSERT(hdc || hwndRef);
-
-	BOOL bFreeDC = (hdc == NULL);
-	hdc = (hdc ? hdc : ::GetDC(hwndRef));
-
-	ASSERT(hdc);
-
-	TEXTMETRIC metrics;
-	GetTextMetrics(hdc, &metrics);
-
-	if (bFreeDC)
-		::ReleaseDC(hwndRef, hdc);
-
-	return (metrics.tmHeight + metrics.tmExternalLeading + 6);
 }
 
 int CCheckComboBox::GetExtraListboxWidth() const
@@ -505,9 +487,7 @@ BOOL CCheckComboBox::OnEditchange()
 		GetDlgItem(1001)->GetWindowText(m_sText);
 	}
 
-	m_bEditChange = TRUE;
-	
-	return FALSE; // pass to parent
+	return CAutoComboBox::OnEditChange();
 }
 
 BOOL CCheckComboBox::OnDropdown() 
@@ -892,4 +872,48 @@ BOOL CCheckComboBox::ToggleCheck(int nItem)
 	}
 
 	return SetCheck(nItem, nCheck);
+}
+
+int CCheckComboBox::UpdateEditAutoComplete(const CString& sText, int nCaretPos)
+{
+	CStringArray aValues;
+	int nMatch = CB_ERR;
+
+	if (Misc::Split(sText, aValues))
+	{
+		int nSearchStart = 0;
+
+		for (int nVal = 0; nVal < aValues.GetSize(); nVal++)
+		{
+			const CString& sValue = aValues[nVal];
+
+			int nValStart = sText.Find(sValue, nSearchStart);
+			ASSERT(nValStart != -1);
+
+			int nValEnd = (nValStart + sValue.GetLength());
+
+			if ((nValStart < nCaretPos) && (nCaretPos <= nValEnd))
+			{
+				CString sInput = sValue.Left(nCaretPos - nValStart);
+				nMatch = FindString(-1, sInput);
+
+				if (nMatch != CB_ERR)
+				{
+					CString sMatch;
+					GetLBText(nMatch, sMatch);
+
+					CString sNewText = sText.Left(nValStart) + sMatch + sText.Mid(nValEnd);
+					::SetWindowText(GetEdit(), sNewText);
+
+					m_scEdit.SendMessage(EM_SETSEL, (WPARAM)(nValStart + sInput.GetLength()), (LPARAM)nValStart + sMatch.GetLength());
+				}
+
+				break; // always
+			}
+
+			nSearchStart = (nValStart + sValue.GetLength());
+		}
+	}
+
+	return nMatch;
 }

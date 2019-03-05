@@ -51,8 +51,6 @@ public:
 
 	void CheckReminders();
 
-	static CString FormatWhenString(const TDCREMINDER& rem);
-
 // Attributes
 protected:
 	CWnd* m_pWndNotify;

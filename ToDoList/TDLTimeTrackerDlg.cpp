@@ -565,7 +565,7 @@ BOOL CTDLTimeTrackerDlg::PreTranslateMessage(MSG* pMsg)
 				{
 					m_cbTasks.SetCurSel(nNext);
 					
-					UpdateButtonState();
+					UpdatePlayButton();
 					UpdateTaskTime(GetSelectedTasklist());
 					
 					return TRUE;
@@ -649,7 +649,7 @@ BOOL CTDLTimeTrackerDlg::AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskF
 	{
 		m_cbTasklists.SetCurSel(0);
 		
-		UpdateButtonState();
+		UpdatePlayButton();
 		RebuildTaskCombo();
 	}
 	
@@ -676,7 +676,7 @@ BOOL CTDLTimeTrackerDlg::UpdateTasks(const CFilteredToDoCtrl* pTDC, const CTaskF
 		RebuildTaskCombo();
 	}
 	
-	UpdateButtonState();
+	UpdatePlayButton();
 	UpdateTaskTime(pTDC);
 	
 	return TRUE;
@@ -735,7 +735,7 @@ void CTDLTimeTrackerDlg::RemoveTasks(const CFilteredToDoCtrl* pTDC, DWORD dwToRe
 		RebuildTaskCombo();
 	}
 
-	UpdateButtonState();
+	UpdatePlayButton();
 	UpdateTaskTime(pTDC);
 }
 
@@ -871,7 +871,7 @@ void CTDLTimeTrackerDlg::RemoveAllTasklists()
 	m_sElapsedTime.Empty();
 
 	UpdateData(FALSE);
-	UpdateButtonState();
+	UpdatePlayButton();
 }
 
 BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)
@@ -907,7 +907,7 @@ BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 	}
 	else
 	{
-		UpdateButtonState();
+		UpdatePlayButton();
 		UpdateTaskTime(pTDC);
 	}
 	
@@ -927,9 +927,9 @@ BOOL CTDLTimeTrackerDlg::IsTrackingSelectedTasklistAndTask() const
 	return pTTL->IsTracking(GetSelectedTaskID());
 }
 
-void CTDLTimeTrackerDlg::UpdateButtonState()
+void CTDLTimeTrackerDlg::UpdatePlayButton(BOOL bCheckVisibility)
 {
-	if (!IsWindowVisible() || m_bCollapsed)
+	if (bCheckVisibility && (!IsWindowVisible() || m_bCollapsed))
 		return;
 
 	BOOL bEnable = ((m_cbTasklists.GetCurSel() != CB_ERR) &&
@@ -1094,13 +1094,13 @@ void CTDLTimeTrackerDlg::OnSelchangeTasklist()
 	DWORD dwTaskID = (pTTL->dwTrackedTaskID ? pTTL->dwTrackedTaskID : pTDC->GetSelectedTaskID());
 	SelectItemByData(m_cbTasks, dwTaskID);
 	
-	UpdateButtonState();
+	UpdatePlayButton();
 	UpdateTaskTime(pTDC);
 }
 
 void CTDLTimeTrackerDlg::OnSelchangeTask()
 {
-	UpdateButtonState();
+	UpdatePlayButton();
 	UpdateTaskTime(GetSelectedTasklist());
 }
 
@@ -1140,7 +1140,7 @@ void CTDLTimeTrackerDlg::OnChangeQuickFind()
 		{
 			m_cbTasks.SetCurSel(nNext);
 
-			UpdateButtonState();
+			UpdatePlayButton();
 			UpdateTaskTime(pTDC);
 		}
 	}
@@ -1241,18 +1241,17 @@ void CTDLTimeTrackerDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CDialog::OnShowWindow(bShow, nStatus);
 
-	if (m_bCentreOnShow)
-	{
-		CenterWindow(m_pWndNotify);
-		m_bCentreOnShow = FALSE;
-	}
-
 	if (bShow)
 	{
-		UpdateButtonState();
+		if (m_bCentreOnShow)
+		{
+			CenterWindow(m_pWndNotify);
+			m_bCentreOnShow = FALSE;
+		}
+
+		UpdatePlayButton(FALSE);
 		UpdateTaskTime(GetSelectedTasklist());
 	}
-
 }
 
 void CTDLTimeTrackerDlg::OnDestroy()

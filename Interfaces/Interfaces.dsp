@@ -109,6 +109,22 @@ SOURCE=.\ImportExportUIHelper.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\Preferences.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\RichEditSpellCheck.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\SpellCheckDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\SpellChecker.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # End Source File
 # Begin Source File
@@ -194,6 +210,22 @@ SOURCE=.\ITransText.h
 # Begin Source File
 
 SOURCE=.\IUIExtension.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Preferences.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\RichEditSpellCheck.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SpellCheckDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SpellChecker.h
 # End Source File
 # Begin Source File
 

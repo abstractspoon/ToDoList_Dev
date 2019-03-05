@@ -198,7 +198,7 @@ protected:
 	
 	BOOL Create(BOOL bVisible);
 	BOOL Recreate();
-	void UpdateButtonState();
+	void UpdatePlayButton(BOOL bCheckVisibility = TRUE);
 	void RebuildTaskCombo();
 	BOOL RebuildTasklistCombo();
 	COLORREF GetBkgndColor() const;

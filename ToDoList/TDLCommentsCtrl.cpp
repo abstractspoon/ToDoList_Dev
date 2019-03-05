@@ -95,7 +95,7 @@ BOOL CTDLCommentsCtrl::Create(CWnd* pParent, UINT nID, const CRect& rPos)
 {
 	SetBordersDLU(0);
 
-	return CRuntimeDlg::Create(NULL, (WS_CHILD | WS_VISIBLE | WS_TABSTOP), 
+	return CRuntimeDlg::Create(NULL, (WS_CHILD | WS_VISIBLE | WS_TABSTOP | DS_SETFONT), 
 								WS_EX_CONTROLPARENT, rPos, pParent, nID);
 }
 
@@ -183,10 +183,19 @@ void CTDLCommentsCtrl::OnSize(UINT nType, int cx, int cy)
 
 	if (m_ctrlComments.GetSafeHwnd())
 	{
+		// Use the combo to position its label
+		CRect rCombo = CDialogHelper::GetChildRect(&m_cbCommentsFmt);
+		CRect rLabel = CDialogHelper::GetCtrlRect(this, IDC_COMBOLABEL);
+
+		rLabel.top = rCombo.top;
+		rLabel.bottom = rCombo.bottom;
+
+		GetDlgItem(IDC_COMBOLABEL)->MoveWindow(rLabel);
+		
 		CRect rComments;
 		CalcCommentsCtrlRect(rComments, cx, cy);
 
-		::MoveWindow(m_ctrlComments, rComments.left, rComments.top, rComments.Width(), rComments.Height(), TRUE);
+		m_ctrlComments.MoveWindow(rComments, TRUE);
 	}
 }
 

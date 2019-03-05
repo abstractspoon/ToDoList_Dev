@@ -25,6 +25,7 @@ enum
 	ACBS_ALLOWDELETE	= 0x01,
 	ACBS_CASESENSITIVE	= 0x02,
 	ACBS_ADDTOSTART		= 0x04,
+	ACBS_AUTOCOMPLETE	= 0x08,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -96,8 +97,14 @@ protected:
 
 	BOOL m_bEditChange;
 	BOOL m_bNotifyingParent;
+	BOOL m_bSkipAutoComplete;
 
 	int m_nHotSimpleListItem;
+
+	// It seems that both the edit and listbox cannot
+	// have visible selection at the same time so we
+	// need to manage it ourselves
+	int m_nAutoCompleteMatch;
 
 	mutable BOOL m_bDrawing;
 
@@ -124,6 +131,7 @@ protected:
 	afx_msg BOOL OnDropDown();
 	afx_msg BOOL OnCloseUp();
 	afx_msg BOOL OnEditChange();
+	afx_msg BOOL OnEditUpdate();
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	DECLARE_MESSAGE_MAP()
 
@@ -132,6 +140,8 @@ protected:
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 		
 protected:
+	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
+							   COLORREF& crText, COLORREF& crBack) const;
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 	virtual int GetExtraListboxWidth() const;
@@ -142,11 +152,13 @@ protected:
 	int HitTestListDeleteBtn(const CPoint& ptList) const;
 	int HitTestList(const CPoint& ptList) const;
 	void RedrawListItem(int nItem) const;
+	BOOL IsAutoCompleteMatch(int nItem) const;
 
 	BOOL AllowDelete() const;
 	BOOL CaseSensitive() const { return Misc::HasFlag(m_dwFlags, ACBS_CASESENSITIVE); }
 	BOOL AddToStart() const { return Misc::HasFlag(m_dwFlags, ACBS_ADDTOSTART); }
 	int AddUniqueItem(const CString& sItem, BOOL bAddToStart);
+	CString GetEditText() const;
 
 	inline HWND GetEdit() const { return m_scEdit.GetHwnd(); }
 	inline HWND GetListbox() const { return m_scList.GetHwnd(); }
@@ -157,6 +169,7 @@ protected:
 	virtual void HandleReturnKey();
 	virtual CString GetSelectedItemText() const;
 	virtual BOOL DeleteLBItem(int nItem);
+	virtual int UpdateEditAutoComplete(const CString& sText, int nCaretPos);
 
 };
 

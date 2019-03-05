@@ -176,17 +176,17 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_bModified(FALSE), 
 	m_bSplitting(FALSE),
 	m_calculator(m_data),
-	m_cbAllocBy(ACBS_ALLOWDELETE),
-	m_cbAllocTo(ACBS_ALLOWDELETE),
-	m_cbCategory(ACBS_ALLOWDELETE),
+	m_cbAllocBy(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
+	m_cbAllocTo(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
+	m_cbCategory(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_ctrlComments(TRUE, 85, &mgr),
 	m_cbFileRef(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS | FES_DISPLAYSIMAGES),
-	m_cbStatus(ACBS_ALLOWDELETE),
-	m_cbTags(ACBS_ALLOWDELETE),
+	m_cbStatus(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
+	m_cbTags(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTimeDone(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	m_cbTimeDue(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	m_cbTimeStart(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
-	m_cbVersion(ACBS_ALLOWDELETE),
+	m_cbVersion(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cfDefault(cfDefault),
 	m_dCost(0),
 	m_dTrackedTimeElapsedHours(0),
@@ -831,13 +831,13 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 				cx = rClient.right;
 				cy = rClient.bottom;
 
-				TRACE(_T("CToDoCtrl::OnSize[client](%d, %d)\n"), cx, cy);
+				//TRACE(_T("CToDoCtrl::OnSize[client](%d, %d)\n"), cx, cy);
 			}
 		}
 		else
 		{
 			ClearInitialSize();
-			TRACE(_T("CToDoCtrl::OnSize(%d, %d)\n"), cx, cy);
+			//TRACE(_T("CToDoCtrl::OnSize(%d, %d)\n"), cx, cy);
 		}
 
 		ValidateCommentsSize();
@@ -883,19 +883,21 @@ void CToDoCtrl::ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable)
 	CRect rProject = GetCtrlRect(IDC_PROJECTNAME); 
 
 	int nOffset = (rAvailable.left - rLabel.left);
+	int nHeight = GetDefaultControlHeight();
 
-	rLabel.OffsetRect(nOffset, 0);
 	rProject.left += nOffset;
-
+	rProject.right = rAvailable.right;
+	rProject.bottom = rProject.top + nHeight;
+	
+	rLabel.OffsetRect(nOffset, 0);
 	rLabel.top = rProject.top;
 	rLabel.bottom = rProject.bottom;
-	rProject.right = rAvailable.right;
 
 	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTLABEL), rLabel);
 	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTNAME), rProject);
 
 	if (m_nMaxState != TDCMS_MAXTASKLIST && HasStyle(TDCS_SHOWPROJECTNAME))
-		rAvailable.top = rProject.bottom + 5;
+		rAvailable.top = rProject.bottom + CDlgUnits(this).ToPixelsY(2);
 	else
 		rAvailable.top = rProject.top;
 }
@@ -1395,15 +1397,10 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 				case TDCUIL_RIGHT: // vertical
 					{
 						if (bStackCommentsAbove)
-						{
-							rComments.top += 2;
-							rComments.bottom = rCtrls.top;
-						}
+							rComments.bottom = rCtrls.top - SPLITSIZE;
 						else
-						{
-							rComments.bottom -= 2;
 							rComments.top = rCtrls.bottom + SPLITSIZE;
-						}
+
 						rComments.left = rAvailable.right - m_nCommentsSize;
 						rComments.right = rCtrls.right;
 
@@ -1414,15 +1411,10 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 				case TDCUIL_LEFT: // vertical
 					{
 						if (bStackCommentsAbove)
-						{
-							rComments.top += 2;
-							rComments.bottom = rCtrls.top;
-						}
+							rComments.bottom = rCtrls.top - SPLITSIZE;
 						else
-						{
-							rComments.bottom -= 2;
 							rComments.top = rCtrls.bottom + SPLITSIZE;
-						}
+
 						rComments.left = rAvailable.left;
 						rComments.right = rAvailable.left + m_nCommentsSize;
 
@@ -1433,15 +1425,10 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 				case TDCUIL_BOTTOM: // horizontal
 					{
 						if (bStackCommentsAbove)
-						{
-							rComments.left += 2;
 							rComments.right = rCtrls.left - SPLITSIZE;
-						}
 						else
-						{
-							rComments.right -= 2;
 							rComments.left = rCtrls.right + SPLITSIZE;
-						}
+
 						rComments.top = rCtrls.top;
 						rComments.bottom = rCtrls.top + m_nCommentsSize;
 
@@ -1458,7 +1445,6 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 			{
 			case TDCUIL_RIGHT: // vertical
 				{
-					rComments.top += 2;
 					rComments.left = rAvailable.right - m_nCommentsSize;
 
 					rAvailable.right = rComments.left - SPLITSIZE;
@@ -1467,7 +1453,6 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 				
 			case TDCUIL_LEFT:
 				{
-					rComments.top += 2;
 					rComments.right = rAvailable.left + m_nCommentsSize;
 
 					rAvailable.left = rComments.right + SPLITSIZE;
@@ -10430,8 +10415,8 @@ void CToDoCtrl::ValidateCommentsSize()
 	int nValidCommentSize = max(nMinComments, min(nMaxComments, m_nCommentsSize));
 
 #ifdef _DEBUG
-	if (m_nCommentsSize != nValidCommentSize)
-		TRACE(_T("CToDoCtrl::ValidateCommentsSize(%d -> %d)\n"), m_nCommentsSize, nValidCommentSize);
+// 	if (m_nCommentsSize != nValidCommentSize)
+// 		TRACE(_T("CToDoCtrl::ValidateCommentsSize(%d -> %d)\n"), m_nCommentsSize, nValidCommentSize);
 #endif
 
 	m_nCommentsSize = nValidCommentSize;

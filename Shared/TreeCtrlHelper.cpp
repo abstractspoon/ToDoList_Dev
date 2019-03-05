@@ -1272,14 +1272,14 @@ HTREEITEM CTreeCtrlHelper::MoveTree(HTREEITEM hti, HTREEITEM htiDestParent, HTRE
 									BOOL bUsesTextCallback, BOOL bUsesImageCallback)
 {
 #ifdef _DEBUG
-	DWORD dwTick = GetTickCount();
+// 	DWORD dwTick = GetTickCount();
 #endif
 	
 	HTREEITEM htiCopy = CopyTree(hti, htiDestParent, htiDestPrevSibling, bUsesTextCallback, bUsesImageCallback);
 
 #ifdef _DEBUG
-	TRACE(_T("CTreeCtrlHelper::MoveTree(CopyTree took %ld ms)\n"), GetTickCount() - dwTick);
-	dwTick = GetTickCount();
+// 	TRACE(_T("CTreeCtrlHelper::MoveTree(CopyTree took %ld ms)\n"), GetTickCount() - dwTick);
+// 	dwTick = GetTickCount();
 #endif
 
 	if (htiCopy)
@@ -1287,7 +1287,7 @@ HTREEITEM CTreeCtrlHelper::MoveTree(HTREEITEM hti, HTREEITEM htiDestParent, HTRE
 		m_tree.DeleteItem(hti);
 
 #ifdef _DEBUG
-		TRACE(_T("CTreeCtrlHelper::MoveTree(DeleteItem took %ld ms)\n"), GetTickCount() - dwTick);
+// 		TRACE(_T("CTreeCtrlHelper::MoveTree(DeleteItem took %ld ms)\n"), GetTickCount() - dwTick);
 #endif
 		return htiCopy;
 	}

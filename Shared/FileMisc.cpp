@@ -312,8 +312,8 @@ time64_t FileMisc::GetFileLastModified(LPCTSTR szPath)
 		T64Utils::FileTimeToT64(&fileTime, &tTime);
 		
 #ifdef _DEBUG
-		struct _stat st;
-		_tstat(szPath, &st);
+// 		struct _stat st;
+// 		_tstat(szPath, &st);
 #endif
 	}
 	

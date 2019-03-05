@@ -93,7 +93,8 @@ CKanbanCtrl::CKanbanCtrl()
 	m_pSelectedList(NULL),
 	m_nTrackAttribute(IUI_NONE),
 	m_nSortBy(IUI_NONE),
-	m_bSelectTasks(FALSE)
+	m_bSelectTasks(FALSE),
+	m_bSettingListFocus(FALSE)
 {
 
 }
@@ -119,6 +120,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_KLCN_CHECKCHANGE, OnListCheckChange)
 	ON_MESSAGE(WM_KLCN_GETTASKICON, OnListGetTaskIcon)
+	ON_MESSAGE(WM_KLCN_WANTFOCUS, OnListWantFocus)
 	ON_MESSAGE(WM_KCM_SELECTTASK, OnSelectTask)
 
 END_MESSAGE_MAP()
@@ -158,29 +160,166 @@ bool CKanbanCtrl::ProcessMessage(MSG* pMsg)
 	{
 	case WM_KEYDOWN:
 		return (HandleKeyDown(pMsg->wParam, pMsg->lParam) != FALSE);
-
-	case WM_LBUTTONDOWN:
-		{
-			CPoint ptScreen(pMsg->lParam);
-			::ClientToScreen(pMsg->hwnd, &ptScreen);
-
-			BOOL bHeader = FALSE;
-			CKanbanListCtrl* pList = HitTestListCtrl(ptScreen, &bHeader);
-
-			if (bHeader && pList)
-				pList->SetFocus();
-		}
-		break;
 	}
 	
 	// all else
 	return false;
 }
 
+BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentList)
+{
+	if (!m_pSelectedList->GetSelectedCount())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if ((nAdjacentList < 0) || (nAdjacentList > m_aListCtrls.GetSize()))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	CKanbanListCtrl* pAdjacentList = m_aListCtrls[nAdjacentList];
+
+	if (!pAdjacentList->GetItemCount())
+		return FALSE;
+
+	// Find the closest task at the currently
+	// selected task's scrolled pos
+	int nSelItem = m_pSelectedList->GetFirstSelectedItem();
+	ASSERT(nSelItem >= 0);
+
+	// scroll into view first
+	m_pSelectedList->EnsureVisible(nSelItem, FALSE);
+
+	CRect rItem;
+	VERIFY(m_pSelectedList->GetItemBounds(nSelItem, &rItem));
+
+	int nClosest = pAdjacentList->HitTest(rItem.CenterPoint());
+
+	if (nClosest == -1)
+		nClosest = (pAdjacentList->GetItemCount() - 1);
+
+	SelectListCtrl(pAdjacentList, FALSE);
+	ASSERT(m_pSelectedList == pAdjacentList);
+
+	pAdjacentList->SelectItem(nClosest, TRUE);
+	pAdjacentList->UpdateWindow();
+
+	return TRUE;
+}
+
+BOOL CKanbanCtrl::SelectNextItem(int nIncrement)
+{
+	if (nIncrement == 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	int nSelItem = m_pSelectedList->GetFirstSelectedItem();
+	int nNumItem = m_pSelectedList->GetItemCount();
+
+	int nNextItem = -1;
+
+	if (nSelItem == -1)
+	{
+		if (nIncrement > 0)
+			nNextItem = 0;
+		else
+			nNextItem = (nNumItem - 1);
+	}
+	else
+	{
+		if (nIncrement > 0)
+			nNextItem = min((nSelItem + nIncrement), (nNumItem - 1));
+		else
+			nNextItem = max((nSelItem + nIncrement), 0);
+	}
+
+	if (nNextItem != nSelItem)
+	{
+		VERIFY(m_pSelectedList->SelectItem(nNextItem, TRUE));
+		m_pSelectedList->EnsureVisible(nNextItem, FALSE);
+
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
 BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 {
 	switch (wp)
 	{
+	case VK_LEFT:
+		if (m_pSelectedList->GetSelectedCount())
+		{
+			int nSelList = m_aListCtrls.Find(m_pSelectedList);
+
+			for (int nList = (nSelList - 1); nList >= 0; nList--)
+			{
+				if (SelectClosestAdjacentItemToSelection(nList))
+					return TRUE;
+			}
+		}
+		break;
+
+	case VK_HOME:
+		if (m_pSelectedList->GetSelectedCount())
+		{
+			int nSelList = m_aListCtrls.Find(m_pSelectedList);
+
+			for (int nList = 0; nList < nSelList; nList++)
+			{
+				if (SelectClosestAdjacentItemToSelection(nList))
+					return TRUE;
+			}
+		}
+		break;
+
+	case VK_RIGHT:
+		if (m_pSelectedList->GetSelectedCount())
+		{
+			int nSelList = m_aListCtrls.Find(m_pSelectedList);
+			int nNumList = m_aListCtrls.GetSize();
+
+			for (int nList = (nSelList + 1); nList < nNumList; nList++)
+			{
+				if (SelectClosestAdjacentItemToSelection(nList))
+					return TRUE;
+			}
+		}
+		break;
+
+	case VK_END:
+		if (m_pSelectedList->GetSelectedCount())
+		{
+			int nSelList = m_aListCtrls.Find(m_pSelectedList);
+			int nNumList = m_aListCtrls.GetSize();
+
+			for (int nList = (nNumList - 1); nList > nSelList; nList--)
+			{
+				if (SelectClosestAdjacentItemToSelection(nList))
+					return TRUE;
+			}
+		}
+		break;
+
+	case VK_DOWN:
+		return SelectNextItem(1);
+
+	case VK_NEXT:
+		return SelectNextItem(m_pSelectedList->GetCountPerPage());
+
+	case VK_UP:
+		return SelectNextItem(-1);
+
+	case VK_PRIOR:
+		return SelectNextItem(-m_pSelectedList->GetCountPerPage());
+
 	case VK_ESCAPE:
 		// handle 'escape' during dragging
 		return (CancelOperation() != FALSE);
@@ -1643,7 +1782,7 @@ void CKanbanCtrl::RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray)
 	Sort(m_nSortBy, m_bSortAscending);
 }
 
-void CKanbanCtrl::FixupSelection()
+void CKanbanCtrl::FixupSelectedList()
 {
 	ASSERT(m_aListCtrls.GetSize());
 
@@ -1658,13 +1797,15 @@ void CKanbanCtrl::FixupSelection()
 			m_pSelectedList = m_aListCtrls[0];
 	}
 
-	FixupFocus();
+	FixupListFocus();
 }
 
-void CKanbanCtrl::FixupFocus()
+void CKanbanCtrl::FixupListFocus()
 {
 	if (IsWindowVisible() && HasFocus())
 	{
+		CAutoFlag af(m_bSettingListFocus, TRUE);
+
 		m_pSelectedList->SetFocus();
 		m_pSelectedList->Invalidate(TRUE);
 	}
@@ -2046,15 +2187,8 @@ void CKanbanCtrl::OnSetFocus(CWnd* pOldWnd)
 {
 	CWnd::OnSetFocus(pOldWnd);
 
-	CKanbanListCtrl* pList = GetSelListCtrl();
-
-	if (pList)
-	{
-		pList->SetFocus();
-		pList->Invalidate(FALSE);
-
-		ScrollToSelectedTask();
-	}
+	FixupListFocus();
+	ScrollToSelectedTask();
 }
 
 int CKanbanCtrl::GetVisibleListCtrlCount() const
@@ -2471,20 +2605,6 @@ BOOL CKanbanCtrl::CancelOperation()
 	return FALSE;
 }
 
-void CKanbanCtrl::OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	*pResult = 0;
-
-	// Ignore focus changes during drag and drop
-	if ((m_bReadOnly || !IsDragging()) && !IsSelectedListCtrl(pNMHDR->hwndFrom))
-	{
-		CKanbanListCtrl* pList = GetListCtrl(pNMHDR->hwndFrom);
-		ASSERT(pList);
-		
-		SelectListCtrl(pList);
-	}
-}
-
 BOOL CKanbanCtrl::SelectListCtrl(CKanbanListCtrl* pList, BOOL bNotifyParent)
 {
 	if (pList)
@@ -2499,7 +2619,7 @@ BOOL CKanbanCtrl::SelectListCtrl(CKanbanListCtrl* pList, BOOL bNotifyParent)
 		CKanbanListCtrl* pPrevSelList = m_pSelectedList;
 		m_pSelectedList = pList;
 
-		FixupFocus();
+		FixupListFocus();
 
 		if (pList->GetItemCount() > 0)
 		{
@@ -2861,4 +2981,34 @@ LRESULT CKanbanCtrl::OnSelectTask(WPARAM /*wp*/, LPARAM lp)
 LRESULT CKanbanCtrl::OnListGetTaskIcon(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_KBC_GETTASKICON, wp, lp);
+}
+
+LRESULT CKanbanCtrl::OnListWantFocus(WPARAM wp, LPARAM /*lp*/)
+{
+	HWND hwndList = (HWND)wp;
+	ASSERT(hwndList && IsWindow(hwndList));
+
+	CKanbanListCtrl* pList = m_aListCtrls.Get(hwndList);
+	ASSERT(pList);
+
+	if (pList)
+	{
+		ASSERT(pList != m_pSelectedList);
+
+		if (pList != m_pSelectedList)
+			SelectListCtrl(pList, FALSE);
+	}
+
+	return 0L;
+}
+
+void CKanbanCtrl::OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = 0;
+
+	// Reverse focus changes outside of our own doing
+	if (!m_bSettingListFocus)
+	{
+		FixupListFocus();
+	}
 }
