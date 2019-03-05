@@ -1265,10 +1265,10 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 			return FALSE;
 		}
 	}
-	// finally, if this was a simple task edit we can just test to 
-	// see if the modified task still matches the filter.
 	else if (aModTaskIDs.GetSize() == 1)
 	{
+		// finally, if this was a simple task edit we can just test to 
+		// see if the modified task still matches the filter.
 		DWORD dwModTaskID = aModTaskIDs[0];
 
 		// VERY SPECIAL CASE
