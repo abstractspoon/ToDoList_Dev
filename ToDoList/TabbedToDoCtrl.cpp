@@ -1782,8 +1782,8 @@ BOOL CTabbedToDoCtrl::ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const CO
 	if (CDateHelper::IsDateSet(dtDue))
 		m_eRecurrence.SetDefaultDate(dtDue);
 
-	SetModified(TRUE, TDCA_STARTDATE, dwTaskID); 
-	SetModified(TRUE, TDCA_DUEDATE, dwTaskID); 
+	CToDoCtrl::SetModified(TRUE, TDCA_STARTDATE, dwTaskID); 
+	CToDoCtrl::SetModified(TRUE, TDCA_DUEDATE, dwTaskID); 
 
 	UpdateControls(FALSE); // don't update comments
 
@@ -2965,12 +2965,14 @@ void CTabbedToDoCtrl::SetListViewNeedFontUpdate(BOOL bUpdate)
 }
 
 
-void CTabbedToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModTaskID)
+void CTabbedToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs)
 {
-	CToDoCtrl::SetModified(bMod, nAttrib, dwModTaskID);
+	CToDoCtrl::SetModified(bMod, nAttrib, aModTaskIDs);
 
 	if (bMod)
 	{
+		DWORD dwModTaskID = (aModTaskIDs.GetSize() ? aModTaskIDs[0] : 0);
+
 		// For new tasks we want to do as little processing as possible 
 		// so as not to delay the appearance of the title edit field.
 		// So, we don't update 'other' views until we receive a successful 

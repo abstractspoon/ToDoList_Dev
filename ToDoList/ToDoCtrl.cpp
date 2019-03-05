@@ -7046,7 +7046,17 @@ BOOL CToDoCtrl::IsModified() const
 // internal version
 void CToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModTaskID)
 {
-	if (!CanEditSelectedTask(nAttrib, dwModTaskID))
+	CDWordArray aModTaskIDs;
+
+	if (dwModTaskID)
+		aModTaskIDs.Add(dwModTaskID);
+
+	SetModified(bMod, nAttrib, aModTaskIDs);
+}
+
+void CToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, const CDWordArray& /*aModTaskIDs*/)
+{
+	if (IsReadOnly())
 		return;
 	
 	SetModified(bMod);
@@ -11695,7 +11705,7 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 			// update current selection
 			UpdateControls();
 
- 			SetModified(TRUE, TDCA_UNDO, 0);
+ 			SetModified(TRUE, TDCA_UNDO, aTaskIDs);
 
 			return TRUE;
 		}

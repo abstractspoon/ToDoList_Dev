@@ -239,7 +239,10 @@ void CFilteredToDoCtrl::OnEditChangeDueTime()
 {
 	// need some special hackery to prevent a re-filter in the middle
 	// of the user manually typing into the time field
-	BOOL bNeedsRefilter = ModNeedsRefilter(TDCA_DUEDATE, FTCV_TASKTREE, GetSelectedTaskID());
+	CDWordArray aSelTaskIDs;
+	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
+
+	BOOL bNeedsRefilter = ModNeedsRefilter(TDCA_DUEDATE, FTCV_TASKTREE, aSelTaskIDs);
 	
 	if (bNeedsRefilter)
 		SetStyle(TDCS_REFILTERONMODIFY, FALSE, FALSE);
@@ -1154,13 +1157,13 @@ BOOL CFilteredToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	return CTabbedToDoCtrl::CanCreateNewTask(nInsertWhere);
 }
 
-void CFilteredToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModTaskID)
+void CFilteredToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs)
 {
 	BOOL bTreeRefiltered = FALSE, bListRefiltered = FALSE;
 
 	if (bMod)
 	{
-		if (ModNeedsRefilter(nAttrib, FTCV_TASKTREE, dwModTaskID))
+		if (ModNeedsRefilter(nAttrib, FTCV_TASKTREE, aModTaskIDs))
 		{
 			// This will also refresh the list view if it is active
 			RefreshFilter();
@@ -1169,7 +1172,7 @@ void CFilteredToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwMo
 			bListRefiltered = (GetTaskView() == FTCV_TASKLIST);
 			bTreeRefiltered = TRUE;
 		}
-		else if (ModNeedsRefilter(nAttrib, FTCV_TASKLIST, dwModTaskID))
+		else if (ModNeedsRefilter(nAttrib, FTCV_TASKLIST, aModTaskIDs))
 		{
 			// if undoing then we must also refresh the list filter because
 			// otherwise ResyncListSelection will fail in the case where
@@ -1190,7 +1193,17 @@ void CFilteredToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwMo
 	CAutoFlag af(m_bIgnoreListRebuild, bListRefiltered);
 	CAutoFlag af2(m_bIgnoreExtensionUpdate, bTreeRefiltered);
 
-	CTabbedToDoCtrl::SetModified(bMod, nAttrib, dwModTaskID);
+	CTabbedToDoCtrl::SetModified(bMod, nAttrib, aModTaskIDs);
+
+	if ((bListRefiltered || bTreeRefiltered) && (nAttrib == TDCA_UNDO) && aModTaskIDs.GetSize())
+	{
+		// Restore the selection at the time of the undo if possible
+		TDCSELECTIONCACHE cache;
+		CacheTreeSelection(cache);
+		
+		if (!SelectTasks(aModTaskIDs, FALSE))
+			RestoreTreeSelection(cache);
+	}
 
 	SyncActiveViewSelectionToTree();
 }
@@ -1208,7 +1221,7 @@ void CFilteredToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 	}
 }
 
-BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView, DWORD dwModTaskID) const 
+BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView, const CDWordArray& aModTaskIDs) const
 {
 	// sanity checks
 	if ((nModType == TDCA_NONE) || !HasStyle(TDCS_REFILTERONMODIFY))
@@ -1256,8 +1269,10 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 
 	// finally, if this was a task edit we can just test to 
 	// see if the modified task still matches the filter.
-	if (bNeedRefilter && dwModTaskID)
+	if (bNeedRefilter && (nModType != TDCA_UNDO) && (aModTaskIDs.GetSize() == 1))
 	{
+		DWORD dwModTaskID = aModTaskIDs[0];
+
 		// VERY SPECIAL CASE
 		// The task being time tracked has been filtered out
 		// in which case we don't need to check if it matches
