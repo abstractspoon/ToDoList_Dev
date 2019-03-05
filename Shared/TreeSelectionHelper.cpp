@@ -972,6 +972,21 @@ int CTreeSelectionHelper::GetItemTitles(const CHTIList& selection, CStringArray&
 	return aTitles.GetSize();
 }
 
+int CTreeSelectionHelper::GetItemData(const CHTIList& selection, CDWordArray& aData) const
+{
+	aData.RemoveAll();
+
+	POSITION pos = selection.GetHeadPosition();
+
+	while (pos)
+	{
+		HTREEITEM hti = selection.GetNext(pos);
+		aData.Add(m_tree.GetItemData(hti));
+	}
+
+	return aData.GetSize();
+}
+
 BOOL CTreeSelectionHelper::HasUncheckedItems() const
 {
 	// look for first incomplete task

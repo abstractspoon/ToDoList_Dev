@@ -150,6 +150,8 @@ public:
 	void OrderItems(CHTIList& selection, BOOL bVisibleOnly = TRUE) const;
 
 	int GetItemTitles(const CHTIList& selection, CStringArray& aTitles) const; 
+	int GetItemData(const CHTIList& selection, CDWordArray& aData) const;
+
 	BOOL HasUncheckedItems() const;
 
 protected:
