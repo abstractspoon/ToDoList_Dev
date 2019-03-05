@@ -4501,12 +4501,16 @@ BOOL CToDoCtrl::SetSelectedTaskAllocBy(const CString& sAllocBy)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		TDC_SET nItemRes = m_data.SetTaskAllocBy(dwTaskID, sAllocBy);
-		
-		if (nItemRes == SET_CHANGE)
+
+		switch (m_data.SetTaskAllocBy(dwTaskID, sAllocBy))
 		{
-			nRes = SET_CHANGE;
-			aModTaskIDs.Add(dwTaskID);
+			case SET_FAILED:
+				return FALSE;
+
+			case SET_CHANGE:
+				nRes = SET_CHANGE;
+				aModTaskIDs.Add(dwTaskID);
+				break;
 		}
 	}
 	
@@ -4529,12 +4533,16 @@ BOOL CToDoCtrl::SetSelectedTaskVersion(const CString& sVersion)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		TDC_SET nItemRes = m_data.SetTaskVersion(dwTaskID, sVersion);
 		
-		if (nItemRes == SET_CHANGE)
+		switch (m_data.SetTaskVersion(dwTaskID, sVersion))
 		{
-			nRes = SET_CHANGE;
-			aModTaskIDs.Add(dwTaskID);
+			case SET_FAILED:
+				return FALSE;
+
+			case SET_CHANGE:
+				nRes = SET_CHANGE;
+				aModTaskIDs.Add(dwTaskID);
+				break;
 		}
 	}
 	
@@ -4557,12 +4565,16 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		TDC_SET nItemRes = m_data.SetTaskStatus(dwTaskID, sStatus);
 		
-		if (nItemRes == SET_CHANGE)
+		switch (m_data.SetTaskStatus(dwTaskID, sStatus))
 		{
-			nRes = SET_CHANGE;
-			aModTaskIDs.Add(dwTaskID);
+			case SET_FAILED:
+				return FALSE;
+
+			case SET_CHANGE:
+				nRes = SET_CHANGE;
+				aModTaskIDs.Add(dwTaskID);
+				break;
 		}
 	}
 
@@ -4622,27 +4634,31 @@ TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArra
 
 	Flush();
 
-	POSITION pos = TSH().GetFirstItemPos();
-	TDC_SET nRes = SET_NOCHANGE;
-
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+
+	aModTaskIDs.RemoveAll();
+	POSITION pos = TSH().GetFirstItemPos();
 
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		TDC_SET nItemRes = m_data.SetTaskArray(dwTaskID, nAttrib, aItems, bAppend);
-
-		if (nItemRes == SET_CHANGE)
+		
+		switch (m_data.SetTaskArray(dwTaskID, nAttrib, aItems, bAppend))
 		{
-			nRes = SET_CHANGE;
-			aModTaskIDs.Add(dwTaskID);
+			case SET_FAILED:
+				return SET_FAILED;
+
+			case SET_CHANGE:
+				aModTaskIDs.Add(dwTaskID);
+				break;
 		}
 	}
 
-	if (nRes == SET_CHANGE)
-		SetModified(TRUE, nAttrib, aModTaskIDs);
+	if (!aModTaskIDs.GetSize())
+		return SET_NOCHANGE;
 
-	return nRes;
+	SetModified(TRUE, nAttrib, aModTaskIDs);
+	return SET_CHANGE;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox& combo)
@@ -4659,7 +4675,6 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox
 	}
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	TDC_SET nRes = SET_NOCHANGE;
 	CDWordArray aModTaskIDs;
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
@@ -4680,20 +4695,22 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox
 			aTaskItems.Copy(aChecked);
 		}
 		
-		TDC_SET nItemRes = m_data.SetTaskArray(dwTaskID, nAttrib, aTaskItems, FALSE);
-
-		if (nItemRes == SET_CHANGE)
+		switch (m_data.SetTaskArray(dwTaskID, nAttrib, aTaskItems, FALSE))
 		{
-			nRes = SET_CHANGE;
-			aModTaskIDs.Add(dwTaskID);
+			case SET_FAILED:
+				return FALSE;
+
+			case SET_CHANGE:
+				aModTaskIDs.Add(dwTaskID);
+				break;
 		}
 	}
 
-	if (nRes == SET_CHANGE)
-		SetModified(TRUE, nAttrib, aModTaskIDs);
+	if (!aModTaskIDs.GetSize())
+		return FALSE;
 
-	return nRes;
-
+	SetModified(TRUE, nAttrib, aModTaskIDs);
+	return TRUE;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCategories(const CStringArray& aCats)
