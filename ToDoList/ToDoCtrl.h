@@ -604,9 +604,7 @@ protected:
 
 	afx_msg void OnTreeSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeClick(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeChangeFocus(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnTreeGetInfoTip(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnTreeDragAbort(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTreeDragEnter(WPARAM wParam, LPARAM lParam);
@@ -724,7 +722,6 @@ protected:
 	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	
-	virtual void SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModTaskID = 0);
 	virtual void SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs);
 
 	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
@@ -766,12 +763,8 @@ protected:
 	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
 	void UpdateDateTimeControls(BOOL bHasSelection);
 	void SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin = 0.0);
-	int GetMaxTaskCategoryWidth(CDC* pDC, BOOL bVisibleOnly = TRUE);
-	int GetMaxTaskTagWidth(CDC* pDC, BOOL bVisibleOnly = TRUE);
 	void IncrementTrackedTime(BOOL bEnding);
-	int CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC);
 	int GetNextPercentDone(int nPercent, BOOL bUp);
-	BOOL ShowLabelEdit(const CRect& rPos);
 	BOOL UpdateCommentsFont(BOOL bResendComments);
 	BOOL FindReplaceSelectedTaskAttribute();
 
@@ -908,10 +901,9 @@ protected:
 	int CreateTasksFromOutlookObjects(const TLDT_DATA* pData);
 
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
-	void SetDefaultComboNames(CAutoComboBox& combo, const CStringArray& aNewNames, 
-								CStringArray& aDefNames, BOOL bReadOnly, BOOL bAddEmpty);
 	void BuildTasksForSave(CTaskFile& tasks/*, BOOL bFirstSave*/) const;
 	BOOL SetComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty);
+	void SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib);
 	
 	static void SetDefaultListContent(CAutoComboBox& combo, const CStringArray& aNewDefs, const CStringArray& aOldDefs, BOOL bAddEmpty = FALSE);
 	static void AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems);
