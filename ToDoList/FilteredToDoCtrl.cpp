@@ -1233,6 +1233,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 	// we only need to refilter if the modified attribute
 	// actually affects the filter
 	BOOL bNeedRefilter = m_filter.ModNeedsRefilter(nModType, m_aCustomAttribDefs);
+	BOOL bTaskEdit = TRUE;
 
 	// handle attributes common to both filter types
 	if (!bNeedRefilter)
@@ -1242,11 +1243,11 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 		case TDCA_NEWTASK:
 			// if we refilter in the middle of adding a task it messes
 			// up the tree items so we handle it in CreateNewTask
-			break;
+			return FALSE;
 			
 		case TDCA_DELETE:
 			// this is handled in CTabbedToDoCtrl::SetModified
-			break;
+			return FALSE;
 			
 		case TDCA_UNDO:
 		case TDCA_PASTE:
@@ -1254,22 +1255,19 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 			// CTabbedToDoCtrl::SetModified() will force a refilter
 			// of the list automatically in response to an undo/paste
 			// so we don't need to handle it ourselves
-			bNeedRefilter = (nView != FTCV_TASKLIST);
-			break;
+			return (nView != FTCV_TASKLIST);
 			
 		case TDCA_POSITION: // == move
-			bNeedRefilter = (nView == FTCV_TASKLIST && !IsSorting());
-			break;
+			return (nView == FTCV_TASKLIST && !IsSorting());
 
 		case TDCA_SELECTION:
 			// never need to refilter
-			break;
+			return FALSE;
 		}
 	}
-
-	// finally, if this was a task edit we can just test to 
+	// finally, if this was a simple task edit we can just test to 
 	// see if the modified task still matches the filter.
-	if (bNeedRefilter && (nModType != TDCA_UNDO) && (aModTaskIDs.GetSize() == 1))
+	else if (aModTaskIDs.GetSize() == 1)
 	{
 		DWORD dwModTaskID = aModTaskIDs[0];
 

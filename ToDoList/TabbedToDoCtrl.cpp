@@ -1782,8 +1782,11 @@ BOOL CTabbedToDoCtrl::ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const CO
 	if (CDateHelper::IsDateSet(dtDue))
 		m_eRecurrence.SetDefaultDate(dtDue);
 
-	CToDoCtrl::SetModified(TRUE, TDCA_STARTDATE, dwTaskID); 
-	CToDoCtrl::SetModified(TRUE, TDCA_DUEDATE, dwTaskID); 
+	CDWordArray aModTaskIDs;
+	aModTaskIDs.Add(dwTaskID);
+
+	CToDoCtrl::SetModified(TRUE, TDCA_STARTDATE, aModTaskIDs); 
+	CToDoCtrl::SetModified(TRUE, TDCA_DUEDATE, aModTaskIDs); 
 
 	UpdateControls(FALSE); // don't update comments
 
@@ -2977,8 +2980,11 @@ void CTabbedToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, const CDWord
 		// so as not to delay the appearance of the title edit field.
 		// So, we don't update 'other' views until we receive a successful 
 		// title edit notification unless they are the active view
-		BOOL bNewSingleTask = ((nAttrib == TDCA_NEWTASK) && dwModTaskID);
-		BOOL bNewTaskTitleEdit = ((nAttrib == TDCA_TASKNAME) && dwModTaskID &&
+		BOOL bNewSingleTask = ((nAttrib == TDCA_NEWTASK) && 
+								(aModTaskIDs.GetSize() == 1));
+
+		BOOL bNewTaskTitleEdit = ((nAttrib == TDCA_TASKNAME) && 
+									(aModTaskIDs.GetSize() == 1) &&
 									(dwModTaskID == m_dwLastAddedID));
 
 		switch (GetTaskView())
@@ -4678,7 +4684,7 @@ BOOL CTabbedToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 					m_taskTree.MoveSelection(htiDestParent, htiDestPrevSibling);
 
 					// Enable the move to be saved
-					CToDoCtrl::SetModified(TRUE, TDCA_POSITION, dwSelTaskID);
+					CToDoCtrl::SetModified(TRUE, TDCA_POSITION, aSelTaskIDs);
 
 					// Mark _other_ extensions as requiring full update
 					SetExtensionsNeedTaskUpdate(TRUE, nView);

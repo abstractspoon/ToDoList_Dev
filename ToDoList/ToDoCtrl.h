@@ -842,8 +842,8 @@ protected:
 	BOOL DoAddTimeToLogFile(DWORD dwTaskID, double dHours, BOOL bShowDialog);
 	BOOL AdjustTaskTimeSpent(DWORD dwTaskID, double dHours);
 
-	BOOL SetTextChange(int nChange, CString& sItem, const CString& sNewItem, TDC_ATTRIBUTE nAttrib, UINT nIDC, DWORD dwTaskID, CAutoComboBox* pCombo = NULL);
-	TDC_SET SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend, DWORD& dwRefTaskID);
+	BOOL SetTextChange(int nChange, CString& sItem, const CString& sNewItem, TDC_ATTRIBUTE nAttrib, UINT nIDC, const CDWordArray& aModTaskIDs, CAutoComboBox* pCombo = NULL);
+	TDC_SET SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend, CDWordArray& aModTaskIDs);
 	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend, CCheckComboBox& combo);
 	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox& combo);
 
