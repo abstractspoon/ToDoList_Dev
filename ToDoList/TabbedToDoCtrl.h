@@ -226,7 +226,7 @@ protected:
 	BOOL ModCausesColorChange(const CTDCAttributeMap& mapAttrib) const;
 	const TDSORT& GetSort() const;
 
-	virtual void SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs);
+	virtual void SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs);
 	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos);
 	virtual BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate); // one style at a time only 
 	virtual void UpdateTasklistVisibility();

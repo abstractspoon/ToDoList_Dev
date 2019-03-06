@@ -1157,34 +1157,31 @@ BOOL CFilteredToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	return CTabbedToDoCtrl::CanCreateNewTask(nInsertWhere);
 }
 
-void CFilteredToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs)
+void CFilteredToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs)
 {
 	BOOL bTreeRefiltered = FALSE, bListRefiltered = FALSE;
 
-	if (bMod)
+	if (ModNeedsRefilter(nAttrib, FTCV_TASKTREE, aModTaskIDs))
 	{
-		if (ModNeedsRefilter(nAttrib, FTCV_TASKTREE, aModTaskIDs))
-		{
-			// This will also refresh the list view if it is active
-			RefreshFilter();
+		// This will also refresh the list view if it is active
+		RefreshFilter();
 
-			// Note: This will also have refreshed the list filter if active
-			bListRefiltered = (GetTaskView() == FTCV_TASKLIST);
-			bTreeRefiltered = TRUE;
-		}
-		else if (ModNeedsRefilter(nAttrib, FTCV_TASKLIST, aModTaskIDs))
+		// Note: This will also have refreshed the list filter if active
+		bListRefiltered = (GetTaskView() == FTCV_TASKLIST);
+		bTreeRefiltered = TRUE;
+	}
+	else if (ModNeedsRefilter(nAttrib, FTCV_TASKLIST, aModTaskIDs))
+	{
+		// if undoing then we must also refresh the list filter because
+		// otherwise ResyncListSelection will fail in the case where
+		// we are undoing a delete because the undone item will not yet be in the list.
+		if (InListView() || (nAttrib == TDCA_UNDO))
 		{
-			// if undoing then we must also refresh the list filter because
-			// otherwise ResyncListSelection will fail in the case where
-			// we are undoing a delete because the undone item will not yet be in the list.
-			if (InListView() || (nAttrib == TDCA_UNDO))
-			{
-				RefreshListFilter();
-			}
-			else
-			{
-				GetViewData2(FTCV_TASKLIST)->bNeedRefilter = TRUE;
-			}
+			RefreshListFilter();
+		}
+		else
+		{
+			GetViewData2(FTCV_TASKLIST)->bNeedRefilter = TRUE;
 		}
 	}
 
@@ -1193,7 +1190,7 @@ void CFilteredToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, const CDWo
 	CAutoFlag af(m_bIgnoreListRebuild, bListRefiltered);
 	CAutoFlag af2(m_bIgnoreExtensionUpdate, bTreeRefiltered);
 
-	CTabbedToDoCtrl::SetModified(bMod, nAttrib, aModTaskIDs);
+	CTabbedToDoCtrl::SetModified(nAttrib, aModTaskIDs);
 
 	if ((bListRefiltered || bTreeRefiltered) && (nAttrib == TDCA_UNDO) && aModTaskIDs.GetSize())
 	{

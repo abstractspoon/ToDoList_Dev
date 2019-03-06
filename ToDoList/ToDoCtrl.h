@@ -722,7 +722,7 @@ protected:
 	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	
-	virtual void SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs);
+	virtual void SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs);
 
 	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
 	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
@@ -903,7 +903,7 @@ protected:
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
 	void BuildTasksForSave(CTaskFile& tasks/*, BOOL bFirstSave*/) const;
 	BOOL SetComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty);
-	void SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib);
+	void SetModified(TDC_ATTRIBUTE nAttrib);
 	
 	static BOOL HandleModResult(DWORD dwTaskID, TDC_SET nRes, CDWordArray& aModTaskIDs);
 	static void SetDefaultListContent(CAutoComboBox& combo, const CStringArray& aNewDefs, const CStringArray& aOldDefs, BOOL bAddEmpty = FALSE);

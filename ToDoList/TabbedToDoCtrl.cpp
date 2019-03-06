@@ -1785,8 +1785,8 @@ BOOL CTabbedToDoCtrl::ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const CO
 	CDWordArray aModTaskIDs;
 	aModTaskIDs.Add(dwTaskID);
 
-	CToDoCtrl::SetModified(TRUE, TDCA_STARTDATE, aModTaskIDs); 
-	CToDoCtrl::SetModified(TRUE, TDCA_DUEDATE, aModTaskIDs); 
+	CToDoCtrl::SetModified(TDCA_STARTDATE, aModTaskIDs); 
+	CToDoCtrl::SetModified(TDCA_DUEDATE, aModTaskIDs); 
 
 	UpdateControls(FALSE); // don't update comments
 
@@ -2967,93 +2967,89 @@ void CTabbedToDoCtrl::SetListViewNeedFontUpdate(BOOL bUpdate)
 		pVData->bNeedFontUpdate = bUpdate;
 }
 
-
-void CTabbedToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs)
+void CTabbedToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs)
 {
-	CToDoCtrl::SetModified(bMod, nAttrib, aModTaskIDs);
+	CToDoCtrl::SetModified(nAttrib, aModTaskIDs);
 
-	if (bMod)
+	DWORD dwModTaskID = (aModTaskIDs.GetSize() ? aModTaskIDs[0] : 0);
+
+	// For new tasks we want to do as little processing as possible 
+	// so as not to delay the appearance of the title edit field.
+	// So, we don't update 'other' views until we receive a successful 
+	// title edit notification unless they are the active view
+	BOOL bNewSingleTask = ((nAttrib == TDCA_NEWTASK) &&
+		(aModTaskIDs.GetSize() == 1));
+
+	BOOL bNewTaskTitleEdit = ((nAttrib == TDCA_TASKNAME) &&
+		(aModTaskIDs.GetSize() == 1) &&
+							  (dwModTaskID == m_dwLastAddedID));
+
+	switch (GetTaskView())
 	{
-		DWORD dwModTaskID = (aModTaskIDs.GetSize() ? aModTaskIDs[0] : 0);
-
-		// For new tasks we want to do as little processing as possible 
-		// so as not to delay the appearance of the title edit field.
-		// So, we don't update 'other' views until we receive a successful 
-		// title edit notification unless they are the active view
-		BOOL bNewSingleTask = ((nAttrib == TDCA_NEWTASK) && 
-								(aModTaskIDs.GetSize() == 1));
-
-		BOOL bNewTaskTitleEdit = ((nAttrib == TDCA_TASKNAME) && 
-									(aModTaskIDs.GetSize() == 1) &&
-									(dwModTaskID == m_dwLastAddedID));
-
-		switch (GetTaskView())
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		if (bNewTaskTitleEdit)
 		{
-		case FTCV_TASKTREE:
-		case FTCV_UNSET:
-			if (bNewTaskTitleEdit)
-			{
-				UpdateListView(TDCA_NEWTASK, dwModTaskID);
-				UpdateExtensionViews(TDCA_NEWTASK, dwModTaskID);
-			}
-			else if (!bNewSingleTask)
-			{
-				UpdateListView(nAttrib, dwModTaskID);
-				UpdateExtensionViews(nAttrib, dwModTaskID);
-			}
-			break;
-
-		case FTCV_TASKLIST:
-			UpdateListView(nAttrib, dwModTaskID);
-
-			if (bNewTaskTitleEdit)
-			{
-				UpdateExtensionViews(TDCA_NEWTASK, dwModTaskID);
-			}
-			else if (!bNewSingleTask)
-			{
-				UpdateExtensionViews(nAttrib, dwModTaskID);
-			}
-			else
-			{
-				// Ensure new task is selected for label editing
-				SelectTask(dwModTaskID);
-			}
-			break;
-
-		case FTCV_UIEXTENSION1:
-		case FTCV_UIEXTENSION2:
-		case FTCV_UIEXTENSION3:
-		case FTCV_UIEXTENSION4:
-		case FTCV_UIEXTENSION5:
-		case FTCV_UIEXTENSION6:
-		case FTCV_UIEXTENSION7:
-		case FTCV_UIEXTENSION8:
-		case FTCV_UIEXTENSION9:
-		case FTCV_UIEXTENSION10:
-		case FTCV_UIEXTENSION11:
-		case FTCV_UIEXTENSION12:
-		case FTCV_UIEXTENSION13:
-		case FTCV_UIEXTENSION14:
-		case FTCV_UIEXTENSION15:
-		case FTCV_UIEXTENSION16:
-			UpdateExtensionViews(nAttrib, dwModTaskID);
-
-			if (bNewTaskTitleEdit)
-			{
-				UpdateListView(TDCA_NEWTASK, dwModTaskID);
-			}
-			else if (!bNewSingleTask)
-			{
-				UpdateListView(nAttrib, dwModTaskID);
-			}
-			else
-			{
-				// Ensure new task is selected for label editing
-				SelectTask(dwModTaskID);
-			}
-			break;
+			UpdateListView(TDCA_NEWTASK, dwModTaskID);
+			UpdateExtensionViews(TDCA_NEWTASK, dwModTaskID);
 		}
+		else if (!bNewSingleTask)
+		{
+			UpdateListView(nAttrib, dwModTaskID);
+			UpdateExtensionViews(nAttrib, dwModTaskID);
+		}
+		break;
+
+	case FTCV_TASKLIST:
+		UpdateListView(nAttrib, dwModTaskID);
+
+		if (bNewTaskTitleEdit)
+		{
+			UpdateExtensionViews(TDCA_NEWTASK, dwModTaskID);
+		}
+		else if (!bNewSingleTask)
+		{
+			UpdateExtensionViews(nAttrib, dwModTaskID);
+		}
+		else
+		{
+			// Ensure new task is selected for label editing
+			SelectTask(dwModTaskID);
+		}
+		break;
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		UpdateExtensionViews(nAttrib, dwModTaskID);
+
+		if (bNewTaskTitleEdit)
+		{
+			UpdateListView(TDCA_NEWTASK, dwModTaskID);
+		}
+		else if (!bNewSingleTask)
+		{
+			UpdateListView(nAttrib, dwModTaskID);
+		}
+		else
+		{
+			// Ensure new task is selected for label editing
+			SelectTask(dwModTaskID);
+		}
+		break;
 	}
 }
 
@@ -4684,7 +4680,7 @@ BOOL CTabbedToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 					m_taskTree.MoveSelection(htiDestParent, htiDestPrevSibling);
 
 					// Enable the move to be saved
-					CToDoCtrl::SetModified(TRUE, TDCA_POSITION, aSelTaskIDs);
+					CToDoCtrl::SetModified(TDCA_POSITION, aSelTaskIDs);
 
 					// Mark _other_ extensions as requiring full update
 					SetExtensionsNeedTaskUpdate(TRUE, nView);

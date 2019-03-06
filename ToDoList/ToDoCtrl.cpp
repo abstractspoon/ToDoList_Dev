@@ -564,14 +564,14 @@ void CToDoCtrl::EnableEncryption(BOOL bEnable)
 	if (!bEnable && !m_sPassword.IsEmpty())
 	{
 		m_sPassword.Empty();
-		SetModified(TRUE, TDCA_ENCRYPT);
+		SetModified(TDCA_ENCRYPT);
 	}
 	else if (bEnable && m_sPassword.IsEmpty())
 	{
 		CEnString sExplanation(IDS_ENABLEENCRYPTION);
 
 		if (CPasswordDialog::RetrievePassword(TRUE, m_sPassword, sExplanation))
-			SetModified(TRUE, TDCA_ENCRYPT);
+			SetModified(TDCA_ENCRYPT);
 	}
 }
 
@@ -2024,7 +2024,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		GetSelectedTaskIDs(aModTaskIDs);
 
 		m_nCommentsState = CS_PENDING;
-		SetModified(TRUE, TDCA_COMMENTS, aModTaskIDs);
+		SetModified(TDCA_COMMENTS, aModTaskIDs);
 
 		return;
 	}	
@@ -2338,7 +2338,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 	if (aModTaskIDs.GetSize())
 	{
 		TDC_ATTRIBUTE nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sAttribID, m_aCustomAttribDefs);
- 		SetModified(TRUE, nAttrib, aModTaskIDs);
+ 		SetModified(nAttrib, aModTaskIDs);
 
 		// update UI except if it's already up to date
 		CUSTOMATTRIBCTRLITEM ctrl;
@@ -2385,7 +2385,7 @@ BOOL CToDoCtrl::SetSelectedTaskMetaData(const CString& sKey, const CString& sMet
 	}
 	
 	if (aModTaskIDs.GetSize())
- 		SetModified(TRUE, TDCA_METADATA, aModTaskIDs);
+ 		SetModified(TDCA_METADATA, aModTaskIDs);
 	
 	return TRUE;
 }
@@ -2636,7 +2636,7 @@ BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
 			m_cpColour.SetColour(color);
 		}
 
-		SetModified(TRUE, TDCA_COLOR, aModTaskIDs);
+		SetModified(TDCA_COLOR, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -2693,7 +2693,7 @@ BOOL CToDoCtrl::SetSelectedTaskIcon(const CString& sIcon)
 	}
 	
 	if (aModTaskIDs.GetSize())
-		SetModified(TRUE, TDCA_ICON, aModTaskIDs);
+		SetModified(TDCA_ICON, aModTaskIDs);
 	
 	return TRUE;
 }
@@ -2756,7 +2756,7 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 
 		TSH().InvalidateAll();
 
-		SetModified(TRUE, TDCA_COMMENTS, aModTaskIDs);
+		SetModified(TDCA_COMMENTS, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -2789,7 +2789,7 @@ BOOL CToDoCtrl::SetSelectedTaskTitle(const CString& sTitle)
 		CDWordArray aModTaskIDs;
 		aModTaskIDs.Add(dwTaskID);
 
-		SetModified(TRUE, TDCA_TASKNAME, aModTaskIDs);
+		SetModified(TDCA_TASKNAME, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -2852,7 +2852,7 @@ BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority)
 			m_cbPriority.SetSelectedPriority(m_nPriority);
 		}
 		
-		SetModified(TRUE, TDCA_PRIORITY, aModTaskIDs);
+		SetModified(TDCA_PRIORITY, aModTaskIDs);
 	}
 
 	return TRUE;
@@ -2886,7 +2886,7 @@ BOOL CToDoCtrl::SetSelectedTaskRisk(int nRisk)
 			m_cbRisk.SetSelectedRisk(m_nRisk);
 		}
 		
-		SetModified(TRUE, TDCA_RISK, aModTaskIDs);
+		SetModified(TDCA_RISK, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -2913,7 +2913,7 @@ BOOL CToDoCtrl::SetSelectedTaskFlag(BOOL bFlagged)
 	}
 	
 	if (aModTaskIDs.GetSize())
-		SetModified(TRUE, TDCA_FLAG, aModTaskIDs);
+		SetModified(TDCA_FLAG, aModTaskIDs);
 	
 	return TRUE;
 }
@@ -2941,7 +2941,7 @@ BOOL CToDoCtrl::SetSelectedTaskLock(BOOL bLocked)
 	}
 	
 	if (aModTaskIDs.GetSize())
-		SetModified(TRUE, TDCA_LOCK, aModTaskIDs);
+		SetModified(TDCA_LOCK, aModTaskIDs);
 	
 	return TRUE;
 }
@@ -2990,7 +2990,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 	if (aModTaskIDs.GetSize())
 	{
 		m_nPriority = m_cbPriority.IncrementPriority(nAmount);
-		SetModified(TRUE, TDCA_PRIORITY, aModTaskIDs);
+		SetModified(TDCA_PRIORITY, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -3070,7 +3070,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 		switch (nDate)
 		{
 		case TDCD_CREATE:	
-			SetModified(TRUE, TDCA_CREATIONDATE, aModTaskIDs); 
+			SetModified(TDCA_CREATIONDATE, aModTaskIDs); 
 			break;
 
 		case TDCD_STARTDATE:
@@ -3091,7 +3091,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 		case TDCD_STARTTIME:
 			bUpdateTimeEst = HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES);
 
-			SetModified(TRUE, TDCA_STARTDATE, aModTaskIDs); 
+			SetModified(TDCA_STARTDATE, aModTaskIDs); 
 			break;
 			
 		case TDCD_DUEDATE:	
@@ -3110,11 +3110,11 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 		case TDCD_DUETIME:
 			bUpdateTimeEst = HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES);
 			
-			SetModified(TRUE, TDCA_DUEDATE, aModTaskIDs); 
+			SetModified(TDCA_DUEDATE, aModTaskIDs); 
 			break;
 				
 		case TDCD_DONETIME:	
-			SetModified(TRUE, TDCA_DONEDATE, aModTaskIDs); 
+			SetModified(TDCA_DONEDATE, aModTaskIDs); 
 			break;
 
 		//case TDCD_DONE:
@@ -3184,19 +3184,19 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 		switch (nDate)
 		{
 		case TDCD_CREATE:	
-			SetModified(TRUE, TDCA_CREATIONDATE, aModTaskIDs); 
+			SetModified(TDCA_CREATIONDATE, aModTaskIDs); 
 			break;
 
 		case TDCD_START:	
-			SetModified(TRUE, TDCA_STARTDATE, aModTaskIDs); 
+			SetModified(TDCA_STARTDATE, aModTaskIDs); 
 			break;
 
 		case TDCD_DUE:		
-			SetModified(TRUE, TDCA_DUEDATE, aModTaskIDs); 
+			SetModified(TDCA_DUEDATE, aModTaskIDs); 
 			break;
 
 		case TDCD_DONE:		
-			SetModified(TRUE, TDCA_DONEDATE, aModTaskIDs); 
+			SetModified(TDCA_DONEDATE, aModTaskIDs); 
 			break;
 
 		default:
@@ -3254,8 +3254,8 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_OFFSET nOffs
 	
 	if (aModTaskIDs.GetSize())
 	{
-		SetModified(TRUE, TDCA_STARTDATE, aModTaskIDs); 
-		SetModified(TRUE, TDCA_DUEDATE, aModTaskIDs); 
+		SetModified(TDCA_STARTDATE, aModTaskIDs); 
+		SetModified(TDCA_DUEDATE, aModTaskIDs); 
 		
 		UpdateControls(FALSE); // don't update comments
 	}
@@ -3644,8 +3644,8 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 			m_cbTimeStart.SetOleTime(dtStart.m_dt);
 			m_cbTimeDue.SetOleTime(dtDue.m_dt);
 
-			SetModified(TRUE, TDCA_STARTDATE, aModTaskIDs);
-			SetModified(TRUE, TDCA_DUEDATE, aModTaskIDs);
+			SetModified(TDCA_STARTDATE, aModTaskIDs);
+			SetModified(TDCA_DUEDATE, aModTaskIDs);
 		}
 		
 		// If some of the tasks were recurring and need to be created
@@ -3659,7 +3659,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 		// if some tasks have recurred or some tasks were completed
 		// then we also need to report that the done date has changed
 		if (bSomeDone || bSomeRecurred)
-			SetModified(TRUE, TDCA_DONEDATE, aModTaskIDs);
+			SetModified(TDCA_DONEDATE, aModTaskIDs);
 
 		// if some were completed and the status also changed
 		// we may also need to update the UI
@@ -3668,7 +3668,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 			m_cbStatus.AddUniqueItem(m_sCompletionStatus);
 			UpdateDataEx(this, IDC_STATUS, m_cbStatus, FALSE);
 
-			SetModified(TRUE, TDCA_STATUS, aModTaskIDs);
+			SetModified(TDCA_STATUS, aModTaskIDs);
 		}
 	}
 	
@@ -3723,7 +3723,7 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 	if (aNewTaskIDs.GetSize())
 	{
 		SelectTasks(aNewTaskIDs);
-		SetModified(TRUE, TDCA_NEWTASK, aNewTaskIDs);
+		SetModified(TDCA_NEWTASK, aNewTaskIDs);
 
 		// notify parent of all new tasks
 		int nTask = aTaskIDs.GetSize();
@@ -3891,7 +3891,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent)
 			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 		}
 		
-		SetModified(TRUE, TDCA_PERCENT, aModTaskIDs);
+		SetModified(TDCA_PERCENT, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -3925,7 +3925,7 @@ BOOL CToDoCtrl::SetSelectedTaskCost(double dCost)
 			UpdateDataEx(this, IDC_COST, m_dCost, FALSE, DECIMALS);
 		}
 		
-		SetModified(TRUE, TDCA_COST, aModTaskIDs);
+		SetModified(TDCA_COST, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -3966,7 +3966,7 @@ BOOL CToDoCtrl::SetSelectedTaskRecurrence(const TDCRECURRENCE& tr)
 			m_nDefRecurReuse = tr.nReuse;
 		}
 		
-		SetModified(TRUE, TDCA_RECURRENCE, aModTaskIDs);
+		SetModified(TDCA_RECURRENCE, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -4073,7 +4073,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 			}
 		}
 		
-		SetModified(TRUE, TDCA_PERCENT, aModTaskIDs);
+		SetModified(TDCA_PERCENT, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -4144,16 +4144,16 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(double dTime, TDC_UNITS nUnits)
 			}
 		}
 		
-		SetModified(TRUE, TDCA_TIMEEST, aModTaskIDs);
+		SetModified(TDCA_TIMEEST, aModTaskIDs);
 
 		// may also need to report percent and/or date changes
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
-			SetModified(TRUE, TDCA_PERCENT, aModTaskIDs);
+			SetModified(TDCA_PERCENT, aModTaskIDs);
 
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 		{
-			SetModified(TRUE, TDCA_STARTDATE, aModTaskIDs);
-			SetModified(TRUE, TDCA_DUEDATE, aModTaskIDs);
+			SetModified(TDCA_STARTDATE, aModTaskIDs);
+			SetModified(TDCA_DUEDATE, aModTaskIDs);
 		}
 	}
 	
@@ -4211,7 +4211,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(double dTime, TDC_UNITS nUnits)
 			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 		}
 		
-		SetModified(TRUE, TDCA_TIMESPENT, aModTaskIDs);
+		SetModified(TDCA_TIMESPENT, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -4289,14 +4289,14 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 			}
 		}
 		
-		SetModified(TRUE, TDCA_TIMEEST, aModTaskIDs);
+		SetModified(TDCA_TIMEEST, aModTaskIDs);
 		
 		// may also need to report percent and/or date changes
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
-			SetModified(TRUE, TDCA_PERCENT, aModTaskIDs);
+			SetModified(TDCA_PERCENT, aModTaskIDs);
 		
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
-			SetModified(TRUE, TDCA_DUEDATE, aModTaskIDs);
+			SetModified(TDCA_DUEDATE, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -4362,7 +4362,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 			}
 		}
 		
-		SetModified(TRUE, TDCA_TIMESPENT, aModTaskIDs);
+		SetModified(TDCA_TIMESPENT, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -4400,7 +4400,7 @@ BOOL CToDoCtrl::SetTextChange(TDC_ATTRIBUTE nAttrib, CString& sItem, const CStri
 			UpdateDataEx(this, nIDC, sItem, FALSE);
 		}
 		
-		SetModified(TRUE, nAttrib, aModTaskIDs);
+		SetModified(nAttrib, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -4555,7 +4555,7 @@ TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArra
 	if (!aModTaskIDs.GetSize())
 		return SET_NOCHANGE;
 
-	SetModified(TRUE, nAttrib, aModTaskIDs);
+	SetModified(nAttrib, aModTaskIDs);
 	return SET_CHANGE;
 }
 
@@ -4598,7 +4598,7 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox
 	}
 
 	if (aModTaskIDs.GetSize())
-		SetModified(TRUE, nAttrib, aModTaskIDs);
+		SetModified(nAttrib, aModTaskIDs);
 
 	return TRUE;
 }
@@ -5034,7 +5034,7 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 		aModTaskIDs.Add(dwTaskID);
 
 		SelectItem(htiNew);
-		SetModified(TRUE, TDCA_NEWTASK, aModTaskIDs); 
+		SetModified(TDCA_NEWTASK, aModTaskIDs); 
 		
 		m_taskTree.InvalidateAll();
 
@@ -5145,7 +5145,7 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 	if (aNewTaskIDs.GetSize())
 	{
 		ASSERT(aNewTaskIDs.GetSize() > 1);
-		SetModified(TRUE, TDCA_NEWTASK, aNewTaskIDs);
+		SetModified(TDCA_NEWTASK, aNewTaskIDs);
 
 		return TRUE;
 	}
@@ -5233,7 +5233,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	m_taskTree.UpdateAll();
 
 	// Update other views before changing selection
-	SetModified(TRUE, TDCA_DELETE, aDelTaskIDs);
+	SetModified(TDCA_DELETE, aDelTaskIDs);
 	
 	// set next selection
 	if (dwNextID)
@@ -5396,7 +5396,7 @@ LRESULT CToDoCtrl::OnEditEnd(WPARAM /*wParam*/, LPARAM lParam)
 			aModTaskIDs.Add(m_dwEditTitleTaskID);
 
 			m_taskTree.InvalidateSelection(TRUE);
-			SetModified(TRUE, TDCA_TASKNAME, aModTaskIDs);
+			SetModified(TDCA_TASKNAME, aModTaskIDs);
 
 			if (bNewTask)
 			{
@@ -5462,7 +5462,7 @@ LRESULT CToDoCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		CDWordArray aModTaskIDs;
 		aModTaskIDs.Add(m_dwLastAddedID);
 
-		SetModified(TRUE, TDCA_DELETE, aModTaskIDs);
+		SetModified(TDCA_DELETE, aModTaskIDs);
 		UpdateControls();
 	}
 
@@ -5523,7 +5523,7 @@ BOOL CToDoCtrl::DeleteAllTasks()
 	m_taskTree.DeleteAll();
 	m_data.DeleteAllTasks();
 
-	SetModified(TRUE, TDCA_DELETE);
+	SetModified(TDCA_DELETE);
 	UpdateControls();
 	
 	return TRUE;
@@ -5822,7 +5822,7 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 		RebuildCustomAttributeUI();
 
 		// update interface
-		SetModified(TRUE, TDCA_CUSTOMATTRIBDEFS);
+		SetModified(TDCA_CUSTOMATTRIBDEFS);
 		UpdateControls(FALSE); // don't update comments
 
 		return TRUE;
@@ -6537,7 +6537,7 @@ void CToDoCtrl::RemoveArchivedTasks(const CTaskFile& tasks, TDC_ARCHIVE nRemove,
 	}
 
 	if (bRemoved)
-		SetModified(TRUE, TDCA_ARCHIVE);
+		SetModified(TDCA_ARCHIVE);
 }
 
 BOOL CToDoCtrl::RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged)
@@ -6923,55 +6923,51 @@ BOOL CToDoCtrl::IsModified() const
 	return (m_nCommentsState == CS_PENDING);
 }
 
-// internal version
-void CToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib)
+void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib)
 {
-	SetModified(bMod, nAttrib, CDWordArray());
+	SetModified(nAttrib, CDWordArray());
 }
 
-void CToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, const CDWordArray& /*aModTaskIDs*/)
+void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& /*aModTaskIDs*/)
 {
 	if (IsReadOnly())
 		return;
 	
-	SetModified(bMod);
+	SetModified(TRUE);
 	
-	if (bMod)
+	m_taskTree.SetModified(nAttrib);
+
+	if (ModNeedsResort(nAttrib))
 	{
-		m_taskTree.SetModified(nAttrib);
-
-		if (ModNeedsResort(nAttrib))
+		// if the mod was a task completion and the parent completed state 
+		// is based on this then we need to resort the entire tree 
+		// likewise for start dates and due dates
+		if ((nAttrib == TDCA_DONEDATE && HasStyle(TDCS_TREATSUBCOMPLETEDASDONE)) ||
+			(nAttrib == TDCA_DUEDATE && (HasStyle(TDCS_USEEARLIESTDUEDATE) || HasStyle(TDCS_USELATESTDUEDATE))) ||
+			(nAttrib == TDCA_STARTDATE && (HasStyle(TDCS_USEEARLIESTSTARTDATE) || HasStyle(TDCS_USELATESTSTARTDATE))))
 		{
-			// if the mod was a task completion and the parent completed state 
-			// is based on this then we need to resort the entire tree 
-			// likewise for start dates and due dates
-			if ((nAttrib == TDCA_DONEDATE && HasStyle(TDCS_TREATSUBCOMPLETEDASDONE)) ||
-				(nAttrib == TDCA_DUEDATE && (HasStyle(TDCS_USEEARLIESTDUEDATE) || HasStyle(TDCS_USELATESTDUEDATE))) ||
-				(nAttrib == TDCA_STARTDATE && (HasStyle(TDCS_USEEARLIESTSTARTDATE) || HasStyle(TDCS_USELATESTSTARTDATE))))
-			{
-				Resort();
-			}
-			else // attributes that only have a local effect
-			{
-				ResortSelectedTaskParents();
-			}
+			Resort();
 		}
-
-		GetParent()->PostMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)nAttrib);
-
-		// special cases: 
-		switch (nAttrib)
+		else // attributes that only have a local effect
 		{
-		case TDCA_PROJECTNAME:
-			// if this was the project name being edited make sure
-			// the focus is set back to the name
-			GetDlgItem(IDC_PROJECTNAME)->SetFocus();
-			break;
-
-		case TDCA_LOCK:
-			UpdateControls(FALSE);
-			break;
+			ResortSelectedTaskParents();
 		}
+	}
+
+	GetParent()->PostMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)nAttrib);
+
+	// special cases: 
+	switch (nAttrib)
+	{
+	case TDCA_PROJECTNAME:
+		// if this was the project name being edited make sure
+		// the focus is set back to the name
+		GetDlgItem(IDC_PROJECTNAME)->SetFocus();
+		break;
+
+	case TDCA_LOCK:
+		UpdateControls(FALSE);
+		break;
 	}
 }
 
@@ -7060,7 +7056,7 @@ BOOL CToDoCtrl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 void CToDoCtrl::OnChangeProjectName()
 {
 	UpdateData();
-	SetModified(TRUE, TDCA_PROJECTNAME);
+	SetModified(TDCA_PROJECTNAME);
 }
 
 LRESULT CToDoCtrl::OnTreeDragAbort(WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -7243,7 +7239,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 						aModTaskIDs.Add(dwTargetID);
 
 						m_data.SetTaskDependencies(dwTargetID, aDepends, (nCmdID == ID_TDD_ADDTASKDEPENDENCY));
-						SetModified(TRUE, TDCA_DEPENDENCY, aModTaskIDs);
+						SetModified(TDCA_DEPENDENCY, aModTaskIDs);
 					}
 					break;
 
@@ -7261,7 +7257,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 						aModTaskIDs.Add(dwTargetID);
 
 						m_data.SetTaskFileRefs(dwTargetID, aFileRefs, TRUE);
-						SetModified(TRUE, TDCA_FILEREF, aModTaskIDs);
+						SetModified(TDCA_FILEREF, aModTaskIDs);
 					}
 					break;
 
@@ -7346,7 +7342,7 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 				// then mark the parent as incomplete too
 				FixupParentCompletion(dwDestParentID);
 
-				SetModified(TRUE, TDCA_POSITION);
+				SetModified(TDCA_POSITION);
 			}
 		}
 		break;
@@ -7709,7 +7705,7 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	if (nDirection == TDCM_RIGHT)
 		FixupParentCompletion(dwDestParentID);
 
-	SetModified(TRUE, TDCA_POSITION);
+	SetModified(TDCA_POSITION);
 
 	return TRUE;
 }
@@ -8340,7 +8336,7 @@ BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent
 		SelectItem(m_taskTree.GetChildItem());
 	}
 	
-	SetModified(TRUE, TDCA_PASTE);
+	SetModified(TDCA_PASTE);
 	UpdateControls();
 	
 	return TRUE;
@@ -8881,7 +8877,7 @@ BOOL CToDoCtrl::AdjustTaskTimeSpent(DWORD dwTaskID, double dHours)
 	aModTaskIDs.Add(dwTaskID);
 
 	m_data.SetTaskTimeSpent(dwTaskID, dTime, nUnits);
-	SetModified(TRUE, TDCA_TIMESPENT, aModTaskIDs);
+	SetModified(TDCA_TIMESPENT, aModTaskIDs);
 
 	return TRUE;
 }
@@ -9477,7 +9473,7 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 			RebuildCustomAttributeUI();
 	}
 
-	SetModified(TRUE, TDCA_PASTE, aTaskIDs);
+	SetModified(TDCA_PASTE, aTaskIDs);
 	return TRUE;
 }
 
@@ -10631,7 +10627,7 @@ BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOO
 				CDWordArray aModTaskIDs;
 				aModTaskIDs.Add(dwTaskID);
 
-				SetModified(TRUE, TDCA_TASKNAME, aModTaskIDs);
+				SetModified(TDCA_TASKNAME, aModTaskIDs);
 			}
 		}
 		else if (nRet == IDNOERRORS && bNotifyNoErrors)
@@ -11083,7 +11079,7 @@ void CToDoCtrl::IncrementTrackedTime(BOOL bEnding)
 			aModTaskIDs.Add(dwTaskID);
 
 			m_data.SetTaskTimeSpent(dwTaskID, dTime, nUnits);
-			SetModified(TRUE, TDCA_TIMESPENT, aModTaskIDs);
+			SetModified(TDCA_TIMESPENT, aModTaskIDs);
 		}
 
 		// Is a reminder due?
@@ -11428,7 +11424,7 @@ void CToDoCtrl::OnSelChangeCommentsType()
 	}
 
 	if (aModTaskIDs.GetSize())
-		SetModified(TRUE, TDCA_COMMENTS, aModTaskIDs);
+		SetModified(TDCA_COMMENTS, aModTaskIDs);
 
 	// update comments control state if previously in a mixed state
 	if (bMixedSelection)
@@ -11579,7 +11575,7 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 			// update current selection
 			UpdateControls();
 
- 			SetModified(TRUE, TDCA_UNDO, aTaskIDs);
+ 			SetModified(TDCA_UNDO, aTaskIDs);
 
 			return TRUE;
 		}
@@ -11972,7 +11968,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATT
 
 	if (aModTaskIDs.GetSize())
 	{
-		SetModified(TRUE, nToAttrib, aModTaskIDs);
+		SetModified(nToAttrib, aModTaskIDs);
 		UpdateControls(FALSE);
 	}
 
@@ -12007,7 +12003,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const C
 	if (aModTaskIDs.GetSize())
 	{
 		TDC_ATTRIBUTE nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sToCustomAttribID, m_aCustomAttribDefs);
-		SetModified(TRUE, nAttrib, aModTaskIDs);
+		SetModified(nAttrib, aModTaskIDs);
 		
 		// update UI
 // 		CUSTOMATTRIBCTRLITEM ctrl;
@@ -12053,7 +12049,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 
 	if (aModTaskIDs.GetSize())
 	{
- 		SetModified(TRUE, nToAttrib, aModTaskIDs);
+ 		SetModified(nToAttrib, aModTaskIDs);
 		UpdateControls(FALSE);
 	}
 
@@ -12094,7 +12090,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 	if (aModTaskIDs.GetSize())
 	{
 		TDC_ATTRIBUTE nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sToCustomAttribID, m_aCustomAttribDefs);
-		SetModified(TRUE, nAttrib, aModTaskIDs);
+		SetModified(nAttrib, aModTaskIDs);
 
 // 		CUSTOMATTRIBCTRLITEM ctrl;
 // 		
