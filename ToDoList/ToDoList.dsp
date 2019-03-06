@@ -775,10 +775,6 @@ SOURCE=.\TaskListOutlookImporter.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\Shared\TaskListStorageMgr.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\TaskListTdlExporter.h
 # End Source File
 # Begin Source File

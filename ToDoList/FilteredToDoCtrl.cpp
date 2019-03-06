@@ -1230,11 +1230,10 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 	// we only need to refilter if the modified attribute
 	// actually affects the filter
 	BOOL bNeedRefilter = m_filter.ModNeedsRefilter(nModType, m_aCustomAttribDefs);
-	BOOL bTaskEdit = TRUE;
 
-	// handle attributes common to both filter types
 	if (!bNeedRefilter)
 	{
+		// handle attributes common to both filter types
 		switch (nModType)
 		{
 		case TDCA_NEWTASK:

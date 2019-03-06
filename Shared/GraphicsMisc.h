@@ -81,6 +81,16 @@ enum GM_OLECURSOR // OLE drag'n'drop cursors
 #	define DCX_USESTYLE 0x00010000
 #endif
 
+#ifndef DPI_AWARENESS_CONTEXT
+DECLARE_HANDLE(DPI_AWARENESS_CONTEXT);
+
+#	define DPI_AWARENESS_CONTEXT_UNAWARE              ((DPI_AWARENESS_CONTEXT)-1)
+#	define DPI_AWARENESS_CONTEXT_SYSTEM_AWARE         ((DPI_AWARENESS_CONTEXT)-2)
+#	define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE    ((DPI_AWARENESS_CONTEXT)-3)
+#	define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 ((DPI_AWARENESS_CONTEXT)-4)
+#	define DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED    ((DPI_AWARENESS_CONTEXT)-5)
+#endif
+
 //////////////////////////////////////////////////////////////////////
 
 namespace GraphicsMisc  
@@ -206,6 +216,7 @@ namespace GraphicsMisc
 	BOOL EnableFlip3D(HWND hWnd, BOOL bEnable = TRUE);
 	BOOL GetExtendedFrameBounds(HWND hWnd, CRect& rBounds);
 	BOOL ChangeWindowMessageFilter(UINT nMessage, BOOL bOn);
+	BOOL EnableNonClientDpiScaling(HWND hWnd);
 
 	BOOL DwmSetWindowAttribute(HWND hWnd, DWORD dwAttrib, LPCVOID pData, DWORD dwDataSize);
 	BOOL DwmGetWindowAttribute(HWND hWnd, DWORD dwAttrib, PVOID pData, DWORD dwDataSize);
@@ -216,6 +227,8 @@ namespace GraphicsMisc
 	BOOL GetPrimaryMonitorScreenSpace(CRect& rScreen);
 	BOOL GetMonitorAvailableScreenSpace(HMONITOR hMon, CRect& rScreen);
 
+	DPI_AWARENESS_CONTEXT SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT nContext);
+	
 	void DrawGradient(CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder);
 	void DrawGlass(CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder);
 	void DrawGlassWithGradient(CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder);

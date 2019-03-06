@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "browserdlg.h"
 #include "misc.h"
+#include "graphicsmisc.h"
 
 #include "..\3rdParty\stdiofileex.h"
 
@@ -19,9 +20,9 @@ static char THIS_FILE[] = __FILE__;
 // CBrowserDlg dialog
 
 
-CBrowserDlg::CBrowserDlg(BOOL bBrowser, LPCTSTR szSettingsKey) 
+CBrowserDlg::CBrowserDlg(BOOL bBrowser, IPreferences* pPrefs, LPCTSTR szSettingsKey) 
 	: 
-	CRuntimeDlg(NULL, NULL, szSettingsKey), m_bBrowser(bBrowser), m_bHideOnClose(FALSE)
+	CRuntimeDlg(NULL, pPrefs, szSettingsKey), m_bBrowser(bBrowser), m_bHideOnClose(FALSE)
 {
 	//{{AFX_DATA_INIT(CBrowserDlg)
 		// NOTE: the ClassWizard will add member initialization here
@@ -169,7 +170,7 @@ BOOL CBrowserDlg::SetDisplayInBrowser(BOOL bBrowser)
 	GetClientRect(rClient);
 
 	if (rClient.IsRectEmpty())
-		rClient.SetRect(0, 0, 600, 400);
+		rClient.SetRect(0, 0, GraphicsMisc::ScaleByDPIFactor(800), GraphicsMisc::ScaleByDPIFactor(600));
 
 	if (bBrowser)
 	{

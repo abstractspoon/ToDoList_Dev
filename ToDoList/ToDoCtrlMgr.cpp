@@ -570,19 +570,22 @@ BOOL CToDoCtrlMgr::ShowDueTaskNotification(int nIndex, LPCTSTR szFilePath, BOOL 
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	CBrowserDlg* pBrowser = NULL;
-	const TDCITEM& tdci = GetTDCItem(nIndex);
+	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 
-	if (!m_mapBrowsers.Lookup(tdci.pTDC, pBrowser))
+	if (!m_mapBrowsers.Lookup(&tdc, pBrowser))
 	{
-		// give each a unique key for preferences
-		CString sKey = tdci.pTDC->GetPreferencesKey(_T("DueTaskViewer"));
-	
-		pBrowser = new CBrowserDlg(bBrowser, sKey);
-		m_mapBrowsers[tdci.pTDC] = pBrowser;
+		pBrowser = new CBrowserDlg(bBrowser);
+		m_mapBrowsers[&tdc] = pBrowser;
 
 		CEnString sTitle(IDS_DUETASKS_TITLE, GetFriendlyProjectName(nIndex));
 		
-		return pBrowser->Create(sTitle, szFilePath, AfxGetMainWnd());
+		if (!pBrowser->Create(sTitle, szFilePath, AfxGetMainWnd()))
+			return FALSE;
+
+		CPreferences prefs;
+		pBrowser->RestorePosition(prefs, tdc.GetPreferencesKey(_T("DueTaskViewer")));
+
+		return TRUE;
 	}
 
 	// else existing browser window
@@ -785,6 +788,7 @@ int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 {
 	CHECKVALIDINDEXRET(nIndex, -1);
 
+	CPreferences prefs;
 	int nSel = GetSelToDoCtrl(), nNewSel = -1;
 
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
@@ -801,7 +805,6 @@ int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 
 		if (!sKey.IsEmpty())
 		{
-			CPreferences prefs;
 
 			if (tdci.crTab == CLR_NONE)
 				prefs.DeleteProfileEntry(sKey, _T("TabColor"));
@@ -846,6 +849,9 @@ int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 
 		if (m_mapBrowsers.Lookup(&tdc, pBrowser))
 		{
+			CPreferences prefs;
+			pBrowser->SavePosition(prefs, tdc.GetPreferencesKey(_T("DueTaskViewer")));
+			
 			pBrowser->DestroyWindow();
 			delete pBrowser;
 

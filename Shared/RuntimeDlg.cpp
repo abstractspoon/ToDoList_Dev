@@ -172,8 +172,7 @@ int CRuntimeDlg::DoModal(LPCTSTR szCaption, DWORD dwStyle, DWORD dwExStyle, cons
 	if (hWndParent != NULL && ::GetActiveWindow() == m_hWnd)
 		::SetActiveWindow(hWndParent);
 	
-	// save pos
-	SaveCurrentPos();
+	SavePosition();
 
 	// destroy modal window
 	DestroyWindow();
@@ -292,36 +291,7 @@ void CRuntimeDlg::SetInitialPos(LPCRECT pRect, DWORD dwStyle)
 	// size to fit?
 	if ((dwStyle & WS_POPUP) && (!pRect || rectAuto.EqualRect(pRect)))
 	{
-		if (m_pPrefs && !m_sSettingsKey.IsEmpty())
-		{
-			CRect rect;
-
-			rect.left = m_pPrefs->GetProfileInt(m_sSettingsKey, _T("left"), rectAuto.left);
-			rect.right = m_pPrefs->GetProfileInt(m_sSettingsKey, _T("right"), rectAuto.right);
-			rect.top = m_pPrefs->GetProfileInt(m_sSettingsKey, _T("top"), rectAuto.top);
-			rect.bottom = m_pPrefs->GetProfileInt(m_sSettingsKey, _T("bottom"), rectAuto.bottom);
-			
-			if (rect == rectAuto) // first time
-			{
-				AutoFit();
-
-				// center
-				if (dwStyle & DS_CENTER)
-					CenterWindow();
-			}
-			else
-			{
-				MoveWindow(rect);
-			}
-		}
-		else
-		{
-			AutoFit();
-			
-			// center
-			if (dwStyle & DS_CENTER)
-				CenterWindow();
-		}
+		RestorePosition(m_pPrefs, m_sSettingsKey, (dwStyle & DS_CENTER));
 	}
 	else if (pRect && !rectAuto.EqualRect(pRect))
 	{
@@ -329,25 +299,61 @@ void CRuntimeDlg::SetInitialPos(LPCRECT pRect, DWORD dwStyle)
 	}
 }
 
-void CRuntimeDlg::SaveCurrentPos()
+void CRuntimeDlg::SavePosition()
 {
-	if (m_pPrefs && !m_sSettingsKey.IsEmpty())
+	SavePosition(m_pPrefs, m_sSettingsKey);
+}
+
+void CRuntimeDlg::SavePosition(IPreferences* pPrefs, LPCTSTR szSettingsKey) const
+{
+	if (!GetSafeHwnd() || !(GetStyle() && WS_POPUP))
+		return;
+	
+	if (pPrefs && !Misc::IsEmpty(szSettingsKey))
 	{
 		CRect rect;
 		GetWindowRect(rect);
-		
-		m_pPrefs->WriteProfileInt(m_sSettingsKey, _T("left"), rect.left);
-		m_pPrefs->WriteProfileInt(m_sSettingsKey, _T("right"), rect.right);
-		m_pPrefs->WriteProfileInt(m_sSettingsKey, _T("top"), rect.top);
-		m_pPrefs->WriteProfileInt(m_sSettingsKey, _T("bottom"), rect.bottom);
+			
+		pPrefs->WriteProfileInt(szSettingsKey, _T("left"), rect.left);
+		pPrefs->WriteProfileInt(szSettingsKey, _T("right"), rect.right);
+		pPrefs->WriteProfileInt(szSettingsKey, _T("top"), rect.top);
+		pPrefs->WriteProfileInt(szSettingsKey, _T("bottom"), rect.bottom);
 	}
+}
+
+void CRuntimeDlg::RestorePosition(const IPreferences* pPrefs, LPCTSTR szSettingsKey, BOOL bCentreFirstTime)
+{
+	if (!GetSafeHwnd() || !(GetStyle() && WS_POPUP))
+		return;
+
+	if (pPrefs && !Misc::IsEmpty(szSettingsKey))
+	{
+		CRect rect;
+		
+		rect.left = pPrefs->GetProfileInt(szSettingsKey, _T("left"), rectAuto.left);
+		rect.right = pPrefs->GetProfileInt(szSettingsKey, _T("right"), rectAuto.right);
+		rect.top = pPrefs->GetProfileInt(szSettingsKey, _T("top"), rectAuto.top);
+		rect.bottom = pPrefs->GetProfileInt(szSettingsKey, _T("bottom"), rectAuto.bottom);
+		
+		if (rect != rectAuto)
+		{
+			MoveWindow(rect);
+			return;
+		}
+	}
+
+	// all else
+	AutoFit();
+
+	if (bCentreFirstTime)
+		CenterWindow();
 }
 
 void CRuntimeDlg::OnDestroy()
 {
 	// save position for popup dialogs
 	if (GetStyle() & WS_POPUP)
-		SaveCurrentPos();
+		SavePosition();
 
 	CDialog::OnDestroy();
 }
@@ -356,7 +362,7 @@ BOOL CRuntimeDlg::DestroyWindow()
 {
 	// save position for popup dialogs
 	if (m_hWnd && (GetStyle() & WS_POPUP))
-		SaveCurrentPos();
+		SavePosition();
 
 	return CDialog::DestroyWindow();
 }
@@ -368,7 +374,7 @@ BOOL CRuntimeDlg::ShowWindow(int nCmdShow)
 	{
 		if (IsWindowVisible() && (nCmdShow == SW_HIDE))
 		{
-			SaveCurrentPos();
+			SavePosition();
 		}
 		else if (!IsWindowVisible() && ((nCmdShow == SW_SHOW) || (nCmdShow == SW_SHOWDEFAULT)))
 		{

@@ -62,6 +62,24 @@ END_EVENTSINK_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CEnBrowserCtrl message handlers
 
+
+BOOL CEnBrowserCtrl::Create(LPCTSTR lpszClassName,
+							 LPCTSTR lpszWindowName, DWORD dwStyle,
+							 const RECT& rect,
+							 CWnd* pParentWnd, UINT nID,
+							 CCreateContext* pContext)
+{
+	return CWebBrowserCtrl::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
+}
+
+BOOL CEnBrowserCtrl::Create(LPCTSTR lpszWindowName, DWORD dwStyle,
+							 const RECT& rect, CWnd* pParentWnd, UINT nID,
+							 CFile* pPersist, BOOL bStorage,
+							 BSTR bstrLicKey)
+{
+	return CWebBrowserCtrl::Create(lpszWindowName, dwStyle, rect, pParentWnd, nID, pPersist, bStorage, bstrLicKey);
+}
+
 void CEnBrowserCtrl::InitPrintBkgnd(BOOL bPrintBkgnd)
 {
 	RestorePrintBkgnd();

@@ -11,13 +11,17 @@
 #include "WebBrowserctrl.h"
 
 /////////////////////////////////////////////////////////////////////////////
+
+class IPreferences;
+
+/////////////////////////////////////////////////////////////////////////////
 // CBrowserDlg dialog
 
 class CBrowserDlg : public CRuntimeDlg
 {
 // Construction
 public:
-	CBrowserDlg(BOOL bBrowser = TRUE, LPCTSTR szSettingsKey = NULL);
+	CBrowserDlg(BOOL bBrowser = TRUE, IPreferences* pPrefs = NULL, LPCTSTR szSettingsKey = NULL);
 
 	virtual int DoModal(LPCTSTR szCaption, LPCTSTR szUrlPath, CWnd* pParentWnd = NULL);
 	virtual BOOL Create(LPCTSTR szCaption, LPCTSTR szUrlPath, CWnd* pParentWnd);

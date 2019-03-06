@@ -19,6 +19,17 @@ public:
 	CEnBrowserCtrl();
 	virtual ~CEnBrowserCtrl();
 
+	virtual BOOL Create(LPCTSTR lpszClassName,
+						LPCTSTR lpszWindowName, DWORD dwStyle,
+						const RECT& rect,
+						CWnd* pParentWnd, UINT nID,
+						CCreateContext* pContext = NULL);
+
+	BOOL Create(LPCTSTR lpszWindowName, DWORD dwStyle,
+				const RECT& rect, CWnd* pParentWnd, UINT nID,
+				CFile* pPersist = NULL, BOOL bStorage = FALSE,
+				BSTR bstrLicKey = NULL);
+	
 // Operations
 public:
 	void Print(LPCTSTR szFile = NULL, BOOL bPrintBkgnd = -1);

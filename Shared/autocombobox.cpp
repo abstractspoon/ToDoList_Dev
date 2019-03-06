@@ -743,9 +743,9 @@ int CAutoComboBox::HitTestListDeleteBtn(const CPoint& ptList) const
 			{
 				CRect rBtn;
 				GetListDeleteButtonRect(rItem, rBtn);
-				rItem.InflateRect(2, 2);
+				rBtn.InflateRect(2, 2);
 				
-				if (rItem.PtInRect(ptList))
+				if (rBtn.PtInRect(ptList))
 					return nItem;
 			}
 		}

@@ -36,6 +36,9 @@ public:
 	BOOL ShowWindow(int nCmdShow);
 	BOOL DestroyWindow();
 
+	void SavePosition(IPreferences* pPrefs, LPCTSTR szSettingsKey) const;
+	void RestorePosition(const IPreferences* pPrefs, LPCTSTR szSettingsKey, BOOL bCentreFirstTime = TRUE);
+
 // Operations
 protected: // intended to be used only from a derived class
 
@@ -149,7 +152,7 @@ protected:
 	void ExcludeCtrls(CDC* pDC, UINT nCtrlIDFrom, UINT nCtrlIDTo, BOOL bIgnoreCorners = FALSE);
 
 	virtual void SetInitialPos(LPCRECT pRect, DWORD dwStyle);
-	void SaveCurrentPos();
+	void SavePosition();
 	BOOL HasInitialSize() const { return (m_sizeInitial.cx && m_sizeInitial.cy); }
 	void ClearInitialSize() { m_sizeInitial.cx  = m_sizeInitial.cy = 0; }
 

@@ -972,6 +972,40 @@ BOOL GraphicsMisc::ChangeWindowMessageFilter(UINT nMessage, BOOL bOn)
 	return FALSE;
 }
 
+BOOL GraphicsMisc::EnableNonClientDpiScaling(HWND hWnd)
+{
+	HMODULE hMod = ::LoadLibrary(_T("User32.dll"));
+	
+	if (hMod)
+	{
+		typedef BOOL (WINAPI *PFNENABLENONCLIENTDPISCALING)(HWND);
+		PFNENABLENONCLIENTDPISCALING pFn = (PFNENABLENONCLIENTDPISCALING)::GetProcAddress(hMod, "EnableNonClientDpiScaling");
+		
+		if (pFn)
+			return pFn(hWnd);
+	}
+
+	// All else
+	return FALSE;
+}
+
+DPI_AWARENESS_CONTEXT GraphicsMisc::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT nContext)
+{
+	HMODULE hMod = ::LoadLibrary(_T("User32.dll"));
+	
+	if (hMod)
+	{
+		typedef DPI_AWARENESS_CONTEXT(WINAPI *PFNSETTHREADDPIAWARENESSCONTEXT)(DPI_AWARENESS_CONTEXT);
+		PFNSETTHREADDPIAWARENESSCONTEXT pFn = (PFNSETTHREADDPIAWARENESSCONTEXT)::GetProcAddress(hMod, "SetThreadDpiAwarenessContext");
+		
+		if (pFn)
+			return pFn(nContext);
+	}
+
+	// All else
+	return DPI_AWARENESS_CONTEXT_UNAWARE;
+}
+
 int GraphicsMisc::DrawAnsiSymbol(CDC* pDC, char cSymbol, const CRect& rText, UINT nFlags, CFont* pFont)
 {
 	if (cSymbol == 0)
