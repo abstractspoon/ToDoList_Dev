@@ -51,7 +51,12 @@ extern UINT urm_SETCURRENTFONTCOLOR;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int COMBO_VOFFSET = (GraphicsMisc::ScaleByDPIFactor(1) - 1);
+const int COMBO_VOFFSET			= (GraphicsMisc::ScaleByDPIFactor(2) - 1);
+const int FONT_COMBO_WIDTH		= GraphicsMisc::ScaleByDPIFactor(128);
+const int SIZE_COMBO_WIDTH		= GraphicsMisc::ScaleByDPIFactor(48);
+const int COMBO_HEIGHT			= GraphicsMisc::ScaleByDPIFactor(256);
+const int COMBO_WIDTH			= GraphicsMisc::ScaleByDPIFactor(40);
+const int MIN_FONT_COMBO_WIDTH	= GraphicsMisc::ScaleByDPIFactor(60);
 
 /////////////////////////////////////////////////////////////////////////////
 // CRRECToolBar
@@ -124,7 +129,7 @@ BOOL CRRECToolBar::Create(CWnd* parent, LPCTSTR szImageFile, COLORREF crMask)
 
 		TBBUTTONINFO tbi;
 		tbi.cbSize = sizeof(TBBUTTONINFO);
-		tbi.cx = (WORD)GraphicsMisc::ScaleByDPIFactor(FONT_COMBO_WIDTH);
+		tbi.cx = (WORD)FONT_COMBO_WIDTH;
 		tbi.dwMask = TBIF_SIZE;  // By index
 
 		// The font name combo
@@ -132,8 +137,8 @@ BOOL CRRECToolBar::Create(CWnd* parent, LPCTSTR szImageFile, COLORREF crMask)
 		GetItemRect(FONT_NAME_POS, &rect);
 
 		rect.left++;
-		rect.top++;		
-		rect.bottom += GraphicsMisc::ScaleByDPIFactor(COMBO_HEIGHT);
+		rect.top += COMBO_VOFFSET;		
+		rect.bottom += COMBO_HEIGHT;
 
 		if (!m_font.Create(WS_CHILD | WS_VSCROLL |	WS_VISIBLE | CBS_AUTOHSCROLL | 
 							CBS_DROPDOWNLIST | CBS_SORT, rect, this, DROPDOWN_FONT))
@@ -142,15 +147,15 @@ BOOL CRRECToolBar::Create(CWnd* parent, LPCTSTR szImageFile, COLORREF crMask)
 		CLocalizer::EnableTranslation(m_font, FALSE);
 		m_font.SetFont(CFont::FromHandle((HFONT) ::GetStockObject(DEFAULT_GUI_FONT)));
 		m_font.FillCombo();
-		m_font.SetMaxWidth(GraphicsMisc::ScaleByDPIFactor(FONT_COMBO_WIDTH));
-
+		m_font.SetMaxWidth(FONT_COMBO_WIDTH);
+		
 		// The font size combo
-		tbi.cx = (WORD)GraphicsMisc::ScaleByDPIFactor(COMBO_WIDTH);
+		tbi.cx = (WORD)COMBO_WIDTH;
 		GetToolBarCtrl().SetButtonInfo(FONT_SIZE_ID, &tbi);
 		GetItemRect(FONT_SIZE_POS, &rect);
 
-		rect.top++;		
-		rect.bottom += GraphicsMisc::ScaleByDPIFactor(COMBO_HEIGHT);
+		rect.top += COMBO_VOFFSET;		
+		rect.bottom += COMBO_HEIGHT;
 		
 		if (!m_size.Create(WS_CHILD | WS_VISIBLE | CBS_AUTOHSCROLL | CBS_DROPDOWNLIST | 
 							CBS_HASSTRINGS, rect, this, DROPDOWN_SIZE))

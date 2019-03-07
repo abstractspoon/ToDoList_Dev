@@ -72,6 +72,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const int SCMARGIN = GraphicsMisc::ScaleByDPIFactor(4);
+const int TOOLBAR_HEIGHT = GraphicsMisc::ScaleByDPIFactor(27);
+const int RULER_HEIGHT = GraphicsMisc::ScaleByDPIFactor(26);
+
 const LPCTSTR FILEPREFIX = _T("file://");
 const int DEFTABSTOP = 320;
 const WORD PFN_NUMBERLIST = 0x0002;
@@ -481,11 +484,14 @@ LRESULT CRulerRichEditCtrl::OnTrackRuler(WPARAM mode, LPARAM pt)
 				int pos = m_rtf.GetScrollPos(SB_HORZ);
 				m_movingtab = -1;
 				CRect hitRect;
-				int y = RULER_HEIGHT - 9;
+				int y = RULER_HEIGHT - GraphicsMisc::ScaleByDPIFactor(9);
 				for(int t = 0 ; t < MAX_TAB_STOPS ; t++)
 				{
 					int x = m_tabs[ t ] + m_margin - pos;
-					hitRect.SetRect(x - 2, y - 1, x + 3, y + 3);
+					hitRect.SetRect(x - GraphicsMisc::ScaleByDPIFactor(2), 
+									y - GraphicsMisc::ScaleByDPIFactor(1), 
+									x + GraphicsMisc::ScaleByDPIFactor(3), 
+									y + GraphicsMisc::ScaleByDPIFactor(3));
 					if (hitRect.PtInRect(*point))
 					{
 						// Yes, we did.
@@ -513,7 +519,7 @@ LRESULT CRulerRichEditCtrl::OnTrackRuler(WPARAM mode, LPARAM pt)
 					dc.SelectObject(&m_pen);
 					dc.SetROP2(R2_XORPEN);
 
-					dc.MoveTo(m_rulerPosition, toolbarHeight + 3);
+					dc.MoveTo(m_rulerPosition, toolbarHeight + GraphicsMisc::ScaleByDPIFactor(3));
 					dc.LineTo(m_rulerPosition, rect.Height());
 
 					dc.SelectStockObject(BLACK_PEN);
@@ -535,7 +541,7 @@ LRESULT CRulerRichEditCtrl::OnTrackRuler(WPARAM mode, LPARAM pt)
 				dc.SelectObject(&m_pen);
 				dc.SetROP2(R2_XORPEN);
 				
-				dc.MoveTo(m_rulerPosition, toolbarHeight + 3);
+				dc.MoveTo(m_rulerPosition, toolbarHeight + GraphicsMisc::ScaleByDPIFactor(3));
 				dc.LineTo(m_rulerPosition, rect.Height());
 				
 				// Set up new line
@@ -545,19 +551,19 @@ LRESULT CRulerRichEditCtrl::OnTrackRuler(WPARAM mode, LPARAM pt)
 				int pos = m_rtf.GetScrollPos(SB_HORZ);
 				int min = m_margin + m_offset;
 				if (m_movingtab > 0)
-					min = (m_tabs[ m_movingtab - 1 ] + m_margin - pos) + 3 + m_offset;
+					min = (m_tabs[ m_movingtab - 1 ] + m_margin - pos) + GraphicsMisc::ScaleByDPIFactor(3) + m_offset;
 				
-				int max = rect.Width() - 5 + m_offset;
+				int max = rect.Width() - GraphicsMisc::ScaleByDPIFactor(5) + m_offset;
 				if (m_movingtab < m_tabs.GetUpperBound())
-					max = (m_tabs[ m_movingtab + 1 ] + m_margin - pos) - 3 + m_offset;
-				max = min(max, rect.Width() - 5 + m_offset);
+					max = (m_tabs[ m_movingtab + 1 ] + m_margin - pos) - GraphicsMisc::ScaleByDPIFactor(3) + m_offset;
+				max = min(max, rect.Width() - GraphicsMisc::ScaleByDPIFactor(5) + m_offset);
 				
 				// Set new positions
 				m_rulerPosition = max(min, point->x - m_offset);
 				m_rulerPosition = min(m_rulerPosition, max);
 				
 				// Draw the new line
-				dc.MoveTo(m_rulerPosition, toolbarHeight + 3);
+				dc.MoveTo(m_rulerPosition, toolbarHeight + GraphicsMisc::ScaleByDPIFactor(3));
 				dc.LineTo(m_rulerPosition, rect.Height());
 				
 				dc.SelectStockObject(BLACK_PEN);
@@ -577,7 +583,7 @@ LRESULT CRulerRichEditCtrl::OnTrackRuler(WPARAM mode, LPARAM pt)
 				dc.SelectObject(&m_pen);
 				dc.SetROP2(R2_XORPEN);
 				
-				dc.MoveTo(m_rulerPosition, toolbarHeight + 3);
+				dc.MoveTo(m_rulerPosition, toolbarHeight + GraphicsMisc::ScaleByDPIFactor(3));
 				dc.LineTo(m_rulerPosition, rect.Height());
 
 				// if the drop is ouside the ruler then delete the tab

@@ -28,8 +28,10 @@
 #include "stdafx.h"
 #include "RRECRuler.h"
 #include "ids.h"
+
 #include "..\shared\themed.h"
 #include "..\shared\misc.h"
+#include "..\shared\GraphicsMisc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -52,7 +54,8 @@ CRRECRuler::CRRECRuler()
 {
 	
 	m_physicalInch = 0;
-	m_mode = Misc::IsMetricMeasurementSystem() ? MODE_METRIC : MODE_INCH; 	m_margin = 0;
+	m_mode = Misc::IsMetricMeasurementSystem() ? MODE_METRIC : MODE_INCH; 	
+	m_margin = 0;
 	m_crBack = GetSysColor(COLOR_3DFACE);
 }
 
@@ -147,10 +150,10 @@ void CRRECRuler::OnPaint()
 
 	// Set up data for the inner ruler window
 	CRect winRect( rect );
-	winRect.top += 3;
-	winRect.bottom -= 5;
-	winRect.right -= 3;
-	winRect.left += m_margin - 2;
+	winRect.top += GraphicsMisc::ScaleByDPIFactor(3);
+	winRect.bottom -= GraphicsMisc::ScaleByDPIFactor(5);
+	winRect.right -= GraphicsMisc::ScaleByDPIFactor(3);
+	winRect.left += m_margin - GraphicsMisc::ScaleByDPIFactor(2);
 
 	if (bEnabled) // else same as dialog bk color
 		dc.FillSolidRect( winRect, GetSysColor(COLOR_WINDOW));
@@ -184,7 +187,7 @@ void CRRECRuler::OnPaint()
 	}
 
 	int midpoint = winRect.top + ( winRect.Height() / 2 );
-	int leftmarg = winRect.left + 2 - pos;
+	int leftmarg = winRect.left + GraphicsMisc::ScaleByDPIFactor(2) - pos;
 	int width = winRect.Height();
 	int t;
 
@@ -202,14 +205,14 @@ void CRRECRuler::OnPaint()
 		// Drawing scale markers
 		for( t = ( leftmarg + ( int ) ( inch8 +.5 ) ) ; t < rect.right - m_margin ; t += ( int ) ( inch8 + .5 ) )
 		{
-			dc.MoveTo( t, midpoint - 1 );
-			dc.LineTo( t, midpoint + 1 );
+			dc.MoveTo( t, midpoint - GraphicsMisc::ScaleByDPIFactor(1) );
+			dc.LineTo( t, midpoint + GraphicsMisc::ScaleByDPIFactor(1) );
 		}
 
 		for( t = leftmarg + inch4 ; t < rect.right - m_margin ; t += inch4 )
 		{
-			dc.MoveTo( t, midpoint - 3 );
-			dc.LineTo( t, midpoint + 3 );
+			dc.MoveTo( t, midpoint - GraphicsMisc::ScaleByDPIFactor(3) );
+			dc.LineTo( t, midpoint + GraphicsMisc::ScaleByDPIFactor(3) );
 		}
 
 		CRect rectInch;
@@ -220,7 +223,7 @@ void CRRECRuler::OnPaint()
 		for( t = leftmarg + m_physicalInch ; t < rect.right - m_margin ; t += m_physicalInch )
 		{
 
-			rectInch.SetRect( t - width / 2, winRect.top + 2, t + width / 2, winRect.bottom - 2 );
+			rectInch.SetRect( t - width / 2, winRect.top + GraphicsMisc::ScaleByDPIFactor(2), t + width / 2, winRect.bottom - GraphicsMisc::ScaleByDPIFactor(2) );
 			counter.Format( _T( "%i" ), count );
 			dc.DrawText( counter, rectInch, DT_SINGLELINE | DT_CENTER | DT_VCENTER );
 			count++;
@@ -235,8 +238,8 @@ void CRRECRuler::OnPaint()
 		// Drawing scale markers
 		for( t = leftmarg + cm2 ; t < rect.right - m_margin ; t += cm2 )
 		{
-			dc.MoveTo( t, midpoint - 1 );
-			dc.LineTo( t, midpoint + 2 );
+			dc.MoveTo( t, midpoint - GraphicsMisc::ScaleByDPIFactor(1) );
+			dc.LineTo( t, midpoint + GraphicsMisc::ScaleByDPIFactor(2) );
 		}
 
 		CRect rectNum;
@@ -246,7 +249,7 @@ void CRRECRuler::OnPaint()
 		// Drawing numbers
 		for( t = leftmarg + cm ; t < rect.right - m_margin ; t += cm )
 		{
-			rectNum.SetRect( t - width / 2, winRect.top + 2, t + width / 2, winRect.bottom - 2 );
+			rectNum.SetRect( t - width / 2, winRect.top + GraphicsMisc::ScaleByDPIFactor(2), t + width / 2, winRect.bottom - GraphicsMisc::ScaleByDPIFactor(2) );
 			counter.Format( _T( "%i" ), count );
 			dc.DrawText( counter, rectNum, DT_SINGLELINE | DT_CENTER | DT_VCENTER );
 			count++;
@@ -258,19 +261,38 @@ void CRRECRuler::OnPaint()
 	int max = m_tabs.GetSize();
 	for( t = 0 ; t < max ; t++ )
 	{
+		int x = (leftmarg + m_tabs[t] - GraphicsMisc::ScaleByDPIFactor(2));
 
-		int x = ( leftmarg + m_tabs[ t ] - 2 );
-		if( x > winRect.left && x + 3 < winRect.right )
+		if ((x > winRect.left) && ((x + GraphicsMisc::ScaleByDPIFactor(3)) < winRect.right))
 		{
-			dc.MoveTo( x, midpoint + 5 );
-			dc.LineTo( x + 6, midpoint + 5 );
-			dc.MoveTo( x, midpoint + 6 );
-			dc.LineTo( x + 6, midpoint + 6 );
+			CPoint ptFrom(x, midpoint + GraphicsMisc::ScaleByDPIFactor(5));
+			CPoint ptTo(x + GraphicsMisc::ScaleByDPIFactor(6), ptFrom.y);
 
-			dc.MoveTo( x + 2, midpoint + 7 );
-			dc.LineTo( x + 2, midpoint + 10 );
-			dc.MoveTo( x + 3, midpoint + 7 );
-			dc.LineTo( x + 3, midpoint + 10 );
+			// Make sure length is even so that the vertical 'tag'
+			// can be correctly centred beneath
+			ptTo.x -= ((ptTo.x - ptFrom.x) % 2);
+
+			dc.MoveTo(ptFrom);
+			dc.LineTo(ptTo);
+
+			ptFrom.y++;
+			ptTo.y++;
+
+			dc.MoveTo(ptFrom);
+			dc.LineTo(ptTo);
+
+			ptFrom.x = (((ptFrom.x + ptTo.x) / 2) - 1);
+			ptTo.x = ptFrom.x;
+			ptTo.y = (midpoint + GraphicsMisc::ScaleByDPIFactor(9));
+
+			dc.MoveTo(ptFrom);
+			dc.LineTo(ptTo);
+
+			ptFrom.x++;
+			ptTo.x++;
+
+			dc.MoveTo(ptFrom);
+			dc.LineTo(ptTo);
 		}
 	}
 

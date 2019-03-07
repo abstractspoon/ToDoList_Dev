@@ -3495,14 +3495,23 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 			TDC_UNITS nUnits = TDCU_NULL;
 
 			double dRemaining = m_calculator.GetTaskRemainingTime(pTDI, pTDS, nUnits);
-			ASSERT(nUnits != TDCU_NULL);
+
+			if (nUnits == TDCU_NULL)
+			{
+				if (HasStyle(TDCS_HIDEZEROTIMECOST))
+					break;
+
+				// else
+				ASSERT(dRemaining == 0.0);
+				nUnits = pTDI->nTimeEstUnits;
+			}
 
 			// format appropriately
 			TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
 
 			if (HasStyle(TDCS_CALCREMAININGTIMEBYPERCENT) || HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
 			{
-				sTaskColText = CTimeHelper().FormatTime(dRemaining, nTHUnits, 2);
+				sTaskColText = CTimeHelper().FormatTime(dRemaining, nTHUnits, 1);
 			}
 			else // TDCS_CALCREMAININGTIMEBYDUEDATE
 			{
