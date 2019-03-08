@@ -65,7 +65,7 @@ int CBrowserDlg::DoModal(LPCTSTR szCaption, LPCTSTR szUrlPath, CWnd* pParentWnd)
 BOOL CBrowserDlg::Create(LPCTSTR szCaption, LPCTSTR szUrlPath, CWnd* pParentWnd)
 {
 	if (Misc::IsEmpty(szUrlPath))
-		return IDCANCEL;
+		return FALSE;
 
 	m_sUrl = szUrlPath;
 
