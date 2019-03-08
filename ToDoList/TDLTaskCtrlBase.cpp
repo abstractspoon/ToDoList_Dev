@@ -1136,6 +1136,8 @@ void CTDLTaskCtrlBase::SaveState(CPreferences& prefs, const CString& sKey) const
 
 	if (!m_bAutoFitSplitter)
 		prefs.WriteProfileInt(sKey, _T("SplitPos"), GetSplitPos());
+	else
+		prefs.DeleteProfileEntry(sKey, _T("SplitPos"));
 	
 	m_sort.SaveState(prefs, sKey);
 }

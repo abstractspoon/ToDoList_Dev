@@ -6490,11 +6490,11 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	// reset last taskedit
 	m_dtLastTaskMod = COleDateTime::GetCurrentTime();
 
+	Resize();
+
 	// restore previously visibility
 	if (bHidden)
 		ShowWindow(SW_HIDE);
-	else
-		Resize();
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	log.LogTimeElapsed(_T("CToDoCtrl::LoadTasks(Remaining)"));
