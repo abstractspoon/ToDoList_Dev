@@ -138,7 +138,6 @@ void CColourPopup::Initialise()
 
     m_nNumColumns       = 0;
     m_nNumRows          = 0;
-    m_nBoxSize          = 18;
     m_nMargin           = ::GetSystemMetrics(SM_CXEDGE);
     m_nCurrentSel       = INVALID_COLOUR;
     m_nChosenColourSel  = INVALID_COLOUR;
@@ -148,8 +147,13 @@ void CColourPopup::Initialise()
 	m_bIgnoreFirstLBtnUp = FALSE;
     m_bChildWindowVisible = FALSE;
 
+	HDC	hdc = ::GetDC(NULL);
+    m_nBoxSize          = ((18 * GetDeviceCaps(hdc, LOGPIXELSX)) / 96);
+	::ReleaseDC(NULL, hdc);
+
     // Idiot check: Make sure the colour square is at least 5 x 5;
-    if (m_nBoxSize - 2*m_nMargin - 2 < 5) m_nBoxSize = 5 + 2*m_nMargin + 2;
+    if (m_nBoxSize - 2*m_nMargin - 2 < 5) 
+		m_nBoxSize = 5 + 2*m_nMargin + 2;
 
     // Create the font
     NONCLIENTMETRICS ncm;

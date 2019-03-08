@@ -146,7 +146,7 @@ int CColourPicker::OnCreate(LPCREATESTRUCT lpCreateStruct)
     if (CButton::OnCreate(lpCreateStruct) == -1)
         return -1;
     
-    SetWindowSize();    // resize appropriately
+    SetWindowSize(TRUE);    // resize appropriately
     return 0;
 }
 
@@ -251,7 +251,7 @@ void CColourPicker::PreSubclassWindow()
 {
     ModifyStyle(0, BS_OWNERDRAW);        // Make it owner drawn
     CButton::PreSubclassWindow();
-    SetWindowSize();                     // resize appropriately
+    SetWindowSize(TRUE);                     // resize appropriately
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -304,7 +304,7 @@ void CColourPicker::SetCustomText(LPCTSTR szCustomText)
 /////////////////////////////////////////////////////////////////////////////
 // CColourPicker implementation
 
-void CColourPicker::SetWindowSize()
+void CColourPicker::SetWindowSize(BOOL bDefault)
 {
     // Get size dimensions of edges
     CSize MarginSize(::GetSystemMetrics(SM_CXEDGE), ::GetSystemMetrics(SM_CYEDGE));
@@ -312,6 +312,7 @@ void CColourPicker::SetWindowSize()
     // Get size of dropdown arrow
     int nArrowWidth = max(::GetSystemMetrics(SM_CXHTHUMB), 5*MarginSize.cx);
     int nArrowHeight = max(::GetSystemMetrics(SM_CYVTHUMB), 5*MarginSize.cy);
+
     CSize ArrowSize(max(nArrowWidth, nArrowHeight), max(nArrowWidth, nArrowHeight));
 
     // Get window size
@@ -322,11 +323,19 @@ void CColourPicker::SetWindowSize()
     if (pParent)
         pParent->ScreenToClient(rect);
 
-    // Set window size at least as wide as 2 arrows, and as high as arrow + margins
-    int nWidth = max(rect.Width(), 2*ArrowSize.cx + 2*MarginSize.cx);
-	int nHeight = max( rect.Height(), ArrowSize.cy+2*MarginSize.cy);
+	if (bDefault)
+	{
+		// Set window size at least as wide as 2 arrows, and as high as arrow + margins
+		int nWidth = max(rect.Width(), 2*ArrowSize.cx + 2*MarginSize.cx);
+		int nHeight = max( rect.Height(), ArrowSize.cy+2*MarginSize.cy);
 
-    MoveWindow(rect.left, rect.top, nWidth, nHeight, TRUE);
+		MoveWindow(rect.left, rect.top, nWidth, nHeight, TRUE);
+	}
+	else
+	{
+		ArrowSize.cy = (rect.Height() - 2*MarginSize.cx);
+		ArrowSize.cx = ArrowSize.cy;
+	}
 
     // Get the new coords of this window
     GetWindowRect(rect);
@@ -342,7 +351,7 @@ void CColourPicker::OnSize(UINT nType, int cx, int cy)
 {
 	CWnd::OnSize(nType, cx, cy);
 
-	SetWindowSize();
+	SetWindowSize(FALSE);
 }
 
 UINT CColourPicker::OnGetDlgCode()

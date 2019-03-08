@@ -49,6 +49,7 @@ public:
 	int GetDockedHeight(BOOL bMaximized) const { return bMaximized ? m_nHeightDockedMax : m_nHeightDocked; }
 
 	inline BOOL IsMaximized() const { return ::IsZoomed(GetHwnd()); }
+	inline BOOL IsMinimized() const { return ::IsIconic(GetHwnd()); }
 
 protected:
 	DM_POS m_nDockPos, m_nLastDockPos;

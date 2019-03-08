@@ -239,7 +239,7 @@ LRESULT CDockManager::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM wp, LPARAM 
 				CAutoFlag af(m_bResizeUpdate, FALSE);
 				LRESULT lr = Default();
 				
-				if (wp == SC_MAXIMIZE)
+				if (IsMaximized())
 					OnMaximize();
 				else
 					OnRestore();
@@ -353,7 +353,7 @@ void CDockManager::OnMaximize()
 
 void CDockManager::OnRestore()
 {
-	ASSERT (!IsMaximized());
+	ASSERT (!IsMaximized() && !IsMinimized());
 
 	BOOL bDockVisible = m_scDockWnd.IsWindowVisible();
 
@@ -622,7 +622,6 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 				MoveWindow(GetCWnd(), rMain);
 				
 				return lr;
-
 			}
 			else
 			{

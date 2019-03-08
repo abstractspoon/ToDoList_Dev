@@ -81,7 +81,7 @@ public:
     virtual ~CColourPicker();
 
 protected:
-    void SetWindowSize();
+    void SetWindowSize(BOOL bDefault);
 	void DoColourPopup();
 
 // protected attributes
