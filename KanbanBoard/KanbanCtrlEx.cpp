@@ -55,6 +55,7 @@ const UINT WM_KCM_SELECTTASK = (WM_APP+10); // WPARAM , LPARAM = Task ID
 //////////////////////////////////////////////////////////////////////
 
 const UINT IDC_LISTCTRL = 101;
+const UINT IDC_HEADER	= 102;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -110,6 +111,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrlEx, CWnd)
 	ON_WM_CREATE()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_HEADER, OnHeaderCustomDraw)
 	ON_NOTIFY(TVN_BEGINDRAG, IDC_LISTCTRL, OnBeginDragListItem)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_LISTCTRL, OnListItemSelChange)
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_LISTCTRL, OnListEditLabel)
@@ -139,7 +141,13 @@ int CKanbanCtrlEx::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_fonts.Initialise(*this);
 	
 	ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
-	m_ilHeight.Create(1, 32, ILC_COLOR32, 1, 0);
+
+	if (!m_header.Create(HDS_FULLDRAG | HDS_DRAGDROP | WS_CHILD | WS_VISIBLE, 
+						 CRect(lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->cx, 50),
+						 this, IDC_HEADER))
+	{
+		return -1;
+	}
 
 	return 0;
 }
@@ -1633,6 +1641,8 @@ void CKanbanCtrlEx::RebuildDynamicListCtrls(const CKanbanItemArrayMap& mapKIArra
 	// (Re)sort
 	m_aListCtrls.Sort();
 
+	RebuildHeaderColumns(); // always
+
 	if (bNeedResize)
 		Resize();
 }
@@ -1653,6 +1663,7 @@ void CKanbanCtrlEx::RebuildFixedListCtrls(const CKanbanItemArrayMap& mapKIArray)
 			VERIFY(AddNewListCtrl(colDef) != NULL);
 		}
 
+		RebuildHeaderColumns(); // always
 		Resize(); // always
 	}
 }
@@ -1707,7 +1718,7 @@ void CKanbanCtrlEx::RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate)
 	}
 
 	Resize();
-	
+		
 	// We only need to restore selection if not doing a task update
 	// because the app takes care of that
 	if (!bTaskUpdate && dwSelTaskID && !SelectTask(dwSelTaskID))
@@ -1721,6 +1732,37 @@ void CKanbanCtrlEx::RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate)
 			if (!m_pSelectedList)
 				m_pSelectedList = m_aListCtrls[0];
 		}
+	}
+}
+
+void CKanbanCtrlEx::RebuildHeaderColumns()
+{
+	int nNumColumns = GetVisibleColumnCount();
+
+	while (nNumColumns < m_header.GetItemCount())
+	{
+		m_header.DeleteItem(0);
+	}
+
+	while (nNumColumns > m_header.GetItemCount())
+	{
+		m_header.AppendItem(1);
+	}
+
+	for (int nCol = 0; nCol < nNumColumns; nCol++)
+	{
+		const CKanbanListCtrlEx* pList = m_aListCtrls[nCol];
+
+		CEnString sTitle(pList->ColumnDefinition().sTitle);
+
+		if (sTitle.IsEmpty())
+			sTitle.LoadString(IDS_BACKLOG);
+
+		CString sFormat;
+		sFormat.Format(_T("%s (%d)"), sTitle, pList->GetCount());
+
+		m_header.SetItemText(nCol, sFormat);
+		m_header.SetItemData(nCol, (DWORD)pList);
 	}
 }
 
@@ -2143,6 +2185,8 @@ BOOL CKanbanCtrlEx::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_aListCtrls.GetSize())
 	{
+		CDialogHelper::ExcludeChild(&m_header, pDC);
+
 		// Clip out the list controls
 		m_aListCtrls.Exclude(pDC);
 		
@@ -2181,6 +2225,8 @@ void CKanbanCtrlEx::Resize(const CRect& rect)
 
 	if (nNumVisibleLists)
 	{
+		ASSERT(m_header.GetItemCount() == nNumVisibleLists);
+
 		BOOL bHideEmpty = !HasOption(KBCF_SHOWEMPTYCOLUMNS);
 		BOOL bShowBacklog = HasOption(KBCF_ALWAYSSHOWBACKLOG);
 
@@ -2188,6 +2234,12 @@ void CKanbanCtrlEx::Resize(const CRect& rect)
 		CRect rAvail(rect);
 		rAvail.DeflateRect(1, 1);
 
+		CRect rHeader(rAvail);
+		rHeader.bottom = (rHeader.top + GraphicsMisc::ScaleByDPIFactor(24));
+	
+		m_header.MoveWindow(rHeader);
+		rAvail.top = rHeader.bottom;
+		
 		CString sStatus;
 		int nListWidth = (rAvail.Width() / nNumVisibleLists);
 
@@ -2231,6 +2283,8 @@ void CKanbanCtrlEx::Resize(const CRect& rect)
 
 			pList->SetWindowPos(pPrev, rList.left, rList.top, rList.Width(), rList.Height(), 0);
 			pList->SetAttributeLabelVisibility(nLabelVis);
+
+			m_header.SetItemWidth(nVis, rList.Width() + 1); // +1 to allow for column gap
 
 			pPrev = pList;
 			nVis++;
@@ -2608,6 +2662,8 @@ BOOL CKanbanCtrlEx::SelectListCtrl(CKanbanListCtrlEx* pList, BOOL bNotifyParent)
 			m_pSelectedList->SetSelected(TRUE);
 		}
 
+		m_header.Invalidate(TRUE);
+
 		return TRUE;
 	}
 
@@ -2640,10 +2696,71 @@ void CKanbanCtrlEx::OnListEditLabel(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	*pResult = TRUE; // cancel our edit
 
-	NMLVDISPINFO* pNMLV = (NMLVDISPINFO*)pNMHDR;
-	ASSERT(pNMLV->item.lParam);
+	NMTVDISPINFO* pNMTV = (NMTVDISPINFO*)pNMHDR;
+	ASSERT(pNMTV->item.lParam);
 
-	GetParent()->SendMessage(WM_KBC_EDITTASKTITLE, pNMLV->item.lParam);
+	GetParent()->SendMessage(WM_KBC_EDITTASKTITLE, pNMTV->item.lParam);
+}
+
+void CKanbanCtrlEx::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NMCUSTOMDRAW* pNMCD = (NMCUSTOMDRAW*)pNMHDR;
+	*pResult = CDRF_DODEFAULT;
+
+	HWND hwndHdr = pNMCD->hdr.hwndFrom;
+	ASSERT(hwndHdr == m_header);
+	
+	switch (pNMCD->dwDrawStage)
+	{
+	case CDDS_PREPAINT:
+		// Handle RTL text column headers and selected column
+		*pResult = CDRF_NOTIFYITEMDRAW;
+		break;
+		
+	case CDDS_ITEMPREPAINT:
+		if (GraphicsMisc::GetRTLDrawTextFlags(hwndHdr) == DT_RTLREADING)
+		{
+			*pResult = CDRF_NOTIFYPOSTPAINT;
+		}
+		else if (m_pSelectedList)
+		{
+			// Show the text of the selected column in bold
+			if (pNMCD->lItemlParam == (LPARAM)m_pSelectedList)
+				::SelectObject(pNMCD->hdc, m_fonts.GetHFont(GMFS_BOLD));
+			else
+				::SelectObject(pNMCD->hdc, m_fonts.GetHFont());
+			
+			*pResult = CDRF_NEWFONT;
+		}
+		break;
+		
+	case CDDS_ITEMPOSTPAINT:
+		{
+			ASSERT(GraphicsMisc::GetRTLDrawTextFlags(hwndHdr) == DT_RTLREADING);
+
+			CRect rItem(pNMCD->rc);
+			rItem.DeflateRect(3, 0);
+
+			CDC* pDC = CDC::FromHandle(pNMCD->hdc);
+			pDC->SetBkMode(TRANSPARENT);
+
+			// Show the text of the selected column in bold
+			HGDIOBJ hPrev = NULL;
+
+			if (pNMCD->lItemlParam == (LPARAM)m_pSelectedList)
+				hPrev = pDC->SelectObject(m_fonts.GetHFont(GMFS_BOLD));
+			else
+				hPrev = pDC->SelectObject(m_fonts.GetHFont());
+			
+			UINT nFlags = (DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(hwndHdr));
+			pDC->DrawText(m_header.GetItemText(pNMCD->dwItemSpec), rItem, nFlags);
+
+			pDC->SelectObject(hPrev);
+			
+			*pResult = CDRF_SKIPDEFAULT;
+		}
+		break;
+	}
 }
 
 void CKanbanCtrlEx::ClearOtherListSelections(const CKanbanListCtrlEx* pIgnore)
@@ -2900,6 +3017,7 @@ LRESULT CKanbanCtrlEx::OnSetFont(WPARAM wp, LPARAM lp)
 {
 	m_fonts.Initialise((HFONT)wp, FALSE);
 	m_aListCtrls.OnSetFont((HFONT)wp);
+	m_header.SendMessage(WM_SETFONT, wp, lp);
 
 	return 0L;
 }

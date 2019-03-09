@@ -48,9 +48,10 @@ public:
 	BOOL IsBacklog() const;
 	BOOL AttributeValuesMatch(const CKanbanListCtrlEx& other) const;
 
+	const KANBANCOLUMN& ColumnDefinition() const { return m_columnDef; }
+	
 	BOOL Create(UINT nID, CWnd* pParentWnd);
 	HTREEITEM AddTask(const KANBANITEM& ki, BOOL bSelect);
-	void RefreshColumnTitle();
 	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent);
 	
 	BOOL SaveToImage(CBitmap& bmImage, int nColWidth);
@@ -94,6 +95,7 @@ public:
 	bool FilterToolTipMessage(MSG* pMsg) { m_tooltip.FilterToolTipMessage(pMsg); return false; }
 
 	const CTreeCtrlHelper& TCH() const { return m_tch; }
+	CTreeCtrlHelper& TCH() { return m_tch; }
 
 	static CString FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis);
 	static BOOL CanDrag(const CKanbanListCtrlEx* pSrcList, const CKanbanListCtrlEx* pDestList);
@@ -119,7 +121,7 @@ protected:
 
 	KANBANCOLUMN m_columnDef;
 	DWORD m_dwDisplay;
-	int m_nLineHeight;
+	int m_nTitleLineHeight, m_nAttribLineHeight;
 	KBC_ATTRIBLABELS m_nAttribLabelVisiability;
 	
 // Overrides
@@ -134,10 +136,9 @@ public:
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CKanbanListCtrlEx)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
-// 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
@@ -150,12 +151,10 @@ protected:
 
 protected:
 	const KANBANITEM* GetKanbanItem(DWORD dwTaskID) const;
-	int CalcRequiredItemHeight(int nNumLines = -1) const;
 	int CalcItemTitleTextHeight() const;
-	int CalcLineHeight() const;
-	BOOL NeedVScrollbar() const;
+	void CheckUpdateLineHeight();
 	void RefreshBkgndColor();
-	BOOL HandleLButtonClick(CPoint point);
+	BOOL HandleLButtonClick(CPoint point, BOOL bDblClk);
 	BOOL GetItemCheckboxRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
 	BOOL GetItemCheckboxRect(CRect& rItem) const;
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE, const KANBANITEM* pKI = NULL) const;
@@ -164,7 +163,7 @@ protected:
 	BOOL GetItemRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
 
 	BOOL DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
-	BOOL DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const;
+	DWORD DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const;
 	BOOL DrawItemBar(CDC* pDC, const KANBANITEM* pKI, BOOL bHasIcon, CRect& rItem) const;
 	void DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags) const;
 	void FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText, BOOL bSelected) const;
@@ -231,7 +230,6 @@ public:
 	void ClearOtherSelections(const CKanbanListCtrlEx* pIgnore);
 	void Redraw(BOOL bErase);
 	void RemoveDeletedTasks(const CDWordSet& mapCurIDs);
-	void RefreshColumnTitles();
 	void DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanListCtrlEx* pIgnore);
 
 protected:

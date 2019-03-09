@@ -16,6 +16,7 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\fontcache.h"
 #include "..\shared\mapex.h"
+#include "..\shared\enheaderctrl.h"
 
 #include "..\Interfaces\itasklist.h"
 #include "..\Interfaces\iuiextension.h"
@@ -94,12 +95,12 @@ protected:
 	UINT m_nNextColor;
 	IUI_ATTRIBUTE m_nTrackAttribute, m_nSortBy;
 	CString m_sTrackAttribID;
-	CImageList m_ilHeight;
 	CDWordArray m_aPriorityColors;
 	CFontCache m_fonts;
 
 	CKanbanListCtrlEx* m_pSelectedList;
 	CKanbanListCtrlExArray m_aListCtrls;
+	CEnHeaderCtrl m_header;
 
 	CKanbanItemMap m_data;
 	CKanbanAttributeValueMap m_mapAttributeValues;
@@ -126,6 +127,7 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSelectTask(WPARAM wp, LPARAM lp);
+	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -143,6 +145,7 @@ protected:
 	BOOL CheckAddBacklogListCtrl();
 	void RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray);
 	int GetVisibleListCtrlCount() const;
+	void RebuildHeaderColumns();
 
 	KBC_ATTRIBLABELS GetListAttributeLabelVisibility(int nListWidth);
 	float GetAverageListCharWidth();

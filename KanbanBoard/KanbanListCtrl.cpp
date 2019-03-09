@@ -65,7 +65,7 @@ const int NUM_TEXTLINES			= 2;
 const int TITLE_VPADDING		= GraphicsMisc::ScaleByDPIFactor(8);
 const int LV_PADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int CHECKBOX_PADDING		= GraphicsMisc::ScaleByDPIFactor(1);
-const int ICON_OFFSET			= GraphicsMisc::ScaleByDPIFactor(2);
+const int IMAGE_PADDING			= GraphicsMisc::ScaleByDPIFactor(2);
 const int ATTRIB_INDENT			= GraphicsMisc::ScaleByDPIFactor(6);
 const int TIP_PADDING			= GraphicsMisc::ScaleByDPIFactor(4);
 const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
@@ -1318,7 +1318,7 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 				// Attributes are not affected by the icon
 				if (bHasIcon)
-					rTitle.left = max(rAttributes.left, (rItem.left + IMAGE_SIZE + ICON_OFFSET));
+					rTitle.left = max(rAttributes.left, (rItem.left + IMAGE_SIZE + IMAGE_PADDING));
 				
 				// Text
 				DrawItemTitle(pDC, pKI, rTitle, crText);
@@ -1401,8 +1401,8 @@ BOOL CKanbanListCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRect
 	BOOL bHasIcons = FALSE;
 	CRect rIcon(rItem);
 
-	rIcon.left += ICON_OFFSET;
-	rIcon.top += ICON_OFFSET;
+	rIcon.left += IMAGE_PADDING;
+	rIcon.top += IMAGE_PADDING;
 
 	if (pKI->bHasIcon || pKI->bParent)
 	{
@@ -1414,7 +1414,7 @@ BOOL CKanbanListCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRect
 			ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
 			bHasIcons = TRUE;
 
-			rIcon.top += (IMAGE_SIZE + ICON_OFFSET);
+			rIcon.top += (IMAGE_SIZE + IMAGE_PADDING);
 
 			if (m_bShowTaskColorAsBar && !pKI->IsDone(TRUE))
 				rIcon.left += BAR_WIDTH;
@@ -1441,7 +1441,7 @@ BOOL CKanbanListCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, BOOL bHasIcon
 		rBar.right = (rBar.left + BAR_WIDTH);
 
 		if (bHasIcon)
-			rBar.top += (IMAGE_SIZE + ICON_OFFSET);
+			rBar.top += (IMAGE_SIZE + IMAGE_PADDING);
 
 		if (!pKI->IsDone(TRUE))
 		{
@@ -2329,7 +2329,7 @@ int CKanbanListCtrl::CalcRequiredColumnWidthForImage() const
 		{
 			int nMaxItemWidth = (int)(pKI->sTitle.GetLength() * fAveCharWidth / 2); // title is on two lines
 			nMaxItemWidth += (pKI->nLevel * LEVEL_INDENT);
-			nMaxItemWidth += (pKI->bHasIcon ? (IMAGE_SIZE + ICON_OFFSET) : 0);
+			nMaxItemWidth += (pKI->bHasIcon ? (IMAGE_SIZE + IMAGE_PADDING) : 0);
 			
 			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 			{

@@ -763,7 +763,7 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 {
 	ASSERT((HWND)wp == m_ctrlKanban.GetSafeHwnd());
 	ASSERT(lp);
-	const CDWordArray* pChangedIDs = (const CDWordArray*)lp;
+	DWORD dwTaskID = lp;
 	
 	CString sCustAttribID;
 	IUI_ATTRIBUTE nAttrib = IUI_NONE;
@@ -778,36 +778,27 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 		sCustAttribID = m_sTrackedCustomAttribID;
 	}
 
-	int nNumTasks = pChangedIDs->GetSize();
-	CArray<IUITASKMOD, IUITASKMOD&> aMods;
-	CStringArray aTempModValues; // because we are sending pointers to temp values
+	IUITASKMOD mod;
 
-	aMods.SetSize(nNumTasks);
-	aTempModValues.SetSize(nNumTasks);
+	mod.nAttrib = nAttrib;
+	mod.dwSelectedTaskID = dwTaskID;
 
-	for (int nTask = 0; nTask < nNumTasks; nTask++)
+	CStringArray aTaskValues;
+	m_ctrlKanban.GetTaskTrackedAttributeValues(mod.dwSelectedTaskID, aTaskValues);
+
+	CString sModValue = Misc::FormatArray(aTaskValues, '\n');
+
+	switch (nAttrib)
 	{
-		IUITASKMOD& mod = aMods[nTask];
-
-		mod.nAttrib = nAttrib;
-		mod.dwSelectedTaskID = pChangedIDs->GetAt(nTask);
-
-		CStringArray aTaskValues;
-		m_ctrlKanban.GetTaskTrackedAttributeValues(mod.dwSelectedTaskID, aTaskValues);
-
-		aTempModValues[nTask] = Misc::FormatArray(aTaskValues, '\n');
-
-		switch (nAttrib)
-		{
 		case IUI_ALLOCTO:
 		case IUI_CATEGORY:
 		case IUI_TAGS:
 		case IUI_STATUS:
 		case IUI_ALLOCBY:
 		case IUI_VERSION:
-			mod.szValue = aTempModValues[nTask];
+			mod.szValue = sModValue; // temporary string
 			break;
-		
+
 		case IUI_PRIORITY:
 		case IUI_RISK:
 			if (aTaskValues.GetSize() == 0)
@@ -815,22 +806,21 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 			else
 				mod.nValue = _ttoi(aTaskValues[0]);
 			break;
-		
+
 		case IUI_CUSTOMATTRIB:
 			ASSERT(!sCustAttribID.IsEmpty());
-		
-			mod.szValue = aTempModValues[nTask];
+
+			mod.szValue = sModValue;
 			mod.szCustomAttribID = sCustAttribID;
 
 			// TODO - multi value items and time periods
 			break;
-		
+
 		default:
 			ASSERT(0);
-		}
 	}
-		
-	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, nNumTasks, (LPARAM)aMods.GetData());
+
+	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
 }
 
 LRESULT CKanbanWnd::OnKanbanNotifySelectionChange(WPARAM /*wp*/, LPARAM /*lp*/) 

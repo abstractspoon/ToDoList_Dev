@@ -79,6 +79,8 @@ struct KANBANITEM
 	COleDateTime dtDone, dtDue, dtStart, dtLastMod, dtCreate;
 	CString sExternalID, sRecurrence, sCreatedBy, sFileRef;
 
+	mutable DWORD dwDrawnIcons;
+
 	int GetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues) const;
 	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;
 	CString GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const;
@@ -103,7 +105,7 @@ struct KANBANITEM
 	void SetTrackedAttributeValues(IUI_ATTRIBUTE nAttribID, const CStringArray& aValues);
 	void SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, int nValue);
 	void SetColor(COLORREF cr);
-
+	
 	static CString GetAttributeID(IUI_ATTRIBUTE nAttrib);
 	static BOOL IsTrackableAttribute(IUI_ATTRIBUTE nAttrib);
 
