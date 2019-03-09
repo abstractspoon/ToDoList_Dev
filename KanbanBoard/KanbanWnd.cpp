@@ -45,6 +45,7 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	m_bReadOnly(FALSE),
 	m_nTrackedAttrib(IUI_NONE),
 	m_ctrlKanban(),
+	m_dwSelTaskID(0),
 #pragma warning(disable:4355)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
@@ -443,27 +444,14 @@ bool CKanbanWnd::SelectTask(DWORD dwTaskID)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_aSelTaskIDs.RemoveAll();
-	m_aSelTaskIDs.Add(dwTaskID);
+	m_dwSelTaskID = dwTaskID;
 
-	return (m_ctrlKanban.SelectTasks(m_aSelTaskIDs) != FALSE);
+	return (m_ctrlKanban.SelectTask(dwTaskID) != FALSE);
 }
 
 bool CKanbanWnd::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	m_aSelTaskIDs.RemoveAll();
-
-	if (nTaskCount)
-	{
-		ASSERT(pdwTaskIDs);
-	
-		for (int nID = 0; nID < nTaskCount; nID++)
-			m_aSelTaskIDs.Add(pdwTaskIDs[nID]);
-	}
-
-	return (m_ctrlKanban.SelectTasks(m_aSelTaskIDs) != FALSE);
+	return false;
 }
 
 bool CKanbanWnd::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
@@ -480,7 +468,7 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, co
 	CSet<IUI_ATTRIBUTE> attrib(pAttributes, nNumAttributes);
 	
 	m_ctrlKanban.UpdateTasks(pTasks, nUpdate, attrib);
-	m_ctrlKanban.GetSelectedTaskIDs(m_aSelTaskIDs);
+	m_dwSelTaskID = m_ctrlKanban.GetSelectedTaskID();
 	
 	// Update custom attribute combo
 	const CKanbanCustomAttributeDefinitionArray& aCustDefs = m_ctrlKanban.GetCustomAttributeDefinitions();
@@ -728,23 +716,7 @@ BOOL CKanbanWnd::OnEraseBkgnd(CDC* pDC)
 
 void CKanbanWnd::SendParentSelectionUpdate()
 {
-	CDWordArray aTaskIDs;
-
-	switch (m_ctrlKanban.GetSelectedTaskIDs(aTaskIDs))
-	{
-	case 0:
-		GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, 0);
-		break;
-			
-	case 1:
-		GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, aTaskIDs[0]);
-		m_aSelTaskIDs.Copy(aTaskIDs);
-		break;
-		
-	default:
-		GetParent()->SendMessage(WM_IUI_SELECTTASK, (WPARAM)aTaskIDs.GetData(), (LPARAM)aTaskIDs.GetSize());
-		m_aSelTaskIDs.Copy(aTaskIDs);
-	}
+	GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, m_ctrlKanban.GetSelectedTaskID());
 }
 
 void CKanbanWnd::OnSetFocus(CWnd* pOldWnd) 
@@ -983,9 +955,9 @@ void CKanbanWnd::OnSelchangeOptions()
 	m_ctrlKanban.SetOption(KBCF_SHOWPARENTTASKS, bIsShowingParentTasks);
 
 	// Fixup selection if parents are being shown
-	if ((bWasShowingParentTasks || bIsShowingParentTasks) && m_aSelTaskIDs.GetSize())
+	if ((bWasShowingParentTasks || bIsShowingParentTasks) && m_dwSelTaskID)
 	{
-		m_ctrlKanban.SelectTasks(m_aSelTaskIDs);
+		m_ctrlKanban.SelectTask(m_dwSelTaskID);
 		SendParentSelectionUpdate();
 	}
 }

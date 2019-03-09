@@ -7,7 +7,7 @@
 // KanbanWnd.h : header file
 //
 
-#include "KanbanCtrl.h"
+#include "KanbanCtrlEx.h"
 #include "KanbanPreferencesDlg.h"
 #include "KanbanOptionComboBox.h"
 
@@ -64,7 +64,7 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CKanbanWnd)
 	//}}AFX_DATA
-	CKanbanCtrl m_ctrlKanban;
+	CKanbanCtrlEx m_ctrlKanban;
 	CKanbanPreferencesDlg m_dlgPrefs;
 	CKanbanAttributeComboBox m_cbAttributes;
 	CKanbanOptionComboBox m_cbOptions;
@@ -80,7 +80,7 @@ protected:
 	UITHEME m_theme;
 	CString	m_sTrackedCustomAttribID;
 	IUI_ATTRIBUTE m_nTrackedAttrib;
-	CDWordArray m_aSelTaskIDs;
+	DWORD m_dwSelTaskID;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

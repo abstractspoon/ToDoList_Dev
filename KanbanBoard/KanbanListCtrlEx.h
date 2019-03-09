@@ -64,7 +64,7 @@ public:
 	BOOL DeleteTask(DWORD dwTaskID);
 
 	DWORD GetSelectedTaskID() const;
-	BOOL SelectTasks(const CDWordArray& aTaskIDs);
+	BOOL SelectTasks(const CDWordArray& aTaskIDs) { return FALSE; }
 	BOOL SelectTask(DWORD dwTaskID);
 	void ScrollToSelection();
 
@@ -89,8 +89,11 @@ public:
 	int CalcAvailableAttributeWidth(int nListWidth = -1) const;
 	BOOL SelectionHasLockedTasks() const;
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
+	void RefreshItemLineHeights();
 
 	bool FilterToolTipMessage(MSG* pMsg) { m_tooltip.FilterToolTipMessage(pMsg); return false; }
+
+	const CTreeCtrlHelper& TCH() const { return m_tch; }
 
 	static CString FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis);
 	static BOOL CanDrag(const CKanbanListCtrlEx* pSrcList, const CKanbanListCtrlEx* pDestList);
@@ -110,7 +113,7 @@ protected:
 	const CDWordArray& m_aPriorityColors;
 	const CKanbanAttributeArray& m_aDisplayAttrib;
 
-	CImageList m_ilHeight, m_ilCheckboxes, m_ilFlags;
+	CImageList m_ilCheckboxes, m_ilFlags;
 	CToolTipCtrlEx m_tooltip;
 	CTreeCtrlHelper m_tch;
 

@@ -4,7 +4,7 @@
 
 #include "..\3rdparty\xnamedcolors.h"
 
-COLORREF KBCOLORS[] = 
+static COLORREF KBCOLORS[] = 
 {
 // 	colorAliceBlue,            
 // 	colorAntiqueWhite,         
@@ -147,6 +147,6 @@ COLORREF KBCOLORS[] =
 // 	colorYellow,               
 	colorYellowGreen          
 };
-const UINT NUM_KBCOLORS = (sizeof(KBCOLORS) / sizeof(COLORREF));
+static const UINT NUM_KBCOLORS = (sizeof(KBCOLORS) / sizeof(COLORREF));
 
 #endif //XNAMEDCOLORS_H

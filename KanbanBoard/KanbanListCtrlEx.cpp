@@ -934,16 +934,7 @@ void CKanbanListCtrlEx::SetMaximumTaskCount(int nMaxTasks)
 
 void CKanbanListCtrlEx::OnDisplayAttributeChanged()
 {
-	SetImageList(NULL, LVSIL_SMALL);
-	m_ilHeight.DeleteImageList();
-
-	m_nLineHeight = CalcLineHeight();
-	int nItemHeight = CalcRequiredItemHeight();
-
-	// Use an image list to force required height
-	m_ilHeight.Create(1, nItemHeight, ILC_COLOR32, 1, 0);
-	
-	SetImageList(&m_ilHeight, LVSIL_SMALL);
+	RefreshItemLineHeights();
 
 	// Update need for scrollbar
 	BOOL bHasVScrollbar = (GetStyle() & WS_VSCROLL);
@@ -962,6 +953,11 @@ void CKanbanListCtrlEx::OnDisplayAttributeChanged()
 		SendMessage(WM_VSCROLL, SB_TOP, 0);
 		ScrollToSelection();
 	}
+}
+
+void CKanbanListCtrlEx::RefreshItemLineHeights()
+{
+	// TODO
 }
 
 BOOL CKanbanListCtrlEx::NeedVScrollbar() const
@@ -1135,6 +1131,19 @@ HTREEITEM CKanbanListCtrlEx::AddTask(const KANBANITEM& ki, BOOL bSelect)
 
 	if (hti)
 	{
+		if (m_nLineHeight == -1)
+		{
+			CRect rItem;
+			CTreeCtrl::GetItemRect(hti, rItem, FALSE);
+
+			m_nLineHeight = rItem.Height();
+		}
+
+		TVITEMEX tvi = { TVIF_INTEGRAL, hti, 0 };
+		tvi.iIntegral = 4;
+
+		::SendMessage(m_hWnd, TVM_SETITEM, 0, (LPARAM)&tvi);
+
 		// select item and make visible
 		if (bSelect)
 		{
@@ -1794,14 +1803,6 @@ void CKanbanListCtrlEx::ClearSelection()
 BOOL CKanbanListCtrlEx::SelectTask(DWORD dwTaskID)
 {
 	return SelectItem(FindTask(dwTaskID));
-}
-
-BOOL CKanbanListCtrlEx::SelectTasks(const CDWordArray& aTaskIDs)
-{
-	if (aTaskIDs.GetSize() != 1)
-		return FALSE;
-
-	return SelectTask(aTaskIDs[0]);
 }
 
 const KANBANITEM* CKanbanListCtrlEx::GetKanbanItem(DWORD dwTaskID) const
