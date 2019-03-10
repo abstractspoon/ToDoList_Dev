@@ -120,7 +120,7 @@ protected:
 
 	KANBANCOLUMN m_columnDef;
 	DWORD m_dwDisplay;
-	int m_nTitleLineHeight, m_nAttribLineHeight;
+	int m_nItemTextHeight, m_nItemTextBorder;
 	KBC_ATTRIBLABELS m_nAttribLabelVisiability;
 	
 // Overrides
@@ -151,7 +151,7 @@ protected:
 protected:
 	const KANBANITEM* GetKanbanItem(DWORD dwTaskID) const;
 	int CalcItemTitleTextHeight() const;
-	void CheckUpdateLineHeight();
+	void RecalcItemLineHeight();
 	void RefreshBkgndColor();
 	BOOL HandleLButtonClick(CPoint point, BOOL bDblClk);
 	BOOL GetItemCheckboxRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;

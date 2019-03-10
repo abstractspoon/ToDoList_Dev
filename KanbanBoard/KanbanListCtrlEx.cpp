@@ -810,8 +810,8 @@ CKanbanListCtrlEx::CKanbanListCtrlEx(const CKanbanItemMap& data, const KANBANCOL
 	m_bShowTaskColorAsBar(FALSE),
 	m_bShowCompletionCheckboxes(FALSE),
 	m_bColorBarByPriority(FALSE),
-	m_nAttribLineHeight(-1),
-	m_nTitleLineHeight(-1),
+	m_nItemTextHeight(-1),
+	m_nItemTextBorder(-1),
 	m_nAttribLabelVisiability(KBCAL_LONG),
 	m_bSavingToImage(FALSE)
 {
@@ -853,24 +853,28 @@ int CKanbanListCtrlEx::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CTreeCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
-
+	
 	VERIFY(InitTooltip());
+
+	m_ilFlags.Create(IDB_FLAG, 16, 1, RGB(255, 0, 255));
+	CEnImageList::ScaleByDPIFactor(m_ilFlags);
 
 	CFont* pFont = m_fonts.GetFont();
 	ASSERT(pFont);
 
 	if (pFont)
+	{
 		SendMessage(WM_SETFONT, (WPARAM)pFont->GetSafeHandle());
+	}
 	else
-		CheckUpdateLineHeight();
-	
+	{
+		m_nItemTextHeight = -1;
+		OnDisplayAttributeChanged();
+	}
+
 	if (GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255))
 		SetImageList(&m_ilCheckboxes, TVSIL_STATE);
 
-	m_ilFlags.Create(IDB_FLAG, 16, 1, RGB(255, 0, 255));
-	CEnImageList::ScaleByDPIFactor(m_ilFlags);
-
-	OnDisplayAttributeChanged();
 	RefreshBkgndColor();
 
 	return 0;
@@ -917,6 +921,7 @@ void CKanbanListCtrlEx::SetMaximumTaskCount(int nMaxTasks)
 
 void CKanbanListCtrlEx::OnDisplayAttributeChanged()
 {
+	RecalcItemLineHeight();
 	RefreshItemLineHeights();
 }
 
@@ -1026,7 +1031,7 @@ void CKanbanListCtrlEx::SetIndentSubtasks(BOOL bIndent)
 
 int CKanbanListCtrlEx::CalcItemTitleTextHeight() const
 {
-	return ((NUM_TEXTLINES * m_nTitleLineHeight) + 2);
+	return ((NUM_TEXTLINES * m_nItemTextHeight) + 2);
 }
 
 HTREEITEM CKanbanListCtrlEx::AddTask(const KANBANITEM& ki, BOOL bSelect)
@@ -1280,9 +1285,6 @@ void CKanbanListCtrlEx::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 
 	int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
 
-	// Attribute display
-	//rAttrib.left += ATTRIB_INDENT;
-
 	for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 	{
 		IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
@@ -1440,7 +1442,7 @@ BOOL CKanbanListCtrlEx::GetItemCheckboxRect(CRect& rItem) const
 {
 	if (m_bShowCompletionCheckboxes)
 	{
-		rItem.bottom = (rItem.top + m_nAttribLineHeight);
+		rItem.bottom = (rItem.top + GetItemHeight());
 
 		rItem.DeflateRect(0, ((rItem.Height() - CEnImageList::GetImageSize(m_ilCheckboxes)) / 2));
 		rItem.right = (rItem.left + rItem.Height());
@@ -1489,7 +1491,7 @@ BOOL CKanbanListCtrlEx::GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL b
 		int nWidth = max(rItem.Width(), MIN_LABEL_EDIT_WIDTH);
 			
 		rItem.right = rItem.left + nWidth;
-		rItem.bottom = (rItem.top + m_nAttribLineHeight);
+		rItem.bottom = (rItem.top + m_nItemTextHeight + m_nItemTextBorder + 2);
 	}
 
 	return TRUE;
@@ -1517,7 +1519,7 @@ BOOL CKanbanListCtrlEx::GetItemTooltipRect(HTREEITEM hti, CRect& rTip, const KAN
 	HFONT hFont = m_fonts.GetHFont((pKI->dwParentID == 0) ? GMFS_BOLD : 0);
 
 	int nWidth = rTip.Width();
-	int nAvailHeight = (NUM_TEXTLINES * m_nTitleLineHeight);
+	int nAvailHeight = CalcItemTitleTextHeight();
 	int nTextHeight = GraphicsMisc::GetTextHeight(pKI->sTitle, GetSafeHwnd(), nWidth, hFont);
 
 	if (nTextHeight <= nAvailHeight)
@@ -1579,7 +1581,7 @@ void CKanbanListCtrlEx::DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAtt
 	CString sAttrib = FormatAttribute(nAttrib, sValue, nLabelVis);
 	pDC->DrawText(sAttrib, rLine, nFlags);
 
-	rLine.top += m_nAttribLineHeight;
+	rLine.top += (m_nItemTextHeight + m_nItemTextBorder - 1);
 }
 
 CString CKanbanListCtrlEx::FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis)
@@ -1751,7 +1753,6 @@ int CALLBACK CKanbanListCtrlEx::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 				pKI2 = pSort->GetParent(pKI2);
 			}
 		}
-		ASSERT(pKI1->dwParentID == pKI2->dwParentID);
 	
 		switch (pSort->nBy)
 		{
@@ -2038,32 +2039,36 @@ LRESULT CKanbanListCtrlEx::OnSetFont(WPARAM wp, LPARAM lp)
 {
 	LRESULT lr = Default();
 
-	CheckUpdateLineHeight();	
+	m_nItemTextHeight = -1;
 	OnDisplayAttributeChanged();
 
 	return lr;
 }
 
-void CKanbanListCtrlEx::CheckUpdateLineHeight()
+void CKanbanListCtrlEx::RecalcItemLineHeight()
 {
-	CDC* pDC = GetDC();
-	HGDIOBJ hPrev = pDC->SelectObject(m_fonts.GetHFont());
-
-	TEXTMETRIC metrics = { 0 };
-	pDC->GetTextMetrics(&metrics);
-
-	m_nTitleLineHeight = (metrics.tmHeight + metrics.tmExternalLeading);
-	ReleaseDC(pDC);
-
-	int nItemHeight = GetItemHeight();
-
-	if (nItemHeight < (IMAGE_SIZE + IMAGE_PADDING))
+	if (m_nItemTextHeight == -1)
 	{
-		nItemHeight = (IMAGE_SIZE + IMAGE_PADDING);
-		SetItemHeight(nItemHeight);
+		CDC* pDC = GetDC();
+		HGDIOBJ hPrev = pDC->SelectObject(m_fonts.GetHFont());
+
+		TEXTMETRIC metrics = { 0 };
+		pDC->GetTextMetrics(&metrics);
+
+		ReleaseDC(pDC);
+
+		m_nItemTextHeight = (metrics.tmHeight + metrics.tmExternalLeading);
 	}
 
-	m_nAttribLineHeight = nItemHeight;
+	if (m_nItemTextBorder == -1)
+		m_nItemTextBorder = (GetItemHeight() - m_nItemTextHeight);
+
+	int nItemHeight = (m_nItemTextHeight + m_nItemTextBorder);
+		
+	if (m_aDisplayAttrib.GetSize() == 0)
+		nItemHeight = max(nItemHeight, (IMAGE_SIZE + IMAGE_PADDING));
+	
+	SetItemHeight(nItemHeight);
 }
 
 BOOL CKanbanListCtrlEx::InitTooltip()
