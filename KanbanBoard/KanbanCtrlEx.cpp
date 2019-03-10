@@ -141,12 +141,14 @@ int CKanbanCtrlEx::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
 
-	if (!m_header.Create(HDS_FULLDRAG | HDS_DRAGDROP | WS_CHILD | WS_VISIBLE, 
+	if (!m_header.Create(/*HDS_FULLDRAG | HDS_DRAGDROP |*/ WS_CHILD | WS_VISIBLE, 
 						 CRect(lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->cx, 50),
 						 this, IDC_HEADER))
 	{
 		return -1;
 	}
+
+	m_header.EnableTracking(FALSE);
 
 	return 0;
 }
