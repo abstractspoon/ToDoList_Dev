@@ -1929,10 +1929,8 @@ BOOL CKanbanListCtrlEx::HandleLButtonClick(CPoint point, BOOL bDblClk)
 	{
 		CTreeCtrl::Default();
 
-		GetParent()->SendMessage(WM_KLCN_WANTFOCUS, (WPARAM)GetSafeHwnd());
-		VERIFY(m_bSelected);
-
-		return TRUE;
+		if (bDblClk)
+			return TRUE;
 	}
 
 	// Test for checkbox hit

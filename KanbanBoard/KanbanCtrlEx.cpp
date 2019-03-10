@@ -121,7 +121,6 @@ BEGIN_MESSAGE_MAP(CKanbanCtrlEx, CWnd)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_KLCN_CHECKCHANGE, OnListCheckChange)
 	ON_MESSAGE(WM_KLCN_GETTASKICON, OnListGetTaskIcon)
-	ON_MESSAGE(WM_KLCN_WANTFOCUS, OnListWantFocus)
 	ON_MESSAGE(WM_KCM_SELECTTASK, OnSelectTask)
 
 END_MESSAGE_MAP()
@@ -1817,7 +1816,7 @@ void CKanbanCtrlEx::FixupSelectedList()
 
 void CKanbanCtrlEx::FixupListFocus()
 {
-	if (IsWindowVisible() && HasFocus())
+	if (IsWindowVisible() && HasFocus() && (GetFocus() != m_pSelectedList))
 	{
 		CAutoFlag af(m_bSettingListFocus, TRUE);
 
@@ -2614,7 +2613,7 @@ void CKanbanCtrlEx::NotifyParentSelectionChange()
 {
 	ASSERT(!m_bSelectTasks);
 
-	GetParent()->SendMessage(WM_KBC_SELECTIONCHANGE, 0, 0);
+	GetParent()->SendMessage(WM_KBC_SELECTIONCHANGE, GetSelectedTaskID(), 0);
 }
 
 // external version
@@ -2680,8 +2679,16 @@ void CKanbanCtrlEx::OnListItemSelChange(NMHDR* pNMHDR, LRESULT* pResult)
 	// only interested in selection changes from the selected list 
 	// and occurring outside of a drag'n'drop or a call to 'SelectTasks', because the 'actual' 
 	// selected task IDs will not change during a drag'n'drop
-	if (!m_bSelectTasks && !IsDragging() && IsSelectedListCtrl(pNMHDR->hwndFrom))
+	if (!m_bSelectTasks && !IsDragging())
 	{
+		CKanbanListCtrlEx* pList = m_aListCtrls.Get(pNMHDR->hwndFrom);
+
+		if (pList && (pList != m_pSelectedList))
+		{
+			CAutoFlag af(m_bSelectTasks, TRUE);
+			SelectListCtrl(pList, FALSE);
+		}
+
 		NotifyParentSelectionChange();
 	}
 #ifdef _DEBUG
@@ -3052,25 +3059,6 @@ LRESULT CKanbanCtrlEx::OnSelectTask(WPARAM /*wp*/, LPARAM lp)
 LRESULT CKanbanCtrlEx::OnListGetTaskIcon(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_KBC_GETTASKICON, wp, lp);
-}
-
-LRESULT CKanbanCtrlEx::OnListWantFocus(WPARAM wp, LPARAM /*lp*/)
-{
-	HWND hwndList = (HWND)wp;
-	ASSERT(hwndList && IsWindow(hwndList));
-
-	CKanbanListCtrlEx* pList = m_aListCtrls.Get(hwndList);
-	ASSERT(pList);
-
-	if (pList)
-	{
-		ASSERT(pList != m_pSelectedList);
-
-		if (pList != m_pSelectedList)
-			SelectListCtrl(pList, FALSE);
-	}
-
-	return 0L;
 }
 
 void CKanbanCtrlEx::OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult)

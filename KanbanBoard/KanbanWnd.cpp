@@ -823,8 +823,9 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
 }
 
-LRESULT CKanbanWnd::OnKanbanNotifySelectionChange(WPARAM /*wp*/, LPARAM /*lp*/) 
+LRESULT CKanbanWnd::OnKanbanNotifySelectionChange(WPARAM wp, LPARAM /*lp*/) 
 {
+	m_dwSelTaskID = wp;
 	SendParentSelectionUpdate();
 	
 	return 0L;
@@ -832,7 +833,7 @@ LRESULT CKanbanWnd::OnKanbanNotifySelectionChange(WPARAM /*wp*/, LPARAM /*lp*/)
 
 LRESULT CKanbanWnd::OnKanbanNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp) 
 {
-	IUITASKMOD mod = { IUI_DONEDATE, 0 };
+	IUITASKMOD mod = { IUI_DONEDATE, m_dwSelTaskID, 0 };
 
 	if (lp) // done/not done
 		VERIFY(CDateHelper::GetTimeT64(CDateHelper::GetDate(DHD_NOW), mod.tValue));

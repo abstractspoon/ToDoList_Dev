@@ -118,7 +118,6 @@ protected:
 	afx_msg void OnListEditLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnListCheckChange(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnListWantFocus(WPARAM wp, LPARAM lp);
 	afx_msg void OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnListGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
