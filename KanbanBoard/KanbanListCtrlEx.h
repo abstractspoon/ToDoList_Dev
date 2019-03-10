@@ -84,12 +84,14 @@ public:
 	void SetColorTaskBarByPriority(BOOL bSet = TRUE);
 	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
 	void SetIndentSubtasks(BOOL bIndent = TRUE);
+	void SetHideEmptyAttributes(BOOL bHide = TRUE);
 
 	void OnDisplayAttributeChanged();
 	int CalcAvailableAttributeWidth(int nListWidth = -1) const;
 	BOOL SelectionHasLockedTasks() const;
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
 	void RefreshItemLineHeights();
+	void RefreshItemLineHeights(DWORD dwTaskID);
 
 	bool FilterToolTipMessage(MSG* pMsg) { m_tooltip.FilterToolTipMessage(pMsg); return false; }
 
@@ -108,6 +110,7 @@ protected:
 	BOOL m_bSavingToImage;
 	BOOL m_bShowCompletionCheckboxes;
 	BOOL m_bIndentSubtasks;
+	BOOL m_bHideEmptyAttributes;
 
 	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;
@@ -160,6 +163,7 @@ protected:
 	BOOL InitTooltip();
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
 	BOOL GetItemRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
+	void RefreshItemLineHeights(HTREEITEM hti);
 
 	BOOL DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	DWORD DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const;
@@ -205,6 +209,7 @@ public:
 	void SetColorTaskBarByPriority(BOOL bSet = TRUE);
 	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
 	void SetIndentSubtasks(BOOL bIndent = TRUE);
+	void SetHideEmptyAttributes(BOOL bHide = TRUE);
 	
 	int GetVisibleCount(BOOL bIncBacklog) const;
 	int GetVisibleTaskCount() const;

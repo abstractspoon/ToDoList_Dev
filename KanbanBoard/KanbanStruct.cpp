@@ -347,6 +347,9 @@ int KANBANITEM::GetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValue
 
 BOOL KANBANITEM::HasTrackedAttributeValues(LPCTSTR szAttrib) const
 {
+	if (Misc::IsEmpty(szAttrib))
+		return FALSE;
+
 	const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
 
 	return (pArray && pArray->GetSize());
@@ -425,6 +428,61 @@ CString KANBANITEM::GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
 	}
 
 	return _T("");
+}
+
+BOOL KANBANITEM::HasAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
+{
+	switch (nAttrib)
+	{
+	case IUI_TASKNAME:
+	case IUI_ID:
+		return TRUE;
+
+	case IUI_ALLOCTO:	
+	case IUI_ALLOCBY:	
+	case IUI_STATUS:	
+	case IUI_CATEGORY:	
+	case IUI_VERSION:	
+	case IUI_TAGS:		
+	case IUI_PRIORITY:	
+	case IUI_RISK:			
+		return HasTrackedAttributeValues(KANBANITEM::GetAttributeID(nAttrib));
+		
+	case IUI_DONEDATE:		return CDateHelper::IsDateSet(dtDone);
+	case IUI_DUEDATE:		return CDateHelper::IsDateSet(dtDue);
+	case IUI_STARTDATE:		return CDateHelper::IsDateSet(dtStart);
+	case IUI_CREATIONDATE:	return CDateHelper::IsDateSet(dtCreate);
+	case IUI_LASTMOD:		return CDateHelper::IsDateSet(dtLastMod);
+
+	case IUI_FILEREF:		return !sFileRef.IsEmpty();
+	case IUI_PARENT:		return !sPath.IsEmpty();
+	case IUI_CREATEDBY:		return !sCreatedBy.IsEmpty();
+	case IUI_EXTERNALID:	return !sExternalID.IsEmpty();
+	case IUI_RECURRENCE:	return !sRecurrence.IsEmpty();
+
+	case IUI_PERCENT:		return (nPercent > 0);
+	case IUI_COST:			return (dCost > 0);
+	case IUI_TIMEEST:		return (dTimeEst > 0);
+	case IUI_TIMESPENT:		return (dTimeSpent > 0);
+
+	case IUI_FLAG:			return bFlag;
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
+int KANBANITEM::GetNonEmptyAttributeCount(const CKanbanAttributeArray& aDisplayAttrib) const
+{
+	int nCount = 0, nAttrib = aDisplayAttrib.GetSize();
+
+	while (nAttrib--)
+	{
+		if (HasAttributeDisplayValue(aDisplayAttrib[nAttrib]))
+			nCount++;
+	}
+
+	return nCount;
 }
 
 BOOL KANBANITEM::AttributeValuesMatch(LPCTSTR szAttrib, const KANBANITEM& ki) const

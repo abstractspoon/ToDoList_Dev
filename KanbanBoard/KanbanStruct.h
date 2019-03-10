@@ -84,10 +84,12 @@ struct KANBANITEM
 	int GetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues) const;
 	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;
 	CString GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const;
+	BOOL HasAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const;
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetFillColor(BOOL bColorIsBkgnd) const;
 	COLORREF GetBorderColor(BOOL bColorIsBkgnd) const;
 	int GetPriority() const;
+	int GetNonEmptyAttributeCount(const CKanbanAttributeArray& aDisplayAttrib) const;
 
 	BOOL HasColor() const;
 	BOOL IsDone(BOOL bIncludeGoodAs) const;

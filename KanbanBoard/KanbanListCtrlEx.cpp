@@ -391,6 +391,19 @@ void CKanbanListCtrlExArray::SetIndentSubtasks(BOOL bIndent)
 	}
 }
 
+void CKanbanListCtrlExArray::SetHideEmptyAttributes(BOOL bHide)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrlEx* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->SetHideEmptyAttributes(bHide);
+	}
+}
+
 void CKanbanListCtrlExArray::Exclude(CDC* pDC)
 {
 	int nList = GetSize();
@@ -801,6 +814,7 @@ CKanbanListCtrlEx::CKanbanListCtrlEx(const CKanbanItemMap& data, const KANBANCOL
 	m_tch(*this),
 	m_columnDef(columnDef),
 	m_aDisplayAttrib(aDisplayAttrib),
+	m_bHideEmptyAttributes(TRUE),
 	m_fonts(fonts),
 	m_aPriorityColors(aPriorityColors),
 	m_bStrikeThruDoneTasks(FALSE),
@@ -932,24 +946,37 @@ void CKanbanListCtrlEx::RefreshItemLineHeights()
 
 	while (hti)
 	{
-		const KANBANITEM* pKI = GetKanbanItem(GetTaskID(hti));
-		ASSERT(pKI);
-
-		int nNumLines = 2;
-		
-		if (m_aDisplayAttrib.GetSize() > 0)
-		{
-			nNumLines += m_aDisplayAttrib.GetSize();
-		}
-		else if (pKI->dwDrawnIcons == (KLCDI_FLAG | KLCDI_ICON))
-		{
-			nNumLines++;
-		}
-
-		TCH().SetItemIntegral(hti, nNumLines);
-
+		RefreshItemLineHeights(hti);
 		hti = GetNextSiblingItem(hti);
 	}
+}
+
+void CKanbanListCtrlEx::RefreshItemLineHeights(HTREEITEM hti)
+{
+	ASSERT(hti);
+
+	const KANBANITEM* pKI = GetKanbanItem(GetTaskID(hti));
+	ASSERT(pKI);
+
+	int nNumLines = 2;
+
+	if (m_aDisplayAttrib.GetSize() > 0)
+	{
+		if (m_bHideEmptyAttributes)
+			nNumLines += pKI->GetNonEmptyAttributeCount(m_aDisplayAttrib);
+		else
+			nNumLines += m_aDisplayAttrib.GetSize();
+	}
+
+	TCH().SetItemIntegral(hti, nNumLines);
+}
+
+void CKanbanListCtrlEx::RefreshItemLineHeights(DWORD dwTaskID)
+{
+	HTREEITEM hti = TCH().FindItem(dwTaskID);
+
+	if (hti)
+		RefreshItemLineHeights(hti);
 }
 
 void CKanbanListCtrlEx::SetTextColorIsBackground(BOOL bSet)
@@ -1027,6 +1054,17 @@ void CKanbanListCtrlEx::SetIndentSubtasks(BOOL bIndent)
 
 	if (GetSafeHwnd())
 		Invalidate(TRUE);
+}
+
+void CKanbanListCtrlEx::SetHideEmptyAttributes(BOOL bHide)
+{
+	if (m_bHideEmptyAttributes != bHide)
+	{
+		m_bHideEmptyAttributes = bHide;
+
+		if (GetSafeHwnd())
+			RefreshItemLineHeights();
+	}
 }
 
 int CKanbanListCtrlEx::CalcItemTitleTextHeight() const
@@ -1288,7 +1326,9 @@ void CKanbanListCtrlEx::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 	for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 	{
 		IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
-		DrawAttribute(pDC, rAttrib, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags);
+		
+		if (!m_bHideEmptyAttributes || pKI->HasAttributeDisplayValue(nAttrib))
+			DrawAttribute(pDC, rAttrib, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags);
 	}
 
 	if (pOldFont)
