@@ -29,11 +29,11 @@ class CThemed;
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CKanbanCtrlEx : public CWnd  
+class CKanbanCtrl : public CWnd  
 {
 public:
-	CKanbanCtrlEx();
-	virtual ~CKanbanCtrlEx();
+	CKanbanCtrl();
+	virtual ~CKanbanCtrl();
 
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
 

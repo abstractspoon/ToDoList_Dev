@@ -64,7 +64,7 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CKanbanWnd)
 	//}}AFX_DATA
-	CKanbanCtrlEx m_ctrlKanban;
+	CKanbanCtrl m_ctrlKanban;
 	CKanbanPreferencesDlg m_dlgPrefs;
 	CKanbanAttributeComboBox m_cbAttributes;
 	CKanbanOptionComboBox m_cbOptions;
