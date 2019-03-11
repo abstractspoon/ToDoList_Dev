@@ -180,10 +180,10 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CKanbanListCtrlExArray : public CArray<CKanbanListCtrl*, CKanbanListCtrl*&>
+class CKanbanListCtrlArray : public CArray<CKanbanListCtrl*, CKanbanListCtrl*&>
 {
 public:
-	virtual ~CKanbanListCtrlExArray();
+	virtual ~CKanbanListCtrlArray();
 	
 	void RemoveAll();
 	BOOL RemoveAt(int nList);

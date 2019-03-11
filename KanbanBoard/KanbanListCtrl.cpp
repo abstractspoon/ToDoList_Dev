@@ -82,12 +82,12 @@ const CRect TEXT_BORDER			= CRect(4, 3, 3, 2);
 
 /////////////////////////////////////////////////////////////////////////////
 
-CKanbanListCtrlExArray::~CKanbanListCtrlExArray()
+CKanbanListCtrlArray::~CKanbanListCtrlArray()
 {
 	RemoveAll();
 }
 
-void CKanbanListCtrlExArray::RemoveAll()
+void CKanbanListCtrlArray::RemoveAll()
 {
 	int nList = GetSize();
 	
@@ -95,7 +95,7 @@ void CKanbanListCtrlExArray::RemoveAll()
 		RemoveAt(nList);
 }
 
-BOOL CKanbanListCtrlExArray::RemoveAt(int nList)
+BOOL CKanbanListCtrlArray::RemoveAt(int nList)
 {
 	if ((nList < 0) || (nList >= GetSize()))
 	{
@@ -116,13 +116,13 @@ BOOL CKanbanListCtrlExArray::RemoveAt(int nList)
 	return TRUE;
 }
 
-int CKanbanListCtrlExArray::Find(DWORD dwTaskID) const
+int CKanbanListCtrlArray::Find(DWORD dwTaskID) const
 {
 	HTREEITEM htiUnused;
 	return Find(dwTaskID, htiUnused);
 }
 
-int CKanbanListCtrlExArray::Find(DWORD dwTaskID, HTREEITEM& hti) const
+int CKanbanListCtrlArray::Find(DWORD dwTaskID, HTREEITEM& hti) const
 {
 	if (dwTaskID)
 	{
@@ -145,7 +145,7 @@ int CKanbanListCtrlExArray::Find(DWORD dwTaskID, HTREEITEM& hti) const
 	return -1;
 }
 
-int CKanbanListCtrlExArray::Find(const CString& sAttribValue) const
+int CKanbanListCtrlArray::Find(const CString& sAttribValue) const
 {
 	CString sAttribValueID(Misc::ToUpper(sAttribValue));
 	int nNumList = GetSize();
@@ -163,7 +163,7 @@ int CKanbanListCtrlExArray::Find(const CString& sAttribValue) const
 	return -1;
 }
 
-int CKanbanListCtrlExArray::Find(HWND hwnd) const
+int CKanbanListCtrlArray::Find(HWND hwnd) const
 {
 	ASSERT(hwnd);
 
@@ -182,7 +182,7 @@ int CKanbanListCtrlExArray::Find(HWND hwnd) const
 	return -1;
 }
 
-int CKanbanListCtrlExArray::Find(const CKanbanListCtrl* pList) const
+int CKanbanListCtrlArray::Find(const CKanbanListCtrl* pList) const
 {
 	int nList = GetSize();
 
@@ -196,13 +196,13 @@ int CKanbanListCtrlExArray::Find(const CKanbanListCtrl* pList) const
 	return -1;
 }
 
-CKanbanListCtrl* CKanbanListCtrlExArray::Get(DWORD dwTaskID) const
+CKanbanListCtrl* CKanbanListCtrlArray::Get(DWORD dwTaskID) const
 {
 	HTREEITEM htiUnused;
 	return Get(dwTaskID, htiUnused);
 }
 
-CKanbanListCtrl* CKanbanListCtrlExArray::Get(DWORD dwTaskID, HTREEITEM& hti) const
+CKanbanListCtrl* CKanbanListCtrlArray::Get(DWORD dwTaskID, HTREEITEM& hti) const
 {
 	int nFind = Find(dwTaskID, hti);
 
@@ -214,7 +214,7 @@ CKanbanListCtrl* CKanbanListCtrlExArray::Get(DWORD dwTaskID, HTREEITEM& hti) con
 	return NULL;
 }
 
-CKanbanListCtrl* CKanbanListCtrlExArray::Get(const CString& sAttribValue) const
+CKanbanListCtrl* CKanbanListCtrlArray::Get(const CString& sAttribValue) const
 {
 	int nFind = Find(sAttribValue);
 
@@ -225,7 +225,7 @@ CKanbanListCtrl* CKanbanListCtrlExArray::Get(const CString& sAttribValue) const
 	return NULL;
 }
 
-CKanbanListCtrl* CKanbanListCtrlExArray::Get(HWND hwnd) const
+CKanbanListCtrl* CKanbanListCtrlArray::Get(HWND hwnd) const
 {
 	int nFind = Find(hwnd);
 
@@ -236,7 +236,7 @@ CKanbanListCtrl* CKanbanListCtrlExArray::Get(HWND hwnd) const
 	return NULL;
 }
 
-CKanbanListCtrl* CKanbanListCtrlExArray::GetFirstNonEmpty() const
+CKanbanListCtrl* CKanbanListCtrlArray::GetFirstNonEmpty() const
 {
 	int nNumList = GetSize();
 
@@ -253,7 +253,7 @@ CKanbanListCtrl* CKanbanListCtrlExArray::GetFirstNonEmpty() const
 	return NULL;
 }
 
-CKanbanListCtrl* CKanbanListCtrlExArray::GetLastNonEmpty() const
+CKanbanListCtrl* CKanbanListCtrlArray::GetLastNonEmpty() const
 {
 	int nList = GetSize();
 
@@ -270,7 +270,7 @@ CKanbanListCtrl* CKanbanListCtrlExArray::GetLastNonEmpty() const
 	return NULL;
 }
 
-CKanbanListCtrl* CKanbanListCtrlExArray::GetBacklog() const
+CKanbanListCtrl* CKanbanListCtrlArray::GetBacklog() const
 {
 	int nList = GetSize();
 
@@ -287,7 +287,7 @@ CKanbanListCtrl* CKanbanListCtrlExArray::GetBacklog() const
 	return NULL;
 }
 
-void CKanbanListCtrlExArray::OnDisplayAttributeChanged()
+void CKanbanListCtrlArray::OnDisplayAttributeChanged()
 {
 	int nList = GetSize();
 
@@ -300,7 +300,7 @@ void CKanbanListCtrlExArray::OnDisplayAttributeChanged()
 	}
 }
 
-void CKanbanListCtrlExArray::SetTextColorIsBackground(BOOL bSet)
+void CKanbanListCtrlArray::SetTextColorIsBackground(BOOL bSet)
 {
 	int nList = GetSize();
 
@@ -313,7 +313,7 @@ void CKanbanListCtrlExArray::SetTextColorIsBackground(BOOL bSet)
 	}
 }
 
-void CKanbanListCtrlExArray::SetShowTaskColorAsBar(BOOL bSet)
+void CKanbanListCtrlArray::SetShowTaskColorAsBar(BOOL bSet)
 {
 	int nList = GetSize();
 
@@ -326,7 +326,7 @@ void CKanbanListCtrlExArray::SetShowTaskColorAsBar(BOOL bSet)
 	}
 }
 
-void CKanbanListCtrlExArray::SetStrikeThruDoneTasks(BOOL bSet)
+void CKanbanListCtrlArray::SetStrikeThruDoneTasks(BOOL bSet)
 {
 	int nList = GetSize();
 
@@ -339,7 +339,7 @@ void CKanbanListCtrlExArray::SetStrikeThruDoneTasks(BOOL bSet)
 	}
 }
 
-void CKanbanListCtrlExArray::SetColorTaskBarByPriority(BOOL bSet)
+void CKanbanListCtrlArray::SetColorTaskBarByPriority(BOOL bSet)
 {
 	int nList = GetSize();
 
@@ -352,7 +352,7 @@ void CKanbanListCtrlExArray::SetColorTaskBarByPriority(BOOL bSet)
 	}
 }
 
-void CKanbanListCtrlExArray::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis)
+void CKanbanListCtrlArray::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis)
 {
 	int nList = GetSize();
 
@@ -365,7 +365,7 @@ void CKanbanListCtrlExArray::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabel
 	}
 }
 
-void CKanbanListCtrlExArray::SetShowCompletionCheckboxes(BOOL bShow)
+void CKanbanListCtrlArray::SetShowCompletionCheckboxes(BOOL bShow)
 {
 	int nList = GetSize();
 
@@ -378,7 +378,7 @@ void CKanbanListCtrlExArray::SetShowCompletionCheckboxes(BOOL bShow)
 	}
 }
 
-void CKanbanListCtrlExArray::SetIndentSubtasks(BOOL bIndent)
+void CKanbanListCtrlArray::SetIndentSubtasks(BOOL bIndent)
 {
 	int nList = GetSize();
 
@@ -391,7 +391,7 @@ void CKanbanListCtrlExArray::SetIndentSubtasks(BOOL bIndent)
 	}
 }
 
-void CKanbanListCtrlExArray::SetHideEmptyAttributes(BOOL bHide)
+void CKanbanListCtrlArray::SetHideEmptyAttributes(BOOL bHide)
 {
 	int nList = GetSize();
 
@@ -404,7 +404,7 @@ void CKanbanListCtrlExArray::SetHideEmptyAttributes(BOOL bHide)
 	}
 }
 
-void CKanbanListCtrlExArray::Exclude(CDC* pDC)
+void CKanbanListCtrlArray::Exclude(CDC* pDC)
 {
 	int nList = GetSize();
 
@@ -417,7 +417,7 @@ void CKanbanListCtrlExArray::Exclude(CDC* pDC)
 	}
 }
 
-void CKanbanListCtrlExArray::SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent)
+void CKanbanListCtrlArray::SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent)
 {
 	int nList = GetSize();
 
@@ -430,13 +430,13 @@ void CKanbanListCtrlExArray::SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL 
 	}
 }
 
-void CKanbanListCtrlExArray::Sort()
+void CKanbanListCtrlArray::Sort()
 {
 	if (GetSize() > 1)
 		qsort(GetData(), GetSize(), sizeof(CKanbanListCtrl**), ListSortProc);
 }
 
-int CKanbanListCtrlExArray::ListSortProc(const void* pV1, const void* pV2)
+int CKanbanListCtrlArray::ListSortProc(const void* pV1, const void* pV2)
 {
 	typedef CKanbanListCtrl* LPCKanbanListCtrlEx;
 
@@ -454,7 +454,7 @@ int CKanbanListCtrlExArray::ListSortProc(const void* pV1, const void* pV2)
 	return Misc::NaturalCompare(pKLC1->GetAttributeValue(), pKLC2->GetAttributeValue());
 }
 
-int CKanbanListCtrlExArray::GetVisibleCount(BOOL bIncBacklog) const
+int CKanbanListCtrlArray::GetVisibleCount(BOOL bIncBacklog) const
 {
 	int nList = GetSize(), nNumVis = 0;
 
@@ -470,7 +470,7 @@ int CKanbanListCtrlExArray::GetVisibleCount(BOOL bIncBacklog) const
 	return nNumVis;
 }
 
-int CKanbanListCtrlExArray::GetVisibleTaskCount() const
+int CKanbanListCtrlArray::GetVisibleTaskCount() const
 {
 	int nList = GetSize(), nNumVis = 0;
 
@@ -485,7 +485,7 @@ int CKanbanListCtrlExArray::GetVisibleTaskCount() const
 	return nNumVis;
 }
 
-float CKanbanListCtrlExArray::GetAverageCharWidth()
+float CKanbanListCtrlArray::GetAverageCharWidth()
 {
 	ASSERT(GetSize());
 
@@ -504,7 +504,7 @@ float CKanbanListCtrlExArray::GetAverageCharWidth()
 	return fAveCharWidth;
 }
 
-CKanbanListCtrl* CKanbanListCtrlExArray::GetNext(const CKanbanListCtrl* pList, BOOL bNext, 
+CKanbanListCtrl* CKanbanListCtrlArray::GetNext(const CKanbanListCtrl* pList, BOOL bNext, 
 												BOOL bExcludeEmpty, BOOL bFixedColumns) const
 {
 	int nList = -1;
@@ -574,7 +574,7 @@ CKanbanListCtrl* CKanbanListCtrlExArray::GetNext(const CKanbanListCtrl* pList, B
 	return NULL;
 }
 
-CKanbanListCtrl* CKanbanListCtrlExArray::HitTest(const CPoint& ptScreen, BOOL* pbHeader) const
+CKanbanListCtrl* CKanbanListCtrlArray::HitTest(const CPoint& ptScreen, BOOL* pbHeader) const
 {
 	HWND hwnd = ::WindowFromPoint(ptScreen);
 
@@ -596,7 +596,7 @@ CKanbanListCtrl* CKanbanListCtrlExArray::HitTest(const CPoint& ptScreen, BOOL* p
 	return pList;
 }
 
-DWORD CKanbanListCtrlExArray::HitTestTask(const CPoint& ptScreen) const
+DWORD CKanbanListCtrlArray::HitTestTask(const CPoint& ptScreen) const
 {
 	const CKanbanListCtrl* pList = HitTest(ptScreen);
 
@@ -612,7 +612,7 @@ DWORD CKanbanListCtrlExArray::HitTestTask(const CPoint& ptScreen) const
 	return 0;
 }
 
-void CKanbanListCtrlExArray::ClearOtherSelections(const CKanbanListCtrl* pIgnore)
+void CKanbanListCtrlArray::ClearOtherSelections(const CKanbanListCtrl* pIgnore)
 {
 	int nList = GetSize();
 
@@ -628,7 +628,7 @@ void CKanbanListCtrlExArray::ClearOtherSelections(const CKanbanListCtrl* pIgnore
 	}
 }
 
-void CKanbanListCtrlExArray::DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanListCtrl* pIgnore)
+void CKanbanListCtrlArray::DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanListCtrl* pIgnore)
 {
 	int nList = GetSize();
 
@@ -642,7 +642,7 @@ void CKanbanListCtrlExArray::DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanL
 	}
 }
 
-int CKanbanListCtrlExArray::CalcRequiredColumnWidthForImage() const
+int CKanbanListCtrlArray::CalcRequiredColumnWidthForImage() const
 {
 	int nMaxWidth = 0;
 	int nList = GetSize();
@@ -659,7 +659,7 @@ int CKanbanListCtrlExArray::CalcRequiredColumnWidthForImage() const
 	return nMaxWidth;
 }
 
-BOOL CKanbanListCtrlExArray::CanSaveToImage() const
+BOOL CKanbanListCtrlArray::CanSaveToImage() const
 {
 	// At least one column must have items
 	// And the item count per page must be 1 or more
@@ -683,7 +683,7 @@ BOOL CKanbanListCtrlExArray::CanSaveToImage() const
 	return FALSE;
 }
 
-BOOL CKanbanListCtrlExArray::SaveToImage(CBitmap& bmImage)
+BOOL CKanbanListCtrlArray::SaveToImage(CBitmap& bmImage)
 {
 	if (!CanSaveToImage())
 		return FALSE;
@@ -749,7 +749,7 @@ BOOL CKanbanListCtrlExArray::SaveToImage(CBitmap& bmImage)
 	return (bmImage.GetSafeHandle() != NULL);
 }
 
-void CKanbanListCtrlExArray::OnSetFont(HFONT hFont)
+void CKanbanListCtrlArray::OnSetFont(HFONT hFont)
 {
 	int nList = GetSize();
 
@@ -762,7 +762,7 @@ void CKanbanListCtrlExArray::OnSetFont(HFONT hFont)
 	}
 }
 
-void CKanbanListCtrlExArray::Redraw(BOOL bErase)
+void CKanbanListCtrlArray::Redraw(BOOL bErase)
 {
 	int nList = GetSize();
 
@@ -776,7 +776,7 @@ void CKanbanListCtrlExArray::Redraw(BOOL bErase)
 	}
 }
 
-void CKanbanListCtrlExArray::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
+void CKanbanListCtrlArray::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 {
 	// Go thru each list removing deleted items
 	int nList = GetSize();

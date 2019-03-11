@@ -99,7 +99,7 @@ protected:
 	CFontCache m_fonts;
 
 	CKanbanListCtrl* m_pSelectedList;
-	CKanbanListCtrlExArray m_aListCtrls;
+	CKanbanListCtrlArray m_aListCtrls;
 	CEnHeaderCtrl m_header;
 
 	CKanbanItemMap m_data;
