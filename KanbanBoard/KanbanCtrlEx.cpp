@@ -547,9 +547,17 @@ void CKanbanCtrlEx::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			bChange |= UpdateData(pTasks, pTasks->GetFirstTask(), attrib, TRUE);
 
 			if (bChange)
+			{
 				RebuildListCtrls(TRUE, TRUE);
+			}
+			else if (UpdateNeedsItemHeightRefresh(attrib))
+			{
+
+			}
 			else
+			{
 				RedrawListCtrls(TRUE);
+			}
 		}
 		break;
 		
@@ -560,6 +568,22 @@ void CKanbanCtrlEx::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	default:
 		ASSERT(0);
 	}
+}
+
+BOOL CKanbanCtrlEx::UpdateNeedsItemHeightRefresh(const CSet<IUI_ATTRIBUTE>& attrib) const
+{
+	if (HasOption(KBCF_HIDEEMPTYATTRIBUTEVALUES))
+	{
+		int nAtt = m_aDisplayAttrib.GetSize();
+
+		while (nAtt--)
+		{
+			if (attrib.Has(m_aDisplayAttrib[nAtt]))
+				return TRUE;
+		}
+	}
+
+	return FALSE;
 }
 
 int CKanbanCtrlEx::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues)
@@ -1161,7 +1185,8 @@ BOOL CKanbanCtrlEx::UpdateGlobalAttributeValues(LPCTSTR szAttribID, const CStrin
 	if (!Misc::MatchAll(mapNewValues, *pValues))
 	{
 		Misc::Copy(mapNewValues, *pValues);
-		return TRUE;
+
+		return IsTracking(szAttribID);
 	}
 
 	// all else

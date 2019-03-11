@@ -193,6 +193,7 @@ protected:
 	BOOL IsTrackedAttributeMultiValue() const;
 	BOOL IsTracking(const CString& sAttribID) const;
 	BOOL CanDrag(const CKanbanListCtrlEx* pSrcList, const CKanbanListCtrlEx* pDestList) const;
+	BOOL UpdateNeedsItemHeightRefresh(const CSet<IUI_ATTRIBUTE>& attrib) const;
 
 	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	BOOL RebuildData(const ITASKLISTBASE* pTasks, const CSet<IUI_ATTRIBUTE>& attrib);
