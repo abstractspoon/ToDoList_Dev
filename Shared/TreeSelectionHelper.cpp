@@ -911,10 +911,6 @@ void CTreeSelectionHelper::OrderItems(BOOL bVisibleOnly)
 
 void CTreeSelectionHelper::OrderItems(CHTIList& selection, BOOL bVisibleOnly) const
 {
-#ifdef _DEBUG
-	DWORD dwTick = GetTickCount();
-#endif
-
 	if (selection.GetCount() > 1)
 	{
 		CHTIList lstOrdered;
@@ -922,10 +918,6 @@ void CTreeSelectionHelper::OrderItems(CHTIList& selection, BOOL bVisibleOnly) co
 
 		selection.Copy(lstOrdered);
 	}
-
-#ifdef _DEBUG
-	TRACE(_T("CTreeSelectionHelper::OrderItems took %ld ms\n"), (GetTickCount() - dwTick));
-#endif
 }
 
 BOOL CTreeSelectionHelper::BuildOrderedItems(const CHTIList& selection, 
