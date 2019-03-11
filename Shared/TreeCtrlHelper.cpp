@@ -527,12 +527,22 @@ BOOL CTreeCtrlHelper::ItemLineIsOdd(HTREEITEM hti) const
 
 void CTreeCtrlHelper::SetItemIntegral(HTREEITEM hti, int iIntegral)
 {
-	TVITEMEX tvi;
+	TVITEMEX tvi = { 0 };
 	tvi.mask = TVIF_HANDLE | TVIF_INTEGRAL;
 	tvi.hItem = hti;
 	tvi.iIntegral = iIntegral;
 	
 	m_tree.SetItem((LPTVITEM)&tvi);
+}
+
+int CTreeCtrlHelper::GetItemIntegral(HTREEITEM hti) const
+{
+	TVITEMEX tvi = { 0 };
+	tvi.mask = TVIF_HANDLE | TVIF_INTEGRAL;
+	tvi.hItem = hti;
+
+	return (m_tree.GetItem((LPTVITEM)&tvi) ? tvi.iIntegral : 1);
+
 }
 
 BOOL CTreeCtrlHelper::IsAnyItemExpanded() const

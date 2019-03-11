@@ -167,6 +167,7 @@ public:
 	BOOL IsAnyItemCollapsed() const;
 
 	void SetItemIntegral(HTREEITEM hti, int iIntegral);
+	int GetItemIntegral(HTREEITEM hti) const;
 	
 	void SetItemChecked(HTREEITEM hti, BOOL bChecked); // 2 state
 	void SetItemChecked(HTREEITEM hti, TCH_CHECK nChecked); // 3 state
