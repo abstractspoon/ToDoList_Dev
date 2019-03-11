@@ -88,7 +88,6 @@ CKanbanCtrlEx::CKanbanCtrlEx()
 	:
 	m_bSortAscending(-1), 
 	m_dwOptions(0),
-	m_bDragging(FALSE),
 	m_bReadOnly(FALSE),
 	m_nNextColor(0),
 	m_pSelectedList(NULL),
@@ -2625,7 +2624,7 @@ BOOL CKanbanCtrlEx::IsDragging() const
 {
 	ASSERT(!m_bReadOnly);
 
-	return (!m_bReadOnly && m_bDragging);
+	return (!m_bReadOnly && (GetCapture() == this));
 }
 
 BOOL CKanbanCtrlEx::NotifyParentAttibuteChange(DWORD dwTaskID)
@@ -2804,21 +2803,22 @@ void CKanbanCtrlEx::ClearOtherListSelections(const CKanbanListCtrl* pIgnore)
 
 void CKanbanCtrlEx::OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	if (!m_bReadOnly)
+	ReleaseCapture();
+
+	if (!m_bReadOnly && !IsDragging())
 	{
-		ASSERT(!IsDragging());
 		ASSERT(pNMHDR->idFrom == IDC_LISTCTRL);
 
 		if (Misc::IsKeyPressed(VK_LBUTTON))
 		{
-			NMLISTVIEW* pNMLV = (NMLISTVIEW*)pNMHDR;
-			ASSERT(pNMLV->iItem != -1);
+			NMTREEVIEW* pNMTV = (NMTREEVIEW*)pNMHDR;
+			ASSERT(pNMTV->itemNew.hItem);
 		
 			CKanbanListCtrl* pList = (CKanbanListCtrl*)CWnd::FromHandle(pNMHDR->hwndFrom);
 
 			if (!pList->SelectionHasLockedTasks())
 			{
-				DWORD dwDragID = pList->GetSelectedTaskID();
+				DWORD dwDragID = pNMTV->itemNew.lParam;
 
 				if (dwDragID)
 				{
@@ -2829,9 +2829,9 @@ void CKanbanCtrlEx::OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult)
 					{
 						VERIFY(pList->SelectTask(dwDragID));
 						SelectListCtrl(pList);
+
 					}
 
-					m_bDragging = TRUE;
 					SetCapture();
 					TRACE(_T("CKanbanCtrlEx::OnBeginDragListItem(start drag)\n"));
 				}
@@ -2863,13 +2863,9 @@ void CKanbanCtrlEx::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	TRACE(_T("CKanbanCtrlEx::OnLButtonUp()\n"));
 
-	// always
-	ReleaseCapture();
-
 	if (IsDragging())
 	{
 		TRACE(_T("CKanbanCtrlEx::OnLButtonUp(end drag)\n"));
-		m_bDragging = FALSE;
 
 		// get the list under the mouse
 		ClientToScreen(&point);
@@ -2915,6 +2911,9 @@ void CKanbanCtrlEx::OnLButtonUp(UINT nFlags, CPoint point)
 			}
 		}
 	}
+
+	// always
+	ReleaseCapture();
 
 	CWnd::OnLButtonUp(nFlags, point);
 }

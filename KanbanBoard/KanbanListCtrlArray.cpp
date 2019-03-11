@@ -535,18 +535,32 @@ CKanbanListCtrl* CKanbanListCtrlArray::GetNext(const CKanbanListCtrl* pList, BOO
 
 CKanbanListCtrl* CKanbanListCtrlArray::HitTest(const CPoint& ptScreen) const
 {
-	HWND hwnd = ::WindowFromPoint(ptScreen);
+	int nList = GetSize();
+	CRect rWindow;
 
-	if (hwnd == NULL)
-		return NULL;
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		pList->GetWindowRect(rWindow);
 
-	int nFind = Find(hwnd);
-	
-	if (nFind == -1)
-		return NULL;
-	
-	// else
-	return GetAt(nFind);
+		if (rWindow.PtInRect(ptScreen))
+			return pList;
+	}
+
+	return NULL;
+
+// 	HWND hwnd = ::WindowFromPoint(ptScreen);
+// 
+// 	if (hwnd == NULL)
+// 		return NULL;
+// 
+// 	int nFind = Find(hwnd);
+// 	
+// 	if (nFind == -1)
+// 		return NULL;
+// 	
+// 	// else
+// 	return GetAt(nFind);
 }
 
 DWORD CKanbanListCtrlArray::HitTestTask(const CPoint& ptScreen) const

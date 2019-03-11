@@ -84,7 +84,6 @@ public:
 	BOOL WantEditUpdate(IUI_ATTRIBUTE nAttribute) const;
 
 protected:
-	BOOL m_bDragging;
 	BOOL m_bReadOnly;
 	BOOL m_bSortAscending;
 	BOOL m_bStrikeThruDone;
