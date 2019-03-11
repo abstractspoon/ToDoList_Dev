@@ -1790,6 +1790,9 @@ void CKanbanCtrl::RebuildHeaderColumns()
 		m_header.SetItemText(nCol, sFormat);
 		m_header.SetItemData(nCol, (DWORD)pList);
 	}
+
+	// Prevent tracking on the last column
+	m_header.EnableItemTracking(nNumColumns - 1, FALSE);
 }
 
 void CKanbanCtrl::RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray)
