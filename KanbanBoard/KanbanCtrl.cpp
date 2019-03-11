@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "KanbanCtrl.h"
+#include "KanbanListCtrl.h"
 #include "KanbanColors.h"
 #include "KanbanMsg.h"
 
@@ -2616,9 +2617,9 @@ CKanbanListCtrl* CKanbanCtrlEx::GetNextListCtrl(const CKanbanListCtrl* pList, BO
 	return m_aListCtrls.GetNext(pList, bNext, bExcludeEmpty, UsingFixedColumns());
 }
 
-CKanbanListCtrl* CKanbanCtrlEx::HitTestListCtrl(const CPoint& ptScreen, BOOL* pbHeader) const
+CKanbanListCtrl* CKanbanCtrlEx::HitTestListCtrl(const CPoint& ptScreen) const
 {
-	return m_aListCtrls.HitTest(ptScreen, pbHeader);
+	return m_aListCtrls.HitTest(ptScreen);
 }
 
 BOOL CKanbanCtrlEx::IsDragging() const

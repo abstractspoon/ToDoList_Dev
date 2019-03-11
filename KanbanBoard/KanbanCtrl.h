@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_KANBANCTRLEX_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
-#define AFX_KANBANCTRLEX_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_
+#if !defined(AFX_KANBANCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
+#define AFX_KANBANCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -11,7 +11,7 @@
 
 #include "Kanbanstruct.h"
 #include "Kanbanenum.h"
-#include "Kanbanlistctrl.h"
+#include "KanbanlistctrlArray.h"
 
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\fontcache.h"
@@ -157,7 +157,7 @@ protected:
 	CKanbanListCtrl* LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL bForward) const;
 	CKanbanListCtrl* GetListCtrl(const CString& sAttribValue) const;
 	CKanbanListCtrl* GetListCtrl(HWND hwnd) const;
-	CKanbanListCtrl* HitTestListCtrl(const CPoint& ptScreen, BOOL* pbHeader = NULL) const;
+	CKanbanListCtrl* HitTestListCtrl(const CPoint& ptScreen) const;
 
 	CKanbanListCtrl* AddNewListCtrl(const KANBANCOLUMN& colDef);
 	CKanbanListCtrl* GetSelListCtrl();
@@ -216,4 +216,4 @@ protected:
 
 };
 
-#endif // !defined(AFX_KANBANCTRLEX_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
+#endif // !defined(AFX_KANBANCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
