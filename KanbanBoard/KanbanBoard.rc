@@ -153,7 +153,7 @@ BEGIN
                     WS_EX_TRANSPARENT
 END
 
-IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 376
+IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 390
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -171,24 +171,26 @@ BEGIN
                     LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
                     LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_HSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Columns",IDC_COLUMNGROUP,7,185,330,8
+    LTEXT           "Columns",IDC_COLUMNGROUP,7,200,330,8
     CONTROL         "Al&ways show 'Backlog' column",IDC_ALWAYSSHOWBACKLOG,
-                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,201,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,216,
                     330,10
-    LTEXT           "Attribute to 'track'",IDC_FIXEDATTRIBLABEL,17,233,307,8
-    COMBOBOX        IDC_ATTRIBUTES,16,244,105,116,CBS_DROPDOWNLIST | 
+    LTEXT           "Attribute to 'track'",IDC_FIXEDATTRIBLABEL,17,248,307,8
+    COMBOBOX        IDC_ATTRIBUTES,16,259,105,116,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CUSTOMATTRIBID,127,244,105,116,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_CUSTOMATTRIBID,127,259,105,116,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     CONTROL         "List1",IDC_COLUMNDEFS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
-                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,263,313,94
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,278,313,94
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,278,246,53,16
-    GROUPBOX        "Fixed column definitions: (optional)",IDC_STATIC,7,218,
+                    WS_VISIBLE,278,261,53,16
+    GROUPBOX        "Fixed column definitions: (optional)",IDC_STATIC,7,233,
                     330,147,0,WS_EX_TRANSPARENT
     GROUPBOX        "Display the following attributes for each task:",
-                    IDC_STATIC,7,69,330,109
+                    IDC_STATIC,7,69,330,124
+    CONTROL         "&Hide empty attribute values",IDC_HIDEEMPTYATTRIBS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,175,313,10
 END
 
 
@@ -213,7 +215,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 337
         TOPMARGIN, 7
-        BOTTOMMARGIN, 369
+        BOTTOMMARGIN, 383
     END
 END
 #endif    // APSTUDIO_INVOKED

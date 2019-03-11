@@ -573,7 +573,7 @@ void CKanbanCtrlEx::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 
 BOOL CKanbanCtrlEx::UpdateNeedsItemHeightRefresh(const CSet<IUI_ATTRIBUTE>& attrib) const
 {
-	if (HasOption(KBCF_HIDEEMPTYATTRIBUTEVALUES))
+	if (HasOption(KBCF_HIDEEMPTYATTRIBUTES))
 	{
 		int nAtt = m_aDisplayAttrib.GetSize();
 
@@ -2195,6 +2195,10 @@ void CKanbanCtrlEx::SetOption(DWORD dwOption, BOOL bSet)
 
 			case KBCF_INDENTSUBTASKS:
 				m_aListCtrls.SetIndentSubtasks(bSet);
+				break;
+
+			case KBCF_HIDEEMPTYATTRIBUTES:
+				m_aListCtrls.SetHideEmptyAttributes(bSet);
 				break;
 			}
 		}

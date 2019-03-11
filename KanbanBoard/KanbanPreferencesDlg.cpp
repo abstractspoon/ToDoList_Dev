@@ -26,7 +26,8 @@ CKanbanPreferencesPage::CKanbanPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	m_bSortSubtaskBelowParent(FALSE),
 	m_bColorBarByPriority(FALSE),
 	m_bIndentSubtasks(FALSE),
-	m_bShowTaskColorAsBar(FALSE)
+	m_bShowTaskColorAsBar(FALSE),
+	m_bHideEmptyAttributeValues(TRUE)
 {
 	//{{AFX_DATA_INIT(CKanbanPreferencesPage)
 	//}}AFX_DATA_INIT
@@ -37,12 +38,13 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	CPreferencesPageBase::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CKanbanPreferencesPage)
-	DDX_Control(pDX, IDC_DISPLAYATTRIBUTES, m_lbDisplayAttrib);
 	DDX_Check(pDX, IDC_SHOWTASKCOLORASBAR, m_bShowTaskColorAsBar);
+	DDX_Control(pDX, IDC_DISPLAYATTRIBUTES, m_lbDisplayAttrib);
 	DDX_Control(pDX, IDC_ATTRIBUTES, m_cbAttributes);
 	DDX_Check(pDX, IDC_SORTSUBTASKSBELOWPARENT, m_bSortSubtaskBelowParent);
 	DDX_Check(pDX, IDC_ALWAYSSHOWBACKLOG, m_bAlwaysShowBacklog);
 	DDX_Control(pDX, IDC_COLUMNDEFS, m_lcFixedColumnDefs);
+	DDX_Check(pDX, IDC_HIDEEMPTYATTRIBS, m_bHideEmptyAttributeValues);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_CUSTOMATTRIBID, m_cbCustomAttributes);
 	DDX_Check(pDX, IDC_COLORBARBYPRIORITY, m_bColorBarByPriority);
@@ -203,6 +205,7 @@ void CKanbanPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey
 	pPrefs->WriteProfileInt(szKey, _T("ShowTaskColorAsBar"), m_bShowTaskColorAsBar);
 	pPrefs->WriteProfileInt(szKey, _T("ColorBarByPriority"), m_bColorBarByPriority);
 	pPrefs->WriteProfileInt(szKey, _T("IndentSubtasks"), m_bIndentSubtasks);
+	pPrefs->WriteProfileInt(szKey, _T("HideEmptyAttributeValues"), m_bHideEmptyAttributeValues);
 
 	// column defs
 	int nNumDefs = m_aFixedColumnDefs.GetSize();
@@ -240,6 +243,7 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	m_bShowTaskColorAsBar = pPrefs->GetProfileInt(szKey, _T("ShowTaskColorAsBar"), FALSE);
 	m_bColorBarByPriority = pPrefs->GetProfileInt(szKey, _T("ColorBarByPriority"), FALSE);
 	m_bIndentSubtasks = pPrefs->GetProfileInt(szKey, _T("IndentSubtasks"), TRUE);
+	m_bHideEmptyAttributeValues = pPrefs->GetProfileInt(szKey, _T("HideEmptyAttributeValues"), TRUE);
 
 	// column defs
 	m_aFixedColumnDefs.RemoveAll();

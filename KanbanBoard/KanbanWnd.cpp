@@ -731,6 +731,7 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 	m_ctrlKanban.SetOption(KBCF_COLORBARBYPRIORITY, m_dlgPrefs.GetColorBarByPriority());
 	m_ctrlKanban.SetOption(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dlgPrefs.GetSortSubtasksBelowParents());
 	m_ctrlKanban.SetOption(KBCF_INDENTSUBTASKS, m_dlgPrefs.GetIndentSubtasks());
+	m_ctrlKanban.SetOption(KBCF_HIDEEMPTYATTRIBUTES, m_dlgPrefs.GetHideEmptyAttributes());
 
 	m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
 

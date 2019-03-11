@@ -80,6 +80,7 @@
 #define IDC_COLORBARBYPRIORITY          16044
 #define IDC_OPTIONS_LABEL               16044
 #define IDC_DISPLAYATTRIBUTES           16045
+#define IDC_HIDEEMPTYATTRIBS            16046
 #define ID_KANBAN_GOTOTODAY             32774
 #define ID_KANBAN_PREFS                 32775
 #define ID_PREFS                        32775
@@ -172,7 +173,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        16013
 #define _APS_NEXT_COMMAND_VALUE         32784
-#define _APS_NEXT_CONTROL_VALUE         16046
+#define _APS_NEXT_CONTROL_VALUE         16047
 #define _APS_NEXT_SYMED_VALUE           16000
 #endif
 #endif

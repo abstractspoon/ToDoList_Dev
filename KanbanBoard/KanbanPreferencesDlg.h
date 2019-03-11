@@ -38,6 +38,7 @@ public:
 	BOOL GetShowTaskColorAsBar() const { return m_bShowTaskColorAsBar; }
 	BOOL GetColorBarByPriority() const { return m_bColorBarByPriority; }
 	BOOL GetIndentSubtasks() const { return m_bIndentSubtasks; }
+	BOOL GetHideEmptyAttributes() const { return m_bHideEmptyAttributeValues; }
 	IUI_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const;
 	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const;
 	int SetDisplayAttributes(const CKanbanAttributeArray& aAttrib);
@@ -51,7 +52,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CKanbanPreferencesPage)
-	BOOL	m_bShowTaskColorAsBar;
 	//}}AFX_DATA
 	CKanbanAttributeComboBox	m_cbAttributes;
 	CKanbanFixedColumnListCtrl	m_lcFixedColumnDefs;
@@ -61,6 +61,8 @@ protected:
 	CKanbanCustomAttributeComboBox m_cbCustomAttributes;
 	CCheckListBoxEx	m_lbDisplayAttrib;
 
+	BOOL	m_bShowTaskColorAsBar;
+	BOOL	m_bHideEmptyAttributeValues;
 	BOOL	m_bSortSubtaskBelowParent;
 	BOOL	m_bColorBarByPriority;
 	BOOL	m_bIndentSubtasks;
@@ -99,9 +101,6 @@ protected:
 	afx_msg void OnPopulateFixedColumns();
 	afx_msg void OnUpdatePopulateColumns(CCmdUI* pCmdUI);
 	afx_msg void OnSelchangeCustomAttribute();
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -128,6 +127,7 @@ public:
 	BOOL GetShowTaskColorAsBar() const { return m_page.GetShowTaskColorAsBar(); }
 	BOOL GetColorBarByPriority() const { return m_page.GetColorBarByPriority(); }
 	BOOL GetIndentSubtasks() const { return m_page.GetIndentSubtasks(); }
+	BOOL GetHideEmptyAttributes() const { return m_page.GetHideEmptyAttributes(); }
 	IUI_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const { return m_page.GetFixedAttributeToTrack(sCustomID); }
 	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const { return m_page.GetDisplayAttributes(aAttrib); }
 
