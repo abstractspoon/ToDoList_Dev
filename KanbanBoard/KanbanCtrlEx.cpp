@@ -2600,7 +2600,7 @@ BOOL CKanbanCtrlEx::IsDragging() const
 {
 	ASSERT(!m_bReadOnly);
 
-	return (!m_bReadOnly && (::GetCapture() == GetSafeHwnd()));
+	return (!m_bReadOnly && m_bDragging);
 }
 
 BOOL CKanbanCtrlEx::NotifyParentAttibuteChange(DWORD dwTaskID)
@@ -2783,29 +2783,39 @@ void CKanbanCtrlEx::OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		ASSERT(!IsDragging());
 		ASSERT(pNMHDR->idFrom == IDC_LISTCTRL);
-		
-		NMLISTVIEW* pNMLV = (NMLISTVIEW*)pNMHDR;
-		ASSERT(pNMLV->iItem != -1);
-		
-		CKanbanListCtrlEx* pList = (CKanbanListCtrlEx*)CWnd::FromHandle(pNMHDR->hwndFrom);
 
-		if (!pList->SelectionHasLockedTasks())
+		if (Misc::IsKeyPressed(VK_LBUTTON))
 		{
-			DWORD dwDragID = pList->GetSelectedTaskID();
+			NMLISTVIEW* pNMLV = (NMLISTVIEW*)pNMHDR;
+			ASSERT(pNMLV->iItem != -1);
+		
+			CKanbanListCtrlEx* pList = (CKanbanListCtrlEx*)CWnd::FromHandle(pNMHDR->hwndFrom);
 
-			if (dwDragID)
+			if (!pList->SelectionHasLockedTasks())
 			{
-				// If the 'drag-from' list is not currently selected
-				// we select it and then reset the selection to the
-				// items we have just copied
-				if (pList != m_pSelectedList)
-				{
-					VERIFY(pList->SelectTask(dwDragID));
-					SelectListCtrl(pList);
-				}
+				DWORD dwDragID = pList->GetSelectedTaskID();
 
-				SetCapture();
+				if (dwDragID)
+				{
+					// If the 'drag-from' list is not currently selected
+					// we select it and then reset the selection to the
+					// items we have just copied
+					if (pList != m_pSelectedList)
+					{
+						VERIFY(pList->SelectTask(dwDragID));
+						SelectListCtrl(pList);
+					}
+
+					m_bDragging = TRUE;
+					SetCapture();
+					TRACE(_T("CKanbanCtrlEx::OnBeginDragListItem(start drag)\n"));
+				}
 			}
+		}
+		else
+		{
+			// Mouse button already released
+			TRACE(_T("CKanbanCtrlEx::OnBeginDragListItem(cancel drag)\n"));
 		}
 	}
 	
@@ -2826,8 +2836,16 @@ BOOL CKanbanCtrlEx::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 void CKanbanCtrlEx::OnLButtonUp(UINT nFlags, CPoint point)
 {
+	TRACE(_T("CKanbanCtrlEx::OnLButtonUp()\n"));
+
+	// always
+	ReleaseCapture();
+
 	if (IsDragging())
 	{
+		TRACE(_T("CKanbanCtrlEx::OnLButtonUp(end drag)\n"));
+		m_bDragging = FALSE;
+
 		// get the list under the mouse
 		ClientToScreen(&point);
 
@@ -2872,9 +2890,6 @@ void CKanbanCtrlEx::OnLButtonUp(UINT nFlags, CPoint point)
 			}
 		}
 	}
-
-	// always
-	ReleaseCapture();
 
 	CWnd::OnLButtonUp(nFlags, point);
 }
