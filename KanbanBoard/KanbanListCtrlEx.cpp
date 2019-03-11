@@ -1095,6 +1095,8 @@ HTREEITEM CKanbanListCtrlEx::AddTask(const KANBANITEM& ki, BOOL bSelect)
 
 	if (hti)
 	{
+		RefreshItemLineHeights(hti);
+
 		// select item and make visible
 		if (bSelect)
 		{
