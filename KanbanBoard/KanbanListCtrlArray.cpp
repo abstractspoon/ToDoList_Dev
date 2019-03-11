@@ -543,24 +543,13 @@ CKanbanListCtrl* CKanbanListCtrlArray::HitTest(const CPoint& ptScreen) const
 		CKanbanListCtrl* pList = GetAt(nList);
 		pList->GetWindowRect(rWindow);
 
+		rWindow.right++; // to allow for the 1 pixel gap
+
 		if (rWindow.PtInRect(ptScreen))
 			return pList;
 	}
 
 	return NULL;
-
-// 	HWND hwnd = ::WindowFromPoint(ptScreen);
-// 
-// 	if (hwnd == NULL)
-// 		return NULL;
-// 
-// 	int nFind = Find(hwnd);
-// 	
-// 	if (nFind == -1)
-// 		return NULL;
-// 	
-// 	// else
-// 	return GetAt(nFind);
 }
 
 DWORD CKanbanListCtrlArray::HitTestTask(const CPoint& ptScreen) const
