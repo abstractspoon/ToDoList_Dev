@@ -60,6 +60,10 @@ const UINT IDC_HEADER	= 102;
 
 //////////////////////////////////////////////////////////////////////
 
+const int MIN_COL_WIDTH = GraphicsMisc::ScaleByDPIFactor(6);
+
+//////////////////////////////////////////////////////////////////////
+
 static CString EMPTY_STR;
 
 //////////////////////////////////////////////////////////////////////
@@ -112,6 +116,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_HEADER, OnHeaderCustomDraw)
+	ON_NOTIFY(HDN_ITEMCHANGING, IDC_HEADER, OnHeaderItemChanging)
 	ON_NOTIFY(TVN_BEGINDRAG, IDC_LISTCTRL, OnBeginDragListItem)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_LISTCTRL, OnListItemSelChange)
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_LISTCTRL, OnListEditLabel)
@@ -141,14 +146,14 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
 
-	if (!m_header.Create(/*HDS_FULLDRAG | HDS_DRAGDROP |*/ WS_CHILD | WS_VISIBLE, 
+	if (!m_header.Create(HDS_FULLDRAG | /*HDS_DRAGDROP |*/ WS_CHILD | WS_VISIBLE, 
 						 CRect(lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->cx, 50),
 						 this, IDC_HEADER))
 	{
 		return -1;
 	}
 
-	m_header.EnableTracking(FALSE);
+	//m_header.EnableTracking(FALSE);
 
 	return 0;
 }
@@ -2735,7 +2740,18 @@ void CKanbanCtrl::OnListEditLabel(NMHDR* pNMHDR, LRESULT* pResult)
 	GetParent()->SendMessage(WM_KBC_EDITTASKTITLE, pNMTV->item.lParam);
 }
 
-void CKanbanCtrlEx::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
+void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
+
+	// don't let user drag column too narrow
+	if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
+	{
+		pHDN->pitem->cxy = max(MIN_COL_WIDTH, pHDN->pitem->cxy);
+	}
+}
+
+void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NMCUSTOMDRAW* pNMCD = (NMCUSTOMDRAW*)pNMHDR;
 	*pResult = CDRF_DODEFAULT;
