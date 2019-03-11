@@ -130,7 +130,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-	void RedrawListCtrls(BOOL bErase = FALSE);
 	void RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	void Resize();
 	void Resize(const CRect& rect);

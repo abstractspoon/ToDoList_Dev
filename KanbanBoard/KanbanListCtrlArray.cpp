@@ -246,6 +246,19 @@ void CKanbanListCtrlArray::OnDisplayAttributeChanged()
 	}
 }
 
+void CKanbanListCtrlArray::RefreshItemLineHeights()
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->RefreshItemLineHeights();
+	}
+}
+
 void CKanbanListCtrlArray::SetTextColorIsBackground(BOOL bSet)
 {
 	int nList = GetSize();

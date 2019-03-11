@@ -553,11 +553,11 @@ void CKanbanCtrlEx::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			}
 			else if (UpdateNeedsItemHeightRefresh(attrib))
 			{
-
+				m_aListCtrls.RefreshItemLineHeights();
 			}
 			else
 			{
-				RedrawListCtrls(TRUE);
+				m_aListCtrls.Redraw(TRUE);
 			}
 		}
 		break;
@@ -1527,11 +1527,6 @@ BOOL CKanbanCtrlEx::WantShowColumn(const CKanbanListCtrl* pList) const
 	return (pList->GetCount() > 0);
 }
 
-void CKanbanCtrlEx::RedrawListCtrls(BOOL bErase)
-{
-	m_aListCtrls.Redraw(bErase);
-}
-
 BOOL CKanbanCtrlEx::DeleteListCtrl(int nList)
 {
 	if ((nList < 0) || (nList >= m_aListCtrls.GetSize()))
@@ -2475,7 +2470,7 @@ void CKanbanCtrlEx::SetPriorityColors(const CDWordArray& aColors)
 
 		// Redraw the lists if coloring by priority
 		if (GetSafeHwnd() && HasOption(KBCF_COLORBARBYPRIORITY))
-			RedrawListCtrls(TRUE);
+			m_aListCtrls.Redraw(TRUE);
 	}
 }
 

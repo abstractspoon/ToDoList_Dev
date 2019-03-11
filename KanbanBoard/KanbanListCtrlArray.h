@@ -23,7 +23,6 @@ public:
 
 	int Find(DWORD dwTaskID) const;
 	int Find(DWORD dwTaskID, HTREEITEM& hti) const;
-	int Find(const CDWordArray& aTaskIDs) const;
 	int Find(HWND hWnd) const;
 	int Find(const CString& sAttribValue) const;
 	int Find(const CKanbanListCtrl* pList) const;
@@ -68,6 +67,7 @@ public:
 	void Redraw(BOOL bErase);
 	void RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 	void DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanListCtrl* pIgnore);
+	void RefreshItemLineHeights();
 
 protected:
 	static int ListSortProc(const void* pV1, const void* pV2);
