@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_KANBANTREELISTCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
-#define AFX_KANBANTREELISTCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_
+#if !defined(AFX_KANBANCTRLEX_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
+#define AFX_KANBANCTRLEX_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -16,6 +16,7 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\fontcache.h"
 #include "..\shared\mapex.h"
+#include "..\shared\enheaderctrl.h"
 
 #include "..\Interfaces\itasklist.h"
 #include "..\Interfaces\iuiextension.h"
@@ -28,19 +29,19 @@ class CThemed;
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CKanbanCtrl : public CWnd  
+class CKanbanCtrlEx : public CWnd  
 {
 public:
-	CKanbanCtrl();
-	virtual ~CKanbanCtrl();
+	CKanbanCtrlEx();
+	virtual ~CKanbanCtrlEx();
 
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib);
 	bool PrepareNewTask(ITaskList* pTask) const;
 
-	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
-	BOOL SelectTasks(const CDWordArray& aTaskIDs);
+	DWORD GetSelectedTaskID() const;
+	BOOL SelectTask(DWORD dwTaskID);
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
@@ -94,12 +95,12 @@ protected:
 	UINT m_nNextColor;
 	IUI_ATTRIBUTE m_nTrackAttribute, m_nSortBy;
 	CString m_sTrackAttribID;
-	CImageList m_ilHeight;
 	CDWordArray m_aPriorityColors;
 	CFontCache m_fonts;
 
 	CKanbanListCtrl* m_pSelectedList;
-	CKanbanListCtrlArray m_aListCtrls;
+	CKanbanListCtrlExArray m_aListCtrls;
+	CEnHeaderCtrl m_header;
 
 	CKanbanItemMap m_data;
 	CKanbanAttributeValueMap m_mapAttributeValues;
@@ -113,11 +114,10 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnListItemChange(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnListItemSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListEditLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnListCheckChange(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnListWantFocus(WPARAM wp, LPARAM lp);
 	afx_msg void OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnListGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
@@ -126,6 +126,7 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSelectTask(WPARAM wp, LPARAM lp);
+	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -143,6 +144,7 @@ protected:
 	BOOL CheckAddBacklogListCtrl();
 	void RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray);
 	int GetVisibleListCtrlCount() const;
+	void RebuildHeaderColumns();
 
 	KBC_ATTRIBLABELS GetListAttributeLabelVisibility(int nListWidth);
 	float GetAverageListCharWidth();
@@ -152,7 +154,7 @@ protected:
 	KANBANITEM* GetKanbanItem(DWORD dwTaskID) const;
 	BOOL HasKanbanItem(DWORD dwTaskID) const;
 
-	CKanbanListCtrl* LocateTask(DWORD dwTaskID, int& nItem, BOOL bForward) const;
+	CKanbanListCtrl* LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL bForward) const;
 	CKanbanListCtrl* GetListCtrl(const CString& sAttribValue) const;
 	CKanbanListCtrl* GetListCtrl(HWND hwnd) const;
 	CKanbanListCtrl* HitTestListCtrl(const CPoint& ptScreen, BOOL* pbHeader = NULL) const;
@@ -180,7 +182,7 @@ protected:
 	BOOL EndDragItem(CKanbanListCtrl* pSrcList, DWORD dwTaskID, CKanbanListCtrl* pDestList, const CString& sDestAttribValue);
 	BOOL HandleKeyDown(WPARAM wp, LPARAM lp);
 	
-	BOOL NotifyParentAttibuteChange(const CDWordArray& aTaskIDs);
+	BOOL NotifyParentAttibuteChange(DWORD dwTaskID);
 	void NotifyParentSelectionChange();
 	BOOL GetListCtrlAttributeValue(const CKanbanListCtrl* pDestList, const CPoint& ptScreen, CString& sValue) const;
 	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nAttrib, const CString& sNewValue);
@@ -191,6 +193,7 @@ protected:
 	BOOL IsTrackedAttributeMultiValue() const;
 	BOOL IsTracking(const CString& sAttribID) const;
 	BOOL CanDrag(const CKanbanListCtrl* pSrcList, const CKanbanListCtrl* pDestList) const;
+	BOOL UpdateNeedsItemHeightRefresh(const CSet<IUI_ATTRIBUTE>& attrib) const;
 
 	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	BOOL RebuildData(const ITASKLISTBASE* pTasks, const CSet<IUI_ATTRIBUTE>& attrib);
@@ -213,4 +216,4 @@ protected:
 
 };
 
-#endif // !defined(AFX_KANBANTREELISTCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
+#endif // !defined(AFX_KANBANCTRLEX_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)

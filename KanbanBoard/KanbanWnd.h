@@ -7,7 +7,7 @@
 // KanbanWnd.h : header file
 //
 
-#include "KanbanCtrlEx.h"
+#include "KanbanCtrl.h"
 #include "KanbanPreferencesDlg.h"
 #include "KanbanOptionComboBox.h"
 
