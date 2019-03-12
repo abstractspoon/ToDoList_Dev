@@ -89,6 +89,7 @@ protected:
 	BOOL m_bStrikeThruDone;
 	BOOL m_bSelectTasks;
 	BOOL m_bSettingListFocus;
+	BOOL m_bResizingHeader;
 
 	DWORD m_dwOptions;
 	UINT m_nNextColor;
@@ -131,8 +132,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	void RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
-	void Resize();
-	void Resize(const CRect& rect);
+	void Resize(BOOL bExcludeHeader);
+	void Resize(const CRect& rect, BOOL bExcludeHeader);
 	void ResizeHeader(CRect& rAvail);
 	void ClearOtherListSelections(const CKanbanListCtrl* pList);
 
@@ -146,7 +147,7 @@ protected:
 	int GetVisibleListCtrlCount() const;
 	void RebuildHeaderColumns();
 
-	KBC_ATTRIBLABELS GetListAttributeLabelVisibility(int nListWidth);
+	KBC_ATTRIBLABELS GetListAttributeLabelVisibility(int nList, int nListWidth);
 	float GetAverageListCharWidth();
 	int CalcRequiredColumnWidthForImage() const;
 	BOOL CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KBC_ATTRIBLABELS nLabelVis) const;

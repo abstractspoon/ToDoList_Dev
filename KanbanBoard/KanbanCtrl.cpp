@@ -61,6 +61,7 @@ const UINT IDC_HEADER	= 102;
 //////////////////////////////////////////////////////////////////////
 
 const int MIN_COL_WIDTH = GraphicsMisc::ScaleByDPIFactor(6);
+const int HEADER_HEIGHT = GraphicsMisc::ScaleByDPIFactor(24);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -98,6 +99,7 @@ CKanbanCtrl::CKanbanCtrl()
 	m_nTrackAttribute(IUI_NONE),
 	m_nSortBy(IUI_NONE),
 	m_bSelectTasks(FALSE),
+	m_bResizingHeader(FALSE),
 	m_bSettingListFocus(FALSE)
 {
 
@@ -1736,7 +1738,7 @@ void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate)
 	}
 
 	RebuildHeaderColumns();
-	Resize();
+	Resize(FALSE);
 		
 	// We only need to restore selection if not doing a task update
 	// because the app takes care of that
@@ -1963,7 +1965,7 @@ BOOL CKanbanCtrl::TrackAttribute(IUI_ATTRIBUTE nAttrib, const CString& sCustomAt
 	m_aListCtrls.RemoveAll();
 
 	RebuildListCtrls(TRUE, TRUE);
-	Resize();
+	Resize(FALSE);
 
 	return TRUE;
 }
@@ -2136,7 +2138,7 @@ void CKanbanCtrl::SetDisplayAttributes(const CKanbanAttributeArray& aAttrib)
 
 		// Update list attribute label visibility
 		if (m_aDisplayAttrib.GetSize())
-			Resize();
+			Resize(FALSE);
 	}
 }
 
@@ -2213,7 +2215,7 @@ void CKanbanCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	CWnd::OnSize(nType, cx, cy);
 
-	Resize(CRect(0, 0, cx, cy));
+	Resize(CRect(0, 0, cx, cy), FALSE);
 }
 
 BOOL CKanbanCtrl::OnEraseBkgnd(CDC* pDC)
@@ -2225,7 +2227,7 @@ BOOL CKanbanCtrl::OnEraseBkgnd(CDC* pDC)
 		// Clip out the list controls
 		m_aListCtrls.Exclude(pDC);
 		
-		// fill the client with gray to create borders
+		// fill the client with gray to create borders and dividers
 		CRect rClient;
 		GetClientRect(rClient);
 		
@@ -2269,7 +2271,7 @@ int CKanbanCtrl::GetVisibleListCtrlCount() const
 	return nNumVis;
 }
 
-void CKanbanCtrl::Resize(const CRect& rect)
+void CKanbanCtrl::Resize(const CRect& rect, BOOL bExcludeHeader)
 {
 	int nNumVisibleLists = GetVisibleListCtrlCount();
 
@@ -2279,17 +2281,15 @@ void CKanbanCtrl::Resize(const CRect& rect)
 		CRect rAvail(rect);
 		rAvail.DeflateRect(1, 1);
 
-		ResizeHeader(rAvail);
+		if (bExcludeHeader)
+			rAvail.top += HEADER_HEIGHT;
+		else
+			ResizeHeader(rAvail);
 		
-		CString sStatus;
-		int nListWidth = (rAvail.Width() / nNumVisibleLists);
-
-		// Check whether the lists are wide enough to show attribute labels
-		KBC_ATTRIBLABELS nLabelVis = GetListAttributeLabelVisibility(nListWidth);
-
 		// Also update tab order as we go
-		int nNumLists = m_aListCtrls.GetSize();
+		CRect rList(rAvail);
 		CWnd* pPrev = NULL;
+		int nNumLists = m_aListCtrls.GetSize();
 
 		for (int nList = 0, nVis = 0; nList < nNumLists; nList++)
 		{
@@ -2313,21 +2313,15 @@ void CKanbanCtrl::Resize(const CRect& rect)
 				pList->EnableWindow(TRUE);
 			}
 
-			CRect rList(rAvail);
-			rList.left = (rAvail.left + (nVis * (nListWidth + 1))); // +1 to create a gap
+			rList.right = (rList.left + m_header.GetItemWidth(nVis));
+			pList->SetWindowPos(pPrev, rList.left, rList.top, rList.Width() - 1, rList.Height(), 0);
 
-			// Last column takes up rest of width
-			if (nVis == (nNumVisibleLists - 1))
-				rList.right = rAvail.right;
-			else
-				rList.right = (rList.left + nListWidth);
-
-			pList->SetWindowPos(pPrev, rList.left, rList.top, rList.Width(), rList.Height(), 0);
+			// Check whether the lists are wide enough to show attribute labels
+			KBC_ATTRIBLABELS nLabelVis = GetListAttributeLabelVisibility(nList, rList.Width());
 			pList->SetAttributeLabelVisibility(nLabelVis);
 
-			m_header.SetItemWidth(nVis, rList.Width() + 1); // +1 to allow for column gap
-
 			pPrev = pList;
+			rList.left = rList.right;
 			nVis++;
 		}
 	}
@@ -2335,13 +2329,15 @@ void CKanbanCtrl::Resize(const CRect& rect)
 
 void CKanbanCtrl::ResizeHeader(CRect& rAvail)
 {
+	CAutoFlag af(m_bResizingHeader, TRUE);
+
 	ASSERT(m_header.GetSafeHwnd());
 
 	int nNumCols = m_header.GetItemCount();
 	ASSERT(nNumCols == GetVisibleListCtrlCount());
 
 	CRect rNewHeader(rAvail);
-	rNewHeader.bottom = (rNewHeader.top + GraphicsMisc::ScaleByDPIFactor(24));
+	rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT);
 	m_header.MoveWindow(rNewHeader);
 		
 	int nTotalColWidth = m_header.CalcTotalItemsWidth();
@@ -2359,7 +2355,7 @@ void CKanbanCtrl::ResizeHeader(CRect& rAvail)
 		else
 		{
 			int nNewWidth = (rNewHeader.Width() - nColStart);
-			m_header.SetItemWidth(nCol, nNewWidth);
+			m_header.SetItemWidth(nCol, nNewWidth + 1); // +1 hides the divider
 		}
 	}
 
@@ -2436,13 +2432,13 @@ BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KB
 	return FALSE;
 }
 
-KBC_ATTRIBLABELS CKanbanCtrl::GetListAttributeLabelVisibility(int nListWidth)
+KBC_ATTRIBLABELS CKanbanCtrl::GetListAttributeLabelVisibility(int nList, int nListWidth)
 {
 	if (!m_aDisplayAttrib.GetSize() || !m_aListCtrls.GetSize())
 		return KBCAL_NONE;
 
 	// Calculate the available width for attributes
-	int nAvailWidth = m_aListCtrls[0]->CalcAvailableAttributeWidth(nListWidth);
+	int nAvailWidth = m_aListCtrls[nList]->CalcAvailableAttributeWidth(nListWidth);
 
 	// Calculate the fixed attribute label lengths and check if any
 	// of them exceed the list width
@@ -2458,12 +2454,12 @@ KBC_ATTRIBLABELS CKanbanCtrl::GetListAttributeLabelVisibility(int nListWidth)
 	return KBCAL_NONE;
 }
 
-void CKanbanCtrl::Resize()
+void CKanbanCtrl::Resize(BOOL bExcludeHeader)
 {
 	CRect rClient;
 	GetClientRect(rClient);
 
-	Resize(rClient);
+	Resize(rClient, bExcludeHeader);
 }
 
 void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
@@ -2617,41 +2613,35 @@ DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 		return 0L;
 	}
 
-	DWORD dwNextID(dwTaskID);
-
 	switch (nCmd)
 	{
 	case IUI_GETNEXTTASK:
-		dwNextID = pList->GetTaskID(pList->GetNextSiblingItem(hti));
-		break;
-
-	case IUI_GETNEXTTOPLEVELTASK:
-		{
-			const CKanbanListCtrl* pNext = GetNextListCtrl(pList, TRUE, TRUE);
-			
-			if (pNext)
-				dwNextID = pNext->GetTaskID(pNext->TCH().GetFirstItem());
-		}
+		hti = pList->GetNextSiblingItem(hti);
 		break;
 
 	case IUI_GETPREVTASK:
-		dwNextID = pList->GetTaskID(pList->GetPrevSiblingItem(hti));
+		hti = pList->GetPrevSiblingItem(hti);
+		break;
+
+	case IUI_GETNEXTTOPLEVELTASK:
+		pList = GetNextListCtrl(pList, TRUE, TRUE);
+			
+		if (pList)
+			hti = pList->TCH().GetFirstItem();
 		break;
 
 	case IUI_GETPREVTOPLEVELTASK:
-		{
-			const CKanbanListCtrl* pPrev = GetNextListCtrl(pList, FALSE, TRUE);
+		pList = GetNextListCtrl(pList, FALSE, TRUE);
 			
-			if (pPrev)
-				dwNextID = pPrev->GetTaskID(pPrev->TCH().GetFirstItem());
-		}
+		if (pList)
+			hti = pList->TCH().GetFirstItem();
 		break;
 
 	default:
 		ASSERT(0);
 	}
 
-	return dwNextID;
+	return (hti ? pList->GetTaskID(hti) : 0);
 }
 
 const CKanbanListCtrl* CKanbanCtrl::GetNextListCtrl(const CKanbanListCtrl* pList, BOOL bNext, BOOL bExcludeEmpty) const
@@ -2786,12 +2776,31 @@ void CKanbanCtrl::OnListEditLabel(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	if (m_bResizingHeader)
+		return;
+
 	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
 
-	// don't let user drag column too narrow
 	if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
 	{
+		// prevent 'this' column becoming too small
 		pHDN->pitem->cxy = max(MIN_COL_WIDTH, pHDN->pitem->cxy);
+
+		// prevent 'next' column becoming too small
+		int nThisWidth = m_header.GetItemWidth(pHDN->iItem);
+		int nNextWidth = m_header.GetItemWidth(pHDN->iItem + 1);
+
+		pHDN->pitem->cxy = min(pHDN->pitem->cxy, (nThisWidth + nNextWidth - MIN_COL_WIDTH));
+
+		// Adjust 'next' column
+		nNextWidth = (nThisWidth + nNextWidth - pHDN->pitem->cxy);
+
+		{
+			CAutoFlag af(m_bResizingHeader, TRUE);
+			m_header.SetItemWidth(pHDN->iItem + 1, nNextWidth);
+		}
+
+		Resize(TRUE);
 	}
 }
 
@@ -2952,7 +2961,7 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 					m_aListCtrls.RemoveAt(nList);
 				}
 
-				Resize();
+				Resize(FALSE);
 
 				if (bChange)
 				{

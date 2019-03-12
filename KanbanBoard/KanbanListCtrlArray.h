@@ -63,7 +63,7 @@ public:
 
 	void Exclude(CDC* pDC);
 	void ClearOtherSelections(const CKanbanListCtrl* pIgnore);
-	void Redraw(BOOL bErase);
+	void Redraw(BOOL bErase, BOOL bUpdate = FALSE);
 	void RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 	void DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanListCtrl* pIgnore);
 	void RefreshItemLineHeights();

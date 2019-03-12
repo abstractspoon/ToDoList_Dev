@@ -702,7 +702,7 @@ void CKanbanListCtrlArray::OnSetFont(HFONT hFont)
 	}
 }
 
-void CKanbanListCtrlArray::Redraw(BOOL bErase)
+void CKanbanListCtrlArray::Redraw(BOOL bErase, BOOL bUpdate)
 {
 	int nList = GetSize();
 
@@ -712,7 +712,12 @@ void CKanbanListCtrlArray::Redraw(BOOL bErase)
 		ASSERT(pList);
 
 		if (pList)
+		{
 			pList->Invalidate(bErase);
+
+			if (bUpdate)
+				pList->UpdateWindow();
+		}
 	}
 }
 
