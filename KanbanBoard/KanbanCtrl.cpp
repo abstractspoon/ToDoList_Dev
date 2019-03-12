@@ -2275,17 +2275,11 @@ void CKanbanCtrl::Resize(const CRect& rect)
 
 	if (nNumVisibleLists)
 	{
-		ASSERT(m_header.GetItemCount() == nNumVisibleLists);
-
 		// Reduce client by a pixel to create a border
 		CRect rAvail(rect);
 		rAvail.DeflateRect(1, 1);
 
-		CRect rHeader(rAvail);
-		rHeader.bottom = (rHeader.top + GraphicsMisc::ScaleByDPIFactor(24));
-	
-		m_header.MoveWindow(rHeader);
-		rAvail.top = rHeader.bottom;
+		ResizeHeader(rAvail);
 		
 		CString sStatus;
 		int nListWidth = (rAvail.Width() / nNumVisibleLists);
@@ -2337,6 +2331,39 @@ void CKanbanCtrl::Resize(const CRect& rect)
 			nVis++;
 		}
 	}
+}
+
+void CKanbanCtrl::ResizeHeader(CRect& rAvail)
+{
+	ASSERT(m_header.GetSafeHwnd());
+
+	int nNumCols = m_header.GetItemCount();
+	ASSERT(nNumCols == GetVisibleListCtrlCount());
+
+	CRect rNewHeader(rAvail);
+	rNewHeader.bottom = (rNewHeader.top + GraphicsMisc::ScaleByDPIFactor(24));
+	m_header.MoveWindow(rNewHeader);
+		
+	int nTotalColWidth = m_header.CalcTotalItemsWidth();
+
+	for (int nCol = 0, nColStart = 0; nCol < nNumCols; nCol++)
+	{
+		if (nCol < (nNumCols - 1))
+		{
+			int nCurWidth = m_header.GetItemWidth(nCol);
+			int nNewWidth = MulDiv(nCurWidth, rNewHeader.Width(), nTotalColWidth);
+
+			m_header.SetItemWidth(nCol, nNewWidth);
+			nColStart += nNewWidth;
+		}
+		else
+		{
+			int nNewWidth = (rNewHeader.Width() - nColStart);
+			m_header.SetItemWidth(nCol, nNewWidth);
+		}
+	}
+
+	rAvail.top = rNewHeader.bottom;
 }
 
 float CKanbanCtrl::GetAverageListCharWidth()

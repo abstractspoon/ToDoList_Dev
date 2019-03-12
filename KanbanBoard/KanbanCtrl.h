@@ -133,6 +133,7 @@ protected:
 	void RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	void Resize();
 	void Resize(const CRect& rect);
+	void ResizeHeader(CRect& rAvail);
 	void ClearOtherListSelections(const CKanbanListCtrl* pList);
 
 	void RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate);
