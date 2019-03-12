@@ -413,22 +413,6 @@ int CKanbanListCtrlArray::ListSortProc(const void* pV1, const void* pV2)
 	return Misc::NaturalCompare(pKLC1->GetAttributeValue(), pKLC2->GetAttributeValue());
 }
 
-int CKanbanListCtrlArray::GetVisibleCount(BOOL bIncBacklog) const
-{
-	int nList = GetSize(), nNumVis = 0;
-
-	while (nList--)
-	{
-		const CKanbanListCtrl* pList = GetAt(nList);
-		ASSERT(pList);
-
-		if (pList->GetCount() || (bIncBacklog && pList->IsBacklog()))
-			nNumVis++;
-	}
-
-	return nNumVis;
-}
-
 int CKanbanListCtrlArray::GetVisibleTaskCount() const
 {
 	int nList = GetSize(), nNumVis = 0;

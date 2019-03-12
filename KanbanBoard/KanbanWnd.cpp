@@ -935,6 +935,7 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 
 	// Track the new attribute
 	m_ctrlKanban.TrackAttribute(nTrackAttrib, sCustomAttrib, aColDefs);
+	m_ctrlKanban.SelectTask(m_dwSelTaskID);
 }
 
 void CKanbanWnd::OnSelchangeOptions() 

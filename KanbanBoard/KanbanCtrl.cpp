@@ -1666,11 +1666,6 @@ void CKanbanCtrl::RebuildDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray)
 	
 	// (Re)sort
 	m_aListCtrls.Sort();
-
-	RebuildHeaderColumns(); // always
-
-	if (bNeedResize)
-		Resize();
 }
 
 void CKanbanCtrl::RebuildFixedListCtrls(const CKanbanItemArrayMap& mapKIArray)
@@ -1688,9 +1683,6 @@ void CKanbanCtrl::RebuildFixedListCtrls(const CKanbanItemArrayMap& mapKIArray)
 			const KANBANCOLUMN& colDef = m_aColumnDefs[nDef];
 			VERIFY(AddNewListCtrl(colDef) != NULL);
 		}
-
-		RebuildHeaderColumns(); // always
-		Resize(); // always
 	}
 }
 
@@ -1743,6 +1735,7 @@ void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate)
 		RemoveOldDynamicListCtrls(mapKIArray);
 	}
 
+	RebuildHeaderColumns();
 	Resize();
 		
 	// We only need to restore selection if not doing a task update
@@ -1763,21 +1756,29 @@ void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate)
 
 void CKanbanCtrl::RebuildHeaderColumns()
 {
-	int nNumColumns = GetVisibleColumnCount();
+	int nNumVisColumns = GetVisibleListCtrlCount();
 
-	while (nNumColumns < m_header.GetItemCount())
+	if (!nNumVisColumns)
+		return;
+
+	while (nNumVisColumns < m_header.GetItemCount())
 	{
 		m_header.DeleteItem(0);
 	}
 
-	while (nNumColumns > m_header.GetItemCount())
+	while (nNumVisColumns > m_header.GetItemCount())
 	{
 		m_header.AppendItem(1);
 	}
 
-	for (int nCol = 0; nCol < nNumColumns; nCol++)
+	int nNumColumns = m_aListCtrls.GetSize();
+
+	for (int nCol = 0, nVis = 0; nCol < nNumColumns; nCol++)
 	{
 		const CKanbanListCtrl* pList = m_aListCtrls[nCol];
+
+		if (!WantShowColumn(pList))
+			continue;
 
 		CEnString sTitle(pList->ColumnDefinition().sTitle);
 
@@ -1787,12 +1788,13 @@ void CKanbanCtrl::RebuildHeaderColumns()
 		CString sFormat;
 		sFormat.Format(_T("%s (%d)"), sTitle, pList->GetCount());
 
-		m_header.SetItemText(nCol, sFormat);
-		m_header.SetItemData(nCol, (DWORD)pList);
+		m_header.SetItemText(nVis, sFormat);
+		m_header.SetItemData(nVis, (DWORD)pList);
+		nVis++;
 	}
 
 	// Prevent tracking on the last column
-	m_header.EnableItemTracking(nNumColumns - 1, FALSE);
+	m_header.EnableItemTracking(nNumVisColumns - 1, FALSE);
 }
 
 void CKanbanCtrl::RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray)
@@ -1846,7 +1848,7 @@ void CKanbanCtrl::FixupSelectedList()
 
 void CKanbanCtrl::FixupListFocus()
 {
-	if (IsWindowVisible() && HasFocus() && (GetFocus() != m_pSelectedList))
+	if (IsWindowVisible() && HasFocus() && m_pSelectedList && (GetFocus() != m_pSelectedList))
 	{
 		CAutoFlag af(m_bSettingListFocus, TRUE);
 
@@ -2247,9 +2249,24 @@ int CKanbanCtrl::GetVisibleListCtrlCount() const
 		return m_aListCtrls.GetSize();
 
 	// Fixed columns
-	BOOL bShowBacklog = HasOption(KBCF_ALWAYSSHOWBACKLOG);
+	BOOL bAlwaysShowBacklog = HasOption(KBCF_ALWAYSSHOWBACKLOG);
+	int nList = m_aListCtrls.GetSize(), nNumVis = 0;
 
-	return m_aListCtrls.GetVisibleCount(bShowBacklog);
+	while (nList--)
+	{
+		const CKanbanListCtrl* pList = m_aListCtrls[nList];
+		ASSERT(pList);
+
+		if (!pList->GetCount())
+		{
+			if (!bAlwaysShowBacklog || !pList->IsBacklog())
+				continue;
+		}
+
+		nNumVis++;
+	}
+
+	return nNumVis;
 }
 
 void CKanbanCtrl::Resize(const CRect& rect)
@@ -2259,9 +2276,6 @@ void CKanbanCtrl::Resize(const CRect& rect)
 	if (nNumVisibleLists)
 	{
 		ASSERT(m_header.GetItemCount() == nNumVisibleLists);
-
-		BOOL bHideEmpty = !HasOption(KBCF_SHOWEMPTYCOLUMNS);
-		BOOL bShowBacklog = HasOption(KBCF_ALWAYSSHOWBACKLOG);
 
 		// Reduce client by a pixel to create a border
 		CRect rAvail(rect);

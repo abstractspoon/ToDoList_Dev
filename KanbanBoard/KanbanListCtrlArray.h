@@ -43,7 +43,6 @@ public:
 	void SetIndentSubtasks(BOOL bIndent = TRUE);
 	void SetHideEmptyAttributes(BOOL bHide = TRUE);
 	
-	int GetVisibleCount(BOOL bIncBacklog) const;
 	int GetVisibleTaskCount() const;
 	float GetAverageCharWidth();
 	DWORD HitTestTask(const CPoint& ptScreen) const;
