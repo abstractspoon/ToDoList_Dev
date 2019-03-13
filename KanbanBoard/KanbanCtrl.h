@@ -132,8 +132,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	void RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
-	void Resize(BOOL bExcludeHeader);
-	void Resize(const CRect& rect, BOOL bExcludeHeader);
+	void Resize(BOOL bIncludeHeader);
+	void Resize(const CRect& rect, BOOL bIncludeHeader);
 	void ResizeHeader(CRect& rAvail);
 
 	void RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate);

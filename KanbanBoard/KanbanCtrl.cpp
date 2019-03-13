@@ -1738,7 +1738,7 @@ void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate)
 	}
 
 	RebuildHeaderColumns();
-	Resize(FALSE);
+	Resize(TRUE);
 		
 	// We only need to restore selection if not doing a task update
 	// because the app takes care of that
@@ -1965,7 +1965,7 @@ BOOL CKanbanCtrl::TrackAttribute(IUI_ATTRIBUTE nAttrib, const CString& sCustomAt
 	m_aListCtrls.RemoveAll();
 
 	RebuildListCtrls(TRUE, TRUE);
-	Resize(FALSE);
+	Resize(TRUE);
 
 	return TRUE;
 }
@@ -2128,7 +2128,7 @@ void CKanbanCtrl::SetDisplayAttributes(const CKanbanAttributeArray& aAttrib)
 
 		// Update list attribute label visibility
 		if (m_aDisplayAttrib.GetSize())
-			Resize(FALSE);
+			Resize(TRUE);
 	}
 }
 
@@ -2205,7 +2205,7 @@ void CKanbanCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	CWnd::OnSize(nType, cx, cy);
 
-	Resize(CRect(0, 0, cx, cy), FALSE);
+	Resize(CRect(0, 0, cx, cy), TRUE);
 }
 
 BOOL CKanbanCtrl::OnEraseBkgnd(CDC* pDC)
@@ -2261,7 +2261,7 @@ int CKanbanCtrl::GetVisibleListCtrlCount() const
 	return nNumVis;
 }
 
-void CKanbanCtrl::Resize(const CRect& rect, BOOL bExcludeHeader)
+void CKanbanCtrl::Resize(const CRect& rect, BOOL bIncludeHeader)
 {
 	int nNumVisibleLists = GetVisibleListCtrlCount();
 
@@ -2271,10 +2271,10 @@ void CKanbanCtrl::Resize(const CRect& rect, BOOL bExcludeHeader)
 		CRect rAvail(rect);
 		rAvail.DeflateRect(1, 1);
 
-		if (bExcludeHeader)
-			rAvail.top += HEADER_HEIGHT;
-		else
+		if (bIncludeHeader)
 			ResizeHeader(rAvail);
+		else
+			rAvail.top += HEADER_HEIGHT;
 		
 		// Also update tab order as we go
 		CRect rList(rAvail);
@@ -2444,12 +2444,12 @@ KBC_ATTRIBLABELS CKanbanCtrl::GetListAttributeLabelVisibility(int nList, int nLi
 	return KBCAL_NONE;
 }
 
-void CKanbanCtrl::Resize(BOOL bExcludeHeader)
+void CKanbanCtrl::Resize(BOOL bIncludeHeader)
 {
 	CRect rClient;
 	GetClientRect(rClient);
 
-	Resize(rClient, bExcludeHeader);
+	Resize(rClient, bIncludeHeader);
 }
 
 void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
@@ -2785,7 +2785,7 @@ void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
 			m_header.SetItemWidth(pHDN->iItem + 1, nNextWidth);
 		}
 
-		Resize(TRUE);
+		Resize(FALSE); // resize just the list ctrls
 	}
 }
 
@@ -2941,7 +2941,7 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 					m_aListCtrls.RemoveAt(nList);
 				}
 
-				Resize(FALSE);
+				Resize(TRUE);
 
 				if (bChange)
 				{
