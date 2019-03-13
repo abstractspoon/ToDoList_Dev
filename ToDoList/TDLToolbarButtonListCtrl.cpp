@@ -91,11 +91,8 @@ void CTDLToolbarButtonListCtrl::InitState()
 		m_cbMenuItems.Initialise(IDR_MAINFRAME, IDS_TOOLBARMENUSEPARATOR);
 	}
 
-	AddCol(_T("Menu Item"), GraphicsMisc::ScaleByDPIFactor(350));
-	SetColumnType(MENUID_COL, ILCT_DROPLIST);
-
-	AddCol(_T("Image"), GraphicsMisc::ScaleByDPIFactor(75));
-	SetColumnType(IMAGE_COL, ILCT_BROWSE);
+	AddCol(_T("Menu Item"), GraphicsMisc::ScaleByDPIFactor(350), ILCT_DROPLIST);
+	AddCol(_T("Image"), GraphicsMisc::ScaleByDPIFactor(75), ILCT_BROWSE);
 
 	SetAutoRowPrompt(CEnString(IDS_NEW_TOOLBARBUTTON));
 	AutoAdd(TRUE, FALSE);

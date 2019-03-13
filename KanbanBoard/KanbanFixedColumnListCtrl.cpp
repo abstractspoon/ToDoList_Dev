@@ -122,13 +122,11 @@ void CKanbanFixedColumnListCtrl::PreSubclassWindow()
 	GetClientRect(rClient);
 	
 	AddCol(CEnString(IDS_COLUMNTITLE),	((rClient.Width() * 3) / 10));
-	AddCol(CEnString(IDS_ATTRIBVALUES),	((rClient.Width() * 3) / 10));
+	AddCol(CEnString(IDS_ATTRIBVALUES),	((rClient.Width() * 3) / 10), ILCT_DROPLIST);
 //	AddCol(CEnString(IDS_MAXTASKCOUNT),	((rClient.Width() * 2) / 10));
-	AddCol(CEnString(IDS_BKGNDCOLOR),	((rClient.Width() * 2) / 10));
-	
-	SetColumnType(KFCL_VALUECOL, ILCT_DROPLIST);
-	SetColumnType(KFCL_COLORCOL, ILCT_BROWSE);
 
+		AddCol(CEnString(IDS_BKGNDCOLOR),	((rClient.Width() * 2) / 10), ILCT_BROWSE);
+		
 	SetAutoRowPrompt(CEnString(IDS_NEWCOLUMN));
 	AutoAdd(TRUE, FALSE);
 	ShowGrid(TRUE, TRUE);

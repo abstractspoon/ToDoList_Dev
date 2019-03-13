@@ -137,9 +137,9 @@ void CTDLColumnAttribVisibilityListCtrl::BuildListCtrl()
 	{
 		AddCol(CEnString(IDS_COLATTRIBNAME), GraphicsMisc::ScaleByDPIFactor(150));
 
-		SetColumnType(AddCol(CEnString(IDS_COLUMNVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100)), ILCT_CHECK);
-		SetColumnType(AddCol(CEnString(IDS_ATTRIBVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100)), ILCT_CHECK);
-		SetColumnType(AddCol(CEnString(IDS_FILTERVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100)), ILCT_CHECK);
+		AddCol(CEnString(IDS_COLUMNVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100), ILCT_CHECK);
+		AddCol(CEnString(IDS_ATTRIBVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100), ILCT_CHECK);
+		AddCol(CEnString(IDS_FILTERVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100), ILCT_CHECK);
 
 		for (int nItem = 0; nItem < NUM_ITEMS; nItem++)
 		{

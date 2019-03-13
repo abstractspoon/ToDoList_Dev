@@ -1149,7 +1149,7 @@ int CInputListCtrl::AddRow(const CString& sRowText, int nImage)
 	return InsertRow(sRowText, GetItemCount(), nImage);
 }
 
-int CInputListCtrl::AddCol(const CString& sColText, int nWidth)
+int CInputListCtrl::AddCol(const CString& sColText, int nWidth, IL_COLUMNTYPE nColType)
 {
 	int nCol = GetColumnCount();
 
@@ -1157,7 +1157,9 @@ int CInputListCtrl::AddCol(const CString& sColText, int nWidth)
 		nCol--; // add before prompt
 
 	nCol = InsertColumn(nCol, sColText, LVCFMT_LEFT, nWidth == -1 ? m_nAutoColWidth : nWidth);
+
 	SetItemText(0, nCol, sColText);
+	SetColumnType(nCol, nColType);
 
 	if (m_nCurCol == -1)
 		m_nCurCol = nCol;

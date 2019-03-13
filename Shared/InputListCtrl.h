@@ -67,7 +67,7 @@ public:
 	int GetLastEdit(int* pRow = NULL, int* pCol = NULL);
 	void AllowDuplicates(BOOL bAllow, BOOL bNotify = FALSE);
 	int AddRow(const CString& sRowText, int nImage = -1);
-	int AddCol(const CString& sColText, int nWidth = -1);
+	int AddCol(const CString& sColText, int nWidth = -1, IL_COLUMNTYPE nColType = ILCT_TEXT);
 	void SetView(int nView);
 	void SetColumnType(int nCol, IL_COLUMNTYPE nType);
 	IL_COLUMNTYPE GetColumnType(int nCol) const;
