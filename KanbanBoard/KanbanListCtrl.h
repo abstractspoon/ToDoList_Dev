@@ -53,8 +53,8 @@ public:
 	HTREEITEM AddTask(const KANBANITEM& ki, BOOL bSelect);
 	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent);
 	
-	BOOL SaveToImage(CBitmap& bmImage, int nColWidth);
-	int CalcRequiredColumnWidthForImage() const;
+	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
+	CSize CalcRequiredSizeForImage() const;
 
 	HTREEITEM FindTask(DWORD dwTaskID) const;
 	HTREEITEM FindTask(const CPoint& ptScreen) const;

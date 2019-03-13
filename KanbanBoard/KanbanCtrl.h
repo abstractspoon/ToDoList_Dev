@@ -148,7 +148,6 @@ protected:
 
 	KBC_ATTRIBLABELS GetListAttributeLabelVisibility(int nList, int nListWidth);
 	float GetAverageListCharWidth();
-	int CalcRequiredColumnWidthForImage() const;
 	BOOL CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KBC_ATTRIBLABELS nLabelVis) const;
 
 	KANBANITEM* GetKanbanItem(DWORD dwTaskID) const;

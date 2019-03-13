@@ -606,9 +606,9 @@ void CKanbanListCtrlArray::DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanLis
 	}
 }
 
-int CKanbanListCtrlArray::CalcRequiredColumnWidthForImage() const
+CSize CKanbanListCtrlArray::CalcRequiredColumnSizeForImage() const
 {
-	int nMaxWidth = 0;
+	CSize reqSize(0, 0);
 	int nList = GetSize();
 
 	while (nList--)
@@ -616,33 +616,29 @@ int CKanbanListCtrlArray::CalcRequiredColumnWidthForImage() const
 		const CKanbanListCtrl* pList = GetAt(nList);
 		ASSERT(pList);
 
-		int nListWidth = pList->CalcRequiredColumnWidthForImage();
-		nMaxWidth = max(nMaxWidth, nListWidth);
+		CSize listSize = pList->CalcRequiredSizeForImage();
+
+		reqSize.cx = max(reqSize.cx, listSize.cx);
+		reqSize.cy = max(reqSize.cy, listSize.cy);
 	}
 
-	return nMaxWidth;
+	return reqSize;
 }
 
 BOOL CKanbanListCtrlArray::CanSaveToImage() const
 {
 	// At least one column must have items
 	// And the item count per page must be 1 or more
-/*
 	int nList = GetSize();
 
 	while (nList--)
 	{
-		const CKanbanListCtrlEx* pList = GetAt(nList);
+		const CKanbanListCtrl* pList = GetAt(nList);
 		ASSERT(pList);
 
-		if (pList->GetCountPerPage() == 0)
-			return FALSE;
-
-		// else
-		if (pList->GetCount())
+		if (pList->GetCount() && pList->GetVisibleCount())
 			return TRUE;
 	}
-*/
 
 	return FALSE;
 }
@@ -658,7 +654,7 @@ BOOL CKanbanListCtrlArray::SaveToImage(CBitmap& bmImage)
 	aListBmps.SetSize(nNumLists, 1);
 
 	int nListWidth = 0, nListHeight = 0;
-	int nReqColWidth = CalcRequiredColumnWidthForImage();
+	CSize reqColSize = CalcRequiredColumnSizeForImage();
 
 	for (int nList = 0; nList < nNumLists; nList++)
 	{
@@ -667,7 +663,7 @@ BOOL CKanbanListCtrlArray::SaveToImage(CBitmap& bmImage)
 
 		CEnBitmap bmp;
 
-		if (!pList->SaveToImage(bmp, nReqColWidth))
+		if (!pList->SaveToImage(bmp, reqColSize))
 			return FALSE;
 
 		CSize size = bmp.GetSize();

@@ -48,7 +48,7 @@ public:
 	DWORD HitTestTask(const CPoint& ptScreen) const;
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
 	
-	int CalcRequiredColumnWidthForImage() const;
+	CSize CalcRequiredColumnSizeForImage() const;
 	BOOL CanSaveToImage() const;
 	BOOL SaveToImage(CBitmap& bmImage);
 

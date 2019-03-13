@@ -283,9 +283,23 @@ CSize CCopyTreeCtrlContents::CalcContentsSize() const
 	sizeContents.cx++;
 
 	CTreeCtrlHelper tch(m_tree);
-	int nTotalVisible = tch.BuildVisibleIndexMap();
 
-	sizeContents.cy = (nTotalVisible * m_nItemHeight);
+	HTREEITEM htiFirst = tch.GetFirstItem();
+	HTREEITEM htiLast = tch.GetLastVisibleItem();
+
+	CRect rFirst, rLast;
+
+	if (m_tree.GetItemRect(htiFirst, rFirst, FALSE) &&
+		m_tree.GetItemRect(htiLast, rLast, FALSE))
+	{
+		sizeContents.cy = (rLast.bottom - rFirst.top);
+	}
+	else
+	{
+		int nTotalVisible = tch.BuildVisibleIndexMap();
+		sizeContents.cy = (nTotalVisible * m_nItemHeight);
+	}
+
 	sizeContents.cy = max(1, sizeContents.cy);
 
 	return sizeContents;

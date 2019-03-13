@@ -3131,11 +3131,6 @@ BOOL CKanbanCtrl::SaveToImage(CBitmap& bmImage)
 	return m_aListCtrls.SaveToImage(bmImage);
 }
 
-int CKanbanCtrl::CalcRequiredColumnWidthForImage() const
-{
-	return m_aListCtrls.CalcRequiredColumnWidthForImage();
-}
-
 BOOL CKanbanCtrl::CanSaveToImage() const
 {
 	return m_aListCtrls.CanSaveToImage();

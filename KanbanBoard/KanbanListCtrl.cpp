@@ -1297,64 +1297,70 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point, BOOL bDblClk)
 	return FALSE;
 }
 
-BOOL CKanbanListCtrl::SaveToImage(CBitmap& bmImage, int nColWidth)
+BOOL CKanbanListCtrl::SaveToImage(CBitmap& bmImage, const CSize& reqColSize)
 {
-/*
-	CLockUpdates lock(*this);
 	CAutoFlag af(m_bSavingToImage, TRUE);
 
-	// Resize column width to suit text
-	int nPrevColWidth = m_header.GetItemWidth(0);
-
-	SetColumnWidth(0, nColWidth);
+	// resize our window to remove any vertical scrollbar
+	CRect rPrev = CDialogHelper::GetChildRect(this);
+	CRect rTemp(rPrev.TopLeft(), reqColSize);
+	
+	MoveWindow(rTemp);
 
 	// Do the copy
-	BOOL bRes = CCopyListCtrlContents(*this).DoCopy(bmImage);
+	BOOL bRes = CCopyWndContents(*this).DoCopy(bmImage);
 
-	// Restore column width
-	SetColumnWidth(0, nPrevColWidth);
+	// Restore size
+	MoveWindow(rPrev);
 
 	return bRes;
-*/
-	return FALSE;
 }
 
-int CKanbanListCtrl::CalcRequiredColumnWidthForImage() const
+CSize CKanbanListCtrl::CalcRequiredSizeForImage() const
 {
-/*
-	CClientDC dc(const_cast<CKanbanListCtrlEx*>(this));
+	CClientDC dc(const_cast<CKanbanListCtrl*>(this));
 	float fAveCharWidth = GraphicsMisc::GetAverageCharWidth(&dc);
 
-	int nMinHeaderWidth = ((int)(m_header.GetItemText(0).GetLength() * fAveCharWidth) + (2 * LV_PADDING));
+	int nMinHeaderWidth = ((int)(m_columnDef.sTitle.GetLength() * fAveCharWidth) + (2 * LV_PADDING));
+	CSize reqSize(nMinHeaderWidth, 0);
 	
-	HTREEITEM hti = GetCount();
-	int nMaxItemWidth = 0;
+	HTREEITEM hti = GetChildItem(NULL);
 	
-	while (nItem--)
+	while (hti)
 	{
-		DWORD dwTaskID = GetTaskID(nItem);
+		DWORD dwTaskID = GetTaskID(hti);
 		const KANBANITEM* pKI = GetKanbanItem(dwTaskID);
 		ASSERT(pKI);
 
 		if (pKI)
 		{
-			int nMaxItemWidth = (int)(pKI->sTitle.GetLength() * fAveCharWidth / 2); // title is on two lines
-			nMaxItemWidth += (pKI->nLevel * LEVEL_INDENT);
-			nMaxItemWidth += (pKI->bHasIcon ? (IMAGE_SIZE + ICON_OFFSET) : 0);
+			int nItemWidth = (int)(pKI->sTitle.GetLength() * fAveCharWidth / 2); // title is on two lines
+			nItemWidth += (pKI->nLevel * LEVEL_INDENT);
+			nItemWidth += (pKI->dwDrawnIcons ? (IMAGE_SIZE + IMAGE_PADDING) : 0);
 			
 			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 			{
 				IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
 				CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeDisplayValue(nAttrib), KBCAL_LONG);
 
-				nMaxItemWidth = max(nMaxItemWidth, ((int)(sAttrib.GetLength() * fAveCharWidth) + ATTRIB_INDENT));
+				nItemWidth = max(nItemWidth, ((int)(sAttrib.GetLength() * fAveCharWidth) + ATTRIB_INDENT));
 			}
+
+			reqSize.cx = max(reqSize.cx, nItemWidth);
 		}
+
+		hti = GetNextSiblingItem(hti);
 	}
-	
-	return max(nMinHeaderWidth, nMaxItemWidth);
-*/
-	return 0;
+
+	CRect rFirst, rLast;
+
+	if (GetItemRect(TCH().GetFirstItem(), rFirst, FALSE) &&
+		GetItemRect(TCH().GetLastVisibleItem(), rLast, FALSE))
+	{
+		reqSize.cy = (rLast.bottom - rFirst.top);
+	}
+		
+	return reqSize;
 }
 
 BOOL CKanbanListCtrl::SelectionHasLockedTasks() const

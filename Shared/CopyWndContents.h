@@ -14,12 +14,12 @@
 class CCopyWndContents
 {
 public:
+	CCopyWndContents(CWnd& wnd);
 	virtual ~CCopyWndContents();
 
 	BOOL DoCopy(CBitmap& bmp, const CRect& rFromTo = CRect(0, 0, -1, -1));
 
 protected:
-	CCopyWndContents(CWnd& wnd);
 
 protected:
 	CWnd& m_wnd;
