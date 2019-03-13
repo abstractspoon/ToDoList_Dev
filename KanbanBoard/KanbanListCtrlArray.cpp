@@ -552,7 +552,7 @@ DWORD CKanbanListCtrlArray::HitTestTask(const CPoint& ptScreen) const
 	return 0;
 }
 
-void CKanbanListCtrlArray::ClearOtherSelections(const CKanbanListCtrl* pIgnore)
+void CKanbanListCtrlArray::SetSelectedList(const CKanbanListCtrl* pSelList)
 {
 	int nList = GetSize();
 

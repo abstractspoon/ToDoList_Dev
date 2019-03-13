@@ -391,7 +391,7 @@ BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 	if ((nPrevSel == nNewSel) && (dwTaskID == dwSelID))
 		return TRUE;
 
-	ClearOtherListSelections(NULL);
+	m_aListCtrls.SetSelectedList(NULL);
 
 	if ((nNewSel == -1) || (dwTaskID == 0))
 		return FALSE;
@@ -2712,7 +2712,7 @@ BOOL CKanbanCtrl::SelectListCtrl(CKanbanListCtrl* pList, BOOL bNotifyParent)
 
 		if (pList->GetCount() > 0)
 		{
-			ClearOtherListSelections(m_pSelectedList);
+			m_aListCtrls.SetSelectedList(m_pSelectedList);
 
 			if (m_pSelectedList->GetSelectedCount())
 				m_pSelectedList->ScrollToSelection();

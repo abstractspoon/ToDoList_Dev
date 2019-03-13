@@ -61,6 +61,7 @@ public:
 	void Sort();
 	void SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent);
 
+	void SetSelectedList(const CKanbanListCtrl* pSelList);
 	void Exclude(CDC* pDC);
 	void ClearOtherSelections(const CKanbanListCtrl* pIgnore);
 	void Redraw(BOOL bErase, BOOL bUpdate = FALSE);
