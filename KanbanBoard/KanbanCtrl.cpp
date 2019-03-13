@@ -1763,14 +1763,25 @@ void CKanbanCtrl::RebuildHeaderColumns()
 	if (!nNumVisColumns)
 		return;
 
+	// Remove excess columns
 	while (nNumVisColumns < m_header.GetItemCount())
 	{
 		m_header.DeleteItem(0);
 	}
 
-	while (nNumVisColumns > m_header.GetItemCount())
+	// Add new columns
+	if (m_header.GetItemCount() < nNumVisColumns)
 	{
-		m_header.AppendItem(1);
+		// Give new columns the average width of old columns
+		int nNewColWidth = 1;
+
+		if (m_header.GetItemCount())
+			nNewColWidth = m_header.CalcAverageItemWidth();
+
+		while (nNumVisColumns > m_header.GetItemCount())
+		{
+			m_header.AppendItem(nNewColWidth);
+		}
 	}
 
 	int nNumColumns = m_aListCtrls.GetSize();
