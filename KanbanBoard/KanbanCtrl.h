@@ -135,7 +135,6 @@ protected:
 	void Resize(BOOL bExcludeHeader);
 	void Resize(const CRect& rect, BOOL bExcludeHeader);
 	void ResizeHeader(CRect& rAvail);
-	void ClearOtherListSelections(const CKanbanListCtrl* pList);
 
 	void RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate);
 	void RebuildDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray);
@@ -156,10 +155,6 @@ protected:
 	BOOL HasKanbanItem(DWORD dwTaskID) const;
 
 	CKanbanListCtrl* LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL bForward) const;
-	CKanbanListCtrl* GetListCtrl(const CString& sAttribValue) const;
-	CKanbanListCtrl* GetListCtrl(HWND hwnd) const;
-	CKanbanListCtrl* HitTestListCtrl(const CPoint& ptScreen) const;
-
 	CKanbanListCtrl* AddNewListCtrl(const KANBANCOLUMN& colDef);
 	CKanbanListCtrl* GetSelListCtrl();
 	CKanbanListCtrl* GetNextListCtrl(const CKanbanListCtrl* pList, BOOL bNext, BOOL bExcludeEmpty);

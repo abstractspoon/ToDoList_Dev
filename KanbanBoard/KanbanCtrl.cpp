@@ -163,7 +163,7 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CKanbanCtrl::FilterToolTipMessage(MSG* pMsg) 
 {
 	// List tooltips
-	CKanbanListCtrl* pList = HitTestListCtrl(pMsg->pt);
+	CKanbanListCtrl* pList = m_aListCtrls.HitTest(pMsg->pt);
 
 	if (pList)
 		pList->FilterToolTipMessage(pMsg);
@@ -1466,7 +1466,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 		{
 			if (!Misc::Contains(aCurValues[nVal], aNewValues))
 			{
-				CKanbanListCtrl* pCurList = GetListCtrl(aCurValues[nVal]);
+				CKanbanListCtrl* pCurList = m_aListCtrls.Get(aCurValues[nVal]);
 				ASSERT(pCurList);
 
 				if (pCurList)
@@ -1487,7 +1487,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 		{
 			if (!Misc::Contains(aNewValues[nVal], aCurValues))
 			{
-				CKanbanListCtrl* pCurList = GetListCtrl(aNewValues[nVal]);
+				CKanbanListCtrl* pCurList = m_aListCtrls.Get(aNewValues[nVal]);
 				
 				if (pCurList)
 					pCurList->AddTask(*pKI, FALSE);
@@ -1628,7 +1628,7 @@ int CKanbanCtrl::AddMissingDynamicListCtrls(const CKanbanItemArrayMap& mapKIArra
 			CString sAttribValueID, sAttribValue;
 			pGlobals->GetNextAssoc(pos, sAttribValueID, sAttribValue);
 			
-			CKanbanListCtrl* pList = GetListCtrl(sAttribValueID);
+			CKanbanListCtrl* pList = m_aListCtrls.Get(sAttribValueID);
 			
 			if ((pList == NULL) && WantShowColumn(sAttribValueID, mapKIArray))
 			{
@@ -2117,16 +2117,6 @@ CKanbanListCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL bF
 	while (pList != pStartList);
 
 	return NULL;
-}
-
-CKanbanListCtrl* CKanbanCtrl::GetListCtrl(const CString& sAttribValue) const
-{
-	return m_aListCtrls.Get(sAttribValue);
-}
-
-CKanbanListCtrl* CKanbanCtrl::GetListCtrl(HWND hwnd) const
-{
-	return m_aListCtrls.Get(hwnd);
 }
 
 void CKanbanCtrl::SetDisplayAttributes(const CKanbanAttributeArray& aAttrib)
@@ -2654,11 +2644,6 @@ CKanbanListCtrl* CKanbanCtrl::GetNextListCtrl(const CKanbanListCtrl* pList, BOOL
 	return m_aListCtrls.GetNext(pList, bNext, bExcludeEmpty, UsingFixedColumns());
 }
 
-CKanbanListCtrl* CKanbanCtrl::HitTestListCtrl(const CPoint& ptScreen) const
-{
-	return m_aListCtrls.HitTest(ptScreen);
-}
-
 BOOL CKanbanCtrl::IsDragging() const
 {
 	ASSERT(!m_bReadOnly);
@@ -2865,11 +2850,6 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 }
 
-void CKanbanCtrl::ClearOtherListSelections(const CKanbanListCtrl* pIgnore)
-{
-	m_aListCtrls.ClearOtherSelections(pIgnore);
-}
-
 void CKanbanCtrl::OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	ReleaseCapture();
@@ -2939,7 +2919,7 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 		// get the list under the mouse
 		ClientToScreen(&point);
 
-		CKanbanListCtrl* pDestList = HitTestListCtrl(point);
+		CKanbanListCtrl* pDestList = m_aListCtrls.HitTest(point);
 		CKanbanListCtrl* pSrcList = m_pSelectedList;
 
 		if (CanDrag(pSrcList, pDestList))
@@ -3104,8 +3084,8 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		
 		// get the list under the mouse
 		ClientToScreen(&point);
-		const CKanbanListCtrl* pDestList = HitTestListCtrl(point);
 
+		const CKanbanListCtrl* pDestList = m_aListCtrls.HitTest(point);
 		BOOL bValidDest = CanDrag(m_pSelectedList, pDestList);
 		BOOL bCopy = Misc::ModKeysArePressed(MKS_CTRL);
 
