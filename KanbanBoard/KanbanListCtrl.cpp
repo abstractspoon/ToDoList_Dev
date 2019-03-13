@@ -167,7 +167,9 @@ int CKanbanListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255))
 		SetImageList(&m_ilCheckboxes, TVSIL_STATE);
 
+	SetExtendedStyle(TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER);
 	RefreshBkgndColor();
+
 	return 0;
 }
 
@@ -973,7 +975,7 @@ DWORD CKanbanListCtrl::GetSelectedTaskID() const
 
 void CKanbanListCtrl::ScrollToSelection()
 {
-	EnsureVisible(GetSelectedItem());
+	TCH().EnsureVisibleEx(GetSelectedItem(), FALSE);
 }
 
 void CKanbanListCtrl::ClearSelection()

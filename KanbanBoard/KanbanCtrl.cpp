@@ -204,10 +204,10 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentList)
 	// Find the closest task at the currently
 	// selected task's scrolled pos
 	HTREEITEM hti = m_pSelectedList->GetSelectedItem();
-	ASSERT(hti >= 0);
+	ASSERT(hti);
 
 	// scroll into view first
-	m_pSelectedList->EnsureVisible(hti);
+	m_pSelectedList->ScrollToSelection();
 
 	CRect rItem;
 	VERIFY(m_pSelectedList->GetItemBounds(hti, &rItem));
