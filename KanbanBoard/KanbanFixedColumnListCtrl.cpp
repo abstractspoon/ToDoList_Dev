@@ -125,6 +125,7 @@ void CKanbanFixedColumnListCtrl::PreSubclassWindow()
 	AddCol(CEnString(IDS_ATTRIBVALUES),	((rClient.Width() * 3) / 10), ILCT_DROPLIST);
 //	AddCol(CEnString(IDS_MAXTASKCOUNT),	((rClient.Width() * 2) / 10));
 
+	if (!Misc::IsHighContrastActive())
 		AddCol(CEnString(IDS_BKGNDCOLOR),	((rClient.Width() * 2) / 10), ILCT_BROWSE);
 		
 	SetAutoRowPrompt(CEnString(IDS_NEWCOLUMN));
@@ -160,6 +161,7 @@ void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 		break;
 
 	case KFCL_COLORCOL:
+		ASSERT(!Misc::IsHighContrastActive());
 		{
 			CColorDialog dialog(GetItemData(nItem));
 
@@ -224,6 +226,8 @@ void CKanbanFixedColumnListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 {
 	if ((nCol == KFCL_COLORCOL) && !IsPrompt(nRow))
 	{
+		ASSERT (!Misc::IsHighContrastActive());
+
 		COLORREF color = GetItemData(nRow);
 
 		if (color != CLR_NONE)
