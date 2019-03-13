@@ -101,7 +101,8 @@ CKanbanCtrl::CKanbanCtrl()
 	m_nSortBy(IUI_NONE),
 	m_bSelectTasks(FALSE),
 	m_bResizingHeader(FALSE),
-	m_bSettingListFocus(FALSE)
+	m_bSettingListFocus(FALSE),
+	m_bSavingToImage(FALSE)
 {
 
 }
@@ -366,20 +367,19 @@ BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 	else
 		nNewSel = m_aListCtrls.Find(dwTaskID);
 
-	if ((nPrevSel == nNewSel) && (dwTaskID == dwSelID))
-		return TRUE;
+	if ((nPrevSel != nNewSel) || (dwTaskID != dwSelID))
+	{
+		m_aListCtrls.SetSelectedList(NULL);
 
-	m_aListCtrls.SetSelectedList(NULL);
+		if ((nNewSel == -1) || (dwTaskID == 0))
+			return FALSE;
 
-	if ((nNewSel == -1) || (dwTaskID == 0))
-		return FALSE;
-
-	// else
-	SelectListCtrl(m_aListCtrls[nNewSel], FALSE);
-	VERIFY(m_pSelectedList->SelectTask(dwTaskID));
+		// else
+		SelectListCtrl(m_aListCtrls[nNewSel], FALSE);
+		VERIFY(m_pSelectedList->SelectTask(dwTaskID));
+	}
 
 	ScrollToSelectedTask();
-
 	return TRUE;
 }
 
@@ -2763,7 +2763,7 @@ void CKanbanCtrl::OnListEditLabel(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	if (m_bResizingHeader)
+	if (m_bResizingHeader || m_bSavingToImage)
 		return;
 
 	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
@@ -2830,7 +2830,7 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		{
 			*pResult = CDRF_NOTIFYPOSTPAINT;
 		}
-		else if (m_pSelectedList)
+		else if (!m_bSavingToImage && m_pSelectedList)
 		{
 			// Show the text of the selected column in bold
 			if (pNMCD->lItemlParam == (LPARAM)m_pSelectedList)
@@ -2855,15 +2855,19 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 			// Show the text of the selected column in bold
 			HGDIOBJ hPrev = NULL;
 
-			if (pNMCD->lItemlParam == (LPARAM)m_pSelectedList)
-				hPrev = pDC->SelectObject(m_fonts.GetHFont(GMFS_BOLD));
-			else
-				hPrev = pDC->SelectObject(m_fonts.GetHFont());
+			if (!m_bSavingToImage)
+			{
+				if (pNMCD->lItemlParam == (LPARAM)m_pSelectedList)
+					hPrev = pDC->SelectObject(m_fonts.GetHFont(GMFS_BOLD));
+				else
+					hPrev = pDC->SelectObject(m_fonts.GetHFont());
+			}
 			
 			UINT nFlags = (DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(hwndHdr));
 			pDC->DrawText(m_header.GetItemText(pNMCD->dwItemSpec), rItem, nFlags);
 
-			pDC->SelectObject(hPrev);
+			if (!m_bSavingToImage)
+				pDC->SelectObject(hPrev);
 			
 			*pResult = CDRF_SKIPDEFAULT;
 		}
@@ -3128,7 +3132,70 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 
 BOOL CKanbanCtrl::SaveToImage(CBitmap& bmImage)
 {
-	return m_aListCtrls.SaveToImage(bmImage);
+	CAutoFlag af(m_bSavingToImage, TRUE);
+	CEnBitmap bmLists;
+
+	if (m_aListCtrls.SaveToImage(bmLists))
+	{
+		// Resize header and column widths to suit
+		CIntArray aColWidths;
+		m_header.GetItemWidths(aColWidths);
+
+		int nTotalListWidth = bmLists.GetSize().cx;
+		int nItem = m_header.GetItemCount();
+
+		int nReqColWidth = (nTotalListWidth / nItem);
+
+		while (nItem--)
+			m_header.SetItemWidth(nItem, nReqColWidth);
+
+		CRect rHeader = CDialogHelper::GetChildRect(&m_header);
+		CDialogHelper::ResizeChild(&m_header, (nTotalListWidth - rHeader.Width()), 0);
+
+		CEnBitmap bmHeader;
+
+		if (CCopyHeaderCtrlContents(m_header).DoCopy(bmHeader))
+		{
+			// Restore widths
+			m_header.SetItemWidths(aColWidths);
+
+			// Create one bitmap to fit both
+			CDC dcImage, dcParts;
+			CClientDC dc(this);
+
+			if (dcImage.CreateCompatibleDC(&dc) && dcParts.CreateCompatibleDC(&dc))
+			{
+				// Create the image big enough to fit the tasks and columns side-by-side
+				CSize sizeLists = bmLists.GetSize();
+				CSize sizeHeader = bmHeader.GetSize();
+
+				CSize sizeImage;
+
+				sizeImage.cx = max(sizeHeader.cx, sizeLists.cx);
+				sizeImage.cy = (sizeHeader.cy + sizeLists.cy);
+
+				if (bmImage.CreateCompatibleBitmap(&dc, sizeImage.cx, sizeImage.cy))
+				{
+					CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
+
+					CBitmap* pOldPart = dcParts.SelectObject(&bmHeader);
+					dcImage.BitBlt(0, 0, sizeHeader.cx, sizeHeader.cy, &dcParts, 0, 0, SRCCOPY);
+
+					dcParts.SelectObject(&bmLists);
+					dcImage.BitBlt(0, sizeHeader.cy, sizeLists.cx, sizeLists.cy, &dcParts, 0, 0, SRCCOPY);
+
+					dcParts.SelectObject(pOldPart);
+					dcImage.SelectObject(pOldImage);
+				}
+			}
+		}
+
+		m_header.MoveWindow(rHeader);
+	}
+
+	ScrollToSelectedTask();
+
+	return (bmImage.GetSafeHandle() != NULL);
 }
 
 BOOL CKanbanCtrl::CanSaveToImage() const

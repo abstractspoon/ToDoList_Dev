@@ -91,6 +91,7 @@ protected:
 	BOOL m_bSelectTasks;
 	BOOL m_bSettingListFocus;
 	BOOL m_bResizingHeader;
+	BOOL m_bSavingToImage;
 
 	DWORD m_dwOptions;
 	UINT m_nNextColor;
