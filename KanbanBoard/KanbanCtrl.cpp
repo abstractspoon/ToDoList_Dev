@@ -156,8 +156,6 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	}
 
-	//m_header.EnableTracking(FALSE);
-
 	return 0;
 }
 
@@ -241,48 +239,6 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentList)
 	SendMessage(WM_NOTIFY, nmtv.hdr.idFrom, (LPARAM)&nmtv);
 
 	return TRUE;
-}
-
-BOOL CKanbanCtrl::SelectNextItem(int nIncrement)
-{
-/*
-	if (nIncrement == 0)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	int nSelItem = m_pSelectedList->GetSelectedItem();
-	int nNumItem = m_pSelectedList->GetCount();
-
-	int nNextItem = -1;
-
-	if (nSelItem == -1)
-	{
-		if (nIncrement > 0)
-			nNextItem = 0;
-		else
-			nNextItem = (nNumItem - 1);
-	}
-	else
-	{
-		if (nIncrement > 0)
-			nNextItem = min((nSelItem + nIncrement), (nNumItem - 1));
-		else
-			nNextItem = max((nSelItem + nIncrement), 0);
-	}
-
-	if (nNextItem != nSelItem)
-	{
-		VERIFY(m_pSelectedList->SelectItem(nNextItem, TRUE));
-		m_pSelectedList->EnsureVisible(nNextItem);
-
-		return TRUE;
-	}
-*/
-
-	// else
-	return FALSE;
 }
 
 BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
