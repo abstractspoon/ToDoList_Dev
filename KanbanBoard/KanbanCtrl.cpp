@@ -2672,6 +2672,8 @@ BOOL CKanbanCtrl::CancelOperation()
 	if (IsDragging())
 	{
 		ReleaseCapture();
+		m_aListCtrls.SetDropTarget(NULL);
+
 		return TRUE;
 	}
 	
@@ -2959,10 +2961,11 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 				}
 			}
 		}
-	}
 
-	// always
-	ReleaseCapture();
+		// always
+		m_aListCtrls.SetDropTarget(NULL);
+		ReleaseCapture();
+	}
 
 	CWnd::OnLButtonUp(nFlags, point);
 }
@@ -3082,14 +3085,23 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		ASSERT(!m_bReadOnly);
 		
-		// get the list under the mouse
+		// get the list and item under the mouse
 		ClientToScreen(&point);
 
 		const CKanbanListCtrl* pDestList = m_aListCtrls.HitTest(point);
 		BOOL bValidDest = CanDrag(m_pSelectedList, pDestList);
-		BOOL bCopy = Misc::ModKeysArePressed(MKS_CTRL);
 
-		GraphicsMisc::SetDragDropCursor(bValidDest ? (bCopy ? GMOC_COPY : GMOC_MOVE) : GMOC_NO);
+		if (bValidDest)
+		{
+			BOOL bCopy = Misc::ModKeysArePressed(MKS_CTRL);
+			GraphicsMisc::SetDragDropCursor(bCopy ? GMOC_COPY : GMOC_MOVE);
+		}
+		else
+		{
+			GraphicsMisc::SetDragDropCursor(GMOC_NO);
+		}
+
+		m_aListCtrls.SetDropTarget(bValidDest ? pDestList : NULL);
 	}
 	
 	CWnd::OnMouseMove(nFlags, point);

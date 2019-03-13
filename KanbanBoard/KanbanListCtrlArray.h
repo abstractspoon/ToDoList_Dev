@@ -53,7 +53,7 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 
 	CKanbanListCtrl* GetNext(const CKanbanListCtrl* pList, BOOL bNext, BOOL bExcludeEmpty, BOOL bFixedColumns) const;
-	CKanbanListCtrl* HitTest(const CPoint& ptScreen) const;
+	CKanbanListCtrl* HitTest(const CPoint& ptScreen, HTREEITEM* pHit = NULL, UINT* pHitFlags = NULL) const;
 
 	void OnDisplayAttributeChanged();
 	void OnSetFont(HFONT hFont);
@@ -62,11 +62,12 @@ public:
 	void SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent);
 
 	void SetSelectedList(const CKanbanListCtrl* pSelList);
+	void SetDropTarget(const CKanbanListCtrl* pTarget);
+	void DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanListCtrl* pIgnore);
+
 	void Exclude(CDC* pDC);
-	void ClearOtherSelections(const CKanbanListCtrl* pIgnore);
 	void Redraw(BOOL bErase, BOOL bUpdate = FALSE);
 	void RemoveDeletedTasks(const CDWordSet& mapCurIDs);
-	void DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanListCtrl* pIgnore);
 	void RefreshItemLineHeights();
 
 protected:

@@ -74,6 +74,7 @@ public:
 	void ClearSelection();
 	void SetSelected(BOOL bSelected);
 
+	void SetDropTarget(BOOL bTarget);
 	void SetBackgroundColor(COLORREF color);
 	void SetExcessColor(COLORREF color);
 	void SetMaximumTaskCount(int nMaxTasks);
@@ -111,6 +112,7 @@ protected:
 	BOOL m_bShowCompletionCheckboxes;
 	BOOL m_bIndentSubtasks;
 	BOOL m_bHideEmptyAttributes;
+	BOOL m_bDropTarget;
 
 	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;

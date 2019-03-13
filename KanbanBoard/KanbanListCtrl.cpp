@@ -104,7 +104,8 @@ CKanbanListCtrl::CKanbanListCtrl(const CKanbanItemMap& data, const KANBANCOLUMN&
 	m_nItemTextHeight(-1),
 	m_nItemTextBorder(-1),
 	m_nAttribLabelVisiability(KBCAL_LONG),
-	m_bSavingToImage(FALSE)
+	m_bSavingToImage(FALSE),
+	m_bDropTarget(FALSE)
 {
 }
 
@@ -167,8 +168,16 @@ int CKanbanListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		SetImageList(&m_ilCheckboxes, TVSIL_STATE);
 
 	RefreshBkgndColor();
-
 	return 0;
+}
+
+void CKanbanListCtrl::SetDropTarget(BOOL bTarget)
+{
+	if (bTarget != m_bDropTarget)
+	{
+		m_bDropTarget = bTarget;
+		RefreshBkgndColor();
+	}
 }
 
 LRESULT CKanbanListCtrl::OnThemeChanged(WPARAM /*wp*/, LPARAM /*lp*/)
@@ -179,10 +188,18 @@ LRESULT CKanbanListCtrl::OnThemeChanged(WPARAM /*wp*/, LPARAM /*lp*/)
 
 void CKanbanListCtrl::RefreshBkgndColor()
 {
-	if (!Misc::IsHighContrastActive() && (m_columnDef.crBackground != CLR_NONE))
-		ListView_SetBkColor(*this, m_columnDef.crBackground);
-	else
-		ListView_SetBkColor(*this, GetSysColor(COLOR_WINDOW));
+	COLORREF crBack = GetSysColor(COLOR_WINDOW);
+
+	if (!Misc::IsHighContrastActive())
+	{
+		if (m_columnDef.crBackground != CLR_NONE)
+			crBack = m_columnDef.crBackground;
+
+		if (m_bDropTarget)
+			crBack = GraphicsMisc::Darker(crBack, 0.1);
+	}
+
+	TreeView_SetBkColor(*this, crBack);
 }
 
 void CKanbanListCtrl::SetBackgroundColor(COLORREF color)
@@ -194,7 +211,6 @@ void CKanbanListCtrl::SetBackgroundColor(COLORREF color)
 	{
 		m_columnDef.crBackground = color;
 		RefreshBkgndColor();
-		Invalidate(TRUE);
 	}
 }
 

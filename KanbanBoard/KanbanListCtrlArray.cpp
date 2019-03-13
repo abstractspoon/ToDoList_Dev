@@ -517,7 +517,7 @@ CKanbanListCtrl* CKanbanListCtrlArray::GetNext(const CKanbanListCtrl* pList, BOO
 	return NULL;
 }
 
-CKanbanListCtrl* CKanbanListCtrlArray::HitTest(const CPoint& ptScreen) const
+CKanbanListCtrl* CKanbanListCtrlArray::HitTest(const CPoint& ptScreen, HTREEITEM* pHit, UINT* pHitFlags) const
 {
 	int nList = GetSize();
 	CRect rWindow;
@@ -530,11 +530,22 @@ CKanbanListCtrl* CKanbanListCtrlArray::HitTest(const CPoint& ptScreen) const
 		rWindow.right++; // to allow for the 1 pixel gap
 
 		if (rWindow.PtInRect(ptScreen))
+		{
+			if (pHit)
+			{
+				CPoint ptClient(ptScreen);
+				pList->ScreenToClient(&ptClient);
+
+				*pHit = pList->HitTest(ptClient, pHitFlags);
+			}
+
 			return pList;
+		}
 	}
 
 	return NULL;
 }
+
 
 DWORD CKanbanListCtrlArray::HitTestTask(const CPoint& ptScreen) const
 {
@@ -561,10 +572,23 @@ void CKanbanListCtrlArray::SetSelectedList(const CKanbanListCtrl* pSelList)
 		CKanbanListCtrl* pList = GetAt(nList);
 		ASSERT(pList);
 
-		if (pList != pIgnore)
+		if (pList != pSelList)
 			pList->ClearSelection();
 
-		pList->SetSelected(pList == pIgnore);
+		pList->SetSelected(pList == pSelList);
+	}
+}
+
+void CKanbanListCtrlArray::SetDropTarget(const CKanbanListCtrl* pTarget)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->SetDropTarget(pList == pTarget);
 	}
 }
 
