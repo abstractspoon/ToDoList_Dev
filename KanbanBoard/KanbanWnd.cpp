@@ -466,9 +466,10 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, co
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	CSet<IUI_ATTRIBUTE> attrib(pAttributes, nNumAttributes);
-	
 	m_ctrlKanban.UpdateTasks(pTasks, nUpdate, attrib);
-	m_dwSelTaskID = m_ctrlKanban.GetSelectedTaskID();
+
+	if (!m_ctrlKanban.SelectTask(m_dwSelTaskID))
+		m_dwSelTaskID = m_ctrlKanban.GetSelectedTaskID();
 	
 	// Update custom attribute combo
 	const CKanbanCustomAttributeDefinitionArray& aCustDefs = m_ctrlKanban.GetCustomAttributeDefinitions();

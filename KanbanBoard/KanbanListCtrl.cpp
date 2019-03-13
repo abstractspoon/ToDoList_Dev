@@ -1261,6 +1261,12 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point, BOOL bDblClk)
 {
 	m_tooltip.Pop();
 
+	// Ignore clicks not hitting an item
+	HTREEITEM hti = HitTest(point);
+
+	if (!hti)
+		return TRUE;
+
 	if (!m_bSelected)
 	{
 		CTreeCtrl::Default();
@@ -1272,18 +1278,12 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point, BOOL bDblClk)
 	// Test for checkbox hit
 	if (!bDblClk)
 	{
-		HTREEITEM hti = HitTest(point);
 		CRect rCheckbox;
 
 		if (GetItemCheckboxRect(hti, rCheckbox, NULL) && rCheckbox.PtInRect(point))
 		{
-			BOOL bWantFocus = (GetFocus() != this);
-
 			if (hti != GetSelectedItem())
 				SelectItem(hti);
-
-			if (bWantFocus)
-				SetFocus();
 
 			// Post message to let mouse-click time to process
 			GetParent()->PostMessage(WM_KLCN_CHECKCHANGE, (WPARAM)GetSafeHwnd(), GetSelectedTaskID());

@@ -222,6 +222,23 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentList)
 	pAdjacentList->SelectItem(htiClosest);
 	pAdjacentList->UpdateWindow();
 
+	// We must synthesize our own notification because the default
+	// one will be ignored because its action is TVC_UNKNOWN
+	NMTREEVIEW nmtv = { 0 };
+
+	nmtv.hdr.hwndFrom = pAdjacentList->GetSafeHwnd();
+	nmtv.hdr.idFrom = pAdjacentList->GetDlgCtrlID();
+	nmtv.hdr.code = TVN_SELCHANGED;
+
+	nmtv.itemNew.hItem = htiClosest;
+	nmtv.itemNew.state = TVIS_SELECTED;
+	nmtv.itemNew.mask = TVIF_STATE;
+	nmtv.itemNew.lParam = pAdjacentList->GetItemData(htiClosest);
+
+	nmtv.action = TVC_BYKEYBOARD;
+
+	SendMessage(WM_NOTIFY, nmtv.hdr.idFrom, (LPARAM)&nmtv);
+
 	return TRUE;
 }
 
@@ -385,8 +402,12 @@ BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 	// Check for 'no change'
 	DWORD dwSelID = GetSelectedTaskID();
 
-	int nPrevSel = m_aListCtrls.Find(m_pSelectedList);
-	int nNewSel = m_aListCtrls.Find(dwTaskID);
+	int nPrevSel = m_aListCtrls.Find(m_pSelectedList), nNewSel = -1;
+
+	if (m_pSelectedList && m_pSelectedList->FindTask(dwTaskID))
+		nNewSel = nPrevSel;
+	else
+		nNewSel = m_aListCtrls.Find(dwTaskID);
 
 	if ((nPrevSel == nNewSel) && (dwTaskID == dwSelID))
 		return TRUE;
@@ -1861,12 +1882,24 @@ void CKanbanCtrl::FixupSelectedList()
 
 void CKanbanCtrl::FixupListFocus()
 {
-	if (IsWindowVisible() && HasFocus() && m_pSelectedList && (GetFocus() != m_pSelectedList))
-	{
-		CAutoFlag af(m_bSettingListFocus, TRUE);
+	const CWnd* pFocus = GetFocus();
 
-		m_pSelectedList->SetFocus();
-		m_pSelectedList->Invalidate(TRUE);
+	if (IsWindowVisible() && HasFocus() && m_pSelectedList && (pFocus != m_pSelectedList))
+	{
+		{
+			CAutoFlag af(m_bSettingListFocus, TRUE);
+
+			m_pSelectedList->SetFocus();
+			m_pSelectedList->Invalidate(TRUE);
+		}
+
+		if (pFocus)
+		{
+			CKanbanListCtrl* pOtherList = m_aListCtrls.Get(*pFocus);
+
+			if (pOtherList)
+				pOtherList->ClearSelection();
+		}
 	}
 }
 
@@ -2699,7 +2732,7 @@ BOOL CKanbanCtrl::SelectListCtrl(CKanbanListCtrl* pList, BOOL bNotifyParent)
 		if (pList == m_pSelectedList)
 		{
 			// Make sure header is refreshed
-			m_pSelectedList->SetSelected(TRUE);
+			m_aListCtrls.SetSelectedList(m_pSelectedList);
 			return TRUE;
 		}
 
@@ -2739,10 +2772,12 @@ BOOL CKanbanCtrl::IsSelectedListCtrl(HWND hWnd) const
 
 void CKanbanCtrl::OnListItemSelChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	// only interested in selection changes from the selected list 
-	// and occurring outside of a drag'n'drop or a call to 'SelectTasks', because the 'actual' 
-	// selected task IDs will not change during a drag'n'drop
-	if (!m_bSelectTasks && !IsDragging())
+	// only interested in selection changes caused by the user
+	LPNMTREEVIEW pNMTV = (LPNMTREEVIEW)pNMHDR;
+	UINT nAction = pNMTV->action;
+
+	if (!m_bSettingListFocus && !m_bSelectTasks && !IsDragging() &&
+		(nAction & (TVC_BYMOUSE | TVC_BYKEYBOARD)))
 	{
 		CKanbanListCtrl* pList = m_aListCtrls.Get(pNMHDR->hwndFrom);
 
