@@ -1980,7 +1980,7 @@ void CGanttTreeListCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 		CClientDC dc(&m_tree);
 		RecalcTreeColumnWidth(nCol, &dc, TRUE);
 
-		SetSplitPos(m_treeHeader.CalcTotalItemsWidth());
+		SetSplitPos(m_treeHeader.CalcTotalItemWidth());
 		Resize();
 	}
 	else if (hwnd == m_listHeader)
@@ -2115,7 +2115,7 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				case HDN_ITEMCHANGED:
 					if (hwnd == m_treeHeader)
 					{
-						SetSplitPos(m_treeHeader.CalcTotalItemsWidth());
+						SetSplitPos(m_treeHeader.CalcTotalItemWidth());
 						Resize();
 						
 						m_tree.UpdateWindow();
@@ -5315,7 +5315,7 @@ void CGanttTreeListCtrl::ResizeAttributeColumnsToFit(BOOL bForce)
 
 void CGanttTreeListCtrl::AdjustSplitterToFitAttributeColumns()
 {
-	int nColsWidth = m_listHeader.CalcTotalItemsWidth();
+	int nColsWidth = m_listHeader.CalcTotalItemWidth();
 	
 	if (HasVScrollBar(m_list))
 		nColsWidth += GetSystemMetrics(SM_CXVSCROLL);
@@ -5334,7 +5334,7 @@ void CGanttTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 	CTreeListSyncer::OnNotifySplitterChange(nSplitPos);
 
 	// Adjust 'Title' column to suit
-	int nRestOfColsWidth = m_treeHeader.CalcTotalItemsWidth(0);
+	int nRestOfColsWidth = m_treeHeader.CalcTotalItemWidth(0);
 
 	CClientDC dc(&m_tree);
 	int nMinColWidth = CalcWidestItemTitle(NULL, &dc, FALSE);

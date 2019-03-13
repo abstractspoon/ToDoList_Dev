@@ -806,7 +806,7 @@ int CEnHeaderCtrl::GetItemWidth(int nItem) const
 	return hdi.cxy;
 }
 
-int CEnHeaderCtrl::CalcTotalItemsWidth(int nIgnoreItem) const
+int CEnHeaderCtrl::CalcTotalItemWidth(int nIgnoreItem) const
 {
 	int nItem = GetItemCount(), nTotalWidth = 0;
 		

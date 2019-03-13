@@ -2340,7 +2340,7 @@ void CKanbanCtrl::ResizeHeader(CRect& rAvail)
 	rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT);
 	m_header.MoveWindow(rNewHeader);
 		
-	int nTotalColWidth = m_header.CalcTotalItemsWidth();
+	int nTotalColWidth = m_header.CalcTotalItemWidth();
 
 	for (int nCol = 0, nColStart = 0; nCol < nNumCols; nCol++)
 	{

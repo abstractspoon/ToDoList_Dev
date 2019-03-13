@@ -81,7 +81,7 @@ public:
 	BOOL SetItemWidths(const CIntArray& aWidths);
 	int GetTrackedItems(CIntArray& aTracked) const;
 	BOOL SetTrackedItems(const CIntArray& aTracked);
-	int CalcTotalItemsWidth(int nIgnoreItem = -1) const;
+	int CalcTotalItemWidth(int nIgnoreItem = -1) const;
 
 	int InsertItem(int nItem, int nWidth, LPCTSTR szText = _T(""), int nFormat = HDF_LEFT, UINT uIDBitmap = 0, DWORD dwItemData = 0);
 	int AppendItem(int nWidth, LPCTSTR szText = _T(""), int nFormat = HDF_LEFT, UINT uIDBitmap = 0, DWORD dwItemData = 0);

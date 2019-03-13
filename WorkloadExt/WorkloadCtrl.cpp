@@ -315,7 +315,7 @@ void CWorkloadCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
 
 void CWorkloadCtrl::AdjustSplitterToFitAttributeColumns()
 {
-	int nColsWidth = m_hdrColumns.CalcTotalItemsWidth();
+	int nColsWidth = m_hdrColumns.CalcTotalItemWidth();
 
 	if (HasVScrollBar(m_lcColumns))
 		nColsWidth += GetSystemMetrics(SM_CXVSCROLL);
@@ -1933,7 +1933,7 @@ void CWorkloadCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CWorkloadCtrl::OnItemChangedTreeHeader(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
-	SetSplitPos(m_hdrTasks.CalcTotalItemsWidth());
+	SetSplitPos(m_hdrTasks.CalcTotalItemWidth());
 	Resize();
 	
 	m_tcTasks.UpdateWindow();
@@ -1949,7 +1949,7 @@ void CWorkloadCtrl::OnDblClickTreeHeaderDivider(NMHDR* pNMHDR, LRESULT* /*pResul
 	ASSERT(nCol != -1);
 
 	RecalcTreeColumnWidth(nCol, &dc);
-	SetSplitPos(m_hdrTasks.CalcTotalItemsWidth());
+	SetSplitPos(m_hdrTasks.CalcTotalItemWidth());
 
 	Resize();
 }
@@ -3335,7 +3335,7 @@ void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
 	CTreeListSyncer::OnNotifySplitterChange(nSplitPos);
 
 	// Adjust 'Title' column to suit
-	int nRestOfColsWidth = m_hdrTasks.CalcTotalItemsWidth(0);
+	int nRestOfColsWidth = m_hdrTasks.CalcTotalItemWidth(0);
 
 	CClientDC dc(&m_tcTasks);
 	int nMinColWidth = CalcWidestItemTitle(NULL, &dc, FALSE);
