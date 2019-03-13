@@ -819,6 +819,20 @@ int CEnHeaderCtrl::CalcTotalItemWidth(int nIgnoreItem) const
 	return nTotalWidth;	
 }
 
+int CEnHeaderCtrl::CalcAverageItemWidth(int nIgnoreItem) const
+{
+	int nNumItems = GetItemCount();
+
+	if ((nIgnoreItem != -1) && (nIgnoreItem < nNumItems))
+		nNumItems--;
+
+	if (nNumItems == 0)
+		return 0;
+
+	// else
+	return (CalcTotalItemWidth(nIgnoreItem) / nNumItems);
+}
+
 int CEnHeaderCtrl::FindItem(DWORD dwData) const
 {
 	int nItem = GetItemCount();
