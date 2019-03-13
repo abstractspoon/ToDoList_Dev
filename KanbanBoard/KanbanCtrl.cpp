@@ -23,6 +23,7 @@
 #include "..\shared\wclassdefines.h"
 #include "..\shared\copywndcontents.h"
 #include "..\shared\enbitmap.h"
+#include "..\shared\DeferWndMove.h"
 
 #include "..\Interfaces\iuiextension.h"
 #include "..\Interfaces\ipreferences.h"
@@ -584,7 +585,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 			}
 			else
 			{
-				m_aListCtrls.Redraw(TRUE);
+				m_aListCtrls.Redraw(FALSE);
 			}
 		}
 		break;
@@ -1759,7 +1760,7 @@ void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate)
 	}
 
 	RebuildHeaderColumns();
-	Resize(TRUE);
+	Resize();
 		
 	// We only need to restore selection if not doing a task update
 	// because the app takes care of that
@@ -2009,7 +2010,7 @@ BOOL CKanbanCtrl::TrackAttribute(IUI_ATTRIBUTE nAttrib, const CString& sCustomAt
 	m_aListCtrls.RemoveAll();
 
 	RebuildListCtrls(TRUE, TRUE);
-	Resize(TRUE);
+	Resize();
 
 	return TRUE;
 }
@@ -2172,7 +2173,7 @@ void CKanbanCtrl::SetDisplayAttributes(const CKanbanAttributeArray& aAttrib)
 
 		// Update list attribute label visibility
 		if (m_aDisplayAttrib.GetSize())
-			Resize(TRUE);
+			Resize();
 	}
 }
 
@@ -2249,7 +2250,7 @@ void CKanbanCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	CWnd::OnSize(nType, cx, cy);
 
-	Resize(CRect(0, 0, cx, cy), TRUE);
+	Resize(cx, cy);
 }
 
 BOOL CKanbanCtrl::OnEraseBkgnd(CDC* pDC)
@@ -2305,22 +2306,23 @@ int CKanbanCtrl::GetVisibleListCtrlCount() const
 	return nNumVis;
 }
 
-void CKanbanCtrl::Resize(const CRect& rect, BOOL bIncludeHeader)
+void CKanbanCtrl::Resize(int cx, int cy)
 {
 	int nNumVisibleLists = GetVisibleListCtrlCount();
 
 	if (nNumVisibleLists)
 	{
-		// Reduce client by a pixel to create a border
-		CRect rAvail(rect);
+		CDeferWndMove dwm(nNumVisibleLists + 1);
+		CRect rAvail(0, 0, cx, cy);
+
+		if (rAvail.IsRectEmpty())
+			GetClientRect(rAvail);
+
+		// Create a border
 		rAvail.DeflateRect(1, 1);
 
-		if (bIncludeHeader)
-			ResizeHeader(rAvail);
-		else
-			rAvail.top += HEADER_HEIGHT;
+		ResizeHeader(dwm, rAvail);
 		
-		// Also update tab order as we go
 		CRect rList(rAvail);
 		CWnd* pPrev = NULL;
 		int nNumLists = m_aListCtrls.GetSize();
@@ -2348,7 +2350,10 @@ void CKanbanCtrl::Resize(const CRect& rect, BOOL bIncludeHeader)
 			}
 
 			rList.right = (rList.left + m_header.GetItemWidth(nVis));
-			pList->SetWindowPos(pPrev, rList.left, rList.top, rList.Width() - 1, rList.Height(), 0);
+			dwm.MoveWindow(pList, rList.left, rList.top, rList.Width() - 1, rList.Height(), FALSE);
+
+			// Also update tab order as we go
+			pList->SetWindowPos(pPrev, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOACTIVATE);
 
 			// Check whether the lists are wide enough to show attribute labels
 			KBC_ATTRIBLABELS nLabelVis = GetListAttributeLabelVisibility(nList, rList.Width());
@@ -2361,7 +2366,7 @@ void CKanbanCtrl::Resize(const CRect& rect, BOOL bIncludeHeader)
 	}
 }
 
-void CKanbanCtrl::ResizeHeader(CRect& rAvail)
+void CKanbanCtrl::ResizeHeader(CDeferWndMove& dwm, CRect& rAvail)
 {
 	CAutoFlag af(m_bResizingHeader, TRUE);
 
@@ -2372,7 +2377,8 @@ void CKanbanCtrl::ResizeHeader(CRect& rAvail)
 
 	CRect rNewHeader(rAvail);
 	rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT);
-	m_header.MoveWindow(rNewHeader);
+
+	dwm.MoveWindow(&m_header, rNewHeader, FALSE);
 		
 	int nTotalColWidth = m_header.CalcTotalItemWidth();
 
@@ -2488,14 +2494,6 @@ KBC_ATTRIBLABELS CKanbanCtrl::GetListAttributeLabelVisibility(int nList, int nLi
 	return KBCAL_NONE;
 }
 
-void CKanbanCtrl::Resize(BOOL bIncludeHeader)
-{
-	CRect rClient;
-	GetClientRect(rClient);
-
-	Resize(rClient, bIncludeHeader);
-}
-
 void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
 {
 	// if the sort attribute equals the track attribute then
@@ -2548,7 +2546,7 @@ void CKanbanCtrl::SetPriorityColors(const CDWordArray& aColors)
 
 		// Redraw the lists if coloring by priority
 		if (GetSafeHwnd() && HasOption(KBCF_COLORBARBYPRIORITY))
-			m_aListCtrls.Redraw(TRUE);
+			m_aListCtrls.Redraw(FALSE);
 	}
 }
 
@@ -2816,24 +2814,43 @@ void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
 
 	if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
 	{
-		// prevent 'this' column becoming too small
-		pHDN->pitem->cxy = max(MIN_COL_WIDTH, pHDN->pitem->cxy);
+		ASSERT(pHDN->iItem < (m_header.GetItemCount() - 1));
 
-		// prevent 'next' column becoming too small
+		// prevent 'this' or 'next' columns becoming too small
 		int nThisWidth = m_header.GetItemWidth(pHDN->iItem);
 		int nNextWidth = m_header.GetItemWidth(pHDN->iItem + 1);
 
+		pHDN->pitem->cxy = max(MIN_COL_WIDTH, pHDN->pitem->cxy);
 		pHDN->pitem->cxy = min(pHDN->pitem->cxy, (nThisWidth + nNextWidth - MIN_COL_WIDTH));
-
-		// Adjust 'next' column
+		
+		// Resize 'next' column
 		nNextWidth = (nThisWidth + nNextWidth - pHDN->pitem->cxy);
 
-		{
-			CAutoFlag af(m_bResizingHeader, TRUE);
-			m_header.SetItemWidth(pHDN->iItem + 1, nNextWidth);
-		}
+		CAutoFlag af(m_bResizingHeader, TRUE);
+		m_header.SetItemWidth(pHDN->iItem + 1, nNextWidth);
+		
+		// Resize corresponding listctrls
+		CKanbanListCtrl* pThisList = m_aListCtrls[pHDN->iItem];
+		CKanbanListCtrl* pNextList = m_aListCtrls[pHDN->iItem + 1];
 
-		Resize(FALSE); // resize just the list ctrls
+		CRect rThisList = CDialogHelper::GetChildRect(pThisList);
+		rThisList.right = (rThisList.left + pHDN->pitem->cxy - 1);
+
+		CRect rNextList = CDialogHelper::GetChildRect(m_aListCtrls[pHDN->iItem + 1]);
+		rNextList.left = (rThisList.right + 1);
+
+		pThisList->MoveWindow(rThisList, FALSE);
+		pNextList->MoveWindow(rNextList, FALSE);
+
+		pThisList->Invalidate(FALSE);
+		pNextList->Invalidate(FALSE);
+
+		// Redraw the vertical divider
+		CRect rDivider(rThisList);
+		rDivider.left = rDivider.right;
+		rDivider.right++;
+
+		InvalidateRect(rDivider, TRUE);
 	}
 }
 
@@ -2989,7 +3006,7 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 					m_aListCtrls.RemoveAt(nList);
 				}
 
-				Resize(TRUE);
+				Resize();
 
 				if (bChange)
 				{

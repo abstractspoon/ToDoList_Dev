@@ -26,6 +26,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 class CThemed;
+class CDeferWndMove;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -132,9 +133,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	void RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
-	void Resize(BOOL bIncludeHeader);
-	void Resize(const CRect& rect, BOOL bIncludeHeader);
-	void ResizeHeader(CRect& rAvail);
+	void Resize(int cx = 0, int cy = 0);
+	void ResizeHeader(CDeferWndMove& dwm, CRect& rAvail);
 
 	void RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate);
 	void RebuildDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray);
