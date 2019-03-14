@@ -43,6 +43,8 @@ const UINT TIMER_EDITLABEL		= 101;
 const COLORREF COMMENTSCOLOR	= RGB(98, 98, 98);
 const COLORREF ALTCOMMENTSCOLOR = RGB(164, 164, 164);
 
+const int TITLE_PADDING			= 2;
+
 //////////////////////////////////////////////////////////////////////
 
 enum
@@ -559,9 +561,10 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 					CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
 
 					GM_ITEMSTATE nState = GetTreeItemState(hti);
+					BOOL bSelected = (nState != GMIS_NONE);
 
 					COLORREF crText, crBack;
-					GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE));
+					GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), bSelected);
 				
 					if (!HasColor(crBack))
 					{
@@ -573,12 +576,19 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 					
 					// draw label background only
 					GetItemTitleRect(hti, TDCTR_LABEL, rItem, pDC, pTDI->sTitle);
+
+					if (bSelected)
+						rItem.left -= TITLE_PADDING;
+
 					DrawTasksRowBackground(pDC, pTVCD->nmcd.rc, rItem, nState, crBack);
+
+					if (bSelected)
+						rItem.left += TITLE_PADDING;
 
 					// draw text
 					DrawColumnText(pDC, pTDI->sTitle, rItem, DT_LEFT, crText, TRUE);
 #ifdef _DEBUG
-					GraphicsMisc::DrawRect(pDC, rItem, CLR_NONE, 255);
+					//GraphicsMisc::DrawRect(pDC, rItem, CLR_NONE, 255);
 #endif
 					// cleanup
 					pDC->SelectObject(pOldFont);
