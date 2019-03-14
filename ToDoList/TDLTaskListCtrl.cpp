@@ -36,6 +36,8 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 const int LV_COLPADDING			= 3;
+const int TITLE_PADDING			= 2;
+
 const int CLIENTCOLWIDTH		= GraphicsMisc::ScaleByDPIFactor(1000);
 const UINT TIMER_EDITLABEL		= 42; // List ctrl's internal timer ID for label edits
 
@@ -286,7 +288,8 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				// selection status, and making sure we don't overdraw any icons
 				// already drawn by Windows in the pre-paint
 				GM_ITEMSTATE nState = GetListItemState(nItem);
-				
+				BOOL bSelected = (nState != GMIS_NONE);
+
 				CRect rRow;
 				m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
 		
@@ -294,7 +297,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				GetItemTitleRect(nItem, TDCTR_LABEL, rItem, pDC, pTDI->sTitle);
 				
 				COLORREF crBack, crText;
-				VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE)));
+				VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), bSelected));
 
 				if (!HasColor(crBack))
 				{
@@ -304,12 +307,18 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 						crBack = GetSysColor(COLOR_WINDOW);
 				}
 				
+				if (bSelected)
+					rItem.left -= TITLE_PADDING;
+
 				DrawTasksRowBackground(pDC, rRow, rItem, nState, crBack);
 				
+				if (bSelected)
+					rItem.left += TITLE_PADDING;
+
 				// draw text
 				DrawColumnText(pDC, pTDI->sTitle, rItem, DT_LEFT, crText, TRUE);
 #ifdef _DEBUG
-				GraphicsMisc::DrawRect(pDC, rItem, CLR_NONE, 255);
+//				GraphicsMisc::DrawRect(pDC, rItem, CLR_NONE, 255);
 #endif
 				// cleanup
 				pDC->SelectObject(pOldFont);
