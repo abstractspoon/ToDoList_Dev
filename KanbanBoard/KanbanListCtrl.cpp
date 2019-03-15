@@ -117,6 +117,7 @@ BEGIN_MESSAGE_MAP(CKanbanListCtrl, CTreeCtrl)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_SIZE()
+	ON_WM_SETCURSOR()
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
@@ -961,12 +962,12 @@ void CKanbanListCtrl::ScrollToSelection()
 
 void CKanbanListCtrl::ClearSelection()
 {
-	SelectItem(NULL);
+	CTreeCtrl::SelectItem(NULL);
 }
 
 BOOL CKanbanListCtrl::SelectTask(DWORD dwTaskID)
 {
-	return SelectItem(FindTask(dwTaskID));
+	return CTreeCtrl::SelectItem(FindTask(dwTaskID));
 }
 
 const KANBANITEM* CKanbanListCtrl::GetKanbanItem(DWORD dwTaskID) const
@@ -1258,24 +1259,65 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point, BOOL bDblClk)
 			return TRUE;
 	}
 
-	// Test for checkbox hit
 	if (!bDblClk)
 	{
-		CRect rCheckbox;
+		UINT nMsgID = 0;
 
-		if (GetItemCheckboxRect(hti, rCheckbox, NULL) && rCheckbox.PtInRect(point))
+		if (HitTestCheckbox(hti, point))
+		{
+			nMsgID = WM_KLCN_CHECKCHANGE;
+		}
+		else if (HitTestIcon(hti, point))
+		{
+			nMsgID = WM_KLCN_EDITTASKICON;
+		}
+
+		if (nMsgID)
 		{
 			if (hti != GetSelectedItem())
-				SelectItem(hti);
+				SelectItem(hti, TRUE);
 
-			// Post message to let mouse-click time to process
-			GetParent()->PostMessage(WM_KLCN_CHECKCHANGE, (WPARAM)GetSafeHwnd(), GetSelectedTaskID());
+			// Post message to let mouse-click time to complete
+			GetParent()->PostMessage(nMsgID, (WPARAM)GetSafeHwnd(), GetTaskID(hti));
 			return TRUE;
 		}
 	}
 
 	// all else
 	return FALSE;
+}
+
+BOOL CKanbanListCtrl::HitTestIcon(HTREEITEM hti, CPoint point) const
+{
+	CRect rIcon;
+	GetItemLabelTextRect(hti, rIcon);
+
+	rIcon.right = (rIcon.left - IMAGE_PADDING);
+	rIcon.left = (rIcon.right - IMAGE_SIZE);
+	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
+
+	return rIcon.PtInRect(point);
+}
+
+BOOL CKanbanListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	CPoint point(::GetMessagePos());
+	ScreenToClient(&point);
+
+	HTREEITEM hti = HitTest(point);
+
+	if (hti && HitTestIcon(hti, point))
+		return GraphicsMisc::SetHandCursor();
+
+	// else
+	return CTreeCtrl::OnSetCursor(pWnd, nHitTest, message);
+}
+
+BOOL CKanbanListCtrl::HitTestCheckbox(HTREEITEM hti, CPoint point) const
+{
+	CRect rCheckbox;
+
+	return (GetItemCheckboxRect(hti, rCheckbox, NULL) && rCheckbox.PtInRect(point));
 }
 
 BOOL CKanbanListCtrl::SaveToImage(CBitmap& bmImage, const CSize& reqColSize)
@@ -1396,6 +1438,31 @@ void CKanbanListCtrl::RecalcItemLineHeight()
 		nItemHeight = max(nItemHeight, (IMAGE_SIZE + IMAGE_PADDING));
 	
 	SetItemHeight(nItemHeight);
+}
+
+BOOL CKanbanListCtrl::SelectItem(HTREEITEM hItem, BOOL bByMouse)
+{
+	if (!CTreeCtrl::SelectItem(hItem))
+		return FALSE;
+
+	// We must synthesize our own notification because the default
+	// one will be ignored because its action is TVC_UNKNOWN
+	NMTREEVIEW nmtv = { 0 };
+
+	nmtv.hdr.hwndFrom = GetSafeHwnd();
+	nmtv.hdr.idFrom = GetDlgCtrlID();
+	nmtv.hdr.code = TVN_SELCHANGED;
+
+	nmtv.itemNew.hItem = hItem;
+	nmtv.itemNew.state = TVIS_SELECTED;
+	nmtv.itemNew.mask = TVIF_STATE;
+	nmtv.itemNew.lParam = GetTaskID(hItem);
+
+	nmtv.action = (bByMouse ? TVC_BYMOUSE : TVC_BYKEYBOARD);
+
+	GetParent()->SendMessage(WM_NOTIFY, nmtv.hdr.idFrom, (LPARAM)&nmtv);
+
+	return TRUE;
 }
 
 BOOL CKanbanListCtrl::InitTooltip()

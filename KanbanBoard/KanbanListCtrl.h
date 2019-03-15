@@ -21,6 +21,7 @@
 
 const UINT WM_KLCN_CHECKCHANGE	= (WM_APP+1); // WPARAM = HWND, LPARAM = Task ID
 const UINT WM_KLCN_GETTASKICON	= (WM_APP+2); // WPARAM = TaskID, LPARAM = int* (imageIndex), return HIMAGELIST
+const UINT WM_KLCN_EDITTASKICON	= (WM_APP+3); // WPARAM = HWND, LPARAM = Task ID
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx window
@@ -73,6 +74,7 @@ public:
 
 	void ClearSelection();
 	void SetSelected(BOOL bSelected);
+	BOOL SelectItem(HTREEITEM hItem, BOOL bByMouse);
 
 	void SetDropTarget(BOOL bTarget);
 	void SetBackgroundColor(COLORREF color);
@@ -151,6 +153,7 @@ protected:
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg void OnTooltipShow(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -168,6 +171,8 @@ protected:
 	BOOL GetItemRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
 	void RefreshItemLineHeights(HTREEITEM hti);
 	int GetItemDisplayAttributeCount(const KANBANITEM& ki) const;
+	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
+	BOOL HitTestIcon(HTREEITEM hti, CPoint point) const;
 
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	void DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;

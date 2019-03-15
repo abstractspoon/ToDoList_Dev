@@ -130,6 +130,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_KLCN_CHECKCHANGE, OnListCheckChange)
 	ON_MESSAGE(WM_KLCN_GETTASKICON, OnListGetTaskIcon)
+	ON_MESSAGE(WM_KLCN_EDITTASKICON, OnListEditTaskIcon)
 	ON_MESSAGE(WM_KCM_SELECTTASK, OnSelectTask)
 
 END_MESSAGE_MAP()
@@ -219,26 +220,9 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentList)
 	SelectListCtrl(pAdjacentList, FALSE);
 	ASSERT(m_pSelectedList == pAdjacentList);
 
-	pAdjacentList->SelectItem(htiClosest);
+	pAdjacentList->SelectItem(htiClosest, FALSE); // FALSE -> by keyboard
 	pAdjacentList->UpdateWindow();
-
-	// We must synthesize our own notification because the default
-	// one will be ignored because its action is TVC_UNKNOWN
-	NMTREEVIEW nmtv = { 0 };
-
-	nmtv.hdr.hwndFrom = pAdjacentList->GetSafeHwnd();
-	nmtv.hdr.idFrom = pAdjacentList->GetDlgCtrlID();
-	nmtv.hdr.code = TVN_SELCHANGED;
-
-	nmtv.itemNew.hItem = htiClosest;
-	nmtv.itemNew.state = TVIS_SELECTED;
-	nmtv.itemNew.mask = TVIF_STATE;
-	nmtv.itemNew.lParam = pAdjacentList->GetItemData(htiClosest);
-
-	nmtv.action = TVC_BYKEYBOARD;
-
-	SendMessage(WM_NOTIFY, nmtv.hdr.idFrom, (LPARAM)&nmtv);
-
+	
 	return TRUE;
 }
 
@@ -481,7 +465,7 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 			if (hti)
 			{
 				SelectListCtrl(pList, FALSE);
-				return pList->SelectItem(hti);
+				return pList->SelectItem(hti, FALSE);
 			}
 
 			// else
@@ -3226,6 +3210,21 @@ LRESULT CKanbanCtrl::OnListCheckChange(WPARAM /*wp*/, LPARAM lp)
 
 		return lr;
 	}
+
+	// else
+	return 0L;
+}
+
+LRESULT CKanbanCtrl::OnListEditTaskIcon(WPARAM /*wp*/, LPARAM lp)
+{
+	ASSERT(!m_bReadOnly);
+
+	DWORD dwTaskID = lp;
+	const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+	ASSERT(pKI);
+
+	if (pKI)
+		return GetParent()->SendMessage(WM_KBC_EDITTASKICON, (WPARAM)GetSafeHwnd());
 
 	// else
 	return 0L;

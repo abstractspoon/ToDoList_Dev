@@ -29,6 +29,9 @@ const UINT WM_KBC_GETTASKICON 		= ::RegisterWindowMessage(_T("WM_KBC_GETTASKICON
 // WPARAM = Task ID, LPARAM = 
 const UINT WM_KBC_EDITTASKTITLE		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKTITLE"));
 
+// WPARAM = Task ID, LPARAM = 
+const UINT WM_KBC_EDITTASKICON		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKICON"));
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_KANBANMSG_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)

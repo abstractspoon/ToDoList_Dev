@@ -100,6 +100,7 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_KBC_PREFSHELP, OnKanbanPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_KBC_GETTASKICON, OnKanbanGetTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKTITLE, OnKanbanEditTaskTitle)
+	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKICON, OnKanbanEditTaskIcon)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
 	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
@@ -147,6 +148,11 @@ LRESULT CKanbanWnd::OnKanbanGetTaskIcon(WPARAM wp, LPARAM lp)
 LRESULT CKanbanWnd::OnKanbanEditTaskTitle(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE, wp, lp);
+}
+
+LRESULT CKanbanWnd::OnKanbanEditTaskIcon(WPARAM wp, LPARAM lp)
+{
+	return GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKICON, wp, lp);
 }
 
 BOOL CKanbanWnd::OnInitDialog() 
