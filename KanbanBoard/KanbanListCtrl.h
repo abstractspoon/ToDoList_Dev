@@ -19,9 +19,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT WM_KLCN_CHECKCHANGE	= (WM_APP+1); // WPARAM = HWND, LPARAM = Task ID
-const UINT WM_KLCN_GETTASKICON	= (WM_APP+2); // WPARAM = TaskID, LPARAM = int* (imageIndex), return HIMAGELIST
-const UINT WM_KLCN_EDITTASKICON	= (WM_APP+3); // WPARAM = HWND, LPARAM = Task ID
+const UINT WM_KLCN_TOGGLETASKDONE	= (WM_APP+1); // WPARAM = HWND, LPARAM = Task ID
+const UINT WM_KLCN_GETTASKICON		= (WM_APP+2); // WPARAM = TaskID, LPARAM = int* (imageIndex), return HIMAGELIST
+const UINT WM_KLCN_EDITTASKICON		= (WM_APP+3); // WPARAM = HWND, LPARAM = Task ID
+const UINT WM_KLCN_TOGGLETASKFLAG	= (WM_APP+4); // WPARAM = HWND, LPARAM = Task ID
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx window
@@ -173,6 +174,7 @@ protected:
 	int GetItemDisplayAttributeCount(const KANBANITEM& ki) const;
 	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
 	BOOL HitTestIcon(HTREEITEM hti, CPoint point) const;
+	BOOL HitTestFlag(HTREEITEM hti, CPoint point) const;
 
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	void DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;

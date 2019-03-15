@@ -95,12 +95,13 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_WM_ERASEBKGND()
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_REGISTERED_MESSAGE(WM_KBC_VALUECHANGE, OnKanbanNotifyValueChange)
-	ON_REGISTERED_MESSAGE(WM_KBC_COMPLETIONCHANGE, OnKanbanNotifyCompletionChange)
+	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKDONE, OnKanbanNotifyEditTaskDone)
+	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKFLAG, OnKanbanNotifyEditTaskFlag)
 	ON_REGISTERED_MESSAGE(WM_KBC_SELECTIONCHANGE, OnKanbanNotifySelectionChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_PREFSHELP, OnKanbanPrefsHelp)
-	ON_REGISTERED_MESSAGE(WM_KBC_GETTASKICON, OnKanbanGetTaskIcon)
-	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKTITLE, OnKanbanEditTaskTitle)
-	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKICON, OnKanbanEditTaskIcon)
+	ON_REGISTERED_MESSAGE(WM_KBC_GETTASKICON, OnKanbanNotifyGetTaskIcon)
+	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKTITLE, OnKanbanNotifyEditTaskTitle)
+	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKICON, OnKanbanNotifyEditTaskIcon)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
 	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
@@ -140,17 +141,17 @@ LRESULT CKanbanWnd::OnKanbanPrefsHelp(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0L;
 }
 
-LRESULT CKanbanWnd::OnKanbanGetTaskIcon(WPARAM wp, LPARAM lp)
+LRESULT CKanbanWnd::OnKanbanNotifyGetTaskIcon(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_GETTASKICON, wp, lp);
 }
 
-LRESULT CKanbanWnd::OnKanbanEditTaskTitle(WPARAM wp, LPARAM lp)
+LRESULT CKanbanWnd::OnKanbanNotifyEditTaskTitle(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE, wp, lp);
 }
 
-LRESULT CKanbanWnd::OnKanbanEditTaskIcon(WPARAM wp, LPARAM lp)
+LRESULT CKanbanWnd::OnKanbanNotifyEditTaskIcon(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKICON, wp, lp);
 }
@@ -839,7 +840,27 @@ LRESULT CKanbanWnd::OnKanbanNotifySelectionChange(WPARAM wp, LPARAM /*lp*/)
 	return 0L;
 }
 
-LRESULT CKanbanWnd::OnKanbanNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp) 
+LRESULT CKanbanWnd::OnKanbanNotifyEditTaskDone(WPARAM /*wp*/, LPARAM lp) 
+{
+	IUITASKMOD mod = { IUI_DONEDATE, m_dwSelTaskID, 0 };
+
+	if (lp) // done/not done
+		VERIFY(CDateHelper::GetTimeT64(CDateHelper::GetDate(DHD_NOW), mod.tValue));
+	else
+		mod.tValue = T64Utils::T64_NULL;
+
+	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
+}
+
+LRESULT CKanbanWnd::OnKanbanNotifyEditTaskFlag(WPARAM /*wp*/, LPARAM lp) 
+{
+	IUITASKMOD mod = { IUI_FLAG, m_dwSelTaskID, 0 };
+	mod.bValue = (lp != 0);
+
+	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
+}
+
+LRESULT CKanbanWnd::OnKanbanNotifyFlagChange(WPARAM /*wp*/, LPARAM lp) 
 {
 	IUITASKMOD mod = { IUI_DONEDATE, m_dwSelTaskID, 0 };
 

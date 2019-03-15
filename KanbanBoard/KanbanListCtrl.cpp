@@ -781,9 +781,6 @@ BOOL CKanbanListCtrl::GetItemCheckboxRect(CRect& rItem) const
 
 BOOL CKanbanListCtrl::GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit, const KANBANITEM* pKI) const
 {
-	if (!pKI)
-		pKI = GetKanbanItem(GetTaskID(hti));
-
 	if (!GetItemRect(hti, rItem, pKI))
 		return FALSE;
 
@@ -1265,11 +1262,15 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point, BOOL bDblClk)
 
 		if (HitTestCheckbox(hti, point))
 		{
-			nMsgID = WM_KLCN_CHECKCHANGE;
+			nMsgID = WM_KLCN_TOGGLETASKDONE;
 		}
 		else if (HitTestIcon(hti, point))
 		{
 			nMsgID = WM_KLCN_EDITTASKICON;
+		}
+		else if (HitTestFlag(hti, point))
+		{
+			nMsgID = WM_KLCN_TOGGLETASKFLAG;
 		}
 
 		if (nMsgID)
@@ -1299,6 +1300,22 @@ BOOL CKanbanListCtrl::HitTestIcon(HTREEITEM hti, CPoint point) const
 	return rIcon.PtInRect(point);
 }
 
+BOOL CKanbanListCtrl::HitTestFlag(HTREEITEM hti, CPoint point) const
+{
+	if (!m_bDrawTaskFlags)
+		return FALSE;
+
+	CRect rFlag;
+	GetItemLabelTextRect(hti, rFlag);
+
+	rFlag.right = (rFlag.left - IMAGE_PADDING);
+	rFlag.left = (rFlag.right - IMAGE_SIZE);
+	rFlag.top += (IMAGE_SIZE + IMAGE_PADDING);
+	rFlag.bottom = (rFlag.top + IMAGE_SIZE);
+
+	return rFlag.PtInRect(point);
+}
+
 BOOL CKanbanListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
 	CPoint point(::GetMessagePos());
@@ -1306,7 +1323,7 @@ BOOL CKanbanListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 	HTREEITEM hti = HitTest(point);
 
-	if (hti && HitTestIcon(hti, point))
+	if (hti && (HitTestIcon(hti, point) || HitTestFlag(hti, point)))
 		return GraphicsMisc::SetHandCursor();
 
 	// else

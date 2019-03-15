@@ -11,11 +11,11 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-// WPARAM = , LPARAM = LPCTSTR
+// WPARAM = Task ID, LPARAM = LPCTSTR
 const UINT WM_KBC_VALUECHANGE		= ::RegisterWindowMessage(_T("WM_KBC_VALUECHANGE"));
 
-// WPARAM = , LPARAM = TRUE/FALSE
-const UINT WM_KBC_COMPLETIONCHANGE	= ::RegisterWindowMessage(_T("WM_KBC_COMPLETIONCHANGE"));
+// WPARAM = Task ID, LPARAM = TRUE/FALSE
+const UINT WM_KBC_EDITTASKDONE		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKDONE"));
 
 // WPARAM = Task ID, LPARAM = 
 const UINT WM_KBC_SELECTIONCHANGE	= ::RegisterWindowMessage(_T("WM_KBC_SELECTIONCHANGE"));
@@ -31,6 +31,9 @@ const UINT WM_KBC_EDITTASKTITLE		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKTI
 
 // WPARAM = Task ID, LPARAM = 
 const UINT WM_KBC_EDITTASKICON		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKICON"));
+
+// WPARAM = Task ID, LPARAM = TRUE/FALSE 
+const UINT WM_KBC_EDITTASKFLAG		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKFLAG"));
 
 /////////////////////////////////////////////////////////////////////////////
 

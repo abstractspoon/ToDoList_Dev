@@ -128,7 +128,8 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_SETFOCUS()
 	ON_WM_SETCURSOR()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
-	ON_MESSAGE(WM_KLCN_CHECKCHANGE, OnListCheckChange)
+	ON_MESSAGE(WM_KLCN_TOGGLETASKDONE, OnListToggleTaskDone)
+	ON_MESSAGE(WM_KLCN_TOGGLETASKFLAG, OnListToggleTaskFlag)
 	ON_MESSAGE(WM_KLCN_GETTASKICON, OnListGetTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKICON, OnListEditTaskIcon)
 	ON_MESSAGE(WM_KCM_SELECTTASK, OnSelectTask)
@@ -3193,17 +3194,17 @@ LRESULT CKanbanCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
-LRESULT CKanbanCtrl::OnListCheckChange(WPARAM /*wp*/, LPARAM lp)
+LRESULT CKanbanCtrl::OnListToggleTaskDone(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(!m_bReadOnly);
+	ASSERT(lp);
 
 	DWORD dwTaskID = lp;
 	const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
-	ASSERT(pKI);
 
 	if (pKI)
 	{
-		LRESULT lr = GetParent()->SendMessage(WM_KBC_COMPLETIONCHANGE, (WPARAM)GetSafeHwnd(), !pKI->IsDone(FALSE));
+		LRESULT lr = GetParent()->SendMessage(WM_KBC_EDITTASKDONE, dwTaskID, !pKI->IsDone(FALSE));
 
 		if (lr && m_data.HasItem(dwTaskID))
 			PostMessage(WM_KCM_SELECTTASK, 0, dwTaskID);
@@ -3212,21 +3213,48 @@ LRESULT CKanbanCtrl::OnListCheckChange(WPARAM /*wp*/, LPARAM lp)
 	}
 
 	// else
+	ASSERT(0);
 	return 0L;
 }
 
 LRESULT CKanbanCtrl::OnListEditTaskIcon(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(!m_bReadOnly);
+	ASSERT(lp);
+
+	return GetParent()->SendMessage(WM_KBC_EDITTASKICON, (WPARAM)lp);
+}
+
+LRESULT CKanbanCtrl::OnListToggleTaskFlag(WPARAM /*wp*/, LPARAM lp)
+{
+	ASSERT(!m_bReadOnly);
+	ASSERT(lp);
 
 	DWORD dwTaskID = lp;
 	const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
-	ASSERT(pKI);
 
 	if (pKI)
-		return GetParent()->SendMessage(WM_KBC_EDITTASKICON, (WPARAM)GetSafeHwnd());
+	{
+		LRESULT lr = GetParent()->SendMessage(WM_KBC_EDITTASKFLAG, dwTaskID, !pKI->bFlag);
+
+		if (lr && m_data.HasItem(dwTaskID))
+		{
+			KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+			ASSERT(pKI);
+
+			pKI->bFlag = !pKI->bFlag;
+
+			if (m_pSelectedList)
+				m_pSelectedList->Invalidate();
+
+			PostMessage(WM_KCM_SELECTTASK, 0, dwTaskID);
+		}
+
+		return lr;
+	}
 
 	// else
+	ASSERT(0);
 	return 0L;
 }
 
