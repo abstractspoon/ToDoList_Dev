@@ -113,6 +113,7 @@ protected:
 	BOOL m_bIndentSubtasks;
 	BOOL m_bHideEmptyAttributes;
 	BOOL m_bDropTarget;
+	BOOL m_bDrawTaskFlags;
 
 	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;
@@ -166,10 +167,11 @@ protected:
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
 	BOOL GetItemRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
 	void RefreshItemLineHeights(HTREEITEM hti);
+	int GetItemDisplayAttributeCount(const KANBANITEM& ki) const;
 
-	BOOL DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
-	DWORD DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const;
-	BOOL DrawItemBar(CDC* pDC, const KANBANITEM* pKI, BOOL bHasIcon, CRect& rItem) const;
+	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
+	void DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
+	void DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags) const;
 	void FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText, BOOL bSelected) const;
 	void DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);

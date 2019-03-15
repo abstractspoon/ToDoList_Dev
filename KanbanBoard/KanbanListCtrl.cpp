@@ -57,28 +57,20 @@ enum // checkbox images
 	KLCC_MIXED, 
 };
 
-enum // Drawn icons
-{
-	KLCDI_ICON = 0x01,
-	KLCDI_FLAG = 0x02,
-
-};
-
 /////////////////////////////////////////////////////////////////////////////
 
 const int MIN_LABEL_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
 const int BAR_WIDTH				= GraphicsMisc::ScaleByDPIFactor(6);
-const int NUM_TEXTLINES			= 2;
-const int TITLE_VPADDING		= GraphicsMisc::ScaleByDPIFactor(8);
+const int NUM_TITLELINES		= 2;
 const int LV_PADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int CHECKBOX_PADDING		= GraphicsMisc::ScaleByDPIFactor(1);
 const int ATTRIB_INDENT			= GraphicsMisc::ScaleByDPIFactor(6);
 const int TIP_PADDING			= GraphicsMisc::ScaleByDPIFactor(4);
 const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
-const int IMAGE_PADDING			= GraphicsMisc::ScaleByDPIFactor(2);
+const int IMAGE_PADDING			= 2/*GraphicsMisc::ScaleByDPIFactor(2)*/;
 const int LEVEL_INDENT			= GraphicsMisc::ScaleByDPIFactor(16);
 
-const CRect TEXT_BORDER			= CRect(4, 3, 3, 2);
+const CRect TEXT_BORDER			= CRect(2, 1, 3, 1);
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx
@@ -91,7 +83,7 @@ CKanbanListCtrl::CKanbanListCtrl(const CKanbanItemMap& data, const KANBANCOLUMN&
 	m_tch(*this),
 	m_columnDef(columnDef),
 	m_aDisplayAttrib(aDisplayAttrib),
-	m_bHideEmptyAttributes(TRUE),
+	m_bHideEmptyAttributes(FALSE),
 	m_fonts(fonts),
 	m_aPriorityColors(aPriorityColors),
 	m_bStrikeThruDoneTasks(FALSE),
@@ -105,7 +97,8 @@ CKanbanListCtrl::CKanbanListCtrl(const CKanbanItemMap& data, const KANBANCOLUMN&
 	m_nItemTextBorder(-1),
 	m_nAttribLabelVisiability(KBCAL_LONG),
 	m_bSavingToImage(FALSE),
-	m_bDropTarget(FALSE)
+	m_bDropTarget(FALSE),
+	m_bDrawTaskFlags(FALSE)
 {
 }
 
@@ -230,6 +223,8 @@ void CKanbanListCtrl::SetMaximumTaskCount(int nMaxTasks)
 
 void CKanbanListCtrl::OnDisplayAttributeChanged()
 {
+	m_bDrawTaskFlags = (Misc::FindT(m_aDisplayAttrib, IUI_FLAG) != -1);
+
 	RecalcItemLineHeight();
 	RefreshItemLineHeights();
 }
@@ -253,17 +248,30 @@ void CKanbanListCtrl::RefreshItemLineHeights(HTREEITEM hti)
 	const KANBANITEM* pKI = GetKanbanItem(GetTaskID(hti));
 	ASSERT(pKI);
 
-	int nNumLines = 2;
-
-	if (m_aDisplayAttrib.GetSize() > 0)
+	if (pKI)
 	{
-		if (m_bHideEmptyAttributes)
-			nNumLines += pKI->GetNonEmptyAttributeCount(m_aDisplayAttrib);
-		else
-			nNumLines += m_aDisplayAttrib.GetSize();
+		int nNumLines = (NUM_TITLELINES + GetItemDisplayAttributeCount(*pKI));
+
+		TCH().SetItemIntegral(hti, nNumLines);
+	}
+}
+
+int CKanbanListCtrl::GetItemDisplayAttributeCount(const KANBANITEM& ki) const
+{
+	int nCount = 0, nDisp = m_aDisplayAttrib.GetSize();
+
+	while (nDisp--)
+	{
+		IUI_ATTRIBUTE nAttribID = m_aDisplayAttrib[nDisp];
+
+		if (nAttribID != IUI_FLAG)
+		{
+			if (!m_bHideEmptyAttributes || ki.HasAttributeDisplayValue(nAttribID))
+				nCount++;
+		}
 	}
 
-	TCH().SetItemIntegral(hti, nNumLines);
+	return nCount;
 }
 
 void CKanbanListCtrl::RefreshItemLineHeights(DWORD dwTaskID)
@@ -364,7 +372,7 @@ void CKanbanListCtrl::SetHideEmptyAttributes(BOOL bHide)
 
 int CKanbanListCtrl::CalcItemTitleTextHeight() const
 {
-	return ((NUM_TEXTLINES * m_nItemTextHeight) + 2);
+	return (NUM_TITLELINES * m_nItemTextHeight);
 }
 
 HTREEITEM CKanbanListCtrl::AddTask(const KANBANITEM& ki, BOOL bSelect)
@@ -543,27 +551,21 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 				// Background
 				FillItemBackground(pDC, pKI, rItem, crText, bSelected);
+	
+				// Bar affects everything else
+				DrawItemBar(pDC, pKI, rItem);
 
-				// Icon
-				pKI->dwDrawnIcons = DrawItemIcons(pDC, pKI, rItem);
+				// Icons don't affect attributes
+				CRect rAttributes(rItem);
 
-				// Bar as required
-				CRect rAttributes(rItem), rTitle(rItem);
-
-				if (DrawItemBar(pDC, pKI, (pKI->dwDrawnIcons != 0), rAttributes))
-					rTitle = rAttributes;
-
-				// Attributes are not affected by the icon
-				if (pKI->dwDrawnIcons != 0)
-					rTitle.left = max(rAttributes.left, (rItem.left + IMAGE_SIZE + IMAGE_PADDING));
-				
-				// Text
-				DrawItemTitle(pDC, pKI, rTitle, crText);
+				DrawItemIcons(pDC, pKI, rItem);
+				DrawItemTitle(pDC, pKI, rItem, crText);
 
 				if (!bSelected && !Misc::IsHighContrastActive() && !pKI->IsDone(TRUE))
 					crText = pDC->SetTextColor(GraphicsMisc::Lighter(crText, 0.3));
 
 				rAttributes.top += CalcItemTitleTextHeight();
+				rAttributes.top += IMAGE_PADDING;
 
 				DrawItemAttributes(pDC, pKI, rAttributes, crText);
 			}
@@ -623,16 +625,19 @@ void CKanbanListCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const 
 	for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 	{
 		IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
-		
-		if (!m_bHideEmptyAttributes || pKI->HasAttributeDisplayValue(nAttrib))
-			DrawAttribute(pDC, rAttrib, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags);
+
+		if (nAttrib != IUI_FLAG)
+		{
+			if (!m_bHideEmptyAttributes || pKI->HasAttributeDisplayValue(nAttrib))
+				DrawAttribute(pDC, rAttrib, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags);
+		}
 	}
 
 	if (pOldFont)
 		pDC->SelectObject(pOldFont);
 }
 
-DWORD CKanbanListCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const
+void CKanbanListCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
 {
 	DWORD dwDrawn = 0;
 	CRect rIcon(rItem);
@@ -646,27 +651,18 @@ DWORD CKanbanListCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRec
 		HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, pKI->dwTaskID, (LPARAM)&iImageIndex);
 
 		if (hilTask && (iImageIndex != -1))
-		{
 			ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
-			dwDrawn |= KLCDI_ICON;
-
-			rIcon.top += (IMAGE_SIZE + IMAGE_PADDING);
-
-			if (m_bShowTaskColorAsBar && !pKI->IsDone(TRUE))
-				rIcon.left += BAR_WIDTH;
-		}
 	}
 
-	if (pKI->bFlag)
-	{
+	rIcon.top += (IMAGE_SIZE/* + IMAGE_PADDING*/);
+
+	if (m_bDrawTaskFlags && pKI->bFlag)
 		ImageList_Draw(m_ilFlags, 0, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
-		dwDrawn |= KLCDI_FLAG;
-	}
 
-	return dwDrawn;
+	rItem.left = (rIcon.left + IMAGE_SIZE);
 }
 
-BOOL CKanbanListCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, BOOL bHasIcon, CRect& rItem) const
+void CKanbanListCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
 {
 	if (m_bShowTaskColorAsBar)
 	{
@@ -675,9 +671,6 @@ BOOL CKanbanListCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, BOOL bHasIcon
 
 		rBar.DeflateRect(2, 2);
 		rBar.right = (rBar.left + BAR_WIDTH);
-
-		if (bHasIcon)
-			rBar.top += (IMAGE_SIZE + IMAGE_PADDING);
 
 		if (!pKI->IsDone(TRUE))
 		{
@@ -703,13 +696,10 @@ BOOL CKanbanListCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, BOOL bHasIcon
 		}
 
 		rItem.left = rBar.right;
-		return TRUE;
 	}
-
-	return FALSE;
 }
 
-BOOL CKanbanListCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem)
+void CKanbanListCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem)
 {
 	if (m_bShowCompletionCheckboxes)
 	{
@@ -729,13 +719,10 @@ BOOL CKanbanListCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& r
 			}
 
 			m_ilCheckboxes.Draw(pDC, iImage, rCheckbox.TopLeft(), ILD_TRANSPARENT);
-			rItem.left = (rCheckbox.right + CHECKBOX_PADDING);
 
-			return TRUE;
+			rItem.left = (rCheckbox.right + CHECKBOX_PADDING);
 		}
 	}
-
-	return FALSE;
 }
 
 BOOL CKanbanListCtrl::GetItemCheckboxRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const
@@ -805,21 +792,15 @@ BOOL CKanbanListCtrl::GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEd
 	VERIFY(GetItemCheckboxRect(rCheckbox));
 
 	rItem.left = (rCheckbox.right + CHECKBOX_PADDING);
+	rItem.left += (IMAGE_SIZE + IMAGE_PADDING);
 
-	if (pKI->dwDrawnIcons != 0)
-	{
-		rItem.left += (IMAGE_SIZE + IMAGE_PADDING);
-	}
-	else if (m_bShowTaskColorAsBar)
-	{
-		rItem.left += (2 + BAR_WIDTH);
-	}
+	if (m_bShowTaskColorAsBar)
+		rItem.left += (BAR_WIDTH + IMAGE_PADDING);
 
 	if (!bEdit)
 	{
 		rItem.DeflateRect(TEXT_BORDER);
 		rItem.bottom = (rItem.top + CalcItemTitleTextHeight());
-		rItem.top--;
 		rItem.right -= 2;
 	}
 	else
@@ -918,7 +899,7 @@ void CKanbanListCtrl::DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttri
 	CString sAttrib = FormatAttribute(nAttrib, sValue, nLabelVis);
 	pDC->DrawText(sAttrib, rLine, nFlags);
 
-	rLine.top += (m_nItemTextHeight + m_nItemTextBorder - 1);
+	rLine.top += (m_nItemTextHeight + m_nItemTextBorder);
 }
 
 CString CKanbanListCtrl::FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis)
@@ -1336,14 +1317,17 @@ CSize CKanbanListCtrl::CalcRequiredSizeForImage() const
 		{
 			int nItemWidth = (int)(pKI->sTitle.GetLength() * fAveCharWidth / 2); // title is on two lines
 			nItemWidth += (pKI->nLevel * LEVEL_INDENT);
-			nItemWidth += (pKI->dwDrawnIcons ? (IMAGE_SIZE + IMAGE_PADDING) : 0);
+			nItemWidth += (IMAGE_SIZE + IMAGE_PADDING);
 			
 			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 			{
 				IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
-				CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeDisplayValue(nAttrib), KBCAL_LONG);
 
-				nItemWidth = max(nItemWidth, ((int)(sAttrib.GetLength() * fAveCharWidth) + ATTRIB_INDENT));
+				if (nAttrib != IUI_FLAG)
+				{
+					CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeDisplayValue(nAttrib), KBCAL_LONG);
+					nItemWidth = max(nItemWidth, ((int)(sAttrib.GetLength() * fAveCharWidth) + ATTRIB_INDENT));
+				}
 			}
 
 			reqSize.cx = max(reqSize.cx, nItemWidth);
@@ -1408,7 +1392,7 @@ void CKanbanListCtrl::RecalcItemLineHeight()
 
 	int nItemHeight = (m_nItemTextHeight + m_nItemTextBorder);
 		
-	if (m_aDisplayAttrib.GetSize() == 0)
+	if (m_bDrawTaskFlags && (m_aDisplayAttrib.GetSize() == 1))
 		nItemHeight = max(nItemHeight, (IMAGE_SIZE + IMAGE_PADDING));
 	
 	SetItemHeight(nItemHeight);

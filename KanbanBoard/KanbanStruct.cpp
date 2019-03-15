@@ -472,19 +472,6 @@ BOOL KANBANITEM::HasAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
 	return FALSE;
 }
 
-int KANBANITEM::GetNonEmptyAttributeCount(const CKanbanAttributeArray& aDisplayAttrib) const
-{
-	int nCount = 0, nAttrib = aDisplayAttrib.GetSize();
-
-	while (nAttrib--)
-	{
-		if (HasAttributeDisplayValue(aDisplayAttrib[nAttrib]))
-			nCount++;
-	}
-
-	return nCount;
-}
-
 BOOL KANBANITEM::AttributeValuesMatch(LPCTSTR szAttrib, const KANBANITEM& ki) const
 {
 	const CStringArray* pThisArray = mapAttribValues.GetMapping(szAttrib);

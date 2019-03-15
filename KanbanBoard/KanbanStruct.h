@@ -79,8 +79,6 @@ struct KANBANITEM
 	COleDateTime dtDone, dtDue, dtStart, dtLastMod, dtCreate;
 	CString sExternalID, sRecurrence, sCreatedBy, sFileRef;
 
-	mutable DWORD dwDrawnIcons;
-
 	int GetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues) const;
 	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;
 	CString GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const;
@@ -89,7 +87,6 @@ struct KANBANITEM
 	COLORREF GetFillColor(BOOL bColorIsBkgnd) const;
 	COLORREF GetBorderColor(BOOL bColorIsBkgnd) const;
 	int GetPriority() const;
-	int GetNonEmptyAttributeCount(const CKanbanAttributeArray& aDisplayAttrib) const;
 
 	BOOL HasColor() const;
 	BOOL IsDone(BOOL bIncludeGoodAs) const;

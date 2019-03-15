@@ -1984,6 +1984,7 @@ CKanbanListCtrl* CKanbanCtrl::AddNewListCtrl(const KANBANCOLUMN& colDef)
 		pList->SetShowTaskColorAsBar(HasOption(KBCF_SHOWTASKCOLORASBAR));
 		pList->SetShowCompletionCheckboxes(HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES));
 		pList->SetIndentSubtasks(HasOption(KBCF_INDENTSUBTASKS));
+		pList->SetHideEmptyAttributes(HasOption(KBCF_HIDEEMPTYATTRIBUTES));
 
 		if (pList->Create(IDC_LISTCTRL, this))
 		{
@@ -2644,8 +2645,6 @@ CKanbanListCtrl* CKanbanCtrl::GetNextListCtrl(const CKanbanListCtrl* pList, BOOL
 
 BOOL CKanbanCtrl::IsDragging() const
 {
-	ASSERT(!m_bReadOnly);
-
 	return (!m_bReadOnly && (GetCapture() == this));
 }
 
@@ -3106,8 +3105,6 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (IsDragging())
 	{
-		ASSERT(!m_bReadOnly);
-		
 		// get the list and item under the mouse
 		ClientToScreen(&point);
 
