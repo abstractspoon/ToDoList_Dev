@@ -25,6 +25,9 @@ public:
 	BOOL GetImageSize(int& nCx, int& nCy) const;
 	BOOL GetImageSize(CSize& size) const;
 
+	int GetImageWidth() const;
+	int GetImageHeight() const;
+	
 	int Add(CBitmap* pbmImage, CBitmap* pbmMask) { return CImageList::Add(pbmImage, pbmMask); }
 	int Add(CBitmap* pbmImage, COLORREF crMask) { return CImageList::Add(pbmImage, crMask); }
 	int Add(HICON hIcon, COLORREF crBkgnd = DEFAULT_BKGNDCOLOR);

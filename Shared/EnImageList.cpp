@@ -41,6 +41,26 @@ BOOL CEnImageList::GetImageSize(CSize& size) const
 	return GetImageSize(*this, size);
 }
 
+int CEnImageList::GetImageWidth() const
+{
+	CSize size;
+
+	if (!GetImageSize(size))
+		return -1;
+
+	return size.cx;
+}
+
+int CEnImageList::GetImageHeight() const
+{
+	CSize size;
+
+	if (!GetImageSize(size))
+		return -1;
+
+	return size.cy;
+}
+
 BOOL CEnImageList::ScaleByDPIFactor(COLORREF crBkgnd)
 {
 	return ScaleByDPIFactor(*this, crBkgnd);
