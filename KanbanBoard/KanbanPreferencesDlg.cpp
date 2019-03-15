@@ -111,8 +111,8 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 
 	m_lcFixedColumnDefs.SetColumnDefinitions(m_aFixedColumnDefs);
 	m_lcFixedColumnDefs.SetCurSel(0);
-	UpdateAttributeValueCombo();
 
+	UpdateAttributeValueCombo();
 	BuildDisplayAttributeListBox();
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -224,13 +224,14 @@ void CKanbanPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey
 
 	// Display Attributes
 	int nNumAttrib = m_aDisplayAttrib.GetSize();
-	pPrefs->WriteProfileInt(szKey, _T("DisplayAttribCount"), nNumAttrib);
-
 	for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 	{
 		CString sEntry = Misc::MakeKey(_T("DisplayAttrib%d"), nAtt);
 		pPrefs->WriteProfileInt(szKey, sEntry, m_aDisplayAttrib[nAtt]);
-	}	
+	}
+
+	pPrefs->WriteProfileInt(szKey, _T("DisplayAttribCount"), nNumAttrib);
+	pPrefs->WriteProfileInt(szKey, _T("AutoAddFlag"), FALSE);
 }
 
 void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
@@ -274,13 +275,24 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 
 	// Display Attributes
 	int nNumAttrib = pPrefs->GetProfileInt(szKey, _T("DisplayAttribCount"));
-	m_aDisplayAttrib.SetSize(nNumAttrib);
 	
 	for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 	{
 		CString sEntry = Misc::MakeKey(_T("DisplayAttrib%d"), nAtt);
-		m_aDisplayAttrib[nAtt] = (IUI_ATTRIBUTE)pPrefs->GetProfileInt(szKey, sEntry, IUI_NONE);
+		IUI_ATTRIBUTE nAttrib = (IUI_ATTRIBUTE)pPrefs->GetProfileInt(szKey, sEntry, IUI_NONE);
+
+		if (nAttrib != IUI_NONE)
+			m_aDisplayAttrib.Add(nAttrib);
 	}	
+
+	// Backwards compatibility
+	if (pPrefs->GetProfileInt(szKey, _T("AutoAddFlag"), TRUE))
+	{
+		IUI_ATTRIBUTE nAttrib = IUI_FLAG;
+
+		if (!Misc::HasT(m_aDisplayAttrib, nAttrib))
+			m_aDisplayAttrib.Add(nAttrib);
+	}
 }
 
 void CKanbanPreferencesPage::OnChangeColumnType() 
