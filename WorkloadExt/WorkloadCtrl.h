@@ -72,6 +72,7 @@ public:
 	const CStringArray& GetAllocatedToList() const { return m_aAllocTo; }
 
 	BOOL SetCurrentPeriod(const COleDateTimeRange& dtPeriod);
+	const COleDateTimeRange& GetDataDateRange() const { return m_dtDataRange; }
 
 	BOOL CanMoveSelectedItem(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedItem(const IUITASKMOVE& move);
@@ -153,7 +154,7 @@ protected:
 	double m_dWorkDaysInPeriod;
 	CString m_sSortByAllocTo;
 	int m_nSortByAllocToCol;
-	COleDateTimeRange m_dtPeriod;
+	COleDateTimeRange m_dtPeriod, m_dtDataRange;
 
 	CStringArray m_aAllocTo;
 	CHTIMap m_mapHTItems;
@@ -254,6 +255,7 @@ protected:
 	void Resize(int cx = 0, int cy = 0);
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
 	void RecalcAllocationTotals();
+	void RecalcDataDateRange();
 	void AdjustSplitterToFitAttributeColumns();
 
 	inline BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }

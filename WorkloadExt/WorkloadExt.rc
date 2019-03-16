@@ -74,14 +74,18 @@ FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Current Period: ",IDC_PERIODDURATION,0,2,300,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,155,12,185,15
+                    WS_VISIBLE,164,12,185,13
     CONTROL         "",IDC_WORKLOAD_FRAME,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,0,28,587,281
     CONTROL         "DateTimePicker1",IDC_PERIODBEGIN,"SysDateTimePick32",
-                    WS_TABSTOP,0,13,70,13
+                    WS_TABSTOP,0,13,73,13
     CONTROL         "DateTimePicker1",IDC_PERIODENDINCLUSIVE,
-                    "SysDateTimePick32",WS_TABSTOP,81,13,70,13
-    CTEXT           "-",IDC_STATIC,71,16,8,8
+                    "SysDateTimePick32",WS_TABSTOP,86,13,73,13
+    CTEXT           "-",IDC_STATIC,75,16,8,8
+    LTEXT           "Acti&ve Date Range",IDC_ACTIVEDATERANGE_LABEL,354,3,233,
+                    8
+    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,353,
+                    12,112,13
 END
 
 

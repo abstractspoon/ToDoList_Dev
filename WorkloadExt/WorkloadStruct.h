@@ -172,6 +172,7 @@ public:
 							CMapAllocationTotals& mapTotalTasks) const;
 
 	void RecalculateOverlaps();
+	BOOL CalcDateRange(COleDateTimeRange& dtRange) const;
 
 protected:
 	int BuildDateSortedList(CArray<WORKLOADITEM*, WORKLOADITEM*&>& aItems) const;

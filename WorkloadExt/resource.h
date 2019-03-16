@@ -27,8 +27,10 @@
 #define IDC_TB_PLACEHOLDER              16024
 #define IDC_WORKLOAD_FRAME              16025
 #define IDC_SELECTEDTASKDATES_LABEL     16028
+#define IDC_ACTIVEDATERANGE_LABEL       16028
 #define IDC_COLUMNVISIBILITY            16032
 #define IDC_TASKTITLE                   16034
+#define IDC_ACTIVEDATERANGE             16034
 #define IDC_ALLOCATIONS                 16035
 #define IDC_PERIODBEGIN                 16037
 #define IDC_PERIODENDINCLUSIVE          16038

@@ -52,6 +52,7 @@ CWorkloadWnd::CWorkloadWnd(CWnd* pParent /*=NULL*/)
 	CDialog(IDD_WORKLOAD_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
+	m_bUpdatingSlider(FALSE),
 #pragma warning(disable:4355)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
@@ -74,6 +75,7 @@ void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_PERIODBEGIN, m_dtcPeriodStart);
 	DDX_Control(pDX, IDC_PERIODENDINCLUSIVE, m_dtcPeriodEnd);
+	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
 }
 
 BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
@@ -113,6 +115,7 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_WLCN_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SORTCHANGE, OnWorkloadNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SELCHANGE, OnWorkloadNotifySelChange)
+	ON_REGISTERED_MESSAGE(RANGE_CHANGED, OnActiveDateRangeChange)
 
 	ON_REGISTERED_MESSAGE(WM_WLC_EDITTASKTITLE, OnWorkloadEditTaskTitle)
 	ON_REGISTERED_MESSAGE(WM_WLC_EDITTASKALLOCATIONS, OnWorkloadEditTaskAllocations)
@@ -281,6 +284,7 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		m_dtPeriod.m_dtEnd = pPrefs->GetProfileDouble(sKey, _T("PeriodEnd"), CDateHelper::GetDate(DHD_ENDTHISMONTH));
 
 		UpdatePeriod();
+		UpdateRangeSlider();
 
 		// column order
 		CIntArray aTreeOrder, aTreeWidths, aTreeTracked;
@@ -325,6 +329,8 @@ void CWorkloadWnd::SetUITheme(const UITHEME* pTheme)
 
 		m_ctrlWorkload.SetSplitBarColor(m_theme.crAppBackDark);
 		m_ctrlWorkload.SetBackgroundColor(m_theme.crAppBackLight);
+
+		m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
 	}
 }
 
@@ -440,6 +446,8 @@ void CWorkloadWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, 
 	m_ctrlWorkload.UpdateTasks(pTasks, nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes));
 	m_toolbar.RefreshButtonStates(FALSE);
 	
+	UpdatePeriod();
+	UpdateRangeSlider();
 }
 
 bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData) 
@@ -696,11 +704,15 @@ void CWorkloadWnd::Resize(int cx, int cy)
 	if (m_ctrlWorkload.GetSafeHwnd())
 	{
 		CRect rWorkload = CDialogHelper::GetChildRect(&m_ctrlWorkload);
-
 		rWorkload.right = cx;
 		rWorkload.bottom = cy;
 
 		m_ctrlWorkload.MoveWindow(rWorkload);
+
+		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
+		rSlider.right = (cx - 10);
+
+		m_sliderDateRange.MoveWindow(rSlider);
 	}
 }
 
@@ -922,6 +934,7 @@ void CWorkloadWnd::OnChangePeriodBegin(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	UpdateData();
 	UpdatePeriod();
+	UpdateRangeSlider();
 	
 	*pResult = 0;
 }
@@ -930,6 +943,7 @@ void CWorkloadWnd::OnChangePeriodEnd(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	UpdateData();
 	UpdatePeriod();
+	UpdateRangeSlider();
 	
 	*pResult = 0;
 }
@@ -939,6 +953,18 @@ void CWorkloadWnd::OnMovePeriodBackOneMonth()
 	m_dtPeriod.Offset(-1, DHU_MONTHS);
 
 	UpdatePeriod();
+	UpdateRangeSlider();
+}
+
+LRESULT CWorkloadWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	if (!m_bUpdatingSlider)
+	{
+		m_dtPeriod.Set(m_sliderDateRange.GetLeft(), m_sliderDateRange.GetRight());
+		UpdatePeriod();
+	}
+
+	return 0L;
 }
 
 void CWorkloadWnd::UpdatePeriod()
@@ -951,7 +977,37 @@ void CWorkloadWnd::UpdatePeriod()
 		m_sPeriodDuration.Empty();
 
 	m_toolbar.RefreshButtonStates(FALSE);
+
 	UpdateData(FALSE);
+}
+
+void CWorkloadWnd::UpdateRangeSlider()
+{
+	CAutoFlag af(m_bUpdatingSlider, TRUE);
+	const COleDateTimeRange& dtData = m_ctrlWorkload.GetDataDateRange();
+
+	if (dtData.IsValid())
+	{
+		m_sliderDateRange.SetMinMax(dtData.GetStart(), dtData.GetEnd());
+
+		if (dtData.Contains(m_dtPeriod))
+		{
+			m_sliderDateRange.SetRange(m_dtPeriod.GetStart(), m_dtPeriod.GetEnd());
+			m_sliderDateRange.EnableWindow(TRUE);
+		}
+		else
+		{
+			m_sliderDateRange.SetRange(dtData.GetStart(), dtData.GetEnd());
+			m_sliderDateRange.EnableWindow(FALSE);
+		}
+	}
+	else
+	{
+		m_sliderDateRange.SetRange(0.0, 1.0);
+		m_sliderDateRange.EnableWindow(FALSE);
+	}
+
+	m_sliderDateRange.SetStep(1.0); // 1 day
 }
 
 void CWorkloadWnd::OnUpdateMovePeriodBackOneMonth(CCmdUI* pCmdUI) 
@@ -962,7 +1018,10 @@ void CWorkloadWnd::OnUpdateMovePeriodBackOneMonth(CCmdUI* pCmdUI)
 void CWorkloadWnd::OnMovePeriodStartForwardOneMonth() 
 {
 	if (m_dtPeriod.OffsetStart(1, DHU_MONTHS))
+	{
 		UpdatePeriod();
+		UpdateRangeSlider();
+	}
 }
 
 void CWorkloadWnd::OnUpdateMovePeriodStartForwardOneMonth(CCmdUI* pCmdUI) 
@@ -975,7 +1034,10 @@ void CWorkloadWnd::OnUpdateMovePeriodStartForwardOneMonth(CCmdUI* pCmdUI)
 void CWorkloadWnd::OnMovePeriodStartBackOneMonth() 
 {
 	if (m_dtPeriod.OffsetStart(-1, DHU_MONTHS))
+	{
 		UpdatePeriod();
+		UpdateRangeSlider();
+	}
 }
 
 void CWorkloadWnd::OnUpdateMovePeriodStartBackOneMonth(CCmdUI* pCmdUI) 
@@ -988,6 +1050,7 @@ void CWorkloadWnd::OnResetPeriodToThisMonth()
 	m_dtPeriod.Set(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH);
 	
 	UpdatePeriod();
+	UpdateRangeSlider();
 }
 
 void CWorkloadWnd::OnUpdateResetPeriodToThisMonth(CCmdUI* pCmdUI) 
@@ -998,7 +1061,10 @@ void CWorkloadWnd::OnUpdateResetPeriodToThisMonth(CCmdUI* pCmdUI)
 void CWorkloadWnd::OnMovePeriodEndForwardOneMonth() 
 {
 	if (m_dtPeriod.OffsetEnd(1, DHU_MONTHS))
+	{
 		UpdatePeriod();
+		UpdateRangeSlider();
+	}
 }
 
 void CWorkloadWnd::OnUpdateMovePeriodEndForwardOneMonth(CCmdUI* pCmdUI) 
@@ -1009,7 +1075,10 @@ void CWorkloadWnd::OnUpdateMovePeriodEndForwardOneMonth(CCmdUI* pCmdUI)
 void CWorkloadWnd::OnMovePeriodEndBackOneMonth() 
 {
 	if (m_dtPeriod.OffsetEnd(-1, DHU_MONTHS))
+	{
 		UpdatePeriod();
+		UpdateRangeSlider();
+	}
 }
 
 void CWorkloadWnd::OnUpdateMovePeriodEndBackOneMonth(CCmdUI* pCmdUI) 
@@ -1024,6 +1093,7 @@ void CWorkloadWnd::OnMovePeriodForwardOneMonth()
 	m_dtPeriod.Offset(1, DHU_MONTHS);
 
 	UpdatePeriod();
+	UpdateRangeSlider();
 }
 
 void CWorkloadWnd::OnUpdateUpdateMovePeriodForwardOneMonth(CCmdUI* pCmdUI) 

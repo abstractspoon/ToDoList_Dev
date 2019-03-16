@@ -586,9 +586,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE))
 			{
 				if (attrib.Has(IUI_DUEDATE) || attrib.Has(IUI_STARTDATE))
-				{
 					m_data.RecalculateOverlaps();
-				}
 			}
 		}
 		break;
@@ -612,6 +610,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	FixupListSortColumn();
 	RecalcTreeColumns(TRUE);
 	RecalcAllocationTotals();
+	RecalcDataDateRange();
 
 	// Stage 2: Restore rendering
 	switch (nUpdate)
@@ -1027,10 +1026,23 @@ void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
 
 	m_data.RecalculateOverlaps();
+
 	RefreshTreeItemMap();
 	ExpandList();
 	RefreshItemBoldState();
 }
+
+void CWorkloadCtrl::RecalcDataDateRange()
+{
+	COleDateTimeRange dtRange;
+
+	if (!m_data.CalcDateRange(dtRange))
+		dtRange.Add(COleDateTime::GetCurrentTime());
+
+	m_dtDataRange.Set(CDateHelper::GetStartOfMonth(dtRange.GetStart()), 
+					  CDateHelper::GetEndOfMonth(dtRange.GetEnd()));
+}
+
 
 void CWorkloadCtrl::RefreshTreeItemMap()
 {

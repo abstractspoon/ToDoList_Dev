@@ -17,6 +17,7 @@
 #include "..\shared\Icon.h"
 #include "..\shared\DateHelper.h"
 #include "..\shared\DateTimeCtrlEx.h"
+#include "..\Shared\RangeSliderCtrl.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -67,18 +68,22 @@ protected:
 	COleDateTimeRange m_dtPeriod;
 	CString	m_sPeriodDuration;
 	//}}AFX_DATA
+
 	CWorkloadCtrl m_ctrlWorkload;
 	CWorkloadPreferencesDlg m_dlgPrefs;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CDateTimeCtrlEx m_dtcPeriodStart, m_dtcPeriodEnd;
+	CRangeSliderCtrl m_sliderDateRange;
 
 	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
 	CString m_sSelectedTaskDates;
+
 	BOOL m_bReadOnly;
 	BOOL m_bInSelectTask;
+	BOOL m_bUpdatingSlider;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -127,6 +132,7 @@ protected:
 	afx_msg LRESULT OnWorkloadNotifyCompletionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySelChange(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnActiveDateRangeChange(WPARAM wp, LPARAM lp);
 
 	afx_msg LRESULT OnWorkloadEditTaskTitle(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadPrefsHelp(WPARAM wp, LPARAM lp);
@@ -143,6 +149,7 @@ protected:
 	int LoadColumnState(const IPreferences* pPrefs, LPCTSTR szKey, CIntArray& aStates) const;
 	BOOL CanEditSelectedTaskAllocations(DWORD dwTaskID = 0) const;
 	void UpdatePeriod();
+	void UpdateRangeSlider();
 
 	static DWORD MapColumn(WLC_COLUMNID nColumn);
 	static WLC_COLUMNID MapColumn(DWORD dwColumn);

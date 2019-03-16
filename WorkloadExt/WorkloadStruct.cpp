@@ -590,6 +590,26 @@ void CWorkloadItemMap::RecalculateOverlaps()
 	}
 }
 
+BOOL CWorkloadItemMap::CalcDateRange(COleDateTimeRange& dtRange) const
+{
+	dtRange.Reset();
+
+	DWORD dwTaskID = 0;
+	WORKLOADITEM* pWI = NULL;
+
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pWI);
+		ASSERT(pWI);
+
+		dtRange.Add(pWI->dtRange);
+	}
+
+	return dtRange.IsValid();
+}
+
 int CWorkloadItemMap::BuildDateSortedList(CArray<WORKLOADITEM*, WORKLOADITEM*&>& aItems) const
 {
 	aItems.RemoveAll();
