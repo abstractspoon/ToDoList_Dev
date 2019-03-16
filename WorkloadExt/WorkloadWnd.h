@@ -137,10 +137,8 @@ protected:
 
 protected:
 	void Resize(int cx, int cy);
-	void EnableSplitting(BOOL bEnable = TRUE);
 	void UpdateWorkloadCtrlPreferences();
 	void SendParentSelectionUpdate();
-	void UpdateSelectedTaskDates();
 	void SaveColumnState(IPreferences* pPrefs, LPCTSTR szKey, const CIntArray& aStates) const;
 	int LoadColumnState(const IPreferences* pPrefs, LPCTSTR szKey, CIntArray& aStates) const;
 	BOOL CanEditSelectedTaskAllocations(DWORD dwTaskID = 0) const;

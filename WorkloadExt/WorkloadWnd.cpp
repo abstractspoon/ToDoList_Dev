@@ -440,7 +440,6 @@ void CWorkloadWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, 
 	m_ctrlWorkload.UpdateTasks(pTasks, nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes));
 	m_toolbar.RefreshButtonStates(FALSE);
 	
-	UpdateSelectedTaskDates();
 }
 
 bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData) 
@@ -758,7 +757,6 @@ LRESULT CWorkloadWnd::OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp)
 
 LRESULT CWorkloadWnd::OnWorkloadNotifySelChange(WPARAM /*wp*/, LPARAM /*lp*/) 
 {
-	UpdateSelectedTaskDates();
 	SendParentSelectionUpdate();
 
 	m_toolbar.RefreshButtonStates(FALSE);
@@ -788,11 +786,6 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 	CDWordArray aColumnVis;
 	m_dlgPrefs.GetColumnVisibility(aColumnVis);
 	m_ctrlWorkload.SetTreeColumnVisibility(aColumnVis);
-}
-
-void CWorkloadWnd::UpdateSelectedTaskDates()
-{
-	// TODO
 }
 
 void CWorkloadWnd::OnWorkloadPreferences() 

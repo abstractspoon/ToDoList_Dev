@@ -21,7 +21,6 @@ public:
 	CRangeSliderCtrl(UINT nThumbStyle = TBS_BOTTOM | TBS_NOTICKS);
 
 	void SetParentBackgroundColor(COLORREF crBkgnd);
-	void SetSliderDrawStyles(UINT nStyle);
 
 protected:
 	CHotTracker m_hotTrack;

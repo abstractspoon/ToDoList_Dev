@@ -89,9 +89,6 @@ public:
 
 	void ResizeColumnsToFit();
 
-	BOOL ZoomIn(BOOL bIn = TRUE);
-	BOOL ZoomBy(int nAmount);
-
 	void SetFocus();
 	BOOL HasFocus() const { return CTreeListSyncer::HasFocus(); }
 
@@ -255,7 +252,6 @@ protected:
 	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
 	void InitItemHeights();
 	void Resize(int cx = 0, int cy = 0);
-	BOOL GetListItemRect(int nItem, CRect& rItem) const;
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
 	void RecalcAllocationTotals();
 	void AdjustSplitterToFitAttributeColumns();
@@ -263,13 +259,11 @@ protected:
 	inline BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 
 	WORKLOADITEM* GetWorkloadItem(DWORD dwTaskID, BOOL bCopyRefID = TRUE) const;
-	WORKLOADITEM* CheckAddTotal(DWORD dwTotalID);
 
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
 	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen) const;
 	int ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;
-	DWORD HitTestTask(const CPoint& point, BOOL bScreen, int& nItem) const;
 	int GetListItem(DWORD dwTaskID) const;
 	int GetListItem(HTREEITEM hti) const;
 	HTREEITEM GetTreeItem(DWORD dwTaskID) const;
@@ -282,7 +276,6 @@ protected:
 	WLC_COLUMNID GetTreeColumnID(int nCol) const;
 	WLC_LISTCOLUMNTYPE GetListColumnType(int nCol) const;
 
-	int GetTotalTreeColumnsWidth() const;
 	BOOL RecalcTreeColumns(BOOL bResize = TRUE);
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
