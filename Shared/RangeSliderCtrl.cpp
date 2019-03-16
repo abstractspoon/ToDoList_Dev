@@ -61,6 +61,8 @@ void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 		{
 			if (m_crParentBkgnd != CLR_NONE)
 				dc.FillSolidRect(rRegion, m_crParentBkgnd);
+			else
+				dc.FillSolidRect(rRegion, GetSysColor(COLOR_3DFACE));
 
 			CRect rTrack(rRegion);
 			RegionToTrack(rTrack);
