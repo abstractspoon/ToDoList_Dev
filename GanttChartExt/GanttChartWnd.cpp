@@ -847,11 +847,10 @@ void CGanttChartWnd::Resize(int cx, int cy)
 		m_ctrlGantt.Resize(rGantt);
 
 		// selected task dates takes available space
-		int nOffset = cx - CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE).right - 10;
-		CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE, nOffset, 0);
+		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
+		rSlider.right = (cx - 10);
 
-		// always redraw the selected task dates
-		GetDlgItem(IDC_ACTIVEDATERANGE)->Invalidate(FALSE);
+		m_sliderDateRange.MoveWindow(rSlider);
 	}
 }
 
