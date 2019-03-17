@@ -9,6 +9,8 @@
 #include "enbitmapex.h"
 #include "AcceleratorString.h"
 #include "icon.h"
+#include "winclasses.h"
+#include "wclassdefines.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,6 +48,7 @@ CEnEdit::CEnEdit(BOOL bComboStyle, LPCTSTR szMask, DWORD dwFlags) :
 					m_bComboStyle(bComboStyle),
 					m_bFirstShow(TRUE), 
 					m_nButtonDown(-1),
+					m_bParentIsCombo(-1),
 					m_nBottomBorder(0),
 					m_nTopBorder(0)
 {
@@ -460,6 +463,9 @@ void CEnEdit::OnNcPaint()
 
 void CEnEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 {
+	if (m_bParentIsCombo == -1) // first time init
+		m_bParentIsCombo = CWinClasses::IsClass(*GetParent(), WC_COMBOBOX);
+
 	// Flicker free painting
 	CDC dcTemp;
 	

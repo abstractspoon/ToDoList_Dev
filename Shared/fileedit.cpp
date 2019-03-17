@@ -10,8 +10,6 @@
 #include "misc.h"
 #include "enstring.h"
 #include "enbitmap.h"
-#include "winclasses.h"
-#include "wclassdefines.h"
 #include "clipboard.h"
 #include "icon.h"
 #include "msoutlookhelper.h"
@@ -78,8 +76,7 @@ CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter) :
 					m_nStyle(nStyle), 
 					m_bTipNeeded(FALSE),
 					m_sFilter(szFilter),
-					m_sCurFolder(FileMisc::GetCwd()),
-					m_bParentIsCombo(-1)
+					m_sCurFolder(FileMisc::GetCwd())
 {
 	if (!(m_nStyle & FES_NOBROWSE))
 	{
@@ -258,9 +255,6 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	// default
 	CEnEdit::NcPaint(pDC, rWindow);
 
-	if (m_bParentIsCombo == -1) // first time init
-		m_bParentIsCombo = CWinClasses::IsClass(*GetParent(), WC_COMBOBOX);
-	
 	// Background color
 	HBRUSH hBkgnd = NULL;
 	

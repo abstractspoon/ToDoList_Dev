@@ -78,7 +78,6 @@ protected:
 	int m_nStyle;
 	CString m_sCurFolder;
 	CString m_sBrowseTitle;
-	BOOL m_bParentIsCombo;
 	CImageList m_ilImageIcon;
 
 	static CString s_sBrowseBtnTip, s_sGoBtnTip;

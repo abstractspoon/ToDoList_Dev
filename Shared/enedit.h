@@ -89,13 +89,15 @@ protected:
 	};
 
 	CArray<EDITBTN, EDITBTN&> m_aButtons;
-	BOOL m_bFirstShow;
-	BOOL m_nButtonDown;
-	BOOL m_bComboStyle;
 	CHotTracker m_hotTrack;
 	int m_nTopBorder, m_nBottomBorder;
 	CEnImageList m_ilBtns, m_ilDisabledBtns;
 	CToolTipCtrlEx m_tooltip;
+
+	BOOL m_bFirstShow;
+	BOOL m_nButtonDown;
+	BOOL m_bComboStyle;
+	BOOL m_bParentIsCombo;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
