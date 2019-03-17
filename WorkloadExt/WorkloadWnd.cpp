@@ -977,6 +977,7 @@ void CWorkloadWnd::UpdatePeriod()
 		m_sPeriodDuration.Empty();
 
 	m_toolbar.RefreshButtonStates(FALSE);
+	GetDlgItem(IDC_ACTIVEDATERANGE_LABEL)->SetWindowText(CEnString(IDS_ACTIVEDATERANGE, m_dtPeriod.Format()));
 
 	UpdateData(FALSE);
 }
@@ -1100,3 +1101,4 @@ void CWorkloadWnd::OnUpdateUpdateMovePeriodForwardOneMonth(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(TRUE);
 }
+

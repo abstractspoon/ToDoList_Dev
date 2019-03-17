@@ -1043,7 +1043,6 @@ void CWorkloadCtrl::RecalcDataDateRange()
 					  CDateHelper::GetEndOfMonth(dtRange.GetEnd()));
 }
 
-
 void CWorkloadCtrl::RefreshTreeItemMap()
 {
 	m_mapHTItems.BuildMap(m_tcTasks);

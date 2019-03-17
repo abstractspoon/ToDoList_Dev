@@ -60,6 +60,7 @@
 #define IDS_COL_TOTAL                   57689
 #define IDS_TOTALSDATERANGE             57690
 #define IDS_PERIODDURATION              57691
+#define IDS_ACTIVEDATERANGE             57692
 
 // Next default values for new objects
 // 
