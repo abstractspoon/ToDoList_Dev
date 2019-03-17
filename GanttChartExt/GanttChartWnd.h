@@ -146,7 +146,6 @@ protected:
 
 protected:
 	void Resize(int cx, int cy);
-	void EnableSplitting(BOOL bEnable = TRUE);
 	void UpdateGanttCtrlPreferences();
 	void SendParentSelectionUpdate();
 	void UpdateActiveRangeLabel();
