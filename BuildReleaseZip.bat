@@ -79,6 +79,14 @@ del %OUTDIR%\Resources\ /Q /S
 del %OUTDIR%\Resources\Translations\backup\ /Q
 xcopy %RESREPO%\*.* %OUTDIR%\Resources\ /Y /D /E /EXCLUDE:%DEVREPO%\BuildReleaseZip_Exclude.txt
 
+REM Zip install instructions to root
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Windows.txt
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Linux.txt
+
+REM And remove from resources to avoid duplication
+del %OUTDIR%\Resources\Install.Windows.txt
+del %OUTDIR%\Resources\Install.Linux.txt
+
 REM Zip Resources
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\ -x!.git*
 
