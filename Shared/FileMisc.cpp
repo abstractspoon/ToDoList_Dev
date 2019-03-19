@@ -602,10 +602,10 @@ int FileMisc::DeleteFolder(LPCTSTR szFolder, DWORD dwFlags, HANDLE hTerminate)
 				nResult = 0; // failed
 			}
 		}
-		// all contained files were deleted successfully
-		// so we can now try to delete the folder itself
 		else
 		{
+			// all contained files were deleted successfully
+			// so we can now try to delete the folder itself
 			if (!RemoveDirectory(szFolder))
 			{
 				DWORD dwErr = GetLastError();

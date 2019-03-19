@@ -1942,7 +1942,17 @@ void CToDoListApp::CleanupAppFolder()
 	FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.csv")), 10602, TRUE);
 	FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.xml")), 177520, TRUE);
 
+	// Rename/move install instructions
+	CString sResources = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder());
+	FileMisc::DeleteFileBySize(sResources + _T("Install.txt"), 1795, TRUE);
+
+	CString sReadme = (sResources + _T("ReadMe\\"));
 	
+	if (FileMisc::DeleteFileBySize(sReadme + _T("Readme.Linux.txt"), 3260, TRUE))
+	{
+		// Intentionally use raw API call so it will fail if any files remain in the folder
+		RemoveDirectory(sReadme);
+	}
 /*
 	// remove old RTF to HTML converter
 	FileMisc::DeleteFile(sFolder + _T("Itenso.Rtf.Converter.Html.dll"), TRUE);
