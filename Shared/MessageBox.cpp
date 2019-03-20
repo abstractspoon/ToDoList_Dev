@@ -144,14 +144,20 @@ int CMessageBox::AfxShow(UINT nInstructionID, UINT nTextID, UINT nFlags)
 	return AfxShow(nInstructionID, CEnString(nTextID), nFlags);
 }
 
-int CMessageBox::AfxShow(const CString& sText, UINT nFlags)
+int CMessageBox::AfxShow(const CString& sMessage, UINT nFlags)
 {
+	CString sText, sInstruction(sMessage);
+
+	if (Misc::Split(sInstruction, sText, '|'))
+		return AfxShow(sInstruction, sText, nFlags);
+
+	// else
 	return AfxShow((LPCTSTR)NULL, sText, nFlags);
 }
 
 int CMessageBox::AfxShow(UINT nTextID, UINT nFlags)
 {
-	return AfxShow((LPCTSTR)NULL, CEnString(nTextID), nFlags);
+	return AfxShow(CEnString(nTextID), nFlags);
 }
 
 int CMessageBox::AfxShow(HWND hwndParent, const CString& sInstruction, const CString& sText, UINT nFlags)
