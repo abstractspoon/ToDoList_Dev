@@ -11669,8 +11669,8 @@ void CToDoListWnd::OnToolsAnalyseLoggedTime()
 	const CPreferencesDlg& userPrefs = Prefs();
 
 	CString sTaskFile(tdc.GetFilePath());
+	CTDLAnalyseLoggedTimeDlg dialog(sTaskFile, tdc.GetCustomAttributeDefs());
 
-	CTDLAnalyseLoggedTimeDlg dialog(sTaskFile);
 	BOOL bContinue = TRUE;
 
 	while (bContinue)

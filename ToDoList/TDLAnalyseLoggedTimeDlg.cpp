@@ -4,7 +4,9 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLAnalyseLoggedTimeDlg.h"
+#include "TDCStruct.h"
 #include "TaskTimeLog.h"
+#include "TDCCustomAttributeHelper.h"
 
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\enstring.h"
@@ -59,10 +61,10 @@ static int FindFormat(TDCTTL_FORMAT nFormat)
 // CTDLAnalyseLoggedTimeDlg dialog
 
 
-CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, CWnd* pParent /*=NULL*/)
+CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLAnalyseLoggedTimeDlg::IDD, _T("AnalyseLog"), pParent), 
-	m_sTaskFilePath(sTaskFile),
+	m_aCustomAttribDefs(aCustomAttribDefs),
 	m_dtFrom(COleDateTime::GetCurrentTime()),
 	m_dtTo(COleDateTime::GetCurrentTime()),
 	m_eOutputFile(FES_COMBOSTYLEBTN | FES_SAVEAS)
@@ -79,7 +81,25 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, CWn
 
 	m_bGroupBy = prefs.GetProfileInt(m_sPrefsKey, _T("GroupBy"), FALSE);
 	m_nGroupByAttrib = (TDC_ATTRIBUTE)prefs.GetProfileInt(m_sPrefsKey, _T("GroupByAttrib"), TDCA_NONE);
-	m_sGroupByCustomAttrib = prefs.GetProfileString(m_sPrefsKey, _T("GroupByCustomAttrib"));
+
+	if (CTDCCustomAttributeHelper::IsCustomAttribute(m_nGroupByAttrib))
+	{
+		int nCust = m_aCustomAttribDefs.Find(prefs.GetProfileString(m_sPrefsKey, _T("GroupByCustomAttrib")));
+
+		if (nCust == -1)
+		{
+			m_nGroupByAttrib = TDCA_NONE;
+		}
+		else
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
+
+			if (attribDef.IsList() && !attribDef.IsMultiList())
+				m_nGroupByAttrib = m_aCustomAttribDefs[nCust].GetAttributeID();
+			else
+				m_nGroupByAttrib = TDCA_NONE;
+		}
+	}
 
 	m_dtFrom = prefs.GetProfileDouble(m_sPrefsKey, _T("AnalysisFromDate"), COleDateTime::GetCurrentTime());
 	m_dtTo = prefs.GetProfileDouble(m_sPrefsKey, _T("AnalysisToDate"), COleDateTime::GetCurrentTime());
@@ -109,9 +129,7 @@ void CTDLAnalyseLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_BYTASK, (int&)m_nBreakdown);
 	DDX_Control(pDX, IDC_OUTPUTFILEPATH, m_eOutputFile);
 	DDX_Control(pDX, IDC_GROUPBYATTRIB, m_cbGroupByAttrib);
-	DDX_Control(pDX, IDC_GROUPBYCUSTOMATTRIB, m_cbGroupByCustomAttrib);
 	DDX_Check(pDX, IDC_GROUPBY, m_bGroupBy);
-	DDX_CBString(pDX, IDC_GROUPBYCUSTOMATTRIB, m_sGroupByCustomAttrib);
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -136,7 +154,6 @@ BEGIN_MESSAGE_MAP(CTDLAnalyseLoggedTimeDlg, CTDLDialog)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_ALLTASKS, OnChangePeriod)
 	ON_BN_CLICKED(IDC_GROUPBY, OnGroupBy)
-	ON_CBN_SELCHANGE(IDC_GROUPBYATTRIB, OnSelChangedGroupByAttribute)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -160,9 +177,22 @@ BOOL CTDLAnalyseLoggedTimeDlg::OnInitDialog()
 	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_TAGS,			TDCA_TAGS);
 	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_VERSION,		TDCA_VERSION);
 
-	if (CDialogHelper::SelectItemByData(m_cbGroupByAttrib, m_nGroupByAttrib) != CB_ERR)
-		OnSelChangedGroupByAttribute();
-	
+	// Add custom attributes
+	int nCust = m_aCustomAttribDefs.GetSize();
+
+	while (nCust--)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
+
+		if (attribDef.IsList() && !attribDef.IsMultiList())
+		{
+			CEnString sItem(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+			CDialogHelper::AddString(m_cbGroupByAttrib, sItem, attribDef.GetAttributeID());
+		}
+	}
+
+	CDialogHelper::SelectItemByData(m_cbGroupByAttrib, m_nGroupByAttrib);
+
 	// Build the 'output format' combo
 	int nFmt = NUM_FORMATS;
 
@@ -202,7 +232,12 @@ void CTDLAnalyseLoggedTimeDlg::OnOK()
 
 	prefs.WriteProfileInt(m_sPrefsKey, _T("GroupBy"), m_bGroupBy);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("GroupByAttrib"), m_nGroupByAttrib);
-	prefs.WriteProfileString(m_sPrefsKey, _T("GroupByCustomAttrib"), m_sGroupByCustomAttrib);
+
+	if (CTDCCustomAttributeHelper::IsCustomAttribute(m_nGroupByAttrib))
+	{
+		int nCust = (m_nGroupByAttrib - TDCA_CUSTOMATTRIB);
+		prefs.WriteProfileString(m_sPrefsKey, _T("GroupByCustomAttrib"), m_aCustomAttribDefs[nCust].sUniqueID);
+	}
 }
 
 void CTDLAnalyseLoggedTimeDlg::OnChangePeriod() 
@@ -310,24 +345,5 @@ void CTDLAnalyseLoggedTimeDlg::OnGroupBy()
 	UpdateData();
 
 	m_cbGroupByAttrib.EnableWindow(m_bGroupBy);
-	m_cbGroupByCustomAttrib.EnableWindow(m_bGroupBy && (m_nGroupByAttrib == TDCA_CUSTOMATTRIB));
 }
 
-void CTDLAnalyseLoggedTimeDlg::OnSelChangedGroupByAttribute()
-{
-	// One time initialisation of custom attribute combo
-	UpdateData();
-
-	BOOL bEnabled = (m_bGroupBy && (m_nGroupByAttrib == TDCA_CUSTOMATTRIB));
-
-	if (bEnabled && !m_cbGroupByCustomAttrib.GetCount() && !m_taskList.GetTaskCount())
-	{
-		ASSERT(m_cbGroupByCustomAttrib.GetCount() == 0);
-		VERIFY(m_taskList.Load(m_sTaskFilePath));
-
-		// TODO
-
-	}
-
-	m_cbGroupByCustomAttrib.EnableWindow(bEnabled);
-}

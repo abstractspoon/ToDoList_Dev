@@ -814,7 +814,6 @@
 #define IDC_TDLPROTOCOLHANDLER          1522
 #define IDC_GROUPBY                     1522
 #define IDC_GROUPBYATTRIB               1523
-#define IDC_GROUPBYCUSTOMATTRIB         1525
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
