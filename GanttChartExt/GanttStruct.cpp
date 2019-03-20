@@ -512,7 +512,9 @@ BOOL GANTTITEM::GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, 
 		}
 	}
 
-	return (CDateHelper::IsDateSet(dtStart) && CDateHelper::IsDateSet(dtDue));
+	return (CDateHelper::IsDateSet(dtStart) && 
+			CDateHelper::IsDateSet(dtDue) &&
+			(dtDue >= dtStart));
 }
 
 BOOL GANTTITEM::IsMilestone(const CString& sMilestoneTag) const
