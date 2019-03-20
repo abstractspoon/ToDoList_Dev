@@ -812,6 +812,9 @@
 #define IDC_TDLEXTENSIONHANDLER         1521
 #define IDC_SEARCH                      1521
 #define IDC_TDLPROTOCOLHANDLER          1522
+#define IDC_GROUPBY                     1522
+#define IDC_GROUPBYATTRIB               1523
+#define IDC_GROUPBYCUSTOMATTRIB         1525
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2232,7 +2235,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        314
 #define _APS_NEXT_COMMAND_VALUE         34618
-#define _APS_NEXT_CONTROL_VALUE         1522
+#define _APS_NEXT_CONTROL_VALUE         1526
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

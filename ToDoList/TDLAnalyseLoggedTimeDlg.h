@@ -8,6 +8,7 @@
 //
 
 #include "TDLDialog.h"
+#include "TaskFile.h"
 #include "tdcenum.h"
 
 #include "..\Shared\fileedit.h"
@@ -19,7 +20,7 @@ class CTDLAnalyseLoggedTimeDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLAnalyseLoggedTimeDlg(const CString& sLogPath, CWnd* pParent = NULL);   // standard constructor
+	CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, CWnd* pParent = NULL);   // standard constructor
 
 	TDCTTL_BREAKDOWN GetBreakdown() const { return m_nBreakdown; }
 	TDCTTL_PERIOD GetPeriod() const { return m_nTimePeriod; }
@@ -36,10 +37,17 @@ protected:
 	COleDateTime	m_dtTo;
 	CString	m_sOutputFilePath;
 	//}}AFX_DATA
+	CString	m_sTaskFilePath;
 	TDCTTL_FORMAT m_nOutputFormat;
 	TDCTTL_PERIOD m_nTimePeriod;
 	TDCTTL_BREAKDOWN m_nBreakdown;
 	CFileEdit m_eOutputFile;
+	CComboBox m_cbGroupByAttrib, m_cbGroupByCustomAttrib;
+	TDC_ATTRIBUTE m_nGroupByAttrib;
+	CString m_sGroupByCustomAttrib;
+	BOOL m_bGroupBy;
+
+	CTaskFile m_taskList;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -48,6 +56,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual void OnOK();
+	virtual BOOL OnInitDialog();
 
 // Implementation
 protected:
@@ -55,9 +64,10 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CTDLAnalyseLoggedTimeDlg)
 	afx_msg void OnChangePeriod();
-	virtual BOOL OnInitDialog();
 	afx_msg void OnSelchangeOutputFormat();
 	//}}AFX_MSG
+	afx_msg void OnGroupBy();
+	afx_msg void OnSelChangedGroupByAttribute();
 	DECLARE_MESSAGE_MAP()
 
 protected:

@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLAnalyseLoggedTimeDlg.h"
+#include "TaskTimeLog.h"
 
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\enstring.h"
@@ -58,10 +59,10 @@ static int FindFormat(TDCTTL_FORMAT nFormat)
 // CTDLAnalyseLoggedTimeDlg dialog
 
 
-CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sLogPath, CWnd* pParent /*=NULL*/)
+CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLAnalyseLoggedTimeDlg::IDD, _T("AnalyseLog"), pParent), 
-	m_sOutputFilePath(sLogPath),
+	m_sTaskFilePath(sTaskFile),
 	m_dtFrom(COleDateTime::GetCurrentTime()),
 	m_dtTo(COleDateTime::GetCurrentTime()),
 	m_eOutputFile(FES_COMBOSTYLEBTN | FES_SAVEAS)
@@ -74,7 +75,12 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sLogPath, CWnd
 
 	m_nTimePeriod = (TDCTTL_PERIOD)prefs.GetProfileInt(m_sPrefsKey, _T("AnalysisTimePeriod"), TTLP_THISMONTH);
 	m_nBreakdown = (TDCTTL_BREAKDOWN)prefs.GetProfileInt(m_sPrefsKey, _T("AnalysisBreakdown"), TTLB_BYDAY);
-	m_nOutputFormat = (TDCTTL_FORMAT)prefs.GetProfileInt(m_sPrefsKey, _T("preAnalysisOutputFormat"), TTLF_CSV);
+	m_nOutputFormat = (TDCTTL_FORMAT)prefs.GetProfileInt(m_sPrefsKey, _T("AnalysisOutputFormat"), TTLF_CSV);
+
+	m_bGroupBy = prefs.GetProfileInt(m_sPrefsKey, _T("GroupBy"), FALSE);
+	m_nGroupByAttrib = (TDC_ATTRIBUTE)prefs.GetProfileInt(m_sPrefsKey, _T("GroupByAttrib"), TDCA_NONE);
+	m_sGroupByCustomAttrib = prefs.GetProfileString(m_sPrefsKey, _T("GroupByCustomAttrib"));
+
 	m_dtFrom = prefs.GetProfileDouble(m_sPrefsKey, _T("AnalysisFromDate"), COleDateTime::GetCurrentTime());
 	m_dtTo = prefs.GetProfileDouble(m_sPrefsKey, _T("AnalysisToDate"), COleDateTime::GetCurrentTime());
 
@@ -82,6 +88,8 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sLogPath, CWnd
 
 	if (!sFolder.IsEmpty() && FileMisc::FolderExists(sFolder))
 		FileMisc::MakePath(m_sOutputFilePath, NULL, sFolder, FileMisc::GetFileNameFromPath(m_sOutputFilePath));
+
+	m_sOutputFilePath = CTDCTaskTimeLog(sTaskFile).GetLogPath();
 
 	FileMisc::RemoveExtension(m_sOutputFilePath);
 	m_sOutputFilePath += _T("_Report");
@@ -100,11 +108,21 @@ void CTDLAnalyseLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_TODAY, (int&)m_nTimePeriod);
 	DDX_Radio(pDX, IDC_BYTASK, (int&)m_nBreakdown);
 	DDX_Control(pDX, IDC_OUTPUTFILEPATH, m_eOutputFile);
+	DDX_Control(pDX, IDC_GROUPBYATTRIB, m_cbGroupByAttrib);
+	DDX_Control(pDX, IDC_GROUPBYCUSTOMATTRIB, m_cbGroupByCustomAttrib);
+	DDX_Check(pDX, IDC_GROUPBY, m_bGroupBy);
+	DDX_CBString(pDX, IDC_GROUPBYCUSTOMATTRIB, m_sGroupByCustomAttrib);
 
 	if (pDX->m_bSaveAndValidate)
+	{
 		m_nOutputFormat = (TDCTTL_FORMAT)GetSelectedItemData(m_cbOutputFormat);
+		m_nGroupByAttrib = (TDC_ATTRIBUTE)GetSelectedItemData(m_cbGroupByAttrib);
+	}
 	else
+	{
 		SelectItemByData(m_cbOutputFormat, m_nOutputFormat);
+		SelectItemByData(m_cbGroupByAttrib, m_nGroupByAttrib);
+	}
 }
 
 BEGIN_MESSAGE_MAP(CTDLAnalyseLoggedTimeDlg, CTDLDialog)
@@ -116,6 +134,9 @@ BEGIN_MESSAGE_MAP(CTDLAnalyseLoggedTimeDlg, CTDLDialog)
 	ON_BN_CLICKED(IDC_THISMONTH, OnChangePeriod)
 	ON_BN_CLICKED(IDC_DATERANGE, OnChangePeriod)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_ALLTASKS, OnChangePeriod)
+	ON_BN_CLICKED(IDC_GROUPBY, OnGroupBy)
+	ON_CBN_SELCHANGE(IDC_GROUPBYATTRIB, OnSelChangedGroupByAttribute)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -125,7 +146,24 @@ BOOL CTDLAnalyseLoggedTimeDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	// we build the output format combo ourselves
+	// Build the 'Group by' attribute combo
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_ALLOCBY,		TDCA_ALLOCBY);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_ALLOCTO,		TDCA_ALLOCTO);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_CATEGORY,		TDCA_CATEGORY);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_CREATEDBY,	TDCA_CREATEDBY);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_CSV_CUSTOMATTRIB,	TDCA_CUSTOMATTRIB);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_EXTERNALID,	TDCA_EXTERNALID);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_LASTMODBY,	TDCA_LASTMODBY);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_PRIORITY,		TDCA_PRIORITY);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_RISK,			TDCA_RISK);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_STATUS,		TDCA_STATUS);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_TAGS,			TDCA_TAGS);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_VERSION,		TDCA_VERSION);
+
+	if (CDialogHelper::SelectItemByData(m_cbGroupByAttrib, m_nGroupByAttrib) != CB_ERR)
+		OnSelChangedGroupByAttribute();
+	
+	// Build the 'output format' combo
 	int nFmt = NUM_FORMATS;
 
 	while (nFmt--)
@@ -135,17 +173,14 @@ BOOL CTDLAnalyseLoggedTimeDlg::OnInitDialog()
 
 		int nIndex = m_cbOutputFormat.AddString(sFormat);
 		m_cbOutputFormat.SetItemData(nIndex, FORMAT_TYPES[nFmt].nFormat);
-
-		// handle selected format
-		if (FORMAT_TYPES[nFmt].nFormat == m_nOutputFormat)
-		{
-			m_cbOutputFormat.SetCurSel(nIndex);
-			OnSelchangeOutputFormat();
-		}
 	}
 
-	// enable/disable breakdowns
+	if (CDialogHelper::SelectItemByData(m_cbOutputFormat, m_nOutputFormat) != CB_ERR)
+		OnSelchangeOutputFormat();
+
+	// enable/disable controls
 	OnChangePeriod();
+	OnGroupBy();
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -164,6 +199,10 @@ void CTDLAnalyseLoggedTimeDlg::OnOK()
 	prefs.WriteProfileDouble(m_sPrefsKey, _T("AnalysisFromDate"), m_dtFrom);
 	prefs.WriteProfileDouble(m_sPrefsKey, _T("AnalysisToDate"), m_dtTo);
 	prefs.WriteProfileString(m_sPrefsKey, _T("AnalysisFolder"), FileMisc::GetFolderFromFilePath(m_sOutputFilePath));
+
+	prefs.WriteProfileInt(m_sPrefsKey, _T("GroupBy"), m_bGroupBy);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("GroupByAttrib"), m_nGroupByAttrib);
+	prefs.WriteProfileString(m_sPrefsKey, _T("GroupByCustomAttrib"), m_sGroupByCustomAttrib);
 }
 
 void CTDLAnalyseLoggedTimeDlg::OnChangePeriod() 
@@ -264,4 +303,31 @@ BOOL CTDLAnalyseLoggedTimeDlg::GetDateRange(COleDateTime& dtFrom, COleDateTime& 
 	}
 
 	return (dtTo > dtFrom);
+}
+
+void CTDLAnalyseLoggedTimeDlg::OnGroupBy()
+{
+	UpdateData();
+
+	m_cbGroupByAttrib.EnableWindow(m_bGroupBy);
+	m_cbGroupByCustomAttrib.EnableWindow(m_bGroupBy && (m_nGroupByAttrib == TDCA_CUSTOMATTRIB));
+}
+
+void CTDLAnalyseLoggedTimeDlg::OnSelChangedGroupByAttribute()
+{
+	// One time initialisation of custom attribute combo
+	UpdateData();
+
+	BOOL bEnabled = (m_bGroupBy && (m_nGroupByAttrib == TDCA_CUSTOMATTRIB));
+
+	if (bEnabled && !m_cbGroupByCustomAttrib.GetCount() && !m_taskList.GetTaskCount())
+	{
+		ASSERT(m_cbGroupByCustomAttrib.GetCount() == 0);
+		VERIFY(m_taskList.Load(m_sTaskFilePath));
+
+		// TODO
+
+	}
+
+	m_cbGroupByCustomAttrib.EnableWindow(bEnabled);
 }
