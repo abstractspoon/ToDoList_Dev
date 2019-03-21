@@ -1741,6 +1741,7 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_TITLERECT nArea, CRec
 		if (GetItemTitleRect(hti, TDCTR_LABEL, rect)) // recursive call
 		{
 			rect.top--;
+			rect.left += TITLE_PADDING;
 			
 			// return in screen coords
 			m_tcTasks.ClientToScreen(rect);
