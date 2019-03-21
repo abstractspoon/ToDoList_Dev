@@ -75,6 +75,7 @@ protected:
 
 	int BuildLogItemArray();
 	int BuildGroupByMapping(TDC_ATTRIBUTE nGroupBy);
+	int BuildSortedIDList(const CMapIDToTime& mapDates, CDWordArray& aIDs) const;
 
 	BOOL AnalyseByTask(const COleDateTime& dtFrom, 
 						const COleDateTime& dtTo,
@@ -109,7 +110,6 @@ protected:
 	static BOOL IsSamePeriod(const COleDateTime& date1, const COleDateTime& date2, TDCTTL_BREAKDOWN nBreakdown);
 	static void AppendLogItemToMap(const TASKTIMELOGITEM& li, CMapIDToTime& mapIDs);
 	static CString FormatPeriod(double dDay, TDCTTL_BREAKDOWN nBreakdown);
-	static int BuildSortedIDList(const CMapIDToTime& mapDates, CDWordArray& aIDs);
 	static int BuildGroupByMapping(const CTaskFile& tasks, HTASKITEM hTask, TDC_ATTRIBUTE nGroupBy, const CString& sCustGroupByAttrib, CMap<DWORD, DWORD, CString, LPCTSTR>& mapGroupBy);
 };
 

@@ -48,6 +48,36 @@ SFE_FORMAT GetCsvFileFormat()
 }
 
 //////////////////////////////////////////////////////////////////////
+
+struct LOGSORTITEM
+{
+	DWORD dwTaskID;
+	CString sGroupBy;
+};
+
+int LogSortProc(const void* pV1, const void* pV2)
+{
+	const LOGSORTITEM* pLI1 = (LOGSORTITEM*)pV1;
+	const LOGSORTITEM* pLI2 = (LOGSORTITEM*)pV2;
+
+	// Sort by group then by ID
+	int nCompare = Misc::NaturalCompare(pLI1->sGroupBy, pLI2->sGroupBy);
+
+	if (nCompare != 0)
+		return nCompare;
+
+	// else
+	if (pLI1->dwTaskID < pLI2->dwTaskID)
+		return -1;
+
+	if (pLI1->dwTaskID > pLI2->dwTaskID)
+		return 1;
+
+	// else
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -844,29 +874,41 @@ void CTDCTaskTimeLogAnalysis::AppendLogItemToMap(const TASKTIMELOGITEM& li, CMap
 	mapIDs[li.dwTaskID] = (dTime + li.dHours);
 }
 
-int CTDCTaskTimeLogAnalysis::BuildSortedIDList(const CMapIDToTime& mapIDs, CDWordArray& aIDs)
+int CTDCTaskTimeLogAnalysis::BuildSortedIDList(const CMapIDToTime& mapIDs, CDWordArray& aIDs) const
 {
 	aIDs.RemoveAll();
 
 	if (mapIDs.GetCount())
 	{
-		aIDs.SetSize(mapIDs.GetCount());
+		// Build intermediate array of items for sorting
+		CArray<LOGSORTITEM, LOGSORTITEM&> aSortItems;
+		aSortItems.SetSize(mapIDs.GetCount());
 
 		POSITION pos = mapIDs.GetStartPosition();
 		int nItem = 0;
+
+		DWORD dwTaskID = 0;
+		double dUnused = 0;
 		
 		while (pos)
 		{
-			DWORD dwTaskID = 0;
-			double dTime = 0;
-			
-			mapIDs.GetNextAssoc(pos, dwTaskID, dTime);
+			mapIDs.GetNextAssoc(pos, dwTaskID, dUnused);
 			ASSERT(dwTaskID > 0);
 			
-			aIDs[nItem++] = dwTaskID;
+			LOGSORTITEM& li = aSortItems[nItem++];
+
+			li.dwTaskID = dwTaskID;
+			m_mapIDtoGroupBy.Lookup(dwTaskID, li.sGroupBy);
 		}
 
-		Misc::SortArray(aIDs);
+		// Sort and convert to simple ID array
+		Misc::SortArrayT(aSortItems, LogSortProc);
+
+		aIDs.SetSize(mapIDs.GetCount());
+		nItem = aIDs.GetSize();
+
+		while (nItem--)
+			aIDs[nItem] = aSortItems.GetData()[nItem].dwTaskID;
 	}
 
 	return aIDs.GetSize();

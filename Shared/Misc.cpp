@@ -2149,8 +2149,8 @@ int Misc::NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBe
 // private string compare function
 int StringSortProc(const void* v1, const void* v2)
 {
-	CString* pStr1 = (CString*)v1;
-	CString* pStr2 = (CString*)v2;
+	const CString* pStr1 = (CString*)v1;
+	const CString* pStr2 = (CString*)v2;
 
 	return Misc::NaturalCompare(*pStr1, *pStr2);
 }
@@ -2165,13 +2165,13 @@ void Misc::SortArray(CStringArray& array, SORTPROC pSortProc)
 // private dword compare function
 int DWordSortProc(const void* v1, const void* v2)
 {
-	DWORD* pDW1 = (DWORD*)v1;
-	DWORD* pDW2 = (DWORD*)v2;
+	const DWORD* pDW1 = (DWORD*)v1;
+	const DWORD* pDW2 = (DWORD*)v2;
 
 	if (*pDW1 < *pDW2)
 		return -1;
 	
-	else if (*pDW1 > *pDW2)
+	if (*pDW1 > *pDW2)
 		return 1;
 
 	// else
