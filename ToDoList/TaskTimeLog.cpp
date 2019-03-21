@@ -643,6 +643,7 @@ CTDCTaskTimeLogAnalysis::~CTDCTaskTimeLogAnalysis()
 BOOL CTDCTaskTimeLogAnalysis::AnalyseTaskLog(const COleDateTime& dtFrom, 
 											const COleDateTime& dtTo,
 											TDCTTL_BREAKDOWN nBreakdown,
+											TDC_ATTRIBUTE nGroupBy,
 											TDCTTL_FORMAT nFormat,
 											LPCTSTR szOutputFile)
 {
@@ -656,7 +657,7 @@ BOOL CTDCTaskTimeLogAnalysis::AnalyseTaskLog(const COleDateTime& dtFrom,
 			CMapIDToTime mapIDs;
 
 			if (AnalyseByTask(dtFrom, dtTo, mapIDs))
-				return OutputAnalysis(mapIDs, nFormat, szOutputFile);
+				return OutputAnalysis(mapIDs, nGroupBy, nFormat, szOutputFile);
 		}
 		break;
 
@@ -669,7 +670,7 @@ BOOL CTDCTaskTimeLogAnalysis::AnalyseTaskLog(const COleDateTime& dtFrom,
 			if (AnalyseByDate(dtFrom, dtTo, aPeriods))
 			{
 				if (BreakdownDateAnalysis(aPeriods, nBreakdown))
-					return OutputAnalysis(aPeriods, nBreakdown, nFormat, szOutputFile);
+					return OutputAnalysis(aPeriods, nBreakdown, nGroupBy, nFormat, szOutputFile);
 			}
 		}
 		break;
@@ -799,6 +800,7 @@ CString CTDCTaskTimeLogAnalysis::FormatCsvRow(DWORD dwTaskID, const CString& sTa
 }
 
 BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTime& mapIDs,
+											TDC_ATTRIBUTE nGroupBy,
 											TDCTTL_FORMAT nFormat,
 											LPCTSTR szOutputFile) const
 {
@@ -1027,6 +1029,7 @@ CString CTDCTaskTimeLogAnalysis::BuildCsvHeader(BOOL bBreakdownByPeriod) const
 
 BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTimeAndPeriodArray& aPeriods,
 											TDCTTL_BREAKDOWN nBreakdown,
+											TDC_ATTRIBUTE nGroupBy,
 											TDCTTL_FORMAT nFormat,
 											LPCTSTR szOutputFile) const
 {

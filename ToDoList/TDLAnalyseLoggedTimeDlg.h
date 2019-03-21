@@ -25,6 +25,8 @@ public:
 	TDCTTL_BREAKDOWN GetBreakdown() const { return m_nBreakdown; }
 	TDCTTL_PERIOD GetPeriod() const { return m_nTimePeriod; }
 	TDCTTL_FORMAT GetOutputFormat() const { return m_nOutputFormat; }
+	TDC_ATTRIBUTE GetGroupBy() const { return m_nGroupByAttrib; }
+
 	CString GetOutputFilepath() const { return m_sOutputFilePath; }
 	BOOL GetDateRange(COleDateTime& dtFrom, COleDateTime& dtTo) const;
 
@@ -32,18 +34,20 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLAnalyseLoggedTimeDlg)
 	enum { IDD = IDD_ANALYSELOGGEDTIME_DIALOG };
-	CComboBox	m_cbOutputFormat;
-	COleDateTime	m_dtFrom;
-	COleDateTime	m_dtTo;
-	CString	m_sOutputFilePath;
 	//}}AFX_DATA
 	TDCTTL_FORMAT m_nOutputFormat;
 	TDCTTL_PERIOD m_nTimePeriod;
 	TDCTTL_BREAKDOWN m_nBreakdown;
+	TDC_ATTRIBUTE m_nGroupByAttrib;
+
+	BOOL m_bGroupBy;
+	COleDateTime m_dtFrom;
+	COleDateTime m_dtTo;
+	CString	m_sOutputFilePath;
+
 	CFileEdit m_eOutputFile;
 	CComboBox m_cbGroupByAttrib;
-	TDC_ATTRIBUTE m_nGroupByAttrib;
-	BOOL m_bGroupBy;
+	CComboBox	m_cbOutputFormat;
 
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 

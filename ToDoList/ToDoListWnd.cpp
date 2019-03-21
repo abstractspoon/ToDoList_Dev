@@ -11693,6 +11693,7 @@ void CToDoListWnd::OnToolsAnalyseLoggedTime()
 				
 				if (ttla.AnalyseTaskLog(dtFrom, dtTo, 
 										dialog.GetBreakdown(), 
+										dialog.GetGroupBy(),
 										dialog.GetOutputFormat(), 
 										dialog.GetOutputFilepath()))
 				{

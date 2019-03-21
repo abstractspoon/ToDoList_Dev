@@ -271,11 +271,16 @@ namespace Misc
 		return TRUE;
 	}
 	
-	typedef int (*STRINGSORTPROC)(const void* pStr1, const void* pStr2);
-	void SortArray(CStringArray& array, STRINGSORTPROC pSortProc = NULL);
+	typedef int (*SORTPROC)(const void* pStr1, const void* pStr2);
 
-	typedef int (*DWORDSORTPROC)(const void* pDW1, const void* pDW2);
-	void SortArray(CDWordArray& array, DWORDSORTPROC pSortProc = NULL);
+	void SortArray(CStringArray& array, SORTPROC pSortProc = NULL);
+	void SortArray(CDWordArray& array, SORTPROC pSortProc = NULL);
+
+	template <class T> 
+	void SortArrayT(CArray<T, T&>& array, SORTPROC pSortProc)
+	{
+		qsort(array.GetData(), array.GetSize(), sizeof(T), pSortProc);
+	}
 
 	void Copy(const CMapStringToString& mapSrc, CMapStringToString& mapDest);
 	BOOL MatchAll(const CMapStringToString& map1, const CMapStringToString& map2);

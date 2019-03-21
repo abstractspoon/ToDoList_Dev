@@ -88,22 +88,10 @@ public:
 	BOOL AnalyseTaskLog(const COleDateTime& dtFrom, 
 						const COleDateTime& dtTo,
 						TDCTTL_BREAKDOWN nBreakdown,
+						TDC_ATTRIBUTE nGroupBy,
 						TDCTTL_FORMAT nFormat,
 						LPCTSTR szOutputFile);
 
-	typedef CMap<DWORD, DWORD, double, double&> CMapIDToTime;
-	
-	class CMapIDToTimeAndPeriod : public CMapIDToTime
-	{
-	public:
-		CMapIDToTimeAndPeriod(double dPeriod = 0.0);
-
-		BOOL IsValid() const;
-		
-	public:
-		COleDateTime dtPeriod;
-	};
-	
 protected:
 	CString m_sTasklist;
 	BOOL m_bLogTaskTimeSeparately;
@@ -112,6 +100,8 @@ protected:
 	CString m_sCsvDelim;
 
 protected:
+	typedef CMap<DWORD, DWORD, double, double&> CMapIDToTime;
+	
 	int BuildLogItemArray();
 	const TASKTIMELOGITEM& GetReferenceLogItem(DWORD dwTaskID) const;
 	const TASKTIMELOGITEM& GetLogItem(int nIndex) const;
@@ -121,8 +111,22 @@ protected:
 						CMapIDToTime& mapIDs) const;
 
 	BOOL OutputAnalysis(const CMapIDToTime& mapIDs,
+						TDC_ATTRIBUTE nGroupBy,
 						TDCTTL_FORMAT nFormat,
 						LPCTSTR szOutputFile) const;
+
+	// ------------------------------------------------------------------------------
+
+	class CMapIDToTimeAndPeriod : public CMapIDToTime
+	{
+	public:
+		CMapIDToTimeAndPeriod(double dPeriod = 0.0);
+
+		BOOL IsValid() const;
+
+	public:
+		COleDateTime dtPeriod;
+	};
 
 	class CMapIDToTimeAndPeriodArray : public CArray<CMapIDToTimeAndPeriod*, CMapIDToTimeAndPeriod*&>
 	{
@@ -139,6 +143,8 @@ protected:
 		static int SortProc(const void* ppPeriod1, const void* ppPeriod2);
 	};
 
+	// ------------------------------------------------------------------------------
+
 	BOOL AnalyseByDate(const COleDateTime& dtFrom, 
 						const COleDateTime& dtTo,
 						CMapIDToTimeAndPeriodArray& aPeriods) const;
@@ -147,6 +153,7 @@ protected:
 
 	BOOL OutputAnalysis(const CMapIDToTimeAndPeriodArray& aPeriods,
 						TDCTTL_BREAKDOWN nBreakdown,
+						TDC_ATTRIBUTE nGroupBy,
 						TDCTTL_FORMAT nFormat,
 						LPCTSTR szOutputFile) const;
 

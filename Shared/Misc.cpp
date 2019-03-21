@@ -2155,7 +2155,7 @@ int StringSortProc(const void* v1, const void* v2)
 	return Misc::NaturalCompare(*pStr1, *pStr2);
 }
 
-void Misc::SortArray(CStringArray& array, STRINGSORTPROC pSortProc)
+void Misc::SortArray(CStringArray& array, SORTPROC pSortProc)
 {
 	qsort(array.GetData(), array.GetSize(), sizeof(CString*), pSortProc ? pSortProc : StringSortProc);
 }
@@ -2178,7 +2178,7 @@ int DWordSortProc(const void* v1, const void* v2)
 	return 0;
 }
 
-void Misc::SortArray(CDWordArray& array, DWORDSORTPROC pSortProc)
+void Misc::SortArray(CDWordArray& array, SORTPROC pSortProc)
 {
 	qsort(array.GetData(), array.GetSize(), sizeof(DWORD*), pSortProc ? pSortProc : DWordSortProc);
 }
