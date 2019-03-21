@@ -5,7 +5,7 @@
 #include "resource.h"
 #include "ToDoCtrlMgr.h"
 #include "tdstringres.h"
-#include "tasktimelog.h"
+#include "TDCTasktimelog.h"
 #include "TDLContentMgr.h"
 
 #include "..\shared\holdredraw.h"

@@ -1034,8 +1034,25 @@ public:
 	{
 		ASSERT(!sAttribID.IsEmpty());
 
-		if (sAttribID.IsEmpty())
-			return -1;
+		if (!sAttribID.IsEmpty())
+		{
+			int nAttrib = GetSize();
+
+			while (nAttrib--)
+			{
+				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
+
+				if ((nAttrib != nIgnore) && (attribDef.sUniqueID.CompareNoCase(sAttribID) == 0))
+					return nAttrib;
+			}
+		}
+
+		return -1;
+	}
+
+	int Find(TDC_ATTRIBUTE nAttribID, int nIgnore = -1) const
+	{
+		ASSERT(nAttribID != TDCA_NONE);
 
 		int nAttrib = GetSize();
 
@@ -1043,7 +1060,7 @@ public:
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
 
-			if ((nAttrib != nIgnore) && (attribDef.sUniqueID.CompareNoCase(sAttribID) == 0))
+			if ((nAttrib != nIgnore) && (attribDef.GetAttributeID() == nAttribID))
 				return nAttrib;
 		}
 

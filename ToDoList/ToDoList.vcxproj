@@ -295,10 +295,6 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="TaskTimeLog.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="TDCAnonymizeTasklist.cpp" />
     <ClCompile Include="TDCCustomAttribData.cpp" />
     <ClCompile Include="TDCCustomAttributeHelper.cpp">
@@ -333,6 +329,8 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="TDCTaskTimeLog.cpp" />
+    <ClCompile Include="TDCTaskTimeLogAnalysis.cpp" />
     <ClCompile Include="TDCTimeTracking.cpp" />
     <ClCompile Include="TDCToDoCtrlPreferenceHelper.cpp" />
     <ClCompile Include="TDCToolsCmdlineParser.cpp" />
@@ -625,7 +623,6 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TaskListTdlImporter.h" />
     <ClInclude Include="TaskListTxtExporter.h" />
     <ClInclude Include="TaskSelectionDlg.h" />
-    <ClInclude Include="TaskTimeLog.h" />
     <ClInclude Include="TDCAnonymizeTasklist.h" />
     <ClInclude Include="tdccustomattribdata.h" />
     <ClInclude Include="TDCCustomAttributeHelper.h" />
@@ -649,6 +646,8 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="tdcstatic.h" />
     <ClInclude Include="tdcstruct.h" />
     <ClInclude Include="tdcswitch.h" />
+    <ClInclude Include="TDCTaskTimeLog.h" />
+    <ClInclude Include="TDCTaskTimeLogAnalysis.h" />
     <ClInclude Include="TDCTimeTracking.h" />
     <ClInclude Include="TDCToDoCtrlPreferenceHelper.h" />
     <ClInclude Include="TDCToolsCmdlineParser.h" />

@@ -5,7 +5,7 @@
 #include "resource.h"
 #include "TDLAnalyseLoggedTimeDlg.h"
 #include "TDCStruct.h"
-#include "TaskTimeLog.h"
+#include "TDCTaskTimeLog.h"
 #include "TDCCustomAttributeHelper.h"
 
 #include "..\Shared\DialogHelper.h"

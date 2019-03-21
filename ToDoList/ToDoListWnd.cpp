@@ -30,7 +30,7 @@
 #include "tdlwelcomewizard.h"
 #include "tdlpastefromclipboarddlg.h"
 #include "tdlanalyseloggedtimedlg.h"
-#include "tasktimelog.h"
+#include "TDCTaskTimeLogAnalysis.h"
 #include "TDLAboutDlg.h"
 #include "TDCWebUpdateScript.h"
 #include "TDCToDoCtrlPreferenceHelper.h"
@@ -11667,9 +11667,10 @@ void CToDoListWnd::OnToolsAnalyseLoggedTime()
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	const CPreferencesDlg& userPrefs = Prefs();
+	const CTDCCustomAttribDefinitionArray& aCustAttribDefs = tdc.GetCustomAttributeDefs();
 
 	CString sTaskFile(tdc.GetFilePath());
-	CTDLAnalyseLoggedTimeDlg dialog(sTaskFile, tdc.GetCustomAttributeDefs());
+	CTDLAnalyseLoggedTimeDlg dialog(sTaskFile, aCustAttribDefs);
 
 	BOOL bContinue = TRUE;
 
@@ -11689,7 +11690,7 @@ void CToDoListWnd::OnToolsAnalyseLoggedTime()
 				SetLastError(0);
 				
 				// else do the analysis
-				CTDCTaskTimeLogAnalysis ttla(sTaskFile, userPrefs.GetLogTaskTimeSeparately());
+				CTDCTaskTimeLogAnalysis ttla(sTaskFile, aCustAttribDefs, userPrefs.GetLogTaskTimeSeparately());
 				
 				if (ttla.AnalyseTaskLog(dtFrom, dtTo, 
 										dialog.GetBreakdown(), 

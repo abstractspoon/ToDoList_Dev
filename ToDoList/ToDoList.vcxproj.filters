@@ -91,9 +91,6 @@
     <ClCompile Include="TaskSelectionDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TaskTimeLog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TDCAnonymizeTasklist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -403,6 +400,12 @@
     <ClCompile Include="TDCFindReplace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDCTaskTimeLog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCTaskTimeLogAnalysis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FilteredToDoCtrl.h">
@@ -502,9 +505,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TaskSelectionDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TaskTimeLog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCAnonymizeTasklist.h">
@@ -838,6 +838,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tdcsort.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCTaskTimeLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCTaskTimeLogAnalysis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

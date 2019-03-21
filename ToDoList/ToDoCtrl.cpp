@@ -9,7 +9,7 @@
 #include "tdcmapping.h"
 #include "tdstringres.h"
 #include "resource.h"
-#include "tasktimelog.h"
+#include "TDCtasktimelog.h"
 #include "todoitem.h"
 #include "tdcstatic.h"
 #include "tdcenum.h"

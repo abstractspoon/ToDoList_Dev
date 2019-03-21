@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_TASKTIMELOG_H__6C9F21CD_509E_4890_9B28_F8C6E52FF54B__INCLUDED_)
-#define AFX_TASKTIMELOG_H__6C9F21CD_509E_4890_9B28_F8C6E52FF54B__INCLUDED_
+#if !defined(AFX_TASKTIMELOGANALYSIS_H__6C9F21CD_509E_4890_9B28_F8C6E52FF54B__INCLUDED_)
+#define AFX_TASKTIMELOGANALYSIS_H__6C9F21CD_509E_4890_9B28_F8C6E52FF54B__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -11,78 +11,15 @@
 
 #pragma warning(disable: 4786)
 
-#include "tdcenum.h"
-
-#include "..\3rdParty\stdiofileex.h"
-
-/////////////////////////////////////////////////////////////////////////////
-
-struct TASKTIMELOGITEM
-{
-	TASKTIMELOGITEM();
-	
-	BOOL IsValidToAnalyse() const;
-	BOOL IsValidToLog() const;
-	void Reset();
-
-	CString FormatRow(int nRowVer, const CString& sDelim) const;
-	BOOL ParseRow(const CString& sRow, const CString& sDelim);
-
-	static BOOL GetRowVersion(int nNumFields);
-	static CString GetRowFormat(int nRowVer, const CString& sDelim);
-	
-	DWORD dwTaskID;
-	COleDateTime dtFrom, dtTo;
-	double dHours;
-	CString sTaskTitle;
-	CString sComment;
-	CString sPerson;
-	CString sPath;
-	BOOL bTracked;
-};
-typedef CArray<TASKTIMELOGITEM, TASKTIMELOGITEM&> CTaskTimeLogItemArray;
-
-/////////////////////////////////////////////////////////////////////////////
-
-class CTDCTaskTimeLog  
-{
-public:
-	CTDCTaskTimeLog(LPCTSTR szRefPath, SFE_FORMAT nFormat = SFEF_AUTODETECT);
-	virtual ~CTDCTaskTimeLog();
-
-	BOOL LogTime(const TASKTIMELOGITEM& li, BOOL bLogSeparately);
- 	BOOL LogTime(DWORD dwTaskID, LPCTSTR szTaskTitle, LPCTSTR szTaskPath, double dHours, const COleDateTime& dtWhen, 
- 				const CString& sComment, BOOL bTracked, BOOL bLogSeparately); 
-
-	CString GetLogPath() const;
-	CString GetLogPath(DWORD dwTaskID, BOOL bLogSeparately) const;
-	const CString& GetDelimiter() const  { return m_sDelim; }
-	
-	// static helper to reduce copying when building
-	// a single list from multiple log files
-	static int ReadLogItems(const CString& sLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sDelim);
-
-protected:
-	CString m_sRefPath;
-	SFE_FORMAT m_nFormat;
-	int m_nVersion;
-	BOOL m_bLogExists;
-	CString m_sDelim;
-
-protected: 
-	CTDCTaskTimeLog();
-	void Initialise(const CString& sLogPath);
-
-	CString GetLatestColumnHeader() const;
-	double CalcAccumulatedTime(DWORD dwTaskID, BOOL bLogSeparately); // returns time in hours
-};
+#include "tdcstruct.h"
+#include "TDCTaskTimeLog.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
 class CTDCTaskTimeLogAnalysis
 {
 public:
-	CTDCTaskTimeLogAnalysis(const CString& sTaskList, BOOL bLogTaskTimeSeparately);
+	CTDCTaskTimeLogAnalysis(const CString& sTaskList, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, BOOL bLogTaskTimeSeparately);
 	~CTDCTaskTimeLogAnalysis();
 
 	BOOL AnalyseTaskLog(const COleDateTime& dtFrom, 
@@ -93,12 +30,16 @@ public:
 						LPCTSTR szOutputFile);
 
 protected:
-	CString m_sTasklist;
+	CString m_sTaskFile;
 	BOOL m_bLogTaskTimeSeparately;
-	CTaskTimeLogItemArray m_aLogItems;
-	CMap<DWORD, DWORD, int, int&> m_mapIDtoRefLogItem;
 	CString m_sCsvDelim;
 
+	CTaskTimeLogItemArray m_aLogItems;
+	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
+
+	CMap<DWORD, DWORD, int, int&> m_mapIDtoRefLogItem;
+	CMap<DWORD, DWORD, CString, LPCTSTR> m_mapIDtoGroupBy;
+	
 protected:
 	typedef CMap<DWORD, DWORD, double, double&> CMapIDToTime;
 	
@@ -133,6 +74,7 @@ protected:
 	// ------------------------------------------------------------------------------
 
 	int BuildLogItemArray();
+	int BuildGroupByMapping(TDC_ATTRIBUTE nGroupBy);
 
 	BOOL AnalyseByTask(const COleDateTime& dtFrom, 
 						const COleDateTime& dtTo,
@@ -168,9 +110,10 @@ protected:
 	static void AppendLogItemToMap(const TASKTIMELOGITEM& li, CMapIDToTime& mapIDs);
 	static CString FormatPeriod(double dDay, TDCTTL_BREAKDOWN nBreakdown);
 	static int BuildSortedIDList(const CMapIDToTime& mapDates, CDWordArray& aIDs);
+	static int BuildGroupByMapping(const CTaskFile& tasks, HTASKITEM hTask, TDC_ATTRIBUTE nGroupBy, const CString& sCustGroupByAttrib, CMap<DWORD, DWORD, CString, LPCTSTR>& mapGroupBy);
 };
 
 
 /////////////////////////////////////////////////////////////////////////////
 
-#endif // !defined(AFX_TASKTIMELOG_H__6C9F21CD_509E_4890_9B28_F8C6E52FF54B__INCLUDED_)
+#endif // !defined(AFX_TASKTIMELOGANALYSIS_H__6C9F21CD_509E_4890_9B28_F8C6E52FF54B__INCLUDED_)
