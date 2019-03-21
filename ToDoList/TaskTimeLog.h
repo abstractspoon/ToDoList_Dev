@@ -102,19 +102,6 @@ protected:
 protected:
 	typedef CMap<DWORD, DWORD, double, double&> CMapIDToTime;
 	
-	int BuildLogItemArray();
-	const TASKTIMELOGITEM& GetReferenceLogItem(DWORD dwTaskID) const;
-	const TASKTIMELOGITEM& GetLogItem(int nIndex) const;
-
-	BOOL AnalyseByTask(const COleDateTime& dtFrom, 
-						const COleDateTime& dtTo,
-						CMapIDToTime& mapIDs) const;
-
-	BOOL OutputAnalysis(const CMapIDToTime& mapIDs,
-						TDC_ATTRIBUTE nGroupBy,
-						TDCTTL_FORMAT nFormat,
-						LPCTSTR szOutputFile) const;
-
 	// ------------------------------------------------------------------------------
 
 	class CMapIDToTimeAndPeriod : public CMapIDToTime
@@ -145,11 +132,22 @@ protected:
 
 	// ------------------------------------------------------------------------------
 
+	int BuildLogItemArray();
+
+	BOOL AnalyseByTask(const COleDateTime& dtFrom, 
+						const COleDateTime& dtTo,
+						CMapIDToTime& mapIDs) const;
+
 	BOOL AnalyseByDate(const COleDateTime& dtFrom, 
 						const COleDateTime& dtTo,
 						CMapIDToTimeAndPeriodArray& aPeriods) const;
 
 	BOOL BreakdownDateAnalysis(CMapIDToTimeAndPeriodArray& aPeriods, TDCTTL_BREAKDOWN nBreakdown) const;
+
+	BOOL OutputAnalysis(const CMapIDToTime& mapIDs,
+						TDC_ATTRIBUTE nGroupBy,
+						TDCTTL_FORMAT nFormat,
+						LPCTSTR szOutputFile) const;
 
 	BOOL OutputAnalysis(const CMapIDToTimeAndPeriodArray& aPeriods,
 						TDCTTL_BREAKDOWN nBreakdown,
@@ -160,6 +158,9 @@ protected:
 	CString BuildCsvHeader(BOOL bBreakdownByPeriod) const;
 	CString FormatCsvRow(DWORD dwTaskID, const CString& sTaskTitle, double dTime, 
 						const CString& sPath, const CString& sPeriod = _T("")) const;
+
+	const TASKTIMELOGITEM& GetReferenceLogItem(DWORD dwTaskID) const;
+	const TASKTIMELOGITEM& GetLogItem(int nIndex) const;
 
 	static void Merge(const CMapIDToTime& mapFrom, CMapIDToTime& mapTo); 
 	static BOOL GetMinMaxDates(const CMapIDToTimeAndPeriodArray& aPeriods, double& dStart, double& dEnd);
