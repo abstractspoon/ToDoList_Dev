@@ -147,20 +147,6 @@ static const TDCCOLUMN COLUMNS[] =
 };
 static const int NUM_COLUMNS = sizeof(COLUMNS) / sizeof(TDCCOLUMN);
 
-static CString GetColumnName(TDC_COLUMN nColID)
-{
-	int nCol = NUM_COLUMNS;
-
-	while (nCol--)
-	{
-		if (COLUMNS[nCol].nColID == nColID)
-			return CEnString(COLUMNS[nCol].nIDLongName);
-	}
-
-	ASSERT(0);
-	return _T("");
-}
-
 /////////////////////////////////////////////////////////////////////////////////////
 
 static const CTRLITEM CTRLITEMS[] = 
@@ -286,20 +272,6 @@ static const TDCATTRIBUTE ATTRIBUTES[] =
 	{ TDCA_COMMENTSSIZE,		IDS_TDLBC_COMMENTSSIZE },
 };
 static const int ATTRIB_COUNT = sizeof(ATTRIBUTES) / sizeof(TDCATTRIBUTE);
-
-static CString GetAttributeName(TDC_ATTRIBUTE nAttrib)
-{
-	int nAtt = ATTRIB_COUNT;
-
-	while (nAtt--)
-	{
-		if (ATTRIBUTES[nAtt].attrib == nAttrib)
-			return CEnString(ATTRIBUTES[nAtt].nAttribResID);
-	}
-
-	ASSERT(0);
-	return _T("");
-}
 
 /////////////////////////////////////////////////////////////////////////////////////
 

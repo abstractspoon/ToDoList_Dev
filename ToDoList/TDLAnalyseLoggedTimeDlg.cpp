@@ -5,7 +5,6 @@
 #include "resource.h"
 #include "TDLAnalyseLoggedTimeDlg.h"
 #include "TDCStruct.h"
-#include "TDCStatic.h"
 #include "TDCTaskTimeLog.h"
 #include "TDCCustomAttributeHelper.h"
 
@@ -57,24 +56,6 @@ static int FindFormat(TDCTTL_FORMAT nFormat)
 	return -1;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
-TDC_ATTRIBUTE GROUPBY_ATTRIBS[] = 
-{
-	TDCA_ALLOCBY,
-	TDCA_ALLOCTO,
-	TDCA_CATEGORY,
-	TDCA_CREATEDBY,
-	TDCA_EXTERNALID,
-	TDCA_LASTMODBY,
-	TDCA_PRIORITY,
-	TDCA_RISK,
-	TDCA_STATUS,
-	TDCA_TAGS,
-	TDCA_VERSION,
-};
-
-const int NUM_GROUPBYATTRIB = (sizeof(GROUPBY_ATTRIBS) / sizeof(GROUPBY_ATTRIBS[0]));
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLAnalyseLoggedTimeDlg dialog
@@ -183,13 +164,17 @@ BOOL CTDLAnalyseLoggedTimeDlg::OnInitDialog()
 	CTDLDialog::OnInitDialog();
 
 	// Build the 'Group by' attribute combo
-	int nAtt = NUM_GROUPBYATTRIB;
-
-	while (nAtt--)
-	{
-		TDC_ATTRIBUTE nAttribID = GROUPBY_ATTRIBS[nAtt];
-		CDialogHelper::AddString(m_cbGroupByAttrib, GetAttributeName(nAttribID), nAttribID);
-	}
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_ALLOCBY,		TDCA_ALLOCBY);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_ALLOCTO,		TDCA_ALLOCTO);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_CATEGORY,		TDCA_CATEGORY);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_CREATEDBY,	TDCA_CREATEDBY);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_EXTERNALID,	TDCA_EXTERNALID);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_LASTMODBY,	TDCA_LASTMODBY);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_PRIORITY,		TDCA_PRIORITY);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_RISK,			TDCA_RISK);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_STATUS,		TDCA_STATUS);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_TAGS,			TDCA_TAGS);
+	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_VERSION,		TDCA_VERSION);
 
 	// Add custom attributes
 	int nCust = m_aCustomAttribDefs.GetSize();
