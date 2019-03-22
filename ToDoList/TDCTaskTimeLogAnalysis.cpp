@@ -33,7 +33,19 @@ static char THIS_FILE[]=__FILE__;
 #define MAGIC_TASKID	    999999999
 #define MAGIC_TASKIDSTR _T("999999999")
 
+//////////////////////////////////////////////////////////////////////
+
 static LPCTSTR TAB = _T("\t");
+
+static LPCTSTR HEADERFMT_PERIOD_GROUPBY = _T("%s\t%s\t%s\t%s\t%s\t%s\n");
+static LPCTSTR HEADERFMT_PERIOD_NOGROUPBY = _T("%s\t%s\t%s\t%s\t%s\n");
+static LPCTSTR HEADERFMT_NOPERIOD_GROUPBY = _T("%s\t%s\t%s\t%s\t%s\n");
+static LPCTSTR HEADERFMT_NOPERIOD_NOGROUPBY = _T("%s\t%s\t%s\t%s\n");
+
+static LPCTSTR ROWFMT_PERIOD_GROUPBY = _T("%s\t%s\t%lu\t%s\t%0.3f\t%s\n");
+static LPCTSTR ROWFMT_PERIOD_NOGROUPBY = _T("%s\t%lu\t%s\t%0.3f\t%s\n");
+static LPCTSTR ROWFMT_NOPERIOD_GROUPBY = _T("%s\t%lu\t%s\t%0.3f\t%s\n");
+static LPCTSTR ROWFMT_NOPERIOD_NOGROUPBY = _T("%lu\t%s\t%0.3f\t%s\n");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -633,27 +645,48 @@ CString CTDCTaskTimeLogAnalysis::BuildCsvHeader(BOOL bBreakdownByPeriod) const
 
 	if (bBreakdownByPeriod)
 	{
-		sHeader.Format(_T("%s\t%s\t%s\t%s\t%s\n"),
-			CEnString(IDS_LOG_PERIOD),
-			CEnString(IDS_LOG_TASKID),
-			CEnString(IDS_LOG_TASKTITLE),
-			CEnString(IDS_LOG_TIMESPENT),
-			CEnString(IDS_LOG_PATH));
+		if (WantGroupBy())
+		{
+			sHeader.Format(HEADERFMT_PERIOD_GROUPBY,
+						   CEnString(IDS_LOG_PERIOD),
+						   GetGroupByHeader(),
+						   CEnString(IDS_LOG_TASKID),
+						   CEnString(IDS_LOG_TASKTITLE),
+						   CEnString(IDS_LOG_TIMESPENT),
+						   CEnString(IDS_LOG_PATH));
+		}
+		else
+		{
+			sHeader.Format(HEADERFMT_PERIOD_NOGROUPBY,
+						   CEnString(IDS_LOG_PERIOD),
+						   CEnString(IDS_LOG_TASKID),
+						   CEnString(IDS_LOG_TASKTITLE),
+						   CEnString(IDS_LOG_TIMESPENT),
+						   CEnString(IDS_LOG_PATH));
+		}
 	}
 	else // by task
 	{
-		sHeader.Format(_T("%s\t%s\t%s\t%s\n"),
-			CEnString(IDS_LOG_TASKID),
-			CEnString(IDS_LOG_TASKTITLE),
-			CEnString(IDS_LOG_TIMESPENT),
-			CEnString(IDS_LOG_PATH));
+		if (WantGroupBy())
+		{
+			sHeader.Format(HEADERFMT_NOPERIOD_GROUPBY,
+						   GetGroupByHeader(),
+						   CEnString(IDS_LOG_TASKID),
+						   CEnString(IDS_LOG_TASKTITLE),
+						   CEnString(IDS_LOG_TIMESPENT),
+						   CEnString(IDS_LOG_PATH));
+		}
+		else
+		{
+			sHeader.Format(HEADERFMT_NOPERIOD_NOGROUPBY,
+						   CEnString(IDS_LOG_TASKID),
+						   CEnString(IDS_LOG_TASKTITLE),
+						   CEnString(IDS_LOG_TIMESPENT),
+						   CEnString(IDS_LOG_PATH));
+		}
 	}
-
 	sHeader.Replace(TAB, m_sCsvDelim);
 
-	if (WantGroupBy())
-		sHeader = (GetGroupByHeader() + m_sCsvDelim + sHeader);
-	
 	return sHeader;
 }
 
@@ -662,15 +695,21 @@ CString CTDCTaskTimeLogAnalysis::FormatCsvRow(DWORD dwTaskID, const CString& sTa
 {
 	CString sRow;
 	
-	if (sPeriod.IsEmpty())
-		sRow.Format(_T("%lu\t%s\t%0.3f\t%s\n"), dwTaskID, sTaskTitle, dTime, sPath);
+	if (!sPeriod.IsEmpty())
+	{
+		if (WantGroupBy())
+			sRow.Format(ROWFMT_PERIOD_GROUPBY, sPeriod, sGroupBy, dwTaskID, sTaskTitle, dTime, sPath);
+		else
+			sRow.Format(ROWFMT_PERIOD_NOGROUPBY, sPeriod, dwTaskID, sTaskTitle, dTime, sPath);
+	}
 	else
-		sRow.Format(_T("%s\t%lu\t%s\t%0.3f\t%s\n"), sPeriod, dwTaskID, sTaskTitle, dTime, sPath);
-
+	{
+		if (WantGroupBy())
+			sRow.Format(ROWFMT_NOPERIOD_GROUPBY, sGroupBy, dwTaskID, sTaskTitle, dTime, sPath);
+		else
+			sRow.Format(ROWFMT_NOPERIOD_NOGROUPBY, dwTaskID, sTaskTitle, dTime, sPath);
+	}
 	sRow.Replace(TAB, m_sCsvDelim);
-
-	if (WantGroupBy())
-		sRow = (sGroupBy + m_sCsvDelim + sRow);
 
 	return sRow;
 }
