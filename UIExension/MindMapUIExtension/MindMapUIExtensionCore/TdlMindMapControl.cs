@@ -993,7 +993,13 @@ namespace MindMapUIExtension
 
         protected bool HitTestIcon(TreeNode node, Point point)
         {
-            return CalcIconRect(GetItemLabelRect(node)).Contains(point);
+			var taskItem = TaskItem(node);
+
+			if (taskItem.IsLocked || !TaskHasIcon(taskItem))
+				return false;
+
+			// else
+			return CalcIconRect(GetItemLabelRect(node)).Contains(point);
         }
 
 		protected override void OnMouseDown(MouseEventArgs e)
@@ -1017,15 +1023,10 @@ namespace MindMapUIExtension
                             // Performing icon editing from a 'MouseUp' or 'MouseClick' event 
                             // causes the edit icon dialog to fail to correctly get focus but
                             // counter-intuitively it works from 'MouseDown'
-                            if (!m_IgnoreMouseClick)
+                            if (!m_IgnoreMouseClick && !ReadOnly && HitTestIcon(hit, e.Location))
                             {
-                                var taskItem = TaskItem(hit);
-
-                                if (!ReadOnly && !taskItem.IsLocked && HitTestIcon(hit, e.Location))
-                                {
-                                    if (EditTaskIcon != null)
-                                        EditTaskIcon(this, UniqueID(SelectedNode));
-                                }
+                                if (EditTaskIcon != null)
+                                    EditTaskIcon(this, UniqueID(SelectedNode));
                             }
                         }
 					}
@@ -1070,7 +1071,7 @@ namespace MindMapUIExtension
                     {
                         cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
                     }
-                    else if (taskItem.IsTask && TaskHasIcon(taskItem) && HitTestIcon(node, e.Location))
+                    else if (TaskHasIcon(taskItem) && HitTestIcon(node, e.Location))
                     {
                         cursor = UIExtension.HandCursor();
                     }
