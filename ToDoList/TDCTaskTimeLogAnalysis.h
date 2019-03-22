@@ -100,6 +100,7 @@ protected:
 
 	BOOL WantGroupBy() const;
 	CString GetTaskGroupBy(DWORD dwTaskID) const;
+	CString GetGroupByHeader() const;
 	CString BuildCsvHeader(BOOL bBreakdownByPeriod) const;
 	CString FormatCsvRow(DWORD dwTaskID, const CString& sTaskTitle, double dTime, 
 						 const CString& sPath, const CString& sPeriod, const CString& sGroupBy) const;

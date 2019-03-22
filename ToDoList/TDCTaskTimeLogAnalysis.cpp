@@ -190,6 +190,8 @@ BOOL CTDCTaskTimeLogAnalysis::AnalyseTaskLog(const COleDateTime& dtFrom,
 		return FALSE;
 
 	m_nGroupBy = nGroupBy;
+	ASSERT(!GetGroupByHeader().IsEmpty());
+
 	BuildGroupByMapping();
 	
 	switch (nBreakdown)
@@ -434,10 +436,12 @@ BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTime& mapIDs,
 					CString sGroupBy = GetTaskGroupBy(dwTaskID);
 
 					// Add spacer between groups
-					if ((nItem > 0) && WantGroupBy() && (sLastGroupBy != sGroupBy))
+					if (WantGroupBy() && (sLastGroupBy != sGroupBy))
 					{
 						sLastGroupBy = sGroupBy;
-						file.WriteString(_T("\n"));
+
+						if (nItem > 0)
+							file.WriteString(_T("\n"));
 					}
 
 					// write to file
@@ -632,17 +636,7 @@ CString CTDCTaskTimeLogAnalysis::BuildCsvHeader(BOOL bBreakdownByPeriod) const
 	sHeader.Replace(TAB, m_sCsvDelim);
 
 	if (WantGroupBy())
-	{
-		CString sGroupBy;
-		int nCust = m_aCustomAttribDefs.Find(m_nGroupBy);
-
-		if (nCust != -1)
-			sGroupBy = m_aCustomAttribDefs[nCust].sLabel;
-		else
-			sGroupBy = GetAttributeName(m_nGroupBy);
-
-		sHeader = (sGroupBy + m_sCsvDelim + sHeader);
-	}
+		sHeader = (GetGroupByHeader() + m_sCsvDelim + sHeader);
 	
 	return sHeader;
 }
@@ -678,6 +672,37 @@ CString CTDCTaskTimeLogAnalysis::GetTaskGroupBy(DWORD dwTaskID) const
 		m_mapIDtoGroupBy.Lookup(dwTaskID, sGroupBy);
 
 	return sGroupBy;
+}
+
+CString CTDCTaskTimeLogAnalysis::GetGroupByHeader() const
+{
+	if (WantGroupBy())
+	{
+		int nCust = m_aCustomAttribDefs.Find(m_nGroupBy);
+
+		if (nCust != -1)
+			return m_aCustomAttribDefs[nCust].sLabel;
+
+		// else
+		switch (m_nGroupBy)
+		{
+		case TDCA_PRIORITY:		return CEnString(IDS_TDLBC_PRIORITY);
+		case TDCA_ALLOCTO:		return CEnString(IDS_TDLBC_ALLOCTO);
+		case TDCA_ALLOCBY:		return CEnString(IDS_TDLBC_ALLOCBY);
+		case TDCA_STATUS:		return CEnString(IDS_TDLBC_STATUS);
+		case TDCA_CATEGORY:		return CEnString(IDS_TDLBC_CATEGORY);
+		case TDCA_TAGS:			return CEnString(IDS_TDLBC_TAGS);
+		case TDCA_CREATEDBY:	return CEnString(IDS_TDLBC_CREATEDBY);
+		case TDCA_RISK:			return CEnString(IDS_TDLBC_RISK);
+		case TDCA_EXTERNALID:	return CEnString(IDS_TDLBC_EXTERNALID);
+		case TDCA_VERSION:		return CEnString(IDS_TDLBC_VERSION);
+		case TDCA_LASTMODBY:	return CEnString(IDS_TDLBC_LASTMODBY);
+		}
+
+		ASSERT(0);
+	}
+
+	return _T("");
 }
 
 BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTimeAndPeriodArray& aPeriods,
@@ -731,10 +756,12 @@ BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTimeAndPeriodArray& a
 						CString sGroupBy = GetTaskGroupBy(dwTaskID);
 
 						// Add spacer between groups
-						if ((nItem > 0) && WantGroupBy() && (sLastGroupBy != sGroupBy))
+						if (WantGroupBy() && (sLastGroupBy != sGroupBy))
 						{
 							sLastGroupBy = sGroupBy;
-							file.WriteString(_T("\n"));
+
+							if (nItem > 0)
+								file.WriteString(_T("\n"));
 						}
 
 						// write to file
