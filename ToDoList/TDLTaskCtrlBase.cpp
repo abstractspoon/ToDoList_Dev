@@ -4410,12 +4410,22 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 		break;
 		
 	case TDCA_TIMEEST:
-		if (!AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs))
+		bRedrawCols |= !AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
+		
+		if (HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
+			bRedrawCols |= !AccumulateRecalcColumn(TDCC_REMAINING, aColIDs);
+
+		if (bRedrawCols)
 			bRedrawCols = HasStyle(TDCS_AUTOCALCPERCENTDONE);
 		break;
 		
 	case TDCA_TIMESPENT:
-		if (!AccumulateRecalcColumn(TDCC_TIMESPENT, aColIDs))
+		bRedrawCols |= !AccumulateRecalcColumn(TDCC_TIMESPENT, aColIDs);
+
+		if (HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
+			bRedrawCols |= !AccumulateRecalcColumn(TDCC_REMAINING, aColIDs);
+		
+		if (bRedrawCols)
 			bRedrawCols = HasStyle(TDCS_AUTOCALCPERCENTDONE);
 		break;
 		

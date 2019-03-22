@@ -367,7 +367,6 @@ protected:
 	afx_msg LRESULT OnPreferencesEditLanguageFile(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesTestTool(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPostTranslateMenu(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnQuickFindItemAdded(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSelchangeFilter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTimeTrackerStartTracking(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTimeTrackerStopTracking(WPARAM wParam, LPARAM lParam);

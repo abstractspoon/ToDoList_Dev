@@ -154,8 +154,8 @@ int COwnerdrawComboBoxBase::CalcMinItemHeight(BOOL bList) const
 	
 	if (bList)
 	{
-		int nMinDLUHeight = CDlgUnits(GetParent()).ToPixelsY(10);
-		nMinHeight = max(nMinHeight, nMinDLUHeight);
+		int nMinDLUHeight = CDlgUnits(GetParent(), TRUE).ToPixelsY(10);
+		nMinHeight = max((nMinHeight + 4), nMinDLUHeight);
 
 		if (HasIcon())
 		{

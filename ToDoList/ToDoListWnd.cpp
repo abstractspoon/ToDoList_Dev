@@ -105,7 +105,7 @@ const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
 const int MRU_MAX_ITEM_LEN = 128;
 
 const int QUICKFIND_HEIGHT = GraphicsMisc::ScaleByDPIFactor(200);
-const int QUICKFIND_VOFFSET = (GraphicsMisc::ScaleByDPIFactor(1) - 1);
+const int QUICKFIND_VOFFSET = (GraphicsMisc::ScaleByDPIFactor(1)/* - 1*/);
 
 #ifdef _DEBUG
 const UINT ONE_MINUTE = 10000;
@@ -429,7 +429,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_NOTIFY(TCN_SELCHANGING, IDC_TABCONTROL, OnTabCtrlSelchanging)
 	ON_NOTIFY(TTN_NEEDTEXT, 0, OnNeedTooltipText)
 	ON_REGISTERED_MESSAGE(WM_TDLTE_EXPORTTHREADFINISHED, OnExportThreadFinished)
-	ON_REGISTERED_MESSAGE(WM_ACBN_ITEMADDED, OnQuickFindItemAdded)
 	ON_REGISTERED_MESSAGE(WM_FBN_FILTERCHNG, OnSelchangeFilter)
 	ON_REGISTERED_MESSAGE(WM_FTD_ADDSEARCH, OnFindAddSearch)
 	ON_REGISTERED_MESSAGE(WM_FTD_SAVESEARCH, OnFindSaveSearch)
@@ -1214,17 +1213,18 @@ BOOL CToDoListWnd::InitTimeTrackDlg()
 {
 	// First time only
 	if (m_dlgTimeTracker.GetSafeHwnd())
-	{
 		return TRUE;
-	}
-	else if (!m_dlgTimeTracker.Create())
-	{
-		return FALSE;
-	}
 
-	UpdateTimeTrackerPreferences();
+	DPI_AWARENESS_CONTEXT nPrev = GraphicsMisc::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
 
-	return TRUE;
+	BOOL bRes = m_dlgTimeTracker.Create();
+
+	GraphicsMisc::SetThreadDpiAwarenessContext(nPrev);
+
+	if (bRes)
+		UpdateTimeTrackerPreferences();
+
+	return bRes;
 }
 
 void CToDoListWnd::UpdateTimeTrackerTasks(const CFilteredToDoCtrl& tdc, BOOL bAllTasks)
@@ -1333,11 +1333,13 @@ BOOL CToDoListWnd::InitMainToolbar()
 	rect.top += QUICKFIND_VOFFSET;
 	rect.bottom += QUICKFIND_HEIGHT;
 	
+	// Note: not sorted
 	if (!m_cbQuickFind.Create(WS_CHILD | WS_VSCROLL | WS_VISIBLE | CBS_AUTOHSCROLL | 
 		CBS_DROPDOWN | CBS_OWNERDRAWFIXED, rect, &m_toolbarMain, IDC_QUICKFIND))
 	{
 		return FALSE;
 	}
+	m_cbQuickFind.SetFont(&m_fontMain);
 
 	// previous quick find items
 	CStringArray aItems;
@@ -1418,20 +1420,6 @@ void CToDoListWnd::OnQuickFindNext()
 void CToDoListWnd::OnUpdateQuickFindNext(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(!m_sQuickFind.IsEmpty());
-}
-
-LRESULT CToDoListWnd::OnQuickFindItemAdded(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	// keep only the last 20 items
-	int nItem = m_cbQuickFind.GetCount();
-
-	while (nItem > 20)
-	{
-		nItem--;
-		m_cbQuickFind.DeleteString(nItem);
-	}
-
-	return 0L;
 }
 
 void CToDoListWnd::OnQuickFindPrev() 
@@ -1597,7 +1585,25 @@ BOOL CToDoListWnd::HandleEscapeTabReturn(MSG* pMsg)
 			case VK_RETURN: // hitting return in filter bar and quick find
 				if (::IsChild(m_cbQuickFind, pMsg->hwnd) && !m_sQuickFind.IsEmpty())
 				{
-					OnQuickFindNext();
+					// Add the item
+					if (m_cbQuickFind.FindStringExact(0, m_sQuickFind) == CB_ERR)
+					{
+						int nSel = m_cbQuickFind.AddUniqueItem(m_sQuickFind, TRUE);
+						m_cbQuickFind.SetCurSel(nSel);
+
+						// keep only the last 20 items
+						int nItem = m_cbQuickFind.GetCount();
+
+						while (nItem > 20)
+						{
+							nItem--;
+							m_cbQuickFind.DeleteString(nItem);
+						}
+					}
+					else
+					{
+						OnQuickFindNext();
+					}
 					return TRUE;
 				}
 				// likewise for filter bar
@@ -2275,6 +2281,8 @@ void CToDoListWnd::SaveSettings()
 
 	if (CDialogHelper::GetComboBoxItems(m_cbQuickFind, aItems))
 		prefs.WriteProfileArray(_T("QuickFind"), aItems);
+	else
+		prefs.DeleteProfileSection(_T("QuickFind"));
 
 	m_mgrShortcuts.SaveSettings(prefs, _T("KeyboardShortcuts"));
 	m_mgrUIExtensions.SavePreferences(prefs, _T("UIExtensions"));
@@ -10310,7 +10318,11 @@ BOOL CToDoListWnd::InitFindDialog(BOOL bShow)
 	{
 		UpdateFindDialogActiveTasklist();
 
+		DPI_AWARENESS_CONTEXT nPrev = GraphicsMisc::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+
 		VERIFY(m_findDlg.Initialize(this));
+
+		GraphicsMisc::SetThreadDpiAwarenessContext(nPrev);
 
 		if (CThemed::IsAppThemed())
 			m_findDlg.SetUITheme(m_theme);
