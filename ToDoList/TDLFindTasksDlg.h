@@ -34,7 +34,7 @@ public:
 	CTDLFindTasksDlg(CWnd* pParent = NULL);   // standard constructor
 	~CTDLFindTasksDlg();
 
-	BOOL Initialize(CWnd* pParent, BOOL bDockable = TRUE);
+	BOOL Create(CWnd* pParent, BOOL bDockable = TRUE);
 	BOOL Show(BOOL bShow = TRUE);
 	void RefreshSearch();
 

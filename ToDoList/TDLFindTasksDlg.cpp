@@ -335,7 +335,7 @@ void CTDLFindTasksDlg::OnUpdateDeleteRule(CCmdUI* pCmdUI)
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-BOOL CTDLFindTasksDlg::Initialize(CWnd* pParent, BOOL bDockable)
+BOOL CTDLFindTasksDlg::Create(CWnd* pParent, BOOL bDockable)
 {
 	ASSERT (pParent || !bDockable);
 	
@@ -347,10 +347,13 @@ BOOL CTDLFindTasksDlg::Initialize(CWnd* pParent, BOOL bDockable)
 	
 	m_bDockable = bDockable;
 
-	if (!Create(CTDLFindTasksDlg::IDD, pParent))
-		return FALSE;
-	
-	return TRUE;
+	DPI_AWARENESS_CONTEXT nPrev = GraphicsMisc::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+
+	BOOL bResult = CDialog::Create(CTDLFindTasksDlg::IDD, pParent);
+
+	GraphicsMisc::SetThreadDpiAwarenessContext(nPrev);
+
+	return bResult;
 }
 
 void CTDLFindTasksDlg::LoadSettings()

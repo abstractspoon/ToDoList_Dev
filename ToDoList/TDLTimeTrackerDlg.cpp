@@ -449,15 +449,21 @@ BOOL CTDLTimeTrackerDlg::Create(DWORD dwOptions)
 
 BOOL CTDLTimeTrackerDlg::Create(BOOL bVisible)
 {
-	m_pWndNotify = AfxGetMainWnd(); 
-	ASSERT_VALID(m_pWndNotify);
-	
-	if (!CDialog::Create(IDD_TIMETRACK_DIALOG, m_bAlwaysOnTop ? GetDesktopWindow() : m_pWndNotify))
+	DPI_AWARENESS_CONTEXT nPrev = GraphicsMisc::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+
+	BOOL bResult = CDialog::Create(IDD_TIMETRACK_DIALOG, m_bAlwaysOnTop ? GetDesktopWindow() : AfxGetMainWnd());
+
+	GraphicsMisc::SetThreadDpiAwarenessContext(nPrev);
+
+	if (!bResult)
 	{
 		ASSERT(0);
 		m_pWndNotify = NULL;
+
 		return FALSE;
 	}
+
+	m_pWndNotify = AfxGetMainWnd();
 
 	if (m_bAlwaysOnTop)
 		SetWindowPos(&CWnd::wndTopMost, 0, 0, 0, 0, (SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE));

@@ -1215,16 +1215,11 @@ BOOL CToDoListWnd::InitTimeTrackDlg()
 	if (m_dlgTimeTracker.GetSafeHwnd())
 		return TRUE;
 
-	DPI_AWARENESS_CONTEXT nPrev = GraphicsMisc::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+	if (!m_dlgTimeTracker.Create())
+		return FALSE;
 
-	BOOL bRes = m_dlgTimeTracker.Create();
-
-	GraphicsMisc::SetThreadDpiAwarenessContext(nPrev);
-
-	if (bRes)
-		UpdateTimeTrackerPreferences();
-
-	return bRes;
+	UpdateTimeTrackerPreferences();
+	return TRUE;
 }
 
 void CToDoListWnd::UpdateTimeTrackerTasks(const CFilteredToDoCtrl& tdc, BOOL bAllTasks)
@@ -1588,7 +1583,7 @@ BOOL CToDoListWnd::HandleEscapeTabReturn(MSG* pMsg)
 					// Add the item
 					if (m_cbQuickFind.FindStringExact(0, m_sQuickFind) == CB_ERR)
 					{
-						int nSel = m_cbQuickFind.AddUniqueItem(m_sQuickFind, TRUE);
+						int nSel = m_cbQuickFind.AddUniqueItem(m_sQuickFind);
 						m_cbQuickFind.SetCurSel(nSel);
 
 						// keep only the last 20 items
@@ -10317,12 +10312,9 @@ BOOL CToDoListWnd::InitFindDialog(BOOL bShow)
 	if (!m_findDlg.GetSafeHwnd())
 	{
 		UpdateFindDialogActiveTasklist();
-
-		DPI_AWARENESS_CONTEXT nPrev = GraphicsMisc::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
-
-		VERIFY(m_findDlg.Initialize(this));
-
-		GraphicsMisc::SetThreadDpiAwarenessContext(nPrev);
+		
+		if (!m_findDlg.Create(this))
+			return FALSE;
 
 		if (CThemed::IsAppThemed())
 			m_findDlg.SetUITheme(m_theme);
@@ -10331,7 +10323,7 @@ BOOL CToDoListWnd::InitFindDialog(BOOL bShow)
 			m_findDlg.Show(bShow);
 	}
 
-	return (m_findDlg.GetSafeHwnd() != NULL);
+	return TRUE;
 }
 
 void CToDoListWnd::OnFindTasks() 
