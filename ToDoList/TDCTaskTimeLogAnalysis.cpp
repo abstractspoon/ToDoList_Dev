@@ -329,11 +329,27 @@ int CTDCTaskTimeLogAnalysis::BuildGroupByMapping(const CTaskFile& tasks, HTASKIT
 		case TDCA_CREATEDBY:	sGroupBy = tasks.GetTaskCreatedBy(hTask);		break;
 		case TDCA_EXTERNALID:	sGroupBy = tasks.GetTaskExternalID(hTask);		break;
 		case TDCA_LASTMODBY:	sGroupBy = tasks.GetTaskLastModifiedBy(hTask);	break;
-		//case TDCA_PRIORITY:		sGroupBy = tasks.GetTaskPriority(hTask);		break;
-		//case TDCA_RISK:			sGroupBy = tasks.GetTaskRisk(hTask);			break;
 		case TDCA_STATUS:		sGroupBy = tasks.GetTaskStatus(hTask);			break;
 		case TDCA_TAGS:			sGroupBy = tasks.GetTaskTag(hTask, 0);			break;
 		case TDCA_VERSION:		sGroupBy = tasks.GetTaskVersion(hTask);			break;
+	
+		case TDCA_PRIORITY:		
+		{
+			int nPriority = tasks.GetTaskPriority(hTask, false);
+
+			if (nPriority >= 0)
+				sGroupBy = Misc::Format(nPriority);
+		}
+		break;
+
+		case TDCA_RISK:
+		{
+			int nRisk = tasks.GetTaskRisk(hTask, false);
+
+			if (nRisk >= 0)
+				sGroupBy = Misc::Format(nRisk);
+		}
+		break;
 
 		default:
 			ASSERT(0);
