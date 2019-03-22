@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "TDCTaskTimeLogAnalysis.h"
 #include "TaskFile.h"
+#include "TDCStatic.h"
 
 #include "..\shared\Filemisc.h"
 #include "..\shared\misc.h"
@@ -61,7 +62,7 @@ int LogSortProc(const void* pV1, const void* pV2)
 	const LOGSORTITEM* pLI2 = (LOGSORTITEM*)pV2;
 
 	// Sort by group then by ID
-	int nCompare = Misc::NaturalCompare(pLI1->sGroupBy, pLI2->sGroupBy);
+	int nCompare = Misc::NaturalCompare(pLI1->sGroupBy, pLI2->sGroupBy, TRUE);
 
 	if (nCompare != 0)
 		return nCompare;
@@ -163,7 +164,8 @@ CTDCTaskTimeLogAnalysis::CTDCTaskTimeLogAnalysis(const CString& sTaskList,
 	:
 	m_sTaskFile(sTaskList), 
 	m_aCustomAttribDefs(aCustomAttribDefs),
-	m_bLogTaskTimeSeparately(bLogTaskTimeSeparately)
+	m_bLogTaskTimeSeparately(bLogTaskTimeSeparately),
+	m_nGroupBy(TDCA_NONE)
 {
 	ASSERT(FileMisc::FileExists(m_sTaskFile));
 
@@ -177,18 +179,19 @@ CTDCTaskTimeLogAnalysis::~CTDCTaskTimeLogAnalysis()
 
 }
 
-BOOL CTDCTaskTimeLogAnalysis::AnalyseTaskLog(const COleDateTime& dtFrom, 
-											const COleDateTime& dtTo,
-											TDCTTL_BREAKDOWN nBreakdown,
-											TDC_ATTRIBUTE nGroupBy,
-											TDCTTL_FORMAT nFormat,
-											LPCTSTR szOutputFile)
+BOOL CTDCTaskTimeLogAnalysis::AnalyseTaskLog(const COleDateTime& dtFrom,
+											 const COleDateTime& dtTo,
+											 TDCTTL_BREAKDOWN nBreakdown,
+											 TDC_ATTRIBUTE nGroupBy,
+											 TDCTTL_FORMAT nFormat,
+											 LPCTSTR szOutputFile)
 {
 	if (!BuildLogItemArray())
 		return FALSE;
 
-	BuildGroupByMapping(nGroupBy);
-
+	m_nGroupBy = nGroupBy;
+	BuildGroupByMapping();
+	
 	switch (nBreakdown)
 	{
 	case TTLB_BYTASK:
@@ -196,7 +199,7 @@ BOOL CTDCTaskTimeLogAnalysis::AnalyseTaskLog(const COleDateTime& dtFrom,
 			CMapIDToTime mapIDs;
 
 			if (AnalyseByTask(dtFrom, dtTo, mapIDs))
-				return OutputAnalysis(mapIDs, nGroupBy, nFormat, szOutputFile);
+				return OutputAnalysis(mapIDs, nFormat, szOutputFile);
 		}
 		break;
 
@@ -209,7 +212,7 @@ BOOL CTDCTaskTimeLogAnalysis::AnalyseTaskLog(const COleDateTime& dtFrom,
 			if (AnalyseByDate(dtFrom, dtTo, aPeriods))
 			{
 				if (BreakdownDateAnalysis(aPeriods, nBreakdown))
-					return OutputAnalysis(aPeriods, nBreakdown, nGroupBy, nFormat, szOutputFile);
+					return OutputAnalysis(aPeriods, nBreakdown, nFormat, szOutputFile);
 			}
 		}
 		break;
@@ -279,22 +282,22 @@ int CTDCTaskTimeLogAnalysis::BuildLogItemArray()
 	return m_aLogItems.GetSize();
 }
 
-int CTDCTaskTimeLogAnalysis::BuildGroupByMapping(TDC_ATTRIBUTE nGroupBy)
+int CTDCTaskTimeLogAnalysis::BuildGroupByMapping()
 {
 	m_mapIDtoGroupBy.RemoveAll();
 
-	if (nGroupBy != TDCA_NONE)
+	if (WantGroupBy())
 	{
 		CTaskFile tasks;
 		VERIFY(tasks.Load(m_sTaskFile));
 
 		CString sCustAttribID;
-		int nCust = m_aCustomAttribDefs.Find(nGroupBy);
+		int nCust = m_aCustomAttribDefs.Find(m_nGroupBy);
 
 		if (nCust != -1)
 			sCustAttribID = m_aCustomAttribDefs[nCust].sUniqueID;
 
-		BuildGroupByMapping(tasks, tasks.GetFirstTask(), nGroupBy, sCustAttribID, m_mapIDtoGroupBy);
+		BuildGroupByMapping(tasks, tasks.GetFirstTask(), m_nGroupBy, sCustAttribID, m_mapIDtoGroupBy);
 	}
 
 	return m_mapIDtoGroupBy.GetCount();
@@ -324,8 +327,8 @@ int CTDCTaskTimeLogAnalysis::BuildGroupByMapping(const CTaskFile& tasks, HTASKIT
 		case TDCA_CREATEDBY:	sGroupBy = tasks.GetTaskCreatedBy(hTask);		break;
 		case TDCA_EXTERNALID:	sGroupBy = tasks.GetTaskExternalID(hTask);		break;
 		case TDCA_LASTMODBY:	sGroupBy = tasks.GetTaskLastModifiedBy(hTask);	break;
-			//case TDCA_PRIORITY:		sGroupBy = tasks.GetTaskPriority(hTask);		break;
-			//case TDCA_RISK:			sGroupBy = tasks.GetTaskRisk(hTask);			break;
+		//case TDCA_PRIORITY:		sGroupBy = tasks.GetTaskPriority(hTask);		break;
+		//case TDCA_RISK:			sGroupBy = tasks.GetTaskRisk(hTask);			break;
 		case TDCA_STATUS:		sGroupBy = tasks.GetTaskStatus(hTask);			break;
 		case TDCA_TAGS:			sGroupBy = tasks.GetTaskTag(hTask, 0);			break;
 		case TDCA_VERSION:		sGroupBy = tasks.GetTaskVersion(hTask);			break;
@@ -390,23 +393,7 @@ BOOL CTDCTaskTimeLogAnalysis::AnalyseByTask(const COleDateTime& dtFrom,
 	return (mapIDs.GetCount() > 0);
 }
 
-CString CTDCTaskTimeLogAnalysis::FormatCsvRow(DWORD dwTaskID, const CString& sTaskTitle, 
-											  double dTime, const CString& sPath, const CString& sPeriod) const
-{
-	CString sRow;
-
-	if (sPeriod.IsEmpty())
-		sRow.Format(_T("%lu\t%s\t%0.3f\t%s\n"), dwTaskID, sTaskTitle, dTime, sPath);
-	else
-		sRow.Format(_T("%s\t%lu\t%s\t%0.3f\t%s\n"), sPeriod, dwTaskID, sTaskTitle, dTime, sPath);
-
-	sRow.Replace(TAB, m_sCsvDelim);
-
-	return sRow;
-}
-
 BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTime& mapIDs,
-											TDC_ATTRIBUTE nGroupBy,
 											TDCTTL_FORMAT nFormat,
 											LPCTSTR szOutputFile) const
 {
@@ -431,6 +418,8 @@ BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTime& mapIDs,
 				CDWordArray aSortedIDs;
 				int nNumItems = BuildSortedIDList(mapIDs, aSortedIDs);
 
+				CString sLastGroupBy;
+
 				for (int nItem = 0; nItem < nNumItems; nItem++)
 				{
 					DWORD dwTaskID = aSortedIDs[nItem];
@@ -440,11 +429,19 @@ BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTime& mapIDs,
 					VERIFY(mapIDs.Lookup(dwTaskID, dTime));
 					ASSERT(dwTaskID > 0);
 					
-					// get the title and path of tha task
+					// get the title and path of the task
 					const TASKTIMELOGITEM& liRef = GetReferenceLogItem(dwTaskID);
-					
+					CString sGroupBy = GetTaskGroupBy(dwTaskID);
+
+					// Add spacer between groups
+					if ((nItem > 0) && WantGroupBy() && (sLastGroupBy != sGroupBy))
+					{
+						sLastGroupBy = sGroupBy;
+						file.WriteString(_T("\n"));
+					}
+
 					// write to file
-					file.WriteString(FormatCsvRow(dwTaskID, liRef.sTaskTitle, dTime, liRef.sPath));
+					file.WriteString(FormatCsvRow(dwTaskID, liRef.sTaskTitle, dTime, liRef.sPath, _T(""), sGroupBy));
 				}
 
 				file.Close();
@@ -475,11 +472,15 @@ BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTime& mapIDs,
 				// write to file
 				CXmlItem* pXITask = file.AddItem(_T("TASK"), _T(""), XIT_ELEMENT);
 				
-				pXITask->SetItemValue(_T("ID"), (int)liRef.dwTaskID);
+				pXITask->SetItemValue(_T("ID"), (int)dwTaskID);
 				pXITask->SetItemValue(_T("TITLE"), liRef.sTaskTitle);
 				pXITask->SetItemValue(_T("HOURS"), dTime);
 				pXITask->SetItemValue(_T("PERSON"), liRef.sPerson);
 				pXITask->SetItemValue(_T("PATH"), liRef.sPath);
+
+				if (WantGroupBy())
+					pXITask->SetItemValue(_T("GROUPBY"), GetTaskGroupBy(dwTaskID));
+
 			}
 			
 			return file.Save(szOutputFile, SFEF_UTF8WITHOUTBOM);
@@ -627,15 +628,60 @@ CString CTDCTaskTimeLogAnalysis::BuildCsvHeader(BOOL bBreakdownByPeriod) const
 			CEnString(IDS_LOG_TIMESPENT),
 			CEnString(IDS_LOG_PATH));
 	}
+
 	sHeader.Replace(TAB, m_sCsvDelim);
 
+	if (WantGroupBy())
+	{
+		CString sGroupBy;
+		int nCust = m_aCustomAttribDefs.Find(m_nGroupBy);
+
+		if (nCust != -1)
+			sGroupBy = m_aCustomAttribDefs[nCust].sLabel;
+		else
+			sGroupBy = GetAttributeName(m_nGroupBy);
+
+		sHeader = (sGroupBy + m_sCsvDelim + sHeader);
+	}
+	
 	return sHeader;
 }
 
+CString CTDCTaskTimeLogAnalysis::FormatCsvRow(DWORD dwTaskID, const CString& sTaskTitle, double dTime, 
+											  const CString& sPath, const CString& sPeriod, const CString& sGroupBy) const
+{
+	CString sRow;
+	
+	if (sPeriod.IsEmpty())
+		sRow.Format(_T("%lu\t%s\t%0.3f\t%s\n"), dwTaskID, sTaskTitle, dTime, sPath);
+	else
+		sRow.Format(_T("%s\t%lu\t%s\t%0.3f\t%s\n"), sPeriod, dwTaskID, sTaskTitle, dTime, sPath);
+
+	sRow.Replace(TAB, m_sCsvDelim);
+
+	if (WantGroupBy())
+		sRow = (sGroupBy + m_sCsvDelim + sRow);
+
+	return sRow;
+}
+
+BOOL CTDCTaskTimeLogAnalysis::WantGroupBy() const
+{
+	return (m_nGroupBy != TDCA_NONE);
+}
+
+CString CTDCTaskTimeLogAnalysis::GetTaskGroupBy(DWORD dwTaskID) const
+{
+	CString sGroupBy;
+
+	if (WantGroupBy())
+		m_mapIDtoGroupBy.Lookup(dwTaskID, sGroupBy);
+
+	return sGroupBy;
+}
 
 BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTimeAndPeriodArray& aPeriods,
 											TDCTTL_BREAKDOWN nBreakdown,
-											TDC_ATTRIBUTE nGroupBy,
 											TDCTTL_FORMAT nFormat,
 											LPCTSTR szOutputFile) const
 {
@@ -668,6 +714,8 @@ BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTimeAndPeriodArray& a
 					// build list if tasks sorted by ID
 					CDWordArray aSortedIDs;
 					int nNumItems = BuildSortedIDList(*pPeriod, aSortedIDs);
+
+					CString sLastGroupBy;
 					
 					for (int nItem = 0; nItem < nNumItems; nItem++)
 					{
@@ -680,9 +728,17 @@ BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTimeAndPeriodArray& a
 						
 						// get the title and path of the task
 						const TASKTIMELOGITEM& liRef = GetReferenceLogItem(dwTaskID);
-						
+						CString sGroupBy = GetTaskGroupBy(dwTaskID);
+
+						// Add spacer between groups
+						if ((nItem > 0) && WantGroupBy() && (sLastGroupBy != sGroupBy))
+						{
+							sLastGroupBy = sGroupBy;
+							file.WriteString(_T("\n"));
+						}
+
 						// write to file
-						file.WriteString(FormatCsvRow(dwTaskID, liRef.sTaskTitle, dTime, liRef.sPath, sPeriod));
+						file.WriteString(FormatCsvRow(dwTaskID, liRef.sTaskTitle, dTime, liRef.sPath, sPeriod, sGroupBy));
 					}
 
 					// spacer between periods
@@ -730,11 +786,14 @@ BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTimeAndPeriodArray& a
 					// write to file
 					CXmlItem* pXITask = pXIPeriod->AddItem(_T("TASK"), _T(""), XIT_ELEMENT);
 
-					pXITask->SetItemValue(_T("ID"), (int)liRef.dwTaskID);
+					pXITask->SetItemValue(_T("ID"), (int)dwTaskID);
 					pXITask->SetItemValue(_T("TITLE"), liRef.sTaskTitle);
 					pXITask->SetItemValue(_T("HOURS"), dTime);
 					pXITask->SetItemValue(_T("PERSON"), liRef.sPerson);
 					pXITask->SetItemValue(_T("PATH"), liRef.sPath);
+
+					if (WantGroupBy())
+						pXITask->SetItemValue(_T("GROUPBY"), GetTaskGroupBy(dwTaskID));
 				}
 			}
 			
@@ -898,7 +957,9 @@ int CTDCTaskTimeLogAnalysis::BuildSortedIDList(const CMapIDToTime& mapIDs, CDWor
 			LOGSORTITEM& li = aSortItems[nItem++];
 
 			li.dwTaskID = dwTaskID;
-			m_mapIDtoGroupBy.Lookup(dwTaskID, li.sGroupBy);
+
+			if (WantGroupBy())
+				m_mapIDtoGroupBy.Lookup(dwTaskID, li.sGroupBy);
 		}
 
 		// Sort and convert to simple ID array

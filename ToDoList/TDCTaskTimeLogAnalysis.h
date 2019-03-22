@@ -19,12 +19,13 @@
 class CTDCTaskTimeLogAnalysis
 {
 public:
-	CTDCTaskTimeLogAnalysis(const CString& sTaskList, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, BOOL bLogTaskTimeSeparately);
+	CTDCTaskTimeLogAnalysis(const CString& sTaskList, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, 
+							BOOL bLogTaskTimeSeparately);
 	~CTDCTaskTimeLogAnalysis();
 
 	BOOL AnalyseTaskLog(const COleDateTime& dtFrom, 
 						const COleDateTime& dtTo,
-						TDCTTL_BREAKDOWN nBreakdown,
+						TDCTTL_BREAKDOWN nBreakdown, 
 						TDC_ATTRIBUTE nGroupBy,
 						TDCTTL_FORMAT nFormat,
 						LPCTSTR szOutputFile);
@@ -33,13 +34,14 @@ protected:
 	CString m_sTaskFile;
 	BOOL m_bLogTaskTimeSeparately;
 	CString m_sCsvDelim;
+	TDC_ATTRIBUTE m_nGroupBy;
 
 	CTaskTimeLogItemArray m_aLogItems;
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
 	CMap<DWORD, DWORD, int, int&> m_mapIDtoRefLogItem;
 	CMap<DWORD, DWORD, CString, LPCTSTR> m_mapIDtoGroupBy;
-	
+
 protected:
 	typedef CMap<DWORD, DWORD, double, double&> CMapIDToTime;
 	
@@ -74,7 +76,7 @@ protected:
 	// ------------------------------------------------------------------------------
 
 	int BuildLogItemArray();
-	int BuildGroupByMapping(TDC_ATTRIBUTE nGroupBy);
+	int BuildGroupByMapping();
 	int BuildSortedIDList(const CMapIDToTime& mapDates, CDWordArray& aIDs) const;
 
 	BOOL AnalyseByTask(const COleDateTime& dtFrom, 
@@ -88,19 +90,19 @@ protected:
 	BOOL BreakdownDateAnalysis(CMapIDToTimeAndPeriodArray& aPeriods, TDCTTL_BREAKDOWN nBreakdown) const;
 
 	BOOL OutputAnalysis(const CMapIDToTime& mapIDs,
-						TDC_ATTRIBUTE nGroupBy,
 						TDCTTL_FORMAT nFormat,
 						LPCTSTR szOutputFile) const;
 
 	BOOL OutputAnalysis(const CMapIDToTimeAndPeriodArray& aPeriods,
 						TDCTTL_BREAKDOWN nBreakdown,
-						TDC_ATTRIBUTE nGroupBy,
 						TDCTTL_FORMAT nFormat,
 						LPCTSTR szOutputFile) const;
 
+	BOOL WantGroupBy() const;
+	CString GetTaskGroupBy(DWORD dwTaskID) const;
 	CString BuildCsvHeader(BOOL bBreakdownByPeriod) const;
 	CString FormatCsvRow(DWORD dwTaskID, const CString& sTaskTitle, double dTime, 
-						const CString& sPath, const CString& sPeriod = _T("")) const;
+						 const CString& sPath, const CString& sPeriod, const CString& sGroupBy) const;
 
 	const TASKTIMELOGITEM& GetReferenceLogItem(DWORD dwTaskID) const;
 	const TASKTIMELOGITEM& GetLogItem(int nIndex) const;
