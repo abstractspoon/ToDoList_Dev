@@ -559,7 +559,7 @@ bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 			CString sFontName;
 			int nFontSize = GraphicsMisc::GetFontNameAndPointSize(pData->hFont, sFontName);
 
-			m_graph.SetBaseFont(sFontName, nFontSize);
+			m_graph.SetFont(sFontName, nFontSize);
 		}
 		break;
 	}

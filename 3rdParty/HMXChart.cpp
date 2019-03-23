@@ -14,6 +14,7 @@
 #define HMX_AREA_YAXIS		7		// percentage
 #define HMX_AREA_XAXIS		10		// percentage
 #define HMX_AREA_MINAXIS	50		// pixels
+#define HMX_XSCALE_OFFSET   14		// pixels
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -26,7 +27,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart
 
-CHMXChart::CHMXChart() : m_strFont(_T("Arial"))
+CHMXChart::CHMXChart() : m_strFont(_T("Arial")), m_nFontSize(-1)
 {
 	// set defaul value
 	m_clrBkGnd = RGB(200, 255, 255);
@@ -62,6 +63,21 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart message handlers
+
+void CHMXChart::SetFont(LPCTSTR szFaceName, int nPointSize)
+{
+	if ((m_strFont.CompareNoCase(szFaceName) != 0) || (nPointSize != m_nFontSize))
+	{
+		m_strFont = szFaceName;
+		m_nFontSize = nPointSize;
+
+		if (GetSafeHwnd())
+		{
+			CalcDatas();
+			Invalidate();
+		}
+	}
+}
 
 void CHMXChart::OnPaint() 
 {
@@ -123,10 +139,6 @@ void CHMXChart::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 
 	CalcDatas();
-
-	// reset fonts
-	m_fontXScale.DeleteObject();
-	m_fontYScale.DeleteObject();
 }
 
 bool CHMXChart::CopyToClipboard()
@@ -429,17 +441,46 @@ bool CHMXChart::DrawBaseline(CDC & dc)
 
 int CHMXChart::CalcTitleFontSize() const
 {
-	return m_rectTitle.Height();
+	if (m_nFontSize == -1)
+		return m_rectTitle.Height();
+
+	// else
+	return (m_nFontSize * 2);
+}
+
+BOOL CHMXChart::CreateXAxisFont(BOOL bTitle, CFont& font) const
+{
+	int nFontSize = CalcYScaleFontSize(bTitle);
+	int nAngle = (bTitle ? 0 : (m_nXLabelDegrees * 10));
+
+	return font.CreateFont(nFontSize, 0, nAngle, 0, FW_NORMAL,
+						   FALSE, FALSE, FALSE, ANSI_CHARSET,
+						   OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
+						   DEFAULT_PITCH, m_strFont);
+}
+
+BOOL CHMXChart::CreateYAxisFont(BOOL bTitle, CFont& font) const
+{
+	int nFontSize = CalcYScaleFontSize(bTitle);
+	int nAngle = (bTitle ? 900 : 0);
+	
+	return font.CreateFont(nFontSize, 0, nAngle, 0, FW_NORMAL,
+							FALSE, FALSE, FALSE, ANSI_CHARSET,
+							OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
+							DEFAULT_PITCH, m_strFont);
 }
 
 int CHMXChart::CalcYScaleFontSize(BOOL bTitle) const
 {
-	int nSize = (m_rectYAxis.Width() / 4);
+	int nSize = m_nFontSize;
 
-	// also check length of scale text
-	if (!m_strYText.IsEmpty())
+	if (nSize == -1)
 	{
-		nSize = min(nSize, (m_rectYAxis.Height() / m_strYText.GetLength()));
+		nSize = (m_rectYAxis.Width() / 4);
+
+		// also check length of scale text
+		if (!m_strYText.IsEmpty())
+			nSize = min(nSize, (m_rectYAxis.Height() / m_strYText.GetLength()));
 	}
 
 	if (bTitle)
@@ -452,22 +493,24 @@ int CHMXChart::CalcYScaleFontSize(BOOL bTitle) const
 
 int CHMXChart::CalcXScaleFontSize(BOOL bTitle) const
 {
-	int nSize = (m_rectXAxis.Height() / 4);
-	
-	// also check length of scale text
-	if (!m_strXText.IsEmpty())
+	int nSize = m_nFontSize;
+
+	if (nSize == -1)
 	{
-		nSize = min(nSize, (m_rectXAxis.Width() / m_strXText.GetLength()));
+		nSize = (m_rectXAxis.Height() / 4);
+
+		// also check length of scale text
+		if (!m_strXText.IsEmpty())
+			nSize = min(nSize, (m_rectXAxis.Width() / m_strXText.GetLength()));
 	}
-	
+
 	if (bTitle)
 	{
 		nSize *= 2;
 	}
-	else
+	else if (m_nXLabelDegrees != 0)
 	{
-		if (m_nXLabelDegrees == 0)
-			nSize += 2;
+		nSize += 2;
 	}
 	
 	return nSize;
@@ -495,13 +538,8 @@ bool CHMXChart::DrawXScale(CDC & dc)
 	
 	if (nCount)
 	{
-		int nFontSize = CalcXScaleFontSize(FALSE);
-
 		CFont font;
-		font.CreateFont(nFontSize, 0, (m_nXLabelDegrees * 10), 0, FW_NORMAL,
-						 FALSE, FALSE, FALSE, ANSI_CHARSET,
-						 OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
-						 DEFAULT_PITCH, m_strFont);
+		VERIFY(CreateXAxisFont(FALSE, font));
 		CFont* pFontOld = dc.SelectObject(&font);
 
 		// dX is the size of a division
@@ -511,7 +549,7 @@ bool CHMXChart::DrawXScale(CDC & dc)
 		{
 			CRect rText(m_rectXAxis);
 			
-			rText.top += 14;
+			rText.top += HMX_XSCALE_OFFSET;
 			rText.left += (int)(dX*(f+0.5)) + 4;
 
 			if (m_nXLabelDegrees > 0)
@@ -533,21 +571,14 @@ bool CHMXChart::DrawXScale(CDC & dc)
 		dc.SelectObject(pFontOld);
 	}
 
-	if(!m_strXText.IsEmpty()) 
+	if (!m_strXText.IsEmpty()) 
 	{
-		if (m_fontXScale.GetSafeHandle() == NULL)
-		{
-			int nFontSize = CalcXScaleFontSize(TRUE);
+		CFont font;
+		VERIFY(CreateXAxisFont(TRUE, font));
 
-			m_fontXScale.CreateFont(nFontSize, 0, 0, 0, FW_NORMAL,
-								  FALSE, FALSE, FALSE, ANSI_CHARSET,
-								  OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
-								  DEFAULT_PITCH, m_strFont);
-		}
-
-		CFont* pFontOld = dc.SelectObject(&m_fontXScale);
-
+		CFont* pFontOld = dc.SelectObject(&font);
 		dc.DrawText(m_strXText, m_rectXAxis, DT_CENTER | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX);
+
 		dc.SelectObject(pFontOld);
 	}
 
@@ -579,19 +610,15 @@ bool CHMXChart::DrawYScale(CDC & dc)
 	
 	if (nTicks)
 	{
-		int nFontSize = CalcYScaleFontSize(FALSE);
+		CFont font;
+		VERIFY(CreateYAxisFont(FALSE, font));
+
+		CFont* pFontOld = dc.SelectObject(&font);
 
 		// nY is the size of a division
 		double nY = (m_nYMax - m_nYMin)/nTicks, nTemp1, nTemp2;
+		int nFontSize = CalcYScaleFontSize(FALSE);
 		CString sBuffer;
-		CFont font;
-
-		font.CreateFont(nFontSize, 0, 0, 0, FW_NORMAL,
-						 FALSE, FALSE, FALSE, ANSI_CHARSET,
-						 OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
-						 DEFAULT_PITCH, m_strFont);
-
-		CFont* pFontOld = dc.SelectObject(&font);
 
 		// draw text
 		for(int f=0; f<=nTicks; f++) 
@@ -613,21 +640,14 @@ bool CHMXChart::DrawYScale(CDC & dc)
 
 	if (!m_strYText.IsEmpty()) 
 	{
-		if (m_fontYScale.GetSafeHandle() == NULL)
-		{
-			int nFontSize = CalcYScaleFontSize(TRUE);
+		CFont font;
+		VERIFY(CreateYAxisFont(TRUE, font));
 
-			m_fontYScale.CreateFont(nFontSize, 0, 900, 0, FW_NORMAL,
-								  FALSE, FALSE, FALSE, ANSI_CHARSET,
-								  OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
-								  DEFAULT_PITCH, m_strFont);
-
-		}
-
-		CFont* pFontOld = dc.SelectObject(&m_fontYScale);
+		CFont* pFontOld = dc.SelectObject(&font);
 
 		dc.SetTextAlign(TA_CENTER | TA_BASELINE);
 		dc.TextOut(rTitle.CenterPoint().x, rTitle.CenterPoint().y, m_strYText);
+
 		dc.SelectObject(pFontOld);
 	}
 
@@ -973,7 +993,7 @@ bool CHMXChart::CalcDatas()
 
 	GetClientRect(m_rectArea);
 
-	int nMargin = (max(m_rectArea.Height(), m_rectArea.Width()) / HMX_AREA_MARGINS);
+	int nMargin = 15/*(max(m_rectArea.Height(), m_rectArea.Width()) / HMX_AREA_MARGINS)*/;
 
 	m_rectUsable = m_rectArea;
 	m_rectUsable.DeflateRect(nMargin, nMargin);
@@ -990,10 +1010,11 @@ bool CHMXChart::CalcDatas()
 	} 
 
 	// make axis width the same for horz and vert
-	int nYAxisWidth = (m_rectGraph.Width()*HMX_AREA_YAXIS)/100;
-	int nXAxisHeight = (m_rectGraph.Height()*HMX_AREA_XAXIS)/100;
-
-	int nAxisSize = max(HMX_AREA_MINAXIS, min(nXAxisHeight, nYAxisWidth));
+	int nAxisSize = 0;
+	{
+		CClientDC dc(this);
+		nAxisSize = CalcAxisSize(m_rectGraph, dc);
+	}
 
 	m_rectYAxis.top    = m_rectGraph.top;
 	m_rectYAxis.left   = m_rectGraph.left;
@@ -1046,6 +1067,76 @@ bool CHMXChart::CalcDatas()
 	m_nYMax = max(m_nYMax, m_nYMin + 10);
 
 	return true;
+}
+
+int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
+{
+	int nAxisSize = 0;
+
+	if (m_nFontSize == -1)
+	{
+		// make axis width the same for horz and vert
+		int nYAxisWidth = (rAvail.Width()*HMX_AREA_YAXIS) / 100;
+		int nXAxisHeight = (rAvail.Height()*HMX_AREA_XAXIS) / 100;
+
+		nAxisSize = max(HMX_AREA_MINAXIS, min(nXAxisHeight, nYAxisWidth));
+	}
+	else
+	{
+		int nXAxisHeight = (m_strXText.IsEmpty() ? 0 : (m_nFontSize * 2));
+		int nYAxisWidth = (m_strYText.IsEmpty() ? 0 : (m_nFontSize * 2));
+
+		if (m_strarrScaleXLabel.GetSize())
+		{
+			CFont font;
+			VERIFY(CreateXAxisFont(FALSE, font));
+
+			CFont* pFontOld = dc.SelectObject(&font);
+			int nLabelHeight = dc.GetTextExtent(_T("ABC123")).cy;
+
+			if (m_nXLabelDegrees == 0)
+			{
+				nXAxisHeight += nLabelHeight;
+			}
+			else
+			{
+				int nLabel = m_strarrScaleXLabel.GetSize(), nMaxLabelLen = 0;
+				CRect rLabel;
+
+				while (nLabel--)
+				{
+					if (!m_strarrScaleXLabel[nLabel].IsEmpty())
+					{
+						int nLabelLen = dc.GetTextExtent(m_strarrScaleXLabel[nLabel]).cx;
+						nMaxLabelLen = max(nMaxLabelLen, nLabelLen);
+					}
+				}
+
+				nXAxisHeight += (int)(sin(m_nXLabelDegrees / 90.0) * nMaxLabelLen);
+				nXAxisHeight += (int)(cos(m_nXLabelDegrees / 90.0) * nLabelHeight);
+				
+				dc.SelectObject(pFontOld);
+			}
+		}
+
+		if (m_nYTicks > 0)
+		{
+			CFont font;
+			VERIFY(CreateYAxisFont(FALSE, font));
+
+			CFont* pFontOld = dc.SelectObject(&font);
+
+			CString sBuffer;
+			sBuffer.Format(_T("%g"), m_nYMax);
+			nYAxisWidth += dc.GetTextExtent(sBuffer).cy;
+			
+			dc.SelectObject(pFontOld);
+		}
+
+		nAxisSize = max(HMX_AREA_MINAXIS, max(nXAxisHeight, nYAxisWidth));
+	}
+	
+	return nAxisSize;
 }
 
 bool CHMXChart::GetMinMax(double& nMin, double& nMax, bool bDataOnly) const

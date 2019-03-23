@@ -77,8 +77,7 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_nScale(1),
 	m_dHoursInDay(DEF_HOURSINDAY),
 	m_nDaysInWeek(DEF_DAYSINWEEK),
-	m_nChartType(BCT_INCOMPLETETASKS),
-	m_nBaseFontSize(8)
+	m_nChartType(BCT_INCOMPLETETASKS)
 {
 }
 
@@ -94,21 +93,6 @@ END_MESSAGE_MAP()
 
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart message handlers
-
-void CBurndownChart::SetBaseFont(LPCTSTR szFaceName, int nPointSize)
-{
-	if ((m_strFont.CompareNoCase(szFaceName) != 0) || (nPointSize != m_nBaseFontSize))
-	{
-		m_strFont = szFaceName;
-		m_nBaseFontSize = nPointSize;
-
-		m_fontXScale.DeleteObject();
-		m_fontYScale.DeleteObject();
-
-		if (GetSafeHwnd())
-			Invalidate();
-	}
-}
 
 BOOL CBurndownChart::SetChartType(BURNDOWN_CHARTTYPE nType)
 {
@@ -134,6 +118,11 @@ BOOL CBurndownChart::SetTimeIntervals(int nDaysInWeek, double dHoursInDay)
 	}
 
 	return FALSE;
+}
+
+void CBurndownChart::SetFont(LPCTSTR szFaceName, int nPointSize)
+{
+	CHMXChart::SetFont(szFaceName, MulDiv(nPointSize, 4, 3));
 }
 
 BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
@@ -646,17 +635,3 @@ int CBurndownChart::HitTest(const CPoint& ptClient) const
 	return ((nXOffset * nNumData) / m_rectData.Width());
 }
 
-int CBurndownChart::CalcXScaleFontSize(BOOL bTitle) const
-{
-	// Fixed font sizes
-	if (bTitle)
-		return (m_nBaseFontSize * 3);
-
-	return MulDiv(m_nBaseFontSize, 3, 2);
-}
-
-int CBurndownChart::CalcYScaleFontSize(BOOL bTitle) const
-{
-	// Same as X axis
-	return CalcXScaleFontSize(bTitle);
-}

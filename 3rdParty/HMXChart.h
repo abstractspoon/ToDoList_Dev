@@ -52,6 +52,7 @@ public:
 
 // Attributes
 public:
+	void SetFont(LPCTSTR szFaceName, int nPointSize = -1);
 
 // Operations
 public:
@@ -179,7 +180,6 @@ protected:
 	CString			m_strTitle;								// main title
 	CString			m_strYText;								// Y text
 	CString			m_strXText;								// X text
-	CString			m_strFont;
 	CRect			m_rectUsable;							// usable area
 	CRect			m_rectData;								// data area
 	CRect			m_rectGraph;							// graph area
@@ -189,9 +189,11 @@ protected:
 	CRect			m_rectArea;								// entire control area
 	COLORREF		m_clrBkGnd;								// background color
 	COLORREF		m_clrGrid;	
-	CFont			m_fontXScale, m_fontYScale;
 	bool			m_bXLabelsAreTicks;
 	int				m_nXLabelDegrees;
+
+	CString			m_strFont;
+	int				m_nFontSize;							// -1 -> dynamic sizing
 
 	CPen			m_penGrid;
 
@@ -207,6 +209,9 @@ protected:
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 	int GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&>& points, BOOL bArea) const;
 	BOOL GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int nSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const;
+	int CalcAxisSize(const CRect& rAvail, CDC& dc) const;
+	BOOL CreateXAxisFont(BOOL bTitle, CFont& font) const;
+	BOOL CreateYAxisFont(BOOL bTitle, CFont& font) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
