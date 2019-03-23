@@ -552,6 +552,16 @@ bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_GETPREVTOPLEVELTASK:
 		// not handled
 		break;
+
+	case IUI_SETTASKFONT:
+		if (pData)
+		{
+			CString sFontName;
+			int nFontSize = GraphicsMisc::GetFontNameAndPointSize(pData->hFont, sFontName);
+
+			m_graph.SetBaseFont(sFontName, nFontSize);
+		}
+		break;
 	}
 
 	return false;

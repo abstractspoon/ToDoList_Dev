@@ -162,6 +162,10 @@ protected:
 
 	virtual COLORREF GetLineColor(int nDatasetIndex, double dValue) const;
 	virtual COLORREF GetFillColor(int nDatasetIndex, double dValue) const;
+	
+	virtual int CalcXScaleFontSize(BOOL bTitle) const;
+	virtual int CalcYScaleFontSize(BOOL bTitle) const;
+	virtual int CalcTitleFontSize() const;
 
 	CStringArray	m_strarrScaleXLabel;					// x labels
 	int				m_nXLabelStep;							// x label step
@@ -175,6 +179,7 @@ protected:
 	CString			m_strTitle;								// main title
 	CString			m_strYText;								// Y text
 	CString			m_strXText;								// X text
+	CString			m_strFont;
 	CRect			m_rectUsable;							// usable area
 	CRect			m_rectData;								// data area
 	CRect			m_rectGraph;							// graph area
@@ -199,8 +204,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	int CalcXScaleFontSize(BOOL bTitle) const;
-	int CalcYScaleFontSize(BOOL bTitle) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 	int GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&>& points, BOOL bArea) const;
 	BOOL GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int nSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const;

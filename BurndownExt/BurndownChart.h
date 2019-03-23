@@ -18,6 +18,7 @@ public:
 	BOOL SetChartType(BURNDOWN_CHARTTYPE nType);
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL SetTimeIntervals(int nDaysInWeek, double dHoursInDay);
+	void SetBaseFont(LPCTSTR szFaceName, int nPointSize);
 
 	void RebuildGraph(BOOL bUpdateExtents);
 	void FilterToolTipMessage(MSG* pMsg);
@@ -28,7 +29,7 @@ protected:
 	CToolTipCtrlEx m_tooltip; 
 	
 	COleDateTimeRange m_dtExtents;
-	int m_nScale;
+	int m_nScale, m_nBaseFontSize;
 	BURNDOWN_CHARTTYPE m_nChartType;
 	int m_nDaysInWeek;
 	double m_dHoursInDay;
@@ -48,11 +49,13 @@ protected:
 	void RebuildXScale();
 	COleDateTime GetGraphStartDate() const;
 	COleDateTime GetGraphEndDate() const;
-	int CalculateRequiredXScale() const;
+	BURNDOWN_CHARTSCALE CalculateRequiredXScale() const;
 	double CalcYAxisInterval(double dDataMax) const;
 	int GetYSubTicks(double dInterval) const;
 	double CalcMaxYAxisValue(double dDataMax) const;
 	int HitTest(const CPoint& ptClient) const;
+	int CalcXScaleFontSize(BOOL bTitle) const;
+	int CalcYScaleFontSize(BOOL bTitle) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

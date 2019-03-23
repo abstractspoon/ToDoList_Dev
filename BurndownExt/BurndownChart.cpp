@@ -56,7 +56,7 @@ enum
 
 const int MIN_XSCALE_SPACING = 50; // pixels
 
-static int SCALES[] = 
+static BURNDOWN_CHARTSCALE SCALES[] = 
 {
 	BCS_DAY,		
 	BCS_WEEK,	
@@ -77,7 +77,8 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_nScale(1),
 	m_dHoursInDay(DEF_HOURSINDAY),
 	m_nDaysInWeek(DEF_DAYSINWEEK),
-	m_nChartType(BCT_INCOMPLETETASKS)
+	m_nChartType(BCT_INCOMPLETETASKS),
+	m_nBaseFontSize(8)
 {
 }
 
@@ -93,6 +94,21 @@ END_MESSAGE_MAP()
 
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart message handlers
+
+void CBurndownChart::SetBaseFont(LPCTSTR szFaceName, int nPointSize)
+{
+	if ((m_strFont.CompareNoCase(szFaceName) != 0) || (nPointSize != m_nBaseFontSize))
+	{
+		m_strFont = szFaceName;
+		m_nBaseFontSize = nPointSize;
+
+		m_fontXScale.DeleteObject();
+		m_fontYScale.DeleteObject();
+
+		if (GetSafeHwnd())
+			Invalidate();
+	}
+}
 
 BOOL CBurndownChart::SetChartType(BURNDOWN_CHARTTYPE nType)
 {
@@ -302,7 +318,7 @@ void CBurndownChart::BuildSprintGraph()
 	CalcDatas();
 }
 
-int CBurndownChart::CalculateRequiredXScale() const
+BURNDOWN_CHARTSCALE CBurndownChart::CalculateRequiredXScale() const
 {
 	// calculate new x scale
 	int nDataWidth = GetDataArea().cx;
@@ -628,4 +644,19 @@ int CBurndownChart::HitTest(const CPoint& ptClient) const
 	int nXOffset = (ptClient.x - m_rectData.left);
 
 	return ((nXOffset * nNumData) / m_rectData.Width());
+}
+
+int CBurndownChart::CalcXScaleFontSize(BOOL bTitle) const
+{
+	// Fixed font sizes
+	if (bTitle)
+		return (m_nBaseFontSize * 3);
+
+	return MulDiv(m_nBaseFontSize, 3, 2);
+}
+
+int CBurndownChart::CalcYScaleFontSize(BOOL bTitle) const
+{
+	// Same as X axis
+	return CalcXScaleFontSize(bTitle);
 }

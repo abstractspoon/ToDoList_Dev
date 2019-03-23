@@ -26,7 +26,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart
 
-CHMXChart::CHMXChart()
+CHMXChart::CHMXChart() : m_strFont(_T("Arial"))
 {
 	// set defaul value
 	m_clrBkGnd = RGB(200, 255, 255);
@@ -270,15 +270,17 @@ bool CHMXChart::DrawTitle(CDC & dc)
 		return false;
 
 	CFont font, *pFontOld;
-	font.CreateFont(m_rectTitle.Height(), 0, 0, 0, FW_NORMAL,
+	int nFontSize = CalcTitleFontSize();
+
+	font.CreateFont(nFontSize, 0, 0, 0, FW_NORMAL,
 					 FALSE, FALSE, FALSE, ANSI_CHARSET,
 					 OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
-					 DEFAULT_PITCH, _T("Arial"));
+					 DEFAULT_PITCH, m_strFont);
 
 	
 	COLORREF clrBkOld = dc.SetBkColor(m_clrBkGnd);
 	pFontOld = dc.SelectObject(&font);
-	dc.DrawText(m_strTitle, m_rectTitle, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+	dc.DrawText(m_strTitle, m_rectTitle, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
 
 	dc.SetBkColor(clrBkOld);
 	dc.SelectObject(pFontOld);
@@ -425,6 +427,11 @@ bool CHMXChart::DrawBaseline(CDC & dc)
 	return true;
 }
 
+int CHMXChart::CalcTitleFontSize() const
+{
+	return m_rectTitle.Height();
+}
+
 int CHMXChart::CalcYScaleFontSize(BOOL bTitle) const
 {
 	int nSize = (m_rectYAxis.Width() / 4);
@@ -494,7 +501,7 @@ bool CHMXChart::DrawXScale(CDC & dc)
 		font.CreateFont(nFontSize, 0, (m_nXLabelDegrees * 10), 0, FW_NORMAL,
 						 FALSE, FALSE, FALSE, ANSI_CHARSET,
 						 OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
-						 DEFAULT_PITCH, _T("Arial"));
+						 DEFAULT_PITCH, m_strFont);
 		CFont* pFontOld = dc.SelectObject(&font);
 
 		// dX is the size of a division
@@ -517,9 +524,9 @@ bool CHMXChart::DrawXScale(CDC & dc)
 				rText.right = rText.left + (int)(dX * m_nXLabelStep);
 
 				if (m_bXLabelsAreTicks)
-					dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX);
+					dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
 				else
-					dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX);
+					dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
 			}
 		}
 	
@@ -535,7 +542,7 @@ bool CHMXChart::DrawXScale(CDC & dc)
 			m_fontXScale.CreateFont(nFontSize, 0, 0, 0, FW_NORMAL,
 								  FALSE, FALSE, FALSE, ANSI_CHARSET,
 								  OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
-								  DEFAULT_PITCH, _T("Arial"));
+								  DEFAULT_PITCH, m_strFont);
 		}
 
 		CFont* pFontOld = dc.SelectObject(&m_fontXScale);
@@ -582,7 +589,7 @@ bool CHMXChart::DrawYScale(CDC & dc)
 		font.CreateFont(nFontSize, 0, 0, 0, FW_NORMAL,
 						 FALSE, FALSE, FALSE, ANSI_CHARSET,
 						 OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
-						 DEFAULT_PITCH, _T("Arial"));
+						 DEFAULT_PITCH, m_strFont);
 
 		CFont* pFontOld = dc.SelectObject(&font);
 
@@ -595,7 +602,7 @@ bool CHMXChart::DrawYScale(CDC & dc)
 			CRect rTemp(m_rectYAxis.left, (int)nTemp2, m_rectYAxis.right - 4, (int)nTemp1);
 			sBuffer.Format(_T("%g"), m_nYMin + nY*f);
 
-			dc.DrawText(sBuffer, &rTemp, DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX);
+			dc.DrawText(sBuffer, &rTemp, DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
 
 			int nLabelLeft = (m_rectYAxis.right - 4 - dc.GetTextExtent(sBuffer).cx);
 			rTitle.right = min(rTitle.right, nLabelLeft);
@@ -606,14 +613,14 @@ bool CHMXChart::DrawYScale(CDC & dc)
 
 	if (!m_strYText.IsEmpty()) 
 	{
-		int nFontSize = CalcYScaleFontSize(TRUE);
-
 		if (m_fontYScale.GetSafeHandle() == NULL)
 		{
+			int nFontSize = CalcYScaleFontSize(TRUE);
+
 			m_fontYScale.CreateFont(nFontSize, 0, 900, 0, FW_NORMAL,
 								  FALSE, FALSE, FALSE, ANSI_CHARSET,
 								  OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
-								  DEFAULT_PITCH, _T("Arial"));
+								  DEFAULT_PITCH, m_strFont);
 
 		}
 
