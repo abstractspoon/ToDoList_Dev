@@ -4123,9 +4123,12 @@ BOOL CWorkloadCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 	m_lcColumnTotals.SetFont(pFont, bRedraw);
 	m_hdrColumns.SetFont(pFont, bRedraw);
 
-
-
 	ResizeColumnsToFit();
+
+	CString sFontName;
+	int nFontSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFontName);
+
+	m_barChart.SetFont(sFontName, MulDiv(nFontSize, 4, 3));
 
 	return TRUE;
 }
