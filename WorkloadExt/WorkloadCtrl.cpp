@@ -322,8 +322,11 @@ void CWorkloadCtrl::AdjustSplitterToFitAttributeColumns()
 	
 	CRect rClient;
 	CWnd::GetClientRect(rClient);
+
+	// adjust for graph
+	rClient.right = ((rClient.Width() * 2) / 3);
 	
-	int nNewSplitPos = (rClient.right - nColsWidth - GetSplitBarWidth() - 1);
+	int nNewSplitPos = (rClient.right - nColsWidth - GetSplitBarWidth() - LV_COLPADDING);
 	nNewSplitPos = max(MIN_LABEL_EDIT_WIDTH, nNewSplitPos);
 	
 	CTreeListSyncer::SetSplitPos(nNewSplitPos);
@@ -1292,25 +1295,36 @@ void CWorkloadCtrl::Resize(int cx, int cy)
 
 	if (cx && cy)
 	{
-		CRect rChart(((cx * 2) / 3), 0, cx, cy);
+		CRect rTreeList(0, 0, ((cx * 2) / 3), cy);
+		rTreeList.bottom = (cy - ((m_tcTasks.GetItemHeight() + 1) * NUM_TOTALS) - LV_COLPADDING);
+
+		CRect rChart(rTreeList.right + LV_COLPADDING, 0, cx, cy);
 		m_barChart.MoveWindow(rChart);
-
-		CRect rect(0, 0, rChart.left - 4, cy);
-		CRect rTreeTotals(rect), rColumnTotals(rect), rTreeList(rect);
-		
-		rTreeTotals.top = (rect.bottom - ((m_tcTasks.GetItemHeight() + 1) * NUM_TOTALS));
-		rColumnTotals.top = rTreeTotals.top;
-		rTreeList.bottom = rTreeTotals.top - 3;
-		
-		// Note: resizing for splitter is handled in OnNotifySplitterChange
-		m_lcTotalsLabels.MoveWindow(rTreeTotals);
-		m_lcColumnTotals.MoveWindow(rColumnTotals);
-
+				
 		CTreeListSyncer::Resize(rTreeList, GetSplitPos());
 
 		if (m_hdrTasks.GetItemCount())
 			m_tcTasks.SetTitleColumnWidth(m_hdrTasks.GetItemWidth(0));
 	}
+}
+
+void CWorkloadCtrl::ResyncTotalsPositions()
+{
+	CRect rClient;
+	CWnd::GetClientRect(rClient);
+
+	CRect rTreeTotals = CDialogHelper::GetChildRect(&m_tcTasks);
+	CRect rColumnTotals = CDialogHelper::GetChildRect(&m_lcColumns);
+
+	rTreeTotals.top = rColumnTotals.top = (max(rTreeTotals.bottom, rColumnTotals.bottom) + LV_COLPADDING);
+	rTreeTotals.bottom = rColumnTotals.bottom = rClient.bottom;
+
+	// Adjust for border drawn by CTreeListSyncer
+	rColumnTotals.right++;
+
+	m_lcColumnTotals.MoveWindow(rColumnTotals);
+	m_lcTotalsLabels.MoveWindow(rTreeTotals);
+	m_lcTotalsLabels.SetColumnWidth(0, rTreeTotals.Width());
 }
 
 void CWorkloadCtrl::OnSize(UINT nType, int cx, int cy)
@@ -3348,27 +3362,22 @@ void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
 	// Adjust 'Title' column to suit
 	int nRestOfColsWidth = m_hdrTasks.CalcTotalItemWidth(0);
 
-	CClientDC dc(&m_tcTasks);
-	int nMinColWidth = CalcWidestItemTitle(NULL, &dc, FALSE);
+	CClientDC dc(this);
+	GraphicsMisc::PrepareDCFont(&dc, m_tcTasks);
 
+	int nMinColWidth = CalcWidestItemTitle(NULL, &dc, FALSE);
 	int nTitleColWidth = max(nMinColWidth, (nSplitPos - nRestOfColsWidth));
 
 	m_hdrTasks.SetItemWidth(WLCC_TITLE, nTitleColWidth);
-	m_hdrTasks.SetItemTracked(WLCC_TITLE, TRUE);
+
+	if (m_bSplitting)
+		m_hdrTasks.SetItemTracked(WLCC_TITLE, TRUE);
+
 	m_hdrTasks.UpdateWindow();
 
 	m_tcTasks.SetTitleColumnWidth(nTitleColWidth);
 
-	CRect rTreeTotals = CDialogHelper::GetChildRect(&m_lcTotalsLabels);
-	CRect rColumnTotals = CDialogHelper::GetChildRect(&m_lcColumnTotals);
-	
-	rTreeTotals.right = (rTreeTotals.left + GetSplitPos() + 1);
-	rColumnTotals.left = (rTreeTotals.right + GetSplitBarWidth() - 2);
-	
-	m_lcTotalsLabels.MoveWindow(rTreeTotals);
-	m_lcColumnTotals.MoveWindow(rColumnTotals);
-	m_lcTotalsLabels.SetColumnWidth(0, nSplitPos);
-	
+	ResyncTotalsPositions();
 	UpdateWindow();
 }
 

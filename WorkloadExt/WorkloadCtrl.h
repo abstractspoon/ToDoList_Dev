@@ -257,6 +257,7 @@ protected:
 	void RecalcAllocationTotals();
 	void RecalcDataDateRange();
 	void AdjustSplitterToFitAttributeColumns();
+	void ResyncTotalsPositions();
 
 	inline BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 
