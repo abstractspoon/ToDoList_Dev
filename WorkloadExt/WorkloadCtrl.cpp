@@ -1296,7 +1296,7 @@ void CWorkloadCtrl::Resize(int cx, int cy)
 	if (cx && cy)
 	{
 		CRect rTreeList(0, 0, ((cx * 2) / 3), cy);
-		rTreeList.bottom = (cy - ((m_tcTasks.GetItemHeight() + 1) * NUM_TOTALS) - LV_COLPADDING);
+		rTreeList.bottom = (cy - (m_tcTasks.GetItemHeight() * NUM_TOTALS) - LV_COLPADDING);
 
 		CRect rChart(rTreeList.right + LV_COLPADDING, 0, cx, cy);
 		m_barChart.MoveWindow(rChart);
@@ -2989,7 +2989,7 @@ CString CWorkloadCtrl::GetListItemColumnText(const WORKLOADITEM& wi, int nCol, i
 	switch (GetListColumnType(nCol))
 	{
 	case WLCT_TOTAL:
-		return wi.mapAllocatedDays.GetTotalDays(nDecimals);
+		return wi.mapAllocatedDays.FormatTotalDays(nDecimals);
 		
 	case WLCT_VALUE:
 		{
@@ -2997,7 +2997,7 @@ CString CWorkloadCtrl::GetListItemColumnText(const WORKLOADITEM& wi, int nCol, i
 			ASSERT(nAllocTo < m_aAllocTo.GetSize());
 			
 			CString sAllocTo = m_aAllocTo[nAllocTo];
-			CString sDays = wi.mapAllocatedDays.GetDays(sAllocTo, nDecimals);
+			CString sDays = wi.mapAllocatedDays.FormatDays(sAllocTo, nDecimals);
 
 			if (!sDays.IsEmpty())
 			{
@@ -3024,7 +3024,7 @@ CString CWorkloadCtrl::GetListItemColumnTotal(const CMapAllocationTotals& mapTot
 	switch (GetListColumnType(nCol))
 	{
 	case WLCT_TOTAL:
-		return mapTotals.GetTotal(nDecimals);
+		return mapTotals.FormatTotal(nDecimals);
 
 	case WLCT_VALUE:
 		{
@@ -3032,7 +3032,7 @@ CString CWorkloadCtrl::GetListItemColumnTotal(const CMapAllocationTotals& mapTot
 			ASSERT(nAllocTo < m_aAllocTo.GetSize());
 
 			CString sAllocTo = m_aAllocTo[nAllocTo];
-			return mapTotals.Get(sAllocTo, nDecimals);
+			return mapTotals.Format(sAllocTo, nDecimals);
 		}
 		break;
 	}
@@ -3315,7 +3315,7 @@ void CWorkloadCtrl::RecalcListColumnsToFit()
 		int nHeaderWidth = dc.GetTextExtent(sAllocTo).cx;
 		nMaxHeaderWidth = max(nMaxHeaderWidth, nHeaderWidth);
 
-		int nTotalWidth = dc.GetTextExtent(m_mapTotalDays.Get(sAllocTo, 2)).cx;
+		int nTotalWidth = dc.GetTextExtent(m_mapTotalDays.Format(sAllocTo, 2)).cx;
 		nMaxHeaderWidth = max(nMaxHeaderWidth, nTotalWidth);
 	}
 	nMaxHeaderWidth += (2 * HD_COLPADDING);

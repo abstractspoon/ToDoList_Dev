@@ -735,9 +735,11 @@ BOOL CWorkloadWnd::OnEraseBkgnd(CDC* pDC)
 	// clip out our children
 	CDialogHelper::ExcludeChild(&m_toolbar, pDC);
 	CDialogHelper::ExcludeChild(&m_ctrlWorkload, pDC);
+	CDialogHelper::ExcludeChild(&m_dtcPeriodStart, pDC);
+	CDialogHelper::ExcludeChild(&m_dtcPeriodEnd, pDC);
+	CDialogHelper::ExcludeChild(&m_sliderDateRange, pDC);
 
-	CDialogHelper::ExcludeCtrl(this, IDC_SELECTEDTASKDATES_LABEL, pDC);
-	CDialogHelper::ExcludeCtrl(this, IDC_SELECTEDTASKDATES, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_ACTIVEDATERANGE_LABEL, pDC);
 
 	// then our background
 	if (m_brBack.GetSafeHandle())

@@ -87,11 +87,11 @@ BOOL CMapDayAllocations::SetDays(const CString& sAllocTo, double dValue)
 	return TRUE;
 }
 
-CString CMapDayAllocations::GetDays(const CString& sAllocTo, int nDecimals) const
+CString CMapDayAllocations::FormatDays(const CString& sAllocTo, int nDecimals) const
 {
 	double dValue = GetDays(sAllocTo);
 
-	return Format(dValue, nDecimals);
+	return FormatDays(dValue, nDecimals);
 }
 
 BOOL CMapDayAllocations::SetDays(const CString& sAllocTo, const CString& sDays)
@@ -216,12 +216,12 @@ double CMapDayAllocations::GetTotalDays() const
 	return dTotalDays;
 }
 
-CString CMapDayAllocations::GetTotalDays(int nDecimals) const
+CString CMapDayAllocations::FormatTotalDays(int nDecimals) const
 {
-	return Format(GetTotalDays(), nDecimals);
+	return FormatDays(GetTotalDays(), nDecimals);
 }
 
-CString CMapDayAllocations::Format(double dValue, int nDecimals)
+CString CMapDayAllocations::FormatDays(double dValue, int nDecimals)
 {
 	return ((dValue == 0.0) ? _T("") : Misc::Format(dValue, nDecimals));
 }
@@ -271,7 +271,7 @@ BOOL CMapAllocationTotals::Set(const CString& sAllocTo, double dValue)
 	return TRUE;
 }
 
-CString CMapAllocationTotals::Get(const CString& sAllocTo, int nDecimals) const
+CString CMapAllocationTotals::Format(const CString& sAllocTo, int nDecimals) const
 {
 	double dValue = Get(sAllocTo);
 
@@ -313,7 +313,7 @@ double CMapAllocationTotals::GetTotal() const
 	return dTotalDays;
 }
 
-CString CMapAllocationTotals::GetTotal(int nDecimals) const
+CString CMapAllocationTotals::FormatTotal(int nDecimals) const
 {
 	return Format(GetTotal(), nDecimals);
 }

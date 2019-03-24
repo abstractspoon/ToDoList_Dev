@@ -68,10 +68,10 @@ public:
 	BOOL Get(const CString& sAllocTo, WORKLOADALLOCATION& wa) const;
 
 	double GetDays(const CString& sAllocTo) const;
-	CString GetDays(const CString& sAllocTo, int nDecimals) const;
+	CString FormatDays(const CString& sAllocTo, int nDecimals) const;
 
 	double GetTotalDays() const;
-	CString GetTotalDays(int nDecimals) const;
+	CString FormatTotalDays(int nDecimals) const;
 
 	BOOL SetDays(const CString& sAllocTo, double dValue);
 	BOOL SetDays(const CString& sAllocTo, const CString& sValue);
@@ -88,7 +88,7 @@ public:
 	void RemoveAll();
 	
 protected:
-	static CString Format(double dValue, int nDecimals);
+	static CString FormatDays(double dValue, int nDecimals);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -100,10 +100,10 @@ public:
 	virtual ~CMapAllocationTotals();
 
 	double Get(const CString& sAllocTo) const;
-	CString Get(const CString& sAllocTo, int nDecimals) const;
+	CString Format(const CString& sAllocTo, int nDecimals) const;
 
 	double GetTotal() const;
-	CString GetTotal(int nDecimals) const;
+	CString FormatTotal(int nDecimals) const;
 
 	BOOL Set(const CString& sAllocTo, double dValue);
 	BOOL Add(const CString& sAllocTo, double dValue);
