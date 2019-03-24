@@ -1888,11 +1888,6 @@ int Misc::ParseSearchString(LPCTSTR szSearch, CStringArray& aWords)
 
 CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 {
-	return (Format(dVal, nDecPlaces) + szTrail);
-}
-
-CString Misc::Format(double dVal, int nDecPlaces)
-{
 	char* szLocale = _strdup(setlocale(LC_NUMERIC, NULL)); // current locale
 	setlocale(LC_NUMERIC, ""); // local default
 
@@ -1907,36 +1902,20 @@ CString Misc::Format(double dVal, int nDecPlaces)
 	setlocale(LC_NUMERIC, szLocale);
 	free(szLocale);
 
-	return sValue;
+	return (sValue + szTrail);
 }
 
 CString Misc::Format(int nVal, LPCTSTR szTrail)
 {
-	return (Format(nVal) + szTrail);
+	return (FormatT(_T("%ld"), nVal) + szTrail);
 }
 
 CString Misc::Format(DWORD dwVal, LPCTSTR szTrail)
 {
-	return (Format(dwVal) + szTrail);
+	return (FormatT(_T("%lu"), dwVal) + szTrail);
 }
 
-CString Misc::Format(int nVal)
-{
-	CString sValue;
-	sValue.Format(_T("%ld"), nVal);
-	
-	return sValue;
-}
-
-CString Misc::Format(DWORD dwVal)
-{
-	CString sValue;
-	sValue.Format(_T("%lu"), dwVal);
-	
-	return sValue;
-}
-
-CString Misc::FormatCost(double dCost)
+CString Misc::FormatCost(double dCost, LPCTSTR szTrail)
 {
 	CString sValue;
 	sValue.Format(_T("%.6f"), dCost);
@@ -1954,7 +1933,7 @@ CString Misc::FormatCost(double dCost)
 	setlocale(LC_NUMERIC, szLocale);
 	free(szLocale);
 
-	return sValue;
+	return (sValue + szTrail);
 }
 
 CString Misc::GetKeyName(WORD wVirtKeyCode, BOOL bExtended)
@@ -2091,8 +2070,7 @@ CString Misc::MakeKey(const CString& sFormat, int nKeyVal, LPCTSTR szParentKey)
 {
 	ASSERT(!sFormat.IsEmpty());
 
-	CString sKey;
-	sKey.Format(sFormat, nKeyVal);
+	CString sKey(FormatT(sFormat, nKeyVal));
 
 	if (!IsEmpty(szParentKey))
 	{
@@ -2109,10 +2087,7 @@ CString Misc::MakeKey(const CString& sFormat, int nKeyVal, LPCTSTR szParentKey)
 
 CString Misc::MakeKey(const CString& sFormat, LPCTSTR szKeyVal, LPCTSTR szParentKey)
 {
-	CString sKey;
-	sKey.Format(sFormat, szKeyVal);
-
-	return MakeKey(sKey, 0, szParentKey);
+	return MakeKey(FormatT(sFormat, szKeyVal), 0, szParentKey);
 }
 
 int Misc::NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBelow)

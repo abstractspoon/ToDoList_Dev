@@ -191,10 +191,10 @@ void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTa
 	pXIDestItem->AddItem(_T("TEXT"), Translate(pSrcTaskFile->GetTaskTitle(hTask)));
 
 	time_t tLastMod = pSrcTaskFile->GetTaskLastModified(hTask);
-	pXIDestItem->AddItem(_T("MODIFIED"), (Misc::Format((DWORD)tLastMod) + _T("000")));
+	pXIDestItem->AddItem(_T("MODIFIED"), Misc::Format((DWORD)tLastMod, _T("000")));
 
 	time_t tCreation = pSrcTaskFile->GetTaskCreationDate(hTask);
-	pXIDestItem->AddItem(_T("CREATED"), (Misc::Format((DWORD)tCreation) + _T("000")));
+	pXIDestItem->AddItem(_T("CREATED"), Misc::Format((DWORD)tCreation, _T("000")));
 
 	// FM specific attributes not handled natively by ToDoList
 	pXIDestItem->AddItem(_T("BACKGROUND_COLOR"), pSrcTaskFile->GetTaskMetaData(hTask, _T("FM_BKGNDCOLOR")));

@@ -420,15 +420,22 @@ namespace Misc
 
 	int Round(double dValue);
 	double Atof(const CString& sValue);
-	CString Format(double dVal, int nDecPlaces, LPCTSTR szTrail);
-	CString Format(double dVal, int nDecPlaces = -1);
-	CString Format(int nVal, LPCTSTR szTrail);
-	CString Format(DWORD dwVal, LPCTSTR szTrail);
-	CString Format(int nVal);
-	CString Format(DWORD dwVal);
-	CString FormatCost(double dCost);
 	BOOL IsNumber(const CString& sValue);
 	BOOL IsSymbol(const CString& sValue);
+
+	CString FormatCost(double dCost, LPCTSTR szTrail = NULL);
+	CString Format(double dVal, int nDecPlaces = -1, LPCTSTR szTrail = NULL);
+	CString Format(int nVal, LPCTSTR szTrail = NULL);
+	CString Format(DWORD dwVal, LPCTSTR szTrail = NULL);
+
+	template <class T>
+	CString FormatT(LPCTSTR szFormat, T tVal)
+	{
+		CString sValue;
+		sValue.Format(szFormat, tVal);
+
+		return sValue;
+	}
 
 	const CString& GetLongest(const CString& str1, const CString& str2, BOOL bAsDouble = FALSE);
 

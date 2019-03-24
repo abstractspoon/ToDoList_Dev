@@ -414,7 +414,6 @@ CString KANBANITEM::GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
 	case IUI_ID:			return Misc::Format(dwTaskID);
 	case IUI_PERCENT:		return Misc::Format(nPercent, _T("%"));
 	case IUI_PARENT:		return sPath;
-	case IUI_FLAG:			return _T(""); // TODO
 	case IUI_CREATEDBY:		return sCreatedBy;
 	case IUI_EXTERNALID:	return sExternalID;
 	case IUI_COST:			return Misc::Format(dCost, 2);
@@ -422,6 +421,7 @@ CString KANBANITEM::GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
 	case IUI_TIMEEST:		return CTimeHelper().FormatTime(dTimeEst, MapUnitsToTHUnits(nTimeEstUnits), 2);
 	case IUI_TIMESPENT:		return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
 
+	case IUI_FLAG:			// drawn separately
 	default:
 		ASSERT(0);
 		break;
@@ -465,7 +465,7 @@ BOOL KANBANITEM::HasAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
 	case IUI_TIMEEST:		return (dTimeEst > 0);
 	case IUI_TIMESPENT:		return (dTimeSpent > 0);
 
-	case IUI_FLAG:			return bFlag;
+	case IUI_FLAG:			break; // handled separately
 	}
 
 	ASSERT(0);
