@@ -58,22 +58,25 @@ const int DEF_MONTH_WIDTH		= GraphicsMisc::ScaleByDPIFactor(72);
 const int TREE_TITLE_MIN_WIDTH	= GraphicsMisc::ScaleByDPIFactor(75); 
 const int COLUMN_PADDING		= GraphicsMisc::ScaleByDPIFactor(15);
 const int MIN_MONTH_WIDTH		= GraphicsMisc::ScaleByDPIFactor(2);
-const int MINS_IN_HOUR			= 60;
-const int MINS_IN_DAY			= (MINS_IN_HOUR * 24);
 const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int TV_TIPPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
-const int MAX_HEADER_WIDTH		= 32000; // (SHRT_MAX - tolerance)
 const int DRAG_BUFFER			= GraphicsMisc::ScaleByDPIFactor(50);
 const int DONE_BOX				= GraphicsMisc::ScaleByDPIFactor(6);
 const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
+const int PARENT_ARROW_SIZE		= GraphicsMisc::ScaleByDPIFactor(6);
 
-const LONG DEPENDPICKPOS_NONE = 0xFFFFFFFF;
-const double DAY_WEEK_MULTIPLIER = 1.5;
-const double HOUR_DAY_MULTIPLIER = 6;
-const double MULTIYEAR_MULTIPLIER = 2.0;
-const double DAYS_IN_YEAR = 365.25;
-const double DAYS_IN_MONTH = (DAYS_IN_YEAR / 12);
+const LONG DEPENDPICKPOS_NONE	= 0xFFFFFFFF;
+
+const double DAY_WEEK_MULTIPLIER	= 1.5;
+const double HOUR_DAY_MULTIPLIER	= 6;
+const double MULTIYEAR_MULTIPLIER	= 2.0;
+const double DAYS_IN_YEAR			= 365.25;
+const double DAYS_IN_MONTH			= (DAYS_IN_YEAR / 12);
+
+const int MINS_IN_HOUR				= 60;
+const int MINS_IN_DAY				= (MINS_IN_HOUR * 24);
+const int MAX_HEADER_WIDTH			= 32000; // (SHRT_MAX - tolerance)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -4516,7 +4519,10 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDE
 
 	if (CalcMilestoneRect(*pGI, rItem, rMilestone))
 	{
-		nPos = rMilestone.CenterPoint().x;
+		if (bFrom)
+			nPos = rMilestone.CenterPoint().x;
+		else
+			nPos = rMilestone.right;
 	}
 	else
 	{
@@ -4527,6 +4533,9 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDE
 
 		if (!GetDrawPosFromDate((bFrom ? dtStart : dtDue), nPos))
 			return FALSE;
+
+		if (pGI->bParent && HasOption(GTLCF_CALCPARENTDATES))
+			rItem.bottom -= PARENT_ARROW_SIZE;
 	}
 
 	CPoint pt(nPos, ((rItem.top + rItem.bottom) / 2));
@@ -4581,10 +4590,11 @@ void CGanttTreeListCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth,
 	GetGanttBarColors(gi, crBorder, crFill);
 	
 	// adjust bar height
-	rBar.DeflateRect(0, GraphicsMisc::ScaleByDPIFactor(2), 0, GraphicsMisc::ScaleByDPIFactor(3));
+	rBar.top += GraphicsMisc::ScaleByDPIFactor(2);
+	rBar.bottom -= GraphicsMisc::ScaleByDPIFactor(3);
 
 	if (gi.bParent && HasOption(GTLCF_CALCPARENTDATES))
-		rBar.DeflateRect(0, 0, 0, GraphicsMisc::ScaleByDPIFactor(5));
+		rBar.bottom -= PARENT_ARROW_SIZE;
 	
 	// Determine what borders to draw
 	DWORD dwBorders = (GMDR_TOP | GMDR_BOTTOM);
@@ -4694,8 +4704,6 @@ void CGanttTreeListCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, cons
 	BOOL bDrawStart = (dtStart >= dtMonthStart);
 	BOOL bDrawEnd = (dtDue <= dtMonthEnd);
 
-	const int ARROW_SIZE = 6;
-
 	if (bDrawStart || bDrawEnd)
 	{
 		pDC->SelectObject(GetSysColorBrush(COLOR_WINDOWTEXT));
@@ -4706,8 +4714,8 @@ void CGanttTreeListCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, cons
 			POINT pt[3] = 
 			{ 
 				{ rBar.left, rBar.bottom }, 
-				{ rBar.left, rBar.bottom + ARROW_SIZE }, 
-				{ rBar.left + ARROW_SIZE, rBar.bottom } 
+				{ rBar.left, rBar.bottom + PARENT_ARROW_SIZE }, 
+				{ rBar.left + PARENT_ARROW_SIZE, rBar.bottom } 
 			};
 		
 			pDC->Polygon(pt, 3);
@@ -4718,8 +4726,8 @@ void CGanttTreeListCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, cons
 			POINT pt[3] = 
 			{ 
 				{ rBar.right, rBar.bottom }, 
-				{ rBar.right, rBar.bottom + ARROW_SIZE }, 
-				{ rBar.right - ARROW_SIZE, rBar.bottom } 
+				{ rBar.right, rBar.bottom + PARENT_ARROW_SIZE }, 
+				{ rBar.right - PARENT_ARROW_SIZE, rBar.bottom } 
 			};
 		
 			pDC->Polygon(pt, 3);

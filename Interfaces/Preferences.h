@@ -115,7 +115,6 @@ protected:
 	static INISECTION* GetSection(LPCTSTR lpszSection, BOOL bCreateNotExist);
 	static int FindSection(LPCTSTR lpszSection, BOOL bIncSubSections = FALSE);
 	
-	static POSITION GetEntry(INISECTION& section, LPCTSTR lpszEntry);
 	static BOOL GetEntryValue(const INISECTION& section, LPCTSTR lpszEntry, CString& sValue);
 	static void SetEntryValue(INISECTION& section, LPCTSTR lpszEntry, LPCTSTR szValue, BOOL bQuoted);
 	static void SetEntryValue(INISECTION& section, const INIENTRY& ie);

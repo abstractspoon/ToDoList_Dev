@@ -98,7 +98,6 @@ protected:
 
 	static BOOL CloseAllToDoListWnds();
 	static int FindToDoListWnds(TDCFINDWND& find);
-	static BOOL FormatEmailParams(CString& sParams);
 	static BOOL ValidateFilePath(CString& sFilePath, const CString& sExt = _T(""));
 	static BOOL ValidateTasklistPath(CString& sPath);
 	static BOOL ValidateIniPath(CString& sIniPath, BOOL bCheckExists);

@@ -70,7 +70,7 @@ LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&bus
 LPCTSTR FACEBOOK_URL		= _T("https://www.facebook.com/abstr.todolist/"); 
 
 LPCTSTR MSVCR100_DLL		= _T("MSVCR100.dll"); 
-LPCTSTR MSVCR100_URL	= _T("https://www.microsoft.com/en-hk/download/details.aspx?id=8328"); 
+LPCTSTR MSVCR100_URL		= _T("https://www.microsoft.com/en-hk/download/details.aspx?id=8328"); 
 LPCTSTR MSVCR100_MSG		= _T("System File Required|ToDoList requires the 'Microsoft Visual C++ 2010 SP1 Redistributable Package' ")
 								_T("to be installed.\n\nClick 'OK' to visit the appropriate download page or 'Cancel' to quit.");
 
@@ -1112,7 +1112,48 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs)
 	if (!CPreferences::UsesIni())
 		return;
 
-	// TODO
+	CString sLastUpgrade = prefs.GetProfileString(_T("Settings"), _T("LastPrefsUpgrade"));
+	CString sAppVer = FileMisc::GetAppVersion();
+
+	if (sLastUpgrade.IsEmpty() || (FileMisc::CompareVersions(sLastUpgrade, sAppVer) < 0))
+	{
+		// Rename 'Tasklists' resource folder to 'Examples'
+		LPCTSTR szTasklists = _T(".\\Resources\\Tasklists\\");
+		LPCTSTR szExamples = _T(".\\Resources\\Examples\\");
+
+		for (int nFile = 1; nFile <= 16; nFile++)
+		{
+			CString sKey = Misc::FormatT(_T("TaskList%d"), nFile);
+			CString sFile = prefs.GetProfileString(_T("MRU"), sKey);
+
+			if (sFile.IsEmpty())
+				break;
+
+			// Only replace if at the start of the filepath
+			if (Misc::Find(szTasklists, sFile, FALSE) == 0)
+			{
+				Misc::Replace(szTasklists, szExamples, sFile, FALSE);
+				prefs.WriteProfileString(_T("MRU"), sKey, sFile);
+			}
+		}
+
+		int nTDCCount = prefs.GetProfileInt(_T("Settings"), _T("NumLastFiles"), 0);
+
+		for (int nTDC = 0; nTDC < nTDCCount; nTDC++)
+		{
+			CString sKey = Misc::MakeKey(_T("LastFile%d"), nTDC);
+			CString sFile = prefs.GetProfileString(_T("Settings"), sKey);
+
+			// Only replace if at the start of the filepath
+			if (Misc::Find(szTasklists, sFile, FALSE) == 0)
+			{
+				Misc::Replace(szTasklists, szExamples, sFile, FALSE);
+				prefs.WriteProfileString(_T("Settings"), sKey, sFile);
+			}
+		}
+
+		prefs.WriteProfileString(_T("Settings"), _T("LastPrefsUpgrade"), sAppVer);
+	}
 }
 
 int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*/) 
@@ -1942,6 +1983,10 @@ void CToDoListApp::CleanupAppFolder()
 	FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.csv")), 10602, TRUE);
 	FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.xml")), 177520, TRUE);
 
+	// Rename 'Tasklists' resource folder
+	CString sExamples = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Examples")));
+	FileMisc::MoveFolder(sTasklists, sExamples);
+
 	// Rename/move install instructions
 	CString sResources = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder());
 	FileMisc::DeleteFileBySize(sResources + _T("Install.txt"), 1795, TRUE);
@@ -1953,13 +1998,5 @@ void CToDoListApp::CleanupAppFolder()
 		// Intentionally use raw API call so it will fail if any files remain in the folder
 		RemoveDirectory(sReadme);
 	}
-/*
-	// remove old RTF to HTML converter
-	FileMisc::DeleteFile(sFolder + _T("Itenso.Rtf.Converter.Html.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("Itenso.Rtf.Interpreter.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("Itenso.Rtf.Parser.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("Itenso.Solutions.Community.Rtf2Html.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("Itenso.Sys.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("Rtf2HtmlBridge.dll"), TRUE);
-*/
+
 }

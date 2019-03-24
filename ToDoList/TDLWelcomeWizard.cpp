@@ -254,7 +254,7 @@ CTDLWelcomePage3::CTDLWelcomePage3()
 	m_psp.dwFlags &= ~(PSP_HASHELP);		
 
 	m_eSampleTasklist.SetFilter(CEnString(IDS_TDLFILEOPENFILTER));
-	m_eSampleTasklist.SetCurrentFolder(FileMisc::GetAppResourceFolder() + _T("\\TaskLists"));
+	m_eSampleTasklist.SetCurrentFolder(FileMisc::GetAppResourceFolder() + _T("\\Examples"));
 	m_sSampleTaskList = "Introduction.tdl";
 	
 	m_strHeaderTitle = CEnString(IDS_WIZ_INTRO_HEADER);
@@ -309,7 +309,7 @@ void CTDLWelcomePage3::OnNosample()
 CString CTDLWelcomePage3::GetSampleFilePath() const 
 { 
 	if (m_bViewSample)
-		return FileMisc::GetFullPath(m_sSampleTaskList, FileMisc::GetAppResourceFolder() + _T("\\TaskLists"));
+		return FileMisc::GetFullPath(m_sSampleTaskList, FileMisc::GetAppResourceFolder() + _T("\\Examples"));
 	else
 		return _T("");
 }
