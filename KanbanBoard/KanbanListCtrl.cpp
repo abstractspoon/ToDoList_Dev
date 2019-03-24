@@ -33,12 +33,20 @@ static char THIS_FILE[] = __FILE__;
 #	define LVS_EX_DOUBLEBUFFER  0x00010000
 #endif
 
+#ifndef TVS_EX_DOUBLEBUFFER
+#	define TVS_EX_DOUBLEBUFFER  0x0004
+#endif
+
 #ifndef LVS_EX_LABELTIP
 #	define LVS_EX_LABELTIP		0x00004000
 #endif
 
 #ifndef TTM_ADJUSTRECT
 #	define TTM_ADJUSTRECT       (WM_USER + 31)
+#endif
+
+#ifndef TVS_NOHSCROLL
+#	define TVS_NOHSCROLL        0x8000
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
@@ -80,7 +88,6 @@ CKanbanListCtrl::CKanbanListCtrl(const CKanbanItemMap& data, const KANBANCOLUMN&
 								const CKanbanAttributeArray& aDisplayAttrib)
 	:
 	m_data(data),
-	m_tch(*this),
 	m_columnDef(columnDef),
 	m_aDisplayAttrib(aDisplayAttrib),
 	m_bHideEmptyAttributes(FALSE),
@@ -98,7 +105,10 @@ CKanbanListCtrl::CKanbanListCtrl(const CKanbanItemMap& data, const KANBANCOLUMN&
 	m_nAttribLabelVisiability(KBCAL_LONG),
 	m_bSavingToImage(FALSE),
 	m_bDropTarget(FALSE),
-	m_bDrawTaskFlags(FALSE)
+	m_bDrawTaskFlags(FALSE),
+#pragma warning (disable: 4355)
+	m_tch(*this)
+#pragma warning (default: 4355)
 {
 }
 
@@ -161,7 +171,7 @@ int CKanbanListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255))
 		SetImageList(&m_ilCheckboxes, TVSIL_STATE);
 
-	SetExtendedStyle(TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER);
+	TreeView_SetExtendedStyle(GetSafeHwnd(), TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER);
 	RefreshBkgndColor();
 
 	return 0;
@@ -920,7 +930,7 @@ CString CKanbanListCtrl::FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& s
 
 BOOL CKanbanListCtrl::GetLabelEditRect(LPRECT pEdit)
 {
-	if (!m_bSelected || !GetCount() || !GetSelectedCount())
+	if (!m_bSelected || !GetCount() || !GetSelectedItem())
 	{
 		ASSERT(0);
 		return FALSE;

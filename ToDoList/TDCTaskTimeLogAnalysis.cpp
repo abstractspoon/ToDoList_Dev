@@ -1045,7 +1045,7 @@ int CTDCTaskTimeLogAnalysis::BuildSortedIDList(const CMapIDToTime& mapIDs, CDWor
 		}
 
 		// Sort and convert to simple ID array
-		Misc::SortArrayT(aSortItems, LogSortProc);
+		Misc::SortArrayT<LOGSORTITEM>(aSortItems, LogSortProc);
 
 		aIDs.SetSize(mapIDs.GetCount());
 		nItem = aIDs.GetSize();

@@ -406,7 +406,7 @@ void CAutoComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
 	if (IsAutoCompleteMatch(nItem))
 		nItemState |= ODS_SELECTED;
 
-	return COwnerdrawComboBoxBase::GetItemColors(nItem, nItemState, dwItemData, crText, crBack);
+	COwnerdrawComboBoxBase::GetItemColors(nItem, nItemState, dwItemData, crText, crBack);
 }
 
 BOOL CAutoComboBox::IsAutoCompleteMatch(int nItem) const

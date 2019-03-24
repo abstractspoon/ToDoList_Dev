@@ -185,7 +185,11 @@ bool CKanbanCtrl::ProcessMessage(MSG* pMsg)
 
 BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentList)
 {
-	if (!m_pSelectedList->GetSelectedCount())
+	// Find the closest task at the currently
+	// selected task's scrolled pos
+	HTREEITEM hti = m_pSelectedList->GetSelectedItem();
+
+	if (!hti)
 	{
 		ASSERT(0);
 		return FALSE;
@@ -201,11 +205,6 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentList)
 
 	if (!pAdjacentList->GetCount())
 		return FALSE;
-
-	// Find the closest task at the currently
-	// selected task's scrolled pos
-	HTREEITEM hti = m_pSelectedList->GetSelectedItem();
-	ASSERT(hti);
 
 	// scroll into view first
 	m_pSelectedList->ScrollToSelection();
@@ -232,7 +231,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 	switch (wp)
 	{
 	case VK_LEFT:
-		if (m_pSelectedList->GetSelectedCount())
+		if (m_pSelectedList->GetSelectedItem())
 		{
 			int nSelList = m_aListCtrls.Find(m_pSelectedList);
 
@@ -245,7 +244,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 		break;
 
 	case VK_HOME:
-		if (m_pSelectedList->GetSelectedCount())
+		if (m_pSelectedList->GetSelectedItem())
 		{
 			int nSelList = m_aListCtrls.Find(m_pSelectedList);
 
@@ -258,7 +257,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 		break;
 
 	case VK_RIGHT:
-		if (m_pSelectedList->GetSelectedCount())
+		if (m_pSelectedList->GetSelectedItem())
 		{
 			int nSelList = m_aListCtrls.Find(m_pSelectedList);
 			int nNumList = m_aListCtrls.GetSize();
@@ -272,7 +271,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 		break;
 
 	case VK_END:
-		if (m_pSelectedList->GetSelectedCount())
+		if (m_pSelectedList->GetSelectedItem())
 		{
 			int nSelList = m_aListCtrls.Find(m_pSelectedList);
 			int nNumList = m_aListCtrls.GetSize();
@@ -2630,7 +2629,7 @@ CKanbanListCtrl* CKanbanCtrl::GetNextListCtrl(const CKanbanListCtrl* pList, BOOL
 
 BOOL CKanbanCtrl::IsDragging() const
 {
-	return (!m_bReadOnly && (GetCapture() == this));
+	return (!m_bReadOnly && (::GetCapture() == *this));
 }
 
 BOOL CKanbanCtrl::NotifyParentAttibuteChange(DWORD dwTaskID)
@@ -2683,7 +2682,7 @@ BOOL CKanbanCtrl::SelectListCtrl(CKanbanListCtrl* pList, BOOL bNotifyParent)
 		{
 			m_aListCtrls.SetSelectedList(m_pSelectedList);
 
-			if (m_pSelectedList->GetSelectedCount())
+			if (m_pSelectedList->GetSelectedItem())
 				m_pSelectedList->ScrollToSelection();
 
 			if (bNotifyParent)

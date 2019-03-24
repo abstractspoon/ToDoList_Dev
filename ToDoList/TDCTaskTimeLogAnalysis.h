@@ -47,6 +47,7 @@ protected:
 	
 	// ------------------------------------------------------------------------------
 
+public:
 	class CMapIDToTimeAndPeriod : public CMapIDToTime
 	{
 	public:
@@ -75,6 +76,7 @@ protected:
 
 	// ------------------------------------------------------------------------------
 
+protected:
 	int BuildLogItemArray();
 	int BuildGroupByMapping();
 	int BuildSortedIDList(const CMapIDToTime& mapDates, CDWordArray& aIDs) const;

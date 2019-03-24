@@ -239,10 +239,6 @@ SOURCE=.\TaskSelectionDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskTimeLog.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\TDCAnonymizeTasklist.cpp
 # End Source File
 # Begin Source File
@@ -304,6 +300,14 @@ SOURCE=.\TDCSourceControl.cpp
 # Begin Source File
 
 SOURCE=.\TDCStartupOptions.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCTaskTimeLog.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCTaskTimeLogAnalysis.cpp
 # End Source File
 # Begin Source File
 
@@ -791,10 +795,6 @@ SOURCE=.\TaskSelectionDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskTimeLog.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\TDCAnonymizeTasklist.h
 # End Source File
 # Begin Source File
@@ -880,6 +880,14 @@ SOURCE=.\tdcstruct.h
 # Begin Source File
 
 SOURCE=.\tdcswitch.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCTaskTimeLog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCTaskTimeLogAnalysis.h
 # End Source File
 # Begin Source File
 
@@ -1528,12 +1536,12 @@ SOURCE=.\ToDoList_All.sln
 # End Source File
 # End Target
 # End Project
+# Section ToDoList : {8856F961-340A-11D0-A96B-00C04FD705A2}
+# 	2:21:DefaultSinkHeaderFile:webbrowserctrl.h
+# 	2:16:DefaultSinkClass:CWebBrowserCtrl
+# End Section
 # Section ToDoList : {D30C1661-CDAF-11D0-8A3E-00C04FC9E26E}
 # 	2:5:Class:CWebBrowserCtrl
 # 	2:10:HeaderFile:webbrowserctrl.h
 # 	2:8:ImplFile:webbrowserctrl.cpp
-# End Section
-# Section ToDoList : {8856F961-340A-11D0-A96B-00C04FD705A2}
-# 	2:21:DefaultSinkHeaderFile:webbrowserctrl.h
-# 	2:16:DefaultSinkClass:CWebBrowserCtrl
 # End Section

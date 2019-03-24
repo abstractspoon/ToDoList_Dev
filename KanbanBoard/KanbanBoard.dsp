@@ -134,6 +134,10 @@ SOURCE=.\KanbanListCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\KanbanListCtrlArray.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\KanbanOptionComboBox.cpp
 # End Source File
 # Begin Source File
@@ -189,6 +193,10 @@ SOURCE=.\KanbanFixedColumnListCtrl.h
 # Begin Source File
 
 SOURCE=.\KanbanListCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\KanbanListCtrlArray.h
 # End Source File
 # Begin Source File
 
