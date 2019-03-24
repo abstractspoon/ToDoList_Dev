@@ -566,7 +566,6 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 		
 	// Month Display may change for large date ranges
 	BuildDisplayCombo();
-
 	UpdateActiveRangeLabel();
 }
 
@@ -1427,6 +1426,7 @@ LRESULT CGanttChartWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
 	else
 		m_ctrlGantt.ClearActiveDateRange();
 
+	BuildDisplayCombo();
 	UpdateActiveRangeLabel();
 
 	return 0L;
