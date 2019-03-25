@@ -103,7 +103,7 @@ protected:
 	static BOOL ValidateIniPath(CString& sIniPath, BOOL bCheckExists);
 	static BOOL GetDefaultIniPath(CString& sIniPath, BOOL bCheckExists);
 	static CString GetResourcePath(LPCTSTR szSubFolder = NULL, LPCTSTR szFile = NULL);
-	static void CleanupAppFolder(LPCTSTR szPrevVe);
+	static void CleanupAppFolder(LPCTSTR szPrevVer);
 	static void FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer);
 
 	static BOOL CALLBACK FindOtherInstance(HWND hwnd, LPARAM lParam);

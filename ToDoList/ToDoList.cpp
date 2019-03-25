@@ -1955,7 +1955,6 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 	if (FileMisc::CompareVersions(szPrevVer, _T("7.0")) < 0)
 	{
 		// remove old web updater
-
 		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc.exe"), TRUE);
 		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc2.exe"), TRUE);
 		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc.log"), TRUE);
