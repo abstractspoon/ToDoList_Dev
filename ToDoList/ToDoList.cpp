@@ -110,7 +110,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListApp construction
 
-CToDoListApp::CToDoListApp() : CWinApp(), m_bVersionChange(FALSE)
+CToDoListApp::CToDoListApp() : CWinApp()
 {
 	// Place all significant initialization in InitInstance
 }
@@ -208,14 +208,13 @@ BOOL CToDoListApp::InitInstance()
 		CFileEdit::SetDefaultButtonImages(iconBrowse.Detach(), iconGo.Detach());
 	
 	// init prefs 
-	if (!InitPreferences(cmdInfo))
+	CString sPrevVer = FileMisc::GetAppVersion();
+
+	if (!InitPreferences(cmdInfo, sPrevVer))
 		return FALSE; // quit app
 
-	if (m_bVersionChange)
-	{
-		CleanupAppFolder();
-		FixupExampleTasklistsTaskDates();
-	}
+	CleanupAppFolder(sPrevVer);
+	FixupExampleTasklistsTaskDates(sPrevVer);
 
 	// commandline options
 	CTDCStartupOptions startup(cmdInfo);
@@ -834,7 +833,7 @@ void CToDoListApp::DoHelp(UINT nHelpID)
 	FileMisc::Run(*m_pMainWnd, (WIKI_URL + sHelpPage), NULL, SW_SHOWNORMAL);
 }
 
-BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
+BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo, CString& sPrevVer)
 {
 	BOOL bUseIni = FALSE;
 	BOOL bSetMultiInstance = FALSE;
@@ -909,7 +908,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		}
 
 		// Has the user already chosen a language?
-		if (!InitTranslation(bFirstTime, bQuiet))
+		if (!InitTranslation(FALSE, bQuiet))
 		{ 
 			// user cancelled -> Quit app
 			return FALSE;
@@ -925,13 +924,8 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 			prefs.WriteProfileInt(_T("Preferences"), _T("MultiInstance"), TRUE);
 		
 		// Check for version change
-		CString sPrevVer = prefs.GetProfileString(_T("AppVer"), _T("Version"));
-		CString sThisVer = FileMisc::GetAppVersion();
-
-		m_bVersionChange = (sPrevVer.IsEmpty() || (FileMisc::CompareVersions(sPrevVer, sThisVer) < 0));
-
-		if (m_bVersionChange)
-			UpgradePreferences(prefs);
+		sPrevVer = prefs.GetProfileString(_T("AppVer"), _T("Version"));
+		UpgradePreferences(prefs, sPrevVer);
 
 		// check for web updates
 		if (prefs.GetProfileInt(_T("Preferences"), _T("AutoCheckForUpdates"), FALSE))
@@ -1113,47 +1107,49 @@ BOOL CToDoListApp::InitTranslation(BOOL bFirstTime, BOOL bQuiet)
 	return TRUE;
 }
 
-void CToDoListApp::UpgradePreferences(CPreferences& prefs)
+void CToDoListApp::UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer)
 {
-	ASSERT(m_bVersionChange);
 	UNREFERENCED_PARAMETER(prefs);
 
 	// we don't handle the registry because it's too hard (for now)
 	if (!CPreferences::UsesIni())
 		return;
 
-	// Rename 'Tasklists' resource folder to 'Examples'
-	LPCTSTR szTasklists = _T(".\\Resources\\Tasklists\\");
-	LPCTSTR szExamples = _T(".\\Resources\\Examples\\");
-
-	for (int nFile = 1; nFile <= 16; nFile++)
+	if (FileMisc::CompareVersions(szPrevVer, _T("7.2.10")) < 0)
 	{
-		CString sKey = Misc::FormatT(_T("TaskList%d"), nFile);
-		CString sFile = prefs.GetProfileString(_T("MRU"), sKey);
+		// Rename 'Tasklists' resource folder to 'Examples'
+		LPCTSTR szTasklists = _T(".\\Resources\\Tasklists\\");
+		LPCTSTR szExamples = _T(".\\Resources\\Examples\\");
 
-		if (sFile.IsEmpty())
-			break;
-
-		// Only replace if at the start of the filepath
-		if (Misc::Find(szTasklists, sFile, FALSE) == 0)
+		for (int nFile = 1; nFile <= 16; nFile++)
 		{
-			Misc::Replace(szTasklists, szExamples, sFile, FALSE);
-			prefs.WriteProfileString(_T("MRU"), sKey, sFile);
+			CString sKey = Misc::FormatT(_T("TaskList%d"), nFile);
+			CString sFile = prefs.GetProfileString(_T("MRU"), sKey);
+
+			if (sFile.IsEmpty())
+				break;
+
+			// Only replace if at the start of the filepath
+			if (Misc::Find(szTasklists, sFile, FALSE) == 0)
+			{
+				Misc::Replace(szTasklists, szExamples, sFile, FALSE);
+				prefs.WriteProfileString(_T("MRU"), sKey, sFile);
+			}
 		}
-	}
 
-	int nTDCCount = prefs.GetProfileInt(_T("Settings"), _T("NumLastFiles"), 0);
+		int nTDCCount = prefs.GetProfileInt(_T("Settings"), _T("NumLastFiles"), 0);
 
-	for (int nTDC = 0; nTDC < nTDCCount; nTDC++)
-	{
-		CString sKey = Misc::MakeKey(_T("LastFile%d"), nTDC);
-		CString sFile = prefs.GetProfileString(_T("Settings"), sKey);
-
-		// Only replace if at the start of the filepath
-		if (Misc::Find(szTasklists, sFile, FALSE) == 0)
+		for (int nTDC = 0; nTDC < nTDCCount; nTDC++)
 		{
-			Misc::Replace(szTasklists, szExamples, sFile, FALSE);
-			prefs.WriteProfileString(_T("Settings"), sKey, sFile);
+			CString sKey = Misc::MakeKey(_T("LastFile%d"), nTDC);
+			CString sFile = prefs.GetProfileString(_T("Settings"), sKey);
+
+			// Only replace if at the start of the filepath
+			if (Misc::Find(szTasklists, sFile, FALSE) == 0)
+			{
+				Misc::Replace(szTasklists, szExamples, sFile, FALSE);
+				prefs.WriteProfileString(_T("Settings"), sKey, sFile);
+			}
 		}
 	}
 }
@@ -1949,84 +1945,96 @@ CString CToDoListApp::GetResourcePath(LPCTSTR szSubFolder, LPCTSTR szFile)
 	return sResource;
 }
 
-void CToDoListApp::CleanupAppFolder()
+void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 {
 	CScopedLogTime log(_T("CleanupAppFolder"));
 
-	// remove old web updater
-	CString sFolder = FileMisc::TerminatePath(FileMisc::GetAppFolder());
-
-	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc.exe"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc2.exe"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc.log"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc2.log"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc.LIC"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("install.bmp"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("install.ico"), TRUE);
-
-	// remove old components
-	FileMisc::DeleteFile(sFolder + _T("GoogleDocsStorage.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("ToodleDoStorage.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("ToDoListLOC.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("RTFContentCtrlLOC.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("ChronicleWrap.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("StatisticsExt.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("OutlookImpExp.dll"), TRUE);
-
-	// remove experimental manifest
-	FileMisc::DeleteFileBySize(sFolder + _T("ToDoList.exe.4K.manifest"), 1153, TRUE);
-
-	// gif translation 'flags' replaced with pngs
-	CString sTranslations = FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
-	FileMisc::DeleteFolderContents(sTranslations, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY, _T("*.gif"));
-
-	// Wrongly installed resource files
+	CString sAppFolder = FileMisc::TerminatePath(FileMisc::GetAppFolder());
 	CString sTasklists = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Tasklists")));
 
-	FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.txt")), 395, TRUE);
-	FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.csv")), 10602, TRUE);
-	FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.xml")), 177520, TRUE);
-
-	// Rename 'Tasklists' resource folder
-	CString sExamples = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Examples")));
-	FileMisc::MoveFolder(sTasklists, sExamples);
-
-	// Rename/move install instructions
-	CString sResources = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder());
-	FileMisc::DeleteFileBySize(sResources + _T("Install.txt"), 1795, TRUE);
-
-	CString sReadme = (sResources + _T("ReadMe\\"));
-	
-	if (FileMisc::DeleteFileBySize(sReadme + _T("Readme.Linux.txt"), 3260, TRUE))
+	if (FileMisc::CompareVersions(szPrevVer, _T("7.0")) < 0)
 	{
-		// Intentionally use raw API call so it will fail if any files remain in the folder
-		RemoveDirectory(sReadme);
+		// remove old web updater
+
+		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc.exe"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc2.exe"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc.log"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc2.log"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc.LIC"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("install.bmp"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("install.ico"), TRUE);
+
+		// remove old components
+		FileMisc::DeleteFile(sAppFolder + _T("GoogleDocsStorage.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("ToodleDoStorage.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("ToDoListLOC.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("RTFContentCtrlLOC.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("ChronicleWrap.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("StatisticsExt.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("OutlookImpExp.dll"), TRUE);
+
+		// gif translation 'flags' replaced with pngs
+		CString sTranslations = FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
+		FileMisc::DeleteFolderContents(sTranslations, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY, _T("*.gif"));
+
+		// Wrongly installed resource files
+		FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.txt")), 395, TRUE);
+		FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.csv")), 10602, TRUE);
+		FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.xml")), 177520, TRUE);
+	}
+
+	if (FileMisc::CompareVersions(szPrevVer, _T("7.2.10")) < 0)
+	{
+		// remove experimental manifest
+		FileMisc::DeleteFileBySize(sAppFolder + _T("ToDoList.exe.4K.manifest"), 1153, TRUE);
+
+		// Rename 'Tasklists' resource folder
+		CString sExamples = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Examples")));
+		FileMisc::MoveFolder(sTasklists, sExamples);
+
+		// Rename/move install instructions
+		CString sResources = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder());
+		FileMisc::DeleteFileBySize(sResources + _T("Install.txt"), 1795, TRUE);
+
+		CString sReadme = (sResources + _T("ReadMe\\"));
+
+		if (FileMisc::DeleteFileBySize(sReadme + _T("Readme.Linux.txt"), 3260, TRUE))
+		{
+			// Intentionally use raw API call so it will fail if any files remain in the folder
+			RemoveDirectory(sReadme);
+		}
 	}
 }
 
-void CToDoListApp::FixupExampleTasklistsTaskDates()
+void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
 {
-	CScopedLogTime log(_T("FixupExampleTasklistsTaskDates"));
+	// Update task dates whenever the version changes
+	CString sThisVer = FileMisc::GetAppVersion();
 
-	CString sExamples = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Examples")));
-
-	CStringArray aExamples;
-	int nNumExamples = FileMisc::FindFiles(sExamples, aExamples, FALSE, _T("*.tdl"));
-
-	for (int nFile = 0; nFile < nNumExamples; nFile++)
+	if (FileMisc::CompareVersions(szPrevVer, sThisVer) < 0)
 	{
-		CTaskFile tasks;
+		CScopedLogTime log(_T("FixupExampleTasklistsTaskDates"));
 
-		if (tasks.Load(aExamples[nFile]))
+		CString sExamples = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Examples")));
+
+		CStringArray aExamples;
+		int nNumExamples = FileMisc::FindFiles(sExamples, aExamples, FALSE, _T("*.tdl"));
+
+		for (int nFile = 0; nFile < nNumExamples; nFile++)
 		{
-			COleDateTime dtNow = COleDateTime::GetCurrentTime(), dtEarliest;
+			CTaskFile tasks;
 
-			if (tasks.GetEarliestTaskStartDate(dtEarliest))
+			if (tasks.Load(aExamples[nFile]))
 			{
-				int nOffset = (int)(dtNow.m_dt - dtEarliest.m_dt); // whole days
+				COleDateTime dtNow = COleDateTime::GetCurrentTime(), dtEarliest;
+
+				if (tasks.GetEarliestTaskStartDate(dtEarliest))
+				{
+					int nOffset = (int)(dtNow.m_dt - dtEarliest.m_dt); // whole days
 				
-				if (tasks.OffsetDates(nOffset))
-					tasks.Save(aExamples[nFile], SFEF_UTF16);
+					if (tasks.OffsetDates(nOffset))
+						tasks.Save(aExamples[nFile], SFEF_UTF16);
+				}
 			}
 		}
 	}

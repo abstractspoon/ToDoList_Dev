@@ -45,7 +45,6 @@ protected:
 
 protected:
 	CString m_sLanguageFile;
-	BOOL m_bVersionChange;
 
 protected:
 // Implementation
@@ -80,10 +79,10 @@ protected:
 
 protected:
 	void DoHelp(UINT nHelpID = 0);
-	BOOL InitPreferences(CEnCommandLineInfo& cmdInfo);
+	BOOL InitPreferences(CEnCommandLineInfo& cmdInfo, CString& sPrevVer);
 	BOOL SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting);
 	BOOL InitTranslation(BOOL bFirstTime, BOOL bQuiet);
-	void UpgradePreferences(CPreferences& prefs);
+	void UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer);
 	void ParseCommandLine(CEnCommandLineInfo& cmdInfo);
 	void RunUninstaller();
 	void RunUpdater(BOOL bPreRelease, BOOL bTestDownload = FALSE);
@@ -104,8 +103,8 @@ protected:
 	static BOOL ValidateIniPath(CString& sIniPath, BOOL bCheckExists);
 	static BOOL GetDefaultIniPath(CString& sIniPath, BOOL bCheckExists);
 	static CString GetResourcePath(LPCTSTR szSubFolder = NULL, LPCTSTR szFile = NULL);
-	static void CleanupAppFolder();
-	static void FixupExampleTasklistsTaskDates();
+	static void CleanupAppFolder(LPCTSTR szPrevVe);
+	static void FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer);
 
 	static BOOL CALLBACK FindOtherInstance(HWND hwnd, LPARAM lParam);
 	static BOOL SendStartupOptions(HWND hwnd, const CTDCStartupOptions& startup, TDL_COPYDATA nMsg);
