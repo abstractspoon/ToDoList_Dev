@@ -6347,7 +6347,7 @@ BOOL CToDoCtrl::DelayLoad(const CString& sFilePath, COleDateTime& dtEarliestDue)
 	m_bDelayLoaded = FALSE;
 	CTaskFile temp;
 	
-	if (temp.LoadHeader(sFilePath) && (temp.IsArchive() || temp.GetEarliestDueDate(dtEarliestDue)))
+	if (temp.LoadHeader(sFilePath) && (temp.IsArchive() || temp.GetEarliestTaskDueDate(dtEarliestDue)))
 	{
 		m_bDelayLoaded = TRUE;
 
@@ -9052,7 +9052,7 @@ void CToDoCtrl::AppendTaskFileHeader(CTaskFile& tasks) const
 	tasks.SetXslHeader(m_sXslHeader);
 	tasks.SetProjectName(m_sProjectName);
 	tasks.SetArchive(m_bArchive);
-	tasks.SetEarliestDueDate(m_calculator.GetEarliestDueDate());
+	tasks.SetEarliestTaskDueDate(m_calculator.GetEarliestDueDate());
 	tasks.SetLastModified(m_dtLastTaskMod);
 
 	tasks.SetNextUniqueID(m_dwNextUniqueID);

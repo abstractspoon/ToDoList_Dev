@@ -153,8 +153,8 @@ public:
 	BOOL SetAttributeVisibility(const TDCCOLEDITFILTERVISIBILITY& vis);
 	BOOL GetAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const;
 
-	BOOL SetEarliestDueDate(const COleDateTime& date);
-	BOOL GetEarliestDueDate(COleDateTime& date) const;
+	BOOL SetEarliestTaskDueDate(const COleDateTime& date);
+	BOOL GetEarliestTaskDueDate(COleDateTime& date) const;
 
 	CString GetCommentsType() const; 
 	void EnableISODates(BOOL bEnable = TRUE) { m_bISODates = bEnable; }

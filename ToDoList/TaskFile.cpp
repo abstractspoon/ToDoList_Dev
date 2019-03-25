@@ -323,7 +323,7 @@ void CTaskFile::SetHeader(const TASKFILE_HEADER& header)
 		VERIFY(SetArchive(header.bArchive));
 
 	if (header.dtEarliestDue != 0)
-		VERIFY(SetEarliestDueDate(header.dtEarliestDue));
+		VERIFY(SetEarliestTaskDueDate(header.dtEarliestDue));
 
 	if (header.dwNextID > 0)
 		VERIFY(SetNextUniqueID(header.dwNextID));
@@ -1420,12 +1420,12 @@ unsigned long CTaskFile::GetFileVersion() const
 	return GetItemValueI(TDL_FILEVERSION);
 }
 
-BOOL CTaskFile::SetEarliestDueDate(const COleDateTime& date)
+BOOL CTaskFile::SetEarliestTaskDueDate(const COleDateTime& date)
 {
 	return (NULL != SetItemValue(TDL_EARLIESTDUEDATE, date));
 }
 
-BOOL CTaskFile::GetEarliestDueDate(COleDateTime& date) const
+BOOL CTaskFile::GetEarliestTaskDueDate(COleDateTime& date) const
 {
 	const CXmlItem* pXItem = GetItem(TDL_EARLIESTDUEDATE);
 
