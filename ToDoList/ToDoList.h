@@ -45,6 +45,7 @@ protected:
 
 protected:
 	CString m_sLanguageFile;
+	BOOL m_bVersionChange;
 
 protected:
 // Implementation
@@ -104,6 +105,7 @@ protected:
 	static BOOL GetDefaultIniPath(CString& sIniPath, BOOL bCheckExists);
 	static CString GetResourcePath(LPCTSTR szSubFolder = NULL, LPCTSTR szFile = NULL);
 	static void CleanupAppFolder();
+	static void FixupExampleTasklistsTaskDates();
 
 	static BOOL CALLBACK FindOtherInstance(HWND hwnd, LPARAM lParam);
 	static BOOL SendStartupOptions(HWND hwnd, const CTDCStartupOptions& startup, TDL_COPYDATA nMsg);

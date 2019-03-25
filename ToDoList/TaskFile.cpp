@@ -1436,6 +1436,31 @@ BOOL CTaskFile::GetEarliestTaskDueDate(COleDateTime& date) const
 	return TRUE;
 }
 
+BOOL CTaskFile::GetEarliestTaskStartDate(COleDateTime& date) const
+{
+	date = GetEarliestTaskStartDate(GetFirstTask());
+
+	return CDateHelper::IsDateSet(date);
+}
+
+BOOL CTaskFile::OffsetDates(int nNumDays)
+{
+	if (!OffsetTaskDates(GetFirstTask(), nNumDays))
+		return FALSE;
+
+	COleDateTime date;
+		
+	if (GetEarliestTaskDueDate(date) && OffsetDate(date, nNumDays))
+		SetEarliestTaskDueDate(date);
+
+	date = GetLastModifiedOle();
+
+	if (OffsetDate(date, nNumDays))
+		SetLastModified(date);
+
+	return TRUE;
+}
+
 CString CTaskFile::GetCommentsType() const
 {
 	return GetItemValue(TDL_COMMENTSTYPE);
@@ -2905,6 +2930,79 @@ COleDateTime CTaskFile::GetTaskStartDateOle(HTASKITEM hTask) const
 COleDateTime CTaskFile::GetTaskCreationDateOle(HTASKITEM hTask) const
 {
 	return GetTaskDateOle(hTask, TDL_TASKCREATIONDATE, TRUE);
+}
+
+COleDateTime CTaskFile::GetEarliestTaskStartDate(HTASKITEM hTask) const
+{
+	COleDateTime dtEarliest = CDateHelper::NullDate();
+
+	if (hTask)
+	{
+		//CDateHelper::Min(dtEarliest, GetTaskCreationDateOle(hTask));
+		CDateHelper::Min(dtEarliest, GetTaskStartDateOle(hTask));
+		//CDateHelper::Min(dtEarliest, GetTaskDueDateOle(hTask));
+		//CDateHelper::Min(dtEarliest, GetTaskDoneDateOle(hTask));
+		//CDateHelper::Min(dtEarliest, GetTaskLastModifiedOle(hTask));
+
+		// First child
+		CDateHelper::Min(dtEarliest, GetEarliestTaskStartDate(GetFirstTask(hTask)));
+
+		// First sibling
+		CDateHelper::Min(dtEarliest, GetEarliestTaskStartDate(GetNextTask(hTask)));
+	}
+
+	return dtEarliest;
+}
+
+BOOL CTaskFile::OffsetTaskDates(HTASKITEM hTask, int nNumDays)
+{
+	BOOL bChanged = FALSE;
+
+	if (hTask && (nNumDays > 0))
+	{
+		COleDateTime date = GetTaskCreationDateOle(hTask);
+
+		if (OffsetDate(date, nNumDays))
+			bChanged |= SetTaskCreationDate(hTask, date);
+
+		date = GetTaskStartDateOle(hTask);
+
+		if (OffsetDate(date, nNumDays))
+			bChanged |= SetTaskStartDate(hTask, date);
+
+		date = GetTaskDueDateOle(hTask);
+
+		if (OffsetDate(date, nNumDays))
+			bChanged |= SetTaskDueDate(hTask, date);
+
+		date = GetTaskDoneDateOle(hTask);
+
+		if (OffsetDate(date, nNumDays))
+			bChanged |= SetTaskDoneDate(hTask, date);
+
+		date = GetTaskLastModifiedOle(hTask);
+
+		if (OffsetDate(date, nNumDays))
+			bChanged |= SetTaskLastModified(hTask, date, GetTaskLastModifiedBy(hTask));
+
+		// First child
+		bChanged |= OffsetTaskDates(GetFirstTask(hTask), nNumDays);
+
+		// Next sibling
+		bChanged |= OffsetTaskDates(GetNextTask(hTask), nNumDays);
+	}
+
+	return bChanged;
+}
+
+BOOL CTaskFile::OffsetDate(COleDateTime& date, int nNumDays)
+{
+	if (!CDateHelper::IsDateSet(date))
+		return FALSE;
+
+	// else
+	date.m_dt += nNumDays;
+	return TRUE;
 }
 
 LPCTSTR CTaskFile::GetTaskDoneDateString(HTASKITEM hTask) const

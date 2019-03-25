@@ -110,7 +110,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListApp construction
 
-CToDoListApp::CToDoListApp() : CWinApp()
+CToDoListApp::CToDoListApp() : CWinApp(), m_bVersionChange(FALSE)
 {
 	// Place all significant initialization in InitInstance
 }
@@ -137,9 +137,6 @@ BOOL CToDoListApp::InitInstance()
 
 	// Set this before anything else
 	CWinHelpButton::SetDefaultIcon(GraphicsMisc::LoadIcon(IDI_HELPBUTTON));
-
-	// Remove any old components before they might get loaded
-	CleanupAppFolder();
 
 	// Process commandline switches
 	CEnCommandLineInfo cmdInfo(_T(".tdl;.xml"));
@@ -213,6 +210,12 @@ BOOL CToDoListApp::InitInstance()
 	// init prefs 
 	if (!InitPreferences(cmdInfo))
 		return FALSE; // quit app
+
+	if (m_bVersionChange)
+	{
+		CleanupAppFolder();
+		FixupExampleTasklistsTaskDates();
+	}
 
 	// commandline options
 	CTDCStartupOptions startup(cmdInfo);
@@ -836,8 +839,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 	BOOL bUseIni = FALSE;
 	BOOL bSetMultiInstance = FALSE;
 	BOOL bRegKeyExists = CRegKey2::KeyExists(HKEY_CURRENT_USER, APPREGKEY);
-	BOOL bUpgraded = cmdInfo.HasOption(SWITCH_UPGRADED);
-
+	
 #ifdef _DEBUG
 	BOOL bQuiet = cmdInfo.HasOption(SWITCH_QUIET);
 #else
@@ -894,10 +896,9 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		}
 	}
 
-	// Has the user already chosen a language?
+	// check existing prefs
 	BOOL bFirstTime = (!bUseIni && !bRegKeyExists);
 
-	// check existing prefs
 	if (!bFirstTime)
 	{
 		if (!SetPreferences(bUseIni, sIniPath, TRUE))
@@ -907,6 +908,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 			return FALSE; 
 		}
 
+		// Has the user already chosen a language?
 		if (!InitTranslation(bFirstTime, bQuiet))
 		{ 
 			// user cancelled -> Quit app
@@ -922,7 +924,14 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		if (bSetMultiInstance)
 			prefs.WriteProfileInt(_T("Preferences"), _T("MultiInstance"), TRUE);
 		
-		UpgradePreferences(prefs);
+		// Check for version change
+		CString sPrevVer = prefs.GetProfileString(_T("AppVer"), _T("Version"));
+		CString sThisVer = FileMisc::GetAppVersion();
+
+		m_bVersionChange = (sPrevVer.IsEmpty() || (FileMisc::CompareVersions(sPrevVer, sThisVer) < 0));
+
+		if (m_bVersionChange)
+			UpgradePreferences(prefs);
 
 		// check for web updates
 		if (prefs.GetProfileInt(_T("Preferences"), _T("AutoCheckForUpdates"), FALSE))
@@ -1106,53 +1115,46 @@ BOOL CToDoListApp::InitTranslation(BOOL bFirstTime, BOOL bQuiet)
 
 void CToDoListApp::UpgradePreferences(CPreferences& prefs)
 {
+	ASSERT(m_bVersionChange);
 	UNREFERENCED_PARAMETER(prefs);
 
 	// we don't handle the registry because it's too hard (for now)
 	if (!CPreferences::UsesIni())
 		return;
 
-	CString sLastUpgrade = prefs.GetProfileString(_T("Settings"), _T("LastPrefsUpgrade"));
-	CString sAppVer = FileMisc::GetAppVersion();
+	// Rename 'Tasklists' resource folder to 'Examples'
+	LPCTSTR szTasklists = _T(".\\Resources\\Tasklists\\");
+	LPCTSTR szExamples = _T(".\\Resources\\Examples\\");
 
-	if (sLastUpgrade.IsEmpty() || (FileMisc::CompareVersions(sLastUpgrade, sAppVer) < 0))
+	for (int nFile = 1; nFile <= 16; nFile++)
 	{
-		// Rename 'Tasklists' resource folder to 'Examples'
-		LPCTSTR szTasklists = _T(".\\Resources\\Tasklists\\");
-		LPCTSTR szExamples = _T(".\\Resources\\Examples\\");
+		CString sKey = Misc::FormatT(_T("TaskList%d"), nFile);
+		CString sFile = prefs.GetProfileString(_T("MRU"), sKey);
 
-		for (int nFile = 1; nFile <= 16; nFile++)
+		if (sFile.IsEmpty())
+			break;
+
+		// Only replace if at the start of the filepath
+		if (Misc::Find(szTasklists, sFile, FALSE) == 0)
 		{
-			CString sKey = Misc::FormatT(_T("TaskList%d"), nFile);
-			CString sFile = prefs.GetProfileString(_T("MRU"), sKey);
-
-			if (sFile.IsEmpty())
-				break;
-
-			// Only replace if at the start of the filepath
-			if (Misc::Find(szTasklists, sFile, FALSE) == 0)
-			{
-				Misc::Replace(szTasklists, szExamples, sFile, FALSE);
-				prefs.WriteProfileString(_T("MRU"), sKey, sFile);
-			}
+			Misc::Replace(szTasklists, szExamples, sFile, FALSE);
+			prefs.WriteProfileString(_T("MRU"), sKey, sFile);
 		}
+	}
 
-		int nTDCCount = prefs.GetProfileInt(_T("Settings"), _T("NumLastFiles"), 0);
+	int nTDCCount = prefs.GetProfileInt(_T("Settings"), _T("NumLastFiles"), 0);
 
-		for (int nTDC = 0; nTDC < nTDCCount; nTDC++)
+	for (int nTDC = 0; nTDC < nTDCCount; nTDC++)
+	{
+		CString sKey = Misc::MakeKey(_T("LastFile%d"), nTDC);
+		CString sFile = prefs.GetProfileString(_T("Settings"), sKey);
+
+		// Only replace if at the start of the filepath
+		if (Misc::Find(szTasklists, sFile, FALSE) == 0)
 		{
-			CString sKey = Misc::MakeKey(_T("LastFile%d"), nTDC);
-			CString sFile = prefs.GetProfileString(_T("Settings"), sKey);
-
-			// Only replace if at the start of the filepath
-			if (Misc::Find(szTasklists, sFile, FALSE) == 0)
-			{
-				Misc::Replace(szTasklists, szExamples, sFile, FALSE);
-				prefs.WriteProfileString(_T("Settings"), sKey, sFile);
-			}
+			Misc::Replace(szTasklists, szExamples, sFile, FALSE);
+			prefs.WriteProfileString(_T("Settings"), sKey, sFile);
 		}
-
-		prefs.WriteProfileString(_T("Settings"), _T("LastPrefsUpgrade"), sAppVer);
 	}
 }
 
@@ -1949,9 +1951,11 @@ CString CToDoListApp::GetResourcePath(LPCTSTR szSubFolder, LPCTSTR szFile)
 
 void CToDoListApp::CleanupAppFolder()
 {
-	CString sFolder = FileMisc::TerminatePath(FileMisc::GetAppFolder());
+	CScopedLogTime log(_T("CleanupAppFolder"));
 
 	// remove old web updater
+	CString sFolder = FileMisc::TerminatePath(FileMisc::GetAppFolder());
+
 	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc.exe"), TRUE);
 	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc2.exe"), TRUE);
 	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc.log"), TRUE);
@@ -1998,5 +2002,32 @@ void CToDoListApp::CleanupAppFolder()
 		// Intentionally use raw API call so it will fail if any files remain in the folder
 		RemoveDirectory(sReadme);
 	}
+}
 
+void CToDoListApp::FixupExampleTasklistsTaskDates()
+{
+	CScopedLogTime log(_T("FixupExampleTasklistsTaskDates"));
+
+	CString sExamples = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Examples")));
+
+	CStringArray aExamples;
+	int nNumExamples = FileMisc::FindFiles(sExamples, aExamples, FALSE, _T("*.tdl"));
+
+	for (int nFile = 0; nFile < nNumExamples; nFile++)
+	{
+		CTaskFile tasks;
+
+		if (tasks.Load(aExamples[nFile]))
+		{
+			COleDateTime dtNow = COleDateTime::GetCurrentTime(), dtEarliest;
+
+			if (tasks.GetEarliestTaskStartDate(dtEarliest))
+			{
+				int nOffset = (int)(dtNow.m_dt - dtEarliest.m_dt); // whole days
+				
+				if (tasks.OffsetDates(nOffset))
+					tasks.Save(aExamples[nFile], SFEF_UTF16);
+			}
+		}
+	}
 }

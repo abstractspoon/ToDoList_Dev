@@ -155,6 +155,8 @@ public:
 
 	BOOL SetEarliestTaskDueDate(const COleDateTime& date);
 	BOOL GetEarliestTaskDueDate(COleDateTime& date) const;
+	BOOL GetEarliestTaskStartDate(COleDateTime& date) const;
+	BOOL OffsetDates(int nNumDays);
 
 	CString GetCommentsType() const; 
 	void EnableISODates(BOOL bEnable = TRUE) { m_bISODates = bEnable; }
@@ -528,7 +530,9 @@ protected:
 	double GetTaskDouble(HTASKITEM hTask, const CString& sDoubleItem) const;
 	TDC_UNITS GetTaskTimeUnits(HTASKITEM hTask, const CString& sUnitsItem) const;
 	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite) const;
-		
+	COleDateTime GetEarliestTaskStartDate(HTASKITEM hTask) const;
+	BOOL OffsetTaskDates(HTASKITEM hTask, int nNumDays);
+
 	bool DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
 	bool TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bOmitHidden) const;
 
@@ -582,6 +586,7 @@ protected:
 
 	static BOOL SetMetaData(CXmlItem* pXItem, const CMapStringToString& mapMetaData);
 	static int GetMetaData(const CXmlItem* pXItem, CMapStringToString& mapMetaData);
+	static BOOL OffsetDate(COleDateTime& date, int nNumDays);
 };
 
 #endif // !defined(AFX_TASKFILE_H__BA5D71E7_2770_45FD_A693_A2344B589DF4__INCLUDED_)
