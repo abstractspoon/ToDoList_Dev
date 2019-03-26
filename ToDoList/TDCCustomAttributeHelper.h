@@ -45,6 +45,9 @@ public:
 	static int EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, CWnd* pParent, BOOL bEnable = TRUE);
 	static void ClearFilterCheckboxHistory(const CTDCCustomControlArray& aControls, CWnd* pParent);
 
+	static BOOL FlushEditControl(CWnd* pCtrl, CWnd* pParent,
+								 const CTDCCustomControlArray& aControls);
+
 	// -------------------------------------------------------------------------
 	
 	static CString GetAttributeTypeID(UINT nCtrlID, const CTDCCustomControlArray& aControls);

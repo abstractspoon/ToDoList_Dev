@@ -10073,9 +10073,10 @@ void CToDoCtrl::Flush(BOOL bEndTimeTracking) // called to end current editing ac
 		{
 			m_cbAllocTo.Flush();
 		}
-
-		// flush custom attributes also
-		// TODO
+		else
+		{
+			CTDCCustomAttributeHelper::FlushEditControl(pFocus, this, m_aCustomControls);
+		}
 	}
 
 	m_treeDragDrop.CancelDrag();

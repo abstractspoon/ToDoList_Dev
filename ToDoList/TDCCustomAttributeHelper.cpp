@@ -875,6 +875,40 @@ CString CTDCCustomAttributeHelper::GetControlTooltip(UINT nCtrlID, CWnd* pParent
 	return _T("");
 }
 
+BOOL CTDCCustomAttributeHelper::FlushEditControl(CWnd* pCtrl, CWnd* pParent,
+												 const CTDCCustomControlArray& aControls)
+{
+	ASSERT(pCtrl && pParent);
+
+	if (aControls.GetSize() == 0)
+		return FALSE;
+
+	ASSERT(pCtrl && pParent);
+
+	UINT nCtrlID = pCtrl->GetDlgCtrlID();
+	int nCtrl = aControls.GetSize();
+
+	while (nCtrl--)
+	{
+		const CUSTOMATTRIBCTRLITEM& ctrl = aControls.GetData()[nCtrl];
+		CWnd* pCustomCtrl = pParent->GetDlgItem(ctrl.nCtrlID);
+		ASSERT(pCustomCtrl);
+		
+		if (CDialogHelper::IsChildOrSame(pCustomCtrl, pCtrl))
+		{
+			if (pCustomCtrl->IsKindOf(RUNTIME_CLASS(CAutoComboBox)))
+			{
+				((CAutoComboBox*)pCustomCtrl)->Flush();
+				return TRUE;
+			}
+
+			break;
+		}
+	}
+
+	return FALSE;
+}
+
 void CTDCCustomAttributeHelper::SaveAutoListDataToDefs(const CWnd* pParent, 
 														const CTDCCustomControlArray& aControls, 
 														const CTDCCustomAttribDefinitionArray& aAttribDefs)
