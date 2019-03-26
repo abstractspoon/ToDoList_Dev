@@ -208,13 +208,8 @@ BOOL CToDoListApp::InitInstance()
 		CFileEdit::SetDefaultButtonImages(iconBrowse.Detach(), iconGo.Detach());
 	
 	// init prefs 
-	CString sPrevVer = FileMisc::GetAppVersion();
-
-	if (!InitPreferences(cmdInfo, sPrevVer))
+	if (!InitPreferences(cmdInfo))
 		return FALSE; // quit app
-
-	CleanupAppFolder(sPrevVer);
-	FixupExampleTasklistsTaskDates(sPrevVer);
 
 	// commandline options
 	CTDCStartupOptions startup(cmdInfo);
@@ -833,7 +828,7 @@ void CToDoListApp::DoHelp(UINT nHelpID)
 	FileMisc::Run(*m_pMainWnd, (WIKI_URL + sHelpPage), NULL, SW_SHOWNORMAL);
 }
 
-BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo, CString& sPrevVer)
+BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 {
 	BOOL bUseIni = FALSE;
 	BOOL bSetMultiInstance = FALSE;
@@ -922,10 +917,6 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo, CString& sPrevVe
 		
 		if (bSetMultiInstance)
 			prefs.WriteProfileInt(_T("Preferences"), _T("MultiInstance"), TRUE);
-		
-		// Check for version change
-		sPrevVer = prefs.GetProfileString(_T("AppVer"), _T("Version"));
-		UpgradePreferences(prefs, sPrevVer);
 
 		// check for web updates
 		if (prefs.GetProfileInt(_T("Preferences"), _T("AutoCheckForUpdates"), FALSE))
@@ -938,6 +929,12 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo, CString& sPrevVe
 				return FALSE; // quit app
 			}
 		}
+		
+		CString sPrevVer = prefs.GetProfileString(_T("AppVer"), _T("Version"));
+
+		CleanupAppFolder(sPrevVer);
+		FixupExampleTasklistsTaskDates(sPrevVer);
+		UpgradePreferences(prefs, sPrevVer);
 	}
 	else  // first time so no ini file exists. show wizard
 	{
@@ -1949,59 +1946,57 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 {
 	CScopedLogTime log(_T("CleanupAppFolder"));
 
-	CString sAppFolder = FileMisc::TerminatePath(FileMisc::GetAppFolder());
-	CString sTasklists = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Tasklists")));
+	CString sAppFolder = FileMisc::GetAppFolder();
+	CString sTasklists = FileMisc::GetAppResourceFolder(_T("Resources\\TaskLists"));
 
 	if (FileMisc::CompareVersions(szPrevVer, _T("7.0")) < 0)
 	{
 		// remove old web updater
-		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc.exe"), TRUE);
-		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc2.exe"), TRUE);
-		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc.log"), TRUE);
-		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc2.log"), TRUE);
-		FileMisc::DeleteFile(sAppFolder + _T("WebUpdateSvc.LIC"), TRUE);
-		FileMisc::DeleteFile(sAppFolder + _T("install.bmp"), TRUE);
-		FileMisc::DeleteFile(sAppFolder + _T("install.ico"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\WebUpdateSvc.exe"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\WebUpdateSvc2.exe"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\WebUpdateSvc.log"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\WebUpdateSvc2.log"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\WebUpdateSvc.LIC"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\install.bmp"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\install.ico"), TRUE);
 
 		// remove old components
-		FileMisc::DeleteFile(sAppFolder + _T("GoogleDocsStorage.dll"), TRUE);
-		FileMisc::DeleteFile(sAppFolder + _T("ToodleDoStorage.dll"), TRUE);
-		FileMisc::DeleteFile(sAppFolder + _T("ToDoListLOC.dll"), TRUE);
-		FileMisc::DeleteFile(sAppFolder + _T("RTFContentCtrlLOC.dll"), TRUE);
-		FileMisc::DeleteFile(sAppFolder + _T("ChronicleWrap.dll"), TRUE);
-		FileMisc::DeleteFile(sAppFolder + _T("StatisticsExt.dll"), TRUE);
-		FileMisc::DeleteFile(sAppFolder + _T("OutlookImpExp.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\GoogleDocsStorage.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\ToodleDoStorage.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\ToDoListLOC.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\RTFContentCtrlLOC.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\ChronicleWrap.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\StatisticsExt.dll"), TRUE);
+		FileMisc::DeleteFile(sAppFolder + _T("\\OutlookImpExp.dll"), TRUE);
 
 		// gif translation 'flags' replaced with pngs
 		CString sTranslations = FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
 		FileMisc::DeleteFolderContents(sTranslations, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY, _T("*.gif"));
 
 		// Wrongly installed resource files
-		FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.txt")), 395, TRUE);
-		FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.csv")), 10602, TRUE);
-		FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.xml")), 177520, TRUE);
+		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.txt")), 395, TRUE);
+		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.csv")), 10602, TRUE);
+		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.xml")), 177520, TRUE);
 	}
 
 	if (FileMisc::CompareVersions(szPrevVer, _T("7.2.10")) < 0)
 	{
 		// remove experimental manifest
-		FileMisc::DeleteFileBySize(sAppFolder + _T("ToDoList.exe.4K.manifest"), 1153, TRUE);
+		FileMisc::DeleteFileBySize(sAppFolder + _T("\\ToDoList.exe.4K.manifest"), 1153, TRUE);
 
 		// Rename 'Tasklists' resource folder
-		CString sExamples = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Examples")));
-		FileMisc::MoveFolder(sTasklists, sExamples);
+		CString sExamples = FileMisc::GetAppResourceFolder(_T("Resources\\Examples"));
+		FileMisc::MoveFolder(sTasklists, sExamples, FMDF_SUBFOLDERS | FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
 
 		// Rename/move install instructions
-		CString sResources = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder());
-		FileMisc::DeleteFileBySize(sResources + _T("Install.txt"), 1795, TRUE);
+		CString sResources = FileMisc::GetAppResourceFolder();
+		FileMisc::DeleteFileBySize(sResources + _T("\\Install.txt"), 1795, TRUE);
 
-		CString sReadme = (sResources + _T("ReadMe\\"));
+		CString sReadmes = FileMisc::GetAppResourceFolder(_T("Resources\\ReadMe"));
+		FileMisc::DeleteFileBySize(sReadmes + _T("\\Readme.Linux.txt"), 3260, TRUE);
 
-		if (FileMisc::DeleteFileBySize(sReadme + _T("Readme.Linux.txt"), 3260, TRUE))
-		{
-			// Intentionally use raw API call so it will fail if any files remain in the folder
-			RemoveDirectory(sReadme);
-		}
+		// Intentionally use raw API call so it will fail if any files remain in the folder
+		RemoveDirectory(sReadmes);
 	}
 }
 

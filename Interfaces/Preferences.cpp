@@ -290,11 +290,7 @@ BOOL CPreferences::SaveInternal()
 		return TRUE; // nothing to do
 
 	// insert application version
-	INISECTION* pSection = GetSection(_T("AppVer"), TRUE);
-	ASSERT(pSection);
-	
-	if (pSection)
-		SetEntryValue(*pSection, _T("Version"), FileMisc::GetAppVersion(), FALSE);
+	WriteIniString(_T("AppVer"), _T("Version"), FileMisc::GetAppVersion(), FALSE);
 
 	// Build output as a single formatted string so that the 
 	// time the prefs file is open is as short as possible

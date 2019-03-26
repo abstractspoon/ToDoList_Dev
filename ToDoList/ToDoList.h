@@ -79,7 +79,7 @@ protected:
 
 protected:
 	void DoHelp(UINT nHelpID = 0);
-	BOOL InitPreferences(CEnCommandLineInfo& cmdInfo, CString& sPrevVer);
+	BOOL InitPreferences(CEnCommandLineInfo& cmdInfo);
 	BOOL SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting);
 	BOOL InitTranslation(BOOL bFirstTime, BOOL bQuiet);
 	void UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer);

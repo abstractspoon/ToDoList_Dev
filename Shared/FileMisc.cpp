@@ -36,8 +36,16 @@ static CString s_sLogAppDataKey;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 static LPCTSTR ENDL = _T("\r\n");
-static LPCTSTR ALLFILESMASK = _T("*.*");
 static CString EMPTYSTRING;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+static LPCTSTR ALLFILESMASK = _T("*.*");
+
+static BOOL IsAllFileMask(LPCTSTR szFileMask)
+{
+	return (Misc::IsEmpty(szFileMask) || (_tcscmp(szFileMask, ALLFILESMASK) == 0));
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -474,7 +482,7 @@ int FileMisc::DeleteFolderContents(LPCTSTR szFolder, DWORD dwFlags, LPCTSTR szFi
 	BOOL bWantSubFolders = Misc::HasFlag(dwFlags, FMDF_SUBFOLDERS);
 	BOOL bWantMsgLoop	 = Misc::HasFlag(dwFlags, FMDF_PROCESSMSGLOOP);
 	BOOL bHiddenReadOnly = Misc::HasFlag(dwFlags, FMDF_HIDDENREADONLY);
-	BOOL bDeleteAll		 = (Misc::IsEmpty(szFileMask) || _tcsstr(szFileMask, ALLFILESMASK));
+	BOOL bDeleteAll		 = IsAllFileMask(szFileMask);
 
 	// if a file mask has been specified with subfolders 
 	// we need to do multiple passes on each folder, 
@@ -602,10 +610,10 @@ int FileMisc::DeleteFolder(LPCTSTR szFolder, DWORD dwFlags, HANDLE hTerminate)
 				nResult = 0; // failed
 			}
 		}
+		// all contained files were deleted successfully
+		// so we can now try to delete the folder itself
 		else
 		{
-			// all contained files were deleted successfully
-			// so we can now try to delete the folder itself
 			if (!RemoveDirectory(szFolder))
 			{
 				DWORD dwErr = GetLastError();
@@ -938,8 +946,11 @@ BOOL FileMisc::MoveFolder(LPCTSTR szSrcFolder, LPCTSTR szDestFolder,
 {
 	if (CopyFolder(szSrcFolder, szDestFolder, szFileMask, dwFlags, hTerminate))
 	{
-		// don't pass on hTerminate to ensure the operation completes
-		return DeleteFolderContents(szSrcFolder, dwFlags, szFileMask, NULL);
+		// Note: don't pass on hTerminate to ensure the operation completes
+		if (IsAllFileMask(szFileMask))
+			return DeleteFolder(szSrcFolder, dwFlags, NULL);
+		else
+			return DeleteFolderContents(szSrcFolder, dwFlags, szFileMask, NULL);
 	}
 
 	return FALSE;
