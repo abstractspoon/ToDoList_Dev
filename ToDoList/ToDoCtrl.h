@@ -682,7 +682,6 @@ protected:
 	afx_msg LRESULT OnFindReplaceAllTasks(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFindReplaceGetExclusionRect(WPARAM wParam, LPARAM lParam);
 
-	// custom data notifications
 	afx_msg void OnCustomAttributeChange(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomAttributeChange(UINT nCtrlID);
 	afx_msg void OnCustomAttributeCancel(UINT nCtrlID);
