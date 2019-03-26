@@ -171,6 +171,18 @@
   <data name="toolstripEditor.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Bottom</value>
   </data>
+  <data name="toolStripEnableEditing.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
+    <value>Magenta</value>
+  </data>
+  <data name="toolStripEnableEditing.Size" type="System.Drawing.Size, System.Drawing">
+    <value>23, 20</value>
+  </data>
+  <data name="toolStripEnableEditing.ToolTipText" xml:space="preserve">
+    <value>Enable Editing</value>
+  </data>
+  <data name="toolStripSeparator17.Size" type="System.Drawing.Size, System.Drawing">
+    <value>6, 23</value>
+  </data>
   <data name="toolstripTextCut.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
@@ -424,10 +436,10 @@
     <value>Print Document</value>
   </data>
   <data name="toolstripEditor.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 277</value>
+    <value>0, 258</value>
   </data>
   <data name="toolstripEditor.Size" type="System.Drawing.Size, System.Drawing">
-    <value>675, 23</value>
+    <value>675, 42</value>
   </data>
   <data name="toolstripEditor.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -451,19 +463,19 @@
     <value>Magenta</value>
   </data>
   <data name="contextTableModify.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>133, 22</value>
   </data>
   <data name="contextTableModify.Text" xml:space="preserve">
     <value>Properties</value>
   </data>
   <data name="contextTableInsertRow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>133, 22</value>
   </data>
   <data name="contextTableInsertRow.Text" xml:space="preserve">
     <value>Insert Row</value>
   </data>
   <data name="contextTableDeleteRow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>133, 22</value>
   </data>
   <data name="contextTableDeleteRow.Text" xml:space="preserve">
     <value>Delete Row</value>
@@ -472,7 +484,7 @@
     <value>Magenta</value>
   </data>
   <data name="contextTable.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
+    <value>108, 22</value>
   </data>
   <data name="contextTable.Text" xml:space="preserve">
     <value>Table</value>
@@ -586,7 +598,7 @@
     <value>Delete</value>
   </data>
   <data name="contextEdit.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
+    <value>108, 22</value>
   </data>
   <data name="contextEdit.Text" xml:space="preserve">
     <value>Edit</value>
@@ -595,7 +607,7 @@
     <value>Magenta</value>
   </data>
   <data name="contextDocumentOpen.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>134, 22</value>
   </data>
   <data name="contextDocumentOpen.Text" xml:space="preserve">
     <value>Open</value>
@@ -604,58 +616,58 @@
     <value>Magenta</value>
   </data>
   <data name="contextDocumentSave.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>134, 22</value>
   </data>
   <data name="contextDocumentSave.Text" xml:space="preserve">
     <value>Save As</value>
   </data>
   <data name="toolStripSeparator9.Size" type="System.Drawing.Size, System.Drawing">
-    <value>149, 6</value>
+    <value>131, 6</value>
   </data>
   <data name="contextDocumentPrint.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
   <data name="contextDocumentPrint.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>134, 22</value>
   </data>
   <data name="contextDocumentPrint.Text" xml:space="preserve">
     <value>Print</value>
   </data>
   <data name="toolStripSeparator10.Size" type="System.Drawing.Size, System.Drawing">
-    <value>149, 6</value>
+    <value>131, 6</value>
   </data>
   <data name="contextDocumentToolbar.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>134, 22</value>
   </data>
   <data name="contextDocumentToolbar.Text" xml:space="preserve">
     <value>Toolbar</value>
   </data>
   <data name="contextDocumentScrollbar.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>134, 22</value>
   </data>
   <data name="contextDocumentScrollbar.Text" xml:space="preserve">
     <value>Scrollbar</value>
   </data>
   <data name="contextDocumentWordwrap.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>134, 22</value>
   </data>
   <data name="contextDocumentWordwrap.Text" xml:space="preserve">
     <value>Word Wrap</value>
   </data>
   <data name="contextDocumentOverwrite.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>134, 22</value>
   </data>
   <data name="contextDocumentOverwrite.Text" xml:space="preserve">
     <value>Overwrite</value>
   </data>
   <data name="contextDocument.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
+    <value>108, 22</value>
   </data>
   <data name="contextDocument.Text" xml:space="preserve">
     <value>Document</value>
   </data>
   <data name="toolStripSeparator7.Size" type="System.Drawing.Size, System.Drawing">
-    <value>124, 6</value>
+    <value>105, 6</value>
   </data>
   <data name="contextFormatFontDialog.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
@@ -805,7 +817,7 @@
     <value>Unordered List</value>
   </data>
   <data name="contextFormat.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
+    <value>108, 22</value>
   </data>
   <data name="contextFormat.Text" xml:space="preserve">
     <value>Format</value>
@@ -817,7 +829,7 @@
     <value>Ctrl+L</value>
   </data>
   <data name="contextJustifyLeft.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>149, 22</value>
   </data>
   <data name="contextJustifyLeft.Text" xml:space="preserve">
     <value>Left</value>
@@ -829,7 +841,7 @@
     <value>Ctrl+E</value>
   </data>
   <data name="contextJustifyCenter.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>149, 22</value>
   </data>
   <data name="contextJustifyCenter.Text" xml:space="preserve">
     <value>Center</value>
@@ -841,13 +853,13 @@
     <value>Ctrl+R</value>
   </data>
   <data name="contextJustifyRight.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>149, 22</value>
   </data>
   <data name="contextJustifyRight.Text" xml:space="preserve">
     <value>Right</value>
   </data>
   <data name="contextJustify.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
+    <value>108, 22</value>
   </data>
   <data name="contextJustify.Text" xml:space="preserve">
     <value>Justify</value>
@@ -856,55 +868,55 @@
     <value>Magenta</value>
   </data>
   <data name="contextFormattingNormal.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>129, 22</value>
   </data>
   <data name="contextFormattingNormal.Text" xml:space="preserve">
     <value>Normal</value>
   </data>
   <data name="contextFormattingHeading1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>129, 22</value>
   </data>
   <data name="contextFormattingHeading1.Text" xml:space="preserve">
     <value>Heading 1</value>
   </data>
   <data name="contextFormattingHeading2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>129, 22</value>
   </data>
   <data name="contextFormattingHeading2.Text" xml:space="preserve">
     <value>Heading 2</value>
   </data>
   <data name="contextFormattingHeading3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>129, 22</value>
   </data>
   <data name="contextFormattingHeading3.Text" xml:space="preserve">
     <value>Heading 3</value>
   </data>
   <data name="contextFormattingHeading4.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>129, 22</value>
   </data>
   <data name="contextFormattingHeading4.Text" xml:space="preserve">
     <value>Heading 4</value>
   </data>
   <data name="contextFormattingHeading5.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>129, 22</value>
   </data>
   <data name="contextFormattingHeading5.Text" xml:space="preserve">
     <value>Heading 5</value>
   </data>
   <data name="contextFormattingFormatted.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>129, 22</value>
   </data>
   <data name="contextFormattingFormatted.Text" xml:space="preserve">
     <value>Formatted</value>
   </data>
   <data name="contextFormatting.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
+    <value>108, 22</value>
   </data>
   <data name="contextFormatting.Text" xml:space="preserve">
     <value>Formatting</value>
   </data>
   <data name="toolStripSeparator8.Size" type="System.Drawing.Size, System.Drawing">
-    <value>124, 6</value>
+    <value>105, 6</value>
   </data>
   <data name="contextInsertLine.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
@@ -913,7 +925,7 @@
     <value>Ctrl+H</value>
   </data>
   <data name="contextInsertLine.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>139, 22</value>
   </data>
   <data name="contextInsertLine.Text" xml:space="preserve">
     <value>Line</value>
@@ -922,7 +934,7 @@
     <value>Magenta</value>
   </data>
   <data name="contextInsertLink.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>139, 22</value>
   </data>
   <data name="contextInsertLink.Text" xml:space="preserve">
     <value>Web Link</value>
@@ -931,19 +943,19 @@
     <value>Magenta</value>
   </data>
   <data name="contextInsertImage.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>139, 22</value>
   </data>
   <data name="contextInsertImage.Text" xml:space="preserve">
     <value>Image</value>
   </data>
   <data name="contextInsertText.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>139, 22</value>
   </data>
   <data name="contextInsertText.Text" xml:space="preserve">
     <value>Text</value>
   </data>
   <data name="contextInsertHtml.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>139, 22</value>
   </data>
   <data name="contextInsertHtml.Text" xml:space="preserve">
     <value>Html</value>
@@ -952,19 +964,19 @@
     <value>Magenta</value>
   </data>
   <data name="contextInsertTable.Size" type="System.Drawing.Size, System.Drawing">
-    <value>152, 22</value>
+    <value>139, 22</value>
   </data>
   <data name="contextInsertTable.Text" xml:space="preserve">
     <value>Table</value>
   </data>
   <data name="contextInsert.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
+    <value>108, 22</value>
   </data>
   <data name="contextInsert.Text" xml:space="preserve">
     <value>Insert</value>
   </data>
   <data name="contextEditor.Size" type="System.Drawing.Size, System.Drawing">
-    <value>128, 192</value>
+    <value>109, 170</value>
   </data>
   <data name="&gt;&gt;contextEditor.Name" xml:space="preserve">
     <value>contextEditor</value>
@@ -981,41 +993,11 @@
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
     <value>675, 300</value>
   </data>
-  <data name="&gt;&gt;toolstripTextCut.Name" xml:space="preserve">
-    <value>toolstripTextCut</value>
-  </data>
-  <data name="&gt;&gt;toolstripTextCut.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripTextCopy.Name" xml:space="preserve">
-    <value>toolstripTextCopy</value>
-  </data>
-  <data name="&gt;&gt;toolstripTextCopy.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripTextPaste.Name" xml:space="preserve">
-    <value>toolstripTextPaste</value>
-  </data>
-  <data name="&gt;&gt;toolstripTextPaste.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;toolStripSeparator1.Name" xml:space="preserve">
     <value>toolStripSeparator1</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator1.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripEditUndo.Name" xml:space="preserve">
-    <value>toolstripEditUndo</value>
-  </data>
-  <data name="&gt;&gt;toolstripEditUndo.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripEditRedo.Name" xml:space="preserve">
-    <value>toolstripEditRedo</value>
-  </data>
-  <data name="&gt;&gt;toolstripEditRedo.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator2.Name" xml:space="preserve">
     <value>toolStripSeparator2</value>
@@ -1023,89 +1005,11 @@
   <data name="&gt;&gt;toolStripSeparator2.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;toolstripFormatBold.Name" xml:space="preserve">
-    <value>toolstripFormatBold</value>
-  </data>
-  <data name="&gt;&gt;toolstripFormatBold.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripFormatUnderline.Name" xml:space="preserve">
-    <value>toolstripFormatUnderline</value>
-  </data>
-  <data name="&gt;&gt;toolstripFormatUnderline.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripFormatItalic.Name" xml:space="preserve">
-    <value>toolstripFormatItalic</value>
-  </data>
-  <data name="&gt;&gt;toolstripFormatItalic.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripFontDialog.Name" xml:space="preserve">
-    <value>toolstripFontDialog</value>
-  </data>
-  <data name="&gt;&gt;toolstripFontDialog.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripFontNormal.Name" xml:space="preserve">
-    <value>toolstripFontNormal</value>
-  </data>
-  <data name="&gt;&gt;toolstripFontNormal.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripColorDialog.Name" xml:space="preserve">
-    <value>toolstripColorDialog</value>
-  </data>
-  <data name="&gt;&gt;toolstripColorDialog.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripFontIncrease.Name" xml:space="preserve">
-    <value>toolstripFontIncrease</value>
-  </data>
-  <data name="&gt;&gt;toolstripFontIncrease.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripFontDecrease.Name" xml:space="preserve">
-    <value>toolstripFontDecrease</value>
-  </data>
-  <data name="&gt;&gt;toolstripFontDecrease.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;toolStripSeparator3.Name" xml:space="preserve">
     <value>toolStripSeparator3</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator3.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripJustifyLeft.Name" xml:space="preserve">
-    <value>toolstripJustifyLeft</value>
-  </data>
-  <data name="&gt;&gt;toolstripJustifyLeft.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripJustifyCenter.Name" xml:space="preserve">
-    <value>toolstripJustifyCenter</value>
-  </data>
-  <data name="&gt;&gt;toolstripJustifyCenter.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripJustifyRight.Name" xml:space="preserve">
-    <value>toolstripJustifyRight</value>
-  </data>
-  <data name="&gt;&gt;toolstripJustifyRight.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripFontIndent.Name" xml:space="preserve">
-    <value>toolstripFontIndent</value>
-  </data>
-  <data name="&gt;&gt;toolstripFontIndent.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripFontOutdent.Name" xml:space="preserve">
-    <value>toolstripFontOutdent</value>
-  </data>
-  <data name="&gt;&gt;toolstripFontOutdent.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator4.Name" xml:space="preserve">
     <value>toolStripSeparator4</value>
@@ -1113,47 +1017,11 @@
   <data name="&gt;&gt;toolStripSeparator4.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;toolstripListOrdered.Name" xml:space="preserve">
-    <value>toolstripListOrdered</value>
-  </data>
-  <data name="&gt;&gt;toolstripListOrdered.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripListUnordered.Name" xml:space="preserve">
-    <value>toolstripListUnordered</value>
-  </data>
-  <data name="&gt;&gt;toolstripListUnordered.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;toolStripSeparator5.Name" xml:space="preserve">
     <value>toolStripSeparator5</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator5.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripInsertLine.Name" xml:space="preserve">
-    <value>toolstripInsertLine</value>
-  </data>
-  <data name="&gt;&gt;toolstripInsertLine.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripInsertTable.Name" xml:space="preserve">
-    <value>toolstripInsertTable</value>
-  </data>
-  <data name="&gt;&gt;toolstripInsertTable.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripInsertImage.Name" xml:space="preserve">
-    <value>toolstripInsertImage</value>
-  </data>
-  <data name="&gt;&gt;toolstripInsertImage.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripInsertLink.Name" xml:space="preserve">
-    <value>toolstripInsertLink</value>
-  </data>
-  <data name="&gt;&gt;toolstripInsertLink.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator6.Name" xml:space="preserve">
     <value>toolStripSeparator6</value>
@@ -1161,28 +1029,10 @@
   <data name="&gt;&gt;toolStripSeparator6.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;toolstripFindReplace.Name" xml:space="preserve">
-    <value>toolstripFindReplace</value>
-  </data>
-  <data name="&gt;&gt;toolstripFindReplace.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripDocumentPrint.Name" xml:space="preserve">
-    <value>toolstripDocumentPrint</value>
-  </data>
-  <data name="&gt;&gt;toolstripDocumentPrint.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;contextTable.Name" xml:space="preserve">
     <value>contextTable</value>
   </data>
   <data name="&gt;&gt;contextTable.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextTableModify.Name" xml:space="preserve">
-    <value>contextTableModify</value>
-  </data>
-  <data name="&gt;&gt;contextTableModify.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;contextTableInsertRow.Name" xml:space="preserve">
@@ -1203,53 +1053,17 @@
   <data name="&gt;&gt;contextEdit.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;contextEditUndo.Name" xml:space="preserve">
-    <value>contextEditUndo</value>
-  </data>
-  <data name="&gt;&gt;contextEditUndo.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextEditRedo.Name" xml:space="preserve">
-    <value>contextEditRedo</value>
-  </data>
-  <data name="&gt;&gt;contextEditRedo.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;toolStripSeparator14.Name" xml:space="preserve">
     <value>toolStripSeparator14</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator14.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;contextEditCut.Name" xml:space="preserve">
-    <value>contextEditCut</value>
-  </data>
-  <data name="&gt;&gt;contextEditCut.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextEditCopy.Name" xml:space="preserve">
-    <value>contextEditCopy</value>
-  </data>
-  <data name="&gt;&gt;contextEditCopy.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextEditPaste.Name" xml:space="preserve">
-    <value>contextEditPaste</value>
-  </data>
-  <data name="&gt;&gt;contextEditPaste.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;toolStripSeparator15.Name" xml:space="preserve">
     <value>toolStripSeparator15</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator15.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextEditFindReplace.Name" xml:space="preserve">
-    <value>contextEditFindReplace</value>
-  </data>
-  <data name="&gt;&gt;contextEditFindReplace.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator16.Name" xml:space="preserve">
     <value>toolStripSeparator16</value>
@@ -1269,28 +1083,10 @@
   <data name="&gt;&gt;contextEditSelectAll.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;contextEditDelete.Name" xml:space="preserve">
-    <value>contextEditDelete</value>
-  </data>
-  <data name="&gt;&gt;contextEditDelete.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;contextDocument.Name" xml:space="preserve">
     <value>contextDocument</value>
   </data>
   <data name="&gt;&gt;contextDocument.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextDocumentOpen.Name" xml:space="preserve">
-    <value>contextDocumentOpen</value>
-  </data>
-  <data name="&gt;&gt;contextDocumentOpen.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextDocumentSave.Name" xml:space="preserve">
-    <value>contextDocumentSave</value>
-  </data>
-  <data name="&gt;&gt;contextDocumentSave.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator9.Name" xml:space="preserve">
@@ -1298,12 +1094,6 @@
   </data>
   <data name="&gt;&gt;toolStripSeparator9.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextDocumentPrint.Name" xml:space="preserve">
-    <value>contextDocumentPrint</value>
-  </data>
-  <data name="&gt;&gt;contextDocumentPrint.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator10.Name" xml:space="preserve">
     <value>toolStripSeparator10</value>
@@ -1347,18 +1137,6 @@
   <data name="&gt;&gt;contextFormat.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;contextFormatFontDialog.Name" xml:space="preserve">
-    <value>contextFormatFontDialog</value>
-  </data>
-  <data name="&gt;&gt;contextFormatFontDialog.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextFormatColorDialog.Name" xml:space="preserve">
-    <value>contextFormatColorDialog</value>
-  </data>
-  <data name="&gt;&gt;contextFormatColorDialog.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;toolStripSeparator11.Name" xml:space="preserve">
     <value>toolStripSeparator11</value>
   </data>
@@ -1369,24 +1147,6 @@
     <value>contextFormatNormal</value>
   </data>
   <data name="&gt;&gt;contextFormatNormal.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextFormatBold.Name" xml:space="preserve">
-    <value>contextFormatBold</value>
-  </data>
-  <data name="&gt;&gt;contextFormatBold.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextFormatItalic.Name" xml:space="preserve">
-    <value>contextFormatItalic</value>
-  </data>
-  <data name="&gt;&gt;contextFormatItalic.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextFormatUnderline.Name" xml:space="preserve">
-    <value>contextFormatUnderline</value>
-  </data>
-  <data name="&gt;&gt;contextFormatUnderline.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;contextFormatSuperscript.Name" xml:space="preserve">
@@ -1413,47 +1173,11 @@
   <data name="&gt;&gt;toolStripSeparator12.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;contextFormatIncrease.Name" xml:space="preserve">
-    <value>contextFormatIncrease</value>
-  </data>
-  <data name="&gt;&gt;contextFormatIncrease.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextFormatDecrease.Name" xml:space="preserve">
-    <value>contextFormatDecrease</value>
-  </data>
-  <data name="&gt;&gt;contextFormatDecrease.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextFormatIndent.Name" xml:space="preserve">
-    <value>contextFormatIndent</value>
-  </data>
-  <data name="&gt;&gt;contextFormatIndent.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextFormatOutdent.Name" xml:space="preserve">
-    <value>contextFormatOutdent</value>
-  </data>
-  <data name="&gt;&gt;contextFormatOutdent.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;toolStripSeparator13.Name" xml:space="preserve">
     <value>toolStripSeparator13</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator13.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextFormatListOrdered.Name" xml:space="preserve">
-    <value>contextFormatListOrdered</value>
-  </data>
-  <data name="&gt;&gt;contextFormatListOrdered.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextFormatListUnordered.Name" xml:space="preserve">
-    <value>contextFormatListUnordered</value>
-  </data>
-  <data name="&gt;&gt;contextFormatListUnordered.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;contextJustify.Name" xml:space="preserve">
     <value>contextJustify</value>
@@ -1461,34 +1185,10 @@
   <data name="&gt;&gt;contextJustify.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;contextJustifyLeft.Name" xml:space="preserve">
-    <value>contextJustifyLeft</value>
-  </data>
-  <data name="&gt;&gt;contextJustifyLeft.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextJustifyCenter.Name" xml:space="preserve">
-    <value>contextJustifyCenter</value>
-  </data>
-  <data name="&gt;&gt;contextJustifyCenter.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextJustifyRight.Name" xml:space="preserve">
-    <value>contextJustifyRight</value>
-  </data>
-  <data name="&gt;&gt;contextJustifyRight.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;contextFormatting.Name" xml:space="preserve">
     <value>contextFormatting</value>
   </data>
   <data name="&gt;&gt;contextFormatting.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextFormattingNormal.Name" xml:space="preserve">
-    <value>contextFormattingNormal</value>
-  </data>
-  <data name="&gt;&gt;contextFormattingNormal.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;contextFormattingHeading1.Name" xml:space="preserve">
@@ -1539,6 +1239,342 @@
   <data name="&gt;&gt;contextInsert.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="&gt;&gt;contextInsertText.Name" xml:space="preserve">
+    <value>contextInsertText</value>
+  </data>
+  <data name="&gt;&gt;contextInsertText.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextInsertHtml.Name" xml:space="preserve">
+    <value>contextInsertHtml</value>
+  </data>
+  <data name="&gt;&gt;contextInsertHtml.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator17.Name" xml:space="preserve">
+    <value>toolStripSeparator17</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator17.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolStripEnableEditing.Name" xml:space="preserve">
+    <value>toolStripEnableEditing</value>
+  </data>
+  <data name="&gt;&gt;toolStripEnableEditing.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripTextCut.Name" xml:space="preserve">
+    <value>toolstripTextCut</value>
+  </data>
+  <data name="&gt;&gt;toolstripTextCut.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripTextCopy.Name" xml:space="preserve">
+    <value>toolstripTextCopy</value>
+  </data>
+  <data name="&gt;&gt;toolstripTextCopy.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripTextPaste.Name" xml:space="preserve">
+    <value>toolstripTextPaste</value>
+  </data>
+  <data name="&gt;&gt;toolstripTextPaste.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripEditUndo.Name" xml:space="preserve">
+    <value>toolstripEditUndo</value>
+  </data>
+  <data name="&gt;&gt;toolstripEditUndo.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripEditRedo.Name" xml:space="preserve">
+    <value>toolstripEditRedo</value>
+  </data>
+  <data name="&gt;&gt;toolstripEditRedo.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripFormatBold.Name" xml:space="preserve">
+    <value>toolstripFormatBold</value>
+  </data>
+  <data name="&gt;&gt;toolstripFormatBold.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripFormatUnderline.Name" xml:space="preserve">
+    <value>toolstripFormatUnderline</value>
+  </data>
+  <data name="&gt;&gt;toolstripFormatUnderline.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripFormatItalic.Name" xml:space="preserve">
+    <value>toolstripFormatItalic</value>
+  </data>
+  <data name="&gt;&gt;toolstripFormatItalic.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripFontDialog.Name" xml:space="preserve">
+    <value>toolstripFontDialog</value>
+  </data>
+  <data name="&gt;&gt;toolstripFontDialog.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripFontNormal.Name" xml:space="preserve">
+    <value>toolstripFontNormal</value>
+  </data>
+  <data name="&gt;&gt;toolstripFontNormal.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripColorDialog.Name" xml:space="preserve">
+    <value>toolstripColorDialog</value>
+  </data>
+  <data name="&gt;&gt;toolstripColorDialog.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripFontIncrease.Name" xml:space="preserve">
+    <value>toolstripFontIncrease</value>
+  </data>
+  <data name="&gt;&gt;toolstripFontIncrease.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripFontDecrease.Name" xml:space="preserve">
+    <value>toolstripFontDecrease</value>
+  </data>
+  <data name="&gt;&gt;toolstripFontDecrease.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripJustifyLeft.Name" xml:space="preserve">
+    <value>toolstripJustifyLeft</value>
+  </data>
+  <data name="&gt;&gt;toolstripJustifyLeft.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripJustifyCenter.Name" xml:space="preserve">
+    <value>toolstripJustifyCenter</value>
+  </data>
+  <data name="&gt;&gt;toolstripJustifyCenter.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripJustifyRight.Name" xml:space="preserve">
+    <value>toolstripJustifyRight</value>
+  </data>
+  <data name="&gt;&gt;toolstripJustifyRight.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripFontIndent.Name" xml:space="preserve">
+    <value>toolstripFontIndent</value>
+  </data>
+  <data name="&gt;&gt;toolstripFontIndent.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripFontOutdent.Name" xml:space="preserve">
+    <value>toolstripFontOutdent</value>
+  </data>
+  <data name="&gt;&gt;toolstripFontOutdent.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripListOrdered.Name" xml:space="preserve">
+    <value>toolstripListOrdered</value>
+  </data>
+  <data name="&gt;&gt;toolstripListOrdered.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripListUnordered.Name" xml:space="preserve">
+    <value>toolstripListUnordered</value>
+  </data>
+  <data name="&gt;&gt;toolstripListUnordered.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripInsertLine.Name" xml:space="preserve">
+    <value>toolstripInsertLine</value>
+  </data>
+  <data name="&gt;&gt;toolstripInsertLine.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripInsertTable.Name" xml:space="preserve">
+    <value>toolstripInsertTable</value>
+  </data>
+  <data name="&gt;&gt;toolstripInsertTable.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripInsertImage.Name" xml:space="preserve">
+    <value>toolstripInsertImage</value>
+  </data>
+  <data name="&gt;&gt;toolstripInsertImage.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripInsertLink.Name" xml:space="preserve">
+    <value>toolstripInsertLink</value>
+  </data>
+  <data name="&gt;&gt;toolstripInsertLink.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripFindReplace.Name" xml:space="preserve">
+    <value>toolstripFindReplace</value>
+  </data>
+  <data name="&gt;&gt;toolstripFindReplace.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripDocumentPrint.Name" xml:space="preserve">
+    <value>toolstripDocumentPrint</value>
+  </data>
+  <data name="&gt;&gt;toolstripDocumentPrint.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextTableModify.Name" xml:space="preserve">
+    <value>contextTableModify</value>
+  </data>
+  <data name="&gt;&gt;contextTableModify.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextEditUndo.Name" xml:space="preserve">
+    <value>contextEditUndo</value>
+  </data>
+  <data name="&gt;&gt;contextEditUndo.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextEditRedo.Name" xml:space="preserve">
+    <value>contextEditRedo</value>
+  </data>
+  <data name="&gt;&gt;contextEditRedo.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextEditCut.Name" xml:space="preserve">
+    <value>contextEditCut</value>
+  </data>
+  <data name="&gt;&gt;contextEditCut.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextEditCopy.Name" xml:space="preserve">
+    <value>contextEditCopy</value>
+  </data>
+  <data name="&gt;&gt;contextEditCopy.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextEditPaste.Name" xml:space="preserve">
+    <value>contextEditPaste</value>
+  </data>
+  <data name="&gt;&gt;contextEditPaste.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextEditFindReplace.Name" xml:space="preserve">
+    <value>contextEditFindReplace</value>
+  </data>
+  <data name="&gt;&gt;contextEditFindReplace.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextEditDelete.Name" xml:space="preserve">
+    <value>contextEditDelete</value>
+  </data>
+  <data name="&gt;&gt;contextEditDelete.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextDocumentOpen.Name" xml:space="preserve">
+    <value>contextDocumentOpen</value>
+  </data>
+  <data name="&gt;&gt;contextDocumentOpen.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextDocumentSave.Name" xml:space="preserve">
+    <value>contextDocumentSave</value>
+  </data>
+  <data name="&gt;&gt;contextDocumentSave.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextDocumentPrint.Name" xml:space="preserve">
+    <value>contextDocumentPrint</value>
+  </data>
+  <data name="&gt;&gt;contextDocumentPrint.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextFormatFontDialog.Name" xml:space="preserve">
+    <value>contextFormatFontDialog</value>
+  </data>
+  <data name="&gt;&gt;contextFormatFontDialog.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextFormatColorDialog.Name" xml:space="preserve">
+    <value>contextFormatColorDialog</value>
+  </data>
+  <data name="&gt;&gt;contextFormatColorDialog.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextFormatBold.Name" xml:space="preserve">
+    <value>contextFormatBold</value>
+  </data>
+  <data name="&gt;&gt;contextFormatBold.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextFormatItalic.Name" xml:space="preserve">
+    <value>contextFormatItalic</value>
+  </data>
+  <data name="&gt;&gt;contextFormatItalic.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextFormatUnderline.Name" xml:space="preserve">
+    <value>contextFormatUnderline</value>
+  </data>
+  <data name="&gt;&gt;contextFormatUnderline.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextFormatIncrease.Name" xml:space="preserve">
+    <value>contextFormatIncrease</value>
+  </data>
+  <data name="&gt;&gt;contextFormatIncrease.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextFormatDecrease.Name" xml:space="preserve">
+    <value>contextFormatDecrease</value>
+  </data>
+  <data name="&gt;&gt;contextFormatDecrease.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextFormatIndent.Name" xml:space="preserve">
+    <value>contextFormatIndent</value>
+  </data>
+  <data name="&gt;&gt;contextFormatIndent.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextFormatOutdent.Name" xml:space="preserve">
+    <value>contextFormatOutdent</value>
+  </data>
+  <data name="&gt;&gt;contextFormatOutdent.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextFormatListOrdered.Name" xml:space="preserve">
+    <value>contextFormatListOrdered</value>
+  </data>
+  <data name="&gt;&gt;contextFormatListOrdered.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextFormatListUnordered.Name" xml:space="preserve">
+    <value>contextFormatListUnordered</value>
+  </data>
+  <data name="&gt;&gt;contextFormatListUnordered.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextJustifyLeft.Name" xml:space="preserve">
+    <value>contextJustifyLeft</value>
+  </data>
+  <data name="&gt;&gt;contextJustifyLeft.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextJustifyCenter.Name" xml:space="preserve">
+    <value>contextJustifyCenter</value>
+  </data>
+  <data name="&gt;&gt;contextJustifyCenter.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextJustifyRight.Name" xml:space="preserve">
+    <value>contextJustifyRight</value>
+  </data>
+  <data name="&gt;&gt;contextJustifyRight.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextFormattingNormal.Name" xml:space="preserve">
+    <value>contextFormattingNormal</value>
+  </data>
+  <data name="&gt;&gt;contextFormattingNormal.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="&gt;&gt;contextInsertLine.Name" xml:space="preserve">
     <value>contextInsertLine</value>
   </data>
@@ -1555,18 +1591,6 @@
     <value>contextInsertImage</value>
   </data>
   <data name="&gt;&gt;contextInsertImage.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextInsertText.Name" xml:space="preserve">
-    <value>contextInsertText</value>
-  </data>
-  <data name="&gt;&gt;contextInsertText.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;contextInsertHtml.Name" xml:space="preserve">
-    <value>contextInsertHtml</value>
-  </data>
-  <data name="&gt;&gt;contextInsertHtml.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;contextInsertTable.Name" xml:space="preserve">

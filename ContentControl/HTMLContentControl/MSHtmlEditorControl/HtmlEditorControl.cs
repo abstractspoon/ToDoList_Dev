@@ -779,10 +779,12 @@ namespace MSDN.Html.Editor
                 _readOnly = value;
                 // define the document editable property
                 body.contentEditable = (!_readOnly).ToString();
-                // define the menu bar state
-                this.toolstripEditor.Enabled = (!_readOnly);
-                // define whether the IE cntext menu should be shown
-                this.editorWebBrowser.IsWebBrowserContextMenuEnabled = _readOnly;
+
+				// define the menu bar state
+				UpdateToolbarEnabledState();
+				
+				// define whether the IE cntext menu should be shown
+				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = _readOnly;
             }
 
         } //ReadOnly
@@ -1768,10 +1770,9 @@ namespace MSDN.Html.Editor
         /// </summary>
         private void FormatSelectionChange()
         {
-            //this.toolstripEditUndo.Enabled = CanEditUndo();
-            //this.contextEditUndo.Enabled = CanEditUndo();
-
-
+            this.toolstripEditUndo.Enabled = CanEditUndo();
+            this.contextEditUndo.Enabled = CanEditUndo();
+			
             // review the bold state of the selected text
             if (ExecuteCommandQuery(HTML_COMMAND_BOLD))
             {
@@ -1835,11 +1836,42 @@ namespace MSDN.Html.Editor
 
         } //FormatSelectionChange
 
+		protected void UpdateToolbarEnabledState()
+		{
+			this.toolstripTextCut.Enabled = !ReadOnly;
+            this.toolstripTextCopy.Enabled = !ReadOnly;
+            this.toolstripTextPaste.Enabled = !ReadOnly;
+            this.toolstripEditUndo.Enabled = !ReadOnly;
+            this.toolstripEditRedo.Enabled = !ReadOnly;
+            this.toolstripFormatBold.Enabled = !ReadOnly;
+            this.toolstripFormatUnderline.Enabled = !ReadOnly;
+            this.toolstripFormatItalic.Enabled = !ReadOnly;
+            this.toolstripFontDialog.Enabled = !ReadOnly;
+            this.toolstripFontNormal.Enabled = !ReadOnly;
+            this.toolstripColorDialog.Enabled = !ReadOnly;
+            this.toolstripFontIncrease.Enabled = !ReadOnly;
+            this.toolstripFontDecrease.Enabled = !ReadOnly;
+            this.toolstripJustifyLeft.Enabled = !ReadOnly;
+            this.toolstripJustifyCenter.Enabled = !ReadOnly;
+            this.toolstripJustifyRight.Enabled = !ReadOnly;
+            this.toolstripFontIndent.Enabled = !ReadOnly;
+            this.toolstripFontOutdent.Enabled = !ReadOnly;
+            this.toolstripListOrdered.Enabled = !ReadOnly;
+            this.toolstripListUnordered.Enabled = !ReadOnly;
+            this.toolstripInsertLine.Enabled = !ReadOnly;
+            this.toolstripInsertTable.Enabled = !ReadOnly;
+            this.toolstripInsertImage.Enabled = !ReadOnly;
+            this.toolstripInsertLink.Enabled = !ReadOnly;
+            this.toolstripFindReplace.Enabled = !ReadOnly;
 
-        /// <summary>
-        /// Method using the document to set the font name
-        /// </summary>
-        public void FormatFontName(string name)
+            this.toolstripEnableEditing.Enabled = true; // always
+            this.toolstripDocumentPrint.Enabled = true; // always
+		}
+
+	/// <summary>
+	/// Method using the document to set the font name
+	/// </summary>
+	public void FormatFontName(string name)
         {
             ExecuteCommandRange(HTML_COMMAND_FONT_NAME, name);
 
@@ -3968,11 +4000,17 @@ namespace MSDN.Html.Editor
 
         }
 
-        /// <summary>
-        /// General Context Meun processing method
-        /// Calls the ProcessCommand with the selected command Tag Text
-        /// </summary>
-        private void contextEditorClick(object sender, EventArgs e)
+		private void toolstripEnableEditClick(object sender, EventArgs e)
+		{
+			ReadOnly = !ReadOnly;
+			this.toolstripEnableEditing.Checked = !ReadOnly;
+		}
+
+		/// <summary>
+		/// General Context Meun processing method
+		/// Calls the ProcessCommand with the selected command Tag Text
+		/// </summary>
+		private void contextEditorClick(object sender, EventArgs e)
         {
             ToolStripMenuItem menuItem = (ToolStripMenuItem)sender;
             string command = (string)menuItem.Tag;

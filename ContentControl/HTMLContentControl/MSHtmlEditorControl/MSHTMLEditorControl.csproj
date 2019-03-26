@@ -214,6 +214,7 @@
     <Content Include="Resources\ToolbarDelete.bmp" />
     <None Include="Resources\ToolbarFileOpen.bmp" />
     <None Include="Resources\ToolbarFileSave.bmp" />
+    <Content Include="Resources\ToolbarEdit.bmp" />
     <Content Include="Resources\ToolbarFind.bmp" />
     <Content Include="Resources\ToolbarFontColor.bmp" />
     <Content Include="Resources\ToolbarFontDown.bmp" />
