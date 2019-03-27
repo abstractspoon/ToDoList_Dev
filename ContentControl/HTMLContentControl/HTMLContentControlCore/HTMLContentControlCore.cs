@@ -92,16 +92,16 @@ namespace HTMLContentControl
 
         public void SavePreferences(Preferences prefs, String key)
         {
-            // TODO
+			// TODO
+			prefs.WriteProfileBool(key, "EditEnabled", m_HtmlEditControl.EditEnabled);
+		}
 
-        }
-
-        public void LoadPreferences(Preferences prefs, String key, bool appOnly)
+		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
             if (!appOnly)
             {
-                // private settings
-                // TODO
+				// private settings
+				m_HtmlEditControl.EditEnabled = prefs.GetProfileBool(key, "EditEnabled", true);
             }
 
             String fontName = @"Tahoma";
