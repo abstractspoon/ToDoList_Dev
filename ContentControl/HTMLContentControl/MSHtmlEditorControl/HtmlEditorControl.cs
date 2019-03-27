@@ -265,6 +265,7 @@ namespace MSDN.Html.Editor
 
         // internal property values
         private bool _readOnly;
+        private bool _editEnabled; // distinct from readonly
         private bool _toolbarVisible;
         private DockStyle _toolbarDock;
         private string _bodyText;
@@ -311,7 +312,8 @@ namespace MSDN.Html.Editor
 
             // define the default values of the properties
             _readOnly = false;
-            _toolbarVisible = true;
+			_editEnabled = true;
+			_toolbarVisible = true;
             _toolbarDock = DockStyle.Bottom;
             _bodyText = DEFAULT_HTML_TEXT;
             _bodyHtml = DEFAULT_HTML_TEXT;
@@ -777,8 +779,9 @@ namespace MSDN.Html.Editor
             set
             {
                 _readOnly = value;
+
                 // define the document editable property
-                body.contentEditable = (!_readOnly).ToString();
+                body.contentEditable = (!_readOnly && _editEnabled).ToString();
 
 				// define the menu bar state
 				UpdateToolbarEnabledState();
@@ -1838,34 +1841,36 @@ namespace MSDN.Html.Editor
 
 		protected void UpdateToolbarEnabledState()
 		{
-			this.toolstripTextCut.Enabled = !ReadOnly;
-            this.toolstripTextCopy.Enabled = !ReadOnly;
-            this.toolstripTextPaste.Enabled = !ReadOnly;
-            this.toolstripEditUndo.Enabled = !ReadOnly;
-            this.toolstripEditRedo.Enabled = !ReadOnly;
-            this.toolstripFormatBold.Enabled = !ReadOnly;
-            this.toolstripFormatUnderline.Enabled = !ReadOnly;
-            this.toolstripFormatItalic.Enabled = !ReadOnly;
-            this.toolstripFontDialog.Enabled = !ReadOnly;
-            this.toolstripFontNormal.Enabled = !ReadOnly;
-            this.toolstripColorDialog.Enabled = !ReadOnly;
-            this.toolstripFontIncrease.Enabled = !ReadOnly;
-            this.toolstripFontDecrease.Enabled = !ReadOnly;
-            this.toolstripJustifyLeft.Enabled = !ReadOnly;
-            this.toolstripJustifyCenter.Enabled = !ReadOnly;
-            this.toolstripJustifyRight.Enabled = !ReadOnly;
-            this.toolstripFontIndent.Enabled = !ReadOnly;
-            this.toolstripFontOutdent.Enabled = !ReadOnly;
-            this.toolstripListOrdered.Enabled = !ReadOnly;
-            this.toolstripListUnordered.Enabled = !ReadOnly;
-            this.toolstripInsertLine.Enabled = !ReadOnly;
-            this.toolstripInsertTable.Enabled = !ReadOnly;
-            this.toolstripInsertImage.Enabled = !ReadOnly;
-            this.toolstripInsertLink.Enabled = !ReadOnly;
-            this.toolstripFindReplace.Enabled = !ReadOnly;
+			this.toolstripTextCut.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripTextCopy.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripTextPaste.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripEditUndo.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripEditRedo.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripFormatBold.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripFormatUnderline.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripFormatItalic.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripFontDialog.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripFontNormal.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripColorDialog.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripFontIncrease.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripFontDecrease.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripJustifyLeft.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripJustifyCenter.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripJustifyRight.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripFontIndent.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripFontOutdent.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripListOrdered.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripListUnordered.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripInsertLine.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripInsertTable.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripInsertImage.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripInsertLink.Enabled = (!_readOnly && _editEnabled);
+            this.toolstripFindReplace.Enabled = (!_readOnly && _editEnabled);
 
-            this.toolstripEnableEditing.Enabled = true; // always
-            this.toolstripDocumentPrint.Enabled = true; // always
+            this.toolstripEnableEditing.Enabled = !_readOnly;
+			this.toolstripEnableEditing.Checked = (!_readOnly && _editEnabled);
+
+			this.toolstripDocumentPrint.Enabled = true; // always
 		}
 
 	/// <summary>
@@ -4002,8 +4007,12 @@ namespace MSDN.Html.Editor
 
 		private void toolstripEnableEditClick(object sender, EventArgs e)
 		{
-			ReadOnly = !ReadOnly;
-			this.toolstripEnableEditing.Checked = !ReadOnly;
+			_editEnabled = !_editEnabled;
+
+			// define the document editable property
+			body.contentEditable = (!_readOnly && _editEnabled).ToString();
+
+			UpdateToolbarEnabledState();
 		}
 
 		/// <summary>
