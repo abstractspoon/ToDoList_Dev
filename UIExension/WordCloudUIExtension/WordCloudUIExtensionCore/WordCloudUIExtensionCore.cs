@@ -410,7 +410,7 @@ namespace WordCloudUIExtension
             }
 
             // App settings
-			ShowSplitterBar(prefs.GetProfileInt("Preferences", "HidePaneSplitBar", 0) == 0);
+			ShowSplitterBar(!prefs.GetProfileBool("Preferences", "HidePaneSplitBar", false));
 
             string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string language = prefs.GetProfileString("Preferences", "LanguageFile", "");
@@ -443,7 +443,7 @@ namespace WordCloudUIExtension
             m_LangIgnoreFilePath = Path.Combine(appPath, "Resources\\Translations", language);
             m_LangIgnoreFilePath = Path.ChangeExtension(m_LangIgnoreFilePath, "WordCloud.Ignore.txt");
 
-            if (prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0)
+            if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false))
             {
                 m_WordCloud.SetFont(prefs.GetProfileString("Preferences", "TreeFont", FontName),
                                     prefs.GetProfileInt("Preferences", "FontSize", 10));
@@ -453,13 +453,13 @@ namespace WordCloudUIExtension
                 m_WordCloud.SetFont(FontName, 10);
             }
 
-            bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
+            bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
             m_TaskMatchesList.TaskColorIsBackground = taskColorIsBkgnd;
 
-            bool showParentsAsFolders = (prefs.GetProfileInt("Preferences", "ShowParentsAsFolders", 0) != 0);
+            bool showParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
             m_TaskMatchesList.ShowParentsAsFolders = showParentsAsFolders;
 
-            bool showDoneCheckboxes = (prefs.GetProfileInt("Preferences", "AllowCheckboxAgainstTreeItem", 0) != 0);
+            bool showDoneCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
             m_TaskMatchesList.ShowCompletionCheckboxes = showDoneCheckboxes;
 
             UpdateBlacklist();

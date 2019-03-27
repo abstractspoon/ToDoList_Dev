@@ -176,10 +176,10 @@ namespace DayViewUIExtension
 				UpdateDayViewPreferences();
             }
 
-			bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
+			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			m_DayView.TaskColorIsBackground = taskColorIsBkgnd;
 
-			bool showParentsAsFolder = (prefs.GetProfileInt("Preferences", "ShowParentsAsFolders", 0) != 0);
+			bool showParentsAsFolder = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
 			m_DayView.ShowParentsAsFolder = showParentsAsFolder;
 
 			if (prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0)

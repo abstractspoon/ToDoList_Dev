@@ -792,6 +792,28 @@ namespace MSDN.Html.Editor
 
         } //ReadOnly
 
+        public bool EditEnabled
+        {
+            get
+            {
+                return _editEnabled;
+            }
+            set
+            {
+				_editEnabled = value;
+
+                // define the document editable property
+                body.contentEditable = (!_readOnly && _editEnabled).ToString();
+
+				// define the menu bar state
+				UpdateToolbarEnabledState();
+				
+				// define whether the IE cntext menu should be shown
+				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = (_readOnly || !_editEnabled);
+            }
+
+        } //ReadOnly
+
 
         /// <summary>
         /// Property defining the visibility of the defined toolbar
@@ -4007,12 +4029,7 @@ namespace MSDN.Html.Editor
 
 		private void toolstripEnableEditClick(object sender, EventArgs e)
 		{
-			_editEnabled = !_editEnabled;
-
-			// define the document editable property
-			body.contentEditable = (!_readOnly && _editEnabled).ToString();
-
-			UpdateToolbarEnabledState();
+			EditEnabled = !EditEnabled;
 		}
 
 		/// <summary>

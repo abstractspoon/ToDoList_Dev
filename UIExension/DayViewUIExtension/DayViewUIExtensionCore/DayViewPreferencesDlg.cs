@@ -25,20 +25,20 @@ namespace DayViewUIExtension
 		{
             string prefsKey = (key + "\\Preferences");
 
-            prefs.WriteProfileInt(prefsKey, "HideParentTasks", (HideParentTasks ? 1 : 0));
-            prefs.WriteProfileInt(prefsKey, "HideTasksWithoutTimes", (HideTasksWithoutTimes ? 1 : 0));
-            prefs.WriteProfileInt(prefsKey, "HideTasksSpanningWeekends", (HideTasksSpanningWeekends ? 1 : 0));
-            prefs.WriteProfileInt(prefsKey, "HideTasksSpanningDays", (HideTasksSpanningDays ? 1 : 0));
+            prefs.WriteProfileBool(prefsKey, "HideParentTasks", HideParentTasks);
+            prefs.WriteProfileBool(prefsKey, "HideTasksWithoutTimes", HideTasksWithoutTimes);
+            prefs.WriteProfileBool(prefsKey, "HideTasksSpanningWeekends", HideTasksSpanningWeekends);
+            prefs.WriteProfileBool(prefsKey, "HideTasksSpanningDays", HideTasksSpanningDays);
 		}
 
         public void LoadPreferences(Preferences prefs, String key)
         {
             string prefsKey = (key + "\\Preferences");
 
-            m_HideParentTasks.Checked = (prefs.GetProfileInt(prefsKey, "HideParentTasks", 1) != 0);
-            m_HideTasksWithoutTimes.Checked = (prefs.GetProfileInt(prefsKey, "HideTasksWithoutTimes", 1) != 0);
-            m_HideTasksSpanningWeekends.Checked = (prefs.GetProfileInt(prefsKey, "HideTasksSpanningWeekends", 0) != 0);
-            m_HideTasksSpanningDays.Checked = (prefs.GetProfileInt(prefsKey, "HideTasksSpanningDays", 0) != 0);
+            m_HideParentTasks.Checked = prefs.GetProfileBool(prefsKey, "HideParentTasks", true);
+            m_HideTasksWithoutTimes.Checked = prefs.GetProfileBool(prefsKey, "HideTasksWithoutTimes", true);
+            m_HideTasksSpanningWeekends.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningWeekends", false);
+            m_HideTasksSpanningDays.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningDays", false);
         }
 
         public Boolean HideParentTasks { get { return m_HideParentTasks.Checked; } }

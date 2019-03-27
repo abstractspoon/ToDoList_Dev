@@ -132,20 +132,20 @@ namespace MindMapUIExtension
                 // private settings
             }
 
-            bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
+            bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			m_MindMap.TaskColorIsBackground = taskColorIsBkgnd;
 
-			bool showParentsAsFolders = (prefs.GetProfileInt("Preferences", "ShowParentsAsFolders", 0) != 0);
+			bool showParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
 			m_MindMap.ShowParentsAsFolders = showParentsAsFolders;
 
-            bool showDoneCheckboxes = (prefs.GetProfileInt("Preferences", "AllowCheckboxAgainstTreeItem", 0) != 0);
+            bool showDoneCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
             m_MindMap.ShowCompletionCheckboxes = showDoneCheckboxes;
 
-            bool strikeThruDone = (prefs.GetProfileInt("Preferences", "StrikethroughDone", 1) != 0);
+            bool strikeThruDone = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
             String fontName = FontName;
             int fontSize = 8;
             
-            if (prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0)
+            if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false))
             {
                 fontName = prefs.GetProfileString("Preferences", "TreeFont", fontName);
                 fontSize = prefs.GetProfileInt("Preferences", "FontSize", fontSize);

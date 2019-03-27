@@ -29,6 +29,9 @@ namespace Abstractspoon
 				Preferences(IPreferences* pPrefs);
 				Preferences(const IPreferences* pPrefs);
 
+				bool GetProfileBool(String^ sSection, String^ sEntry, bool bDefault);
+				bool WriteProfileBool(String^ sSection, String^ sEntry, bool bValue);
+
 				int GetProfileInt(String^ sSection, String^ sEntry, int nDefault);
 				bool WriteProfileInt(String^ sSection, String^ sEntry, int nValue);
 

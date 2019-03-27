@@ -98,7 +98,7 @@ namespace HTMLReportExporter
 
 			HtmlNotes = "";
 
-			if (prefs.GetProfileInt(sKey, "ExportSpaceForNotes", 0) != 0)
+			if (prefs.GetProfileBool(sKey, "ExportSpaceForNotes", false))
 			{
 				int nLine = prefs.GetProfileInt(sKey, "LineSpaces", 8);
 
@@ -113,7 +113,7 @@ namespace HTMLReportExporter
 				}
 			}
 
-			StrikeThruDone = (prefs.GetProfileInt(sKey, "StrikethroughDone", 1) != 0);
+			StrikeThruDone = prefs.GetProfileBool(sKey, "StrikethroughDone", true);
 
 			var style = tasks.GetMetaData("EXPORTSTYLE");
 
@@ -138,7 +138,7 @@ namespace HTMLReportExporter
 
 			Indent = "";
 
-			if (prefs.GetProfileInt(sKey, "UseSpaceIndents", 1) != 0)
+			if (prefs.GetProfileBool(sKey, "UseSpaceIndents", true))
 			{
 				int nSpace = prefs.GetProfileInt(sKey, "TextIndent", 2);
 

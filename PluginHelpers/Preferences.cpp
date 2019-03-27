@@ -38,6 +38,16 @@ Preferences::Preferences() : m_pPrefs(nullptr), m_pConstPrefs(nullptr)
 
 // ---------------------------------------------------------
 
+bool Preferences::GetProfileBool(String^ sSection, String^ sEntry, bool bDefault)
+{
+	return (GetProfileInt(sSection, sEntry, (bDefault ? 1 : 0)) != 0);
+}
+
+bool Preferences::WriteProfileBool(String^ sSection, String^ sEntry, bool bValue)
+{
+	return WriteProfileInt(sSection, sEntry, (bValue ? 1 : 0));
+}
+
 int Preferences::GetProfileInt(String^ sSection, String^ sEntry, int nDefault)
 {
    return GETPREF(GetProfileInt, nDefault);

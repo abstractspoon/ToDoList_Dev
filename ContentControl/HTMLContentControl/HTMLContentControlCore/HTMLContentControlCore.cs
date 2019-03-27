@@ -107,13 +107,13 @@ namespace HTMLContentControl
             String fontName = @"Tahoma";
             float fontSize = 8.25F;
             
-            if (prefs.GetProfileInt("Preferences", "SpecifyCommentsFont", 0) != 0)
+            if (prefs.GetProfileBool("Preferences", "SpecifyCommentsFont", false))
             {
                 fontName = prefs.GetProfileString("Preferences", "CommentsFont", "Tahoma");
                 fontSize = prefs.GetProfileInt("Preferences", "CommentsFontSize", 8);
             }
-            else if ((prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0) &&
-                    (prefs.GetProfileInt("Preferences", "CommentsUseTreeFont", 0) != 0))
+            else if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false) &&
+                    prefs.GetProfileBool("Preferences", "CommentsUseTreeFont", false))
             {
                 fontName = prefs.GetProfileString("Preferences", "TreeFont", "Tahoma");
                 fontSize = prefs.GetProfileInt("Preferences", "FontSize", 8);
