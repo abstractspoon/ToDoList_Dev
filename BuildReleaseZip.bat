@@ -40,7 +40,7 @@ REM Zip C++ Binaries
 REM Manifest for XP only (Updater will delete for other OSes)
 %PATH7ZIP% a %OUTZIP% %1\ToDoList\res\ToDoList.exe.XP.manifest
 
-REM Handle dlls explicitly to maintain control over .NET plugins
+REM Handle dlls explicitly to maintain control over plugins
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\PlainTextImport.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\RTFContentCtrl.dll
@@ -60,9 +60,6 @@ REM Handle dlls explicitly to maintain control over .NET plugins
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\OdbcStorage.dll
 
 REM .Net Plugins
-REM echo.%1 | findstr /C:"_Dev" 1>nul
-
-REM IF ERRORLEVEL 1 goto CONTINUE
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\PluginHelpers.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\DayViewUIExtensionCore.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\DayViewUIExtensionBridge.dll
@@ -72,7 +69,19 @@ REM IF ERRORLEVEL 1 goto CONTINUE
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\WordCloudUIExtensionCore.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\WordCloudUIExtensionBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Gma.CodeCloud.Controls.dll
-REM :CONTINUE
+
+REM ToDoList_Dev-only Plugins
+echo.%1 | findstr /C:"_Dev" 1>nul
+
+IF ERRORLEVEL 1 goto CONTINUE
+
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\WorkloadExt.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLContentControlBridge.dll"
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLContentControlCore.dll"
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll"
+REM %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.mshtml.dll"
+
+:CONTINUE
  
 REM Copy latest Resources
 del %OUTDIR%\Resources\ /Q /S
