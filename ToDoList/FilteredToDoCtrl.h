@@ -28,7 +28,7 @@ class CFilteredToDoCtrl : public CTabbedToDoCtrl
 {
 public:
 	CFilteredToDoCtrl(CUIExtensionMgr& mgrUIExt, 
-						CContentMgr& mgrContent, 
+						CTDLContentMgr& mgrContent, 
 						const CONTENTFORMAT& cfDefault,
 						const TDCCOLEDITFILTERVISIBILITY& visDefault);
 	

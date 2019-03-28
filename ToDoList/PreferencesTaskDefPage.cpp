@@ -8,6 +8,7 @@
 #include "tdcmapping.h"
 #include "todoitem.h"
 #include "tdltaskicondlg.h"
+#include "tdlcontentmgr.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
@@ -40,7 +41,7 @@ const LPCTSTR ENDL = _T("\r\n");
 
 IMPLEMENT_DYNCREATE(CPreferencesTaskDefPage, CPreferencesPageBase)
 
-CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CContentMgr* pMgrContent) 
+CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CTDLContentMgr* pMgrContent) 
 	: 
 	CPreferencesPageBase(CPreferencesTaskDefPage::IDD),
 	m_pMgrContent(pMgrContent), 

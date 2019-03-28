@@ -17,7 +17,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // PreferencesTaskDefPage.h : header file
 
-class CContentMgr;
+class CTDLContentMgr;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -26,7 +26,7 @@ class CTDLCommentsCtrl : public CRuntimeDlg
 	DECLARE_DYNAMIC(CTDLCommentsCtrl)
 
 public:
-	CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CContentMgr* pMgrContent = NULL);
+	CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CTDLContentMgr* pMgrContent = NULL);
 	virtual ~CTDLCommentsCtrl();
 
 	BOOL Create(CWnd* pParent, UINT nID, const CRect& rPos = CRect(0, 0, 0, 0));
@@ -57,7 +57,7 @@ public:
 	ISpellCheck* GetSpellCheckInterface() { return m_ctrlComments.GetSpellCheckInterface(); }
 
 protected:
-	const CContentMgr* m_pMgrContent;
+	const CTDLContentMgr* m_pMgrContent;
 
 	CContentTypeComboBox m_cbCommentsFmt;
 	CContentCtrl m_ctrlComments;
@@ -90,6 +90,7 @@ protected:
 	afx_msg void OnSelchangeCommentsformat();
 	afx_msg void OnDestroy();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnEnable(BOOL bEnable);
 
 	afx_msg LRESULT OnSetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
@@ -105,12 +106,11 @@ protected:
 protected:
 	void CalcCommentsCtrlRect(CRect& rCtrl, int cx = 0, int cy = 0) const;
 	BOOL UpdateControlFormat();
+	BOOL UpdateControlFormat(const CONTENTFORMAT& cf);
 	CString GetPreferencesKey() const;
 	void SavePreferences() const;
 	void LoadPreferences(BOOL bAppOnly);
 
-public:
-	afx_msg void OnEnable(BOOL bEnable);
 };
 
 #endif // AFX_TDLCOMMENTCTRL_H__852964E3_4ABD_4B66_88BA_F553177616F2__INCLUDED_

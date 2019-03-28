@@ -5,7 +5,6 @@
 #include "resource.h"
 #include "todolist.h"
 #include "ToDoListWnd.h"
-#include "Preferencesdlg.h"
 #include "tdlwelcomewizard.h"
 #include "tdcenum.h"
 #include "tdcmsg.h"

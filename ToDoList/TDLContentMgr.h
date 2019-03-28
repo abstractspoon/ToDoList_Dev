@@ -17,6 +17,8 @@ public:
 	CTDLContentMgr();
 	virtual ~CTDLContentMgr();
 
+	CONTENTFORMAT GetSimpleTextContentFormat() const;
+
 protected:
 	virtual void Initialize() const;
 

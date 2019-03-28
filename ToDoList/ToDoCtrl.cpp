@@ -167,7 +167,7 @@ UINT CToDoCtrl::WM_TDC_RECREATERECURRINGTASK		= (WM_APP + 3);
 
 //////////////////////////////////////////////////////////////////////////////
 
-CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault) 
+CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault) 
 	: 
 	m_bArchive(FALSE),
 	m_bDelayLoaded(FALSE),

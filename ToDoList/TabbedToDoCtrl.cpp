@@ -79,7 +79,7 @@ CStringArray CTabbedToDoCtrl::s_aDefTaskViews;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, CContentMgr& mgrContent, 
+CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, CTDLContentMgr& mgrContent, 
 								 const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault) 
 	:
 	CToDoCtrl(mgrContent, cfDefault, visDefault), 

@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLCommentsCtrl.h"
+#include "TDLContentMgr.h"
 
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dlgunits.h"
@@ -31,7 +32,7 @@ enum
 
 IMPLEMENT_DYNAMIC(CTDLCommentsCtrl, CRuntimeDlg)
 
-CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CContentMgr* pMgrContent)
+CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CTDLContentMgr* pMgrContent)
 	:
 	m_pMgrContent(pMgrContent), 
 	m_cbCommentsFmt(pMgrContent, IDI_NULL),
@@ -284,15 +285,22 @@ void CTDLCommentsCtrl::OnSelchangeCommentsformat()
 
 BOOL CTDLCommentsCtrl::UpdateControlFormat()
 {
-	ASSERT(m_pMgrContent);
+	ASSERT(GetSafeHwnd());
+
+	CONTENTFORMAT cf;
+	m_cbCommentsFmt.GetSelectedFormat(cf);
+
+	return UpdateControlFormat(cf);
+}
+
+BOOL CTDLCommentsCtrl::UpdateControlFormat(const CONTENTFORMAT& cf)
+{
+	ASSERT(m_pMgrContent && (m_pMgrContent->FindContent(cf) != -1));
 	ASSERT(GetSafeHwnd());
 
 	// save outgoing content prefs provided they've already been loaded
 	if (!m_bFirstLoadCommentsPrefs)
 		SavePreferences();
-
-	CONTENTFORMAT cf;
-	m_cbCommentsFmt.GetSelectedFormat(cf);
 
 	if (m_ctrlComments.GetContentFormat() == cf)
 	{
@@ -467,12 +475,13 @@ BOOL CTDLCommentsCtrl::SetSelectedFormat(const CONTENTFORMAT& cf)
 
 	if (m_ctrlComments.GetSafeHwnd() && (cf == cfSel))
 		return TRUE;
-	
+
 	if (m_cbCommentsFmt.SetSelectedFormat(cf) == CB_ERR)
 	{
-		// Setting to an empty format is not an error 
-		// it's just a way to indicate multiple formats
-		return cf.IsEmpty();
+		// If multiple formats or an unknown format
+		// use simple text as a fallback
+		UpdateControlFormat(m_pMgrContent->GetSimpleTextContentFormat());
+		return FALSE;
 	}
 
 	// else

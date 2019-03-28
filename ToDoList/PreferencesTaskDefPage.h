@@ -41,7 +41,7 @@ class CPreferencesTaskDefPage : public CPreferencesPageBase
 
 // Construction
 public:
-	CPreferencesTaskDefPage(const CContentMgr* pMgrContent = NULL);
+	CPreferencesTaskDefPage(const CTDLContentMgr* pMgrContent = NULL);
 	~CPreferencesTaskDefPage();
 
 	void SetPriorityColors(const CDWordArray& aColors);

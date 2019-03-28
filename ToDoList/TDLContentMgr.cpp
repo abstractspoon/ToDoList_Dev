@@ -36,3 +36,10 @@ void CTDLContentMgr::Initialize() const
 		pMgr->m_aContent.InsertAt(0, new CTDCSimpleTextContent);
 	}
 }
+
+CONTENTFORMAT CTDLContentMgr::GetSimpleTextContentFormat() const
+{
+	Initialize();
+
+	return GetContentFormat(0);
+}

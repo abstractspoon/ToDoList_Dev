@@ -55,7 +55,7 @@ class CTabbedToDoCtrl : public CToDoCtrl
 {
 public:
 	CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, 
-					CContentMgr& mgrContent, 
+					CTDLContentMgr& mgrContent, 
 					const CONTENTFORMAT& cfDefault,
 					const TDCCOLEDITFILTERVISIBILITY& visDefault);
 

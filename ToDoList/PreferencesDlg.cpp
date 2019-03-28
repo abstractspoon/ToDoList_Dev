@@ -111,7 +111,7 @@ const LPCTSTR PREFSKEY = _T("Preferences");
 // CPreferencesDlg dialog
 
 CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr, 
-								 const CContentMgr* pContentMgr, 
+								 const CTDLContentMgr* pContentMgr, 
 								 const CTDCImportExportMgr* pExportMgr,
 								 const CUIExtensionMgr* pMgrUIExt,
 								 CWnd* pParent /*=NULL*/)

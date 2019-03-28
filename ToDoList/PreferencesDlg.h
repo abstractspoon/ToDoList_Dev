@@ -63,7 +63,7 @@ class CPreferencesDlg : public CPreferencesDlgBase
 // Construction
 public:
 	CPreferencesDlg(CShortcutManager* pShortcutMgr = NULL, 
-					const CContentMgr* pContentMgr = NULL, 
+					const CTDLContentMgr* pContentMgr = NULL, 
 					const CTDCImportExportMgr* pExportMgr = NULL, 
 					const CUIExtensionMgr* pMgrUIExt = NULL,
 					CWnd* pParent = NULL);   // standard constructor
