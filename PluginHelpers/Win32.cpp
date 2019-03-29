@@ -88,13 +88,37 @@ int Win32::GetSystemDPI()
 	if (nDPI == 0)
 	{
 		HDC	hdc = ::GetDC(NULL);
-
 		nDPI = GetDeviceCaps(hdc, LOGPIXELSX);
-
 		::ReleaseDC(NULL, hdc);
 	}
 
 	return nDPI;
+}
+
+String^ Win32::GetFaceName(HFONT hFont)
+{
+	if (!hFont)
+		return gcnew String("Tahoma");
+
+	LOGFONT lf = { 0 };
+	::GetObject(hFont, sizeof(lf), &lf);
+
+	return gcnew String(lf.lfFaceName);
+}
+
+int Win32::GetPointSize(HFONT hFont)
+{
+	if (!hFont)
+		return 8;
+
+	LOGFONT lf = { 0 };
+	::GetObject(hFont, sizeof(lf), &lf);
+
+	HDC hDC = ::GetDC(NULL);
+	int nPPI = GetDeviceCaps(hDC, LOGPIXELSY);
+	::ReleaseDC(NULL, hDC);
+
+	return MulDiv(abs(lf.lfHeight), 72, nPPI);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

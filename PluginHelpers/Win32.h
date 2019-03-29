@@ -31,6 +31,9 @@ namespace Abstractspoon
 				static int GetVScrollPos(IntPtr hWnd);
 
 				static int GetSystemDPI();
+
+				static String^ GetFaceName(HFONT hFont);
+				static int GetPointSize(HFONT hFont);
 			};
 
 			public ref class DlgUnits
