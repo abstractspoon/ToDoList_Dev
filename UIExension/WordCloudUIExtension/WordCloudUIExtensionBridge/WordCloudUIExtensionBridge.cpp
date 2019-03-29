@@ -336,9 +336,9 @@ void CWordCloudUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 	m_wnd->SetReadOnly(bReadOnly);
 }
 
-void CWordCloudUIExtensionBridgeWindow::SetDefaultFont(HFONT hFont)
+void CWordCloudUIExtensionBridgeWindow::SetTaskFont(HFONT hFont)
 {
-	m_wnd->SetDefaultFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
+	m_wnd->SetTaskFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
 }
 
 HWND CWordCloudUIExtensionBridgeWindow::GetHwnd() const

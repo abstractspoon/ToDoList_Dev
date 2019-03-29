@@ -72,7 +72,7 @@ public:
 	void SetUITheme(const UITHEME* pTheme);
 	void SetReadOnly(bool bReadOnly);
 	HWND GetHwnd() const;
-	void SetDefaultFont(HFONT hFont);
+	void SetTaskFont(HFONT hFont);
 
 	void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly = FALSE);

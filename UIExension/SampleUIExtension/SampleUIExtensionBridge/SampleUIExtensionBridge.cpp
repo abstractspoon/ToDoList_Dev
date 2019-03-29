@@ -221,9 +221,9 @@ void CSampleUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 	m_wnd->SetUITheme(theme.get());
 }
 
-void CSampleUIExtensionBridgeWindow::SetDefaultFont(HFONT hFont)
+void CSampleUIExtensionBridgeWindow::SetTaskFont(HFONT hFont)
 {
-	//m_wnd->SetDefaultFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
+	//TODO
 }
 
 void CSampleUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)

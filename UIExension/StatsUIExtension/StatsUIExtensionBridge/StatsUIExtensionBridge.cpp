@@ -235,9 +235,9 @@ void CStatsUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 	m_wnd->SetReadOnly(bReadOnly);
 }
 
-void CStatsUIExtensionBridgeWindow::SetDefaultFont(HFONT hFont)
+void CStatsUIExtensionBridgeWindow::SetTaskFont(HFONT hFont)
 {
-	//m_wnd->SetDefaultFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
+	//TODO
 }
 
 HWND CStatsUIExtensionBridgeWindow::GetHwnd() const

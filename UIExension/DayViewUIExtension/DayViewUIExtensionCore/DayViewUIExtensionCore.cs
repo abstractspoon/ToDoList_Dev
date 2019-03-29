@@ -157,7 +157,7 @@ namespace DayViewUIExtension
             BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 		}
 		
-		public void SetDefaultFont(String faceName, int pointSize)
+		public void SetTaskFont(String faceName, int pointSize)
 		{
 			m_DayView.SetFont(faceName, pointSize);
 		}
@@ -196,7 +196,7 @@ namespace DayViewUIExtension
 				fontName = prefs.GetProfileString("Preferences", "TreeFont", fontName);
 				fontSize = prefs.GetProfileInt("Preferences", "FontSize", fontSize);
 			}
-			SetDefaultFont(fontName, fontSize);
+			SetTaskFont(fontName, fontSize);
 			// ************************************************
 
 			// Weekends

@@ -371,7 +371,7 @@ namespace WordCloudUIExtension
 			m_ColorsLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 		}
 
-		public void SetDefaultFont(String faceName, int pointSize)
+		public void SetTaskFont(String faceName, int pointSize)
 		{
 			m_WordCloud.SetFont(faceName, pointSize);
 		}

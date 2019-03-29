@@ -85,7 +85,7 @@ namespace HTMLContentControl
             m_HtmlEditControl.SetUITheme(theme);
         }
 
-		public void SetDefaultCommentsFont(String fontName, int pointSize)
+		public void SetContentFont(String fontName, int pointSize)
 		{
 			m_HtmlEditControl.SetFont(fontName, pointSize);
 		}

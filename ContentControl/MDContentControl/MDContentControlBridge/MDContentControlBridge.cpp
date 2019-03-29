@@ -237,7 +237,7 @@ void CMDContentControlBridge::SetUITheme(const UITHEME* pTheme)
 
 }
 
-void CMDContentControlBridge::SetDefaultFont(HFONT hFont)
+void CMDContentControlBridge::SetContentFont(HFONT hFont)
 {
 
 }

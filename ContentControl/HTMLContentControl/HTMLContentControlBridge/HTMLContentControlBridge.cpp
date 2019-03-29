@@ -255,9 +255,9 @@ void CHTMLContentControlBridge::SetUITheme(const UITHEME* pTheme)
 	m_wnd->SetUITheme(theme.get());
 }
 
-void CHTMLContentControlBridge::SetDefaultFont(HFONT hFont)
+void CHTMLContentControlBridge::SetContentFont(HFONT hFont)
 {
-	m_wnd->SetDefaultCommentsFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
+	m_wnd->SetContentFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
 }
 
 void CHTMLContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const

@@ -118,7 +118,7 @@ namespace MindMapUIExtension
             m_MindMap.ConnectionColor = color;
         }
 
-		public void SetDefaultFont(String faceName, int pointSize)
+		public void SetTaskFont(String faceName, int pointSize)
 		{
 			m_MindMap.SetFont(faceName, pointSize);
 		}
@@ -157,7 +157,7 @@ namespace MindMapUIExtension
 				fontName = prefs.GetProfileString("Preferences", "TreeFont", fontName);
 				fontSize = prefs.GetProfileInt("Preferences", "FontSize", fontSize);
 			}
-			SetDefaultFont(fontName, fontSize);
+			SetTaskFont(fontName, fontSize);
 			// ************************************************
 
 			m_MindMap.SetStrikeThruDone(prefs.GetProfileBool("Preferences", "StrikethroughDone", true));
