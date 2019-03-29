@@ -56,7 +56,6 @@ public:
 	CKanbanListCtrl* HitTest(const CPoint& ptScreen, HTREEITEM* pHit = NULL, UINT* pHitFlags = NULL) const;
 
 	void OnDisplayAttributeChanged();
-	void OnSetFont(HFONT hFont);
 
 	void Sort();
 	void SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent);
@@ -69,6 +68,7 @@ public:
 	void Redraw(BOOL bErase, BOOL bUpdate = FALSE);
 	void RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 	void RefreshItemLineHeights();
+	void SetFont(HFONT hFont);
 
 protected:
 	static int ListSortProc(const void* pV1, const void* pV2);

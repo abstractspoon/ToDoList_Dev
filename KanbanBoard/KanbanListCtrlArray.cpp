@@ -709,7 +709,7 @@ BOOL CKanbanListCtrlArray::SaveToImage(CBitmap& bmImage)
 	return (bmImage.GetSafeHandle() != NULL);
 }
 
-void CKanbanListCtrlArray::OnSetFont(HFONT hFont)
+void CKanbanListCtrlArray::SetFont(HFONT hFont)
 {
 	int nList = GetSize();
 

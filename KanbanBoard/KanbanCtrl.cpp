@@ -3187,7 +3187,7 @@ BOOL CKanbanCtrl::CanSaveToImage() const
 LRESULT CKanbanCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 {
 	m_fonts.Initialise((HFONT)wp, FALSE);
-	m_aListCtrls.OnSetFont((HFONT)wp);
+	m_aListCtrls.SetFont((HFONT)wp);
 	m_header.SendMessage(WM_SETFONT, wp, lp);
 
 	return 0L;
