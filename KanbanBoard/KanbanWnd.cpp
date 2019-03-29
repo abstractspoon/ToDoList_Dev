@@ -587,7 +587,7 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	return false;
 }
 
-void CKanbanWnd::SetDefaultFont(HFONT hFont)
+void CKanbanWnd::SetTaskFont(HFONT hFont)
 {
 	m_ctrlKanban.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE);
 }

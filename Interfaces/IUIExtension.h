@@ -369,7 +369,7 @@ public:
 	virtual IUI_HITTEST HitTest(const POINT& ptScreen) const = 0;
 
 	virtual void SetUITheme(const UITHEME* pTheme) = 0;
-	virtual void SetDefaultFont(HFONT hFont) = 0;
+	virtual void SetTaskFont(HFONT hFont) = 0;
 
 	virtual void SetReadOnly(bool bReadOnly) = 0;
 	virtual HWND GetHwnd() const = 0;

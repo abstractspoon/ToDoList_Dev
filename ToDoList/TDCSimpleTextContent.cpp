@@ -385,7 +385,7 @@ BOOL CTDLSimpleTextContentCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pP
  	return CUrlRichEditCtrl::Create(dwStyle, rect, pParentWnd, nID);
 }
 
-void CTDLSimpleTextContentCtrl::SetDefaultFont(HFONT hFont)
+void CTDLSimpleTextContentCtrl::SetContentFont(HFONT hFont)
 {
 	// richedit2.0 sends a EN_CHANGE notification if it contains
 	// text when it receives a font change.

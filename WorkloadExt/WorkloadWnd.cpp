@@ -570,7 +570,7 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	return false;
 }
 
-void CWorkloadWnd::SetDefaultFont(HFONT hFont)
+void CWorkloadWnd::SetTaskFont(HFONT hFont)
 {
 	CHoldRedraw hr(*this);
 	

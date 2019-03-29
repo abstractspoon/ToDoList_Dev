@@ -43,7 +43,7 @@ public:
 	HWND GetHwnd() const { return GetSafeHwnd(); }
 	
 	void SetUITheme(const UITHEME* pTheme);
-	void SetDefaultFont(HFONT hFont);
+	void SetTaskFont(HFONT hFont);
 
 	bool GetLabelEditRect(LPRECT pEdit);
 	IUI_HITTEST HitTest(const POINT& ptScreen) const;

@@ -604,7 +604,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	m_aExtViews[nExtension] = pExtWnd;
 
 	// Set font before loading preferences
-	pExtWnd->SetDefaultFont(m_taskTree.GetFont());
+	pExtWnd->SetTaskFont(m_taskTree.GetFont());
 	pVData->bNeedFontUpdate = FALSE;
 		
 	// restore state
@@ -788,7 +788,7 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 
 			if (pVData->bNeedFontUpdate)
 			{
-				pExtWnd->SetDefaultFont(m_taskTree.GetFont());
+				pExtWnd->SetTaskFont(m_taskTree.GetFont());
 				pVData->bNeedFontUpdate = FALSE;
 			}
 		}
@@ -3954,7 +3954,7 @@ BOOL CTabbedToDoCtrl::SetTreeFont(HFONT hFont)
 
 				if (pExtWnd && pData)
 				{
-					pExtWnd->SetDefaultFont(m_taskTree.GetFont());
+					pExtWnd->SetTaskFont(m_taskTree.GetFont());
 					pData->bNeedFontUpdate = FALSE;
 				}
 

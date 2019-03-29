@@ -403,7 +403,7 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	return false;
 }
 
-void CCalendarWnd::SetDefaultFont(HFONT hFont)
+void CCalendarWnd::SetTaskFont(HFONT hFont)
 {
 	m_BigCalendar.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE);
 }

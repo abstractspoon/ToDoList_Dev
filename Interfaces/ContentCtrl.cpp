@@ -114,7 +114,7 @@ void CContentCtrl::SetUITheme(const CUIThemeFile& theme)
 void CContentCtrl::SetDefaultFont(HFONT hFont)
 {
 	if (m_pContentCtrl)
-		m_pContentCtrl->SetDefaultFont(hFont);
+		m_pContentCtrl->SetContentFont(hFont);
 }
 
 void CContentCtrl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const

@@ -68,7 +68,7 @@ public:
 	bool Undo();
 	bool Redo();
 	void SetUITheme(const UITHEME* pTheme);
-	void SetDefaultFont(HFONT hFont);
+	void SetContentFont(HFONT hFont);
 	void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
 	bool FindReplaceAll(LPCTSTR szFind, LPCTSTR szReplace, bool bCaseSensitive, bool bWholeWord);

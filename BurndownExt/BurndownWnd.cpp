@@ -227,7 +227,7 @@ void CBurndownWnd::SetUITheme(const UITHEME* pTheme)
 	}
 }
 
-void CBurndownWnd::SetDefaultFont(HFONT hFont)
+void CBurndownWnd::SetTaskFont(HFONT hFont)
 {
 	CString sFontName;
 	int nFontSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFontName);

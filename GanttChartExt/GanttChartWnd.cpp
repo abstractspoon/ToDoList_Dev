@@ -698,7 +698,7 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	return false;
 }
 
-void CGanttChartWnd::SetDefaultFont(HFONT hFont)
+void CGanttChartWnd::SetTaskFont(HFONT hFont)
 {
 	CHoldRedraw hr(*this);
 	

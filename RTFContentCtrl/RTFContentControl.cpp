@@ -325,7 +325,7 @@ void CRTFContentControl::SetUITheme(const UITHEME* pTheme)
 	m_ruler.SetBackgroundColor(pTheme->crToolbarLight);
 }
 
-void CRTFContentControl::SetDefaultFont(HFONT hFont)
+void CRTFContentControl::SetContentFont(HFONT hFont)
 {
 	// richedit2.0 sends a EN_CHANGE notification if it contains
 	// text when it receives a font change.
