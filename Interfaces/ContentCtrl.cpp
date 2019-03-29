@@ -111,8 +111,10 @@ void CContentCtrl::SetUITheme(const CUIThemeFile& theme)
 	}
 }
 
-void CContentCtrl::SetDefaultFont(HFONT hFont)
+void CContentCtrl::SetContentFont(HFONT hFont)
 {
+	ASSERT(hFont);
+
 	if (m_pContentCtrl)
 		m_pContentCtrl->SetContentFont(hFont);
 }

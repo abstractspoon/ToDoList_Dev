@@ -760,7 +760,7 @@ BOOL CToDoCtrl::UpdateCommentsFont(BOOL bResendComments)
 			ASSERT(nPointSize > 0);
 #endif
 
-			m_ctrlComments.SetDefaultCommentsFont(hFont);
+			m_ctrlComments.SetContentFont(hFont);
 
 			// we've had some trouble with plugins using the richedit control 
 			// so after a font change we always resend the content

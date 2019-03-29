@@ -32,7 +32,7 @@ public:
 	BOOL Create(CWnd* pParent, UINT nID, const CRect& rPos = CRect(0, 0, 0, 0));
 
 	void SetUITheme(const CUIThemeFile& theme);
-	void SetDefaultCommentsFont(HFONT hFont);
+	void SetContentFont(HFONT hFont);
 	void SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCommentsState);
 	void SetPreferencesFilePath(LPCTSTR szFilePath);
 	void SetWindowPrompts(LPCTSTR szComboPrompt, LPCTSTR szCommentsPrompt);
@@ -63,7 +63,7 @@ protected:
 	CContentCtrl m_ctrlComments;
 	CUIThemeFile m_theme;
 	CBrush m_brBack;
-	HFONT m_hDefaultFont;
+	HFONT m_hContentFont;
 
 	CWndPromptManager m_mgrPrompts;
 	CString m_sCommentsPrompt, m_sComboPrompt;
@@ -92,7 +92,6 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnEnable(BOOL bEnable);
 
-	afx_msg LRESULT OnSetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsDoHelp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsKillFocus(WPARAM wParam, LPARAM lParam);

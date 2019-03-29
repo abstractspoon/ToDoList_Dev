@@ -37,7 +37,7 @@ CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CTDLCont
 	m_pMgrContent(pMgrContent), 
 	m_cbCommentsFmt(pMgrContent, IDI_NULL),
 	m_bFirstLoadCommentsPrefs(TRUE),
-	m_hDefaultFont(NULL),
+	m_hContentFont(NULL),
 	m_bReadOnly(FALSE)
 {
 	int nComboOffsetDLU = 0;
@@ -74,7 +74,6 @@ BEGIN_MESSAGE_MAP(CTDLCommentsCtrl, CRuntimeDlg)
 	ON_WM_CTLCOLOR()
 	ON_WM_ERASEBKGND()
 	ON_WM_SETFOCUS()
-	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_CBN_SELENDOK(IDC_COMBO, OnSelchangeCommentsformat)
 	ON_REGISTERED_MESSAGE(WM_ICC_CONTENTCHANGE, OnCommentsChange)
 	ON_REGISTERED_MESSAGE(WM_ICC_KILLFOCUS, OnCommentsKillFocus)
@@ -128,22 +127,14 @@ void CTDLCommentsCtrl::SetWindowPrompts(LPCTSTR szComboPrompt, LPCTSTR szComment
 		m_mgrPrompts.SetEditPrompt(m_ctrlComments, szCommentsPrompt);
 }
 
-LRESULT CTDLCommentsCtrl::OnSetFont(WPARAM wParam, LPARAM /*lParam*/)
+void CTDLCommentsCtrl::SetContentFont(HFONT hFont)
 {
-	// If the default font has not been explicitly set
-	// then use this font once only
-	if (!m_ctrlComments.GetSafeHwnd() && !m_hDefaultFont)
-		m_hDefaultFont = (HFONT)wParam;
+	ASSERT(hFont);
 
-	return Default();
-}
-
-void CTDLCommentsCtrl::SetDefaultCommentsFont(HFONT hFont)
-{
-	m_hDefaultFont = hFont;
+	m_hContentFont = hFont;
 
 	if (m_ctrlComments.GetSafeHwnd())
-		m_ctrlComments.SetDefaultFont(hFont);
+		m_ctrlComments.SetContentFont(hFont);
 }
 
 void CTDLCommentsCtrl::SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCommentsState)
@@ -324,8 +315,8 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat(const CONTENTFORMAT& cf)
 	if (CThemed::IsAppThemed())
 		m_ctrlComments.SetUITheme(m_theme);
 	
-	if (m_hDefaultFont)
-		m_ctrlComments.SetDefaultFont(m_hDefaultFont);
+	if (m_hContentFont)
+		m_ctrlComments.SetContentFont(m_hContentFont);
 
 	if (CWinClasses::IsEditControl(m_ctrlComments))
 		m_mgrPrompts.SetEditPrompt(m_ctrlComments, m_sCommentsPrompt);

@@ -173,7 +173,7 @@ void CPreferencesTaskDefPage::SetDefaultCommentsFont(const CString& sFaceName, i
 	if (!GraphicsMisc::SameFont(m_fontDefComments, sFaceName, nPointSize))
 	{
 		VERIFY(GraphicsMisc::CreateFont(m_fontDefComments, sFaceName, nPointSize));
-		m_ctrlComments.SetDefaultCommentsFont(m_fontDefComments);
+		m_ctrlComments.SetContentFont(m_fontDefComments);
 	}
 }
 
