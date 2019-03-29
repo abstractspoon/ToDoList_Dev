@@ -457,7 +457,7 @@ namespace WordCloudUIExtension
 				fontName = prefs.GetProfileString("Preferences", "TreeFont", fontName);
 				fontSize = prefs.GetProfileInt("Preferences", "FontSize", fontSize);
 			}
-			SetDefaultFont(fontName, fontSize);
+			SetTaskFont(fontName, fontSize);
 			// ************************************************
 
 			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
