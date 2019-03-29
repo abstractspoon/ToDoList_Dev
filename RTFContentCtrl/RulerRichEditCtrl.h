@@ -48,6 +48,8 @@ public:
 	void SetLockColours(BOOL bLock = TRUE);
 	BOOL HasLockedColours() const { return m_bLockedColours; }
 
+	void SetDefaultFont(HFONT hFont);
+	
 protected:
 // Formatting
 	void DoFont();
@@ -96,7 +98,6 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnKillFocusToolbar(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg void OnEnHScroll();
 	afx_msg void OnEnSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);

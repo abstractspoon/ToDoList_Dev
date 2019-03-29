@@ -143,7 +143,7 @@ void CTDLCommentsCtrl::SetDefaultCommentsFont(HFONT hFont)
 	m_hDefaultFont = hFont;
 
 	if (m_ctrlComments.GetSafeHwnd())
-		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hDefaultFont);
+		m_ctrlComments.SetDefaultFont(hFont);
 }
 
 void CTDLCommentsCtrl::SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCommentsState)
@@ -325,7 +325,7 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat(const CONTENTFORMAT& cf)
 		m_ctrlComments.SetUITheme(m_theme);
 	
 	if (m_hDefaultFont)
-		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hDefaultFont);
+		m_ctrlComments.SetDefaultFont(m_hDefaultFont);
 
 	if (CWinClasses::IsEditControl(m_ctrlComments))
 		m_mgrPrompts.SetEditPrompt(m_ctrlComments, m_sCommentsPrompt);

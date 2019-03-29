@@ -183,6 +183,7 @@ public:
 	virtual bool Redo() = 0;
 	
 	virtual void SetUITheme(const UITHEME* pTheme) = 0;
+	virtual void SetDefaultFont(HFONT hFont) = 0;
 
 	virtual void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const = 0;
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly) = 0;

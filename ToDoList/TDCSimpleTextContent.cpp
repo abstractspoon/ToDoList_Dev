@@ -356,7 +356,6 @@ BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnUpdateCommentsMenuCmd)
 	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChangeText)
 	ON_CONTROL_REFLECT_EX(EN_KILLFOCUS, OnKillFocus)
-	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_SETWORDWRAP, OnSetWordWrap)
 	ON_NOTIFY_REFLECT_EX(TTN_NEEDTEXT, OnGetTooltip)
 	ON_WM_NCDESTROY()
@@ -386,7 +385,7 @@ BOOL CTDLSimpleTextContentCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pP
  	return CUrlRichEditCtrl::Create(dwStyle, rect, pParentWnd, nID);
 }
 
-LRESULT CTDLSimpleTextContentCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+void CTDLSimpleTextContentCtrl::SetDefaultFont(HFONT hFont)
 {
 	// richedit2.0 sends a EN_CHANGE notification if it contains
 	// text when it receives a font change.
@@ -394,7 +393,7 @@ LRESULT CTDLSimpleTextContentCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 	// being sent
 	CAutoFlag af(m_bAllowNotify, FALSE);
 
-	return CUrlRichEditCtrl::OnSetFont(wp, lp);
+	CUrlRichEditCtrl::SendMessage(WM_SETFONT, (WPARAM)hFont);
 }
 
 BOOL CTDLSimpleTextContentCtrl::OnChangeText() 

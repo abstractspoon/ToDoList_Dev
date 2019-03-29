@@ -68,6 +68,7 @@ public:
 	bool Undo();
 	bool Redo();
 	void SetUITheme(const UITHEME* pTheme);
+	void SetDefaultFont(HFONT hFont);
 	void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
 	bool FindReplaceAll(LPCTSTR szFind, LPCTSTR szReplace, bool bCaseSensitive, bool bWholeWord);
@@ -109,7 +110,6 @@ protected:
 	afx_msg void OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI);
 	afx_msg BOOL OnChangeText();
 	afx_msg BOOL OnKillFocus();
-	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetWordWrap(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNcDestroy();

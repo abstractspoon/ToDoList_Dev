@@ -180,7 +180,6 @@ BEGIN_MESSAGE_MAP(CRulerRichEditCtrl, CWnd)
 	ON_WM_CREATE()
 	ON_MESSAGE(WM_THEMECHANGED, OnThemeChanged)
 	ON_NOTIFY(NM_KILLFOCUS, TOOLBAR_CONTROL, OnKillFocusToolbar)
-	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_EN_HSCROLL(RTF_CONTROL, OnEnHScroll)
 	ON_NOTIFY(EN_SELCHANGE, RTF_CONTROL, OnEnSelChange)
 END_MESSAGE_MAP()
@@ -407,12 +406,12 @@ void CRulerRichEditCtrl::OnEnSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = 0;
 }
 
-LRESULT CRulerRichEditCtrl::OnSetFont(WPARAM wp, LPARAM /*lp*/)
+void CRulerRichEditCtrl::SetDefaultFont(HFONT hFont)
 {
 	// reverse engineer the hFont and use the results
 	// for the rtf defaults
 	CString sFace;
-	int nPoint = GraphicsMisc::GetFontNameAndPointSize((HFONT)wp, sFace);
+	int nPoint = GraphicsMisc::GetFontNameAndPointSize(hFont, sFace);
 
 	if (nPoint && !sFace.IsEmpty())
 	{
@@ -433,8 +432,6 @@ LRESULT CRulerRichEditCtrl::OnSetFont(WPARAM wp, LPARAM /*lp*/)
 		m_rtf.SendMessage(EM_SETCHARFORMAT, 0, (LPARAM)&m_cfDefault);
 	}
 	// else eat it
-
-	return 0L;
 }
 
 BOOL CRulerRichEditCtrl::OnEraseBkgnd(CDC* /*pDC*/) 

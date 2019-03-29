@@ -44,6 +44,7 @@ public:
 	bool Undo();
 	bool Redo();
 	void SetUITheme(const UITHEME* pTheme);
+	void SetDefaultFont(HFONT hFont);
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
 	bool FindReplaceAll(LPCTSTR szFind, LPCTSTR szReplace, bool bCaseSensitive, bool bWholeWord);
@@ -129,7 +130,6 @@ protected:
 	afx_msg void OnUpdateEditInlineSpellcheck(CCmdUI* pCmdUI);
 	afx_msg void OnChangeText();
 	afx_msg void OnKillFocus();
-	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg void OnStyleChanging(int nStyleType, LPSTYLESTRUCT lpStyleStruct);
 	afx_msg LRESULT OnCustomUrl(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFailedUrl(WPARAM wp, LPARAM lp);

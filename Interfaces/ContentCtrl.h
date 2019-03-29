@@ -69,7 +69,8 @@ public:
 	BOOL Redo();
 
 	void SetUITheme(const CUIThemeFile& theme);
-	
+	void SetDefaultFont(HFONT hFont);
+
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOOL bAppOnly);
 

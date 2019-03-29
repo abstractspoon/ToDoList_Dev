@@ -132,7 +132,6 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_INLINESPELLCHECK, OnUpdateEditInlineSpellcheck)
 	ON_EN_CHANGE(RTF_CONTROL, OnChangeText)
 	ON_EN_KILLFOCUS(RTF_CONTROL, OnKillFocus)
-	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_NOTIFY(TTN_NEEDTEXT, RTF_CONTROL, OnGetTooltip)
 	ON_WM_STYLECHANGING()
 	ON_REGISTERED_MESSAGE(WM_UREN_CUSTOMURL, OnCustomUrl)
@@ -187,17 +186,6 @@ void CRTFContentControl::OnKillFocus()
 {
 	if (m_bAllowNotify)
 		GetParent()->SendMessage(WM_ICC_KILLFOCUS);
-}
-
-LRESULT CRTFContentControl::OnSetFont(WPARAM wp, LPARAM lp)
-{
-	// richedit2.0 sends a EN_CHANGE notification if it contains
-	// text when it receives a font change.
-	// to us though this is a bogus change so we prevent a notification
-	// being sent
-	CAutoFlag af(m_bAllowNotify, FALSE);
-
-	return CRulerRichEditCtrl::OnSetFont(wp, lp);
 }
 
 // ICustomControl implementation
@@ -335,6 +323,17 @@ void CRTFContentControl::SetUITheme(const UITHEME* pTheme)
 	m_toolbar.SetBackgroundColors(pTheme->crToolbarLight, pTheme->crToolbarDark, pTheme->nRenderStyle != UIRS_GLASS, pTheme->nRenderStyle != UIRS_GRADIENT);
 	m_toolbar.SetHotColor(pTheme->crToolbarHot);
 	m_ruler.SetBackgroundColor(pTheme->crToolbarLight);
+}
+
+void CRTFContentControl::SetDefaultFont(HFONT hFont)
+{
+	// richedit2.0 sends a EN_CHANGE notification if it contains
+	// text when it receives a font change.
+	// to us though this is a bogus change so we prevent a notification
+	// being sent
+	CAutoFlag af(m_bAllowNotify, FALSE);
+
+	CRulerRichEditCtrl::SetDefaultFont(hFont);
 }
 
 HWND CRTFContentControl::GetHwnd() const
