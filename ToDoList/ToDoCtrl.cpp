@@ -704,7 +704,7 @@ BOOL CToDoCtrl::SetTreeFont(HFONT hFont)
 {
 	ASSERT(hFont);
 
-	if (hFont)
+	if (hFont && !GraphicsMisc::SameFontNameSize(hFont, m_hFontTree))
 	{
 		m_hFontTree = hFont;
 
@@ -725,7 +725,7 @@ BOOL CToDoCtrl::SetCommentsFont(HFONT hFont)
 {
 	ASSERT(hFont);
 
-	if (hFont)
+	if (hFont && !GraphicsMisc::SameFontNameSize(hFont, m_hFontComments))
 	{
 		m_hFontComments = hFont;
 
@@ -741,7 +741,7 @@ BOOL CToDoCtrl::UpdateCommentsFont(BOOL bResendComments)
 {
 	if (m_ctrlComments.GetSafeHwnd())
 	{
-		HFONT hCurFont = CDialogHelper::GetFont(m_ctrlComments), hFont = NULL;
+		HFONT hFont = NULL;
 
 		if (HasStyle(TDCS_COMMENTSUSETREEFONT))
 			hFont = m_hFontTree;
@@ -750,28 +750,25 @@ BOOL CToDoCtrl::UpdateCommentsFont(BOOL bResendComments)
 
 		ASSERT(hFont);
 
-		if (!hFont)
-			hFont = CDialogHelper::GetFont(GetParent());
-
+		if (hFont)
+		{
 #ifdef _DEBUG
-		CString sFaceName;
-		int nPointSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFaceName);
+			CString sFaceName;
+			int nPointSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFaceName);
 
-		ASSERT(!sFaceName.IsEmpty());
-		ASSERT(nPointSize > 0);
+			ASSERT(!sFaceName.IsEmpty());
+			ASSERT(nPointSize > 0);
 #endif
 
-		if (GraphicsMisc::SameFontNameSize(hFont, hCurFont))
-			return FALSE;
+			m_ctrlComments.SetDefaultCommentsFont(hFont);
 
-		m_ctrlComments.SetDefaultCommentsFont(hFont);
+			// we've had some trouble with plugins using the richedit control 
+			// so after a font change we always resend the content
+			if (bResendComments)
+				m_ctrlComments.SetContent(m_sTextComments, m_customComments, FALSE);
 
-		// we've had some trouble with plugins using the richedit control 
-		// so after a font change we always resend the content
-		if (bResendComments)
-			m_ctrlComments.SetContent(m_sTextComments, m_customComments, FALSE);
-
-		return TRUE;
+			return TRUE;
+		}
 	}
 
 	return FALSE;
