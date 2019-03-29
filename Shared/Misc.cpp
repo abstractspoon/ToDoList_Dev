@@ -659,7 +659,7 @@ int Misc::Replace(const CString& sSearchFor, const CString& sReplaceWith, CStrin
 	if (sSearchFor.IsEmpty() || sSearchIn.IsEmpty())
 	{
 		ASSERT(0);
-		return FALSE;
+		return 0;
 	}
 
 	int nNumReplaced = 0;

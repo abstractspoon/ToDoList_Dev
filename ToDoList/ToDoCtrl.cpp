@@ -709,12 +709,7 @@ BOOL CToDoCtrl::SetTreeFont(HFONT hFont)
 		m_hFontTree = hFont;
 
 		if (m_taskTree.GetSafeHwnd())
-		{
-			if (HasStyle(TDCS_COMMENTSUSETREEFONT))
-				UpdateCommentsFont(TRUE);
-
 			return m_taskTree.SetFont(hFont);
-		}
 	}
 
 	// no change
@@ -729,48 +724,24 @@ BOOL CToDoCtrl::SetCommentsFont(HFONT hFont)
 	{
 		m_hFontComments = hFont;
 
-		if (!HasStyle(TDCS_COMMENTSUSETREEFONT))
-			return UpdateCommentsFont(TRUE);
+#ifdef _DEBUG
+		CString sFaceName;
+		int nPointSize = GraphicsMisc::GetFontNameAndPointSize(m_hFontComments, sFaceName);
+
+		ASSERT(!sFaceName.IsEmpty());
+		ASSERT(nPointSize > 0);
+#endif
+
+		m_ctrlComments.SetContentFont(m_hFontComments);
+
+		// we've had some trouble with plugins using the richedit control 
+		// so after a font change we always resend the content
+		m_ctrlComments.SetContent(m_sTextComments, m_customComments, FALSE);
+
+		return TRUE;
 	}
 
 	// no change
-	return FALSE;
-}
-
-BOOL CToDoCtrl::UpdateCommentsFont(BOOL bResendComments)
-{
-	if (m_ctrlComments.GetSafeHwnd())
-	{
-		HFONT hFont = NULL;
-
-		if (HasStyle(TDCS_COMMENTSUSETREEFONT))
-			hFont = m_hFontTree;
-		else
-			hFont = m_hFontComments;
-
-		ASSERT(hFont);
-
-		if (hFont)
-		{
-#ifdef _DEBUG
-			CString sFaceName;
-			int nPointSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFaceName);
-
-			ASSERT(!sFaceName.IsEmpty());
-			ASSERT(nPointSize > 0);
-#endif
-
-			m_ctrlComments.SetContentFont(hFont);
-
-			// we've had some trouble with plugins using the richedit control 
-			// so after a font change we always resend the content
-			if (bResendComments)
-				m_ctrlComments.SetContent(m_sTextComments, m_customComments, FALSE);
-
-			return TRUE;
-		}
-	}
-
 	return FALSE;
 }
 
@@ -1930,8 +1901,10 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		// will be empty which will put the comments type combo in an
 		// indeterminate state which is the desired effect since this requires
 		// the user to reset the type before they can edit
-		m_cfComments = sCommentsType;
-		m_ctrlComments.SetSelectedFormat(m_cfComments);
+		if (m_ctrlComments.SetSelectedFormat(sCommentsType))
+			m_cfComments = sCommentsType;
+		else
+			m_cfComments.Empty();
 		
 		UpdateComments(FALSE);
 	}
@@ -5703,13 +5676,10 @@ BOOL CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
 		case TDCS_SAVEUIVISINTASKLIST:
 		case TDCS_AUTOADJUSTDEPENDENCYDATES:
 		case TDCS_TRACKSELECTEDTASKONLY:
+		case TDCS_COMMENTSUSETREEFONT:
 			// do nothing
 			break;
 
-		case TDCS_COMMENTSUSETREEFONT:
-			UpdateCommentsFont(TRUE);
-			break;
-			
 		default:
 			//ASSERT(0); // just to help catch forgotten styles
 			break;
