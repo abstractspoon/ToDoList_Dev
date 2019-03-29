@@ -237,6 +237,11 @@ void CMDContentControlBridge::SetUITheme(const UITHEME* pTheme)
 
 }
 
+void CMDContentControlBridge::SetDefaultFont(HFONT hFont)
+{
+
+}
+
 void CMDContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 

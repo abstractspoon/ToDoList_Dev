@@ -175,6 +175,7 @@ namespace MindMapUIExtension
 		private Boolean m_TaskColorIsBkgnd;
 		private Boolean m_IgnoreMouseClick;
         private Boolean m_ShowCompletionCheckboxes;
+		private Boolean m_StrikeThruDone;
 
 		private TreeNode m_PreviouslySelectedNode;
 		private Timer m_EditTimer;
@@ -195,6 +196,7 @@ namespace MindMapUIExtension
 			m_IgnoreMouseClick = false;
 			m_ShowParentAsFolder = false;
             m_ShowCompletionCheckboxes = true;
+			m_StrikeThruDone = true;
 
 			m_EditTimer = new Timer();
 			m_EditTimer.Interval = 500;
@@ -204,9 +206,22 @@ namespace MindMapUIExtension
                 m_CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 		}
         
-        public void SetFont(String fontName, int fontSize, bool strikeThruDone)
-        {
-            bool baseFontChange = ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize));
+        public void SetStrikeThruDone(bool strikeThruDone)
+		{
+			m_StrikeThruDone = strikeThruDone;
+
+			if (m_BoldLabelFont != null)
+				SetFont(m_BoldLabelFont.Name, (int)m_BoldLabelFont.Size, m_StrikeThruDone);
+		}
+
+		public new void SetFont(String fontName, int fontSize)
+		{
+			SetFont(fontName, fontSize, m_StrikeThruDone);
+		}
+
+		protected void SetFont(String fontName, int fontSize, bool strikeThruDone)
+		{
+			bool baseFontChange = ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize));
             bool doneFontChange = (baseFontChange || (m_BoldDoneLabelFont.Strikeout != strikeThruDone));
 
             if (baseFontChange)

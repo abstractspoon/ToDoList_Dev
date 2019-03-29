@@ -26,6 +26,8 @@ namespace MindMapUIExtension
 
         private TdlMindMapControl m_MindMap;
 
+		private bool m_StrikeThruDone = true;
+
         // ----------------------------------------------------------------------------
 
         public MindMapUIExtensionCore(IntPtr hwndParent, Translator trans)
@@ -116,7 +118,12 @@ namespace MindMapUIExtension
             m_MindMap.ConnectionColor = color;
         }
 
-        public void SetReadOnly(bool bReadOnly)
+		public void SetDefaultFont(String faceName, int pointSize)
+		{
+			m_MindMap.SetFont(faceName, pointSize);
+		}
+
+		public void SetReadOnly(bool bReadOnly)
         {
             m_MindMap.ReadOnly = bReadOnly;
         }
@@ -140,18 +147,20 @@ namespace MindMapUIExtension
 
             bool showDoneCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
             m_MindMap.ShowCompletionCheckboxes = showDoneCheckboxes;
+			
+			// Remove for 7.3 *********************************
+			String fontName = FontName;
+			int fontSize = 8;
 
-            bool strikeThruDone = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
-            String fontName = FontName;
-            int fontSize = 8;
-            
-            if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false))
-            {
-                fontName = prefs.GetProfileString("Preferences", "TreeFont", fontName);
-                fontSize = prefs.GetProfileInt("Preferences", "FontSize", fontSize);
-            }
+			if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false))
+			{
+				fontName = prefs.GetProfileString("Preferences", "TreeFont", fontName);
+				fontSize = prefs.GetProfileInt("Preferences", "FontSize", fontSize);
+			}
+			SetDefaultFont(fontName, fontSize);
+			// ************************************************
 
-            m_MindMap.SetFont(fontName, fontSize, strikeThruDone);
+			m_MindMap.SetStrikeThruDone(prefs.GetProfileBool("Preferences", "StrikethroughDone", true));
         }
 
 		public new Boolean Focus()

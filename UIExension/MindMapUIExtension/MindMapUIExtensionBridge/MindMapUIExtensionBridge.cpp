@@ -359,6 +359,11 @@ void CMindMapUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 	m_wnd->SetReadOnly(bReadOnly);
 }
 
+void CMindMapUIExtensionBridgeWindow::SetDefaultFont(HFONT hFont)
+{
+	m_wnd->SetDefaultFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
+}
+
 HWND CMindMapUIExtensionBridgeWindow::GetHwnd() const
 {
 	return static_cast<HWND>(m_wnd->Handle.ToPointer());

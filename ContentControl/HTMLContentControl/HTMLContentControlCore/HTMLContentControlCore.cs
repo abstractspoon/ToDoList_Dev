@@ -10,7 +10,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace HTMLContentControl
 {
     [System.ComponentModel.DesignerCategory("")]
-    public partial class HTMLContentControlCore : System.Windows.Forms.Panel, IContentControlWnd
+    public partial class HTMLContentControlCore : System.Windows.Forms.UserControl, IContentControlWnd
     {
         private IntPtr m_HwndParent;
         private System.Drawing.Font m_ControlsFont;
@@ -83,9 +83,14 @@ namespace HTMLContentControl
         public void SetUITheme(UITheme theme)
         {
             m_HtmlEditControl.SetUITheme(theme);
-       }
+        }
 
-        public void SetReadOnly(bool bReadOnly)
+		public void SetDefaultCommentsFont(String fontName, int pointSize)
+		{
+			m_HtmlEditControl.SetFont(fontName, pointSize);
+		}
+
+		public void SetReadOnly(bool bReadOnly)
         {
             m_HtmlEditControl.ReadOnly = bReadOnly;
         }
@@ -103,28 +108,28 @@ namespace HTMLContentControl
 				// private settings
 				m_HtmlEditControl.EditEnabled = prefs.GetProfileBool(key, "EditEnabled", true);
             }
-
-            String fontName = @"Tahoma";
-            float fontSize = 8.25F;
-            
-            if (prefs.GetProfileBool("Preferences", "SpecifyCommentsFont", false))
-            {
-                fontName = prefs.GetProfileString("Preferences", "CommentsFont", "Tahoma");
-                fontSize = prefs.GetProfileInt("Preferences", "CommentsFontSize", 8);
-            }
-            else if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false) &&
-                    prefs.GetProfileBool("Preferences", "CommentsUseTreeFont", false))
-            {
-                fontName = prefs.GetProfileString("Preferences", "TreeFont", "Tahoma");
-                fontSize = prefs.GetProfileInt("Preferences", "FontSize", 8);
-            }
-
-            //SetCssFontNameAndSize(fontName, fontSize);
+// 
+//             String fontName = @"Tahoma";
+//             float fontSize = 8.25F;
+//             
+//             if (prefs.GetProfileBool("Preferences", "SpecifyCommentsFont", false))
+//             {
+//                 fontName = prefs.GetProfileString("Preferences", "CommentsFont", "Tahoma");
+//                 fontSize = prefs.GetProfileInt("Preferences", "CommentsFontSize", 8);
+//             }
+//             else if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false) &&
+//                     prefs.GetProfileBool("Preferences", "CommentsUseTreeFont", false))
+//             {
+//                 fontName = prefs.GetProfileString("Preferences", "TreeFont", "Tahoma");
+//                 fontSize = prefs.GetProfileInt("Preferences", "FontSize", 8);
+//             }
+// 
+//             m_HtmlEditControl.SetFont(fontName, fontSize);
         }
 
-        // --------------------------------------------------------------------
+		// --------------------------------------------------------------------
 
-        protected override void OnGotFocus(EventArgs e)
+		protected override void OnGotFocus(EventArgs e)
         {
             base.OnGotFocus(e);
 

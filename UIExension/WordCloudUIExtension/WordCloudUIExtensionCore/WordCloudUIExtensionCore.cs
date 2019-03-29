@@ -371,6 +371,11 @@ namespace WordCloudUIExtension
 			m_ColorsLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 		}
 
+		public void SetDefaultFont(String faceName, int pointSize)
+		{
+			m_WordCloud.SetFont(faceName, pointSize);
+		}
+
 		public void SetReadOnly(bool bReadOnly)
 		{
 		}
@@ -443,17 +448,19 @@ namespace WordCloudUIExtension
             m_LangIgnoreFilePath = Path.Combine(appPath, "Resources\\Translations", language);
             m_LangIgnoreFilePath = Path.ChangeExtension(m_LangIgnoreFilePath, "WordCloud.Ignore.txt");
 
-            if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false))
-            {
-                m_WordCloud.SetFont(prefs.GetProfileString("Preferences", "TreeFont", FontName),
-                                    prefs.GetProfileInt("Preferences", "FontSize", 10));
-            }
-            else
-            {
-                m_WordCloud.SetFont(FontName, 10);
-            }
+			// Remove for 7.3 *********************************
+			String fontName = FontName;
+			int fontSize = 10;
 
-            bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
+			if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false))
+			{
+				fontName = prefs.GetProfileString("Preferences", "TreeFont", fontName);
+				fontSize = prefs.GetProfileInt("Preferences", "FontSize", fontSize);
+			}
+			SetDefaultFont(fontName, fontSize);
+			// ************************************************
+
+			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
             m_TaskMatchesList.TaskColorIsBackground = taskColorIsBkgnd;
 
             bool showParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);

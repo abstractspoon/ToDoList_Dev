@@ -156,6 +156,11 @@ namespace DayViewUIExtension
 
             BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 		}
+		
+		public void SetDefaultFont(String faceName, int pointSize)
+		{
+			m_DayView.SetFont(faceName, pointSize);
+		}
 
 		public void SetReadOnly(bool bReadOnly)
 		{
@@ -182,18 +187,20 @@ namespace DayViewUIExtension
 			bool showParentsAsFolder = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
 			m_DayView.ShowParentsAsFolder = showParentsAsFolder;
 
-			if (prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0)
-            {
-                m_DayView.SetFont(prefs.GetProfileString("Preferences", "TreeFont", FontName),
-                                  prefs.GetProfileInt("Preferences", "FontSize", 8));
-            }
-            else
-            {
-                m_DayView.SetFont(FontName, 8);
-            }
+			// Remove for 7.3 *********************************
+			String fontName = FontName;
+			int fontSize = 8;
 
-            // Weekends
-            WeekendDays dwWeekends = (WeekendDays)prefs.GetProfileInt("Preferences", "Weekends", 0);
+			if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false))
+			{
+				fontName = prefs.GetProfileString("Preferences", "TreeFont", fontName);
+				fontSize = prefs.GetProfileInt("Preferences", "FontSize", fontSize);
+			}
+			SetDefaultFont(fontName, fontSize);
+			// ************************************************
+
+			// Weekends
+			WeekendDays dwWeekends = (WeekendDays)prefs.GetProfileInt("Preferences", "Weekends", 0);
 
             List<System.DayOfWeek> weekendDays = new List<System.DayOfWeek>();
 
