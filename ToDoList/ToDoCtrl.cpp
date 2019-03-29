@@ -2921,8 +2921,18 @@ BOOL CToDoCtrl::SetSelectedTaskLock(BOOL bLocked)
 	}
 	
 	if (aModTaskIDs.GetSize())
+	{
 		SetModified(TDCA_LOCK, aModTaskIDs);
 	
+		if (IsColumnShowing(TDCC_LOCK))
+		{
+			if (aModTaskIDs.GetSize() > 1)
+				m_taskTree.RedrawColumns();
+			else
+				m_taskTree.InvalidateTask(aModTaskIDs[0]);
+		}
+	}
+
 	return TRUE;
 }
 
@@ -3261,27 +3271,30 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 		return SET_FAILED;
 	}
 
+	TDC_SET nRes = SET_NOCHANGE;
+
 	// Fallback if either start or due date is not set
 	if (!pTDI->HasStart())
 	{
+		// Handle subtasks at the end
 		if (pTDI->HasDue())
-			return m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, bAndSubtasks, FALSE);
-
-		// else both not set
-		return SET_FAILED;
+			nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, FALSE, FALSE);
 	}
 	else if (!pTDI->HasDue())
 	{
-		return m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, bAndSubtasks, FALSE);
+		// Handle subtasks at the end
+		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, FALSE, FALSE);
 	}
+	else // else both are set
+	{
+		COleDateTime dtStart = m_data.GetTaskDate(dwTaskID, TDCD_START);
+		ASSERT(CDateHelper::IsDateSet(dtStart));
 
-	// else both are set
-	COleDateTime dtStart = m_data.GetTaskDate(dwTaskID, TDCD_START);
-	ASSERT(CDateHelper::IsDateSet(dtStart));
+		CDateHelper::OffsetDate(dtStart, nAmount, TDC::MapUnitsToDHUnits(nUnits));
 
-	CDateHelper::OffsetDate(dtStart, nAmount, TDC::MapUnitsToDHUnits(nUnits));
-
-	TDC_SET nRes = m_data.MoveTaskStartAndDueDates(dwTaskID, dtStart);
+		nRes = m_data.MoveTaskStartAndDueDates(dwTaskID, dtStart);
+	}
+	ASSERT(nRes != SET_FAILED);
 
 	mapProcessed.Add(dwTaskID);
 
@@ -3297,7 +3310,8 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 			{
 				DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
 
-				if (OffsetTaskStartAndDueDates(dwChildID, nAmount, nUnits, TRUE, mapProcessed) == SET_CHANGE)
+				// RECURSIVE CALL
+				if (SET_CHANGE == OffsetTaskStartAndDueDates(dwChildID, nAmount, nUnits, TRUE, mapProcessed))
 					nRes = SET_CHANGE;
 			}
 		}
