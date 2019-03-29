@@ -574,14 +574,6 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		}
 		break;
 
-	case IUI_SETTASKFONT:
-		if (pData)
-		{
-			m_ctrlKanban.SendMessage(WM_SETFONT, (WPARAM)pData->hFont, TRUE);
-			return false;
-		}
-		break;
-
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -593,6 +585,11 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	}
 
 	return false;
+}
+
+void CKanbanWnd::SetDefaultFont(HFONT hFont)
+{
+	m_ctrlKanban.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE);
 }
 
 bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const 

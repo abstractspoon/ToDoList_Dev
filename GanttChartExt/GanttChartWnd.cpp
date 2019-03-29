@@ -673,14 +673,6 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		}
 		break;
 
-	case IUI_SETTASKFONT:
-		if (pData)
-		{
-			CHoldRedraw hr(*this);
-			m_ctrlGantt.SetFont(pData->hFont, TRUE);
-		}
-		break;
-
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -704,6 +696,13 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	}
 
 	return false;
+}
+
+void CGanttChartWnd::SetDefaultFont(HFONT hFont)
+{
+	CHoldRedraw hr(*this);
+	
+	m_ctrlGantt.SetFont(hFont, TRUE);
 }
 
 bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const 

@@ -159,7 +159,6 @@ enum IUI_APPCOMMAND
 	IUI_GETPREVTASK,				// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
 	IUI_GETPREVTOPLEVELTASK,		// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
 	IUI_SAVETOIMAGE,				// IUIAPPCOMMANDDATA::szFilePath	[in/out]
-	IUI_SETTASKFONT,				// IUIAPPCOMMANDDATA::hFont			[in]
 	IUI_MULTISORT,					// IUIAPPCOMMANDDATA::sort			[in]
 	IUI_SELECTFIRSTTASK,			// IUIAPPCOMMANDDATA::select		[in]
 	IUI_SELECTNEXTTASK,				// IUIAPPCOMMANDDATA::select		[in]
@@ -305,7 +304,6 @@ struct IUIAPPCOMMANDDATA
 		IUI_ATTRIBUTE nSortBy;
 		DWORD dwTaskID;
 		WCHAR szFilePath[MAX_PATH + 1];
-		HFONT hFont;			
 		IUIMULTISORT sort;
 		IUISELECTTASK select;
 		IUITASKMOVE move;	
@@ -371,6 +369,8 @@ public:
 	virtual IUI_HITTEST HitTest(const POINT& ptScreen) const = 0;
 
 	virtual void SetUITheme(const UITHEME* pTheme) = 0;
+	virtual void SetDefaultFont(HFONT hFont) = 0;
+
 	virtual void SetReadOnly(bool bReadOnly) = 0;
 	virtual HWND GetHwnd() const = 0;
 

@@ -546,14 +546,6 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		}
 		break;
 
-	case IUI_SETTASKFONT:
-		if (pData)
-		{
-			CHoldRedraw hr(*this);
-			m_ctrlWorkload.SetFont(pData->hFont, TRUE);
-		}
-		break;
-
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -576,6 +568,13 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	}
 
 	return false;
+}
+
+void CWorkloadWnd::SetDefaultFont(HFONT hFont)
+{
+	CHoldRedraw hr(*this);
+	
+	m_ctrlWorkload.SetFont(hFont, TRUE);
 }
 
 bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const 

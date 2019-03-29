@@ -32,9 +32,6 @@ public:
 	// IUI_GETPREVTOPLEVELTASK, 
 	CUIExtensionAppCmdData(DWORD dwTaskID);
 
-	// IUI_SETTASKFONT
-	CUIExtensionAppCmdData(HFONT hFont);
-
 	// IUI_MOVETASK
 	CUIExtensionAppCmdData(DWORD dwSelTaskID, 
 								DWORD dwParentID, 

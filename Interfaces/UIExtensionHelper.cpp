@@ -45,12 +45,6 @@ CUIExtensionAppCmdData::CUIExtensionAppCmdData(DWORD taskID)
 	dwTaskID = taskID;
 }
 
-// IUI_SETTASKFONT
-CUIExtensionAppCmdData::CUIExtensionAppCmdData(HFONT font)
-{
-	hFont = font;
-}
-
 // IUI_MOVETASK
 CUIExtensionAppCmdData::CUIExtensionAppCmdData(DWORD dwSelTaskID, 
 	DWORD dwParentID, 

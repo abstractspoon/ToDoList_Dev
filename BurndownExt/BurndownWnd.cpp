@@ -227,6 +227,14 @@ void CBurndownWnd::SetUITheme(const UITHEME* pTheme)
 	}
 }
 
+void CBurndownWnd::SetDefaultFont(HFONT hFont)
+{
+	CString sFontName;
+	int nFontSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFontName);
+
+	m_graph.SetFont(sFontName, nFontSize);
+}
+
 bool CBurndownWnd::ProcessMessage(MSG* /*pMsg*/) 
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -551,16 +559,6 @@ bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVTOPLEVELTASK:
 		// not handled
-		break;
-
-	case IUI_SETTASKFONT:
-		if (pData)
-		{
-			CString sFontName;
-			int nFontSize = GraphicsMisc::GetFontNameAndPointSize(pData->hFont, sFontName);
-
-			m_graph.SetFont(sFontName, nFontSize);
-		}
 		break;
 	}
 

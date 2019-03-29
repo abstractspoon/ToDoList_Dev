@@ -710,7 +710,8 @@ BOOL CToDoCtrl::SetTreeFont(HFONT hFont)
 
 		if (m_taskTree.GetSafeHwnd())
 		{
-			UpdateCommentsFont(TRUE);
+			if (HasStyle(TDCS_COMMENTSUSETREEFONT))
+				UpdateCommentsFont(TRUE);
 
 			return m_taskTree.SetFont(hFont);
 		}
@@ -728,7 +729,8 @@ BOOL CToDoCtrl::SetCommentsFont(HFONT hFont)
 	{
 		m_hFontComments = hFont;
 
-		return UpdateCommentsFont(TRUE);
+		if (!HasStyle(TDCS_COMMENTSUSETREEFONT))
+			return UpdateCommentsFont(TRUE);
 	}
 
 	// no change
@@ -746,8 +748,18 @@ BOOL CToDoCtrl::UpdateCommentsFont(BOOL bResendComments)
 		else
 			hFont = m_hFontComments;
 
+		ASSERT(hFont);
+
 		if (!hFont)
 			hFont = CDialogHelper::GetFont(GetParent());
+
+#ifdef _DEBUG
+		CString sFaceName;
+		int nPointSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFaceName);
+
+		ASSERT(!sFaceName.IsEmpty());
+		ASSERT(nPointSize > 0);
+#endif
 
 		if (GraphicsMisc::SameFontNameSize(hFont, hCurFont))
 			return FALSE;

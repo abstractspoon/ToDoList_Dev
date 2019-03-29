@@ -604,9 +604,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	m_aExtViews[nExtension] = pExtWnd;
 
 	// Set font before loading preferences
-	CUIExtensionAppCmdData data(m_taskTree.GetFont());
-
-	pExtWnd->DoAppCommand(IUI_SETTASKFONT, &data);
+	pExtWnd->SetDefaultFont(m_taskTree.GetFont());
 	pVData->bNeedFontUpdate = FALSE;
 		
 	// restore state
@@ -790,9 +788,7 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 
 			if (pVData->bNeedFontUpdate)
 			{
-				CUIExtensionAppCmdData data(m_taskTree.GetFont());
-
-				pExtWnd->DoAppCommand(IUI_SETTASKFONT, &data);
+				pExtWnd->SetDefaultFont(m_taskTree.GetFont());
 				pVData->bNeedFontUpdate = FALSE;
 			}
 		}
@@ -3950,10 +3946,17 @@ BOOL CTabbedToDoCtrl::SetTreeFont(HFONT hFont)
 		case FTCV_UIEXTENSION15:
 		case FTCV_UIEXTENSION16:
 			{
-				CUIExtensionAppCmdData data(hFont);
+				IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+				ASSERT(pExtWnd);
 
-				if (ExtensionDoAppCommand(nView, IUI_SETTASKFONT, data))
-					GetViewData(nView)->bNeedFontUpdate = FALSE;
+				VIEWDATA* pData = GetViewData(nView);
+				ASSERT(pData);
+
+				if (pExtWnd && pData)
+				{
+					pExtWnd->SetDefaultFont(m_taskTree.GetFont());
+					pData->bNeedFontUpdate = FALSE;
+				}
 
 				// mark rest of extensions needing update
 				SetExtensionsNeedFontUpdate(TRUE, nView);
