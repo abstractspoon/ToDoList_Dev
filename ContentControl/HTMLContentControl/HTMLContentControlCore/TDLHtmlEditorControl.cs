@@ -91,9 +91,12 @@ namespace HTMLContentControl
             // TODO
         }
 
-		public void SetFont(string fontName, float pointSize)
+		public void SetFont(string fontName, int pointSize)
 		{
-			BodyFont = new MSDN.Html.Editor.HtmlFontProperty(fontName, pointSize);
+			// Convert size to ems because it gives us greater granularity
+			float ems = Win32.PointsToEms(pointSize);
+
+			BodyFont = new MSDN.Html.Editor.HtmlFontProperty(fontName, ems);
 		}
 
 		private void OnTextChangeTimer(object sender, EventArgs e)

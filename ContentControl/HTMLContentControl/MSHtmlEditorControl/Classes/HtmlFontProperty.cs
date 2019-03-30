@@ -51,6 +51,7 @@ namespace MSDN.Html.Editor
         // properties defined for the Font
         private string			_name;
         private HtmlFontSize	_size;
+		private float			_sizeInEms;
         private bool			_bold;
         private bool			_italic;
         private bool			_underline;
@@ -88,6 +89,22 @@ namespace MSDN.Html.Editor
             set
             {
                 _size = value;
+            }
+        } //Size
+
+        /// <summary>
+        /// Property for the Size of the Font
+        /// </summary>
+        [Description("The Size of the Font")]
+        public float SizeInEms
+		{
+            get
+            {
+                return _sizeInEms;
+            }
+            set
+            {
+				_sizeInEms = value;
             }
         } //Size
 
@@ -189,13 +206,14 @@ namespace MSDN.Html.Editor
 
 
         /// <summary>
-        /// Public constrctor for name only
+        /// Public constructor for name only
         /// </summary>
         public HtmlFontProperty(string name)
         {
             _name = name;
             _size = HtmlFontSize.Default;
-            _bold = false;
+			_sizeInEms = 0;
+			_bold = false;
             _italic = false;
             _underline = false;
             _strikeout = false;
@@ -205,12 +223,13 @@ namespace MSDN.Html.Editor
         } //HtmlFontProperty
 
         /// <summary>
-        /// Public constrctor for name and size only
+        /// Public constructor for name and size only
         /// </summary>
         public HtmlFontProperty(string name, HtmlFontSize size)
         {
             _name = name;
             _size = size;
+			_sizeInEms = 0;
             _bold = false;
             _italic = false;
             _underline = false;
@@ -221,12 +240,13 @@ namespace MSDN.Html.Editor
         } //HtmlFontProperty
 
         /// <summary>
-        /// Public constrctor for name and size only
+        /// Public constructor for name and size only
         /// </summary>
-        public HtmlFontProperty(string name, float size)
+        public HtmlFontProperty(string name, float ems)
         {
             _name = name;
-            _size = HtmlFontConversion.FontSizeToHtml(size);
+			_sizeInEms = ems;
+			_size = HtmlFontConversion.EmsToHtml(ems);
             _bold = false;
             _italic = false;
             _underline = false;
@@ -237,12 +257,13 @@ namespace MSDN.Html.Editor
         } //HtmlFontProperty
 
         /// <summary>
-        /// Public constrctor for all standard attributes
+        /// Public constructor for all standard attributes
         /// </summary>
         public HtmlFontProperty(string name, HtmlFontSize size, bool bold, bool italic, bool underline)
         {
             _name = name;
             _size = size;
+			_sizeInEms = 0;
             _bold = bold;
             _italic = italic;
             _underline = underline;
@@ -253,12 +274,13 @@ namespace MSDN.Html.Editor
         } //HtmlFontProperty
 
         /// <summary>
-        /// Public constrctor for all attributes
+        /// Public constructor for all attributes
         /// </summary>
         public HtmlFontProperty(string name, HtmlFontSize size, bool bold, bool italic, bool underline, bool strikeout, bool subscript, bool superscript)
         {
             _name = name;
             _size = size;
+			_sizeInEms = 0;
             _bold = bold;
             _italic = italic;
             _underline = underline;
@@ -274,7 +296,8 @@ namespace MSDN.Html.Editor
         public HtmlFontProperty(System.Drawing.Font font)
         {
             _name = font.Name;
-            _size = HtmlFontConversion.FontSizeToHtml(font.SizeInPoints);
+            _size = HtmlFontConversion.PointsToHtml(font.SizeInPoints);
+			_sizeInEms = 0;
             _bold = font.Bold;
             _italic = font.Italic;
             _underline = font.Underline;
@@ -309,7 +332,8 @@ namespace MSDN.Html.Editor
             {
                 if (font1.Name == font2.Name &&
                     font1.Size == font2.Size &&
-                    font1.Bold == font2.Bold && 
+					font1.SizeInEms == font2.SizeInEms &&
+					font1.Bold == font2.Bold && 
                     font1.Italic == font2.Italic &&
                     font1.Underline == font2.Underline &&
                     font1.Strikeout == font2.Strikeout &&
@@ -432,7 +456,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Determines the font size given a selected font in points
         /// </summary>
-        public static HtmlFontSize FontSizeToHtml(float fontSize)
+        public static HtmlFontSize PointsToHtml(float fontSize)
         {
             // make the following mapping
             // 1:8pt
@@ -456,20 +480,28 @@ namespace MSDN.Html.Editor
 
         } //FontSizeToHtml
 
+        public static HtmlFontSize EmsToHtml(float ems)
+        {
+			const float PtToEm = 0.08365f; // https://www.convertunits.com/from/pt/to/em
+			float points = (ems / PtToEm);
+
+			return PointsToHtml(points);
+        }
+
 
         /// <summary>
         /// Determines the font size given the html font size
         /// </summary>
-        public static float FontSizeFromHtml(HtmlFontSize fontSize)
+        public static float PointsFromHtml(HtmlFontSize fontSize)
         {
-            return HtmlFontConversion.FontSizeFromHtml((int)fontSize);
+            return HtmlFontConversion.PointsFromHtml((int)fontSize);
 
         } //FontSizeFromHtml
 
         /// <summary>
         /// Determines the font size given the html int size
         /// </summary>
-        public static float FontSizeFromHtml(int fontSize)
+        public static float PointsFromHtml(int fontSize)
         {
             // make the following mapping
             // 1:8pt
@@ -533,7 +565,7 @@ namespace MSDN.Html.Editor
             }
 
             // return value as a HtmlFontSize
-            return HtmlFontConversion.FontSizeToHtml(size);
+            return HtmlFontConversion.PointsToHtml(size);
 
         } //StyleSizeToHtml
 

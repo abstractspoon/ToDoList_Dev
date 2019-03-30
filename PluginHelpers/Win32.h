@@ -34,6 +34,7 @@ namespace Abstractspoon
 
 				static String^ GetFaceName(HFONT hFont);
 				static int GetPointSize(HFONT hFont);
+				static float PointsToEms(int nPointSize);
 			};
 
 			public ref class DlgUnits

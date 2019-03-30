@@ -1257,8 +1257,10 @@ namespace MSDN.Html.Editor
                 // set the new value using the default if set to null
                 if (HtmlFontProperty.IsNotNull(value)) _bodyFont = value;
                 else _bodyFont = _defaultFont;
+
                 // set the font attributes based on any body styles
                 mshtmlStyle bodyStyle = body.style;
+
                 if (bodyStyle != null)
                 {
                     if (HtmlFontProperty.IsEqual(_bodyFont, _defaultFont))
@@ -1267,13 +1269,17 @@ namespace MSDN.Html.Editor
                         if (bodyStyle.fontFamily != null) bodyStyle.fontFamily = string.Empty;
                         if (bodyStyle.fontSize != null) bodyStyle.fontSize = string.Empty;
                         if (bodyStyle.fontWeight != null) bodyStyle.fontWeight = string.Empty;
-                    }
-                    else
+					}
+					else
                     {
                         // set the body styles based on the defined value
                         bodyStyle.fontFamily = _bodyFont.Name;
-                        bodyStyle.fontSize = HtmlFontConversion.HtmlFontSizeString(_bodyFont.Size);
                         bodyStyle.fontWeight = HtmlFontConversion.HtmlFontBoldString(_bodyFont.Bold);
+
+						if (_bodyFont.SizeInEms > 0)
+							bodyStyle.fontSize = String.Format("{0}em", _bodyFont.SizeInEms);
+						else
+							bodyStyle.fontSize = HtmlFontConversion.HtmlFontSizeString(_bodyFont.Size);
                     }
                 }
             }

@@ -121,6 +121,13 @@ int Win32::GetPointSize(HFONT hFont)
 	return MulDiv(abs(lf.lfHeight), 72, nPPI);
 }
 
+float Win32::PointsToEms(int nPointSize)
+{
+	const float PtToEm = 0.08365f; // https://www.convertunits.com/from/pt/to/em
+
+	return (nPointSize * PtToEm);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 DlgUnits::DlgUnits(IntPtr hWnd) : m_hWnd(Win32::GetHwnd(hWnd))
