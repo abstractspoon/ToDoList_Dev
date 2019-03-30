@@ -412,7 +412,7 @@ namespace MSDN.Html.Editor
         {
             // if in readonly mode display the standard context menu
             // otherwise display the editing context menu
-            if (!_readOnly)
+            if (!editorWebBrowser.IsWebBrowserContextMenuEnabled)
             {
                 // should disable inappropriate commands
                 if (IsParentTable())
@@ -441,7 +441,7 @@ namespace MSDN.Html.Editor
         private void DocumentSelectionChange(object sender, EventArgs e)
         {
             // if not in readonly mode process the selection change
-            if (!_readOnly)
+            if (!_readOnly && _editEnabled)
             {
                 FormatSelectionChange();
             }
@@ -804,8 +804,8 @@ namespace MSDN.Html.Editor
 				UpdateToolbarEnabledState();
 				
 				// define whether the IE cntext menu should be shown
-				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = _readOnly;
-            }
+				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = (_readOnly || !_editEnabled);
+			}
 
         } //ReadOnly
 

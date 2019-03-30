@@ -133,6 +133,7 @@
 			this.contextInsertText = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertHtml = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertTable = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator18 = new System.Windows.Forms.ToolStripSeparator();
 			this.browserPanel.SuspendLayout();
 			this.toolstripEditor.SuspendLayout();
 			this.contextEditor.SuspendLayout();
@@ -716,6 +717,7 @@
             this.contextFormatColorDialog,
             this.toolStripSeparator11,
             this.contextFormatNormal,
+            this.toolStripSeparator18,
             this.contextFormatBold,
             this.contextFormatItalic,
             this.contextFormatUnderline,
@@ -1023,6 +1025,11 @@
 			this.contextInsertTable.Tag = "InsertTable";
 			this.contextInsertTable.Click += new System.EventHandler(this.contextEditorClick);
 			// 
+			// toolStripSeparator18
+			// 
+			this.toolStripSeparator18.Name = "toolStripSeparator18";
+			resources.ApplyResources(this.toolStripSeparator18, "toolStripSeparator18");
+			// 
 			// HtmlEditorControl
 			// 
 			this.Controls.Add(this.toolstripEditor);
@@ -1144,5 +1151,6 @@
         private System.Windows.Forms.WebBrowser editorWebBrowser;
 		private System.Windows.Forms.ToolStripButton toolstripEnableEditing;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator17;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator18;
 	}
 }
