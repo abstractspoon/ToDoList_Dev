@@ -1901,7 +1901,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		// will be empty which will put the comments type combo in an
 		// indeterminate state which is the desired effect since this requires
 		// the user to reset the type before they can edit
-		if (m_ctrlComments.SetSelectedFormat(sCommentsType))
+		if (m_ctrlComments.SetSelectedFormat(sCommentsType) != CB_ERR)
 			m_cfComments = sCommentsType;
 		else
 			m_cfComments.Empty();
