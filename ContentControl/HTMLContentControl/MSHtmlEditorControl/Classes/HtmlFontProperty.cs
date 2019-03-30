@@ -221,6 +221,22 @@ namespace MSDN.Html.Editor
         } //HtmlFontProperty
 
         /// <summary>
+        /// Public constrctor for name and size only
+        /// </summary>
+        public HtmlFontProperty(string name, float size)
+        {
+            _name = name;
+            _size = HtmlFontConversion.FontSizeToHtml(size);
+            _bold = false;
+            _italic = false;
+            _underline = false;
+            _strikeout = false;
+            _subscript = false;
+            _superscript = false;
+
+        } //HtmlFontProperty
+
+        /// <summary>
         /// Public constrctor for all standard attributes
         /// </summary>
         public HtmlFontProperty(string name, HtmlFontSize size, bool bold, bool italic, bool underline)

@@ -93,12 +93,7 @@ namespace HTMLContentControl
 
 		public void SetFont(string fontName, float pointSize)
 		{
-			MSDN.Html.Editor.HtmlFontProperty font = new MSDN.Html.Editor.HtmlFontProperty();
-
-			font.Name = fontName;
-			font.Size = MSDN.Html.Editor.HtmlFontConversion.FontSizeToHtml(pointSize);
-
-			BodyFont = font;
+			BodyFont = new MSDN.Html.Editor.HtmlFontProperty(fontName, pointSize);
 		}
 
         private void OnTextChangeTimer(object sender, EventArgs e)
