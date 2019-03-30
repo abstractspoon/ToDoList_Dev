@@ -23,9 +23,9 @@ namespace HTMLContentControl
 
         public new event EventHandler TextChanged;
 
-        // ---------------------------------------------------------------
+		// ---------------------------------------------------------------
 
-        public TDLHtmlEditorControl(System.Drawing.Font font, Translator trans)
+		public TDLHtmlEditorControl(System.Drawing.Font font, Translator trans)
         {
             m_ControlsFont = font;
             m_Trans = trans;
@@ -96,7 +96,7 @@ namespace HTMLContentControl
 			BodyFont = new MSDN.Html.Editor.HtmlFontProperty(fontName, pointSize);
 		}
 
-        private void OnTextChangeTimer(object sender, EventArgs e)
+		private void OnTextChangeTimer(object sender, EventArgs e)
         {
             if (!IsDisposed)
             {

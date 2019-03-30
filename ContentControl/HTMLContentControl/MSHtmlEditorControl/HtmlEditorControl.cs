@@ -62,12 +62,14 @@ namespace MSDN.Html.Editor
     [ToolboxBitmap(typeof(HtmlEditorControl), "Resources.HtmlEditor.bmp")]
     public partial class HtmlEditorControl : UserControl
     {
-        #region Public Events
+		public new event EventHandler LostFocus;
 
-        /// <summary>
-        /// Public event that is raised if an internal processing exception is found
-        /// </summary>
-        [Category("Exception"), Description("An Internal Processing Exception was encountered")]
+		#region Public Events
+
+		/// <summary>
+		/// Public event that is raised if an internal processing exception is found
+		/// </summary>
+		[Category("Exception"), Description("An Internal Processing Exception was encountered")]
         public event HtmlExceptionEventHandler HtmlException;
 
         /// <summary>
@@ -345,12 +347,11 @@ namespace MSDN.Html.Editor
             this.ScrollBars = _scrollBars;
 
         } //HtmlEditorControl
-
-
-        /// <summary>
-        /// Defines all the body attributes once a document has been loaded
-        /// </summary>
-        private void DefineBodyAttributes()
+		
+		/// <summary>
+		/// Defines all the body attributes once a document has been loaded
+		/// </summary>
+		private void DefineBodyAttributes()
         {
             // define the body colors based on the new body html
             if (body.bgColor == null)
@@ -441,11 +442,15 @@ namespace MSDN.Html.Editor
             if (!_readOnly)
             {
                 FormatSelectionChange();
-
-
             }
 
         } //DocumentSelectionChange
+
+        private void DocumentLoseFocus(object sender, EventArgs e)
+        {
+			if (LostFocus != null)
+				LostFocus(this, e);
+		} //
 
         /// <summary>
         /// Method to perform the process of key being pressed
@@ -603,9 +608,10 @@ namespace MSDN.Html.Editor
             this.editorWebBrowser.Document.ContextMenuShowing += new HtmlElementEventHandler(DocumentContextMenu);
             this.editorWebBrowser.Document.AttachEventHandler("onselectionchange", DocumentSelectionChange);
             this.editorWebBrowser.Document.AttachEventHandler("onkeydown", DocumentKeyPress);
+			this.editorWebBrowser.Document.AttachEventHandler("onfocusout", DocumentLoseFocus);
 
-            // signalled complete
-            codeNavigate = false;
+			// signalled complete
+			codeNavigate = false;
             loading = false;
 
             // after navigation define the document Url
@@ -614,12 +620,11 @@ namespace MSDN.Html.Editor
 
         } //BrowserDocumentComplete
 
-
-        /// <summary>
-        /// Create a new focus method that ensure the body gets the focus
-        /// Should be called when text processing command are called
-        /// </summary>
-        public new bool Focus()
+		/// <summary>
+		/// Create a new focus method that ensure the body gets the focus
+		/// Should be called when text processing command are called
+		/// </summary>
+		public new bool Focus()
         {
             // have the return value be the focus return from the user control
             bool focus = base.Focus();
@@ -4005,21 +4010,26 @@ namespace MSDN.Html.Editor
 
         #region Toolbar Processing Operations
 
-        public System.Windows.Forms.ToolStrip ToolBar 
+        protected System.Windows.Forms.ToolStrip ToolBar 
         {
             get { return toolstripEditor; }
         }
 
-        public System.Windows.Forms.Panel BrowserPanel
+        protected System.Windows.Forms.Panel BrowserPanel
         {
             get { return browserPanel; }
         }
 
-        /// <summary>
-        /// General Tool Strip processing method
-        /// Calls the ProcessCommand with the selected command Tag Text
-        /// </summary>
-        private void toolstripEditorClick(object sender, EventArgs e)
+		protected System.Windows.Forms.WebBrowser WebBrowser
+		{
+			get { return editorWebBrowser; }
+		}
+
+		/// <summary>
+		/// General Tool Strip processing method
+		/// Calls the ProcessCommand with the selected command Tag Text
+		/// </summary>
+		private void toolstripEditorClick(object sender, EventArgs e)
         {
             ToolStripButton button = (ToolStripButton)sender;
             string command = (string)button.Tag;
