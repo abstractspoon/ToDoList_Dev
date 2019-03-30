@@ -262,7 +262,10 @@ void CHTMLContentControlBridge::SetContentFont(HFONT hFont)
 
 void CHTMLContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
+	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
+	m_wnd->SavePreferences(prefs.get(), key.get());
 }
 
 void CHTMLContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
