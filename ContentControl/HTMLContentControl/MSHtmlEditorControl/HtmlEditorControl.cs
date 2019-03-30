@@ -337,7 +337,9 @@ namespace MSDN.Html.Editor
             this.contextDocumentToolbar.Checked = true;
             this.contextDocumentScrollbar.Checked = true;
             this.contextDocumentWordwrap.Checked = true;
-            SetBrowserPanelSize();
+			this.toolstripEnableEditing.Checked = !ReadOnly;
+
+			SetBrowserPanelSize();
 
             // load the blank Html page to load the MsHtml object model
             BrowserCodeNavigate(BLANK_HTML_PAGE);
@@ -450,12 +452,21 @@ namespace MSDN.Html.Editor
         {
 			if (LostFocus != null)
 				LostFocus(this, e);
-		} //
+		} //DocumentLoseFocus
 
-        /// <summary>
-        /// Method to perform the process of key being pressed
-        /// </summary>
-        private void DocumentKeyPress(object sender, EventArgs e)
+        private void DocumentDoubleClick(object sender, EventArgs e)
+        {
+			mshtmlSelection sel = document.selection as mshtmlSelection;
+			mshtmlTextRange rng = sel.createRange() as mshtmlTextRange;
+
+			rng.expand("word");
+			rng.select();
+		} //DocumentDoubleClick
+
+		/// <summary>
+		/// Method to perform the process of key being pressed
+		/// </summary>
+		private void DocumentKeyPress(object sender, EventArgs e)
         {
             // define the event object being processes and review the key being pressed
             mshtmlEventObject eventObject = document.parentWindow.@event;
@@ -609,6 +620,7 @@ namespace MSDN.Html.Editor
             this.editorWebBrowser.Document.AttachEventHandler("onselectionchange", DocumentSelectionChange);
             this.editorWebBrowser.Document.AttachEventHandler("onkeydown", DocumentKeyPress);
 			this.editorWebBrowser.Document.AttachEventHandler("onfocusout", DocumentLoseFocus);
+			this.editorWebBrowser.Document.AttachEventHandler("ondblclick", DocumentDoubleClick);
 
 			// signalled complete
 			codeNavigate = false;
@@ -2242,9 +2254,12 @@ namespace MSDN.Html.Editor
                     if (anchor.href != null) hrefLink = anchor.href;
                 }
                 // if text is a valid href then set the link
-                if (hrefLink == string.Empty && IsValidHref(hrefText))
-                {
-                    hrefLink = hrefText;
+                if (hrefLink == string.Empty)
+				{
+					if (IsValidHref(hrefText))
+						hrefLink = hrefText;
+					else
+						hrefLink = "https://";
                 }
 
                 // prompt the user for the new href
