@@ -221,7 +221,16 @@ namespace HTMLContentControl
             int dialogLeft = (parentCentre.X - (dialog.Width / 2));
             int dialogTop = (parentCentre.Y - (dialog.Height / 2));
 
-            dialog.Location = new Point(dialogLeft, dialogTop);
+			// but keep within screen
+			Rectangle screenArea = Screen.FromControl(this).WorkingArea;
+
+			dialogLeft = Math.Max(screenArea.Left, dialogLeft);
+			dialogLeft = Math.Min(screenArea.Right - dialog.Width, dialogLeft);
+
+			dialogTop = Math.Max(screenArea.Top, dialogTop);
+			dialogTop = Math.Min(screenArea.Bottom - dialog.Height, dialogTop);
+			
+			dialog.Location = new Point(dialogLeft, dialogTop);
 
             // Add icon for identification
             dialog.ShowIcon = true;
