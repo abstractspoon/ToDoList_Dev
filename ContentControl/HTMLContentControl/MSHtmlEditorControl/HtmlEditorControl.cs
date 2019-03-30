@@ -477,6 +477,12 @@ namespace MSDN.Html.Editor
 			mshtmlTextRange rng = sel.createRange() as mshtmlTextRange;
 
 			rng.expand("word");
+
+			// Omit trailing whitespace
+			int len = rng.text.Length;
+			int wordLen = rng.text.TrimEnd(null).Length;
+
+			rng.moveEnd("character", (wordLen - len));
 			rng.select();
 		} //DocumentDoubleClick
 
