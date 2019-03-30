@@ -2392,13 +2392,20 @@ BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KB
 
 					// Exclude 'File Link' and 'Parent' because these will 
 					// almost always push things over the limit
-					if ((nAttribID != IUI_FILEREF) && (nAttribID != IUI_PARENT))
+					// Exclude 'flag' because that is rendered as an icon
+					switch (nAttribID)
 					{
-						int nValueLen = pKI->GetAttributeDisplayValue(nAttribID).GetLength();
-
-						if ((int)((aLabelLen[nAtt] + nValueLen) * fAveCharWidth) > nAvailWidth)
-							return FALSE;
+					case IUI_FILEREF:
+					case IUI_PARENT:
+					case IUI_FLAG:
+						continue;
 					}
+
+					// else
+					int nValueLen = pKI->GetAttributeDisplayValue(nAttribID).GetLength();
+
+					if ((int)((aLabelLen[nAtt] + nValueLen) * fAveCharWidth) > nAvailWidth)
+						return FALSE;
 				}
 			}
 
