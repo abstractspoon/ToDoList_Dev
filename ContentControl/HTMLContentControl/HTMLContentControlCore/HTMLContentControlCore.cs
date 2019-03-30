@@ -155,8 +155,9 @@ namespace HTMLContentControl
             this.m_HtmlEditControl.Location = new System.Drawing.Point(0, 0);
             this.m_HtmlEditControl.Name = "m_HtmlEditControl";
             this.m_HtmlEditControl.Size = this.ClientSize;
-
-            this.Controls.Add(this.m_HtmlEditControl);
+			this.m_HtmlEditControl.ContentMargin = 5;
+			
+			this.Controls.Add(this.m_HtmlEditControl);
 
             this.ResumeLayout(false);
             this.PerformLayout();

@@ -434,6 +434,23 @@ namespace MSDN.Html.Editor
 
         } //DocumentContextMenu
 
+		public int ContentMargin
+		{
+			set
+			{
+				if (value >= 0)
+				{
+					mshtml.IHTMLDocument2 doc = (document as mshtml.IHTMLDocument2);
+
+					// The first parameter is the url, the second is the index of the added style sheet.
+					mshtmlStyleSheet ss = doc.createStyleSheet("", 0);
+
+					var rule = String.Format("{{ margin: {0}; }}", value);
+					ss.addRule("body", rule);
+				}
+			}
+		}
+
 
         /// <summary>
         /// Method to perform the process of selection change
