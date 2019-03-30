@@ -37,8 +37,8 @@ public:
 	void SetPreferencesFilePath(LPCTSTR szFilePath);
 	void SetWindowPrompts(LPCTSTR szComboPrompt, LPCTSTR szCommentsPrompt);
 
-	int GetSelectedFormat(CONTENTFORMAT& cf) const;
-	int SetSelectedFormat(const CONTENTFORMAT& cf);
+	BOOL GetSelectedFormat(CONTENTFORMAT& cf) const;
+	BOOL SetSelectedFormat(const CONTENTFORMAT& cf);
 	BOOL IsFormat(const CONTENTFORMAT& cf) const { return m_ctrlComments.IsFormat(cf); }
 
 	BOOL GetContent(CString& sTextContent, CBinaryData& customContent) const;
