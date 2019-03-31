@@ -36,7 +36,6 @@ CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CTDLCont
 	:
 	m_pMgrContent(pMgrContent), 
 	m_cbCommentsFmt(pMgrContent, IDI_NULL),
-	m_bFirstLoadCommentsPrefs(TRUE),
 	m_hContentFont(NULL),
 	m_bReadOnly(FALSE)
 {
@@ -284,29 +283,26 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 	return UpdateControlFormat(cf);
 }
 
-BOOL CTDLCommentsCtrl::UpdateControlFormat(const CONTENTFORMAT& cf)
+BOOL CTDLCommentsCtrl::UpdateControlFormat(const CONTENTFORMAT& cfNew)
 {
-	ASSERT(m_pMgrContent && (m_pMgrContent->FindContent(cf) != -1));
+	ASSERT(m_pMgrContent && (m_pMgrContent->FindContent(cfNew) != -1));
 	ASSERT(GetSafeHwnd());
 
-	// save outgoing content prefs provided they've already been loaded
-	if (!m_bFirstLoadCommentsPrefs)
+	CONTENTFORMAT cfOld = m_ctrlComments.GetContentFormat();
+
+	// save outgoing content prefs 
+	if (!cfOld.IsEmpty() && (cfNew != cfOld))
 		SavePreferences();
 
-	if (m_ctrlComments.GetContentFormat() == cf)
-	{
-		m_bFirstLoadCommentsPrefs = m_sPrefsFilePath.IsEmpty();
-		LoadPreferences(!m_bFirstLoadCommentsPrefs);
-
-		return FALSE;
-	}
+	if (cfNew == cfOld)
+		return TRUE;
 
 	CRect rComments;
 	CalcCommentsCtrlRect(rComments);
 
 	DWORD dwStyle = (WS_VISIBLE | WS_TABSTOP | WS_CHILD | WS_CLIPSIBLINGS); 
 
-	if (!m_pMgrContent->CreateContentControl(cf, m_ctrlComments, 
+	if (!m_pMgrContent->CreateContentControl(cfNew, m_ctrlComments, 
 		IDC_CTRL, dwStyle, WS_EX_CLIENTEDGE, rComments, *this))
 	{
 		return FALSE;
@@ -531,7 +527,6 @@ void CTDLCommentsCtrl::SetPreferencesFilePath(LPCTSTR szFilePath)
 	if (!Misc::IsEmpty(szFilePath) && (m_sPrefsFilePath != szFilePath))
 	{
 		m_sPrefsFilePath = szFilePath; 
-
 		LoadPreferences(FALSE);
 	}
 }

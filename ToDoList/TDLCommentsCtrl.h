@@ -68,7 +68,6 @@ protected:
 	CWndPromptManager m_mgrPrompts;
 	CString m_sCommentsPrompt, m_sComboPrompt;
 
-	BOOL m_bFirstLoadCommentsPrefs;
 	CString m_sPrefsFilePath;
 	BOOL m_bReadOnly;
 
