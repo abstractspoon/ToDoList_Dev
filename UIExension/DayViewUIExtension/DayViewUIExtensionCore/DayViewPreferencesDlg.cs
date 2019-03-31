@@ -13,11 +13,12 @@ namespace DayViewUIExtension
 {
     public partial class DayViewPreferencesDlg : Form
     {
-        public DayViewPreferencesDlg(Translator trans)
+        public DayViewPreferencesDlg(Translator trans, Font font)
         {
             InitializeComponent();
-            ScaleByDPIFactor();
 
+			DPIScaling.Scale(this);
+			DialogUtils.SetFont(this, font);
             trans.Translate(this);
         }
 
@@ -45,34 +46,5 @@ namespace DayViewUIExtension
         public Boolean HideTasksWithoutTimes { get { return m_HideTasksWithoutTimes.Checked; } }
         public Boolean HideTasksSpanningWeekends { get { return m_HideTasksSpanningWeekends.Checked; } }
         public Boolean HideTasksSpanningDays { get { return m_HideTasksSpanningDays.Checked; } }
-
-        protected void ScaleByDPIFactor()
-        {
-            if (DPIScaling.WantScaling())
-            {
-                SuspendLayout();
-
-                this.Bounds = DPIScaling.Scale(this.Bounds);
-                this.Width -= 10;
-                this.Height -= 20;
-
-                this.panel1.Bounds = DPIScaling.Scale(this.panel1.Bounds);
-                this.m_HideParentTasks.Bounds = DPIScaling.Scale(this.m_HideParentTasks.Bounds);
-                this.m_HideTasksWithoutTimes.Bounds = DPIScaling.Scale(this.m_HideTasksWithoutTimes.Bounds);
-                this.m_HideTasksSpanningWeekends.Bounds = DPIScaling.Scale(this.m_HideTasksSpanningWeekends.Bounds);
-                this.m_HideTasksSpanningDays.Bounds = DPIScaling.Scale(this.m_HideTasksSpanningDays.Bounds);
-                this.BtnCancel.Bounds = DPIScaling.Scale(this.BtnCancel.Bounds);
-                this.BtnOK.Bounds = DPIScaling.Scale(this.BtnOK.Bounds);
-
-                // Make sure border is the same all the way around
-//                 int leftBorder = this.panel1.Left;
-//                 int topBorder = this.panel1.Top;
-// 
-//                 this.Width = this.panel1.Width + 2 * leftBorder;
-//                 this.Height = this.BtnOK.Bottom + topBorder;
-
-                ResumeLayout();
-            }
-        }
     }
 }

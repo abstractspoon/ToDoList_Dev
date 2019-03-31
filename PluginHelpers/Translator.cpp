@@ -63,7 +63,7 @@ void Translator::Translate(System::Windows::Forms::ToolStripItemCollection^ item
 
 		if ((tsmi != nullptr) && tsmi->HasDropDownItems)
 		{
-			Translate(tsmi->DropDownItems);
+			Translate(tsmi->DropDownItems); // RECURSIVE CALL
 		}
 	}
 }

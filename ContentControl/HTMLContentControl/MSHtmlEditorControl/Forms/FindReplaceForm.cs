@@ -50,7 +50,6 @@ namespace MSDN.Html.Editor
 
             // Define the initial state of the form assuming a Find command to be displayed first
             DefineFindWindow(findNotReplace);
-            DefineOptionsWindow(options);
 
             // ensure buttons not initially enabled
             this.bFindNext.Enabled = false;
@@ -83,47 +82,7 @@ namespace MSDN.Html.Editor
 
         } //DefineFindWindow
 
-
-        /// <summary>
-        /// Defines if the options dialog is shown
-        /// </summary>
-        private void DefineOptionsWindow(bool options)
-        {
-            if (options)
-            {
-                // Form displayed with the options shown
-                this.bOptions.Text = "Less Options";
-                this.panelOptions.Visible = true;
-                this.tabControl.Height = TAB_HEIGHT_WITH_OPTION;
-                this.Height = FORM_HEIGHT_WITH_OPTION;
-                this.optionMatchCase.Focus();
-            }
-            else
-            {
-                // Form displayed without the options shown
-                this.bOptions.Text = "More Options";
-                this.panelOptions.Visible = false;
-                this.tabControl.Height = TAB_HEIGHT_WITHOUT_OPTION;
-                this.Height = FORM_HEIGHT_WITHOUT_OPTION;
-                this.textFind.Focus();
-            }
-
-        } //DefineOptionsWindow
-
-
-        /// <summary>
-        /// Event defining the visibility of the options
-        /// Based on the user clicking the options button
-        /// </summary>
-        private void bOptions_Click(object sender, System.EventArgs e)
-        {
-            options = !options;
-            DefineOptionsWindow(options);
-
-        } //OptionsClick
-
-
-        /// <summary>
+		/// <summary>
         /// Event setting the state of the form
         /// Based on the user clicking a new form tab
         /// </summary>

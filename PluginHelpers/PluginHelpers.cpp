@@ -27,3 +27,20 @@ MarshalledString::operator LPCWSTR()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+void DialogUtils::SetFont(System::Windows::Forms::Control^ ctrl, System::Drawing::Font^ font)
+{
+	ctrl->Font = font;
+
+	SetFont(ctrl->Controls, font);
+}
+
+void DialogUtils::SetFont(System::Windows::Forms::Control::ControlCollection^ ctrls, System::Drawing::Font^ font)
+{
+	int nCtrl = ctrls->Count;
+
+	while (nCtrl--)
+		SetFont(ctrls[nCtrl], font); // RECURSIVE CALL
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////

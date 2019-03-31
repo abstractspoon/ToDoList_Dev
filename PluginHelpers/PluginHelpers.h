@@ -33,6 +33,14 @@ namespace Abstractspoon
 
 #define MS(x) MarshalledString(x)
 
+
+			public ref class DialogUtils
+			{
+			public:
+				static void SetFont(System::Windows::Forms::Control^ ctrl, System::Drawing::Font^ font);
+				static void SetFont(System::Windows::Forms::Control::ControlCollection^ ctrls, System::Drawing::Font^ font);
+
+			};
 		}
 	}
 }

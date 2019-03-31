@@ -82,5 +82,9 @@ namespace MSDN.Html.Editor
 
         } //HrefLink
 
-    }
+		private void hrefLink_TextChanged(object sender, EventArgs e)
+		{
+
+		}
+	}
 }

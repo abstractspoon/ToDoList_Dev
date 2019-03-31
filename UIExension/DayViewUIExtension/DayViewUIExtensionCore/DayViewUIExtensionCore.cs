@@ -60,7 +60,7 @@ namespace DayViewUIExtension
 
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 			m_ControlsFont = new Font(FontName, 8);
-            m_PrefsDlg = new DayViewPreferencesDlg(trans);
+            m_PrefsDlg = new DayViewPreferencesDlg(trans, m_ControlsFont);
 
 			InitializeComponent();
 		}

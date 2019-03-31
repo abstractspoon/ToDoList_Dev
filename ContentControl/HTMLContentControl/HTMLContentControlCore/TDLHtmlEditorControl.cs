@@ -205,12 +205,10 @@ namespace HTMLContentControl
         {
             base.DefineDialogProperties(dialog);
 
-			// Set Font as this may change size
-			foreach (Control ctrl in dialog.Controls)
-				ctrl.Font = m_ControlsFont;
-
-            // Translate as this may change size
-            m_Trans.Translate(dialog);
+			// Operations that change dialog size
+			DialogUtils.SetFont(dialog, m_ControlsFont);
+			DPIScaling.Scale(dialog);
+			m_Trans.Translate(dialog);
 
             // Centre dialogs over our client area
             dialog.StartPosition = FormStartPosition.Manual;
