@@ -376,17 +376,15 @@ namespace DayViewUIExtension
 
             if (DPIScaling.WantScaling())
             {
-                int imageSize = DPIScaling.Scale(16);
+				int imageSize = DPIScaling.Scale(16);
 
-                m_Toolbar.ImageScalingSize = new Size(imageSize, imageSize);
+				m_Toolbar.ImageScalingSize = new Size(imageSize, imageSize);
                 m_Toolbar.AutoSize = false;
                 m_Toolbar.Height = (imageSize + 10);
             }
 
 			m_TBRenderer = new UIThemeToolbarRenderer();
 			m_Toolbar.Renderer = m_TBRenderer;
-
-			Toolbars.FixupButtonSizes(m_Toolbar);
 
 			var btn1 = new ToolStripButton();
 			btn1.ImageIndex = 0;
@@ -405,6 +403,8 @@ namespace DayViewUIExtension
 			btn3.Click += new EventHandler(OnHelp);
 			btn3.ToolTipText = m_Trans.Translate("Online Help");
 			m_Toolbar.Items.Add(btn3);
+
+			Toolbars.FixupButtonSizes(m_Toolbar);
 
 			Controls.Add(m_Toolbar);
 		}

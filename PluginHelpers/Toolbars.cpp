@@ -6,6 +6,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+#using <system.dll>
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,7 +27,20 @@ void Toolbars::FixupButtonSizes(ToolStrip^ toolbar)
 			int xPadding = (imageSize.Width + 7 - button->Size.Width);
 			int yPadding = (imageSize.Height + 7 - button->Size.Height);
 
+			System::Diagnostics::Trace::WriteLine(String::Format("Toolbars::FixupButtonSizes({0}, size({1}, {2}), padding({3}, {4}))", 
+																 i, button->Size.Width, button->Size.Height, xPadding, yPadding));
+
 			button->Padding = Padding(xPadding / 2, yPadding / 2, xPadding - xPadding / 2, yPadding - yPadding / 2);
+		}
+		else
+		{
+			auto sep = dynamic_cast<ToolStripSeparator^>(toolbar->Items[i]);
+
+			if (sep != nullptr)
+			{
+				sep->AutoSize = false;
+				sep->Height = (imageSize.Height + 7);
+			}
 		}
 	}
 }

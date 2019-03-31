@@ -50,13 +50,13 @@ namespace HTMLContentControl
             this.ToolBar.Renderer = m_toolbarRenderer;
             this.ToolBar.Font = m_ControlsFont;
 
-            if (DPIScaling.WantScaling())
+			if (DPIScaling.WantScaling())
             {
                 int imageSize = DPIScaling.Scale(16);
-                this.ToolBar.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
-            }
 
-			Toolbars.FixupButtonSizes(this.ToolBar);
+                this.ToolBar.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
+				this.ContextMenu.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
+			}
 
             this.ToolbarDock = DockStyle.Top;
             this.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
@@ -75,9 +75,12 @@ namespace HTMLContentControl
 
             m_TextChangeTimer.Interval = 200;
             m_TextChangeTimer.Start();
-        }
 
-        void InitialiseFeatures()
+			// Place this at the end to ensure the toolbar has finished its resize
+			Toolbars.FixupButtonSizes(this.ToolBar);
+		}
+
+		void InitialiseFeatures()
         {
             // remove whole 'Document' submenu
             CommandHandling.HideCommand("contextDocument", ContextMenu.Items);
