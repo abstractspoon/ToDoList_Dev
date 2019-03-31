@@ -133,7 +133,6 @@
 			this.Controls.Add(this.BtnOK);
 			this.Controls.Add(this.BtnCancel);
 			this.Controls.Add(this.panel1);
-			this.Font = new System.Drawing.Font("Tahoma", 8F);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
