@@ -207,7 +207,6 @@ namespace HTMLContentControl
 
 			// Operations that change dialog size
 			DialogUtils.SetFont(dialog, m_ControlsFont);
-			DPIScaling.Scale(dialog);
 			m_Trans.Translate(dialog);
 
             // Centre dialogs over our client area

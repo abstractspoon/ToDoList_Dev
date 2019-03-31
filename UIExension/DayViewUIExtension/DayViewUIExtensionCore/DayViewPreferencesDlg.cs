@@ -17,7 +17,6 @@ namespace DayViewUIExtension
         {
             InitializeComponent();
 
-			DPIScaling.Scale(this);
 			DialogUtils.SetFont(this, font);
             trans.Translate(this);
         }

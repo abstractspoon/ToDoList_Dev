@@ -21,12 +21,6 @@ namespace Abstractspoon
 				static System::Drawing::Point Scale(System::Drawing::Point point);
 				static System::Drawing::Size Scale(System::Drawing::Size size);
 				static System::Drawing::Rectangle Scale(System::Drawing::Rectangle rect);
-				
-				static void Scale(System::Windows::Forms::Form^ window);
-				static void Scale(System::Windows::Forms::Control::ControlCollection^ items);
-
-			protected:
-				static System::Drawing::Rectangle GetBoundingRect(System::Windows::Forms::Control::ControlCollection^ items);
 			};
 		}
 	}
