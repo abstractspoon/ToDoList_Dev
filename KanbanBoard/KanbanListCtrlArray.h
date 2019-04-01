@@ -9,14 +9,14 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CKanbanListCtrl;
+class CKanbanColumnCtrl;
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CKanbanListCtrlArray : public CArray<CKanbanListCtrl*, CKanbanListCtrl*&>
+class CKanbanColumnCtrlArray : public CArray<CKanbanColumnCtrl*, CKanbanColumnCtrl*&>
 {
 public:
-	virtual ~CKanbanListCtrlArray();
+	virtual ~CKanbanColumnCtrlArray();
 	
 	void RemoveAll();
 	BOOL RemoveAt(int nList);
@@ -25,15 +25,15 @@ public:
 	int Find(DWORD dwTaskID, HTREEITEM& hti) const;
 	int Find(HWND hWnd) const;
 	int Find(const CString& sAttribValue) const;
-	int Find(const CKanbanListCtrl* pList) const;
+	int Find(const CKanbanColumnCtrl* pList) const;
 
-	CKanbanListCtrl* Get(DWORD dwTaskID) const;
-	CKanbanListCtrl* Get(DWORD dwTaskID, HTREEITEM& hti) const;
-	CKanbanListCtrl* Get(HWND hWnd) const;
-	CKanbanListCtrl* Get(const CString& sAttribValue) const;
-	CKanbanListCtrl* GetFirstNonEmpty() const;
-	CKanbanListCtrl* GetLastNonEmpty() const;
-	CKanbanListCtrl* GetBacklog() const;
+	CKanbanColumnCtrl* Get(DWORD dwTaskID) const;
+	CKanbanColumnCtrl* Get(DWORD dwTaskID, HTREEITEM& hti) const;
+	CKanbanColumnCtrl* Get(HWND hWnd) const;
+	CKanbanColumnCtrl* Get(const CString& sAttribValue) const;
+	CKanbanColumnCtrl* GetFirstNonEmpty() const;
+	CKanbanColumnCtrl* GetLastNonEmpty() const;
+	CKanbanColumnCtrl* GetBacklog() const;
 
 	void SetTextColorIsBackground(BOOL bSet = TRUE);
 	void SetShowTaskColorAsBar(BOOL bSet = TRUE);
@@ -52,17 +52,17 @@ public:
 	BOOL CanSaveToImage() const;
 	BOOL SaveToImage(CBitmap& bmImage);
 
-	CKanbanListCtrl* GetNext(const CKanbanListCtrl* pList, BOOL bNext, BOOL bExcludeEmpty, BOOL bFixedColumns) const;
-	CKanbanListCtrl* HitTest(const CPoint& ptScreen, HTREEITEM* pHit = NULL, UINT* pHitFlags = NULL) const;
+	CKanbanColumnCtrl* GetNext(const CKanbanColumnCtrl* pList, BOOL bNext, BOOL bExcludeEmpty, BOOL bFixedColumns) const;
+	CKanbanColumnCtrl* HitTest(const CPoint& ptScreen, HTREEITEM* pHit = NULL, UINT* pHitFlags = NULL) const;
 
 	void OnDisplayAttributeChanged();
 
 	void Sort();
 	void SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent);
 
-	void SetSelectedList(const CKanbanListCtrl* pSelList);
-	void SetDropTarget(const CKanbanListCtrl* pTarget);
-	void DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanListCtrl* pIgnore);
+	void SetSelectedList(const CKanbanColumnCtrl* pSelList);
+	void SetDropTarget(const CKanbanColumnCtrl* pTarget);
+	void DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanColumnCtrl* pIgnore);
 
 	void Exclude(CDC* pDC);
 	void Redraw(BOOL bErase, BOOL bUpdate = FALSE);

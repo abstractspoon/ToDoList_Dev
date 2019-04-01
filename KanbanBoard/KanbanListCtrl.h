@@ -27,13 +27,13 @@ const UINT WM_KLCN_TOGGLETASKFLAG	= (WM_APP+4); // WPARAM = HWND, LPARAM = Task 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx window
 
-class CKanbanListCtrl : public CTreeCtrl
+class CKanbanColumnCtrl : public CTreeCtrl
 {
-	DECLARE_DYNAMIC(CKanbanListCtrl);
+	DECLARE_DYNAMIC(CKanbanColumnCtrl);
 
 // Construction
 public:
-	CKanbanListCtrl(const CKanbanItemMap& data, 
+	CKanbanColumnCtrl(const CKanbanItemMap& data, 
 					const KANBANCOLUMN& columnDef, 
 					CFontCache& fonts,
 					const CDWordArray& aPriorityColors,
@@ -47,7 +47,7 @@ public:
 	BOOL HasMultipleValues() const;
 	BOOL HasAnyValues() const;
 	BOOL IsBacklog() const;
-	BOOL AttributeValuesMatch(const CKanbanListCtrl& other) const;
+	BOOL AttributeValuesMatch(const CKanbanColumnCtrl& other) const;
 
 	const KANBANCOLUMN& ColumnDefinition() const { return m_columnDef; }
 	
@@ -103,7 +103,7 @@ public:
 	CTreeCtrlHelper& TCH() { return m_tch; }
 
 	static CString FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis);
-	static BOOL CanDrag(const CKanbanListCtrl* pSrcList, const CKanbanListCtrl* pDestList);
+	static BOOL CanDrag(const CKanbanColumnCtrl* pSrcList, const CKanbanColumnCtrl* pDestList);
 
 protected:
 	BOOL m_bTextColorIsBkgnd;
@@ -139,7 +139,7 @@ protected:
 
 // Implementation
 public:
-	virtual ~CKanbanListCtrl();
+	virtual ~CKanbanColumnCtrl();
 
 	// Generated message map functions
 protected:
