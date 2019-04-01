@@ -1059,6 +1059,8 @@ void CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 
 		hti = htiNext;
 	}
+
+	ASSERT(m_mapItems.GetCount() == GetCount());
 }
 
 int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
