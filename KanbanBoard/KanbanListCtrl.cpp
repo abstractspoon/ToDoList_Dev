@@ -1054,8 +1054,8 @@ void CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 		// get next item before deleting this one
 		HTREEITEM htiNext = GetNextItem(hti, TVGN_NEXT);
 
-		if (!mapCurIDs.Has(dwTaskID))
-			CTreeCtrl::DeleteItem(hti);
+		if (!mapCurIDs.Has(dwTaskID) && CTreeCtrl::DeleteItem(hti))
+			m_mapItems.RemoveKey(dwTaskID);
 
 		hti = htiNext;
 	}
