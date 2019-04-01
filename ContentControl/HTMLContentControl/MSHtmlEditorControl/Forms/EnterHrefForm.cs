@@ -64,12 +64,18 @@ namespace MSDN.Html.Editor
             {
                 return (NavigateActionOption)this.listTargets.SelectedIndex;
             }
-        }
+		}
 
-        /// <summary>
-        /// Property for the href for the text
-        /// </summary>
-        public string HrefLink
+		public void EnforceHrefTarget(NavigateActionOption action)
+		{
+			this.listTargets.SelectedIndex = (int)action;
+			this.listTargets.Enabled = false;
+		}
+
+		/// <summary>
+		/// Property for the href for the text
+		/// </summary>
+		public string HrefLink
         {
             get
             {

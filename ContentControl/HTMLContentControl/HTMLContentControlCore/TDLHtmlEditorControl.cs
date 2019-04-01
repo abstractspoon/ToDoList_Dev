@@ -235,6 +235,12 @@ namespace HTMLContentControl
             // Add icon for identification
             dialog.ShowIcon = true;
             dialog.Icon = HTMLContentControlCore.html;
+
+			// This is a hack in any other language but apparently not in C#
+			var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
+
+			if (urlDialog != null)
+				urlDialog.EnforceHrefTarget(MSDN.Html.Editor.NavigateActionOption.NewWindow);
         }
 
         public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
