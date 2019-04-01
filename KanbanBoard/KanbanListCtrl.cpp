@@ -300,10 +300,16 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 
 	if (dwOptions != m_dwOptions)
 	{
+		DWORD dwPrevOptions = m_dwOptions;
 		m_dwOptions = dwOptions;
 
 		if (GetSafeHwnd())
-			Invalidate(FALSE);
+		{
+			if (Misc::FlagHasChanged(KBCF_HIDEEMPTYATTRIBUTES, dwPrevOptions, m_dwOptions))
+				RefreshItemLineHeights();
+			else
+				Invalidate(FALSE);
+		}
 	}
 }
 
