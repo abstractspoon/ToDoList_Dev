@@ -117,7 +117,7 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	//{{AFX_MSG_MAP(CKanbanListCtrlEx)
 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
-	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnListCustomDraw)
+	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
 	ON_MESSAGE(WM_THEMECHANGED, OnThemeChanged)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
@@ -292,16 +292,14 @@ void CKanbanColumnCtrl::RefreshItemLineHeights(DWORD dwTaskID)
 
 void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 {
-	if ((dwOptions & KBCF_COLORBARBYPRIORITY) && (m_aPriorityColors.GetSize() != 11))
+	if (Misc::HasFlag(dwOptions, KBCF_COLORBARBYPRIORITY) && (m_aPriorityColors.GetSize() != 11))
 	{
 		ASSERT(0);
-		dwOptions &= ~KBCF_COLORBARBYPRIORITY;
+		Misc::ModifyFlags(dwOptions, KBCF_COLORBARBYPRIORITY);
 	}
 
 	if (dwOptions != m_dwOptions)
 	{
-		BOOL bResort = ()
-
 		m_dwOptions = dwOptions;
 
 		if (GetSafeHwnd())
@@ -407,20 +405,20 @@ BOOL CKanbanColumnCtrl::HasAnyValues() const
 	return (m_columnDef.aAttribValues.GetSize() > 0);
 }
 
-int CKanbanColumnCtrl::CalcAvailableAttributeWidth(int nListWidth) const
+int CKanbanColumnCtrl::CalcAvailableAttributeWidth(int nColWidth) const
 {
-	if (nListWidth < 0)
+	if (nColWidth < 0)
 	{
 		CRect rClient;
 		GetClientRect(rClient);
-		nListWidth = rClient.Width();
+		nColWidth = rClient.Width();
 	}
 	else
 	{
-		nListWidth -= GetSystemMetrics(SM_CXVSCROLL);
+		nColWidth -= GetSystemMetrics(SM_CXVSCROLL);
 	}
 
-	int nAvailWidth = (nListWidth - (2 * LV_PADDING));
+	int nAvailWidth = (nColWidth - (2 * LV_PADDING));
 
 	if (HasOption(KBCF_SHOWTASKCOLORASBAR))
 		nAvailWidth -= BAR_WIDTH;
@@ -471,7 +469,7 @@ void CKanbanColumnCtrl::FillItemBackground(CDC* pDC, const KANBANITEM* pKI, cons
 	}
 }
 
-void CKanbanColumnCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult) 
+void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	NMTVCUSTOMDRAW* pTVCD = (NMTVCUSTOMDRAW*)pNMHDR;
 	*pResult = CDRF_DODEFAULT;
@@ -1553,19 +1551,19 @@ BOOL CKanbanColumnCtrl::AttributeValuesMatch(const CKanbanColumnCtrl& other) con
 	return Misc::MatchAll(m_columnDef.aAttribValues, aOtherValues);
 }
 
-BOOL CKanbanColumnCtrl::CanDrag(const CKanbanColumnCtrl* pSrcList, const CKanbanColumnCtrl* pDestList)
+BOOL CKanbanColumnCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol)
 {
-	if (!pDestList)
+	if (!pDestCol)
 		return FALSE;
 	
-	if (pDestList == pSrcList)
+	if (pDestCol == pSrcCol)
 		return FALSE;
 		
-	if (pSrcList->AttributeValuesMatch(*pDestList))
+	if (pSrcCol->AttributeValuesMatch(*pDestCol))
 		return FALSE;
 
 	// Can't copy FROM the backlog
-	if (pSrcList->IsBacklog() && Misc::ModKeysArePressed(MKS_CTRL))
+	if (pSrcCol->IsBacklog() && Misc::ModKeysArePressed(MKS_CTRL))
 		return FALSE;
 
 	return TRUE;

@@ -56,8 +56,8 @@ const UINT WM_KCM_SELECTTASK = (WM_APP+10); // WPARAM , LPARAM = Task ID
 
 //////////////////////////////////////////////////////////////////////
 
-const UINT IDC_LISTCTRL = 101;
-const UINT IDC_HEADER	= 102;
+const UINT IDC_COLUMNCTRL	= 101;
+const UINT IDC_HEADER		= 102;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -96,12 +96,12 @@ CKanbanCtrl::CKanbanCtrl()
 	m_dwOptions(0),
 	m_bReadOnly(FALSE),
 	m_nNextColor(0),
-	m_pSelectedList(NULL),
+	m_pSelectedColumn(NULL),
 	m_nTrackAttribute(IUI_NONE),
 	m_nSortBy(IUI_NONE),
 	m_bSelectTasks(FALSE),
 	m_bResizingHeader(FALSE),
-	m_bSettingListFocus(FALSE),
+	m_bSettingColumnFocus(FALSE),
 	m_bSavingToImage(FALSE)
 {
 
@@ -121,17 +121,17 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_LBUTTONUP()
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_HEADER, OnHeaderCustomDraw)
 	ON_NOTIFY(HDN_ITEMCHANGING, IDC_HEADER, OnHeaderItemChanging)
-	ON_NOTIFY(TVN_BEGINDRAG, IDC_LISTCTRL, OnBeginDragListItem)
-	ON_NOTIFY(TVN_SELCHANGED, IDC_LISTCTRL, OnListItemSelChange)
-	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_LISTCTRL, OnListEditLabel)
-	ON_NOTIFY(NM_SETFOCUS, IDC_LISTCTRL, OnListSetFocus)
+	ON_NOTIFY(TVN_BEGINDRAG, IDC_COLUMNCTRL, OnBeginDragColumnItem)
+	ON_NOTIFY(TVN_SELCHANGED, IDC_COLUMNCTRL, OnColumnItemSelChange)
+	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_COLUMNCTRL, OnColumnEditLabel)
+	ON_NOTIFY(NM_SETFOCUS, IDC_COLUMNCTRL, OnColumnSetFocus)
 	ON_WM_SETFOCUS()
 	ON_WM_SETCURSOR()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
-	ON_MESSAGE(WM_KLCN_TOGGLETASKDONE, OnListToggleTaskDone)
-	ON_MESSAGE(WM_KLCN_TOGGLETASKFLAG, OnListToggleTaskFlag)
-	ON_MESSAGE(WM_KLCN_GETTASKICON, OnListGetTaskIcon)
-	ON_MESSAGE(WM_KLCN_EDITTASKICON, OnListEditTaskIcon)
+	ON_MESSAGE(WM_KLCN_TOGGLETASKDONE, OnColumnToggleTaskDone)
+	ON_MESSAGE(WM_KLCN_TOGGLETASKFLAG, OnColumnToggleTaskFlag)
+	ON_MESSAGE(WM_KLCN_GETTASKICON, OnColumnGetTaskIcon)
+	ON_MESSAGE(WM_KLCN_EDITTASKICON, OnColumnEditTaskIcon)
 	ON_MESSAGE(WM_KCM_SELECTTASK, OnSelectTask)
 
 END_MESSAGE_MAP()
@@ -164,11 +164,11 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CKanbanCtrl::FilterToolTipMessage(MSG* pMsg) 
 {
-	// List tooltips
-	CKanbanColumnCtrl* pList = m_aListCtrls.HitTest(pMsg->pt);
+	// Column tooltips
+	CKanbanColumnCtrl* pCol = m_aColumns.HitTest(pMsg->pt);
 
-	if (pList)
-		pList->FilterToolTipMessage(pMsg);
+	if (pCol)
+		pCol->FilterToolTipMessage(pMsg);
 }
 
 bool CKanbanCtrl::ProcessMessage(MSG* pMsg) 
@@ -183,11 +183,11 @@ bool CKanbanCtrl::ProcessMessage(MSG* pMsg)
 	return false;
 }
 
-BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentList)
+BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentCol)
 {
 	// Find the closest task at the currently
 	// selected task's scrolled pos
-	HTREEITEM hti = m_pSelectedList->GetSelectedItem();
+	HTREEITEM hti = m_pSelectedColumn->GetSelectedItem();
 
 	if (!hti)
 	{
@@ -195,33 +195,33 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentList)
 		return FALSE;
 	}
 
-	if ((nAdjacentList < 0) || (nAdjacentList > m_aListCtrls.GetSize()))
+	if ((nAdjacentCol < 0) || (nAdjacentCol > m_aColumns.GetSize()))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	CKanbanColumnCtrl* pAdjacentList = m_aListCtrls[nAdjacentList];
+	CKanbanColumnCtrl* pAdjacentCol = m_aColumns[nAdjacentCol];
 
-	if (!pAdjacentList->GetCount())
+	if (!pAdjacentCol->GetCount())
 		return FALSE;
 
 	// scroll into view first
-	m_pSelectedList->ScrollToSelection();
+	m_pSelectedColumn->ScrollToSelection();
 
 	CRect rItem;
-	VERIFY(m_pSelectedList->GetItemBounds(hti, &rItem));
+	VERIFY(m_pSelectedColumn->GetItemBounds(hti, &rItem));
 
-	HTREEITEM htiClosest = pAdjacentList->HitTest(rItem.CenterPoint());
+	HTREEITEM htiClosest = pAdjacentCol->HitTest(rItem.CenterPoint());
 
 	if (!htiClosest)
-		htiClosest = pAdjacentList->TCH().GetLastItem();
+		htiClosest = pAdjacentCol->TCH().GetLastItem();
 
-	SelectListCtrl(pAdjacentList, FALSE);
-	ASSERT(m_pSelectedList == pAdjacentList);
+	SelectColumn(pAdjacentCol, FALSE);
+	ASSERT(m_pSelectedColumn == pAdjacentCol);
 
-	pAdjacentList->SelectItem(htiClosest, FALSE); // FALSE -> by keyboard
-	pAdjacentList->UpdateWindow();
+	pAdjacentCol->SelectItem(htiClosest, FALSE); // FALSE -> by keyboard
+	pAdjacentCol->UpdateWindow();
 	
 	return TRUE;
 }
@@ -231,54 +231,54 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 	switch (wp)
 	{
 	case VK_LEFT:
-		if (m_pSelectedList->GetSelectedItem())
+		if (m_pSelectedColumn->GetSelectedItem())
 		{
-			int nSelList = m_aListCtrls.Find(m_pSelectedList);
+			int nSelCol = m_aColumns.Find(m_pSelectedColumn);
 
-			for (int nList = (nSelList - 1); nList >= 0; nList--)
+			for (int nCol = (nSelCol - 1); nCol >= 0; nCol--)
 			{
-				if (SelectClosestAdjacentItemToSelection(nList))
+				if (SelectClosestAdjacentItemToSelection(nCol))
 					return TRUE;
 			}
 		}
 		break;
 
 	case VK_HOME:
-		if (m_pSelectedList->GetSelectedItem())
+		if (m_pSelectedColumn->GetSelectedItem())
 		{
-			int nSelList = m_aListCtrls.Find(m_pSelectedList);
+			int nSelCol = m_aColumns.Find(m_pSelectedColumn);
 
-			for (int nList = 0; nList < nSelList; nList++)
+			for (int nCol = 0; nCol < nSelCol; nCol++)
 			{
-				if (SelectClosestAdjacentItemToSelection(nList))
+				if (SelectClosestAdjacentItemToSelection(nCol))
 					return TRUE;
 			}
 		}
 		break;
 
 	case VK_RIGHT:
-		if (m_pSelectedList->GetSelectedItem())
+		if (m_pSelectedColumn->GetSelectedItem())
 		{
-			int nSelList = m_aListCtrls.Find(m_pSelectedList);
-			int nNumList = m_aListCtrls.GetSize();
+			int nSelCol = m_aColumns.Find(m_pSelectedColumn);
+			int nNumCol = m_aColumns.GetSize();
 
-			for (int nList = (nSelList + 1); nList < nNumList; nList++)
+			for (int nCol = (nSelCol + 1); nCol < nNumCol; nCol++)
 			{
-				if (SelectClosestAdjacentItemToSelection(nList))
+				if (SelectClosestAdjacentItemToSelection(nCol))
 					return TRUE;
 			}
 		}
 		break;
 
 	case VK_END:
-		if (m_pSelectedList->GetSelectedItem())
+		if (m_pSelectedColumn->GetSelectedItem())
 		{
-			int nSelList = m_aListCtrls.Find(m_pSelectedList);
-			int nNumList = m_aListCtrls.GetSize();
+			int nSelCol = m_aColumns.Find(m_pSelectedColumn);
+			int nNumCol = m_aColumns.GetSize();
 
-			for (int nList = (nNumList - 1); nList > nSelList; nList--)
+			for (int nCol = (nNumCol - 1); nCol > nSelCol; nCol--)
 			{
-				if (SelectClosestAdjacentItemToSelection(nList))
+				if (SelectClosestAdjacentItemToSelection(nCol))
 					return TRUE;
 			}
 		}
@@ -289,13 +289,13 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 		return (CancelOperation() != FALSE);
 
 	case VK_DELETE:
-		if (m_pSelectedList && !m_pSelectedList->IsBacklog())
+		if (m_pSelectedColumn && !m_pSelectedColumn->IsBacklog())
 		{
 			// For each of the selected tasks remove the attribute value(s) of the
 			// selected list (column). Tasks having no values remaining are moved 
 			// to the backlog
 			CStringArray aListValues;
-			VERIFY(m_pSelectedList->GetAttributeValues(aListValues));
+			VERIFY(m_pSelectedColumn->GetAttributeValues(aListValues));
 
 			DWORD dwTaskID = GetSelectedTaskID();
 			KANBANITEM* pKI = GetKanbanItem(dwTaskID);
@@ -310,16 +310,16 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 
 			// Reset selected list before removing items to 
 			// to prevent unwanted selection notifications
-			CKanbanColumnCtrl* pList = m_pSelectedList;
-			m_pSelectedList = NULL;
+			CKanbanColumnCtrl* pCol = m_pSelectedColumn;
+			m_pSelectedColumn = NULL;
 
 			if (pKI)
 			{
-				VERIFY(pList->DeleteTask(dwTaskID));
+				VERIFY(pCol->DeleteTask(dwTaskID));
 
 				if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
 				{
-					CKanbanColumnCtrl* pBacklog = m_aListCtrls.GetBacklog();
+					CKanbanColumnCtrl* pBacklog = m_aColumns.GetBacklog();
 
 					if (pBacklog)
 						pBacklog->AddTask(*pKI, FALSE);
@@ -344,23 +344,23 @@ BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 	// Check for 'no change'
 	DWORD dwSelID = GetSelectedTaskID();
 
-	int nPrevSel = m_aListCtrls.Find(m_pSelectedList), nNewSel = -1;
+	int nPrevSel = m_aColumns.Find(m_pSelectedColumn), nNewSel = -1;
 
-	if (m_pSelectedList && m_pSelectedList->FindTask(dwTaskID))
+	if (m_pSelectedColumn && m_pSelectedColumn->FindTask(dwTaskID))
 		nNewSel = nPrevSel;
 	else
-		nNewSel = m_aListCtrls.Find(dwTaskID);
+		nNewSel = m_aColumns.Find(dwTaskID);
 
 	if ((nPrevSel != nNewSel) || (dwTaskID != dwSelID))
 	{
-		m_aListCtrls.SetSelectedList(NULL);
+		m_aColumns.SetSelectedColumn(NULL);
 
 		if ((nNewSel == -1) || (dwTaskID == 0))
 			return FALSE;
 
 		// else
-		SelectListCtrl(m_aListCtrls[nNewSel], FALSE);
-		VERIFY(m_pSelectedList->SelectTask(dwTaskID));
+		SelectColumn(m_aColumns[nNewSel], FALSE);
+		VERIFY(m_pSelectedColumn->SelectTask(dwTaskID));
 	}
 
 	ScrollToSelectedTask();
@@ -369,34 +369,34 @@ BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 
 DWORD CKanbanCtrl::GetSelectedTaskID() const
 {
-	const CKanbanColumnCtrl* pList = GetSelListCtrl();
+	const CKanbanColumnCtrl* pCol = GetSelColumn();
 
-	if (pList)
-		return pList->GetSelectedTaskID();
+	if (pCol)
+		return pCol->GetSelectedTaskID();
 
 	// else
 	return 0;
 }
 
-CKanbanColumnCtrl* CKanbanCtrl::GetSelListCtrl()
+CKanbanColumnCtrl* CKanbanCtrl::GetSelColumn()
 {
-	ASSERT((m_pSelectedList == NULL) || Misc::HasT(m_aListCtrls, m_pSelectedList));
+	ASSERT((m_pSelectedColumn == NULL) || Misc::HasT(m_aColumns, m_pSelectedColumn));
 
-	if (!m_pSelectedList && m_aListCtrls.GetSize())
-		m_pSelectedList = m_aListCtrls[0];
+	if (!m_pSelectedColumn && m_aColumns.GetSize())
+		m_pSelectedColumn = m_aColumns[0];
 
-	return m_pSelectedList;
+	return m_pSelectedColumn;
 }
 
-const CKanbanColumnCtrl* CKanbanCtrl::GetSelListCtrl() const
+const CKanbanColumnCtrl* CKanbanCtrl::GetSelColumn() const
 {
-	if (m_pSelectedList)
+	if (m_pSelectedColumn)
 	{
-		return m_pSelectedList;
+		return m_pSelectedColumn;
 	}
-	else if (m_aListCtrls.GetSize())
+	else if (m_aColumns.GetSize())
 	{
-		return m_aListCtrls[0];
+		return m_aColumns[0];
 	}
 
 	// else
@@ -405,47 +405,47 @@ const CKanbanColumnCtrl* CKanbanCtrl::GetSelListCtrl() const
 
 BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 {
-	CKanbanColumnCtrl* pList = NULL;
+	CKanbanColumnCtrl* pCol = NULL;
 	HTREEITEM htiStart = NULL;
 	BOOL bForwards = TRUE;
 
 	switch (nCmd)
 	{
 	case IUI_SELECTFIRSTTASK:
-		pList = m_aListCtrls.GetFirstNonEmpty();
+		pCol = m_aColumns.GetFirstNonEmpty();
 
-		if (pList)
-			htiStart = pList->TCH().GetFirstItem();
+		if (pCol)
+			htiStart = pCol->TCH().GetFirstItem();
 		break;
 
 	case IUI_SELECTNEXTTASK:
-		pList = m_pSelectedList;
+		pCol = m_pSelectedColumn;
 
-		if (pList)
-			htiStart = pList->GetNextSiblingItem(pList->GetSelectedItem());;
+		if (pCol)
+			htiStart = pCol->GetNextSiblingItem(pCol->GetSelectedItem());;
 		break;
 
 	case IUI_SELECTNEXTTASKINCLCURRENT:
-		pList = m_pSelectedList;
+		pCol = m_pSelectedColumn;
 
-		if (pList)
-			htiStart = pList->GetSelectedItem();
+		if (pCol)
+			htiStart = pCol->GetSelectedItem();
 		break;
 
 	case IUI_SELECTPREVTASK:
-		pList = m_pSelectedList;
+		pCol = m_pSelectedColumn;
 		bForwards = FALSE;
 
-		if (pList)
-			htiStart = pList->GetPrevSiblingItem(pList->GetSelectedItem());
+		if (pCol)
+			htiStart = pCol->GetPrevSiblingItem(pCol->GetSelectedItem());
 		break;
 
 	case IUI_SELECTLASTTASK:
-		pList = m_aListCtrls.GetLastNonEmpty();
+		pCol = m_aColumns.GetLastNonEmpty();
 		bForwards = FALSE;
 
-		if (pList)
-			htiStart = pList->TCH().GetLastItem();
+		if (pCol)
+			htiStart = pCol->TCH().GetLastItem();
 		break;
 
 	default:
@@ -453,26 +453,26 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 		break;
 	}
 
-	if (pList)
+	if (pCol)
 	{
-		const CKanbanColumnCtrl* pStartList = pList;
+		const CKanbanColumnCtrl* pStartCol = pCol;
 		HTREEITEM hti = htiStart;
 		
 		do
 		{
-			hti = pList->FindTask(select, bForwards, hti);
+			hti = pCol->FindTask(select, bForwards, hti);
 
 			if (hti)
 			{
-				SelectListCtrl(pList, FALSE);
-				return pList->SelectItem(hti, FALSE);
+				SelectColumn(pCol, FALSE);
+				return pCol->SelectItem(hti, FALSE);
 			}
 
 			// else
-			pList = GetNextListCtrl(pList, bForwards, TRUE);
-			hti = (bForwards ? pList->TCH().GetFirstItem() : pList->TCH().GetLastItem());
+			pCol = GetNextColumn(pCol, bForwards, TRUE);
+			hti = (bForwards ? pCol->TCH().GetFirstItem() : pCol->TCH().GetLastItem());
 		}
-		while (pList != pStartList);
+		while (pCol != pStartCol);
 	}
 
 	// all else
@@ -505,7 +505,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 	{
 	case IUI_ALL:
 		RebuildData(pTasks, attrib);
- 		RebuildListCtrls(TRUE, TRUE);
+ 		RebuildColumns(TRUE, TRUE);
 		break;
 		
 	case IUI_NEW:
@@ -517,15 +517,15 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 
 			if (bChange)
 			{
-				RebuildListCtrls(TRUE, TRUE);
+				RebuildColumns(TRUE, TRUE);
 			}
 			else if (UpdateNeedsItemHeightRefresh(attrib))
 			{
-				m_aListCtrls.RefreshItemLineHeights();
+				m_aColumns.RefreshItemLineHeights();
 			}
 			else
 			{
-				m_aListCtrls.Redraw(FALSE);
+				m_aColumns.Redraw(FALSE);
 			}
 		}
 		break;
@@ -1242,7 +1242,7 @@ void CKanbanCtrl::LoadDefaultAttributeListValues(const IPreferences* pPrefs)
 	LoadDefaultAttributeListValues(pPrefs, _T("TAGS"),		_T("TagList"));
 
 	if (m_nTrackAttribute != IUI_NONE)
-		RebuildListCtrls(FALSE, FALSE);
+		RebuildColumns(FALSE, FALSE);
 }
 
 void CKanbanCtrl::LoadDefaultAttributeListValues(const IPreferences* pPrefs, LPCTSTR szAttribID, LPCTSTR szSubKey)
@@ -1428,13 +1428,13 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 		{
 			if (!Misc::Contains(aCurValues[nVal], aNewValues))
 			{
-				CKanbanColumnCtrl* pCurList = m_aListCtrls.Get(aCurValues[nVal]);
-				ASSERT(pCurList);
+				CKanbanColumnCtrl* pCurCol = m_aColumns.Get(aCurValues[nVal]);
+				ASSERT(pCurCol);
 
-				if (pCurList)
+				if (pCurCol)
 				{
-					VERIFY(pCurList->DeleteTask(pKI->dwTaskID));
-					bChange |= (pCurList->GetCount() == 0);
+					VERIFY(pCurCol->DeleteTask(pKI->dwTaskID));
+					bChange |= (pCurCol->GetCount() == 0);
 				}
 
 				// Remove from list to speed up later searching
@@ -1449,10 +1449,10 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 		{
 			if (!Misc::Contains(aNewValues[nVal], aCurValues))
 			{
-				CKanbanColumnCtrl* pCurList = m_aListCtrls.Get(aNewValues[nVal]);
+				CKanbanColumnCtrl* pCurCol = m_aColumns.Get(aNewValues[nVal]);
 				
-				if (pCurList)
-					pCurList->AddTask(*pKI, FALSE);
+				if (pCurCol)
+					pCurCol->AddTask(*pKI, FALSE);
 				else
 					bChange = TRUE; // needs new list ctrl
 			}
@@ -1484,32 +1484,32 @@ BOOL CKanbanCtrl::WantShowColumn(LPCTSTR szValue, const CKanbanItemArrayMap& map
 	return (pKIArr && pKIArr->GetSize());
 }
 
-BOOL CKanbanCtrl::WantShowColumn(const CKanbanColumnCtrl* pList) const
+BOOL CKanbanCtrl::WantShowColumn(const CKanbanColumnCtrl* pCol) const
 {
 	if (HasOption(KBCF_SHOWEMPTYCOLUMNS))
 		return TRUE;
 
-	if (HasOption(KBCF_ALWAYSSHOWBACKLOG) && pList->IsBacklog())
+	if (HasOption(KBCF_ALWAYSSHOWBACKLOG) && pCol->IsBacklog())
 		return TRUE;
 
-	return (pList->GetCount() > 0);
+	return (pCol->GetCount() > 0);
 }
 
-BOOL CKanbanCtrl::DeleteListCtrl(int nList)
+BOOL CKanbanCtrl::DeleteColumn(int nCol)
 {
-	if ((nList < 0) || (nList >= m_aListCtrls.GetSize()))
+	if ((nCol < 0) || (nCol >= m_aColumns.GetSize()))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	CKanbanColumnCtrl* pList = m_aListCtrls[nList];
-	ASSERT(pList);
+	CKanbanColumnCtrl* pCol = m_aColumns[nCol];
+	ASSERT(pCol);
 
-	if (pList == m_pSelectedList)
-		m_pSelectedList = NULL;
+	if (pCol == m_pSelectedColumn)
+		m_pSelectedColumn = NULL;
 
-	m_aListCtrls.RemoveAt(nList);
+	m_aColumns.RemoveAt(nCol);
 
 	return TRUE;
 }
@@ -1530,7 +1530,7 @@ BOOL CKanbanCtrl::HasNonParentTasks(const CKanbanItemArray* pItems)
 	return FALSE;
 }
 
-int CKanbanCtrl::RemoveOldDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray)
+int CKanbanCtrl::RemoveOldDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 {
 	if (!UsingDynamicColumns())
 	{
@@ -1541,26 +1541,26 @@ int CKanbanCtrl::RemoveOldDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray
 	// remove any lists whose values are no longer used
 	// or which Optionally have no items 
 	const CKanbanValueMap* pGlobals = m_mapAttributeValues.GetMapping(m_sTrackAttribID);
-	int nList = m_aListCtrls.GetSize(), nNumRemoved = 0;
+	int nCol = m_aColumns.GetSize(), nNumRemoved = 0;
 	
-	while (nList--)
+	while (nCol--)
 	{
-		CKanbanColumnCtrl* pList = m_aListCtrls[nList];
-		ASSERT(pList && !pList->HasMultipleValues());
+		CKanbanColumnCtrl* pCol = m_aColumns[nCol];
+		ASSERT(pCol && !pCol->HasMultipleValues());
 		
-		if ((pGlobals == NULL) || !WantShowColumn(pList))
+		if ((pGlobals == NULL) || !WantShowColumn(pCol))
 		{
-			DeleteListCtrl(nList);
+			DeleteColumn(nCol);
 			nNumRemoved++;
 		}
 		else
 		{
-			CString sAttribValueID(pList->GetAttributeValueID());
+			CString sAttribValueID(pCol->GetAttributeValueID());
 			
 			if (!Misc::HasKey(*pGlobals, sAttribValueID) || 
 				!WantShowColumn(sAttribValueID, mapKIArray))
 			{
-				DeleteListCtrl(nList);
+				DeleteColumn(nCol);
 				nNumRemoved++;
 			}
 		}
@@ -1569,7 +1569,7 @@ int CKanbanCtrl::RemoveOldDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray
 	return nNumRemoved;
 }
 
-int CKanbanCtrl::AddMissingDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray)
+int CKanbanCtrl::AddMissingDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 {
 	if (!UsingDynamicColumns())
 	{
@@ -1590,9 +1590,9 @@ int CKanbanCtrl::AddMissingDynamicListCtrls(const CKanbanItemArrayMap& mapKIArra
 			CString sAttribValueID, sAttribValue;
 			pGlobals->GetNextAssoc(pos, sAttribValueID, sAttribValue);
 			
-			CKanbanColumnCtrl* pList = m_aListCtrls.Get(sAttribValueID);
+			CKanbanColumnCtrl* pCol = m_aColumns.Get(sAttribValueID);
 			
-			if ((pList == NULL) && WantShowColumn(sAttribValueID, mapKIArray))
+			if ((pCol == NULL) && WantShowColumn(sAttribValueID, mapKIArray))
 			{
 				KANBANCOLUMN colDef;
 				
@@ -1601,20 +1601,20 @@ int CKanbanCtrl::AddMissingDynamicListCtrls(const CKanbanItemArrayMap& mapKIArra
 				colDef.aAttribValues.Add(sAttribValue);
 				//colDef.crBackground = KBCOLORS[m_nNextColor++ % NUM_KBCOLORS];
 				
-				VERIFY (AddNewListCtrl(colDef) != NULL);
+				VERIFY (AddNewColumn(colDef) != NULL);
 				nNumAdded++;
 			}
 		}
 
 		ASSERT(!HasOption(KBCF_SHOWEMPTYCOLUMNS) || 
 				(m_nTrackAttribute == IUI_CUSTOMATTRIB) ||
-				(m_aListCtrls.GetSize() == pGlobals->GetCount()));
+				(m_aColumns.GetSize() == pGlobals->GetCount()));
 	}
 
 	return nNumAdded;
 }
 
-void CKanbanCtrl::RebuildDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray)
+void CKanbanCtrl::RebuildDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 {
 	if (!UsingDynamicColumns())
 	{
@@ -1622,17 +1622,17 @@ void CKanbanCtrl::RebuildDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray)
 		return;
 	}
 	
-	BOOL bNeedResize = RemoveOldDynamicListCtrls(mapKIArray);
-	bNeedResize |= AddMissingDynamicListCtrls(mapKIArray);
+	BOOL bNeedResize = RemoveOldDynamicColumns(mapKIArray);
+	bNeedResize |= AddMissingDynamicColumns(mapKIArray);
 
 	// If no columns created, create empty Backlog column
-	bNeedResize |= CheckAddBacklogListCtrl();
+	bNeedResize |= CheckAddBacklogColumn();
 	
 	// (Re)sort
-	m_aListCtrls.Sort();
+	m_aColumns.SortColumns();
 }
 
-void CKanbanCtrl::RebuildFixedListCtrls(const CKanbanItemArrayMap& mapKIArray)
+void CKanbanCtrl::RebuildFixedColumns(const CKanbanItemArrayMap& mapKIArray)
 {
 	if (!UsingFixedColumns())
 	{
@@ -1640,33 +1640,33 @@ void CKanbanCtrl::RebuildFixedListCtrls(const CKanbanItemArrayMap& mapKIArray)
 		return;
 	}
 
-	if (m_aListCtrls.GetSize() == 0) // first time only
+	if (m_aColumns.GetSize() == 0) // first time only
 	{
 		for (int nDef = 0; nDef < m_aColumnDefs.GetSize(); nDef++)
 		{
 			const KANBANCOLUMN& colDef = m_aColumnDefs[nDef];
-			VERIFY(AddNewListCtrl(colDef) != NULL);
+			VERIFY(AddNewColumn(colDef) != NULL);
 		}
 	}
 }
 
-BOOL CKanbanCtrl::CheckAddBacklogListCtrl()
+BOOL CKanbanCtrl::CheckAddBacklogColumn()
 {
-	if (m_aListCtrls.GetSize() == 0) 
+	if (m_aColumns.GetSize() == 0) 
 	{
 		KANBANCOLUMN colDef;
 		
 		colDef.sAttribID = m_sTrackAttribID;
 		colDef.aAttribValues.Add(_T(""));
 		
-		VERIFY (AddNewListCtrl(colDef) != NULL);
+		VERIFY (AddNewColumn(colDef) != NULL);
 		return TRUE;
 	}
 
 	return FALSE;
 }
 
-void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate)
+void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate)
 {
 	if (m_sTrackAttribID.IsEmpty())
 	{
@@ -1682,45 +1682,45 @@ void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData, BOOL bTaskUpdate)
 	m_data.BuildTempItemMaps(m_sTrackAttribID, mapKIArray);
 
 	if (UsingDynamicColumns())
-		RebuildDynamicListCtrls(mapKIArray);
+		RebuildDynamicColumns(mapKIArray);
 	else
-		RebuildFixedListCtrls(mapKIArray);
+		RebuildFixedColumns(mapKIArray);
 
 	// Rebuild the list data for each list (which can be empty)
 	if (bRebuildData)
 	{
-		RebuildListCtrlData(mapKIArray);
+		RebuildColumnsData(mapKIArray);
 	}
 	else if (UsingDynamicColumns())
 	{
 		// If not rebuilding the data (which will remove lists
 		// which are empty as consequence of not showing parent
 		// tasks) we made need to remove such lists.
-		RemoveOldDynamicListCtrls(mapKIArray);
+		RemoveOldDynamicColumns(mapKIArray);
 	}
 
-	RebuildHeaderColumns();
+	RebuildColumnHeader();
 	Resize();
 		
 	// We only need to restore selection if not doing a task update
 	// because the app takes care of that
 	if (!bTaskUpdate && dwSelTaskID && !SelectTask(dwSelTaskID))
 	{
-		if (!m_pSelectedList || !Misc::HasT(m_aListCtrls, m_pSelectedList))
+		if (!m_pSelectedColumn || !Misc::HasT(m_aColumns, m_pSelectedColumn))
 		{
 			// Find the first list with some items
-			m_pSelectedList = m_aListCtrls.GetFirstNonEmpty();
+			m_pSelectedColumn = m_aColumns.GetFirstNonEmpty();
 
 			// No list has items?
-			if (!m_pSelectedList)
-				m_pSelectedList = m_aListCtrls[0];
+			if (!m_pSelectedColumn)
+				m_pSelectedColumn = m_aColumns[0];
 		}
 	}
 }
 
-void CKanbanCtrl::RebuildHeaderColumns()
+void CKanbanCtrl::RebuildColumnHeader()
 {
-	int nNumVisColumns = GetVisibleListCtrlCount();
+	int nNumVisColumns = GetVisibleColumnCount();
 
 	if (!nNumVisColumns)
 		return;
@@ -1746,25 +1746,25 @@ void CKanbanCtrl::RebuildHeaderColumns()
 		}
 	}
 
-	int nNumColumns = m_aListCtrls.GetSize();
+	int nNumColumns = m_aColumns.GetSize();
 
 	for (int nCol = 0, nVis = 0; nCol < nNumColumns; nCol++)
 	{
-		const CKanbanColumnCtrl* pList = m_aListCtrls[nCol];
+		const CKanbanColumnCtrl* pCol = m_aColumns[nCol];
 
-		if (!WantShowColumn(pList))
+		if (!WantShowColumn(pCol))
 			continue;
 
-		CEnString sTitle(pList->ColumnDefinition().sTitle);
+		CEnString sTitle(pCol->ColumnDefinition().sTitle);
 
 		if (sTitle.IsEmpty())
 			sTitle.LoadString(IDS_BACKLOG);
 
 		CString sFormat;
-		sFormat.Format(_T("%s (%d)"), sTitle, pList->GetCount());
+		sFormat.Format(_T("%s (%d)"), sTitle, pCol->GetCount());
 
 		m_header.SetItemText(nVis, sFormat);
-		m_header.SetItemData(nVis, (DWORD)pList);
+		m_header.SetItemData(nVis, (DWORD)pCol);
 		nVis++;
 
 		// Allow tracking on all but the last column
@@ -1772,74 +1772,74 @@ void CKanbanCtrl::RebuildHeaderColumns()
 	}
 }
 
-void CKanbanCtrl::RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray)
+void CKanbanCtrl::RebuildColumnsData(const CKanbanItemArrayMap& mapKIArray)
 {
 	BOOL bShowParents = HasOption(KBCF_SHOWPARENTTASKS);
-	int nList = m_aListCtrls.GetSize();
+	int nCol = m_aColumns.GetSize();
 	
-	while (nList--)
+	while (nCol--)
 	{
-		CKanbanColumnCtrl* pList = m_aListCtrls[nList];
-		ASSERT(pList);
+		CKanbanColumnCtrl* pCol = m_aColumns[nCol];
+		ASSERT(pCol);
 		
-		RebuildListContents(pList, mapKIArray, bShowParents);
+		RebuildColumnContents(pCol, mapKIArray, bShowParents);
 		
 		// The list can still end up empty if parent tasks are 
 		// omitted in Dynamic columns so we recheck and delete if required
 		if (UsingDynamicColumns())
 		{
-			if (!bShowParents && !WantShowColumn(pList))
+			if (!bShowParents && !WantShowColumn(pCol))
 			{
-				DeleteListCtrl(nList);
+				DeleteColumn(nCol);
 			}
 		}
 	}
 		
-	// Lists can still end up empty if there were 
+	// Columns can still end up empty if there were 
 	// only unwanted parents
-	CheckAddBacklogListCtrl();
+	CheckAddBacklogColumn();
 
 	// Resort
 	Sort(m_nSortBy, m_bSortAscending);
 }
 
-void CKanbanCtrl::FixupSelectedList()
+void CKanbanCtrl::FixupSelectedColumn()
 {
-	ASSERT(m_aListCtrls.GetSize());
+	ASSERT(m_aColumns.GetSize());
 
 	// Make sure selected list is valid
-	if (!m_pSelectedList || !Misc::HasT(m_aListCtrls, m_pSelectedList))
+	if (!m_pSelectedColumn || !Misc::HasT(m_aColumns, m_pSelectedColumn))
 	{
 		// Find the first list with some items
-		m_pSelectedList = m_aListCtrls.GetFirstNonEmpty();
+		m_pSelectedColumn = m_aColumns.GetFirstNonEmpty();
 
 		// No list has items?
-		if (!m_pSelectedList)
-			m_pSelectedList = m_aListCtrls[0];
+		if (!m_pSelectedColumn)
+			m_pSelectedColumn = m_aColumns[0];
 	}
 
-	FixupListFocus();
+	FixupColumnFocus();
 }
 
-void CKanbanCtrl::FixupListFocus()
+void CKanbanCtrl::FixupColumnFocus()
 {
 	const CWnd* pFocus = GetFocus();
 
-	if (IsWindowVisible() && HasFocus() && m_pSelectedList && (pFocus != m_pSelectedList))
+	if (IsWindowVisible() && HasFocus() && m_pSelectedColumn && (pFocus != m_pSelectedColumn))
 	{
 		{
-			CAutoFlag af(m_bSettingListFocus, TRUE);
+			CAutoFlag af(m_bSettingColumnFocus, TRUE);
 
-			m_pSelectedList->SetFocus();
-			m_pSelectedList->Invalidate(TRUE);
+			m_pSelectedColumn->SetFocus();
+			m_pSelectedColumn->Invalidate(TRUE);
 		}
 
 		if (pFocus)
 		{
-			CKanbanColumnCtrl* pOtherList = m_aListCtrls.Get(*pFocus);
+			CKanbanColumnCtrl* pOtherCol = m_aColumns.Get(*pFocus);
 
-			if (pOtherList)
-				pOtherList->ClearSelection();
+			if (pOtherCol)
+				pOtherCol->ClearSelection();
 		}
 	}
 }
@@ -1896,19 +1896,19 @@ BOOL CKanbanCtrl::TrackAttribute(IUI_ATTRIBUTE nAttrib, const CString& sCustomAt
 			else if (m_aColumnDefs.MatchesAll(aColumnDefs, FALSE))
 			{
 				int nCol = aColumnDefs.GetSize();
-				ASSERT(nCol == m_aListCtrls.GetSize());
+				ASSERT(nCol == m_aColumns.GetSize());
 
 				while (nCol--)
 				{
 					const KANBANCOLUMN& colDef = aColumnDefs[nCol];
-					CKanbanColumnCtrl* pList = m_aListCtrls[nCol];
-					ASSERT(pList);
+					CKanbanColumnCtrl* pCol = m_aColumns[nCol];
+					ASSERT(pCol);
 
-					if (pList)
+					if (pCol)
 					{
-						pList->SetBackgroundColor(colDef.crBackground);
-						//pList->SetExcessColor(colDef.crExcess);
-						//pList->SetMaximumTaskCount(colDef.nMaxTaskCount);
+						pCol->SetBackgroundColor(colDef.crBackground);
+						//pCol->SetExcessColor(colDef.crExcess);
+						//pCol->SetMaximumTaskCount(colDef.nMaxTaskCount);
 					}
 				}
 				return TRUE;
@@ -1946,52 +1946,52 @@ BOOL CKanbanCtrl::TrackAttribute(IUI_ATTRIBUTE nAttrib, const CString& sCustomAt
 	// delete all lists and start over
 	CHoldRedraw gr(*this, NCR_PAINT | NCR_ERASEBKGND);
 
-	m_pSelectedList = NULL;
-	m_aListCtrls.RemoveAll();
+	m_pSelectedColumn = NULL;
+	m_aColumns.RemoveAll();
 
-	RebuildListCtrls(TRUE, TRUE);
+	RebuildColumns(TRUE, TRUE);
 	Resize();
 
 	return TRUE;
 }
 
-CKanbanColumnCtrl* CKanbanCtrl::AddNewListCtrl(const KANBANCOLUMN& colDef)
+CKanbanColumnCtrl* CKanbanCtrl::AddNewColumn(const KANBANCOLUMN& colDef)
 {
-	CKanbanColumnCtrl* pList = new CKanbanColumnCtrl(m_data, colDef, m_fonts, m_aPriorityColors, m_aDisplayAttrib);
-	ASSERT(pList);
+	CKanbanColumnCtrl* pCol = new CKanbanColumnCtrl(m_data, colDef, m_fonts, m_aPriorityColors, m_aDisplayAttrib);
+	ASSERT(pCol);
 
-	if (pList)
+	if (pCol)
 	{
-		pList->SetOptions(m_dwOptions);
+		pCol->SetOptions(m_dwOptions);
 
-		if (pList->Create(IDC_LISTCTRL, this))
+		if (pCol->Create(IDC_COLUMNCTRL, this))
 		{
-			m_aListCtrls.Add(pList);
+			m_aColumns.Add(pCol);
 		}
 		else
 		{
-			delete pList;
-			pList = NULL;
+			delete pCol;
+			pCol = NULL;
 		}
 	}
 	
-	return pList;
+	return pCol;
 }
 
-BOOL CKanbanCtrl::RebuildListContents(CKanbanColumnCtrl* pList, const CKanbanItemArrayMap& mapKIArray, BOOL bShowParents)
+BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanItemArrayMap& mapKIArray, BOOL bShowParents)
 {
-	ASSERT(pList && pList->GetSafeHwnd());
+	ASSERT(pCol && pCol->GetSafeHwnd());
 
-	if (!pList || !pList->GetSafeHwnd())
+	if (!pCol || !pCol->GetSafeHwnd())
 		return FALSE;
 
-	DWORD dwSelID = pList->GetSelectedTaskID();
+	DWORD dwSelID = pCol->GetSelectedTaskID();
 
-	pList->SetRedraw(FALSE);
-	pList->DeleteAllItems();
+	pCol->SetRedraw(FALSE);
+	pCol->DeleteAllItems();
 
 	CStringArray aValueIDs;
-	int nNumVals = pList->GetAttributeValueIDs(aValueIDs);
+	int nNumVals = pCol->GetAttributeValueIDs(aValueIDs);
 
 	for (int nVal = 0; nVal < nNumVals; nVal++)
 	{
@@ -2010,14 +2010,14 @@ BOOL CKanbanCtrl::RebuildListContents(CKanbanColumnCtrl* pList, const CKanbanIte
 				{
 					BOOL bSelected = (dwSelID == pKI->dwTaskID);
 
-					VERIFY(pList->AddTask(*pKI, bSelected) != NULL);
+					VERIFY(pCol->AddTask(*pKI, bSelected) != NULL);
 				}
 			}
 		}
 	}
 	
-	pList->RefreshItemLineHeights();
-	pList->SetRedraw(TRUE);
+	pCol->RefreshItemLineHeights();
+	pCol->SetRedraw(TRUE);
 
 	return TRUE;
 }
@@ -2051,7 +2051,7 @@ void CKanbanCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 	CDWordSet mapIDs;
 	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(NULL), mapIDs, TRUE);
 
-	m_aListCtrls.RemoveDeletedTasks(mapIDs);
+	m_aColumns.RemoveDeletedTasks(mapIDs);
 	m_data.RemoveDeletedItems(mapIDs);
 }
 
@@ -2068,33 +2068,33 @@ BOOL CKanbanCtrl::HasKanbanItem(DWORD dwTaskID) const
 CKanbanColumnCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL bForward) const
 {
 	// First try selected list
-	if (m_pSelectedList)
+	if (m_pSelectedColumn)
 	{
-		hti = m_pSelectedList->FindTask(dwTaskID);
+		hti = m_pSelectedColumn->FindTask(dwTaskID);
 
 		if (hti)
-			return m_pSelectedList;
+			return m_pSelectedColumn;
 	}
 
 	// try any other list in the specified direction
-	const CKanbanColumnCtrl* pList = GetNextListCtrl(m_pSelectedList, bForward, TRUE);
+	const CKanbanColumnCtrl* pCol = GetNextColumn(m_pSelectedColumn, bForward, TRUE);
 
-	if (!pList)
+	if (!pCol)
 		return NULL;
 
-	const CKanbanColumnCtrl* pStartList = pList;
+	const CKanbanColumnCtrl* pStartCol = pCol;
 
 	do
 	{
-		hti = pList->FindTask(dwTaskID);
+		hti = pCol->FindTask(dwTaskID);
 
 		if (hti)
-			return const_cast<CKanbanColumnCtrl*>(pList);
+			return const_cast<CKanbanColumnCtrl*>(pCol);
 
 		// else
-		pList = GetNextListCtrl(pList, bForward, TRUE);
+		pCol = GetNextColumn(pCol, bForward, TRUE);
 	}
-	while (pList != pStartList);
+	while (pCol != pStartCol);
 
 	return NULL;
 }
@@ -2104,7 +2104,7 @@ void CKanbanCtrl::SetDisplayAttributes(const CKanbanAttributeArray& aAttrib)
 	if (!Misc::MatchAllT(m_aDisplayAttrib, aAttrib, FALSE))
 	{
 		m_aDisplayAttrib.Copy(aAttrib);
-		m_aListCtrls.OnDisplayAttributeChanged();
+		m_aColumns.OnDisplayAttributeChanged();
 
 		// Update list attribute label visibility
 		if (m_aDisplayAttrib.GetSize())
@@ -2124,16 +2124,21 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 	{
 		if (Misc::FlagHasChanged(KBCF_SHOWPARENTTASKS, m_dwOptions, dwOptions))
 		{
-			RebuildListCtrls(TRUE, FALSE);
+			RebuildColumns(TRUE, FALSE);
 		}
 		else if (Misc::FlagHasChanged(KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG, m_dwOptions, dwOptions))
 		{
-			RebuildListCtrls(FALSE, FALSE);
+			RebuildColumns(FALSE, FALSE);
+		}
+
+		m_aColumns.SetOptions(dwOptions & ~(KBCF_SHOWPARENTTASKS | KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG));
+
+		if ((m_nSortBy != IUI_NONE) && Misc::FlagHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwOptions))
+		{
+			m_aColumns.SortItems(m_nSortBy, m_bSortAscending);
 		}
 
 		m_dwOptions = dwOptions;
-
-		m_aListCtrls.SetOptions(dwOptions & ~(KBCF_SHOWPARENTTASKS | KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG));
 	}
 }
 
@@ -2146,12 +2151,12 @@ void CKanbanCtrl::OnSize(UINT nType, int cx, int cy)
 
 BOOL CKanbanCtrl::OnEraseBkgnd(CDC* pDC)
 {
-	if (m_aListCtrls.GetSize())
+	if (m_aColumns.GetSize())
 	{
 		CDialogHelper::ExcludeChild(&m_header, pDC);
 
 		// Clip out the list controls
-		m_aListCtrls.Exclude(pDC);
+		m_aColumns.Exclude(pDC);
 		
 		// fill the client with gray to create borders and dividers
 		CRect rClient;
@@ -2167,27 +2172,27 @@ void CKanbanCtrl::OnSetFocus(CWnd* pOldWnd)
 {
 	CWnd::OnSetFocus(pOldWnd);
 
-	FixupListFocus();
+	FixupColumnFocus();
 	ScrollToSelectedTask();
 }
 
-int CKanbanCtrl::GetVisibleListCtrlCount() const
+int CKanbanCtrl::GetVisibleColumnCount() const
 {
 	if (UsingDynamicColumns() || HasOption(KBCF_SHOWEMPTYCOLUMNS))
-		return m_aListCtrls.GetSize();
+		return m_aColumns.GetSize();
 
 	// Fixed columns
 	BOOL bAlwaysShowBacklog = HasOption(KBCF_ALWAYSSHOWBACKLOG);
-	int nList = m_aListCtrls.GetSize(), nNumVis = 0;
+	int nCol = m_aColumns.GetSize(), nNumVis = 0;
 
-	while (nList--)
+	while (nCol--)
 	{
-		const CKanbanColumnCtrl* pList = m_aListCtrls[nList];
-		ASSERT(pList);
+		const CKanbanColumnCtrl* pCol = m_aColumns[nCol];
+		ASSERT(pCol);
 
-		if (!pList->GetCount())
+		if (!pCol->GetCount())
 		{
-			if (!bAlwaysShowBacklog || !pList->IsBacklog())
+			if (!bAlwaysShowBacklog || !pCol->IsBacklog())
 				continue;
 		}
 
@@ -2199,11 +2204,11 @@ int CKanbanCtrl::GetVisibleListCtrlCount() const
 
 void CKanbanCtrl::Resize(int cx, int cy)
 {
-	int nNumVisibleLists = GetVisibleListCtrlCount();
+	int nNumVisibleCols = GetVisibleColumnCount();
 
-	if (nNumVisibleLists)
+	if (nNumVisibleCols)
 	{
-		CDeferWndMove dwm(nNumVisibleLists + 1);
+		CDeferWndMove dwm(nNumVisibleCols + 1);
 		CRect rAvail(0, 0, cx, cy);
 
 		if (rAvail.IsRectEmpty())
@@ -2214,44 +2219,44 @@ void CKanbanCtrl::Resize(int cx, int cy)
 
 		ResizeHeader(dwm, rAvail);
 		
-		CRect rList(rAvail);
+		CRect rCol(rAvail);
 		CWnd* pPrev = NULL;
-		int nNumLists = m_aListCtrls.GetSize();
+		int nNumCols = m_aColumns.GetSize();
 
-		for (int nList = 0, nVis = 0; nList < nNumLists; nList++)
+		for (int nCol = 0, nVis = 0; nCol < nNumCols; nCol++)
 		{
-			CKanbanColumnCtrl* pList = m_aListCtrls[nList];
-			ASSERT(pList && pList->GetSafeHwnd());
+			CKanbanColumnCtrl* pCol = m_aColumns[nCol];
+			ASSERT(pCol && pCol->GetSafeHwnd());
 			
 			// If we find an empty column, it can only be with 
 			// Fixed columns because we only hide columns rather
 			// than delete them
 			if (UsingFixedColumns())
 			{
-				if (!WantShowColumn(pList))
+				if (!WantShowColumn(pCol))
 				{
-					pList->ShowWindow(SW_HIDE);
-					pList->EnableWindow(FALSE);
+					pCol->ShowWindow(SW_HIDE);
+					pCol->EnableWindow(FALSE);
 					continue;
 				}
 
 				// else
-				pList->ShowWindow(SW_SHOW);
-				pList->EnableWindow(TRUE);
+				pCol->ShowWindow(SW_SHOW);
+				pCol->EnableWindow(TRUE);
 			}
 
-			rList.right = (rList.left + m_header.GetItemWidth(nVis));
-			dwm.MoveWindow(pList, rList.left, rList.top, rList.Width() - 1, rList.Height(), FALSE);
+			rCol.right = (rCol.left + m_header.GetItemWidth(nVis));
+			dwm.MoveWindow(pCol, rCol.left, rCol.top, rCol.Width() - 1, rCol.Height(), FALSE);
 
 			// Also update tab order as we go
-			pList->SetWindowPos(pPrev, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOACTIVATE);
+			pCol->SetWindowPos(pPrev, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOACTIVATE);
 
 			// Check whether the lists are wide enough to show attribute labels
-			KBC_ATTRIBLABELS nLabelVis = GetListAttributeLabelVisibility(nList, rList.Width());
-			pList->SetAttributeLabelVisibility(nLabelVis);
+			KBC_ATTRIBLABELS nLabelVis = GetColumnAttributeLabelVisibility(nCol, rCol.Width());
+			pCol->SetAttributeLabelVisibility(nLabelVis);
 
-			pPrev = pList;
-			rList.left = rList.right;
+			pPrev = pCol;
+			rCol.left = rCol.right;
 			nVis++;
 		}
 	}
@@ -2264,7 +2269,7 @@ void CKanbanCtrl::ResizeHeader(CDeferWndMove& dwm, CRect& rAvail)
 	ASSERT(m_header.GetSafeHwnd());
 
 	int nNumCols = m_header.GetItemCount();
-	ASSERT(nNumCols == GetVisibleListCtrlCount());
+	ASSERT(nNumCols == GetVisibleColumnCount());
 
 	CRect rNewHeader(rAvail);
 	rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT);
@@ -2293,9 +2298,9 @@ void CKanbanCtrl::ResizeHeader(CDeferWndMove& dwm, CRect& rAvail)
 	rAvail.top = rNewHeader.bottom;
 }
 
-float CKanbanCtrl::GetAverageListCharWidth()
+float CKanbanCtrl::GetAverageColumnCharWidth()
 {
-	return m_aListCtrls.GetAverageCharWidth();
+	return m_aColumns.GetAverageCharWidth();
 }
 
 BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KBC_ATTRIBLABELS nLabelVis) const
@@ -2370,17 +2375,17 @@ BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KB
 	return FALSE;
 }
 
-KBC_ATTRIBLABELS CKanbanCtrl::GetListAttributeLabelVisibility(int nList, int nListWidth)
+KBC_ATTRIBLABELS CKanbanCtrl::GetColumnAttributeLabelVisibility(int nCol, int nColWidth)
 {
-	if (!m_aDisplayAttrib.GetSize() || !m_aListCtrls.GetSize())
+	if (!m_aDisplayAttrib.GetSize() || !m_aColumns.GetSize())
 		return KBCAL_NONE;
 
 	// Calculate the available width for attributes
-	int nAvailWidth = m_aListCtrls[nList]->CalcAvailableAttributeWidth(nListWidth);
+	int nAvailWidth = m_aColumns[nCol]->CalcAvailableAttributeWidth(nColWidth);
 
 	// Calculate the fixed attribute label lengths and check if any
 	// of them exceed the list width
-	float fAveCharWidth = GetAverageListCharWidth();
+	float fAveCharWidth = GetAverageColumnCharWidth();
 	KBC_ATTRIBLABELS nLabelVis[2] = { KBCAL_LONG, KBCAL_SHORT };
 
 	for (int nPass = 0; nPass < 2; nPass++)
@@ -2410,7 +2415,7 @@ void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
 		// do the sort
  		CHoldRedraw hr(*this);
 
-		m_aListCtrls.SortItems(m_nSortBy, m_bSortAscending);
+		m_aColumns.SortItems(m_nSortBy, m_bSortAscending);
 	}
 }
 
@@ -2421,14 +2426,14 @@ void CKanbanCtrl::SetReadOnly(bool bReadOnly)
 
 BOOL CKanbanCtrl::GetLabelEditRect(LPRECT pEdit)
 {
-	if (!m_pSelectedList || !m_pSelectedList->GetLabelEditRect(pEdit))
+	if (!m_pSelectedColumn || !m_pSelectedColumn->GetLabelEditRect(pEdit))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
 	// else convert from list to 'our' coords
-	m_pSelectedList->ClientToScreen(pEdit);
+	m_pSelectedColumn->ClientToScreen(pEdit);
 	ScreenToClient(pEdit);
 
 	return TRUE;
@@ -2442,16 +2447,16 @@ void CKanbanCtrl::SetPriorityColors(const CDWordArray& aColors)
 
 		// Redraw the lists if coloring by priority
 		if (GetSafeHwnd() && HasOption(KBCF_COLORBARBYPRIORITY))
-			m_aListCtrls.Redraw(FALSE);
+			m_aColumns.Redraw(FALSE);
 	}
 }
 
 void CKanbanCtrl::ScrollToSelectedTask()
 {
-	CKanbanColumnCtrl* pList = GetSelListCtrl();
+	CKanbanColumnCtrl* pCol = GetSelColumn();
 
-	if (pList)
-		pList->ScrollToSelection();
+	if (pCol)
+		pCol->ScrollToSelection();
 }
 
 bool CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
@@ -2467,13 +2472,13 @@ bool CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
 	HTASKITEM hNewTask = pTasks->GetFirstTask();
 	ASSERT(hNewTask);
 
-	const CKanbanColumnCtrl* pList = GetSelListCtrl();
+	const CKanbanColumnCtrl* pCol = GetSelColumn();
 	CString sValue;
 
-	CRect rListCtrl;
-	pList->GetWindowRect(rListCtrl);
+	CRect rColCtrl;
+	pCol->GetWindowRect(rColCtrl);
 
-	if (!GetListCtrlAttributeValue(pList, rListCtrl.CenterPoint(), sValue))
+	if (!GetColumnAttributeValue(pCol, rColCtrl.CenterPoint(), sValue))
 		return false;
 
 	switch (m_nTrackAttribute)
@@ -2521,7 +2526,7 @@ bool CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
 
 DWORD CKanbanCtrl::HitTestTask(const CPoint& ptScreen) const
 {
-	return m_aListCtrls.HitTestTask(ptScreen);
+	return m_aColumns.HitTestTask(ptScreen);
 }
 
 DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
@@ -2529,9 +2534,9 @@ DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	BOOL bForward = ((nCmd == IUI_GETPREVTASK) || (nCmd == IUI_GETPREVTOPLEVELTASK));
 
 	HTREEITEM hti = NULL;
-	const CKanbanColumnCtrl* pList = LocateTask(dwTaskID, hti, bForward);
+	const CKanbanColumnCtrl* pCol = LocateTask(dwTaskID, hti, bForward);
 	
-	if (!pList || (UsingFixedColumns() && !pList->IsWindowVisible()))
+	if (!pCol || (UsingFixedColumns() && !pCol->IsWindowVisible()))
 	{
 		return 0L;
 	}
@@ -2544,42 +2549,42 @@ DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	switch (nCmd)
 	{
 	case IUI_GETNEXTTASK:
-		hti = pList->GetNextSiblingItem(hti);
+		hti = pCol->GetNextSiblingItem(hti);
 		break;
 
 	case IUI_GETPREVTASK:
-		hti = pList->GetPrevSiblingItem(hti);
+		hti = pCol->GetPrevSiblingItem(hti);
 		break;
 
 	case IUI_GETNEXTTOPLEVELTASK:
-		pList = GetNextListCtrl(pList, TRUE, TRUE);
+		pCol = GetNextColumn(pCol, TRUE, TRUE);
 			
-		if (pList)
-			hti = pList->TCH().GetFirstItem();
+		if (pCol)
+			hti = pCol->TCH().GetFirstItem();
 		break;
 
 	case IUI_GETPREVTOPLEVELTASK:
-		pList = GetNextListCtrl(pList, FALSE, TRUE);
+		pCol = GetNextColumn(pCol, FALSE, TRUE);
 			
-		if (pList)
-			hti = pList->TCH().GetFirstItem();
+		if (pCol)
+			hti = pCol->TCH().GetFirstItem();
 		break;
 
 	default:
 		ASSERT(0);
 	}
 
-	return (hti ? pList->GetTaskID(hti) : 0);
+	return (hti ? pCol->GetTaskID(hti) : 0);
 }
 
-const CKanbanColumnCtrl* CKanbanCtrl::GetNextListCtrl(const CKanbanColumnCtrl* pList, BOOL bNext, BOOL bExcludeEmpty) const
+const CKanbanColumnCtrl* CKanbanCtrl::GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty) const
 {
-	return m_aListCtrls.GetNext(pList, bNext, bExcludeEmpty, UsingFixedColumns());
+	return m_aColumns.GetNext(pCol, bNext, bExcludeEmpty, UsingFixedColumns());
 }
 
-CKanbanColumnCtrl* CKanbanCtrl::GetNextListCtrl(const CKanbanColumnCtrl* pList, BOOL bNext, BOOL bExcludeEmpty)
+CKanbanColumnCtrl* CKanbanCtrl::GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty)
 {
-	return m_aListCtrls.GetNext(pList, bNext, bExcludeEmpty, UsingFixedColumns());
+	return m_aColumns.GetNext(pCol, bNext, bExcludeEmpty, UsingFixedColumns());
 }
 
 BOOL CKanbanCtrl::IsDragging() const
@@ -2608,7 +2613,7 @@ BOOL CKanbanCtrl::CancelOperation()
 	if (IsDragging())
 	{
 		ReleaseCapture();
-		m_aListCtrls.SetDropTarget(NULL);
+		m_aColumns.SetDropTarget(NULL);
 
 		return TRUE;
 	}
@@ -2617,36 +2622,36 @@ BOOL CKanbanCtrl::CancelOperation()
 	return FALSE;
 }
 
-BOOL CKanbanCtrl::SelectListCtrl(CKanbanColumnCtrl* pList, BOOL bNotifyParent)
+BOOL CKanbanCtrl::SelectColumn(CKanbanColumnCtrl* pCol, BOOL bNotifyParent)
 {
-	if (pList)
+	if (pCol)
 	{
-		if (pList == m_pSelectedList)
+		if (pCol == m_pSelectedColumn)
 		{
 			// Make sure header is refreshed
-			m_aListCtrls.SetSelectedList(m_pSelectedList);
+			m_aColumns.SetSelectedColumn(m_pSelectedColumn);
 			return TRUE;
 		}
 
-		CKanbanColumnCtrl* pPrevSelList = m_pSelectedList;
-		m_pSelectedList = pList;
+		CKanbanColumnCtrl* pPrevSelCol = m_pSelectedColumn;
+		m_pSelectedColumn = pCol;
 
-		FixupListFocus();
+		FixupColumnFocus();
 
-		if (pList->GetCount() > 0)
+		if (pCol->GetCount() > 0)
 		{
-			m_aListCtrls.SetSelectedList(m_pSelectedList);
+			m_aColumns.SetSelectedColumn(m_pSelectedColumn);
 
-			if (m_pSelectedList->GetSelectedItem())
-				m_pSelectedList->ScrollToSelection();
+			if (m_pSelectedColumn->GetSelectedItem())
+				m_pSelectedColumn->ScrollToSelection();
 
 			if (bNotifyParent)
 				NotifyParentSelectionChange();
 		}
 		else
 		{
-			pPrevSelList->SetSelected(FALSE);
-			m_pSelectedList->SetSelected(TRUE);
+			pPrevSelCol->SetSelected(FALSE);
+			m_pSelectedColumn->SetSelected(TRUE);
 		}
 
 		m_header.Invalidate(TRUE);
@@ -2657,26 +2662,26 @@ BOOL CKanbanCtrl::SelectListCtrl(CKanbanColumnCtrl* pList, BOOL bNotifyParent)
 	return FALSE;
 }
 
-BOOL CKanbanCtrl::IsSelectedListCtrl(HWND hWnd) const
+BOOL CKanbanCtrl::IsSelectedColumn(HWND hWnd) const
 {
-	return (m_pSelectedList && (m_pSelectedList->GetSafeHwnd() == hWnd));
+	return (m_pSelectedColumn && (m_pSelectedColumn->GetSafeHwnd() == hWnd));
 }
 
-void CKanbanCtrl::OnListItemSelChange(NMHDR* pNMHDR, LRESULT* pResult)
+void CKanbanCtrl::OnColumnItemSelChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// only interested in selection changes caused by the user
 	LPNMTREEVIEW pNMTV = (LPNMTREEVIEW)pNMHDR;
 	UINT nAction = pNMTV->action;
 
-	if (!m_bSettingListFocus && !m_bSelectTasks && !IsDragging() &&
+	if (!m_bSettingColumnFocus && !m_bSelectTasks && !IsDragging() &&
 		(nAction & (TVC_BYMOUSE | TVC_BYKEYBOARD)))
 	{
-		CKanbanColumnCtrl* pList = m_aListCtrls.Get(pNMHDR->hwndFrom);
+		CKanbanColumnCtrl* pCol = m_aColumns.Get(pNMHDR->hwndFrom);
 
-		if (pList && (pList != m_pSelectedList))
+		if (pCol && (pCol != m_pSelectedColumn))
 		{
 			CAutoFlag af(m_bSelectTasks, TRUE);
-			SelectListCtrl(pList, FALSE);
+			SelectColumn(pCol, FALSE);
 		}
 
 		NotifyParentSelectionChange();
@@ -2689,7 +2694,7 @@ void CKanbanCtrl::OnListItemSelChange(NMHDR* pNMHDR, LRESULT* pResult)
 #endif
 }
 
-void CKanbanCtrl::OnListEditLabel(NMHDR* pNMHDR, LRESULT* pResult)
+void CKanbanCtrl::OnColumnEditLabel(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	*pResult = TRUE; // cancel our edit
 
@@ -2724,23 +2729,23 @@ void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
 		m_header.SetItemWidth(pHDN->iItem + 1, nNextWidth);
 		
 		// Resize corresponding listctrls
-		CKanbanColumnCtrl* pThisList = m_aListCtrls[pHDN->iItem];
-		CKanbanColumnCtrl* pNextList = m_aListCtrls[pHDN->iItem + 1];
+		CKanbanColumnCtrl* pThisCol = m_aColumns[pHDN->iItem];
+		CKanbanColumnCtrl* pNextCol = m_aColumns[pHDN->iItem + 1];
 
-		CRect rThisList = CDialogHelper::GetChildRect(pThisList);
-		rThisList.right = (rThisList.left + pHDN->pitem->cxy - 1);
+		CRect rThisCol = CDialogHelper::GetChildRect(pThisCol);
+		rThisCol.right = (rThisCol.left + pHDN->pitem->cxy - 1);
 
-		CRect rNextList = CDialogHelper::GetChildRect(m_aListCtrls[pHDN->iItem + 1]);
-		rNextList.left = (rThisList.right + 1);
+		CRect rNextCol = CDialogHelper::GetChildRect(m_aColumns[pHDN->iItem + 1]);
+		rNextCol.left = (rThisCol.right + 1);
 
-		pThisList->MoveWindow(rThisList, FALSE);
-		pNextList->MoveWindow(rNextList, FALSE);
+		pThisCol->MoveWindow(rThisCol, FALSE);
+		pNextCol->MoveWindow(rNextCol, FALSE);
 
-		pThisList->Invalidate(FALSE);
-		pNextList->Invalidate(FALSE);
+		pThisCol->Invalidate(FALSE);
+		pNextCol->Invalidate(FALSE);
 
 		// Redraw the vertical divider
-		CRect rDivider(rThisList);
+		CRect rDivider(rThisCol);
 		rDivider.left = rDivider.right;
 		rDivider.right++;
 
@@ -2768,10 +2773,10 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		{
 			*pResult = CDRF_NOTIFYPOSTPAINT;
 		}
-		else if (!m_bSavingToImage && m_pSelectedList)
+		else if (!m_bSavingToImage && m_pSelectedColumn)
 		{
 			// Show the text of the selected column in bold
-			if (pNMCD->lItemlParam == (LPARAM)m_pSelectedList)
+			if (pNMCD->lItemlParam == (LPARAM)m_pSelectedColumn)
 				::SelectObject(pNMCD->hdc, m_fonts.GetHFont(GMFS_BOLD));
 			else
 				::SelectObject(pNMCD->hdc, m_fonts.GetHFont());
@@ -2795,7 +2800,7 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 			if (!m_bSavingToImage)
 			{
-				if (pNMCD->lItemlParam == (LPARAM)m_pSelectedList)
+				if (pNMCD->lItemlParam == (LPARAM)m_pSelectedColumn)
 					hPrev = pDC->SelectObject(m_fonts.GetHFont(GMFS_BOLD));
 				else
 					hPrev = pDC->SelectObject(m_fonts.GetHFont());
@@ -2813,22 +2818,22 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 }
 
-void CKanbanCtrl::OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult)
+void CKanbanCtrl::OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	ReleaseCapture();
 
 	if (!m_bReadOnly && !IsDragging())
 	{
-		ASSERT(pNMHDR->idFrom == IDC_LISTCTRL);
+		ASSERT(pNMHDR->idFrom == IDC_COLUMNCTRL);
 
 		if (Misc::IsKeyPressed(VK_LBUTTON))
 		{
 			NMTREEVIEW* pNMTV = (NMTREEVIEW*)pNMHDR;
 			ASSERT(pNMTV->itemNew.hItem);
 		
-			CKanbanColumnCtrl* pList = (CKanbanColumnCtrl*)CWnd::FromHandle(pNMHDR->hwndFrom);
+			CKanbanColumnCtrl* pCol = (CKanbanColumnCtrl*)CWnd::FromHandle(pNMHDR->hwndFrom);
 
-			if (!pList->SelectionHasLockedTasks())
+			if (!pCol->SelectionHasLockedTasks())
 			{
 				DWORD dwDragID = pNMTV->itemNew.lParam;
 
@@ -2837,22 +2842,22 @@ void CKanbanCtrl::OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult)
 					// If the 'drag-from' list is not currently selected
 					// we select it and then reset the selection to the
 					// items we have just copied
-					if (pList != m_pSelectedList)
+					if (pCol != m_pSelectedColumn)
 					{
-						VERIFY(pList->SelectTask(dwDragID));
-						SelectListCtrl(pList);
+						VERIFY(pCol->SelectTask(dwDragID));
+						SelectColumn(pCol);
 
 					}
 
 					SetCapture();
-					TRACE(_T("CKanbanCtrlEx::OnBeginDragListItem(start drag)\n"));
+					TRACE(_T("CKanbanCtrlEx::OnBeginDragColItem(start drag)\n"));
 				}
 			}
 		}
 		else
 		{
 			// Mouse button already released
-			TRACE(_T("CKanbanCtrlEx::OnBeginDragListItem(cancel drag)\n"));
+			TRACE(_T("CKanbanCtrlEx::OnBeginDragColItem(cancel drag)\n"));
 		}
 	}
 	
@@ -2882,26 +2887,26 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 		// get the list under the mouse
 		ClientToScreen(&point);
 
-		CKanbanColumnCtrl* pDestList = m_aListCtrls.HitTest(point);
-		CKanbanColumnCtrl* pSrcList = m_pSelectedList;
+		CKanbanColumnCtrl* pDestCol = m_aColumns.HitTest(point);
+		CKanbanColumnCtrl* pSrcCol = m_pSelectedColumn;
 
-		if (CanDrag(pSrcList, pDestList))
+		if (CanDrag(pSrcCol, pDestCol))
 		{
 			CString sDestAttribValue;
 			
-			if (GetListCtrlAttributeValue(pDestList, point, sDestAttribValue))
+			if (GetColumnAttributeValue(pDestCol, point, sDestAttribValue))
 			{
-				DWORD dwDragID = pSrcList->GetSelectedTaskID();
+				DWORD dwDragID = pSrcCol->GetSelectedTaskID();
 				ASSERT(dwDragID);
 
-				BOOL bChange = EndDragItem(pSrcList, dwDragID, pDestList, sDestAttribValue);
+				BOOL bChange = EndDragItem(pSrcCol, dwDragID, pDestCol, sDestAttribValue);
 
-				if (!WantShowColumn(pSrcList) && UsingDynamicColumns())
+				if (!WantShowColumn(pSrcCol) && UsingDynamicColumns())
 				{
-					int nList = Misc::FindT(m_aListCtrls, pSrcList);
-					ASSERT(nList != -1);
+					int nCol = Misc::FindT(m_aColumns, pSrcCol);
+					ASSERT(nCol != -1);
 
-					m_aListCtrls.RemoveAt(nList);
+					m_aColumns.RemoveAt(nCol);
 				}
 
 				Resize();
@@ -2910,9 +2915,9 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 				{
 					// Resort before fixing up selection
 					if ((m_nSortBy != IUI_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
-						pDestList->Sort(m_nSortBy, m_bSortAscending);
+						pDestCol->Sort(m_nSortBy, m_bSortAscending);
 
-					SelectListCtrl(pDestList, FALSE);
+					SelectColumn(pDestCol, FALSE);
 					SelectTask(dwDragID); 
 
 					NotifyParentSelectionChange();
@@ -2922,27 +2927,27 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 		}
 
 		// always
-		m_aListCtrls.SetDropTarget(NULL);
+		m_aColumns.SetDropTarget(NULL);
 		ReleaseCapture();
 	}
 
 	CWnd::OnLButtonUp(nFlags, point);
 }
 
-BOOL CKanbanCtrl::CanDrag(const CKanbanColumnCtrl* pSrcList, const CKanbanColumnCtrl* pDestList) const
+BOOL CKanbanCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol) const
 {
 	// Can only copy MULTI-VALUE attributes
 	if (Misc::ModKeysArePressed(MKS_CTRL) && !IsTrackedAttributeMultiValue())
 		return FALSE;
 
-	return CKanbanColumnCtrl::CanDrag(pSrcList, pDestList);
+	return CKanbanColumnCtrl::CanDrag(pSrcCol, pDestCol);
 }
 
-BOOL CKanbanCtrl::EndDragItem(CKanbanColumnCtrl* pSrcList, DWORD dwTaskID, 
-								CKanbanColumnCtrl* pDestList, const CString& sDestAttribValue)
+BOOL CKanbanCtrl::EndDragItem(CKanbanColumnCtrl* pSrcCol, DWORD dwTaskID, 
+								CKanbanColumnCtrl* pDestCol, const CString& sDestAttribValue)
 {
-	ASSERT(CanDrag(pSrcList, pDestList));
-	ASSERT(pSrcList->FindTask(dwTaskID) != NULL);
+	ASSERT(CanDrag(pSrcCol, pDestCol));
+	ASSERT(pSrcCol->FindTask(dwTaskID) != NULL);
 
 	KANBANITEM* pKI = GetKanbanItem(dwTaskID);
 
@@ -2952,8 +2957,8 @@ BOOL CKanbanCtrl::EndDragItem(CKanbanColumnCtrl* pSrcList, DWORD dwTaskID,
 		return FALSE;
 	}
 
-	BOOL bSrcIsBacklog = pSrcList->IsBacklog();
-	BOOL bDestIsBacklog = pDestList->IsBacklog();
+	BOOL bSrcIsBacklog = pSrcCol->IsBacklog();
+	BOOL bDestIsBacklog = pDestCol->IsBacklog();
 	BOOL bCopy = (!bSrcIsBacklog && 
 					Misc::ModKeysArePressed(MKS_CTRL) &&
 					IsTrackedAttributeMultiValue());
@@ -2961,7 +2966,7 @@ BOOL CKanbanCtrl::EndDragItem(CKanbanColumnCtrl* pSrcList, DWORD dwTaskID,
 	// Remove from the source list(s) if moving
 	if (bSrcIsBacklog)
 	{
-		VERIFY(pSrcList->DeleteTask(dwTaskID));
+		VERIFY(pSrcCol->DeleteTask(dwTaskID));
 	}
 	else if (!bCopy) // move
 	{
@@ -2969,41 +2974,41 @@ BOOL CKanbanCtrl::EndDragItem(CKanbanColumnCtrl* pSrcList, DWORD dwTaskID,
 		pKI->RemoveAllTrackedAttributeValues(m_sTrackAttribID);
 
 		// Remove from all src lists
-		m_aListCtrls.DeleteTaskFromOthers(dwTaskID, pDestList);
+		m_aColumns.DeleteTaskFromOthers(dwTaskID, pDestCol);
 	}
 	else if (bDestIsBacklog) // and 'copy'
 	{
 		// Just remove the source list's value(s)
 		CStringArray aSrcValues;
-		int nVal = pSrcList->GetAttributeValues(aSrcValues);
+		int nVal = pSrcCol->GetAttributeValues(aSrcValues);
 
 		while (nVal--)
 			pKI->RemoveTrackedAttributeValue(m_sTrackAttribID, aSrcValues[nVal]);
 
-		VERIFY(pSrcList->DeleteTask(dwTaskID));
+		VERIFY(pSrcCol->DeleteTask(dwTaskID));
 	}
 
 	// Append to the destination list
 	if (bDestIsBacklog)
 	{
 		if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
-			pDestList->AddTask(*pKI, TRUE);
+			pDestCol->AddTask(*pKI, TRUE);
 	}
 	else
 	{
 		pKI->AddTrackedAttributeValue(m_sTrackAttribID, sDestAttribValue);
 
-		if (pDestList->FindTask(dwTaskID) == NULL)
-			pDestList->AddTask(*pKI, TRUE);
+		if (pDestCol->FindTask(dwTaskID) == NULL)
+			pDestCol->AddTask(*pKI, TRUE);
 	}
 
 	return TRUE;
 }
 
-BOOL CKanbanCtrl::GetListCtrlAttributeValue(const CKanbanColumnCtrl* pDestList, const CPoint& ptScreen, CString& sValue) const
+BOOL CKanbanCtrl::GetColumnAttributeValue(const CKanbanColumnCtrl* pDestCol, const CPoint& ptScreen, CString& sValue) const
 {
 	CStringArray aListValues;
-	int nNumValues = pDestList->GetAttributeValues(aListValues);
+	int nNumValues = pDestCol->GetAttributeValues(aListValues);
 
 	switch (nNumValues)
 	{
@@ -3016,7 +3021,7 @@ BOOL CKanbanCtrl::GetListCtrlAttributeValue(const CKanbanColumnCtrl* pDestList, 
 		return TRUE;
 	}
 
-	// List has multiple values -> show popup menu
+	// Column has multiple values -> show popup menu
 	CMenu menu;
 	VERIFY (menu.CreatePopupMenu());
 
@@ -3026,7 +3031,7 @@ BOOL CKanbanCtrl::GetListCtrlAttributeValue(const CKanbanColumnCtrl* pDestList, 
 	}
 
 	UINT nValID = menu.TrackPopupMenu((TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RETURNCMD), 
-										ptScreen.x, ptScreen.y, CWnd::FromHandle(*pDestList));
+										ptScreen.x, ptScreen.y, CWnd::FromHandle(*pDestCol));
 
 	if (nValID > 0)
 	{
@@ -3045,8 +3050,8 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		// get the list and item under the mouse
 		ClientToScreen(&point);
 
-		const CKanbanColumnCtrl* pDestList = m_aListCtrls.HitTest(point);
-		BOOL bValidDest = CanDrag(m_pSelectedList, pDestList);
+		const CKanbanColumnCtrl* pDestCol = m_aColumns.HitTest(point);
+		BOOL bValidDest = CanDrag(m_pSelectedColumn, pDestCol);
 
 		if (bValidDest)
 		{
@@ -3058,7 +3063,7 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 			GraphicsMisc::SetDragDropCursor(GMOC_NO);
 		}
 
-		m_aListCtrls.SetDropTarget(bValidDest ? pDestList : NULL);
+		m_aColumns.SetDropTarget(bValidDest ? pDestCol : NULL);
 	}
 	
 	CWnd::OnMouseMove(nFlags, point);
@@ -3067,24 +3072,24 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 BOOL CKanbanCtrl::SaveToImage(CBitmap& bmImage)
 {
 	CAutoFlag af(m_bSavingToImage, TRUE);
-	CEnBitmap bmLists;
+	CEnBitmap bmColumns;
 
-	if (m_aListCtrls.SaveToImage(bmLists))
+	if (m_aColumns.SaveToImage(bmColumns))
 	{
 		// Resize header and column widths to suit
 		CIntArray aColWidths;
 		m_header.GetItemWidths(aColWidths);
 
-		int nTotalListWidth = bmLists.GetSize().cx;
+		int nTotalColumnWidth = bmColumns.GetSize().cx;
 		int nItem = m_header.GetItemCount();
 
-		int nReqColWidth = (nTotalListWidth / nItem);
+		int nReqColWidth = (nTotalColumnWidth / nItem);
 
 		while (nItem--)
 			m_header.SetItemWidth(nItem, nReqColWidth);
 
 		CRect rHeader = CDialogHelper::GetChildRect(&m_header);
-		CDialogHelper::ResizeChild(&m_header, (nTotalListWidth - rHeader.Width()), 0);
+		CDialogHelper::ResizeChild(&m_header, (nTotalColumnWidth - rHeader.Width()), 0);
 
 		CEnBitmap bmHeader;
 
@@ -3100,13 +3105,13 @@ BOOL CKanbanCtrl::SaveToImage(CBitmap& bmImage)
 			if (dcImage.CreateCompatibleDC(&dc) && dcParts.CreateCompatibleDC(&dc))
 			{
 				// Create the image big enough to fit the tasks and columns side-by-side
-				CSize sizeLists = bmLists.GetSize();
+				CSize sizeColumns = bmColumns.GetSize();
 				CSize sizeHeader = bmHeader.GetSize();
 
 				CSize sizeImage;
 
-				sizeImage.cx = max(sizeHeader.cx, sizeLists.cx);
-				sizeImage.cy = (sizeHeader.cy + sizeLists.cy);
+				sizeImage.cx = max(sizeHeader.cx, sizeColumns.cx);
+				sizeImage.cy = (sizeHeader.cy + sizeColumns.cy);
 
 				if (bmImage.CreateCompatibleBitmap(&dc, sizeImage.cx, sizeImage.cy))
 				{
@@ -3115,8 +3120,8 @@ BOOL CKanbanCtrl::SaveToImage(CBitmap& bmImage)
 					CBitmap* pOldPart = dcParts.SelectObject(&bmHeader);
 					dcImage.BitBlt(0, 0, sizeHeader.cx, sizeHeader.cy, &dcParts, 0, 0, SRCCOPY);
 
-					dcParts.SelectObject(&bmLists);
-					dcImage.BitBlt(0, sizeHeader.cy, sizeLists.cx, sizeLists.cy, &dcParts, 0, 0, SRCCOPY);
+					dcParts.SelectObject(&bmColumns);
+					dcImage.BitBlt(0, sizeHeader.cy, sizeColumns.cx, sizeColumns.cy, &dcParts, 0, 0, SRCCOPY);
 
 					dcParts.SelectObject(pOldPart);
 					dcImage.SelectObject(pOldImage);
@@ -3134,19 +3139,19 @@ BOOL CKanbanCtrl::SaveToImage(CBitmap& bmImage)
 
 BOOL CKanbanCtrl::CanSaveToImage() const
 {
-	return m_aListCtrls.CanSaveToImage();
+	return m_aColumns.CanSaveToImage();
 }
 
 LRESULT CKanbanCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 {
 	m_fonts.Initialise((HFONT)wp, FALSE);
-	m_aListCtrls.SetFont((HFONT)wp);
+	m_aColumns.SetFont((HFONT)wp);
 	m_header.SendMessage(WM_SETFONT, wp, lp);
 
 	return 0L;
 }
 
-LRESULT CKanbanCtrl::OnListToggleTaskDone(WPARAM /*wp*/, LPARAM lp)
+LRESULT CKanbanCtrl::OnColumnToggleTaskDone(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(lp);
@@ -3169,7 +3174,7 @@ LRESULT CKanbanCtrl::OnListToggleTaskDone(WPARAM /*wp*/, LPARAM lp)
 	return 0L;
 }
 
-LRESULT CKanbanCtrl::OnListEditTaskIcon(WPARAM /*wp*/, LPARAM lp)
+LRESULT CKanbanCtrl::OnColumnEditTaskIcon(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(lp);
@@ -3177,7 +3182,7 @@ LRESULT CKanbanCtrl::OnListEditTaskIcon(WPARAM /*wp*/, LPARAM lp)
 	return GetParent()->SendMessage(WM_KBC_EDITTASKICON, (WPARAM)lp);
 }
 
-LRESULT CKanbanCtrl::OnListToggleTaskFlag(WPARAM /*wp*/, LPARAM lp)
+LRESULT CKanbanCtrl::OnColumnToggleTaskFlag(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(lp);
@@ -3196,8 +3201,8 @@ LRESULT CKanbanCtrl::OnListToggleTaskFlag(WPARAM /*wp*/, LPARAM lp)
 
 			pKI->bFlag = !pKI->bFlag;
 
-			if (m_pSelectedList)
-				m_pSelectedList->Invalidate();
+			if (m_pSelectedColumn)
+				m_pSelectedColumn->Invalidate();
 
 			PostMessage(WM_KCM_SELECTTASK, 0, dwTaskID);
 		}
@@ -3215,18 +3220,18 @@ LRESULT CKanbanCtrl::OnSelectTask(WPARAM /*wp*/, LPARAM lp)
 	return SelectTask(lp);
 }
 
-LRESULT CKanbanCtrl::OnListGetTaskIcon(WPARAM wp, LPARAM lp)
+LRESULT CKanbanCtrl::OnColumnGetTaskIcon(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_KBC_GETTASKICON, wp, lp);
 }
 
-void CKanbanCtrl::OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult)
+void CKanbanCtrl::OnColumnSetFocus(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	*pResult = 0;
 
 	// Reverse focus changes outside of our own doing
-	if (!m_bSettingListFocus)
+	if (!m_bSettingColumnFocus)
 	{
-		FixupListFocus();
+		FixupColumnFocus();
 	}
 }

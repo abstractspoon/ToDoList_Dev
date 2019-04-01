@@ -346,7 +346,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 			break;
 
 		case IUI_CUSTOMATTRIB:
-			m_sTrackedCustomAttribID = pPrefs->GetProfileString(sKey, _T("CustomAttrib"));
+			m_sTrackedCustomAttribID = pPrefs->GetProfileString(szKey, _T("CustomAttrib"));
 
 			// fallback
 			if (m_sTrackedCustomAttribID.IsEmpty())
@@ -731,12 +731,12 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 {
 	DWORD dwOptions = m_ctrlKanban.GetOptions();
 
-	ModifyOptions(KBCF_ALWAYSSHOWBACKLOG, dwOptions, m_dlgPrefs.GetAlwaysShowBacklog());
-	ModifyOptions(KBCF_SHOWTASKCOLORASBAR, dwOptions, m_dlgPrefs.GetShowTaskColorAsBar());
-	ModifyOptions(KBCF_COLORBARBYPRIORITY, dwOptions, m_dlgPrefs.GetColorBarByPriority());
-	ModifyOptions(KBCF_SORTSUBTASTASKSBELOWPARENTS, dwOptions, m_dlgPrefs.GetSortSubtasksBelowParents());
-	ModifyOptions(KBCF_INDENTSUBTASKS, dwOptions, m_dlgPrefs.GetIndentSubtasks());
-	ModifyOptions(KBCF_HIDEEMPTYATTRIBUTES, dwOptions, m_dlgPrefs.GetHideEmptyAttributes());
+	Misc::SetFlag(dwOptions, KBCF_ALWAYSSHOWBACKLOG, m_dlgPrefs.GetAlwaysShowBacklog());
+	Misc::SetFlag(dwOptions, KBCF_SHOWTASKCOLORASBAR, m_dlgPrefs.GetShowTaskColorAsBar());
+	Misc::SetFlag(dwOptions, KBCF_COLORBARBYPRIORITY, m_dlgPrefs.GetColorBarByPriority());
+	Misc::SetFlag(dwOptions, KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dlgPrefs.GetSortSubtasksBelowParents());
+	Misc::SetFlag(dwOptions, KBCF_INDENTSUBTASKS, m_dlgPrefs.GetIndentSubtasks());
+	Misc::SetFlag(dwOptions, KBCF_HIDEEMPTYATTRIBUTES, m_dlgPrefs.GetHideEmptyAttributes());
 
 	m_ctrlKanban.SetOptions(dwOptions);
 
@@ -972,8 +972,8 @@ void CKanbanWnd::OnSelchangeOptions()
 
 	DWORD dwOptions = m_ctrlKanban.GetOptions();
 
-	ModifyOptions(KBCF_SHOWEMPTYCOLUMNS, dwOptions, m_cbOptions.HasSelectedOption(KBCF_SHOWEMPTYCOLUMNS));
-	ModifyOptions(KBCF_SHOWPARENTTASKS, dwOptions, bIsShowingParentTasks);
+	Misc::SetFlag(dwOptions, KBCF_SHOWEMPTYCOLUMNS, m_cbOptions.HasSelectedOption(KBCF_SHOWEMPTYCOLUMNS));
+	Misc::SetFlag(dwOptions, KBCF_SHOWPARENTTASKS, bIsShowingParentTasks);
 
 	m_ctrlKanban.SetOptions(dwOptions);
 

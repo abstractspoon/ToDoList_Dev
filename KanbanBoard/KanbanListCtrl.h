@@ -84,7 +84,7 @@ public:
 
 	void SetOptions(DWORD dwOptions);
 	void OnDisplayAttributeChanged();
-	int CalcAvailableAttributeWidth(int nListWidth = -1) const;
+	int CalcAvailableAttributeWidth(int nColWidth = -1) const;
 	BOOL SelectionHasLockedTasks() const;
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
 	void RefreshItemLineHeights();
@@ -96,7 +96,7 @@ public:
 	CTreeCtrlHelper& TCH() { return m_tch; }
 
 	static CString FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis);
-	static BOOL CanDrag(const CKanbanColumnCtrl* pSrcList, const CKanbanColumnCtrl* pDestList);
+	static BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol);
 
 protected:
 	BOOL m_bSelected;
@@ -132,7 +132,7 @@ protected:
 	//{{AFX_MSG(CKanbanListCtrlEx)
 	//}}AFX_MSG
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);

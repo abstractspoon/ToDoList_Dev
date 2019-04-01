@@ -50,10 +50,10 @@ public:
 
 	void OnDisplayAttributeChanged();
 
-	void Sort();
+	void SortColumns();
 	void SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending);
 
-	void SetSelectedList(const CKanbanColumnCtrl* pSelList);
+	void SetSelectedColumn(const CKanbanColumnCtrl* pSelList);
 	void SetDropTarget(const CKanbanColumnCtrl* pTarget);
 	void DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanColumnCtrl* pIgnore);
 
@@ -64,7 +64,7 @@ public:
 	void SetFont(HFONT hFont);
 
 protected:
-	static int ListSortProc(const void* pV1, const void* pV2);
+	static int SortProc(const void* pV1, const void* pV2);
 
 };
 
