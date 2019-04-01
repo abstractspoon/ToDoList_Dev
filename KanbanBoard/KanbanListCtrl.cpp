@@ -295,52 +295,24 @@ void CKanbanColumnCtrl::RefreshItemLineHeights(DWORD dwTaskID)
 		RefreshItemLineHeights(hti);
 }
 
-void CKanbanColumnCtrl::SetTextColorIsBackground(BOOL bSet)
+void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 {
-	if (bSet != m_bTextColorIsBkgnd)
-	{
-		m_bTextColorIsBkgnd = bSet;
+	m_bShowTaskColorAsBar = (dwOptions & KBCF_SHOWTASKCOLORASBAR);
+	m_bStrikeThruDoneTasks = (dwOptions & KBCF_STRIKETHRUDONETASKS);
+	m_bShowCompletionCheckboxes = (dwOptions & KBCF_SHOWCOMPLETIONCHECKBOXES);
+	m_bIndentSubtasks = (dwOptions & KBCF_INDENTSUBTASKS);
+	m_bHideEmptyAttributes = (dwOptions & KBCF_HIDEEMPTYATTRIBUTES);
+	m_bColorBarByPriority = (dwOptions & KBCF_COLORBARBYPRIORITY);
+	m_bTextColorIsBkgnd = (dwOptions & KBCF_TASKTEXTCOLORISBKGND);
 
-		if (GetSafeHwnd())
-			Invalidate(FALSE);
-	}
-}
-
-void CKanbanColumnCtrl::SetShowTaskColorAsBar(BOOL bSet)
-{
-	if (bSet != m_bShowTaskColorAsBar)
-	{
-		m_bShowTaskColorAsBar = bSet;
-		
-		if (GetSafeHwnd())
-			Invalidate(FALSE);
-	}
-}
-
-void CKanbanColumnCtrl::SetStrikeThruDoneTasks(BOOL bSet)
-{
-	if (bSet != m_bStrikeThruDoneTasks)
-	{
-		m_bStrikeThruDoneTasks = bSet;
-
-		if (GetSafeHwnd())
-			Invalidate(FALSE);
-	}
-}
-
-void CKanbanColumnCtrl::SetColorTaskBarByPriority(BOOL bSet)
-{
-	if (bSet && (m_aPriorityColors.GetSize() != 11))
+	if (m_bColorBarByPriority && (m_aPriorityColors.GetSize() != 11))
 	{
 		ASSERT(0);
-		return;
+		m_bColorBarByPriority = FALSE;
 	}
-
-	// else
-	m_bColorBarByPriority = bSet;
-
+	
 	if (GetSafeHwnd())
-		Invalidate(TRUE);
+		Invalidate(FALSE);
 }
 
 void CKanbanColumnCtrl::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis)
@@ -354,33 +326,6 @@ void CKanbanColumnCtrl::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis)
 void CKanbanColumnCtrl::SetSelected(BOOL bSelected)
 {
 	m_bSelected = bSelected;
-}
-
-void CKanbanColumnCtrl::SetShowCompletionCheckboxes(BOOL bShow)
-{
-	m_bShowCompletionCheckboxes = bShow;
-
-	if (GetSafeHwnd())
-		Invalidate(TRUE);
-}
-
-void CKanbanColumnCtrl::SetIndentSubtasks(BOOL bIndent)
-{
-	m_bIndentSubtasks = bIndent;
-
-	if (GetSafeHwnd())
-		Invalidate(TRUE);
-}
-
-void CKanbanColumnCtrl::SetHideEmptyAttributes(BOOL bHide)
-{
-	if (m_bHideEmptyAttributes != bHide)
-	{
-		m_bHideEmptyAttributes = bHide;
-
-		if (GetSafeHwnd())
-			RefreshItemLineHeights();
-	}
 }
 
 int CKanbanColumnCtrl::CalcItemTitleTextHeight() const

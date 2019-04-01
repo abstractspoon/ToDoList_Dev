@@ -82,14 +82,7 @@ public:
 	void SetExcessColor(COLORREF color);
 	void SetMaximumTaskCount(int nMaxTasks);
 
-	void SetTextColorIsBackground(BOOL bSet = TRUE);
-	void SetShowTaskColorAsBar(BOOL bSet = TRUE);
-	void SetStrikeThruDoneTasks(BOOL bSet = TRUE);
-	void SetColorTaskBarByPriority(BOOL bSet = TRUE);
-	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
-	void SetIndentSubtasks(BOOL bIndent = TRUE);
-	void SetHideEmptyAttributes(BOOL bHide = TRUE);
-
+	void SetOptions(DWORD dwOptions);
 	void OnDisplayAttributeChanged();
 	int CalcAvailableAttributeWidth(int nListWidth = -1) const;
 	BOOL SelectionHasLockedTasks() const;

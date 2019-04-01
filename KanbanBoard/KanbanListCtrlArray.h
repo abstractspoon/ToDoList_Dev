@@ -35,14 +35,7 @@ public:
 	CKanbanColumnCtrl* GetLastNonEmpty() const;
 	CKanbanColumnCtrl* GetBacklog() const;
 
-	void SetTextColorIsBackground(BOOL bSet = TRUE);
-	void SetShowTaskColorAsBar(BOOL bSet = TRUE);
-	void SetStrikeThruDoneTasks(BOOL bSet = TRUE);
-	void SetColorTaskBarByPriority(BOOL bSet = TRUE);
-	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
-	void SetIndentSubtasks(BOOL bIndent = TRUE);
-	void SetHideEmptyAttributes(BOOL bHide = TRUE);
-	
+	void SetOptions(DWORD dwOptions);
 	int GetVisibleTaskCount() const;
 	float GetAverageCharWidth();
 	DWORD HitTestTask(const CPoint& ptScreen) const;

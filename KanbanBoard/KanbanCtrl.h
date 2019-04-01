@@ -57,7 +57,8 @@ public:
 
  	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending);
 
-	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
+	void SetOptions(DWORD dwOptions);
+	DWORD GetOptions() const { return m_dwOptions; }
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 
 	void SetDisplayAttributes(const CKanbanAttributeArray& aAttrib);
@@ -209,7 +210,7 @@ protected:
 	static BOOL HasNonParentTasks(const CKanbanItemArray* pItems);
 	static void UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib);
 	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
-
+	static BOOL OptionHasChanged(DWORD dwOption, DWORD dwOldOptions, DWORD dwNewOptions);
 };
 
 #endif // !defined(AFX_KANBANCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)

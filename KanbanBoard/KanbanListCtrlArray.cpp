@@ -259,7 +259,7 @@ void CKanbanColumnCtrlArray::RefreshItemLineHeights()
 	}
 }
 
-void CKanbanColumnCtrlArray::SetTextColorIsBackground(BOOL bSet)
+void CKanbanColumnCtrlArray::SetOptions(DWORD dwOptions)
 {
 	int nList = GetSize();
 
@@ -268,46 +268,7 @@ void CKanbanColumnCtrlArray::SetTextColorIsBackground(BOOL bSet)
 		CKanbanColumnCtrl* pList = GetAt(nList);
 		ASSERT(pList);
 
-		pList->SetTextColorIsBackground(bSet);
-	}
-}
-
-void CKanbanColumnCtrlArray::SetShowTaskColorAsBar(BOOL bSet)
-{
-	int nList = GetSize();
-
-	while (nList--)
-	{
-		CKanbanColumnCtrl* pList = GetAt(nList);
-		ASSERT(pList);
-
-		pList->SetShowTaskColorAsBar(bSet);
-	}
-}
-
-void CKanbanColumnCtrlArray::SetStrikeThruDoneTasks(BOOL bSet)
-{
-	int nList = GetSize();
-
-	while (nList--)
-	{
-		CKanbanColumnCtrl* pList = GetAt(nList);
-		ASSERT(pList);
-
-		pList->SetStrikeThruDoneTasks(bSet);
-	}
-}
-
-void CKanbanColumnCtrlArray::SetColorTaskBarByPriority(BOOL bSet)
-{
-	int nList = GetSize();
-
-	while (nList--)
-	{
-		CKanbanColumnCtrl* pList = GetAt(nList);
-		ASSERT(pList);
-
-		pList->SetColorTaskBarByPriority(bSet);
+		pList->SetOptions(dwOptions);
 	}
 }
 
@@ -321,45 +282,6 @@ void CKanbanColumnCtrlArray::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabel
 		ASSERT(pList);
 
 		pList->SetAttributeLabelVisibility(nLabelVis);
-	}
-}
-
-void CKanbanColumnCtrlArray::SetShowCompletionCheckboxes(BOOL bShow)
-{
-	int nList = GetSize();
-
-	while (nList--)
-	{
-		CKanbanColumnCtrl* pList = GetAt(nList);
-		ASSERT(pList);
-
-		pList->SetShowCompletionCheckboxes(bShow);
-	}
-}
-
-void CKanbanColumnCtrlArray::SetIndentSubtasks(BOOL bIndent)
-{
-	int nList = GetSize();
-
-	while (nList--)
-	{
-		CKanbanColumnCtrl* pList = GetAt(nList);
-		ASSERT(pList);
-
-		pList->SetIndentSubtasks(bIndent);
-	}
-}
-
-void CKanbanColumnCtrlArray::SetHideEmptyAttributes(BOOL bHide)
-{
-	int nList = GetSize();
-
-	while (nList--)
-	{
-		CKanbanColumnCtrl* pList = GetAt(nList);
-		ASSERT(pList);
-
-		pList->SetHideEmptyAttributes(bHide);
 	}
 }
 

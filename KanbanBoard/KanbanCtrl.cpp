@@ -1962,13 +1962,7 @@ CKanbanColumnCtrl* CKanbanCtrl::AddNewListCtrl(const KANBANCOLUMN& colDef)
 
 	if (pList)
 	{
-		pList->SetTextColorIsBackground(HasOption(KBCF_TASKTEXTCOLORISBKGND));
-		pList->SetStrikeThruDoneTasks(HasOption(KBCF_STRIKETHRUDONETASKS));
-		pList->SetColorTaskBarByPriority(HasOption(KBCF_COLORBARBYPRIORITY));
-		pList->SetShowTaskColorAsBar(HasOption(KBCF_SHOWTASKCOLORASBAR));
-		pList->SetShowCompletionCheckboxes(HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES));
-		pList->SetIndentSubtasks(HasOption(KBCF_INDENTSUBTASKS));
-		pList->SetHideEmptyAttributes(HasOption(KBCF_HIDEEMPTYATTRIBUTES));
+		pList->SetOptions(m_dwOptions);
 
 		if (pList->Create(IDC_LISTCTRL, this))
 		{
@@ -2124,66 +2118,44 @@ int CKanbanCtrl::GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const
 	return aAttrib.GetSize();
 }
 
-void CKanbanCtrl::SetOption(DWORD dwOption, BOOL bSet)
+BOOL CKanbanCtrl::OptionHasChanged(DWORD dwOption, DWORD dwOldOptions, DWORD dwNewOptions)
 {
-	if (dwOption)
+	return ((dwOldOptions & dwOption) != (dwNewOptions & dwOption));
+}
+
+void CKanbanCtrl::SetOptions(DWORD dwOptions)
+{
+	if (dwOptions != m_dwOptions)
 	{
-		DWORD dwPrev = m_dwOptions;
+		BOOL bRebuildLists = FALSE;
+		BOOL bRebuildData = FALSE;
+		BOOL bResort = FALSE;
 
-		if (bSet)
-			m_dwOptions |= dwOption;
-		else
-			m_dwOptions &= ~dwOption;
-
-		// specific handling
-		if (m_dwOptions != dwPrev)
+		if (OptionHasChanged(KBCF_SHOWPARENTTASKS, m_dwOptions, dwOptions))
 		{
-			switch (dwOption)
-			{
-			case KBCF_SHOWPARENTTASKS:
-				RebuildListCtrls(TRUE, FALSE);
-				break;
-
-			case KBCF_SORTSUBTASTASKSBELOWPARENTS:
-				if (m_nSortBy != IUI_NONE)
-					Sort(m_nSortBy, m_bSortAscending);
-				break;
-
-			case KBCF_SHOWEMPTYCOLUMNS:
-			case KBCF_ALWAYSSHOWBACKLOG:
-				if (m_aListCtrls.GetSize())
-					RebuildListCtrls(FALSE, FALSE);
-				break;
-
-			case KBCF_TASKTEXTCOLORISBKGND:
-				m_aListCtrls.SetTextColorIsBackground(bSet);
-				break;
-
-			case KBCF_COLORBARBYPRIORITY:
-				m_aListCtrls.SetColorTaskBarByPriority(bSet);
-				break;
-
-			case KBCF_STRIKETHRUDONETASKS:
-				m_aListCtrls.SetStrikeThruDoneTasks(bSet);
-				break;
-
-			case KBCF_SHOWTASKCOLORASBAR:
-				m_aListCtrls.SetShowTaskColorAsBar(bSet);
-				break;
-
-			case KBCF_SHOWCOMPLETIONCHECKBOXES:
-				m_aListCtrls.SetShowCompletionCheckboxes(bSet);
-				break;
-
-			case KBCF_INDENTSUBTASKS:
-				m_aListCtrls.SetIndentSubtasks(bSet);
-				break;
-
-			case KBCF_HIDEEMPTYATTRIBUTES:
-				m_aListCtrls.SetHideEmptyAttributes(bSet);
-				break;
-			}
+			bRebuildLists = TRUE;
+			bRebuildData = TRUE;
 		}
+
+		if (OptionHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwOptions))
+		{
+			bResort = (m_nSortBy != IUI_NONE);
+		}
+
+		if (OptionHasChanged(KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG, m_dwOptions, dwOptions))
+		{
+			bRebuildLists = TRUE;
+		}
+
+		m_dwOptions = dwOptions;
+
+		m_aListCtrls.SetOptions(dwOptions & ~(KBCF_SHOWPARENTTASKS | KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG));
+
+		if (bRebuildLists)
+			RebuildListCtrls(bRebuildData, FALSE);
+
+		if (bResort)
+			Sort(m_nSortBy, m_bSortAscending);
 	}
 }
 

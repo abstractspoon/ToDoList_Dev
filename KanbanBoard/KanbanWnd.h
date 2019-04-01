@@ -131,7 +131,9 @@ protected:
 	void SendParentSelectionUpdate();
 	void EnableDisableCtrls();
 	void UpdatePriorityColors(const IPreferences* pPrefs);
-	void ProcessTrackedAttributeChange(); 
+	void ProcessTrackedAttributeChange();
+
+	static void ModifyOptions(DWORD dwOption, DWORD& dwOptions, BOOL bAppend);
 };
 
 /////////////////////////////////////////////////////////////////////////////

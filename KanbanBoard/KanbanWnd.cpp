@@ -304,16 +304,28 @@ void CKanbanWnd::UpdatePriorityColors(const IPreferences* pPrefs)
 	m_ctrlKanban.SetPriorityColors(aPriorityColors);
 }
 
+void CKanbanWnd::ModifyOptions(DWORD dwOption, DWORD& dwOptions, BOOL bAppend)
+{
+	if (bAppend)
+		dwOptions |= dwOption;
+	else
+		dwOptions &= ~dwOption;
+}
+
 void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly) 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// application preferences
-	m_ctrlKanban.SetOption(KBCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
-	m_ctrlKanban.SetOption(KBCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
-	m_ctrlKanban.SetOption(KBCF_SHOWCOMPLETIONCHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
-
 	UpdatePriorityColors(pPrefs);
+
+	DWORD dwOptions = m_ctrlKanban.GetOptions();
+
+	ModifyOptions(KBCF_STRIKETHRUDONETASKS, dwOptions, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
+	ModifyOptions(KBCF_TASKTEXTCOLORISBKGND, dwOptions, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
+	ModifyOptions(KBCF_SHOWCOMPLETIONCHECKBOXES, dwOptions, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
+
+	m_ctrlKanban.SetOptions(dwOptions);
 	
 	// Default attribute values
 	m_ctrlKanban.LoadDefaultAttributeListValues(pPrefs);
@@ -731,12 +743,16 @@ void CKanbanWnd::OnSetFocus(CWnd* pOldWnd)
 
 void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 {
-	m_ctrlKanban.SetOption(KBCF_ALWAYSSHOWBACKLOG, m_dlgPrefs.GetAlwaysShowBacklog());
-	m_ctrlKanban.SetOption(KBCF_SHOWTASKCOLORASBAR, m_dlgPrefs.GetShowTaskColorAsBar());
-	m_ctrlKanban.SetOption(KBCF_COLORBARBYPRIORITY, m_dlgPrefs.GetColorBarByPriority());
-	m_ctrlKanban.SetOption(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dlgPrefs.GetSortSubtasksBelowParents());
-	m_ctrlKanban.SetOption(KBCF_INDENTSUBTASKS, m_dlgPrefs.GetIndentSubtasks());
-	m_ctrlKanban.SetOption(KBCF_HIDEEMPTYATTRIBUTES, m_dlgPrefs.GetHideEmptyAttributes());
+	DWORD dwOptions = m_ctrlKanban.GetOptions();
+
+	ModifyOptions(KBCF_ALWAYSSHOWBACKLOG, dwOptions, m_dlgPrefs.GetAlwaysShowBacklog());
+	ModifyOptions(KBCF_SHOWTASKCOLORASBAR, dwOptions, m_dlgPrefs.GetShowTaskColorAsBar());
+	ModifyOptions(KBCF_COLORBARBYPRIORITY, dwOptions, m_dlgPrefs.GetColorBarByPriority());
+	ModifyOptions(KBCF_SORTSUBTASTASKSBELOWPARENTS, dwOptions, m_dlgPrefs.GetSortSubtasksBelowParents());
+	ModifyOptions(KBCF_INDENTSUBTASKS, dwOptions, m_dlgPrefs.GetIndentSubtasks());
+	ModifyOptions(KBCF_HIDEEMPTYATTRIBUTES, dwOptions, m_dlgPrefs.GetHideEmptyAttributes());
+
+	m_ctrlKanban.SetOptions(dwOptions);
 
 	m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
 
@@ -965,12 +981,15 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 
 void CKanbanWnd::OnSelchangeOptions() 
 {
-	m_ctrlKanban.SetOption(KBCF_SHOWEMPTYCOLUMNS, m_cbOptions.HasSelectedOption(KBCF_SHOWEMPTYCOLUMNS));
-
 	BOOL bWasShowingParentTasks = m_ctrlKanban.HasOption(KBCF_SHOWPARENTTASKS);
 	BOOL bIsShowingParentTasks = m_cbOptions.HasSelectedOption(KBCF_SHOWPARENTTASKS);
 
-	m_ctrlKanban.SetOption(KBCF_SHOWPARENTTASKS, bIsShowingParentTasks);
+	DWORD dwOptions = m_ctrlKanban.GetOptions();
+
+	ModifyOptions(KBCF_SHOWEMPTYCOLUMNS, dwOptions, m_cbOptions.HasSelectedOption(KBCF_SHOWEMPTYCOLUMNS));
+	ModifyOptions(KBCF_SHOWPARENTTASKS, dwOptions, bIsShowingParentTasks);
+
+	m_ctrlKanban.SetOptions(dwOptions);
 
 	// Fixup selection if parents are being shown
 	if ((bWasShowingParentTasks || bIsShowingParentTasks) && m_dwSelTaskID)
