@@ -87,7 +87,6 @@ public:
 protected:
 	BOOL m_bReadOnly;
 	BOOL m_bSortAscending;
-	BOOL m_bStrikeThruDone;
 	BOOL m_bSelectTasks;
 	BOOL m_bSettingListFocus;
 	BOOL m_bResizingHeader;
