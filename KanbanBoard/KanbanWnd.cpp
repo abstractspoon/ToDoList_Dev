@@ -304,14 +304,6 @@ void CKanbanWnd::UpdatePriorityColors(const IPreferences* pPrefs)
 	m_ctrlKanban.SetPriorityColors(aPriorityColors);
 }
 
-void CKanbanWnd::ModifyOptions(DWORD dwOption, DWORD& dwOptions, BOOL bAppend)
-{
-	if (bAppend)
-		dwOptions |= dwOption;
-	else
-		dwOptions &= ~dwOption;
-}
-
 void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly) 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -321,9 +313,9 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 
 	DWORD dwOptions = m_ctrlKanban.GetOptions();
 
-	ModifyOptions(KBCF_STRIKETHRUDONETASKS, dwOptions, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
-	ModifyOptions(KBCF_TASKTEXTCOLORISBKGND, dwOptions, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
-	ModifyOptions(KBCF_SHOWCOMPLETIONCHECKBOXES, dwOptions, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
+	Misc::SetFlag(dwOptions, KBCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
+	Misc::SetFlag(dwOptions, KBCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
+	Misc::SetFlag(dwOptions, KBCF_SHOWCOMPLETIONCHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
 
 	m_ctrlKanban.SetOptions(dwOptions);
 	
@@ -333,24 +325,18 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 	// Kanban specific options
 	if (!bAppOnly)
 	{
-		CString sKey(szKey);
-		
-		// Options
 		DWORD dwComboOptions = 0;
 
-		if (pPrefs->GetProfileInt(sKey, _T("ShowParents"), TRUE))
-			dwComboOptions |= KBCF_SHOWPARENTTASKS;
-
-		if (pPrefs->GetProfileInt(sKey, _T("ShowEmptyColumns"),TRUE))
-			dwComboOptions |= KBCF_SHOWEMPTYCOLUMNS;
-
+		Misc::SetFlag(dwComboOptions, KBCF_SHOWPARENTTASKS, pPrefs->GetProfileInt(szKey, _T("ShowParents"), TRUE));
+		Misc::SetFlag(dwComboOptions, KBCF_SHOWEMPTYCOLUMNS, pPrefs->GetProfileInt(szKey, _T("ShowEmptyColumns"), TRUE));
+		
 		m_cbOptions.SetSelectedOptions(dwComboOptions);
 		OnSelchangeOptions();
 		
 		// Last tracked attribute
-		m_dlgPrefs.LoadPreferences(pPrefs, sKey);
+		m_dlgPrefs.LoadPreferences(pPrefs, szKey);
 
-		m_nTrackedAttrib = (IUI_ATTRIBUTE)pPrefs->GetProfileInt(sKey, _T("LastTrackedAttribute"), IUI_STATUS);
+		m_nTrackedAttrib = (IUI_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("LastTrackedAttribute"), IUI_STATUS);
 
 		switch (m_nTrackedAttrib)
 		{

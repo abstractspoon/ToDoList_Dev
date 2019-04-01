@@ -133,7 +133,6 @@ protected:
 	void UpdatePriorityColors(const IPreferences* pPrefs);
 	void ProcessTrackedAttributeChange();
 
-	static void ModifyOptions(DWORD dwOption, DWORD& dwOptions, BOOL bAppend);
 };
 
 /////////////////////////////////////////////////////////////////////////////

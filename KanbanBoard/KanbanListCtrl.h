@@ -53,7 +53,7 @@ public:
 	
 	BOOL Create(UINT nID, CWnd* pParentWnd);
 	HTREEITEM AddTask(const KANBANITEM& ki, BOOL bSelect);
-	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent);
+	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending);
 	
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
 	CSize CalcRequiredSizeForImage() const;
@@ -99,15 +99,8 @@ public:
 	static BOOL CanDrag(const CKanbanColumnCtrl* pSrcList, const CKanbanColumnCtrl* pDestList);
 
 protected:
-	BOOL m_bTextColorIsBkgnd;
 	BOOL m_bSelected;
-	BOOL m_bShowTaskColorAsBar;
-	BOOL m_bColorBarByPriority;
-	BOOL m_bStrikeThruDoneTasks;
 	BOOL m_bSavingToImage;
-	BOOL m_bShowCompletionCheckboxes;
-	BOOL m_bIndentSubtasks;
-	BOOL m_bHideEmptyAttributes;
 	BOOL m_bDropTarget;
 	BOOL m_bDrawTaskFlags;
 
@@ -121,7 +114,7 @@ protected:
 	CTreeCtrlHelper m_tch;
 
 	KANBANCOLUMN m_columnDef;
-	DWORD m_dwDisplay;
+	DWORD m_dwDisplay, m_dwOptions;
 	int m_nItemTextHeight, m_nItemTextBorder;
 	KBC_ATTRIBLABELS m_nAttribLabelVisiability;
 	
@@ -168,6 +161,7 @@ protected:
 	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
 	BOOL HitTestIcon(HTREEITEM hti, CPoint point) const;
 	BOOL HitTestFlag(HTREEITEM hti, CPoint point) const;
+	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	void DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;

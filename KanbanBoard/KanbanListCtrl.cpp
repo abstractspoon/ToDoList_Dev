@@ -90,22 +90,17 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_data(data),
 	m_columnDef(columnDef),
 	m_aDisplayAttrib(aDisplayAttrib),
-	m_bHideEmptyAttributes(FALSE),
 	m_fonts(fonts),
 	m_aPriorityColors(aPriorityColors),
-	m_bStrikeThruDoneTasks(FALSE),
-	m_bIndentSubtasks(FALSE),
-	m_bTextColorIsBkgnd(FALSE),
 	m_bSelected(FALSE),
-	m_bShowTaskColorAsBar(FALSE),
-	m_bShowCompletionCheckboxes(FALSE),
-	m_bColorBarByPriority(FALSE),
 	m_nItemTextHeight(-1),
 	m_nItemTextBorder(-1),
 	m_nAttribLabelVisiability(KBCAL_LONG),
 	m_bSavingToImage(FALSE),
 	m_bDropTarget(FALSE),
 	m_bDrawTaskFlags(FALSE),
+	m_dwDisplay(0),
+	m_dwOptions(0),
 #pragma warning (disable: 4355)
 	m_tch(*this)
 #pragma warning (default: 4355)
@@ -279,7 +274,7 @@ int CKanbanColumnCtrl::GetItemDisplayAttributeCount(const KANBANITEM& ki) const
 
 		if (nAttribID != IUI_FLAG)
 		{
-			if (!m_bHideEmptyAttributes || ki.HasAttributeDisplayValue(nAttribID))
+			if (!HasOption(KBCF_HIDEEMPTYATTRIBUTES) || ki.HasAttributeDisplayValue(nAttribID))
 				nCount++;
 		}
 	}
@@ -297,22 +292,21 @@ void CKanbanColumnCtrl::RefreshItemLineHeights(DWORD dwTaskID)
 
 void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 {
-	m_bShowTaskColorAsBar = (dwOptions & KBCF_SHOWTASKCOLORASBAR);
-	m_bStrikeThruDoneTasks = (dwOptions & KBCF_STRIKETHRUDONETASKS);
-	m_bShowCompletionCheckboxes = (dwOptions & KBCF_SHOWCOMPLETIONCHECKBOXES);
-	m_bIndentSubtasks = (dwOptions & KBCF_INDENTSUBTASKS);
-	m_bHideEmptyAttributes = (dwOptions & KBCF_HIDEEMPTYATTRIBUTES);
-	m_bColorBarByPriority = (dwOptions & KBCF_COLORBARBYPRIORITY);
-	m_bTextColorIsBkgnd = (dwOptions & KBCF_TASKTEXTCOLORISBKGND);
-
-	if (m_bColorBarByPriority && (m_aPriorityColors.GetSize() != 11))
+	if ((dwOptions & KBCF_COLORBARBYPRIORITY) && (m_aPriorityColors.GetSize() != 11))
 	{
 		ASSERT(0);
-		m_bColorBarByPriority = FALSE;
+		dwOptions &= ~KBCF_COLORBARBYPRIORITY;
 	}
-	
-	if (GetSafeHwnd())
-		Invalidate(FALSE);
+
+	if (dwOptions != m_dwOptions)
+	{
+		BOOL bResort = ()
+
+		m_dwOptions = dwOptions;
+
+		if (GetSafeHwnd())
+			Invalidate(FALSE);
+	}
 }
 
 void CKanbanColumnCtrl::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis)
@@ -428,7 +422,7 @@ int CKanbanColumnCtrl::CalcAvailableAttributeWidth(int nListWidth) const
 
 	int nAvailWidth = (nListWidth - (2 * LV_PADDING));
 
-	if (m_bShowTaskColorAsBar)
+	if (HasOption(KBCF_SHOWTASKCOLORASBAR))
 		nAvailWidth -= BAR_WIDTH;
 
 	nAvailWidth -= (TEXT_BORDER.left + TEXT_BORDER.right);
@@ -461,7 +455,7 @@ void CKanbanColumnCtrl::FillItemBackground(CDC* pDC, const KANBANITEM* pKI, cons
 
 		GraphicsMisc::DrawExplorerItemBkgnd(pDC, GetSafeHwnd(), nState, rItem, GMIB_THEMECLASSIC);
 	}
-	else if (m_bShowTaskColorAsBar)
+	else if (HasOption(KBCF_SHOWTASKCOLORASBAR))
 	{
 		COLORREF crFill = GetSysColor(COLOR_WINDOW);
 		COLORREF crBorder = GetSysColor(COLOR_WINDOWFRAME);
@@ -470,8 +464,8 @@ void CKanbanColumnCtrl::FillItemBackground(CDC* pDC, const KANBANITEM* pKI, cons
 	}
 	else // use task's own colour
 	{
-		COLORREF crFill = pKI->GetFillColor(m_bTextColorIsBkgnd);
-		COLORREF crBorder = pKI->GetBorderColor(m_bTextColorIsBkgnd);
+		COLORREF crFill = pKI->GetFillColor(HasOption(KBCF_TASKTEXTCOLORISBKGND));
+		COLORREF crBorder = pKI->GetBorderColor(HasOption(KBCF_TASKTEXTCOLORISBKGND));
 
 		GraphicsMisc::DrawRect(pDC, rItem, crFill, crBorder);
 	}
@@ -505,7 +499,7 @@ void CKanbanColumnCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				DrawItemCheckbox(pDC, pKI, rItem);
 				
 				BOOL bSelected = (!m_bSavingToImage && (GetItemState(hti, TVIS_SELECTED) == TVIS_SELECTED));
-				COLORREF crText = pKI->GetTextColor(bSelected, (m_bTextColorIsBkgnd && !m_bShowTaskColorAsBar));
+				COLORREF crText = pKI->GetTextColor(bSelected, (HasOption(KBCF_TASKTEXTCOLORISBKGND) && !HasOption(KBCF_SHOWTASKCOLORASBAR)));
 
 				// Background
 				FillItemBackground(pDC, pKI, rItem, crText, bSelected);
@@ -544,7 +538,7 @@ void CKanbanColumnCtrl::DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRe
 	CFont* pOldFont = NULL;
 	DWORD dwFontFlags = 0;
 
-	if (m_bStrikeThruDoneTasks && pKI->IsDone(FALSE))
+	if (HasOption(KBCF_STRIKETHRUDONETASKS) && pKI->IsDone(FALSE))
 		dwFontFlags |= GMFS_STRIKETHRU;
 
 	if (pKI->dwParentID == 0)
@@ -573,7 +567,7 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 	CFont* pOldFont = NULL;
 	DWORD dwFontFlags = 0;
 
-	if (m_bStrikeThruDoneTasks && pKI->IsDone(FALSE))
+	if (HasOption(KBCF_STRIKETHRUDONETASKS) && pKI->IsDone(FALSE))
 		pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_STRIKETHRU));
 
 	CRect rAttrib(rItem);
@@ -587,7 +581,7 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 
 		if (nAttrib != IUI_FLAG)
 		{
-			if (!m_bHideEmptyAttributes || pKI->HasAttributeDisplayValue(nAttrib))
+			if (!HasOption(KBCF_HIDEEMPTYATTRIBUTES) || pKI->HasAttributeDisplayValue(nAttrib))
 				DrawAttribute(pDC, rAttrib, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags);
 		}
 	}
@@ -660,7 +654,7 @@ void CKanbanColumnCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rI
 
 void CKanbanColumnCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
 {
-	if (m_bShowTaskColorAsBar)
+	if (HasOption(KBCF_SHOWTASKCOLORASBAR))
 	{
 		// Don't draw for completed items but ensure same indentation
 		CRect rBar(rItem);
@@ -670,7 +664,7 @@ void CKanbanColumnCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rIte
 
 		if (!pKI->IsDone(TRUE))
 		{
-			if (m_bColorBarByPriority)
+			if (HasOption(KBCF_COLORBARBYPRIORITY))
 			{
 				int nPriority = pKI->GetPriority();
 
@@ -697,7 +691,7 @@ void CKanbanColumnCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rIte
 
 void CKanbanColumnCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem)
 {
-	if (m_bShowCompletionCheckboxes)
+	if (HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES))
 	{
 		CRect rCheckbox(rItem);
 
@@ -723,7 +717,7 @@ void CKanbanColumnCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect&
 
 BOOL CKanbanColumnCtrl::GetItemCheckboxRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const
 {
-	if (m_bShowCompletionCheckboxes)
+	if (HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES))
 	{
 		GetItemRect(hti, rItem, pKI);
 
@@ -744,7 +738,7 @@ BOOL CKanbanColumnCtrl::GetItemRect(HTREEITEM hti, CRect& rItem, const KANBANITE
 	if (!GetItemBounds(hti, rItem))
 		return FALSE;
 
-	if (m_bIndentSubtasks)
+	if (HasOption(KBCF_INDENTSUBTASKS))
 	{
 		if (!pKI)
 			pKI = GetKanbanItem(GetTaskID(hti));
@@ -760,7 +754,7 @@ BOOL CKanbanColumnCtrl::GetItemRect(HTREEITEM hti, CRect& rItem, const KANBANITE
 
 BOOL CKanbanColumnCtrl::GetItemCheckboxRect(CRect& rItem) const
 {
-	if (m_bShowCompletionCheckboxes)
+	if (HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES))
 	{
 		rItem.bottom = (rItem.top + GetItemHeight());
 
@@ -792,7 +786,7 @@ BOOL CKanbanColumnCtrl::GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL b
 	
 	rItem.top += (pKI->nLevel * (m_nItemTextHeight + m_nItemTextBorder));
 
-	if (m_bShowTaskColorAsBar)
+	if (HasOption(KBCF_SHOWTASKCOLORASBAR))
 		rItem.left += (BAR_WIDTH + IMAGE_PADDING);
 
 	if (!bEdit)
@@ -1175,13 +1169,13 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 	return (pSort->bAscending ? nCompare : -nCompare);
 }
 
-void CKanbanColumnCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent)
+void CKanbanColumnCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
 {
 	KANBANSORT ks(m_data);
 	
 	ks.nBy = nBy;
 	ks.bAscending = bAscending;
-	ks.bSubtasksBelowParent = bSubtasksBelowParent;
+	ks.bSubtasksBelowParent = HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
 
 	switch (nBy)
 	{

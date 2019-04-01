@@ -468,7 +468,8 @@ namespace Misc
 	BOOL IsCursorKeyPressed(DWORD dwKeys = MKC_ANY);
 	CString GetKeyName(WORD wVirtKey, BOOL bExtended = FALSE); 
 
-	inline BOOL HasFlag(DWORD dwFlags, DWORD dwFlag) { return (((dwFlags & dwFlag) == dwFlag) ? TRUE : FALSE); }
+	BOOL HasFlag(DWORD dwFlags, DWORD dwFlag);
+	BOOL FlagHasChanged(DWORD dwFlag, DWORD dwOldFlags, DWORD dwNewFlags);
 	BOOL ModifyFlags(DWORD& dwFlags, DWORD dwRemove, DWORD dwAdd = 0);
 	BOOL SetFlag(DWORD& dwFlags, DWORD dwFlag, BOOL bSet = TRUE);
 

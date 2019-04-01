@@ -2050,6 +2050,16 @@ BOOL Misc::ModKeysArePressed(DWORD dwKeys)
 	return TRUE;
 }
 
+BOOL Misc::HasFlag(DWORD dwFlags, DWORD dwFlag)
+{
+	return (((dwFlags & dwFlag) == dwFlag) ? TRUE : FALSE);
+}
+
+BOOL Misc::FlagHasChanged(DWORD dwFlag, DWORD dwOldFlags, DWORD dwNewFlags)
+{
+	return ((dwOldFlags & dwFlag) != (dwNewFlags & dwFlag));
+}
+
 BOOL Misc::ModifyFlags(DWORD& dwFlags, DWORD dwRemove, DWORD dwAdd)
 {
 	DWORD dwOldFlags = dwFlags;

@@ -298,7 +298,7 @@ void CKanbanColumnCtrlArray::Exclude(CDC* pDC)
 	}
 }
 
-void CKanbanColumnCtrlArray::SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent)
+void CKanbanColumnCtrlArray::SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending)
 {
 	int nList = GetSize();
 
@@ -307,7 +307,7 @@ void CKanbanColumnCtrlArray::SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL 
 		CKanbanColumnCtrl* pList = GetAt(nList);
 		ASSERT(pList);
 
-		pList->Sort(nBy, bAscending, bSubtasksBelowParent);
+		pList->Sort(nBy, bAscending);
 	}
 }
 

@@ -2118,44 +2118,22 @@ int CKanbanCtrl::GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const
 	return aAttrib.GetSize();
 }
 
-BOOL CKanbanCtrl::OptionHasChanged(DWORD dwOption, DWORD dwOldOptions, DWORD dwNewOptions)
-{
-	return ((dwOldOptions & dwOption) != (dwNewOptions & dwOption));
-}
-
 void CKanbanCtrl::SetOptions(DWORD dwOptions)
 {
 	if (dwOptions != m_dwOptions)
 	{
-		BOOL bRebuildLists = FALSE;
-		BOOL bRebuildData = FALSE;
-		BOOL bResort = FALSE;
-
-		if (OptionHasChanged(KBCF_SHOWPARENTTASKS, m_dwOptions, dwOptions))
+		if (Misc::FlagHasChanged(KBCF_SHOWPARENTTASKS, m_dwOptions, dwOptions))
 		{
-			bRebuildLists = TRUE;
-			bRebuildData = TRUE;
+			RebuildListCtrls(TRUE, FALSE);
 		}
-
-		if (OptionHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwOptions))
+		else if (Misc::FlagHasChanged(KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG, m_dwOptions, dwOptions))
 		{
-			bResort = (m_nSortBy != IUI_NONE);
-		}
-
-		if (OptionHasChanged(KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG, m_dwOptions, dwOptions))
-		{
-			bRebuildLists = TRUE;
+			RebuildListCtrls(FALSE, FALSE);
 		}
 
 		m_dwOptions = dwOptions;
 
 		m_aListCtrls.SetOptions(dwOptions & ~(KBCF_SHOWPARENTTASKS | KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG));
-
-		if (bRebuildLists)
-			RebuildListCtrls(bRebuildData, FALSE);
-
-		if (bResort)
-			Sort(m_nSortBy, m_bSortAscending);
 	}
 }
 
@@ -2424,9 +2402,7 @@ void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
 	
 	m_nSortBy = nBy;
 
-	BOOL bSubtasksBelowParent = HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
-	
-	if ((m_nSortBy != IUI_NONE) || bSubtasksBelowParent)
+	if ((m_nSortBy != IUI_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
 	{
 		ASSERT((m_nSortBy == IUI_NONE) || (bAscending != -1));
 		m_bSortAscending = bAscending;
@@ -2434,7 +2410,7 @@ void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
 		// do the sort
  		CHoldRedraw hr(*this);
 
-		m_aListCtrls.SortItems(m_nSortBy, m_bSortAscending, bSubtasksBelowParent);
+		m_aListCtrls.SortItems(m_nSortBy, m_bSortAscending);
 	}
 }
 
@@ -2933,10 +2909,8 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 				if (bChange)
 				{
 					// Resort before fixing up selection
-					BOOL bSubtasksBelowParent = HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
-					
-					if ((m_nSortBy != IUI_NONE) || bSubtasksBelowParent)
-						pDestList->Sort(m_nSortBy, m_bSortAscending, bSubtasksBelowParent);
+					if ((m_nSortBy != IUI_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
+						pDestList->Sort(m_nSortBy, m_bSortAscending);
 
 					SelectListCtrl(pDestList, FALSE);
 					SelectTask(dwDragID); 
