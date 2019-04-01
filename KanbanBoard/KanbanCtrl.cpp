@@ -1766,10 +1766,10 @@ void CKanbanCtrl::RebuildHeaderColumns()
 		m_header.SetItemText(nVis, sFormat);
 		m_header.SetItemData(nVis, (DWORD)pList);
 		nVis++;
-	}
 
-	// Prevent tracking on the last column
-	m_header.EnableItemTracking(nNumVisColumns - 1, FALSE);
+		// Allow tracking on all but the last column
+		m_header.EnableItemTracking(nCol, (nCol != (nNumColumns - 1)));
+	}
 }
 
 void CKanbanCtrl::RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray)
