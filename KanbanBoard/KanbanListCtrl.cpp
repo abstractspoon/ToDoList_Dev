@@ -261,7 +261,9 @@ void CKanbanListCtrl::RefreshItemLineHeights(HTREEITEM hti)
 
 	if (pKI)
 	{
-		int nNumLines = (NUM_TITLELINES + GetItemDisplayAttributeCount(*pKI));
+		int nNumLines = NUM_TITLELINES;
+		nNumLines += GetItemDisplayAttributeCount(*pKI);
+		nNumLines += pKI->nLevel; // for displaying parents
 
 		TCH().SetItemIntegral(hti, nNumLines);
 	}
@@ -564,6 +566,7 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				FillItemBackground(pDC, pKI, rItem, crText, bSelected);
 	
 				// Bar affects everything else
+				DrawItemParents(pDC, pKI, rItem);
 				DrawItemBar(pDC, pKI, rItem);
 
 				// Icons don't affect attributes
@@ -646,6 +649,43 @@ void CKanbanListCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const 
 
 	if (pOldFont)
 		pDC->SelectObject(pOldFont);
+}
+
+void CKanbanListCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
+{
+	if (pKI->dwParentID)
+	{
+		CStringArray aParentTitles;
+		DWORD dwParentID = pKI->dwParentID;
+
+		while (dwParentID)
+		{
+			const KANBANITEM* pKIParent = GetKanbanItem(dwParentID);
+
+			aParentTitles.Add(pKIParent->sTitle);
+			dwParentID = pKIParent->dwParentID;
+		}
+
+		// Draw in reverse order
+		int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
+		int nParent = aParentTitles.GetSize();
+		
+		CRect rParent(rItem);
+		rParent.DeflateRect(TEXT_BORDER);
+	
+		pDC->SetBkMode(TRANSPARENT);
+		pDC->SetTextColor(0);
+
+		while (nParent--)
+		{
+			pDC->DrawText(aParentTitles[nParent], rParent, nFlags);
+
+			rParent.top += (m_nItemTextHeight + m_nItemTextBorder);
+			rParent.left += 5;
+		}
+
+		rItem.top = rParent.top;
+	}
 }
 
 void CKanbanListCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
@@ -801,6 +841,11 @@ BOOL CKanbanListCtrl::GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEd
 
 	rItem.left = (rCheckbox.right + CHECKBOX_PADDING);
 	rItem.left += (IMAGE_SIZE + IMAGE_PADDING);
+
+	if (!pKI)
+		pKI = GetKanbanItem(GetTaskID(hti));
+	
+	rItem.top += (pKI->nLevel * (m_nItemTextHeight + m_nItemTextBorder));
 
 	if (m_bShowTaskColorAsBar)
 		rItem.left += (BAR_WIDTH + IMAGE_PADDING);

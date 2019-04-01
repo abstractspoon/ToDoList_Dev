@@ -177,6 +177,7 @@ protected:
 	BOOL HitTestFlag(HTREEITEM hti, CPoint point) const;
 
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
+	void DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags) const;
