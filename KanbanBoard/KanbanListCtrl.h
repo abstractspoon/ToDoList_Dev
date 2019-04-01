@@ -53,6 +53,10 @@ public:
 	
 	BOOL Create(UINT nID, CWnd* pParentWnd);
 	HTREEITEM AddTask(const KANBANITEM& ki, BOOL bSelect);
+	BOOL DeleteTask(DWORD dwTaskID);
+	BOOL DeleteAll();
+	void RemoveDeletedTasks(const CDWordSet& mapCurIDs);
+
 	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending);
 	
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
@@ -63,7 +67,6 @@ public:
 	HTREEITEM FindTask(const IUISELECTTASK& select, BOOL bNext, HTREEITEM htiStart = NULL) const;
 
 	DWORD GetTaskID(HTREEITEM hti) const { return GetItemData(hti); }
-	BOOL DeleteTask(DWORD dwTaskID);
 
 	DWORD GetSelectedTaskID() const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs) { return FALSE; }
@@ -109,6 +112,9 @@ protected:
 	const CDWordArray& m_aPriorityColors;
 	const CKanbanAttributeArray& m_aDisplayAttrib;
 
+	// For quick lookup
+	CMap<DWORD, DWORD, HTREEITEM, HTREEITEM&> m_mapItems;
+
 	CImageList m_ilCheckboxes, m_ilFlags;
 	CToolTipCtrlEx m_tooltip;
 	CTreeCtrlHelper m_tch;
@@ -144,6 +150,12 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+protected:
+	// Prevent parent calling these
+	void DeleteAllItems() {}
+	void InsertItem() {}
+	void DeleteItem() {}
+	
 protected:
 	const KANBANITEM* GetKanbanItem(DWORD dwTaskID) const;
 	int CalcItemTitleTextHeight() const;

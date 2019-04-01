@@ -341,19 +341,21 @@ HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki, BOOL bSelect)
 		return hti;
 	}
 
-	hti = InsertItem(TVIF_TEXT | TVIF_PARAM, 
-					 ki.sTitle,
-					 0,
-					 0,
-					 0,
-					 0,
-					 ki.dwTaskID,
-					 TVI_ROOT,
-					 TVI_LAST);
+	hti = CTreeCtrl::InsertItem(TVIF_TEXT | TVIF_PARAM,
+								ki.sTitle,
+								0,
+								0,
+								0,
+								0,
+								ki.dwTaskID,
+								TVI_ROOT,
+								TVI_LAST);
 	ASSERT(hti);
 
 	if (hti)
 	{
+		m_mapItems[ki.dwTaskID] = hti;
+
 		RefreshItemLineHeights(hti);
 
 		// select item and make visible
@@ -981,7 +983,11 @@ const KANBANITEM* CKanbanColumnCtrl::GetKanbanItem(DWORD dwTaskID) const
 
 HTREEITEM CKanbanColumnCtrl::FindTask(DWORD dwTaskID) const
 {
-	return m_tch.FindItem(dwTaskID);
+	HTREEITEM hti = NULL;
+	m_mapItems.Lookup(dwTaskID, hti);
+
+	return hti;
+	//return m_tch.FindItem(dwTaskID);
 }
 
 HTREEITEM CKanbanColumnCtrl::FindTask(const CPoint& ptScreen) const
@@ -1021,13 +1027,38 @@ BOOL CKanbanColumnCtrl::DeleteTask(DWORD dwTaskID)
 {
 	HTREEITEM hti = FindTask(dwTaskID);
 
-	if (hti && DeleteItem(hti))
+	if (hti && CTreeCtrl::DeleteItem(hti))
 	{
-		//RefreshColumnTitle();
+		m_mapItems.RemoveKey(dwTaskID);
 		return TRUE;
 	}
 
 	return FALSE;
+}
+
+BOOL CKanbanColumnCtrl::DeleteAll()
+{
+	m_mapItems.RemoveAll();
+
+	return CTreeCtrl::DeleteAllItems();
+}
+
+void CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
+{
+	HTREEITEM hti = GetChildItem(NULL);
+
+	while (hti)
+	{
+		DWORD dwTaskID = GetTaskID(hti);
+
+		// get next item before deleting this one
+		HTREEITEM htiNext = GetNextItem(hti, TVGN_NEXT);
+
+		if (!mapCurIDs.Has(dwTaskID))
+			CTreeCtrl::DeleteItem(hti);
+
+		hti = htiNext;
+	}
 }
 
 int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)

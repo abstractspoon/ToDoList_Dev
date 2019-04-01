@@ -663,20 +663,8 @@ void CKanbanColumnCtrlArray::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 		CKanbanColumnCtrl* pCol = GetAt(nCol);
 		ASSERT(pCol);
 
-		HTREEITEM hti = pCol->GetChildItem(NULL);
-
-		while (hti)
-		{
-			DWORD dwTaskID = pCol->GetTaskID(hti);
-	
-			// get next item before deleting this one
-			HTREEITEM htiNext = pCol->GetNextItem(hti, TVGN_NEXT);
-
-			if (!mapCurIDs.Has(dwTaskID))
-				pCol->DeleteItem(hti);
-
-			hti = htiNext;
-		}
+		if (pCol)
+			pCol->RemoveDeletedTasks(mapCurIDs);
 	}
 }
 

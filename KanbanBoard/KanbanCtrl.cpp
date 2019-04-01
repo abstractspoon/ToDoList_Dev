@@ -1988,7 +1988,7 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 	DWORD dwSelID = pCol->GetSelectedTaskID();
 
 	pCol->SetRedraw(FALSE);
-	pCol->DeleteAllItems();
+	pCol->DeleteAll();
 
 	CStringArray aValueIDs;
 	int nNumVals = pCol->GetAttributeValueIDs(aValueIDs);
