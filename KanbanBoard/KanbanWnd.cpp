@@ -760,11 +760,15 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 
 	ProcessTrackedAttributeChange();
 
-	CKanbanAttributeArray aAttrib;
-	m_dlgPrefs.GetDisplayAttributes(aAttrib);
-	m_ctrlKanban.SetDisplayAttributes(aAttrib);
-
 	m_toolbar.RefreshButtonStates();
+}
+
+void CKanbanWnd::RefreshKanbanCtrlDisplayAttributes()
+{
+	CKanbanAttributeArray aAttrib;
+
+	m_dlgPrefs.GetDisplayAttributes(aAttrib, m_nTrackedAttrib);
+	m_ctrlKanban.SetDisplayAttributes(aAttrib);
 }
 
 LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
@@ -875,19 +879,11 @@ void CKanbanWnd::OnKanbanPreferences()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs = m_ctrlKanban.GetCustomAttributeDefinitions();
-
-	CKanbanAttributeValueMap mapValues;
-	m_ctrlKanban.GetAttributeValues(mapValues);
-
-	CKanbanAttributeArray aDisplayAttrib;
-	m_ctrlKanban.GetDisplayAttributes(aDisplayAttrib);
-
 	// If the user creates fixed column defs for the first time
 	// we will automatically turn them on
 	BOOL bHadFixedColumns = m_dlgPrefs.HasFixedColumns();
 	
-	if (m_dlgPrefs.DoModal(aCustAttribDefs, mapValues, aDisplayAttrib) == IDOK)
+	if (m_dlgPrefs.DoModal(m_ctrlKanban) == IDOK)
 	{
 		UpdateKanbanCtrlPreferences(bHadFixedColumns != m_dlgPrefs.HasFixedColumns());
 		Resize();
@@ -959,6 +955,7 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 
 	EnableDisableCtrls();
 	Resize();
+	RefreshKanbanCtrlDisplayAttributes();
 
 	// Track the new attribute
 	m_ctrlKanban.TrackAttribute(nTrackAttrib, sCustomAttrib, aColDefs);

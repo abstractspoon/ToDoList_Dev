@@ -23,6 +23,10 @@
 #include "..\Interfaces\iuiextension.h"
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CKanbanCtrl;
+
+/////////////////////////////////////////////////////////////////////////////
 // CKanbanPreferencesPage dialog
 
 class CKanbanPreferencesPage : public CPreferencesPageBase
@@ -41,7 +45,6 @@ public:
 	BOOL GetHideEmptyAttributes() const { return m_bHideEmptyAttributeValues; }
 	IUI_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const;
 	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const;
-	int SetDisplayAttributes(const CKanbanAttributeArray& aAttrib);
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
@@ -129,12 +132,12 @@ public:
 	BOOL GetIndentSubtasks() const { return m_page.GetIndentSubtasks(); }
 	BOOL GetHideEmptyAttributes() const { return m_page.GetHideEmptyAttributes(); }
 	IUI_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const { return m_page.GetFixedAttributeToTrack(sCustomID); }
-	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const { return m_page.GetDisplayAttributes(aAttrib); }
+	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib, IUI_ATTRIBUTE nExclude) const;
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
 
-	int DoModal(const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs, const CKanbanAttributeValueMap& mapValues, const CKanbanAttributeArray& aDisplayAttrib);
+	int DoModal(const CKanbanCtrl& ctrlKanban);
 
 protected:
 	CKanbanPreferencesPage m_page;

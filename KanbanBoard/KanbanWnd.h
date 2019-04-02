@@ -132,6 +132,7 @@ protected:
 	void EnableDisableCtrls();
 	void UpdatePriorityColors(const IPreferences* pPrefs);
 	void ProcessTrackedAttributeChange();
+	void RefreshKanbanCtrlDisplayAttributes();
 
 };
 

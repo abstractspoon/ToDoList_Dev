@@ -6,6 +6,7 @@
 #include "KanbanPreferencesDlg.h"
 #include "Kanbanenum.h"
 #include "KanbanMsg.h"
+#include "KanbanCtrl.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
@@ -509,18 +510,6 @@ int CKanbanPreferencesPage::GetDisplayAttributes(CKanbanAttributeArray& aAttrib)
 	return aAttrib.GetSize();
 }
 
-BOOL CKanbanPreferencesPage::SetDisplayAttributes(const CKanbanAttributeArray& aAttrib)
-{
-	if (m_lbDisplayAttrib.GetSafeHwnd())
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	m_aDisplayAttrib.Copy(aAttrib);
-	return TRUE;
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanPreferencesDlg dialog
 
@@ -541,13 +530,14 @@ BEGIN_MESSAGE_MAP(CKanbanPreferencesDlg, CPreferencesDlgBase)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-int CKanbanPreferencesDlg::DoModal(const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs, 
-								   const CKanbanAttributeValueMap& mapValues,
-								   const CKanbanAttributeArray& aDisplayAttrib)
+int CKanbanPreferencesDlg::DoModal(const CKanbanCtrl& ctrlKanban)
 {
-	m_page.SetCustomAttributes(aCustAttribDefs);
+	m_page.SetCustomAttributes(ctrlKanban.GetCustomAttributeDefinitions());
+
+	CKanbanAttributeValueMap mapValues;
+	ctrlKanban.GetAttributeValues(mapValues);
+
 	m_page.SetAttributeValues(mapValues);
-	m_page.SetDisplayAttributes(aDisplayAttrib);
 	
 	return CPreferencesDlgBase::DoModal();
 }
@@ -566,4 +556,17 @@ void CKanbanPreferencesDlg::DoHelp()
 
 	if (m_pParentWnd)
 		m_pParentWnd->SendMessage(WM_KBC_PREFSHELP);
+}
+
+int CKanbanPreferencesDlg::GetDisplayAttributes(CKanbanAttributeArray& aAttrib, IUI_ATTRIBUTE nExclude) const
+{
+	if (m_page.GetDisplayAttributes(aAttrib) && (nExclude != IUI_NONE))
+	{
+		int nFind = Misc::FindT(aAttrib, nExclude);
+
+		if (nFind != -1)
+			aAttrib.RemoveAt(nFind);
+	}
+
+	return aAttrib.GetSize();
 }
