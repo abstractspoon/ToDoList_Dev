@@ -172,7 +172,6 @@ KANBANITEM& KANBANITEM::operator=(const KANBANITEM& ki)
 {
 	dwTaskID = ki.dwTaskID;
 	sTitle = ki.sTitle;
-	sPath = ki.sPath;
 	color = ki.color;
 	dTimeEst = ki.dTimeEst;
 	dTimeSpent = ki.dTimeSpent;
@@ -196,7 +195,6 @@ BOOL KANBANITEM::operator==(const KANBANITEM& ki) const
 {
 	return ((dwTaskID == ki.dwTaskID) &&
 			(sTitle == ki.sTitle) && 
-			(sPath == ki.sPath) &&
 			(color == ki.color) &&
 			(dTimeEst == ki.dTimeEst) &&
 			(dTimeSpent == ki.dTimeSpent) &&
@@ -413,7 +411,6 @@ CString KANBANITEM::GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
 	case IUI_FILEREF:		return sFileRef;
 	case IUI_ID:			return Misc::Format(dwTaskID);
 	case IUI_PERCENT:		return Misc::Format(nPercent, _T("%"));
-	case IUI_PARENT:		return sPath;
 	case IUI_CREATEDBY:		return sCreatedBy;
 	case IUI_EXTERNALID:	return sExternalID;
 	case IUI_COST:			return Misc::Format(dCost, 2);
@@ -422,6 +419,7 @@ CString KANBANITEM::GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
 	case IUI_TIMESPENT:		return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
 
 	case IUI_FLAG:			// drawn separately
+	case IUI_PARENT:		// drawn separately
 	default:
 		ASSERT(0);
 		break;
@@ -455,7 +453,6 @@ BOOL KANBANITEM::HasAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
 	case IUI_LASTMOD:		return CDateHelper::IsDateSet(dtLastMod);
 
 	case IUI_FILEREF:		return !sFileRef.IsEmpty();
-	case IUI_PARENT:		return !sPath.IsEmpty();
 	case IUI_CREATEDBY:		return !sCreatedBy.IsEmpty();
 	case IUI_EXTERNALID:	return !sExternalID.IsEmpty();
 	case IUI_RECURRENCE:	return !sRecurrence.IsEmpty();
@@ -465,6 +462,7 @@ BOOL KANBANITEM::HasAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
 	case IUI_TIMEEST:		return (dTimeEst > 0);
 	case IUI_TIMESPENT:		return (dTimeSpent > 0);
 
+	case IUI_PARENT:		break; // handled separately
 	case IUI_FLAG:			break; // handled separately
 	}
 

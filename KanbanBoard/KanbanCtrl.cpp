@@ -714,22 +714,17 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 		pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 	
-		// Path is parent's path + parent's name
 		if (dwParentID)
 		{
 			const KANBANITEM* pKIParent = m_data.GetItem(dwParentID);
 			ASSERT(pKIParent);
 
-			if (pKIParent->sPath.IsEmpty())
-				pKI->sPath = pKIParent->sTitle;
-			else
-				pKI->sPath = pKIParent->sPath + '\\' + pKIParent->sTitle;
-
-			pKI->nLevel = (pKIParent->nLevel + 1);
+			if (pKIParent)
+				pKI->nLevel = (pKIParent->nLevel + 1);
 		}
 		else
 		{
-			pKI->nLevel = 0;
+			ASSERT(pKI->nLevel == 0);
 		}
 
 		// trackable attributes
