@@ -1359,7 +1359,7 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 			{
 				DWORD dwPrevToTask;
 				VERIFY(m_dlgDepends.GetFromDependency(dwPrevToTask));
-				VERIFY(Misc::RemoveItem(dwPrevToTask, aDepends));
+				VERIFY(Misc::RemoveItemT(dwPrevToTask, aDepends));
 			}
 			break;
 			

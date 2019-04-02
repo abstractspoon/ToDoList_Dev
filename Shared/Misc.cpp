@@ -1164,33 +1164,6 @@ BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)
 
 	aFrom.RemoveAt(nFind);
 	return TRUE;
-
-	return (nFind != -1);
-}
-
-BOOL Misc::RemoveItem(DWORD dwItem, CDWordArray& aFrom)
-{
-	int nFind = Find(dwItem, aFrom);
-
-	if (nFind == -1)
-		return -1;
-
-	aFrom.RemoveAt(nFind);
-	return TRUE;
-}
-
-int Misc::Find(DWORD dwItem, const CDWordArray& array)
-{
-	int nItem = array.GetSize();
-
-	while (nItem--)
-	{
-		if (array[nItem] == dwItem)
-			return nItem;
-	}
-
-	// not found
-	return -1;
 }
 
 int Misc::AddUniqueItems(const CStringArray& array, CStringArray& aTo, BOOL bCaseSensitive)

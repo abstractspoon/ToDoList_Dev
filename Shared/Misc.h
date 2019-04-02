@@ -136,8 +136,6 @@ namespace Misc
 		BOOL bOrderSensitive = FALSE);
 	BOOL MatchAny(const CDWordArray& array1, const CDWordArray& array2);
 	
-	BOOL RemoveItem(DWORD dwItem, CDWordArray& aFrom);
-
 #ifdef _DEBUG
 	void Trace(const CStringArray& array);
 #endif
@@ -411,7 +409,6 @@ namespace Misc
 	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
 	int Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = TRUE, int iStart = 0);
 	int Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = TRUE, BOOL bWholeWord = FALSE, int iStart = 0);
-	int Find(DWORD dwItem, const CDWordArray& array);
 	int Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
 	BOOL Contains(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive = FALSE, BOOL bPartialOK = TRUE);
 
