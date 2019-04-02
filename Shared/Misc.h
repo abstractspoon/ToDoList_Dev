@@ -163,7 +163,29 @@ namespace Misc
 		return array.GetData()[nItem];
 	}
 
-/*
+	template <class T, class S> 
+	BOOL AddUniqueItemT(S item, T& array)
+	{
+		if (FindT(item, array) != -1)
+			return FALSE;
+
+		array.Add(item);
+		return TRUE;
+	}
+
+	template <class T, class S>
+	BOOL RemoveItemT(const S& item, T& array)
+	{
+		int nFind = FindT(item, array);
+
+		if (nFind == -1)
+			return FALSE;
+
+		array.RemoveAt(nFind);
+		return TRUE;
+	}
+	
+	/*
 	template <class T> 
 	T IncrementItemT(CArray<T, T&>& array, int nItem)
 	{
