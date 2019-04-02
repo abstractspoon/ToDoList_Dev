@@ -62,8 +62,6 @@ public:
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 
 	void SetDisplayAttributes(const CKanbanAttributeArray& aAttrib);
-	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const;
-
 	BOOL CancelOperation();
 	void SetReadOnly(bool bReadOnly);
 	BOOL GetLabelEditRect(LPRECT pEdit);

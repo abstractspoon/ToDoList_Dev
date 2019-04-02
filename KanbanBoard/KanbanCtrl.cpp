@@ -2112,12 +2112,6 @@ void CKanbanCtrl::SetDisplayAttributes(const CKanbanAttributeArray& aAttrib)
 	}
 }
 
-int CKanbanCtrl::GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const
-{
-	aAttrib.Copy(m_aDisplayAttrib);
-	return aAttrib.GetSize();
-}
-
 void CKanbanCtrl::SetOptions(DWORD dwOptions)
 {
 	if (dwOptions != m_dwOptions)
