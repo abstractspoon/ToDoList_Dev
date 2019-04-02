@@ -99,6 +99,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_bSavingToImage(FALSE),
 	m_bDropTarget(FALSE),
 	m_bDrawTaskFlags(FALSE),
+	m_bDrawTaskParents(FALSE),
 	m_dwDisplay(0),
 	m_dwOptions(0),
 #pragma warning (disable: 4355)
@@ -230,6 +231,7 @@ void CKanbanColumnCtrl::SetMaximumTaskCount(int nMaxTasks)
 void CKanbanColumnCtrl::OnDisplayAttributeChanged()
 {
 	m_bDrawTaskFlags = (Misc::FindT(IUI_FLAG, m_aDisplayAttrib) != -1);
+	m_bDrawTaskParents = (Misc::FindT(IUI_PARENT, m_aDisplayAttrib) != -1);
 
 	RecalcItemLineHeight();
 	RefreshItemLineHeights();
@@ -258,7 +260,9 @@ void CKanbanColumnCtrl::RefreshItemLineHeights(HTREEITEM hti)
 	{
 		int nNumLines = NUM_TITLELINES;
 		nNumLines += GetItemDisplayAttributeCount(*pKI);
-		nNumLines += pKI->nLevel; // for displaying parents
+
+		if (m_bDrawTaskParents)
+			nNumLines += pKI->nLevel;
 
 		TCH().SetItemIntegral(hti, nNumLines);
 	}
@@ -272,10 +276,16 @@ int CKanbanColumnCtrl::GetItemDisplayAttributeCount(const KANBANITEM& ki) const
 	{
 		IUI_ATTRIBUTE nAttribID = m_aDisplayAttrib[nDisp];
 
-		if (nAttribID != IUI_FLAG)
+		switch (nAttribID)
 		{
+		case IUI_FLAG:
+		case IUI_PARENT:
+			break;
+
+		default:
 			if (!HasOption(KBCF_HIDEEMPTYATTRIBUTES) || ki.HasAttributeDisplayValue(nAttribID))
 				nCount++;
+			break;
 		}
 	}
 
@@ -585,10 +595,16 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 	{
 		IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
 
-		if (nAttrib != IUI_FLAG)
+		switch (nAttrib)
 		{
+		case IUI_FLAG:
+		case IUI_PARENT:
+			break;
+
+		default:
 			if (!HasOption(KBCF_HIDEEMPTYATTRIBUTES) || pKI->HasAttributeDisplayValue(nAttrib))
 				DrawAttribute(pDC, rAttrib, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags);
+			break;
 		}
 	}
 
@@ -598,7 +614,7 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 
 void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
 {
-	if (pKI->dwParentID)
+	if (m_bDrawTaskParents && pKI->dwParentID)
 	{
 		CStringArray aParentTitles;
 		DWORD dwParentID = pKI->dwParentID;
@@ -790,7 +806,8 @@ BOOL CKanbanColumnCtrl::GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL b
 	if (!pKI)
 		pKI = GetKanbanItem(GetTaskID(hti));
 	
-	rItem.top += (pKI->nLevel * (m_nItemTextHeight + m_nItemTextBorder));
+	if (m_bDrawTaskParents)
+		rItem.top += (pKI->nLevel * (m_nItemTextHeight + m_nItemTextBorder));
 
 	if (HasOption(KBCF_SHOWTASKCOLORASBAR))
 		rItem.left += (BAR_WIDTH + IMAGE_PADDING);

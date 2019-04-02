@@ -106,6 +106,7 @@ protected:
 	BOOL m_bSavingToImage;
 	BOOL m_bDropTarget;
 	BOOL m_bDrawTaskFlags;
+	BOOL m_bDrawTaskParents;
 
 	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;

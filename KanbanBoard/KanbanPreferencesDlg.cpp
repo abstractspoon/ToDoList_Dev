@@ -232,7 +232,7 @@ void CKanbanPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey
 	}
 
 	pPrefs->WriteProfileInt(szKey, _T("DisplayAttribCount"), nNumAttrib);
-	pPrefs->WriteProfileInt(szKey, _T("AutoAddFlag"), FALSE);
+	pPrefs->WriteProfileInt(szKey, _T("AutoAddFlagAndParent"), FALSE);
 }
 
 void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
@@ -287,9 +287,10 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	}	
 
 	// Backwards compatibility
-	if (pPrefs->GetProfileInt(szKey, _T("AutoAddFlag"), TRUE))
+	if (pPrefs->GetProfileInt(szKey, _T("AutoAddFlagAndParent"), TRUE))
 	{
 		Misc::AddUniqueItemT(IUI_FLAG, m_aDisplayAttrib);
+		Misc::AddUniqueItemT(IUI_PARENT, m_aDisplayAttrib);
 	}
 }
 

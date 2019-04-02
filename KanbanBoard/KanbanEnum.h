@@ -15,8 +15,8 @@
 
 // Pseudo Attributes
 
-const int IUI_PARENT		= IUI_POSITION;
-const int IUI_FIXEDCOLUMNS	= 0xffffffff;
+#define IUI_PARENT			IUI_POSITION
+#define IUI_FIXEDCOLUMNS	0xffffffff
 
 /////////////////////////////////////////////////////////////////////////////
 
