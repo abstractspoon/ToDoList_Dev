@@ -366,7 +366,7 @@ CKanbanColumnCtrl* CKanbanColumnCtrlArray::GetNext(const CKanbanColumnCtrl* pCol
 
 	if (pCol)
 	{
-		nCol = Misc::FindT(*this, pCol);
+		nCol = Misc::FindT(pCol, *this);
 
 		if (nCol == -1)
 		{

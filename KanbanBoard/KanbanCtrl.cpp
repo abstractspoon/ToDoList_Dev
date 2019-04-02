@@ -380,7 +380,7 @@ DWORD CKanbanCtrl::GetSelectedTaskID() const
 
 CKanbanColumnCtrl* CKanbanCtrl::GetSelColumn()
 {
-	ASSERT((m_pSelectedColumn == NULL) || Misc::HasT(m_aColumns, m_pSelectedColumn));
+	ASSERT((m_pSelectedColumn == NULL) || Misc::HasT(m_pSelectedColumn, m_aColumns));
 
 	if (!m_pSelectedColumn && m_aColumns.GetSize())
 		m_pSelectedColumn = m_aColumns[0];
@@ -1706,7 +1706,7 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate)
 	// because the app takes care of that
 	if (!bTaskUpdate && dwSelTaskID && !SelectTask(dwSelTaskID))
 	{
-		if (!m_pSelectedColumn || !Misc::HasT(m_aColumns, m_pSelectedColumn))
+		if (!m_pSelectedColumn || !Misc::HasT(m_pSelectedColumn, m_aColumns))
 		{
 			// Find the first list with some items
 			m_pSelectedColumn = m_aColumns.GetFirstNonEmpty();
@@ -1808,7 +1808,7 @@ void CKanbanCtrl::FixupSelectedColumn()
 	ASSERT(m_aColumns.GetSize());
 
 	// Make sure selected list is valid
-	if (!m_pSelectedColumn || !Misc::HasT(m_aColumns, m_pSelectedColumn))
+	if (!m_pSelectedColumn || !Misc::HasT(m_pSelectedColumn, m_aColumns))
 	{
 		// Find the first list with some items
 		m_pSelectedColumn = m_aColumns.GetFirstNonEmpty();
@@ -2903,7 +2903,7 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 				if (!WantShowColumn(pSrcCol) && UsingDynamicColumns())
 				{
-					int nCol = Misc::FindT(m_aColumns, pSrcCol);
+					int nCol = Misc::FindT(pSrcCol, m_aColumns);
 					ASSERT(nCol != -1);
 
 					m_aColumns.RemoveAt(nCol);

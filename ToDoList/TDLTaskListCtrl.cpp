@@ -1267,7 +1267,7 @@ int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocused
 	
 		dwFocusedTaskID = GetFocusedListTaskID();
 	}
-	ASSERT((!aTaskIDs.GetSize() && (dwFocusedTaskID == 0)) || Misc::HasT(aTaskIDs, dwFocusedTaskID));
+	ASSERT((!aTaskIDs.GetSize() && (dwFocusedTaskID == 0)) || Misc::HasT(dwFocusedTaskID, aTaskIDs));
 	
 	return aTaskIDs.GetSize();
 }
@@ -1413,7 +1413,7 @@ int CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache, BOOL bEns
 		CDWordArray aTaskIDs;
 		aTaskIDs.Copy(cache.aSelTaskIDs);
 		
-		if (!Misc::HasT(aTaskIDs, dwFocusedTaskID))
+		if (!Misc::HasT(dwFocusedTaskID, aTaskIDs))
 			aTaskIDs.Add(dwFocusedTaskID);
 			
 		SetSelectedTasks(aTaskIDs, dwFocusedTaskID);

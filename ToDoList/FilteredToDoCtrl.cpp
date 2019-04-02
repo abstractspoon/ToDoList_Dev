@@ -800,7 +800,7 @@ BOOL CFilteredToDoCtrl::WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 			}
 			else
 			{
-				bWantTask = Misc::HasT(m_aSelectedTaskIDsForFiltering, pTDS->GetTaskID());
+				bWantTask = Misc::HasT(pTDS->GetTaskID(), m_aSelectedTaskIDsForFiltering);
 
 				// check parents
 				if (!bWantTask && pFilter->bWantAllSubtasks)
@@ -809,7 +809,7 @@ BOOL CFilteredToDoCtrl::WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 
 					while (pTDSParent && !pTDSParent->IsRoot() && !bWantTask)
 					{
-						bWantTask = Misc::HasT(m_aSelectedTaskIDsForFiltering, pTDSParent->GetTaskID());
+						bWantTask = Misc::HasT(pTDSParent->GetTaskID(), m_aSelectedTaskIDsForFiltering);
 						pTDSParent = pTDSParent->GetParentTask();
 					}
 				}

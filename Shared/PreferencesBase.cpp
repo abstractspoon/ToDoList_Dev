@@ -186,7 +186,7 @@ BOOL CPreferencesPageBase::GetHighlightRect(HWND hwnd, CRect& rHighlight) const
 	if (!::IsWindowVisible(hwnd))
 		return FALSE;
 
-	ASSERT(Misc::HasT(m_aHighlightedCtrls, hwnd));
+	ASSERT(Misc::HasT(hwnd, m_aHighlightedCtrls));
 
 	::GetWindowRect(hwnd, rHighlight);
 	ScreenToClient(rHighlight);
@@ -275,7 +275,7 @@ HBRUSH CPreferencesPageBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	switch (nCtlColor)
 	{
 		case CTLCOLOR_STATIC:
-			if (Misc::HasT(m_aHighlightedCtrls, pWnd->GetSafeHwnd()))
+			if (Misc::HasT(pWnd->GetSafeHwnd(), m_aHighlightedCtrls))
 			{
 				hbr = m_brHighlight;
 			}
@@ -288,7 +288,7 @@ HBRUSH CPreferencesPageBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 		case CTLCOLOR_EDIT:
 		case CTLCOLOR_LISTBOX:
-			if (Misc::HasT(m_aHighlightedCtrls, pWnd->GetSafeHwnd()))
+			if (Misc::HasT(pWnd->GetSafeHwnd(), m_aHighlightedCtrls))
 			{
 				hbr = m_brHighlight;
 			}

@@ -229,7 +229,7 @@ void CKanbanColumnCtrl::SetMaximumTaskCount(int nMaxTasks)
 
 void CKanbanColumnCtrl::OnDisplayAttributeChanged()
 {
-	m_bDrawTaskFlags = (Misc::FindT(m_aDisplayAttrib, IUI_FLAG) != -1);
+	m_bDrawTaskFlags = (Misc::FindT(IUI_FLAG, m_aDisplayAttrib) != -1);
 
 	RecalcItemLineHeight();
 	RefreshItemLineHeights();

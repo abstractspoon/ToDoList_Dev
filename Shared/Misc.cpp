@@ -1035,7 +1035,7 @@ BOOL Misc::MatchAll(const CDWordArray& array1, const CDWordArray& array2,
 	for (int nItem1 = 0; nItem1 < nSize1; nItem1++)
 	{
 		// look for matching item in array2
-		if (FindT(array2, array1[nItem1]) == -1)
+		if (FindT(array1[nItem1], array2) == -1)
 		{
 			// no-match found == not the same
 			return FALSE;
@@ -1052,7 +1052,7 @@ BOOL Misc::MatchAny(const CDWordArray& array1, const CDWordArray& array2)
 	for (int nItem1 = 0; nItem1 < nSize1; nItem1++)
 	{
 		// look for matching item
-		if (FindT(array2, array1[nItem1]) != -1)
+		if (FindT(array1[nItem1], array2) != -1)
 			return TRUE;
 	}
 	

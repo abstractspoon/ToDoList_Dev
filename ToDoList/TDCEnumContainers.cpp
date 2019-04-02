@@ -125,7 +125,7 @@ CTDCAttributeArray::~CTDCAttributeArray()
 
 BOOL CTDCAttributeArray::Has(TDC_ATTRIBUTE nAttrib) const
 {
-	return Misc::HasT(*this, nAttrib);
+	return Misc::HasT(nAttrib, *this);
 }
 
 int CTDCAttributeArray::Add(TDC_ATTRIBUTE nAttrib)
@@ -191,7 +191,7 @@ CTDCColumnIDArray::~CTDCColumnIDArray()
 
 BOOL CTDCColumnIDArray::Has(TDC_COLUMN nColID) const
 {
-	return Misc::HasT(*this, nColID);
+	return Misc::HasT(nColID, *this);
 }
 
 int CTDCColumnIDArray::Add(TDC_COLUMN nColID)

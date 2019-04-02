@@ -1297,7 +1297,7 @@ CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLI
 		if (format && (format == nFormat))
 			return format;
 		
-		if (Misc::HasT(aFormatIDs, (DWORD)nFormat))
+		if (Misc::HasT((DWORD)nFormat, aFormatIDs))
 			return nFormat;
 	}
 
@@ -1308,7 +1308,7 @@ CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLI
 			return format;
 
 		// else try for plain text
-		if (Misc::HasT(aFormatIDs, (DWORD)CB_TEXTFORMAT))
+		if (Misc::HasT((DWORD)CB_TEXTFORMAT, aFormatIDs))
 			return CB_TEXTFORMAT;
 	}
 

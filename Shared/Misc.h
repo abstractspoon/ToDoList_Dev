@@ -221,7 +221,7 @@ namespace Misc
 	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim = TRUE);
 
 	template <class T, class S> 
-	int FindT(const T& array, const S& toFind)
+	int FindT(const S& toFind, const T& array)
 	{
 		int nItem = array.GetSize();
 		const S* pData = array.GetData();
@@ -237,9 +237,9 @@ namespace Misc
 	}
 	
 	template <class T, class S> 
-	int HasT(const T& array, const S& toFind)
+	int HasT(const S& toFind, const T& array)
 	{
-		return (FindT<T, S>(array, toFind) != -1);
+		return (FindT<T, S>(toFind, array) != -1);
 	}
 
 

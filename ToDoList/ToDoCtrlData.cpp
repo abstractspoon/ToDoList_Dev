@@ -1837,8 +1837,8 @@ TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString&
 
 		while (nItem--)
 		{
-			if (!Misc::HasT(aMatched, aNewItems[nItem]) &&
-				!Misc::HasT(aMixed, aNewItems[nItem]))
+			if (!Misc::HasT(aNewItems[nItem], aMatched) &&
+				!Misc::HasT(aNewItems[nItem], aMixed))
 			{
 				aNewItems.RemoveAt(nItem);
 			}
