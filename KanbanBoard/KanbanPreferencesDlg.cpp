@@ -289,10 +289,7 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	// Backwards compatibility
 	if (pPrefs->GetProfileInt(szKey, _T("AutoAddFlag"), TRUE))
 	{
-		IUI_ATTRIBUTE nAttrib = IUI_FLAG;
-
-		if (!Misc::HasT(m_aDisplayAttrib, nAttrib))
-			m_aDisplayAttrib.Add(nAttrib);
+		Misc::AddUniqueItemT(IUI_FLAG, m_aDisplayAttrib);
 	}
 }
 
@@ -561,12 +558,7 @@ void CKanbanPreferencesDlg::DoHelp()
 int CKanbanPreferencesDlg::GetDisplayAttributes(CKanbanAttributeArray& aAttrib, IUI_ATTRIBUTE nExclude) const
 {
 	if (m_page.GetDisplayAttributes(aAttrib) && (nExclude != IUI_NONE))
-	{
-		int nFind = Misc::FindT(aAttrib, nExclude);
-
-		if (nFind != -1)
-			aAttrib.RemoveAt(nFind);
-	}
+		Misc::RemoveItemT(nExclude, aAttrib);
 
 	return aAttrib.GetSize();
 }

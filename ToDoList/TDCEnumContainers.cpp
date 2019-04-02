@@ -128,23 +128,14 @@ BOOL CTDCAttributeArray::Has(TDC_ATTRIBUTE nAttrib) const
 	return Misc::HasT(nAttrib, *this);
 }
 
-int CTDCAttributeArray::Add(TDC_ATTRIBUTE nAttrib)
+BOOL CTDCAttributeArray::AddUnique(TDC_ATTRIBUTE nAttrib)
 {
-	int nFind = Misc::FindT(*this, nAttrib);
-
-	if (nFind != -1)
-		return nFind;
-
-	// else
-	return CArray<TDC_ATTRIBUTE, TDC_ATTRIBUTE>::Add(nAttrib);
+	return Misc::AddUniqueItemT(nAttrib, *this);
 }
 
 void CTDCAttributeArray::Remove(TDC_ATTRIBUTE nAttrib)
 {
-	int nFind = Misc::FindT(*this, nAttrib);
-
-	if (nFind != -1)
-		RemoveAt(nFind);
+	Misc::RemoveItemT(nAttrib, *this);
 }
 
 BOOL CTDCAttributeArray::MatchAll(const CTDCAttributeArray& aOther) const
@@ -194,23 +185,14 @@ BOOL CTDCColumnIDArray::Has(TDC_COLUMN nColID) const
 	return Misc::HasT(nColID, *this);
 }
 
-int CTDCColumnIDArray::Add(TDC_COLUMN nColID)
+BOOL CTDCColumnIDArray::AddUnique(TDC_COLUMN nColID)
 {
-	int nFind = Misc::FindT(*this, nColID);
-
-	if (nFind != -1)
-		return nFind;
-
-	// else
-	return CArray<TDC_COLUMN, TDC_COLUMN>::Add(nColID);
+	return Misc::AddUniqueItemT(nColID, *this);
 }
 
 void CTDCColumnIDArray::Remove(TDC_COLUMN nColID)
 {
-	int nFind = Misc::FindT(*this, nColID);
-
-	if (nFind != -1)
-		RemoveAt(nFind);
+	Misc::RemoveItemT(nColID, *this);
 }
 
 BOOL CTDCColumnIDArray::MatchAll(const CTDCColumnIDArray& aOther) const

@@ -381,7 +381,7 @@ namespace TDC
 			TDC_ATTRIBUTE att = MapColumnToAttribute(aCols[nCol]);
 			
 			if (att != TDCA_NONE)
-				aAttrib.Add(att);
+				aAttrib.AddUnique(att);
 		}
 		
 		return aAttrib.GetSize();

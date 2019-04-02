@@ -111,7 +111,7 @@ int CTDLColumnListBox::GetAllColumns(CTDCColumnIDArray& aColumns) const
 	while (nIndex--)
 	{
 		TDC_COLUMN col = m_aColumns[nIndex].nTDCCol;
-		aColumns.Add(col);
+		VERIFY(aColumns.AddUnique(col));
 	}
 
 	return aColumns.GetSize();
@@ -203,7 +203,7 @@ int CTDLColumnListBox::GetVisibleColumns(CTDCColumnIDArray& aColumns) const
 		COLUMNVIS cs = m_aColumns[nIndex];
 
 		if (cs.bVisible)
-			aColumns.Add(cs.nTDCCol);
+			VERIFY(aColumns.AddUnique(cs.nTDCCol));
 	}
 
 	return aColumns.GetSize();

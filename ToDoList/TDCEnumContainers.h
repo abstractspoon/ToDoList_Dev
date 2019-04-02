@@ -84,7 +84,7 @@ public:
 	~CTDCAttributeArray();
 	
 	BOOL Has(TDC_ATTRIBUTE nAttrib) const;
-	int Add(TDC_ATTRIBUTE nAttrib);
+	BOOL AddUnique(TDC_ATTRIBUTE nAttrib);
 	void Remove(TDC_ATTRIBUTE nAttrib);
 
 	BOOL MatchAll(const CTDCAttributeArray& aOther) const;
@@ -112,7 +112,7 @@ public:
 	~CTDCColumnIDArray();
 
 	BOOL Has(TDC_COLUMN nColID) const;
-	int Add(TDC_COLUMN nColID);
+	BOOL AddUnique(TDC_COLUMN nColID);
 	void Remove(TDC_COLUMN nColID);
 
 	BOOL MatchAll(const CTDCColumnIDArray& aOther) const;

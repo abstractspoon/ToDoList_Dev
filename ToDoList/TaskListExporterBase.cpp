@@ -635,8 +635,8 @@ void CTaskListExporterBase::BuildAttribList(const ITASKLISTBASE* pTasks, HTASKIT
 		// always add custom attribs
 		if (pTasks->GetCustomAttributeCount())
 		{
-			ARRATTRIBUTES.Add(TDCA_CUSTOMATTRIB);
-			ARRLABELS.Add(_T(""));
+			if (ARRATTRIBUTES.AddUnique(TDCA_CUSTOMATTRIB))
+				ARRLABELS.Add(_T(""));
 		}
 	}
 
@@ -655,10 +655,8 @@ void CTaskListExporterBase::BuildAttribList(const ITASKLISTBASE* pTasks, HTASKIT
 void CTaskListExporterBase::CheckAddAttribtoList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 												TDC_ATTRIBUTE attrib, LPCTSTR szAttribName)
 {
-	if (pTasks->TaskHasAttribute(hTask, szAttribName) && !WantAttribute(attrib))
+	if (pTasks->TaskHasAttribute(hTask, szAttribName) && ARRATTRIBUTES.AddUnique(attrib))
 	{
-		ARRATTRIBUTES.Add(attrib);
-
 		// translate label once only
 		CEnString sLabel(GetAttribLabel(attrib));
 		sLabel.Translate();
@@ -674,16 +672,7 @@ BOOL CTaskListExporterBase::WantAttribute(TDC_ATTRIBUTE attrib) const
 
 int CTaskListExporterBase::FindAttribute(TDC_ATTRIBUTE attrib) const
 {
-	int nAttrib = ARRATTRIBUTES.GetSize();
-	
-	while (nAttrib--)
-	{
-		if (ARRATTRIBUTES[nAttrib] == attrib)
-			return nAttrib; 
-	}
-
-	// not found
-	return -1;
+	return Misc::FindT(attrib, ARRATTRIBUTES);
 }
 
 CString CTaskListExporterBase::GetAttribLabel(TDC_ATTRIBUTE attrib)

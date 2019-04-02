@@ -1711,10 +1711,7 @@ void CDialogHelper::InvalidateAllCtrls(const CWnd* pParent, BOOL bErase)
 
 void CDialogHelper::RemoveCtrlID(UINT nCtrlID, CUIntArray& aCtrlIDs)
 {
-	int nFind = Misc::FindT(aCtrlIDs, nCtrlID);
-
-	if (nFind != -1)
-		aCtrlIDs.RemoveAt(nFind);
+	Misc::RemoveItemT(nCtrlID, aCtrlIDs);
 }
 
 
