@@ -2736,7 +2736,6 @@ void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
 		rDivider.right++;
 
 		Invalidate(TRUE);
-		//InvalidateRect(rDivider, TRUE);
 	}
 }
 
