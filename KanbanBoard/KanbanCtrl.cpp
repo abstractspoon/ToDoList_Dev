@@ -2111,23 +2111,24 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 {
 	if (dwOptions != m_dwOptions)
 	{
-		if (Misc::FlagHasChanged(KBCF_SHOWPARENTTASKS, m_dwOptions, dwOptions))
+		DWORD dwPrevOptions = m_dwOptions;
+		m_dwOptions = dwOptions;
+
+		if (Misc::FlagHasChanged(KBCF_SHOWPARENTTASKS, m_dwOptions, dwPrevOptions))
 		{
 			RebuildColumns(TRUE, FALSE);
 		}
-		else if (Misc::FlagHasChanged(KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG, m_dwOptions, dwOptions))
+		else if (Misc::FlagHasChanged(KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG, m_dwOptions, dwPrevOptions))
 		{
 			RebuildColumns(FALSE, FALSE);
 		}
 
 		m_aColumns.SetOptions(dwOptions & ~(KBCF_SHOWPARENTTASKS | KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG));
 
-		if ((m_nSortBy != IUI_NONE) && Misc::FlagHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwOptions))
+		if ((m_nSortBy != IUI_NONE) && Misc::FlagHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwPrevOptions))
 		{
 			m_aColumns.SortItems(m_nSortBy, m_bSortAscending);
 		}
-
-		m_dwOptions = dwOptions;
 	}
 }
 
