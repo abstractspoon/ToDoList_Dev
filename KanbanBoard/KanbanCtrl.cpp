@@ -2235,7 +2235,7 @@ void CKanbanCtrl::Resize(int cx, int cy)
 			}
 
 			rCol.right = (rCol.left + m_header.GetItemWidth(nVis));
-			dwm.MoveWindow(pCol, rCol.left, rCol.top, rCol.Width() - 1, rCol.Height(), FALSE);
+			dwm.MoveWindow(pCol, rCol.left, rCol.top, rCol.Width() - 1, rCol.Height(), TRUE);
 
 			// Also update tab order as we go
 			pCol->SetWindowPos(pPrev, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOACTIVATE);
@@ -2263,7 +2263,7 @@ void CKanbanCtrl::ResizeHeader(CDeferWndMove& dwm, CRect& rAvail)
 	CRect rNewHeader(rAvail);
 	rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT);
 
-	dwm.MoveWindow(&m_header, rNewHeader, FALSE);
+	dwm.MoveWindow(&m_header, rNewHeader, TRUE);
 		
 	int nTotalColWidth = m_header.CalcTotalItemWidth();
 
@@ -2727,11 +2727,8 @@ void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
 		CRect rNextCol = CDialogHelper::GetChildRect(m_aColumns[pHDN->iItem + 1]);
 		rNextCol.left = (rThisCol.right + 1);
 
-		pThisCol->MoveWindow(rThisCol, FALSE);
-		pNextCol->MoveWindow(rNextCol, FALSE);
-
-		pThisCol->Invalidate(FALSE);
-		pNextCol->Invalidate(FALSE);
+		pThisCol->MoveWindow(rThisCol, TRUE);
+		pNextCol->MoveWindow(rNextCol, TRUE);
 
 		// Redraw the vertical divider
 		CRect rDivider(rThisCol);
