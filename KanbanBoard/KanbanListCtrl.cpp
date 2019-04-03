@@ -519,9 +519,16 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 				// Background
 				FillItemBackground(pDC, pKI, rItem, crText, bSelected);
+
+				// Parents
+				COLORREF crOtherText = crText;
+				
+				if (!bSelected && !Misc::IsHighContrastActive() && !pKI->IsDone(TRUE))
+					crOtherText = GraphicsMisc::Lighter(crText, 0.3);
+
+				DrawItemParents(pDC, pKI, rItem, crOtherText);
 	
 				// Bar affects everything else
-				DrawItemParents(pDC, pKI, rItem);
 				DrawItemBar(pDC, pKI, rItem);
 
 				// Icons don't affect attributes
@@ -530,13 +537,10 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				DrawItemIcons(pDC, pKI, rItem);
 				DrawItemTitle(pDC, pKI, rItem, crText);
 
-				if (!bSelected && !Misc::IsHighContrastActive() && !pKI->IsDone(TRUE))
-					crText = pDC->SetTextColor(GraphicsMisc::Lighter(crText, 0.3));
-
 				rAttributes.top += CalcItemTitleTextHeight();
 				rAttributes.top += IMAGE_PADDING;
 
-				DrawItemAttributes(pDC, pKI, rAttributes, crText);
+				DrawItemAttributes(pDC, pKI, rAttributes, crOtherText);
 			}
 			
 			*pResult |= CDRF_SKIPDEFAULT;
@@ -603,7 +607,7 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 
 		default:
 			if (!HasOption(KBCF_HIDEEMPTYATTRIBUTES) || pKI->HasAttributeDisplayValue(nAttrib))
-				DrawAttribute(pDC, rAttrib, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags);
+				DrawAttribute(pDC, rAttrib, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags, crText);
 			break;
 		}
 	}
@@ -612,7 +616,7 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 		pDC->SelectObject(pOldFont);
 }
 
-void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
+void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const
 {
 	if (m_bDrawTaskParents && pKI->dwParentID)
 	{
@@ -635,7 +639,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 		rParent.DeflateRect(TEXT_BORDER);
 	
 		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(0);
+		pDC->SetTextColor(crText);
 
 		while (nParent--)
 		{
@@ -904,7 +908,7 @@ UINT CKanbanColumnCtrl::GetDisplayFormat(IUI_ATTRIBUTE nAttrib, BOOL bLong)
 	return 0;
 }
 
-void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags) const
+void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const
 {
 	KBC_ATTRIBLABELS nLabelVis = m_nAttribLabelVisiability;
 	
@@ -912,6 +916,9 @@ void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAtt
 		nLabelVis = KBCAL_LONG;
 
 	CString sAttrib = FormatAttribute(nAttrib, sValue, nLabelVis);
+
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(crText);
 	pDC->DrawText(sAttrib, rLine, nFlags);
 
 	rLine.top += (m_nItemTextHeight + m_nItemTextBorder);

@@ -177,10 +177,10 @@ protected:
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
-	void DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
+	void DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const;
 	void DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
-	void DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags) const;
+	void DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const;
 	void FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText, BOOL bSelected) const;
 	void DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 	void DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
