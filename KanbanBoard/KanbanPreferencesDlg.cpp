@@ -290,7 +290,9 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	if (pPrefs->GetProfileInt(szKey, _T("AutoAddFlagAndParent"), TRUE))
 	{
 		Misc::AddUniqueItemT(IUI_FLAG, m_aDisplayAttrib);
-		Misc::AddUniqueItemT(IUI_PARENT, m_aDisplayAttrib);
+
+		if (!Misc::IsHighContrastActive())
+			Misc::AddUniqueItemT(IUI_PARENT, m_aDisplayAttrib);
 	}
 }
 
