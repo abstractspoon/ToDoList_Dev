@@ -253,7 +253,7 @@ void CKanbanColumnCtrl::RefreshItemLineHeights(HTREEITEM hti)
 {
 	ASSERT(hti);
 
-	const KANBANITEM* pKI = GetKanbanItem(GetTaskID(hti));
+	const KANBANITEM* pKI = m_data.GetItem(GetTaskID(hti));
 	ASSERT(pKI);
 
 	if (pKI)
@@ -500,7 +500,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		
 	case CDDS_ITEMPREPAINT:
 		{
-			const KANBANITEM* pKI = GetKanbanItem(pTVCD->nmcd.lItemlParam);
+			const KANBANITEM* pKI = m_data.GetItem(pTVCD->nmcd.lItemlParam);
 			
 			if (pKI)
 			{
@@ -620,20 +620,18 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 {
 	if (m_bDrawTaskParents && pKI->dwParentID)
 	{
-		CStringArray aParentTitles;
-		DWORD dwParentID = pKI->dwParentID;
+		CKanbanItemArray aParents;
+		const KANBANITEM* pKIParent = m_data.GetItem(pKI->dwParentID);
 
-		while (dwParentID)
+		while (pKIParent)
 		{
-			const KANBANITEM* pKIParent = GetKanbanItem(dwParentID);
-
-			aParentTitles.Add(pKIParent->sTitle);
-			dwParentID = pKIParent->dwParentID;
+			aParents.Add(pKIParent);
+			pKIParent = m_data.GetItem(pKIParent->dwParentID);
 		}
 
 		// Draw in reverse order
 		int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
-		int nParent = aParentTitles.GetSize();
+		int nParent = aParents.GetSize();
 		
 		CRect rParent(rItem);
 		rParent.DeflateRect(TEXT_BORDER);
@@ -643,10 +641,22 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 
 		while (nParent--)
 		{
-			pDC->DrawText(aParentTitles[nParent], rParent, nFlags);
+			const KANBANITEM* pKIParent = aParents[nParent];
+			ASSERT(pKIParent);
+			
+			int iImageIndex = -1;
+			HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, pKIParent->dwTaskID, (LPARAM)&iImageIndex);
+
+			if (hilTask && (iImageIndex != -1))
+			{
+				ImageList_DrawEx(hilTask, iImageIndex, *pDC, rParent.left, rParent.top, 0, 0, 0, 255, ILD_TRANSPARENT | ILD_BLEND50);
+				rParent.left += (IMAGE_SIZE + IMAGE_PADDING);
+			}
+
+			pDC->DrawText(pKIParent->sTitle, rParent, nFlags);
 
 			rParent.top += (m_nItemTextHeight + m_nItemTextBorder);
-			rParent.left += 5;
+			rParent.left = (rItem.left + 6);
 		}
 
 		rItem.top = rParent.top;
@@ -767,7 +777,7 @@ BOOL CKanbanColumnCtrl::GetItemRect(HTREEITEM hti, CRect& rItem, const KANBANITE
 	if (HasOption(KBCF_INDENTSUBTASKS))
 	{
 		if (!pKI)
-			pKI = GetKanbanItem(GetTaskID(hti));
+			pKI = m_data.GetItem(GetTaskID(hti));
 
 		ASSERT(pKI);
 
@@ -808,7 +818,7 @@ BOOL CKanbanColumnCtrl::GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL b
 	rItem.left += (IMAGE_SIZE + IMAGE_PADDING);
 
 	if (!pKI)
-		pKI = GetKanbanItem(GetTaskID(hti));
+		pKI = m_data.GetItem(GetTaskID(hti));
 	
 	if (m_bDrawTaskParents)
 		rItem.top += (pKI->nLevel * (m_nItemTextHeight + m_nItemTextBorder));
@@ -837,14 +847,12 @@ BOOL CKanbanColumnCtrl::GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL b
 BOOL CKanbanColumnCtrl::GetItemTooltipRect(HTREEITEM hti, CRect& rTip, const KANBANITEM* pKI) const
 {
 	if (!pKI)
-	{
-		pKI = GetKanbanItem(GetTaskID(hti));
+		pKI = m_data.GetItem(GetTaskID(hti));
 
-		if (!pKI)
-		{
-			ASSERT(0);
-			return FALSE;
-		}
+	if (!pKI)
+	{
+		ASSERT(0);
+		return FALSE;
 	}
 
 	if (!GetItemLabelTextRect(hti, rTip, FALSE, pKI))
@@ -991,20 +999,6 @@ BOOL CKanbanColumnCtrl::SelectTask(DWORD dwTaskID)
 	return CTreeCtrl::SelectItem(FindTask(dwTaskID));
 }
 
-const KANBANITEM* CKanbanColumnCtrl::GetKanbanItem(DWORD dwTaskID) const
-{
-	ASSERT(dwTaskID);
-	
-	KANBANITEM* pKI = NULL;
-	
-	if (dwTaskID && m_data.Lookup(dwTaskID, pKI))
-	{
-		ASSERT(pKI);
-	}
-	
-	return pKI;
-}
-
 HTREEITEM CKanbanColumnCtrl::FindTask(DWORD dwTaskID) const
 {
 	HTREEITEM hti = NULL;
@@ -1034,7 +1028,7 @@ HTREEITEM CKanbanColumnCtrl::FindTask(const IUISELECTTASK& select, BOOL bNext, H
 	while (htiNext)
 	{
 		DWORD dwTaskID = GetTaskID(htiNext);
-		const KANBANITEM* pKI = GetKanbanItem(dwTaskID);
+		const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
 
 		if (pKI->MatchesAttribute(select))
 		{
@@ -1424,8 +1418,7 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 	while (hti)
 	{
 		DWORD dwTaskID = GetTaskID(hti);
-		const KANBANITEM* pKI = GetKanbanItem(dwTaskID);
-		ASSERT(pKI);
+		const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
 
 		if (pKI)
 		{

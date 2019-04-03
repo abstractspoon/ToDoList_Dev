@@ -158,7 +158,6 @@ protected:
 	void DeleteItem() {}
 	
 protected:
-	const KANBANITEM* GetKanbanItem(DWORD dwTaskID) const;
 	int CalcItemTitleTextHeight() const;
 	void RecalcItemLineHeight();
 	void RefreshBkgndColor();
