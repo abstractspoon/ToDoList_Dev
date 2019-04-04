@@ -275,7 +275,8 @@ namespace DayViewUIExtension
                         if (rect.Width < nameWidth)
                             dayName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek);
 
-                        g.DrawString(dayName, fntDay, SystemBrushes.WindowText, rect, format);
+						TextRenderer.DrawText(g, dayName, fntDay, rect, SystemColors.WindowText);
+                        //g.DrawString(dayName, fntDay, SystemBrushes.WindowText, rect, format);
                     }
                 }
             }
