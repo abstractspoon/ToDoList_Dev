@@ -26,7 +26,7 @@ class CTDLCommentsCtrl : public CRuntimeDlg
 	DECLARE_DYNAMIC(CTDLCommentsCtrl)
 
 public:
-	CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CTDLContentMgr* pMgrContent = NULL);
+	CTDLCommentsCtrl(BOOL bShowLabel, int nComboLenDLU, const CTDLContentMgr* pMgrContent = NULL);
 	virtual ~CTDLCommentsCtrl();
 
 	BOOL Create(CWnd* pParent, UINT nID, const CRect& rPos = CRect(0, 0, 0, 0));
@@ -70,6 +70,7 @@ protected:
 
 	CString m_sPrefsFilePath;
 	BOOL m_bReadOnly;
+	BOOL m_bShowingLabel;
 
 	CONTENTFORMAT m_cfLastCustom;
 	CBinaryData m_LastCustomComments;

@@ -32,16 +32,17 @@ enum
 
 IMPLEMENT_DYNAMIC(CTDLCommentsCtrl, CRuntimeDlg)
 
-CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CTDLContentMgr* pMgrContent)
+CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bShowLabel, int nComboLenDLU, const CTDLContentMgr* pMgrContent)
 	:
 	m_pMgrContent(pMgrContent), 
 	m_cbCommentsFmt(pMgrContent, IDI_NULL),
 	m_hContentFont(NULL),
-	m_bReadOnly(FALSE)
+	m_bReadOnly(FALSE),
+	m_bShowingLabel(bShowLabel)
 {
 	int nComboOffsetDLU = 0;
 
-	if (bLabel)
+	if (m_bShowingLabel)
 	{
 		CString sLabel;
 		sLabel.LoadString(IDS_TDC_FIELD_COMMENTS);
@@ -174,14 +175,17 @@ void CTDLCommentsCtrl::OnSize(UINT nType, int cx, int cy)
 
 	if (m_ctrlComments.GetSafeHwnd())
 	{
-		// Use the combo to position its label
-		CRect rCombo = CDialogHelper::GetChildRect(&m_cbCommentsFmt);
-		CRect rLabel = CDialogHelper::GetCtrlRect(this, IDC_COMBOLABEL);
+		if (m_bShowingLabel)
+		{
+			// Use the combo to position its label
+			CRect rCombo = CDialogHelper::GetChildRect(&m_cbCommentsFmt);
+			CRect rLabel = CDialogHelper::GetCtrlRect(this, IDC_COMBOLABEL);
 
-		rLabel.top = rCombo.top;
-		rLabel.bottom = rCombo.bottom;
+			rLabel.top = rCombo.top;
+			rLabel.bottom = rCombo.bottom;
 
-		GetDlgItem(IDC_COMBOLABEL)->MoveWindow(rLabel);
+			GetDlgItem(IDC_COMBOLABEL)->MoveWindow(rLabel);
+		}
 		
 		CRect rComments;
 		CalcCommentsCtrlRect(rComments, cx, cy);
@@ -194,7 +198,7 @@ HBRUSH CTDLCommentsCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CRuntimeDlg::OnCtlColor(pDC, pWnd, nCtlColor);
 
-	if (nCtlColor == CTLCOLOR_STATIC)
+	if (m_bShowingLabel && (nCtlColor == CTLCOLOR_STATIC))
 	{
 		if (m_brBack.GetSafeHandle())
 		{
@@ -210,9 +214,11 @@ BOOL CTDLCommentsCtrl::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_theme.crAppBackLight != CLR_NONE)
 	{
-		ExcludeCtrl(this, IDC_COMBOLABEL, pDC);
 		ExcludeCtrl(this, IDC_COMBO, pDC);
 		ExcludeCtrl(this, IDC_CTRL, pDC);
+
+		if (m_bShowingLabel)
+			ExcludeCtrl(this, IDC_COMBOLABEL, pDC);
 
 		CRect rClient;
 		GetClientRect(rClient);
@@ -405,10 +411,13 @@ void CTDLCommentsCtrl::SetUITheme(const CUIThemeFile& theme)
 
 	m_theme = theme;
 
-	GraphicsMisc::VerifyDeleteObject(m_brBack);
+	if (m_bShowingLabel)
+	{
+		GraphicsMisc::VerifyDeleteObject(m_brBack);
 
-	if (m_theme.crAppBackLight != CLR_NONE)
-		m_brBack.CreateSolidBrush(m_theme.crAppBackLight);
+		if (m_theme.crAppBackLight != CLR_NONE)
+			m_brBack.CreateSolidBrush(m_theme.crAppBackLight);
+	}
 
 	m_ctrlComments.SetUITheme(m_theme);
 
