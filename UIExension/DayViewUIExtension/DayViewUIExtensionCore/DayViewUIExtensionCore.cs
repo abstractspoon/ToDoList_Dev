@@ -432,7 +432,7 @@ namespace DayViewUIExtension
             m_DayView.HideTasksSpanningDays = m_PrefsDlg.HideTasksSpanningDays;
 
 			m_DayView.SlotsPerHour = (60 / m_PrefsDlg.SlotMinutes);
-			m_DayView.MinSlotHeight = m_PrefsDlg.MinSlotHeight;
+			m_DayView.MinSlotHeight = DPIScaling.Scale(m_PrefsDlg.MinSlotHeight);
 
 			m_DayView.Invalidate();
 		}

@@ -18,15 +18,18 @@ namespace DayViewUIExtension
 			public SlotMinutesItem(int minutes)
 			{
 				numMinutes = minutes;
-				text = String.Format("{0} minutes", minutes);
 			}
 
 			public override String ToString()
 			{
-				return text;
+				return ToString(numMinutes);
 			}
 
-			private String text;
+			public static String ToString(int numMinutes)
+			{
+				return String.Format("{0} minutes", numMinutes);
+			}
+
 			public int numMinutes;
 		}
 
@@ -37,12 +40,11 @@ namespace DayViewUIExtension
 			DialogUtils.SetFont(this, font);
 			trans.Translate(this);
 
-			// Build 'slot's combo
-			for (int numSlots = 1; numSlots <= 12; numSlots++)
-			{
-				if (TDLDayView.IsValidSlotsPerHour(numSlots))
-					m_SlotMinuteCombo.Items.Add(new SlotMinutesItem(60 / numSlots));
-			}
+			// Build 'slot minutes' combo
+			var slotMins = new int[] { 5, 10, 15, 20, 30, 60 };
+
+			foreach (var mins in slotMins)
+				m_SlotMinuteCombo.Items.Add(new SlotMinutesItem(mins));
 
 			// Build 'slot height' combo
 			var slotHeights = new int[] { 5, 10, 15, 20, 25 };
@@ -88,9 +90,10 @@ namespace DayViewUIExtension
 			get
 			{
 				int numMins = 15;
+				var selSlot = (m_SlotMinuteCombo.SelectedItem as SlotMinutesItem);
 
-				if (m_SlotMinuteCombo.SelectedItem != null)
-					numMins = (int)m_MinSlotHeightCombo.SelectedItem;
+				if (selSlot != null)
+					numMins = selSlot.numMinutes;
 
 				return numMins;
 			}
@@ -102,7 +105,7 @@ namespace DayViewUIExtension
 				if (TDLDayView.IsValidSlotsPerHour(60 / value))
 					numMins = value;
 
-				int index = m_SlotMinuteCombo.FindStringExact(numMins.ToString());
+				int index = m_SlotMinuteCombo.FindStringExact(SlotMinutesItem.ToString(numMins));
 
 				if (index != -1)
 					m_SlotMinuteCombo.SelectedIndex = index;
@@ -113,12 +116,11 @@ namespace DayViewUIExtension
 		{
 			get
 			{
-				int height = 5;
-
 				if (m_MinSlotHeightCombo.SelectedItem != null)
-					height = (int)m_MinSlotHeightCombo.SelectedItem;
+					return (int)m_MinSlotHeightCombo.SelectedItem;
 
-				return DPIScaling.Scale(height);
+				// else
+				return 5;
 			}
 
 			set
