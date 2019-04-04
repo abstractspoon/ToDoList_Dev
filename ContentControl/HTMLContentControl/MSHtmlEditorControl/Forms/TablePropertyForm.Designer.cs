@@ -43,6 +43,7 @@ namespace MSDN.Html.Editor
 			this.labelPadding = new System.Windows.Forms.Label();
 			this.numericColumns = new System.Windows.Forms.NumericUpDown();
 			this.numericRows = new System.Windows.Forms.NumericUpDown();
+			this.label1 = new System.Windows.Forms.Label();
 			this.labelRowColumn = new System.Windows.Forms.Label();
 			this.groupPercentPixel = new System.Windows.Forms.Panel();
 			this.radioWidthPixel = new System.Windows.Forms.RadioButton();
@@ -54,7 +55,6 @@ namespace MSDN.Html.Editor
 			this.labelBorderAlign = new System.Windows.Forms.Label();
 			this.labelBorderSize = new System.Windows.Forms.Label();
 			this.numericBorderSize = new System.Windows.Forms.NumericUpDown();
-			this.label1 = new System.Windows.Forms.Label();
 			this.groupCaption.SuspendLayout();
 			this.groupLayout.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericCellSpacing)).BeginInit();
@@ -117,7 +117,7 @@ namespace MSDN.Html.Editor
 			// labelLocation
 			// 
 			this.labelLocation.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelLocation.Location = new System.Drawing.Point(200, 56);
+			this.labelLocation.Location = new System.Drawing.Point(202, 54);
 			this.labelLocation.Name = "labelLocation";
 			this.labelLocation.Size = new System.Drawing.Size(64, 23);
 			this.labelLocation.TabIndex = 7;
@@ -137,7 +137,7 @@ namespace MSDN.Html.Editor
 			// labelCaptionAlign
 			// 
 			this.labelCaptionAlign.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelCaptionAlign.Location = new System.Drawing.Point(8, 56);
+			this.labelCaptionAlign.Location = new System.Drawing.Point(10, 54);
 			this.labelCaptionAlign.Name = "labelCaptionAlign";
 			this.labelCaptionAlign.Size = new System.Drawing.Size(64, 23);
 			this.labelCaptionAlign.TabIndex = 5;
@@ -147,7 +147,7 @@ namespace MSDN.Html.Editor
 			// labelCaption
 			// 
 			this.labelCaption.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelCaption.Location = new System.Drawing.Point(8, 24);
+			this.labelCaption.Location = new System.Drawing.Point(10, 22);
 			this.labelCaption.Name = "labelCaption";
 			this.labelCaption.Size = new System.Drawing.Size(64, 23);
 			this.labelCaption.TabIndex = 1;
@@ -188,7 +188,7 @@ namespace MSDN.Html.Editor
 			// labelSpacing
 			// 
 			this.labelSpacing.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelSpacing.Location = new System.Drawing.Point(200, 61);
+			this.labelSpacing.Location = new System.Drawing.Point(204, 58);
 			this.labelSpacing.Name = "labelSpacing";
 			this.labelSpacing.Size = new System.Drawing.Size(98, 23);
 			this.labelSpacing.TabIndex = 5;
@@ -205,7 +205,7 @@ namespace MSDN.Html.Editor
 			// labelPadding
 			// 
 			this.labelPadding.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelPadding.Location = new System.Drawing.Point(8, 61);
+			this.labelPadding.Location = new System.Drawing.Point(10, 58);
 			this.labelPadding.Name = "labelPadding";
 			this.labelPadding.Size = new System.Drawing.Size(106, 23);
 			this.labelPadding.TabIndex = 3;
@@ -226,10 +226,20 @@ namespace MSDN.Html.Editor
 			this.numericRows.Size = new System.Drawing.Size(64, 20);
 			this.numericRows.TabIndex = 1;
 			// 
+			// label1
+			// 
+			this.label1.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.label1.Location = new System.Drawing.Point(204, 18);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(98, 23);
+			this.label1.TabIndex = 0;
+			this.label1.Text = "Column count:";
+			this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
 			// labelRowColumn
 			// 
 			this.labelRowColumn.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelRowColumn.Location = new System.Drawing.Point(8, 21);
+			this.labelRowColumn.Location = new System.Drawing.Point(10, 18);
 			this.labelRowColumn.Name = "labelRowColumn";
 			this.labelRowColumn.Size = new System.Drawing.Size(106, 23);
 			this.labelRowColumn.TabIndex = 0;
@@ -277,7 +287,7 @@ namespace MSDN.Html.Editor
 			// labelWidth
 			// 
 			this.labelWidth.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelWidth.Location = new System.Drawing.Point(8, 56);
+			this.labelWidth.Location = new System.Drawing.Point(10, 53);
 			this.labelWidth.Name = "labelWidth";
 			this.labelWidth.Size = new System.Drawing.Size(56, 23);
 			this.labelWidth.TabIndex = 7;
@@ -313,7 +323,7 @@ namespace MSDN.Html.Editor
 			// labelBorderAlign
 			// 
 			this.labelBorderAlign.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelBorderAlign.Location = new System.Drawing.Point(200, 24);
+			this.labelBorderAlign.Location = new System.Drawing.Point(200, 21);
 			this.labelBorderAlign.Name = "labelBorderAlign";
 			this.labelBorderAlign.Size = new System.Drawing.Size(64, 23);
 			this.labelBorderAlign.TabIndex = 5;
@@ -323,7 +333,7 @@ namespace MSDN.Html.Editor
 			// labelBorderSize
 			// 
 			this.labelBorderSize.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelBorderSize.Location = new System.Drawing.Point(8, 24);
+			this.labelBorderSize.Location = new System.Drawing.Point(10, 21);
 			this.labelBorderSize.Name = "labelBorderSize";
 			this.labelBorderSize.Size = new System.Drawing.Size(56, 23);
 			this.labelBorderSize.TabIndex = 4;
@@ -336,16 +346,6 @@ namespace MSDN.Html.Editor
 			this.numericBorderSize.Name = "numericBorderSize";
 			this.numericBorderSize.Size = new System.Drawing.Size(104, 20);
 			this.numericBorderSize.TabIndex = 3;
-			// 
-			// label1
-			// 
-			this.label1.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.label1.Location = new System.Drawing.Point(200, 21);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(98, 23);
-			this.label1.TabIndex = 0;
-			this.label1.Text = "Column count:";
-			this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// TablePropertyForm
 			// 
