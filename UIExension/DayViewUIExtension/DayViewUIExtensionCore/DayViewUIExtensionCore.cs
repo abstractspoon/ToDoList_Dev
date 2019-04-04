@@ -341,6 +341,8 @@ namespace DayViewUIExtension
             // counter-intuitively it works from 'MouseDown'
             m_DayView.MouseDown += new MouseEventHandler(OnDayViewMouseClick);
 
+			m_DayView.MouseWheel += new MouseEventHandler(OnDayViewMouseWheel);
+
 			m_DayView.StartDate = DateTime.Now;
             m_DayView.SetFont(FontName, 8);
 
@@ -529,6 +531,17 @@ namespace DayViewUIExtension
                 notify.NotifyEditIcon();
             }
         }
+
+		private void OnDayViewMouseWheel(object sender, MouseEventArgs e)
+		{
+			if (ModifierKeys.Equals(Keys.Control))
+			{
+				bool change = ((e.Delta < 0) ? m_PrefsDlg.DecrementMinSlotHeight() : m_PrefsDlg.IncrementMinSlotHeight());
+
+				if (change)
+					m_DayView.MinSlotHeight = m_PrefsDlg.MinSlotHeight;
+			}
+		}
 
 		private void OnDayViewNewAppointment(object sender, Calendar.NewAppointmentEventArgs args)
 		{

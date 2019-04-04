@@ -98,7 +98,7 @@ namespace DayViewUIExtension
 				return numMins;
 			}
 
-			set
+			protected set // internal use only
 			{
 				int numMins = 15;
 
@@ -123,7 +123,7 @@ namespace DayViewUIExtension
 				return 5;
 			}
 
-			set
+			protected set // internal use only
 			{
 				int minSlotHeight = ((value / 5) * 5);
 				minSlotHeight = Math.Min(30, minSlotHeight);
@@ -134,6 +134,22 @@ namespace DayViewUIExtension
 				if (index != -1)
 					m_MinSlotHeightCombo.SelectedIndex = index;
 			}
+		}
+
+		public bool IncrementMinSlotHeight()
+		{
+			int oldSlotheight = MinSlotHeight;
+			MinSlotHeight = (oldSlotheight + 5);
+
+			return (MinSlotHeight != oldSlotheight);
+		}
+
+		public bool DecrementMinSlotHeight()
+		{
+			int oldSlotheight = MinSlotHeight;
+			MinSlotHeight = (oldSlotheight - 5);
+
+			return (MinSlotHeight != oldSlotheight);
 		}
 
 	}

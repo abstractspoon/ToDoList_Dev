@@ -849,14 +849,10 @@ namespace Calendar
         {
             base.OnMouseWheel(e);
 
-            if (e.Delta < 0)
-            {//mouse wheel scroll down
-                ScrollMe(true);
-            }
-            else
-            {//mouse wheel scroll up
-                ScrollMe(false);
-            }
+			if (ModifierKeys.Equals(Keys.None))
+			{
+				ScrollMe(e.Delta < 0);
+			}
         }
 
         System.Collections.Hashtable cachedAppointments = new System.Collections.Hashtable();

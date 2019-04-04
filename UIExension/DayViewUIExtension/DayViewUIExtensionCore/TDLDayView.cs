@@ -548,7 +548,7 @@ namespace DayViewUIExtension
             Update();
         }
 
-        protected override void OnMouseMove(MouseEventArgs e)
+		protected override void OnMouseMove(MouseEventArgs e)
         {
             var selTool = ActiveTool as Calendar.SelectionTool;
 
@@ -631,6 +631,7 @@ namespace DayViewUIExtension
 
 					ValidateMinSlotHeight();
 					AdjustScrollbar();
+					Invalidate();
 				}
 			}
 
