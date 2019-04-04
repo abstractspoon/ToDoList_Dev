@@ -10,6 +10,19 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+class ModuleInitialiser
+{
+public:
+	ModuleInitialiser()
+	{
+		System::Windows::Forms::Application::SetCompatibleTextRenderingDefault(false);
+	}
+};
+
+static ModuleInitialiser* _init = new ModuleInitialiser();
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 MarshalledString::MarshalledString(String^ str) : m_wszGlobal(NULL)
 {
 	m_wszGlobal = (LPCWSTR)Marshal::StringToHGlobalUni(str).ToPointer();
