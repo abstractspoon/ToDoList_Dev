@@ -430,6 +430,7 @@ namespace DayViewUIExtension
 			m_DayView.HideTasksWithoutTimes = m_PrefsDlg.HideTasksWithoutTimes;
             m_DayView.HideTasksSpanningWeekends = m_PrefsDlg.HideTasksSpanningWeekends;
             m_DayView.HideTasksSpanningDays = m_PrefsDlg.HideTasksSpanningDays;
+			m_DayView.SlotsPerHour = m_PrefsDlg.SlotsPerHour;
 
 			m_DayView.Invalidate();
 		}

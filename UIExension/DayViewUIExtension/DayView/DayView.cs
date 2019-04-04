@@ -510,17 +510,7 @@ namespace Calendar
             set
             {
                 // Must be sensible values
-                bool valid = false;
-
-                switch (value)
-                {
-                    case  1: valid = true; break;
-                    case  2: valid = true; break;
-                    case  4: valid = true; break;
-                    case 12: valid = true; break;
-                }
-
-                if (valid)
+				if (IsValidSlotsPerHour(value))
                 {
                     slotsPerHour = value;
                     Invalidate();
@@ -528,7 +518,22 @@ namespace Calendar
             }
         }
 
-        private void UpdateWorkingHours()
+		public static Boolean IsValidSlotsPerHour(int numSlots)
+		{
+			switch (numSlots)
+			{
+				case 1: return true;
+				case 2: return true;
+				case 3: return true;
+				case 4: return true;
+				case 6: return true;
+				case 12: return true;
+			}
+
+			return false;
+		}
+
+		private void UpdateWorkingHours()
         {
             workStart = new DateTime(1, 1, 1, workingHourStart, workingMinuteStart, 0);
 
@@ -1571,8 +1576,8 @@ namespace Calendar
 
             foreach (Appointment appointment in appointments)
             {
-                int firstHalfHour = appointment.StartDate.Hour * slotsPerHour + (appointment.StartDate.Minute / /*30*/(60 / slotsPerHour));
-                int lastHalfHour = appointment.EndDate.Hour * slotsPerHour + (appointment.EndDate.Minute / /*30*/(60 / slotsPerHour));
+                int firstHalfHour = appointment.StartDate.Hour * slotsPerHour + (appointment.StartDate.Minute / (60 / slotsPerHour));
+                int lastHalfHour = appointment.EndDate.Hour * slotsPerHour + (appointment.EndDate.Minute / (60 / slotsPerHour));
 
                 // Added to allow small parts been displayed
                 if (lastHalfHour == firstHalfHour)

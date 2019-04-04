@@ -842,5 +842,44 @@ namespace DayViewUIExtension
 
             base.OnMouseMove(e);
         }
+
+		public new int SlotsPerHour
+		{
+			get
+			{
+				return base.SlotsPerHour;
+			}
+			set
+			{
+				// Must be sensible values
+				if (IsValidSlotsPerHour(value))
+				{
+					// If we're increasing the number of slots we force a 
+					// recalculation of the min slot height else we just validate it
+					if (value > base.SlotsPerHour)
+					{
+						minSlotHeight = DPIScaling.Scale(5);
+					}
+					base.SlotsPerHour = value;
+
+					ValidateMinSlotHeight();
+					AdjustScrollbar();
+				}
+			}
+		}
+
+		protected void ValidateMinSlotHeight()
+		{
+			using (var g = Graphics.FromHwnd(this.Handle))
+			{
+				int minHourHeight = (int)g.MeasureString("0", Renderer.HourFont).Height;
+
+				if ((minSlotHeight * SlotsPerHour) < minHourHeight)
+					minSlotHeight = ((minHourHeight / SlotsPerHour) + 1);
+
+				if (SlotHeight < minSlotHeight)
+					SlotHeight = minSlotHeight;
+			}
+		}
 	}
 }
