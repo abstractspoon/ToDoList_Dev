@@ -329,7 +329,7 @@ namespace DayViewUIExtension
 
 		private void CreateDayView()
 		{
-			m_DayView = new TDLDayView(m_TaskIcons);
+			m_DayView = new TDLDayView(m_TaskIcons, DPIScaling.Scale(5));
 
 			m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(OnDayViewNewAppointment);
 			m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(OnDayViewSelectionChanged);
@@ -430,7 +430,9 @@ namespace DayViewUIExtension
 			m_DayView.HideTasksWithoutTimes = m_PrefsDlg.HideTasksWithoutTimes;
             m_DayView.HideTasksSpanningWeekends = m_PrefsDlg.HideTasksSpanningWeekends;
             m_DayView.HideTasksSpanningDays = m_PrefsDlg.HideTasksSpanningDays;
-			m_DayView.SlotsPerHour = m_PrefsDlg.SlotsPerHour;
+
+			m_DayView.SlotsPerHour = (60 / m_PrefsDlg.SlotMinutes);
+			m_DayView.MinSlotHeight = m_PrefsDlg.MinSlotHeight;
 
 			m_DayView.Invalidate();
 		}

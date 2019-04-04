@@ -37,7 +37,7 @@
 			this.m_HideTasksWithoutTimes = new System.Windows.Forms.CheckBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.m_MinSlotHeightCombo = new System.Windows.Forms.ComboBox();
-			this.m_NumSlotsCombo = new System.Windows.Forms.ComboBox();
+			this.m_SlotMinuteCombo = new System.Windows.Forms.ComboBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.BtnCancel = new System.Windows.Forms.Button();
 			this.BtnOK = new System.Windows.Forms.Button();
@@ -56,7 +56,7 @@
 			this.panel1.Controls.Add(this.groupBox1);
 			this.panel1.Controls.Add(this.label2);
 			this.panel1.Controls.Add(this.m_MinSlotHeightCombo);
-			this.panel1.Controls.Add(this.m_NumSlotsCombo);
+			this.panel1.Controls.Add(this.m_SlotMinuteCombo);
 			this.panel1.Controls.Add(this.label1);
 			this.panel1.Location = new System.Drawing.Point(9, 10);
 			this.panel1.Margin = new System.Windows.Forms.Padding(0);
@@ -126,36 +126,37 @@
 			this.label2.AutoSize = true;
 			this.label2.Location = new System.Drawing.Point(10, 40);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(157, 13);
+			this.label2.Size = new System.Drawing.Size(156, 13);
 			this.label2.TabIndex = 4;
-			this.label2.Text = "Minimum height of each division";
+			this.label2.Text = "Minimum height of each interval";
 			this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// m_MinSlotHeightCombo
 			// 
+			this.m_MinSlotHeightCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_MinSlotHeightCombo.FormattingEnabled = true;
 			this.m_MinSlotHeightCombo.Location = new System.Drawing.Point(229, 36);
 			this.m_MinSlotHeightCombo.Name = "m_MinSlotHeightCombo";
 			this.m_MinSlotHeightCombo.Size = new System.Drawing.Size(142, 21);
 			this.m_MinSlotHeightCombo.TabIndex = 3;
 			// 
-			// m_NumSlotsCombo
+			// m_SlotMinuteCombo
 			// 
-			this.m_NumSlotsCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_NumSlotsCombo.FormattingEnabled = true;
-			this.m_NumSlotsCombo.Location = new System.Drawing.Point(229, 9);
-			this.m_NumSlotsCombo.Name = "m_NumSlotsCombo";
-			this.m_NumSlotsCombo.Size = new System.Drawing.Size(142, 21);
-			this.m_NumSlotsCombo.TabIndex = 3;
+			this.m_SlotMinuteCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.m_SlotMinuteCombo.FormattingEnabled = true;
+			this.m_SlotMinuteCombo.Location = new System.Drawing.Point(229, 9);
+			this.m_SlotMinuteCombo.Name = "m_SlotMinuteCombo";
+			this.m_SlotMinuteCombo.Size = new System.Drawing.Size(142, 21);
+			this.m_SlotMinuteCombo.TabIndex = 3;
 			// 
 			// label1
 			// 
 			this.label1.AutoSize = true;
 			this.label1.Location = new System.Drawing.Point(10, 12);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(141, 13);
+			this.label1.Size = new System.Drawing.Size(123, 13);
 			this.label1.TabIndex = 2;
-			this.label1.Text = "Number of divisions per hour";
+			this.label1.Text = "Smallest editable interval";
 			this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// BtnCancel
@@ -217,7 +218,7 @@
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.ComboBox m_MinSlotHeightCombo;
-		private System.Windows.Forms.ComboBox m_NumSlotsCombo;
+		private System.Windows.Forms.ComboBox m_SlotMinuteCombo;
 		private System.Windows.Forms.Label label1;
 	}
 }

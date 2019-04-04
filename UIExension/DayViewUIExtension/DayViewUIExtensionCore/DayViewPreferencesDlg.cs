@@ -13,6 +13,23 @@ namespace DayViewUIExtension
 {
     public partial class DayViewPreferencesDlg : Form
     {
+		protected class SlotMinutesItem
+		{
+			public SlotMinutesItem(int minutes)
+			{
+				numMinutes = minutes;
+				text = String.Format("{0} minutes", minutes);
+			}
+
+			public override String ToString()
+			{
+				return text;
+			}
+
+			private String text;
+			public int numMinutes;
+		}
+
         public DayViewPreferencesDlg(Translator trans, Font font)
         {
             InitializeComponent();
@@ -24,14 +41,17 @@ namespace DayViewUIExtension
 			for (int numSlots = 1; numSlots <= 12; numSlots++)
 			{
 				if (TDLDayView.IsValidSlotsPerHour(numSlots))
-					m_NumSlotsCombo.Items.Add(new Slot(numSlots));
+					m_SlotMinuteCombo.Items.Add(new SlotMinutesItem(60 / numSlots));
 			}
 
 			// Build 'slot height' combo
-			// TODO
+			var slotHeights = new int[] { 5, 10, 15, 20, 25 };
+
+			foreach (var height in slotHeights)
+				m_MinSlotHeightCombo.Items.Add(height);
 		}
 
-        public void SavePreferences(Preferences prefs, String key)
+		public void SavePreferences(Preferences prefs, String key)
 		{
             string prefsKey = (key + "\\Preferences");
 
@@ -40,13 +60,11 @@ namespace DayViewUIExtension
             prefs.WriteProfileBool(prefsKey, "HideTasksSpanningWeekends", HideTasksSpanningWeekends);
             prefs.WriteProfileBool(prefsKey, "HideTasksSpanningDays", HideTasksSpanningDays);
 
-			var slot = (m_NumSlotsCombo.SelectedItem as Slot);
-
-			if (slot != null)
-				prefs.WriteProfileInt(prefsKey, "SlotsPerHour", slot.numSlots);
+			prefs.WriteProfileInt(prefsKey, "SlotMinutes", SlotMinutes);
+			prefs.WriteProfileInt(prefsKey, "MinSlotHeight", MinSlotHeight);
 		}
 
-        public void LoadPreferences(Preferences prefs, String key)
+		public void LoadPreferences(Preferences prefs, String key)
         {
             string prefsKey = (key + "\\Preferences");
 
@@ -55,51 +73,66 @@ namespace DayViewUIExtension
             m_HideTasksSpanningWeekends.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningWeekends", false);
             m_HideTasksSpanningDays.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningDays", false);
 
-			int numSlots = prefs.GetProfileInt(prefsKey, "SlotsPerHour", 4);
+			SlotMinutes = prefs.GetProfileInt(prefsKey, "SlotMinutes", 15);
+			MinSlotHeight = prefs.GetProfileInt(prefsKey, "MinSlotHeight", 5);
 
-			if (!TDLDayView.IsValidSlotsPerHour(numSlots))
-				numSlots = 4;
-
-			int index = m_NumSlotsCombo.FindStringExact(Slot.FormatSlotText(numSlots));
-
-			if (index != -1)
-				m_NumSlotsCombo.SelectedIndex = index;
 		}
 
-        public Boolean HideParentTasks { get { return m_HideParentTasks.Checked; } }
+		public Boolean HideParentTasks { get { return m_HideParentTasks.Checked; } }
         public Boolean HideTasksWithoutTimes { get { return m_HideTasksWithoutTimes.Checked; } }
         public Boolean HideTasksSpanningWeekends { get { return m_HideTasksSpanningWeekends.Checked; } }
         public Boolean HideTasksSpanningDays { get { return m_HideTasksSpanningDays.Checked; } }
 
-		public int SlotsPerHour
+		public int SlotMinutes
 		{
 			get
 			{
-				Slot slot = (m_NumSlotsCombo.SelectedItem as Slot);
-				return ((slot == null) ? 4 : slot.numSlots);
+				int numMins = 15;
+
+				if (m_SlotMinuteCombo.SelectedItem != null)
+					numMins = (int)m_MinSlotHeightCombo.SelectedItem;
+
+				return numMins;
+			}
+
+			set
+			{
+				int numMins = 15;
+
+				if (TDLDayView.IsValidSlotsPerHour(60 / value))
+					numMins = value;
+
+				int index = m_SlotMinuteCombo.FindStringExact(numMins.ToString());
+
+				if (index != -1)
+					m_SlotMinuteCombo.SelectedIndex = index;
 			}
 		}
 
-		protected class Slot
+		public int MinSlotHeight
 		{
-			public Slot(int slots)
+			get
 			{
-				text = FormatSlotText(slots);
-				numSlots = slots;
+				int height = 5;
+
+				if (m_MinSlotHeightCombo.SelectedItem != null)
+					height = (int)m_MinSlotHeightCombo.SelectedItem;
+
+				return DPIScaling.Scale(height);
 			}
 
-			public override String ToString()
+			set
 			{
-				return text;
-			}
+				int minSlotHeight = ((value / 5) * 5);
+				minSlotHeight = Math.Min(30, minSlotHeight);
+				minSlotHeight = Math.Max(5, minSlotHeight);
 
-			public static String FormatSlotText(int numSlots)
-			{
-				return String.Format("{0} ({1} minutes)", numSlots, (60 / numSlots));
-			}
+				int index = m_MinSlotHeightCombo.FindStringExact(minSlotHeight.ToString());
 
-			public String text;
-			public int numSlots;
+				if (index != -1)
+					m_MinSlotHeightCombo.SelectedIndex = index;
+			}
 		}
+
 	}
 }
