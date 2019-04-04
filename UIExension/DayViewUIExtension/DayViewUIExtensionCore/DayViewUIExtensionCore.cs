@@ -354,7 +354,7 @@ namespace DayViewUIExtension
 			m_WeekLabel.Font = new Font(FontName, 14);
             m_WeekLabel.Location = new Point(m_Toolbar.Right, DPIScaling.Scale(LabelTop));
             m_WeekLabel.Size = new Size(DPIScaling.Scale(350), m_Toolbar.Height);
-			m_WeekLabel.TextAlign = ContentAlignment.MiddleLeft;
+			m_WeekLabel.TextAlign = ContentAlignment.TopLeft;
 
 			Controls.Add(m_WeekLabel);
 		}
