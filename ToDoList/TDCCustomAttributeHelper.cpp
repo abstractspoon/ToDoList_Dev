@@ -89,6 +89,12 @@ CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
 			break;
 
+		case TDCCA_FRACTION:
+			pControl = new CMaskEdit(_T("0123456789/"));
+			szClass = WC_EDIT;
+			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+			break;
+
 		case TDCCA_FILELINK:
 			pControl = new CFileEdit(FES_GOBUTTON);
 			szClass = WC_EDIT;
@@ -280,6 +286,7 @@ BOOL CTDCCustomAttributeHelper::AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFI
 	case TDCCA_STRING:
 	case TDCCA_INTEGER:
 	case TDCCA_DOUBLE:
+	case TDCCA_FRACTION:
 	case TDCCA_BOOL:
 	case TDCCA_ICON:
 	case TDCCA_FILELINK:
@@ -307,6 +314,7 @@ CString CTDCCustomAttributeHelper::GetControlLabel(const TDCCUSTOMATTRIBUTEDEFIN
 		case TDCCA_STRING:
 		case TDCCA_INTEGER:
 		case TDCCA_DOUBLE:
+		case TDCCA_FRACTION:
 		case TDCCA_BOOL:
 		case TDCCA_ICON:
 		case TDCCA_FILELINK:
@@ -1047,6 +1055,7 @@ BOOL CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUSTOM
 		case TDCCA_INTEGER:
 		case TDCCA_DOUBLE:
 		case TDCCA_FILELINK:
+		case TDCCA_FRACTION:
 			pCtrl->GetWindowText(sText);
 			data.Set(sText);
 			break;
@@ -1195,6 +1204,7 @@ void CTDCCustomAttributeHelper::UpdateControl(const CWnd* pParent, const CUSTOMA
 		case TDCCA_INTEGER:
 		case TDCCA_DOUBLE:
 		case TDCCA_FILELINK:
+		case TDCCA_FRACTION:
 			pCtrl->SetWindowText(data.AsString());
 			break;
 
@@ -1372,6 +1382,7 @@ FIND_ATTRIBTYPE CTDCCustomAttributeHelper::GetAttributeFindType(TDC_ATTRIBUTE nA
 	case TDCCA_STRING:		return FT_STRING;
 	case TDCCA_INTEGER:		return FT_INTEGER;
 	case TDCCA_DOUBLE:		return FT_DOUBLE;
+	case TDCCA_FRACTION:	return FT_DOUBLE; // TODO
 	case TDCCA_DATE:		return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
 	case TDCCA_BOOL:		return FT_BOOL;
 	case TDCCA_ICON:		return FT_ICON;
@@ -1444,6 +1455,7 @@ BOOL CTDCCustomAttributeHelper::AppendFilterRules(const CTDCCustomAttributeDataM
 			case TDCCA_STRING:
 			case TDCCA_INTEGER:
 			case TDCCA_DOUBLE:
+			case TDCCA_FRACTION:
 			case TDCCA_FILELINK:
 			case TDCCA_DATE:
 			case TDCCA_TIMEPERIOD:

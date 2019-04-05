@@ -560,13 +560,13 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel = NULL) 
 		: 
-	sLabel(szLabel),
-	dwAttribType(TDCCA_STRING), 
-	nTextAlignment(DT_LEFT), 
-	dwFeatures(TDCCAF_SORT | TDCCAF_FILTER),
-	nColID(TDCC_NONE),
-	nAttribID(TDCA_NONE),
-	bEnabled(TRUE)
+		sLabel(szLabel),
+		dwAttribType(TDCCA_STRING),
+		nTextAlignment(DT_LEFT),
+		dwFeatures(TDCCAF_SORT | TDCCAF_FILTER),
+		nColID(TDCC_NONE),
+		nAttribID(TDCA_NONE),
+		bEnabled(TRUE)
 	{
 
 	}
@@ -650,6 +650,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 		case TDCCA_INTEGER:
 		case TDCCA_DOUBLE:
 		case TDCCA_TIMEPERIOD:
+		case TDCCA_FRACTION:
 			return TA_RIGHT;
 		}
 
@@ -781,6 +782,10 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 		case TDCCA_ICON:
 			break;
 
+		case TDCCA_FRACTION:
+			return ((dwFeature == TDCCAF_DISPLAYASPERCENT) ||
+					(dwFeature == TDCCAF_HIDEZERO));
+
 		default:
 			ASSERT(0);
 			break;
@@ -794,6 +799,29 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 		return SupportsFeature(TDCCAF_ACCUMULATE) ||
 				SupportsFeature(TDCCAF_MAXIMIZE) ||
 				SupportsFeature(TDCCAF_MINIMIZE);
+	}
+
+	CString FormatNumber(double dValue) const
+	{
+		DWORD dwDataType = GetDataType();
+		BOOL bAsPercentage = SupportsFeature(TDCCAF_DISPLAYASPERCENT);
+		LPCTSTR szTrail = (bAsPercentage ? _T("%") : NULL);
+
+		switch (dwDataType)
+		{
+		case TDCCA_FRACTION:
+			if (bAsPercentage)
+				dValue *= 100;
+			// fall thru
+		case TDCCA_DOUBLE:
+			return Misc::Format(dValue, (bAsPercentage ? 1 : 2), szTrail);
+
+		case TDCCA_INTEGER:
+			return Misc::Format(dValue, 0, szTrail);
+		}
+
+		ASSERT(0);
+		return _T("");
 	}
 
 	CString GetNextListItem(const CString& sItem, BOOL bNext) const
@@ -871,6 +899,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 			case TDCCA_STRING:
 			case TDCCA_INTEGER:	
 			case TDCCA_DOUBLE:	
+			case TDCCA_FRACTION:
 			case TDCCA_DATE:	
 			case TDCCA_BOOL:
 			case TDCCA_TIMEPERIOD:
@@ -887,6 +916,10 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 					if (DecodeImageTag(sItem, sDummy, sName) && !sName.IsEmpty())
 						nItemLen += pDC->GetTextExtent(sName).cx;
 				}
+				break;
+
+			default:
+				ASSERT(0);
 				break;
 			}
 
@@ -922,7 +955,6 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 		case 2:
 			sName = aParts[1];
 			// fall thru
-
 		case 1:
 			sImage = aParts[0];
 			break;
@@ -962,9 +994,23 @@ private:
 		// or only partially to icons, flags and file links
 		switch (dwDataType)
 		{
+		case TDCCA_STRING:
+		case TDCCA_INTEGER:
+		case TDCCA_DOUBLE:
+			// all types supported
+			break;
+
 		case TDCCA_DATE:
 		case TDCCA_TIMEPERIOD:
 			dwListType = TDCCA_NOTALIST;
+			break;
+
+		case TDCCA_FRACTION:
+			if (dwListType)
+			{
+				if ((dwListType != TDCCA_FIXEDLIST) && (dwListType != TDCCA_AUTOLIST))
+					dwListType = TDCCA_FIXEDLIST;
+			}
 			break;
 
 		case TDCCA_BOOL:
@@ -987,6 +1033,10 @@ private:
 			{
 				dwListType = TDCCA_AUTOLIST;
 			}
+			break;
+
+		default:
+			ASSERT(0);
 			break;
 		}
 

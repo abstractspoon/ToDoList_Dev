@@ -138,9 +138,6 @@ public:
 	static FIND_ATTRIBTYPE GetAttributeFindType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate,
 												const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
-	static void ValidateAttributeFindOperator(const SEARCHPARAM& sp, 
-											const CTDCCustomAttribDefinitionArray& aAttribDefs);
-
 	static BOOL AppendFilterRules(const CTDCCustomAttributeDataMap& mapData, 
 								const CTDCCustomAttribDefinitionArray& aAttribDefs, CSearchParamArray& aRules);
 

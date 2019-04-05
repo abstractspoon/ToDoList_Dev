@@ -108,11 +108,50 @@ const CString& TDCCADATA::AsString() const
 	return sData; 
 }
 
-double TDCCADATA::AsDouble() const 
+double TDCCADATA::AsFraction() const 
 { 
 	ASSERT(sExtra.IsEmpty());
 
-	return _ttof(sData); 
+	CString sNumerator(sData), sDenominator;
+
+	if (!Misc::Split(sNumerator, sDenominator, '/'))
+		return AsDouble();
+
+	// else
+	double dNumerator = _ttof(sNumerator);
+	double dDenominator = _ttof(sDenominator);
+
+	if (dDenominator == 0.0)
+		dDenominator = 1.0;
+
+	return (dNumerator / dDenominator);
+}
+
+double TDCCADATA::AsDouble() const
+{
+	ASSERT(sExtra.IsEmpty());
+
+	if (sData.IsEmpty() || !_istdigit(Misc::First(sData)) || !_istdigit(Misc::Last(sData)))
+		return 0.0;
+
+	double dNumerator = 0.0, dDenominator = 1.0;
+	CString sNumerator(sData), sDenominator;
+
+	if (Misc::Split(sNumerator, sDenominator, '/'))
+	{
+		dNumerator = _ttof(sNumerator);
+		dDenominator = _ttof(sDenominator);
+
+		if (dDenominator == 0.0)
+			dDenominator = 1.0;
+	}
+	else
+	{
+		dNumerator = _ttof(sData);
+	}
+	ASSERT(dDenominator != 0.0);
+
+	return (dNumerator / dDenominator);
 }
 
 int TDCCADATA::AsInteger() const 

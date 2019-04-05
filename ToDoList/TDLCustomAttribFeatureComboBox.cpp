@@ -33,6 +33,7 @@ const TDCFEATURE FEATURES[] =
 	{ IDS_CUSTOM_FEATURE_SHOWTIME,		TDCCAF_SHOWTIME },
 	{ IDS_CUSTOM_FEATURE_FILTER,		TDCCAF_FILTER },
 	{ IDS_CUSTOM_FEATURE_INHERITANCE,	TDCCAF_INHERITPARENTCHANGES },
+	{ IDS_CUSTOM_FEATURE_PERCENTAGE,	TDCCAF_DISPLAYASPERCENT },
 };
 const int NUM_FEATURES = sizeof(FEATURES) / sizeof(TDCFEATURE);
 
@@ -55,7 +56,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomAttribFeatureComboBox message handlers
 
-BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefintion(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
+BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefinition(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
 {
 	ASSERT_VALID(this);
 

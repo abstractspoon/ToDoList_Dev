@@ -1706,6 +1706,10 @@ double CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, const TDCC
 				TDC::MapUnitsToTHUnits(nUnits));
 		}
 	}
+	else if (attribDef.IsDataType(TDCCA_FRACTION))
+	{
+		dValue = data.AsFraction();
+	}
 	else // double/int
 	{
 		dValue = data.AsDouble();
@@ -1716,18 +1720,17 @@ double CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, const TDCC
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
 {
-	if (!attribDef.SupportsCalculation())
-		return FALSE;
+	double dCalcValue = DBL_NULL;
 
 	TDCCADATA data;
 	pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
 
-	DWORD dwDataType = attribDef.GetDataType();
-	double dCalcValue = DBL_NULL;
-
-	// easier to handle by feature 
+	if (!attribDef.SupportsCalculation())
+	{
+		dCalcValue = GetCalculationValue(data, attribDef, nUnits);
+	}
 	// -----------------------------------------------------------
-	if (attribDef.HasFeature(TDCCAF_ACCUMULATE))
+	else if (attribDef.HasFeature(TDCCAF_ACCUMULATE))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE));
 
@@ -1798,7 +1801,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 	}
 	else
 	{
-		dCalcValue = GetCalculationValue(data, attribDef, nUnits);
+		ASSERT(0);
 	}
 
 	if (dCalcValue == DBL_NULL)

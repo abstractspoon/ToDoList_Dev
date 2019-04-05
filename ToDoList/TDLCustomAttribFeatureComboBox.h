@@ -19,7 +19,7 @@ class CTDLCustomAttribFeatureComboBox : public CCheckComboBox
 public:
 	CTDLCustomAttribFeatureComboBox();
 
-	BOOL SetAttributeDefintion(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
+	BOOL SetAttributeDefinition(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 	DWORD GetSelectedFeatures() const;
 	CString FormatSelectedFeatures() const;
 

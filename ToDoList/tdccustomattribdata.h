@@ -37,6 +37,7 @@ struct TDCCADATA
 
 	const CString& AsString() const;
 	double AsDouble() const;
+	double AsFraction() const;
 	int AsInteger() const;
 	COleDateTime AsDate() const;
 	bool AsBool() const;

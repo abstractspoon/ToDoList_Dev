@@ -2887,8 +2887,9 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
 
 	CRect rCol(rSubItem);
+	DWORD dwDataType = attribDef.GetDataType();
 	
-	switch (attribDef.GetDataType())
+	switch (dwDataType)
 	{
 	case TDCCA_DATE:
 		{
@@ -2902,13 +2903,14 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
+	case TDCCA_FRACTION:
 		{
 			double dValue = 0.0;
 			m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue);
 			
 			if ((dValue != 0.0) || !attribDef.HasFeature(TDCCAF_HIDEZERO))
 			{
-				CString sText(Misc::Format(dValue, (attribDef.IsDataType(TDCCA_DOUBLE) ? 2 : 0)));
+				CString sText(attribDef.FormatNumber(dValue));
 				DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
 			}			
 		}

@@ -34,6 +34,7 @@ static TDLCAD_TYPE DATA_TYPES[] =
 	{ IDS_CAD_STRING,		TDCCA_STRING },
 	{ IDS_CAD_INT,			TDCCA_INTEGER },
 	{ IDS_CAD_FLOAT,		TDCCA_DOUBLE },
+	{ IDS_CAD_FRACTION,		TDCCA_FRACTION },
 	{ IDS_CAD_DATE,			TDCCA_DATE },
 	{ IDS_CAD_BOOL,			TDCCA_BOOL },
 	{ IDS_CAD_ICON,			TDCCA_ICON },
@@ -420,6 +421,16 @@ void CTDLCustomAttributeDlg::BuildListTypeCombo(DWORD dwDataType)
 				continue;
 			}
 			break;
+
+		case TDCCA_FRACTION:
+			// single selection list type accepted only
+			if ((dwListType != TDCCA_NOTALIST) && 
+				(dwListType != TDCCA_FIXEDLIST) &&
+				(dwListType != TDCCA_AUTOLIST))
+			{
+				continue;
+			}
+			break;
 		}
 
 		int nIndex = m_cbListType.AddString(CEnString(LIST_TYPES[nList].nIDName));
@@ -451,7 +462,7 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT*
 
 		BuildListTypeCombo(m_dwDataType);
 
-		m_cbFeatures.SetAttributeDefintion(attrib);
+		m_cbFeatures.SetAttributeDefinition(attrib);
 	}
 	else
 	{
@@ -516,11 +527,13 @@ void CTDLCustomAttributeDlg::EnableControls()
 		case TDCCA_DOUBLE:
 		case TDCCA_ICON:
 		case TDCCA_FILELINK:
+		case TDCCA_FRACTION:
 			bEnableListData = (dwListType != TDCCA_NOTALIST);
 			break;
 
 		default:
 			ASSERT(0);
+			break;
 		}
 
 		GetDlgItem(IDC_BROWSEIMAGES)->EnableWindow(bEnableListData && (dwDataType == TDCCA_ICON));
@@ -557,7 +570,7 @@ void CTDLCustomAttributeDlg::OnSelchangeDatatype()
 	m_lcAttributes.SetItemText(nSel, COL_DATATYPE, sDataType);
 
 	// update feature combo
-	m_cbFeatures.SetAttributeDefintion(attrib);
+	m_cbFeatures.SetAttributeDefinition(attrib);
 
 	// And features in case they changed
 	m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
@@ -602,9 +615,17 @@ void CTDLCustomAttributeDlg::UpdateListDataMask()
 	case TDCCA_INTEGER:
 		m_eListData.SetMask(_T("0123456789"));
 		break;
+
+	case TDCCA_FRACTION:
+		m_eListData.SetMask(_T("0123456789/"));
+		break;
 			
 	case TDCCA_DOUBLE:
 		m_eListData.SetMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
+		break;
+
+	default:
+		ASSERT(0);
 		break;
 	}
 }
@@ -635,7 +656,7 @@ void CTDLCustomAttributeDlg::OnSelchangeListtype()
 	m_dwListType = attrib.GetListType();
 
 	// update feature combo
-	m_cbFeatures.SetAttributeDefintion(attrib);
+	m_cbFeatures.SetAttributeDefinition(attrib);
 
 	// And features in case they changed
 	m_dwFeatures = m_cbFeatures.GetSelectedFeatures();

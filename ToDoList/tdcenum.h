@@ -923,6 +923,7 @@ enum // custom attribute data types
 	TDCCA_ICON				= 0x0005,
 	TDCCA_FILELINK			= 0x0006,
 	TDCCA_TIMEPERIOD		= 0x0007,
+	TDCCA_FRACTION			= 0x0008,
 
 	TDCCA_DATAMASK			= 0x00ff,
 };
@@ -948,6 +949,7 @@ enum // custom attribute features
 	TDCCAF_SHOWTIME				= 0x0020, // Dates only
 	TDCCAF_FILTER				= 0x0040, 
 	TDCCAF_INHERITPARENTCHANGES	= 0x0080, 
+	TDCCAF_DISPLAYASPERCENT		= 0x0100, // Numbers only
 };
 
 /////////////////////////////////////////////////////////////////////////////

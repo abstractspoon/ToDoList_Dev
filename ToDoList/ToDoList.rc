@@ -1894,7 +1894,7 @@ IDD_TIMETRACK_DIALOG DIALOGEX 0, 0, 134, 111
 STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_STATICEDGE
 CAPTION "Time Tracker"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     COMBOBOX        IDC_TASKLISTS,4,28,126,128,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
@@ -5088,8 +5088,8 @@ BEGIN
     IDS_CAD_COLALIGNMENT    "Alignment"
     IDS_CAD_STRING          "Text"
     IDS_CAD_DATE            "Date"
-    IDS_CAD_INT             "Number (whole)"
-    IDS_CAD_FLOAT           "Number (fractional)"
+    IDS_CAD_INT             "Number (integer eg. 13)"
+    IDS_CAD_FLOAT           "Number (decimal eg. 5.62)"
     IDS_CAD_BOOL            "Checkbox"
     IDS_CAD_NOTLIST         "Not a list"
     IDS_CAD_AUTOLIST        "Dynamic data, single-selection"
@@ -5462,6 +5462,8 @@ BEGIN
     IDS_REPLACEINTASKCOMMENTS "Replace in Task Comments"
     IDS_FINDINTASKCOMMENTS  "Find in Task Comments"
     IDS_SEARCHPREFS_PROMPT  "Search Preferences"
+    IDS_CAD_FRACTION        "Number (Fraction eg. 2/3)"
+    IDS_CUSTOM_FEATURE_PERCENTAGE "Display as percentage"
 END
 
 #endif    // English (Australia) resources
