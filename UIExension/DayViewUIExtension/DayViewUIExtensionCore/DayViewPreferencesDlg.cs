@@ -13,38 +13,44 @@ namespace DayViewUIExtension
 {
     public partial class DayViewPreferencesDlg : Form
     {
+		private Translator m_Trans;
+
 		protected class SlotMinutesItem
 		{
-			public SlotMinutesItem(int minutes)
+			public SlotMinutesItem(int minutes, Translator trans)
 			{
 				numMinutes = minutes;
+				this.trans = trans;
 			}
 
 			public override String ToString()
 			{
-				return ToString(numMinutes);
+				return ToString(numMinutes, trans);
 			}
 
-			public static String ToString(int numMinutes)
+			public static String ToString(int numMinutes, Translator trans)
 			{
-				return String.Format("{0} minutes", numMinutes);
+				return trans.Translate(String.Format("{0} minutes", numMinutes));
 			}
 
 			public int numMinutes;
+			protected Translator trans;
 		}
 
         public DayViewPreferencesDlg(Translator trans, Font font)
         {
+			m_Trans = trans;
+			
             InitializeComponent();
 
 			DialogUtils.SetFont(this, font);
-			trans.Translate(this);
+			m_Trans.Translate(this);
 
 			// Build 'slot minutes' combo
 			var slotMins = new int[] { 5, 10, 15, 20, 30, 60 };
 
 			foreach (var mins in slotMins)
-				m_SlotMinuteCombo.Items.Add(new SlotMinutesItem(mins));
+				m_SlotMinuteCombo.Items.Add(new SlotMinutesItem(mins, m_Trans));
 
 			// Build 'slot height' combo
 			var slotHeights = new int[] { 5, 10, 15, 20, 25 };
@@ -105,7 +111,7 @@ namespace DayViewUIExtension
 				if (TDLDayView.IsValidSlotsPerHour(60 / value))
 					numMins = value;
 
-				int index = m_SlotMinuteCombo.FindStringExact(SlotMinutesItem.ToString(numMins));
+				int index = m_SlotMinuteCombo.FindStringExact(SlotMinutesItem.ToString(numMins, m_Trans));
 
 				if (index != -1)
 					m_SlotMinuteCombo.SelectedIndex = index;
