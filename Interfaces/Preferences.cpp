@@ -40,30 +40,22 @@ CString INIENTRY::Format() const
 
 BOOL INIENTRY::Parse(const CString& sEntry)
 {
-	int nEquals = sEntry.Find('=');
+	sName = sEntry;
 
-	if (nEquals != -1)
-	{
-		sName = sEntry.Left(nEquals);
-		sName.TrimRight();
+	if (!Misc::Split(sName, sValue, '='))
+		return FALSE;
 
-		sValue = sEntry.Mid(nEquals + 1);
-		sValue.TrimLeft();
+	// remove quotes
+	bQuoted = sValue.Replace(_T("\""), _T(""));
 
-		// remove quotes
-		bQuoted = sValue.Replace(_T("\""), _T(""));
-
-		return !sName.IsEmpty();
-	}
-
-	return FALSE;
+	return !sName.IsEmpty();
 }
 
 BOOL INIENTRY::operator==(const INIENTRY& ie) const
 {
 	return ((sName == ie.sName) && 
-		(sValue == ie.sValue) && 
-		(bQuoted == ie.bQuoted));
+			(sValue == ie.sValue) && 
+			(bQuoted == ie.bQuoted));
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -905,15 +897,15 @@ BOOL CPreferences::Load(LPCTSTR szFilePath, CIniSectionArray& aSections)
 
 	while (file.ReadString(sLine))
 	{
-		if (!sLine.IsEmpty())
+		if (!Misc::Trim(sLine).IsEmpty())
 		{
 			// is it a section ?
-			if (sLine[0] == '[')
+			if (Misc::TrimFirstIf('[', sLine))
 			{
-				CString sSection = sLine.Mid(1, sLine.GetLength() - 2);
+				VERIFY(Misc::TrimLastIf(']', sLine));
 
 				// assume (for speed) that the section is already unique
-				pCurSection = new INISECTION(sSection);
+				pCurSection = new INISECTION(sLine);
 				aSections.Add(pCurSection);
 
 				ASSERT (pCurSection != NULL);

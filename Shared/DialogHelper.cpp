@@ -773,14 +773,7 @@ CWnd* CDialogHelper::FindNextMatch(CWnd* pCurrent, UINT nShortcut)
 
 UINT CDialogHelper::GetShortcut(const CString& sText)
 {
-	for (int nChar = 0; nChar < sText.GetLength() - 1; nChar++)
-	{
-		if (sText[nChar] == '&' && sText[nChar + 1] != '&')
-			return toupper(sText[nChar + 1]);
-	}
-
-	// no shortcut
-	return 0;
+	return CAcceleratorString::GetAccelerator(sText);
 }
 
 UINT CDialogHelper::MessageBoxEx(const CWnd* pWnd, UINT nIDText, UINT nIDCaption, UINT nType)

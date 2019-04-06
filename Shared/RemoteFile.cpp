@@ -350,7 +350,7 @@ BOOL CRemoteFile::RemotePathIsFolder(const CString& sPath)
 	sFolder.Replace('\\', '/');
 	sFolder.TrimRight();
 
-	return (sFolder.GetAt(sFolder.GetLength() - 1) == '/');
+	return (Misc::Last(sFolder) == '/');
 }
 
 // for upload
@@ -739,7 +739,7 @@ BOOL CRemoteFile::ValidateLocalFolder(CString& sFolder, BOOL bAllowCreation)
 			// if the folder ends in a backslash then create as is
 			sFolder.Replace('/', '\\');
 
-			if (sFolder.GetAt(sFolder.GetLength() - 1) == '\\')
+			if (Misc::Last(sFolder) == '\\')
 			{
 				FileMisc::CreateFolder(sFolder);
 			}

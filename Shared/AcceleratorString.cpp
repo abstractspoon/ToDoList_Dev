@@ -60,7 +60,7 @@ int CAcceleratorString::FindAccelerator(const CString& sText)
 	if (!sText.IsEmpty())
 	{
 		// Look for first single '&'
-		int nAccel = sText.Find('&'), nLast = (sText.GetLength() - 1); 
+		int nAccel = sText.Find('&'), nLast = Misc::LastIndex(sText); 
 
 		while ((nAccel != -1) && (nAccel < nLast))
 		{

@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "EnString.h"
+#include "Misc.h"
 
 #include "..\Interfaces\itranstext.h"
 
@@ -346,12 +347,12 @@ CSize CEnString::FormatDCEx(CDC* pDC, int nWidth, int nStyle)
 			// truncate another char
 			if (bEndEllipsis)
 			{
-				sFinalText = sFinalText.Left(sFinalText.GetLength() - 1);
+				Misc::TrimLast(sFinalText);
 				sizeText = pDC->GetTextExtent(CString("..." + sFinalText));
 			}
 			else
 			{
-				sFinalText = sFinalText.Mid(1);
+				Misc::TrimFirst(sFinalText);
 		        sizeText = pDC->GetTextExtent(CString(sFinalText + "..."));
 			}
 

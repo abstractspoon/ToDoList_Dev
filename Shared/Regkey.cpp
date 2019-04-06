@@ -494,94 +494,79 @@ BOOL CRegKey2::ImportSectionFromIni(const CString& sSection, CStdioFile& file, C
 	
 	while (file.ReadString(sLine))
 	{
-		sLine.TrimLeft();
-		sLine.TrimRight();
-		
-		if (sLine.IsEmpty())
-			continue;
-
-		else if (sLine[0] == '[')
+		if (Misc::Trim(sLine).IsEmpty())
 		{
-			// check for end tag
-			if (sLine[sLine.GetLength() - 1] == ']')
-			{
-				sNextSection = sLine.Mid(1, sLine.GetLength() - 2);
-				return TRUE;
-			}
-			
-			// else
-			return FALSE;
+			continue;
+		}
+		else if (Misc::TrimFirstIf('[', sLine))
+		{
+			VERIFY(Misc::TrimLastIf(']', sLine));
+			sNextSection = sLine;
+
+			return TRUE;
 		}
 		else if (!bRoot) // can't have values in the root
 		{      
-			CString sName, sValue;
-			int nEquals = sLine.Find('=');
-			
-			if (nEquals > 0)
+			CString sName(sLine), sValue;
+
+			// name must not be empty
+			if (Misc::Split(sName, sValue, '=') && !sName.IsEmpty())
 			{
-				sName = sLine.Left(nEquals);
-				sValue = sLine.Mid(nEquals + 1);
-				
-				sName.TrimLeft();
-				sName.TrimRight();
-				sValue.TrimLeft();
-				sValue.TrimRight();
-				
-				// name must not be empty
-				if (!sName.IsEmpty())
+				// if value contains only digits optionally beginning 
+				// with a minus sign then its a DWORD else a string
+				BOOL bString = FALSE;
+
+				if (sValue.IsEmpty())
 				{
-					// if value contains only digits optionally beginning 
-					// with a minus sign then its a DWORD else a string
-					BOOL bString = FALSE;
-
-					if (sValue.IsEmpty())
-						bString = TRUE;
-					else
+					bString = TRUE;
+				}
+				else
+				{
+					// traverse the chars
+					for (int nChar = 0; nChar < sValue.GetLength() && !bString; nChar++)
 					{
-						// traverse the chars
-						for (int nChar = 0; nChar < sValue.GetLength() && !bString; nChar++)
+						switch (sValue[nChar])
 						{
-							switch (sValue[nChar])
-							{
-							case '-':
-								bString = (nChar > 0);
-								break;
+						case '-':
+							bString = (nChar > 0);
+							break;
 
-							case '0':
-							case '1':
-							case '2':
-							case '3':
-							case '4':
-							case '5':
-							case '6':
-							case '7':
-							case '8':
-							case '9':
-								break; // okay
+						case '0':
+						case '1':
+						case '2':
+						case '3':
+						case '4':
+						case '5':
+						case '6':
+						case '7':
+						case '8':
+						case '9':
+							break; // okay
 
-							default:
-								bString = TRUE; // everything else
-								break;
+						default:
+							bString = TRUE; // everything else
+							break;
 
-							}
 						}
 					}
-
-					if (bString)
-					{
-						// remove possible leading and trailing quotes
-						if (sValue.GetLength() && sValue[0] == '\"' && sValue[sValue.GetLength() - 1] == '\"')
-							reg.Write(sName, sValue.Mid(1, sValue.GetLength() - 2));
-						else
-							reg.Write(sName, sValue);
-					}
-					else // DWORD
-						reg.Write(sName, (DWORD)_ttoi(sValue));
 				}
+
+				if (bString)
+				{
+					// remove possible leading and trailing quotes
+					if ((Misc::First(sValue) == '\"') && (Misc::Last(sValue) == '\"'))
+						reg.Write(sName, sValue.Mid(1, sValue.GetLength() - 2));
+					else
+						reg.Write(sName, sValue);
+				}
+				else // DWORD
+					reg.Write(sName, (DWORD)_ttoi(sValue));
 			}
 		}
 		else // invalid file
+		{
 			return FALSE;
+		}
 	}
 	
 	return TRUE;

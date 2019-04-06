@@ -778,6 +778,16 @@ BOOL Misc::HasEmpty(const CStringArray& aItems)
 	return FALSE;
 }
 
+int Misc::LastIndex(const CString& sText)
+{
+	return (sText.GetLength() - 1);
+}
+
+int Misc::LastIndex(LPCTSTR szText)
+{
+	return (lstrlen(szText) - 1);
+}
+
 TCHAR Misc::First(const CString& sText)
 {
 	if (sText.IsEmpty())
@@ -799,7 +809,7 @@ TCHAR Misc::Last(const CString& sText)
 	}
 
 	// else
-	return sText[sText.GetLength() - 1];
+	return sText[LastIndex(sText)];
 }
 
 TCHAR Misc::First(LPCTSTR szText)
@@ -823,7 +833,31 @@ TCHAR Misc::Last(LPCTSTR szText)
 	}
 
 	// else
-	return szText[lstrlen(szText) - 1];
+	return szText[LastIndex(szText)];
+}
+
+BOOL Misc::TrimFirstIf(TCHAR cText, CString& sText)
+{
+	if (cText && (First(sText) == cText))
+	{
+		sText.TrimLeft(cText);
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
+BOOL Misc::TrimLastIf(TCHAR cText, CString& sText)
+{
+	if (cText && (Last(sText) == cText))
+	{
+		sText.TrimRight(cText);
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
 }
 
 TCHAR Misc::TrimFirst(CString& sText)

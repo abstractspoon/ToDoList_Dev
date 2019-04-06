@@ -412,12 +412,17 @@ namespace Misc
 	CString GetQuoted(LPCTSTR szText);
 	BOOL IsQuoted(LPCTSTR szText);
 
+	int LastIndex(const CString& sText);
+	int LastIndex(LPCTSTR szText);
+
 	TCHAR First(const CString& sText);
 	TCHAR Last(const CString& sText);
 	TCHAR First(LPCTSTR szText);
 	TCHAR Last(LPCTSTR szText);
 	TCHAR TrimFirst(CString& sText);
 	TCHAR TrimLast(CString& sText);
+	BOOL TrimFirstIf(TCHAR cText, CString& sText);
+	BOOL TrimLastIf(TCHAR cText, CString& sText);
 	CString& Trim(CString& sText, TCHAR cChar);
 	CString& Trim(CString& sText, LPCTSTR lpszTargets = NULL);
 	CString& TrimAlpha(CString& sText);

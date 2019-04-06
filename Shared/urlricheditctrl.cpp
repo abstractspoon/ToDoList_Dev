@@ -961,10 +961,10 @@ void CUrlRichEditCtrl::PathReplaceSel(LPCTSTR lpszPath, BOOL bFile)
 	// test
 	if (!sSelText.IsEmpty())
 	{
-		if (!isspace(sSelText[0]))
+		if (!isspace(Misc::First(sSelText)))
 			sPath = ' ' + sPath;
 		
-		if (!isspace(sSelText[sSelText.GetLength() - 1]))
+		if (!isspace(Misc::Last(sSelText)))
 			sPath += ' ';
 	}
 	

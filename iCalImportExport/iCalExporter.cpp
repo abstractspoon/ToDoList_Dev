@@ -386,10 +386,7 @@ CString CiCalExporter::FormatRecurrence(int nRegularity, DWORD dwSpecific1, DWOR
 				sRecurrence += _T("SA,");
 
 			// strip off trailing comma
-			int nLast = sRecurrence.GetLength() - 1;
-
-			if (sRecurrence[nLast] == ',')
-				sRecurrence = sRecurrence.Left(nLast);
+			sRecurrence.TrimRight(',');
 		}
 		break;
 

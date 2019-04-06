@@ -248,7 +248,7 @@ CString FileMisc::TerminatePath(LPCTSTR szPath, BOOL bTerminate)
 
 BOOL FileMisc::IsPathTerminated(const CString& sPath)
 {
-	return (sPath.ReverseFind('\\') == (sPath.GetLength() - 1));
+	return (Misc::Last(sPath) == '\\');
 }
 
 CString& FileMisc::ReplaceExtension(CString& sFilePath, LPCTSTR szExt)

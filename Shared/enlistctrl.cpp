@@ -199,10 +199,10 @@ void CEnListCtrl::OnPaint()
 
 			if (!sText.IsEmpty())
 			{
-				if (sText[0] != '(')
+				if (Misc::First(sText) != '(')
 					sText = "(" + sText;
 
-				if (sText[sText.GetLength() - 1] != ')')
+				if (Misc::Last(sText) != ')')
 					sText += ")";
 			
 				dc.SetTextColor(::GetSysColor(COLOR_WINDOWTEXT));
