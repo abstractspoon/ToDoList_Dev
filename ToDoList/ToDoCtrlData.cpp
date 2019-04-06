@@ -1805,9 +1805,6 @@ TDC_SET CToDoCtrlData::SetTaskLock(DWORD dwTaskID, BOOL bLocked)
 
 TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, const TDCCADATA& data)
 {
-	TODOITEM* pTDI = NULL;
-	EDIT_GET_TDI(dwTaskID, pTDI);
-	
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
 	if (!CTDCCustomAttributeHelper::GetAttributeDef(sAttribID, m_aCustomAttribDefs, attribDef))
@@ -1816,8 +1813,11 @@ TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString&
 		return SET_FAILED;
 	}
 
+	TODOITEM* pTDI = NULL;
+	EDIT_GET_TDI(dwTaskID, pTDI);
+
 	TDCCADATA dataOld;
-	GetTaskCustomAttributeData(dwTaskID, sAttribID, dataOld);
+	pTDI->GetCustomAttributeValue(sAttribID, dataOld);
 
 	CStringArray aOldItems, aNewItems;
 	dataOld.AsArray(aOldItems);

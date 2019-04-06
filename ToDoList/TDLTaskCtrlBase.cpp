@@ -1084,19 +1084,19 @@ void CTDLTaskCtrlBase::RecalcColumnWidth(TDC_COLUMN nColID)
 		break;
 
 	case TDCC_CREATIONTIME:
-		RecalcColumnWidth(TDCC_CREATIONDATE);
+		RecalcColumnWidth(TDCC_CREATIONDATE); // RECURSIVE CALL
 		break;
 
 	case TDCC_STARTTIME:
-		RecalcColumnWidth(TDCC_STARTDATE);
+		RecalcColumnWidth(TDCC_STARTDATE); // RECURSIVE CALL
 		break;
 
 	case TDCC_DUETIME:
-		RecalcColumnWidth(TDCC_DUEDATE);
+		RecalcColumnWidth(TDCC_DUEDATE); // RECURSIVE CALL
 		break;
 
 	case TDCC_DONETIME:
-		RecalcColumnWidth(TDCC_DONEDATE);
+		RecalcColumnWidth(TDCC_DONEDATE); // RECURSIVE CALL
 		break;
 
 	default:
@@ -5074,6 +5074,7 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 						}
 						break;
 
+					case TDCCA_FRACTION:
 					case TDCCA_DOUBLE:
 					case TDCCA_INTEGER:
 						{
@@ -5084,10 +5085,7 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 						break;
 
 					case TDCCA_FILELINK:
-						{
-							nColWidth = (attribDef.aDefaultListData.GetSize() * 18);
-
-						}
+						nColWidth = (attribDef.aDefaultListData.GetSize() * 18);
 						break;
 
 					default:
