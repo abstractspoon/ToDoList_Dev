@@ -801,29 +801,6 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 				SupportsFeature(TDCCAF_MINIMIZE);
 	}
 
-	CString FormatNumber(double dValue) const
-	{
-		DWORD dwDataType = GetDataType();
-		BOOL bAsPercentage = SupportsFeature(TDCCAF_DISPLAYASPERCENT);
-		LPCTSTR szTrail = (bAsPercentage ? _T("%") : NULL);
-
-		switch (dwDataType)
-		{
-		case TDCCA_FRACTION:
-			if (bAsPercentage)
-				dValue *= 100;
-			// fall thru
-		case TDCCA_DOUBLE:
-			return Misc::Format(dValue, (bAsPercentage ? 1 : 2), szTrail);
-
-		case TDCCA_INTEGER:
-			return Misc::Format(dValue, 0, szTrail);
-		}
-
-		ASSERT(0);
-		return _T("");
-	}
-
 	CString GetNextListItem(const CString& sItem, BOOL bNext) const
 	{
 		DWORD dwListType = GetListType();

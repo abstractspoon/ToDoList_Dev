@@ -1164,14 +1164,50 @@ CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const TDCCU
 	{
 		return data.FormatAsArray('+');
 	}
-	else if (attribDef.GetDataType() == TDCCA_DATE)
+	else
 	{
-		return data.FormatAsDate();
+		switch (attribDef.GetDataType())
+		{
+		case TDCCA_DATE:
+			return data.FormatAsDate();
+
+		case TDCCA_DOUBLE:
+		case TDCCA_INTEGER:
+			return FormatNumber(data.AsDouble(), attribDef);
+
+		case TDCCA_FRACTION:
+			return FormatNumber(data.AsFraction(), attribDef);
+		}
 	}
 
 	// all else
 	return data.AsString();
 }
+
+CString CTDCCustomAttributeHelper::FormatNumber(double dValue, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
+{
+	DWORD dwDataType = attribDef.GetDataType();
+	BOOL bAsPercentage = attribDef.HasFeature(TDCCAF_DISPLAYASPERCENT);
+	LPCTSTR szTrail = (bAsPercentage ? _T("%") : NULL);
+
+	switch (dwDataType)
+	{
+	case TDCCA_FRACTION:
+		if (bAsPercentage)
+			dValue *= 100;
+		// fall thru
+
+	case TDCCA_DOUBLE:
+		return Misc::Format(dValue, (bAsPercentage ? 1 : 2), szTrail);
+
+	case TDCCA_INTEGER:
+		return Misc::Format(dValue, 0, szTrail);
+	}
+
+	ASSERT(0);
+	return _T("");
+}
+
 
 void CTDCCustomAttributeHelper::ClearControl(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs)

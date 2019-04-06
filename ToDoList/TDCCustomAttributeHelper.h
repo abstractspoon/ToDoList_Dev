@@ -164,6 +164,7 @@ protected:
 									CTDCCustomControlArray& aControls, UINT nCtrlIDStart, BOOL bFilter);
 	static BOOL WantControl(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bFilter);
 	static CString GetControlTooltip(UINT nCtrlID, CWnd* pParent);
+	static CString FormatNumber(double dValue, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 };
 
 #endif // !defined(AFX_TDCCUSTOMATTRIBUTEHELPER_H__4044B3B7_1EA0_4279_9620_F2035DAE87DF__INCLUDED_)

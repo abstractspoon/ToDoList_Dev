@@ -2910,7 +2910,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			
 			if ((dValue != 0.0) || !attribDef.HasFeature(TDCCAF_HIDEZERO))
 			{
-				CString sText(attribDef.FormatNumber(dValue));
+				CString sText(CTDCCustomAttributeHelper::FormatData(dValue, attribDef));
 				DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
 			}			
 		}
@@ -2923,7 +2923,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 
 			m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
 
-			CString sText(FormatTimeValue(dValue, nUnits, TRUE));
+			CString sText(CTDCCustomAttributeHelper::FormatData(dValue, attribDef));
 			DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
 		}
 		break;
