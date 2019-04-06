@@ -104,7 +104,6 @@ protected:
 	BOOL HasLockedTasks(const TODOSTRUCTURE* pTDS) const;
 	BOOL IsParentTaskDone(const TODOSTRUCTURE* pTDS) const;
 	
-	const TODOITEM* GetLastModifiedTask(DWORD dwTaskID) const;
 	const TODOITEM* GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
 	static double GetBestDate(double dBest, double dDate, BOOL bEarliest);
