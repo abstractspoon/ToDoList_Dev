@@ -1674,19 +1674,12 @@ CTDCTaskCalculator::CTDCTaskCalculator(const CToDoCtrlData& data)
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
 {
-	if (dwTaskID && attribDef.SupportsCalculation())
-	{
-		const TODOITEM* pTDI = NULL;
-		const TODOSTRUCTURE* pTDS = NULL;
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
 
-		if (m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
-			return GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
 
-		ASSERT(0);
-	}
-
-	// all else
-	return FALSE;
+	return GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
 }
 
 double CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDC_UNITS nUnits)
