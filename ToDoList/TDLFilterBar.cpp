@@ -434,6 +434,22 @@ BOOL CTDLFilterBar::PreTranslateMessage(MSG* pMsg)
 	return CDialog::PreTranslateMessage(pMsg);
 }
 
+BOOL CTDLFilterBar::SelectFilter(int nFilter)
+{
+	if (nFilter < 0 || nFilter >= m_cbTaskFilter.GetCount())
+		return FALSE;
+
+	m_cbTaskFilter.SetCurSel(nFilter);
+	OnSelchangeFilter();
+
+	return TRUE;
+}
+
+int CTDLFilterBar::GetSelectedFilter() const
+{
+	return m_cbTaskFilter.GetCurSel();
+}
+
 FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const
 {
 	if (m_filter.IsAdvanced())
@@ -473,6 +489,11 @@ void CTDLFilterBar::AddAdvancedFilters(const CStringArray& aFilters)
 int CTDLFilterBar::GetAdvancedFilterNames(CStringArray& aFilters) const
 {
 	return m_cbTaskFilter.GetAdvancedFilters(aFilters); 
+}
+
+int CTDLFilterBar::GetAllFilterNames(CStringArray& aFilters) const
+{
+	return CDialogHelper::GetComboBoxItems(m_cbTaskFilter, aFilters);
 }
 
 void CTDLFilterBar::RemoveAdvancedFilters()

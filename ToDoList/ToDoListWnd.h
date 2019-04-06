@@ -543,6 +543,7 @@ protected:
 	afx_msg void OnViewSaveToImage();
 	afx_msg void OnViewMainToolbar();
 	afx_msg void OnViewCustomToolbar();
+	afx_msg void OnViewActivateFilter(UINT nCmdID);
 	afx_msg void OnWindow(UINT nCmdID);
 #ifdef _DEBUG
 	afx_msg void OnDebugEndSession();
@@ -661,6 +662,7 @@ protected:
 	void PrepareEditMenu(CMenu* pMenu);
 	void PrepareSortMenu(CMenu* pMenu);
 	void AddUserStorageToMenu(CMenu* pMenu);
+	void AddFiltersToMenu(CMenu* pMenu);
 
 	void ShowFindDialog(BOOL bShow = TRUE);
 	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);

@@ -409,6 +409,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND_RANGE(ID_VIEW_EXPANDDUE, ID_VIEW_COLLAPSESTARTED, OnViewExpandTasks)
 	ON_COMMAND_RANGE(ID_VIEW_TOGGLEALLTASKEXPANDED, ID_VIEW_TOGGLEALLTASKEXPANDED, OnViewExpandTasks)
 	ON_COMMAND_RANGE(ID_VIEW_TOGGLETASKEXPANDED, ID_VIEW_TOGGLETASKEXPANDED, OnViewExpandTasks)
+	ON_COMMAND_RANGE(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, OnViewActivateFilter)
 	ON_COMMAND_RANGE(ID_WINDOW1, ID_WINDOW16, OnWindow)
 	ON_MESSAGE(WM_UPDATEUDTSINTOOLBAR, OnUpdateUDTsInToolbar)
 	ON_MESSAGE(WM_APPRESTOREFOCUS, OnAppRestoreFocus)
@@ -7121,6 +7122,19 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 	}
 }
 
+void CToDoListWnd::OnViewActivateFilter(UINT nCmdID)
+{
+	int nFilter = (nCmdID - ID_VIEW_ACTIVATEFILTER1);
+
+	if ((nFilter < 0) || (nFilter >= 24))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	VERIFY(m_filterBar.SelectFilter(nFilter));
+}
+
 void CToDoListWnd::OnShowTaskView(UINT nCmdID) 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
@@ -7194,9 +7208,7 @@ void CToDoListWnd::AddUserStorageToMenu(CMenu* pMenu)
 		int nStore = 16;
 
 		while (nStore--)
-		{
 			pMenu->DeleteMenu(nStore, MF_BYPOSITION);
-		}
 		
 		// if we have any tools to add we do it here
 		int nNumStorage = min(m_mgrStorage.GetNumStorage(), 16);
@@ -7226,6 +7238,45 @@ void CToDoListWnd::AddUserStorageToMenu(CMenu* pMenu)
 		else // if nothing to add just re-add placeholder
 		{
 			pMenu->InsertMenu(0, MF_BYPOSITION | MF_STRING | MF_GRAYED, MENUSTARTID, CEnString(IDS_3RDPARTYSTORAGE));
+		}
+	}
+}
+
+void CToDoListWnd::AddFiltersToMenu(CMenu* pMenu) 
+{
+	if (pMenu)
+	{
+		const UINT MENUSTARTID = pMenu->GetMenuItemID(0);
+
+		// delete existing entries
+		int nFilter = 24;
+
+		while (nFilter--)
+			pMenu->DeleteMenu(nFilter, MF_BYPOSITION);
+		
+		CStringArray aFilters;
+		int nNumFilters = min(m_filterBar.GetAllFilterNames(aFilters), 24);
+
+		if (nNumFilters)
+		{
+			UINT nFlags = (MF_BYPOSITION | MF_STRING);
+			CString sMenuItem;
+
+			for (int nFilter = 0; nFilter < nNumFilters; nFilter++)
+			{
+				sMenuItem.Format(_T("&%s"), aFilters[nFilter]);
+				sMenuItem.Replace('\t', ' ');
+				
+				pMenu->InsertMenu(nFilter, nFlags, (ID_VIEW_ACTIVATEFILTER1 + nFilter), sMenuItem);
+			}
+
+			int nSelFilter = m_filterBar.GetSelectedFilter();
+			pMenu->CheckMenuRadioItem(0, nNumFilters, nSelFilter, MF_BYPOSITION);
+
+		}
+		else // if nothing to add just re-add placeholder
+		{
+			pMenu->InsertMenu(0, MF_BYPOSITION | MF_STRING | MF_GRAYED, MENUSTARTID, CEnString(IDS_FILTERPLACEHOLDER));
 		}
 	}
 }
@@ -7405,15 +7456,17 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 	}
 	else // all other sub-menus
 	{
-		// test for 'Open From...'
-		if (pPopupMenu->GetMenuItemID(0) == ID_FILE_OPEN_USERSTORAGE1)
+		switch (pPopupMenu->GetMenuItemID(0))
 		{
+		// test for 'Open From.../Save To...'
+		case ID_FILE_OPEN_USERSTORAGE1:
+		case ID_FILE_SAVE_USERSTORAGE1:
 			AddUserStorageToMenu(pPopupMenu);
-		}
-		// test for 'save To...'
-		else if (pPopupMenu->GetMenuItemID(0) == ID_FILE_SAVE_USERSTORAGE1)
-		{
-			AddUserStorageToMenu(pPopupMenu);
+			break;
+
+		case ID_VIEW_ACTIVATEFILTER1:
+			AddFiltersToMenu(pPopupMenu);
+			break;
 		}
 	}
 

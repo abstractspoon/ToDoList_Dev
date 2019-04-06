@@ -3166,6 +3166,57 @@ BEGIN
         MENUITEM "&Clear Filter",               ID_VIEW_CLEARFILTER
         MENUITEM "Toggle F&ilter",              ID_VIEW_TOGGLEFILTER
         MENUITEM "&Refresh Filter",             ID_VIEW_REFRESHFILTER
+        POPUP "&Activate Filter"
+        BEGIN
+            MENUITEM "Filter 1",                    ID_VIEW_ACTIVATEFILTER1
+            , GRAYED
+            MENUITEM "Filter 2",                    ID_VIEW_ACTIVATEFILTER2
+            , GRAYED
+            MENUITEM "Filter 3",                    ID_VIEW_ACTIVATEFILTER3
+            , GRAYED
+            MENUITEM "Filter 4",                    ID_VIEW_ACTIVATEFILTER4
+            , GRAYED
+            MENUITEM "Filter 5",                    ID_VIEW_ACTIVATEFILTER5
+            , GRAYED
+            MENUITEM "Filter 6",                    ID_VIEW_ACTIVATEFILTER6
+            , GRAYED
+            MENUITEM "Filter 7",                    ID_VIEW_ACTIVATEFILTER7
+            , GRAYED
+            MENUITEM "Filter 8",                    ID_VIEW_ACTIVATEFILTER8
+            , GRAYED
+            MENUITEM "Filter 9",                    ID_VIEW_ACTIVATEFILTER9
+            , GRAYED
+            MENUITEM "Filter 10",                   ID_VIEW_ACTIVATEFILTER10
+            , GRAYED
+            MENUITEM "Filter 11",                   ID_VIEW_ACTIVATEFILTER11
+            , GRAYED
+            MENUITEM "Filter 12",                   ID_VIEW_ACTIVATEFILTER12
+            , GRAYED
+            MENUITEM "Filter 13",                   ID_VIEW_ACTIVATEFILTER13
+            , GRAYED
+            MENUITEM "Filter 14",                   ID_VIEW_ACTIVATEFILTER14
+            , GRAYED
+            MENUITEM "Filter 15",                   ID_VIEW_ACTIVATEFILTER15
+            , GRAYED
+            MENUITEM "Filter 16",                   ID_VIEW_ACTIVATEFILTER16
+            , GRAYED
+            MENUITEM "Filter 17",                   ID_VIEW_ACTIVATEFILTER17
+            , GRAYED
+            MENUITEM "Filter 18",                   ID_VIEW_ACTIVATEFILTER18
+            , GRAYED
+            MENUITEM "Filter 19",                   ID_VIEW_ACTIVATEFILTER19
+            , GRAYED
+            MENUITEM "Filter 20",                   ID_VIEW_ACTIVATEFILTER20
+            , GRAYED
+            MENUITEM "Filter 21",                   ID_VIEW_ACTIVATEFILTER21
+            , GRAYED
+            MENUITEM "Filter 22",                   ID_VIEW_ACTIVATEFILTER22
+            , GRAYED
+            MENUITEM "Filter 23",                   ID_VIEW_ACTIVATEFILTER23
+            , GRAYED
+            MENUITEM "Filter 24",                   ID_VIEW_ACTIVATEFILTER24
+            , GRAYED
+        END
         MENUITEM SEPARATOR
         MENUITEM "Show Time Trac&ker",          ID_VIEW_SHOWTIMETRACKER
         MENUITEM "Show Reminder &Notification Window", ID_VIEW_SHOWREMINDERS
@@ -5464,6 +5515,7 @@ BEGIN
     IDS_SEARCHPREFS_PROMPT  "Search Preferences"
     IDS_CAD_FRACTION        "Number (Fraction eg. 2/3)"
     IDS_CUSTOM_FEATURE_PERCENTAGE "Display as percentage"
+    IDS_FILTERPLACEHOLDER   "Filters"
 END
 
 #endif    // English (Australia) resources

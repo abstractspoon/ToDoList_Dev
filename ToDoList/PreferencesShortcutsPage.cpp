@@ -114,6 +114,7 @@ void CPreferencesShortcutsPage::OnFirstShow()
 			menu.TranslateDynamicMenuItems(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, _T("3rd Party Storage %d"));
 			menu.TranslateDynamicMenuItems(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, _T("3rd Party Storage %d"));
 			menu.TranslateDynamicMenuItems(ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16, _T("Task View Visibility %d"));
+			menu.TranslateDynamicMenuItems(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, _T("Filter %d"));
 
 			for (int nPos = 0; nPos < (int)menu.GetMenuItemCount(); nPos++)
 			{
