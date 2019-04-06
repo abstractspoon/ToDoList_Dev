@@ -112,14 +112,16 @@ double TDCCADATA::AsFraction() const
 { 
 	ASSERT(sExtra.IsEmpty());
 
-	CString sNumerator(sData), sDenominator;
+	if (sData.IsEmpty())
+		return 0.0;
 
-	if (!Misc::Split(sNumerator, sDenominator, '/'))
+	int nDiv = sData.Find('/');
+
+	if ((nDiv == -1) || (nDiv == Misc::LastIndex(sData)))
 		return AsDouble();
 
-	// else
-	double dNumerator = _ttof(sNumerator);
-	double dDenominator = _ttof(sDenominator);
+	double dNumerator = _ttof(sData); // will stop when it hits '/'
+	double dDenominator = _ttof((LPCTSTR)sData + nDiv + 1);
 
 	if (dDenominator == 0.0)
 		dDenominator = 1.0;
@@ -131,27 +133,7 @@ double TDCCADATA::AsDouble() const
 {
 	ASSERT(sExtra.IsEmpty());
 
-	if (sData.IsEmpty() || !_istdigit(Misc::First(sData)) || !_istdigit(Misc::Last(sData)))
-		return 0.0;
-
-	double dNumerator = 0.0, dDenominator = 1.0;
-	CString sNumerator(sData), sDenominator;
-
-	if (Misc::Split(sNumerator, sDenominator, '/'))
-	{
-		dNumerator = _ttof(sNumerator);
-		dDenominator = _ttof(sDenominator);
-
-		if (dDenominator == 0.0)
-			dDenominator = 1.0;
-	}
-	else
-	{
-		dNumerator = _ttof(sData);
-	}
-	ASSERT(dDenominator != 0.0);
-
-	return (dNumerator / dDenominator);
+	return _ttof(sData);
 }
 
 int TDCCADATA::AsInteger() const 
