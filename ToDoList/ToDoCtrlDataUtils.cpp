@@ -1718,12 +1718,8 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 	TDCCADATA data;
 	pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
 
-	if (!attribDef.SupportsCalculation())
-	{
-		dCalcValue = GetCalculationValue(data, attribDef, nUnits);
-	}
 	// -----------------------------------------------------------
-	else if (attribDef.HasFeature(TDCCAF_ACCUMULATE))
+	if (attribDef.HasFeature(TDCCAF_ACCUMULATE))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE));
 
@@ -1794,7 +1790,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 	}
 	else
 	{
-		ASSERT(0);
+		dCalcValue = GetCalculationValue(data, attribDef, nUnits);
 	}
 
 	if (dCalcValue == DBL_NULL)
