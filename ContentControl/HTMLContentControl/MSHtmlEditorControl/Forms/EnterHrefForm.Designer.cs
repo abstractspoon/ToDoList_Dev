@@ -36,6 +36,7 @@ namespace MSDN.Html.Editor
 			this.hrefLink = new System.Windows.Forms.TextBox();
 			this.labelTarget = new System.Windows.Forms.Label();
 			this.listTargets = new System.Windows.Forms.ComboBox();
+			this.fileBrowseBtn = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// bInsert
@@ -107,7 +108,7 @@ namespace MSDN.Html.Editor
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.hrefLink.Location = new System.Drawing.Point(70, 48);
 			this.hrefLink.Name = "hrefLink";
-			this.hrefLink.Size = new System.Drawing.Size(350, 20);
+			this.hrefLink.Size = new System.Drawing.Size(315, 20);
 			this.hrefLink.TabIndex = 6;
 			this.hrefLink.Text = "https://";
 			this.hrefLink.TextChanged += new System.EventHandler(this.hrefLink_TextChanged);
@@ -130,12 +131,24 @@ namespace MSDN.Html.Editor
 			this.listTargets.Size = new System.Drawing.Size(121, 21);
 			this.listTargets.TabIndex = 8;
 			// 
+			// fileBrowseBtn
+			// 
+			this.fileBrowseBtn.Location = new System.Drawing.Point(391, 47);
+			this.fileBrowseBtn.Margin = new System.Windows.Forms.Padding(0);
+			this.fileBrowseBtn.Name = "fileBrowseBtn";
+			this.fileBrowseBtn.Size = new System.Drawing.Size(30, 22);
+			this.fileBrowseBtn.TabIndex = 9;
+			this.fileBrowseBtn.Text = "...";
+			this.fileBrowseBtn.UseVisualStyleBackColor = true;
+			this.fileBrowseBtn.Click += new System.EventHandler(this.fileBrowseBtn_Click);
+			// 
 			// EnterHrefForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.bCancel;
 			this.ClientSize = new System.Drawing.Size(432, 141);
+			this.Controls.Add(this.fileBrowseBtn);
 			this.Controls.Add(this.listTargets);
 			this.Controls.Add(this.labelTarget);
 			this.Controls.Add(this.hrefLink);
@@ -168,7 +181,7 @@ namespace MSDN.Html.Editor
         private System.Windows.Forms.TextBox hrefLink;
         private System.Windows.Forms.Label labelTarget;
         private System.Windows.Forms.ComboBox listTargets;
-
-    }
+		private System.Windows.Forms.Button fileBrowseBtn;
+	}
 }
 

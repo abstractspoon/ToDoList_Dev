@@ -17,7 +17,7 @@ namespace MSDN.Html.Editor
     /// Form used to enter an Html Image attribute
     /// Consists of Href, Text and Image Alignment
     /// </summary>
-    internal partial class EnterImageForm : Form
+    public partial class EnterImageForm : Form
     {
 
         /// <summary>
@@ -86,5 +86,34 @@ namespace MSDN.Html.Editor
             }
         }
 
-    }
+		public String LastBrowsedFolder { get; set; } = @"C:\";
+
+		private void fileBrowseBtn_Click(object sender, EventArgs e)
+		{
+			var dlg = new OpenFileDialog
+			{
+				InitialDirectory = LastBrowsedFolder,
+				Title = "Select Image File",
+
+				CheckFileExists = true,
+				CheckPathExists = true,
+
+				DefaultExt = "png",
+				Filter = "Image files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif",
+				FilterIndex = 0,
+				RestoreDirectory = true,
+
+				ShowReadOnly = false
+			};
+
+			if (dlg.ShowDialog() == DialogResult.OK)
+			{
+				// Format filePath as file URI
+				var uri = new System.Uri(dlg.FileName);
+				ImageLink = uri.AbsoluteUri;
+
+				LastBrowsedFolder = System.IO.Path.GetDirectoryName(dlg.FileName);
+			}
+		}
+	}
 }

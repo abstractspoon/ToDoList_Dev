@@ -35,6 +35,7 @@ namespace MSDN.Html.Editor
 			this.hrefLink = new System.Windows.Forms.TextBox();
 			this.labelAlign = new System.Windows.Forms.Label();
 			this.listAlign = new System.Windows.Forms.ComboBox();
+			this.fileBrowseBtn = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// bInsert
@@ -94,7 +95,7 @@ namespace MSDN.Html.Editor
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.hrefLink.Location = new System.Drawing.Point(70, 48);
 			this.hrefLink.Name = "hrefLink";
-			this.hrefLink.Size = new System.Drawing.Size(350, 20);
+			this.hrefLink.Size = new System.Drawing.Size(315, 20);
 			this.hrefLink.TabIndex = 1;
 			// 
 			// labelAlign
@@ -116,6 +117,17 @@ namespace MSDN.Html.Editor
 			this.listAlign.Size = new System.Drawing.Size(121, 21);
 			this.listAlign.TabIndex = 3;
 			// 
+			// fileBrowseBtn
+			// 
+			this.fileBrowseBtn.Location = new System.Drawing.Point(390, 47);
+			this.fileBrowseBtn.Margin = new System.Windows.Forms.Padding(0);
+			this.fileBrowseBtn.Name = "fileBrowseBtn";
+			this.fileBrowseBtn.Size = new System.Drawing.Size(30, 22);
+			this.fileBrowseBtn.TabIndex = 8;
+			this.fileBrowseBtn.Text = "...";
+			this.fileBrowseBtn.UseVisualStyleBackColor = true;
+			this.fileBrowseBtn.Click += new System.EventHandler(this.fileBrowseBtn_Click);
+			// 
 			// EnterImageForm
 			// 
 			this.AcceptButton = this.bInsert;
@@ -123,6 +135,7 @@ namespace MSDN.Html.Editor
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.bCancel;
 			this.ClientSize = new System.Drawing.Size(432, 141);
+			this.Controls.Add(this.fileBrowseBtn);
 			this.Controls.Add(this.listAlign);
 			this.Controls.Add(this.labelAlign);
 			this.Controls.Add(this.hrefLink);
@@ -153,7 +166,7 @@ namespace MSDN.Html.Editor
         private System.Windows.Forms.TextBox hrefLink;
         private System.Windows.Forms.Label labelAlign;
         private System.Windows.Forms.ComboBox listAlign;
-    
-    }
+		private System.Windows.Forms.Button fileBrowseBtn;
+	}
 }
 

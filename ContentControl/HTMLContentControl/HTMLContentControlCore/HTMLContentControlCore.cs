@@ -99,6 +99,8 @@ namespace HTMLContentControl
         {
 			// TODO
 			prefs.WriteProfileBool(key, "EditEnabled", m_HtmlEditControl.EditEnabled);
+			prefs.WriteProfileString(key, "LastBrowsedFileFolder", m_HtmlEditControl.LastBrowsedFileFolder);
+			prefs.WriteProfileString(key, "LastBrowsedImageFolder", m_HtmlEditControl.LastBrowsedImageFolder);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -107,8 +109,10 @@ namespace HTMLContentControl
             {
 				// private settings
 				m_HtmlEditControl.EditEnabled = prefs.GetProfileBool(key, "EditEnabled", true);
-            }
-        }
+				m_HtmlEditControl.LastBrowsedFileFolder = prefs.GetProfileString(key, "LastBrowsedFileFolder", @"C:\");
+				m_HtmlEditControl.LastBrowsedImageFolder = prefs.GetProfileString(key, "LastBrowsedImageFolder", @"C:\");
+			}
+		}
 
 		// --------------------------------------------------------------------
 

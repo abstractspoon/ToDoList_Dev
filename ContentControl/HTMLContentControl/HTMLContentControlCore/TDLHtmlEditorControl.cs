@@ -17,7 +17,7 @@ namespace HTMLContentControl
         private Translator m_Trans;
         private Timer m_TextChangeTimer;
         private String m_PrevTextChange = "";
-        private Boolean m_SettingContent = false;
+		private Boolean m_SettingContent = false;
 
         // ---------------------------------------------------------------
 
@@ -43,7 +43,10 @@ namespace HTMLContentControl
             ToolBar.BackColor = BackColor;
         }
 
-        private void InitializeComponent()
+		public String LastBrowsedImageFolder { get; set; } = @"C:\";
+		public String LastBrowsedFileFolder { get; set; } = @"C:\";
+
+		private void InitializeComponent()
         {
 			InitialiseFeatures();
 
@@ -204,9 +207,9 @@ namespace HTMLContentControl
             return true;
         }
 
-        protected override void DefineDialogProperties(Form dialog)
+        protected override void PreShowDialog(Form dialog)
         {
-            base.DefineDialogProperties(dialog);
+            base.PreShowDialog(dialog);
 
 			// Operations that change dialog size
 			DialogUtils.SetFont(dialog, m_ControlsFont);
@@ -236,14 +239,38 @@ namespace HTMLContentControl
             dialog.ShowIcon = true;
             dialog.Icon = HTMLContentControlCore.html;
 
-			// This is a hack in any other language but apparently not in C#
-			var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
+			// Per dialog customisations
+			if (dialog is MSDN.Html.Editor.EnterHrefForm)
+			{
+				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
 
-			if (urlDialog != null)
 				urlDialog.EnforceHrefTarget(MSDN.Html.Editor.NavigateActionOption.NewWindow);
-        }
+				urlDialog.LastBrowsedFolder = LastBrowsedFileFolder;
+			}
+			else if (dialog is MSDN.Html.Editor.EnterImageForm)
+			{
+				var imageDialog = (dialog as MSDN.Html.Editor.EnterImageForm);
 
-        public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
+				imageDialog.LastBrowsedFolder = LastBrowsedImageFolder;
+			}
+		}
+
+		protected override void PostShowDialog(Form dialog)
+		{
+			// Per dialog customisations
+			if (dialog is MSDN.Html.Editor.EnterHrefForm)
+			{
+				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
+				LastBrowsedFileFolder = urlDialog.LastBrowsedFolder;
+			}
+			else if (dialog is MSDN.Html.Editor.EnterImageForm)
+			{
+				var imageDialog = (dialog as MSDN.Html.Editor.EnterImageForm);
+				LastBrowsedImageFolder = imageDialog.LastBrowsedFolder;
+			}
+		}
+		
+		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
             // Handle keyboard shortcuts
             if ((message == 0x0100) || (message == 0x0104) && (Control.ModifierKeys != Keys.None))

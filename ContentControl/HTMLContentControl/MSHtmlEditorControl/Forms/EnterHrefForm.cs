@@ -92,5 +92,34 @@ namespace MSDN.Html.Editor
 		{
 
 		}
+
+		public String LastBrowsedFolder { get; set; } = @"C:\";
+
+		private void fileBrowseBtn_Click(object sender, EventArgs e)
+		{
+			var dlg = new OpenFileDialog
+			{
+				InitialDirectory = LastBrowsedFolder,
+				Title = "Select File",
+
+				CheckFileExists = true,
+				CheckPathExists = true,
+
+				Filter = "All files (*.*)|*.*",
+				FilterIndex = 0,
+				RestoreDirectory = true,
+
+				ShowReadOnly = false
+			};
+
+			if (dlg.ShowDialog() == DialogResult.OK)
+			{
+				// Format filePath as file URI
+				var uri = new System.Uri(dlg.FileName);
+				HrefLink = uri.AbsoluteUri;
+
+				LastBrowsedFolder = System.IO.Path.GetDirectoryName(dlg.FileName);
+			}
+		}
 	}
 }
