@@ -102,6 +102,7 @@ namespace MSDN.Html.Editor
 				InitialDirectory = LastBrowsedFolder,
 				Title = "Select File",
 
+				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
 				CheckPathExists = true,
 

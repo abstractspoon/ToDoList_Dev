@@ -95,10 +95,10 @@ namespace MSDN.Html.Editor
 				InitialDirectory = LastBrowsedFolder,
 				Title = "Select Image File",
 
+				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
 				CheckPathExists = true,
 
-				DefaultExt = "png",
 				Filter = "Image files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif",
 				FilterIndex = 0,
 				RestoreDirectory = true,
