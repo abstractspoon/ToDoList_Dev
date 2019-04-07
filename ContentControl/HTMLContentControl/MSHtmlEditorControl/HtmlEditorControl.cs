@@ -2297,41 +2297,45 @@ namespace MSDN.Html.Editor
                     DialogResult result = dialog.ShowDialog(/*this.ParentForm*/);
                     // based on the user interaction perform the neccessary action
                     // after one has a valid href
-                    if (result == DialogResult.Yes)
-                    {
-                        hrefLink = dialog.HrefLink;
-                        target = dialog.HrefTarget;
-                        if (IsValidHref(hrefLink))
-                        {
-                            // insert or update the current link
-                            if (anchor == null)
-                            {
-                                ExecuteCommandRange(range, HTML_COMMAND_INSERT_LINK, hrefLink);
-                                element = (mshtmlElement)range.parentElement();
-                                // parse up the tree until the anchor element is found
-                                while (element != null && !(element is mshtmlAnchorElement))
-                                {
-                                    element = (mshtmlElement)element.parentElement;
-                                }
-                                if (element != null) anchor = (mshtmlAnchorElement)element;
-                            }
-                            else
-                            {
-                                anchor.href = hrefLink;
-                            }
-                            if (target != NavigateActionOption.Default)
-                            {
-                                anchor.target = (target == NavigateActionOption.NewWindow) ? TARGET_WINDOW_NEW : TARGET_WINDOW_SAME;
-                            }
-                        }
+					if (result != DialogResult.Cancel)
+					{
+						if (result == DialogResult.Yes)
+						{
+							hrefLink = dialog.HrefLink;
+							target = dialog.HrefTarget;
+							if (IsValidHref(hrefLink))
+							{
+								// insert or update the current link
+								if (anchor == null)
+								{
+									ExecuteCommandRange(range, HTML_COMMAND_INSERT_LINK, hrefLink);
+									element = (mshtmlElement)range.parentElement();
+									// parse up the tree until the anchor element is found
+									while (element != null && !(element is mshtmlAnchorElement))
+									{
+										element = (mshtmlElement)element.parentElement;
+									}
+									if (element != null) anchor = (mshtmlAnchorElement)element;
+								}
+								else
+								{
+									anchor.href = hrefLink;
+								}
+								if (target != NavigateActionOption.Default)
+								{
+									anchor.target = (target == NavigateActionOption.NewWindow) ? TARGET_WINDOW_NEW : TARGET_WINDOW_SAME;
+								}
+							}
+						}
+						else if (result == DialogResult.No)
+						{
+							// remove the current link assuming present
+							if (anchor != null) ExecuteCommandRange(range, HTML_COMMAND_REMOVE_LINK, null);;
+						}
+
 						PostShowDialog(dialog);
 					}
-					else if (result == DialogResult.No)
-                    {
-                        // remove the current link assuming present
-                        if (anchor != null) ExecuteCommandRange(range, HTML_COMMAND_REMOVE_LINK, null);;
-                    }
-                }
+				}
             }
             else
             {
