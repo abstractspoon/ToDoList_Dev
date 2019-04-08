@@ -51,6 +51,7 @@ namespace MSDN.Html.Editor
             set
             {
                 this.hrefText.Text = value;
+				this.hrefText.ReadOnly = !String.IsNullOrWhiteSpace(value);
             }
 
         } //HrefText

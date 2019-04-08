@@ -47,7 +47,7 @@ namespace MSDN.Html.Editor
 			this.bInsert.Location = new System.Drawing.Point(178, 109);
 			this.bInsert.Name = "bInsert";
 			this.bInsert.Size = new System.Drawing.Size(75, 23);
-			this.bInsert.TabIndex = 0;
+			this.bInsert.TabIndex = 4;
 			this.bInsert.Text = "Insert";
 			// 
 			// bRemove
@@ -58,7 +58,7 @@ namespace MSDN.Html.Editor
 			this.bRemove.Location = new System.Drawing.Point(262, 109);
 			this.bRemove.Name = "bRemove";
 			this.bRemove.Size = new System.Drawing.Size(75, 23);
-			this.bRemove.TabIndex = 1;
+			this.bRemove.TabIndex = 5;
 			this.bRemove.Text = "Remove";
 			// 
 			// bCancel
@@ -69,7 +69,7 @@ namespace MSDN.Html.Editor
 			this.bCancel.Location = new System.Drawing.Point(346, 109);
 			this.bCancel.Name = "bCancel";
 			this.bCancel.Size = new System.Drawing.Size(75, 23);
-			this.bCancel.TabIndex = 2;
+			this.bCancel.TabIndex = 6;
 			this.bCancel.Text = "Cancel";
 			// 
 			// labelText
@@ -97,9 +97,8 @@ namespace MSDN.Html.Editor
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.hrefText.Location = new System.Drawing.Point(70, 16);
 			this.hrefText.Name = "hrefText";
-			this.hrefText.ReadOnly = true;
 			this.hrefText.Size = new System.Drawing.Size(350, 20);
-			this.hrefText.TabIndex = 5;
+			this.hrefText.TabIndex = 3;
 			// 
 			// hrefLink
 			// 
@@ -109,7 +108,7 @@ namespace MSDN.Html.Editor
 			this.hrefLink.Location = new System.Drawing.Point(70, 48);
 			this.hrefLink.Name = "hrefLink";
 			this.hrefLink.Size = new System.Drawing.Size(315, 20);
-			this.hrefLink.TabIndex = 6;
+			this.hrefLink.TabIndex = 0;
 			this.hrefLink.Text = "https://";
 			this.hrefLink.TextChanged += new System.EventHandler(this.hrefLink_TextChanged);
 			// 
@@ -129,7 +128,7 @@ namespace MSDN.Html.Editor
 			this.listTargets.Location = new System.Drawing.Point(70, 80);
 			this.listTargets.Name = "listTargets";
 			this.listTargets.Size = new System.Drawing.Size(121, 21);
-			this.listTargets.TabIndex = 8;
+			this.listTargets.TabIndex = 2;
 			// 
 			// fileBrowseBtn
 			// 
@@ -137,7 +136,7 @@ namespace MSDN.Html.Editor
 			this.fileBrowseBtn.Margin = new System.Windows.Forms.Padding(0);
 			this.fileBrowseBtn.Name = "fileBrowseBtn";
 			this.fileBrowseBtn.Size = new System.Drawing.Size(30, 22);
-			this.fileBrowseBtn.TabIndex = 9;
+			this.fileBrowseBtn.TabIndex = 1;
 			this.fileBrowseBtn.Text = "...";
 			this.fileBrowseBtn.UseVisualStyleBackColor = true;
 			this.fileBrowseBtn.Click += new System.EventHandler(this.fileBrowseBtn_Click);

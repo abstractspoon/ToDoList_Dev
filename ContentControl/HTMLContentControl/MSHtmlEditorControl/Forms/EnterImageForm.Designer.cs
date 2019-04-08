@@ -86,7 +86,7 @@ namespace MSDN.Html.Editor
 			this.hrefText.Location = new System.Drawing.Point(70, 16);
 			this.hrefText.Name = "hrefText";
 			this.hrefText.Size = new System.Drawing.Size(350, 20);
-			this.hrefText.TabIndex = 2;
+			this.hrefText.TabIndex = 3;
 			// 
 			// hrefLink
 			// 
@@ -96,7 +96,7 @@ namespace MSDN.Html.Editor
 			this.hrefLink.Location = new System.Drawing.Point(70, 48);
 			this.hrefLink.Name = "hrefLink";
 			this.hrefLink.Size = new System.Drawing.Size(315, 20);
-			this.hrefLink.TabIndex = 1;
+			this.hrefLink.TabIndex = 0;
 			// 
 			// labelAlign
 			// 
@@ -115,7 +115,7 @@ namespace MSDN.Html.Editor
 			this.listAlign.Location = new System.Drawing.Point(70, 80);
 			this.listAlign.Name = "listAlign";
 			this.listAlign.Size = new System.Drawing.Size(121, 21);
-			this.listAlign.TabIndex = 3;
+			this.listAlign.TabIndex = 2;
 			// 
 			// fileBrowseBtn
 			// 
@@ -123,7 +123,7 @@ namespace MSDN.Html.Editor
 			this.fileBrowseBtn.Margin = new System.Windows.Forms.Padding(0);
 			this.fileBrowseBtn.Name = "fileBrowseBtn";
 			this.fileBrowseBtn.Size = new System.Drawing.Size(30, 22);
-			this.fileBrowseBtn.TabIndex = 8;
+			this.fileBrowseBtn.TabIndex = 1;
 			this.fileBrowseBtn.Text = "...";
 			this.fileBrowseBtn.UseVisualStyleBackColor = true;
 			this.fileBrowseBtn.Click += new System.EventHandler(this.fileBrowseBtn_Click);

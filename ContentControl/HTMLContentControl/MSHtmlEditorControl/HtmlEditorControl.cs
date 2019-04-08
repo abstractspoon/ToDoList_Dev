@@ -473,18 +473,30 @@ namespace MSDN.Html.Editor
 
         private void DocumentDoubleClick(object sender, EventArgs e)
         {
-			mshtmlSelection sel = document.selection as mshtmlSelection;
-			mshtmlTextRange rng = sel.createRange() as mshtmlTextRange;
-
-			rng.expand("word");
-
-			// Omit trailing whitespace
-			int len = rng.text.Length;
-			int wordLen = rng.text.TrimEnd(null).Length;
-
-			rng.moveEnd("character", (wordLen - len));
-			rng.select();
+			SelectWordAtCaret();
 		} //DocumentDoubleClick
+
+		private void SelectWordAtCaret()
+		{
+			mshtmlSelection sel = document.selection as mshtmlSelection;
+
+			if (sel != null)
+			{
+				mshtmlTextRange rng = sel.createRange() as mshtmlTextRange;
+
+				if ((rng != null) && (String.IsNullOrEmpty(rng.text)))
+				{
+					rng.expand("word");
+
+					// Omit trailing whitespace
+					int len = rng.text.Length;
+					int wordLen = rng.text.TrimEnd(null).Length;
+
+					rng.moveEnd("character", (wordLen - len));
+					rng.select();
+				}
+			}
+		}
 
 		/// <summary>
 		/// Method to perform the process of key being pressed
@@ -2258,96 +2270,126 @@ namespace MSDN.Html.Editor
         {
             // get the text range working with
             mshtmlTextRange range = GetTextRange();
-            string hrefText = (range == null) ? null : range.text;
-            string hrefLink = string.Empty;
+            string hrefText = ((range == null) || (range.text == null)) ? string.Empty : range.text;
+
+			string hrefLink = string.Empty;
             NavigateActionOption target;
 
-            // ensure have text in the range otherwise nothing works
-            if (hrefText != null)
-            {
-                // calculate the items working with
-                mshtmlAnchorElement anchor = null;
-                mshtmlElement element = (mshtmlElement)range.parentElement();
-                // parse up the tree until the anchor element is found
-                while (element != null && !(element is mshtmlAnchorElement))
-                {
-                    element = (mshtmlElement)element.parentElement;
-                }
-                // extract the HREF properties
-                if (element is mshtmlAnchorElement)
-                {
-                    anchor = (mshtmlAnchorElement)element;
-                    if (anchor.href != null) hrefLink = anchor.href;
-                }
-                // if text is a valid href then set the link
-                if (hrefLink == string.Empty)
+			// calculate the items working with
+			mshtmlAnchorElement anchor = null;
+			mshtmlElement element = (mshtmlElement)range.parentElement();
+
+			// parse up the tree until the anchor element is found
+			while (element != null && !(element is mshtmlAnchorElement))
+			{
+				element = (mshtmlElement)element.parentElement;
+			}
+
+			// extract the HREF properties
+			if (element is mshtmlAnchorElement)
+			{
+				anchor = (mshtmlAnchorElement)element;
+
+				if (anchor.href != null)
 				{
-					if (IsValidHref(hrefText))
-						hrefLink = hrefText;
-					else
-						hrefLink = "https://";
-                }
-
-                // prompt the user for the new href
-                using (EnterHrefForm dialog = new EnterHrefForm())
-                {
-                    dialog.HrefText = hrefText;
-                    dialog.HrefLink = hrefLink;
-                    PreShowDialog(dialog);
-                    DialogResult result = dialog.ShowDialog(/*this.ParentForm*/);
-                    // based on the user interaction perform the neccessary action
-                    // after one has a valid href
-					if (result != DialogResult.Cancel)
-					{
-						if (result == DialogResult.Yes)
-						{
-							hrefLink = dialog.HrefLink;
-							target = dialog.HrefTarget;
-							if (IsValidHref(hrefLink))
-							{
-								// insert or update the current link
-								if (anchor == null)
-								{
-									ExecuteCommandRange(range, HTML_COMMAND_INSERT_LINK, hrefLink);
-									element = (mshtmlElement)range.parentElement();
-									// parse up the tree until the anchor element is found
-									while (element != null && !(element is mshtmlAnchorElement))
-									{
-										element = (mshtmlElement)element.parentElement;
-									}
-									if (element != null) anchor = (mshtmlAnchorElement)element;
-								}
-								else
-								{
-									anchor.href = hrefLink;
-								}
-								if (target != NavigateActionOption.Default)
-								{
-									anchor.target = (target == NavigateActionOption.NewWindow) ? TARGET_WINDOW_NEW : TARGET_WINDOW_SAME;
-								}
-							}
-						}
-						else if (result == DialogResult.No)
-						{
-							// remove the current link assuming present
-							if (anchor != null) ExecuteCommandRange(range, HTML_COMMAND_REMOVE_LINK, null);;
-						}
-
-						PostShowDialog(dialog);
-					}
+					hrefLink = anchor.href;
+					hrefText = element.innerText;
 				}
-            }
-            else
-            {
-                throw new HtmlEditorException("Must Select Text from which to create a Link.", "InsertLink");
-            }
+			}
+			
+			if (String.IsNullOrEmpty(hrefText))
+			{
+				SelectWordAtCaret();
 
-        } //InsertLinkPrompt
+				range = GetTextRange();
+				hrefText = ((range == null) || (range.text == null)) ? string.Empty : range.text;
+			}
+			
+			// if text is a valid href then set the link
+			if (hrefLink == string.Empty)
+			{
+				if (IsValidHref(hrefText))
+					hrefLink = hrefText;
+				else
+					hrefLink = "https://";
+			}
 
-        /// <summary>
-        /// Method to remove a web link from the users selected text
-        /// </summary>
-        public void RemoveLink()
+			// prompt the user for the new href
+			using (EnterHrefForm dialog = new EnterHrefForm())
+			{
+				dialog.HrefText = hrefText;
+				dialog.HrefLink = hrefLink;
+
+				PreShowDialog(dialog);
+
+				DialogResult result = dialog.ShowDialog(/*this.ParentForm*/);
+
+				// based on the user interaction perform the necessary action
+				// after one has a valid href
+				if ((result != DialogResult.Cancel))
+				{
+					if (result == DialogResult.Yes)
+					{
+						string newHrefText = dialog.HrefText.Trim();
+
+						hrefLink = dialog.HrefLink;
+						target = dialog.HrefTarget;
+
+						if (!String.IsNullOrEmpty(newHrefText) && IsValidHref(hrefLink))
+						{
+							// If the user has changed the Href text, we paste
+							// it over the current selection and then reselect it
+							if (!hrefText.Equals(newHrefText))
+							{
+								ExecuteCommandRange(range, HTML_COMMAND_TEXT_PASTE, newHrefText);
+
+								range = GetTextRange();
+								range.moveStart("character", -newHrefText.Length);
+							}
+
+							// insert or update the current link
+							if (anchor == null)
+							{
+								ExecuteCommandRange(range, HTML_COMMAND_INSERT_LINK, hrefLink);
+								element = (mshtmlElement)range.parentElement();
+								// parse up the tree until the anchor element is found
+								while (element != null && !(element is mshtmlAnchorElement))
+								{
+									element = (mshtmlElement)element.parentElement;
+								}
+								if (element != null) anchor = (mshtmlAnchorElement)element;
+							}
+							else
+							{
+								anchor.href = hrefLink;
+							}
+
+							if (target != NavigateActionOption.Default)
+							{
+								anchor.target = (target == NavigateActionOption.NewWindow) ? TARGET_WINDOW_NEW : TARGET_WINDOW_SAME;
+							}
+
+							range.collapse(false);
+							range.select();
+						}
+
+					}
+					else if (result == DialogResult.No)
+					{
+						// remove the current link assuming present
+						if (anchor != null)
+							ExecuteCommandRange(range, HTML_COMMAND_REMOVE_LINK, null); ;
+					}
+
+					PostShowDialog(dialog);
+				}
+			}
+		} //InsertLinkPrompt
+
+	/// <summary>
+	/// Method to remove a web link from the users selected text
+	/// </summary>
+	public void RemoveLink()
         {
             ExecuteCommandRange(HTML_COMMAND_REMOVE_LINK, null);
 
