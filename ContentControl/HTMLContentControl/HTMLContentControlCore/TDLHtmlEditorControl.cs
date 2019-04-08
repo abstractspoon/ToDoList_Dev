@@ -302,7 +302,11 @@ namespace HTMLContentControl
 			if (base.IsValidHref(href))
 				return true;
 
-			var uri = new Uri(href);
+			Uri uri;
+
+			if (!Uri.TryCreate(href, UriKind.Absolute, out uri))
+				return false;
+
 			return (uri.Scheme == "tdl");
 
 		} //IsValidHref
