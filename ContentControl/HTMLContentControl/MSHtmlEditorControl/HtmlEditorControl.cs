@@ -4011,9 +4011,12 @@ namespace MSDN.Html.Editor
         /// </summary>
         private bool IsValidHref(string href)
         {
-            return Regex.IsMatch(href, HREF_TEST_EXPRESSION, RegexOptions.IgnoreCase);
+			Uri unused;
 
-        } //IsValidHref
+			return Uri.TryCreate(href, UriKind.Absolute, out unused);
+			//return Regex.IsMatch(href, HREF_TEST_EXPRESSION, RegexOptions.IgnoreCase);
+
+		} //IsValidHref
 
 
         /// <summary>
