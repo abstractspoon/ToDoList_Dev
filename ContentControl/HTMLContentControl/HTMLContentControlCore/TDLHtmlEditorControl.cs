@@ -68,14 +68,14 @@ namespace HTMLContentControl
             this.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.BorderSize = 0;
             this.NavigateAction = MSDN.Html.Editor.NavigateActionOption.NewWindow;
+			this.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnNavigate);
 
 			this.BrowserPanel.Anchor = AnchorStyles.None; // we handle positioning ourselves
 
             m_Trans.Translate(ToolBar.Items);
             m_Trans.Translate(ContextMenu.Items);
 
-            m_TextChangeTimer.Tick += OnTextChangeTimer;
-
+            m_TextChangeTimer.Tick += new EventHandler(OnTextChangeTimer);
             m_TextChangeTimer.Interval = 200;
             m_TextChangeTimer.Start();
 
@@ -244,7 +244,7 @@ namespace HTMLContentControl
 			{
 				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
 
-				urlDialog.EnforceHrefTarget(MSDN.Html.Editor.NavigateActionOption.NewWindow);
+				urlDialog.EnforceHrefTarget(MSDN.Html.Editor.NavigateActionOption.Default);
 				urlDialog.LastBrowsedFolder = LastBrowsedFileFolder;
 			}
 			else if (dialog is MSDN.Html.Editor.EnterImageForm)
@@ -297,8 +297,43 @@ namespace HTMLContentControl
             return false;
         }
 
+		protected void OnNavigate(object sender, MSDN.Html.Editor.HtmlNavigationEventArgs e)
+		{
+			var uri = new Uri(e.Url);
 
-    }
+			if (uri.IsFile)
+			{
+				// tdl://
+				if (uri.Scheme == "tdl")
+				{
+					// TODO
+				}
+				else
+				{
+					try
+					{
+						using (var myProcess = new System.Diagnostics.Process())
+						{
+							myProcess.StartInfo.UseShellExecute = true;
+							myProcess.StartInfo.FileName = uri.LocalPath;
+							myProcess.StartInfo.CreateNoWindow = false;
+							myProcess.StartInfo.Verb = "open";
+
+							myProcess.Start();
+						}
+					}
+					catch (Exception exp)
+					{
+						Console.WriteLine(exp.Message);
+					}
+				}
+				
+				e.Cancel = true;
+			}
+			// else let browser handle it
+		}
+
+	}
 
     
 

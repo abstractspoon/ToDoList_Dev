@@ -2368,6 +2368,10 @@ namespace MSDN.Html.Editor
 							{
 								anchor.target = (target == NavigateActionOption.NewWindow) ? TARGET_WINDOW_NEW : TARGET_WINDOW_SAME;
 							}
+							else
+							{
+								anchor.target = String.Empty;
+							}
 
 							range.collapse(false);
 							range.select();
