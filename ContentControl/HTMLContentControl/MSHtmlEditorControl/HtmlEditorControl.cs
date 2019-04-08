@@ -4013,12 +4013,11 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method to determine if a string url is valid
         /// </summary>
-        private bool IsValidHref(string href)
+        virtual protected bool IsValidHref(string href)
         {
 			Uri unused;
 
 			return Uri.TryCreate(href, UriKind.Absolute, out unused);
-			//return Regex.IsMatch(href, HREF_TEST_EXPRESSION, RegexOptions.IgnoreCase);
 
 		} //IsValidHref
 

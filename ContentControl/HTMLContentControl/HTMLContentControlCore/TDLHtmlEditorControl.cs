@@ -297,37 +297,47 @@ namespace HTMLContentControl
             return false;
         }
 
+		override protected bool IsValidHref(string href)
+		{
+			if (base.IsValidHref(href))
+				return true;
+
+			var uri = new Uri(href);
+			return (uri.Scheme == "tdl");
+
+		} //IsValidHref
+
 		protected void OnNavigate(object sender, MSDN.Html.Editor.HtmlNavigationEventArgs e)
 		{
 			var uri = new Uri(e.Url);
 
-			if (uri.IsFile)
+			// tdl://
+			if (uri.Scheme == "tdl")
 			{
-				// tdl://
-				if (uri.Scheme == "tdl")
-				{
-					// TODO
-				}
-				else
-				{
-					try
-					{
-						using (var myProcess = new System.Diagnostics.Process())
-						{
-							myProcess.StartInfo.UseShellExecute = true;
-							myProcess.StartInfo.FileName = uri.LocalPath;
-							myProcess.StartInfo.CreateNoWindow = false;
-							myProcess.StartInfo.Verb = "open";
+				// TODO
+				int breakpoint = 0;
 
-							myProcess.Start();
-						}
-					}
-					catch (Exception exp)
+				e.Cancel = true;
+			}
+			else if (uri.IsFile)
+			{
+				try
+				{
+					using (var myProcess = new System.Diagnostics.Process())
 					{
-						Console.WriteLine(exp.Message);
+						myProcess.StartInfo.UseShellExecute = true;
+						myProcess.StartInfo.FileName = uri.LocalPath;
+						myProcess.StartInfo.CreateNoWindow = false;
+						myProcess.StartInfo.Verb = "open";
+
+						myProcess.Start();
 					}
 				}
-				
+				catch (Exception exp)
+				{
+					Console.WriteLine(exp.Message);
+				}
+
 				e.Cancel = true;
 			}
 			// else let browser handle it
