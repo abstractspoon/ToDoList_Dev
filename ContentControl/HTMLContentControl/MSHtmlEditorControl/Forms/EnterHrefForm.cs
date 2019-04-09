@@ -46,11 +46,11 @@ namespace MSDN.Html.Editor
         {
             get
             {
-                return this.hrefText.Text;
+                return this.hrefText.Text.Trim();
             }
             set
             {
-                this.hrefText.Text = value;
+                this.hrefText.Text = value.Trim();
 				this.hrefText.ReadOnly = !String.IsNullOrWhiteSpace(value);
             }
 

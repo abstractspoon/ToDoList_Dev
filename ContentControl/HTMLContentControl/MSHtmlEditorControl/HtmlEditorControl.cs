@@ -2336,7 +2336,7 @@ namespace MSDN.Html.Editor
 
 					if (result == DialogResult.Yes)
 					{
-						string newHrefText = dialog.HrefText.Trim();
+						string newHrefText = dialog.HrefText;
 
 						hrefLink = dialog.HrefLink;
 						target = dialog.HrefTarget;
