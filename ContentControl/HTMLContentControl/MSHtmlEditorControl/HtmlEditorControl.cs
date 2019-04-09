@@ -2274,7 +2274,14 @@ namespace MSDN.Html.Editor
         {
             // get the text range working with
             mshtmlTextRange range = GetTextRange();
-            string hrefText = ((range == null) || (range.text == null)) ? string.Empty : range.text;
+
+			if (range == null)
+			{
+				Console.Beep();
+				return;
+			}
+
+			string hrefText = ((range == null) || (range.text == null)) ? string.Empty : range.text;
 
 			string hrefLink = string.Empty;
             NavigateActionOption target;
