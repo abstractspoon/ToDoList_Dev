@@ -152,7 +152,7 @@ int CMessageBox::AfxShow(const CString& sMessage, UINT nFlags)
 		return AfxShow(sInstruction, sText, nFlags);
 
 	// else
-	return AfxShow((LPCTSTR)NULL, sText, nFlags);
+	return AfxShow((LPCTSTR)NULL, sMessage, nFlags);
 }
 
 int CMessageBox::AfxShow(UINT nTextID, UINT nFlags)
