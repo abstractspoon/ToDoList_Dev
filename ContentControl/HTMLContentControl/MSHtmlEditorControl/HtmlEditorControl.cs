@@ -2371,13 +2371,11 @@ namespace MSDN.Html.Editor
 							}
 
 							if (target != NavigateActionOption.Default)
-							{
 								anchor.target = (target == NavigateActionOption.NewWindow) ? TARGET_WINDOW_NEW : TARGET_WINDOW_SAME;
-							}
 							else
-							{
 								anchor.target = String.Empty;
-							}
+
+							element.setAttribute("title", hrefLink);
 
 							range.collapse(false);
 							range.select();
