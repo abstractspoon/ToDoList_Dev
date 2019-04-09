@@ -2381,7 +2381,7 @@ namespace MSDN.Html.Editor
 							else
 								anchor.target = String.Empty;
 
-							element.setAttribute("title", hrefLink); // tooltip
+							element.setAttribute("title", GetHrefTooltip(hrefLink));
 
 							range.collapse(false);
 							range.select();
@@ -4024,6 +4024,12 @@ namespace MSDN.Html.Editor
 		virtual protected bool IsValidHref(string href)
 		{
 			return Regex.IsMatch(href, HREF_TEST_EXPRESSION, RegexOptions.IgnoreCase);
+
+		} //IsValidHref
+
+		virtual protected String GetHrefTooltip(string href)
+		{
+			return href;
 
 		} //IsValidHref
 

@@ -48,7 +48,6 @@ String^ ContentControlWnd::ParentNotify::GetLinkTooltip(String^ sLink)
 	if (IsWindow(m_hwndParent))
 	{
 		ICCLINKTOOLTIP tt = { 0 };
-
 		tt.szLink = MS(sLink);
 
 		if (::SendMessage(m_hwndParent, WM_ICC_GETLINKTOOLTIP, 0, (LPARAM)&tt))
@@ -64,6 +63,10 @@ bool ContentControlWnd::ParentNotify::NotifyFailedLink(String^ sFailedLink)
 	if (!IsWindow(m_hwndParent))
 		return false;
 
+	// Fixup outlook links
+	if (sFailedLink->StartsWith("outlook://") && !sFailedLink->StartsWith("outlook:///"))
+		sFailedLink = sFailedLink->Replace("outlook://", "outlook:///");
+
 	::SendMessage(m_hwndParent, WM_ICC_FAILEDLINK, (WPARAM)GetFrom(), (LPARAM)(LPCWSTR)MS(sFailedLink));
 	return true;
 }
@@ -72,6 +75,15 @@ bool ContentControlWnd::ParentNotify::NotifyTaskLink(String^ sTaskLink)
 {
 	if (!IsWindow(m_hwndParent))
 		return false;
+
+	// Fix various issues before sending
+	if (!sTaskLink->StartsWith("tdl://"))
+		return false;
+
+	if (sTaskLink->StartsWith("tdl:///"))
+		sTaskLink = sTaskLink->Replace("tdl:///", "tdl://");
+
+	sTaskLink = sTaskLink->Trim('/');
 
 	::SendMessage(m_hwndParent, WM_ICC_TASKLINK, 0, (LPARAM)(LPCWSTR)MS(sTaskLink));
 	return true;

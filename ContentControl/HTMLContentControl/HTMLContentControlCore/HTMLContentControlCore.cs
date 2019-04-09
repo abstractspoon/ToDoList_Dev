@@ -36,6 +36,7 @@ namespace HTMLContentControl
             m_HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
             m_HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
 			m_HtmlEditControl.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnNavigateLink);
+			m_HtmlEditControl.NeedLinkTooltip += new NeedLinkTooltipEventHandler(OnNeedLinkTooltip);
 		}
 
 		// ITDLContentControl ------------------------------------------------------------------
@@ -185,17 +186,21 @@ namespace HTMLContentControl
 		protected void OnNavigateLink(object sender, MSDN.Html.Editor.HtmlNavigationEventArgs e)
 		{
 			// Pass everything back to our parent for consistent handling
+			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
 			var uri = new Uri(e.Url);
 
-			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
-
 			if (uri.Scheme == "tdl")
-				notify.NotifyTaskLink(uri.PathAndQuery);
+				notify.NotifyTaskLink(e.Url);
 			else
 				notify.NotifyFailedLink(e.Url);
 
 			e.Cancel = true; // always
 		}
 
+		protected void OnNeedLinkTooltip(object sender, NeedLinkTooltipEventArgs e)
+		{
+			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
+			e.tooltip = notify.GetLinkTooltip(e.href);
+		}
 	}
 }

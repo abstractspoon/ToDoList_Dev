@@ -9,7 +9,17 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLContentControl
 {
-    [System.ComponentModel.DesignerCategory("")]
+	public delegate void NeedLinkTooltipEventHandler(object sender, NeedLinkTooltipEventArgs args);
+
+	public class NeedLinkTooltipEventArgs : EventArgs
+	{
+		public NeedLinkTooltipEventArgs(String _href) { href = _href; }
+
+		public String href;
+		public String tooltip;
+	}
+
+	[System.ComponentModel.DesignerCategory("")]
     public class TDLHtmlEditorControl : MSDN.Html.Editor.HtmlEditorControl
     {
         private UIThemeToolbarRenderer m_toolbarRenderer;
@@ -22,6 +32,7 @@ namespace HTMLContentControl
         // ---------------------------------------------------------------
 
         public new event EventHandler TextChanged;
+		public event NeedLinkTooltipEventHandler NeedLinkTooltip;
 
 		// ---------------------------------------------------------------
 
@@ -260,15 +271,7 @@ namespace HTMLContentControl
 			if (dialog is MSDN.Html.Editor.EnterHrefForm)
 			{
 				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
-
 				LastBrowsedFileFolder = urlDialog.LastBrowsedFolder;
-
-				// Fix for misformed outlook links
-				if (urlDialog.HrefLink.StartsWith("outlook://") &&
-					!urlDialog.HrefLink.StartsWith("outlook:///"))
-				{
-					urlDialog.HrefLink = urlDialog.HrefLink.Replace("outlook://", "outlook:///");
-				}
 			}
 			else if (dialog is MSDN.Html.Editor.EnterImageForm)
 			{
@@ -313,8 +316,25 @@ namespace HTMLContentControl
 
 			return href.ToLower().StartsWith("outlook://");
 		}
+
+		override protected String GetHrefTooltip(string href)
+		{
+			if (NeedLinkTooltip != null)
+			{
+				var args = new NeedLinkTooltipEventArgs(href);
+				NeedLinkTooltip(this, args);
+
+				if (!String.IsNullOrWhiteSpace(args.tooltip))
+					return args.tooltip;
+			}
+
+			// all else
+			return base.GetHrefTooltip(href);
+		}
+
+
 	}
 
-    
+
 
 }
