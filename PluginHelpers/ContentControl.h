@@ -25,10 +25,22 @@ namespace Abstractspoon
 
 					bool NotifyChange();
 					bool NotifyKillFocus();
+					bool NotifyFailedLink(String^ sFailedLink);
+					bool NotifyTaskLink(String^ sTaskLink);
+					bool NotifyWantSpellcheck();
+
+					//bool GetClipboard();
+					bool HasClipboard();
+					bool DoHelp(String^ sHelpKey);
+
+					String^ GetLinkTooltip(String^ sLink);
 
 				private:
 					HWND m_hwndParent;
 					HWND m_hwndFrom;
+
+				private:
+					HWND GetFrom();
 				};
 			};
 

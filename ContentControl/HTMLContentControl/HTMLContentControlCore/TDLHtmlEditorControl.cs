@@ -68,7 +68,6 @@ namespace HTMLContentControl
             this.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.BorderSize = 0;
             this.NavigateAction = MSDN.Html.Editor.NavigateActionOption.NewWindow;
-			this.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnNavigate);
 
 			this.BrowserPanel.Anchor = AnchorStyles.None; // we handle positioning ourselves
 
@@ -261,7 +260,15 @@ namespace HTMLContentControl
 			if (dialog is MSDN.Html.Editor.EnterHrefForm)
 			{
 				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
+
 				LastBrowsedFileFolder = urlDialog.LastBrowsedFolder;
+
+				// Fix for misformed outlook links
+				if (urlDialog.HrefLink.StartsWith("outlook://") &&
+					!urlDialog.HrefLink.StartsWith("outlook:///"))
+				{
+					urlDialog.HrefLink = urlDialog.HrefLink.Replace("outlook://", "outlook:///");
+				}
 			}
 			else if (dialog is MSDN.Html.Editor.EnterImageForm)
 			{
@@ -299,54 +306,13 @@ namespace HTMLContentControl
 
 		override protected bool IsValidHref(string href)
 		{
-			if (base.IsValidHref(href))
+			Uri unused;
+
+			if (Uri.TryCreate(href, UriKind.Absolute, out unused))
 				return true;
 
-			Uri uri;
-
-			if (!Uri.TryCreate(href, UriKind.Absolute, out uri))
-				return false;
-
-			return (uri.Scheme == "tdl");
-
-		} //IsValidHref
-
-		protected void OnNavigate(object sender, MSDN.Html.Editor.HtmlNavigationEventArgs e)
-		{
-			var uri = new Uri(e.Url);
-
-			// tdl://
-			if (uri.Scheme == "tdl")
-			{
-				// TODO
-				int breakpoint = 0;
-
-				e.Cancel = true;
-			}
-			else if (uri.IsFile)
-			{
-				try
-				{
-					using (var myProcess = new System.Diagnostics.Process())
-					{
-						myProcess.StartInfo.UseShellExecute = true;
-						myProcess.StartInfo.FileName = uri.LocalPath;
-						myProcess.StartInfo.CreateNoWindow = false;
-						myProcess.StartInfo.Verb = "open";
-
-						myProcess.Start();
-					}
-				}
-				catch (Exception exp)
-				{
-					Console.WriteLine(exp.Message);
-				}
-
-				e.Cancel = true;
-			}
-			// else let browser handle it
+			return href.ToLower().StartsWith("outlook://");
 		}
-
 	}
 
     

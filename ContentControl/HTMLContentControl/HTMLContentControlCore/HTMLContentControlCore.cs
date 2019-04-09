@@ -35,11 +35,12 @@ namespace HTMLContentControl
 
             m_HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
             m_HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
-        }
+			m_HtmlEditControl.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnNavigateLink);
+		}
 
-        // ITDLContentControl ------------------------------------------------------------------
+		// ITDLContentControl ------------------------------------------------------------------
 
-        public Byte[] GetContent()
+		public Byte[] GetContent()
         {
             return m_HtmlEditControl.GetContent();
         }
@@ -181,5 +182,20 @@ namespace HTMLContentControl
             notify.NotifyKillFocus();
         }
 
-    }
+		protected void OnNavigateLink(object sender, MSDN.Html.Editor.HtmlNavigationEventArgs e)
+		{
+			// Pass everything back to our parent for consistent handling
+			var uri = new Uri(e.Url);
+
+			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
+
+			if (uri.Scheme == "tdl")
+				notify.NotifyTaskLink(uri.PathAndQuery);
+			else
+				notify.NotifyFailedLink(e.Url);
+
+			e.Cancel = true; // always
+		}
+
+	}
 }

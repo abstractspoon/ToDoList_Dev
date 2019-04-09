@@ -484,16 +484,19 @@ namespace MSDN.Html.Editor
 			{
 				mshtmlTextRange rng = sel.createRange() as mshtmlTextRange;
 
-				if ((rng != null) && (String.IsNullOrEmpty(rng.text)))
+				if ((rng != null) && String.IsNullOrEmpty(rng.text))
 				{
 					rng.expand("word");
 
 					// Omit trailing whitespace
-					int len = rng.text.Length;
-					int wordLen = rng.text.TrimEnd(null).Length;
+					if ((rng != null) && !String.IsNullOrEmpty(rng.text))
+					{
+						int len = rng.text.Length;
+						int wordLen = rng.text.TrimEnd(null).Length;
 
-					rng.moveEnd("character", (wordLen - len));
-					rng.select();
+						rng.moveEnd("character", (wordLen - len));
+						rng.select();
+					}
 				}
 			}
 		}
@@ -1697,8 +1700,8 @@ namespace MSDN.Html.Editor
                 PreShowDialog(dialog);
                 if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
-                    this.InnerHtml = dialog.HTML;
 					PostShowDialog(dialog);
+                    this.InnerHtml = dialog.HTML;
                 }
             }
 
@@ -2228,7 +2231,9 @@ namespace MSDN.Html.Editor
                 // after one has a valid image href
                 if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
-                    imageHref = dialog.ImageLink;
+					PostShowDialog(dialog);
+
+					imageHref = dialog.ImageLink;
                     imageText = dialog.ImageText;
                     imageAlign = dialog.ImageAlign;
                     if (imageHref != string.Empty)
@@ -2246,7 +2251,6 @@ namespace MSDN.Html.Editor
                             }
                         }
                     }
-					PostShowDialog(dialog);
 				}
 			}
 
@@ -2328,6 +2332,8 @@ namespace MSDN.Html.Editor
 				// after one has a valid href
 				if ((result != DialogResult.Cancel))
 				{
+					PostShowDialog(dialog);
+
 					if (result == DialogResult.Yes)
 					{
 						string newHrefText = dialog.HrefText.Trim();
@@ -2376,7 +2382,6 @@ namespace MSDN.Html.Editor
 							range.collapse(false);
 							range.select();
 						}
-
 					}
 					else if (result == DialogResult.No)
 					{
@@ -2385,7 +2390,6 @@ namespace MSDN.Html.Editor
 							ExecuteCommandRange(range, HTML_COMMAND_REMOVE_LINK, null); ;
 					}
 
-					PostShowDialog(dialog);
 				}
 			}
 		} //InsertLinkPrompt
@@ -2450,8 +2454,8 @@ namespace MSDN.Html.Editor
                 PreShowDialog(dialog);
                 if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
-                    this.SelectedHtml = dialog.HTML;
 					PostShowDialog(dialog);
+					this.SelectedHtml = dialog.HTML;
 				}
 			}
         
@@ -2472,8 +2476,8 @@ namespace MSDN.Html.Editor
                 PreShowDialog(dialog);
                 if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
-                    this.SelectedText = dialog.HTML;
 					PostShowDialog(dialog);
+                    this.SelectedText = dialog.HTML;
 				}
 			}
         
@@ -2641,9 +2645,9 @@ namespace MSDN.Html.Editor
                 dialog.HtmlFont = GetFontAttributes();
                 if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
+					PostShowDialog(dialog);
                     HtmlFontProperty font = dialog.HtmlFont;
                     FormatFontAttributes(new HtmlFontProperty(font.Name, font.Size, font.Bold, font.Italic, font.Underline, font.Strikeout, font.Subscript, font.Superscript));
-					PostShowDialog(dialog);
 				}
 			}
 
@@ -3236,14 +3240,14 @@ namespace MSDN.Html.Editor
                 // based on the user interaction perform the neccessary action
                 if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
-                    tableProperties = dialog.TableProperties;
+					PostShowDialog(dialog);
+
+					tableProperties = dialog.TableProperties;
 
                     if (table == null)
 						TableInsert(tableProperties);
                     else
 						ProcessTable(table, tableProperties);
-
-					PostShowDialog(dialog);
 				}
 			}
 
@@ -4009,18 +4013,15 @@ namespace MSDN.Html.Editor
         protected virtual void PostShowDialog(Form dialog)
         {
         } // PostShowDialog
-		
-        /// <summary>
-        /// Method to determine if a string url is valid
-        /// </summary>
-        virtual protected bool IsValidHref(string href)
-        {
-			Uri unused;
 
-			return Uri.TryCreate(href, UriKind.Absolute, out unused);
+		/// <summary>
+		/// Method to determine if a string url is valid
+		/// </summary>
+		virtual protected bool IsValidHref(string href)
+		{
+			return Regex.IsMatch(href, HREF_TEST_EXPRESSION, RegexOptions.IgnoreCase);
 
 		} //IsValidHref
-
 
         /// <summary>
         /// Method to determine if the tag name is of the correct type
