@@ -1216,7 +1216,7 @@ BOOL CToDoListWnd::InitTimeTrackDlg()
 	if (m_dlgTimeTracker.GetSafeHwnd())
 		return TRUE;
 
-	if (!m_dlgTimeTracker.Create())
+	if (!m_dlgTimeTracker.Create(this))
 		return FALSE;
 
 	UpdateTimeTrackerPreferences();

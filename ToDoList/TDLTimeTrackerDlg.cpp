@@ -203,7 +203,7 @@ BOOL TRACKTASKLIST::RemoveTasks(DWORD dwToRemove)
 	return (pTasks->GetSize() != nNumTask);
 }
 
-void TRACKTASKLIST::BuildTaskMap(CMap<DWORD, DWORD, int, int>& mapTasks) const
+void TRACKTASKLIST::BuildTaskMap(CMapTaskIndex& mapTasks) const
 {
 	mapTasks.RemoveAll();
 
@@ -438,13 +438,17 @@ BOOL CTDLTimeTrackerDlg::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 	return TRUE;
 }
 
-BOOL CTDLTimeTrackerDlg::Create(DWORD dwOptions)
+BOOL CTDLTimeTrackerDlg::Create(CWnd* pNotify, DWORD dwOptions)
 {
 	// Called externally so get topmost state from prefs
 	m_bAlwaysOnTop = CPreferences().GetProfileInt(_T("TimeTracker"), _T("AlwaysOnTop"), TRUE);
 	m_dwOptions = dwOptions;
 
-	return Create(FALSE);
+	if (!Create(FALSE))
+		return FALSE;
+
+	m_pWndNotify = pNotify;
+	return TRUE;
 }
 
 BOOL CTDLTimeTrackerDlg::Create(BOOL bVisible)
@@ -462,8 +466,6 @@ BOOL CTDLTimeTrackerDlg::Create(BOOL bVisible)
 
 		return FALSE;
 	}
-
-	m_pWndNotify = AfxGetMainWnd();
 
 	if (m_bAlwaysOnTop)
 		SetWindowPos(&CWnd::wndTopMost, 0, 0, 0, 0, (SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE));

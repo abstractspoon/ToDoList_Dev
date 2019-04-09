@@ -109,7 +109,7 @@ public:
 	CTDLTimeTrackerDlg();
 	virtual ~CTDLTimeTrackerDlg();
 	
-	BOOL Create(DWORD dwOptions = (TTDO_ALLOWPARENTTRACKING | TTDO_FORMATTIMESASHMS));
+	BOOL Create(CWnd* pNotify, DWORD dwOptions = (TTDO_ALLOWPARENTTRACKING | TTDO_FORMATTIMESASHMS));
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetOption(DWORD dwOption, BOOL bEnable = TRUE);
 	void SetWindowIcons(HICON hIconBig, HICON hIconSmall);
