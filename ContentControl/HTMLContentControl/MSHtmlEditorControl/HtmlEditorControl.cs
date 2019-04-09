@@ -2281,10 +2281,8 @@ namespace MSDN.Html.Editor
 				return;
 			}
 
-			string hrefText = ((range == null) || (range.text == null)) ? string.Empty : range.text;
-
+			string hrefText = (range.text == null ? String.Empty : range.text);
 			string hrefLink = string.Empty;
-            NavigateActionOption target;
 
 			// calculate the items working with
 			mshtmlAnchorElement anchor = null;
@@ -2344,9 +2342,9 @@ namespace MSDN.Html.Editor
 					if (result == DialogResult.Yes)
 					{
 						string newHrefText = dialog.HrefText;
-
+						var target = dialog.HrefTarget;
+						
 						hrefLink = dialog.HrefLink;
-						target = dialog.HrefTarget;
 
 						if (!String.IsNullOrEmpty(newHrefText) && IsValidHref(hrefLink))
 						{
@@ -2365,12 +2363,13 @@ namespace MSDN.Html.Editor
 							{
 								ExecuteCommandRange(range, HTML_COMMAND_INSERT_LINK, hrefLink);
 								element = (mshtmlElement)range.parentElement();
+
 								// parse up the tree until the anchor element is found
 								while (element != null && !(element is mshtmlAnchorElement))
-								{
 									element = (mshtmlElement)element.parentElement;
-								}
-								if (element != null) anchor = (mshtmlAnchorElement)element;
+
+								if (element != null)
+									anchor = (mshtmlAnchorElement)element;
 							}
 							else
 							{
@@ -2382,7 +2381,7 @@ namespace MSDN.Html.Editor
 							else
 								anchor.target = String.Empty;
 
-							element.setAttribute("title", hrefLink);
+							element.setAttribute("title", hrefLink); // tooltip
 
 							range.collapse(false);
 							range.select();
