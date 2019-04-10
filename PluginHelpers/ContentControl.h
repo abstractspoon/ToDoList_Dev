@@ -33,7 +33,7 @@ namespace Abstractspoon
 					bool HasClipboard();
 					bool DoHelp(String^ sHelpKey);
 
-					String^ GetLinkTooltip(String^ sLink);
+					String^ GetTaskLinkTooltip(String^ sLink);
 
 				private:
 					HWND m_hwndParent;

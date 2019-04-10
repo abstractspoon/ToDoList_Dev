@@ -4074,7 +4074,12 @@ namespace MSDN.Html.Editor
             
         } //RebaseAnchorUrl
 
-        public void RefreshLinkTooltips()
+		public void RefreshLinkTooltips()
+		{
+			RefreshLinkTooltips(null);
+		}
+
+		public void RefreshLinkTooltips(String protocol)
         {
 			mshtmlElementCollection anchors = body.getElementsByTagName(ANCHOR_TAG);
 			foreach (mshtmlElement element in anchors)
@@ -4082,9 +4087,9 @@ namespace MSDN.Html.Editor
 				try
 				{
 					mshtmlAnchorElement anchor = (mshtmlAnchorElement)element;
-					string hrefLink = (element as mshtmlAnchorElement).href;
 
-					element.setAttribute("title", GetHrefTooltip(hrefLink));
+					if (String.IsNullOrEmpty(protocol) || (anchor.protocol == protocol))
+						element.setAttribute("title", GetHrefTooltip(anchor.href));
 				}
 				catch (Exception)
 				{

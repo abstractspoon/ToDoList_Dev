@@ -43,14 +43,14 @@ bool ContentControlWnd::ParentNotify::NotifyKillFocus()
 	return true;
 }
 
-String^ ContentControlWnd::ParentNotify::GetLinkTooltip(String^ sLink)
+String^ ContentControlWnd::ParentNotify::GetTaskLinkTooltip(String^ sLink)
 {
-	if (IsWindow(m_hwndParent))
+	if (IsWindow(m_hwndParent) && sLink->StartsWith("tdl://"))
 	{
-		ICCLINKTOOLTIP tt = { 0 };
-		tt.szLink = MS(ValidateLink(sLink));
+		ICCTASKLINKTOOLTIP tt = { 0 };
+		tt.szTaskLink = MS(ValidateLink(sLink));
 
-		if (::SendMessage(m_hwndParent, WM_ICC_GETLINKTOOLTIP, 0, (LPARAM)&tt))
+		if (::SendMessage(m_hwndParent, WM_ICC_GETTASKLINKTOOLTIP, 0, (LPARAM)&tt))
 			return gcnew String(tt.szTooltip);
 	}
 

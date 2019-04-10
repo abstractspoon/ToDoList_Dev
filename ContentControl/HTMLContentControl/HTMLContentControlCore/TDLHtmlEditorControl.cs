@@ -9,13 +9,13 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLContentControl
 {
-	public delegate void NeedLinkTooltipEventHandler(object sender, NeedLinkTooltipEventArgs args);
+	public delegate void NeedTaskLinkTooltipEventHandler(object sender, NeedTaskLinkTooltipEventArgs args);
 
-	public class NeedLinkTooltipEventArgs : EventArgs
+	public class NeedTaskLinkTooltipEventArgs : EventArgs
 	{
-		public NeedLinkTooltipEventArgs(String _href) { href = _href; }
+		public NeedTaskLinkTooltipEventArgs(String _href) { taskLink = _href; }
 
-		public String href;
+		public String taskLink;
 		public String tooltip;
 	}
 
@@ -32,7 +32,7 @@ namespace HTMLContentControl
         // ---------------------------------------------------------------
 
         public new event EventHandler TextChanged;
-		public event NeedLinkTooltipEventHandler NeedLinkTooltip;
+		public event NeedTaskLinkTooltipEventHandler NeedTaskLinkTooltip;
 
 		// ---------------------------------------------------------------
 
@@ -321,10 +321,10 @@ namespace HTMLContentControl
 
 		override protected String GetHrefTooltip(string href)
 		{
-			if (NeedLinkTooltip != null)
+			if ((NeedTaskLinkTooltip != null) && href.ToLower().StartsWith("tdl://"))
 			{
-				var args = new NeedLinkTooltipEventArgs(href);
-				NeedLinkTooltip(this, args);
+				var args = new NeedTaskLinkTooltipEventArgs(href);
+				NeedTaskLinkTooltip(this, args);
 
 				if (!String.IsNullOrWhiteSpace(args.tooltip))
 					return args.tooltip;
