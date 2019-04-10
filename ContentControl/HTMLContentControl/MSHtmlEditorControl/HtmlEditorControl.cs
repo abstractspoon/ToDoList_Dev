@@ -655,7 +655,8 @@ namespace MSDN.Html.Editor
             // at this point the document and body has been loaded
             // so define the event handler for the context menu
             this.editorWebBrowser.Document.ContextMenuShowing += new HtmlElementEventHandler(DocumentContextMenu);
-            this.editorWebBrowser.Document.AttachEventHandler("onselectionchange", DocumentSelectionChange);
+
+			this.editorWebBrowser.Document.AttachEventHandler("onselectionchange", DocumentSelectionChange);
             this.editorWebBrowser.Document.AttachEventHandler("onkeydown", DocumentKeyPress);
 			this.editorWebBrowser.Document.AttachEventHandler("onfocusout", DocumentLoseFocus);
 			this.editorWebBrowser.Document.AttachEventHandler("ondblclick", DocumentDoubleClick);
@@ -2381,8 +2382,6 @@ namespace MSDN.Html.Editor
 							else
 								anchor.target = String.Empty;
 
-							element.setAttribute("title", GetHrefTooltip(hrefLink));
-
 							range.collapse(false);
 							range.select();
 						}
@@ -4027,12 +4026,6 @@ namespace MSDN.Html.Editor
 
 		} //IsValidHref
 
-		virtual protected String GetHrefTooltip(string href)
-		{
-			return href;
-
-		} //IsValidHref
-
         /// <summary>
         /// Method to determine if the tag name is of the correct type
         /// A string comparision is made whilst ignoring case
@@ -4074,38 +4067,14 @@ namespace MSDN.Html.Editor
             
         } //RebaseAnchorUrl
 
-		public void RefreshLinkTooltips()
-		{
-			RefreshLinkTooltips(null);
-		}
+        #endregion
 
-		public void RefreshLinkTooltips(String protocol)
-        {
-			mshtmlElementCollection anchors = body.getElementsByTagName(ANCHOR_TAG);
-			foreach (mshtmlElement element in anchors)
-			{
-				try
-				{
-					mshtmlAnchorElement anchor = (mshtmlAnchorElement)element;
+        #region Internal Event Processing
 
-					if (String.IsNullOrEmpty(protocol) || (anchor.protocol == protocol))
-						element.setAttribute("title", GetHrefTooltip(anchor.href));
-				}
-				catch (Exception)
-				{
-					// ignore any errors
-				}
-			}
-		} //RefreshLinkTooltips
-
-	#endregion
-
-	#region Internal Event Processing
-
-	/// <summary>
-	/// Control the sizing of the browser control
-	/// </summary>
-	private void browserPanelResize(object sender, EventArgs e)
+        /// <summary>
+        /// Control the sizing of the browser control
+        /// </summary>
+        private void browserPanelResize(object sender, EventArgs e)
         {
             SetBrowserPanelSize();
         }

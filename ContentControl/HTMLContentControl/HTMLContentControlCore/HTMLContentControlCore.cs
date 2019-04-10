@@ -36,7 +36,7 @@ namespace HTMLContentControl
             m_HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
             m_HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
 			m_HtmlEditControl.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnNavigateLink);
-			m_HtmlEditControl.NeedTaskLinkTooltip += new NeedTaskLinkTooltipEventHandler(OnNeedTaskLinkTooltip);
+			m_HtmlEditControl.NeedLinkTooltip += new NeedLinkTooltipEventHandler(OnNeedLinkTooltip);
 		}
 
 		// ITDLContentControl ------------------------------------------------------------------
@@ -114,11 +114,6 @@ namespace HTMLContentControl
 				m_HtmlEditControl.LastBrowsedFileFolder = prefs.GetProfileString(key, "LastBrowsedFileFolder", @"C:\");
 				m_HtmlEditControl.LastBrowsedImageFolder = prefs.GetProfileString(key, "LastBrowsedImageFolder", @"C:\");
 			}
-		}
-
-		public void RefreshTaskLinkTooltips()
-		{
-			m_HtmlEditControl.RefreshLinkTooltips("tdl:");
 		}
 
 		// --------------------------------------------------------------------
@@ -201,13 +196,10 @@ namespace HTMLContentControl
 			e.Cancel = true; // always
 		}
 
-		protected void OnNeedTaskLinkTooltip(object sender, NeedTaskLinkTooltipEventArgs e)
+		protected void OnNeedLinkTooltip(object sender, NeedLinkTooltipEventArgs e)
 		{
-			if (e.taskLink.ToLower().StartsWith("tdl://"))
-			{
-				ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
-				e.tooltip = notify.GetTaskLinkTooltip(e.taskLink);
-			}
+			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
+			e.tooltip = notify.NotifyWantLinkTooltip(e.linkUri);
 		}
 	}
 }

@@ -28,12 +28,11 @@ namespace Abstractspoon
 					bool NotifyFailedLink(String^ sFailedLink);
 					bool NotifyTaskLink(String^ sTaskLink);
 					bool NotifyWantSpellcheck();
+					String^ NotifyWantLinkTooltip(String^ sLink);
 
 					//bool GetClipboard();
 					bool HasClipboard();
 					bool DoHelp(String^ sHelpKey);
-
-					String^ GetTaskLinkTooltip(String^ sLink);
 
 				private:
 					HWND m_hwndParent;

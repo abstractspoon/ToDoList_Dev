@@ -9,13 +9,13 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLContentControl
 {
-	public delegate void NeedTaskLinkTooltipEventHandler(object sender, NeedTaskLinkTooltipEventArgs args);
+	public delegate void NeedLinkTooltipEventHandler(object sender, NeedLinkTooltipEventArgs args);
 
-	public class NeedTaskLinkTooltipEventArgs : EventArgs
+	public class NeedLinkTooltipEventArgs : EventArgs
 	{
-		public NeedTaskLinkTooltipEventArgs(String _href) { taskLink = _href; }
+		public NeedLinkTooltipEventArgs(String href) { linkUri = href; }
 
-		public String taskLink;
+		public String linkUri;
 		public String tooltip;
 	}
 
@@ -32,7 +32,7 @@ namespace HTMLContentControl
         // ---------------------------------------------------------------
 
         public new event EventHandler TextChanged;
-		public event NeedTaskLinkTooltipEventHandler NeedTaskLinkTooltip;
+		public event NeedLinkTooltipEventHandler NeedLinkTooltip;
 
 		// ---------------------------------------------------------------
 
@@ -88,6 +88,9 @@ namespace HTMLContentControl
             m_TextChangeTimer.Tick += new EventHandler(OnTextChangeTimer);
             m_TextChangeTimer.Interval = 200;
             m_TextChangeTimer.Start();
+
+			// Dynamic tooltip handling
+			this.WebBrowser.Document.MouseOver += new HtmlElementEventHandler(OnDocumentMouseOver);
 
 			// Place this at the end to ensure the toolbar has finished its resize
 			Toolbars.FixupButtonSizes(this.ToolBar);
@@ -178,7 +181,7 @@ namespace HTMLContentControl
                 var html = System.Text.Encoding.Unicode.GetString(content).TrimEnd('\0').Trim();
 
                 InnerHtml = html;
-				m_PrevTextChange = InnerHtml;
+                m_PrevTextChange = InnerHtml;
             }
             // catch (Exception exception)
             // {
@@ -317,21 +320,38 @@ namespace HTMLContentControl
 			return href.ToLower().StartsWith("outlook://");
 		}
 
-		override protected String GetHrefTooltip(string href)
+		private void OnDocumentMouseOver(object sender, HtmlElementEventArgs e)
 		{
-			if ((NeedTaskLinkTooltip != null) && href.ToLower().StartsWith("tdl://"))
+			var element = e.ToElement;
+
+			if ((element != null) && (element.TagName.Equals("A")))
 			{
-				var args = new NeedTaskLinkTooltipEventArgs(href);
-				NeedTaskLinkTooltip(this, args);
+				String href = element.GetAttribute("href"), tooltip = String.Empty;
 
-				if (!String.IsNullOrWhiteSpace(args.tooltip))
-					return args.tooltip;
+				if (NeedLinkTooltip != null)
+				{
+					var args = new NeedLinkTooltipEventArgs(href);
+					NeedLinkTooltip(this, args);
+	
+					tooltip = args.tooltip;
+				}
+
+				// Prevent setting the tooltip causing a text change notification
+				m_TextChangeTimer.Stop();
+
+				if (!String.IsNullOrEmpty(tooltip))
+				{
+					element.SetAttribute("title", tooltip);
+				}
+				else if (String.IsNullOrEmpty(element.GetAttribute("title")))
+				{
+					element.SetAttribute("title", href);
+				}
+
+				m_PrevTextChange = InnerHtml;
+				m_TextChangeTimer.Start();
 			}
-
-			// all else
-			return base.GetHrefTooltip(href);
 		}
-
 
 	}
 

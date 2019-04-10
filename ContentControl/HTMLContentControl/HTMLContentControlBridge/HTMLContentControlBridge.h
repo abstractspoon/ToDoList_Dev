@@ -49,12 +49,11 @@ public:
 
    BOOL Create(UINT nCtrlID, DWORD nStyle, 
       long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
-   LPCWSTR GetTypeID() const;
 
    int GetContent(unsigned char* pContent) const;
    bool SetContent(const unsigned char* pContent, int nLength, bool bResetSelection);
-   void RefreshTaskLinkTooltips();
-   
+   LPCWSTR GetTypeID() const;
+
    // text content if supported. return false if not supported
    int GetTextContent(LPWSTR szContent, int nLength = -1) const;
    bool SetTextContent(LPCWSTR szContent, bool bResetSelection);

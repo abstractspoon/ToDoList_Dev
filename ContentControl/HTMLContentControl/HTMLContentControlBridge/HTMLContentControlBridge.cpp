@@ -177,11 +177,6 @@ bool CHTMLContentControlBridge::SetContent(const unsigned char* pContent, int nL
 	return m_wnd->SetContent(content, bResetSelection);
 }
 
-void CHTMLContentControlBridge::RefreshTaskLinkTooltips()
-{
-	m_wnd->RefreshTaskLinkTooltips();
-}
-
 bool CHTMLContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord)
 {
 	msclr::auto_gcroot<String^> find = gcnew String(szFind);

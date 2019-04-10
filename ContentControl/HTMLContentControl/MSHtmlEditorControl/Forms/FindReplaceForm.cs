@@ -24,7 +24,7 @@ namespace MSDN.Html.Editor
         private const int TAB_HEIGHT_WITHOUT_OPTION = 152;
 
         // private variables defining the state of the form
-        private bool options = false;
+        //private bool options = false;
         private bool findNotReplace  = true;
         private string findText;
         private string replaceText;
