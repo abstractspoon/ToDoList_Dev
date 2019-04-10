@@ -4074,14 +4074,33 @@ namespace MSDN.Html.Editor
             
         } //RebaseAnchorUrl
 
-        #endregion
+        public void RefreshLinkTooltips()
+        {
+			mshtmlElementCollection anchors = body.getElementsByTagName(ANCHOR_TAG);
+			foreach (mshtmlElement element in anchors)
+			{
+				try
+				{
+					mshtmlAnchorElement anchor = (mshtmlAnchorElement)element;
+					string hrefLink = (element as mshtmlAnchorElement).href;
 
-        #region Internal Event Processing
+					element.setAttribute("title", GetHrefTooltip(hrefLink));
+				}
+				catch (Exception)
+				{
+					// ignore any errors
+				}
+			}
+		} //RefreshLinkTooltips
 
-        /// <summary>
-        /// Control the sizing of the browser control
-        /// </summary>
-        private void browserPanelResize(object sender, EventArgs e)
+	#endregion
+
+	#region Internal Event Processing
+
+	/// <summary>
+	/// Control the sizing of the browser control
+	/// </summary>
+	private void browserPanelResize(object sender, EventArgs e)
         {
             SetBrowserPanelSize();
         }
