@@ -403,7 +403,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETCLIPBOARD, OnTDCGetClipboard)
 	ON_REGISTERED_MESSAGE(WM_ICC_TASKLINK, OnTDCDoTaskLink)
 	ON_REGISTERED_MESSAGE(WM_ICC_FAILEDLINK, OnTDCFailedLink)
-	ON_REGISTERED_MESSAGE(WM_ICC_GETTASKLINKTOOLTIP, OnCommentsGetTooltip)
+	ON_REGISTERED_MESSAGE(WM_ICC_GETTASKLINKTOOLTIP, OnCommentsGetTaskLinkTooltip)
 
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
@@ -6980,21 +6980,20 @@ LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	return 0L;
 }
 
-LRESULT CToDoCtrl::OnCommentsGetTooltip(WPARAM /*wParam*/, LPARAM lParam)
+LRESULT CToDoCtrl::OnCommentsGetTaskLinkTooltip(WPARAM /*wParam*/, LPARAM lParam)
 {
 	ASSERT(lParam);
 
 	ICCTASKLINKTOOLTIP* pTT = (ICCTASKLINKTOOLTIP*)lParam;
-	CString sLink(pTT->szTaskLink);
+	CString sFile;
+	DWORD dwTaskID = 0;
 
-	if (!sLink.IsEmpty())
+	if (ParseTaskLink(pTT->szTaskLink, TRUE, dwTaskID, sFile))
 	{
 		CString sTooltip;
-		CString sFile;
-		DWORD dwTaskID = 0;
 
 		// Handle Local task links only
-		if (ParseTaskLink(sLink, TRUE, dwTaskID, sFile) && dwTaskID && sFile.IsEmpty())
+		if (dwTaskID && sFile.IsEmpty())
 		{
 			sTooltip = m_data.GetTaskTitle(dwTaskID);
 			ASSERT(!sTooltip.IsEmpty());
@@ -7007,7 +7006,7 @@ LRESULT CToDoCtrl::OnCommentsGetTooltip(WPARAM /*wParam*/, LPARAM lParam)
 			tip.hdr.idFrom = GetDlgCtrlID();
 			tip.hdr.code = TTN_NEEDTEXT;
 
-			if (GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)pTT->szTaskLink, (LPARAM)&tip))
+			if (GetParent()->SendMessage(WM_TDCM_GETTASKLINKTOOLTIP, (WPARAM)pTT->szTaskLink, (LPARAM)&tip))
 			{
 				sTooltip = tip.szText;
 
