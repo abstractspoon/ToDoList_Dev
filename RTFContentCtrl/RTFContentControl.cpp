@@ -42,7 +42,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-static LPCTSTR TDL_LINK = _T("tdl://");
+static const LPCTSTR TDL_LINK = _T("tdl://");
+static const int TDL_LINK_LEN = 5;
 
 /////////////////////////////////////////////////////////////////////////////
 // CRTFContentControl
@@ -1051,12 +1052,14 @@ void CRTFContentControl::OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 	TOOLTIPTEXT* pTTN = (TOOLTIPTEXT*)pNMHDR;
 	*pResult = 0;
 
-	ICCLINKTOOLTIP tooltip = { 0 };
-	tooltip.szLink = pTTN->lpszText;
-
-	if (GetParent()->SendMessage(WM_ICC_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)&tooltip))
+	if (_tcsncmp(TDL_LINK, pTTN->lpszText, TDL_LINK_LEN) == 0)
 	{
-		lstrcpyn(pTTN->szText, tooltip.szTooltip, ICCLINKTOOLTIPLEN);
-		*pResult = TRUE;
+		ICCTASKLINKTOOLTIP tooltip = { pTTN->lpszText, 0 };
+
+		if (GetParent()->SendMessage(WM_ICC_GETTASKLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)&tooltip))
+		{
+			lstrcpyn(pTTN->szText, tooltip.szTooltip, ICCLINKTOOLTIPLEN);
+			*pResult = TRUE;
+		}
 	}
 }

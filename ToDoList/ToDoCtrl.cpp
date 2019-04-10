@@ -403,7 +403,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETCLIPBOARD, OnTDCGetClipboard)
 	ON_REGISTERED_MESSAGE(WM_ICC_TASKLINK, OnTDCDoTaskLink)
 	ON_REGISTERED_MESSAGE(WM_ICC_FAILEDLINK, OnTDCFailedLink)
-	ON_REGISTERED_MESSAGE(WM_ICC_GETLINKTOOLTIP, OnCommentsGetTooltip)
+	ON_REGISTERED_MESSAGE(WM_ICC_GETTASKLINKTOOLTIP, OnCommentsGetTooltip)
 
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
@@ -6984,8 +6984,8 @@ LRESULT CToDoCtrl::OnCommentsGetTooltip(WPARAM /*wParam*/, LPARAM lParam)
 {
 	ASSERT(lParam);
 
-	ICCLINKTOOLTIP* pTT = (ICCLINKTOOLTIP*)lParam;
-	CString sLink(pTT->szLink);
+	ICCTASKLINKTOOLTIP* pTT = (ICCTASKLINKTOOLTIP*)lParam;
+	CString sLink(pTT->szTaskLink);
 
 	if (!sLink.IsEmpty())
 	{
@@ -7007,7 +7007,7 @@ LRESULT CToDoCtrl::OnCommentsGetTooltip(WPARAM /*wParam*/, LPARAM lParam)
 			tip.hdr.idFrom = GetDlgCtrlID();
 			tip.hdr.code = TTN_NEEDTEXT;
 
-			if (GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)pTT->szLink, (LPARAM)&tip))
+			if (GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)pTT->szTaskLink, (LPARAM)&tip))
 			{
 				sTooltip = tip.szText;
 
