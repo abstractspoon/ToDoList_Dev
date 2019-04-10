@@ -819,17 +819,15 @@ BOOL CTDLSimpleTextContentCtrl::OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 	TOOLTIPTEXT* pTTN = (TOOLTIPTEXT*)pNMHDR;
 	*pResult = 0;
 
-	if (_tcsncmp(_T("tdl://"), pTTN->lpszText, 5) == 0)
+	ICCLINKTOOLTIP tooltip = { 0 };
+	tooltip.szLink = pTTN->lpszText;
+
+	if (GetParent()->SendMessage(WM_ICC_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)&tooltip))
 	{
-		ICCTASKLINKTOOLTIP tooltip = { pTTN->lpszText, 0 };
+		lstrcpyn(pTTN->szText, tooltip.szTooltip, ICCLINKTOOLTIPLEN);
 
-		if (GetParent()->SendMessage(WM_ICC_GETTASKLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)&tooltip))
-		{
-			lstrcpyn(pTTN->szText, tooltip.szTooltip, ICCLINKTOOLTIPLEN);
-			*pResult = TRUE;
-
-			return TRUE;
-		}
+		*pResult = TRUE;
+		return TRUE;
 	}
 
 	return FALSE;

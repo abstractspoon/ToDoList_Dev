@@ -158,12 +158,6 @@ void CContentCtrl::SetFocus()
 		::SetFocus(hwndThis);
 }
 
-void CContentCtrl::RefreshTaskLinkTooltips()
-{
-	if (m_pContentCtrl)
-		m_pContentCtrl->RefreshTaskLinkTooltips();
-}
-
 ISpellCheck* CContentCtrl::GetSpellCheckInterface()
 {
 	if (m_pContentCtrl)
@@ -264,16 +258,10 @@ BOOL CContentCtrl::SetContent(const unsigned char* pContent, int nLength, BOOL b
 	CAutoFlag af(m_bSettingContent, TRUE);
 
 	if (m_pContentCtrl)
-	{
-		if (m_pContentCtrl->SetContent(pContent, nLength, (bResetSelection != FALSE)))
-		{
-			m_pContentCtrl->RefreshTaskLinkTooltips();
-			return TRUE;
-		}
-	}
+		return m_pContentCtrl->SetContent(pContent, nLength, (bResetSelection != FALSE));
 
 	// else
-	return FALSE;
+	return false;
 }
 
 BOOL CContentCtrl::SetContent(const CBinaryData& content, BOOL bResetSelection)
@@ -327,13 +315,7 @@ BOOL CContentCtrl::SetTextContent(LPCTSTR szContent, BOOL bResetSelection)
 	CAutoFlag af(m_bSettingContent, TRUE);
 
 	if (m_pContentCtrl)
-	{
-		if (m_pContentCtrl->SetTextContent(szContent, (bResetSelection != FALSE)))
-		{
-			m_pContentCtrl->RefreshTaskLinkTooltips();
-			return TRUE;
-		}
-	}
+		return m_pContentCtrl->SetTextContent(szContent, (bResetSelection != FALSE));
 
 	// else
 	return FALSE;

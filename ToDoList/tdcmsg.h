@@ -35,7 +35,7 @@ const UINT WM_TDCM_GETCLIPBOARD				= ::RegisterWindowMessage(_T("WM_TDCM_GETCLIP
 const UINT WM_TDCM_HASCLIPBOARD				= ::RegisterWindowMessage(_T("WM_TDCM_HASCLIPBOARD"));		// lParam == match hwnd
 const UINT WM_TDCM_ISTASKDONE				= ::RegisterWindowMessage(_T("WM_TDCM_ISTASKDONE"));		// format as WM_TDCM_SELECTTASK
 const UINT WM_TDCM_GETTASKREMINDER			= ::RegisterWindowMessage(_T("WM_TDCM_TASKHASREMINDER"));	// wParam = TaskID, lParam = TDC* 
-const UINT WM_TDCM_GETTASKLINKTOOLTIP		= ::RegisterWindowMessage(_T("WM_TDCM_GETTASKLINKTOOLTIP"));	// wParam = url, lParam = TOOLTIPTEXT*
+const UINT WM_TDCM_GETLINKTOOLTIP			= ::RegisterWindowMessage(_T("WM_TDCM_GETLINKTOOLTIP"));	// wParam = url, lParam = TOOLTIPTEXT*
 
 // from CToDoCtrlReminders
 const UINT WM_TDCN_DISMISSREMINDER			= ::RegisterWindowMessage(_T("WM_TDCN_DISMISSREMINDER"));	// wParam = TaskID, lParam = TDC* 

@@ -62,7 +62,6 @@ public:
 	BOOL ProcessMessage(MSG* pMsg);
 	BOOL HasFocus() const;
 	void SetFocus();
-	void RefreshTaskLinkTooltips();
 
 	ISpellCheck* GetSpellCheckInterface();
 	

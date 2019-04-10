@@ -449,7 +449,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnToDoCtrlGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnToDoCtrlIsTaskDone)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnToDoCtrlSelectTask)
-	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKLINKTOOLTIP, OnToDoCtrlGetTaskLinkTooltip)
+	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnToDoCtrlGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTDROPFILES, OnToDoCtrlImportDropFiles)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CANIMPORTDROPFILES, OnToDoCtrlCanImportDropFiles)
 	ON_REGISTERED_MESSAGE(WM_TDCN_CLICKREMINDERCOL, OnToDoCtrlNotifyClickReminderCol)
@@ -8384,7 +8384,6 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 	tdcShow.SetMaximizeState(m_nMaxState);
 	tdcShow.EnableWindow(TRUE);
 	tdcShow.SetFocusToTasks();
-	tdcShow.RefreshTaskLinkTooltips();
 	tdcShow.ShowWindow(SW_SHOW);
 
 	// if the tasklist is encrypted and todolist always prompts for password
@@ -11936,32 +11935,43 @@ LRESULT CToDoListWnd::OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam)
 	return FileMisc::Run(*this, sCommandline);
 }
 
-LRESULT CToDoListWnd::OnToDoCtrlGetTaskLinkTooltip(WPARAM wParam, LPARAM lParam)
+LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
 {
-	if (GetSelToDoCtrl() != -1)
-	{
-		LPCTSTR szLink = (LPCTSTR)wParam;
-		TOOLTIPTEXT* pTT = (TOOLTIPTEXT*)lParam;
+	LPCTSTR szLink = (LPCTSTR)wParam;
+	TOOLTIPTEXT* pTT = (TOOLTIPTEXT*)lParam;
 
-		// Must  if it's a task link
+	CString sTooltip;
+
+	// if it's an Outlook link then run it directly
+	if (CMSOutlookHelper::IsOutlookUrl(szLink))
+	{
+		// TODO
+	}
+	else // see if it's a task link
+	{
 		CString sPath, sCwd(m_mgrToDoCtrls.GetFolderPath(GetSelToDoCtrl()));
 		DWORD dwTaskID = 0;
 
 		if (CFilteredToDoCtrl::ParseTaskLink(szLink, TRUE, sCwd, dwTaskID, sPath))
 		{
-			ASSERT(!sPath.IsEmpty());
-
-			int nTDC = m_mgrToDoCtrls.FindToDoCtrl(sPath);
-
-			if ((nTDC != -1) && m_mgrToDoCtrls.IsLoaded(nTDC))
+			if (sPath.IsEmpty())
 			{
-				CString sTooltip = GetToDoCtrl(nTDC).GetTaskTitle(dwTaskID);
-				ASSERT(!sTooltip.IsEmpty());
+				sTooltip = GetToDoCtrl().GetTaskTitle(dwTaskID);
+			}
+			else
+			{
+				int nTDC = m_mgrToDoCtrls.FindToDoCtrl(sPath);
 
-				lstrcpyn(pTT->szText, sTooltip, 80);
-				return TRUE;
+				if ((nTDC != -1) && m_mgrToDoCtrls.IsLoaded(nTDC))
+					sTooltip = GetToDoCtrl(nTDC).GetTaskTitle(dwTaskID);
 			}
 		}
+	}
+
+	if (!sTooltip.IsEmpty())
+	{
+		lstrcpyn(pTT->szText, sTooltip, 80);
+		return TRUE;
 	}
 
 	// all else

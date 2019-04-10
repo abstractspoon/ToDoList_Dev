@@ -52,7 +52,6 @@ public:
 
 	BOOL ProcessMessage(MSG* pMsg) { return m_ctrlComments.ProcessMessage(pMsg); }
 	BOOL HasFocus() const { return m_ctrlComments.HasFocus(); }
-	void RefreshTaskLinkTooltips() { m_ctrlComments.RefreshTaskLinkTooltips(); }
 	void UpdateAppPreferences();
 
 	ISpellCheck* GetSpellCheckInterface() { return m_ctrlComments.GetSpellCheckInterface(); }

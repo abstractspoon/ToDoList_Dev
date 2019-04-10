@@ -26,23 +26,23 @@ const UINT ICONTENTCTRL_VERSION = 3;
 
 const int ICCLINKTOOLTIPLEN = 80; // from NMTTDISPINFO
 
-struct ICCTASKLINKTOOLTIP
+struct ICCLINKTOOLTIP
 {
-	LPCWSTR szTaskLink;
+	LPCWSTR szLink;
 	TCHAR szTooltip[ICCLINKTOOLTIPLEN];
 };
 
 //////////////////////////////////////////////////////////////////////
 
-const UINT WM_ICC_WANTSPELLCHECK		= ::RegisterWindowMessageW(L"WM_ICC_WANTSPELLCHECK");
-const UINT WM_ICC_CONTENTCHANGE			= ::RegisterWindowMessageW(L"WM_ICC_CONTENTCHANGE");
-const UINT WM_ICC_KILLFOCUS				= ::RegisterWindowMessageW(L"WM_ICC_KILLFOCUS");
-const UINT WM_ICC_DOHELP				= ::RegisterWindowMessageW(L"WM_ICC_DOHELP");				// lParam = Help key (LPCWSTR)
-const UINT WM_ICC_GETCLIPBOARD			= ::RegisterWindowMessageW(L"WM_ICC_GETCLIPBOARD");			// lParam = HWND
-const UINT WM_ICC_HASCLIPBOARD			= ::RegisterWindowMessageW(L"WM_ICC_HASCLIPBOARD");			// lParam = HWND
-const UINT WM_ICC_TASKLINK				= ::RegisterWindowMessageW(L"WM_ICC_TASKLINK");				// lParam = URL (LPCWSTR)
-const UINT WM_ICC_FAILEDLINK			= ::RegisterWindowMessageW(L"WM_ICC_FAILEDLINK");			// wParam = HWND, lParam = URL (LPCWSTR)
-const UINT WM_ICC_GETTASKLINKTOOLTIP	= ::RegisterWindowMessageW(L"WM_ICC_GETTASKLINKTOOLTIP");	// lParam = ICCTASKLINKTOOLTIP*
+const UINT WM_ICC_WANTSPELLCHECK	= ::RegisterWindowMessageW(L"WM_ICC_WANTSPELLCHECK");
+const UINT WM_ICC_CONTENTCHANGE		= ::RegisterWindowMessageW(L"WM_ICC_CONTENTCHANGE");
+const UINT WM_ICC_KILLFOCUS			= ::RegisterWindowMessageW(L"WM_ICC_KILLFOCUS");
+const UINT WM_ICC_DOHELP			= ::RegisterWindowMessageW(L"WM_ICC_DOHELP");			// lParam = Help key (LPCWSTR)
+const UINT WM_ICC_GETCLIPBOARD		= ::RegisterWindowMessageW(L"WM_ICC_GETCLIPBOARD");		// lParam = HWND
+const UINT WM_ICC_HASCLIPBOARD		= ::RegisterWindowMessageW(L"WM_ICC_HASCLIPBOARD");		// lParam = HWND
+const UINT WM_ICC_TASKLINK			= ::RegisterWindowMessageW(L"WM_ICC_TASKLINK");			// lParam = URL (LPCWSTR)
+const UINT WM_ICC_FAILEDLINK		= ::RegisterWindowMessageW(L"WM_ICC_FAILEDLINK");		// wParam = HWND, lParam = URL (LPCWSTR)
+const UINT WM_ICC_GETLINKTOOLTIP	= ::RegisterWindowMessageW(L"WM_ICC_GETLINKTOOLTIP");	// lParam = ICCLINKTOOLTIP*
 
 //////////////////////////////////////////////////////////////////////
 
@@ -168,7 +168,6 @@ public:
 	// text content if supported. return false if not supported
 	virtual int GetTextContent(LPWSTR szContent, int nLength = -1) const = 0;
 	virtual bool SetTextContent(LPCWSTR szContent, bool bResetSelection) = 0;
-	virtual void RefreshTaskLinkTooltips() = 0;
 
 	virtual bool FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord) = 0;
 

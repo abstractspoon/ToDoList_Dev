@@ -48,7 +48,6 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
 	bool FindReplaceAll(LPCTSTR szFind, LPCTSTR szReplace, bool bCaseSensitive, bool bWholeWord);
-	void RefreshTaskLinkTooltips() {} // handled dynamically
 
 	// global settings
 	static void SetPasteSourceUrls(BOOL bPasteUrls) { CRulerRichEdit::SetPasteSourceUrls(bPasteUrls); }
