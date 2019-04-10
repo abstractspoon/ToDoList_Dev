@@ -116,6 +116,11 @@ namespace HTMLContentControl
 			}
 		}
 
+		public void RefreshTaskLinkTooltips()
+		{
+			m_HtmlEditControl.RefreshLinkTooltips("tdl:");
+		}
+
 		// --------------------------------------------------------------------
 
 		protected override void OnGotFocus(EventArgs e)

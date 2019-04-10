@@ -56,6 +56,7 @@ public:
    // text content if supported. return false if not supported
    int GetTextContent(LPWSTR szContent, int nLength = -1) const;
    bool SetTextContent(LPCWSTR szContent, bool bResetSelection);
+	void RefreshTaskLinkTooltips() {} // not implemented
 
    bool FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord);
 
@@ -64,7 +65,7 @@ public:
 
    void Release();
    bool ProcessMessage(MSG* pMsg);
-   void FilterToolTipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
+   void FilterToolTipMessage(MSG* pMsg) {} //.Net tooltips don't need this
 
    ISpellCheck* GetSpellCheckInterface();
 
@@ -79,7 +80,6 @@ public:
 
 protected:
    gcroot<MDContentControlCore^> m_wnd;
-   //gcroot<System::Windows::Interop::HwndSource^> m_source;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

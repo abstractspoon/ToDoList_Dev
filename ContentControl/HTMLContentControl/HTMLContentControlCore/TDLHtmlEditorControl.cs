@@ -178,8 +178,6 @@ namespace HTMLContentControl
                 var html = System.Text.Encoding.Unicode.GetString(content).TrimEnd('\0').Trim();
 
                 InnerHtml = html;
-				RefreshLinkTooltips();
-
 				m_PrevTextChange = InnerHtml;
             }
             // catch (Exception exception)
