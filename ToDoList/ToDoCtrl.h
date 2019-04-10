@@ -427,6 +427,7 @@ public:
 	void RedrawReminders();
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos, BOOL bResize);
 	void SetCompletionStatus(const CString& sStatus);
+	void RefreshTaskLinkTooltips() { m_ctrlComments.RefreshTaskLinkTooltips(); }
 
 	BOOL ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const;
 	CString FormatTaskLink(DWORD dwTaskID, BOOL bFull) const;

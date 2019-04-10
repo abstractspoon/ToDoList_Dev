@@ -168,6 +168,7 @@ public:
 	// text content if supported. return false if not supported
 	virtual int GetTextContent(LPWSTR szContent, int nLength = -1) const = 0;
 	virtual bool SetTextContent(LPCWSTR szContent, bool bResetSelection) = 0;
+	virtual void RefreshTaskLinkTooltips() = 0;
 
 	virtual bool FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord) = 0;
 

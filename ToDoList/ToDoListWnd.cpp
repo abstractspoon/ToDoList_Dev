@@ -8384,6 +8384,7 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 	tdcShow.SetMaximizeState(m_nMaxState);
 	tdcShow.EnableWindow(TRUE);
 	tdcShow.SetFocusToTasks();
+	tdcShow.RefreshTaskLinkTooltips();
 	tdcShow.ShowWindow(SW_SHOW);
 
 	// if the tasklist is encrypted and todolist always prompts for password
@@ -11947,8 +11948,9 @@ LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
 	{
 		// TODO
 	}
-	else // see if it's a task link
+	else if (GetSelToDoCtrl() != -1)
 	{
+		// see if it's a task link
 		CString sPath, sCwd(m_mgrToDoCtrls.GetFolderPath(GetSelToDoCtrl()));
 		DWORD dwTaskID = 0;
 
