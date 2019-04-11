@@ -10,8 +10,8 @@
 #pragma warning(disable:4505)
 
 // latest interface
-#define ITASKLISTBASE	 ITaskList16 
-#define IID_TASKLISTBASE IID_TASKLIST16
+#define ITASKLISTBASE	 ITaskList17 
+#define IID_TASKLISTBASE IID_TASKLIST17
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -31,6 +31,7 @@ static const GUID IID_TASKLIST13 = { 0x5951fde6, 0x508a, 0x4a9d, { 0xa5, 0x5d, 0
 static const GUID IID_TASKLIST14 = { 0x0e95dc97, 0x41f7, 0x4d9c, { 0xb4, 0x25, 0xf5, 0xd4, 0xc2, 0xb1, 0xba, 0x4c } };
 static const GUID IID_TASKLIST15 = { 0x2a8fd5f0, 0x63ae, 0x485f, { 0xbc, 0x5e, 0xa2, 0xa2, 0xc2, 0xc2, 0x51, 0x5e } };
 static const GUID IID_TASKLIST16 = { 0x66fc35d2, 0xc471, 0x4af6, { 0xbe, 0xfc, 0xf3, 0xba, 0x5f, 0xfd, 0x90, 0xd1 } };
+static const GUID IID_TASKLIST17 = { 0xd44e1030, 0x3c18, 0x41df, { 0xb7, 0x5e, 0x70, 0xcf, 0xd8, 0x62, 0x15, 0x47 } };
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -509,6 +510,14 @@ public:
 									DWORD& dwSpecific1, DWORD& dwSpecific2, 
 									TDC_RECURFROMOPTION& nRecalcFrom, TDC_RECURREUSEOPTION& nReuse, 
 									int& nNumOccur, int& nRemainingOccur, bool& bPreserveComments) const = 0;
+};
+
+class ITaskList17 : public ITaskList16
+{
+	// new methods
+public:
+	virtual LPCWSTR GetFileName(bool bFullPath) const = 0;
+
 };
 
 #endif // _ITASKLIST_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

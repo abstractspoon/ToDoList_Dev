@@ -8074,7 +8074,7 @@ BOOL CToDoCtrl::CopyCurrentSelection() const
 	ClearCopiedItem();
 
 	// copy selected tasks to clipboard
-	TDCGETTASKS filter(TDCGT_ALL, TDCGTF_FILENAME);
+	TDCGETTASKS filter;
 	CTaskFile tasks;
 
 	if (!GetSelectedTasks(tasks, filter))
@@ -9019,10 +9019,6 @@ void CToDoCtrl::PrepareTaskfileForTasks(CTaskFile& tasks, const TDCGETTASKS& fil
 	// custom attributes
 	SaveCustomAttributeDefinitions(tasks, filter);
 	
-	// filename
-	if (filter.HasFlag(TDCGTF_FILENAME))
-		tasks.SetFileName(m_sLastSavePath);
-	
 	// meta data	
 	tasks.SetMetaData(m_mapMetaData);
 	
@@ -9045,11 +9041,10 @@ void CToDoCtrl::AppendTaskFileHeader(CTaskFile& tasks) const
 	tasks.SetArchive(m_bArchive);
 	tasks.SetEarliestTaskDueDate(m_calculator.GetEarliestDueDate());
 	tasks.SetLastModified(m_dtLastTaskMod);
+	tasks.SetFilePath(m_sLastSavePath);
 
 	tasks.SetNextUniqueID(m_dwNextUniqueID);
 	ASSERT (tasks.GetNextUniqueID() == m_dwNextUniqueID);
-
-	tasks.SetFileName(FileMisc::GetFileNameFromPath(m_sLastSavePath));
 	
 	if (!HasStyle(TDCS_USES3RDPARTYSOURCECONTROL))
 	{

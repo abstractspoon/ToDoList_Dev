@@ -41,7 +41,6 @@ public:
 
 protected:
 	static void CreateReverseFileLinks(CTaskFile& tasks, HTASKITEM hTask, const CID2IDMap& mapIDs, const CString& sFileName, BOOL bAndSiblings);
-	static void CopyCustomDataDefinitions(const ITaskList* pTasks, CTDCCustomAttribDefinitionArray& aAttribDefs);
 	static void FixupInternalDependencies(CTaskFile& tasks, HTASKITEM hTask, const CID2IDMap& mapIDs, BOOL bAndSiblings);
 	static void BuildReverseIDMap(const CID2IDMap& mapIDs, CID2IDMap& mapReverseIDs);
 };

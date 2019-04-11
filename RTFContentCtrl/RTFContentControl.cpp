@@ -877,11 +877,11 @@ void CRTFContentControl::OnEditPasteasRef()
 
 	// verify that we can get the corresponding filename
 	CString sFileName;
-	ITaskList4* pClip4 = GetITLInterface<ITaskList4>(pClipboard, IID_TASKLIST4);
+	ITaskList17* pClip17 = GetITLInterface<ITaskList17>(pClipboard, IID_TASKLIST17);
 
-	if (pClip4)
+	if (pClip17)
 	{
-		sFileName = pClip4->GetAttribute(TDL_FILENAME);
+		sFileName = pClip17->GetFileName(false);
 		sFileName.Replace(_T(" "), _T("%20"));
 	}
 	else // get the clipboard for just this tasklist

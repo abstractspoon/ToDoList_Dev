@@ -216,7 +216,7 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 	}
 }
 
-BOOL TASKCALITEM::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
+BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
 {
 	ASSERT(dwTaskID == 0 || pTasks->GetTaskID(hTask) == dwTaskID);
 

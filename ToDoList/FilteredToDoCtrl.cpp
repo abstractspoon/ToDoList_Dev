@@ -348,7 +348,7 @@ BOOL CFilteredToDoCtrl::CopyCurrentSelection() const
 	
 	ClearCopiedItem();
 	
-	TDCGETTASKS filter(TDCGT_ALL, TDCGTF_FILENAME);
+	TDCGETTASKS filter;
 	CTaskFile tasks;
 
 	PrepareTaskfileForTasks(tasks, filter);
@@ -1498,6 +1498,8 @@ BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, cons
 	// Special case: No filter is set -> All tasks (v much faster)
 	if (!IsFilterSet(FTCV_TASKTREE))
 	{
+		PrepareTaskfileForTasks(tasks, TDCGT_ALL);
+
 		if (CTabbedToDoCtrl::GetAllTasks(tasks))
 		{
 			AddGlobalsToTaskFile(tasks, mapAttrib);

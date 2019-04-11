@@ -91,10 +91,6 @@ public:
 
 	SFE_FORMAT				GetFormat() const { return m_nFormat; }
 
-	static BOOL				LoadFile(LPCWSTR szPathname, CString& sText, BOOL bDenyWrite = FALSE);
-	static int				LoadFile(LPCWSTR szPathname, CStringArray& aLines, int nNumLines = -1);
-	static BOOL				SaveFile(LPCWSTR szPathname, const CString& sText, SFE_FORMAT nFormat, UINT nCodePage = CP_ACP);
-
 	static UINT				GetCurrentLocaleCodePage();
 	static BOOL				IsSaving(UINT nOpenFlags);
 

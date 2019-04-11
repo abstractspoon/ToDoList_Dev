@@ -269,6 +269,7 @@ public:
 	CString GetFilePath() const;
 	CString GetFileName() const;
 	const HANDLE GetFileHandle() const;
+	void SetFilePath(LPCTSTR lpszNewName);
 
 	CString GetXmlHeader() const;
 	CString GetXslHeader() const;

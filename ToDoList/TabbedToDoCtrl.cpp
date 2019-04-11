@@ -918,9 +918,6 @@ BOOL CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const 
 
 	GetTasks(tasks, FTCV_TASKTREE, filter);
 
-	if (mapAttrib.Has(TDCA_PROJECTNAME))
-		tasks.SetProjectName(m_sProjectName);
-
 	return TRUE;
 }
 
@@ -1104,8 +1101,9 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(CTaskFile& tasks,
 void CTabbedToDoCtrl::UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, 
 										  IUI_UPDATETYPE nType, const CTDCAttributeMap& mapAttrib)
 {
-	CAutoFlag af(m_bUpdatingExtensions, TRUE);
+	ASSERT(!tasks.GetFilePath().IsEmpty() || m_sLastSavePath.IsEmpty());
 
+	CAutoFlag af(m_bUpdatingExtensions, TRUE);
 	CArray<IUI_ATTRIBUTE, IUI_ATTRIBUTE> aAttrib;
 	
 	if (TDC::MapAttributesToIUIAttributes(mapAttrib, aAttrib))
@@ -3195,9 +3193,6 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 		// Misc
 		if (pExtWnd->WantTaskUpdate(IUI_CUSTOMATTRIB))
 			mapAttrib.Add(TDCA_CUSTOMATTRIB_ALL);
-
-		if (pExtWnd->WantTaskUpdate(IUI_PROJECTNAME))
-			mapAttrib.Add(TDCA_PROJECTNAME);
 
 		// Always
 		mapAttrib.Add(TDCA_LOCK);

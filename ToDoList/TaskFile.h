@@ -60,7 +60,7 @@ struct TASKFILE_HEADER
 	CString sXmlHeader;
 	CString sXslHeader;
 	CString sProjectName;
-	CString sFileName;
+	CString sFilePath;
 	CString sCheckedOutTo;
 	BOOL bArchive;
 	BOOL bUnicode;
@@ -130,7 +130,7 @@ public:
 	BOOL RemoveFromSourceControl();
 
 	BOOL SetArchive(BOOL bArchive = TRUE);
-	BOOL SetFileName(LPCTSTR szFilename);
+	void SetFilePath(LPCTSTR szFilePath);
 
 	BOOL SetLastModified(const COleDateTime& tLastMod);
 	COleDateTime GetLastModifiedOle() const;
@@ -235,7 +235,12 @@ public:
 	BOOL SetTaskIsParent(HTASKITEM hTask);
 
 	//////////////////////////////////////////////////////////////
+	// ITaskList17 implementation 
+	LPCTSTR GetFileName(bool bFullPath) const;
+
+	//////////////////////////////////////////////////////////////
 	// ITaskList16 implementation 
+	
 	bool IsTaskLocked(HTASKITEM hTask, bool bCalc) const;
 	bool SetTaskLock(HTASKITEM hTask, bool bLocked);
 	bool IsTaskFlagged(HTASKITEM hTask, bool bCalc) const;

@@ -48,12 +48,12 @@ IIMPORTEXPORT_RESULT CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTask
 	for (int nTaskList = 0; nTaskList < nTaskListCount; nTaskList++)
 	{
 		const ITaskList* pTasks = pSrcTaskFile->GetTaskList(nTaskList);
-		const ITaskList8* pTasks8 = GetITLInterface<ITaskList8>(pTasks, IID_TASKLIST8);
+		const ITaskList17* pTasks17 = GetITLInterface<ITaskList17>(pTasks, IID_TASKLIST17);
 		
-		if (pTasks8) // minimum requirement
+		if (pTasks17) // minimum requirement
 		{
 			// do not export the destination file if it also appears in the list
-			CString sFilePath = pTasks8->GetAttribute(TDL_FILENAME);
+			CString sFilePath = pTasks17->GetFileName(true);
 
 			if (FileMisc::IsSamePath(sFilePath, szDestFilePath))
 				continue;
@@ -61,11 +61,11 @@ IIMPORTEXPORT_RESULT CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTask
 			// save off custom attribute definitions
 			CTDCCustomAttribDefinitionArray aDefs; 
 
-			if (CTaskFile::GetCustomAttributeDefs(pTasks8, aDefs))
+			if (CTaskFile::GetCustomAttributeDefs(pTasks17, aDefs))
 				aAttribDefs.Append(aDefs);
 
 			// create a top-level task for each tasklist
-			CString sProjectName = pTasks8->GetProjectName();
+			CString sProjectName = pTasks17->GetProjectName();
 
 			if (sProjectName.IsEmpty())
 				sProjectName = FileMisc::GetFileNameFromPath(sFilePath, FALSE);
@@ -76,10 +76,10 @@ IIMPORTEXPORT_RESULT CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTask
 			// and keeping track of the ID mapping as we go
 			CID2IDMap mapIDs;
 
-			tasks.CopyTaskFrom(pTasks8, pTasks8->GetFirstTask(), hFileTask, TRUE, &mapIDs);
+			tasks.CopyTaskFrom(pTasks17, pTasks17->GetFirstTask(), hFileTask, TRUE, &mapIDs);
 
 			// verify task count is as expected
-			ASSERT(mapIDs.GetCount() == pTasks8->GetTaskCount());
+			ASSERT(mapIDs.GetCount() == pTasks17->GetTaskCount());
 
 			// create file links back to original tasks
 			HTASKITEM hFirstTask = tasks.GetFirstTask(hFileTask);

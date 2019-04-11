@@ -1652,6 +1652,11 @@ CString CXmlFile::GetFileName() const
 	return FileMisc::GetFileNameFromPath(GetFilePath());
 }
 
+void CXmlFile::SetFilePath(LPCTSTR lpszNewName)
+{
+	CStdioFileEx::SetFilePath(lpszNewName);
+}
+
 const HANDLE CXmlFile::GetFileHandle() const 
 { 
 	return (HANDLE)CStdioFileEx::m_hFile; 

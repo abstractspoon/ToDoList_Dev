@@ -200,6 +200,11 @@ HRESULT CTaskFile::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObj
 		*ppvObject = reinterpret_cast<ITaskList16*>(this);
 		AddRef();
 	}
+	else if (IsEqualIID(riid, IID_TASKLIST17))
+	{
+		*ppvObject = reinterpret_cast<ITaskList17*>(this);
+		AddRef();
+	}
 	else
 	{
 		ASSERT(0);
@@ -330,8 +335,8 @@ void CTaskFile::SetHeader(const TASKFILE_HEADER& header)
 	else 
 		VERIFY(SetNextUniqueID(m_dwNextUniqueID));
 
-	if (!header.sFileName.IsEmpty())
-		VERIFY(SetFileName(header.sFileName));
+	if (!header.sFilePath.IsEmpty())
+		SetFilePath(header.sFilePath);
 
 	if (header.nFileVersion != -1)
 		VERIFY(SetFileVersion(header.nFileVersion));
@@ -342,7 +347,7 @@ void CTaskFile::GetHeader(TASKFILE_HEADER& header) const
 	header.sXmlHeader = m_sXmlHeader;
 	header.sXslHeader = GetXslHeader();
 	header.sProjectName = GetProjectName();
-	header.sFileName = GetItemValue(TDL_FILENAME);
+	header.sFilePath = GetItemValue(TDL_FILENAME);
 	header.sCheckedOutTo = GetCheckOutTo();
 	header.bArchive = IsArchive();
 	header.bUnicode = (GetFormat() == SFEF_UTF16);
@@ -1526,14 +1531,14 @@ BOOL CTaskFile::SetArchive(BOOL bArchive)
 	return TRUE;
 }
 
-BOOL CTaskFile::SetFileName(LPCTSTR szFilename)
+void CTaskFile::SetFilePath(LPCTSTR szFilePath)
 {
-	if (!Misc::IsEmpty(szFilename))
-		return (NULL != SetItemValue(TDL_FILENAME, szFilename));
+	CStdioFileEx::SetFilePath(szFilePath);
 
-	// else
-	DeleteItem(TDL_FILENAME);
-	return TRUE;
+	if (!Misc::IsEmpty(szFilePath))
+		SetItemValue(TDL_FILENAME, FileMisc::GetFileNameFromPath(szFilePath));
+	else
+		DeleteItem(TDL_FILENAME);
 }
 
 BOOL CTaskFile::SetLastModified(const COleDateTime& tLastMod)
@@ -2522,6 +2527,15 @@ bool CTaskFile::IsTaskFlagged(HTASKITEM hTask, bool bCalc) const
 		return TRUE;
 
 	return (GetTaskUChar(hTask, TDL_TASKFLAG) > 0);
+}
+
+LPCTSTR CTaskFile::GetFileName(bool bFullPath) const
+{
+	if (bFullPath)
+		return CXmlFile::GetFilePath();
+
+	// else
+	return GetAttribute(TDL_FILENAME);
 }
 
 bool CTaskFile::IsTaskLocked(HTASKITEM hTask, bool bCalc) const

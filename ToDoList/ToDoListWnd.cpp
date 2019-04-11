@@ -4626,7 +4626,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 	CString sStylesheet(userPrefs.GetDueTaskStylesheet());
 	BOOL bTransform = GetStylesheetPath(tdc, sStylesheet);
 	
-	DWORD dwFlags = TDCGTF_FILENAME;
+	DWORD dwFlags = 0;
 	
 	if (userPrefs.GetDisplayDueCommentsInHtml())
 		dwFlags |= TDCGTF_HTMLCOMMENTS;
@@ -10076,8 +10076,6 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 	tasks.SetProjectName(tdc.GetFriendlyProjectName());
 	
 	// export flags
-	filter.dwFlags |= TDCGTF_FILENAME;
-
 	if (userPrefs.GetExportParentTitleCommentsOnly())
 		filter.dwFlags |= TDCGTF_PARENTTITLECOMMENTSONLY;
 
