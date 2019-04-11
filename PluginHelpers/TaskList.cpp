@@ -146,6 +146,11 @@ String^ TaskList::GetReportDate()
 	return GETSTR(GetReportDate);
 }
 
+String^ TaskList::GetProjectName()
+{
+	return GETSTR(GetProjectName);
+}
+
 String^ TaskList::GetMetaData(String^ sKey)
 {
 	return GETSTR_ARG(GetMetaData, MS(sKey));

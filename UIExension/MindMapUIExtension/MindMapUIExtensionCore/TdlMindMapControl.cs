@@ -103,6 +103,12 @@ namespace MindMapUIExtension
 				return m_Title;
 #endif
 			} 
+
+			set // only works for the root
+			{
+				if (!IsTask && !String.IsNullOrWhiteSpace(value))
+					m_Title = value;
+			}
 		}
 		
 		public UInt32 ID { get { return m_TaskID; } }
@@ -324,7 +330,8 @@ namespace MindMapUIExtension
                 case UIExtension.TaskAttribute.DoneDate:
 			    case UIExtension.TaskAttribute.Position:
 			    case UIExtension.TaskAttribute.SubtaskDone:
-                    return true;
+				case UIExtension.TaskAttribute.ProjectName:
+					return true;
             }
 
             // all else
@@ -541,8 +548,20 @@ namespace MindMapUIExtension
 		protected void UpdateTaskAttributes(TaskList tasks,
 								HashSet<UIExtension.TaskAttribute> attribs)
 		{
+			var rootItem = TaskItem(RootNode);
+
+			if ((rootItem != null) && !rootItem.IsTask)
+			{
+				var projName = GetProjectName(tasks);
+
+				if (!projName.Equals(rootItem.Title))
+				{
+					rootItem.Title = projName;
+					RootNode.Text = projName;
+				}
+			}
+
 			var changedTaskIds = new HashSet<UInt32>();
-            
 			Task task = tasks.GetFirstTask();
 
 			while (task.IsValid() && ProcessTaskUpdate(task, attribs, changedTaskIds))
@@ -628,7 +647,8 @@ namespace MindMapUIExtension
 			else
 			{
 				// There is more than one 'root' task so create a real root parent
-				rootNode = AddRootNode(new MindMapTaskItem(m_Trans.Translate("Root")));
+				var projName = GetProjectName(tasks);
+				rootNode = AddRootNode(new MindMapTaskItem(projName));
 
 				AddTaskToTree(task, rootNode);
 			}
@@ -639,6 +659,17 @@ namespace MindMapUIExtension
 
 			EndUpdate();
 			SetSelectedNode(selID);
+		}
+
+		protected String GetProjectName(TaskList tasks)
+		{
+			String rootName = tasks.GetProjectName();
+
+			if (!String.IsNullOrWhiteSpace(rootName))
+				return rootName;
+
+			// else
+			return m_Trans.Translate("Root");
 		}
 
 		protected List<UInt32> GetExpandedItems(TreeNode node)

@@ -106,6 +106,8 @@ namespace Abstractspoon
 					CustomAttribute,
 					OffsetTask,
 					SubtaskDone,
+					MetaData,
+					ProjectName,
 
 					// new values here ONLY
 

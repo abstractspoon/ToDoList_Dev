@@ -249,6 +249,7 @@ namespace Abstractspoon
 
 				String^ GetReportTitle();
 				String^ GetReportDate();
+				String^ GetProjectName();
 				String^ GetMetaData(String^ sKey);
 
 				UInt32  GetCustomAttributeCount();

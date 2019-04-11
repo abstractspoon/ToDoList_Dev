@@ -26,8 +26,6 @@ namespace MindMapUIExtension
 
         private TdlMindMapControl m_MindMap;
 
-		private bool m_StrikeThruDone = true;
-
         // ----------------------------------------------------------------------------
 
         public MindMapUIExtensionCore(IntPtr hwndParent, Translator trans)
