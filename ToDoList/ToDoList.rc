@@ -560,38 +560,39 @@ BEGIN
     CONTROL         "Show &default task icons in icon selection dialog",
                     IDC_SHOWDEFAULTTASKICONS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,145,381,10
-    LTEXT           "Filtering",IDC_FILTERGROUP,7,165,381,8
+    CONTROL         "Display 'User Defined Tools' in toolbar",
+                    IDC_DISPLAYUDTSINTOOLBAR,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,160,387,10
+    LTEXT           "Filtering",IDC_FILTERGROUP,7,180,381,8
     CONTROL         "S&how default filters",IDC_SHOWDEFAULTFILTERS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,180,387,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,195,387,10
     CONTROL         "&Allow multi selection in the filter droplists",
                     IDC_MULTISELFILTER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,195,381,10
+                    7,210,381,10
     CONTROL         "Rest&ore tasklist filters when restarting ToDoList",
                     IDC_RESTORETASKLISTFILTERS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,210,381,10
+                    WS_TABSTOP,7,225,381,10
     CONTROL         "A&utomatically refilter after editing",IDC_AUTOREFILTER,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,225,381,10
-    LTEXT           "When filtering by 'Title', match on:",IDC_STATIC,7,240,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,240,381,10
+    LTEXT           "When filtering by 'Title', match on:",IDC_STATIC,7,255,
                     371,10,SS_CENTERIMAGE
     CONTROL         "&Titles only",IDC_MATCHTITLES,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,17,255,371,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,17,270,371,10
     CONTROL         "Titles and &comments",IDC_MATCHTITLESCOMMENTS,"Button",
-                    BS_AUTORADIOBUTTON,17,270,371,10
+                    BS_AUTORADIOBUTTON,17,285,371,10
     CONTROL         "&Any text field (eg. Allocated To, External ID, etc)",
-                    IDC_MATCHANYTEXT,"Button",BS_AUTORADIOBUTTON,17,285,371,
+                    IDC_MATCHANYTEXT,"Button",BS_AUTORADIOBUTTON,17,300,371,
                     10
-    LTEXT           "Sorting",IDC_SORTGROUP,7,305,381,8
+    LTEXT           "Sorting",IDC_SORTGROUP,7,320,381,8
     CONTROL         "Al&ways sort completed tasks below other tasks",
                     IDC_SORTDONETASKSATBOTTOM,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,320,381,10
+                    WS_TABSTOP,7,335,381,10
     CONTROL         "A&utomatically resort after editing",IDC_AUTORESORT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,335,381,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,350,381,10
     CONTROL         "E&nable sorting by clicking on column headers",
                     IDC_ENABLECOLUMNHEADERSORTING,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,350,387,10
-    LTEXT           "Main Toolbar",IDC_TOOLBARGROUP,7,370,381,8
-    CONTROL         "Display 'User Defined Tools'",IDC_DISPLAYUDTSINTOOLBAR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,385,387,10
+                    WS_TABSTOP,7,365,387,10
+    LTEXT           "Main Toolbar",IDC_TOOLBARGROUP,7,385,381,8
     LTEXT           "'New Task' &button places task:",IDC_STATIC,8,400,380,8
     COMBOBOX        IDC_NEWTASKPOSITION,7,412,183,121,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
