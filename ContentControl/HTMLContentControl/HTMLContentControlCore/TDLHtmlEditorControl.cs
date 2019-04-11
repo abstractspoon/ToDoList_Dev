@@ -54,8 +54,8 @@ namespace HTMLContentControl
             ToolBar.BackColor = BackColor;
         }
 
-		public String LastBrowsedImageFolder { get; set; } = @"C:\";
-		public String LastBrowsedFileFolder { get; set; } = @"C:\";
+		public String LastBrowsedImageFolder { get; set; }
+		public String LastBrowsedFileFolder { get; set; }
 
 		private void InitializeComponent()
         {
