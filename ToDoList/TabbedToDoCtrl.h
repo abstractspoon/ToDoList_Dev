@@ -321,6 +321,7 @@ protected:
 	CString GetExtensionPrefsSubKey(const IUIExtensionWindow* pExtWnd);
 	void UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib);
 	void UpdateExtensionViewsTasks(TDC_ATTRIBUTE nAttrib);
+	void UpdateExtensionViewsProjectName();
 	BOOL IsExtensionView(HWND hWnd) const;
 	BOOL ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
 	void RefreshExtensionViewSort(FTC_VIEW nView);

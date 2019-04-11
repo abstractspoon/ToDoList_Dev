@@ -640,6 +640,7 @@ namespace TDC
 		case TDCA_TIMESPENT:		
 		case TDCA_VERSION:			
 		case TDCA_CUSTOMATTRIBDEFS:
+		case TDCA_PROJECTNAME:
 			return IUI_EDIT;
 
 		default: // handle custom attrib
@@ -695,9 +696,9 @@ namespace TDC
 		// specials
 		case TDCA_CUSTOMATTRIBDEFS:	return IUI_CUSTOMATTRIB;
 		case TDCA_CUSTOMATTRIB_ALL:	return IUI_CUSTOMATTRIB;
+		case TDCA_PROJECTNAME:		return IUI_PROJECTNAME;
 
 		case TDCA_NEWTASK:			return IUI_NONE;
-		case TDCA_PROJECTNAME:		return IUI_NONE;
 		case TDCA_ALL:				return IUI_NONE;
 		case TDCA_NONE:				return IUI_NONE;
 			
@@ -822,7 +823,6 @@ namespace TDC
 		case IUI_LASTMOD:		return TDCA_LASTMODDATE; // TDCA_LASTMODBY
 		case IUI_LOCK:			return TDCA_LOCK;
 		case IUI_METADATA:		return TDCA_METADATA;
-		case IUI_OFFSETTASK:	return TDCA_NONE; // intentionally 'none'
 		case IUI_PERCENT:		return TDCA_PERCENT;
 		case IUI_POSITION:		return TDCA_POSITION;
 		case IUI_PRIORITY:		return TDCA_PRIORITY;
@@ -836,6 +836,11 @@ namespace TDC
 		case IUI_TIMESPENT:		return TDCA_TIMESPENT;
 		case IUI_VERSION:		return TDCA_VERSION;
 			break;
+
+		// Specials
+		case IUI_OFFSETTASK:	return TDCA_NONE; // intentionally 'none'
+		case IUI_PROJECTNAME:	return TDCA_PROJECTNAME;
+
 		}
 
 		ASSERT(0);

@@ -917,6 +917,10 @@ BOOL CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const 
 	filter.mapAttribs.Copy(mapAttrib);
 
 	GetTasks(tasks, FTCV_TASKTREE, filter);
+
+	if (mapAttrib.Has(TDCA_PROJECTNAME))
+		tasks.SetProjectName(m_sProjectName);
+
 	return TRUE;
 }
 
@@ -3188,8 +3192,12 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 				mapAttrib.Add((TDC_ATTRIBUTE)nAttrib);
 		}
 
+		// Misc
 		if (pExtWnd->WantTaskUpdate(IUI_CUSTOMATTRIB))
 			mapAttrib.Add(TDCA_CUSTOMATTRIB_ALL);
+
+		if (pExtWnd->WantTaskUpdate(IUI_PROJECTNAME))
+			mapAttrib.Add(TDCA_PROJECTNAME);
 
 		// Always
 		mapAttrib.Add(TDCA_LOCK);
@@ -3295,6 +3303,9 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 		break;	
 
 	case TDCA_PROJECTNAME:
+		UpdateExtensionViewsProjectName();
+		break;
+
 	case TDCA_ENCRYPT:
 	case TDCA_METADATA:
 		// do nothing
@@ -3306,6 +3317,35 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 		else
 			ASSERT(0);
 		break;
+	}
+}
+
+void CTabbedToDoCtrl::UpdateExtensionViewsProjectName()
+{
+	if (AnyExtensionViewWantsChange(TDCA_PROJECTNAME))
+	{
+		CTaskFile tasks;
+		AppendTaskFileHeader(tasks);
+
+		int nExt = m_aExtViews.GetSize();
+
+		while (nExt--)
+		{
+			IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
+
+			if (pExtWnd && pExtWnd->WantTaskUpdate(IUI_PROJECTNAME))
+			{
+				FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+				VIEWDATA* pVData = GetViewData(nExtView);
+				ASSERT(pVData);
+
+				if (pVData && !pVData->bNeedFullTaskUpdate)
+				{
+					IUI_ATTRIBUTE nProjName = IUI_PROJECTNAME;
+					pExtWnd->UpdateTasks(&tasks, IUI_EDIT, &nProjName, 1);
+				}
+			}
+		}
 	}
 }
 

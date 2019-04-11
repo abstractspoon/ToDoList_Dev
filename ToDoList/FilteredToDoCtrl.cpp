@@ -1501,6 +1501,10 @@ BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, cons
 		if (CTabbedToDoCtrl::GetAllTasks(tasks))
 		{
 			AddGlobalsToTaskFile(tasks, mapAttrib);
+			
+			if (mapAttrib.Has(TDCA_PROJECTNAME))
+				tasks.SetProjectName(m_sProjectName);
+
 			return TRUE;
 		}
 
