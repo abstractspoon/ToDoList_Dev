@@ -326,35 +326,28 @@ namespace HTMLContentControl
 
 			if ((element != null) && (element.TagName.Equals("A")))
 			{
-				String href = element.GetAttribute("href"), tooltip = String.Empty;
+				String href = element.GetAttribute("href"), tooltip = href;
 
 				if (NeedLinkTooltip != null)
 				{
 					var args = new NeedLinkTooltipEventArgs(href);
 					NeedLinkTooltip(this, args);
-	
-					tooltip = args.tooltip;
+
+					if (!String.IsNullOrWhiteSpace(args.tooltip))
+						tooltip = args.tooltip;
 				}
 
-				// Prevent setting the tooltip causing a text change notification
-				m_TextChangeTimer.Stop();
-
-				if (!String.IsNullOrEmpty(tooltip))
+				if (!tooltip.Equals(element.GetAttribute("title")))
 				{
+					// Prevent setting the tooltip causing a text change notification
+					m_TextChangeTimer.Stop();
+
 					element.SetAttribute("title", tooltip);
-				}
-				else if (String.IsNullOrEmpty(element.GetAttribute("title")))
-				{
-					element.SetAttribute("title", href);
-				}
+					m_PrevTextChange = InnerHtml;
 
-				m_PrevTextChange = InnerHtml;
-				m_TextChangeTimer.Start();
+					m_TextChangeTimer.Start();
+				}
 			}
 		}
-
 	}
-
-
-
 }
