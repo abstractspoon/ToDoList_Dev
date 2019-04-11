@@ -345,7 +345,6 @@ int CTDLTaskIconDlg::FindListItem(int nImage) const
 	
 	lvfi.lParam = nImage;
 	lvfi.flags = LVFI_PARAM;
-	lvfi.vkDirection = VK_DOWN;
 	
 	return m_lcIcons.FindItem(&lvfi);
 }
@@ -377,16 +376,78 @@ void CTDLTaskIconDlg::OnEditlabel()
 
 BOOL CTDLTaskIconDlg::PreTranslateMessage(MSG* pMsg) 
 {
-	int nItem = m_lcIcons.GetNextItem(-1, LVNI_SELECTED);
-
-	if (nItem != -1 && pMsg->message == WM_KEYUP && pMsg->wParam == VK_F2)
+	if (pMsg->message == WM_KEYUP)
 	{
-		m_lcIcons.SetFocus();
-		m_lcIcons.EditLabel(nItem);
-		return TRUE;
+		int nItem = m_lcIcons.GetNextItem(-1, LVNI_SELECTED);
+
+		switch (pMsg->wParam)
+		{
+		case VK_F2:
+			if (nItem != -1)
+			{
+				m_lcIcons.SetFocus();
+				m_lcIcons.EditLabel(nItem);
+				return TRUE;
+			}
+			break;
+		}
 	}
-	
+	else if (pMsg->message == WM_KEYDOWN)
+	{
+		switch (pMsg->wParam)
+		{
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			{
+				// List View seems to assume that items beginning with the
+				// same letter will be contiguous and so it stops as soon
+				// as the first character changes. Unfortunately our numbered
+				// icons are sorted 'naturally' and so the default searching
+				// is broken.
+				int nSelItem = m_lcIcons.GetNextItem(-1, LVNI_SELECTED);
+				int nNumItem = m_lcIcons.GetItemCount();
+
+				if (SelectNextMatch((TCHAR)pMsg->wParam, nSelItem + 1, nNumItem - 1))
+					return TRUE;
+
+				// Wrap around
+				if (SelectNextMatch((TCHAR)pMsg->wParam, 0, nSelItem - 1))
+					return TRUE;
+			}
+			break;
+		}
+	}
+
+	// all else
 	return CTDLDialog::PreTranslateMessage(pMsg);
+}
+
+BOOL CTDLTaskIconDlg::SelectNextMatch(TCHAR cKeypress, int nFrom, int nTo)
+{
+	ASSERT(nFrom <= nTo);
+	ASSERT(nTo < m_lcIcons.GetItemCount());
+
+	for (int nItem = nFrom; nItem <= nTo; nItem++)
+	{
+		if (Misc::First(m_lcIcons.GetItemText(nItem, 0)) == cKeypress)
+		{
+			m_lcIcons.SetItemState(-1, 0, (LVIS_FOCUSED | LVIS_SELECTED));
+			m_lcIcons.SetItemState(nItem, (LVIS_FOCUSED | LVIS_SELECTED), (LVIS_FOCUSED | LVIS_SELECTED));
+			m_lcIcons.EnsureVisible(nItem, FALSE);
+
+			return TRUE;
+		}
+	}
+
+	return FALSE;
 }
 
 BOOL CTDLTaskIconDlg::OnEraseBkgnd(CDC* pDC) 

@@ -111,6 +111,11 @@ CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 		case TDCCA_BOOL:
 		case TDCCA_ICON:
 			break;
+
+		default:
+			// Unknown/unhandled data type
+			ASSERT(0);
+			return NULL;
 		}
 	}
 	else if (bFilter)
@@ -593,25 +598,23 @@ BOOL CTDCCustomAttributeHelper::RebuildControls(const CTDCCustomAttribDefinition
 				ctrl.nCtrlID = nID++;
 				ctrl.nLabelID = nID++;
 				
-				pLabel = CreateAttributeLabel(attribDef, pParent, ctrl.nLabelID, FALSE);
-				ASSERT_VALID(pLabel);
-				
 				pCtrl = CreateAttribute(attribDef, ilImages, pParent, ctrl.nCtrlID, FALSE, bFilter, bMultiSelectionFilter);
-				ASSERT_VALID(pCtrl);
+
+				if (pCtrl)
+					pLabel = CreateAttributeLabel(attribDef, pParent, ctrl.nLabelID, FALSE);
 
 				// Buddy control
-				BOOL bWantsBuddy = AttributeWantsBuddy(attribDef);
+				BOOL bWantsBuddy = (pCtrl && pLabel && AttributeWantsBuddy(attribDef));
 
 				if (bWantsBuddy)
 				{
 					ctrl.nBuddyCtrlID = nID++;
 					ctrl.nBuddyLabelID = nID++;
 					
-					pBuddyLabel = CreateAttributeLabel(attribDef, pParent, ctrl.nBuddyLabelID, TRUE);
-					ASSERT_VALID(pLabel);
-					
 					pBuddyCtrl = CreateAttribute(attribDef, ilImages, pParent, ctrl.nBuddyCtrlID, TRUE, bFilter, bMultiSelectionFilter);
-					ASSERT_VALID(pCtrl);
+
+					if (pBuddyCtrl)
+						pBuddyLabel = CreateAttributeLabel(attribDef, pParent, ctrl.nBuddyLabelID, TRUE);
 				}					
 				
 				if (!pCtrl || !pLabel || (bWantsBuddy && (!pBuddyCtrl || !pBuddyLabel)))
@@ -622,14 +625,15 @@ BOOL CTDCCustomAttributeHelper::RebuildControls(const CTDCCustomAttribDefinition
 					delete pBuddyCtrl;
 					delete pBuddyLabel;
 
-					return FALSE;
+					// Make resilient to opening newer tasklists 
+					// with data types unknown to us
+					continue;
 				}
 
 				// insert after nCtrlIDPos
 				pLabel->SetWindowPos(pInsertAfter, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW);
 				pCtrl->SetWindowPos(pLabel, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW);
-
-
+				
 				if (bWantsBuddy)
 				{
 					// insert after nCtrlIDPos

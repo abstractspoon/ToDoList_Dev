@@ -1978,14 +1978,20 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.xml")), 177520, TRUE);
 	}
 
-	if (FileMisc::CompareVersions(szPrevVer, _T("7.2.10")) < 0)
+	if (FileMisc::CompareVersions(szPrevVer, _T("7.2.11")) < 0)
 	{
 		// remove experimental manifest
 		FileMisc::DeleteFileBySize(sAppFolder + _T("\\ToDoList.exe.4K.manifest"), 1153, TRUE);
 
 		// Rename 'Tasklists' resource folder
 		CString sExamples = FileMisc::GetAppResourceFolder(_T("Resources\\Examples"));
-		FileMisc::MoveFolder(sTasklists, sExamples, FMDF_SUBFOLDERS | FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
+		FileMisc::CreateFolder(sExamples);
+
+		FileMisc::MoveFile(sTasklists + _T("\\Introduction.tdl"), sExamples + _T("\\Introduction.tdl"), TRUE, TRUE);
+		FileMisc::MoveFile(sTasklists + _T("\\ToDoListDocumentation.tdl"), sExamples + _T("\\ToDoListDocumentation.tdl"), TRUE, TRUE);
+
+		// Intentionally use raw API call so it will fail if any files remain in the folder
+		RemoveDirectory(sTasklists);
 
 		// Rename/move install instructions
 		CString sResources = FileMisc::GetAppResourceFolder();

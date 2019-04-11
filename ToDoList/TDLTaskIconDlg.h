@@ -78,6 +78,7 @@ protected:
 	int FindListItem(int nImage) const;
 	void EnableDisable();
 	CString GetImageName(int iImage) const; 
+	BOOL SelectNextMatch(TCHAR cKeypress, int nFrom, int nTo);
 
 	static int CALLBACK SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 
 };
