@@ -1046,6 +1046,9 @@
     <None Include="res\reset_elapsed.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\search_prefs.ico">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

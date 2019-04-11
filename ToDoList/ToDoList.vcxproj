@@ -769,6 +769,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\plus.ico" />
     <None Include="res\prefs_dlg_std.ico" />
     <None Include="res\reset_elapsed.ico" />
+    <None Include="res\search_prefs.ico" />
     <None Include="res\shield.ico" />
     <None Include="res\simpletext.ico" />
     <None Include="res\social_toolbar.bmp" />
