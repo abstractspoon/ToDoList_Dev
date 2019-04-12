@@ -5,7 +5,7 @@
 #include "pluginhelpers.h"
 #include "Preferences.h"
 
-#include "..\..\ToDoList_Dev\Interfaces\IPreferences.h"
+#include <Interfaces\IPreferences.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

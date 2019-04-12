@@ -54,6 +54,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;PLUGINHELPERS_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -64,15 +65,11 @@
       <Command>mkdir "$(SolutionDir)$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
 
-mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList"
-mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
-copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
+mkdir "$(SolutionDir)..\Core\ToDoList"
+mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 
-mkdir "$(SolutionDir)..\ToDoList_7.2\ToDoList"
-mkdir "$(SolutionDir)..\ToDoList_7.2\ToDoList\unicode_$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)..\ToDoList_7.2\ToDoList\unicode_$(ConfigurationName)\"
-copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unicode_$(ConfigurationName)\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -84,6 +81,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unico
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGINHELPERS_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -96,15 +94,11 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unico
       <Command>mkdir "$(SolutionDir)$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
 
-mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList"
-mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
-copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
+mkdir "$(SolutionDir)..\Core\ToDoList"
+mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 
-mkdir "$(SolutionDir)..\ToDoList_7.2\ToDoList"
-mkdir "$(SolutionDir)..\ToDoList_7.2\ToDoList\unicode_$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)..\ToDoList_7.2\ToDoList\unicode_$(ConfigurationName)\"
-copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unicode_$(ConfigurationName)\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

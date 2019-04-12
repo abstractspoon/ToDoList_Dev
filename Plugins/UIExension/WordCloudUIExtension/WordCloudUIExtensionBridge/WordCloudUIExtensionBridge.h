@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////
 
-#include "..\..\..\..\ToDoList_Dev\Interfaces\IUIExtension.h"
+#include <Interfaces\IUIExtension.h>
 
 #include <vcclr.h>
 

@@ -90,15 +90,11 @@
     <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
 
-mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList"
-mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
-copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
+mkdir "$(SolutionDir)..\Core\ToDoList"
+mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 
-mkdir "$(SolutionDir)..\ToDoList_7.2\ToDoList"
-mkdir "$(SolutionDir)..\ToDoList_7.2\ToDoList\unicode_$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)..\ToDoList_7.2\ToDoList\unicode_$(ConfigurationName)\"
-copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unicode_$(ConfigurationName)\"
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -261,3 +261,4 @@ paket-files/
 *.ini
 *.zip
 *.bak
+*.vsscc

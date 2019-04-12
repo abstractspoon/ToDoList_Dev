@@ -49,6 +49,7 @@
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);_EXPORTING;_UNICODE;UNICODE</PreprocessorDefinitions>
       <CompileAsManaged>true</CompileAsManaged>
       <AdditionalUsingDirectories>..\..\..\Debug</AdditionalUsingDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -56,10 +57,10 @@
     <PostBuildEvent>
       <Command>mkdir "$(SolutionDir)$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
-mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList"
-mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
-copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
+mkdir "$(SolutionDir)..\Core\ToDoList"
+mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -73,6 +74,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unico
       <CompileAsManaged>true</CompileAsManaged>
       <ExceptionHandling>Async</ExceptionHandling>
       <AdditionalUsingDirectories>..\..\..\Release</AdditionalUsingDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -82,10 +84,10 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unico
     <PostBuildEvent>
       <Command>mkdir "$(SolutionDir)$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
-mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList"
-mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
-copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
+mkdir "$(SolutionDir)..\Core\ToDoList"
+mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "3rdParty"=..\3rdParty\3rdParty.dsp - Package Owner=<4>
+Project: "3rdParty"=.\3rdParty\3rdParty.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -15,7 +15,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "BurndownExt"=..\BurndownExt\BurndownExt.dsp - Package Owner=<4>
+Project: "BurndownExt"=.\BurndownExt\BurndownExt.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -33,7 +33,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "CalendarExt"=..\CalendarExt\CalendarExt.dsp - Package Owner=<4>
+Project: "CalendarExt"=.\CalendarExt\CalendarExt.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -51,7 +51,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "EncryptDecrypt"=..\EncryptDecrypt\EncryptDecrypt.dsp - Package Owner=<4>
+Project: "EncryptDecrypt"=.\EncryptDecrypt\EncryptDecrypt.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -66,7 +66,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "FMindImportExport"=..\FMindImportExport\FMindImportExport.dsp - Package Owner=<4>
+Project: "FMindImportExport"=.\FMindImportExport\FMindImportExport.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -84,7 +84,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "FtpStorage"=..\FtpStorage\FtpStorage.dsp - Package Owner=<4>
+Project: "FtpStorage"=.\FtpStorage\FtpStorage.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -102,7 +102,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "GPExport"=..\GPExport\GPExport.dsp - Package Owner=<4>
+Project: "GPExport"=.\GPExport\GPExport.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -120,7 +120,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "GanttChartExt"=..\GanttChartExt\GanttChartExt.dsp - Package Owner=<4>
+Project: "GanttChartExt"=.\GanttChartExt\GanttChartExt.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -138,7 +138,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "Interfaces"=..\Interfaces\Interfaces.dsp - Package Owner=<4>
+Project: "Interfaces"=.\Interfaces\Interfaces.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -150,25 +150,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "KanbanBoard"=..\KanbanBoard\KanbanBoard.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name Shared
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name 3rdParty
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "MLOImport"=..\MLOImport\MLOImport.dsp - Package Owner=<4>
+Project: "KanbanBoard"=.\KanbanBoard\KanbanBoard.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -186,7 +168,25 @@ Package=<4>
 
 ###############################################################################
 
-Project: "MySpellCheck"=..\MySpellCheck\MySpellCheck.dsp - Package Owner=<4>
+Project: "MLOImport"=.\MLOImport\MLOImport.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "MySpellCheck"=.\MySpellCheck\MySpellCheck.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -201,7 +201,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "PlainTextImport"=..\PlainTextImport\PlainTextImport.dsp - Package Owner=<4>
+Project: "PlainTextImport"=.\PlainTextImport\PlainTextImport.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -219,7 +219,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "RTFContentCtrl"=..\RTFContentCtrl\RTFContentCtrl.dsp - Package Owner=<4>
+Project: "RTFContentCtrl"=.\RTFContentCtrl\RTFContentCtrl.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -240,7 +240,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "Shared"=..\Shared\Shared.dsp - Package Owner=<4>
+Project: "Shared"=.\Shared\Shared.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -252,7 +252,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "TDLTest"=..\TDLTest\TDLTest.dsp - Package Owner=<4>
+Project: "TDLTest"=.\TDLTest\TDLTest.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -270,7 +270,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "TDLTransEdit"=..\TDLTransEdit\TDLTransEdit.dsp - Package Owner=<4>
+Project: "TDLTransEdit"=.\TDLTransEdit\TDLTransEdit.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -291,7 +291,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "TDLUninstall"=..\TDLUninstall\TDLUninstall.dsp - Package Owner=<4>
+Project: "TDLUninstall"=.\TDLUninstall\TDLUninstall.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -309,7 +309,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "TDLUpdate"=..\TDLUpdate\TDLUpdate.dsp - Package Owner=<4>
+Project: "TDLUpdate"=.\TDLUpdate\TDLUpdate.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -327,7 +327,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ToDoList"=.\ToDoList.dsp - Package Owner=<4>
+Project: "ToDoList"=.\ToDoList\ToDoList.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -408,7 +408,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "TransText"=..\TransText\TransText.dsp - Package Owner=<4>
+Project: "TransText"=.\TransText\TransText.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -426,7 +426,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "WorkloadExt"=..\WorkloadExt\WorkloadExt.dsp - Package Owner=<4>
+Project: "WorkloadExt"=.\WorkloadExt\WorkloadExt.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -444,7 +444,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "iCalImportExport"=..\iCalImportExport\iCalImportExport.dsp - Package Owner=<4>
+Project: "iCalImportExport"=.\iCalImportExport\iCalImportExport.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

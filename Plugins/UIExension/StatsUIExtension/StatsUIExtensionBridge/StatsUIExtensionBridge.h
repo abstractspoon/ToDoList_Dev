@@ -5,7 +5,7 @@
 // EXPORTERBRIDGE_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 
-#include "..\..\..\..\ToDoList_Dev\Interfaces\IUIExtension.h"
+#include <Interfaces\IUIExtension.h>
 
 #include <vcclr.h>
 using namespace StatsUIExtension;
