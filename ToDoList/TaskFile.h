@@ -240,7 +240,6 @@ public:
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList16 implementation 
-	
 	bool IsTaskLocked(HTASKITEM hTask, bool bCalc) const;
 	bool SetTaskLock(HTASKITEM hTask, bool bLocked);
 	bool IsTaskFlagged(HTASKITEM hTask, bool bCalc) const;
