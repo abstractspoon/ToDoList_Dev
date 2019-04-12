@@ -1,0 +1,68 @@
+Debug/*
+Release/*
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+*.metagen
+*.exp
+*.ilk
+*.pdb
+*.ini
+*.suo
+*.ipch
+*.tlog
+*.log
+*.bi
+*.lastbuildstate
+*.unsuccessfulbuild
+*.cache
+*.txt
+*.idb
+*.sdf
+*.opensdf
+*.res
+*.manifest
+*.csv
+*.xml
+*.zip
+*.tdl
+*.force
+*.aps
+*.bak
+*.aps
+*.nupkg
+*._
+*.db
+*.opendb
+*.db-wal
+*.db-shm
+*.ide
+*.CopyComplete
+*.aps
+*.resources

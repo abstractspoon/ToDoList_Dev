@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{34649D7D-04A9-4092-AD0B-F7022C123FD7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Gma.CodeCloud.Controls</RootNamespace>
+    <AssemblyName>Gma.CodeCloud.Controls</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CloudControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="GdiGraphicEngine.cs" />
+    <Compile Include="Geometry\BaseLayout.cs" />
+    <Compile Include="Geometry\DataStructures\QuadTree.cs" />
+    <Compile Include="Geometry\DataStructures\QuadTreeNode.cs" />
+    <Compile Include="Geometry\IGraphicEgine.cs" />
+    <Compile Include="Geometry\ILayout.cs" />
+    <Compile Include="Geometry\LayoutItem.cs" />
+    <Compile Include="Geometry\SpiralLayout.cs" />
+    <Compile Include="Geometry\TypewriterLayout.cs" />
+    <Compile Include="LayoutFactory.cs" />
+    <Compile Include="LayoutType.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TextAnalyses\Processing\IWord.cs" />
+    <Compile Include="TextAnalyses\Processing\Word.cs" />
+    <Compile Include="TextAnalyses\Processing\WordExtensions.cs" />
+    <Compile Include="TextAnalyses\Processing\WordGroup.cs" />
+    <Compile Include="TextAnalyses\Blacklist\CommonBlacklist.cs" />
+    <Compile Include="TextAnalyses\Blacklist\En\CommonWords.cs" />
+    <Compile Include="TextAnalyses\Stemmers\En\PorterStem.cs" />
+    <Compile Include="TextAnalyses\Stemmers\En\PorterStemmer.cs" />
+    <Compile Include="TextAnalyses\Extractors\BaseExtractor.cs" />
+    <Compile Include="TextAnalyses\Extractors\FileExtractor.cs" />
+    <Compile Include="TextAnalyses\Blacklist\IBlacklist.cs" />
+    <Compile Include="TextAnalyses\Extractors\IProgressIndicator.cs" />
+    <Compile Include="TextAnalyses\Stemmers\IWordStemmer.cs" />
+    <Compile Include="TextAnalyses\Blacklist\NullBlacklist.cs" />
+    <Compile Include="TextAnalyses\Stemmers\NullStemmer.cs" />
+    <Compile Include="TextAnalyses\Extractors\UriExtractor.cs" />
+    <Compile Include="TextAnalyses\Extractors\StringExtractor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CloudControl.resx">
+      <DependentUpon>CloudControl.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
+
+mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList"
+mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
+copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
+
+mkdir "$(SolutionDir)..\ToDoList_7.2\ToDoList"
+mkdir "$(SolutionDir)..\ToDoList_7.2\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\ToDoList_7.2\ToDoList\unicode_$(ConfigurationName)\"
+copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unicode_$(ConfigurationName)\"
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
