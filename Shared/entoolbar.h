@@ -38,6 +38,16 @@ public:
 	int Resize(int cx, CPoint ptTopLeft = CPoint(0, 0));
 	int GetMinReqLength() const; // single row
 
+	BOOL IsItemSeparator(int nPos) const;
+	BOOL LastItemIsSeparator() const;
+	BOOL AppendSeparator();
+	BOOL InsertSeparator(int nPos);
+	int InsertSeparatorAfter(UINT nCmdID); // returns pos
+	BOOL DeleteLastItem();
+	BOOL DeleteItem(int nPos);
+	BOOL SetItemWidth(int nPos, int nWidth, CRect& rect);
+	BOOL SetItemWidth(int nPos, int nWidth);
+
 	// Attributes
 protected:
 	CEnImageList m_ilDisabled, m_ilNormal;

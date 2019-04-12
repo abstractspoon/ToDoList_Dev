@@ -512,7 +512,7 @@ int CEnToolBar::EstimateHeightRequired(int cx) const
 
 int CEnToolBar::GetMinReqLength() const
 {
-	int nLen = (m_cxLeftBorder + m_cxLeftBorder);
+	int nLen = (m_cxLeftBorder + m_cxRightBorder);
 	int nBtn = GetButtonCount();
 
 	while (nBtn--)
@@ -524,6 +524,86 @@ int CEnToolBar::GetMinReqLength() const
 	}
 
 	return nLen;
+}
+
+BOOL CEnToolBar::DeleteLastItem()
+{
+	return DeleteItem(GetToolBarCtrl().GetButtonCount() - 1);
+}
+
+BOOL CEnToolBar::DeleteItem(int nPos)
+{
+	if ((nPos < 0) || (nPos >= GetToolBarCtrl().GetButtonCount()))
+		return FALSE;
+
+	return GetToolBarCtrl().DeleteButton(nPos);
+}
+
+BOOL CEnToolBar::LastItemIsSeparator() const
+{
+	return IsItemSeparator(GetToolBarCtrl().GetButtonCount() - 1);
+}
+
+BOOL CEnToolBar::SetItemWidth(int nPos, int nWidth, CRect& rect)
+{
+	TBBUTTONINFO tbi;
+	tbi.cbSize = sizeof(TBBUTTONINFO);
+	tbi.cx = (WORD)nWidth;
+	tbi.dwMask = TBIF_SIZE;
+
+	if (!GetToolBarCtrl().SetButtonInfo(nPos, &tbi))
+		return FALSE;
+
+	GetToolBarCtrl().GetItemRect(nPos, &rect);
+	return TRUE;
+}
+
+BOOL CEnToolBar::SetItemWidth(int nPos, int nWidth)
+{
+	CRect rUnused;
+	return SetItemWidth(nPos, nWidth, rUnused);
+}
+
+BOOL CEnToolBar::IsItemSeparator(int nPos) const
+{
+	return ((GetButtonStyle(nPos) & TBSTYLE_SEP) == TBSTYLE_SEP);
+}
+
+BOOL CEnToolBar::AppendSeparator()
+{
+	if (LastItemIsSeparator())
+		return FALSE;
+
+	return InsertSeparator(-1);
+}
+
+BOOL CEnToolBar::InsertSeparator(int nPos)
+{
+	if (nPos == -1)
+	{
+		nPos = GetToolBarCtrl().GetButtonCount();
+	}
+	else if ((nPos < 0) || (nPos > GetToolBarCtrl().GetButtonCount()))
+	{
+		return FALSE;
+	}
+
+	TBBUTTON tbbSep = { 0, nPos, 0, TBSTYLE_SEP, 0, NULL };
+
+	return GetToolBarCtrl().InsertButton(nPos, &tbbSep);
+}
+
+int CEnToolBar::InsertSeparatorAfter(UINT nCmdID)
+{
+	int nPos = CommandToIndex(nCmdID);
+
+	if (nPos == -1)
+		return FALSE;
+
+	if (!InsertSeparator(++nPos))
+		return -1;
+
+	return nPos;
 }
 
 int CEnToolBar::EstimateRowsRequired(int cx) const
