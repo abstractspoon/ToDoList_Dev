@@ -958,8 +958,6 @@ BOOL CKanbanColumnCtrl::GetLabelEditRect(LPRECT pEdit)
 		return FALSE;
 	}
 
-	ASSERT(GetSelectedCount() == 1);
-
 	HTREEITEM hti = GetSelectedItem();
 	ASSERT(hti);
 
@@ -1078,7 +1076,7 @@ void CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 		hti = htiNext;
 	}
 
-	ASSERT(m_mapItems.GetCount() == GetCount());
+	ASSERT(m_mapItems.GetCount() == (int)GetCount());
 }
 
 int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
