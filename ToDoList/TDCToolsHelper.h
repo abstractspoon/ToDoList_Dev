@@ -14,6 +14,8 @@
 
 #include "..\shared\menuiconmgr.h"
 
+//////////////////////////////////////////////////////////////////////
+
 struct USERTOOL
 {
 	CString sToolName;
@@ -37,10 +39,17 @@ struct USERTOOLARGS
 	CTDCCustomAttributeDataMap mapTaskCustData;
 };
 
+//////////////////////////////////////////////////////////////////////
+
 class CSysImageList;
 class CPreferencesDlg;
+class CEnToolBar;
+
+//////////////////////////////////////////////////////////////////////
 
 typedef CArray<USERTOOL, USERTOOL&> CUserToolArray;
+
+//////////////////////////////////////////////////////////////////////
 
 class CTDCToolsHelper  
 {
@@ -51,8 +60,8 @@ public:
 	void UpdateMenu(CCmdUI* pCmdUI, const CUserToolArray& tools, CMenuIconMgr& iconMgr);
 	BOOL RunTool(const USERTOOL& tool, const USERTOOLARGS& args);
 	BOOL TestTool(const USERTOOL& tool, const USERTOOLARGS& args);
-	void AppendToolsToToolbar(const CUserToolArray& aTools, CToolBar& toolbar, UINT nCmdAfter);
-	void RemoveToolsFromToolbar(CToolBar& toolbar, UINT nCmdAfter);
+	void AppendToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter);
+	void RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter);
 	
 protected:
 	UINT m_nStartID;

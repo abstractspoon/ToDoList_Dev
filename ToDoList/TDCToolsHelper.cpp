@@ -16,6 +16,7 @@
 #include "..\shared\misc.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\messagebox.h"
+#include "..\shared\entoolbar.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -33,7 +34,11 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDCToolsHelper::CTDCToolsHelper(BOOL bTDLEnabled, UINT nStart, int nSize) : m_nStartID(nStart), m_nSize(nSize), m_bTDLEnabled(bTDLEnabled)
+CTDCToolsHelper::CTDCToolsHelper(BOOL bTDLEnabled, UINT nStart, int nSize) 
+	: 
+	m_nStartID(nStart), 
+	m_nSize(nSize), 
+	m_bTDLEnabled(bTDLEnabled)
 {
 	
 }
@@ -341,7 +346,7 @@ BOOL CTDCToolsHelper::ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, const CSt
 	return tcp.ReplaceArgument(sName, sArgValue);
 }
 
-void CTDCToolsHelper::RemoveToolsFromToolbar(CToolBar& toolbar, UINT nCmdAfter)
+void CTDCToolsHelper::RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter)
 {
 	int nRemoved = 0;
 	
@@ -369,12 +374,14 @@ void CTDCToolsHelper::RemoveToolsFromToolbar(CToolBar& toolbar, UINT nCmdAfter)
 	// remove separator
 	if (nRemoved)
 	{
-		int nSep = toolbar.CommandToIndex(nCmdAfter) + 1;
-		toolbar.GetToolBarCtrl().DeleteButton(nSep);
+		if (nCmdAfter > 0)
+			toolbar.DeleteItem(toolbar.CommandToIndex(nCmdAfter) + 1);
+		else
+			toolbar.GetToolBarCtrl().DeleteButton(0);
 	}
 }
 
-void CTDCToolsHelper::AppendToolsToToolbar(const CUserToolArray& aTools, CToolBar& toolbar, UINT nCmdAfter)
+void CTDCToolsHelper::AppendToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter)
 {
 	// remove tools first
 	RemoveToolsFromToolbar(toolbar, nCmdAfter);
@@ -417,10 +424,7 @@ void CTDCToolsHelper::AppendToolsToToolbar(const CUserToolArray& aTools, CToolBa
 		
 		// add a separator if any buttons added
 		if (nAdded)
-		{
-			TBBUTTON tbb = { -1, 0, 0, TBSTYLE_SEP, 0, 0, (UINT)-1 };
-			toolbar.GetToolBarCtrl().InsertButton(nStartPos, &tbb);
-		}
+			toolbar.InsertSeparator(nStartPos);
 	}
 }
 

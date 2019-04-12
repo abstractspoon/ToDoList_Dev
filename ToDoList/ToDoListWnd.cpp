@@ -184,8 +184,8 @@ CToDoListWnd::CToDoListWnd()
 	m_bShowProjectName(TRUE),
 	m_bQueryOpenAllow(FALSE),
 	m_bPasswordPrompting(TRUE),
-	m_bShowMainToolbar(TRUE),
-	m_bShowCustomToolbar(TRUE),
+	m_bShowingMainToolbar(TRUE),
+	m_bShowingCustomToolbar(TRUE),
 	m_bReloading(FALSE),
 	m_hwndLastFocus(NULL),
 	m_bStartHidden(FALSE),
@@ -1269,7 +1269,7 @@ BOOL CToDoListWnd::InitMainToolbar()
 
 	UINT nStyle = (WS_CHILD | CBRS_ALIGN_TOP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | CBRS_TOOLTIPS);
 
-	if (m_bShowMainToolbar)
+	if (m_bShowingMainToolbar)
 		nStyle |= WS_VISIBLE;
 
 	if (!m_toolbarMain.CreateEx(this, (TBSTYLE_FLAT | TBSTYLE_WRAPABLE), nStyle))
@@ -1309,23 +1309,14 @@ BOOL CToDoListWnd::InitMainToolbar()
 	
 	// insert combobox for quick Find after Find Tasks button
 	int nPos = m_toolbarMain.CommandToIndex(ID_EDIT_FINDTASKS) + 1;
+	ASSERT(m_toolbarMain.IsItemSeparator(nPos));
 	
-	TBBUTTON tbbQuickFind = { 0, nPos, 0, TBSTYLE_SEP, 0, NULL };
-	TBBUTTON tbbSep = { 0, nPos + 1, 0, TBSTYLE_SEP, 0, NULL };
-	
-	m_toolbarMain.GetToolBarCtrl().InsertButton(nPos, &tbbQuickFind);
-	m_toolbarMain.GetToolBarCtrl().InsertButton(nPos + 1, &tbbSep);
-	
-	TBBUTTONINFO tbi;
-	tbi.cbSize = sizeof( TBBUTTONINFO );
-	tbi.cx = (WORD)GraphicsMisc::ScaleByDPIFactor(150);
-	tbi.dwMask = TBIF_SIZE;
-	
-	m_toolbarMain.GetToolBarCtrl().SetButtonInfo(nPos + 1, &tbi);
+	m_toolbarMain.InsertSeparator(nPos);
+	m_toolbarMain.InsertSeparator(nPos + 1);
 	
 	CRect rect;
-	m_toolbarMain.GetToolBarCtrl().GetItemRect(nPos + 1, &rect);
-
+	m_toolbarMain.SetItemWidth(nPos + 1, GraphicsMisc::ScaleByDPIFactor(150), rect);
+	
 	rect.top += QUICKFIND_VOFFSET;
 	rect.bottom += QUICKFIND_HEIGHT;
 	
@@ -1352,7 +1343,7 @@ BOOL CToDoListWnd::InitMainToolbar()
 
 BOOL CToDoListWnd::InitCustomToolbar()
 {
-	if (!m_bShowCustomToolbar || m_toolbarCustom.GetSafeHwnd())
+	if (!m_bShowingCustomToolbar || m_toolbarCustom.GetSafeHwnd())
 		return TRUE;
 
 	CToolbarButtonArray aTBButtons;
@@ -1389,12 +1380,12 @@ BOOL CToDoListWnd::InitCustomToolbar()
 
 void CToDoListWnd::OnUpdateQuickFind(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_bShowMainToolbar);
+	pCmdUI->Enable(m_bShowingMainToolbar);
 }
 
 void CToDoListWnd::OnQuickFind() 
 {
-	if (m_bShowMainToolbar)
+	if (m_bShowingMainToolbar)
 		m_cbQuickFind.SetFocus();
 }
 
@@ -2259,8 +2250,8 @@ void CToDoListWnd::SaveSettings()
 	// other settings
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ViewState"), m_nMaxState);
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowFilterBar"), m_bShowFilterBar);
-	prefs.WriteProfileInt(SETTINGS_KEY, _T("ToolbarOption"), m_bShowMainToolbar);
-	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowCustomToolbar"), m_bShowCustomToolbar);
+	prefs.WriteProfileInt(SETTINGS_KEY, _T("ToolbarOption"), m_bShowingMainToolbar);
+	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowCustomToolbar"), m_bShowingCustomToolbar);
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowProjectName"), m_bShowProjectName);
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowStatusBar"), m_bShowStatusBar);
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowTasklistBar"), m_bShowTasklistBar);
@@ -2288,7 +2279,8 @@ void CToDoListWnd::SaveSettings()
 LRESULT CToDoListWnd::OnUpdateUDTsInToolbar(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	Misc::ProcessMsgLoop();
-	UpdateUDTsInMainToolbar();
+	UpdateUDTsInToolbar(UDT_INIT);
+
 	return 0L;
 }
 
@@ -2516,8 +2508,8 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	// refresh toolbar 'tools' buttons unless minimized because
 	// we must handle it when we're first shown
-	if (m_bShowMainToolbar && (AfxGetApp()->m_nCmdShow != SW_SHOWMINIMIZED))
-		UpdateUDTsInMainToolbar();
+	if (AfxGetApp()->m_nCmdShow != SW_SHOWMINIMIZED)
+		UpdateUDTsInToolbar(UDT_INIT);
 
 	// current focus
 	PostMessage(WM_FW_FOCUSCHANGE, (WPARAM)::GetFocus(), 0L);
@@ -2563,16 +2555,16 @@ void CToDoListWnd::LoadSettings()
 	m_statusBar.ShowWindow(m_bShowStatusBar ? SW_SHOW : SW_HIDE);
 
 	// toolbars
-	m_bShowMainToolbar = prefs.GetProfileInt(SETTINGS_KEY, _T("ToolbarOption"), TRUE);
-	m_toolbarMain.ShowWindow(m_bShowMainToolbar ? SW_SHOW : SW_HIDE);
-	m_toolbarMain.EnableWindow(m_bShowMainToolbar);
+	m_bShowingMainToolbar = prefs.GetProfileInt(SETTINGS_KEY, _T("ToolbarOption"), TRUE);
+	m_toolbarMain.ShowWindow(m_bShowingMainToolbar ? SW_SHOW : SW_HIDE);
+	m_toolbarMain.EnableWindow(m_bShowingMainToolbar);
 
-	m_bShowCustomToolbar = prefs.GetProfileInt(SETTINGS_KEY, _T("ShowCustomToolbar"), TRUE);
+	m_bShowingCustomToolbar = prefs.GetProfileInt(SETTINGS_KEY, _T("ShowCustomToolbar"), TRUE);
 
 	if (m_toolbarCustom.GetSafeHwnd())
 	{
-		m_toolbarCustom.ShowWindow(m_bShowCustomToolbar ? SW_SHOW : SW_HIDE);
-		m_toolbarCustom.EnableWindow(m_bShowCustomToolbar);
+		m_toolbarCustom.ShowWindow(m_bShowingCustomToolbar ? SW_SHOW : SW_HIDE);
+		m_toolbarCustom.EnableWindow(m_bShowingCustomToolbar);
 	}
 
 	// tabbars
@@ -2966,11 +2958,11 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 	// Bevel below the toolbars
 	int nVPos = 0;
 
-	if (m_toolbarCustom.GetSafeHwnd() && m_bShowCustomToolbar)
+	if (m_toolbarCustom.GetSafeHwnd() && m_bShowingCustomToolbar)
 	{
 		nVPos = (CDialogHelper::GetChildRect(&m_toolbarCustom).bottom + 1);
 	}
-	else if (m_bShowMainToolbar)
+	else if (m_bShowingMainToolbar)
 	{
 		nVPos = m_toolbarMain.GetHeight();
 	}
@@ -5020,9 +5012,12 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 
 		// Custom toolbar
 		CToolbarButtonArray aOldButtons, aNewButtons;
+		int nNumOldBtns = oldPrefs.GetCustomToolbarButtons(aOldButtons);
+		int nNumNewBtns = newPrefs.GetCustomToolbarButtons(aNewButtons);
+		
+		BOOL bCustomToolbarChange = ((nNumNewBtns != nNumOldBtns) || !Misc::MatchAllT(aOldButtons, aNewButtons, TRUE));
 
-		if (oldPrefs.GetCustomToolbarButtons(aOldButtons) != newPrefs.GetCustomToolbarButtons(aNewButtons) ||
-			!Misc::MatchAllT(aOldButtons, aNewButtons, TRUE))
+		if (bCustomToolbarChange)
 		{
 			m_toolbarCustom.DestroyWindow();
 			InitCustomToolbar();
@@ -5044,12 +5039,18 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 		// Content controls
 		m_mgrContent.LoadPreferences(CPreferences(), _T("ContentControls"), TRUE);
 
-		// don't ask me for the full details on this but it seems as
-		// though the CSysImageList class is waiting to process a 
-		// message before we can switch image sizes so we put it
-		// right at the end after everything is done.
-		Misc::ProcessMsgLoop();
-		UpdateUDTsInMainToolbar();
+		// UDTs in toolbar
+		bCustomToolbarChange |= (oldPrefs.GetDisplayUDTsInToolbar() != newPrefs.GetDisplayUDTsInToolbar());
+
+		if (bCustomToolbarChange)
+		{
+			// don't ask me for the full details on this but it seems as
+			// though the CSysImageList class is waiting to process a 
+			// message before we can switch image sizes so we put it
+			// right at the end after everything is done.
+			Misc::ProcessMsgLoop();
+			UpdateUDTsInToolbar(UDT_PREFERENCES);
+		}
 	}
 	
 	// finally set or terminate the various status check timers
@@ -6124,12 +6125,12 @@ BOOL CToDoListWnd::CalcToDoCtrlRect(CRect& rect, int cx, int cy, BOOL bMaximized
 	CRect rTaskList(0, BEVEL, cx - BEVEL, cy);
 	
 	// toolbar
-	if (m_bShowMainToolbar) 
+	if (m_bShowingMainToolbar) 
  		rTaskList.top += m_toolbarMain.GetHeight();
 	
-	if (m_toolbarCustom.GetSafeHwnd() && m_bShowCustomToolbar) 
+	if (m_toolbarCustom.GetSafeHwnd() && m_bShowingCustomToolbar) 
 	{
-		BOOL bSeparateLine = (!m_bShowMainToolbar || ((m_toolbarMain.GetMinReqLength() + m_toolbarCustom.GetMinReqLength()) > cx));
+		BOOL bSeparateLine = (!m_bShowingMainToolbar || ((m_toolbarMain.GetMinReqLength() + m_toolbarCustom.GetMinReqLength()) > cx));
 
 		if (bSeparateLine)
 			rTaskList.top += (m_toolbarCustom.GetHeight() + BEVEL);
@@ -6207,7 +6208,7 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 	CRect rTaskList(0, BEVEL, cx - BEVEL, cy);
 	
 	// toolbar
-	if (m_bShowMainToolbar) // showing toolbar
+	if (m_bShowingMainToolbar) // showing toolbar
 		rTaskList.top += m_toolbarMain.Resize(cx);
 
 	// ensure m_cbQuickFind is positioned correctly
@@ -6232,17 +6233,25 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 	}
 
 	// Attempt to put the custom toolbar on the same line
-	if (m_toolbarCustom.GetSafeHwnd() && m_bShowCustomToolbar)
+	if (m_toolbarCustom.GetSafeHwnd() && m_bShowingCustomToolbar)
 	{
 		int nMainLen = m_toolbarMain.GetMinReqLength();
-		BOOL bSeparateLine = (!m_bShowMainToolbar || ((nMainLen + m_toolbarCustom.GetMinReqLength()) > cx));
+		BOOL bSeparateLine = (!m_bShowingMainToolbar || ((nMainLen + m_toolbarCustom.GetMinReqLength()) > cx));
 
 		if (bSeparateLine)
 		{
+			if (m_toolbarMain.LastItemIsSeparator())
+				m_toolbarMain.DeleteLastItem();
+
 			rTaskList.top += (m_toolbarCustom.Resize(cx, CPoint(0, rTaskList.top)) + BEVEL);
 		}
 		else
 		{
+			if (!m_toolbarMain.LastItemIsSeparator())
+				m_toolbarMain.AppendSeparator();
+
+			int nMainLen = m_toolbarMain.GetMinReqLength();
+
 			m_toolbarMain.Resize(nMainLen);
 			m_toolbarCustom.Resize(cx - nMainLen, CPoint(nMainLen, 0));
 		}
@@ -7084,7 +7093,7 @@ void CToDoListWnd::OnUpdateUserTool(CCmdUI* pCmdUI)
 		CTDCToolsHelper th(Prefs().GetEnableTDLExtension(), ID_TOOLS_USERTOOL1, MAX_NUM_TOOLS);
 		th.UpdateMenu(pCmdUI, aTools, m_mgrMenuIcons);
 	}
-	else if (m_bShowMainToolbar) 
+	else if (m_bShowingMainToolbar) 
 	{
 		int nTool = pCmdUI->m_nID - ID_TOOLS_USERTOOL1;
 		ASSERT (nTool >= 0 && nTool < MAX_NUM_TOOLS);
@@ -7490,10 +7499,13 @@ LRESULT CToDoListWnd::OnPostTranslateMenu(WPARAM /*wp*/, LPARAM lp)
 
 void CToDoListWnd::OnViewCustomToolbar() 
 {
-	m_bShowCustomToolbar = !m_bShowCustomToolbar;
+	m_bShowingCustomToolbar = !m_bShowingCustomToolbar;
 
-	m_toolbarCustom.ShowWindow(m_bShowCustomToolbar ? SW_SHOW : SW_HIDE);
-	m_toolbarCustom.EnableWindow(m_bShowCustomToolbar);
+	if (Prefs().GetDisplayUDTsInToolbar())
+		UpdateUDTsInToolbar(UDT_CUSTOMTOOLBAR);
+	
+	m_toolbarCustom.ShowWindow(m_bShowingCustomToolbar ? SW_SHOW : SW_HIDE);
+	m_toolbarCustom.EnableWindow(m_bShowingCustomToolbar);
 
 	Resize();
 	Invalidate(TRUE);
@@ -7501,10 +7513,13 @@ void CToDoListWnd::OnViewCustomToolbar()
 
 void CToDoListWnd::OnViewMainToolbar() 
 {
-	m_bShowMainToolbar = !m_bShowMainToolbar;
+	m_bShowingMainToolbar = !m_bShowingMainToolbar;
+
+	if (Prefs().GetDisplayUDTsInToolbar())
+		UpdateUDTsInToolbar(UDT_MAINTOOLBAR);
 	
-	m_toolbarMain.ShowWindow(m_bShowMainToolbar ? SW_SHOW : SW_HIDE);
-	m_toolbarMain.EnableWindow(m_bShowMainToolbar);
+	m_toolbarMain.ShowWindow(m_bShowingMainToolbar ? SW_SHOW : SW_HIDE);
+	m_toolbarMain.EnableWindow(m_bShowingMainToolbar);
 	
 	Resize();
 	Invalidate(TRUE);
@@ -7512,38 +7527,119 @@ void CToDoListWnd::OnViewMainToolbar()
 
 void CToDoListWnd::OnUpdateViewMainToolbar(CCmdUI* pCmdUI) 
 {
-	pCmdUI->SetCheck(m_bShowMainToolbar ? 1 : 0);
+	pCmdUI->SetCheck(m_bShowingMainToolbar ? 1 : 0);
 }
 
 void CToDoListWnd::OnUpdateViewCustomToolbar(CCmdUI* pCmdUI) 
 {
-	pCmdUI->SetCheck(m_bShowCustomToolbar ? 1 : 0);
+	pCmdUI->SetCheck(m_bShowingCustomToolbar ? 1 : 0);
 	pCmdUI->Enable(Prefs().HasCustomToolbar());
 }
 
-void CToDoListWnd::UpdateUDTsInMainToolbar()
+void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 {
-	CTDCToolsHelper th(Prefs().GetEnableTDLExtension(), ID_TOOLS_USERTOOL1, MAX_NUM_TOOLS);
-	
-	if (Prefs().GetDisplayUDTsInToolbar())
-	{
-		// then re-add
-		CUserToolArray aTools;
-		Prefs().GetUserTools(aTools);
-		
-		th.AppendToolsToToolbar(aTools, m_toolbarMain, ID_PREFERENCES);
+	const CPreferencesDlg& prefs = Prefs();
+	CTDCToolsHelper th(prefs.GetEnableTDLExtension(), ID_TOOLS_USERTOOL1, MAX_NUM_TOOLS);
 
-		// refresh tooltips
-		m_tbHelperMain.Release();
-		m_tbHelperMain.Initialize(&m_toolbarMain, this, &m_mgrShortcuts);
-	}
-	else // remove
+	BOOL bRemoveFromMainToolbar = FALSE, bRemoveFromCustomToolbar = FALSE;
+	BOOL bAddToMainToolbar = FALSE, bAddToCustomToolbar = FALSE;
+	BOOL bWantInToolbar = prefs.GetDisplayUDTsInToolbar();
+
+	switch (nChange)
 	{
+	case UDT_INIT:
+		if (m_bShowingMainToolbar)
+		{
+			bAddToMainToolbar = TRUE;
+		}
+		else // main toolbar hidden
+		{
+			bAddToCustomToolbar = m_bShowingCustomToolbar;
+		}
+		break;
+
+	case UDT_MAINTOOLBAR:
+		if (m_bShowingMainToolbar)
+		{
+			bAddToMainToolbar = TRUE;
+
+			// If custom toolbar was previously showing then
+			// it will have had the UDTs so we must remove them
+			bRemoveFromCustomToolbar = m_bShowingCustomToolbar;
+		}
+		else // hide main toolbar
+		{
+			bAddToCustomToolbar = m_bShowingCustomToolbar;
+
+			// Main toolbar previously had the UDTs so we must remove them
+			bRemoveFromMainToolbar = TRUE;
+		}
+		break;
+
+	case UDT_CUSTOMTOOLBAR:
+		if (m_bShowingMainToolbar)
+		{
+			// If main toolbar was already visible then
+			// it will already be showing the UDTs so nothing to be done
+		}
+		else if (m_bShowingCustomToolbar)
+		{
+			// Custom toolbar was previously hidden so we just need to add
+			bAddToCustomToolbar = TRUE;
+		}
+		else // hide custom toolbar
+		{
+			// Custom toolbar was previously visible so we just need to remove
+			bRemoveFromCustomToolbar = TRUE;
+		}
+		break;
+
+	case UDT_PREFERENCES:
+		if (m_bShowingMainToolbar)
+		{
+			bAddToMainToolbar = TRUE;
+
+			// Main toolbar previously had the UDTs so we must remove them
+			bRemoveFromMainToolbar = TRUE;
+		}
+		else // main toolbar hidden
+		{
+			bAddToCustomToolbar = m_bShowingCustomToolbar;
+
+			// Custom toolbar previously had the UDTs so we must remove them
+			bRemoveFromCustomToolbar = TRUE;
+		}
+		break;
+	}
+
+	if (bRemoveFromMainToolbar)
 		th.RemoveToolsFromToolbar(m_toolbarMain, ID_PREFERENCES);
+
+	if (bRemoveFromCustomToolbar)
+		th.RemoveToolsFromToolbar(m_toolbarCustom, prefs.GetLastCustomToolbarButtonID());
+
+	if (bWantInToolbar && (bAddToMainToolbar || bAddToCustomToolbar))
+	{
+		CUserToolArray aTools;
+		prefs.GetUserTools(aTools);
+
+		if (bAddToMainToolbar)
+		{
+			th.AppendToolsToToolbar(aTools, m_toolbarMain, ID_PREFERENCES);
+
+			// refresh tooltips
+			m_tbHelperMain.Release();
+			m_tbHelperMain.Initialize(&m_toolbarMain, this, &m_mgrShortcuts);
+		}
+		else
+		{
+			th.AppendToolsToToolbar(aTools, m_toolbarCustom, prefs.GetLastCustomToolbarButtonID());
+		}
 	}
 
 	// resize toolbar to accept the additional buttons
-	Resize();
+	if (bRemoveFromMainToolbar || bRemoveFromCustomToolbar || bAddToMainToolbar || bAddToCustomToolbar)
+		Resize();
 }
 
 void CToDoListWnd::OnSort() 

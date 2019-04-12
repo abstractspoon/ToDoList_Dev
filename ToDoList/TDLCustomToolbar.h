@@ -31,6 +31,11 @@ struct TOOLBARBUTTON
 		return ((nMenuID == tbOther.nMenuID) &&
 				(sImageID == tbOther.sImageID));
 	}
+
+	BOOL IsSeparator() const
+	{
+		return (nMenuID == 0);
+	}
 	
 	UINT nMenuID;
 	CString sImageID;

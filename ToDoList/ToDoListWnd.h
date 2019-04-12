@@ -140,8 +140,8 @@ protected:
 	BOOL m_bShowFilterBar;
 	BOOL m_bShowProjectName;
 	BOOL m_bShowStatusBar;
-	BOOL m_bShowMainToolbar;
-	BOOL m_bShowCustomToolbar;
+	BOOL m_bShowingMainToolbar;
+	BOOL m_bShowingCustomToolbar;
 	BOOL m_bShowTasklistBar;
 	BOOL m_bShowTreeListBar;
 	BOOL m_bInNewTask;
@@ -666,8 +666,16 @@ protected:
 
 	void ShowFindDialog(BOOL bShow = TRUE);
 	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
-	
-	void UpdateUDTsInMainToolbar();
+
+
+	enum UDTCHANGETYPE
+	{
+		UDT_INIT,
+		UDT_MAINTOOLBAR,
+		UDT_CUSTOMTOOLBAR,
+		UDT_PREFERENCES
+	};
+	void UpdateUDTsInToolbar(UDTCHANGETYPE nChange);
 	void PopulateToolArgs(USERTOOLARGS& args) const;
 
 	CFilteredToDoCtrl& GetToDoCtrl();
