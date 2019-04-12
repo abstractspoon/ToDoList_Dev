@@ -14,15 +14,13 @@ if NOT "%~1" == "" (
    )
 )
 
-if "%LATESTREPO%" == "" set LATESTREPO=%REPOROOT%\ToDoList_7.2
-
 ECHO LATESTREPO=%LATESTREPO%
 
-set DEVREPO=%REPOROOT%\ToDoList_Dev
+if "%LATESTREPO%" == "" exit
+
 set RESREPO=%REPOROOT%\ToDoList_Resources
 set PLUGINSREPO=%REPOROOT%\ToDoList_Plugins
 
-ECHO DEVREPO=%DEVREPO%
 ECHO RESREPO=%RESREPO%
 ECHO PLUGINSREPO=%PLUGINSREPO%
 
@@ -30,13 +28,13 @@ ECHO ON
 
 REM - Build Core App
 cd %LATESTREPO%
-"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList\ToDoList_All.dsw /MAKE "ALL - Win32 Unicode Release" 
+"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\Core\ToDoList_All.dsw /MAKE "ALL - Win32 Unicode Release" 
 
 REM - Build Plugins
 cd %PLUGINSREPO%
-"C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" .\ToDoList_Plugins.sln /Build "Release"
+"C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" .\Plugins\ToDoList_Plugins.sln /Build "Release"
 
 REM Allow caller to cancel
 pause
 
-CALL %DEVREPO%\BuildReleaseZip.bat %LATESTREPO%
+CALL %LATESTREPO%\BuildReleaseZip.bat %LATESTREPO%
