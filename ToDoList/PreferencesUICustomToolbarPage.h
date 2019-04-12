@@ -27,6 +27,7 @@ public:
 
 	BOOL HasToolbarButtons() const;
 	int GetToolbarButtons(CToolbarButtonArray& aButtons) const;
+	UINT GetLastCustomToolbarButtonID() const;
 
 protected:
 

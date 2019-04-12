@@ -241,6 +241,7 @@ public:
 	// CPreferencesUICustomToolbarPage
 	BOOL HasCustomToolbar() const { return m_pageUICustomToolbar.HasToolbarButtons(); }
 	int GetCustomToolbarButtons(CToolbarButtonArray& aButtons) const { return m_pageUICustomToolbar.GetToolbarButtons(aButtons); }
+	UINT GetLastCustomToolbarButtonID() const { return m_pageUICustomToolbar.GetLastCustomToolbarButtonID(); }
 
 	// CPreferencesUIVisibilityPage
 	void GetDefaultColumnEditFilterVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const { m_pageUIVisibility.GetColumnAttributeVisibility(vis); }

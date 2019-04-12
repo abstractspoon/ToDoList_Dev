@@ -66,6 +66,20 @@ void CTDLToolbarButtonListCtrl::SetButtons(const CToolbarButtonArray& aButtons)
 	m_aButtons.Copy(aButtons);
 }
 
+UINT CTDLToolbarButtonListCtrl::GetLastButtonID() const
+{
+	int nBtn = m_aButtons.GetSize();
+
+	while (nBtn--)
+	{
+		if (!m_aButtons[nBtn].IsSeparator())
+			return m_aButtons[nBtn].nMenuID;
+	}
+
+	// all else
+	return 0;
+}
+
 void CTDLToolbarButtonListCtrl::InitState()
 {
 	OverrideSelectionTheming(TRUE, TRUE);

@@ -150,6 +150,11 @@ int CPreferencesUICustomToolbarPage::GetToolbarButtons(CToolbarButtonArray& aBut
 	return m_ilcButtons.GetButtons(aButtons);
 }
 
+UINT CPreferencesUICustomToolbarPage::GetLastCustomToolbarButtonID() const
+{
+	return m_ilcButtons.GetLastButtonID();
+}
+
 void CPreferencesUICustomToolbarPage::OnOK()
 {
 	CPreferencesPageBase::OnOK();

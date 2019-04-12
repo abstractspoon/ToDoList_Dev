@@ -24,6 +24,7 @@ public:
 	BOOL HasButtons() const;
 	int GetButtons(CToolbarButtonArray& aButtons) const;
 	void SetButtons(const CToolbarButtonArray& aButtons);
+	UINT GetLastButtonID() const;
 
 	BOOL CanMoveSelectedButtonUp() const;
 	BOOL CanMoveSelectedButtonDown() const;
