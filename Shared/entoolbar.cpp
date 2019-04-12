@@ -534,7 +534,10 @@ BOOL CEnToolBar::DeleteLastItem()
 BOOL CEnToolBar::DeleteItem(int nPos)
 {
 	if ((nPos < 0) || (nPos >= GetToolBarCtrl().GetButtonCount()))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	return GetToolBarCtrl().DeleteButton(nPos);
 }
@@ -554,7 +557,7 @@ BOOL CEnToolBar::SetItemWidth(int nPos, int nWidth, CRect& rect)
 	if (!GetToolBarCtrl().SetButtonInfo(nPos, &tbi))
 		return FALSE;
 
-	GetToolBarCtrl().GetItemRect(nPos, &rect);
+	GetItemRect(nPos, &rect);
 	return TRUE;
 }
 
@@ -563,6 +566,21 @@ BOOL CEnToolBar::SetItemWidth(int nPos, int nWidth)
 	CRect rUnused;
 	return SetItemWidth(nPos, nWidth, rUnused);
 }
+
+int CEnToolBar::GetItemWidth(int nPos) const
+{
+	if ((nPos < 0) || (nPos >= GetToolBarCtrl().GetButtonCount()))
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	CRect rItem;
+	GetItemRect(nPos, &rItem);
+
+	return rItem.Width();
+}
+
 
 BOOL CEnToolBar::IsItemSeparator(int nPos) const
 {
@@ -703,7 +721,7 @@ int CEnToolBar::Resize(int cx, CPoint ptTopLeft)
 		MoveWindow(rToolbar);
 	}
 
-	return nRealHeight;
+	return GetHeight();
 }
 
 int CEnToolBar::GetHeight() const

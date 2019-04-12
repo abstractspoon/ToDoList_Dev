@@ -47,6 +47,7 @@ public:
 	BOOL DeleteItem(int nPos);
 	BOOL SetItemWidth(int nPos, int nWidth, CRect& rect);
 	BOOL SetItemWidth(int nPos, int nWidth);
+	int GetItemWidth(int nPos) const;
 
 	// Attributes
 protected:

@@ -122,6 +122,7 @@ protected:
 	CTDLThreadedExporterWnd m_wndExport;
 
 	int m_nLastSelItem; // just for flicker-free todoctrl switching
+	int m_nToolbarEndSepWidth;
 
 	CShortcutManager m_mgrShortcuts;
 	CTDCImportExportMgr m_mgrImportExport;

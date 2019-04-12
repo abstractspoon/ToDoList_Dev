@@ -1310,6 +1310,9 @@ BOOL CToDoListWnd::InitMainToolbar()
 	// insert combobox for quick Find after Find Tasks button
 	int nPos = m_toolbarMain.CommandToIndex(ID_EDIT_FINDTASKS) + 1;
 	ASSERT(m_toolbarMain.IsItemSeparator(nPos));
+
+	// A separator at the end is wider than one in the middle (??)
+	m_nToolbarEndSepWidth = (m_toolbarMain.GetItemWidth(nPos) + 2);
 	
 	m_toolbarMain.InsertSeparator(nPos);
 	m_toolbarMain.InsertSeparator(nPos + 1);
@@ -6130,7 +6133,18 @@ BOOL CToDoListWnd::CalcToDoCtrlRect(CRect& rect, int cx, int cy, BOOL bMaximized
 	
 	if (m_toolbarCustom.GetSafeHwnd() && m_bShowingCustomToolbar) 
 	{
-		BOOL bSeparateLine = (!m_bShowingMainToolbar || ((m_toolbarMain.GetMinReqLength() + m_toolbarCustom.GetMinReqLength()) > cx));
+		BOOL bSeparateLine = !m_bShowingMainToolbar;
+		
+		if (!bSeparateLine)
+		{
+			int nMainLen = m_toolbarMain.GetMinReqLength();
+			int nCustLen = m_toolbarCustom.GetMinReqLength();
+
+			if (!m_toolbarMain.LastItemIsSeparator())
+				nMainLen += m_nToolbarEndSepWidth;
+
+			bSeparateLine = ((nMainLen + nCustLen) > cx);
+		}
 
 		if (bSeparateLine)
 			rTaskList.top += (m_toolbarCustom.GetHeight() + BEVEL);
@@ -6235,8 +6249,18 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 	// Attempt to put the custom toolbar on the same line
 	if (m_toolbarCustom.GetSafeHwnd() && m_bShowingCustomToolbar)
 	{
-		int nMainLen = m_toolbarMain.GetMinReqLength();
-		BOOL bSeparateLine = (!m_bShowingMainToolbar || ((nMainLen + m_toolbarCustom.GetMinReqLength()) > cx));
+		BOOL bSeparateLine = !m_bShowingMainToolbar;
+
+		if (!bSeparateLine)
+		{
+			int nMainLen = m_toolbarMain.GetMinReqLength();
+			int nCustLen = m_toolbarCustom.GetMinReqLength();
+
+			if (!m_toolbarMain.LastItemIsSeparator())
+				nMainLen += m_nToolbarEndSepWidth;
+
+			bSeparateLine = ((nMainLen + nCustLen) > cx);
+		}
 
 		if (bSeparateLine)
 		{
@@ -6303,7 +6327,9 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 #ifdef _DEBUG
 		CRect rect;
 		CalcToDoCtrlRect(rect, cx, cy, IsZoomed());
-		ASSERT(rect == rTaskList);
+
+		if (rect != rTaskList)
+			ASSERT(0);
 #endif
 
 	}
@@ -7500,6 +7526,9 @@ LRESULT CToDoListWnd::OnPostTranslateMenu(WPARAM /*wp*/, LPARAM lp)
 void CToDoListWnd::OnViewCustomToolbar() 
 {
 	m_bShowingCustomToolbar = !m_bShowingCustomToolbar;
+
+	if (m_bShowingCustomToolbar && !m_toolbarCustom.GetSafeHwnd())
+		InitCustomToolbar();
 
 	if (Prefs().GetDisplayUDTsInToolbar())
 		UpdateUDTsInToolbar(UDT_CUSTOMTOOLBAR);
@@ -11307,7 +11336,9 @@ void CToDoListWnd::OnEnable(BOOL bEnable)
 	{
 		// clear any pressed state
 		m_toolbarMain.Invalidate(FALSE);
-		m_toolbarCustom.Invalidate(FALSE);
+
+		if (m_toolbarCustom.GetSafeHwnd())
+			m_toolbarCustom.Invalidate(FALSE);
 
 		UpdateWindow();
 
