@@ -301,7 +301,7 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat(const CONTENTFORMAT& cfNew)
 		SavePreferences();
 
 	if (cfNew == cfOld)
-		return TRUE;
+		return FALSE;
 
 	CRect rComments;
 	CalcCommentsCtrlRect(rComments);
