@@ -23,9 +23,9 @@ REM - Build PluginHelpers by itself because everything else is dependent on it
 REM - Build rest of plugins
 "C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" .\ToDoList_Plugins.sln /Build "Release"
 
-REM Allow caller to cancel
+REM Allow caller to cancel building Zip
 pause
 
-CALL %LATESTREPO%\BuildReleaseZip.bat %LATESTREPO%
+CALL %REPO%\BuildReleaseZip.bat
 
 popd
