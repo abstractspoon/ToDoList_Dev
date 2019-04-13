@@ -1,18 +1,10 @@
 ECHO OFF
 
-if "%~1" == "" exit
+pushd %~dp0
+set REPO=%CD%
+ECHO REPO=%REPO%
 
-set REPOROOT=C:\Users\Daniel.Godson\Documents\GitHub
-
-if NOT EXIST %REPOROOT% set REPOROOT=D:\_code
-if NOT EXIST %REPOROOT% exit
-
-set LATESTREPO="%~1"
-
-set DEVREPO=%REPOROOT%\ToDoList_Dev
-set RESREPO=%REPOROOT%\ToDoList_Resources
-
-ECHO DEVREPO=%DEVREPO%
+set RESREPO=%REPO%\..\ToDoList_Resources
 ECHO RESREPO=%RESREPO%
 
 REM 7-Zip Location
@@ -23,7 +15,7 @@ if NOT EXIST %PATH7ZIP% exit
 
 ECHO PATH7ZIP=%PATH7ZIP%
 
-set OUTDIR=%1\ToDoList\Unicode_Release
+set OUTDIR=%REPO%\Core\ToDoList\Unicode_Release
 set OUTZIP=%OUTDIR%\todolist_exe_.zip
 
 ECHO OUTDIR=%OUTDIR%
@@ -58,6 +50,7 @@ REM Handle dlls explicitly to maintain control over plugins
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MLOImport.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MySpellCheck.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\OdbcStorage.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\WorkloadExt.dll
 
 REM .Net Plugins
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\PluginHelpers.dll
@@ -69,24 +62,14 @@ REM .Net Plugins
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\WordCloudUIExtensionCore.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\WordCloudUIExtensionBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Gma.CodeCloud.Controls.dll
-
-REM ToDoList_Dev-only Plugins
-echo.%1 | findstr /C:"_Dev" 1>nul
-
-IF ERRORLEVEL 1 goto CONTINUE
-
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\WorkloadExt.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLContentControlBridge.dll"
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLContentControlCore.dll"
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll"
-REM %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.mshtml.dll"
 
-:CONTINUE
- 
 REM Copy latest Resources
 del %OUTDIR%\Resources\ /Q /S
 del %OUTDIR%\Resources\Translations\backup\ /Q
-xcopy %RESREPO%\*.* %OUTDIR%\Resources\ /Y /D /E /EXCLUDE:%DEVREPO%\BuildReleaseZip_Exclude.txt
+xcopy %RESREPO%\*.* %OUTDIR%\Resources\ /Y /D /E /EXCLUDE:%REPO%\BuildReleaseZip_Exclude.txt
 
 REM Zip install instructions to root
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Windows.txt
@@ -102,4 +85,5 @@ REM Zip Resources
 REM Open zip for inspection
 %OUTZIP%
 
+popd
 pause
