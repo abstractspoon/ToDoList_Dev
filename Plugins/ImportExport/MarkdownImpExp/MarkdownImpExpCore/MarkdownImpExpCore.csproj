@@ -55,12 +55,6 @@
       <HintPath>..\..\..\$(Configuration)\PluginHelpers.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\ContentControl\MDContentControl\MarkdownSharp\MarkdownSharp.csproj">
-      <Project>{37619116-CCE8-465A-8B1F-081CA53364BB}</Project>
-      <Name>MarkdownSharp</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)"

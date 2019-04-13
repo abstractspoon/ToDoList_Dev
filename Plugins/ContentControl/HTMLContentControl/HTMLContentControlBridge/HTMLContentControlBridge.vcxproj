@@ -126,6 +126,11 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
   <ItemGroup>
     <None Include="res\html.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HTMLContentControlCore\HTMLContentControlCore.csproj">
+      <Project>{8a0b2029-7325-4527-9483-38ddc1f3b011}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

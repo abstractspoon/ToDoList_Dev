@@ -130,6 +130,11 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
   <ItemGroup>
     <None Include="res\dayview.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DayViewUIExtensionCore\DayViewUIExtensionCore.csproj">
+      <Project>{92fefdb8-3f95-4404-a620-8003b51c5a53}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
