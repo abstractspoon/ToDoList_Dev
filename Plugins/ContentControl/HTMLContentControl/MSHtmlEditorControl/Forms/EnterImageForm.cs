@@ -86,7 +86,7 @@ namespace MSDN.Html.Editor
             }
         }
 
-		public String LastBrowsedFolder { get; set; } = @"C:\";
+		public String LastBrowsedFolder { get; set; }
 
 		private void fileBrowseBtn_Click(object sender, EventArgs e)
 		{
