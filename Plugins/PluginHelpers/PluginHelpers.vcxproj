@@ -118,6 +118,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ClInclude Include="TaskList.h" />
     <ClInclude Include="Toolbars.h" />
     <ClInclude Include="Translator.h" />
+    <ClInclude Include="TreeCtrl.h" />
     <ClInclude Include="UIExtension.h" />
     <ClInclude Include="UITheme.h" />
     <ClInclude Include="Win32.h" />
@@ -145,6 +146,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ClCompile Include="TaskList.cpp" />
     <ClCompile Include="Toolbars.cpp" />
     <ClCompile Include="Translator.cpp" />
+    <ClCompile Include="TreeCtrl.cpp" />
     <ClCompile Include="UIExtension.cpp" />
     <ClCompile Include="UITheme.cpp" />
     <ClCompile Include="Win32.cpp" />
