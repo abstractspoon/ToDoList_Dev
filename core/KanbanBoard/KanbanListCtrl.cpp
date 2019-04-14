@@ -240,7 +240,6 @@ void CKanbanColumnCtrl::OnDisplayAttributeChanged()
 void CKanbanColumnCtrl::RefreshItemLineHeights()
 {
 	HTREEITEM hti = GetChildItem(NULL);
-	TVITEMEX tvi = { TVIF_INTEGRAL, 0 };
 
 	while (hti)
 	{
