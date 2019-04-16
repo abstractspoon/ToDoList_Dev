@@ -1642,8 +1642,22 @@ bool CTaskFile::GetReportOnAttribute(I_ATTRIBUTE nAttrib) const
 
 	while (pXItem)
 	{
-		if (pXItem->GetValueI() == nAttrib)
+		TDC_ATTRIBUTE nReportAttrib = (TDC_ATTRIBUTE)pXItem->GetValueI();
+
+		switch (nReportAttrib)
+		{
+		case TDCA_NONE:
+			return false;
+
+		case TDCA_ALL:
 			return true;
+
+		// all else
+		default:
+			if (nReportAttrib == nAttrib)
+				return true;
+			break;
+		}
 		
 		pXItem = pXItem->GetSibling();
 	}

@@ -289,16 +289,13 @@ struct TDCGETTASKS
 		// 'no' attributes really means 'no' attributes
 		// else it means 'all attributes' 
 		if (mapAttribs.GetCount() == 0)
-		{
-			if (HasFlag(TDCGTF_USERCOLUMNS))
-				return FALSE;
-			else
-				return TRUE;
-		}
-		else if (mapAttribs.Has(TDCA_ALL))
-		{
+			return (HasFlag(TDCGTF_USERCOLUMNS) ? FALSE : TRUE);
+
+		if (mapAttribs.Has(TDCA_ALL))
 			return TRUE;
-		}
+
+		if (mapAttribs.Has(TDCA_NONE))
+			return FALSE;
 
 		return mapAttribs.Has(nAttrib);
 	}
