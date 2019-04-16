@@ -52,10 +52,8 @@ public:
 		if (lstrcmpi(TDL_TASK, szItem) == 0)
 			return FALSE; // stop
 		
-#ifndef NO_TL_ENCRYPTDECRYPT
 		if (CXmlFileEx::XFE_ENCODEDDATA.CompareNoCase(szItem) == 0)
 			return FALSE; // stop
-#endif
 
 		return TRUE; // continue
 	}
@@ -232,9 +230,6 @@ BOOL CTaskFile::TransformToFile(const CString& sTransformPath, const CString& sO
 	return CXmlFile::TransformToFile(sTransformPath, sOutputPath, nFormat);
 }
 
-// ---------------------------------------------------------------------------------
-#ifndef NO_TL_ENCRYPTDECRYPT 
-
 BOOL CTaskFile::Decrypt(LPCTSTR szPassword)
 {
 	BOOL bWasEncrypted = IsEncrypted();
@@ -266,15 +261,9 @@ BOOL CTaskFile::IsPasswordPromptingDisabled() const
 	return (GetItemValueI(TDL_DISABLEPASSWORDPROMPTING) != FALSE);
 }
 
-#endif
-
 BOOL CTaskFile::Load(LPCTSTR szFilePath, IXmlParse* pCallback, BOOL bDecrypt)
 {
-#ifdef NO_TL_ENCRYPTDECRYPT
-	BOOL bRes = CXmlFile::Load(szFilePath, TDL_ROOT, pCallback);
-#else
 	BOOL bRes = CXmlFileEx::Load(szFilePath, TDL_ROOT, pCallback, bDecrypt);
-#endif
 	
 	if (bRes)
 	{
@@ -361,11 +350,7 @@ BOOL CTaskFile::LoadEx(IXmlParse* pCallback)
 {
 	BOOL bResult = CXmlFileEx::LoadEx(TDL_ROOT, pCallback);
 
-#ifdef NO_TL_ENCRYPTDECRYPT
-	if (bResult)
-#else
 	if (bResult && !IsEncrypted())
-#endif
 	{
 		// initialize 
 		m_dwNextUniqueID = (DWORD)GetItemValueI(TDL_NEXTUNIQUEID);
