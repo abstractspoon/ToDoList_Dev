@@ -48,7 +48,7 @@ CCalendarPreferencesPage::CCalendarPreferencesPage()
 	CPreferencesPageBase(IDD_PREFERENCES_PAGE),
 	m_cbHeatMapPalette(CBF_SYNTHESIZE, IDS_NOHEATMAP),
 	m_crThemeBkgnd(CLR_NONE),
-	m_nHeatMapAttrib(IUI_DONEDATE)
+	m_nHeatMapAttrib(IA_DONEDATE)
 {
 	//{{AFX_DATA_INIT(CCalendarPreferencesPage)
 	m_bShowCalcStartDates = FALSE;
@@ -84,7 +84,7 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	if (pDX->m_bSaveAndValidate)
 	{
 		m_cbHeatMapPalette.GetSelectedPalette(m_aSelPalette);
-		m_nHeatMapAttrib = (IUI_ATTRIBUTE)CDialogHelper::GetSelectedItemData(m_cbHeatMapAttribute);
+		m_nHeatMapAttrib = (I_ATTRIBUTE)CDialogHelper::GetSelectedItemData(m_cbHeatMapAttribute);
 	}
 	else
 	{
@@ -113,9 +113,9 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 
 	m_cbHeatMapPalette.Initialize(HEATMAP_PALETTETYPE, HEATMAP_NUMPALETTECOLORS);
 
-	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMDONE, IUI_DONEDATE);
-	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMDUE, IUI_DUEDATE);
-	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMSTARTED, IUI_STARTDATE);
+	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMDONE, IA_DONEDATE);
+	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMDUE, IA_DUEDATE);
+	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMSTARTED, IA_STARTDATE);
 
 	UpdateData(FALSE);
 
@@ -224,10 +224,10 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 			m_aSelPalette.Copy(aPalettes[0]);
 	}
 
-	m_nHeatMapAttrib = (IUI_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("HeatMapAttribute"), IUI_DONEDATE);
+	m_nHeatMapAttrib = (I_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("HeatMapAttribute"), IA_DONEDATE);
 }
 
-BOOL CCalendarPreferencesPage::GetEnableHeatMap(CDWordArray& aPalette, IUI_ATTRIBUTE& nAttrib) const
+BOOL CCalendarPreferencesPage::GetEnableHeatMap(CDWordArray& aPalette, I_ATTRIBUTE& nAttrib) const
 {
 	if (m_aSelPalette.GetSize() == 0)
 		return FALSE;

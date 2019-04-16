@@ -87,7 +87,7 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, CTDLContentMgr& mgrC
 	m_bTaskColorChange(FALSE),
 	m_bUpdatingExtensions(FALSE),
 	m_bRecreatingRecurringTasks(FALSE),
-	m_nExtModifyingAttrib(IUI_NONE),
+	m_nExtModifyingAttrib(IA_NONE),
 	m_mgrUIExt(mgrUIExt),
 	m_taskList(m_ilTaskIcons, m_data, TCF(), m_aStyles, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs)
 {
@@ -1104,9 +1104,9 @@ void CTabbedToDoCtrl::UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTa
 	ASSERT(!tasks.GetFilePath().IsEmpty() || m_sLastSavePath.IsEmpty());
 
 	CAutoFlag af(m_bUpdatingExtensions, TRUE);
-	CArray<IUI_ATTRIBUTE, IUI_ATTRIBUTE> aAttrib;
+	CArray<I_ATTRIBUTE, I_ATTRIBUTE> aAttrib;
 	
-	if (TDC::MapAttributesToIUIAttributes(mapAttrib, aAttrib))
+	if (TDC::MapAttributesToIAttributes(mapAttrib, aAttrib))
 		pExtWnd->UpdateTasks(&tasks, nType, aAttrib.GetData(), aAttrib.GetSize());
 }
 
@@ -1306,7 +1306,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtSortColumnChange(WPARAM wParam, LPARAM lParam)
 
 			if (pVData)
 			{
-				pVData->sort.single.nBy = TDC::MapIUIAttributeToColumn((IUI_ATTRIBUTE)lParam);
+				pVData->sort.single.nBy = TDC::MapIAttributeToColumn((I_ATTRIBUTE)lParam);
 				pVData->sort.single.bAscending = wParam;
 			}
 		}
@@ -1414,12 +1414,12 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 
 BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const
 {
-	TDC_ATTRIBUTE nAttribID = TDC::MapIUIAttributeToAttribute(mod.nAttrib);
+	TDC_ATTRIBUTE nAttribID = TDC::MapIAttributeToAttribute(mod.nAttrib);
 	dwTaskID = mod.dwSelectedTaskID;
 
 	if (nAttribID == TDCA_NONE)
 	{
-		if (mod.nAttrib == IUI_OFFSETTASK)
+		if (mod.nAttrib == IA_OFFSETTASK)
 			nAttribID = TDCA_STARTDATE;
 		else
 			return FALSE;
@@ -1462,7 +1462,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 	
 	switch (mod.nAttrib)
 	{
-	case IUI_TASKNAME:		
+	case IA_TASKNAME:		
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskTitle(dwTaskID, mod.szValue));
@@ -1471,7 +1471,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_PRIORITY:		
+	case IA_PRIORITY:		
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskPriority(dwTaskID, mod.nAttrib));
@@ -1480,7 +1480,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_COLOR: 		
+	case IA_COLOR: 		
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskColor(dwTaskID, mod.crValue));
@@ -1489,7 +1489,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_ALLOCBY:		
+	case IA_ALLOCBY:		
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskAllocBy(dwTaskID, mod.szValue));
@@ -1498,7 +1498,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_STATUS:		
+	case IA_STATUS:		
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskStatus(dwTaskID, mod.szValue));
@@ -1507,7 +1507,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_PERCENT:		
+	case IA_PERCENT:		
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskPercent(dwTaskID, mod.nValue));
@@ -1516,7 +1516,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_TIMEEST:		
+	case IA_TIMEEST:		
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskTimeEstimate(dwTaskID, mod.dValue, mod.nTimeUnits));
@@ -1525,7 +1525,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_TIMESPENT:		
+	case IA_TIMESPENT:		
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, mod.dValue, mod.nTimeUnits));
@@ -1534,7 +1534,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_COMMENTS:		
+	case IA_COMMENTS:		
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskComments(dwTaskID, mod.szValue));
@@ -1543,7 +1543,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_FLAG:			
+	case IA_FLAG:			
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskFlag(dwTaskID, mod.bValue));
@@ -1552,7 +1552,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_RISK:			
+	case IA_RISK:			
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskRisk(dwTaskID, mod.nValue));
@@ -1561,7 +1561,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_EXTERNALID: 	
+	case IA_EXTERNALID: 	
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskExternalID(dwTaskID, mod.szValue));
@@ -1570,7 +1570,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_COST:			
+	case IA_COST:			
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskCost(dwTaskID, mod.dValue));
@@ -1579,7 +1579,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_VERSION:		
+	case IA_VERSION:		
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskVersion(dwTaskID, mod.szValue));
@@ -1588,7 +1588,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_DONEDATE:		
+	case IA_DONEDATE:		
 		{
 			COleDateTime date(CDateHelper::GetDate(mod.tValue));
 
@@ -1599,7 +1599,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_STARTDATE:		
+	case IA_STARTDATE:		
 		{
 			COleDateTime date(CDateHelper::GetDate(mod.tValue));
 
@@ -1610,7 +1610,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_DUEDATE:		
+	case IA_DUEDATE:		
 		{
 			COleDateTime date(CDateHelper::GetDate(mod.tValue));
 
@@ -1629,7 +1629,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 		
-	case IUI_ALLOCTO:
+	case IA_ALLOCTO:
 		{
 			Misc::Split(mod.szValue, aValues, '\n');
 
@@ -1641,7 +1641,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 		
-	case IUI_CATEGORY:
+	case IA_CATEGORY:
 		{
 			Misc::Split(mod.szValue, aValues, '\n');
 
@@ -1652,7 +1652,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 		
-	case IUI_TAGS:
+	case IA_TAGS:
 		{
 			Misc::Split(mod.szValue, aValues, '\n');
 
@@ -1663,7 +1663,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 		
-	case IUI_FILEREF:
+	case IA_FILEREF:
 		{
 			Misc::Split(mod.szValue, aValues, '\n');
 
@@ -1674,7 +1674,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 		
-	case IUI_DEPENDENCY: 
+	case IA_DEPENDENCY: 
 		{
 			Misc::Split(mod.szValue, aValues, '\n');
 
@@ -1688,7 +1688,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 		
-	case IUI_OFFSETTASK:
+	case IA_OFFSETTASK:
 		if (GetSelectedCount() == 1)
 		{
 			ASSERT(dwTaskID == 0);
@@ -1705,7 +1705,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_CUSTOMATTRIB:	
+	case IA_CUSTOMATTRIB:	
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskCustomAttributeData(dwTaskID, mod.szCustomAttribID, mod.szValue));
@@ -1714,7 +1714,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 
-	case IUI_METADATA:
+	case IA_METADATA:
 		{
 			IUIExtensionWindow* pExtWnd = GetExtensionWnd(GetTaskView());
 			ASSERT(pExtWnd && pExtWnd->GetHwnd());
@@ -1730,10 +1730,10 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		break;
 
 	// not supported
-	case IUI_RECURRENCE: 
-	case IUI_CREATIONDATE:
-	case IUI_CREATEDBY:
-	case IUI_POSITION:
+	case IA_RECURRENCE: 
+	case IA_CREATIONDATE:
+	case IA_CREATEDBY:
+	case IA_POSITION:
 		ASSERT(0);
 		break;
 
@@ -1744,7 +1744,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 
 	if (bChange)
 	{
-		if (m_data.WantUpdateInheritedAttibute(TDC::MapIUIAttributeToAttribute(mod.nAttrib)))
+		if (m_data.WantUpdateInheritedAttibute(TDC::MapIAttributeToAttribute(mod.nAttrib)))
 			dwResults |= UIEXTMOD_INHERITATTRIB;
 
 		dwResults |= UIEXTMOD_SUCCESS;
@@ -1836,7 +1836,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 				dwResults = 0;
 			}
 
-			m_nExtModifyingAttrib = IUI_NONE;
+			m_nExtModifyingAttrib = IA_NONE;
 		}
 	}
 	catch (...)
@@ -1895,7 +1895,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 	
 	BOOL bSuccess = FALSE;
-	m_nExtModifyingAttrib = IUI_POSITION;
+	m_nExtModifyingAttrib = IA_POSITION;
 
 	try
 	{
@@ -1927,7 +1927,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 		bSuccess = FALSE;
 	}
 
-	m_nExtModifyingAttrib = IUI_NONE;
+	m_nExtModifyingAttrib = IA_NONE;
 
 	return bSuccess;
 }
@@ -2426,7 +2426,7 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 
 				// if this extension is active and wants a 
 				// color update we want to start progress
-				BOOL bWantColorUpdate = (m_bTaskColorChange && pExtWnd->WantTaskUpdate(IUI_COLOR));
+				BOOL bWantColorUpdate = (m_bTaskColorChange && pExtWnd->WantTaskUpdate(IA_COLOR));
 
 				if (bWantColorUpdate && nExtView == nCurView)
 					BeginExtensionProgress(pVData);
@@ -3186,12 +3186,12 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 		
 		while (nAttrib--)
 		{
-			if (pExtWnd->WantTaskUpdate(TDC::MapAttributeToIUIAttribute((TDC_ATTRIBUTE)nAttrib)))
+			if (pExtWnd->WantTaskUpdate(TDC::MapAttributeToIAttribute((TDC_ATTRIBUTE)nAttrib)))
 				mapAttrib.Add((TDC_ATTRIBUTE)nAttrib);
 		}
 
 		// Misc
-		if (pExtWnd->WantTaskUpdate(IUI_CUSTOMATTRIB))
+		if (pExtWnd->WantTaskUpdate(IA_CUSTOMATTRIB))
 			mapAttrib.Add(TDCA_CUSTOMATTRIB_ALL);
 
 		// Always
@@ -3199,7 +3199,7 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 		mapAttrib.Add(TDCA_METADATA);
 
 		// Include 'position' if extension supports 'unsorted'
-		CUIExtensionAppCmdData data(IUI_NONE);
+		CUIExtensionAppCmdData data(IA_NONE);
 
 		if (pExtWnd->CanDoAppCommand(IUI_SORT, &data))
 			mapAttrib.Add(TDCA_POSITION);
@@ -3293,7 +3293,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 		break;	
 
 	case TDCA_POSITION: // == move
-		if (m_nExtModifyingAttrib != IUI_POSITION)
+		if (m_nExtModifyingAttrib != IA_POSITION)
 			UpdateExtensionViewsTasks(nAttrib);
 		break;	
 
@@ -3328,7 +3328,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsProjectName()
 		{
 			IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
 
-			if (pExtWnd && pExtWnd->WantTaskUpdate(IUI_PROJECTNAME))
+			if (pExtWnd && pExtWnd->WantTaskUpdate(IA_PROJECTNAME))
 			{
 				FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
 				VIEWDATA* pVData = GetViewData(nExtView);
@@ -3336,7 +3336,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsProjectName()
 
 				if (pVData && !pVData->bNeedFullTaskUpdate)
 				{
-					IUI_ATTRIBUTE nProjName = IUI_PROJECTNAME;
+					I_ATTRIBUTE nProjName = IA_PROJECTNAME;
 					pExtWnd->UpdateTasks(&tasks, IUI_EDIT, &nProjName, 1);
 				}
 			}
@@ -3664,7 +3664,7 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 		if (!pVData || pVData->bNeedFullTaskUpdate)
 			return FALSE;
 	}
-	else if (m_nExtModifyingAttrib != IUI_NONE) // active view
+	else if (m_nExtModifyingAttrib != IA_NONE) // active view
 	{
 		// if this update has come about as a consequence
 		// of this extension window modifying the specified
@@ -3680,7 +3680,7 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 	IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
 	ASSERT(pExtWnd);
 	
-	return (pExtWnd && pExtWnd->WantTaskUpdate(TDC::MapAttributeToIUIAttribute(nAttrib)));
+	return (pExtWnd && pExtWnd->WantTaskUpdate(TDC::MapAttributeToIAttribute(nAttrib)));
 }
 
 BOOL CTabbedToDoCtrl::AllExtensionViewsNeedFullUpdate() const
@@ -4247,15 +4247,15 @@ int CTabbedToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			int nCol = IUI_NUMATTRIBUTES;
+			int nCol = IA_NUMATTRIBUTES;
 
 			while (nCol--)
 			{
-				IUI_ATTRIBUTE nBy = (IUI_ATTRIBUTE)nCol;
+				I_ATTRIBUTE nBy = (I_ATTRIBUTE)nCol;
 
 				if (ExtensionCanSortBy(nView, nBy))
 				{
-					TDC_COLUMN nColID = TDC::MapIUIAttributeToColumn(nBy);
+					TDC_COLUMN nColID = TDC::MapIAttributeToColumn(nBy);
 
 					if (nColID != TDCC_NONE)
 						mapColIDs.Add(nColID);
@@ -4439,7 +4439,7 @@ void CTabbedToDoCtrl::RefreshExtensionViewSort(FTC_VIEW nView)
 		}
 		else
 		{
-			IUI_ATTRIBUTE nCol = TDC::MapColumnToIUIAttribute(pVData->sort.single.nBy);
+			I_ATTRIBUTE nCol = TDC::MapColumnToIAttribute(pVData->sort.single.nBy);
 			CUIExtensionAppCmdData data(nCol, pVData->sort.single.bAscending);
 
 			ExtensionDoAppCommand(nView, IUI_SORT, data);
@@ -4447,7 +4447,7 @@ void CTabbedToDoCtrl::RefreshExtensionViewSort(FTC_VIEW nView)
 	}
 	else
 	{
-		CUIExtensionAppCmdData data(IUI_NONE);
+		CUIExtensionAppCmdData data(IA_NONE);
 		ExtensionDoAppCommand(nView, IUI_SORT, data);
 	}
 }
@@ -4519,9 +4519,9 @@ void CTabbedToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			IUI_ATTRIBUTE nCol = TDC::MapColumnToIUIEdit(nBy);
+			I_ATTRIBUTE nCol = TDC::MapColumnToIAttribute(nBy);
 			
-			if ((nCol != IUI_NONE) || (nBy == TDCC_NONE))
+			if ((nCol != IA_NONE) || (nBy == TDCC_NONE))
 			{
 				VIEWDATA* pVData = GetViewData(nView);
 				ASSERT(pVData);
@@ -4583,9 +4583,9 @@ BOOL CTabbedToDoCtrl::CanSortBy(TDC_COLUMN nBy) const
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			IUI_ATTRIBUTE nColID = TDC::MapColumnToIUIEdit(nBy);
+			I_ATTRIBUTE nColID = TDC::MapColumnToIAttribute(nBy);
 
-			if ((nColID == IUI_NONE) && (nBy != TDCC_NONE))
+			if ((nColID == IA_NONE) && (nBy != TDCC_NONE))
 				return FALSE;
 
 			return ExtensionCanSortBy(nView, nColID);
@@ -4597,7 +4597,7 @@ BOOL CTabbedToDoCtrl::CanSortBy(TDC_COLUMN nBy) const
 	return FALSE;
 }
 
-BOOL CTabbedToDoCtrl::ExtensionCanSortBy(FTC_VIEW nView, IUI_ATTRIBUTE nBy) const
+BOOL CTabbedToDoCtrl::ExtensionCanSortBy(FTC_VIEW nView, I_ATTRIBUTE nBy) const
 {
 	if (!IsExtensionView(nView))
 	{
@@ -4606,7 +4606,7 @@ BOOL CTabbedToDoCtrl::ExtensionCanSortBy(FTC_VIEW nView, IUI_ATTRIBUTE nBy) cons
 	}
 
 	// Custom attributes not currently supported
-	if (nBy == IUI_CUSTOMATTRIB)
+	if (nBy == IA_CUSTOMATTRIB)
 		return FALSE;
 
 	// all else
@@ -5514,7 +5514,7 @@ BOOL CTabbedToDoCtrl::SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, T
 			IUI_APPCOMMAND nCmdID = TDC::MapSelectTaskToIUICommand(nSelect);
 			ASSERT(nCmdID != IUI_NOCOMMAND);
 
-			CUIExtensionAppCmdData data(IUI_TASKNAME, bFindReplace, sPart, bCaseSensitive, bWholeWord);
+			CUIExtensionAppCmdData data(IA_TASKNAME, bFindReplace, sPart, bCaseSensitive, bWholeWord);
 
 			return ExtensionDoAppCommand(nView, nCmdID, data);
 		}

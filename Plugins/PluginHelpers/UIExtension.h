@@ -119,11 +119,11 @@ namespace Abstractspoon
 					NoDrag,
 				};
 
-				static TaskAttribute Map(IUI_ATTRIBUTE attrib);
-				static Collections::Generic::HashSet<TaskAttribute>^ Map(const IUI_ATTRIBUTE* pAttrib, int numAttrib);
+				static TaskAttribute Map(I_ATTRIBUTE attrib);
+				static Collections::Generic::HashSet<TaskAttribute>^ Map(const I_ATTRIBUTE* pAttrib, int numAttrib);
 				static UpdateType Map(IUI_UPDATETYPE type);
 				static IUI_HITTEST Map(HitResult test);
-				static IUI_ATTRIBUTE Map(TaskAttribute attrib);
+				static I_ATTRIBUTE Map(TaskAttribute attrib);
 
 				ref class ParentNotify
 				{

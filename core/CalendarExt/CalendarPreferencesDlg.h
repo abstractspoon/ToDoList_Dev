@@ -45,7 +45,7 @@ public:
 	BOOL GetCalcMissingDueAsStart() const;
 	BOOL GetCalcMissingDueAsLatestStartAndToday() const;
 
-	BOOL GetEnableHeatMap(CDWordArray& aPalette, IUI_ATTRIBUTE& nAttrib) const;
+	BOOL GetEnableHeatMap(CDWordArray& aPalette, I_ATTRIBUTE& nAttrib) const;
 	
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
@@ -73,7 +73,7 @@ protected:
 	CComboBox m_cbHeatMapAttribute;
 	CColorBrewerComboBox m_cbHeatMapPalette;
 	CDWordArray m_aSelPalette;
-	IUI_ATTRIBUTE m_nHeatMapAttrib;
+	I_ATTRIBUTE m_nHeatMapAttrib;
 	COLORREF m_crThemeBkgnd;
 	
 // Overrides
@@ -127,7 +127,7 @@ public:
 	BOOL GetCalcMissingDueAsStart() const { return m_page.GetCalcMissingDueAsStart(); }
 	BOOL GetCalcMissingDueAsLatestStartAndToday() const { return m_page.GetCalcMissingDueAsLatestStartAndToday(); }
 
-	BOOL GetEnableHeatMap(CDWordArray& aPalette, IUI_ATTRIBUTE& nAttrib) const { return m_page.GetEnableHeatMap(aPalette, nAttrib); }
+	BOOL GetEnableHeatMap(CDWordArray& aPalette, I_ATTRIBUTE& nAttrib) const { return m_page.GetEnableHeatMap(aPalette, nAttrib); }
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }

@@ -18,7 +18,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-typedef CArray<IUI_ATTRIBUTE, IUI_ATTRIBUTE&> CKanbanAttributeArray;
+typedef CArray<I_ATTRIBUTE, I_ATTRIBUTE&> CKanbanAttributeArray;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -81,8 +81,8 @@ struct KANBANITEM
 
 	int GetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues) const;
 	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;
-	CString GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const;
-	BOOL HasAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const;
+	CString GetAttributeDisplayValue(I_ATTRIBUTE nAttrib) const;
+	BOOL HasAttributeDisplayValue(I_ATTRIBUTE nAttrib) const;
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetFillColor(BOOL bColorIsBkgnd) const;
 	COLORREF GetBorderColor(BOOL bColorIsBkgnd) const;
@@ -99,14 +99,14 @@ struct KANBANITEM
 	void RemoveTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues);
 	void RemoveAllTrackedAttributeValues(LPCTSTR szAttrib);
 	void SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
-	void SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, LPCTSTR szValue);
+	void SetTrackedAttributeValue(I_ATTRIBUTE nAttribID, LPCTSTR szValue);
 	void SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues);
-	void SetTrackedAttributeValues(IUI_ATTRIBUTE nAttribID, const CStringArray& aValues);
-	void SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, int nValue);
+	void SetTrackedAttributeValues(I_ATTRIBUTE nAttribID, const CStringArray& aValues);
+	void SetTrackedAttributeValue(I_ATTRIBUTE nAttribID, int nValue);
 	void SetColor(COLORREF cr);
 	
-	static CString GetAttributeID(IUI_ATTRIBUTE nAttrib);
-	static BOOL IsTrackableAttribute(IUI_ATTRIBUTE nAttrib);
+	static CString GetAttributeID(I_ATTRIBUTE nAttrib);
+	static BOOL IsTrackableAttribute(I_ATTRIBUTE nAttrib);
 
 protected:
 	CMapStringToStringArray mapAttribValues;
@@ -196,7 +196,7 @@ struct KANBANSORT
 	const KANBANITEM* GetParent(const KANBANITEM* pKIChild) const;
 
 	const CKanbanItemMap& data;
-	IUI_ATTRIBUTE nBy;
+	I_ATTRIBUTE nBy;
 	CString sAttribID;
 	BOOL bAscending;
 	BOOL bSubtasksBelowParent;

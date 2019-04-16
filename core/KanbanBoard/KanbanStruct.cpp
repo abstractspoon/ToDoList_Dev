@@ -216,7 +216,7 @@ KANBANITEM::~KANBANITEM()
 	
 }
 
-void KANBANITEM::SetTrackedAttributeValues(IUI_ATTRIBUTE nAttribID, const CStringArray& aValues)
+void KANBANITEM::SetTrackedAttributeValues(I_ATTRIBUTE nAttribID, const CStringArray& aValues)
 {
 	SetTrackedAttributeValues(GetAttributeID(nAttribID), aValues);
 }
@@ -300,12 +300,12 @@ void KANBANITEM::RemoveAllTrackedAttributeValues(LPCTSTR szAttrib)
 	mapAttribValues.RemoveKey(szAttrib);
 }
 
-void KANBANITEM::SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, LPCTSTR szValue)
+void KANBANITEM::SetTrackedAttributeValue(I_ATTRIBUTE nAttribID, LPCTSTR szValue)
 {
 	SetTrackedAttributeValue(GetAttributeID(nAttribID), szValue);
 }
 
-void KANBANITEM::SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, int nValue)
+void KANBANITEM::SetTrackedAttributeValue(I_ATTRIBUTE nAttribID, int nValue)
 {
 	// Less than zero == empty
 	CString sValue;
@@ -366,60 +366,60 @@ BOOL KANBANITEM::MatchesAttribute(const IUISELECTTASK& select) const
 	return (Misc::Find(select.szWords, sAttrib, select.bCaseSensitive, select.bWholeWord) != -1);
 }
 
-CString KANBANITEM::GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
+CString KANBANITEM::GetAttributeDisplayValue(I_ATTRIBUTE nAttrib) const
 {
 	switch (nAttrib)
 	{
-	case IUI_TASKNAME:
+	case IA_TASKNAME:
 		return sTitle;
 
-	case IUI_ALLOCTO:	
-	case IUI_ALLOCBY:	
-	case IUI_STATUS:	
-	case IUI_CATEGORY:	
-	case IUI_VERSION:	
-	case IUI_TAGS:		
-	case IUI_PRIORITY:	
-	case IUI_RISK:			
+	case IA_ALLOCTO:	
+	case IA_ALLOCBY:	
+	case IA_STATUS:	
+	case IA_CATEGORY:	
+	case IA_VERSION:	
+	case IA_TAGS:		
+	case IA_PRIORITY:	
+	case IA_RISK:			
 		return GetTrackedAttributeValue(KANBANITEM::GetAttributeID(nAttrib));
 		
-	case IUI_DONEDATE:		
+	case IA_DONEDATE:		
 		if (CDateHelper::IsDateSet(dtDone))
 			return dtDone.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case IUI_DUEDATE:		
+	case IA_DUEDATE:		
 		if (CDateHelper::IsDateSet(dtDue))
 			return dtDue.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case IUI_STARTDATE:		
+	case IA_STARTDATE:		
 		if (CDateHelper::IsDateSet(dtStart))
 			return dtStart.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case IUI_CREATIONDATE:	
+	case IA_CREATIONDATE:	
 		if (CDateHelper::IsDateSet(dtCreate))
 			return dtCreate.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case IUI_LASTMOD:		
+	case IA_LASTMOD:		
 		if (CDateHelper::IsDateSet(dtLastMod))
 			return dtLastMod.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case IUI_FILEREF:		return sFileRef;
-	case IUI_ID:			return Misc::Format(dwTaskID);
-	case IUI_PERCENT:		return Misc::Format(nPercent, _T("%"));
-	case IUI_CREATEDBY:		return sCreatedBy;
-	case IUI_EXTERNALID:	return sExternalID;
-	case IUI_COST:			return Misc::Format(dCost, 2);
-	case IUI_RECURRENCE:	return sRecurrence;
-	case IUI_TIMEEST:		return CTimeHelper().FormatTime(dTimeEst, MapUnitsToTHUnits(nTimeEstUnits), 2);
-	case IUI_TIMESPENT:		return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
+	case IA_FILEREF:		return sFileRef;
+	case IA_ID:			return Misc::Format(dwTaskID);
+	case IA_PERCENT:		return Misc::Format(nPercent, _T("%"));
+	case IA_CREATEDBY:		return sCreatedBy;
+	case IA_EXTERNALID:	return sExternalID;
+	case IA_COST:			return Misc::Format(dCost, 2);
+	case IA_RECURRENCE:	return sRecurrence;
+	case IA_TIMEEST:		return CTimeHelper().FormatTime(dTimeEst, MapUnitsToTHUnits(nTimeEstUnits), 2);
+	case IA_TIMESPENT:		return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
 
-	case IUI_FLAG:			// drawn separately
-	case IUI_PARENT:		// drawn separately
+	case IA_FLAG:			// drawn separately
+	case IA_PARENT:		// drawn separately
 	default:
 		ASSERT(0);
 		break;
@@ -428,42 +428,42 @@ CString KANBANITEM::GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
 	return _T("");
 }
 
-BOOL KANBANITEM::HasAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
+BOOL KANBANITEM::HasAttributeDisplayValue(I_ATTRIBUTE nAttrib) const
 {
 	switch (nAttrib)
 	{
-	case IUI_TASKNAME:
-	case IUI_ID:
+	case IA_TASKNAME:
+	case IA_ID:
 		return TRUE;
 
-	case IUI_ALLOCTO:	
-	case IUI_ALLOCBY:	
-	case IUI_STATUS:	
-	case IUI_CATEGORY:	
-	case IUI_VERSION:	
-	case IUI_TAGS:		
-	case IUI_PRIORITY:	
-	case IUI_RISK:			
+	case IA_ALLOCTO:	
+	case IA_ALLOCBY:	
+	case IA_STATUS:	
+	case IA_CATEGORY:	
+	case IA_VERSION:	
+	case IA_TAGS:		
+	case IA_PRIORITY:	
+	case IA_RISK:			
 		return HasTrackedAttributeValues(KANBANITEM::GetAttributeID(nAttrib));
 		
-	case IUI_DONEDATE:		return CDateHelper::IsDateSet(dtDone);
-	case IUI_DUEDATE:		return CDateHelper::IsDateSet(dtDue);
-	case IUI_STARTDATE:		return CDateHelper::IsDateSet(dtStart);
-	case IUI_CREATIONDATE:	return CDateHelper::IsDateSet(dtCreate);
-	case IUI_LASTMOD:		return CDateHelper::IsDateSet(dtLastMod);
+	case IA_DONEDATE:		return CDateHelper::IsDateSet(dtDone);
+	case IA_DUEDATE:		return CDateHelper::IsDateSet(dtDue);
+	case IA_STARTDATE:		return CDateHelper::IsDateSet(dtStart);
+	case IA_CREATIONDATE:	return CDateHelper::IsDateSet(dtCreate);
+	case IA_LASTMOD:		return CDateHelper::IsDateSet(dtLastMod);
 
-	case IUI_FILEREF:		return !sFileRef.IsEmpty();
-	case IUI_CREATEDBY:		return !sCreatedBy.IsEmpty();
-	case IUI_EXTERNALID:	return !sExternalID.IsEmpty();
-	case IUI_RECURRENCE:	return !sRecurrence.IsEmpty();
+	case IA_FILEREF:		return !sFileRef.IsEmpty();
+	case IA_CREATEDBY:		return !sCreatedBy.IsEmpty();
+	case IA_EXTERNALID:	return !sExternalID.IsEmpty();
+	case IA_RECURRENCE:	return !sRecurrence.IsEmpty();
 
-	case IUI_PERCENT:		return (nPercent > 0);
-	case IUI_COST:			return (dCost > 0);
-	case IUI_TIMEEST:		return (dTimeEst > 0);
-	case IUI_TIMESPENT:		return (dTimeSpent > 0);
+	case IA_PERCENT:		return (nPercent > 0);
+	case IA_COST:			return (dCost > 0);
+	case IA_TIMEEST:		return (dTimeEst > 0);
+	case IA_TIMESPENT:		return (dTimeSpent > 0);
 
-	case IUI_PARENT:		break; // handled separately
-	case IUI_FLAG:			break; // handled separately
+	case IA_PARENT:		break; // handled separately
+	case IA_FLAG:			break; // handled separately
 	}
 
 	ASSERT(0);
@@ -582,25 +582,25 @@ BOOL KANBANITEM::IsDone(BOOL bIncludeGoodAs) const
 
 int KANBANITEM::GetPriority() const
 {
-	CString sPriority(GetTrackedAttributeValue(GetAttributeID(IUI_PRIORITY)));
+	CString sPriority(GetTrackedAttributeValue(GetAttributeID(IA_PRIORITY)));
 
 	return (sPriority.IsEmpty() ? -2 : _ttoi(sPriority));
 }
 
-CString KANBANITEM::GetAttributeID(IUI_ATTRIBUTE nAttrib)
+CString KANBANITEM::GetAttributeID(I_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IUI_ALLOCTO:	return _T("ALLOCTO");
-	case IUI_ALLOCBY:	return _T("ALLOCBY");
-	case IUI_STATUS:	return _T("STATUS");
-	case IUI_CATEGORY:	return _T("CATEGORY");
-	case IUI_VERSION:	return _T("VERSION");
-	case IUI_TAGS:		return _T("TAGS");
-	case IUI_PRIORITY:	return _T("PRIORITY");
-	case IUI_RISK:		return _T("RISK");
+	case IA_ALLOCTO:	return _T("ALLOCTO");
+	case IA_ALLOCBY:	return _T("ALLOCBY");
+	case IA_STATUS:	return _T("STATUS");
+	case IA_CATEGORY:	return _T("CATEGORY");
+	case IA_VERSION:	return _T("VERSION");
+	case IA_TAGS:		return _T("TAGS");
+	case IA_PRIORITY:	return _T("PRIORITY");
+	case IA_RISK:		return _T("RISK");
 
-	case IUI_CUSTOMATTRIB:
+	case IA_CUSTOMATTRIB:
 		ASSERT(0);
 		break;
 		
@@ -612,21 +612,21 @@ CString KANBANITEM::GetAttributeID(IUI_ATTRIBUTE nAttrib)
 	return _T("");
 }
 
-BOOL KANBANITEM::IsTrackableAttribute(IUI_ATTRIBUTE nAttrib)
+BOOL KANBANITEM::IsTrackableAttribute(I_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IUI_ALLOCTO:	
-	case IUI_ALLOCBY:	
-	case IUI_STATUS:	
-	case IUI_CATEGORY:	
-	case IUI_VERSION:	
-	case IUI_TAGS:		
-	case IUI_PRIORITY:	
-	case IUI_RISK:		
+	case IA_ALLOCTO:	
+	case IA_ALLOCBY:	
+	case IA_STATUS:	
+	case IA_CATEGORY:	
+	case IA_VERSION:	
+	case IA_TAGS:		
+	case IA_PRIORITY:	
+	case IA_RISK:		
 		return TRUE;
 
-	case IUI_CUSTOMATTRIB:
+	case IA_CUSTOMATTRIB:
 		// TODO
 		break;
 	}
@@ -933,7 +933,7 @@ BOOL CKanbanColumnArray::MatchesAll(const CKanbanColumnArray& other, BOOL bIncDi
 KANBANSORT::KANBANSORT(const CKanbanItemMap& map)
 	:
 	data(map),
-	nBy(IUI_NONE),
+	nBy(IA_NONE),
 	bAscending(TRUE),
 	bSubtasksBelowParent(FALSE)
 {

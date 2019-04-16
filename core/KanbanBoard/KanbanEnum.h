@@ -15,8 +15,8 @@
 
 // Pseudo Attributes
 
-#define IUI_PARENT			IUI_POSITION
-#define IUI_FIXEDCOLUMNS	0xffffffff
+#define IA_PARENT			IA_POSITION
+#define IA_FIXEDCOLUMNS		0xffffffff
 
 /////////////////////////////////////////////////////////////////////////////
 

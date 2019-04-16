@@ -34,7 +34,7 @@ const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
 /////////////////////////////////////////////////////////////////////////////
 
 // Used temporarily by CompareTCItems
-static IUI_ATTRIBUTE s_nSortBy = IUI_NONE;
+static I_ATTRIBUTE s_nSortBy = IA_NONE;
 static BOOL s_bSortAscending = TRUE;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_bStrikeThruDone(FALSE),
 	m_bSavingToImage(FALSE),
 	m_nTaskHeight(DEF_TASK_HEIGHT),
-	m_nSortBy(IUI_NONE),
+	m_nSortBy(IA_NONE),
 	m_bSortAscending(-1)
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
@@ -224,17 +224,17 @@ BOOL CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	return true;
 }
 
-BOOL CTaskCalendarCtrl::WantEditUpdate(IUI_ATTRIBUTE nEditAttrib)
+BOOL CTaskCalendarCtrl::WantEditUpdate(I_ATTRIBUTE nEditAttrib)
 {
 	switch (nEditAttrib)
 	{
-	case IUI_TASKNAME:
-	case IUI_DONEDATE:
-	case IUI_DUEDATE:
-	case IUI_STARTDATE:
-	case IUI_COLOR:
-	case IUI_DEPENDENCY:
-	case IUI_ICON:
+	case IA_TASKNAME:
+	case IA_DONEDATE:
+	case IA_DUEDATE:
+	case IA_STARTDATE:
+	case IA_COLOR:
+	case IA_DEPENDENCY:
+	case IA_ICON:
 		return true;
 	}
 	
@@ -242,13 +242,13 @@ BOOL CTaskCalendarCtrl::WantEditUpdate(IUI_ATTRIBUTE nEditAttrib)
 	return FALSE;
 }
 
-BOOL CTaskCalendarCtrl::WantSortUpdate(IUI_ATTRIBUTE nEditAttrib)
+BOOL CTaskCalendarCtrl::WantSortUpdate(I_ATTRIBUTE nEditAttrib)
 {
 	switch (nEditAttrib)
 	{
-	case IUI_TASKNAME:
-	case IUI_ID:
-	case IUI_NONE:
+	case IA_TASKNAME:
+	case IA_ID:
+	case IA_NONE:
 // 	case IUI_DONEDATE:
 // 	case IUI_DUEDATE:
 // 	case IUI_STARTDATE:
@@ -259,7 +259,7 @@ BOOL CTaskCalendarCtrl::WantSortUpdate(IUI_ATTRIBUTE nEditAttrib)
 	return FALSE;
 }
 
-BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
+BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
 
@@ -376,7 +376,7 @@ BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 }
 
 BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, 
-									const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+									const CSet<I_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return FALSE;
@@ -444,7 +444,7 @@ void CTaskCalendarCtrl::NotifyParentDragChange()
 	GetParent()->SendMessage(WM_CALENDAR_DRAGCHANGE, (WPARAM)GetSnapMode(), m_dwSelectedTaskID);
 }
 
-void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<I_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return;
@@ -1001,7 +1001,7 @@ int CTaskCalendarCtrl::GetTaskHeight() const
 	return max(MIN_TASK_HEIGHT, min(nHeight, m_nTaskHeight));
 }
 
-BOOL CTaskCalendarCtrl::SortBy(IUI_ATTRIBUTE nSortBy, BOOL bAscending)
+BOOL CTaskCalendarCtrl::SortBy(I_ATTRIBUTE nSortBy, BOOL bAscending)
 {
 	if (!WantSortUpdate(nSortBy))
 		return FALSE;
@@ -1114,7 +1114,7 @@ int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell) const
 
 		qsort(pTasks->GetData(), pTasks->GetSize(), sizeof(TASKCALITEM*), CompareTCItems);
 
-		s_nSortBy = IUI_NONE;
+		s_nSortBy = IA_NONE;
 		s_bSortAscending = -1;
 	}
 
@@ -1183,15 +1183,16 @@ int CTaskCalendarCtrl::CompareTCItems(const void* pV1, const void* pV2)
 
 	switch (s_nSortBy)
 	{
-	case IUI_TASKNAME:
+	case IA_TASKNAME:
 		ASSERT(s_bSortAscending != -1);
 		nCompare = pTCI1->GetName(FALSE).CompareNoCase(pTCI2->GetName(FALSE));
 		break;
 
-	case IUI_ID:
+	case IA_ID:
 		ASSERT(s_bSortAscending != -1);
 		// fall thru
-	case IUI_NONE:
+
+	case IA_NONE:
 		nCompare = ((pTCI1->GetTaskID() < pTCI2->GetTaskID()) ? -1 : 1);
 		break;
 
@@ -1199,7 +1200,7 @@ int CTaskCalendarCtrl::CompareTCItems(const void* pV1, const void* pV2)
 		ASSERT(0);
 	}
 
-	if (!s_bSortAscending && (nCompare != 0) && (s_nSortBy != IUI_NONE))
+	if (!s_bSortAscending && (nCompare != 0) && (s_nSortBy != IA_NONE))
 		nCompare = -nCompare;
 
 	return nCompare;

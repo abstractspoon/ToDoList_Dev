@@ -288,7 +288,7 @@ void CKanbanColumnCtrlArray::Exclude(CDC* pDC)
 	}
 }
 
-void CKanbanColumnCtrlArray::SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending)
+void CKanbanColumnCtrlArray::SortItems(I_ATTRIBUTE nBy, BOOL bAscending)
 {
 	int nCol = GetSize();
 

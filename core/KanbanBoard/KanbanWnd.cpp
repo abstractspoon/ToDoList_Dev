@@ -43,7 +43,7 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_KANBANTREE_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
-	m_nTrackedAttrib(IUI_NONE),
+	m_nTrackedAttrib(IA_NONE),
 	m_ctrlKanban(),
 	m_dwSelTaskID(0),
 #pragma warning(disable:4355)
@@ -71,7 +71,7 @@ void CKanbanWnd::DoDataExchange(CDataExchange* pDX)
 		m_nTrackedAttrib = m_cbAttributes.GetSelectedAttribute();
 		m_sTrackedCustomAttribID = m_cbCustomAttributes.GetSelectedAttributeID();
 	}
-	else if (m_nTrackedAttrib != IUI_NONE)
+	else if (m_nTrackedAttrib != IA_NONE)
 	{
 		m_cbAttributes.SetSelectedAttribute(m_nTrackedAttrib);
 		m_cbCustomAttributes.SetSelectedAttributeID(m_sTrackedCustomAttribID);
@@ -221,7 +221,7 @@ void CKanbanWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	// Last tracked attribute
 	pPrefs->WriteProfileInt(szKey, _T("LastTrackedAttribute"), m_nTrackedAttrib);
 
-	if (m_nTrackedAttrib == IUI_CUSTOMATTRIB)
+	if (m_nTrackedAttrib == IA_CUSTOMATTRIB)
 		pPrefs->WriteProfileString(sKey, _T("CustomAttrib"), m_sTrackedCustomAttribID);
 	else
 		pPrefs->DeleteProfileEntry(sKey, _T("CustomAttrib"));
@@ -336,21 +336,21 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		// Last tracked attribute
 		m_dlgPrefs.LoadPreferences(pPrefs, szKey);
 
-		m_nTrackedAttrib = (IUI_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("LastTrackedAttribute"), IUI_STATUS);
+		m_nTrackedAttrib = (I_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("LastTrackedAttribute"), IA_STATUS);
 
 		switch (m_nTrackedAttrib)
 		{
-		case IUI_FIXEDCOLUMNS:
+		case IA_FIXEDCOLUMNS:
 			if (!m_dlgPrefs.HasFixedColumns())
-				m_nTrackedAttrib = IUI_STATUS;
+				m_nTrackedAttrib = IA_STATUS;
 			break;
 
-		case IUI_CUSTOMATTRIB:
+		case IA_CUSTOMATTRIB:
 			m_sTrackedCustomAttribID = pPrefs->GetProfileString(szKey, _T("CustomAttrib"));
 
 			// fallback
 			if (m_sTrackedCustomAttribID.IsEmpty())
-				m_nTrackedAttrib = IUI_STATUS;
+				m_nTrackedAttrib = IA_STATUS;
 			break;
 		}
 
@@ -459,18 +459,18 @@ bool CKanbanWnd::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 	return false;
 }
 
-bool CKanbanWnd::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
+bool CKanbanWnd::WantTaskUpdate(I_ATTRIBUTE nAttribute) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	return (m_ctrlKanban.WantEditUpdate(nAttribute) != FALSE);
 }
 
-void CKanbanWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CKanbanWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const I_ATTRIBUTE* pAttributes, int nNumAttributes)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	CSet<IUI_ATTRIBUTE> attrib(pAttributes, nNumAttributes);
+	CSet<I_ATTRIBUTE> attrib(pAttributes, nNumAttributes);
 	m_ctrlKanban.UpdateTasks(pTasks, nUpdate, attrib);
 
 	if (!m_ctrlKanban.SelectTask(m_dwSelTaskID))
@@ -479,7 +479,7 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, co
 	// Update custom attribute combo
 	const CKanbanCustomAttributeDefinitionArray& aCustDefs = m_ctrlKanban.GetCustomAttributeDefinitions();
 
-	if (attrib.Has(IUI_CUSTOMATTRIB))
+	if (attrib.Has(IA_CUSTOMATTRIB))
 	{
 		m_cbCustomAttributes.SetAttributeDefinitions(aCustDefs);
 		m_cbCustomAttributes.SetSelectedAttributeID(m_sTrackedCustomAttribID);
@@ -490,9 +490,9 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, co
 	// Validate any change in selection
 	UpdateData(TRUE);
 
-	if (m_nTrackedAttrib == IUI_NONE)
+	if (m_nTrackedAttrib == IA_NONE)
 	{
-		m_nTrackedAttrib = IUI_STATUS;
+		m_nTrackedAttrib = IA_STATUS;
 		UpdateData(FALSE);
 
 		EnableDisableCtrls();
@@ -653,7 +653,7 @@ void CKanbanWnd::Resize(int cx, int cy)
 
 		CRect rAttrib;
 
-		if (m_nTrackedAttrib == IUI_CUSTOMATTRIB)
+		if (m_nTrackedAttrib == IA_CUSTOMATTRIB)
 			rAttrib = GetChildRect(&m_cbCustomAttributes);
 		else
 			rAttrib = GetChildRect(&m_cbAttributes);
@@ -746,14 +746,14 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 	// but has now deleted them then we revert to 'status'
 	if (bFixedColumnsToggled)
 	{
-		if ((m_nTrackedAttrib == IUI_FIXEDCOLUMNS) && !m_dlgPrefs.HasFixedColumns())
+		if ((m_nTrackedAttrib == IA_FIXEDCOLUMNS) && !m_dlgPrefs.HasFixedColumns())
 		{
-			m_nTrackedAttrib = IUI_STATUS;
+			m_nTrackedAttrib = IA_STATUS;
 			UpdateData(FALSE);
 		}
-		else if ((m_nTrackedAttrib != IUI_FIXEDCOLUMNS) && m_dlgPrefs.HasFixedColumns())
+		else if ((m_nTrackedAttrib != IA_FIXEDCOLUMNS) && m_dlgPrefs.HasFixedColumns())
 		{
-			m_nTrackedAttrib = (IUI_ATTRIBUTE)IUI_FIXEDCOLUMNS;
+			m_nTrackedAttrib = (I_ATTRIBUTE)IA_FIXEDCOLUMNS;
 			UpdateData(FALSE);
 		}
 	}
@@ -778,9 +778,9 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 	DWORD dwTaskID = lp;
 	
 	CString sCustAttribID;
-	IUI_ATTRIBUTE nAttrib = IUI_NONE;
+	I_ATTRIBUTE nAttrib = IA_NONE;
 	
-	if (m_nTrackedAttrib == IUI_FIXEDCOLUMNS)
+	if (m_nTrackedAttrib == IA_FIXEDCOLUMNS)
 	{
 		nAttrib = m_dlgPrefs.GetFixedAttributeToTrack(sCustAttribID);
 	}
@@ -802,24 +802,24 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 
 	switch (nAttrib)
 	{
-		case IUI_ALLOCTO:
-		case IUI_CATEGORY:
-		case IUI_TAGS:
-		case IUI_STATUS:
-		case IUI_ALLOCBY:
-		case IUI_VERSION:
+		case IA_ALLOCTO:
+		case IA_CATEGORY:
+		case IA_TAGS:
+		case IA_STATUS:
+		case IA_ALLOCBY:
+		case IA_VERSION:
 			mod.szValue = sModValue; // temporary string
 			break;
 
-		case IUI_PRIORITY:
-		case IUI_RISK:
+		case IA_PRIORITY:
+		case IA_RISK:
 			if (aTaskValues.GetSize() == 0)
 				mod.nValue = -2; // None
 			else
 				mod.nValue = _ttoi(aTaskValues[0]);
 			break;
 
-		case IUI_CUSTOMATTRIB:
+		case IA_CUSTOMATTRIB:
 			ASSERT(!sCustAttribID.IsEmpty());
 
 			mod.szValue = sModValue;
@@ -845,7 +845,7 @@ LRESULT CKanbanWnd::OnKanbanNotifySelectionChange(WPARAM wp, LPARAM /*lp*/)
 
 LRESULT CKanbanWnd::OnKanbanNotifyEditTaskDone(WPARAM /*wp*/, LPARAM lp) 
 {
-	IUITASKMOD mod = { IUI_DONEDATE, m_dwSelTaskID, 0 };
+	IUITASKMOD mod = { IA_DONEDATE, m_dwSelTaskID, 0 };
 
 	if (lp) // done/not done
 		VERIFY(CDateHelper::GetTimeT64(CDateHelper::GetDate(DHD_NOW), mod.tValue));
@@ -857,7 +857,7 @@ LRESULT CKanbanWnd::OnKanbanNotifyEditTaskDone(WPARAM /*wp*/, LPARAM lp)
 
 LRESULT CKanbanWnd::OnKanbanNotifyEditTaskFlag(WPARAM /*wp*/, LPARAM lp) 
 {
-	IUITASKMOD mod = { IUI_FLAG, m_dwSelTaskID, 0 };
+	IUITASKMOD mod = { IA_FLAG, m_dwSelTaskID, 0 };
 	mod.bValue = (lp != 0);
 
 	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
@@ -865,7 +865,7 @@ LRESULT CKanbanWnd::OnKanbanNotifyEditTaskFlag(WPARAM /*wp*/, LPARAM lp)
 
 LRESULT CKanbanWnd::OnKanbanNotifyFlagChange(WPARAM /*wp*/, LPARAM lp) 
 {
-	IUITASKMOD mod = { IUI_DONEDATE, m_dwSelTaskID, 0 };
+	IUITASKMOD mod = { IA_DONEDATE, m_dwSelTaskID, 0 };
 
 	if (lp) // done/not done
 		VERIFY(CDateHelper::GetTimeT64(CDateHelper::GetDate(DHD_NOW), mod.tValue));
@@ -894,7 +894,7 @@ void CKanbanWnd::OnKanbanPreferences()
 
 void CKanbanWnd::EnableDisableCtrls()
 {
-	BOOL bCustom = (m_nTrackedAttrib == IUI_CUSTOMATTRIB);
+	BOOL bCustom = (m_nTrackedAttrib == IA_CUSTOMATTRIB);
 	
 	m_cbCustomAttributes.ShowWindow(bCustom ? SW_SHOW : SW_HIDE);
 	m_cbCustomAttributes.EnableWindow(bCustom);
@@ -923,10 +923,10 @@ void CKanbanWnd::OnSelchangeTrackedAttribute()
 void CKanbanWnd::ProcessTrackedAttributeChange() 
 {
 	CKanbanColumnArray aColDefs;
-	IUI_ATTRIBUTE nTrackAttrib;
+	I_ATTRIBUTE nTrackAttrib;
 	CString sCustomAttrib;
 
-	if (m_nTrackedAttrib == IUI_FIXEDCOLUMNS)
+	if (m_nTrackedAttrib == IA_FIXEDCOLUMNS)
 	{
 		VERIFY(m_dlgPrefs.GetFixedColumnDefinitions(aColDefs));
 
@@ -936,7 +936,7 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 	{
 		// If the new type is 'custom' auto-select the first custom attribute
 		// else hide the custom attribute field
-		if ((m_nTrackedAttrib == IUI_CUSTOMATTRIB) && m_sTrackedCustomAttribID.IsEmpty())
+		if ((m_nTrackedAttrib == IA_CUSTOMATTRIB) && m_sTrackedCustomAttribID.IsEmpty())
 		{
 			m_cbCustomAttributes.SetCurSel(0);
 			m_sTrackedCustomAttribID = m_cbCustomAttributes.GetSelectedAttributeID();
@@ -944,7 +944,7 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 			// Fallback
 			if (m_sTrackedCustomAttribID.IsEmpty())
 			{
-				m_nTrackedAttrib = IUI_STATUS;
+				m_nTrackedAttrib = IA_STATUS;
 				UpdateData(FALSE);
 			}
 		}

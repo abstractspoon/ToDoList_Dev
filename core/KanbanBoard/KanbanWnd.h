@@ -49,8 +49,8 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
-	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes);
-	bool WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const;
+	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const I_ATTRIBUTE* pAttributes, int nNumAttributes);
+	bool WantTaskUpdate(I_ATTRIBUTE nAttribute) const;
 	bool PrepareNewTask(ITaskList* pTask) const;
 
 	bool SelectTask(DWORD dwTaskID);
@@ -81,7 +81,7 @@ protected:
 	CBrush m_brBack;
 	UITHEME m_theme;
 	CString	m_sTrackedCustomAttribID;
-	IUI_ATTRIBUTE m_nTrackedAttrib;
+	I_ATTRIBUTE m_nTrackedAttrib;
 	DWORD m_dwSelTaskID;
 
 // Overrides

@@ -287,7 +287,7 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	m_MiniCalendar.SetOptions(dwOptions);
 
 	CDWordArray aHeatMapPalette;
-	IUI_ATTRIBUTE nHeatMapAttrib = IUI_NONE;
+	I_ATTRIBUTE nHeatMapAttrib = IA_NONE;
 
 	if (m_dlgPrefs.GetEnableHeatMap(aHeatMapPalette, nHeatMapAttrib))
 		m_MiniCalendar.EnableHeatMap(aHeatMapPalette, nHeatMapAttrib);
@@ -514,7 +514,7 @@ bool CCalendarWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
 	return false; // only support single selection
 }
 
-bool CCalendarWnd::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
+bool CCalendarWnd::WantTaskUpdate(I_ATTRIBUTE nAttribute) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -528,11 +528,11 @@ bool CCalendarWnd::PrepareNewTask(ITaskList* pTask) const
 	return (m_BigCalendar.PrepareNewTask(pTask) != FALSE);
 }
 
-void CCalendarWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CCalendarWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const I_ATTRIBUTE* pAttributes, int nNumAttributes)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	if (m_BigCalendar.UpdateTasks(pTasks, nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes)) != FALSE)
+	if (m_BigCalendar.UpdateTasks(pTasks, nUpdate, CSet<I_ATTRIBUTE>(pAttributes, nNumAttributes)) != FALSE)
 		m_MiniCalendar.OnUpdateTasks();
 
 	UpdateSelectedTaskDates();
@@ -705,27 +705,27 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 
 	if (m_BigCalendar.GetSelectedTaskDates(dtStart, dtDue))
 	{
-		IUITASKMOD mod = { IUI_NONE, 0 };
+		IUITASKMOD mod = { IA_NONE, 0 };
 		
 		switch (wp)
 		{
 		case TCCHT_BEGIN:
 			if (CDateHelper::GetTimeT64(dtStart, mod.tValue))
-				mod.nAttrib = IUI_STARTDATE;
+				mod.nAttrib = IA_STARTDATE;
 			break;
 			
 		case TCCHT_MIDDLE:
 			if (CDateHelper::GetTimeT64(dtStart, mod.tValue))
-				mod.nAttrib = IUI_OFFSETTASK;
+				mod.nAttrib = IA_OFFSETTASK;
 			break;
 			
 		case TCCHT_END:
 			if (CDateHelper::GetTimeT64(dtDue, mod.tValue))
-				mod.nAttrib = IUI_DUEDATE;
+				mod.nAttrib = IA_DUEDATE;
 			break;
 		}
 		
-		if (mod.nAttrib != IUI_NONE)
+		if (mod.nAttrib != IA_NONE)
 		{
 			if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
 			{

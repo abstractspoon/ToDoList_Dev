@@ -858,7 +858,7 @@ Boolean Task::AddFileReference(String^ sFileLink)
 	return SETTASKSTR(AddTaskFileLink, sFileLink);
 }
 
-Boolean Task::SetColor(UINT32 color)
+Boolean Task::SetColor(UInt32 color)
 {
 	return SETTASKVAL(SetTaskColor, color);
 }

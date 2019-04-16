@@ -28,7 +28,7 @@ static char THIS_FILE[] = __FILE__;
 CTaskMiniCalendarCtrl::CTaskMiniCalendarCtrl(const CTaskCalItemMap& mapData) 
 	: 
 	m_mapData(mapData), 
-	m_nHeatMapAttribute(IUI_NONE)
+	m_nHeatMapAttribute(IA_NONE)
 {
 }
 
@@ -119,10 +119,10 @@ void CTaskMiniCalendarCtrl::GetDateCellColors(const COleDateTime& dt, BOOL bSele
 	}
 }
 
-void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, IUI_ATTRIBUTE nAttrib)
+void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, I_ATTRIBUTE nAttrib)
 {
 	ASSERT(aPalette.GetSize());
-	ASSERT(nAttrib != IUI_NONE);
+	ASSERT(nAttrib != IA_NONE);
 
 	if (m_mapHeatMap.SetColorPalette(aPalette))
 		Invalidate();
@@ -143,7 +143,7 @@ void CTaskMiniCalendarCtrl::DisableHeatMap()
 	{
 		m_tooltip.DestroyWindow();
 		m_mapHeatMap.ClearHeat();
-		m_nHeatMapAttribute = IUI_NONE;
+		m_nHeatMapAttribute = IA_NONE;
 
 		Invalidate();
 	}

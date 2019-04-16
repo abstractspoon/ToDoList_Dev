@@ -104,10 +104,10 @@
       <OutputFile>.\Unicode_Debug/ToDoList.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>mkdir ..\..\ToDoList_Plugins
-mkdir ..\..\ToDoList_Plugins\debug
-copy unicode_debug\ToDoList.exe ..\..\todolist_Plugins\debug /y
-copy unicode_debug\ToDoList.pdb ..\..\todolist_Plugins\debug /y
+      <Command>mkdir ..\..\Plugins
+mkdir ..\..\Plugins\debug
+copy unicode_debug\ToDoList.exe ..\..\Plugins\debug /y
+copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

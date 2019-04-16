@@ -14,6 +14,7 @@
 #include <Windows.h>
 
 #include "ITaskList.h"
+#include "IAttribute.h"
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -183,60 +184,11 @@ enum IUI_HITTEST
 	// new values here
 };
 
-enum IUI_ATTRIBUTE
-{
-	// NEVER CHANGE THE ORDER OF THIS LIST
-	IUI_NONE		= 0,
-	IUI_TASKNAME,			
-	IUI_DONEDATE,			
-	IUI_DUEDATE	,			
-	IUI_STARTDATE,			
-	IUI_PRIORITY,		
-	IUI_COLOR,		
-	IUI_ALLOCTO,		
-	IUI_ALLOCBY,		
-	IUI_STATUS,		
-	IUI_CATEGORY,		
-	IUI_PERCENT,		
-	IUI_TIMEEST,		
-	IUI_TIMESPENT,		
-	IUI_FILEREF,		
-	IUI_COMMENTS,		
-	IUI_FLAG,		
-	IUI_CREATIONDATE,		
-	IUI_CREATEDBY,		
-	IUI_RISK,				
-	IUI_EXTERNALID,		
-	IUI_COST,				
-	IUI_DEPENDENCY,		
-	IUI_RECURRENCE,		
-	IUI_VERSION,			
-	IUI_POSITION,		
-	IUI_ID,		
-	IUI_LASTMOD,		
-	IUI_ICON,		
-	IUI_TAGS,		
-	IUI_CUSTOMATTRIB,		
-	IUI_OFFSETTASK,		
-	IUI_LOCK,
-	IUI_SUBTASKDONE,
-	IUI_TASKNAMEORCOMMENTS,
-	IUI_ANYTEXTATTRIBUTE,
-	IUI_METADATA,
-	IUI_PROJECTNAME,
-
-	// new values here
-	// IUI_
-
-	// ALWAYS THE LAST VALUE
-	IUI_NUMATTRIBUTES
-};
-
 //////////////////////////////////////////////////////////////////////
 
 struct IUITASKMOD
 {
-	IUI_ATTRIBUTE nAttrib;
+	I_ATTRIBUTE nAttrib;
 	DWORD dwSelectedTaskID;		// 'zero' for _ALL_ selected tasks
 	LPCWSTR szCustomAttribID;	// IUI_CUSTOMATTRIB
 
@@ -274,13 +226,13 @@ struct IUITASKMOVE
 
 struct IUIMULTISORT
 {
-	IUI_ATTRIBUTE nAttrib1;
+	I_ATTRIBUTE nAttrib1;
 	bool bAscending1;
 
-	IUI_ATTRIBUTE nAttrib2;
+	I_ATTRIBUTE nAttrib2;
 	bool bAscending2;
 
-	IUI_ATTRIBUTE nAttrib3;
+	I_ATTRIBUTE nAttrib3;
 	bool bAscending3;
 };
 
@@ -288,7 +240,7 @@ struct IUIMULTISORT
 
 struct IUISELECTTASK
 {
-	IUI_ATTRIBUTE nAttrib; // IUI_TASKNAME, IUI_TASKNAMEORCOMMENTS or IUI_ANYTEXTATTRIBUTE
+	I_ATTRIBUTE nAttrib; // IUI_TASKNAME, IUI_TASKNAMEORCOMMENTS or IUI_ANYTEXTATTRIBUTE
 	bool bFindReplace;
 
 	LPCWSTR szWords;	
@@ -302,7 +254,7 @@ struct IUIAPPCOMMANDDATA
 {
 	union
 	{
-		IUI_ATTRIBUTE nSortBy;
+		I_ATTRIBUTE nSortBy;
 		DWORD dwTaskID;
 		WCHAR szFilePath[MAX_PATH + 1];
 		IUIMULTISORT sort;
@@ -356,8 +308,8 @@ public:
 	virtual bool SelectTask(DWORD dwTaskID) = 0;
 	virtual bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount) = 0;
 
-	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes) = 0;
-	virtual bool WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const = 0;
+	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const I_ATTRIBUTE* pAttributes, int nNumAttributes) = 0;
+	virtual bool WantTaskUpdate(I_ATTRIBUTE nAttribute) const = 0;
 	virtual bool PrepareNewTask(ITaskList* pTask) const = 0;
 	
 	virtual bool ProcessMessage(MSG* pMsg) = 0;

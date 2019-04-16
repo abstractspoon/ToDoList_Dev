@@ -230,8 +230,8 @@ void CKanbanColumnCtrl::SetMaximumTaskCount(int nMaxTasks)
 
 void CKanbanColumnCtrl::OnDisplayAttributeChanged()
 {
-	m_bDrawTaskFlags = (Misc::FindT(IUI_FLAG, m_aDisplayAttrib) != -1);
-	m_bDrawTaskParents = (Misc::FindT(IUI_PARENT, m_aDisplayAttrib) != -1);
+	m_bDrawTaskFlags = (Misc::FindT(IA_FLAG, m_aDisplayAttrib) != -1);
+	m_bDrawTaskParents = (Misc::FindT(IA_PARENT, m_aDisplayAttrib) != -1);
 
 	RecalcItemLineHeight();
 	RefreshItemLineHeights();
@@ -273,12 +273,12 @@ int CKanbanColumnCtrl::GetItemDisplayAttributeCount(const KANBANITEM& ki) const
 
 	while (nDisp--)
 	{
-		IUI_ATTRIBUTE nAttribID = m_aDisplayAttrib[nDisp];
+		I_ATTRIBUTE nAttribID = m_aDisplayAttrib[nDisp];
 
 		switch (nAttribID)
 		{
-		case IUI_FLAG:
-		case IUI_PARENT:
+		case IA_FLAG:
+		case IA_PARENT:
 			break;
 
 		default:
@@ -596,12 +596,12 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 
 	for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 	{
-		IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
+		I_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
 
 		switch (nAttrib)
 		{
-		case IUI_FLAG:
-		case IUI_PARENT:
+		case IA_FLAG:
+		case IA_PARENT:
 			break;
 
 		default:
@@ -881,41 +881,41 @@ BOOL CKanbanColumnCtrl::GetItemTooltipRect(HTREEITEM hti, CRect& rTip, const KAN
 	return TRUE;
 }
 
-UINT CKanbanColumnCtrl::GetDisplayFormat(IUI_ATTRIBUTE nAttrib, BOOL bLong)
+UINT CKanbanColumnCtrl::GetDisplayFormat(I_ATTRIBUTE nAttrib, BOOL bLong)
 {
 	switch (nAttrib)
 	{
-	case IUI_ALLOCBY:		return (bLong ? IDS_DISPLAY_ALLOCBY : IDS_DISPLAY_ALLOCBY_SHORT);
-	case IUI_ALLOCTO:		return (bLong ? IDS_DISPLAY_ALLOCTO : IDS_DISPLAY_ALLOCTO_SHORT);
-	case IUI_CATEGORY:		return (bLong ? IDS_DISPLAY_CATEGORY : IDS_DISPLAY_CATEGORY_SHORT);
-	case IUI_COST:			return (bLong ? IDS_DISPLAY_COST : IDS_DISPLAY_COST_SHORT);
-	case IUI_CREATEDBY:		return (bLong ? IDS_DISPLAY_CREATEDBY : IDS_DISPLAY_CREATEDBY_SHORT);
-	case IUI_CREATIONDATE:	return (bLong ? IDS_DISPLAY_CREATEDATE : IDS_DISPLAY_CREATEDATE_SHORT);
-	case IUI_DONEDATE:		return (bLong ? IDS_DISPLAY_DONEDATE : IDS_DISPLAY_DONEDATE_SHORT);
-	case IUI_DUEDATE:		return (bLong ? IDS_DISPLAY_DUEDATE : IDS_DISPLAY_DUEDATE_SHORT);
-	case IUI_EXTERNALID:	return (bLong ? IDS_DISPLAY_EXTERNALID : IDS_DISPLAY_EXTERNALID_SHORT);
-	case IUI_FLAG:			return (bLong ? IDS_DISPLAY_FLAG : IDS_DISPLAY_FLAG_SHORT);
-	case IUI_FILEREF:		return (bLong ? IDS_DISPLAY_FILEREF : IDS_DISPLAY_FILEREF_SHORT);
-	case IUI_ID:			return (bLong ? IDS_DISPLAY_TASKID : IDS_DISPLAY_TASKID_SHORT);
-	case IUI_LASTMOD:		return (bLong ? IDS_DISPLAY_LASTMOD : IDS_DISPLAY_LASTMOD_SHORT);
-	case IUI_PARENT:		return (bLong ? IDS_DISPLAY_PARENT : IDS_DISPLAY_PARENT_SHORT);
-	case IUI_PERCENT:		return (bLong ? IDS_DISPLAY_PERCENT : IDS_DISPLAY_PERCENT_SHORT);
-	case IUI_PRIORITY:		return (bLong ? IDS_DISPLAY_PRIORITY : IDS_DISPLAY_PRIORITY_SHORT);
-	case IUI_RECURRENCE:	return (bLong ? IDS_DISPLAY_RECURRENCE : IDS_DISPLAY_RECURRENCE_SHORT);
-	case IUI_RISK:			return (bLong ? IDS_DISPLAY_RISK : IDS_DISPLAY_RISK_SHORT);
-	case IUI_STARTDATE:		return (bLong ? IDS_DISPLAY_STARTDATE : IDS_DISPLAY_STARTDATE_SHORT);
-	case IUI_STATUS:		return (bLong ? IDS_DISPLAY_STATUS : IDS_DISPLAY_STATUS_SHORT);
-	case IUI_TAGS:			return (bLong ? IDS_DISPLAY_TAGS : IDS_DISPLAY_TAGS_SHORT);
-	case IUI_TIMEEST:		return (bLong ? IDS_DISPLAY_TIMEEST : IDS_DISPLAY_TIMEEST_SHORT);
-	case IUI_TIMESPENT:		return (bLong ? IDS_DISPLAY_TIMESPENT : IDS_DISPLAY_TIMESPENT_SHORT);
-	case IUI_VERSION:		return (bLong ? IDS_DISPLAY_VERSION : IDS_DISPLAY_VERSION_SHORT);
+	case IA_ALLOCBY:		return (bLong ? IDS_DISPLAY_ALLOCBY : IDS_DISPLAY_ALLOCBY_SHORT);
+	case IA_ALLOCTO:		return (bLong ? IDS_DISPLAY_ALLOCTO : IDS_DISPLAY_ALLOCTO_SHORT);
+	case IA_CATEGORY:		return (bLong ? IDS_DISPLAY_CATEGORY : IDS_DISPLAY_CATEGORY_SHORT);
+	case IA_COST:			return (bLong ? IDS_DISPLAY_COST : IDS_DISPLAY_COST_SHORT);
+	case IA_CREATEDBY:		return (bLong ? IDS_DISPLAY_CREATEDBY : IDS_DISPLAY_CREATEDBY_SHORT);
+	case IA_CREATIONDATE:	return (bLong ? IDS_DISPLAY_CREATEDATE : IDS_DISPLAY_CREATEDATE_SHORT);
+	case IA_DONEDATE:		return (bLong ? IDS_DISPLAY_DONEDATE : IDS_DISPLAY_DONEDATE_SHORT);
+	case IA_DUEDATE:		return (bLong ? IDS_DISPLAY_DUEDATE : IDS_DISPLAY_DUEDATE_SHORT);
+	case IA_EXTERNALID:	return (bLong ? IDS_DISPLAY_EXTERNALID : IDS_DISPLAY_EXTERNALID_SHORT);
+	case IA_FLAG:			return (bLong ? IDS_DISPLAY_FLAG : IDS_DISPLAY_FLAG_SHORT);
+	case IA_FILEREF:		return (bLong ? IDS_DISPLAY_FILEREF : IDS_DISPLAY_FILEREF_SHORT);
+	case IA_ID:			return (bLong ? IDS_DISPLAY_TASKID : IDS_DISPLAY_TASKID_SHORT);
+	case IA_LASTMOD:		return (bLong ? IDS_DISPLAY_LASTMOD : IDS_DISPLAY_LASTMOD_SHORT);
+	case IA_PARENT:		return (bLong ? IDS_DISPLAY_PARENT : IDS_DISPLAY_PARENT_SHORT);
+	case IA_PERCENT:		return (bLong ? IDS_DISPLAY_PERCENT : IDS_DISPLAY_PERCENT_SHORT);
+	case IA_PRIORITY:		return (bLong ? IDS_DISPLAY_PRIORITY : IDS_DISPLAY_PRIORITY_SHORT);
+	case IA_RECURRENCE:	return (bLong ? IDS_DISPLAY_RECURRENCE : IDS_DISPLAY_RECURRENCE_SHORT);
+	case IA_RISK:			return (bLong ? IDS_DISPLAY_RISK : IDS_DISPLAY_RISK_SHORT);
+	case IA_STARTDATE:		return (bLong ? IDS_DISPLAY_STARTDATE : IDS_DISPLAY_STARTDATE_SHORT);
+	case IA_STATUS:		return (bLong ? IDS_DISPLAY_STATUS : IDS_DISPLAY_STATUS_SHORT);
+	case IA_TAGS:			return (bLong ? IDS_DISPLAY_TAGS : IDS_DISPLAY_TAGS_SHORT);
+	case IA_TIMEEST:		return (bLong ? IDS_DISPLAY_TIMEEST : IDS_DISPLAY_TIMEEST_SHORT);
+	case IA_TIMESPENT:		return (bLong ? IDS_DISPLAY_TIMESPENT : IDS_DISPLAY_TIMESPENT_SHORT);
+	case IA_VERSION:		return (bLong ? IDS_DISPLAY_VERSION : IDS_DISPLAY_VERSION_SHORT);
 	}
 
 	ASSERT(0);
 	return 0;
 }
 
-void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const
+void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, I_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const
 {
 	KBC_ATTRIBLABELS nLabelVis = m_nAttribLabelVisiability;
 	
@@ -931,7 +931,7 @@ void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAtt
 	rLine.top += (m_nItemTextHeight + m_nItemTextBorder);
 }
 
-CString CKanbanColumnCtrl::FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis)
+CString CKanbanColumnCtrl::FormatAttribute(I_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis)
 {
 	UINT nFormatID = 0;
 	
@@ -1118,18 +1118,18 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 	
 		switch (pSort->nBy)
 		{
-		case IUI_TASKNAME:
+		case IA_TASKNAME:
 			nCompare = Misc::NaturalCompare(pKI1->sTitle, pKI2->sTitle);
 			break;
 			
-		case IUI_ALLOCBY:
-		case IUI_ALLOCTO:
-		case IUI_CATEGORY:
-		case IUI_PRIORITY:
-		case IUI_RISK:
-		case IUI_STATUS:
-		case IUI_TAGS:
-		case IUI_VERSION:
+		case IA_ALLOCBY:
+		case IA_ALLOCTO:
+		case IA_CATEGORY:
+		case IA_PRIORITY:
+		case IA_RISK:
+		case IA_STATUS:
+		case IA_TAGS:
+		case IA_VERSION:
 		{
 				ASSERT(!pSort->sAttribID.IsEmpty());
 
@@ -1140,36 +1140,36 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 			}
 			break;
 
-		case IUI_CUSTOMATTRIB:
+		case IA_CUSTOMATTRIB:
 			// TODO
 			break;
 
 		// Other display attributes
-		case IUI_COST:
+		case IA_COST:
 			nCompare = ((pKI1->dCost > pKI2->dCost) ? 1 : -1);
 			break;
 			
-		case IUI_CREATIONDATE:
+		case IA_CREATIONDATE:
 			nCompare = CDateHelper::Compare(pKI1->dtCreate, pKI2->dtCreate, DHC_COMPARETIME);
 			break;
 			
-		case IUI_CREATEDBY:
+		case IA_CREATEDBY:
 			nCompare = Misc::NaturalCompare(pKI1->sCreatedBy, pKI2->sCreatedBy);
 			break;
 			
-		case IUI_DONEDATE:
+		case IA_DONEDATE:
 			nCompare = CDateHelper::Compare(pKI1->dtDone, pKI2->dtDone, (DHC_COMPARETIME | DHC_NOTIMEISENDOFDAY));
 			break;
 			
-		case IUI_DUEDATE:
+		case IA_DUEDATE:
 			nCompare = CDateHelper::Compare(pKI1->dtDue, pKI2->dtDue, (DHC_COMPARETIME | DHC_NOTIMEISENDOFDAY));
 			break;
 			
-		case IUI_EXTERNALID:
+		case IA_EXTERNALID:
 			nCompare = Misc::NaturalCompare(pKI1->sExternalID, pKI2->sExternalID);
 			break;
 			
-		case IUI_FLAG:
+		case IA_FLAG:
 			if (pKI1->bFlag && pKI2->bFlag)
 			{
 				nCompare = 0;
@@ -1184,33 +1184,33 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 			}
 			break;
 			
-		case IUI_LASTMOD:
+		case IA_LASTMOD:
 			nCompare = CDateHelper::Compare(pKI1->dtLastMod, pKI2->dtLastMod, DHC_COMPARETIME);
 			break;
 			
-		case IUI_PERCENT:
+		case IA_PERCENT:
 			nCompare = ((pKI1->nPercent > pKI2->nPercent) ? 1 : -1);
 			break;
 			
-		case IUI_RECURRENCE:
+		case IA_RECURRENCE:
 			nCompare = Misc::NaturalCompare(pKI1->sRecurrence, pKI2->sRecurrence);
 			break;
 			
-		case IUI_STARTDATE:
+		case IA_STARTDATE:
 			nCompare = CDateHelper::Compare(pKI1->dtStart, pKI2->dtStart, DHC_COMPARETIME);
 			break;
 			
-		case IUI_TIMEEST:
+		case IA_TIMEEST:
 			nCompare = CTimeHelper().Compare(pKI1->dTimeEst, MapUnitsToTHUnits(pKI1->nTimeEstUnits), 
 											pKI2->dTimeEst, MapUnitsToTHUnits(pKI2->nTimeEstUnits));
 			break;
 			
-		case IUI_TIMESPENT:
+		case IA_TIMESPENT:
 			nCompare = CTimeHelper().Compare(pKI1->dTimeSpent, MapUnitsToTHUnits(pKI1->nTimeSpentUnits), 
 											pKI2->dTimeSpent, MapUnitsToTHUnits(pKI2->nTimeSpentUnits));
 			break;
 
-		case IUI_NONE: // Synonymous with IUI_POSITION
+		case IA_NONE: // Synonymous with IUI_POSITION
 			ASSERT(pSort->bSubtasksBelowParent);
 
 			// Avoid reversal of sign below
@@ -1221,7 +1221,7 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 	return (pSort->bAscending ? nCompare : -nCompare);
 }
 
-void CKanbanColumnCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
+void CKanbanColumnCtrl::Sort(I_ATTRIBUTE nBy, BOOL bAscending)
 {
 	KANBANSORT ks(m_data);
 	
@@ -1231,14 +1231,14 @@ void CKanbanColumnCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
 
 	switch (nBy)
 	{
-	case IUI_STATUS:
-	case IUI_ALLOCTO:
-	case IUI_CATEGORY:
-	case IUI_ALLOCBY:
-	case IUI_TAGS:
-	case IUI_RISK:
-	case IUI_PRIORITY:
-	case IUI_VERSION:
+	case IA_STATUS:
+	case IA_ALLOCTO:
+	case IA_CATEGORY:
+	case IA_ALLOCBY:
+	case IA_TAGS:
+	case IA_RISK:
+	case IA_PRIORITY:
+	case IA_VERSION:
 		ks.sAttribID = KANBANITEM::GetAttributeID(nBy);
 		break;
 	}
@@ -1425,9 +1425,9 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 			
 			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 			{
-				IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
+				I_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
 
-				if (nAttrib != IUI_FLAG)
+				if (nAttrib != IA_FLAG)
 				{
 					CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeDisplayValue(nAttrib), KBCAL_LONG);
 					nItemWidth = max(nItemWidth, ((int)(sAttrib.GetLength() * fAveCharWidth) + ATTRIB_INDENT));

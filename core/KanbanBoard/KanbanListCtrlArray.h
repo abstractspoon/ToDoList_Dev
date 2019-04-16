@@ -51,7 +51,7 @@ public:
 	void OnDisplayAttributeChanged();
 
 	void SortColumns();
-	void SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending);
+	void SortItems(I_ATTRIBUTE nBy, BOOL bAscending);
 
 	void SetSelectedColumn(const CKanbanColumnCtrl* pSelList);
 	void SetDropTarget(const CKanbanColumnCtrl* pTarget);

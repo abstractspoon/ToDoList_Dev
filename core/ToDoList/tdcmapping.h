@@ -652,194 +652,194 @@ namespace TDC
 		return IUI_EDIT;
 	}
 
-	static IUI_ATTRIBUTE MapAttributeToIUIAttribute(TDC_ATTRIBUTE nAttrib)
+	static I_ATTRIBUTE MapAttributeToIAttribute(TDC_ATTRIBUTE nAttrib)
 	{
 		switch (nAttrib)
 		{
-		case TDCA_ALLOCBY:			return IUI_ALLOCBY;
-		case TDCA_ALLOCTO:			return IUI_ALLOCTO;
-		case TDCA_CATEGORY:			return IUI_CATEGORY;
-		case TDCA_COLOR:			return IUI_COLOR;
-		case TDCA_COMMENTS:			return IUI_COMMENTS;
-		case TDCA_COST:				return IUI_COST;
-		case TDCA_CREATEDBY:		return IUI_CREATEDBY;
-		case TDCA_CREATIONDATE:		return IUI_CREATIONDATE;
-		case TDCA_DEPENDENCY:		return IUI_DEPENDENCY;
-		case TDCA_DONEDATE:			return IUI_DONEDATE; 
-		case TDCA_DONETIME:			return IUI_DONEDATE;
-		case TDCA_DUEDATE:			return IUI_DUEDATE;
-		case TDCA_DUETIME:			return IUI_DUEDATE;
-		case TDCA_EXTERNALID:		return IUI_EXTERNALID;
-		case TDCA_FILEREF:			return IUI_FILEREF;
-		case TDCA_FLAG:				return IUI_FLAG;
-		case TDCA_ICON:				return IUI_ICON;
-		case TDCA_LOCK:				return IUI_LOCK;
-		case TDCA_ID:				return IUI_ID;
-		case TDCA_LASTMODDATE:		return IUI_LASTMOD;
-		case TDCA_LASTMODBY:		return IUI_LASTMOD;
-		case TDCA_METADATA:			return IUI_METADATA;
-		case TDCA_PERCENT:			return IUI_PERCENT;
-		case TDCA_POSITION:			return IUI_POSITION;
-		case TDCA_PRIORITY:			return IUI_PRIORITY;
-		case TDCA_RECURRENCE:		return IUI_RECURRENCE;
-		case TDCA_RISK:				return IUI_RISK;
-		case TDCA_STARTDATE:		return IUI_STARTDATE;
-		case TDCA_STARTTIME:		return IUI_STARTDATE;
-		case TDCA_STATUS:			return IUI_STATUS;
-		case TDCA_SUBTASKDONE:		return IUI_SUBTASKDONE;
-		case TDCA_TAGS:				return IUI_TAGS;
-		case TDCA_TASKNAME:			return IUI_TASKNAME;
-		case TDCA_TIMEEST:			return IUI_TIMEEST;
-		case TDCA_TIMESPENT:		return IUI_TIMESPENT;
-		case TDCA_VERSION:			return IUI_VERSION;
+		case TDCA_ALLOCBY:			return IA_ALLOCBY;
+		case TDCA_ALLOCTO:			return IA_ALLOCTO;
+		case TDCA_CATEGORY:			return IA_CATEGORY;
+		case TDCA_COLOR:			return IA_COLOR;
+		case TDCA_COMMENTS:			return IA_COMMENTS;
+		case TDCA_COST:				return IA_COST;
+		case TDCA_CREATEDBY:		return IA_CREATEDBY;
+		case TDCA_CREATIONDATE:		return IA_CREATIONDATE;
+		case TDCA_DEPENDENCY:		return IA_DEPENDENCY;
+		case TDCA_DONEDATE:			return IA_DONEDATE; 
+		case TDCA_DONETIME:			return IA_DONEDATE;
+		case TDCA_DUEDATE:			return IA_DUEDATE;
+		case TDCA_DUETIME:			return IA_DUEDATE;
+		case TDCA_EXTERNALID:		return IA_EXTERNALID;
+		case TDCA_FILEREF:			return IA_FILEREF;
+		case TDCA_FLAG:				return IA_FLAG;
+		case TDCA_ICON:				return IA_ICON;
+		case TDCA_LOCK:				return IA_LOCK;
+		case TDCA_ID:				return IA_ID;
+		case TDCA_LASTMODDATE:		return IA_LASTMOD;
+		case TDCA_LASTMODBY:		return IA_LASTMOD;
+		case TDCA_METADATA:			return IA_METADATA;
+		case TDCA_PERCENT:			return IA_PERCENT;
+		case TDCA_POSITION:			return IA_POSITION;
+		case TDCA_PRIORITY:			return IA_PRIORITY;
+		case TDCA_RECURRENCE:		return IA_RECURRENCE;
+		case TDCA_RISK:				return IA_RISK;
+		case TDCA_STARTDATE:		return IA_STARTDATE;
+		case TDCA_STARTTIME:		return IA_STARTDATE;
+		case TDCA_STATUS:			return IA_STATUS;
+		case TDCA_SUBTASKDONE:		return IA_SUBTASKDONE;
+		case TDCA_TAGS:				return IA_TAGS;
+		case TDCA_TASKNAME:			return IA_TASKNAME;
+		case TDCA_TIMEEST:			return IA_TIMEEST;
+		case TDCA_TIMESPENT:		return IA_TIMESPENT;
+		case TDCA_VERSION:			return IA_VERSION;
 
 		// specials
-		case TDCA_CUSTOMATTRIBDEFS:	return IUI_CUSTOMATTRIB;
-		case TDCA_CUSTOMATTRIB_ALL:	return IUI_CUSTOMATTRIB;
-		case TDCA_PROJECTNAME:		return IUI_PROJECTNAME;
+		case TDCA_CUSTOMATTRIBDEFS:	return IA_CUSTOMATTRIB;
+		case TDCA_CUSTOMATTRIB_ALL:	return IA_CUSTOMATTRIB;
+		case TDCA_PROJECTNAME:		return IA_PROJECTNAME;
 
-		case TDCA_NEWTASK:			return IUI_NONE;
-		case TDCA_ALL:				return IUI_NONE;
-		case TDCA_NONE:				return IUI_NONE;
+		case TDCA_NEWTASK:			return IA_NONE;
+		case TDCA_ALL:				return IA_NONE;
+		case TDCA_NONE:				return IA_NONE;
 			
 		default: // handle custom attrib
 			if ((nAttrib >= TDCA_CUSTOMATTRIB_FIRST) && (nAttrib < TDCA_CUSTOMATTRIB_LAST))
-				return IUI_CUSTOMATTRIB;
+				return IA_CUSTOMATTRIB;
 		}
 
 		ASSERT(0);
-		return IUI_NONE;
+		return IA_NONE;
 	}
 
-	static int MapAttributesToIUIAttributes(const CTDCAttributeMap& mapAttrib, CArray<IUI_ATTRIBUTE, IUI_ATTRIBUTE>& aAttrib)
+	static int MapAttributesToIAttributes(const CTDCAttributeMap& mapAttrib, CArray<I_ATTRIBUTE, I_ATTRIBUTE>& aAttrib)
 	{
 		POSITION pos = mapAttrib.GetStartPosition();
 		
 		while (pos)
 		{
 			TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
-			aAttrib.Add(MapAttributeToIUIAttribute(nAttrib));
+			aAttrib.Add(MapAttributeToIAttribute(nAttrib));
 		}
 		
 		return aAttrib.GetSize();
 	}
 
-	static IUI_ATTRIBUTE MapColumnToIUIAttribute(TDC_COLUMN nColumn) 
-	{
-		TDC_ATTRIBUTE nAttrib = MapColumnToAttribute(nColumn);
+// 	static I_ATTRIBUTE MapColumnToIAttribute(TDC_COLUMN nColumn) 
+// 	{
+// 		TDC_ATTRIBUTE nAttrib = MapColumnToAttribute(nColumn);
+// 
+// 		return MapAttributeToIAttribute(nAttrib);
+// 	}
 
-		return MapAttributeToIUIAttribute(nAttrib);
-	}
-
-	static void MapSortColumnsToIUIMultiSort(const TDSORTCOLUMN* pSortCols, IUIMULTISORT& multiSort)
-	{
-		multiSort.nAttrib1 = TDC::MapColumnToIUIAttribute(pSortCols[0].nBy);
-		multiSort.bAscending1 = (pSortCols[0].bAscending != FALSE);
-
-		multiSort.nAttrib2 = TDC::MapColumnToIUIAttribute(pSortCols[1].nBy);
-		multiSort.bAscending2 = (pSortCols[1].bAscending != FALSE);
-
-		multiSort.nAttrib3 = TDC::MapColumnToIUIAttribute(pSortCols[2].nBy);
-		multiSort.bAscending3 = (pSortCols[2].bAscending != FALSE);
-	}
-
-	static IUI_ATTRIBUTE MapColumnToIUIEdit(TDC_COLUMN nCol)
+	static I_ATTRIBUTE MapColumnToIAttribute(TDC_COLUMN nCol)
 	{
 		switch (nCol)
 		{
-		case TDCC_ALLOCBY:		return IUI_ALLOCBY;
-		case TDCC_ALLOCTO:		return IUI_ALLOCTO;
-		case TDCC_CATEGORY:		return IUI_CATEGORY;
-		case TDCC_CLIENT:		return IUI_TASKNAME;
-		case TDCC_COLOR:		return IUI_COLOR;
-		case TDCC_COST:			return IUI_COST;
-		case TDCC_CREATEDBY:	return IUI_CREATEDBY;
-		case TDCC_CREATIONDATE:	return IUI_CREATIONDATE;
-		case TDCC_DEPENDENCY:	return IUI_DEPENDENCY;
-		case TDCC_DONEDATE:		return IUI_DONEDATE;
-		case TDCC_DONETIME:		return IUI_DONEDATE;
-		case TDCC_DUEDATE:		return IUI_DUEDATE;
-		case TDCC_DUETIME:		return IUI_DUEDATE;
-		case TDCC_EXTERNALID:	return IUI_EXTERNALID;
-		case TDCC_FILEREF:		return IUI_FILEREF;
-		case TDCC_FLAG:			return IUI_FLAG;
-		case TDCC_ICON:			return IUI_ICON;
-		case TDCC_ID:			return IUI_ID;
-		case TDCC_LASTMODDATE:	return IUI_LASTMOD;
-		case TDCC_LASTMODBY:	return IUI_LASTMOD;
-		case TDCC_LOCK:			return IUI_LOCK;
-		case TDCC_NONE:			return IUI_NONE;
-		case TDCC_PERCENT:		return IUI_PERCENT;
-		case TDCC_POSITION:		return IUI_POSITION;
-		case TDCC_PRIORITY:		return IUI_PRIORITY;
-		case TDCC_RECURRENCE:	return IUI_RECURRENCE;
-		case TDCC_RISK:			return IUI_RISK;
-		case TDCC_STARTDATE:	return IUI_STARTDATE;
-		case TDCC_STARTTIME:	return IUI_STARTDATE;
-		case TDCC_STATUS:		return IUI_STATUS;
-		case TDCC_SUBTASKDONE:	return IUI_SUBTASKDONE;
-		case TDCC_TAGS:			return IUI_TAGS;
-		case TDCC_TIMEEST:		return IUI_TIMEEST;
-		case TDCC_TIMESPENT:	return IUI_TIMESPENT;
-		case TDCC_VERSION:		return IUI_VERSION;
+		case TDCC_ALLOCBY:		return IA_ALLOCBY;
+		case TDCC_ALLOCTO:		return IA_ALLOCTO;
+		case TDCC_CATEGORY:		return IA_CATEGORY;
+		case TDCC_CLIENT:		return IA_TASKNAME;
+		case TDCC_COLOR:		return IA_COLOR;
+		case TDCC_COST:			return IA_COST;
+		case TDCC_CREATEDBY:	return IA_CREATEDBY;
+		case TDCC_CREATIONDATE:	return IA_CREATIONDATE;
+		case TDCC_DEPENDENCY:	return IA_DEPENDENCY;
+		case TDCC_DONEDATE:		return IA_DONEDATE;
+		case TDCC_DONETIME:		return IA_DONEDATE;
+		case TDCC_DUEDATE:		return IA_DUEDATE;
+		case TDCC_DUETIME:		return IA_DUEDATE;
+		case TDCC_EXTERNALID:	return IA_EXTERNALID;
+		case TDCC_FILEREF:		return IA_FILEREF;
+		case TDCC_FLAG:			return IA_FLAG;
+		case TDCC_ICON:			return IA_ICON;
+		case TDCC_ID:			return IA_ID;
+		case TDCC_LASTMODDATE:	return IA_LASTMOD;
+		case TDCC_LASTMODBY:	return IA_LASTMOD;
+		case TDCC_LOCK:			return IA_LOCK;
+		case TDCC_NONE:			return IA_NONE;
+		case TDCC_PERCENT:		return IA_PERCENT;
+		case TDCC_POSITION:		return IA_POSITION;
+		case TDCC_PRIORITY:		return IA_PRIORITY;
+		case TDCC_RECURRENCE:	return IA_RECURRENCE;
+		case TDCC_RISK:			return IA_RISK;
+		case TDCC_STARTDATE:	return IA_STARTDATE;
+		case TDCC_STARTTIME:	return IA_STARTDATE;
+		case TDCC_STATUS:		return IA_STATUS;
+		case TDCC_SUBTASKDONE:	return IA_SUBTASKDONE;
+		case TDCC_TAGS:			return IA_TAGS;
+		case TDCC_TIMEEST:		return IA_TIMEEST;
+		case TDCC_TIMESPENT:	return IA_TIMESPENT;
+		case TDCC_VERSION:		return IA_VERSION;
 
-		case TDCC_DONE:			return IUI_NONE;
-		case TDCC_REMINDER:		return IUI_NONE;
-		case TDCC_TRACKTIME:	return IUI_NONE;
-		case TDCC_RECENTEDIT:	return IUI_NONE;
-		case TDCC_REMAINING:	return IUI_NONE;
-		case TDCC_PATH:			return IUI_NONE;
+		case TDCC_DONE:			return IA_NONE;
+		case TDCC_REMINDER:		return IA_NONE;
+		case TDCC_TRACKTIME:	return IA_NONE;
+		case TDCC_RECENTEDIT:	return IA_NONE;
+		case TDCC_REMAINING:	return IA_NONE;
+		case TDCC_PATH:			return IA_NONE;
 
 		default: // handle custom columns
 			if (nCol >= TDCC_CUSTOMCOLUMN_FIRST && nCol < TDCC_CUSTOMCOLUMN_LAST)
-				return IUI_CUSTOMATTRIB;
+				return IA_CUSTOMATTRIB;
 		}
 
 		// all else
 		ASSERT(0);
-		return IUI_NONE;
+		return IA_NONE;
 	}
 
-	static TDC_ATTRIBUTE MapIUIAttributeToAttribute(IUI_ATTRIBUTE nAttrib)
+	static void MapSortColumnsToIUIMultiSort(const TDSORTCOLUMN* pSortCols, IUIMULTISORT& multiSort)
+	{
+		multiSort.nAttrib1 = TDC::MapColumnToIAttribute(pSortCols[0].nBy);
+		multiSort.bAscending1 = (pSortCols[0].bAscending != FALSE);
+
+		multiSort.nAttrib2 = TDC::MapColumnToIAttribute(pSortCols[1].nBy);
+		multiSort.bAscending2 = (pSortCols[1].bAscending != FALSE);
+
+		multiSort.nAttrib3 = TDC::MapColumnToIAttribute(pSortCols[2].nBy);
+		multiSort.bAscending3 = (pSortCols[2].bAscending != FALSE);
+	}
+
+	static TDC_ATTRIBUTE MapIAttributeToAttribute(I_ATTRIBUTE nAttrib)
 	{
 		switch (nAttrib)
 		{
-		case IUI_ALLOCBY:		return TDCA_ALLOCBY;
-		case IUI_ALLOCTO:		return TDCA_ALLOCTO;
-		case IUI_CATEGORY:		return TDCA_CATEGORY;
-		case IUI_COLOR:			return TDCA_COLOR;
-		case IUI_COST:			return TDCA_COST;
-		case IUI_CREATEDBY:		return TDCA_CREATEDBY;
-		case IUI_CREATIONDATE:	return TDCA_CREATIONDATE;
-		case IUI_CUSTOMATTRIB:	return TDCA_CUSTOMATTRIB;
-		case IUI_DEPENDENCY:	return TDCA_DEPENDENCY;
-		case IUI_DONEDATE:		return TDCA_DONEDATE; 
-		case IUI_DUEDATE:		return TDCA_DUEDATE;
-		case IUI_EXTERNALID:	return TDCA_EXTERNALID;
-		case IUI_FILEREF:		return TDCA_FILEREF;
-		case IUI_FLAG:			return TDCA_FLAG;
-		case IUI_ICON:			return TDCA_ICON;
-		case IUI_ID:			return TDCA_ID;
-		case IUI_LASTMOD:		return TDCA_LASTMODDATE; // TDCA_LASTMODBY
-		case IUI_LOCK:			return TDCA_LOCK;
-		case IUI_METADATA:		return TDCA_METADATA;
-		case IUI_PERCENT:		return TDCA_PERCENT;
-		case IUI_POSITION:		return TDCA_POSITION;
-		case IUI_PRIORITY:		return TDCA_PRIORITY;
-		case IUI_RECURRENCE:	return TDCA_RECURRENCE;
-		case IUI_RISK:			return TDCA_RISK;
-		case IUI_STARTDATE:		return TDCA_STARTDATE;
-		case IUI_STATUS:		return TDCA_STATUS;
-		case IUI_TAGS:			return TDCA_TAGS;
-		case IUI_TASKNAME:		return TDCA_TASKNAME;
-		case IUI_TIMEEST:		return TDCA_TIMEEST;
-		case IUI_TIMESPENT:		return TDCA_TIMESPENT;
-		case IUI_VERSION:		return TDCA_VERSION;
+		case IA_ALLOCBY:		return TDCA_ALLOCBY;
+		case IA_ALLOCTO:		return TDCA_ALLOCTO;
+		case IA_CATEGORY:		return TDCA_CATEGORY;
+		case IA_COLOR:			return TDCA_COLOR;
+		case IA_COST:			return TDCA_COST;
+		case IA_CREATEDBY:		return TDCA_CREATEDBY;
+		case IA_CREATIONDATE:	return TDCA_CREATIONDATE;
+		case IA_CUSTOMATTRIB:	return TDCA_CUSTOMATTRIB;
+		case IA_DEPENDENCY:		return TDCA_DEPENDENCY;
+		case IA_DONEDATE:		return TDCA_DONEDATE; 
+		case IA_DUEDATE:		return TDCA_DUEDATE;
+		case IA_EXTERNALID:		return TDCA_EXTERNALID;
+		case IA_FILEREF:		return TDCA_FILEREF;
+		case IA_FLAG:			return TDCA_FLAG;
+		case IA_ICON:			return TDCA_ICON;
+		case IA_ID:				return TDCA_ID;
+		case IA_LASTMOD:		return TDCA_LASTMODDATE; // TDCA_LASTMODBY
+		case IA_LOCK:			return TDCA_LOCK;
+		case IA_METADATA:		return TDCA_METADATA;
+		case IA_PERCENT:		return TDCA_PERCENT;
+		case IA_POSITION:		return TDCA_POSITION;
+		case IA_PRIORITY:		return TDCA_PRIORITY;
+		case IA_RECURRENCE:		return TDCA_RECURRENCE;
+		case IA_RISK:			return TDCA_RISK;
+		case IA_STARTDATE:		return TDCA_STARTDATE;
+		case IA_STATUS:			return TDCA_STATUS;
+		case IA_TAGS:			return TDCA_TAGS;
+		case IA_TASKNAME:		return TDCA_TASKNAME;
+		case IA_TIMEEST:		return TDCA_TIMEEST;
+		case IA_TIMESPENT:		return TDCA_TIMESPENT;
+		case IA_VERSION:		return TDCA_VERSION;
 			break;
 
 		// Specials
-		case IUI_OFFSETTASK:	return TDCA_NONE; // intentionally 'none'
-		case IUI_PROJECTNAME:	return TDCA_PROJECTNAME;
+		case IA_OFFSETTASK:	return TDCA_NONE; // intentionally 'none'
+		case IA_PROJECTNAME:	return TDCA_PROJECTNAME;
 
 		}
 
@@ -847,42 +847,42 @@ namespace TDC
 		return TDCA_NONE;
 	}
 
-	static TDC_COLUMN MapIUIAttributeToColumn(IUI_ATTRIBUTE nCol)
+	static TDC_COLUMN MapIAttributeToColumn(I_ATTRIBUTE nCol)
 	{
 		switch (nCol)
 		{
-		case IUI_ALLOCBY:		return TDCC_ALLOCBY;
-		case IUI_ALLOCTO:		return TDCC_ALLOCTO;
-		case IUI_CATEGORY:		return TDCC_CATEGORY;
-		case IUI_TASKNAME:		return TDCC_CLIENT;
-		case IUI_COLOR:			return TDCC_COLOR;
-		case IUI_COST:			return TDCC_COST;
-		case IUI_CREATEDBY:		return TDCC_CREATEDBY;
-		case IUI_CREATIONDATE:	return TDCC_CREATIONDATE;
-		case IUI_DEPENDENCY:	return TDCC_DEPENDENCY;
-		case IUI_DONEDATE:		return TDCC_DONEDATE;
-		case IUI_DUEDATE:		return TDCC_DUEDATE;
-		case IUI_EXTERNALID:	return TDCC_EXTERNALID;
-		case IUI_FILEREF:		return TDCC_FILEREF;
-		case IUI_FLAG:			return TDCC_FLAG;
-		case IUI_ICON:			return TDCC_ICON;
-		case IUI_ID:			return TDCC_ID;
-		case IUI_LASTMOD:		return TDCC_LASTMODDATE; // TDCC_LASTMODBY
-		case IUI_LOCK:			return TDCC_LOCK;
-		case IUI_METADATA:		return TDCC_NONE;
-		case IUI_NONE:			return TDCC_NONE;
-		case IUI_PERCENT:		return TDCC_PERCENT;
-		case IUI_POSITION:		return TDCC_POSITION;
-		case IUI_PRIORITY:		return TDCC_PRIORITY;
-		case IUI_RECURRENCE:	return TDCC_RECURRENCE;
-		case IUI_RISK:			return TDCC_RISK;
-		case IUI_STARTDATE:		return TDCC_STARTDATE;
-		case IUI_STATUS:		return TDCC_STATUS;
-		case IUI_SUBTASKDONE:	return TDCC_SUBTASKDONE;
-		case IUI_TAGS:			return TDCC_TAGS;
-		case IUI_TIMEEST:		return TDCC_TIMEEST;
-		case IUI_TIMESPENT:		return TDCC_TIMESPENT;
-		case IUI_VERSION:		return TDCC_VERSION;
+		case IA_ALLOCBY:		return TDCC_ALLOCBY;
+		case IA_ALLOCTO:		return TDCC_ALLOCTO;
+		case IA_CATEGORY:		return TDCC_CATEGORY;
+		case IA_TASKNAME:		return TDCC_CLIENT;
+		case IA_COLOR:			return TDCC_COLOR;
+		case IA_COST:			return TDCC_COST;
+		case IA_CREATEDBY:		return TDCC_CREATEDBY;
+		case IA_CREATIONDATE:	return TDCC_CREATIONDATE;
+		case IA_DEPENDENCY:		return TDCC_DEPENDENCY;
+		case IA_DONEDATE:		return TDCC_DONEDATE;
+		case IA_DUEDATE:		return TDCC_DUEDATE;
+		case IA_EXTERNALID:		return TDCC_EXTERNALID;
+		case IA_FILEREF:		return TDCC_FILEREF;
+		case IA_FLAG:			return TDCC_FLAG;
+		case IA_ICON:			return TDCC_ICON;
+		case IA_ID:				return TDCC_ID;
+		case IA_LASTMOD:		return TDCC_LASTMODDATE; // TDCC_LASTMODBY
+		case IA_LOCK:			return TDCC_LOCK;
+		case IA_METADATA:		return TDCC_NONE;
+		case IA_NONE:			return TDCC_NONE;
+		case IA_PERCENT:		return TDCC_PERCENT;
+		case IA_POSITION:		return TDCC_POSITION;
+		case IA_PRIORITY:		return TDCC_PRIORITY;
+		case IA_RECURRENCE:		return TDCC_RECURRENCE;
+		case IA_RISK:			return TDCC_RISK;
+		case IA_STARTDATE:		return TDCC_STARTDATE;
+		case IA_STATUS:			return TDCC_STATUS;
+		case IA_SUBTASKDONE:	return TDCC_SUBTASKDONE;
+		case IA_TAGS:			return TDCC_TAGS;
+		case IA_TIMEEST:		return TDCC_TIMEEST;
+		case IA_TIMESPENT:		return TDCC_TIMESPENT;
+		case IA_VERSION:		return TDCC_VERSION;
 			//case IUI_CUSTOMATTRIB:	return TDCC_CUSTOMATTRIB;
 		}
 
@@ -891,15 +891,15 @@ namespace TDC
 		return TDCC_NONE;
 	}
 	
-	static BOOL AttributeMatchesIUIEdit(TDC_ATTRIBUTE nAttrib, IUI_ATTRIBUTE nIUIAttrib)
+	static BOOL AttributeMatchesIUIEdit(TDC_ATTRIBUTE nAttrib, I_ATTRIBUTE nIUIAttrib)
 	{
-		if ((nAttrib == TDCA_NONE) || (nIUIAttrib == IUI_NONE))
+		if ((nAttrib == TDCA_NONE) || (nIUIAttrib == IA_NONE))
 		{
 			ASSERT(0);
 			return FALSE;
 		}
 		
-		TDC_ATTRIBUTE nMapEdit = MapIUIAttributeToAttribute(nIUIAttrib);
+		TDC_ATTRIBUTE nMapEdit = MapIAttributeToAttribute(nIUIAttrib);
 		
 		if (nAttrib == nMapEdit)
 			return TRUE;
@@ -907,7 +907,7 @@ namespace TDC
 		// else
 		switch (nIUIAttrib)
 		{
-		case IUI_OFFSETTASK:
+		case IA_OFFSETTASK:
 			return (nAttrib == TDCA_DUEDATE || nAttrib == TDCA_STARTDATE);
 		}
 		

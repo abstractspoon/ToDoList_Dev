@@ -18,95 +18,95 @@ using namespace Windows::Forms;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-UIExtension::TaskAttribute UIExtension::Map(IUI_ATTRIBUTE attrib)
+UIExtension::TaskAttribute UIExtension::Map(I_ATTRIBUTE attrib)
 {
 	switch (attrib)
 	{
-	case IUI_TASKNAME:		return UIExtension::TaskAttribute::Title;
-	case IUI_DONEDATE:		return UIExtension::TaskAttribute::DoneDate;
-	case IUI_DUEDATE:		return UIExtension::TaskAttribute::DueDate;
-	case IUI_STARTDATE:		return UIExtension::TaskAttribute::StartDate;
-	case IUI_PRIORITY:		return UIExtension::TaskAttribute::Priority;
-	case IUI_COLOR:			return UIExtension::TaskAttribute::Color;
-	case IUI_ALLOCTO:		return UIExtension::TaskAttribute::AllocBy;
-	case IUI_ALLOCBY:		return UIExtension::TaskAttribute::AllocTo;
-	case IUI_STATUS:		return UIExtension::TaskAttribute::Status;
-	case IUI_CATEGORY:		return UIExtension::TaskAttribute::Category;
-	case IUI_PERCENT:		return UIExtension::TaskAttribute::Percent;
-	case IUI_TIMEEST:		return UIExtension::TaskAttribute::TimeEstimate;
-	case IUI_TIMESPENT:		return UIExtension::TaskAttribute::TimeSpent;
-	case IUI_FILEREF:		return UIExtension::TaskAttribute::FileReference;
-	case IUI_COMMENTS:		return UIExtension::TaskAttribute::Comments;
-	case IUI_FLAG:			return UIExtension::TaskAttribute::Flag;
-	case IUI_CREATIONDATE:	return UIExtension::TaskAttribute::CreationDate;
-	case IUI_CREATEDBY:		return UIExtension::TaskAttribute::CreatedBy;
-	case IUI_RISK:			return UIExtension::TaskAttribute::Risk;			
-	case IUI_EXTERNALID:	return UIExtension::TaskAttribute::ExternalId;	
-	case IUI_COST:			return UIExtension::TaskAttribute::Cost;			
-	case IUI_DEPENDENCY:	return UIExtension::TaskAttribute::Dependency;	
-	case IUI_RECURRENCE:	return UIExtension::TaskAttribute::Recurrence;	
-	case IUI_VERSION:		return UIExtension::TaskAttribute::Version;		
-	case IUI_POSITION:		return UIExtension::TaskAttribute::Position;
-	case IUI_ID:			return UIExtension::TaskAttribute::Id;
-	case IUI_LASTMOD:		return UIExtension::TaskAttribute::LastModified;
-	case IUI_ICON:			return UIExtension::TaskAttribute::Icon;
-	case IUI_TAGS:			return UIExtension::TaskAttribute::Tag;
-	case IUI_CUSTOMATTRIB:	return UIExtension::TaskAttribute::CustomAttribute;
-	case IUI_OFFSETTASK:	return UIExtension::TaskAttribute::OffsetTask;
-	case IUI_SUBTASKDONE:	return UIExtension::TaskAttribute::SubtaskDone;
-	case IUI_METADATA:		return UIExtension::TaskAttribute::MetaData;
-	case IUI_PROJECTNAME:	return UIExtension::TaskAttribute::ProjectName;
+	case IA_TASKNAME:		return UIExtension::TaskAttribute::Title;
+	case IA_DONEDATE:		return UIExtension::TaskAttribute::DoneDate;
+	case IA_DUEDATE:		return UIExtension::TaskAttribute::DueDate;
+	case IA_STARTDATE:		return UIExtension::TaskAttribute::StartDate;
+	case IA_PRIORITY:		return UIExtension::TaskAttribute::Priority;
+	case IA_COLOR:			return UIExtension::TaskAttribute::Color;
+	case IA_ALLOCTO:		return UIExtension::TaskAttribute::AllocBy;
+	case IA_ALLOCBY:		return UIExtension::TaskAttribute::AllocTo;
+	case IA_STATUS:			return UIExtension::TaskAttribute::Status;
+	case IA_CATEGORY:		return UIExtension::TaskAttribute::Category;
+	case IA_PERCENT:		return UIExtension::TaskAttribute::Percent;
+	case IA_TIMEEST:		return UIExtension::TaskAttribute::TimeEstimate;
+	case IA_TIMESPENT:		return UIExtension::TaskAttribute::TimeSpent;
+	case IA_FILEREF:		return UIExtension::TaskAttribute::FileReference;
+	case IA_COMMENTS:		return UIExtension::TaskAttribute::Comments;
+	case IA_FLAG:			return UIExtension::TaskAttribute::Flag;
+	case IA_CREATIONDATE:	return UIExtension::TaskAttribute::CreationDate;
+	case IA_CREATEDBY:		return UIExtension::TaskAttribute::CreatedBy;
+	case IA_RISK:			return UIExtension::TaskAttribute::Risk;
+	case IA_EXTERNALID:		return UIExtension::TaskAttribute::ExternalId;
+	case IA_COST:			return UIExtension::TaskAttribute::Cost;
+	case IA_DEPENDENCY:		return UIExtension::TaskAttribute::Dependency;
+	case IA_RECURRENCE:		return UIExtension::TaskAttribute::Recurrence;
+	case IA_VERSION:		return UIExtension::TaskAttribute::Version;
+	case IA_POSITION:		return UIExtension::TaskAttribute::Position;
+	case IA_ID:				return UIExtension::TaskAttribute::Id;
+	case IA_LASTMOD:		return UIExtension::TaskAttribute::LastModified;
+	case IA_ICON:			return UIExtension::TaskAttribute::Icon;
+	case IA_TAGS:			return UIExtension::TaskAttribute::Tag;
+	case IA_CUSTOMATTRIB:	return UIExtension::TaskAttribute::CustomAttribute;
+	case IA_OFFSETTASK:		return UIExtension::TaskAttribute::OffsetTask;
+	case IA_SUBTASKDONE:	return UIExtension::TaskAttribute::SubtaskDone;
+	case IA_METADATA:		return UIExtension::TaskAttribute::MetaData;
+	case IA_PROJECTNAME:	return UIExtension::TaskAttribute::ProjectName;
 		//  case IUI_
 	}
 
 	return UIExtension::TaskAttribute::Unknown;
 }
 
-IUI_ATTRIBUTE UIExtension::Map(UIExtension::TaskAttribute attrib)
+I_ATTRIBUTE UIExtension::Map(UIExtension::TaskAttribute attrib)
 {
 	switch (attrib)
 	{
-	case UIExtension::TaskAttribute::Title:				return IUI_TASKNAME;	
-	case UIExtension::TaskAttribute::DoneDate:			return IUI_DONEDATE;	
-	case UIExtension::TaskAttribute::DueDate:			return IUI_DUEDATE;		
-	case UIExtension::TaskAttribute::StartDate:			return IUI_STARTDATE;	
-	case UIExtension::TaskAttribute::Priority:			return IUI_PRIORITY;	
-	case UIExtension::TaskAttribute::Color:				return IUI_COLOR;		
-	case UIExtension::TaskAttribute::AllocBy:			return IUI_ALLOCTO;		
-	case UIExtension::TaskAttribute::AllocTo:			return IUI_ALLOCBY;		
-	case UIExtension::TaskAttribute::Status:			return IUI_STATUS;		
-	case UIExtension::TaskAttribute::Category:			return IUI_CATEGORY;	
-	case UIExtension::TaskAttribute::Percent:			return IUI_PERCENT;		
-	case UIExtension::TaskAttribute::TimeEstimate:		return IUI_TIMEEST;		
-	case UIExtension::TaskAttribute::TimeSpent:			return IUI_TIMESPENT;	
-	case UIExtension::TaskAttribute::FileReference:		return IUI_FILEREF;		
-	case UIExtension::TaskAttribute::Comments:			return IUI_COMMENTS;	
-	case UIExtension::TaskAttribute::Flag:				return IUI_FLAG;		
-	case UIExtension::TaskAttribute::CreationDate:		return IUI_CREATIONDATE;
-	case UIExtension::TaskAttribute::CreatedBy:			return IUI_CREATEDBY;	
-	case UIExtension::TaskAttribute::Risk:				return IUI_RISK;		
-	case UIExtension::TaskAttribute::ExternalId:		return IUI_EXTERNALID;	
-	case UIExtension::TaskAttribute::Cost:				return IUI_COST;		
-	case UIExtension::TaskAttribute::Dependency:		return IUI_DEPENDENCY;	
-	case UIExtension::TaskAttribute::Recurrence:		return IUI_RECURRENCE;	
-	case UIExtension::TaskAttribute::Version:			return IUI_VERSION;		
-	case UIExtension::TaskAttribute::Position:			return IUI_POSITION;	
-	case UIExtension::TaskAttribute::Id:				return IUI_ID;			
-	case UIExtension::TaskAttribute::LastModified:		return IUI_LASTMOD;		
-	case UIExtension::TaskAttribute::Icon:				return IUI_ICON;		
-	case UIExtension::TaskAttribute::Tag:				return IUI_TAGS;		
-	case UIExtension::TaskAttribute::CustomAttribute:	return IUI_CUSTOMATTRIB;
-	case UIExtension::TaskAttribute::OffsetTask:		return IUI_OFFSETTASK;	
-	case UIExtension::TaskAttribute::SubtaskDone:		return IUI_SUBTASKDONE;
-	case UIExtension::TaskAttribute::MetaData:			return IUI_METADATA;
-	case UIExtension::TaskAttribute::ProjectName:		return IUI_PROJECTNAME;
+	case UIExtension::TaskAttribute::Title:				return IA_TASKNAME;
+	case UIExtension::TaskAttribute::DoneDate:			return IA_DONEDATE;
+	case UIExtension::TaskAttribute::DueDate:			return IA_DUEDATE;
+	case UIExtension::TaskAttribute::StartDate:			return IA_STARTDATE;
+	case UIExtension::TaskAttribute::Priority:			return IA_PRIORITY;
+	case UIExtension::TaskAttribute::Color:				return IA_COLOR;
+	case UIExtension::TaskAttribute::AllocBy:			return IA_ALLOCTO;
+	case UIExtension::TaskAttribute::AllocTo:			return IA_ALLOCBY;
+	case UIExtension::TaskAttribute::Status:			return IA_STATUS;
+	case UIExtension::TaskAttribute::Category:			return IA_CATEGORY;
+	case UIExtension::TaskAttribute::Percent:			return IA_PERCENT;
+	case UIExtension::TaskAttribute::TimeEstimate:		return IA_TIMEEST;
+	case UIExtension::TaskAttribute::TimeSpent:			return IA_TIMESPENT;
+	case UIExtension::TaskAttribute::FileReference:		return IA_FILEREF;
+	case UIExtension::TaskAttribute::Comments:			return IA_COMMENTS;
+	case UIExtension::TaskAttribute::Flag:				return IA_FLAG;
+	case UIExtension::TaskAttribute::CreationDate:		return IA_CREATIONDATE;
+	case UIExtension::TaskAttribute::CreatedBy:			return IA_CREATEDBY;
+	case UIExtension::TaskAttribute::Risk:				return IA_RISK;
+	case UIExtension::TaskAttribute::ExternalId:		return IA_EXTERNALID;
+	case UIExtension::TaskAttribute::Cost:				return IA_COST;
+	case UIExtension::TaskAttribute::Dependency:		return IA_DEPENDENCY;
+	case UIExtension::TaskAttribute::Recurrence:		return IA_RECURRENCE;
+	case UIExtension::TaskAttribute::Version:			return IA_VERSION;
+	case UIExtension::TaskAttribute::Position:			return IA_POSITION;
+	case UIExtension::TaskAttribute::Id:				return IA_ID;
+	case UIExtension::TaskAttribute::LastModified:		return IA_LASTMOD;
+	case UIExtension::TaskAttribute::Icon:				return IA_ICON;
+	case UIExtension::TaskAttribute::Tag:				return IA_TAGS;
+	case UIExtension::TaskAttribute::CustomAttribute:	return IA_CUSTOMATTRIB;
+	case UIExtension::TaskAttribute::OffsetTask:		return IA_OFFSETTASK;
+	case UIExtension::TaskAttribute::SubtaskDone:		return IA_SUBTASKDONE;
+	case UIExtension::TaskAttribute::MetaData:			return IA_METADATA;
+	case UIExtension::TaskAttribute::ProjectName:		return IA_PROJECTNAME;
 		//  case IUI_
 	}
 
-	return IUI_NONE;
+	return IA_NONE;
 }
 
-Collections::Generic::HashSet<UIExtension::TaskAttribute>^ UIExtension::Map(const IUI_ATTRIBUTE* pAttrib, int numAttrib)
+Collections::Generic::HashSet<UIExtension::TaskAttribute>^ UIExtension::Map(const I_ATTRIBUTE* pAttrib, int numAttrib)
 {
 	Collections::Generic::HashSet<TaskAttribute>^ attribs = gcnew(Collections::Generic::HashSet<TaskAttribute>);
 
@@ -276,7 +276,7 @@ UIExtension::ParentNotify::ParentNotify(IntPtr hwndParent)
 
 bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, DateTime date)
 {
-	if (UIExtension::Map(nAttribute) == IUI_NONE)
+	if (UIExtension::Map(nAttribute) == IA_NONE)
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, date));
@@ -285,7 +285,7 @@ bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, Da
 
 bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, double value)
 {
-	if (UIExtension::Map(nAttribute) == IUI_NONE)
+	if (UIExtension::Map(nAttribute) == IA_NONE)
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value));
@@ -294,7 +294,7 @@ bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, do
 
 bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, double time, Task::TimeUnits units)
 {
-	if (UIExtension::Map(nAttribute) == IUI_NONE)
+	if (UIExtension::Map(nAttribute) == IA_NONE)
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, time, units));
@@ -303,7 +303,7 @@ bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, do
 
 bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, int value)
 {
-	if (UIExtension::Map(nAttribute) == IUI_NONE)
+	if (UIExtension::Map(nAttribute) == IA_NONE)
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value));
@@ -312,7 +312,7 @@ bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, in
 
 bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, bool value)
 {
-	if (UIExtension::Map(nAttribute) == IUI_NONE)
+	if (UIExtension::Map(nAttribute) == IA_NONE)
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value));
@@ -330,7 +330,7 @@ bool UIExtension::ParentNotify::AddMod(String^ sCustAttribID, String^ value)
 
 bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, String^ value)
 {
-	if (UIExtension::Map(nAttribute) == IUI_NONE)
+	if (UIExtension::Map(nAttribute) == IA_NONE)
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value));

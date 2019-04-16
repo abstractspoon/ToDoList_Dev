@@ -494,7 +494,7 @@ void CGanttTreeListCtrl::SetExpandedState(const CDWordArray& aExpanded)
 	}
 }
 
-BOOL CGanttTreeListCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib) const
+BOOL CGanttTreeListCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib) const
 {
 	switch (nUpdate)
 	{
@@ -532,7 +532,7 @@ BOOL CGanttTreeListCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<IUI_
 	return FALSE;
 }
 
-void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
+void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib)
 {
 	// we must have been initialized already
 	ASSERT(m_list.GetSafeHwnd() && m_tree.GetSafeHwnd());
@@ -590,7 +590,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			// update the task(s)
 			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE))
 			{
-				if (attrib.Has(IUI_STARTDATE) || attrib.Has(IUI_DUEDATE) || attrib.Has(IUI_DONEDATE))
+				if (attrib.Has(IA_STARTDATE) || attrib.Has(IA_DUEDATE) || attrib.Has(IA_DONEDATE))
 					RecalcDateRange();
 			}
 		}
@@ -667,23 +667,23 @@ CString CGanttTreeListCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITE
 	return Misc::FormatArray(aAllocTo);
 }
 
-BOOL CGanttTreeListCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib)
+BOOL CGanttTreeListCtrl::WantEditUpdate(I_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IUI_ALLOCTO:
-	case IUI_COLOR:
-	case IUI_DEPENDENCY:
-	case IUI_DONEDATE:
-	case IUI_DUEDATE:
-	case IUI_ICON:
-	case IUI_ID:
-	case IUI_NONE:
-	case IUI_PERCENT:
-	case IUI_STARTDATE:
-	case IUI_SUBTASKDONE:
-	case IUI_TAGS:
-	case IUI_TASKNAME:
+	case IA_ALLOCTO:
+	case IA_COLOR:
+	case IA_DEPENDENCY:
+	case IA_DONEDATE:
+	case IA_DUEDATE:
+	case IA_ICON:
+	case IA_ID:
+	case IA_NONE:
+	case IA_PERCENT:
+	case IA_STARTDATE:
+	case IA_SUBTASKDONE:
+	case IA_TAGS:
+	case IA_TASKNAME:
 		return TRUE;
 	}
 	
@@ -691,22 +691,22 @@ BOOL CGanttTreeListCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib)
 	return (nAttrib == IUI_ALL);
 }
 
-BOOL CGanttTreeListCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
+BOOL CGanttTreeListCtrl::WantSortUpdate(I_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IUI_ALLOCTO:
-	case IUI_DUEDATE:
-	case IUI_ID:
-	case IUI_PERCENT:
-	case IUI_STARTDATE:
-	case IUI_TASKNAME:
-	case IUI_TAGS:
-	case IUI_DONEDATE:
-	case IUI_DEPENDENCY:
+	case IA_ALLOCTO:
+	case IA_DUEDATE:
+	case IA_ID:
+	case IA_PERCENT:
+	case IA_STARTDATE:
+	case IA_TASKNAME:
+	case IA_TAGS:
+	case IA_DONEDATE:
+	case IA_DEPENDENCY:
 		return (MapAttributeToColumn(nAttrib) != GTLCC_NONE);
 
-	case IUI_NONE:
+	case IA_NONE:
 		return TRUE;
 	}
 	
@@ -714,38 +714,38 @@ BOOL CGanttTreeListCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
 	return FALSE;
 }
 
-IUI_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttribute(GTLC_COLUMN nCol)
+I_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttribute(GTLC_COLUMN nCol)
 {
 	switch (nCol)
 	{
-	case GTLCC_TITLE:		return IUI_TASKNAME;
-	case GTLCC_DUEDATE:		return IUI_DUEDATE;
-	case GTLCC_STARTDATE:	return IUI_STARTDATE;
-	case GTLCC_ALLOCTO:		return IUI_ALLOCTO;
-	case GTLCC_PERCENT:		return IUI_PERCENT;
-	case GTLCC_TASKID:		return IUI_ID;
-	case GTLCC_DONEDATE:	return IUI_DONEDATE;
-	case GTLCC_TAGS:		return IUI_TAGS;
-	case GTLCC_DEPENDENCY:	return IUI_DEPENDENCY;
+	case GTLCC_TITLE:		return IA_TASKNAME;
+	case GTLCC_DUEDATE:		return IA_DUEDATE;
+	case GTLCC_STARTDATE:	return IA_STARTDATE;
+	case GTLCC_ALLOCTO:		return IA_ALLOCTO;
+	case GTLCC_PERCENT:		return IA_PERCENT;
+	case GTLCC_TASKID:		return IA_ID;
+	case GTLCC_DONEDATE:	return IA_DONEDATE;
+	case GTLCC_TAGS:		return IA_TAGS;
+	case GTLCC_DEPENDENCY:	return IA_DEPENDENCY;
 	}
 	
 	// all else 
-	return IUI_NONE;
+	return IA_NONE;
 }
 
-GTLC_COLUMN CGanttTreeListCtrl::MapAttributeToColumn(IUI_ATTRIBUTE nAttrib)
+GTLC_COLUMN CGanttTreeListCtrl::MapAttributeToColumn(I_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IUI_TASKNAME:		return GTLCC_TITLE;		
-	case IUI_DUEDATE:		return GTLCC_DUEDATE;		
-	case IUI_STARTDATE:		return GTLCC_STARTDATE;	
-	case IUI_ALLOCTO:		return GTLCC_ALLOCTO;		
-	case IUI_PERCENT:		return GTLCC_PERCENT;		
-	case IUI_ID:			return GTLCC_TASKID;		
-	case IUI_DONEDATE:		return GTLCC_DONEDATE;
-	case IUI_TAGS:			return GTLCC_TAGS;
-	case IUI_DEPENDENCY:	return GTLCC_DEPENDENCY;
+	case IA_TASKNAME:		return GTLCC_TITLE;		
+	case IA_DUEDATE:		return GTLCC_DUEDATE;		
+	case IA_STARTDATE:		return GTLCC_STARTDATE;	
+	case IA_ALLOCTO:		return GTLCC_ALLOCTO;		
+	case IA_PERCENT:		return GTLCC_PERCENT;		
+	case IA_ID:			return GTLCC_TASKID;		
+	case IA_DONEDATE:		return GTLCC_DONEDATE;
+	case IA_TAGS:			return GTLCC_TAGS;
+	case IA_DEPENDENCY:	return GTLCC_DEPENDENCY;
 	}
 	
 	// all else 
@@ -753,7 +753,7 @@ GTLC_COLUMN CGanttTreeListCtrl::MapAttributeToColumn(IUI_ATTRIBUTE nAttrib)
 }
 
 BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
-									IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, 
+									IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib, 
 									BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -819,19 +819,19 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	// can't use a switch here because we also need to check for IUI_ALL
 	time64_t tDate = 0;
 	
-	if (attrib.Has(IUI_TASKNAME))
+	if (attrib.Has(IA_TASKNAME))
 		pGI->sTitle = pTasks->GetTaskTitle(hTask);
 	
-	if (attrib.Has(IUI_ALLOCTO))
+	if (attrib.Has(IA_ALLOCTO))
 		pGI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
 	
-	if (attrib.Has(IUI_ICON))
+	if (attrib.Has(IA_ICON))
 		pGI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
-	if (attrib.Has(IUI_PERCENT))
+	if (attrib.Has(IA_PERCENT))
 		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		
-	if (attrib.Has(IUI_STARTDATE))
+	if (attrib.Has(IA_STARTDATE))
 	{ 
 		// update min/max too
 		if (pTasks->GetTaskStartDate64(hTask, (pGI->bParent != FALSE), tDate))
@@ -840,7 +840,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 			pGI->ClearStartDate(TRUE);
 	}
 	
-	if (attrib.Has(IUI_DUEDATE))
+	if (attrib.Has(IA_DUEDATE))
 	{
 		// update min/max too
 		if (pTasks->GetTaskDueDate64(hTask, (pGI->bParent != FALSE), tDate))
@@ -849,7 +849,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 			pGI->ClearDueDate(TRUE);
 	}
 	
-	if (attrib.Has(IUI_DONEDATE))
+	if (attrib.Has(IA_DONEDATE))
 	{
 		if (pTasks->GetTaskDoneDate64(hTask, tDate))
 			pGI->SetDoneDate(tDate);
@@ -857,13 +857,13 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 			pGI->ClearDoneDate();
 	}
 	
-	if (attrib.Has(IUI_SUBTASKDONE))
+	if (attrib.Has(IA_SUBTASKDONE))
 	{
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 		pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 	}
 
-	if (attrib.Has(IUI_TAGS))
+	if (attrib.Has(IA_TAGS))
 	{
 		int nTag = pTasks->GetTaskTagCount(hTask);
 		pGI->aTags.RemoveAll();
@@ -872,7 +872,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 			pGI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
 	}
 	
-	if (attrib.Has(IUI_DEPENDENCY))
+	if (attrib.Has(IA_DEPENDENCY))
 	{
 		int nDepend = pTasks->GetTaskDependencyCount(hTask);
 		pGI->aDependIDs.RemoveAll();
@@ -5886,7 +5886,7 @@ int CALLBACK CGanttTreeListCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, L
 
 	for (int nCol = 0; ((nCol < 3) && (nCompare == 0)); nCol++)
 	{
-		if (sort.cols[nCol].nBy == IUI_NONE)
+		if (sort.cols[nCol].nBy == IA_NONE)
 			break;
 
 		nCompare = pThis->CompareTasks(lParam1, lParam2, sort.cols[nCol]);

@@ -46,33 +46,33 @@ void CKanbanAttributeComboBox::PreSubclassWindow()
 
 void CKanbanAttributeComboBox::BuildCombo()
 {
-	IUI_ATTRIBUTE nSel = GetSelectedAttribute();
+	I_ATTRIBUTE nSel = GetSelectedAttribute();
 	ResetContent();
 
-	CDialogHelper::AddString(*this, CEnString(IDS_STATUSATTRIB), IUI_STATUS);
-	CDialogHelper::AddString(*this, CEnString(IDS_ALLOCTOATTRIB), IUI_ALLOCTO);
-	CDialogHelper::AddString(*this, CEnString(IDS_ALLOCBYATTRIB), IUI_ALLOCBY);
-	CDialogHelper::AddString(*this, CEnString(IDS_CATEGORYATTRIB), IUI_CATEGORY);
-	CDialogHelper::AddString(*this, CEnString(IDS_PRIORITYATTRIB), IUI_PRIORITY);
-	CDialogHelper::AddString(*this, CEnString(IDS_RISKATTRIB), IUI_RISK);
-	CDialogHelper::AddString(*this, CEnString(IDS_VERSIONATTRIB), IUI_VERSION);
-	CDialogHelper::AddString(*this, CEnString(IDS_TAGSATTRIB), IUI_TAGS);
+	CDialogHelper::AddString(*this, CEnString(IDS_STATUSATTRIB), IA_STATUS);
+	CDialogHelper::AddString(*this, CEnString(IDS_ALLOCTOATTRIB), IA_ALLOCTO);
+	CDialogHelper::AddString(*this, CEnString(IDS_ALLOCBYATTRIB), IA_ALLOCBY);
+	CDialogHelper::AddString(*this, CEnString(IDS_CATEGORYATTRIB), IA_CATEGORY);
+	CDialogHelper::AddString(*this, CEnString(IDS_PRIORITYATTRIB), IA_PRIORITY);
+	CDialogHelper::AddString(*this, CEnString(IDS_RISKATTRIB), IA_RISK);
+	CDialogHelper::AddString(*this, CEnString(IDS_VERSIONATTRIB), IA_VERSION);
+	CDialogHelper::AddString(*this, CEnString(IDS_TAGSATTRIB), IA_TAGS);
 
 	if (m_bShowFixedColumns)
-		CDialogHelper::AddString(*this, CEnString(IDS_FIXEDCOLUMNS), IUI_FIXEDCOLUMNS);
+		CDialogHelper::AddString(*this, CEnString(IDS_FIXEDCOLUMNS), IA_FIXEDCOLUMNS);
 
 	if (m_bShowCustomAttrib)
-		CDialogHelper::AddString(*this, CEnString(IDS_CUSTOMATTRIB), IUI_CUSTOMATTRIB);
+		CDialogHelper::AddString(*this, CEnString(IDS_CUSTOMATTRIB), IA_CUSTOMATTRIB);
 
 	SetSelectedAttribute(nSel);
 }
 
-IUI_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute() const
+I_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute() const
 {
-	return (IUI_ATTRIBUTE)CDialogHelper::GetSelectedItemData(*this);
+	return (I_ATTRIBUTE)CDialogHelper::GetSelectedItemData(*this);
 }
 
-BOOL CKanbanAttributeComboBox::SetSelectedAttribute(IUI_ATTRIBUTE nAttrib)
+BOOL CKanbanAttributeComboBox::SetSelectedAttribute(I_ATTRIBUTE nAttrib)
 {
 	return (CB_ERR != CDialogHelper::SelectItemByData(*this, (DWORD)nAttrib));
 }
