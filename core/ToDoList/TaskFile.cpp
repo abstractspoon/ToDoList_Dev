@@ -1618,6 +1618,39 @@ BOOL CTaskFile::SetReportAttributes(LPCTSTR szTitle, const COleDateTime& date)
 	return bRes;
 }
 
+BOOL CTaskFile::SetReportAttributes(LPCTSTR szTitle, const CTDCAttributeMap& mapAttrib, const COleDateTime& date)
+{
+	if (!SetReportAttributes(szTitle, date))
+		return FALSE;
+
+	DeleteItem(TDL_REPORTATTRIB);
+
+	POSITION pos = mapAttrib.GetStartPosition();
+
+	while (pos)
+		VERIFY(AddItem(TDL_REPORTATTRIB, mapAttrib.GetNext(pos)));
+
+	return TRUE;
+}
+
+bool CTaskFile::GetReportOnAttribute(I_ATTRIBUTE nAttrib) const
+{
+	const CXmlItem* pXItem = GetItem(TDL_REPORTATTRIB);
+
+	if (!pXItem)
+		return true;
+
+	while (pXItem)
+	{
+		if (pXItem->GetValueI() == nAttrib)
+			return true;
+		
+		pXItem = pXItem->GetSibling();
+	}
+
+	return false;
+}
+
 BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 {
 	CXmlItem* pXITask = NULL;

@@ -21,6 +21,7 @@
 class CBinaryData;
 class CTDCCustomAttribDefinitionArray;
 class CTDCCustomAttributeDataMap;
+class CTDCAttributeMap;
 
 struct TODOITEM;
 struct TDCRECURRENCE; 
@@ -162,6 +163,7 @@ public:
 	void EnableISODates(BOOL bEnable = TRUE) { m_bISODates = bEnable; }
 
 	BOOL SetReportAttributes(LPCTSTR szTitle, const COleDateTime& date = 0.0);
+	BOOL SetReportAttributes(LPCTSTR szTitle, const CTDCAttributeMap& mapAttrib, const COleDateTime& date = 0.0);
 	BOOL HideAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bHide = TRUE);
 
 	// Task-related methods -----------
@@ -237,6 +239,8 @@ public:
 	//////////////////////////////////////////////////////////////
 	// ITaskList17 implementation 
 	LPCTSTR GetFileName(bool bFullPath) const;
+
+	bool GetReportOnAttribute(I_ATTRIBUTE nAttrib) const;
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList16 implementation 
