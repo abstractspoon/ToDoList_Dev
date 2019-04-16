@@ -51,7 +51,6 @@ public:
 
 	TSD_ATTRIB GetAttributeOption() const { return (TSD_ATTRIB)m_nAttribOption; }
 	int GetUserAttributes(CTDCAttributeMap& mapAttrib) const;
-	int GetAllAttributes(CTDCAttributeMap& mapAttrib) const { return m_lbAttribList.GetAllAttributes(mapAttrib); }
 	BOOL GetWantCommentsWithVisible() const { return m_bIncludeComments; }
 
 	void SetWantWhatTasks(TSD_TASKS nWhat);

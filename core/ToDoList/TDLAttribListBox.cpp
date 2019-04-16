@@ -127,20 +127,6 @@ void CTDLAttributeListBox::SetAllAttributesVisible(BOOL bVisible)
 	}
 }
 
-int CTDLAttributeListBox::GetAllAttributes(CTDCAttributeMap& mapAttrib) const
-{
-	mapAttrib.RemoveAll();
-
-	int nIndex = m_aAttribs.GetSize();
-	
-	while (nIndex--)
-		mapAttrib.Add(m_aAttribs[nIndex].nTDCAttrib);
-
-	mapAttrib.Add(TDCA_CUSTOMATTRIB_ALL);
-
-	return mapAttrib.GetCount();
-}
-
 BOOL CTDLAttributeListBox::OnReflectCheckChange()
 {
 	// update all check states because we don't know which one changed

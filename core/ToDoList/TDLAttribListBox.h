@@ -28,9 +28,8 @@ public:
 	CTDLAttributeListBox(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 	void SetAllAttributesVisible(BOOL bVisible = TRUE);
-	int GetAllAttributes(CTDCAttributeMap& mapAttrib) const;
-
 	void SetVisibleAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs);
+
 	void GetVisibleAttributes(CTDCAttributeMap& mapAttrib, CStringSet& mapCustomAttribIDs) const;
 	void GetVisibleAttributes(CTDCAttributeMap& mapAttrib) const; // includes custom attributes
 
