@@ -139,6 +139,9 @@
     <ClInclude Include="TasklistSchemaDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IEnums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Interfaces.vcxproj" />

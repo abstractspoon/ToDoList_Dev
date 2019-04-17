@@ -15,8 +15,8 @@
 
 // Pseudo Attributes
 
-#define IA_PARENT			IA_POSITION
-#define IA_FIXEDCOLUMNS		0xffffffff
+#define TDCA_PARENT			TDCA_POSITION
+#define TDCA_FIXEDCOLUMNS		0xffffffff
 
 /////////////////////////////////////////////////////////////////////////////
 

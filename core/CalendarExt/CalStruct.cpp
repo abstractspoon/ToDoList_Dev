@@ -35,7 +35,7 @@ TASKCALITEM::TASKCALITEM()
 
 }
 	
-TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<I_ATTRIBUTE>& attrib, DWORD dwCalcDates) 
+TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, DWORD dwCalcDates) 
 	: 
 	color(CLR_NONE), 
 	bGoodAsDone(FALSE),
@@ -93,10 +93,10 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 		(bIsParent == tci.bIsParent));
 }
 
-void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<I_ATTRIBUTE>& attrib, DWORD dwCalcDates)
+void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, DWORD dwCalcDates)
 {
 	// check for quick exit
-	if (!(attrib.Has(IA_STARTDATE) || attrib.Has(IA_DUEDATE) || attrib.Has(IA_DONEDATE)))
+	if (!(attrib.Has(TDCA_STARTDATE) || attrib.Has(TDCA_DUEDATE) || attrib.Has(TDCA_DONEDATE)))
 		return;
 
 	// get creation date once only
@@ -106,7 +106,7 @@ void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 		dtCreation = GetDate(tDate);
 
 	// retrieve new dates
-	if (attrib.Has(IA_STARTDATE))
+	if (attrib.Has(TDCA_STARTDATE))
 	{
 		if (pTasks->GetTaskStartDate64(hTask, FALSE, tDate))
 			dtStart = GetDate(tDate);
@@ -116,7 +116,7 @@ void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 		ReformatName();
 	}
 	
-	if (attrib.Has(IA_DUEDATE))
+	if (attrib.Has(TDCA_DUEDATE))
 	{
 		if (pTasks->GetTaskDueDate64(hTask, FALSE, tDate))
 			dtDue = GetDate(tDate);
@@ -124,7 +124,7 @@ void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 			CDateHelper::ClearDate(dtDue);
 	}
 
-	if (attrib.Has(IA_DONEDATE))
+	if (attrib.Has(TDCA_DONEDATE))
 	{
 		if (pTasks->GetTaskDoneDate64(hTask, tDate))
 			dtDone = GetDate(tDate);
@@ -216,7 +216,7 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 	}
 }
 
-BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<I_ATTRIBUTE>& attrib, DWORD dwCalcDates)
+BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, DWORD dwCalcDates)
 {
 	ASSERT(dwTaskID == 0 || pTasks->GetTaskID(hTask) == dwTaskID);
 
@@ -226,13 +226,13 @@ BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 	// snapshot current state to check for changes
 	TASKCALITEM tciOrg = *this;
 
-	if (attrib.Has(IA_TASKNAME))
+	if (attrib.Has(TDCA_TASKNAME))
 		sName = pTasks->GetTaskTitle(hTask);
 
-	if (attrib.Has(IA_ICON))
+	if (attrib.Has(TDCA_ICON))
 		bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
-	if (attrib.Has(IA_DEPENDENCY))
+	if (attrib.Has(TDCA_DEPENDENCY))
 		bHasDepends = !Misc::IsEmpty(pTasks->GetTaskDependency(hTask, 0));
 
 	UpdateTaskDates(pTasks, hTask, attrib, dwCalcDates);
@@ -493,11 +493,11 @@ BOOL CHeatMap::SetColorPalette(const CDWordArray& aColors)
 	return TRUE;
 }
 
-BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, I_ATTRIBUTE nAttrib, DWORD dwOptions)
+BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttrib, DWORD dwOptions)
 {
 	m_mapHeat.RemoveAll();
 
-	if ((nAttrib == IA_NONE) || (mapData.GetCount() == 0))
+	if ((nAttrib == TDCA_NONE) || (mapData.GetCount() == 0))
 		return FALSE;
 
 	POSITION pos = mapData.GetStartPosition();
@@ -513,7 +513,7 @@ BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, I_ATTRIBUTE nAttrib, 
 
 		switch (nAttrib)
 		{
-		case IA_DONEDATE:
+		case TDCA_DONEDATE:
 			if (pTCI->IsDone(FALSE))
 			{
 				COleDateTime dtDone = CDateHelper::GetDateOnly(pTCI->GetDoneDate());
@@ -521,7 +521,7 @@ BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, I_ATTRIBUTE nAttrib, 
 			}
 			break;
 
-		case IA_DUEDATE:
+		case TDCA_DUEDATE:
 			if (!pTCI->IsDone(FALSE) && pTCI->HasAnyEndDate())
 			{
 				COleDateTime dtDue = CDateHelper::GetDateOnly(pTCI->GetAnyEndDate());
@@ -529,7 +529,7 @@ BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, I_ATTRIBUTE nAttrib, 
 			}
 			break;
 
-		case IA_STARTDATE:
+		case TDCA_STARTDATE:
 			if (!pTCI->IsDone(FALSE) && pTCI->HasAnyStartDate())
 			{
 				COleDateTime dtStart = CDateHelper::GetDateOnly(pTCI->GetAnyStartDate());

@@ -3,13 +3,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "IEnums.h"
+
+////////////////////////////////////////////////////////////////////////////////
+
 #pragma warning(disable:4505)
 
 /////////////////////////////////////////////////////////////////////////////////
-
-#include "IAttribute.h"
-
-////////////////////////////////////////////////////////////////////////////////
 //
 // ITaskList.h: interface and implementation of the ITaskList class.
 //
@@ -44,118 +44,7 @@ static const GUID IID_TASKLIST17 = { 0xd44e1030, 0x3c18, 0x41df, { 0xb7, 0x5e, 0
 typedef void* HTASKITEM;
 typedef __int64 time64_t;
 
-/////////////////////////////////////////////////////////////////////////////////
-
-enum TDC_UNITS
-{
-	TDCU_NULL		= 0,	// error code
-	TDCU_MINS		= 'I',
-	TDCU_HOURS		= 'H',
-	TDCU_DAYS		= 'D',
-	TDCU_WEEKDAYS   = 'K',
-	TDCU_WEEKS		= 'W',
-	TDCU_MONTHS		= 'M',
-	TDCU_YEARS		= 'Y',
-};
-
-static bool IsValidUnits(TDC_UNITS nUnits)
-{
-	switch (nUnits)
-	{
-	case TDCU_NULL:
-		return false;
-
-	case TDCU_MINS:
-	case TDCU_HOURS:
-	case TDCU_DAYS:
-	case TDCU_WEEKDAYS : 
-	case TDCU_WEEKS:
-	case TDCU_MONTHS:	
-	case TDCU_YEARS:
-		return true;
-	}
-
-	return false;
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
-
-enum 
-{
-	TDC_NOPRIORITYORISK		= -2,
-	TDC_MINPRIORITYORISK	= 0,
-	TDC_MAXPRIORITYORISK	= 10,
-};
-
-static bool IsValidPriorityOrRisk(int nValue)
-{
-	if (nValue > TDC_MAXPRIORITYORISK)
-		return false;
-
-	if ((nValue < TDC_MINPRIORITYORISK) && (nValue != TDC_NOPRIORITYORISK))
-		return false;
-
-	return true;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-enum TDC_REGULARITY
-{
-	TDIR_NONE = -1, // error
-
-	// original options
-	TDIR_ONCE,
-	TDIR_DAILY,
-	TDIR_WEEKLY,
-	TDIR_MONTHLY,
-	TDIR_YEARLY,
-
-	TDIR_DAY_EVERY_NDAYS					= TDIR_DAILY,		
-	TDIR_WEEK_SPECIFIC_DOWS_NWEEKS			= TDIR_WEEKLY,	
-	TDIR_MONTH_SPECIFIC_DAY_NMONTHS			= TDIR_MONTHLY,	
-	TDIR_YEAR_SPECIFIC_DAY_MONTH			= TDIR_YEARLY,	
-
-	// new options
-	TDIR_DAY_EVERY_WEEKDAY,
-	TDIR_DAY_RECREATEAFTERNDAYS_DEP,		// deprecated
-	TDIR_WEEK_RECREATEAFTERNWEEKS_DEP,		// deprecated
-	TDIR_MONTH_SPECIFIC_DOW_NMONTHS,
-	TDIR_MONTH_RECREATEAFTERNMONTHS_DEP,	// deprecated
-	TDIR_YEAR_SPECIFIC_DOW_MONTH,
-	TDIR_YEAR_RECREATEAFTERNYEARS_DEP,		// deprecated
-
-	// replace deprecated options
-	TDIR_WEEK_EVERY_NWEEKS,
-	TDIR_MONTH_EVERY_NMONTHS,
-	TDIR_YEAR_EVERY_NYEARS,
-
-	// new option
-	TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS,
-	TDIR_DAY_EVERY_NWEEKDAYS,
-
-	// ADD NEW OPTIONS HERE ONLY!
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-enum TDC_RECURREUSEOPTION
-{
-	TDIRO_REUSE,
-	TDIRO_CREATE,
-	TDIRO_ASK,
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-enum TDC_RECURFROMOPTION
-{
-	TDIRO_DONEDATE,
-	TDIRO_DUEDATE,
-	TDIRO_STARTDATE,
-};
-
-/////////////////////////////////////////////////////////////////////////////////
 
 class ITaskList;
 
@@ -524,7 +413,10 @@ class ITaskList17 : public ITaskList16
 public:
 	virtual LPCWSTR GetFileName(bool bFullPath) const = 0;
 
-	virtual bool GetReportOnAttribute(I_ATTRIBUTE nAttrib) const = 0;
+	virtual bool IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const = 0;
+	virtual bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const = 0;
+
+	virtual LPCWSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const = 0;
 
 };
 

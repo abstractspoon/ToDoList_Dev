@@ -11,7 +11,7 @@
 #include "..\shared\timehelper.h"
 #include "..\shared\datehelper.h"
 
-#include "..\Interfaces\ITaskList.h" // for TDC_UNITS
+#include "..\Interfaces\IEnums.h"
 
 #include <afxtempl.h>
 

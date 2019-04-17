@@ -135,6 +135,7 @@
     <ClInclude Include="ContentTypeCombobox.h" />
     <ClInclude Include="IContentControl.h" />
     <ClInclude Include="IEncryption.h" />
+    <ClInclude Include="IEnums.h" />
     <ClInclude Include="IFileStorage.h" />
     <ClInclude Include="IImportExport.h" />
     <ClInclude Include="ImportExportComboBox.h" />

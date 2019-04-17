@@ -23,7 +23,7 @@ static char THIS_FILE[] = __FILE__;
 CKanbanPreferencesPage::CKanbanPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	: 
 	CPreferencesPageBase(IDD_PREFERENCES_PAGE), 
-	m_nFixedAttrib(IA_STATUS),
+	m_nFixedAttrib(TDCA_STATUS),
 	m_bSortSubtaskBelowParent(FALSE),
 	m_bColorBarByPriority(FALSE),
 	m_bIndentSubtasks(FALSE),
@@ -120,11 +120,11 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-I_ATTRIBUTE CKanbanPreferencesPage::GetFixedAttributeToTrack(CString& sCustomAttribID) const
+TDC_ATTRIBUTE CKanbanPreferencesPage::GetFixedAttributeToTrack(CString& sCustomAttribID) const
 {
 	if (HasFixedColumns())
 	{
-		if (m_nFixedAttrib == IA_CUSTOMATTRIB)
+		if (m_nFixedAttrib == TDCA_CUSTOMATTRIB)
 			sCustomAttribID = m_sFixedCustomAttribID;
 		else
 			sCustomAttribID.Empty();
@@ -134,7 +134,7 @@ I_ATTRIBUTE CKanbanPreferencesPage::GetFixedAttributeToTrack(CString& sCustomAtt
 
 	// else
 	ASSERT(0);
-	return IA_NONE;
+	return TDCA_NONE;
 }
 
 void CKanbanPreferencesPage::UpdateAttributeValueCombo()
@@ -143,7 +143,7 @@ void CKanbanPreferencesPage::UpdateAttributeValueCombo()
 
 	CStringArray aValues;
 
-	CString sAttribID = ((m_nFixedAttrib == IA_CUSTOMATTRIB) ? m_sFixedCustomAttribID : KANBANITEM::GetAttributeID(m_nFixedAttrib));
+	CString sAttribID = ((m_nFixedAttrib == TDCA_CUSTOMATTRIB) ? m_sFixedCustomAttribID : KANBANITEM::GetAttributeID(m_nFixedAttrib));
 	ASSERT(!sAttribID.IsEmpty());
 
 	const CKanbanValueMap* pValues = m_mapAttribValues.GetMapping(sAttribID);
@@ -180,7 +180,7 @@ void CKanbanPreferencesPage::OnOK()
 	{
 		if (m_lbDisplayAttrib.GetCheck(nItem) != 0)
 		{
-			I_ATTRIBUTE nAttrib = (I_ATTRIBUTE)m_lbDisplayAttrib.GetItemData(nItem);
+			TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)m_lbDisplayAttrib.GetItemData(nItem);
 			m_aDisplayAttrib.Add(nAttrib);
 		}
 	}
@@ -237,7 +237,7 @@ void CKanbanPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey
 
 void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
 {
-	m_nFixedAttrib = (I_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("FixedAttribute"), IA_STATUS);
+	m_nFixedAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("FixedAttribute"), TDCA_STATUS);
 	m_sFixedCustomAttribID = pPrefs->GetProfileString(szKey, _T("FixedCustomAttributeID"));
 	
 	m_bAlwaysShowBacklog = pPrefs->GetProfileInt(szKey, _T("AlwaysShowBacklog"), TRUE);
@@ -280,19 +280,19 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 	{
 		CString sEntry = Misc::MakeKey(_T("DisplayAttrib%d"), nAtt);
-		I_ATTRIBUTE nAttrib = (I_ATTRIBUTE)pPrefs->GetProfileInt(szKey, sEntry, IA_NONE);
+		TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, sEntry, TDCA_NONE);
 
-		if (nAttrib != IA_NONE)
+		if (nAttrib != TDCA_NONE)
 			m_aDisplayAttrib.Add(nAttrib);
 	}	
 
 	// Backwards compatibility
 	if (pPrefs->GetProfileInt(szKey, _T("AutoAddFlagAndParent"), TRUE))
 	{
-		Misc::AddUniqueItemT(IA_FLAG, m_aDisplayAttrib);
+		Misc::AddUniqueItemT(TDCA_FLAG, m_aDisplayAttrib);
 
 		if (!Misc::IsHighContrastActive())
-			Misc::AddUniqueItemT(IA_PARENT, m_aDisplayAttrib);
+			Misc::AddUniqueItemT(TDCA_PARENT, m_aDisplayAttrib);
 	}
 }
 
@@ -312,8 +312,8 @@ void CKanbanPreferencesPage::OnShowColorAsBar()
 
 void CKanbanPreferencesPage::EnableDisableControls()
 {
-	m_cbCustomAttributes.EnableWindow(m_nFixedAttrib == IA_CUSTOMATTRIB);
-	m_cbCustomAttributes.ShowWindow((m_nFixedAttrib == IA_CUSTOMATTRIB) ? SW_SHOW : SW_HIDE);
+	m_cbCustomAttributes.EnableWindow(m_nFixedAttrib == TDCA_CUSTOMATTRIB);
+	m_cbCustomAttributes.ShowWindow((m_nFixedAttrib == TDCA_CUSTOMATTRIB) ? SW_SHOW : SW_HIDE);
 	
 	GetDlgItem(IDC_COLORBARBYPRIORITY)->EnableWindow(m_bShowTaskColorAsBar);
 
@@ -325,7 +325,7 @@ void CKanbanPreferencesPage::OnSelchangeAttribute()
 {
 	UpdateData();
 
-	if (m_nFixedAttrib != IA_CUSTOMATTRIB)
+	if (m_nFixedAttrib != TDCA_CUSTOMATTRIB)
 	{
 		m_sFixedCustomAttribID.Empty();
 		m_cbCustomAttributes.SetCurSel(CB_ERR);
@@ -347,7 +347,7 @@ void CKanbanPreferencesPage::OnSelchangeAttribute()
 
 void CKanbanPreferencesPage::OnSelchangeCustomAttribute() 
 {
-	ASSERT(m_nFixedAttrib == IA_CUSTOMATTRIB);
+	ASSERT(m_nFixedAttrib == TDCA_CUSTOMATTRIB);
 
 	UpdateData();
 
@@ -385,7 +385,7 @@ void CKanbanPreferencesPage::OnUpdateMoveFixedColUp(CCmdUI* pCmdUI)
 
 CString CKanbanPreferencesPage::GetFixedAttributeID() const
 {
-	return ((m_nFixedAttrib == IA_CUSTOMATTRIB) ? m_sFixedCustomAttribID : KANBANITEM::GetAttributeID(m_nFixedAttrib));
+	return ((m_nFixedAttrib == TDCA_CUSTOMATTRIB) ? m_sFixedCustomAttribID : KANBANITEM::GetAttributeID(m_nFixedAttrib));
 }
 
 void CKanbanPreferencesPage::OnPopulateFixedColumns()
@@ -467,30 +467,30 @@ void CKanbanPreferencesPage::BuildDisplayAttributeListBox()
 {
 	ASSERT(m_lbDisplayAttrib.GetSafeHwnd());
 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_ALLOCBY,	IA_ALLOCBY); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_ALLOCTO,	IA_ALLOCTO); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CATEGORY,	IA_CATEGORY); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_COST,		IA_COST); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CREATEDATE,	IA_CREATIONDATE);
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CREATEDBY,	IA_CREATEDBY);
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_DONEDATE,	IA_DONEDATE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_DUEDATE,	IA_DUEDATE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_EXTERNALID,	IA_EXTERNALID); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FLAG,		IA_FLAG); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FILEREF,	IA_FILEREF); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_LASTMOD,	IA_LASTMOD); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PERCENT,	IA_PERCENT); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PRIORITY,	IA_PRIORITY); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RECURRENCE,	IA_RECURRENCE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RISK,		IA_RISK); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STARTDATE,	IA_STARTDATE);
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STATUS,		IA_STATUS); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TAGS,		IA_TAGS); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TASKID,		IA_ID); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMEEST,	IA_TIMEEST); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMESPENT,	IA_TIMESPENT); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_VERSION,	IA_VERSION); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PARENT,		IA_PARENT); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_ALLOCBY,	TDCA_ALLOCBY); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_ALLOCTO,	TDCA_ALLOCTO); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CATEGORY,	TDCA_CATEGORY); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_COST,		TDCA_COST); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CREATEDATE,	TDCA_CREATIONDATE);
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CREATEDBY,	TDCA_CREATEDBY);
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_DONEDATE,	TDCA_DONEDATE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_DUEDATE,	TDCA_DUEDATE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_EXTERNALID,	TDCA_EXTERNALID); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FLAG,		TDCA_FLAG); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FILEREF,	TDCA_FILEREF); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_LASTMOD,	TDCA_LASTMODDATE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PERCENT,	TDCA_PERCENT); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PRIORITY,	TDCA_PRIORITY); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RECURRENCE,	TDCA_RECURRENCE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RISK,		TDCA_RISK); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STARTDATE,	TDCA_STARTDATE);
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STATUS,		TDCA_STATUS); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TAGS,		TDCA_TAGS); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TASKID,		TDCA_ID); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMEEST,	TDCA_TIMEEST); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMESPENT,	TDCA_TIMESPENT); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_VERSION,	TDCA_VERSION); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PARENT,		TDCA_PARENT); 
 
 	int nItem = m_aDisplayAttrib.GetSize();
 	
@@ -558,9 +558,9 @@ void CKanbanPreferencesDlg::DoHelp()
 		m_pParentWnd->SendMessage(WM_KBC_PREFSHELP);
 }
 
-int CKanbanPreferencesDlg::GetDisplayAttributes(CKanbanAttributeArray& aAttrib, I_ATTRIBUTE nExclude) const
+int CKanbanPreferencesDlg::GetDisplayAttributes(CKanbanAttributeArray& aAttrib, TDC_ATTRIBUTE nExclude) const
 {
-	if (m_page.GetDisplayAttributes(aAttrib) && (nExclude != IA_NONE))
+	if (m_page.GetDisplayAttributes(aAttrib) && (nExclude != TDCA_NONE))
 		Misc::RemoveItemT(nExclude, aAttrib);
 
 	return aAttrib.GetSize();

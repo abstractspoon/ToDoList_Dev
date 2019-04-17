@@ -43,7 +43,7 @@ public:
 	BOOL GetColorBarByPriority() const { return m_bColorBarByPriority; }
 	BOOL GetIndentSubtasks() const { return m_bIndentSubtasks; }
 	BOOL GetHideEmptyAttributes() const { return m_bHideEmptyAttributeValues; }
-	I_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const;
+	TDC_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const;
 	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const;
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
@@ -71,7 +71,7 @@ protected:
 	BOOL	m_bIndentSubtasks;
 	BOOL	m_bAlwaysShowBacklog;
 	CString	m_sFixedCustomAttribID;
-	I_ATTRIBUTE m_nFixedAttrib;
+	TDC_ATTRIBUTE m_nFixedAttrib;
 
 	CKanbanColumnArray m_aFixedColumnDefs;
 	CKanbanCustomAttributeDefinitionArray m_aCustAttribDefs;
@@ -131,8 +131,8 @@ public:
 	BOOL GetColorBarByPriority() const { return m_page.GetColorBarByPriority(); }
 	BOOL GetIndentSubtasks() const { return m_page.GetIndentSubtasks(); }
 	BOOL GetHideEmptyAttributes() const { return m_page.GetHideEmptyAttributes(); }
-	I_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const { return m_page.GetFixedAttributeToTrack(sCustomID); }
-	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib, I_ATTRIBUTE nExclude) const;
+	TDC_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const { return m_page.GetFixedAttributeToTrack(sCustomID); }
+	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib, TDC_ATTRIBUTE nExclude) const;
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }

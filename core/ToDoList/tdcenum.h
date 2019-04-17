@@ -8,6 +8,8 @@
 // tdcenum.h : header file
 //
 
+#include "..\Interfaces\IEnums.h"
+
 #include <afxtempl.h>
 
 // WM_COPYDATA options
@@ -549,101 +551,6 @@ enum // Filter Bar
 	IDC_FIRST_CUSTOMFILTERFIELD = 4000,
 	IDC_LAST_CUSTOMFILTERFIELD = IDC_FIRST_CUSTOMFILTERFIELD + 256,
 };
- 
-/////////////////////////////////////////////////////////////////////////////
-
-enum TDC_ATTRIBUTE
-{
-	// NEVER CHANGE THE ORDER OF THIS LIST
-	TDCA_NONE = -1,
-
-	TDCA_FIRSTATTRIBUTE = 0,
-	TDCA_TASKNAME = TDCA_FIRSTATTRIBUTE,
-	TDCA_DONEDATE,
-	TDCA_DUEDATE,
-	TDCA_STARTDATE,
-	TDCA_PRIORITY,
-	TDCA_COLOR,
-	TDCA_ALLOCTO,
-	TDCA_ALLOCBY,
-	TDCA_STATUS,
-	TDCA_CATEGORY,
-	TDCA_PERCENT,
-	TDCA_TIMEEST,
-	TDCA_TIMESPENT,
-	TDCA_FILEREF,
-	TDCA_COMMENTS,
-	TDCA_PROJECTNAME,
-	TDCA_FLAG,
-	TDCA_CREATIONDATE,
-	TDCA_CREATEDBY,
-	TDCA_RISK,			
-	TDCA_EXTERNALID,	
-	TDCA_COST,			
-	TDCA_DEPENDENCY,	
-	TDCA_RECURRENCE,	
-	TDCA_VERSION,		
-	TDCA_POSITION,
-	TDCA_ID,
-	TDCA_LASTMODDATE,
-	TDCA_DUETIME,
-	TDCA_ICON,
-	TDCA_STARTTIME,
-	TDCA_DONETIME,
-	TDCA_TAGS,
-
-	// number of 'real' attributes
-	TDCA_ATTRIBUTECOUNT,
-
-	// pseudo attribute
-	TDCA_PARENTID,
-
-	// pseudo attributes for SetModified
-	TDCA_NEWTASK,
-	TDCA_UNDO,
-	TDCA_DELETE,
-	TDCA_ARCHIVE,
-	TDCA_ENCRYPT,
-	TDCA_PASTE,
-
-	// pseudo attributes for Find Tasks dialog
-	TDCA_TASKNAMEORCOMMENTS,
-	TDCA_ANYTEXTATTRIBUTE,
-	TDCA_DONEDATE_RELATIVE_DEP,		// deprecated
-	TDCA_DUEDATE_RELATIVE_DEP,		// deprecated
-	TDCA_STARTDATE_RELATIVE_DEP,	// deprecated
-	TDCA_CREATIONDATE_RELATIVE_DEP,	// deprecated
-	TDCA_LASTMOD_RELATIVE_DEP,		// deprecated
-
-	// custom attributes
-	TDCA_CUSTOMATTRIBDEFS,
-	TDCA_CUSTOMATTRIB,
-	TDCA_CUSTOMATTRIB_FIRST = TDCA_CUSTOMATTRIB,
-	TDCA_CUSTOMATTRIB_LAST = TDCA_CUSTOMATTRIB_FIRST + 63,
-
-	// pseudo attribute for filtering
-	TDCA_SELECTION,
-	TDCA_RECENTMODIFIED,
-
-	// pseudo attribute for printing
-	TDCA_NOTES_DEP,					// deprecated
-
-	// pseudo attributes for Find Tasks dialog
-	TDCA_PATH,
-
-	// ADD NEW ATTRIBUTES HERE!
-	TDCA_SUBTASKDONE,
-	TDCA_LOCK,
-	TDCA_MERGE,
-	TDCA_CUSTOMATTRIB_ALL,
-	TDCA_LASTMODBY,
-	TDCA_METADATA,
-	TDCA_COMMENTSSIZE,
-
-	TDCA_ALL = 0xfffffff0,
-};
-
-const int NUM_CUST_ATTRIB = (TDCA_CUSTOMATTRIB_LAST - TDCA_CUSTOMATTRIB_FIRST + 1);
  
 /////////////////////////////////////////////////////////////////////////////
 

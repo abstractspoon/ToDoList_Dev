@@ -390,8 +390,8 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	CString sItem = CTaskListExporterBase::FormatAttribute(pTasks, hTask, nDepth, nAttrib, sAttribLabel);
 
 	// extra processing
-	CString sTextColor = pTasks->GetTaskAttribute(hTask, TDL_TASKTEXTWEBCOLOR);
-	CString sBackColor = pTasks->GetTaskAttribute(hTask, TDL_TASKBACKWEBCOLOR);
+	CString sTextColor = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, TDL_TASKTEXTWEBCOLOR);
+	CString sBackColor = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, TDL_TASKBACKWEBCOLOR);
 	BOOL bColor = TRUE;
 	BOOL bStrikeThru = (STRIKETHRUDONE && pTasks->IsTaskDone(hTask));
 	BOOL bBlockQuote = FALSE;
@@ -471,9 +471,9 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		break;
 		
 	case TDCA_COMMENTS:
-		if (pTasks->TaskHasAttribute(hTask, TDL_TASKHTMLCOMMENTS))
+		if (((ITaskList*)pTasks)->TaskHasAttribute(hTask, TDL_TASKHTMLCOMMENTS))
 		{
-			sItem = pTasks->GetTaskAttribute(hTask, TDL_TASKHTMLCOMMENTS);
+			sItem = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, TDL_TASKHTMLCOMMENTS);
 			sItem.TrimRight();
 			
 			// note: we reset the font after the comments because the font

@@ -28,7 +28,7 @@ public:
 	CTaskMiniCalendarCtrl(const CTaskCalItemMap& mapData);
 	virtual ~CTaskMiniCalendarCtrl();
 
-	void EnableHeatMap(const CDWordArray& aPalette, I_ATTRIBUTE nAttrib);
+	void EnableHeatMap(const CDWordArray& aPalette, TDC_ATTRIBUTE nAttrib);
 	void DisableHeatMap();
 	void SetOptions(DWORD dwOptions);
 
@@ -44,7 +44,7 @@ protected:
 	CHeatMap m_mapHeatMap;
 	CToolTipCtrlEx m_tooltip;
 	
-	I_ATTRIBUTE m_nHeatMapAttribute;
+	TDC_ATTRIBUTE m_nHeatMapAttribute;
 	DWORD m_dwOptions;
 
 	// Generated message map functions

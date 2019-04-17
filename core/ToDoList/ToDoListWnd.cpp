@@ -6488,7 +6488,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 		CTDCAttributeMap mapAttrib;
 		GetAttributesForExport(dlg.GetTaskSelection(), tdc, mapAttrib);
 
-		tasks.SetReportAttributes(dlg.GetTitle(), mapAttrib, dlg.GetDate());
+		tasks.SetReportAttributes(dlg.GetTitle(), dlg.GetDate());
 
 		// save intermediate tasklist to file as required
 		LogIntermediateTaskList(tasks, tdc.GetFilePath());

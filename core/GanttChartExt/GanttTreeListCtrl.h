@@ -51,7 +51,7 @@ public:
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 
-	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib);
+	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib);
 	bool PrepareNewTask(ITaskList* pTask) const;
 
 	DWORD GetSelectedTaskID() const;
@@ -141,10 +141,10 @@ public:
 	BOOL GetActiveDateRange(GANTTDATERANGE& dtRange) const;
 	BOOL GetDataDateRange(GANTTDATERANGE& dtRange) const;
 
-	static BOOL WantEditUpdate(I_ATTRIBUTE nAttrib);
-	static BOOL WantSortUpdate(I_ATTRIBUTE nAttrib);
-	static I_ATTRIBUTE MapColumnToAttribute(GTLC_COLUMN nCol);
-	static GTLC_COLUMN MapAttributeToColumn(I_ATTRIBUTE nAttrib);
+	static BOOL WantEditUpdate(TDC_ATTRIBUTE nAttrib);
+	static BOOL WantSortUpdate(TDC_ATTRIBUTE nAttrib);
+	static TDC_ATTRIBUTE MapColumnToAttribute(GTLC_COLUMN nCol);
+	static GTLC_COLUMN MapAttributeToColumn(TDC_ATTRIBUTE nAttrib);
 
 protected:
 	BOOL m_bReadOnly;
@@ -371,14 +371,14 @@ protected:
 
 	void RebuildTree(const ITASKLISTBASE* pTasks);
 	void BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd = TRUE);
-	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void RecalcParentDates();
 	void RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI);
 	void RefreshTreeItemMap();
 	void UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void UpdateParentStatus(DWORD dwOldParentID, DWORD dwNewParentID);
 
-	BOOL EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib) const;
+	BOOL EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib) const;
 	void Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
 	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCOLUMN& col) const;
 

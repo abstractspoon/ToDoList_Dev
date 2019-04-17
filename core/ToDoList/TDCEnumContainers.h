@@ -6,6 +6,8 @@
 
 #include "..\Shared\mapex.h"
 
+#include "..\Interfaces\IEnums.h"
+
 #include <afxtempl.h>
 
 //////////////////////////////////////////////////////////////////////

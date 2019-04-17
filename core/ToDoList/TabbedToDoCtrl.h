@@ -162,7 +162,7 @@ protected:
 	BOOL m_bUpdatingExtensions;
 	BOOL m_bRecreatingRecurringTasks;
 
-	I_ATTRIBUTE m_nExtModifyingAttrib;
+	TDC_ATTRIBUTE m_nExtModifyingAttrib;
 	CDWordArray m_aRecreatedRecurringTasks;
 
 	// almost all of the tree's view data is stored in CToDoCtrl
@@ -325,9 +325,10 @@ protected:
 	BOOL IsExtensionView(HWND hWnd) const;
 	BOOL ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
 	void RefreshExtensionViewSort(FTC_VIEW nView);
-	BOOL ExtensionCanSortBy(FTC_VIEW nView, I_ATTRIBUTE nBy) const;
+	BOOL ExtensionCanSortBy(FTC_VIEW nView, TDC_ATTRIBUTE nBy) const;
 	BOOL GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nDirection, DWORD& dwDestParentID, DWORD& dwDestPrevSiblingID) const;
 	BOOL ValidatePreviousSiblingTaskID(DWORD dwTaskID, DWORD& dwPrevSiblingID) const;
+	BOOL AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttrib) const;
 
 	virtual BOOL GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const;
 	BOOL GetSelectedTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib, DWORD dwFlags) const;

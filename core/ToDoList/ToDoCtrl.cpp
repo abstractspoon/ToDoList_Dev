@@ -11895,6 +11895,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_FLAG:			
 	case TDCA_ICON:		
 	case TDCA_METADATA:
+	case TDCA_OFFSETTASK:
 	case TDCA_PRIORITY:		
 	case TDCA_RECURRENCE:	
 	case TDCA_RISK:			

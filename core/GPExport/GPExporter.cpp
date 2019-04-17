@@ -242,7 +242,7 @@ bool CGPExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
 	// colour
 	if (pSrcTaskFile->GetTaskTextColor(hTask) > 0)
 	{
-		CString sColor = pSrcTaskFile->GetTaskAttribute(hTask, _T("TEXTWEBCOLOR"));
+		CString sColor = ((ITaskList*)pSrcTaskFile)->GetTaskAttribute(hTask, _T("TEXTWEBCOLOR"));
 		ASSERT(!sColor.IsEmpty() && sColor[0] == '#');
 
 		pXIDestItem->AddItem(_T("color"), sColor);

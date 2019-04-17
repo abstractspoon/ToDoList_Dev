@@ -216,7 +216,7 @@ KANBANITEM::~KANBANITEM()
 	
 }
 
-void KANBANITEM::SetTrackedAttributeValues(I_ATTRIBUTE nAttribID, const CStringArray& aValues)
+void KANBANITEM::SetTrackedAttributeValues(TDC_ATTRIBUTE nAttribID, const CStringArray& aValues)
 {
 	SetTrackedAttributeValues(GetAttributeID(nAttribID), aValues);
 }
@@ -300,12 +300,12 @@ void KANBANITEM::RemoveAllTrackedAttributeValues(LPCTSTR szAttrib)
 	mapAttribValues.RemoveKey(szAttrib);
 }
 
-void KANBANITEM::SetTrackedAttributeValue(I_ATTRIBUTE nAttribID, LPCTSTR szValue)
+void KANBANITEM::SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, LPCTSTR szValue)
 {
 	SetTrackedAttributeValue(GetAttributeID(nAttribID), szValue);
 }
 
-void KANBANITEM::SetTrackedAttributeValue(I_ATTRIBUTE nAttribID, int nValue)
+void KANBANITEM::SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, int nValue)
 {
 	// Less than zero == empty
 	CString sValue;
@@ -366,60 +366,60 @@ BOOL KANBANITEM::MatchesAttribute(const IUISELECTTASK& select) const
 	return (Misc::Find(select.szWords, sAttrib, select.bCaseSensitive, select.bWholeWord) != -1);
 }
 
-CString KANBANITEM::GetAttributeDisplayValue(I_ATTRIBUTE nAttrib) const
+CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 {
 	switch (nAttrib)
 	{
-	case IA_TASKNAME:
+	case TDCA_TASKNAME:
 		return sTitle;
 
-	case IA_ALLOCTO:	
-	case IA_ALLOCBY:	
-	case IA_STATUS:	
-	case IA_CATEGORY:	
-	case IA_VERSION:	
-	case IA_TAGS:		
-	case IA_PRIORITY:	
-	case IA_RISK:			
+	case TDCA_ALLOCTO:	
+	case TDCA_ALLOCBY:	
+	case TDCA_STATUS:	
+	case TDCA_CATEGORY:	
+	case TDCA_VERSION:	
+	case TDCA_TAGS:		
+	case TDCA_PRIORITY:	
+	case TDCA_RISK:			
 		return GetTrackedAttributeValue(KANBANITEM::GetAttributeID(nAttrib));
 		
-	case IA_DONEDATE:		
+	case TDCA_DONEDATE:		
 		if (CDateHelper::IsDateSet(dtDone))
 			return dtDone.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case IA_DUEDATE:		
+	case TDCA_DUEDATE:		
 		if (CDateHelper::IsDateSet(dtDue))
 			return dtDue.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case IA_STARTDATE:		
+	case TDCA_STARTDATE:		
 		if (CDateHelper::IsDateSet(dtStart))
 			return dtStart.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case IA_CREATIONDATE:	
+	case TDCA_CREATIONDATE:	
 		if (CDateHelper::IsDateSet(dtCreate))
 			return dtCreate.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case IA_LASTMOD:		
+	case TDCA_LASTMODDATE:		
 		if (CDateHelper::IsDateSet(dtLastMod))
 			return dtLastMod.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case IA_FILEREF:		return sFileRef;
-	case IA_ID:			return Misc::Format(dwTaskID);
-	case IA_PERCENT:		return Misc::Format(nPercent, _T("%"));
-	case IA_CREATEDBY:		return sCreatedBy;
-	case IA_EXTERNALID:	return sExternalID;
-	case IA_COST:			return Misc::Format(dCost, 2);
-	case IA_RECURRENCE:	return sRecurrence;
-	case IA_TIMEEST:		return CTimeHelper().FormatTime(dTimeEst, MapUnitsToTHUnits(nTimeEstUnits), 2);
-	case IA_TIMESPENT:		return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
+	case TDCA_FILEREF:		return sFileRef;
+	case TDCA_ID:			return Misc::Format(dwTaskID);
+	case TDCA_PERCENT:		return Misc::Format(nPercent, _T("%"));
+	case TDCA_CREATEDBY:		return sCreatedBy;
+	case TDCA_EXTERNALID:	return sExternalID;
+	case TDCA_COST:			return Misc::Format(dCost, 2);
+	case TDCA_RECURRENCE:	return sRecurrence;
+	case TDCA_TIMEEST:		return CTimeHelper().FormatTime(dTimeEst, MapUnitsToTHUnits(nTimeEstUnits), 2);
+	case TDCA_TIMESPENT:		return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
 
-	case IA_FLAG:			// drawn separately
-	case IA_PARENT:		// drawn separately
+	case TDCA_FLAG:			// drawn separately
+	case TDCA_PARENT:		// drawn separately
 	default:
 		ASSERT(0);
 		break;
@@ -428,42 +428,42 @@ CString KANBANITEM::GetAttributeDisplayValue(I_ATTRIBUTE nAttrib) const
 	return _T("");
 }
 
-BOOL KANBANITEM::HasAttributeDisplayValue(I_ATTRIBUTE nAttrib) const
+BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 {
 	switch (nAttrib)
 	{
-	case IA_TASKNAME:
-	case IA_ID:
+	case TDCA_TASKNAME:
+	case TDCA_ID:
 		return TRUE;
 
-	case IA_ALLOCTO:	
-	case IA_ALLOCBY:	
-	case IA_STATUS:	
-	case IA_CATEGORY:	
-	case IA_VERSION:	
-	case IA_TAGS:		
-	case IA_PRIORITY:	
-	case IA_RISK:			
+	case TDCA_ALLOCTO:	
+	case TDCA_ALLOCBY:	
+	case TDCA_STATUS:	
+	case TDCA_CATEGORY:	
+	case TDCA_VERSION:	
+	case TDCA_TAGS:		
+	case TDCA_PRIORITY:	
+	case TDCA_RISK:			
 		return HasTrackedAttributeValues(KANBANITEM::GetAttributeID(nAttrib));
 		
-	case IA_DONEDATE:		return CDateHelper::IsDateSet(dtDone);
-	case IA_DUEDATE:		return CDateHelper::IsDateSet(dtDue);
-	case IA_STARTDATE:		return CDateHelper::IsDateSet(dtStart);
-	case IA_CREATIONDATE:	return CDateHelper::IsDateSet(dtCreate);
-	case IA_LASTMOD:		return CDateHelper::IsDateSet(dtLastMod);
+	case TDCA_DONEDATE:		return CDateHelper::IsDateSet(dtDone);
+	case TDCA_DUEDATE:		return CDateHelper::IsDateSet(dtDue);
+	case TDCA_STARTDATE:	return CDateHelper::IsDateSet(dtStart);
+	case TDCA_CREATIONDATE:	return CDateHelper::IsDateSet(dtCreate);
+	case TDCA_LASTMODDATE:	return CDateHelper::IsDateSet(dtLastMod);
 
-	case IA_FILEREF:		return !sFileRef.IsEmpty();
-	case IA_CREATEDBY:		return !sCreatedBy.IsEmpty();
-	case IA_EXTERNALID:	return !sExternalID.IsEmpty();
-	case IA_RECURRENCE:	return !sRecurrence.IsEmpty();
+	case TDCA_FILEREF:		return !sFileRef.IsEmpty();
+	case TDCA_CREATEDBY:	return !sCreatedBy.IsEmpty();
+	case TDCA_EXTERNALID:	return !sExternalID.IsEmpty();
+	case TDCA_RECURRENCE:	return !sRecurrence.IsEmpty();
 
-	case IA_PERCENT:		return (nPercent > 0);
-	case IA_COST:			return (dCost > 0);
-	case IA_TIMEEST:		return (dTimeEst > 0);
-	case IA_TIMESPENT:		return (dTimeSpent > 0);
+	case TDCA_PERCENT:		return (nPercent > 0);
+	case TDCA_COST:			return (dCost > 0);
+	case TDCA_TIMEEST:		return (dTimeEst > 0);
+	case TDCA_TIMESPENT:	return (dTimeSpent > 0);
 
-	case IA_PARENT:		break; // handled separately
-	case IA_FLAG:			break; // handled separately
+	case TDCA_PARENT:		break; // handled separately
+	case TDCA_FLAG:			break; // handled separately
 	}
 
 	ASSERT(0);
@@ -582,25 +582,25 @@ BOOL KANBANITEM::IsDone(BOOL bIncludeGoodAs) const
 
 int KANBANITEM::GetPriority() const
 {
-	CString sPriority(GetTrackedAttributeValue(GetAttributeID(IA_PRIORITY)));
+	CString sPriority(GetTrackedAttributeValue(GetAttributeID(TDCA_PRIORITY)));
 
 	return (sPriority.IsEmpty() ? -2 : _ttoi(sPriority));
 }
 
-CString KANBANITEM::GetAttributeID(I_ATTRIBUTE nAttrib)
+CString KANBANITEM::GetAttributeID(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IA_ALLOCTO:	return _T("ALLOCTO");
-	case IA_ALLOCBY:	return _T("ALLOCBY");
-	case IA_STATUS:	return _T("STATUS");
-	case IA_CATEGORY:	return _T("CATEGORY");
-	case IA_VERSION:	return _T("VERSION");
-	case IA_TAGS:		return _T("TAGS");
-	case IA_PRIORITY:	return _T("PRIORITY");
-	case IA_RISK:		return _T("RISK");
+	case TDCA_ALLOCTO:	return _T("ALLOCTO");
+	case TDCA_ALLOCBY:	return _T("ALLOCBY");
+	case TDCA_STATUS:	return _T("STATUS");
+	case TDCA_CATEGORY:	return _T("CATEGORY");
+	case TDCA_VERSION:	return _T("VERSION");
+	case TDCA_TAGS:		return _T("TAGS");
+	case TDCA_PRIORITY:	return _T("PRIORITY");
+	case TDCA_RISK:		return _T("RISK");
 
-	case IA_CUSTOMATTRIB:
+	case TDCA_CUSTOMATTRIB:
 		ASSERT(0);
 		break;
 		
@@ -612,21 +612,21 @@ CString KANBANITEM::GetAttributeID(I_ATTRIBUTE nAttrib)
 	return _T("");
 }
 
-BOOL KANBANITEM::IsTrackableAttribute(I_ATTRIBUTE nAttrib)
+BOOL KANBANITEM::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IA_ALLOCTO:	
-	case IA_ALLOCBY:	
-	case IA_STATUS:	
-	case IA_CATEGORY:	
-	case IA_VERSION:	
-	case IA_TAGS:		
-	case IA_PRIORITY:	
-	case IA_RISK:		
+	case TDCA_ALLOCTO:	
+	case TDCA_ALLOCBY:	
+	case TDCA_STATUS:	
+	case TDCA_CATEGORY:	
+	case TDCA_VERSION:	
+	case TDCA_TAGS:		
+	case TDCA_PRIORITY:	
+	case TDCA_RISK:		
 		return TRUE;
 
-	case IA_CUSTOMATTRIB:
+	case TDCA_CUSTOMATTRIB:
 		// TODO
 		break;
 	}
@@ -933,7 +933,7 @@ BOOL CKanbanColumnArray::MatchesAll(const CKanbanColumnArray& other, BOOL bIncDi
 KANBANSORT::KANBANSORT(const CKanbanItemMap& map)
 	:
 	data(map),
-	nBy(IA_NONE),
+	nBy(TDCA_NONE),
 	bAscending(TRUE),
 	bSubtasksBelowParent(FALSE)
 {

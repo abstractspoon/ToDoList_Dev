@@ -294,17 +294,17 @@ bool CBurndownWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
 	return true;
 }
 
-bool CBurndownWnd::WantTaskUpdate(I_ATTRIBUTE nAttribute) const
+bool CBurndownWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	switch (nAttribute)
 	{
-	case IA_DONEDATE:
-	case IA_STARTDATE:
-	case IA_CREATIONDATE:
-	case IA_TIMEEST:
-	case IA_TIMESPENT:
+	case TDCA_DONEDATE:
+	case TDCA_STARTDATE:
+	case TDCA_CREATIONDATE:
+	case TDCA_TIMEEST:
+	case TDCA_TIMESPENT:
 		return true;
 	}
 
@@ -358,7 +358,7 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 	}
 }
 
-void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const I_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -388,7 +388,7 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 		break;
 		
 	case IUI_EDIT:
-		UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, CSet<I_ATTRIBUTE>(pAttributes, nNumAttributes), TRUE);
+		UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, CSet<TDC_ATTRIBUTE>(pAttributes, nNumAttributes), TRUE);
 		RebuildGraph(TRUE, TRUE, TRUE);
 		break;
 		
@@ -402,7 +402,7 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 	}
 }
 
-void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	// handle task if not NULL (== root)
 	if (hTask == NULL)
@@ -427,10 +427,10 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 		
 		if (pSI)
 		{
-			if (attrib.Has(IA_DONEDATE))
+			if (attrib.Has(TDCA_DONEDATE))
 				pSI->dtDone = GetTaskDoneDate(pTasks, hTask);
 
-			if (attrib.Has(IA_STARTDATE))
+			if (attrib.Has(TDCA_STARTDATE))
 			{
 				pSI->dtStart = GetTaskStartDate(pTasks, hTask);
 				
@@ -439,10 +439,10 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 					pSI->dtStart = min(pSI->dtStart, pSI->dtDone);
 			}
 
-			if (attrib.Has(IA_TIMEEST))
+			if (attrib.Has(TDCA_TIMEEST))
 				pSI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pSI->nTimeEstUnits, false);
 
-			if (attrib.Has(IA_TIMESPENT))
+			if (attrib.Has(TDCA_TIMESPENT))
 				pSI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pSI->nTimeSpentUnits, false);
 		}
 		else

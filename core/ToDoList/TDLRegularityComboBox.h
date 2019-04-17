@@ -7,7 +7,7 @@
 // TDLRegularityComboBox.h : header file
 //
 
-#include "..\Interfaces\iTaskList.h"
+#include "..\Interfaces\IEnums.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLRegularityComboBox window

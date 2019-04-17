@@ -14,7 +14,6 @@
 #include <Windows.h>
 
 #include "ITaskList.h"
-#include "IAttribute.h"
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -188,7 +187,7 @@ enum IUI_HITTEST
 
 struct IUITASKMOD
 {
-	I_ATTRIBUTE nAttrib;
+	TDC_ATTRIBUTE nAttrib;
 	DWORD dwSelectedTaskID;		// 'zero' for _ALL_ selected tasks
 	LPCWSTR szCustomAttribID;	// IUI_CUSTOMATTRIB
 
@@ -226,13 +225,13 @@ struct IUITASKMOVE
 
 struct IUIMULTISORT
 {
-	I_ATTRIBUTE nAttrib1;
+	TDC_ATTRIBUTE nAttrib1;
 	bool bAscending1;
 
-	I_ATTRIBUTE nAttrib2;
+	TDC_ATTRIBUTE nAttrib2;
 	bool bAscending2;
 
-	I_ATTRIBUTE nAttrib3;
+	TDC_ATTRIBUTE nAttrib3;
 	bool bAscending3;
 };
 
@@ -240,7 +239,7 @@ struct IUIMULTISORT
 
 struct IUISELECTTASK
 {
-	I_ATTRIBUTE nAttrib; // IUI_TASKNAME, IUI_TASKNAMEORCOMMENTS or IUI_ANYTEXTATTRIBUTE
+	TDC_ATTRIBUTE nAttrib; // IUI_TASKNAME, IUI_TASKNAMEORCOMMENTS or IUI_ANYTEXTATTRIBUTE
 	bool bFindReplace;
 
 	LPCWSTR szWords;	
@@ -254,7 +253,7 @@ struct IUIAPPCOMMANDDATA
 {
 	union
 	{
-		I_ATTRIBUTE nSortBy;
+		TDC_ATTRIBUTE nSortBy;
 		DWORD dwTaskID;
 		WCHAR szFilePath[MAX_PATH + 1];
 		IUIMULTISORT sort;
@@ -308,8 +307,8 @@ public:
 	virtual bool SelectTask(DWORD dwTaskID) = 0;
 	virtual bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount) = 0;
 
-	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const I_ATTRIBUTE* pAttributes, int nNumAttributes) = 0;
-	virtual bool WantTaskUpdate(I_ATTRIBUTE nAttribute) const = 0;
+	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes) = 0;
+	virtual bool WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const = 0;
 	virtual bool PrepareNewTask(ITaskList* pTask) const = 0;
 	
 	virtual bool ProcessMessage(MSG* pMsg) = 0;

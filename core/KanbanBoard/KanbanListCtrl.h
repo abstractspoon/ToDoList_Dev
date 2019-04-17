@@ -57,7 +57,7 @@ public:
 	BOOL DeleteAll();
 	void RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 
-	void Sort(I_ATTRIBUTE nBy, BOOL bAscending);
+	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
 	
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
 	CSize CalcRequiredSizeForImage() const;
@@ -98,7 +98,7 @@ public:
 	const CTreeCtrlHelper& TCH() const { return m_tch; }
 	CTreeCtrlHelper& TCH() { return m_tch; }
 
-	static CString FormatAttribute(I_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis);
+	static CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis);
 	static BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol);
 
 protected:
@@ -179,13 +179,13 @@ protected:
 	void DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const;
 	void DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
-	void DrawAttribute(CDC* pDC, CRect& rLine, I_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const;
+	void DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const;
 	void FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText, BOOL bSelected) const;
 	void DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 	void DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	static UINT GetDisplayFormat(I_ATTRIBUTE nAttrib, BOOL bLong);
+	static UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);
 
 };
 

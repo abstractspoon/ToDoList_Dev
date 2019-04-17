@@ -9,7 +9,7 @@
 
 #include "TDLDialog.h"
 
-#include "..\Interfaces\ITaskList.h"
+//#include "..\Interfaces\ITaskList.h"
 
 #include "..\shared\TimeEdit.h"
 #include "..\shared\Timecombobox.h"

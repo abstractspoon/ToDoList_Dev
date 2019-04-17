@@ -23,7 +23,7 @@ public:
 
 	// IUI_SORT
 	// IUI_TOGGLABLESORT
-	CUIExtensionAppCmdData(I_ATTRIBUTE nSortCol, BOOL bAscending);
+	CUIExtensionAppCmdData(TDC_ATTRIBUTE nSortCol, BOOL bAscending);
 
 	// IUI_SELECTTASK
 	// IUI_GETNEXTTASK
@@ -44,7 +44,7 @@ public:
 	// IUI_SELECTNEXTTASKINCLCURRENT
 	// IUI_SELECTPREVTASK
 	// IUI_SELECTLASTTASK
-	CUIExtensionAppCmdData(I_ATTRIBUTE nAttrib, 
+	CUIExtensionAppCmdData(TDC_ATTRIBUTE nAttrib, 
 								BOOL bFindReplace, 
 								LPCWSTR szWords, 
 								BOOL bCaseSensitive, 

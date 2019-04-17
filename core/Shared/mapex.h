@@ -136,6 +136,12 @@ public:
 		return CopyFrom(other.GetData(), other.GetSize());
 	}
 
+	template <class ARRAY>
+	int CopyFrom(const ARRAY& other)
+	{
+		return CopyFrom(other.GetData(), other.GetSize());
+	}
+
 	int CopyFrom(const KEY* pOther, int nNumOther)
 	{
 		if (!pOther)
@@ -158,13 +164,6 @@ public:
 		CopyTo(other);
 	}
 
-protected:
-	template <class ARRAY>
-	int CopyFrom(const ARRAY& other)
-	{
-		return CopyFrom(other.GetData(), other.GetSize());
-	}
-
 	template <class ARRAY>
 	int CopyTo(ARRAY& other) const
 	{
@@ -176,6 +175,7 @@ protected:
 
 		return other.GetSize();
 	}
+
 };
 
 //////////////////////////////////////////////////////////////////////

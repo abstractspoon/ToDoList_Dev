@@ -97,8 +97,8 @@ CKanbanCtrl::CKanbanCtrl()
 	m_bReadOnly(FALSE),
 	m_nNextColor(0),
 	m_pSelectedColumn(NULL),
-	m_nTrackAttribute(IA_NONE),
-	m_nSortBy(IA_NONE),
+	m_nTrackAttribute(TDCA_NONE),
+	m_nSortBy(TDCA_NONE),
 	m_bSelectTasks(FALSE),
 	m_bResizingHeader(FALSE),
 	m_bSettingColumnFocus(FALSE),
@@ -484,7 +484,7 @@ BOOL CKanbanCtrl::HasFocus() const
 	return CDialogHelper::IsChildOrSame(GetSafeHwnd(), ::GetFocus());
 }
 
-void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib)
+void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib)
 {
 	ASSERT(GetSafeHwnd());
 
@@ -539,7 +539,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 	}
 }
 
-BOOL CKanbanCtrl::UpdateNeedsItemHeightRefresh(const CSet<I_ATTRIBUTE>& attrib) const
+BOOL CKanbanCtrl::UpdateNeedsItemHeightRefresh(const CSet<TDC_ATTRIBUTE>& attrib) const
 {
 	if (HasOption(KBCF_HIDEEMPTYATTRIBUTES))
 	{
@@ -619,37 +619,37 @@ int CKanbanCtrl::GetTaskTags(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStri
 }
 
 // External interface
-BOOL CKanbanCtrl::WantEditUpdate(I_ATTRIBUTE nAttrib) const
+BOOL CKanbanCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib) const
 {
 	switch (nAttrib)
 	{
-	case IA_ALLOCBY:
-	case IA_ALLOCTO:
-	case IA_CATEGORY:
-	case IA_COLOR:
-	case IA_COST:
-	case IA_CREATIONDATE:
-	case IA_CREATEDBY:
-	case IA_CUSTOMATTRIB:
-	case IA_DONEDATE:
-	case IA_DUEDATE:
-	case IA_EXTERNALID:
-	case IA_FILEREF:
-	case IA_FLAG:
-	case IA_ICON:
-	case IA_LASTMOD:
-	case IA_PERCENT:
-	case IA_PRIORITY:
-	case IA_RECURRENCE:
-	case IA_RISK:
-	case IA_STARTDATE:
-	case IA_STATUS:
-	case IA_SUBTASKDONE:
-	case IA_TAGS:
-	case IA_TASKNAME:
-	case IA_TIMEEST:
-	case IA_TIMESPENT:
-	case IA_VERSION:
+	case TDCA_ALLOCBY:
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_COLOR:
+	case TDCA_COST:
+	case TDCA_CREATIONDATE:
+	case TDCA_CREATEDBY:
+	case TDCA_CUSTOMATTRIB:
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_EXTERNALID:
+	case TDCA_FILEREF:
+	case TDCA_FLAG:
+	case TDCA_ICON:
+	case TDCA_LASTMODDATE:
+	case TDCA_PERCENT:
+	case TDCA_PRIORITY:
+	case TDCA_RECURRENCE:
+	case TDCA_RISK:
+	case TDCA_STARTDATE:
+	case TDCA_STATUS:
+	case TDCA_SUBTASKDONE:
+	case TDCA_TAGS:
+	case TDCA_TASKNAME:
+	case TDCA_TIMEEST:
+	case TDCA_TIMESPENT:
+	case TDCA_VERSION:
 		return TRUE;
 	}
 	
@@ -658,11 +658,11 @@ BOOL CKanbanCtrl::WantEditUpdate(I_ATTRIBUTE nAttrib) const
 }
 
 // External interface
-BOOL CKanbanCtrl::WantSortUpdate(I_ATTRIBUTE nAttrib) const
+BOOL CKanbanCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib) const
 {
 	switch (nAttrib)
 	{
-	case IA_NONE:
+	case TDCA_NONE:
 		return HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
 	}
 
@@ -670,7 +670,7 @@ BOOL CKanbanCtrl::WantSortUpdate(I_ATTRIBUTE nAttrib) const
 	return WantEditUpdate(nAttrib);
 }
 
-BOOL CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks, const CSet<I_ATTRIBUTE>& attrib)
+BOOL CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks, const CSet<TDC_ATTRIBUTE>& attrib)
 {
 	// Rebuild global attribute value lists
 	m_mapAttributeValues.RemoveAll();
@@ -684,7 +684,7 @@ BOOL CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks, const CSet<I_ATTRIBUT
 	return AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, attrib, TRUE);
 }
 
-BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<I_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (!hTask)
 		return FALSE;
@@ -731,19 +731,19 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 		CStringArray aValues;
 
 		if (GetTaskCategories(pTasks, hTask, aValues))
-			pKI->SetTrackedAttributeValues(IA_CATEGORY, aValues);
+			pKI->SetTrackedAttributeValues(TDCA_CATEGORY, aValues);
 
 		if (GetTaskAllocTo(pTasks, hTask, aValues))
-			pKI->SetTrackedAttributeValues(IA_ALLOCTO, aValues);
+			pKI->SetTrackedAttributeValues(TDCA_ALLOCTO, aValues);
 
 		if (GetTaskTags(pTasks, hTask, aValues))
-			pKI->SetTrackedAttributeValues(IA_TAGS, aValues);
+			pKI->SetTrackedAttributeValues(TDCA_TAGS, aValues);
 	
-		pKI->SetTrackedAttributeValue(IA_STATUS, pTasks->GetTaskStatus(hTask));
-		pKI->SetTrackedAttributeValue(IA_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
-		pKI->SetTrackedAttributeValue(IA_VERSION, pTasks->GetTaskVersion(hTask));
-		pKI->SetTrackedAttributeValue(IA_PRIORITY, pTasks->GetTaskPriority(hTask, FALSE));
-		pKI->SetTrackedAttributeValue(IA_RISK, pTasks->GetTaskRisk(hTask, FALSE));
+		pKI->SetTrackedAttributeValue(TDCA_STATUS, pTasks->GetTaskStatus(hTask));
+		pKI->SetTrackedAttributeValue(TDCA_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
+		pKI->SetTrackedAttributeValue(TDCA_VERSION, pTasks->GetTaskVersion(hTask));
+		pKI->SetTrackedAttributeValue(TDCA_PRIORITY, pTasks->GetTaskPriority(hTask, FALSE));
+		pKI->SetTrackedAttributeValue(TDCA_RISK, pTasks->GetTaskRisk(hTask, FALSE));
 
 		// custom attributes
 		int nCust = pTasks->GetCustomAttributeCount();
@@ -788,7 +788,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 	return TRUE;
 }
 
-BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<I_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return FALSE;
@@ -813,10 +813,10 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 			KANBANITEM* pKI = NULL;
 			GET_KI_RET(dwTaskID, pKI, FALSE);
 
-			if (attrib.Has(IA_TASKNAME))
+			if (attrib.Has(TDCA_TASKNAME))
 				pKI->sTitle = pTasks->GetTaskTitle(hTask);
 			
-			if (attrib.Has(IA_DONEDATE))
+			if (attrib.Has(TDCA_DONEDATE))
 			{
 				BOOL bDone = pTasks->IsTaskDone(hTask);
 				BOOL bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
@@ -828,55 +828,55 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 				}
 			}
 
-			if (attrib.Has(IA_SUBTASKDONE))
+			if (attrib.Has(TDCA_SUBTASKDONE))
 			{
 				LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 				pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 			}
 
-			if (attrib.Has(IA_ICON))
+			if (attrib.Has(TDCA_ICON))
 				pKI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
-			if (attrib.Has(IA_FLAG))
+			if (attrib.Has(TDCA_FLAG))
 				pKI->bFlag = (pTasks->IsTaskFlagged(hTask, true) ? TRUE : FALSE);
 			
 			// Trackable attributes
 			CStringArray aValues;
 
-			if (attrib.Has(IA_ALLOCTO))
+			if (attrib.Has(TDCA_ALLOCTO))
 			{
 				GetTaskAllocTo(pTasks, hTask, aValues);
-				bChange |= UpdateTrackableTaskAttribute(pKI, IA_ALLOCTO, aValues);
+				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCTO, aValues);
 			}
 
-			if (attrib.Has(IA_CATEGORY))
+			if (attrib.Has(TDCA_CATEGORY))
 			{
 				GetTaskCategories(pTasks, hTask, aValues);
-				bChange |= UpdateTrackableTaskAttribute(pKI, IA_CATEGORY, aValues);
+				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_CATEGORY, aValues);
 			}
 
-			if (attrib.Has(IA_TAGS))
+			if (attrib.Has(TDCA_TAGS))
 			{
 				GetTaskTags(pTasks, hTask, aValues);
-				bChange |= UpdateTrackableTaskAttribute(pKI, IA_TAGS, aValues);
+				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_TAGS, aValues);
 			}
 
-			if (attrib.Has(IA_ALLOCBY))
-				bChange |= UpdateTrackableTaskAttribute(pKI, IA_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
+			if (attrib.Has(TDCA_ALLOCBY))
+				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
 
-			if (attrib.Has(IA_STATUS))
-				bChange |= UpdateTrackableTaskAttribute(pKI, IA_STATUS, pTasks->GetTaskStatus(hTask));
+			if (attrib.Has(TDCA_STATUS))
+				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_STATUS, pTasks->GetTaskStatus(hTask));
 
-			if (attrib.Has(IA_VERSION))
-				bChange |= UpdateTrackableTaskAttribute(pKI, IA_VERSION, pTasks->GetTaskVersion(hTask));
+			if (attrib.Has(TDCA_VERSION))
+				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_VERSION, pTasks->GetTaskVersion(hTask));
 
-			if (attrib.Has(IA_PRIORITY))
-				bChange |= UpdateTrackableTaskAttribute(pKI, IA_PRIORITY, pTasks->GetTaskPriority(hTask, true));
+			if (attrib.Has(TDCA_PRIORITY))
+				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_PRIORITY, pTasks->GetTaskPriority(hTask, true));
 
-			if (attrib.Has(IA_RISK))
-				bChange |= UpdateTrackableTaskAttribute(pKI, IA_RISK, pTasks->GetTaskRisk(hTask, true));
+			if (attrib.Has(TDCA_RISK))
+				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_RISK, pTasks->GetTaskRisk(hTask, true));
 
-			if (attrib.Has(IA_CUSTOMATTRIB))
+			if (attrib.Has(TDCA_CUSTOMATTRIB))
 			{
 				int nID = m_aCustomAttribDefs.GetSize();
 
@@ -938,47 +938,47 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 	return bChange;
 }
 
-void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<I_ATTRIBUTE>& attrib)
+void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib)
 {
 	time64_t tDate = 0;
 	
-	if (attrib.Has(IA_TIMEEST))
+	if (attrib.Has(TDCA_TIMEEST))
 		pKI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pKI->nTimeEstUnits, true);
 	
-	if (attrib.Has(IA_TIMESPENT))
+	if (attrib.Has(TDCA_TIMESPENT))
 		pKI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pKI->nTimeSpentUnits, true);
 	
-	if (attrib.Has(IA_COST))
+	if (attrib.Has(TDCA_COST))
 		pKI->dCost = pTasks->GetTaskCost(hTask, true);
 	
-	if (attrib.Has(IA_CREATEDBY))
+	if (attrib.Has(TDCA_CREATEDBY))
 		pKI->sCreatedBy = pTasks->GetTaskCreatedBy(hTask);
 	
-	if (attrib.Has(IA_CREATIONDATE))
+	if (attrib.Has(TDCA_CREATIONDATE))
 		pKI->dtCreate = pTasks->GetTaskCreationDate(hTask);
 	
-	if (attrib.Has(IA_DONEDATE) && pTasks->GetTaskDoneDate64(hTask, tDate))
+	if (attrib.Has(TDCA_DONEDATE) && pTasks->GetTaskDoneDate64(hTask, tDate))
 		pKI->dtDone = CDateHelper::GetDate(tDate);
 	
-	if (attrib.Has(IA_DUEDATE) && pTasks->GetTaskDueDate64(hTask, true, tDate))
+	if (attrib.Has(TDCA_DUEDATE) && pTasks->GetTaskDueDate64(hTask, true, tDate))
 		pKI->dtDue = CDateHelper::GetDate(tDate);
 	
-	if (attrib.Has(IA_STARTDATE) && pTasks->GetTaskStartDate64(hTask, true, tDate))
+	if (attrib.Has(TDCA_STARTDATE) && pTasks->GetTaskStartDate64(hTask, true, tDate))
 		pKI->dtStart = CDateHelper::GetDate(tDate);
 	
-	if (attrib.Has(IA_LASTMOD) && pTasks->GetTaskLastModified64(hTask, tDate))
+	if (attrib.Has(TDCA_LASTMODDATE) && pTasks->GetTaskLastModified64(hTask, tDate))
 		pKI->dtLastMod = CDateHelper::GetDate(tDate);
 	
-	if (attrib.Has(IA_PERCENT))
+	if (attrib.Has(TDCA_PERCENT))
 		pKI->nPercent = pTasks->GetTaskPercentDone(hTask, true);
 	
-	if (attrib.Has(IA_EXTERNALID))
+	if (attrib.Has(TDCA_EXTERNALID))
 		pKI->sExternalID = pTasks->GetTaskExternalID(hTask);
 	
-	if (attrib.Has(IA_RECURRENCE))
-		pKI->sRecurrence = pTasks->GetTaskAttribute(hTask, TDL_TASKRECURRENCE);
+	if (attrib.Has(TDCA_RECURRENCE))
+		pKI->sRecurrence = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, TDL_TASKRECURRENCE);
 
-	if (attrib.Has(IA_FILEREF) && pTasks->GetTaskFileLinkCount(hTask))
+	if (attrib.Has(TDCA_FILEREF) && pTasks->GetTaskFileLinkCount(hTask))
 	{
 		pKI->sFileRef = pTasks->GetTaskFileLink(hTask, 0);
 
@@ -988,46 +988,46 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 	}
 }
 
-BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, const CSet<I_ATTRIBUTE>& attrib)
+BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, const CSet<TDC_ATTRIBUTE>& attrib)
 {
 	BOOL bChange = FALSE;
 
-	if (attrib.Has(IA_STATUS))
-		bChange |= UpdateGlobalAttributeValues(pTasks, IA_STATUS);
+	if (attrib.Has(TDCA_STATUS))
+		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_STATUS);
 	
-	if (attrib.Has(IA_ALLOCTO))
-		bChange |= UpdateGlobalAttributeValues(pTasks, IA_ALLOCTO);
+	if (attrib.Has(TDCA_ALLOCTO))
+		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_ALLOCTO);
 	
-	if (attrib.Has(IA_CATEGORY))
-		bChange |= UpdateGlobalAttributeValues(pTasks, IA_CATEGORY);
+	if (attrib.Has(TDCA_CATEGORY))
+		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_CATEGORY);
 	
-	if (attrib.Has(IA_ALLOCBY))
-		bChange |= UpdateGlobalAttributeValues(pTasks, IA_ALLOCBY);
+	if (attrib.Has(TDCA_ALLOCBY))
+		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_ALLOCBY);
 	
-	if (attrib.Has(IA_TAGS))
-		bChange |= UpdateGlobalAttributeValues(pTasks, IA_TAGS);
+	if (attrib.Has(TDCA_TAGS))
+		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_TAGS);
 	
-	if (attrib.Has(IA_VERSION))
-		bChange |= UpdateGlobalAttributeValues(pTasks, IA_VERSION);
+	if (attrib.Has(TDCA_VERSION))
+		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_VERSION);
 	
-	if (attrib.Has(IA_PRIORITY))
-		bChange |= UpdateGlobalAttributeValues(pTasks, IA_PRIORITY);
+	if (attrib.Has(TDCA_PRIORITY))
+		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_PRIORITY);
 	
-	if (attrib.Has(IA_RISK))
-		bChange |= UpdateGlobalAttributeValues(pTasks, IA_RISK);
+	if (attrib.Has(TDCA_RISK))
+		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_RISK);
 	
-	if (attrib.Has(IA_CUSTOMATTRIB))
-		bChange |= UpdateGlobalAttributeValues(pTasks, IA_CUSTOMATTRIB);
+	if (attrib.Has(TDCA_CUSTOMATTRIB))
+		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_CUSTOMATTRIB);
 	
 	return bChange;
 }
 
-BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, I_ATTRIBUTE nAttribute)
+BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE nAttribute)
 {
 	switch (nAttribute)
 	{
-	case IA_PRIORITY:
-	case IA_RISK:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
 		{
 			CString sAttribID(KANBANITEM::GetAttributeID(nAttribute));
 
@@ -1049,12 +1049,12 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, I_ATT
 		}
 		break;
 		
-	case IA_STATUS:
-	case IA_ALLOCTO:
-	case IA_ALLOCBY:
-	case IA_CATEGORY:
-	case IA_VERSION:
-	case IA_TAGS:	
+	case TDCA_STATUS:
+	case TDCA_ALLOCTO:
+	case TDCA_ALLOCBY:
+	case TDCA_CATEGORY:
+	case TDCA_VERSION:
+	case TDCA_TAGS:	
 		{
 			CString sXMLTag(GetXMLTag(nAttribute)); 
 			CString sAttribID(KANBANITEM::GetAttributeID(nAttribute));
@@ -1074,7 +1074,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, I_ATT
 		}
 		break;
 		
-	case IA_CUSTOMATTRIB:
+	case TDCA_CUSTOMATTRIB:
 		{
 			BOOL bChange = FALSE;
 			int nCustom = pTasks->GetCustomAttributeCount();
@@ -1172,7 +1172,7 @@ int CKanbanCtrl::GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aVa
 	return aValues.GetSize();
 }
 
-int CKanbanCtrl::GetAttributeValues(I_ATTRIBUTE nAttrib, CStringArray& aValues) const
+int CKanbanCtrl::GetAttributeValues(TDC_ATTRIBUTE nAttrib, CStringArray& aValues) const
 {
 	CString sAttribID(KANBANITEM::GetAttributeID(nAttrib));
 
@@ -1236,7 +1236,7 @@ void CKanbanCtrl::LoadDefaultAttributeListValues(const IPreferences* pPrefs)
 	LoadDefaultAttributeListValues(pPrefs, _T("VERSION"),	_T("VersionList"));
 	LoadDefaultAttributeListValues(pPrefs, _T("TAGS"),		_T("TagList"));
 
-	if (m_nTrackAttribute != IA_NONE)
+	if (m_nTrackAttribute != TDCA_NONE)
 		RebuildColumns(FALSE, FALSE);
 }
 
@@ -1263,18 +1263,18 @@ void CKanbanCtrl::LoadDefaultAttributeListValues(const IPreferences* pPrefs, LPC
 	}
 }
 
-CString CKanbanCtrl::GetXMLTag(I_ATTRIBUTE nAttrib)
+CString CKanbanCtrl::GetXMLTag(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IA_ALLOCTO:	return TDL_TASKALLOCTO;
-	case IA_ALLOCBY:	return TDL_TASKALLOCBY;
-	case IA_STATUS:	return TDL_TASKSTATUS;
-	case IA_CATEGORY:	return TDL_TASKCATEGORY;
-	case IA_VERSION:	return TDL_TASKVERSION;
-	case IA_TAGS:		return TDL_TASKTAG;
+	case TDCA_ALLOCTO:	return TDL_TASKALLOCTO;
+	case TDCA_ALLOCBY:	return TDL_TASKALLOCBY;
+	case TDCA_STATUS:	return TDL_TASKSTATUS;
+	case TDCA_CATEGORY:	return TDL_TASKCATEGORY;
+	case TDCA_VERSION:	return TDL_TASKVERSION;
+	case TDCA_TAGS:		return TDL_TASKTAG;
 		
-	case IA_CUSTOMATTRIB:
+	case TDCA_CUSTOMATTRIB:
 		ASSERT(0);
 		break;
 		
@@ -1286,13 +1286,13 @@ CString CKanbanCtrl::GetXMLTag(I_ATTRIBUTE nAttrib)
 	return EMPTY_STR;
 }
 
-BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, I_ATTRIBUTE nAttrib, int nNewValue)
+BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, int nNewValue)
 {
 #ifdef _DEBUG
 	switch (nAttrib)
 	{
-	case IA_PRIORITY:
-	case IA_RISK:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
 		break;
 
 	default:
@@ -1314,19 +1314,19 @@ BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
 {
 	switch (m_nTrackAttribute)
 	{
-	case IA_PRIORITY:
-	case IA_RISK:
-	case IA_ALLOCBY:
-	case IA_STATUS:
-	case IA_VERSION:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+	case TDCA_ALLOCBY:
+	case TDCA_STATUS:
+	case TDCA_VERSION:
 		return FALSE;
 
-	case IA_ALLOCTO:
-	case IA_CATEGORY:
-	case IA_TAGS:
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_TAGS:
 		return TRUE;
 
-	case IA_CUSTOMATTRIB:
+	case TDCA_CUSTOMATTRIB:
 		{
 			int nDef = m_aCustomAttribDefs.FindDefinition(m_sTrackAttribID);
 			
@@ -1342,21 +1342,21 @@ BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
 	return FALSE;
 }
 
-BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, I_ATTRIBUTE nAttrib, const CString& sNewValue)
+BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, const CString& sNewValue)
 {
 	CStringArray aNewValues;
 
 	switch (nAttrib)
 	{
-	case IA_PRIORITY:
-	case IA_RISK:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
 		if (!sNewValue.IsEmpty())
 			aNewValues.Add(sNewValue);
 		break;
 
-	case IA_ALLOCBY:
-	case IA_STATUS:
-	case IA_VERSION:
+	case TDCA_ALLOCBY:
+	case TDCA_STATUS:
+	case TDCA_VERSION:
 		aNewValues.Add(sNewValue);
 		break;
 
@@ -1368,13 +1368,13 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, I_ATTRIBUTE nAtt
 	return UpdateTrackableTaskAttribute(pKI, KANBANITEM::GetAttributeID(nAttrib), aNewValues);
 }
 
-BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, I_ATTRIBUTE nAttrib, const CStringArray& aNewValues)
+BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, const CStringArray& aNewValues)
 {
 	switch (nAttrib)
 	{
-	case IA_ALLOCTO:
-	case IA_CATEGORY:
-	case IA_TAGS:
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_TAGS:
 		if (aNewValues.GetSize() == 0)
 		{
 			CStringArray aTemp;
@@ -1602,7 +1602,7 @@ int CKanbanCtrl::AddMissingDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 		}
 
 		ASSERT(!HasOption(KBCF_SHOWEMPTYCOLUMNS) || 
-				(m_nTrackAttribute == IA_CUSTOMATTRIB) ||
+				(m_nTrackAttribute == TDCA_CUSTOMATTRIB) ||
 				(m_aColumns.GetSize() == pGlobals->GetCount()));
 	}
 
@@ -1665,7 +1665,7 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate)
 {
 	if (m_sTrackAttribID.IsEmpty())
 	{
-		ASSERT(m_nTrackAttribute == IA_NONE);
+		ASSERT(m_nTrackAttribute == TDCA_NONE);
 		return;
 	}
 
@@ -1839,9 +1839,9 @@ void CKanbanCtrl::FixupColumnFocus()
 	}
 }
 
-I_ATTRIBUTE CKanbanCtrl::GetTrackedAttribute(CString& sCustomAttrib) const
+TDC_ATTRIBUTE CKanbanCtrl::GetTrackedAttribute(CString& sCustomAttrib) const
 {
-	if (m_nTrackAttribute == IA_CUSTOMATTRIB)
+	if (m_nTrackAttribute == TDCA_CUSTOMATTRIB)
 		sCustomAttrib = m_sTrackAttribID;
 	else
 		sCustomAttrib.Empty();
@@ -1849,7 +1849,7 @@ I_ATTRIBUTE CKanbanCtrl::GetTrackedAttribute(CString& sCustomAttrib) const
 	return m_nTrackAttribute;
 }
 
-BOOL CKanbanCtrl::TrackAttribute(I_ATTRIBUTE nAttrib, const CString& sCustomAttribID, 
+BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID, 
 								 const CKanbanColumnArray& aColumnDefs)
 {
 	// validate input and check for changes
@@ -1857,17 +1857,17 @@ BOOL CKanbanCtrl::TrackAttribute(I_ATTRIBUTE nAttrib, const CString& sCustomAttr
 
 	switch (nAttrib)
 	{
-	case IA_STATUS:
-	case IA_ALLOCTO:
-	case IA_ALLOCBY:
-	case IA_CATEGORY:
-	case IA_VERSION:
-	case IA_PRIORITY:
-	case IA_RISK:
-	case IA_TAGS:
+	case TDCA_STATUS:
+	case TDCA_ALLOCTO:
+	case TDCA_ALLOCBY:
+	case TDCA_CATEGORY:
+	case TDCA_VERSION:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+	case TDCA_TAGS:
 		break;
 		
-	case IA_CUSTOMATTRIB:
+	case TDCA_CUSTOMATTRIB:
 		if (sCustomAttribID.IsEmpty())
 			return FALSE;
 
@@ -1922,18 +1922,18 @@ BOOL CKanbanCtrl::TrackAttribute(I_ATTRIBUTE nAttrib, const CString& sCustomAttr
 
 	switch (nAttrib)
 	{
-	case IA_STATUS:
-	case IA_ALLOCTO:
-	case IA_ALLOCBY:
-	case IA_CATEGORY:
-	case IA_VERSION:
-	case IA_PRIORITY:
-	case IA_RISK:
-	case IA_TAGS:
+	case TDCA_STATUS:
+	case TDCA_ALLOCTO:
+	case TDCA_ALLOCBY:
+	case TDCA_CATEGORY:
+	case TDCA_VERSION:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+	case TDCA_TAGS:
 		m_sTrackAttribID = KANBANITEM::GetAttributeID(nAttrib);
 		break;
 		
-	case IA_CUSTOMATTRIB:
+	case TDCA_CUSTOMATTRIB:
 		m_sTrackAttribID = sCustomAttribID;
 		break;
 	}
@@ -2125,7 +2125,7 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 
 		m_aColumns.SetOptions(dwOptions & ~(KBCF_SHOWPARENTTASKS | KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG));
 
-		if ((m_nSortBy != IA_NONE) && Misc::FlagHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwPrevOptions))
+		if ((m_nSortBy != TDCA_NONE) && Misc::FlagHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwPrevOptions))
 		{
 			m_aColumns.SortItems(m_nSortBy, m_bSortAscending);
 		}
@@ -2310,7 +2310,7 @@ BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KB
 
 			while (nAtt--)
 			{
-				I_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
+				TDC_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
 				CString sLabel = CKanbanColumnCtrl::FormatAttribute(nAttribID, _T(""), nLabelVis);
 
 				aLabelLen[nAtt] = sLabel.GetLength();
@@ -2333,16 +2333,16 @@ BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KB
 
 				while (nAtt--)
 				{
-					I_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
+					TDC_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
 
 					// Exclude 'File Link' and 'Parent' because these will 
 					// almost always push things over the limit
 					// Exclude 'flag' because that is rendered as an icon
 					switch (nAttribID)
 					{
-					case IA_FILEREF:
-					case IA_PARENT:
-					case IA_FLAG:
+					case TDCA_FILEREF:
+					case TDCA_PARENT:
+					case TDCA_FLAG:
 						continue;
 					}
 
@@ -2387,19 +2387,19 @@ KBC_ATTRIBLABELS CKanbanCtrl::GetColumnAttributeLabelVisibility(int nCol, int nC
 	return KBCAL_NONE;
 }
 
-void CKanbanCtrl::Sort(I_ATTRIBUTE nBy, BOOL bAscending)
+void CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 {
 	// if the sort attribute equals the track attribute then
 	// tasks are already sorted into separate columns so we  
 	// sort by title instead
-	if ((nBy != IA_NONE) && (nBy == m_nTrackAttribute))
-		nBy = IA_TASKNAME;
+	if ((nBy != TDCA_NONE) && (nBy == m_nTrackAttribute))
+		nBy = TDCA_TASKNAME;
 	
 	m_nSortBy = nBy;
 
-	if ((m_nSortBy != IA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
+	if ((m_nSortBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
 	{
-		ASSERT((m_nSortBy == IA_NONE) || (bAscending != -1));
+		ASSERT((m_nSortBy == TDCA_NONE) || (bAscending != -1));
 		m_bSortAscending = bAscending;
 
 		// do the sort
@@ -2473,39 +2473,39 @@ bool CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
 
 	switch (m_nTrackAttribute)
 	{
-	case IA_STATUS:
+	case TDCA_STATUS:
 		pTasks->SetTaskStatus(hNewTask, sValue);
 		break;
 
-	case IA_ALLOCTO:
+	case TDCA_ALLOCTO:
 		pTasks->AddTaskAllocatedTo(hNewTask, sValue);
 		break;
 
-	case IA_ALLOCBY:
+	case TDCA_ALLOCBY:
 		pTasks->SetTaskAllocatedBy(hNewTask, sValue);
 		break;
 
-	case IA_CATEGORY:
+	case TDCA_CATEGORY:
 		pTasks->AddTaskCategory(hNewTask, sValue);
 		break;
 
-	case IA_PRIORITY:
+	case TDCA_PRIORITY:
 		pTasks->SetTaskPriority(hNewTask, _ttoi(sValue));
 		break;
 
-	case IA_RISK:
+	case TDCA_RISK:
 		pTasks->SetTaskRisk(hNewTask, _ttoi(sValue));
 		break;
 
-	case IA_VERSION:
+	case TDCA_VERSION:
 		pTasks->SetTaskVersion(hNewTask, sValue);
 		break;
 
-	case IA_TAGS:
+	case TDCA_TAGS:
 		pTasks->AddTaskTag(hNewTask, sValue);
 		break;
 
-	case IA_CUSTOMATTRIB:
+	case TDCA_CUSTOMATTRIB:
 		ASSERT(!m_sTrackAttribID.IsEmpty());
 		pTasks->SetTaskCustomAttributeData(hNewTask, m_sTrackAttribID, sValue);
 		break;
@@ -2901,7 +2901,7 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 				if (bChange)
 				{
 					// Resort before fixing up selection
-					if ((m_nSortBy != IA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
+					if ((m_nSortBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
 						pDestCol->Sort(m_nSortBy, m_bSortAscending);
 
 					SelectColumn(pDestCol, FALSE);

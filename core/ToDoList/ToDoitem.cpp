@@ -617,6 +617,17 @@ void TODOITEM::SetMetaData(const CString& sKey, const CString& sData)
 		mapMetaData[sKey] = sData;
 }
 
+BOOL TODOITEM::IsValidPriorityOrRisk(int nValue)
+{
+	if (nValue > TDC_MAXPRIORITYORISK)
+		return FALSE;
+
+	if ((nValue < TDC_MINPRIORITYORISK) && (nValue != TDC_NOPRIORITYORISK))
+		return FALSE;
+
+	return TRUE;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 CToDoCtrlDataItems::CToDoCtrlDataItems() 

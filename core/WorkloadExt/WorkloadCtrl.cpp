@@ -508,7 +508,7 @@ void CWorkloadCtrl::SetExpandedState(const CDWordArray& aExpanded)
 	}
 }
 
-BOOL CWorkloadCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib) const
+BOOL CWorkloadCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib) const
 {
 	switch (nUpdate)
 	{
@@ -546,7 +546,7 @@ BOOL CWorkloadCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBU
 	return FALSE;
 }
 
-void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib)
+void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib)
 {
 	// we must have been initialized already
 	ASSERT(m_lcColumns.GetSafeHwnd() && m_tcTasks.GetSafeHwnd());
@@ -588,7 +588,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			// update the task(s)
 			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE))
 			{
-				if (attrib.Has(IA_DUEDATE) || attrib.Has(IA_STARTDATE))
+				if (attrib.Has(TDCA_DUEDATE) || attrib.Has(TDCA_STARTDATE))
 					m_data.RecalculateOverlaps();
 			}
 		}
@@ -707,21 +707,21 @@ int CWorkloadCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 	return aAllocTo.GetSize();
 }
 
-BOOL CWorkloadCtrl::WantEditUpdate(I_ATTRIBUTE nAttrib)
+BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IA_ALLOCTO:
-	case IA_COLOR:
-	case IA_DONEDATE:
-	case IA_DUEDATE:
-	case IA_ICON:
-	case IA_ID:
-	case IA_NONE:
-	case IA_PERCENT:
-	case IA_STARTDATE:
-	case IA_SUBTASKDONE:
-	case IA_TASKNAME:
+	case TDCA_ALLOCTO:
+	case TDCA_COLOR:
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_ICON:
+	case TDCA_ID:
+	case TDCA_NONE:
+	case TDCA_PERCENT:
+	case TDCA_STARTDATE:
+	case TDCA_SUBTASKDONE:
+	case TDCA_TASKNAME:
 		return TRUE;
 	}
 	
@@ -729,19 +729,19 @@ BOOL CWorkloadCtrl::WantEditUpdate(I_ATTRIBUTE nAttrib)
 	return (nAttrib == IUI_ALL);
 }
 
-BOOL CWorkloadCtrl::WantSortUpdate(I_ATTRIBUTE nAttrib)
+BOOL CWorkloadCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IA_ALLOCTO:
-	case IA_DUEDATE:
-	case IA_ID:
-	case IA_PERCENT:
-	case IA_STARTDATE:
-	case IA_TASKNAME:
+	case TDCA_ALLOCTO:
+	case TDCA_DUEDATE:
+	case TDCA_ID:
+	case TDCA_PERCENT:
+	case TDCA_STARTDATE:
+	case TDCA_TASKNAME:
 		return (MapAttributeToColumn(nAttrib) != WLCC_NONE);
 
-	case IA_NONE:
+	case TDCA_NONE:
 		return TRUE;
 	}
 	
@@ -749,34 +749,34 @@ BOOL CWorkloadCtrl::WantSortUpdate(I_ATTRIBUTE nAttrib)
 	return FALSE;
 }
 
-I_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMNID nCol)
+TDC_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMNID nCol)
 {
 	switch (nCol)
 	{
-	case WLCC_TITLE:		return IA_TASKNAME;
-	case WLCC_DUEDATE:		return IA_DUEDATE;
-	case WLCC_STARTDATE:	return IA_STARTDATE;
-	case WLCC_PERCENT:		return IA_PERCENT;
-	case WLCC_TASKID:		return IA_ID;
-	case WLCC_ALLOCTO:		return IA_ALLOCTO;
-	case WLCC_DURATION:		return IA_TIMEEST;
+	case WLCC_TITLE:		return TDCA_TASKNAME;
+	case WLCC_DUEDATE:		return TDCA_DUEDATE;
+	case WLCC_STARTDATE:	return TDCA_STARTDATE;
+	case WLCC_PERCENT:		return TDCA_PERCENT;
+	case WLCC_TASKID:		return TDCA_ID;
+	case WLCC_ALLOCTO:		return TDCA_ALLOCTO;
+	case WLCC_DURATION:		return TDCA_TIMEEST;
 	}
 	
 	// all else 
-	return IA_NONE;
+	return TDCA_NONE;
 }
 
-WLC_COLUMNID CWorkloadCtrl::MapAttributeToColumn(I_ATTRIBUTE nAttrib)
+WLC_COLUMNID CWorkloadCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IA_TASKNAME:		return WLCC_TITLE;		
-	case IA_DUEDATE:		return WLCC_DUEDATE;		
-	case IA_STARTDATE:		return WLCC_STARTDATE;	
-	case IA_PERCENT:		return WLCC_PERCENT;		
-	case IA_ID:			return WLCC_TASKID;		
-	case IA_ALLOCTO:		return WLCC_ALLOCTO;		
-	case IA_TIMEEST:		return WLCC_DURATION;		
+	case TDCA_TASKNAME:		return WLCC_TITLE;		
+	case TDCA_DUEDATE:		return WLCC_DUEDATE;		
+	case TDCA_STARTDATE:		return WLCC_STARTDATE;	
+	case TDCA_PERCENT:		return WLCC_PERCENT;		
+	case TDCA_ID:			return WLCC_TASKID;		
+	case TDCA_ALLOCTO:		return WLCC_ALLOCTO;		
+	case TDCA_TIMEEST:		return WLCC_DURATION;		
 	}
 	
 	// all else 
@@ -784,7 +784,7 @@ WLC_COLUMNID CWorkloadCtrl::MapAttributeToColumn(I_ATTRIBUTE nAttrib)
 }
 
 BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
-									IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib, 
+									IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib, 
 									BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -850,22 +850,22 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	// can't use a switch here because we also need to check for IUI_ALL
 	time64_t tDate = 0;
 	
-	if (attrib.Has(IA_TASKNAME))
+	if (attrib.Has(TDCA_TASKNAME))
 		pWI->sTitle = pTasks->GetTaskTitle(hTask);
 	
- 	if (attrib.Has(IA_ALLOCTO))
+ 	if (attrib.Has(TDCA_ALLOCTO))
 	{
  		GetTaskAllocTo(pTasks, hTask, pWI->aAllocTo);
 		Misc::AddUniqueItems(pWI->aAllocTo, m_aAllocTo);
 	}
 	
-	if (attrib.Has(IA_ICON))
+	if (attrib.Has(TDCA_ICON))
 		pWI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
-	if (attrib.Has(IA_PERCENT))
+	if (attrib.Has(TDCA_PERCENT))
 		pWI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		
-	if (attrib.Has(IA_STARTDATE))
+	if (attrib.Has(TDCA_STARTDATE))
 	{
 		if (pTasks->GetTaskStartDate64(hTask, pWI->bParent, tDate))
 			pWI->dtRange.m_dtStart = CDateHelper::GetDate(tDate);
@@ -873,7 +873,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 			CDateHelper::ClearDate(pWI->dtRange.m_dtStart);
 	}
 	
-	if (attrib.Has(IA_DUEDATE))
+	if (attrib.Has(TDCA_DUEDATE))
 	{
 		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
 			pWI->dtRange.m_dtEnd = CDateHelper::GetDate(tDate);
@@ -881,10 +881,10 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 			CDateHelper::ClearDate(pWI->dtRange.m_dtEnd);
 	}
 	
-	if (attrib.Has(IA_DONEDATE))
+	if (attrib.Has(TDCA_DONEDATE))
 		pWI->bDone = pTasks->IsTaskDone(hTask);
 
-	if (attrib.Has(IA_SUBTASKDONE))
+	if (attrib.Has(TDCA_SUBTASKDONE))
 	{
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 		pWI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
@@ -3637,7 +3637,7 @@ int CALLBACK CWorkloadCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM
 
 	for (int nCol = 0; ((nCol < 3) && (nCompare == 0)); nCol++)
 	{
-		if (sort.cols[nCol].nBy == IA_NONE)
+		if (sort.cols[nCol].nBy == TDCA_NONE)
 			break;
 
 		nCompare = pThis->CompareTasks(lParam1, lParam2, sort.cols[nCol]);

@@ -105,7 +105,7 @@ bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*sz
 	{
 		// detect whether we want task position
 		HTASKITEM hFirstTask = pTasks->GetFirstTask(NULL);
-		WANTPOS = (hFirstTask && pTasks->TaskHasAttribute(hFirstTask, TDL_TASKPOS));
+		WANTPOS = (hFirstTask && ((ITaskList*)pTasks)->TaskHasAttribute(hFirstTask, TDL_TASKPOS));
 	}
 
 	BuildAttribList(pTasks, NULL);
@@ -485,7 +485,7 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 			// get the attribute name that we will be using
 			CString sAttribName;
 
-			if (pTasks->TaskHasAttribute(hTask, szAttribName) || (szAltAttribName == NULL))
+			if (((ITaskList*)pTasks)->TaskHasAttribute(hTask, szAttribName) || (szAltAttribName == NULL))
 			{
 				sAttribName = szAttribName;
 			}
@@ -494,7 +494,7 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 				sAttribName = szAltAttribName;
 			}
 
-			sAttribVal = pTasks->GetTaskAttribute(hTask, sAttribName);
+			sAttribVal = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, sAttribName);
 
 			// special handling
 			switch (nAttrib)
@@ -655,7 +655,7 @@ void CTaskListExporterBase::BuildAttribList(const ITASKLISTBASE* pTasks, HTASKIT
 void CTaskListExporterBase::CheckAddAttribtoList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 												TDC_ATTRIBUTE attrib, LPCTSTR szAttribName)
 {
-	if (pTasks->TaskHasAttribute(hTask, szAttribName) && ARRATTRIBUTES.AddUnique(attrib))
+	if (((ITaskList*)pTasks)->TaskHasAttribute(hTask, szAttribName) && ARRATTRIBUTES.AddUnique(attrib))
 	{
 		// translate label once only
 		CEnString sLabel(GetAttribLabel(attrib));

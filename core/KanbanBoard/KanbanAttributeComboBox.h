@@ -19,8 +19,8 @@ class CKanbanAttributeComboBox : public CComboBox
 public:
 	CKanbanAttributeComboBox();
 
-	I_ATTRIBUTE GetSelectedAttribute() const;
-	BOOL SetSelectedAttribute(I_ATTRIBUTE nAttrib);
+	TDC_ATTRIBUTE GetSelectedAttribute() const;
+	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttrib);
 
 	void ShowCustomAttribute(BOOL bShow = TRUE);
 	void ShowFixedColumns(BOOL bShow = TRUE);

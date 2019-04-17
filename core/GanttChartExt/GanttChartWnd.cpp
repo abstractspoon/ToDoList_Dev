@@ -535,18 +535,18 @@ bool CGanttChartWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/
 	return false; // only support single selection
 }
 
-bool CGanttChartWnd::WantTaskUpdate(I_ATTRIBUTE nAttribute) const
+bool CGanttChartWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	return (CGanttTreeListCtrl::WantEditUpdate(nAttribute) != FALSE);
 }
 
-void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const I_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	m_ctrlGantt.UpdateTasks(pTasks, nUpdate, CSet<I_ATTRIBUTE>(pAttributes, nNumAttributes));
+	m_ctrlGantt.UpdateTasks(pTasks, nUpdate, CSet<TDC_ATTRIBUTE>(pAttributes, nNumAttributes));
 
 	GANTTDATERANGE dtDataRange;
 	VERIFY(m_ctrlGantt.GetDataDateRange(dtDataRange));
@@ -780,7 +780,7 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 
 GTLC_COLUMN CGanttChartWnd::MapColumn(DWORD dwColumn)
 {
-	return CGanttTreeListCtrl::MapAttributeToColumn((I_ATTRIBUTE)dwColumn);
+	return CGanttTreeListCtrl::MapAttributeToColumn((TDC_ATTRIBUTE)dwColumn);
 }
 
 DWORD CGanttChartWnd::MapColumn(GTLC_COLUMN nColumn)
@@ -1067,7 +1067,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 	COleDateTime dtStart, dtDue;
 	if (m_ctrlGantt.GetSelectedTaskDates(dtStart, dtDue))
 	{
-		IUITASKMOD mod[2] = { { IA_NONE, 0 }, { IA_NONE, 0 } };
+		IUITASKMOD mod[2] = { { TDCA_NONE, 0 }, { TDCA_NONE, 0 } };
 		int nNumMod = 1;
 		
 		switch (wp)
@@ -1075,14 +1075,14 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 		case GTLCD_START:
 			if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue))
 			{
-				mod[0].nAttrib = IA_STARTDATE;
+				mod[0].nAttrib = TDCA_STARTDATE;
 			}
 			break;
 			
 		case GTLCD_END:
 			if (CDateHelper::GetTimeT64(dtDue, mod[0].tValue))
 			{
-				mod[0].nAttrib = IA_DUEDATE;
+				mod[0].nAttrib = TDCA_DUEDATE;
 			}
 			break;
 			
@@ -1099,15 +1099,15 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 				if (bStartSet && bDueSet)
 				{
 					if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue))
-						mod[0].nAttrib = IA_OFFSETTASK;
+						mod[0].nAttrib = TDCA_OFFSETTASK;
 				}
 				else
 				{
 					if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue) &&
 						CDateHelper::GetTimeT64(dtDue, mod[1].tValue))
 					{
-						mod[0].nAttrib = IA_STARTDATE;
-						mod[1].nAttrib = IA_DUEDATE;
+						mod[0].nAttrib = TDCA_STARTDATE;
+						mod[1].nAttrib = TDCA_DUEDATE;
 						nNumMod = 2;
 					}
 				}
@@ -1115,7 +1115,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 			break;
 		}
 		
-		if (mod[0].nAttrib != IA_NONE)
+		if (mod[0].nAttrib != TDCA_NONE)
 			return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, nNumMod, (LPARAM)&mod[0]);
 	}
 
@@ -1371,7 +1371,7 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 
 		// notify parent
 		CString sDepends = Misc::FormatArray(aDepends, '\n');
-		IUITASKMOD mod = { IA_DEPENDENCY, 0 };
+		IUITASKMOD mod = { TDCA_DEPENDENCY, 0 };
 
 		mod.szValue = sDepends;
 			
@@ -1391,7 +1391,7 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 
 LRESULT CGanttChartWnd::OnGanttNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp) 
 {
-	IUITASKMOD mod = { IA_DONEDATE, 0 };
+	IUITASKMOD mod = { TDCA_DONEDATE, 0 };
 
 	if (lp) // done/not done
 		VERIFY(CDateHelper::GetTimeT64(CDateHelper::GetDate(DHD_NOW), mod.tValue));

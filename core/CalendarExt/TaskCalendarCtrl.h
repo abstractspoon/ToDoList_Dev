@@ -31,7 +31,7 @@ public:
 	CTaskCalendarCtrl();
 	virtual ~CTaskCalendarCtrl();
 
-	BOOL UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib);
+	BOOL UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib);
 	BOOL PrepareNewTask(ITaskList* pTask) const;
 
 	BOOL SaveToImage(CBitmap& bmImage);
@@ -51,7 +51,7 @@ public:
 	BOOL SelectTask(DWORD dwTaskID, BOOL bScroll);
 	void ScrollToSelectedTask();
 	void ScrollToTask(DWORD dwTaskID);
-	BOOL SortBy(I_ATTRIBUTE nSortBy, BOOL bAscending);
+	BOOL SortBy(TDC_ATTRIBUTE nSortBy, BOOL bAscending);
 
 	TCC_SNAPMODE GetSnapMode() const;
 	void SetSnapMode(TCC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }
@@ -65,8 +65,8 @@ public:
 
 	const CTaskCalItemMap& Data() const { return m_mapData; }
 
-	static BOOL WantEditUpdate(I_ATTRIBUTE nEditAttribute);
-	static BOOL WantSortUpdate(I_ATTRIBUTE nEditAttribute);
+	static BOOL WantEditUpdate(TDC_ATTRIBUTE nEditAttribute);
+	static BOOL WantSortUpdate(TDC_ATTRIBUTE nEditAttribute);
 	static int GetDefaultTaskHeight();
 
 protected:
@@ -88,7 +88,7 @@ protected:
 	CFontCache m_fonts;
 	COleDateTime m_dtMin, m_dtMax;
 	int m_nTaskHeight;
-	I_ATTRIBUTE m_nSortBy;
+	TDC_ATTRIBUTE m_nSortBy;
 	BOOL m_bSortAscending;
 	
 	mutable CMap<DWORD, DWORD, int, int> m_mapVertPosContinuous, m_mapTextOffset;
@@ -184,9 +184,9 @@ protected:
 	BOOL NotifyParentDateChange(TCC_HITTEST nHit);
 	void NotifyParentDragChange();
 
-	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	BOOL RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
-	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<I_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void DeleteData();
 	void RecalcDataRange();
 

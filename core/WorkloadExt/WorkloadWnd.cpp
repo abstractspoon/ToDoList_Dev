@@ -432,18 +432,18 @@ bool CWorkloadWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
 	return false; // only support single selection
 }
 
-bool CWorkloadWnd::WantTaskUpdate(I_ATTRIBUTE nAttribute) const
+bool CWorkloadWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	return (CWorkloadCtrl::WantEditUpdate(nAttribute) != FALSE);
 }
 
-void CWorkloadWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const I_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CWorkloadWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	m_ctrlWorkload.UpdateTasks(pTasks, nUpdate, CSet<I_ATTRIBUTE>(pAttributes, nNumAttributes));
+	m_ctrlWorkload.UpdateTasks(pTasks, nUpdate, CSet<TDC_ATTRIBUTE>(pAttributes, nNumAttributes));
 	m_toolbar.RefreshButtonStates(FALSE);
 	
 	UpdatePeriod();
@@ -652,7 +652,7 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 
 WLC_COLUMNID CWorkloadWnd::MapColumn(DWORD dwColumn)
 {
-	return CWorkloadCtrl::MapAttributeToColumn((I_ATTRIBUTE)dwColumn);
+	return CWorkloadCtrl::MapAttributeToColumn((TDC_ATTRIBUTE)dwColumn);
 }
 
 DWORD CWorkloadWnd::MapColumn(WLC_COLUMNID nColumn)
@@ -832,7 +832,7 @@ LRESULT CWorkloadWnd::OnWorkloadNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(!m_bReadOnly);
 
-	IUITASKMOD mod = { IA_DONEDATE, 0 };
+	IUITASKMOD mod = { TDCA_DONEDATE, 0 };
 
 	if (lp) // done/not done
 		VERIFY(CDateHelper::GetTimeT64(CDateHelper::GetDate(DHD_NOW), mod.tValue));
@@ -867,7 +867,7 @@ void CWorkloadWnd::OnWorkloadEditAllocations()
 
 		if (!wiNew.mapAllocatedDays.MatchAll(wi.mapAllocatedDays))
 		{
-			IUITASKMOD mod[2] = { { IA_METADATA, 0 }, { IA_ALLOCTO, 0 } };
+			IUITASKMOD mod[2] = { { TDCA_METADATA, 0 }, { TDCA_ALLOCTO, 0 } };
 			int nNumMods = 0;
 
 			// always

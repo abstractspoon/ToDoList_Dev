@@ -24,6 +24,12 @@
 
 ///////////////////////////////////////////////////////////////////////////////////
 
+const int TDC_NOPRIORITYORISK = -2;
+const int TDC_MINPRIORITYORISK = 0;
+const int TDC_MAXPRIORITYORISK = 10;
+
+///////////////////////////////////////////////////////////////////////////////////
+
 struct TODOITEM
 {
 	friend class CToDoCtrlData;
@@ -101,7 +107,8 @@ public:
 	static void SetRecentlyModifiedPeriod(double dDays);
 	static void SetModifierName(const CString sModifier);
 	static BOOL IsRecentlyModified(const COleDateTime& date);
-	
+	static BOOL IsValidPriorityOrRisk(int nValue);
+
 	// Attributes
 	CString sTitle;
 	CString sComments;

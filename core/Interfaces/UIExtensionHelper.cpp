@@ -27,7 +27,7 @@ CUIExtensionAppCmdData::CUIExtensionAppCmdData(LPCWSTR szImagePath)
 
 // IUI_SORT
 // IUI_TOGGLABLESORT
-CUIExtensionAppCmdData::CUIExtensionAppCmdData(I_ATTRIBUTE nSortCol, BOOL bAscending)
+CUIExtensionAppCmdData::CUIExtensionAppCmdData(TDC_ATTRIBUTE nSortCol, BOOL bAscending)
 {
 	ASSERT(bAscending != -1);
 
@@ -67,7 +67,7 @@ CUIExtensionAppCmdData::CUIExtensionAppCmdData(const IUIMULTISORT& sortCols)
 // IUI_SELECTNEXTTASKINCLCURRENT
 // IUI_SELECTPREVTASK
 // IUI_SELECTLASTTASK
-CUIExtensionAppCmdData::CUIExtensionAppCmdData(I_ATTRIBUTE nAttrib, 
+CUIExtensionAppCmdData::CUIExtensionAppCmdData(TDC_ATTRIBUTE nAttrib, 
 	BOOL bFindReplace, 
 	LPCWSTR szWords, 
 	BOOL bCaseSensitive, 

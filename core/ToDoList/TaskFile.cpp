@@ -1633,36 +1633,22 @@ BOOL CTaskFile::SetReportAttributes(LPCTSTR szTitle, const CTDCAttributeMap& map
 	return TRUE;
 }
 
-bool CTaskFile::GetReportOnAttribute(I_ATTRIBUTE nAttrib) const
+bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const
 {
-	const CXmlItem* pXItem = GetItem(TDL_REPORTATTRIB);
+	// TODO
+	return true;
+}
 
-	if (!pXItem)
-		return true;
+bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const
+{
+	// TODO
+	return true;
+}
 
-	while (pXItem)
-	{
-		TDC_ATTRIBUTE nReportAttrib = (TDC_ATTRIBUTE)pXItem->GetValueI();
-
-		switch (nReportAttrib)
-		{
-		case TDCA_NONE:
-			return false;
-
-		case TDCA_ALL:
-			return true;
-
-		// all else
-		default:
-			if (nReportAttrib == nAttrib)
-				return true;
-			break;
-		}
-		
-		pXItem = pXItem->GetSibling();
-	}
-
-	return false;
+LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const
+{
+	// TODO
+	return NULLSTRING;
 }
 
 BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
@@ -3511,8 +3497,8 @@ bool CTaskFile::SetTaskColor(HTASKITEM hTask, unsigned long nColor)
 
 bool CTaskFile::SetTaskPriorityOrRisk(HTASKITEM hTask, const CString& sIntItem, int iVal)
 {
-	if (!IsValidPriorityOrRisk(iVal))
-		iVal = (char)max(TDC_MINPRIORITYORISK, min(TDC_MAXPRIORITYORISK, iVal));
+	if (!TODOITEM::IsValidPriorityOrRisk(iVal))
+		iVal = (int)max(TDC_MINPRIORITYORISK, min(TDC_MAXPRIORITYORISK, iVal));
 
 	if (!SetTaskInt(hTask, sIntItem, iVal))
 		return false;

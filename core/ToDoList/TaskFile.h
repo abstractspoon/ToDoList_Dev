@@ -240,7 +240,9 @@ public:
 	// ITaskList17 implementation 
 	LPCTSTR GetFileName(bool bFullPath) const;
 
-	bool GetReportOnAttribute(I_ATTRIBUTE nAttrib) const;
+	bool IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const;
+	bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const;
+	LPCTSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const;
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList16 implementation 
@@ -595,6 +597,7 @@ protected:
 	static BOOL SetMetaData(CXmlItem* pXItem, const CMapStringToString& mapMetaData);
 	static int GetMetaData(const CXmlItem* pXItem, CMapStringToString& mapMetaData);
 	static BOOL OffsetDate(COleDateTime& date, int nNumDays);
+
 };
 
 #endif // !defined(AFX_TASKFILE_H__BA5D71E7_2770_45FD_A693_A2344B589DF4__INCLUDED_)

@@ -38,7 +38,7 @@ public:
 
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
 
-	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<I_ATTRIBUTE>& attrib);
+	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib);
 	bool PrepareNewTask(ITaskList* pTask) const;
 
 	DWORD GetSelectedTaskID() const;
@@ -55,7 +55,7 @@ public:
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 
- 	void Sort(I_ATTRIBUTE nBy, BOOL bAscending);
+ 	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
 
 	void SetOptions(DWORD dwOptions);
 	DWORD GetOptions() const { return m_dwOptions; }
@@ -71,17 +71,17 @@ public:
 	int GetVisibleTaskCount() const { return m_aColumns.GetVisibleTaskCount(); }
 
 	int GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aValues) const;
-	int GetAttributeValues(I_ATTRIBUTE nAttrib, CStringArray& aValues) const;
+	int GetAttributeValues(TDC_ATTRIBUTE nAttrib, CStringArray& aValues) const;
 	void LoadDefaultAttributeListValues(const IPreferences* pPrefs);
-	BOOL TrackAttribute(I_ATTRIBUTE nAttrib, const CString& sCustomAttribID, const CKanbanColumnArray& aColumnDefs);
-	I_ATTRIBUTE GetTrackedAttribute() const { return m_nTrackAttribute; }
-	I_ATTRIBUTE GetTrackedAttribute(CString& sCustomAttrib) const;
+	BOOL TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID, const CKanbanColumnArray& aColumnDefs);
+	TDC_ATTRIBUTE GetTrackedAttribute() const { return m_nTrackAttribute; }
+	TDC_ATTRIBUTE GetTrackedAttribute(CString& sCustomAttrib) const;
 
 	const CKanbanCustomAttributeDefinitionArray& GetCustomAttributeDefinitions() const { return m_aCustomAttribDefs; }
 	int GetAttributeValues(CKanbanAttributeValueMap& mapValues) const;
 
-	BOOL WantSortUpdate(I_ATTRIBUTE nAttribute) const;
-	BOOL WantEditUpdate(I_ATTRIBUTE nAttribute) const;
+	BOOL WantSortUpdate(TDC_ATTRIBUTE nAttribute) const;
+	BOOL WantEditUpdate(TDC_ATTRIBUTE nAttribute) const;
 
 protected:
 	BOOL m_bReadOnly;
@@ -93,7 +93,7 @@ protected:
 
 	DWORD m_dwOptions;
 	UINT m_nNextColor;
-	I_ATTRIBUTE m_nTrackAttribute, m_nSortBy;
+	TDC_ATTRIBUTE m_nTrackAttribute, m_nSortBy;
 	CString m_sTrackAttribID;
 	CDWordArray m_aPriorityColors;
 	CFontCache m_fonts;
@@ -179,21 +179,21 @@ protected:
 	BOOL NotifyParentAttibuteChange(DWORD dwTaskID);
 	void NotifyParentSelectionChange();
 	BOOL GetColumnAttributeValue(const CKanbanColumnCtrl* pDestCol, const CPoint& ptScreen, CString& sValue) const;
-	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, I_ATTRIBUTE nAttrib, const CString& sNewValue);
-	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, I_ATTRIBUTE nAttrib, int nNewValue);
-	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, I_ATTRIBUTE nAttrib, const CStringArray& aNewValues);
+	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, const CString& sNewValue);
+	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, int nNewValue);
+	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, const CStringArray& aNewValues);
 	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues);
 	void LoadDefaultAttributeListValues(const IPreferences* pPrefs, LPCTSTR szAttribID, LPCTSTR szSubKey);
 	BOOL IsTrackedAttributeMultiValue() const;
 	BOOL IsTracking(const CString& sAttribID) const;
 	BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol) const;
-	BOOL UpdateNeedsItemHeightRefresh(const CSet<I_ATTRIBUTE>& attrib) const;
+	BOOL UpdateNeedsItemHeightRefresh(const CSet<TDC_ATTRIBUTE>& attrib) const;
 
-	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<I_ATTRIBUTE>& attrib, BOOL bAndSiblings);
-	BOOL RebuildData(const ITASKLISTBASE* pTasks, const CSet<I_ATTRIBUTE>& attrib);
-	BOOL AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<I_ATTRIBUTE>& attrib, BOOL bAndSiblings);
-	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, const CSet<I_ATTRIBUTE>& attrib);
-	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, I_ATTRIBUTE nAttribute);
+	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL RebuildData(const ITASKLISTBASE* pTasks, const CSet<TDC_ATTRIBUTE>& attrib);
+	BOOL AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, const CSet<TDC_ATTRIBUTE>& attrib);
+	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE nAttribute);
 	BOOL UpdateGlobalAttributeValues(LPCTSTR szAttribID, const CStringArray& aValues);
 
 	BOOL WantShowColumn(LPCTSTR szAttribID, const CKanbanItemArrayMap& mapKIArray) const;
@@ -203,9 +203,9 @@ protected:
 	static int GetTaskCategories(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
 	static int GetTaskTags(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
 	static BOOL RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanItemArrayMap& mapKIArray, BOOL bShowParents);
-	static CString GetXMLTag(I_ATTRIBUTE nAttrib);
+	static CString GetXMLTag(TDC_ATTRIBUTE nAttrib);
 	static BOOL HasNonParentTasks(const CKanbanItemArray* pItems);
-	static void UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<I_ATTRIBUTE>& attrib);
+	static void UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib);
 	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
 };
 
