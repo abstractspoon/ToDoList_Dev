@@ -18,41 +18,41 @@ using namespace Windows::Forms;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-UIExtension::TaskAttribute UIExtension::Map(I_ATTRIBUTE attrib)
+UIExtension::TaskAttribute UIExtension::Map(TDC_ATTRIBUTE attrib)
 {
 	switch (attrib)
 	{
 	case TDCA_TASKNAME:		return UIExtension::TaskAttribute::Title;
 	case TDCA_DONEDATE:		return UIExtension::TaskAttribute::DoneDate;
 	case TDCA_DUEDATE:		return UIExtension::TaskAttribute::DueDate;
-	case TDCA_STARTDATE:		return UIExtension::TaskAttribute::StartDate;
+	case TDCA_STARTDATE:	return UIExtension::TaskAttribute::StartDate;
 	case TDCA_PRIORITY:		return UIExtension::TaskAttribute::Priority;
-	case TDCA_COLOR:			return UIExtension::TaskAttribute::Color;
+	case TDCA_COLOR:		return UIExtension::TaskAttribute::Color;
 	case TDCA_ALLOCTO:		return UIExtension::TaskAttribute::AllocBy;
 	case TDCA_ALLOCBY:		return UIExtension::TaskAttribute::AllocTo;
-	case TDCA_STATUS:			return UIExtension::TaskAttribute::Status;
+	case TDCA_STATUS:		return UIExtension::TaskAttribute::Status;
 	case TDCA_CATEGORY:		return UIExtension::TaskAttribute::Category;
 	case TDCA_PERCENT:		return UIExtension::TaskAttribute::Percent;
 	case TDCA_TIMEEST:		return UIExtension::TaskAttribute::TimeEstimate;
-	case TDCA_TIMESPENT:		return UIExtension::TaskAttribute::TimeSpent;
+	case TDCA_TIMESPENT:	return UIExtension::TaskAttribute::TimeSpent;
 	case TDCA_FILEREF:		return UIExtension::TaskAttribute::FileReference;
 	case TDCA_COMMENTS:		return UIExtension::TaskAttribute::Comments;
 	case TDCA_FLAG:			return UIExtension::TaskAttribute::Flag;
 	case TDCA_CREATIONDATE:	return UIExtension::TaskAttribute::CreationDate;
-	case TDCA_CREATEDBY:		return UIExtension::TaskAttribute::CreatedBy;
+	case TDCA_CREATEDBY:	return UIExtension::TaskAttribute::CreatedBy;
 	case TDCA_RISK:			return UIExtension::TaskAttribute::Risk;
-	case TDCA_EXTERNALID:		return UIExtension::TaskAttribute::ExternalId;
+	case TDCA_EXTERNALID:	return UIExtension::TaskAttribute::ExternalId;
 	case TDCA_COST:			return UIExtension::TaskAttribute::Cost;
-	case TDCA_DEPENDENCY:		return UIExtension::TaskAttribute::Dependency;
-	case TDCA_RECURRENCE:		return UIExtension::TaskAttribute::Recurrence;
+	case TDCA_DEPENDENCY:	return UIExtension::TaskAttribute::Dependency;
+	case TDCA_RECURRENCE:	return UIExtension::TaskAttribute::Recurrence;
 	case TDCA_VERSION:		return UIExtension::TaskAttribute::Version;
 	case TDCA_POSITION:		return UIExtension::TaskAttribute::Position;
-	case TDCA_ID:				return UIExtension::TaskAttribute::Id;
-	case TDCA_LASTMOD:		return UIExtension::TaskAttribute::LastModified;
+	case TDCA_ID:			return UIExtension::TaskAttribute::Id;
+	case TDCA_LASTMODDATE:	return UIExtension::TaskAttribute::LastModified;
 	case TDCA_ICON:			return UIExtension::TaskAttribute::Icon;
 	case TDCA_TAGS:			return UIExtension::TaskAttribute::Tag;
 	case TDCA_CUSTOMATTRIB:	return UIExtension::TaskAttribute::CustomAttribute;
-	case TDCA_OFFSETTASK:		return UIExtension::TaskAttribute::OffsetTask;
+	case TDCA_OFFSETTASK:	return UIExtension::TaskAttribute::OffsetTask;
 	case TDCA_SUBTASKDONE:	return UIExtension::TaskAttribute::SubtaskDone;
 	case TDCA_METADATA:		return UIExtension::TaskAttribute::MetaData;
 	case TDCA_PROJECTNAME:	return UIExtension::TaskAttribute::ProjectName;
@@ -62,7 +62,7 @@ UIExtension::TaskAttribute UIExtension::Map(I_ATTRIBUTE attrib)
 	return UIExtension::TaskAttribute::Unknown;
 }
 
-I_ATTRIBUTE UIExtension::Map(UIExtension::TaskAttribute attrib)
+TDC_ATTRIBUTE UIExtension::Map(UIExtension::TaskAttribute attrib)
 {
 	switch (attrib)
 	{
@@ -92,7 +92,7 @@ I_ATTRIBUTE UIExtension::Map(UIExtension::TaskAttribute attrib)
 	case UIExtension::TaskAttribute::Version:			return TDCA_VERSION;
 	case UIExtension::TaskAttribute::Position:			return TDCA_POSITION;
 	case UIExtension::TaskAttribute::Id:				return TDCA_ID;
-	case UIExtension::TaskAttribute::LastModified:		return TDCA_LASTMOD;
+	case UIExtension::TaskAttribute::LastModified:		return TDCA_LASTMODDATE;
 	case UIExtension::TaskAttribute::Icon:				return TDCA_ICON;
 	case UIExtension::TaskAttribute::Tag:				return TDCA_TAGS;
 	case UIExtension::TaskAttribute::CustomAttribute:	return TDCA_CUSTOMATTRIB;
@@ -106,7 +106,7 @@ I_ATTRIBUTE UIExtension::Map(UIExtension::TaskAttribute attrib)
 	return TDCA_NONE;
 }
 
-Collections::Generic::HashSet<UIExtension::TaskAttribute>^ UIExtension::Map(const I_ATTRIBUTE* pAttrib, int numAttrib)
+Collections::Generic::HashSet<UIExtension::TaskAttribute>^ UIExtension::Map(const TDC_ATTRIBUTE* pAttrib, int numAttrib)
 {
 	Collections::Generic::HashSet<TaskAttribute>^ attribs = gcnew(Collections::Generic::HashSet<TaskAttribute>);
 

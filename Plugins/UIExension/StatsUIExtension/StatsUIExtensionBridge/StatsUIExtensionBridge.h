@@ -56,8 +56,8 @@ public:
 	bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
 	bool SupportsTaskSelection() const { return false; }
 
-	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const I_ATTRIBUTE* pAttributes, int nNumAttributes);
-	bool WantTaskUpdate(I_ATTRIBUTE nAttribute) const;
+	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes);
+	bool WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const;
 	bool PrepareNewTask(ITaskList* pTask) const;
 
 	bool ProcessMessage(MSG* pMsg);
