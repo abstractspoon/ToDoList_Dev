@@ -742,10 +742,10 @@ GTLC_COLUMN CGanttTreeListCtrl::MapAttributeToColumn(I_ATTRIBUTE nAttrib)
 	case IA_STARTDATE:		return GTLCC_STARTDATE;	
 	case IA_ALLOCTO:		return GTLCC_ALLOCTO;		
 	case IA_PERCENT:		return GTLCC_PERCENT;		
-	case IA_ID:			return GTLCC_TASKID;		
+	case IA_ID:				return GTLCC_TASKID;		
 	case IA_DONEDATE:		return GTLCC_DONEDATE;
 	case IA_TAGS:			return GTLCC_TAGS;
-	case IA_DEPENDENCY:	return GTLCC_DEPENDENCY;
+	case IA_DEPENDENCY:		return GTLCC_DEPENDENCY;
 	}
 	
 	// all else 
