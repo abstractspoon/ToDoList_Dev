@@ -378,7 +378,7 @@ BOOL CFilteredToDoCtrl::CopyCurrentSelection() const
 		if (!hTask)
 			return FALSE;
 		
-		m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, TDCGT_ALL, FALSE);
+		m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, TDCGT_ALL);
 
 		// and subtasks
 		m_exporter.ExportSubTasks(pTDS, tasks, hTask, TRUE);

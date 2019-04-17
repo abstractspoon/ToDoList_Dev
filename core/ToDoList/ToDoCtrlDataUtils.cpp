@@ -3439,7 +3439,7 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 }
 
 BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, 
-	HTASKITEM hTask, const TDCGETTASKS& filter, BOOL bTitleCommentsOnly) const
+	HTASKITEM hTask, const TDCGETTASKS& filter/*, BOOL bTitleCommentsOnly*/) const
 {
 	ASSERT(pTDI);
 
@@ -3447,9 +3447,13 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		return FALSE;
 
 	BOOL bDone = pTDI->IsDone();
-	BOOL bTitleOnly = filter.HasFlag(TDCGTF_TITLESONLY);
-	BOOL bHtmlComments = filter.HasFlag(TDCGTF_HTMLCOMMENTS);
-	BOOL bTextComments = filter.HasFlag(TDCGTF_TEXTCOMMENTS);
+	BOOL bParent = pTDS->HasSubTasks();
+
+	BOOL bTitleOnly = filter.mapAttribs.HasOnly(TDCA_TASKNAME);
+	BOOL bTitleCommentsOnly = (!bTitleOnly && bParent && filter.HasFlag(TDCGTF_PARENTTITLECOMMENTSONLY));
+
+	BOOL bHtmlComments = (filter.mapAttribs.Has(TDCA_COMMENTS) && filter.HasFlag(TDCGTF_HTMLCOMMENTS));
+	BOOL bTextComments = (filter.mapAttribs.Has(TDCA_COMMENTS) && filter.HasFlag(TDCGTF_TEXTCOMMENTS));
 	BOOL bTransform = filter.HasFlag(TDCGTF_TRANSFORM);
 
 	// attributes
@@ -3466,11 +3470,11 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		tasks.SetTaskTitle(hTask, pTDI->sTitle);
 
 	// hide IDs if not wanted
-	if (bTitleOnly || bTitleCommentsOnly || !filter.WantAttribute(TDCA_ID))
-		tasks.HideAttribute(hTask, TDL_TASKID);
-
-	if (bTitleOnly || bTitleCommentsOnly || !filter.WantAttribute(TDCA_PARENTID))
-		tasks.HideAttribute(hTask, TDL_TASKPARENTID);
+// 	if (bTitleOnly || bTitleCommentsOnly || !filter.WantAttribute(TDCA_ID))
+// 		tasks.HideAttribute(hTask, TDL_TASKID);
+// 
+// 	if (bTitleOnly || bTitleCommentsOnly || !filter.WantAttribute(TDCA_PARENTID))
+// 		tasks.HideAttribute(hTask, TDL_TASKPARENTID);
 
 	// ignore everything else if we are a reference
 	if (pTDI->dwTaskRefID)
@@ -3667,12 +3671,12 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 			tasks.SetTaskDoneDate(hTask, pTDI->dateDone);
 			tasks.SetTaskGoodAsDone(hTask, TRUE);
 
-			// hide it if column not visible
-			if (!filter.WantAttribute(TDCA_DONEDATE))
-			{
-				tasks.HideAttribute(hTask, TDL_TASKDONEDATE);
-				tasks.HideAttribute(hTask, TDL_TASKDONEDATESTRING);
-			}
+// 			// hide it if column not visible
+// 			if (!filter.WantAttribute(TDCA_DONEDATE))
+// 			{
+// 				tasks.HideAttribute(hTask, TDL_TASKDONEDATE);
+// 				tasks.HideAttribute(hTask, TDL_TASKDONEDATESTRING);
+// 			}
 		}
 		else if (m_calculator.IsTaskDone(pTDI, pTDS))
 		{
@@ -3783,8 +3787,8 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 	{
 		tasks.SetTaskDoneDate(hTask, pTDI->dateDone);
 		tasks.SetTaskGoodAsDone(hTask, TRUE);
-		tasks.HideAttribute(hTask, TDL_TASKDONEDATE);
-		tasks.HideAttribute(hTask, TDL_TASKDONEDATESTRING);
+// 		tasks.HideAttribute(hTask, TDL_TASKDONEDATE);
+// 		tasks.HideAttribute(hTask, TDL_TASKDONEDATESTRING);
 	}
 	else if (m_calculator.IsTaskDone(pTDI, pTDS))
 	{

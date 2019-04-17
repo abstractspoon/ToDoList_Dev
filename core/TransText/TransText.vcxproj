@@ -160,9 +160,10 @@ copy unicode_release\transtext.dll ..\..\Plugins\release /y
     <PostBuildEvent>
       <Command>mkdir ..\ToDoList
 mkdir ..\ToDoList\unicode_debug
+mkdir ..\..\Plugins\debug
 copy unicode_debug\transtext.dll ..\todolist\unicode_debug /y
-copy unicode_debug\transtext.dll ..\..\todolist_Plugins\debug /y
-copy unicode_debug\transtext.pdb ..\..\todolist_Plugins\debug /y
+copy unicode_debug\transtext.dll ..\..\Plugins\debug /y
+copy unicode_debug\transtext.pdb ..\..\Plugins\debug /y
 
 </Command>
     </PostBuildEvent>

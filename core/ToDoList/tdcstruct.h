@@ -285,13 +285,7 @@ struct TDCGETTASKS
 
 	BOOL WantAttribute(TDC_ATTRIBUTE nAttrib) const
 	{
-		// if TDCGTF_CUSTOMCOLUMNS is set then
-		// 'no' attributes really means 'no' attributes
-		// else it means 'all attributes' 
-		if (mapAttribs.GetCount() == 0)
-			return (HasFlag(TDCGTF_USERCOLUMNS) ? FALSE : TRUE);
-
-		if (mapAttribs.Has(TDCA_ALL))
+		if ((mapAttribs.GetCount() == 0) || mapAttribs.Has(TDCA_ALL))
 			return TRUE;
 
 		if (mapAttribs.Has(TDCA_NONE))

@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "tdcenumContainers.h"
+
 #include "..\Shared\xmlfileex.h"
 
 #include "..\Interfaces\ITaskList.h"
@@ -21,7 +23,6 @@
 class CBinaryData;
 class CTDCCustomAttribDefinitionArray;
 class CTDCCustomAttributeDataMap;
-class CTDCAttributeMap;
 
 struct TODOITEM;
 struct TDCRECURRENCE; 
@@ -162,9 +163,9 @@ public:
 	CString GetCommentsType() const; 
 	void EnableISODates(BOOL bEnable = TRUE) { m_bISODates = bEnable; }
 
-	BOOL SetReportAttributes(LPCTSTR szTitle, const COleDateTime& date = 0.0);
-	BOOL SetReportAttributes(LPCTSTR szTitle, const CTDCAttributeMap& mapAttrib, const COleDateTime& date = 0.0);
-	BOOL HideAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bHide = TRUE);
+	BOOL SetReportDetails(LPCTSTR szTitle, const COleDateTime& date = 0.0);
+	void SetAvailableAttributes(const CTDCAttributeMap& mapAttrib);
+	//BOOL HideAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bHide = TRUE);
 
 	// Task-related methods -----------
 	COleDateTime GetTaskLastModifiedOle(HTASKITEM hTask) const;
@@ -173,8 +174,8 @@ public:
 	COleDateTime GetTaskStartDateOle(HTASKITEM hTask) const;
 	COleDateTime GetTaskCreationDateOle(HTASKITEM hTask) const;
 
-	BOOL SetTaskID(HTASKITEM hTask, unsigned long nID, BOOL bVisible = TRUE);
-	BOOL SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID, BOOL bVisible = TRUE);
+	BOOL SetTaskID(HTASKITEM hTask, unsigned long nID/*, BOOL bVisible = TRUE*/);
+	BOOL SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID/*, BOOL bVisible = TRUE*/);
 	int GetTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents = TRUE) const;
 
 	BOOL SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi);
@@ -473,8 +474,11 @@ public:
 	bool IsTaskDue(HTASKITEM hTask) const;
 	bool IsTaskFlagged(HTASKITEM hTask) const;
 
+protected: // deprecated
 	bool TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const;
 	LPCTSTR GetTaskAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const;
+
+public:
 	HTASKITEM GetTaskParent(HTASKITEM hTask) const;
 
 	bool SetTaskTitle(HTASKITEM hTask, LPCTSTR szTitle);
@@ -512,8 +516,9 @@ public:
 protected:
 	DWORD m_dwNextUniqueID;
 	BOOL m_bISODates;
-	BOOL m_bHideParentID; // special case
+	//BOOL m_bHideParentID; // special case
 	CString m_sHtmlImgFolder;
+	CTDCAttributeMap m_mapReadableAttrib;
 
 	mutable CMap <DWORD, DWORD, HTASKITEM, HTASKITEM&> m_mapHandles;
 
@@ -544,7 +549,7 @@ protected:
 	BOOL OffsetTaskDates(HTASKITEM hTask, int nNumDays);
 
 	bool DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
-	bool TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bOmitHidden) const;
+	//bool TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bOmitHidden) const;
 
 	const CXmlItem* GetCustomAttribDefs(int nIndex = 0) const;
 	const CXmlItem* GetTaskCustomAttribute(HTASKITEM hTask, LPCTSTR szID) const;
@@ -597,7 +602,7 @@ protected:
 	static BOOL SetMetaData(CXmlItem* pXItem, const CMapStringToString& mapMetaData);
 	static int GetMetaData(const CXmlItem* pXItem, CMapStringToString& mapMetaData);
 	static BOOL OffsetDate(COleDateTime& date, int nNumDays);
-
+	static LPCTSTR MapAttribToTag(TDC_ATTRIBUTE nAttrib);
 };
 
 #endif // !defined(AFX_TASKFILE_H__BA5D71E7_2770_45FD_A693_A2344B589DF4__INCLUDED_)

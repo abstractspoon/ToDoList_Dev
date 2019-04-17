@@ -4621,26 +4621,30 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 	CString sStylesheet(userPrefs.GetDueTaskStylesheet());
 	BOOL bTransform = GetStylesheetPath(tdc, sStylesheet);
 	
-	DWORD dwFlags = 0;
+	TDCGETTASKS filter;
+	filter.sAllocTo = userPrefs.GetDueTaskPerson();
 	
 	if (userPrefs.GetDisplayDueCommentsInHtml())
-		dwFlags |= TDCGTF_HTMLCOMMENTS;
+		filter.dwFlags |= TDCGTF_HTMLCOMMENTS;
 	else
-		dwFlags |= TDCGTF_TEXTCOMMENTS;
+		filter.dwFlags |= TDCGTF_TEXTCOMMENTS;
 
 	if (bTransform)
-		dwFlags |= TDCGTF_TRANSFORM;
+		filter.dwFlags |= TDCGTF_TRANSFORM;
 
 	// due task notification preference overrides Export preference
 	if (userPrefs.GetDueTaskTitlesOnly())
 	{
-		dwFlags |= TDCGTF_TITLESONLY;
+		filter.mapAttribs.Add(TDCA_TASKNAME);
 	}
-	else if (userPrefs.GetExportParentTitleCommentsOnly())
+	else // visible attributes only
 	{
-		dwFlags |= TDCGTF_PARENTTITLECOMMENTSONLY;
-	}
+		TDC::MapColumnsToAttributes(tdc.GetVisibleColumns(), filter.mapAttribs);
 
+		if (userPrefs.GetExportParentTitleCommentsOnly())
+			filter.dwFlags |= TDCGTF_PARENTTITLECOMMENTSONLY;
+	}
+			
 	TDC_GETTASKS nFilter = TDCGT_DUE;
 	UINT nIDDueBy = IDS_DUETODAY;
 	
@@ -4678,13 +4682,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 		ASSERT (0);
 		return NULL;
 	}
-	
-	TDCGETTASKS filter(nFilter, dwFlags);
-	filter.sAllocTo = userPrefs.GetDueTaskPerson();
-	
-	// visible attributes only
-	TDC::MapColumnsToAttributes(tdc.GetVisibleColumns(), filter.mapAttribs);
-			
+		
 	// prepare structure
 	int nExporter = -1;
 	
@@ -4715,7 +4713,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 	}
 	
 	// set an appropriate title
-	pExport->tasks.SetReportAttributes(CEnString(nIDDueBy));
+	pExport->tasks.SetReportDetails(CEnString(nIDDueBy));
 
 	if (bTransform)
 		pExport->sStylesheet = sStylesheet;
@@ -5353,7 +5351,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 			GetTasks(tdc, TRUE, TRUE, dialog.GetTaskSelection(), tasks, sHtmlImgFolder);
 
-			tasks.SetReportAttributes(_T(""), dialog.GetDate());
+			tasks.SetReportDetails(_T(""), dialog.GetDate());
 		}
 
 		VERIFY(tasks.Save(sOutputFile, SFEF_UTF16));
@@ -6485,10 +6483,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 		if (!bTransform)
 			tasks.SetMetaData(TDL_EXPORTSTYLE, Misc::Format(nStyle));
 
-		CTDCAttributeMap mapAttrib;
-		GetAttributesForExport(dlg.GetTaskSelection(), tdc, mapAttrib);
-
-		tasks.SetReportAttributes(dlg.GetTitle(), dlg.GetDate());
+		tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
 		// save intermediate tasklist to file as required
 		LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -10035,12 +10030,8 @@ void CToDoListWnd::OnExport()
 		CTaskFile tasks;
 		GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 
-		// add report attributes
-		CTDCAttributeMap mapAttrib;
-		GetAttributesForExport(dialog.GetTaskSelection(), tdc, mapAttrib);
-
-		CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
-		tasks.SetReportAttributes(sTitle, mapAttrib);
+		// add report details
+		tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC));
 		
 		// save intermediate tasklist to file as required
 		LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -10090,12 +10081,8 @@ void CToDoListWnd::OnExport()
 				
 				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 				
-				// add report attribs
-				CTDCAttributeMap mapAttrib;
-				GetAttributesForExport(dialog.GetTaskSelection(), tdc, mapAttrib);
-
-				CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl);
-				tasks.SetReportAttributes(sTitle, mapAttrib);
+				// add report details
+				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl));
 
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -10184,12 +10171,8 @@ void CToDoListWnd::OnExport()
 				CTaskFile tasks;
 				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 				
-				// add report attribs
-				CTDCAttributeMap mapAttrib;
-				GetAttributesForExport(dialog.GetTaskSelection(), tdc, mapAttrib);
-				
-				CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl);
-				tasks.SetReportAttributes(sTitle, mapAttrib);
+				// add report details
+				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl));
 
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -10211,7 +10194,8 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 
 	tasks.Reset();	
 	tasks.SetProjectName(tdc.GetFriendlyProjectName());
-	
+	tasks.SetAvailableAttributes(filter.mapAttribs);
+
 	// export flags
 	if (userPrefs.GetExportParentTitleCommentsOnly())
 		filter.dwFlags |= TDCGTF_PARENTTITLECOMMENTSONLY;
@@ -10295,11 +10279,11 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 	TDC_GETTASKS nFilter = TDCGT_ALL;
 	
 	// build filter
-	if (taskSel.GetWantCompletedTasks() && !taskSel.GetWantInCompleteTasks())
+	if (taskSel.GetWantCompletedTasks() && !taskSel.GetWantIncompleteTasks())
 	{
 		nFilter = TDCGT_DONE;
 	}
-	else if (!taskSel.GetWantCompletedTasks() && taskSel.GetWantInCompleteTasks())
+	else if (!taskSel.GetWantCompletedTasks() && taskSel.GetWantIncompleteTasks())
 	{
 		nFilter = TDCGT_NOTDONE;
 	}
@@ -10307,45 +10291,10 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 	TDCGETTASKS filter(nFilter);
 
 	// attributes to export
-	GetAttributesForExport(taskSel, tdc, filter.mapAttribs);
+	taskSel.GetSelectedAttributes(tdc, filter.mapAttribs);
 
-	if (taskSel.GetAttributeOption() == TSDA_USER)
-		filter.dwFlags |= TDCGTF_USERCOLUMNS;
-	
 	// get the tasks
-   return GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, dwSelFlags, tasks, szHtmlImageDir);
-}
-
-int CToDoListWnd::GetAttributesForExport(const CTaskSelectionDlg& taskSel, const CFilteredToDoCtrl& tdc, CTDCAttributeMap& mapAttribs)
-{
-	mapAttribs.RemoveAll();
-
-	// attributes to export
-	switch (taskSel.GetAttributeOption())
-	{
-	case TSDA_ALL:
-		mapAttribs.Add(TDCA_ALL);
-		break;
-
-	case TSDA_VISIBLE:
-		{
-			// visible columns
-			TDC::MapColumnsToAttributes(tdc.GetVisibleColumns(), mapAttribs);
-
-			mapAttribs.Add(TDCA_CUSTOMATTRIB_ALL);
-
-			if (taskSel.GetWantCommentsWithVisible())
-				mapAttribs.Add(TDCA_COMMENTS);
-		}
-		break;
-
-	case TSDA_USER:
-		if (!taskSel.GetUserAttributes(mapAttribs))
-			mapAttribs.Add(TDCA_NONE);
-		break;
-	}
-
-	return mapAttribs.GetSize();
+	return GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, dwSelFlags, tasks, szHtmlImageDir);
 }
 
 void CToDoListWnd::OnUpdateExport(CCmdUI* pCmdUI) 
@@ -10422,11 +10371,8 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	CTaskFile tasks;
 	GetTasks(tdc, TRUE, TRUE, dialog.GetTaskSelection(), tasks, sHtmlImgFolder);
 
-	// add report attribs 
-	CTDCAttributeMap mapAttrib;
-	GetAttributesForExport(dialog.GetTaskSelection(), tdc, mapAttrib);
-
-	tasks.SetReportAttributes(sTitle, mapAttrib, dialog.GetDate());
+	// add report details
+	tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC), dialog.GetDate());
 	
 	// save intermediate tasklist to file as required
 	LogIntermediateTaskList(tasks, tdc.GetFilePath());

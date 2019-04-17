@@ -89,8 +89,8 @@ CTaskFile::CTaskFile(LPCTSTR szPassword)
 	: 
 	CXmlFileEx(TDL_ROOT, szPassword),
 	m_dwNextUniqueID(1), 
-	m_bISODates(FALSE), 
-	m_bHideParentID(FALSE)
+	m_bISODates(FALSE)/*, 
+	m_bHideParentID(FALSE)*/
 {
 }
 
@@ -98,8 +98,8 @@ CTaskFile::CTaskFile(const CTaskFile& tasks, LPCTSTR szPassword)
 	: 
 	CXmlFileEx(TDL_ROOT, szPassword),
 	m_dwNextUniqueID(1), 
-	m_bISODates(FALSE), 
-	m_bHideParentID(FALSE)
+	m_bISODates(FALSE)/*, 
+	m_bHideParentID(FALSE)*/
 {
 	CopyFrom(tasks);
 }
@@ -108,8 +108,8 @@ CTaskFile::CTaskFile(const ITaskList* pTasks, LPCTSTR szPassword)
 	: 
 	CXmlFileEx(TDL_ROOT, szPassword),
 	m_dwNextUniqueID(1), 
-	m_bISODates(FALSE), 
-	m_bHideParentID(FALSE)
+	m_bISODates(FALSE)/*, 
+	m_bHideParentID(FALSE)*/
 {
 	CopyFrom(pTasks);
 }
@@ -1584,7 +1584,7 @@ BOOL CTaskFile::SetNextUniqueID(DWORD dwNextID)
 	return bResult;
 }
 
-BOOL CTaskFile::SetReportAttributes(LPCTSTR szTitle, const COleDateTime& date)
+BOOL CTaskFile::SetReportDetails(LPCTSTR szTitle, const COleDateTime& date)
 {
 	BOOL bRes = TRUE;
 
@@ -1618,37 +1618,20 @@ BOOL CTaskFile::SetReportAttributes(LPCTSTR szTitle, const COleDateTime& date)
 	return bRes;
 }
 
-BOOL CTaskFile::SetReportAttributes(LPCTSTR szTitle, const CTDCAttributeMap& mapAttrib, const COleDateTime& date)
+void CTaskFile::SetAvailableAttributes(const CTDCAttributeMap& mapAttrib)
 {
-	if (!SetReportAttributes(szTitle, date))
-		return FALSE;
-
-	DeleteItem(TDL_REPORTATTRIB);
-
-	POSITION pos = mapAttrib.GetStartPosition();
-
-	while (pos)
-		VERIFY(AddItem(TDL_REPORTATTRIB, mapAttrib.GetNext(pos)));
-
-	return TRUE;
+	m_mapReadableAttrib.Copy(mapAttrib);
 }
 
 bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const
 {
-	// TODO
-	return true;
-}
+	if (!m_mapReadableAttrib.GetCount() || m_mapReadableAttrib.Has(TDCA_ALL))
+		return true;
 
-bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const
-{
-	// TODO
-	return true;
-}
+	if (m_mapReadableAttrib.Has(TDCA_NONE))
+		return false;
 
-LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const
-{
-	// TODO
-	return NULLSTRING;
+	return (m_mapReadableAttrib.Has(nAttrib) != FALSE);
 }
 
 BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
@@ -1687,7 +1670,7 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 		if (!tdi.sIcon.IsEmpty())
 		{
 			ASSERT(tdi.sIcon != _T("-1")); // Historical bug
-			SetTaskString(hTask, TDL_TASKICONINDEX, tdi.sIcon);
+			SetTaskString(hTask, TDL_TASKICON, tdi.sIcon);
 		}
 		
 		// rest of non-string attributes
@@ -1775,6 +1758,8 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
 
 BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite) const
 {
+	ASSERT(m_mapReadableAttrib.GetCount() == 0);
+
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, FALSE);
 
@@ -1793,7 +1778,7 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		GETATTRIB(TDL_TASKCREATEDBY,			tdi.sCreatedBy = GetTaskString(hTask, TDL_TASKCREATEDBY));
 		GETATTRIB(TDL_TASKEXTERNALID,			tdi.sExternalID = GetTaskString(hTask, TDL_TASKEXTERNALID));
 		GETATTRIB(TDL_TASKVERSION,				tdi.sVersion = GetTaskString(hTask, TDL_TASKVERSION));
-		GETATTRIB(TDL_TASKICONINDEX,			tdi.sIcon = GetTaskString(hTask, TDL_TASKICONINDEX));
+		GETATTRIB(TDL_TASKICON,					tdi.sIcon = GetTaskString(hTask, TDL_TASKICON));
 		GETATTRIB(TDL_TASKLASTMODBY,			tdi.sLastModifiedBy = GetTaskString(hTask, TDL_TASKLASTMODBY));
 
 		// Historical bug
@@ -2313,7 +2298,7 @@ LPCTSTR CTaskFile::GetTaskTitle(HTASKITEM hTask) const
 
 LPCTSTR CTaskFile::GetTaskIcon(HTASKITEM hTask) const
 {
-	const CString& sIcon = GetTaskString(hTask, TDL_TASKICONINDEX);
+	const CString& sIcon = GetTaskString(hTask, TDL_TASKICON);
 
 	// Historical bug
 	if ((sIcon.GetLength() == 2) && (sIcon == _T("-1")))
@@ -3059,7 +3044,7 @@ LPCTSTR CTaskFile::GetTaskStartDateString(HTASKITEM hTask) const
 
 unsigned long CTaskFile::GetTaskPosition(HTASKITEM hTask) const
 {
-	return GetTaskULong(hTask, TDL_TASKPOS);
+	return GetTaskULong(hTask, TDL_TASKPOSITION);
 }
 
 LPCTSTR CTaskFile::GetTaskPositionString(HTASKITEM hTask) const
@@ -3069,7 +3054,7 @@ LPCTSTR CTaskFile::GetTaskPositionString(HTASKITEM hTask) const
 
 bool CTaskFile::IsTaskDone(HTASKITEM hTask) const
 {
-	return (TaskHasAttribute(hTask, TDL_TASKDONEDATE, FALSE) ||
+	return (TaskHasAttribute(hTask, TDL_TASKDONEDATE/*, FALSE*/) ||
 			(GetTaskPercentDone(hTask, FALSE) == 100));
 }
 
@@ -3089,68 +3074,145 @@ bool CTaskFile::IsTaskDue(HTASKITEM hTask) const
 // interface version
 bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const
 {
-	return TaskHasAttribute(hTask, szAttrib, TRUE);
-}
-
-// internal version
-bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bOmitHidden) const
-{
+// 	return TaskHasAttribute(hTask, szAttrib, TRUE);
+// }
+// 
+// // internal version
+// bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bOmitHidden) const
+// {
 	// special case: parent task ID because m_bHideParentID
 	// operates at a tasklist level
-	if (bOmitHidden && m_bHideParentID && STR_MATCH(szAttrib, TDL_TASKPARENTID))
-		return FALSE;
+// 	if (bOmitHidden && m_bHideParentID && STR_MATCH(szAttrib, TDL_TASKPARENTID))
+// 		return FALSE;
 
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, false);
 	
 	const CXmlItem* pXIAttrib = pXITask->GetItem(szAttrib);
 	
-	if (!pXIAttrib || !pXIAttrib->HasValue()) // not found
-	{
-		// some fallbacks
-		if (STR_MATCH(szAttrib, TDL_TASKCOLOR))
-		{
-			return TaskHasAttribute(hTask, TDL_TASKTEXTCOLOR, bOmitHidden); // RECURSIVE
-		}
-		else if (STR_MATCH(szAttrib, TDL_TASKWEBCOLOR))
-		{
-			return TaskHasAttribute(hTask, TDL_TASKTEXTWEBCOLOR, bOmitHidden); // RECURSIVE
-		}
-		else if (STR_MATCH(szAttrib, TDL_TASKPARENTID))
-		{
-			return TaskHasAttribute(hTask, TDL_TASKID, bOmitHidden); // RECURSIVE
-		}
-		else if (pXIAttrib && STR_MATCH(szAttrib, TDL_TASKCUSTOMATTRIBDATA))
-		{
-			return (pXIAttrib->HasItem(TDL_TASKCUSTOMATTRIBID) != FALSE);
-		}
-		else if (pXIAttrib && STR_MATCH(szAttrib, TDL_TASKRECURRENCE))
-		{
-			return (pXIAttrib->HasItem(TDL_TASKRECURRENCEFREQ) != FALSE);
-		}
+	if (pXIAttrib && pXIAttrib->HasValue())
+		return true;
 
-		// else
-		return FALSE;
+	// some fallbacks
+	if (STR_MATCH(szAttrib, TDL_TASKCOLOR))
+		return (pXITask->ItemHasValue(TDL_TASKTEXTCOLOR) != FALSE);
+
+	if (STR_MATCH(szAttrib, TDL_TASKWEBCOLOR))
+		return (pXITask->ItemHasValue(TDL_TASKTEXTWEBCOLOR) != FALSE);
+
+	if (STR_MATCH(szAttrib, TDL_TASKPARENTID))
+		return (pXITask->ItemHasValue(TDL_TASKID) != FALSE);
+
+	if (pXIAttrib)
+	{
+		if (STR_MATCH(szAttrib, TDL_TASKCUSTOMATTRIBDATA))
+			return (pXIAttrib->HasItem(TDL_TASKCUSTOMATTRIBID) != FALSE);
+
+		if (STR_MATCH(szAttrib, TDL_TASKRECURRENCE))
+			return (pXIAttrib->HasItem(TDL_TASKRECURRENCEFREQ) != FALSE);
 	}
-	
+
 	// finally check for hidden attribute
-	return (!bOmitHidden || (pXIAttrib->GetItemValueI(_T("HIDE")) == 0));
+	//return (!bOmitHidden || (pXIAttrib->GetItemValueI(_T("HIDE")) == 0));
+	return TRUE;
+}
+
+bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const
+{
+	if (!IsAttributeAvailable(nAttrib))
+		return false;
+
+	LPCTSTR szAttrib = MapAttribToTag(nAttrib);
+
+	if (Misc::IsEmpty(szAttrib))
+		return false;
+
+	const CXmlItem* pXITask = NULL;
+	GET_TASK(pXITask, hTask, false);
+
+	return (pXITask->ItemHasValue(szAttrib) != FALSE);
+}
+
+LPCTSTR CTaskFile::MapAttribToTag(TDC_ATTRIBUTE nAttrib)
+{
+	switch (nAttrib)
+	{
+	case TDCA_ALLOCBY:		return TDL_TASKALLOCBY;
+	case TDCA_ALLOCTO:		return TDL_TASKALLOCTO;
+	case TDCA_CATEGORY:		return TDL_TASKCATEGORY;
+	case TDCA_COLOR:		return TDL_TASKCOLOR;
+	case TDCA_COST:			return TDL_TASKCOST;
+	case TDCA_CREATEDBY:	return TDL_TASKCREATEDBY;
+	case TDCA_CREATIONDATE:	return TDL_TASKCREATIONDATE;
+	case TDCA_CUSTOMATTRIB:	return TDL_TASKCUSTOMATTRIBDATA;
+	case TDCA_DEPENDENCY:	return TDL_TASKDEPENDENCY;
+	case TDCA_DONEDATE:		return TDL_TASKDONEDATE;
+	case TDCA_DUEDATE:		return TDL_TASKDUEDATE;
+	case TDCA_EXTERNALID:	return TDL_TASKEXTERNALID;
+	case TDCA_FILEREF:		return TDL_TASKFILEREFPATH;
+	case TDCA_FLAG:			return TDL_TASKFLAG;
+	case TDCA_ICON:			return TDL_TASKICON;
+	case TDCA_ID:			return TDL_TASKID;
+	case TDCA_LASTMODDATE:	return TDL_TASKLASTMOD;
+	case TDCA_LOCK:			return TDL_TASKLOCK;
+	case TDCA_METADATA:		return TDL_TASKMETADATA;
+	case TDCA_PARENTID:		return TDL_TASKPARENTID;
+	case TDCA_PERCENT:		return TDL_TASKPERCENTDONE;
+	case TDCA_POSITION:		return TDL_TASKPOSITION;
+	case TDCA_PRIORITY:		return TDL_TASKPRIORITY;
+	case TDCA_RECURRENCE:	return TDL_TASKRECURRENCE;
+	case TDCA_RISK:			return TDL_TASKRISK;
+	case TDCA_STARTDATE:	return TDL_TASKSTARTDATE;
+	case TDCA_STATUS:		return TDL_TASKSTATUS;
+	case TDCA_TAGS:			return TDL_TASKTAG;
+	case TDCA_TASKNAME:		return TDL_TASKTITLE;
+	case TDCA_TIMEEST:		return TDL_TASKTIMEESTIMATE;
+	case TDCA_TIMESPENT:	return TDL_TASKTIMESPENT;
+	case TDCA_VERSION:		return TDL_TASKVERSION;
+		break;
+
+	case TDCA_OFFSETTASK:	break; // not supported
+	case TDCA_PROJECTNAME:	break; // not supported
+
+	default:				ASSERT(0);
+	}
+
+	return NULLSTRING;
+}
+
+LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const
+{
+	if (!IsAttributeAvailable(nAttrib))
+		return NULLSTRING;
+
+	LPCTSTR szAttrib = MapAttribToTag(nAttrib);
+
+	if (Misc::IsEmpty(szAttrib))
+		return NULLSTRING;
+
+	const CXmlItem* pXITask = NULL;
+	GET_TASK(pXITask, hTask, NULLSTRING);
+
+	return pXITask->GetItemValue(szAttrib);
 }
 
 LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const
 {
+	if (Misc::IsEmpty(szAttrib))
+		return NULLSTRING;
+	
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, NULLSTRING);
 
 	CString sValue = pXITask->GetItemValue(szAttrib);
 
-	// special case: Parent ID
-	if (sValue.IsEmpty() && STR_MATCH(szAttrib, TDL_TASKPARENTID) && TaskHasAttribute(hTask, TDL_TASKID))
-	{
-		static CString sPID;
-		sPID.Format(_T("%lu"), GetTaskParentID(hTask));
-		sValue = sPID;
-	}
+ 	// special case: Parent ID
+ 	if (sValue.IsEmpty() && STR_MATCH(szAttrib, TDL_TASKPARENTID) && TaskHasAttribute(hTask, TDL_TASKID))
+ 	{
+ 		static CString sPID;
+ 		sPID.Format(_T("%lu"), GetTaskParentID(hTask));
+ 		sValue = sPID;
+ 	}
 
 	return sValue;
 }
@@ -3384,14 +3446,14 @@ bool CTaskFile::SetTaskCreatedBy(HTASKITEM hTask, LPCTSTR szCreatedBy)
 	return SetTaskString(hTask, TDL_TASKCREATEDBY, szCreatedBy);
 }
 
-BOOL CTaskFile::SetTaskID(HTASKITEM hTask, unsigned long nID, BOOL bVisible)
+BOOL CTaskFile::SetTaskID(HTASKITEM hTask, unsigned long nID/*, BOOL bVisible*/)
 {
 	if (SetTaskULong(hTask, TDL_TASKID, nID))
 	{
 		// update m_dwNextUniqueID
 		m_dwNextUniqueID = max(m_dwNextUniqueID, nID + 1);
 
-		return HideAttribute(hTask, TDL_TASKID, !bVisible);
+		return TRUE;//HideAttribute(hTask, TDL_TASKID, !bVisible);
 	}
 	
 	return FALSE;
@@ -3422,14 +3484,14 @@ void CTaskFile::AddTaskIDs(HTASKITEM hTask, BOOL bIncParents, CDWordArray& aTask
 	AddTaskIDs(GetNextTask(hTask), bIncParents, aTaskIDs);
 }
 
-BOOL CTaskFile::SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID, BOOL bVisible)
+BOOL CTaskFile::SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID/*, BOOL bVisible*/)
 {
-	if (SetTaskULong(hTask, TDL_TASKREFID, nRefID))
-	{
-		return HideAttribute(hTask, TDL_TASKREFID, !bVisible);
-	}
-	
-	return false;
+	return SetTaskULong(hTask, TDL_TASKREFID, nRefID);
+// 	{
+// 		return HideAttribute(hTask, TDL_TASKREFID, !bVisible);
+// 	}
+// 	
+// 	return FALSE;
 }
 
 DWORD CTaskFile::GetTaskReferenceID(HTASKITEM hTask) const
@@ -3442,6 +3504,7 @@ bool CTaskFile::IsTaskReference(HTASKITEM hTask) const
 	return (GetTaskReferenceID(hTask) > 0);
 }
 
+/*
 BOOL CTaskFile::HideAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bHide)
 {
 	// Hiding parent ID works at file level
@@ -3479,6 +3542,7 @@ BOOL CTaskFile::HideAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bHide)
 	
 	return FALSE;
 }
+*/
 
 bool CTaskFile::SetTaskColor(HTASKITEM hTask, unsigned long nColor)
 {
@@ -3503,8 +3567,8 @@ bool CTaskFile::SetTaskPriorityOrRisk(HTASKITEM hTask, const CString& sIntItem, 
 	if (!SetTaskInt(hTask, sIntItem, iVal))
 		return false;
 
-	if (iVal == TDC_NOPRIORITYORISK)
-		HideAttribute(hTask, sIntItem, TRUE);
+// 	if (iVal == TDC_NOPRIORITYORISK)
+// 		HideAttribute(hTask, sIntItem, TRUE);
 
 	return true;
 }
@@ -3744,7 +3808,7 @@ BOOL CTaskFile::SetTaskTextColor(HTASKITEM hTask, COLORREF color)
 bool CTaskFile::SetTaskIcon(HTASKITEM hTask, LPCTSTR szIcon)
 {
 	ASSERT(lstrcmp(szIcon, _T("-1")) != 0); // Historical bug
-	return SetTaskString(hTask, TDL_TASKICONINDEX, szIcon);
+	return SetTaskString(hTask, TDL_TASKICON, szIcon);
 }
 
 BOOL CTaskFile::SetTaskSubtaskCompletion(HTASKITEM hTask, const CString& sSubtaskDone)
@@ -3843,7 +3907,7 @@ bool CTaskFile::SetTaskPosition(HTASKITEM hTask, LPCTSTR szPos)
 
 bool CTaskFile::SetTaskPosition(HTASKITEM hTask, unsigned long nPos)
 {
-	return SetTaskULong(hTask, TDL_TASKPOS, nPos);
+	return SetTaskULong(hTask, TDL_TASKPOSITION, nPos);
 }
 
 bool CTaskFile::SetTaskRisk(HTASKITEM hTask, int nRisk)

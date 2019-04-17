@@ -56,6 +56,11 @@ public:
 		return Lookup(key, val);
 	}
 
+	BOOL HasOnly(KEY key) const
+	{
+		return ((GetCount() == 1) && Has(key));
+	}
+
 	void Add(KEY key)
 	{
 		char val = 0;
@@ -175,7 +180,6 @@ public:
 
 		return other.GetSize();
 	}
-
 };
 
 //////////////////////////////////////////////////////////////////////

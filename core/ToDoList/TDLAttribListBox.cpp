@@ -114,19 +114,6 @@ int CTDLAttributeListBox::FindAttribute(TDC_ATTRIBUTE nAttrib) const
 	return -1;
 }
 
-void CTDLAttributeListBox::SetAllAttributesVisible(BOOL bVisible)
-{
-	int nIndex = m_aAttribs.GetSize();
-	
-	while (nIndex--)
-	{
-		m_aAttribs[nIndex].bVisible = bVisible;
-
-		if (GetSafeHwnd())
-			SetCheck(nIndex, bVisible ? 1 : 0);
-	}
-}
-
 BOOL CTDLAttributeListBox::OnReflectCheckChange()
 {
 	// update all check states because we don't know which one changed
@@ -165,7 +152,7 @@ LRESULT CTDLAttributeListBox::OnInitListBox(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0L;
 }
 
-void CTDLAttributeListBox::SetVisibleAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs)
+void CTDLAttributeListBox::SetSelectedAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs)
 {
 	int nAttrib = m_aAttribs.GetSize();
 	
@@ -189,7 +176,7 @@ void CTDLAttributeListBox::SetVisibleAttributes(const CTDCAttributeMap& mapAttri
 	}
 }
 
-void CTDLAttributeListBox::GetVisibleAttributes(CTDCAttributeMap& mapAttrib, CStringSet& mapCustomAttribIDs) const
+int CTDLAttributeListBox::GetSelectedAttributes(CTDCAttributeMap& mapAttrib, CStringSet& mapCustomAttribIDs) const
 {
 	mapAttrib.RemoveAll();
 	mapCustomAttribIDs.RemoveAll();
@@ -218,9 +205,11 @@ void CTDLAttributeListBox::GetVisibleAttributes(CTDCAttributeMap& mapAttrib, CSt
 			}
 		}
 	}
+
+	return (mapAttrib.GetCount() + mapCustomAttribIDs.GetCount());
 }
 
-void CTDLAttributeListBox::GetVisibleAttributes(CTDCAttributeMap& mapAttrib) const
+int CTDLAttributeListBox::GetSelectedAttributes(CTDCAttributeMap& mapAttrib) const
 {
 	mapAttrib.RemoveAll();
 
@@ -239,4 +228,6 @@ void CTDLAttributeListBox::GetVisibleAttributes(CTDCAttributeMap& mapAttrib) con
 				mapAttrib.Add(TDCA_PARENTID);
 		}
 	}
+
+	return mapAttrib.GetCount();
 }

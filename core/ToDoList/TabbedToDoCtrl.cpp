@@ -960,7 +960,7 @@ BOOL CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTA
 	}
 
 	// Attributes
-	m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, filter, FALSE);
+	m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, filter);
 
 	// Subtasks
 	AddTreeChildrenToTaskFile(hti, tasks, hTask, filter);
@@ -3697,7 +3697,6 @@ BOOL CTabbedToDoCtrl::AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttrib) const
 	// all else
 	return FALSE;
 }
-
 
 BOOL CTabbedToDoCtrl::AllExtensionViewsNeedFullUpdate() const
 {

@@ -81,6 +81,7 @@ public:
 	int GetValueI() const;
 	double GetValueF() const;
 
+	BOOL ItemHasValue(const CString& sItemName, const CString& sSubItemName = EMPTY_STR) const;
 	const CString& GetItemValue(const CString& sItemName, const CString& sSubItemName = EMPTY_STR) const;
 	int GetItemValueI(const CString& sItemName, const CString& sSubItemName = EMPTY_STR) const;
 	double GetItemValueF(const CString& sItemName, const CString& sSubItemName = EMPTY_STR) const;

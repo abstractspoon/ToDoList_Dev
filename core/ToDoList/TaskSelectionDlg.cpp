@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TaskSelectionDlg.h"
+#include "ToDoCtrl.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\dialoghelper.h"
@@ -79,7 +80,7 @@ CTaskSelectionDlg::CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAtt
 			mapCustAttribIDs.Add(sCustAttribID);
 		}
 
-		m_lbAttribList.SetVisibleAttributes(mapAttrib, mapCustAttribIDs);
+		m_lbAttribList.SetSelectedAttributes(mapAttrib, mapCustAttribIDs);
 	}
 }
 
@@ -169,7 +170,7 @@ void CTaskSelectionDlg::OnOK()
 	CTDCAttributeMap mapAttrib;
 	CStringSet mapCustomAttribIDs;
 
-	m_lbAttribList.GetVisibleAttributes(mapAttrib, mapCustomAttribIDs);
+	m_lbAttribList.GetSelectedAttributes(mapAttrib, mapCustomAttribIDs);
 
 	// Default attributes
 	prefs.WriteProfileInt(sGroup, _T("Count"), mapAttrib.GetCount());
@@ -322,14 +323,35 @@ void CTaskSelectionDlg::OnChangeAttribOption()
 	GetDlgItem(IDC_INCLUDECOMMENTS)->EnableWindow(m_nAttribOption == TSDA_VISIBLE);
 }
 
-int CTaskSelectionDlg::GetUserAttributes(CTDCAttributeMap& mapAttrib) const
+int CTaskSelectionDlg::GetSelectedAttributes(const CToDoCtrl& tdc, CTDCAttributeMap& mapAttrib) const
 {
 	mapAttrib.RemoveAll();
 
-	if (m_nAttribOption == TSDA_USER)
-		m_lbAttribList.GetVisibleAttributes(mapAttrib);
-	else
-		ASSERT(0);
+	// attributes to export
+	switch (m_nAttribOption)
+	{
+	case TSDA_ALL:
+		mapAttrib.Add(TDCA_ALL);
+		break;
+
+	case TSDA_VISIBLE:
+		{
+			// visible columns
+			TDC::MapColumnsToAttributes(tdc.GetVisibleColumns(), mapAttrib);
+
+			mapAttrib.Add(TDCA_TASKNAME);
+			mapAttrib.Add(TDCA_CUSTOMATTRIB_ALL);
+
+			if (m_bIncludeComments)
+				mapAttrib.Add(TDCA_COMMENTS);
+		}
+		break;
+
+	case TSDA_USER:
+		m_lbAttribList.GetSelectedAttributes(mapAttrib);
+		mapAttrib.Add(TDCA_TASKNAME);
+		break;
+	}
 
 	return mapAttrib.GetCount();
 }

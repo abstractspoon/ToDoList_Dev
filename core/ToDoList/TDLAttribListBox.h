@@ -27,11 +27,10 @@ class CTDLAttributeListBox : public CCheckListBoxEx
 public:
 	CTDLAttributeListBox(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
-	void SetAllAttributesVisible(BOOL bVisible = TRUE);
-	void SetVisibleAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs);
+	void SetSelectedAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs);
 
-	void GetVisibleAttributes(CTDCAttributeMap& mapAttrib, CStringSet& mapCustomAttribIDs) const;
-	void GetVisibleAttributes(CTDCAttributeMap& mapAttrib) const; // includes custom attributes
+	int GetSelectedAttributes(CTDCAttributeMap& mapAttrib, CStringSet& mapCustomAttribIDs) const;
+	int GetSelectedAttributes(CTDCAttributeMap& mapAttrib) const; // includes custom attributes
 
 // Attributes
 protected:

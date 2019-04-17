@@ -47,10 +47,10 @@ public:
 	BOOL GetWantSelectedSubtasks() const { return GetWantSelectedTasks() && m_bSelectedSubtasks; }
 	BOOL GetWantSelectedParentTask() const { return GetWantSelectedTasks() && m_bSelectedParentTask; }
 	BOOL GetWantCompletedTasks() const { return m_bCompletedTasks; }
-	BOOL GetWantInCompleteTasks() const { return m_bIncompleteTasks; }
+	BOOL GetWantIncompleteTasks() const { return m_bIncompleteTasks; }
 
 	TSD_ATTRIB GetAttributeOption() const { return (TSD_ATTRIB)m_nAttribOption; }
-	int GetUserAttributes(CTDCAttributeMap& mapAttrib) const;
+	int GetSelectedAttributes(const CToDoCtrl& tdc, CTDCAttributeMap& mapAttrib) const;
 	BOOL GetWantCommentsWithVisible() const { return m_bIncludeComments; }
 
 	void SetWantWhatTasks(TSD_TASKS nWhat);

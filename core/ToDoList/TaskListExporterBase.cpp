@@ -101,14 +101,17 @@ bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*sz
 		
 	ROUNDTIMEFRACTIONS = pPrefs->GetProfileInt(szKey, _T("RoundTimeFractions"), FALSE);
 
-	if (pTasks)
-	{
-		// detect whether we want task position
-		HTASKITEM hFirstTask = pTasks->GetFirstTask(NULL);
-		WANTPOS = (hFirstTask && ((ITaskList*)pTasks)->TaskHasAttribute(hFirstTask, TDL_TASKPOS));
-	}
+// 	if (pTasks)
+// 	{
+// 		// detect whether we want task position
+// 		HTASKITEM hFirstTask = pTasks->GetFirstTask(NULL);
+// 		WANTPOS = (hFirstTask && pTasks->TaskHasAttribute(hFirstTask, TDL_TASKPOS));
+// 	}
 
-	BuildAttribList(pTasks, NULL);
+	BuildAttribList(pTasks/*, NULL*/);
+
+	// detect whether we want task position
+	WANTPOS = WantAttribute(TDCA_POSITION);
 
 	return true;
 }
@@ -292,6 +295,8 @@ CString CTaskListExporterBase::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM
 CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int /*nDepth*/,
 											   TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const
 {
+	ASSERT(WantAttribute(nAttrib));
+
 	CString sItem;
 
 	switch (nAttrib)
@@ -483,18 +488,14 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		else
 		{
 			// get the attribute name that we will be using
-			CString sAttribName;
-
 			if (((ITaskList*)pTasks)->TaskHasAttribute(hTask, szAttribName) || (szAltAttribName == NULL))
 			{
-				sAttribName = szAttribName;
+				sAttribVal = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, szAttribName);
 			}
 			else if (szAltAttribName)
 			{
-				sAttribName = szAltAttribName;
+				sAttribVal = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, szAltAttribName);
 			}
-
-			sAttribVal = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, sAttribName);
 
 			// special handling
 			switch (nAttrib)
@@ -591,71 +592,45 @@ CString CTaskListExporterBase::FormatCustomAttributes(const ITASKLISTBASE* pTask
 	return sCustAttribs;
 }
 
-void CTaskListExporterBase::BuildAttribList(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+void CTaskListExporterBase::BuildAttribList(const ITASKLISTBASE* pTasks)
 {
-	if (hTask)
-	{
-		CheckAddAttribtoList(pTasks, hTask, TDCA_POSITION,		TDL_TASKPOS);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_TASKNAME,		TDL_TASKTITLE);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_ID,			TDL_TASKID);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_PARENTID,		TDL_TASKPARENTID);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_PATH,			TDL_TASKPATH);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_PRIORITY,		TDL_TASKPRIORITY);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_RISK,			TDL_TASKRISK);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_PERCENT,		TDL_TASKPERCENTDONE);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_TIMEEST,		TDL_TASKTIMEESTIMATE);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_TIMESPENT,		TDL_TASKTIMESPENT);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_CREATIONDATE,	TDL_TASKCREATIONDATESTRING);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_CREATEDBY,		TDL_TASKCREATEDBY);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_LASTMODDATE,	TDL_TASKLASTMODSTRING);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_LASTMODBY,		TDL_TASKLASTMODBY);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_STARTDATE,		TDL_TASKSTARTDATESTRING);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_DUEDATE,		TDL_TASKDUEDATESTRING);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_DONEDATE,		TDL_TASKDONEDATESTRING);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_RECURRENCE,	TDL_TASKRECURRENCE);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_ALLOCTO,		TDL_TASKALLOCTO);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_ALLOCBY,		TDL_TASKALLOCBY);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_STATUS,		TDL_TASKSTATUS);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_CATEGORY,		TDL_TASKCATEGORY);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_TAGS,			TDL_TASKTAG);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_EXTERNALID,	TDL_TASKEXTERNALID);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_COST,			TDL_TASKCOST);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_VERSION,		TDL_TASKVERSION);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_FLAG,			TDL_TASKFLAG);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_DEPENDENCY,	TDL_TASKDEPENDENCY);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_FILEREF,		TDL_TASKFILEREFPATH);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_SUBTASKDONE,	TDL_TASKSUBTASKDONE);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_COMMENTS,		TDL_TASKCOMMENTS);
-	}
-	else // root => initialize arrays
-	{
-		ARRATTRIBUTES.RemoveAll();
-		ARRLABELS.RemoveAll();
-
-		// always add custom attribs
-		if (pTasks->GetCustomAttributeCount())
-		{
-			if (ARRATTRIBUTES.AddUnique(TDCA_CUSTOMATTRIB))
-				ARRLABELS.Add(_T(""));
-		}
-	}
-
-	// subtasks
-	hTask = pTasks->GetFirstTask(hTask);
-
-	while (hTask) // at least one sub-task
-	{
-		BuildAttribList(pTasks, hTask);
-
-		// next subtask
-		hTask = pTasks->GetNextTask(hTask);
-	}
+	CheckAddAttribtoList(pTasks, TDCA_POSITION);
+	CheckAddAttribtoList(pTasks, TDCA_TASKNAME);
+	CheckAddAttribtoList(pTasks, TDCA_ID);
+	CheckAddAttribtoList(pTasks, TDCA_PARENTID);
+	//CheckAddAttribtoList(pTasks, TDCA_PATH);
+	CheckAddAttribtoList(pTasks, TDCA_PRIORITY);
+	CheckAddAttribtoList(pTasks, TDCA_RISK);
+	CheckAddAttribtoList(pTasks, TDCA_PERCENT);
+	CheckAddAttribtoList(pTasks, TDCA_TIMEEST);
+	CheckAddAttribtoList(pTasks, TDCA_TIMESPENT);
+	CheckAddAttribtoList(pTasks, TDCA_CREATIONDATE);
+	CheckAddAttribtoList(pTasks, TDCA_CREATEDBY);
+	CheckAddAttribtoList(pTasks, TDCA_LASTMODDATE);
+	CheckAddAttribtoList(pTasks, TDCA_LASTMODBY);
+	CheckAddAttribtoList(pTasks, TDCA_STARTDATE);
+	CheckAddAttribtoList(pTasks, TDCA_DUEDATE);
+	CheckAddAttribtoList(pTasks, TDCA_DONEDATE);
+	CheckAddAttribtoList(pTasks, TDCA_RECURRENCE);
+	CheckAddAttribtoList(pTasks, TDCA_ALLOCTO);
+	CheckAddAttribtoList(pTasks, TDCA_ALLOCBY);
+	CheckAddAttribtoList(pTasks, TDCA_STATUS);
+	CheckAddAttribtoList(pTasks, TDCA_CATEGORY);
+	CheckAddAttribtoList(pTasks, TDCA_TAGS);
+	CheckAddAttribtoList(pTasks, TDCA_EXTERNALID);
+	CheckAddAttribtoList(pTasks, TDCA_COST);
+	CheckAddAttribtoList(pTasks, TDCA_VERSION);
+	CheckAddAttribtoList(pTasks, TDCA_FLAG);
+	CheckAddAttribtoList(pTasks, TDCA_DEPENDENCY);
+	CheckAddAttribtoList(pTasks, TDCA_FILEREF);
+	CheckAddAttribtoList(pTasks, TDCA_SUBTASKDONE);
+	CheckAddAttribtoList(pTasks, TDCA_COMMENTS);
+	CheckAddAttribtoList(pTasks, TDCA_CUSTOMATTRIB);
 }
 
-void CTaskListExporterBase::CheckAddAttribtoList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
-												TDC_ATTRIBUTE attrib, LPCTSTR szAttribName)
+void CTaskListExporterBase::CheckAddAttribtoList(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE attrib)
 {
-	if (((ITaskList*)pTasks)->TaskHasAttribute(hTask, szAttribName) && ARRATTRIBUTES.AddUnique(attrib))
+	if (pTasks->IsAttributeAvailable(attrib) && ARRATTRIBUTES.AddUnique(attrib))
 	{
 		// translate label once only
 		CEnString sLabel(GetAttribLabel(attrib));

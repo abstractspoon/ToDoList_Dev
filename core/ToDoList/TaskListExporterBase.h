@@ -73,8 +73,8 @@ private:
 	CString FormatDependencyList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sAttribLabel) const;
 	CString FormatFileReferenceList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sAttribLabel) const;
 
-	void BuildAttribList(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
-	void CheckAddAttribtoList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE attrib, LPCTSTR szAttribName);
+	void BuildAttribList(const ITASKLISTBASE* pTasks);
+	void CheckAddAttribtoList(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE attrib);
 	
 };
 
