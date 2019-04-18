@@ -9,13 +9,15 @@ namespace DayViewUIExtension
 	[System.ComponentModel.DesignerCategory("")]
 	public class DayViewWeekLabel : System.Windows.Forms.Label
 	{
-		public DayViewWeekLabel()
+		public DayViewWeekLabel(Translator trans)
 		{
+			m_Trans = trans;
 			m_NumWeeks = 1;
 		}
 
 		private DateTime m_StartDate;
 		private int m_NumWeeks;
+		private Translator m_Trans;
 
 		public int NumWeeks
 		{
@@ -44,22 +46,26 @@ namespace DayViewUIExtension
 				if (endDate.Year == m_StartDate.Year)
 				{
 					if (endDate.Month == m_StartDate.Month)
+					{
 						Text = m_StartDate.ToString("MMMM yyyy");
+					}
 					else
+					{
 						Text = String.Format("{0} - {1}",
-														m_StartDate.ToString("MMMM"),
-														endDate.ToString("MMMM yyyy"));
+											m_StartDate.ToString("MMMM"),
+											endDate.ToString("MMMM yyyy"));
+					}
 				}
 				else
 				{
 					Text = String.Format("{0} - {1}",
-													m_StartDate.ToString("MMMM yyyy"),
-													endDate.ToString("MMMM yyyy"),
-													m_StartDate.Year);
+										m_StartDate.ToString("MMMM yyyy"),
+										endDate.ToString("MMMM yyyy"),
+										m_StartDate.Year);
 				}
 
-                String weekNum = String.Format(" (Week {0})", DateUtil.WeekOfYear(m_StartDate));
-                Text = Text + weekNum;
+                String weekNum = String.Format(m_Trans.Translate("(Week {0})"), DateUtil.WeekOfYear(m_StartDate));
+                Text = (Text + ' ' + weekNum);
 
 				Invalidate();
 			}

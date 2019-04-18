@@ -25,6 +25,11 @@ namespace DayViewUIExtension
 
 		// ------------------------------------------------------------------------
 
+		static private String AM = new DateTime(1, 1, 1, 6, 0, 0).ToString("tt", System.Globalization.CultureInfo.CurrentCulture);
+		static private String PM = new DateTime(1, 1, 1, 18, 0, 0).ToString("tt", System.Globalization.CultureInfo.CurrentCulture);
+		
+		// ------------------------------------------------------------------------
+
 		public TDLRenderer(IntPtr hWnd, UIExtension.TaskIcon taskIcons)
 		{
             // One time initialisation
@@ -161,24 +166,21 @@ namespace DayViewUIExtension
 
             using (SolidBrush brush = new SolidBrush(this.TextColor))
             {
-                string amPmTime;
+				// Ignore 'ampm' and format for the current regional settings
+                string amPmTime = "00";
 
-                if (ampm)
-                {
-                    if (hour < 12)
-                        amPmTime = "AM";
-                    else
-                        amPmTime = "PM";
+                if (!String.IsNullOrEmpty(AM))
+				{
+					if (hour < 12)
+						amPmTime = AM;
+					else
+						amPmTime = PM;
 
-                    if (hour != 12)
-                        hour = hour % 12;
-                }
-                else
-                {
-                    amPmTime = "00";
-                }
+					if (hour != 12)
+						hour = hour % 12;
+				}
 
-                String hourStr = hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture);
+				String hourStr = hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture);
                 
 				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 				g.DrawString(hourStr, HourFont, brush, rect);

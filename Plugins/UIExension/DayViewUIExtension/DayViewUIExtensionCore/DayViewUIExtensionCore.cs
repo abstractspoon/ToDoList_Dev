@@ -349,7 +349,7 @@ namespace DayViewUIExtension
 
 		private void CreateWeekLabel()
 		{
-			m_WeekLabel = new DayViewWeekLabel();
+			m_WeekLabel = new DayViewWeekLabel(m_Trans);
 
 			m_WeekLabel.Font = new Font(FontName, 14);
             m_WeekLabel.Location = new Point(m_Toolbar.Right, DPIScaling.Scale(LabelTop));

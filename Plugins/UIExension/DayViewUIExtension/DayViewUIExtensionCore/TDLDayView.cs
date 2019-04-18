@@ -38,7 +38,7 @@ namespace DayViewUIExtension
             appointmentGripWidth = DPIScaling.Scale(appointmentGripWidth);
             headerBorder = DPIScaling.Scale(headerBorder);
             longAppointmentSpacing = DPIScaling.Scale(longAppointmentSpacing);
-            
+
             m_Renderer = new TDLRenderer(Handle, taskIcons);
 			m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
 			m_UserMinSlotHeight = minSlotHeight;
