@@ -238,7 +238,7 @@ CString CTaskListHtmlExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM
 	case STYLE_WRAP:
 	case STYLE_PARA:
 		// figure out indent
-		if (WANTPOS)
+		if (pTasks->IsAttributeAvailable(TDCA_POSITION))
 		{
 			if (nDepth > 1)
 			{
@@ -281,10 +281,10 @@ CString CTaskListHtmlExporter::ExportSubtasks(const ITASKLISTBASE* pTasks, HTASK
 	{
 		if (EXPORTSTYLE != STYLE_TABLE)
 		{
-			if (!WANTPOS)
-				sSubtasks += _T("</ul>");
-			else
+			if (pTasks->IsAttributeAvailable(TDCA_POSITION))
 				sSubtasks += _T("</blockquote>");
+			else
+				sSubtasks += _T("</ul>");
 		}
 	}
 
@@ -403,7 +403,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		// Indent subtasks in table view only
 		if (EXPORTSTYLE == STYLE_TABLE)
 		{
-			if ((nAttrib == TDCA_POSITION) || !WANTPOS)
+			if ((nAttrib == TDCA_POSITION) || !pTasks->IsAttributeAvailable(TDCA_POSITION))
 			{
 				while (--nDepth)
 					sItem = (INDENT + sItem);

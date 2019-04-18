@@ -9596,10 +9596,7 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 				return FALSE;
 			}
 			
-// 			BOOL bTitleCommentsOnly = (m_taskTree.ItemHasChildren(hti) &&
-// 									filter.HasFlag(TDCGTF_PARENTTITLECOMMENTSONLY));
-
-			m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, filter/*, bTitleCommentsOnly*/);
+			m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, filter);
 		}
 
 		// we return TRUE if we match the filter _or_ we have any matching children

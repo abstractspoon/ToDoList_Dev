@@ -3439,7 +3439,7 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 }
 
 BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, 
-	HTASKITEM hTask, const TDCGETTASKS& filter/*, BOOL bTitleCommentsOnly*/) const
+	HTASKITEM hTask, const TDCGETTASKS& filter) const
 {
 	ASSERT(pTDI);
 
@@ -3465,20 +3465,13 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 	// if task is a reference we use a bit of sleight of hand
 	// and write the 'true' task's title but nothing else
 	if (pTDI->dwTaskRefID)
+	{
 		tasks.SetTaskTitle(hTask, m_data.GetTaskTitle(pTDI->dwTaskRefID));
-	else
-		tasks.SetTaskTitle(hTask, pTDI->sTitle);
-
-	// hide IDs if not wanted
-// 	if (bTitleOnly || bTitleCommentsOnly || !filter.WantAttribute(TDCA_ID))
-// 		tasks.HideAttribute(hTask, TDL_TASKID);
-// 
-// 	if (bTitleOnly || bTitleCommentsOnly || !filter.WantAttribute(TDCA_PARENTID))
-// 		tasks.HideAttribute(hTask, TDL_TASKPARENTID);
-
-	// ignore everything else if we are a reference
-	if (pTDI->dwTaskRefID)
 		return TRUE;
+	}
+	
+	// else
+	tasks.SetTaskTitle(hTask, pTDI->sTitle);
 
 	if (!bTransform)
 		tasks.SetTaskIcon(hTask, pTDI->sIcon);
@@ -3670,13 +3663,6 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		{
 			tasks.SetTaskDoneDate(hTask, pTDI->dateDone);
 			tasks.SetTaskGoodAsDone(hTask, TRUE);
-
-// 			// hide it if column not visible
-// 			if (!filter.WantAttribute(TDCA_DONEDATE))
-// 			{
-// 				tasks.HideAttribute(hTask, TDL_TASKDONEDATE);
-// 				tasks.HideAttribute(hTask, TDL_TASKDONEDATESTRING);
-// 			}
 		}
 		else if (m_calculator.IsTaskDone(pTDI, pTDS))
 		{
@@ -3787,8 +3773,6 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 	{
 		tasks.SetTaskDoneDate(hTask, pTDI->dateDone);
 		tasks.SetTaskGoodAsDone(hTask, TRUE);
-// 		tasks.HideAttribute(hTask, TDL_TASKDONEDATE);
-// 		tasks.HideAttribute(hTask, TDL_TASKDONEDATESTRING);
 	}
 	else if (m_calculator.IsTaskDone(pTDI, pTDS))
 	{

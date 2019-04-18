@@ -223,7 +223,7 @@ CString CTaskListCsvExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 		{
 		case TDCA_POSITION:
 		case TDCA_TASKNAME:
-			if ((nAttrib == TDCA_POSITION) || !WANTPOS)
+			if ((nAttrib == TDCA_POSITION) || !pTasks->IsAttributeAvailable(TDCA_POSITION))
 			{
 				CString sIndent;
 

@@ -69,7 +69,6 @@ static int NUMORDER = sizeof(ATTRIB_ORDER) / sizeof(TDC_ATTRIBUTE);
 
 CTaskListExporterBase::CTaskListExporterBase() 
 	: 
-	WANTPOS(FALSE), 
 	ROUNDTIMEFRACTIONS(TRUE),
 	ENDL(_T("\r\n")),
 	MULTIFILE(FALSE),
@@ -96,22 +95,9 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::ExportOutput(LPCTSTR szDestFilePath,
 bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, bool /*bSilent*/, 
 									   IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// we go straight for the application preferences
-	szKey = _T("Preferences");
-		
-	ROUNDTIMEFRACTIONS = pPrefs->GetProfileInt(szKey, _T("RoundTimeFractions"), FALSE);
+	ROUNDTIMEFRACTIONS = pPrefs->GetProfileInt(_T("Preferences"), _T("RoundTimeFractions"), FALSE);
 
-// 	if (pTasks)
-// 	{
-// 		// detect whether we want task position
-// 		HTASKITEM hFirstTask = pTasks->GetFirstTask(NULL);
-// 		WANTPOS = (hFirstTask && pTasks->TaskHasAttribute(hFirstTask, TDL_TASKPOS));
-// 	}
-
-	BuildAttribList(pTasks/*, NULL*/);
-
-	// detect whether we want task position
-	WANTPOS = WantAttribute(TDCA_POSITION);
+	BuildAttribList(pTasks);
 
 	return true;
 }
@@ -391,7 +377,7 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		break;
 		
 	case TDCA_POSITION:
-		if (WANTPOS)
+		if (pTasks->IsAttributeAvailable(TDCA_POSITION))
 			sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKPOSSTRING);
 		break;
 		

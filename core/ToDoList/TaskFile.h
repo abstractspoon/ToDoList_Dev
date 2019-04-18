@@ -165,7 +165,6 @@ public:
 
 	BOOL SetReportDetails(LPCTSTR szTitle, const COleDateTime& date = 0.0);
 	void SetAvailableAttributes(const CTDCAttributeMap& mapAttrib);
-	//BOOL HideAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bHide = TRUE);
 
 	// Task-related methods -----------
 	COleDateTime GetTaskLastModifiedOle(HTASKITEM hTask) const;
@@ -174,8 +173,8 @@ public:
 	COleDateTime GetTaskStartDateOle(HTASKITEM hTask) const;
 	COleDateTime GetTaskCreationDateOle(HTASKITEM hTask) const;
 
-	BOOL SetTaskID(HTASKITEM hTask, unsigned long nID/*, BOOL bVisible = TRUE*/);
-	BOOL SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID/*, BOOL bVisible = TRUE*/);
+	BOOL SetTaskID(HTASKITEM hTask, unsigned long nID);
+	BOOL SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID);
 	int GetTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents = TRUE) const;
 
 	BOOL SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi);
@@ -427,12 +426,12 @@ public:
 
 	bool IsSourceControlled() const;
 	LPCTSTR GetCheckOutTo() const;
-	bool IsCheckedOut() const { ASSERT(0); return false; } // Deprecated
+	bool IsCheckedOut() const { ASSERT(0); return false; } // DEPRECATED
 	
 	unsigned long GetFileFormat() const;
 	unsigned long GetFileVersion() const;
 	
-	time_t GetLastModified() const { ASSERT(0); return 0; } // Deprecated
+	time_t GetLastModified() const { ASSERT(0); return 0; } // DEPRECATED
 
 	bool SetProjectName(LPCTSTR szName);
 	bool SetFileVersion(unsigned long nVersion);
@@ -464,7 +463,7 @@ public:
 	time_t GetTaskLastModified(HTASKITEM hTask) const;
 	time_t GetTaskDoneDate(HTASKITEM hTask) const;
 	time_t GetTaskDueDate(HTASKITEM hTask) const;
-	time_t GetTaskStartDate(HTASKITEM hTask) const; // deprecated
+	time_t GetTaskStartDate(HTASKITEM hTask) const; // DEPRECATED
 
 	LPCTSTR GetTaskDoneDateString(HTASKITEM hTask) const;
 	LPCTSTR GetTaskDueDateString(HTASKITEM hTask) const;
@@ -474,11 +473,8 @@ public:
 	bool IsTaskDue(HTASKITEM hTask) const;
 	bool IsTaskFlagged(HTASKITEM hTask) const;
 
-protected: // deprecated
 	bool TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const;
 	LPCTSTR GetTaskAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const;
-
-public:
 	HTASKITEM GetTaskParent(HTASKITEM hTask) const;
 
 	bool SetTaskTitle(HTASKITEM hTask, LPCTSTR szTitle);
@@ -516,7 +512,6 @@ public:
 protected:
 	DWORD m_dwNextUniqueID;
 	BOOL m_bISODates;
-	//BOOL m_bHideParentID; // special case
 	CString m_sHtmlImgFolder;
 	CTDCAttributeMap m_mapReadableAttrib;
 
@@ -547,9 +542,7 @@ protected:
 	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite) const;
 	COleDateTime GetEarliestTaskStartDate(HTASKITEM hTask) const;
 	BOOL OffsetTaskDates(HTASKITEM hTask, int nNumDays);
-
-	bool DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
-	//bool TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bOmitHidden) const;
+	BOOL DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
 
 	const CXmlItem* GetCustomAttribDefs(int nIndex = 0) const;
 	const CXmlItem* GetTaskCustomAttribute(HTASKITEM hTask, LPCTSTR szID) const;
@@ -590,8 +583,7 @@ protected:
 				  	 const CString& sItemTag, CStringArray& aItems) const;
 	/////////////////////////////////////////////////////////////////////////////////////
 
-	// helpers
-public:
+public:	// helpers
 	static int GetCustomAttributeDefs(const ITaskList* pTasks, CTDCCustomAttribDefinitionArray& aAttribs);
 
 protected:
