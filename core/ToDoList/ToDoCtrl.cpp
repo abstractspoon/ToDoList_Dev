@@ -5315,7 +5315,7 @@ BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 	rPos.right = max(rPos.right, rPos.left + 150);
 
 	// create edit if nec.
-	if (!m_eTaskName.GetSafeHwnd() && !m_eTaskName.Create(this, IDC_FTC_EDIT, WS_POPUP | WS_CHILD | WS_BORDER))
+	if (!m_eTaskName.GetSafeHwnd() && !m_eTaskName.Create(this, IDC_FTC_EDIT, WS_POPUP | WS_BORDER))
 		return FALSE;
 
 	// start
