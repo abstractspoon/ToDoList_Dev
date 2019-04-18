@@ -50,7 +50,7 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
-	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes);
+	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	bool WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const;
 	bool PrepareNewTask(ITaskList* /*pTask*/) const;
 
@@ -112,12 +112,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	void UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
 	BOOL RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings, BOOL bCheckExist);
 
 	void RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility);
-	double GetTaskTimeInDays(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bEstimate);
 	COleDateTime GetTaskStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	COleDateTime GetTaskDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 

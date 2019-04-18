@@ -16,6 +16,12 @@ CTDCAttributeMap::CTDCAttributeMap()
 {
 }
 
+CTDCAttributeMap::CTDCAttributeMap(TDC_ATTRIBUTE nAttrib)
+	: CTDCBaseEnumSet<TDC_ATTRIBUTE>()
+{
+	Add(nAttrib);
+}
+
 CTDCAttributeMap::CTDCAttributeMap(const CTDCAttributeMap& mapOther) 
 	: CTDCBaseEnumSet<TDC_ATTRIBUTE>(mapOther)
 {

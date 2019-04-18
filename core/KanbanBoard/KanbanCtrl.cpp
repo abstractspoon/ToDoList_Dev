@@ -484,7 +484,7 @@ BOOL CKanbanCtrl::HasFocus() const
 	return CDialogHelper::IsChildOrSame(GetSafeHwnd(), ::GetFocus());
 }
 
-void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib)
+void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 {
 	ASSERT(GetSafeHwnd());
 
@@ -504,7 +504,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 	switch (nUpdate)
 	{
 	case IUI_ALL:
-		RebuildData(pTasks, attrib);
+		RebuildData(pTasks);
  		RebuildColumns(TRUE, TRUE);
 		break;
 		
@@ -512,14 +512,14 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 	case IUI_EDIT:
 		{
  			// update the task(s)
-			BOOL bChange = UpdateGlobalAttributeValues(pTasks, attrib);
-			bChange |= UpdateData(pTasks, pTasks->GetFirstTask(), attrib, TRUE);
+			BOOL bChange = UpdateGlobalAttributeValues(pTasks);
+			bChange |= UpdateData(pTasks, pTasks->GetFirstTask(), TRUE);
 
 			if (bChange)
 			{
 				RebuildColumns(TRUE, TRUE);
 			}
-			else if (UpdateNeedsItemHeightRefresh(attrib))
+			else if (UpdateNeedsItemHeightRefresh(pTasks))
 			{
 				m_aColumns.RefreshItemLineHeights();
 			}
@@ -539,7 +539,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 	}
 }
 
-BOOL CKanbanCtrl::UpdateNeedsItemHeightRefresh(const CSet<TDC_ATTRIBUTE>& attrib) const
+BOOL CKanbanCtrl::UpdateNeedsItemHeightRefresh(const ITASKLISTBASE* pTasks) const
 {
 	if (HasOption(KBCF_HIDEEMPTYATTRIBUTES))
 	{
@@ -547,7 +547,7 @@ BOOL CKanbanCtrl::UpdateNeedsItemHeightRefresh(const CSet<TDC_ATTRIBUTE>& attrib
 
 		while (nAtt--)
 		{
-			if (attrib.Has(m_aDisplayAttrib[nAtt]))
+			if (pTasks->IsAttributeAvailable(m_aDisplayAttrib[nAtt]))
 				return TRUE;
 		}
 	}
@@ -670,21 +670,21 @@ BOOL CKanbanCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib) const
 	return WantEditUpdate(nAttrib);
 }
 
-BOOL CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks, const CSet<TDC_ATTRIBUTE>& attrib)
+BOOL CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
 {
 	// Rebuild global attribute value lists
 	m_mapAttributeValues.RemoveAll();
 	m_aCustomAttribDefs.RemoveAll();
 
-	UpdateGlobalAttributeValues(pTasks, attrib);
+	UpdateGlobalAttributeValues(pTasks);
 
 	// Rebuild data
 	m_data.RemoveAll();
 
-	return AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, attrib, TRUE);
+	return AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, TRUE);
 }
 
-BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, BOOL bAndSiblings)
 {
 	if (!hTask)
 		return FALSE;
@@ -766,10 +766,10 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 		}
 
 		// Other display-only attributes
-		UpdateItemDisplayAttributes(pKI, pTasks, hTask, attrib);
+		UpdateItemDisplayAttributes(pKI, pTasks, hTask);
 
 		// first child
-		AddTaskToData(pTasks, pTasks->GetFirstTask(hTask), dwTaskID, attrib, TRUE);
+		AddTaskToData(pTasks, pTasks->GetFirstTask(hTask), dwTaskID, TRUE);
 	}
 
 	// Siblings NON-RECURSIVELY
@@ -780,7 +780,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 		while (hSibling)
 		{
 			// FALSE == don't recurse on siblings
-			AddTaskToData(pTasks, hSibling, dwParentID, attrib, FALSE);
+			AddTaskToData(pTasks, hSibling, dwParentID, FALSE);
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
@@ -788,7 +788,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 	return TRUE;
 }
 
-BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return FALSE;
@@ -806,17 +806,17 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 		// Can be a new task
 		if (!HasKanbanItem(dwTaskID))
 		{
-			bChange = AddTaskToData(pTasks, hTask, pTasks->GetTaskParentID(hTask), attrib, FALSE);
+			bChange = AddTaskToData(pTasks, hTask, pTasks->GetTaskParentID(hTask), FALSE);
 		}
 		else
 		{
 			KANBANITEM* pKI = NULL;
 			GET_KI_RET(dwTaskID, pKI, FALSE);
 
-			if (attrib.Has(TDCA_TASKNAME))
+			if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
 				pKI->sTitle = pTasks->GetTaskTitle(hTask);
 			
-			if (attrib.Has(TDCA_DONEDATE))
+			if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
 			{
 				BOOL bDone = pTasks->IsTaskDone(hTask);
 				BOOL bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
@@ -828,55 +828,55 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 				}
 			}
 
-			if (attrib.Has(TDCA_SUBTASKDONE))
+			if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
 			{
 				LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 				pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 			}
 
-			if (attrib.Has(TDCA_ICON))
+			if (pTasks->IsAttributeAvailable(TDCA_ICON))
 				pKI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
-			if (attrib.Has(TDCA_FLAG))
+			if (pTasks->IsAttributeAvailable(TDCA_FLAG))
 				pKI->bFlag = (pTasks->IsTaskFlagged(hTask, true) ? TRUE : FALSE);
 			
 			// Trackable attributes
 			CStringArray aValues;
 
-			if (attrib.Has(TDCA_ALLOCTO))
+			if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
 			{
 				GetTaskAllocTo(pTasks, hTask, aValues);
 				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCTO, aValues);
 			}
 
-			if (attrib.Has(TDCA_CATEGORY))
+			if (pTasks->IsAttributeAvailable(TDCA_CATEGORY))
 			{
 				GetTaskCategories(pTasks, hTask, aValues);
 				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_CATEGORY, aValues);
 			}
 
-			if (attrib.Has(TDCA_TAGS))
+			if (pTasks->IsAttributeAvailable(TDCA_TAGS))
 			{
 				GetTaskTags(pTasks, hTask, aValues);
 				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_TAGS, aValues);
 			}
 
-			if (attrib.Has(TDCA_ALLOCBY))
+			if (pTasks->IsAttributeAvailable(TDCA_ALLOCBY))
 				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
 
-			if (attrib.Has(TDCA_STATUS))
+			if (pTasks->IsAttributeAvailable(TDCA_STATUS))
 				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_STATUS, pTasks->GetTaskStatus(hTask));
 
-			if (attrib.Has(TDCA_VERSION))
+			if (pTasks->IsAttributeAvailable(TDCA_VERSION))
 				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_VERSION, pTasks->GetTaskVersion(hTask));
 
-			if (attrib.Has(TDCA_PRIORITY))
+			if (pTasks->IsAttributeAvailable(TDCA_PRIORITY))
 				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_PRIORITY, pTasks->GetTaskPriority(hTask, true));
 
-			if (attrib.Has(TDCA_RISK))
+			if (pTasks->IsAttributeAvailable(TDCA_RISK))
 				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_RISK, pTasks->GetTaskRisk(hTask, true));
 
-			if (attrib.Has(TDCA_CUSTOMATTRIB))
+			if (pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
 			{
 				int nID = m_aCustomAttribDefs.GetSize();
 
@@ -906,7 +906,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 			}
 
 			// other display-only attributes
-			UpdateItemDisplayAttributes(pKI, pTasks, hTask, attrib);
+			UpdateItemDisplayAttributes(pKI, pTasks, hTask);
 			
 			// always update colour because it can change for so many reasons
 			pKI->SetColor(pTasks->GetTaskTextColor(hTask));
@@ -917,7 +917,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 	}
 		
 	// children
-	if (UpdateData(pTasks, pTasks->GetFirstTask(hTask), attrib, TRUE))
+	if (UpdateData(pTasks, pTasks->GetFirstTask(hTask), TRUE))
 		bChange = TRUE;
 
 	// handle siblings WITHOUT RECURSION
@@ -928,7 +928,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			if (UpdateData(pTasks, hSibling, attrib, FALSE))
+			if (UpdateData(pTasks, hSibling, FALSE))
 				bChange = TRUE;
 			
 			hSibling = pTasks->GetNextTask(hSibling);
@@ -938,47 +938,47 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 	return bChange;
 }
 
-void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib)
+void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
 	time64_t tDate = 0;
 	
-	if (attrib.Has(TDCA_TIMEEST))
+	if (pTasks->IsAttributeAvailable(TDCA_TIMEEST))
 		pKI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pKI->nTimeEstUnits, true);
 	
-	if (attrib.Has(TDCA_TIMESPENT))
+	if (pTasks->IsAttributeAvailable(TDCA_TIMESPENT))
 		pKI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pKI->nTimeSpentUnits, true);
 	
-	if (attrib.Has(TDCA_COST))
+	if (pTasks->IsAttributeAvailable(TDCA_COST))
 		pKI->dCost = pTasks->GetTaskCost(hTask, true);
 	
-	if (attrib.Has(TDCA_CREATEDBY))
+	if (pTasks->IsAttributeAvailable(TDCA_CREATEDBY))
 		pKI->sCreatedBy = pTasks->GetTaskCreatedBy(hTask);
 	
-	if (attrib.Has(TDCA_CREATIONDATE))
+	if (pTasks->IsAttributeAvailable(TDCA_CREATIONDATE))
 		pKI->dtCreate = pTasks->GetTaskCreationDate(hTask);
 	
-	if (attrib.Has(TDCA_DONEDATE) && pTasks->GetTaskDoneDate64(hTask, tDate))
+	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE) && pTasks->GetTaskDoneDate64(hTask, tDate))
 		pKI->dtDone = CDateHelper::GetDate(tDate);
 	
-	if (attrib.Has(TDCA_DUEDATE) && pTasks->GetTaskDueDate64(hTask, true, tDate))
+	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE) && pTasks->GetTaskDueDate64(hTask, true, tDate))
 		pKI->dtDue = CDateHelper::GetDate(tDate);
 	
-	if (attrib.Has(TDCA_STARTDATE) && pTasks->GetTaskStartDate64(hTask, true, tDate))
+	if (pTasks->IsAttributeAvailable(TDCA_STARTDATE) && pTasks->GetTaskStartDate64(hTask, true, tDate))
 		pKI->dtStart = CDateHelper::GetDate(tDate);
 	
-	if (attrib.Has(TDCA_LASTMODDATE) && pTasks->GetTaskLastModified64(hTask, tDate))
+	if (pTasks->IsAttributeAvailable(TDCA_LASTMODDATE) && pTasks->GetTaskLastModified64(hTask, tDate))
 		pKI->dtLastMod = CDateHelper::GetDate(tDate);
 	
-	if (attrib.Has(TDCA_PERCENT))
+	if (pTasks->IsAttributeAvailable(TDCA_PERCENT))
 		pKI->nPercent = pTasks->GetTaskPercentDone(hTask, true);
 	
-	if (attrib.Has(TDCA_EXTERNALID))
+	if (pTasks->IsAttributeAvailable(TDCA_EXTERNALID))
 		pKI->sExternalID = pTasks->GetTaskExternalID(hTask);
 	
-	if (attrib.Has(TDCA_RECURRENCE))
+	if (pTasks->IsAttributeAvailable(TDCA_RECURRENCE))
 		pKI->sRecurrence = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, TDL_TASKRECURRENCE);
 
-	if (attrib.Has(TDCA_FILEREF) && pTasks->GetTaskFileLinkCount(hTask))
+	if (pTasks->IsAttributeAvailable(TDCA_FILEREF) && pTasks->GetTaskFileLinkCount(hTask))
 	{
 		pKI->sFileRef = pTasks->GetTaskFileLink(hTask, 0);
 
@@ -988,35 +988,35 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 	}
 }
 
-BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, const CSet<TDC_ATTRIBUTE>& attrib)
+BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks)
 {
 	BOOL bChange = FALSE;
 
-	if (attrib.Has(TDCA_STATUS))
+	if (pTasks->IsAttributeAvailable(TDCA_STATUS))
 		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_STATUS);
 	
-	if (attrib.Has(TDCA_ALLOCTO))
+	if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
 		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_ALLOCTO);
 	
-	if (attrib.Has(TDCA_CATEGORY))
+	if (pTasks->IsAttributeAvailable(TDCA_CATEGORY))
 		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_CATEGORY);
 	
-	if (attrib.Has(TDCA_ALLOCBY))
+	if (pTasks->IsAttributeAvailable(TDCA_ALLOCBY))
 		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_ALLOCBY);
 	
-	if (attrib.Has(TDCA_TAGS))
+	if (pTasks->IsAttributeAvailable(TDCA_TAGS))
 		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_TAGS);
 	
-	if (attrib.Has(TDCA_VERSION))
+	if (pTasks->IsAttributeAvailable(TDCA_VERSION))
 		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_VERSION);
 	
-	if (attrib.Has(TDCA_PRIORITY))
+	if (pTasks->IsAttributeAvailable(TDCA_PRIORITY))
 		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_PRIORITY);
 	
-	if (attrib.Has(TDCA_RISK))
+	if (pTasks->IsAttributeAvailable(TDCA_RISK))
 		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_RISK);
 	
-	if (attrib.Has(TDCA_CUSTOMATTRIB))
+	if (pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
 		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_CUSTOMATTRIB);
 	
 	return bChange;

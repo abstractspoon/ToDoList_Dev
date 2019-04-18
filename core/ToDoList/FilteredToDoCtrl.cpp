@@ -918,9 +918,9 @@ void CFilteredToDoCtrl::RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgres
 
 		// update view with filtered tasks
 		CTaskFile tasks;
-		GetAllTasksForExtensionViewUpdate(tasks, pData->mapWantedAttrib);
+		GetAllTasksForExtensionViewUpdate(pData->mapWantedAttrib, tasks);
 
-		UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pData->mapWantedAttrib); 
+		UpdateExtensionView(pExtWnd, tasks, IUI_ALL); 
 		
 		if (bShowProgress)
 			EndExtensionProgress();
@@ -1488,7 +1488,7 @@ BOOL CFilteredToDoCtrl::FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const S
 	return FALSE;
 }
 
-BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const
+BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const
 {
 	if (m_bIgnoreExtensionUpdate)
 	{
@@ -1503,10 +1503,8 @@ BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, cons
 		if (CTabbedToDoCtrl::GetAllTasks(tasks))
 		{
 			AddGlobalsToTaskFile(tasks, mapAttrib);
+			tasks.SetAvailableAttributes(mapAttrib);
 			
-			if (mapAttrib.Has(TDCA_PROJECTNAME))
-				tasks.SetProjectName(m_sProjectName);
-
 			return TRUE;
 		}
 
@@ -1515,7 +1513,7 @@ BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, cons
 	}
 
 	// else
-	return CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(tasks, mapAttrib);
+	return CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(mapAttrib, tasks);
 }
 
 void CFilteredToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITFILTERVISIBILITY& vis)

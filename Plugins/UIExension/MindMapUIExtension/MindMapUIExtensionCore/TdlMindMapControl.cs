@@ -88,7 +88,7 @@ namespace MindMapUIExtension
 			return Title;
 		}
 
-		public void Update(Task task, HashSet<UIExtension.TaskAttribute> attribs)
+		public void Update(Task task, HashSet<Task.Attribute> attribs)
 		{
 			// TODO
 		}
@@ -129,27 +129,27 @@ namespace MindMapUIExtension
             return m_IsDone; 
         }
 
-		public bool ProcessTaskUpdate(Task task, HashSet<UIExtension.TaskAttribute> attribs)
+		public bool ProcessTaskUpdate(Task task)
 		{
 			if (task.GetID() != m_TaskID)
 				return false;
 
-			if (attribs.Contains(UIExtension.TaskAttribute.Title))
+			if (task.HasAttribute(Task.Attribute.Title))
 				m_Title = task.GetTitle();
 
-			if (attribs.Contains(UIExtension.TaskAttribute.Icon))
+			if (task.HasAttribute(Task.Attribute.Icon))
 				m_HasIcon = (task.GetIcon().Length > 0);
 
-			if (attribs.Contains(UIExtension.TaskAttribute.Flag))
+			if (task.HasAttribute(Task.Attribute.Flag))
 				m_IsFlagged = task.IsFlagged(false);
 
-			if (attribs.Contains(UIExtension.TaskAttribute.Color))
+			if (task.HasAttribute(Task.Attribute.Color))
 				m_TextColor = task.GetTextDrawingColor();
 
-            if (attribs.Contains(UIExtension.TaskAttribute.SubtaskDone))
+            if (task.HasAttribute(Task.Attribute.SubtaskDone))
                 m_SomeSubtasksDone = task.HasSomeSubtasksDone();
 
-            if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
+            if (task.HasAttribute(Task.Attribute.DoneDate))
                 m_IsDone = task.IsDone();
 
 			m_IsParent = task.IsParent();
@@ -253,15 +253,13 @@ namespace MindMapUIExtension
             base.SetFont(fontName, fontSize);
         }
 
-		public void UpdateTasks(TaskList tasks,
-								UIExtension.UpdateType type,
-								HashSet<UIExtension.TaskAttribute> attribs)
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
 			switch (type)
 			{
 				case UIExtension.UpdateType.Edit:
 				case UIExtension.UpdateType.New:
-					UpdateTaskAttributes(tasks, attribs);
+					UpdateTaskAttributes(tasks);
 					break;
 
 				case UIExtension.UpdateType.Delete:
@@ -318,19 +316,19 @@ namespace MindMapUIExtension
             }
         }
 
-        public bool WantTaskUpdate(UIExtension.TaskAttribute attrib)
+        public bool WantTaskUpdate(Task.Attribute attrib)
         {
             switch (attrib)
             {
                 // Note: lock state is always provided
-                case UIExtension.TaskAttribute.Title:
-                case UIExtension.TaskAttribute.Icon:
-                case UIExtension.TaskAttribute.Flag:
-                case UIExtension.TaskAttribute.Color:
-                case UIExtension.TaskAttribute.DoneDate:
-			    case UIExtension.TaskAttribute.Position:
-			    case UIExtension.TaskAttribute.SubtaskDone:
-				case UIExtension.TaskAttribute.ProjectName:
+                case Task.Attribute.Title:
+                case Task.Attribute.Icon:
+                case Task.Attribute.Flag:
+                case Task.Attribute.Color:
+                case Task.Attribute.DoneDate:
+			    case Task.Attribute.Position:
+			    case Task.Attribute.SubtaskDone:
+				case Task.Attribute.ProjectName:
 					return true;
             }
 
@@ -545,8 +543,7 @@ namespace MindMapUIExtension
 			return null;
 		}
 
-		protected void UpdateTaskAttributes(TaskList tasks,
-								HashSet<UIExtension.TaskAttribute> attribs)
+		protected void UpdateTaskAttributes(TaskList tasks)
 		{
 			var rootItem = TaskItem(RootNode);
 
@@ -564,10 +561,10 @@ namespace MindMapUIExtension
 			var changedTaskIds = new HashSet<UInt32>();
 			Task task = tasks.GetFirstTask();
 
-			while (task.IsValid() && ProcessTaskUpdate(task, attribs, changedTaskIds))
+			while (task.IsValid() && ProcessTaskUpdate(task, changedTaskIds))
 				task = task.GetNextTask();
 
-			if (attribs.Contains(UIExtension.TaskAttribute.Title))
+			if (tasks.HasAttribute(Task.Attribute.Title))
 			{
 				foreach (var id in changedTaskIds)
 					RefreshNodeLabel(id, false);
@@ -576,9 +573,7 @@ namespace MindMapUIExtension
 			RecalculatePositions();
 		}
 
-		private bool ProcessTaskUpdate(Task task,
-									   HashSet<UIExtension.TaskAttribute> attribs,
-									   HashSet<UInt32> taskIds)
+		private bool ProcessTaskUpdate(Task task, HashSet<UInt32> taskIds)
 		{
 			if (!task.IsValid())
 				return false;
@@ -594,12 +589,12 @@ namespace MindMapUIExtension
 
 				AddTaskToTree(task, parentNode, true);
 			}
-			else if (item.ProcessTaskUpdate(task, attribs))
+			else if (item.ProcessTaskUpdate(task))
 			{
 				// Process children
 				Task subtask = task.GetFirstSubtask();
 
-				while (subtask.IsValid() && ProcessTaskUpdate(subtask, attribs, taskIds))
+				while (subtask.IsValid() && ProcessTaskUpdate(subtask, taskIds))
 					subtask = subtask.GetNextTask();
 			}
 			else

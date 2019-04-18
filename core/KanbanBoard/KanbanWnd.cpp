@@ -466,20 +466,27 @@ bool CKanbanWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 	return (m_ctrlKanban.WantEditUpdate(nAttribute) != FALSE);
 }
 
-void CKanbanWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	CSet<TDC_ATTRIBUTE> attrib(pAttributes, nNumAttributes);
-	m_ctrlKanban.UpdateTasks(pTasks, nUpdate, attrib);
+	m_ctrlKanban.UpdateTasks(pTaskList, nUpdate);
 
 	if (!m_ctrlKanban.SelectTask(m_dwSelTaskID))
 		m_dwSelTaskID = m_ctrlKanban.GetSelectedTaskID();
 
 	// Update custom attribute combo
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
+
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return;
+	}
+
 	const CKanbanCustomAttributeDefinitionArray& aCustDefs = m_ctrlKanban.GetCustomAttributeDefinitions();
 
-	if (attrib.Has(TDCA_CUSTOMATTRIB))
+	if (pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
 	{
 		m_cbCustomAttributes.SetAttributeDefinitions(aCustDefs);
 		m_cbCustomAttributes.SetSelectedAttributeID(m_sTrackedCustomAttribID);

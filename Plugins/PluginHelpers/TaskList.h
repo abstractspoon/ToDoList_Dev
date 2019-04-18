@@ -2,16 +2,16 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-class IPreferences;
-class ITaskList;
-class ITaskList16;
-class ITransText;
+#include <Interfaces\ITasklist.h>
 
-enum TDC_UNITS;
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+class ITransText;
 
 struct UITHEME;
 
-typedef void* HTASKITEM;
+enum TDC_UNITS;
+enum TDC_ATTRIBUTE;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48,12 +48,60 @@ namespace Abstractspoon
 					Years,
 				};
 
+				enum class Attribute
+				{
+					Unknown = -1,
+
+					Title = 0,
+					DoneDate,
+					DueDate,
+					StartDate,
+					Priority,
+					Color,
+					AllocatedTo,
+					AllocatedBy,
+					Status,
+					Category,
+					Percent,
+					TimeEstimate,
+					TimeSpent,
+					FileReference,
+					Comments,
+					Flag,
+					CreationDate,
+					CreatedBy,
+					Risk,
+					ExternalId,
+					Cost,
+					Dependency,
+					Recurrence,
+					Version,
+					Position,
+					Id,
+					LastModifiedDate,
+					Icon,
+					Tags,
+					CustomAttribute,
+					OffsetTask,
+					SubtaskDone,
+					MetaData,
+					ProjectName,
+					ParentId,
+					LastModifiedBy,
+					Path,
+
+					// new values here ONLY
+
+				};
+
+				// ----------------------------------------------------------------------------
+
 			public:
 				Task(ITaskList* pTaskList, HTASKITEM hTask);        // GET & SET
 				Task(const ITaskList* pTaskList, HTASKITEM hTask);  // GET ONLY
 				Task(const Task^ task);
 
-				bool IsValid();
+				Boolean IsValid();
 
 				Task^ GetFirstSubtask();
 				Task^ GetNextTask();
@@ -130,8 +178,8 @@ namespace Abstractspoon
 				double GetTimeEstimate(TimeUnits% cUnits, bool calculated);
 				double GetTimeSpent(TimeUnits% cUnits, bool calculated);
 
-				String^ GetAttribute(String^ sAttrib);
-				Boolean HasAttribute(String^ sAttrib);
+				String^ GetAttribute(Attribute attrib);
+				Boolean HasAttribute(Attribute attrib);
 
 				String^ GetCustomAttributeData(String^ sID);
 				String^ GetMetaData(String^ sKey);
@@ -182,14 +230,16 @@ namespace Abstractspoon
 
 				// MISC -------------------------------------------------------
 
-				static TimeUnits Map(TDC_UNITS units);
-				static TDC_UNITS Map(TimeUnits units);
-				static DateTime Map(Int64 tDate);
-				static Int64 Map(DateTime^ date);
+				static TimeUnits MapUnits(TDC_UNITS units);
+				static TDC_UNITS MapUnits(TimeUnits units);
+				static DateTime MapDate(Int64 tDate);
+				static Int64 MapDate(DateTime^ date);
+				static Attribute MapAttribute(TDC_ATTRIBUTE attrib);
+				static TDC_ATTRIBUTE MapAttribute(Attribute attrib);
 
 			private: // -------------------------------------------------------
-				ITaskList16* m_pTaskList;
-				const ITaskList16* m_pConstTaskList;
+				ITASKLISTBASE* m_pTaskList;
+				const ITASKLISTBASE* m_pConstTaskList;
 				HTASKITEM m_hTask;
 
 			private: // -------------------------------------------------------
@@ -203,49 +253,11 @@ namespace Abstractspoon
 			public ref class TaskList
 			{
 			public:
-				enum class TaskAttribute
-				{
-					Unknown = -1,
-
-					Title = 0,
-					Position,
-					Id,
-					ParentId,
-					Path,
-					Priority,
-					Risk,
-					Percent,
-					TimeEstimate,
-					TimeSpent,
-					CreationDate,
-					CreatedBy,
-					LastModifiedDate,
-					LastModifiedBy,
-					StartDate,
-					DueDate,
-					DoneDate,
-					Recurrence,
-					AllocatedTo,
-					AllocatedBy,
-					Status,
-					Category,
-					Tags,
-					ExternalId,
-					Cost,
-					Version,
-					Flag,
-					Dependency,
-					FileLink,
-					SubtaskDone,
-					Comments,
-					HtmlComments,
-				};
-
-			public:
 				TaskList(ITaskList* pTaskList);        // GET & SET
 				TaskList(const ITaskList* pTaskList);  // GET ONLY
 
 				bool IsValid();
+				bool HasAttribute(Task::Attribute attrib);
 
 				String^ GetReportTitle();
 				String^ GetReportDate();
@@ -270,18 +282,12 @@ namespace Abstractspoon
 				Boolean SetMetaData(String^ sKey, String^ sValue);
 				Boolean ClearMetaData(String^ sKey);
 
-				int GetAttributeList(Collections::Generic::HashSet<TaskList::TaskAttribute>^ attribs);
-
 			private: // -------------------------------------------------------
-				ITaskList16* m_pTaskList;
-				const ITaskList16* m_pConstTaskList;
+				ITASKLISTBASE* m_pTaskList;
+				const ITASKLISTBASE* m_pConstTaskList;
 
 			private: // -------------------------------------------------------
 				TaskList();
-
-				void BuildAttributeList(Task^ task, Collections::Generic::HashSet<TaskList::TaskAttribute>^ attribs);
-				void AddAttributeToList(TaskList::TaskAttribute attrib, String^ attribId, Task^ task,
-												  Collections::Generic::HashSet<TaskList::TaskAttribute>^ attribs);
 
 			};
 		}

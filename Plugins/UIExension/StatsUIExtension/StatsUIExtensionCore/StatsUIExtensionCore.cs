@@ -34,9 +34,7 @@ namespace StatsUIExtension
             return false;
         }
 
-	    public void UpdateTasks(TaskList tasks, 
-                                UIExtension.UpdateType type,
-                                System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
+	    public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
         {
 /*
             Task task = tasks.GetFirstTask();
@@ -45,73 +43,73 @@ namespace StatsUIExtension
             System.Text.StringBuilder attrib = new System.Text.StringBuilder();
             System.Text.StringBuilder value = new System.Text.StringBuilder();
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Title))
+            if (tasks.HasAttribute(Task.Attribute.Title))
             {
                 attrib.Append("Title");
                 value.Append(task.GetTitle());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
+            if (tasks.HasAttribute(Task.Attribute.DoneDate))
             {
                 attrib.Append("Done Date");
                 value.Append(task.GetDoneDateString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
+            if (tasks.HasAttribute(Task.Attribute.DueDate))
             {
                 attrib.Append("Due Date");
                 value.Append(task.GetDueDateString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
+            if (tasks.HasAttribute(Task.Attribute.StartDate))
             {
                 attrib.Append("Start Date");
                 value.Append(task.GetStartDateString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Priority))
+            if (tasks.HasAttribute(Task.Attribute.Priority))
             {
                 attrib.Append("Priority");
                 value.Append(task.GetPriority().ToString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Color))
+            if (tasks.HasAttribute(Task.Attribute.Color))
             {
                 attrib.Append("Color");
                 value.Append(task.GetColor().ToString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
+            if (tasks.HasAttribute(Task.Attribute.AllocTo))
             {
                 attrib.Append("Alloc To");
                 value.Append(task.GetAllocatedTo(0));
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.AllocBy))
+            if (tasks.HasAttribute(Task.Attribute.AllocBy))
             {
                 attrib.Append("Alloc By");
                 value.Append(task.GetAllocatedBy());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Status))
+            if (tasks.HasAttribute(Task.Attribute.Status))
             {
                 attrib.Append("Status");
                 value.Append(task.GetStatus());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Category))
+            if (tasks.HasAttribute(Task.Attribute.Category))
             {
                 attrib.Append("Category");
                 value.Append(task.GetCategory(0));
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Percent))
+            if (tasks.HasAttribute(Task.Attribute.Percent))
             {
                 attrib.Append("Percent");
                 value.Append(task.GetPercentDone().ToString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.TimeEstimate))
+            if (tasks.HasAttribute(Task.Attribute.TimeEstimate))
             {
                 attrib.Append("Time Estimate");
 
@@ -119,7 +117,7 @@ namespace StatsUIExtension
                 value.Append(task.GetTimeEstimate(ref units).ToString() + units);
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.TimeSpent))
+            if (tasks.HasAttribute(Task.Attribute.TimeSpent))
             {
                 attrib.Append("Time Spent");
 
@@ -127,104 +125,104 @@ namespace StatsUIExtension
                 value.Append(task.GetTimeSpent(ref units).ToString() + units);
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.FileReference))
+            if (tasks.HasAttribute(Task.Attribute.FileReference))
             {
                 attrib.Append("File Reference");
                 value.Append(task.GetFileReference(0));
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Comments))
+            if (tasks.HasAttribute(Task.Attribute.Comments))
             {
                 attrib.Append("Comments");
                 value.Append(task.GetComments());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Flag))
+            if (tasks.HasAttribute(Task.Attribute.Flag))
             {
                 attrib.Append("Flag");
                 value.Append(task.IsFlagged().ToString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.CreationDate))
+            if (tasks.HasAttribute(Task.Attribute.CreationDate))
             {
                 attrib.Append("Creation Date");
                 value.Append(task.GetCreationDateString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.CreatedBy))
+            if (tasks.HasAttribute(Task.Attribute.CreatedBy))
             {
                 attrib.Append("Created By");
                 value.Append(task.GetCreatedBy());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Risk))
+            if (tasks.HasAttribute(Task.Attribute.Risk))
             {
                 attrib.Append("Risk");
                 value.Append(task.GetRisk().ToString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.ExternalId))
+            if (tasks.HasAttribute(Task.Attribute.ExternalId))
             {
                 attrib.Append("External ID");
                 value.Append(task.GetExternalID());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Cost))
+            if (tasks.HasAttribute(Task.Attribute.Cost))
             {
                 attrib.Append("Cost");
                 value.Append(task.GetCost().ToString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Dependency))
+            if (tasks.HasAttribute(Task.Attribute.Dependency))
             {
                 attrib.Append("Dependency");
                 value.Append(task.GetDependency(0));
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Recurrence))
+            if (tasks.HasAttribute(Task.Attribute.Recurrence))
             {
                 attrib.Append("Recurrence");
                 //value.Append(task.GetRecurrence());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Version))
+            if (tasks.HasAttribute(Task.Attribute.Version))
             {
                 attrib.Append("Version");
                 value.Append(task.GetVersion());
             }
 
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Position))
+            if (tasks.HasAttribute(Task.Attribute.Position))
             {
                 attrib.Append("Position");
                 value.Append(task.GetPositionString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Id))
+            if (tasks.HasAttribute(Task.Attribute.Id))
             {
                 attrib.Append("ID");
                 value.Append(task.GetID().ToString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.LastModified))
+            if (tasks.HasAttribute(Task.Attribute.LastModified))
             {
                 attrib.Append("Last Modified");
                 //value.Append(task.GetLastModifiedString());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Icon))
+            if (tasks.HasAttribute(Task.Attribute.Icon))
             {
                 attrib.Append("Icon");
                 value.Append(task.GetIcon());
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.Tag))
+            if (tasks.HasAttribute(Task.Attribute.Tag))
             {
                 attrib.Append("Tag");
                 value.Append(task.GetTag(0));
             }
 
-            if (attribs.Contains(UIExtension.TaskAttribute.CustomAttribute))
+            if (tasks.HasAttribute(Task.Attribute.CustomAttribute))
             {
                 attrib.Append("Custom Attribute");
                 //value.Append(task.GetCustomAttributeData());
@@ -246,12 +244,12 @@ namespace StatsUIExtension
 */
         }
 
-        public bool WantTaskUpdate(UIExtension.TaskAttribute attrib)
+        public bool WantTaskUpdate(Task.Attribute attrib)
 	    {
 			return true; // all updates
 	    }
 
-        public bool WantSortUpdate(UIExtension.TaskAttribute attrib)
+        public bool WantSortUpdate(Task.Attribute attrib)
         {
             return false;
         }

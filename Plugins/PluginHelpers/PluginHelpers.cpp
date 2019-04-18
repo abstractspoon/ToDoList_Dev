@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "pluginhelpers.h"
 
+#include <Interfaces\IEnums.h>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace Abstractspoon::Tdl::PluginHelpers;

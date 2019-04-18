@@ -307,7 +307,7 @@ public:
 	virtual bool SelectTask(DWORD dwTaskID) = 0;
 	virtual bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount) = 0;
 
-	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes) = 0;
+	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate) = 0;
 	virtual bool WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const = 0;
 	virtual bool PrepareNewTask(ITaskList* pTask) const = 0;
 	

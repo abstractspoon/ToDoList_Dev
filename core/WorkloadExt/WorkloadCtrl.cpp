@@ -508,7 +508,7 @@ void CWorkloadCtrl::SetExpandedState(const CDWordArray& aExpanded)
 	}
 }
 
-BOOL CWorkloadCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib) const
+BOOL CWorkloadCtrl::EditWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const
 {
 	switch (nUpdate)
 	{
@@ -525,12 +525,12 @@ BOOL CWorkloadCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRI
 		if (m_sort.IsSorting())
 		{
 			if (!m_sort.bMultiSort)
-				return attrib.Has(MapColumnToAttribute(m_sort.single.nBy));
+				return pTasks->IsAttributeAvailable(MapColumnToAttribute(m_sort.single.nBy));
 
 			// else
 			for (int nCol = 0; nCol < 3; nCol++)
 			{
-				if (attrib.Has(MapColumnToAttribute(m_sort.multi.cols[nCol].nBy)))
+				if (pTasks->IsAttributeAvailable(MapColumnToAttribute(m_sort.multi.cols[nCol].nBy)))
 					return TRUE;
 			}
 		}
@@ -546,7 +546,7 @@ BOOL CWorkloadCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRI
 	return FALSE;
 }
 
-void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib)
+void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 {
 	// we must have been initialized already
 	ASSERT(m_lcColumns.GetSafeHwnd() && m_tcTasks.GetSafeHwnd());
@@ -586,9 +586,9 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			m_lcColumns.SetRedraw(FALSE);
 			
 			// update the task(s)
-			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE))
+			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE))
 			{
-				if (attrib.Has(TDCA_DUEDATE) || attrib.Has(TDCA_STARTDATE))
+				if (pTasks->IsAttributeAvailable(TDCA_DUEDATE) || pTasks->IsAttributeAvailable(TDCA_STARTDATE))
 					m_data.RecalculateOverlaps();
 			}
 		}
@@ -648,7 +648,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		return;
 	}
 		
-	if (EditWantsResort(nUpdate, attrib))
+	if (EditWantsResort(pTasks, nUpdate))
 	{
 		ASSERT(m_sort.IsSorting());
 
@@ -783,9 +783,7 @@ WLC_COLUMNID CWorkloadCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
 	return WLCC_NONE;
 }
 
-BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
-									IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib, 
-									BOOL bAndSiblings)
+BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return FALSE;
@@ -850,22 +848,22 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	// can't use a switch here because we also need to check for IUI_ALL
 	time64_t tDate = 0;
 	
-	if (attrib.Has(TDCA_TASKNAME))
+	if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
 		pWI->sTitle = pTasks->GetTaskTitle(hTask);
 	
- 	if (attrib.Has(TDCA_ALLOCTO))
+ 	if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
 	{
  		GetTaskAllocTo(pTasks, hTask, pWI->aAllocTo);
 		Misc::AddUniqueItems(pWI->aAllocTo, m_aAllocTo);
 	}
 	
-	if (attrib.Has(TDCA_ICON))
+	if (pTasks->IsAttributeAvailable(TDCA_ICON))
 		pWI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
-	if (attrib.Has(TDCA_PERCENT))
+	if (pTasks->IsAttributeAvailable(TDCA_PERCENT))
 		pWI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		
-	if (attrib.Has(TDCA_STARTDATE))
+	if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
 	{
 		if (pTasks->GetTaskStartDate64(hTask, pWI->bParent, tDate))
 			pWI->dtRange.m_dtStart = CDateHelper::GetDate(tDate);
@@ -873,7 +871,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 			CDateHelper::ClearDate(pWI->dtRange.m_dtStart);
 	}
 	
-	if (attrib.Has(TDCA_DUEDATE))
+	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
 	{
 		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
 			pWI->dtRange.m_dtEnd = CDateHelper::GetDate(tDate);
@@ -881,10 +879,10 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 			CDateHelper::ClearDate(pWI->dtRange.m_dtEnd);
 	}
 	
-	if (attrib.Has(TDCA_DONEDATE))
+	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
 		pWI->bDone = pTasks->IsTaskDone(hTask);
 
-	if (attrib.Has(TDCA_SUBTASKDONE))
+	if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
 	{
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 		pWI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
@@ -903,7 +901,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	BOOL bChange = !(*pWI == giOrg);
 		
 	// children
-	if (UpdateTask(pTasks, pTasks->GetFirstTask(hTask), nUpdate, attrib, TRUE))
+	if (UpdateTask(pTasks, pTasks->GetFirstTask(hTask), nUpdate, TRUE))
 		bChange = TRUE;
 
 	// handle siblings WITHOUT RECURSION
@@ -914,7 +912,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			if (UpdateTask(pTasks, hSibling, nUpdate, attrib, FALSE))
+			if (UpdateTask(pTasks, hSibling, nUpdate, FALSE))
 				bChange = TRUE;
 			
 			hSibling = pTasks->GetNextTask(hSibling);

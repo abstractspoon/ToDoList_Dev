@@ -354,9 +354,7 @@ namespace DayViewUIExtension
 			return ((date.Date >= startDate) && (date.Date < endDate));
 		}
 
-		public void UpdateTasks(TaskList tasks,
-						UIExtension.UpdateType type,
-						System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
+		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type)
 		{
             UInt32 selTaskId = SelectedAppointmentId;
 
@@ -377,7 +375,7 @@ namespace DayViewUIExtension
 
 			Task task = tasks.GetFirstTask();
 
-			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
+			while (task.IsValid() && ProcessTaskUpdate(task, type))
 				task = task.GetNextTask();
 
 			SelectionStart = SelectionEnd;
@@ -386,9 +384,7 @@ namespace DayViewUIExtension
             Invalidate();
         }
 
-		private bool ProcessTaskUpdate(Task task,
-									   UIExtension.UpdateType type,
-									   System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
+		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type)
 		{
 			if (!task.IsValid())
 				return false;
@@ -398,12 +394,12 @@ namespace DayViewUIExtension
 
 			if (m_Items.TryGetValue(taskID, out item))
 			{
-				item.UpdateTaskAttributes(task, type, attribs);
+				item.UpdateTaskAttributes(task, type, false);
 			}
 			else
 			{
 				item = new CalendarItem();
-				item.UpdateTaskAttributes(task, type, null);
+				item.UpdateTaskAttributes(task, type, true);
 			}
 
 			m_Items[taskID] = item;
@@ -411,7 +407,7 @@ namespace DayViewUIExtension
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attribs))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type))
 				subtask = subtask.GetNextTask();
 
 			return true;

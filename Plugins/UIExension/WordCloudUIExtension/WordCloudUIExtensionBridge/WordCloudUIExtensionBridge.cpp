@@ -154,16 +154,16 @@ bool CWordCloudUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int
 	return m_wnd->SelectTasks(taskIDs);
 }
 
-void CWordCloudUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CWordCloudUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
 {
 	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate), UIExtension::Map(pAttributes, nNumAttributes));
+	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate));
 }
 
 bool CWordCloudUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 {
-	return m_wnd->WantTaskUpdate(UIExtension::Map(nAttribute));
+	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
 }
 
 bool CWordCloudUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const

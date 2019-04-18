@@ -31,7 +31,7 @@ public:
 	CTaskCalendarCtrl();
 	virtual ~CTaskCalendarCtrl();
 
-	BOOL UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib);
+	BOOL UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	BOOL PrepareNewTask(ITaskList* pTask) const;
 
 	BOOL SaveToImage(CBitmap& bmImage);
@@ -184,9 +184,9 @@ protected:
 	BOOL NotifyParentDateChange(TCC_HITTEST nHit);
 	void NotifyParentDragChange();
 
-	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
 	BOOL RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
-	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void DeleteData();
 	void RecalcDataRange();
 

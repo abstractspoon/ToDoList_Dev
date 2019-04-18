@@ -18,104 +18,6 @@ using namespace Windows::Forms;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-UIExtension::TaskAttribute UIExtension::Map(TDC_ATTRIBUTE attrib)
-{
-	switch (attrib)
-	{
-	case TDCA_TASKNAME:		return UIExtension::TaskAttribute::Title;
-	case TDCA_DONEDATE:		return UIExtension::TaskAttribute::DoneDate;
-	case TDCA_DUEDATE:		return UIExtension::TaskAttribute::DueDate;
-	case TDCA_STARTDATE:	return UIExtension::TaskAttribute::StartDate;
-	case TDCA_PRIORITY:		return UIExtension::TaskAttribute::Priority;
-	case TDCA_COLOR:		return UIExtension::TaskAttribute::Color;
-	case TDCA_ALLOCTO:		return UIExtension::TaskAttribute::AllocBy;
-	case TDCA_ALLOCBY:		return UIExtension::TaskAttribute::AllocTo;
-	case TDCA_STATUS:		return UIExtension::TaskAttribute::Status;
-	case TDCA_CATEGORY:		return UIExtension::TaskAttribute::Category;
-	case TDCA_PERCENT:		return UIExtension::TaskAttribute::Percent;
-	case TDCA_TIMEEST:		return UIExtension::TaskAttribute::TimeEstimate;
-	case TDCA_TIMESPENT:	return UIExtension::TaskAttribute::TimeSpent;
-	case TDCA_FILEREF:		return UIExtension::TaskAttribute::FileReference;
-	case TDCA_COMMENTS:		return UIExtension::TaskAttribute::Comments;
-	case TDCA_FLAG:			return UIExtension::TaskAttribute::Flag;
-	case TDCA_CREATIONDATE:	return UIExtension::TaskAttribute::CreationDate;
-	case TDCA_CREATEDBY:	return UIExtension::TaskAttribute::CreatedBy;
-	case TDCA_RISK:			return UIExtension::TaskAttribute::Risk;
-	case TDCA_EXTERNALID:	return UIExtension::TaskAttribute::ExternalId;
-	case TDCA_COST:			return UIExtension::TaskAttribute::Cost;
-	case TDCA_DEPENDENCY:	return UIExtension::TaskAttribute::Dependency;
-	case TDCA_RECURRENCE:	return UIExtension::TaskAttribute::Recurrence;
-	case TDCA_VERSION:		return UIExtension::TaskAttribute::Version;
-	case TDCA_POSITION:		return UIExtension::TaskAttribute::Position;
-	case TDCA_ID:			return UIExtension::TaskAttribute::Id;
-	case TDCA_LASTMODDATE:	return UIExtension::TaskAttribute::LastModified;
-	case TDCA_ICON:			return UIExtension::TaskAttribute::Icon;
-	case TDCA_TAGS:			return UIExtension::TaskAttribute::Tag;
-	case TDCA_CUSTOMATTRIB:	return UIExtension::TaskAttribute::CustomAttribute;
-	case TDCA_OFFSETTASK:	return UIExtension::TaskAttribute::OffsetTask;
-	case TDCA_SUBTASKDONE:	return UIExtension::TaskAttribute::SubtaskDone;
-	case TDCA_METADATA:		return UIExtension::TaskAttribute::MetaData;
-	case TDCA_PROJECTNAME:	return UIExtension::TaskAttribute::ProjectName;
-		//  case IUI_
-	}
-
-	return UIExtension::TaskAttribute::Unknown;
-}
-
-TDC_ATTRIBUTE UIExtension::Map(UIExtension::TaskAttribute attrib)
-{
-	switch (attrib)
-	{
-	case UIExtension::TaskAttribute::Title:				return TDCA_TASKNAME;
-	case UIExtension::TaskAttribute::DoneDate:			return TDCA_DONEDATE;
-	case UIExtension::TaskAttribute::DueDate:			return TDCA_DUEDATE;
-	case UIExtension::TaskAttribute::StartDate:			return TDCA_STARTDATE;
-	case UIExtension::TaskAttribute::Priority:			return TDCA_PRIORITY;
-	case UIExtension::TaskAttribute::Color:				return TDCA_COLOR;
-	case UIExtension::TaskAttribute::AllocBy:			return TDCA_ALLOCTO;
-	case UIExtension::TaskAttribute::AllocTo:			return TDCA_ALLOCBY;
-	case UIExtension::TaskAttribute::Status:			return TDCA_STATUS;
-	case UIExtension::TaskAttribute::Category:			return TDCA_CATEGORY;
-	case UIExtension::TaskAttribute::Percent:			return TDCA_PERCENT;
-	case UIExtension::TaskAttribute::TimeEstimate:		return TDCA_TIMEEST;
-	case UIExtension::TaskAttribute::TimeSpent:			return TDCA_TIMESPENT;
-	case UIExtension::TaskAttribute::FileReference:		return TDCA_FILEREF;
-	case UIExtension::TaskAttribute::Comments:			return TDCA_COMMENTS;
-	case UIExtension::TaskAttribute::Flag:				return TDCA_FLAG;
-	case UIExtension::TaskAttribute::CreationDate:		return TDCA_CREATIONDATE;
-	case UIExtension::TaskAttribute::CreatedBy:			return TDCA_CREATEDBY;
-	case UIExtension::TaskAttribute::Risk:				return TDCA_RISK;
-	case UIExtension::TaskAttribute::ExternalId:		return TDCA_EXTERNALID;
-	case UIExtension::TaskAttribute::Cost:				return TDCA_COST;
-	case UIExtension::TaskAttribute::Dependency:		return TDCA_DEPENDENCY;
-	case UIExtension::TaskAttribute::Recurrence:		return TDCA_RECURRENCE;
-	case UIExtension::TaskAttribute::Version:			return TDCA_VERSION;
-	case UIExtension::TaskAttribute::Position:			return TDCA_POSITION;
-	case UIExtension::TaskAttribute::Id:				return TDCA_ID;
-	case UIExtension::TaskAttribute::LastModified:		return TDCA_LASTMODDATE;
-	case UIExtension::TaskAttribute::Icon:				return TDCA_ICON;
-	case UIExtension::TaskAttribute::Tag:				return TDCA_TAGS;
-	case UIExtension::TaskAttribute::CustomAttribute:	return TDCA_CUSTOMATTRIB;
-	case UIExtension::TaskAttribute::OffsetTask:		return TDCA_OFFSETTASK;
-	case UIExtension::TaskAttribute::SubtaskDone:		return TDCA_SUBTASKDONE;
-	case UIExtension::TaskAttribute::MetaData:			return TDCA_METADATA;
-	case UIExtension::TaskAttribute::ProjectName:		return TDCA_PROJECTNAME;
-		//  case IUI_
-	}
-
-	return TDCA_NONE;
-}
-
-Collections::Generic::HashSet<UIExtension::TaskAttribute>^ UIExtension::Map(const TDC_ATTRIBUTE* pAttrib, int numAttrib)
-{
-	Collections::Generic::HashSet<TaskAttribute>^ attribs = gcnew(Collections::Generic::HashSet<TaskAttribute>);
-
-	for (int attrib = 0; attrib < numAttrib; attrib++)
-		attribs->Add(Map(pAttrib[attrib]));
-
-	return attribs;
-}
-
 UIExtension::UpdateType UIExtension::Map(IUI_UPDATETYPE type)
 {
 	switch (type)
@@ -145,7 +47,7 @@ IUI_HITTEST UIExtension::Map(UIExtension::HitResult test)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UIExtension::TaskAttribute attrib, DateTime value)
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, DateTime value)
 	:
 	nAttrib(attrib),
 	dataType(DataType::Date),
@@ -154,7 +56,7 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UIExtension::TaskAttribute att
 
 }
 
-UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UIExtension::TaskAttribute attrib, double value)
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, double value)
 	:
 	nAttrib(attrib),
 	dataType(DataType::Double),
@@ -163,7 +65,7 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UIExtension::TaskAttribute att
 
 }
 
-UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UIExtension::TaskAttribute attrib, double time, Task::TimeUnits units)
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, double time, Task::TimeUnits units)
 	:
 	nAttrib(attrib),
 	dataType(DataType::Time),
@@ -173,7 +75,7 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UIExtension::TaskAttribute att
 
 }
 
-UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UIExtension::TaskAttribute attrib, int value)
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, int value)
 	:
 	nAttrib(attrib),
 	dataType(DataType::Integer),
@@ -182,7 +84,7 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UIExtension::TaskAttribute att
 
 }
 
-UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UIExtension::TaskAttribute attrib, bool value)
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, bool value)
 	:
 	nAttrib(attrib),
 	dataType(DataType::Bool),
@@ -191,7 +93,7 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UIExtension::TaskAttribute att
 
 }
 
-UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UIExtension::TaskAttribute attrib, String^ value)
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, String^ value)
 	:
 	nAttrib(attrib),
 	dataType(DataType::Text),
@@ -202,7 +104,7 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UIExtension::TaskAttribute att
 
 UIExtension::ParentNotify::IUITaskMod::IUITaskMod(String^ customAttribId, String^ value)
 	:
-	nAttrib(UIExtension::TaskAttribute::CustomAttribute),
+	nAttrib(Task::Attribute::CustomAttribute),
 	dataType(DataType::Custom),
 	szCustomAttribID(customAttribId),
 	szValue(value)
@@ -211,7 +113,7 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(String^ customAttribId, String
 
 bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 {
-	mod.nAttrib = UIExtension::Map(nAttrib);
+	mod.nAttrib = Task::MapAttribute(nAttrib);
 
 	switch (dataType)
 	{
@@ -223,7 +125,7 @@ bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 		if (tValue == DateTime::MinValue)
 			mod.tValue = 0xffffffffffffffff;
 		else
-			mod.tValue = static_cast<__int64>(Task::Map(tValue));
+			mod.tValue = static_cast<__int64>(Task::MapDate(tValue));
 		break;
 
 	case DataType::Integer:
@@ -257,7 +159,7 @@ bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 
 	case DataType::Time:
 		mod.dValue = dValue;
-		mod.nTimeUnits = Task::Map(nTimeUnits);
+		mod.nTimeUnits = Task::MapUnits(nTimeUnits);
 		break;
 	}
 
@@ -274,45 +176,45 @@ UIExtension::ParentNotify::ParentNotify(IntPtr hwndParent)
 	m_TaskMods = gcnew List<IUITaskMod^>();
 }
 
-bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, DateTime date)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, DateTime date)
 {
-	if (UIExtension::Map(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, date));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, double value)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, double value)
 {
-	if (UIExtension::Map(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, double time, Task::TimeUnits units)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, double time, Task::TimeUnits units)
 {
-	if (UIExtension::Map(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, time, units));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, int value)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, int value)
 {
-	if (UIExtension::Map(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, bool value)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, bool value)
 {
-	if (UIExtension::Map(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value));
@@ -328,9 +230,9 @@ bool UIExtension::ParentNotify::AddMod(String^ sCustAttribID, String^ value)
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(UIExtension::TaskAttribute nAttribute, String^ value)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, String^ value)
 {
-	if (UIExtension::Map(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value));
@@ -372,7 +274,7 @@ bool UIExtension::ParentNotify::NotifyMod(bool bClearModsAlways)
 	return bSuccess;
 }
 
-bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute, DateTime date)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, DateTime date)
 {
 	ClearMods();
 	AddMod(nAttribute, date);
@@ -380,7 +282,7 @@ bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute,
 	return NotifyMod(true);
 }
 
-bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute, double value)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, double value)
 {
 	ClearMods();
 	AddMod(nAttribute, value);
@@ -388,7 +290,7 @@ bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute,
 	return NotifyMod(true);
 }
 
-bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute, double time, Task::TimeUnits units)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, double time, Task::TimeUnits units)
 {
 	ClearMods();
 	AddMod(nAttribute, time, units);
@@ -396,7 +298,7 @@ bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute,
 	return NotifyMod(true);
 }
 
-bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute, int value)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, int value)
 {
 	ClearMods();
 	AddMod(nAttribute, value);
@@ -404,7 +306,7 @@ bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute,
 	return NotifyMod(true);
 }
 
-bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute, bool value)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, bool value)
 {
 	ClearMods();
 	AddMod(nAttribute, value);
@@ -420,7 +322,7 @@ bool UIExtension::ParentNotify::NotifyMod(String^ sCustAttribID, String^ value)
 	return NotifyMod(true);
 }
 
-bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute, String^ value)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, String^ value)
 {
 	ClearMods();
 	AddMod(nAttribute, value);

@@ -259,7 +259,7 @@ BOOL CTaskCalendarCtrl::WantSortUpdate(TDC_ATTRIBUTE nEditAttrib)
 	return FALSE;
 }
 
-BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib)
+BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
 
@@ -275,17 +275,17 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	{
 	case IUI_ALL:
 		DeleteData();
-		BuildData(pTasks, pTasks->GetFirstTask(), attrib, TRUE);
+		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
 		bChange = TRUE;
 		break;
 
 	case IUI_NEW:
-		BuildData(pTasks, pTasks->GetFirstTask(), attrib, TRUE);
+		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
 		bChange = TRUE;
 		break;
 		
 	case IUI_EDIT:
-		bChange = UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE);
+		bChange = UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE);
 		break;
 		
 	case IUI_DELETE:
@@ -375,8 +375,7 @@ BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 	return bChange;
 }
 
-BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, 
-									const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return FALSE;
@@ -393,17 +392,17 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		if (HasTask(dwTaskID)) 
 		{
 			TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
-			bChange = pTCI->UpdateTask(pTasks, hTask, attrib, m_dwOptions);
+			bChange = pTCI->UpdateTask(pTasks, hTask, m_dwOptions);
 
 			// subtasks
 			HTASKITEM hSubtask = pTasks->GetFirstTask(hTask);
 
 			if (hSubtask)
-				bChange |= UpdateTask(pTasks, hSubtask, nUpdate, attrib, TRUE);
+				bChange |= UpdateTask(pTasks, hSubtask, nUpdate, TRUE);
 		}
 		else // must be new task
 		{
-			BuildData(pTasks, hTask, attrib, FALSE);
+			BuildData(pTasks, hTask, FALSE);
 		}
 	}
 	
@@ -415,7 +414,7 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			if (UpdateTask(pTasks, hSibling, nUpdate, attrib, FALSE))
+			if (UpdateTask(pTasks, hSibling, nUpdate, FALSE))
 				bChange = TRUE;
 			
 			hSibling = pTasks->GetNextTask(hSibling);
@@ -444,7 +443,7 @@ void CTaskCalendarCtrl::NotifyParentDragChange()
 	GetParent()->SendMessage(WM_CALENDAR_DRAGCHANGE, (WPARAM)GetSnapMode(), m_dwSelectedTaskID);
 }
 
-void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return;
@@ -458,12 +457,12 @@ void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 
 	if (!HasTask(dwTaskID))
 	{
-		TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, attrib, m_dwOptions);
+		TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, m_dwOptions);
 		m_mapData[dwTaskID] = pTCI;
 	}
 	
 	// process children
-	BuildData(pTasks, pTasks->GetFirstTask(hTask), attrib, TRUE);
+	BuildData(pTasks, pTasks->GetFirstTask(hTask), TRUE);
 
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
@@ -473,7 +472,7 @@ void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			BuildData(pTasks, hSibling, attrib, FALSE);
+			BuildData(pTasks, hSibling, FALSE);
 
 			hSibling = pTasks->GetNextTask(hSibling);
 		}

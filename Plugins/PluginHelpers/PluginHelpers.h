@@ -9,6 +9,8 @@ using namespace System::Runtime::InteropServices;
 
 struct UITHEME;
 
+enum TDC_ATTRIBUTE;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace Abstractspoon
@@ -17,8 +19,10 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
+			// ----------------------------------------------------------------------------
 			// converts System::String to LPCWSTR, and frees memory on exit
 			// DO NOT USE TO RETURN STRINGS
+
 			public ref class MarshalledString
 			{
 			public:
@@ -33,6 +37,7 @@ namespace Abstractspoon
 
 #define MS(x) MarshalledString(x)
 
+			// ----------------------------------------------------------------------------
 
 			public ref class DialogUtils
 			{

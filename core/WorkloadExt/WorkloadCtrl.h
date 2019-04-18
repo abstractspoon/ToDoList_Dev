@@ -57,7 +57,7 @@ public:
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
 
-	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib);
+	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	bool PrepareNewTask(ITaskList* pTask) const;
 
 	DWORD GetSelectedTaskID() const;
@@ -302,10 +302,10 @@ protected:
 
 	void RebuildTree(const ITASKLISTBASE* pTasks);
 	void BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd = TRUE);
-	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
 	void RefreshTreeItemMap();
 
-	BOOL EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib) const;
+	BOOL EditWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const;
 	void Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
 	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOADSORTCOLUMN& col) const;
 	void FixupListSortColumn(LPCTSTR szAllocTo = NULL);

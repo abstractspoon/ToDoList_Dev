@@ -35,7 +35,7 @@ TASKCALITEM::TASKCALITEM()
 
 }
 	
-TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, DWORD dwCalcDates) 
+TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates) 
 	: 
 	color(CLR_NONE), 
 	bGoodAsDone(FALSE),
@@ -44,7 +44,7 @@ TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSe
 	bLocked(FALSE),
 	bIsParent(FALSE)
 {
-	UpdateTask(pTasks, hTask, attrib, dwCalcDates);
+	UpdateTask(pTasks, hTask, dwCalcDates);
 
 	// Handle TopLevel only on creation
 	bTopLevel = (pTasks->GetTaskParentID(hTask) == 0);
@@ -93,11 +93,15 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 		(bIsParent == tci.bIsParent));
 }
 
-void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, DWORD dwCalcDates)
+void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates)
 {
 	// check for quick exit
-	if (!(attrib.Has(TDCA_STARTDATE) || attrib.Has(TDCA_DUEDATE) || attrib.Has(TDCA_DONEDATE)))
+	if (!pTasks->IsAttributeAvailable(TDCA_STARTDATE) &&
+		!pTasks->IsAttributeAvailable(TDCA_DUEDATE) &&
+		!pTasks->IsAttributeAvailable(TDCA_DONEDATE))
+	{
 		return;
+	}
 
 	// get creation date once only
 	time64_t tDate = 0;
@@ -106,7 +110,7 @@ void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 		dtCreation = GetDate(tDate);
 
 	// retrieve new dates
-	if (attrib.Has(TDCA_STARTDATE))
+	if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
 	{
 		if (pTasks->GetTaskStartDate64(hTask, FALSE, tDate))
 			dtStart = GetDate(tDate);
@@ -116,7 +120,7 @@ void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 		ReformatName();
 	}
 	
-	if (attrib.Has(TDCA_DUEDATE))
+	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
 	{
 		if (pTasks->GetTaskDueDate64(hTask, FALSE, tDate))
 			dtDue = GetDate(tDate);
@@ -124,7 +128,7 @@ void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 			CDateHelper::ClearDate(dtDue);
 	}
 
-	if (attrib.Has(TDCA_DONEDATE))
+	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
 	{
 		if (pTasks->GetTaskDoneDate64(hTask, tDate))
 			dtDone = GetDate(tDate);
@@ -216,7 +220,7 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 	}
 }
 
-BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, DWORD dwCalcDates)
+BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates)
 {
 	ASSERT(dwTaskID == 0 || pTasks->GetTaskID(hTask) == dwTaskID);
 
@@ -226,16 +230,16 @@ BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 	// snapshot current state to check for changes
 	TASKCALITEM tciOrg = *this;
 
-	if (attrib.Has(TDCA_TASKNAME))
+	if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
 		sName = pTasks->GetTaskTitle(hTask);
 
-	if (attrib.Has(TDCA_ICON))
+	if (pTasks->IsAttributeAvailable(TDCA_ICON))
 		bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
-	if (attrib.Has(TDCA_DEPENDENCY))
+	if (pTasks->IsAttributeAvailable(TDCA_DEPENDENCY))
 		bHasDepends = !Misc::IsEmpty(pTasks->GetTaskDependency(hTask, 0));
 
-	UpdateTaskDates(pTasks, hTask, attrib, dwCalcDates);
+	UpdateTaskDates(pTasks, hTask, dwCalcDates);
 
 	// always update colour
 	color = pTasks->GetTaskTextColor(hTask);

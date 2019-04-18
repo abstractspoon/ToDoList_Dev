@@ -76,24 +76,22 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public void UpdateTasks(TaskList tasks, 
-								UIExtension.UpdateType type, 
-								HashSet<UIExtension.TaskAttribute> attribs)
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-			m_DayView.UpdateTasks(tasks, type, attribs);
+			m_DayView.UpdateTasks(tasks, type);
 		}
 
-		public bool WantTaskUpdate(UIExtension.TaskAttribute attrib)
+		public bool WantTaskUpdate(Task.Attribute attrib)
 		{
 			switch (attrib)
 			{
-				case UIExtension.TaskAttribute.Title:
-				case UIExtension.TaskAttribute.DoneDate:
-				case UIExtension.TaskAttribute.DueDate:
-				case UIExtension.TaskAttribute.StartDate:
-				case UIExtension.TaskAttribute.AllocTo:
-				case UIExtension.TaskAttribute.Icon:
-                case UIExtension.TaskAttribute.TimeEstimate:
+				case Task.Attribute.Title:
+				case Task.Attribute.DoneDate:
+				case Task.Attribute.DueDate:
+				case Task.Attribute.StartDate:
+				case Task.Attribute.AllocatedTo:
+				case Task.Attribute.Icon:
+                case Task.Attribute.TimeEstimate:
 					return true;
 			}
 
@@ -101,7 +99,7 @@ namespace DayViewUIExtension
 			return false;
 		}
 	   
-		public bool WantSortUpdate(UIExtension.TaskAttribute attrib)
+		public bool WantSortUpdate(Task.Attribute attrib)
 		{
 			return false;
 		}
@@ -610,7 +608,7 @@ namespace DayViewUIExtension
 				case Calendar.SelectionTool.Mode.Move:
 					if (item.StartDateDiffersFromOriginal())
 					{
-						if (notify.NotifyMod(UIExtension.TaskAttribute.OffsetTask, item.StartDate))
+						if (notify.NotifyMod(Task.Attribute.OffsetTask, item.StartDate))
 						{
 							item.UpdateOriginalDates();
 						}
@@ -626,14 +624,14 @@ namespace DayViewUIExtension
 				case Calendar.SelectionTool.Mode.ResizeTop:
 					if (item.StartDateDiffersFromOriginal())
 					{
-                        notify.AddMod(UIExtension.TaskAttribute.StartDate, item.StartDate);
+                        notify.AddMod(Task.Attribute.StartDate, item.StartDate);
 
                         // Update the Time estimate if it is zero or 
                         // it used to match the previous date range
                         bool modifyTimeEst = WantModifyTimeEstimate(item);
 
                         if (modifyTimeEst)
-                            notify.AddMod(UIExtension.TaskAttribute.TimeEstimate, item.LengthAsTimeEstimate(false), item.TimeEstUnits);
+                            notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(false), item.TimeEstUnits);
 
 						if (notify.NotifyMod())
 						{
@@ -655,15 +653,15 @@ namespace DayViewUIExtension
 					if (item.EndDateDiffersFromOriginal())
 					{
 						if (item.IsDone)
-							notify.AddMod(UIExtension.TaskAttribute.DoneDate, item.EndDate);
+							notify.AddMod(Task.Attribute.DoneDate, item.EndDate);
 						else
-							notify.AddMod(UIExtension.TaskAttribute.DueDate, item.EndDate);
+							notify.AddMod(Task.Attribute.DueDate, item.EndDate);
 
 						// Update the Time estimate if used to match the previous date range
 						bool modifyTimeEst = WantModifyTimeEstimate(item);
 
                         if (modifyTimeEst)
-                            notify.AddMod(UIExtension.TaskAttribute.TimeEstimate, item.LengthAsTimeEstimate(false), item.TimeEstUnits);
+                            notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(false), item.TimeEstUnits);
 
 						if (notify.NotifyMod())
 						{

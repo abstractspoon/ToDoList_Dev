@@ -49,7 +49,7 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
-	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes);
+	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	bool WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const;
 	bool PrepareNewTask(ITaskList* pTask) const;
 

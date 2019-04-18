@@ -360,7 +360,7 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 
 				pVData->bNeedFullTaskUpdate = FALSE;
 				
-				UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pVData->mapWantedAttrib);
+				UpdateExtensionView(pExtWnd, tasks, IUI_ALL);
 				SyncExtensionSelectionToTree(nView);
 
 				// mark rest of extensions needing update
@@ -782,8 +782,8 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 
 				CTaskFile tasks;
 
-				if (GetAllTasksForExtensionViewUpdate(tasks, pVData->mapWantedAttrib))
-					UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pVData->mapWantedAttrib);
+				if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks))
+					UpdateExtensionView(pExtWnd, tasks, IUI_ALL);
 			}
 
 			if (pVData->bNeedFontUpdate)
@@ -911,7 +911,7 @@ int CTabbedToDoCtrl::GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASK
 	return 0;
 }
 
-BOOL CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const
+BOOL CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter;
 	filter.mapAttribs.Copy(mapAttrib);
@@ -1073,9 +1073,8 @@ void CTabbedToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttr
 		mapAttrib.Add(TDCA_COLOR);
 }
 
-int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(CTaskFile& tasks, 
-															const CTDCAttributeMap& mapAttrib, 
-															DWORD dwFlags) const
+int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, 
+															DWORD dwFlags, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter;
 	filter.mapAttribs.Copy(mapAttrib);
@@ -1098,16 +1097,14 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(CTaskFile& tasks,
 	return tasks.GetTaskCount();
 }
 
-void CTabbedToDoCtrl::UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, 
-										  IUI_UPDATETYPE nType, const CTDCAttributeMap& mapAttrib)
+void CTabbedToDoCtrl::UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, IUI_UPDATETYPE nType)
 {
 	ASSERT(!tasks.GetFilePath().IsEmpty() || m_sLastSavePath.IsEmpty());
 
 	CAutoFlag af(m_bUpdatingExtensions, TRUE);
 	CTDCAttributeArray aAttrib;
 	
-	if (mapAttrib.CopyTo(aAttrib))
-		pExtWnd->UpdateTasks(&tasks, nType, aAttrib.GetData(), aAttrib.GetSize());
+	pExtWnd->UpdateTasks(&tasks, nType);
 }
 
 DWORD CTabbedToDoCtrl::GetSingleSelectedTaskID() const
@@ -1853,8 +1850,8 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 			CWaitCursor cursor;
 			CTaskFile tasks;
 
-			if (GetAllTasksForExtensionViewUpdate(tasks, pVData->mapWantedAttrib))
-				UpdateExtensionView(pExtWnd, tasks, IUI_EDIT, pVData->mapWantedAttrib);
+			if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks))
+				UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
 		}
 		else if (dwResults & UIEXTMOD_OFFSETDATES)
 		{
@@ -2430,17 +2427,16 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 				{
 					if (nExtView == nCurView)
 					{
-						CWaitCursor cursor;
-
 						CTDCAttributeMap mapAttribs;
 						mapAttribs.Add(TDCA_COLOR);
 						
 						CTaskFile tasks;
+						CWaitCursor cursor;
 						
-						if (GetAllTasksForExtensionViewUpdate(tasks, mapAttribs))
+						if (GetAllTasksForExtensionViewUpdate(mapAttribs, tasks))
 						{
 							pVData->bNeedFullTaskUpdate = FALSE;
-							UpdateExtensionView(pExtWnd, tasks, IUI_EDIT, mapAttribs);
+							UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
 						}
 					}
 					else // mark for update
@@ -3313,6 +3309,8 @@ void CTabbedToDoCtrl::UpdateExtensionViewsProjectName()
 		CTaskFile tasks;
 		AppendTaskFileHeader(tasks);
 
+		tasks.SetAvailableAttributes(CTDCAttributeMap(TDCA_PROJECTNAME));
+
 		int nExt = m_aExtViews.GetSize();
 
 		while (nExt--)
@@ -3326,10 +3324,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsProjectName()
 				ASSERT(pVData);
 
 				if (pVData && !pVData->bNeedFullTaskUpdate)
-				{
-					TDC_ATTRIBUTE nProjName = TDCA_PROJECTNAME;
-					pExtWnd->UpdateTasks(&tasks, IUI_EDIT, &nProjName, 1);
-				}
+					pExtWnd->UpdateTasks(&tasks, IUI_EDIT);
 			}
 		}
 	}
@@ -3367,14 +3362,14 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(TDC_ATTRIBUTE nAttrib)
 
 			CTaskFile tasks;
 
-			if (GetAllTasksForExtensionViewUpdate(tasks, pVData->mapWantedAttrib))
+			if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks))
 			{
 				CWaitCursor cursor;
 				BeginExtensionProgress(pVData);
 
 				// update all tasks
 				pVData->bNeedFullTaskUpdate = FALSE;
-				UpdateExtensionView(pExtWnd, tasks, nUpdate, pVData->mapWantedAttrib);
+				UpdateExtensionView(pExtWnd, tasks, nUpdate);
 
 				SyncExtensionSelectionToTree(nView);
 				EndExtensionProgress();
@@ -3464,13 +3459,13 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 		// For the moment 
 		if (m_taskTree.SelectionHasDependents())
 		{
-			GetAllTasksForExtensionViewUpdate(tasks, mapAttrib);
+			GetAllTasksForExtensionViewUpdate(mapAttrib, tasks);
 			break;
 		}
 		// else fall thru
 
 	default:
-		GetSelectedTasksForExtensionViewUpdate(tasks, mapAttrib, dwFlags);
+		GetSelectedTasksForExtensionViewUpdate(mapAttrib, dwFlags, tasks);
 		break;
 	}
 	
@@ -3488,14 +3483,9 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 		if (pExtWnd)
 		{
 			if (pVData)
-			{
-				if (nUpdate == IUI_NEW)
-					mapAttrib.Copy(pVData->mapWantedAttrib);
-				
 				pVData->bNeedFullTaskUpdate = FALSE;
-			}
 			
-			UpdateExtensionView(pExtWnd, tasks, nUpdate, mapAttrib);
+			UpdateExtensionView(pExtWnd, tasks, nUpdate);
 
 			if (nExtView == GetTaskView())
 				SyncExtensionSelectionToTree(nExtView);

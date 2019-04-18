@@ -10194,7 +10194,7 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 
 	tasks.Reset();	
 	tasks.SetProjectName(tdc.GetFriendlyProjectName());
-	tasks.SetAvailableAttributes(filter.mapAttribs);
+//	tasks.SetAvailableAttributes(filter.mapAttribs);
 
 	// export flags
 	if (userPrefs.GetExportParentTitleCommentsOnly())

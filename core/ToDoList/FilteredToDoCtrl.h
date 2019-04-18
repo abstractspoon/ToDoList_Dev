@@ -126,7 +126,7 @@ protected:
 	virtual BOOL RemoveArchivedTask(DWORD dwTaskID);
 	virtual BOOL CopyCurrentSelection() const;
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
-	virtual BOOL GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const;
+	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const;
 
 	void SaveSettings() const;
 	void LoadSettings();

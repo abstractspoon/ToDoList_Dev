@@ -40,7 +40,7 @@ namespace WordCloudUIExtension
         // -------------------------------------------------------------
 
 		private IntPtr m_HwndParent;
-        private UIExtension.TaskAttribute m_Attrib;
+        private Task.Attribute m_Attrib;
 		private Translator m_Trans;
 
 		private bool m_Splitting;
@@ -69,7 +69,7 @@ namespace WordCloudUIExtension
 		{
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
-			m_Attrib = UIExtension.TaskAttribute.Title;
+			m_Attrib = Task.Attribute.Title;
             m_ExcludedWords = new CommonWords(); // English by default
 
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
@@ -91,7 +91,7 @@ namespace WordCloudUIExtension
 
 		public bool SelectTask(UInt32 taskId)
 		{
-			if (m_Attrib == UIExtension.TaskAttribute.Unknown)
+			if (m_Attrib == Task.Attribute.Unknown)
 				return false;
 
 			if (!m_TaskMatchesList.HasMatchId(taskId))
@@ -136,9 +136,7 @@ namespace WordCloudUIExtension
 			return false;
 		}
 
-		public void UpdateTasks(TaskList tasks, 
-								UIExtension.UpdateType type, 
-								System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
 			HashSet<UInt32> changedTaskIds = null;
 
@@ -159,7 +157,7 @@ namespace WordCloudUIExtension
             
 			Task task = tasks.GetFirstTask();
 
-			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs, changedTaskIds))
+			while (task.IsValid() && ProcessTaskUpdate(task, type, changedTaskIds))
 				task = task.GetNextTask();
 
 			UpdateWeightedWords(true);
@@ -199,22 +197,25 @@ namespace WordCloudUIExtension
 
 		private bool ProcessTaskUpdate(Task task, 
 									   UIExtension.UpdateType type,
-                                       HashSet<UIExtension.TaskAttribute> attribs,
 									   HashSet<UInt32> taskIds)
 		{
 			if (!task.IsValid())
 				return false;
 
 			CloudTaskItem item;
-			bool newTask = !m_Items.TryGetValue(task.GetID(), out item);
 
-			if (newTask)
+			if (m_Items.TryGetValue(task.GetID(), out item))
+			{
+				item.ProcessTaskUpdate(task, type, false);
+			}
+			else
 			{
 				item = new CloudTaskItem(task.GetID());
+				item.ProcessTaskUpdate(task, type, true);
+
 				m_Items[item.Id] = item;
 			}
 
-			item.ProcessTaskUpdate(task, type, attribs, newTask);
 
 			if (taskIds != null)
 				taskIds.Add(item.Id);
@@ -222,7 +223,7 @@ namespace WordCloudUIExtension
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attribs, taskIds))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, taskIds))
 				subtask = subtask.GetNextTask();
 
 			return true;
@@ -300,13 +301,13 @@ namespace WordCloudUIExtension
             return m_WordCloud.SaveToImage();
         }
 
-		public bool WantTaskUpdate(UIExtension.TaskAttribute attrib)
+		public bool WantTaskUpdate(Task.Attribute attrib)
 		{
 			switch (attrib)
 			{
-				case UIExtension.TaskAttribute.Title:
-				case UIExtension.TaskAttribute.Icon:
-				case UIExtension.TaskAttribute.Color:
+				case Task.Attribute.Title:
+				case Task.Attribute.Icon:
+				case Task.Attribute.Color:
 					return true;
 			}
 
@@ -314,7 +315,7 @@ namespace WordCloudUIExtension
 			return AttributeComboBox.IsSupportedAttribute(attrib);
 		}
 	   
-		public bool WantSortUpdate(UIExtension.TaskAttribute attrib)
+		public bool WantSortUpdate(Task.Attribute attrib)
 		{
 			return false;
 		}
@@ -393,10 +394,10 @@ namespace WordCloudUIExtension
             if (!appOnly)
             { 
                 // private settings
-				var attrib = (UIExtension.TaskAttribute)prefs.GetProfileInt(key, "AttribToTrack", (int)UIExtension.TaskAttribute.Title);
+				var attrib = (Task.Attribute)prefs.GetProfileInt(key, "AttribToTrack", (int)Task.Attribute.Title);
 
 				if (!AttributeComboBox.IsSupportedAttribute(attrib))
-					attrib = UIExtension.TaskAttribute.Title;
+					attrib = Task.Attribute.Title;
 
 				m_AttributeCombo.SetSelectedAttribute(attrib);
 
@@ -859,7 +860,7 @@ namespace WordCloudUIExtension
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
-            return notify.NotifyMod(UIExtension.TaskAttribute.DoneDate,
+            return notify.NotifyMod(Task.Attribute.DoneDate,
                                     (completed ? DateTime.Now : DateTime.MinValue));
         }
 

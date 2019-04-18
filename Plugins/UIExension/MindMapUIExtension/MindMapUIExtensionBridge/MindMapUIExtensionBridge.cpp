@@ -157,16 +157,16 @@ bool CMindMapUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int n
 	return m_wnd->SelectTasks(taskIDs);
 }
 
-void CMindMapUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CMindMapUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
 {
 	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate), UIExtension::Map(pAttributes, nNumAttributes));
+	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate));
 }
 
 bool CMindMapUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 {
-	return m_wnd->WantTaskUpdate(UIExtension::Map(nAttribute));
+	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
 }
 
 bool CMindMapUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const

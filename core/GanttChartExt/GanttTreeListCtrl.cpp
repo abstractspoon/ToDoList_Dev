@@ -494,7 +494,7 @@ void CGanttTreeListCtrl::SetExpandedState(const CDWordArray& aExpanded)
 	}
 }
 
-BOOL CGanttTreeListCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib) const
+BOOL CGanttTreeListCtrl::EditWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const
 {
 	switch (nUpdate)
 	{
@@ -511,12 +511,12 @@ BOOL CGanttTreeListCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<TDC_
 		if (m_sort.IsSorting())
 		{
 			if (!m_sort.bMultiSort)
-				return attrib.Has(MapColumnToAttribute(m_sort.single.nBy));
+				return pTasks->IsAttributeAvailable(MapColumnToAttribute(m_sort.single.nBy));
 
 			// else
 			for (int nCol = 0; nCol < 3; nCol++)
 			{
-				if (attrib.Has(MapColumnToAttribute(m_sort.multi.cols[nCol].nBy)))
+				if (pTasks->IsAttributeAvailable(MapColumnToAttribute(m_sort.multi.cols[nCol].nBy)))
 					return TRUE;
 			}
 		}
@@ -532,13 +532,10 @@ BOOL CGanttTreeListCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<TDC_
 	return FALSE;
 }
 
-void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib)
+void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 {
 	// we must have been initialized already
 	ASSERT(m_list.GetSafeHwnd() && m_tree.GetSafeHwnd());
-
-	// always cancel any ongoing operation
-	CancelOperation();
 
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
 
@@ -547,6 +544,9 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 		ASSERT(0);
 		return;
 	}
+
+	// always cancel any ongoing operation
+	CancelOperation();
 
 	switch (nUpdate)
 	{
@@ -588,10 +588,14 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			int nNumMonths = GetNumMonths(m_nMonthDisplay);
 			
 			// update the task(s)
-			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE))
+			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE))
 			{
-				if (attrib.Has(TDCA_STARTDATE) || attrib.Has(TDCA_DUEDATE) || attrib.Has(TDCA_DONEDATE))
+				if (pTasks->IsAttributeAvailable(TDCA_STARTDATE) ||
+					pTasks->IsAttributeAvailable(TDCA_DUEDATE) ||
+					pTasks->IsAttributeAvailable(TDCA_DONEDATE))
+				{
 					RecalcDateRange();
+				}
 			}
 		}
 		break;
@@ -619,7 +623,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 	InitItemHeights();
 	UpdateTreeColumnWidths(TRUE);
 
-	if (EditWantsResort(nUpdate, attrib))
+	if (EditWantsResort(pTasks, nUpdate))
 	{
 		ASSERT(m_sort.IsSorting());
 
@@ -752,9 +756,7 @@ GTLC_COLUMN CGanttTreeListCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
 	return GTLCC_NONE;
 }
 
-BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
-									IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib, 
-									BOOL bAndSiblings)
+BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return FALSE;
@@ -819,19 +821,19 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	// can't use a switch here because we also need to check for IUI_ALL
 	time64_t tDate = 0;
 	
-	if (attrib.Has(TDCA_TASKNAME))
+	if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
 		pGI->sTitle = pTasks->GetTaskTitle(hTask);
 	
-	if (attrib.Has(TDCA_ALLOCTO))
+	if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
 		pGI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
 	
-	if (attrib.Has(TDCA_ICON))
+	if (pTasks->IsAttributeAvailable(TDCA_ICON))
 		pGI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
-	if (attrib.Has(TDCA_PERCENT))
+	if (pTasks->IsAttributeAvailable(TDCA_PERCENT))
 		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		
-	if (attrib.Has(TDCA_STARTDATE))
+	if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
 	{ 
 		// update min/max too
 		if (pTasks->GetTaskStartDate64(hTask, (pGI->bParent != FALSE), tDate))
@@ -840,7 +842,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 			pGI->ClearStartDate(TRUE);
 	}
 	
-	if (attrib.Has(TDCA_DUEDATE))
+	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
 	{
 		// update min/max too
 		if (pTasks->GetTaskDueDate64(hTask, (pGI->bParent != FALSE), tDate))
@@ -849,7 +851,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 			pGI->ClearDueDate(TRUE);
 	}
 	
-	if (attrib.Has(TDCA_DONEDATE))
+	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
 	{
 		if (pTasks->GetTaskDoneDate64(hTask, tDate))
 			pGI->SetDoneDate(tDate);
@@ -857,13 +859,13 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 			pGI->ClearDoneDate();
 	}
 	
-	if (attrib.Has(TDCA_SUBTASKDONE))
+	if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
 	{
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 		pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 	}
 
-	if (attrib.Has(TDCA_TAGS))
+	if (pTasks->IsAttributeAvailable(TDCA_TAGS))
 	{
 		int nTag = pTasks->GetTaskTagCount(hTask);
 		pGI->aTags.RemoveAll();
@@ -872,7 +874,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 			pGI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
 	}
 	
-	if (attrib.Has(TDCA_DEPENDENCY))
+	if (pTasks->IsAttributeAvailable(TDCA_DEPENDENCY))
 	{
 		int nDepend = pTasks->GetTaskDependencyCount(hTask);
 		pGI->aDependIDs.RemoveAll();
@@ -900,7 +902,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	BOOL bChange = !(*pGI == giOrg);
 		
 	// children
-	if (UpdateTask(pTasks, pTasks->GetFirstTask(hTask), nUpdate, attrib, TRUE))
+	if (UpdateTask(pTasks, pTasks->GetFirstTask(hTask), nUpdate, TRUE))
 		bChange = TRUE;
 
 	// handle siblings WITHOUT RECURSION
@@ -911,7 +913,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			if (UpdateTask(pTasks, hSibling, nUpdate, attrib, FALSE))
+			if (UpdateTask(pTasks, hSibling, nUpdate, FALSE))
 				bChange = TRUE;
 			
 			hSibling = pTasks->GetNextTask(hSibling);

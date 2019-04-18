@@ -312,7 +312,7 @@ protected:
 	BOOL AllExtensionViewsNeedFullUpdate() const;
 	void BeginExtensionProgress(const VIEWDATA* pData, UINT nMsg = 0);
 	void EndExtensionProgress();
-	void UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, IUI_UPDATETYPE nType, const CTDCAttributeMap& mapAttrib);
+	void UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, IUI_UPDATETYPE nType);
 	void SetExtensionsNeedTaskUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
 	void SetExtensionsNeedFontUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
 	void SetListViewNeedFontUpdate(BOOL bUpdate);
@@ -330,8 +330,8 @@ protected:
 	BOOL ValidatePreviousSiblingTaskID(DWORD dwTaskID, DWORD& dwPrevSiblingID) const;
 	BOOL AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttrib) const;
 
-	virtual BOOL GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const;
-	BOOL GetSelectedTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib, DWORD dwFlags) const;
+	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const;
+	BOOL GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, DWORD dwFlags, CTaskFile& tasks) const;
 	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttrib) const;
 	int GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
 	int GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter, DWORD dwFlags) const;

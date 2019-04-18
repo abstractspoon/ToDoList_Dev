@@ -528,11 +528,11 @@ bool CCalendarWnd::PrepareNewTask(ITaskList* pTask) const
 	return (m_BigCalendar.PrepareNewTask(pTask) != FALSE);
 }
 
-void CCalendarWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CCalendarWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	if (m_BigCalendar.UpdateTasks(pTasks, nUpdate, CSet<TDC_ATTRIBUTE>(pAttributes, nNumAttributes)) != FALSE)
+	if (m_BigCalendar.UpdateTasks(pTasks, nUpdate))
 		m_MiniCalendar.OnUpdateTasks();
 
 	UpdateSelectedTaskDates();

@@ -64,6 +64,7 @@ class CTDCAttributeMap : public CTDCBaseEnumSet<TDC_ATTRIBUTE>
 {
 public:
 	CTDCAttributeMap();
+	CTDCAttributeMap(TDC_ATTRIBUTE nAttrib);
 	CTDCAttributeMap(const CTDCAttributeMap& mapOther);
 	~CTDCAttributeMap();
 

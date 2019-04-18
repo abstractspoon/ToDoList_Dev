@@ -15,7 +15,7 @@ namespace WordCloudUIExtension
 		public CloudTaskItem(UInt32 id)
 		{
 			Id = id;
-			m_WordAttribute = UIExtension.TaskAttribute.Unknown;
+			m_WordAttribute = Task.Attribute.Unknown;
 		}
 
 		public override String ToString()
@@ -91,13 +91,12 @@ namespace WordCloudUIExtension
         }
         
 		private List<string> m_Words;
-		private UIExtension.TaskAttribute m_WordAttribute;
+		private Task.Attribute m_WordAttribute;
 
 		static readonly char[] WordDelims = { ',', ' ', '\t', '\r', '\n' };
 		static readonly char[] WordTrim = { '\'', '\"', '{', '}', '(', ')', ':', ';', '.', '[', ']' };
 
-		public void ProcessTaskUpdate(Task task, UIExtension.UpdateType type,
-									  HashSet<UIExtension.TaskAttribute> attribs, Boolean newTask)
+		public void ProcessTaskUpdate(Task task, UIExtension.UpdateType type, Boolean newTask)
 		{
             IsParent = task.IsParent();
             IsLocked = task.IsLocked(true);
@@ -125,49 +124,49 @@ namespace WordCloudUIExtension
 			}
 			else
 			{
-				if (attribs.Contains(UIExtension.TaskAttribute.Title))
+				if (task.HasAttribute(Task.Attribute.Title))
 					Title = task.GetTitle();
 
-				if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
+				if (task.HasAttribute(Task.Attribute.DoneDate))
 					DoneDate = SplitDate(task.GetDoneDateString());
 
-				if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
+				if (task.HasAttribute(Task.Attribute.DueDate))
 					DueDate = SplitDate(task.GetDueDateString(false));
 
-				if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
+				if (task.HasAttribute(Task.Attribute.StartDate))
 					StartDate = SplitDate(task.GetStartDateString(false));
 
-				if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
+				if (task.HasAttribute(Task.Attribute.AllocatedTo))
 					AllocTo = task.GetAllocatedTo();
 
-				if (attribs.Contains(UIExtension.TaskAttribute.AllocBy))
+				if (task.HasAttribute(Task.Attribute.AllocatedBy))
 					AllocBy = task.GetAllocatedBy();
 
-				if (attribs.Contains(UIExtension.TaskAttribute.Status))
+				if (task.HasAttribute(Task.Attribute.Status))
 					Status = task.GetStatus();
 
-				if (attribs.Contains(UIExtension.TaskAttribute.Category))
+				if (task.HasAttribute(Task.Attribute.Category))
 					Category = task.GetCategory();
 
-				if (attribs.Contains(UIExtension.TaskAttribute.Comments))
+				if (task.HasAttribute(Task.Attribute.Comments))
 					Comments = task.GetComments();
 
-				if (attribs.Contains(UIExtension.TaskAttribute.CreationDate))
+				if (task.HasAttribute(Task.Attribute.CreationDate))
 					CreationDate = SplitDate(task.GetCreationDateString());
 
-				if (attribs.Contains(UIExtension.TaskAttribute.CreatedBy))
+				if (task.HasAttribute(Task.Attribute.CreatedBy))
 					CreatedBy = task.GetCreatedBy();
 
-				if (attribs.Contains(UIExtension.TaskAttribute.Version))
+				if (task.HasAttribute(Task.Attribute.Version))
 					Version = task.GetVersion();
 
-				if (attribs.Contains(UIExtension.TaskAttribute.Tag))
+				if (task.HasAttribute(Task.Attribute.Tags))
 					Tags = task.GetTag();
 
-				if (attribs.Contains(UIExtension.TaskAttribute.Icon))
+				if (task.HasAttribute(Task.Attribute.Icon))
 					HasIcon = (task.GetIcon().Length > 0);
 
-				if (attribs.Contains(UIExtension.TaskAttribute.Color))
+				if (task.HasAttribute(Task.Attribute.Color))
 					TextColor = task.GetTextDrawingColor();
 			}
 		}
@@ -248,7 +247,7 @@ namespace WordCloudUIExtension
 			return words;
 		}
 
-		public List<string> GetWords(UIExtension.TaskAttribute attrib, IBlacklist exclusions, Boolean force)
+		public List<string> GetWords(Task.Attribute attrib, IBlacklist exclusions, Boolean force)
 		{
 			if (force || (attrib != m_WordAttribute))
 			{
@@ -259,27 +258,27 @@ namespace WordCloudUIExtension
 			return m_Words;
 		}
 
-		public List<string> GetAttributeValues(UIExtension.TaskAttribute attrib, IBlacklist exclusions)
+		public List<string> GetAttributeValues(Task.Attribute attrib, IBlacklist exclusions)
 		{
 			var values = new List<string>();
 
 			switch (attrib)
 			{
-				case UIExtension.TaskAttribute.Title:			values = ToWords(Title);	break;
-				case UIExtension.TaskAttribute.Comments:		values = ToWords(Comments); break;
+				case Task.Attribute.Title:			values = ToWords(Title);	break;
+				case Task.Attribute.Comments:		values = ToWords(Comments); break;
 
-				case UIExtension.TaskAttribute.AllocTo:			values = AllocTo;			break;
-				case UIExtension.TaskAttribute.Category:		values = Category;			break;
-				case UIExtension.TaskAttribute.Tag:				values = Tags;				break;
+				case Task.Attribute.AllocatedTo:	values = AllocTo;			break;
+				case Task.Attribute.Category:		values = Category;			break;
+				case Task.Attribute.Tags:			values = Tags;				break;
 
-				case UIExtension.TaskAttribute.DoneDate:		values.Add(DoneDate);		break;
-				case UIExtension.TaskAttribute.DueDate:			values.Add(DueDate);		break;
-				case UIExtension.TaskAttribute.StartDate:		values.Add(StartDate);		break;
-				case UIExtension.TaskAttribute.AllocBy:			values.Add(AllocBy);		break;
-				case UIExtension.TaskAttribute.Status:			values.Add(Status);			break;
-				case UIExtension.TaskAttribute.CreationDate:	values.Add(CreationDate);	break;
-				case UIExtension.TaskAttribute.CreatedBy:		values.Add(CreatedBy);		break;
-				case UIExtension.TaskAttribute.Version:			values.Add(Version);		break;
+				case Task.Attribute.DoneDate:		values.Add(DoneDate);		break;
+				case Task.Attribute.DueDate:		values.Add(DueDate);		break;
+				case Task.Attribute.StartDate:		values.Add(StartDate);		break;
+				case Task.Attribute.AllocatedBy:	values.Add(AllocBy);		break;
+				case Task.Attribute.Status:			values.Add(Status);			break;
+				case Task.Attribute.CreationDate:	values.Add(CreationDate);	break;
+				case Task.Attribute.CreatedBy:		values.Add(CreatedBy);		break;
+				case Task.Attribute.Version:		values.Add(Version);		break;
 			}
 
 			values.RemoveAll(p => (p.Length < 2));
@@ -290,7 +289,7 @@ namespace WordCloudUIExtension
 			return values;
 		}
 
-		public Boolean AttributeHasValue(UIExtension.TaskAttribute attrib, String value, IBlacklist exclusions)
+		public Boolean AttributeHasValue(Task.Attribute attrib, String value, IBlacklist exclusions)
 		{
 			var words = GetWords(attrib, exclusions, false);
 

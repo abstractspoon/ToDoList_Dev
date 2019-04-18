@@ -439,11 +439,11 @@ bool CWorkloadWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 	return (CWorkloadCtrl::WantEditUpdate(nAttribute) != FALSE);
 }
 
-void CWorkloadWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CWorkloadWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	m_ctrlWorkload.UpdateTasks(pTasks, nUpdate, CSet<TDC_ATTRIBUTE>(pAttributes, nNumAttributes));
+	m_ctrlWorkload.UpdateTasks(pTasks, nUpdate);
 	m_toolbar.RefreshButtonStates(FALSE);
 	
 	UpdatePeriod();

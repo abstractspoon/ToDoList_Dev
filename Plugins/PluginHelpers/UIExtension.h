@@ -70,81 +70,35 @@ namespace Abstractspoon
 					Task,
 				};
 
-				enum class TaskAttribute
-				{
-					Unknown = -1,
-
-					Title = 0,
-					DoneDate,
-					DueDate,
-					StartDate,
-					Priority,
-					Color,
-					AllocTo,
-					AllocBy,
-					Status,
-					Category,
-					Percent,
-					TimeEstimate,
-					TimeSpent,
-					FileReference,
-					Comments,
-					Flag,
-					CreationDate,
-					CreatedBy,
-					Risk,			
-					ExternalId,	
-					Cost,			
-					Dependency,	
-					Recurrence,	
-					Version,		
-					Position,
-					Id,
-					LastModified,
-					Icon,
-					Tag,
-					CustomAttribute,
-					OffsetTask,
-					SubtaskDone,
-					MetaData,
-					ProjectName,
-
-					// new values here ONLY
-
-				};
-
 				enum class AppCursorType
 				{
 					LockedTask,
 					NoDrag,
 				};
 
-				static TaskAttribute Map(TDC_ATTRIBUTE attrib);
-				static Collections::Generic::HashSet<TaskAttribute>^ Map(const TDC_ATTRIBUTE* pAttrib, int numAttrib);
 				static UpdateType Map(IUI_UPDATETYPE type);
 				static IUI_HITTEST Map(HitResult test);
-				static TDC_ATTRIBUTE Map(TaskAttribute attrib);
 
 				ref class ParentNotify
 				{
 				public:
 					ParentNotify(IntPtr hwndParent);
 
-					bool AddMod(UIExtension::TaskAttribute nAttribute, DateTime value);
-					bool AddMod(UIExtension::TaskAttribute nAttribute, double value);
-					bool AddMod(UIExtension::TaskAttribute nAttribute, double time, Task::TimeUnits units);
-					bool AddMod(UIExtension::TaskAttribute nAttribute, int value);
-					bool AddMod(UIExtension::TaskAttribute nAttribute, bool value);
-					bool AddMod(UIExtension::TaskAttribute nAttribute, String^ value);
+					bool AddMod(Task::Attribute nAttribute, DateTime value);
+					bool AddMod(Task::Attribute nAttribute, double value);
+					bool AddMod(Task::Attribute nAttribute, double time, Task::TimeUnits units);
+					bool AddMod(Task::Attribute nAttribute, int value);
+					bool AddMod(Task::Attribute nAttribute, bool value);
+					bool AddMod(Task::Attribute nAttribute, String^ value);
 					bool AddMod(String^ sCustAttribID, String^ value);
 
 					bool NotifyMod();
-					bool NotifyMod(UIExtension::TaskAttribute nAttribute, DateTime value);
-					bool NotifyMod(UIExtension::TaskAttribute nAttribute, double value);
-					bool NotifyMod(UIExtension::TaskAttribute nAttribute, double time, Task::TimeUnits units);
-					bool NotifyMod(UIExtension::TaskAttribute nAttribute, int value);
-					bool NotifyMod(UIExtension::TaskAttribute nAttribute, bool value);
-					bool NotifyMod(UIExtension::TaskAttribute nAttribute, String^ value);
+					bool NotifyMod(Task::Attribute nAttribute, DateTime value);
+					bool NotifyMod(Task::Attribute nAttribute, double value);
+					bool NotifyMod(Task::Attribute nAttribute, double time, Task::TimeUnits units);
+					bool NotifyMod(Task::Attribute nAttribute, int value);
+					bool NotifyMod(Task::Attribute nAttribute, bool value);
+					bool NotifyMod(Task::Attribute nAttribute, String^ value);
 					bool NotifyMod(String^ sCustAttribID, String^ value);
 
 					bool NotifyMove(UInt32 taskID, UInt32 parentTaskID, UInt32 afterSiblingID);
@@ -164,19 +118,19 @@ namespace Abstractspoon
 					ref class IUITaskMod
 					{
 					public:
-						IUITaskMod(UIExtension::TaskAttribute attrib, DateTime value);
-						IUITaskMod(UIExtension::TaskAttribute attrib, double value);
-						IUITaskMod(UIExtension::TaskAttribute attrib, double time, Task::TimeUnits units);
-						IUITaskMod(UIExtension::TaskAttribute attrib, int value);
-						IUITaskMod(UIExtension::TaskAttribute attrib, bool value);
-						IUITaskMod(UIExtension::TaskAttribute attrib, String^ value);
+						IUITaskMod(Task::Attribute attrib, DateTime value);
+						IUITaskMod(Task::Attribute attrib, double value);
+						IUITaskMod(Task::Attribute attrib, double time, Task::TimeUnits units);
+						IUITaskMod(Task::Attribute attrib, int value);
+						IUITaskMod(Task::Attribute attrib, bool value);
+						IUITaskMod(Task::Attribute attrib, String^ value);
 
 						IUITaskMod(String^ customAttribId, String^ value);
 
 						bool CopyTo(IUITASKMOD& mod);
 
 					public:
-						UIExtension::TaskAttribute nAttrib;
+						Task::Attribute nAttrib;
 						UInt32 dwSelectedTaskID;		
 						String^ szCustomAttribID;
 
@@ -258,9 +212,9 @@ namespace Abstractspoon
 				bool SelectTask(UInt32 taskID);
 				bool SelectTasks(cli::array<UInt32>^ taskIDs);
 
-				void UpdateTasks(TaskList^ tasks, UIExtension::UpdateType update, Collections::Generic::HashSet<UIExtension::TaskAttribute>^ attribs);
-				bool WantTaskUpdate(UIExtension::TaskAttribute attribute);
-				bool WantSortUpdate(UIExtension::TaskAttribute attribute);
+				void UpdateTasks(TaskList^ tasks, UIExtension::UpdateType update);
+				bool WantTaskUpdate(Task::Attribute attribute);
+				bool WantSortUpdate(Task::Attribute attribute);
 				bool PrepareNewTask(Task^% task);
 
 				bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);

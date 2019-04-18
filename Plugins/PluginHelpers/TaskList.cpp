@@ -9,7 +9,7 @@
 
 #include <3rdParty\T64Utils.h>
 
-#include <Interfaces\ITasklist.h>
+#include <Interfaces\IEnums.h>
 #include <Interfaces\TasklistSchemaDef.h>
 
 #include <OleAuto.h>
@@ -46,77 +46,15 @@ bool TaskList::IsValid()
 	return (m_pConstTaskList || m_pTaskList);
 }
 
-int TaskList::GetAttributeList(Collections::Generic::HashSet<TaskList::TaskAttribute>^ attribs)
+bool TaskList::HasAttribute(Task::Attribute attrib)
 {
-	attribs->Clear();
+	if (attrib == Task::Attribute::Unknown)
+		return false;
 
-	if (IsValid())
-	{
-		Task^ task = GetFirstTask();
+	TDC_ATTRIBUTE nAttrib = Task::MapAttribute(attrib);
 
-		while (task->IsValid())
-		{
-			BuildAttributeList(task, attribs);
-
-			task = task->GetNextTask();
-		}
-	}
-
-	return attribs->Count;
-}
-
-void TaskList::BuildAttributeList(Task^ task, Collections::Generic::HashSet<TaskList::TaskAttribute>^ attribs)
-{
-#define ADDATTRIB(attrib, id) AddAttributeToList(attrib, gcnew String(id), task, attribs)
-
-	ADDATTRIB(TaskAttribute::Position,			TDL_TASKPOS);
-	ADDATTRIB(TaskAttribute::Title,				TDL_TASKTITLE);
-	ADDATTRIB(TaskAttribute::Id,				TDL_TASKID);
-	ADDATTRIB(TaskAttribute::ParentId,			TDL_TASKPARENTID);
-	ADDATTRIB(TaskAttribute::Path,				TDL_TASKPATH);
-	ADDATTRIB(TaskAttribute::Priority,			TDL_TASKPRIORITY);
-	ADDATTRIB(TaskAttribute::Risk,				TDL_TASKRISK);
-	ADDATTRIB(TaskAttribute::Percent,			TDL_TASKPERCENTDONE);
-	ADDATTRIB(TaskAttribute::TimeEstimate,		TDL_TASKTIMEESTIMATE);
-	ADDATTRIB(TaskAttribute::TimeSpent,			TDL_TASKTIMESPENT);
-	ADDATTRIB(TaskAttribute::CreationDate,		TDL_TASKCREATIONDATESTRING);
-	ADDATTRIB(TaskAttribute::CreatedBy,			TDL_TASKCREATEDBY);
-	ADDATTRIB(TaskAttribute::LastModifiedDate,	TDL_TASKLASTMODSTRING);
-	ADDATTRIB(TaskAttribute::LastModifiedBy,	TDL_TASKLASTMODBY);
-	ADDATTRIB(TaskAttribute::StartDate,			TDL_TASKSTARTDATESTRING);	
-	ADDATTRIB(TaskAttribute::DueDate,			TDL_TASKDUEDATESTRING);
-	ADDATTRIB(TaskAttribute::DoneDate,			TDL_TASKDONEDATESTRING);
-	ADDATTRIB(TaskAttribute::Recurrence,		TDL_TASKRECURRENCE);
-	ADDATTRIB(TaskAttribute::AllocatedTo,		TDL_TASKALLOCTO);
-	ADDATTRIB(TaskAttribute::AllocatedBy,		TDL_TASKALLOCBY);
-	ADDATTRIB(TaskAttribute::Status,			TDL_TASKSTATUS);
-	ADDATTRIB(TaskAttribute::Category,			TDL_TASKCATEGORY);
-	ADDATTRIB(TaskAttribute::Tags,				TDL_TASKTAG);
-	ADDATTRIB(TaskAttribute::ExternalId,		TDL_TASKEXTERNALID);
-	ADDATTRIB(TaskAttribute::Cost,				TDL_TASKCOST);
-	ADDATTRIB(TaskAttribute::Version,			TDL_TASKVERSION);
-	ADDATTRIB(TaskAttribute::Flag,				TDL_TASKFLAG);
-	ADDATTRIB(TaskAttribute::Dependency,		TDL_TASKDEPENDENCY);
-	ADDATTRIB(TaskAttribute::FileLink,			TDL_TASKFILEREFPATH);
-	ADDATTRIB(TaskAttribute::SubtaskDone,		TDL_TASKSUBTASKDONE);
-	ADDATTRIB(TaskAttribute::Comments,			TDL_TASKCOMMENTS);
-
-	// subtasks
-	Task^ subtask = task->GetFirstSubtask();
-
-	while (subtask->IsValid())
-	{
-		BuildAttributeList(subtask, attribs);
-
-		subtask = subtask->GetNextTask();
-	}
-}
-
-void TaskList::AddAttributeToList(TaskList::TaskAttribute attrib, String^ attribId, Task^ task, 
-								  Collections::Generic::HashSet<TaskList::TaskAttribute>^ attribs)
-{
-	if (!attribs->Contains(attrib) && task->HasAttribute(attribId))
-		attribs->Add(attrib);
+	return (m_pConstTaskList ? m_pConstTaskList->IsAttributeAvailable(nAttrib) :
+		(m_pTaskList ? m_pTaskList->IsAttributeAvailable(nAttrib) : false));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -223,6 +161,9 @@ Task^ TaskList::GetFirstTask()
 #define GETTASKDATE(fn, errret) \
 	(m_pConstTaskList ? m_pConstTaskList->fn(m_hTask, date) : (m_pTaskList ? m_pTaskList->fn(m_hTask, date) : errret))
 
+#define GETTASKATTRIB(arg) \
+	gcnew String(m_pConstTaskList ? ((ITaskList*)m_pConstTaskList)->GetTaskAttribute(m_hTask, arg) : (m_pTaskList ? ((ITaskList*)m_pTaskList)->GetTaskAttribute(m_hTask, arg) : L""))
+
 #define GETTASKSTR(fn) \
 	gcnew String(GETTASKVAL(fn, L""))
 
@@ -276,13 +217,33 @@ bool Task::IsValid()
 	return ((m_pConstTaskList || m_pTaskList) && (m_hTask != nullptr));
 }
 
+String^ Task::GetAttribute(Task::Attribute attrib)
+{
+	TDC_ATTRIBUTE nAttrib = MapAttribute(attrib);
+
+	return GETTASKSTR_ARG(GetTaskAttribute, nAttrib);
+}
+
+bool Task::HasAttribute(Task::Attribute attrib)
+{
+	if (attrib == Task::Attribute::Unknown)
+		return false;
+
+	TDC_ATTRIBUTE nAttrib = MapAttribute(attrib);
+
+	return (m_pConstTaskList ? m_pConstTaskList->IsAttributeAvailable(nAttrib) :
+			(m_pTaskList ? m_pTaskList->IsAttributeAvailable(nAttrib) : false));
+}
+
 Task^ Task::GetFirstSubtask()
 {
 	if (m_pConstTaskList)
 		return gcnew Task(m_pConstTaskList, m_pConstTaskList->GetFirstTask(m_hTask));
 
-	// else
-	return gcnew Task(m_pTaskList, m_pTaskList->GetFirstTask(m_hTask));
+	if (m_pTaskList)
+		return gcnew Task(m_pTaskList, m_pTaskList->GetFirstTask(m_hTask));
+
+	return nullptr;
 }
 
 Task^ Task::GetNextTask()
@@ -290,8 +251,10 @@ Task^ Task::GetNextTask()
 	if (m_pConstTaskList)
 		return gcnew Task(m_pConstTaskList, m_pConstTaskList->GetNextTask(m_hTask));
 
-	// else
-	return gcnew Task(m_pTaskList, m_pTaskList->GetNextTask(m_hTask));
+	if (m_pTaskList)
+		return gcnew Task(m_pTaskList, m_pTaskList->GetNextTask(m_hTask));
+
+	return nullptr;
 }
 
 Task^ Task::GetParentTask()
@@ -299,8 +262,10 @@ Task^ Task::GetParentTask()
 	if (m_pConstTaskList)
 		return gcnew Task(m_pConstTaskList, m_pConstTaskList->GetTaskParent(m_hTask));
 
-	// else
-	return gcnew Task(m_pTaskList, m_pTaskList->GetTaskParent(m_hTask));
+	if (m_pTaskList)
+		return gcnew Task(m_pTaskList, m_pTaskList->GetTaskParent(m_hTask));
+
+	return nullptr;
 }
 
 String^ Task::GetTitle()
@@ -315,7 +280,7 @@ String^ Task::GetComments()
 
 String^ Task::GetHtmlComments()
 {
-	return GETTASKSTR_ARG(GetTaskAttribute, TDL_TASKHTMLCOMMENTS);
+	return GETTASKATTRIB(TDL_TASKHTMLCOMMENTS);
 }
 
 String^ Task::GetAllocatedBy()
@@ -422,12 +387,12 @@ System::Windows::Media::Color Task::GetPriorityMediaColor()
 
 String^ Task::GetTextForeWebColor()
 {
-	return GETTASKSTR_ARG(GetTaskAttribute, TDL_TASKTEXTWEBCOLOR);
+	return GETTASKATTRIB(TDL_TASKTEXTWEBCOLOR);
 }
 
 String^ Task::GetTextBackWebColor()
 {
-	return GETTASKSTR_ARG(GetTaskAttribute, TDL_TASKBACKWEBCOLOR);
+	return GETTASKATTRIB(TDL_TASKBACKWEBCOLOR);
 }
 
 String^ Task::GetPriorityWebColor()
@@ -568,7 +533,7 @@ DateTime Task::GetLastModifiedDate()
 	__int64 date = 0;
 	
 	if (GETTASKDATE(GetTaskLastModified64, false))
-		return Map(date);
+		return MapDate(date);
 
 	// else
 	return DateTime::MinValue;
@@ -579,7 +544,7 @@ DateTime Task::GetDoneDate()
 	__int64 date = 0;
 	
 	if (GETTASKDATE(GetTaskDoneDate64, false))
-		return Map(date);
+		return MapDate(date);
 
 	// else
 	return DateTime::MinValue;
@@ -590,7 +555,7 @@ DateTime Task::GetDueDate(bool calculated)
 	__int64 date = 0;
 	
 	if (GETTASKDATE_ARG(GetTaskDueDate64, calculated, false))
-		return Map(date);
+		return MapDate(date);
 
 	// else
 	return DateTime::MinValue;
@@ -601,7 +566,7 @@ DateTime Task::GetStartDate(bool calculated)
 	__int64 date = 0;
 	
 	if (GETTASKDATE_ARG(GetTaskStartDate64, calculated, false))
-		return Map(date);
+		return MapDate(date);
 
 	// else
 	return DateTime::MinValue;
@@ -612,7 +577,7 @@ DateTime Task::GetCreationDate()
 	__int64 date = 0;
 	
 	if (GETTASKDATE(GetTaskCreationDate64, false))
-		return Map(date);
+		return MapDate(date);
 
 	// else
 	return DateTime::MinValue;
@@ -693,7 +658,7 @@ double Task::GetTimeEstimate(TimeUnits% cUnits, bool calculated)
 	double dTime = (m_pConstTaskList ? m_pConstTaskList->GetTaskTimeEstimate(m_hTask, nUnits, calculated) :
 		(m_pTaskList ? m_pTaskList->GetTaskTimeEstimate(m_hTask, nUnits, calculated) : 0.0));
 
-	cUnits = Map(nUnits);
+	cUnits = MapUnits(nUnits);
 	return dTime;
 }
 
@@ -704,7 +669,7 @@ double Task::GetTimeSpent(TimeUnits% cUnits, bool calculated)
 	double dTime = (m_pConstTaskList ? m_pConstTaskList->GetTaskTimeSpent(m_hTask, nUnits, calculated) :
 		(m_pTaskList ? m_pTaskList->GetTaskTimeSpent(m_hTask, nUnits, calculated) : 0.0));
 
-	cUnits = Map(nUnits);
+	cUnits = MapUnits(nUnits);
 	return dTime;
 }
 
@@ -712,20 +677,6 @@ Boolean Task::GetRecurrence()
 {
 	// TODO
 	return false;
-}
-
-Boolean Task::HasAttribute(String^ sAttrib)
-{
-	return (m_pConstTaskList ? m_pConstTaskList->TaskHasAttribute(m_hTask, MS(sAttrib)) : 
-			(m_pTaskList ? m_pTaskList->TaskHasAttribute(m_hTask, MS(sAttrib)) : false));
-}
-
-String^ Task::GetAttribute(String^ sAttrib)
-{
-	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskAttribute(m_hTask, MS(sAttrib)) : 
-			(m_pTaskList ? m_pTaskList->GetTaskAttribute(m_hTask, MS(sAttrib)) : L""));
-
-	return gcnew String(szValue);
 }
 
 String^ Task::GetCustomAttributeData(String^ sID)
@@ -890,37 +841,37 @@ Boolean Task::SetFlag(Boolean bFlag)
 
 Boolean Task::SetLastModified(DateTime^ dtLastMod)
 {
-	return SETTASKVAL(SetTaskLastModified64, Map(dtLastMod));
+	return SETTASKVAL(SetTaskLastModified64, MapDate(dtLastMod));
 }
 
 Boolean Task::SetDoneDate(DateTime^ dtCompletion)
 {
-	return SETTASKVAL(SetTaskDoneDate64, Map(dtCompletion));
+	return SETTASKVAL(SetTaskDoneDate64, MapDate(dtCompletion));
 }
 
 Boolean Task::SetDueDate(DateTime^ dtDue)
 {
-	return SETTASKVAL(SetTaskDueDate64, Map(dtDue));
+	return SETTASKVAL(SetTaskDueDate64, MapDate(dtDue));
 }
 
 Boolean Task::SetStartDate(DateTime^ dtStart)
 {
-	return SETTASKVAL(SetTaskStartDate64, Map(dtStart));
+	return SETTASKVAL(SetTaskStartDate64, MapDate(dtStart));
 }
 
 Boolean Task::SetCreationDate(DateTime^ dtCreation)
 {
-	return SETTASKVAL(SetTaskCreationDate64, Map(dtCreation));
+	return SETTASKVAL(SetTaskCreationDate64, MapDate(dtCreation));
 }
 
 Boolean Task::SetTimeEstimate(double dTime, TimeUnits cUnits)
 {
-	return (m_pTaskList ? m_pTaskList->SetTaskTimeEstimate(m_hTask, dTime, Map(cUnits)) : false);
+	return (m_pTaskList ? m_pTaskList->SetTaskTimeEstimate(m_hTask, dTime, MapUnits(cUnits)) : false);
 }
 
 Boolean Task::SetTimeSpent(double dTime, TimeUnits cUnits)
 {
-	return (m_pTaskList ? m_pTaskList->SetTaskTimeSpent(m_hTask, dTime, Map(cUnits)) : false);
+	return (m_pTaskList ? m_pTaskList->SetTaskTimeSpent(m_hTask, dTime, MapUnits(cUnits)) : false);
 }
 
 Boolean Task::SetCustomAttributeData(String^ sID, String^ sValue)
@@ -943,7 +894,7 @@ Boolean Task::ClearMetaData(String^ sKey)
 	return (m_pTaskList ? m_pTaskList->ClearTaskMetaData(m_hTask, MS(sKey)) : false);
 }
 
-Task::TimeUnits Task::Map(TDC_UNITS units)
+Task::TimeUnits Task::MapUnits(TDC_UNITS units)
 {
 	switch (units)
 	{
@@ -960,7 +911,7 @@ Task::TimeUnits Task::Map(TDC_UNITS units)
 	return TimeUnits::Unknown;
 }
 
-TDC_UNITS Task::Map(TimeUnits units)
+TDC_UNITS Task::MapUnits(TimeUnits units)
 {
 	switch (units)
 	{
@@ -977,7 +928,7 @@ TDC_UNITS Task::Map(TimeUnits units)
 	return TDCU_NULL;
 }
 
-DateTime Task::Map(Int64 tDate)
+DateTime Task::MapDate(Int64 tDate)
 {
 	SYSTEMTIME st = { 0 };
 	T64Utils::T64ToSystemTime(&tDate, &st);
@@ -994,7 +945,7 @@ DateTime Task::Map(Int64 tDate)
 	return *date;
 }
 
-Int64 Task::Map(DateTime^ date)
+Int64 Task::MapDate(DateTime^ date)
 {
 	SYSTEMTIME st = { 0 };
 
@@ -1011,3 +962,93 @@ Int64 Task::Map(DateTime^ date)
 	return tDate;
 }
 
+Task::Attribute Task::MapAttribute(TDC_ATTRIBUTE attrib)
+{
+	switch (attrib)
+	{
+	case TDCA_TASKNAME:			return Task::Attribute::Title;
+	case TDCA_DONEDATE:			return Task::Attribute::DoneDate;
+	case TDCA_DUEDATE:			return Task::Attribute::DueDate;
+	case TDCA_STARTDATE:		return Task::Attribute::StartDate;
+	case TDCA_PRIORITY:			return Task::Attribute::Priority;
+	case TDCA_COLOR:			return Task::Attribute::Color;
+	case TDCA_ALLOCTO:			return Task::Attribute::AllocatedBy;
+	case TDCA_ALLOCBY:			return Task::Attribute::AllocatedTo;
+	case TDCA_STATUS:			return Task::Attribute::Status;
+	case TDCA_CATEGORY:			return Task::Attribute::Category;
+	case TDCA_PERCENT:			return Task::Attribute::Percent;
+	case TDCA_TIMEEST:			return Task::Attribute::TimeEstimate;
+	case TDCA_TIMESPENT:		return Task::Attribute::TimeSpent;
+	case TDCA_FILEREF:			return Task::Attribute::FileReference;
+	case TDCA_COMMENTS:			return Task::Attribute::Comments;
+	case TDCA_FLAG:				return Task::Attribute::Flag;
+	case TDCA_CREATIONDATE:		return Task::Attribute::CreationDate;
+	case TDCA_CREATEDBY:		return Task::Attribute::CreatedBy;
+	case TDCA_RISK:				return Task::Attribute::Risk;
+	case TDCA_EXTERNALID:		return Task::Attribute::ExternalId;
+	case TDCA_COST:				return Task::Attribute::Cost;
+	case TDCA_DEPENDENCY:		return Task::Attribute::Dependency;
+	case TDCA_RECURRENCE:		return Task::Attribute::Recurrence;
+	case TDCA_VERSION:			return Task::Attribute::Version;
+	case TDCA_POSITION:			return Task::Attribute::Position;
+	case TDCA_ID:				return Task::Attribute::Id;
+	case TDCA_LASTMODDATE:		return Task::Attribute::LastModifiedDate;
+	case TDCA_ICON:				return Task::Attribute::Icon;
+	case TDCA_TAGS:				return Task::Attribute::Tags;
+	case TDCA_CUSTOMATTRIB:		return Task::Attribute::CustomAttribute;
+	case TDCA_OFFSETTASK:		return Task::Attribute::OffsetTask;
+	case TDCA_SUBTASKDONE:		return Task::Attribute::SubtaskDone;
+	case TDCA_METADATA:			return Task::Attribute::MetaData;
+	case TDCA_PROJECTNAME:		return Task::Attribute::ProjectName;
+		//  case TDCA_
+	}
+
+	return Attribute::Unknown;
+}
+
+TDC_ATTRIBUTE Task::MapAttribute(Task::Attribute attrib)
+{
+	switch (attrib)
+	{
+	case Task::Attribute::Title:			return TDCA_TASKNAME;
+	case Task::Attribute::DoneDate:			return TDCA_DONEDATE;
+	case Task::Attribute::DueDate:			return TDCA_DUEDATE;
+	case Task::Attribute::StartDate:		return TDCA_STARTDATE;
+	case Task::Attribute::Priority:			return TDCA_PRIORITY;
+	case Task::Attribute::Color:			return TDCA_COLOR;
+	case Task::Attribute::AllocatedBy:		return TDCA_ALLOCTO;
+	case Task::Attribute::AllocatedTo:		return TDCA_ALLOCBY;
+	case Task::Attribute::Status:			return TDCA_STATUS;
+	case Task::Attribute::Category:			return TDCA_CATEGORY;
+	case Task::Attribute::Percent:			return TDCA_PERCENT;
+	case Task::Attribute::TimeEstimate:		return TDCA_TIMEEST;
+	case Task::Attribute::TimeSpent:		return TDCA_TIMESPENT;
+	case Task::Attribute::FileReference:	return TDCA_FILEREF;
+	case Task::Attribute::Comments:			return TDCA_COMMENTS;
+	case Task::Attribute::Flag:				return TDCA_FLAG;
+	case Task::Attribute::CreationDate:		return TDCA_CREATIONDATE;
+	case Task::Attribute::CreatedBy:		return TDCA_CREATEDBY;
+	case Task::Attribute::Risk:				return TDCA_RISK;
+	case Task::Attribute::ExternalId:		return TDCA_EXTERNALID;
+	case Task::Attribute::Cost:				return TDCA_COST;
+	case Task::Attribute::Dependency:		return TDCA_DEPENDENCY;
+	case Task::Attribute::Recurrence:		return TDCA_RECURRENCE;
+	case Task::Attribute::Version:			return TDCA_VERSION;
+	case Task::Attribute::Position:			return TDCA_POSITION;
+	case Task::Attribute::Id:				return TDCA_ID;
+	case Task::Attribute::ParentId:			return TDCA_PARENTID;
+	case Task::Attribute::LastModifiedDate:	return TDCA_LASTMODDATE;
+	case Task::Attribute::Icon:				return TDCA_ICON;
+	case Task::Attribute::Tags:				return TDCA_TAGS;
+	case Task::Attribute::CustomAttribute:	return TDCA_CUSTOMATTRIB;
+	case Task::Attribute::OffsetTask:		return TDCA_OFFSETTASK;
+	case Task::Attribute::SubtaskDone:		return TDCA_SUBTASKDONE;
+	case Task::Attribute::MetaData:			return TDCA_METADATA;
+	case Task::Attribute::ProjectName:		return TDCA_PROJECTNAME;
+		//  case IUI_
+	}
+
+	return TDCA_NONE;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////

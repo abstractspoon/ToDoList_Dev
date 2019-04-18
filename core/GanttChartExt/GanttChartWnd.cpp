@@ -542,11 +542,11 @@ bool CGanttChartWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 	return (CGanttTreeListCtrl::WantEditUpdate(nAttribute) != FALSE);
 }
 
-void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	m_ctrlGantt.UpdateTasks(pTasks, nUpdate, CSet<TDC_ATTRIBUTE>(pAttributes, nNumAttributes));
+	m_ctrlGantt.UpdateTasks(pTasks, nUpdate);
 
 	GANTTDATERANGE dtDataRange;
 	VERIFY(m_ctrlGantt.GetDataDateRange(dtDataRange));

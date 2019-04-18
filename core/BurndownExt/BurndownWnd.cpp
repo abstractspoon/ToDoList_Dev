@@ -358,7 +358,7 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 	}
 }
 
-void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const TDC_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -388,7 +388,7 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 		break;
 		
 	case IUI_EDIT:
-		UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, CSet<TDC_ATTRIBUTE>(pAttributes, nNumAttributes), TRUE);
+		UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE);
 		RebuildGraph(TRUE, TRUE, TRUE);
 		break;
 		
@@ -402,7 +402,7 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 	}
 }
 
-void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings)
 {
 	// handle task if not NULL (== root)
 	if (hTask == NULL)
@@ -427,10 +427,10 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 		
 		if (pSI)
 		{
-			if (attrib.Has(TDCA_DONEDATE))
+			if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
 				pSI->dtDone = GetTaskDoneDate(pTasks, hTask);
 
-			if (attrib.Has(TDCA_STARTDATE))
+			if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
 			{
 				pSI->dtStart = GetTaskStartDate(pTasks, hTask);
 				
@@ -439,10 +439,10 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 					pSI->dtStart = min(pSI->dtStart, pSI->dtDone);
 			}
 
-			if (attrib.Has(TDCA_TIMEEST))
+			if (pTasks->IsAttributeAvailable(TDCA_TIMEEST))
 				pSI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pSI->nTimeEstUnits, false);
 
-			if (attrib.Has(TDCA_TIMESPENT))
+			if (pTasks->IsAttributeAvailable(TDCA_TIMESPENT))
 				pSI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pSI->nTimeSpentUnits, false);
 		}
 		else
@@ -452,7 +452,7 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 	}
 	
 	// children
-	UpdateTask(pTasks, pTasks->GetFirstTask(hTask), nUpdate, attrib, TRUE);
+	UpdateTask(pTasks, pTasks->GetFirstTask(hTask), nUpdate, TRUE);
 	
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
@@ -462,7 +462,7 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			UpdateTask(pTasks, hSibling, nUpdate, attrib, FALSE);
+			UpdateTask(pTasks, hSibling, nUpdate, FALSE);
 			
 			hSibling = pTasks->GetNextTask(hSibling);
 		}

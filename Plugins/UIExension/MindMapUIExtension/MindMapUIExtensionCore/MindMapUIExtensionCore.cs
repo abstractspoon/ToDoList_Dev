@@ -51,19 +51,17 @@ namespace MindMapUIExtension
             return false;
         }
 
-        public void UpdateTasks(TaskList tasks,
-                                UIExtension.UpdateType type,
-                                HashSet<UIExtension.TaskAttribute> attribs)
+        public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
         {
-			m_MindMap.UpdateTasks(tasks, type, attribs);
+			m_MindMap.UpdateTasks(tasks, type);
         }
 
-        public bool WantTaskUpdate(UIExtension.TaskAttribute attrib)
+        public bool WantTaskUpdate(Task.Attribute attrib)
         {
             return m_MindMap.WantTaskUpdate(attrib);
         }
 
-        public bool WantSortUpdate(UIExtension.TaskAttribute attrib)
+        public bool WantSortUpdate(Task.Attribute attrib)
         {
             return false;
         }
@@ -250,7 +248,7 @@ namespace MindMapUIExtension
         {
             var notify = new UIExtension.ParentNotify(m_hwndParent);
 
-            return notify.NotifyMod(UIExtension.TaskAttribute.DoneDate, 
+            return notify.NotifyMod(Task.Attribute.DoneDate, 
                                     (completed ? DateTime.Now : DateTime.MinValue));
         }
 

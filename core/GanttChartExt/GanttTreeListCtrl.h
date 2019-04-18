@@ -51,7 +51,7 @@ public:
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 
-	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib);
+	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	bool PrepareNewTask(ITaskList* pTask) const;
 
 	DWORD GetSelectedTaskID() const;
@@ -371,14 +371,14 @@ protected:
 
 	void RebuildTree(const ITASKLISTBASE* pTasks);
 	void BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd = TRUE);
-	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
 	void RecalcParentDates();
 	void RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI);
 	void RefreshTreeItemMap();
 	void UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void UpdateParentStatus(DWORD dwOldParentID, DWORD dwNewParentID);
 
-	BOOL EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib) const;
+	BOOL EditWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const;
 	void Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
 	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCOLUMN& col) const;
 

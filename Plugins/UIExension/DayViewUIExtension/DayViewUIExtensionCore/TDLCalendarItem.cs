@@ -174,66 +174,14 @@ namespace DayViewUIExtension
 					(EndDate > StartDate));
 		}
 
-		public bool UpdateTaskAttributes(Task task,
-							   UIExtension.UpdateType type,
-							   System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
+		public bool UpdateTaskAttributes(Task task, UIExtension.UpdateType type, bool newTask)
 		{
 			if (!task.IsValid())
 				return false;
 
 			UInt32 taskID = task.GetID();
 
-			if (attribs != null)
-			{
-				if (attribs.Contains(UIExtension.TaskAttribute.Title))
-					Title = task.GetTitle();
-
-				if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
-				{
-					m_PrevDueDate = task.GetDueDate(false); // always
-
-					if (!IsDone)
-						EndDate = m_PrevDueDate;
-				}
-
-				if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
-				{
-					bool wasDone = IsDone;
-					IsDone = (task.IsDone() || task.IsGoodAsDone());
-
-					if (IsDone)
-					{
-						if (!wasDone)
-							m_PrevDueDate = EndDate;
-
-						EndDate = task.GetDoneDate();
-					}
-					else if (wasDone && !IsDone)
-					{
-						EndDate = m_PrevDueDate;
-					}
-				}
-
-				if (attribs.Contains(UIExtension.TaskAttribute.TimeEstimate))
-				{
-					Task.TimeUnits units = Task.TimeUnits.Unknown;
-					TimeEstimate = task.GetTimeEstimate(ref units, false);
-					TimeEstUnits = units;
-				}
-
-				if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
-					StartDate = task.GetStartDate(false);
-
-				if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
-					AllocTo = String.Join(", ", task.GetAllocatedTo());
-
-				if (attribs.Contains(UIExtension.TaskAttribute.Icon))
-					HasIcon = task.HasIcon();
-
-				TaskTextColor = task.GetTextDrawingColor();
-				IsLocked = task.IsLocked(true);
-			}
-			else
+			if (newTask)
 			{
 				Title = task.GetTitle();
 				AllocTo = String.Join(", ", task.GetAllocatedTo());
@@ -253,6 +201,56 @@ namespace DayViewUIExtension
 
 				m_PrevDueDate = task.GetDueDate(false);
 				EndDate = (IsDone ? task.GetDoneDate() : m_PrevDueDate);
+			}
+			else
+			{
+				if (task.HasAttribute(Task.Attribute.Title))
+					Title = task.GetTitle();
+
+				if (task.HasAttribute(Task.Attribute.DueDate))
+				{
+					m_PrevDueDate = task.GetDueDate(false); // always
+
+					if (!IsDone)
+						EndDate = m_PrevDueDate;
+				}
+
+				if (task.HasAttribute(Task.Attribute.DoneDate))
+				{
+					bool wasDone = IsDone;
+					IsDone = (task.IsDone() || task.IsGoodAsDone());
+
+					if (IsDone)
+					{
+						if (!wasDone)
+							m_PrevDueDate = EndDate;
+
+						EndDate = task.GetDoneDate();
+					}
+					else if (wasDone && !IsDone)
+					{
+						EndDate = m_PrevDueDate;
+					}
+				}
+
+				if (task.HasAttribute(Task.Attribute.TimeEstimate))
+				{
+					Task.TimeUnits units = Task.TimeUnits.Unknown;
+					TimeEstimate = task.GetTimeEstimate(ref units, false);
+					TimeEstUnits = units;
+				}
+
+				if (task.HasAttribute(Task.Attribute.StartDate))
+					StartDate = task.GetStartDate(false);
+
+				if (task.HasAttribute(Task.Attribute.AllocatedTo))
+					AllocTo = String.Join(", ", task.GetAllocatedTo());
+
+				if (task.HasAttribute(Task.Attribute.Icon))
+					HasIcon = task.HasIcon();
+
+				TaskTextColor = task.GetTextDrawingColor();
+				IsLocked = task.IsLocked(true);
 			}
 
 			UpdateOriginalDates();

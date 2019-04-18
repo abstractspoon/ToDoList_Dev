@@ -19,39 +19,39 @@ namespace HTMLReportExporter
 		static String Space = @"&nbsp;";
 		static String Endl = @"\n";
 
-		static List<TaskList.TaskAttribute> AttribOrder = new List<TaskList.TaskAttribute>()
+		static List<Task.Attribute> AttribOrder = new List<Task.Attribute>()
 		{
-			TaskList.TaskAttribute.Position,
-			TaskList.TaskAttribute.Title,
-			TaskList.TaskAttribute.Id,
-			TaskList.TaskAttribute.ParentId,
-			TaskList.TaskAttribute.Path,
-			TaskList.TaskAttribute.Priority,
-			TaskList.TaskAttribute.Risk,
-			TaskList.TaskAttribute.Percent,
-			TaskList.TaskAttribute.TimeEstimate,
-			TaskList.TaskAttribute.TimeSpent,
-			TaskList.TaskAttribute.CreationDate,
-			TaskList.TaskAttribute.CreatedBy,
-			TaskList.TaskAttribute.LastModifiedDate,
-			TaskList.TaskAttribute.LastModifiedBy,
-			TaskList.TaskAttribute.StartDate,
-			TaskList.TaskAttribute.DueDate,
-			TaskList.TaskAttribute.DoneDate,
-			TaskList.TaskAttribute.Recurrence,
-			TaskList.TaskAttribute.AllocatedTo,
-			TaskList.TaskAttribute.AllocatedBy,
-			TaskList.TaskAttribute.Status,
-			TaskList.TaskAttribute.Category,
-			TaskList.TaskAttribute.Tags,
-			TaskList.TaskAttribute.ExternalId,
-			TaskList.TaskAttribute.Cost,
-			TaskList.TaskAttribute.Version,
-			TaskList.TaskAttribute.Flag,
-			TaskList.TaskAttribute.Dependency,
-			TaskList.TaskAttribute.FileLink,
-			TaskList.TaskAttribute.SubtaskDone,
-			TaskList.TaskAttribute.Comments,
+			Task.Attribute.Position,
+			Task.Attribute.Title,
+			Task.Attribute.Id,
+			Task.Attribute.ParentId,
+			Task.Attribute.Path,
+			Task.Attribute.Priority,
+			Task.Attribute.Risk,
+			Task.Attribute.Percent,
+			Task.Attribute.TimeEstimate,
+			Task.Attribute.TimeSpent,
+			Task.Attribute.CreationDate,
+			Task.Attribute.CreatedBy,
+			Task.Attribute.LastModifiedDate,
+			Task.Attribute.LastModifiedBy,
+			Task.Attribute.StartDate,
+			Task.Attribute.DueDate,
+			Task.Attribute.DoneDate,
+			Task.Attribute.Recurrence,
+			Task.Attribute.AllocatedTo,
+			Task.Attribute.AllocatedBy,
+			Task.Attribute.Status,
+			Task.Attribute.Category,
+			Task.Attribute.Tags,
+			Task.Attribute.ExternalId,
+			Task.Attribute.Cost,
+			Task.Attribute.Version,
+			Task.Attribute.Flag,
+			Task.Attribute.Dependency,
+			Task.Attribute.FileReference,
+			Task.Attribute.SubtaskDone,
+			Task.Attribute.Comments,
 		};
 
 		enum RenderStyle
@@ -76,7 +76,7 @@ namespace HTMLReportExporter
 		private bool StrikeThruDone = true;
 		private int CommentsPercentWidth = 30;
 		private RenderStyle Style = DefRenderStyle;
-		private HashSet<TaskList.TaskAttribute> Attribs = new HashSet<TaskList.TaskAttribute>();
+		private HashSet<Task.Attribute> Attribs = new HashSet<Task.Attribute>();
 
 
 
@@ -89,7 +89,7 @@ namespace HTMLReportExporter
 
 		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
-			tasks.GetAttributeList(Attribs);
+			//tasks.GetAttributeList(Attribs);
 
 			String font = prefs.GetProfileString("Preferences", "HTMLFont", "Verdana");
 			int fontSize = prefs.GetProfileInt(sKey, "HtmlFontSize", 2);
@@ -387,7 +387,7 @@ namespace HTMLReportExporter
 			{
 				case RenderStyle.Wrap:
 				case RenderStyle.Paragraph:
-					if (Attribs.Contains(TaskList.TaskAttribute.Position))
+					if (Attribs.Contains(Task.Attribute.Position))
 					{
 						if (depth > 0)
 							html.RenderBeginTag(HtmlTextWriterTag.Blockquote);
@@ -413,7 +413,7 @@ namespace HTMLReportExporter
 			{
 				case RenderStyle.Wrap:
 				case RenderStyle.Paragraph:
-					if (Attribs.Contains(TaskList.TaskAttribute.Position))
+					if (Attribs.Contains(Task.Attribute.Position))
 					{
 						if (depth > 0)
 							html.RenderEndTag(); // Blockquote
@@ -432,7 +432,7 @@ namespace HTMLReportExporter
 
 		// ----------------------
 
-		protected bool ExportTaskAttribute(Task task, TaskList.TaskAttribute attrib, bool first, int depth, HtmlTextWriter html)
+		protected bool ExportTaskAttribute(Task task, Task.Attribute attrib, bool first, int depth, HtmlTextWriter html)
 		{
 			if (!Attribs.Contains(attrib))
 				return false;
@@ -444,7 +444,7 @@ namespace HTMLReportExporter
 			switch (Style)
 			{
 				case RenderStyle.Wrap:
-					if (attrib == TaskList.TaskAttribute.Comments)
+					if (attrib == Task.Attribute.Comments)
 					{
 						html.WriteLine();
 						html.Write(attribVal);
@@ -471,7 +471,7 @@ namespace HTMLReportExporter
 			return true;
 		}
 
-		protected String FormatTaskAttribute(Task task, TaskList.TaskAttribute attrib, int depth)
+		protected String FormatTaskAttribute(Task task, Task.Attribute attrib, int depth)
 		{
 			var attribVal = GetAttributeValue(task, attrib);
 
@@ -486,15 +486,15 @@ namespace HTMLReportExporter
 
 			switch (attrib)
 			{
-				case TaskList.TaskAttribute.Position:
+				case Task.Attribute.Position:
 					wantIndent = (Style == RenderStyle.Table);
 					break;
 
-				case TaskList.TaskAttribute.Title:
-					wantIndent = ((Style == RenderStyle.Table) && !Attribs.Contains(TaskList.TaskAttribute.Position));
+				case Task.Attribute.Title:
+					wantIndent = ((Style == RenderStyle.Table) && !Attribs.Contains(Task.Attribute.Position));
 					break;
 
-				case TaskList.TaskAttribute.Priority:
+				case Task.Attribute.Priority:
 					{
 /*
 						int nPriority = task.GetPriority(hTask, TRUE);
@@ -511,17 +511,17 @@ namespace HTMLReportExporter
 					}
 					break;
 
-				case TaskList.TaskAttribute.FileLink:
+				case Task.Attribute.FileReference:
 /*
 					if (!sItem.IsEmpty())
 					{
 						// do it over creating a link for each file ref
 						String sFileRefs;
-						int nNumFileRefs = pTasks->GetTaskFileLinkCount(hTask);
+						int nNumFileRefs = pTasks->GetTaskFileReferenceCount(hTask);
 
 						for (int nFile = 0; nFile < nNumFileRefs; nFile++)
 						{
-							String sFilePath = pTasks->GetTaskFileLink(hTask, nFile), sFileName;
+							String sFilePath = pTasks->GetTaskFileReference(hTask, nFile), sFileName;
 
 							if (PathIsURL(sFilePath))
 							{
@@ -551,7 +551,7 @@ namespace HTMLReportExporter
 */
 					break;
 
-				case TaskList.TaskAttribute.Comments:
+				case Task.Attribute.Comments:
 /*
 					if (pTasks->TaskHasAttribute(hTask, TDL_TASKHTMLCOMMENTS))
 					{
@@ -663,7 +663,7 @@ namespace HTMLReportExporter
 			{
 				case RenderStyle.Wrap:
 				case RenderStyle.Paragraph:
-					if (Attribs.Contains(TaskList.TaskAttribute.Position))
+					if (Attribs.Contains(Task.Attribute.Position))
 						html.RenderBeginTag(HtmlTextWriterTag.Blockquote);
 					else
 						html.RenderBeginTag(HtmlTextWriterTag.Ul);
@@ -689,80 +689,80 @@ namespace HTMLReportExporter
 			}
 		}
 
-		protected String GetAttributeName(TaskList.TaskAttribute attrib)
+		protected String GetAttributeName(Task.Attribute attrib)
 		{
 			switch (attrib)
 			{
-				case TaskList.TaskAttribute.Title:				return m_Trans.Translate("Title");
-				case TaskList.TaskAttribute.Position:			return m_Trans.Translate("Position");
-				case TaskList.TaskAttribute.Id:					return m_Trans.Translate("Id");
-				case TaskList.TaskAttribute.ParentId:			return m_Trans.Translate("Parent Id");
-				case TaskList.TaskAttribute.Path:				return m_Trans.Translate("Path");
-				case TaskList.TaskAttribute.Priority:			return m_Trans.Translate("Priority");
-				case TaskList.TaskAttribute.Risk:				return m_Trans.Translate("Risk");
-				case TaskList.TaskAttribute.Percent:			return m_Trans.Translate("Percent");
-				case TaskList.TaskAttribute.TimeEstimate:		return m_Trans.Translate("Time Estimate");
-				case TaskList.TaskAttribute.TimeSpent:			return m_Trans.Translate("Time Spent");
-				case TaskList.TaskAttribute.CreationDate:		return m_Trans.Translate("Creation Date");
-				case TaskList.TaskAttribute.CreatedBy:			return m_Trans.Translate("Created By");
-				case TaskList.TaskAttribute.LastModifiedDate:	return m_Trans.Translate("Last Modified Date");
-				case TaskList.TaskAttribute.LastModifiedBy:		return m_Trans.Translate("Last Modified By");
-				case TaskList.TaskAttribute.StartDate:			return m_Trans.Translate("Start Date");
-				case TaskList.TaskAttribute.DueDate:			return m_Trans.Translate("Due Date");
-				case TaskList.TaskAttribute.DoneDate:			return m_Trans.Translate("Done Date");
-				case TaskList.TaskAttribute.Recurrence:			return m_Trans.Translate("Recurrence");
-				case TaskList.TaskAttribute.AllocatedTo:		return m_Trans.Translate("Allocated To");
-				case TaskList.TaskAttribute.AllocatedBy:		return m_Trans.Translate("Allocated By");
-				case TaskList.TaskAttribute.Status:				return m_Trans.Translate("Status");
-				case TaskList.TaskAttribute.Category:			return m_Trans.Translate("Category");
-				case TaskList.TaskAttribute.Tags:				return m_Trans.Translate("Tags");
-				case TaskList.TaskAttribute.ExternalId:			return m_Trans.Translate("ExternalId");
-				case TaskList.TaskAttribute.Cost:				return m_Trans.Translate("Cost");
-				case TaskList.TaskAttribute.Version:			return m_Trans.Translate("Version");
-				case TaskList.TaskAttribute.Flag:				return m_Trans.Translate("Flag");
-				case TaskList.TaskAttribute.Dependency:			return m_Trans.Translate("Dependency");
-				case TaskList.TaskAttribute.FileLink:			return m_Trans.Translate("File Link");
-				case TaskList.TaskAttribute.SubtaskDone:		return m_Trans.Translate("Subtask Done");
-				case TaskList.TaskAttribute.Comments:			return m_Trans.Translate("Comments");
+				case Task.Attribute.Title:				return m_Trans.Translate("Title");
+				case Task.Attribute.Position:			return m_Trans.Translate("Position");
+				case Task.Attribute.Id:					return m_Trans.Translate("Id");
+				case Task.Attribute.ParentId:			return m_Trans.Translate("Parent Id");
+				case Task.Attribute.Path:				return m_Trans.Translate("Path");
+				case Task.Attribute.Priority:			return m_Trans.Translate("Priority");
+				case Task.Attribute.Risk:				return m_Trans.Translate("Risk");
+				case Task.Attribute.Percent:			return m_Trans.Translate("Percent");
+				case Task.Attribute.TimeEstimate:		return m_Trans.Translate("Time Estimate");
+				case Task.Attribute.TimeSpent:			return m_Trans.Translate("Time Spent");
+				case Task.Attribute.CreationDate:		return m_Trans.Translate("Creation Date");
+				case Task.Attribute.CreatedBy:			return m_Trans.Translate("Created By");
+				case Task.Attribute.LastModifiedDate:	return m_Trans.Translate("Last Modified Date");
+				case Task.Attribute.LastModifiedBy:		return m_Trans.Translate("Last Modified By");
+				case Task.Attribute.StartDate:			return m_Trans.Translate("Start Date");
+				case Task.Attribute.DueDate:			return m_Trans.Translate("Due Date");
+				case Task.Attribute.DoneDate:			return m_Trans.Translate("Done Date");
+				case Task.Attribute.Recurrence:			return m_Trans.Translate("Recurrence");
+				case Task.Attribute.AllocatedTo:		return m_Trans.Translate("Allocated To");
+				case Task.Attribute.AllocatedBy:		return m_Trans.Translate("Allocated By");
+				case Task.Attribute.Status:				return m_Trans.Translate("Status");
+				case Task.Attribute.Category:			return m_Trans.Translate("Category");
+				case Task.Attribute.Tags:				return m_Trans.Translate("Tags");
+				case Task.Attribute.ExternalId:			return m_Trans.Translate("ExternalId");
+				case Task.Attribute.Cost:				return m_Trans.Translate("Cost");
+				case Task.Attribute.Version:			return m_Trans.Translate("Version");
+				case Task.Attribute.Flag:				return m_Trans.Translate("Flag");
+				case Task.Attribute.Dependency:			return m_Trans.Translate("Dependency");
+				case Task.Attribute.FileReference:			return m_Trans.Translate("File Link");
+				case Task.Attribute.SubtaskDone:		return m_Trans.Translate("Subtask Done");
+				case Task.Attribute.Comments:			return m_Trans.Translate("Comments");
 			}
 
 			return "";
 		}
 
-		protected String GetAttributeValue(Task task, TaskList.TaskAttribute attrib)
+		protected String GetAttributeValue(Task task, Task.Attribute attrib)
 		{
 			switch (attrib)
 			{
-				case TaskList.TaskAttribute.Title:				return task.GetTitle();
-				case TaskList.TaskAttribute.Position:			return task.GetPositionString();
-				case TaskList.TaskAttribute.Id:					return task.GetID().ToString();
-				case TaskList.TaskAttribute.Path:				return task.GetPath(@"\");
-				case TaskList.TaskAttribute.Percent:			return task.GetPercentDone(false).ToString();
-				case TaskList.TaskAttribute.TimeEstimate:		return "";// task.GetTimeEstimate();
-				case TaskList.TaskAttribute.TimeSpent:			return "";// task.GetTimeSpent();
-				case TaskList.TaskAttribute.CreationDate:		return task.GetCreationDateString();
-				case TaskList.TaskAttribute.CreatedBy:			return task.GetCreatedBy();
-				case TaskList.TaskAttribute.LastModifiedDate:	return task.GetLastModifiedDateString();
-				case TaskList.TaskAttribute.LastModifiedBy:		return task.GetLastModifiedBy();
-				case TaskList.TaskAttribute.StartDate:			return task.GetStartDateString(false);
-				case TaskList.TaskAttribute.DueDate:			return task.GetDueDateString(false);
-				case TaskList.TaskAttribute.DoneDate:			return task.GetDoneDateString();
-				case TaskList.TaskAttribute.Recurrence:			return "";// task.GetRecurrence();
-				case TaskList.TaskAttribute.AllocatedBy:		return task.GetAllocatedBy();
-				case TaskList.TaskAttribute.Status:				return task.GetStatus();
-				case TaskList.TaskAttribute.ExternalId:			return task.GetExternalID();
-				case TaskList.TaskAttribute.Cost:				return task.GetCost(false).ToString();
-				case TaskList.TaskAttribute.Version:			return task.GetVersion();
-				case TaskList.TaskAttribute.Flag:				return task.IsFlagged(false).ToString();
-				case TaskList.TaskAttribute.SubtaskDone:		return "";// task.GetSubtaskDoneString();
+				case Task.Attribute.Title:				return task.GetTitle();
+				case Task.Attribute.Position:			return task.GetPositionString();
+				case Task.Attribute.Id:					return task.GetID().ToString();
+				case Task.Attribute.Path:				return task.GetPath(@"\");
+				case Task.Attribute.Percent:			return task.GetPercentDone(false).ToString();
+				case Task.Attribute.TimeEstimate:		return "";// task.GetTimeEstimate();
+				case Task.Attribute.TimeSpent:			return "";// task.GetTimeSpent();
+				case Task.Attribute.CreationDate:		return task.GetCreationDateString();
+				case Task.Attribute.CreatedBy:			return task.GetCreatedBy();
+				case Task.Attribute.LastModifiedDate:	return task.GetLastModifiedDateString();
+				case Task.Attribute.LastModifiedBy:		return task.GetLastModifiedBy();
+				case Task.Attribute.StartDate:			return task.GetStartDateString(false);
+				case Task.Attribute.DueDate:			return task.GetDueDateString(false);
+				case Task.Attribute.DoneDate:			return task.GetDoneDateString();
+				case Task.Attribute.Recurrence:			return "";// task.GetRecurrence();
+				case Task.Attribute.AllocatedBy:		return task.GetAllocatedBy();
+				case Task.Attribute.Status:				return task.GetStatus();
+				case Task.Attribute.ExternalId:			return task.GetExternalID();
+				case Task.Attribute.Cost:				return task.GetCost(false).ToString();
+				case Task.Attribute.Version:			return task.GetVersion();
+				case Task.Attribute.Flag:				return task.IsFlagged(false).ToString();
+				case Task.Attribute.SubtaskDone:		return "";// task.GetSubtaskDoneString();
 
-				case TaskList.TaskAttribute.AllocatedTo:		return task.FormatAllocatedTo("+");
-				case TaskList.TaskAttribute.Category:			return task.FormatCategory("+");
-				case TaskList.TaskAttribute.Tags:				return task.FormatTag("+");
-				case TaskList.TaskAttribute.Dependency:			return task.FormatDependency("+");
-				case TaskList.TaskAttribute.FileLink:			return task.FormatFileReference("+");
+				case Task.Attribute.AllocatedTo:		return task.FormatAllocatedTo("+");
+				case Task.Attribute.Category:			return task.FormatCategory("+");
+				case Task.Attribute.Tags:				return task.FormatTag("+");
+				case Task.Attribute.Dependency:			return task.FormatDependency("+");
+				case Task.Attribute.FileReference:			return task.FormatFileReference("+");
 					
-				case TaskList.TaskAttribute.Priority:
+				case Task.Attribute.Priority:
 					{
 						Int32 priority = task.GetPriority(false);
 
@@ -778,9 +778,8 @@ namespace HTMLReportExporter
 						return priority.ToString();
 					}
 					break;
-
-
-				case TaskList.TaskAttribute.Risk:
+					
+				case Task.Attribute.Risk:
 					{
 						Int32 priority = task.GetRisk(false);
 
@@ -797,7 +796,7 @@ namespace HTMLReportExporter
 					}
 					break;
 
-				case TaskList.TaskAttribute.ParentId:
+				case Task.Attribute.ParentId:
 					{
 						UInt32 parentId = task.GetParentID();
 
@@ -806,7 +805,7 @@ namespace HTMLReportExporter
 					}
 					break;
 
-				case TaskList.TaskAttribute.Comments:
+				case Task.Attribute.Comments:
 					{
 						String htmlComments = task.GetHtmlComments();
 

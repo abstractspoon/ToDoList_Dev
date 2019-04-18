@@ -9011,6 +9011,7 @@ int CToDoCtrl::GetTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 void CToDoCtrl::PrepareTaskfileForTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
 	tasks.Reset();
+	tasks.SetAvailableAttributes(filter.mapAttribs);
 
 	// ISO date strings
 	// must be done first before any tasks are added

@@ -23,12 +23,12 @@ struct TASKCALITEM
 public:
 	TASKCALITEM();
 	TASKCALITEM(const TASKCALITEM& tci);
-	TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, DWORD dwCalcDates);
+	TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates);
 
 	TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci);
 	BOOL TASKCALITEM::operator==(const TASKCALITEM& tci);
 
-	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, DWORD dwCalcDates);
+	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates);
 	void RecalcDates(DWORD dwCalcDates);
 	inline DWORD GetTaskID() const { return dwTaskID; }
 
@@ -72,7 +72,7 @@ protected:
 	BOOL bHasIcon, bIsParent;
 
 protected:
-	void UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, DWORD dwCalcDates);
+	void UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates);
 	void ReformatName();
 
 	static COleDateTime GetDate(time64_t tDate);

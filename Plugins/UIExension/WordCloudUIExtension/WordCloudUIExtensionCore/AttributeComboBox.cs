@@ -14,7 +14,7 @@ namespace WordCloudUIExtension
     {
         protected class AttributeItem
         {
-            public AttributeItem(string name, UIExtension.TaskAttribute attrib)
+            public AttributeItem(string name, Task.Attribute attrib)
             {
                 Name = name;
                 Attrib = attrib;
@@ -26,7 +26,7 @@ namespace WordCloudUIExtension
             }
 
             public string Name { set; get; }
-            public UIExtension.TaskAttribute Attrib { set; get; }
+            public Task.Attribute Attrib { set; get; }
         }
 
         // ---------------------------------------------------------------
@@ -35,40 +35,40 @@ namespace WordCloudUIExtension
         {
 			if (Items.Count == 0) // once only
 			{
-				AddItem(trans, "Title", UIExtension.TaskAttribute.Title);
-				AddItem(trans, "Comments", UIExtension.TaskAttribute.Comments);
-				AddItem(trans, "Status", UIExtension.TaskAttribute.Status);
-				AddItem(trans, "Category", UIExtension.TaskAttribute.Category);
-				AddItem(trans, "Completion Date", UIExtension.TaskAttribute.DoneDate);
-				AddItem(trans, "Due Date", UIExtension.TaskAttribute.DueDate);
-				AddItem(trans, "Start Date", UIExtension.TaskAttribute.StartDate);
-				AddItem(trans, "Allocated To", UIExtension.TaskAttribute.AllocTo);
-				AddItem(trans, "Allocated By", UIExtension.TaskAttribute.AllocBy);
-				AddItem(trans, "Creation Date", UIExtension.TaskAttribute.CreationDate);
-				AddItem(trans, "Created By", UIExtension.TaskAttribute.CreatedBy);
-				AddItem(trans, "Version", UIExtension.TaskAttribute.Version);
-				AddItem(trans, "Tags", UIExtension.TaskAttribute.Tag);
+				AddItem(trans, "Title",			Task.Attribute.Title);
+				AddItem(trans, "Comments",		Task.Attribute.Comments);
+				AddItem(trans, "Status",		Task.Attribute.Status);
+				AddItem(trans, "Category",		Task.Attribute.Category);
+				AddItem(trans, "Completion Date", Task.Attribute.DoneDate);
+				AddItem(trans, "Due Date",		Task.Attribute.DueDate);
+				AddItem(trans, "Start Date",	Task.Attribute.StartDate);
+				AddItem(trans, "Allocated To",	Task.Attribute.AllocatedTo);
+				AddItem(trans, "Allocated By",	Task.Attribute.AllocatedBy);
+				AddItem(trans, "Creation Date", Task.Attribute.CreationDate);
+				AddItem(trans, "Created By",	Task.Attribute.CreatedBy);
+				AddItem(trans, "Version",		Task.Attribute.Version);
+				AddItem(trans, "Tags",			Task.Attribute.Tags);
 			}
 
             return true;
         }
 
-		private bool AddItem(Translator trans, string name, UIExtension.TaskAttribute attrib)
+		private bool AddItem(Translator trans, string name, Task.Attribute attrib)
 		{
             return (Items.Add(new AttributeItem(trans.Translate(name), attrib)) != -1);
 		}
 
-        public UIExtension.TaskAttribute GetSelectedAttribute()
+        public Task.Attribute GetSelectedAttribute()
         {
             AttributeItem selItem = (AttributeItem)SelectedItem;
 
             if (selItem == null)
-                return UIExtension.TaskAttribute.Unknown;
+                return Task.Attribute.Unknown;
 
             return selItem.Attrib;
         }
 
-        public bool SetSelectedAttribute(UIExtension.TaskAttribute attrib)
+        public bool SetSelectedAttribute(Task.Attribute attrib)
         {
             var item = FindAttribute(attrib);
 
@@ -80,7 +80,7 @@ namespace WordCloudUIExtension
             return true;
         }
 
-        protected AttributeItem FindAttribute(UIExtension.TaskAttribute attrib)
+        protected AttributeItem FindAttribute(Task.Attribute attrib)
         {
             foreach (AttributeItem item in Items)
             {
@@ -92,23 +92,23 @@ namespace WordCloudUIExtension
             return null;
         }
 
-        public static bool IsSupportedAttribute(UIExtension.TaskAttribute attrib)
+        public static bool IsSupportedAttribute(Task.Attribute attrib)
         {
             switch (attrib)
             {
-                case UIExtension.TaskAttribute.Title:
-                case UIExtension.TaskAttribute.DoneDate:
-                case UIExtension.TaskAttribute.DueDate:
-                case UIExtension.TaskAttribute.StartDate:
-                case UIExtension.TaskAttribute.AllocTo:
-                case UIExtension.TaskAttribute.AllocBy:
-                case UIExtension.TaskAttribute.Status:
-                case UIExtension.TaskAttribute.Category:
-                case UIExtension.TaskAttribute.Comments:
-                case UIExtension.TaskAttribute.CreationDate:
-                case UIExtension.TaskAttribute.CreatedBy:
-                case UIExtension.TaskAttribute.Version:
-                case UIExtension.TaskAttribute.Tag:
+                case Task.Attribute.Title:
+                case Task.Attribute.DoneDate:
+                case Task.Attribute.DueDate:
+                case Task.Attribute.StartDate:
+                case Task.Attribute.AllocatedTo:
+                case Task.Attribute.AllocatedBy:
+                case Task.Attribute.Status:
+                case Task.Attribute.Category:
+                case Task.Attribute.Comments:
+                case Task.Attribute.CreationDate:
+                case Task.Attribute.CreatedBy:
+                case Task.Attribute.Version:
+                case Task.Attribute.Tags:
                     return true;
             }
 

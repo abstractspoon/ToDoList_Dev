@@ -38,7 +38,7 @@ public:
 
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
 
-	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<TDC_ATTRIBUTE>& attrib);
+	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	bool PrepareNewTask(ITaskList* pTask) const;
 
 	DWORD GetSelectedTaskID() const;
@@ -187,12 +187,12 @@ protected:
 	BOOL IsTrackedAttributeMultiValue() const;
 	BOOL IsTracking(const CString& sAttribID) const;
 	BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol) const;
-	BOOL UpdateNeedsItemHeightRefresh(const CSet<TDC_ATTRIBUTE>& attrib) const;
+	BOOL UpdateNeedsItemHeightRefresh(const ITASKLISTBASE* pTasks) const;
 
-	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings);
-	BOOL RebuildData(const ITASKLISTBASE* pTasks, const CSet<TDC_ATTRIBUTE>& attrib);
-	BOOL AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<TDC_ATTRIBUTE>& attrib, BOOL bAndSiblings);
-	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, const CSet<TDC_ATTRIBUTE>& attrib);
+	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
+	BOOL RebuildData(const ITASKLISTBASE* pTasks);
+	BOOL AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, BOOL bAndSiblings);
+	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks);
 	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE nAttribute);
 	BOOL UpdateGlobalAttributeValues(LPCTSTR szAttribID, const CStringArray& aValues);
 
@@ -205,7 +205,7 @@ protected:
 	static BOOL RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanItemArrayMap& mapKIArray, BOOL bShowParents);
 	static CString GetXMLTag(TDC_ATTRIBUTE nAttrib);
 	static BOOL HasNonParentTasks(const CKanbanItemArray* pItems);
-	static void UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<TDC_ATTRIBUTE>& attrib);
+	static void UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
 };
 
