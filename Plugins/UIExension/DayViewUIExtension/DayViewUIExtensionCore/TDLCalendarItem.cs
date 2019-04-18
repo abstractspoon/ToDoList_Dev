@@ -204,10 +204,10 @@ namespace DayViewUIExtension
 			}
 			else
 			{
-				if (task.HasAttribute(Task.Attribute.Title))
+				if (task.IsAttributeAvailable(Task.Attribute.Title))
 					Title = task.GetTitle();
 
-				if (task.HasAttribute(Task.Attribute.DueDate))
+				if (task.IsAttributeAvailable(Task.Attribute.DueDate))
 				{
 					m_PrevDueDate = task.GetDueDate(false); // always
 
@@ -215,7 +215,7 @@ namespace DayViewUIExtension
 						EndDate = m_PrevDueDate;
 				}
 
-				if (task.HasAttribute(Task.Attribute.DoneDate))
+				if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
 				{
 					bool wasDone = IsDone;
 					IsDone = (task.IsDone() || task.IsGoodAsDone());
@@ -233,20 +233,20 @@ namespace DayViewUIExtension
 					}
 				}
 
-				if (task.HasAttribute(Task.Attribute.TimeEstimate))
+				if (task.IsAttributeAvailable(Task.Attribute.TimeEstimate))
 				{
 					Task.TimeUnits units = Task.TimeUnits.Unknown;
 					TimeEstimate = task.GetTimeEstimate(ref units, false);
 					TimeEstUnits = units;
 				}
 
-				if (task.HasAttribute(Task.Attribute.StartDate))
+				if (task.IsAttributeAvailable(Task.Attribute.StartDate))
 					StartDate = task.GetStartDate(false);
 
-				if (task.HasAttribute(Task.Attribute.AllocatedTo))
+				if (task.IsAttributeAvailable(Task.Attribute.AllocatedTo))
 					AllocTo = String.Join(", ", task.GetAllocatedTo());
 
-				if (task.HasAttribute(Task.Attribute.Icon))
+				if (task.IsAttributeAvailable(Task.Attribute.Icon))
 					HasIcon = task.HasIcon();
 
 				TaskTextColor = task.GetTextDrawingColor();

@@ -43,73 +43,73 @@ namespace StatsUIExtension
             System.Text.StringBuilder attrib = new System.Text.StringBuilder();
             System.Text.StringBuilder value = new System.Text.StringBuilder();
 
-            if (tasks.HasAttribute(Task.Attribute.Title))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Title))
             {
                 attrib.Append("Title");
                 value.Append(task.GetTitle());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.DoneDate))
+            if (tasks.IsAttributeAvailable(Task.Attribute.DoneDate))
             {
                 attrib.Append("Done Date");
                 value.Append(task.GetDoneDateString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.DueDate))
+            if (tasks.IsAttributeAvailable(Task.Attribute.DueDate))
             {
                 attrib.Append("Due Date");
                 value.Append(task.GetDueDateString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.StartDate))
+            if (tasks.IsAttributeAvailable(Task.Attribute.StartDate))
             {
                 attrib.Append("Start Date");
                 value.Append(task.GetStartDateString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Priority))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Priority))
             {
                 attrib.Append("Priority");
                 value.Append(task.GetPriority().ToString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Color))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Color))
             {
                 attrib.Append("Color");
                 value.Append(task.GetColor().ToString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.AllocTo))
+            if (tasks.IsAttributeAvailable(Task.Attribute.AllocTo))
             {
                 attrib.Append("Alloc To");
                 value.Append(task.GetAllocatedTo(0));
             }
 
-            if (tasks.HasAttribute(Task.Attribute.AllocBy))
+            if (tasks.IsAttributeAvailable(Task.Attribute.AllocBy))
             {
                 attrib.Append("Alloc By");
                 value.Append(task.GetAllocatedBy());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Status))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Status))
             {
                 attrib.Append("Status");
                 value.Append(task.GetStatus());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Category))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Category))
             {
                 attrib.Append("Category");
                 value.Append(task.GetCategory(0));
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Percent))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Percent))
             {
                 attrib.Append("Percent");
                 value.Append(task.GetPercentDone().ToString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.TimeEstimate))
+            if (tasks.IsAttributeAvailable(Task.Attribute.TimeEstimate))
             {
                 attrib.Append("Time Estimate");
 
@@ -117,7 +117,7 @@ namespace StatsUIExtension
                 value.Append(task.GetTimeEstimate(ref units).ToString() + units);
             }
 
-            if (tasks.HasAttribute(Task.Attribute.TimeSpent))
+            if (tasks.IsAttributeAvailable(Task.Attribute.TimeSpent))
             {
                 attrib.Append("Time Spent");
 
@@ -125,104 +125,104 @@ namespace StatsUIExtension
                 value.Append(task.GetTimeSpent(ref units).ToString() + units);
             }
 
-            if (tasks.HasAttribute(Task.Attribute.FileReference))
+            if (tasks.IsAttributeAvailable(Task.Attribute.FileReference))
             {
                 attrib.Append("File Reference");
                 value.Append(task.GetFileReference(0));
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Comments))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Comments))
             {
                 attrib.Append("Comments");
                 value.Append(task.GetComments());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Flag))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Flag))
             {
                 attrib.Append("Flag");
                 value.Append(task.IsFlagged().ToString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.CreationDate))
+            if (tasks.IsAttributeAvailable(Task.Attribute.CreationDate))
             {
                 attrib.Append("Creation Date");
                 value.Append(task.GetCreationDateString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.CreatedBy))
+            if (tasks.IsAttributeAvailable(Task.Attribute.CreatedBy))
             {
                 attrib.Append("Created By");
                 value.Append(task.GetCreatedBy());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Risk))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Risk))
             {
                 attrib.Append("Risk");
                 value.Append(task.GetRisk().ToString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.ExternalId))
+            if (tasks.IsAttributeAvailable(Task.Attribute.ExternalId))
             {
                 attrib.Append("External ID");
                 value.Append(task.GetExternalID());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Cost))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Cost))
             {
                 attrib.Append("Cost");
                 value.Append(task.GetCost().ToString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Dependency))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Dependency))
             {
                 attrib.Append("Dependency");
                 value.Append(task.GetDependency(0));
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Recurrence))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Recurrence))
             {
                 attrib.Append("Recurrence");
                 //value.Append(task.GetRecurrence());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Version))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Version))
             {
                 attrib.Append("Version");
                 value.Append(task.GetVersion());
             }
 
 
-            if (tasks.HasAttribute(Task.Attribute.Position))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Position))
             {
                 attrib.Append("Position");
                 value.Append(task.GetPositionString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Id))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Id))
             {
                 attrib.Append("ID");
                 value.Append(task.GetID().ToString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.LastModified))
+            if (tasks.IsAttributeAvailable(Task.Attribute.LastModified))
             {
                 attrib.Append("Last Modified");
                 //value.Append(task.GetLastModifiedString());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Icon))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Icon))
             {
                 attrib.Append("Icon");
                 value.Append(task.GetIcon());
             }
 
-            if (tasks.HasAttribute(Task.Attribute.Tag))
+            if (tasks.IsAttributeAvailable(Task.Attribute.Tag))
             {
                 attrib.Append("Tag");
                 value.Append(task.GetTag(0));
             }
 
-            if (tasks.HasAttribute(Task.Attribute.CustomAttribute))
+            if (tasks.IsAttributeAvailable(Task.Attribute.CustomAttribute))
             {
                 attrib.Append("Custom Attribute");
                 //value.Append(task.GetCustomAttributeData());

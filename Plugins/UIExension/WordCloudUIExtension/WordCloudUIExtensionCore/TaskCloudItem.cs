@@ -124,49 +124,49 @@ namespace WordCloudUIExtension
 			}
 			else
 			{
-				if (task.HasAttribute(Task.Attribute.Title))
+				if (task.IsAttributeAvailable(Task.Attribute.Title))
 					Title = task.GetTitle();
 
-				if (task.HasAttribute(Task.Attribute.DoneDate))
+				if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
 					DoneDate = SplitDate(task.GetDoneDateString());
 
-				if (task.HasAttribute(Task.Attribute.DueDate))
+				if (task.IsAttributeAvailable(Task.Attribute.DueDate))
 					DueDate = SplitDate(task.GetDueDateString(false));
 
-				if (task.HasAttribute(Task.Attribute.StartDate))
+				if (task.IsAttributeAvailable(Task.Attribute.StartDate))
 					StartDate = SplitDate(task.GetStartDateString(false));
 
-				if (task.HasAttribute(Task.Attribute.AllocatedTo))
+				if (task.IsAttributeAvailable(Task.Attribute.AllocatedTo))
 					AllocTo = task.GetAllocatedTo();
 
-				if (task.HasAttribute(Task.Attribute.AllocatedBy))
+				if (task.IsAttributeAvailable(Task.Attribute.AllocatedBy))
 					AllocBy = task.GetAllocatedBy();
 
-				if (task.HasAttribute(Task.Attribute.Status))
+				if (task.IsAttributeAvailable(Task.Attribute.Status))
 					Status = task.GetStatus();
 
-				if (task.HasAttribute(Task.Attribute.Category))
+				if (task.IsAttributeAvailable(Task.Attribute.Category))
 					Category = task.GetCategory();
 
-				if (task.HasAttribute(Task.Attribute.Comments))
+				if (task.IsAttributeAvailable(Task.Attribute.Comments))
 					Comments = task.GetComments();
 
-				if (task.HasAttribute(Task.Attribute.CreationDate))
+				if (task.IsAttributeAvailable(Task.Attribute.CreationDate))
 					CreationDate = SplitDate(task.GetCreationDateString());
 
-				if (task.HasAttribute(Task.Attribute.CreatedBy))
+				if (task.IsAttributeAvailable(Task.Attribute.CreatedBy))
 					CreatedBy = task.GetCreatedBy();
 
-				if (task.HasAttribute(Task.Attribute.Version))
+				if (task.IsAttributeAvailable(Task.Attribute.Version))
 					Version = task.GetVersion();
 
-				if (task.HasAttribute(Task.Attribute.Tags))
+				if (task.IsAttributeAvailable(Task.Attribute.Tags))
 					Tags = task.GetTag();
 
-				if (task.HasAttribute(Task.Attribute.Icon))
+				if (task.IsAttributeAvailable(Task.Attribute.Icon))
 					HasIcon = (task.GetIcon().Length > 0);
 
-				if (task.HasAttribute(Task.Attribute.Color))
+				if (task.IsAttributeAvailable(Task.Attribute.Color))
 					TextColor = task.GetTextDrawingColor();
 			}
 		}

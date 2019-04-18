@@ -46,11 +46,8 @@ bool TaskList::IsValid()
 	return (m_pConstTaskList || m_pTaskList);
 }
 
-bool TaskList::HasAttribute(Task::Attribute attrib)
+bool TaskList::IsAttributeAvailable(Task::Attribute attrib)
 {
-	if (attrib == Task::Attribute::Unknown)
-		return false;
-
 	TDC_ATTRIBUTE nAttrib = Task::MapAttribute(attrib);
 
 	return (m_pConstTaskList ? m_pConstTaskList->IsAttributeAvailable(nAttrib) :
@@ -217,6 +214,14 @@ bool Task::IsValid()
 	return ((m_pConstTaskList || m_pTaskList) && (m_hTask != nullptr));
 }
 
+Boolean Task::IsAttributeAvailable(Attribute attrib)
+{
+	TDC_ATTRIBUTE nAttrib = MapAttribute(attrib);
+
+	return (m_pConstTaskList ? m_pConstTaskList->IsAttributeAvailable(nAttrib) :
+			(m_pTaskList ? m_pTaskList->IsAttributeAvailable(nAttrib) : false));
+}
+
 String^ Task::GetAttribute(Task::Attribute attrib)
 {
 	TDC_ATTRIBUTE nAttrib = MapAttribute(attrib);
@@ -226,13 +231,10 @@ String^ Task::GetAttribute(Task::Attribute attrib)
 
 bool Task::HasAttribute(Task::Attribute attrib)
 {
-	if (attrib == Task::Attribute::Unknown)
-		return false;
-
 	TDC_ATTRIBUTE nAttrib = MapAttribute(attrib);
 
-	return (m_pConstTaskList ? m_pConstTaskList->IsAttributeAvailable(nAttrib) :
-			(m_pTaskList ? m_pTaskList->IsAttributeAvailable(nAttrib) : false));
+	return (m_pConstTaskList ? m_pConstTaskList->TaskHasAttribute(m_hTask, nAttrib) :
+			(m_pTaskList ? m_pTaskList->TaskHasAttribute(m_hTask, nAttrib) : false));
 }
 
 Task^ Task::GetFirstSubtask()

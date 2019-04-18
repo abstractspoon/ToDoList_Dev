@@ -10,9 +10,6 @@ class ITransText;
 
 struct UITHEME;
 
-enum TDC_UNITS;
-enum TDC_ATTRIBUTE;
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System;
@@ -102,6 +99,7 @@ namespace Abstractspoon
 				Task(const Task^ task);
 
 				Boolean IsValid();
+				Boolean IsAttributeAvailable(Attribute attrib);
 
 				Task^ GetFirstSubtask();
 				Task^ GetNextTask();
@@ -257,7 +255,7 @@ namespace Abstractspoon
 				TaskList(const ITaskList* pTaskList);  // GET ONLY
 
 				bool IsValid();
-				bool HasAttribute(Task::Attribute attrib);
+				bool IsAttributeAvailable(Task::Attribute attrib);
 
 				String^ GetReportTitle();
 				String^ GetReportDate();

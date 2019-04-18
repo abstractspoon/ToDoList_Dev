@@ -134,22 +134,22 @@ namespace MindMapUIExtension
 			if (task.GetID() != m_TaskID)
 				return false;
 
-			if (task.HasAttribute(Task.Attribute.Title))
+			if (task.IsAttributeAvailable(Task.Attribute.Title))
 				m_Title = task.GetTitle();
 
-			if (task.HasAttribute(Task.Attribute.Icon))
+			if (task.IsAttributeAvailable(Task.Attribute.Icon))
 				m_HasIcon = (task.GetIcon().Length > 0);
 
-			if (task.HasAttribute(Task.Attribute.Flag))
+			if (task.IsAttributeAvailable(Task.Attribute.Flag))
 				m_IsFlagged = task.IsFlagged(false);
 
-			if (task.HasAttribute(Task.Attribute.Color))
+			if (task.IsAttributeAvailable(Task.Attribute.Color))
 				m_TextColor = task.GetTextDrawingColor();
 
-            if (task.HasAttribute(Task.Attribute.SubtaskDone))
+            if (task.IsAttributeAvailable(Task.Attribute.SubtaskDone))
                 m_SomeSubtasksDone = task.HasSomeSubtasksDone();
 
-            if (task.HasAttribute(Task.Attribute.DoneDate))
+            if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
                 m_IsDone = task.IsDone();
 
 			m_IsParent = task.IsParent();
@@ -564,7 +564,7 @@ namespace MindMapUIExtension
 			while (task.IsValid() && ProcessTaskUpdate(task, changedTaskIds))
 				task = task.GetNextTask();
 
-			if (tasks.HasAttribute(Task.Attribute.Title))
+			if (tasks.IsAttributeAvailable(Task.Attribute.Title))
 			{
 				foreach (var id in changedTaskIds)
 					RefreshNodeLabel(id, false);
