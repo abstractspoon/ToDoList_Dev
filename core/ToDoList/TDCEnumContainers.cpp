@@ -76,9 +76,10 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib)
 	case TDCA_EXTERNALID:		
 	case TDCA_FILEREF:			
 	case TDCA_FLAG:				
+	case TDCA_HTMLCOMMENTS:
 	case TDCA_ICON:				
+	case TDCA_ID:
 	case TDCA_LOCK:				
-	case TDCA_ID:				
 	case TDCA_LASTMODDATE:	
 	case TDCA_LASTMODBY:	
 	case TDCA_METADATA:	

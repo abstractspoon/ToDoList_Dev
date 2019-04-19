@@ -302,7 +302,7 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	case TDCA_COMMENTS:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKCOMMENTS);
 		break;
-		
+
 	case TDCA_COST:			
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKCALCCOST, TDL_TASKCOST);
 		break;
@@ -346,6 +346,10 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		sItem = FormatAttribute(TDCA_FLAG, _T(""), sItem);
 		break;
 		
+	case TDCA_HTMLCOMMENTS:
+		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKHTMLCOMMENTS);
+		break;
+
 	case TDCA_ICON:
 		break;
 		
@@ -374,8 +378,7 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		break;
 		
 	case TDCA_POSITION:
-		if (pTasks->IsAttributeAvailable(TDCA_POSITION))
-			sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKPOSSTRING);
+		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKPOSSTRING);
 		break;
 		
 	case TDCA_PRIORITY:
@@ -596,8 +599,22 @@ void CTaskListExporterBase::BuildAttribList(const ITASKLISTBASE* pTasks)
 
 	for (int nAtt = 0; nAtt < NUMORDER; nAtt++)
 	{
-		if (pTasks->IsAttributeAvailable(ATTRIB_ORDER[nAtt]))
-			ARRATTRIBUTES.Add(ATTRIB_ORDER[nAtt]);
+		TDC_ATTRIBUTE nAttrib = ATTRIB_ORDER[nAtt];
+
+		if (pTasks->IsAttributeAvailable(nAttrib))
+		{
+			ARRATTRIBUTES.Add(nAttrib);
+		}
+		else // fallback
+		{
+			switch (nAttrib)
+			{
+			case TDCA_COMMENTS:
+				if (pTasks->IsAttributeAvailable(TDCA_HTMLCOMMENTS))
+					ARRATTRIBUTES.Add(nAttrib);
+				break;
+			}
+		}
 	}
 
 	ASSERT(ARRATTRIBUTES.GetSize());

@@ -258,7 +258,7 @@ const CXmlItem* CXmlItem::FindItemEx(const CString& sItemName, const CString& sI
 
 BOOL CXmlItem::ItemHasValue(const CString& sItemName, const CString& sSubItemName) const
 {
-	return !GetItemValue(sItemName, sItemName).IsEmpty();
+	return !GetItemValue(sItemName, sSubItemName).IsEmpty();
 }
 
 const CString& CXmlItem::GetItemValue(const CString& sItemName, const CString& sSubItem) const

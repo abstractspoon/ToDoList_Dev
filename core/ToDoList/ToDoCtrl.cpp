@@ -9588,16 +9588,6 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 			
 			if (!hTask)
 				return FALSE;
-
-			const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-
-			if (!pTDS)
-			{
-				ASSERT(0);
-				return FALSE;
-			}
-			
-			m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, filter);
 		}
 
 		// we return TRUE if we match the filter _or_ we have any matching children
@@ -9664,8 +9654,22 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 		}
 		
 		// if we don't match, we remove the item
-		if (!bMatch)
+		if (bMatch)
+		{
+			const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
+
+			if (!pTDS)
+			{
+				ASSERT(0);
+				return FALSE;
+			}
+
+			m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, filter);
+		}
+		else
+		{
 			tasks.DeleteTask(hTask);
+		}
 		
 		return bMatch;
 	}
