@@ -6126,7 +6126,11 @@ void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTAS
 	// just like we do with standard combos
 	CTDCCustomAttributeHelper::SaveAutoListDataToDefs(this, m_aCustomControls, m_aCustomAttribDefs);
 
-	if (filter.HasFlag(TDCGTF_USERCOLUMNS))
+	if (filter.mapAttribs.HasOnly(TDCA_ALL))
+	{
+		tasks.SetCustomAttributeDefs(m_aCustomAttribDefs);
+	}
+	else // save all
 	{
 		// Save only those attributes that exist in the filter 
 		CTDCCustomAttribDefinitionArray aAttribDefs;
@@ -6142,10 +6146,6 @@ void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTAS
 
 		if (aAttribDefs.GetSize() > 0)
 			tasks.SetCustomAttributeDefs(aAttribDefs);
-	}
-	else // save all
-	{
-		tasks.SetCustomAttributeDefs(m_aCustomAttribDefs);
 	}
 }
 

@@ -59,6 +59,7 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
+	case TDCA_ALL:			
 	case TDCA_ALLOCBY:			
 	case TDCA_ALLOCTO:			
 	case TDCA_CATEGORY:			

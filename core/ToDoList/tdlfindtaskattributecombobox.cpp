@@ -133,15 +133,15 @@ void CTDLFindTaskAttributeComboBox::BuildCombo()
 		if (ap.nAttribResID)
 		{
 			CEnString sAttrib(ap.nAttribResID);
-			DWORD dwItemData = EncodeItemData(ap.attrib);
+			DWORD dwItemData = EncodeItemData(ap.nAttribID);
 
 			CDialogHelper::AddString(*this, sAttrib, dwItemData); 
 
 			// is it a date
-			if (AttributeIsDate(ap.attrib))
+			if (AttributeIsDate(ap.nAttribID))
 			{
 				// then add relative version too
-				dwItemData = EncodeItemData(ap.attrib, TRUE);
+				dwItemData = EncodeItemData(ap.nAttribID, TRUE);
 
 				sAttrib += ' ';
 				sAttrib += CEnString(IDS_TDLBC_RELATIVESUFFIX);
@@ -217,7 +217,7 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule)
 
 			while (nAttrib--)
 			{
-				if (ATTRIBUTES[nAttrib].attrib == attrib)
+				if (ATTRIBUTES[nAttrib].nAttribID == attrib)
 				{
 					if (ATTRIBUTES[nAttrib].nAttribResID)
 					{

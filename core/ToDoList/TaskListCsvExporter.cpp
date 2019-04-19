@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "TaskListcsvExporter.h"
 #include "tdlrecurringtaskedit.h"
+#include "TDCCustomAttributeHelper.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
@@ -86,10 +87,7 @@ bool CTaskListCsvExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDes
 	
 	// Add project identifier if exporting multiple files
 	if (MULTIFILE)
-	{
 		ARRATTRIBUTES.InsertAt(0, TDCA_PROJECTNAME);
-		ARRLABELS.Add(GetAttribLabel(TDCA_PROJECTNAME));
-	}
 	
 	// we read direct from app preferences
 	szKey = _T("Preferences");
@@ -109,39 +107,20 @@ bool CTaskListCsvExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDes
 
 	m_bExportingForExcel = dialog.IsExportingForExcel();
 
-	// if Task and Parent IDs are wanted, we may have to add them manually
-	// Note: Do parent ID first so that task ID is inserted before it
-	CheckAddIDField(TDCA_PARENTID);
-	CheckAddIDField(TDCA_ID);
-	
+	CheckAddIDFields();
+
 	return true;
 }
 
-void CTaskListCsvExporter::CheckAddIDField(TDC_ATTRIBUTE nAttrib)
+void CTaskListCsvExporter::CheckAddIDFields()
 {
-	// sanity check
-	switch (nAttrib)
-	{
-	case TDCA_PARENTID:
-	case TDCA_ID:
-	case TDCA_PROJECTNAME:
-		break;
-
-	default:
-		ASSERT(0);
-		return;
-	}
-
-	if ((m_aColumnMapping.Find(nAttrib) != -1) && (FindAttribute(nAttrib) == -1))
-	{
-		ARRATTRIBUTES.InsertAt(0, nAttrib);
-
-		// translate label once only
-		CEnString sLabel(GetAttribLabel(nAttrib));
-		sLabel.Translate();
-		
-		ARRLABELS.InsertAt(0, sLabel);
-	}
+	// if Task and Parent IDs are wanted, we may have to add them manually
+	// Note: Do parent ID first so that task ID is inserted before it
+	if ((m_aColumnMapping.Find(TDCA_PARENTID) != -1) && !WantAttribute(TDCA_PARENTID))
+		ARRATTRIBUTES.InsertAt(0, TDCA_PARENTID);
+	
+	if ((m_aColumnMapping.Find(TDCA_ID) != -1) && !WantAttribute(TDCA_ID))
+		ARRATTRIBUTES.InsertAt(0, TDCA_ID);
 }
 
 CString CTaskListCsvExporter::FormatHeader(const ITASKLISTBASE* pTasks) const
@@ -163,7 +142,7 @@ CString CTaskListCsvExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttrib, const CStr
 {
 	CString sHeader;
 	
-	if (IsCustomAttribute(nAttrib))
+	if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
 	{
 		sHeader = (sAttribLabel + DELIM);
 	}

@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "TasklistHtmlExporter.h"
 #include "tdlrecurringtaskedit.h"
+#include "TDCCustomAttributeHelper.h"
 
 #include "..\shared\xmlfile.h"
 #include "..\shared\filemisc.h"
@@ -203,7 +204,7 @@ CString CTaskListHtmlExporter::FormatHeader(const ITASKLISTBASE* pTasks) const
 {
 	CString sHeader = CTaskListExporterBase::FormatHeader(pTasks);
 
-	if (EXPORTSTYLE == STYLE_TABLE && !sHeader.IsEmpty())
+	if ((EXPORTSTYLE == STYLE_TABLE) && !sHeader.IsEmpty())
 	{
 		sHeader = _T("<thead><tr>") + sHeader + _T("</tr></thead>");
 	}
@@ -359,7 +360,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 					
 				case STYLE_TABLE:
 					// special case: custom attrib
-					if (IsCustomAttribute(nAttrib))
+					if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
 						sFmtAttrib = FormatTableCell(sAttribVal);
 					else
 						sFmtAttrib = sAttribVal;
@@ -471,9 +472,9 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		break;
 		
 	case TDCA_COMMENTS:
-		if (((ITaskList*)pTasks)->TaskHasAttribute(hTask, TDL_TASKHTMLCOMMENTS))
+		if (pTasks->TaskHasAttribute(hTask, TDCA_HTMLCOMMENTS))
 		{
-			sItem = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, TDL_TASKHTMLCOMMENTS);
+			sItem = pTasks->GetTaskAttribute(hTask, TDCA_HTMLCOMMENTS);
 			sItem.TrimRight();
 			
 			// note: we reset the font after the comments because the font
@@ -532,7 +533,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	}
 
 	// we've already handled custom attrib above
-	if (EXPORTSTYLE == STYLE_TABLE && !IsCustomAttribute(nAttrib))
+	if ((EXPORTSTYLE == STYLE_TABLE) && !CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
 	{
 		if (sItem.IsEmpty())
 			sItem = SPACE;

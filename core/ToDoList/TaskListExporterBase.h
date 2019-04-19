@@ -33,8 +33,10 @@ protected:
 	// Pseudo-const overridable variables
 	BOOL ROUNDTIMEFRACTIONS, MULTIFILE;
 	CTDCAttributeArray ARRATTRIBUTES;
-	CStringArray ARRLABELS;
 	CString ENDL, LISTSEPARATOR;
+
+private:
+	static CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR> ATTRIBLABELS;
 
 protected:
 	// overridables
@@ -54,10 +56,8 @@ protected:
 
 protected:
 	// helpers
-	int FindAttribute(TDC_ATTRIBUTE attrib) const;
-	
 	static CString GetAttribLabel(TDC_ATTRIBUTE attrib);
-	static BOOL IsCustomAttribute(TDC_ATTRIBUTE attrib);
+	static void BuildLabelMap();
 
 private:
 	// helpers
@@ -74,7 +74,6 @@ private:
 	CString FormatFileReferenceList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sAttribLabel) const;
 
 	void BuildAttribList(const ITASKLISTBASE* pTasks);
-	void CheckAddAttribtoList(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE attrib);
 	
 };
 

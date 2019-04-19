@@ -3452,8 +3452,8 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 	BOOL bTitleOnly = filter.mapAttribs.HasOnly(TDCA_TASKNAME);
 	BOOL bTitleCommentsOnly = (!bTitleOnly && bParent && filter.HasFlag(TDCGTF_PARENTTITLECOMMENTSONLY));
 
-	BOOL bHtmlComments = (filter.mapAttribs.Has(TDCA_COMMENTS) && filter.HasFlag(TDCGTF_HTMLCOMMENTS));
-	BOOL bTextComments = (filter.mapAttribs.Has(TDCA_COMMENTS) && filter.HasFlag(TDCGTF_TEXTCOMMENTS));
+	BOOL bTextComments = filter.mapAttribs.Has(TDCA_COMMENTS);
+	BOOL bHtmlComments = filter.mapAttribs.Has(TDCA_HTMLCOMMENTS);
 	BOOL bTransform = filter.HasFlag(TDCGTF_TRANSFORM);
 
 	// attributes
@@ -3477,7 +3477,7 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		tasks.SetTaskIcon(hTask, pTDI->sIcon);
 
 	// comments
-	if (!bTitleOnly && filter.WantAttribute(TDCA_COMMENTS))
+	if (!bTitleOnly && (bTextComments || bHtmlComments))
 	{
 		CString sHtml;
 
@@ -3490,10 +3490,10 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 				tasks.GetHtmlImageFolder());
 		}
 
-		// to simplify stylesheet design we render all comments
-		// as HTMLCOMMENTS even if they are plain text
 		if (bTransform)
 		{
+			// to simplify stylesheet design we render all comments
+			// as HTMLCOMMENTS even if they are plain text
 			if (sHtml.IsEmpty())
 				sHtml = pTDI->sComments;
 
@@ -3506,8 +3506,9 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 				tasks.SetTaskComments(hTask, pTDI->sComments);
 			}
 		}
-		else // render both HTML _and_ plain text
+		else 
 		{
+			// render both HTML _and_ plain text
 			if (!sHtml.IsEmpty())
 				tasks.SetTaskHtmlComments(hTask, sHtml, bTransform);
 

@@ -2388,7 +2388,7 @@ struct TDCADVANCEDFILTER
 
 struct TDCATTRIBUTE
 {
-	TDC_ATTRIBUTE attrib;
+	TDC_ATTRIBUTE nAttribID;
 	UINT nAttribResID;
 };
 

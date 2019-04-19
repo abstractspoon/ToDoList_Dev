@@ -78,7 +78,7 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		const TDCATTRIBUTE& att = ATTRIBUTES[nAttrib];
 
 		// ignore certain attributes
-		switch (att.attrib)
+		switch (att.nAttribID)
 		{
 		case TDCA_COLOR:
 		case TDCA_PROJECTNAME:
@@ -92,11 +92,11 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		case TDCA_NONE:
 			// Allow mapping to 'none' when importing
 			if (m_bImporting)
-				CDialogHelper::AddString(m_cbAttributes, _T(""), att.attrib);
+				CDialogHelper::AddString(m_cbAttributes, _T(""), att.nAttribID);
 			break;
 
 		default:
-			CDialogHelper::AddString(m_cbAttributes, CEnString(att.nAttribResID), att.attrib);
+			CDialogHelper::AddString(m_cbAttributes, CEnString(att.nAttribResID), att.nAttribID);
 			break;
 		}
 	}
@@ -183,7 +183,7 @@ CString CTDLImportExportAttributeMappingListCtrl::GetAttributeName(TDC_ATTRIBUTE
 	{
 		const TDCATTRIBUTE& att = ATTRIBUTES[nAttrib];
 
-		if (nAtt == att.attrib)
+		if (nAtt == att.nAttribID)
 			return CEnString(att.nAttribResID);
 	}
 

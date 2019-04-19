@@ -116,19 +116,6 @@ CString CTaskListTxtExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 		}
 		break;
 
-	case TDCA_PROJECTNAME:
-		{
-			CString sTitle = pTasks->GetReportTitle();
-			CString sDate = pTasks->GetReportDate();
-			
-			if (!sTitle.IsEmpty())
-				sItem.Format(_T("%s\n%s\n"), sTitle, sDate);
-
-			else if (!sDate.IsEmpty())
-				sItem.Format(_T("%s\n"), sDate);
-		}
-		break;
-
 	case TDCA_PARENTID:
 		// ignore if not set
 		if (pTasks->GetTaskParentID(hTask) == 0)
@@ -153,5 +140,23 @@ CString CTaskListTxtExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM 
 	}
 
 	return sTask;
+}
+
+CString CTaskListTxtExporter::FormatTitle(const ITASKLISTBASE* pTasks) const
+{
+	CString sTitle = pTasks->GetReportTitle();
+	CString sDate = pTasks->GetReportDate();
+	CString sHeader;
+
+	if (!sTitle.IsEmpty())
+	{
+		sHeader.Format(_T("%s\n%s\n"), sTitle, sDate);
+	}
+	else if (!sDate.IsEmpty())
+	{
+		sHeader.Format(_T("%s\n"), sDate);
+	}
+
+	return sHeader;
 }
 

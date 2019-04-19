@@ -26,12 +26,9 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 static TDC_ATTRIBUTE ATTRIB_ORDER[] = 
 {
-	TDCA_PROJECTNAME,
 	TDCA_POSITION,
 	TDCA_TASKNAME,
 	TDCA_ID,
@@ -67,6 +64,14 @@ static TDC_ATTRIBUTE ATTRIB_ORDER[] =
 };
 static int NUMORDER = sizeof(ATTRIB_ORDER) / sizeof(TDC_ATTRIBUTE);
 
+//////////////////////////////////////////////////////////////////////
+
+CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR> CTaskListExporterBase::ATTRIBLABELS;
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+
 CTaskListExporterBase::CTaskListExporterBase() 
 	: 
 	ROUNDTIMEFRACTIONS(TRUE),
@@ -74,6 +79,7 @@ CTaskListExporterBase::CTaskListExporterBase()
 	MULTIFILE(FALSE),
 	LISTSEPARATOR(_T("+"))
 {
+	BuildLabelMap();
 }
 
 CTaskListExporterBase::~CTaskListExporterBase()
@@ -93,7 +99,7 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::ExportOutput(LPCTSTR szDestFilePath,
 }
 
 bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, bool /*bSilent*/, 
-									   IPreferences* pPrefs, LPCTSTR szKey)
+									   IPreferences* pPrefs, LPCTSTR /*szKey*/)
 {
 	ROUNDTIMEFRACTIONS = pPrefs->GetProfileInt(_T("Preferences"), _T("RoundTimeFractions"), FALSE);
 
@@ -180,39 +186,34 @@ CString CTaskListExporterBase::FormatHeader(const ITASKLISTBASE* pTasks) const
 {
 	CString sHeader;
 
-	// make sure these are in the order we want
-	for (int nAtt = 0; nAtt < NUMORDER; nAtt++)
+	for (int nAtt = 0; nAtt < ARRATTRIBUTES.GetSize(); nAtt++)
 	{
-		TDC_ATTRIBUTE nAttrib = ATTRIB_ORDER[nAtt];
-		int nFind = FindAttribute(nAttrib);
+		TDC_ATTRIBUTE nAttrib = ARRATTRIBUTES[nAtt];
 
-		if (nFind != -1) // found
+		if (nAttrib == TDCA_CUSTOMATTRIB)
 		{
-			if (nAttrib == TDCA_CUSTOMATTRIB)
+			int nNumCust = pTasks->GetCustomAttributeCount();
+
+			for (int nCust = 0; nCust < nNumCust; nCust++)
 			{
-				int nNumCust = pTasks->GetCustomAttributeCount();
-				
-				for (int nCust = 0; nCust < nNumCust; nCust++)
+				if (pTasks->IsCustomAttributeEnabled(nCust))
 				{
-					if (pTasks->IsCustomAttributeEnabled(nCust))
-					{
-						// combine the label and ID so we can import later
-						CString sLabel;
+					// combine the label and ID so we can import later
+					CString sLabel;
 
-						if (WantExportCustomAttributeID())
-							sLabel.Format(_T("%s (%s)"), pTasks->GetCustomAttributeLabel(nCust), pTasks->GetCustomAttributeID(nCust));
-						else
-							sLabel = pTasks->GetCustomAttributeLabel(nCust);
+					if (WantExportCustomAttributeID())
+						sLabel.Format(_T("%s (%s)"), pTasks->GetCustomAttributeLabel(nCust), pTasks->GetCustomAttributeID(nCust));
+					else
+						sLabel = pTasks->GetCustomAttributeLabel(nCust);
 
-						sHeader += FormatHeaderItem(nAttrib, sLabel);
-					}
+					sHeader += FormatHeaderItem(nAttrib, sLabel);
 				}
 			}
-			else
-			{
-				CString sLabel = ARRLABELS[nFind];
-				sHeader += FormatHeaderItem(nAttrib, sLabel);
-			}
+		}
+		else
+		{
+			CString sLabel = GetAttribLabel(nAttrib);
+			sHeader += FormatHeaderItem(nAttrib, sLabel);
 		}
 	}
 
@@ -256,16 +257,12 @@ CString CTaskListExporterBase::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM
 		ASSERT (hTask);
 
 		// make sure these are in the order we want
-		for (int nAtt = 0; nAtt < NUMORDER; nAtt++)
+		for (int nAtt = 0; nAtt < ARRATTRIBUTES.GetSize(); nAtt++)
 		{
-			TDC_ATTRIBUTE attrib = ATTRIB_ORDER[nAtt];
-			int nFind = FindAttribute(attrib);
+			TDC_ATTRIBUTE attrib = ARRATTRIBUTES[nAtt];
+			CString sLabel = GetAttribLabel(attrib);
 
-			if (nFind != -1) // found
-			{
-				CString sLabel = ARRLABELS[nFind];
-				sTask += FormatAttribute(pTasks, hTask, nDepth, attrib,	sLabel);
-			}
+			sTask += FormatAttribute(pTasks, hTask, nDepth, attrib,	sLabel);
 		}
 
 		// notes section
@@ -578,78 +575,45 @@ CString CTaskListExporterBase::FormatCustomAttributes(const ITASKLISTBASE* pTask
 	return sCustAttribs;
 }
 
+void CTaskListExporterBase::BuildLabelMap()
+{
+	// Once only
+	if (ATTRIBLABELS.GetCount() == 0)
+	{
+		for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
+		{
+			const TDCATTRIBUTE& attrib = ATTRIBUTES[nAtt];
+			ATTRIBLABELS[attrib.nAttribID] = CEnString(attrib.nAttribResID);
+		}
+
+		ATTRIBLABELS[TDCA_CUSTOMATTRIB] = "";
+	}
+}
+
 void CTaskListExporterBase::BuildAttribList(const ITASKLISTBASE* pTasks)
 {
-	CheckAddAttribtoList(pTasks, TDCA_POSITION);
-	CheckAddAttribtoList(pTasks, TDCA_TASKNAME);
-	CheckAddAttribtoList(pTasks, TDCA_ID);
-	CheckAddAttribtoList(pTasks, TDCA_PARENTID);
-	//CheckAddAttribtoList(pTasks, TDCA_PATH);
-	CheckAddAttribtoList(pTasks, TDCA_PRIORITY);
-	CheckAddAttribtoList(pTasks, TDCA_RISK);
-	CheckAddAttribtoList(pTasks, TDCA_PERCENT);
-	CheckAddAttribtoList(pTasks, TDCA_TIMEEST);
-	CheckAddAttribtoList(pTasks, TDCA_TIMESPENT);
-	CheckAddAttribtoList(pTasks, TDCA_CREATIONDATE);
-	CheckAddAttribtoList(pTasks, TDCA_CREATEDBY);
-	CheckAddAttribtoList(pTasks, TDCA_LASTMODDATE);
-	CheckAddAttribtoList(pTasks, TDCA_LASTMODBY);
-	CheckAddAttribtoList(pTasks, TDCA_STARTDATE);
-	CheckAddAttribtoList(pTasks, TDCA_DUEDATE);
-	CheckAddAttribtoList(pTasks, TDCA_DONEDATE);
-	CheckAddAttribtoList(pTasks, TDCA_RECURRENCE);
-	CheckAddAttribtoList(pTasks, TDCA_ALLOCTO);
-	CheckAddAttribtoList(pTasks, TDCA_ALLOCBY);
-	CheckAddAttribtoList(pTasks, TDCA_STATUS);
-	CheckAddAttribtoList(pTasks, TDCA_CATEGORY);
-	CheckAddAttribtoList(pTasks, TDCA_TAGS);
-	CheckAddAttribtoList(pTasks, TDCA_EXTERNALID);
-	CheckAddAttribtoList(pTasks, TDCA_COST);
-	CheckAddAttribtoList(pTasks, TDCA_VERSION);
-	CheckAddAttribtoList(pTasks, TDCA_FLAG);
-	CheckAddAttribtoList(pTasks, TDCA_DEPENDENCY);
-	CheckAddAttribtoList(pTasks, TDCA_FILEREF);
-	CheckAddAttribtoList(pTasks, TDCA_SUBTASKDONE);
-	CheckAddAttribtoList(pTasks, TDCA_COMMENTS);
-	CheckAddAttribtoList(pTasks, TDCA_CUSTOMATTRIB);
-}
+	ARRATTRIBUTES.RemoveAll();
 
-void CTaskListExporterBase::CheckAddAttribtoList(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE attrib)
-{
-	if (pTasks->IsAttributeAvailable(attrib) && ARRATTRIBUTES.AddUnique(attrib))
+	for (int nAtt = 0; nAtt < NUMORDER; nAtt++)
 	{
-		// translate label once only
-		CEnString sLabel(GetAttribLabel(attrib));
-		sLabel.Translate();
-
-		ARRLABELS.Add(sLabel);
-	}
-}
-
-BOOL CTaskListExporterBase::WantAttribute(TDC_ATTRIBUTE attrib) const
-{
-	return (FindAttribute(attrib) != -1);
-}
-
-int CTaskListExporterBase::FindAttribute(TDC_ATTRIBUTE attrib) const
-{
-	return Misc::FindT(attrib, ARRATTRIBUTES);
-}
-
-CString CTaskListExporterBase::GetAttribLabel(TDC_ATTRIBUTE attrib)
-{
-	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
-	{
-		const TDCATTRIBUTE& att = ATTRIBUTES[nAttrib];
-
-		if (attrib == att.attrib)
-			return CEnString(att.nAttribResID);
+		if (pTasks->IsAttributeAvailable(ATTRIB_ORDER[nAtt]))
+			ARRATTRIBUTES.Add(ATTRIB_ORDER[nAtt]);
 	}
 
-	return _T("");
+	ASSERT(ARRATTRIBUTES.GetSize());
 }
 
-BOOL CTaskListExporterBase::IsCustomAttribute(TDC_ATTRIBUTE attrib)
+BOOL CTaskListExporterBase::WantAttribute(TDC_ATTRIBUTE nAttrib) const
 {
-	return ((attrib >= TDCA_CUSTOMATTRIB_FIRST) && (attrib <= TDCA_CUSTOMATTRIB_LAST));
+	return (Misc::FindT(nAttrib, ARRATTRIBUTES) != -1);
+}
+
+CString CTaskListExporterBase::GetAttribLabel(TDC_ATTRIBUTE nAttrib)
+{
+	CString sLabel;
+
+	VERIFY(ATTRIBLABELS.Lookup(nAttrib, sLabel));
+	ASSERT(!sLabel.IsEmpty() || (nAttrib == TDCA_CUSTOMATTRIB));
+
+	return sLabel;
 }

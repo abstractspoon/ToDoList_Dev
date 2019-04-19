@@ -4621,37 +4621,13 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 	CString sStylesheet(userPrefs.GetDueTaskStylesheet());
 	BOOL bTransform = GetStylesheetPath(tdc, sStylesheet);
 	
-	TDCGETTASKS filter;
-	filter.sAllocTo = userPrefs.GetDueTaskPerson();
-	
-	if (userPrefs.GetDisplayDueCommentsInHtml())
-		filter.dwFlags |= TDCGTF_HTMLCOMMENTS;
-	else
-		filter.dwFlags |= TDCGTF_TEXTCOMMENTS;
-
-	if (bTransform)
-		filter.dwFlags |= TDCGTF_TRANSFORM;
-
-	// due task notification preference overrides Export preference
-	if (userPrefs.GetDueTaskTitlesOnly())
-	{
-		filter.mapAttribs.Add(TDCA_TASKNAME);
-	}
-	else // visible attributes only
-	{
-		TDC::MapColumnsToAttributes(tdc.GetVisibleColumns(), filter.mapAttribs);
-
-		if (userPrefs.GetExportParentTitleCommentsOnly())
-			filter.dwFlags |= TDCGTF_PARENTTITLECOMMENTSONLY;
-	}
-			
 	TDC_GETTASKS nFilter = TDCGT_DUE;
 	UINT nIDDueBy = IDS_DUETODAY;
 	
 	switch (nDueBy)
 	{
 	case PFP_DUETODAY:
-		break; // done
+		break;
 		
 	case PFP_DUETOMORROW:
 		nIDDueBy = IDS_DUETOMORROW;
@@ -4682,7 +4658,30 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 		ASSERT (0);
 		return NULL;
 	}
-		
+
+	TDCGETTASKS filter(nFilter);
+	filter.sAllocTo = userPrefs.GetDueTaskPerson();
+
+	if (bTransform)
+		filter.dwFlags |= TDCGTF_TRANSFORM;
+
+	// due task notification preference overrides Export preference
+	if (!userPrefs.GetDueTaskTitlesOnly())
+	{
+		// visible attributes only
+		TDC::MapColumnsToAttributes(tdc.GetVisibleColumns(), filter.mapAttribs);
+
+		if (userPrefs.GetExportParentTitleCommentsOnly())
+			filter.dwFlags |= TDCGTF_PARENTTITLECOMMENTSONLY;
+
+		if (userPrefs.GetDisplayDueCommentsInHtml())
+			filter.mapAttribs.Add(TDCA_HTMLCOMMENTS);
+		else
+			filter.mapAttribs.Add(TDCA_COMMENTS);
+	}
+
+	filter.mapAttribs.Add(TDCA_TASKNAME); // always
+			
 	// prepare structure
 	int nExporter = -1;
 	
@@ -10194,26 +10193,27 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 
 	tasks.Reset();	
 	tasks.SetProjectName(tdc.GetFriendlyProjectName());
-//	tasks.SetAvailableAttributes(filter.mapAttribs);
 
 	// export flags
 	if (userPrefs.GetExportParentTitleCommentsOnly())
 		filter.dwFlags |= TDCGTF_PARENTTITLECOMMENTSONLY;
 
+	if (bTransform)
+	{
+		ASSERT(bHtmlComments);
+		filter.dwFlags |= TDCGTF_TRANSFORM;
+	}
+
 	if (bHtmlComments)
 	{
-		filter.dwFlags |= TDCGTF_HTMLCOMMENTS;
+		if (filter.mapAttribs.Has(TDCA_COMMENTS))
+			filter.mapAttribs.Add(TDCA_HTMLCOMMENTS);
+
 		tasks.SetHtmlImageFolder(szHtmlImageDir);
 
 		// And delete all existing images in that folder
 		if (!Misc::IsEmpty(szHtmlImageDir))
 			FileMisc::DeleteFolderContents(szHtmlImageDir, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
-
-		if (bTransform)
-		{
-			ASSERT(bHtmlComments);
-			filter.dwFlags |= TDCGTF_TRANSFORM;
-		}
 	}
 
 	// get the tasks

@@ -50,6 +50,7 @@ protected:
 
 	virtual bool InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	virtual CString GetSpaceForNotes() const { return TEXTNOTES; }
+	virtual CString FormatTitle(const ITASKLISTBASE* pTasks) const;
 };
 
 #endif // !defined(AFX_TASKLISTTXTEXPORTER_H__CF68988D_FBBD_431D_BB56_464E8737D993__INCLUDED_)
