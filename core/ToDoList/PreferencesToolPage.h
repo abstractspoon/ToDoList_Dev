@@ -36,6 +36,7 @@ public:
 
 	int GetUserTools(CUserToolArray& aTools) const; // returns the number of tools
 	BOOL GetUserTool(int nTool, USERTOOL& tool) const; 
+	BOOL GetDisplayUDTsInToolbar() const { return m_bDisplayUDTsInToolbar; }
 
 protected:
 
@@ -57,6 +58,7 @@ protected:
 	CMenuButton	m_btnArgMenu;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
+	BOOL m_bDisplayUDTsInToolbar;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

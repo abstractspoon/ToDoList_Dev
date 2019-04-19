@@ -68,6 +68,7 @@ void CPreferencesToolPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ICONPATH, m_eIconPath);
 	DDX_Control(pDX, IDC_CMDLINE, m_eCmdLine);
 	//}}AFX_DATA_MAP
+	DDX_Check(pDX, IDC_DISPLAYUDTSINTOOLBAR, m_bDisplayUDTsInToolbar);
 }
 
 BEGIN_MESSAGE_MAP(CPreferencesToolPage, CPreferencesPageBase)
@@ -770,7 +771,7 @@ void CPreferencesToolPage::OnImportTools()
 	}
 }
 
-void CPreferencesToolPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR /*szKey*/)
+void CPreferencesToolPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// load tools
 	int nToolCount = pPrefs->GetProfileInt(_T("Tools"), _T("ToolCount"), 0);
@@ -792,9 +793,11 @@ void CPreferencesToolPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR /
 
 		m_aTools.Add(ut);
 	}
+
+	m_bDisplayUDTsInToolbar = pPrefs->GetProfileInt(szKey, _T("DisplayUDTsInToolbar"), TRUE);
 }
 
-void CPreferencesToolPage::SavePreferences(IPreferences* pPrefs, LPCTSTR /*szKey*/) const
+void CPreferencesToolPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	// save tools to registry and m_aTools
 	int nToolCount = m_aTools.GetSize();
@@ -817,6 +820,7 @@ void CPreferencesToolPage::SavePreferences(IPreferences* pPrefs, LPCTSTR /*szKey
 	}
 
 	pPrefs->WriteProfileInt(_T("Tools"), _T("ToolCount"), nToolCount);
+	pPrefs->WriteProfileInt(szKey, _T("DisplayUDTsInToolbar"), m_bDisplayUDTsInToolbar);
 }
 
 void CPreferencesToolPage::OnSize(UINT nType, int cx, int cy) 

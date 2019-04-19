@@ -236,7 +236,6 @@ public:
 	BOOL GetStackEditFieldsAndComments() const { return m_pageUI.GetStackEditFieldsAndComments(); }
 	BOOL GetStackCommentsAboveEditFields() const { return m_pageUI.GetStackCommentsAboveEditFields(); }
 	BOOL GetIncludeWebLinksInCommentsPaste() const { return m_pageUI.GetIncludeWebLinksInCommentsPaste(); }
-	BOOL GetDisplayUDTsInToolbar() const { return m_pageUI.GetDisplayUDTsInToolbar(); }
 
 	// CPreferencesUICustomToolbarPage
 	BOOL HasCustomToolbar() const { return m_pageUICustomToolbar.HasToolbarButtons(); }
@@ -300,6 +299,7 @@ public:
 	// CPreferencesToolPage
 	int GetUserTools(CUserToolArray& aTools) const { return m_pageTools.GetUserTools(aTools); }
 	BOOL GetUserTool(int nTool, USERTOOL& tool) const { return m_pageTools.GetUserTool(nTool, tool); } 
+	BOOL GetDisplayUDTsInToolbar() const { return m_pageTools.GetDisplayUDTsInToolbar(); }
 
 //	BOOL Get() const { return m_b; }
 

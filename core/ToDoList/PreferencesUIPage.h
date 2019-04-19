@@ -80,7 +80,6 @@ public:
 	BOOL GetStackEditFieldsAndComments() const { return m_bStackEditFieldsAndComments; }
 	BOOL GetStackCommentsAboveEditFields() const { return (m_bStackEditFieldsAndComments && m_bStackCommentsAboveEditFields); }
 	BOOL GetIncludeWebLinksInCommentsPaste() const { return m_bIncludeWebLinksInCommentsPaste; }
-	BOOL GetDisplayUDTsInToolbar() const { return m_bDisplayUDTsInToolbar; }
 //	BOOL Get() const { return ; }
 
 protected:
@@ -113,7 +112,6 @@ protected:
 	BOOL	m_bStackCommentsAboveEditFields;
 	BOOL	m_bIncludeWebLinksInCommentsPaste;
 	BOOL	m_bSortDoneTasksAtBottom;
-	BOOL	m_bDisplayUDTsInToolbar;
 
 	PUIP_NEWTASKPOS	m_nNewTaskPos;
 	PUIP_NEWTASKPOS	m_nNewSubtaskPos;

@@ -71,7 +71,6 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TASKVIEWVISIBILITY, m_lbTaskViews);
 	DDX_Check(pDX, IDC_SORTDONETASKSATBOTTOM, m_bSortDoneTasksAtBottom);
 	DDX_Check(pDX, IDC_INCLUDEWEBLINKINCOMMENTSPASTE, m_bIncludeWebLinksInCommentsPaste);
-	DDX_Check(pDX, IDC_DISPLAYUDTSINTOOLBAR, m_bDisplayUDTsInToolbar);
 
 	if (pDX->m_bSaveAndValidate)
 		m_sUIThemeFile = m_cbThemes.GetThemePath();
@@ -166,7 +165,6 @@ void CPreferencesUIPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 	m_bStackEditFieldsAndComments = pPrefs->GetProfileInt(szKey, _T("StackEditFieldsAndComments"), TRUE);
 	m_bStackCommentsAboveEditFields = pPrefs->GetProfileInt(szKey, _T("StackCommentsAboveEditFields"), TRUE);
 	m_bIncludeWebLinksInCommentsPaste = pPrefs->GetProfileInt(szKey, _T("IncludeWebLinksInCommentsPaste"), TRUE);
-	m_bDisplayUDTsInToolbar = pPrefs->GetProfileInt(szKey, _T("DisplayUDTsInToolbar"), TRUE);
 //	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 
 	// task view visibility
@@ -219,7 +217,6 @@ void CPreferencesUIPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) co
 	pPrefs->WriteProfileInt(szKey, _T("StackEditFieldsAndComments"), m_bStackEditFieldsAndComments);
 	pPrefs->WriteProfileInt(szKey, _T("StackCommentsAboveEditFields"), m_bStackCommentsAboveEditFields);
 	pPrefs->WriteProfileInt(szKey, _T("IncludeWebLinksInCommentsPaste"), m_bIncludeWebLinksInCommentsPaste);
-	pPrefs->WriteProfileInt(szKey, _T("DisplayUDTsInToolbar"), m_bDisplayUDTsInToolbar);
 //	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 
 	pPrefs->WriteProfileString(szKey, _T("UIThemeFile"), m_sUIThemeFile);
