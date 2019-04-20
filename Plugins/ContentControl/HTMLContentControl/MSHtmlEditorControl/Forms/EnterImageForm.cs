@@ -12,18 +12,20 @@ using ImageAlignOption = MSDN.Html.Editor.ImageAlignOption;
 
 namespace MSDN.Html.Editor
 {
-
-    /// <summary>
-    /// Form used to enter an Html Image attribute
-    /// Consists of Href, Text and Image Alignment
-    /// </summary>
-    public partial class EnterImageForm : Form
+	
+	/// <summary>
+	/// Form used to enter an Html Image attribute
+	/// Consists of Href, Text and Image Alignment
+	/// </summary>
+	public partial class EnterImageForm : Form
     {
+		private static string ImageFilter = "Image files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif;";
 
-        /// <summary>
-        /// Public form constructor
-        /// </summary>
-        public EnterImageForm()
+
+		/// <summary>
+		/// Public form constructor
+		/// </summary>
+		public EnterImageForm()
         {
             //
             // Required for Windows Form Designer support
@@ -88,6 +90,18 @@ namespace MSDN.Html.Editor
 
 		public String LastBrowsedFolder { get; set; }
 
+		public static bool IsImagePath(string path)
+		{
+			string extension = System.IO.Path.GetExtension(path);
+
+			if (String.IsNullOrEmpty(extension))
+				return false;
+
+			string filter = String.Format("*{0};", extension);
+
+			return ImageFilter.Contains(filter);
+		}
+
 		private void fileBrowseBtn_Click(object sender, EventArgs e)
 		{
 			var dlg = new OpenFileDialog
@@ -99,7 +113,7 @@ namespace MSDN.Html.Editor
 				CheckFileExists = true,
 				CheckPathExists = true,
 
-				Filter = "Image files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif",
+				Filter = ImageFilter,
 				FilterIndex = 0,
 				RestoreDirectory = true,
 

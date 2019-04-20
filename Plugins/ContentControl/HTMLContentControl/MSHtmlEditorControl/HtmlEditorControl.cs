@@ -1776,8 +1776,35 @@ namespace MSDN.Html.Editor
         /// </summary>
         public void TextPaste()
         {
-            //this.editorWebBrowser.ExecWB(SHDocVw.OLECMDID.OLECMDID_PASTE, PROMPT_USER_NO, ref EMPTY_PARAMETER, ref EMPTY_PARAMETER);
-            ExecuteCommandDocument(HTML_COMMAND_TEXT_PASTE);
+			// Special case: clipboard holds a URL so we trigger the InsertLink dialog
+			if (Clipboard.ContainsText())
+			{
+				var text = Clipboard.GetText();
+
+				if (EnterImageForm.IsImagePath(text))
+				{
+					if (!IsValidHref(text))
+						text = new System.Uri(text).AbsoluteUri;
+
+					InsertImagePrompt(text);
+					return;
+				}
+				else if (IsValidHref(text))
+				{
+					InsertLinkPrompt(text);
+					return;
+				}
+			}
+			else if (Clipboard.ContainsFileDropList())
+			{
+				var filePath = Clipboard.GetFileDropList()[0];
+
+				InsertImagePrompt(new System.Uri(filePath).AbsoluteUri);
+				return;
+			}
+
+			//this.editorWebBrowser.ExecWB(SHDocVw.OLECMDID.OLECMDID_PASTE, PROMPT_USER_NO, ref EMPTY_PARAMETER, ref EMPTY_PARAMETER);
+			ExecuteCommandDocument(HTML_COMMAND_TEXT_PASTE);
 
         } //TextPaste
 
@@ -2190,15 +2217,20 @@ namespace MSDN.Html.Editor
 
         } //InsertImage
 
-        /// <summary>
-        /// Method to insert a image and prompt a user for the link
-        /// Calls the public InsertImage method
-        /// </summary>
-        public void InsertImagePrompt()
+		/// <summary>
+		/// Method to insert a image and prompt a user for the link
+		/// Calls the public InsertImage method
+		/// </summary>
+		public void InsertImagePrompt()
+		{
+			InsertImagePrompt("");
+		}
+
+		public void InsertImagePrompt(string imageHref)
         {
             // set default image and text tags
             string imageText = string.Empty;
-            string imageHref = string.Empty;
+
             ImageAlignOption imageAlign = ImageAlignOption.Left;
             mshtmlElement control = null;
 
@@ -2209,9 +2241,14 @@ namespace MSDN.Html.Editor
                 if (IsStringEqual(control.tagName, IMAGE_TAG))
                 {
                     mshtmlImageElement image = (mshtmlImageElement)control;
-                    imageHref = image.href;
+
+					if (string.IsNullOrEmpty(imageHref))
+						imageHref = image.href;
+
                     imageText = image.alt;
-                    if (image.align != null) imageAlign = (ImageAlignOption)TryParseEnum(typeof(ImageAlignOption), image.align, ImageAlignOption.Left);
+
+                    if (image.align != null)
+						imageAlign = (ImageAlignOption)TryParseEnum(typeof(ImageAlignOption), image.align, ImageAlignOption.Left);
                 }
                 else
                 {
@@ -2267,11 +2304,17 @@ namespace MSDN.Html.Editor
 
         } //InsertLink
 
-        /// <summary>
-        /// Method to insert a link and prompt a user for the href
-        /// Calls the public InsertLink method
-        /// </summary>
-        public void InsertLinkPrompt()
+		/// <summary>
+		/// Method to insert a link and prompt a user for the href
+		/// Calls the public InsertLink method
+		/// </summary>
+		/// 
+		public void InsertLinkPrompt()
+		{
+			InsertLinkPrompt("");
+		}
+
+		protected void InsertLinkPrompt(string hrefLink)
         {
             // get the text range working with
             mshtmlTextRange range = GetTextRange();
@@ -2283,7 +2326,6 @@ namespace MSDN.Html.Editor
 			}
 
 			string hrefText = (range.text == null ? String.Empty : range.text);
-			string hrefLink = string.Empty;
 
 			// calculate the items working with
 			mshtmlAnchorElement anchor = null;
@@ -2302,7 +2344,9 @@ namespace MSDN.Html.Editor
 
 				if (anchor.href != null)
 				{
-					hrefLink = anchor.href;
+					if (String.IsNullOrEmpty(hrefLink))
+						hrefLink = anchor.href;
+
 					hrefText = element.innerText;
 				}
 			}
@@ -2314,10 +2358,10 @@ namespace MSDN.Html.Editor
 				range = GetTextRange();
 				hrefText = ((range == null) || (range.text == null)) ? string.Empty : range.text;
 			}
-			
-			// if text is a valid href then set the link
-			if (hrefLink == string.Empty)
+
+			if (String.IsNullOrEmpty(hrefLink))
 			{
+				// if text is a valid href then set the link
 				if (IsValidHref(hrefText))
 					hrefLink = hrefText;
 				else
@@ -4023,6 +4067,12 @@ namespace MSDN.Html.Editor
 		virtual protected bool IsValidHref(string href)
 		{
 			return Regex.IsMatch(href, HREF_TEST_EXPRESSION, RegexOptions.IgnoreCase);
+
+		} //IsValidHref
+
+		virtual protected bool IsValidImageHref(string href)
+		{
+			return (IsValidHref(href) && EnterImageForm.IsImagePath(href));
 
 		} //IsValidHref
 
