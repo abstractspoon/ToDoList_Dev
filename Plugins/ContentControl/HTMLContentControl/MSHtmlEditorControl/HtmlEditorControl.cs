@@ -2271,34 +2271,41 @@ namespace MSDN.Html.Editor
                 {
 					PostShowDialog(dialog);
 
-					imageHref = dialog.ImageLink;
-                    imageText = dialog.ImageText;
-                    imageAlign = dialog.ImageAlign;
-                    if (imageHref != string.Empty)
-                    {
-                        ExecuteCommandRange(HTML_COMMAND_INSERT_IMAGE, imageHref);
-                        control = GetFirstControl();
-                        if (control != null)
-                        {
-                            if (imageText == string.Empty) imageText = imageHref;
-                            if (IsStringEqual(control.tagName, IMAGE_TAG))
-                            {
-                                mshtmlImageElement image = (mshtmlImageElement)control;
-                                image.alt = imageText;
-                                if (imageAlign != ImageAlignOption.Left) image.align = imageAlign.ToString().ToLower();
-                            }
-                        }
-                    }
+					InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign);
 				}
 			}
 
         } //InsertImagePrompt
 
+		protected bool InsertImage(string imageHref, string imageText, ImageAlignOption imageAlign)
+		{
+			if (imageHref == string.Empty)
+				return false;
 
-        /// <summary>
-        /// Method to create a web link from the users selected text
-        /// </summary>
-        public void InsertLink(string href)
+			if (!ExecuteCommandRange(HTML_COMMAND_INSERT_IMAGE, imageHref))
+				return false;
+
+			var control = GetFirstControl();
+
+			if (control != null)
+			{
+				if (IsStringEqual(control.tagName, IMAGE_TAG))
+				{
+					mshtmlImageElement image = (mshtmlImageElement)control;
+					image.alt = (String.IsNullOrEmpty(imageText) ? imageHref : imageText);
+
+					if (imageAlign != ImageAlignOption.Left)
+						image.align = imageAlign.ToString().ToLower();
+				}
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Method to create a web link from the users selected text
+		/// </summary>
+		public void InsertLink(string href)
         {
             ExecuteCommandRange(HTML_COMMAND_INSERT_LINK, href);
 
@@ -2389,7 +2396,7 @@ namespace MSDN.Html.Editor
 						string newHrefText = dialog.HrefText;
 						var target = dialog.HrefTarget;
 						
-						hrefLink = dialog.HrefLink;
+						hrefLink = dialog.HrefLink.ToLower();
 
 						if (!String.IsNullOrEmpty(newHrefText) && IsValidHref(hrefLink))
 						{
