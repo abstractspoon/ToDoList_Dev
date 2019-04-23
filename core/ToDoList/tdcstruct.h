@@ -30,8 +30,58 @@ typedef CMap<TDC_STYLE, TDC_STYLE, BOOL, BOOL&> CTDCStylesMap;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-class CToDoCtrl;
 class CFilteredToDoCtrl;
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+struct TDCTIMEPERIOD
+{
+	double dDuration;
+	TDC_UNITS nUnits;
+
+	TH_UNITS GetTHUnits() const { return TDC::MapUnitsToTHUnits(nUnits); }
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+struct TDCCOST
+{
+	double dCost;
+	BOOL bCostIsRate;
+
+	CString Format() const 
+	{ 
+		CString sCost = Misc::FormatCost(dCost);
+	
+		if (bCostIsRate)
+			sCost = ('@' + sCost);
+		
+		return sCost;
+	}
+
+	BOOL Parse(LPCTSTR szCost)
+	{
+		TCHAR cFirst = Misc::First(szCost);
+		
+		if (cFirst == '@')
+		{
+			bCostIsRate = TRUE;
+			szCost++;
+		}
+		else if ((cFirst >= '0') && (cFirst <= '9'))
+		{
+			bCostIsRate = FALSE;
+		}
+		else
+		{
+			return FALSE;
+		}
+
+		dCost = Misc::Atof(szCost);
+		return TRUE;
+	}
+
+};
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
