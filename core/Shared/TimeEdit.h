@@ -12,9 +12,11 @@
 #include "enedit.h"
 #include "timehelper.h"
 
+//////////////////////////////////////////////////////////////////////
+
 const UINT WM_TEN_UNITSCHANGE = ::RegisterWindowMessage(_T("WM_TEN_UNITSCHANGE")); // wParam == <CtrlID>, lParam = <prev units>
 
-const int TEBTN_UNITS = 1;
+//////////////////////////////////////////////////////////////////////
 
 class CTimeEdit : public CEnEdit, public CTimeHelper
 {
