@@ -245,7 +245,7 @@ public:
 	LPCTSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const;
 
 	bool SetTaskCost(HTASKITEM hTask, double dCost, bool bIsRate);
-	bool GetTaskCost(HTASKITEM hTask, double& dCost, bool& bIsRate) const;
+	double GetTaskCost(HTASKITEM hTask, bool bCalc, bool& bIsRate) const;
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList16 implementation 

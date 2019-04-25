@@ -419,7 +419,7 @@ public:
 	virtual LPCWSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const = 0;
 	
 	virtual bool SetTaskCost(HTASKITEM hTask, double dCost, bool bIsRate) = 0;
-	virtual bool GetTaskCost(HTASKITEM hTask, double& dCost, bool& bIsRate) const = 0;
+	virtual double GetTaskCost(HTASKITEM hTask, bool bCalc, bool& bIsRate) const = 0;
 };
 
 #endif // _ITASKLIST_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

@@ -828,6 +828,19 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		}
 
 		// ---------------------------------------------------------------------------
+
+		const ITaskList17* pTL17Src = GetITLInterface<ITaskList17>(pTasksSrc, IID_TASKLIST17);
+		ITaskList17* pTL17Dest = GetITLInterface<ITaskList17>(pTasksDest, IID_TASKLIST17);
+		
+		if (!(pTL17Src && pTL17Dest))
+			break;
+
+		bool bCostIsRate;
+		double dCost = pTL17Src->GetTaskCost(hTaskSrc, false, bCostIsRate);
+
+		pTL17Dest->SetTaskCost(hTaskDest, dCost, bCostIsRate);
+
+		// ---------------------------------------------------------------------------
 	} 
 	while (0);
 
@@ -1636,8 +1649,15 @@ bool CTaskFile::SetTaskCost(HTASKITEM hTask, double dCost, bool bIsRate)
 	return SetTaskAttribute(hTask, TDL_TASKCOST, TDCCOST::Format(dCost, (bIsRate ? TRUE : FALSE)));
 }
 
-bool CTaskFile::GetTaskCost(HTASKITEM hTask, double& dCost, bool& bIsRate) const
+double CTaskFile::GetTaskCost(HTASKITEM hTask, bool bCalc, bool& bIsRate) const
 {
+	if (bCalc)
+	{
+		bIsRate = false;
+		return GetTaskCost(hTask, bCalc);
+	}
+
+	// else
 	CString sCost;
 
 	if (!GetTaskAttribute(hTask, TDL_TASKCOST, sCost))
@@ -1645,10 +1665,8 @@ bool CTaskFile::GetTaskCost(HTASKITEM hTask, double& dCost, bool& bIsRate) const
 
 	TDCCOST cost(sCost);
 
-	dCost = cost.dAmount;
 	bIsRate = (cost.bIsRate != FALSE);
-
-	return true;
+	return cost.dAmount;
 }
 
 BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
@@ -2623,6 +2641,9 @@ double CTaskFile::GetTaskCost(HTASKITEM hTask, bool bCalc) const
 		return GetTaskDouble(hTask, TDL_TASKCALCCOST);
 
 	// else
+	// Note: If someone is calling this old version and the
+	// cost is actually a rate then this will return 0.0 due
+	// to the leading '@' which is exactly what we want
 	return GetTaskDouble(hTask, TDL_TASKCOST);
 }
 
