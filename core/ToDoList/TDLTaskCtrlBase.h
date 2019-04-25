@@ -135,7 +135,7 @@ public:
 	int GetSelectedTaskPercent() const;
 	int GetSelectedTaskPriority() const;
 	int GetSelectedTaskRisk() const;
-	double GetSelectedTaskCost() const;
+	CString GetSelectedTaskCost() const;
 	BOOL IsSelectedTaskFlagged() const;
 	BOOL IsSelectedTaskLocked() const;
 	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const;

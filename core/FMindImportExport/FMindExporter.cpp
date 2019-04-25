@@ -279,7 +279,7 @@ void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTa
 	ADDCUSTOMATTRIB(FM_CUSTOMFLAG, pSrcTaskFile->IsTaskFlagged(hTask, false))
 	ADDCUSTOMATTRIB(FM_CUSTOMCREATEDBY, pSrcTaskFile->GetTaskCreatedBy(hTask))
 	ADDCUSTOMATTRIB(FM_CUSTOMEXTID, pSrcTaskFile->GetTaskExternalID(hTask))
-	ADDCUSTOMATTRIB(FM_CUSTOMCOST, pSrcTaskFile->GetTaskCost(hTask, false))
+	ADDCUSTOMATTRIB(FM_CUSTOMCOST, pSrcTaskFile->GetTaskAttribute(hTask, TDCA_COST))
 	ADDCUSTOMATTRIB(FM_CUSTOMVERSION, pSrcTaskFile->GetTaskVersion(hTask))
 
 	// dates

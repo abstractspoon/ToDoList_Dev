@@ -259,7 +259,7 @@ public:
 	int GetSelectedTaskPercent() const { return m_taskTree.GetSelectedTaskPercent(); }
 	int GetSelectedTaskPriority() const { return m_taskTree.GetSelectedTaskPriority(); }
 	int GetSelectedTaskRisk() const { return m_taskTree.GetSelectedTaskRisk(); }
-	double GetSelectedTaskCost() const { return m_taskTree.GetSelectedTaskCost(); }
+	CString GetSelectedTaskCost() const { return m_taskTree.GetSelectedTaskCost(); }
 	BOOL IsSelectedTaskFlagged() const { return m_taskTree.IsSelectedTaskFlagged(); }
 	BOOL IsSelectedTaskLocked() const { return m_taskTree.IsSelectedTaskLocked(); }
 	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const;
@@ -307,7 +307,7 @@ public:
 	BOOL SetSelectedTaskExternalID(const CString& sID);
 	BOOL SetSelectedTaskFlag(BOOL bFlagged);
 	BOOL SetSelectedTaskLock(BOOL bLocked);
-	BOOL SetSelectedTaskCost(double dCost);
+	BOOL SetSelectedTaskCost(const TDCCOST& cost);
 	BOOL SetSelectedTaskVersion(const CString& sVersion);
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments = _T(""));
 	BOOL SetSelectedTaskIcon(const CString& sIcon); 
@@ -530,15 +530,14 @@ protected:
 	CString m_sExternalID, m_sDepends;
 	CString m_sOccurrence;
 	CString m_sVersion;
+	CString m_sCost;
 	CBinaryData m_customComments;
-	double m_dTimeEstimate, m_dTimeSpent;
 	double m_dTrackedTimeElapsedHours;
-	double m_dCost;
 	int m_nPriority;
 	int m_nRisk;
 	int m_nPercentDone;
 	
-	TDC_UNITS m_nTimeEstUnits, m_nTimeSpentUnits;
+	TDCTIMEPERIOD m_timeEstimate, m_timeSpent;
 	CONTENTFORMAT m_cfComments, m_cfDefault;
 	TDCRECURRENCE m_tRecurrence;
 	COLORREF m_crColour;

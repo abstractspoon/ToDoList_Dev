@@ -188,10 +188,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_cbTimeStart(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	m_cbVersion(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cfDefault(cfDefault),
-	m_dCost(0),
 	m_dTrackedTimeElapsedHours(0),
-	m_dTimeEstimate(0),
-	m_dTimeSpent(0),
 	m_data(m_aStyles, m_aCustomAttribDefs),
 	m_dwEditTitleTaskID(0),
 	m_dwLastAddedID(0),
@@ -213,8 +210,6 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_nPriority(-1), 
 	m_treeDragDrop(TSH(), m_taskTree.Tree()),
 	m_visColEdit(visDefault),
-	m_nTimeEstUnits(TDCU_HOURS),
-	m_nTimeSpentUnits(TDCU_HOURS),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
 	m_timeTracking(m_data, m_taskTree.TSH()),
 	m_taskTree(m_ilTaskIcons, m_data, m_aStyles, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs),
@@ -242,7 +237,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	
 	// set up number masks
 	m_ePercentDone.SetMask(_T("0123456789"));
-	m_eCost.SetMask(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
+	m_eCost.SetMask(_T("@-.0123456789"), ME_LOCALIZEDECIMAL);
 	
 	// add 'clock' button to 'time spent'
 	m_iconTrackTime.LoadIcon(IDI_TIME_TRACK);
@@ -294,12 +289,12 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TIMESPENT, m_eTimeSpent);
 	DDX_Control(pDX, IDC_VERSION, m_cbVersion);
 
-	DDX_Text(pDX, IDC_COST, m_dCost, DECIMALS);
+	DDX_Text(pDX, IDC_COST, m_sCost/*, DECIMALS*/);
 	DDX_Text(pDX, IDC_DEPENDS, m_sDepends);
 	DDX_Text(pDX, IDC_EXTERNALID, m_sExternalID);
 	DDX_Text(pDX, IDC_PROJECTNAME, m_sProjectName);
-	DDX_Text(pDX, IDC_TIMEEST, m_dTimeEstimate, DECIMALS);
-	DDX_Text(pDX, IDC_TIMESPENT, m_dTimeSpent, DECIMALS);
+	DDX_Text(pDX, IDC_TIMEEST, m_timeEstimate.dAmount, DECIMALS);
+	DDX_Text(pDX, IDC_TIMESPENT, m_timeSpent.dAmount, DECIMALS);
 
 	DDX_AutoCBString(pDX, IDC_ALLOCBY, m_sAllocBy);
 	DDX_AutoCBString(pDX, IDC_STATUS, m_sStatus);
@@ -318,8 +313,8 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 		m_nPercentDone = max(0, _ttoi(sPercent));
 		m_nPercentDone = min(100, m_nPercentDone);
 
-		m_nTimeEstUnits = TDC::MapTHUnitsToUnits(m_eTimeEstimate.GetUnits());
-		m_nTimeSpentUnits = TDC::MapTHUnitsToUnits(m_eTimeSpent.GetUnits());
+		m_timeEstimate.nUnits = TDC::MapTHUnitsToUnits(m_eTimeEstimate.GetUnits());
+		m_timeSpent.nUnits = TDC::MapTHUnitsToUnits(m_eTimeSpent.GetUnits());
 
 		m_cbFileRef.GetFileList(m_aFileRefs);
 		m_eRecurrence.GetRecurrenceOptions(m_tRecurrence);
@@ -333,8 +328,8 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	{
 		m_spinPercent.SetPos(m_nPercentDone);
 		
-		m_eTimeEstimate.SetUnits(TDC::MapUnitsToTHUnits(m_nTimeEstUnits));
-		m_eTimeSpent.SetUnits(TDC::MapUnitsToTHUnits(m_nTimeSpentUnits));
+		m_eTimeEstimate.SetUnits(TDC::MapUnitsToTHUnits(m_timeEstimate.nUnits));
+		m_eTimeSpent.SetUnits(TDC::MapUnitsToTHUnits(m_timeSpent.nUnits));
 
 		m_cbFileRef.SetFileList(m_aFileRefs);
 		m_eRecurrence.SetRecurrenceOptions(m_tRecurrence);
@@ -1786,7 +1781,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_sExternalID = GetSelectedTaskExtID();
 		m_sVersion = GetSelectedTaskVersion();
 		m_crColour = GetSelectedTaskColor();
-		m_dCost = GetSelectedTaskCost();
+		m_sCost = GetSelectedTaskCost();
 
 		if (m_crColour == 0)
 			m_crColour = CLR_DEFAULT;
@@ -1817,16 +1812,16 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 		if (bEditTime)
 		{
-			m_dTimeEstimate = GetSelectedTaskTimeEstimate(m_nTimeEstUnits);
-			m_dTimeSpent = GetSelectedTaskTimeSpent(m_nTimeSpentUnits);
+			m_timeEstimate.dAmount = GetSelectedTaskTimeEstimate(m_timeEstimate.nUnits);
+			m_timeSpent.dAmount = GetSelectedTaskTimeSpent(m_timeSpent.nUnits);
 		}
 		else
 		{
-			m_nTimeEstUnits = m_tdiDefault.nTimeEstUnits;
-			m_dTimeEstimate = m_calculator.GetTaskTimeEstimate(dwTaskID, m_nTimeEstUnits);
+			m_timeEstimate.nUnits = m_tdiDefault.timeEstimate.nUnits;
+			m_timeEstimate.dAmount = m_calculator.GetTaskTimeEstimate(dwTaskID, m_timeEstimate.nUnits);
 
-			m_nTimeSpentUnits = m_tdiDefault.nTimeSpentUnits;
-			m_dTimeSpent = m_calculator.GetTaskTimeSpent(dwTaskID, m_nTimeEstUnits);
+			m_timeSpent.nUnits = m_tdiDefault.timeSpent.nUnits;
+			m_timeSpent.dAmount = m_calculator.GetTaskTimeSpent(dwTaskID, m_timeEstimate.nUnits);
 		}
 
 		// chess clock for time spent
@@ -1862,20 +1857,21 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	}
 	else // clear controls
 	{
-		m_sTextComments.Empty();
-		m_customComments.Empty();
 		m_nPriority = 0;
 		m_nRisk = 0;
+		m_nPercentDone = 0;
+		m_timeEstimate.dAmount = m_timeSpent.dAmount = 0;
+		m_tRecurrence = TDCRECURRENCE();
+		m_crColour = CLR_DEFAULT;
+
+		m_sTextComments.Empty();
+		m_customComments.Empty();
 		m_sAllocBy.Empty();
 		m_sStatus.Empty();
 		m_sExternalID.Empty();
 		m_sDepends.Empty();
-		m_nPercentDone = 0;
-		m_dTimeEstimate = m_dTimeSpent = 0;
-		m_dCost = 0;
-		m_tRecurrence = TDCRECURRENCE();
+		m_sCost.Empty();
 		m_sVersion.Empty();
-		m_crColour = CLR_DEFAULT;
 
 		m_cbAllocTo.CheckAll(CCBC_UNCHECKED);
 		m_cbCategory.CheckAll(CCBC_UNCHECKED);
@@ -2088,7 +2084,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_COST:
-		SetSelectedTaskCost(m_dCost);
+		SetSelectedTaskCost(TDCCOST(m_sCost));
 		break;
 		
 	case TDCA_RECURRENCE:
@@ -2164,16 +2160,16 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		
 	case TDCA_TIMEEST:
 		if (dwFlags & UTF_TIMEUNITSONLY)
-			SetSelectedTaskTimeEstimateUnits(m_nTimeEstUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
+			SetSelectedTaskTimeEstimateUnits(m_timeEstimate.nUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
 		else
-			SetSelectedTaskTimeEstimate(m_dTimeEstimate, m_nTimeEstUnits);
+			SetSelectedTaskTimeEstimate(m_timeEstimate.dAmount, m_timeEstimate.nUnits);
 		break;
 		
 	case TDCA_TIMESPENT:
 		if (dwFlags & UTF_TIMEUNITSONLY)
-			SetSelectedTaskTimeSpentUnits(m_nTimeSpentUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
+			SetSelectedTaskTimeSpentUnits(m_timeSpent.nUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
 		else
-			SetSelectedTaskTimeSpent(m_dTimeSpent, m_nTimeSpentUnits);
+			SetSelectedTaskTimeSpent(m_timeSpent.dAmount, m_timeSpent.nUnits);
 		break;
 		
 	case TDCA_FILEREF:
@@ -3891,7 +3887,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent)
 	return TRUE;
 }
 
-BOOL CToDoCtrl::SetSelectedTaskCost(double dCost)
+BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost)
 {
 	if (!CanEditSelectedTask(TDCA_COST))
 		return FALSE;
@@ -3907,16 +3903,16 @@ BOOL CToDoCtrl::SetSelectedTaskCost(double dCost)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		if (!HandleModResult(dwTaskID, m_data.SetTaskCost(dwTaskID, dCost), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.SetTaskCost(dwTaskID, cost.dAmount, cost.bIsRate), aModTaskIDs))
 			return FALSE;
 	}
 	
 	if (aModTaskIDs.GetSize())
 	{
-		if (m_dCost != dCost)
+		if (!(TDCCOST(m_sCost) == cost))
 		{
-			m_dCost = dCost;
-			UpdateDataEx(this, IDC_COST, m_dCost, FALSE, DECIMALS);
+			m_sCost = cost.Format();
+			UpdateDataEx(this, IDC_COST, m_sCost, FALSE/*, DECIMALS*/);
 		}
 		
 		SetModified(TDCA_COST, aModTaskIDs);
@@ -4106,15 +4102,15 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(double dTime, TDC_UNITS nUnits)
 	
 	if (aModTaskIDs.GetSize())
 	{
-		if ((m_dTimeEstimate != dTime) || (m_nTimeEstUnits != nUnits))
+		if ((m_timeEstimate.dAmount != dTime) || (m_timeEstimate.nUnits != nUnits))
 		{
-			// note: setting the time field changes m_nTimeEstUnits
+			// note: setting the time field changes m_timeEstimate.nUnits
 			// so we have to do them separately
-			m_nTimeEstUnits = nUnits;
-			m_dTimeEstimate = dTime;
+			m_timeEstimate.nUnits = nUnits;
+			m_timeEstimate.dAmount = dTime;
 
-			m_eTimeEstimate.SetUnits(TDC::MapUnitsToTHUnits(m_nTimeEstUnits));
-			UpdateDataEx(this, IDC_TIMEEST, m_dTimeEstimate, FALSE, DECIMALS);
+			m_eTimeEstimate.SetUnits(TDC::MapUnitsToTHUnits(m_timeEstimate.nUnits));
+			UpdateDataEx(this, IDC_TIMEEST, m_timeEstimate.dAmount, FALSE, DECIMALS);
 		}
 		
 		// Recalc other attributes if only one item selected
@@ -4187,15 +4183,15 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(double dTime, TDC_UNITS nUnits)
 	
 	if (aModTaskIDs.GetSize())
 	{
-		if ((m_dTimeSpent != dTime) || (m_nTimeSpentUnits != nUnits))
+		if ((m_timeSpent.dAmount != dTime) || (m_timeSpent.nUnits != nUnits))
 		{
-			// note: setting the time field changes m_nTimeSpentUnits
+			// note: setting the time field changes m_timeSpent.nUnits
 			// so we have to do them separately
-			m_nTimeSpentUnits = nUnits;
-			m_dTimeSpent = dTime;
+			m_timeSpent.nUnits = nUnits;
+			m_timeSpent.dAmount = dTime;
 			
-			m_eTimeSpent.SetUnits(TDC::MapUnitsToTHUnits(m_nTimeSpentUnits));
-			UpdateDataEx(this, IDC_TIMESPENT, m_dTimeSpent, FALSE, DECIMALS);
+			m_eTimeSpent.SetUnits(TDC::MapUnitsToTHUnits(m_timeSpent.nUnits));
+			UpdateDataEx(this, IDC_TIMESPENT, m_timeSpent.dAmount, FALSE, DECIMALS);
 		}
 		
 		// update % complete?
@@ -4254,10 +4250,10 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 	
 	if (aModTaskIDs.GetSize())
 	{
-		if (m_nTimeEstUnits != nUnits)
+		if (m_timeEstimate.nUnits != nUnits)
 		{
-			m_nTimeEstUnits = nUnits;
-			m_eTimeEstimate.SetUnits(TDC::MapUnitsToTHUnits(m_nTimeEstUnits));
+			m_timeEstimate.nUnits = nUnits;
+			m_eTimeEstimate.SetUnits(TDC::MapUnitsToTHUnits(m_timeEstimate.nUnits));
 		}
 
 		// update other controls if only one item selected
@@ -4265,8 +4261,8 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 		{
 			if (bRecalcTime)
 			{
-				m_dTimeEstimate = GetSelectedTaskTimeEstimate(nUnits);
-				UpdateDataEx(this, IDC_TIMEEST, m_dTimeEstimate, FALSE, DECIMALS);
+				m_timeEstimate.dAmount = GetSelectedTaskTimeEstimate(nUnits);
+				UpdateDataEx(this, IDC_TIMEEST, m_timeEstimate.dAmount, FALSE, DECIMALS);
 			}
 			// update % complete?
 			else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -4334,10 +4330,10 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 	// update UI
 	if (aModTaskIDs.GetSize())
 	{
-		if (m_nTimeSpentUnits != nUnits)
+		if (m_timeSpent.nUnits != nUnits)
 		{
-			m_nTimeSpentUnits = nUnits;
-			m_eTimeSpent.SetUnits(TDC::MapUnitsToTHUnits(m_nTimeSpentUnits));
+			m_timeSpent.nUnits = nUnits;
+			m_eTimeSpent.SetUnits(TDC::MapUnitsToTHUnits(m_timeSpent.nUnits));
 		}
 
 		// update controls if only one item selected
@@ -4345,8 +4341,8 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 		{
 			if (bRecalcTime)
 			{
-				m_dTimeSpent = GetSelectedTaskTimeSpent(nUnits);
-				UpdateDataEx(this, IDC_TIMESPENT, m_dTimeSpent, FALSE, DECIMALS);
+				m_timeSpent.dAmount = GetSelectedTaskTimeSpent(nUnits);
+				UpdateDataEx(this, IDC_TIMESPENT, m_timeSpent.dAmount, FALSE, DECIMALS);
 			}
 			// update % complete?
 			else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -5083,7 +5079,7 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 		
 		// calculate how much time to allocate to each
 		BOOL bHasDueTime = pTDI->HasDueTime();
-		double dSubTime = 0, dSubEst = (pTDI->dTimeEstimate / nNumSubtasks);
+		double dSubTime = 0, dSubEst = (pTDI->timeEstimate.dAmount / nNumSubtasks);
 		
 		if (pTDI->HasStart() && bHasDueTime && (pTDI->dateDue > pTDI->dateStart))
 			dSubTime = ((pTDI->dateDue - pTDI->dateStart) / nNumSubtasks);
@@ -5095,7 +5091,7 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 			TODOITEM* pTDISub = m_data.NewTask(*pTDI); // copy parent
 			
 			// allocate time slice and dates
-			pTDISub->dTimeEstimate = dSubEst;
+			pTDISub->timeEstimate.dAmount = dSubEst;
 			
 			if (dSubTime)
 			{
@@ -5114,7 +5110,7 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 
 			// clear time spent from all but first task
 			if (nSubtask)
-				pTDISub->dTimeSpent = 0;
+				pTDISub->timeSpent.dAmount = 0;
 
 			// map it
 			DWORD dwChildID = m_dwNextUniqueID++;
@@ -10843,8 +10839,8 @@ void CToDoCtrl::SetDefaultTaskAttributes(const TODOITEM& tdi)
 	CDateHelper::ClearDate(m_tdiDefault.dateCreated);
 
 	// pass on default time units for calculations
-	m_taskTree.SetDefaultTImeUnits(tdi.nTimeEstUnits, tdi.nTimeSpentUnits);
-	m_data.SetDefaultTimeUnits(tdi.nTimeEstUnits, tdi.nTimeSpentUnits);
+	m_taskTree.SetDefaultTImeUnits(tdi.timeEstimate.nUnits, tdi.timeSpent.nUnits);
+	m_data.SetDefaultTimeUnits(tdi.timeEstimate.nUnits, tdi.timeSpent.nUnits);
 }
 
 LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
@@ -11789,7 +11785,6 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	case TDCA_PERCENT:		return SetSelectedTaskPercentDone(0);
 	case TDCA_FLAG:			return SetSelectedTaskFlag(FALSE);
 	case TDCA_LOCK:			return SetSelectedTaskLock(FALSE);
-	case TDCA_COST:			return SetSelectedTaskCost(0.0);
 	case TDCA_COLOR:		return SetSelectedTaskColor(0);
 	case TDCA_RECURRENCE:	return SetSelectedTaskRecurrence(TDCRECURRENCE());
 		
@@ -11805,6 +11800,13 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 			TDC_UNITS nUnits;
 			GetSelectedTaskTimeSpent(nUnits); // preserve existing units
 			return SetSelectedTaskTimeSpent(0.0, nUnits);
+		}
+
+	case TDCA_COST:
+		{
+			TDCCOST cost(GetSelectedTaskCost()); // preserve existing units
+			cost.dAmount = 0.0;
+			return SetSelectedTaskCost(cost);
 		}
 
 	// these have no field

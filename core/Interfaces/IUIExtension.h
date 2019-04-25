@@ -189,7 +189,7 @@ struct IUITASKMOD
 {
 	TDC_ATTRIBUTE nAttrib;
 	DWORD dwSelectedTaskID;		// 'zero' for _ALL_ selected tasks
-	LPCWSTR szCustomAttribID;	// IUI_CUSTOMATTRIB
+	LPCWSTR szCustomAttribID;	// TDCA_CUSTOMATTRIB
 
 	// The attribute value
 	union
@@ -205,7 +205,8 @@ struct IUITASKMOD
 	// Extra info
 	union
 	{
-		TDC_UNITS nTimeUnits;	// IUI_TIMEEST, IUI_TIMESPENT, IUI_CUSTOMATTRIB
+		TDC_UNITS nTimeUnits;	// TDCA_TIMEEST, TDCA_TIMESPENT, TDCA_CUSTOMATTRIB
+		bool bCostIsRate;		// TDCA_COST
 	};
 };
 

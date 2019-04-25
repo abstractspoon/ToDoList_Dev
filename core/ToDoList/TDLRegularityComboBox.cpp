@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "tdcstruct.h"
 #include "TDLRegularityComboBox.h"
+#include "TDCRecurrence.h"
 
 #include "..\Shared\DialogHelper.h"
 

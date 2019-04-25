@@ -125,7 +125,7 @@ bool CFMindImporter::ImportTask(const CXmlItem* pFMTask, ITASKLISTBASE* pDestTas
 	pDestTaskFile->SetTaskCreatedBy(hTask, GetAttribValueS(pFMTask, FM_CUSTOMCREATEDBY));
 	pDestTaskFile->SetTaskRisk(hTask, GetAttribValueI(pFMTask, FM_CUSTOMRISK));
 	pDestTaskFile->SetTaskExternalID(hTask, GetAttribValueS(pFMTask, FM_CUSTOMEXTID));
-	pDestTaskFile->SetTaskCost(hTask, GetAttribValueD(pFMTask, FM_CUSTOMCOST));
+	pDestTaskFile->SetTaskCost(hTask, GetAttribValueD(pFMTask, FM_CUSTOMCOST), false);
 	pDestTaskFile->SetTaskVersion(hTask, GetAttribValueS(pFMTask, FM_CUSTOMVERSION));
 	pDestTaskFile->SetTaskComments(hTask, GetTaskComments(pFMTask));
 

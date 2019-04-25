@@ -5470,10 +5470,14 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 		if (startup.GetCost(dItem, bOffset))
 		{
-			if (bOffset)
-				dItem += tdc.GetSelectedTaskCost();
+			TDCCOST cost(tdc.GetSelectedTaskCost()); // preserve 'IsRate'
 
-			tdc.SetSelectedTaskCost(dItem);
+			if (bOffset)
+				cost.dAmount += dItem;
+			else
+				cost.dAmount = dItem;
+
+			tdc.SetSelectedTaskCost(cost);
 		}
 
 		// Times
@@ -12434,10 +12438,10 @@ void CToDoListWnd::UpdateStatusBarInfo(const CFilteredToDoCtrl& tdc, TDCSTATUSBA
 
 	const CPreferencesDlg& userPrefs = Prefs();
 
-	sbi.nTimeEstUnits = m_tdiDefault.nTimeEstUnits;
+	sbi.nTimeEstUnits = m_tdiDefault.timeEstimate.nUnits;
 	sbi.dTimeEst = tdc.CalcSelectedTaskTimeEstimate(sbi.nTimeEstUnits);
 
-	sbi.nTimeSpentUnits = m_tdiDefault.nTimeSpentUnits;
+	sbi.nTimeSpentUnits = m_tdiDefault.timeSpent.nUnits;
 	sbi.dTimeSpent = tdc.CalcSelectedTaskTimeSpent(sbi.nTimeSpentUnits);
 }
 

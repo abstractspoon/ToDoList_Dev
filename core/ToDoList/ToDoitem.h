@@ -11,7 +11,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "tdcenum.h"
+#include "tdcstruct.h"
 #include "tdccustomattribdata.h"
 #include "tdcrecurrence.h"
 
@@ -29,6 +29,44 @@ const int TDC_MINPRIORITYORISK = 0;
 const int TDC_MAXPRIORITYORISK = 10;
 
 ///////////////////////////////////////////////////////////////////////////////////
+
+struct TDCTIMEPERIOD
+{
+	TDCTIMEPERIOD();
+
+	BOOL operator==(const TDCTIMEPERIOD& other) const;
+	TDCTIMEPERIOD& operator=(const TDCTIMEPERIOD& other);
+
+	TH_UNITS GetTHUnits() const;
+	BOOL SetTHUnits(TH_UNITS nTHUnits);
+
+	double GetTime(TH_UNITS nUnits) const;
+	double GetTime(TH_UNITS nUnits, const CTimeHelper& th) const;
+
+	double dAmount;
+	TDC_UNITS nUnits;
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+struct TDCCOST
+{
+	TDCCOST(LPCTSTR szCost = NULL);
+	TDCCOST(double dCost, BOOL bCostIsRate);
+
+	BOOL operator==(const TDCCOST& other) const;
+	TDCCOST& operator=(const TDCCOST& other);
+
+	CString Format() const;
+	BOOL Parse(LPCTSTR szCost);
+
+	static CString Format(double dAmount, BOOL bIsRate);
+
+	double dAmount;
+	BOOL bIsRate;
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 struct TODOITEM
 {
@@ -89,9 +127,6 @@ public:
 	const CTDCMetaDataMap& GetMetaData() const { return mapMetaData; }
 	void SetMetaData(const CTDCMetaDataMap& mapData) { mapMetaData.Copy(mapData); }
 
-	TDC_UNITS GetTimeUnits(BOOL bTimeEst) const;
-	TH_UNITS GetTHTimeUnits(BOOL bTimeEst) const;
-	
 	// only applies to dependencies within this tasklist
 	BOOL RemoveLocalDependency(DWORD dwDependID);
 	BOOL IsLocallyDependentOn(DWORD dwDependID) const;
@@ -137,14 +172,13 @@ public:
 	int nPercentDone;
 	int nRisk;
 	
-	double dCost;
-	double dTimeEstimate, dTimeSpent;
+	TDCCOST cost;
+	TDCTIMEPERIOD timeEstimate, timeSpent;
 	
 	BOOL bFlagged;
 	BOOL bLocked;
 
 	COLORREF color;
-	TDC_UNITS nTimeEstUnits, nTimeSpentUnits;
 	CBinaryData customComments;
 	TDCRECURRENCE trRecurrence;
 	DWORD dwTaskRefID;

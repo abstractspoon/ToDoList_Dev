@@ -427,14 +427,14 @@ CString CToDoCtrlFind::GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const
 		{
 		case TDCC_TIMEEST:
 	 		if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-				nUnits = pTDI->nTimeEstUnits;
+				nUnits = pTDI->timeEstimate.nUnits;
 
 			dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, nUnits);
 			break;
 
 		case TDCC_TIMESPENT:
 			if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-				nUnits = pTDI->nTimeSpentUnits;
+				nUnits = pTDI->timeSpent.nUnits;
 			
 			dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, nUnits);
 			break;

@@ -402,7 +402,10 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 		break;
 
 	case TDCA_COST: 
-		pTasks->SetTaskCost(hTask, _ttof(sValue));
+		{
+			TDCCOST cost(sValue);
+			pTasks->SetTaskCost(hTask, cost.dAmount, (cost.bIsRate != FALSE));
+		}
 		break;
 
 	case TDCA_TIMEEST: 

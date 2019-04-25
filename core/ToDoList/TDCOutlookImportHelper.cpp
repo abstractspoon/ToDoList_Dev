@@ -267,15 +267,15 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 			break;
 			
 		case TDCA_COST: 
-			tdi.dCost = _ttof(sData);
+			tdi.cost.Parse(sData);
 			break;
 			
 		case TDCA_TIMEEST: 
-			tdi.dTimeEstimate = ImportDuration(sData, tdi.nTimeEstUnits);
+			tdi.timeEstimate.dAmount = ImportDuration(sData, tdi.timeEstimate.nUnits);
 			break;
 			
 		case TDCA_TIMESPENT: 
-			tdi.dTimeSpent = ImportDuration(sData, tdi.nTimeSpentUnits);
+			tdi.timeSpent.dAmount = ImportDuration(sData, tdi.timeSpent.nUnits);
 			break;
 		}
 	}
@@ -380,10 +380,10 @@ BOOL CTDCOutlookImportHelper::SetTaskAttributes(ITaskList* pTaskList, HTASKITEM 
 	pTasks->SetTaskPriority(hTask, tdi.nPriority);
 	pTasks->SetTaskRisk(hTask, tdi.nRisk);
 	pTasks->SetTaskPercentDone(hTask, (unsigned char)tdi.nPercentDone);
-	pTasks->SetTaskCost(hTask, tdi.dCost);
+	pTasks->SetTaskCost(hTask, tdi.cost.dAmount, (tdi.cost.bIsRate != FALSE));
 	pTasks->SetTaskFlag(hTask, (tdi.bFlagged == TRUE));
-	pTasks->SetTaskTimeEstimate(hTask, tdi.dTimeEstimate, tdi.nTimeEstUnits);
-	pTasks->SetTaskTimeSpent(hTask, tdi.dTimeSpent, tdi.nTimeSpentUnits);
+	pTasks->SetTaskTimeEstimate(hTask, tdi.timeEstimate.dAmount, tdi.timeEstimate.nUnits);
+	pTasks->SetTaskTimeSpent(hTask, tdi.timeSpent.dAmount, tdi.timeSpent.nUnits);
 
 	return TRUE;
 }

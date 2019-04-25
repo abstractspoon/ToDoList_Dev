@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "TDCCustomAttribData.h"
 #include "TDCmapping.h"
+#include "todoitem.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\datehelper.h"
@@ -201,6 +202,20 @@ double TDCCADATA::AsTimePeriod(TDC_UNITS& nUnits) const
 	return _ttof(sData);
 }
 
+double TDCCADATA::AsCost(BOOL& bIsRate) const
+{
+	if (IsEmpty())
+	{
+		bIsRate = FALSE;
+		return 0.0;
+	}
+	
+	// else
+	bIsRate = (sData.Find(_T(":1")) != -1);
+	return _ttof(sData);
+
+}
+
 TDC_UNITS TDCCADATA::GetTimeUnits() const
 {
 	if (IsEmpty())
@@ -250,6 +265,11 @@ void TDCCADATA::Set(double dValue, TDC_UNITS nUnits)
 { 
 	ASSERT(IsValidUnits(nUnits));
 	sData.Format(_T("%lf:%lc"), dValue, (TCHAR)nUnits); 
+}
+
+void TDCCADATA::Set(double dValue, BOOL bIsRate)
+{
+	sData = TDCCOST::Format(dValue, bIsRate);
 }
 
 void TDCCADATA::Set(bool bValue, TCHAR nChar) 

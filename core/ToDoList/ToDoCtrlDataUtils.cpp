@@ -2179,8 +2179,12 @@ double CTDCTaskCalculator::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE
 	if (!pTDS || !pTDI)
 		return 0.0;
 
-	double dCost = pTDI->dCost; // own cost
+	// own cost
+	double dCost = pTDI->cost.dAmount;
 
+	if (pTDI->cost.bIsRate)
+		dCost *= pTDI->timeSpent.dAmount;
+	
 	if (pTDS->HasSubTasks())
 	{
 		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
@@ -2205,9 +2209,9 @@ TDC_UNITS CTDCTaskCalculator::GetBestTimeEstUnits(const TODOITEM* pTDI, const TO
 
 	TDC_UNITS nUnits = m_data.m_nDefTimeEstUnits;
 
-	if (pTDI->dTimeEstimate > 0)
+	if (pTDI->timeEstimate.dAmount > 0)
 	{
-		nUnits = pTDI->nTimeEstUnits;
+		nUnits = pTDI->timeEstimate.nUnits;
 	}
 	else if (pTDS->HasSubTasks())
 	{
@@ -2230,9 +2234,9 @@ TDC_UNITS CTDCTaskCalculator::GetBestTimeSpentUnits(const TODOITEM* pTDI, const 
 
 	TDC_UNITS nUnits = m_data.m_nDefTimeSpentUnits;
 
-	if (pTDI->dTimeSpent > 0)
+	if (pTDI->timeSpent.dAmount > 0)
 	{
-		nUnits = pTDI->nTimeSpentUnits;
+		nUnits = pTDI->timeSpent.nUnits;
 	}
 	else if (pTDS->HasSubTasks())
 	{
@@ -2270,11 +2274,9 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 	dWeightedEstimate = 0.0;
 
 	BOOL bIsParent = pTDS->HasSubTasks();
-	CTimeHelper th;
-
 	if (!bIsParent || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 	{
-		dEstimate = th.GetTime(pTDI->dTimeEstimate, pTDI->GetTHTimeUnits(TRUE), THU_HOURS);
+		dEstimate = pTDI->timeEstimate.GetTime(THU_HOURS);
 
 		// DON'T WEIGHT BY PERCENT if we are auto-calculating
 		// percent-done, because that will recurse back into here
@@ -2304,6 +2306,8 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 	}
 
 	// Estimate is calculated internally in hours so we need to convert it to nUnits
+	CTimeHelper th;
+
 	dEstimate = th.GetTime(dEstimate, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
 	dWeightedEstimate = th.GetTime(dWeightedEstimate, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
 
@@ -2333,7 +2337,7 @@ double CTDCTaskCalculator::GetTaskRemainingTime(const TODOITEM* pTDI, const TODO
 	}
 	else
 	{
-		double dEstimate = GetTaskTimeEstimate(pTDI, pTDS, pTDI->nTimeEstUnits, dWeightedEstimate);
+		double dEstimate = GetTaskTimeEstimate(pTDI, pTDS, pTDI->timeEstimate.nUnits, dWeightedEstimate);
 
 		if (m_data.HasStyle(TDCS_CALCREMAININGTIMEBYPERCENT))
 		{
@@ -2344,17 +2348,17 @@ double CTDCTaskCalculator::GetTaskRemainingTime(const TODOITEM* pTDI, const TODO
 			if (dEstimate != 0.0)
 			{
 				dRemain = dWeightedEstimate;
-				nUnits = pTDI->nTimeEstUnits;
+				nUnits = pTDI->timeEstimate.nUnits;
 			}
 		}
 		else if (m_data.HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
 		{
-			double dSpent = GetTaskTimeSpent(pTDI, pTDS, pTDI->nTimeEstUnits);
+			double dSpent = GetTaskTimeSpent(pTDI, pTDS, pTDI->timeEstimate.nUnits);
 
 			if ((dEstimate != 0.0) || (dSpent != 0.0))
 			{
 				dRemain = (dEstimate - dSpent);
-				nUnits = pTDI->nTimeEstUnits;
+				nUnits = pTDI->timeEstimate.nUnits;
 			}
 		}
 	}
@@ -2377,7 +2381,7 @@ double CTDCTaskCalculator::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRU
 
 	// task's own time
 	if (!bIsParent || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-		dSpent = CTimeHelper().GetTime(pTDI->dTimeSpent, pTDI->GetTHTimeUnits(FALSE), THU_HOURS);
+		dSpent = pTDI->timeSpent.GetTime(THU_HOURS);
 
 	if (bIsParent) // children's time
 	{
@@ -3621,7 +3625,7 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		if (filter.WantAttribute(TDCA_COST))
 		{
 			//if (pTDI->dCost > 0)
-			tasks.SetTaskCost(hTask, pTDI->dCost);
+			tasks.SetTaskCost(hTask, pTDI->cost.dAmount, (pTDI->cost.bIsRate != FALSE));
 
 			double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
 
@@ -3632,8 +3636,8 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		// time estimate
 		if (filter.WantAttribute(TDCA_TIMEEST))
 		{
-			if ((pTDI->dTimeEstimate > 0) || (pTDI->nTimeEstUnits != TDCU_HOURS))
-				tasks.SetTaskTimeEstimate(hTask, pTDI->dTimeEstimate, pTDI->nTimeEstUnits);
+			if ((pTDI->timeEstimate.dAmount > 0) || (pTDI->timeEstimate.nUnits != TDCU_HOURS))
+				tasks.SetTaskTimeEstimate(hTask, pTDI->timeEstimate.dAmount, pTDI->timeEstimate.nUnits);
 
 			// for calc'ed estimate use this item's units if it
 			// has a non-zero time estimate, else its first subtask's units
@@ -3647,8 +3651,8 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		// time spent
 		if (filter.WantAttribute(TDCA_TIMESPENT))
 		{
-			if ((pTDI->dTimeSpent != 0) || (pTDI->nTimeSpentUnits != TDCU_HOURS))
-				tasks.SetTaskTimeSpent(hTask, pTDI->dTimeSpent, pTDI->nTimeSpentUnits);
+			if ((pTDI->timeSpent.dAmount != 0) || (pTDI->timeSpent.nUnits != TDCU_HOURS))
+				tasks.SetTaskTimeSpent(hTask, pTDI->timeSpent.dAmount, pTDI->timeSpent.nUnits);
 
 			// for calc'ed spent use this item's units if it
 			// has a non-zero time estimate, else its first subtask's units

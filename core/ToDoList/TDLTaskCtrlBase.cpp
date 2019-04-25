@@ -3507,7 +3507,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 
 				// else
 				ASSERT(dRemaining == 0.0);
-				nUnits = pTDI->nTimeEstUnits;
+				nUnits = pTDI->timeEstimate.nUnits;
 			}
 
 			// format appropriately
@@ -3555,20 +3555,30 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		break;
 
 	case TDCC_TIMEEST:
-	case TDCC_TIMESPENT:
 		{
-			BOOL bTimeEst = (nColID == TDCC_TIMEEST);
-			TDC_UNITS nUnits = (bTimeEst ? m_nDefTimeEstUnits : m_nDefTimeSpentUnits); // good default value
+			TDC_UNITS nUnits = m_nDefTimeEstUnits; // good default value
 
 			// get actual task time units
 			if (!pTDS->HasSubTasks() || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-				nUnits = pTDI->GetTimeUnits(bTimeEst);
+				nUnits = pTDI->timeEstimate.nUnits;
 
 			// draw time
-			double dTime = (bTimeEst ? m_calculator.GetTaskTimeEstimate(pTDI, pTDS, nUnits) :
-										m_calculator.GetTaskTimeSpent(pTDI, pTDS, nUnits));
+			double dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, nUnits);
+			sTaskColText = FormatTimeValue(dTime, nUnits, FALSE); // FALSE = estimates cannot be -ve
+		}
+		break;
 
-			sTaskColText = FormatTimeValue(dTime, nUnits, !bTimeEst);
+	case TDCC_TIMESPENT:
+		{
+			TDC_UNITS nUnits = m_nDefTimeSpentUnits; // good default value
+
+			// get actual task time units
+			if (!pTDS->HasSubTasks() || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+				nUnits = pTDI->timeSpent.nUnits;
+
+			// draw time
+			double dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, nUnits);
+			sTaskColText = FormatTimeValue(dTime, nUnits, TRUE); // TRUE = time spent can be -ve
 		}
 		break;
 
@@ -5801,9 +5811,9 @@ CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen
 	return sPath;
 }
 
-double CTDLTaskCtrlBase::GetSelectedTaskCost() const
+CString CTDLTaskCtrlBase::GetSelectedTaskCost() const
 {
-	double dCost = 0.0;
+	TDCCOST cost;
 	
 	if (GetSelectedCount())
 	{
@@ -5811,19 +5821,21 @@ double CTDLTaskCtrlBase::GetSelectedTaskCost() const
 		POSITION pos = GetFirstSelectedTaskPos();
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		dCost = m_data.GetTaskCost(dwTaskID);
+		cost.dAmount = m_data.GetTaskCost(dwTaskID, cost.bIsRate);
 		
 		while (pos)
 		{
 			dwTaskID = GetNextSelectedTaskID(pos);
-			double dTaskCost = m_data.GetTaskCost(dwTaskID);
 
-			if (dCost != dTaskCost)
-				return 0.0;
+			BOOL bCostIsRate;
+			double dCost = m_data.GetTaskCost(dwTaskID, bCostIsRate);
+
+			if ((dCost != cost.dAmount) || (bCostIsRate != cost.bIsRate))
+				return _T("");
 		}
 	}
 	
-	return dCost;
+	return cost.Format();
 }
 
 BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted) const

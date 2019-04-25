@@ -44,6 +44,7 @@ struct TDCCADATA
 	int AsArray(CStringArray& aValues) const;
 	int AsArrays(CStringArray& aValues, CStringArray& aExtra) const;
 	double AsTimePeriod(TDC_UNITS& nUnits) const;
+	double AsCost(BOOL& bIsRate) const;
 
 	TDC_UNITS GetTimeUnits() const;
 
@@ -52,6 +53,7 @@ struct TDCCADATA
 	void Set(const COleDateTime& dtValue);
 	void Set(const CString& sValue, TCHAR cSep = 0);
 	void Set(double dValue, TDC_UNITS nUnits);
+	void Set(double dValue, BOOL bIsRate);
 	void Set(bool bValue, TCHAR nChar = 0);
 	void Set(const CStringArray& aValues);
 	void Set(const CStringArray& aValues, const CStringArray& aExtra);

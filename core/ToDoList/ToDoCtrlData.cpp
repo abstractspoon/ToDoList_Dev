@@ -483,12 +483,13 @@ const CBinaryData& CToDoCtrlData::GetTaskCustomComments(DWORD dwTaskID, CString&
 	return pTDI->customComments;
 }
 
-double CToDoCtrlData::GetTaskCost(DWORD dwTaskID) const
+double CToDoCtrlData::GetTaskCost(DWORD dwTaskID, BOOL& bCostIsRate) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, 0);
 	
-	return pTDI->dCost;
+	bCostIsRate = pTDI->cost.bIsRate;
+	return pTDI->cost.dAmount;
 }
 
 double CToDoCtrlData::GetTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS& nUnits) const
@@ -496,8 +497,8 @@ double CToDoCtrlData::GetTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS& nUnits) con
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, 0);
 
-	nUnits = pTDI->nTimeEstUnits;
-	return pTDI->dTimeEstimate;
+	nUnits = pTDI->timeEstimate.nUnits;
+	return pTDI->timeEstimate.dAmount;
 }
 
 double CToDoCtrlData::GetTaskTimeSpent(DWORD dwTaskID, TDC_UNITS& nUnits) const
@@ -505,8 +506,8 @@ double CToDoCtrlData::GetTaskTimeSpent(DWORD dwTaskID, TDC_UNITS& nUnits) const
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, 0);
 	
-	nUnits = pTDI->nTimeSpentUnits;
-	return pTDI->dTimeSpent;
+	nUnits = pTDI->timeSpent.nUnits;
+	return pTDI->timeSpent.dAmount;
 }
 
 int CToDoCtrlData::GetTaskAllocTo(DWORD dwTaskID, CStringArray& aAllocTo) const
@@ -1204,10 +1205,12 @@ TDC_SET CToDoCtrlData::CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, 
 			case TDCA_FLAG:			COPYATTRIB(bFlagged); break;
 			case TDCA_LOCK:			COPYATTRIB(bLocked); break;
 			
-			case TDCA_TIMEEST:		COPYATTRIB(dTimeEstimate); 
-									COPYATTRIB(nTimeEstUnits); break;
-			case TDCA_TIMESPENT:	COPYATTRIB(dTimeSpent);	
-									COPYATTRIB(nTimeSpentUnits); break;
+			case TDCA_TIMEEST:		COPYATTRIB(timeEstimate.dAmount); 
+									COPYATTRIB(timeEstimate.nUnits); break;
+			case TDCA_TIMESPENT:	COPYATTRIB(timeSpent.dAmount);	
+									COPYATTRIB(timeSpent.nUnits); break;
+			case TDCA_COST:			COPYATTRIB(cost.dAmount);	
+									COPYATTRIB(cost.bIsRate); break;
 			
 			case TDCA_COMMENTS:		COPYATTRIB(sComments); 
 									COPYATTRIB(customComments); 
@@ -1360,8 +1363,14 @@ TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib,
 		nRes = SetTaskLock(dwTaskID, FALSE);
 		break;
 
-	case TDCA_COST:			
-		nRes = SetTaskCost(dwTaskID, 0.0);
+	case TDCA_COST:	
+		{
+			// preserve 'IsRate'
+			BOOL bCostIsRate;
+			GetTaskCost(dwTaskID, bCostIsRate);
+			
+			nRes = SetTaskCost(dwTaskID, 0.0, bCostIsRate);
+		}
 		break;
 
 	case TDCA_COLOR:		
@@ -1650,8 +1659,8 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 		break;
 
 	case TDCA_TIMEEST:
-		if (bIncludeBlank || pTDIParent->dTimeEstimate > 0)
-			pTDIChild->dTimeEstimate = pTDIParent->dTimeEstimate;
+		if (bIncludeBlank || pTDIParent->timeEstimate.dAmount > 0)
+			pTDIChild->timeEstimate = pTDIParent->timeEstimate;
 		break;
 
 	case TDCA_FILEREF:
@@ -2137,7 +2146,7 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 			return SET_FAILED;
 		}
 	}
-	else if (pTDI->dTimeEstimate <= 0.0)
+	else if (pTDI->timeEstimate.dAmount <= 0.0)
 	{
 		ASSERT(0);
 		return SET_FAILED;
@@ -2159,15 +2168,15 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 	double dDuration = 0.0;
 	
 	if (pTDI->HasDue())
-		dDuration = CalcDuration(pTDI->dateStart, pTDI->dateDue, pTDI->nTimeEstUnits);
+		dDuration = CalcDuration(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits);
 	else
-		dDuration = pTDI->dTimeEstimate;
+		dDuration = pTDI->timeEstimate.dAmount;
 	
 	ASSERT(dDuration > 0.0);
 	
 	// recalc due date
 	COleDateTime dtStart(dtNewStart);
-	COleDateTime dtNewDue = AddDuration(dtStart, dDuration, pTDI->nTimeEstUnits);
+	COleDateTime dtNewDue = AddDuration(dtStart, dDuration, pTDI->timeEstimate.nUnits);
 
 	// FALSE -> don't recalc time estimate until due date is set
 	TDC_SET nRes = SetTaskDate(dwTaskID, pTDI, TDCD_START, dtStart, FALSE);
@@ -2223,12 +2232,27 @@ TDC_SET CToDoCtrlData::SetTaskPercent(DWORD dwTaskID, int nPercent)
 	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_PERCENT, pTDI->nPercentDone, nPercent);
 }
 
-TDC_SET CToDoCtrlData::SetTaskCost(DWORD dwTaskID, double dCost)
+TDC_SET CToDoCtrlData::SetTaskCost(DWORD dwTaskID, double dCost, BOOL bIsRate)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_COST, pTDI->dCost, dCost);
+	if ((pTDI->cost.dAmount == dCost) && ((pTDI->cost.bIsRate && bIsRate) || (!pTDI->cost.bIsRate && !bIsRate)))
+		return SET_NOCHANGE;
+
+	// save undo data
+	SaveEditUndo(dwTaskID, pTDI, TDCA_COST);
+
+	// make the change
+	pTDI->cost.dAmount = dCost;
+	pTDI->cost.bIsRate = bIsRate;
+
+	pTDI->SetModified();
+
+	// update subtasks
+	ApplyLastInheritedChangeToSubtasks(dwTaskID, TDCA_COST);
+
+	return SET_CHANGE;
 }
 
 TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, double dTime, TDC_UNITS nUnits)
@@ -2236,10 +2260,10 @@ TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, double dTime, TDC_UNI
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	double dOrgEstimate = pTDI->dTimeEstimate;
-	TDC_UNITS nOrgUnits = pTDI->nTimeEstUnits;
+	double dOrgEstimate = pTDI->timeEstimate.dAmount;
+	TDC_UNITS nOrgUnits = pTDI->timeEstimate.nUnits;
 	
-	TDC_SET nRes = EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEEST, pTDI->dTimeEstimate, dTime, pTDI->nTimeEstUnits, nUnits);
+	TDC_SET nRes = EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEEST, pTDI->timeEstimate.dAmount, dTime, pTDI->timeEstimate.nUnits, nUnits);
 
 	if ((nRes == SET_CHANGE) && HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 	{
@@ -2264,21 +2288,21 @@ TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, double dTime, TDC_UNI
 
 BOOL CToDoCtrlData::CalcMissingStartDateFromDue(TODOITEM* pTDI) const
 {
-	if (pTDI->HasStart() || !pTDI->HasDue() || (pTDI->dTimeEstimate <= 0.0))
+	if (pTDI->HasStart() || !pTDI->HasDue() || (pTDI->timeEstimate.dAmount <= 0.0))
 		return FALSE;
 
 	// Subtract time estimate from due date
-	pTDI->dateStart = AddDuration(pTDI->dateDue, -pTDI->dTimeEstimate, pTDI->nTimeEstUnits);
+	pTDI->dateStart = AddDuration(pTDI->dateDue, -pTDI->timeEstimate.dAmount, pTDI->timeEstimate.nUnits);
 	return TRUE;
 }
 
 BOOL CToDoCtrlData::CalcMissingDueDateFromStart(TODOITEM* pTDI) const
 {
-	if (!pTDI->HasStart() || pTDI->HasDue() || (pTDI->dTimeEstimate <= 0.0))
+	if (!pTDI->HasStart() || pTDI->HasDue() || (pTDI->timeEstimate.dAmount <= 0.0))
 		return FALSE;
 
 	// Add time estimate to start date
-	pTDI->dateDue = AddDuration(pTDI->dateStart, pTDI->dTimeEstimate, pTDI->nTimeEstUnits);
+	pTDI->dateDue = AddDuration(pTDI->dateStart, pTDI->timeEstimate.dAmount, pTDI->timeEstimate.nUnits);
 	return TRUE;
 }
 
@@ -2316,10 +2340,10 @@ TDC_SET CToDoCtrlData::RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TD
 						break;
 					}
 
-					double dDuration = CalcDuration(pTDI->dateStart, pTDI->dateDue, pTDI->nTimeEstUnits);
+					double dDuration = CalcDuration(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits);
 					ASSERT(dDuration > 0.0);
 
-					return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEEST, pTDI->dTimeEstimate, dDuration, pTDI->nTimeEstUnits, pTDI->nTimeEstUnits);
+					return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEEST, pTDI->timeEstimate.dAmount, dDuration, pTDI->timeEstimate.nUnits, pTDI->timeEstimate.nUnits);
 				}
 			}
 			break;
@@ -2335,7 +2359,7 @@ TDC_SET CToDoCtrlData::SetTaskTimeSpent(DWORD dwTaskID, double dTime, TDC_UNITS 
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 	
-	return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMESPENT, pTDI->dTimeSpent, dTime, pTDI->nTimeSpentUnits, nUnits);
+	return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMESPENT, pTDI->timeSpent.dAmount, dTime, pTDI->timeSpent.nUnits, nUnits);
 }
 
 BOOL CToDoCtrlData::ResetRecurringSubtaskOccurrences(DWORD dwTaskID)
@@ -3244,7 +3268,7 @@ BOOL CToDoCtrlData::CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDepen
 	
 	if (CDateHelper::IsDateSet(dtNewStart))
 	{
-		if (pTDI->nTimeEstUnits == TDCU_WEEKDAYS)
+		if (pTDI->timeEstimate.nUnits == TDCU_WEEKDAYS)
 			CDateHelper::MakeWeekday(dtNewStart);
 
 		return TRUE;
@@ -3269,9 +3293,9 @@ UINT CToDoCtrlData::SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDate
 
 	if (pTDI->HasDue() && pTDI->HasStart())
 	{
-		double dDuration = CalcDuration(pTDI->dateStart, pTDI->dateDue, pTDI->nTimeEstUnits);
+		double dDuration = CalcDuration(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits);
 
-		COleDateTime dtNewDue = AddDuration(dtStart, dDuration, pTDI->nTimeEstUnits);
+		COleDateTime dtNewDue = AddDuration(dtStart, dDuration, pTDI->timeEstimate.nUnits);
 
 		if (dtNewDue != pTDI->dateDue)
 		{
@@ -3663,7 +3687,6 @@ BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib
 	case TDCA_PRIORITY:		data.Set(GetTaskPriority(dwTaskID));		break;	
 	case TDCA_RISK:			data.Set(GetTaskRisk(dwTaskID));			break;	
 	case TDCA_PERCENT:		data.Set(GetTaskPercent(dwTaskID, FALSE));	break;	
-	case TDCA_COST:			data.Set(GetTaskCost(dwTaskID));			break;	
 	case TDCA_FLAG:			data.Set(IsTaskFlagged(dwTaskID));			break;	
 	case TDCA_ICON:			data.Set(GetTaskIcon(dwTaskID));			break;	
 	case TDCA_LOCK:			data.Set(IsTaskLocked(dwTaskID));			break;	
@@ -3714,6 +3737,15 @@ BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib
 			data.Set(dTime, nUnits);
 		}
 		break;
+
+	case TDCA_COST:	
+		{
+			BOOL bCostIsRate;
+			double dCost = GetTaskCost(dwTaskID, bCostIsRate);
+
+			data.Set(dCost, bCostIsRate);
+		}
+		break;
 	}
 
 	return !data.IsEmpty();
@@ -3753,7 +3785,6 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 	case TDCA_PRIORITY:		return SetTaskPriority(dwTaskID, data.AsInteger());
 	case TDCA_RISK:			return SetTaskRisk(dwTaskID, data.AsInteger());
 	case TDCA_PERCENT:		return SetTaskPercent(dwTaskID, data.AsInteger());
-	case TDCA_COST:			return SetTaskCost(dwTaskID, data.AsDouble());
 	case TDCA_FLAG:			return SetTaskFlag(dwTaskID, data.AsBool());
 	case TDCA_LOCK:			return SetTaskLock(dwTaskID, data.AsBool());
 
@@ -3799,6 +3830,15 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 			double dTime = data.AsTimePeriod(nUnits);
 
 			return SetTaskTimeSpent(dwTaskID, dTime, nUnits);
+		}
+		break;
+
+	case TDCA_COST:
+		{
+			BOOL bCostIsRate;
+			double dCost = data.AsCost(bCostIsRate);
+
+			return SetTaskCost(dwTaskID, dCost, bCostIsRate);
 		}
 		break;
 	}

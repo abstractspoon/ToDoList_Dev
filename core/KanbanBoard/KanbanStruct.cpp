@@ -413,7 +413,7 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_PERCENT:		return Misc::Format(nPercent, _T("%"));
 	case TDCA_CREATEDBY:		return sCreatedBy;
 	case TDCA_EXTERNALID:	return sExternalID;
-	case TDCA_COST:			return Misc::Format(dCost, 2);
+	case TDCA_COST:			return sCost;
 	case TDCA_RECURRENCE:	return sRecurrence;
 	case TDCA_TIMEEST:		return CTimeHelper().FormatTime(dTimeEst, MapUnitsToTHUnits(nTimeEstUnits), 2);
 	case TDCA_TIMESPENT:		return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
@@ -456,9 +456,9 @@ BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_CREATEDBY:	return !sCreatedBy.IsEmpty();
 	case TDCA_EXTERNALID:	return !sExternalID.IsEmpty();
 	case TDCA_RECURRENCE:	return !sRecurrence.IsEmpty();
+	case TDCA_COST:			return !sCost.IsEmpty();
 
 	case TDCA_PERCENT:		return (nPercent > 0);
-	case TDCA_COST:			return (dCost > 0);
 	case TDCA_TIMEEST:		return (dTimeEst > 0);
 	case TDCA_TIMESPENT:	return (dTimeSpent > 0);
 

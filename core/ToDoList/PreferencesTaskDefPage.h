@@ -14,6 +14,7 @@
 #include "tdlreminderperiodcombobox.h"
 #include "tdcenumcontainers.h"
 #include "tdlcommentsctrl.h"
+#include "todoitem.h"
 
 #include "..\shared\preferencesbase.h"
 #include "..\shared\colorbutton.h"
@@ -66,11 +67,11 @@ protected:
 	CIconButton		m_btDefIcon;
 
 	CString	m_sDefCreatedBy;
-	double	m_dDefCost;
+	CString	m_sDefCost;
 	BOOL	m_bReminderBeforeDue;
 	int		m_nDefPriority;
 	int		m_nDefRisk;
-	double	m_dDefTimeEst, m_dDefTimeSpent;
+	TDCTIMEPERIOD m_defTimeEst, m_defTimeSpent;
 	CString	m_sDefAllocTo;
 	CString	m_sDefAllocBy;
 	CString	m_sDefStatus;

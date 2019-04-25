@@ -244,6 +244,9 @@ public:
 	bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const;
 	LPCTSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const;
 
+	bool SetTaskCost(HTASKITEM hTask, double dCost, bool bIsRate);
+	bool GetTaskCost(HTASKITEM hTask, double& dCost, bool& bIsRate) const;
+
 	//////////////////////////////////////////////////////////////
 	// ITaskList16 implementation 
 	bool IsTaskLocked(HTASKITEM hTask, bool bCalc) const;

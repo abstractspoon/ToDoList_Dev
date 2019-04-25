@@ -1561,9 +1561,9 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 	case TDCA_COST:			
 		{
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskCost(dwTaskID, mod.dValue));
+				bChange = (SET_CHANGE == m_data.SetTaskCost(dwTaskID, mod.dValue, (mod.bCostIsRate ? TRUE : FALSE)));
 			else
-				bChange = SetSelectedTaskCost(mod.dValue);
+				bChange = SetSelectedTaskCost(TDCCOST(mod.dValue, (mod.bCostIsRate ? TRUE : FALSE)));
 		}
 		break;
 

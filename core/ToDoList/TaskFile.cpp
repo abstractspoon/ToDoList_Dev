@@ -1631,6 +1631,26 @@ bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const
 	return (m_mapReadableAttrib.Has(nAttrib) != FALSE);
 }
 
+bool CTaskFile::SetTaskCost(HTASKITEM hTask, double dCost, bool bIsRate)
+{
+	return SetTaskAttribute(hTask, TDL_TASKCOST, TDCCOST::Format(dCost, (bIsRate ? TRUE : FALSE)));
+}
+
+bool CTaskFile::GetTaskCost(HTASKITEM hTask, double& dCost, bool& bIsRate) const
+{
+	CString sCost;
+
+	if (!GetTaskAttribute(hTask, TDL_TASKCOST, sCost))
+		return false;
+
+	TDCCOST cost(sCost);
+
+	dCost = cost.dAmount;
+	bIsRate = (cost.bIsRate != FALSE);
+
+	return true;
+}
+
 BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 {
 	CXmlItem* pXITask = NULL;
@@ -1698,14 +1718,14 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 		if (tdi.aFileLinks.GetSize())
 			SetTaskFileLinks(hTask, tdi.aFileLinks);
 		
-		if (tdi.dCost != 0)
-			SetTaskCost(hTask, tdi.dCost);
+		if ((tdi.cost.dAmount != 0) || tdi.cost.bIsRate)
+			SetTaskCost(hTask, tdi.cost.dAmount, (tdi.cost.bIsRate != FALSE));
 		
-		if ((tdi.dTimeEstimate > 0) || (tdi.nTimeEstUnits != TDCU_HOURS))
-			SetTaskTimeEstimate(hTask, tdi.dTimeEstimate, tdi.nTimeEstUnits);
+		if ((tdi.timeEstimate.dAmount > 0) || (tdi.timeEstimate.nUnits != TDCU_HOURS))
+			SetTaskTimeEstimate(hTask, tdi.timeEstimate.dAmount, tdi.timeEstimate.nUnits);
 		
-		if ((tdi.dTimeSpent != 0.0) || (tdi.nTimeSpentUnits != TDCU_HOURS))
-			SetTaskTimeSpent(hTask, tdi.dTimeSpent, tdi.nTimeSpentUnits);
+		if ((tdi.timeSpent.dAmount != 0.0) || (tdi.timeSpent.nUnits != TDCU_HOURS))
+			SetTaskTimeSpent(hTask, tdi.timeSpent.dAmount, tdi.timeSpent.nUnits);
 		
 		// done date and percent
 		if (tdi.IsDone())
@@ -1787,11 +1807,11 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 
 		GETATTRIB(TDL_TASKCOLOR,				tdi.color = (COLORREF)GetTaskColor(hTask));
 		GETATTRIB(TDL_TASKPERCENTDONE,			tdi.nPercentDone = (int)GetTaskPercentDone(hTask, false));
-		GETATTRIB(TDL_TASKTIMEESTIMATE,			tdi.dTimeEstimate = GetTaskTimeEstimate(hTask, tdi.nTimeEstUnits, false));
-		GETATTRIB(TDL_TASKTIMESPENT,			tdi.dTimeSpent = GetTaskTimeSpent(hTask, tdi.nTimeSpentUnits, false));
+		GETATTRIB(TDL_TASKTIMEESTIMATE,			tdi.timeEstimate.dAmount = GetTaskTimeEstimate(hTask, tdi.timeEstimate.nUnits, false));
+		GETATTRIB(TDL_TASKTIMESPENT,			tdi.timeSpent.dAmount = GetTaskTimeSpent(hTask, tdi.timeSpent.nUnits, false));
 		GETATTRIB(TDL_TASKPRIORITY,				tdi.nPriority = (int)GetTaskPriority(hTask, false));
 		GETATTRIB(TDL_TASKRISK,					tdi.nRisk = GetTaskRisk(hTask, false));
-		GETATTRIB(TDL_TASKCOST,					tdi.dCost = GetTaskCost(hTask, false));
+		GETATTRIB(TDL_TASKCOST,					tdi.cost.Parse(GetTaskString(hTask, TDL_TASKCOST)));
 
 		GETATTRIB(TDL_TASKDUEDATE,				tdi.dateDue = GetTaskDueDateOle(hTask));
 		GETATTRIB(TDL_TASKSTARTDATE,			tdi.dateStart = GetTaskStartDateOle(hTask));
@@ -3186,23 +3206,25 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const
 	if (Misc::IsEmpty(szAttrib))
 		return NULLSTRING;
 	
- 	// special case
- 	if (STR_MATCH(szAttrib, TDL_TASKPARENTID))
- 	{
-		if (!IsAttributeAvailable(TDCA_PARENTID))
-			return NULLSTRING;
-
-		static CString sPID;
-
-		sPID.Format(_T("%lu"), GetTaskParentID(hTask));
-		return sPID;
- 	}
-
-	// else
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, NULLSTRING);
 
-	return pXITask->GetItemValue(szAttrib);
+	LPCTSTR szValue = pXITask->GetItemValue(szAttrib);
+
+	if (!Misc::IsEmpty(szValue))
+		return szValue;
+	
+ 	// Fallback in special case
+	if (STR_MATCH(szAttrib, TDL_TASKPARENTID) && IsAttributeAvailable(TDCA_ID))
+	{
+		const CXmlItem* pXIParent = pXITask->GetParent();
+
+		if (pXIParent)
+			return pXIParent->GetItemValue(TDL_TASKID);
+	}
+
+	// all else
+	return NULLSTRING;
 }
 
 HTASKITEM CTaskFile::GetTaskParent(HTASKITEM hTask) const

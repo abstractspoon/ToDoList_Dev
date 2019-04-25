@@ -34,6 +34,122 @@ const CString EMPTY_STR(_T(""));
 
 //////////////////////////////////////////////////////////////////////
 
+TDCTIMEPERIOD::TDCTIMEPERIOD() : dAmount(0.0), nUnits(TDCU_HOURS)
+{
+}
+
+BOOL TDCTIMEPERIOD::operator==(const TDCTIMEPERIOD& other) const
+{
+	return ((dAmount == other.dAmount) && (nUnits == other.nUnits));
+}
+
+TDCTIMEPERIOD& TDCTIMEPERIOD::operator=(const TDCTIMEPERIOD& other)
+{
+	dAmount = other.dAmount;
+	nUnits = other.nUnits;
+
+	return *this;
+}
+
+TH_UNITS TDCTIMEPERIOD::GetTHUnits() const
+{
+	return TDC::MapUnitsToTHUnits(nUnits);
+}
+
+BOOL TDCTIMEPERIOD::SetTHUnits(TH_UNITS nTHUnits)
+{
+	TDC_UNITS nTemp = TDC::MapTHUnitsToUnits(nTHUnits);
+
+	if (nTemp == TDCU_NULL)
+		return FALSE;
+
+	nUnits = nTemp;
+	return TRUE;
+}
+
+double TDCTIMEPERIOD::GetTime(TH_UNITS nToUnits) const
+{
+	return CTimeHelper().GetTime(dAmount, TDC::MapUnitsToTHUnits(nUnits), nToUnits);
+}
+
+double TDCTIMEPERIOD::GetTime(TH_UNITS nToUnits, const CTimeHelper& th) const
+{
+	return th.GetTime(dAmount, TDC::MapUnitsToTHUnits(nUnits), nToUnits);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+TDCCOST::TDCCOST(LPCTSTR szCost) : dAmount(0.0), bIsRate(FALSE)
+{
+	if (!Misc::IsEmpty(szCost))
+		Parse(szCost);
+}
+
+TDCCOST::TDCCOST(double dCost, BOOL bCostIsRate) : dAmount(dCost), bIsRate(bCostIsRate)
+{
+}
+
+BOOL TDCCOST::operator==(const TDCCOST& other) const
+{
+	return ((dAmount == other.dAmount) && (bIsRate == other.bIsRate));
+}
+
+TDCCOST& TDCCOST::operator=(const TDCCOST& other)
+{
+	dAmount = other.dAmount;
+	bIsRate = other.bIsRate;
+
+	return *this;
+}
+
+CString TDCCOST::Format() const
+{
+	return Format(dAmount, bIsRate);
+}
+
+CString TDCCOST::Format(double dAmount, BOOL bIsRate)
+{
+	CString sCost = Misc::Format(dAmount, 2);
+
+	if (bIsRate)
+		sCost = ('@' + sCost);
+
+	return sCost;
+}
+
+BOOL TDCCOST::Parse(LPCTSTR szCost)
+{
+	if (Misc::IsEmpty(szCost))
+	{
+		dAmount = 0.0;
+		bIsRate = FALSE;
+	}
+	else
+	{
+		TCHAR cFirst = Misc::First(szCost);
+
+		if (cFirst == '@')
+		{
+			bIsRate = TRUE;
+			szCost++;
+		}
+		else if ((cFirst >= '0') && (cFirst <= '9'))
+		{
+			bIsRate = FALSE;
+		}
+		else
+		{
+			return FALSE;
+		}
+
+		dAmount = Misc::Atof(szCost);
+	}
+
+	return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments) :
 	sTitle(szTitle), 
 	sComments(szComments),
@@ -41,11 +157,6 @@ TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments) :
 	nPriority(TDC_NOPRIORITYORISK),
 	nRisk(TDC_NOPRIORITYORISK),
 	nPercentDone(0),
-	dTimeEstimate(0),
-	dTimeSpent(0),
-	nTimeEstUnits(TDCU_HOURS),
-	nTimeSpentUnits(TDCU_HOURS),
-	dCost(0),
 	bFlagged(FALSE),
 	bLocked(FALSE),
 	dateCreated(COleDateTime::GetCurrentTime()),
@@ -81,11 +192,9 @@ TODOITEM& TODOITEM::operator=(const TODOITEM& tdi)
 	sStatus = tdi.sStatus;
 	nPriority = tdi.nPriority;
 	nPercentDone = tdi.nPercentDone;
-	dTimeEstimate = tdi.dTimeEstimate;
-	dTimeSpent = tdi.dTimeSpent;
-	nTimeEstUnits = tdi.nTimeEstUnits;
-	nTimeSpentUnits = tdi.nTimeSpentUnits;
-	dCost = tdi.dCost;
+	timeEstimate = tdi.timeEstimate;
+	timeSpent = tdi.timeSpent;
+	cost = tdi.cost;
 	dateStart = tdi.dateStart;
 	dateDue = tdi.dateDue;
 	dateDone = tdi.dateDone;
@@ -127,11 +236,9 @@ BOOL TODOITEM::operator==(const TODOITEM& tdi)
 			(nPriority == tdi.nPriority) &&
 			(nRisk == tdi.nRisk) &&
 			(nPercentDone == tdi.nPercentDone) &&
-			(dTimeEstimate == tdi.dTimeEstimate) &&
-			(dTimeSpent == tdi.dTimeSpent) &&
-			(nTimeEstUnits == tdi.nTimeEstUnits) &&
-			(nTimeSpentUnits == tdi.nTimeSpentUnits) &&
-			(dCost == tdi.dCost) &&
+			(timeEstimate == tdi.timeEstimate) &&
+			(timeSpent == tdi.timeSpent) &&
+			(cost == tdi.cost) &&
 			(dateStart == tdi.dateStart) &&
 			(dateDue == tdi.dateDue) &&
 			(dateDone == tdi.dateDone) &&
@@ -564,16 +671,6 @@ void TODOITEM::SetRecentlyModifiedPeriod(double dDays)
 void TODOITEM::SetModifierName(const CString sModifier)
 {
 	sModifierName = sModifier;
-}
-
-TDC_UNITS TODOITEM::GetTimeUnits(BOOL bTimeEst) const
-{
-	return (bTimeEst ? nTimeEstUnits : nTimeSpentUnits);
-}
-
-TH_UNITS TODOITEM::GetTHTimeUnits(BOOL bTimeEst) const
-{
-	return TDC::MapUnitsToTHUnits(GetTimeUnits(bTimeEst));
 }
 
 COleDateTime TODOITEM::GetDefaultStartDueDate(const COleDateTime& dtCreation, const COleDateTime& dtStartDue)
