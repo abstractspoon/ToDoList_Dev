@@ -1509,7 +1509,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskTimeEstimate(dwTaskID, mod.dValue, mod.nTimeUnits));
 			else
-				bChange = SetSelectedTaskTimeEstimate(mod.dValue, mod.nTimeUnits);
+				bChange = SetSelectedTaskTimeEstimate(TDCTIMEPERIOD(mod.dValue, mod.nTimeUnits));
 		}
 		break;
 
@@ -1518,7 +1518,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, mod.dValue, mod.nTimeUnits));
 			else
-				bChange = SetSelectedTaskTimeSpent(mod.dValue, mod.nTimeUnits);
+				bChange = SetSelectedTaskTimeSpent(TDCTIMEPERIOD(mod.dValue, mod.nTimeUnits));
 		}
 		break;
 

@@ -34,7 +34,7 @@ const CString EMPTY_STR(_T(""));
 
 //////////////////////////////////////////////////////////////////////
 
-TDCTIMEPERIOD::TDCTIMEPERIOD() : dAmount(0.0), nUnits(TDCU_HOURS)
+TDCTIMEPERIOD::TDCTIMEPERIOD(double dTime, TDC_UNITS nTimeUnits) : dAmount(dTime), nUnits(nTimeUnits)
 {
 }
 
@@ -75,6 +75,39 @@ double TDCTIMEPERIOD::GetTime(TH_UNITS nToUnits) const
 double TDCTIMEPERIOD::GetTime(TH_UNITS nToUnits, const CTimeHelper& th) const
 {
 	return th.GetTime(dAmount, TDC::MapUnitsToTHUnits(nUnits), nToUnits);
+}
+
+BOOL TDCTIMEPERIOD::SetUnits(TDC_UNITS nNewUnits, BOOL bRecalc)
+{
+	if ((nNewUnits == TDCU_NULL) || (nUnits == TDCU_NULL))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (nNewUnits == nUnits)
+		return FALSE;
+
+	if (bRecalc && (dAmount != 0.0))
+		dAmount = CTimeHelper().GetTime(dAmount, GetTHUnits(), TDC::MapUnitsToTHUnits(nNewUnits));
+
+	nUnits = nNewUnits;
+	return TRUE;
+}
+
+BOOL TDCTIMEPERIOD::AddTime(double dTime, TDC_UNITS nTimeUnits)
+{
+	if ((nTimeUnits == TDCU_NULL) || (nUnits == TDCU_NULL))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (dTime == 0.0)
+		return FALSE;
+	
+	dAmount += CTimeHelper().GetTime(dTime, TDC::MapUnitsToTHUnits(nTimeUnits), GetTHUnits());
+	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

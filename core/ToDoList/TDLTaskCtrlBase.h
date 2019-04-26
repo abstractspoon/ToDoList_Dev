@@ -117,8 +117,8 @@ public:
 	CString GetSelectedTaskComments() const;
 	const CBinaryData& GetSelectedTaskCustomComments(CString& sCommentsTypeID) const;
 	CString GetSelectedTaskTitle() const;
-	double GetSelectedTaskTimeEstimate(TDC_UNITS& nUnits) const;
-	double GetSelectedTaskTimeSpent(TDC_UNITS& nUnits) const;
+	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const;
+	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const;
 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const;
 	int GetSelectedTaskAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
 	CString GetSelectedTaskAllocBy() const;

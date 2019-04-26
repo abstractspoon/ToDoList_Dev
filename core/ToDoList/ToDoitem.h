@@ -32,7 +32,7 @@ const int TDC_MAXPRIORITYORISK = 10;
 
 struct TDCTIMEPERIOD
 {
-	TDCTIMEPERIOD();
+	TDCTIMEPERIOD(double dAmount = 0.0, TDC_UNITS nUnits = TDCU_HOURS);
 
 	BOOL operator==(const TDCTIMEPERIOD& other) const;
 	TDCTIMEPERIOD& operator=(const TDCTIMEPERIOD& other);
@@ -43,6 +43,9 @@ struct TDCTIMEPERIOD
 	double GetTime(TH_UNITS nUnits) const;
 	double GetTime(TH_UNITS nUnits, const CTimeHelper& th) const;
 
+	BOOL SetUnits(TDC_UNITS nNewUnits, BOOL bRecalc);
+	BOOL AddTime(double dAmount, TDC_UNITS nUnits);
+
 	double dAmount;
 	TDC_UNITS nUnits;
 };
@@ -51,8 +54,8 @@ struct TDCTIMEPERIOD
 
 struct TDCCOST
 {
-	TDCCOST(LPCTSTR szCost = NULL);
-	TDCCOST(double dCost, BOOL bCostIsRate);
+	TDCCOST(LPCTSTR szCost);
+	TDCCOST(double dCost = 0.0, BOOL bCostIsRate = FALSE);
 
 	BOOL operator==(const TDCCOST& other) const;
 	TDCCOST& operator=(const TDCCOST& other);

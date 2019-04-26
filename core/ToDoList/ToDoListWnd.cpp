@@ -5484,39 +5484,36 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 
 		// Times
-		TDC_UNITS nUnits, nCurUnits;
-		CTimeHelper th;
+		TDCTIMEPERIOD time;
 
-		if (startup.GetTimeEst(dItem, nUnits, bOffset))
+		if (startup.GetTimeEst(time.dAmount, time.nUnits, bOffset))
 		{
-			double dTime = tdc.GetSelectedTaskTimeEstimate(nCurUnits);
-
-			if (dTime != 0.0)
+			TDCTIMEPERIOD timeEst;
+			
+			if (tdc.GetSelectedTaskTimeEstimate(timeEst) && (timeEst.dAmount != 0.0))
 			{
-				dItem = th.GetTime(dItem, TDC::MapUnitsToTHUnits(nUnits), TDC::MapUnitsToTHUnits(nCurUnits));
-				nUnits = nCurUnits;
+				time.SetUnits(timeEst.nUnits, TRUE);
 				
 				if (bOffset)
-					dItem += dTime;
+					time.dAmount += timeEst.dAmount;
 			}
 
-			tdc.SetSelectedTaskTimeEstimate(dItem, nUnits);
+			tdc.SetSelectedTaskTimeEstimate(time);
 		}
 
-		if (startup.GetTimeSpent(dItem, nUnits, bOffset))
+		if (startup.GetTimeSpent(time.dAmount, time.nUnits, bOffset))
 		{
-			double dTime = tdc.GetSelectedTaskTimeSpent(nCurUnits);
+			TDCTIMEPERIOD timeSpent;
 
-			if (dTime != 0.0)
+			if (tdc.GetSelectedTaskTimeSpent(timeSpent) && (timeSpent.dAmount != 0.0))
 			{
-				dItem = th.GetTime(dItem, TDC::MapUnitsToTHUnits(nUnits), TDC::MapUnitsToTHUnits(nCurUnits));
-				nUnits = nCurUnits;
+				time.SetUnits(timeSpent.nUnits, TRUE);
 
 				if (bOffset)
-					dItem += dTime;
+					time.dAmount += timeSpent.dAmount;
 			}
 
-			tdc.SetSelectedTaskTimeSpent(dItem, nUnits); 
+			tdc.SetSelectedTaskTimeSpent(time); 
 		}
 
 		// Multi-string items
@@ -5563,6 +5560,8 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 		
 		// start date and time
+		TDC_UNITS nUnits;
+
 		if (startup.GetStartDate(dItem, nUnits, bOffset))
 		{
 			if (bOffset)

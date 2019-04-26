@@ -5673,66 +5673,54 @@ BOOL CTDLTaskCtrlBase::IsSelectedTaskReference() const
 	return m_data.IsTaskReference(GetSelectedTaskID());
 }
 
-double CTDLTaskCtrlBase::GetSelectedTaskTimeEstimate(TDC_UNITS& nUnits) const
+BOOL CTDLTaskCtrlBase::GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const
 {
-	double dTime = 0.0;
-	nUnits = m_nDefTimeEstUnits;
-	
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+	if (!GetSelectedCount())
+		return FALSE;
 
-		dTime = m_data.GetTaskTimeEstimate(dwTaskID, nUnits);
+	// get first item's value as initial
+	POSITION pos = GetFirstSelectedTaskPos();
+	DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+	timeEst.dAmount = m_data.GetTaskTimeEstimate(dwTaskID, timeEst.nUnits);
 		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-			
-			TDC_UNITS nTaskUnits;
-			double dTaskTime = m_data.GetTaskTimeEstimate(dwTaskID, nTaskUnits);
-			
-			if ((dTime != dTaskTime) || (nUnits != nTaskUnits))
-			{
-				nUnits = TDCU_NULL;
-				return 0.0;
-			}
-		}
+	while (pos)
+	{
+		dwTaskID = GetNextSelectedTaskID(pos);
+
+		TDCTIMEPERIOD time;
+		time.dAmount = m_data.GetTaskTimeEstimate(dwTaskID, time.nUnits);
+
+		if (!(time == timeEst))
+			return FALSE;
 	}
 	
-	return dTime;
+	return TRUE;
 }
 
-double CTDLTaskCtrlBase::GetSelectedTaskTimeSpent(TDC_UNITS& nUnits) const
+BOOL CTDLTaskCtrlBase::GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const
 {
-	double dTime = 0.0;
-	nUnits = m_nDefTimeSpentUnits;
-	
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+	if (!GetSelectedCount())
+		return FALSE;
 
-		dTime = m_data.GetTaskTimeSpent(dwTaskID, nUnits);
-		
-		while (pos)
-		{
-			DWORD dwTaskID = GetNextSelectedTaskID(pos);
-			
-			TDC_UNITS nTaskUnits;
-			double dTaskTime = m_data.GetTaskTimeSpent(dwTaskID, nTaskUnits);
-			
-			if ((dTime != dTaskTime) || (nUnits != nTaskUnits))
-			{
-				nUnits = TDCU_NULL;
-				return 0.0;
-			}
-		}
+	// get first item's value as initial
+	POSITION pos = GetFirstSelectedTaskPos();
+	DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+	timeSpent.dAmount = m_data.GetTaskTimeSpent(dwTaskID, timeSpent.nUnits);
+
+	while (pos)
+	{
+		dwTaskID = GetNextSelectedTaskID(pos);
+
+		TDCTIMEPERIOD time;
+		time.dAmount = m_data.GetTaskTimeSpent(dwTaskID, time.nUnits);
+
+		if (!(time == timeSpent))
+			return FALSE;
 	}
-	
-	return dTime;
+
+	return TRUE;
 }
 
 COLORREF CTDLTaskCtrlBase::GetSelectedTaskColor() const

@@ -243,8 +243,8 @@ public:
 	CString GetSelectedTaskComments() const { return m_taskTree.GetSelectedTaskComments(); }
 	const CBinaryData& GetSelectedTaskCustomComments(CString& sCommentsTypeID) const { return m_taskTree.GetSelectedTaskCustomComments(sCommentsTypeID); }
 	CString GetSelectedTaskTitle() const { return m_taskTree.GetSelectedTaskTitle(); }
-	double GetSelectedTaskTimeEstimate(TDC_UNITS& nUnits) const { return m_taskTree.GetSelectedTaskTimeEstimate(nUnits); }
-	double GetSelectedTaskTimeSpent(TDC_UNITS& nUnits) const { return m_taskTree.GetSelectedTaskTimeSpent(nUnits); }
+	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const { return m_taskTree.GetSelectedTaskTimeEstimate(timeEst); }
+	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const { return m_taskTree.GetSelectedTaskTimeSpent(timeSpent); }
 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const { return m_taskTree.GetSelectedTaskAllocTo(aAllocTo); }
 	CString GetSelectedTaskAllocBy() const { return m_taskTree.GetSelectedTaskAllocBy(); }
 	CString GetSelectedTaskStatus() const { return m_taskTree.GetSelectedTaskStatus(); }
@@ -288,8 +288,8 @@ public:
 	BOOL ClearSelectedTaskColor() { return SetSelectedTaskColor(CLR_NONE); }
 	BOOL SetSelectedTaskTitle(const CString& sTitle);
 	BOOL SetSelectedTaskPercentDone(int nPercent);
-	BOOL SetSelectedTaskTimeEstimate(double dTime, TDC_UNITS nUnits = TDCU_HOURS);
-	BOOL SetSelectedTaskTimeSpent(double dTime, TDC_UNITS nUnits = TDCU_HOURS);
+	BOOL SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst);
+	BOOL SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent);
 	BOOL SetSelectedTaskAllocBy(const CString& sAllocBy);
 	BOOL SetSelectedTaskStatus(const CString& sStatus);
 	BOOL SetSelectedTaskAllocTo(const CStringArray& aAllocTo);
