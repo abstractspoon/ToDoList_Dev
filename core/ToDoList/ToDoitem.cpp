@@ -38,6 +38,11 @@ TDCTIMEPERIOD::TDCTIMEPERIOD(double dTime, TDC_UNITS nTimeUnits) : dAmount(dTime
 {
 }
 
+TDCTIMEPERIOD::TDCTIMEPERIOD(double dTime, TH_UNITS nTimeUnits) : dAmount(dTime), nUnits(TDCU_HOURS)
+{
+	SetTHUnits(nTimeUnits, FALSE);
+}
+
 BOOL TDCTIMEPERIOD::operator==(const TDCTIMEPERIOD& other) const
 {
 	return ((dAmount == other.dAmount) && (nUnits == other.nUnits));
@@ -56,15 +61,9 @@ TH_UNITS TDCTIMEPERIOD::GetTHUnits() const
 	return TDC::MapUnitsToTHUnits(nUnits);
 }
 
-BOOL TDCTIMEPERIOD::SetTHUnits(TH_UNITS nTHUnits)
+BOOL TDCTIMEPERIOD::SetTHUnits(TH_UNITS nTHUnits, BOOL bRecalc)
 {
-	TDC_UNITS nTemp = TDC::MapTHUnitsToUnits(nTHUnits);
-
-	if (nTemp == TDCU_NULL)
-		return FALSE;
-
-	nUnits = nTemp;
-	return TRUE;
+	return SetUnits(TDC::MapTHUnitsToUnits(nTHUnits), bRecalc);
 }
 
 double TDCTIMEPERIOD::GetTime(TH_UNITS nToUnits) const
@@ -108,6 +107,11 @@ BOOL TDCTIMEPERIOD::AddTime(double dTime, TDC_UNITS nTimeUnits)
 	
 	dAmount += CTimeHelper().GetTime(dTime, TDC::MapUnitsToTHUnits(nTimeUnits), GetTHUnits());
 	return TRUE;
+}
+
+CString TDCTIMEPERIOD::Format(int nDecPlaces) const
+{
+	return CTimeHelper().FormatTime(dAmount, GetTHUnits(), nDecPlaces);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

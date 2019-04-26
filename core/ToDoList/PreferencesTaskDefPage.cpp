@@ -92,8 +92,8 @@ void CPreferencesTaskDefPage::DoDataExchange(CDataExchange* pDX)
 	{
 		m_nDefReminderLeadin = m_cbDefReminder.GetSelectedPeriod();
 
-		m_defTimeEst.SetTHUnits(m_eTimeEst.GetUnits());
-		m_defTimeSpent.SetTHUnits(m_eTimeSpent.GetUnits());
+		m_defTimeEst.SetTHUnits(m_eTimeEst.GetUnits(), FALSE);
+		m_defTimeSpent.SetTHUnits(m_eTimeSpent.GetUnits(), FALSE);
 	}
 	else
 	{
@@ -212,9 +212,9 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 	m_bUseCreationDateForDefDueDate = pPrefs->GetProfileInt(szKey, _T("UseCreationForDefDueDate"), FALSE);
 	m_sDefCost = pPrefs->GetProfileString(szKey, _T("DefaultCost"), _T("0"));
 	m_defTimeEst.dAmount = pPrefs->GetProfileDouble(szKey, _T("DefaultTimeEstimate"), 0);
-	m_defTimeEst.SetTHUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("DefaultTimeEstUnits"), THU_HOURS));
+	m_defTimeEst.SetTHUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("DefaultTimeEstUnits"), THU_HOURS), FALSE);
 	m_defTimeSpent.dAmount = pPrefs->GetProfileDouble(szKey, _T("DefaultTimeSpent"), 0);
-	m_defTimeSpent.SetTHUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("DefaultTimeSpentUnits"), THU_HOURS));
+	m_defTimeSpent.SetTHUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("DefaultTimeSpentUnits"), THU_HOURS), FALSE);
 	m_sDefIcon = pPrefs->GetProfileString(szKey, _T("DefaultIcon"));
 	m_nDefReminderLeadin = pPrefs->GetProfileInt(szKey, _T("DefaultReminderLeadin"), TDLRPC_NOREMINDER);
 	m_bReminderBeforeDue = pPrefs->GetProfileInt(szKey, _T("ReminderBeforeDue"), TRUE);

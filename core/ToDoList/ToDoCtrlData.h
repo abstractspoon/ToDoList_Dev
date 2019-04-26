@@ -106,9 +106,9 @@ public:
 	CString GetTaskComments(DWORD dwTaskID) const;
 	const CBinaryData& GetTaskCustomComments(DWORD dwTaskID, CString& sCommentsTypeID) const;
 	int GetTaskPercent(DWORD dwTaskID, BOOL bCheckIfDone) const;
-	double GetTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS& nUnits) const;
-	double GetTaskTimeSpent(DWORD dwTaskID, TDC_UNITS& nUnits) const;
-	double GetTaskCost(DWORD dwTaskID, BOOL& bCostIsRate) const;
+	BOOL GetTaskTimeEstimate(DWORD dwTaskID, TDCTIMEPERIOD& timeEst) const;
+	BOOL GetTaskTimeSpent(DWORD dwTaskID, TDCTIMEPERIOD& timeSpent) const;
+	BOOL GetTaskCost(DWORD dwTaskID, TDCCOST& cost) const;
 	CString GetTaskAllocBy(DWORD dwTaskID) const;
 	CString GetTaskCreatedBy(DWORD dwTaskID) const;
 	CString GetTaskStatus(DWORD dwTaskID) const;
@@ -176,9 +176,9 @@ public:
 	TDC_SET SetTaskComments(DWORD dwTaskID, const CString& sComments, const CBinaryData& customComments = _T(""));
 	TDC_SET SetTaskCommentsType(DWORD dwTaskID, const CString& sCommentsTypeID);
 	TDC_SET SetTaskPercent(DWORD dwTaskID, int nPercent);
-	TDC_SET SetTaskTimeEstimate(DWORD dwTaskID, double dTime, TDC_UNITS nUnits);
-	TDC_SET SetTaskTimeSpent(DWORD dwTaskID, double dTime, TDC_UNITS nUnits);
-	TDC_SET SetTaskCost(DWORD dwTaskID, double dCost, BOOL bIsRate);
+	TDC_SET SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst);
+	TDC_SET SetTaskTimeSpent(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst);
+	TDC_SET SetTaskCost(DWORD dwTaskID, const TDCCOST& cost);
 	TDC_SET SetTaskAllocBy(DWORD dwTaskID, const CString& sAllocBy);
 	TDC_SET SetTaskStatus(DWORD dwTaskID, const CString& sStatus);
 	TDC_SET SetTaskExternalID(DWORD dwTaskID, const CString& sID);
@@ -288,7 +288,7 @@ protected:
 		return DoEditTaskAttribute(dwTaskID, pTDI, nAttrib, val, newValue);
 	}
 	TDC_SET EditTaskArrayAttribute(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, CStringArray& aValues, const CStringArray& aNewValues, BOOL bAppend, BOOL bOrderSensitive = FALSE);
-	TDC_SET EditTaskTimeAttribute(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, double& dValue, double dNewValue, TDC_UNITS& nUnits, TDC_UNITS nNewUnits);
+	TDC_SET EditTaskTimeAttribute(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, TDCTIMEPERIOD& time, const TDCTIMEPERIOD& newTime);
 	
 	template <class T>
 	TDC_SET DoEditTaskAttribute(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, T& val, const T& newValue)

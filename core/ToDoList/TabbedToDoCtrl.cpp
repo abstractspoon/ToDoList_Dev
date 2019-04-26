@@ -1506,19 +1506,23 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 
 	case TDCA_TIMEEST:		
 		{
+			TDCTIMEPERIOD time(mod.dValue, mod.nTimeUnits);
+
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskTimeEstimate(dwTaskID, mod.dValue, mod.nTimeUnits));
+				bChange = (SET_CHANGE == m_data.SetTaskTimeEstimate(dwTaskID, time));
 			else
-				bChange = SetSelectedTaskTimeEstimate(TDCTIMEPERIOD(mod.dValue, mod.nTimeUnits));
+				bChange = SetSelectedTaskTimeEstimate(time);
 		}
 		break;
 
 	case TDCA_TIMESPENT:		
 		{
+			TDCTIMEPERIOD time(mod.dValue, mod.nTimeUnits);
+
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, mod.dValue, mod.nTimeUnits));
+				bChange = (SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, time));
 			else
-				bChange = SetSelectedTaskTimeSpent(TDCTIMEPERIOD(mod.dValue, mod.nTimeUnits));
+				bChange = SetSelectedTaskTimeSpent(time);
 		}
 		break;
 
@@ -1560,10 +1564,12 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 
 	case TDCA_COST:			
 		{
+			TDCCOST cost(mod.dValue, (mod.bCostIsRate ? TRUE : FALSE));
+
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskCost(dwTaskID, mod.dValue, (mod.bCostIsRate ? TRUE : FALSE)));
+				bChange = (SET_CHANGE == m_data.SetTaskCost(dwTaskID, cost));
 			else
-				bChange = SetSelectedTaskCost(TDCCOST(mod.dValue, (mod.bCostIsRate ? TRUE : FALSE)));
+				bChange = SetSelectedTaskCost(cost);
 		}
 		break;
 

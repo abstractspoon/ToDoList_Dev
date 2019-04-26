@@ -13,12 +13,18 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+struct TDCCOST;
+struct TDCTIMEPERIOD;
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 struct TDCCADATA
 {
 	TDCCADATA(const CString& sValue = _T(""), TCHAR cSep = 0);
 	TDCCADATA(LPCTSTR szValue, TCHAR cSep = 0);
 	TDCCADATA(double dValue);
-	TDCCADATA(double dValue, TDC_UNITS nUnits);
+	TDCCADATA(const TDCCOST& cost);
+	TDCCADATA(const TDCTIMEPERIOD& time);
 	TDCCADATA(const CStringArray& aValues);
 	TDCCADATA(const CStringArray& aValues, const CStringArray& aExtra);
 	TDCCADATA(int nValue);
@@ -43,8 +49,8 @@ struct TDCCADATA
 	bool AsBool() const;
 	int AsArray(CStringArray& aValues) const;
 	int AsArrays(CStringArray& aValues, CStringArray& aExtra) const;
-	double AsTimePeriod(TDC_UNITS& nUnits) const;
-	double AsCost(BOOL& bIsRate) const;
+	BOOL AsTimePeriod(TDCTIMEPERIOD& time) const;
+	BOOL AsCost(TDCCOST& cost) const;
 
 	TDC_UNITS GetTimeUnits() const;
 
@@ -52,8 +58,8 @@ struct TDCCADATA
 	void Set(int nValue);
 	void Set(const COleDateTime& dtValue);
 	void Set(const CString& sValue, TCHAR cSep = 0);
-	void Set(double dValue, TDC_UNITS nUnits);
-	void Set(double dValue, BOOL bIsRate);
+	void Set(const TDCTIMEPERIOD& time);
+	void Set(const TDCCOST& cost);
 	void Set(bool bValue, TCHAR nChar = 0);
 	void Set(const CStringArray& aValues);
 	void Set(const CStringArray& aValues, const CStringArray& aExtra);

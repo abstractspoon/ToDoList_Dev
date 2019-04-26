@@ -27,9 +27,14 @@ TDCCADATA::TDCCADATA(double dValue)
 	Set(dValue); 
 }
 
-TDCCADATA::TDCCADATA(double dValue, TDC_UNITS nUnits) 
+TDCCADATA::TDCCADATA(const TDCTIMEPERIOD& time)
 { 
-	Set(dValue, nUnits); 
+	Set(time); 
+}
+
+TDCCADATA::TDCCADATA(const TDCCOST& cost)
+{ 
+	Set(cost); 
 }
 
 TDCCADATA::TDCCADATA(const CStringArray& aValues) 
@@ -189,31 +194,25 @@ int TDCCADATA::AsArray(const CString& sValue, CStringArray& aValues)
 	return Misc::Split(sValue, aValues, '\n', TRUE); 
 }
 
-double TDCCADATA::AsTimePeriod(TDC_UNITS& nUnits) const
+BOOL TDCCADATA::AsTimePeriod(TDCTIMEPERIOD& time) const
 {
 	if (IsEmpty())
 	{
-		nUnits = TDCU_HOURS;
-		return 0.0;
+		time.nUnits = TDCU_HOURS;
+		time.dAmount = 0.0;
+	}
+	else
+	{
+		time.nUnits = GetTimeUnits();
+		time.dAmount = AsDouble();
 	}
 	
-	// else
-	nUnits = GetTimeUnits();
-	return _ttof(sData);
+	return (time.nUnits != TDCU_NULL);
 }
 
-double TDCCADATA::AsCost(BOOL& bIsRate) const
+BOOL TDCCADATA::AsCost(TDCCOST& cost) const
 {
-	if (IsEmpty())
-	{
-		bIsRate = FALSE;
-		return 0.0;
-	}
-	
-	// else
-	bIsRate = (sData.Find(_T(":1")) != -1);
-	return _ttof(sData);
-
+	return cost.Parse(sData);
 }
 
 TDC_UNITS TDCCADATA::GetTimeUnits() const
@@ -261,15 +260,15 @@ void TDCCADATA::Set(const CString& sValue, TCHAR cSep)
 	sData = sValue; 
 }
 
-void TDCCADATA::Set(double dValue, TDC_UNITS nUnits) 
+void TDCCADATA::Set(const TDCTIMEPERIOD& time)
 { 
-	ASSERT(IsValidUnits(nUnits));
-	sData.Format(_T("%lf:%lc"), dValue, (TCHAR)nUnits); 
+	ASSERT(IsValidUnits(time.nUnits));
+	sData.Format(_T("%lf:%lc"), time.dAmount, (TCHAR)time.nUnits); 
 }
 
-void TDCCADATA::Set(double dValue, BOOL bIsRate)
+void TDCCADATA::Set(const TDCCOST& cost)
 {
-	sData = TDCCOST::Format(dValue, bIsRate);
+	sData = cost.Format();
 }
 
 void TDCCADATA::Set(bool bValue, TCHAR nChar) 
@@ -340,10 +339,10 @@ CString TDCCADATA::FormatAsDate(BOOL bISO) const
 
 CString TDCCADATA::FormatAsTimePeriod(int nDecimalPlaces) const
 {
-	TDC_UNITS nUnits;
-	double dTime = AsTimePeriod(nUnits);
+	TDCTIMEPERIOD time;
+	VERIFY(AsTimePeriod(time));
 
-	return CTimeHelper().FormatTime(dTime, TDC::MapUnitsToTHUnits(nUnits), nDecimalPlaces);
+	return time.Format(nDecimalPlaces);
 }
 
 /////////////////////////////////////////////////////////////////////////////

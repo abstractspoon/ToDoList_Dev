@@ -2776,13 +2776,13 @@ COleDateTime CToDoCtrl::GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const
 	return m_data.GetTaskDate(dwTaskID, nDate);
 }
 
-BOOL CToDoCtrl::GetTaskTimes(DWORD dwTaskID, double& dTimeEst, TDC_UNITS& nEstUnits, double& dTimeSpent, TDC_UNITS& nSpentUnits) const
+BOOL CToDoCtrl::GetTaskTimes(DWORD dwTaskID, TDCTIMEPERIOD& timeEst, TDCTIMEPERIOD& timeSpent) const
 {
 	if (!m_data.HasTask(dwTaskID))
 		return FALSE;
 
-	dTimeEst = m_data.GetTaskTimeEstimate(dwTaskID, nEstUnits);
-	dTimeSpent = m_data.GetTaskTimeSpent(dwTaskID, nSpentUnits);
+	m_data.GetTaskTimeEstimate(dwTaskID, timeEst);
+	m_data.GetTaskTimeSpent(dwTaskID, timeSpent);
 
 	return TRUE;
 }
@@ -3888,7 +3888,7 @@ BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		if (!HandleModResult(dwTaskID, m_data.SetTaskCost(dwTaskID, cost.dAmount, cost.bIsRate), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.SetTaskCost(dwTaskID, cost), aModTaskIDs))
 			return FALSE;
 	}
 	
@@ -4075,7 +4075,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst)
 		if (!m_taskTree.ItemHasChildren(hti) || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 		{
 			DWORD dwTaskID = GetTaskID(hti);
-			TDC_SET nItemRes = m_data.SetTaskTimeEstimate(dwTaskID, timeEst.dAmount, timeEst.nUnits);
+			TDC_SET nItemRes = m_data.SetTaskTimeEstimate(dwTaskID, timeEst);
 			
 			if (nItemRes == SET_CHANGE)
 			{
@@ -4153,7 +4153,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent)
 		if (!m_taskTree.ItemHasChildren(hti) || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 		{
 			DWORD dwTaskID = GetTaskID(hti);
-			TDC_SET nItemRes = m_data.SetTaskTimeSpent(dwTaskID, timeSpent.dAmount, timeSpent.nUnits);
+			TDC_SET nItemRes = m_data.SetTaskTimeSpent(dwTaskID, timeSpent);
 			
 			if (nItemRes == SET_CHANGE)
 			{
@@ -4207,11 +4207,11 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 		if (!m_data.TaskHasSubtasks(dwTaskID) || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 		{
 			TDCTIMEPERIOD timeEst;
-			timeEst.dAmount = m_data.GetTaskTimeEstimate(dwTaskID, timeEst.nUnits);
+			m_data.GetTaskTimeEstimate(dwTaskID, timeEst);
 
 			if (timeEst.SetUnits(nUnits, bRecalcTime))
 			{
-				if (!HandleModResult(dwTaskID, m_data.SetTaskTimeEstimate(dwTaskID, timeEst.dAmount, timeEst.nUnits), aModTaskIDs))
+				if (!HandleModResult(dwTaskID, m_data.SetTaskTimeEstimate(dwTaskID, timeEst), aModTaskIDs))
 					return FALSE;
 			}
 		}
@@ -4282,11 +4282,11 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 			continue;
 
 		TDCTIMEPERIOD timeSpent;
-		timeSpent.dAmount = m_data.GetTaskTimeSpent(dwTaskID, timeSpent.nUnits);
+		m_data.GetTaskTimeSpent(dwTaskID, timeSpent);
 
 		if (timeSpent.SetUnits(nUnits, bRecalcTime))
 		{
-			if (!HandleModResult(dwTaskID, m_data.SetTaskTimeSpent(dwTaskID, timeSpent.dAmount, timeSpent.nUnits), aModTaskIDs))
+			if (!HandleModResult(dwTaskID, m_data.SetTaskTimeSpent(dwTaskID, timeSpent), aModTaskIDs))
 				return FALSE;
 		}
 	}
@@ -8814,7 +8814,7 @@ BOOL CToDoCtrl::AdjustTaskTimeSpent(DWORD dwTaskID, double dHours)
 	ASSERT(dwTaskID && (dHours != 0.0));
 
 	TDCTIMEPERIOD time;
-	time.dAmount = m_data.GetTaskTimeSpent(dwTaskID, time.nUnits);
+	m_data.GetTaskTimeSpent(dwTaskID, time);
 
 	VERIFY(time.AddTime(dHours, TDCU_HOURS));
 
@@ -8827,7 +8827,7 @@ BOOL CToDoCtrl::AdjustTaskTimeSpent(DWORD dwTaskID, double dHours)
 	CDWordArray aModTaskIDs;
 	aModTaskIDs.Add(dwTaskID);
 
-	m_data.SetTaskTimeSpent(dwTaskID, time.dAmount, time.nUnits);
+	m_data.SetTaskTimeSpent(dwTaskID, time);
 	SetModified(TDCA_TIMESPENT, aModTaskIDs);
 
 	return TRUE;
@@ -11005,7 +11005,7 @@ void CToDoCtrl::IncrementTrackedTime(BOOL bEnding)
 		ASSERT(dwTaskID);
 
 		TDCTIMEPERIOD time;
-		time.dAmount = m_data.GetTaskTimeSpent(dwTaskID, time.nUnits);
+		m_data.GetTaskTimeSpent(dwTaskID, time);
 		
 		// Tracked/logged time is always in hours
 		m_dTrackedTimeElapsedHours += dIncrement;
@@ -11022,7 +11022,7 @@ void CToDoCtrl::IncrementTrackedTime(BOOL bEnding)
 			CDWordArray aModTaskIDs;
 			aModTaskIDs.Add(dwTaskID);
 
-			m_data.SetTaskTimeSpent(dwTaskID, time.dAmount, time.nUnits);
+			m_data.SetTaskTimeSpent(dwTaskID, time);
 			SetModified(TDCA_TIMESPENT, aModTaskIDs);
 		}
 

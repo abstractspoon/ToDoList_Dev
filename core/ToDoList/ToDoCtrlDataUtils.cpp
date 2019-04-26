@@ -1688,16 +1688,13 @@ double CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, const TDCC
 
 	if (IsValidUnits(nUnits) && attribDef.IsDataType(TDCCA_TIMEPERIOD))
 	{
-		TDC_UNITS nTaskUnits;
-		dValue = data.AsTimePeriod(nTaskUnits);
+		TDCTIMEPERIOD time;
 
 		// Convert to requested units
-		if ((dValue != 0.0) && IsValidUnits(nTaskUnits) && (nTaskUnits != nUnits))
-		{
-			dValue = CTimeHelper().GetTime(dValue, 
-				TDC::MapUnitsToTHUnits(nTaskUnits), 
-				TDC::MapUnitsToTHUnits(nUnits));
-		}
+		if (data.AsTimePeriod(time))
+			time.SetUnits(nUnits, TRUE);
+
+		dValue = time.dAmount;
 	}
 	else if (attribDef.IsDataType(TDCCA_FRACTION))
 	{

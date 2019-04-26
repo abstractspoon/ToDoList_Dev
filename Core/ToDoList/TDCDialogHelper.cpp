@@ -73,7 +73,7 @@ void CTDCDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, TDCTIMEPERIOD& val
 	CDialogHelper::DDX_Text(pDX, nIDC, value.dAmount, nDecimals);
 	
 	if (pDX->m_bSaveAndValidate)
-		value.SetTHUnits(pTime->GetUnits());
+		value.SetTHUnits(pTime->GetUnits(), FALSE);
 	else
 		pTime->SetUnits(value.GetTHUnits());
 }

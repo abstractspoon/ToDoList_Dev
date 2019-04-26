@@ -5682,14 +5682,14 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const
 	POSITION pos = GetFirstSelectedTaskPos();
 	DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-	timeEst.dAmount = m_data.GetTaskTimeEstimate(dwTaskID, timeEst.nUnits);
-		
+	m_data.GetTaskTimeEstimate(dwTaskID, timeEst);
+
 	while (pos)
 	{
 		dwTaskID = GetNextSelectedTaskID(pos);
 
 		TDCTIMEPERIOD time;
-		time.dAmount = m_data.GetTaskTimeEstimate(dwTaskID, time.nUnits);
+		m_data.GetTaskTimeEstimate(dwTaskID, time);
 
 		if (!(time == timeEst))
 			return FALSE;
@@ -5707,14 +5707,14 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const
 	POSITION pos = GetFirstSelectedTaskPos();
 	DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-	timeSpent.dAmount = m_data.GetTaskTimeSpent(dwTaskID, timeSpent.nUnits);
+	m_data.GetTaskTimeSpent(dwTaskID, timeSpent);
 
 	while (pos)
 	{
 		dwTaskID = GetNextSelectedTaskID(pos);
 
 		TDCTIMEPERIOD time;
-		time.dAmount = m_data.GetTaskTimeSpent(dwTaskID, time.nUnits);
+		m_data.GetTaskTimeSpent(dwTaskID, time);
 
 		if (!(time == timeSpent))
 			return FALSE;
@@ -5807,16 +5807,16 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCost(TDCCOST& cost) const
 		POSITION pos = GetFirstSelectedTaskPos();
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		cost.dAmount = m_data.GetTaskCost(dwTaskID, cost.bIsRate);
+		VERIFY(m_data.GetTaskCost(dwTaskID, cost));
 		
 		while (pos)
 		{
 			dwTaskID = GetNextSelectedTaskID(pos);
 
-			BOOL bCostIsRate;
-			double dCost = m_data.GetTaskCost(dwTaskID, bCostIsRate);
+			TDCCOST taskCost;
+			VERIFY(m_data.GetTaskCost(dwTaskID, taskCost));
 
-			if ((dCost != cost.dAmount) || (bCostIsRate != cost.bIsRate))
+			if (!(cost == taskCost))
 			{
 				cost.dAmount = 0.0;
 				cost.bIsRate = FALSE;

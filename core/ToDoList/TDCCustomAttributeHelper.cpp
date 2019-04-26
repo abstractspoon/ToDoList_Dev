@@ -6,6 +6,7 @@
 #include "TDCCustomAttributeHelper.h"
 #include "TDCstruct.h"
 #include "tdliconcombobox.h"
+#include "todoitem.h"
 
 #include "..\shared\DialogHelper.h"
 #include "..\shared\checkcombobox.h"
@@ -1089,7 +1090,7 @@ BOOL CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUSTOM
 				TH_UNITS nUnits = ((CTimeEdit*)pCtrl)->GetUnits();
 				double dTime = ((CTimeEdit*)pCtrl)->GetTime();
 
-				data.Set(dTime, TDC::MapTHUnitsToUnits(nUnits));
+				data.Set(TDCTIMEPERIOD(dTime, nUnits));
 			}
 			break;
 
@@ -1280,10 +1281,10 @@ void CTDCCustomAttributeHelper::UpdateControl(const CWnd* pParent, const CUSTOMA
 
 		case TDCCA_TIMEPERIOD:
 			{
-				TDC_UNITS nUnits = TDCU_HOURS;
-				double dTime = data.AsTimePeriod(nUnits);
+				TDCTIMEPERIOD time;
+				VERIFY(data.AsTimePeriod(time));
 
-				((CTimeEdit*)pCtrl)->SetTime(dTime, TDC::MapUnitsToTHUnits(nUnits));
+				((CTimeEdit*)pCtrl)->SetTime(time.dAmount, time.GetTHUnits());
 			}
 			break;
 

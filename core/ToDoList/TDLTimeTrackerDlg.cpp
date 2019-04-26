@@ -967,28 +967,27 @@ void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC)
 	DWORD dwSelTaskID = GetSelectedTaskID();
 
 	CTimeHelper th;
-	double dTimeEst = 0.0, dTimeSpent = 0.0;
-	TDC_UNITS nEstUnits = TDCU_HOURS, nSpentUnits = TDCU_HOURS;
+	TDCTIMEPERIOD timeEst, timeSpent;
 	
 	m_sTaskTimes.Empty();
 	m_sElapsedTime.Empty();
 	
 	if (dwSelTaskID)
-		pTDC->GetTaskTimes(dwSelTaskID, dTimeEst, nEstUnits, dTimeSpent, nSpentUnits);
+		pTDC->GetTaskTimes(dwSelTaskID, timeEst, timeSpent);
 
 	m_sElapsedTime = pTDC->FormatTimeTrackingElapsedTime();
 	
 	if (HasOption(TTDO_FORMATTIMESASHMS))
 	{
 		m_sTaskTimes.Format(_T("%s : %s"),
-			th.FormatTimeHMS(dTimeEst, TDC::MapUnitsToTHUnits(nEstUnits), (HMS_ALLOWZERO | HMS_DECIMALPLACES)),
-			th.FormatTimeHMS(dTimeSpent, TDC::MapUnitsToTHUnits(nSpentUnits), (HMS_ALLOWZERO | HMS_DECIMALPLACES)));
+			th.FormatTimeHMS(timeEst.dAmount, timeEst.GetTHUnits(), (HMS_ALLOWZERO | HMS_DECIMALPLACES)),
+			th.FormatTimeHMS(timeSpent.dAmount, timeSpent.GetTHUnits(), (HMS_ALLOWZERO | HMS_DECIMALPLACES)));
 	}
 	else
 	{
 		m_sTaskTimes.Format(_T("%s : %s"),
-			th.FormatTime(dTimeEst, TDC::MapUnitsToTHUnits(nEstUnits), 2),
-			th.FormatTime(dTimeSpent, TDC::MapUnitsToTHUnits(nSpentUnits), 2));
+			th.FormatTime(timeEst.dAmount, timeEst.GetTHUnits(), 2),
+			th.FormatTime(timeSpent.dAmount, timeSpent.GetTHUnits(), 2));
 	}
 		
 	if (m_bCollapsed)
