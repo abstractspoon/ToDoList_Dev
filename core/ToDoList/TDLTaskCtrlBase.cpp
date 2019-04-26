@@ -5811,10 +5811,8 @@ CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen
 	return sPath;
 }
 
-CString CTDLTaskCtrlBase::GetSelectedTaskCost() const
+BOOL CTDLTaskCtrlBase::GetSelectedTaskCost(TDCCOST& cost) const
 {
-	TDCCOST cost;
-	
 	if (GetSelectedCount())
 	{
 		// get first item's value as initial
@@ -5831,11 +5829,16 @@ CString CTDLTaskCtrlBase::GetSelectedTaskCost() const
 			double dCost = m_data.GetTaskCost(dwTaskID, bCostIsRate);
 
 			if ((dCost != cost.dAmount) || (bCostIsRate != cost.bIsRate))
-				return _T("");
+			{
+				cost.dAmount = 0.0;
+				cost.bIsRate = FALSE;
+			}
 		}
+
+		return TRUE;
 	}
 	
-	return cost.Format();
+	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted) const

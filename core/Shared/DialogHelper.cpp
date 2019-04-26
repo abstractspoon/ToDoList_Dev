@@ -42,7 +42,15 @@ const CString DELIMS(_T(".,;:-?"));
 //////////////////////////////////////////////////////////////////////
 // MFC replacements to prevent popup error messages
 
-BOOL DH_SimpleScanf(LPCTSTR lpszText, LPCTSTR lpszFormat, va_list pData)
+void CDialogHelper::GetControlText(HWND hWndCtrl, TCHAR szBuffer[FLOATBUFLEN])
+{
+	::GetWindowText(hWndCtrl, szBuffer, FLOATBUFLEN);
+
+	if (*szBuffer == 0)
+		lstrcpy(szBuffer, _T("0"));
+}
+
+BOOL CDialogHelper::SimpleScanf(LPCTSTR lpszText, LPCTSTR lpszFormat, va_list pData)
 {
 	ASSERT(lpszText != NULL);
 	ASSERT(lpszFormat != NULL);
@@ -109,7 +117,7 @@ BOOL DH_SimpleScanf(LPCTSTR lpszText, LPCTSTR lpszFormat, va_list pData)
 	return TRUE;
 }
 
-BOOL DH_SimpleFloatParse(LPCTSTR lpszText, double& d)
+BOOL CDialogHelper::SimpleFloatParse(LPCTSTR lpszText, double& d)
 {
 	ASSERT(lpszText != NULL);
 	while (*lpszText == ' ' || *lpszText == '\t')
@@ -128,26 +136,20 @@ BOOL DH_SimpleFloatParse(LPCTSTR lpszText, double& d)
 	return TRUE;
 }
 
-void DH_DDX_TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, UINT nIDPrompt, ...)
+void CDialogHelper::DDX_TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, UINT nIDPrompt, ...)
 {
 	va_list pData;
 	va_start(pData, nIDPrompt);
 
 	HWND hWndCtrl = pDX->PrepareEditCtrl(nIDC);
-	TCHAR szBuffer[32];
+	TCHAR szBuffer[FLOATBUFLEN];
 
 	if (pDX->m_bSaveAndValidate)
 	{
 		// the following works for %d, %u, %ld, %lu
-		::GetWindowText(hWndCtrl, szBuffer, sizeof(szBuffer) / sizeof(TCHAR));
+		GetControlText(hWndCtrl, szBuffer);
 
-// *******************************************************************
-		if (*szBuffer == 0)
-			lstrcpy(szBuffer, _T("0"));
-
-// *******************************************************************
-
-		if (!DH_SimpleScanf(szBuffer, lpszFormat, pData))
+		if (!SimpleScanf(szBuffer, lpszFormat, pData))
 		{
 // *******************************************************************
 //			AfxMessageBox(nIDPrompt);
@@ -159,14 +161,14 @@ void DH_DDX_TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, UIN
 	{
 		wvsprintf(szBuffer, lpszFormat, pData);
 
-			// does not support floating point numbers - see dlgfloat.cpp
+		// does not support floating point numbers - see dlgfloat.cpp
 		AfxSetWindowText(hWndCtrl, szBuffer);
 	}
 
 	va_end(pData);
 }
 
-void DH_TextFloatFormat(CDataExchange* pDX, int nIDC, void* pData, double value, int nSizeGcvt, int nDecimals)
+void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double value, int nSizeGcvt, int nDecimals, TCHAR szBuffer[FLOATBUFLEN])
 {
 	// handle locale specific decimal separator
 	setlocale(LC_NUMERIC, "");
@@ -174,24 +176,11 @@ void DH_TextFloatFormat(CDataExchange* pDX, int nIDC, void* pData, double value,
 	ASSERT(pData != NULL);
 	ASSERT((nDecimals == -1) || (nDecimals > 0));
 
-	HWND hWndCtrl = pDX->PrepareEditCtrl(nIDC);
-	const int BUFLEN = 32;
-	
-	TCHAR szBuffer[BUFLEN];
-
-	if (pDX->m_bSaveAndValidate)
+	if (bSaveAndValidate)
 	{
-		::GetWindowText(hWndCtrl, szBuffer, sizeof(szBuffer) / sizeof(TCHAR));
-
-		// *******************************************************************
-		if (*szBuffer == 0)
-			lstrcpy(szBuffer, _T("0"));
-
-		// *******************************************************************
-
 		double d;
 
-		if (!DH_SimpleFloatParse(szBuffer, d))
+		if (!SimpleFloatParse(szBuffer, d))
 		{
 // *******************************************************************
 //			AfxMessageBox(nIDPrompt);
@@ -200,7 +189,7 @@ void DH_TextFloatFormat(CDataExchange* pDX, int nIDC, void* pData, double value,
 			
 			// try English locale
 			setlocale(LC_NUMERIC, "English");
-			DH_SimpleFloatParse(szBuffer, d);
+			SimpleFloatParse(szBuffer, d);
 		}
 
 		if (nSizeGcvt == FLT_DIG)
@@ -222,12 +211,10 @@ void DH_TextFloatFormat(CDataExchange* pDX, int nIDC, void* pData, double value,
 		}
 
 #if _MSC_VER >= 1400
-		_stprintf_s(szBuffer, _T("%.*g"), nSizeGcvt, value);
+		_stprintf_s(szBuffer, FLOATBUFLEN, _T("%.*g"), nSizeGcvt, value);
 #else
 		_stprintf(szBuffer, _T("%.*g"), nSizeGcvt, value);
 #endif
-
-		AfxSetWindowText(hWndCtrl, szBuffer);
 	}
 
 	// restore decimal separator to '.'
@@ -241,7 +228,7 @@ void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, BYTE& value)
 	int n = (int)value;
 	if (pDX->m_bSaveAndValidate)
 	{
-		DH_DDX_TextWithFormat(pDX, nIDC, _T("%u"), AFX_IDP_PARSE_BYTE, &n);
+		DDX_TextWithFormat(pDX, nIDC, _T("%u"), AFX_IDP_PARSE_BYTE, &n);
 
 		if (n > 255)
 		{
@@ -253,47 +240,47 @@ void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, BYTE& value)
 		value = (BYTE)n;
 	}
 	else
-		DH_DDX_TextWithFormat(pDX, nIDC, _T("%u"), AFX_IDP_PARSE_BYTE, n);
+		DDX_TextWithFormat(pDX, nIDC, _T("%u"), AFX_IDP_PARSE_BYTE, n);
 }
 
 void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, short& value)
 {
 	if (pDX->m_bSaveAndValidate)
-		DH_DDX_TextWithFormat(pDX, nIDC, _T("%sd"), AFX_IDP_PARSE_INT, &value);
+		DDX_TextWithFormat(pDX, nIDC, _T("%sd"), AFX_IDP_PARSE_INT, &value);
 	else
-		DH_DDX_TextWithFormat(pDX, nIDC, _T("%hd"), AFX_IDP_PARSE_INT, value);
+		DDX_TextWithFormat(pDX, nIDC, _T("%hd"), AFX_IDP_PARSE_INT, value);
 }
 
 void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, int& value)
 {
 	if (pDX->m_bSaveAndValidate)
-		DH_DDX_TextWithFormat(pDX, nIDC, _T("%d"), AFX_IDP_PARSE_INT, &value);
+		DDX_TextWithFormat(pDX, nIDC, _T("%d"), AFX_IDP_PARSE_INT, &value);
 	else
-		DH_DDX_TextWithFormat(pDX, nIDC, _T("%d"), AFX_IDP_PARSE_INT, value);
+		DDX_TextWithFormat(pDX, nIDC, _T("%d"), AFX_IDP_PARSE_INT, value);
 }
 
 void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, UINT& value)
 {
 	if (pDX->m_bSaveAndValidate)
-		DH_DDX_TextWithFormat(pDX, nIDC, _T("%u"), AFX_IDP_PARSE_UINT, &value);
+		DDX_TextWithFormat(pDX, nIDC, _T("%u"), AFX_IDP_PARSE_UINT, &value);
 	else
-		DH_DDX_TextWithFormat(pDX, nIDC, _T("%u"), AFX_IDP_PARSE_UINT, value);
+		DDX_TextWithFormat(pDX, nIDC, _T("%u"), AFX_IDP_PARSE_UINT, value);
 }
 
 void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, long& value)
 {
 	if (pDX->m_bSaveAndValidate)
-		DH_DDX_TextWithFormat(pDX, nIDC, _T("%ld"), AFX_IDP_PARSE_INT, &value);
+		DDX_TextWithFormat(pDX, nIDC, _T("%ld"), AFX_IDP_PARSE_INT, &value);
 	else
-		DH_DDX_TextWithFormat(pDX, nIDC, _T("%ld"), AFX_IDP_PARSE_INT, value);
+		DDX_TextWithFormat(pDX, nIDC, _T("%ld"), AFX_IDP_PARSE_INT, value);
 }
 
 void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, DWORD& value)
 {
 	if (pDX->m_bSaveAndValidate)
-		DH_DDX_TextWithFormat(pDX, nIDC, _T("%lu"), AFX_IDP_PARSE_UINT, &value);
+		DDX_TextWithFormat(pDX, nIDC, _T("%lu"), AFX_IDP_PARSE_UINT, &value);
 	else
-		DH_DDX_TextWithFormat(pDX, nIDC, _T("%lu"), AFX_IDP_PARSE_UINT, value);
+		DDX_TextWithFormat(pDX, nIDC, _T("%lu"), AFX_IDP_PARSE_UINT, value);
 }
 
 void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, CString& value)
@@ -306,12 +293,36 @@ void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, CString& value)
 
 void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, float& value, int nDecimals)
 {
-	DH_TextFloatFormat(pDX, nIDC, &value, value, FLT_DIG, nDecimals);
+	HWND hWndCtrl = pDX->PrepareEditCtrl(nIDC);
+	TCHAR szBuffer[FLOATBUFLEN];
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		GetControlText(hWndCtrl, szBuffer);
+		TextFloatFormat(TRUE, &value, value, FLT_DIG, nDecimals, szBuffer);
+	}
+	else
+	{
+		TextFloatFormat(FALSE, &value, value, FLT_DIG, nDecimals, szBuffer);
+		AfxSetWindowText(hWndCtrl, szBuffer);
+	}
 }
 
 void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, double& value, int nDecimals)
 {
-	DH_TextFloatFormat(pDX, nIDC, &value, value, DBL_DIG, nDecimals);
+	HWND hWndCtrl = pDX->PrepareEditCtrl(nIDC);
+	TCHAR szBuffer[FLOATBUFLEN];
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		GetControlText(hWndCtrl, szBuffer);
+		TextFloatFormat(TRUE, &value, value, DBL_DIG, nDecimals, szBuffer);
+	}
+	else
+	{
+		TextFloatFormat(FALSE, &value, value, DBL_DIG, nDecimals, szBuffer);
+		AfxSetWindowText(hWndCtrl, szBuffer);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

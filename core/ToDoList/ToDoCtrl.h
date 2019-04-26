@@ -23,9 +23,9 @@
 #include "tdcTimeTracking.h"
 #include "tdcSourceControl.h"
 #include "tdcFindReplace.h"
+#include "tdcdialoghelper.h"
 
 #include "..\shared\runtimedlg.h"
-#include "..\shared\dialoghelper.h"
 #include "..\shared\orderedtreectrl.h"
 #include "..\shared\filecombobox.h"
 #include "..\shared\urlricheditctrl.h"
@@ -259,7 +259,7 @@ public:
 	int GetSelectedTaskPercent() const { return m_taskTree.GetSelectedTaskPercent(); }
 	int GetSelectedTaskPriority() const { return m_taskTree.GetSelectedTaskPriority(); }
 	int GetSelectedTaskRisk() const { return m_taskTree.GetSelectedTaskRisk(); }
-	CString GetSelectedTaskCost() const { return m_taskTree.GetSelectedTaskCost(); }
+	BOOL GetSelectedTaskCost(TDCCOST& cost) const { return m_taskTree.GetSelectedTaskCost(cost); }
 	BOOL IsSelectedTaskFlagged() const { return m_taskTree.IsSelectedTaskFlagged(); }
 	BOOL IsSelectedTaskLocked() const { return m_taskTree.IsSelectedTaskLocked(); }
 	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const;
@@ -530,13 +530,13 @@ protected:
 	CString m_sExternalID, m_sDepends;
 	CString m_sOccurrence;
 	CString m_sVersion;
-	CString m_sCost;
 	CBinaryData m_customComments;
 	double m_dTrackedTimeElapsedHours;
 	int m_nPriority;
 	int m_nRisk;
 	int m_nPercentDone;
 	
+	TDCCOST m_cost;
 	TDCTIMEPERIOD m_timeEstimate, m_timeSpent;
 	CONTENTFORMAT m_cfComments, m_cfDefault;
 	TDCRECURRENCE m_tRecurrence;

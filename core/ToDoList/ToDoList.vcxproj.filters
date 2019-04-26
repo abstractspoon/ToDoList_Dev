@@ -406,6 +406,9 @@
     <ClCompile Include="TDCTaskTimeLogAnalysis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDCDialogHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FilteredToDoCtrl.h">
@@ -844,6 +847,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCTaskTimeLogAnalysis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCDialogHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

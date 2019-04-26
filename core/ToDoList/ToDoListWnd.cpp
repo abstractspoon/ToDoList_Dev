@@ -5470,14 +5470,17 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 		if (startup.GetCost(dItem, bOffset))
 		{
-			TDCCOST cost(tdc.GetSelectedTaskCost()); // preserve 'IsRate'
+			TDCCOST cost;
+			
+			if (tdc.GetSelectedTaskCost(cost))
+			{
+				if (bOffset)
+					cost.dAmount += dItem;
+				else
+					cost.dAmount = dItem;
 
-			if (bOffset)
-				cost.dAmount += dItem;
-			else
-				cost.dAmount = dItem;
-
-			tdc.SetSelectedTaskCost(cost);
+				tdc.SetSelectedTaskCost(cost);
+			}
 		}
 
 		// Times

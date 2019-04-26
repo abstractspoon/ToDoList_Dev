@@ -20,6 +20,7 @@
 #include "tdladdloggedtimedlg.h"
 #include "tdcoutlookimporthelper.h"
 #include "ToDoCtrlDataDefines.h"
+#include "TDCDialogHelper.h"
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\osversion.h"
@@ -289,12 +290,13 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TIMESPENT, m_eTimeSpent);
 	DDX_Control(pDX, IDC_VERSION, m_cbVersion);
 
-	DDX_Text(pDX, IDC_COST, m_sCost/*, DECIMALS*/);
 	DDX_Text(pDX, IDC_DEPENDS, m_sDepends);
 	DDX_Text(pDX, IDC_EXTERNALID, m_sExternalID);
 	DDX_Text(pDX, IDC_PROJECTNAME, m_sProjectName);
-	DDX_Text(pDX, IDC_TIMEEST, m_timeEstimate.dAmount, DECIMALS);
-	DDX_Text(pDX, IDC_TIMESPENT, m_timeSpent.dAmount, DECIMALS);
+
+	CTDCDialogHelper::DDX_Text(pDX, IDC_COST, m_cost, DECIMALS);
+	CTDCDialogHelper::DDX_Text(pDX, IDC_TIMEEST, m_timeEstimate, DECIMALS);
+	CTDCDialogHelper::DDX_Text(pDX, IDC_TIMESPENT, m_timeSpent, DECIMALS);
 
 	DDX_AutoCBString(pDX, IDC_ALLOCBY, m_sAllocBy);
 	DDX_AutoCBString(pDX, IDC_STATUS, m_sStatus);
@@ -313,9 +315,6 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 		m_nPercentDone = max(0, _ttoi(sPercent));
 		m_nPercentDone = min(100, m_nPercentDone);
 
-		m_timeEstimate.nUnits = TDC::MapTHUnitsToUnits(m_eTimeEstimate.GetUnits());
-		m_timeSpent.nUnits = TDC::MapTHUnitsToUnits(m_eTimeSpent.GetUnits());
-
 		m_cbFileRef.GetFileList(m_aFileRefs);
 		m_eRecurrence.GetRecurrenceOptions(m_tRecurrence);
 
@@ -328,9 +327,6 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	{
 		m_spinPercent.SetPos(m_nPercentDone);
 		
-		m_eTimeEstimate.SetUnits(TDC::MapUnitsToTHUnits(m_timeEstimate.nUnits));
-		m_eTimeSpent.SetUnits(TDC::MapUnitsToTHUnits(m_timeSpent.nUnits));
-
 		m_cbFileRef.SetFileList(m_aFileRefs);
 		m_eRecurrence.SetRecurrenceOptions(m_tRecurrence);
 
@@ -1781,7 +1777,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_sExternalID = GetSelectedTaskExtID();
 		m_sVersion = GetSelectedTaskVersion();
 		m_crColour = GetSelectedTaskColor();
-		m_sCost = GetSelectedTaskCost();
 
 		if (m_crColour == 0)
 			m_crColour = CLR_DEFAULT;
@@ -1849,10 +1844,9 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		else
 			m_nPercentDone = m_calculator.GetTaskPercentDone(dwTaskID);		
 		
-		// recurrence
+		// Misc
+		GetSelectedTaskCost(m_cost);
 		GetSelectedTaskRecurrence(m_tRecurrence);
-
-		// custom attributes
 		GetSelectedTaskCustomAttributeData(m_mapCustomCtrlData, FALSE);
 	}
 	else // clear controls
@@ -1861,6 +1855,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_nRisk = 0;
 		m_nPercentDone = 0;
 		m_timeEstimate.dAmount = m_timeSpent.dAmount = 0;
+		m_cost.dAmount = 0.0;
 		m_tRecurrence = TDCRECURRENCE();
 		m_crColour = CLR_DEFAULT;
 
@@ -1870,7 +1865,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_sStatus.Empty();
 		m_sExternalID.Empty();
 		m_sDepends.Empty();
-		m_sCost.Empty();
 		m_sVersion.Empty();
 
 		m_cbAllocTo.CheckAll(CCBC_UNCHECKED);
@@ -2084,7 +2078,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_COST:
-		SetSelectedTaskCost(TDCCOST(m_sCost));
+		SetSelectedTaskCost(m_cost);
 		break;
 		
 	case TDCA_RECURRENCE:
@@ -3909,10 +3903,10 @@ BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost)
 	
 	if (aModTaskIDs.GetSize())
 	{
-		if (!(TDCCOST(m_sCost) == cost))
+		if (!(m_cost == cost))
 		{
-			m_sCost = cost.Format();
-			UpdateDataEx(this, IDC_COST, m_sCost, FALSE/*, DECIMALS*/);
+			m_cost = cost;
+			CTDCDialogHelper().UpdateDataEx(this, IDC_COST, m_cost, FALSE, DECIMALS);
 		}
 		
 		SetModified(TDCA_COST, aModTaskIDs);
@@ -11804,7 +11798,8 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 
 	case TDCA_COST:
 		{
-			TDCCOST cost(GetSelectedTaskCost()); // preserve existing units
+			TDCCOST cost;
+			GetSelectedTaskCost(cost); // preserve 'IsRate'
 			cost.dAmount = 0.0;
 			return SetSelectedTaskCost(cost);
 		}

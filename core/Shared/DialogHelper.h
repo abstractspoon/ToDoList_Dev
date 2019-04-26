@@ -152,6 +152,9 @@ public:
 protected:
 	CDialogHelper() : m_bInUpdateEx(FALSE) {}
 
+	BOOL m_bInUpdateEx;
+
+protected:
 	// helpers for updating only a single item
 	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, BYTE& value, BOOL bSaveAndValidate = TRUE);
 	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, short& value, BOOL bSaveAndValidate = TRUE);
@@ -173,8 +176,14 @@ protected:
 	static BOOL CtrlMatchesClassFilter(const CWnd* pCtrl, LPCTSTR szClassFilter);
 	static BOOL CtrlMatchesClassFilters(const CWnd* pCtrl, const LPCTSTR szClassFilters[], int nNumFilters);
 
-private:
-	BOOL m_bInUpdateEx;
+protected: // very low-level helpers
+	static const int FLOATBUFLEN = 64;
+	static void GetControlText(HWND hWndCtrl, TCHAR szBuffer[FLOATBUFLEN]);
+	static BOOL SimpleScanf(LPCTSTR lpszText, LPCTSTR lpszFormat, va_list pData);
+	static BOOL SimpleFloatParse(LPCTSTR lpszText, double& d);
+	static void DDX_TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, UINT nIDPrompt, ...);
+	static void TextFloatFormat(BOOL bSaveAndValidate, void* pData, double value, int nSizeGcvt, int nDecimals, TCHAR szBuffer[FLOATBUFLEN]);
+
 };
 
 #endif // !defined(AFX_DIALOGHELPER_H__8543A453_171B_11D4_AE08_0000E8425C3E__INCLUDED_)
