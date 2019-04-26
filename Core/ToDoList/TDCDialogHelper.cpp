@@ -78,6 +78,23 @@ void CTDCDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, TDCTIMEPERIOD& val
 		pTime->SetUnits(value.GetTHUnits());
 }
 
+void CTDCDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, int& value, CSpinButtonCtrl& spin, int nMin, int nMax)
+{
+	if (pDX->m_bSaveAndValidate)
+	{
+		CDialogHelper::DDX_Text(pDX, nIDC, value);
+		value = max(nMin, min(nMax, value));
+	}
+	else
+	{
+		value = max(nMin, min(nMax, value));
+		CDialogHelper::DDX_Text(pDX, nIDC, value);
+
+		spin.SetRange32(nMin, nMax);
+		spin.SetPos(value);
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 BOOL CTDCDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, TDCCOST& value, BOOL bSaveAndValidate, int nDecimals)

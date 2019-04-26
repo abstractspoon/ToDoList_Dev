@@ -31,6 +31,7 @@ public:
 
 	static void DDX_Text(CDataExchange* pDX, int nIDC, TDCCOST& value, int nDecimals = -1);
 	static void DDX_Text(CDataExchange* pDX, int nIDC, TDCTIMEPERIOD& value, int nDecimals = -1);
+	static void DDX_Text(CDataExchange* pDX, int nIDC, int& value, CSpinButtonCtrl& spin, int nMin = 0, int nMax = 100);
 	
 };
 

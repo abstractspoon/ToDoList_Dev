@@ -297,6 +297,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	CTDCDialogHelper::DDX_Text(pDX, IDC_COST, m_cost, DECIMALS);
 	CTDCDialogHelper::DDX_Text(pDX, IDC_TIMEEST, m_timeEstimate, DECIMALS);
 	CTDCDialogHelper::DDX_Text(pDX, IDC_TIMESPENT, m_timeSpent, DECIMALS);
+	CTDCDialogHelper::DDX_Text(pDX, IDC_PERCENT, m_nPercentDone, m_spinPercent);
 
 	DDX_AutoCBString(pDX, IDC_ALLOCBY, m_sAllocBy);
 	DDX_AutoCBString(pDX, IDC_STATUS, m_sStatus);
@@ -309,12 +310,6 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	// custom
 	if (pDX->m_bSaveAndValidate)
 	{
-		CString sPercent;
-		m_ePercentDone.GetWindowText(sPercent);
-		
-		m_nPercentDone = max(0, _ttoi(sPercent));
-		m_nPercentDone = min(100, m_nPercentDone);
-
 		m_cbFileRef.GetFileList(m_aFileRefs);
 		m_eRecurrence.GetRecurrenceOptions(m_tRecurrence);
 
@@ -325,8 +320,6 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		m_spinPercent.SetPos(m_nPercentDone);
-		
 		m_cbFileRef.SetFileList(m_aFileRefs);
 		m_eRecurrence.SetRecurrenceOptions(m_tRecurrence);
 
