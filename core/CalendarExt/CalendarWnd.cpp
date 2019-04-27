@@ -209,7 +209,7 @@ void CCalendarWnd::OnSelChangeNumWeeks()
 
 void CCalendarWnd::OnSelChangeSnapMode()
 {
-	m_BigCalendar.SetSnapMode((TCC_SNAPMODE)CDialogHelper::GetSelectedItemData(m_cbSnapModes));
+	m_BigCalendar.SetSnapMode(CDialogHelper::GetSelectedItemData(m_cbSnapModes, TCCSM_FREE));
 }
 
 void CCalendarWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const 

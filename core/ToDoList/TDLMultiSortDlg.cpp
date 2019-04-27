@@ -122,7 +122,7 @@ void CTDLMultiSortDlg::BuildCombos()
 	{
 		m_cbSortBy[0].SetCurSel(0);
 
-		TDC_COLUMN nColID = (TDC_COLUMN)GetSelectedItemData(m_cbSortBy[0]);
+		TDC_COLUMN nColID = GetSelectedItemData(m_cbSortBy[0], TDCC_NONE);
 		m_sort.SetSortBy(0, nColID);
 	}
 }
@@ -160,7 +160,7 @@ void CTDLMultiSortDlg::OnSelchangeSortby3()
 
 void CTDLMultiSortDlg::OnSelchangeSortby(int nCol)
 {
-	TDC_COLUMN nColID = (TDC_COLUMN)GetSelectedItemData(m_cbSortBy[nCol]);
+	TDC_COLUMN nColID = GetSelectedItemData(m_cbSortBy[nCol], TDCC_NONE);
 	m_sort.SetSortBy(nCol, nColID);
 
 	EnableControls();

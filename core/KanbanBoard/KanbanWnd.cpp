@@ -66,16 +66,8 @@ void CKanbanWnd::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_ATTRIBUTES, m_cbAttributes);
 
-	if (pDX->m_bSaveAndValidate)
-	{
-		m_nTrackedAttrib = m_cbAttributes.GetSelectedAttribute();
-		m_sTrackedCustomAttribID = m_cbCustomAttributes.GetSelectedAttributeID();
-	}
-	else if (m_nTrackedAttrib != TDCA_NONE)
-	{
-		m_cbAttributes.SetSelectedAttribute(m_nTrackedAttrib);
-		m_cbCustomAttributes.SetSelectedAttributeID(m_sTrackedCustomAttribID);
-	}
+	m_cbAttributes.DDX(pDX, m_nTrackedAttrib);
+	m_cbCustomAttributes.DDX(pDX, m_sTrackedCustomAttribID);
 }
 
 BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)

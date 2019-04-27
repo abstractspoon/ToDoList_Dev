@@ -17,6 +17,8 @@ public:
 	CString GetSelectedAttributeID() const;
 	BOOL SetSelectedAttributeID(const CString& sAttribID);
 
+	void DDX(CDataExchange* pDX, CString& value);
+
 protected:
 	CKanbanCustomAttributeDefinitionArray m_aCustAttribDefs;
 	

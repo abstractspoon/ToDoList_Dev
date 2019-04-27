@@ -106,10 +106,23 @@ public:
 	static int CalcMaxTextWidth(CComboBox& combo, int nMinWidth = 0, BOOL bDropped = FALSE, CDC* pDCRef = NULL, int nTabWidth = 0);
 	static int SelectItemByValue(CComboBox& combo, int nValue);
 	static int SelectItemByData(CComboBox& combo, DWORD dwItemData);
+	static DWORD GetSelectedItemData(const CComboBox& combo);
 	static int GetSelectedItemAsValue(const CComboBox& combo);
 	static CString GetSelectedItem(const CComboBox& combo);
 	static CString GetItem(const CComboBox& combo, int nItem);
-	static DWORD GetSelectedItemData(const CComboBox& combo);
+
+	template <class T>
+	static T GetSelectedItemData(const CComboBox& combo, T fallbackValue)
+	{
+		int nSel = combo.GetCurSel();
+
+		if (nSel != CB_ERR)
+			return (T)combo.GetItemData(nSel);
+
+		// else
+		return fallbackValue;
+	}
+	
 	static BOOL IsDroppedComboBox(HWND hCtrl);
 	static int FindItemByValue(const CComboBox& combo, int nValue);
 	static int AddString(CComboBox& combo, LPCTSTR szItem, DWORD dwItemData);

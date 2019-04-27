@@ -25,6 +25,8 @@ public:
 	void ShowCustomAttribute(BOOL bShow = TRUE);
 	void ShowFixedColumns(BOOL bShow = TRUE);
 
+	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value);
+
 // Attributes
 protected:
 	BOOL m_bShowCustomAttrib;

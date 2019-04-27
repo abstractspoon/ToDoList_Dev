@@ -82,6 +82,14 @@ BOOL CKanbanCustomAttributeComboBox::SetSelectedAttributeID(const CString& sAttr
 	return (CDialogHelper::SelectItemByData(*this, (nSel + 1)) != CB_ERR);
 }
 
+void CKanbanCustomAttributeComboBox::DDX(CDataExchange* pDX, CString& value)
+{
+	if (pDX->m_bSaveAndValidate)
+		value = GetSelectedAttributeID();
+	else
+		SetSelectedAttributeID(value);
+}
+
 void CKanbanCustomAttributeComboBox::BuildCombo()
 {
 	// Only if empty

@@ -129,7 +129,7 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 			if (m_cbColorByAttribute.GetCurSel() == CB_ERR)
 				m_nColorAttribute = DEFCOLORATTRIB;
 			else
-				m_nColorAttribute = (TDC_ATTRIBUTE)GetSelectedItemData(m_cbColorByAttribute);
+				m_nColorAttribute = GetSelectedItemData(m_cbColorByAttribute, TDCA_NONE);
 		}
 	}
 	else

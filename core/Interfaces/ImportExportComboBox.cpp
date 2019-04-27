@@ -176,7 +176,7 @@ CString CImportExportComboBox::GetSelectedTypeID() const
 	if (GetCurSel() == CB_ERR)
 		return _T("");
 
-	int nImpExp = (int)CDialogHelper::GetSelectedItemData(*this);
+	int nImpExp = CDialogHelper::GetSelectedItemData(*this, 0);
 		
 	return (m_bImporting ? 
 			m_mgrImpExp.GetImporterTypeID(nImpExp) :
@@ -201,4 +201,12 @@ int CImportExportComboBox::SetSelectedTypeID(LPCTSTR szTypeID)
 		CDialogHelper::SelectItemByData(*this, nImpExp);
 
 	return nImpExp;
+}
+
+void CImportExportComboBox::DDX(CDataExchange* pDX, CString& value)
+{
+	if (pDX->m_bSaveAndValidate)
+		value = GetSelectedTypeID();
+	else
+		SetSelectedTypeID(value);
 }

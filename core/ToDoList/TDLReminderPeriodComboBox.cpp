@@ -135,9 +135,9 @@ BOOL CTDLReminderPeriodComboBox::SetSelectedPeriod(UINT nMinutes)
 	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nMinutes));
 }
 
-UINT CTDLReminderPeriodComboBox::GetSelectedPeriod() const
+int CTDLReminderPeriodComboBox::GetSelectedPeriod() const
 {
-	return CDialogHelper::GetSelectedItemData(*this);
+	return CDialogHelper::GetSelectedItemData(*this, 15);
 }
 
 void CTDLReminderPeriodComboBox::ValidateLeadin(UINT& nMinutes)

@@ -962,7 +962,7 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 void CGanttChartWnd::OnSelchangeDisplay() 
 {
 	GTLC_MONTH_DISPLAY nCurDisplay = m_ctrlGantt.GetMonthDisplay();
-	GTLC_MONTH_DISPLAY nNewDisplay = (GTLC_MONTH_DISPLAY)CDialogHelper::GetSelectedItemData(m_cbDisplayOptions);
+	GTLC_MONTH_DISPLAY nNewDisplay = CDialogHelper::GetSelectedItemData(m_cbDisplayOptions, GTLC_DISPLAY_NONE);
 
 	if (!SetMonthDisplay(nNewDisplay))
 	{
@@ -975,7 +975,7 @@ void CGanttChartWnd::OnSelchangeSnapMode()
 {
 	// save snap mode as we go
 	GTLC_MONTH_DISPLAY nCurDisplay = m_ctrlGantt.GetMonthDisplay();
-	GTLC_SNAPMODE nSnap = (GTLC_SNAPMODE)CDialogHelper::GetSelectedItemData(m_cbSnapModes);
+	GTLC_SNAPMODE nSnap = CDialogHelper::GetSelectedItemData(m_cbSnapModes, GTLCSM_NONE);
 
 	m_mapDisplaySnapModes[nCurDisplay] = nSnap;
 	m_ctrlGantt.SetSnapMode(nSnap);

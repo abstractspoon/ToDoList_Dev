@@ -51,16 +51,8 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_COLORBARBYPRIORITY, m_bColorBarByPriority);
 	DDX_Check(pDX, IDC_INDENTSUBTASKS, m_bIndentSubtasks);
 
-	if (pDX->m_bSaveAndValidate)
-	{
-		m_nFixedAttrib = m_cbAttributes.GetSelectedAttribute();
-		m_sFixedCustomAttribID = m_cbCustomAttributes.GetSelectedAttributeID();
-	}
-	else
-	{
-		m_cbAttributes.SetSelectedAttribute(m_nFixedAttrib);
-		m_cbCustomAttributes.SetSelectedAttributeID(m_sFixedCustomAttribID);
-	}
+	m_cbAttributes.DDX(pDX, m_nFixedAttrib);
+	m_cbCustomAttributes.DDX(pDX, m_sFixedCustomAttribID);
 }
 
 

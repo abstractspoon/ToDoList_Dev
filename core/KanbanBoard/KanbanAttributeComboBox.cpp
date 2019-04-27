@@ -69,12 +69,20 @@ void CKanbanAttributeComboBox::BuildCombo()
 
 TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute() const
 {
-	return (TDC_ATTRIBUTE)CDialogHelper::GetSelectedItemData(*this);
+	return CDialogHelper::GetSelectedItemData(*this, TDCA_STATUS);
 }
 
 BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttrib)
 {
-	return (CB_ERR != CDialogHelper::SelectItemByData(*this, (DWORD)nAttrib));
+	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nAttrib));
+}
+
+void CKanbanAttributeComboBox::DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value)
+{
+	if (pDX->m_bSaveAndValidate)
+		value = GetSelectedAttribute();
+	else
+		SetSelectedAttribute(value);
 }
 
 void CKanbanAttributeComboBox::ShowCustomAttribute(BOOL bShow)

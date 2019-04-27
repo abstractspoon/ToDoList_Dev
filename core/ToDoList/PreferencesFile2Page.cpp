@@ -89,16 +89,15 @@ void CPreferencesFile2Page::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_AUTOSAVE, m_bAutoSave);
 	DDX_Text(pDX, IDC_AUTOSAVEFREQUENCY, m_nAutoSaveFrequency);
 
+	m_cbOtherExporters.DDX(pDX, m_sOtherExportTypeID);
+
 	// custom
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_sOtherExportTypeID = m_cbOtherExporters.GetSelectedTypeID();
 		m_nKeepBackups = GetSelectedItemAsValue(m_cbKeepBackups);
 	}
 	else
 	{
-		m_cbOtherExporters.SetSelectedTypeID(m_sOtherExportTypeID);
-
 		if (CB_ERR == SelectItemByValue(m_cbKeepBackups, m_nKeepBackups))
 		{
 			if (m_nKeepBackups == 0) // all

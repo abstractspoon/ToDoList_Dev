@@ -125,7 +125,7 @@ void CTDLFilterComboBox::RefillCombo(LPCTSTR szAdvancedSel)
 
 FILTER_SHOW CTDLFilterComboBox::GetSelectedFilter() const
 {
-	return (FILTER_SHOW)CDialogHelper::GetSelectedItemData(*this);
+	return CDialogHelper::GetSelectedItemData(*this, FS_ALL);
 }
 
 FILTER_SHOW CTDLFilterComboBox::GetSelectedFilter(CString& sAdvanced) const

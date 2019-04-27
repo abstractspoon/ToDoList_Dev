@@ -20,7 +20,7 @@ public:
 	virtual ~CTDLReminderPeriodComboBox();
 
 	BOOL SetSelectedPeriod(UINT nMinutes);
-	UINT GetSelectedPeriod() const;
+	int GetSelectedPeriod() const;
 
 	void DDX(CDataExchange* pDX, int& nMinutes);
 

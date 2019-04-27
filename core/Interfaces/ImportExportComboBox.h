@@ -26,6 +26,8 @@ public:
 	CString GetSelectedTypeID() const;
 	int SetSelectedTypeID(LPCTSTR szTypeID);
 
+	void DDX(CDataExchange* pDX, CString& value);
+
 protected:
 	const CImportExportMgr& m_mgrImpExp;
 
