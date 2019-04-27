@@ -54,10 +54,10 @@ protected:
 	int		m_nReadonlyReloadOption;
 	int		m_nTimestampReloadOption;
 	BOOL	m_bCheckinOnClose;
-	UINT	m_nRemoteFileCheckFreq;
+	int		m_nRemoteFileCheckFreq;
 	BOOL	m_bPromptReloadOnWritable;
 	BOOL	m_bPromptReloadOnTimestamp;
-	UINT    m_nCheckinNoEditTime;
+	int		m_nCheckinNoEditTime;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

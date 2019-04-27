@@ -326,6 +326,25 @@ void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, double& value, int nD
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// combo
+
+void CDialogHelper::DDX_CBValue(CDataExchange* pDX, CComboBox& combo, int& value, int fallbackValue)
+{
+	if (pDX->m_bSaveAndValidate)
+	{
+		value = GetSelectedItemAsValue(combo);
+	}
+	else
+	{
+		if (CB_ERR == SelectItemByValue(combo, value))
+		{
+			value = fallbackValue;
+			VERIFY(SelectItemByValue(combo, value) != CB_ERR);
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, BYTE& value, BOOL bSaveAndValidate)
 {

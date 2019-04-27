@@ -7,6 +7,8 @@
 // PreferencesTaskPage.h : header file
 //
 
+#include "ToDoitem.h"
+
 #include "..\shared\timeedit.h"
 #include "..\shared\preferencesbase.h"
 
@@ -91,8 +93,7 @@ protected:
 	CString	m_sCompletionStatus;
 	//}}AFX_DATA
 	CTimeEdit	m_eRecentModPeriod;
-	double		m_dRecentModTime;
-	TH_UNITS	m_nRecentModTimeUnits;
+	TDCTIMEPERIOD m_recentModTime;
 
 	PTCP_CALCTIMEREMAINING	m_nCalcRemainingTime;
 	PTCP_CALCDUEDATE		m_nCalcDueDate;

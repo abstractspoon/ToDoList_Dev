@@ -240,4 +240,14 @@ void CColorBrewerComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 	}
 }
 
-
+void CColorBrewerComboBox::DDX(CDataExchange* pDX, CDWordArray& aColors)
+{
+	if (pDX->m_bSaveAndValidate)
+	{
+		GetSelectedPalette(aColors);
+	}
+	else if (aColors.GetSize())
+	{
+		SetSelectedPalette(aColors);
+	}
+}

@@ -67,10 +67,10 @@ protected:
 	CIconButton		m_btDefIcon;
 
 	CString	m_sDefCreatedBy;
-	CString	m_sDefCost;
 	BOOL	m_bReminderBeforeDue;
 	int		m_nDefPriority;
 	int		m_nDefRisk;
+	TDCCOST	m_defCost;
 	TDCTIMEPERIOD m_defTimeEst, m_defTimeSpent;
 	CString	m_sDefAllocTo;
 	CString	m_sDefAllocBy;
@@ -84,7 +84,7 @@ protected:
 	BOOL	m_bUseCreationDateForDefDueDate;
 	CWndPromptManager m_mgrPrompts;
 	CTDCImageList m_ilTaskIcons;
-	UINT m_nDefReminderLeadin;
+	int m_nDefReminderLeadin;
 
 	const CContentMgr* m_pMgrContent;
 	CTDLCommentsCtrl m_ctrlComments;

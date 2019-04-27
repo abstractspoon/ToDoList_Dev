@@ -36,6 +36,8 @@ public:
 	int GetSelectedPalette(CDWordArray& aColors) const;
 	int SetSelectedPalette(const CDWordArray& aColors);
 
+	void DDX(CDataExchange* pDX, CDWordArray& aColors);
+
 // Attributes
 protected:
 	CColorBrewer m_brewer;

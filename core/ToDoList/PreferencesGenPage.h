@@ -96,7 +96,7 @@ public:
 	//}}AFX_DATA
 	CFileEdit	m_eStickiesPath;
 	DWORD	m_dwGlobalHotkey;
-	UINT    m_nMinimizeNoEditTime;
+	int		m_nMinimizeNoEditTime;
 	BOOL	m_bShowFullTaskPathInSticky;
 
 // Overrides

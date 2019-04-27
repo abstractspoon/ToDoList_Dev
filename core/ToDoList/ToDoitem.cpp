@@ -139,14 +139,14 @@ TDCCOST& TDCCOST::operator=(const TDCCOST& other)
 	return *this;
 }
 
-CString TDCCOST::Format() const
+CString TDCCOST::Format(int nDecimals) const
 {
-	return Format(dAmount, bIsRate);
+	return Format(dAmount, bIsRate, nDecimals);
 }
 
-CString TDCCOST::Format(double dAmount, BOOL bIsRate)
+CString TDCCOST::Format(double dAmount, BOOL bIsRate, int nDecimals)
 {
-	CString sCost = Misc::Format(dAmount, 2);
+	CString sCost = Misc::Format(dAmount, nDecimals);
 
 	if (bIsRate)
 		sCost = ('@' + sCost);

@@ -63,10 +63,10 @@ struct TDCCOST
 	BOOL operator==(const TDCCOST& other) const;
 	TDCCOST& operator=(const TDCCOST& other);
 
-	CString Format() const;
+	CString Format(int nDecimals = -1) const;
 	BOOL Parse(LPCTSTR szCost);
 
-	static CString Format(double dAmount, BOOL bIsRate);
+	static CString Format(double dAmount, BOOL bIsRate, int nDecimals = -1);
 
 	double dAmount;
 	BOOL bIsRate;

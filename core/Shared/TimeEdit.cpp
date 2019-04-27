@@ -7,6 +7,7 @@
 #include "stringres.h"
 #include "misc.h"
 #include "localizer.h"
+#include "dialoghelper.h"
 
 #include <math.h>
 
@@ -396,3 +397,14 @@ void CTimeEdit::RemoveTrailingZeros(CString& sTime)
 		}
 	}
 }
+
+void CTimeEdit::DDX(CDataExchange* pDX, double& value, TH_UNITS& units, int nDecimals)
+{
+	CDialogHelper::DDX_Text(pDX, GetDlgCtrlID(), value, nDecimals);
+
+	if (pDX->m_bSaveAndValidate)
+		units = GetUnits();
+	else
+		SetUnits(units);
+}
+

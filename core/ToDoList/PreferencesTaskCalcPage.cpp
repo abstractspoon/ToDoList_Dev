@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "PreferencesTaskCalcPage.h"
+#include "TDCDialogHelper.h"
 
 #include "..\shared\Misc.h"
 #include "..\shared\enstring.h"
@@ -60,15 +61,7 @@ void CPreferencesTaskCalcPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_TASKINHERITSSUBTASKFLAGS, m_bTaskInheritsSubtaskFlags);
 	DDX_Check(pDX, IDC_USELATESTLASTMODIFIED, m_bUseLatestLastModifiedDate);
 
-	if (pDX->m_bSaveAndValidate)
-	{
-		m_dRecentModTime = m_eRecentModPeriod.GetTime();
-		m_nRecentModTimeUnits = m_eRecentModPeriod.GetUnits();
-	}
-	else
-	{
-		m_eRecentModPeriod.SetTime(m_dRecentModTime, m_nRecentModTimeUnits);
-	}
+	CTDCDialogHelper::DDX_Text(pDX, m_eRecentModPeriod, m_recentModTime);
 }
 
 
@@ -183,8 +176,8 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	if (m_bAutoCalcPercentDone)
 		m_bAveragePercentSubCompletion = FALSE;
 
-	m_dRecentModTime = pPrefs->GetProfileDouble(szKey, _T("RecentModTime"), 1.0);
-	m_nRecentModTimeUnits = (TH_UNITS)pPrefs->GetProfileInt(szKey, _T("RecentModTimeUnits"), THU_HOURS);
+	m_recentModTime.dAmount = pPrefs->GetProfileDouble(szKey, _T("RecentModTime"), 1.0);
+	m_recentModTime.SetTHUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("RecentModTimeUnits"), THU_HOURS), FALSE);
 
 //	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
@@ -214,8 +207,8 @@ void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("TaskInheritsSubtaskFlags"), m_bTaskInheritsSubtaskFlags);
 	pPrefs->WriteProfileInt(szKey, _T("UseLatestLastModifiedDate"), m_bUseLatestLastModifiedDate);
 
-	pPrefs->WriteProfileDouble(szKey, _T("RecentModTime"), m_dRecentModTime);
-	pPrefs->WriteProfileInt(szKey, _T("RecentModTimeUnits"), m_nRecentModTimeUnits);
+	pPrefs->WriteProfileDouble(szKey, _T("RecentModTime"), m_recentModTime.dAmount);
+	pPrefs->WriteProfileInt(szKey, _T("RecentModTimeUnits"), m_recentModTime.GetTHUnits());
 
 	pPrefs->WriteProfileString(szKey, _T("CompletionStatus"), m_sCompletionStatus);
 
@@ -227,7 +220,7 @@ void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 COleDateTimeSpan CPreferencesTaskCalcPage::GetRecentlyModifiedPeriod() const
 {
-	return CTimeHelper(24, 7).GetTime(m_dRecentModTime, m_nRecentModTimeUnits, THU_DAYS);
+	return CTimeHelper(24, 7).GetTime(m_recentModTime.dAmount, m_recentModTime.GetTHUnits(), THU_DAYS);
 }
 
 void CPreferencesTaskCalcPage::OnSetStatusOnDone() 

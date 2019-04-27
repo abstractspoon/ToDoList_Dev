@@ -60,22 +60,20 @@ void CTDCDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, TDCCOST& value, in
 	}
 }
 
-void CTDCDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, TDCTIMEPERIOD& value, int nDecimals)
+void CTDCDialogHelper::DDX_Text(CDataExchange* pDX, CTimeEdit& ctrl, TDCTIMEPERIOD& value, int nDecimals)
 {
-	CTimeEdit* pTime = reinterpret_cast<CTimeEdit*>(CWnd::FromHandle(pDX->PrepareCtrl(nIDC)));
-
-	if (!pTime)
-	{
-		ASSERT(0);
-		return;
-	}
-
-	CDialogHelper::DDX_Text(pDX, nIDC, value.dAmount, nDecimals);
+	TH_UNITS nUnits;
 	
 	if (pDX->m_bSaveAndValidate)
-		value.SetTHUnits(pTime->GetUnits(), FALSE);
+	{
+		ctrl.DDX(pDX, value.dAmount, nUnits, nDecimals);
+		value.SetTHUnits(nUnits, FALSE);
+	}
 	else
-		pTime->SetUnits(value.GetTHUnits());
+	{
+		nUnits = value.GetTHUnits();
+		ctrl.DDX(pDX, value.dAmount, nUnits, nDecimals);
+	}
 }
 
 void CTDCDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, int& value, CSpinButtonCtrl& spin, int nMin, int nMax)
@@ -107,12 +105,12 @@ BOOL CTDCDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, TDCCOST& value, BOOL b
 	return TRUE;
 }
 
-BOOL CTDCDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, TDCTIMEPERIOD& value, BOOL bSaveAndValidate, int nDecimals)
+BOOL CTDCDialogHelper::UpdateDataEx(CWnd* pWnd, CTimeEdit& ctrl, TDCTIMEPERIOD& value, BOOL bSaveAndValidate, int nDecimals)
 {
 	CAutoFlag af(m_bInUpdateEx, TRUE);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
-	DDX_Text(&dx, nIDC, value, nDecimals);
+	DDX_Text(&dx, ctrl, value, nDecimals);
 
 	return TRUE;
 }

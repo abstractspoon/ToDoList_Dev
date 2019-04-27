@@ -29,24 +29,6 @@ const UINT IDS_TDC_SCALE[] = { IDS_TDC_SCALE0,
 
 const int TDC_NUMSCALES = sizeof(IDS_TDC_SCALE) / sizeof(UINT);
 
-void AFXAPI DDX_CBPriority(CDataExchange* pDX, int nIDC, int& nPriority)
-{
-	if (pDX->m_bSaveAndValidate)
-	{
-		::DDX_CBIndex(pDX, nIDC, nPriority);
-
-		if (nPriority == 0) // NONE
-			nPriority = FM_NOPRIORITY;
-		else
-			nPriority--;
-	}
-	else
-	{
-		int nTemp = (nPriority == FM_NOPRIORITY) ? 0 : nPriority + 1;
-		::DDX_CBIndex(pDX, nIDC, nTemp);
-	}
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPriorityComboBox
 
@@ -203,3 +185,20 @@ void CTDLPriorityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 	CColorComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 }	
 
+void CTDLPriorityComboBox::DDX(CDataExchange* pDX, int& nPriority)
+{
+	if (pDX->m_bSaveAndValidate)
+	{
+		nPriority = GetCurSel();
+
+		if (nPriority == 0) // NONE
+			nPriority = FM_NOPRIORITY;
+		else
+			nPriority--;
+	}
+	else
+	{
+		int nTemp = (nPriority == FM_NOPRIORITY) ? 0 : nPriority + 1;
+		SetCurSel(nTemp);
+	}
+}

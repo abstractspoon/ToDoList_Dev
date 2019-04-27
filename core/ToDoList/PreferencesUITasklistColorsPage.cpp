@@ -115,15 +115,15 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 	DDX_CBIndex(pDX, IDC_PRIORITYCOLORS, m_nSelPriorityColor);
 	DDX_Control(pDX, IDC_PRIORITYCOLORS, m_cbPriorityColors);
 
+	CDialogHelper::DDX_CBValue(pDX, m_cbTreeFontSize, m_nTreeFontSize, 9);
+	CDialogHelper::DDX_CBValue(pDX, m_cbCommentsFontSize, m_nCommentsFontSize, 9);
+
 	m_cbTreeFonts.DDX(pDX, m_sTreeFont);
 	m_cbCommentsFonts.DDX(pDX, m_sCommentsFont);
+	m_cbPriorityScheme.DDX(pDX, m_aPriorityScheme);
 
-	// font sizes
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_nTreeFontSize = GetSelectedItemAsValue(m_cbTreeFontSize);
-		m_nCommentsFontSize = GetSelectedItemAsValue(m_cbCommentsFontSize);
-
 		if (m_cbColorByAttribute.GetCount())
 		{
 			if (m_cbColorByAttribute.GetCurSel() == CB_ERR)
@@ -131,28 +131,11 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 			else
 				m_nColorAttribute = (TDC_ATTRIBUTE)GetSelectedItemData(m_cbColorByAttribute);
 		}
-		
-		m_cbPriorityScheme.GetSelectedPalette(m_aPriorityScheme);
 	}
 	else
 	{
-		if (CB_ERR == SelectItemByValue(m_cbTreeFontSize, m_nTreeFontSize))
-		{
-			m_nTreeFontSize = 9;
-			SelectItemByValue(m_cbTreeFontSize, m_nTreeFontSize);
-		}
-
-		if (CB_ERR == SelectItemByValue(m_cbCommentsFontSize, m_nCommentsFontSize))
-		{
-			m_nCommentsFontSize = 9;
-			SelectItemByValue(m_cbCommentsFontSize, m_nCommentsFontSize);
-		}
-
 		if (m_cbColorByAttribute.GetCount())
 			SelectItemByData(m_cbColorByAttribute, m_nColorAttribute);
-
-		if (m_aPriorityScheme.GetSize())
-			m_cbPriorityScheme.SetSelectedPalette(m_aPriorityScheme);
 	}
 }
 

@@ -293,19 +293,20 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_DEPENDS, m_sDepends);
 	DDX_Text(pDX, IDC_EXTERNALID, m_sExternalID);
 	DDX_Text(pDX, IDC_PROJECTNAME, m_sProjectName);
+	DDX_ColourPicker(pDX, IDC_COLOUR, m_crColour);
 
 	CTDCDialogHelper::DDX_Text(pDX, IDC_COST, m_cost, DECIMALS);
-	CTDCDialogHelper::DDX_Text(pDX, IDC_TIMEEST, m_timeEstimate, DECIMALS);
-	CTDCDialogHelper::DDX_Text(pDX, IDC_TIMESPENT, m_timeSpent, DECIMALS);
 	CTDCDialogHelper::DDX_Text(pDX, IDC_PERCENT, m_nPercentDone, m_spinPercent);
 
-	DDX_AutoCBString(pDX, IDC_ALLOCBY, m_sAllocBy);
-	DDX_AutoCBString(pDX, IDC_STATUS, m_sStatus);
-	DDX_AutoCBString(pDX, IDC_VERSION, m_sVersion);
+	CTDCDialogHelper::DDX_Text(pDX, m_eTimeEstimate, m_timeEstimate, DECIMALS);
+	CTDCDialogHelper::DDX_Text(pDX, m_eTimeSpent, m_timeSpent, DECIMALS);
 
-	DDX_CBPriority(pDX, IDC_PRIORITY, m_nPriority);
-	DDX_CBRisk(pDX, IDC_RISK, m_nRisk);
-	DDX_ColourPicker(pDX, IDC_COLOUR, m_crColour);
+	m_cbAllocBy.DDX(pDX, m_sAllocBy);
+	m_cbStatus.DDX(pDX, m_sStatus);
+	m_cbVersion.DDX(pDX, m_sVersion);
+
+	m_cbPriority.DDX(pDX, m_nPriority);
+	m_cbRisk.DDX(pDX, m_nRisk);
 	
 	// custom
 	if (pDX->m_bSaveAndValidate)
@@ -3106,7 +3107,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 			TDCTIMEPERIOD time;
 			VERIFY(GetSelectedTaskTimeEstimate(time));
 
-			CTDCDialogHelper().UpdateDataEx(this, IDC_TIMEEST, time, FALSE, DECIMALS);
+			CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, time, FALSE, DECIMALS);
 		}
 	}
 	
@@ -4092,7 +4093,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst)
 			// note: setting the time field changes m_timeEstimate.nUnits
 			// so we have to do them separately
 			m_timeEstimate = timeEst;
-			CTDCDialogHelper().UpdateDataEx(this, IDC_TIMEEST, m_timeEstimate, FALSE, DECIMALS);
+			CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE, DECIMALS);
 		}
 		
 		// Recalc other attributes if only one item selected
@@ -4170,7 +4171,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent)
 			// note: setting the time field changes m_timeSpent.nUnits
 			// so we have to do them separately
 			m_timeSpent = timeSpent;
-			CTDCDialogHelper().UpdateDataEx(this, IDC_TIMESPENT, m_timeSpent, FALSE, DECIMALS);
+			CTDCDialogHelper().UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE, DECIMALS);
 		}
 		
 		// update % complete?
@@ -4231,7 +4232,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 			if (bRecalcTime)
 			{
 				GetSelectedTaskTimeEstimate(m_timeEstimate);
-				CTDCDialogHelper().UpdateDataEx(this, IDC_TIMEEST, m_timeEstimate, FALSE, DECIMALS);
+				CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE, DECIMALS);
 			}
 			// update % complete?
 			else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -4306,7 +4307,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 			if (bRecalcTime)
 			{
 				GetSelectedTaskTimeSpent(m_timeSpent);
-				CTDCDialogHelper().UpdateDataEx(this, IDC_TIMESPENT, m_timeSpent, FALSE, DECIMALS);
+				CTDCDialogHelper().UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE, DECIMALS);
 			}
 			// update % complete?
 			else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))

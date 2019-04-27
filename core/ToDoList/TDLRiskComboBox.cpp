@@ -29,24 +29,6 @@ const UINT IDS_TDC_SCALE[] = { IDS_TDC_SCALE0,
 
 const int TDC_NUMSCALES = sizeof(IDS_TDC_SCALE) / sizeof(UINT);
 
-void AFXAPI DDX_CBRisk(CDataExchange* pDX, int nIDC, int& nRisk)
-{
-	if (pDX->m_bSaveAndValidate)
-	{
-		::DDX_CBIndex(pDX, nIDC, nRisk);
-
-		if (nRisk == 0) // NONE
-			nRisk = FM_NORISK;
-		else
-			nRisk--;
-	}
-	else
-	{
-		int nTemp = (nRisk == FM_NORISK) ? 0 : nRisk + 1;
-		::DDX_CBIndex(pDX, nIDC, nTemp);
-	}
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLRiskComboBox
 
@@ -140,3 +122,20 @@ void CTDLRiskComboBox::BuildCombo()
 	SetCurSel(nSel);
 }
 
+void CTDLRiskComboBox::DDX(CDataExchange* pDX, int& nRisk)
+{
+	if (pDX->m_bSaveAndValidate)
+	{
+		nRisk = GetCurSel();
+
+		if (nRisk == 0) // NONE
+			nRisk = FM_NORISK;
+		else
+			nRisk--;
+	}
+	else
+	{
+		int nTemp = (nRisk == FM_NORISK) ? 0 : nRisk + 1;
+		SetCurSel(nTemp);
+	}
+}

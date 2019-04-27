@@ -79,10 +79,7 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplay);
 	//}}AFX_DATA_MAP
 
-	if (pDX->m_bSaveAndValidate)
-		m_nChartType = (BURNDOWN_CHARTTYPE)CDialogHelper::GetSelectedItemData(m_cbDisplay);
-	else
-		CDialogHelper::SelectItemByData(m_cbDisplay, m_nChartType);
+	CDialogHelper::DDX_CBData(pDX, m_cbDisplay, m_nChartType, BCT_REMAININGDAYS);
 }
 
 

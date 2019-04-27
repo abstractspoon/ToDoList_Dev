@@ -59,21 +59,9 @@ void CPreferencesExportPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_PREVIEWEXPORT, m_bPreviewExport);
 	DDX_Check(pDX, IDC_EXPORTVISIBLEONLY, m_bExportVisibleOnly);
 
-	m_cbFonts.DDX(pDX, m_sHtmlFont);
+	CDialogHelper::DDX_CBValue(pDX, m_cbFontSize, m_nHtmlFontSize, 3);
 
-	// custom
-	if (pDX->m_bSaveAndValidate)
-	{
-		m_nHtmlFontSize = GetSelectedItemAsValue(m_cbFontSize);
-	}
-	else
-	{
-		if (CB_ERR == SelectItemByValue(m_cbFontSize, m_nHtmlFontSize))
-		{
-			m_nHtmlFontSize = 3;
-			SelectItemByValue(m_cbFontSize, m_nHtmlFontSize);
-		}
-	}
+	m_cbFonts.DDX(pDX, m_sHtmlFont);
 }
 
 

@@ -15,6 +15,8 @@
 
 //////////////////////////////////////////////////////////////////////
 
+class CTimeEdit;
+
 struct TDCCOST;
 struct TDCTIMEPERIOD;
 
@@ -27,12 +29,12 @@ public:
 
 	// helpers for updating only a single item
 	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, TDCCOST& value, BOOL bSaveAndValidate = TRUE, int nDecimals = -1);
-	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, TDCTIMEPERIOD& value, BOOL bSaveAndValidate = TRUE, int nDecimals = -1);
+	BOOL UpdateDataEx(CWnd* pWnd, CTimeEdit& ctrl, TDCTIMEPERIOD& value, BOOL bSaveAndValidate = TRUE, int nDecimals = -1);
 
 	static void DDX_Text(CDataExchange* pDX, int nIDC, TDCCOST& value, int nDecimals = -1);
-	static void DDX_Text(CDataExchange* pDX, int nIDC, TDCTIMEPERIOD& value, int nDecimals = -1);
 	static void DDX_Text(CDataExchange* pDX, int nIDC, int& value, CSpinButtonCtrl& spin, int nMin = 0, int nMax = 100);
-	
+
+	static void DDX_Text(CDataExchange* pDX, CTimeEdit& ctrl, TDCTIMEPERIOD& value, int nDecimals = -1);
 };
 
 #endif // !defined(AFX_TDCDIALOGHELPER_H__8543A453_171B_11D4_AE08_0000E8425C3E__INCLUDED_)

@@ -22,6 +22,8 @@ public:
 	BOOL SetSelectedPeriod(UINT nMinutes);
 	UINT GetSelectedPeriod() const;
 
+	void DDX(CDataExchange* pDX, int& nMinutes);
+
 protected:
 	DWORD m_dwShow;
 

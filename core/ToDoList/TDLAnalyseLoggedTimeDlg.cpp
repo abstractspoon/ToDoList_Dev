@@ -131,16 +131,8 @@ void CTDLAnalyseLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_GROUPBYATTRIB, m_cbGroupByAttrib);
 	DDX_Check(pDX, IDC_GROUPBY, m_bGroupBy);
 
-	if (pDX->m_bSaveAndValidate)
-	{
-		m_nOutputFormat = (TDCTTL_FORMAT)GetSelectedItemData(m_cbOutputFormat);
-		m_nGroupByAttrib = (TDC_ATTRIBUTE)GetSelectedItemData(m_cbGroupByAttrib);
-	}
-	else
-	{
-		SelectItemByData(m_cbOutputFormat, m_nOutputFormat);
-		SelectItemByData(m_cbGroupByAttrib, m_nGroupByAttrib);
-	}
+	CDialogHelper::DDX_CBData(pDX, m_cbOutputFormat, m_nOutputFormat, TTLF_CSV);
+	CDialogHelper::DDX_CBData(pDX, m_cbGroupByAttrib, m_nGroupByAttrib, TDCA_NONE);
 }
 
 BEGIN_MESSAGE_MAP(CTDLAnalyseLoggedTimeDlg, CTDLDialog)

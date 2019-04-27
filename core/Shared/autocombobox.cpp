@@ -24,52 +24,6 @@ const COLORREF RED			= RGB(200, 90, 90);
 const COLORREF WHITE		= RGB(240, 240, 240);
 
 /////////////////////////////////////////////////////////////////////////////
-
-void AFXAPI DDX_AutoCBString(CDataExchange* pDX, int nIDC, CString& value)
-{
-	HWND hWndCtrl = pDX->PrepareCtrl(nIDC);
-
-	if (pDX->m_bSaveAndValidate)
-	{
-		::DDX_CBString(pDX, nIDC, value);
-	}
-	else
-	{
-		// try exact first
-		int nIndex = (int)::SendMessage(hWndCtrl, CB_FINDSTRINGEXACT, (WPARAM)-1,
-										(LPARAM)(LPCTSTR)value);
-
-		// then partial
-		if (nIndex == CB_ERR)
-		{
-			nIndex = ::SendMessage(hWndCtrl, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)(LPCTSTR)value);
-
-			// if there's a match, check its not partial
-			if (nIndex != CB_ERR)
-			{
-				CString sItem;
-				int nLen = ::SendMessage(hWndCtrl, CB_GETLBTEXTLEN, nIndex, 0);
-				::SendMessage(hWndCtrl, CB_GETLBTEXT, nIndex, (LPARAM)(LPCTSTR)sItem.GetBuffer(nLen + 1));
-				sItem.ReleaseBuffer();
-
-				if (value.CompareNoCase(sItem) != 0)
-					nIndex = CB_ERR;
-			}
-		}
-
-		if (nIndex == CB_ERR)
-		{
-			// add it and then select it if not empty
-			if (!value.IsEmpty())
-				nIndex = ::SendMessage(hWndCtrl, CB_ADDSTRING, 0, (LPARAM)(LPCTSTR)value);
-
-		}
-
-		::SendMessage(hWndCtrl, CB_SETCURSEL, nIndex, 0L);
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // CAutoComboBox
 
 CAutoComboBox::CAutoComboBox(DWORD dwFlags) 
@@ -933,3 +887,39 @@ BOOL CAutoComboBox::DeleteLBItem(int nItem)
 	// else
 	return FALSE;
 }
+
+void CAutoComboBox::DDX(CDataExchange* pDX, CString& value)
+{
+	if (pDX->m_bSaveAndValidate)
+	{
+		::DDX_CBString(pDX, GetDlgCtrlID(), value);
+	}
+	else
+	{
+		// try exact first
+		int nIndex = FindStringExact(-1, value);
+
+		// then partial
+		if (nIndex == CB_ERR)
+		{
+			nIndex = SelectString(-1, value);
+
+			// if there's a match, check its not partial
+			if (nIndex != CB_ERR)
+			{
+				CString sItem;
+				GetLBText(nIndex, sItem);
+
+				if (value.CompareNoCase(sItem) != 0)
+					nIndex = CB_ERR;
+			}
+		}
+
+		// add it and then select it if not empty
+		if ((nIndex == CB_ERR) && !value.IsEmpty())
+			nIndex = AddString(value);
+
+		SetCurSel(nIndex);
+	}
+}
+

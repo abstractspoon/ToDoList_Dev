@@ -49,26 +49,8 @@ void CPreferencesMultiUserPage::DoDataExchange(CDataExchange* pDX)
 	DDX_CBIndex(pDX, IDC_TIMESTAMPRELOADOPTION, m_nTimestampReloadOption);
 	DDX_Check(pDX, IDC_CHECKINONCLOSE, m_bCheckinOnClose);
 
-	// custom
-	if (pDX->m_bSaveAndValidate)
-	{
-		m_nRemoteFileCheckFreq = GetSelectedItemAsValue(m_cbRemoteFileCheck);
-		m_nCheckinNoEditTime = GetSelectedItemAsValue(m_cbNoEditTime);
-	}
-	else
-	{
-		if (CB_ERR == SelectItemByValue(m_cbRemoteFileCheck, m_nRemoteFileCheckFreq))
-		{
-			m_nRemoteFileCheckFreq = 30;
-			SelectItemByValue(m_cbRemoteFileCheck, m_nRemoteFileCheckFreq);
-		}
-
-		if (CB_ERR == SelectItemByValue(m_cbNoEditTime, m_nCheckinNoEditTime))
-		{
-			m_nCheckinNoEditTime = 10;
-			SelectItemByValue(m_cbNoEditTime, m_nCheckinNoEditTime);
-		}
-	}
+	CDialogHelper::DDX_CBValue(pDX, m_cbRemoteFileCheck, m_nRemoteFileCheckFreq, 30);
+	CDialogHelper::DDX_CBValue(pDX, m_cbNoEditTime, m_nCheckinNoEditTime, 10);
 }
 
 

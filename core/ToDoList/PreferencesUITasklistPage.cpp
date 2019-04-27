@@ -66,10 +66,7 @@ void CPreferencesUITasklistPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_ALLOWTREEITEMCHECKBOX, m_bAllowCheckboxAgainstTreeItem);
 	DDX_Check(pDX, IDC_HIDEPANESPLITBAR, m_bHidePaneSplitBar);
 
-	if (pDX->m_bSaveAndValidate)
-		m_nPercentIncrement = GetSelectedItemAsValue(m_cbPercentIncrement);
-	else
-		SelectItemByValue(m_cbPercentIncrement, m_nPercentIncrement);
+	CDialogHelper::DDX_CBValue(pDX, m_cbPercentIncrement, m_nPercentIncrement, 5);
 }
 
 

@@ -81,16 +81,9 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_HEATMAPPALETTE, m_cbHeatMapPalette);
 	DDX_Control(pDX, IDC_HEATMAPATTRIBUTE, m_cbHeatMapAttribute);
 
-	if (pDX->m_bSaveAndValidate)
-	{
-		m_cbHeatMapPalette.GetSelectedPalette(m_aSelPalette);
-		m_nHeatMapAttrib = (TDC_ATTRIBUTE)CDialogHelper::GetSelectedItemData(m_cbHeatMapAttribute);
-	}
-	else
-	{
-		m_cbHeatMapPalette.SetSelectedPalette(m_aSelPalette);
-		CDialogHelper::SelectItemByData(m_cbHeatMapAttribute, m_nHeatMapAttrib);
-	}
+	DDX_CBData(pDX, m_cbHeatMapAttribute, m_nHeatMapAttrib, TDCA_DONEDATE);
+	
+	m_cbHeatMapPalette.DDX(pDX, m_aSelPalette);
 }
 
 

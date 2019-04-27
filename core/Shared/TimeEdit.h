@@ -12,6 +12,7 @@
 #include "enedit.h"
 #include "timehelper.h"
 
+
 //////////////////////////////////////////////////////////////////////
 
 const UINT WM_TEN_UNITSCHANGE = ::RegisterWindowMessage(_T("WM_TEN_UNITSCHANGE")); // wParam == <CtrlID>, lParam = <prev units>
@@ -43,6 +44,8 @@ public:
 
 	static void SetUnits(TH_UNITS nUnits, LPCTSTR szLongUnits, LPCTSTR szAbbrevUnits);
 	static void SetDefaultButtonTip(LPCTSTR szUnits);
+
+	void DDX(CDataExchange* pDX, double& value, TH_UNITS& units, int nDecimals = -1);
 
 protected:
 	TH_UNITS m_nUnits;

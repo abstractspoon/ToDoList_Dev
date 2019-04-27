@@ -31,9 +31,6 @@ enum
 /////////////////////////////////////////////////////////////////////////////
 // CAutoComboBox window
 
-// replacement DDX routine
-void AFXAPI DDX_AutoCBString(CDataExchange* pDX, int nIDC, CString& value);
-
 class CAutoComboBox : public COwnerdrawComboBoxBase, private CSubclasser
 {
 	DECLARE_DYNAMIC(CAutoComboBox)
@@ -86,6 +83,8 @@ public:
 	inline BOOL IsWindowVisible() const { return COwnerdrawComboBoxBase::IsWindowVisible(); }
 	inline UINT GetDlgCtrlID() const { return COwnerdrawComboBoxBase::GetDlgCtrlID(); }
 	inline void SetRedraw(BOOL bRedraw = TRUE) { COwnerdrawComboBoxBase::SetRedraw(bRedraw); }
+
+	void DDX(CDataExchange* pDX, CString& value);
 
 protected:
 	DWORD m_dwFlags;

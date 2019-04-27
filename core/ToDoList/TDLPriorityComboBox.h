@@ -12,9 +12,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPriorityComboBox window
 
-// replacement DDX routine
-void AFXAPI DDX_CBPriority(CDataExchange* pDX, int nIDC, int& nPriority);
-
 class CTDLPriorityComboBox : public CColorComboBox
 {
 // Construction
@@ -29,6 +26,8 @@ public:
 	int IncrementPriority(int nAmount);
 	int GetSelectedPriority() const; // -2 -> 10
 	void SetSelectedPriority(int nPriority); // -2 -> 10
+
+	void DDX(CDataExchange* pDX, int& nPriority);
 
 protected:
 // Overrides

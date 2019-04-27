@@ -158,3 +158,11 @@ void CTDLReminderPeriodComboBox::ValidateLeadin(UINT& nMinutes)
 		}
 	}
 }
+
+void CTDLReminderPeriodComboBox::DDX(CDataExchange* pDX, int& nMinutes)
+{
+	if (pDX->m_bSaveAndValidate)
+		nMinutes = GetSelectedPeriod();
+	else
+		SetSelectedPeriod(nMinutes);
+}

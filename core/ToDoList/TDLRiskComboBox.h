@@ -12,9 +12,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // CTDLRiskComboBox window
 
-// replacement DDX routine
-void AFXAPI DDX_CBRisk(CDataExchange* pDX, int nIDC, int& nRisk);
-
 class CTDLRiskComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
@@ -23,6 +20,8 @@ public:
 
 	int GetSelectedRisk() const; // -2 -> 10
 	void SetSelectedRisk(int nRisk); // -2 -> 10
+
+	void DDX(CDataExchange* pDX, int& nRisk);
 
 protected:
 // Overrides

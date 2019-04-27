@@ -109,7 +109,7 @@ void CPreferencesFile2Page::DoDataExchange(CDataExchange* pDX)
 			else
 			{
 				m_nKeepBackups = 10;
-				m_cbKeepBackups.SelectString(-1, _T("10"));
+				SelectItemByValue(m_cbKeepBackups, m_nKeepBackups);
 			}
 		}
 	}

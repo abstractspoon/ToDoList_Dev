@@ -40,6 +40,25 @@ public:
 	static void DDX_Text(CDataExchange* pDX, int nIDC, float& value, int nDecimals = -1);
 	static void DDX_Text(CDataExchange* pDX, int nIDC, double& value, int nDecimals = -1);
 
+	static void DDX_CBValue(CDataExchange* pDX, CComboBox& combo, int& value, int fallbackValue);
+
+	template <class T>
+	static void DDX_CBData(CDataExchange* pDX, CComboBox& combo, T& value, T fallbackValue)
+	{
+		if (pDX->m_bSaveAndValidate)
+		{
+			value = (T)GetSelectedItemData(combo);
+		}
+		else
+		{
+			if (CB_ERR == SelectItemByData(combo, (DWORD)value))
+			{
+				value = fallbackValue;
+				VERIFY(SelectItemByData(combo, (DWORD)value) != CB_ERR);
+			}
+		}
+	}
+
 	static UINT MessageBoxEx(const CWnd* pWnd, UINT nIDText, UINT nIDCaption, UINT nType = MB_OK);
 	static UINT MessageBoxEx(const CWnd* pWnd, LPCTSTR szText, UINT nIDCaption, UINT nType = MB_OK);
 
