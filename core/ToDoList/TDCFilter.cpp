@@ -610,7 +610,7 @@ void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey) const
 
 void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs)
 {
-	m_nState = (TDCFILTER_STATE)prefs.GetProfileInt(sKey, _T("State"), TDCFS_NONE);
+	m_nState = prefs.GetProfileEnum(sKey, _T("State"), TDCFS_NONE);
 
 	switch (m_nState)
 	{
@@ -737,9 +737,9 @@ void CTDCFilter::SaveAdvancedFilter(CPreferences& prefs, const CString& sKey, co
 
 void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, TDCFILTER& filter)
 {
-	filter.nShow = (FILTER_SHOW)prefs.GetProfileInt(sKey, _T("Show"), FS_ALL);
-	filter.nStartBy = (FILTER_DATE)prefs.GetProfileInt(sKey, _T("Start"), FD_ANY);
-	filter.nDueBy = (FILTER_DATE)prefs.GetProfileInt(sKey, _T("Due"), FD_ANY);
+	filter.nShow = prefs.GetProfileEnum(sKey, _T("Show"), FS_ALL);
+	filter.nStartBy = prefs.GetProfileEnum(sKey, _T("Start"), FD_ANY);
+	filter.nDueBy = prefs.GetProfileEnum(sKey, _T("Due"), FD_ANY);
 
 	filter.sTitle = prefs.GetProfileString(sKey, _T("Title"));
 	filter.nPriority = prefs.GetProfileInt(sKey, _T("Priority"), FM_ANYPRIORITY);

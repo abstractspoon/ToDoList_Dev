@@ -30,7 +30,7 @@ BOOL CTDCSearchParamHelper::LoadRule(const CPreferences& prefs, const CString& s
 									SEARCHPARAM& rule)
 {
 	CString sAttribID = prefs.GetProfileString(sRule, _T("Attribute"));
-	FIND_OPERATOR op = (FIND_OPERATOR)prefs.GetProfileInt(sRule, _T("Operator"), FOP_EQUALS);
+	FIND_OPERATOR op = prefs.GetProfileEnum(sRule, _T("Operator"), FOP_EQUALS);
 	BOOL bAnd = prefs.GetProfileInt(sRule, _T("And"), TRUE);
 	DWORD dwFlags = prefs.GetProfileInt(sRule, _T("Flags"), 0);
 	CString sValue = prefs.GetProfileString(sRule, _T("Value"));

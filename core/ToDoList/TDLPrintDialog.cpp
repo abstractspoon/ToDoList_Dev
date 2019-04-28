@@ -42,7 +42,7 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView,
 	CPreferences prefs;
 
 	m_bDate = prefs.GetProfileInt(m_sPrefsKey, _T("WantDate"), TRUE);
-	m_nExportStyle = (TDLPD_STYLE)prefs.GetProfileInt(m_sPrefsKey, _T("ExportStyle"), TDLPDS_WRAP);
+	m_nExportStyle = prefs.GetProfileEnum(m_sPrefsKey, _T("ExportStyle"), TDLPDS_WRAP);
 
 	if (!m_bSupportsExportToImage && (m_nExportStyle == TDLPDS_IMAGE))
 		m_nExportStyle = TDLPDS_WRAP;

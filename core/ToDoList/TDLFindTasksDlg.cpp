@@ -390,8 +390,8 @@ void CTDLFindTasksDlg::LoadSettings()
 		
 		if (dwBottomRight != -1 && dwTopLeft != -1)
 		{
-			nPos = (DM_POS)prefs.GetProfileInt(_T("FindTasks"), _T("DockPos"), DMP_UNDOCKED);
-			nLastPos = (DM_POS)prefs.GetProfileInt(_T("FindTasks"), _T("LastDockPos"), DMP_RIGHT);
+			nPos = prefs.GetProfileEnum(_T("FindTasks"), _T("DockPos"), DMP_UNDOCKED);
+			nLastPos = prefs.GetProfileEnum(_T("FindTasks"), _T("LastDockPos"), DMP_RIGHT);
 
 			CRect rect(GET_X_LPARAM(dwTopLeft), GET_Y_LPARAM(dwTopLeft), 
 					GET_X_LPARAM(dwBottomRight), GET_Y_LPARAM(dwBottomRight));

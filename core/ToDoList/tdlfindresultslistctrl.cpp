@@ -353,13 +353,13 @@ void CTDLFindResultsListCtrl::RefreshUserPreferences()
 	
 	// update user completed tasks colour
 	if (prefs.GetProfileInt(_T("Preferences"), _T("SpecifyDoneColor"), FALSE))
-		m_crDone = (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), -1);
+		m_crDone = (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), CLR_NONE);
 	else
 		m_crDone = CLR_NONE;
 	
 	// update user reference tasks colour
 	if (prefs.GetProfileInt(_T("Preferences"), _T("ReferenceColor"), FALSE))
-		m_crRef = (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), _T("Reference"), -1);
+		m_crRef = (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), _T("Reference"), CLR_NONE);
 	else
 		m_crRef = CLR_NONE;
 

@@ -204,10 +204,10 @@ void CTDLImportOutlookObjectsDlg::BuildMasterMapping()
 	for (int nMap = 0; nMap < nNumMap; nMap++)
 	{
 		CString sKey = Misc::MakeKey(_T("Field%d"), nMap);
-		OUTLOOK_FIELDTYPE nFieldType = (OUTLOOK_FIELDTYPE)prefs.GetProfileInt(sSection, sKey, -1);
+		OUTLOOK_FIELDTYPE nFieldType = prefs.GetProfileEnum(sSection, sKey, OA_NONE);
 
 		sKey = Misc::MakeKey(_T("Attrib%d"), nMap);
-		TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)prefs.GetProfileInt(sSection, sKey, TDCA_NONE);
+		TDC_ATTRIBUTE nAttrib = prefs.GetProfileEnum(sSection, sKey, TDCA_NONE);
 
 		if (nFieldType != -1)
 		{

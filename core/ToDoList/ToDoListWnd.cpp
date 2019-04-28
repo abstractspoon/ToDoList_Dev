@@ -2549,7 +2549,7 @@ void CToDoListWnd::LoadSettings()
 	CPreferences prefs;
 
 	BOOL bMaxTasklists = prefs.GetProfileInt(SETTINGS_KEY, _T("SimpleMode"), FALSE); // backward compatibility
-	m_nMaxState = (TDC_MAXSTATE)prefs.GetProfileInt(SETTINGS_KEY, _T("ViewState"), bMaxTasklists ? TDCMS_MAXTASKLIST : TDCMS_NORMAL);
+	m_nMaxState = prefs.GetProfileEnum(SETTINGS_KEY, _T("ViewState"), bMaxTasklists ? TDCMS_MAXTASKLIST : TDCMS_NORMAL);
 
 	m_bShowFilterBar = prefs.GetProfileInt(SETTINGS_KEY, _T("ShowFilterBar"), m_bShowFilterBar);
 	m_bShowProjectName = prefs.GetProfileInt(SETTINGS_KEY, _T("ShowProjectName"), m_bShowProjectName);
@@ -6975,7 +6975,7 @@ void CToDoListWnd::OnTimerAutoMinimize()
 	// check whether we should hide ourselves
 	double dElapsed = (Misc::GetTicksSinceLastUserInput() / ONE_MINUTE);
 		
-	if (dElapsed > (double)Prefs().GetAutoMinimizeFrequency())
+	if (dElapsed > Prefs().GetAutoMinimizeFrequency())
 		ShowWindow(SW_MINIMIZE);
 }
 

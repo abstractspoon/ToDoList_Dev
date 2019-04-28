@@ -69,6 +69,12 @@ public:
 	CString GetProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszDefault = NULL) const;
 	BOOL WriteProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue);
 
+	template <class T>
+	T GetProfileEnum(LPCTSTR lpszSection, LPCTSTR lpszEntry, T nDefault) const
+	{
+		return (T)GetProfileInt(lpszSection, lpszEntry, nDefault);
+	}
+
 	// note: Binary not currently supported by ini file
 
 	// extras

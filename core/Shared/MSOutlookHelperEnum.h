@@ -12,6 +12,7 @@
 enum OUTLOOK_FIELDTYPE
 {
 	// DO NOT CHANGE THE ORDER OF EXISTING ITEMS
+	OA_NONE = -1,
 
 	// Common ----------------------------
 	OA_BODY = 0,

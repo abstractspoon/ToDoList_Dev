@@ -75,12 +75,12 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, con
 	// restore previous state
 	CPreferences prefs;
 
-	m_nTimePeriod = (TDCTTL_PERIOD)prefs.GetProfileInt(m_sPrefsKey, _T("AnalysisTimePeriod"), TTLP_THISMONTH);
-	m_nBreakdown = (TDCTTL_BREAKDOWN)prefs.GetProfileInt(m_sPrefsKey, _T("AnalysisBreakdown"), TTLB_BYDAY);
-	m_nOutputFormat = (TDCTTL_FORMAT)prefs.GetProfileInt(m_sPrefsKey, _T("AnalysisOutputFormat"), TTLF_CSV);
+	m_nTimePeriod = prefs.GetProfileEnum(m_sPrefsKey, _T("AnalysisTimePeriod"), TTLP_THISMONTH);
+	m_nBreakdown = prefs.GetProfileEnum(m_sPrefsKey, _T("AnalysisBreakdown"), TTLB_BYDAY);
+	m_nOutputFormat = prefs.GetProfileEnum(m_sPrefsKey, _T("AnalysisOutputFormat"), TTLF_CSV);
 
 	m_bGroupBy = prefs.GetProfileInt(m_sPrefsKey, _T("GroupBy"), FALSE);
-	m_nGroupByAttrib = (TDC_ATTRIBUTE)prefs.GetProfileInt(m_sPrefsKey, _T("GroupByAttrib"), TDCA_NONE);
+	m_nGroupByAttrib = prefs.GetProfileEnum(m_sPrefsKey, _T("GroupByAttrib"), TDCA_NONE);
 
 	if (CTDCCustomAttributeHelper::IsCustomAttribute(m_nGroupByAttrib))
 	{
