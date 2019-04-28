@@ -45,6 +45,9 @@ public:
 	template <class T>
 	static void DDX_CBData(CDataExchange* pDX, CComboBox& combo, T& value, T fallbackValue)
 	{
+		if (!combo.GetCount())
+			return;
+
 		if (pDX->m_bSaveAndValidate)
 		{
 			value = (T)GetSelectedItemData(combo);

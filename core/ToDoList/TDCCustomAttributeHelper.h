@@ -113,11 +113,11 @@ public:
 	static void ClearControl(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
 								const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
-	static void UpdateControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
+	static void UpdateControls(const CWnd* pParent, const CTDCCustomControlArray& aControls,
 								const CTDCCustomAttribDefinitionArray& aAttribDefs,
 								const CTDCCustomAttributeDataMap& mapData);
 
-	static void ClearControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
+	static void ClearControls(const CWnd* pParent, const CTDCCustomControlArray& aControls,
 								const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 	static BOOL GetControlAttributeTypes(const CUSTOMATTRIBCTRLITEM& ctrl,
@@ -140,6 +140,9 @@ public:
 
 	static BOOL AppendFilterRules(const CTDCCustomAttributeDataMap& mapData, 
 								const CTDCCustomAttribDefinitionArray& aAttribDefs, CSearchParamArray& aRules);
+
+	static void DDX(CDataExchange* pDX, const CTDCCustomControlArray& aControls, 
+					const CTDCCustomAttribDefinitionArray& aAttribDefs, CTDCCustomAttributeDataMap& value);
 
 protected:
 	static CWnd* CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 

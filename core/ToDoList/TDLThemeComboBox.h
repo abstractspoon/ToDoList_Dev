@@ -21,6 +21,8 @@ public:
 	CString GetThemePath() const;
 	BOOL SetThemePath(LPCTSTR szThemePath);
 
+	void DDX(CDataExchange* pDX, CString& value);
+
 protected:
 // Overrides
 	// ClassWizard generated virtual function overrides

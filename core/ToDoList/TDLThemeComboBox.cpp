@@ -137,3 +137,10 @@ CString CTDLThemeComboBox::FormatThemePath(LPCTSTR szThemeName)
 	return sThemePath;
 }
 
+void CTDLThemeComboBox::DDX(CDataExchange* pDX, CString& value)
+{
+	if (pDX->m_bSaveAndValidate)
+		value = GetThemePath();
+	else
+		SetThemePath(value);
+}

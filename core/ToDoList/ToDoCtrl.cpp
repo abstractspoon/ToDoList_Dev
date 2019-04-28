@@ -304,30 +304,21 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	m_cbAllocBy.DDX(pDX, m_sAllocBy);
 	m_cbStatus.DDX(pDX, m_sStatus);
 	m_cbVersion.DDX(pDX, m_sVersion);
-
 	m_cbPriority.DDX(pDX, m_nPriority);
 	m_cbRisk.DDX(pDX, m_nRisk);
+	m_eRecurrence.DDX(pDX, m_tRecurrence);
+	m_cbFileRef.DDX(pDX, m_aFileRefs);
 	
+	CTDCCustomAttributeHelper::DDX(pDX, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
+
 	// custom
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_cbFileRef.GetFileList(m_aFileRefs);
-		m_eRecurrence.GetRecurrenceOptions(m_tRecurrence);
-
 		if (m_crColour == CLR_DEFAULT)
 			m_crColour = CLR_NONE; // unset
-
-		CTDCCustomAttributeHelper::GetControlData(this, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
 	}
 	else
 	{
-		m_cbFileRef.SetFileList(m_aFileRefs);
-		m_eRecurrence.SetRecurrenceOptions(m_tRecurrence);
-
-		if (m_mapCustomCtrlData.GetCount() == 0)
-			CTDCCustomAttributeHelper::ClearControls(this, m_aCustomControls, m_aCustomAttribDefs);
-		else
-			CTDCCustomAttributeHelper::UpdateControls(this, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
 	}
 }
 

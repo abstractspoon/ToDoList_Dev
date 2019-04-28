@@ -332,6 +332,9 @@ void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, double& value, int nD
 
 void CDialogHelper::DDX_CBValue(CDataExchange* pDX, CComboBox& combo, int& value, int fallbackValue)
 {
+	if (!combo.GetCount())
+		return;
+
 	if (pDX->m_bSaveAndValidate)
 	{
 		value = GetSelectedItemAsValue(combo);

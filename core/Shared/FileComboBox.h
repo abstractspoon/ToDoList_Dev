@@ -24,6 +24,8 @@ public:
 	int AddFile(const CString& sFile) { return AddUniqueItem(sFile); }
 	int AddFiles(const CStringArray& aFiles);
 
+	void DDX(CDataExchange* pDX, CStringArray& value);
+
 protected:
 	class CMultiFileEdit : public CFileEdit
 	{

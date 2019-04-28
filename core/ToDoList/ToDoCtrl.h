@@ -50,25 +50,12 @@
 /////////////////////////////////////////////////////////////////////////////
 
 // predeclarations
-class CXmlItem;
 class CTaskFile;
 class CDeferWndMove;
-class CDlgUnits;
 class CSpellCheckDlg;
 class CPreferences;
-class CMSOutlookItemDataMap;
-class CTDCAttributeMapping;
 
 struct CTRLITEM;
-struct TDCCOLUMN;
-
-/////////////////////////////////////////////////////////////////////////////
-
-namespace OutlookAPI
-{
-	class _MailItem;
-	class Selection;
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCtrl dialog

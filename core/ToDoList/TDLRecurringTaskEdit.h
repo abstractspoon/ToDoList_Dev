@@ -35,6 +35,8 @@ public:
 	static int CalcMaxRegularityWidth(CDC* pDC, BOOL bIncOnce = TRUE);
 	static void SetDefaultButtonTip(LPCTSTR szOption);
 
+	void DDX(CDataExchange* pDX, TDCRECURRENCE& value);
+
 protected:
 	TDCRECURRENCE m_tr;
 	BOOL m_bReadOnly;

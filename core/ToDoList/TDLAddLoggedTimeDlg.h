@@ -8,6 +8,7 @@
 //
 
 #include "TDLDialog.h"
+#include "ToDoItem.h"
 
 //#include "..\Interfaces\ITaskList.h"
 
@@ -42,7 +43,7 @@ protected:
 	//{{AFX_DATA(CTDLAddLoggedTimeDlg)
 	enum { IDD = IDD_ADDLOGGEDTIME_DIALOG };
 	CTimeComboBox	m_cbTimeWhen;
-	double	m_dLoggedTime;
+	TDCTIMEPERIOD	m_loggedTime;
 	DWORD	m_dwTaskID;
 	CString	m_sTaskTitle;
 	BOOL	m_bAddTimeToTimeSpent;
@@ -50,7 +51,6 @@ protected:
 	//}}AFX_DATA
 	CDateTimeCtrlEx	m_dateWhen;
 	CTimeEdit m_eLoggedTime;
-	TH_UNITS m_nUnits;
 	COleDateTime m_dtWhen;
 	BOOL m_bShowAddTimeToTimeSpent;
 	CEnStatic m_stTaskTitle;

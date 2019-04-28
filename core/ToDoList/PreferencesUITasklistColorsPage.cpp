@@ -117,26 +117,12 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 
 	CDialogHelper::DDX_CBValue(pDX, m_cbTreeFontSize, m_nTreeFontSize, 9);
 	CDialogHelper::DDX_CBValue(pDX, m_cbCommentsFontSize, m_nCommentsFontSize, 9);
+	CDialogHelper::DDX_CBData(pDX, m_cbColorByAttribute, m_nColorAttribute, DEFCOLORATTRIB);
 
 	m_cbTreeFonts.DDX(pDX, m_sTreeFont);
 	m_cbCommentsFonts.DDX(pDX, m_sCommentsFont);
 	m_cbPriorityScheme.DDX(pDX, m_aPriorityScheme);
 
-	if (pDX->m_bSaveAndValidate)
-	{
-		if (m_cbColorByAttribute.GetCount())
-		{
-			if (m_cbColorByAttribute.GetCurSel() == CB_ERR)
-				m_nColorAttribute = DEFCOLORATTRIB;
-			else
-				m_nColorAttribute = GetSelectedItemData(m_cbColorByAttribute, TDCA_NONE);
-		}
-	}
-	else
-	{
-		if (m_cbColorByAttribute.GetCount())
-			SelectItemByData(m_cbColorByAttribute, m_nColorAttribute);
-	}
 }
 
 

@@ -134,6 +134,14 @@ void CTDLRecurringTaskEdit::SetRecurrenceOptions(const TDCRECURRENCE& tr)
 		SetWindowText(m_tr.GetRegularityText()); // for display purposes
 }
 
+void CTDLRecurringTaskEdit::DDX(CDataExchange* pDX, TDCRECURRENCE& value)
+{
+	if (pDX->m_bSaveAndValidate)
+		GetRecurrenceOptions(value);
+	else
+		SetRecurrenceOptions(value);
+}
+
 BOOL CTDLRecurringTaskEdit::ModifyStyle(DWORD dwRemove, DWORD dwAdd, UINT nFlags)
 {
 	if ((dwRemove & ES_READONLY) != (dwAdd & ES_READONLY))

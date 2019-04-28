@@ -230,6 +230,14 @@ int CFileComboBox::SetFileList(const CStringArray& aFiles)
 	return nNumFiles;
 }
 
+void CFileComboBox::DDX(CDataExchange* pDX, CStringArray& value)
+{
+	if (pDX->m_bSaveAndValidate)
+		GetFileList(value);
+	else
+		SetFileList(value);
+}
+
 int CFileComboBox::AddFiles(const CStringArray& aFiles)
 {
 	// add files in reverse order so that the first one ends up at the top

@@ -983,7 +983,7 @@ CString CTDCCustomAttributeHelper::GetAttributeTypeID(UINT nCtrlID, const CTDCCu
 	return _T("");
 }
 
-void CTDCCustomAttributeHelper::UpdateControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
+void CTDCCustomAttributeHelper::UpdateControls(const CWnd* pParent, const CTDCCustomControlArray& aControls,
 												const CTDCCustomAttribDefinitionArray& aAttribDefs,
 												const CTDCCustomAttributeDataMap& mapData)
 {
@@ -1001,7 +1001,7 @@ void CTDCCustomAttributeHelper::UpdateControls(const CWnd* pParent, CTDCCustomCo
 	}
 }
 
-void CTDCCustomAttributeHelper::ClearControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
+void CTDCCustomAttributeHelper::ClearControls(const CWnd* pParent, const CTDCCustomControlArray& aControls,
 												const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
 	int nCtrl = aControls.GetSize();
@@ -1150,6 +1150,22 @@ BOOL CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUSTOM
 	}
 
 	return !data.IsEmpty();
+}
+
+void CTDCCustomAttributeHelper::DDX(CDataExchange* pDX, const CTDCCustomControlArray& aControls,
+				const CTDCCustomAttribDefinitionArray& aAttribDefs, CTDCCustomAttributeDataMap& value)
+{
+	if (pDX->m_bSaveAndValidate)
+	{
+		GetControlData(pDX->m_pDlgWnd, aControls, aAttribDefs, value);
+	}
+	else
+	{
+		if (value.GetCount() == 0)
+			CTDCCustomAttributeHelper::ClearControls(pDX->m_pDlgWnd, aControls, aAttribDefs);
+		else
+			CTDCCustomAttributeHelper::UpdateControls(pDX->m_pDlgWnd, aControls, aAttribDefs, value);
+	}
 }
 
 CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const CString& sUniqueID, 

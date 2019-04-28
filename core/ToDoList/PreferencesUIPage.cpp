@@ -72,10 +72,7 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_SORTDONETASKSATBOTTOM, m_bSortDoneTasksAtBottom);
 	DDX_Check(pDX, IDC_INCLUDEWEBLINKINCOMMENTSPASTE, m_bIncludeWebLinksInCommentsPaste);
 
-	if (pDX->m_bSaveAndValidate)
-		m_sUIThemeFile = m_cbThemes.GetThemePath();
-	else
-		m_cbThemes.SetThemePath(m_sUIThemeFile);
+	m_cbThemes.DDX(pDX, m_sUIThemeFile);
 }
 
 BEGIN_MESSAGE_MAP(CPreferencesUIPage, CPreferencesPageBase)

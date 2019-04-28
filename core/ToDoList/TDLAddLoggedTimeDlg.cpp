@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLAddLoggedTimeDlg.h"
+#include "TDCDialogHelper.h"
 
 #include "..\shared\DateHelper.h"
 #include "..\Shared\localizer.h"
@@ -25,7 +26,7 @@ CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, 
 	: 
 	CTDLDialog(CTDLAddLoggedTimeDlg::IDD, _T("AddLoggedTime"), pParent), 
 	m_cbTimeWhen(TCB_HALFHOURS | TCB_HOURSINDAY),
-	m_dLoggedTime(0.0),
+	m_loggedTime(dHours, TDCU_HOURS),
 	m_dwTaskID(dwTaskID),
 	m_sTaskTitle(szTaskTitle),
 	m_bShowAddTimeToTimeSpent(FALSE),
@@ -34,10 +35,10 @@ CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, 
 	//{{AFX_DATA_INIT(CTDLAddLoggedTimeDlg)
 	//}}AFX_DATA_INIT
 	m_dtWhen = COleDateTime::GetCurrentTime();
-	m_nUnits = (TH_UNITS)CPreferences().GetProfileInt(m_sPrefsKey, _T("AddLoggedTimeUnits"), THU_MINS);
 
-	// convert log time from hours to current units
-	m_dLoggedTime = CTimeHelper().GetTime(dHours, THU_HOURS, m_nUnits);
+	// Restore user's previous units choice
+	TH_UNITS nUnits = CPreferences().GetProfileEnum(m_sPrefsKey, _T("AddLoggedTimeUnits"), THU_MINS);
+	m_loggedTime.SetTHUnits(nUnits, TRUE);
 
 	// Allow negative values only for untracked times
 	m_eLoggedTime.EnableNegativeTimes(!m_bTracked);
@@ -57,11 +58,10 @@ void CTDLAddLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_TASKTITLE, m_stTaskTitle);
 
+	CTDCDialogHelper::DDX_Text(pDX, m_eLoggedTime, m_loggedTime);
+
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_nUnits = m_eLoggedTime.GetUnits();
-		m_dLoggedTime = m_eLoggedTime.GetTime();
-
 		m_dateWhen.GetTime(m_dtWhen);
 		COleDateTime time = m_cbTimeWhen.GetOleTime();
 
@@ -69,8 +69,6 @@ void CTDLAddLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		m_eLoggedTime.SetTime(m_dLoggedTime, m_nUnits);
-
 		m_dateWhen.SetTime(m_dtWhen);
 		m_cbTimeWhen.SetOleTime(CDateHelper::GetTimeOnly(m_dtWhen));
 	}
@@ -109,7 +107,7 @@ int CTDLAddLoggedTimeDlg::DoModal(BOOL bShowAddTimeToTimeSpent)
 
 double CTDLAddLoggedTimeDlg::GetLoggedHours() const
 { 
-	return CTimeHelper().GetTime(m_dLoggedTime, m_nUnits, THU_HOURS);
+	return m_loggedTime.GetTime(THU_HOURS);
 }
 
 COleDateTime CTDLAddLoggedTimeDlg::GetWhen() const
@@ -122,7 +120,7 @@ void CTDLAddLoggedTimeDlg::OnOK()
 	CTDLDialog::OnOK();
 
 	CPreferences prefs;
-	prefs.WriteProfileInt(m_sPrefsKey, _T("AddLoggedTimeUnits"), m_nUnits);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("AddLoggedTimeUnits"), m_loggedTime.GetTHUnits());
 
 	if (m_bShowAddTimeToTimeSpent)
 	{
@@ -171,7 +169,7 @@ BOOL CTDLAddLoggedTimeDlg::OnInitDialog()
 	m_stTaskTitle.SetFontStyle(TRUE);
 
 	// set focus to time spent if no time specified
-	if (m_dLoggedTime == 0.0)
+	if (m_loggedTime.dAmount == 0.0)
 	{
 		m_eLoggedTime.SetFocus();
 		m_eLoggedTime.SetSel(0, -1);
