@@ -34,6 +34,10 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+const int FLOATBUFLEN = 400;
+
+//////////////////////////////////////////////////////////////////////
+
 void CTDCDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, TDCCOST& value, int nDecimals)
 {
 	if (pDX->m_bSaveAndValidate)
@@ -46,7 +50,7 @@ void CTDCDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, TDCCOST& value, in
 	else
 	{
 		HWND hWndCtrl = pDX->PrepareEditCtrl(nIDC);
-		TCHAR szBuffer[FLOATBUFLEN+1] = { 0 };
+		TCHAR szBuffer[FLOATBUFLEN + 1] = { 0 }; // +1 for '@'
 		LPTSTR szNumStart = szBuffer;
 
 		if (value.bIsRate)
@@ -55,7 +59,7 @@ void CTDCDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, TDCCOST& value, in
 			szNumStart++;
 		}
 
-		TextFloatFormat(FALSE, &value.dAmount, value.dAmount, DBL_DIG, nDecimals, szNumStart);
+		TextFloatFormat(FALSE, &value.dAmount, value.dAmount, DBL_DIG, nDecimals, szNumStart, FLOATBUFLEN);
 		AfxSetWindowText(hWndCtrl, szBuffer);
 	}
 }

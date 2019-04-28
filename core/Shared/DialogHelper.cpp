@@ -32,6 +32,7 @@ static char THIS_FILE[]=__FILE__;
 
 const CRect EMPTY_RECT(0, 0, 0, 0);
 const CString DELIMS(_T(".,;:-?"));
+const int FLOATBUFLEN = 400;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -42,7 +43,7 @@ const CString DELIMS(_T(".,;:-?"));
 //////////////////////////////////////////////////////////////////////
 // MFC replacements to prevent popup error messages
 
-void CDialogHelper::GetControlText(HWND hWndCtrl, TCHAR szBuffer[FLOATBUFLEN])
+void GetControlText(HWND hWndCtrl, TCHAR szBuffer[FLOATBUFLEN])
 {
 	::GetWindowText(hWndCtrl, szBuffer, FLOATBUFLEN);
 
@@ -50,7 +51,7 @@ void CDialogHelper::GetControlText(HWND hWndCtrl, TCHAR szBuffer[FLOATBUFLEN])
 		lstrcpy(szBuffer, _T("0"));
 }
 
-BOOL CDialogHelper::SimpleScanf(LPCTSTR lpszText, LPCTSTR lpszFormat, va_list pData)
+BOOL SimpleScanf(LPCTSTR lpszText, LPCTSTR lpszFormat, va_list pData)
 {
 	ASSERT(lpszText != NULL);
 	ASSERT(lpszFormat != NULL);
@@ -117,7 +118,7 @@ BOOL CDialogHelper::SimpleScanf(LPCTSTR lpszText, LPCTSTR lpszFormat, va_list pD
 	return TRUE;
 }
 
-BOOL CDialogHelper::SimpleFloatParse(LPCTSTR lpszText, double& d)
+BOOL SimpleFloatParse(LPCTSTR lpszText, double& d)
 {
 	ASSERT(lpszText != NULL);
 	while (*lpszText == ' ' || *lpszText == '\t')
@@ -136,7 +137,7 @@ BOOL CDialogHelper::SimpleFloatParse(LPCTSTR lpszText, double& d)
 	return TRUE;
 }
 
-void CDialogHelper::DDX_TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, UINT nIDPrompt, ...)
+void DDX_TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, UINT nIDPrompt, ...)
 {
 	va_list pData;
 	va_start(pData, nIDPrompt);
@@ -168,7 +169,8 @@ void CDialogHelper::DDX_TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lps
 	va_end(pData);
 }
 
-void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double value, int nSizeGcvt, int nDecimals, TCHAR szBuffer[FLOATBUFLEN])
+void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double value, int nSizeGcvt, 
+									int nDecimals, LPTSTR szBuffer, int nBufSize)
 {
 	// handle locale specific decimal separator
 	setlocale(LC_NUMERIC, "");
@@ -211,7 +213,7 @@ void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double v
 		}
 
 #if _MSC_VER >= 1400
-		_stprintf_s(szBuffer, FLOATBUFLEN, _T("%.*g"), nSizeGcvt, value);
+		_stprintf_s(szBuffer, nBufSize, _T("%.*g"), nSizeGcvt, value);
 #else
 		_stprintf(szBuffer, _T("%.*g"), nSizeGcvt, value);
 #endif
@@ -299,11 +301,11 @@ void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, float& value, int nDe
 	if (pDX->m_bSaveAndValidate)
 	{
 		GetControlText(hWndCtrl, szBuffer);
-		TextFloatFormat(TRUE, &value, value, FLT_DIG, nDecimals, szBuffer);
+		TextFloatFormat(TRUE, &value, value, FLT_DIG, nDecimals, szBuffer, FLOATBUFLEN);
 	}
 	else
 	{
-		TextFloatFormat(FALSE, &value, value, FLT_DIG, nDecimals, szBuffer);
+		TextFloatFormat(FALSE, &value, value, FLT_DIG, nDecimals, szBuffer, FLOATBUFLEN);
 		AfxSetWindowText(hWndCtrl, szBuffer);
 	}
 }
@@ -316,11 +318,11 @@ void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, double& value, int nD
 	if (pDX->m_bSaveAndValidate)
 	{
 		GetControlText(hWndCtrl, szBuffer);
-		TextFloatFormat(TRUE, &value, value, DBL_DIG, nDecimals, szBuffer);
+		TextFloatFormat(TRUE, &value, value, DBL_DIG, nDecimals, szBuffer, FLOATBUFLEN);
 	}
 	else
 	{
-		TextFloatFormat(FALSE, &value, value, DBL_DIG, nDecimals, szBuffer);
+		TextFloatFormat(FALSE, &value, value, DBL_DIG, nDecimals, szBuffer, FLOATBUFLEN);
 		AfxSetWindowText(hWndCtrl, szBuffer);
 	}
 }

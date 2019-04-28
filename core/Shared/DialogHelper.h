@@ -26,10 +26,6 @@ enum RT_CTRLSTATE // for SetCtrlState
 
 //////////////////////////////////////////////////////////////////////
 
-static const int FLOATBUFLEN = 64;
-
-//////////////////////////////////////////////////////////////////////
-
 class CDialogHelper
 {
 public:
@@ -212,12 +208,8 @@ protected:
 	static BOOL CtrlMatchesClassFilter(const CWnd* pCtrl, LPCTSTR szClassFilter);
 	static BOOL CtrlMatchesClassFilters(const CWnd* pCtrl, const LPCTSTR szClassFilters[], int nNumFilters);
 
-protected: // very low-level helpers
-	static void GetControlText(HWND hWndCtrl, TCHAR szBuffer[FLOATBUFLEN]);
-	static BOOL SimpleScanf(LPCTSTR lpszText, LPCTSTR lpszFormat, va_list pData);
-	static BOOL SimpleFloatParse(LPCTSTR lpszText, double& d);
-	static void DDX_TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, UINT nIDPrompt, ...);
-	static void TextFloatFormat(BOOL bSaveAndValidate, void* pData, double value, int nSizeGcvt, int nDecimals, TCHAR szBuffer[FLOATBUFLEN]);
+protected: // very low-level helper
+	static void TextFloatFormat(BOOL bSaveAndValidate, void* pData, double value, int nSizeGcvt, int nDecimals, LPTSTR szBuffer, int nBufSize);
 
 };
 
