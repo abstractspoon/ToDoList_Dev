@@ -46,6 +46,16 @@ namespace Abstractspoon
 				static void SetFont(System::Windows::Forms::Control::ControlCollection^ ctrls, System::Drawing::Font^ font);
 
 			};
+
+			// ----------------------------------------------------------------------------
+
+			public ref class Licensing
+			{
+			public:
+				static bool CheckLicense(String^ typeId);
+				static bool CheckLicense(String^ publicKey, String^ licensePath);
+
+			};
 		}
 	}
 }
