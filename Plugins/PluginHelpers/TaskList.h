@@ -210,7 +210,7 @@ namespace Abstractspoon
 				Boolean SetRisk(Byte Risk);
 
 				Boolean SetPercentDone(Byte nPercent);
-				Boolean SetCost(double dCost);
+				Boolean SetCost(double dCost, bool isRate);
 				Boolean SetFlag(Boolean bFlag);
 
 				Boolean SetLastModified(DateTime^ dtLastMod);

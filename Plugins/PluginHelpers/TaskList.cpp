@@ -527,7 +527,16 @@ Byte Task::GetPercentDone(bool calculated)
 
 double Task::GetCost(bool calculated)
 {
-	return GETTASKVAL_ARG(GetTaskCost, calculated, 0);
+	bool unused = false;
+
+	if (m_pConstTaskList)
+		return m_pConstTaskList->GetTaskCost(m_hTask, calculated, unused);
+	
+	if (m_pTaskList)
+		return m_pTaskList->GetTaskCost(m_hTask, calculated, unused);
+
+	// all else
+	return false;
 }
 
 DateTime Task::GetLastModifiedDate()
@@ -831,9 +840,9 @@ Boolean Task::SetPercentDone(Byte nPercent)
 	return SETTASKVAL(SetTaskPercentDone, nPercent);
 }
 
-Boolean Task::SetCost(double dCost)
+Boolean Task::SetCost(double dCost, bool isRate)
 {
-	return SETTASKVAL(SetTaskCost, dCost);
+	return (m_pTaskList ? m_pTaskList->SetTaskCost(m_hTask, dCost, isRate) : false);
 }
 
 Boolean Task::SetFlag(Boolean bFlag)
