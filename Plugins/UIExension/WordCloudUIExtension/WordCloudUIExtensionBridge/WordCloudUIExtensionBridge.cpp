@@ -43,6 +43,10 @@ CWordCloudUIExtensionBridge::CWordCloudUIExtensionBridge() : m_hIcon(NULL), m_pT
 	HMODULE hMod = LoadLibrary(L"WordCloudUIExtensionBridge.dll"); // us
 
 	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_DAYVIEW));
+
+	msclr::auto_gcroot<Licensing^> licensing = gcnew Licensing();
+
+	licensing->CheckLicense(gcnew String(WORDCLOUD_GUID));
 }
 
 void CWordCloudUIExtensionBridge::Release()
