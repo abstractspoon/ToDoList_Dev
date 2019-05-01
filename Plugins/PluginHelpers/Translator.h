@@ -15,7 +15,7 @@ namespace Abstractspoon
 			public ref class Translator
 			{
 			public:
-				Translator(ITransText* pTaskList);
+				Translator(ITransText* pTransText);
 
 				String^ Translate(String^ sText);
 				void Translate(System::Windows::Forms::Form^ window);
