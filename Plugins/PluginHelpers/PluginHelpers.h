@@ -49,19 +49,6 @@ namespace Abstractspoon
 
 			// ----------------------------------------------------------------------------
 
-			public ref class Licensing
-			{
-			public:
-				static bool CheckLicense(String^ typeId);
-				static bool CheckLicense(String^ publicKey, String^ licensePath);
-
-			protected:
-				ref class RhinoLicensing
-				{
-				public:
-				};
-
-			};
 		}
 	}
 }

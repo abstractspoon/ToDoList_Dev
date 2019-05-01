@@ -27,6 +27,11 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+const LPCWSTR HTMLREPORTER_GUID = L"95E6E2D4-2301-461A-80FB-C2863E788F37";
+const LPCWSTR HTMLREPORTER_NAME = L"HTML Reporter";
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
 CHTMLReportExporterBridge::CHTMLReportExporterBridge() : m_pTT(nullptr)
@@ -51,7 +56,7 @@ HICON CHTMLReportExporterBridge::GetIcon() const
 
 LPCWSTR CHTMLReportExporterBridge::GetMenuText() const
 {
-	return L"HTML Reporter";
+	return HTMLREPORTER_NAME;
 }
 
 LPCWSTR CHTMLReportExporterBridge::GetFileFilter() const
@@ -66,7 +71,7 @@ LPCWSTR CHTMLReportExporterBridge::GetFileExtension() const
 
 LPCWSTR CHTMLReportExporterBridge::GetTypeID() const
 {
-	return L"95E6E2D4-2301-461A-80FB-C2863E788F37";
+	return HTMLREPORTER_GUID;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

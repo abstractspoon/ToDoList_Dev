@@ -26,6 +26,11 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+const LPCWSTR MARKDOWNEXPORTER_GUID = L"49A52D2D-7661-49AF-949A-E60066B300FC";
+const LPCWSTR MARKDOWNEXPORTER_NAME = L"Markdown";
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
 CMarkdownImpExpBridge::CMarkdownImpExpBridge()
@@ -51,7 +56,7 @@ HICON CMarkdownImpExpBridge::GetIcon() const
 
 LPCWSTR CMarkdownImpExpBridge::GetMenuText() const
 {
-	return L"Markdown";
+	return MARKDOWNEXPORTER_NAME;
 }
 
 LPCWSTR CMarkdownImpExpBridge::GetFileFilter() const
@@ -66,7 +71,7 @@ LPCWSTR CMarkdownImpExpBridge::GetFileExtension() const
 
 LPCWSTR CMarkdownImpExpBridge::GetTypeID() const
 {
-	return L"49A52D2D-7661-49AF-949A-E60066B300FC";
+	return MARKDOWNEXPORTER_GUID;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -27,6 +27,11 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+const LPCWSTR OUTLOOKEXPORTER_GUID = L"85D6AC7D-2D7D-4ACE-B776-C215FA181C33";
+const LPCWSTR OUTLOOKEXPORTER_NAME = L"Microsoft Outlook";
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
 COutlookExporterBridge::COutlookExporterBridge() : m_hIcon(NULL), m_pTT(nullptr)
@@ -54,7 +59,7 @@ HICON COutlookExporterBridge::GetIcon() const
 
 LPCWSTR COutlookExporterBridge::GetMenuText() const
 {
-	return L"Microsoft Outlook";
+	return OUTLOOKEXPORTER_NAME;
 }
 
 LPCWSTR COutlookExporterBridge::GetFileFilter() const
@@ -69,7 +74,7 @@ LPCWSTR COutlookExporterBridge::GetFileExtension() const
 
 LPCWSTR COutlookExporterBridge::GetTypeID() const
 {
-	return L"85D6AC7D-2D7D-4ACE-B776-C215FA181C33";
+	return OUTLOOKEXPORTER_GUID;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -31,8 +31,6 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-// REPLACE THIS WITH NEW GUID!
-
 const LPCWSTR WORDCLOUD_GUID = L"3BDEF4EA-7B02-41E1-BE65-3E03025E1FFE";
 const LPCWSTR WORDCLOUD_NAME = L"Word Cloud";
 
@@ -44,7 +42,7 @@ CWordCloudUIExtensionBridge::CWordCloudUIExtensionBridge() : m_hIcon(NULL), m_pT
 
 	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_DAYVIEW));
 
-	msclr::auto_gcroot<Licensing^> licensing = gcnew Licensing();
+	msclr::auto_gcroot<RhinoLicensing^> licensing = gcnew RhinoLicensing();
 
 	licensing->CheckLicense(gcnew String(WORDCLOUD_GUID));
 }
