@@ -215,7 +215,7 @@ BOOL CPreferencesDlg::OnInitDialog()
 
 	m_sbGrip.Initialize(this);
 
-	m_mgrPrompts.SetEditPrompt(m_eSearchText, _T("Search Preferences"));
+	m_mgrPrompts.SetEditPrompt(m_eSearchText, CEnString(IDS_SEARCHPREFS_PROMPT));
 	
 	// disable translation of category title because
 	// categories will already been translated
