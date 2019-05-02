@@ -2250,9 +2250,10 @@
 #define IDS_REPLACEINTASKCOMMENTS       58488
 #define IDS_FINDINTASKCOMMENTS          58489
 #define IDS_SEARCHPREFS_PROMPT          58490
-#define IDS_CAD_FRACTION                58491
-#define IDS_CUSTOM_FEATURE_PERCENTAGE   58492
-#define IDS_FILTERPLACEHOLDER           58493
+#define IDS_SD_TITLE                    58491
+#define IDS_CAD_FRACTION                58492
+#define IDS_CUSTOM_FEATURE_PERCENTAGE   58493
+#define IDS_FILTERPLACEHOLDER           58494
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects

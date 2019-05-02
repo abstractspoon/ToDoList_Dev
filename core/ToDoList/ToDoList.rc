@@ -4775,8 +4775,8 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_TDLBC_PROJECTNAME   "Project Name"
-    IDS_CSV_EXPORTDLG       "Export Tasks To CSV"
-    IDS_CSV_IMPORTDLG       "Import Tasks From CSV"
+    IDS_CSV_EXPORTDLG       "Export Tasks to CSV"
+    IDS_CSV_IMPORTDLG       "Import Tasks from CSV"
     IDS_SB_FOCUS_TIP        "Currently focused field"
     IDS_SB_SELTIMEEST_TIP   "Aggregate time estimate for the selected tasks"
     IDS_SB_SELTIMESPENT_TIP "Aggregate time spent on the selected tasks"
@@ -5353,7 +5353,7 @@ BEGIN
                             "Unable to process Startup Options|When more than one instance of ToDoList is running you must specify a filepath as well."
     IDS_RESTARTTOUPDATESETTINGS 
                             "Regional Settings Change|The user interface will be updated next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
-    IDS_OUTLOOK_IMPORTDLG   "Import Tasks From Outlook"
+    IDS_OUTLOOK_IMPORTDLG   "Import Tasks from Outlook"
     IDS_OA_ACTUALWORK       "Actual Work"
     IDS_OA_DATECOMPLETED    "Completion Date"
     IDS_OA_DELEGATOR        "Delegator"
@@ -5516,6 +5516,7 @@ BEGIN
     IDS_CAD_FRACTION        "Number (Fraction eg. 2/3)"
     IDS_CUSTOM_FEATURE_PERCENTAGE "Display as percentage"
     IDS_FILTERPLACEHOLDER   "Filters"
+    IDS_SD_TITLE            "Remote Server Details"
 END
 
 #endif    // English (Australia) resources

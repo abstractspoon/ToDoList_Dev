@@ -130,7 +130,7 @@ IDI_ICALENDAR           ICON    DISCARDABLE     "res\\icalendar_16.ico"
 
 IDD_EXPORTOPTIONSDIALOG DIALOG DISCARDABLE  0, 0, 217, 70
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Export Tasks To iCalendar"
+CAPTION "Export Tasks to iCalendar"
 FONT 8, "Tahoma"
 BEGIN
     CONTROL         "Export tasks as 'event' items",IDC_EXPORTASVEVENT,

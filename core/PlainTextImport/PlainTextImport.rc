@@ -186,8 +186,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_IMPORTLABEL         "Subtasks are indented at each level with:"
     IDS_EXPORTLABEL         "Indent subtasks at each level with:"
-    IDS_IMPORTTITLE         "Import Tasks From Outline"
-    IDS_EXPORTTITLE         "Export Tasks To Outline"
+    IDS_IMPORTTITLE         "Import Tasks from Outline"
+    IDS_EXPORTTITLE         "Export Tasks to Outline"
     IDS_IMPORTPROJECTLABEL  "Import the first line as the project name"
     IDS_EXPORTPROJECTLABEL  "Export the project name as the first line"
 END
