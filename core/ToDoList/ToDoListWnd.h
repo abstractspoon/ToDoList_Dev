@@ -24,6 +24,7 @@
 #include "tdlquickfindcombobox.h"
 #include "TDLThreadedExporterWnd.h"
 #include "TDLCustomToolbar.h"
+#include "TDCMainMenu.h"
 
 #include "..\shared\trayicon.h"
 #include "..\shared\toolbarhelper.h"
@@ -34,7 +35,6 @@
 #include "..\shared\tabctrlex.h"
 #include "..\shared\enrecentfilelist.h"
 #include "..\shared\enimagelist.h"
-#include "..\shared\enmenu.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\tabbedcombobox.h"
 #include "..\shared\deferWndMove.h"
@@ -93,7 +93,7 @@ protected:
 protected:
 	CTDLQuickFindComboBox m_cbQuickFind;
 	CEnBrowserCtrl m_IE;
-	CEnMenu m_menubar;
+	CTDCMainMenu m_menubar;
 	CEnRecentFileList m_mruList;
 	CEnToolBar m_toolbarMain;
 	CTDLCustomToolbar m_toolbarCustom;
@@ -660,8 +660,8 @@ protected:
 	int ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidth, BOOL bCalcOnly = FALSE);
 	BOOL GetFilterBarRect(CRect& rect) const;
 
-	void PrepareEditMenu(CMenu* pMenu);
-	void PrepareSortMenu(CMenu* pMenu);
+	void PrepareEditMenu(CMenu* pMenu) const;
+	void PrepareSortMenu(CMenu* pMenu) const;
 	void AddUserStorageToMenu(CMenu* pMenu);
 	void AddFiltersToMenu(CMenu* pMenu);
 

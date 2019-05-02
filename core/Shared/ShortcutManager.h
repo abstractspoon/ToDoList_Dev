@@ -66,7 +66,8 @@ public:
 	int IsEmpty() { return (m_mapID2Shortcut.GetCount() == 0); }
 	WORD GetInvalidComb() { return m_wInvalidComb; }
 
-	int BuildMapping(UINT nMenuID, CStringArray& aMapping, char cDelim = '\t');
+	int BuildMapping(UINT nMenuID, CStringArray& aMapping, char cDelim = '\t') const;
+	int BuildMapping(const CMenu& menu, CStringArray& aMapping, char cDelim = '\t') const;
 
 protected:
 	CMap<DWORD, DWORD, UINT, UINT&> m_mapShortcut2ID; // for use in ProcessMsg
@@ -79,7 +80,7 @@ protected:
 
 	void PrepareMenuItems(CMenu* pMenu) const;
 	DWORD GetShortcut(WORD wVirtKeyCode, BOOL bExtended) const;
-	int BuildMapping(CMenu* pMenu, LPCTSTR szParentName, CStringArray& aMapping, char cDelim);
+	int BuildMapping(const CMenu* pMenu, LPCTSTR szParentName, CStringArray& aMapping, char cDelim) const;
 
 	static BOOL IsEditShortcut(DWORD dwShortcut);
 };

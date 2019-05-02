@@ -402,18 +402,26 @@ void CShortcutManager::PrepareMenuItems(CMenu* pMenu) const
 	}
 }
 
-int CShortcutManager::BuildMapping(UINT nMenuID, CStringArray& aMapping, char cDelim)
+int CShortcutManager::BuildMapping(UINT nMenuID, CStringArray& aMapping, char cDelim) const
 {
 	CEnMenu menu;
 
-	if (!menu.LoadMenu(nMenuID, GetHwnd(), TRUE, TRUE) || !menu.GetMenuItemCount())
+	if (!menu.LoadMenu(nMenuID, GetHwnd(), TRUE, TRUE))
+		return 0;
+
+	return BuildMapping(menu, aMapping, cDelim);
+}
+
+int CShortcutManager::BuildMapping(const CMenu& menu, CStringArray& aMapping, char cDelim) const
+{
+	if (!menu.GetMenuItemCount())
 		return 0;
 
 	return BuildMapping(&menu, NULL, aMapping, cDelim);
 }
 
-int CShortcutManager::BuildMapping(CMenu* pMenu, LPCTSTR szParentName, 
-								   CStringArray& aMapping, char cDelim)
+int CShortcutManager::BuildMapping(const CMenu* pMenu, LPCTSTR szParentName, 
+								   CStringArray& aMapping, char cDelim) const
 {
 	int nItems = pMenu->GetMenuItemCount();
 

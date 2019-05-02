@@ -30,10 +30,6 @@ public:
 	int GetFilePaths(CStringArray& aFilePaths) const;
 	int GetFileNames(CStringArray& aFileNames) const;
 
-protected:
-	virtual BOOL GetDisplayName(CString& strName, int nIndex,
-		LPCTSTR lpszCurDir, int nCurDir, BOOL bAtLeastName = TRUE) const;
-
 };
 
 #endif // !defined(AFX_ENRECENTFILELIST_H__AA4B1746_135C_4E81_96E1_DE6CE758EFDC__INCLUDED_)

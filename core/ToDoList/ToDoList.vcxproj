@@ -314,6 +314,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="TDCImportExportMgr.cpp" />
+    <ClCompile Include="TDCMainMenu.cpp" />
     <ClCompile Include="TDCMergeTasklist.cpp" />
     <ClCompile Include="TDCOutlookImportHelper.cpp" />
     <ClCompile Include="TdcRecurrence.cpp" />
@@ -635,6 +636,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDCFindReplace.h" />
     <ClInclude Include="TDCImageList.h" />
     <ClInclude Include="TDCImportExportMgr.h" />
+    <ClInclude Include="TDCMainMenu.h" />
     <ClInclude Include="tdcmapping.h" />
     <ClInclude Include="TDCMergeTasklist.h" />
     <ClInclude Include="tdcmsg.h" />

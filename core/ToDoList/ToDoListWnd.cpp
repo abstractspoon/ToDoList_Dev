@@ -1070,31 +1070,36 @@ void CToDoListWnd::InitMenuIconManager()
 
 void CToDoListWnd::OnShowKeyboardshortcuts() 
 {
-	CStringArray aMapping;
+	CTDCMainMenu menu;
 
-	if (m_mgrShortcuts.BuildMapping(IDR_MAINFRAME, aMapping, '|'))
+	if (menu.LoadMenu(TRUE, TRUE))
 	{
-		// add a few misc items that don't appear in the menus
-		CString sMisc;
+		CStringArray aMapping;
 
-		for (int nItem = 0; nItem < NUM_MISCSHORTCUTS; nItem++)
+		if (m_mgrShortcuts.BuildMapping(menu, aMapping, '|'))
 		{
-			if (MISC_SHORTCUTS[nItem].dwShortcut)
-			{
-				const SHORTCUT& sc = MISC_SHORTCUTS[nItem];
-				CString sShortcut(m_mgrShortcuts.GetShortcutText(sc.dwShortcut));
+			// add a few misc items that don't appear in the menus
+			CString sMisc;
 
-				sMisc.Format(_T("%s|%s"), sShortcut, CEnString(sc.nIDShortcut));
-			}
-			else
+			for (int nItem = 0; nItem < NUM_MISCSHORTCUTS; nItem++)
 			{
-				sMisc.Empty();
-			}
+				if (MISC_SHORTCUTS[nItem].dwShortcut)
+				{
+					const SHORTCUT& sc = MISC_SHORTCUTS[nItem];
+					CString sShortcut(m_mgrShortcuts.GetShortcutText(sc.dwShortcut));
 
-			aMapping.Add(sMisc);
-		}
+					sMisc.Format(_T("%s|%s"), sShortcut, CEnString(sc.nIDShortcut));
+				}
+				else
+				{
+					sMisc.Empty();
+				}
+
+				aMapping.Add(sMisc);
+			}
 	
-		CTDLKeyboardShortcutDisplayDlg(aMapping, '|').DoModal();
+			CTDLKeyboardShortcutDisplayDlg(aMapping, '|').DoModal();
+		}
 	}
 }
 
@@ -5135,7 +5140,7 @@ BOOL CToDoListWnd::LoadMenubar()
 {
 	m_menubar.DestroyMenu();
 	
-	if (!m_menubar.LoadMenu(IDR_MAINFRAME, GetSafeHwnd(), TRUE))
+	if (!m_menubar.LoadMenu(GetSafeHwnd(), TRUE))
 		return FALSE;
 
 #ifdef _DEBUG
@@ -9284,7 +9289,7 @@ LRESULT CToDoListWnd::OnPreferencesEditLanguageFile(WPARAM /*wp*/, LPARAM /*lp*/
 	return FileMisc::Run(*this, _T("TDLTransEdit.exe"), sLangFilePath, SW_SHOWNORMAL, FileMisc::GetModuleFolder());
 }
 
-void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
+void CToDoListWnd::PrepareSortMenu(CMenu* pMenu) const
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 		
@@ -9399,7 +9404,7 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 	}
 }
 
-void CToDoListWnd::PrepareEditMenu(CMenu* pMenu)
+void CToDoListWnd::PrepareEditMenu(CMenu* pMenu) const
 {
 	if (!Prefs().GetShowEditMenuAsColumns())
 		return;

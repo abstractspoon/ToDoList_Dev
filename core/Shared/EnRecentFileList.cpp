@@ -47,8 +47,15 @@ void CEnRecentFileList::UpdateMenu(CCmdUI* pCmdUI)
 		for (int iMRU = 1; iMRU < m_nSize; iMRU++)
 			pCmdUI->m_pMenu->DeleteMenu(nFirstID + iMRU, MF_BYCOMMAND);
 	}
+
+	// Temporarily set the CWD to some unlikely location to prevent
+	// any of the file paths being made relative
+	CString sCwd = FileMisc::GetCwd();
+	FileMisc::SetCwd(FileMisc::GetWindowsSystemFolder());
 	
 	CRecentFileList::UpdateMenu(pCmdUI);
+
+	FileMisc::SetCwd(sCwd);
 	
 	// fix up default MFC implementation which does not 
 	// add the leading '1' for items above 9
@@ -154,11 +161,4 @@ int CEnRecentFileList::GetFileNames(CStringArray& aFileNames) const
 		aFileNames[nFile] = FileMisc::GetFileNameFromPath(aFileNames[nFile]);
 
 	return aFileNames.GetSize();
-}
-
-BOOL CEnRecentFileList::GetDisplayName(CString& strName, int nIndex,
-	LPCTSTR lpszCurDir, int nCurDir, BOOL bAtLeastName) const
-{
-	// Prevent CWD tasklists becoming relative
-	return CRecentFileList::GetDisplayName(strName, nIndex, lpszCurDir, -1, bAtLeastName);
 }
