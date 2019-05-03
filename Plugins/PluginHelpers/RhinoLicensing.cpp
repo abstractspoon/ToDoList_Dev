@@ -26,38 +26,41 @@ bool RhinoLicensing::CheckLicense(String^ typeId)
 {
 	String^ appFolder = Path::GetDirectoryName(Assembly::GetExecutingAssembly()->Location);
 	String^ licenseFolder = Path::Combine(appFolder, "Resources\\Licenses");
-	String^ licensePath = Path::Combine(licenseFolder, typeId + ".xml");
 
-	auto licenseFiles = Directory::EnumerateFiles(licenseFolder, typeId + ".xml", SearchOption::AllDirectories);
-	auto attributes = gcnew Dictionary<String^, String^>();
-
-	for each (String^ licenseFile in licenseFiles)
+	if (Directory::Exists(licenseFolder))
 	{
-		if (!CheckLicense(gcnew String(PUBLIC_KEY), licenseFile, attributes))
-			continue;
+		auto licenseFiles = Directory::EnumerateFiles(licenseFolder, typeId + ".xml", SearchOption::AllDirectories);
+		auto attributes = gcnew Dictionary<String^, String^>();
 
-		// Validate attributes
-		String ^licId, ^expiryDate, ^licType, ^email, ^pluginName, ^pluginId;
-
-		if (!attributes->TryGetValue("id", licId) ||
-			!attributes->TryGetValue("expiration", expiryDate) ||
-			!attributes->TryGetValue("type", licType) ||
-			!attributes->TryGetValue("email", email) ||
-			!attributes->TryGetValue("plugin_name", pluginName) ||
-			!attributes->TryGetValue("plugin_id", pluginId))
+		for each (String^ licenseFile in licenseFiles)
 		{
-			continue;
+			if (!CheckLicense(gcnew String(PUBLIC_KEY), licenseFile, attributes))
+				continue;
+
+			// Validate attributes
+			String ^licId, ^expiryDate, ^licType, ^email, ^pluginName, ^pluginId;
+
+			if (!attributes->TryGetValue("id", licId) ||
+				!attributes->TryGetValue("expiration", expiryDate) ||
+				!attributes->TryGetValue("type", licType) ||
+				!attributes->TryGetValue("email", email) ||
+				!attributes->TryGetValue("plugin_name", pluginName) ||
+				!attributes->TryGetValue("plugin_id", pluginId))
+			{
+				continue;
+			}
+
+			if (!pluginId->Equals(typeId))
+				continue;
+
+			// TODO
+			//auto expirationDate = DateTime::ParseExact(date->Value, "yyyy-MM-ddTHH:mm:ss.fffffff", CultureInfo::InvariantCulture);
+			//auto licType = (/*LicenseType)Enum.Parse(typeof(LicenseType), */licenseType->Value);
 		}
-
-		if (!pluginId->Equals(typeId))
-			continue;
-
-		// TODO
-		//auto expirationDate = DateTime::ParseExact(date->Value, "yyyy-MM-ddTHH:mm:ss.fffffff", CultureInfo::InvariantCulture);
-		//auto licType = (/*LicenseType)Enum.Parse(typeof(LicenseType), */licenseType->Value);
 	}
+
 	
-	return true;
+	return false;
 }
 
 bool RhinoLicensing::CheckLicense(String^ publicKey, String^ licensePath, /*out*/ Dictionary<String^, String^>^ attributes)

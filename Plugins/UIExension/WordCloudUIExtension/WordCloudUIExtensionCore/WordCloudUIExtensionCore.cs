@@ -80,11 +80,14 @@ namespace WordCloudUIExtension
             m_SplitterWidth = DPIScaling.Scale(6);
 
 			InitializeComponent();
+
+			RhinoLicensing.CheckLicense("3BDEF4EA-7B02-41E1-BE65-3E03025E1FFE");
+
 		}
 
 		// IUIExtension ------------------------------------------------------------------
 
-        public override Boolean Focused
+		public override Boolean Focused
         {
             get { return (base.Focused || m_WordCloud.Focused || m_TaskMatchesList.Focused); }
         }
