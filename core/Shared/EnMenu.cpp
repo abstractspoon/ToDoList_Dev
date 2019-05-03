@@ -220,6 +220,8 @@ void CEnMenu::SetBackgroundColor(COLORREF color)
 
 BOOL CEnMenu::LoadMenu(UINT nMenuResID, HWND hWndRef, BOOL bTranslate, BOOL bRecursiveTranslate)
 {
+	DestroyMenu();
+
 	if (CMenu::LoadMenu(nMenuResID))
 	{
 		if (bTranslate && s_pTT)

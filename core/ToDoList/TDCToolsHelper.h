@@ -57,11 +57,12 @@ public:
 	CTDCToolsHelper(BOOL bTDLEnabled, UINT nStart, int nSize = 16);
 	virtual ~CTDCToolsHelper();
 	
-	void UpdateMenu(CCmdUI* pCmdUI, const CUserToolArray& tools, CMenuIconMgr& iconMgr);
 	BOOL RunTool(const USERTOOL& tool, const USERTOOLARGS& args);
 	BOOL TestTool(const USERTOOL& tool, const USERTOOLARGS& args);
 	void AppendToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter);
 	void RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter);
+
+	static HICON GetToolIcon(CSysImageList& sil, const USERTOOL& ut);
 	
 protected:
 	UINT m_nStartID;
@@ -76,7 +77,6 @@ protected:
 	BOOL CheckToDoListVersionCompatibility(const CString& sToolPath) const;
 	BOOL RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, BOOL bTest);
 
-	static HICON GetToolIcon(CSysImageList& sil, const USERTOOL& ut);
 	static CString GetToolPath(const USERTOOL& tool);
 	static BOOL GetToolPaths(const USERTOOL& tool, CString& sToolPath, CString& sIconPath);
 

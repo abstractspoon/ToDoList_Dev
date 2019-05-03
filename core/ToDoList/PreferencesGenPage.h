@@ -43,6 +43,7 @@ public:
 	BOOL GetAlwaysOnTop() const { return m_bAlwaysOnTop; }
 	BOOL GetUseSysTray() const { return m_bUseSysTray; }
 	int GetSysTrayOption() const { return !m_bUseSysTray ? STO_NONE : m_nSysTrayOption; }
+	BOOL HasSysTrayOptions(int nOption1, int nOption2) const;
 	BOOL GetConfirmDelete() const { return m_bConfirmDelete; }
 	BOOL GetConfirmSaveOnExit() const { return m_bConfirmSaveOnExit; }
 	BOOL GetShowOnStartup() const { return m_bShowOnStartup; }

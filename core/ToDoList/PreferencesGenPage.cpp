@@ -345,3 +345,21 @@ void CPreferencesGenPage::OnEditDisplayLanguage()
 {
 	GetParent()->SendMessage(WM_PGP_EDITLANGFILE);
 }
+
+BOOL CPreferencesGenPage::HasSysTrayOptions(int nOption1, int nOption2) const
+{
+	int nSysOpt = GetSysTrayOption();
+
+	if (nSysOpt == nOption1)
+	{
+		return TRUE;
+	}
+	else if (nOption2 != STO_NONE)
+	{
+		return (nSysOpt == nOption2);
+	}
+
+	// all else
+	return FALSE;
+}
+

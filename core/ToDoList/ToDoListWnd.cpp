@@ -100,7 +100,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const int BEVEL = 3; // DON'T SCALE
-const int MAX_NUM_TOOLS = 50;
 const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
 const int MRU_MAX_ITEM_LEN = 128;
 
@@ -752,8 +751,8 @@ void CToDoListWnd::SetUITheme(const CString& sThemeFile)
 	if (m_findDlg.GetSafeHwnd())
 		m_findDlg.SetUITheme(m_theme);
 
-	UpdateMenuBackgroundColor();
-	DrawMenuBar();
+	m_menubar.SetUITheme(m_theme);
+
 	Invalidate();
 }
 
@@ -1034,7 +1033,9 @@ void CToDoListWnd::InitMenuIconManager()
 		VERIFY(m_mgrMenuIcons.AddImages(aCmdIDs, sImagePath, crMask));
 	}
 	else
+	{
 		m_mgrMenuIcons.AddImages(aCmdIDs, nToolbarImageID, RGB(255, 0, 255));
+	}
 
 	// extra
 	aCmdIDs.RemoveAll();
@@ -1072,7 +1073,7 @@ void CToDoListWnd::OnShowKeyboardshortcuts()
 {
 	CTDCMainMenu menu;
 
-	if (menu.LoadMenu(TRUE, TRUE))
+	if (menu.LoadMenu())
 	{
 		CStringArray aMapping;
 
@@ -1714,7 +1715,7 @@ void CToDoListWnd::OnCancel()
 
 	// if the close button has been configured to Minimize to tray
 	// then do that here else normal minimize 
-	if (HasSysTrayOptions(STO_ONMINCLOSE, STO_ONCLOSE))
+	if (Prefs().HasSysTrayOptions(STO_ONMINCLOSE, STO_ONCLOSE))
 	{
 		MinimizeToTray();
 	}
@@ -2755,7 +2756,7 @@ void CToDoListWnd::RestoreVisibility()
 			// tray when minimized then hide here too
 			else if ((nDefShowState == SW_SHOWMINIMIZED) || (nDefShowState == SW_SHOWMINNOACTIVE))
 			{
-				if (HasSysTrayOptions(STO_ONMINIMIZE, STO_ONMINCLOSE))
+				if (Prefs().HasSysTrayOptions(STO_ONMINIMIZE, STO_ONMINCLOSE))
 				{
 					m_bVisible = FALSE;
 				}
@@ -3277,7 +3278,7 @@ LRESULT CToDoListWnd::OnClose(WPARAM /*wp*/, LPARAM bForUpdate)
 {
 	if (!m_bEndingSession)
 	{
-		if (!bForUpdate && HasSysTrayOptions(STO_ONCLOSE, STO_ONMINCLOSE))
+		if (!bForUpdate && Prefs().HasSysTrayOptions(STO_ONCLOSE, STO_ONMINCLOSE))
 		{
 			MinimizeToTray();
 		}
@@ -3908,7 +3909,7 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 				{
 				case MM_TASKCONTEXT:
 					m_nContextColumnID = tdc.ColumnHitTest(point);
-					PrepareEditMenu(pPopup);
+					m_menubar.PrepareEditMenu(pPopup, tdc, Prefs());
 					break;
 				}
 				
@@ -4002,7 +4003,7 @@ void CToDoListWnd::Show(BOOL bAllowToggle)
 	{
 		SetForegroundWindow();
 	}
-	else if (HasSysTrayOptions(STO_NONE))
+	else if (Prefs().HasSysTrayOptions(STO_NONE))
 	{
 		ShowWindow(SW_MINIMIZE);
 	}
@@ -4853,9 +4854,6 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 	// kill timers for the duration
 	KillTimers();
 
-	// restore translation of dynamic menu items shortcut prefs
-	EnableDynamicMenuTranslation(TRUE);
-	
 	ASSERT(m_pPrefs);
 
 	// Pass in the selected tasklist's list data
@@ -4864,9 +4862,6 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 	m_pPrefs->SetAutoListData(autoListData);
 
 	UINT nRet = m_pPrefs->DoModal(nInitPage);
-	
-	// re-disable dynamic menu translation
-	EnableDynamicMenuTranslation(FALSE);
 	
 	// updates userPrefs
 	RedrawWindow();
@@ -5102,96 +5097,16 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 	return FALSE;
 }
 
-void CToDoListWnd::UpdateMenuBackgroundColor()
-{
-	// set the menu background colour
-	// Note: On XP and classic, the menu bar is not distinctive
-	// so we set the menu color a little darker than 3DFACE
-	if (!CThemed::IsAppThemed())
-	{
-		m_menubar.SetBackgroundColor(GraphicsMisc::Darker(GetSysColor(COLOR_3DFACE), 0.1));
-	}
-	else if (COSVersion() < OSV_VISTA)
-	{
-		if (m_theme.crMenuBack == m_theme.crAppBackLight)
-		{
-			if (m_theme.crAppBackDark != m_theme.crAppBackLight)
-			{
-				m_menubar.SetBackgroundColor(m_theme.crAppBackDark);
-			}
-			else
-			{
-				m_menubar.SetBackgroundColor(GraphicsMisc::Darker(m_theme.crAppBackLight, 0.1));
-			}
-		}
-		else
-		{
-			m_menubar.SetBackgroundColor(m_theme.crMenuBack);
-		}
-
-	}
-	else // Vista+ with themes
-	{
-		m_menubar.SetBackgroundColor(m_theme.crMenuBack);
-	}
-}
 
 BOOL CToDoListWnd::LoadMenubar()
 {
-	m_menubar.DestroyMenu();
-	
-	if (!m_menubar.LoadMenu(GetSafeHwnd(), TRUE))
+	if (!m_menubar.LoadMenu(Prefs()))
 		return FALSE;
-
-#ifdef _DEBUG
-	m_menubar.ModifyMenu(AM_DEBUG, MF_BYPOSITION | MFT_RIGHTJUSTIFY, 0, _T("&Debug"));
-
-	// don't translate the debug menu
-	CLocalizer::EnableTranslation(::GetSubMenu(m_menubar, AM_DEBUG), FALSE);
-#else
-	m_menubar.DeleteMenu(AM_DEBUG, MF_BYPOSITION);
-#endif
 
 	SetMenu(&m_menubar);
 	m_hMenuDefault = m_menubar;
 
-
-	if (!Prefs().GetShowTasklistTabCloseButton()) 
-		m_menubar.AddMDIButton(MEB_CLOSE, ID_CLOSE);
-	
-	UpdateMenuBackgroundColor();
-	DrawMenuBar();
-
-	// disable translation of dynamic menus
-	EnableDynamicMenuTranslation(FALSE);
-
-	// delete 'Record Bug Report' if below W7
-	if (COSVersion() < OSV_WIN7)
-	{
-		CMenu* pSubMenu = m_menubar.GetSubMenu(AM_HELP);
-		ASSERT(pSubMenu);
-		
-		int nPos = CEnMenu::GetMenuItemPos(*pSubMenu, ID_HELP_RECORDBUGREPORT);
-		ASSERT(nPos != -1);
-		
-		pSubMenu->DeleteMenu(nPos, MF_BYPOSITION);
-		
-		// and the following separator
-		if (pSubMenu->GetMenuItemID(nPos) == 0)
-			pSubMenu->DeleteMenu(nPos, MF_BYPOSITION);
-	}
-
 	return TRUE;
-}
-
-void CToDoListWnd::EnableDynamicMenuTranslation(BOOL bEnable)
-{
-	CLocalizer::EnableTranslation(ID_FILE_MRU_FIRST, ID_FILE_MRU_LAST, bEnable);
-	CLocalizer::EnableTranslation(ID_WINDOW1, ID_WINDOW16, bEnable);
-	CLocalizer::EnableTranslation(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, bEnable);
-	CLocalizer::EnableTranslation(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, bEnable);
-	CLocalizer::EnableTranslation(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, bEnable);
-	CLocalizer::EnableTranslation(ID_TRAYICON_SHOWDUETASKS1, ID_TRAYICON_SHOWDUETASKS20, bEnable);
 }
 
 void CToDoListWnd::UpdateGlobalHotkey()
@@ -7121,15 +7036,7 @@ void CToDoListWnd::OnNeedTooltipText(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CToDoListWnd::OnUpdateUserTool(CCmdUI* pCmdUI) 
 {
-	if (pCmdUI->m_pMenu && pCmdUI->m_nID == ID_TOOLS_USERTOOL1) // only handle first item
-	{
-		CUserToolArray aTools;
-		Prefs().GetUserTools(aTools);
-		
-		CTDCToolsHelper th(Prefs().GetEnableTDLExtension(), ID_TOOLS_USERTOOL1, MAX_NUM_TOOLS);
-		th.UpdateMenu(pCmdUI, aTools, m_mgrMenuIcons);
-	}
-	else if (m_bShowingMainToolbar) 
+	if (m_bShowingMainToolbar && (pCmdUI->m_pMenu == NULL)) 
 	{
 		int nTool = pCmdUI->m_nID - ID_TOOLS_USERTOOL1;
 		ASSERT (nTool >= 0 && nTool < MAX_NUM_TOOLS);
@@ -7213,12 +7120,12 @@ void CToDoListWnd::OnShowTaskView(UINT nCmdID)
 		{
 			CStringArray aTypeIDs;
 			
-			if (tdc.GetVisibleTaskViews(aTypeIDs))
+			if (tdc.GetVisibleExtensionViews(aTypeIDs))
 			{
 				CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
 
 				if (helper.ProcessExtensionVisibilityMenuCmd(nCmdID, m_mgrUIExtensions, aTypeIDs))
-					tdc.SetVisibleTaskViews(aTypeIDs);
+					tdc.SetVisibleExtensionViews(aTypeIDs);
 			}
 		}
 		break;
@@ -7240,89 +7147,6 @@ void CToDoListWnd::OnUpdateShowTaskView(CCmdUI* pCmdUI)
 	case ID_SHOWVIEW_UIEXTENSION1:
 		// handled in OnInitMenuPopup
 		break;
-	}
-}
-
-void CToDoListWnd::AddUserStorageToMenu(CMenu* pMenu) 
-{
-	if (pMenu)
-	{
-		const UINT MENUSTARTID = pMenu->GetMenuItemID(0);
-
-		// delete existing entries
-		int nStore = 16;
-
-		while (nStore--)
-			pMenu->DeleteMenu(nStore, MF_BYPOSITION);
-		
-		// if we have any tools to add we do it here
-		int nNumStorage = min(m_mgrStorage.GetNumStorage(), 16);
-
-		if (nNumStorage)
-		{
-			UINT nFlags = (MF_BYPOSITION | MF_STRING);
-
-			for (int nStore = 0; nStore < nNumStorage; nStore++)
-			{
-				CString sMenuItem, sText = m_mgrStorage.GetStorageMenuText(nStore);
-								
-				if (nStore < 9)
-					sMenuItem.Format(_T("&%d %s"), nStore + 1, sText);
-				else
-					sMenuItem = sText;
-				
-				pMenu->InsertMenu(nStore, nFlags, MENUSTARTID + nStore, sMenuItem);
-
-				// add icon if available
-				HICON hIcon = m_mgrStorage.GetStorageIcon(nStore);
-
-				if (hIcon)
-					m_mgrMenuIcons.AddImage(MENUSTARTID + nStore, hIcon);
-			}
-		}
-		else // if nothing to add just re-add placeholder
-		{
-			pMenu->InsertMenu(0, MF_BYPOSITION | MF_STRING | MF_GRAYED, MENUSTARTID, CEnString(IDS_3RDPARTYSTORAGE));
-		}
-	}
-}
-
-void CToDoListWnd::AddFiltersToMenu(CMenu* pMenu) 
-{
-	if (pMenu)
-	{
-		const UINT MENUSTARTID = pMenu->GetMenuItemID(0);
-
-		// delete existing entries
-		int nFilter = 24;
-
-		while (nFilter--)
-			pMenu->DeleteMenu(nFilter, MF_BYPOSITION);
-		
-		CStringArray aFilters;
-		int nNumFilters = min(m_filterBar.GetAllFilterNames(aFilters), 24);
-
-		if (nNumFilters)
-		{
-			UINT nFlags = (MF_BYPOSITION | MF_STRING);
-			CString sMenuItem;
-
-			for (int nFilter = 0; nFilter < nNumFilters; nFilter++)
-			{
-				sMenuItem.Format(_T("&%s"), aFilters[nFilter]);
-				sMenuItem.Replace('\t', ' ');
-				
-				pMenu->InsertMenu(nFilter, nFlags, (ID_VIEW_ACTIVATEFILTER1 + nFilter), sMenuItem);
-			}
-
-			int nSelFilter = m_filterBar.GetSelectedFilter();
-			pMenu->CheckMenuRadioItem(0, nNumFilters, nSelFilter, MF_BYPOSITION);
-
-		}
-		else // if nothing to add just re-add placeholder
-		{
-			pMenu->InsertMenu(0, MF_BYPOSITION | MF_STRING | MF_GRAYED, MENUSTARTID, CEnString(IDS_FILTERPLACEHOLDER));
-		}
 	}
 }
 
@@ -7422,96 +7246,19 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 	UpdateWindow();
 }
 
-BOOL CToDoListWnd::HasSysTrayOptions(int nOption1, int nOption2) const
-{
-	int nSysOpt = Prefs().GetSysTrayOption();
-
-	if (nSysOpt == nOption1)
-	{
-		return TRUE;
-	}
-	else if (nOption2 != STO_NONE) 
-	{
-		return (nSysOpt == nOption2);
-	}
-
-	// all else
-	return FALSE;
-}
-
 void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu) 
 {
-	// test for top-level menus
-	if (bSysMenu)
-		return;
-
-	if (m_menubar.GetSubMenu(AM_FILE) == pPopupMenu)
+	if (!bSysMenu)
 	{
-		// insert Min to sys tray if appropriate 
-		BOOL bHasMinToTray = (::GetMenuString(*pPopupMenu, ID_MINIMIZETOTRAY, NULL, 0, MF_BYCOMMAND) != 0);
-		
-		if (HasSysTrayOptions(STO_ONCLOSE, STO_ONMINCLOSE))
+		if (m_menubar.HandleInitMenuPopup(pPopupMenu,
+										  GetToDoCtrl(),
+										  Prefs(),
+										  m_filterBar,
+										  m_mgrStorage,
+										  m_mgrUIExtensions,
+										  m_mgrMenuIcons))
 		{
-			if (!bHasMinToTray)
-				pPopupMenu->InsertMenu(ID_EXIT, MF_BYCOMMAND, ID_MINIMIZETOTRAY, CEnString(ID_MINIMIZETOTRAY));
-		}
-		else if (bHasMinToTray) // then remove
-		{
-			pPopupMenu->DeleteMenu(ID_MINIMIZETOTRAY, MF_BYCOMMAND);
-		}
-
-		// Remove 'Email Tasks' if Outlook is not installed
-		if (!CMSOutlookHelper::IsOutlookInstalled())
-		{
-			int nPos = CEnMenu::GetMenuItemPos(*pPopupMenu, ID_SENDTASKS);
-
-			if (nPos != -1)
-			{
-				// Delete menu item
-				pPopupMenu->DeleteMenu(nPos, MF_BYPOSITION);
-
-				// And then delete separator
-				pPopupMenu->DeleteMenu(nPos, MF_BYPOSITION);
-			}
-		}
-	}
-	else if (m_menubar.GetSubMenu(AM_EDIT) == pPopupMenu)
-	{
-		// remove relevant commands from the edit menu
-		PrepareEditMenu(pPopupMenu);
-	}
-	else if (m_menubar.GetSubMenu(AM_SORT) == pPopupMenu)
-	{
-		// remove relevant commands from the sort menu
-		PrepareSortMenu(pPopupMenu);
-	}
-	else if (m_menubar.GetSubMenu(AM_VIEW) == pPopupMenu)
-	{
-		// add UI extensions
-		HMENU hMenuUIExt = CEnMenu::GetSubMenu(*pPopupMenu, ID_SHOWVIEW_TASKTREE);
-
-		if (hMenuUIExt)
-		{
-			CStringArray aTypeIDs;
-			GetToDoCtrl().GetVisibleTaskViews(aTypeIDs);
-			
-			CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
-			helper.UpdateExtensionVisibilityState(CMenu::FromHandle(hMenuUIExt), m_mgrUIExtensions, aTypeIDs);
-		} 
-	}
-	else // all other sub-menus
-	{
-		switch (pPopupMenu->GetMenuItemID(0))
-		{
-		// test for 'Open From.../Save To...'
-		case ID_FILE_OPEN_USERSTORAGE1:
-		case ID_FILE_SAVE_USERSTORAGE1:
-			AddUserStorageToMenu(pPopupMenu);
-			break;
-
-		case ID_VIEW_ACTIVATEFILTER1:
-			AddFiltersToMenu(pPopupMenu);
-			break;
+			return;
 		}
 	}
 
@@ -7520,17 +7267,7 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 
 LRESULT CToDoListWnd::OnPostTranslateMenu(WPARAM /*wp*/, LPARAM lp)
 {
-	HMENU hMenu = (HMENU)lp;
-	ASSERT(::IsMenu(hMenu));
-
-	CMenu* pSortMenu = m_menubar.GetSubMenu(AM_SORT);
-
-	if (pSortMenu && (hMenu == pSortMenu->GetSafeHmenu()))
-	{
-		CEnMenu::SortMenuStrings(hMenu, ID_SORTBY_DEFAULTCOLUMNS_FIRST, ID_SORTBY_DEFAULTCOLUMNS_LAST);
-	}
-
-	return 0L;
+	return m_menubar.HandlePostTranslateMenu((HMENU)lp);
 }
 
 void CToDoListWnd::OnViewCustomToolbar() 
@@ -9289,256 +9026,6 @@ LRESULT CToDoListWnd::OnPreferencesEditLanguageFile(WPARAM /*wp*/, LPARAM /*lp*/
 	return FileMisc::Run(*this, _T("TDLTransEdit.exe"), sLangFilePath, SW_SHOWNORMAL, FileMisc::GetModuleFolder());
 }
 
-void CToDoListWnd::PrepareSortMenu(CMenu* pMenu) const
-{
-	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-		
-	CTDCColumnIDMap mapColIDs;
-	tdc.GetSortableColumns(mapColIDs);
-
-	BOOL bVisibleColumnsOnly = Prefs().GetShowSortMenuAsColumns();
-
-	if (bVisibleColumnsOnly)
-	{
-		// Always rebuild from scratch
-		{
-			CEnMenu menuBar;
-			VERIFY(menuBar.LoadMenu(IDR_MAINFRAME, *this, TRUE));
-
-			VERIFY(CEnMenu::CopyMenuContents(::GetSubMenu(menuBar, AM_SORT), *pMenu));
-		}
-		
-		int nCountLastSep = 0;
-		
-		for (int nItem = 0; nItem < (int)pMenu->GetMenuItemCount(); nItem++)
-		{
-			BOOL bDelete = FALSE;
-			BOOL bIsSeparator = FALSE;
-
-			UINT nMenuID = pMenu->GetMenuItemID(nItem);
-
-			if (nMenuID == ID_SEPARATOR)
-			{
-				bIsSeparator = TRUE;
-				bDelete = (nCountLastSep == 0);
-				nCountLastSep = 0;
-			}
-			else
-			{
-				TDC_COLUMN nColID = TDC::MapSortIDToColumn(nMenuID);
-
-				if (nColID != TDCC_NONE)
-					bDelete = !mapColIDs.Has(nColID);
-			}
-
-			// delete the item else increment the count since the last separator
-			if (bDelete)
-			{
-				ASSERT((nMenuID == ID_SEPARATOR) || (TDC::MapSortIDToColumn(nMenuID) != TDCC_NONE));
-
-				pMenu->DeleteMenu(nItem, MF_BYPOSITION);
-				nItem--;
-			}
-			else if (!bIsSeparator)
-			{
-				nCountLastSep++;
-			}
-		}
-	}
-
-	// custom sort columns
-
-	// first delete all custom columns and the related separator
-	int nItem = (int)pMenu->GetMenuItemCount();
-
-	while (nItem--)
-	{
-		UINT nMenuID = pMenu->GetMenuItemID(nItem);
-
-		if (nMenuID >= ID_SORTBY_CUSTOMCOLUMN_FIRST && nMenuID <= ID_SORTBY_CUSTOMCOLUMN_LAST)
-			pMenu->DeleteMenu(nItem, MF_BYPOSITION);
-	}
-
-	// separator is just before the separator before 'unsorted entry'
-	int nInsert = CEnMenu::GetMenuItemPos(*pMenu, ID_SORTBY_NONE) - 1;
-	ASSERT(nInsert >= 0);
-
-	// delete separator if exist
-	if ((nInsert > 0) && CEnMenu::IsSeparator(*pMenu, (nInsert - 1)))
-	{
-		nInsert--;
-		pMenu->DeleteMenu(nInsert, MF_BYPOSITION);
-	}
-
-	// then re-add
-	CTDCCustomAttribDefinitionArray aAttribDefs;
-
-	if (tdc.GetCustomAttributeDefs(aAttribDefs))
-	{
-		// re-add separator on demand
-		BOOL bWantSep = TRUE;
-
-		for (int nCol = 0; nCol < aAttribDefs.GetSize(); nCol++)
-		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nCol];
-			TDC_COLUMN nColID = attribDef.GetColumnID();
-
-			if (bVisibleColumnsOnly && !mapColIDs.Has(nColID))
-				continue;
-
-			ASSERT(attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT));
-
-			if (bWantSep)
-			{
-				bWantSep = FALSE;
-				pMenu->InsertMenu(nInsert, MF_BYPOSITION);
-				nInsert++;
-			}
-
-			UINT nMenuID = ((nColID - TDCC_CUSTOMCOLUMN_FIRST) + ID_SORTBY_CUSTOMCOLUMN_FIRST);
-			CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-
-			pMenu->InsertMenu(nInsert, MF_BYPOSITION, nMenuID, sColumn);
-			nInsert++;
-		}
-	}
-}
-
-void CToDoListWnd::PrepareEditMenu(CMenu* pMenu) const
-{
-	if (!Prefs().GetShowEditMenuAsColumns())
-		return;
-
-	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	
-	int nCountLastSep = 0;
-	
-	for (int nItem = 0; nItem < (int)pMenu->GetMenuItemCount(); nItem++)
-	{
-		BOOL bDelete = FALSE;
-		BOOL bIsSeparator = FALSE;
-
-		UINT nMenuID = pMenu->GetMenuItemID(nItem);
-		
-		switch (nMenuID)
-		{
-		case -1: // its a popup so recursively handle it
-			{
-				CMenu* pPopup = pMenu->GetSubMenu(nItem);
-
-				if (pPopup)
-				{
-					PrepareEditMenu(pPopup);
-				
-					// if the popup is now empty remove it too
-					bDelete = !pPopup->GetMenuItemCount();
-				}
-			}
-			break;
-
-		case ID_EDIT_SETTASKLISTCOLOR:
-		case ID_EDIT_CLEARTASKLISTCOLOR:
-			bDelete = !CTabCtrlEx::IsSupportedFlag(TCE_TABCOLORS);
-			break;
-			
-		case ID_EDIT_TASKCOLOR:
-		case ID_EDIT_CLEARTASKCOLOR:
-			bDelete = !((Prefs().GetTextColorOption() == COLOROPT_DEFAULT) ||
-						tdc.IsEditFieldShowing(TDCA_COLOR));
-			break;
-			
-        case ID_EDIT_DECTASKPRIORITY:
-        case ID_EDIT_INCTASKPRIORITY:
-		case ID_EDIT_SETPRIORITYNONE: 
-        case ID_EDIT_SETPRIORITY0:
-        case ID_EDIT_SETPRIORITY1:
-        case ID_EDIT_SETPRIORITY2:
-        case ID_EDIT_SETPRIORITY3:
-        case ID_EDIT_SETPRIORITY4:
-        case ID_EDIT_SETPRIORITY5:
-        case ID_EDIT_SETPRIORITY6:
-        case ID_EDIT_SETPRIORITY7:
-        case ID_EDIT_SETPRIORITY8:
-        case ID_EDIT_SETPRIORITY9:
-        case ID_EDIT_SETPRIORITY10:
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PRIORITY, TDCA_PRIORITY);
-			break;
-			
-		case ID_EDIT_OFFSETDATES:
-			bDelete = !(tdc.IsColumnOrEditFieldShowing(TDCC_STARTDATE, TDCA_STARTDATE) ||
-						tdc.IsColumnOrEditFieldShowing(TDCC_DUEDATE, TDCA_DUEDATE) || 
-						tdc.IsColumnOrEditFieldShowing(TDCC_DONEDATE, TDCA_DONEDATE));
-			break;
-			
-        case ID_EDIT_CLOCK_TASK:
-			bDelete = !(tdc.IsColumnShowing(TDCC_TRACKTIME) ||
-						tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT));
-			break;
-
-        case ID_SHOWTIMELOGFILE:
-        case ID_ADDTIMETOLOGFILE:
-			bDelete = !((tdc.IsColumnShowing(TDCC_TRACKTIME) ||
-						tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT)) &&
-						Prefs().GetLogTimeTracking());
-			break;
-			
-        case ID_EDIT_DECTASKPERCENTDONE:	
-        case ID_EDIT_INCTASKPERCENTDONE:	
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PERCENT, TDCA_PERCENT); 
-			break;
-
-        case ID_EDIT_OPENFILEREF1:
-		case ID_EDIT_SETFILEREF:			
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_FILEREF, TDCA_FILEREF); 
-			break;
-
-        case ID_EDIT_FLAGTASK:				
-			bDelete = !tdc.IsColumnShowing(TDCC_FLAG); 
-			break;
-
-		case ID_EDIT_LOCKTASK:				
-			bDelete = FALSE;
-			break;
-
-        case ID_EDIT_RECURRENCE:			
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_RECURRENCE, TDCA_RECURRENCE); 
-			break;
-
-        case ID_EDIT_GOTODEPENDENCY:		
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_DEPENDENCY, TDCA_DEPENDENCY); 
-			break;
-
-        case ID_EDIT_SETTASKICON:			
-        case ID_EDIT_CLEARTASKICON:	
-			break;
-
-		case ID_SEPARATOR: 
-			bIsSeparator = TRUE;
-			bDelete = (nCountLastSep == 0);
-			nCountLastSep = 0;
-			break;
-
-		default: 
-			break; 
-		}
-
-		// delete the item else increment the count since the last separator
-		if (bDelete)
-		{
-			pMenu->DeleteMenu(nItem, MF_BYPOSITION);
-			nItem--;
-		}
-		else if (!bIsSeparator)
-			nCountLastSep++;
-	}
-
-	// make sure last item is not a separator
-	int nLastItem = (int)pMenu->GetMenuItemCount() - 1;
-
-	if (pMenu->GetMenuItemID(nLastItem) == 0)
-		pMenu->DeleteMenu(nLastItem, MF_BYPOSITION);
-}
-
 void CToDoListWnd::OnViewNext() 
 {
 	if (GetTDCCount() < 2)
@@ -9584,7 +9071,7 @@ void CToDoListWnd::OnSysCommand(UINT nID, LPARAM lParam)
 		{
 			m_hwndLastFocus = ::GetFocus();
 
-			if (HasSysTrayOptions(STO_ONMINIMIZE, STO_ONMINCLOSE))
+			if (Prefs().HasSysTrayOptions(STO_ONMINIMIZE, STO_ONMINCLOSE))
 			{
 				MinimizeToTray();
 			}
@@ -10995,22 +10482,16 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 
 void CToDoListWnd::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
-	if ((nIDCtl == 0) && (lpDrawItemStruct->itemID == ID_CLOSE))
-	{
-		if (m_menubar.DrawMDIButton(lpDrawItemStruct))
-			return;
-	}
+	if (m_menubar.HandleDrawItem(nIDCtl, lpDrawItemStruct))
+		return;
 
 	CFrameWnd::OnDrawItem(nIDCtl, lpDrawItemStruct);
 } 
 
 void CToDoListWnd::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) 
 {
-	if (nIDCtl == 0 && lpMeasureItemStruct->itemID == ID_CLOSE)
-	{
-		if (m_menubar.MeasureMDIButton(lpMeasureItemStruct))
-			return;
-	}
+	if (m_menubar.HandleMeasureItem(nIDCtl, lpMeasureItemStruct))
+		return;
 	
 	CFrameWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
 }

@@ -627,7 +627,6 @@ protected:
 	void UpdateAeroFeatures();
 	void CopySelectedTasksToClipboard(TDC_TASKS2CLIPBOARD nAsFormat);
 	void SetUITheme(const CString& sThemeFile);
-	BOOL HasSysTrayOptions(int nOption1, int nOption2 = STO_NONE) const;
 	void ProcessQuickFindTextChange(BOOL bComboSelChange);
 	void RefreshFindTasksListData();
 	void CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID);
@@ -660,15 +659,9 @@ protected:
 	int ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidth, BOOL bCalcOnly = FALSE);
 	BOOL GetFilterBarRect(CRect& rect) const;
 
-	void PrepareEditMenu(CMenu* pMenu) const;
-	void PrepareSortMenu(CMenu* pMenu) const;
-	void AddUserStorageToMenu(CMenu* pMenu);
-	void AddFiltersToMenu(CMenu* pMenu);
-
 	void ShowFindDialog(BOOL bShow = TRUE);
 	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
-
-
+	
 	enum UDTCHANGETYPE
 	{
 		UDT_INIT,
@@ -706,7 +699,6 @@ protected:
 	void UpdateSBPaneAndTooltip(UINT nIDPane, UINT nIDTextFormat, const CString& sValue, UINT nIDTooltip, TDC_COLUMN nTDCC);
 	void UpdateStatusBarInfo(const CFilteredToDoCtrl& tdc, TDCSTATUSBARINFO& sbi) const;
 	void UpdateMenuIconMgrSourceControlStatus();
-	void UpdateMenuBackgroundColor();
 	void UpdateTimeTrackerPreferences();
 	void UpdateWindowIcons();
 
@@ -752,7 +744,6 @@ protected:
 	static void EnableTDLExtension(BOOL bEnable, BOOL bStartup);
 	static void EnableTDLProtocol(BOOL bEnable, BOOL bStartup);
 	static void SetupUIStrings();
-	static void EnableDynamicMenuTranslation(BOOL bEnable);
 	static CString GetEndSessionFilePath();
 	static BOOL IsEndSessionFilePath(const CString& sFilePath);
 	static BOOL LogIntermediateTaskList(CTaskFile& tasks, LPCTSTR szRefPath);

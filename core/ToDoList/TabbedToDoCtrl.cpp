@@ -186,7 +186,7 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 		AddView(m_mgrUIExt.GetUIExtension(nExt));
 	}
 
-	SetVisibleTaskViews(s_aDefTaskViews);
+	SetVisibleExtensionViews(s_aDefTaskViews);
 
 	return FALSE;
 }
@@ -399,11 +399,11 @@ void CTabbedToDoCtrl::LoadPrefs()
 			Misc::RemoveItem(sTypeID, aTypeIDs);
 		}
 
-		SetVisibleTaskViews(aTypeIDs);
+		SetVisibleExtensionViews(aTypeIDs);
 	}
 	else
 	{
-		SetVisibleTaskViews(s_aDefTaskViews);
+		SetVisibleExtensionViews(s_aDefTaskViews);
 	}
 
 	// Last active view
@@ -438,7 +438,7 @@ void CTabbedToDoCtrl::SavePrefs()
 	CStringArray aVisTypeIDs, aTypeIDs;
 
 	m_mgrUIExt.GetExtensionTypeIDs(aTypeIDs);
-	GetVisibleTaskViews(aVisTypeIDs, FALSE);
+	GetVisibleExtensionViews(aVisTypeIDs);
 
 	// remove visible items to leave hidden ones
 	Misc::RemoveItems(aVisTypeIDs, aTypeIDs);
@@ -4093,7 +4093,7 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 		// extension views
 		CStringArray aTypeIDs;
-		GetVisibleTaskViews(aTypeIDs, TRUE);
+		GetVisibleExtensionViews(aTypeIDs);
 
 		CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
 		helper.UpdateExtensionVisibilityState(pPopup, m_mgrUIExt, aTypeIDs);
@@ -4116,7 +4116,7 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 			
 		default:
 			if (helper.ProcessExtensionVisibilityMenuCmd(nCmdID, m_mgrUIExt, aTypeIDs))
-				SetVisibleTaskViews(aTypeIDs);
+				SetVisibleExtensionViews(aTypeIDs);
 			break;
 		}
 	}
@@ -6115,7 +6115,7 @@ BOOL CTabbedToDoCtrl::IsListViewTabShowing() const
 	return m_tabViews.IsViewTabShowing(FTCV_TASKLIST);
 }
 
-void CTabbedToDoCtrl::SetVisibleTaskViews(const CStringArray& aTypeIDs)
+void CTabbedToDoCtrl::SetVisibleExtensionViews(const CStringArray& aTypeIDs)
 {
 	// update extension visibility
 	int nExt = m_mgrUIExt.GetNumUIExtensions();
@@ -6144,13 +6144,7 @@ void CTabbedToDoCtrl::SetVisibleTaskViews(const CStringArray& aTypeIDs)
 #endif
 }
 
-// Externally called
-int CTabbedToDoCtrl::GetVisibleTaskViews(CStringArray& aTypeIDs) const
-{
-	return GetVisibleTaskViews(aTypeIDs, TRUE);
-}
-
-int CTabbedToDoCtrl::GetVisibleTaskViews(CStringArray& aTypeIDs, BOOL bIncListView) const
+int CTabbedToDoCtrl::GetVisibleExtensionViews(CStringArray& aTypeIDs) const
 {
 	ASSERT(GetSafeHwnd());
 
@@ -6166,14 +6160,10 @@ int CTabbedToDoCtrl::GetVisibleTaskViews(CStringArray& aTypeIDs, BOOL bIncListVi
 			aTypeIDs.Add(m_mgrUIExt.GetUIExtensionTypeID(nExt));
 	}
 
-	// Handle list view
-	if (bIncListView && IsListViewTabShowing())
-		aTypeIDs.Add(LISTVIEW_TYPE);
-
 #ifdef _DEBUG
 	int nTabCount = (m_tabViews.GetItemCount() - 1); // -1 for tree
 
-	if (!bIncListView && IsListViewTabShowing())
+	if (IsListViewTabShowing())
 		nTabCount--;
 
 	ASSERT(nTabCount == aTypeIDs.GetSize());

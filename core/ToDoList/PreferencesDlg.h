@@ -82,6 +82,7 @@ public:
 	BOOL GetConfirmSaveOnExit() const { return m_pageGen.GetConfirmSaveOnExit(); }
 	BOOL GetShowOnStartup() const { return m_pageGen.GetShowOnStartup(); }
 	int GetSysTrayOption() const { return m_pageGen.GetSysTrayOption(); }
+	BOOL HasSysTrayOptions(int nOption1, int nOption2 = STO_NONE) const { return m_pageGen.HasSysTrayOptions(nOption1, nOption2); }
 	BOOL GetToggleTrayVisibility() const { return m_pageGen.GetToggleTrayVisibility(); }
 	BOOL GetMultiInstance() const { return m_pageGen.GetMultiInstance(); }
 	BOOL GetGlobalHotkey() const { return m_pageGen.GetGlobalHotkey(); }

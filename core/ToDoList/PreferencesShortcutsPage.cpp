@@ -106,7 +106,7 @@ void CPreferencesShortcutsPage::OnFirstShow()
 
 		CTDCMainMenu menu;
 
-		if (menu.LoadMenu(TRUE, TRUE))
+		if (menu.LoadMenu())
 		{
 			for (int nPos = 0; nPos < (int)menu.GetMenuItemCount(); nPos++)
 			{

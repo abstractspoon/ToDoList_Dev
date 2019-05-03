@@ -77,9 +77,9 @@ public:
 	CString GetTaskViewName() const { return m_tabViews.GetViewName(GetTaskView()); }
 	void ShowListViewTab(BOOL bVisible = TRUE);
 	BOOL IsListViewTabShowing() const;
-	void SetVisibleTaskViews(const CStringArray& aTypeIDs);
-	int GetVisibleTaskViews(CStringArray& aTypeIDs) const;
 	void SaveAllTaskViewPreferences();
+	void SetVisibleExtensionViews(const CStringArray& aTypeIDs);
+	int GetVisibleExtensionViews(CStringArray& aTypeIDs) const;
 
 	static void SetDefaultTaskViews(const CStringArray& aTypeIDs);
 	
@@ -255,7 +255,6 @@ protected:
 	void SavePrefs();
 	BOOL IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const;
 	void UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0);
-	int GetVisibleTaskViews(CStringArray& aTypeIDs, BOOL bIncListView) const;
 
 	void SyncActiveViewSelectionToTree();
 	void SyncListSelectionToTree();
