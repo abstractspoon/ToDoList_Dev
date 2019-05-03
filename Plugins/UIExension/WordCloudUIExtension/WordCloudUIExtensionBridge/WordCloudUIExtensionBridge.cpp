@@ -42,9 +42,9 @@ CWordCloudUIExtensionBridge::CWordCloudUIExtensionBridge() : m_hIcon(NULL), m_pT
 
 	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_DAYVIEW));
 
-	msclr::auto_gcroot<RhinoLicensing^> licensing = gcnew RhinoLicensing();
-
-	licensing->CheckLicense(gcnew String(WORDCLOUD_GUID));
+// 	msclr::auto_gcroot<RhinoLicensing^> licensing = gcnew RhinoLicensing();
+// 
+// 	licensing->CheckLicense(gcnew String(WORDCLOUD_GUID));
 }
 
 void CWordCloudUIExtensionBridge::Release()
