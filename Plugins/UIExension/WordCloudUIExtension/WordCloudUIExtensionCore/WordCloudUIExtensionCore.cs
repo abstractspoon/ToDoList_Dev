@@ -81,7 +81,7 @@ namespace WordCloudUIExtension
 
 			InitializeComponent();
 
-			RhinoLicensing.CheckLicense("3BDEF4EA-7B02-41E1-BE65-3E03025E1FFE");
+			RhinoLicensing.LicenseType licType = RhinoLicensing.CheckLicense("3BDEF4EA-7B02-41E1-BE65-3E03025E1FFE");
 
 		}
 

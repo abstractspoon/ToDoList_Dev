@@ -16,10 +16,19 @@ namespace Abstractspoon
 			public ref class RhinoLicensing
 			{
 			public:
-				static bool CheckLicense(String^ typeId);
+				enum class LicenseType
+				{
+					Trial,
+					Paid,
+					Supporter,
+				};
+
+			public:
+				static LicenseType GetLicense(String^ typeId);
 				static bool CheckLicense(String^ publicKey, String^ licensePath, /*out*/ Dictionary<String^, String^>^ attributes);
 
 			protected:
+				static bool CheckLicense(String^ typeId);
 
 			};
 		}
