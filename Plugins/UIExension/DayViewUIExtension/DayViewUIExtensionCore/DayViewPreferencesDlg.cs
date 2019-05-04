@@ -11,7 +11,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
-    public partial class DayViewPreferencesDlg : Form
+    partial class DayViewPreferencesDlg : Form
     {
 		private Translator m_Trans;
 

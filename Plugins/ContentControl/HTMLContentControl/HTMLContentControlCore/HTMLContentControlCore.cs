@@ -32,11 +32,6 @@ namespace HTMLContentControl
             m_HelpID = helpID;
             
             InitializeComponent();
-
-            m_HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
-            m_HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
-			m_HtmlEditControl.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnNavigateLink);
-			m_HtmlEditControl.NeedLinkTooltip += new NeedLinkTooltipEventHandler(OnNeedLinkTooltip);
 		}
 
 		// ITDLContentControl ------------------------------------------------------------------
@@ -162,14 +157,18 @@ namespace HTMLContentControl
             this.m_HtmlEditControl.Name = "m_HtmlEditControl";
             this.m_HtmlEditControl.Size = this.ClientSize;
 			this.m_HtmlEditControl.ContentMargin = 5;
-			
+			this.m_HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
+			this.m_HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
+			this.m_HtmlEditControl.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnNavigateLink);
+			this.m_HtmlEditControl.NeedLinkTooltip += new NeedLinkTooltipEventHandler(OnNeedLinkTooltip);
+
 			this.Controls.Add(this.m_HtmlEditControl);
 
             this.ResumeLayout(false);
             this.PerformLayout();
-        }
+		}
 
-        private void OnInputTextChanged(object sender, EventArgs e)
+		private void OnInputTextChanged(object sender, EventArgs e)
         {
             ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent);
 
@@ -183,7 +182,7 @@ namespace HTMLContentControl
             notify.NotifyKillFocus();
         }
 
-		protected void OnNavigateLink(object sender, MSDN.Html.Editor.HtmlNavigationEventArgs e)
+		private void OnNavigateLink(object sender, MSDN.Html.Editor.HtmlNavigationEventArgs e)
 		{
 			// Pass everything back to our parent for consistent handling
 			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
@@ -196,7 +195,7 @@ namespace HTMLContentControl
 			e.Cancel = true; // always
 		}
 
-		protected void OnNeedLinkTooltip(object sender, NeedLinkTooltipEventArgs e)
+		private void OnNeedLinkTooltip(object sender, NeedLinkTooltipEventArgs e)
 		{
 			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
 			e.tooltip = notify.NotifyWantLinkTooltip(e.linkUri);

@@ -66,9 +66,6 @@
     <ClInclude Include="TreeCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RhinoLicensing.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -117,9 +114,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TreeCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RhinoLicensing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

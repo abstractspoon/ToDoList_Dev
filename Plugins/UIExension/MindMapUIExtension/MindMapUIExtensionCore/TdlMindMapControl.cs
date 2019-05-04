@@ -15,7 +15,7 @@ namespace MindMapUIExtension
     public delegate Boolean EditTaskIconEventHandler(object sender, UInt32 taskId);
     public delegate Boolean EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
 
-	public class MindMapTaskItem
+	class MindMapTaskItem
 	{
 		// Data
 		private String m_Title;
@@ -164,7 +164,7 @@ namespace MindMapUIExtension
 
 	[System.ComponentModel.DesignerCategory("")]
 
-	public class TdlMindMapControl : MindMapControl
+	class TdlMindMapControl : MindMapControl
 	{
 		public event EditTaskLabelEventHandler      EditTaskLabel;
         public event EditTaskIconEventHandler       EditTaskIcon;
@@ -511,7 +511,7 @@ namespace MindMapUIExtension
             return fontChange;
         }
 
-		protected MindMapTaskItem TaskItem(TreeNode node)
+		private MindMapTaskItem TaskItem(TreeNode node)
 		{
 			if (node == null)
 				return null;
@@ -519,7 +519,7 @@ namespace MindMapUIExtension
 			return (ItemData(node) as MindMapTaskItem);
 		}
 
-		protected MindMapTaskItem TaskItem(Object itemData)
+		private MindMapTaskItem TaskItem(Object itemData)
 		{
 			if (itemData == null)
 				return null;
@@ -527,7 +527,7 @@ namespace MindMapUIExtension
 			return (itemData as MindMapTaskItem);
 		}
 
-		protected TreeNode TopLevelParent(TreeNode node)
+		private TreeNode TopLevelParent(TreeNode node)
 		{
 			while ((node != null) && !IsRoot(node))
 			{
@@ -543,7 +543,7 @@ namespace MindMapUIExtension
 			return null;
 		}
 
-		protected void UpdateTaskAttributes(TaskList tasks)
+		private void UpdateTaskAttributes(TaskList tasks)
 		{
 			var rootItem = TaskItem(RootNode);
 
@@ -607,7 +607,7 @@ namespace MindMapUIExtension
 			return true;
 		}
 
-		protected void RebuildTreeView(TaskList tasks)
+		private void RebuildTreeView(TaskList tasks)
 		{
 			// Snapshot the expanded tasks so we can restore them afterwards
 			var expandedIDs = GetExpandedItems(RootNode);
@@ -656,7 +656,7 @@ namespace MindMapUIExtension
 			SetSelectedNode(selID);
 		}
 
-		protected String GetProjectName(TaskList tasks)
+		private String GetProjectName(TaskList tasks)
 		{
 			String rootName = tasks.GetProjectName();
 
@@ -667,7 +667,7 @@ namespace MindMapUIExtension
 			return m_Trans.Translate("Root");
 		}
 
-		protected List<UInt32> GetExpandedItems(TreeNode node)
+		private List<UInt32> GetExpandedItems(TreeNode node)
 		{
 			List<UInt32> expandedIDs = null;
 
@@ -690,7 +690,7 @@ namespace MindMapUIExtension
 			return expandedIDs;
 		}
 
-		protected Boolean SetExpandedItems(List<UInt32> expandedNodes)
+		private Boolean SetExpandedItems(List<UInt32> expandedNodes)
 		{
             if (expandedNodes == null)
                 return false;
@@ -750,7 +750,7 @@ namespace MindMapUIExtension
 			return true;
 		}
 
-        void FixupParentalStatus(TreeNode parentNode, int nodeCountOffset)
+		private void FixupParentalStatus(TreeNode parentNode, int nodeCountOffset)
         {
             var parentItem = TaskItem(parentNode);
 
@@ -758,7 +758,7 @@ namespace MindMapUIExtension
                 parentItem.FixupParentalStatus((parentNode.Nodes.Count + nodeCountOffset), m_TaskIcons);
         }
 
-        void FixupParentID(TreeNode node, TreeNode parent)
+		private void FixupParentID(TreeNode node, TreeNode parent)
         {
             var taskItem = TaskItem(node);
 
@@ -868,17 +868,17 @@ namespace MindMapUIExtension
             return CheckBoxState.UncheckedNormal;
         }
 
-		protected Boolean NodeHasIcon(TreeNode node)
+		private Boolean NodeHasIcon(TreeNode node)
 		{
 			return TaskHasIcon(TaskItem(node));
 		}
 
-        protected Boolean NodeIsTask(TreeNode node)
+		private Boolean NodeIsTask(TreeNode node)
         {
             return TaskItem(node).IsTask;
         }
 
-		protected Boolean TaskHasIcon(MindMapTaskItem taskItem)
+		private Boolean TaskHasIcon(MindMapTaskItem taskItem)
 		{
 			return ((m_TaskIcons != null) &&
 					(taskItem != null) &&
@@ -1024,7 +1024,7 @@ namespace MindMapUIExtension
             }
 		}
 
-        protected bool HitTestCheckbox(TreeNode node, Point point)
+		private bool HitTestCheckbox(TreeNode node, Point point)
         {
             if (!m_ShowCompletionCheckboxes)
                 return false;
@@ -1032,7 +1032,7 @@ namespace MindMapUIExtension
             return CalcCheckboxRect(GetItemLabelRect(node)).Contains(point);
         }
 
-        protected bool HitTestIcon(TreeNode node, Point point)
+		private bool HitTestIcon(TreeNode node, Point point)
         {
 			var taskItem = TaskItem(node);
 
@@ -1086,7 +1086,7 @@ namespace MindMapUIExtension
 			base.OnMouseDown(e);
 		}
 
-		protected void OnEditLabelTimer(object sender, EventArgs e)
+		private void OnEditLabelTimer(object sender, EventArgs e)
 		{
 			m_EditTimer.Stop();
 

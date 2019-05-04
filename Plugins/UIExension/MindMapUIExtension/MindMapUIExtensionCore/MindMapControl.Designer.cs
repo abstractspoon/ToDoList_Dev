@@ -1,4 +1,7 @@
-﻿namespace MindMapUIExtension
+﻿using System;
+using System.Windows.Forms;
+
+namespace MindMapUIExtension
 {
     partial class MindMapControl
     {
@@ -42,7 +45,10 @@
             this.m_DebugMode.TabIndex = 0;
             this.m_DebugMode.Text = "Debug mode";
             this.m_DebugMode.UseVisualStyleBackColor = true;
-  
+
+			m_DebugMode.CheckedChanged += new EventHandler(OnDebugModeChanged);
+			m_DebugMode.Font = this.Font;
+ 
             this.Controls.Add(this.m_DebugMode);
 #endif
             // 
@@ -54,6 +60,13 @@
             this.m_TreeView.Name = "TreeView";
             this.m_TreeView.Size = new System.Drawing.Size(300, 375);
             this.m_TreeView.TabIndex = 1;
+
+			if (!DebugMode())
+				m_TreeView.Visible = false;
+
+			m_TreeView.AfterExpand += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
+			m_TreeView.AfterCollapse += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
+			m_TreeView.AfterSelect += new TreeViewEventHandler(OnTreeViewAfterSelect);
 
             this.Controls.Add(this.m_TreeView);
             // 
@@ -67,12 +80,26 @@
             this.ResumeLayout(false);
             this.PerformLayout();
 
-        }
+			m_DragTimer = new Timer();
+			m_DragTimer.Interval = (int)GetDoubleClickTime();
+			m_DragTimer.Tick += new EventHandler(OnDragTimer);
 
-        #endregion
+			this.AutoScroll = true;
+			this.AllowDrop = true;
+			this.ReadOnly = false;
+
+			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+			SetStyle(ControlStyles.UserPaint, true);
+			SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+			SetStyle(ControlStyles.ResizeRedraw, true);
+
+			base.BorderStyle = BorderStyle.None;
+		}
+
+		#endregion
 
 #if DEBUG
-        private System.Windows.Forms.CheckBox m_DebugMode;
+		private System.Windows.Forms.CheckBox m_DebugMode;
 #endif
         private System.Windows.Forms.TreeView m_TreeView;
     }

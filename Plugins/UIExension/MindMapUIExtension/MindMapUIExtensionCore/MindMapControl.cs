@@ -62,7 +62,7 @@ namespace MindMapUIExtension
 		// Win32 Imports -----------------------------------------------------------------
 
 		[DllImport("User32.dll")]
-		public static extern int GetScrollPos(IntPtr hWnd, int nScrollBar);
+		static extern int GetScrollPos(IntPtr hWnd, int nScrollBar);
 
 		static int SB_HORZ = 0;
 		static int SB_VERT = 1;
@@ -70,7 +70,7 @@ namespace MindMapUIExtension
 		// --------------------------
 
 		[DllImport("User32.dll")]
-		public static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
+		static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
 
 		const int TVM_SETITEMHEIGHT = (0x1100 + 27);
 		const int TVM_GETITEMHEIGHT = (0x1100 + 28);
@@ -78,12 +78,12 @@ namespace MindMapUIExtension
 		// --------------------------
 
 		[DllImport("User32.dll")]
-		public static extern UInt32 GetDoubleClickTime();
+		static extern UInt32 GetDoubleClickTime();
 		
 		// --------------------------
 
 		[DllImport("User32.dll")]
-		public static extern int GetSystemMetrics(int index);
+		static extern int GetSystemMetrics(int index);
 		
 		const int SM_CXDOUBLECLK = 36;
 		const int SM_CYDOUBLECLK = 37;
@@ -97,13 +97,13 @@ namespace MindMapUIExtension
             return value;
         }
 
-		protected int ItemHorzSeparation { get { return ScaleByDPIFactor(40); } }
-		protected int ItemVertSeparation { get { return ScaleByDPIFactor(4); } }
-        protected int InsertionMarkerHeight { get { return ScaleByDPIFactor(6); } }
-		protected int ExpansionButtonSize { get { return ScaleByDPIFactor(8); } }
-		protected int ExpansionButtonSeparation { get { return ScaleByDPIFactor(2); } }
-		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
-        protected int GraphPadding { get { return ScaleByDPIFactor(6); } }
+		private int ItemHorzSeparation { get { return ScaleByDPIFactor(40); } }
+		private int ItemVertSeparation { get { return ScaleByDPIFactor(4); } }
+        private int InsertionMarkerHeight { get { return ScaleByDPIFactor(6); } }
+		private int ExpansionButtonSize { get { return ScaleByDPIFactor(8); } }
+		private int ExpansionButtonSeparation { get { return ScaleByDPIFactor(2); } }
+		private int LabelPadding { get { return ScaleByDPIFactor(2); } }
+        private int GraphPadding { get { return ScaleByDPIFactor(6); } }
 
 		protected enum NodeDrawState
 		{
@@ -119,7 +119,7 @@ namespace MindMapUIExtension
 			Right,
 		}
 
-        protected enum DropPos
+		protected enum DropPos
         {
             None,
             On,
@@ -150,32 +150,8 @@ namespace MindMapUIExtension
 			m_DropTarget = null;
             m_DropPos = DropPos.None;
 
-			m_DragTimer = new Timer();
-			m_DragTimer.Interval = (int)GetDoubleClickTime();
-			m_DragTimer.Tick += new EventHandler(OnDragTimer);
+			InitializeComponent();
 
-            InitializeComponent();
-#if DEBUG
-   			m_DebugMode.CheckedChanged += new EventHandler(OnDebugModeChanged);
-            m_DebugMode.Font = this.Font;
-#endif
-            if (!DebugMode())
-                m_TreeView.Visible = false;
-
-            m_TreeView.AfterExpand += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
-            m_TreeView.AfterCollapse += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
-            m_TreeView.AfterSelect += new TreeViewEventHandler(OnTreeViewAfterSelect);
-
-            AutoScroll = true;
-			AllowDrop = true;
-            ReadOnly = false;
-
-			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-			SetStyle(ControlStyles.UserPaint, true);
-			SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            SetStyle(ControlStyles.ResizeRedraw, true);
-            
-            base.BorderStyle = BorderStyle.None;
 		}
 
         public void SetFont(String fontName, int fontSize)

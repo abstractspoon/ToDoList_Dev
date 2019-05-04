@@ -58,10 +58,6 @@ namespace DayViewUIExtension
 			m_Trans = trans;
             m_HelpID = helpID;
 
-			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
-			m_ControlsFont = new Font(FontName, 8);
-            m_PrefsDlg = new DayViewPreferencesDlg(trans, m_ControlsFont);
-
 			InitializeComponent();
 		}
 		
@@ -318,7 +314,11 @@ namespace DayViewUIExtension
 
 		private void InitializeComponent()
 		{
-            // Day view always comes last
+			m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
+			m_ControlsFont = new Font(FontName, 8);
+			m_PrefsDlg = new DayViewPreferencesDlg(m_Trans, m_ControlsFont);
+
+			// Day view always comes last
 			CreateToolbar();
 			CreateWeekLabel();
 			CreateMonthYearCombos();
@@ -409,12 +409,12 @@ namespace DayViewUIExtension
 			Controls.Add(m_Toolbar);
 		}
 
-		protected void OnGoToToday(object sender, EventArgs e)
+		private void OnGoToToday(object sender, EventArgs e)
 		{
             m_DayView.GoToToday();
 		}
 
-		protected void OnPreferences(object sender, EventArgs e)
+		private void OnPreferences(object sender, EventArgs e)
 		{
 			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
 
@@ -437,7 +437,7 @@ namespace DayViewUIExtension
 			m_DayView.Invalidate();
 		}
 
-		protected void OnHelp(object sender, EventArgs e)
+		private void OnHelp(object sender, EventArgs e)
 		{
             UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -680,7 +680,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-        protected bool WantModifyTimeEstimate(CalendarItem item)
+        private bool WantModifyTimeEstimate(CalendarItem item)
         {
             // Update the Time estimate if it is zero or it used to match the previous date range
             if ((item.TimeEstimate == 0.0) && item.TimeEstimateIsMinsOrHours)
@@ -690,7 +690,7 @@ namespace DayViewUIExtension
             return item.TimeEstimateMatchesOriginalLength;
         }
 
-        protected int ControlTop
+        private int ControlTop
         {
             get
             {

@@ -12,7 +12,7 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace DayViewUIExtension
 {
-    public class TDLRenderer : Calendar.AbstractRenderer
+    class TDLRenderer : Calendar.AbstractRenderer
     {
 		private UIExtension.SelectionRect m_SelectionRect;
 		private VisualStyleRenderer m_HeaderNormal, m_HeaderHot;

@@ -9,7 +9,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLContentControl
 {
-	public delegate void NeedLinkTooltipEventHandler(object sender, NeedLinkTooltipEventArgs args);
+	delegate void NeedLinkTooltipEventHandler(object sender, NeedLinkTooltipEventArgs args);
 
 	public class NeedLinkTooltipEventArgs : EventArgs
 	{
@@ -20,7 +20,7 @@ namespace HTMLContentControl
 	}
 
 	[System.ComponentModel.DesignerCategory("")]
-    public class TDLHtmlEditorControl : MSDN.Html.Editor.HtmlEditorControl
+    class TDLHtmlEditorControl : MSDN.Html.Editor.HtmlEditorControl
     {
         private UIThemeToolbarRenderer m_toolbarRenderer;
         private System.Drawing.Font m_ControlsFont;
@@ -96,7 +96,7 @@ namespace HTMLContentControl
 			Toolbars.FixupButtonSizes(this.ToolBar);
 		}
 
-		void InitialiseFeatures()
+		private void InitialiseFeatures()
         {
             // remove whole 'Document' submenu
             CommandHandling.HideCommand("contextDocument", ContextMenu.Items);

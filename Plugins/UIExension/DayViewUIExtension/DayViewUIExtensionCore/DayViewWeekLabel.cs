@@ -7,7 +7,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace DayViewUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
-	public class DayViewWeekLabel : System.Windows.Forms.Label
+	class DayViewWeekLabel : System.Windows.Forms.Label
 	{
 		public DayViewWeekLabel(Translator trans)
 		{

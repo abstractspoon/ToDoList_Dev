@@ -6,7 +6,7 @@ using System.Text;
 namespace DayViewUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
-	public class DayViewYearComboBox : System.Windows.Forms.ComboBox
+	class DayViewYearComboBox : System.Windows.Forms.ComboBox
 	{
 		public DayViewYearComboBox()
 		{

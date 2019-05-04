@@ -11,8 +11,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
-
-	public class TDLDayView : Calendar.DayView
+	class TDLDayView : Calendar.DayView
     {
         private UInt32 m_SelectedTaskID = 0;
 
