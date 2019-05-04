@@ -41,8 +41,6 @@ CWordCloudUIExtensionBridge::CWordCloudUIExtensionBridge() : m_hIcon(NULL), m_pT
 	HMODULE hMod = LoadLibrary(L"WordCloudUIExtensionBridge.dll"); // us
 
 	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_DAYVIEW));
-
-	RhinoLicensing::LicenseType licType = RhinoLicensing::GetLicense(gcnew String(WORDCLOUD_GUID));
 }
 
 void CWordCloudUIExtensionBridge::Release()
