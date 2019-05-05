@@ -77,6 +77,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     AFX_IDS_APP_TITLE       "EasyFtp"
+    IDS_SD_TITLE            "Remote Server Details"
 END
 
 #endif    // English (U.S.) resources

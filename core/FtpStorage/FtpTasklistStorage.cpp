@@ -11,6 +11,7 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
+#include "..\shared\ServerDlg.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -148,7 +149,8 @@ void CFtpTasklistStorageApp::SetLocalizer(ITransText* pTT)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	CLocalizer::Initialize(pTT);
+	if (CLocalizer::Initialize(pTT))
+		CServerDlg::SetItemText(SD_TITLE, IDS_SD_TITLE);
 }
 
 void CFtpTasklistStorageApp::Release()

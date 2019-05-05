@@ -4,6 +4,7 @@
 //
 #define IDS_TDLFILEFILTER               102
 #define IDR_FTPSTORAGE                  13001
+#define IDS_SD_TITLE                    57345
 
 // Next default values for new objects
 // 

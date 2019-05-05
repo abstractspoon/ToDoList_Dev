@@ -647,7 +647,9 @@ void CTDCMainMenu::PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, 
 	const int MENUSTARTPOS = CEnMenu::GetMenuItemPos(*pMenu, ID_TOOLS_USERTOOL1);
 
 	// delete existing tool entries and their icons first
-	for (int nTool = 0; nTool < MAX_NUM_TOOLS; nTool++)
+	int nTool = MAX_NUM_TOOLS;
+
+	while (nTool--)
 	{
 		DeleteMenu(MENUSTARTID + nTool, MF_BYCOMMAND);
 		mgrMenuIcons.DeleteImage(MENUSTARTID + nTool);
@@ -658,7 +660,7 @@ void CTDCMainMenu::PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, 
 	prefs.GetUserTools(aTools);
 
 	// Remove invalid tools
-	int nTool = aTools.GetSize();
+	nTool = aTools.GetSize();
 
 	while (nTool--)
 	{

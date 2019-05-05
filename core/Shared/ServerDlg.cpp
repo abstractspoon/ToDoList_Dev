@@ -212,7 +212,7 @@ int CServerDlg::DoModal(IPreferences* pPrefs, LPCTSTR szKey)
 	m_pPrefs = pPrefs;
 	m_sPrefKey = szKey;
 
-	return CRuntimeDlg::DoModal(_T("Remote Server Details")); 
+	return CRuntimeDlg::DoModal(GetItemText(SD_TITLE, _T("Remote Server Details"))); 
 }
 
 void CServerDlg::OnOK() 

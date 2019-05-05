@@ -251,6 +251,10 @@ SOURCE=.\TDCCustomAttributeHelper.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCDialogHelper.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDCEnumContainers.cpp
 # End Source File
 # Begin Source File
@@ -268,6 +272,10 @@ SOURCE=.\TDCImageList.cpp
 # Begin Source File
 
 SOURCE=.\TDCImportExportMgr.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCMainMenu.cpp
 # End Source File
 # Begin Source File
 
@@ -807,6 +815,10 @@ SOURCE=.\TDCCustomAttributeHelper.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCDialogHelper.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\tdcenum.h
 # End Source File
 # Begin Source File
@@ -828,6 +840,10 @@ SOURCE=.\TDCImageList.h
 # Begin Source File
 
 SOURCE=.\TDCImportExportMgr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCMainMenu.h
 # End Source File
 # Begin Source File
 

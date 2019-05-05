@@ -82,10 +82,8 @@ END_MESSAGE_MAP()
 
 int CPasswordDialog::DoModal() 
 {	
-	CString sText = GetItemText(PD_TITLE, _T("Password Required"));
 	CString sTitle;
-
-	sTitle.Format(_T("%s - %s"), sText, AfxGetAppName());
+	sTitle.Format(_T("%s - %s"), GetItemText(PD_TITLE, _T("Password Required")), AfxGetAppName());
 
 	return CRuntimeDlg::DoModal(sTitle, RTD_DEFSTYLE, RTD_DEFEXSTYLE | WS_EX_TOPMOST); 
 }

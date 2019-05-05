@@ -151,13 +151,13 @@ protected:
 	void ShowControl(UINT nCtrlID, BOOL bShow = TRUE);
 	void ExcludeCtrls(CDC* pDC, UINT nCtrlIDFrom, UINT nCtrlIDTo, BOOL bIgnoreCorners = FALSE);
 
-	virtual void SetInitialPos(LPCRECT pRect, DWORD dwStyle);
 	void SavePosition();
 	BOOL HasInitialSize() const { return (m_sizeInitial.cx && m_sizeInitial.cy); }
 	void ClearInitialSize() { m_sizeInitial.cx  = m_sizeInitial.cy = 0; }
 
+	virtual void SetInitialPos(LPCRECT pRect, DWORD dwStyle);
 	virtual CPoint GetInitialPos() const { return CPoint(-1, -1); }
-	virtual CString OverrideItemText(UINT /*nIDItem*/) { return ""; }
+	virtual CString OverrideItemText(UINT /*nIDItem*/) { return _T(""); }
 
 	static void BuildClassMap();
 	static CString GetControlClassName(CWnd* pWnd); // works up the derivation chain till it finds a 'standard' windows control class
