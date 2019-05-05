@@ -40,10 +40,14 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\Utils\Utils.cs">
+      <Link>Utils.cs</Link>
+    </Compile>
     <Compile Include="OutlookExporterCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
