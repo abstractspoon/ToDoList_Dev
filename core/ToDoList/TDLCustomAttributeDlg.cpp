@@ -650,7 +650,14 @@ void CTDLCustomAttributeDlg::OnSelchangeListtype()
 
 	// update attribute
 	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+	BOOL bWasList = attrib.IsList();
+
 	attrib.SetListType(m_dwListType);
+
+	// If we've switched from non-left to list
+	// then automatically add 'filterable'
+	if (!bWasList && attrib.IsList())
+		attrib.dwFeatures |= TDCCAF_FILTER;
 
 	// update list type in case it has changed
 	m_dwListType = attrib.GetListType();
@@ -660,8 +667,8 @@ void CTDLCustomAttributeDlg::OnSelchangeListtype()
 
 	// And features in case they changed
 	m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
-
-	if (attrib.dwFeatures != m_dwFeatures)
+	
+	if ((attrib.dwFeatures != m_dwFeatures) || (!bWasList && attrib.IsList()))
 	{
 		attrib.dwFeatures = m_dwFeatures;
 		m_lcAttributes.SetItemText(nSel, COL_FEATURES, FormatFeatureList(m_dwFeatures));
