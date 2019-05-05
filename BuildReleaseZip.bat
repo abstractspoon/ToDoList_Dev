@@ -11,9 +11,15 @@ REM 7-Zip Location
 set PATH7ZIP="C:\Program Files (x86)\7-Zip\7z.exe"
 
 if NOT EXIST %PATH7ZIP% set PATH7ZIP="C:\Program Files\7-Zip\7z.exe"
+ECHO PATH7ZIP=%PATH7ZIP%
+
 if NOT EXIST %PATH7ZIP% exit
 
-ECHO PATH7ZIP=%PATH7ZIP%
+REM Obfuscar Location
+set PATHOBFUSCAR="D:\Tools\Obfuscar\Obfuscar.Console.exe"
+ECHO PATHOBFUSCAR=%PATHOBFUSCAR%
+
+if NOT EXIST %PATHOBFUSCAR% exit
 
 set OUTDIR=%REPO%\Core\ToDoList\Unicode_Release
 set OUTZIP=%OUTDIR%\todolist_exe_.zip
@@ -52,7 +58,9 @@ REM Handle dlls explicitly to maintain control over plugins
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\OdbcStorage.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\WorkloadExt.dll
 
-REM .Net Plugins
+REM .Net Plugins are obfuscated first
+%PATHOBFUSCAR% %REPO%\ObfuscatePlugins.xml
+
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\PluginHelpers.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\DayViewUIExtensionCore.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\DayViewUIExtensionBridge.dll
