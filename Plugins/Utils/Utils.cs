@@ -16,30 +16,46 @@ namespace Utils
 	class RhinoLicensing
 	{
 		static String PUBLIC_KEY = "<RSAKeyValue><Modulus>9twJpwt/Ofe58BOdK5Cb8XKGP5bvgxGh3IYkvCqvdzOCH3pi9BvOX+/fsRo/7HFbNmPr3Txu+hBl1JVH9ACXDxm20oKqgl6TzIk33iV6SrbuiZASi1OPAiTmsWBGKTIwrG9KiQ8JGmBotV/v2gRflqKELwiMUOO9W2DlgJ6szq0=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
-		static String SUPPORTER_ID = "00000000-0000-0000-0000-000000000000";
+		static String ALL_MODULES = "00000000-0000-0000-0000-000000000000";
 
 		public enum LicenseType
 		{
+			Free,
 			Trial,
 			Paid,
 			Supporter,
+			Contributor,
 		};
 		
 		public static LicenseType GetLicense(String typeId)
 		{
-			// Check for supporter first
-			if (CheckLicense(SUPPORTER_ID))
-				return LicenseType.Supporter;
+			String licType;
 
-			if (CheckLicense(typeId))
-				return LicenseType.Paid;
+			if (HasLicense(ALL_MODULES, out licType))
+			{
+				switch (licType)
+				{
+					case "Supported":	return LicenseType.Supporter;
+					case "Contributor": return LicenseType.Contributor;
+				}
+			}
+			else if (HasLicense(typeId, out licType))
+			{
+				switch (licType)
+				{
+					case "Free":		return LicenseType.Free;
+					case "Paid":		return LicenseType.Paid;
+				}
+			}
 
-			// else
+			// all else
 			return LicenseType.Trial;
 		}
 
-		private static bool CheckLicense(String typeId)
+		private static bool HasLicense(String typeId, out String licType)
 		{
+			licType = String.Empty;
+
 			String appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 			String licenseFolder = Path.Combine(appFolder, "Resources\\Licenses");
 
@@ -54,7 +70,7 @@ namespace Utils
 						continue;
 
 					// Validate attributes
-					String licId, expiryDate, licType, email, pluginName, pluginId;
+					String licId, expiryDate, email, pluginName, pluginId;
 
 					if (!attributes.TryGetValue("id", out licId) ||
 						!attributes.TryGetValue("expiration", out expiryDate) ||
@@ -72,6 +88,8 @@ namespace Utils
 					// TODO
 					//var expirationDate = DateTime.ParseExact(date.Value, "yyyy-MM-ddTHH:mm:ss.fffffff", CultureInfo.InvariantCulture);
 					//var licType = (/*LicenseType)Enum.Parse(typeof(LicenseType), */licenseType.Value);
+
+					return true;
 				}
 			}
 
