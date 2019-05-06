@@ -149,7 +149,11 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				return null;
 
 			// Make sure the parent doesn't already have a banner
-			// TODO
+			foreach (var ctrl in parent.Controls)
+			{
+				if (ctrl is RhinoLicenseBanner)
+					return null;
+			}
 
 			var banner = new RhinoLicenseBanner(typeId, trans);
 
