@@ -40,7 +40,7 @@ public:
 	
 	CString GetExporterMenuText(int nExporter) const;
 	CString GetExporterFileExtension(int nExporter, BOOL bWithDot) const;
-	BOOL ExporterHasFileExtension(int nExporter) const;
+	BOOL ExporterHasFileExtension(int nExporter, LPCTSTR szExt = NULL) const;
 	CString GetExporterFileFilter(int nExporter) const;
 	CString GetExporterTypeID(int nExporter) const;
 	HICON GetExporterIcon(int nExporter) const;

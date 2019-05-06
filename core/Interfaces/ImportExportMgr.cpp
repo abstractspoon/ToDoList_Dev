@@ -286,9 +286,14 @@ CString CImportExportMgr::GetExporterFileExtension(int nExporter, BOOL bWithDot)
 	return FileMisc::FormatExtension(sExt, bWithDot);
 }
 
-BOOL CImportExportMgr::ExporterHasFileExtension(int nExporter) const
+BOOL CImportExportMgr::ExporterHasFileExtension(int nExporter, LPCTSTR szExt) const
 {
-	return !GetExporterFileExtension(nExporter, FALSE).IsEmpty();
+	if (Misc::IsEmpty(szExt))
+		return !GetExporterFileExtension(nExporter, FALSE).IsEmpty();
+
+	CString sExt = GetExporterFileExtension(nExporter, (Misc::First(szExt) == '.'));
+
+	return (sExt.CompareNoCase(szExt) == 0);
 }
 
 CString CImportExportMgr::GetExporterFileFilter(int nExporter) const

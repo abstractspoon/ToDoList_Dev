@@ -1998,7 +1998,8 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	// So if user either wants 'Filtered Tasks' or 'Html Comments' or
 	// only 'Visible Columns' we need to grab the tasks again.
 	BOOL bFiltered = (userPrefs.GetSaveExportFilteredOnly() && tdc.HasAnyFilter());
-	BOOL bHtmlComments = CTDCImportExportMgr::IsFormat(userPrefs.GetSaveExportTypeID(), TDCET_HTML);
+	BOOL bHtmlComments = (m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("htm")) ||
+							m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("html")));
 
 	pExport->sStylesheet = userPrefs.GetSaveExportStylesheet();
 	BOOL bTransform = GetStylesheetPath(tdc, pExport->sStylesheet);
@@ -9458,7 +9459,7 @@ void CToDoListWnd::OnExport()
 	// filename OR they confirm that they want to overwrite the file(s)
 	CString sExportPath;
 	BOOL bOverWrite = FALSE;
-	int nFormat = -1;
+	int nExporter = -1;
 
 	while (!bOverWrite)
 	{
@@ -9466,7 +9467,7 @@ void CToDoListWnd::OnExport()
 			return;
 
 		sExportPath = dialog.GetExportPath();
-		nFormat = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
+		nExporter = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
 
 		UINT nMsgFlags = (MB_OKCANCEL | MB_ICONWARNING);
 
@@ -9480,7 +9481,7 @@ void CToDoListWnd::OnExport()
 		}
 		else // check all open tasklists
 		{
-			CString sFilePath, sExt = m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE);
+			CString sFilePath, sExt = m_mgrImportExport.GetExporterFileExtension(nExporter, TRUE);
 			CStringArray aExistPaths;
 		
 			for (int nCtrl = 0; nCtrl < nTDCCount; nCtrl++)
@@ -9507,7 +9508,8 @@ void CToDoListWnd::OnExport()
 	// export
 	DOPROGRESS(IDS_EXPORTPROGRESS);
 	
-	BOOL bHtmlComments = (nFormat == m_mgrImportExport.GetExporter(TDCET_HTML));
+	BOOL bHtmlComments = (m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("htm")) ||
+						  m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("html")));
 
 	if ((nTDCCount == 1) || !dialog.GetExportAllTasklists())
 	{
@@ -9535,7 +9537,7 @@ void CToDoListWnd::OnExport()
 		// save intermediate tasklist to file as required
 		LogIntermediateTaskList(tasks, tdc.GetFilePath());
 
-		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sExportPath, nFormat, FALSE);
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sExportPath, nExporter, FALSE);
 
 		switch (nRes)
 		{
@@ -9592,7 +9594,7 @@ void CToDoListWnd::OnExport()
 		
 		Resize();
 
-		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskLists(&taskFiles, sExportPath, nFormat, FALSE);
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskLists(&taskFiles, sExportPath, nExporter, FALSE);
 
 		switch (nRes)
 		{
@@ -9607,7 +9609,7 @@ void CToDoListWnd::OnExport()
 	}
 	else // separate files
 	{
-		CString sExt = m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE);
+		CString sExt = m_mgrImportExport.GetExporterFileExtension(nExporter, TRUE);
 		
 		for (int nCtrl = 0; nCtrl < nTDCCount; nCtrl++)
 		{
@@ -9639,7 +9641,7 @@ void CToDoListWnd::OnExport()
 												sExt, 
 												sFilePath, 
 												EOFN_DEFAULTSAVE,
-												m_mgrImportExport.GetExporterFileFilter(nFormat));
+												m_mgrImportExport.GetExporterFileFilter(nExporter));
 						
 						CPreferences prefs;
 
@@ -9676,7 +9678,7 @@ void CToDoListWnd::OnExport()
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks, tdc.GetFilePath());
 
-				m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nFormat, FALSE);
+				m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nExporter, FALSE);
 			}
 			
 			tdc.UnlockWindowUpdate();
