@@ -17,7 +17,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 {
 	class RhinoLicensing
 	{
-		static String PUBLIC_KEY = "<RSAKeyValue><Modulus>9twJpwt/Ofe58BOdK5Cb8XKGP5bvgxGh3IYkvCqvdzOCH3pi9BvOX+/fsRo/7HFbNmPr3Txu+hBl1JVH9ACXDxm20oKqgl6TzIk33iV6SrbuiZASi1OPAiTmsWBGKTIwrG9KiQ8JGmBotV/v2gRflqKELwiMUOO9W2DlgJ6szq0=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
+		static String PUBLIC_KEY  = "<RSAKeyValue><Modulus>9twJpwt/Ofe58BOdK5Cb8XKGP5bvgxGh3IYkvCqvdzOCH3pi9BvOX+/fsRo/7HFbNmPr3Txu+hBl1JVH9ACXDxm20oKqgl6TzIk33iV6SrbuiZASi1OPAiTmsWBGKTIwrG9KiQ8JGmBotV/v2gRflqKELwiMUOO9W2DlgJ6szq0=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
 		static String ALL_MODULES = "00000000-0000-0000-0000-000000000000";
 
 		public enum LicenseType
@@ -28,7 +28,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			Supporter,
 			Contributor,
 		};
-		
+
 		public static LicenseType GetLicense(String typeId)
 		{
 			String licType;
@@ -37,7 +37,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			{
 				switch (licType)
 				{
-					case "Supported":	return LicenseType.Supporter;
+					case "Supported": return LicenseType.Supporter;
 					case "Contributor": return LicenseType.Contributor;
 				}
 			}
@@ -45,8 +45,8 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			{
 				switch (licType)
 				{
-					case "Free":		return LicenseType.Free;
-					case "Paid":		return LicenseType.Paid;
+					case "Free": return LicenseType.Free;
+					case "Paid": return LicenseType.Paid;
 				}
 			}
 
@@ -72,12 +72,12 @@ namespace Abstractspoon.Tdl.PluginHelpers
 						continue;
 
 					// Validate attributes
-					String licId, expiryDate, email, pluginName, pluginId;
+					String licId, expiryDate, ownerId, pluginName, pluginId;
 
 					if (!attributes.TryGetValue("id", out licId) ||
 						!attributes.TryGetValue("expiration", out expiryDate) ||
 						!attributes.TryGetValue("type", out licType) ||
-						!attributes.TryGetValue("email", out email) ||
+						!attributes.TryGetValue("owner_id", out ownerId) ||
 						!attributes.TryGetValue("plugin_name", out pluginName) ||
 						!attributes.TryGetValue("plugin_id", out pluginId))
 					{
@@ -87,9 +87,13 @@ namespace Abstractspoon.Tdl.PluginHelpers
 					if (!pluginId.Equals(typeId))
 						continue;
 
-					// TODO
-					//var expirationDate = DateTime.ParseExact(date.Value, "yyyy-MM-ddTHH:mm:ss.fffffff", CultureInfo.InvariantCulture);
-					//var licType = (/*LicenseType)Enum.Parse(typeof(LicenseType), */licenseType.Value);
+					String userName, domainName, computerName;
+
+					if (!DecodeUserID(ownerId, out userName, out domainName, out computerName))
+						continue;
+
+					if (!VerifyUserIDs(userName, domainName, computerName))
+						continue;
 
 					return true;
 				}
@@ -143,102 +147,219 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			return true;
 		}
 
-		public static Control CreateBanner(String typeId, Control parent, Translator trans)
+		private static bool TestUserIds()
+		{
+			var userId = EncodeUserID();
+
+			String userName, domainName, computerName;
+
+			if (!DecodeUserID(userId, out userName, out domainName, out computerName))
+				return false;
+
+			if (!VerifyUserIDs(userName, domainName, computerName))
+				return false;
+
+			return true;
+		}
+
+		private static void GetUserIDs(out String userName, out String domainName, out String computerName)
+		{
+			userName = Environment.UserName;
+			domainName = Environment.UserDomainName;
+			computerName = Environment.MachineName;
+		}
+
+		public static String EncodeUserID()
+		{
+			String userName, domainName, computerName, userId;
+			GetUserIDs(out userName, out domainName, out computerName);
+
+			if (String.IsNullOrEmpty(domainName))
+				userId = String.Format("{0}.{1}", userName, computerName);
+			else
+				userId = String.Format("{0}.{1}.{2}", userName, computerName, domainName);
+
+			var bytes = Encoding.UTF8.GetBytes(userId);
+			Array.Reverse(bytes);
+
+			return Convert.ToBase64String(bytes);
+		}
+
+		private static bool DecodeUserID(String userId, out String userName, out String domainName, out String computerName)
+		{
+			var bytes = Convert.FromBase64String(userId);
+			Array.Reverse(bytes);
+
+			var userIds = Encoding.UTF8.GetString(bytes).Split('.');
+
+			switch (userIds.Count())
+			{
+				case 2:
+					userName = userIds[0];
+					computerName = userIds[1];
+					domainName = String.Empty;
+					break;
+
+				case 3:
+					userName = userIds[0];
+					computerName = userIds[1];
+					domainName = userIds[2];
+					break;
+
+				default:
+					userName = String.Empty;
+					computerName = String.Empty;
+					domainName = String.Empty;
+					return false;
+			}
+
+			return true;
+		}
+
+		private static bool VerifyUserIDs(String userName, String domainName, String computerName)
+		{
+			String user, domain, computer;
+			GetUserIDs(out user, out domain, out computer);
+
+			return (user.Equals(userName) && domain.Equals(domainName) && computer.Equals(computerName));
+		}
+
+		// Returns the visible height of the banner
+		public static int CreateBanner(String typeId, Control parent, Translator trans, int dollarPrice)
 		{
 			if (parent == null)
-				return null;
+				return 0;
 
 			// Make sure the parent doesn't already have a banner
 			foreach (var ctrl in parent.Controls)
 			{
 				if (ctrl is RhinoLicenseBanner)
-					return null;
+					return (ctrl as RhinoLicenseBanner).Height;
 			}
 
-			var banner = new RhinoLicenseBanner(typeId, trans);
+			var banner = new RhinoLicenseBanner(typeId, trans, dollarPrice);
 
 			banner.Location = new Point(0, 0);
 			banner.Size = new Size(parent.ClientSize.Width, banner.Height);
 
 			parent.Controls.Add(banner);
-			
-			return banner;
+
+			return banner.Height;
+		}
+	}
+
+	class RhinoLicenseBanner : Label
+	{
+		static String PAYPAL_URL = @"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=abstractspoon2%40optusnet%2ecom%2eau&item_name={0}({1})&amount={2}";
+
+		// ---------------------------------------------
+
+		private String m_TypeId;
+		private RhinoLicensing.LicenseType m_LicenseType;
+		private Translator m_Trans;
+		private LinkLabel m_buyBtn;
+		private int m_DollarPrice;
+
+		// ---------------------------------------------
+
+		public RhinoLicenseBanner(String typeId, Translator trans, int dollarPrice)
+		{
+			m_TypeId = typeId;
+			m_Trans = trans;
+			m_DollarPrice = dollarPrice;
+			m_LicenseType = RhinoLicensing.GetLicense(typeId);
+
+			InitializeComponent();
 		}
 
-		private class RhinoLicenseBanner : Label
+		private void InitializeComponent()
 		{
-			private RhinoLicensing.LicenseType m_LicenseType;
-			private Translator m_Trans;
+			Text = String.Format("{0}: {1}", m_Trans.Translate("License"), m_Trans.Translate(m_LicenseType.ToString()));
+			Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+			TextAlign = ContentAlignment.MiddleLeft;
+			//BorderStyle = BorderStyle.FixedSingle;
 
-			// ---------------------------------------------
+			Color fore, back;
+			GetColors(out fore, out back);
 
-			public RhinoLicenseBanner(String typeId, Translator trans) : this(RhinoLicensing.GetLicense(typeId), trans)
+			BackColor = back;
+			ForeColor = fore;
+
+			if (m_LicenseType == RhinoLicensing.LicenseType.Trial)
 			{
+				m_buyBtn = new LinkLabel();
+				m_buyBtn.Text = String.Format("Buy... (USD{0})", m_DollarPrice);
+				m_buyBtn.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
+				m_buyBtn.Height = Height;
+				m_buyBtn.BackColor = back;
+				m_buyBtn.LinkColor = fore;
+				m_buyBtn.TextAlign = ContentAlignment.MiddleRight;
+				m_buyBtn.LinkClicked += new LinkLabelLinkClickedEventHandler(OnBuyLicense);
+
+				this.Controls.Add(m_buyBtn);
 			}
+		}
 
-			public RhinoLicenseBanner(RhinoLicensing.LicenseType licType, Translator trans)
+		private void OnBuyLicense(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			System.Diagnostics.Process.Start(FormatPaypalUrl());
+		}
+
+		public new int Height
+		{
+			get
 			{
-				m_LicenseType = licType;
-				m_Trans = trans;
-
-				InitializeComponent();
-			}
-
-			private void InitializeComponent()
-			{
-				Text = String.Format("{0}: {1}", m_Trans.Translate("License"), m_Trans.Translate(m_LicenseType.ToString()));
-				Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-				TextAlign = ContentAlignment.MiddleLeft;
-				BorderStyle = BorderStyle.FixedSingle;
-
 				switch (m_LicenseType)
 				{
 					case RhinoLicensing.LicenseType.Free:
-						break;
+						return 0;
 
-					case RhinoLicensing.LicenseType.Trial:
-						ForeColor = Color.DarkRed;
-						break;
+					//case RhinoLicensing.LicenseType.Trial:
+					//	return 0;
 
 					case RhinoLicensing.LicenseType.Paid:
-						break;
+						return 0;
 
-					case RhinoLicensing.LicenseType.Supporter:
-						break;
+						//case RhinoLicensing.LicenseType.Supporter:
+						//	return 0;
 
-					case RhinoLicensing.LicenseType.Contributor:
-						break;
+						//case RhinoLicensing.LicenseType.Contributor:
+						//	return 0;
 				}
-			}
 
-			public new int Height
-			{
-				get
-				{
-					/*
-						switch (m_LicenseType)
-						{
-							case RhinoLicensing.LicenseType.Free:
-								return 0;
-
-							case RhinoLicensing.LicenseType.Trial:
-								return 0;
-
-							case RhinoLicensing.LicenseType.Paid:
-								return 0;
-
-							case RhinoLicensing.LicenseType.Supporter:
-								return 0;
-
-							case RhinoLicensing.LicenseType.Contributor:
-								return 0;
-						}
-					*/
-					return PluginHelpers.DPIScaling.Scale(20);
-				}
+				return PluginHelpers.DPIScaling.Scale(20);
 			}
 		}
 
-	}
+		private void GetColors(out Color fore, out Color back)
+		{
+			fore = Color.Black;
+			back = SystemColors.ButtonFace;
 
+			switch (m_LicenseType)
+			{
+				case RhinoLicensing.LicenseType.Free:
+					break;
+
+				case RhinoLicensing.LicenseType.Trial:
+					back = Color.DarkRed;
+					fore = Color.White;
+					break;
+
+				case RhinoLicensing.LicenseType.Paid:
+					break;
+
+				case RhinoLicensing.LicenseType.Supporter:
+					break;
+
+				case RhinoLicensing.LicenseType.Contributor:
+					break;
+			}
+		}
+
+		private String FormatPaypalUrl()
+		{
+			return String.Format(PAYPAL_URL, m_TypeId, RhinoLicensing.EncodeUserID(), m_DollarPrice);
+		}
+	}
 }

@@ -153,12 +153,12 @@ namespace HTMLContentControl
             this.Padding = new System.Windows.Forms.Padding(0);
             this.Font = m_ControlsFont;
 
-			var banner = RhinoLicensing.CreateBanner(m_TypeID, this, m_Trans);
+			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeID, this, m_Trans, 5);
 
 			m_HtmlEditControl = new TDLHtmlEditorControl(m_ControlsFont, m_Trans);
-            m_HtmlEditControl.Location = new System.Drawing.Point(0, banner.Height);
-            m_HtmlEditControl.Name = "m_HtmlEditControl";
-            m_HtmlEditControl.Size = new System.Drawing.Size(this.ClientSize.Width, this.ClientSize.Height - banner.Height);
+			m_HtmlEditControl.Name = "m_HtmlEditControl";
+			m_HtmlEditControl.Location = new System.Drawing.Point(0, bannerHeight);
+            m_HtmlEditControl.Size = new System.Drawing.Size(this.ClientSize.Width, this.ClientSize.Height - bannerHeight);
 			m_HtmlEditControl.ContentMargin = 5;
 			m_HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
 			m_HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
