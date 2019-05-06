@@ -142,82 +142,99 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
 			return true;
 		}
+
+		public static Control CreateBanner(String typeId, Control parent, Translator trans)
+		{
+			if (parent == null)
+				return null;
+
+			// Make sure the parent doesn't already have a banner
+			// TODO
+
+			var banner = new RhinoLicenseBanner(typeId, trans);
+
+			banner.Location = new Point(0, 0);
+			banner.Size = new Size(parent.ClientSize.Width, banner.Height);
+
+			parent.Controls.Add(banner);
+			
+			return banner;
+		}
+
+		private class RhinoLicenseBanner : Label
+		{
+			private RhinoLicensing.LicenseType m_LicenseType;
+			private Translator m_Trans;
+
+			// ---------------------------------------------
+
+			public RhinoLicenseBanner(String typeId, Translator trans) : this(RhinoLicensing.GetLicense(typeId), trans)
+			{
+			}
+
+			public RhinoLicenseBanner(RhinoLicensing.LicenseType licType, Translator trans)
+			{
+				m_LicenseType = licType;
+				m_Trans = trans;
+
+				InitializeComponent();
+			}
+
+			private void InitializeComponent()
+			{
+				Text = String.Format("{0}: {1}", m_Trans.Translate("License"), m_Trans.Translate(m_LicenseType.ToString()));
+				Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+				TextAlign = ContentAlignment.MiddleLeft;
+				BorderStyle = BorderStyle.FixedSingle;
+
+				switch (m_LicenseType)
+				{
+					case RhinoLicensing.LicenseType.Free:
+						break;
+
+					case RhinoLicensing.LicenseType.Trial:
+						ForeColor = Color.DarkRed;
+						break;
+
+					case RhinoLicensing.LicenseType.Paid:
+						break;
+
+					case RhinoLicensing.LicenseType.Supporter:
+						break;
+
+					case RhinoLicensing.LicenseType.Contributor:
+						break;
+				}
+			}
+
+			public new int Height
+			{
+				get
+				{
+					/*
+						switch (m_LicenseType)
+						{
+							case RhinoLicensing.LicenseType.Free:
+								return 0;
+
+							case RhinoLicensing.LicenseType.Trial:
+								return 0;
+
+							case RhinoLicensing.LicenseType.Paid:
+								return 0;
+
+							case RhinoLicensing.LicenseType.Supporter:
+								return 0;
+
+							case RhinoLicensing.LicenseType.Contributor:
+								return 0;
+						}
+					*/
+					return PluginHelpers.DPIScaling.Scale(20);
+				}
+			}
+		}
+
 	}
 
-	class RhinoLicenseBanner : Label
-	{
-		private RhinoLicensing.LicenseType m_LicenseType;
-		private Translator m_Trans;
-
-		// ---------------------------------------------
-
-		public RhinoLicenseBanner(String typeId, Control parent, Translator trans) : this(RhinoLicensing.GetLicense(typeId), parent, trans)
-		{
-		}
-
-		public RhinoLicenseBanner(RhinoLicensing.LicenseType licType, Control parent, Translator trans)
-		{
-			m_LicenseType = licType;
-			m_Trans = trans;
-
-			InitializeComponent(parent);
-		}
-
-		private void InitializeComponent(Control parent)
-		{
-			Text = String.Format("{0}: {1}", m_Trans.Translate("License"), m_Trans.Translate(m_LicenseType.ToString()));
-			Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-			TextAlign = ContentAlignment.MiddleLeft;
-			BorderStyle = BorderStyle.FixedSingle;
-
-			switch (m_LicenseType)
-			{
-				case RhinoLicensing.LicenseType.Free:
-					break;
-
-				case RhinoLicensing.LicenseType.Trial:
-					ForeColor = Color.DarkRed;
-					break;
-
-				case RhinoLicensing.LicenseType.Paid:
-					break;
-
-				case RhinoLicensing.LicenseType.Supporter:
-					break;
-
-				case RhinoLicensing.LicenseType.Contributor:
-					break;
-			}
-
-			Location = new Point(0, 0);
-			Size = new Size(parent.ClientSize.Width, Height);
-		}
-
-		public new int Height
-		{
-			get
-			{
-				/*
-					switch (m_LicenseType)
-					{
-						case RhinoLicensing.LicenseType.Free:
-							return 0;
-
-						case RhinoLicensing.LicenseType.Trial:
-							return 0;
-
-						case RhinoLicensing.LicenseType.Paid:
-							return 0;
-
-						case RhinoLicensing.LicenseType.Supporter:
-							return 0;
-
-						case RhinoLicensing.LicenseType.Contributor:
-							return 0;
-					}
-				*/
-				return PluginHelpers.DPIScaling.Scale(20);
-			}
-		}
-	} 
 }

@@ -17,7 +17,6 @@ namespace HTMLContentControl
         private TDLHtmlEditorControl m_HtmlEditControl;
         private Translator m_Trans;
         private String m_TypeID;
-		private RhinoLicenseBanner m_LicenseBanner;
 
         // --------------------------------------------------------------------------------------
 
@@ -154,12 +153,12 @@ namespace HTMLContentControl
             this.Padding = new System.Windows.Forms.Padding(0);
             this.Font = m_ControlsFont;
 
-			m_LicenseBanner = new RhinoLicenseBanner(m_TypeID, this, m_Trans);
+			var banner = RhinoLicensing.CreateBanner(m_TypeID, this, m_Trans);
 
 			m_HtmlEditControl = new TDLHtmlEditorControl(m_ControlsFont, m_Trans);
-            m_HtmlEditControl.Location = new System.Drawing.Point(0, m_LicenseBanner.Height);
+            m_HtmlEditControl.Location = new System.Drawing.Point(0, banner.Height);
             m_HtmlEditControl.Name = "m_HtmlEditControl";
-            m_HtmlEditControl.Size = new System.Drawing.Size(this.ClientSize.Width, this.ClientSize.Height - m_LicenseBanner.Height);
+            m_HtmlEditControl.Size = new System.Drawing.Size(this.ClientSize.Width, this.ClientSize.Height - banner.Height);
 			m_HtmlEditControl.ContentMargin = 5;
 			m_HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
 			m_HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
@@ -167,7 +166,6 @@ namespace HTMLContentControl
 			m_HtmlEditControl.NeedLinkTooltip += new NeedLinkTooltipEventHandler(OnNeedLinkTooltip);
 
 			this.Controls.Add(this.m_HtmlEditControl);
-			this.Controls.Add(this.m_LicenseBanner);
 
 			this.ResumeLayout(false);
             this.PerformLayout();
