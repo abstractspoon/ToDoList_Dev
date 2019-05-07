@@ -274,7 +274,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
 		private void InitializeComponent()
 		{
-			Text = String.Format("{0}: {1}", m_Trans.Translate("License"), m_Trans.Translate(m_LicenseType.ToString()));
+			Text = m_Trans.Translate(m_LicenseType.ToString() + ' ' + "License");
 			Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 			TextAlign = ContentAlignment.MiddleLeft;
 			//BorderStyle = BorderStyle.FixedSingle;
@@ -288,7 +288,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			if (m_LicenseType == RhinoLicensing.LicenseType.Trial)
 			{
 				m_buyBtn = new LinkLabel();
-				m_buyBtn.Text = String.Format("Buy... (USD{0})", m_DollarPrice);
+				m_buyBtn.Text = String.Format("{0} (USD{1})", m_Trans.Translate("Buy"), m_DollarPrice);
 				m_buyBtn.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
 				m_buyBtn.Height = Height;
 				m_buyBtn.BackColor = back;
