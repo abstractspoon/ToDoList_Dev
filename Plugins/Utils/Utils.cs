@@ -19,6 +19,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 	{
 		static String PUBLIC_KEY  = "<RSAKeyValue><Modulus>9twJpwt/Ofe58BOdK5Cb8XKGP5bvgxGh3IYkvCqvdzOCH3pi9BvOX+/fsRo/7HFbNmPr3Txu+hBl1JVH9ACXDxm20oKqgl6TzIk33iV6SrbuiZASi1OPAiTmsWBGKTIwrG9KiQ8JGmBotV/v2gRflqKELwiMUOO9W2DlgJ6szq0=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
 		static String ALL_MODULES = "00000000-0000-0000-0000-000000000000";
+		static char USERID_DELIM  = ':';
 
 		public enum LicenseType
 		{
@@ -171,13 +172,13 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
 		public static String EncodeUserID()
 		{
-			String userName, domainName, computerName, userId;
+			String userName, domainName, computerName;
 			GetUserIDs(out userName, out domainName, out computerName);
 
-			if (String.IsNullOrEmpty(domainName))
-				userId = String.Format("{0}.{1}", userName, computerName);
-			else
-				userId = String.Format("{0}.{1}.{2}", userName, computerName, domainName);
+			String userId = (userName + USERID_DELIM + computerName);
+
+			if (!String.IsNullOrEmpty(domainName))
+				userId = (userId + USERID_DELIM + domainName);
 
 			var bytes = Encoding.UTF8.GetBytes(userId);
 			Array.Reverse(bytes);
@@ -190,7 +191,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			var bytes = Convert.FromBase64String(userId);
 			Array.Reverse(bytes);
 
-			var userIds = Encoding.UTF8.GetString(bytes).Split('.');
+			var userIds = Encoding.UTF8.GetString(bytes).Split(USERID_DELIM);
 
 			switch (userIds.Count())
 			{
