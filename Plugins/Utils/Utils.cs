@@ -64,7 +64,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
 			if (Directory.Exists(licenseFolder))
 			{
-				var licenseFiles = Directory.EnumerateFiles(licenseFolder, typeId + ".xml", SearchOption.AllDirectories);
+				var licenseFiles = Directory.EnumerateFiles(licenseFolder, typeId + "*.xml", SearchOption.AllDirectories);
 				var attributes = new Dictionary<String, String>();
 
 				foreach (String licenseFile in licenseFiles)
@@ -231,136 +231,167 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			if (parent == null)
 				return 0;
 
-			// Make sure the parent doesn't already have a banner
-			foreach (var ctrl in parent.Controls)
+			// Add once per parent
+			var banner = GetBanner(parent);
+
+			if (banner == null)
 			{
-				if (ctrl is RhinoLicenseBanner)
-					return (ctrl as RhinoLicenseBanner).Height;
+				banner = new Banner(typeId, trans, dollarPrice);
+
+				banner.Location = new Point(0, 0);
+				banner.Size = new Size(parent.ClientSize.Width, banner.Height);
+
+				parent.Controls.Add(banner);
 			}
-
-			var banner = new RhinoLicenseBanner(typeId, trans, dollarPrice);
-
-			banner.Location = new Point(0, 0);
-			banner.Size = new Size(parent.ClientSize.Width, banner.Height);
-
-			parent.Controls.Add(banner);
 
 			return banner.Height;
 		}
-	}
 
-	class RhinoLicenseBanner : Label
-	{
-		static String PAYPAL_URL = @"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=abstractspoon2%40optusnet%2ecom%2eau&item_name={0}({1})&amount={2}";
-
-		// ---------------------------------------------
-
-		private String m_TypeId;
-		private RhinoLicensing.LicenseType m_LicenseType;
-		private Translator m_Trans;
-		private LinkLabel m_buyBtn;
-		private int m_DollarPrice;
-
-		// ---------------------------------------------
-
-		public RhinoLicenseBanner(String typeId, Translator trans, int dollarPrice)
+		public static void SetUITheme(Control bannerParent, UITheme theme)
 		{
-			m_TypeId = typeId;
-			m_Trans = trans;
-			m_DollarPrice = dollarPrice;
-			m_LicenseType = RhinoLicensing.GetLicense(typeId);
+			var banner = GetBanner(bannerParent);
 
-			InitializeComponent();
+			if (banner != null)
+				banner.SetUITheme(theme);
 		}
 
-		private void InitializeComponent()
+		private static Banner GetBanner(Control bannerParent)
 		{
-			Text = m_Trans.Translate(m_LicenseType.ToString() + ' ' + "License");
-			Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-			TextAlign = ContentAlignment.MiddleLeft;
-			//BorderStyle = BorderStyle.FixedSingle;
-
-			Color fore, back;
-			GetColors(out fore, out back);
-
-			BackColor = back;
-			ForeColor = fore;
-
-			if (m_LicenseType == RhinoLicensing.LicenseType.Trial)
+			if (bannerParent != null)
 			{
-				m_buyBtn = new LinkLabel();
-				m_buyBtn.Text = String.Format("{0} (USD{1})", m_Trans.Translate("Buy"), m_DollarPrice);
-				m_buyBtn.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
-				m_buyBtn.Height = Height;
-				m_buyBtn.BackColor = back;
-				m_buyBtn.LinkColor = fore;
-				m_buyBtn.TextAlign = ContentAlignment.MiddleRight;
-				m_buyBtn.LinkClicked += new LinkLabelLinkClickedEventHandler(OnBuyLicense);
-
-				this.Controls.Add(m_buyBtn);
+				foreach (var ctrl in bannerParent.Controls)
+				{
+					if (ctrl is Banner)
+						return (ctrl as Banner);
+				}
 			}
-		}
 
-		private void OnBuyLicense(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-			System.Diagnostics.Process.Start(FormatPaypalUrl());
+			return null;
 		}
-
-		public new int Height
+		
+		private class Banner : Label
 		{
-			get
+			static String PAYPAL_URL = @"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=abstractspoon2%40optusnet%2ecom%2eau&item_name={0}({1})&amount={2}";
+
+			// ---------------------------------------------
+
+			private String m_TypeId;
+			private RhinoLicensing.LicenseType m_LicenseType;
+			private Translator m_Trans;
+			private LinkLabel m_buyBtn;
+			private int m_DollarPrice = 0;
+			private Color m_themeBkColor = SystemColors.ButtonFace;
+
+			// ---------------------------------------------
+
+			public Banner(String typeId, Translator trans, int dollarPrice)
 			{
+				m_TypeId = typeId;
+				m_Trans = trans;
+				m_DollarPrice = dollarPrice;
+				m_LicenseType = RhinoLicensing.GetLicense(typeId);
+
+				InitializeComponent();
+			}
+
+			public void SetUITheme(UITheme theme)
+			{
+				m_themeBkColor = theme.GetAppDrawingColor(UITheme.AppColor.StatusBarDark);
+				RefreshColors();
+			}
+
+			private void InitializeComponent()
+			{
+				Text = m_Trans.Translate(m_LicenseType.ToString() + ' ' + "License");
+				Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+				TextAlign = ContentAlignment.MiddleLeft;
+
+				if ((m_LicenseType != RhinoLicensing.LicenseType.Free) &&
+					(m_LicenseType != RhinoLicensing.LicenseType.Paid))
+				{
+					m_buyBtn = new LinkLabel();
+					m_buyBtn.Text = String.Format("{0} (USD{1})", m_Trans.Translate("Buy"), m_DollarPrice);
+					m_buyBtn.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
+					m_buyBtn.Height = Height;
+					m_buyBtn.TextAlign = ContentAlignment.MiddleRight;
+					m_buyBtn.LinkClicked += new LinkLabelLinkClickedEventHandler(OnBuyLicense);
+
+					this.Controls.Add(m_buyBtn);
+				}
+
+				RefreshColors();
+			}
+
+			private void OnBuyLicense(object sender, LinkLabelLinkClickedEventArgs e)
+			{
+				System.Diagnostics.Process.Start(FormatPaypalUrl());
+			}
+
+			public new int Height
+			{
+				get
+				{
+					switch (m_LicenseType)
+					{
+						case RhinoLicensing.LicenseType.Free:
+							return 0;
+
+						//case RhinoLicensing.LicenseType.Trial:
+						//	return 0;
+
+						case RhinoLicensing.LicenseType.Paid:
+							return 0;
+
+							//case RhinoLicensing.LicenseType.Supporter:
+							//	return 0;
+
+							//case RhinoLicensing.LicenseType.Contributor:
+							//	return 0;
+					}
+
+					return PluginHelpers.DPIScaling.Scale(20);
+				}
+			}
+
+			private void RefreshColors()
+			{
+				BackColor = SystemColors.ButtonFace;
+				ForeColor = Color.Black;
+
 				switch (m_LicenseType)
 				{
 					case RhinoLicensing.LicenseType.Free:
-						return 0;
+						break;
 
-					//case RhinoLicensing.LicenseType.Trial:
-					//	return 0;
+					case RhinoLicensing.LicenseType.Trial:
+						BackColor = Color.DarkRed;
+						ForeColor = Color.White;
+						break;
 
 					case RhinoLicensing.LicenseType.Paid:
-						return 0;
+						break;
 
-						//case RhinoLicensing.LicenseType.Supporter:
-						//	return 0;
+					case RhinoLicensing.LicenseType.Supporter:
+						BackColor = ColorUtil.DrawingColor.AdjustLighting(m_themeBkColor, -0.05f, false);
+						break;
 
-						//case RhinoLicensing.LicenseType.Contributor:
-						//	return 0;
+					case RhinoLicensing.LicenseType.Contributor:
+						BackColor = ColorUtil.DrawingColor.AdjustLighting(m_themeBkColor, -0.05f, false);
+						break;
 				}
 
-				return PluginHelpers.DPIScaling.Scale(20);
+				if (m_buyBtn != null)
+				{
+					m_buyBtn.BackColor = BackColor;
+					m_buyBtn.LinkColor = ForeColor;
+				}
 			}
-		}
 
-		private void GetColors(out Color fore, out Color back)
-		{
-			fore = Color.Black;
-			back = SystemColors.ButtonFace;
-
-			switch (m_LicenseType)
+			private String FormatPaypalUrl()
 			{
-				case RhinoLicensing.LicenseType.Free:
-					break;
-
-				case RhinoLicensing.LicenseType.Trial:
-					back = Color.DarkRed;
-					fore = Color.White;
-					break;
-
-				case RhinoLicensing.LicenseType.Paid:
-					break;
-
-				case RhinoLicensing.LicenseType.Supporter:
-					break;
-
-				case RhinoLicensing.LicenseType.Contributor:
-					break;
+				return String.Format(PAYPAL_URL, m_TypeId, RhinoLicensing.EncodeUserID(), m_DollarPrice);
 			}
-		}
-
-		private String FormatPaypalUrl()
-		{
-			return String.Format(PAYPAL_URL, m_TypeId, RhinoLicensing.EncodeUserID(), m_DollarPrice);
 		}
 	}
+
 }

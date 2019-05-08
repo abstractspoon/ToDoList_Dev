@@ -79,6 +79,8 @@ namespace HTMLContentControl
         public void SetUITheme(UITheme theme)
         {
             m_HtmlEditControl.SetUITheme(theme);
+
+			RhinoLicensing.SetUITheme(this, theme);
         }
 
 		public void SetContentFont(String fontName, int pointSize)
