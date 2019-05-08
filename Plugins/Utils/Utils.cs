@@ -34,20 +34,21 @@ namespace Abstractspoon.Tdl.PluginHelpers
 		{
 			String licType;
 
-			if (HasLicense(ALL_MODULES, out licType))
-			{
-				switch (licType)
-				{
-					case "Supported": return LicenseType.Supporter;
-					case "Contributor": return LicenseType.Contributor;
-				}
-			}
-			else if (HasLicense(typeId, out licType))
+			// Paid/free licenses take priority
+			if (HasLicense(typeId, out licType))
 			{
 				switch (licType)
 				{
 					case "Free": return LicenseType.Free;
 					case "Paid": return LicenseType.Paid;
+				}
+			}
+			else if (HasLicense(ALL_MODULES, out licType))
+			{
+				switch (licType)
+				{
+					case "Supported": return LicenseType.Supporter;
+					case "Contributor": return LicenseType.Contributor;
 				}
 			}
 
@@ -64,7 +65,8 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
 			if (Directory.Exists(licenseFolder))
 			{
-				var licenseFiles = Directory.EnumerateFiles(licenseFolder, typeId + "*.xml", SearchOption.AllDirectories);
+				var searchPattern = ("*" + typeId + ".xml"); // total flexibility
+				var licenseFiles = Directory.EnumerateFiles(licenseFolder, searchPattern, SearchOption.AllDirectories);
 				var attributes = new Dictionary<String, String>();
 
 				foreach (String licenseFile in licenseFiles)
