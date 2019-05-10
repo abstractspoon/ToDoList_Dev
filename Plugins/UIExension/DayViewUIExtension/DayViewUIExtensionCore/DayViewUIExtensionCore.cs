@@ -181,18 +181,6 @@ namespace DayViewUIExtension
 			bool showParentsAsFolder = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
 			m_DayView.ShowParentsAsFolder = showParentsAsFolder;
 
-			// Remove for 7.3 *********************************
-			String fontName = FontName;
-			int fontSize = 8;
-
-			if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false))
-			{
-				fontName = prefs.GetProfileString("Preferences", "TreeFont", fontName);
-				fontSize = prefs.GetProfileInt("Preferences", "FontSize", fontSize);
-			}
-			SetTaskFont(fontName, fontSize);
-			// ************************************************
-
 			// Weekends
 			WeekendDays dwWeekends = (WeekendDays)prefs.GetProfileInt("Preferences", "Weekends", 0);
 

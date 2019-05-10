@@ -144,18 +144,6 @@ namespace MindMapUIExtension
             bool showDoneCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
             m_MindMap.ShowCompletionCheckboxes = showDoneCheckboxes;
 			
-			// Remove for 7.3 *********************************
-			String fontName = FontName;
-			int fontSize = 8;
-
-			if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false))
-			{
-				fontName = prefs.GetProfileString("Preferences", "TreeFont", fontName);
-				fontSize = prefs.GetProfileInt("Preferences", "FontSize", fontSize);
-			}
-			SetTaskFont(fontName, fontSize);
-			// ************************************************
-
 			m_MindMap.SetStrikeThruDone(prefs.GetProfileBool("Preferences", "StrikethroughDone", true));
         }
 

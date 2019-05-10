@@ -452,18 +452,6 @@ namespace WordCloudUIExtension
             m_LangIgnoreFilePath = Path.Combine(appPath, "Resources\\Translations", language);
             m_LangIgnoreFilePath = Path.ChangeExtension(m_LangIgnoreFilePath, "WordCloud.Ignore.txt");
 
-			// Remove for 7.3 *********************************
-			String fontName = FontName;
-			int fontSize = 10;
-
-			if (prefs.GetProfileBool("Preferences", "SpecifyTreeFont", false))
-			{
-				fontName = prefs.GetProfileString("Preferences", "TreeFont", fontName);
-				fontSize = prefs.GetProfileInt("Preferences", "FontSize", fontSize);
-			}
-			SetTaskFont(fontName, fontSize);
-			// ************************************************
-
 			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
             m_TaskMatchesList.TaskColorIsBackground = taskColorIsBkgnd;
 
