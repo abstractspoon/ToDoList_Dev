@@ -18,7 +18,8 @@ namespace MindMapUIExtension
 
         // ----------------------------------------------------------------------------
 
-        private IntPtr m_hwndParent = IntPtr.Zero;
+        private IntPtr m_HwndParent = IntPtr.Zero;
+        private String m_TypeId;
 
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
@@ -28,13 +29,11 @@ namespace MindMapUIExtension
 
         // ----------------------------------------------------------------------------
 
-        public MindMapUIExtensionCore(IntPtr hwndParent, Translator trans)
+        public MindMapUIExtensionCore(String typeId, IntPtr hwndParent, Translator trans)
         {
-            m_hwndParent = hwndParent;
+            m_TypeId = typeId;
+            m_HwndParent = hwndParent;
             m_Trans = trans;
-
-            m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
-			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
             InitializeComponent();
         }
@@ -209,11 +208,22 @@ namespace MindMapUIExtension
 
         private void InitializeComponent()
         {
-            m_MindMap = new TdlMindMapControl(m_Trans, m_TaskIcons);
+            m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
+            m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
-            m_MindMap.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
+			m_MindMap = new TdlMindMapControl(m_Trans, m_TaskIcons);
+
+#if DEBUG
+			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, 5);
+
+			m_MindMap.Location = new Point(0, bannerHeight);
+			m_MindMap.Size = new Size(this.ClientSize.Width, this.ClientSize.Height - bannerHeight);
+#else
+			m_MindMap.Size = ClientSize;
+#endif
+
+			m_MindMap.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             m_MindMap.Font = m_ControlsFont;
-            m_MindMap.Size = ClientRectangle.Size;
             m_MindMap.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 
 			m_MindMap.SelectionChange += new SelectionChangeEventHandler(OnMindMapSelectionChange);
@@ -227,14 +237,14 @@ namespace MindMapUIExtension
 
         Boolean OnMindMapEditTaskLabel(object sender, UInt32 taskId)
 		{
-			var notify = new UIExtension.ParentNotify(m_hwndParent);
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			return notify.NotifyEditLabel();
 		}
 
         Boolean OnMindMapEditTaskCompletion(object sender, UInt32 taskId, bool completed)
         {
-            var notify = new UIExtension.ParentNotify(m_hwndParent);
+            var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyMod(Task.Attribute.DoneDate, 
                                     (completed ? DateTime.Now : DateTime.MinValue));
@@ -242,7 +252,7 @@ namespace MindMapUIExtension
 
         Boolean OnMindMapEditTaskIcon(object sender, UInt32 taskId)
         {
-            var notify = new UIExtension.ParentNotify(m_hwndParent);
+            var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyEditIcon();
         }
@@ -250,14 +260,14 @@ namespace MindMapUIExtension
 		void OnMindMapSelectionChange(object sender, object itemData)
 		{
 			var taskItem = (itemData as MindMapTaskItem);
-			var notify = new UIExtension.ParentNotify(m_hwndParent);
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			notify.NotifySelChange(taskItem.ID);
 		}
 
 		Boolean OnMindMapDragDrop(object sender, MindMapDragEventArgs e)
 		{
-			var notify = new UIExtension.ParentNotify(m_hwndParent);
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			if (e.copyItem)
 				return notify.NotifyCopy(e.dragged.uniqueID, 
