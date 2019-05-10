@@ -281,6 +281,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			private RhinoLicensing.LicenseType m_LicenseType;
 			private Translator m_Trans;
 			private LinkLabel m_buyBtn;
+            private ToolTip m_buyBtnTooltip;
 			private int m_DollarPrice = 0;
 			private Color m_themeBkColor = SystemColors.ButtonFace;
 
@@ -319,6 +320,9 @@ namespace Abstractspoon.Tdl.PluginHelpers
 					m_buyBtn.LinkClicked += new LinkLabelLinkClickedEventHandler(OnBuyLicense);
 
 					this.Controls.Add(m_buyBtn);
+
+                    m_buyBtnTooltip = new ToolTip();
+                    m_buyBtnTooltip.SetToolTip(this, "https://www.paypal.com");
 				}
 
 				RefreshColors();
