@@ -1549,20 +1549,17 @@ DWORD FileMisc::Run(HWND hwnd, LPCTSTR lpFile, LPCTSTR lpParams, int nShowCmd, L
 	if (dwRes < SE_ERR_SUCCESS)
 	{
 		if (lpVerb)
-			LogText(_T("ShellExecute(%s: %s) failed. RetCode = %ld"), lpFile, lpVerb, dwRes);
+			LogText(_T("ShellExecute(%s: %s) failed. Error = %s (%ld)"), lpFile, lpVerb, Misc::FormatGetLastError(dwRes), dwRes);
 		else
-			LogText(_T("ShellExecute(%s) failed. RetCode = %ld"), lpFile, dwRes);
+			LogText(_T("ShellExecute(%s) failed. Error = %s (%ld)"), lpFile, Misc::FormatGetLastError(dwRes), dwRes);
 
 		// try CreateProcess
-		STARTUPINFO si;
-		PROCESS_INFORMATION pi;
+		STARTUPINFO si = { 0 };
+		PROCESS_INFORMATION pi = { 0 };
 
-		ZeroMemory( &si, sizeof(si) );
 		si.cb = sizeof(si);
 		si.wShowWindow = (WORD)nShowCmd;
 		si.dwFlags = STARTF_USESHOWWINDOW;
-
-		ZeroMemory( &pi, sizeof(pi) );
 
 		// Start the child process.
 		if (CreateProcess( NULL,			// No module name (use command line).
@@ -1577,6 +1574,11 @@ DWORD FileMisc::Run(HWND hwnd, LPCTSTR lpFile, LPCTSTR lpParams, int nShowCmd, L
 							&pi ))			// Pointer to PROCESS_INFORMATION structure.
 		{
 			dwRes = SE_ERR_SUCCESS;
+		}
+		else
+		{
+			dwRes = ::GetLastError();
+			LogText(_T("ShellExecute.CreateProcess(%s) failed. Error = %s (%ld)"), lpFile, Misc::FormatGetLastError(dwRes), dwRes);
 		}
 
 		// Close process and thread handles.
