@@ -66,6 +66,7 @@ namespace HTMLReportExporter
 		// --------------------------------------------------------------------------------------
 
 		private Translator m_Trans;
+		private String m_TypeId;
 
 		// --------------------------------------------------------------------------------------
 
@@ -82,13 +83,26 @@ namespace HTMLReportExporter
 
 		// --------------------------------------------------------------------------------------
 
-		public HTMLReportExporterCore(Translator trans)
+		public HTMLReportExporterCore(String typeId, Translator trans)
 		{
+			m_TypeId = typeId;
 			m_Trans = trans;
 		}
 
 		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
+			if (!silent)
+			{
+				// Display a dialog to get the report parameters
+				using (var dialog = new HTMLReportExporterForm(m_TypeId, m_Trans))
+				{
+					if (dialog.ShowDialog() != DialogResult.OK)
+						return false;
+
+					// TODO
+				}
+			}
+
 			//tasks.GetAttributeList(Attribs);
 
 			String font = prefs.GetProfileString("Preferences", "HTMLFont", "Verdana");
@@ -194,14 +208,8 @@ namespace HTMLReportExporter
 
 		public bool Export(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
-			InitConsts(tasks, destFilePath, silent, prefs, sKey);
-
-			if (!silent)
-			{
-				// Display a dialog to get the report parameters
-				// TODO
-
-			}
+			if (!InitConsts(tasks, destFilePath, silent, prefs, sKey))
+				return false;
 
 			try
 			{

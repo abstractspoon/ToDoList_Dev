@@ -51,12 +51,23 @@
       <Link>Utils.cs</Link>
     </Compile>
     <Compile Include="HTMLReportExporterCore.cs" />
+    <Compile Include="HTMLReportExporterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HTMLReportExporterForm.Designer.cs">
+      <DependentUpon>HTMLReportExporterForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PluginHelpers">
       <HintPath>..\..\..\$(Configuration)\PluginHelpers.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="HTMLReportExporterForm.resx">
+      <DependentUpon>HTMLReportExporterForm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
