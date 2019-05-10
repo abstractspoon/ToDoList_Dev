@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 using System.IO;
 using System.Reflection;
@@ -270,7 +271,30 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
 			return null;
 		}
-		
+
+		private class LinkLabelEx : LinkLabel
+		{
+			private const int WM_SETCURSOR = 0x0020;
+
+			[DllImport("user32.dll", CharSet = CharSet.Auto)]
+			private static extern IntPtr SetCursor(IntPtr hCursor);
+
+			protected override void WndProc(ref Message m)
+			{
+				if (m.Msg == WM_SETCURSOR)
+				{
+					// Set the cursor to use the system hand cursor
+					SetCursor(UIExtension.HandCursor().Handle);
+
+					// Indicate that the message has been handled
+					m.Result = IntPtr.Zero;
+					return;
+				}
+
+				base.WndProc(ref m);
+			}
+		}
+
 		private class Banner : Label
 		{
 			static String PAYPAL_URL = @"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=abstractspoon2%40optusnet%2ecom%2eau&item_name={0}({1})&amount={2}";
@@ -280,7 +304,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			private String m_TypeId;
 			private RhinoLicensing.LicenseType m_LicenseType;
 			private Translator m_Trans;
-			private LinkLabel m_buyBtn;
+			private LinkLabelEx m_buyBtn;
             private ToolTip m_buyBtnTooltip;
 			private int m_DollarPrice = 0;
 			private Color m_themeBkColor = SystemColors.ButtonFace;
@@ -312,7 +336,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				if ((m_LicenseType != RhinoLicensing.LicenseType.Free) &&
 					(m_LicenseType != RhinoLicensing.LicenseType.Paid))
 				{
-					m_buyBtn = new LinkLabel();
+					m_buyBtn = new LinkLabelEx();
 					m_buyBtn.Text = String.Format("{0} (USD{1})", m_Trans.Translate("Buy"), m_DollarPrice);
 					m_buyBtn.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
 					m_buyBtn.Height = Height;
@@ -322,7 +346,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 					this.Controls.Add(m_buyBtn);
 
                     m_buyBtnTooltip = new ToolTip();
-                    m_buyBtnTooltip.SetToolTip(this, "https://www.paypal.com");
+                    m_buyBtnTooltip.SetToolTip(m_buyBtn, "https://www.paypal.com");
 				}
 
 				RefreshColors();
