@@ -79,6 +79,9 @@ namespace Abstractspoon
 				static UpdateType Map(IUI_UPDATETYPE type);
 				static IUI_HITTEST Map(HitResult test);
 
+				static Windows::Forms::Cursor^ AppCursor(AppCursorType cursor);
+				static Windows::Forms::Cursor^ HandCursor();
+
 				ref class ParentNotify
 				{
 				public:
@@ -202,9 +205,6 @@ namespace Abstractspoon
 					System::Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerSelected;
 					System::Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerFocused;
 				};
-
-				static Windows::Forms::Cursor^ AppCursor(AppCursorType cursor);
-				static Windows::Forms::Cursor^ HandCursor();
 			};
 
 			public interface class IUIExtension
