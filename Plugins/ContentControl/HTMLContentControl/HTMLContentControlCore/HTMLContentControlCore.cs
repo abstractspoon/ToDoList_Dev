@@ -2,6 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Drawing;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -13,7 +14,7 @@ namespace HTMLContentControl
     public partial class HTMLContentControlCore : System.Windows.Forms.UserControl, IContentControlWnd
     {
         private IntPtr m_HwndParent;
-        private System.Drawing.Font m_ControlsFont;
+        private Font m_ControlsFont;
         private TDLHtmlEditorControl m_HtmlEditControl;
         private Translator m_Trans;
         private String m_TypeID;
@@ -142,13 +143,13 @@ namespace HTMLContentControl
 
         private void InitializeComponent()
         {
-			m_ControlsFont = new System.Drawing.Font(FontName, 8);
+			m_ControlsFont = new Font(FontName, 8);
 
 			this.SuspendLayout();
             // 
             // HTMLContentControlCore
             // 
-            this.ClientSize = new System.Drawing.Size(603, 716);
+            this.ClientSize = new Size(603, 716);
             this.Name = "HTMLContentControlCore";
             this.ResizeRedraw = true;
             this.Margin = new System.Windows.Forms.Padding(0);
@@ -159,8 +160,8 @@ namespace HTMLContentControl
 
 			m_HtmlEditControl = new TDLHtmlEditorControl(m_ControlsFont, m_Trans);
 			m_HtmlEditControl.Name = "m_HtmlEditControl";
-			m_HtmlEditControl.Location = new System.Drawing.Point(0, bannerHeight);
-            m_HtmlEditControl.Size = new System.Drawing.Size(this.ClientSize.Width, this.ClientSize.Height - bannerHeight);
+			m_HtmlEditControl.Location = new Point(0, bannerHeight);
+            m_HtmlEditControl.Size = new Size(this.ClientSize.Width, this.ClientSize.Height - bannerHeight);
 			m_HtmlEditControl.ContentMargin = 5;
 			m_HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
 			m_HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
