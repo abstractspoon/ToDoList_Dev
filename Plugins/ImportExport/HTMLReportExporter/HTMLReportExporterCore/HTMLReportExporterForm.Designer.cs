@@ -31,11 +31,16 @@
 			this.Content = new System.Windows.Forms.Panel();
 			this.BtnOK = new System.Windows.Forms.Button();
 			this.BtnCancel = new System.Windows.Forms.Button();
+			this.comboBox1 = new System.Windows.Forms.ComboBox();
 			this.Content.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// Content
 			// 
+			this.Content.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.Content.Controls.Add(this.comboBox1);
 			this.Content.Controls.Add(this.BtnOK);
 			this.Content.Controls.Add(this.BtnCancel);
 			this.Content.Location = new System.Drawing.Point(0, 0);
@@ -66,6 +71,14 @@
 			this.BtnCancel.Text = "Cancel";
 			this.BtnCancel.UseVisualStyleBackColor = true;
 			// 
+			// comboBox1
+			// 
+			this.comboBox1.FormattingEnabled = true;
+			this.comboBox1.Location = new System.Drawing.Point(0, 0);
+			this.comboBox1.Name = "comboBox1";
+			this.comboBox1.Size = new System.Drawing.Size(121, 21);
+			this.comboBox1.TabIndex = 4;
+			// 
 			// HTMLReportExporterForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -85,5 +98,6 @@
 		private System.Windows.Forms.Panel Content;
 		private System.Windows.Forms.Button BtnOK;
 		private System.Windows.Forms.Button BtnCancel;
+		private System.Windows.Forms.ComboBox comboBox1;
 	}
 }

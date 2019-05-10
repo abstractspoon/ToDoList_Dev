@@ -32,9 +32,9 @@ namespace HTMLReportExporter
 
 			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, 20);
 
+			this.Height = (this.Height + bannerHeight);
 			this.Content.Location = new Point(0, bannerHeight);
-			this.ClientSize = new Size(this.ClientSize.Width, this.ClientSize.Height + bannerHeight);
-
+			this.Content.Height = (this.Content.Height - bannerHeight);
 		}
 	}
 }
