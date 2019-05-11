@@ -38,9 +38,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MarkdownLog">
-      <HintPath>..\MarkdownLog\bin\$(Configuration)\MarkdownLog.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -59,6 +56,12 @@
     <Reference Include="PluginHelpers">
       <HintPath>..\..\..\$(Configuration)\PluginHelpers.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\3rdParty\MarkdownLog\MarkdownLog.csproj">
+      <Project>{f28c9fc0-8d67-459c-a177-2809cd1816f5}</Project>
+      <Name>MarkdownLog</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

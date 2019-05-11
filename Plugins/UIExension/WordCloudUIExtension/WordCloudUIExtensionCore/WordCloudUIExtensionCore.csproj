@@ -81,7 +81,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CloudControl\Controls.csproj">
+    <ProjectReference Include="..\..\..\3rdParty\CloudControl\Controls.csproj">
       <Project>{34649D7D-04A9-4092-AD0B-F7022C123FD7}</Project>
       <Name>Controls</Name>
     </ProjectReference>

@@ -113,9 +113,6 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ResourceCompile Include="MDContentControlBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="MDContentControlCore">
-      <HintPath>..\$(Configuration)\MDContentControlCore.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />

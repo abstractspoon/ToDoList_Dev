@@ -38,13 +38,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MarkdownSharp">
-      <HintPath>..\MarkdownSharp\bin\$(Configuration)\MarkdownSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="MDContentControlCore, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\$(Configuration)\MDContentControlCore.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -77,6 +70,12 @@
     <EmbeddedResource Include="MDContentControlCore.resx">
       <DependentUpon>MDContentControlCore.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\3rdParty\MarkdownSharp\MarkdownSharp.csproj">
+      <Project>{37619116-cce8-465a-8b1f-081ca53364bb}</Project>
+      <Name>MarkdownSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

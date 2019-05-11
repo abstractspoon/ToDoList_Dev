@@ -89,7 +89,7 @@
       <Project>{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}</Project>
       <Name>PluginHelpers</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DayView\DayView.csproj">
+    <ProjectReference Include="..\..\..\3rdParty\DayView\DayView.csproj">
       <Project>{D17A4D6A-4CAA-4470-8A19-F42463C021FD}</Project>
       <Name>DayView</Name>
     </ProjectReference>
