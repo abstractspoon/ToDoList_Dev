@@ -9898,9 +9898,10 @@ BOOL CToDoListWnd::LogIntermediateTaskList(CTaskFile& tasks, LPCTSTR szRefPath)
 
 CString CToDoListWnd::GetIntermediateTaskListPath(LPCTSTR szRefPath)
 {
-	ASSERT(szRefPath && FileMisc::IsPath(szRefPath));
+	CEnString sRefName(IDS_TDC_UNTITLEDFILE);
 
-	CString sRefName = FileMisc::RemoveExtension(FileMisc::GetFileNameFromPath(szRefPath));
+	if (szRefPath && FileMisc::IsPath(szRefPath))
+		sRefName = FileMisc::RemoveExtension(FileMisc::GetFileNameFromPath(szRefPath));
 	
 	return FileMisc::GetTempFilePath(sRefName, _T("intermediate.txt")); 
 }
