@@ -28,6 +28,7 @@ public:
 
 protected:
 	ITransText* m_pTT;
+	HICON m_hIcon;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

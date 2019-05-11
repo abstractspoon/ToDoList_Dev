@@ -28,14 +28,17 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 const LPCWSTR HTMLREPORTER_GUID = L"95E6E2D4-2301-461A-80FB-C2863E788F37";
-const LPCWSTR HTMLREPORTER_NAME = L"HTML Reporter";
+const LPCWSTR HTMLREPORTER_NAME = L"Report Writer";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-CHTMLReportExporterBridge::CHTMLReportExporterBridge() : m_pTT(nullptr)
+CHTMLReportExporterBridge::CHTMLReportExporterBridge() : m_pTT(nullptr), m_hIcon(NULL)
 {
+	HMODULE hMod = LoadLibrary(L"HTMLReportExporterBridge.dll"); // us
+
+	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_HTMLREPORTER));
 }
 
 void CHTMLReportExporterBridge::Release()
@@ -51,7 +54,7 @@ void CHTMLReportExporterBridge::SetLocalizer(ITransText* pTT)
 
 HICON CHTMLReportExporterBridge::GetIcon() const
 {
-	return NULL;
+	return m_hIcon;
 }
 
 LPCWSTR CHTMLReportExporterBridge::GetMenuText() const
