@@ -334,7 +334,8 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				TextAlign = ContentAlignment.MiddleLeft;
 
 				if ((m_LicenseType != RhinoLicensing.LicenseType.Free) &&
-					(m_LicenseType != RhinoLicensing.LicenseType.Paid))
+					(m_LicenseType != RhinoLicensing.LicenseType.Paid) &&
+					(m_DollarPrice > 0))
 				{
 					m_buyBtn = new LinkLabelEx();
 					m_buyBtn.Text = String.Format("{0} (USD{1})", m_Trans.Translate("Buy"), m_DollarPrice);
