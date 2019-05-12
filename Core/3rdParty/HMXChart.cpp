@@ -27,7 +27,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart
 
-CHMXChart::CHMXChart() : m_strFont(_T("Arial")), m_nFontSize(-1)
+CHMXChart::CHMXChart() : m_strFont(_T("Arial")), m_nFontPixelSize(-1)
 {
 	// set defaul value
 	m_clrBkGnd = RGB(200, 255, 255);
@@ -64,12 +64,12 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart message handlers
 
-void CHMXChart::SetFont(LPCTSTR szFaceName, int nPointSize)
+void CHMXChart::SetFont(LPCTSTR szFaceName, int nPixelSize)
 {
-	if ((m_strFont.CompareNoCase(szFaceName) != 0) || (nPointSize != m_nFontSize))
+	if ((m_strFont.CompareNoCase(szFaceName) != 0) || (nPixelSize != m_nFontPixelSize))
 	{
 		m_strFont = szFaceName;
-		m_nFontSize = nPointSize;
+		m_nFontPixelSize = nPixelSize;
 
 		if (GetSafeHwnd())
 		{
@@ -441,19 +441,19 @@ bool CHMXChart::DrawBaseline(CDC & dc)
 
 int CHMXChart::CalcTitleFontSize() const
 {
-	if (m_nFontSize == -1)
+	if (m_nFontPixelSize == -1)
 		return m_rectTitle.Height();
 
 	// else
-	return (m_nFontSize * 2);
+	return (m_nFontPixelSize * 2);
 }
 
 BOOL CHMXChart::CreateXAxisFont(BOOL bTitle, CFont& font) const
 {
-	int nFontSize = CalcYScaleFontSize(bTitle);
+	int nFontSize = CalcXScaleFontSize(bTitle); // pixels
 	int nAngle = (bTitle ? 0 : (m_nXLabelDegrees * 10));
 
-	return font.CreateFont(nFontSize, 0, nAngle, 0, FW_NORMAL,
+	return font.CreateFont(-nFontSize, 0, nAngle, 0, FW_NORMAL,
 						   FALSE, FALSE, FALSE, ANSI_CHARSET,
 						   OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
 						   DEFAULT_PITCH, m_strFont);
@@ -461,10 +461,10 @@ BOOL CHMXChart::CreateXAxisFont(BOOL bTitle, CFont& font) const
 
 BOOL CHMXChart::CreateYAxisFont(BOOL bTitle, CFont& font) const
 {
-	int nFontSize = CalcYScaleFontSize(bTitle);
+	int nFontSize = CalcYScaleFontSize(bTitle); // pixels
 	int nAngle = (bTitle ? 900 : 0);
 	
-	return font.CreateFont(nFontSize, 0, nAngle, 0, FW_NORMAL,
+	return font.CreateFont(-nFontSize, 0, nAngle, 0, FW_NORMAL,
 							FALSE, FALSE, FALSE, ANSI_CHARSET,
 							OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
 							DEFAULT_PITCH, m_strFont);
@@ -472,7 +472,7 @@ BOOL CHMXChart::CreateYAxisFont(BOOL bTitle, CFont& font) const
 
 int CHMXChart::CalcYScaleFontSize(BOOL bTitle) const
 {
-	int nSize = m_nFontSize;
+	int nSize = m_nFontPixelSize;
 
 	if (nSize == -1)
 	{
@@ -485,33 +485,16 @@ int CHMXChart::CalcYScaleFontSize(BOOL bTitle) const
 
 	if (bTitle)
 		nSize *= 2;
-	else
-		nSize += 2;
 
 	return nSize;
 }
 
 int CHMXChart::CalcXScaleFontSize(BOOL bTitle) const
 {
-	int nSize = m_nFontSize;
+	int nSize = CalcYScaleFontSize(bTitle);
 
-	if (nSize == -1)
-	{
-		nSize = (m_rectXAxis.Height() / 4);
-
-		// also check length of scale text
-		if (!m_strXText.IsEmpty())
-			nSize = min(nSize, (m_rectXAxis.Width() / m_strXText.GetLength()));
-	}
-
-	if (bTitle)
-	{
-		nSize *= 2;
-	}
-	else if (m_nXLabelDegrees != 0)
-	{
-		nSize += 2;
-	}
+	if (!bTitle && (m_nXLabelDegrees != 0))
+		nSize++;
 	
 	return nSize;
 }
@@ -1073,7 +1056,7 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 {
 	int nAxisSize = 0;
 
-	if (m_nFontSize == -1)
+	if (m_nFontPixelSize == -1)
 	{
 		// make axis width the same for horz and vert
 		int nYAxisWidth = (rAvail.Width()*HMX_AREA_YAXIS) / 100;
@@ -1083,8 +1066,8 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 	}
 	else
 	{
-		int nXAxisHeight = (m_strXText.IsEmpty() ? 0 : (m_nFontSize * 2));
-		int nYAxisWidth = (m_strYText.IsEmpty() ? 0 : (m_nFontSize * 2));
+		int nXAxisHeight = (m_strXText.IsEmpty() ? 0 : (m_nFontPixelSize * 2));
+		int nYAxisWidth = (m_strYText.IsEmpty() ? 0 : (m_nFontPixelSize * 2));
 
 		if (m_strarrScaleXLabel.GetSize())
 		{

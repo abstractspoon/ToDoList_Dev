@@ -54,6 +54,7 @@ protected:
 	int GetYSubTicks(double dInterval) const;
 	double CalcMaxYAxisValue(double dDataMax) const;
 	int HitTest(const CPoint& ptClient) const;
+
 };
 
 /////////////////////////////////////////////////////////////////////////////

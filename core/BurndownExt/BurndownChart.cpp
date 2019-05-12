@@ -122,7 +122,7 @@ BOOL CBurndownChart::SetTimeIntervals(int nDaysInWeek, double dHoursInDay)
 
 void CBurndownChart::SetFont(LPCTSTR szFaceName, int nPointSize)
 {
-	CHMXChart::SetFont(szFaceName, MulDiv(nPointSize, 4, 3));
+	CHMXChart::SetFont(szFaceName, GraphicsMisc::PointToPixel(nPointSize)/*MulDiv(nPointSize, 4, 3)*/);
 }
 
 BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)

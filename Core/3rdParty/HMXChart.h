@@ -52,7 +52,7 @@ public:
 
 // Attributes
 public:
-	void SetFont(LPCTSTR szFaceName, int nPointSize = -1);
+	void SetFont(LPCTSTR szFaceName, int nPixelSize = -1);
 
 // Operations
 public:
@@ -193,7 +193,7 @@ protected:
 	int				m_nXLabelDegrees;
 
 	CString			m_strFont;
-	int				m_nFontSize;							// -1 -> dynamic sizing
+	int				m_nFontPixelSize;						// -1 -> dynamic sizing
 
 	CPen			m_penGrid;
 
