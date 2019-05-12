@@ -684,7 +684,7 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 		DWORD dwDependsID = GetNextTask(pos, pTDI);
 		ASSERT (dwDependsID && pTDI);
 
-		if (pTDI && (dwDependsID != dwTaskID) && Misc::Contains(sTaskID, pTDI->aDependencies))
+		if (pTDI && (dwDependsID != dwTaskID) && Misc::Contains(sTaskID, pTDI->aDependencies, FALSE, TRUE))
 			return TRUE;
 	}	
 

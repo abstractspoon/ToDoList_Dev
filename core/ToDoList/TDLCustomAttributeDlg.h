@@ -66,8 +66,7 @@ protected:
 	CUIThemeFile m_theme;
 	CIconButton m_btBrowseImages;
 
-	const CImageList& m_ilCheck;
-	const CTDCImageList& m_ilIcons;
+	const CToDoCtrl& m_tdc;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

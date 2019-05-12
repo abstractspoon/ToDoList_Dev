@@ -79,7 +79,7 @@ void CEnCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL /*bLast*
 
 		if (!sExt.IsEmpty()) // found something
 		{
-			if (!m_aFileExt.GetSize() || Misc::Contains(sExt, m_aFileExt, FALSE, FALSE))
+			if (!m_aFileExt.GetSize() || Misc::Contains(sExt, m_aFileExt, FALSE, TRUE))
 			{
 				m_strFileName = sParam;
 			}

@@ -34,9 +34,9 @@ CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sS
 	m_ilIcons(ilIcons), 
 	m_sIconName(sSelName), 
 	m_bMultiSel(FALSE),
-	m_bWantNone(bWantNoneItem)
+	m_bWantNone(bWantNoneItem),
+	m_bAllowReload(pParent != NULL)
 {
-	ASSERT(m_pParentWnd);
 }
 
 CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, CWnd* pParent /*=NULL*/)
@@ -44,10 +44,9 @@ CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArra
 	CTDLDialog(CTDLTaskIconDlg::IDD, _T("TaskIcons"), pParent), 
 	m_ilIcons(ilIcons), 
 	m_bMultiSel(TRUE),
-	m_bWantNone(FALSE)
+	m_bWantNone(FALSE),
+	m_bAllowReload(pParent != NULL)
 {
-	ASSERT(m_pParentWnd);
-
 	if (aSelNames.GetSize())
 		m_sIconName = aSelNames[0];
 
@@ -86,6 +85,9 @@ BOOL CTDLTaskIconDlg::OnInitDialog()
 	
 	ListView_SetImageList(m_lcIcons, m_ilIcons, LVSIL_SMALL);
 	BuildListCtrl();
+
+	GetDlgItem(IDC_RELOADICONS)->EnableWindow(m_bAllowReload);
+	GetDlgItem(IDC_RELOADICONS)->ShowWindow(m_bAllowReload ? SW_SHOW : SW_HIDE);
 
 	// disable OK button if nothing selected
 	EnableDisable();
@@ -194,7 +196,7 @@ void CTDLTaskIconDlg::BuildListCtrl()
 			}
 			else
 			{
-				if (Misc::Contains(sBaseName, m_aIconNames, FALSE, FALSE))
+				if (Misc::Contains(sBaseName, m_aIconNames, FALSE, TRUE))
 				{
 					m_lcIcons.SetItemState(nIndex, LVIS_SELECTED, LVIS_SELECTED);
 
@@ -480,6 +482,9 @@ CString CTDLTaskIconDlg::GetImageName(int iImage) const
 
 void CTDLTaskIconDlg::OnReloadIcons() 
 {
+	ASSERT(m_pParentWnd);
+	ASSERT(m_bAllowReload);
+
 	if (m_pParentWnd && m_pParentWnd->SendMessage(WM_TDCTI_RELOADICONS))
 	{
 		ListView_SetImageList(m_lcIcons, m_ilIcons, LVSIL_SMALL);

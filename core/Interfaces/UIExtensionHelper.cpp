@@ -119,7 +119,7 @@ void CUIExtensionHelper::UpdateExtensionVisibilityState(CMenu* pMenu, const CUIE
 		
 		// check state
 		CString sTypeID = mgr.GetUIExtensionTypeID(nExt);
-		BOOL bVisible = Misc::Contains(sTypeID, aTypeIDs, FALSE, FALSE);
+		BOOL bVisible = Misc::Contains(sTypeID, aTypeIDs, FALSE, TRUE);
 		
 		pMenu->CheckMenuItem(nMenuID, bVisible ? MF_CHECKED : 0);
 	}

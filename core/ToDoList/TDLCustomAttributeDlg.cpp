@@ -102,8 +102,7 @@ CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CToDoCtrl& tdc, const CUITh
 	m_eUniqueID(_T(". \r\n\t"), ME_EXCLUDE),
 	m_btInsertSymbol(1, 0, (MBS_DOWN | MBS_RETURNCMD)),
 	m_sTaskFile(tdc.GetFilePath()),
-	m_ilCheck(tdc.GetCheckImageList()),
-	m_ilIcons(tdc.GetTaskIconImageList())
+	m_tdc(tdc)
 {
 	//{{AFX_DATA_INIT(CTDLCustomAttributeDlg)
 	m_sUniqueID = _T("");
@@ -231,7 +230,7 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	m_lcAttributes.SetItemState(0, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	OnItemchangedAttriblist(NULL, NULL);
 
-	ListView_SetImageList(m_lcAttributes, m_ilCheck, LVSIL_SMALL);
+	ListView_SetImageList(m_lcAttributes, m_tdc.GetCheckImageList(), LVSIL_SMALL);
 	ListView_SetExtendedListViewStyle(m_lcAttributes, LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
 
 	CThemed::SetWindowTheme(&m_lcAttributes, _T("Explorer"));
@@ -1135,7 +1134,7 @@ void CTDLCustomAttributeDlg::OnBrowseimages()
 	}
 
 	// show dialog and rebuild list
-	CTDLTaskIconDlg dialog(m_ilIcons, aImages);
+	CTDLTaskIconDlg dialog(m_tdc.GetTaskIconImageList(), aImages, (CWnd*)&m_tdc);
 
 	if (dialog.DoModal() == IDOK)
 	{

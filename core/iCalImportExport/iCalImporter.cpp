@@ -617,25 +617,25 @@ BOOL CiCalImporter::DecodeRecurrence(const CString& sRecur, TDC_REGULARITY& nReg
 
 			if (Misc::Split(sByDayVal, aDays, ','))
 			{
-				if (Misc::Contains(_T("SU"), aDays, FALSE, FALSE))
+				if (Misc::Contains(_T("SU"), aDays, FALSE, TRUE))
 					dwSpecific2 |= DHW_SUNDAY;
 
-				if (Misc::Contains(_T("MO"), aDays, FALSE, FALSE))
+				if (Misc::Contains(_T("MO"), aDays, FALSE, TRUE))
 					dwSpecific2 |= DHW_MONDAY;
 
-				if (Misc::Contains(_T("TU"), aDays, FALSE, FALSE))
+				if (Misc::Contains(_T("TU"), aDays, FALSE, TRUE))
 					dwSpecific2 |= DHW_TUESDAY;
 
-				if (Misc::Contains(_T("WE"), aDays, FALSE, FALSE))
+				if (Misc::Contains(_T("WE"), aDays, FALSE, TRUE))
 					dwSpecific2 |= DHW_WEDNESDAY;
 
-				if (Misc::Contains(_T("TH"), aDays, FALSE, FALSE))
+				if (Misc::Contains(_T("TH"), aDays, FALSE, TRUE))
 					dwSpecific2 |= DHW_THURSDAY;
 
-				if (Misc::Contains(_T("FR"), aDays, FALSE, FALSE))
+				if (Misc::Contains(_T("FR"), aDays, FALSE, TRUE))
 					dwSpecific2 |= DHW_FRIDAY;
 
-				if (Misc::Contains(_T("SA"), aDays, FALSE, FALSE))
+				if (Misc::Contains(_T("SA"), aDays, FALSE, TRUE))
 					dwSpecific2 |= DHW_SATURDAY;
 			}
 		}

@@ -42,7 +42,9 @@ protected:
 	const CTDCImageList& m_ilIcons;
 	CString m_sIconName;
 	CMapStringToString m_mapRenamedItems;
-	BOOL m_bMultiSel, m_bWantNone;
+	BOOL m_bMultiSel;
+	BOOL m_bWantNone;
+	BOOL m_bAllowReload;
 	CStringArray m_aIconNames;
 
 // Overrides

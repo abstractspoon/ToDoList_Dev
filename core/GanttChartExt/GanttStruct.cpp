@@ -529,7 +529,7 @@ BOOL GANTTITEM::IsMilestone(const CString& sMilestoneTag) const
 		return FALSE;
 
 	// else
-	return Misc::Contains(sMilestoneTag, aTags, FALSE, FALSE);
+	return Misc::Contains(sMilestoneTag, aTags, FALSE, TRUE);
 }
 
 //////////////////////////////////////////////////////////////////////
