@@ -471,34 +471,49 @@ namespace MSDN.Html.Editor
 				LostFocus(this, e);
 		} //DocumentLoseFocus
 
-        private void DocumentDoubleClick(object sender, EventArgs e)
+        private void DocumentDoubleClick(object sender, HtmlElementEventArgs e)
         {
 			if (!_readOnly && _editEnabled)
 				SelectWordAtCaret();
+			else
+				SelectWordAtPoint(e.MousePosition);
 
 		} //DocumentDoubleClick
 
 		private void SelectWordAtCaret()
 		{
-			mshtmlSelection sel = document.selection as mshtmlSelection;
+			if (document.selection != null)
+				SelectWord(document.selection.createRange() as mshtmlTextRange);
+		}
 
-			if (sel != null)
+		private void SelectWordAtPoint(Point pos)
+		{
+			if (document.selection != null)
 			{
-				mshtmlTextRange rng = sel.createRange() as mshtmlTextRange;
+				var rng = (document.selection.createRange() as mshtmlTextRange);
 
-				if ((rng != null) && String.IsNullOrEmpty(rng.text))
+				if (rng != null)
 				{
-					rng.expand("word");
+					rng.moveToPoint(pos.X, pos.Y);
+					SelectWord(rng);
+				}
+			}
+		}
 
-					// Omit trailing whitespace
-					if ((rng != null) && !String.IsNullOrEmpty(rng.text))
-					{
-						int len = rng.text.Length;
-						int wordLen = rng.text.TrimEnd(null).Length;
+		private void SelectWord(mshtmlTextRange rng)
+		{
+			if ((rng != null) && String.IsNullOrEmpty(rng.text))
+			{
+				rng.expand("word");
 
-						rng.moveEnd("character", (wordLen - len));
-						rng.select();
-					}
+				// Omit trailing whitespace
+				if ((rng != null) && !String.IsNullOrEmpty(rng.text))
+				{
+					int len = rng.text.Length;
+					int wordLen = rng.text.TrimEnd(null).Length;
+
+					rng.moveEnd("character", (wordLen - len));
+					rng.select();
 				}
 			}
 		}
@@ -657,11 +672,11 @@ namespace MSDN.Html.Editor
             // at this point the document and body has been loaded
             // so define the event handler for the context menu
             this.editorWebBrowser.Document.ContextMenuShowing += new HtmlElementEventHandler(DocumentContextMenu);
+			this.editorWebBrowser.Document.Body.DoubleClick += new HtmlElementEventHandler(DocumentDoubleClick);
 
 			this.editorWebBrowser.Document.AttachEventHandler("onselectionchange", DocumentSelectionChange);
             this.editorWebBrowser.Document.AttachEventHandler("onkeydown", DocumentKeyPress);
 			this.editorWebBrowser.Document.AttachEventHandler("onfocusout", DocumentLoseFocus);
-			this.editorWebBrowser.Document.AttachEventHandler("ondblclick", DocumentDoubleClick);
 
 			// signalled complete
 			codeNavigate = false;
