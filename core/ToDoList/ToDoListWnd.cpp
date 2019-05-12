@@ -2355,7 +2355,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	const CPreferencesDlg& userPrefs = Prefs();
 	
 	// late initialization
-	CMouseWheelMgr::Initialize();
+	//CMouseWheelMgr::Initialize();
 	CEditShortcutMgr::Initialize();
 	CFocusWatcher::Initialize(this);
 	CComboListboxPositioner::Initialize();
@@ -7251,16 +7251,13 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 {
 	if (!bSysMenu)
 	{
-		if (m_menubar.HandleInitMenuPopup(pPopupMenu,
-										  GetToDoCtrl(),
-										  Prefs(),
-										  m_filterBar,
-										  m_mgrStorage,
-										  m_mgrUIExtensions,
-										  m_mgrMenuIcons))
-		{
-			return;
-		}
+		m_menubar.HandleInitMenuPopup(pPopupMenu,
+									  GetToDoCtrl(),
+									  Prefs(),
+									  m_filterBar,
+									  m_mgrStorage,
+									  m_mgrUIExtensions,
+									  m_mgrMenuIcons);
 	}
 
 	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
