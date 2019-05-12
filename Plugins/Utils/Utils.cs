@@ -339,7 +339,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				{
 					m_buyBtn = new LinkLabelEx();
 					m_buyBtn.Text = String.Format("{0} (USD{1})", m_Trans.Translate("Buy"), m_DollarPrice);
-					m_buyBtn.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
+					m_buyBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 					m_buyBtn.Height = Height;
 					m_buyBtn.TextAlign = ContentAlignment.MiddleRight;
 					m_buyBtn.LinkClicked += new LinkLabelLinkClickedEventHandler(OnBuyLicense);
@@ -389,6 +389,8 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				BackColor = SystemColors.ButtonFace;
 				ForeColor = Color.Black;
 
+                Color PressedColor = ForeColor;
+
 				switch (m_LicenseType)
 				{
 					case RhinoLicensing.LicenseType.Free:
@@ -397,6 +399,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 					case RhinoLicensing.LicenseType.Trial:
 						BackColor = Color.DarkRed;
 						ForeColor = Color.White;
+                        PressedColor = Color.LightPink;
 						break;
 
 					case RhinoLicensing.LicenseType.Paid:
@@ -404,10 +407,12 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
 					case RhinoLicensing.LicenseType.Supporter:
 						BackColor = ColorUtil.DrawingColor.AdjustLighting(m_themeBkColor, -0.05f, false);
+                        PressedColor = Color.DimGray;
 						break;
 
 					case RhinoLicensing.LicenseType.Contributor:
 						BackColor = ColorUtil.DrawingColor.AdjustLighting(m_themeBkColor, -0.05f, false);
+                        PressedColor = Color.DimGray;
 						break;
 				}
 
@@ -415,6 +420,8 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				{
 					m_buyBtn.BackColor = BackColor;
 					m_buyBtn.LinkColor = ForeColor;
+                    m_buyBtn.ActiveLinkColor = PressedColor;
+                    m_buyBtn.VisitedLinkColor = PressedColor;
 				}
 			}
 
