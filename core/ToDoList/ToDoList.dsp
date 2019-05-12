@@ -1127,10 +1127,6 @@ SOURCE=.\TDLRiskComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdlschemadef.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\TDLSendTasksDlg.h
 # End Source File
 # Begin Source File
@@ -1548,7 +1544,7 @@ SOURCE=.\ToDoList.vcxproj.filters
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoList_All.sln
+SOURCE=..\ToDoList_Core.sln
 # End Source File
 # End Target
 # End Project

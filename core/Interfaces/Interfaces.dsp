@@ -233,6 +233,10 @@ SOURCE=.\StdAfx.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\TasklistSchemaDef.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\TaskListStorageMgr.h
 # End Source File
 # Begin Source File

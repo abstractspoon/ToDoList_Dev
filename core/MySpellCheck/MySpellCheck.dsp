@@ -201,10 +201,6 @@ SOURCE=..\3rdParty\myspell\mythes.hxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\Shared\SpellChecker.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\StdAfx.h
 # End Source File
 # Begin Source File
