@@ -121,7 +121,7 @@ enum TDC_UNITS
 	TDCU_YEARS = 'Y',
 };
 
-static bool IsValidUnits(TDC_UNITS nUnits)
+static inline bool IsValidUnits(TDC_UNITS nUnits)
 {
 	switch (nUnits)
 	{
