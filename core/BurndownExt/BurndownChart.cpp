@@ -120,11 +120,6 @@ BOOL CBurndownChart::SetTimeIntervals(int nDaysInWeek, double dHoursInDay)
 	return FALSE;
 }
 
-void CBurndownChart::SetFont(LPCTSTR szFaceName, int nPointSize)
-{
-	CHMXChart::SetFont(szFaceName, GraphicsMisc::PointToPixel(nPointSize)/*MulDiv(nPointSize, 4, 3)*/);
-}
-
 BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
 {
 	CClientDC dc(this);

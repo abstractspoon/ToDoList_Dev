@@ -64,8 +64,17 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart message handlers
 
-void CHMXChart::SetFont(LPCTSTR szFaceName, int nPixelSize)
+void CHMXChart::SetFont(LPCTSTR szFaceName, int nPointSize)
 {
+	// Convert points to pixels
+	int nPointsPerInch = 72;
+	
+	HDC hDC = ::GetDC(NULL);
+	int nPixelsPerInch = GetDeviceCaps(hDC, LOGPIXELSY);
+	::ReleaseDC(NULL, hDC);
+
+	int nPixelSize = MulDiv(abs(nPointSize), nPixelsPerInch, nPointsPerInch);
+
 	if ((m_strFont.CompareNoCase(szFaceName) != 0) || (nPixelSize != m_nFontPixelSize))
 	{
 		m_strFont = szFaceName;

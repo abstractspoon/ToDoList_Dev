@@ -52,7 +52,7 @@ public:
 
 // Attributes
 public:
-	void SetFont(LPCTSTR szFaceName, int nPixelSize = -1);
+	void SetFont(LPCTSTR szFaceName, int nPointSize = -1);
 
 // Operations
 public:

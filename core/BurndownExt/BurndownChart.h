@@ -18,7 +18,6 @@ public:
 	BOOL SetChartType(BURNDOWN_CHARTTYPE nType);
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL SetTimeIntervals(int nDaysInWeek, double dHoursInDay);
-	void SetFont(LPCTSTR szFaceName, int nPointSize);
 
 	void RebuildGraph(BOOL bUpdateExtents);
 	void FilterToolTipMessage(MSG* pMsg);

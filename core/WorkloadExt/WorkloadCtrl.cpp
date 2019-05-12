@@ -4135,7 +4135,7 @@ BOOL CWorkloadCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 	CString sFontName;
 	int nFontSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFontName);
 
-	m_barChart.SetFont(sFontName, MulDiv(nFontSize, 4, 3));
+	m_barChart.SetFont(sFontName, nFontSize);
 
 	return TRUE;
 }
