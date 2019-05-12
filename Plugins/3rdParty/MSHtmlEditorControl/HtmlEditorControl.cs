@@ -473,7 +473,9 @@ namespace MSDN.Html.Editor
 
         private void DocumentDoubleClick(object sender, EventArgs e)
         {
-			SelectWordAtCaret();
+			if (!_readOnly && _editEnabled)
+				SelectWordAtCaret();
+
 		} //DocumentDoubleClick
 
 		private void SelectWordAtCaret()
