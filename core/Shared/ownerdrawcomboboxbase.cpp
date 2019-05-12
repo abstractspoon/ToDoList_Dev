@@ -159,7 +159,7 @@ int COwnerdrawComboBoxBase::CalcMinItemHeight(BOOL bList) const
 
 		if (HasIcon())
 		{
-			int nMinDPIHeight = GraphicsMisc::ScaleByDPIFactor(16);
+			int nMinDPIHeight = GraphicsMisc::ScaleByDPIFactor(18);
 			nMinHeight = max(nMinHeight, nMinDPIHeight);
 		}
 	}
