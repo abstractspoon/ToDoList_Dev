@@ -4897,7 +4897,7 @@ TODOITEM* CToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 }
 
 HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, 
-								BOOL bEdit, DWORD dwDependency = 0)
+								BOOL bEdit, DWORD dwDependency)
 {
 	m_dwLastAddedID = 0;
 	
