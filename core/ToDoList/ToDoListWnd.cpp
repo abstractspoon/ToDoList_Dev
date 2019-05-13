@@ -3116,13 +3116,6 @@ BOOL CToDoListWnd::CreateNewTask(const CString& sTitle, TDC_INSERTWHERE nInsertW
 	return TRUE;
 }
 
-BOOL CToDoListWnd::CreateNewDependentTask(const CString& sTitle, TDC_INSERTWHERE nInsertWhere, BOOL bEdit)
-{
-	DWORD dwDependency = GetToDoCtrl().GetSelectedTaskID();
-	
-	return CreateNewTask(sTitle, nInsertWhere, bEdit, dwDependency);
-}
-
 void CToDoListWnd::CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID)
 {
 	UINT nReminderLeadin = 0;
