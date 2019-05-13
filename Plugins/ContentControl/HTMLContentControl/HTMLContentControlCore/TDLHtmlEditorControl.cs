@@ -137,34 +137,6 @@ namespace HTMLContentControl
             }
         }
 
-		protected override void OnSizeChanged(EventArgs e)
-		{
-			base.OnSizeChanged(e);
-
-			// Not sure where the bug is but the interface between 
-			// the browser control and the toolbar is often wrong
-			int iLastBtn = (ToolBar.Items.Count - 1);
-			ToolStripItem lastBtn = null;
-
-			while (iLastBtn-- > 0)
-			{
-				if (ToolBar.Items[iLastBtn].Visible)
-				{
-					lastBtn = ToolBar.Items[iLastBtn];
-					break;
-				}
-			}
-
-			if (lastBtn != null)
-			{
-				int toolbarBottom = lastBtn.Bounds.Bottom;
-
-				ToolBar.Bounds = new Rectangle(0, 0, Bounds.Width, toolbarBottom);
-				BrowserPanel.Bounds = new Rectangle(0, toolbarBottom + 1, Bounds.Width, Bounds.Height - toolbarBottom);
-			}
-
-		}
-
 		public Byte[] GetContent()
         {
             var html = InnerHtml ?? String.Empty;
