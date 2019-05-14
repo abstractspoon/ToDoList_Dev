@@ -43,13 +43,13 @@ namespace HTMLReportExporter
 			}
 		}
 
-		public Color ToolbarBackColor
+		public void Initialise(Color toolbarBkColor, bool focused)
 		{
-			set
-			{
-				ToolBar.BackColor = value;
-				Invalidate();
-			}
+			ToolBar.BackColor = toolbarBkColor;
+			ToolbarVisible = focused;
+
+			if (focused)
+				Focus();
 		}
 
 		private void InitializeComponentEx()
@@ -69,9 +69,12 @@ namespace HTMLReportExporter
 			this.InnerText = "";
 			this.TabIndex = 26;
 			this.BorderSize = 0;
+			this.ContentMargin = 5;
 
 			this.BrowserPanel.Anchor = AnchorStyles.None; // we handle positioning ourselves
 
+			this.WebBrowser.Document.AttachEventHandler("onfocusout", OnLostFocus);
+			this.WebBrowser.Document.AttachEventHandler("onfocusin", OnGotFocus);
 
 			// Place this at the end to ensure the toolbar has finished its resize
 			Toolbars.FixupButtonSizes(this.ToolBar);
@@ -160,6 +163,18 @@ namespace HTMLReportExporter
 			// 				var imageDialog = (dialog as MSDN.Html.Editor.EnterImageForm);
 			// 				LastBrowsedImageFolder = imageDialog.LastBrowsedFolder;
 			// 			}
+		}
+
+		private void OnGotFocus(object sender, EventArgs e)
+		{
+			ToolbarVisible = true;
+			EditEnabled = true;
+		}
+
+		private void OnLostFocus(object sender, EventArgs e)
+		{
+			ToolbarVisible = false;
+			EditEnabled = false;
 		}
 
 	}

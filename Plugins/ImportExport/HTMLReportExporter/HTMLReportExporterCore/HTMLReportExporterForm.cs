@@ -30,10 +30,10 @@ namespace HTMLReportExporter
 		{
 			InitializeComponent();
 
-			this.tdlHtmlReportHeaderControl.ToolbarBackColor = BackColor;
-			this.tdlHtmlReportTitleControl.ToolbarBackColor = BackColor;
-			this.tdlHtmlReportTaskFormatControl.ToolbarBackColor = BackColor;
-			this.tdlHtmlReportFooterControl.ToolbarBackColor = BackColor;
+			this.tdlHtmlReportHeaderControl.Initialise(BackColor, false);
+			this.tdlHtmlReportTitleControl.Initialise(BackColor, false);
+			this.tdlHtmlReportTaskFormatControl.Initialise(BackColor, true);
+			this.tdlHtmlReportFooterControl.Initialise(BackColor, false);
 
 			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, 0/*20*/);
 
@@ -41,5 +41,6 @@ namespace HTMLReportExporter
 			this.Content.Location = new Point(0, bannerHeight);
 			this.Content.Height = (this.Content.Height - bannerHeight);
 		}
+
 	}
 }
