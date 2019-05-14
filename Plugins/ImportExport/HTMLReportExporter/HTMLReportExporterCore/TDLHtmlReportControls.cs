@@ -4,19 +4,24 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Diagnostics;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLReportExporter
 {
-	partial class TDLHtmlReportControl : MSDN.Html.Editor.HtmlEditorControl
+	partial class TDLHtmlReportControlBase : MSDN.Html.Editor.HtmlEditorControl
 	{
 		private System.Drawing.Font m_ControlsFont;
 		private Translator m_Trans;
 
 		// ---------------------------------------------------------------
 
-		public TDLHtmlReportControl()
+		public event EventHandler FocusChange;
+
+		// ---------------------------------------------------------------
+
+		public TDLHtmlReportControlBase()
 		{
 			InitializeComponentEx();
 		}
@@ -165,36 +170,76 @@ namespace HTMLReportExporter
 			// 			}
 		}
 
+		public new bool Focused
+		{
+			get { return (base.Focused || ToolBar.Focused || WebBrowser.Focused); }
+		}
+
 		private void OnGotFocus(object sender, EventArgs e)
 		{
 			ToolbarVisible = true;
 			EditEnabled = true;
+
+			if (FocusChange != null)
+				FocusChange(this, new EventArgs());
 		}
 
 		private void OnLostFocus(object sender, EventArgs e)
 		{
-			ToolbarVisible = false;
-			EditEnabled = false;
+			// eat this if the toolbar or us got focused
+			if (Focused)
+			{
+				Focus(); // sets it back to web browser
+			}
+			else
+			{
+				ToolbarVisible = false;
+				EditEnabled = false;
+
+				if (FocusChange != null)
+					FocusChange(this, new EventArgs());
+			}
 		}
 
+		static public bool GetIntermediatePosition(RectangleF startPos, RectangleF endPos, int numIterations, int curIteration, out RectangleF pos)
+		{
+			if (curIteration >= numIterations)
+			{
+				pos = endPos;
+				return false;
+			}
+
+			var left = GetIntermediatePosition(startPos.Left, endPos.Left, numIterations, curIteration);
+			var top = GetIntermediatePosition(startPos.Top, endPos.Top, numIterations, curIteration);
+			var right = GetIntermediatePosition(startPos.Right, endPos.Right, numIterations, curIteration);
+			var bottom = GetIntermediatePosition(startPos.Bottom, endPos.Bottom, numIterations, curIteration);
+
+			pos = RectangleF.FromLTRB(left, top, right, bottom);
+			return true;
+		}
+
+		static private float GetIntermediatePosition(float startPos, float endPos, int numIterations, int curIteration)
+		{
+			return (startPos + (((endPos - startPos) * curIteration) / numIterations));
+		}
 	}
 
-	partial class TDLHtmlReportHeaderControl : TDLHtmlReportControl
+	partial class TDLHtmlReportHeaderControl : TDLHtmlReportControlBase
 	{
 
 	}
 
-	partial class TDLHtmlReportTitleControl : TDLHtmlReportControl
+	partial class TDLHtmlReportTitleControl : TDLHtmlReportControlBase
 	{
 
 	}
 
-	partial class TDLHtmlReportTaskFormatControl : TDLHtmlReportControl
+	partial class TDLHtmlReportTaskFormatControl : TDLHtmlReportControlBase
 	{
 
 	}
 
-	partial class TDLHtmlReportFooterControl : TDLHtmlReportControl
+	partial class TDLHtmlReportFooterControl : TDLHtmlReportControlBase
 	{
 
 	}
