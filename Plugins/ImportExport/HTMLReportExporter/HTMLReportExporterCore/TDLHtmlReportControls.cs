@@ -200,28 +200,6 @@ namespace HTMLReportExporter
 					FocusChange(this, new EventArgs());
 			}
 		}
-
-		static public bool GetIntermediatePosition(RectangleF startPos, RectangleF endPos, int numIterations, int curIteration, out RectangleF pos)
-		{
-			if (curIteration >= numIterations)
-			{
-				pos = endPos;
-				return false;
-			}
-
-			var left = GetIntermediatePosition(startPos.Left, endPos.Left, numIterations, curIteration);
-			var top = GetIntermediatePosition(startPos.Top, endPos.Top, numIterations, curIteration);
-			var right = GetIntermediatePosition(startPos.Right, endPos.Right, numIterations, curIteration);
-			var bottom = GetIntermediatePosition(startPos.Bottom, endPos.Bottom, numIterations, curIteration);
-
-			pos = RectangleF.FromLTRB(left, top, right, bottom);
-			return true;
-		}
-
-		static private float GetIntermediatePosition(float startPos, float endPos, int numIterations, int curIteration)
-		{
-			return (startPos + (((endPos - startPos) * curIteration) / numIterations));
-		}
 	}
 
 	partial class TDLHtmlReportHeaderControl : TDLHtmlReportControlBase

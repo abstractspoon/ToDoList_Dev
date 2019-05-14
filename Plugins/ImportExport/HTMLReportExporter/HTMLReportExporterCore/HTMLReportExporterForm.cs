@@ -56,7 +56,7 @@ namespace HTMLReportExporter
 
 			if (m_FocusedCtrl != focus)
 			{
-				m_FocusedCtrl = null;
+				m_FocusedCtrl = focus;
 
 				if (focus != null)
 					Trace.TraceWarning("{0} has focus", focus.Name);
@@ -64,7 +64,7 @@ namespace HTMLReportExporter
 					Trace.TraceWarning("No control has focus");
 
 				// Resize windows to suit
-				// TODO
+				RepositionReportControls();
 			}
 
 		}
@@ -98,6 +98,90 @@ namespace HTMLReportExporter
 			}
 
 			return null;
+		}
+
+		private struct PositionInfo
+		{
+			public PositionInfo(TDLHtmlReportControlBase ctrl)
+			{
+				Control = ctrl;
+				Parent = ctrl.Parent;
+				Start = new Rectangle(Parent.Bounds.Location, Parent.Bounds.Size);
+				End = new Rectangle(Parent.Bounds.Location, Parent.Bounds.Size);
+			}
+
+			public TDLHtmlReportControlBase Control;
+			public Control Parent;
+			public Rectangle Start, End;
+		}
+
+		private void RepositionReportControls()
+		{
+			int availableHeight = (footerGroupBox.Bounds.Bottom - headerGroupBox.Bounds.Top);
+			int spacing = (titleGroupBox.Bounds.Top - headerGroupBox.Bounds.Bottom);
+
+			int unfocusedHeight = 0, focusedHeight = 0;
+
+			if (m_FocusedCtrl == null)
+			{
+				unfocusedHeight = ((availableHeight - (3 * spacing)) / 4);
+			}
+			else
+			{
+				// The focused control gets twice as much room as the rest
+				unfocusedHeight = (availableHeight - (3 * spacing)) / 5;
+				focusedHeight = (availableHeight - (3 * (spacing + unfocusedHeight)));
+			}
+
+			// Calculate all the target
+			PositionInfo[] reportCtrls = 
+			{
+				new PositionInfo(tdlHtmlReportHeaderControl),
+				new PositionInfo(tdlHtmlReportTitleControl),
+				new PositionInfo(tdlHtmlReportTaskFormatControl),
+				new PositionInfo(tdlHtmlReportFooterControl)
+			};
+
+			for (int ctrl = 0; ctrl < 4; ctrl++)
+			{
+				if (reportCtrls[ctrl].Control == m_FocusedCtrl)
+					reportCtrls[ctrl].End.Height = focusedHeight;
+				else
+					reportCtrls[ctrl].End.Height = unfocusedHeight;
+
+				// fixup following task
+				if (ctrl < 3)
+					reportCtrls[ctrl + 1].End.Y = (reportCtrls[ctrl].End.Bottom + spacing);
+			}
+
+			// Resize the controls
+			for (int i = 0; i < 10; i++)
+			{
+				for (int ctrl = 0; ctrl < 4; ctrl++)
+				{
+					reportCtrls[ctrl].Parent.Bounds = GetIntermediatePosition(reportCtrls[ctrl], 10, i);
+				}
+			}
+		}
+
+		static private Rectangle GetIntermediatePosition(PositionInfo pos, int numIterations, int curIteration)
+		{
+			if (curIteration >= numIterations)
+			{
+				return pos.End;
+			}
+
+			var left = GetIntermediatePosition(pos.Start.Left, pos.End.Left, numIterations, curIteration);
+			var top = GetIntermediatePosition(pos.Start.Top, pos.End.Top, numIterations, curIteration);
+			var right = GetIntermediatePosition(pos.Start.Right, pos.End.Right, numIterations, curIteration);
+			var bottom = GetIntermediatePosition(pos.Start.Bottom, pos.End.Bottom, numIterations, curIteration);
+
+			return Rectangle.FromLTRB(left, top, right, bottom);
+		}
+
+		static private int GetIntermediatePosition(int startPos, int endPos, int numIterations, int curIteration)
+		{
+			return (startPos + (((endPos - startPos) * curIteration) / numIterations));
 		}
 	}
 }
