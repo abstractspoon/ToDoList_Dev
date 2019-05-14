@@ -64,11 +64,11 @@
       <DependentUpon>HTMLReportExporterForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TDLHtmlReportControl.cs">
+    <Compile Include="TDLHtmlReportControls.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TDLHtmlReportControl.Designer.cs">
-      <DependentUpon>TDLHtmlReportControl.cs</DependentUpon>
+    <Compile Include="TDLHtmlReportControls.Designer.cs">
+      <DependentUpon>TDLHtmlReportControls.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
