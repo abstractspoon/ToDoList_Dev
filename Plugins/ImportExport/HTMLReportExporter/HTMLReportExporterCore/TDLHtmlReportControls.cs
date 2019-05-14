@@ -43,6 +43,15 @@ namespace HTMLReportExporter
 			}
 		}
 
+		public Color ToolbarBackColor
+		{
+			set
+			{
+				ToolBar.BackColor = value;
+				Invalidate();
+			}
+		}
+
 		private void InitializeComponentEx()
 		{
 			InitialiseFeatures();
