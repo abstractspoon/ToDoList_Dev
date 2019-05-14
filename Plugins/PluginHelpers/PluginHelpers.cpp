@@ -21,7 +21,14 @@ class ModuleInitialiser
 public:
 	ModuleInitialiser()
 	{
-		System::Windows::Forms::Application::SetCompatibleTextRenderingDefault(false);
+		try
+		{
+			System::Windows::Forms::Application::SetCompatibleTextRenderingDefault(false);
+		}
+		catch (...)
+		{
+
+		}
 	}
 };
 
