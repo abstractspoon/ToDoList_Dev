@@ -20,6 +20,7 @@ namespace Abstractspoon
 			{
 			public:
 				static bool HideCommand(String^ commandId, System::Windows::Forms::ToolStripItemCollection^ items);
+				static void HideDuplicateSeparators(System::Windows::Forms::ToolStripItemCollection^ items);
 				static bool ProcessMenuShortcut(System::Windows::Forms::Keys keyPress, System::Windows::Forms::ToolStripItemCollection^ items);
 				static bool SetMenuShortcut(String^ commandId, System::Windows::Forms::Keys keyPress, System::Windows::Forms::ToolStripItemCollection^ items);
 

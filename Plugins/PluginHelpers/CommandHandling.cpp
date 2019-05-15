@@ -22,10 +22,59 @@ bool CommandHandling::HideCommand(String^ commandId, ToolStripItemCollection^ it
 		cmd->Visible = false;
 		cmd->Enabled = false;
 
+		HideDuplicateSeparators(items);
+
 		return true;
 	}
 
 	return false;
+}
+
+void CommandHandling::HideDuplicateSeparators(ToolStripItemCollection^ items)
+{
+	bool prevIsSep = true;
+
+	for (int iItem = 0; iItem < items->Count; iItem++)
+	{
+		ToolStripItem^ item = items[iItem];
+		bool isSep = (dynamic_cast<ToolStripSeparator^>(item) != nullptr);
+
+		if (isSep)
+		{
+			if (prevIsSep)
+			{
+				item->Visible = false;
+				item->Enabled = false;
+			}
+			else
+			{
+				if (iItem == (items->Count - 1)) // last item
+				{
+					item->Visible = false;
+					item->Enabled = false;
+
+					prevIsSep = true;
+				}
+				else
+				{
+					ToolStripItem^ nextItem = items[iItem + 1];
+					bool nextIsSep = (dynamic_cast<ToolStripSeparator^>(nextItem) != nullptr);
+
+					if (nextIsSep)
+					{
+						item->Visible = false;
+						item->Enabled = false;
+
+						prevIsSep = true;
+					}
+				}
+			}
+		}
+		else
+		{
+			prevIsSep = false;
+		}
+	}
 }
 
 bool CommandHandling::ProcessMenuShortcut(Keys keyPress, ToolStripItemCollection^ items)

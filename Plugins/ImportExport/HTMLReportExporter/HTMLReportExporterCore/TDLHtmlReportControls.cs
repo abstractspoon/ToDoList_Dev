@@ -82,18 +82,19 @@ namespace HTMLReportExporter
 			Toolbars.FixupButtonSizes(this.ToolBar);
 		}
 
-		private void InitialiseFeatures()
+		virtual protected void InitialiseFeatures()
 		{
 			// remove whole 'Document' submenu
 			CommandHandling.HideCommand("contextDocument", ContextMenu.Items);
 			CommandHandling.HideCommand("contextDocumentPrint", ContextMenu.Items);
 
 			CommandHandling.HideCommand("toolstripDocumentPrint", ToolBar.Items);
-			// 
-			//             CommandHandling.SetMenuShortcut("contextFormatStrikeout", Keys.Control | Keys.Subtract, ContextMenu.Items);
-			//             CommandHandling.SetMenuShortcut("contextFormatIncrease", Keys.Control | Keys.Decimal, ContextMenu.Items);
-			//             CommandHandling.SetMenuShortcut("contextFormatDecrease", Keys.Control | Keys.Oemcomma, ContextMenu.Items);
-			// TODO
+			CommandHandling.HideCommand("toolstripEnableEditing", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripFindReplace", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripInsertLink", ToolBar.Items);
+			CommandHandling.HideCommand("", ToolBar.Items);
+			CommandHandling.HideCommand("", ToolBar.Items);
+			CommandHandling.HideCommand("", ToolBar.Items);
 		}
 
 		public void SetFont(string fontName, int pointSize)
@@ -188,21 +189,51 @@ namespace HTMLReportExporter
 
 	partial class TDLHtmlReportHeaderControl : TDLHtmlReportControlBase
 	{
+		override protected void InitialiseFeatures()
+		{
+			base.InitialiseFeatures();
+
+			CommandHandling.HideCommand("toolstripListOrdered", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripListUnordered", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripInsertTable", ToolBar.Items);
+		}
+
 
 	}
 
 	partial class TDLHtmlReportTitleControl : TDLHtmlReportControlBase
 	{
+		override protected void InitialiseFeatures()
+		{
+			base.InitialiseFeatures();
+
+			CommandHandling.HideCommand("toolstripListOrdered", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripListUnordered", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripInsertTable", ToolBar.Items);
+		}
 
 	}
 
 	partial class TDLHtmlReportTaskFormatControl : TDLHtmlReportControlBase
 	{
+		override protected void InitialiseFeatures()
+		{
+			base.InitialiseFeatures();
+		}
+
 
 	}
 
 	partial class TDLHtmlReportFooterControl : TDLHtmlReportControlBase
 	{
+		override protected void InitialiseFeatures()
+		{
+			base.InitialiseFeatures();
+
+			CommandHandling.HideCommand("toolstripListOrdered", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripListUnordered", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripInsertTable", ToolBar.Items);
+		}
 
 	}
 
