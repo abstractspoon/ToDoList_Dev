@@ -32,87 +32,44 @@ namespace HTMLReportExporter
 		{
 			InitializeComponent();
 
-			this.tdlHtmlReportHeaderControl.Initialise(BackColor, false);
-			this.tdlHtmlReportTitleControl.Initialise(BackColor, false);
-			this.tdlHtmlReportTaskFormatControl.Initialise(BackColor, true);
-			this.tdlHtmlReportFooterControl.Initialise(BackColor, false);
-
-			this.tdlHtmlReportHeaderControl.FocusChange += new EventHandler(OnFocusChange);
-			this.tdlHtmlReportTitleControl.FocusChange += new EventHandler(OnFocusChange);
-			this.tdlHtmlReportTaskFormatControl.FocusChange += new EventHandler(OnFocusChange);
-			this.tdlHtmlReportFooterControl.FocusChange += new EventHandler(OnFocusChange);
-			
 			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, 0/*20*/);
 
 			this.Height = (this.Height + bannerHeight);
 			this.Content.Location = new Point(0, bannerHeight);
 			this.Content.Height = (this.Content.Height - bannerHeight);
+
+			this.tdlHtmlReportHeaderControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
+			this.tdlHtmlReportTitleControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
+			this.tdlHtmlReportTaskFormatControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
+			this.tdlHtmlReportFooterControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
+
+			this.tdlHtmlReportHeaderControl.Initialise(BackColor, false);
+			this.tdlHtmlReportTitleControl.Initialise(BackColor, false);
+			this.tdlHtmlReportFooterControl.Initialise(BackColor, false);
+			this.tdlHtmlReportTaskFormatControl.Initialise(BackColor, true);
 		}
 
-
-		private void OnFocusChange(object sender, EventArgs e)
+		private void OnReportCtrlGotFocus(object sender, EventArgs e)
 		{
-			var focus = GetFocusedReportControl();
-
-			if (m_FocusedCtrl != focus)
+			if ((sender != m_FocusedCtrl) || (m_FocusedCtrl == null))
 			{
-				m_FocusedCtrl = focus;
-
-				if (focus != null)
-					Trace.TraceWarning("{0} has focus", focus.Name);
-				else
-					Trace.TraceWarning("No control has focus");
-
-				// Resize windows to suit
+				m_FocusedCtrl = (sender as TDLHtmlReportControlBase);
 				RepositionReportControls();
 			}
-
-		}
-
-		static private Control GetFocusedControl(Control parent)
-		{
-			if (parent.Focused)
-				return parent;
-
-			foreach (Control ctrl in parent.Controls)
-			{
-				var focus = GetFocusedControl(ctrl); // RECURSIVE CALL
-
-				if (focus != null)
-					return focus;
-			}
-
-			return null;
-		}
-
-		private TDLHtmlReportControlBase GetFocusedReportControl()
-		{
-			var focus = GetFocusedControl(this);
-
-			while (focus != null)
-			{
-				if (focus is TDLHtmlReportControlBase)
-					return (focus as TDLHtmlReportControlBase);
-
-				focus = focus.Parent;
-			}
-
-			return null;
 		}
 
 		private struct PositionInfo
 		{
 			public PositionInfo(TDLHtmlReportControlBase ctrl)
 			{
-				Control = ctrl;
+				Ctrl = ctrl;
 				Parent = ctrl.Parent;
-				Start = new Rectangle(Parent.Bounds.Location, Parent.Bounds.Size);
-				End = new Rectangle(Parent.Bounds.Location, Parent.Bounds.Size);
+				Pos = new Rectangle(Parent.Bounds.Location, Parent.Bounds.Size);
 			}
 
-			public TDLHtmlReportControlBase Control;
+			public TDLHtmlReportControlBase Ctrl;
 			public Control Parent;
-			public Rectangle Start, End;
+			public Rectangle Pos;
 		}
 
 		private void RepositionReportControls()
@@ -144,44 +101,28 @@ namespace HTMLReportExporter
 
 			for (int ctrl = 0; ctrl < 4; ctrl++)
 			{
-				if (reportCtrls[ctrl].Control == m_FocusedCtrl)
-					reportCtrls[ctrl].End.Height = focusedHeight;
+				if (reportCtrls[ctrl].Ctrl == m_FocusedCtrl)
+					reportCtrls[ctrl].Pos.Height = focusedHeight;
 				else
-					reportCtrls[ctrl].End.Height = unfocusedHeight;
+					reportCtrls[ctrl].Pos.Height = unfocusedHeight;
 
 				// fixup following task
 				if (ctrl < 3)
-					reportCtrls[ctrl + 1].End.Y = (reportCtrls[ctrl].End.Bottom + spacing);
+					reportCtrls[ctrl + 1].Pos.Y = (reportCtrls[ctrl].Pos.Bottom + spacing);
 			}
 
 			// Resize the controls
-			for (int i = 0; i < 10; i++)
-			{
-				for (int ctrl = 0; ctrl < 4; ctrl++)
-				{
-					reportCtrls[ctrl].Parent.Bounds = GetIntermediatePosition(reportCtrls[ctrl], 10, i);
-				}
-			}
-		}
+			this.SuspendLayout();
 
-		static private Rectangle GetIntermediatePosition(PositionInfo pos, int numIterations, int curIteration)
-		{
-			if (curIteration >= numIterations)
+			for (int ctrl = 0; ctrl < 4; ctrl++)
 			{
-				return pos.End;
+				reportCtrls[ctrl].Parent.Bounds = reportCtrls[ctrl].Pos;
+
+				reportCtrls[ctrl].Ctrl.ToolbarVisible = (reportCtrls[ctrl].Ctrl == m_FocusedCtrl);
+				reportCtrls[ctrl].Ctrl.EditEnabled = (reportCtrls[ctrl].Ctrl == m_FocusedCtrl);
 			}
 
-			var left = GetIntermediatePosition(pos.Start.Left, pos.End.Left, numIterations, curIteration);
-			var top = GetIntermediatePosition(pos.Start.Top, pos.End.Top, numIterations, curIteration);
-			var right = GetIntermediatePosition(pos.Start.Right, pos.End.Right, numIterations, curIteration);
-			var bottom = GetIntermediatePosition(pos.Start.Bottom, pos.End.Bottom, numIterations, curIteration);
-
-			return Rectangle.FromLTRB(left, top, right, bottom);
-		}
-
-		static private int GetIntermediatePosition(int startPos, int endPos, int numIterations, int curIteration)
-		{
-			return (startPos + (((endPos - startPos) * curIteration) / numIterations));
+			this.ResumeLayout();
 		}
 	}
 }

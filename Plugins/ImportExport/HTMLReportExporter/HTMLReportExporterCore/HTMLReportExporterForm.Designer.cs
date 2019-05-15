@@ -29,20 +29,20 @@
 		private void InitializeComponent()
 		{
 			this.Content = new System.Windows.Forms.Panel();
-			this.headerGroupBox = new HTMLReportExporter.CheckGroupBox();
-			this.tdlHtmlReportHeaderControl = new HTMLReportExporter.TDLHtmlReportHeaderControl();
 			this.BtnOK = new System.Windows.Forms.Button();
 			this.BtnCancel = new System.Windows.Forms.Button();
+			this.taskGroupBox = new System.Windows.Forms.GroupBox();
+			this.headerGroupBox = new HTMLReportExporter.CheckGroupBox();
+			this.tdlHtmlReportHeaderControl = new HTMLReportExporter.TDLHtmlReportHeaderControl();
 			this.titleGroupBox = new HTMLReportExporter.CheckGroupBox();
 			this.tdlHtmlReportTitleControl = new HTMLReportExporter.TDLHtmlReportTitleControl();
-			this.taskGroupBox = new System.Windows.Forms.GroupBox();
 			this.tdlHtmlReportTaskFormatControl = new HTMLReportExporter.TDLHtmlReportTaskFormatControl();
 			this.footerGroupBox = new HTMLReportExporter.CheckGroupBox();
 			this.tdlHtmlReportFooterControl = new HTMLReportExporter.TDLHtmlReportFooterControl();
 			this.Content.SuspendLayout();
+			this.taskGroupBox.SuspendLayout();
 			this.headerGroupBox.SuspendLayout();
 			this.titleGroupBox.SuspendLayout();
-			this.taskGroupBox.SuspendLayout();
 			this.footerGroupBox.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -61,6 +61,39 @@
 			this.Content.Name = "Content";
 			this.Content.Size = new System.Drawing.Size(787, 507);
 			this.Content.TabIndex = 0;
+			// 
+			// BtnOK
+			// 
+			this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.BtnOK.Location = new System.Drawing.Point(620, 474);
+			this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
+			this.BtnOK.Name = "BtnOK";
+			this.BtnOK.Size = new System.Drawing.Size(75, 23);
+			this.BtnOK.TabIndex = 2;
+			this.BtnOK.Text = "OK";
+			this.BtnOK.UseVisualStyleBackColor = true;
+			// 
+			// BtnCancel
+			// 
+			this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.BtnCancel.Location = new System.Drawing.Point(702, 474);
+			this.BtnCancel.Name = "BtnCancel";
+			this.BtnCancel.Size = new System.Drawing.Size(75, 23);
+			this.BtnCancel.TabIndex = 3;
+			this.BtnCancel.Text = "Cancel";
+			this.BtnCancel.UseVisualStyleBackColor = true;
+			// 
+			// taskGroupBox
+			// 
+			this.taskGroupBox.Controls.Add(this.tdlHtmlReportTaskFormatControl);
+			this.taskGroupBox.Location = new System.Drawing.Point(16, 211);
+			this.taskGroupBox.Name = "taskGroupBox";
+			this.taskGroupBox.Size = new System.Drawing.Size(556, 149);
+			this.taskGroupBox.TabIndex = 28;
+			this.taskGroupBox.TabStop = false;
+			this.taskGroupBox.Text = "Task Formatting";
 			// 
 			// headerGroupBox
 			// 
@@ -91,29 +124,6 @@
 			this.tdlHtmlReportHeaderControl.TabIndex = 26;
 			this.tdlHtmlReportHeaderControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
-			// BtnOK
-			// 
-			this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.BtnOK.Location = new System.Drawing.Point(620, 474);
-			this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
-			this.BtnOK.Name = "BtnOK";
-			this.BtnOK.Size = new System.Drawing.Size(75, 23);
-			this.BtnOK.TabIndex = 2;
-			this.BtnOK.Text = "OK";
-			this.BtnOK.UseVisualStyleBackColor = true;
-			// 
-			// BtnCancel
-			// 
-			this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.BtnCancel.Location = new System.Drawing.Point(702, 474);
-			this.BtnCancel.Name = "BtnCancel";
-			this.BtnCancel.Size = new System.Drawing.Size(75, 23);
-			this.BtnCancel.TabIndex = 3;
-			this.BtnCancel.Text = "Cancel";
-			this.BtnCancel.UseVisualStyleBackColor = true;
-			// 
 			// titleGroupBox
 			// 
 			this.titleGroupBox.CheckAction = HTMLReportExporter.CheckGroupBoxCheckAction.Enable;
@@ -143,22 +153,13 @@
 			this.tdlHtmlReportTitleControl.TabIndex = 26;
 			this.tdlHtmlReportTitleControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
-			// taskGroupBox
-			// 
-			this.taskGroupBox.Controls.Add(this.tdlHtmlReportTaskFormatControl);
-			this.taskGroupBox.Location = new System.Drawing.Point(16, 211);
-			this.taskGroupBox.Name = "taskGroupBox";
-			this.taskGroupBox.Size = new System.Drawing.Size(556, 149);
-			this.taskGroupBox.TabIndex = 28;
-			this.taskGroupBox.TabStop = false;
-			this.taskGroupBox.Text = "Task Formatting";
-			// 
 			// tdlHtmlReportTaskFormatControl
 			// 
 			this.tdlHtmlReportTaskFormatControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.tdlHtmlReportTaskFormatControl.BorderSize = ((byte)(0));
+			this.tdlHtmlReportTaskFormatControl.Cursor = System.Windows.Forms.Cursors.Default;
 			this.tdlHtmlReportTaskFormatControl.EditEnabled = true;
 			this.tdlHtmlReportTaskFormatControl.InnerText = null;
 			this.tdlHtmlReportTaskFormatControl.LastBrowsedFileFolder = null;
@@ -208,11 +209,11 @@
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "HTMLReportExporterForm";
 			this.Content.ResumeLayout(false);
+			this.taskGroupBox.ResumeLayout(false);
 			this.headerGroupBox.ResumeLayout(false);
 			this.headerGroupBox.PerformLayout();
 			this.titleGroupBox.ResumeLayout(false);
 			this.titleGroupBox.PerformLayout();
-			this.taskGroupBox.ResumeLayout(false);
 			this.footerGroupBox.ResumeLayout(false);
 			this.footerGroupBox.PerformLayout();
 			this.ResumeLayout(false);

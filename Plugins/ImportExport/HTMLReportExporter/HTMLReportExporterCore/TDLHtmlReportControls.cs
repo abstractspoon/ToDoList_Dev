@@ -17,7 +17,7 @@ namespace HTMLReportExporter
 
 		// ---------------------------------------------------------------
 
-		public event EventHandler FocusChange;
+		public new event EventHandler GotFocus;
 
 		// ---------------------------------------------------------------
 
@@ -177,28 +177,15 @@ namespace HTMLReportExporter
 
 		private void OnGotFocus(object sender, EventArgs e)
 		{
-			ToolbarVisible = true;
-			EditEnabled = true;
-
-			if (FocusChange != null)
-				FocusChange(this, new EventArgs());
+			if (GotFocus != null)
+				GotFocus(this, new EventArgs());
 		}
 
 		private void OnLostFocus(object sender, EventArgs e)
 		{
 			// eat this if the toolbar or us got focused
 			if (Focused)
-			{
 				Focus(); // sets it back to web browser
-			}
-			else
-			{
-				ToolbarVisible = false;
-				EditEnabled = false;
-
-				if (FocusChange != null)
-					FocusChange(this, new EventArgs());
-			}
 		}
 	}
 
