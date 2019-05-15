@@ -48,13 +48,10 @@ namespace HTMLReportExporter
 			}
 		}
 
-		public void Initialise(Color toolbarBkColor, bool focused)
+		public Color ToolbarBackColor
 		{
-			ToolBar.BackColor = toolbarBkColor;
-			ToolbarVisible = focused;
-
-			if (focused)
-				Focus();
+			get { return ToolBar.BackColor; }
+			set { ToolBar.BackColor = value; }
 		}
 
 		private void InitializeComponentEx()

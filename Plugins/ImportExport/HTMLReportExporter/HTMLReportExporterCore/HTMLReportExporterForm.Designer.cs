@@ -32,6 +32,7 @@
 			this.BtnOK = new System.Windows.Forms.Button();
 			this.BtnCancel = new System.Windows.Forms.Button();
 			this.taskGroupBox = new System.Windows.Forms.GroupBox();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.headerGroupBox = new HTMLReportExporter.CheckGroupBox();
 			this.tdlHtmlReportHeaderControl = new HTMLReportExporter.TDLHtmlReportHeaderControl();
 			this.titleGroupBox = new HTMLReportExporter.CheckGroupBox();
@@ -51,6 +52,7 @@
 			this.Content.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.Content.Controls.Add(this.groupBox1);
 			this.Content.Controls.Add(this.headerGroupBox);
 			this.Content.Controls.Add(this.BtnOK);
 			this.Content.Controls.Add(this.BtnCancel);
@@ -59,14 +61,14 @@
 			this.Content.Controls.Add(this.footerGroupBox);
 			this.Content.Location = new System.Drawing.Point(0, 0);
 			this.Content.Name = "Content";
-			this.Content.Size = new System.Drawing.Size(787, 507);
+			this.Content.Size = new System.Drawing.Size(876, 515);
 			this.Content.TabIndex = 0;
 			// 
 			// BtnOK
 			// 
 			this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.BtnOK.Location = new System.Drawing.Point(620, 474);
+			this.BtnOK.Location = new System.Drawing.Point(709, 482);
 			this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
 			this.BtnOK.Name = "BtnOK";
 			this.BtnOK.Size = new System.Drawing.Size(75, 23);
@@ -78,7 +80,7 @@
 			// 
 			this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.BtnCancel.Location = new System.Drawing.Point(702, 474);
+			this.BtnCancel.Location = new System.Drawing.Point(791, 482);
 			this.BtnCancel.Name = "BtnCancel";
 			this.BtnCancel.Size = new System.Drawing.Size(75, 23);
 			this.BtnCancel.TabIndex = 3;
@@ -88,12 +90,21 @@
 			// taskGroupBox
 			// 
 			this.taskGroupBox.Controls.Add(this.tdlHtmlReportTaskFormatControl);
-			this.taskGroupBox.Location = new System.Drawing.Point(16, 211);
+			this.taskGroupBox.Location = new System.Drawing.Point(12, 218);
 			this.taskGroupBox.Name = "taskGroupBox";
 			this.taskGroupBox.Size = new System.Drawing.Size(556, 149);
 			this.taskGroupBox.TabIndex = 28;
 			this.taskGroupBox.TabStop = false;
 			this.taskGroupBox.Text = "Task Formatting";
+			// 
+			// groupBox1
+			// 
+			this.groupBox1.Location = new System.Drawing.Point(584, 12);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(279, 458);
+			this.groupBox1.TabIndex = 29;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Preview";
 			// 
 			// headerGroupBox
 			// 
@@ -101,7 +112,7 @@
 			this.headerGroupBox.Checked = true;
 			this.headerGroupBox.ContentsEnabled = true;
 			this.headerGroupBox.Controls.Add(this.tdlHtmlReportHeaderControl);
-			this.headerGroupBox.Location = new System.Drawing.Point(16, 5);
+			this.headerGroupBox.Location = new System.Drawing.Point(12, 12);
 			this.headerGroupBox.Name = "headerGroupBox";
 			this.headerGroupBox.Size = new System.Drawing.Size(556, 97);
 			this.headerGroupBox.TabIndex = 27;
@@ -122,6 +133,7 @@
 			this.tdlHtmlReportHeaderControl.Name = "tdlHtmlReportHeaderControl";
 			this.tdlHtmlReportHeaderControl.Size = new System.Drawing.Size(533, 63);
 			this.tdlHtmlReportHeaderControl.TabIndex = 26;
+			this.tdlHtmlReportHeaderControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
 			this.tdlHtmlReportHeaderControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// titleGroupBox
@@ -130,7 +142,7 @@
 			this.titleGroupBox.Checked = true;
 			this.titleGroupBox.ContentsEnabled = true;
 			this.titleGroupBox.Controls.Add(this.tdlHtmlReportTitleControl);
-			this.titleGroupBox.Location = new System.Drawing.Point(16, 108);
+			this.titleGroupBox.Location = new System.Drawing.Point(12, 115);
 			this.titleGroupBox.Name = "titleGroupBox";
 			this.titleGroupBox.Size = new System.Drawing.Size(556, 97);
 			this.titleGroupBox.TabIndex = 28;
@@ -151,6 +163,7 @@
 			this.tdlHtmlReportTitleControl.Name = "tdlHtmlReportTitleControl";
 			this.tdlHtmlReportTitleControl.Size = new System.Drawing.Size(533, 63);
 			this.tdlHtmlReportTitleControl.TabIndex = 26;
+			this.tdlHtmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
 			this.tdlHtmlReportTitleControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// tdlHtmlReportTaskFormatControl
@@ -168,6 +181,7 @@
 			this.tdlHtmlReportTaskFormatControl.Name = "tdlHtmlReportTaskFormatControl";
 			this.tdlHtmlReportTaskFormatControl.Size = new System.Drawing.Size(533, 115);
 			this.tdlHtmlReportTaskFormatControl.TabIndex = 26;
+			this.tdlHtmlReportTaskFormatControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
 			this.tdlHtmlReportTaskFormatControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// footerGroupBox
@@ -176,7 +190,7 @@
 			this.footerGroupBox.Checked = true;
 			this.footerGroupBox.ContentsEnabled = true;
 			this.footerGroupBox.Controls.Add(this.tdlHtmlReportFooterControl);
-			this.footerGroupBox.Location = new System.Drawing.Point(16, 366);
+			this.footerGroupBox.Location = new System.Drawing.Point(12, 373);
 			this.footerGroupBox.Name = "footerGroupBox";
 			this.footerGroupBox.Size = new System.Drawing.Size(556, 97);
 			this.footerGroupBox.TabIndex = 28;
@@ -197,13 +211,14 @@
 			this.tdlHtmlReportFooterControl.Name = "tdlHtmlReportFooterControl";
 			this.tdlHtmlReportFooterControl.Size = new System.Drawing.Size(533, 63);
 			this.tdlHtmlReportFooterControl.TabIndex = 26;
+			this.tdlHtmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
 			this.tdlHtmlReportFooterControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// HTMLReportExporterForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(786, 506);
+			this.ClientSize = new System.Drawing.Size(875, 514);
 			this.Controls.Add(this.Content);
 			this.Name = "HTMLReportExporterForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -233,5 +248,6 @@
 		private CheckGroupBox titleGroupBox;
 		private System.Windows.Forms.GroupBox taskGroupBox;
 		private CheckGroupBox footerGroupBox;
+		private System.Windows.Forms.GroupBox groupBox1;
 	}
 }

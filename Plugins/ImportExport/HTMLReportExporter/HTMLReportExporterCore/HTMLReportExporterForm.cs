@@ -43,10 +43,12 @@ namespace HTMLReportExporter
 			this.tdlHtmlReportTaskFormatControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
 			this.tdlHtmlReportFooterControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
 
-			this.tdlHtmlReportHeaderControl.Initialise(BackColor, false);
-			this.tdlHtmlReportTitleControl.Initialise(BackColor, false);
-			this.tdlHtmlReportFooterControl.Initialise(BackColor, false);
-			this.tdlHtmlReportTaskFormatControl.Initialise(BackColor, true);
+			this.tdlHtmlReportHeaderControl.ToolbarBackColor = BackColor;
+			this.tdlHtmlReportTitleControl.ToolbarBackColor = BackColor;
+			this.tdlHtmlReportFooterControl.ToolbarBackColor = BackColor;
+			this.tdlHtmlReportTaskFormatControl.ToolbarBackColor = BackColor;
+
+			this.tdlHtmlReportTaskFormatControl.Focus();
 		}
 
 		private void OnReportCtrlGotFocus(object sender, EventArgs e)
@@ -58,25 +60,13 @@ namespace HTMLReportExporter
 			}
 		}
 
-		private struct PositionInfo
-		{
-			public PositionInfo(TDLHtmlReportControlBase ctrl)
-			{
-				Ctrl = ctrl;
-				Parent = ctrl.Parent;
-				Pos = new Rectangle(Parent.Bounds.Location, Parent.Bounds.Size);
-			}
-
-			public TDLHtmlReportControlBase Ctrl;
-			public Control Parent;
-			public Rectangle Pos;
-		}
-
 		private void RepositionReportControls()
 		{
 			int availableHeight = (footerGroupBox.Bounds.Bottom - headerGroupBox.Bounds.Top);
 			int spacing = (titleGroupBox.Bounds.Top - headerGroupBox.Bounds.Bottom);
 
+			// The focused control gets more more than the others
+			const int focusedMultiplier = 3;
 			int unfocusedHeight = 0, focusedHeight = 0;
 
 			if (m_FocusedCtrl == null)
@@ -85,41 +75,37 @@ namespace HTMLReportExporter
 			}
 			else
 			{
-				// The focused control gets twice as much room as the rest
-				unfocusedHeight = (availableHeight - (3 * spacing)) / 5;
+				unfocusedHeight = ((availableHeight - (3 * spacing)) / (3 + focusedMultiplier));
 				focusedHeight = (availableHeight - (3 * (spacing + unfocusedHeight)));
 			}
 
-			// Calculate all the target
-			PositionInfo[] reportCtrls = 
+			// Resize the controls
+			int top = headerGroupBox.Bounds.Top;
+			int left = headerGroupBox.Bounds.Left;
+			int width = headerGroupBox.Bounds.Width;
+
+			TDLHtmlReportControlBase[] reportCtrls =
 			{
-				new PositionInfo(tdlHtmlReportHeaderControl),
-				new PositionInfo(tdlHtmlReportTitleControl),
-				new PositionInfo(tdlHtmlReportTaskFormatControl),
-				new PositionInfo(tdlHtmlReportFooterControl)
+				tdlHtmlReportHeaderControl,
+				tdlHtmlReportTitleControl,
+				tdlHtmlReportTaskFormatControl,
+				tdlHtmlReportFooterControl
 			};
 
-			for (int ctrl = 0; ctrl < 4; ctrl++)
-			{
-				if (reportCtrls[ctrl].Ctrl == m_FocusedCtrl)
-					reportCtrls[ctrl].Pos.Height = focusedHeight;
-				else
-					reportCtrls[ctrl].Pos.Height = unfocusedHeight;
-
-				// fixup following task
-				if (ctrl < 3)
-					reportCtrls[ctrl + 1].Pos.Y = (reportCtrls[ctrl].Pos.Bottom + spacing);
-			}
-
-			// Resize the controls
 			this.SuspendLayout();
 
 			for (int ctrl = 0; ctrl < 4; ctrl++)
 			{
-				reportCtrls[ctrl].Parent.Bounds = reportCtrls[ctrl].Pos;
+				bool focused = (reportCtrls[ctrl] == m_FocusedCtrl);
+				int height = (focused ? focusedHeight : unfocusedHeight);
 
-				reportCtrls[ctrl].Ctrl.ToolbarVisible = (reportCtrls[ctrl].Ctrl == m_FocusedCtrl);
-				reportCtrls[ctrl].Ctrl.EditEnabled = (reportCtrls[ctrl].Ctrl == m_FocusedCtrl);
+				reportCtrls[ctrl].Parent.Bounds = new Rectangle(left, top, width, height);
+
+				reportCtrls[ctrl].ToolbarVisible = focused;
+				reportCtrls[ctrl].EditEnabled = focused;
+
+				// next control
+				top = (reportCtrls[ctrl].Parent.Bottom + spacing);
 			}
 
 			this.ResumeLayout();

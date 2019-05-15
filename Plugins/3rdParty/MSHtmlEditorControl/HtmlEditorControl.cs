@@ -458,10 +458,8 @@ namespace MSDN.Html.Editor
         private void DocumentSelectionChange(object sender, EventArgs e)
         {
             // if not in readonly mode process the selection change
-            if (!_readOnly && _editEnabled)
-            {
+            if (IsEditable)
                 FormatSelectionChange();
-            }
 
         } //DocumentSelectionChange
 
@@ -473,7 +471,7 @@ namespace MSDN.Html.Editor
 
         private void DocumentDoubleClick(object sender, HtmlElementEventArgs e)
         {
-			if (!_readOnly && _editEnabled)
+			if (IsEditable)
 				SelectWordAtCaret();
 			else
 				SelectWordAtPoint(e.MousePosition);
@@ -854,13 +852,13 @@ namespace MSDN.Html.Editor
                 _readOnly = value;
 
                 // define the document editable property
-                body.contentEditable = (!_readOnly && _editEnabled).ToString();
+                body.contentEditable = IsEditable.ToString();
 
 				// define the menu bar state
-				UpdateToolbarEnabledState();
+				UpdateEnabledState();
 				
 				// define whether the IE cntext menu should be shown
-				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = (_readOnly || !_editEnabled);
+				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = !IsEditable;
 			}
 
         } //ReadOnly
@@ -876,17 +874,21 @@ namespace MSDN.Html.Editor
 				_editEnabled = value;
 
                 // define the document editable property
-                body.contentEditable = (!_readOnly && _editEnabled).ToString();
-
+                body.contentEditable = IsEditable.ToString();
+				
 				// define the menu bar state
-				UpdateToolbarEnabledState();
+				UpdateEnabledState();
 				
 				// define whether the IE cntext menu should be shown
-				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = (_readOnly || !_editEnabled);
+				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = !IsEditable;
             }
 
         } //ReadOnly
 
+		private bool IsEditable
+		{
+			get { return (!_readOnly && _editEnabled); }
+		}
 
         /// <summary>
         /// Property defining the visibility of the defined toolbar
@@ -1969,36 +1971,44 @@ namespace MSDN.Html.Editor
 
         } //FormatSelectionChange
 
-		protected void UpdateToolbarEnabledState()
+		override protected void OnEnabledChanged(EventArgs e)
 		{
-			this.toolstripTextCut.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripTextCopy.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripTextPaste.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripEditUndo.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripEditRedo.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFormatBold.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFormatUnderline.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFormatItalic.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFontDialog.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFontNormal.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripColorDialog.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFontIncrease.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFontDecrease.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripJustifyLeft.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripJustifyCenter.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripJustifyRight.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFontIndent.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFontOutdent.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripListOrdered.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripListUnordered.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripInsertLine.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripInsertTable.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripInsertImage.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripInsertLink.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFindReplace.Enabled = (!_readOnly && _editEnabled);
+			base.OnEnabledChanged(e);
+
+			this.WebBrowser.Document.BackColor = (Enabled ? SystemColors.Window : SystemColors.ControlLight);
+		}
+
+		protected void UpdateEnabledState()
+		{
+
+			this.toolstripTextCut.Enabled = IsEditable;
+            this.toolstripTextCopy.Enabled = IsEditable;
+            this.toolstripTextPaste.Enabled = IsEditable;
+            this.toolstripEditUndo.Enabled = IsEditable;
+            this.toolstripEditRedo.Enabled = IsEditable;
+            this.toolstripFormatBold.Enabled = IsEditable;
+            this.toolstripFormatUnderline.Enabled = IsEditable;
+            this.toolstripFormatItalic.Enabled = IsEditable;
+            this.toolstripFontDialog.Enabled = IsEditable;
+            this.toolstripFontNormal.Enabled = IsEditable;
+            this.toolstripColorDialog.Enabled = IsEditable;
+            this.toolstripFontIncrease.Enabled = IsEditable;
+            this.toolstripFontDecrease.Enabled = IsEditable;
+            this.toolstripJustifyLeft.Enabled = IsEditable;
+            this.toolstripJustifyCenter.Enabled = IsEditable;
+            this.toolstripJustifyRight.Enabled = IsEditable;
+            this.toolstripFontIndent.Enabled = IsEditable;
+            this.toolstripFontOutdent.Enabled = IsEditable;
+            this.toolstripListOrdered.Enabled = IsEditable;
+            this.toolstripListUnordered.Enabled = IsEditable;
+            this.toolstripInsertLine.Enabled = IsEditable;
+            this.toolstripInsertTable.Enabled = IsEditable;
+            this.toolstripInsertImage.Enabled = IsEditable;
+            this.toolstripInsertLink.Enabled = IsEditable;
+            this.toolstripFindReplace.Enabled = IsEditable;
 
             this.toolstripEnableEditing.Enabled = !_readOnly;
-			this.toolstripEnableEditing.Checked = (!_readOnly && _editEnabled);
+			this.toolstripEnableEditing.Checked = IsEditable;
 
 			this.toolstripDocumentPrint.Enabled = true; // always
 		}
