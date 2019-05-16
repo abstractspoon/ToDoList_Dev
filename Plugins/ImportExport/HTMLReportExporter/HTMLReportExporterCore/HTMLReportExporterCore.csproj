@@ -65,7 +65,7 @@
     <Compile Include="HtmlReportTemplateForm.Designer.cs">
       <DependentUpon>HtmlReportTemplateForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="HtmlReportWriter.cs" />
+    <Compile Include="HtmlReportBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HtmlReportControls.cs">
       <SubType>UserControl</SubType>
