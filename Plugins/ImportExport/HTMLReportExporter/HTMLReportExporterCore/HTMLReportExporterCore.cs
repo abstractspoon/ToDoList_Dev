@@ -78,9 +78,7 @@ namespace HTMLReportExporter
 		private int CommentsPercentWidth = 30;
 		private RenderStyle Style = DefRenderStyle;
 		private HashSet<Task.Attribute> Attribs = new HashSet<Task.Attribute>();
-
-
-
+		
 		// --------------------------------------------------------------------------------------
 
 		public HTMLReportExporterCore(String typeId, Translator trans)

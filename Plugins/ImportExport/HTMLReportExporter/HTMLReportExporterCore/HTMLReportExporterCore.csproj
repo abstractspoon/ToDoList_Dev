@@ -51,18 +51,21 @@
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\Utils\Utils.cs">
       <Link>Utils.cs</Link>
     </Compile>
     <Compile Include="HTMLReportExporterCore.cs" />
+    <Compile Include="HtmlReportTemplate.cs" />
     <Compile Include="HtmlReportTemplateForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="HtmlReportTemplateForm.Designer.cs">
       <DependentUpon>HtmlReportTemplateForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="HtmlReportWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HtmlReportControls.cs">
       <SubType>UserControl</SubType>

@@ -17,6 +17,7 @@ namespace HTMLReportExporter
 		private String m_TypeId;
 		private Translator m_Trans;
 		private HtmlReportControlBase m_FocusedCtrl = null;
+		private HtmlReportTemplate m_Template;
 
 		// --------------------------------------------------------------
 
@@ -24,6 +25,7 @@ namespace HTMLReportExporter
 		{
 			m_TypeId = typeId;
 			m_Trans = trans;
+			m_Template = new HtmlReportTemplate();
 
 			InitializeComponentEx();
 		}
@@ -38,17 +40,37 @@ namespace HTMLReportExporter
 			this.Content.Location = new Point(0, bannerHeight);
 			this.Content.Height = (this.Content.Height - bannerHeight);
 
-			this.tdlHtmlReportHeaderControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
-			this.tdlHtmlReportTitleControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
-			this.tdlHtmlReportTaskFormatControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
-			this.tdlHtmlReportFooterControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
+			if (m_Template.Load("HtmlReportTemplate.txt"))
+			{
+				this.htmlReportHeaderControl.InnerHtml = m_Template.HeaderTemplate;
+				this.htmlReportTitleControl.InnerHtml = m_Template.TitleTemplate;
+				this.htmlReportTaskFormatControl.InnerHtml = m_Template.TaskTemplate;
+				this.htmlReportFooterControl.InnerHtml = m_Template.FooterTemplate;
+			}
+			
+			this.htmlReportHeaderControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
+			this.htmlReportTitleControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
+			this.htmlReportTaskFormatControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
+			this.htmlReportFooterControl.GotFocus += new EventHandler(OnReportCtrlGotFocus);
 
-			this.tdlHtmlReportHeaderControl.ToolbarBackColor = BackColor;
-			this.tdlHtmlReportTitleControl.ToolbarBackColor = BackColor;
-			this.tdlHtmlReportFooterControl.ToolbarBackColor = BackColor;
-			this.tdlHtmlReportTaskFormatControl.ToolbarBackColor = BackColor;
+			this.htmlReportHeaderControl.ToolbarBackColor = BackColor;
+			this.htmlReportTitleControl.ToolbarBackColor = BackColor;
+			this.htmlReportTaskFormatControl.ToolbarBackColor = BackColor;
+			this.htmlReportFooterControl.ToolbarBackColor = BackColor;
 
-			this.tdlHtmlReportTaskFormatControl.Focus();
+			this.htmlReportTaskFormatControl.Focus();
+		}
+
+		protected override void OnFormClosed(FormClosedEventArgs e)
+		{
+			base.OnFormClosed(e);
+
+			m_Template.HeaderTemplate = this.htmlReportHeaderControl.InnerHtml;
+			m_Template.TitleTemplate = this.htmlReportTitleControl.InnerHtml;
+			m_Template.TaskTemplate = this.htmlReportTaskFormatControl.InnerHtml;
+			m_Template.FooterTemplate = this.htmlReportFooterControl.InnerHtml;
+
+			m_Template.Save("HtmlReportTemplate.txt");
 		}
 
 		private void OnReportCtrlGotFocus(object sender, EventArgs e)
@@ -86,10 +108,10 @@ namespace HTMLReportExporter
 
 			HtmlReportControlBase[] reportCtrls =
 			{
-				tdlHtmlReportHeaderControl,
-				tdlHtmlReportTitleControl,
-				tdlHtmlReportTaskFormatControl,
-				tdlHtmlReportFooterControl
+				htmlReportHeaderControl,
+				htmlReportTitleControl,
+				htmlReportTaskFormatControl,
+				htmlReportFooterControl
 			};
 
 			this.SuspendLayout();

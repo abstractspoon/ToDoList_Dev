@@ -34,12 +34,12 @@
 			this.taskGroupBox = new System.Windows.Forms.GroupBox();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.headerGroupBox = new HTMLReportExporter.CheckGroupBox();
-			this.tdlHtmlReportHeaderControl = new HTMLReportExporter.HtmlReportHeaderControl();
+			this.htmlReportHeaderControl = new HTMLReportExporter.HtmlReportHeaderControl();
 			this.titleGroupBox = new HTMLReportExporter.CheckGroupBox();
-			this.tdlHtmlReportTitleControl = new HTMLReportExporter.HtmlReportTitleControl();
-			this.tdlHtmlReportTaskFormatControl = new HTMLReportExporter.HtmlReportTaskFormatControl();
+			this.htmlReportTitleControl = new HTMLReportExporter.HtmlReportTitleControl();
+			this.htmlReportTaskFormatControl = new HTMLReportExporter.HtmlReportTaskFormatControl();
 			this.footerGroupBox = new HTMLReportExporter.CheckGroupBox();
-			this.tdlHtmlReportFooterControl = new HTMLReportExporter.HtmlReportFooterControl();
+			this.htmlReportFooterControl = new HTMLReportExporter.HtmlReportFooterControl();
 			this.Content.SuspendLayout();
 			this.taskGroupBox.SuspendLayout();
 			this.headerGroupBox.SuspendLayout();
@@ -89,7 +89,7 @@
 			// 
 			// taskGroupBox
 			// 
-			this.taskGroupBox.Controls.Add(this.tdlHtmlReportTaskFormatControl);
+			this.taskGroupBox.Controls.Add(this.htmlReportTaskFormatControl);
 			this.taskGroupBox.Location = new System.Drawing.Point(12, 218);
 			this.taskGroupBox.Name = "taskGroupBox";
 			this.taskGroupBox.Size = new System.Drawing.Size(556, 149);
@@ -111,7 +111,7 @@
 			this.headerGroupBox.CheckAction = HTMLReportExporter.CheckGroupBoxCheckAction.Enable;
 			this.headerGroupBox.Checked = true;
 			this.headerGroupBox.ContentsEnabled = true;
-			this.headerGroupBox.Controls.Add(this.tdlHtmlReportHeaderControl);
+			this.headerGroupBox.Controls.Add(this.htmlReportHeaderControl);
 			this.headerGroupBox.Location = new System.Drawing.Point(12, 12);
 			this.headerGroupBox.Name = "headerGroupBox";
 			this.headerGroupBox.Size = new System.Drawing.Size(556, 97);
@@ -121,27 +121,27 @@
 			// 
 			// tdlHtmlReportHeaderControl
 			// 
-			this.tdlHtmlReportHeaderControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this.htmlReportHeaderControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.tdlHtmlReportHeaderControl.BorderSize = ((byte)(0));
-			this.tdlHtmlReportHeaderControl.EditEnabled = true;
-			this.tdlHtmlReportHeaderControl.InnerText = null;
-			this.tdlHtmlReportHeaderControl.LastBrowsedFileFolder = null;
-			this.tdlHtmlReportHeaderControl.LastBrowsedImageFolder = null;
-			this.tdlHtmlReportHeaderControl.Location = new System.Drawing.Point(11, 19);
-			this.tdlHtmlReportHeaderControl.Name = "tdlHtmlReportHeaderControl";
-			this.tdlHtmlReportHeaderControl.Size = new System.Drawing.Size(533, 63);
-			this.tdlHtmlReportHeaderControl.TabIndex = 26;
-			this.tdlHtmlReportHeaderControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
-			this.tdlHtmlReportHeaderControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
+			this.htmlReportHeaderControl.BorderSize = ((byte)(0));
+			this.htmlReportHeaderControl.EditEnabled = true;
+			this.htmlReportHeaderControl.InnerText = null;
+			this.htmlReportHeaderControl.LastBrowsedFileFolder = null;
+			this.htmlReportHeaderControl.LastBrowsedImageFolder = null;
+			this.htmlReportHeaderControl.Location = new System.Drawing.Point(11, 19);
+			this.htmlReportHeaderControl.Name = "tdlHtmlReportHeaderControl";
+			this.htmlReportHeaderControl.Size = new System.Drawing.Size(533, 63);
+			this.htmlReportHeaderControl.TabIndex = 26;
+			this.htmlReportHeaderControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
+			this.htmlReportHeaderControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// titleGroupBox
 			// 
 			this.titleGroupBox.CheckAction = HTMLReportExporter.CheckGroupBoxCheckAction.Enable;
 			this.titleGroupBox.Checked = true;
 			this.titleGroupBox.ContentsEnabled = true;
-			this.titleGroupBox.Controls.Add(this.tdlHtmlReportTitleControl);
+			this.titleGroupBox.Controls.Add(this.htmlReportTitleControl);
 			this.titleGroupBox.Location = new System.Drawing.Point(12, 115);
 			this.titleGroupBox.Name = "titleGroupBox";
 			this.titleGroupBox.Size = new System.Drawing.Size(556, 97);
@@ -151,45 +151,45 @@
 			// 
 			// tdlHtmlReportTitleControl
 			// 
-			this.tdlHtmlReportTitleControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this.htmlReportTitleControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.tdlHtmlReportTitleControl.BorderSize = ((byte)(0));
-			this.tdlHtmlReportTitleControl.EditEnabled = true;
-			this.tdlHtmlReportTitleControl.InnerText = null;
-			this.tdlHtmlReportTitleControl.LastBrowsedFileFolder = null;
-			this.tdlHtmlReportTitleControl.LastBrowsedImageFolder = null;
-			this.tdlHtmlReportTitleControl.Location = new System.Drawing.Point(11, 19);
-			this.tdlHtmlReportTitleControl.Name = "tdlHtmlReportTitleControl";
-			this.tdlHtmlReportTitleControl.Size = new System.Drawing.Size(533, 63);
-			this.tdlHtmlReportTitleControl.TabIndex = 26;
-			this.tdlHtmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
-			this.tdlHtmlReportTitleControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
+			this.htmlReportTitleControl.BorderSize = ((byte)(0));
+			this.htmlReportTitleControl.EditEnabled = true;
+			this.htmlReportTitleControl.InnerText = null;
+			this.htmlReportTitleControl.LastBrowsedFileFolder = null;
+			this.htmlReportTitleControl.LastBrowsedImageFolder = null;
+			this.htmlReportTitleControl.Location = new System.Drawing.Point(11, 19);
+			this.htmlReportTitleControl.Name = "tdlHtmlReportTitleControl";
+			this.htmlReportTitleControl.Size = new System.Drawing.Size(533, 63);
+			this.htmlReportTitleControl.TabIndex = 26;
+			this.htmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
+			this.htmlReportTitleControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// tdlHtmlReportTaskFormatControl
 			// 
-			this.tdlHtmlReportTaskFormatControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this.htmlReportTaskFormatControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.tdlHtmlReportTaskFormatControl.BorderSize = ((byte)(0));
-			this.tdlHtmlReportTaskFormatControl.Cursor = System.Windows.Forms.Cursors.Default;
-			this.tdlHtmlReportTaskFormatControl.EditEnabled = true;
-			this.tdlHtmlReportTaskFormatControl.InnerText = null;
-			this.tdlHtmlReportTaskFormatControl.LastBrowsedFileFolder = null;
-			this.tdlHtmlReportTaskFormatControl.LastBrowsedImageFolder = null;
-			this.tdlHtmlReportTaskFormatControl.Location = new System.Drawing.Point(11, 19);
-			this.tdlHtmlReportTaskFormatControl.Name = "tdlHtmlReportTaskFormatControl";
-			this.tdlHtmlReportTaskFormatControl.Size = new System.Drawing.Size(533, 115);
-			this.tdlHtmlReportTaskFormatControl.TabIndex = 26;
-			this.tdlHtmlReportTaskFormatControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
-			this.tdlHtmlReportTaskFormatControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
+			this.htmlReportTaskFormatControl.BorderSize = ((byte)(0));
+			this.htmlReportTaskFormatControl.Cursor = System.Windows.Forms.Cursors.Default;
+			this.htmlReportTaskFormatControl.EditEnabled = true;
+			this.htmlReportTaskFormatControl.InnerText = null;
+			this.htmlReportTaskFormatControl.LastBrowsedFileFolder = null;
+			this.htmlReportTaskFormatControl.LastBrowsedImageFolder = null;
+			this.htmlReportTaskFormatControl.Location = new System.Drawing.Point(11, 19);
+			this.htmlReportTaskFormatControl.Name = "tdlHtmlReportTaskFormatControl";
+			this.htmlReportTaskFormatControl.Size = new System.Drawing.Size(533, 115);
+			this.htmlReportTaskFormatControl.TabIndex = 26;
+			this.htmlReportTaskFormatControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
+			this.htmlReportTaskFormatControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// footerGroupBox
 			// 
 			this.footerGroupBox.CheckAction = HTMLReportExporter.CheckGroupBoxCheckAction.Enable;
 			this.footerGroupBox.Checked = true;
 			this.footerGroupBox.ContentsEnabled = true;
-			this.footerGroupBox.Controls.Add(this.tdlHtmlReportFooterControl);
+			this.footerGroupBox.Controls.Add(this.htmlReportFooterControl);
 			this.footerGroupBox.Location = new System.Drawing.Point(12, 373);
 			this.footerGroupBox.Name = "footerGroupBox";
 			this.footerGroupBox.Size = new System.Drawing.Size(556, 97);
@@ -199,20 +199,20 @@
 			// 
 			// tdlHtmlReportFooterControl
 			// 
-			this.tdlHtmlReportFooterControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this.htmlReportFooterControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.tdlHtmlReportFooterControl.BorderSize = ((byte)(0));
-			this.tdlHtmlReportFooterControl.EditEnabled = true;
-			this.tdlHtmlReportFooterControl.InnerText = null;
-			this.tdlHtmlReportFooterControl.LastBrowsedFileFolder = null;
-			this.tdlHtmlReportFooterControl.LastBrowsedImageFolder = null;
-			this.tdlHtmlReportFooterControl.Location = new System.Drawing.Point(11, 19);
-			this.tdlHtmlReportFooterControl.Name = "tdlHtmlReportFooterControl";
-			this.tdlHtmlReportFooterControl.Size = new System.Drawing.Size(533, 63);
-			this.tdlHtmlReportFooterControl.TabIndex = 26;
-			this.tdlHtmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
-			this.tdlHtmlReportFooterControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
+			this.htmlReportFooterControl.BorderSize = ((byte)(0));
+			this.htmlReportFooterControl.EditEnabled = true;
+			this.htmlReportFooterControl.InnerText = null;
+			this.htmlReportFooterControl.LastBrowsedFileFolder = null;
+			this.htmlReportFooterControl.LastBrowsedImageFolder = null;
+			this.htmlReportFooterControl.Location = new System.Drawing.Point(11, 19);
+			this.htmlReportFooterControl.Name = "tdlHtmlReportFooterControl";
+			this.htmlReportFooterControl.Size = new System.Drawing.Size(533, 63);
+			this.htmlReportFooterControl.TabIndex = 26;
+			this.htmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
+			this.htmlReportFooterControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// HTMLReportExporterForm
 			// 
@@ -240,11 +240,11 @@
 		private System.Windows.Forms.Panel Content;
 		private System.Windows.Forms.Button BtnOK;
 		private System.Windows.Forms.Button BtnCancel;
-		private HtmlReportFooterControl tdlHtmlReportFooterControl;
-		private HtmlReportTaskFormatControl tdlHtmlReportTaskFormatControl;
-		private HtmlReportTitleControl tdlHtmlReportTitleControl;
+		private HtmlReportFooterControl htmlReportFooterControl;
+		private HtmlReportTaskFormatControl htmlReportTaskFormatControl;
+		private HtmlReportTitleControl htmlReportTitleControl;
 		private CheckGroupBox headerGroupBox;
-		private HtmlReportHeaderControl tdlHtmlReportHeaderControl;
+		private HtmlReportHeaderControl htmlReportHeaderControl;
 		private CheckGroupBox titleGroupBox;
 		private System.Windows.Forms.GroupBox taskGroupBox;
 		private CheckGroupBox footerGroupBox;
