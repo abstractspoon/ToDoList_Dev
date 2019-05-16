@@ -14,7 +14,6 @@ namespace HTMLReportExporter
 		// --------------------------------------------------------------------------------------
 
 		static String CommentsDoneColor = @"#808080";
-		static String DocType = @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD XHTML 1.0 Transitional//EN"" ""http://www.w3.org/TR/html4/loose.dtd"">";
 		static String Tab = @"&nbsp;&nbsp;&nbsp;&nbsp;";
 		static String Space = @"&nbsp;";
 		static String Endl = @"\n";
@@ -68,6 +67,8 @@ namespace HTMLReportExporter
 		private Translator m_Trans;
 		private String m_TypeId;
 
+		private HtmlReportTemplate m_Template;
+
 		// --------------------------------------------------------------------------------------
 
 		// Pseudo-constants
@@ -97,7 +98,8 @@ namespace HTMLReportExporter
 					if (dialog.ShowDialog() != DialogResult.OK)
 						return false;
 
-					// TODO
+					m_Template = dialog.ReportTemplate;
+					m_Template.Save("HtmlReportTemplate.txt");
 				}
 			}
 
@@ -215,14 +217,9 @@ namespace HTMLReportExporter
 				{
 					using (var html = new HtmlTextWriter(file))
 					{
-						html.Write(DocType);
-						html.WriteLine();
-						html.RenderBeginTag(HtmlTextWriterTag.Html);
+						var report = new HtmlReportBuilder(tasks, "HtmlReportTemplate.txt");
 
-						WriteHeader(tasks, html);
-						WriteBody(tasks, html);
-
-						html.RenderEndTag(); // Html
+						report.BuildReport(html);
 					}
 				}
 			}

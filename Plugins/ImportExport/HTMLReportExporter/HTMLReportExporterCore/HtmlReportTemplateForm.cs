@@ -30,6 +30,11 @@ namespace HTMLReportExporter
 			InitializeComponentEx();
 		}
 
+		public HtmlReportTemplate ReportTemplate
+		{
+			get { return m_Template; }
+		}
+
 		private void InitializeComponentEx()
 		{
 			InitializeComponent();
@@ -61,16 +66,17 @@ namespace HTMLReportExporter
 			this.htmlReportTaskFormatControl.Focus();
 		}
 
-		protected override void OnFormClosed(FormClosedEventArgs e)
+		protected override void OnClosing(CancelEventArgs e)
 		{
-			base.OnFormClosed(e);
+			base.OnClosing(e);
 
-			m_Template.HeaderTemplate = this.htmlReportHeaderControl.InnerHtml;
-			m_Template.TitleTemplate = this.htmlReportTitleControl.InnerHtml;
-			m_Template.TaskTemplate = this.htmlReportTaskFormatControl.InnerHtml;
-			m_Template.FooterTemplate = this.htmlReportFooterControl.InnerHtml;
-
-			m_Template.Save("HtmlReportTemplate.txt");
+			if (!e.Cancel)
+			{
+				m_Template.HeaderTemplate = this.htmlReportHeaderControl.InnerHtml;
+				m_Template.TitleTemplate = this.htmlReportTitleControl.InnerHtml;
+				m_Template.TaskTemplate = this.htmlReportTaskFormatControl.InnerHtml;
+				m_Template.FooterTemplate = this.htmlReportFooterControl.InnerHtml;
+			}
 		}
 
 		private void OnReportCtrlGotFocus(object sender, EventArgs e)

@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace HTMLReportExporter
 {
-	class HtmlReportTemplate
+	public class HtmlReportTemplate
 	{
 		public HtmlReportTemplate()
 		{
@@ -28,25 +28,25 @@ namespace HTMLReportExporter
 		public String TaskTemplate { get; set; }
 		public String FooterTemplate { get; set; }
 
-		public String FormatHeaderTemplate()
+		public String FormatHeader()
+		{
+			// TODO
+			return HeaderTemplate;
+		}
+		public String FormatTitle(String reportTitle, String reportDate)
+		{
+			// TODO
+			return TitleTemplate;
+		}
+		public String FormatTask()
 		{
 			// TODO
 			return "";
 		}
-		public String FormatTitleTemplate()
+		public String FormatFooter()
 		{
 			// TODO
-			return "";
-		}
-		public String FormatTaskTemplate()
-		{
-			// TODO
-			return "";
-		}
-		public String FormatFooterTemplate()
-		{
-			// TODO
-			return "";
+			return FooterTemplate;
 		}
 		
 		public bool Load(String pathName)
