@@ -22,59 +22,72 @@ bool CommandHandling::HideCommand(String^ commandId, ToolStripItemCollection^ it
 		cmd->Visible = false;
 		cmd->Enabled = false;
 
-		HideDuplicateSeparators(items);
+		// Prevent sequential visible separators
+		ToolStripItem^ nextVisCmd = nullptr;
+		ToolStripItem^ prevVisCmd = nullptr;
 
+		int iItem = items->IndexOf(cmd);
+		
+		// Handle nested menus
+		if (iItem == -1)
+		{
+			ToolStripMenuItem^ menu = dynamic_cast<ToolStripMenuItem^>(cmd->OwnerItem);
+
+			if ((menu != nullptr) && menu->HasDropDownItems)
+			{
+				items = menu->DropDownItems;
+				iItem = items->IndexOf(cmd);
+			}
+		}
+
+		if (iItem != -1)
+		{
+			int iNext = iItem, iPrev = iItem;
+
+			while (iPrev--)
+			{
+				if (items[iPrev]->Visible)
+				{
+					prevVisCmd = items[iPrev];
+					break;
+				}
+			}
+
+			while (++iNext < items->Count)
+			{
+				if (items[iNext]->Visible)
+				{
+					nextVisCmd = items[iNext];
+					break;
+				}
+			}
+
+			if (IsSeparator(nextVisCmd) && IsNullOrSeparator(prevVisCmd))
+			{
+				nextVisCmd->Visible = false;
+				nextVisCmd->Enabled = false;
+			}
+			else if (IsSeparator(prevVisCmd) && (nextVisCmd == nullptr))
+			{
+				prevVisCmd->Visible = false;
+				prevVisCmd->Enabled = false;
+			}
+		}
+		
 		return true;
 	}
 
 	return false;
 }
 
-void CommandHandling::HideDuplicateSeparators(ToolStripItemCollection^ items)
+bool CommandHandling::IsNullOrSeparator(System::Windows::Forms::ToolStripItem^ item)
 {
-	bool prevIsSep = true;
+	return ((item == nullptr) || IsSeparator(item));
+}
 
-	for (int iItem = 0; iItem < items->Count; iItem++)
-	{
-		ToolStripItem^ item = items[iItem];
-		bool isSep = (dynamic_cast<ToolStripSeparator^>(item) != nullptr);
-
-		if (isSep)
-		{
-			if (prevIsSep)
-			{
-				item->Visible = false;
-				item->Enabled = false;
-			}
-			else
-			{
-				if (iItem == (items->Count - 1)) // last item
-				{
-					item->Visible = false;
-					item->Enabled = false;
-
-					prevIsSep = true;
-				}
-				else
-				{
-					ToolStripItem^ nextItem = items[iItem + 1];
-					bool nextIsSep = (dynamic_cast<ToolStripSeparator^>(nextItem) != nullptr);
-
-					if (nextIsSep)
-					{
-						item->Visible = false;
-						item->Enabled = false;
-
-						prevIsSep = true;
-					}
-				}
-			}
-		}
-		else
-		{
-			prevIsSep = false;
-		}
-	}
+bool CommandHandling::IsSeparator(System::Windows::Forms::ToolStripItem^ item)
+{
+	return (dynamic_cast<ToolStripSeparator^>(item) != nullptr);
 }
 
 bool CommandHandling::ProcessMenuShortcut(Keys keyPress, ToolStripItemCollection^ items)
