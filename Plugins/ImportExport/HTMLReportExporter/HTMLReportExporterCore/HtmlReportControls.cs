@@ -10,7 +10,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLReportExporter
 {
-	partial class TDLHtmlReportControlBase : MSDN.Html.Editor.HtmlEditorControl
+	partial class HtmlReportControlBase : MSDN.Html.Editor.HtmlEditorControl
 	{
 		private System.Drawing.Font m_ControlsFont;
 		private Translator m_Trans;
@@ -21,7 +21,7 @@ namespace HTMLReportExporter
 
 		// ---------------------------------------------------------------
 
-		public TDLHtmlReportControlBase()
+		public HtmlReportControlBase()
 		{
 			InitializeComponentEx();
 		}
@@ -187,7 +187,7 @@ namespace HTMLReportExporter
 		}
 	}
 
-	partial class TDLHtmlReportHeaderControl : TDLHtmlReportControlBase
+	partial class HtmlReportHeaderControl : HtmlReportControlBase
 	{
 		override protected void InitialiseFeatures()
 		{
@@ -201,7 +201,7 @@ namespace HTMLReportExporter
 
 	}
 
-	partial class TDLHtmlReportTitleControl : TDLHtmlReportControlBase
+	partial class HtmlReportTitleControl : HtmlReportControlBase
 	{
 		override protected void InitialiseFeatures()
 		{
@@ -214,7 +214,7 @@ namespace HTMLReportExporter
 
 	}
 
-	partial class TDLHtmlReportTaskFormatControl : TDLHtmlReportControlBase
+	partial class HtmlReportTaskFormatControl : HtmlReportControlBase
 	{
 		override protected void InitialiseFeatures()
 		{
@@ -224,7 +224,7 @@ namespace HTMLReportExporter
 
 	}
 
-	partial class TDLHtmlReportFooterControl : TDLHtmlReportControlBase
+	partial class HtmlReportFooterControl : HtmlReportControlBase
 	{
 		override protected void InitialiseFeatures()
 		{

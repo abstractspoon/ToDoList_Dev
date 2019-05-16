@@ -38,7 +38,7 @@
 	*/
 
 
-	partial class TDLHtmlReportControlBase
+	partial class HtmlReportControlBase
 	{
 		/// <summary> 
 		/// Required designer variable.
@@ -73,7 +73,7 @@
 		#endregion
 	}
 
-	partial class TDLHtmlReportHeaderControl
+	partial class HtmlReportHeaderControl
 	{
 		/// <summary> 
 		/// Required designer variable.
@@ -108,7 +108,7 @@
 		#endregion
 	}
 
-	partial class TDLHtmlReportTitleControl
+	partial class HtmlReportTitleControl
 	{
 		/// <summary> 
 		/// Required designer variable.
@@ -143,7 +143,7 @@
 		#endregion
 	}
 
-	partial class TDLHtmlReportTaskFormatControl
+	partial class HtmlReportTaskFormatControl
 	{
 		/// <summary> 
 		/// Required designer variable.
@@ -178,7 +178,7 @@
 		#endregion
 	}
 
-	partial class TDLHtmlReportFooterControl
+	partial class HtmlReportFooterControl
 	{
 		/// <summary> 
 		/// Required designer variable.

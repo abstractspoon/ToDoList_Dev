@@ -1,6 +1,6 @@
 ﻿namespace HTMLReportExporter
 {
-	partial class HTMLReportExporterForm
+	partial class HtmlReportTemplateForm
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -34,12 +34,12 @@
 			this.taskGroupBox = new System.Windows.Forms.GroupBox();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.headerGroupBox = new HTMLReportExporter.CheckGroupBox();
-			this.tdlHtmlReportHeaderControl = new HTMLReportExporter.TDLHtmlReportHeaderControl();
+			this.tdlHtmlReportHeaderControl = new HTMLReportExporter.HtmlReportHeaderControl();
 			this.titleGroupBox = new HTMLReportExporter.CheckGroupBox();
-			this.tdlHtmlReportTitleControl = new HTMLReportExporter.TDLHtmlReportTitleControl();
-			this.tdlHtmlReportTaskFormatControl = new HTMLReportExporter.TDLHtmlReportTaskFormatControl();
+			this.tdlHtmlReportTitleControl = new HTMLReportExporter.HtmlReportTitleControl();
+			this.tdlHtmlReportTaskFormatControl = new HTMLReportExporter.HtmlReportTaskFormatControl();
 			this.footerGroupBox = new HTMLReportExporter.CheckGroupBox();
-			this.tdlHtmlReportFooterControl = new HTMLReportExporter.TDLHtmlReportFooterControl();
+			this.tdlHtmlReportFooterControl = new HTMLReportExporter.HtmlReportFooterControl();
 			this.Content.SuspendLayout();
 			this.taskGroupBox.SuspendLayout();
 			this.headerGroupBox.SuspendLayout();
@@ -240,11 +240,11 @@
 		private System.Windows.Forms.Panel Content;
 		private System.Windows.Forms.Button BtnOK;
 		private System.Windows.Forms.Button BtnCancel;
-		private TDLHtmlReportFooterControl tdlHtmlReportFooterControl;
-		private TDLHtmlReportTaskFormatControl tdlHtmlReportTaskFormatControl;
-		private TDLHtmlReportTitleControl tdlHtmlReportTitleControl;
+		private HtmlReportFooterControl tdlHtmlReportFooterControl;
+		private HtmlReportTaskFormatControl tdlHtmlReportTaskFormatControl;
+		private HtmlReportTitleControl tdlHtmlReportTitleControl;
 		private CheckGroupBox headerGroupBox;
-		private TDLHtmlReportHeaderControl tdlHtmlReportHeaderControl;
+		private HtmlReportHeaderControl tdlHtmlReportHeaderControl;
 		private CheckGroupBox titleGroupBox;
 		private System.Windows.Forms.GroupBox taskGroupBox;
 		private CheckGroupBox footerGroupBox;

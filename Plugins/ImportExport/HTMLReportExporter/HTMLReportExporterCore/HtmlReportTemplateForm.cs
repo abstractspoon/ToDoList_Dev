@@ -12,15 +12,15 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLReportExporter
 {
-	public partial class HTMLReportExporterForm : Form
+	public partial class HtmlReportTemplateForm : Form
 	{
 		private String m_TypeId;
 		private Translator m_Trans;
-		private TDLHtmlReportControlBase m_FocusedCtrl = null;
+		private HtmlReportControlBase m_FocusedCtrl = null;
 
 		// --------------------------------------------------------------
 
-		public HTMLReportExporterForm(String typeId, Translator trans)
+		public HtmlReportTemplateForm(String typeId, Translator trans)
 		{
 			m_TypeId = typeId;
 			m_Trans = trans;
@@ -55,7 +55,7 @@ namespace HTMLReportExporter
 		{
 			if ((sender != m_FocusedCtrl) || (m_FocusedCtrl == null))
 			{
-				m_FocusedCtrl = (sender as TDLHtmlReportControlBase);
+				m_FocusedCtrl = (sender as HtmlReportControlBase);
 				RepositionReportControls();
 			}
 		}
@@ -84,7 +84,7 @@ namespace HTMLReportExporter
 			int left = headerGroupBox.Bounds.Left;
 			int width = headerGroupBox.Bounds.Width;
 
-			TDLHtmlReportControlBase[] reportCtrls =
+			HtmlReportControlBase[] reportCtrls =
 			{
 				tdlHtmlReportHeaderControl,
 				tdlHtmlReportTitleControl,
