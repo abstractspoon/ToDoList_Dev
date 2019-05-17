@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -83,7 +84,9 @@ namespace HTMLReportExporter
 
 					try
 					{
-						using (var file = new System.IO.StreamWriter("HtmlReporterPreview.html"))
+						String previewPath = Path.Combine(Path.GetTempPath(), "HtmlReporterPreview.html");
+
+						using (var file = new StreamWriter(previewPath))
 						{
 							using (var html = new HtmlTextWriter(file))
 							{
@@ -93,7 +96,7 @@ namespace HTMLReportExporter
 							}
 						}
 
-						browserPreview.Navigate("HtmlReporterPreview.html");
+						browserPreview.Navigate(new System.Uri(previewPath));
 					}
 					catch (Exception /*e*/)
 					{

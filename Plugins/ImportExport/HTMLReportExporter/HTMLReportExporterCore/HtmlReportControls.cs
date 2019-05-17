@@ -66,7 +66,6 @@ namespace HTMLReportExporter
 				this.ContextMenu.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
 			}
 
-			this.ToolbarBackColor = SystemColors.ControlLightLight;
 			this.ToolbarDock = DockStyle.Top;
 			this.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
 			this.InnerText = "";

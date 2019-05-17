@@ -215,7 +215,7 @@
 			this.htmlReportHeaderControl.Name = "htmlReportHeaderControl";
 			this.htmlReportHeaderControl.Size = new System.Drawing.Size(384, 403);
 			this.htmlReportHeaderControl.TabIndex = 26;
-			this.htmlReportHeaderControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
+			this.htmlReportHeaderControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
 			this.htmlReportHeaderControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// htmlReportTitleControl
@@ -232,7 +232,7 @@
 			this.htmlReportTitleControl.Name = "htmlReportTitleControl";
 			this.htmlReportTitleControl.Size = new System.Drawing.Size(384, 403);
 			this.htmlReportTitleControl.TabIndex = 26;
-			this.htmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
+			this.htmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
 			this.htmlReportTitleControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// htmlReportTaskFormatControl
@@ -250,7 +250,7 @@
 			this.htmlReportTaskFormatControl.Name = "htmlReportTaskFormatControl";
 			this.htmlReportTaskFormatControl.Size = new System.Drawing.Size(384, 426);
 			this.htmlReportTaskFormatControl.TabIndex = 26;
-			this.htmlReportTaskFormatControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
+			this.htmlReportTaskFormatControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
 			this.htmlReportTaskFormatControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// htmlReportFooterControl
@@ -267,7 +267,7 @@
 			this.htmlReportFooterControl.Name = "htmlReportFooterControl";
 			this.htmlReportFooterControl.Size = new System.Drawing.Size(384, 400);
 			this.htmlReportFooterControl.TabIndex = 26;
-			this.htmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLight;
+			this.htmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
 			this.htmlReportFooterControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// HtmlReportTemplateForm
