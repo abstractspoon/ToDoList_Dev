@@ -19,10 +19,10 @@ namespace HTMLReportExporter
 
 		// -------------------------------------------------------------
 
-		public HtmlReportBuilder(TaskList tasks, String reportTemplatePath)
+		public HtmlReportBuilder(TaskList tasks, HtmlReportTemplate template)
 		{
 			m_Tasklist = tasks;
-			m_Template = new HtmlReportTemplate(reportTemplatePath);
+			m_Template = template;
 		}
 
 		public bool BuildReport(HtmlTextWriter html)

@@ -43,8 +43,6 @@ namespace HTMLReportExporter
 
 	public class HtmlReportTemplate
 	{
-		private String m_FilePath;
-
 		// -----------------------------------------
 
 		public HtmlReportTemplate()
@@ -58,18 +56,11 @@ namespace HTMLReportExporter
 			TitleTemplate = new TemplateItem();
 			TaskTemplate = new TemplateItem();
 			FooterTemplate = new TemplateItem();
-
-			m_FilePath = "";
 		}
 
 		public HtmlReportTemplate(String pathName)
 		{
 			Load(pathName);
-		}
-
-		public String FilePath
-		{
-			get { return m_FilePath; }
 		}
 
 		public TemplateItem HeaderTemplate { get; set; }
@@ -131,6 +122,8 @@ namespace HTMLReportExporter
 				return false;
 
 			// else
+			Reset();
+
 			try
 			{
 				var doc = XDocument.Load(pathName);
@@ -153,7 +146,6 @@ namespace HTMLReportExporter
 				return false;
 			}
 
-			m_FilePath = Path.GetFullPath(pathName);
 			return true;
 		}
 
@@ -181,7 +173,6 @@ namespace HTMLReportExporter
 				return false;
 			}
 
-			m_FilePath = Path.GetFullPath(pathName);
 			return true;
 		}
 
