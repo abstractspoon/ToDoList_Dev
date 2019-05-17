@@ -51,11 +51,6 @@ namespace HTMLReportExporter
 				this.htmlReportTaskFormatControl.InnerHtml = m_Template.TaskTemplate;
 				this.htmlReportFooterControl.InnerHtml = m_Template.FooterTemplate;
 			}
-			
-			this.htmlReportHeaderControl.ToolbarBackColor = SystemColors.ControlLightLight;
-			this.htmlReportTitleControl.ToolbarBackColor = SystemColors.ControlLightLight;
-			this.htmlReportTaskFormatControl.ToolbarBackColor = SystemColors.ControlLightLight;
-			this.htmlReportFooterControl.ToolbarBackColor = SystemColors.ControlLightLight;
 
 			this.tabControl.SelectTab(taskPage);
 		}
