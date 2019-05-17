@@ -99,7 +99,9 @@ namespace HTMLReportExporter
 						return false;
 
 					m_Template = dialog.ReportTemplate;
-					m_Template.Save("HtmlReportTemplate.txt");
+#if DEBUG
+					return false;
+#endif
 				}
 			}
 
@@ -217,9 +219,9 @@ namespace HTMLReportExporter
 				{
 					using (var html = new HtmlTextWriter(file))
 					{
-						var report = new HtmlReportBuilder(tasks, "HtmlReportTemplate.txt");
+						var report = new HtmlReportBuilder(tasks, m_Template.FilePath);
 
-						report.BuildReport(html);
+						return report.BuildReport(html);
 					}
 				}
 			}

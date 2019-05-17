@@ -31,12 +31,12 @@
 			this.Content = new System.Windows.Forms.Panel();
 			this.tabControl = new System.Windows.Forms.TabControl();
 			this.headerPage = new System.Windows.Forms.TabPage();
-			this.headerGroupBox = new System.Windows.Forms.CheckBox();
+			this.headerCheckBox = new System.Windows.Forms.CheckBox();
 			this.titlePage = new System.Windows.Forms.TabPage();
-			this.titleGroupBox = new System.Windows.Forms.CheckBox();
+			this.titleCheckBox = new System.Windows.Forms.CheckBox();
 			this.taskPage = new System.Windows.Forms.TabPage();
 			this.footerPage = new System.Windows.Forms.TabPage();
-			this.footerGroupBox = new System.Windows.Forms.CheckBox();
+			this.footerCheckBox = new System.Windows.Forms.CheckBox();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.BtnOK = new System.Windows.Forms.Button();
 			this.BtnCancel = new System.Windows.Forms.Button();
@@ -83,7 +83,7 @@
 			// headerPage
 			// 
 			this.headerPage.Controls.Add(this.htmlReportHeaderControl);
-			this.headerPage.Controls.Add(this.headerGroupBox);
+			this.headerPage.Controls.Add(this.headerCheckBox);
 			this.headerPage.Location = new System.Drawing.Point(4, 22);
 			this.headerPage.Name = "headerPage";
 			this.headerPage.Padding = new System.Windows.Forms.Padding(3);
@@ -94,19 +94,19 @@
 			// 
 			// headerGroupBox
 			// 
-			this.headerGroupBox.Checked = true;
-			this.headerGroupBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.headerGroupBox.Location = new System.Drawing.Point(3, 3);
-			this.headerGroupBox.Name = "headerGroupBox";
-			this.headerGroupBox.Size = new System.Drawing.Size(97, 17);
-			this.headerGroupBox.TabIndex = 27;
-			this.headerGroupBox.TabStop = false;
-			this.headerGroupBox.Text = "Enable";
+			this.headerCheckBox.Checked = true;
+			this.headerCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.headerCheckBox.Location = new System.Drawing.Point(3, 3);
+			this.headerCheckBox.Name = "headerGroupBox";
+			this.headerCheckBox.Size = new System.Drawing.Size(97, 17);
+			this.headerCheckBox.TabIndex = 27;
+			this.headerCheckBox.TabStop = false;
+			this.headerCheckBox.Text = "Enable";
 			// 
 			// titlePage
 			// 
 			this.titlePage.Controls.Add(this.htmlReportTitleControl);
-			this.titlePage.Controls.Add(this.titleGroupBox);
+			this.titlePage.Controls.Add(this.titleCheckBox);
 			this.titlePage.Location = new System.Drawing.Point(4, 22);
 			this.titlePage.Name = "titlePage";
 			this.titlePage.Padding = new System.Windows.Forms.Padding(3);
@@ -117,14 +117,14 @@
 			// 
 			// titleGroupBox
 			// 
-			this.titleGroupBox.Checked = true;
-			this.titleGroupBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.titleGroupBox.Location = new System.Drawing.Point(3, 3);
-			this.titleGroupBox.Name = "titleGroupBox";
-			this.titleGroupBox.Size = new System.Drawing.Size(97, 17);
-			this.titleGroupBox.TabIndex = 28;
-			this.titleGroupBox.TabStop = false;
-			this.titleGroupBox.Text = "Enable";
+			this.titleCheckBox.Checked = true;
+			this.titleCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.titleCheckBox.Location = new System.Drawing.Point(3, 3);
+			this.titleCheckBox.Name = "titleGroupBox";
+			this.titleCheckBox.Size = new System.Drawing.Size(97, 17);
+			this.titleCheckBox.TabIndex = 28;
+			this.titleCheckBox.TabStop = false;
+			this.titleCheckBox.Text = "Enable";
 			// 
 			// taskPage
 			// 
@@ -139,7 +139,7 @@
 			// footerPage
 			// 
 			this.footerPage.Controls.Add(this.htmlReportFooterControl);
-			this.footerPage.Controls.Add(this.footerGroupBox);
+			this.footerPage.Controls.Add(this.footerCheckBox);
 			this.footerPage.Location = new System.Drawing.Point(4, 22);
 			this.footerPage.Name = "footerPage";
 			this.footerPage.Size = new System.Drawing.Size(390, 432);
@@ -149,14 +149,14 @@
 			// 
 			// footerGroupBox
 			// 
-			this.footerGroupBox.Checked = true;
-			this.footerGroupBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.footerGroupBox.Location = new System.Drawing.Point(3, 6);
-			this.footerGroupBox.Name = "footerGroupBox";
-			this.footerGroupBox.Size = new System.Drawing.Size(97, 17);
-			this.footerGroupBox.TabIndex = 28;
-			this.footerGroupBox.TabStop = false;
-			this.footerGroupBox.Text = "Enable";
+			this.footerCheckBox.Checked = true;
+			this.footerCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.footerCheckBox.Location = new System.Drawing.Point(3, 6);
+			this.footerCheckBox.Name = "footerGroupBox";
+			this.footerCheckBox.Size = new System.Drawing.Size(97, 17);
+			this.footerCheckBox.TabIndex = 28;
+			this.footerCheckBox.TabStop = false;
+			this.footerCheckBox.Text = "Enable";
 			// 
 			// groupBox1
 			// 
@@ -298,8 +298,8 @@
 		private HtmlReportFooterControl htmlReportFooterControl;
 		private HtmlReportTaskFormatControl htmlReportTaskFormatControl;
 		private HtmlReportTitleControl htmlReportTitleControl;
-		private System.Windows.Forms.CheckBox titleGroupBox;
-		private System.Windows.Forms.CheckBox footerGroupBox;
+		private System.Windows.Forms.CheckBox titleCheckBox;
+		private System.Windows.Forms.CheckBox footerCheckBox;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.TabControl tabControl;
 		private System.Windows.Forms.TabPage headerPage;
@@ -307,7 +307,7 @@
 		private System.Windows.Forms.TabPage titlePage;
 		private System.Windows.Forms.TabPage taskPage;
 		private System.Windows.Forms.TabPage footerPage;
-		private System.Windows.Forms.CheckBox headerGroupBox;
+		private System.Windows.Forms.CheckBox headerCheckBox;
 		private System.Windows.Forms.WebBrowser browserPreview;
 	}
 }

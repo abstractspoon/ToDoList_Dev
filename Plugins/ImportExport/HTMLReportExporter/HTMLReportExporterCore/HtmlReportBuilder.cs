@@ -80,7 +80,7 @@ namespace HTMLReportExporter
 		{
 			html.RenderBeginTag(HtmlTextWriterTag.Body);
 
-			if (!String.IsNullOrWhiteSpace(m_Template.HeaderTemplate))
+			if (m_Template.HeaderTemplate.Enabled)
 			{
 				html.RenderBeginTag("header");
 				html.Write(m_Template.FormatHeader());
@@ -90,7 +90,7 @@ namespace HTMLReportExporter
 			var reportTitle = m_Tasklist.GetReportTitle();
 			var reportDate = m_Tasklist.GetReportDate();
 
-			if (!String.IsNullOrWhiteSpace(m_Template.TitleTemplate))
+			if (m_Template.TitleTemplate.Enabled)
 			{
 				//html.Write(DefaultFont);
 				html.RenderBeginTag(HtmlTextWriterTag.H2);
@@ -108,7 +108,7 @@ namespace HTMLReportExporter
 
 			//ExportTasks(tasks, html);
 
-			if (!String.IsNullOrWhiteSpace(m_Template.FooterTemplate))
+			if (m_Template.FooterTemplate.Enabled)
 			{
 				html.RenderBeginTag("footer");
 				html.Write(m_Template.FormatFooter());

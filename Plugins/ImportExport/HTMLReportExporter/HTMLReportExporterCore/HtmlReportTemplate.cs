@@ -8,14 +8,58 @@ using System.Xml;
 
 namespace HTMLReportExporter
 {
+	public class TemplateItem
+	{
+		public TemplateItem()
+		{
+			Reset();
+		}
+
+		public void Reset()
+		{
+			Enabled = true;
+			Text = "";
+		}
+
+		public override String ToString()
+		{
+			return Text;
+		}
+
+		public bool Equals(TemplateItem other)
+		{
+			return ((Enabled == other.Enabled) && Text.Equals(other.Text));
+		}
+
+		public void Copy(TemplateItem other)
+		{
+			Enabled = other.Enabled;
+			Text = String.Copy(other.Text);
+		}
+
+		public bool Enabled { set; get; }
+		public String Text { set; get; }
+	}
+
 	public class HtmlReportTemplate
 	{
+		private String m_FilePath;
+
+		// -----------------------------------------
+
 		public HtmlReportTemplate()
 		{
-			HeaderTemplate = "";
-			TitleTemplate = "";
-			TaskTemplate = "";
-			FooterTemplate = "";
+			Reset();
+		}
+
+		public void Reset()
+		{
+			HeaderTemplate = new TemplateItem();
+			TitleTemplate = new TemplateItem();
+			TaskTemplate = new TemplateItem();
+			FooterTemplate = new TemplateItem();
+
+			m_FilePath = "";
 		}
 
 		public HtmlReportTemplate(String pathName)
@@ -23,10 +67,15 @@ namespace HTMLReportExporter
 			Load(pathName);
 		}
 
-		public String HeaderTemplate { get; set; }
-		public String TitleTemplate { get; set; }
-		public String TaskTemplate { get; set; }
-		public String FooterTemplate { get; set; }
+		public String FilePath
+		{
+			get { return m_FilePath; }
+		}
+
+		public TemplateItem HeaderTemplate { get; set; }
+		public TemplateItem TitleTemplate { get; set; }
+		public TemplateItem TaskTemplate { get; set; }
+		public TemplateItem FooterTemplate { get; set; }
 
 		public bool Equals(HtmlReportTemplate other)
 		{
@@ -44,10 +93,10 @@ namespace HTMLReportExporter
 			if (other == null)
 				return false;
 
-			HeaderTemplate = String.Copy(other.HeaderTemplate);
-			TitleTemplate = String.Copy(other.TitleTemplate);
-			TaskTemplate = String.Copy(other.TaskTemplate);
-			FooterTemplate = String.Copy(other.FooterTemplate);
+			HeaderTemplate.Copy(other.HeaderTemplate);
+			TitleTemplate.Copy(other.TitleTemplate);
+			TaskTemplate.Copy(other.TaskTemplate);
+			FooterTemplate.Copy(other.FooterTemplate);
 
 			return true;
 		}
@@ -55,24 +104,27 @@ namespace HTMLReportExporter
 		public String FormatHeader()
 		{
 			// TODO
-			return HeaderTemplate;
+			return (HeaderTemplate.Enabled ? HeaderTemplate.Text : "");
 		}
+
 		public String FormatTitle(String reportTitle, String reportDate)
 		{
 			// TODO
-			return TitleTemplate;
+			return (TitleTemplate.Enabled ? TitleTemplate.Text : "");
 		}
+
 		public String FormatTask()
 		{
 			// TODO
-			return "";
+			return (TaskTemplate.Enabled ? TaskTemplate.Text : "");
 		}
+
 		public String FormatFooter()
 		{
 			// TODO
-			return FooterTemplate;
+			return (FooterTemplate.Enabled ? FooterTemplate.Text : "");
 		}
-		
+
 		public bool Load(String pathName)
 		{
 			if (!File.Exists(pathName))
@@ -83,21 +135,25 @@ namespace HTMLReportExporter
 			{
 				var doc = XDocument.Load(pathName);
 
-				HeaderTemplate = doc.Root.Element("header").Value;
-				TitleTemplate = doc.Root.Element("title").Value;
-				TaskTemplate = doc.Root.Element("task").Value;
-				FooterTemplate = doc.Root.Element("footer").Value;
+				HeaderTemplate.Text = doc.Root.Element("header").Element("text").Value;
+				HeaderTemplate.Enabled = (bool)doc.Root.Element("header").Element("enabled");
+
+				TitleTemplate.Text = doc.Root.Element("title").Element("text").Value;
+				TitleTemplate.Enabled = (bool)doc.Root.Element("title").Element("enabled");
+
+				TaskTemplate.Text = doc.Root.Element("task").Element("text").Value;
+				TaskTemplate.Enabled = (bool)doc.Root.Element("task").Element("enabled");
+
+				FooterTemplate.Text = doc.Root.Element("footer").Element("text").Value;
+				FooterTemplate.Enabled = (bool)doc.Root.Element("footer").Element("enabled");
 			}
 			catch
 			{
-				HeaderTemplate = "";
-				TitleTemplate = "";
-				TaskTemplate = "";
-				FooterTemplate = "";
-
+				Reset();
 				return false;
 			}
 
+			m_FilePath = Path.GetFullPath(pathName);
 			return true;
 		}
 
@@ -106,10 +162,18 @@ namespace HTMLReportExporter
 			try
 			{
 				XDocument doc = new XDocument(new XElement("report",
-											new XElement("header", HeaderTemplate),
-											new XElement("title", TitleTemplate),
-											new XElement("task", TaskTemplate),
-											new XElement("footer", FooterTemplate)));
+												new XElement("header",
+													new XElement("text", HeaderTemplate.Text),
+													new XElement("enabled", HeaderTemplate.Enabled)),
+												new XElement("title",
+													new XElement("text", TitleTemplate.Text),
+													new XElement("enabled", TitleTemplate.Enabled)),
+												new XElement("task",
+													new XElement("text", TaskTemplate.Text),
+													new XElement("enabled", TaskTemplate.Enabled)),
+												new XElement("footer",
+													new XElement("text", FooterTemplate.Text),
+													new XElement("enabled", FooterTemplate.Enabled))));
 				doc.Save(pathName);
 			}
 			catch
@@ -117,6 +181,7 @@ namespace HTMLReportExporter
 				return false;
 			}
 
+			m_FilePath = Path.GetFullPath(pathName);
 			return true;
 		}
 
