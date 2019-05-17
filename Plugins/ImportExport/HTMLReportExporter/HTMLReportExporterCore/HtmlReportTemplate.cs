@@ -12,29 +12,29 @@ namespace HTMLReportExporter
 	{
 		public TemplateItem()
 		{
-			Reset();
+			Clear();
 		}
 
-		public void Reset()
+		public void Clear()
 		{
 			Enabled = true;
 			Text = "";
 		}
 
-		public override String ToString()
-		{
-			return Text;
-		}
-
 		public bool Equals(TemplateItem other)
 		{
-			return ((Enabled == other.Enabled) && Text.Equals(other.Text));
+			return ((other != null) && (Enabled == other.Enabled) && Text.Equals(other.Text));
 		}
 
-		public void Copy(TemplateItem other)
+		public bool Copy(TemplateItem other)
 		{
+			if (other == null)
+				return false;
+
 			Enabled = other.Enabled;
 			Text = String.Copy(other.Text);
+
+			return true;
 		}
 
 		public bool Enabled { set; get; }
@@ -47,10 +47,10 @@ namespace HTMLReportExporter
 
 		public HtmlReportTemplate()
 		{
-			Reset();
+			Clear();
 		}
 
-		public void Reset()
+		public void Clear()
 		{
 			HeaderTemplate = new TemplateItem();
 			TitleTemplate = new TemplateItem();
@@ -122,7 +122,7 @@ namespace HTMLReportExporter
 				return false;
 
 			// else
-			Reset();
+			Clear();
 
 			try
 			{
@@ -142,7 +142,7 @@ namespace HTMLReportExporter
 			}
 			catch
 			{
-				Reset();
+				Clear();
 				return false;
 			}
 
