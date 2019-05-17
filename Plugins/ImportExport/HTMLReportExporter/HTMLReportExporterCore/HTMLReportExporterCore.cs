@@ -93,7 +93,7 @@ namespace HTMLReportExporter
 			if (!silent)
 			{
 				// Display a dialog to get the report parameters
-				using (var dialog = new HtmlReportTemplateForm(m_TypeId, m_Trans))
+				using (var dialog = new HtmlReportTemplateForm(m_TypeId, m_Trans, tasks))
 				{
 					if (dialog.ShowDialog() != DialogResult.OK)
 						return false;

@@ -40,7 +40,7 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.BtnOK = new System.Windows.Forms.Button();
 			this.BtnCancel = new System.Windows.Forms.Button();
-			this.webPreview = new System.Windows.Forms.WebBrowser();
+			this.browserPreview = new System.Windows.Forms.WebBrowser();
 			this.htmlReportHeaderControl = new HTMLReportExporter.HtmlReportHeaderControl();
 			this.htmlReportTitleControl = new HTMLReportExporter.HtmlReportTitleControl();
 			this.htmlReportTaskFormatControl = new HTMLReportExporter.HtmlReportTaskFormatControl();
@@ -160,7 +160,7 @@
 			// 
 			// groupBox1
 			// 
-			this.groupBox1.Controls.Add(this.webPreview);
+			this.groupBox1.Controls.Add(this.browserPreview);
 			this.groupBox1.Location = new System.Drawing.Point(416, 12);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(447, 458);
@@ -191,16 +191,15 @@
 			this.BtnCancel.Text = "Cancel";
 			this.BtnCancel.UseVisualStyleBackColor = true;
 			// 
-			// webPreview
+			// browserPreview
 			// 
-			this.webPreview.AllowNavigation = false;
-			this.webPreview.AllowWebBrowserDrop = false;
-			this.webPreview.Location = new System.Drawing.Point(11, 22);
-			this.webPreview.MinimumSize = new System.Drawing.Size(20, 20);
-			this.webPreview.Name = "webPreview";
-			this.webPreview.Size = new System.Drawing.Size(425, 429);
-			this.webPreview.TabIndex = 0;
-			this.webPreview.WebBrowserShortcutsEnabled = false;
+			this.browserPreview.AllowWebBrowserDrop = false;
+			this.browserPreview.Location = new System.Drawing.Point(11, 22);
+			this.browserPreview.MinimumSize = new System.Drawing.Size(20, 20);
+			this.browserPreview.Name = "browserPreview";
+			this.browserPreview.Size = new System.Drawing.Size(425, 429);
+			this.browserPreview.TabIndex = 0;
+			this.browserPreview.WebBrowserShortcutsEnabled = false;
 			// 
 			// htmlReportHeaderControl
 			// 
@@ -309,6 +308,6 @@
 		private System.Windows.Forms.TabPage taskPage;
 		private System.Windows.Forms.TabPage footerPage;
 		private System.Windows.Forms.CheckBox headerGroupBox;
-		private System.Windows.Forms.WebBrowser webPreview;
+		private System.Windows.Forms.WebBrowser browserPreview;
 	}
 }

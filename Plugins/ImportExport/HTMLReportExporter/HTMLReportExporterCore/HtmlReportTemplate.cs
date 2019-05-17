@@ -28,6 +28,30 @@ namespace HTMLReportExporter
 		public String TaskTemplate { get; set; }
 		public String FooterTemplate { get; set; }
 
+		public bool Equals(HtmlReportTemplate other)
+		{
+			if (other == null)
+				return false;
+
+			return (HeaderTemplate.Equals(other.HeaderTemplate) &&
+					TitleTemplate.Equals(other.TitleTemplate) &&
+					TaskTemplate.Equals(other.TaskTemplate) &&
+					FooterTemplate.Equals(other.FooterTemplate));
+		}
+
+		public bool Copy(HtmlReportTemplate other)
+		{
+			if (other == null)
+				return false;
+
+			HeaderTemplate = String.Copy(other.HeaderTemplate);
+			TitleTemplate = String.Copy(other.TitleTemplate);
+			TaskTemplate = String.Copy(other.TaskTemplate);
+			FooterTemplate = String.Copy(other.FooterTemplate);
+
+			return true;
+		}
+
 		public String FormatHeader()
 		{
 			// TODO
