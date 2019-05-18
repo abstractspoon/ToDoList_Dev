@@ -23,7 +23,7 @@ namespace HTMLReportExporter
 
 		private HtmlReportTemplate m_Template = null;
 		private HtmlReportTemplate m_PrevTemplate = null;
-		private Timer m_TextChangeTimer = null;
+		private Timer m_ChangeTimer = null;
 		private String m_TemplateFilePath = "HtmlReportTemplate.txt";
 
 		// --------------------------------------------------------------
@@ -37,7 +37,7 @@ namespace HTMLReportExporter
 
 			m_Template = new HtmlReportTemplate();
 			m_PrevTemplate = new HtmlReportTemplate();
-			m_TextChangeTimer = new Timer();
+			m_ChangeTimer = new Timer();
 
 			InitializeComponentEx();
 		}
@@ -68,51 +68,54 @@ namespace HTMLReportExporter
 			if (m_Template.Load(m_TemplateFilePath))
 			{
 				this.htmlReportHeaderControl.InnerHtml = m_Template.Header.Text;
-				this.headerCheckBox.Checked = m_Template.Header.Enabled;
+				this.headerEnabled.Checked = m_Template.Header.Enabled;
+				this.headerDivider.Checked = m_Template.Header.WantDivider;
 
 				this.htmlReportTitleControl.InnerHtml = m_Template.Title.Text;
-				this.titleCheckBox.Checked = m_Template.Title.Enabled;
+				this.titleEnabled.Checked = m_Template.Title.Enabled;
 
 				this.htmlReportTasksControl.InnerHtml = m_Template.Task.Text;
 				// always enabled
 
 				this.htmlReportFooterControl.InnerHtml = m_Template.Footer.Text;
-				this.footerCheckBox.Checked = m_Template.Footer.Enabled;
+				this.footerEnabled.Checked = m_Template.Footer.Enabled;
+				this.footerEnabled.Checked = m_Template.Footer.WantDivider;
 			}
 
 			this.tabControl.SelectTab(taskPage);
 			this.browserPreview.Navigate("about:blank");
 
-			m_TextChangeTimer.Tick += new EventHandler(OnTextChangeTimer);
-			m_TextChangeTimer.Interval = 500;
-			m_TextChangeTimer.Start();
-
-			headerCheckBox.CheckedChanged += new EventHandler(OnTextEnableChange);
-			titleCheckBox.CheckedChanged += new EventHandler(OnTextEnableChange);
-			footerCheckBox.CheckedChanged += new EventHandler(OnTextEnableChange);
+			m_ChangeTimer.Tick += new EventHandler(OnChangeTimer);
+			m_ChangeTimer.Interval = 500;
+			m_ChangeTimer.Start();
 		}
 
-		private void OnTextChangeTimer(object sender, EventArgs e)
+		private void OnChangeTimer(object sender, EventArgs e)
 		{
 			if (!IsDisposed)
 			{
-				m_Template.Header.Text = this.htmlReportHeaderControl.InnerHtml ?? "";
-				m_Template.Title.Text = this.htmlReportTitleControl.InnerHtml ?? "";
-				m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
-				m_Template.Footer.Text = this.htmlReportFooterControl.InnerHtml ?? "";
-
-				CheckRefreshPreview();
-			}
-		}
-
-		private void OnTextEnableChange(object sender, EventArgs e)
-		{
-			if (!IsDisposed)
-			{
-				m_Template.Header.Enabled = headerCheckBox.Checked;
-				m_Template.Title.Enabled = titleCheckBox.Checked;
-				m_Template.Task.Enabled = true; // always
-				m_Template.Footer.Enabled = footerCheckBox.Checked;
+				if (tabControl.SelectedTab == headerPage)
+				{
+					m_Template.Header.Text = this.htmlReportHeaderControl.InnerHtml ?? "";
+					m_Template.Header.Enabled = headerEnabled.Checked;
+					m_Template.Header.WantDivider = headerDivider.Checked;
+				}
+				else if (tabControl.SelectedTab == titlePage)
+				{
+					m_Template.Title.Text = this.htmlReportTitleControl.InnerHtml ?? "";
+					m_Template.Title.Enabled = titleEnabled.Checked;
+				}
+				else if (tabControl.SelectedTab == taskPage)
+				{
+					m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
+					m_Template.Task.Enabled = true; // always
+				}
+				else if (tabControl.SelectedTab == footerPage)
+				{
+					m_Template.Footer.Text = this.htmlReportFooterControl.InnerHtml ?? "";
+					m_Template.Footer.Enabled = footerEnabled.Checked;
+					m_Template.Footer.WantDivider = footerDivider.Checked;
+				}
 
 				CheckRefreshPreview();
 			}

@@ -12,7 +12,7 @@ namespace HTMLReportExporter
 {
 	public class TemplateItem
 	{
-		private String XmlTag;
+		protected String XmlTag;
 
 		public TemplateItem(String xmlTag)
 		{
@@ -21,18 +21,18 @@ namespace HTMLReportExporter
 			XmlTag = xmlTag;
 		}
 
-		public void Clear()
+		virtual public void Clear()
 		{
 			Enabled = true;
 			Text = "";
 		}
 
-		public bool Equals(TemplateItem other)
+		virtual public bool Equals(TemplateItem other)
 		{
 			return ((other != null) && (Enabled == other.Enabled) && Text.Equals(other.Text));
 		}
 
-		public bool Copy(TemplateItem other)
+		virtual public bool Copy(TemplateItem other)
 		{
 			if (other == null)
 				return false;
@@ -44,13 +44,13 @@ namespace HTMLReportExporter
 			return true;
 		}
 
-		public void Read(XDocument doc)
+		virtual public void Read(XDocument doc)
 		{
 			Text = doc.Root.Element(XmlTag).Element("text").Value;
 			Enabled = (bool)doc.Root.Element(XmlTag).Element("enabled");
 		}
 
-		public void Write(XDocument doc)
+		virtual public void Write(XDocument doc)
 		{
 			doc.Root.Add(new XElement(XmlTag,
 							new XElement("text", Text),
@@ -68,11 +68,58 @@ namespace HTMLReportExporter
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	public class HeaderTemplateItem : TemplateItem
+	public class HeaderFooterTemplateItem : TemplateItem
+	{
+		public bool WantDivider { get; set; }
+
+		public HeaderFooterTemplateItem(String xmlTag) : base(xmlTag)
+		{
+			WantDivider = true;
+		}
+
+		override public void Read(XDocument doc)
+		{
+			base.Read(doc);
+
+			if (doc.Root.Element(XmlTag).Element("wantDivider") != null)
+				WantDivider = (bool)doc.Root.Element(XmlTag).Element("wantDivider");
+		}
+
+		override public void Write(XDocument doc)
+		{
+			base.Write(doc);
+
+			doc.Root.Element(XmlTag).Add(new XElement("wantDivider"), WantDivider);
+		}
+
+		override public void Clear()
+		{
+			base.Clear();
+			WantDivider = true;
+		}
+
+		public bool Equals(HeaderFooterTemplateItem other)
+		{
+			return (base.Equals(other) && (WantDivider == other.WantDivider));
+		}
+
+		public bool Copy(HeaderFooterTemplateItem other)
+		{
+			if (!base.Copy(other))
+				return false;
+
+			WantDivider = other.WantDivider;
+			return true;
+		}
+
+	}
+
+	public class HeaderTemplateItem : HeaderFooterTemplateItem
 	{
 		public HeaderTemplateItem() : base("header")
 		{
 		}
+
 	}
 
 	public class TitleTemplateItem : TemplateItem
@@ -137,7 +184,7 @@ namespace HTMLReportExporter
 		}
 	}
 
-	public class FooterTemplateItem : TemplateItem
+	public class FooterTemplateItem : HeaderFooterTemplateItem
 	{
 		public FooterTemplateItem() : base("footer")
 		{

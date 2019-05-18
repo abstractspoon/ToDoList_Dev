@@ -108,11 +108,23 @@ namespace HTMLReportExporter
 			html.Write("table { border-collapse: collapse; }");
 			html.WriteLine();
 
-			html.Write(".page-header { position: fixed; top: 0; width: 100%; border-bottom: 1px solid black;	background: yellow;	}");
+			html.Write(".page-header { position: fixed; top: 0; width: 100%; background: yellow;	}");
 			html.WriteLine();
 
-			html.Write(".page-footer { position: fixed;	bottom: 0; width: 100%; border-top: 1px solid black; background: blue;	}");
+			if (m_Template.Header.WantDivider)
+			{
+				html.Write(".page-header { border-bottom: 1px solid black; }");
+				html.WriteLine();
+			}
+
+			html.Write(".page-footer { position: fixed;	bottom: 0; width: 100%; background: blue;	}");
 			html.WriteLine();
+
+			if (m_Template.Footer.WantDivider)
+			{
+				html.Write(".page-footer { border-top: 1px solid black; }");
+				html.WriteLine();
+			}
 
 			html.Write(".page { page-break-after: always; }");
 			html.WriteLine();
@@ -257,9 +269,9 @@ namespace HTMLReportExporter
 		
 		protected String GetAttributeName(Task.Attribute attrib)
 		{
+				/*
 			switch (attrib)
 			{
-				/*
 				case Task.Attribute.Title: return m_Trans.Translate("Title");
 				case Task.Attribute.Position: return m_Trans.Translate("Position");
 				case Task.Attribute.Id: return m_Trans.Translate("Id");
@@ -291,8 +303,8 @@ namespace HTMLReportExporter
 				case Task.Attribute.FileReference: return m_Trans.Translate("File Link");
 				case Task.Attribute.SubtaskDone: return m_Trans.Translate("Subtask Done");
 				case Task.Attribute.Comments: return m_Trans.Translate("Comments");
-				*/
 			}
+				*/
 
 			return "";
 		}
