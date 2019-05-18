@@ -222,11 +222,17 @@ Boolean Task::IsAttributeAvailable(Attribute attrib)
 			(m_pTaskList ? m_pTaskList->IsAttributeAvailable(nAttrib) : false));
 }
 
-String^ Task::GetAttribute(Task::Attribute attrib)
+String^ Task::GetAttribute(Task::Attribute attrib, bool calculated)
 {
 	TDC_ATTRIBUTE nAttrib = MapAttribute(attrib);
 
-	return GETTASKSTR_ARG(GetTaskAttribute, nAttrib);
+	if (m_pConstTaskList)
+		return gcnew String(m_pConstTaskList->GetTaskAttribute(m_hTask, nAttrib, calculated));
+	
+	if (m_pTaskList)
+		return gcnew String(m_pTaskList->GetTaskAttribute(m_hTask, nAttrib, calculated));
+
+	return gcnew String(L"");
 }
 
 bool Task::HasAttribute(Task::Attribute attrib)

@@ -176,7 +176,7 @@ namespace Abstractspoon
 				double GetTimeEstimate(TimeUnits% cUnits, bool calculated);
 				double GetTimeSpent(TimeUnits% cUnits, bool calculated);
 
-				String^ GetAttribute(Attribute attrib);
+				String^ GetAttribute(Attribute attrib, bool calculated);
 				Boolean HasAttribute(Attribute attrib);
 
 				String^ GetCustomAttributeData(String^ sID);
