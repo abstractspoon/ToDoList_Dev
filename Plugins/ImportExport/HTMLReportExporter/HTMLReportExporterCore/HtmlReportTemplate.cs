@@ -6,13 +6,19 @@ using System.Text;
 using System.Net;
 using System.Xml;
 
+using Abstractspoon.Tdl.PluginHelpers;
+
 namespace HTMLReportExporter
 {
 	public class TemplateItem
 	{
-		public TemplateItem()
+		private String XmlTag;
+
+		public TemplateItem(String xmlTag)
 		{
 			Clear();
+
+			XmlTag = xmlTag;
 		}
 
 		public void Clear()
@@ -33,17 +39,116 @@ namespace HTMLReportExporter
 
 			Enabled = other.Enabled;
 			Text = String.Copy(other.Text);
+			XmlTag = String.Copy(other.XmlTag);
 
 			return true;
+		}
+
+		public void Read(XDocument doc)
+		{
+			Text = doc.Root.Element(XmlTag).Element("text").Value;
+			Enabled = (bool)doc.Root.Element(XmlTag).Element("enabled");
+		}
+
+		public void Write(XDocument doc)
+		{
+			doc.Root.Add(new XElement(XmlTag,
+							new XElement("text", Text),
+							new XElement("enabled", Enabled)));
+		}
+
+		public String Format()
+		{
+			return (Enabled ? Text : "");
 		}
 
 		public bool Enabled { set; get; }
 		public String Text { set; get; }
 	}
 
+	//////////////////////////////////////////////////////////////////////////////
+
+	public class HeaderTemplateItem : TemplateItem
+	{
+		public HeaderTemplateItem() : base("header")
+		{
+		}
+	}
+
+	public class TitleTemplateItem : TemplateItem
+	{
+		public TitleTemplateItem() : base("title")
+		{
+		}
+
+		public String Format(TaskList tasks)
+		{
+			// TODO: String reportTitle, String reportDate
+			return base.Format();
+		}
+
+	}
+
+	public class TaskTemplateItem : TemplateItem
+	{
+		public TaskTemplateItem() : base("task")
+		{
+		}
+
+		private static Task.Attribute[] Attribs = 
+		{
+			Task.Attribute.Position,
+			Task.Attribute.Title,
+			Task.Attribute.Id,
+			Task.Attribute.ParentId,
+			Task.Attribute.Path,
+			Task.Attribute.Priority,
+			Task.Attribute.Risk,
+			Task.Attribute.Percent,
+			Task.Attribute.TimeEstimate,
+			Task.Attribute.TimeSpent,
+			Task.Attribute.CreationDate,
+			Task.Attribute.CreatedBy,
+			Task.Attribute.LastModifiedDate,
+			Task.Attribute.LastModifiedBy,
+			Task.Attribute.StartDate,
+			Task.Attribute.DueDate,
+			Task.Attribute.DoneDate,
+			Task.Attribute.Recurrence,
+			Task.Attribute.AllocatedTo,
+			Task.Attribute.AllocatedBy,
+			Task.Attribute.Status,
+			Task.Attribute.Category,
+			Task.Attribute.Tags,
+			Task.Attribute.ExternalId,
+			Task.Attribute.Cost,
+			Task.Attribute.Version,
+			Task.Attribute.Flag,
+			Task.Attribute.Dependency,
+			Task.Attribute.FileReference,
+			Task.Attribute.SubtaskDone,
+			Task.Attribute.Comments,
+		};
+
+		private String Format(Task task, int depth)
+		{
+			// TODO
+			return base.Format();
+		}
+	}
+
+	public class FooterTemplateItem : TemplateItem
+	{
+		public FooterTemplateItem() : base("footer")
+		{
+		}
+
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+
 	public class HtmlReportTemplate
 	{
-		// -----------------------------------------
 
 		public HtmlReportTemplate()
 		{
@@ -52,10 +157,10 @@ namespace HTMLReportExporter
 
 		public void Clear()
 		{
-			HeaderTemplate = new TemplateItem();
-			TitleTemplate = new TemplateItem();
-			TaskTemplate = new TemplateItem();
-			FooterTemplate = new TemplateItem();
+			Header = new HeaderTemplateItem();
+			Title = new TitleTemplateItem();
+			Task = new TaskTemplateItem();
+			Footer = new FooterTemplateItem();
 		}
 
 		public HtmlReportTemplate(String pathName)
@@ -63,20 +168,20 @@ namespace HTMLReportExporter
 			Load(pathName);
 		}
 
-		public TemplateItem HeaderTemplate { get; set; }
-		public TemplateItem TitleTemplate { get; set; }
-		public TemplateItem TaskTemplate { get; set; }
-		public TemplateItem FooterTemplate { get; set; }
+		public HeaderTemplateItem Header { get; private set; }
+		public TitleTemplateItem Title { get; private set; }
+		public TaskTemplateItem Task { get; private set; }
+		public FooterTemplateItem Footer { get; private set; }
 
 		public bool Equals(HtmlReportTemplate other)
 		{
 			if (other == null)
 				return false;
 
-			return (HeaderTemplate.Equals(other.HeaderTemplate) &&
-					TitleTemplate.Equals(other.TitleTemplate) &&
-					TaskTemplate.Equals(other.TaskTemplate) &&
-					FooterTemplate.Equals(other.FooterTemplate));
+			return (Header.Equals(other.Header) &&
+					Title.Equals(other.Title) &&
+					Task.Equals(other.Task) &&
+					Footer.Equals(other.Footer));
 		}
 
 		public bool Copy(HtmlReportTemplate other)
@@ -84,36 +189,12 @@ namespace HTMLReportExporter
 			if (other == null)
 				return false;
 
-			HeaderTemplate.Copy(other.HeaderTemplate);
-			TitleTemplate.Copy(other.TitleTemplate);
-			TaskTemplate.Copy(other.TaskTemplate);
-			FooterTemplate.Copy(other.FooterTemplate);
+			Header.Copy(other.Header);
+			Title.Copy(other.Title);
+			Task.Copy(other.Task);
+			Footer.Copy(other.Footer);
 
 			return true;
-		}
-
-		public String FormatHeader()
-		{
-			// TODO
-			return (HeaderTemplate.Enabled ? HeaderTemplate.Text : "");
-		}
-
-		public String FormatTitle(String reportTitle, String reportDate)
-		{
-			// TODO
-			return (TitleTemplate.Enabled ? TitleTemplate.Text : "");
-		}
-
-		public String FormatTask()
-		{
-			// TODO
-			return (TaskTemplate.Enabled ? TaskTemplate.Text : "");
-		}
-
-		public String FormatFooter()
-		{
-			// TODO
-			return (FooterTemplate.Enabled ? FooterTemplate.Text : "");
 		}
 
 		public bool Load(String pathName)
@@ -128,17 +209,10 @@ namespace HTMLReportExporter
 			{
 				var doc = XDocument.Load(pathName);
 
-				HeaderTemplate.Text = doc.Root.Element("header").Element("text").Value;
-				HeaderTemplate.Enabled = (bool)doc.Root.Element("header").Element("enabled");
-
-				TitleTemplate.Text = doc.Root.Element("title").Element("text").Value;
-				TitleTemplate.Enabled = (bool)doc.Root.Element("title").Element("enabled");
-
-				TaskTemplate.Text = doc.Root.Element("task").Element("text").Value;
-				TaskTemplate.Enabled = (bool)doc.Root.Element("task").Element("enabled");
-
-				FooterTemplate.Text = doc.Root.Element("footer").Element("text").Value;
-				FooterTemplate.Enabled = (bool)doc.Root.Element("footer").Element("enabled");
+				Header.Read(doc);
+				Title.Read(doc);
+				Task.Read(doc);
+				Footer.Read(doc);
 			}
 			catch
 			{
@@ -153,19 +227,13 @@ namespace HTMLReportExporter
 		{
 			try
 			{
-				XDocument doc = new XDocument(new XElement("report",
-												new XElement("header",
-													new XElement("text", HeaderTemplate.Text),
-													new XElement("enabled", HeaderTemplate.Enabled)),
-												new XElement("title",
-													new XElement("text", TitleTemplate.Text),
-													new XElement("enabled", TitleTemplate.Enabled)),
-												new XElement("task",
-													new XElement("text", TaskTemplate.Text),
-													new XElement("enabled", TaskTemplate.Enabled)),
-												new XElement("footer",
-													new XElement("text", FooterTemplate.Text),
-													new XElement("enabled", FooterTemplate.Enabled))));
+				XDocument doc = new XDocument(new XElement("report"));
+
+				Header.Write(doc);
+				Title.Write(doc);
+				Task.Write(doc);
+				Footer.Write(doc);
+
 				doc.Save(pathName);
 			}
 			catch

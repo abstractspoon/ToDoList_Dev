@@ -16,21 +16,24 @@ namespace HTMLReportExporter
 {
 	public partial class HtmlReportTemplateForm : Form
 	{
-		private String m_TypeId;
-		private Translator m_Trans;
-		private TaskList m_Tasklist;
+		private String m_TypeId = "";
+		private Translator m_Trans = null;
+		private TaskList m_Tasklist = null;
+		private Preferences m_Prefs = null;
 
-		private HtmlReportTemplate m_Template, m_PrevTemplate;
-		private Timer m_TextChangeTimer;
+		private HtmlReportTemplate m_Template = null;
+		private HtmlReportTemplate m_PrevTemplate = null;
+		private Timer m_TextChangeTimer = null;
 		private String m_TemplateFilePath = "HtmlReportTemplate.txt";
 
 		// --------------------------------------------------------------
 
-		public HtmlReportTemplateForm(String typeId, Translator trans, TaskList tasks)
+		public HtmlReportTemplateForm(String typeId, Translator trans, TaskList tasks, Preferences prefs)
 		{
 			m_TypeId = typeId;
 			m_Trans = trans;
 			m_Tasklist = tasks;
+			m_Prefs = prefs;
 
 			m_Template = new HtmlReportTemplate();
 			m_PrevTemplate = new HtmlReportTemplate();
@@ -54,19 +57,27 @@ namespace HTMLReportExporter
 			this.Content.Location = new Point(0, bannerHeight);
 			this.Content.Height = (this.Content.Height - bannerHeight);
 
+			var defFontName = m_Prefs.GetProfileString("Preferences", "HTMLFont", "Verdana");
+			var defFontSize = m_Prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
+
+			this.htmlReportHeaderControl.SetFont(defFontName, defFontSize);
+			this.htmlReportTitleControl.SetFont(defFontName, defFontSize);
+			this.htmlReportTasksControl.SetFont(defFontName, defFontSize);
+			this.htmlReportFooterControl.SetFont(defFontName, defFontSize);
+
 			if (m_Template.Load(m_TemplateFilePath))
 			{
-				this.htmlReportHeaderControl.InnerHtml = m_Template.HeaderTemplate.Text;
-				this.headerCheckBox.Checked = m_Template.HeaderTemplate.Enabled;
+				this.htmlReportHeaderControl.InnerHtml = m_Template.Header.Text;
+				this.headerCheckBox.Checked = m_Template.Header.Enabled;
 
-				this.htmlReportTitleControl.InnerHtml = m_Template.TitleTemplate.Text;
-				this.titleCheckBox.Checked = m_Template.TitleTemplate.Enabled;
+				this.htmlReportTitleControl.InnerHtml = m_Template.Title.Text;
+				this.titleCheckBox.Checked = m_Template.Title.Enabled;
 
-				this.htmlReportTaskFormatControl.InnerHtml = m_Template.TaskTemplate.Text;
+				this.htmlReportTasksControl.InnerHtml = m_Template.Task.Text;
 				// always enabled
 
-				this.htmlReportFooterControl.InnerHtml = m_Template.FooterTemplate.Text;
-				this.footerCheckBox.Checked = m_Template.FooterTemplate.Enabled;
+				this.htmlReportFooterControl.InnerHtml = m_Template.Footer.Text;
+				this.footerCheckBox.Checked = m_Template.Footer.Enabled;
 			}
 
 			this.tabControl.SelectTab(taskPage);
@@ -85,10 +96,10 @@ namespace HTMLReportExporter
 		{
 			if (!IsDisposed)
 			{
-				m_Template.HeaderTemplate.Text = this.htmlReportHeaderControl.InnerHtml ?? "";
-				m_Template.TitleTemplate.Text = this.htmlReportTitleControl.InnerHtml ?? "";
-				m_Template.TaskTemplate.Text = this.htmlReportTaskFormatControl.InnerHtml ?? "";
-				m_Template.FooterTemplate.Text = this.htmlReportFooterControl.InnerHtml ?? "";
+				m_Template.Header.Text = this.htmlReportHeaderControl.InnerHtml ?? "";
+				m_Template.Title.Text = this.htmlReportTitleControl.InnerHtml ?? "";
+				m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
+				m_Template.Footer.Text = this.htmlReportFooterControl.InnerHtml ?? "";
 
 				CheckRefreshPreview();
 			}
@@ -98,10 +109,10 @@ namespace HTMLReportExporter
 		{
 			if (!IsDisposed)
 			{
-				m_Template.HeaderTemplate.Enabled = headerCheckBox.Checked;
-				m_Template.TitleTemplate.Enabled = titleCheckBox.Checked;
-				m_Template.TaskTemplate.Enabled = true; // always
-				m_Template.FooterTemplate.Enabled = footerCheckBox.Checked;
+				m_Template.Header.Enabled = headerCheckBox.Checked;
+				m_Template.Title.Enabled = titleCheckBox.Checked;
+				m_Template.Task.Enabled = true; // always
+				m_Template.Footer.Enabled = footerCheckBox.Checked;
 
 				CheckRefreshPreview();
 			}
@@ -129,7 +140,7 @@ namespace HTMLReportExporter
 					{
 						using (var html = new HtmlTextWriter(file))
 						{
-							var report = new HtmlReportBuilder(m_Tasklist, m_Template);
+							var report = new HtmlReportBuilder(m_Tasklist, m_Template, m_Prefs);
 
 							report.BuildReport(html);
 						}

@@ -162,7 +162,7 @@ namespace HTMLContentControl
 			m_HtmlEditControl.Name = "m_HtmlEditControl";
 			m_HtmlEditControl.Location = new Point(0, bannerHeight);
             m_HtmlEditControl.Size = new Size(this.ClientSize.Width, this.ClientSize.Height - bannerHeight);
-			m_HtmlEditControl.ContentMargin = 5;
+
 			m_HtmlEditControl.TextChanged += new System.EventHandler(OnInputTextChanged);
 			m_HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
 			m_HtmlEditControl.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnNavigateLink);

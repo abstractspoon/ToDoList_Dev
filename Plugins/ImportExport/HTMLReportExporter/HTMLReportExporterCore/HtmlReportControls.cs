@@ -71,7 +71,7 @@ namespace HTMLReportExporter
 			this.InnerText = "";
 			this.TabIndex = 26;
 			this.BorderSize = 0;
-			this.ContentMargin = 5;
+			this.ContentMargin = 8;
 
 			this.BrowserPanel.Anchor = AnchorStyles.None; // we handle positioning ourselves
 
@@ -80,6 +80,15 @@ namespace HTMLReportExporter
 
 			// Place this at the end to ensure the toolbar has finished its resize
 			Toolbars.FixupButtonSizes(this.ToolBar);
+		}
+
+		public void SetFont(string fontName, int htmlSize)
+		{
+			// Convert size to ems because it gives us greater granularity
+			int pointSize = MSDN.Html.Editor.HtmlFontConversion.PointsFromHtml(htmlSize);
+			float ems = Win32.PointsToEms(pointSize);
+
+			BodyFont = new MSDN.Html.Editor.HtmlFontProperty(fontName, ems);
 		}
 
 		virtual protected void InitialiseFeatures()
@@ -95,14 +104,6 @@ namespace HTMLReportExporter
 			CommandHandling.HideCommand("", ToolBar.Items);
 			CommandHandling.HideCommand("", ToolBar.Items);
 			CommandHandling.HideCommand("", ToolBar.Items);
-		}
-
-		public void SetFont(string fontName, int pointSize)
-		{
-			// Convert size to ems because it gives us greater granularity
-			float ems = Win32.PointsToEms(pointSize);
-
-			BodyFont = new MSDN.Html.Editor.HtmlFontProperty(fontName, ems);
 		}
 
 		protected override void PreShowDialog(Form dialog)

@@ -79,6 +79,7 @@ namespace HTMLContentControl
             this.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.BorderSize = 0;
             this.NavigateAction = MSDN.Html.Editor.NavigateActionOption.NewWindow;
+			this.ContentMargin = 8;
 
 			this.BrowserPanel.Anchor = AnchorStyles.None; // we handle positioning ourselves
 
