@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Diagnostics;
+using System.Reflection;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -188,15 +189,62 @@ namespace HTMLReportExporter
 		}
 	}
 
-	partial class HtmlReportHeaderControl : HtmlReportControlBase
+	partial class HtmlReportHeaderFooterControl : HtmlReportControlBase
+	{
+		private System.Windows.Forms.ToolStripButton toolstripBackColor;
+
+		public HtmlReportHeaderFooterControl()
+		{
+			// Add background colour button to toolbar
+			this.toolstripBackColor = new System.Windows.Forms.ToolStripButton();
+
+			this.toolstripBackColor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolstripBackColor.Name = "toolstripBackColor";
+			this.toolstripBackColor.Tag = "BackColor";
+			this.toolstripBackColor.Click += new System.EventHandler(OnBackColorClick);
+
+			var assembly = Assembly.GetExecutingAssembly();
+			var image = new Bitmap(assembly.GetManifestResourceStream("HTMLReportExporter.ToolBackColor.bmp"));
+			image.MakeTransparent(Color.Magenta);
+			this.toolstripBackColor.Image = image;
+			
+			int index = ToolBar.Items.IndexOfKey("toolstripTextColor");
+			this.toolstripBackColor.Size = this.ToolBar.Items[index].Size;
+
+			ToolBar.Items.Insert((index + 1), this.toolstripBackColor);
+		}
+
+		override protected void InitialiseFeatures()
+		{
+			base.InitialiseFeatures();
+
+		}
+
+		private void OnBackColorClick(object sender, EventArgs e)
+		{
+			using (ColorDialog colorDialog = new ColorDialog())
+			{
+				colorDialog.AnyColor = true;
+				colorDialog.SolidColorOnly = true;
+				colorDialog.AllowFullOpen = true;
+				colorDialog.Color = BackColor;
+				//colorDialog.CustomColors = _customColors;
+
+				if (colorDialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+				{
+					//_customColors = colorDialog.CustomColors;
+					BodyBackColor = colorDialog.Color;
+				}
+			}
+		}
+	}
+
+	partial class HtmlReportHeaderControl : HtmlReportHeaderFooterControl
 	{
 		override protected void InitialiseFeatures()
 		{
 			base.InitialiseFeatures();
 
-			CommandHandling.HideCommand("toolstripListOrdered", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripListUnordered", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripInsertTable", ToolBar.Items);
 		}
 
 
@@ -208,9 +256,6 @@ namespace HTMLReportExporter
 		{
 			base.InitialiseFeatures();
 
-			CommandHandling.HideCommand("toolstripListOrdered", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripListUnordered", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripInsertTable", ToolBar.Items);
 		}
 
 	}
@@ -225,15 +270,12 @@ namespace HTMLReportExporter
 
 	}
 
-	partial class HtmlReportFooterControl : HtmlReportControlBase
+	partial class HtmlReportFooterControl : HtmlReportHeaderFooterControl
 	{
 		override protected void InitialiseFeatures()
 		{
 			base.InitialiseFeatures();
 
-			CommandHandling.HideCommand("toolstripListOrdered", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripListUnordered", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripInsertTable", ToolBar.Items);
 		}
 
 	}

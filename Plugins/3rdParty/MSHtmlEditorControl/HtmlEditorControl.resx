@@ -291,13 +291,13 @@
   <data name="toolstripFontNormal.Text" xml:space="preserve">
     <value>Clear Formatting</value>
   </data>
-  <data name="toolstripColorDialog.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
+  <data name="toolstripTextColor.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
-  <data name="toolstripColorDialog.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="toolstripTextColor.Size" type="System.Drawing.Size, System.Drawing">
     <value>23, 20</value>
   </data>
-  <data name="toolstripColorDialog.Text" xml:space="preserve">
+  <data name="toolstripTextColor.Text" xml:space="preserve">
     <value>Edit Color</value>
   </data>
   <data name="toolstripFontIncrease.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
@@ -1092,10 +1092,10 @@
   <data name="&gt;&gt;toolstripFontNormal.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;toolstripColorDialog.Name" xml:space="preserve">
-    <value>toolstripColorDialog</value>
+  <data name="&gt;&gt;toolstripTextColor.Name" xml:space="preserve">
+    <value>toolstripTextColor</value>
   </data>
-  <data name="&gt;&gt;toolstripColorDialog.Type" xml:space="preserve">
+  <data name="&gt;&gt;toolstripTextColor.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolstripFontIncrease.Name" xml:space="preserve">

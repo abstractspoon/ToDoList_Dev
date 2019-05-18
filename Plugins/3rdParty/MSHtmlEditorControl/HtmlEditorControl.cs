@@ -170,7 +170,7 @@ namespace MSDN.Html.Editor
         private const string INTERNAL_COMMAND_FORMATSTRIKEOUT = "FormatStrikeout";
         private const string INTERNAL_COMMAND_FONTDIALOG = "FontDialog";
         private const string INTERNAL_COMMAND_FONTNORMAL = "FontNormal";
-        private const string INTERNAL_COMMAND_COLORDIALOG = "ColorDialog";
+        private const string INTERNAL_COMMAND_TEXTCOLOR = "TextColor";
         private const string INTERNAL_COMMAND_FONTINCREASE = "FontIncrease";
         private const string INTERNAL_COMMAND_FONTDECREASE = "FontDecrease";
         private const string INTERNAL_COMMAND_JUSTIFYLEFT = "JustifyLeft";
@@ -1991,7 +1991,7 @@ namespace MSDN.Html.Editor
             this.toolstripFormatItalic.Enabled = IsEditable;
             this.toolstripFontDialog.Enabled = IsEditable;
             this.toolstripFontNormal.Enabled = IsEditable;
-            this.toolstripColorDialog.Enabled = IsEditable;
+            this.toolstripTextColor.Enabled = IsEditable;
             this.toolstripFontIncrease.Enabled = IsEditable;
             this.toolstripFontDecrease.Enabled = IsEditable;
             this.toolstripJustifyLeft.Enabled = IsEditable;
@@ -2703,7 +2703,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method using the exec command to define the color properties for the selected tag
         /// </summary>
-        public void FormatFontColor(Color color)
+        public void FormatTextColor(Color color)
         {
             // Use the COLOR object to set the property ForeColor
             string colorHtml;
@@ -2739,7 +2739,7 @@ namespace MSDN.Html.Editor
         /// Method to display the system color dialog
         /// Use use to set the selected text Color
         /// </summary>
-        public void FormatFontColorPrompt()
+        public void FormatTextColorPrompt()
         {
             // display the Color dialog and use the selected color to modify text
             using (ColorDialog colorDialog = new ColorDialog())
@@ -2752,7 +2752,7 @@ namespace MSDN.Html.Editor
                 if (colorDialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
                     _customColors = colorDialog.CustomColors;
-                    FormatFontColor(colorDialog.Color);
+                    FormatTextColor(colorDialog.Color);
                 }
             }
 
@@ -4329,9 +4329,9 @@ namespace MSDN.Html.Editor
                         // FONT style remove
                         FormatRemove();
                         break;
-                    case INTERNAL_COMMAND_COLORDIALOG:
+                    case INTERNAL_COMMAND_TEXTCOLOR:
                         // COLOR style creation
-                        FormatFontColorPrompt();
+                        FormatTextColorPrompt();
                         break;
                     case INTERNAL_COMMAND_FONTINCREASE:
                         // FONTSIZE increase

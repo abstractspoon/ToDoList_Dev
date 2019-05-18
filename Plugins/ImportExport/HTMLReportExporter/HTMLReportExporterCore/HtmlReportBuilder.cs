@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web.UI;
+using System.Drawing;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -102,13 +103,13 @@ namespace HTMLReportExporter
  			html.Write(m_DefaultFontStyle);
 			html.WriteLine();
 
-			html.Write("body { line-height: normal; }");
+			html.Write("body { line-height: normal; margin: 0; }");
 			html.WriteLine();
 
 			html.Write("table { border-collapse: collapse; }");
 			html.WriteLine();
 
-			html.Write(".page-header { position: fixed; top: 0; width: 100%; background: yellow;	}");
+			html.Write(".page-header { position: fixed; top: 0; width: 100%; }");
 			html.WriteLine();
 
 			if (m_Template.Header.WantDivider)
@@ -117,12 +118,24 @@ namespace HTMLReportExporter
 				html.WriteLine();
 			}
 
-			html.Write(".page-footer { position: fixed;	bottom: 0; width: 100%; background: blue;	}");
+			if (m_Template.Header.BackColor != Color.Transparent)
+			{
+				html.Write(String.Format(".page-header {{ background: {0}; }}", m_Template.Header.BackColorHtml));
+				html.WriteLine();
+			}
+
+			html.Write(".page-footer { position: fixed;	bottom: 0; width: 100%; }");
 			html.WriteLine();
 
 			if (m_Template.Footer.WantDivider)
 			{
 				html.Write(".page-footer { border-top: 1px solid black; }");
+				html.WriteLine();
+			}
+
+			if (m_Template.Footer.BackColor != Color.Transparent)
+			{
+				html.Write(String.Format(".page-footer {{ background: {0}; }}", m_Template.Footer.BackColorHtml));
 				html.WriteLine();
 			}
 

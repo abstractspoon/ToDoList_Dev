@@ -68,6 +68,7 @@ namespace HTMLReportExporter
 			if (m_Template.Load(m_TemplateFilePath))
 			{
 				this.htmlReportHeaderControl.InnerHtml = m_Template.Header.Text;
+				this.htmlReportHeaderControl.BodyBackColor = m_Template.Header.BackColor;
 				this.headerEnabled.Checked = m_Template.Header.Enabled;
 				this.headerDivider.Checked = m_Template.Header.WantDivider;
 
@@ -78,12 +79,22 @@ namespace HTMLReportExporter
 				// always enabled
 
 				this.htmlReportFooterControl.InnerHtml = m_Template.Footer.Text;
+				this.htmlReportFooterControl.BodyBackColor = m_Template.Footer.BackColor;
 				this.footerEnabled.Checked = m_Template.Footer.Enabled;
-				this.footerEnabled.Checked = m_Template.Footer.WantDivider;
+				this.footerDivider.Checked = m_Template.Footer.WantDivider;
 			}
+#if DEBUG
+			else
+			{
+				this.htmlReportHeaderControl.InnerHtml = "Header";
+				this.htmlReportTitleControl.InnerHtml = "Title";
+				this.htmlReportTasksControl.InnerHtml = "Tasks";
+				this.htmlReportFooterControl.InnerHtml = "Footer";
+			}
+#endif
+// 			this.tabControl.SelectTab(headerPage);
 
-			this.tabControl.SelectTab(taskPage);
-			this.browserPreview.Navigate("about:blank");
+			RefreshPreview();
 
 			m_ChangeTimer.Tick += new EventHandler(OnChangeTimer);
 			m_ChangeTimer.Interval = 500;
@@ -99,6 +110,7 @@ namespace HTMLReportExporter
 					m_Template.Header.Text = this.htmlReportHeaderControl.InnerHtml ?? "";
 					m_Template.Header.Enabled = headerEnabled.Checked;
 					m_Template.Header.WantDivider = headerDivider.Checked;
+					m_Template.Header.BackColor = this.htmlReportHeaderControl.BodyBackColor;
 				}
 				else if (tabControl.SelectedTab == titlePage)
 				{
@@ -115,6 +127,7 @@ namespace HTMLReportExporter
 					m_Template.Footer.Text = this.htmlReportFooterControl.InnerHtml ?? "";
 					m_Template.Footer.Enabled = footerEnabled.Checked;
 					m_Template.Footer.WantDivider = footerDivider.Checked;
+					m_Template.Footer.BackColor = this.htmlReportFooterControl.BodyBackColor;
 				}
 
 				CheckRefreshPreview();
@@ -134,26 +147,30 @@ namespace HTMLReportExporter
 			if (!m_Template.Equals(m_PrevTemplate))
 			{
 				m_PrevTemplate.Copy(m_Template);
+				RefreshPreview();
+			}
+		}
 
-				try
+		private void RefreshPreview()
+		{
+			try
+			{
+				String previewPath = Path.Combine(Path.GetTempPath(), "HtmlReporterPreview.html");
+
+				using (var file = new StreamWriter(previewPath))
 				{
-					String previewPath = Path.Combine(Path.GetTempPath(), "HtmlReporterPreview.html");
-
-					using (var file = new StreamWriter(previewPath))
+					using (var html = new HtmlTextWriter(file))
 					{
-						using (var html = new HtmlTextWriter(file))
-						{
-							var report = new HtmlReportBuilder(m_Tasklist, m_Template, m_Prefs);
+						var report = new HtmlReportBuilder(m_Tasklist, m_Template, m_Prefs);
 
-							report.BuildReport(html);
-						}
+						report.BuildReport(html);
 					}
+				}
 
-					browserPreview.Navigate(new System.Uri(previewPath));
-				}
-				catch (Exception /*e*/)
-				{
-				}
+				browserPreview.Navigate(new System.Uri(previewPath));
+			}
+			catch (Exception /*e*/)
+			{
 			}
 		}
 	}

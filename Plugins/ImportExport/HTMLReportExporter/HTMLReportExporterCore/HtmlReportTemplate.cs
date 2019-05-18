@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using System.Text;
 using System.Net;
 using System.Xml;
+using System.Drawing;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -71,36 +72,51 @@ namespace HTMLReportExporter
 	public class HeaderFooterTemplateItem : TemplateItem
 	{
 		public bool WantDivider { get; set; }
+		public Color BackColor { get; set; }
+
+		public String BackColorHtml
+		{
+			get { return ColorTranslator.ToHtml(Color.FromArgb(BackColor.ToArgb())); }
+		}
 
 		public HeaderFooterTemplateItem(String xmlTag) : base(xmlTag)
 		{
-			WantDivider = true;
+			Clear();
 		}
 
 		override public void Read(XDocument doc)
 		{
 			base.Read(doc);
 
-			if (doc.Root.Element(XmlTag).Element("wantDivider") != null)
-				WantDivider = (bool)doc.Root.Element(XmlTag).Element("wantDivider");
+			WantDivider = (bool)doc.Root.Element(XmlTag).Element("wantDivider");
+
+			if (doc.Root.Element(XmlTag).Element("backColor") != null)
+				BackColor = ColorTranslator.FromHtml(doc.Root.Element(XmlTag).Element("backColor").Value);
 		}
 
 		override public void Write(XDocument doc)
 		{
 			base.Write(doc);
 
-			doc.Root.Element(XmlTag).Add(new XElement("wantDivider"), WantDivider);
+			doc.Root.Element(XmlTag).Add(new XElement("wantDivider", WantDivider));
+
+			if (BackColor != Color.Transparent)
+				doc.Root.Element(XmlTag).Add(new XElement("backColor", BackColorHtml));
 		}
 
 		override public void Clear()
 		{
 			base.Clear();
+
 			WantDivider = true;
+			BackColor = Color.Transparent;
 		}
 
 		public bool Equals(HeaderFooterTemplateItem other)
 		{
-			return (base.Equals(other) && (WantDivider == other.WantDivider));
+			return (base.Equals(other) && 
+					(WantDivider == other.WantDivider) &&
+					(BackColor.Equals(other.BackColor)));
 		}
 
 		public bool Copy(HeaderFooterTemplateItem other)
@@ -109,6 +125,7 @@ namespace HTMLReportExporter
 				return false;
 
 			WantDivider = other.WantDivider;
+			BackColor = Color.FromName(other.BackColor.ToString());
 			return true;
 		}
 

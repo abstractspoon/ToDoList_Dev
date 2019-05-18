@@ -45,7 +45,7 @@
 			this.toolstripFormatItalic = new System.Windows.Forms.ToolStripButton();
 			this.toolstripFontDialog = new System.Windows.Forms.ToolStripButton();
 			this.toolstripFontNormal = new System.Windows.Forms.ToolStripButton();
-			this.toolstripColorDialog = new System.Windows.Forms.ToolStripButton();
+			this.toolstripTextColor = new System.Windows.Forms.ToolStripButton();
 			this.toolstripFontIncrease = new System.Windows.Forms.ToolStripButton();
 			this.toolstripFontDecrease = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
@@ -176,7 +176,7 @@
             this.toolstripFormatItalic,
             this.toolstripFontDialog,
             this.toolstripFontNormal,
-            this.toolstripColorDialog,
+            this.toolstripTextColor,
             this.toolstripFontIncrease,
             this.toolstripFontDecrease,
             this.toolStripSeparator3,
@@ -313,14 +313,14 @@
 			this.toolstripFontNormal.Tag = "FontNormal";
 			this.toolstripFontNormal.Click += new System.EventHandler(this.toolstripEditorClick);
 			// 
-			// toolstripColorDialog
+			// toolstripTextColor
 			// 
-			this.toolstripColorDialog.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolstripColorDialog.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontColor;
-			resources.ApplyResources(this.toolstripColorDialog, "toolstripColorDialog");
-			this.toolstripColorDialog.Name = "toolstripColorDialog";
-			this.toolstripColorDialog.Tag = "ColorDialog";
-			this.toolstripColorDialog.Click += new System.EventHandler(this.toolstripEditorClick);
+			this.toolstripTextColor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolstripTextColor.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarTextColor;
+			resources.ApplyResources(this.toolstripTextColor, "toolstripTextColor");
+			this.toolstripTextColor.Name = "toolstripTextColor";
+			this.toolstripTextColor.Tag = "TextColor";
+			this.toolstripTextColor.Click += new System.EventHandler(this.toolstripEditorClick);
 			// 
 			// toolstripFontIncrease
 			// 
@@ -745,7 +745,7 @@
 			// 
 			// contextFormatColorDialog
 			// 
-			this.contextFormatColorDialog.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontColor;
+			this.contextFormatColorDialog.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarTextColor;
 			resources.ApplyResources(this.contextFormatColorDialog, "contextFormatColorDialog");
 			this.contextFormatColorDialog.Name = "contextFormatColorDialog";
 			this.contextFormatColorDialog.Tag = "ColorDialog";
@@ -1058,7 +1058,7 @@
         private System.Windows.Forms.ToolStripButton toolstripFormatItalic;
         private System.Windows.Forms.ToolStripButton toolstripFontDialog;
         private System.Windows.Forms.ToolStripButton toolstripFontNormal;
-        private System.Windows.Forms.ToolStripButton toolstripColorDialog;
+        private System.Windows.Forms.ToolStripButton toolstripTextColor;
         private System.Windows.Forms.ToolStripButton toolstripFontIncrease;
         private System.Windows.Forms.ToolStripButton toolstripFontDecrease;
         private System.Windows.Forms.ToolStripButton toolstripJustifyLeft;
