@@ -102,9 +102,9 @@ namespace HTMLReportExporter
 			CommandHandling.HideCommand("toolstripEnableEditing", ToolBar.Items);
 			CommandHandling.HideCommand("toolstripFindReplace", ToolBar.Items);
 			CommandHandling.HideCommand("toolstripInsertLink", ToolBar.Items);
-			CommandHandling.HideCommand("", ToolBar.Items);
-			CommandHandling.HideCommand("", ToolBar.Items);
-			CommandHandling.HideCommand("", ToolBar.Items);
+			//CommandHandling.HideCommand("", ToolBar.Items);
+			//CommandHandling.HideCommand("", ToolBar.Items);
+			//CommandHandling.HideCommand("", ToolBar.Items);
 		}
 
 		protected override void PreShowDialog(Form dialog)

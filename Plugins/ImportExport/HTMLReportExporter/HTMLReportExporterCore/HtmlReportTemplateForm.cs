@@ -37,7 +37,10 @@ namespace HTMLReportExporter
 
 			m_Template = new HtmlReportTemplate();
 			m_PrevTemplate = new HtmlReportTemplate();
+
 			m_ChangeTimer = new Timer();
+			m_ChangeTimer.Tick += new EventHandler(OnChangeTimer);
+			m_ChangeTimer.Interval = 500;
 
 			InitializeComponentEx();
 		}
@@ -65,40 +68,37 @@ namespace HTMLReportExporter
 			this.htmlReportTasksControl.SetFont(defFontName, defFontSize);
 			this.htmlReportFooterControl.SetFont(defFontName, defFontSize);
 
-			if (m_Template.Load(m_TemplateFilePath))
+			if (!m_Template.Load(m_TemplateFilePath))
 			{
-				this.htmlReportHeaderControl.InnerHtml = m_Template.Header.Text;
-				this.htmlReportHeaderControl.BodyBackColor = m_Template.Header.BackColor;
-				this.headerEnabled.Checked = m_Template.Header.Enabled;
-				this.headerDivider.Checked = m_Template.Header.WantDivider;
-
-				this.htmlReportTitleControl.InnerHtml = m_Template.Title.Text;
-				this.titleEnabled.Checked = m_Template.Title.Enabled;
-
-				this.htmlReportTasksControl.InnerHtml = m_Template.Task.Text;
-				// always enabled
-
-				this.htmlReportFooterControl.InnerHtml = m_Template.Footer.Text;
-				this.htmlReportFooterControl.BodyBackColor = m_Template.Footer.BackColor;
-				this.footerEnabled.Checked = m_Template.Footer.Enabled;
-				this.footerDivider.Checked = m_Template.Footer.WantDivider;
-			}
 #if DEBUG
-			else
-			{
-				this.htmlReportHeaderControl.InnerHtml = "Header";
-				this.htmlReportTitleControl.InnerHtml = "Title";
-				this.htmlReportTasksControl.InnerHtml = "Tasks";
-				this.htmlReportFooterControl.InnerHtml = "Footer";
-			}
+				this.m_Template.Header.Text = "Header";
+				this.m_Template.Header.BackColor = Color.LightBlue;
+				this.m_Template.Title.Text = "Title";
+				this.m_Template.Task.Text = "$(Title)";
+				this.m_Template.Footer.Text = "Footer";
+				this.m_Template.Footer.BackColor = Color.LightPink;
 #endif
-// 			this.tabControl.SelectTab(headerPage);
+			}
+
+			this.htmlReportHeaderControl.InnerHtml = m_Template.Header.Text;
+			this.htmlReportHeaderControl.BodyBackColor = m_Template.Header.BackColor;
+			this.headerEnabled.Checked = m_Template.Header.Enabled;
+			this.headerDivider.Checked = m_Template.Header.WantDivider;
+
+			this.htmlReportTitleControl.InnerHtml = m_Template.Title.Text;
+			this.titleEnabled.Checked = m_Template.Title.Enabled;
+
+			this.htmlReportTasksControl.InnerHtml = m_Template.Task.Text;
+			// always enabled
+
+			this.htmlReportFooterControl.InnerHtml = m_Template.Footer.Text;
+			this.htmlReportFooterControl.BodyBackColor = m_Template.Footer.BackColor;
+			this.footerEnabled.Checked = m_Template.Footer.Enabled;
+			this.footerDivider.Checked = m_Template.Footer.WantDivider;
+
+			// 			this.tabControl.SelectTab(headerPage);
 
 			RefreshPreview();
-
-			m_ChangeTimer.Tick += new EventHandler(OnChangeTimer);
-			m_ChangeTimer.Interval = 500;
-			m_ChangeTimer.Start();
 		}
 
 		private void OnChangeTimer(object sender, EventArgs e)
@@ -146,8 +146,12 @@ namespace HTMLReportExporter
 		{
 			if (!m_Template.Equals(m_PrevTemplate))
 			{
+				m_ChangeTimer.Stop();
+
 				m_PrevTemplate.Copy(m_Template);
 				RefreshPreview();
+
+				m_ChangeTimer.Start();
 			}
 		}
 

@@ -97,7 +97,7 @@ namespace HTMLReportExporter
 			html.AddAttribute("type", "text/css");
 			html.RenderBeginTag(HtmlTextWriterTag.Style);
 
-			html.Write("@media print { thead { display: table-header-group; } tfoot { display: table-footer-group; } body { margin: 0; } }");
+			html.Write("@media print { thead { display: table-header-group; } tfoot { display: table-footer-group; } body { margin: 0; } page { border-bottom: none; } }");
 			html.WriteLine();
 
  			html.Write(m_DefaultFontStyle);
@@ -138,11 +138,10 @@ namespace HTMLReportExporter
 				html.Write(String.Format(".page-footer {{ background: {0}; }}", m_Template.Footer.BackColorHtml));
 				html.WriteLine();
 			}
-
-			html.Write(".page { page-break-after: always; }");
+			html.Write(".page { page-break-after: always; border-bottom: 1px dotted; width: 100% }");
 			html.WriteLine();
 
-			html.Write("@page { margin: 0 }");
+			html.Write("@page { margin: 0; }");
 			html.WriteLine();
 
 			html.Write(".page-header, .page-header-space { height: 100px; }");
@@ -249,7 +248,10 @@ namespace HTMLReportExporter
 
 			while (task.IsValid())
 			{
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
 				ExportTask(task, 0, html);
+				html.RenderEndTag(); // Div
+
 				task = task.GetNextTask();
 			}
 
@@ -268,6 +270,7 @@ namespace HTMLReportExporter
 		protected void ExportTask(Task task, int depth, HtmlTextWriter html)
 		{
 			// This task
+			html.Write(m_Template.Task.Format(task, depth));
 			// TODO
 
 			// This task's children

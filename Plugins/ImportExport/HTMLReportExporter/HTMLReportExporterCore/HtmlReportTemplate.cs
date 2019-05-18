@@ -109,14 +109,14 @@ namespace HTMLReportExporter
 			base.Clear();
 
 			WantDivider = true;
-			BackColor = Color.Transparent;
+			BackColor = Color.White;
 		}
 
 		public bool Equals(HeaderFooterTemplateItem other)
 		{
 			return (base.Equals(other) && 
 					(WantDivider == other.WantDivider) &&
-					(BackColor.Equals(other.BackColor)));
+					(BackColor.ToArgb() == other.BackColor.ToArgb()));
 		}
 
 		public bool Copy(HeaderFooterTemplateItem other)
@@ -194,10 +194,16 @@ namespace HTMLReportExporter
 			Task.Attribute.Comments,
 		};
 
-		private String Format(Task task, int depth)
+		public String Format(Task task, int depth)
 		{
-			// TODO
-			return base.Format();
+			var text = base.Format();
+
+			if (!String.IsNullOrWhiteSpace(text))
+			{
+				text = text.Replace("$(Title)", task.GetTitle());
+			}
+
+			return text;
 		}
 	}
 
