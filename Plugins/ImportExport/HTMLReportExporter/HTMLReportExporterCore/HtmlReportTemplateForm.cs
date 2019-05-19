@@ -99,6 +99,7 @@ namespace HTMLReportExporter
 			// 			this.tabControl.SelectTab(headerPage);
 
 			RefreshPreview();
+			m_ChangeTimer.Start();
 		}
 
 		private void OnChangeTimer(object sender, EventArgs e)

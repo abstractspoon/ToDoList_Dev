@@ -414,9 +414,9 @@ public:
 	virtual LPCWSTR GetFileName(bool bFullPath) const = 0;
 
 	virtual bool IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const = 0;
-	virtual bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const = 0;
+	virtual bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc = false, bool bDisplay = false) const = 0;
 
-	virtual LPCWSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc = true) const = 0;
+	virtual LPCWSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc = false, bool bDisplay = false) const = 0;
 	
 	virtual bool SetTaskCost(HTASKITEM hTask, double dCost, bool bIsRate) = 0;
 	virtual double GetTaskCost(HTASKITEM hTask, bool bCalc, bool& bIsRate) const = 0;

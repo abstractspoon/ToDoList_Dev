@@ -3153,12 +3153,12 @@ bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const
 	return false;
 }
 
-bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const
+bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay) const
 {
 	if (!IsAttributeAvailable(nAttrib))
 		return false;
 
-	LPCTSTR szAttrib = MapAttribToTag(nAttrib, false);
+	LPCTSTR szAttrib = MapAttribToTag(nAttrib, bCalc, bDisplay);
 
 	if (Misc::IsEmpty(szAttrib))
 		return false;
@@ -3169,7 +3169,7 @@ bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib) const
 	return (pXITask->ItemHasValue(szAttrib) != FALSE);
 }
 
-LPCTSTR CTaskFile::MapAttribToTag(TDC_ATTRIBUTE nAttrib, bool bCalc)
+LPCTSTR CTaskFile::MapAttribToTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay)
 {
 	switch (nAttrib)
 	{
@@ -3178,17 +3178,14 @@ LPCTSTR CTaskFile::MapAttribToTag(TDC_ATTRIBUTE nAttrib, bool bCalc)
 	case TDCA_CATEGORY:		return TDL_TASKCATEGORY;
 	case TDCA_COLOR:		return TDL_TASKCOLOR;
 	case TDCA_CREATEDBY:	return TDL_TASKCREATEDBY;
-	case TDCA_CREATIONDATE:	return TDL_TASKCREATIONDATESTRING;
 	case TDCA_CUSTOMATTRIB:	return TDL_TASKCUSTOMATTRIBDATA;
 	case TDCA_DEPENDENCY:	return TDL_TASKDEPENDENCY;
-	case TDCA_DONEDATE:		return TDL_TASKDONEDATESTRING;
 	case TDCA_EXTERNALID:	return TDL_TASKEXTERNALID;
 	case TDCA_FILEREF:		return TDL_TASKFILEREFPATH;
 	case TDCA_FLAG:			return TDL_TASKFLAG;
 	case TDCA_HTMLCOMMENTS: return TDL_TASKHTMLCOMMENTS;
 	case TDCA_ICON:			return TDL_TASKICON;
 	case TDCA_ID:			return TDL_TASKID;
-	case TDCA_LASTMODDATE:	return TDL_TASKLASTMODSTRING;
 	case TDCA_LASTMODBY:	return TDL_TASKLASTMODBY;
 	case TDCA_METADATA:		return TDL_TASKMETADATA;
 	case TDCA_PARENTID:		return TDL_TASKPARENTID;
@@ -3200,30 +3197,66 @@ LPCTSTR CTaskFile::MapAttribToTag(TDC_ATTRIBUTE nAttrib, bool bCalc)
 	case TDCA_TASKNAME:		return TDL_TASKTITLE;
 	case TDCA_VERSION:		return TDL_TASKVERSION;
 	case TDCA_SUBTASKDONE:	return TDL_TASKSUBTASKDONE;
-
-	case TDCA_COST:			return bCalc ? TDL_TASKCALCCOST : TDL_TASKCOST;
-	case TDCA_DUEDATE:		return bCalc ? TDL_TASKCALCDUEDATESTRING : TDL_TASKDUEDATESTRING;
-	case TDCA_LOCK:			return bCalc ? TDL_TASKCALCLOCK : TDL_TASKLOCK;
-	case TDCA_PERCENT:		return bCalc ? TDL_TASKCALCCOMPLETION : TDL_TASKPERCENTDONE;
-	case TDCA_PRIORITY:		return bCalc ? TDL_TASKHIGHESTPRIORITY : TDL_TASKPRIORITY;
-	case TDCA_RISK:			return bCalc ? TDL_TASKHIGHESTRISK : TDL_TASKRISK;
-	case TDCA_STARTDATE:	return bCalc ? TDL_TASKCALCSTARTDATESTRING : TDL_TASKSTARTDATESTRING;
-	case TDCA_TIMEEST:		return bCalc ? TDL_TASKCALCTIMEESTIMATE : TDL_TASKTIMEESTIMATE;
-	case TDCA_TIMESPENT:	return bCalc ? TDL_TASKCALCTIMESPENT : TDL_TASKTIMESPENT;
 	}
 
+	if (bDisplay)
+	{
+		switch (nAttrib)
+		{
+		case TDCA_CREATIONDATE:	return TDL_TASKCREATIONDATESTRING;
+		case TDCA_DONEDATE:		return TDL_TASKDONEDATESTRING;
+		case TDCA_LASTMODDATE:	return TDL_TASKLASTMODSTRING;
+
+		case TDCA_DUEDATE:		return bCalc ? TDL_TASKCALCDUEDATESTRING : TDL_TASKDUEDATESTRING;
+		case TDCA_STARTDATE:	return bCalc ? TDL_TASKCALCSTARTDATESTRING : TDL_TASKSTARTDATESTRING;
+		}
+	}
+
+	if (bCalc)
+	{
+		switch (nAttrib)
+		{
+		case TDCA_COST:			return bCalc ? TDL_TASKCALCCOST : TDL_TASKCOST;
+		case TDCA_LOCK:			return bCalc ? TDL_TASKCALCLOCK : TDL_TASKLOCK;
+		case TDCA_PERCENT:		return bCalc ? TDL_TASKCALCCOMPLETION : TDL_TASKPERCENTDONE;
+		case TDCA_PRIORITY:		return bCalc ? TDL_TASKHIGHESTPRIORITY : TDL_TASKPRIORITY;
+		case TDCA_RISK:			return bCalc ? TDL_TASKHIGHESTRISK : TDL_TASKRISK;
+		case TDCA_TIMEEST:		return bCalc ? TDL_TASKCALCTIMEESTIMATE : TDL_TASKTIMEESTIMATE;
+		case TDCA_TIMESPENT:	return bCalc ? TDL_TASKCALCTIMESPENT : TDL_TASKTIMESPENT;
+		}
+	}
+	
 	// all else
 	ASSERT(0);
 	return NULLSTRING;
 }
 
-LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc) const
+LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay) const
 {
 	if (!IsAttributeAvailable(nAttrib))
 		return NULLSTRING;
 
-	LPCTSTR szAttrib = MapAttribToTag(nAttrib, bCalc);
+	LPCTSTR szAttrib = MapAttribToTag(nAttrib, bCalc, bDisplay);
 
+	if (bDisplay)
+	{
+		static CString DISPLAYSTRING;
+
+		switch (nAttrib)
+		{
+		case TDCA_ALLOCTO:
+		case TDCA_CATEGORY:
+		case TDCA_DEPENDENCY:
+		case TDCA_FILEREF:
+		case TDCA_TAGS:
+			DISPLAYSTRING = FormatTaskArray(hTask, szAttrib);
+			break;
+		}
+		
+		return DISPLAYSTRING;
+	}
+
+	// all else
 	return GetTaskAttribute(hTask, szAttrib);
 }
 
@@ -4312,6 +4345,16 @@ bool CTaskFile::DeleteTaskArray(HTASKITEM hTask, const CString& sItemTag)
 
 	// delete any existing items
 	return (pXITask->DeleteItem(sItemTag) == TRUE);
+}
+
+CString CTaskFile::FormatTaskArray(HTASKITEM hTask, const CString& sItemTag) const
+{
+	CStringArray aItems;
+
+	if (!GetTaskArray(hTask, sItemTag, aItems, FALSE))
+		return NULLSTRING;
+
+	return Misc::FormatArray(aItems);
 }
 
 BOOL CTaskFile::SetTaskArray(HTASKITEM hTask, const CString& sItemTag, const CStringArray& aItems, BOOL bAllowEmpty)

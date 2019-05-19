@@ -248,10 +248,7 @@ namespace HTMLReportExporter
 
 			while (task.IsValid())
 			{
-				html.RenderBeginTag(HtmlTextWriterTag.Div);
 				ExportTask(task, 0, html);
-				html.RenderEndTag(); // Div
-
 				task = task.GetNextTask();
 			}
 
@@ -269,7 +266,9 @@ namespace HTMLReportExporter
 
 		protected void ExportTask(Task task, int depth, HtmlTextWriter html)
 		{
-			// This task
+			 // This task
+			html.RenderBeginTag(HtmlTextWriterTag.Div);
+			html.Write(GetDepthIndent(depth));
 			html.Write(m_Template.Task.Format(task, depth));
 			// TODO
 
@@ -281,50 +280,9 @@ namespace HTMLReportExporter
 				ExportTask(subtask, (depth + 1), html); // RECURSIVE call
 				subtask = subtask.GetNextTask();
 			}
+			html.RenderEndTag(); // Div
 		}
 		
-		protected String GetAttributeName(Task.Attribute attrib)
-		{
-				/*
-			switch (attrib)
-			{
-				case Task.Attribute.Title: return m_Trans.Translate("Title");
-				case Task.Attribute.Position: return m_Trans.Translate("Position");
-				case Task.Attribute.Id: return m_Trans.Translate("Id");
-				case Task.Attribute.ParentId: return m_Trans.Translate("Parent Id");
-				case Task.Attribute.Path: return m_Trans.Translate("Path");
-				case Task.Attribute.Priority: return m_Trans.Translate("Priority");
-				case Task.Attribute.Risk: return m_Trans.Translate("Risk");
-				case Task.Attribute.Percent: return m_Trans.Translate("Percent");
-				case Task.Attribute.TimeEstimate: return m_Trans.Translate("Time Estimate");
-				case Task.Attribute.TimeSpent: return m_Trans.Translate("Time Spent");
-				case Task.Attribute.CreationDate: return m_Trans.Translate("Creation Date");
-				case Task.Attribute.CreatedBy: return m_Trans.Translate("Created By");
-				case Task.Attribute.LastModifiedDate: return m_Trans.Translate("Last Modified Date");
-				case Task.Attribute.LastModifiedBy: return m_Trans.Translate("Last Modified By");
-				case Task.Attribute.StartDate: return m_Trans.Translate("Start Date");
-				case Task.Attribute.DueDate: return m_Trans.Translate("Due Date");
-				case Task.Attribute.DoneDate: return m_Trans.Translate("Done Date");
-				case Task.Attribute.Recurrence: return m_Trans.Translate("Recurrence");
-				case Task.Attribute.AllocatedTo: return m_Trans.Translate("Allocated To");
-				case Task.Attribute.AllocatedBy: return m_Trans.Translate("Allocated By");
-				case Task.Attribute.Status: return m_Trans.Translate("Status");
-				case Task.Attribute.Category: return m_Trans.Translate("Category");
-				case Task.Attribute.Tags: return m_Trans.Translate("Tags");
-				case Task.Attribute.ExternalId: return m_Trans.Translate("ExternalId");
-				case Task.Attribute.Cost: return m_Trans.Translate("Cost");
-				case Task.Attribute.Version: return m_Trans.Translate("Version");
-				case Task.Attribute.Flag: return m_Trans.Translate("Flag");
-				case Task.Attribute.Dependency: return m_Trans.Translate("Dependency");
-				case Task.Attribute.FileReference: return m_Trans.Translate("File Link");
-				case Task.Attribute.SubtaskDone: return m_Trans.Translate("Subtask Done");
-				case Task.Attribute.Comments: return m_Trans.Translate("Comments");
-			}
-				*/
-
-			return "";
-		}
-
 		protected String GetAttributeValue(Task task, Task.Attribute attrib)
 		{
 			switch (attrib)

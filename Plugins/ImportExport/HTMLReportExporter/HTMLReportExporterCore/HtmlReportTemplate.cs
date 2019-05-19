@@ -125,7 +125,7 @@ namespace HTMLReportExporter
 				return false;
 
 			WantDivider = other.WantDivider;
-			BackColor = Color.FromName(other.BackColor.ToString());
+			BackColor = Color.FromArgb(other.BackColor.ToArgb());
 			return true;
 		}
 
@@ -153,46 +153,32 @@ namespace HTMLReportExporter
 
 	}
 
+	public struct TaskTemplateAttribute
+	{
+		public TaskTemplateAttribute(Task.Attribute id, String label, String placeHolder)
+		{
+			Id = id;
+			Label = label;
+			PlaceHolder = placeHolder;
+		}
+
+		public Task.Attribute Id;
+		public String Label;
+		public String PlaceHolder;
+	}
+
 	public class TaskTemplateItem : TemplateItem
 	{
 		public TaskTemplateItem() : base("task")
 		{
 		}
 
-		private static Task.Attribute[] Attribs = 
+		static String SubstituteValue(String template, TaskTemplateAttribute attrib, Task task)
 		{
-			Task.Attribute.Position,
-			Task.Attribute.Title,
-			Task.Attribute.Id,
-			Task.Attribute.ParentId,
-			Task.Attribute.Path,
-			Task.Attribute.Priority,
-			Task.Attribute.Risk,
-			Task.Attribute.Percent,
-			Task.Attribute.TimeEstimate,
-			Task.Attribute.TimeSpent,
-			Task.Attribute.CreationDate,
-			Task.Attribute.CreatedBy,
-			Task.Attribute.LastModifiedDate,
-			Task.Attribute.LastModifiedBy,
-			Task.Attribute.StartDate,
-			Task.Attribute.DueDate,
-			Task.Attribute.DoneDate,
-			Task.Attribute.Recurrence,
-			Task.Attribute.AllocatedTo,
-			Task.Attribute.AllocatedBy,
-			Task.Attribute.Status,
-			Task.Attribute.Category,
-			Task.Attribute.Tags,
-			Task.Attribute.ExternalId,
-			Task.Attribute.Cost,
-			Task.Attribute.Version,
-			Task.Attribute.Flag,
-			Task.Attribute.Dependency,
-			Task.Attribute.FileReference,
-			Task.Attribute.SubtaskDone,
-			Task.Attribute.Comments,
-		};
+			var placeHolder = String.Format("$({0})", attrib.PlaceHolder);
+
+			return template.Replace(placeHolder, task.GetAttribute(attrib.Id, true));
+		}
 
 		public String Format(Task task, int depth)
 		{
@@ -200,11 +186,48 @@ namespace HTMLReportExporter
 
 			if (!String.IsNullOrWhiteSpace(text))
 			{
-				text = text.Replace("$(Title)", task.GetTitle());
+				foreach (var attrib in Attributes)
+					text = SubstituteValue(text, attrib, task);
 			}
 
 			return text;
 		}
+
+		public static TaskTemplateAttribute[] Attributes =
+		{
+			new TaskTemplateAttribute(Task.Attribute.AllocatedBy,       "Allocated By",             "allocBy" ),
+			new TaskTemplateAttribute(Task.Attribute.AllocatedTo,       "Allocated To",             "allocTo" ),
+			new TaskTemplateAttribute(Task.Attribute.Category,          "Category",                 "cat" ),
+			new TaskTemplateAttribute(Task.Attribute.Cost,              "Cost",                     "cost" ),
+			new TaskTemplateAttribute(Task.Attribute.CreatedBy,         "Created By",               "createBy" ),
+			new TaskTemplateAttribute(Task.Attribute.CreationDate,      "Creation Date",            "createDate" ),
+			new TaskTemplateAttribute(Task.Attribute.Dependency,        "Dependency",               "depends" ),
+			new TaskTemplateAttribute(Task.Attribute.DoneDate,          "Completion Date",          "doneDate" ),
+			new TaskTemplateAttribute(Task.Attribute.DueDate,           "Due Date",                 "dueDate" ),
+			new TaskTemplateAttribute(Task.Attribute.ExternalId,        "ExternalId",               "extId" ),
+			new TaskTemplateAttribute(Task.Attribute.FileReference,     "File Link",                "filelink" ),
+			new TaskTemplateAttribute(Task.Attribute.Flag,              "Flag",                     "flag" ),
+			new TaskTemplateAttribute(Task.Attribute.HtmlComments,      "Comments",                 "comments" ),
+			new TaskTemplateAttribute(Task.Attribute.Id,                "Id",                       "id" ),
+			new TaskTemplateAttribute(Task.Attribute.LastModifiedBy,    "Last Modified By",         "modBy" ),
+			new TaskTemplateAttribute(Task.Attribute.LastModifiedDate,  "Last Modified Date",       "modDate" ),
+			new TaskTemplateAttribute(Task.Attribute.ParentId,          "Parent Id",                "pid" ),
+			new TaskTemplateAttribute(Task.Attribute.Path,              "Path",                     "path" ),
+			new TaskTemplateAttribute(Task.Attribute.Percent,           "Percentage Completion",    "percent" ),
+			new TaskTemplateAttribute(Task.Attribute.Position,          "Position",                 "pos" ),
+			new TaskTemplateAttribute(Task.Attribute.Priority,          "Priority",                 "priority" ),
+			new TaskTemplateAttribute(Task.Attribute.Recurrence,        "Recurrence",               "recurs" ),
+			new TaskTemplateAttribute(Task.Attribute.Risk,              "Risk",                     "risk" ),
+			new TaskTemplateAttribute(Task.Attribute.StartDate,         "Start Date",               "startDate" ),
+			new TaskTemplateAttribute(Task.Attribute.Status,            "Status",                   "status" ),
+			new TaskTemplateAttribute(Task.Attribute.SubtaskDone,       "Subtask Done",             "subtaskDone" ),
+			new TaskTemplateAttribute(Task.Attribute.Tags,              "Tags",                     "tag" ),
+			new TaskTemplateAttribute(Task.Attribute.TimeEstimate,      "Time Estimate",            "est" ),
+			new TaskTemplateAttribute(Task.Attribute.TimeSpent,         "Time Spent",               "spent" ),
+			new TaskTemplateAttribute(Task.Attribute.Title,             "Title",                    "title" ),
+			new TaskTemplateAttribute(Task.Attribute.Version,           "Version",                  "ver" ),
+		};
+
 	}
 
 	public class FooterTemplateItem : HeaderFooterTemplateItem
