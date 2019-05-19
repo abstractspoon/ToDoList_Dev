@@ -83,7 +83,8 @@ namespace HTMLReportExporter
 			this.htmlReportHeaderControl.InnerHtml = m_Template.Header.Text;
 			this.htmlReportHeaderControl.BodyBackColor = m_Template.Header.BackColor;
 			this.headerEnabled.Checked = m_Template.Header.Enabled;
-			this.headerDivider.Checked = m_Template.Header.WantDivider;
+			this.headerDividerCheckbox.Checked = m_Template.Header.WantDivider;
+			this.headerHeightCombobox.Text = m_Template.Header.PixelHeightText;
 
 			this.htmlReportTitleControl.InnerHtml = m_Template.Title.Text;
 			this.titleEnabled.Checked = m_Template.Title.Enabled;
@@ -94,9 +95,8 @@ namespace HTMLReportExporter
 			this.htmlReportFooterControl.InnerHtml = m_Template.Footer.Text;
 			this.htmlReportFooterControl.BodyBackColor = m_Template.Footer.BackColor;
 			this.footerEnabled.Checked = m_Template.Footer.Enabled;
-			this.footerDivider.Checked = m_Template.Footer.WantDivider;
-
-			// 			this.tabControl.SelectTab(headerPage);
+			this.footerDividerCheckbox.Checked = m_Template.Footer.WantDivider;
+			this.footerHeightCombobox.Text = m_Template.Footer.PixelHeightText;
 
 			RefreshPreview();
 			m_ChangeTimer.Start();
@@ -110,8 +110,9 @@ namespace HTMLReportExporter
 				{
 					m_Template.Header.Text = this.htmlReportHeaderControl.InnerHtml ?? "";
 					m_Template.Header.Enabled = headerEnabled.Checked;
-					m_Template.Header.WantDivider = headerDivider.Checked;
+					m_Template.Header.WantDivider = headerDividerCheckbox.Checked;
 					m_Template.Header.BackColor = this.htmlReportHeaderControl.BodyBackColor;
+					m_Template.Header.PixelHeightText = this.headerHeightCombobox.Text;
 				}
 				else if (tabControl.SelectedTab == titlePage)
 				{
@@ -127,8 +128,9 @@ namespace HTMLReportExporter
 				{
 					m_Template.Footer.Text = this.htmlReportFooterControl.InnerHtml ?? "";
 					m_Template.Footer.Enabled = footerEnabled.Checked;
-					m_Template.Footer.WantDivider = footerDivider.Checked;
+					m_Template.Footer.WantDivider = footerDividerCheckbox.Checked;
 					m_Template.Footer.BackColor = this.htmlReportFooterControl.BodyBackColor;
+					m_Template.Footer.PixelHeightText = this.footerHeightCombobox.Text;
 				}
 
 				CheckRefreshPreview();

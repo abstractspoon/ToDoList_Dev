@@ -71,17 +71,38 @@ namespace HTMLReportExporter
 
 	public class HeaderFooterTemplateItem : TemplateItem
 	{
+		private int DefPixelHeight = 0;
+
+		// ----------------------------------
+
 		public bool WantDivider { get; set; }
 		public Color BackColor { get; set; }
+		public int PixelHeight { get; set; }
+
+		public String PixelHeightText
+		{
+			get { return PixelHeight.ToString(); }
+			set
+			{
+				int height = 0;
+
+				if (Int32.TryParse(value, out height) && (height > 0))
+					PixelHeight = height;
+			}
+		}
+
+		// ----------------------------------
+
+		public HeaderFooterTemplateItem(String xmlTag, int defPixelHeight) : base(xmlTag)
+		{
+			DefPixelHeight = defPixelHeight;
+
+			Clear();
+		}
 
 		public String BackColorHtml
 		{
 			get { return ColorTranslator.ToHtml(Color.FromArgb(BackColor.ToArgb())); }
-		}
-
-		public HeaderFooterTemplateItem(String xmlTag) : base(xmlTag)
-		{
-			Clear();
 		}
 
 		override public void Read(XDocument doc)
@@ -92,6 +113,9 @@ namespace HTMLReportExporter
 
 			if (doc.Root.Element(XmlTag).Element("backColor") != null)
 				BackColor = ColorTranslator.FromHtml(doc.Root.Element(XmlTag).Element("backColor").Value);
+
+			if (doc.Root.Element(XmlTag).Element("pixelHeight") != null)
+				PixelHeight = (int)doc.Root.Element(XmlTag).Element("pixelHeight");
 		}
 
 		override public void Write(XDocument doc)
@@ -99,6 +123,7 @@ namespace HTMLReportExporter
 			base.Write(doc);
 
 			doc.Root.Element(XmlTag).Add(new XElement("wantDivider", WantDivider));
+			doc.Root.Element(XmlTag).Add(new XElement("pixelHeight", PixelHeight));
 
 			if (BackColor != Color.Transparent)
 				doc.Root.Element(XmlTag).Add(new XElement("backColor", BackColorHtml));
@@ -110,12 +135,14 @@ namespace HTMLReportExporter
 
 			WantDivider = true;
 			BackColor = Color.White;
+			PixelHeight = DefPixelHeight;
 		}
 
 		public bool Equals(HeaderFooterTemplateItem other)
 		{
 			return (base.Equals(other) && 
 					(WantDivider == other.WantDivider) &&
+					(PixelHeight == other.PixelHeight) &&
 					(BackColor.ToArgb() == other.BackColor.ToArgb()));
 		}
 
@@ -125,7 +152,9 @@ namespace HTMLReportExporter
 				return false;
 
 			WantDivider = other.WantDivider;
+			PixelHeight = other.PixelHeight;
 			BackColor = Color.FromArgb(other.BackColor.ToArgb());
+
 			return true;
 		}
 
@@ -133,7 +162,15 @@ namespace HTMLReportExporter
 
 	public class HeaderTemplateItem : HeaderFooterTemplateItem
 	{
-		public HeaderTemplateItem() : base("header")
+		public HeaderTemplateItem() : base("header", 100)
+		{
+		}
+
+	}
+
+	public class FooterTemplateItem : HeaderFooterTemplateItem
+	{
+		public FooterTemplateItem() : base("footer", 50)
 		{
 		}
 
@@ -227,14 +264,6 @@ namespace HTMLReportExporter
 			new TaskTemplateAttribute(Task.Attribute.Title,             "Title",                    "title" ),
 			new TaskTemplateAttribute(Task.Attribute.Version,           "Version",                  "ver" ),
 		};
-
-	}
-
-	public class FooterTemplateItem : HeaderFooterTemplateItem
-	{
-		public FooterTemplateItem() : base("footer")
-		{
-		}
 
 	}
 

@@ -115,26 +115,35 @@ namespace HTMLReportExporter
  			html.WriteLine(m_BodyFontStyle);
 			html.WriteLine("body { line-height: normal; margin: 0; }");
 			html.WriteLine("table { border-collapse: collapse; }");
-			html.WriteLine(".page-header { position: fixed; top: 0; width: 100%; }");
 
-			if (m_Template.Header.WantDivider)
-				html.WriteLine(".page-header { border-bottom: 1px solid black; }");
+			if (m_Template.Header.Enabled && (m_Template.Header.PixelHeight > 0))
+			{
+				html.WriteLine(".page-header { position: fixed; top: 0; width: 100%; }");
 
-			if (m_Template.Header.BackColor != Color.Transparent)
-				html.WriteLine(String.Format(".page-header {{ background: {0}; }}", m_Template.Header.BackColorHtml));
+				if (m_Template.Header.WantDivider)
+					html.WriteLine(".page-header { border-bottom: 1px solid black; }");
 
-			html.WriteLine(".page-footer { position: fixed;	bottom: 0; width: 100%; }");
+				if (m_Template.Header.BackColor != Color.Transparent)
+					html.WriteLine(String.Format(".page-header {{ background: {0}; }}", m_Template.Header.BackColorHtml));
 
-			if (m_Template.Footer.WantDivider)
-				html.Write(".page-footer { border-top: 1px solid black; }");
+				html.WriteLine(String.Format(".page-header, .page-header-space {{ height: {0}px; }}", m_Template.Header.PixelHeight));
+			}
 
-			if (m_Template.Footer.BackColor != Color.Transparent)
-				html.WriteLine(String.Format(".page-footer {{ background: {0}; }}", m_Template.Footer.BackColorHtml));
+			if (m_Template.Footer.Enabled && (m_Template.Footer.PixelHeight > 0))
+			{
+				html.WriteLine(".page-footer { position: fixed;	bottom: 0; width: 100%; }");
+
+				if (m_Template.Footer.WantDivider)
+					html.Write(".page-footer { border-top: 1px solid black; }");
+
+				if (m_Template.Footer.BackColor != Color.Transparent)
+					html.WriteLine(String.Format(".page-footer {{ background: {0}; }}", m_Template.Footer.BackColorHtml));
+
+				html.WriteLine(String.Format(".page-footer, .page-footer-space {{ height: {0}px; }}", m_Template.Footer.PixelHeight));
+			}
 
 			html.WriteLine(".page { page-break-after: always; border-bottom: 1px dotted; width: 100%; }");
 			html.WriteLine("@page { margin: 0; }");
-			html.WriteLine(".page-header, .page-header-space { height: 100px; }");
-			html.WriteLine(".page-footer, .page-footer-space { height: 50px; }");
 
 			html.WriteLine("@media print { ");
 			html.WriteLine("thead { display: table-header-group; } ");
