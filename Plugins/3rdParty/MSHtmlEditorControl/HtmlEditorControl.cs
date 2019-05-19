@@ -4554,6 +4554,11 @@ namespace MSDN.Html.Editor
 		{
 			base.OnSizeChanged(e);
 
+			FixupControlPositions();
+		}
+
+		protected void FixupControlPositions()
+		{
 			// Not sure where the bug is but the interface between 
 			// the browser control and the toolbar is often wrong
 			int iLastBtn = (ToolBar.Items.Count - 1);
@@ -4575,7 +4580,6 @@ namespace MSDN.Html.Editor
 				ToolBar.Bounds = new Rectangle(0, 0, Bounds.Width, toolbarBottom);
 				BrowserPanel.Bounds = new Rectangle(0, toolbarBottom + 1, Bounds.Width, Bounds.Height - toolbarBottom);
 			}
-
 		}
 
 		#endregion

@@ -142,14 +142,16 @@ namespace HTMLReportExporter
 				html.WriteLine(String.Format(".page-footer, .page-footer-space {{ height: {0}px; }}", m_Template.Footer.PixelHeight));
 			}
 
-			html.WriteLine(".page { page-break-after: always; border-bottom: 1px dotted; width: 100%; }");
+			if (m_Template.Title.SeparatePage)
+				html.WriteLine(".title-page { page-break-after: always; border-bottom: 1px dotted; width: 100%; }");
+
 			html.WriteLine("@page { margin: 0; }");
 
 			html.WriteLine("@media print { ");
 			html.WriteLine("thead { display: table-header-group; } ");
 			html.WriteLine("tfoot { display: table-footer-group; } ");
-			html.WriteLine("body { margin: 10; } ");
-			html.WriteLine(".page { border-bottom: none; } }");
+			//html.WriteLine("body { margin: 10; } ");
+			html.WriteLine(".title-page { border-bottom: none; } }");
 
 			html.RenderEndTag(); // Style
 			html.WriteLine();
@@ -230,17 +232,20 @@ namespace HTMLReportExporter
 			// Actual body fits inside one row/column
 			html.RenderBeginTag(HtmlTextWriterTag.Tbody);
 			html.RenderBeginTag(HtmlTextWriterTag.Tr);
+
+			html.AddAttribute("style", "padding:15mm");
 			html.RenderBeginTag(HtmlTextWriterTag.Td);
 
 			if (m_Template.Title.Enabled)
 			{
-				html.AddAttribute("class", "page");
+				if (m_Template.Title.SeparatePage)
+					html.AddAttribute("class", "title-page");
+
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
 				html.Write(m_Template.Title.Format(m_Tasklist));
 				html.RenderEndTag(); // Div
 			}
 
-			html.AddAttribute("class", "page");
 			html.RenderBeginTag(HtmlTextWriterTag.Div);
 			html.WriteLine();
 

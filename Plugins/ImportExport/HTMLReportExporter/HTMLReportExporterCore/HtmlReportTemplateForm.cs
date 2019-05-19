@@ -28,6 +28,16 @@ namespace HTMLReportExporter
 
 		// --------------------------------------------------------------
 
+		private enum TabPage
+		{
+			Header = 0,
+			Title = 1,
+			Tasks = 2,
+			Footer = 3
+		}
+
+		// --------------------------------------------------------------
+
 		public HtmlReportTemplateForm(String typeId, Translator trans, TaskList tasks, Preferences prefs)
 		{
 			m_TypeId = typeId;
@@ -82,55 +92,76 @@ namespace HTMLReportExporter
 
 			this.htmlReportHeaderControl.InnerHtml = m_Template.Header.Text;
 			this.htmlReportHeaderControl.BodyBackColor = m_Template.Header.BackColor;
-			this.headerEnabled.Checked = m_Template.Header.Enabled;
+			this.headerEnabledCheckbox.Checked = m_Template.Header.Enabled;
 			this.headerDividerCheckbox.Checked = m_Template.Header.WantDivider;
 			this.headerHeightCombobox.Text = m_Template.Header.PixelHeightText;
 
 			this.htmlReportTitleControl.InnerHtml = m_Template.Title.Text;
-			this.titleEnabled.Checked = m_Template.Title.Enabled;
+			this.titleEnabledCheckbox.Checked = m_Template.Title.Enabled;
+			this.titleSeparatePageCheckbox.Checked = m_Template.Title.SeparatePage;
 
 			this.htmlReportTasksControl.InnerHtml = m_Template.Task.Text;
 			// always enabled
 
 			this.htmlReportFooterControl.InnerHtml = m_Template.Footer.Text;
 			this.htmlReportFooterControl.BodyBackColor = m_Template.Footer.BackColor;
-			this.footerEnabled.Checked = m_Template.Footer.Enabled;
+			this.footerEnabledCheckbox.Checked = m_Template.Footer.Enabled;
 			this.footerDividerCheckbox.Checked = m_Template.Footer.WantDivider;
 			this.footerHeightCombobox.Text = m_Template.Footer.PixelHeightText;
 
+			this.tabControl.SelectedIndexChanged += new EventHandler(OnTabPageChange);
+
 			RefreshPreview();
+
 			m_ChangeTimer.Start();
 		}
 
+		private void OnTabPageChange(object sender, EventArgs e)
+		{
+			if (!IsDisposed)
+			{
+				switch ((TabPage)tabControl.SelectedIndex)
+				{
+					case TabPage.Header: this.htmlReportHeaderControl.SetActive(); break;
+					case TabPage.Title:  this.htmlReportTitleControl.SetActive();  break;
+					case TabPage.Tasks:  this.htmlReportTasksControl.SetActive();  break;
+					case TabPage.Footer: this.htmlReportFooterControl.SetActive(); break;
+				}
+			}
+		}
+		
 		private void OnChangeTimer(object sender, EventArgs e)
 		{
 			if (!IsDisposed)
 			{
-				if (tabControl.SelectedTab == headerPage)
+				switch ((TabPage)tabControl.SelectedIndex)
 				{
-					m_Template.Header.Text = this.htmlReportHeaderControl.InnerHtml ?? "";
-					m_Template.Header.Enabled = headerEnabled.Checked;
-					m_Template.Header.WantDivider = headerDividerCheckbox.Checked;
-					m_Template.Header.BackColor = this.htmlReportHeaderControl.BodyBackColor;
-					m_Template.Header.PixelHeightText = this.headerHeightCombobox.Text;
-				}
-				else if (tabControl.SelectedTab == titlePage)
-				{
-					m_Template.Title.Text = this.htmlReportTitleControl.InnerHtml ?? "";
-					m_Template.Title.Enabled = titleEnabled.Checked;
-				}
-				else if (tabControl.SelectedTab == taskPage)
-				{
-					m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
-					m_Template.Task.Enabled = true; // always
-				}
-				else if (tabControl.SelectedTab == footerPage)
-				{
-					m_Template.Footer.Text = this.htmlReportFooterControl.InnerHtml ?? "";
-					m_Template.Footer.Enabled = footerEnabled.Checked;
-					m_Template.Footer.WantDivider = footerDividerCheckbox.Checked;
-					m_Template.Footer.BackColor = this.htmlReportFooterControl.BodyBackColor;
-					m_Template.Footer.PixelHeightText = this.footerHeightCombobox.Text;
+					case TabPage.Header:
+						m_Template.Header.Text = this.htmlReportHeaderControl.InnerHtml ?? "";
+						m_Template.Header.Enabled = headerEnabledCheckbox.Checked;
+						m_Template.Header.WantDivider = headerDividerCheckbox.Checked;
+						m_Template.Header.BackColor = this.htmlReportHeaderControl.BodyBackColor;
+						m_Template.Header.PixelHeightText = this.headerHeightCombobox.Text ?? "100";
+						break;
+
+					case TabPage.Title:
+						m_Template.Title.Text = this.htmlReportTitleControl.InnerHtml ?? "";
+						m_Template.Title.Enabled = titleEnabledCheckbox.Checked;
+						m_Template.Title.SeparatePage = this.titleSeparatePageCheckbox.Checked;
+						break;
+
+					case TabPage.Tasks:
+						m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
+						m_Template.Task.Enabled = true; // always
+						break;
+
+					case TabPage.Footer:
+						m_Template.Footer.Text = this.htmlReportFooterControl.InnerHtml ?? "";
+						m_Template.Footer.Enabled = footerEnabledCheckbox.Checked;
+						m_Template.Footer.WantDivider = footerDividerCheckbox.Checked;
+						m_Template.Footer.BackColor = this.htmlReportFooterControl.BodyBackColor;
+						m_Template.Footer.PixelHeightText = this.footerHeightCombobox.Text ?? "50";
+						break;
 				}
 
 				CheckRefreshPreview();

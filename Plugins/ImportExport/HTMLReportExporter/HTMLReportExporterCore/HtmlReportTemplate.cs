@@ -15,6 +15,13 @@ namespace HTMLReportExporter
 	{
 		protected String XmlTag;
 
+		// ----------------------------------
+
+		public bool Enabled { set; get; }
+		public String Text { set; get; }
+
+		// ----------------------------------
+
 		public TemplateItem(String xmlTag)
 		{
 			Clear();
@@ -47,8 +54,8 @@ namespace HTMLReportExporter
 
 		virtual public void Read(XDocument doc)
 		{
-			Text = doc.Root.Element(XmlTag).Element("text").Value;
-			Enabled = (bool)doc.Root.Element(XmlTag).Element("enabled");
+			Text = ReadValue(doc, "text");
+			Enabled = ReadValue(doc, "enabled", true);
 		}
 
 		virtual public void Write(XDocument doc)
@@ -63,8 +70,26 @@ namespace HTMLReportExporter
 			return (Enabled ? Text : "");
 		}
 
-		public bool Enabled { set; get; }
-		public String Text { set; get; }
+		protected String ReadValue(XDocument doc, String element, String defValue = "")
+		{
+			var xElm = doc.Root.Element(XmlTag).Element(element);
+
+			return ((xElm == null) ? defValue : xElm.Value);
+		}
+
+		protected int ReadValue(XDocument doc, String element, int defValue)
+		{
+			var xElm = doc.Root.Element(XmlTag).Element(element);
+
+			return ((xElm == null) ? defValue : (int)xElm);
+		}
+
+		protected bool ReadValue(XDocument doc, String element, bool defValue)
+		{
+			var xElm = doc.Root.Element(XmlTag).Element(element);
+
+			return ((xElm == null) ? defValue : (bool)xElm);
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -102,20 +127,27 @@ namespace HTMLReportExporter
 
 		public String BackColorHtml
 		{
-			get { return ColorTranslator.ToHtml(Color.FromArgb(BackColor.ToArgb())); }
+			get
+			{
+				return ColorTranslator.ToHtml(Color.FromArgb(BackColor.ToArgb()));
+			}
+
+			set
+			{
+				if (String.IsNullOrWhiteSpace(value))
+					BackColor = Color.Transparent;
+				else
+					BackColor = ColorTranslator.FromHtml(value);
+			}
 		}
 
 		override public void Read(XDocument doc)
 		{
 			base.Read(doc);
 
-			WantDivider = (bool)doc.Root.Element(XmlTag).Element("wantDivider");
-
-			if (doc.Root.Element(XmlTag).Element("backColor") != null)
-				BackColor = ColorTranslator.FromHtml(doc.Root.Element(XmlTag).Element("backColor").Value);
-
-			if (doc.Root.Element(XmlTag).Element("pixelHeight") != null)
-				PixelHeight = (int)doc.Root.Element(XmlTag).Element("pixelHeight");
+			WantDivider = ReadValue(doc, "wantDivider", true);
+			BackColorHtml = ReadValue(doc, "backColor");
+			PixelHeight = ReadValue(doc, "pixelHeight", DefPixelHeight);
 		}
 
 		override public void Write(XDocument doc)
@@ -178,6 +210,10 @@ namespace HTMLReportExporter
 
 	public class TitleTemplateItem : TemplateItem
 	{
+		public bool SeparatePage { get; set; }
+
+		// ----------------------------------
+
 		public TitleTemplateItem() : base("title")
 		{
 		}
@@ -186,6 +222,41 @@ namespace HTMLReportExporter
 		{
 			// TODO: String reportTitle, String reportDate
 			return base.Format();
+		}
+
+		override public void Read(XDocument doc)
+		{
+			base.Read(doc);
+
+			SeparatePage = ReadValue(doc, "separatePage", true);
+		}
+
+		override public void Write(XDocument doc)
+		{
+			base.Write(doc);
+
+			doc.Root.Element(XmlTag).Add(new XElement("separatePage", SeparatePage));
+		}
+
+		override public void Clear()
+		{
+			base.Clear();
+
+			SeparatePage = true;
+		}
+
+		public bool Equals(TitleTemplateItem other)
+		{
+			return (base.Equals(other) && (SeparatePage == other.SeparatePage));
+		}
+
+		public bool Copy(TitleTemplateItem other)
+		{
+			if (!base.Copy(other))
+				return false;
+
+			SeparatePage = other.SeparatePage;
+			return true;
 		}
 
 	}

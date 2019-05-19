@@ -74,8 +74,6 @@ namespace HTMLReportExporter
 			this.BorderSize = 0;
 			this.ContentMargin = 8;
 
-			this.BrowserPanel.Anchor = AnchorStyles.None; // we handle positioning ourselves
-
 			this.WebBrowser.Document.AttachEventHandler("onfocusout", OnLostFocus);
 			this.WebBrowser.Document.AttachEventHandler("onfocusin", OnGotFocus);
 
@@ -90,6 +88,11 @@ namespace HTMLReportExporter
 			float ems = Win32.PointsToEms(pointSize);
 
 			BodyFont = new MSDN.Html.Editor.HtmlFontProperty(fontName, ems);
+		}
+
+		public void SetActive()
+		{
+			FixupControlPositions();
 		}
 
 		virtual protected void InitialiseFeatures()
