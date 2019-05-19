@@ -3158,7 +3158,7 @@ bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bC
 	if (!IsAttributeAvailable(nAttrib))
 		return false;
 
-	LPCTSTR szAttrib = MapAttribToTag(nAttrib, bCalc, bDisplay);
+	LPCTSTR szAttrib = GetAttribTag(nAttrib, bCalc, bDisplay);
 
 	if (Misc::IsEmpty(szAttrib))
 		return false;
@@ -3169,7 +3169,7 @@ bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bC
 	return (pXITask->ItemHasValue(szAttrib) != FALSE);
 }
 
-LPCTSTR CTaskFile::MapAttribToTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay)
+LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay)
 {
 	switch (nAttrib)
 	{
@@ -3197,33 +3197,21 @@ LPCTSTR CTaskFile::MapAttribToTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDispl
 	case TDCA_TASKNAME:		return TDL_TASKTITLE;
 	case TDCA_VERSION:		return TDL_TASKVERSION;
 	case TDCA_SUBTASKDONE:	return TDL_TASKSUBTASKDONE;
-	}
 
-	if (bDisplay)
-	{
-		switch (nAttrib)
-		{
-		case TDCA_CREATIONDATE:	return TDL_TASKCREATIONDATESTRING;
-		case TDCA_DONEDATE:		return TDL_TASKDONEDATESTRING;
-		case TDCA_LASTMODDATE:	return TDL_TASKLASTMODSTRING;
+	case TDCA_COST:			return (bCalc ? TDL_TASKCALCCOST : TDL_TASKCOST);
+	case TDCA_LOCK:			return (bCalc ? TDL_TASKCALCLOCK : TDL_TASKLOCK);
+	case TDCA_PERCENT:		return (bCalc ? TDL_TASKCALCCOMPLETION : TDL_TASKPERCENTDONE);
+	case TDCA_PRIORITY:		return (bCalc ? TDL_TASKHIGHESTPRIORITY : TDL_TASKPRIORITY);
+	case TDCA_RISK:			return (bCalc ? TDL_TASKHIGHESTRISK : TDL_TASKRISK);
+	case TDCA_TIMEEST:		return (bCalc ? TDL_TASKCALCTIMEESTIMATE : TDL_TASKTIMEESTIMATE);
+	case TDCA_TIMESPENT:	return (bCalc ? TDL_TASKCALCTIMESPENT : TDL_TASKTIMESPENT);
 
-		case TDCA_DUEDATE:		return bCalc ? TDL_TASKCALCDUEDATESTRING : TDL_TASKDUEDATESTRING;
-		case TDCA_STARTDATE:	return bCalc ? TDL_TASKCALCSTARTDATESTRING : TDL_TASKSTARTDATESTRING;
-		}
-	}
+	case TDCA_CREATIONDATE:	return (bDisplay ? TDL_TASKCREATIONDATESTRING : TDL_TASKCREATIONDATE);
+	case TDCA_DONEDATE:		return (bDisplay ? TDL_TASKDONEDATESTRING : TDL_TASKDONEDATE);
+	case TDCA_LASTMODDATE:	return (bDisplay ? TDL_TASKLASTMODSTRING : TDL_TASKLASTMOD);
 
-	if (bCalc)
-	{
-		switch (nAttrib)
-		{
-		case TDCA_COST:			return bCalc ? TDL_TASKCALCCOST : TDL_TASKCOST;
-		case TDCA_LOCK:			return bCalc ? TDL_TASKCALCLOCK : TDL_TASKLOCK;
-		case TDCA_PERCENT:		return bCalc ? TDL_TASKCALCCOMPLETION : TDL_TASKPERCENTDONE;
-		case TDCA_PRIORITY:		return bCalc ? TDL_TASKHIGHESTPRIORITY : TDL_TASKPRIORITY;
-		case TDCA_RISK:			return bCalc ? TDL_TASKHIGHESTRISK : TDL_TASKRISK;
-		case TDCA_TIMEEST:		return bCalc ? TDL_TASKCALCTIMEESTIMATE : TDL_TASKTIMEESTIMATE;
-		case TDCA_TIMESPENT:	return bCalc ? TDL_TASKCALCTIMESPENT : TDL_TASKTIMESPENT;
-		}
+	case TDCA_DUEDATE:		return (bCalc ? (bDisplay ? TDL_TASKCALCDUEDATESTRING : TDL_TASKDUEDATESTRING) : (bDisplay ? TDL_TASKDUEDATESTRING : TDL_TASKDUEDATE));
+	case TDCA_STARTDATE:	return (bCalc ? (bDisplay ? TDL_TASKCALCSTARTDATESTRING : TDL_TASKSTARTDATESTRING) : (bDisplay ? TDL_TASKSTARTDATESTRING : TDL_TASKSTARTDATE));
 	}
 	
 	// all else
@@ -3236,7 +3224,15 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool
 	if (!IsAttributeAvailable(nAttrib))
 		return NULLSTRING;
 
-	LPCTSTR szAttrib = MapAttribToTag(nAttrib, bCalc, bDisplay);
+	if (!TaskHasAttribute(hTask, nAttrib, bCalc, bDisplay))
+	{
+		if (bCalc && TaskHasAttribute(hTask, nAttrib, !bCalc, bDisplay))
+			bCalc = false;
+		else
+			return NULLSTRING;
+	}
+
+	LPCTSTR szAttrib = GetAttribTag(nAttrib, bCalc, bDisplay);
 
 	if (bDisplay)
 	{
@@ -3250,10 +3246,8 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool
 		case TDCA_FILEREF:
 		case TDCA_TAGS:
 			DISPLAYSTRING = FormatTaskArray(hTask, szAttrib);
-			break;
+			return DISPLAYSTRING;
 		}
-		
-		return DISPLAYSTRING;
 	}
 
 	// all else

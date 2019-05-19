@@ -177,7 +177,7 @@ namespace HTMLReportExporter
 		{
 			var placeHolder = String.Format("$({0})", attrib.PlaceHolder);
 
-			return template.Replace(placeHolder, task.GetAttribute(attrib.Id, true));
+			return template.Replace(placeHolder, task.GetAttribute(attrib.Id, true, true));
 		}
 
 		public String Format(Task task, int depth)
