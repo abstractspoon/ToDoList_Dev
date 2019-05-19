@@ -86,6 +86,7 @@ namespace Abstractspoon
 					ParentId,
 					LastModifiedBy,
 					Path,
+					HtmlComments,
 
 					// new values here ONLY
 

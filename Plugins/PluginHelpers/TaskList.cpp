@@ -1027,41 +1027,44 @@ TDC_ATTRIBUTE Task::MapAttribute(Task::Attribute attrib)
 {
 	switch (attrib)
 	{
-	case Task::Attribute::Title:			return TDCA_TASKNAME;
-	case Task::Attribute::DoneDate:			return TDCA_DONEDATE;
-	case Task::Attribute::DueDate:			return TDCA_DUEDATE;
-	case Task::Attribute::StartDate:		return TDCA_STARTDATE;
-	case Task::Attribute::Priority:			return TDCA_PRIORITY;
-	case Task::Attribute::Color:			return TDCA_COLOR;
 	case Task::Attribute::AllocatedBy:		return TDCA_ALLOCTO;
 	case Task::Attribute::AllocatedTo:		return TDCA_ALLOCBY;
-	case Task::Attribute::Status:			return TDCA_STATUS;
 	case Task::Attribute::Category:			return TDCA_CATEGORY;
+	case Task::Attribute::Color:			return TDCA_COLOR;
+	case Task::Attribute::Comments:			return TDCA_COMMENTS;
+	case Task::Attribute::Cost:				return TDCA_COST;
+	case Task::Attribute::CreatedBy:		return TDCA_CREATEDBY;
+	case Task::Attribute::CreationDate:		return TDCA_CREATIONDATE;
+	case Task::Attribute::CustomAttribute:	return TDCA_CUSTOMATTRIB;
+	case Task::Attribute::Dependency:		return TDCA_DEPENDENCY;
+	case Task::Attribute::DoneDate:			return TDCA_DONEDATE;
+	case Task::Attribute::DueDate:			return TDCA_DUEDATE;
+	case Task::Attribute::ExternalId:		return TDCA_EXTERNALID;
+	case Task::Attribute::FileReference:	return TDCA_FILEREF;
+	case Task::Attribute::Flag:				return TDCA_FLAG;
+	case Task::Attribute::Icon:				return TDCA_ICON;
+	case Task::Attribute::HtmlComments:		return TDCA_HTMLCOMMENTS;
+	case Task::Attribute::Id:				return TDCA_ID;
+	case Task::Attribute::LastModifiedBy:	return TDCA_LASTMODBY;
+	case Task::Attribute::LastModifiedDate:	return TDCA_LASTMODDATE;
+	case Task::Attribute::MetaData:			return TDCA_METADATA;
+	case Task::Attribute::OffsetTask:		return TDCA_OFFSETTASK;
+	case Task::Attribute::ParentId:			return TDCA_PARENTID;
+	case Task::Attribute::Path:				return TDCA_PATH;
 	case Task::Attribute::Percent:			return TDCA_PERCENT;
+	case Task::Attribute::Position:			return TDCA_POSITION;
+	case Task::Attribute::Priority:			return TDCA_PRIORITY;
+	case Task::Attribute::ProjectName:		return TDCA_PROJECTNAME;
+	case Task::Attribute::Recurrence:		return TDCA_RECURRENCE;
+	case Task::Attribute::Risk:				return TDCA_RISK;
+	case Task::Attribute::StartDate:		return TDCA_STARTDATE;
+	case Task::Attribute::Status:			return TDCA_STATUS;
+	case Task::Attribute::SubtaskDone:		return TDCA_SUBTASKDONE;
+	case Task::Attribute::Tags:				return TDCA_TAGS;
 	case Task::Attribute::TimeEstimate:		return TDCA_TIMEEST;
 	case Task::Attribute::TimeSpent:		return TDCA_TIMESPENT;
-	case Task::Attribute::FileReference:	return TDCA_FILEREF;
-	case Task::Attribute::Comments:			return TDCA_COMMENTS;
-	case Task::Attribute::Flag:				return TDCA_FLAG;
-	case Task::Attribute::CreationDate:		return TDCA_CREATIONDATE;
-	case Task::Attribute::CreatedBy:		return TDCA_CREATEDBY;
-	case Task::Attribute::Risk:				return TDCA_RISK;
-	case Task::Attribute::ExternalId:		return TDCA_EXTERNALID;
-	case Task::Attribute::Cost:				return TDCA_COST;
-	case Task::Attribute::Dependency:		return TDCA_DEPENDENCY;
-	case Task::Attribute::Recurrence:		return TDCA_RECURRENCE;
+	case Task::Attribute::Title:			return TDCA_TASKNAME;
 	case Task::Attribute::Version:			return TDCA_VERSION;
-	case Task::Attribute::Position:			return TDCA_POSITION;
-	case Task::Attribute::Id:				return TDCA_ID;
-	case Task::Attribute::ParentId:			return TDCA_PARENTID;
-	case Task::Attribute::LastModifiedDate:	return TDCA_LASTMODDATE;
-	case Task::Attribute::Icon:				return TDCA_ICON;
-	case Task::Attribute::Tags:				return TDCA_TAGS;
-	case Task::Attribute::CustomAttribute:	return TDCA_CUSTOMATTRIB;
-	case Task::Attribute::OffsetTask:		return TDCA_OFFSETTASK;
-	case Task::Attribute::SubtaskDone:		return TDCA_SUBTASKDONE;
-	case Task::Attribute::MetaData:			return TDCA_METADATA;
-	case Task::Attribute::ProjectName:		return TDCA_PROJECTNAME;
 		//  case IUI_
 	}
 
