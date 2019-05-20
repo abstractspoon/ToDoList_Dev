@@ -330,13 +330,6 @@ namespace HTMLReportExporter
 			}
 		}
 
-		static String SubstituteValue(String template, TaskTemplateAttribute attrib, Task task)
-		{
-			var placeHolder = String.Format("$({0})", attrib.PlaceHolder);
-
-			return template.Replace(placeHolder, task.GetAttribute(attrib.Id, true, true));
-		}
-
 		public String Format(Task task, int depth)
 		{
 			var text = base.Format();
@@ -344,10 +337,26 @@ namespace HTMLReportExporter
 			if (!String.IsNullOrWhiteSpace(text))
 			{
 				foreach (var attrib in Attributes)
-					text = SubstituteValue(text, attrib, task);
+					text = text.Replace(attrib.PlaceHolder, task.GetAttribute(attrib.Id, true, true));
 			}
 
 			return text;
+		}
+
+		public String FormatTableHeader()
+		{
+			if (Layout != TaskLayout.Table)
+				return String.Empty;
+
+			var header = base.Format();
+
+			if (!String.IsNullOrWhiteSpace(header))
+			{
+				foreach (var attrib in Attributes)
+					header = header.Replace(attrib.PlaceHolder, attrib.Label);
+			}
+
+			return header;
 		}
 
 		public TaskLayout Layout
@@ -357,37 +366,37 @@ namespace HTMLReportExporter
 
 		public static TaskTemplateAttribute[] Attributes =
 		{
-			new TaskTemplateAttribute(Task.Attribute.AllocatedBy,       "Allocated By",             "allocBy" ),
-			new TaskTemplateAttribute(Task.Attribute.AllocatedTo,       "Allocated To",             "allocTo" ),
-			new TaskTemplateAttribute(Task.Attribute.Category,          "Category",                 "cat" ),
-			new TaskTemplateAttribute(Task.Attribute.Cost,              "Cost",                     "cost" ),
-			new TaskTemplateAttribute(Task.Attribute.CreatedBy,         "Created By",               "createBy" ),
-			new TaskTemplateAttribute(Task.Attribute.CreationDate,      "Creation Date",            "createDate" ),
-			new TaskTemplateAttribute(Task.Attribute.Dependency,        "Dependency",               "depends" ),
-			new TaskTemplateAttribute(Task.Attribute.DoneDate,          "Completion Date",          "doneDate" ),
-			new TaskTemplateAttribute(Task.Attribute.DueDate,           "Due Date",                 "dueDate" ),
-			new TaskTemplateAttribute(Task.Attribute.ExternalId,        "ExternalId",               "extId" ),
-			new TaskTemplateAttribute(Task.Attribute.FileReference,     "File Link",                "filelink" ),
-			new TaskTemplateAttribute(Task.Attribute.Flag,              "Flag",                     "flag" ),
-			new TaskTemplateAttribute(Task.Attribute.HtmlComments,      "Comments",                 "comments" ),
-			new TaskTemplateAttribute(Task.Attribute.Id,                "Id",                       "id" ),
-			new TaskTemplateAttribute(Task.Attribute.LastModifiedBy,    "Last Modified By",         "modBy" ),
-			new TaskTemplateAttribute(Task.Attribute.LastModifiedDate,  "Last Modified Date",       "modDate" ),
-			new TaskTemplateAttribute(Task.Attribute.ParentId,          "Parent Id",                "pid" ),
-			new TaskTemplateAttribute(Task.Attribute.Path,              "Path",                     "path" ),
-			new TaskTemplateAttribute(Task.Attribute.Percent,           "Percentage Completion",    "percent" ),
-			new TaskTemplateAttribute(Task.Attribute.Position,          "Position",                 "pos" ),
-			new TaskTemplateAttribute(Task.Attribute.Priority,          "Priority",                 "priority" ),
-			new TaskTemplateAttribute(Task.Attribute.Recurrence,        "Recurrence",               "recurs" ),
-			new TaskTemplateAttribute(Task.Attribute.Risk,              "Risk",                     "risk" ),
-			new TaskTemplateAttribute(Task.Attribute.StartDate,         "Start Date",               "startDate" ),
-			new TaskTemplateAttribute(Task.Attribute.Status,            "Status",                   "status" ),
-			new TaskTemplateAttribute(Task.Attribute.SubtaskDone,       "Subtask Done",             "subtaskDone" ),
-			new TaskTemplateAttribute(Task.Attribute.Tags,              "Tags",                     "tag" ),
-			new TaskTemplateAttribute(Task.Attribute.TimeEstimate,      "Time Estimate",            "est" ),
-			new TaskTemplateAttribute(Task.Attribute.TimeSpent,         "Time Spent",               "spent" ),
-			new TaskTemplateAttribute(Task.Attribute.Title,             "Title",                    "title" ),
-			new TaskTemplateAttribute(Task.Attribute.Version,           "Version",                  "ver" ),
+			new TaskTemplateAttribute(Task.Attribute.AllocatedBy,       "Allocated By",             "$(allocBy)" ),
+			new TaskTemplateAttribute(Task.Attribute.AllocatedTo,       "Allocated To",             "$(allocTo)" ),
+			new TaskTemplateAttribute(Task.Attribute.Category,          "Category",                 "$(cat)" ),
+			new TaskTemplateAttribute(Task.Attribute.Cost,              "Cost",                     "$(cost)" ),
+			new TaskTemplateAttribute(Task.Attribute.CreatedBy,         "Created By",               "$(createBy)" ),
+			new TaskTemplateAttribute(Task.Attribute.CreationDate,      "Creation Date",            "$(createDate)" ),
+			new TaskTemplateAttribute(Task.Attribute.Dependency,        "Dependency",               "$(depends)" ),
+			new TaskTemplateAttribute(Task.Attribute.DoneDate,          "Completion Date",          "$(doneDate)" ),
+			new TaskTemplateAttribute(Task.Attribute.DueDate,           "Due Date",                 "$(dueDate)" ),
+			new TaskTemplateAttribute(Task.Attribute.ExternalId,        "ExternalId",               "$(extId)" ),
+			new TaskTemplateAttribute(Task.Attribute.FileReference,     "File Link",                "$(filelink)" ),
+			new TaskTemplateAttribute(Task.Attribute.Flag,              "Flag",                     "$(flag)" ),
+			new TaskTemplateAttribute(Task.Attribute.HtmlComments,      "Comments",                 "$(comments)" ),
+			new TaskTemplateAttribute(Task.Attribute.Id,                "Id",                       "$(id)" ),
+			new TaskTemplateAttribute(Task.Attribute.LastModifiedBy,    "Last Modified By",         "$(modBy)" ),
+			new TaskTemplateAttribute(Task.Attribute.LastModifiedDate,  "Last Modified Date",       "$(modDate)" ),
+			new TaskTemplateAttribute(Task.Attribute.ParentId,          "Parent Id",                "$(pid)" ),
+			new TaskTemplateAttribute(Task.Attribute.Path,              "Path",                     "$(path)" ),
+			new TaskTemplateAttribute(Task.Attribute.Percent,           "Percentage Completion",    "$(percent)" ),
+			new TaskTemplateAttribute(Task.Attribute.Position,          "Position",                 "$(pos)" ),
+			new TaskTemplateAttribute(Task.Attribute.Priority,          "Priority",                 "$(priority)" ),
+			new TaskTemplateAttribute(Task.Attribute.Recurrence,        "Recurrence",               "$(recurs)" ),
+			new TaskTemplateAttribute(Task.Attribute.Risk,              "Risk",                     "$(risk)" ),
+			new TaskTemplateAttribute(Task.Attribute.StartDate,         "Start Date",               "$(startDate)" ),
+			new TaskTemplateAttribute(Task.Attribute.Status,            "Status",                   "$(status)" ),
+			new TaskTemplateAttribute(Task.Attribute.SubtaskDone,       "Subtask Done",             "$(subtaskDone)" ),
+			new TaskTemplateAttribute(Task.Attribute.Tags,              "Tags",                     "$(tag)" ),
+			new TaskTemplateAttribute(Task.Attribute.TimeEstimate,      "Time Estimate",            "$(est)" ),
+			new TaskTemplateAttribute(Task.Attribute.TimeSpent,         "Time Spent",               "$(spent)" ),
+			new TaskTemplateAttribute(Task.Attribute.Title,             "Title",                    "$(title)" ),
+			new TaskTemplateAttribute(Task.Attribute.Version,           "Version",                  "$(ver)" ),
 		};
 
 	}
