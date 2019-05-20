@@ -373,6 +373,7 @@ namespace HTMLReportExporter
 		public class TaskTemplateReporter : TaskTemplate
 		{
 			private TaskLayout m_Layout;
+			private String m_StartHtml, m_TaskHtml, m_EndHtml;
 
 			private enum TaskLayout
 			{
@@ -387,71 +388,161 @@ namespace HTMLReportExporter
 			public TaskTemplateReporter(TaskTemplate task)
 			{
 				Copy(task);
-				InitLayout();
 			}
 
-			private void InitLayout()
+			private void InitLayout(TaskList tasks)
 			{
-				// Figure out what layout we have
-				var doc = new XmlDocument();
+				m_Layout = TaskLayout.None;
+				m_TaskHtml = Text;
+				m_StartHtml = String.Empty;
+				m_EndHtml = String.Empty;
 
 				try
 				{
-					doc.LoadXml(Text);
+					var doc = new HtmlAgilityPack.HtmlDocument();
+					doc.LoadHtml(Text);
 
-					if (doc.DocumentElement.Name.Equals("TABLE"))
+					// Remove everything before the first bit of text
+					// or the first major structural element
+					var elm = doc.DocumentNode.FirstChild;
+
+					while (elm != null)
 					{
-						m_Layout = TaskLayout.Table;
+						// get next sibling in case we need to delete this node
+						var nextElm = elm.NextSibling;
+
+						if (ElementHasContent(elm))
+							break;
+
+						elm.Remove();
+						elm = nextElm;
 					}
-					else if (doc.DocumentElement.Name.Equals("UL"))
+
+					if (elm != null)
 					{
-						m_Layout = TaskLayout.UnorderedList;
-					}
-					else if (doc.DocumentElement.Name.Equals("OL"))
-					{
-						m_Layout = TaskLayout.OrderedList;
-					}
-					else
-					{
-						m_Layout = TaskLayout.None;
+						switch (elm.Name.ToUpper())
+						{
+							case "TABLE":
+								m_Layout = TaskLayout.Table;
+								m_TaskHtml = GetElementInnerHtml(elm, "TBODY");
+								break;
+
+							case "UL":
+								m_Layout = TaskLayout.UnorderedList;
+								m_TaskHtml = elm.InnerHtml;
+								break;
+
+							case "OL":
+								m_Layout = TaskLayout.OrderedList;
+								m_TaskHtml = elm.InnerHtml;
+								break;
+						}
+
+						if (m_Layout != TaskLayout.None)
+						{
+							int taskStart = elm.OuterHtml.IndexOf(m_TaskHtml);
+
+							m_StartHtml = elm.OuterHtml.Substring(0, taskStart);
+							m_EndHtml = elm.OuterHtml.Substring(taskStart + m_TaskHtml.Length);
+
+							// Special case: Prefix 'Table:Tbody' with header row
+							if (m_Layout == TaskLayout.Table)
+							{
+								int tbodyStart = m_StartHtml.ToUpper().IndexOf("<TBODY>");
+
+								if (tbodyStart != -1)
+								{
+									var theadHtml = "<thead>" + FormatTableHeader() + "</thead>";
+									m_StartHtml = m_StartHtml.Insert(tbodyStart, theadHtml);
+								}
+							}
+
+						}
 					}
 				}
 				catch
 				{
-					m_Layout = TaskLayout.None;
 				}
+			}
+
+			static private HtmlAgilityPack.HtmlNode FindElement(HtmlAgilityPack.HtmlNode elm, string name, bool recursive = true)
+			{
+				if (elm.Name.ToUpper().Equals(name))
+					return elm;
+
+				if (recursive)
+				{
+					var child = elm.FirstChild;
+
+					while (child != null)
+					{
+						var find = FindElement(child, name, recursive);
+
+						if (find != null)
+							return find;
+
+						child = child.NextSibling;
+					}
+				}
+
+				return null;
+			}
+
+			static private String GetElementInnerHtml(HtmlAgilityPack.HtmlNode elm, string name, bool recursive = true)
+			{
+				var find = FindElement(elm, name, recursive);
+
+				return (find == null ? String.Empty : find.InnerHtml);
+			}
+
+			private static bool ElementHasContent(HtmlAgilityPack.HtmlNode elm)
+			{
+				if (elm == null)
+					return false;
+
+				if (IsContent(elm.InnerText))
+					return true;
+
+				// process children
+				var child = elm.FirstChild;
+
+				while (child != null)
+				{
+					if (ElementHasContent(child))
+						return true;
+
+					child = child.NextSibling;
+				}
+
+				return false;
+			}
+
+			private static bool IsContent(String text)
+			{
+				var content = text.Replace("\r", "")
+									.Replace("\n", "")
+									.Replace("&nbsp;", "")
+									.Trim();
+
+				return !String.IsNullOrWhiteSpace(content);
 			}
 
 			public bool WriteTableContent(TaskList tasks, HtmlTextWriter html)
 			{
-				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.WriteLine();
-
-				switch (m_Layout)
-				{
-					case TaskLayout.Table:
-						break;
-
-					case TaskLayout.UnorderedList:
-						break;
-
-					case TaskLayout.OrderedList:
-						break;
-				}
-
 				// Top-level tasks
 				var task = tasks.GetFirstTask();
 
 				if (task == null)
 					return false;
 
-				while (task.IsValid())
-				{
-					WriteTask(task, 0, html);
-					task = task.GetNextTask();
-				}
+				InitLayout(tasks);
 
-				html.WriteLine();
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
+				html.WriteLine(m_StartHtml);
+
+				WriteTask(task, 0, html);
+				
+				html.WriteLine(m_EndHtml);
 				html.RenderEndTag(); // Div
 
 				return true;
@@ -459,15 +550,24 @@ namespace HTMLReportExporter
 			
 			public void WriteTask(Task task, int depth, HtmlTextWriter html)
 			{
+				if ((task == null) || !task.IsValid())
+					return;
+
 				if (!String.IsNullOrWhiteSpace(EnabledText))
 				{
-					var text = Text;
+					var text = m_TaskHtml;
 
 					foreach (var attrib in Attributes)
 						text = text.Replace(attrib.PlaceHolder, task.GetAttribute(attrib.Id, true, true));
 
 					html.WriteLine(text);
 				}
+
+				// First subtask
+				WriteTask(task.GetFirstSubtask(), depth + 1, html);
+
+				// First subling
+				WriteTask(task.GetNextTask(), depth, html);
 			}
 
 			public String FormatTableHeader()
@@ -475,7 +575,7 @@ namespace HTMLReportExporter
 				if (m_Layout != TaskLayout.Table)
 					return String.Empty;
 
-				var header = EnabledText;
+				var header = m_TaskHtml;
 
 				if (!String.IsNullOrWhiteSpace(header))
 				{
