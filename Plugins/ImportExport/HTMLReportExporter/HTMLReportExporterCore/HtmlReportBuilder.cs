@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Web.UI;
 using System.Drawing;
+using System.Xml;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -17,6 +18,13 @@ namespace HTMLReportExporter
 		private String m_BodyFontStyle = "";
 		private String m_TaskBaseIndent = "";
 		private bool m_StrikeThruDone = true;
+
+		// -------------------------------------------------------------
+
+		private HeaderTemplateReporter Header { get; set; }
+		private TitleTemplateReporter Title { get; set; }
+		private TaskTemplateReporter Tasks { get; set; }
+		private FooterTemplateReporter Footer { get; set; }
 
 		// -------------------------------------------------------------
 
@@ -35,6 +43,11 @@ namespace HTMLReportExporter
 			m_StrikeThruDone = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 			m_BodyFontStyle = FormatBodyFontStyle(prefs);
 			m_TaskBaseIndent = FormatTaskBaseIndent(prefs);
+
+			Header = new HeaderTemplateReporter(template.Header);
+			Title = new TitleTemplateReporter(template.Title);
+			Tasks = new TaskTemplateReporter(template.Task);
+			Footer = new FooterTemplateReporter(template.Footer);
 		}
 
 		private static String FormatBodyFontStyle(Preferences prefs)
@@ -113,44 +126,19 @@ namespace HTMLReportExporter
 			html.RenderBeginTag(HtmlTextWriterTag.Style);
 
  			html.WriteLine(m_BodyFontStyle);
+
 			html.WriteLine("body { line-height: normal; margin: 0; }");
 			html.WriteLine("table { border-collapse: collapse; }");
 
-			if (m_Template.Header.Enabled && (m_Template.Header.PixelHeight > 0))
-			{
-				html.WriteLine(".page-header { position: fixed; top: 0; width: 100%; }");
-
-				if (m_Template.Header.WantDivider)
-					html.WriteLine(".page-header { border-bottom: 1px solid black; }");
-
-				if (m_Template.Header.BackColor != Color.Transparent)
-					html.WriteLine(String.Format(".page-header {{ background: {0}; }}", m_Template.Header.BackColorHtml));
-
-				html.WriteLine(String.Format(".page-header, .page-header-space {{ height: {0}px; }}", m_Template.Header.PixelHeight));
-			}
-
-			if (m_Template.Footer.Enabled && (m_Template.Footer.PixelHeight > 0))
-			{
-				html.WriteLine(".page-footer { position: fixed;	bottom: 0; width: 100%; }");
-
-				if (m_Template.Footer.WantDivider)
-					html.Write(".page-footer { border-top: 1px solid black; }");
-
-				if (m_Template.Footer.BackColor != Color.Transparent)
-					html.WriteLine(String.Format(".page-footer {{ background: {0}; }}", m_Template.Footer.BackColorHtml));
-
-				html.WriteLine(String.Format(".page-footer, .page-footer-space {{ height: {0}px; }}", m_Template.Footer.PixelHeight));
-			}
-
-			if (m_Template.Title.SeparatePage)
-				html.WriteLine(".title-page { page-break-after: always; border-bottom: 1px dotted; width: 100%; }");
+			Header.WriteStyles(html);
+			Footer.WriteStyles(html);
+			Title.WriteStyles(html);
 
 			html.WriteLine("@page { margin: 0; }");
 
 			html.WriteLine("@media print { ");
 			html.WriteLine("thead { display: table-header-group; } ");
 			html.WriteLine("tfoot { display: table-footer-group; } ");
-			//html.WriteLine("body { margin: 10; } ");
 			html.WriteLine(".title-page { border-bottom: none; } }");
 
 			html.RenderEndTag(); // Style
@@ -176,58 +164,14 @@ namespace HTMLReportExporter
 		{
 			html.RenderBeginTag(HtmlTextWriterTag.Body);
 
-			if (m_Template.Header.Enabled)
-			{
-				html.AddAttribute("class", "page-header");
-				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.Write(m_Template.Header.Format());
-				html.RenderEndTag(); // Div
-				html.WriteLine();
-			}
-
-			if (m_Template.Footer.Enabled)
-			{
-				html.AddAttribute("class", "page-footer");
-				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.Write(m_Template.Footer.Format());
-				html.RenderEndTag(); // Div
-				html.WriteLine();
-			}
+			Header.WriteBodyDiv(html);
+			Footer.WriteBodyDiv(html);
 
 			html.AddAttribute("width", "100%");
 			html.RenderBeginTag(HtmlTextWriterTag.Table);
 
-			if (m_Template.Header.Enabled)
-			{
-				html.RenderBeginTag(HtmlTextWriterTag.Thead);
-				html.RenderBeginTag(HtmlTextWriterTag.Tr);
-				html.RenderBeginTag(HtmlTextWriterTag.Td);
-
-				html.AddAttribute("class", "page-header-space");
-				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.RenderEndTag(); // Div
-
-				html.RenderEndTag(); // Td
-				html.RenderEndTag(); // Tr
-				html.RenderEndTag(); // Thead
-				html.WriteLine();
-			}
-
-			if (m_Template.Footer.Enabled)
-			{
-				html.RenderBeginTag(HtmlTextWriterTag.Tfoot);
-				html.RenderBeginTag(HtmlTextWriterTag.Tr);
-				html.RenderBeginTag(HtmlTextWriterTag.Td);
-
-				html.AddAttribute("class", "page-footer-space");
-				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.RenderEndTag(); // Div
-
-				html.RenderEndTag(); // Td
-				html.RenderEndTag(); // Tr
-				html.RenderEndTag(); // Thead
-				html.WriteLine();
-			}
+			Header.WriteTableContent(html);
+			Footer.WriteTableContent(html);
 
 			// Actual body fits inside one row/column
 			html.RenderBeginTag(HtmlTextWriterTag.Tbody);
@@ -236,27 +180,12 @@ namespace HTMLReportExporter
 			html.AddAttribute("style", "padding:15mm");
 			html.RenderBeginTag(HtmlTextWriterTag.Td);
 
-			if (m_Template.Title.Enabled)
-			{
-				if (m_Template.Title.SeparatePage)
-					html.AddAttribute("class", "title-page");
-
-				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.Write(m_Template.Title.Format(m_Tasklist));
-				html.RenderEndTag(); // Div
-			}
+			Title.WriteTableContent(m_Tasklist, html);
 
 			html.RenderBeginTag(HtmlTextWriterTag.Div);
 			html.WriteLine();
 
-			// Top-level tasks
-			var task = m_Tasklist.GetFirstTask();
-
-			while (task.IsValid())
-			{
-				ExportTask(task, 0, html);
-				task = task.GetNextTask();
-			}
+			Tasks.AddTasks(m_Tasklist, html);
 
 			html.WriteLine();
 			html.RenderEndTag(); // Div
@@ -272,20 +201,7 @@ namespace HTMLReportExporter
 
 		protected void ExportTask(Task task, int depth, HtmlTextWriter html)
 		{
-			// This task
-			html.Write(m_Template.Task.Format(task, depth));
-			// TODO
 
-			// This task's children
-			html.RenderBeginTag(HtmlTextWriterTag.Blockquote);
-			Task subtask = task.GetFirstSubtask();
-
-			while (subtask.IsValid())
-			{
-				ExportTask(subtask, (depth + 1), html); // RECURSIVE call
-				subtask = subtask.GetNextTask();
-			}
-			html.RenderEndTag(); // Blockquote
 		}
 		
 		protected String FormatTaskDepthIndent(int depth)
@@ -298,5 +214,263 @@ namespace HTMLReportExporter
 			return depthIndent;
 		}
 
+		// --------------------------------------------------------------------------
+
+		public class HeaderTemplateReporter : HeaderTemplate
+		{
+			public HeaderTemplateReporter(HeaderTemplate header)
+			{
+				Copy(header);
+			}
+
+			public bool WriteStyles(HtmlTextWriter html)
+			{
+				if (!Enabled || (PixelHeight <= 0))
+					return false;
+
+				html.WriteLine(".page-header { position: fixed; top: 0; width: 100%; }");
+
+				if (WantDivider)
+					html.WriteLine(".page-header { border-bottom: 1px solid black; }");
+
+				if (BackColor != Color.Transparent)
+					html.WriteLine(String.Format(".page-header {{ background: {0}; }}", BackColorHtml));
+
+				html.WriteLine(String.Format(".page-header, .page-header-space {{ height: {0}px; }}", PixelHeight));
+
+				return true;
+			}
+
+			public bool WriteBodyDiv(HtmlTextWriter html)
+			{
+				if (!Enabled || (PixelHeight <= 0))
+					return false;
+
+				html.AddAttribute("class", "page-header");
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
+				html.Write(Text);
+				html.RenderEndTag(); // Div
+				html.WriteLine();
+
+				return true;
+			}
+
+			public bool WriteTableContent(HtmlTextWriter html)
+			{
+				if (!Enabled || (PixelHeight <= 0))
+					return false;
+
+				html.RenderBeginTag(HtmlTextWriterTag.Thead);
+				html.RenderBeginTag(HtmlTextWriterTag.Tr);
+				html.RenderBeginTag(HtmlTextWriterTag.Td);
+
+				html.AddAttribute("class", "page-header-space");
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
+				html.RenderEndTag(); // Div
+
+				html.RenderEndTag(); // Td
+				html.RenderEndTag(); // Tr
+				html.RenderEndTag(); // Thead
+				html.WriteLine();
+
+				return true;
+			}
+		}
+
+		public class FooterTemplateReporter : FooterTemplate
+		{
+			public FooterTemplateReporter(FooterTemplate footer)
+			{
+				Copy(footer);
+			}
+
+			public bool WriteStyles(HtmlTextWriter html)
+			{
+				if (!Enabled || (PixelHeight <= 0))
+					return false;
+
+				html.WriteLine(".page-footer { position: fixed;	bottom: 0; width: 100%; }");
+
+				if (WantDivider)
+					html.Write(".page-footer { border-top: 1px solid black; }");
+
+				if (BackColor != Color.Transparent)
+					html.WriteLine(String.Format(".page-footer {{ background: {0}; }}", BackColorHtml));
+
+				html.WriteLine(String.Format(".page-footer, .page-footer-space {{ height: {0}px; }}", PixelHeight));
+
+				return true;
+			}
+
+			public bool WriteBodyDiv(HtmlTextWriter html)
+			{
+				if (!Enabled || (PixelHeight <= 0))
+					return false;
+
+				html.AddAttribute("class", "page-footer");
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
+				html.Write(Text);
+				html.RenderEndTag(); // Div
+				html.WriteLine();
+
+				return true;
+			}
+
+			public bool WriteTableContent(HtmlTextWriter html)
+			{
+				if (!Enabled || (PixelHeight <= 0))
+					return false;
+
+				html.RenderBeginTag(HtmlTextWriterTag.Tfoot);
+				html.RenderBeginTag(HtmlTextWriterTag.Tr);
+				html.RenderBeginTag(HtmlTextWriterTag.Td);
+
+				html.AddAttribute("class", "page-footer-space");
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
+				html.RenderEndTag(); // Div
+
+				html.RenderEndTag(); // Td
+				html.RenderEndTag(); // Tr
+				html.RenderEndTag(); // Thead
+				html.WriteLine();
+
+				return true;
+			}
+
+		}
+
+		public class TitleTemplateReporter : TitleTemplate
+		{
+			public TitleTemplateReporter(TitleTemplate title)
+			{
+				Copy(title);
+			}
+
+			public bool WriteStyles(HtmlTextWriter html)
+			{
+				if (!Enabled || !SeparatePage)
+					return false;
+
+				html.WriteLine(".title-page { page-break-after: always; border-bottom: 1px dotted; width: 100%; }");
+
+				return true;
+			}
+
+			public bool WriteTableContent(TaskList tasks, HtmlTextWriter html)
+			{
+				if (!Enabled)
+					return false;
+
+				if (SeparatePage)
+					html.AddAttribute("class", "title-page");
+
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
+
+				// TODO
+				html.Write(Text);
+				//html.Write(Title.Format(m_Tasklist));
+				html.RenderEndTag(); // Div
+
+				return true;
+			}
+
+		}
+
+		public class TaskTemplateReporter : TaskTemplate
+		{
+			private TaskLayout m_Layout;
+
+			private enum TaskLayout
+			{
+				None,
+				Table,
+				OrderedList,
+				UnorderedList
+			}
+
+			// ------------------------------------------------------
+
+			public TaskTemplateReporter(TaskTemplate task)
+			{
+				Copy(task);
+				InitLayout();
+			}
+
+			private void InitLayout()
+			{
+				// Figure out what layout we have
+				var doc = new XmlDocument();
+
+				try
+				{
+					doc.LoadXml(Text);
+
+					if (doc.DocumentElement.Name.Equals("TABLE"))
+					{
+						m_Layout = TaskLayout.Table;
+					}
+					else if (doc.DocumentElement.Name.Equals("UL"))
+					{
+						m_Layout = TaskLayout.UnorderedList;
+					}
+					else if (doc.DocumentElement.Name.Equals("OL"))
+					{
+						m_Layout = TaskLayout.OrderedList;
+					}
+					else
+					{
+						m_Layout = TaskLayout.None;
+					}
+				}
+				catch
+				{
+					m_Layout = TaskLayout.None;
+				}
+			}
+
+			public bool AddTasks(TaskList tasks, HtmlTextWriter html)
+			{
+				// Top-level tasks
+				var task = tasks.GetFirstTask();
+
+				if (task == null)
+					return false;
+
+				while (task.IsValid())
+				{
+					AddTask(task, 0, html);
+					task = task.GetNextTask();
+				}
+
+				return true;
+			}
+			
+			public void AddTask(Task task, int depth, HtmlTextWriter html)
+			{
+				var text = EnabledText;
+
+				if (!String.IsNullOrWhiteSpace(text))
+				{
+					foreach (var attrib in Attributes)
+						text = text.Replace(attrib.PlaceHolder, task.GetAttribute(attrib.Id, true, true));
+				}
+			}
+
+			public String FormatTableHeader()
+			{
+				if (m_Layout != TaskLayout.Table)
+					return String.Empty;
+
+				var header = EnabledText;
+
+				if (!String.IsNullOrWhiteSpace(header))
+				{
+					foreach (var attrib in Attributes)
+						header = header.Replace(attrib.PlaceHolder, attrib.Label);
+				}
+
+				return header;
+			}
+		}
 	}
 }

@@ -20,7 +20,8 @@ namespace HTMLReportExporter
 
 		public bool Enabled { set; get; }
 		public String Text { set; get; }
-
+		public String EnabledText { get { return (Enabled ? Text : ""); } }
+		
 		// ----------------------------------
 
 		public TemplateItem(String xmlTag)
@@ -64,11 +65,6 @@ namespace HTMLReportExporter
 			doc.Root.Add(new XElement(XmlTag,
 							new XElement("text", Text),
 							new XElement("enabled", Enabled)));
-		}
-
-		public String Format()
-		{
-			return (Enabled ? Text : "");
 		}
 
 		protected String ReadValue(XDocument doc, String element, String defValue = "")
@@ -199,12 +195,22 @@ namespace HTMLReportExporter
 		{
 		}
 
+		public HeaderTemplate(HeaderTemplate header) : this()
+		{
+			Copy(header);
+		}
+
 	}
 
 	public class FooterTemplate : HeaderFooterTemplateItem
 	{
 		public FooterTemplate() : base("footer", 50)
 		{
+		}
+
+		public FooterTemplate(FooterTemplate footer) : this()
+		{
+			Copy(footer);
 		}
 
 	}
@@ -217,12 +223,6 @@ namespace HTMLReportExporter
 
 		public TitleTemplate() : base("title")
 		{
-		}
-
-		public String Format(TaskList tasks)
-		{
-			// TODO: String reportTitle, String reportDate
-			return base.Format();
 		}
 
 		override public void Read(XDocument doc)
@@ -278,90 +278,8 @@ namespace HTMLReportExporter
 
 	public class TaskTemplate : TemplateItem
 	{
-		public enum TaskLayout
-		{
-			None,
-			Table,
-			OrderedList,
-			UnorderedList
-		}
-
 		public TaskTemplate() : base("task")
 		{
-			Layout = TaskLayout.None;
-		}
-
-		public new String Text
-		{
-			get { return base.Text; }
-
-			set
-			{
-				base.Text = value;
-
-				// Figure out what layout we have
-				var doc = new XmlDocument();
-
-				try
-				{
-					doc.LoadXml(Text);
-
-					if (doc.DocumentElement.Name.Equals("TABLE"))
-					{
-						Layout = TaskLayout.Table;
-					}
-					else if (doc.DocumentElement.Name.Equals("UL"))
-					{
-						Layout = TaskLayout.UnorderedList;
-					}
-					else if (doc.DocumentElement.Name.Equals("OL"))
-					{
-						Layout = TaskLayout.OrderedList;
-					}
-					else
-					{
-						Layout = TaskLayout.None;
-					}
-				}
-				catch
-				{
-					Layout = TaskLayout.None;
-				}
-			}
-		}
-
-		public String Format(Task task, int depth)
-		{
-			var text = base.Format();
-
-			if (!String.IsNullOrWhiteSpace(text))
-			{
-				foreach (var attrib in Attributes)
-					text = text.Replace(attrib.PlaceHolder, task.GetAttribute(attrib.Id, true, true));
-			}
-
-			return text;
-		}
-
-		public String FormatTableHeader()
-		{
-			if (Layout != TaskLayout.Table)
-				return String.Empty;
-
-			var header = base.Format();
-
-			if (!String.IsNullOrWhiteSpace(header))
-			{
-				foreach (var attrib in Attributes)
-					header = header.Replace(attrib.PlaceHolder, attrib.Label);
-			}
-
-			return header;
-		}
-
-		public TaskLayout Layout
-		{
-			get; private set;
 		}
 
 		public static TaskTemplateAttribute[] Attributes =
