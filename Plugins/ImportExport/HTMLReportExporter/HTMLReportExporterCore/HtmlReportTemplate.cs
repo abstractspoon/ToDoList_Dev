@@ -192,29 +192,29 @@ namespace HTMLReportExporter
 
 	}
 
-	public class HeaderTemplateItem : HeaderFooterTemplateItem
+	public class HeaderTemplate : HeaderFooterTemplateItem
 	{
-		public HeaderTemplateItem() : base("header", 100)
+		public HeaderTemplate() : base("header", 100)
 		{
 		}
 
 	}
 
-	public class FooterTemplateItem : HeaderFooterTemplateItem
+	public class FooterTemplate : HeaderFooterTemplateItem
 	{
-		public FooterTemplateItem() : base("footer", 50)
+		public FooterTemplate() : base("footer", 50)
 		{
 		}
 
 	}
 
-	public class TitleTemplateItem : TemplateItem
+	public class TitleTemplate : TemplateItem
 	{
 		public bool SeparatePage { get; set; }
 
 		// ----------------------------------
 
-		public TitleTemplateItem() : base("title")
+		public TitleTemplate() : base("title")
 		{
 		}
 
@@ -245,12 +245,12 @@ namespace HTMLReportExporter
 			SeparatePage = true;
 		}
 
-		public bool Equals(TitleTemplateItem other)
+		public bool Equals(TitleTemplate other)
 		{
 			return (base.Equals(other) && (SeparatePage == other.SeparatePage));
 		}
 
-		public bool Copy(TitleTemplateItem other)
+		public bool Copy(TitleTemplate other)
 		{
 			if (!base.Copy(other))
 				return false;
@@ -275,9 +275,9 @@ namespace HTMLReportExporter
 		public String PlaceHolder;
 	}
 
-	public class TaskTemplateItem : TemplateItem
+	public class TaskTemplate : TemplateItem
 	{
-		public TaskTemplateItem() : base("task")
+		public TaskTemplate() : base("task")
 		{
 		}
 
@@ -350,10 +350,10 @@ namespace HTMLReportExporter
 
 		public void Clear()
 		{
-			Header = new HeaderTemplateItem();
-			Title = new TitleTemplateItem();
-			Task = new TaskTemplateItem();
-			Footer = new FooterTemplateItem();
+			Header = new HeaderTemplate();
+			Title = new TitleTemplate();
+			Task = new TaskTemplate();
+			Footer = new FooterTemplate();
 		}
 
 		public HtmlReportTemplate(String pathName)
@@ -361,10 +361,10 @@ namespace HTMLReportExporter
 			Load(pathName);
 		}
 
-		public HeaderTemplateItem Header { get; private set; }
-		public TitleTemplateItem Title { get; private set; }
-		public TaskTemplateItem Task { get; private set; }
-		public FooterTemplateItem Footer { get; private set; }
+		public HeaderTemplate Header { get; private set; }
+		public TitleTemplate Title { get; private set; }
+		public TaskTemplate Task { get; private set; }
+		public FooterTemplate Footer { get; private set; }
 
 		public bool Equals(HtmlReportTemplate other)
 		{
