@@ -6,6 +6,7 @@ using System.Text;
 using System.Net;
 using System.Xml;
 using System.Drawing;
+using System.Web.UI;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -135,7 +136,7 @@ namespace HTMLReportExporter
 			set
 			{
 				if (String.IsNullOrWhiteSpace(value))
-					BackColor = Color.Transparent;
+					BackColor = Color.White;
 				else
 					BackColor = ColorTranslator.FromHtml(value);
 			}
@@ -157,7 +158,7 @@ namespace HTMLReportExporter
 			doc.Root.Element(XmlTag).Add(new XElement("wantDivider", WantDivider));
 			doc.Root.Element(XmlTag).Add(new XElement("pixelHeight", PixelHeight));
 
-			if (BackColor != Color.Transparent)
+			if ((BackColor != Color.Transparent) && (BackColor != Color.White))
 				doc.Root.Element(XmlTag).Add(new XElement("backColor", BackColorHtml));
 		}
 
@@ -277,8 +278,56 @@ namespace HTMLReportExporter
 
 	public class TaskTemplate : TemplateItem
 	{
+		public enum TaskLayout
+		{
+			None,
+			Table,
+			OrderedList,
+			UnorderedList
+		}
+
 		public TaskTemplate() : base("task")
 		{
+			Layout = TaskLayout.None;
+		}
+
+		public new String Text
+		{
+			get { return base.Text; }
+
+			set
+			{
+				base.Text = value;
+
+				// Figure out what layout we have
+				var doc = new XmlDocument();
+
+				try
+				{
+					doc.LoadXml(Text);
+
+					if (doc.DocumentElement.Name.Equals("TABLE"))
+					{
+						Layout = TaskLayout.Table;
+					}
+					else if (doc.DocumentElement.Name.Equals("UL"))
+					{
+						Layout = TaskLayout.UnorderedList;
+					}
+					else if (doc.DocumentElement.Name.Equals("OL"))
+					{
+						Layout = TaskLayout.OrderedList;
+					}
+					else
+					{
+						Layout = TaskLayout.None;
+					}
+				}
+				catch
+				{
+					Layout = TaskLayout.None;
+				}
+			}
 		}
 
 		static String SubstituteValue(String template, TaskTemplateAttribute attrib, Task task)
@@ -299,6 +348,11 @@ namespace HTMLReportExporter
 			}
 
 			return text;
+		}
+
+		public TaskLayout Layout
+		{
+			get; private set;
 		}
 
 		public static TaskTemplateAttribute[] Attributes =
