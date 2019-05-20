@@ -141,7 +141,7 @@ namespace HTMLReportExporter
 						m_Template.Header.Enabled = headerEnabledCheckbox.Checked;
 						m_Template.Header.WantDivider = headerDividerCheckbox.Checked;
 						m_Template.Header.BackColor = this.htmlReportHeaderControl.BodyBackColor;
-						m_Template.Header.PixelHeightText = this.headerHeightCombobox.Text ?? "100";
+						m_Template.Header.PixelHeightText = this.headerHeightCombobox.Text;
 						break;
 
 					case TabPage.Title:
@@ -160,7 +160,7 @@ namespace HTMLReportExporter
 						m_Template.Footer.Enabled = footerEnabledCheckbox.Checked;
 						m_Template.Footer.WantDivider = footerDividerCheckbox.Checked;
 						m_Template.Footer.BackColor = this.htmlReportFooterControl.BodyBackColor;
-						m_Template.Footer.PixelHeightText = this.footerHeightCombobox.Text ?? "50";
+						m_Template.Footer.PixelHeightText = this.footerHeightCombobox.Text;
 						break;
 				}
 

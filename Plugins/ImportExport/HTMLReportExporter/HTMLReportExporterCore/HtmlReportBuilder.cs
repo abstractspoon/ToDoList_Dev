@@ -181,14 +181,7 @@ namespace HTMLReportExporter
 			html.RenderBeginTag(HtmlTextWriterTag.Td);
 
 			Title.WriteTableContent(m_Tasklist, html);
-
-			html.RenderBeginTag(HtmlTextWriterTag.Div);
-			html.WriteLine();
-
-			Tasks.AddTasks(m_Tasklist, html);
-
-			html.WriteLine();
-			html.RenderEndTag(); // Div
+			Tasks.WriteTableContent(m_Tasklist, html);
 
 			html.RenderEndTag(); // Td
 			html.RenderEndTag(); // Tr
@@ -366,9 +359,10 @@ namespace HTMLReportExporter
 
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
 
-				// TODO
-				html.Write(Text);
-				//html.Write(Title.Format(m_Tasklist));
+				var title = Text.Replace("$(reportTitle)", tasks.GetReportTitle());
+				title = title.Replace("$(reportDate)", tasks.GetReportDate());
+				html.Write(title);
+
 				html.RenderEndTag(); // Div
 
 				return true;
@@ -428,8 +422,23 @@ namespace HTMLReportExporter
 				}
 			}
 
-			public bool AddTasks(TaskList tasks, HtmlTextWriter html)
+			public bool WriteTableContent(TaskList tasks, HtmlTextWriter html)
 			{
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
+				html.WriteLine();
+
+				switch (m_Layout)
+				{
+					case TaskLayout.Table:
+						break;
+
+					case TaskLayout.UnorderedList:
+						break;
+
+					case TaskLayout.OrderedList:
+						break;
+				}
+
 				// Top-level tasks
 				var task = tasks.GetFirstTask();
 
@@ -438,21 +447,26 @@ namespace HTMLReportExporter
 
 				while (task.IsValid())
 				{
-					AddTask(task, 0, html);
+					WriteTask(task, 0, html);
 					task = task.GetNextTask();
 				}
+
+				html.WriteLine();
+				html.RenderEndTag(); // Div
 
 				return true;
 			}
 			
-			public void AddTask(Task task, int depth, HtmlTextWriter html)
+			public void WriteTask(Task task, int depth, HtmlTextWriter html)
 			{
-				var text = EnabledText;
-
-				if (!String.IsNullOrWhiteSpace(text))
+				if (!String.IsNullOrWhiteSpace(EnabledText))
 				{
+					var text = Text;
+
 					foreach (var attrib in Attributes)
 						text = text.Replace(attrib.PlaceHolder, task.GetAttribute(attrib.Id, true, true));
+
+					html.WriteLine(text);
 				}
 			}
 
