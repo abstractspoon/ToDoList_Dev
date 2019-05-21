@@ -3190,7 +3190,6 @@ LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay
 	case TDCA_METADATA:		return TDL_TASKMETADATA;
 	case TDCA_PARENTID:		return TDL_TASKPARENTID;
 	case TDCA_PATH:			return TDL_TASKPATH;
-	case TDCA_POSITION:		return TDL_TASKPOSITION;
 	case TDCA_RECURRENCE:	return TDL_TASKRECURRENCE;
 	case TDCA_STATUS:		return TDL_TASKSTATUS;
 	case TDCA_TAGS:			return TDL_TASKTAG;
@@ -3209,6 +3208,7 @@ LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay
 	case TDCA_CREATIONDATE:	return (bDisplay ? TDL_TASKCREATIONDATESTRING : TDL_TASKCREATIONDATE);
 	case TDCA_DONEDATE:		return (bDisplay ? TDL_TASKDONEDATESTRING : TDL_TASKDONEDATE);
 	case TDCA_LASTMODDATE:	return (bDisplay ? TDL_TASKLASTMODSTRING : TDL_TASKLASTMOD);
+	case TDCA_POSITION:		return (bDisplay ? TDL_TASKPOSSTRING : TDL_TASKPOSITION);
 
 	case TDCA_DUEDATE:		return (bCalc ? (bDisplay ? TDL_TASKCALCDUEDATESTRING : TDL_TASKDUEDATESTRING) : (bDisplay ? TDL_TASKDUEDATESTRING : TDL_TASKDUEDATE));
 	case TDCA_STARTDATE:	return (bCalc ? (bDisplay ? TDL_TASKCALCSTARTDATESTRING : TDL_TASKSTARTDATESTRING) : (bDisplay ? TDL_TASKSTARTDATESTRING : TDL_TASKSTARTDATE));
@@ -3236,6 +3236,7 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool
 
 	if (bDisplay)
 	{
+		// Customisations
 		static CString DISPLAYSTRING;
 
 		switch (nAttrib)
@@ -3246,6 +3247,31 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool
 		case TDCA_FILEREF:
 		case TDCA_TAGS:
 			DISPLAYSTRING = FormatTaskArray(hTask, szAttrib);
+			return DISPLAYSTRING;
+
+		case TDCA_TIMEEST:
+		case TDCA_TIMESPENT:
+			{
+				TDCTIMEPERIOD time;
+				time.dAmount = (nAttrib == TDCA_TIMEEST) ?
+								GetTaskTimeEstimate(hTask, time.nUnits, bCalc) :
+								GetTaskTimeSpent(hTask, time.nUnits, bCalc);
+
+				if (time.dAmount == 0)
+					DISPLAYSTRING.Empty();
+				else
+					DISPLAYSTRING = time.Format(2);
+			}
+			return DISPLAYSTRING;
+
+		case TDCA_PRIORITY:
+		case TDCA_RISK:
+			{
+				DISPLAYSTRING = GetTaskAttribute(hTask, szAttrib);
+
+				if (DISPLAYSTRING == _T("-2"))
+					DISPLAYSTRING.Empty();
+			}
 			return DISPLAYSTRING;
 		}
 	}
