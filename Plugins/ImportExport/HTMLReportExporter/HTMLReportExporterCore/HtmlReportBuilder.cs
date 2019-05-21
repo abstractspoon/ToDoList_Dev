@@ -564,9 +564,15 @@ namespace HTMLReportExporter
 				}
 
 				// First subtask
+				if (m_Layout != TaskLayout.Table)
+					html.WriteLine(m_StartHtml);
+
 				WriteTask(task.GetFirstSubtask(), depth + 1, html);
 
-				// First subling
+				if (m_Layout != TaskLayout.Table)
+					html.WriteLine(m_EndHtml);
+
+				// Next task
 				WriteTask(task.GetNextTask(), depth, html);
 			}
 
