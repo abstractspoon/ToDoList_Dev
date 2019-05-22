@@ -814,6 +814,10 @@
 #define IDC_TDLPROTOCOLHANDLER          1522
 #define IDC_GROUPBY                     1522
 #define IDC_GROUPBYATTRIB               1523
+#define IDC_HASLUNCHBREAK               1526
+#define IDC_STARTOFLUNCH                1527
+#define IDC_ENDOFLUNCH                  1528
+#define IDC_STARTOFDAY                  1529
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2281,7 +2285,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        314
 #define _APS_NEXT_COMMAND_VALUE         34642
-#define _APS_NEXT_CONTROL_VALUE         1526
+#define _APS_NEXT_CONTROL_VALUE         1528
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

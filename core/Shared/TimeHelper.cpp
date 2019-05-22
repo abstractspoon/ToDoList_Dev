@@ -19,28 +19,20 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const double SECS2MINS	 	= 60;
-const double MINS2HOURS 	= 60;
-const double DAYS2WEEKS 	= 7;
+const double SECS2MINS	 	= 60.0;
+const double MINS2HOURS 	= 60.0;
+const double DAYS2WEEKS 	= 7.0;
 const double WEEKS2MONTHS 	= 4.348; // 365.25 / (7 * 12)
-const double MONTHS2YEARS 	= 12;
+const double MONTHS2YEARS 	= 12.0;
 const double FUDGE 			= 1e-6;
 
 //////////////////////////////////////////////////////////////////////
 
 // user definables
-double CTimeHelper::HOURS2WORKDAYS = 8; 
-double CTimeHelper::WORKDAYS2WEEKS = 5;
-
-//////////////////////////////////////////////////////////////////////
-
-// assume working days pivot about 1.30pm
-// eg. a standard working day of 8 hours (+1 for lunch)
-// starts at 9am (13.50 - 4.5) and 
-// ends at 6pm (13.30 + 4.5)
-const double MIDDAY			= 13.5;
-const double LUNCHSTARTTIME = (MIDDAY - 0.5);
-const double LUNCHENDTIME	= (MIDDAY + 0.5);
+double CTimeHelper::HOURS2WORKDAYS = 8.0; 
+double CTimeHelper::WORKDAYS2WEEKS = 5.0;
+double CTimeHelper::LUNCHSTARTINHOURS = 13.0;
+double CTimeHelper::LUNCHENDINHOURS = 14.0;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -50,14 +42,21 @@ CMap<TH_UNITS, TH_UNITS, TCHAR, TCHAR&> CTimeHelper::MAPUNIT2CH; // user definab
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTimeHelper::CTimeHelper() : m_dHours2Workdays(HOURS2WORKDAYS), m_dWorkdays2Weeks(WORKDAYS2WEEKS)
+CTimeHelper::CTimeHelper() 
+	: 
+	m_dHours2Workdays(HOURS2WORKDAYS), 
+	m_dWorkdays2Weeks(WORKDAYS2WEEKS),
+	m_dLunchStartInHours(LUNCHSTARTINHOURS),
+	m_dLunchEndInHours(LUNCHENDINHOURS)
 {
 }
 
-CTimeHelper::CTimeHelper(double dHoursInWorkday, double dWorkdaysInWeek) 
+CTimeHelper::CTimeHelper(double dHoursInWorkday, double dWorkdaysInWeek, double dLunchStartInHours, double dLunchEndInHours)
 	: 
 	m_dHours2Workdays(dHoursInWorkday), 
-	m_dWorkdays2Weeks(dWorkdaysInWeek)
+	m_dWorkdays2Weeks(dWorkdaysInWeek),
+	m_dLunchStartInHours(dLunchStartInHours),
+	m_dLunchEndInHours(dLunchEndInHours)
 {
 }
 
@@ -98,28 +97,28 @@ THU_WORKDAYPERIOD CTimeHelper::GetWorkdayPeriod(const COleDateTime& date) const
 
 double CTimeHelper::GetStartOfWorkday(BOOL bInDays) const
 {
-	double dHours = (LUNCHSTARTTIME - (m_dHours2Workdays / 2));
+	double dHours = (m_dLunchStartInHours - (m_dHours2Workdays / 2));
 	
 	return (bInDays ? (dHours / 24) : dHours);
 }
 
 double CTimeHelper::GetStartOfWorkdayLunch(BOOL bInDays) const
 {
-	double dHours = LUNCHSTARTTIME;
+	double dHours = m_dLunchStartInHours;
 
 	return (bInDays ? (dHours / 24) : dHours);
 }
 
 double CTimeHelper::GetEndOfWorkday(BOOL bInDays) const
 {
-	double dHours = (LUNCHENDTIME + (m_dHours2Workdays / 2));
+	double dHours = (m_dLunchEndInHours + (m_dHours2Workdays / 2));
 
 	return (bInDays ? (dHours / 24) : dHours);
 }
 
 double CTimeHelper::GetEndOfWorkdayLunch(BOOL bInDays) const
 {
-	double dHours = LUNCHENDTIME;
+	double dHours = m_dLunchEndInHours;
 
 	return (bInDays ? (dHours / 24) : dHours);
 }
@@ -744,6 +743,21 @@ BOOL CTimeHelper::SetWorkdaysInWeek(double dDays)
 		return FALSE;
 
 	WORKDAYS2WEEKS = dDays;
+	return TRUE;
+}
+
+// static
+BOOL CTimeHelper::SetLunchBreak(double dStartInHours, double dEndInHours)
+{
+	if (dStartInHours < 0 || dStartInHours > 24)
+		return FALSE;
+
+	if (dEndInHours < dStartInHours)
+		return FALSE;
+
+	LUNCHSTARTINHOURS = dStartInHours;
+	LUNCHENDINHOURS = dEndInHours;
+
 	return TRUE;
 }
 
