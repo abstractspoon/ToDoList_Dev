@@ -99,6 +99,7 @@
 			this.contextFormatColorDialog = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
 			this.contextFormatNormal = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator18 = new System.Windows.Forms.ToolStripSeparator();
 			this.contextFormatBold = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextFormatItalic = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextFormatUnderline = new System.Windows.Forms.ToolStripMenuItem();
@@ -133,7 +134,15 @@
 			this.contextInsertText = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertHtml = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertTable = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator18 = new System.Windows.Forms.ToolStripSeparator();
+			this.newToolStripButton = new System.Windows.Forms.ToolStripButton();
+			this.openToolStripButton = new System.Windows.Forms.ToolStripButton();
+			this.saveToolStripButton = new System.Windows.Forms.ToolStripButton();
+			this.printToolStripButton = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
+			this.helpToolStripButton = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator20 = new System.Windows.Forms.ToolStripSeparator();
+			this.toolStripSeparator19 = new System.Windows.Forms.ToolStripSeparator();
+			this.toolStripSeparator21 = new System.Windows.Forms.ToolStripSeparator();
 			this.browserPanel.SuspendLayout();
 			this.toolstripEditor.SuspendLayout();
 			this.contextEditor.SuspendLayout();
@@ -174,28 +183,37 @@
             this.toolstripFormatBold,
             this.toolstripFormatUnderline,
             this.toolstripFormatItalic,
+            this.toolStripSeparator21,
             this.toolstripFontDialog,
             this.toolstripFontNormal,
             this.toolstripTextColor,
+            this.toolStripSeparator19,
             this.toolstripFontIncrease,
             this.toolstripFontDecrease,
             this.toolStripSeparator3,
             this.toolstripJustifyLeft,
             this.toolstripJustifyCenter,
             this.toolstripJustifyRight,
-            this.toolstripFontIndent,
-            this.toolstripFontOutdent,
             this.toolStripSeparator4,
             this.toolstripListOrdered,
             this.toolstripListUnordered,
             this.toolStripSeparator5,
+            this.toolstripFontOutdent,
+            this.toolstripFontIndent,
+            this.toolStripSeparator20,
             this.toolstripInsertLine,
             this.toolstripInsertTable,
             this.toolstripInsertImage,
             this.toolstripInsertLink,
             this.toolStripSeparator6,
             this.toolstripFindReplace,
-            this.toolstripDocumentPrint});
+            this.toolstripDocumentPrint,
+            this.newToolStripButton,
+            this.openToolStripButton,
+            this.saveToolStripButton,
+            this.printToolStripButton,
+            this.toolStripSeparator,
+            this.helpToolStripButton});
 			this.toolstripEditor.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
 			this.toolstripEditor.Name = "toolstripEditor";
 			this.toolstripEditor.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
@@ -763,6 +781,11 @@
 			this.contextFormatNormal.Tag = "FontNormal";
 			this.contextFormatNormal.Click += new System.EventHandler(this.contextEditorClick);
 			// 
+			// toolStripSeparator18
+			// 
+			this.toolStripSeparator18.Name = "toolStripSeparator18";
+			resources.ApplyResources(this.toolStripSeparator18, "toolStripSeparator18");
+			// 
 			// contextFormatBold
 			// 
 			this.contextFormatBold.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarBold;
@@ -1025,10 +1048,55 @@
 			this.contextInsertTable.Tag = "InsertTable";
 			this.contextInsertTable.Click += new System.EventHandler(this.contextEditorClick);
 			// 
-			// toolStripSeparator18
+			// newToolStripButton
 			// 
-			this.toolStripSeparator18.Name = "toolStripSeparator18";
-			resources.ApplyResources(this.toolStripSeparator18, "toolStripSeparator18");
+			this.newToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			resources.ApplyResources(this.newToolStripButton, "newToolStripButton");
+			this.newToolStripButton.Name = "newToolStripButton";
+			// 
+			// openToolStripButton
+			// 
+			this.openToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			resources.ApplyResources(this.openToolStripButton, "openToolStripButton");
+			this.openToolStripButton.Name = "openToolStripButton";
+			// 
+			// saveToolStripButton
+			// 
+			this.saveToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			resources.ApplyResources(this.saveToolStripButton, "saveToolStripButton");
+			this.saveToolStripButton.Name = "saveToolStripButton";
+			// 
+			// printToolStripButton
+			// 
+			this.printToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			resources.ApplyResources(this.printToolStripButton, "printToolStripButton");
+			this.printToolStripButton.Name = "printToolStripButton";
+			// 
+			// toolStripSeparator
+			// 
+			this.toolStripSeparator.Name = "toolStripSeparator";
+			resources.ApplyResources(this.toolStripSeparator, "toolStripSeparator");
+			// 
+			// helpToolStripButton
+			// 
+			this.helpToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			resources.ApplyResources(this.helpToolStripButton, "helpToolStripButton");
+			this.helpToolStripButton.Name = "helpToolStripButton";
+			// 
+			// toolStripSeparator20
+			// 
+			this.toolStripSeparator20.Name = "toolStripSeparator20";
+			resources.ApplyResources(this.toolStripSeparator20, "toolStripSeparator20");
+			// 
+			// toolStripSeparator19
+			// 
+			this.toolStripSeparator19.Name = "toolStripSeparator19";
+			resources.ApplyResources(this.toolStripSeparator19, "toolStripSeparator19");
+			// 
+			// toolStripSeparator21
+			// 
+			this.toolStripSeparator21.Name = "toolStripSeparator21";
+			resources.ApplyResources(this.toolStripSeparator21, "toolStripSeparator21");
 			// 
 			// HtmlEditorControl
 			// 
@@ -1152,5 +1220,14 @@
 		private System.Windows.Forms.ToolStripButton toolstripEnableEditing;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator17;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator18;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator21;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator19;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator20;
+		private System.Windows.Forms.ToolStripButton newToolStripButton;
+		private System.Windows.Forms.ToolStripButton openToolStripButton;
+		private System.Windows.Forms.ToolStripButton saveToolStripButton;
+		private System.Windows.Forms.ToolStripButton printToolStripButton;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
+		private System.Windows.Forms.ToolStripButton helpToolStripButton;
 	}
 }
