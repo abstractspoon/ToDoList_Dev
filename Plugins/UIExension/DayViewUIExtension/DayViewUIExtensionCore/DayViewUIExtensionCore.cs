@@ -18,8 +18,7 @@ namespace DayViewUIExtension
 		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
         private String m_HelpID;
-
-
+		
         [Flags] private enum WeekendDays
         {
 	        SUNDAY		= 0X01,
@@ -48,6 +47,7 @@ namespace DayViewUIExtension
         private ToolStrip m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
+		private Label m_SelectedTaskDatesLabel;
 
 		private Font m_ControlsFont;
 
@@ -64,7 +64,11 @@ namespace DayViewUIExtension
 		
 		public bool SelectTask(UInt32 dwTaskID)
 		{
-            return m_DayView.SelectTask(dwTaskID);
+			bool selected = m_DayView.SelectTask(dwTaskID);
+
+			UpdatedSelectedTaskDatesText();
+
+			return selected;
 		}
 
 		public bool SelectTasks(UInt32[] pdwTaskIDs)
@@ -293,11 +297,13 @@ namespace DayViewUIExtension
 			m_ControlsFont = new Font(FontName, 8);
 			m_PrefsDlg = new DayViewPreferencesDlg(m_Trans, m_ControlsFont);
 
-			// Day view always comes last
+			CreateMonthYearCombos();
 			CreateToolbar();
 			CreateWeekLabel();
-			CreateMonthYearCombos();
-            CreateDayView();
+			CreateSelectedTaskDatesLabel();
+
+			// Day view always comes last
+			CreateDayView();
 		}
 
 		private void CreateDayView()
@@ -308,13 +314,12 @@ namespace DayViewUIExtension
 			m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(OnDayViewSelectionChanged);
 			m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
 			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
-
-            // Performing icon editing from a 'MouseUp' or 'MouseClick' event 
-            // causes the edit icon dialog to fail to correctly get focus but
-            // counter-intuitively it works from 'MouseDown'
-            m_DayView.MouseDown += new MouseEventHandler(OnDayViewMouseClick);
-
 			m_DayView.MouseWheel += new MouseEventHandler(OnDayViewMouseWheel);
+
+			// Performing icon editing from a 'MouseUp' or 'MouseClick' event 
+			// causes the edit icon dialog to fail to correctly get focus but
+			// counter-intuitively it works from 'MouseDown'
+			m_DayView.MouseDown += new MouseEventHandler(OnDayViewMouseClick);
 
 			m_DayView.StartDate = DateTime.Now;
             m_DayView.SetFont(FontName, 8);
@@ -328,10 +333,24 @@ namespace DayViewUIExtension
 
 			m_WeekLabel.Font = new Font(FontName, 14);
             m_WeekLabel.Location = new Point(m_Toolbar.Right, DPIScaling.Scale(LabelTop));
-            m_WeekLabel.Size = new Size(DPIScaling.Scale(350), m_Toolbar.Height);
+            m_WeekLabel.Height = m_Toolbar.Height;
 			m_WeekLabel.TextAlign = ContentAlignment.TopLeft;
+			m_WeekLabel.AutoSize = true;
 
 			Controls.Add(m_WeekLabel);
+		}
+
+		private void CreateSelectedTaskDatesLabel()
+		{
+			m_SelectedTaskDatesLabel = new Label();
+
+			m_SelectedTaskDatesLabel.Font = m_ControlsFont;
+			m_SelectedTaskDatesLabel.Location = new Point(m_Toolbar.Right, m_Toolbar.Bottom);
+			m_SelectedTaskDatesLabel.Height = m_Toolbar.Height;
+			m_SelectedTaskDatesLabel.TextAlign = ContentAlignment.MiddleLeft;
+			m_SelectedTaskDatesLabel.AutoSize = true;
+
+			Controls.Add(m_SelectedTaskDatesLabel);
 		}
 
 		private void CreateToolbar()
@@ -482,9 +501,9 @@ namespace DayViewUIExtension
 			m_YearCombo.Location = new Point(m_MonthCombo.Right + 10, m_YearCombo.Top);
 			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, m_YearCombo.Top);
 			m_WeekLabel.Location = new Point(m_Toolbar.Right + 10, m_YearCombo.Top);
-			m_WeekLabel.AutoSize = true;// Width = (ClientRectangle.Right - m_WeekLabel.Left);
-			
-            Rectangle dayViewRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+			UpdatedSelectedTaskDatesPosition(); // called elsewhere also
+
+			Rectangle dayViewRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
 
 			dayViewRect.Y = ControlTop;
 			dayViewRect.Height -= ControlTop;
@@ -545,9 +564,37 @@ namespace DayViewUIExtension
 
                 case Calendar.SelectionType.Appointment:
                     if (args.Appointment != null)
+					{
+						UpdatedSelectedTaskDatesText();
                         notify.NotifySelChange(args.Appointment.Id);
+					}
 					break;
 			}
+		}
+
+		private void UpdatedSelectedTaskDatesText()
+		{
+			DateTime from = DateTime.MinValue, to = DateTime.MinValue;
+
+			if (m_DayView.GetSelectedTaskDates(ref from, ref to) &&
+				(from != DateTime.MinValue) &&
+				(to != DateTime.MinValue))
+			{
+				String toDate = to.ToString((from.DayOfYear == to.DayOfYear) ? "t" : "g");
+
+				m_SelectedTaskDatesLabel.Text = String.Format("{0}: {1}-{2}",
+												m_Trans.Translate("Selected Task Date Range"),
+												from.ToString("g"), toDate);
+			}
+			else
+			{
+				m_SelectedTaskDatesLabel.Text = String.Empty;
+			}
+		}
+
+		private void UpdatedSelectedTaskDatesPosition()
+		{
+			m_SelectedTaskDatesLabel.Location = new Point(m_WeekLabel.Right + 10, m_YearCombo.Bottom - m_SelectedTaskDatesLabel.Height);
 		}
 
 		private void OnDayViewWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
@@ -560,9 +607,11 @@ namespace DayViewUIExtension
 
 				m_MonthCombo.SelectedMonth = args.StartDate.Month;
 				m_YearCombo.SelectedYear = args.StartDate.Year;
+				UpdatedSelectedTaskDatesPosition();
 
 				m_SettingMonthYear = false;
 			}
+
 		}
 
 		private void OnMonthYearSelChanged(object sender, EventArgs args)
@@ -572,6 +621,7 @@ namespace DayViewUIExtension
 				m_SettingDayViewStartDate = true;
 
 				m_DayView.StartDate = new DateTime(m_YearCombo.SelectedYear, m_MonthCombo.SelectedMonth, 1);
+				UpdatedSelectedTaskDatesPosition();
 
 				m_SettingDayViewStartDate = false;
 			}
@@ -579,18 +629,18 @@ namespace DayViewUIExtension
 
         private void OnDayViewAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
-			Calendar.MoveAppointmentEventArgs move = args as Calendar.MoveAppointmentEventArgs;
+			var move = args as Calendar.MoveAppointmentEventArgs;
 
 			// Ignore moves whilst they are occurring
 			if ((move == null) || !move.Finished)
 				return;
 
-			CalendarItem item = args.Appointment as CalendarItem;
+			var item = args.Appointment as CalendarItem;
 
 			if (item == null)
 				return;
 
-			UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			switch (move.Mode)
 			{
