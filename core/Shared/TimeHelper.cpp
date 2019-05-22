@@ -29,8 +29,9 @@ const double FUDGE 			= 1e-6;
 //////////////////////////////////////////////////////////////////////
 
 // user definables
-double CTimeHelper::HOURS2WORKDAYS = 8.0; 
-double CTimeHelper::WORKDAYS2WEEKS = 5.0;
+double CTimeHelper::HOURSINWORKDAY = 8.0; 
+double CTimeHelper::WORKDAYSINWEEK = 5.0;
+double CTimeHelper::DAYSTARTINHOURS = 9.0;
 double CTimeHelper::LUNCHSTARTINHOURS = 13.0;
 double CTimeHelper::LUNCHENDINHOURS = 14.0;
 
@@ -44,17 +45,19 @@ CMap<TH_UNITS, TH_UNITS, TCHAR, TCHAR&> CTimeHelper::MAPUNIT2CH; // user definab
 
 CTimeHelper::CTimeHelper() 
 	: 
-	m_dHours2Workdays(HOURS2WORKDAYS), 
-	m_dWorkdays2Weeks(WORKDAYS2WEEKS),
+	m_dHoursInWorkday(HOURSINWORKDAY), 
+	m_dWorkdaysInWeek(WORKDAYSINWEEK),
+	m_dDayStartInHours(DAYSTARTINHOURS),
 	m_dLunchStartInHours(LUNCHSTARTINHOURS),
 	m_dLunchEndInHours(LUNCHENDINHOURS)
 {
 }
 
-CTimeHelper::CTimeHelper(double dHoursInWorkday, double dWorkdaysInWeek, double dLunchStartInHours, double dLunchEndInHours)
+CTimeHelper::CTimeHelper(double dHoursInWorkday, double dWorkdaysInWeek, double dDayStartInHours, double dLunchStartInHours, double dLunchEndInHours)
 	: 
-	m_dHours2Workdays(dHoursInWorkday), 
-	m_dWorkdays2Weeks(dWorkdaysInWeek),
+	m_dHoursInWorkday(dHoursInWorkday), 
+	m_dWorkdaysInWeek(dWorkdaysInWeek),
+	m_dDayStartInHours(dDayStartInHours),
 	m_dLunchStartInHours(dLunchStartInHours),
 	m_dLunchEndInHours(dLunchEndInHours)
 {
@@ -97,7 +100,7 @@ THU_WORKDAYPERIOD CTimeHelper::GetWorkdayPeriod(const COleDateTime& date) const
 
 double CTimeHelper::GetStartOfWorkday(BOOL bInDays) const
 {
-	double dHours = (m_dLunchStartInHours - (m_dHours2Workdays / 2));
+	double dHours = m_dDayStartInHours;
 	
 	return (bInDays ? (dHours / 24) : dHours);
 }
@@ -109,17 +112,18 @@ double CTimeHelper::GetStartOfWorkdayLunch(BOOL bInDays) const
 	return (bInDays ? (dHours / 24) : dHours);
 }
 
-double CTimeHelper::GetEndOfWorkday(BOOL bInDays) const
-{
-	double dHours = (m_dLunchEndInHours + (m_dHours2Workdays / 2));
-
-	return (bInDays ? (dHours / 24) : dHours);
-}
-
 double CTimeHelper::GetEndOfWorkdayLunch(BOOL bInDays) const
 {
 	double dHours = m_dLunchEndInHours;
 
+	return (bInDays ? (dHours / 24) : dHours);
+}
+
+double CTimeHelper::GetEndOfWorkday(BOOL bInDays) const
+{
+	double dHours = (m_dDayStartInHours + m_dHoursInWorkday);
+	dHours += max((m_dLunchEndInHours - m_dLunchStartInHours), 0.0);
+	
 	return (bInDays ? (dHours / 24) : dHours);
 }
 
@@ -133,15 +137,15 @@ void CTimeHelper::CalculatePartWorkdays(const COleDateTime& dtStart, const COleD
 	switch (GetWorkdayPeriod(dtStart))
 	{
 	case THU_BEFORE:
-		dPartStartDay = m_dHours2Workdays;
+		dPartStartDay = m_dHoursInWorkday;
 		break;
 
 	case THU_MORNING:
-		dPartStartDay = ((GetStartOfWorkdayLunch(FALSE) - dPartStartDay) + (m_dHours2Workdays / 2));
+		dPartStartDay = ((GetStartOfWorkdayLunch(FALSE) - dPartStartDay) + (m_dHoursInWorkday / 2));
 		break;
 
 	case THU_LUNCH:
-		dPartStartDay = (m_dHours2Workdays / 2);
+		dPartStartDay = (m_dHoursInWorkday / 2);
 		break;
 
 	case THU_AFTERNOON:
@@ -172,15 +176,15 @@ void CTimeHelper::CalculatePartWorkdays(const COleDateTime& dtStart, const COleD
 		break;
 
 	case THU_LUNCH:
-		dPartEndDay = (m_dHours2Workdays / 2);
+		dPartEndDay = (m_dHoursInWorkday / 2);
 		break;
 
 	case THU_AFTERNOON:
-		dPartEndDay = ((dPartEndDay - GetEndOfWorkdayLunch(FALSE)) + (m_dHours2Workdays / 2));
+		dPartEndDay = ((dPartEndDay - GetEndOfWorkdayLunch(FALSE)) + (m_dHoursInWorkday / 2));
 		break;
 
 	case THU_AFTER:
-		dPartEndDay = m_dHours2Workdays;
+		dPartEndDay = m_dHoursInWorkday;
 		break;
 
 	default:
@@ -191,8 +195,8 @@ void CTimeHelper::CalculatePartWorkdays(const COleDateTime& dtStart, const COleD
 
 	if (bInDays)
 	{
-		dPartStartDay /= m_dHours2Workdays;
-		dPartEndDay /= m_dHours2Workdays;
+		dPartStartDay /= m_dHoursInWorkday;
+		dPartEndDay /= m_dHoursInWorkday;
 	}
 }
 
@@ -229,16 +233,16 @@ double CTimeHelper::GetTime(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits
 	}
 	else if ((nFromUnits == THU_DAYS) && (nToUnits == THU_WEEKDAYS))
 	{
-		if (m_dWorkdays2Weeks != DAYS2WEEKS)
+		if (m_dWorkdaysInWeek != DAYS2WEEKS)
 		{
-			dTime *= (m_dWorkdays2Weeks / DAYS2WEEKS);
+			dTime *= (m_dWorkdaysInWeek / DAYS2WEEKS);
 		}
 	}
 	else if ((nFromUnits == THU_WEEKDAYS) && (nToUnits == THU_DAYS))
 	{
-		if (m_dWorkdays2Weeks != DAYS2WEEKS)
+		if (m_dWorkdaysInWeek != DAYS2WEEKS)
 		{
-			dTime *= (DAYS2WEEKS / m_dWorkdays2Weeks);
+			dTime *= (DAYS2WEEKS / m_dWorkdaysInWeek);
 		}
 	}
 	else if (Compare(nFromUnits, nToUnits) > 0)
@@ -259,7 +263,7 @@ double CTimeHelper::GetTime(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits
 				
 			case THU_WEEKDAYS:
 			case THU_DAYS:
-				dTime *= m_dHours2Workdays;
+				dTime *= m_dHoursInWorkday;
 				nFromUnits = THU_HOURS;
 				break;
 
@@ -297,12 +301,12 @@ double CTimeHelper::GetTime(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits
 				break;
 				
 			case THU_HOURS:
-				dTime /= m_dHours2Workdays;
+				dTime /= m_dHoursInWorkday;
 				nFromUnits = GetDaysToWeeksUnits(nToUnits);
 				break;
 
 			case THU_WEEKDAYS:
-				dTime /= m_dWorkdays2Weeks;
+				dTime /= m_dWorkdaysInWeek;
 				nFromUnits = THU_WEEKS;
 				break;
 
@@ -509,18 +513,18 @@ TCHAR CTimeHelper::GetUnits(TH_UNITS nUnits)
 
 double CTimeHelper::GetHoursInOneDay(BOOL bStatic) const 
 { 
-	return (bStatic ? HOURS2WORKDAYS : m_dHours2Workdays); 
+	return (bStatic ? HOURSINWORKDAY : m_dHoursInWorkday); 
 }
 
 double CTimeHelper::GetWeekdaysInOneWeek(BOOL bStatic) const 
 { 
-	return (bStatic ? WORKDAYS2WEEKS : m_dWorkdays2Weeks); 
+	return (bStatic ? WORKDAYSINWEEK : m_dWorkdaysInWeek); 
 }
 
 double CTimeHelper::GetDaysToWeeksFactor(TH_UNITS nUnits) const
 {
 	// Give preference to weekdays unless explicitly set to 'days'
-	return ((nUnits != THU_DAYS) ? m_dWorkdays2Weeks : DAYS2WEEKS);
+	return ((nUnits != THU_DAYS) ? m_dWorkdaysInWeek : DAYS2WEEKS);
 }
 
 TH_UNITS CTimeHelper::GetDaysToWeeksUnits(TH_UNITS nUnits) const
@@ -552,7 +556,7 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFl
 	
 	// and all the others up to years
 	double dHours = (dMins / MINS2HOURS);
-	double dDays = (dHours / m_dHours2Workdays);
+	double dDays = (dHours / m_dHoursInWorkday);
 	double dWeeks = (dDays / GetDaysToWeeksFactor(nUnitsFrom));
 	double dMonths = (dWeeks / WEEKS2MONTHS);
 	double dYears = (dMonths / MONTHS2YEARS);
@@ -573,7 +577,7 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFl
 	}
 	else if (dDays >= 1.0)
 	{
-		sTime = FormatTimeHMS(dDays, THU_DAYS, THU_HOURS, m_dHours2Workdays, bDecPlaces, cDelim);
+		sTime = FormatTimeHMS(dDays, THU_DAYS, THU_HOURS, m_dHoursInWorkday, bDecPlaces, cDelim);
 	}
 	else if (dHours >= 1.0)
 	{
@@ -732,7 +736,16 @@ BOOL CTimeHelper::SetHoursInWorkday(double dHours)
 	if (dHours <= 0 || dHours > 24)
 		return FALSE;
 
-	HOURS2WORKDAYS = dHours;
+	HOURSINWORKDAY = dHours;
+	return TRUE;
+}
+
+BOOL CTimeHelper::SetStartOfWorkday(double dHours)
+{
+	if (dHours <= 0 || dHours > 24)
+		return FALSE;
+
+	DAYSTARTINHOURS = dHours;
 	return TRUE;
 }
 
@@ -742,7 +755,7 @@ BOOL CTimeHelper::SetWorkdaysInWeek(double dDays)
 	if (dDays <= 0 || dDays > 7)
 		return FALSE;
 
-	WORKDAYS2WEEKS = dDays;
+	WORKDAYSINWEEK = dDays;
 	return TRUE;
 }
 

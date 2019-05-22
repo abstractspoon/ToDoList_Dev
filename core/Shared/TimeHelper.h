@@ -53,8 +53,11 @@ class CTimeHelper
 {
 public:
 	CTimeHelper(); // uses statically defined hours and days
-	CTimeHelper(double dHoursInWorkday, double dWorkdaysInWeek, 
-				double dLunchStartInHours = 13.0, double dLunchEndInHours = 14.0);
+	CTimeHelper(double dHoursInWorkday, 
+				double dWorkdaysInWeek,
+				double dDayStartInHours = 9.0,
+				double dLunchStartInHours = 13.0, 
+				double dLunchEndInHours = 14.0);
 	
 	double GetTime(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits) const;
 	CString FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFlags = HMS_DECIMALPLACES) const;
@@ -73,6 +76,7 @@ public:
 public:
 	static BOOL SetHoursInWorkday(double dHours);
 	static BOOL SetWorkdaysInWeek(double dDays);
+	static BOOL SetStartOfWorkday(double dHours);
 	static BOOL SetLunchBreak(double dStartInHours, double dEndInHours);
 	static void SetUnits(TH_UNITS nUnits, LPCTSTR szUnits);
 	static void SetUnits(TH_UNITS nUnits, TCHAR cUnits);
@@ -86,8 +90,8 @@ public:
 	static double DecodeClockTime(LPCTSTR szTime); // returns 0-24
 	
 protected:
-	double m_dHours2Workdays, m_dWorkdays2Weeks;
-	double m_dLunchStartInHours, m_dLunchEndInHours;
+	double m_dHoursInWorkday, m_dWorkdaysInWeek;
+	double m_dDayStartInHours, m_dLunchStartInHours, m_dLunchEndInHours;
 
 protected:
 	double GetDaysToWeeksFactor(TH_UNITS nUnits) const;
@@ -95,8 +99,8 @@ protected:
 
 protected:
 	// user definable pseudo-constants
-	static double HOURS2WORKDAYS, WORKDAYS2WEEKS; 
-	static double LUNCHSTARTINHOURS, LUNCHENDINHOURS;
+	static double HOURSINWORKDAY, WORKDAYSINWEEK; 
+	static double DAYSTARTINHOURS, LUNCHSTARTINHOURS, LUNCHENDINHOURS;
 
 	static CMap<TH_UNITS, TH_UNITS, TCHAR, TCHAR&> MAPUNIT2CH;
 	

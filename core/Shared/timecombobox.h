@@ -36,6 +36,9 @@ public:
 	
 	DWORD GetStyle() { return m_dwStyle; }
 	void SetStyle(DWORD dwStyle);
+
+	void DDX(CDataExchange* pDX, double& dHours);
+	void DDX(CDataExchange* pDX, COleDateTime& dtTime);
 	
 protected:
 	DWORD m_dwStyle;

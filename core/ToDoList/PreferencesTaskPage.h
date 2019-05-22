@@ -10,6 +10,7 @@
 #include "..\shared\preferencesbase.h"
 #include "..\shared\DayOfWeekchecklistbox.h"
 #include "..\shared\SoundEdit.h"
+#include "..\shared\TimeComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskPage dialog
@@ -32,8 +33,14 @@ public:
 	BOOL GetLogTaskTimeSeparately() const { return m_bLogTime && m_bLogTasksSeparately; }
 	BOOL GetExclusiveTimeTracking() const { return m_bExclusiveTimeTracking; }
 	BOOL GetAllowParentTimeTracking() const { return m_bAllowParentTimeTracking; }
+	BOOL GetHasLunchBreak() const { return m_bHasLunchBreak; }
 	double GetHoursInOneDay() const;
+	double GetStartOfWorkday(BOOL bInDays = TRUE) const;
+	double GetStartOfWorkdayLunch(BOOL bInDays = TRUE) const;
+	double GetEndOfWorkday(BOOL bInDays = TRUE) const;
+	double GetEndOfWorkdayLunch(BOOL bInDays = TRUE) const;
 	double GetDaysInOneWeek() const;
+
 	DWORD GetWeekendDays() const { return m_dwWeekends; }
 	BOOL GetDisplayLogConfirm() const { return m_bDisplayLogConfirm; }
 	int GetTrackReminderFrequency() const { return m_bTrackReminder ? m_nTrackReminderFrequency : 0; }
@@ -46,6 +53,9 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesTaskPage)
 	enum { IDD = IDD_PREFTASK_PAGE };
+	CTimeComboBox	m_cbEndOfLunch;
+	CTimeComboBox	m_cbStartOfLunch;
+	CTimeComboBox	m_cbStartOfWorkday;
 	CString	m_sHoursInDay;
 	int		m_nDaysInWeek;
 	BOOL	m_bLogTime;
@@ -56,12 +66,16 @@ protected:
 	BOOL	m_bTrackReminder;
 	int		m_nTrackReminderFrequency;
 	BOOL	m_bShowTimeTracker;
+	BOOL	m_bHasLunchBreak;
 	//}}AFX_DATA
 	BOOL	m_bTrackNonSelectedTasks;
 	BOOL	m_bTrackOnScreenSaver;
 	BOOL	m_bTrackNonActiveTasklists;
 	BOOL	m_bTrackHibernated;
 	BOOL	m_bEndTrackingOnReminder;
+	double	m_dEndOfLunchInHours;
+	double	m_dStartOfLunchInHours;
+	double	m_dStartOfWorkdayInHours;
 
 	DWORD	m_dwWeekends;
 	CDayOfWeekCheckListBox m_lbWeekends;
@@ -86,6 +100,9 @@ protected:
 	afx_msg void OnLogtime();
 	afx_msg void OnChangeWeekends();
 	afx_msg void OnNotifyTimeTracking();
+	afx_msg void OnHasLunchBreak();
+	afx_msg void OnChangeStartOfDay();
+	afx_msg void OnChangeHoursInDay();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
