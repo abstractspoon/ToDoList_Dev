@@ -103,6 +103,7 @@ protected:
 	afx_msg void OnHasLunchBreak();
 	afx_msg void OnChangeStartOfDay();
 	afx_msg void OnChangeHoursInDay();
+	afx_msg void OnChangeLunchBreak();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

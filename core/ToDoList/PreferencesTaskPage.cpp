@@ -93,9 +93,13 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_NOTIFYTIMETRACKING, OnNotifyTimeTracking)
 	ON_BN_CLICKED(IDC_HASLUNCHBREAK, OnHasLunchBreak)
 	ON_CBN_EDITCHANGE(IDC_STARTOFDAY, OnChangeStartOfDay)
-	ON_CBN_SELENDOK(IDC_STARTOFDAY, OnChangeStartOfDay)
 	ON_CBN_EDITCHANGE(IDC_HOURSINONEDAY, OnChangeHoursInDay)
+	ON_CBN_SELENDOK(IDC_STARTOFDAY, OnChangeStartOfDay)
 	ON_CBN_SELENDOK(IDC_HOURSINONEDAY, OnChangeHoursInDay)
+	ON_CBN_EDITCHANGE(IDC_STARTOFLUNCH, OnChangeLunchBreak)
+	ON_CBN_SELENDOK(IDC_STARTOFLUNCH, OnChangeLunchBreak)
+	ON_CBN_EDITCHANGE(IDC_ENDOFLUNCH, OnChangeLunchBreak)
+	ON_CBN_SELENDOK(IDC_ENDOFLUNCH, OnChangeLunchBreak)
 	//}}AFX_MSG_MAP
 	ON_CONTROL(CLBN_CHKCHANGE, IDC_WEEKENDS, OnChangeWeekends)
 END_MESSAGE_MAP()
@@ -298,4 +302,11 @@ void CPreferencesTaskPage::OnChangeHoursInDay()
 	UpdateData();
 
 	CTimeHelper::SetHoursInWorkday(GetHoursInOneDay());
+}
+
+void CPreferencesTaskPage::OnChangeLunchBreak() 
+{
+	UpdateData();
+	
+	CTimeHelper::SetLunchBreak(m_dStartOfLunchInHours, m_dEndOfLunchInHours);
 }
