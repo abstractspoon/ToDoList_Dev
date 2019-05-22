@@ -173,7 +173,14 @@ namespace DayViewUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
-			m_PrefsDlg.HoursInWorkingDay = prefs.GetProfileDouble("Preferences", "HoursInDay", 8.0);
+			HoursInWorkingDay = prefs.GetProfileDouble("Preferences", "HoursInDay", 8.0);
+			StartOfDayInHours = prefs.GetProfileDouble("Preferences", "StartOfWorkdayInHours", 9.0);
+			StartOfLunchInHours = prefs.GetProfileDouble("Preferences", "StartOfLunchInHours", 13.0);
+
+			if (prefs.GetProfileBool("Preferences", "HasLunchBreak", true))
+				EndOfLunchInHours = prefs.GetProfileDouble("Preferences", "EndOfLunchInHours", 14.0);
+			else
+				EndOfLunchInHours = StartOfLunchInHours;
 
 			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			m_DayView.TaskColorIsBackground = taskColorIsBkgnd;
@@ -284,7 +291,23 @@ namespace DayViewUIExtension
 
 		// Internal ------------------------------------------------------------------------------
 
-        protected override void Dispose(bool disposing)
+		private double HoursInWorkingDay { get; set; }
+		private double StartOfDayInHours { get; set; }
+		private double StartOfLunchInHours { get; set; }
+		private double EndOfLunchInHours { get; set; }
+
+		private double EndOfDayInHours
+		{
+			get
+			{
+				var endOfDay = (StartOfDayInHours + HoursInWorkingDay);
+				endOfDay += Math.Max((EndOfLunchInHours - StartOfLunchInHours), 0.0);
+
+				return endOfDay;
+			}
+		}
+
+		protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
 
@@ -435,14 +458,11 @@ namespace DayViewUIExtension
 
 		private void UpdateWorkingHourDisplay()
 		{
-			double StartOfDay = m_PrefsDlg.StartOfDayInHours;
-			double EndOfDay = m_PrefsDlg.EndOfDayInHours;
+			m_DayView.WorkingHourStart = (int)StartOfDayInHours;
+			m_DayView.WorkingMinuteStart = (int)((StartOfDayInHours - (int)StartOfDayInHours) * 60);
 
-			m_DayView.WorkingHourStart = (int)StartOfDay;
-			m_DayView.WorkingMinuteStart = (int)((StartOfDay - m_DayView.WorkingHourStart) * 60);
-
-			m_DayView.WorkingHourEnd = (int)EndOfDay;
-			m_DayView.WorkingMinuteEnd = (int)((EndOfDay - m_DayView.WorkingHourEnd) * 60);
+			m_DayView.WorkingHourEnd = (int)EndOfDayInHours;
+			m_DayView.WorkingMinuteEnd = (int)((EndOfDayInHours - (int)EndOfDayInHours) * 60);
 		}
 
 		private void OnHelp(object sender, EventArgs e)
