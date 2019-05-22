@@ -14,6 +14,7 @@ namespace DayViewUIExtension
     partial class DayViewPreferencesDlg : Form
     {
 		private Translator m_Trans;
+		// ------------------------------------------------------------------------
 
 		protected class SlotMinutesItem
 		{
@@ -37,6 +38,8 @@ namespace DayViewUIExtension
 			protected Translator trans;
 		}
 
+		// ------------------------------------------------------------------------
+
         public DayViewPreferencesDlg(Translator trans, Font font)
         {
 			m_Trans = trans;
@@ -57,6 +60,10 @@ namespace DayViewUIExtension
 
 			foreach (var height in slotHeights)
 				m_MinSlotHeightCombo.Items.Add(height);
+
+			PopulateTimeOfDayCombo(m_StartOfDay);
+			PopulateTimeOfDayCombo(m_StartOfLunch);
+			PopulateTimeOfDayCombo(m_EndOfLunch);
 		}
 
 		public void SavePreferences(Preferences prefs, String key)
@@ -70,6 +77,10 @@ namespace DayViewUIExtension
 
 			prefs.WriteProfileInt(prefsKey, "SlotMinutes", SlotMinutes);
 			prefs.WriteProfileInt(prefsKey, "MinSlotHeight", MinSlotHeight);
+
+			prefs.WriteProfileDouble(prefsKey, "StartOfDay", GetTimeInHours(m_StartOfDay));
+			prefs.WriteProfileDouble(prefsKey, "EndOfLunch", GetTimeInHours(m_EndOfLunch));
+			prefs.WriteProfileDouble(prefsKey, "StartOfLunch", GetTimeInHours(m_StartOfLunch));
 		}
 
 		public void LoadPreferences(Preferences prefs, String key)
@@ -80,16 +91,41 @@ namespace DayViewUIExtension
             m_HideTasksWithoutTimes.Checked = prefs.GetProfileBool(prefsKey, "HideTasksWithoutTimes", true);
             m_HideTasksSpanningWeekends.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningWeekends", false);
             m_HideTasksSpanningDays.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningDays", false);
+			m_WantLunchBreak.Checked = prefs.GetProfileBool(prefsKey, "WantLunchBreak", true);
 
 			SlotMinutes = prefs.GetProfileInt(prefsKey, "SlotMinutes", 15);
 			MinSlotHeight = prefs.GetProfileInt(prefsKey, "MinSlotHeight", 5);
 
+			SetTimeInHours(m_StartOfDay, prefs.GetProfileDouble(prefsKey, "StartOfDay", 9));
+			SetTimeInHours(m_StartOfLunch, prefs.GetProfileDouble(prefsKey, "StartOfLunch", 12.5));
+			SetTimeInHours(m_EndOfLunch, prefs.GetProfileDouble(prefsKey, "EndOfLunch", 13.5));
 		}
 
-		public Boolean HideParentTasks { get { return m_HideParentTasks.Checked; } }
-        public Boolean HideTasksWithoutTimes { get { return m_HideTasksWithoutTimes.Checked; } }
-        public Boolean HideTasksSpanningWeekends { get { return m_HideTasksSpanningWeekends.Checked; } }
-        public Boolean HideTasksSpanningDays { get { return m_HideTasksSpanningDays.Checked; } }
+		public bool HideParentTasks { get { return m_HideParentTasks.Checked; } }
+        public bool HideTasksWithoutTimes { get { return m_HideTasksWithoutTimes.Checked; } }
+        public bool HideTasksSpanningWeekends { get { return m_HideTasksSpanningWeekends.Checked; } }
+        public bool HideTasksSpanningDays { get { return m_HideTasksSpanningDays.Checked; } }
+
+		public double HoursInWorkingDay { get; set; }
+		
+		public double StartOfDayInHours { get { return GetTimeInHours(m_StartOfDay); } }
+		public double EndOfDayInHours
+		{
+			get
+			{
+				double endOfDay = (StartOfDayInHours + HoursInWorkingDay);
+
+				if (m_WantLunchBreak.Checked)
+				{
+					double lunchBreak = (GetTimeInHours(m_EndOfLunch) - GetTimeInHours(m_StartOfLunch));
+
+					if (lunchBreak > 0)
+						endOfDay += lunchBreak;
+				}
+
+				return endOfDay;
+			}
+		}
 
 		public int SlotMinutes
 		{
@@ -158,5 +194,44 @@ namespace DayViewUIExtension
 			return (MinSlotHeight != oldSlotheight);
 		}
 
+		private void OnWantLunchBreak_CheckedChanged(object sender, EventArgs e)
+		{
+			m_StartOfLunch.Enabled = m_WantLunchBreak.Checked;
+			m_EndOfLunch.Enabled = m_WantLunchBreak.Checked;
+		}
+
+		private void PopulateTimeOfDayCombo(ComboBox combo)
+		{
+			// Once only
+			if (combo.Items.Count != 0)
+				return;
+
+			for (int hour = 0; hour < 24; hour++)
+			{
+				String hourStr = new DateTime(1, 1, 1, hour, 0, 0).ToString("t", System.Globalization.CultureInfo.CurrentCulture);
+				String halfHourStr = new DateTime(1, 1, 1, hour, 30, 0).ToString("t", System.Globalization.CultureInfo.CurrentCulture);
+
+				combo.Items.Add(hourStr);
+				combo.Items.Add(halfHourStr);
+			}
+		}
+
+		private double GetTimeInHours(ComboBox combo)
+		{
+			DateTime time;
+
+			if (DateTime.TryParse(combo.Text, out time))
+				return (time.Hour + (time.Minute / 60.0));
+
+			return -1;
+		}
+
+		private void SetTimeInHours(ComboBox combo, double hours)
+		{
+			int hour = (int)hours;
+			int minute = (int)((hours - hour) * 60);
+
+			combo.Text = new DateTime(1, 1, 1, hour, minute, 0).ToString("t", System.Globalization.CultureInfo.CurrentCulture);
+		}
 	}
 }

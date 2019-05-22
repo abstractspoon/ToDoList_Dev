@@ -19,6 +19,7 @@ namespace DayViewUIExtension
 		private UIExtension.TaskIcon m_TaskIcons;
         private String m_HelpID;
 
+
         [Flags] private enum WeekendDays
         {
 	        SUNDAY		= 0X01,
@@ -168,12 +169,7 @@ namespace DayViewUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
-            if (!appOnly)
-            {
-                // private settings
-                m_PrefsDlg.LoadPreferences(prefs, key);
-				UpdateDayViewPreferences();
-            }
+			m_PrefsDlg.HoursInWorkingDay = prefs.GetProfileDouble("Preferences", "HoursInDay", 8.0);
 
 			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			m_DayView.TaskColorIsBackground = taskColorIsBkgnd;
@@ -209,25 +205,16 @@ namespace DayViewUIExtension
 
             m_DayView.WeekendDays = weekendDays;
 
-            // Working hours
-            double hoursInDay = prefs.GetProfileDouble("Preferences", "HoursInDay", 8.0);
-
-            // assume working days pivot about 1.30pm
-            // eg. a standard working day of 8 hours (+1 for lunch)
-            // starts at 9am (13.50 - 4.5) and 
-            // ends at 6pm (13.30 + 4.5)
-            const double MIDDAY = 13.5;
-            const double LUNCHSTARTTIME = (MIDDAY - 0.5);
-            const double LUNCHENDTIME = (MIDDAY + 0.5);
-
-            double StartOfDay = Math.Max(LUNCHSTARTTIME - (hoursInDay / 2), 0);
-            double EndOfDay = Math.Min(LUNCHENDTIME + (hoursInDay / 2), 24);
-
-            m_DayView.WorkingHourStart = (int)StartOfDay;
-            m_DayView.WorkingMinuteStart = (int)((StartOfDay - m_DayView.WorkingHourStart) * 60);
-
-            m_DayView.WorkingHourEnd = (int)EndOfDay;
-            m_DayView.WorkingMinuteEnd = (int)((EndOfDay - m_DayView.WorkingHourEnd) * 60);
+            if (!appOnly)
+            {
+                // private settings
+                m_PrefsDlg.LoadPreferences(prefs, key);
+				UpdateDayViewPreferences();
+            }
+			else
+			{
+				UpdateWorkingHourDisplay();
+			}
  		}
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
@@ -422,7 +409,21 @@ namespace DayViewUIExtension
 			m_DayView.SlotsPerHour = (60 / m_PrefsDlg.SlotMinutes);
 			m_DayView.MinSlotHeight = DPIScaling.Scale(m_PrefsDlg.MinSlotHeight);
 
+			UpdateWorkingHourDisplay();
+
 			m_DayView.Invalidate();
+		}
+
+		private void UpdateWorkingHourDisplay()
+		{
+			double StartOfDay = m_PrefsDlg.StartOfDayInHours;
+			double EndOfDay = m_PrefsDlg.EndOfDayInHours;
+
+			m_DayView.WorkingHourStart = (int)StartOfDay;
+			m_DayView.WorkingMinuteStart = (int)((StartOfDay - m_DayView.WorkingHourStart) * 60);
+
+			m_DayView.WorkingHourEnd = (int)EndOfDay;
+			m_DayView.WorkingMinuteEnd = (int)((EndOfDay - m_DayView.WorkingHourEnd) * 60);
 		}
 
 		private void OnHelp(object sender, EventArgs e)
