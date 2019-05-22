@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Globalization;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
@@ -20,14 +21,9 @@ namespace DayViewUIExtension
 		private UIExtension.TaskIcon m_TaskIcons;
 		private IntPtr m_hWnd;
 		private Font m_BaseFont;
-		private Boolean m_ShowParentsAsFolder;
-		private Boolean m_TaskColorIsBkgnd;
+		private bool m_ShowParentsAsFolder;
+		private bool m_TaskColorIsBkgnd;
 
-		// ------------------------------------------------------------------------
-
-		static private String AM = new DateTime(1, 1, 1, 6, 0, 0).ToString("tt", System.Globalization.CultureInfo.CurrentCulture);
-		static private String PM = new DateTime(1, 1, 1, 18, 0, 0).ToString("tt", System.Globalization.CultureInfo.CurrentCulture);
-		
 		// ------------------------------------------------------------------------
 
 		public TDLRenderer(IntPtr hWnd, UIExtension.TaskIcon taskIcons)
@@ -52,13 +48,13 @@ namespace DayViewUIExtension
 			m_ShowParentsAsFolder = false;
         }
 
-		public Boolean ShowParentsAsFolder
+		public bool ShowParentsAsFolder
 		{
 			get { return m_ShowParentsAsFolder; }
 			set { m_ShowParentsAsFolder = value; }
 		}
 
-		public Boolean TaskColorIsBackground
+		public bool TaskColorIsBackground
 		{
 			get { return m_TaskColorIsBkgnd; }
 			set { m_TaskColorIsBkgnd = value; }
@@ -169,12 +165,12 @@ namespace DayViewUIExtension
 				// Ignore 'ampm' and format for the current regional settings
                 string amPmTime = "00";
 
-                if (!String.IsNullOrEmpty(AM))
+                if (!String.IsNullOrEmpty(DateTimeFormatInfo.CurrentInfo.AMDesignator))
 				{
 					if (hour < 12)
-						amPmTime = AM;
+						amPmTime = DateTimeFormatInfo.CurrentInfo.AMDesignator;
 					else
-						amPmTime = PM;
+						amPmTime = DateTimeFormatInfo.CurrentInfo.PMDesignator;
 
 					if (hour != 12)
 						hour = hour % 12;
@@ -290,7 +286,7 @@ namespace DayViewUIExtension
                 g.FillRectangle(backBrush, rect);
         }
 
-		public Boolean TaskHasIcon(CalendarItem taskItem)
+		public bool TaskHasIcon(CalendarItem taskItem)
 		{
 			return ((m_TaskIcons != null) &&
 					(taskItem != null) &&
