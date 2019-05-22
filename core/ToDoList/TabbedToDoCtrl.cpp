@@ -1406,7 +1406,13 @@ LRESULT CTabbedToDoCtrl::OnUIExtEditSelectedTaskIcon(WPARAM /*wParam*/, LPARAM /
 
 BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 {
-	return CToDoCtrl::CanEditSelectedTask(nAttrib, dwTaskID);
+	if (!CToDoCtrl::CanEditSelectedTask(nAttrib, dwTaskID))
+		return FALSE;
+
+	if (GetUpdateControlsItem() == NULL)
+		return (nAttrib == TDCA_NEWTASK);
+
+	return TRUE;
 }
 
 BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const
@@ -2047,7 +2053,9 @@ void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 
 BOOL CTabbedToDoCtrl::WantTaskContextMenu() const
 {
-	return ViewHasTaskSelection(GetTaskView());
+	FTC_VIEW nView = GetTaskView();
+
+	return (ViewSupportsNewTask(nView) || ViewHasTaskSelection(nView));
 }
 
 BOOL CTabbedToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
@@ -5221,6 +5229,46 @@ BOOL CTabbedToDoCtrl::ViewSupportsTaskSelection(FTC_VIEW nView) const
 
 			if (pExt)
 				return (pExt->CanDoAppCommand(IUI_SELECTTASK) ? TRUE : FALSE);
+		}
+		break;
+	}
+
+	// all else
+	ASSERT(0);
+	return FALSE;
+}
+
+BOOL CTabbedToDoCtrl::ViewSupportsNewTask(FTC_VIEW nView) const
+{
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+	case FTCV_TASKLIST:
+		return TRUE;
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		{
+			const VIEWDATA* pData = GetViewData(nView);
+			ASSERT(pData && (pData->bCanPrepareNewTask != -1));
+
+			if (pData)
+				return pData->bCanPrepareNewTask;
 		}
 		break;
 	}
