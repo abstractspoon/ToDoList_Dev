@@ -482,7 +482,7 @@ namespace DayViewUIExtension
 			m_YearCombo.Location = new Point(m_MonthCombo.Right + 10, m_YearCombo.Top);
 			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, m_YearCombo.Top);
 			m_WeekLabel.Location = new Point(m_Toolbar.Right + 10, m_YearCombo.Top);
-            m_WeekLabel.Width = (ClientRectangle.Right - m_WeekLabel.Left);
+			m_WeekLabel.AutoSize = true;// Width = (ClientRectangle.Right - m_WeekLabel.Left);
 			
             Rectangle dayViewRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
 
