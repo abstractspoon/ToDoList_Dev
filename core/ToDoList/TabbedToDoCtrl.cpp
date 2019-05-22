@@ -4100,10 +4100,12 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		pPopup->CheckMenuItem(ID_SHOWVIEW_LISTVIEW, IsListViewTabShowing() ? MF_CHECKED : 0);
 
 		// extension views
+		CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
+		helper.AddAllExtensionsToMenu(pPopup, m_mgrUIExt);
+
 		CStringArray aTypeIDs;
 		GetVisibleExtensionViews(aTypeIDs);
 
-		CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
 		helper.UpdateExtensionVisibilityState(pPopup, m_mgrUIExt, aTypeIDs);
 
 		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON, 

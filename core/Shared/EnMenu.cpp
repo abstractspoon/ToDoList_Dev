@@ -669,6 +669,34 @@ BOOL CEnMenu::SetMenuString(HMENU hMenu, UINT nIDItem, const CString& sItem, UIN
 	return ::SetMenuItemInfo(hMenu, nIDItem, bByPosition, &minfo);
 }
 
+DWORD CEnMenu::GetMenuItemData(HMENU hMenu, UINT nIDItem, UINT nFlags)
+{
+	BOOL bByPosition = (nFlags & MF_BYPOSITION);
+	ASSERT(nIDItem || bByPosition);
+
+	MENUITEMINFO minfo;
+	minfo.cbSize = sizeof(minfo);
+	minfo.fMask = MIIM_DATA;
+	minfo.dwItemData = 0;
+
+	VERIFY(::GetMenuItemInfo(hMenu, nIDItem, bByPosition, &minfo));
+
+	return minfo.dwItemData;
+}
+
+BOOL CEnMenu::SetMenuItemData(HMENU hMenu, UINT nIDItem, DWORD dwItemData, UINT nFlags)
+{
+	BOOL bByPosition = (nFlags & MF_BYPOSITION);
+	ASSERT(nIDItem || bByPosition);
+
+	MENUITEMINFO minfo;
+	minfo.cbSize = sizeof(minfo);
+	minfo.fMask = MIIM_DATA;
+	minfo.dwItemData = 0;
+
+	return ::GetMenuItemInfo(hMenu, nIDItem, bByPosition, &minfo);
+}
+
 BOOL CEnMenu::SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd)
 {
 	int nNumCmdItems = (nCmdIDEnd - nCmdIDStart + 1);
