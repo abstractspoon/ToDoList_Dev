@@ -2527,9 +2527,6 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	// current focus
 	PostMessage(WM_FW_FOCUSCHANGE, (WPARAM)::GetFocus(), 0L);
 	
-	// theme
-	SetUITheme(userPrefs.GetUITheme());
-
 	RefreshTabOrder();
 	Invalidate(TRUE);
 
