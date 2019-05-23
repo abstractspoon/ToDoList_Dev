@@ -6241,7 +6241,7 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 			CAutoFlag af(m_bDelayLoaded, FALSE);
 
 			// Clear flag if check-out failed
-			bWantCheckout = (m_sourceControl.CheckOut(tasks, CString()) == TDCF_SUCCESS);
+			bWantCheckout = (m_sourceControl.CheckOut(tasks, CString(), FALSE, sFilePath) == TDCF_SUCCESS);
 		}
 
 		if (tasks.Decrypt(m_sPassword))

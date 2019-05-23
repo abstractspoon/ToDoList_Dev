@@ -301,6 +301,7 @@ protected:
 	BOOL ContinueParsing(const CString& sItem, const CString& sValue); 
 	BOOL BuildDOM() const;
 	int Export(const CXmlItem* pItem, CXmlNodeWrapper* pNode) const;
+	BOOL CheckInitialiseXMLDoc(const CString& sRootItemName, BOOL bSetHeaders) const;
 
 	virtual MSXML2::IXMLDOMNodePtr InsertNode(CXmlNodeWrapper* pNode, int nNode, const CXmlItem* pXItem) const;
 	

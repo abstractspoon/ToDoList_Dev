@@ -883,7 +883,7 @@ CString CXmlItem::ToString(double dValue)
 CXmlFile::CXmlFile(const CString& sRootItemName) 
 	: 
 	m_xiRoot(NULL, sRootItemName), 
-	m_xmlDoc(_T(""), sRootItemName),
+	m_xmlDoc(FALSE), // initialise on demand
 	m_pCallback(NULL)
 {
 }
@@ -893,11 +893,33 @@ CXmlFile::~CXmlFile()
 	
 }
 
+BOOL CXmlFile::CheckInitialiseXMLDoc(const CString& sRootItemName, BOOL bSetHeaders) const
+{
+	if (!m_xmlDoc.IsValid() || (m_xiRoot.GetName() != sRootItemName))
+	{
+		m_xmlDoc.Release();
+		
+		if (!m_xmlDoc.Initialise(_T(""), sRootItemName))
+			return FALSE;
+	}
+
+	// clear document
+	m_xmlDoc.Reset();
+
+	if (bSetHeaders)
+	{
+		m_xmlDoc.SetXmlHeader(GetXmlHeader());
+		m_xmlDoc.SetXslHeader(GetXslHeader());
+	}
+
+	return TRUE;
+}
+
 BOOL CXmlFile::LoadContent(const CString& sContent, const CString& sRootItemName)
 {
 	Reset();
 	
-	if (!m_xmlDoc.IsValid())
+	if (!CheckInitialiseXMLDoc(sRootItemName, FALSE))
 		return FALSE;
 	
 	if (!m_xmlDoc.LoadXML(sContent))
@@ -1096,7 +1118,7 @@ BOOL CXmlFile::LoadEx(const CString& sRootItemName, IXmlParse* pCallback)
 	
 	try
 	{
-		if (m_xmlDoc.IsValid())
+		if (CheckInitialiseXMLDoc(sRootItemName, FALSE))
 		{
 			if (!m_xmlDoc.LoadXML(sFileContents))
 			{
@@ -1327,16 +1349,12 @@ BOOL CXmlFile::Export(CString& sOutput) const
 
 BOOL CXmlFile::BuildDOM() const
 {
-	ASSERT(m_xmlDoc.IsValid());
-
-	if (!m_xmlDoc.IsValid())
+	if (!CheckInitialiseXMLDoc(m_xiRoot.GetName(), TRUE))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
-	// clear existing document
-	m_xmlDoc.Reset();
-	m_xmlDoc.SetXmlHeader(GetXmlHeader());
-	m_xmlDoc.SetXslHeader(GetXslHeader());
-	
 	// build new one
 	CXmlNodeWrapper node(m_xmlDoc.AsNode());
 	
@@ -1680,7 +1698,10 @@ BOOL CXmlFile::SetXmlHeader(const CString& sHeader)
 	m_sXmlHeader = sHeader; 
 	m_sXmlHeader.MakeLower(); 
 
-	return m_xmlDoc.SetXmlHeader(m_sXmlHeader);
+	if (m_xmlDoc.IsValid())
+		return m_xmlDoc.SetXmlHeader(m_sXmlHeader);
+
+	return TRUE;
 }
 
 CString CXmlFile::GetXslHeader() const 
@@ -1693,7 +1714,10 @@ BOOL CXmlFile::SetXslHeader(const CString& sHeader)
 	m_sXslHeader = sHeader; 
 	m_sXslHeader.MakeLower(); 
 
-	return m_xmlDoc.SetXslHeader(m_sXslHeader);
+	if (m_xmlDoc.IsValid())
+		return m_xmlDoc.SetXslHeader(m_sXslHeader);
+
+	return TRUE;
 }
 
 void CXmlFile::SortItems(const CString& sItemName, const CString& sKeyName, BOOL bAscending)

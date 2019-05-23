@@ -99,7 +99,7 @@ BOOL CTDCSourceControl::CanCheckOut() const
 	return (m_bSourceControlled && !m_bCheckedOut);
 }
 
-TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, BOOL bForce)
+TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, BOOL bForce, LPCTSTR szTasklistPath)
 {
 	if (!m_bSourceControlled)
 	{
@@ -119,13 +119,21 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 		ASSERT(0);
 		return TDCF_SUCCESS;
 	}
-
+	
 	CString sTaskfilePath;
 
 	if (!GetTasklistPath(sTaskfilePath))
 	{
-		m_bCheckedOut = TRUE;
-		return TDCF_SUCCESS;
+		if (FileMisc::FileExists(szTasklistPath) && !tasks.IsEmpty())
+		{
+			sTaskfilePath = szTasklistPath;
+		}
+		else
+		{
+			// Never been saved so it's ours!
+			m_bCheckedOut = TRUE;
+			return TDCF_SUCCESS;
+		}
 	}
 
 	// Always backup before overwriting
@@ -135,8 +143,8 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 	FILETIME ftMod = { 0 };
 	VERIFY(FileMisc::GetFileLastModified(sTaskfilePath, ftMod));
 
-	// Must be already encrypted
-	ASSERT(tasks.GetPassword().IsEmpty() || tasks.IsEncrypted());
+	// If it has a password it must be empty or already encrypted
+	ASSERT(tasks.GetPassword().IsEmpty() || tasks.IsEmpty() || tasks.IsEncrypted());
 
 	TDC_FILE nResult = TDCF_UNSET;
 
