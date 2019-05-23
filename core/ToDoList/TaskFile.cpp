@@ -3246,7 +3246,9 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool
 		case TDCA_DEPENDENCY:
 		case TDCA_FILEREF:
 		case TDCA_TAGS:
-			DISPLAYSTRING = FormatTaskArray(hTask, szAttrib);
+			{
+				DISPLAYSTRING = FormatTaskArray(hTask, szAttrib);
+			}
 			return DISPLAYSTRING;
 
 		case TDCA_TIMEEST:
