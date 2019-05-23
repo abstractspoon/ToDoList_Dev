@@ -450,40 +450,21 @@ CString CCalendarCtrl::GetMonthName(const COleDateTime& date, BOOL bShort) const
 void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
 							 BOOL bSelected, BOOL bToday, BOOL bShowMonth)
 {
-	if ((m_bMonthIsOdd && !(pCell->date.GetMonth()%2)) || 
-		(!m_bMonthIsOdd && (pCell->date.GetMonth()%2)))
-	{
-		pDC->FillSolidRect(rCell, CALENDAR_LIGHTGREY);
-	}
+	CRect rBkgnd(rCell);
+	COLORREF crBkgnd = GetCellBackgroundColor(pCell, bSelected, bToday);
+	COLORREF crHeader = GetCellHeaderColor(pCell, bSelected, bToday);
 	
-	if (bToday)
+	if (crHeader != CLR_NONE)
 	{
-		CRect selRect(rCell);
-		selRect.bottom = selRect.top + m_nDayHeaderHeight - 1;
+		CRect rHeader(rCell);
+		rHeader.bottom = rHeader.top + m_nDayHeaderHeight - 1;
 
-		pDC->FillSolidRect(selRect, m_crTheme);
+		pDC->FillSolidRect(rHeader, crHeader);
+		rBkgnd.top = (rHeader.bottom + 1);
 	}
-	
-	// Draw the selection
-	if (bSelected)
-	{	
-		CRect selRect(rCell);
 
-		if (bToday)	
-			selRect.top += m_nDayHeaderHeight;
-
-		pDC->FillSolidRect(selRect, GetFadedThemeColour(40));
-	}
-	
-	// Out of range
-	if ((pCell->date >= m_BoundUp) || 
-		(pCell->date <= m_BoundDown))	
-	{
-		CRect selRect(rCell);
-		CBrush br;
-
-		pDC->FillSolidRect(selRect, RGB(255,225,225));
-	}
+	if (crBkgnd != CLR_NONE)
+		pDC->FillSolidRect(rBkgnd, crBkgnd);
 	
 	if (pCell->bMark)
 	{
@@ -508,16 +489,15 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 			csDay.Format(_T("%s %d"), GetMonthName(pCell->date, TRUE), nDay);
 	}
 	else
+	{
 		csDay.Format(_T("%d"), nDay);
+	}
 	
-	unsigned long nColor;
-	
-	if (bSelected && !bToday)
-		nColor = pDC->SetTextColor(RGB(255,104,4));
+	if (bSelected/* && !bToday*/)
+		pDC->SetTextColor(RGB(255,104,4));
 	else
-		nColor = pDC->SetTextColor(RGB(0,0,0));
+		pDC->SetTextColor(RGB(0,0,0));
 	
-	pDC->SetTextColor(nColor);
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->DrawText(csDay, (LPRECT)(LPCRECT)rCell, DT_RIGHT|DT_TOP);
 
@@ -526,6 +506,38 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 	rContent.DeflateRect(1,m_nDayHeaderHeight, 0, 0);		
 	
 	DrawCellContent(pDC, pCell, rContent, bSelected, bToday);
+}
+
+COLORREF CCalendarCtrl::GetCellBackgroundColor(const CCalendarCell* pCell, BOOL bSelected, BOOL /*bToday*/) const
+{
+	// Draw the selection
+	if (bSelected)
+	{
+		return GetFadedThemeColour(10);
+	}
+
+	// Out of range
+	if ((pCell->date >= m_BoundUp) ||
+		(pCell->date <= m_BoundDown))
+	{
+		return RGB(255, 225, 225);
+	}
+
+	if ((m_bMonthIsOdd && !(pCell->date.GetMonth() % 2)) ||
+		(!m_bMonthIsOdd && (pCell->date.GetMonth() % 2)))
+	{
+		return CALENDAR_LIGHTGREY;
+	}
+
+	return CLR_NONE;
+}
+
+COLORREF CCalendarCtrl::GetCellHeaderColor(const CCalendarCell* pCell, BOOL /*bSelected*/, BOOL bToday) const
+{
+	if (bToday)
+		return m_crTheme;
+
+	return CLR_NONE;
 }
 
 void CCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
@@ -1462,7 +1474,7 @@ void CCalendarCtrl::AdjustSelection()
 	}
 }
 
-COLORREF CCalendarCtrl::GetFadedThemeColour(int percent)
+COLORREF CCalendarCtrl::GetFadedThemeColour(int percent) const
 {	
 	unsigned char r = GetRValue(m_crTheme), g = GetGValue(m_crTheme), b = GetBValue(m_crTheme);
 	int al = percent*75/100;

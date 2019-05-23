@@ -630,10 +630,48 @@ void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 	CCalendarCtrlEx::DrawCells(pDC);
 }
 
-void CTaskCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
-							 BOOL bSelected, BOOL bToday, BOOL bShowMonth)
+COLORREF CTaskCalendarCtrl::GetCellBackgroundColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const
 {
-	CCalendarCtrlEx::DrawCell(pDC, pCell, rCell, bSelected, bToday, bShowMonth);
+	COLORREF crBkgnd = CCalendarCtrlEx::GetCellBackgroundColor(pCell, bSelected, bToday);
+
+	if (CDateHelper::IsWeekend(pCell->date))
+	{
+		crBkgnd = m_crTheme;
+
+		if (bSelected)
+			crBkgnd = GraphicsMisc::Darker(crBkgnd, 0.02, FALSE);
+	}
+	else if (bSelected)
+	{
+		crBkgnd = GraphicsMisc::Lighter(m_crTheme, 0.5);
+	}
+
+	return crBkgnd;
+}
+
+COLORREF CTaskCalendarCtrl::GetCellHeaderColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const
+{
+	COLORREF crHeader = CLR_NONE; // == same as background color
+
+	if (CDateHelper::IsWeekend(pCell->date))
+	{
+		if (bToday)
+		{
+			crHeader = GraphicsMisc::Darker(m_crTheme, 0.02, FALSE);
+
+			if (bSelected)
+				crHeader = GraphicsMisc::Darker(crHeader, 0.02, FALSE);
+		}
+	}
+	else if (bToday)
+	{
+		crHeader = m_crTheme;
+
+		if (bSelected)
+			crHeader = GraphicsMisc::Darker(crHeader, 0.02, FALSE);
+	}
+
+	return crHeader;
 }
 
 void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 

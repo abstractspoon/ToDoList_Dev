@@ -130,13 +130,12 @@ protected:
 	virtual void DrawHeader(CDC* pDC);
 	virtual void DrawGrid(CDC* pDC);
 	virtual void DrawCells(CDC* pDC);
-	virtual void DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
-							BOOL bSelected, BOOL bToday, BOOL bShowMonth);
-	virtual void DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
+	virtual void DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell,
 									BOOL bSelected, BOOL bToday);
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
-
-
+	virtual COLORREF GetCellBackgroundColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const;
+	virtual COLORREF GetCellHeaderColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const;
+	
 	int RebuildCellTasks(CCalendarCell* pCell) const;
 	const CTaskCalItemArray* GetCellTasks(const CCalendarCell* pCell) const;
 	CTaskCalItemArray* GetCellTasks(CCalendarCell* pCell) const;
@@ -145,7 +144,6 @@ protected:
 	int GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell) const;
 	BOOL GetTaskIndex(DWORD dwTaskID, const CCalendarCell* pCell) const;
 
-	void ResetPositions();
 	BOOL IsValidTask(int nTask, const CCalendarCell* pCell) const;
 	int GetTaskTextOffset(DWORD dwTaskID) const;
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
