@@ -2606,10 +2606,12 @@ void CToDoListWnd::LoadSettings()
 	UpdateTimeTrackerPreferences();
 	
 	// time periods
+	CDateHelper::SetWeekendDays(userPrefs.GetWeekendDays());
 	CTimeHelper::SetHoursInWorkday(userPrefs.GetHoursInWorkday());
 	CTimeHelper::SetWorkdaysInWeek(userPrefs.GetWorkdaysInWeek());
-	CDateHelper::SetWeekendDays(userPrefs.GetWeekendDays());
-
+	CTimeHelper::SetStartOfWorkday(userPrefs.GetStartOfWorkday(FALSE));
+	CTimeHelper::SetLunchBreak(userPrefs.GetStartOfWorkdayLunch(FALSE), userPrefs.GetEndOfWorkdayLunch(FALSE));
+	
 	// support for .tdl extension and tdl:// protocol
 	EnableTDLExtension(userPrefs.GetEnableTDLExtension(), TRUE);
 	EnableTDLProtocol(userPrefs.GetEnableTDLProtocol(), TRUE);
@@ -4988,9 +4990,11 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 		UpdateGlobalHotkey();
 		
 		// time periods
+		CDateHelper::SetWeekendDays(newPrefs.GetWeekendDays());
 		CTimeHelper::SetHoursInWorkday(newPrefs.GetHoursInWorkday());
 		CTimeHelper::SetWorkdaysInWeek(newPrefs.GetWorkdaysInWeek());
-		CDateHelper::SetWeekendDays(newPrefs.GetWeekendDays());
+		CTimeHelper::SetStartOfWorkday(newPrefs.GetStartOfWorkday(FALSE));
+		CTimeHelper::SetLunchBreak(newPrefs.GetStartOfWorkdayLunch(FALSE), newPrefs.GetEndOfWorkdayLunch(FALSE));
 		
 		RefreshTabOrder();
 		RefreshPauseTimeTracking();

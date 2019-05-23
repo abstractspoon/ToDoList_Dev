@@ -266,7 +266,16 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	CDateHelper::SetWeekendDays(dwWeekends);
 
 	double dHoursInDay = pPrefs->GetProfileDouble(_T("Preferences"), _T("HoursInDay"), 8.0);
+	double dStartOfDayInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("StartOfWorkdayInHours"), 9.0);
+	double dStartOfLunchInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("StartOfLunchInHours"), 13.0);
+	double dEndOfLunchInHours = dStartOfLunchInHours;
+
+	if (pPrefs->GetProfileInt(_T("Preferences"), _T("HasLunchBreak"), TRUE))
+		dEndOfLunchInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("EndOfLunchInHours"), 14.0);
+
 	CTimeHelper::SetHoursInWorkday(dHoursInDay);
+	CTimeHelper::SetStartOfWorkday(dStartOfDayInHours);
+	CTimeHelper::SetLunchBreak(dStartOfLunchInHours, dEndOfLunchInHours);
 
 	// Workload specific options
 	if (!bAppOnly)
