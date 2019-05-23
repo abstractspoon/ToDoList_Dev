@@ -778,13 +778,17 @@ BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 
 BOOL CToDoListWnd::EnableLogging(BOOL bEnable)
 {
+	BOOL bIsEnabled = FileMisc::IsLoggingEnabled();
+
+	if ((bIsEnabled && bEnable) || (!bIsEnabled && !bEnable))
+		return TRUE;
+
 	BOOL bRes = FileMisc::EnableLogging(bEnable, _T("Abstractspoon"));
 
 	if (bRes && bEnable)
 		FileMisc::LogAppModuleState(FBM_SORTBY_FILENAME);
 
 	return bRes;
-
 }
 
 int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
