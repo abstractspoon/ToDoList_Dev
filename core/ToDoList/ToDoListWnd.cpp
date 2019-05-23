@@ -7486,6 +7486,8 @@ void CToDoListWnd::OnUpdateMovetaskdown(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnMovetaskup() 
 {
+	CScopedLogTime log(_T("CToDoListWnd::OnMovetaskup"));
+	
 	GetToDoCtrl().MoveSelectedTask(TDCM_UP);	
 }
 

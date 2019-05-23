@@ -47,6 +47,8 @@ class CTDLTaskCtrlBase : public CWnd, protected CTreeListSyncer
 {
 	DECLARE_DYNAMIC(CTDLTaskCtrlBase);
 	
+	friend class CTCBHoldResync;
+	
 protected: // base class only
 	CTDLTaskCtrlBase(BOOL bSyncSelection,
 					 const CTDCImageList& ilIcons,
@@ -532,5 +534,31 @@ protected:
 #endif
 
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTCBHoldResync
+{
+public:
+	CTCBHoldResync(CTDLTaskCtrlBase& tls) : m_tcb(tls), m_bResyncHeld(FALSE)
+	{
+		if (m_tcb.IsResyncEnabled())
+		{
+			m_tcb.EnableResync(FALSE, m_tcb.PrimaryWnd());
+			m_bResyncHeld = TRUE;
+		}
+	}
+	
+	~CTCBHoldResync()
+	{
+		if (m_bResyncHeld)
+			m_tcb.EnableResync(TRUE, m_tcb.PrimaryWnd());
+	}
+	
+protected:
+	CTDLTaskCtrlBase& m_tcb;
+	BOOL m_bResyncHeld;
+};
+
 
 #endif // !defined(AFX_TDCTASKCTRLBASE_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_)
