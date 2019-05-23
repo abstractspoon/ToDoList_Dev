@@ -346,10 +346,11 @@ BEGIN
     PUSHBUTTON      "Copy &All",IDC_COPYALL,295,202,50,14
 END
 
-IDD_PREFTASK_PAGE DIALOG DISCARDABLE  0, 0, 400, 379
+IDD_PREFTASK_PAGE DIALOG DISCARDABLE  0, 0, 400, 473
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
+    LTEXT           "-",IDC_STATIC,81,343,8,8
     LTEXT           "Time Tracking",IDC_TRACKGROUP,7,10,386,8
     CONTROL         "&Show the Time-Tracker window whenever a task's time is tracked",
                     IDC_SHOWTIMETRACKER,"Button",BS_AUTOCHECKBOX | 
@@ -385,25 +386,37 @@ BEGIN
     CONTROL         "When time-tracking, remind me every:",
                     IDC_NOTIFYTIMETRACKING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,190,385,10
-    EDITTEXT        IDC_NOTIFYTIMETRACKINGFREQUENCY,17,202,29,14,
+    EDITTEXT        IDC_NOTIFYTIMETRACKINGFREQUENCY,18,202,29,14,
                     ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "minutes",IDC_STATIC,53,204,90,8
-    LTEXT           "&Play this sound",IDC_STATIC,17,219,221,8
-    EDITTEXT        IDC_PLAYSOUND,17,231,215,14,ES_AUTOHSCROLL
+    LTEXT           "&Play this sound",IDC_STATIC,18,219,221,8
+    EDITTEXT        IDC_PLAYSOUND,18,231,215,14,ES_AUTOHSCROLL
     CONTROL         "And then stop the timer",IDC_ENDTRACKINGONREMINDER,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,249,378,10
     LTEXT           "Time Periods",IDC_TIMEGROUP,7,269,386,8
-    LTEXT           "One &day equals:",IDC_STATIC,7,284,85,8
-    COMBOBOX        IDC_HOURSINONEDAY,97,282,39,115,CBS_DROPDOWN | 
+    GROUPBOX        "Working Day",IDC_STATIC,7,281,375,81
+    COMBOBOX        IDC_HOURSINONEDAY,18,294,48,115,CBS_DROPDOWN | 
                     WS_TABSTOP
-    LTEXT           "hours",IDC_STATIC,143,284,59,8
-    LTEXT           "One &week equals:",IDC_STATIC,7,299,85,8
-    EDITTEXT        IDC_DAYSINONEWEEK,97,298,39,12,ES_AUTOHSCROLL | 
-                    ES_READONLY | WS_DISABLED
-    LTEXT           "days",IDC_STATIC,143,299,60,8
+    LTEXT           "hours",IDC_STATIC,70,296,59,8
+    LTEXT           "Beginning at:",IDC_STATIC,18,312,67,8
+    COMBOBOX        IDC_STARTOFDAY,87,310,48,30,CBS_DROPDOWN | 
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Lunch break",IDC_HASLUNCHBREAK,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,18,328,117,10
+    COMBOBOX        IDC_STARTOFLUNCH,29,340,48,30,CBS_DROPDOWN | 
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
+    COMBOBOX        IDC_ENDOFLUNCH,87,340,48,30,CBS_DROPDOWN | 
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
+    GROUPBOX        "Working Week",IDC_STATIC,7,368,375,99
+    EDITTEXT        IDC_DAYSINONEWEEK,18,383,48,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    LTEXT           "days",IDC_STATIC,70,385,60,8
     LTEXT           "Th&e following days represent the weekend:",IDC_STATIC,
-                    7,316,387,8
-    LISTBOX         IDC_WEEKENDS,7,328,225,43,LBS_OWNERDRAWFIXED | 
+                    18,402,352,8
+    LISTBOX         IDC_WEEKENDS,18,414,218,43,LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | 
                     LBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
 END
@@ -1533,7 +1546,7 @@ END
 IDD_TDLIMPORTEXPORT_DIALOG DIALOGEX 0, 0, 400, 289
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Import Tasks from Tasklist"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,289,268,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,344,268,50,14
@@ -3111,7 +3124,78 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "T&oggle between Task Tree and List View", 
                                                 ID_VIEW_TOGGLETREEANDLIST
+        MENUITEM "To&ggle between Tasks and Comments", 
+                                                ID_VIEW_TOGGLETASKSANDCOMMENTS
+
+        MENUITEM SEPARATOR
         MENUITEM "Next Task Vie&w",             ID_VIEW_CYCLETASKVIEWS
+        POPUP "Activate &Task View"
+        BEGIN
+            MENUITEM "&Task Tree",                  ID_ACTIVATEVIEW_TASKTREE
+            MENUITEM "&List View",                  ID_ACTIVATEVIEW_LISTVIEW
+            MENUITEM "Task View 1",                 ID_ACTIVATEVIEW_UIEXTENSION1
+
+            MENUITEM "Task View 2",                 ID_ACTIVATEVIEW_UIEXTENSION2
+
+            MENUITEM "Task View 3",                 ID_ACTIVATEVIEW_UIEXTENSION3
+
+            MENUITEM "Task View 4",                 ID_ACTIVATEVIEW_UIEXTENSION4
+
+            MENUITEM "Task View 5",                 ID_ACTIVATEVIEW_UIEXTENSION5
+
+            MENUITEM "Task View 6",                 ID_ACTIVATEVIEW_UIEXTENSION6
+
+            MENUITEM "Task View 7",                 ID_ACTIVATEVIEW_UIEXTENSION7
+
+            MENUITEM "Task View 8",                 ID_ACTIVATEVIEW_UIEXTENSION8
+
+            MENUITEM "Task View 9",                 ID_ACTIVATEVIEW_UIEXTENSION9
+
+            MENUITEM "Task View 10",                ID_ACTIVATEVIEW_UIEXTENSION10
+
+            MENUITEM "Task View 11",                ID_ACTIVATEVIEW_UIEXTENSION11
+
+            MENUITEM "Task View 12",                ID_ACTIVATEVIEW_UIEXTENSION12
+
+            MENUITEM "Task View 13",                ID_ACTIVATEVIEW_UIEXTENSION13
+
+            MENUITEM "Task View 14",                ID_ACTIVATEVIEW_UIEXTENSION14
+
+            MENUITEM "Task View 15",                ID_ACTIVATEVIEW_UIEXTENSION15
+
+            MENUITEM "Task View 16",                ID_ACTIVATEVIEW_UIEXTENSION16
+
+        END
+        POPUP "Task View &Visibility"
+        BEGIN
+            MENUITEM "&Task Tree",                  ID_SHOWVIEW_TASKTREE
+            , CHECKED, GRAYED
+            MENUITEM SEPARATOR
+            MENUITEM "List View",                   ID_SHOWVIEW_LISTVIEW
+            MENUITEM "Task View 1",                 ID_SHOWVIEW_UIEXTENSION1
+            MENUITEM "Task View 2",                 ID_SHOWVIEW_UIEXTENSION2
+            MENUITEM "Task View 3",                 ID_SHOWVIEW_UIEXTENSION3
+            MENUITEM "Task View 4",                 ID_SHOWVIEW_UIEXTENSION4
+            MENUITEM "Task View 5",                 ID_SHOWVIEW_UIEXTENSION5
+            MENUITEM "Task View 6",                 ID_SHOWVIEW_UIEXTENSION6
+            MENUITEM "Task View 7",                 ID_SHOWVIEW_UIEXTENSION7
+            MENUITEM "Task View 8",                 ID_SHOWVIEW_UIEXTENSION8
+            MENUITEM "Task View 9",                 ID_SHOWVIEW_UIEXTENSION9
+            MENUITEM "Task View 10",                ID_SHOWVIEW_UIEXTENSION10
+
+            MENUITEM "Task View 11",                ID_SHOWVIEW_UIEXTENSION11
+
+            MENUITEM "Task View 12",                ID_SHOWVIEW_UIEXTENSION12
+
+            MENUITEM "Task View 13",                ID_SHOWVIEW_UIEXTENSION13
+
+            MENUITEM "Task View 14",                ID_SHOWVIEW_UIEXTENSION14
+
+            MENUITEM "Task View 15",                ID_SHOWVIEW_UIEXTENSION15
+
+            MENUITEM "Task View 16",                ID_SHOWVIEW_UIEXTENSION16
+
+        END
         MENUITEM SEPARATOR
         POPUP "Task &View Font"
         BEGIN
@@ -3122,10 +3206,6 @@ BEGIN
             MENUITEM "Restore &Default Font Size",  ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE
 
         END
-        MENUITEM SEPARATOR
-        MENUITEM "To&ggle between Tasks and Comments", 
-                                                ID_VIEW_TOGGLETASKSANDCOMMENTS
-
         MENUITEM SEPARATOR
         MENUITEM "&Previous TaskList",          ID_VIEW_PREV
         MENUITEM "&Next TaskList",              ID_VIEW_NEXT
@@ -3212,7 +3292,7 @@ BEGIN
             , GRAYED
             MENUITEM "Filter 22",                   ID_VIEW_ACTIVATEFILTER22
             , GRAYED
-            MENUITEM "Filter 23",                   ID_VIEW_ACTIVATEFILTER23
+            MENUITEM "Filter 23",                   ID_ACTIVATEVIEW_UIEXTENSION5
             , GRAYED
             MENUITEM "Filter 24",                   ID_VIEW_ACTIVATEFILTER24
             , GRAYED
@@ -3221,36 +3301,6 @@ BEGIN
         MENUITEM "Show Time Trac&ker",          ID_VIEW_SHOWTIMETRACKER
         MENUITEM "Show Reminder &Notification Window", ID_VIEW_SHOWREMINDERS
         MENUITEM SEPARATOR
-        POPUP "Task View &Visibility"
-        BEGIN
-            MENUITEM "&Task Tree",                  ID_SHOWVIEW_TASKTREE
-            , CHECKED, GRAYED
-            MENUITEM SEPARATOR
-            MENUITEM "List View",                   ID_SHOWVIEW_LISTVIEW
-            MENUITEM "Task View Visibility 1",      ID_SHOWVIEW_UIEXTENSION1
-            MENUITEM "Task View Visibility 2",      ID_SHOWVIEW_UIEXTENSION2
-            MENUITEM "Task View Visibility 3",      ID_SHOWVIEW_UIEXTENSION3
-            MENUITEM "Task View Visibility 4",      ID_SHOWVIEW_UIEXTENSION4
-            MENUITEM "Task View Visibility 5",      ID_SHOWVIEW_UIEXTENSION5
-            MENUITEM "Task View Visibility 6",      ID_SHOWVIEW_UIEXTENSION6
-            MENUITEM "Task View Visibility 7",      ID_SHOWVIEW_UIEXTENSION7
-            MENUITEM "Task View Visibility 8",      ID_SHOWVIEW_UIEXTENSION8
-            MENUITEM "Task View Visibility 9",      ID_SHOWVIEW_UIEXTENSION9
-            MENUITEM "Task View Visibility 10",     ID_SHOWVIEW_UIEXTENSION10
-
-            MENUITEM "Task View Visibility 11",     ID_SHOWVIEW_UIEXTENSION11
-
-            MENUITEM "Task View Visibility 12",     ID_SHOWVIEW_UIEXTENSION12
-
-            MENUITEM "Task View Visibility 13",     ID_SHOWVIEW_UIEXTENSION13
-
-            MENUITEM "Task View Visibility 14",     ID_SHOWVIEW_UIEXTENSION14
-
-            MENUITEM "Task View Visibility 15",     ID_SHOWVIEW_UIEXTENSION15
-
-            MENUITEM "Task View Visibility 16",     ID_SHOWVIEW_UIEXTENSION16
-
-        END
         MENUITEM SEPARATOR
         POPUP "Bar &Visibility"
         BEGIN
@@ -3956,7 +4006,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 396
         TOPMARGIN, 10
-        BOTTOMMARGIN, 374
+        BOTTOMMARGIN, 468
     END
 
     IDD_PREFTASKDEF_PAGE, DIALOG
@@ -5514,10 +5564,10 @@ BEGIN
     IDS_REPLACEINTASKCOMMENTS "Replace in Task Comments"
     IDS_FINDINTASKCOMMENTS  "Find in Task Comments"
     IDS_SEARCHPREFS_PROMPT  "Search Preferences"
+    IDS_SD_TITLE            "Remote Server Details"
     IDS_CAD_FRACTION        "Number (Fraction eg. 2/3)"
     IDS_CUSTOM_FEATURE_PERCENTAGE "Display as percentage"
     IDS_FILTERPLACEHOLDER   "Filters"
-    IDS_SD_TITLE            "Remote Server Details"
 END
 
 #endif    // English (Australia) resources

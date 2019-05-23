@@ -204,6 +204,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\HtmlEditor.bmp" />
@@ -216,7 +217,7 @@
     <None Include="Resources\ToolbarFileSave.bmp" />
     <Content Include="Resources\ToolbarEdit.bmp" />
     <Content Include="Resources\ToolbarFind.bmp" />
-    <Content Include="Resources\ToolbarFontColor.bmp" />
+    <Content Include="Resources\ToolbarTextColor.bmp" />
     <Content Include="Resources\ToolbarFontDown.bmp" />
     <Content Include="Resources\ToolbarFontNormal.bmp" />
     <Content Include="Resources\ToolbarFontStyle.bmp" />

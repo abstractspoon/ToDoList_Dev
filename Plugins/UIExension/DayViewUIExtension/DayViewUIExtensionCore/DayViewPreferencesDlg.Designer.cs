@@ -61,7 +61,7 @@
 			this.panel1.Location = new System.Drawing.Point(9, 10);
 			this.panel1.Margin = new System.Windows.Forms.Padding(0);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(501, 196);
+			this.panel1.Size = new System.Drawing.Size(501, 306);
 			this.panel1.TabIndex = 0;
 			// 
 			// groupBox1
@@ -163,7 +163,7 @@
 			// 
 			this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.BtnCancel.Location = new System.Drawing.Point(435, 218);
+			this.BtnCancel.Location = new System.Drawing.Point(435, 328);
 			this.BtnCancel.Name = "BtnCancel";
 			this.BtnCancel.Size = new System.Drawing.Size(75, 23);
 			this.BtnCancel.TabIndex = 1;
@@ -174,7 +174,7 @@
 			// 
 			this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.BtnOK.Location = new System.Drawing.Point(353, 218);
+			this.BtnOK.Location = new System.Drawing.Point(353, 328);
 			this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
 			this.BtnOK.Name = "BtnOK";
 			this.BtnOK.Size = new System.Drawing.Size(75, 23);
@@ -187,7 +187,7 @@
 			this.AcceptButton = this.BtnOK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(520, 250);
+			this.ClientSize = new System.Drawing.Size(520, 360);
 			this.Controls.Add(this.BtnOK);
 			this.Controls.Add(this.BtnCancel);
 			this.Controls.Add(this.panel1);

@@ -293,6 +293,7 @@ protected:
 	BOOL InExtensionView() const;
 	BOOL IsViewSet() const;
 	BOOL ViewSupportsTaskSelection(FTC_VIEW nView) const;
+	BOOL ViewSupportsNewTask(FTC_VIEW nView) const;
 	BOOL ViewHasTaskSelection(FTC_VIEW nView) const;
 
 	void UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0);

@@ -95,29 +95,12 @@ CUIExtensionHelper::CUIExtensionHelper(UINT nFirstMenuID, int nMaxNumExtensions)
 
 void CUIExtensionHelper::UpdateExtensionVisibilityState(CMenu* pMenu, const CUIExtensionMgr& mgr, const CStringArray& aTypeIDs) const
 {
-	ASSERT(pMenu);
-
-	// cache position of first item
-	int nPos = CEnMenu::GetMenuItemPos(*pMenu, m_nFirstMenuID);
-
-	// delete all extension items
-	int nExt = 16;
-
-	while (nExt--)
-		pMenu->DeleteMenu(m_nFirstMenuID + nExt, MF_BYCOMMAND);
-	
-	// re-add and tick those that are visible
+	// Tick those that are visible
 	int nNumExt = min(m_nMaxNumExtensions, mgr.GetNumUIExtensions());
 	
-	for (nExt = 0; nExt < nNumExt; nExt++)
+	for (int nExt = 0; nExt < nNumExt; nExt++)
 	{
 		UINT nMenuID = (m_nFirstMenuID + nExt);
-		
-		// text
-		CString sUIExt = mgr.GetUIExtensionMenuText(nExt);
-		pMenu->InsertMenu(nPos++, (MF_STRING | MF_BYPOSITION), nMenuID, sUIExt);
-		
-		// check state
 		CString sTypeID = mgr.GetUIExtensionTypeID(nExt);
 		BOOL bVisible = Misc::Contains(sTypeID, aTypeIDs, FALSE, TRUE);
 		
@@ -145,4 +128,53 @@ BOOL CUIExtensionHelper::ProcessExtensionVisibilityMenuCmd(UINT nCmdID, const CU
 
 	// all else
 	return FALSE;
+}
+
+void CUIExtensionHelper::AddAllExtensionsToMenu(CMenu* pMenu, const CUIExtensionMgr& mgr) const
+{
+	CStringArray aTypeIDs;
+	mgr.GetExtensionTypeIDs(aTypeIDs);
+
+	AddExtensionsToMenu(pMenu, mgr, aTypeIDs);
+}
+
+void CUIExtensionHelper::AddExtensionsToMenu(CMenu* pMenu, const CUIExtensionMgr& mgr, const CStringArray& aTypeIDs) const
+{
+	ASSERT(pMenu);
+
+	// cache position of first visible item because
+	// m_nFirstMenuID may not actually be present
+	int nPos = -1, nExt;
+
+	for (nExt = 0; (nExt < m_nMaxNumExtensions) && (nPos == -1); nExt++)
+		nPos = CEnMenu::GetMenuItemPos(*pMenu, m_nFirstMenuID + nExt);
+
+	if (nPos == -1)
+	{
+		nPos = pMenu->GetMenuItemCount();
+	}
+	else // delete all extension items
+	{
+		int nExt = m_nMaxNumExtensions;
+
+		while (nExt--)
+			pMenu->DeleteMenu(m_nFirstMenuID + nExt, MF_BYCOMMAND);
+	}
+	
+	// re-add
+	int nNumExt = min(m_nMaxNumExtensions, mgr.GetNumUIExtensions());
+	
+	for (nExt = 0; nExt < nNumExt; nExt++)
+	{
+		CString sTypeID = mgr.GetUIExtensionTypeID(nExt);
+
+		if (Misc::Contains(sTypeID, aTypeIDs, FALSE, TRUE))
+		{
+			UINT nMenuID = (m_nFirstMenuID + nExt);
+			CString sUIExt = mgr.GetUIExtensionMenuText(nExt);
+
+			VERIFY(pMenu->InsertMenu(nPos++, (MF_STRING | MF_BYPOSITION), nMenuID, sUIExt));
+		}
+	}
+
 }

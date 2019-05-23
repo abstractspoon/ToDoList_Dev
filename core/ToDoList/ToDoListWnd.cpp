@@ -391,6 +391,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_VIEW_CUSTOMTOOLBAR, OnViewCustomToolbar)
 	ON_COMMAND_EX_RANGE(ID_FILE_MRU_FILE1, ID_FILE_MRU_FILE16, OnOpenRecentFile)
 	ON_COMMAND_RANGE(ID_EDIT_OPENFILEREF1, ID_EDIT_OPENFILEREF16, OnEditOpenfileref)
+	ON_COMMAND_RANGE(ID_ACTIVATEVIEW_TASKTREE, ID_ACTIVATEVIEW_UIEXTENSION16, OnActivateTaskView)
 	ON_COMMAND_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnSetPriority)
 	ON_COMMAND_RANGE(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, OnFileOpenFromUserStorage)
 	ON_COMMAND_RANGE(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, OnFileSaveToUserStorage)
@@ -2530,9 +2531,6 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	// current focus
 	PostMessage(WM_FW_FOCUSCHANGE, (WPARAM)::GetFocus(), 0L);
 	
-	// theme
-	SetUITheme(userPrefs.GetUITheme());
-
 	RefreshTabOrder();
 	Invalidate(TRUE);
 
@@ -2609,10 +2607,12 @@ void CToDoListWnd::LoadSettings()
 	UpdateTimeTrackerPreferences();
 	
 	// time periods
+	CDateHelper::SetWeekendDays(userPrefs.GetWeekendDays());
 	CTimeHelper::SetHoursInWorkday(userPrefs.GetHoursInWorkday());
 	CTimeHelper::SetWorkdaysInWeek(userPrefs.GetWorkdaysInWeek());
-	CDateHelper::SetWeekendDays(userPrefs.GetWeekendDays());
-
+	CTimeHelper::SetStartOfWorkday(userPrefs.GetStartOfWorkday(FALSE));
+	CTimeHelper::SetLunchBreak(userPrefs.GetStartOfWorkdayLunch(FALSE), userPrefs.GetEndOfWorkdayLunch(FALSE));
+	
 	// support for .tdl extension and tdl:// protocol
 	EnableTDLExtension(userPrefs.GetEnableTDLExtension(), TRUE);
 	EnableTDLProtocol(userPrefs.GetEnableTDLProtocol(), TRUE);
@@ -3118,13 +3118,6 @@ BOOL CToDoListWnd::CreateNewTask(const CString& sTitle, TDC_INSERTWHERE nInsertW
 	CheckCreateDefaultReminder(tdc, tdc.GetSelectedTaskID());
 
 	return TRUE;
-}
-
-BOOL CToDoListWnd::CreateNewDependentTask(const CString& sTitle, TDC_INSERTWHERE nInsertWhere, BOOL bEdit)
-{
-	DWORD dwDependency = GetToDoCtrl().GetSelectedTaskID();
-	
-	return CreateNewTask(sTitle, nInsertWhere, bEdit, dwDependency);
 }
 
 void CToDoListWnd::CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID)
@@ -4998,9 +4991,11 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 		UpdateGlobalHotkey();
 		
 		// time periods
+		CDateHelper::SetWeekendDays(newPrefs.GetWeekendDays());
 		CTimeHelper::SetHoursInWorkday(newPrefs.GetHoursInWorkday());
 		CTimeHelper::SetWorkdaysInWeek(newPrefs.GetWorkdaysInWeek());
-		CDateHelper::SetWeekendDays(newPrefs.GetWeekendDays());
+		CTimeHelper::SetStartOfWorkday(newPrefs.GetStartOfWorkday(FALSE));
+		CTimeHelper::SetLunchBreak(newPrefs.GetStartOfWorkdayLunch(FALSE), newPrefs.GetEndOfWorkdayLunch(FALSE));
 		
 		RefreshTabOrder();
 		RefreshPauseTimeTracking();
@@ -12886,4 +12881,23 @@ void CToDoListWnd::OnViewShowRemindersWindow()
 void CToDoListWnd::OnUpdateViewShowRemindersWindow(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(TRUE);
+}
+
+void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
+{
+	switch (nCmdID)
+	{
+	case ID_ACTIVATEVIEW_TASKTREE:
+		GetToDoCtrl().SetTaskView(FTCV_TASKTREE);
+		break;
+
+	case ID_ACTIVATEVIEW_LISTVIEW:
+		GetToDoCtrl().SetTaskView(FTCV_TASKLIST);
+		break;
+
+	default:
+		ASSERT ((nCmdID >= ID_ACTIVATEVIEW_UIEXTENSION1) && (nCmdID <= ID_ACTIVATEVIEW_UIEXTENSION16));
+		GetToDoCtrl().SetTaskView((FTC_VIEW)(FTCV_UIEXTENSION1 + (nCmdID - ID_ACTIVATEVIEW_UIEXTENSION1)));
+		break;
+	}
 }

@@ -189,6 +189,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnViewShowTimeTracker();
 	afx_msg BOOL OnQueryOpen();
+	afx_msg void OnActivateTaskView(UINT nCmdID);
 	afx_msg void OnAddtimetologfile();
 	afx_msg void OnArchiveSelectedTasks();
 	afx_msg void OnCloseallbutthis();
@@ -607,7 +608,6 @@ protected:
 
 	BOOL CreateNewTask(const CString& sTitle, TDC_INSERTWHERE nInsertWhere, BOOL bEdit = TRUE, DWORD dwDependency = 0);
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependent = FALSE) const;
-	BOOL CreateNewDependentTask(const CString& sTitle, TDC_INSERTWHERE nInsertWhere, BOOL bEdit = TRUE);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 	BOOL CanImportPasteFromClipboard() const;
 

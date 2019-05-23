@@ -22,10 +22,72 @@ bool CommandHandling::HideCommand(String^ commandId, ToolStripItemCollection^ it
 		cmd->Visible = false;
 		cmd->Enabled = false;
 
+		// Prevent sequential visible separators
+		ToolStripItem^ nextVisCmd = nullptr;
+		ToolStripItem^ prevVisCmd = nullptr;
+
+		int iItem = items->IndexOf(cmd);
+		
+		// Handle nested menus
+		if (iItem == -1)
+		{
+			ToolStripMenuItem^ menu = dynamic_cast<ToolStripMenuItem^>(cmd->OwnerItem);
+
+			if ((menu != nullptr) && menu->HasDropDownItems)
+			{
+				items = menu->DropDownItems;
+				iItem = items->IndexOf(cmd);
+			}
+		}
+
+		if (iItem != -1)
+		{
+			int iNext = iItem, iPrev = iItem;
+
+			while (iPrev--)
+			{
+				if (items[iPrev]->Visible)
+				{
+					prevVisCmd = items[iPrev];
+					break;
+				}
+			}
+
+			while (++iNext < items->Count)
+			{
+				if (items[iNext]->Visible)
+				{
+					nextVisCmd = items[iNext];
+					break;
+				}
+			}
+
+			if (IsSeparator(nextVisCmd) && IsNullOrSeparator(prevVisCmd))
+			{
+				nextVisCmd->Visible = false;
+				nextVisCmd->Enabled = false;
+			}
+			else if (IsSeparator(prevVisCmd) && (nextVisCmd == nullptr))
+			{
+				prevVisCmd->Visible = false;
+				prevVisCmd->Enabled = false;
+			}
+		}
+		
 		return true;
 	}
 
 	return false;
+}
+
+bool CommandHandling::IsNullOrSeparator(System::Windows::Forms::ToolStripItem^ item)
+{
+	return ((item == nullptr) || IsSeparator(item));
+}
+
+bool CommandHandling::IsSeparator(System::Windows::Forms::ToolStripItem^ item)
+{
+	return (dynamic_cast<ToolStripSeparator^>(item) != nullptr);
 }
 
 bool CommandHandling::ProcessMenuShortcut(Keys keyPress, ToolStripItemCollection^ items)

@@ -166,13 +166,17 @@ public:
 	BOOL GetTrackNonSelectedTasks() const { return m_pageTask.GetTrackNonSelectedTasks(); }
 	BOOL GetTrackOnScreenSaver() const { return m_pageTask.GetTrackOnScreenSaver(); }
 	BOOL GetTrackHibernated() const { return m_pageTask.GetTrackHibernated(); }
+	DWORD GetWeekendDays() const { return m_pageTask.GetWeekendDays(); }
+	double GetStartOfWorkday(BOOL bInDays = TRUE) const { return m_pageTask.GetStartOfWorkday(bInDays); }
+	double GetStartOfWorkdayLunch(BOOL bInDays = TRUE) const { return m_pageTask.GetStartOfWorkdayLunch(bInDays); }
+	double GetEndOfWorkday(BOOL bInDays = TRUE) const { return m_pageTask.GetEndOfWorkday(bInDays); }
+	double GetEndOfWorkdayLunch(BOOL bInDays = TRUE) const { return m_pageTask.GetEndOfWorkdayLunch(bInDays); }
 	double GetHoursInWorkday() const { return m_pageTask.GetHoursInOneDay(); }
 	double GetWorkdaysInWeek() const { return m_pageTask.GetDaysInOneWeek(); }
 	BOOL GetLogTimeTracking() const { return m_pageTask.GetLogTimeTracking(); }
 	BOOL GetLogTaskTimeSeparately() const { return m_pageTask.GetLogTaskTimeSeparately(); }
 	BOOL GetExclusiveTimeTracking() const { return m_pageTask.GetExclusiveTimeTracking(); }
 	BOOL GetAllowParentTimeTracking() const { return m_pageTask.GetAllowParentTimeTracking(); }
-	DWORD GetWeekendDays() const { return m_pageTask.GetWeekendDays(); }
 	BOOL GetDisplayLogConfirm() const { return m_pageTask.GetDisplayLogConfirm(); }
 	int GetTrackReminderFrequency() const { return m_pageTask.GetTrackReminderFrequency(); }
 	int GetShowTimeTracker() const { return m_pageTask.GetShowTimeTracker(); }

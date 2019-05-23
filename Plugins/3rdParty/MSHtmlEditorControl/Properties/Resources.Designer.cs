@@ -153,16 +153,6 @@ namespace MSDN.Html.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ToolbarFontColor {
-            get {
-                object obj = ResourceManager.GetObject("ToolbarFontColor", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap ToolbarFontDown {
             get {
                 object obj = ResourceManager.GetObject("ToolbarFontDown", resourceCulture);
@@ -346,6 +336,16 @@ namespace MSDN.Html.Editor.Properties {
         internal static System.Drawing.Bitmap ToolbarTabRemove {
             get {
                 object obj = ResourceManager.GetObject("ToolbarTabRemove", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ToolbarTextColor {
+            get {
+                object obj = ResourceManager.GetObject("ToolbarTextColor", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

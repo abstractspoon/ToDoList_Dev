@@ -80,11 +80,14 @@ private:
 class CXmlDocumentWrapper
 {
 public:
-	CXmlDocumentWrapper();
+	CXmlDocumentWrapper(BOOL bInitialise = TRUE);
 	CXmlDocumentWrapper(const CString& header);
 	CXmlDocumentWrapper(const CString& header, const CString& sRootItem);
 	CXmlDocumentWrapper(MSXML2::IXMLDOMDocumentPtr pDoc);
 	virtual ~CXmlDocumentWrapper();
+	
+	BOOL Initialise();
+	BOOL Initialise(const CString& header, const CString& sRootItem = _T(""));
 
 	CString GetUrl() const;
 	CString GetXML(BOOL bPreserveWhiteSpace = TRUE) const;
@@ -94,6 +97,7 @@ public:
 	BOOL LoadXML(const CString& xml, BOOL bPreserveWhiteSpace = TRUE);
 	BOOL Save(const CString& path = _T(""), BOOL bPreserveWhiteSpace = TRUE);
 	void Reset();
+	void Release();
 
 	CString GetXmlHeader(BOOL bAsXml = FALSE) const;
 	CString GetXslHeader(BOOL bAsXml = FALSE) const;
@@ -121,8 +125,8 @@ private:
 	static BOOL s_bVer3orGreater;
 
 private:
-	BOOL Initialise();
-	BOOL Initialise(const CString& header);
+// 	BOOL Initialise();
+// 	BOOL Initialise(const CString& header);
 
 //////////////////////////////////////////////////////////////////////////////
 };

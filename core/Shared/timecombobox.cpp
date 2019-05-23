@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "timecombobox.h"
 #include "timehelper.h"
+#include "datehelper.h"
 #include "misc.h"
 #include "localizer.h"
 #include "holdredraw.h"
@@ -106,6 +107,31 @@ void CTimeComboBox::BuildCombo(BOOL bReset)
 	}
 }
 
+void CTimeComboBox::DDX(CDataExchange* pDX, double& dHours)
+{
+	if (pDX->m_bSaveAndValidate)
+		dHours = Get24HourTime();
+	else
+		Set24HourTime(dHours);
+}
+
+void CTimeComboBox::DDX(CDataExchange* pDX, COleDateTime& dtTime)
+{
+	double dTime = CDateHelper::GetTimeOnly(dtTime);
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		double dDays = CDateHelper::GetDateOnly(dtTime);
+		double dTime = GetOleTime();
+
+		dtTime = CDateHelper::MakeDate(dDays, dTime);
+	}
+	else
+	{
+		SetOleTime(CDateHelper::GetTimeOnly(dtTime));
+	}
+}
+
 double CTimeComboBox::GetOleTime() const
 {
 	double dTime = (Get24HourTime() / 24.0);
@@ -161,7 +187,7 @@ CString CTimeComboBox::GetCurrentTime() const
 
 	if ((pMsg->message == WM_COMMAND) && 
 		(pMsg->lParam == (LPARAM)GetSafeHwnd()) &&
-		(HIWORD(pMsg->wParam) == CBN_SELCHANGE))
+		((HIWORD(pMsg->wParam) == CBN_SELCHANGE) || (HIWORD(pMsg->wParam) == CBN_SELENDOK)))
 	{
 		GetLBText(GetCurSel(), sTime);
 	}
@@ -308,7 +334,7 @@ void CTimeComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
 		double dTime = Get24HourTime(nItem);
 		CTimeHelper th;
 
-		if ((dTime > 0) &&
+		if ((dTime >= 0) &&
 			((dTime < th.GetStartOfWorkday(FALSE)) ||
 			(dTime > th.GetEndOfWorkday(FALSE))))
 		{

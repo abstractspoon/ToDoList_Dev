@@ -106,12 +106,14 @@ protected:
 	virtual void DrawCells(CDC* pDC);
 	virtual void DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
 							BOOL bSelected, BOOL bToday, BOOL bShowMonth);
-	virtual void DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
+	virtual void DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell,
 									BOOL bSelected, BOOL bToday);
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
 
 	virtual CString GetDayOfWeekName(const COleDateTime& date, BOOL bShort = FALSE) const;
 	virtual CString GetMonthName(const COleDateTime& date, BOOL bShort = FALSE) const;
+	virtual COLORREF GetCellBackgroundColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const;
+	virtual COLORREF GetCellHeaderColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const;
 	
 	bool GetGridCellFromPoint(const CPoint& point, int &nRow, int &nCol) const;
 	bool GetGridCellFromDate(const COleDateTime& date, int &nRow, int &nCol) const;
@@ -126,7 +128,7 @@ protected:
 
 	const CCalendarCell* GetCell(int nRow, int nCol) const;
 	CCalendarCell* GetCell(int nRow, int nCol);
-	COLORREF GetFadedThemeColour(int percent);
+	COLORREF GetFadedThemeColour(int percent) const;
 	int GetDayOfWeek(int nColumn) const;
 	COleDateTime GetMinDate(int nRow) const;
 	COleDateTime GetMaxDate(int nRow) const;

@@ -170,7 +170,7 @@ namespace MSDN.Html.Editor
         private const string INTERNAL_COMMAND_FORMATSTRIKEOUT = "FormatStrikeout";
         private const string INTERNAL_COMMAND_FONTDIALOG = "FontDialog";
         private const string INTERNAL_COMMAND_FONTNORMAL = "FontNormal";
-        private const string INTERNAL_COMMAND_COLORDIALOG = "ColorDialog";
+        private const string INTERNAL_COMMAND_TEXTCOLOR = "TextColor";
         private const string INTERNAL_COMMAND_FONTINCREASE = "FontIncrease";
         private const string INTERNAL_COMMAND_FONTDECREASE = "FontDecrease";
         private const string INTERNAL_COMMAND_JUSTIFYLEFT = "JustifyLeft";
@@ -458,10 +458,8 @@ namespace MSDN.Html.Editor
         private void DocumentSelectionChange(object sender, EventArgs e)
         {
             // if not in readonly mode process the selection change
-            if (!_readOnly && _editEnabled)
-            {
+            if (IsEditable)
                 FormatSelectionChange();
-            }
 
         } //DocumentSelectionChange
 
@@ -471,32 +469,49 @@ namespace MSDN.Html.Editor
 				LostFocus(this, e);
 		} //DocumentLoseFocus
 
-        private void DocumentDoubleClick(object sender, EventArgs e)
+        private void DocumentDoubleClick(object sender, HtmlElementEventArgs e)
         {
-			SelectWordAtCaret();
+			if (IsEditable)
+				SelectWordAtCaret();
+			else
+				SelectWordAtPoint(e.MousePosition);
+
 		} //DocumentDoubleClick
 
 		private void SelectWordAtCaret()
 		{
-			mshtmlSelection sel = document.selection as mshtmlSelection;
+			if (document.selection != null)
+				SelectWord(document.selection.createRange() as mshtmlTextRange);
+		}
 
-			if (sel != null)
+		private void SelectWordAtPoint(Point pos)
+		{
+			if (document.selection != null)
 			{
-				mshtmlTextRange rng = sel.createRange() as mshtmlTextRange;
+				var rng = (document.selection.createRange() as mshtmlTextRange);
 
-				if ((rng != null) && String.IsNullOrEmpty(rng.text))
+				if (rng != null)
 				{
-					rng.expand("word");
+					rng.moveToPoint(pos.X, pos.Y);
+					SelectWord(rng);
+				}
+			}
+		}
 
-					// Omit trailing whitespace
-					if ((rng != null) && !String.IsNullOrEmpty(rng.text))
-					{
-						int len = rng.text.Length;
-						int wordLen = rng.text.TrimEnd(null).Length;
+		private void SelectWord(mshtmlTextRange rng)
+		{
+			if ((rng != null) && String.IsNullOrEmpty(rng.text))
+			{
+				rng.expand("word");
 
-						rng.moveEnd("character", (wordLen - len));
-						rng.select();
-					}
+				// Omit trailing whitespace
+				if ((rng != null) && !String.IsNullOrEmpty(rng.text))
+				{
+					int len = rng.text.Length;
+					int wordLen = rng.text.TrimEnd(null).Length;
+
+					rng.moveEnd("character", (wordLen - len));
+					rng.select();
 				}
 			}
 		}
@@ -655,11 +670,11 @@ namespace MSDN.Html.Editor
             // at this point the document and body has been loaded
             // so define the event handler for the context menu
             this.editorWebBrowser.Document.ContextMenuShowing += new HtmlElementEventHandler(DocumentContextMenu);
+			this.editorWebBrowser.Document.Body.DoubleClick += new HtmlElementEventHandler(DocumentDoubleClick);
 
 			this.editorWebBrowser.Document.AttachEventHandler("onselectionchange", DocumentSelectionChange);
             this.editorWebBrowser.Document.AttachEventHandler("onkeydown", DocumentKeyPress);
 			this.editorWebBrowser.Document.AttachEventHandler("onfocusout", DocumentLoseFocus);
-			this.editorWebBrowser.Document.AttachEventHandler("ondblclick", DocumentDoubleClick);
 
 			// signalled complete
 			codeNavigate = false;
@@ -837,13 +852,13 @@ namespace MSDN.Html.Editor
                 _readOnly = value;
 
                 // define the document editable property
-                body.contentEditable = (!_readOnly && _editEnabled).ToString();
+                body.contentEditable = IsEditable.ToString();
 
 				// define the menu bar state
-				UpdateToolbarEnabledState();
+				UpdateEnabledState();
 				
 				// define whether the IE cntext menu should be shown
-				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = (_readOnly || !_editEnabled);
+				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = !IsEditable;
 			}
 
         } //ReadOnly
@@ -859,17 +874,21 @@ namespace MSDN.Html.Editor
 				_editEnabled = value;
 
                 // define the document editable property
-                body.contentEditable = (!_readOnly && _editEnabled).ToString();
-
+                body.contentEditable = IsEditable.ToString();
+				
 				// define the menu bar state
-				UpdateToolbarEnabledState();
+				UpdateEnabledState();
 				
 				// define whether the IE cntext menu should be shown
-				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = (_readOnly || !_editEnabled);
+				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = !IsEditable;
             }
 
         } //ReadOnly
 
+		private bool IsEditable
+		{
+			get { return (!_readOnly && _editEnabled); }
+		}
 
         /// <summary>
         /// Property defining the visibility of the defined toolbar
@@ -1952,36 +1971,44 @@ namespace MSDN.Html.Editor
 
         } //FormatSelectionChange
 
-		protected void UpdateToolbarEnabledState()
+		override protected void OnEnabledChanged(EventArgs e)
 		{
-			this.toolstripTextCut.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripTextCopy.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripTextPaste.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripEditUndo.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripEditRedo.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFormatBold.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFormatUnderline.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFormatItalic.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFontDialog.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFontNormal.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripColorDialog.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFontIncrease.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFontDecrease.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripJustifyLeft.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripJustifyCenter.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripJustifyRight.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFontIndent.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFontOutdent.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripListOrdered.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripListUnordered.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripInsertLine.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripInsertTable.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripInsertImage.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripInsertLink.Enabled = (!_readOnly && _editEnabled);
-            this.toolstripFindReplace.Enabled = (!_readOnly && _editEnabled);
+			base.OnEnabledChanged(e);
+
+			this.WebBrowser.Document.BackColor = (Enabled ? SystemColors.Window : SystemColors.ControlLight);
+		}
+
+		protected void UpdateEnabledState()
+		{
+
+			this.toolstripTextCut.Enabled = IsEditable;
+            this.toolstripTextCopy.Enabled = IsEditable;
+            this.toolstripTextPaste.Enabled = IsEditable;
+            this.toolstripEditUndo.Enabled = IsEditable;
+            this.toolstripEditRedo.Enabled = IsEditable;
+            this.toolstripFormatBold.Enabled = IsEditable;
+            this.toolstripFormatUnderline.Enabled = IsEditable;
+            this.toolstripFormatItalic.Enabled = IsEditable;
+            this.toolstripFontDialog.Enabled = IsEditable;
+            this.toolstripFontNormal.Enabled = IsEditable;
+            this.toolstripTextColor.Enabled = IsEditable;
+            this.toolstripFontIncrease.Enabled = IsEditable;
+            this.toolstripFontDecrease.Enabled = IsEditable;
+            this.toolstripJustifyLeft.Enabled = IsEditable;
+            this.toolstripJustifyCenter.Enabled = IsEditable;
+            this.toolstripJustifyRight.Enabled = IsEditable;
+            this.toolstripFontIndent.Enabled = IsEditable;
+            this.toolstripFontOutdent.Enabled = IsEditable;
+            this.toolstripListOrdered.Enabled = IsEditable;
+            this.toolstripListUnordered.Enabled = IsEditable;
+            this.toolstripInsertLine.Enabled = IsEditable;
+            this.toolstripInsertTable.Enabled = IsEditable;
+            this.toolstripInsertImage.Enabled = IsEditable;
+            this.toolstripInsertLink.Enabled = IsEditable;
+            this.toolstripFindReplace.Enabled = IsEditable;
 
             this.toolstripEnableEditing.Enabled = !_readOnly;
-			this.toolstripEnableEditing.Checked = (!_readOnly && _editEnabled);
+			this.toolstripEnableEditing.Checked = IsEditable;
 
 			this.toolstripDocumentPrint.Enabled = true; // always
 		}
@@ -2676,7 +2703,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method using the exec command to define the color properties for the selected tag
         /// </summary>
-        public void FormatFontColor(Color color)
+        public void FormatTextColor(Color color)
         {
             // Use the COLOR object to set the property ForeColor
             string colorHtml;
@@ -2712,7 +2739,7 @@ namespace MSDN.Html.Editor
         /// Method to display the system color dialog
         /// Use use to set the selected text Color
         /// </summary>
-        public void FormatFontColorPrompt()
+        public void FormatTextColorPrompt()
         {
             // display the Color dialog and use the selected color to modify text
             using (ColorDialog colorDialog = new ColorDialog())
@@ -2725,7 +2752,7 @@ namespace MSDN.Html.Editor
                 if (colorDialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
                     _customColors = colorDialog.CustomColors;
-                    FormatFontColor(colorDialog.Color);
+                    FormatTextColor(colorDialog.Color);
                 }
             }
 
@@ -4302,9 +4329,9 @@ namespace MSDN.Html.Editor
                         // FONT style remove
                         FormatRemove();
                         break;
-                    case INTERNAL_COMMAND_COLORDIALOG:
+                    case INTERNAL_COMMAND_TEXTCOLOR:
                         // COLOR style creation
-                        FormatFontColorPrompt();
+                        FormatTextColorPrompt();
                         break;
                     case INTERNAL_COMMAND_FONTINCREASE:
                         // FONTSIZE increase
@@ -4523,7 +4550,39 @@ namespace MSDN.Html.Editor
             }
         }
 
-        #endregion
+		protected override void OnSizeChanged(EventArgs e)
+		{
+			base.OnSizeChanged(e);
 
-    } //HtmlEditorControl
+			FixupControlPositions();
+		}
+
+		protected void FixupControlPositions()
+		{
+			// Not sure where the bug is but the interface between 
+			// the browser control and the toolbar is often wrong
+			int iLastBtn = (ToolBar.Items.Count - 1);
+			ToolStripItem lastBtn = null;
+
+			while (iLastBtn-- > 0)
+			{
+				if (ToolBar.Items[iLastBtn].Visible)
+				{
+					lastBtn = ToolBar.Items[iLastBtn];
+					break;
+				}
+			}
+
+			if (lastBtn != null)
+			{
+				int toolbarBottom = lastBtn.Bounds.Bottom;
+
+				ToolBar.Bounds = new Rectangle(0, 0, Bounds.Width, toolbarBottom);
+				BrowserPanel.Bounds = new Rectangle(0, toolbarBottom + 1, Bounds.Width, Bounds.Height - toolbarBottom);
+			}
+		}
+
+		#endregion
+
+	} //HtmlEditorControl
 }

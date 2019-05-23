@@ -198,7 +198,25 @@ namespace DayViewUIExtension
             return m_SelectedTaskID;
         }
 
-        public void FixupSelection(bool scrollToTask)
+		public bool GetSelectedTaskDates(ref DateTime from, ref DateTime to)
+		{
+			UInt32 selTaskID = GetSelectedTaskID();
+
+			if (selTaskID == 0)
+				return false;
+
+			CalendarItem item;
+
+			if (!m_Items.TryGetValue(selTaskID, out item))
+				return false;
+
+			from = item.StartDate;
+			to = item.EndDate;
+
+			return true;
+		}
+
+		public void FixupSelection(bool scrollToTask)
         {
             UInt32 prevSelTaskID = SelectedAppointmentId;
             UInt32 selTaskID = GetSelectedTaskID();

@@ -14,6 +14,7 @@ namespace DayViewUIExtension
     partial class DayViewPreferencesDlg : Form
     {
 		private Translator m_Trans;
+		// ------------------------------------------------------------------------
 
 		protected class SlotMinutesItem
 		{
@@ -36,6 +37,8 @@ namespace DayViewUIExtension
 			public int numMinutes;
 			protected Translator trans;
 		}
+
+		// ------------------------------------------------------------------------
 
         public DayViewPreferencesDlg(Translator trans, Font font)
         {
@@ -83,13 +86,12 @@ namespace DayViewUIExtension
 
 			SlotMinutes = prefs.GetProfileInt(prefsKey, "SlotMinutes", 15);
 			MinSlotHeight = prefs.GetProfileInt(prefsKey, "MinSlotHeight", 5);
-
 		}
 
-		public Boolean HideParentTasks { get { return m_HideParentTasks.Checked; } }
-        public Boolean HideTasksWithoutTimes { get { return m_HideTasksWithoutTimes.Checked; } }
-        public Boolean HideTasksSpanningWeekends { get { return m_HideTasksSpanningWeekends.Checked; } }
-        public Boolean HideTasksSpanningDays { get { return m_HideTasksSpanningDays.Checked; } }
+		public bool HideParentTasks { get { return m_HideParentTasks.Checked; } }
+        public bool HideTasksWithoutTimes { get { return m_HideTasksWithoutTimes.Checked; } }
+        public bool HideTasksSpanningWeekends { get { return m_HideTasksSpanningWeekends.Checked; } }
+        public bool HideTasksSpanningDays { get { return m_HideTasksSpanningDays.Checked; } }
 
 		public int SlotMinutes
 		{
@@ -157,6 +159,5 @@ namespace DayViewUIExtension
 
 			return (MinSlotHeight != oldSlotheight);
 		}
-
 	}
 }

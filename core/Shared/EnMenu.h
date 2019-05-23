@@ -88,6 +88,8 @@ public:
 
 	static CString GetMenuString(HMENU hMenu, UINT nIDItem,	UINT nFlags);
 	static BOOL SetMenuString(HMENU hMenu, UINT nIDItem, const CString& sItem, UINT nFlags);
+	static DWORD GetMenuItemData(HMENU hMenu, UINT nIDItem, UINT nFlags);
+	static BOOL SetMenuItemData(HMENU hMenu, UINT nIDItem, DWORD dwItemData, UINT nFlags);
 	static int GetMenuStrings(HMENU hMenu, CStringArray& aItems);
 	static BOOL SetMenuStrings(HMENU hMenu, const CStringArray& aItems);
 	static BOOL SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd);

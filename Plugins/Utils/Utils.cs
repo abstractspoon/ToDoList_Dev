@@ -329,7 +329,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
 			private void InitializeComponent()
 			{
-				Text = m_Trans.Translate(m_LicenseType.ToString() + ' ' + "License");
+				Text = LicenseString;
 				Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 				TextAlign = ContentAlignment.MiddleLeft;
 
@@ -381,6 +381,32 @@ namespace Abstractspoon.Tdl.PluginHelpers
 					}
 
 					return PluginHelpers.DPIScaling.Scale(20);
+				}
+			}
+
+			private String LicenseString
+			{
+				get
+				{
+					switch (m_LicenseType)
+					{
+						//case RhinoLicensing.LicenseType.Free:
+						//	break;
+
+						case RhinoLicensing.LicenseType.Trial:
+							return m_Trans.Translate("Trial License");
+
+						//case RhinoLicensing.LicenseType.Paid:
+						//	return 0;
+
+						case RhinoLicensing.LicenseType.Supporter:
+							return m_Trans.Translate("Supporter License");
+
+						case RhinoLicensing.LicenseType.Contributor:
+							return m_Trans.Translate("Contributor License");
+					}
+
+					return String.Empty;
 				}
 			}
 

@@ -279,10 +279,11 @@ MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::RemoveNode(MSXML2::IXMLDOMNodePtr pNode)
 
 BOOL CXmlDocumentWrapper::s_bVer3orGreater = -1;
 
-CXmlDocumentWrapper::CXmlDocumentWrapper()
+CXmlDocumentWrapper::CXmlDocumentWrapper(BOOL bInitialise)
 	: m_bHeaderSet(FALSE)
 {
-	VERIFY(Initialise());
+	if (bInitialise)
+		VERIFY(Initialise());
 }
 
 CXmlDocumentWrapper::CXmlDocumentWrapper(const CString& header)
@@ -299,6 +300,12 @@ CXmlDocumentWrapper::CXmlDocumentWrapper(const CString& sHeader, const CString& 
 
 BOOL CXmlDocumentWrapper::Initialise()
 {
+	if (IsValid())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	try
 	{
 		m_xmldoc.CreateInstance(MSXML2::CLSID_DOMDocument);
@@ -306,7 +313,6 @@ BOOL CXmlDocumentWrapper::Initialise()
 		m_xmldoc->put_async(VARIANT_FALSE);
 		
 		Reset();
-
 		return TRUE;
 	}
 	catch (...)
@@ -316,17 +322,21 @@ BOOL CXmlDocumentWrapper::Initialise()
 	return FALSE;
 }
 
-BOOL CXmlDocumentWrapper::Initialise(const CString& header)
+BOOL CXmlDocumentWrapper::Initialise(const CString& header, const CString& sRootItem)
 {
-	if (Initialise())
-	{
-		if (!header.IsEmpty())
-			SetXmlHeader(header);
+	CString sPrevRootItem = m_sRootItemName;
+	m_sRootItemName = sRootItem; // because Initialise wants it to be set
 
-		return TRUE;
+	if (!Initialise())
+	{
+		m_sRootItemName = sPrevRootItem;
+		return FALSE;
 	}
 
-	return FALSE;
+	if (!header.IsEmpty())
+		SetXmlHeader(header);
+
+	return TRUE;
 }
 
 CXmlDocumentWrapper::CXmlDocumentWrapper(MSXML2::IXMLDOMDocumentPtr pDoc)
@@ -335,6 +345,11 @@ CXmlDocumentWrapper::CXmlDocumentWrapper(MSXML2::IXMLDOMDocumentPtr pDoc)
 }
 
 CXmlDocumentWrapper::~CXmlDocumentWrapper()
+{
+	Release();
+}
+
+void CXmlDocumentWrapper::Release()
 {
 	if (m_xmldoc != NULL)
 		m_xmldoc.Release();

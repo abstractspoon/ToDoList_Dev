@@ -27,6 +27,11 @@ namespace Abstractspoon
 				static System::Windows::Forms::ToolStripItem^ GetCommandItem(String^ commandId, System::Windows::Forms::ToolStripItemCollection^ items);
 				static System::Windows::Forms::ToolStripMenuItem^ GetMenuItem(String^ commandId, System::Windows::Forms::ToolStripItemCollection^ items);
 				static System::Windows::Forms::ToolStripMenuItem^ GetMenuItem(System::Windows::Forms::Keys keyPress, System::Windows::Forms::ToolStripItemCollection^ items);
+
+			protected:
+				static bool IsSeparator(System::Windows::Forms::ToolStripItem^ item);
+				static bool IsNullOrSeparator(System::Windows::Forms::ToolStripItem^ item);
+
 			};
 		}
 	}

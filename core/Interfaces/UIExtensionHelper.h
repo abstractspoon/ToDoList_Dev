@@ -61,6 +61,9 @@ class CUIExtensionHelper
 public:
 	CUIExtensionHelper(UINT nFirstMenuID, int nMaxNumExtensions);
 
+	void AddAllExtensionsToMenu(CMenu* pMenu, const CUIExtensionMgr& mgr) const;
+	void AddExtensionsToMenu(CMenu* pMenu, const CUIExtensionMgr& mgr, const CStringArray& aTypeIDs) const;
+
 	void UpdateExtensionVisibilityState(CMenu* pMenu, const CUIExtensionMgr& mgr, const CStringArray& aTypeIDs) const;
 	BOOL ProcessExtensionVisibilityMenuCmd(UINT nCmdID, const CUIExtensionMgr& mgr, CStringArray& aTypeIDs) const;
 
@@ -68,6 +71,7 @@ protected:
 	UINT m_nFirstMenuID;
 	int m_nMaxNumExtensions;
 
+protected:
 };
 
 #endif // !defined(AFX_TDCUIEXTENSIONHELPER_H__AD55BB4A_A382_4DE3_9B26_531DC4EBBA88__INCLUDED_)

@@ -90,7 +90,8 @@ BOOL CTDCMainMenu::LoadMenu()
 	TranslateDynamicMenuItems(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, _T("User Defined Tool %d"));
 	TranslateDynamicMenuItems(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, _T("3rd Party Storage %d"));
 	TranslateDynamicMenuItems(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, _T("3rd Party Storage %d"));
-	TranslateDynamicMenuItems(ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16, _T("Task View Visibility %d"));
+	TranslateDynamicMenuItems(ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16, _T("Task View %d"));
+	TranslateDynamicMenuItems(ID_ACTIVATEVIEW_UIEXTENSION1, ID_ACTIVATEVIEW_UIEXTENSION16, _T("Task View %d"));
 
 	return TRUE;
 }
@@ -198,8 +199,12 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 			AddFiltersToMenu(pPopupMenu, filterBar);
 			return TRUE;
 
+		case ID_ACTIVATEVIEW_TASKTREE:
+			AddTaskViewActivationToMenu(pPopupMenu, tdc, mgrUIExt);
+			return TRUE;
+
 		case ID_SHOWVIEW_TASKTREE:
-			AddTaskViewsToMenu(pPopupMenu, tdc, mgrUIExt);
+			AddTaskViewVisibilityToMenu(pPopupMenu, tdc, mgrUIExt);
 			return TRUE;
 		}
 	}
@@ -243,17 +248,70 @@ void CTDCMainMenu::PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs)
 	}
 }
 
-void CTDCMainMenu::AddTaskViewsToMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt)
+void CTDCMainMenu::AddTaskViewVisibilityToMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt)
 {
-	// ListView
+	CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
+	helper.AddAllExtensionsToMenu(pMenu, mgrUIExt);
+	
+	// ListView visibility
 	pMenu->CheckMenuItem(ID_SHOWVIEW_LISTVIEW, (tdc.IsListViewTabShowing() ? MF_CHECKED : 0));
 
-	// UI Extensions
+	// UI Extension visibility
 	CStringArray aTypeIDs;
 	tdc.GetVisibleExtensionViews(aTypeIDs);
 
-	CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
 	helper.UpdateExtensionVisibilityState(pMenu, mgrUIExt, aTypeIDs);
+}
+
+void CTDCMainMenu::AddTaskViewActivationToMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt)
+{
+	CStringArray aTypeIDs;
+	tdc.GetVisibleExtensionViews(aTypeIDs);
+
+	CUIExtensionHelper helper(ID_ACTIVATEVIEW_UIEXTENSION1, 16);
+	helper.AddExtensionsToMenu(pMenu, mgrUIExt, aTypeIDs);
+
+	// Active view
+	FTC_VIEW nView = tdc.GetTaskView();
+	int nMenuID = 0;
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		nMenuID = ID_ACTIVATEVIEW_TASKTREE;
+		break;
+
+	case FTCV_TASKLIST:
+		nMenuID = ID_ACTIVATEVIEW_LISTVIEW;
+		break;
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		nMenuID = (ID_ACTIVATEVIEW_UIEXTENSION1 + (nView - FTCV_UIEXTENSION1));
+		break;
+
+		// all else
+	default:
+		ASSERT(0);
+		return;
+	}
+
+	pMenu->CheckMenuRadioItem(0, ID_ACTIVATEVIEW_UIEXTENSION16, nMenuID, MF_BYCOMMAND);
 }
 
 BOOL CTDCMainMenu::HandlePostTranslateMenu(HMENU hMenu)

@@ -175,7 +175,7 @@ BOOL CTDLAnalyseLoggedTimeDlg::OnInitDialog()
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
 
-		if (attribDef.IsList() && !attribDef.IsMultiList())
+		if (!attribDef.IsList() || !attribDef.IsMultiList())
 		{
 			CEnString sItem(IDS_CUSTOMCOLUMN, attribDef.sLabel);
 			CDialogHelper::AddString(m_cbGroupByAttrib, sItem, attribDef.GetAttributeID());

@@ -501,7 +501,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Determines the font size given the html int size
         /// </summary>
-        public static float PointsFromHtml(int fontSize)
+        public static int PointsFromHtml(int fontSize)
         {
             // make the following mapping
             // 1:8pt
@@ -511,37 +511,19 @@ namespace MSDN.Html.Editor
             // 5:18pt
             // 6:24pt
             // 7:36pt
-            float calcFont = 0;
-
             switch (fontSize)
             {
-                case 1:
-                    calcFont = 8F;
-                    break;
-                case 2:
-                    calcFont = 10F;
-                    break;
-                case 3:
-                    calcFont = 12F;
-                    break;
-                case 4:
-                    calcFont = 14F;
-                    break;
-                case 5:
-                    calcFont = 18F;
-                    break;
-                case 6:
-                    calcFont = 24F;
-                    break;
-                case 7:
-                    calcFont = 36F;
-                    break;
-                default:
-                    calcFont = 12F;
-                    break;
+                case 1: return 8;
+                case 2: return 10;
+                case 3: return 12;
+                case 4: return 14;
+                case 5: return 18;
+                case 6: return 24;
+                case 7: return 36;
             }
         
-            return calcFont;
+			// all else
+            return 12;
 
         } //FontSizeFromHtml
 
