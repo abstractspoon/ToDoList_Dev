@@ -119,8 +119,6 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crGridline = CLR_NONE);
 
 	HTREEITEM GetTreeSelItem() const;
-	int GetTreeSelItems(CHTIArray& aItems) const;
-	void SetTreeSelItems(const CHTIArray& aItems, HTREEITEM htiFocus = NULL);
 	void SelectTreeItem(HTREEITEM hti, BOOL bClear = TRUE);
 
 	void Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, HTREEITEM hti = NULL);
@@ -154,12 +152,11 @@ private:
 protected:
 	inline BOOL CanResync() const { return (IsResyncEnabled() && !m_bResyncing); }
 	inline BOOL IsResyncEnabled() const { return m_bResyncEnabled; }
+	inline BOOL IsResyncing() const { return m_bResyncing; }
 
 	BOOL Resync(HWND hwnd, HWND hwndTo);
-	BOOL IsResyncing() const { return m_bResyncing; }
 	void PostResync(HWND hwnd);
 	void EnableResync(BOOL bEnable, HWND hwnd = NULL);
-	void ResetResync();
 	void WindowNeedsScrollBars(HWND hwnd, const CRect& rect, BOOL& bNeedHScroll, BOOL& bNeedVScroll) const;
 	
 #ifdef _DEBUG
@@ -231,7 +228,6 @@ protected:
 	virtual BOOL ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel = TRUE);
 	void PostResync(HWND hwnd, BOOL bIncSelection);
 
-	int GetHeaderHeight(HWND hwnd) const;
 	int GetListItem(HWND hwndList, HWND hwndTree, HTREEITEM hti) const;
 	int GetListItem(HWND hwndList1, HWND hwndList2, int nItem2) const;
 	HTREEITEM GetTreeItem(HWND hwndTree, HWND hwndList, int nItem) const;
