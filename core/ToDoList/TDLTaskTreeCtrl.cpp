@@ -708,39 +708,13 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 	NotifyParentSelChange();
 }
 
-void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks(BOOL bUpdateWindow)
+void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
 {
-	// Scope hold resync else trailing UpdateWindow will not work
-	{
-		// Prevent re-entrancy
-		CTLSHoldResync hr(*this);
-		
-		m_lcColumns.SetItemState(-1, 0, (LVIS_SELECTED | LVIS_FOCUSED));
-		
-		HTREEITEM htiSel = TSH().GetAnchor();
-		POSITION pos = TSH().GetFirstItemPos();
-		
-		while (pos)
-		{
-			HTREEITEM hti = TSH().GetNextItem(pos);
-			int nItem = GetListItem(hti);
-			
-			if (hti == htiSel)
-			{
-				m_lcColumns.SetItemState(nItem, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
-				m_lcColumns.SetSelectionMark(nItem);
-			}
-			else
-			{
-				m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);
-			}
-		}
-	}
+	CHTIList selection;
+	TSH().CopySelection(selection);
 
-	m_lcColumns.Invalidate(FALSE);
-
-	if (bUpdateWindow)
-	 	m_lcColumns.UpdateWindow();
+	if (ResyncListToTreeSelection(m_tcTasks, selection, TSH().GetAnchor()))
+ 		m_lcColumns.UpdateWindow();
 }
 
 void CTDLTaskTreeCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
@@ -822,14 +796,14 @@ void CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 			break;
 		}
 
-		SyncColumnSelectionToTasks();
-			
+ 		SyncColumnSelectionToTasks();
+ 			
 		if (hti)
 		{
 			CHoldHScroll hhs(m_tcTasks);
 			TCH().EnsureVisibleEx(hti, FALSE);
 		}
-		
+ 		
 		// notify parent of selection change
 		// unless up/down cursor key still pressed
 		if (!TSH().Matches(lstPrevSel) && !Misc::IsCursorKeyPressed(MKC_UPDOWN))
@@ -907,7 +881,7 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 			if (nEditCol != TDCC_NONE)
 			{
 				// make sure attribute pane is synced
-				SyncColumnSelectionToTasks(TRUE);
+				SyncColumnSelectionToTasks();
 
 				// forward the click
 				NotifyParentOfColumnEditClick(nEditCol, dwTaskID);
@@ -1586,7 +1560,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		// Handle selection change before column click/dblclk
 		if (bSelChange)
 		{
-			SyncColumnSelectionToTasks(nAction == SC_BYMOUSE);
+			SyncColumnSelectionToTasks();
 			
 			if (!TSH().Matches(lstPrevSel))
 			{

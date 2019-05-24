@@ -492,6 +492,41 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 	return bSynced;
 }
 
+BOOL CTreeListSyncer::ResyncListToTreeSelection(HWND hwndTree, const CList<HTREEITEM, HTREEITEM>& htItems, HTREEITEM htiFocused)
+{
+	ASSERT(IsTree(hwndTree));
+
+	HWND hwndList = OtherWnd(hwndTree);
+	ASSERT(IsList(hwndList));
+
+	if (!CanResync())
+		return FALSE;
+
+	CAutoFlag af(m_bResyncing, TRUE);
+
+	ListView_SetItemState(hwndList, -1, 0, LVIS_SELECTED);
+
+	POSITION pos = htItems.GetHeadPosition();
+
+	while (pos)
+	{
+		HTREEITEM hti = htItems.GetNext(pos);
+		int nItem = GetListItem(hwndList, hwndTree, hti);
+
+		if (hti == htiFocused)
+		{
+			ListView_SetItemState(hwndList, nItem, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
+			ListView_SetSelectionMark(hwndList, nItem);
+		}
+		else
+		{
+			ListView_SetItemState(hwndList, nItem, LVIS_SELECTED, LVIS_SELECTED);
+		}
+	}
+
+	return TRUE;
+}
+
 BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel)
 {
 	if (!CanResync() || !HasFlag(TLSF_SYNCSELECTION))
