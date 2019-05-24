@@ -7619,7 +7619,11 @@ BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg)
 
 BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 {
+#ifdef _DEBUG
 	DWORD dwTick = GetTickCount();
+#else
+	CScopedLogTime log(_T("CToDoCtrl::MoveSelectedTask()"));
+#endif
 
 	if (!CanMoveSelectedTask(nDirection))
 		return FALSE;
@@ -7652,7 +7656,9 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 
 	SetModified(TDCA_POSITION);
 
+#ifdef _DEBUG
 	TRACE(_T("CToDoCtrl::MoveSelectedTask() took %ld ms\n"), GetTickCount() - dwTick);
+#endif
 
 	return TRUE;
 }
