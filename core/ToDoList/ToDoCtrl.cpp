@@ -7619,6 +7619,8 @@ BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg)
 
 BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 {
+	DWORD dwTick = GetTickCount();
+
 	if (!CanMoveSelectedTask(nDirection))
 		return FALSE;
 	
@@ -7649,6 +7651,8 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 		FixupParentCompletion(dwDestParentID);
 
 	SetModified(TDCA_POSITION);
+
+	TRACE(_T("CToDoCtrl::MoveSelectedTask() took %ld ms\n"), GetTickCount() - dwTick);
 
 	return TRUE;
 }
