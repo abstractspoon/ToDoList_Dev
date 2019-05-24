@@ -80,10 +80,9 @@ public:
 protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CToDoListWnd)
-	protected:
-//	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	//}}AFX_VIRTUAL
+protected:
+	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual void OnOK() {}
 	virtual void OnCancel();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
