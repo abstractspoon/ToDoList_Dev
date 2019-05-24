@@ -10771,12 +10771,10 @@ void CToDoListWnd::UpdateCwd()
 	}
 }
 
-BOOL CToDoListWnd::OnCommand(WPARAM wParam, LPARAM lParam) 
-{
-	UpdateWindow();
-
-	return CFrameWnd::OnCommand(wParam, lParam);
-}
+// BOOL CToDoListWnd::OnCommand(WPARAM wParam, LPARAM lParam) 
+// {
+// 	return CFrameWnd::OnCommand(wParam, lParam);
+// }
 
 void CToDoListWnd::OnEnable(BOOL bEnable) 
 {
