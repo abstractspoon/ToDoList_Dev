@@ -3767,10 +3767,10 @@ LRESULT CTDLTaskCtrlBase::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 int CTDLTaskCtrlBase::CalcSplitterPosToFitListColumns() const
 {
 	int nFirst = m_hdrColumns.GetFirstVisibleItem();
-	ASSERT(nFirst != -1);
-	
 	int nLast = m_hdrColumns.GetLastVisibleItem();
-	ASSERT(nLast != -1);
+
+	if ((nFirst == -1) && (nLast == -1))
+		return -1;
 
 	CRect rFirst, rLast;
 	VERIFY(m_hdrColumns.GetItemRect(nFirst, rFirst) && m_hdrColumns.GetItemRect(nLast, rLast));
@@ -3800,7 +3800,7 @@ void CTDLTaskCtrlBase::AdjustSplitterToFitAttributeColumns()
 {
 	int nNewSplitPos = CalcSplitterPosToFitListColumns();
 
-	if (nNewSplitPos != GetSplitPos())
+	if ((nNewSplitPos != -1) && (nNewSplitPos != GetSplitPos()))
 	{
 		CRect rClient;
 		CWnd::GetClientRect(rClient);
