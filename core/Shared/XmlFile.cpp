@@ -8,6 +8,7 @@
 #include "misc.h"
 #include "filemisc.h"
 #include "webmisc.h"
+#include "ScopedTimer.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -1316,7 +1317,7 @@ BOOL CXmlFile::Export(CString& sOutput) const
 	try
 	{
 		// PERMANENT LOGGING //////////////////////////////////////////////////
-		CScopedLogTime log(_T("CXmlFile::Export()"));
+		CScopedLogTimer log(_T("CXmlFile::Export()"));
 		///////////////////////////////////////////////////////////////////////
 
 		if (BuildDOM())

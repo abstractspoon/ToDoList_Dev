@@ -196,39 +196,6 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-CScopedLogTime::CScopedLogTime()
-{
-	m_dwTickStart = m_dwIntermediateStart = ::GetTickCount();
-}
-
-CScopedLogTime::CScopedLogTime(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3)
-{
-	ASSERT(!Misc::IsEmpty(szScope));
-
-	m_sScope.Format(szScope, szArg1, szArg2, szArg3);
-	m_dwTickStart = m_dwIntermediateStart = ::GetTickCount();
-}
-
-CScopedLogTime::~CScopedLogTime()
-{
-	if (FileMisc::IsLoggingEnabled() && !m_sScope.IsEmpty())
-	{
-		// This updates m_dwStart but we don't care
-		FileMisc::LogTimeElapsed(m_dwTickStart, m_sScope);
-	}
-}
-
-void CScopedLogTime::LogTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3)
-{
-	if (FileMisc::IsLoggingEnabled() && !Misc::IsEmpty(szSubScope))
-	{
-		// This updates m_dwIntermediateStart
-		FileMisc::LogTimeElapsed(m_dwIntermediateStart, szSubScope, szArg1, szArg2, szArg3);
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
 CString& FileMisc::TerminatePath(CString& sPath, BOOL bTerminate)
 {
 	// always unterminate first

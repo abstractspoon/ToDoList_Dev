@@ -73,6 +73,7 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\ComboListboxPositioner.h"
 #include "..\shared\sendfiletoEx.h"
+#include "..\shared\ScopedTimer.h"
 
 #include "..\3rdparty\gui.h"
 
@@ -1750,7 +1751,7 @@ void CToDoListWnd::OnSave()
 {
 	///////////////////////////////////////////////////////////////////
 	// PERMANENT LOGGING
-	CScopedLogTime log(_T("CToDoListWnd::OnSave()"));
+	CScopedLogTimer log(_T("CToDoListWnd::OnSave()"));
 	///////////////////////////////////////////////////////////////////
 
 	SaveTaskList(GetSelToDoCtrl());
@@ -8415,7 +8416,7 @@ void CToDoListWnd::OnEndSession(BOOL bEnding)
 	{
 		///////////////////////////////////////////////////////////////////////
 		// PERMANENT LOGGING
-		CScopedLogTime log(_T("CToDoListWnd::OnEndSession()"));
+		CScopedLogTimer log(_T("CToDoListWnd::OnEndSession()"));
 		///////////////////////////////////////////////////////////////////////
 		
 		m_bEndingSession = TRUE;

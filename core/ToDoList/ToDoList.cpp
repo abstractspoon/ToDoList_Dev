@@ -30,6 +30,7 @@
 #include "..\shared\rtlstylemgr.h"
 #include "..\shared\winhelpbutton.h"
 #include "..\shared\messagebox.h"
+#include "..\shared\ScopedTimer.h"
 
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
@@ -1943,7 +1944,7 @@ CString CToDoListApp::GetResourcePath(LPCTSTR szSubFolder, LPCTSTR szFile)
 
 void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 {
-	CScopedLogTime log(_T("CleanupAppFolder"));
+	CScopedLogTimer log(_T("CleanupAppFolder"));
 
 	CString sAppFolder = FileMisc::GetAppFolder();
 	CString sTasklists = FileMisc::GetAppResourceFolder(_T("Resources\\TaskLists"));
@@ -2012,7 +2013,7 @@ void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
 
 	if (FileMisc::CompareVersions(szPrevVer, sThisVer) < 0)
 	{
-		CScopedLogTime log(_T("FixupExampleTasklistsTaskDates"));
+		CScopedLogTimer log(_T("FixupExampleTasklistsTaskDates"));
 
 		CString sExamples = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Examples")));
 

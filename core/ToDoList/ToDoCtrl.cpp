@@ -51,6 +51,7 @@
 #include "..\shared\clipboard.h"
 #include "..\shared\mapex.h"
 #include "..\shared\messagebox.h"
+#include "..\shared\ScopedTimer.h"
 
 #include "..\3rdparty\msoutl.h"
 #include "..\3rdparty\shellicons.h"
@@ -5873,7 +5874,7 @@ TDC_FILE CToDoCtrl::Save(const CString& sFilePath, BOOL bFlush)
 TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL bFlush)
 {
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTime log(_T("CToDoCtrl::Save()"));
+	CScopedLogTimer log(_T("CToDoCtrl::Save()"));
 	CString sFileName = FileMisc::GetFileNameFromPath(sFilePath);
 	///////////////////////////////////////////////////////////////////////
 	
@@ -5954,7 +5955,7 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 TDC_FILE CToDoCtrl::SaveTaskfile(CTaskFile& tasks, const CString& sSavePath)
 {
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTime log(_T("CToDoCtrl::SaveTaskfile(%s)"), FileMisc::GetFileNameFromPath(sSavePath));
+	CScopedLogTimer log(_T("CToDoCtrl::SaveTaskfile(%s)"), FileMisc::GetFileNameFromPath(sSavePath));
 	///////////////////////////////////////////////////////////////////
 	CWaitCursor cursor;
 
@@ -6005,7 +6006,7 @@ TDC_FILE CToDoCtrl::MapTaskfileError(int nFileErr)
 void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 {
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTime log(_T("CToDoCtrl::BuildTasksForSave()"));
+	CScopedLogTimer log(_T("CToDoCtrl::BuildTasksForSave()"));
 	///////////////////////////////////////////////////////////////////
 
 	tasks.Reset();
@@ -6220,7 +6221,7 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 	SetReadonly(CDriveInfo::IsReadonlyPath(sFilePath) > 0);
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTime log(_T("CToDoCtrl::Load(%s)"), sFilePath);
+	CScopedLogTimer log(_T("CToDoCtrl::Load(%s)"), sFilePath);
 	///////////////////////////////////////////////////////////////////
 	
 	if (tasks.Load(sFilePath, NULL, FALSE)) // don't decrypt
@@ -6313,7 +6314,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 		return FALSE;
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTime log(_T("CToDoCtrl::LoadTasks()"));
+	CScopedLogTimer log(_T("CToDoCtrl::LoadTasks()"));
 	///////////////////////////////////////////////////////////////////
 
 	// save visible state
@@ -7622,7 +7623,7 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 #ifdef _DEBUG
 	DWORD dwTick = GetTickCount();
 #else
-	CScopedLogTime log(_T("CToDoCtrl::MoveSelectedTask()"));
+	CScopedLogTimer log(_T("CToDoCtrl::MoveSelectedTask()"));
 #endif
 
 	if (!CanMoveSelectedTask(nDirection))
@@ -9038,7 +9039,7 @@ void CToDoCtrl::HandleUnsavedComments()
 HTREEITEM CToDoCtrl::SetAllTasks(const CTaskFile& tasks)
 {
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTime log;
+	CScopedLogTimer log;
 	///////////////////////////////////////////////////////////////////
 
 	// Clear existing tree items

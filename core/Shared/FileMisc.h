@@ -131,22 +131,6 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CScopedLogTime
-{
-public:
-	CScopedLogTime();	
-	CScopedLogTime(LPCTSTR szScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));	
-	~CScopedLogTime();
-
-	void LogTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));
-
-protected:
-	DWORD m_dwTickStart, m_dwIntermediateStart;
-	CString m_sScope;
-};
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
 namespace FileMisc
 {
 	CString& TerminatePath(CString& sPath, BOOL bTerminate = TRUE);

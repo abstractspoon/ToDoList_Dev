@@ -22,6 +22,7 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\savefocus.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\ScopedTimer.h"
 
 #include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -541,7 +542,7 @@ void CFilteredToDoCtrl::ClearFilter()
 void CFilteredToDoCtrl::ToggleFilter()
 {
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTime log(_T("CFilteredToDoCtrl::ToggleFilter(%s)"), (m_filter.HasAnyFilter() ? _T("off") : _T("on")));
+	CScopedLogTimer log(_T("CFilteredToDoCtrl::ToggleFilter(%s)"), (m_filter.HasAnyFilter() ? _T("off") : _T("on")));
 	///////////////////////////////////////////////////////////////////
 
 	if (m_filter.ToggleFilter())
