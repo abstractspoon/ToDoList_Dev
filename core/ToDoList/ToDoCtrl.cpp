@@ -7620,18 +7620,16 @@ BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg)
 
 BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 {
-#ifdef _DEBUG
-	DWORD dwTick = GetTickCount();
-#else
-	CScopedLogTimer log(_T("CToDoCtrl::MoveSelectedTask()"));
-#endif
-
 	if (!CanMoveSelectedTask(nDirection))
 		return FALSE;
 	
+	CScopedLogTimer log(_T("CToDoCtrl::MoveSelectedTask()"));
+
 	// else
 	Flush(); // end any editing action
 	SetFocusToTasks(); // else datetime controls get their focus screwed
+
+	log.LogTimeElapsed(_T("Flush&SetFocusToTasks"));
 
 	// do the move
 	// move the tasks
@@ -7646,10 +7644,14 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	if (!m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
 		return FALSE;
 
+	log.LogTimeElapsed(_T("m_data.MoveTasks"));
+
 	CLockUpdates lu(*this);
 	HOLD_REDRAW(*this, m_taskTree);
 	
 	m_taskTree.MoveSelection(nDirection);
+
+	log.LogTimeElapsed(_T("m_taskTree.MoveSelection"));
 
 	// refresh parent states if moving to the right (adding subtasks)
 	if (nDirection == TDCM_RIGHT)
@@ -7657,9 +7659,7 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 
 	SetModified(TDCA_POSITION);
 
-#ifdef _DEBUG
-	TRACE(_T("CToDoCtrl::MoveSelectedTask() took %ld ms\n"), GetTickCount() - dwTick);
-#endif
+	log.LogTimeElapsed(_T("SetModified"));
 
 	return TRUE;
 }
