@@ -1254,7 +1254,10 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 			// so we don't need to handle it ourselves
 			return (nView != FTCV_TASKLIST);
 			
-		case TDCA_POSITION: // == move
+		case TDCA_POSITION:
+		case TDCA_POSITION_SAMEPARENT:
+		case TDCA_POSITION_DIFFERENTPARENT:
+			// Task was moved
 			return (nView == FTCV_TASKLIST && !IsSorting());
 
 		case TDCA_SELECTION:

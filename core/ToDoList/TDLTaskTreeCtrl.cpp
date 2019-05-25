@@ -2612,9 +2612,13 @@ void CTDLTaskTreeCtrl::SetModified(TDC_ATTRIBUTE nAttrib)
 		ASSERT(m_mapHTItems.GetCount() == (int)m_tcTasks.GetCount());
 		break;
 
+	case TDCA_POSITION:
+		ASSERT(0);
+		//fallthru
+
 	case TDCA_UNDO:
 	case TDCA_PASTE:
-	case TDCA_POSITION: // == move
+	case TDCA_POSITION_DIFFERENTPARENT:
 		RefreshItemBoldState();
 		ASSERT(m_mapHTItems.GetCount() == (int)m_tcTasks.GetCount());
 		break;

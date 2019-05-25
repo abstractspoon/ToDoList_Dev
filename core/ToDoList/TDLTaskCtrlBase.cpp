@@ -4470,11 +4470,40 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 	case TDCA_COLOR:
 		bRedrawTasks = TRUE;
 		break;
+
+	case TDCA_POSITION:	
+		ASSERT(0);
+		// fallthru
+
+	case TDCA_POSITION_DIFFERENTPARENT:
+		{
+			AccumulateRecalcColumn(TDCC_POSITION, aColIDs);
+
+			// Add all auto-calculated attributes
+			AccumulateRecalcColumn(TDCC_COST, aColIDs);
+			AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
+			AccumulateRecalcColumn(TDCC_TIMESPENT, aColIDs);
+
+			for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
+			{
+				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs.GetData()[nAttrib];
+
+				if (attribDef.HasFeature(TDCCAF_ACCUMULATE) ||
+					attribDef.HasFeature(TDCCAF_MINIMIZE) ||
+					attribDef.HasFeature(TDCCAF_MAXIMIZE))
+				{
+					AccumulateRecalcColumn(attribDef.GetColumnID(), aColIDs);
+				}
+			}
+		}
+		break;
 		
-	case TDCA_NONE:
+	case TDCA_POSITION_SAMEPARENT:		// moved within the same parent
+		bRedrawCols = IsColumnShowing(TDCC_POSITION);
+		break;
+		
 	case TDCA_PASTE:
 	case TDCA_MERGE:
-	case TDCA_POSITION: // == move
 	case TDCA_DELETE:
 	case TDCA_ARCHIVE:
 	case TDCA_UNDO:
@@ -4484,6 +4513,7 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 		aColIDs.Add(TDCC_ALL);
 		break;
 		
+	case TDCA_NONE:
 	case TDCA_TASKNAMEORCOMMENTS:
 	case TDCA_ANYTEXTATTRIBUTE:
 		ASSERT(0);
@@ -4496,7 +4526,7 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 			ASSERT(0);
 		break;
 	}
-		
+
 	RecalcColumnWidths(aColIDs);
 	
 	if (bRedrawTasks)
@@ -4630,7 +4660,9 @@ BOOL CTDLTaskCtrlBase::ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy
 	case TDCA_COST:
 	case TDCA_FILEREF:
 	case TDCA_POSITION:
-	case TDCA_LOCK:			
+	case TDCA_POSITION_SAMEPARENT:
+	case TDCA_POSITION_DIFFERENTPARENT:
+	case TDCA_LOCK:
 		{
 			ASSERT(nModCol != TDCC_NONE);
 

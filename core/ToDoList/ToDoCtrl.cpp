@@ -7270,6 +7270,8 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 			IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 			HOLD_REDRAW(*this, m_taskTree);
 
+			DWORD dwSrcParentID = GetSelectedTaskParentID();
+			
 			DWORD dwDestParentID = m_taskTree.GetTaskID(htiDropTarget);
 			DWORD dwDestPrevSiblingID = m_taskTree.GetTaskID(htiDropAfter);
 
@@ -7286,7 +7288,10 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 				// then mark the parent as incomplete too
 				FixupParentCompletion(dwDestParentID);
 
-				SetModified(TDCA_POSITION);
+				if (dwSrcParentID == dwDestParentID)
+					SetModified(TDCA_POSITION_SAMEPARENT);
+				else
+					SetModified(TDCA_POSITION_DIFFERENTPARENT);
 			}
 		}
 		break;
@@ -7657,7 +7662,10 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	if (nDirection == TDCM_RIGHT)
 		FixupParentCompletion(dwDestParentID);
 
-	SetModified(TDCA_POSITION);
+	if ((nDirection == TDCM_DOWN) || (nDirection == TDCM_UP))
+		SetModified(TDCA_POSITION_SAMEPARENT);
+	else
+		SetModified(TDCA_POSITION_DIFFERENTPARENT);
 
 	log.LogTimeElapsed(_T("SetModified"));
 
@@ -11783,6 +11791,8 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	// these have no field
 	case TDCA_SUBTASKDONE:
 	case TDCA_POSITION:
+	case TDCA_POSITION_SAMEPARENT:
+	case TDCA_POSITION_DIFFERENTPARENT:
 	case TDCA_CREATEDBY:
 	case TDCA_CREATIONDATE:
 	case TDCA_LASTMODDATE:

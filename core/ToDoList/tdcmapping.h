@@ -160,7 +160,6 @@ namespace TDC
 		case TDCC_TIMESPENT:	return ID_SORTBY_TIMESPENT;
 		case TDCC_TRACKTIME:	return ID_SORTBY_TIMETRACKING;
 		case TDCC_VERSION:		return ID_SORTBY_VERSION;
-
 		}
 		
 		// handle custom columns
@@ -201,7 +200,6 @@ namespace TDC
 		case TDCA_NONE:				return TDCC_NONE;
 		case TDCA_PATH:				return TDCC_PATH;
 		case TDCA_PERCENT:			return TDCC_PERCENT;
-		case TDCA_POSITION:			return TDCC_POSITION;
 		case TDCA_PRIORITY:			return TDCC_PRIORITY;
 		case TDCA_RECURRENCE:		return TDCC_RECURRENCE;
 		case TDCA_RISK:				return TDCC_RISK;
@@ -214,6 +212,10 @@ namespace TDC
 		case TDCA_TIMEEST:			return TDCC_TIMEEST;
 		case TDCA_TIMESPENT:		return TDCC_TIMESPENT;
 		case TDCA_VERSION:			return TDCC_VERSION;
+
+		case TDCA_POSITION_SAMEPARENT:	
+		case TDCA_POSITION_DIFFERENTPARENT:
+		case TDCA_POSITION:			return TDCC_POSITION;
 		}
 		
 		// handle custom columns
@@ -262,6 +264,8 @@ namespace TDC
 		// don't have controls
 		case TDCA_SUBTASKDONE:
 		case TDCA_POSITION:
+		case TDCA_POSITION_SAMEPARENT:
+		case TDCA_POSITION_DIFFERENTPARENT:
 		case TDCA_PATH:
 		case TDCA_NONE:
 		case TDCA_FLAG:

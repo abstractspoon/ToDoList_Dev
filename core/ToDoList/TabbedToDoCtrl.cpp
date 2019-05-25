@@ -1734,6 +1734,8 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 	case TDCA_CREATIONDATE:
 	case TDCA_CREATEDBY:
 	case TDCA_POSITION:
+	case TDCA_POSITION_SAMEPARENT:
+	case TDCA_POSITION_DIFFERENTPARENT:
 		ASSERT(0);
 		break;
 
@@ -3355,7 +3357,12 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(TDC_ATTRIBUTE nAttrib)
 	case TDCA_PASTE:
 	case TDCA_MERGE:
 	case TDCA_ARCHIVE:
-	case TDCA_POSITION: // == move
+		break;
+
+	case TDCA_POSITION:
+	case TDCA_POSITION_SAMEPARENT:
+	case TDCA_POSITION_DIFFERENTPARENT:
+		// move
 		break;
 
 	default:
@@ -3402,12 +3409,18 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 	{
 	case TDCA_DELETE:
 	case TDCA_UNDO:
-	case TDCA_POSITION: // == move
 	case TDCA_PASTE:
 	case TDCA_MERGE:
 	case TDCA_ARCHIVE:
 	case TDCA_PROJECTNAME:
 	case TDCA_ENCRYPT:
+		ASSERT(0);
+		return;
+
+	case TDCA_POSITION:
+	case TDCA_POSITION_SAMEPARENT:
+	case TDCA_POSITION_DIFFERENTPARENT: 
+		// == move
 		ASSERT(0);
 		return;
 	}
@@ -3569,13 +3582,17 @@ BOOL CTabbedToDoCtrl::IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_NEWTASK: 
 	case TDCA_DELETE:
 	case TDCA_UNDO:
-	case TDCA_POSITION: // == move
 	case TDCA_PASTE:
 	case TDCA_MERGE:
 	case TDCA_ARCHIVE:
 	case TDCA_CUSTOMATTRIBDEFS:
 	case TDCA_PROJECTNAME:
 	case TDCA_ENCRYPT:
+		return FALSE;
+
+	case TDCA_POSITION:
+	case TDCA_POSITION_SAMEPARENT:
+	case TDCA_POSITION_DIFFERENTPARENT:
 		return FALSE;
 
 	default:
@@ -4739,7 +4756,10 @@ BOOL CTabbedToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 					m_taskTree.MoveSelection(htiDestParent, htiDestPrevSibling);
 
 					// Enable the move to be saved
-					CToDoCtrl::SetModified(TDCA_POSITION, aSelTaskIDs);
+					if (nDirection == TDCM_DOWN || nDirection == TDCM_UP)
+						CToDoCtrl::SetModified(TDCA_POSITION_SAMEPARENT, aSelTaskIDs);
+					else
+						CToDoCtrl::SetModified(TDCA_POSITION_DIFFERENTPARENT, aSelTaskIDs);
 
 					// Mark _other_ extensions as requiring full update
 					SetExtensionsNeedTaskUpdate(TRUE, nView);
