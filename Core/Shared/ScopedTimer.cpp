@@ -105,7 +105,7 @@ void CScopedTraceTimer::TraceTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPC
 		CString sMessage = FormatTimeElapsed(sScope, m_dwIntermediateStart);
 
 		TRACE(sMessage);
-		TRACE('\n');
+		TRACE(_T("\n"));
 	}
 #endif
 }
@@ -113,7 +113,7 @@ void CScopedTraceTimer::TraceTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPC
 void CScopedTraceTimer::OnScopeEnded(const CString& sMessage)
 {
 	TRACE(sMessage);
-	TRACE('\n');
+	TRACE(_T("\n"));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
