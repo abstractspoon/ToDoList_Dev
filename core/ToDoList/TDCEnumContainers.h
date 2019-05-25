@@ -99,10 +99,12 @@ class CTDCColumnIDMap : public CTDCBaseEnumSet<TDC_COLUMN>
 {
 public:
 	CTDCColumnIDMap();
+	CTDCColumnIDMap(TDC_COLUMN nColID);
 	CTDCColumnIDMap(const CTDCColumnIDMap& mapOther);
 	~CTDCColumnIDMap();
 
 	void Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt);
+	BOOL Has(TDC_COLUMN nColID) const;
 };
 
 //////////////////////////////////////////////////////////////////////

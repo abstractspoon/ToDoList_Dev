@@ -138,7 +138,6 @@ public:
 
 	void DeleteAll();
 	void DeselectAll();
-	BOOL CancelOperation();
 	BOOL PreTranslateMessage(MSG* pMsg);
 	void SetModified(TDC_ATTRIBUTE nAttrib);
 
@@ -184,7 +183,7 @@ protected:
 	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
 	BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
-	int RecalcColumnWidth(int nCol, CDC* pDC) const;
+	int CalculateColumnWidth(int nCol, CDC* pDC) const;
 	DWORD GetColumnItemTaskID(int nItem) const;
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	BOOL IsColumnShowing(TDC_COLUMN nColID) const;
@@ -192,7 +191,6 @@ protected:
 
 protected:
 	// pseudo-message handlers
-	void OnTreeKeyDown(NMTVKEYDOWN* pTVKD);
 	LRESULT OnTreeGetDispInfo(NMTVDISPINFO* pTVDI);
 
 protected:
@@ -205,7 +203,6 @@ protected:
 	inline HWND Tasks() const { return m_tcTasks; }
 	inline HWND TasksHeader() const { return m_hdrTasks; }
 	
-	void RedrawTree(BOOL bErase = FALSE);
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader) const;
 	BOOL GetItemTitleRect(HTREEITEM hti, TDC_TITLERECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
 

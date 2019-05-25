@@ -1683,9 +1683,9 @@ DWORD CTDLTaskTreeCtrl::GetColumnItemTaskID(int nItem) const
 	return GetTaskID((HTREEITEM)m_lcColumns.GetItemData(nItem));
 }
 
-int CTDLTaskTreeCtrl::RecalcColumnWidth(int nCol, CDC* pDC) const
+int CTDLTaskTreeCtrl::CalculateColumnWidth(int nCol, CDC* pDC) const
 {
-	return CTDLTaskCtrlBase::RecalcColumnWidth(nCol, pDC, TRUE);
+	return CTDLTaskCtrlBase::CalculateColumnWidth(nCol, pDC, TRUE);
 }
 
 BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_TITLERECT nArea, CRect& rect, CDC* pDC, LPCTSTR szTitle) const

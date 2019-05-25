@@ -244,7 +244,7 @@ public:
 	
 	DWORD GetTaskID() const { return m_dwID; }
 	DWORD GetSubTaskID(int nPos) const;
-	BOOL HasSubTask(DWORD dwSubtaskID, BOOL bImmediate = TRUE) const;
+	BOOL HasParent(DWORD dwParentID, BOOL bImmediate = TRUE) const;
 	
 	int GetSubTaskPosition(DWORD dwID) const;
 	int GetPosition() const;
@@ -255,8 +255,6 @@ public:
 	
 	BOOL ParentIsRoot() const { return (GetParentTaskID() == 0); }
 	BOOL IsRoot() const { return (GetTaskID() == 0); }
-	
-	DWORD GetPreviousSubTaskID(int nPos);
 	
 	int GetSubTaskCount() const { return m_aSubTasks.GetSize(); }
 	BOOL HasSubTasks() const { return GetSubTaskCount() > 0; }

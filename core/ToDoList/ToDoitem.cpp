@@ -937,24 +937,6 @@ DWORD TODOSTRUCTURE::GetSubTaskID(int nPos) const
 	return pTDS ? pTDS->GetTaskID() : 0;
 }
 
-BOOL TODOSTRUCTURE::HasSubTask(DWORD dwSubtaskID, BOOL bImmediate) const
-{
-	int nPos = GetSubTaskPosition(dwSubtaskID);
-
-	if ((nPos != -1) || bImmediate)
-		return (nPos != -1);
-
-	// check subtasks
-	for (int nSubTask = 0; nSubTask < GetSubTaskCount(); nSubTask++)
-	{
-		if (GetSubTask(nPos)->HasSubTask(dwSubtaskID, FALSE))
-			return TRUE;
-	}
-
-	// else
-	return FALSE;
-}
-
 int TODOSTRUCTURE::GetSubTaskPosition(DWORD dwID) const
 {
 	ASSERT(dwID);
@@ -970,6 +952,21 @@ int TODOSTRUCTURE::GetSubTaskPosition(DWORD dwID) const
 	
 	// not found
 	return -1;
+}
+
+BOOL TODOSTRUCTURE::HasParent(DWORD dwParentID, BOOL bImmediate) const
+{
+	const TODOSTRUCTURE* pTDSParent = GetParentTask();
+
+	while (pTDSParent && (pTDSParent->GetTaskID() != dwParentID))
+	{
+		if (bImmediate)
+			return FALSE;
+
+		pTDSParent = pTDSParent->GetParentTask();
+	}
+
+	return (pTDSParent != NULL);
 }
 
 int TODOSTRUCTURE::GetPosition() const
@@ -994,15 +991,6 @@ TODOSTRUCTURE* TODOSTRUCTURE::GetParentTask() const
 	ASSERT(this != m_pTDSParent);
 
 	return m_pTDSParent;
-}
-
-DWORD TODOSTRUCTURE::GetPreviousSubTaskID(int nPos)
-{
-	if (nPos <= 0 || nPos >= GetSubTaskCount())
-		return 0;
-	
-	// else
-	return GetSubTaskID(nPos - 1);
 }
 
 BOOL TODOSTRUCTURE::HasSameParent(const TODOSTRUCTURE* pTDS) const
@@ -1156,7 +1144,7 @@ DWORD CToDoCtrlDataStructure::GetPreviousTaskID(DWORD dwID) const
 		return 0;
 	
 	// else
-	return pTDSParent->GetPreviousSubTaskID(nPos);
+	return pTDSParent->GetSubTaskID(nPos - 1);
 }
 
 DWORD CToDoCtrlDataStructure::GetParentTaskID(DWORD dwID) const

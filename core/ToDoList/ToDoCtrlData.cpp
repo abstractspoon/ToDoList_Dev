@@ -248,20 +248,17 @@ BOOL CToDoCtrlData::HasTask(DWORD dwTaskID) const
 	return m_items.HasTask(dwTaskID);
 }
 
-BOOL CToDoCtrlData::TaskHasSubtask(DWORD dwTaskID, DWORD dwSubtaskID, BOOL bImmediate) const
+BOOL CToDoCtrlData::TaskHasParent(DWORD dwTaskID, DWORD dwParentID, BOOL bImmediate) const
 {
-	if (dwTaskID == 0)
-		return m_struct.HasSubTask(dwSubtaskID, bImmediate);
-
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDS(dwTaskID, pTDS, FALSE);
 
-	return pTDS->HasSubTask(dwSubtaskID, bImmediate);
+	return pTDS->HasParent(dwParentID, bImmediate);
 }
 
 BOOL CToDoCtrlData::TaskHasSibling(DWORD dwTaskID, DWORD dwSiblingID, BOOL bImmediate) const
 {
-	if (dwTaskID == 0)
+	if ((dwTaskID == 0) || (dwSiblingID == 0))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -272,18 +269,18 @@ BOOL CToDoCtrlData::TaskHasSibling(DWORD dwTaskID, DWORD dwSiblingID, BOOL bImme
 	GET_TDS(dwTaskID, pTDS, FALSE);
 
 	const TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
-	BOOL bSameParent = (pTDSParent->HasSubTask(dwSiblingID, TRUE));
 
-	if (!bSameParent || bImmediate)
-	{
-		return bSameParent;
-	}
+	if (!TaskHasParent(dwSiblingID, pTDS->GetParentTaskID()))
+		return FALSE;
+
+	if (!bImmediate)
+		return TRUE;
 
 	// Check they have adjacent positions
 	int nPos = pTDSParent->GetSubTaskPosition(dwTaskID);
-	int nSiblingPos = pTDSParent->GetSubTaskPosition(dwSiblingID);
 
-	return (abs(nPos - nSiblingPos) == 1);
+	return ((pTDS->GetSubTaskID(nPos - 1) == dwSiblingID) ||
+			(pTDS->GetSubTaskID(nPos + 1) == dwSiblingID));
 }
 
 POSITION CToDoCtrlData::GetFirstTaskPosition() const
@@ -2789,7 +2786,7 @@ BOOL CToDoCtrlData::MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestP
 		return FALSE;
 	}
 	
-	DWORD dwPrevSiblingID = pTDSSrcParent->GetPreviousSubTaskID(nSrcPos);
+	DWORD dwSrcPrevSiblingID = pTDSSrcParent->GetSubTaskID(nSrcPos - 1);
 	
 	// get destination
 	TODOSTRUCTURE* pTDSDestParent = NULL;
@@ -2810,7 +2807,7 @@ BOOL CToDoCtrlData::MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestP
 	if ((pTDSDestParent == pTDSSrcParent) && (nDestPos == nSrcPos))
 		return FALSE;
 
-	return (MoveTask(pTDSSrcParent, nSrcPos, dwPrevSiblingID, pTDSDestParent, nDestPos) != -1);
+	return (MoveTask(pTDSSrcParent, nSrcPos, dwSrcPrevSiblingID, pTDSDestParent, nDestPos) != -1);
 }
 
 int CToDoCtrlData::MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwSrcPrevSiblingID,
@@ -2925,8 +2922,8 @@ BOOL CToDoCtrlData::MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID,
 
 		if (tdsCopy.FindTask(dwTaskID, pTDSDummy, nDummyPos))
 		{
-			DWORD dwPrevSiblingID = pTDSDummy->GetPreviousSubTaskID(nDummyPos);
-			nDestPos = MoveTask(pTDSSrcParent, nSrcPos, dwPrevSiblingID, pTDSDestParent, nDestPos);
+			DWORD dwSrcPrevSiblingID = pTDSDummy->GetSubTaskID(nDummyPos - 1);
+			nDestPos = MoveTask(pTDSSrcParent, nSrcPos, dwSrcPrevSiblingID, pTDSDestParent, nDestPos);
 			
 			if (nDestPos != -1)
 				nMoved++;

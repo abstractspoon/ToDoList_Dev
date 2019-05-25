@@ -89,7 +89,6 @@ public:
 	void RedrawTasks(BOOL bErase = TRUE) const;
 	void RedrawColumns(BOOL bErase = TRUE) const;
 	void RedrawColumn(TDC_COLUMN nColID) const;
-	void RecalcColumnWidth(TDC_COLUMN nColID);
 	void RecalcColumnWidths();
 	void RecalcAllColumnWidths();
 	
@@ -230,7 +229,6 @@ public:
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) const { crDue = m_crDue; crDueToday = m_crDueToday; }
 	BOOL ModCausesTaskTextColorChange(TDC_ATTRIBUTE nModType) const;
 
-	BOOL CancelOperation();
 	void SetReadOnly(bool bReadOnly) { m_bReadOnly = bReadOnly; }
 	void Resize(const CRect& rect);
 	void SetTimeTrackTaskID(DWORD dwTaskID);
@@ -351,7 +349,7 @@ protected:
 	virtual DWORD HitTestTasksTask(const CPoint& ptScreen) const = 0;
 	virtual void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE) = 0;
 	virtual HWND Tasks() const = 0;
-	virtual int RecalcColumnWidth(int nCol, CDC* pDC) const = 0;
+	virtual int CalculateColumnWidth(int nCol, CDC* pDC) const = 0;
 	virtual GM_ITEMSTATE GetColumnItemState(int nItem) const = 0;
 	virtual void DeselectAll() = 0;
 	virtual DWORD GetHelpID() const = 0;
@@ -372,18 +370,19 @@ protected:
 	BOOL GetTaskReminder(DWORD dwTaskID, COleDateTime& dtRem) const;
 	time_t GetTaskReminder(DWORD dwTaskID) const;
 	TDC_COLUMN GetColumnID(int nCol) const; // zero is always 'tasks'
-	int RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) const;
 	CFont* GetTaskFont(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bColumns = TRUE);
 	BOOL HasThemedState(GM_ITEMSTATE nState) const;
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
 	void UpdateHeaderSorting();
 	CString FormatInfoTip(DWORD dwTaskID, int nMaxLen) const;
-	void RecalcColumnWidths(BOOL bCustom);
-	void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs);
 	const CEnHeaderCtrl& GetColumnHeaderCtrl(TDC_COLUMN nColID) const;
 	BOOL IsVisible() const;
 	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize = 16, int nImage = 0, int nCount = 1) const;
 	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0, int nCount = 1) const;
+
+	int CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
+	void RecalcColumnWidths(BOOL bCustomOnly);
+	void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs);
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);
 	BOOL GetColumnOrder(CDWordArray& aColumns) const;
@@ -403,6 +402,7 @@ protected:
 	void DoSort();
 	BOOL ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy) const;
 	BOOL AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const;
+	int GetVisibleColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const;
 
 	// private structures to help with sorting --------------------------
 	struct TDSORTFLAGS

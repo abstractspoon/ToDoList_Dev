@@ -158,6 +158,12 @@ CTDCColumnIDMap::CTDCColumnIDMap()
 {
 }
 
+CTDCColumnIDMap::CTDCColumnIDMap(TDC_COLUMN nColID)
+	: CTDCBaseEnumSet<TDC_COLUMN>()
+{
+	Add(nColID);
+}
+
 CTDCColumnIDMap::CTDCColumnIDMap(const CTDCColumnIDMap& mapOther)
 	: CTDCBaseEnumSet<TDC_COLUMN>(mapOther)
 {
@@ -171,6 +177,23 @@ CTDCColumnIDMap::~CTDCColumnIDMap()
 void CTDCColumnIDMap::Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)
 {
 	CTDCBaseEnumSet<TDC_COLUMN>::Load(pPrefs, szKey, szValueKeyFmt, TDCC_NONE);
+}
+
+BOOL CTDCColumnIDMap::Has(TDC_COLUMN nColID) const
+{
+	if (CTDCBaseEnumSet<TDC_COLUMN>::Has(nColID))
+		return TRUE;
+
+	// Date/Time fallbacks
+	switch (nColID)
+	{
+	case TDCC_CREATIONDATE:	return CTDCBaseEnumSet<TDC_COLUMN>::Has(TDCC_CREATIONTIME);
+	case TDCC_STARTDATE:	return CTDCBaseEnumSet<TDC_COLUMN>::Has(TDCC_STARTTIME);
+	case TDCC_DUEDATE:		return CTDCBaseEnumSet<TDC_COLUMN>::Has(TDCC_DUETIME);
+	case TDCC_DONEDATE:		return CTDCBaseEnumSet<TDC_COLUMN>::Has(TDCC_DONETIME);
+	}
+
+	return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////

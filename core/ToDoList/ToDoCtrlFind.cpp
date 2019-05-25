@@ -187,11 +187,15 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 		{
 		case TDCA_COST:	
 			{
-				// get cost
 				double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
 				
-				if ((dCost != 0) || !m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
-					sLongest = Misc::Format(dCost, 2);
+				// No need to check children because this calculation
+				// already takes account of them
+				if ((dCost == 0) && m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
+					return EMPTY_STR;
+
+				// else
+				return Misc::Format(dCost, 2);
 			}
 			break;
 
@@ -207,20 +211,8 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 			sLongest = m_formatter.GetTaskPath(pTDI, pTDS);
 			break;
 
-		case TDCA_ALLOCTO:		
-		case TDCA_CATEGORY:		
-		case TDCA_TAGS:			
-		case TDCA_ALLOCBY:		
-		case TDCA_STATUS:		
-		case TDCA_VERSION:		
-		case TDCA_EXTERNALID:	
-		case TDCA_RECURRENCE:	
-		case TDCA_CREATEDBY:	
-			ASSERT(0); // wrong function called
-			return EMPTY_STR;
-
-		default:		
-			ASSERT(0); // not currently supported
+		default: // not supported by this function
+			ASSERT(0);
 			return EMPTY_STR;
 		}
 	}
