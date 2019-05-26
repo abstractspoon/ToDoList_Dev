@@ -1752,6 +1752,7 @@ void CToDoListWnd::OnSave()
 	///////////////////////////////////////////////////////////////////
 	// PERMANENT LOGGING
 	CScopedLogTimer log(_T("CToDoListWnd::OnSave()"));
+	log.LogStart();
 	///////////////////////////////////////////////////////////////////
 
 	SaveTaskList(GetSelToDoCtrl());
@@ -7494,7 +7495,10 @@ void CToDoListWnd::OnMovetaskup()
 #ifdef _DEBUG
 	TRACE(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick);
 #else
-	FileMisc::LogText(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick);
+	if (FileMisc::IsLoggingEnabled())
+	{
+		FileMisc::LogTextRaw(Misc::FormatT(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick));
+	}
 #endif
 
 	dwLastTick = GetTickCount();

@@ -149,9 +149,7 @@ protected:
 
 	GM_ITEMSTATE GetListItemState(int nItem) const;
 
-#ifdef _DEBUG
 	LPCTSTR GetDebugName() const { return _T("ListView"); }
-#endif
 
 };
 

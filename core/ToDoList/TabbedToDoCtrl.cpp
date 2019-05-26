@@ -103,6 +103,9 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, CTDLContentMgr& mgrC
 
 	// tab is on by default
 	m_aStyles.SetAt(TDCS_SHOWTREELISTBAR, 1);
+
+	// Will be enabled on first showing
+	m_taskList.EnableRecalcColumns(FALSE);
 }
 
 CTabbedToDoCtrl::~CTabbedToDoCtrl()
@@ -711,6 +714,9 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				pLVData->bNeedFontUpdate = FALSE;
 				m_taskList.SetFont(m_taskTree.GetFont());
 			}
+
+			// This does nothing if already enabled
+			m_taskList.EnableRecalcColumns(TRUE);
 		}
 		break;
 

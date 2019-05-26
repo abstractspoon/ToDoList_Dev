@@ -5874,8 +5874,7 @@ TDC_FILE CToDoCtrl::Save(const CString& sFilePath, BOOL bFlush)
 TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL bFlush)
 {
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTimer log(_T("CToDoCtrl::Save()"));
-	CString sFileName = FileMisc::GetFileNameFromPath(sFilePath);
+	CScopedLogTimer log(_T("CToDoCtrl::Save(%s)"), FileMisc::GetFileNameFromPath(sFilePath));
 	///////////////////////////////////////////////////////////////////////
 	
 	ASSERT (GetSafeHwnd());
@@ -6221,11 +6220,14 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 	SetReadonly(CDriveInfo::IsReadonlyPath(sFilePath) > 0);
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTimer log(_T("CToDoCtrl::Load(%s)"), sFilePath);
+	CScopedLogTimer log(_T("CToDoCtrl::Load(%s)"), FileMisc::GetFileNameFromPath(sFilePath));
+	log.LogStart();
 	///////////////////////////////////////////////////////////////////
 	
 	if (tasks.Load(sFilePath, NULL, FALSE)) // don't decrypt
 	{
+		log.LogTimeElapsed(_T("CToDoCtrl::Load(tasks.Load)"), FileMisc::GetFileNameFromPath(sFilePath));
+
 		m_sourceControl.InitialiseState(tasks);
 
 		BOOL bWantCheckout = (HasStyle(TDCS_CHECKOUTONLOAD) &&
@@ -6266,9 +6268,18 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 				TSH().RemoveAll();
 				TSH().ClearHistory();
 			}
-					
+
 			LoadTasks(tasks);
+					
+			// PERMANENT LOGGING //////////////////////////////////////////////
+			log.LogTimeElapsed(_T("CToDoCtrl::Load(LoadTasks)"));
+			///////////////////////////////////////////////////////////////////
+
 			LoadTaskIcons();
+					
+			// PERMANENT LOGGING //////////////////////////////////////////////
+			log.LogTimeElapsed(_T("CToDoCtrl::Load(LoadTaskIcons)"));
+			///////////////////////////////////////////////////////////////////
 			
 			SetModified(FALSE);
 			return TDCF_SUCCESS;
@@ -6313,8 +6324,10 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	if (!GetSafeHwnd())
 		return FALSE;
 
+	m_taskTree.EnableRecalcColumns(FALSE);
+
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTimer log(_T("CToDoCtrl::LoadTasks()"));
+	CScopedLogTimer log;
 	///////////////////////////////////////////////////////////////////
 
 	// save visible state
@@ -6439,11 +6452,13 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	// restore previously visibility
 	if (bHidden)
 		ShowWindow(SW_HIDE);
+	
+	m_taskTree.EnableRecalcColumns(TRUE);
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	log.LogTimeElapsed(_T("CToDoCtrl::LoadTasks(Remaining)"));
 	///////////////////////////////////////////////////////////////////
-
+	
 	return TRUE;
 }
 
@@ -7628,7 +7643,10 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	if (!CanMoveSelectedTask(nDirection))
 		return FALSE;
 	
+	// PERMANENT LOGGING //////////////////////////////////////////////
 	CScopedLogTimer log(_T("CToDoCtrl::MoveSelectedTask()"));
+	log.LogStart();
+	///////////////////////////////////////////////////////////////////
 
 	// else
 	Flush(); // end any editing action
@@ -9047,7 +9065,8 @@ void CToDoCtrl::HandleUnsavedComments()
 HTREEITEM CToDoCtrl::SetAllTasks(const CTaskFile& tasks)
 {
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTimer log;
+// 	CScopedLogTimer log(_T("CToDoCtrl::SetAllTasks"));
+// 	log.LogStart();
 	///////////////////////////////////////////////////////////////////
 
 	// Clear existing tree items
@@ -9055,21 +9074,21 @@ HTREEITEM CToDoCtrl::SetAllTasks(const CTaskFile& tasks)
 	m_taskTree.DeleteAll();
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	log.LogTimeElapsed(_T("CToDoCtrl::SetAllTasks(m_taskTree.DeleteAll)"));
+// 	log.LogTimeElapsed(_T("CToDoCtrl::SetAllTasks(m_taskTree.DeleteAll)"));
 	///////////////////////////////////////////////////////////////////
 
 	// Build data structure first 
 	m_data.BuildDataModel(tasks);
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	log.LogTimeElapsed(_T("CToDoCtrl::SetAllTasks(m_data.BuildDataModel)"));
+// 	log.LogTimeElapsed(_T("CToDoCtrl::SetAllTasks(m_data.BuildDataModel)"));
 	///////////////////////////////////////////////////////////////////
 
 	// Then tree structure
 	HTREEITEM hti = RebuildTree();
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	log.LogTimeElapsed(_T("CToDoCtrl::SetAllTasks(RebuildTree)"));
+// 	log.LogTimeElapsed(_T("CToDoCtrl::SetAllTasks(RebuildTree)"));
 	///////////////////////////////////////////////////////////////////
 
 	return hti;
@@ -10412,14 +10431,8 @@ void CToDoCtrl::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CRuntimeDlg::OnShowWindow(bShow, nStatus);
 	
-	if (bShow)
-	{
- 		//Resize();
-	}
-	else
-	{
+	if (!bShow)
 		m_findReplace.DestroyDialog();
-	}
 }
 
 LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM /*lParam*/)

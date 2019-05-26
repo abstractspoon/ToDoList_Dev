@@ -91,6 +91,7 @@ public:
 	void RedrawColumn(TDC_COLUMN nColID) const;
 	void RecalcColumnWidths();
 	void RecalcAllColumnWidths();
+	void EnableRecalcColumns(BOOL bEnable = TRUE);
 	
  	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTrueTask(dwTaskID); }
  	inline UINT GetTaskCount() const { return m_data.GetTaskCount(); }
@@ -241,8 +242,6 @@ public:
 	void ClientToScreen(LPRECT pRect) const { CWnd::ClientToScreen(pRect); }
 	void ScreenToClient(LPRECT pRect) const { CWnd::ScreenToClient(pRect); }
 
-	const CTDCTaskComparer& Comparer() const { return m_comparer; }
-
 	static const TDCCOLUMN* GetColumn(TDC_COLUMN nColID);
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
 	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);
@@ -300,6 +299,7 @@ protected:
 private:
 	BOOL m_bBoundSelecting;
 	BOOL m_bAutoFitSplitter;
+	BOOL m_bEnableRecalcColumns;
 
 protected:
 	// Virtual function overrides
@@ -529,36 +529,10 @@ protected:
 							const TDSORTCOLUMN& sort, 
 							const TDSORTFLAGS& flags);
 	
-#ifdef _DEBUG
+	// ----------------------------------------------------
+
 	virtual LPCTSTR GetDebugName() const = 0;
-#endif
 
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-class CTCBHoldResync
-{
-public:
-	CTCBHoldResync(CTDLTaskCtrlBase& tls) : m_tcb(tls), m_bResyncHeld(FALSE)
-	{
-		if (m_tcb.IsResyncEnabled())
-		{
-			m_tcb.EnableResync(FALSE, m_tcb.PrimaryWnd());
-			m_bResyncHeld = TRUE;
-		}
-	}
-	
-	~CTCBHoldResync()
-	{
-		if (m_bResyncHeld)
-			m_tcb.EnableResync(TRUE, m_tcb.PrimaryWnd());
-	}
-	
-protected:
-	CTDLTaskCtrlBase& m_tcb;
-	BOOL m_bResyncHeld;
-};
-
 
 #endif // !defined(AFX_TDCTASKCTRLBASE_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_)

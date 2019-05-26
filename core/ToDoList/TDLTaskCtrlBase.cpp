@@ -23,6 +23,7 @@
 #include "..\shared\webmisc.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\msoutlookhelper.h"
+#include "..\shared\ScopedTimer.h"
 
 #include "..\3rdparty\colordef.h"
 
@@ -120,7 +121,8 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 	m_calculator(data),
 	m_formatter(data),
 	m_bAutoFitSplitter(TRUE),
-	m_imageIcons(16, 16)
+	m_imageIcons(16, 16),
+	m_bEnableRecalcColumns(TRUE)
 {
 	// build one time column map
 	if (s_mapColumns.IsEmpty())
@@ -228,7 +230,6 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255));
 
 	BuildColumns();
-	RecalcColumnWidths();
 	OnColumnVisibilityChange(CTDCColumnIDMap());
 	PostResize();
 
@@ -767,11 +768,13 @@ void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
 
 void CTDLTaskCtrlBase::OnImageListChange()
 {
+	CHoldRedraw hr(Tasks());
+
 	SetTasksImageList(m_ilTaskIcons, FALSE, !IsColumnShowing(TDCC_ICON));
 	SetTasksImageList(m_ilCheckboxes, TRUE, (!IsColumnShowing(TDCC_DONE) && HasStyle(TDCS_ALLOWTREEITEMCHECKBOX)));
 
-	if (IsVisible())
-		::InvalidateRect(Tasks(), NULL, FALSE);
+// 	if (IsVisible())
+// 		::InvalidateRect(Tasks(), NULL, FALSE);
 }
 
 BOOL CTDLTaskCtrlBase::IsVisible() const
@@ -1005,8 +1008,21 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 	return TRUE;
 }
 
+void CTDLTaskCtrlBase::EnableRecalcColumns(BOOL bEnable)
+{
+	if ((bEnable && !m_bEnableRecalcColumns) || (!bEnable && m_bEnableRecalcColumns))
+	{
+		m_bEnableRecalcColumns = bEnable;
+
+		if (bEnable)
+			RecalcColumnWidths();
+	}
+}
+
 void CTDLTaskCtrlBase::RecalcAllColumnWidths()
 {
+	ASSERT(m_bEnableRecalcColumns);
+
 	m_hdrColumns.ClearAllTracked();
 
 	RecalcColumnWidths();
@@ -1014,6 +1030,11 @@ void CTDLTaskCtrlBase::RecalcAllColumnWidths()
 
 void CTDLTaskCtrlBase::RecalcColumnWidths()
 {
+	if (!m_bEnableRecalcColumns)
+		return;
+
+	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcColumnWidths(%s)"), GetDebugName());
+
 	VERIFY(m_ilFileRef.Initialize());
 	
 	RecalcColumnWidths(FALSE); // Standard and Custom cols
@@ -1245,11 +1266,11 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 		if (!CTDCCustomAttributeHelper::GetAttributeDef(sort.nBy, base.m_aCustomAttribDefs, attribDef))
 			return 0;
 		
-		return base.Comparer().CompareTasks(dwTaskID1, dwTaskID2, attribDef, sort.bAscending);
+		return base.m_comparer.CompareTasks(dwTaskID1, dwTaskID2, attribDef, sort.bAscending);
 	}
 	
 	// else default attribute
-	return base.Comparer().CompareTasks(dwTaskID1, 
+	return base.m_comparer.CompareTasks(dwTaskID1, 
 										dwTaskID2, 
 										sort.nBy, 
 										sort.bAscending, 

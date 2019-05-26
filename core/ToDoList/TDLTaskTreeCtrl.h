@@ -231,8 +231,9 @@ protected:
 #ifdef _DEBUG
 	void Trace(HTREEITEM hti, int nLevel);
 	void Trace(LPCTSTR szComment, HTREEITEM hti);
-	LPCTSTR GetDebugName() const { return _T("TaskTree"); }
 #endif
+
+	LPCTSTR GetDebugName() const { return _T("TaskTree"); }
 
 };
 
