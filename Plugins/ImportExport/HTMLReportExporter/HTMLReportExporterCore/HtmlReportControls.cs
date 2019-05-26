@@ -84,7 +84,7 @@ namespace HTMLReportExporter
 		public void SetFont(string fontName, int htmlSize)
 		{
 			// Convert size to ems because it gives us greater granularity
-			int pointSize = MSDN.Html.Editor.HtmlFontConversion.PointsFromHtml(htmlSize);
+			int pointSize = (int)MSDN.Html.Editor.HtmlFontConversion.PointsFromHtml(htmlSize);
 			float ems = Win32.PointsToEms(pointSize);
 
 			BodyFont = new MSDN.Html.Editor.HtmlFontProperty(fontName, ems);
