@@ -768,13 +768,11 @@ void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
 
 void CTDLTaskCtrlBase::OnImageListChange()
 {
-	CHoldRedraw hr(Tasks());
-
 	SetTasksImageList(m_ilTaskIcons, FALSE, !IsColumnShowing(TDCC_ICON));
 	SetTasksImageList(m_ilCheckboxes, TRUE, (!IsColumnShowing(TDCC_DONE) && HasStyle(TDCS_ALLOWTREEITEMCHECKBOX)));
 
-// 	if (IsVisible())
-// 		::InvalidateRect(Tasks(), NULL, FALSE);
+	if (IsVisible())
+		::InvalidateRect(Tasks(), NULL, FALSE);
 }
 
 BOOL CTDLTaskCtrlBase::IsVisible() const
