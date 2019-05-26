@@ -391,41 +391,63 @@ void CTreeCtrlHelper::AddVisibleItemToIndex(HTREEITEM hti) const
 	}
 }
 
-void CTreeCtrlHelper::EnsureVisibleEx(HTREEITEM hti, BOOL bVPartialOK, BOOL bHPartialOK)
+BOOL CTreeCtrlHelper::IsItemFullyVisible(HTREEITEM hti) const
+{
+	return IsItemVisible(hti, FALSE, FALSE);
+}
+
+BOOL CTreeCtrlHelper::IsItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL bHorzPartialOK) const
+{
+	BOOL bUnused1, bUnused2;
+	
+	return IsItemVisible(hti, bVertPartialOK, bHorzPartialOK, bUnused1, bUnused2);
+}
+
+BOOL CTreeCtrlHelper::IsItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL bHorzPartialOK, BOOL& bVertVisible, BOOL& bHorzVisible) const
+{
+	bVertVisible = bHorzVisible = FALSE;
+
+	CRect rItem;
+    
+	if (!m_tree.GetItemRect(hti, rItem, TRUE))
+		return FALSE; // parent not expanded
+
+	CRect rClient, rIntersect;
+	m_tree.GetClientRect(rClient);
+		
+	// vertically
+	if (rIntersect.IntersectRect(rClient, rItem))
+	{
+		bVertVisible = (bVertPartialOK || (rItem.top >= rClient.top && rItem.bottom <= rClient.bottom));
+	}
+		
+	// horizontally
+	rClient.DeflateRect(HVISIBLE, 0);
+
+	if (rIntersect.IntersectRect(rClient, rItem))
+	{
+		bHorzVisible = (bHorzPartialOK || (rItem.left >= rClient.left && rItem.right <= rClient.right));
+	}
+
+	return (bVertVisible && bHorzVisible);
+}
+
+void CTreeCtrlHelper::EnsureItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL bHorzPartialOK)
 {
 	CRect rItem;
 
 	if (m_tree.GetItemRect(hti, rItem, FALSE))
 	{
-		CRect rClient, rText, rIntersect;
+		BOOL bVertVisible = FALSE, bHorzVisible = FALSE;
 
-		m_tree.GetClientRect(rClient);
-	
-		BOOL bNeedHScroll = TRUE, bNeedVScroll = TRUE;
-
-		// vertically
-		if (rIntersect.IntersectRect(rClient, rItem))
-		{
-			if (bVPartialOK || (rItem.top >= rClient.top && rItem.bottom <= rClient.bottom))
-				bNeedVScroll = FALSE;
-		}
-
-		// horizontally
-		rClient.DeflateRect(HVISIBLE, 0);
-		m_tree.GetItemRect(hti, rText, TRUE);
-
-		if (rIntersect.IntersectRect(rClient, rText))
-		{
-			if (bHPartialOK || (rText.left >= rClient.left && rText.right <= rClient.right))
-				bNeedHScroll = FALSE;
-		}
-
-		// see if we're close enough already
-		if (!bNeedVScroll && !bNeedHScroll)
+		if (IsItemVisible(hti, bVertPartialOK, bHorzPartialOK, bVertVisible, bHorzVisible))
 			return;
 
+		CRect rClient;
+		m_tree.GetClientRect(rClient);
+	
 		// vertical scroll
-		if (bNeedVScroll)
+		if (!bVertVisible)
 		{
 			// now get us as close as possible first
 			// Only use CTreeCtrl::EnsureVisible if we're not in the right vertical pos
@@ -435,9 +457,9 @@ void CTreeCtrlHelper::EnsureVisibleEx(HTREEITEM hti, BOOL bVPartialOK, BOOL bHPa
 
 			CRect rOrg(rItem);
 			
-			if (rItem.top < rClient.top || (bVPartialOK && rItem.bottom < rClient.top))
+			if (rItem.top < rClient.top || (bVertPartialOK && rItem.bottom < rClient.top))
 			{
-				while (rClient.top > (bVPartialOK ? rItem.bottom : rItem.top))
+				while (rClient.top > (bVertPartialOK ? rItem.bottom : rItem.top))
 				{
 					m_tree.SendMessage(WM_VSCROLL, SB_LINEUP);
 					m_tree.GetItemRect(hti, rItem, TRUE); // check again
@@ -449,9 +471,9 @@ void CTreeCtrlHelper::EnsureVisibleEx(HTREEITEM hti, BOOL bVPartialOK, BOOL bHPa
 					rOrg = rItem;
 				}
 			}
-			else if (rItem.bottom > rClient.bottom || (bVPartialOK && rItem.top > rClient.bottom))
+			else if (rItem.bottom > rClient.bottom || (bVertPartialOK && rItem.top > rClient.bottom))
 			{
-				while (rClient.bottom < (bVPartialOK ? rItem.top : rItem.bottom))
+				while (rClient.bottom < (bVertPartialOK ? rItem.top : rItem.bottom))
 				{
 					m_tree.SendMessage(WM_VSCROLL, SB_LINEDOWN);
 					m_tree.GetItemRect(hti, rItem, TRUE); // check again
@@ -464,19 +486,18 @@ void CTreeCtrlHelper::EnsureVisibleEx(HTREEITEM hti, BOOL bVPartialOK, BOOL bHPa
 				}
 			}
 			
-			bNeedHScroll = TRUE;
-			m_tree.GetItemRect(hti, rText, TRUE);
+			bHorzVisible = FALSE;
 		}
 
 		// horizontal scroll
-		if (bNeedHScroll)
+		if (bHorzVisible)
 		{
-			rItem = rText;
+			m_tree.GetItemRect(hti, rItem, TRUE);
 			CRect rOrg(rItem);
 
-			if (rItem.left < rClient.left || (bHPartialOK && rItem.right < rClient.left))
+			if (rItem.left < rClient.left || (bHorzPartialOK && rItem.right < rClient.left))
 			{
-				while (rClient.left > (bHPartialOK ? rItem.right : rItem.left))
+				while (rClient.left > (bHorzPartialOK ? rItem.right : rItem.left))
 				{
 					m_tree.SendMessage(WM_HSCROLL, SB_LINELEFT);
 					m_tree.GetItemRect(hti, rItem, TRUE); // check again
@@ -488,9 +509,9 @@ void CTreeCtrlHelper::EnsureVisibleEx(HTREEITEM hti, BOOL bVPartialOK, BOOL bHPa
 					rOrg = rItem;
 				}
 			}
-			else if (rItem.right > rClient.right || (bHPartialOK && rItem.left > rClient.right))
+			else if (rItem.right > rClient.right || (bHorzPartialOK && rItem.left > rClient.right))
 			{
-				while (rClient.right < (bHPartialOK ? rItem.left : rItem.right))
+				while (rClient.right < (bHorzPartialOK ? rItem.left : rItem.right))
 				{
 					m_tree.SendMessage(WM_HSCROLL, SB_LINERIGHT);
 					m_tree.GetItemRect(hti, rItem, TRUE); // check again
@@ -505,7 +526,9 @@ void CTreeCtrlHelper::EnsureVisibleEx(HTREEITEM hti, BOOL bVPartialOK, BOOL bHPa
 		}
 	}
 	else
+	{
 		m_tree.EnsureVisible(hti);
+	}
 
 	m_tree.UpdateWindow();
 }
@@ -612,29 +635,20 @@ BOOL CTreeCtrlHelper::IsParentItemExpanded(HTREEITEM hti, BOOL bRecursive) const
 	if (!hti)
 		return FALSE;
 
+	if (bRecursive)
+	{
+		CRect rUnused;
+		return m_tree.GetItemRect(hti, rUnused, FALSE);
+	}
+	
 	HTREEITEM htiParent = m_tree.GetParentItem(hti);
 
-	if (!htiParent) // root
-	{
-		return TRUE; // always expanded
-	}
-	else if (IsItemExpanded(htiParent))
-	{
-		if (!bRecursive)
-			return TRUE;
-
-		// else
-		return IsParentItemExpanded(htiParent, TRUE); // RECURSIVE CALL
-	}
-
+	// root is always expanded
+	if (!htiParent) 
+		return TRUE; 
+	
 	// else
-	return FALSE;
-}
-
-BOOL CTreeCtrlHelper::IsItemVisible(HTREEITEM hti) const
-{
-	// all parents up to the root must be expanded
-	return IsParentItemExpanded(hti, TRUE);
+	return (m_tree.GetItemState(htiParent, TVIS_EXPANDED) & TVIS_EXPANDED);
 }
 
 BOOL CTreeCtrlHelper::ItemHasParent(HTREEITEM hti, HTREEITEM htiParent) const
@@ -796,7 +810,7 @@ HTREEITEM CTreeCtrlHelper::GetNextPageVisibleItem(HTREEITEM hti) const
 	// figure out how many items to step
 	HTREEITEM htiNext = m_tree.GetNextVisibleItem(hti);
 
-	if (!htiNext || !IsFullyVisible(htiNext))
+	if (!htiNext || !IsItemFullyVisible(htiNext))
 	{
 		int nCount = m_tree.GetVisibleCount();
 
@@ -818,7 +832,7 @@ HTREEITEM CTreeCtrlHelper::GetNextPageVisibleItem(HTREEITEM hti) const
 		{
 			hti = m_tree.GetNextVisibleItem(hti);
 			
-			if (hti && IsFullyVisible(hti))
+			if (hti && IsItemFullyVisible(hti))
 				htiNext = hti;
 			else
 				hti = NULL;
@@ -834,7 +848,7 @@ HTREEITEM CTreeCtrlHelper::GetPrevPageVisibleItem(HTREEITEM hti) const
 	// figure out how many items to step
 	HTREEITEM htiPrev = m_tree.GetPrevVisibleItem(hti);
 
-	if (!htiPrev || !IsFullyVisible(htiPrev))
+	if (!htiPrev || !IsItemFullyVisible(htiPrev))
 	{
 		int nCount = m_tree.GetVisibleCount();
 
@@ -856,7 +870,7 @@ HTREEITEM CTreeCtrlHelper::GetPrevPageVisibleItem(HTREEITEM hti) const
 		{
 			hti = m_tree.GetPrevVisibleItem(hti);
 			
-			if (hti && IsFullyVisible(hti))
+			if (hti && IsItemFullyVisible(hti))
 				htiPrev = hti;
 			else
 				hti = NULL;
@@ -984,16 +998,6 @@ HTREEITEM CTreeCtrlHelper::GetPrevVisibleItem(HTREEITEM hti, BOOL bAllowChildren
 
 	// else
 	return htiPrev;
-}
-
-BOOL CTreeCtrlHelper::IsFullyVisible(HTREEITEM hti) const
-{
-	CRect rClient, rItem, rIntersect;
-
-	m_tree.GetClientRect(rClient);
-	m_tree.GetItemRect(hti, rItem, FALSE);
-
-	return (rIntersect.IntersectRect(rItem, rClient) && rIntersect == rItem);
 }
 
 int CTreeCtrlHelper::FindItem(HTREEITEM htiFind, HTREEITEM htiStart)

@@ -161,10 +161,14 @@ public:
 	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bChildren = FALSE);
 	void ToggleItemExpansion(HTREEITEM hti, BOOL bChildren = FALSE);
 	BOOL IsParentItemExpanded(HTREEITEM hti, BOOL bRecursive = FALSE) const;
-	BOOL IsItemVisible(HTREEITEM hti) const;
 	BOOL ItemHasParent(HTREEITEM hti, HTREEITEM htiParent) const;
 	BOOL IsAnyItemExpanded() const;
 	BOOL IsAnyItemCollapsed() const;
+
+	BOOL IsItemFullyVisible(HTREEITEM hti) const;
+	BOOL IsItemVisible(HTREEITEM hti, BOOL bVertPartialOK = TRUE, BOOL bHorzPartialOK = TRUE) const;
+	BOOL IsItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL bHorzPartialOK, BOOL& bVertVisible, BOOL& bHorzVisible) const;
+	void EnsureItemVisible(HTREEITEM hti, BOOL bVertPartialOK = TRUE, BOOL bHorzPartialOK = TRUE);
 
 	void SetItemIntegral(HTREEITEM hti, int iIntegral);
 	int GetItemIntegral(HTREEITEM hti) const;
@@ -227,14 +231,11 @@ public:
 	HTREEITEM GetPrevItem(HTREEITEM hti, BOOL bAllowChildren = TRUE) const; // prev item as-if all items were expanded
 
 	int FindItem(HTREEITEM htiFind, HTREEITEM htiStart); // return -1 for above, 1 for below, 0 if same
-	BOOL IsFullyVisible(HTREEITEM hti) const;
 
 	HTREEITEM FindDeepestItem(int& nDepth, BOOL bExpandedOnly = FALSE) const;
 	HTREEITEM FindDeepestItem(BOOL bExpandedOnly = FALSE) const;
 	HTREEITEM FindWidestItem(int& nWidth, BOOL bExpandedOnly = FALSE, CDC* pDC = NULL) const;
 	HTREEITEM FindWidestItem(BOOL bExpandedOnly = FALSE, CDC* pDC = NULL) const;
-
-	void EnsureVisibleEx(HTREEITEM hti, BOOL bVPartialOK = TRUE, BOOL bHPartialOK = TRUE);
 
 	HTREEITEM MoveTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 
 						BOOL bUsesTextCallback = FALSE, BOOL bUsesImageCallback = FALSE);

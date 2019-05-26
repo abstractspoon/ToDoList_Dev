@@ -20,8 +20,6 @@ protected:
 	CScopedTimer();
 	CScopedTimer(LPCTSTR szScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));
 
-	virtual void OnScopeEnded(const CString& /*sMessage*/) {}
-
 protected:
 	static CString FormatTimeElapsed(LPCTSTR szScope, DWORD& dwTickFrom);
 	static CString FormatScope(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3);
@@ -34,12 +32,9 @@ class CScopedLogTimer : public CScopedTimer
 public:
 	CScopedLogTimer();
 	CScopedLogTimer(LPCTSTR szScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));
-	~CScopedLogTimer() {}
+	~CScopedLogTimer();
 
 	void LogTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));
-
-protected:
-	virtual void OnScopeEnded(const CString& sMessage);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,12 +44,9 @@ class CScopedTraceTimer : public CScopedTimer
 public:
 	CScopedTraceTimer();
 	CScopedTraceTimer(LPCTSTR szScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));
-	~CScopedTraceTimer() {}
+	~CScopedTraceTimer();
 
 	void TraceTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));
-
-protected:
-	virtual void OnScopeEnded(const CString& sMessage);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

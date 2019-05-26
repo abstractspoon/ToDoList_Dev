@@ -4494,7 +4494,7 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& d
 		HTREEITEM hti = m_mapHTItems.GetItem(dwTaskID);
 		ASSERT(hti);
 
-		while (!TCH().IsItemVisible(hti))
+		while (!TCH().IsParentItemExpanded(hti))
 			hti = m_tree.GetParentItem(hti);
 
 		DWORD dwParentID = GetTaskID(hti);

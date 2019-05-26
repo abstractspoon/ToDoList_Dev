@@ -158,7 +158,7 @@ BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_
 		bSelected = TCH().SelectItem(hti);
 		
 		CHoldHScroll hhs(m_tcTasks);
-		TCH().EnsureVisibleEx(hti, FALSE);
+		TCH().EnsureItemVisible(hti, FALSE);
 	}
 
 	if (bSyncAndNotify)
@@ -325,39 +325,53 @@ void CTDLTaskTreeCtrl::OnEndRebuild()
 
 BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible()
 {
-	if (GetSelectedCount())
-	{
-		OSVERSION nOSVer = COSVersion();
+	if (!GetSelectedCount())
+		return FALSE;
 
-		if ((nOSVer == OSV_LINUX) || (nOSVer < OSV_VISTA))
+	OSVERSION nOSVer = COSVersion();
+	
+	if ((nOSVer == OSV_LINUX) || (nOSVer < OSV_VISTA))
+	{
+		m_tcTasks.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)GetTreeSelectedItem());
+	}
+	else
+	{
+		// Check there's something to do because holding 
+		// the redraw/scroll has a cost
+		BOOL bAllVisible = TRUE;
+		POSITION pos = TSH().GetFirstItemPos();
+		
+		while (pos && bAllVisible)
 		{
-			m_tcTasks.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)GetTreeSelectedItem());
+			HTREEITEM htiSel = TSH().GetNextItem(pos);
+			bAllVisible = TCH().IsParentItemExpanded(htiSel, TRUE);
 		}
-		else
+		
+		if (bAllVisible)
+			bAllVisible = TCH().IsItemVisible(GetTreeSelectedItem(), FALSE);
+		
+		if (!bAllVisible)
 		{
 			CHoldRedraw hr(*this);
 			CHoldHScroll hhs(m_tcTasks, 0);
-
+			
 			// Expand the parents of all selected tasks
 			POSITION pos = TSH().GetFirstItemPos();
-
+			
 			while (pos)
 			{
 				HTREEITEM htiSel = TSH().GetNextItem(pos);
 				HTREEITEM htiParent = m_tcTasks.GetParentItem(htiSel);
-
+				
 				if (htiParent)
 					TCH().ExpandItem(htiParent);
 			}
-		
-			TCH().EnsureVisibleEx(GetTreeSelectedItem(), FALSE);
+			
+			TCH().EnsureItemVisible(GetTreeSelectedItem(), FALSE);
 		}
-
-		return TRUE;
 	}
-	
-	// else
-	return FALSE;
+
+	return TRUE;
 }
 
 BOOL CTDLTaskTreeCtrl::IsColumnShowing(TDC_COLUMN nColID) const
@@ -801,7 +815,7 @@ void CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 		if (hti)
 		{
 			CHoldHScroll hhs(m_tcTasks);
-			TCH().EnsureVisibleEx(hti, FALSE);
+			TCH().EnsureItemVisible(hti, FALSE);
 		}
  		
 		// notify parent of selection change

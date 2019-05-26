@@ -18,11 +18,6 @@ CScopedTimer::CScopedTimer(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCT
 
 CScopedTimer::~CScopedTimer()
 {
-	if (!m_sScope.IsEmpty())
-	{
-		CString sMessage = FormatTimeElapsed(m_sScope, m_dwTickStart);
-		OnScopeEnded(sMessage);
-	}
 }
 
 CString CScopedTimer::FormatTimeElapsed(LPCTSTR szScope, DWORD& dwTickFrom)
@@ -62,6 +57,14 @@ CScopedLogTimer::CScopedLogTimer(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2
 	CScopedTimer(szScope, szArg1, szArg2, szArg3)
 {
 }
+	
+CScopedLogTimer::~CScopedLogTimer()
+{
+	if (FileMisc::IsLoggingEnabled() && !m_sScope.IsEmpty())
+	{
+		FileMisc::LogTextRaw(FormatTimeElapsed(m_sScope, m_dwTickStart));
+	}
+}
 
 void CScopedLogTimer::LogTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3)
 {
@@ -70,14 +73,6 @@ void CScopedLogTimer::LogTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPCTSTR
 		CString sScope = FormatScope(szSubScope, szArg1, szArg2, szArg3);
 		CString sMessage = FormatTimeElapsed(sScope, m_dwIntermediateStart);
 
-		FileMisc::LogTextRaw(sMessage);
-	}
-}
-
-void CScopedLogTimer::OnScopeEnded(const CString& sMessage)
-{
-	if (FileMisc::IsLoggingEnabled())
-	{
 		FileMisc::LogTextRaw(sMessage);
 	}
 }
@@ -95,6 +90,15 @@ CScopedTraceTimer::CScopedTraceTimer(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR sz
 	CScopedTimer(szScope, szArg1, szArg2, szArg3)
 {
 }
+	
+CScopedTraceTimer::~CScopedTraceTimer()
+{
+	if (!m_sScope.IsEmpty())
+	{
+		TRACE(FormatTimeElapsed(m_sScope, m_dwTickStart));
+		TRACE(_T("\n"));
+	}
+}
 
 void CScopedTraceTimer::TraceTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3)
 {
@@ -108,12 +112,6 @@ void CScopedTraceTimer::TraceTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPC
 		TRACE(_T("\n"));
 	}
 #endif
-}
-
-void CScopedTraceTimer::OnScopeEnded(const CString& sMessage)
-{
-	TRACE(sMessage);
-	TRACE(_T("\n"));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -983,7 +983,7 @@ DWORD CKanbanColumnCtrl::GetSelectedTaskID() const
 
 void CKanbanColumnCtrl::ScrollToSelection()
 {
-	TCH().EnsureVisibleEx(GetSelectedItem(), FALSE);
+	TCH().EnsureItemVisible(GetSelectedItem(), FALSE);
 }
 
 void CKanbanColumnCtrl::ClearSelection()

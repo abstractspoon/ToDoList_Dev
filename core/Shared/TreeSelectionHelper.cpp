@@ -462,7 +462,7 @@ void CTreeSelectionHelper::RemoveHiddenItems()
 		POSITION posPrev = pos;
 		HTREEITEM hti = GetNextItem(pos);
 
-		if (!m_tch.IsItemVisible(hti))
+		if (!m_tch.IsParentItemExpanded(hti, TRUE))
 		{
 			if (hti == m_htiAnchor)
 				m_htiAnchor = NULL;

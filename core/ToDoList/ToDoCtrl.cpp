@@ -11164,10 +11164,8 @@ void CToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 	{
 		HTREEITEM htiSel = TSH().GetFirstItem(), hti = htiSel;
 
-		while (hti && !TCH().IsItemVisible(hti))
-		{
+		while (hti && !TCH().IsParentItemExpanded(hti))
 			hti = m_taskTree.GetParentItem(hti);
-		}
 
 		if (hti != htiSel)
 			SelectItem(hti);
