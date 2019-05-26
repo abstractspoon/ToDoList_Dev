@@ -110,6 +110,9 @@ copy unicode_debug\ToDoList.exe ..\..\Plugins\debug /y
 copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y
 </Command>
     </PostBuildEvent>
+    <BuildLog>
+      <Path />
+    </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
     <Midl>
@@ -169,6 +172,9 @@ mkdir ..\..\ToDoList_Plugins\release
 copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
 </Command>
     </PostBuildEvent>
+    <BuildLog>
+      <Path />
+    </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FilteredToDoCtrl.cpp">

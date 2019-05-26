@@ -1031,11 +1031,14 @@ void CTDLTaskCtrlBase::RecalcColumnWidths()
 	if (!m_bEnableRecalcColumns)
 		return;
 
+	VERIFY(m_ilFileRef.Initialize());
+
 	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcColumnWidths(%s)"), GetDebugName());
 	log.LogStart();
 
-	VERIFY(m_ilFileRef.Initialize());
-	
+	m_find.WalkTree(FALSE);
+	log.LogTimeElapsed(_T("m_find.WalkTree"));
+
 	RecalcColumnWidths(FALSE); // Standard and Custom cols
 }
 

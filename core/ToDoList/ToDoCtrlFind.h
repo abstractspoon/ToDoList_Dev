@@ -69,6 +69,9 @@ public:
 	HTREEITEM FindFirstTask(const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards = TRUE) const;
 	HTREEITEM FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards = TRUE) const;
 
+	// For debugging
+	void WalkTree(BOOL bVisibleOnly) const;
+
 protected:
 	CTreeCtrl& m_tree; 
 	const CToDoCtrlData& m_data;
@@ -94,7 +97,10 @@ protected:
 	float GetLargestCommentsSizeInKB(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	int GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	BOOL WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const;
-	
+
+	// For debugging
+	CString WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const;
+
 };
 
 #endif // !defined(AFX_TODOCTRLTREEDATA_H__02C3C360_45AB_45DC_B1BF_BCBEA472F0C7__INCLUDED_)

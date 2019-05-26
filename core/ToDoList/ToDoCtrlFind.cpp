@@ -338,7 +338,14 @@ int CToDoCtrlFind::GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, 
 
 BOOL CToDoCtrlFind::WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const
 {
-	return ((hti == NULL) || !bVisibleOnly || (m_tree.GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED));
+	if (hti == NULL) // root -> always
+		return TRUE;
+
+	if (!bVisibleOnly) // all
+		return TRUE;
+
+	// else
+	return (m_tree.GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED);
 }
 
 CString CToDoCtrlFind::GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* pTDI, 
@@ -797,4 +804,40 @@ HTREEITEM CToDoCtrlFind::FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& pa
 	return NULL; // not found
 }
 
+void CToDoCtrlFind::WalkTree(BOOL bVisibleOnly) const
+{
+	CString sLongest = WalkTree(NULL, bVisibleOnly);
+}
 
+CString CToDoCtrlFind::WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const
+{
+	CString sLongest;
+
+	if (hti)
+	{
+		const TODOITEM* pTDI;
+		const TODOSTRUCTURE* pTDS;
+
+		DWORD dwTaskID = GetTaskID(hti);
+		m_data.GetTrueTask(dwTaskID, pTDI, pTDS);
+
+		sLongest = m_formatter.GetTaskPath(pTDI, pTDS);
+	}
+
+	if (WantSearchChildren(hti, bVisibleOnly))
+	{
+		HTREEITEM htiChild = m_tree.GetChildItem(hti);
+
+		while (htiChild)
+		{
+			CString sLongestChild = WalkTree(htiChild, bVisibleOnly);
+
+			if (sLongestChild.GetLength() > sLongest.GetLength())
+				sLongest = sLongestChild;
+				
+			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
+		}
+	}
+
+	return sLongest;
+}
