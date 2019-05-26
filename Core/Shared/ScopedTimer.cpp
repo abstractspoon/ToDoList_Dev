@@ -12,7 +12,7 @@ CScopedTimer::CScopedTimer()
 
 CScopedTimer::CScopedTimer(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3)
 {
-	m_sScope = FormatScope(szScope, szArg1, szArg2, szArg3);
+	m_sScope = Format(szScope, szArg1, szArg2, szArg3);
 	m_dwTickStart = m_dwIntermediateStart = ::GetTickCount();
 }
 
@@ -22,10 +22,10 @@ CScopedTimer::~CScopedTimer()
 
 CString CScopedTimer::FormatStart() const
 {
-	CString sMessage;
-	sMessage.Format(_T("%s - Start"), m_sScope);
+	if (!m_sScope.IsEmpty())
+		return Format(_T("%s - Start"), m_sScope, NULL, NULL);
 
-	return sMessage;
+	return _T("");
 }
 
 CString CScopedTimer::FormatTimeElapsed(LPCTSTR szScope, DWORD& dwTickFrom)
@@ -33,21 +33,36 @@ CString CScopedTimer::FormatTimeElapsed(LPCTSTR szScope, DWORD& dwTickFrom)
 	ASSERT(!Misc::IsEmpty(szScope));
 
 	DWORD dwTickNow = GetTickCount();
-
-	CString sMessage;
-	sMessage.Format(_T("%s took %lu ms"), szScope, (dwTickNow - dwTickFrom));
+	CString sElapsed = Misc::Format(dwTickNow - dwTickFrom);
 
 	dwTickFrom = dwTickNow;
 
-	return sMessage;
+	return Format(_T("%s took %s ms"), szScope, sElapsed, NULL);
 }
 
-CString CScopedTimer::FormatScope(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3)
+CString CScopedTimer::Format(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3)
 {
-	ASSERT(!Misc::IsEmpty(szScope));
-
 	CString sScope;
-	sScope.Format(szScope, szArg1, szArg2, szArg3);
+
+	if (szScope)
+	{
+		if (szArg1 && szArg2 && szArg3)
+		{
+			sScope.Format(szScope, szArg1, szArg2, szArg3);
+		}
+		else if (szArg1 && szArg2)
+		{
+			sScope.Format(szScope, szArg1, szArg2);
+		}
+		else if (szArg1)
+		{
+			sScope.Format(szScope, szArg1);
+		}
+		else
+		{
+			sScope = szScope;
+		}
+	}
 
 	return sScope;
 }
@@ -78,7 +93,7 @@ void CScopedLogTimer::LogTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPCTSTR
 {
 	if (FileMisc::IsLoggingEnabled() && !Misc::IsEmpty(szSubScope))
 	{
-		CString sScope = FormatScope(szSubScope, szArg1, szArg2, szArg3);
+		CString sScope = Format(szSubScope, szArg1, szArg2, szArg3);
 		CString sMessage = FormatTimeElapsed(sScope, m_dwIntermediateStart);
 
 		FileMisc::LogTextRaw(sMessage);
@@ -134,7 +149,7 @@ void CScopedTraceTimer::TraceTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPC
 #ifdef _DEBUG
 	if (!Misc::IsEmpty(szSubScope))
 	{
-		CString sScope = FormatScope(szSubScope, szArg1, szArg2, szArg3);
+		CString sScope = Format(szSubScope, szArg1, szArg2, szArg3);
 		CString sMessage = FormatTimeElapsed(sScope, m_dwIntermediateStart);
 
 		TRACE(sMessage);

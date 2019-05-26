@@ -1032,6 +1032,7 @@ void CTDLTaskCtrlBase::RecalcColumnWidths()
 		return;
 
 	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcColumnWidths(%s)"), GetDebugName());
+	log.LogStart();
 
 	VERIFY(m_ilFileRef.Initialize());
 	
@@ -1063,6 +1064,8 @@ void CTDLTaskCtrlBase::RecalcColumnWidths(BOOL bCustomOnly)
 
 			if (bWantCol)
 			{
+				CScopedLogTimer log(m_hdrColumns.GetItemText(nItem));
+
 				int nColWidth = CalculateColumnWidth(nItem, &dc);
 				m_hdrColumns.SetItemWidth(nItem, nColWidth);
 			}

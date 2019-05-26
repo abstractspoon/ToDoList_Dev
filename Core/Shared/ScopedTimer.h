@@ -18,13 +18,13 @@ protected:
 
 protected:
 	CScopedTimer();
-	CScopedTimer(LPCTSTR szScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));
+	CScopedTimer(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3);
 
 	CString FormatStart() const;
 
 protected:
 	static CString FormatTimeElapsed(LPCTSTR szScope, DWORD& dwTickFrom);
-	static CString FormatScope(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3);
+	static CString Format(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,11 +33,11 @@ class CScopedLogTimer : public CScopedTimer
 {
 public:
 	CScopedLogTimer();
-	CScopedLogTimer(LPCTSTR szScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));
+	CScopedLogTimer(LPCTSTR szScope, LPCTSTR szArg1 = NULL, LPCTSTR szArg2 = NULL, LPCTSTR szArg3 = NULL);
 	~CScopedLogTimer();
 
 	void LogStart();
-	void LogTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));
+	void LogTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1 = NULL, LPCTSTR szArg2 = NULL, LPCTSTR szArg3 = NULL);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,11 +46,11 @@ class CScopedTraceTimer : public CScopedTimer
 {
 public:
 	CScopedTraceTimer();
-	CScopedTraceTimer(LPCTSTR szScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));
+	CScopedTraceTimer(LPCTSTR szScope, LPCTSTR szArg1 = NULL, LPCTSTR szArg2 = NULL, LPCTSTR szArg3 = NULL);
 	~CScopedTraceTimer();
 
 	void TraceStart();
-	void TraceTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1 = _T(""), LPCTSTR szArg2 = _T(""), LPCTSTR szArg3 = _T(""));
+	void TraceTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1 = NULL, LPCTSTR szArg2 = NULL, LPCTSTR szArg3 = NULL);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
