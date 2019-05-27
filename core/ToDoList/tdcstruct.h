@@ -97,26 +97,34 @@ struct TDCFINDWND
 
 struct TDCAUTOLISTDATA
 {
-	TDCAUTOLISTDATA(){}
-
-	void Copy(const TDCAUTOLISTDATA& other)
+	TDCAUTOLISTDATA() {}
+	TDCAUTOLISTDATA(const TDCAUTOLISTDATA& other) 
 	{
-		Copy(other, *this, FALSE);
+		Copy(other);
 	}
 
-	void AppendUnique(const TDCAUTOLISTDATA& other)
+	int Copy(const TDCAUTOLISTDATA& other)
 	{
-		Copy(other, *this, TRUE);
+		return Copy(other, *this, FALSE);
 	}
 
-	void RemoveItems(const TDCAUTOLISTDATA& other)
+	int AppendUnique(const TDCAUTOLISTDATA& other)
 	{
-		Misc::RemoveItems(other.aCategory, aCategory);
-		Misc::RemoveItems(other.aStatus, aStatus);
-		Misc::RemoveItems(other.aAllocTo, aAllocTo);
-		Misc::RemoveItems(other.aAllocBy, aAllocBy);
-		Misc::RemoveItems(other.aTags, aTags);
-		Misc::RemoveItems(other.aVersion, aVersion);
+		return Copy(other, *this, TRUE);
+	}
+
+	int RemoveItems(const TDCAUTOLISTDATA& other)
+	{
+		int nNumRemoved = 0;
+
+		nNumRemoved += Misc::RemoveItems(other.aCategory, aCategory);
+		nNumRemoved += Misc::RemoveItems(other.aStatus, aStatus);
+		nNumRemoved += Misc::RemoveItems(other.aAllocTo, aAllocTo);
+		nNumRemoved += Misc::RemoveItems(other.aAllocBy, aAllocBy);
+		nNumRemoved += Misc::RemoveItems(other.aTags, aTags);
+		nNumRemoved += Misc::RemoveItems(other.aVersion, aVersion);
+
+		return nNumRemoved;
 	}
 
 	int GetSize() const
@@ -142,22 +150,28 @@ struct TDCAUTOLISTDATA
 	CStringArray aCategory, aStatus, aAllocTo, aAllocBy, aTags, aVersion;
 
 protected:
-	void Copy(const TDCAUTOLISTDATA& from, TDCAUTOLISTDATA& to, BOOL bAppend)
+	int Copy(const TDCAUTOLISTDATA& from, TDCAUTOLISTDATA& to, BOOL bAppend)
 	{
-		CopyItems(from.aCategory, to.aCategory, bAppend);
-		CopyItems(from.aStatus, to.aStatus, bAppend);
-		CopyItems(from.aAllocTo, to.aAllocTo, bAppend);
-		CopyItems(from.aAllocBy, to.aAllocBy, bAppend);
-		CopyItems(from.aTags, to.aTags, bAppend);
-		CopyItems(from.aVersion, to.aVersion, bAppend);
+		int nNumCopied = 0;
+
+		nNumCopied += CopyItems(from.aCategory, to.aCategory, bAppend);
+		nNumCopied += CopyItems(from.aStatus, to.aStatus, bAppend);
+		nNumCopied += CopyItems(from.aAllocTo, to.aAllocTo, bAppend);
+		nNumCopied += CopyItems(from.aAllocBy, to.aAllocBy, bAppend);
+		nNumCopied += CopyItems(from.aTags, to.aTags, bAppend);
+		nNumCopied += CopyItems(from.aVersion, to.aVersion, bAppend);
+
+		return nNumCopied;
 	}
 
-	void CopyItems(const CStringArray& aFrom, CStringArray& aTo, BOOL bAppend)
+	int CopyItems(const CStringArray& aFrom, CStringArray& aTo, BOOL bAppend)
 	{
 		if (bAppend)
-			Misc::AddUniqueItems(aFrom, aTo);
-		else
-			aTo.Copy(aFrom);
+			return Misc::AddUniqueItems(aFrom, aTo);
+
+		// else
+		aTo.Copy(aFrom);
+		return aTo.GetSize();
 	}
 };
 

@@ -83,10 +83,11 @@ CTDLTaskListCtrl::CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 								   const CToDoCtrlData& data, 
 								   const CToDoCtrlFind& find,
 								   const CWordArray& aStyles,
+								   const TDCAUTOLISTDATA& tld,
 								   const CTDCColumnIDMap& mapVisibleCols,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
 	: 
-	CTDLTaskCtrlBase(TRUE, ilIcons, data, find, aStyles, mapVisibleCols, aCustAttribDefs)
+	CTDLTaskCtrlBase(TRUE, ilIcons, data, find, aStyles, tld, mapVisibleCols, aCustAttribDefs)
 {
 }
 

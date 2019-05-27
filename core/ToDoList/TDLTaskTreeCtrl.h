@@ -45,10 +45,11 @@ class CTDLTaskTreeCtrl : public CTDLTaskCtrlBase
 
 public:
 	CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
-					const CToDoCtrlData& data, 
-					const CWordArray& aStyles,
-					const CTDCColumnIDMap& mapVisibleCols,
-					const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+					 const CToDoCtrlData& data,
+					 const CWordArray& aStyles,
+					 const TDCAUTOLISTDATA& tld,
+					 const CTDCColumnIDMap& mapVisibleCols,
+					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 
 	virtual ~CTDLTaskTreeCtrl();
 	operator HWND() const { return GetSafeHwnd(); }

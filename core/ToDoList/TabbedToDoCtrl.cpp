@@ -89,7 +89,7 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, CTDLContentMgr& mgrC
 	m_bRecreatingRecurringTasks(FALSE),
 	m_nExtModifyingAttrib(TDCA_NONE),
 	m_mgrUIExt(mgrUIExt),
-	m_taskList(m_ilTaskIcons, m_data, TCF(), m_aStyles, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs)
+	m_taskList(m_ilTaskIcons, m_data, TCF(), m_aStyles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs)
 {
 	// add extra controls to implement list-view
 	for (int nCtrl = 0; nCtrl < NUM_FTDCCTRLS; nCtrl++)

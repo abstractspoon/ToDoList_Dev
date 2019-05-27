@@ -63,10 +63,11 @@ IMPLEMENT_DYNAMIC(CTDLTaskTreeCtrl, CTDLTaskCtrlBase)
 CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 								   const CToDoCtrlData& data, 
 								   const CWordArray& aStyles,
+								   const TDCAUTOLISTDATA& tld,
 								   const CTDCColumnIDMap& mapVisibleCols,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
 	: 
-	CTDLTaskCtrlBase(FALSE, ilIcons, data, m_find, aStyles, mapVisibleCols, aCustAttribDefs),
+	CTDLTaskCtrlBase(FALSE, ilIcons, data, m_find, aStyles, tld, mapVisibleCols, aCustAttribDefs),
 	m_tsh(m_tcTasks),
 	m_tch(m_tcTasks),
 	m_htiLastHandledLBtnDown(NULL),

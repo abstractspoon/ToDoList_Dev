@@ -40,11 +40,12 @@ class CTDLTaskListCtrl : public CTDLTaskCtrlBase
 	
 public:
 	CTDLTaskListCtrl(const CTDCImageList& ilIcons,
-					const CToDoCtrlData& data, 
-					const CToDoCtrlFind& find,
-					const CWordArray& aStyles,
-					const CTDCColumnIDMap& mapVisibleCols,
-					const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+					 const CToDoCtrlData& data,
+					 const CToDoCtrlFind& find,
+					 const CWordArray& aStyles,
+					 const TDCAUTOLISTDATA& tld,
+					 const CTDCColumnIDMap& mapVisibleCols,
+					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 
 	virtual ~CTDLTaskListCtrl();
 	operator HWND() const { return GetSafeHwnd(); }
@@ -90,7 +91,6 @@ public:
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	void DeleteAll();
 	void RemoveDeletedItems();
-	BOOL CancelOperation();
 	BOOL SaveToImage(CBitmap& bmImage);
 
 	void OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate);
@@ -135,7 +135,6 @@ protected:
 	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
 	BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate);
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader) const;
-	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, const CString& sExtra) const;
 	inline HWND TasksHeader() const { return m_hdrTasks; }
 	int GetTopIndex() const;
 	BOOL SetTopIndex(int nIndex);

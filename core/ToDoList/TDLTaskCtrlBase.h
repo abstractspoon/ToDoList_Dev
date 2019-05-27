@@ -55,6 +55,7 @@ protected: // base class only
 					 const CToDoCtrlData& data, 
 					 const CToDoCtrlFind& find, 
 					 const CWordArray& aStyles,
+					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
 					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 
@@ -254,6 +255,7 @@ protected:
 	const CToDoCtrlData& m_data;
 	const CToDoCtrlFind& m_find;
 	const CWordArray& m_aStyles;
+	const TDCAUTOLISTDATA& m_tld;
 	const CTDCImageList& m_ilTaskIcons;
 	const CTDCColumnIDMap& m_mapVisibleCols;
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;

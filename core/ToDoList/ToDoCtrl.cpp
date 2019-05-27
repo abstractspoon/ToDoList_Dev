@@ -214,7 +214,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_visColEdit(visDefault),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
 	m_timeTracking(m_data, m_taskTree.TSH()),
-	m_taskTree(m_ilTaskIcons, m_data, m_aStyles, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs),
+	m_taskTree(m_ilTaskIcons, m_data, m_aStyles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs),
 	m_exporter(m_data, m_taskTree, m_mgrContent),
 #pragma warning (disable: 4355)
 	m_sourceControl(*this),
@@ -2404,14 +2404,30 @@ BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 
 int CToDoCtrl::GetAutoListData(TDCAUTOLISTDATA& tld) const
 {
-	m_cbAllocTo.GetItems(tld.aAllocTo);
-	m_cbAllocBy.GetItems(tld.aAllocBy);
-	m_cbCategory.GetItems(tld.aCategory);
-	m_cbStatus.GetItems(tld.aStatus);
-	m_cbTags.GetItems(tld.aTags);
-	m_cbVersion.GetItems(tld.aVersion);
+	return tld.Copy(m_tldAll);
+}
 
-	return tld.GetSize();
+void CToDoCtrl::UpdateAutoListData(TDC_ATTRIBUTE nAttrib)
+{
+	BOOL bWantAll = (nAttrib == TDCA_ALL);
+
+	if (bWantAll || (nAttrib == TDCA_CATEGORY))
+		m_cbCategory.GetItems(m_tldAll.aCategory); 
+	
+	if (bWantAll || (nAttrib == TDCA_ALLOCTO))
+		m_cbAllocTo.GetItems(m_tldAll.aAllocTo);
+
+	if (bWantAll || (nAttrib == TDCA_ALLOCBY))
+		m_cbAllocBy.GetItems(m_tldAll.aAllocBy);
+
+	if (bWantAll || (nAttrib == TDCA_STATUS))
+		m_cbStatus.GetItems(m_tldAll.aStatus);
+
+	if (bWantAll || (nAttrib == TDCA_TAGS))
+		m_cbTags.GetItems(m_tldAll.aTags);
+
+	if (bWantAll || (nAttrib == TDCA_VERSION))
+		m_cbVersion.GetItems(m_tldAll.aVersion);
 }
 
 void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
@@ -2430,7 +2446,8 @@ void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 
 	// save
 	m_tldDefault.Copy(tld);
-
+	UpdateAutoListData();
+	
 	// restore selection
 	OnSelCancelAllocTo();
 	OnSelCancelCategory();
@@ -2483,14 +2500,14 @@ BOOL CToDoCtrl::SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bRe
 	switch (nListAttribID)
 	{
 	// multi-selection
-	case TDCA_CATEGORY: return SetComboReadOnly(m_cbCategory,	bReadOnly, m_tldDefault.aCategory, FALSE);
-	case TDCA_ALLOCTO:	return SetComboReadOnly(m_cbAllocTo,	bReadOnly, m_tldDefault.aAllocTo, FALSE);
-	case TDCA_TAGS:		return SetComboReadOnly(m_cbTags,		bReadOnly, m_tldDefault.aTags, FALSE);
+	case TDCA_CATEGORY: return SetAutoComboReadOnly(m_cbCategory,	bReadOnly, m_tldDefault.aCategory, FALSE);
+	case TDCA_ALLOCTO:	return SetAutoComboReadOnly(m_cbAllocTo,	bReadOnly, m_tldDefault.aAllocTo, FALSE);
+	case TDCA_TAGS:		return SetAutoComboReadOnly(m_cbTags,		bReadOnly, m_tldDefault.aTags, FALSE);
 
 	// single selection
-	case TDCA_ALLOCBY:	return SetComboReadOnly(m_cbAllocBy,	bReadOnly, m_tldDefault.aAllocBy, TRUE);
-	case TDCA_VERSION:	return SetComboReadOnly(m_cbVersion,	bReadOnly, m_tldDefault.aVersion, TRUE);
-	case TDCA_STATUS:	return SetComboReadOnly(m_cbStatus,		bReadOnly, m_tldDefault.aStatus, TRUE);
+	case TDCA_ALLOCBY:	return SetAutoComboReadOnly(m_cbAllocBy,	bReadOnly, m_tldDefault.aAllocBy, TRUE);
+	case TDCA_VERSION:	return SetAutoComboReadOnly(m_cbVersion,	bReadOnly, m_tldDefault.aVersion, TRUE);
+	case TDCA_STATUS:	return SetAutoComboReadOnly(m_cbStatus,		bReadOnly, m_tldDefault.aStatus, TRUE);
 	}
 
 	// all else
@@ -2502,14 +2519,14 @@ BOOL CToDoCtrl::RenameTaskAttributeValues(TDC_ATTRIBUTE nListAttribID, const CSt
 	return (m_data.RenameTasksAttributeValue(nListAttribID, sFrom, sTo, bCaseSensitive, bWholeWord) == SET_CHANGE);
 }
 
-BOOL CToDoCtrl::SetComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty)
+BOOL CToDoCtrl::SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty)
 {
 	BOOL bWasReadOnly = !CDialogHelper::ComboHasEdit(combo);
 
 	CStringArray aContent;
 	CDialogHelper::GetComboBoxItems(combo, aContent);
 
-	if (!CDialogHelper::SetComboReadOnly(combo, TRUE, bReadOnly, COMBODROPHEIGHT))
+	if (!CDialogHelper::SetAutoComboReadOnly(combo, TRUE, bReadOnly, COMBODROPHEIGHT))
 		return FALSE;
 
 	if ((bReadOnly && !bWasReadOnly) || (!bReadOnly && bWasReadOnly))
@@ -6040,36 +6057,41 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 
 void CToDoCtrl::SaveGlobals(CTaskFile& tasks) const
 {
-	// Note: we always remove the default items before we save
-	TDCAUTOLISTDATA tld;
-	
-	if (GetAutoListData(tld))
-	{
-		tld.RemoveItems(m_tldDefault);
-		tasks.SetAutoListData(tld);
-	}
+	// Remove default items before saving
+	TDCAUTOLISTDATA tld(m_tldAll);
+	tld.RemoveItems(m_tldDefault);
+
+	tasks.SetAutoListData(tld);
 }
 
 void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 {
 	TDCAUTOLISTDATA tld;
-	
+
 	if (tasks.GetAutoListData(tld))
 	{
-		AddUserListContent(m_cbCategory, tld.aCategory);
-		AddUserListContent(m_cbTags, tld.aTags);
-		AddUserListContent(m_cbStatus, tld.aStatus);
-		AddUserListContent(m_cbAllocTo, tld.aAllocTo);
-		AddUserListContent(m_cbAllocBy, tld.aAllocBy);
-		AddUserListContent(m_cbVersion, tld.aVersion);
+		int nNumAdded = 0;
+
+		nNumAdded += AddUserListContent(m_cbCategory,	tld.aCategory);
+		nNumAdded += AddUserListContent(m_cbTags,		tld.aTags);
+		nNumAdded += AddUserListContent(m_cbStatus,		tld.aStatus);
+		nNumAdded += AddUserListContent(m_cbAllocTo,	tld.aAllocTo);
+		nNumAdded += AddUserListContent(m_cbAllocBy,	tld.aAllocBy);
+		nNumAdded += AddUserListContent(m_cbVersion,	tld.aVersion);
+
+		if (nNumAdded)
+			UpdateAutoListData();
 	}
 }
 
-void CToDoCtrl::AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems)
+int CToDoCtrl::AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems)
 {
 	// we only bother updating the combos if their content is 'writable'
 	if (CDialogHelper::ComboHasEdit(combo))
-		combo.AddUniqueItems(aItems);
+		return combo.AddUniqueItems(aItems);
+
+	// else
+	return 0; // nothing added
 }
 
 void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter) const
@@ -7867,7 +7889,7 @@ LRESULT CToDoCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 		// Note: parent doesn't need to know about this
 		return 0L;
 		
-	case IDC_CATEGORY:
+	case IDC_CATEGORY: 
 	case IDC_TAGS:
 	case IDC_STATUS:
 	case IDC_ALLOCTO:
@@ -7875,8 +7897,10 @@ LRESULT CToDoCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 	case IDC_VERSION:
 		{
 			TDC_ATTRIBUTE nAttribID = TDC::MapCtrlIDToAttribute(nCtrlID);
+
+			UpdateAutoListData(nAttribID);
 			GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, nAttribID);
-		}
+		}		
 		break;
 
 	default:
@@ -7895,6 +7919,12 @@ LRESULT CToDoCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 	SetModified(TRUE);
 
 	return 0L;
+}
+
+void CToDoCtrl::OnAutoComboListChange(TDC_ATTRIBUTE nAttribID, CAutoComboBox& combo, CStringArray& aItems)
+{
+	combo.GetItems(aItems);
+	GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, nAttribID);
 }
 
 void CToDoCtrl::OnSelChangeAllocTo()

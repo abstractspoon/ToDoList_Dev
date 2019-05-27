@@ -130,7 +130,7 @@ public:
 	static int FindItemByValue(const CComboBox& combo, int nValue);
 	static int AddString(CComboBox& combo, LPCTSTR szItem, DWORD dwItemData);
 	static int AddString(CComboBox& combo, UINT nIDItem, DWORD dwItemData);
-	static BOOL SetComboReadOnly(CComboBox& combo, BOOL bVScroll, BOOL bReadonly = TRUE, int nDropHeight = 200);
+	static BOOL SetAutoComboReadOnly(CComboBox& combo, BOOL bVScroll, BOOL bReadonly = TRUE, int nDropHeight = 200);
 	static void SetComboEditReadonly(CComboBox& combo, BOOL bReadonly = TRUE);
 	static int FindItemByData(const CComboBox& combo, DWORD dwItemData);
 	static BOOL ComboHasEdit(const CComboBox& combo);

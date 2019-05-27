@@ -480,7 +480,7 @@ protected:
 	CTreeDragDropHelper m_treeDragDrop;
 	CWndPromptManager m_mgrPrompts;
 	COleDateTime m_dtLastTaskMod;
-	TDCAUTOLISTDATA m_tldDefault;
+	TDCAUTOLISTDATA m_tldDefault, m_tldAll;
 	TDC_MAXSTATE m_nMaxState;
 	TDC_UILOCATION m_nControlsPos, m_nCommentsPos;
 	int m_nPercentIncrement;
@@ -887,12 +887,14 @@ protected:
 
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
 	void BuildTasksForSave(CTaskFile& tasks/*, BOOL bFirstSave*/) const;
-	BOOL SetComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty);
+	BOOL SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty);
+	void OnAutoComboListChange(TDC_ATTRIBUTE nAttribID, CAutoComboBox& combo, CStringArray& aItems);
 	void SetModified(TDC_ATTRIBUTE nAttrib);
-	
+	void UpdateAutoListData(TDC_ATTRIBUTE nAttrib = TDCA_ALL);
+
 	static BOOL HandleModResult(DWORD dwTaskID, TDC_SET nRes, CDWordArray& aModTaskIDs);
 	static void SetDefaultListContent(CAutoComboBox& combo, const CStringArray& aNewDefs, const CStringArray& aOldDefs, BOOL bAddEmpty = FALSE);
-	static void AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems);
+	static int AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems);
 	static BOOL XMLHeaderIsUnicode(LPCTSTR szXmlHeader);
 	static BOOL IsTaskLinkURL(const CString& sLink);
 	static TDC_FILE SaveTaskfile(CTaskFile& tasks, const CString& sSavePath);

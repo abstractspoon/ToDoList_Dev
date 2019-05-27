@@ -625,7 +625,7 @@ int CDialogHelper::GetComboBoxItems(const CComboBox& combo, CStringArray& aItems
 	return aItems.GetSize();
 }
 
-BOOL CDialogHelper::SetComboReadOnly(CComboBox& combo, BOOL bVScroll, BOOL bReadOnly, int nDropHeight)
+BOOL CDialogHelper::SetAutoComboReadOnly(CComboBox& combo, BOOL bVScroll, BOOL bReadOnly, int nDropHeight)
 {
 	BOOL bIsReadOnly = !ComboHasEdit(combo);
 		

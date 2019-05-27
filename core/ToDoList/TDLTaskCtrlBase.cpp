@@ -87,6 +87,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 								   const CToDoCtrlData& data, 
 								   const CToDoCtrlFind& find,
 								   const CWordArray& aStyles,
+								   const TDCAUTOLISTDATA& tld,
 								   const CTDCColumnIDMap& mapVisibleCols,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
 	: 
@@ -94,6 +95,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 	m_data(data),
 	m_find(find),
 	m_aStyles(aStyles),
+	m_tld(tld),
 	m_ilTaskIcons(ilIcons),
 	m_mapVisibleCols(mapVisibleCols),
 	m_aCustomAttribDefs(aCustAttribDefs),
@@ -1036,9 +1038,6 @@ void CTDLTaskCtrlBase::RecalcColumnWidths()
 
 	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcColumnWidths(%s)"), GetDebugName());
 	log.LogStart();
-
-	m_find.WalkTree(FALSE);
-	log.LogTimeElapsed(_T("m_find.WalkTree"));
 
 	RecalcColumnWidths(FALSE); // Standard and Custom cols
 }
@@ -5003,17 +5002,49 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 		break;
 		
 	case TDCC_ALLOCTO:
+		{
+			// determine the longest visible string
+			CString sLongest = m_find.GetLongestValue(TDCA_ALLOCTO, m_tld.aAllocTo, bVisibleTasksOnly);
+			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
+		}
+		break;
+		
 	case TDCC_ALLOCBY:
+		{
+			// determine the longest visible string
+			CString sLongest = m_find.GetLongestValue(TDCA_ALLOCBY, m_tld.aAllocBy, bVisibleTasksOnly);
+			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
+		}
+		break;
+		
 	case TDCC_CATEGORY:
+		{
+			// determine the longest visible string
+			CString sLongest = m_find.GetLongestValue(TDCA_CATEGORY, m_tld.aCategory, bVisibleTasksOnly);
+			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
+		}
+		break;
+		
 	case TDCC_TAGS:
+		{
+			// determine the longest visible string
+			CString sLongest = m_find.GetLongestValue(TDCA_TAGS, m_tld.aTags, bVisibleTasksOnly);
+			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
+		}
+		break;
+		
 	case TDCC_STATUS:
+		{
+			// determine the longest visible string
+			CString sLongest = m_find.GetLongestValue(TDCA_STATUS, m_tld.aStatus, bVisibleTasksOnly);
+			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
+		}
+		break;
+		
 	case TDCC_VERSION:
 		{
-			TDC_ATTRIBUTE nAttrib = TDC::MapColumnToAttribute(nColID);
-			ASSERT(nAttrib != TDCA_NONE);
-
 			// determine the longest visible string
-			CString sLongest = m_find.GetLongestValue(nAttrib, CStringArray(), bVisibleTasksOnly);
+			CString sLongest = m_find.GetLongestValue(TDCA_VERSION, m_tld.aVersion, bVisibleTasksOnly);
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
 		}
 		break;

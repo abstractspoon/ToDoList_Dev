@@ -70,7 +70,7 @@ public:
 	HTREEITEM FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards = TRUE) const;
 
 	// For debugging
-	void WalkTree(BOOL bVisibleOnly) const;
+	//void WalkTree(BOOL bVisibleOnly) const;
 
 protected:
 	CTreeCtrl& m_tree; 
@@ -78,6 +78,8 @@ protected:
 	CTDCTaskMatcher m_matcher;
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
+
+	mutable CString m_sLongestRecurrence;
 
 protected:
 	void FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResultArray& aResults) const;
@@ -105,9 +107,10 @@ protected:
 	BOOL WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const;
 
 	// For debugging
-	CString WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const;
+	//CString WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const;
 
 	static CString GetLongerString(const CString& str1, const CString& str2);
+	static BOOL EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible);
 };
 
 #endif // !defined(AFX_TODOCTRLTREEDATA_H__02C3C360_45AB_45DC_B1BF_BCBEA472F0C7__INCLUDED_)

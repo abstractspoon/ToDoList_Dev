@@ -126,7 +126,20 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, BOOL bVisibleOnly)
 
 	case TDCA_SUBTASKDONE:			
 		return GetLongestSubtaskDone(NULL, NULL, NULL, bVisibleOnly);
-	
+
+	case TDCA_RECURRENCE:
+		if (m_sLongestRecurrence.IsEmpty())
+		{
+			CStringArray aRecurs;
+			aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_DAILY, FALSE));
+			aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_WEEKLY, FALSE));
+			aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_MONTHLY, FALSE));
+			aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_YEARLY, FALSE));
+
+			m_sLongestRecurrence = Misc::GetLongestItem(aRecurs);
+		}
+		return GetLongestValue(nAttrib, NULL, NULL, m_sLongestRecurrence, bVisibleOnly);
+
 	case TDCA_ALLOCTO:
 	case TDCA_CATEGORY:
 	case TDCA_TAGS:
@@ -157,6 +170,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, const CStringArray
 	case TDCA_ALLOCBY:
 	case TDCA_STATUS:
 	case TDCA_VERSION:
+	case TDCA_RECURRENCE:
 		sLongestPossible = Misc::GetLongestItem(aPossible);
 		break;
 
@@ -212,15 +226,33 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 	}
 
 	// We only need continue if we have not hit the longest possible value
-	if (sLongestPossible.IsEmpty() || (sLongest.GetLength() < sLongestPossible.GetLength()))
+	if (EqualsLongestPossible(sLongest, sLongestPossible))
+		return sLongest;
+
+	if (WantSearchChildren(hti, bVisibleOnly))
 	{
-		if (WantSearchChildren(hti, bVisibleOnly))
+		HTREEITEM htiChild = m_tree.GetChildItem(hti);
+
+		while (htiChild)
 		{
-			SEARCH_SUBTASKS_LONGEST_STR(hti, sLongest, GetLongestValue(nAttrib, htiChild, NULL, bVisibleOnly));
+			CString sChildLongest = GetLongestValue(nAttrib, htiChild, NULL, sLongestPossible, bVisibleOnly);
+
+			if (EqualsLongestPossible(sChildLongest, sLongestPossible))
+				return sChildLongest;
+
+			if (sChildLongest.GetLength() > sLongest.GetLength())
+				sLongest = sChildLongest;
+			
+			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 		}
 	}
 
 	return sLongest;
+}
+
+BOOL CToDoCtrlFind::EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible)
+{
+	return (!sLongestPossible.IsEmpty() && (sValue.GetLength() >= sLongestPossible.GetLength()));
 }
 
 CString CToDoCtrlFind::GetLongestSubtaskDone(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const
@@ -408,8 +440,14 @@ int CToDoCtrlFind::GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, 
 
 BOOL CToDoCtrlFind::WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const
 {
-	if ((hti == NULL) || !bVisibleOnly)
-		return m_tree.ItemHasChildren(hti);
+	if (hti == NULL)
+		return true;
+	
+	if (!m_tree.ItemHasChildren(hti))
+		return FALSE;
+
+	if (!bVisibleOnly)
+		return TRUE;
 
 	// else
 	return (m_tree.GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED);
@@ -862,6 +900,7 @@ HTREEITEM CToDoCtrlFind::FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& pa
 	return NULL; // not found
 }
 
+/*
 void CToDoCtrlFind::WalkTree(BOOL bVisibleOnly) const
 {
 	CString sLongest = WalkTree(NULL, bVisibleOnly);
@@ -889,6 +928,7 @@ CString CToDoCtrlFind::WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const
 
 	return sLongest;
 }
+*/
 
 CString CToDoCtrlFind::GetLongestCost() const
 {
