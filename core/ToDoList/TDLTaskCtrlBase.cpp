@@ -727,7 +727,8 @@ void CTDLTaskCtrlBase::OnUndoRedo(BOOL /*bUndo*/)
 
 void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChanges)
 {
-	CHoldRedraw hr(m_lcColumns);
+	CTLSHoldResync hr(*this);
+	CHoldRedraw hr2(m_lcColumns);
 	
 	int nNumCols = m_hdrColumns.GetItemCount();
 	
@@ -1086,7 +1087,7 @@ void CTDLTaskCtrlBase::RecalcColumnWidths(BOOL bCustomOnly)
 void CTDLTaskCtrlBase::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs)
 {
 	CIntArray aCols;
-	int nNumCols = GetVisibleColumnIndices(aColIDs, aCols);
+	int nNumCols = GetColumnIndices(aColIDs, aCols);
 
 	if (nNumCols)
 	{
@@ -4527,7 +4528,7 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 	}
 }
 
-int CTDLTaskCtrlBase::GetVisibleColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const
+int CTDLTaskCtrlBase::GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const
 {
 	aCols.RemoveAll();
 
@@ -4538,10 +4539,13 @@ int CTDLTaskCtrlBase::GetVisibleColumnIndices(const CTDCColumnIDMap& aColIDs, CI
 
 	for (int nCol = 0; nCol < nNumCols; nCol++)
 	{
-		if (m_hdrColumns.IsItemVisible(nCol))
+		if (aColIDs.Has((TDC_COLUMN)m_hdrColumns.GetItemData(nCol)))
 		{
-			if (aColIDs.Has((TDC_COLUMN)m_hdrColumns.GetItemData(nCol)))
-				aCols.Add(nCol);
+			aCols.Add(nCol);
+
+			// can stop when we have everything
+			if (aCols.GetSize() == aColIDs.GetCount())
+				break;
 		}
 	}
 

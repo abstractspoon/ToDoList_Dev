@@ -402,7 +402,7 @@ protected:
 	void DoSort();
 	BOOL ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy) const;
 	BOOL AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const;
-	int GetVisibleColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const;
+	int GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const;
 
 	// private structures to help with sorting --------------------------
 	struct TDSORTFLAGS
