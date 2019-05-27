@@ -900,7 +900,6 @@ HTREEITEM CToDoCtrlFind::FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& pa
 	return NULL; // not found
 }
 
-/*
 void CToDoCtrlFind::WalkTree(BOOL bVisibleOnly) const
 {
 	CString sLongest = WalkTree(NULL, bVisibleOnly);
@@ -915,10 +914,10 @@ CString CToDoCtrlFind::WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const
 		const TODOITEM* pTDI;
 		const TODOSTRUCTURE* pTDS;
 
-		DWORD dwTaskID = GetTaskID(hti);
-		m_data.GetTrueTask(dwTaskID, pTDI, pTDS);
+// 		DWORD dwTaskID = GetTaskID(hti);
+// 		m_data.GetTrueTask(dwTaskID, pTDI, pTDS);
 
-		sLongest = m_formatter.GetTaskPath(pTDI, pTDS);
+		//sLongest = pTDI->sTitle;
 	}
 
 	if (WantSearchChildren(hti, bVisibleOnly))
@@ -928,7 +927,6 @@ CString CToDoCtrlFind::WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const
 
 	return sLongest;
 }
-*/
 
 CString CToDoCtrlFind::GetLongestCost() const
 {

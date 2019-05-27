@@ -70,7 +70,7 @@ public:
 	HTREEITEM FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards = TRUE) const;
 
 	// For debugging
-	//void WalkTree(BOOL bVisibleOnly) const;
+	void WalkTree(BOOL bVisibleOnly) const;
 
 protected:
 	CTreeCtrl& m_tree; 
@@ -107,7 +107,7 @@ protected:
 	BOOL WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const;
 
 	// For debugging
-	//CString WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const;
+	CString WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const;
 
 	static CString GetLongerString(const CString& str1, const CString& str2);
 	static BOOL EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible);
