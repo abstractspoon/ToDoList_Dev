@@ -472,6 +472,22 @@ void Misc::Trace(const CStringArray& array)
 }
 #endif
 
+CString Misc::GetLongestItem(const CStringArray& array)
+{
+	CString sLongest;
+	int nItem = array.GetSize();
+
+	while (nItem--)
+	{
+		const CString& sItem = GetItem(array, nItem);
+
+		if (sItem.GetLength() > sLongest.GetLength())
+			sLongest = sItem;
+	}
+
+	return sLongest;
+}
+
 int Misc::GetTotalLength(const CStringArray& array)
 {
 	int nLength = 0;

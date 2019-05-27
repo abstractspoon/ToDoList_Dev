@@ -27,7 +27,8 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const static CString EMPTY_STR;
+const static CString		EMPTY_STR;
+const static CStringArray	EMPTY_STRARRAY;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -125,22 +126,54 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, BOOL bVisibleOnly)
 
 	case TDCA_SUBTASKDONE:			
 		return GetLongestSubtaskDone(NULL, NULL, NULL, bVisibleOnly);
-
+	
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_TAGS:
+	case TDCA_ALLOCBY:
 	case TDCA_STATUS:
-		ASSERT(0); // Must call GetLongestStatus() to pass 'completion status'
+	case TDCA_VERSION:
+		// Should use the version taking an array of possible values
+		ASSERT(0);
 		return EMPTY_STR;
 	}
 		
 	// all the rest
-	return GetLongerString(EMPTY_STR, GetLongestValue(nAttrib, NULL, NULL, bVisibleOnly));
+	return GetLongestValue(nAttrib, NULL, NULL, bVisibleOnly);
 }
 
-CString CToDoCtrlFind::GetLongestStatus(const CString& sCompletionStatus, BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, const CStringArray& aPossible, BOOL bVisibleOnly) const
 {
-	return GetLongerString(sCompletionStatus, GetLongestValue(TDCA_STATUS, NULL, NULL, bVisibleOnly));
+	CString sLongestPossible;
+
+	switch (nAttrib)
+	{
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_TAGS:
+		sLongestPossible = Misc::FormatArray(aPossible);
+		break;
+
+	case TDCA_ALLOCBY:
+	case TDCA_STATUS:
+	case TDCA_VERSION:
+		sLongestPossible = Misc::GetLongestItem(aPossible);
+		break;
+
+	default:
+		ASSERT(0);
+		return EMPTY_STR;
+	}
+
+	return GetLongestValue(nAttrib, NULL, NULL, sLongestPossible, bVisibleOnly);
 }
 
 CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const
+{
+	return GetLongestValue(nAttrib, hti, pTDI, EMPTY_STR, bVisibleOnly);
+}
+
+CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, const CString& sLongestPossible, BOOL bVisibleOnly) const
 {
 	if (hti && !pTDI)
 		pTDI = GetTask(hti);
@@ -168,7 +201,8 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 		case TDCA_SUBTASKDONE:			
 		case TDCA_POSITION:	
 		case TDCA_PATH:
-			ASSERT(0); // wrong function called
+			// Should use the version taking pTDI and pTDS
+			ASSERT(0); 
 			return EMPTY_STR;
 
 		default:		
@@ -176,12 +210,16 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 			return EMPTY_STR;
 		}
 	}
-	
-	if (WantSearchChildren(hti, bVisibleOnly))
+
+	// We only need continue if we have not hit the longest possible value
+	if (sLongestPossible.IsEmpty() || (sLongest.GetLength() < sLongestPossible.GetLength()))
 	{
-		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongest, GetLongestValue(nAttrib, htiChild, NULL, bVisibleOnly));
+		if (WantSearchChildren(hti, bVisibleOnly))
+		{
+			SEARCH_SUBTASKS_LONGEST_STR(hti, sLongest, GetLongestValue(nAttrib, htiChild, NULL, bVisibleOnly));
+		}
 	}
-	
+
 	return sLongest;
 }
 

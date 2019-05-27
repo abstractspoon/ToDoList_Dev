@@ -236,7 +236,7 @@ public:
 	void SetEditTitleTaskID(DWORD dwTaskID);
 	void SetNextUniqueTaskID(DWORD dwTaskID);
 	void SetCompletionStatus(const CString& sStatus);
-	void SetDefaultTImeUnits(TDC_UNITS nTimeEstUnits, TDC_UNITS nTimeSpentUnits) { m_nDefTimeEstUnits = nTimeEstUnits; m_nDefTimeSpentUnits = nTimeSpentUnits; }
+	void SetDefaultTimeUnits(TDC_UNITS nTimeEstUnits, TDC_UNITS nTimeSpentUnits) { m_nDefTimeEstUnits = nTimeEstUnits; m_nDefTimeSpentUnits = nTimeSpentUnits; }
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 	void ClientToScreen(LPRECT pRect) const { CWnd::ClientToScreen(pRect); }
@@ -337,6 +337,7 @@ protected:
 
 	enum SELCHANGE_ACTION
 	{
+		SC_NONE = -1,
 		SC_UNKNOWN,
 		SC_BYMOUSE,
 		SC_BYKEYBOARD

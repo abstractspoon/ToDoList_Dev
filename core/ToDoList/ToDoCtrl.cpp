@@ -10827,7 +10827,7 @@ void CToDoCtrl::SetDefaultTaskAttributes(const TODOITEM& tdi)
 	CDateHelper::ClearDate(m_tdiDefault.dateCreated);
 
 	// pass on default time units for calculations
-	m_taskTree.SetDefaultTImeUnits(tdi.timeEstimate.nUnits, tdi.timeSpent.nUnits);
+	m_taskTree.SetDefaultTimeUnits(tdi.timeEstimate.nUnits, tdi.timeSpent.nUnits);
 	m_data.SetDefaultTimeUnits(tdi.timeEstimate.nUnits, tdi.timeSpent.nUnits);
 }
 

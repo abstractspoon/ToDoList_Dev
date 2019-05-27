@@ -4987,15 +4987,10 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 
 	case TDCC_RECURRENCE:
 	case TDCC_EXTERNALID:
-	case TDCC_VERSION:
-	case TDCC_ALLOCBY:
 	case TDCC_CREATEDBY:
 	case TDCC_COST:
 	case TDCC_PATH:
 	case TDCC_SUBTASKDONE:
-	case TDCC_ALLOCTO:
-	case TDCC_CATEGORY:
-	case TDCC_TAGS:
 	case TDCC_LASTMODBY:
 		{
 			TDC_ATTRIBUTE nAttrib = TDC::MapColumnToAttribute(nColID);
@@ -5007,10 +5002,18 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 		}
 		break;
 		
+	case TDCC_ALLOCTO:
+	case TDCC_ALLOCBY:
+	case TDCC_CATEGORY:
+	case TDCC_TAGS:
 	case TDCC_STATUS:
+	case TDCC_VERSION:
 		{
+			TDC_ATTRIBUTE nAttrib = TDC::MapColumnToAttribute(nColID);
+			ASSERT(nAttrib != TDCA_NONE);
+
 			// determine the longest visible string
-			CString sLongest = m_find.GetLongestStatus(m_sCompletionStatus, bVisibleTasksOnly);
+			CString sLongest = m_find.GetLongestValue(nAttrib, CStringArray(), bVisibleTasksOnly);
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
 		}
 		break;
