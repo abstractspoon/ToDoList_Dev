@@ -674,7 +674,10 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					BOOL bSelChange = FALSE;
 					
 					if (!bHitSelected)
+					{
 						bSelChange = SelectItem(nHit);
+						NotifyParentSelChange(SC_BYMOUSE);
+					}
 
 					// If multiple items are selected and no edit took place
 					// Clear the selection to just the hit item
@@ -682,17 +685,10 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						bSelChange |= SelectItem(nHit);
 				
 					// Eat the msg to prevent a label edit if we changed the selection
-					if (bSelChange)
-					{
-						NotifyParentSelChange(SC_BYMOUSE);
+					// Or if the item was already selected but not focused, 
+					// to be consistent with CTDLTaskTreeCtrl
+					if (bSelChange || !bHadFocus)
 						return 0L;
-					}
-					else if (!bHadFocus)
-					{
-						// Or if the item was already selected but not focused, 
-						// to be consistent with CTDLTaskTreeCtrl
-						return 0L;
-					}
 				}
 				else if (Misc::IsKeyPressed(VK_SHIFT)) // bulk-selection
 				{
@@ -942,22 +938,17 @@ BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 		
 		if (nItem != -1)
 		{
-			BOOL bSelected = IsListItemSelected(m_lcTasks, nItem); 
+			ASSERT(IsListItemSelected(m_lcTasks, nItem)); 
 			DWORD dwTaskID = GetColumnItemTaskID(nItem);
 			
 			if (!bDblClk)
 			{
 				if (!IsColumnShowing(TDCC_DONE) && HasHitTestFlag(nFlags, LVHT_ONITEMSTATEICON))
 				{
-					// handle clicking on state item which does NOT appear 
-					// to handle changing the selection (weirdly)
-					if (!bSelected)
-						SelectItem(nItem);
-							
 					NotifyParentOfColumnEditClick(TDCC_DONE, dwTaskID);
 					return TRUE;
 				}
-				else if (!IsColumnShowing(TDCC_ICON) && bSelected && HasHitTestFlag(nFlags, LVHT_ONITEMICON))
+				else if (!IsColumnShowing(TDCC_ICON) && HasHitTestFlag(nFlags, LVHT_ONITEMICON))
 				{
 					NotifyParentOfColumnEditClick(TDCC_ICON, dwTaskID);
 					return TRUE;
@@ -975,6 +966,7 @@ BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 				if (rItem.PtInRect(pt))
 				{
 					NotifyParentOfColumnEditClick(TDCC_CLIENT, dwTaskID);
+					// don't return TRUE otherwise the label edit stops working
 				}
 			}
 		}
