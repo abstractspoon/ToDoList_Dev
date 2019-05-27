@@ -30,6 +30,23 @@ static char THIS_FILE[]=__FILE__;
 const static CString EMPTY_STR;
 
 //////////////////////////////////////////////////////////////////////
+
+#define SEARCH_SUBTASKS_LONGEST_STR(hti, maxVal, fn)              \
+{																  \
+	HTREEITEM htiChild = m_tree.GetChildItem(hti);				  \
+																  \
+	while (htiChild)											  \
+	{															  \
+		CString sChildLongest = fn;								  \
+																  \
+		if (sChildLongest.GetLength() > maxVal.GetLength())		  \
+			maxVal = sChildLongest;								  \
+																  \
+		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);		  \
+	}															  \
+}
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -94,23 +111,33 @@ int CToDoCtrlFind::GetLargestFileLinkCount(BOOL bVisibleOnly) const
 
 CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, BOOL bVisibleOnly) const
 {
-	return GetLongestValue(nAttrib, EMPTY_STR, bVisibleOnly);
-}
-
-CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, const CString& sExtra, BOOL bVisibleOnly) const
-{
 	// attributes requiring subtask values
 	switch (nAttrib)
 	{
-	case TDCA_PATH:			
-	case TDCA_COST:			
+	case TDCA_PATH:	
+		return GetLongestPath(NULL, NULL, NULL, EMPTY_STR, bVisibleOnly);
+
+	case TDCA_POSITION:
+		return GetLongestPosition(NULL, NULL, NULL, EMPTY_STR, bVisibleOnly);
+
+	case TDCA_COST:	
+		return GetLongestCost();
+
 	case TDCA_SUBTASKDONE:			
-	case TDCA_POSITION:			
-		return GetLongerString(sExtra, GetLongestValue(nAttrib, NULL, NULL, NULL, bVisibleOnly));
+		return GetLongestSubtaskDone(NULL, NULL, NULL, bVisibleOnly);
+
+	case TDCA_STATUS:
+		ASSERT(0); // Must call GetLongestStatus() to pass 'completion status'
+		return EMPTY_STR;
 	}
 		
 	// all the rest
-	return GetLongerString(sExtra, GetLongestValue(nAttrib, NULL, NULL, bVisibleOnly));
+	return GetLongerString(EMPTY_STR, GetLongestValue(nAttrib, NULL, NULL, bVisibleOnly));
+}
+
+CString CToDoCtrlFind::GetLongestStatus(const CString& sCompletionStatus, BOOL bVisibleOnly) const
+{
+	return GetLongerString(sCompletionStatus, GetLongestValue(TDCA_STATUS, NULL, NULL, bVisibleOnly));
 }
 
 CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const
@@ -152,24 +179,13 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 	
 	if (WantSearchChildren(hti, bVisibleOnly))
 	{
-		// check children
-		HTREEITEM htiChild = m_tree.GetChildItem(hti);
-		
-		while (htiChild)
-		{
-			CString sChildLongest = GetLongestValue(nAttrib, htiChild, NULL, bVisibleOnly);
-
-			if (sChildLongest.GetLength() > sLongest.GetLength())
-				sLongest = sChildLongest;
-			
-			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
-		}
+		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongest, GetLongestValue(nAttrib, htiChild, NULL, bVisibleOnly));
 	}
 	
 	return sLongest;
 }
 
-CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLongestSubtaskDone(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const
 {
 	if (hti && (!pTDI || !pTDS))
 	{
@@ -182,57 +198,73 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 	CString sLongest;
 
 	if (pTDI && pTDS)
-	{
-		switch (nAttrib)
-		{
-		case TDCA_COST:	
-			{
-				double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
-				
-				// No need to check children because this calculation
-				// already takes account of them
-				if ((dCost == 0) && m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
-					return EMPTY_STR;
-
-				// else
-				return Misc::Format(dCost, 2);
-			}
-			break;
-
-		case TDCA_SUBTASKDONE:	
-			sLongest = m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
-			break;
-
-		case TDCA_POSITION:
-			sLongest = m_formatter.GetTaskPosition(pTDS);
-			break;
-
-		case TDCA_PATH:
-			sLongest = m_formatter.GetTaskPath(pTDI, pTDS);
-			break;
-
-		default: // not supported by this function
-			ASSERT(0);
-			return EMPTY_STR;
-		}
-	}
+		sLongest = m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
 	
 	if (WantSearchChildren(hti, bVisibleOnly))
 	{
-		// check children
-		HTREEITEM htiChild = m_tree.GetChildItem(hti);
-		
-		while (htiChild)
-		{
-			CString sChildLongest = GetLongestValue(nAttrib, htiChild, NULL, NULL, bVisibleOnly);
-
-			if (sChildLongest.GetLength() > sLongest.GetLength())
-				sLongest = sChildLongest;
-			
-			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
-		}
+		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongest, GetLongestSubtaskDone(htiChild, NULL, NULL, bVisibleOnly));
 	}
 	
+	return sLongest;
+}
+
+CString CToDoCtrlFind::GetLongestPosition(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const CString& sParentPos, BOOL bVisibleOnly) const
+{
+	if (hti && (!pTDI || !pTDS))
+	{
+		DWORD dwTaskID = GetTaskID(hti);
+		
+		if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
+			return EMPTY_STR;
+	}
+	
+	CString sPos = (pTDS ? Misc::Format(pTDS->GetPosition() + 1) : EMPTY_STR);
+
+	if (WantSearchChildren(hti, bVisibleOnly))
+	{
+		// Find the longest child
+		CString sLongestChild;
+		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongestChild, GetLongestPosition(htiChild, NULL, NULL, sPos, bVisibleOnly));
+
+		sPos = sLongestChild;
+	}
+	
+	if (sParentPos.IsEmpty())
+		return sPos;
+
+	if (sPos.IsEmpty())
+		return sParentPos;
+
+	CString sLongest;
+	sLongest.Format(_T("%s.%s"), sParentPos, sPos);
+	
+	return sLongest;
+}
+
+CString CToDoCtrlFind::GetLongestPath(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const CString& sParentPath, BOOL bVisibleOnly) const
+{
+	if (hti && (!pTDI || !pTDS))
+	{
+		DWORD dwTaskID = GetTaskID(hti);
+		
+		if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
+			return EMPTY_STR;
+	}
+
+	CString sLongest(sParentPath);
+	
+	if (WantSearchChildren(hti, bVisibleOnly))
+	{
+		// Find the longest child
+		CString sLongestChild, sChildParent = (pTDI ? pTDI->sTitle : EMPTY_STR);
+		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongestChild, GetLongestPath(htiChild, NULL, NULL, sChildParent, bVisibleOnly));
+
+		if (sParentPath.IsEmpty())
+			sLongest = sLongestChild;
+		else 
+			sLongest.Format(_T("%s\\%s"), sParentPath, sLongestChild);
+	}
+
 	return sLongest;
 }
 
@@ -342,7 +374,7 @@ BOOL CToDoCtrlFind::WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const
 		return TRUE;
 
 	if (!bVisibleOnly) // all
-		return TRUE;
+		return m_tree.ItemHasChildren(hti);
 
 	// else
 	return (m_tree.GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED);
@@ -467,16 +499,7 @@ CString CToDoCtrlFind::GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const
 	// children
 	if (WantSearchChildren(hti, bVisibleOnly))
 	{
-		// check children
-		HTREEITEM htiChild = m_tree.GetChildItem(hti);
-
-		while (htiChild)
-		{
-			CString sChildLongest = GetLongestTime(htiChild, NULL, NULL, nDefUnits, nCol, bVisibleOnly);
-			sLongest = Misc::GetLongest(sLongest, sChildLongest);
-
-			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
-		}
+		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongest, GetLongestTime(htiChild, NULL, NULL, nDefUnits, nCol, bVisibleOnly));
 	}
 
 	return sLongest;
@@ -826,18 +849,28 @@ CString CToDoCtrlFind::WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const
 
 	if (WantSearchChildren(hti, bVisibleOnly))
 	{
-		HTREEITEM htiChild = m_tree.GetChildItem(hti);
-
-		while (htiChild)
-		{
-			CString sLongestChild = WalkTree(htiChild, bVisibleOnly);
-
-			if (sLongestChild.GetLength() > sLongest.GetLength())
-				sLongest = sLongestChild;
-				
-			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
-		}
+		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongest, WalkTree(htiChild, bVisibleOnly));
 	}
 
 	return sLongest;
+}
+
+CString CToDoCtrlFind::GetLongestCost() const
+{
+	// Just process the top-level items
+	double biggest = 0.0;
+	HTREEITEM hti = m_tree.GetChildItem(NULL);
+
+	while (hti)
+	{
+		double cost = m_calculator.GetTaskCost(GetTaskID(hti));
+		biggest = max(biggest, cost);
+
+		hti = m_tree.GetNextItem(hti, TVGN_NEXT);
+	}
+
+	if ((biggest == 0) && m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
+		return EMPTY_STR;
+
+	return Misc::Format(biggest, 2);
 }

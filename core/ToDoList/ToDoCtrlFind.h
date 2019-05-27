@@ -47,9 +47,9 @@ public:
 
 	// generic
 	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, BOOL bVisibleOnly = TRUE) const;
-	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, const CString& sExtra, BOOL bVisibleOnly = TRUE) const;
 
 	// specific
+	CString GetLongestStatus(const CString& sCompletionStatus, BOOL bVisibleOnly = TRUE) const;
 	CString GetLongestTimeEstimate(TDC_UNITS nDefUnits, BOOL bVisibleOnly = TRUE) const;
 	CString GetLongestTimeSpent(TDC_UNITS nDefUnits, BOOL bVisibleOnly = TRUE) const;
 	CString GetLongestTimeRemaining(TDC_UNITS nDefUnits, BOOL bVisibleOnly = TRUE) const;
@@ -86,13 +86,15 @@ protected:
 	BOOL FindVisibleTaskWithStartTime(HTREEITEM hti) const;
 	BOOL FindVisibleTaskWithDoneTime(HTREEITEM hti) const;
 
+	CString GetLongestCost() const;
 	CString GetLongestTime(TDC_UNITS nDefUnits, TDC_COLUMN nCol, BOOL bVisibleOnly = TRUE) const;
  	CString GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nDefUnits, TDC_COLUMN nCol, BOOL bVisibleOnly) const;
  	CString GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* pTDI, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
 	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
-	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const;
-	static CString GetLongerString(const CString& str1, const CString& str2);
-
+	CString GetLongestSubtaskDone(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const;
+	CString GetLongestPosition(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const CString& sParentPos, BOOL bVisibleOnly) const;
+	CString GetLongestPath(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const CString& sParentPath, BOOL bVisibleOnly) const;
+	
 	DWORD GetLargestReferenceID(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	float GetLargestCommentsSizeInKB(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	int GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
@@ -101,6 +103,7 @@ protected:
 	// For debugging
 	CString WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const;
 
+	static CString GetLongerString(const CString& str1, const CString& str2);
 };
 
 #endif // !defined(AFX_TODOCTRLTREEDATA_H__02C3C360_45AB_45DC_B1BF_BCBEA472F0C7__INCLUDED_)
