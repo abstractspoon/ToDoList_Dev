@@ -276,7 +276,7 @@ HTREEITEM CTreeCtrlHelper::FindFirstParent() const
 {
 	HTREEITEM hti = m_tree.GetChildItem(NULL);
 
-	while (hti && (m_tree.GetChildItem(hti) == NULL))
+	while (hti && !m_tree.ItemHasChildren(hti))
 		hti = m_tree.GetNextItem(hti, TVGN_NEXT);
 
 	return hti;

@@ -3777,7 +3777,7 @@ void CGanttTreeListCtrl::DrawListItemRollupText(CDC* pDC, HTREEITEM htiParent, c
 
 	while (htiChild)
 	{
-		if (m_tree.GetChildItem(htiChild))
+		if (m_tree.ItemHasChildren(htiChild))
 		{
 			DrawListItemRollupText(pDC, htiChild, rItem, rClip, crRow); // RECURSIVE CALL
 		}
@@ -3853,7 +3853,7 @@ void CGanttTreeListCtrl::DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int n
 
 	while (htiChild)
 	{
-		if (m_tree.GetChildItem(htiChild))
+		if (m_tree.ItemHasChildren(htiChild))
 		{
 			DrawListItemRollup(pDC, htiChild, nCol, rColumn, bSelected); // RECURSIVE CALL
 		}
