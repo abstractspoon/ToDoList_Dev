@@ -370,10 +370,7 @@ int CToDoCtrlFind::GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, 
 
 BOOL CToDoCtrlFind::WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const
 {
-	if (hti == NULL) // root -> always
-		return TRUE;
-
-	if (!bVisibleOnly) // all
+	if ((hti == NULL) || !bVisibleOnly)
 		return m_tree.ItemHasChildren(hti);
 
 	// else
