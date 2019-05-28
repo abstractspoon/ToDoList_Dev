@@ -125,12 +125,26 @@ public:
 	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const; 
 	CString GetTaskPosition(DWORD dwTaskID) const; 
 
-	CString GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString GetTaskPosition(const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskAllocTo(const TODOITEM* pTDI) const;
 	CString GetTaskCategories(const TODOITEM* pTDI) const;
 	CString GetTaskTags(const TODOITEM* pTDI) const;
+	CString GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskPosition(const TODOSTRUCTURE* pTDS) const;
+
+	int GetTaskAllocToLen(DWORD dwTaskID) const;
+	int GetTaskCategoriesLen(DWORD dwTaskID) const;
+	int GetTaskTagsLen(DWORD dwTaskID) const;
+	int GetTaskSubtaskCompletionLen(DWORD dwTaskID) const;
+	int GetTaskPathLen(DWORD dwTaskID, int nMaxLen = -1) const;
+	int GetTaskPositionLen(DWORD dwTaskID) const;
+
+	int GetTaskAllocToLen(const TODOITEM* pTDI) const;
+	int GetTaskCategoriesLen(const TODOITEM* pTDI) const;
+	int GetTaskTagsLen(const TODOITEM* pTDI) const;
+	int GetTaskSubtaskCompletionLen(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	int GetTaskPathLen(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	int GetTaskPositionLen(const TODOSTRUCTURE* pTDS) const;
 
 protected:
 	const CToDoCtrlData& m_data;

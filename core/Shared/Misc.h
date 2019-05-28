@@ -147,7 +147,8 @@ namespace Misc
 	BOOL AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
 
 	CString GetLongestItem(const CStringArray& array);
-	int GetTotalLength(const CStringArray& array);
+	int GetTotalLength(const CStringArray& array, LPCTSTR szSep = NULL, BOOL bIncEmpty = FALSE);
+	int GetTotalLength(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty = FALSE);
 
 	const CString& GetItem(const CStringArray& array, int nItem);
 
@@ -461,6 +462,26 @@ namespace Misc
 		sValue.Format(szFormat, tVal);
 
 		return sValue;
+	}
+
+	template <class T>
+	int GetFormattedLength(T tVal, int nDecimals)
+	{
+		int nNumDigits = 0, nNum = (int)tVal;
+
+		if (nVal < 0) 
+			nNumDigits = 1; // remove this line if '-' counts as a digit
+
+		while (nVal > 0)
+		{
+			nVal /= 10;
+			nNumDigits++;
+		}
+
+		if (nDecimals > 0)
+			nNumDigits += (nDecimals + 1);
+
+		return nNumDigits;
 	}
 
 	const CString& GetLongest(const CString& str1, const CString& str2, BOOL bAsDouble = FALSE);

@@ -345,10 +345,11 @@ CString Misc::GetUserName()
 CString Misc::GetListSeparator()
 {
 	static CString sSep;
-	const int BUFLEN = 10;
 	
 	if (sSep.IsEmpty()) // init first time only
 	{
+		const int BUFLEN = 10;
+
 		GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SLIST, sSep.GetBuffer(BUFLEN), BUFLEN - 1);
 		sSep.ReleaseBuffer();
 		
@@ -488,18 +489,39 @@ CString Misc::GetLongestItem(const CStringArray& array)
 	return sLongest;
 }
 
-int Misc::GetTotalLength(const CStringArray& array)
+int Misc::GetTotalLength(const CStringArray& array, LPCTSTR szSep, BOOL bIncEmpty)
 {
-	int nLength = 0;
-	int nItem = array.GetSize();
+	int nCount = array.GetSize();
 
-	while (nItem--)
+	switch (nCount)
 	{
-		const CString& sItem = GetItem(array, nItem);
-		nLength += sItem.GetLength();
+	case 0: return 0;
+	case 1:	return array[0].GetLength();
 	}
 
-	return nLength;
+	// All else
+	int nLenSep = (szSep ? lstrlen(szSep) : 0), nTotalLen = 0;
+
+	if (!szSep)
+		nLenSep = (GetListSeparator().GetLength() + 1);
+
+	for (int nItem = 0; nItem < nCount; nItem++)
+	{
+		int nItemLen = GetItem(array, nItem).GetLength();
+		nTotalLen += nItemLen;
+
+		if ((bIncEmpty || nItemLen) && (nItem > 0))
+			nTotalLen += nLenSep;
+	}
+
+	return nTotalLen;
+}
+
+int Misc::GetTotalLength(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty)
+{
+	TCHAR szSep[2] = { cSep, 0 };
+
+	return GetTotalLength(array, szSep, bIncEmpty);
 }
 
 BOOL Misc::Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim)
