@@ -226,8 +226,6 @@ public:
 	void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
 	BOOL WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib) const;
 
-	static DH_UNITS MapUnitsToDHUnits();
-
 protected:
 	CToDoCtrlDataItems m_items; // the real data
 	CToDoCtrlUndo m_undo;

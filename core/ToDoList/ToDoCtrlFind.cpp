@@ -119,7 +119,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, BOOL bVisibleOnly)
 		return GetLongestPath(NULL, NULL, NULL, EMPTY_STR, bVisibleOnly);
 
 	case TDCA_POSITION:
-		return GetLongestPosition(NULL, NULL, NULL, EMPTY_STR, bVisibleOnly);
+		return GetLongestPosition(NULL, NULL, NULL, bVisibleOnly);
 
 	case TDCA_COST:	
 		return GetLongestCost();
@@ -189,8 +189,8 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 
 CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, const CString& sLongestPossible, BOOL bVisibleOnly) const
 {
-	if (hti && !pTDI)
-		pTDI = GetTask(hti);
+	if (!CheckGetTask(hti, pTDI))
+		return EMPTY_STR;
 	
 	CString sLongest;
 
@@ -255,15 +255,42 @@ BOOL CToDoCtrlFind::EqualsLongestPossible(const CString& sValue, const CString& 
 	return (!sLongestPossible.IsEmpty() && (sValue.GetLength() >= sLongestPossible.GetLength()));
 }
 
-CString CToDoCtrlFind::GetLongestSubtaskDone(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const
+BOOL CToDoCtrlFind::CheckGetTask(HTREEITEM hti, const TODOITEM*& pTDI, BOOL bTrueTask) const
+{
+	if (hti && !pTDI)
+	{
+		pTDI = GetTask(hti, bTrueTask);
+
+		if (!pTDI)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+	}
+	
+	return TRUE;
+}
+
+BOOL CToDoCtrlFind::CheckGetTask(HTREEITEM hti, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS) const
 {
 	if (hti && (!pTDI || !pTDS))
 	{
 		DWORD dwTaskID = GetTaskID(hti);
-		
+
 		if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
-			return EMPTY_STR;
+		{
+			ASSERT(0);
+			return FALSE;
+		}
 	}
+
+	return TRUE;
+}
+
+CString CToDoCtrlFind::GetLongestSubtaskDone(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const
+{
+	if (!CheckGetTask(hti, pTDI, pTDS))
+		return EMPTY_STR;
 	
 	CString sLongest;
 
@@ -278,48 +305,36 @@ CString CToDoCtrlFind::GetLongestSubtaskDone(HTREEITEM hti, const TODOITEM* pTDI
 	return sLongest;
 }
 
-CString CToDoCtrlFind::GetLongestPosition(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const CString& sParentPos, BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLongestPosition(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const
 {
-	if (hti && (!pTDI || !pTDS))
-	{
-		DWORD dwTaskID = GetTaskID(hti);
-		
-		if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
-			return EMPTY_STR;
-	}
-	
+	if (!CheckGetTask(hti, pTDI, pTDS))
+		return EMPTY_STR;
+
 	CString sPos = (pTDS ? Misc::Format(pTDS->GetPosition() + 1) : EMPTY_STR);
+	CString sLongestChild;
 
 	if (WantSearchChildren(hti, bVisibleOnly))
 	{
 		// Find the longest child
-		CString sLongestChild;
-		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongestChild, GetLongestPosition(htiChild, NULL, NULL, sPos, bVisibleOnly));
-
-		sPos = sLongestChild;
+		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongestChild, GetLongestPosition(htiChild, NULL, NULL, bVisibleOnly));
 	}
-	
-	if (sParentPos.IsEmpty())
-		return sPos;
 
 	if (sPos.IsEmpty())
-		return sParentPos;
+		return sLongestChild;
 
+	if (sLongestChild.IsEmpty())
+		return sPos;
+	
 	CString sLongest;
-	sLongest.Format(_T("%s.%s"), sParentPos, sPos);
+	sLongest.Format(_T("%s.%s"), sPos, sLongestChild);
 	
 	return sLongest;
 }
 
 CString CToDoCtrlFind::GetLongestPath(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const CString& sParentPath, BOOL bVisibleOnly) const
 {
-	if (hti && (!pTDI || !pTDS))
-	{
-		DWORD dwTaskID = GetTaskID(hti);
-		
-		if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
-			return EMPTY_STR;
-	}
+	if (!CheckGetTask(hti, pTDI, pTDS))
+		return EMPTY_STR;
 
 	CString sLongest(sParentPath);
 	
@@ -365,8 +380,8 @@ CString CToDoCtrlFind::GetLongerString(const CString& str1, const CString& str2)
 
 DWORD CToDoCtrlFind::GetLargestReferenceID(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const
 {
-	if (hti && !pTDI)
-		pTDI = GetTask(hti, FALSE); // FALSE -> Want references
+	if (!CheckGetTask(hti, pTDI, FALSE)) // FALSE -> Want references
+		return 0;
 
 	DWORD dwLargest = (pTDI ? pTDI->dwTaskRefID : 0);
 
@@ -390,8 +405,8 @@ DWORD CToDoCtrlFind::GetLargestReferenceID(HTREEITEM hti, const TODOITEM* pTDI, 
 
 float CToDoCtrlFind::GetLargestCommentsSizeInKB(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const
 {
-	if (hti && !pTDI)
-		pTDI = GetTask(hti);
+	if (!CheckGetTask(hti, pTDI))
+		return 0.0f;
 
 	float fLargest = (pTDI ? pTDI->GetCommentsSizeInKB() : 0);
 
@@ -415,8 +430,8 @@ float CToDoCtrlFind::GetLargestCommentsSizeInKB(HTREEITEM hti, const TODOITEM* p
 
 int CToDoCtrlFind::GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const
 {
-	if (hti && !pTDI)
-		pTDI = GetTask(hti, FALSE); // FALSE -> Want references
+	if (!CheckGetTask(hti, pTDI)) // FALSE -> Want references
+		return 0;
 
 	int nLargest = (pTDI ? pTDI->aFileLinks.GetSize() : 0);
 
@@ -440,11 +455,11 @@ int CToDoCtrlFind::GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, 
 
 BOOL CToDoCtrlFind::WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const
 {
-	if (hti == NULL)
-		return true;
-	
-	if (!m_tree.ItemHasChildren(hti))
+	if (m_tree.GetChildItem(hti) == NULL)
 		return FALSE;
+
+	if (hti == NULL)
+		return TRUE; // always expanded
 
 	if (!bVisibleOnly)
 		return TRUE;
@@ -456,8 +471,8 @@ BOOL CToDoCtrlFind::WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const
 CString CToDoCtrlFind::GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* pTDI, 
 												 const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const
 {
-	if (hti && !pTDI)
-		pTDI = GetTask(hti);
+	if (!CheckGetTask(hti, pTDI))
+		return EMPTY_STR;
 
 	CString sLongest;
 
@@ -507,16 +522,8 @@ CString CToDoCtrlFind::GetLongestTime(TDC_UNITS nDefUnits, TDC_COLUMN nCol, BOOL
 
 CString CToDoCtrlFind::GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nDefUnits, TDC_COLUMN nCol, BOOL bVisibleOnly) const
 {
-	if (hti && (!pTDI || !pTDS))
-	{
-		DWORD dwTaskID = GetTaskID(hti);
-		
-		if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
-		{
-			ASSERT(0);
-			return EMPTY_STR;
-		}
-	}
+	if (!CheckGetTask(hti, pTDI, pTDS))
+		return EMPTY_STR;
 
 	CString sLongest;
 
@@ -914,10 +921,10 @@ CString CToDoCtrlFind::WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const
 		const TODOITEM* pTDI;
 		const TODOSTRUCTURE* pTDS;
 
-// 		DWORD dwTaskID = GetTaskID(hti);
-// 		m_data.GetTrueTask(dwTaskID, pTDI, pTDS);
+		DWORD dwTaskID = GetTaskID(hti);
+		m_data.GetTrueTask(dwTaskID, pTDI, pTDS);
 
-		//sLongest = pTDI->sTitle;
+//		sLongest = pTDI->sTitle;
 	}
 
 	if (WantSearchChildren(hti, bVisibleOnly))

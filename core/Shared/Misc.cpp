@@ -377,11 +377,8 @@ CString Misc::FormatArray(const CStringArray& array, LPCTSTR szSep, BOOL bIncEmp
 
 	switch (nCount)
 	{
-	case 0:
-		return _T("");
-
-	case 1:
-		return array[0];
+	case 0: return _T("");
+	case 1:	return array[0];
 	}
 
 	// All else
@@ -489,7 +486,21 @@ CString Misc::GetLongestItem(const CStringArray& array)
 	return sLongest;
 }
 
-int Misc::GetTotalLength(const CStringArray& array, LPCTSTR szSep, BOOL bIncEmpty)
+int Misc::GetMaximumItemLength(const CStringArray& array)
+{
+	int nLongest = 0;
+	int nItem = array.GetSize();
+
+	while (nItem--)
+	{
+		const CString& sItem = GetItem(array, nItem);
+		nLongest = max(nLongest, sItem.GetLength());
+	}
+
+	return nLongest;
+}
+
+int Misc::GetFormattedLength(const CStringArray& array, LPCTSTR szSep, BOOL bIncEmpty)
 {
 	int nCount = array.GetSize();
 
@@ -500,10 +511,8 @@ int Misc::GetTotalLength(const CStringArray& array, LPCTSTR szSep, BOOL bIncEmpt
 	}
 
 	// All else
-	int nLenSep = (szSep ? lstrlen(szSep) : 0), nTotalLen = 0;
-
-	if (!szSep)
-		nLenSep = (GetListSeparator().GetLength() + 1);
+	int nLenSep = (szSep ? lstrlen(szSep) : (GetListSeparator().GetLength() + 1));
+	int nTotalLen = 0;
 
 	for (int nItem = 0; nItem < nCount; nItem++)
 	{
@@ -517,11 +526,11 @@ int Misc::GetTotalLength(const CStringArray& array, LPCTSTR szSep, BOOL bIncEmpt
 	return nTotalLen;
 }
 
-int Misc::GetTotalLength(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty)
+int Misc::GetFormattedLength(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty)
 {
 	TCHAR szSep[2] = { cSep, 0 };
 
-	return GetTotalLength(array, szSep, bIncEmpty);
+	return GetFormattedLength(array, szSep, bIncEmpty);
 }
 
 BOOL Misc::Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim)
