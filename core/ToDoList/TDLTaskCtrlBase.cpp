@@ -1072,56 +1072,69 @@ void CTDLTaskCtrlBase::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL b
 		}
 	}
 
-	// Get the longest task values for the remaining attributes
-	BOOL bVisibleTasksOnly = IsTreeList();
+	if (aColIDs.GetCount() == 0)
+		return;
 
-	CTDCLongestItemMap mapLongest;
-	m_find.GetLongestValues(mapCols, mapLongest, bVisibleTasksOnly);
-
-	// Do the column 
 	CHoldRedraw hr(m_lcColumns);
-
-	// recalc the widths of 'non-tracked' items
 	CClientDC dc(&m_lcColumns);
+
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
 
-	m_hdrColumns.SetItemWidth(0, 0);
-
-	for (int nItem = 1; nItem < nNumCols; nItem++)
+	// Optimise for single columns
+	if (!bZeroOthers && (aColIDs.GetCount() == 1))
 	{
-		TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nItem);
-		int nColWidth = 0;
+		int nCol = m_hdrColumns.FindItem(aColIDs.GetFirst());
+		ASSERT(nCol != -1);
 
-		if (mapCols.Has(nColID))
-		{
-			if (mapLongest.IsSupportedColumn(nColID))
-			{
-				CString sLongest = mapLongest.GetLongestValue(nColID);
-
-				if (sLongest.GetLength())
-					nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, &dc);
-
-				if (nColWidth == 0)
-					nColWidth = MIN_RESIZE_WIDTH;
-				else
-					nColWidth = max((nColWidth + (2 * LV_COLPADDING)), MIN_RESIZE_WIDTH);
-
-				// take max of this and column title
-				int nTitleWidth = (m_hdrColumns.GetItemTextWidth(nItem, &dc) + (2 * HD_COLPADDING));
-
-				nColWidth = max(nTitleWidth, nColWidth);
-			}
-			else
-			{
-				nColWidth = CalculateColumnWidth(nItem, &dc, bVisibleTasksOnly);
-			}
-		}
-		else if (!bZeroOthers)
-		{
-			continue;
-		}
-
+		int nColWidth = CalculateColumnWidth(nCol, &dc, bVisibleTasksOnly);
 		m_hdrColumns.SetItemWidth(nItem, nColWidth);
+	}
+	else
+	{
+		// Get the longest task values for the remaining attributes
+		BOOL bVisibleTasksOnly = IsTreeList();
+
+		CTDCLongestItemMap mapLongest;
+		m_find.GetLongestValues(mapCols, mapLongest, bVisibleTasksOnly);
+
+		m_hdrColumns.SetItemWidth(0, 0); // always
+
+		for (int nItem = 1; nItem < nNumCols; nItem++)
+		{
+			TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nItem);
+			int nColWidth = 0;
+
+			if (mapCols.Has(nColID))
+			{
+				if (mapLongest.IsSupportedColumn(nColID))
+				{
+					CString sLongest = mapLongest.GetLongestValue(nColID);
+
+					if (sLongest.GetLength())
+						nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, &dc);
+
+					if (nColWidth == 0)
+						nColWidth = MIN_RESIZE_WIDTH;
+					else
+						nColWidth = max((nColWidth + (2 * LV_COLPADDING)), MIN_RESIZE_WIDTH);
+
+					// take max of this and column title
+					int nTitleWidth = (m_hdrColumns.GetItemTextWidth(nItem, &dc) + (2 * HD_COLPADDING));
+
+					nColWidth = max(nTitleWidth, nColWidth);
+				}
+				else
+				{
+					nColWidth = CalculateColumnWidth(nItem, &dc, bVisibleTasksOnly);
+				}
+			}
+			else if (!bZeroOthers)
+			{
+				continue;
+			}
+
+			m_hdrColumns.SetItemWidth(nItem, nColWidth);
+		}
 	}
 
 	// cleanup

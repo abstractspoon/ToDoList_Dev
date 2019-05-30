@@ -197,6 +197,18 @@ BOOL CTDCColumnIDMap::Has(TDC_COLUMN nColID) const
 	return FALSE;
 }
 
+TDC_COLUMN CTDCColumnIDMap::GetFirst() const
+{
+	if (GetCount())
+	{
+		POSITION pos = GetStartPosition();
+		return GetNext(pos);
+	}
+
+	// else
+	return TDCC_NONE;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 CTDCColumnIDArray::CTDCColumnIDArray()

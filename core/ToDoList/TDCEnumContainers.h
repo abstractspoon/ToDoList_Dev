@@ -105,6 +105,7 @@ public:
 
 	void Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt);
 	BOOL Has(TDC_COLUMN nColID) const;
+	TDC_COLUMN GetFirst() const;
 };
 
 //////////////////////////////////////////////////////////////////////
