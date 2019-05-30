@@ -37,21 +37,8 @@ enum // GetTaskBreadcrumbs
 class CTDCLongestValueMap : public CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>
 {
 public:
-	BOOL HasAttribute(TDC_ATTRIBUTE nAttribID) const 
-	{ 
-		UINT nHashBucket, nHashValue;
-		CAssoc* pAssoc = GetAssocAt(nAttribID, nHashBucket, nHashValue);
-
-		return (pAssoc && !pAssoc->value.IsEmpty()); 
-	}
-
-	CString GetLongestValue(TDC_ATTRIBUTE nAttribID) const
-	{
-		CString sValue;
-		Lookup(nAttribID, sValue);
-
-		return sValue;
-	}
+	BOOL HasAttribute(TDC_ATTRIBUTE nAttribID) const; 
+	CString GetLongestValue(TDC_ATTRIBUTE nAttribID) const;
 };
 
 //////////////////////////////////////////////////////////////////////

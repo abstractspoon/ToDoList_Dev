@@ -208,6 +208,29 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
+
+BOOL CTDCLongestValueMap::HasAttribute(TDC_ATTRIBUTE nAttribID) const
+{
+	if (!LONGESTITEM::IsSupportedAttribute(nAttribID))
+		return FALSE;
+
+	UINT nHashBucket, nHashValue;
+	CAssoc* pAssoc = GetAssocAt(nAttribID, nHashBucket, nHashValue);
+
+	return (pAssoc && !pAssoc->value.IsEmpty());
+}
+
+CString CTDCLongestValueMap::GetLongestValue(TDC_ATTRIBUTE nAttribID) const
+{
+	CString sValue;
+
+	if (LONGESTITEM::IsSupportedAttribute(nAttribID))
+		Lookup(nAttribID, sValue);
+
+	return sValue;
+}
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -268,7 +291,47 @@ int CToDoCtrlFind::GetLongestValues(const CTDCAttributeMap& mapAttrib, const TDC
 
 void CToDoCtrlFind::GetLongestValues(const CTDCAttributeMap& mapAttrib, HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CLongestItemMap& mapLongest, BOOL bVisibleOnly) const
 {
-	// TODO
+	if (!CheckGetTask(hti, pTDI, TRUE))
+		return;
+
+	if (pTDI)
+	{
+		CString sValue;
+		
+		if (mapAttrib.Has(TDCA_ALLOCTO))
+			mapLongest.UpdateValue(TDCA_ALLOCTO, m_formatter.GetTaskAllocTo(pTDI));
+
+		if (mapAttrib.Has(TDCA_CATEGORY))
+			mapLongest.UpdateValue(TDCA_CATEGORY, m_formatter.GetTaskCategories(pTDI));
+
+		if (mapAttrib.Has(TDCA_TAGS))
+			mapLongest.UpdateValue(TDCA_TAGS, m_formatter.GetTaskTags(pTDI));
+
+		if (mapAttrib.Has(TDCA_ALLOCBY))
+			mapLongest.UpdateValue(TDCA_ALLOCBY, sValue = pTDI->sAllocBy);
+
+		if (mapAttrib.Has(TDCA_STATUS))
+			mapLongest.UpdateValue(TDCA_STATUS, pTDI->sStatus);
+
+		if (mapAttrib.Has(TDCA_VERSION))
+			mapLongest.UpdateValue(TDCA_VERSION, pTDI->sVersion);
+
+		if (mapAttrib.Has(TDCA_EXTERNALID))
+			mapLongest.UpdateValue(TDCA_EXTERNALID, pTDI->sExternalID);
+
+		if (mapAttrib.Has(TDCA_CREATEDBY))
+			mapLongest.UpdateValue(TDCA_CREATEDBY, pTDI->sCreatedBy);
+
+		if (mapAttrib.Has(TDCA_LASTMODBY))
+			mapLongest.UpdateValue(TDCA_LASTMODBY, pTDI->sLastModifiedBy);
+
+		if (mapAttrib.Has(TDCA_RECURRENCE))
+			mapLongest.UpdateValue(TDCA_RECURRENCE, pTDI->trRecurrence.GetRegularityText(FALSE));
+
+		// TODO
+
+	}
+
 }
 
 CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, BOOL bVisibleOnly) const
