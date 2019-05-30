@@ -723,6 +723,23 @@ CString CTDCCustomAttributeHelper::GetAttributeTypeID(TDC_ATTRIBUTE nAttribID, c
 	return _T("");
 }
 
+int CTDCCustomAttributeHelper::GetVisibleAttributeIDs(const CTDCCustomAttribDefinitionArray& aAttribDefs, CTDCAttributeMap& mapAttribs, BOOL bAppend)
+{
+	if (!bAppend)
+		mapAttribs.RemoveAll();
+
+	int nColsSize = mapAttribs.GetCount();
+	int nDef = aAttribDefs.GetSize();
+
+	while (nDef--)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& def = aAttribDefs.GetData()[nDef];
+		mapAttribs.Add(def.GetAttributeID());
+	}
+
+	return (mapAttribs.GetCount() - nColsSize);
+}
+
 BOOL CTDCCustomAttributeHelper::GetAttributeDef(TDC_ATTRIBUTE nAttribID, 
 												const CTDCCustomAttribDefinitionArray& aAttribDefs,
 												TDCCUSTOMATTRIBUTEDEFINITION& attribDef)

@@ -126,7 +126,6 @@ protected:
 	DWORD HitTestTasksTask(const CPoint& ptScreen) const;
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	HWND Tasks() const { return m_lcTasks; }
-	int CalculateColumnWidth(int nCol, CDC* pDC) const;
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;
 	void DeselectAll();
 	DWORD GetHelpID() const;

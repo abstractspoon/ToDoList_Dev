@@ -1018,11 +1018,6 @@ void CTDLTaskListCtrl::GetWindowRect(CRect& rWindow, BOOL bWithHeader) const
 	}
 }
 
-int CTDLTaskListCtrl::CalculateColumnWidth(int nCol, CDC* pDC) const
-{
-	return CTDLTaskCtrlBase::CalculateColumnWidth(nCol, pDC, FALSE);
-}
-
 BOOL CTDLTaskListCtrl::GetItemTitleRect(int nItem, TDC_TITLERECT nArea, CRect& rect, CDC* pDC, LPCTSTR szTitle) const
 {
 	// basic title rect

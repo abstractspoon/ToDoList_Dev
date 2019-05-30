@@ -48,6 +48,166 @@ const static CStringArray	EMPTY_STRARRAY;
 }
 
 //////////////////////////////////////////////////////////////////////
+
+static CString GetLongestRecurrenceOption()
+{
+	static CString sLongestOption;
+
+	if (sLongestOption.IsEmpty())
+	{
+		CStringArray aRecurs;
+		aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_DAILY, FALSE));
+		aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_WEEKLY, FALSE));
+		aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_MONTHLY, FALSE));
+		aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_YEARLY, FALSE));
+
+		sLongestOption = Misc::GetLongestItem(aRecurs);
+	}
+
+	return sLongestOption;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+struct LONGESTITEM
+{
+	LONGESTITEM() : nLongestPossibleValue(0)
+	{
+	}
+
+	CString sLongestValue;
+	int nLongestPossibleValue;
+
+	BOOL Update(const CString& sOther)
+	{
+		if (sOther.GetLength() > sLongestValue.GetLength())
+		{
+			sLongestValue = sOther;
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	BOOL IsLongestPossible() const
+	{
+		return ((nLongestPossibleValue > 0) && (sLongestValue.GetLength() >= nLongestPossibleValue));
+	}
+
+	static BOOL IsSupportedAttribute(TDC_ATTRIBUTE nAttribID)
+	{
+		switch (nAttribID)
+		{
+		case TDCA_ALLOCTO:
+		case TDCA_CATEGORY:
+		case TDCA_TAGS:
+		case TDCA_ALLOCBY:
+		case TDCA_STATUS:
+		case TDCA_VERSION:
+		case TDCA_EXTERNALID:
+		case TDCA_CREATEDBY:
+		case TDCA_LASTMODBY:
+		case TDCA_RECURRENCE:
+		case TDCA_COST:
+		case TDCA_SUBTASKDONE:
+		case TDCA_POSITION:
+		case TDCA_PATH:
+			return TRUE;
+		}
+
+		// else
+		return CTDCCustomAttributeHelper::IsCustomAttribute(nAttribID);
+	}
+};
+
+// ---------------------------------------------------------------------
+
+class CLongestItemMap : public CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, LONGESTITEM, LONGESTITEM&>
+{
+public:
+	int Initialise(const CTDCAttributeMap& mapAttrib, const TDCAUTOLISTDATA& tldPossible)
+	{
+		RemoveAll();
+
+		POSITION pos = mapAttrib.GetStartPosition();
+
+		while (pos)
+		{
+			TDC_ATTRIBUTE nAttribID = mapAttrib.GetNext(pos);
+
+			if (LONGESTITEM::IsSupportedAttribute(nAttribID))
+			{
+				LONGESTITEM li;
+
+				switch (nAttribID)
+				{
+				case TDCA_ALLOCTO:
+					li.nLongestPossibleValue = Misc::GetFormattedLength(tldPossible.aAllocTo);
+					break;
+
+				case TDCA_CATEGORY:
+					li.nLongestPossibleValue = Misc::GetFormattedLength(tldPossible.aCategory);
+					break;
+
+				case TDCA_TAGS:
+					li.nLongestPossibleValue = Misc::GetFormattedLength(tldPossible.aTags);
+					break;
+
+				case TDCA_ALLOCBY:
+					li.nLongestPossibleValue = Misc::GetMaximumItemLength(tldPossible.aAllocBy);
+					break;
+
+				case TDCA_STATUS:
+					li.nLongestPossibleValue = Misc::GetMaximumItemLength(tldPossible.aStatus);
+					break;
+
+				case TDCA_VERSION:
+					li.nLongestPossibleValue = Misc::GetMaximumItemLength(tldPossible.aVersion);
+					break;
+
+				case TDCA_RECURRENCE:
+					li.nLongestPossibleValue = GetLongestRecurrenceOption().GetLength();
+					break;
+				}
+
+				SetAt(nAttribID, li);
+			}
+		}
+
+		return GetSize();
+	}
+
+	void UpdateValue(TDC_ATTRIBUTE nAttribID, const CString& sValue)
+	{
+		if (sValue.GetLength() > 0)
+		{
+			LONGESTITEM li;
+			VERIFY(Lookup(nAttribID, li));
+
+			if (li.Update(sValue))
+				SetAt(nAttribID, li);
+		}
+	}
+
+	int GetLongestValues(CTDCLongestValueMap& mapValues)
+	{
+		mapValues.RemoveAll();
+
+		LONGESTITEM li;
+		TDC_ATTRIBUTE nAttribID;
+		POSITION pos = GetStartPosition();
+
+		while (pos)
+		{
+			GetNextAssoc(pos, nAttribID, li);
+			mapValues[nAttribID] = li.sLongestValue;
+		}
+
+		return mapValues.GetCount();
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -95,19 +255,20 @@ const TODOITEM* CToDoCtrlFind::GetTask(HTREEITEM hti, BOOL bTrue) const
 	return m_data.GetTask(dwTaskID);
 }
 
-DWORD CToDoCtrlFind::GetLargestReferenceID(BOOL bVisibleOnly) const
+int CToDoCtrlFind::GetLongestValues(const CTDCAttributeMap& mapAttrib, const TDCAUTOLISTDATA& tldPossible, CTDCLongestValueMap& mapLongest, BOOL bVisibleOnly) const
 {
-	return GetLargestReferenceID(NULL, NULL, bVisibleOnly);
+	CLongestItemMap mapItems;
+	mapItems.Initialise(mapAttrib, tldPossible);
+	
+	GetLongestValues(mapAttrib, NULL, NULL, NULL, mapItems, bVisibleOnly);
+
+	mapItems.GetLongestValues(mapLongest);
+	return mapLongest.GetCount();
 }
 
-float CToDoCtrlFind::GetLargestCommentsSizeInKB(BOOL bVisibleOnly) const
+void CToDoCtrlFind::GetLongestValues(const CTDCAttributeMap& mapAttrib, HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CLongestItemMap& mapLongest, BOOL bVisibleOnly) const
 {
-	return GetLargestCommentsSizeInKB(NULL, NULL, bVisibleOnly);
-}
-
-int CToDoCtrlFind::GetLargestFileLinkCount(BOOL bVisibleOnly) const
-{
-	return GetLargestFileLinkCount(NULL, NULL, bVisibleOnly);
+	// TODO
 }
 
 CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, BOOL bVisibleOnly) const
@@ -128,17 +289,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, BOOL bVisibleOnly)
 		return GetLongestSubtaskDone(NULL, NULL, NULL, bVisibleOnly);
 
 	case TDCA_RECURRENCE:
-		if (m_sLongestRecurrence.IsEmpty())
-		{
-			CStringArray aRecurs;
-			aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_DAILY, FALSE));
-			aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_WEEKLY, FALSE));
-			aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_MONTHLY, FALSE));
-			aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_YEARLY, FALSE));
-
-			m_sLongestRecurrence = Misc::GetLongestItem(aRecurs);
-		}
-		return GetLongestValue(nAttrib, NULL, NULL, m_sLongestRecurrence, bVisibleOnly);
+		return GetLongestValue(nAttrib, NULL, NULL, GetLongestRecurrenceOption(), bVisibleOnly);
 
 	case TDCA_ALLOCTO:
 	case TDCA_CATEGORY:
@@ -189,7 +340,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 
 CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, const CString& sLongestPossible, BOOL bVisibleOnly) const
 {
-	if (!CheckGetTask(hti, pTDI))
+	if (!CheckGetTask(hti, pTDI, TRUE))
 		return EMPTY_STR;
 	
 	CString sLongest;
@@ -373,6 +524,21 @@ CString CToDoCtrlFind::GetLongestCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINIT
 	return GetLongestCustomAttribute(NULL, NULL, attribDef, bVisibleOnly);
 }
 
+DWORD CToDoCtrlFind::GetLargestReferenceID(BOOL bVisibleOnly) const
+{
+	return GetLargestReferenceID(NULL, NULL, bVisibleOnly);
+}
+
+float CToDoCtrlFind::GetLargestCommentsSizeInKB(BOOL bVisibleOnly) const
+{
+	return GetLargestCommentsSizeInKB(NULL, NULL, bVisibleOnly);
+}
+
+int CToDoCtrlFind::GetLargestFileLinkCount(BOOL bVisibleOnly) const
+{
+	return GetLargestFileLinkCount(NULL, NULL, bVisibleOnly);
+}
+
 CString CToDoCtrlFind::GetLongerString(const CString& str1, const CString& str2)
 {
 	return ((str1.GetLength() > str2.GetLength()) ? str1 : str2);
@@ -405,7 +571,7 @@ DWORD CToDoCtrlFind::GetLargestReferenceID(HTREEITEM hti, const TODOITEM* pTDI, 
 
 float CToDoCtrlFind::GetLargestCommentsSizeInKB(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const
 {
-	if (!CheckGetTask(hti, pTDI))
+	if (!CheckGetTask(hti, pTDI, TRUE))
 		return 0.0f;
 
 	float fLargest = (pTDI ? pTDI->GetCommentsSizeInKB() : 0);
@@ -430,7 +596,7 @@ float CToDoCtrlFind::GetLargestCommentsSizeInKB(HTREEITEM hti, const TODOITEM* p
 
 int CToDoCtrlFind::GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const
 {
-	if (!CheckGetTask(hti, pTDI)) // FALSE -> Want references
+	if (!CheckGetTask(hti, pTDI, TRUE))
 		return 0;
 
 	int nLargest = (pTDI ? pTDI->aFileLinks.GetSize() : 0);
@@ -471,7 +637,7 @@ BOOL CToDoCtrlFind::WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const
 CString CToDoCtrlFind::GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* pTDI, 
 												 const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const
 {
-	if (!CheckGetTask(hti, pTDI))
+	if (!CheckGetTask(hti, pTDI, TRUE))
 		return EMPTY_STR;
 
 	CString sLongest;
@@ -712,7 +878,7 @@ BOOL CToDoCtrlFind::FindVisibleTaskWithDueTime() const
 BOOL CToDoCtrlFind::FindVisibleTaskWithDueTime(HTREEITEM hti) const
 {
 	ASSERT(hti);
-	const TODOITEM* pTDI = GetTask(hti);
+	const TODOITEM* pTDI = GetTask(hti, TRUE);
 	
 	if (pTDI && !pTDI->IsDone() && pTDI->HasDueTime())
 		return TRUE;
@@ -756,7 +922,7 @@ BOOL CToDoCtrlFind::FindVisibleTaskWithStartTime(HTREEITEM hti) const
 {
 	ASSERT(hti);
 
-	const TODOITEM* pTDI = GetTask(hti);
+	const TODOITEM* pTDI = GetTask(hti, TRUE);
 	ASSERT(pTDI);
 	
 	if (pTDI && !pTDI->IsDone() && pTDI->HasStartTime())
@@ -801,7 +967,7 @@ BOOL CToDoCtrlFind::FindVisibleTaskWithDoneTime(HTREEITEM hti) const
 {
 	ASSERT(hti);
 
-	const TODOITEM* pTDI = GetTask(hti);
+	const TODOITEM* pTDI = GetTask(hti, TRUE);
 	ASSERT(pTDI);
 	
 	if (pTDI && pTDI->IsDone() && pTDI->HasDoneTime())

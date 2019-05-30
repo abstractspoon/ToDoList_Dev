@@ -1042,7 +1042,7 @@ void CTDLTaskCtrlBase::RecalcColumnWidths()
 	m_find.WalkTree(FALSE);
 	log.LogTimeElapsed(_T("m_find.WalkTree"));
 
-	RecalcColumnWidths(FALSE); // Standard and Custom cols
+	RecalcColumnWidths2(FALSE); // Standard and Custom cols
 }
 
 void CTDLTaskCtrlBase::RecalcColumnWidths(BOOL bCustomOnly)
@@ -1055,6 +1055,7 @@ void CTDLTaskCtrlBase::RecalcColumnWidths(BOOL bCustomOnly)
 
 	m_hdrColumns.SetItemWidth(0, 0);
 	int nNumCols = m_hdrColumns.GetItemCount();
+	BOOL bVisibleTasksOnly = IsTreeList();
 	
 	for (int nItem = 1; nItem < nNumCols; nItem++)
 	{		
@@ -1072,7 +1073,7 @@ void CTDLTaskCtrlBase::RecalcColumnWidths(BOOL bCustomOnly)
 			{
 				CScopedLogTimer log(m_hdrColumns.GetItemText(nItem));
 
-				int nColWidth = CalculateColumnWidth(nItem, &dc);
+				int nColWidth = CalculateColumnWidth(nItem, &dc, bVisibleTasksOnly);
 				m_hdrColumns.SetItemWidth(nItem, nColWidth);
 			}
 		}
@@ -1086,8 +1087,92 @@ void CTDLTaskCtrlBase::RecalcColumnWidths(BOOL bCustomOnly)
 	dc.SelectObject(pOldFont);
 }
 
+void CTDLTaskCtrlBase::RecalcColumnWidths2(BOOL bCustomOnly)
+{
+	// Get a list of all the visible columnn attributes
+	CTDCAttributeMap mapAttrib;
+
+	if (!bCustomOnly)
+		TDC::MapColumnsToAttributes(m_mapVisibleCols, mapAttrib);
+	
+	CTDCCustomAttributeHelper::GetVisibleAttributeIDs(m_aCustomAttribDefs, mapAttrib, TRUE); // append
+
+	// Weed out all the tracked columns
+	int nNumCols = m_hdrColumns.GetItemCount();
+	
+	for (int nItem = 1; nItem < nNumCols; nItem++)
+	{		
+		if (m_hdrColumns.IsItemVisible(nItem))
+		{
+			TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nItem);
+			
+			if (m_hdrColumns.IsItemTracked(nItem))
+			{
+				TDC_ATTRIBUTE nAttribID = TDC::MapColumnToAttribute(nColID);
+				ASSERT(nAttribID != TDCA_NONE);
+
+				mapAttrib.RemoveKey(nAttribID);
+			}
+		}
+	}
+
+	// Get the longest task values for the remaining attributes
+	BOOL bVisibleTasksOnly = IsTreeList();
+
+	CTDCLongestValueMap mapLongest;
+	m_find.GetLongestValues(mapAttrib, m_tld, mapLongest, bVisibleTasksOnly);
+	
+	// Do the column 
+	CHoldRedraw hr(m_lcColumns);
+
+	// recalc the widths of 'non-tracked' items
+	CClientDC dc(&m_lcColumns);
+	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
+
+	m_hdrColumns.SetItemWidth(0, 0);
+	
+	for (int nItem = 1; nItem < nNumCols; nItem++)
+	{		
+		TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nItem);
+		TDC_ATTRIBUTE nAttribID = TDC::MapColumnToAttribute(nColID);
+		int nColWidth = 0;
+
+		if (mapAttrib.Has(nAttribID))
+		{
+			if (mapLongest.HasAttribute(nAttribID))
+			{
+				CString sLongest = mapLongest.GetLongestValue(nAttribID);
+
+				if (sLongest.GetLength())
+				nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, &dc);
+
+				if (nColWidth == 0)
+					nColWidth = MIN_RESIZE_WIDTH;
+				else
+					nColWidth = max((nColWidth + (2 * LV_COLPADDING)), MIN_RESIZE_WIDTH);
+
+				// take max of this and column title
+				int nTitleWidth = (m_hdrColumns.GetItemTextWidth(nItem, &dc) + (2 * HD_COLPADDING));
+
+				nColWidth = max(nTitleWidth, nColWidth);
+			}
+			else
+			{
+				nColWidth = CalculateColumnWidth(nItem, &dc, bVisibleTasksOnly);
+			}
+		}
+
+		m_hdrColumns.SetItemWidth(nItem, nColWidth);
+	}
+
+	// cleanup
+	dc.SelectObject(pOldFont);
+}
+
 void CTDLTaskCtrlBase::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs)
 {
+	BOOL bVisibleTasksOnly = IsTreeList();
+
 	CIntArray aCols;
 	int nNumCols = GetColumnIndices(aColIDs, aCols);
 
@@ -1102,7 +1187,7 @@ void CTDLTaskCtrlBase::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs)
 		{
 			int nCol = aCols[nItem];
 
-			int nColWidth = CalculateColumnWidth(nCol, &dc);
+			int nColWidth = CalculateColumnWidth(nCol, &dc, bVisibleTasksOnly);
 			m_hdrColumns.SetItemWidth(nCol, nColWidth);
 		}
 
@@ -3913,7 +3998,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						{
 							CClientDC dc(&m_lcColumns);
 							CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
-							int nColWidth = CalculateColumnWidth(nItem, &dc);
+							int nColWidth = CalculateColumnWidth(nItem, &dc, IsTreeList());
 							
 							m_hdrColumns.SetItemWidth(nItem, nColWidth);
 							m_hdrColumns.SetItemTracked(nItem, FALSE); // width now auto-calc'ed
@@ -4966,7 +5051,7 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 		
 	case TDCC_ID:
 		{
-			DWORD dwRefID = m_find.GetLargestReferenceID();
+			DWORD dwRefID = m_find.GetLargestReferenceID(bVisibleTasksOnly);
 
 			if (dwRefID)
 				nColWidth = GraphicsMisc::GetFormattedTextWidth(pDC, _T("%u (%u)"), m_dwNextUniqueTaskID - 1, dwRefID);
@@ -5094,9 +5179,17 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 
 			switch (nColID)
 			{
-			case TDCC_TIMEEST:   sLongest = m_find.GetLongestTimeEstimate(m_nDefTimeEstUnits);	break;
-			case TDCC_TIMESPENT: sLongest = m_find.GetLongestTimeSpent(m_nDefTimeEstUnits);		break;
-			case TDCC_REMAINING: sLongest = m_find.GetLongestTimeRemaining(m_nDefTimeEstUnits); break;
+			case TDCC_TIMEEST:   
+				sLongest = m_find.GetLongestTimeEstimate(m_nDefTimeEstUnits, bVisibleTasksOnly);	
+				break;
+			
+			case TDCC_TIMESPENT: 
+				sLongest = m_find.GetLongestTimeSpent(m_nDefTimeEstUnits, bVisibleTasksOnly);		
+				break;
+
+			case TDCC_REMAINING: 
+				sLongest = m_find.GetLongestTimeRemaining(m_nDefTimeEstUnits, bVisibleTasksOnly); 
+				break;
 			}
 
 			nColWidth = (pDC->GetTextExtent(sLongest).cx + 4); // add a bit to handle different time unit widths
@@ -5117,7 +5210,7 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 
 	case TDCC_COMMENTSSIZE:
 		{
-			float fSize = m_find.GetLargestCommentsSizeInKB();
+			float fSize = m_find.GetLargestCommentsSizeInKB(bVisibleTasksOnly);
 
 			if (fSize > 0)
 				nColWidth = (1 + (int)log10(fSize));

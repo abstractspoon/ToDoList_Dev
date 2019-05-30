@@ -66,7 +66,7 @@ public:
 	inline const CToDoCtrlFind& Find() const { return m_find; }
 	inline const CHTIMap& TreeItemMap() const { return m_mapHTItems; }
 
-	inline const TODOITEM* GetSelectedTask() const { return m_find.GetTask(GetSelectedItem()); }
+	inline const TODOITEM* GetSelectedTask() const { return m_find.GetTask(GetSelectedItem(), TRUE); }
 	inline const TODOITEM* GetTask(HTREEITEM hti, BOOL bTrue = TRUE) const { return m_find.GetTask(hti, bTrue); }
 	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return CTDLTaskCtrlBase::GetTask(dwTaskID); }
 	inline DWORD GetTaskID(HTREEITEM hti) const { return m_find.GetTaskID(hti); }
@@ -184,7 +184,6 @@ protected:
 	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
 	BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
-	int CalculateColumnWidth(int nCol, CDC* pDC) const;
 	DWORD GetColumnItemTaskID(int nItem) const;
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	BOOL IsColumnShowing(TDC_COLUMN nColID) const;

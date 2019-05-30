@@ -352,7 +352,6 @@ protected:
 	virtual DWORD HitTestTasksTask(const CPoint& ptScreen) const = 0;
 	virtual void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE) = 0;
 	virtual HWND Tasks() const = 0;
-	virtual int CalculateColumnWidth(int nCol, CDC* pDC) const = 0;
 	virtual GM_ITEMSTATE GetColumnItemState(int nItem) const = 0;
 	virtual void DeselectAll() = 0;
 	virtual DWORD GetHelpID() const = 0;
@@ -385,6 +384,7 @@ protected:
 
 	int CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
 	void RecalcColumnWidths(BOOL bCustomOnly);
+	void RecalcColumnWidths2(BOOL bCustomOnly);
 	void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs);
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);
@@ -510,6 +510,7 @@ protected:
 	inline BOOL HasColor(COLORREF color) const { return (color != CLR_NONE); }
 	inline BOOL IsBoundSelecting() const { return (m_bBoundSelecting && Misc::IsKeyPressed(VK_LBUTTON)); }
 	inline BOOL IsEditingTask(DWORD dwTaskID) const { return (m_dwEditTitleTaskID == dwTaskID); }
+	inline BOOL IsTreeList() const { return CTreeListSyncer::IsTree(Tasks()); }
 
 	// internal version
 	BOOL GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
