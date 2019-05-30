@@ -17,7 +17,7 @@
 
 class TODOSTRUCTURE;
 class CToDoCtrlData;
-class CLongestItemMap;
+class CTDCLongestItemMap;
 
 struct TODOITEM;
 struct TDCCUSTOMATTRIBUTEDEFINITION;
@@ -34,14 +34,21 @@ enum // GetTaskBreadcrumbs
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCLongestValueMap : public CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>
+class CTDCLongestItemMap : public CMap<TDC_COLUMN, TDC_COLUMN, CString, LPCTSTR>
 {
 public:
-	BOOL HasAttribute(TDC_ATTRIBUTE nAttribID) const; 
-	CString GetLongestValue(TDC_ATTRIBUTE nAttribID) const;
+	BOOL Initialise(const CTDCColumnIDMap& mapCols);
+	BOOL CheckUpdateValue(const CTDCColumnIDMap& mapCols, TDC_COLUMN nColID, const CString& sValue);
+	BOOL CheckUpdateValue(const CTDCColumnIDMap& mapCols, TDC_COLUMN nColID, const CStringArray& aValues);
+	BOOL UpdateValue(TDC_COLUMN nColID, const CString& sValue);
+	BOOL HasColumn(TDC_COLUMN nColID) const;
+	CString GetLongestValue(TDC_COLUMN nColID) const;
+
+	static BOOL IsSupportedColumn(TDC_COLUMN nColID);
 };
 
 //////////////////////////////////////////////////////////////////////
+
 
 class CToDoCtrlFind  
 {
@@ -57,13 +64,15 @@ public:
 
 	int GetTaskBreadcrumbs(HTREEITEM hti, CDWordArray& aBreadcrumbs, DWORD dwFlags = TCFBC_PARENTSONLY | TCFBC_UP) const;
 
-	int GetLongestValues(const CTDCAttributeMap& mapAttrib, const TDCAUTOLISTDATA& tldPossible, CTDCLongestValueMap& mapLongest, BOOL bVisibleOnly) const;
+	int GetLongestValues(const CTDCColumnIDMap& mapCols, CTDCLongestItemMap& mapLongest, BOOL bVisibleOnly) const;
+	void GetLongestValues(const CTDCColumnIDMap& mapCols, HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTDCLongestItemMap& mapLongest, BOOL bVisibleOnly) const;
 
 	// generic
 	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, BOOL bVisibleOnly) const;
 	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, const CStringArray& aPossible, BOOL bVisibleOnly) const;
 
 	// specific
+	CString GetLongestCost() const;
 	CString GetLongestTimeEstimate(TDC_UNITS nDefUnits, BOOL bVisibleOnly) const;
 	CString GetLongestTimeSpent(TDC_UNITS nDefUnits, BOOL bVisibleOnly) const;
 	CString GetLongestTimeRemaining(TDC_UNITS nDefUnits, BOOL bVisibleOnly) const;
@@ -100,14 +109,11 @@ protected:
 	BOOL FindVisibleTaskWithStartTime(HTREEITEM hti) const;
 	BOOL FindVisibleTaskWithDoneTime(HTREEITEM hti) const;
 	
-	void GetLongestValues(const CTDCAttributeMap& mapAttrib, HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CLongestItemMap& mapLongest, BOOL bVisibleOnly) const;
-
 	// generic
 	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, const CString& sLongestPossible, BOOL bVisibleOnly) const;
 
 	// specific
-	CString GetLongestCost() const;
 	CString GetLongestTime(TDC_UNITS nDefUnits, TDC_COLUMN nCol, BOOL bVisibleOnly) const;
  	CString GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nDefUnits, TDC_COLUMN nCol, BOOL bVisibleOnly) const;
  	CString GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* pTDI, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;

@@ -141,8 +141,8 @@ public:
 	static BOOL AppendFilterRules(const CTDCCustomAttributeDataMap& mapData, 
 								const CTDCCustomAttribDefinitionArray& aAttribDefs, CSearchParamArray& aRules);
 
-	static int GetVisibleAttributeIDs(const CTDCCustomAttribDefinitionArray& aAttribDefs,
-									CTDCAttributeMap& mapAttribs, BOOL bAppend = TRUE);
+	static int GetVisibleColumnIDs(const CTDCCustomAttribDefinitionArray& aAttribDefs,
+									CTDCColumnIDMap& mapCols, BOOL bAppend = TRUE);
 
 	static void DDX(CDataExchange* pDX, const CTDCCustomControlArray& aControls, 
 					const CTDCCustomAttribDefinitionArray& aAttribDefs, CTDCCustomAttributeDataMap& value);

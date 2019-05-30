@@ -294,7 +294,7 @@ protected:
 	CEnImageList m_ilCheckboxes, m_ilColSymbols;
 	CIconCache m_imageIcons;
 
-	static CMap<TDC_COLUMN, TDC_COLUMN, const TDCCOLUMN*, const TDCCOLUMN*&> s_mapColumns;
+	static CTDCColumnMap s_mapColumns;
 	static short s_nExtendedSelection;
 	static double s_dRecentModPeriod;
 
@@ -384,8 +384,7 @@ protected:
 
 	int CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
 	void RecalcColumnWidths(BOOL bCustomOnly);
-	void RecalcColumnWidths2(BOOL bCustomOnly);
-	void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs);
+	void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers);
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);
 	BOOL GetColumnOrder(CDWordArray& aColumns) const;

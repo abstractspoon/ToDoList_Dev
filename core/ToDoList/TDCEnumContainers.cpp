@@ -84,6 +84,7 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib)
 	case TDCA_LASTMODBY:	
 	case TDCA_METADATA:	
 	case TDCA_PARENTID:
+	case TDCA_PATH:
 	case TDCA_PERCENT:			
 	case TDCA_POSITION:	
 	case TDCA_PROJECTNAME:

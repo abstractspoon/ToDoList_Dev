@@ -444,6 +444,7 @@ struct TDCCOLUMN
 };
 
 class CTDCColumnArray : public CArray<TDCCOLUMN, TDCCOLUMN&> {};
+typedef CMap<TDC_COLUMN, TDC_COLUMN, const TDCCOLUMN*, const TDCCOLUMN*&> CTDCColumnMap;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 

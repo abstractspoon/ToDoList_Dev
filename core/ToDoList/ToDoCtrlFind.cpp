@@ -69,163 +69,108 @@ static CString GetLongestRecurrenceOption()
 
 //////////////////////////////////////////////////////////////////////
 
-struct LONGESTITEM
+BOOL CTDCLongestItemMap::Initialise(const CTDCColumnIDMap& mapCols)
 {
-	LONGESTITEM() : nLongestPossibleValue(0)
+	RemoveAll();
+
+	int nNumSupported = 0;
+	POSITION pos = mapCols.GetStartPosition();
+
+	while (pos)
 	{
+		if (IsSupportedColumn(mapCols.GetNext(pos)))
+			nNumSupported++;
 	}
 
-	CString sLongestValue;
-	int nLongestPossibleValue;
+	return (nNumSupported > 0);
+}
 
-	BOOL Update(const CString& sOther)
-	{
-		if (sOther.GetLength() > sLongestValue.GetLength())
-		{
-			sLongestValue = sOther;
-			return TRUE;
-		}
-
+BOOL CTDCLongestItemMap::CheckUpdateValue(const CTDCColumnIDMap& mapCols, TDC_COLUMN nColID, const CString& sValue)
+{
+	if (!IsSupportedColumn(nColID) || !mapCols.Has(nColID) || sValue.IsEmpty())
 		return FALSE;
-	}
 
-	BOOL IsLongestPossible() const
-	{
-		return ((nLongestPossibleValue > 0) && (sLongestValue.GetLength() >= nLongestPossibleValue));
-	}
+	// else
+	return UpdateValue(nColID, sValue);
+}
 
-	static BOOL IsSupportedAttribute(TDC_ATTRIBUTE nAttribID)
-	{
-		switch (nAttribID)
-		{
-		case TDCA_ALLOCTO:
-		case TDCA_CATEGORY:
-		case TDCA_TAGS:
-		case TDCA_ALLOCBY:
-		case TDCA_STATUS:
-		case TDCA_VERSION:
-		case TDCA_EXTERNALID:
-		case TDCA_CREATEDBY:
-		case TDCA_LASTMODBY:
-		case TDCA_RECURRENCE:
-		case TDCA_COST:
-		case TDCA_SUBTASKDONE:
-		case TDCA_POSITION:
-		case TDCA_PATH:
-			return TRUE;
-		}
-
-		// else
-		return CTDCCustomAttributeHelper::IsCustomAttribute(nAttribID);
-	}
-};
-
-// ---------------------------------------------------------------------
-
-class CLongestItemMap : public CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, LONGESTITEM, LONGESTITEM&>
+BOOL CTDCLongestItemMap::CheckUpdateValue(const CTDCColumnIDMap& mapCols, TDC_COLUMN nColID, const CStringArray& aValues)
 {
-public:
-	int Initialise(const CTDCAttributeMap& mapAttrib, const TDCAUTOLISTDATA& tldPossible)
+	if (!mapCols.Has(nColID) || (aValues.GetSize() == 0))
+		return FALSE;
+
+	// else
+	return UpdateValue(nColID, Misc::FormatArray(aValues));
+}
+
+BOOL CTDCLongestItemMap::UpdateValue(TDC_COLUMN nColID, const CString& sValue)
+{
+	if (sValue.GetLength() > 0)
 	{
-		RemoveAll();
+		UINT nHashBucket, nHashValue;
+		CAssoc* pAssoc = GetAssocAt(nColID, nHashBucket, nHashValue);
 
-		POSITION pos = mapAttrib.GetStartPosition();
-
-		while (pos)
+		if (pAssoc != NULL)
 		{
-			TDC_ATTRIBUTE nAttribID = mapAttrib.GetNext(pos);
-
-			if (LONGESTITEM::IsSupportedAttribute(nAttribID))
+			if (sValue.GetLength() > pAssoc->value.GetLength())
 			{
-				LONGESTITEM li;
-
-				switch (nAttribID)
-				{
-				case TDCA_ALLOCTO:
-					li.nLongestPossibleValue = Misc::GetFormattedLength(tldPossible.aAllocTo);
-					break;
-
-				case TDCA_CATEGORY:
-					li.nLongestPossibleValue = Misc::GetFormattedLength(tldPossible.aCategory);
-					break;
-
-				case TDCA_TAGS:
-					li.nLongestPossibleValue = Misc::GetFormattedLength(tldPossible.aTags);
-					break;
-
-				case TDCA_ALLOCBY:
-					li.nLongestPossibleValue = Misc::GetMaximumItemLength(tldPossible.aAllocBy);
-					break;
-
-				case TDCA_STATUS:
-					li.nLongestPossibleValue = Misc::GetMaximumItemLength(tldPossible.aStatus);
-					break;
-
-				case TDCA_VERSION:
-					li.nLongestPossibleValue = Misc::GetMaximumItemLength(tldPossible.aVersion);
-					break;
-
-				case TDCA_RECURRENCE:
-					li.nLongestPossibleValue = GetLongestRecurrenceOption().GetLength();
-					break;
-				}
-
-				SetAt(nAttribID, li);
+				pAssoc->value = sValue;
+				return TRUE;
 			}
 		}
-
-		return GetSize();
-	}
-
-	void UpdateValue(TDC_ATTRIBUTE nAttribID, const CString& sValue)
-	{
-		if (sValue.GetLength() > 0)
+		else
 		{
-			LONGESTITEM li;
-			VERIFY(Lookup(nAttribID, li));
-
-			if (li.Update(sValue))
-				SetAt(nAttribID, li);
+			SetAt(nColID, sValue);
+			return TRUE;
 		}
 	}
 
-	int GetLongestValues(CTDCLongestValueMap& mapValues)
-	{
-		mapValues.RemoveAll();
+	// else
+	return FALSE;
+}
 
-		LONGESTITEM li;
-		TDC_ATTRIBUTE nAttribID;
-		POSITION pos = GetStartPosition();
-
-		while (pos)
-		{
-			GetNextAssoc(pos, nAttribID, li);
-			mapValues[nAttribID] = li.sLongestValue;
-		}
-
-		return mapValues.GetCount();
-	}
-};
-
-//////////////////////////////////////////////////////////////////////
-
-BOOL CTDCLongestValueMap::HasAttribute(TDC_ATTRIBUTE nAttribID) const
+BOOL CTDCLongestItemMap::IsSupportedColumn(TDC_COLUMN nColID)
 {
-	if (!LONGESTITEM::IsSupportedAttribute(nAttribID))
+	switch (nColID)
+	{
+	case TDCC_ALLOCTO:
+	case TDCC_CATEGORY:
+	case TDCC_TAGS:
+	case TDCC_ALLOCBY:
+	case TDCC_STATUS:
+	case TDCC_VERSION:
+	case TDCC_EXTERNALID:
+	case TDCC_CREATEDBY:
+	case TDCC_LASTMODBY:
+	case TDCC_RECURRENCE:
+	case TDCC_COST:
+	case TDCC_SUBTASKDONE:
+	case TDCC_POSITION:
+	case TDCC_PATH:
+		return TRUE;
+	}
+
+	// else
+	return CTDCCustomAttributeHelper::IsCustomColumn(nColID);
+}
+
+BOOL CTDCLongestItemMap::HasColumn(TDC_COLUMN nColID) const
+{
+	if (!IsSupportedColumn(nColID))
 		return FALSE;
 
 	UINT nHashBucket, nHashValue;
-	CAssoc* pAssoc = GetAssocAt(nAttribID, nHashBucket, nHashValue);
+	CAssoc* pAssoc = GetAssocAt(nColID, nHashBucket, nHashValue);
 
-	return (pAssoc && !pAssoc->value.IsEmpty());
+	return (pAssoc != NULL);
 }
 
-CString CTDCLongestValueMap::GetLongestValue(TDC_ATTRIBUTE nAttribID) const
+CString CTDCLongestItemMap::GetLongestValue(TDC_COLUMN nColID) const
 {
 	CString sValue;
 
-	if (LONGESTITEM::IsSupportedAttribute(nAttribID))
-		Lookup(nAttribID, sValue);
+	if (IsSupportedColumn(nColID))
+		Lookup(nColID, sValue);
 
 	return sValue;
 }
@@ -278,79 +223,11 @@ const TODOITEM* CToDoCtrlFind::GetTask(HTREEITEM hti, BOOL bTrue) const
 	return m_data.GetTask(dwTaskID);
 }
 
-int CToDoCtrlFind::GetLongestValues(const CTDCAttributeMap& mapAttrib, const TDCAUTOLISTDATA& tldPossible, CTDCLongestValueMap& mapLongest, BOOL bVisibleOnly) const
-{
-	CLongestItemMap mapItems;
-	mapItems.Initialise(mapAttrib, tldPossible);
-	
-	GetLongestValues(mapAttrib, NULL, NULL, NULL, mapItems, bVisibleOnly);
-
-	mapItems.GetLongestValues(mapLongest);
-	return mapLongest.GetCount();
-}
-
-void CToDoCtrlFind::GetLongestValues(const CTDCAttributeMap& mapAttrib, HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CLongestItemMap& mapLongest, BOOL bVisibleOnly) const
-{
-	if (!CheckGetTask(hti, pTDI, TRUE))
-		return;
-
-	if (pTDI)
-	{
-		CString sValue;
-		
-		if (mapAttrib.Has(TDCA_ALLOCTO))
-			mapLongest.UpdateValue(TDCA_ALLOCTO, m_formatter.GetTaskAllocTo(pTDI));
-
-		if (mapAttrib.Has(TDCA_CATEGORY))
-			mapLongest.UpdateValue(TDCA_CATEGORY, m_formatter.GetTaskCategories(pTDI));
-
-		if (mapAttrib.Has(TDCA_TAGS))
-			mapLongest.UpdateValue(TDCA_TAGS, m_formatter.GetTaskTags(pTDI));
-
-		if (mapAttrib.Has(TDCA_ALLOCBY))
-			mapLongest.UpdateValue(TDCA_ALLOCBY, sValue = pTDI->sAllocBy);
-
-		if (mapAttrib.Has(TDCA_STATUS))
-			mapLongest.UpdateValue(TDCA_STATUS, pTDI->sStatus);
-
-		if (mapAttrib.Has(TDCA_VERSION))
-			mapLongest.UpdateValue(TDCA_VERSION, pTDI->sVersion);
-
-		if (mapAttrib.Has(TDCA_EXTERNALID))
-			mapLongest.UpdateValue(TDCA_EXTERNALID, pTDI->sExternalID);
-
-		if (mapAttrib.Has(TDCA_CREATEDBY))
-			mapLongest.UpdateValue(TDCA_CREATEDBY, pTDI->sCreatedBy);
-
-		if (mapAttrib.Has(TDCA_LASTMODBY))
-			mapLongest.UpdateValue(TDCA_LASTMODBY, pTDI->sLastModifiedBy);
-
-		if (mapAttrib.Has(TDCA_RECURRENCE))
-			mapLongest.UpdateValue(TDCA_RECURRENCE, pTDI->trRecurrence.GetRegularityText(FALSE));
-
-		// TODO
-
-	}
-
-}
-
 CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, BOOL bVisibleOnly) const
 {
 	// attributes requiring subtask values
 	switch (nAttrib)
 	{
-	case TDCA_PATH:	
-		return GetLongestPath(NULL, NULL, NULL, EMPTY_STR, bVisibleOnly);
-
-	case TDCA_POSITION:
-		return GetLongestPosition(NULL, NULL, NULL, bVisibleOnly);
-
-	case TDCA_COST:	
-		return GetLongestCost();
-
-	case TDCA_SUBTASKDONE:			
-		return GetLongestSubtaskDone(NULL, NULL, NULL, bVisibleOnly);
-
 	case TDCA_RECURRENCE:
 		return GetLongestValue(nAttrib, NULL, NULL, GetLongestRecurrenceOption(), bVisibleOnly);
 
@@ -1182,4 +1059,80 @@ CString CToDoCtrlFind::GetLongestCost() const
 		return EMPTY_STR;
 
 	return Misc::Format(biggest, 2);
+}
+
+int CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols, CTDCLongestItemMap& mapLongest, BOOL bVisibleOnly) const
+{
+	if (mapLongest.Initialise(mapCols))
+	{
+		// Cost is special because we only have to process the 
+		// top-level tasks as they already aggregate their subtasks
+		if (mapCols.Has(TDCC_COST))
+			mapLongest.UpdateValue(TDCC_COST, GetLongestCost());
+
+		// All the rest
+		GetLongestValues(mapCols, NULL, NULL, NULL, mapLongest, bVisibleOnly);
+	}
+
+	return mapLongest.GetCount();
+}
+
+void CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols, HTREEITEM hti,
+										const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
+										CTDCLongestItemMap& mapLongest, BOOL bVisibleOnly) const
+{
+	if (!CheckGetTask(hti, pTDI, pTDS))
+		return;
+	
+	BOOL bSearchSubtasks = WantSearchChildren(hti, bVisibleOnly);
+
+	if (pTDI)
+	{
+		// Attributes not affected by subtasks
+		mapLongest.CheckUpdateValue(mapCols, TDCC_ALLOCTO, pTDI->aAllocTo);
+		mapLongest.CheckUpdateValue(mapCols, TDCC_CATEGORY, pTDI->aCategories);
+		mapLongest.CheckUpdateValue(mapCols, TDCC_TAGS, pTDI->aTags);
+		mapLongest.CheckUpdateValue(mapCols, TDCC_ALLOCBY, pTDI->sAllocBy);
+		mapLongest.CheckUpdateValue(mapCols, TDCC_STATUS, pTDI->sStatus);
+		mapLongest.CheckUpdateValue(mapCols, TDCC_VERSION, pTDI->sVersion);
+		mapLongest.CheckUpdateValue(mapCols, TDCC_EXTERNALID, pTDI->sExternalID);
+		mapLongest.CheckUpdateValue(mapCols, TDCC_CREATEDBY, pTDI->sCreatedBy);
+		mapLongest.CheckUpdateValue(mapCols, TDCC_LASTMODBY, pTDI->sLastModifiedBy);
+		mapLongest.CheckUpdateValue(mapCols, TDCC_RECURRENCE, pTDI->trRecurrence.GetRegularityText(FALSE));
+
+		// Attributes dependent on subtask values
+		// Note: Cost handled elsewhere
+		if (mapCols.Has(TDCC_PATH))
+		{
+			// The longest path string will always be a leaf/collapsed task
+			// so we don't update the 'cache' until then
+			if (!bSearchSubtasks)
+				mapLongest.UpdateValue(TDCC_PATH, m_formatter.GetTaskPath(pTDI, pTDS));
+		}
+
+		if (mapCols.Has(TDCC_POSITION))
+		{
+			// The longest position string will always be a leaf/collapsed task
+			// so we don't update the 'cache' until then
+			if (!bSearchSubtasks)
+				mapLongest.UpdateValue(TDCC_POSITION, m_formatter.GetTaskPosition(pTDS));
+		}
+
+		if (mapCols.Has(TDCC_SUBTASKDONE))
+		{
+			// No shortcuts for this attribute
+			mapLongest.UpdateValue(TDCC_SUBTASKDONE, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
+		}
+	}
+
+	if (bSearchSubtasks)
+	{
+		HTREEITEM htiChild = m_tree.GetChildItem(hti);
+
+		while (htiChild)
+		{
+			GetLongestValues(mapCols, htiChild, NULL, NULL, mapLongest, bVisibleOnly);
+			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
+		}
+	}
 }
