@@ -470,6 +470,7 @@ protected:
 	PFNTLSCOMPARE PrepareSort(TDSORTPARAMS& ss) const;
 	
 	int CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustomWantsTime = FALSE) const;
+	int CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC, BOOL bVisibleTasksOnly) const;
 	BOOL WantDrawColumnTime(TDC_DATE nDate, BOOL bCustomWantsTime = FALSE) const;
 	int CalcSplitterPosToFitListColumns() const;
 	void UpdateAttributePaneVisibility();
