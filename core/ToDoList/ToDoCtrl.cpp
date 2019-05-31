@@ -9094,34 +9094,15 @@ void CToDoCtrl::HandleUnsavedComments()
 
 HTREEITEM CToDoCtrl::SetAllTasks(const CTaskFile& tasks)
 {
-	// PERMANENT LOGGING //////////////////////////////////////////////
-// 	CScopedLogTimer log(_T("CToDoCtrl::SetAllTasks"));
-// 	log.LogStart();
-	///////////////////////////////////////////////////////////////////
-
 	// Clear existing tree items
 	TSH().RemoveAll(FALSE);
 	m_taskTree.DeleteAll();
 
-	// PERMANENT LOGGING //////////////////////////////////////////////
-// 	log.LogTimeElapsed(_T("CToDoCtrl::SetAllTasks(m_taskTree.DeleteAll)"));
-	///////////////////////////////////////////////////////////////////
-
 	// Build data structure first 
 	m_data.BuildDataModel(tasks);
 
-	// PERMANENT LOGGING //////////////////////////////////////////////
-// 	log.LogTimeElapsed(_T("CToDoCtrl::SetAllTasks(m_data.BuildDataModel)"));
-	///////////////////////////////////////////////////////////////////
-
 	// Then tree structure
-	HTREEITEM hti = RebuildTree();
-
-	// PERMANENT LOGGING //////////////////////////////////////////////
-// 	log.LogTimeElapsed(_T("CToDoCtrl::SetAllTasks(RebuildTree)"));
-	///////////////////////////////////////////////////////////////////
-
-	return hti;
+	return RebuildTree();
 }
 
 HTREEITEM CToDoCtrl::RebuildTree(const void* pContext)
