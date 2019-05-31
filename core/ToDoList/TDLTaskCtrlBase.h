@@ -97,7 +97,6 @@ public:
  	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTrueTask(dwTaskID); }
  	inline UINT GetTaskCount() const { return m_data.GetTaskCount(); }
 	inline BOOL HasSelection() const { return GetSelectedCount(); }
-	inline BOOL VisibleItemCountsMatch() const { return (GetVisibleItemCount() == m_lcColumns.GetItemCount()); }
 
 	virtual int GetItemCount() const = 0;
 	virtual int GetVisibleItemCount() const = 0;
