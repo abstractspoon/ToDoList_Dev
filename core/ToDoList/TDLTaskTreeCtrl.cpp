@@ -20,6 +20,7 @@
 #include "..\shared\TreeDragDropHelper.h"
 #include "..\shared\themed.h"
 #include "..\shared\osversion.h"
+#include "..\shared\ScopedTimer.h"
 
 #include "..\3rdparty\shellicons.h"
 #include "..\3rdparty\colordef.h"
@@ -2285,7 +2286,7 @@ HTREEITEM CTDLTaskTreeCtrl::InsertItem(DWORD dwTaskID, HTREEITEM htiParent, HTRE
 										dwTaskID, // lParam
 										htiParent, 
 										(htiAfter ? htiAfter : TVI_FIRST),
-										FALSE,
+										(htiParent == NULL), // bold top-level items
 										FALSE);
 
 	m_mapHTItems[dwTaskID] = htiNew;
@@ -2476,8 +2477,6 @@ void CTDLTaskTreeCtrl::SaveState(CPreferences& prefs, const CString& sKey, BOOL 
 
 HTREEITEM CTDLTaskTreeCtrl::LoadState(const CPreferences& prefs, const CString& sKey, BOOL bExpandedOnly) 
 {
-	RefreshItemBoldState();
-
 	if (!bExpandedOnly)
 		CTDLTaskCtrlBase::LoadState(prefs, sKey);
 
@@ -2606,7 +2605,7 @@ void CTDLTaskTreeCtrl::RefreshItemBoldState(HTREEITEM hti, BOOL bAndChildren)
 		
 		while (htiChild)
 		{
-			RefreshItemBoldState(htiChild);
+			RefreshItemBoldState(htiChild); // RECURSIVE CALL
 			htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
 		}
 	}
