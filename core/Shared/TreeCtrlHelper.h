@@ -158,7 +158,7 @@ public:
 	BOOL HasFocus(BOOL bIncEditing = TRUE);
 	int IsItemExpanded(HTREEITEM hti, BOOL bFully = FALSE) const; // TRUE, FALSE, -1 if no children
 	void ExpandAll(BOOL bExpand = TRUE);
-	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bChildren = FALSE);
+	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bChildren = FALSE, BOOL bParents = TRUE);
 	void ToggleItemExpansion(HTREEITEM hti, BOOL bChildren = FALSE);
 	BOOL IsParentItemExpanded(HTREEITEM hti, BOOL bRecursive = FALSE) const;
 	BOOL ItemHasParent(HTREEITEM hti, HTREEITEM htiParent) const;
@@ -256,7 +256,6 @@ protected:
 
 	void BuildCopy(const HTREEITEM hti, TCHHCOPY* pCopy) const;
 	HTREEITEM CopyTree(HTREEITEM hDest, const TCHHCOPY* pSrc, TCH_WHERE nWhere, BOOL bUsesTextCallback, BOOL bUsesImageCallback);
-	void ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bChildren, BOOL bParents);
 };
 
 #endif // !defined(AFX_TREECTRLHELPER_H__F6652DBE_3770_4E1C_A246_057AD6AD16B7__INCLUDED_)

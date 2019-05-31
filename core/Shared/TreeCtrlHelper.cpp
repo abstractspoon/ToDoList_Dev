@@ -227,12 +227,6 @@ void CTreeCtrlHelper::ExpandAll(BOOL bExpand)
 	SetItemStateEx(NULL, bExpand ? TVIS_EXPANDED : 0, TVIS_EXPANDED, TRUE);
 }
 
-void CTreeCtrlHelper::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bChildren)
-{
-	// For this item only we expand its parents
-	ExpandItem(hti, bExpand, bChildren, TRUE);
-}
-
 void CTreeCtrlHelper::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bChildren, BOOL bParents)
 {
 	// special case: equiv to ExpandAll
