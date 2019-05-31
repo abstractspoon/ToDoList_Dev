@@ -10846,19 +10846,16 @@ int CToDoCtrl::GetSelectedTaskCustomAttributeData(CTDCCustomAttributeDataMap& ma
 void CToDoCtrl::SetDefaultTaskAttributes(const TODOITEM& tdi)
 {
 	m_tdiDefault = tdi;
-
 	m_cfDefault = m_tdiDefault.sCommentsTypeID;
+
 	m_data.SetDefaultCommentsFormat(m_cfDefault);
+	m_data.SetDefaultTimeUnits(tdi.timeEstimate.nUnits, tdi.timeSpent.nUnits);
 	
 	TODOITEM::SetModifierName(tdi.sCreatedBy); // 'this' user
 
 	// set default task creation date to zero so that new tasks
 	// always get the current date
 	CDateHelper::ClearDate(m_tdiDefault.dateCreated);
-
-	// pass on default time units for calculations
-	m_taskTree.SetDefaultTimeUnits(tdi.timeEstimate.nUnits, tdi.timeSpent.nUnits);
-	m_data.SetDefaultTimeUnits(tdi.timeEstimate.nUnits, tdi.timeSpent.nUnits);
 }
 
 LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)

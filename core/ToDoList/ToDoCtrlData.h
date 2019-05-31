@@ -223,6 +223,8 @@ public:
 	
 	void SetDefaultCommentsFormat(const CString& format);
 	void SetDefaultTimeUnits(TDC_UNITS nTimeEstUnits, TDC_UNITS nTimeSpentUnits);
+	TDC_UNITS GetDefaultTimeEstimateUnits() const { return m_nDefTimeEstUnits; }
+	TDC_UNITS GetDefaultTimeSpentUnits() const { return m_nDefTimeSpentUnits; }
 	void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
 	BOOL WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib) const;
 

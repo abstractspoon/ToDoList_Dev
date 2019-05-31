@@ -3041,7 +3041,8 @@ BOOL CTDCTaskCalculator::IsParentTaskDone(const TODOSTRUCTURE* pTDS) const
 
 CTDCTaskFormatter::CTDCTaskFormatter(const CToDoCtrlData& data) 
 	: 
-	m_data(data)
+	m_data(data),
+	m_calculator(data)
 {
 
 }
@@ -3150,6 +3151,337 @@ CString CTDCTaskFormatter::GetTaskSubtaskCompletion(DWORD dwTaskID) const
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
 
 	return GetTaskSubtaskCompletion(pTDI, pTDS);
+}
+
+CString CTDCTaskFormatter::GetTaskTimeEstimate(DWORD dwTaskID) const
+{
+	return GetTaskTime(dwTaskID, TDCC_TIMEEST);
+}
+
+CString CTDCTaskFormatter::GetTaskTimeSpent(DWORD dwTaskID) const
+{
+	return GetTaskTime(dwTaskID, TDCC_TIMESPENT);
+}
+
+CString CTDCTaskFormatter::GetTaskTimeRemaining(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	return GetTaskTimeRemaining(pTDI, pTDS);
+}
+
+CString CTDCTaskFormatter::GetTaskPercentDone(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	return GetTaskPercentDone(pTDI, pTDS);
+}
+
+CString CTDCTaskFormatter::GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	if (!m_data.HasStyle(TDCS_HIDEPERCENTFORDONETASKS) || !m_calculator.IsTaskDone(pTDI, pTDS))
+	{
+		int nPercent = m_calculator.GetTaskPercentDone(pTDI, pTDS);
+
+		if ((nPercent > 0) || !m_data.HasStyle(TDCS_HIDEZEROPERCENTDONE))
+			return Misc::Format(nPercent, _T("%"));
+	}
+
+	// else
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskCommentSize(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
+
+	return GetTaskCommentSize(pTDI);
+}
+
+CString CTDCTaskFormatter::GetTaskRecentlyModified(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	return GetTaskRecentlyModified(pTDI, pTDS);
+}
+
+CString CTDCTaskFormatter::GetTaskRecurrence(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
+
+	return GetTaskRecurrence(pTDI);
+}
+
+CString CTDCTaskFormatter::GetTaskRecentlyModified(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	ASSERT(pTDI);
+
+	if (pTDI && m_calculator.IsTaskRecentlyModified(pTDI, pTDS))
+		return '*';
+
+	// else
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskRecurrence(const TODOITEM* pTDI) const
+{
+	ASSERT(pTDI);
+
+	if (pTDI)
+		return pTDI->trRecurrence.GetRegularityText(FALSE);
+
+	// else
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskCommentSize(const TODOITEM* pTDI) const
+{
+	float fSize = pTDI->GetCommentsSizeInKB();
+
+	if (fSize >= 1)
+		return Misc::Format(max(1, (int)fSize));
+
+	if (fSize > 0)
+		return _T(">0");
+
+	// else
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskCost(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	return GetTaskCost(pTDI, pTDS);
+}
+
+CString CTDCTaskFormatter::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
+
+	if (dCost != 0.0 || !m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
+		return Misc::Format(dCost, 2);
+
+	// else
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskPriority(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	return GetTaskPriority(pTDI, pTDS);
+}
+
+CString CTDCTaskFormatter::GetTaskRisk(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	return GetTaskRisk(pTDI, pTDS);
+}
+
+CString CTDCTaskFormatter::GetTaskStatus(DWORD dwTaskID, const CString& sCompletionStatus) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	return GetTaskStatus(pTDI, pTDS, sCompletionStatus);
+}
+
+CString CTDCTaskFormatter::GetTaskStatus(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const CString& sCompletionStatus) const
+{
+	// if a task is completed and has no status and the completion status
+	// has been specified then draw the completion status
+	if (pTDI->sStatus.IsEmpty() && !sCompletionStatus.IsEmpty() && m_calculator.IsTaskDone(pTDI, pTDS))
+		return sCompletionStatus;
+
+	// else
+	return pTDI->sStatus;
+}
+
+CString CTDCTaskFormatter::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	ASSERT(pTDI && pTDS);
+
+	if (pTDI && pTDS)
+	{
+		if (!m_data.HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_calculator.IsTaskDone(pTDI, pTDS))
+		{
+			int nPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE);
+
+			if ((nPriority != FM_NOPRIORITY) && !m_data.HasStyle(TDCS_HIDEPRIORITYNUMBER))
+				return Misc::Format(nPriority);
+		}
+	}
+
+	// else
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	ASSERT(pTDI && pTDS);
+
+	if (pTDI && pTDS)
+	{
+		if (m_data.HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !m_calculator.IsTaskDone(pTDI, pTDS))
+		{
+			int nRisk = m_calculator.GetTaskHighestRisk(pTDI, pTDS);
+
+			if (nRisk != FM_NORISK)
+				return Misc::Format(nRisk);
+		}
+	}
+
+	// else
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskTime(DWORD dwTaskID, TDC_COLUMN nColID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	return GetTaskTime(pTDI, pTDS, nColID);
+}
+
+CString CTDCTaskFormatter::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	return GetTaskTime(pTDI, pTDS, TDCC_TIMEEST);
+}
+
+CString CTDCTaskFormatter::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	return GetTaskTime(pTDI, pTDS, TDCC_TIMESPENT);
+}
+
+CString CTDCTaskFormatter::GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	ASSERT(pTDI && pTDS);
+
+	if (pTDI && pTDS)
+	{
+		TDC_UNITS nUnits = TDCU_NULL;
+		double dRemaining = m_calculator.GetTaskRemainingTime(pTDI, pTDS, nUnits);
+
+		if (nUnits == TDCU_NULL)
+		{
+			if (m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
+				return EMPTY_STR;
+
+			// else
+			ASSERT(dRemaining == 0.0);
+			nUnits = pTDI->timeEstimate.nUnits;
+		}
+
+		// format appropriately
+		TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
+		CTimeHelper th;
+
+		if (m_data.HasStyle(TDCS_CALCREMAININGTIMEBYPERCENT) ||
+			m_data.HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
+		{
+			return th.FormatTime(dRemaining, nTHUnits, 1);
+		}
+
+		// else TDCS_CALCREMAININGTIMEBYDUEDATE
+		COleDateTime date = m_calculator.GetTaskDueDate(pTDI, pTDS);
+
+		if (CDateHelper::IsDateSet(date))
+		{
+			if (m_data.HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
+				return th.FormatTimeHMS(dRemaining, THU_DAYS, TRUE);
+
+			// find best units for display
+			if (fabs(dRemaining) >= 1.0)
+				return th.FormatTime(dRemaining, THU_DAYS, 1);
+
+			dRemaining *= 24; // to hours
+
+			if (fabs(dRemaining) >= 1.0)
+				return th.FormatTime(dRemaining, THU_HOURS, 1);
+
+			return th.FormatTime(dRemaining * 60, THU_MINS, 0);
+		}
+	}
+
+	// else
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const
+{
+	ASSERT(pTDI && pTDS);
+
+	if (pTDI && pTDS)
+	{
+		double dTime = 0.0;
+		TDC_UNITS nUnits = TDCU_NULL;
+		int nDecPlaces = (m_data.HasStyle(TDCS_ROUNDTIMEFRACTIONS) ? 0 : 2);
+
+		switch (nColID)
+		{
+		case TDCC_TIMEEST:
+			if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+				nUnits = pTDI->timeEstimate.nUnits;
+			else
+				nUnits = m_data.GetDefaultTimeEstimateUnits();
+
+			dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, nUnits);
+
+			// check for negative times
+			if (dTime < 0.0)
+				return EMPTY_STR;
+			break;
+
+		case TDCC_TIMESPENT:
+			if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+				nUnits = pTDI->timeSpent.nUnits;
+			else
+				nUnits = m_data.GetDefaultTimeSpentUnits();
+
+			dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, nUnits);
+			break;
+
+		case TDCC_REMAINING:
+			return GetTaskTimeRemaining(pTDI, pTDS);
+
+		default:
+			nUnits = TDCU_NULL;
+			ASSERT(0);
+			return EMPTY_STR;
+		}
+
+		if ((dTime != 0.0) || !m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
+		{
+			TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
+
+			if (m_data.HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
+				return CTimeHelper().FormatTimeHMS(dTime, nTHUnits, (BOOL)nDecPlaces);
+
+			// else
+			return CTimeHelper().FormatTime(dTime, nTHUnits, nDecPlaces);
+		}
+	}
+
+	// else
+	return EMPTY_STR;
 }
 
 CString CTDCTaskFormatter::GetTaskAllocTo(const TODOITEM* pTDI) const

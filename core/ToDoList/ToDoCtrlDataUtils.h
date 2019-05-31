@@ -124,19 +124,44 @@ public:
 	CString GetTaskSubtaskCompletion(DWORD dwTaskID) const;
 	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const; 
 	CString GetTaskPosition(DWORD dwTaskID) const; 
-
+	CString GetTaskTimeEstimate(DWORD dwTaskID) const;
+	CString GetTaskTimeSpent(DWORD dwTaskID) const;
+	CString GetTaskTimeRemaining(DWORD dwTaskID) const;
+	CString GetTaskPercentDone(DWORD dwTaskID) const;
+	CString GetTaskCommentSize(DWORD dwTaskID) const;
+	CString GetTaskCost(DWORD dwTaskID) const;
+	CString GetTaskPriority(DWORD dwTaskID) const;
+	CString GetTaskRisk(DWORD dwTaskID) const;
+	CString GetTaskStatus(DWORD dwTaskID, const CString& sCompletionStatus) const;
+	CString GetTaskRecentlyModified(DWORD dwTaskID) const;
+	CString GetTaskRecurrence(DWORD dwTaskID) const;
+	
 	CString GetTaskAllocTo(const TODOITEM* pTDI) const;
 	CString GetTaskCategories(const TODOITEM* pTDI) const;
 	CString GetTaskTags(const TODOITEM* pTDI) const;
 	CString GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPosition(const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskCommentSize(const TODOITEM* pTDI) const;
+	CString GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskStatus(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const CString& sCompletionStatus) const;
+	CString GetTaskRecentlyModified(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskRecurrence(const TODOITEM* pTDI) const;
+
+	CString GetTaskTime(DWORD dwTaskID, TDC_COLUMN nColID) const;
+	CString GetTaskTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
 
 protected:
 	const CToDoCtrlData& m_data;
+	CTDCTaskCalculator m_calculator;
 
 protected:
-
 };
 
 //////////////////////////////////////////////////////////////////////

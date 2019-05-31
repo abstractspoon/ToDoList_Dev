@@ -116,8 +116,6 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 	m_bSortingColumns(FALSE),
 	m_nColorByAttrib(TDCA_NONE),
 	m_bBoundSelecting(FALSE),
-	m_nDefTimeEstUnits(TDCU_HOURS), 
-	m_nDefTimeSpentUnits(TDCU_HOURS),
 	m_comparer(data),
 	m_calculator(data),
 	m_formatter(data),
@@ -1079,6 +1077,7 @@ void CTDLTaskCtrlBase::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL b
 	CClientDC dc(&m_lcColumns);
 
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
+	BOOL bVisibleTasksOnly = IsTreeList();
 
 	// Optimise for single columns
 	if (!bZeroOthers && (aColIDs.GetCount() == 1))
@@ -1087,13 +1086,11 @@ void CTDLTaskCtrlBase::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL b
 		ASSERT(nCol != -1);
 
 		int nColWidth = CalculateColumnWidth(nCol, &dc, bVisibleTasksOnly);
-		m_hdrColumns.SetItemWidth(nItem, nColWidth);
+		m_hdrColumns.SetItemWidth(nCol, nColWidth);
 	}
 	else
 	{
 		// Get the longest task values for the remaining attributes
-		BOOL bVisibleTasksOnly = IsTreeList();
-
 		CTDCLongestItemMap mapLongest;
 		m_find.GetLongestValues(mapCols, mapLongest, bVisibleTasksOnly);
 
@@ -3386,10 +3383,11 @@ void CTDLTaskCtrlBase::SetCompletionStatus(const CString& sStatus)
 CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, 
 	const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const
 {
-	ASSERT(pTDS && pTDI && dwTaskID && (nColID != TDCC_NONE));
-
-	if (!(pTDS && pTDI && dwTaskID && (nColID != TDCC_NONE)))
+	if (!pTDS || !pTDI || !dwTaskID || (nColID == TDCC_NONE))
+	{
+		ASSERT(0);
 		return _T("");
+	}
 
 	CString sTaskColText;
 		
@@ -3404,30 +3402,15 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		break;
 
 	case TDCC_PRIORITY:
-		// priority color
-		if (!HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_calculator.IsTaskDone(pTDI, pTDS))
-		{
-			int nPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE);
-			BOOL bHasPriority = (nPriority != FM_NOPRIORITY);
-
-			// draw priority number over the top
-			if (bHasPriority && !HasStyle(TDCS_HIDEPRIORITYNUMBER))
-				sTaskColText = Misc::Format(nPriority);
-		}
+		sTaskColText = m_formatter.GetTaskPriority(pTDI, pTDS);
 		break;
 
 	case TDCC_RISK:
-		if (HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !m_calculator.IsTaskDone(pTDI, pTDS))
-		{
-			int nRisk = m_calculator.GetTaskHighestRisk(pTDI, pTDS);
-
-			if (nRisk != FM_NORISK)
-				sTaskColText = Misc::Format(nRisk);
-		}
+		sTaskColText = m_formatter.GetTaskRisk(pTDI, pTDS);
 		break;
 
 	case TDCC_RECURRENCE:
-		sTaskColText = pTDI->trRecurrence.GetRegularityText(FALSE);
+		sTaskColText = m_formatter.GetTaskRecurrence(pTDI);
 		break;
 
 	case TDCC_ID:
@@ -3435,7 +3418,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		if (pTDS->GetTaskID() != dwTaskID)
 			sTaskColText.Format(_T("(%lu) %lu"), pTDS->GetTaskID(), dwTaskID);
 		else
-			sTaskColText.Format(_T("%lu"), dwTaskID);
+			sTaskColText = Misc::Format(dwTaskID);
 		break;
 
 	case TDCC_PARENTID:
@@ -3443,17 +3426,11 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		break;
 
 	case TDCC_RECENTEDIT:
-		if (m_calculator.IsTaskRecentlyModified(pTDI, pTDS))
-			sTaskColText = _T("*");
+		sTaskColText = m_formatter.GetTaskRecentlyModified(pTDI, pTDS);
 		break;
 
 	case TDCC_COST:
-		{
-			double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
-
-			if (dCost != 0.0 || !HasStyle(TDCS_HIDEZEROTIMECOST))
-				sTaskColText = Misc::Format(dCost, 2);
-		}
+		sTaskColText = m_formatter.GetTaskCost(pTDI, pTDS);
 		break;
 
 	case TDCC_EXTERNALID:
@@ -3477,14 +3454,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		break;
 
 	case TDCC_STATUS:
-		{
-			sTaskColText = pTDI->sStatus;
-
-			// if a task is completed and has no status and the completion status
-			// has been specified then draw the completion status
-			if (sTaskColText.IsEmpty() && !m_sCompletionStatus.IsEmpty() && m_calculator.IsTaskDone(pTDI, pTDS))
-				sTaskColText = m_sCompletionStatus;
-		}
+		sTaskColText = m_formatter.GetTaskStatus(pTDI, pTDS, m_sCompletionStatus);
 		break;
 
 	case TDCC_CATEGORY:
@@ -3500,108 +3470,13 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		break;
 
 	case TDCC_PERCENT:
-		{
-			if (HasStyle(TDCS_HIDEPERCENTFORDONETASKS) && 
-				m_calculator.IsTaskDone(pTDI, pTDS))
-			{
-				break; // nothing to do
-			}
-
-			int nPercent = m_calculator.GetTaskPercentDone(pTDI, pTDS);
-
-			if (!nPercent && HasStyle(TDCS_HIDEZEROPERCENTDONE))
-				break; // nothing to do
-
-			sTaskColText = Misc::Format(nPercent, _T("%"));
-		}
+		sTaskColText = m_formatter.GetTaskPercentDone(pTDI, pTDS);
 		break;
 
 	case TDCC_REMAINING:
-		{
-			TDC_UNITS nUnits = TDCU_NULL;
-
-			double dRemaining = m_calculator.GetTaskRemainingTime(pTDI, pTDS, nUnits);
-
-			if (nUnits == TDCU_NULL)
-			{
-				if (HasStyle(TDCS_HIDEZEROTIMECOST))
-					break;
-
-				// else
-				ASSERT(dRemaining == 0.0);
-				nUnits = pTDI->timeEstimate.nUnits;
-			}
-
-			// format appropriately
-			TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
-
-			if (HasStyle(TDCS_CALCREMAININGTIMEBYPERCENT) || HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
-			{
-				sTaskColText = CTimeHelper().FormatTime(dRemaining, nTHUnits, 1);
-			}
-			else // TDCS_CALCREMAININGTIMEBYDUEDATE
-			{
-				COleDateTime date = m_calculator.GetTaskDueDate(pTDI, pTDS);
-
-				if (CDateHelper::IsDateSet(date)) 
-				{
-					if (HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
-					{
-						sTaskColText = CTimeHelper().FormatTimeHMS(dRemaining, THU_DAYS, TRUE);
-					}
-					else
-					{
-						// find best units for display
-						if (fabs(dRemaining) >= 1.0)
-						{
-							sTaskColText = CTimeHelper().FormatTime(dRemaining, THU_DAYS, 1);
-						}
-						else
-						{
-							dRemaining *= 24; // to hours
-
-							if (fabs(dRemaining) >= 1.0)
-							{
-								sTaskColText = CTimeHelper().FormatTime(dRemaining, THU_HOURS, 1);
-							}
-							else
-							{
-								dRemaining *= 60; // to mins
-								sTaskColText = CTimeHelper().FormatTime(dRemaining, THU_MINS, 0);
-							}
-						}
-					}
-				}
-			}
-		}
-		break;
-
 	case TDCC_TIMEEST:
-		{
-			TDC_UNITS nUnits = m_nDefTimeEstUnits; // good default value
-
-			// get actual task time units
-			if (!pTDS->HasSubTasks() || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-				nUnits = pTDI->timeEstimate.nUnits;
-
-			// draw time
-			double dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, nUnits);
-			sTaskColText = FormatTimeValue(dTime, nUnits, FALSE); // FALSE = estimates cannot be -ve
-		}
-		break;
-
 	case TDCC_TIMESPENT:
-		{
-			TDC_UNITS nUnits = m_nDefTimeSpentUnits; // good default value
-
-			// get actual task time units
-			if (!pTDS->HasSubTasks() || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-				nUnits = pTDI->timeSpent.nUnits;
-
-			// draw time
-			double dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, nUnits);
-			sTaskColText = FormatTimeValue(dTime, nUnits, TRUE); // TRUE = time spent can be -ve
-		}
+		sTaskColText = m_formatter.GetTaskTime(pTDI, pTDS, nColID);
 		break;
 
 	case TDCC_PATH:
@@ -3629,18 +3504,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		break;
 
 	case TDCC_COMMENTSSIZE:
-		{
-			float fSize = pTDI->GetCommentsSizeInKB();
-
-			if (fSize >= 1)
-			{
-				sTaskColText = Misc::Format(max(1, (int)fSize));
-			}
-			else if (fSize > 0)
-			{
-				sTaskColText = _T(">0");
-			}
-		}
+		sTaskColText = m_formatter.GetTaskCommentSize(pTDI);
 		break;
 
 	default:
@@ -3650,34 +3514,6 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 	}
 	
 	return sTaskColText;
-}
-
-CString CTDLTaskCtrlBase::FormatTimeValue(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const
-{
-	CString sTime;
-
-	// first handle zero times
-	if ((dTime == 0.0) && HasStyle(TDCS_HIDEZEROTIMECOST))
-	{
-		// do nothing
-	}
-	// then check for negative times
-	else if (!bAllowNegative && (dTime < 0.0))
-	{
-		// do nothing
-	}
-	else
-	{
-		int nDecPlaces = HasStyle(TDCS_ROUNDTIMEFRACTIONS) ? 0 : 2;
-		TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
-
-		if (HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
-			sTime = CTimeHelper().FormatTimeHMS(dTime, nTHUnits, (BOOL)nDecPlaces);
-		else
-			sTime = CTimeHelper().FormatTime(dTime, nTHUnits, nDecPlaces);
-	}
-
-	return sTime;
 }
 
 // message and notifications for 'us'
@@ -5125,17 +4961,9 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 
 			switch (nColID)
 			{
-			case TDCC_TIMEEST:   
-				sLongest = m_find.GetLongestTimeEstimate(m_nDefTimeEstUnits, bVisibleTasksOnly);	
-				break;
-			
-			case TDCC_TIMESPENT: 
-				sLongest = m_find.GetLongestTimeSpent(m_nDefTimeEstUnits, bVisibleTasksOnly);		
-				break;
-
-			case TDCC_REMAINING: 
-				sLongest = m_find.GetLongestTimeRemaining(m_nDefTimeEstUnits, bVisibleTasksOnly); 
-				break;
+			case TDCC_TIMEEST:		sLongest = m_find.GetLongestTimeEstimate(bVisibleTasksOnly);	break;
+			case TDCC_TIMESPENT:	sLongest = m_find.GetLongestTimeSpent(bVisibleTasksOnly);		break;
+			case TDCC_REMAINING: 	sLongest = m_find.GetLongestTimeRemaining(bVisibleTasksOnly);	break;
 			}
 
 			nColWidth = (pDC->GetTextExtent(sLongest).cx + 4); // add a bit to handle different time unit widths

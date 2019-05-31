@@ -237,7 +237,6 @@ public:
 	void SetEditTitleTaskID(DWORD dwTaskID);
 	void SetNextUniqueTaskID(DWORD dwTaskID);
 	void SetCompletionStatus(const CString& sStatus);
-	void SetDefaultTimeUnits(TDC_UNITS nTimeEstUnits, TDC_UNITS nTimeSpentUnits) { m_nDefTimeEstUnits = nTimeEstUnits; m_nDefTimeSpentUnits = nTimeSpentUnits; }
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 	void ClientToScreen(LPRECT pRect) const { CWnd::ClientToScreen(pRect); }
@@ -274,7 +273,6 @@ protected:
 	TDSORT m_sort;
 	float m_fAveHeaderCharWidth;
 	int m_nMaxInfotipCommentsLength;
-	TDC_UNITS m_nDefTimeEstUnits, m_nDefTimeSpentUnits;
 	CString m_sTasklistFolder;
 
 	CTDCTaskComparer m_comparer;
@@ -486,7 +484,6 @@ protected:
 	BOOL HandleListLBtnDown(CListCtrl& lc, CPoint pt);
 	BOOL ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nColID, const CPoint* pCursor = NULL) const;
 	BOOL AccumulateRecalcColumn(TDC_COLUMN nColID, CSet<TDC_COLUMN>& aColIDs) const;
-	CString FormatTimeValue(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 
 	void DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 							COLORREF crText, BOOL bSelected);
