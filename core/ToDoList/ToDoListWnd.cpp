@@ -7497,7 +7497,7 @@ void CToDoListWnd::OnMovetaskup()
 #else
 	if (FileMisc::IsLoggingEnabled())
 	{
-		FileMisc::LogTextRaw(Misc::FormatT(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick));
+		FileMisc::LogTextRaw(Misc::Format(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick));
 	}
 #endif
 

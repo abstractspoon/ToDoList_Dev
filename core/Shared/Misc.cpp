@@ -1961,12 +1961,27 @@ CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 
 CString Misc::Format(int nVal, LPCTSTR szTrail)
 {
-	return (FormatT(_T("%ld"), nVal) + szTrail);
+	return (Format(_T("%ld"), nVal) + szTrail);
 }
 
 CString Misc::Format(DWORD dwVal, LPCTSTR szTrail)
 {
-	return (FormatT(_T("%lu"), dwVal) + szTrail);
+	return (Format(_T("%lu"), dwVal) + szTrail);
+}
+
+CString Misc::Format(LPCTSTR lpszFormat, ...)
+{
+	ASSERT(AfxIsValidString(lpszFormat));
+
+	va_list argList;
+	va_start(argList, lpszFormat);
+
+	CString sValue;
+	sValue.FormatV(lpszFormat, argList);
+
+	va_end(argList);
+
+	return sValue;
 }
 
 CString Misc::FormatCost(double dCost, LPCTSTR szTrail)
@@ -2134,7 +2149,7 @@ CString Misc::MakeKey(const CString& sFormat, int nKeyVal, LPCTSTR szParentKey)
 {
 	ASSERT(!sFormat.IsEmpty());
 
-	CString sKey(FormatT(sFormat, nKeyVal));
+	CString sKey(Format(sFormat, nKeyVal));
 
 	if (!IsEmpty(szParentKey))
 	{
@@ -2151,7 +2166,7 @@ CString Misc::MakeKey(const CString& sFormat, int nKeyVal, LPCTSTR szParentKey)
 
 CString Misc::MakeKey(const CString& sFormat, LPCTSTR szKeyVal, LPCTSTR szParentKey)
 {
-	return MakeKey(FormatT(sFormat, szKeyVal), 0, szParentKey);
+	return MakeKey(Format(sFormat, szKeyVal), 0, szParentKey);
 }
 
 int Misc::NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBelow)

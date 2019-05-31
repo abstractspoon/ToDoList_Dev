@@ -1120,7 +1120,7 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer)
 
 		for (int nFile = 1; nFile <= 16; nFile++)
 		{
-			CString sKey = Misc::FormatT(_T("TaskList%d"), nFile);
+			CString sKey = Misc::Format(_T("TaskList%d"), nFile);
 			CString sFile = prefs.GetProfileString(_T("MRU"), sKey);
 
 			if (sFile.IsEmpty())

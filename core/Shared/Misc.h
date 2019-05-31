@@ -455,15 +455,7 @@ namespace Misc
 	CString Format(double dVal, int nDecPlaces = -1, LPCTSTR szTrail = NULL);
 	CString Format(int nVal, LPCTSTR szTrail = NULL);
 	CString Format(DWORD dwVal, LPCTSTR szTrail = NULL);
-
-	template <class T>
-	CString FormatT(LPCTSTR szFormat, T tVal)
-	{
-		CString sValue;
-		sValue.Format(szFormat, tVal);
-
-		return sValue;
-	}
+	CString Format(LPCTSTR lpszFormat, ...);
 
 	template <class T>
 	int GetFormattedLength(T tVal, int nDecimals)

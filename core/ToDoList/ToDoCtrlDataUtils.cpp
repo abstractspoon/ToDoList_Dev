@@ -3579,6 +3579,14 @@ CString CTDCTaskFormatter::GetTaskPath(DWORD dwTaskID, int nMaxLen) const
 	return Misc::FormatArray(aElements, _T("\\"));
 }
 
+CString CTDCTaskFormatter::GetID(DWORD dwTaskID, DWORD dwRefID) const
+{
+	if ((dwRefID == 0) || (dwRefID == dwTaskID))
+		return Misc::Format(dwTaskID);
+
+	return Misc::Format(_T("(%lu) %lu"), dwRefID, dwTaskID);
+}
+
 /////////////////////////////////////////////////////////////////////////////////////
 
 CTDCTaskExporter::CTDCTaskExporter(const CToDoCtrlData& data, 

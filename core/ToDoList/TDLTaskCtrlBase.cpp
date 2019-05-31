@@ -733,8 +733,7 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChange
 	
 	for (int nItem = 1; nItem < nNumCols; nItem++)
 	{		
-		TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nItem);
-		m_hdrColumns.ShowItem(nItem, IsColumnShowing(nColID));
+		m_hdrColumns.ShowItem(nItem, IsColumnShowing(GetColumnID(nItem)));
 	}
 
 	UpdateAttributePaneVisibility();
@@ -755,10 +754,7 @@ void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
 	int nItem = m_hdrColumns.GetItemCount();
 	
 	while (nItem-- && !bShow)
-	{		
-		TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nItem);
-		bShow = IsColumnShowing(nColID);
-	}
+		bShow = IsColumnShowing(GetColumnID(nItem));
 	
 	if (bShow)
 		SetHidden(TLSH_NONE);
@@ -864,12 +860,7 @@ BOOL CTDLTaskCtrlBase::GetColumnOrder(CDWordArray& aColumnIDs) const
 		aColumnIDs.SetSize(nNumCols - 1); 
 
 		for (int nItem = 1; nItem < nNumCols; nItem++)
-		{		
-			TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(aOrder[nItem]);
-			ASSERT(nColID != TDCC_NONE);
-			
-			aColumnIDs[nItem - 1] = nColID;
-		}
+			aColumnIDs[nItem - 1] = GetColumnID(aOrder[nItem]);
 	
 		return TRUE;
 	}
@@ -1061,12 +1052,10 @@ void CTDLTaskCtrlBase::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL b
 
 	for (int nItem = 1; nItem < nNumCols; nItem++)
 	{
-		if (m_hdrColumns.IsItemVisible(nItem))
+		if (m_hdrColumns.IsItemVisible(nItem) && 
+			m_hdrColumns.IsItemTracked(nItem))
 		{
-			TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nItem);
-
-			if (m_hdrColumns.IsItemTracked(nItem))
-				mapCols.RemoveKey(nColID);
+			mapCols.RemoveKey(GetColumnID(nItem));
 		}
 	}
 
@@ -1098,7 +1087,7 @@ void CTDLTaskCtrlBase::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL b
 
 		for (int nItem = 1; nItem < nNumCols; nItem++)
 		{
-			TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nItem);
+			TDC_COLUMN nColID = GetColumnID(nItem);
 			int nColWidth = 0;
 
 			if (mapCols.Has(nColID))
@@ -1481,7 +1470,7 @@ TDC_COLUMN CTDLTaskCtrlBase::HitTestColumn(const CPoint& ptScreen) const
 		int nCol = m_hdrColumns.HitTest(ptHeader);
 		
 		if (nCol >= 0)
-			return (TDC_COLUMN)m_hdrColumns.GetItemData(nCol);
+			return GetColumnID(nCol);
 	}
 	else if (PtInClientRect(ptScreen, m_lcColumns, TRUE)) // columns
 	{
@@ -2412,7 +2401,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		if (rSubItem.Width() <= MIN_COL_WIDTH)
 			continue;
 		
-		TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nCol);
+		TDC_COLUMN nColID = GetColumnID(nCol);
 
 		// Note: we pass dwTaskID NOT dwTrueID here so that references 
 		// can be handled correctly
@@ -3350,19 +3339,11 @@ const TDCCOLUMN* CTDLTaskCtrlBase::GetColumn(TDC_COLUMN nColID)
 
 TDC_COLUMN CTDLTaskCtrlBase::GetColumnID(int nCol) const
 {
-	switch (nCol)
-	{
-	case 0:
-		// zero is always 'tasks'
+	if (nCol == 0)
 		return TDCC_CLIENT;
 
-	default:
-		if (nCol > 0)
-		{
-			return (TDC_COLUMN)m_hdrColumns.GetItemData(nCol);
-		}
-		break;
-	}
+	if (nCol > 0)
+		return (TDC_COLUMN)m_hdrColumns.GetItemData(nCol);
 
 	ASSERT(0);
 	return TDCC_NONE;
@@ -3383,137 +3364,63 @@ void CTDLTaskCtrlBase::SetCompletionStatus(const CString& sStatus)
 CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, 
 	const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const
 {
-	if (!pTDS || !pTDI || !dwTaskID || (nColID == TDCC_NONE))
+	if (pTDS && pTDI && dwTaskID && (nColID != TDCC_NONE))
 	{
-		ASSERT(0);
-		return _T("");
+		switch (nColID)
+		{
+		case TDCC_CLIENT:		return pTDI->sTitle;
+		case TDCC_EXTERNALID:	return pTDI->sExternalID;
+		case TDCC_VERSION:		return pTDI->sVersion;
+		case TDCC_LASTMODBY:	return pTDI->sLastModifiedBy;
+		case TDCC_ALLOCBY:		return pTDI->sAllocBy;
+		case TDCC_CREATEDBY:	return pTDI->sCreatedBy;
+
+		case TDCC_POSITION:		return m_formatter.GetTaskPosition(pTDS);
+		case TDCC_PRIORITY:		return m_formatter.GetTaskPriority(pTDI, pTDS);
+		case TDCC_RISK:			return m_formatter.GetTaskRisk(pTDI, pTDS);
+		case TDCC_RECURRENCE:	return m_formatter.GetTaskRecurrence(pTDI);
+		case TDCC_RECENTEDIT:	return m_formatter.GetTaskRecentlyModified(pTDI, pTDS);
+		case TDCC_COST:			return m_formatter.GetTaskCost(pTDI, pTDS);
+		case TDCC_ALLOCTO:		return m_formatter.GetTaskAllocTo(pTDI);
+		case TDCC_STATUS:		return m_formatter.GetTaskStatus(pTDI, pTDS, m_sCompletionStatus);
+		case TDCC_CATEGORY:		return m_formatter.GetTaskCategories(pTDI);
+		case TDCC_TAGS:			return m_formatter.GetTaskTags(pTDI);
+		case TDCC_PERCENT:		return m_formatter.GetTaskPercentDone(pTDI, pTDS);
+		case TDCC_REMAINING:	return m_formatter.GetTaskTimeRemaining(pTDI, pTDS);
+		case TDCC_TIMEEST:		return m_formatter.GetTaskTimeEstimate(pTDI, pTDS);
+		case TDCC_TIMESPENT:	return m_formatter.GetTaskTimeSpent(pTDI, pTDS);
+		case TDCC_PATH:			return m_formatter.GetTaskPath(pTDI, pTDS);
+		case TDCC_SUBTASKDONE:	return m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
+		case TDCC_COMMENTSSIZE:	return m_formatter.GetTaskCommentSize(pTDI);
+
+		case TDCC_ID:			return m_formatter.GetID(pTDS->GetTaskID(), dwTaskID);
+		case TDCC_PARENTID:		return m_formatter.GetID(pTDS->GetParentTaskID());
+
+		case TDCC_STARTDATE:
+		case TDCC_DUEDATE:
+		case TDCC_DONEDATE:
+		case TDCC_CREATIONDATE:
+		case TDCC_LASTMODDATE:
+		case TDCC_ICON:
+		case TDCC_DEPENDENCY:
+		case TDCC_DONE:
+		case TDCC_TRACKTIME:
+		case TDCC_FLAG:
+		case TDCC_LOCK:
+		case TDCC_REMINDER:
+		case TDCC_FILEREF:
+			// items having no text or rendered differently
+			return _T("");
+
+		default:
+			// handled during drawing
+			ASSERT(CTDCCustomAttributeHelper::IsCustomColumn(nColID));
+			return _T("");
+		}
 	}
 
-	CString sTaskColText;
-		
-	switch (nColID)
-	{
-	case TDCC_CLIENT:
-		sTaskColText = pTDI->sTitle;
-		break;
-
-	case TDCC_POSITION:
-		sTaskColText = m_formatter.GetTaskPosition(pTDS);
-		break;
-
-	case TDCC_PRIORITY:
-		sTaskColText = m_formatter.GetTaskPriority(pTDI, pTDS);
-		break;
-
-	case TDCC_RISK:
-		sTaskColText = m_formatter.GetTaskRisk(pTDI, pTDS);
-		break;
-
-	case TDCC_RECURRENCE:
-		sTaskColText = m_formatter.GetTaskRecurrence(pTDI);
-		break;
-
-	case TDCC_ID:
-		// Figure out is this is really a reference
-		if (pTDS->GetTaskID() != dwTaskID)
-			sTaskColText.Format(_T("(%lu) %lu"), pTDS->GetTaskID(), dwTaskID);
-		else
-			sTaskColText = Misc::Format(dwTaskID);
-		break;
-
-	case TDCC_PARENTID:
-		sTaskColText = Misc::Format(pTDS->GetParentTaskID());
-		break;
-
-	case TDCC_RECENTEDIT:
-		sTaskColText = m_formatter.GetTaskRecentlyModified(pTDI, pTDS);
-		break;
-
-	case TDCC_COST:
-		sTaskColText = m_formatter.GetTaskCost(pTDI, pTDS);
-		break;
-
-	case TDCC_EXTERNALID:
-		sTaskColText = pTDI->sExternalID;
-		break;
-
-	case TDCC_VERSION:
-		sTaskColText = pTDI->sVersion;
-		break;
-
-	case TDCC_LASTMODBY:
-		sTaskColText = pTDI->sLastModifiedBy;
-		break;
-
-	case TDCC_ALLOCTO:
-		sTaskColText = m_formatter.GetTaskAllocTo(pTDI);
-		break;
-
-	case TDCC_ALLOCBY:
-		sTaskColText = pTDI->sAllocBy;
-		break;
-
-	case TDCC_STATUS:
-		sTaskColText = m_formatter.GetTaskStatus(pTDI, pTDS, m_sCompletionStatus);
-		break;
-
-	case TDCC_CATEGORY:
-		sTaskColText = m_formatter.GetTaskCategories(pTDI);
-		break;
-
-	case TDCC_TAGS:
-		sTaskColText = m_formatter.GetTaskTags(pTDI);
-		break;
-
-	case TDCC_CREATEDBY:
-		sTaskColText = pTDI->sCreatedBy;
-		break;
-
-	case TDCC_PERCENT:
-		sTaskColText = m_formatter.GetTaskPercentDone(pTDI, pTDS);
-		break;
-
-	case TDCC_REMAINING:
-	case TDCC_TIMEEST:
-	case TDCC_TIMESPENT:
-		sTaskColText = m_formatter.GetTaskTime(pTDI, pTDS, nColID);
-		break;
-
-	case TDCC_PATH:
-		sTaskColText = m_formatter.GetTaskPath(pTDI, pTDS);
-		break;
-
-		// items having no text or rendered differently
-	case TDCC_STARTDATE:
-	case TDCC_DUEDATE:
-	case TDCC_DONEDATE:
-	case TDCC_CREATIONDATE:
-	case TDCC_LASTMODDATE:
-	case TDCC_ICON:
-	case TDCC_DEPENDENCY:
-	case TDCC_DONE:
-	case TDCC_TRACKTIME:
-	case TDCC_FLAG:
-	case TDCC_LOCK:
-	case TDCC_REMINDER:
-	case TDCC_FILEREF:
-		break;
-
-	case TDCC_SUBTASKDONE:
-		sTaskColText = m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
-		break;
-
-	case TDCC_COMMENTSSIZE:
-		sTaskColText = m_formatter.GetTaskCommentSize(pTDI);
-		break;
-
-	default:
-		// handled during drawing
-		ASSERT(CTDCCustomAttributeHelper::IsCustomColumn(nColID));
-		break;
-	}
-	
-	return sTaskColText;
+	ASSERT(0);
+	return _T("");
 }
 
 // message and notifications for 'us'
@@ -3798,7 +3705,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						// forward on to our parent
 						if ((pHDN->iButton == 0) && m_hdrColumns.IsItemVisible(pHDN->iItem))
 						{
-							OnHeaderClick((TDC_COLUMN)m_hdrColumns.GetItemData(pHDN->iItem));
+							OnHeaderClick(GetColumnID(pHDN->iItem));
 						}
 						return 0L;
 					}
@@ -3817,9 +3724,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						}
 						else if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
 						{
-							TDC_COLUMN nColID = GetColumnID(pHDN->iItem);
-
-							if (IsColumnShowing(nColID))
+							if (IsColumnShowing(GetColumnID(pHDN->iItem)))
 							{
 								pHDN->pitem->cxy = max(MIN_COL_WIDTH, pHDN->pitem->cxy);
 							}
@@ -4408,7 +4313,7 @@ int CTDLTaskCtrlBase::GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray
 
 	for (int nCol = 0; nCol < nNumCols; nCol++)
 	{
-		if (aColIDs.Has((TDC_COLUMN)m_hdrColumns.GetItemData(nCol)))
+		if (aColIDs.Has(GetColumnID(nCol)))
 		{
 			aCols.Add(nCol);
 
@@ -4806,7 +4711,7 @@ TDC_COLUMN CTDLTaskCtrlBase::GetSortColumn(TDC_SORTDIR& nSortDir) const
 
 int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const
 {
-	TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nCol);
+	TDC_COLUMN nColID = GetColumnID(nCol);
 
 	// handle hidden columns
 	if (!IsColumnShowing(nColID))

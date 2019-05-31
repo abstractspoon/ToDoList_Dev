@@ -662,23 +662,19 @@ int GraphicsMisc::GetTextWidth(CDC* pDC, const CString& sText)
 	return pDC->GetTextExtent(sText).cx;
 }
 
-int AFX_CDECL GraphicsMisc::GetFormattedTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...)
+int GraphicsMisc::GetFormattedTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...)
 {
-	static TCHAR BUFFER[2048];
-
 	ASSERT(AfxIsValidString(lpszFormat));
 
 	va_list argList;
 	va_start(argList, lpszFormat);
 
-#if _MSC_VER >= 1400
-	_vstprintf_s(BUFFER, lpszFormat, argList);
-#else
-	_vstprintf(BUFFER, lpszFormat, argList);
-#endif
+	CString sText;
+	sText.FormatV(lpszFormat, argList);
+
 	va_end(argList);
 
-	return pDC->GetTextExtent(BUFFER).cx;
+	return pDC->GetTextExtent(sText).cx;
 }
 
 float GraphicsMisc::GetAverageCharWidth(CDC* pDC, CFont* pFont)
