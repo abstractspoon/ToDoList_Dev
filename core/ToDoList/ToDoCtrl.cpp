@@ -10043,7 +10043,7 @@ HTREEITEM CToDoCtrl::LoadTasksState(const CPreferences& prefs, BOOL bRebuildingT
 	HTREEITEM hti = m_taskTree.LoadState(prefs, GetPreferencesKey(_T("TaskTree")), bRebuildingTree);
 
 	if (!bRebuildingTree)
-		m_taskTree.RecalcColumnWidths();
+		m_taskTree.RecalcUntrackedColumnWidths();
 
 	return hti;
 }

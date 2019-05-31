@@ -6110,7 +6110,7 @@ HTREEITEM CTabbedToDoCtrl::LoadTasksState(const CPreferences& prefs, BOOL bRebui
 	if (!bRebuildingTree)
 	{
 		m_taskList.LoadState(prefs, GetPreferencesKey(_T("TaskList")));
-		m_taskList.RecalcColumnWidths();
+		m_taskList.RecalcUntrackedColumnWidths();
 		
 		if (m_taskList.IsSorting())
 		{

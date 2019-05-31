@@ -453,7 +453,7 @@ void CTDLTaskCtrlBase::SetNextUniqueTaskID(DWORD dwTaskID)
 		m_dwNextUniqueTaskID = dwTaskID;
 
 		if (GetSafeHwnd())
-			RecalcColumnWidths(CTDCColumnIDMap(TDCC_ID), FALSE);
+			RecalcUntrackedColumnWidths(CTDCColumnIDMap(TDCC_ID), FALSE);
 	}
 }
 
@@ -495,7 +495,7 @@ void CTDLTaskCtrlBase::OnStylesUpdated()
 {
 	SetTasksImageList(m_ilCheckboxes, TRUE, (!IsColumnShowing(TDCC_DONE) && HasStyle(TDCS_ALLOWTREEITEMCHECKBOX)));
 
-	RecalcColumnWidths();
+	RecalcUntrackedColumnWidths();
 	UpdateHeaderSorting();
 	PostResize();
 
@@ -548,7 +548,7 @@ void CTDLTaskCtrlBase::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate
 	case TDCS_DISPLAYHMSTIMEFORMAT:
 	case TDCS_TREATSUBCOMPLETEDASDONE:
 		if (bDoUpdate)
-			RecalcColumnWidths();
+			RecalcUntrackedColumnWidths();
 		break;
 		
 	case TDCS_USEHIGHESTPRIORITY:
@@ -566,12 +566,12 @@ void CTDLTaskCtrlBase::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate
 		
 	case TDCS_SHOWNONFILEREFSASTEXT:
 		if (bDoUpdate && IsColumnShowing(TDCC_FILEREF))
-			RecalcColumnWidths();
+			RecalcUntrackedColumnWidths();
 		break;
 		
 	case TDCS_USEPERCENTDONEINTIMEEST:
 		if (bDoUpdate && IsColumnShowing(TDCC_TIMEEST))
-			RecalcColumnWidths();
+			RecalcUntrackedColumnWidths();
 		break;
 		
 	case TDCS_SHOWREMINDERSASDATEANDTIME:
@@ -584,7 +584,7 @@ void CTDLTaskCtrlBase::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate
 			m_hdrColumns.SetItemTracked(nCol, FALSE);
 
 			if (bDoUpdate)
-				RecalcColumnWidths();
+				RecalcUntrackedColumnWidths();
 		}
 		break;
 		
@@ -594,7 +594,7 @@ void CTDLTaskCtrlBase::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate
 			IsColumnShowing(TDCC_TIMESPENT) || 
 			IsColumnShowing(TDCC_COST)))
 		{
-			RecalcColumnWidths();
+			RecalcUntrackedColumnWidths();
 		}
 		break;
 		
@@ -603,7 +603,7 @@ void CTDLTaskCtrlBase::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate
 			(IsColumnShowing(TDCC_TIMEEST) || 
 			IsColumnShowing(TDCC_TIMESPENT)))
 		{
-			RecalcColumnWidths();
+			RecalcUntrackedColumnWidths();
 		}
 		break;
 		
@@ -621,7 +621,7 @@ void CTDLTaskCtrlBase::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate
 		if (bDoUpdate)
 		{
 			if (IsColumnShowing(TDCC_PERCENT))
-				RecalcColumnWidths();
+				RecalcUntrackedColumnWidths();
 			else
 				InvalidateAll();
 		}
@@ -632,7 +632,7 @@ void CTDLTaskCtrlBase::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate
 			(IsColumnShowing(TDCC_STARTDATE) || 
 			IsColumnShowing(TDCC_DUEDATE)))
 		{
-			RecalcColumnWidths();
+			RecalcUntrackedColumnWidths();
 		}
 		break;
 		
@@ -643,7 +643,7 @@ void CTDLTaskCtrlBase::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate
 			IsColumnShowing(TDCC_DUEDATE) || 
 			IsColumnShowing(TDCC_DONEDATE)))
 		{
-			RecalcColumnWidths();
+			RecalcUntrackedColumnWidths();
 		}
 		break;
 		
@@ -741,7 +741,7 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChange
 	if (mapChanges.Has(TDCC_ICON) || mapChanges.Has(TDCC_DONE))
 		OnImageListChange();
 
-	RecalcColumnWidths(mapChanges, FALSE);
+	RecalcUntrackedColumnWidths(mapChanges, FALSE);
 
 	if (m_bAutoFitSplitter)
 		AdjustSplitterToFitAttributeColumns();
@@ -809,7 +809,7 @@ void CTDLTaskCtrlBase::OnCustomAttributeChange()
 	}
 
 	UpdateAttributePaneVisibility();
-	RecalcColumnWidths(TRUE); // Only custom columns
+	RecalcUntrackedColumnWidths(TRUE); // Only custom columns
 }
 
 BOOL CTDLTaskCtrlBase::IsColumnShowing(TDC_COLUMN nColID) const
@@ -992,7 +992,7 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 		m_hdrColumns.ShowItem(nItem, TRUE);
 	}
 
-	RecalcColumnWidths();
+	RecalcUntrackedColumnWidths();
 
 	return TRUE;
 }
@@ -1004,7 +1004,7 @@ void CTDLTaskCtrlBase::EnableRecalcColumns(BOOL bEnable)
 		m_bEnableRecalcColumns = bEnable;
 
 		if (bEnable)
-			RecalcColumnWidths();
+			RecalcUntrackedColumnWidths();
 	}
 }
 
@@ -1015,10 +1015,10 @@ void CTDLTaskCtrlBase::RecalcAllColumnWidths()
 	m_hdrColumns.ClearAllTracked();
 
 	CWaitCursor cursor;
-	RecalcColumnWidths();
+	RecalcUntrackedColumnWidths();
 }
 
-void CTDLTaskCtrlBase::RecalcColumnWidths()
+void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()
 {
 	if (!m_bEnableRecalcColumns)
 		return;
@@ -1026,12 +1026,11 @@ void CTDLTaskCtrlBase::RecalcColumnWidths()
 	VERIFY(m_ilFileRef.Initialize());
 
 	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcColumnWidths(%s)"), GetDebugName());
-	log.LogStart();
 
-	RecalcColumnWidths(FALSE); // Standard and Custom cols
+	RecalcUntrackedColumnWidths(FALSE); // Standard and Custom cols
 }
 
-void CTDLTaskCtrlBase::RecalcColumnWidths(BOOL bCustomOnly)
+void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 {
 	// Get a list of all the visible column attributes
 	CTDCColumnIDMap mapCols;
@@ -1041,10 +1040,10 @@ void CTDLTaskCtrlBase::RecalcColumnWidths(BOOL bCustomOnly)
 	
 	CTDCCustomAttributeHelper::GetVisibleColumnIDs(m_aCustomAttribDefs, mapCols, TRUE); // append
 
-	RecalcColumnWidths(mapCols, TRUE);
+	RecalcUntrackedColumnWidths(mapCols, TRUE);
 }
 
-void CTDLTaskCtrlBase::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers)
+void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers)
 {
 	// Weed out all the tracked columns
 	CTDCColumnIDMap mapCols(aColIDs);
@@ -1526,7 +1525,7 @@ BOOL CTDLTaskCtrlBase::SetFont(HFONT hFont)
 		CHoldRedraw hr(*this);
 		::SendMessage(Tasks(), WM_SETFONT, (WPARAM)hFont, TRUE);
 
-		RecalcColumnWidths();
+		RecalcUntrackedColumnWidths();
 	}
 	
 	return bChange;
@@ -3349,7 +3348,6 @@ TDC_COLUMN CTDLTaskCtrlBase::GetColumnID(int nCol) const
 	return TDCC_NONE;
 }
 
-
 void CTDLTaskCtrlBase::SetCompletionStatus(const CString& sStatus) 
 { 
 	if (sStatus != m_sCompletionStatus)
@@ -4290,7 +4288,7 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 		break;
 	}
 
-	RecalcColumnWidths(aColIDs, FALSE);
+	RecalcUntrackedColumnWidths(aColIDs, FALSE);
 	
 	if (bRedrawTasks)
 	{

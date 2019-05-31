@@ -300,7 +300,7 @@ void CTDLTaskTreeCtrl::SetExpandedTasks(const CDWordArray& aExpanded)
 	if (nNumExpanded)
 	{
 		ExpandList();
-		RecalcColumnWidths();
+		RecalcUntrackedColumnWidths();
 	}
 }
 
@@ -321,7 +321,7 @@ void CTDLTaskTreeCtrl::OnEndRebuild()
 	CTDLTaskCtrlBase::OnEndRebuild();
 
 	ExpandList();
-	RecalcColumnWidths();
+	RecalcUntrackedColumnWidths();
 }
 
 BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible()
@@ -448,7 +448,7 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 		m_tcTasks.EnsureVisible(htiSel);
 	}
 
-	RecalcColumnWidths();
+	RecalcUntrackedColumnWidths();
 }
 
 void CTDLTaskTreeCtrl::ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList)
@@ -1167,7 +1167,7 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 				}
 
 				UpdateAll();
-				RecalcColumnWidths();
+				RecalcUntrackedColumnWidths();
 				break;
 			}
 		}

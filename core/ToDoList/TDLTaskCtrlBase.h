@@ -90,7 +90,7 @@ public:
 	void RedrawTasks(BOOL bErase = TRUE) const;
 	void RedrawColumns(BOOL bErase = TRUE) const;
 	void RedrawColumn(TDC_COLUMN nColID) const;
-	void RecalcColumnWidths();
+	void RecalcUntrackedColumnWidths();
 	void RecalcAllColumnWidths();
 	void EnableRecalcColumns(BOOL bEnable = TRUE);
 	
@@ -381,8 +381,8 @@ protected:
 	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0, int nCount = 1) const;
 
 	int CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
-	void RecalcColumnWidths(BOOL bCustomOnly);
-	void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers);
+	void RecalcUntrackedColumnWidths(BOOL bCustomOnly);
+	void RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers);
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);
 	BOOL GetColumnOrder(CDWordArray& aColumns) const;
