@@ -66,8 +66,9 @@ public:
 	
 	// generic
 	int GetLongestValues(const CTDCColumnIDMap& mapCols, CTDCLongestItemMap& mapLongest, BOOL bVisibleOnly) const;
-	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, BOOL bVisibleOnly) const;
-	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, const CStringArray& aPossible, BOOL bVisibleOnly) const;
+	CString GetLongestValue(TDC_COLUMN nCol, BOOL bVisibleOnly) const;
+	CString GetLongestValue(TDC_COLUMN nCol, const CStringArray& aPossible, BOOL bVisibleOnly) const;
+	CString GetLongestTime(TDC_COLUMN nCol, BOOL bVisibleOnly) const;
 
 	// specific
 	CString GetLongestCost() const;
@@ -75,9 +76,9 @@ public:
 	CString GetLongestTimeSpent(BOOL bVisibleOnly) const;
 	CString GetLongestTimeRemaining(BOOL bVisibleOnly) const;
 	CString GetLongestCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
+	CString GetLargestCommentsSizeInKB(BOOL bVisibleOnly) const;
 
 	DWORD GetLargestReferenceID(BOOL bVisibleOnly) const;
-	float GetLargestCommentsSizeInKB(BOOL bVisibleOnly) const;
 	int GetLargestFileLinkCount(BOOL bVisibleOnly) const;
 
 	BOOL FindVisibleTaskWithDueTime() const;
@@ -109,11 +110,10 @@ protected:
 	
 	// generic
 	void GetLongestValues(const CTDCColumnIDMap& mapCols, HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTDCLongestItemMap& mapLongest, BOOL bVisibleOnly) const;
-	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
-	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, const CString& sLongestPossible, BOOL bVisibleOnly) const;
+	CString GetLongestValue(TDC_COLUMN nCol, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
+	CString GetLongestValue(TDC_COLUMN nCol, HTREEITEM hti, const TODOITEM* pTDI, const CString& sLongestPossible, BOOL bVisibleOnly) const;
 
 	// specific
-	CString GetLongestTime(TDC_COLUMN nCol, BOOL bVisibleOnly) const;
  	CString GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nCol, BOOL bVisibleOnly) const;
  	CString GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* pTDI, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
 	CString GetLongestSubtaskDone(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const;

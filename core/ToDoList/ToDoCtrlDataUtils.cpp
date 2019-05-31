@@ -3242,15 +3242,24 @@ CString CTDCTaskFormatter::GetTaskRecurrence(const TODOITEM* pTDI) const
 	return EMPTY_STR;
 }
 
-CString CTDCTaskFormatter::GetTaskCommentSize(const TODOITEM* pTDI) const
+CString CTDCTaskFormatter::GetCommentSize(float fSize) const
 {
-	float fSize = pTDI->GetCommentsSizeInKB();
-
 	if (fSize >= 1)
 		return Misc::Format(max(1, (int)fSize));
 
 	if (fSize > 0)
 		return _T(">0");
+
+	// else
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskCommentSize(const TODOITEM* pTDI) const
+{
+	ASSERT(pTDI);
+
+	if (pTDI)
+		return GetCommentSize(pTDI->GetCommentsSizeInKB());
 
 	// else
 	return EMPTY_STR;
@@ -3314,18 +3323,34 @@ CString CTDCTaskFormatter::GetTaskStatus(const TODOITEM* pTDI, const TODOSTRUCTU
 	return pTDI->sStatus;
 }
 
+CString CTDCTaskFormatter::GetPriority(int nPriority) const
+{
+	if (!m_data.HasStyle(TDCS_HIDEPRIORITYNUMBER) && (nPriority != FM_NOPRIORITY))
+		return Misc::Format(nPriority);
+
+	// else
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetRisk(int nRisk) const
+{
+	if (nRisk != FM_NOPRIORITY)
+		return Misc::Format(nRisk);
+
+	// else
+	return EMPTY_STR;
+}
+
 CString CTDCTaskFormatter::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	ASSERT(pTDI && pTDS);
 
-	if (pTDI && pTDS)
+	if (pTDI && pTDS && !m_data.HasStyle(TDCS_HIDEPRIORITYNUMBER))
 	{
 		if (!m_data.HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_calculator.IsTaskDone(pTDI, pTDS))
 		{
 			int nPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE);
-
-			if ((nPriority != FM_NOPRIORITY) && !m_data.HasStyle(TDCS_HIDEPRIORITYNUMBER))
-				return Misc::Format(nPriority);
+			return GetPriority(nPriority);
 		}
 	}
 

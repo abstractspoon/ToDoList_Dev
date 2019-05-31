@@ -117,6 +117,10 @@ class CTDCTaskFormatter
 {
 public:
 	CTDCTaskFormatter(const CToDoCtrlData& data);
+	
+	CString GetCommentSize(float fSize) const;
+	CString GetPriority(int nPriority) const;
+	CString GetRisk(int nRisk) const;
 
 	CString GetTaskAllocTo(DWORD dwTaskID) const;
 	CString GetTaskCategories(DWORD dwTaskID) const;

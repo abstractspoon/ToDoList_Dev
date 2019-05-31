@@ -4823,6 +4823,7 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 	case TDCC_DEPENDENCY:
 	case TDCC_ICON:
 	case TDCC_DONE:
+		// Fixed width
 		break; 
 		
 	case TDCC_REMINDER:
@@ -4847,13 +4848,6 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 		break; 
 
 	case TDCC_POSITION:
-		{
-			// determine the longest visible string
-			CString sLongest = m_find.GetLongestValue(TDCA_POSITION, bVisibleTasksOnly);
-			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
-		}
-		break;
-
 	case TDCC_RECURRENCE:
 	case TDCC_EXTERNALID:
 	case TDCC_CREATEDBY:
@@ -4861,12 +4855,10 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 	case TDCC_PATH:
 	case TDCC_SUBTASKDONE:
 	case TDCC_LASTMODBY:
+	case TDCC_COMMENTSSIZE:
 		{
-			TDC_ATTRIBUTE nAttrib = TDC::MapColumnToAttribute(nColID);
-			ASSERT(nAttrib != TDCA_NONE);
-			
 			// determine the longest visible string
-			CString sLongest = m_find.GetLongestValue(nAttrib, bVisibleTasksOnly);
+			CString sLongest = m_find.GetLongestValue(nColID, bVisibleTasksOnly);
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
 		}
 		break;
@@ -4874,7 +4866,7 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 	case TDCC_ALLOCTO:
 		{
 			// determine the longest visible string
-			CString sLongest = m_find.GetLongestValue(TDCA_ALLOCTO, m_tld.aAllocTo, bVisibleTasksOnly);
+			CString sLongest = m_find.GetLongestValue(nColID, m_tld.aAllocTo, bVisibleTasksOnly);
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
 		}
 		break;
@@ -4882,7 +4874,7 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 	case TDCC_ALLOCBY:
 		{
 			// determine the longest visible string
-			CString sLongest = m_find.GetLongestValue(TDCA_ALLOCBY, m_tld.aAllocBy, bVisibleTasksOnly);
+			CString sLongest = m_find.GetLongestValue(nColID, m_tld.aAllocBy, bVisibleTasksOnly);
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
 		}
 		break;
@@ -4890,7 +4882,7 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 	case TDCC_CATEGORY:
 		{
 			// determine the longest visible string
-			CString sLongest = m_find.GetLongestValue(TDCA_CATEGORY, m_tld.aCategory, bVisibleTasksOnly);
+			CString sLongest = m_find.GetLongestValue(nColID, m_tld.aCategory, bVisibleTasksOnly);
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
 		}
 		break;
@@ -4898,7 +4890,7 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 	case TDCC_TAGS:
 		{
 			// determine the longest visible string
-			CString sLongest = m_find.GetLongestValue(TDCA_TAGS, m_tld.aTags, bVisibleTasksOnly);
+			CString sLongest = m_find.GetLongestValue(nColID, m_tld.aTags, bVisibleTasksOnly);
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
 		}
 		break;
@@ -4906,7 +4898,7 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 	case TDCC_STATUS:
 		{
 			// determine the longest visible string
-			CString sLongest = m_find.GetLongestValue(TDCA_STATUS, m_tld.aStatus, bVisibleTasksOnly);
+			CString sLongest = m_find.GetLongestValue(nColID, m_tld.aStatus, bVisibleTasksOnly);
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
 		}
 		break;
@@ -4914,7 +4906,7 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 	case TDCC_VERSION:
 		{
 			// determine the longest visible string
-			CString sLongest = m_find.GetLongestValue(TDCA_VERSION, m_tld.aVersion, bVisibleTasksOnly);
+			CString sLongest = m_find.GetLongestValue(nColID, m_tld.aVersion, bVisibleTasksOnly);
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
 		}
 		break;
@@ -4980,15 +4972,6 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 	case TDCC_STARTDATE:
 	case TDCC_DONEDATE:
 		nColWidth = CalcMaxDateColWidth(TDC::MapColumnToDate(nColID), pDC);
-		break;
-
-	case TDCC_COMMENTSSIZE:
-		{
-			float fSize = m_find.GetLargestCommentsSizeInKB(bVisibleTasksOnly);
-
-			if (fSize > 0)
-				nColWidth = (1 + (int)log10(fSize));
-		}
 		break;
 
 	default:

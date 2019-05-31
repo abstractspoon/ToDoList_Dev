@@ -226,45 +226,45 @@ const TODOITEM* CToDoCtrlFind::GetTask(HTREEITEM hti, BOOL bTrue) const
 	return m_data.GetTask(dwTaskID);
 }
 
-CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, BOOL bVisibleOnly) const
 {
 	// attributes requiring subtask values
-	switch (nAttrib)
+	switch (nColID)
 	{
-	case TDCA_RECURRENCE:
-		return GetLongestValue(nAttrib, NULL, NULL, GetLongestRecurrenceOption(), bVisibleOnly);
+	case TDCC_RECURRENCE:
+		return GetLongestValue(nColID, NULL, NULL, GetLongestRecurrenceOption(), bVisibleOnly);
 
-	case TDCA_ALLOCTO:
-	case TDCA_CATEGORY:
-	case TDCA_TAGS:
-	case TDCA_ALLOCBY:
-	case TDCA_STATUS:
-	case TDCA_VERSION:
+	case TDCC_ALLOCTO:
+	case TDCC_CATEGORY:
+	case TDCC_TAGS:
+	case TDCC_ALLOCBY:
+	case TDCC_STATUS:
+	case TDCC_VERSION:
 		// Should use the version taking an array of possible values
 		ASSERT(0);
 		return EMPTY_STR;
 	}
 		
 	// all the rest
-	return GetLongestValue(nAttrib, NULL, NULL, bVisibleOnly);
+	return GetLongestValue(nColID, NULL, NULL, bVisibleOnly);
 }
 
-CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, const CStringArray& aPossible, BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, const CStringArray& aPossible, BOOL bVisibleOnly) const
 {
 	CString sLongestPossible;
 
-	switch (nAttrib)
+	switch (nColID)
 	{
-	case TDCA_ALLOCTO:
-	case TDCA_CATEGORY:
-	case TDCA_TAGS:
+	case TDCC_ALLOCTO:
+	case TDCC_CATEGORY:
+	case TDCC_TAGS:
 		sLongestPossible = Misc::FormatArray(aPossible);
 		break;
 
-	case TDCA_ALLOCBY:
-	case TDCA_STATUS:
-	case TDCA_VERSION:
-	case TDCA_RECURRENCE:
+	case TDCC_ALLOCBY:
+	case TDCC_STATUS:
+	case TDCC_VERSION:
+	case TDCC_RECURRENCE:
 		sLongestPossible = Misc::GetLongestItem(aPossible);
 		break;
 
@@ -273,15 +273,15 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, const CStringArray
 		return EMPTY_STR;
 	}
 
-	return GetLongestValue(nAttrib, NULL, NULL, sLongestPossible, bVisibleOnly);
+	return GetLongestValue(nColID, NULL, NULL, sLongestPossible, bVisibleOnly);
 }
 
-CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const
 {
-	return GetLongestValue(nAttrib, hti, pTDI, EMPTY_STR, bVisibleOnly);
+	return GetLongestValue(nColID, hti, pTDI, EMPTY_STR, bVisibleOnly);
 }
 
-CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, const CString& sLongestPossible, BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, HTREEITEM hti, const TODOITEM* pTDI, const CString& sLongestPossible, BOOL bVisibleOnly) const
 {
 	if (!CheckGetTask(hti, pTDI, TRUE))
 		return EMPTY_STR;
@@ -290,25 +290,25 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 
 	if (pTDI)
 	{
-		switch (nAttrib)
+		switch (nColID)
 		{
-		case TDCA_ALLOCTO:		sLongest = m_formatter.GetTaskAllocTo(pTDI);			break;
-		case TDCA_CATEGORY:		sLongest = m_formatter.GetTaskCategories(pTDI);			break;	
-		case TDCA_TAGS:			sLongest = m_formatter.GetTaskTags(pTDI);				break;	
+		case TDCC_ALLOCTO:		sLongest = m_formatter.GetTaskAllocTo(pTDI);			break;
+		case TDCC_CATEGORY:		sLongest = m_formatter.GetTaskCategories(pTDI);			break;	
+		case TDCC_TAGS:			sLongest = m_formatter.GetTaskTags(pTDI);				break;	
+		case TDCC_COMMENTSSIZE: sLongest = m_formatter.GetTaskCommentSize(pTDI);		break;
+		case TDCC_RECURRENCE:	sLongest = m_formatter.GetTaskRecurrence(pTDI);			break;
 			
-		case TDCA_ALLOCBY:		sLongest = pTDI->sAllocBy;								break;
-		case TDCA_STATUS:		sLongest = pTDI->sStatus;								break;		
-		case TDCA_VERSION:		sLongest = pTDI->sVersion;								break;		
-		case TDCA_EXTERNALID:	sLongest = pTDI->sExternalID;							break;	
-		case TDCA_CREATEDBY:	sLongest = pTDI->sCreatedBy;							break;
-		case TDCA_LASTMODBY:	sLongest = pTDI->sLastModifiedBy;						break;
+		case TDCC_ALLOCBY:		sLongest = pTDI->sAllocBy;								break;
+		case TDCC_STATUS:		sLongest = pTDI->sStatus;								break;		
+		case TDCC_VERSION:		sLongest = pTDI->sVersion;								break;		
+		case TDCC_EXTERNALID:	sLongest = pTDI->sExternalID;							break;	
+		case TDCC_CREATEDBY:	sLongest = pTDI->sCreatedBy;							break;
+		case TDCC_LASTMODBY:	sLongest = pTDI->sLastModifiedBy;						break;
 
-		case TDCA_RECURRENCE:	sLongest = pTDI->trRecurrence.GetRegularityText(FALSE);	break;
-
-		case TDCA_COST:			
-		case TDCA_SUBTASKDONE:			
-		case TDCA_POSITION:	
-		case TDCA_PATH:
+		case TDCC_COST:
+		case TDCC_SUBTASKDONE:
+		case TDCC_POSITION:
+		case TDCC_PATH:
 			// Should use the version taking pTDI and pTDS
 			ASSERT(0); 
 			return EMPTY_STR;
@@ -329,7 +329,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 
 		while (htiChild)
 		{
-			CString sChildLongest = GetLongestValue(nAttrib, htiChild, NULL, sLongestPossible, bVisibleOnly);
+			CString sChildLongest = GetLongestValue(nColID, htiChild, NULL, sLongestPossible, bVisibleOnly);
 
 			if (EqualsLongestPossible(sChildLongest, sLongestPossible))
 				return sChildLongest;
@@ -472,9 +472,11 @@ DWORD CToDoCtrlFind::GetLargestReferenceID(BOOL bVisibleOnly) const
 	return GetLargestReferenceID(NULL, NULL, bVisibleOnly);
 }
 
-float CToDoCtrlFind::GetLargestCommentsSizeInKB(BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLargestCommentsSizeInKB(BOOL bVisibleOnly) const
 {
-	return GetLargestCommentsSizeInKB(NULL, NULL, bVisibleOnly);
+	float fLargest = GetLargestCommentsSizeInKB(NULL, NULL, bVisibleOnly);
+
+	return m_formatter.GetCommentSize(fLargest);
 }
 
 int CToDoCtrlFind::GetLargestFileLinkCount(BOOL bVisibleOnly) const
