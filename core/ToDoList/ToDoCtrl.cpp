@@ -785,22 +785,16 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 
 				cx = rClient.right;
 				cy = rClient.bottom;
-
-				//TRACE(_T("CToDoCtrl::OnSize[client](%d, %d)\n"), cx, cy);
 			}
 		}
 		else
 		{
 			ClearInitialSize();
-			//TRACE(_T("CToDoCtrl::OnSize(%d, %d)\n"), cx, cy);
 		}
 
 		ValidateCommentsSize();
-
-		// hide unused controls
 		ShowHideControls();
 
-		// written to use DeferWindowPos()
 		CRect rAvailable(0, 0, cx, cy);
 		{
 			CDeferWndMove dwm(100);
