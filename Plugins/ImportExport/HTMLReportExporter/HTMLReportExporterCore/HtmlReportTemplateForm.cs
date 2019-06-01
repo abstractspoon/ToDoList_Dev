@@ -9,6 +9,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Web.UI;
+using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -20,11 +21,12 @@ namespace HTMLReportExporter
 		private Translator m_Trans = null;
 		private TaskList m_Tasklist = null;
 		private Preferences m_Prefs = null;
-
+		
 		private HtmlReportTemplate m_Template = null;
 		private HtmlReportTemplate m_PrevTemplate = null;
 		private Timer m_ChangeTimer = null;
 		private String m_TemplateFilePath = "HtmlReportTemplate.txt";
+		private bool m_FirstPreview = true;
 
 		// --------------------------------------------------------------
 
@@ -110,10 +112,34 @@ namespace HTMLReportExporter
 			this.footerHeightCombobox.Text = m_Template.Footer.PixelHeightText;
 
 			this.tabControl.SelectedIndexChanged += new EventHandler(OnTabPageChange);
+			this.browserPreview.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(OnPreviewLoaded);
 
 			RefreshPreview();
 
 			m_ChangeTimer.Start();
+		}
+
+		private void OnPreviewLoaded(object sender, WebBrowserDocumentCompletedEventArgs e)
+		{
+			if (m_FirstPreview)
+			{
+				SetPreviewZoom(40);
+				m_FirstPreview = false;
+			}
+		}
+
+		private void SetPreviewZoom(int percent)
+		{
+			int OLECMDID_OPTICAL_ZOOM = 63;
+			int OLECMDEXECOPT_DONTPROMPTUSER = 2;
+
+			if ((percent >= 10) && (percent <= 1000))
+			{
+				dynamic ax = this.browserPreview.ActiveXInstance;
+
+				if (ax != null)
+					ax.ExecWB(OLECMDID_OPTICAL_ZOOM, OLECMDEXECOPT_DONTPROMPTUSER, new VariantWrapper(percent), new VariantWrapper(0));
+			}
 		}
 
 		private void OnTabPageChange(object sender, EventArgs e)
