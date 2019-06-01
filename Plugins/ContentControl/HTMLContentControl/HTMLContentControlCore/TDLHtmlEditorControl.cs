@@ -101,15 +101,18 @@ namespace HTMLContentControl
         {
             // remove whole 'Document' submenu
             CommandHandling.HideCommand("contextDocument", ContextMenu.Items);
-            CommandHandling.HideCommand("contextDocumentPrint", ContextMenu.Items);
 
-            CommandHandling.HideCommand("toolstripDocumentPrint", ToolBar.Items);
-// 
-//             CommandHandling.SetMenuShortcut("contextFormatStrikeout", Keys.Control | Keys.Subtract, ContextMenu.Items);
-//             CommandHandling.SetMenuShortcut("contextFormatIncrease", Keys.Control | Keys.Decimal, ContextMenu.Items);
-//             CommandHandling.SetMenuShortcut("contextFormatDecrease", Keys.Control | Keys.Oemcomma, ContextMenu.Items);
-            // TODO
-        }
+			CommandHandling.HideCommand("toolstripDocumentNew", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripDocumentOpen", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripDocumentSave", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripDocumentPrint", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripDocumentHelp", ToolBar.Items);
+			// 
+			//             CommandHandling.SetMenuShortcut("contextFormatStrikeout", Keys.Control | Keys.Subtract, ContextMenu.Items);
+			//             CommandHandling.SetMenuShortcut("contextFormatIncrease", Keys.Control | Keys.Decimal, ContextMenu.Items);
+			//             CommandHandling.SetMenuShortcut("contextFormatDecrease", Keys.Control | Keys.Oemcomma, ContextMenu.Items);
+			// TODO
+		}
 
 		public void SetFont(string fontName, int pointSize)
 		{

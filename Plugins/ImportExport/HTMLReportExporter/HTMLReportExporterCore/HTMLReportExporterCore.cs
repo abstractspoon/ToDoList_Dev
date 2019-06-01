@@ -38,7 +38,7 @@ namespace HTMLReportExporter
 
 					m_Template = dialog.ReportTemplate;
 #if DEBUG
-					return false;
+//					return false;
 #endif
 				}
 			}

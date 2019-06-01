@@ -99,11 +99,14 @@ namespace HTMLReportExporter
 		{
 			// remove whole 'Document' submenu
 			CommandHandling.HideCommand("contextDocument", ContextMenu.Items);
-			CommandHandling.HideCommand("contextDocumentPrint", ContextMenu.Items);
+			CommandHandling.HideCommand("contextInsertLink", ContextMenu.Items);
 
+			CommandHandling.HideCommand("toolstripDocumentNew", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripDocumentOpen", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripDocumentSave", ToolBar.Items);
 			CommandHandling.HideCommand("toolstripDocumentPrint", ToolBar.Items);
+			CommandHandling.HideCommand("toolstripDocumentHelp", ToolBar.Items);
 			CommandHandling.HideCommand("toolstripEnableEditing", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripFindReplace", ToolBar.Items);
 			CommandHandling.HideCommand("toolstripInsertLink", ToolBar.Items);
 			//CommandHandling.HideCommand("", ToolBar.Items);
 			//CommandHandling.HideCommand("", ToolBar.Items);
