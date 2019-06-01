@@ -135,7 +135,7 @@ namespace HTMLReportExporter
 			Footer.WriteStyles(html);
 			Title.WriteStyles(html);
 
-			html.WriteLine("@page { margin: 10mm; }");
+			html.WriteLine("@page { margin: 0; }");
 
 			html.WriteLine("@media print { ");
 			html.WriteLine("thead { display: table-header-group; } ");
@@ -350,7 +350,7 @@ namespace HTMLReportExporter
 				if (!Enabled || !SeparatePage)
 					return false;
 
-				html.WriteLine(".title-page { page-break-after: always; border-bottom: 1px dotted; width: 100%; }");
+				html.WriteLine(".title-page { page-break-after: always; border-bottom: 2px dotted; width: 100%; margin:20px }");
 
 				return true;
 			}
