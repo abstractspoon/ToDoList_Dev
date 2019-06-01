@@ -1330,12 +1330,16 @@ BOOL CTreeListSyncer::HandleEraseBkgnd(CDC* pDC)
 
 	if (GetHScrollDeadSpace(rDead))
 	{
+#ifdef _DEBUG
+		pDC->FillSolidRect(rDead, RGB(128, 128, 128));
+#else
 		CThemed th;
 		
 		if (th.IsNonClientThemed() && th.Open(GetCWnd(), _T("SCROLLBAR")))
 			th.DrawBackground(pDC, SBP_LOWERTRACKHORZ, SCRBS_NORMAL, rDead);
 		else
 			pDC->FillSolidRect(rDead, ::GetSysColor(COLOR_SCROLLBAR));
+#endif
 		
 		pDC->ExcludeClipRect(rDead);
 		bHandled = TRUE;
@@ -2689,10 +2693,11 @@ void CTreeListSyncer::Resize(const CRect& rLeft, const CRect& rRight)
 	WindowNeedsScrollBars(Right(), rRight, bRightHScroll, bRightVScroll);
 
 	const int CXSCROLL = GetSystemMetrics(SM_CXVSCROLL);
+	const int CYSCROLL = GetSystemMetrics(SM_CYHSCROLL);
 
 	if (bLeftHScroll && !bRightHScroll)
 	{
-		rRightActual.bottom -= CXSCROLL;
+		rRightActual.bottom -= CYSCROLL;
 
 		// Note: The act of deducting the height of the scrollbar
 		// from the bottom of the right pane may be enough to
@@ -2713,7 +2718,7 @@ void CTreeListSyncer::Resize(const CRect& rLeft, const CRect& rRight)
 	}
 	else if (!bLeftHScroll && bRightHScroll)
 	{
-		rLeftActual.bottom -= CXSCROLL;
+		rLeftActual.bottom -= CYSCROLL;
 
 		// Note: The act of deducting the height of the scrollbar
 		// from the bottom of the right pane may be enough to
@@ -2745,6 +2750,32 @@ void CTreeListSyncer::Resize(const CRect& rLeft, const CRect& rRight)
 	// also invalidate parent if we are drawing a border
 	if (HasFlag(TLSF_BORDER))
 		::InvalidateRect(GetHwnd(), NULL, TRUE);
+
+	//CheckBottomAlignment();
+}
+
+void CTreeListSyncer::CheckBottomAlignment() const
+{
+	BOOL bLeftHasHScrollbar = HasHScrollBar(Left());
+	BOOL bRightHasHScrollbar = HasHScrollBar(Right());
+
+	CRect rLeft, rRight;
+	::GetWindowRect(Left(), rLeft);
+	::GetWindowRect(Right(), rRight);
+
+	if ((bLeftHasHScrollbar && bRightHasHScrollbar) || 
+		(!bLeftHasHScrollbar && !bRightHasHScrollbar))
+	{
+		ASSERT(rLeft.bottom == rRight.bottom);
+	}
+	else if (bLeftHasHScrollbar && !bRightHasHScrollbar)
+	{
+		ASSERT(rRight.bottom == (rLeft.bottom - GetSystemMetrics(SM_CYHSCROLL)));
+	}
+	else // (!bLeftHasScrollbar && bRightHasScrollbar)
+	{
+		ASSERT(rLeft.bottom == (rRight.bottom - GetSystemMetrics(SM_CYHSCROLL)));
+	}
 }
 
 void CTreeListSyncer::RefreshSize()
