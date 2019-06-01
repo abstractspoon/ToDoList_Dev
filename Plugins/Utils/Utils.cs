@@ -394,7 +394,10 @@ namespace Abstractspoon.Tdl.PluginHelpers
 						//	break;
 
 						case RhinoLicensing.LicenseType.Trial:
-							return m_Trans.Translate("Trial License");
+							if (m_DollarPrice > 0)
+								return m_Trans.Translate("Trial License");
+
+							return m_Trans.Translate("Under Development");
 
 						//case RhinoLicensing.LicenseType.Paid:
 						//	return 0;
