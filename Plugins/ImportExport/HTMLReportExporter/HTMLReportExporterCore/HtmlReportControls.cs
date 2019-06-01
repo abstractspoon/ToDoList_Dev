@@ -140,37 +140,37 @@ namespace HTMLReportExporter
 
 			// Add icon for identification
 			dialog.ShowIcon = true;
-			//dialog.Icon = HTMLReportExporterCore.html;
-			// 
-			// 			// Per dialog customisations
-			// 			if (dialog is MSDN.Html.Editor.EnterHrefForm)
-			// 			{
-			// 				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
-			// 
-			// 				urlDialog.EnforceHrefTarget(MSDN.Html.Editor.NavigateActionOption.Default);
-			// 				urlDialog.LastBrowsedFolder = LastBrowsedFileFolder;
-			// 			}
-			// 			else if (dialog is MSDN.Html.Editor.EnterImageForm)
-			// 			{
-			// 				var imageDialog = (dialog as MSDN.Html.Editor.EnterImageForm);
-			// 
-			// 				imageDialog.LastBrowsedFolder = LastBrowsedImageFolder;
-			// 			}
+			dialog.Icon = HTMLReportExporter.Properties.Resources.HTMLReporter;
+
+			// Per dialog customisations
+			if (dialog is MSDN.Html.Editor.EnterHrefForm)
+			{
+				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
+
+				urlDialog.EnforceHrefTarget(MSDN.Html.Editor.NavigateActionOption.Default);
+				urlDialog.LastBrowsedFolder = LastBrowsedFileFolder;
+			}
+			else if (dialog is MSDN.Html.Editor.EnterImageForm)
+			{
+				var imageDialog = (dialog as MSDN.Html.Editor.EnterImageForm);
+
+				imageDialog.LastBrowsedFolder = LastBrowsedImageFolder;
+			}
 		}
 
 		protected override void PostShowDialog(Form dialog)
 		{
-			// 			// Per dialog customisations
-			// 			if (dialog is MSDN.Html.Editor.EnterHrefForm)
-			// 			{
-			// 				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
-			// 				LastBrowsedFileFolder = urlDialog.LastBrowsedFolder;
-			// 			}
-			// 			else if (dialog is MSDN.Html.Editor.EnterImageForm)
-			// 			{
-			// 				var imageDialog = (dialog as MSDN.Html.Editor.EnterImageForm);
-			// 				LastBrowsedImageFolder = imageDialog.LastBrowsedFolder;
-			// 			}
+			// Per dialog customisations
+			if (dialog is MSDN.Html.Editor.EnterHrefForm)
+			{
+				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
+				LastBrowsedFileFolder = urlDialog.LastBrowsedFolder;
+			}
+			else if (dialog is MSDN.Html.Editor.EnterImageForm)
+			{
+				var imageDialog = (dialog as MSDN.Html.Editor.EnterImageForm);
+				LastBrowsedImageFolder = imageDialog.LastBrowsedFolder;
+			}
 		}
 
 		public new bool Focused

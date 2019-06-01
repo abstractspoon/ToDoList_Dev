@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HtmlReportTemplateForm));
 			this.Content = new System.Windows.Forms.Panel();
 			this.tabControl = new System.Windows.Forms.TabControl();
 			this.headerPage = new System.Windows.Forms.TabPage();
@@ -35,25 +36,25 @@
 			this.headerPixelLabel = new System.Windows.Forms.Label();
 			this.headerHeightLabel = new System.Windows.Forms.Label();
 			this.headerDividerCheckbox = new System.Windows.Forms.CheckBox();
+			this.htmlReportHeaderControl = new HTMLReportExporter.HtmlReportHeaderControl();
 			this.headerEnabledCheckbox = new System.Windows.Forms.CheckBox();
 			this.titlePage = new System.Windows.Forms.TabPage();
 			this.titleSeparatePageCheckbox = new System.Windows.Forms.CheckBox();
 			this.titleEnabledCheckbox = new System.Windows.Forms.CheckBox();
+			this.htmlReportTitleControl = new HTMLReportExporter.HtmlReportTitleControl();
 			this.taskPage = new System.Windows.Forms.TabPage();
+			this.htmlReportTasksControl = new HTMLReportExporter.HtmlReportTaskFormatControl();
 			this.footerPage = new System.Windows.Forms.TabPage();
 			this.footerHeightCombobox = new System.Windows.Forms.ComboBox();
 			this.footerPixelLabel = new System.Windows.Forms.Label();
 			this.footerHeightLabel = new System.Windows.Forms.Label();
 			this.footerDividerCheckbox = new System.Windows.Forms.CheckBox();
 			this.footerEnabledCheckbox = new System.Windows.Forms.CheckBox();
+			this.htmlReportFooterControl = new HTMLReportExporter.HtmlReportFooterControl();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.browserPreview = new System.Windows.Forms.WebBrowser();
 			this.BtnOK = new System.Windows.Forms.Button();
 			this.BtnCancel = new System.Windows.Forms.Button();
-			this.htmlReportHeaderControl = new HTMLReportExporter.HtmlReportHeaderControl();
-			this.htmlReportTitleControl = new HTMLReportExporter.HtmlReportTitleControl();
-			this.htmlReportTasksControl = new HTMLReportExporter.HtmlReportTaskFormatControl();
-			this.htmlReportFooterControl = new HTMLReportExporter.HtmlReportFooterControl();
 			this.Content.SuspendLayout();
 			this.tabControl.SuspendLayout();
 			this.headerPage.SuspendLayout();
@@ -160,6 +161,23 @@
 			this.headerDividerCheckbox.Text = "Add dividing line";
 			this.headerDividerCheckbox.UseVisualStyleBackColor = true;
 			// 
+			// htmlReportHeaderControl
+			// 
+			this.htmlReportHeaderControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.htmlReportHeaderControl.BorderSize = ((byte)(0));
+			this.htmlReportHeaderControl.EditEnabled = true;
+			this.htmlReportHeaderControl.InnerText = null;
+			this.htmlReportHeaderControl.LastBrowsedFileFolder = null;
+			this.htmlReportHeaderControl.LastBrowsedImageFolder = null;
+			this.htmlReportHeaderControl.Location = new System.Drawing.Point(3, 26);
+			this.htmlReportHeaderControl.Name = "htmlReportHeaderControl";
+			this.htmlReportHeaderControl.Size = new System.Drawing.Size(384, 378);
+			this.htmlReportHeaderControl.TabIndex = 26;
+			this.htmlReportHeaderControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
+			this.htmlReportHeaderControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
+			// 
 			// headerEnabledCheckbox
 			// 
 			this.headerEnabledCheckbox.Checked = true;
@@ -208,6 +226,23 @@
 			this.titleEnabledCheckbox.TabStop = false;
 			this.titleEnabledCheckbox.Text = "Enable";
 			// 
+			// htmlReportTitleControl
+			// 
+			this.htmlReportTitleControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.htmlReportTitleControl.BorderSize = ((byte)(0));
+			this.htmlReportTitleControl.EditEnabled = true;
+			this.htmlReportTitleControl.InnerText = null;
+			this.htmlReportTitleControl.LastBrowsedFileFolder = null;
+			this.htmlReportTitleControl.LastBrowsedImageFolder = null;
+			this.htmlReportTitleControl.Location = new System.Drawing.Point(3, 26);
+			this.htmlReportTitleControl.Name = "htmlReportTitleControl";
+			this.htmlReportTitleControl.Size = new System.Drawing.Size(384, 378);
+			this.htmlReportTitleControl.TabIndex = 26;
+			this.htmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
+			this.htmlReportTitleControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
+			// 
 			// taskPage
 			// 
 			this.taskPage.Controls.Add(this.htmlReportTasksControl);
@@ -217,6 +252,24 @@
 			this.taskPage.TabIndex = 2;
 			this.taskPage.Text = "Task Formatting";
 			this.taskPage.UseVisualStyleBackColor = true;
+			// 
+			// htmlReportTasksControl
+			// 
+			this.htmlReportTasksControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.htmlReportTasksControl.BorderSize = ((byte)(0));
+			this.htmlReportTasksControl.Cursor = System.Windows.Forms.Cursors.Default;
+			this.htmlReportTasksControl.EditEnabled = true;
+			this.htmlReportTasksControl.InnerText = null;
+			this.htmlReportTasksControl.LastBrowsedFileFolder = null;
+			this.htmlReportTasksControl.LastBrowsedImageFolder = null;
+			this.htmlReportTasksControl.Location = new System.Drawing.Point(3, 3);
+			this.htmlReportTasksControl.Name = "htmlReportTasksControl";
+			this.htmlReportTasksControl.Size = new System.Drawing.Size(384, 426);
+			this.htmlReportTasksControl.TabIndex = 26;
+			this.htmlReportTasksControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
+			this.htmlReportTasksControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// footerPage
 			// 
@@ -297,6 +350,23 @@
 			this.footerEnabledCheckbox.TabStop = false;
 			this.footerEnabledCheckbox.Text = "Enable";
 			// 
+			// htmlReportFooterControl
+			// 
+			this.htmlReportFooterControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.htmlReportFooterControl.BorderSize = ((byte)(0));
+			this.htmlReportFooterControl.EditEnabled = true;
+			this.htmlReportFooterControl.InnerText = null;
+			this.htmlReportFooterControl.LastBrowsedFileFolder = null;
+			this.htmlReportFooterControl.LastBrowsedImageFolder = null;
+			this.htmlReportFooterControl.Location = new System.Drawing.Point(3, 26);
+			this.htmlReportFooterControl.Name = "htmlReportFooterControl";
+			this.htmlReportFooterControl.Size = new System.Drawing.Size(384, 378);
+			this.htmlReportFooterControl.TabIndex = 26;
+			this.htmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
+			this.htmlReportFooterControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
+			// 
 			// groupBox1
 			// 
 			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -346,81 +416,13 @@
 			this.BtnCancel.Text = "Cancel";
 			this.BtnCancel.UseVisualStyleBackColor = true;
 			// 
-			// htmlReportHeaderControl
-			// 
-			this.htmlReportHeaderControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.htmlReportHeaderControl.BorderSize = ((byte)(0));
-			this.htmlReportHeaderControl.EditEnabled = true;
-			this.htmlReportHeaderControl.InnerText = null;
-			this.htmlReportHeaderControl.LastBrowsedFileFolder = null;
-			this.htmlReportHeaderControl.LastBrowsedImageFolder = null;
-			this.htmlReportHeaderControl.Location = new System.Drawing.Point(3, 26);
-			this.htmlReportHeaderControl.Name = "htmlReportHeaderControl";
-			this.htmlReportHeaderControl.Size = new System.Drawing.Size(384, 378);
-			this.htmlReportHeaderControl.TabIndex = 26;
-			this.htmlReportHeaderControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.htmlReportHeaderControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
-			// 
-			// htmlReportTitleControl
-			// 
-			this.htmlReportTitleControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.htmlReportTitleControl.BorderSize = ((byte)(0));
-			this.htmlReportTitleControl.EditEnabled = true;
-			this.htmlReportTitleControl.InnerText = null;
-			this.htmlReportTitleControl.LastBrowsedFileFolder = null;
-			this.htmlReportTitleControl.LastBrowsedImageFolder = null;
-			this.htmlReportTitleControl.Location = new System.Drawing.Point(3, 26);
-			this.htmlReportTitleControl.Name = "htmlReportTitleControl";
-			this.htmlReportTitleControl.Size = new System.Drawing.Size(384, 378);
-			this.htmlReportTitleControl.TabIndex = 26;
-			this.htmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.htmlReportTitleControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
-			// 
-			// htmlReportTasksControl
-			// 
-			this.htmlReportTasksControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.htmlReportTasksControl.BorderSize = ((byte)(0));
-			this.htmlReportTasksControl.Cursor = System.Windows.Forms.Cursors.Default;
-			this.htmlReportTasksControl.EditEnabled = true;
-			this.htmlReportTasksControl.InnerText = null;
-			this.htmlReportTasksControl.LastBrowsedFileFolder = null;
-			this.htmlReportTasksControl.LastBrowsedImageFolder = null;
-			this.htmlReportTasksControl.Location = new System.Drawing.Point(3, 3);
-			this.htmlReportTasksControl.Name = "htmlReportTasksControl";
-			this.htmlReportTasksControl.Size = new System.Drawing.Size(384, 426);
-			this.htmlReportTasksControl.TabIndex = 26;
-			this.htmlReportTasksControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.htmlReportTasksControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
-			// 
-			// htmlReportFooterControl
-			// 
-			this.htmlReportFooterControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.htmlReportFooterControl.BorderSize = ((byte)(0));
-			this.htmlReportFooterControl.EditEnabled = true;
-			this.htmlReportFooterControl.InnerText = null;
-			this.htmlReportFooterControl.LastBrowsedFileFolder = null;
-			this.htmlReportFooterControl.LastBrowsedImageFolder = null;
-			this.htmlReportFooterControl.Location = new System.Drawing.Point(3, 26);
-			this.htmlReportFooterControl.Name = "htmlReportFooterControl";
-			this.htmlReportFooterControl.Size = new System.Drawing.Size(384, 378);
-			this.htmlReportFooterControl.TabIndex = 26;
-			this.htmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.htmlReportFooterControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
-			// 
 			// HtmlReportTemplateForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(875, 514);
 			this.Controls.Add(this.Content);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MinimizeBox = false;
 			this.Name = "HtmlReportTemplateForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
