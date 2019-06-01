@@ -129,12 +129,13 @@ namespace HTMLReportExporter
 
 			html.WriteLine("body { line-height: normal; margin: 0; }");
 			html.WriteLine("table { border-collapse: collapse; }");
+			html.WriteLine(".page {	page-break-after: always; }");
 
 			Header.WriteStyles(html);
 			Footer.WriteStyles(html);
 			Title.WriteStyles(html);
 
-			html.WriteLine("@page { margin: 0; }");
+			html.WriteLine("@page { margin: 10mm; }");
 
 			html.WriteLine("@media print { ");
 			html.WriteLine("thead { display: table-header-group; } ");
@@ -180,8 +181,13 @@ namespace HTMLReportExporter
 			html.AddAttribute("style", "padding:15mm");
 			html.RenderBeginTag(HtmlTextWriterTag.Td);
 
+			html.AddAttribute("class", "page");
+			html.RenderBeginTag(HtmlTextWriterTag.Div);
+			
 			Title.WriteTableContent(m_Tasklist, html);
 			Tasks.WriteTableContent(m_Tasklist, html);
+
+			html.RenderEndTag(); // Div
 
 			html.RenderEndTag(); // Td
 			html.RenderEndTag(); // Tr
@@ -452,7 +458,9 @@ namespace HTMLReportExporter
 
 								if (tbodyStart != -1)
 								{
-									var theadHtml = "<thead style=font-weight:bold;font-size:1.5em>" + FormatTableHeader() + "</thead>";
+									var theadStyle = "style=font-weight:bold;font-size:1.5em;display:table-header-group;";
+									var theadHtml = String.Format("<thead {0}>{1}</thead>", theadStyle, FormatTableHeader());
+
 									m_StartHtml = m_StartHtml.Insert(tbodyStart, theadHtml);
 								}
 							}
