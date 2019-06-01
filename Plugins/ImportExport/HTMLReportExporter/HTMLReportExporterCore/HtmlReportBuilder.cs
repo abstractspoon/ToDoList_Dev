@@ -452,7 +452,7 @@ namespace HTMLReportExporter
 
 								if (tbodyStart != -1)
 								{
-									var theadHtml = "<thead>" + FormatTableHeader() + "</thead>";
+									var theadHtml = "<thead style=font-weight:bold;font-size:1.5em>" + FormatTableHeader() + "</thead>";
 									m_StartHtml = m_StartHtml.Insert(tbodyStart, theadHtml);
 								}
 							}
