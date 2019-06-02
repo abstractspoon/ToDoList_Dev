@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,2,997,1
+ FILEVERSION 7,2,997,2
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 2, 997, 1\0"
+            VALUE "FileVersion", "7, 2, 997, 2\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-19\0"
             VALUE "LegalTrademarks", "\0"
@@ -395,15 +395,15 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,249,378,10
     LTEXT           "Time Periods",IDC_TIMEGROUP,7,269,386,8
     GROUPBOX        "Working Day",IDC_STATIC,7,281,375,81
-    COMBOBOX        IDC_HOURSINONEDAY,18,294,48,115,CBS_DROPDOWN | 
+    COMBOBOX        IDC_HOURSINONEDAY,87,294,48,115,CBS_DROPDOWN | 
                     WS_TABSTOP
-    LTEXT           "hours",IDC_STATIC,70,296,59,8
-    LTEXT           "Beginning at:",IDC_STATIC,18,312,67,8
-    COMBOBOX        IDC_STARTOFDAY,87,310,48,30,CBS_DROPDOWN | 
+    LTEXT           "hours",IDC_STATIC,139,296,59,8
+    LTEXT           "Beginning at:",IDC_STATIC,18,311,67,8
+    COMBOBOX        IDC_STARTOFDAY,87,309,48,124,CBS_DROPDOWN | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "Lunch break",IDC_HASLUNCHBREAK,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,328,117,10
+    CONTROL         "Lunch break (added to duration)",IDC_HASLUNCHBREAK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,328,354,10
     COMBOBOX        IDC_STARTOFLUNCH,29,340,48,30,CBS_DROPDOWN | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
@@ -419,6 +419,7 @@ BEGIN
     LISTBOX         IDC_WEEKENDS,18,414,218,43,LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | 
                     LBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Duration:",IDC_STATIC,18,296,67,8
 END
 
 IDD_PREFTASKDEF_PAGE DIALOG DISCARDABLE  0, 0, 398, 432
