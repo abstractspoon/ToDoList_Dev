@@ -436,7 +436,7 @@
 			this.MinimizeBox = false;
 			this.Name = "HtmlReportTemplateForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "HTMLReportExporterForm";
+			this.Text = "Report Writer";
 			this.Content.ResumeLayout(false);
 			this.Content.PerformLayout();
 			this.tabControl.ResumeLayout(false);
