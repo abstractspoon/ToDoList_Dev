@@ -19,6 +19,8 @@ namespace HTMLReportExporter
 		private String m_TaskBaseIndent = "";
 		private bool m_StrikeThruDone = true;
 
+		private const int ContentPadding = 40;
+
 		// -------------------------------------------------------------
 
 		private HeaderTemplateReporter Header { get; set; }
@@ -238,7 +240,8 @@ namespace HTMLReportExporter
 				if (BackColor != Color.Transparent)
 					html.WriteLine(String.Format(".page-header {{ background: {0}; }}", BackColorHtml));
 
-				html.WriteLine(String.Format(".page-header, .page-header-space {{ height: {0}px; }}", PixelHeight));
+				html.WriteLine(String.Format(".page-header {{ height: {0}px; }}", PixelHeight));
+				html.WriteLine(String.Format(".page-header-space {{ height: {0}px; }}", PixelHeight + ContentPadding));
 
 				return true;
 			}
@@ -299,7 +302,8 @@ namespace HTMLReportExporter
 				if (BackColor != Color.Transparent)
 					html.WriteLine(String.Format(".page-footer {{ background: {0}; }}", BackColorHtml));
 
-				html.WriteLine(String.Format(".page-footer, .page-footer-space {{ height: {0}px; }}", PixelHeight));
+				html.WriteLine(String.Format(".page-footer {{ height: {0}px; }}", PixelHeight));
+				html.WriteLine(String.Format(".page-footer-space {{ height: {0}px; }}", PixelHeight + ContentPadding));
 
 				return true;
 			}
