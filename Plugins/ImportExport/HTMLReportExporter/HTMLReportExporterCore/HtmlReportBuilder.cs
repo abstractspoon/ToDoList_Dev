@@ -357,7 +357,7 @@ namespace HTMLReportExporter
 				if (!Enabled || !SeparatePage)
 					return false;
 
-				html.WriteLine(".title-page { page-break-after: always; border-bottom: 2px dotted; width: 100%; margin:20px }");
+				html.WriteLine(".title-page { page-break-after: always; border-bottom: 2px dotted; width: 100%; margin-bottom:20px }");
 
 				return true;
 			}

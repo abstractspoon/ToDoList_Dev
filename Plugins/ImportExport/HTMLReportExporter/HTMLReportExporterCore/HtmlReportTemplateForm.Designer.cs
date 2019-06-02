@@ -332,7 +332,7 @@
 			this.browserPreview.Location = new System.Drawing.Point(-1, 0);
 			this.browserPreview.MinimumSize = new System.Drawing.Size(20, 20);
 			this.browserPreview.Name = "browserPreview";
-			this.browserPreview.Size = new System.Drawing.Size(448, 435);
+			this.browserPreview.Size = new System.Drawing.Size(448, 434);
 			this.browserPreview.TabIndex = 0;
 			this.browserPreview.WebBrowserShortcutsEnabled = false;
 			// 
