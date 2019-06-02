@@ -1073,7 +1073,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 		int nCol = m_hdrColumns.FindItem(aColIDs.GetFirst());
 		ASSERT(nCol != -1);
 
-		int nColWidth = CalculateColumnWidth(nCol, &dc, bVisibleTasksOnly);
+		int nColWidth = CalcColumnWidth(nCol, &dc, bVisibleTasksOnly);
 		m_hdrColumns.SetItemWidth(nCol, nColWidth);
 	}
 	else
@@ -1110,7 +1110,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 				}
 				else
 				{
-					nColWidth = CalculateColumnWidth(nItem, &dc, bVisibleTasksOnly);
+					nColWidth = CalcColumnWidth(nItem, &dc, bVisibleTasksOnly);
 				}
 			}
 			else if (!bZeroOthers)
@@ -1798,8 +1798,8 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 			}
 
 			// else
-			BOOL bDueToday = m_calculator.IsTaskDue(pTDI, pTDS, TRUE);
-			BOOL bOverDue = m_calculator.IsTaskDue(pTDI, pTDS, FALSE);
+			BOOL bDueToday = m_calculator.IsTaskDueToday(pTDI, pTDS);
+			BOOL bOverDue = m_calculator.IsTaskOverDue(pTDI, pTDS);
 
 			// overdue takes priority
 			if (HasColor(m_crDue) && bOverDue)
@@ -1965,32 +1965,36 @@ BOOL CTDLTaskCtrlBase::SetStartedTaskColors(COLORREF crStarted, COLORREF crStart
 	return FALSE;
 }
 
+BOOL CTDLTaskCtrlBase::CheckUpdateDueBrushColor(COLORREF crNew, COLORREF& crCur, CBrush& brCur)
+{
+	if (crCur != crNew)
+	{
+		GraphicsMisc::VerifyDeleteObject(brCur);
+
+		if (HasColor(crNew))
+			brCur.CreateSolidBrush(crNew);
+
+		crCur = crNew;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 BOOL CTDLTaskCtrlBase::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 {
-	if ((m_crDue != crDue) || (m_crDueToday != crDueToday))
+	BOOL bResort = (IsSortingBy(TDCC_PRIORITY) && HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && (HasColor(crDueToday) != HasColor(m_crDueToday)));
+
+	if (CheckUpdateDueBrushColor(crDue, m_crDue, m_brDue) || 
+		CheckUpdateDueBrushColor(crDueToday, m_crDueToday, m_brDueToday))
 	{
-		if (m_crDue != crDue)
-		{
-			GraphicsMisc::VerifyDeleteObject(m_brDue);
-			
-			if (HasColor(crDue))
-				m_brDue.CreateSolidBrush(crDue);
-
-			m_crDue = crDue;
-		}
-
-		if (m_crDueToday != crDueToday)
-		{
-			GraphicsMisc::VerifyDeleteObject(m_brDueToday);
-			
-			if (HasColor(crDueToday))
-				m_brDueToday.CreateSolidBrush(crDueToday);
-			
-			m_crDueToday = crDueToday;
-		}
-
 		if (GetSafeHwnd())
-			InvalidateAll();
+		{
+			if (bResort)
+				Resort(FALSE);
+			else
+				InvalidateAll();
+		}
 
 		return TRUE;
 	}
@@ -2462,33 +2466,38 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				}
 				
 				// then, if the task is also due, draw a small tag
-				if (m_calculator.IsTaskDue(pTDI, pTDS))
+				// unless it's due today and the user doesn't want today's tasks marked as due
+				// or there's no due color 
+				HBRUSH brTag = NULL;
+				
+				if (HasColor(m_crDue) && m_calculator.IsTaskOverDue(pTDI, pTDS))
 				{
-					BOOL bDueToday = m_calculator.IsTaskDue(pTDI, pTDS, TRUE);
+					brTag = m_brDue;
+				}
+				else if (HasColor(m_crDueToday) && m_calculator.IsTaskDueToday(pTDI, pTDS))
+				{
+					brTag = m_brDueToday;
+				}
+
+				if (brTag != NULL)
+				{
+					POINT pt[3] = 
+					{ 
+						{ rSubItem.left, rSubItem.top + 7 }, 
+						{ rSubItem.left, rSubItem.top }, 
+						{ rSubItem.left + 7, rSubItem.top } 
+					};
 					
-					// unless it's due today and the user doesn't want today's tasks marked as due
-					// or there's no due color 
-					if ((!bDueToday && HasColor(m_crDue)) || 
-						(bDueToday && HasColor(m_crDueToday)))
-					{
-						POINT pt[3] = 
-						{ 
-							{ rSubItem.left, rSubItem.top + 7 }, 
-						 	{ rSubItem.left, rSubItem.top }, 
-						 	{ rSubItem.left + 7, rSubItem.top } 
-						};
-						
-						CBrush* pOldBr = pDC->SelectObject(bDueToday ? &m_brDueToday : &m_brDue);
-						pDC->SelectStockObject(NULL_PEN);
-						 
-						pDC->Polygon(pt, 3);
-						pDC->SelectObject(pOldBr);
-						
-						// a black line between the two
-						pDC->SelectStockObject(BLACK_PEN);
-						pDC->MoveTo(rSubItem.left, rSubItem.top + 6);
-						pDC->LineTo(rSubItem.left + 7, rSubItem.top - 1);
-					}
+					HGDIOBJ hOldBr = pDC->SelectObject(brTag);
+					pDC->SelectStockObject(NULL_PEN);
+					
+					pDC->Polygon(pt, 3);
+					pDC->SelectObject(hOldBr);
+					
+					// a black line between the two
+					pDC->SelectStockObject(BLACK_PEN);
+					pDC->MoveTo(rSubItem.left, rSubItem.top + 6);
+					pDC->LineTo(rSubItem.left + 7, rSubItem.top - 1);
 				}
 				
 				// draw priority number over the top
@@ -2526,11 +2535,9 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 						crBar = GetPriorityColor(nPriority);
 						
 						// check for due
-						if (m_calculator.IsTaskDue(pTDI, pTDS))
+						if (m_calculator.IsTaskOverDue(pTDI, pTDS))
 						{
-							BOOL bDueToday = m_calculator.IsTaskDue(pTDI, pTDS, TRUE);
-							
-							if (bDueToday && HasColor(m_crDueToday))
+							if (HasColor(m_crDueToday) && m_calculator.IsTaskDueToday(pTDI, pTDS))
 							{
 								crBar = m_crDueToday;
 							}
@@ -3685,7 +3692,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						{
 							CClientDC dc(&m_lcColumns);
 							CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
-							int nColWidth = CalculateColumnWidth(nItem, &dc, IsTreeList());
+							int nColWidth = CalcColumnWidth(nItem, &dc, IsTreeList());
 							
 							m_hdrColumns.SetItemWidth(nItem, nColWidth);
 							m_hdrColumns.SetItemTracked(nItem, FALSE); // width now auto-calc'ed
@@ -4707,7 +4714,7 @@ TDC_COLUMN CTDLTaskCtrlBase::GetSortColumn(TDC_SORTDIR& nSortDir) const
 	return m_nSortColID;
 }
 
-int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const
+int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const
 {
 	TDC_COLUMN nColID = GetColumnID(nCol);
 
@@ -4738,16 +4745,12 @@ int CTDLTaskCtrlBase::CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTask
 	case TDCC_ID:
 		{
 			DWORD dwRefID = m_find.GetLargestReferenceID(bVisibleTasksOnly);
-
-			if (dwRefID)
-				nColWidth = GraphicsMisc::GetFormattedTextWidth(pDC, _T("%lu (%lu)"), m_dwNextUniqueTaskID - 1, dwRefID);
-			else
-				nColWidth = GraphicsMisc::GetFormattedTextWidth(pDC, _T("%lu"), m_dwNextUniqueTaskID - 1);
+			nColWidth = GraphicsMisc::GetTextWidth(pDC, m_formatter.GetID(m_dwNextUniqueTaskID - 1, dwRefID));
 		}
 		break; 
 
 	case TDCC_PARENTID:
-		nColWidth = GraphicsMisc::GetFormattedTextWidth(pDC, _T("%lu"), m_dwNextUniqueTaskID - 1);
+		nColWidth = GraphicsMisc::GetTextWidth(pDC, m_formatter.GetID(m_dwNextUniqueTaskID - 1));
 		break; 
 
 	case TDCC_POSITION:
@@ -5982,7 +5985,7 @@ BOOL CTDLTaskCtrlBase::IsSelectedTaskDone() const
 
 BOOL CTDLTaskCtrlBase::IsSelectedTaskDue() const
 {
-	return m_calculator.IsTaskDue(GetSelectedTaskID());
+	return m_calculator.IsTaskOverDue(GetSelectedTaskID());
 }
 
 CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID, int nMaxLen) const

@@ -379,7 +379,7 @@ protected:
 	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize = 16, int nImage = 0, int nCount = 1) const;
 	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0, int nCount = 1) const;
 
-	int CalculateColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
+	int CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
 	void RecalcUntrackedColumnWidths(BOOL bCustomOnly);
 	void RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers);
 
@@ -503,7 +503,6 @@ protected:
 	void DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, COLORREF crText, 
 						BOOL bCalculated = FALSE, BOOL bCustomWantsTime = FALSE, int nAlign = DT_RIGHT);
 
-	inline BOOL HasColor(COLORREF color) const { return (color != CLR_NONE); }
 	inline BOOL IsBoundSelecting() const { return (m_bBoundSelecting && Misc::IsKeyPressed(VK_LBUTTON)); }
 	inline BOOL IsEditingTask(DWORD dwTaskID) const { return (m_dwEditTitleTaskID == dwTaskID); }
 	inline BOOL IsTreeList() const { return CTreeListSyncer::IsTree(Tasks()); }
@@ -520,6 +519,8 @@ protected:
 	static int CalcRequiredIconColumnWidth(int nNumImage);
 	static int SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks, 
 												CStringArray& aMatched, CStringArray& aMixed);
+	static BOOL CheckUpdateDueBrushColor(COLORREF crNew, COLORREF& crCur, CBrush& brCur);
+	static inline BOOL HasColor(COLORREF color) { return (color != CLR_NONE) ? TRUE : FALSE; }
 
 	static int CALLBACK SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 
 	static int CALLBACK SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 
