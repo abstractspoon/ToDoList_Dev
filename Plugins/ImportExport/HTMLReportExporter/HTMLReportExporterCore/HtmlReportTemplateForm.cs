@@ -30,7 +30,7 @@ namespace HTMLReportExporter
 
 		// --------------------------------------------------------------
 
-		private enum TabPage
+		private enum PageType
 		{
 			Header = 0,
 			Title = 1,
@@ -113,10 +113,48 @@ namespace HTMLReportExporter
 
 			this.tabControl.SelectedIndexChanged += new EventHandler(OnTabPageChange);
 			this.browserPreview.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(OnPreviewLoaded);
+			this.headerEnabledCheckbox.CheckedChanged += new EventHandler(OnHeaderEnableChanged);
+			this.titleEnabledCheckbox.CheckedChanged += new EventHandler(OnTitleEnableChanged);
+			this.footerEnabledCheckbox.CheckedChanged += new EventHandler(OnFooterEnableChanged);
+
+			OnHeaderEnableChanged(this.headerEnabledCheckbox, new EventArgs());
+			OnTitleEnableChanged(this.titleEnabledCheckbox, new EventArgs());
+			OnFooterEnableChanged(this.footerEnabledCheckbox, new EventArgs());
 
 			RefreshPreview();
 
 			m_ChangeTimer.Start();
+		}
+
+		private void OnHeaderEnableChanged(object sender, EventArgs args)
+		{
+			EnableControls(headerPage, sender);
+		}
+
+		private void OnTitleEnableChanged(object sender, EventArgs args)
+		{
+			EnableControls(titlePage, sender);
+		}
+
+		private void OnFooterEnableChanged(object sender, EventArgs args)
+		{
+			EnableControls(footerPage, sender);
+		}
+
+		private void EnableControls(TabPage page, object checkbox)
+		{
+			if ((checkbox != null) && (checkbox is CheckBox))
+			{
+				bool enabled = (checkbox as CheckBox).Checked;
+
+				foreach (System.Windows.Forms.Control control in page.Controls)
+				{
+					if (control != checkbox)
+						control.Enabled = enabled;
+				}
+			}
+
+
 		}
 
 		private void OnPreviewLoaded(object sender, WebBrowserDocumentCompletedEventArgs e)
@@ -146,12 +184,12 @@ namespace HTMLReportExporter
 		{
 			if (!IsDisposed)
 			{
-				switch ((TabPage)tabControl.SelectedIndex)
+				switch ((PageType)tabControl.SelectedIndex)
 				{
-					case TabPage.Header: this.htmlReportHeaderControl.SetActive(); break;
-					case TabPage.Title:  this.htmlReportTitleControl.SetActive();  break;
-					case TabPage.Tasks:  this.htmlReportTasksControl.SetActive();  break;
-					case TabPage.Footer: this.htmlReportFooterControl.SetActive(); break;
+					case PageType.Header: this.htmlReportHeaderControl.SetActive(); break;
+					case PageType.Title:  this.htmlReportTitleControl.SetActive();  break;
+					case PageType.Tasks:  this.htmlReportTasksControl.SetActive();  break;
+					case PageType.Footer: this.htmlReportFooterControl.SetActive(); break;
 				}
 			}
 		}
@@ -160,9 +198,9 @@ namespace HTMLReportExporter
 		{
 			if (!IsDisposed)
 			{
-				switch ((TabPage)tabControl.SelectedIndex)
+				switch ((PageType)tabControl.SelectedIndex)
 				{
-					case TabPage.Header:
+					case PageType.Header:
 						m_Template.Header.Text = this.htmlReportHeaderControl.InnerHtml ?? "";
 						m_Template.Header.Enabled = headerEnabledCheckbox.Checked;
 						m_Template.Header.WantDivider = headerDividerCheckbox.Checked;
@@ -170,18 +208,18 @@ namespace HTMLReportExporter
 						m_Template.Header.PixelHeightText = this.headerHeightCombobox.Text;
 						break;
 
-					case TabPage.Title:
+					case PageType.Title:
 						m_Template.Title.Text = this.htmlReportTitleControl.InnerHtml ?? "";
 						m_Template.Title.Enabled = titleEnabledCheckbox.Checked;
 						m_Template.Title.SeparatePage = this.titleSeparatePageCheckbox.Checked;
 						break;
 
-					case TabPage.Tasks:
+					case PageType.Tasks:
 						m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
 						m_Template.Task.Enabled = true; // always
 						break;
 
-					case TabPage.Footer:
+					case PageType.Footer:
 						m_Template.Footer.Text = this.htmlReportFooterControl.InnerHtml ?? "";
 						m_Template.Footer.Enabled = footerEnabledCheckbox.Checked;
 						m_Template.Footer.WantDivider = footerDividerCheckbox.Checked;
