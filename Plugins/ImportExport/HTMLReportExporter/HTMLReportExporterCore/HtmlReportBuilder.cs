@@ -130,6 +130,7 @@ namespace HTMLReportExporter
 			html.WriteLine("body { line-height: normal; margin: 0; }");
 			html.WriteLine("table { border-collapse: collapse; }");
 			html.WriteLine(".page {	page-break-after: always; }");
+			//html.WriteLine(".avoid { page-break-inside: avoid; margin: 4px 0 4px 0; }");
 
 			Header.WriteStyles(html);
 			Footer.WriteStyles(html);
@@ -140,12 +141,14 @@ namespace HTMLReportExporter
 			html.WriteLine("@media print { ");
 			html.WriteLine("thead { display: table-header-group; } ");
 			html.WriteLine("tfoot { display: table-footer-group; } ");
-			html.WriteLine(".title-page { border-bottom: none; } }");
+			html.WriteLine(".title-page { border-bottom: none; } ");
+			html.WriteLine("tr { page-break-inside: avoid !important; margin: 4px 0 4px 0; } ");
+			html.WriteLine(" }");
 
 			html.RenderEndTag(); // Style
 			html.WriteLine();
 		}
-
+		
 		private void WriteMetadata(HtmlTextWriter html)
 		{
 			html.AddAttribute("http-equiv", "content-type");
@@ -191,7 +194,7 @@ namespace HTMLReportExporter
 
 			html.RenderEndTag(); // Td
 			html.RenderEndTag(); // Tr
-			html.RenderEndTag(); // Thead
+			html.RenderEndTag(); // Tbody
 
 			html.RenderEndTag(); // Table
 			html.RenderEndTag(); // Body
@@ -451,18 +454,23 @@ namespace HTMLReportExporter
 							m_StartHtml = elm.OuterHtml.Substring(0, taskStart);
 							m_EndHtml = elm.OuterHtml.Substring(taskStart + m_TaskHtml.Length);
 
-							// Special case: Prefix 'Table:Tbody' with header row
 							if (m_Layout == TaskLayout.Table)
 							{
+								// Prefix 'Table:Tbody' with header row
 								int tbodyStart = m_StartHtml.ToUpper().IndexOf("<TBODY>");
 
 								if (tbodyStart != -1)
 								{
 									var theadStyle = "style=font-weight:bold;font-size:1.5em;display:table-header-group;";
-									var theadHtml = String.Format("<thead {0}>{1}</thead>", theadStyle, FormatTableHeader());
+									var theadHtml = String.Format("\n<thead {0}>{1}</thead>", theadStyle, FormatTableHeader());
 
 									m_StartHtml = m_StartHtml.Insert(tbodyStart, theadHtml);
 								}
+
+								// Wrap <td> in <div> to prevent breaks across page
+								//m_TaskHtml = m_TaskHtml.Replace("<td>", "<td><div class=\"avoid\">");
+								//m_TaskHtml = m_TaskHtml.Replace("</td>", "</div></td>");
+
 							}
 
 						}
