@@ -76,7 +76,7 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 			{
 				auto button = dynamic_cast<ToolStripButton^>(toolbar->Items[i]);
 
-				if (button != nullptr)
+				if ((button != nullptr) && (button->Visible))
 				{
 					if (prevBtnRect.IsEmpty)
 					{

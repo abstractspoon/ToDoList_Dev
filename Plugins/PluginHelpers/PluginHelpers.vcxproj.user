@@ -4,7 +4,7 @@
     <LocalDebuggerCommand>$(SolutionDir)$(Configuration)\ToDoList.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>-g</LocalDebuggerCommandArguments>
-    <LocalDebuggerDebuggerType>Mixed</LocalDebuggerDebuggerType>
+    <LocalDebuggerDebuggerType>Auto</LocalDebuggerDebuggerType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerCommand>$(SolutionDir)\..\Core\ToDoList\Unicode_Release\ToDoList.exe</LocalDebuggerCommand>

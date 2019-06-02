@@ -123,7 +123,7 @@ namespace HTMLReportExporter
 		{
 			if (m_FirstPreview)
 			{
-				SetPreviewZoom(40);
+				SetPreviewZoom(DPIScaling.Scale(40));
 				m_FirstPreview = false;
 			}
 		}

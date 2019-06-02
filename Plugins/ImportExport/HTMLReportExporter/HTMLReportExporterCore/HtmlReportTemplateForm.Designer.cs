@@ -284,9 +284,9 @@
 			this.footerDividerCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.footerDividerCheckbox.Location = new System.Drawing.Point(300, 412);
 			this.footerDividerCheckbox.Name = "footerDividerCheckbox";
-			this.footerDividerCheckbox.Size = new System.Drawing.Size(87, 17);
+			this.footerDividerCheckbox.Size = new System.Drawing.Size(103, 17);
 			this.footerDividerCheckbox.TabIndex = 29;
-			this.footerDividerCheckbox.Text = "Show divider";
+			this.footerDividerCheckbox.Text = "Add dividing line";
 			this.footerDividerCheckbox.UseVisualStyleBackColor = true;
 			// 
 			// footerEnabledCheckbox
@@ -384,9 +384,9 @@
 			this.htmlReportTitleControl.InnerText = null;
 			this.htmlReportTitleControl.LastBrowsedFileFolder = null;
 			this.htmlReportTitleControl.LastBrowsedImageFolder = null;
-			this.htmlReportTitleControl.Location = new System.Drawing.Point(3, 26);
+			this.htmlReportTitleControl.Location = new System.Drawing.Point(7, 26);
 			this.htmlReportTitleControl.Name = "htmlReportTitleControl";
-			this.htmlReportTitleControl.Size = new System.Drawing.Size(384, 378);
+			this.htmlReportTitleControl.Size = new System.Drawing.Size(375, 378);
 			this.htmlReportTitleControl.TabIndex = 26;
 			this.htmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
 			this.htmlReportTitleControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
@@ -402,9 +402,9 @@
 			this.htmlReportTasksControl.InnerText = null;
 			this.htmlReportTasksControl.LastBrowsedFileFolder = null;
 			this.htmlReportTasksControl.LastBrowsedImageFolder = null;
-			this.htmlReportTasksControl.Location = new System.Drawing.Point(3, 3);
+			this.htmlReportTasksControl.Location = new System.Drawing.Point(7, 3);
 			this.htmlReportTasksControl.Name = "htmlReportTasksControl";
-			this.htmlReportTasksControl.Size = new System.Drawing.Size(384, 426);
+			this.htmlReportTasksControl.Size = new System.Drawing.Size(375, 426);
 			this.htmlReportTasksControl.TabIndex = 26;
 			this.htmlReportTasksControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
 			this.htmlReportTasksControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
@@ -419,9 +419,9 @@
 			this.htmlReportFooterControl.InnerText = null;
 			this.htmlReportFooterControl.LastBrowsedFileFolder = null;
 			this.htmlReportFooterControl.LastBrowsedImageFolder = null;
-			this.htmlReportFooterControl.Location = new System.Drawing.Point(3, 26);
+			this.htmlReportFooterControl.Location = new System.Drawing.Point(7, 26);
 			this.htmlReportFooterControl.Name = "htmlReportFooterControl";
-			this.htmlReportFooterControl.Size = new System.Drawing.Size(384, 378);
+			this.htmlReportFooterControl.Size = new System.Drawing.Size(375, 378);
 			this.htmlReportFooterControl.TabIndex = 26;
 			this.htmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
 			this.htmlReportFooterControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;

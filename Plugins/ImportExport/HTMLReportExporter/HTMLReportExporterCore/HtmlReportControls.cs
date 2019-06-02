@@ -118,8 +118,8 @@ namespace HTMLReportExporter
 			base.PreShowDialog(dialog);
 
 			// Operations that change dialog size
-			// 			DialogUtils.SetFont(dialog, m_ControlsFont);
-			// 			m_Trans.Translate(dialog);
+			DialogUtils.SetFont(dialog, m_ControlsFont);
+			m_Trans.Translate(dialog);
 
 			// Centre dialogs over our client area
 			dialog.StartPosition = FormStartPosition.Manual;
@@ -218,6 +218,7 @@ namespace HTMLReportExporter
 			this.toolstripBackColor.Size = this.ToolBar.Items[index].Size;
 
 			ToolBar.Items.Insert((index + 1), this.toolstripBackColor);
+			Toolbars.FixupButtonSizes(ToolBar);
 		}
 
 		override protected void InitialiseFeatures()

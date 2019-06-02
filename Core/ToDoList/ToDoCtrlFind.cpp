@@ -107,14 +107,13 @@ BOOL CTDCLongestItemMap::UpdateValue(TDC_COLUMN nColID, const CString& sValue)
 {
 	if (sValue.GetLength() > 0)
 	{
-		UINT nHashBucket, nHashValue;
-		CAssoc* pAssoc = GetAssocAt(nColID, nHashBucket, nHashValue);
+		CString sCurVal;
 
-		if (pAssoc != NULL)
+		if (Lookup(nColID, sCurVal))
 		{
-			if (sValue.GetLength() > pAssoc->value.GetLength())
+			if (sValue.GetLength() > sCurVal.GetLength())
 			{
-				pAssoc->value = sValue;
+				SetAt(nColID, sValue);
 				return TRUE;
 			}
 		}
@@ -162,10 +161,8 @@ BOOL CTDCLongestItemMap::HasColumn(TDC_COLUMN nColID) const
 	if (!IsSupportedColumn(nColID))
 		return FALSE;
 
-	UINT nHashBucket, nHashValue;
-	CAssoc* pAssoc = GetAssocAt(nColID, nHashBucket, nHashValue);
-
-	return (pAssoc != NULL);
+	CString sCurVal;
+	return (Lookup(nColID, sCurVal) && !sCurVal.IsEmpty());
 }
 
 CString CTDCLongestItemMap::GetLongestValue(TDC_COLUMN nColID) const
