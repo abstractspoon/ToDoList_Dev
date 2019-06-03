@@ -26,6 +26,7 @@ namespace Abstractspoon
 			public ref class UITheme
 			{
 			public:
+				UITheme();
 				UITheme(const UITHEME* pTheme);
 
 				enum class RenderStyle 
@@ -63,10 +64,8 @@ namespace Abstractspoon
 			private:
 				UITHEME* m_pTheme;
 
-			private:
-				UITheme();
-
 				UInt32 GetColor(AppColor color);
+				void InitTheme(const UITHEME* pTheme);
 			};
 
 			// --------------------------------------------------------------

@@ -21,6 +21,7 @@ namespace HTMLReportExporter
 		private Translator m_Trans = null;
 		private TaskList m_Tasklist = null;
 		private Preferences m_Prefs = null;
+		private UIThemeToolbarRenderer m_TBRenderer = null;
 
 		private HtmlReportTemplate m_Template = null;
 		private HtmlReportTemplate m_PrevTemplate = null;
@@ -117,7 +118,12 @@ namespace HTMLReportExporter
 			this.titleEnabledCheckbox.CheckedChanged += new EventHandler(OnTitleEnableChanged);
 			this.footerEnabledCheckbox.CheckedChanged += new EventHandler(OnFooterEnableChanged);
 
-			this.Toolbar.Renderer = new BaseToolbarRenderer();
+			m_TBRenderer = new UIThemeToolbarRenderer();
+
+			m_TBRenderer.SetUITheme(new UITheme());
+			m_TBRenderer.EnableDrawRowDividers(true);
+
+			this.Toolbar.Renderer = m_TBRenderer;
 
 			// Place this at the end to ensure the toolbar has finished its resize
 			Toolbars.FixupButtonSizes(this.Toolbar);

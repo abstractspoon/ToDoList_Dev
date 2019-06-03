@@ -15,7 +15,7 @@ namespace HTMLReportExporter
 	{
 		private System.Drawing.Font m_ControlsFont = null;
 		private Translator m_Trans = null;
-		private BaseToolbarRenderer m_TBRenderer = null;
+		private UIThemeToolbarRenderer m_TBRenderer = null;
 
 		// ---------------------------------------------------------------
 
@@ -118,7 +118,9 @@ namespace HTMLReportExporter
 
 		virtual protected void InitialiseToolbar()
 		{
-			m_TBRenderer = new BaseToolbarRenderer();
+			m_TBRenderer = new UIThemeToolbarRenderer();
+
+			m_TBRenderer.SetUITheme(new UITheme());
 			m_TBRenderer.EnableDrawRowDividers(true);
 
 			this.ToolBar.Renderer = m_TBRenderer;

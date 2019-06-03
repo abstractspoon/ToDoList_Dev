@@ -17,17 +17,39 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 UITheme::UITheme() : m_pTheme(nullptr)
 {
-	m_pTheme = new UITHEME;
-	ZeroMemory(m_pTheme, sizeof(UITHEME));
+	InitTheme(nullptr);
 }
 
-UITheme::UITheme(const UITHEME* pTheme)
+UITheme::UITheme(const UITHEME* pTheme) : m_pTheme(nullptr)
+{
+	InitTheme(pTheme);
+}
+
+void UITheme::InitTheme(const UITHEME* pTheme)
 {
 	m_pTheme = new UITHEME;
 	ZeroMemory(m_pTheme, sizeof(UITHEME));
 
 	if (pTheme)
+	{
 		*m_pTheme = *pTheme;
+	}
+	else
+	{
+		// From 'Core\Interfaces\UIThemeFile.cpp'
+		m_pTheme->crAppBackDark		= GetSysColor(COLOR_3DFACE);
+		m_pTheme->crAppBackLight	= GetSysColor(COLOR_3DFACE);
+		m_pTheme->crAppLinesDark	= GetSysColor(COLOR_3DSHADOW);
+		m_pTheme->crAppLinesLight	= GetSysColor(COLOR_3DHIGHLIGHT);
+		m_pTheme->crAppText			= GetSysColor(COLOR_WINDOWTEXT);
+		m_pTheme->crMenuBack		= GetSysColor(COLOR_3DFACE);
+		m_pTheme->crToolbarDark		= GetSysColor(COLOR_3DFACE);
+		m_pTheme->crToolbarLight	= GetSysColor(COLOR_3DFACE);
+		m_pTheme->crStatusBarDark	= GetSysColor(COLOR_3DFACE);
+		m_pTheme->crStatusBarLight	= GetSysColor(COLOR_3DFACE);
+		m_pTheme->crStatusBarText	= GetSysColor(COLOR_WINDOWTEXT);
+		m_pTheme->crToolbarHot		= -1; // CLR_NONE
+	}
 }
 
 UITheme::RenderStyle UITheme::GetRenderStyle()
