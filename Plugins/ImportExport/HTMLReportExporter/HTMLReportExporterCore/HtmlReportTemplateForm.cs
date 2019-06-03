@@ -123,7 +123,7 @@ namespace HTMLReportExporter
 			this.titleEnabledCheckbox.CheckedChanged += new EventHandler(OnTitleEnableChanged);
 			this.footerEnabledCheckbox.CheckedChanged += new EventHandler(OnFooterEnableChanged);
 
-			//m_Trans.Translate(this);
+			m_Trans.Translate(this);
 
 			m_TBRenderer = new UIThemeToolbarRenderer();
 

@@ -45,7 +45,7 @@ namespace HTMLReportExporter
 			set
 			{
 				m_Trans = value;
-				m_Trans.Translate(ToolBar.Items);
+				// Toolbar handled by parent
 				m_Trans.Translate(ContextMenu.Items);
 			}
 		}

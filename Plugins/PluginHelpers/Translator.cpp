@@ -7,6 +7,7 @@
 
 #include <Interfaces\ITransText.h>
 
+using namespace System::Windows::Forms;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,7 +38,7 @@ String^ Translator::Translate(String^ sText)
 	return sTextOut;
 }
 
-void Translator::Translate(System::Windows::Forms::Form^ window)
+void Translator::Translate(Form^ window)
 {
 	// Window title
 	window->Text = Translate(window->Text);
@@ -46,20 +47,19 @@ void Translator::Translate(System::Windows::Forms::Form^ window)
 	Translate(window->Controls);
 }
 
-void Translator::Translate(System::Windows::Forms::ToolStripItemCollection^ items)
+void Translator::Translate(ToolStripItemCollection^ items)
 {
 	int nItem = items->Count;
 
 	while (nItem--)
 	{
-		System::Windows::Forms::ToolStripItem^ tsi = items[nItem];
+		auto tsi = items[nItem];
 
 		tsi->Text = Translate(tsi->Text);
 		tsi->ToolTipText = Translate(tsi->ToolTipText);
 
 		// children
-		System::Windows::Forms::ToolStripMenuItem^ tsmi = 
-			dynamic_cast<System::Windows::Forms::ToolStripMenuItem^>(tsi);
+		auto tsmi = dynamic_cast<ToolStripMenuItem^>(tsi);
 
 		if ((tsmi != nullptr) && tsmi->HasDropDownItems)
 		{
@@ -68,21 +68,33 @@ void Translator::Translate(System::Windows::Forms::ToolStripItemCollection^ item
 	}
 }
 
-void Translator::Translate(System::Windows::Forms::Control::ControlCollection^ items)
+void Translator::Translate(Control::ControlCollection^ items)
 {
 	int nItem = items->Count;
 
 	while (nItem--)
 	{
-		System::Windows::Forms::Control^ ctrl = items[nItem];
+		auto ctrl = items[nItem];
 
-		// Avoid translating dynamic content
-		// TODO
+		// Special cases
+		if ((dynamic_cast<WebBrowser^>(ctrl) != nullptr) ||
+			(dynamic_cast<TextBox^>(ctrl) != nullptr) ||
+			(dynamic_cast<RichTextBox^>(ctrl) != nullptr))
+		{
+			continue;
+		}
 
-		ctrl->Text = Translate(ctrl->Text);
+		if (dynamic_cast<ToolStrip^>(ctrl) != nullptr)
+		{
+			Translate(dynamic_cast<ToolStrip^>(ctrl)->Items);
+		}
+		else
+		{
+			ctrl->Text = Translate(ctrl->Text);
 
-		// children
-		Translate(ctrl->Controls);
+			// children
+			Translate(ctrl->Controls);
+		}
 	}
 }
 
