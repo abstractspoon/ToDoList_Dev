@@ -81,6 +81,11 @@ namespace HTMLReportExporter
 			this.htmlReportTasksControl.SetFont(defFontName, defFontSize);
 			this.htmlReportFooterControl.SetFont(defFontName, defFontSize);
 
+			this.htmlReportHeaderControl.Translator = m_Trans;
+			this.htmlReportTitleControl.Translator = m_Trans;
+			this.htmlReportTasksControl.Translator = m_Trans;
+			this.htmlReportFooterControl.Translator = m_Trans;
+
 			if (!m_Template.Load(m_TemplateFilePath))
 			{
 #if DEBUG
@@ -117,6 +122,8 @@ namespace HTMLReportExporter
 			this.headerEnabledCheckbox.CheckedChanged += new EventHandler(OnHeaderEnableChanged);
 			this.titleEnabledCheckbox.CheckedChanged += new EventHandler(OnTitleEnableChanged);
 			this.footerEnabledCheckbox.CheckedChanged += new EventHandler(OnFooterEnableChanged);
+
+			//m_Trans.Translate(this);
 
 			m_TBRenderer = new UIThemeToolbarRenderer();
 
@@ -303,7 +310,35 @@ namespace HTMLReportExporter
 
 		private void OnOpenReportTemplate(object sender, EventArgs e)
 		{
+			var dlg = new OpenFileDialog
+			{
+				//InitialDirectory = LastBrowsedFolder,
+				Title = m_Trans.Translate("Open Template File"),
 
+				AutoUpgradeEnabled = true,
+				CheckFileExists = true,
+				CheckPathExists = true,
+
+				Filter = FileFilter,
+				FilterIndex = 0,
+				RestoreDirectory = true,
+
+				ShowReadOnly = false
+			};
+
+			if (dlg.ShowDialog() == DialogResult.OK)
+			{
+				if (m_Template.Load(dlg.FileName))
+				{
+					m_TemplateFilePath = dlg.FileName;
+					// TODO
+				}
+			}
+		}
+
+		private String FileFilter
+		{
+			get { return String.Format("{0} (*.rwt)|*.rwt;", m_Trans.Translate("Report Writer Templates"));	}
 		}
 
 		private void OnSaveReportTemplate(object sender, EventArgs e)

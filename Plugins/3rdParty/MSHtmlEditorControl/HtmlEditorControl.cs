@@ -4583,6 +4583,5 @@ namespace MSDN.Html.Editor
 		}
 
 		#endregion
-
 	} //HtmlEditorControl
 }
