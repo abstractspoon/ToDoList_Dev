@@ -812,6 +812,7 @@
 #define IDC_TDLEXTENSIONHANDLER         1521
 #define IDC_SEARCH                      1521
 #define IDC_TDLPROTOCOLHANDLER          1522
+#define IDC_MODIFYSHORTCUTS             1522
 #define IDC_GROUPBY                     1522
 #define IDC_GROUPBYATTRIB               1523
 #define IDC_HASLUNCHBREAK               1526

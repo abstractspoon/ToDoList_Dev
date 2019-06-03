@@ -362,6 +362,7 @@ protected:
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGetIcon(WPARAM bLargeIcon, LPARAM /*not used*/);
 	afx_msg LRESULT OnHotkey(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnModifyKeyboardShortcuts(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPostOnCreate(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSessionStatusChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesClearMRU(WPARAM wp, LPARAM lp);
@@ -713,7 +714,7 @@ protected:
 					TSD_TASKS nWhatTasks, TDCGETTASKS& filter, DWORD dwSelFlags, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
 	
 	void DoSendTasks(BOOL bSelected);
-	void DoPreferences(int nInitPage = -1);
+	BOOL DoPreferences(int nInitPage = -1);
 	void DoPrint(BOOL bPreview = FALSE);
 	BOOL DoDueTaskNotification(int nTDC, int nDueBy);
 	BOOL DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartup);

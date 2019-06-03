@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "tdlKeyboardShortcutDisplayDlg.h"
+#include "tdcmsg.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
@@ -47,6 +48,7 @@ void CTDLKeyboardShortcutDisplayDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTDLKeyboardShortcutDisplayDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CKeyboardShortcutDisplayDlg)
 	ON_BN_CLICKED(IDC_COPYSHORTCUTS, OnCopyshortcuts)
+	ON_BN_CLICKED(IDC_MODIFYSHORTCUTS, OnModifyShortcuts)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -113,4 +115,10 @@ void CTDLKeyboardShortcutDisplayDlg::OnCopyshortcuts()
 	}
 
 	VERIFY(CClipboard(*this).SetText(sText));
+}
+
+void CTDLKeyboardShortcutDisplayDlg::OnModifyShortcuts() 
+{
+	if (GetParent()->SendMessage(WM_TDLKS_MODIFYSHORTCUTS))
+		EndDialog(IDOK);
 }

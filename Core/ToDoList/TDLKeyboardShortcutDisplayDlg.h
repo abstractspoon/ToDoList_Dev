@@ -45,6 +45,7 @@ protected:
 	//{{AFX_MSG(CKeyboardShortcutDisplayDlg)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnCopyshortcuts();
+	afx_msg void OnModifyShortcuts();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -1075,6 +1075,7 @@ BEGIN
     PUSHBUTTON      "Copy &All",IDC_COPYSHORTCUTS,167,206,50,14
     LTEXT           "&ToDoList has the following keyboard shortcuts enabled:",
                     IDC_STATIC,7,7,263,11
+    PUSHBUTTON      "&Modify...",IDC_MODIFYSHORTCUTS,114,206,50,14
 END
 
 IDD_COLUMNSELECTION_DIALOG DIALOG DISCARDABLE  0, 0, 426, 283

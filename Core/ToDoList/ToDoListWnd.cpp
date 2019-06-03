@@ -441,6 +441,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_FTD_SELECTALL, OnFindSelectAll)
 	ON_REGISTERED_MESSAGE(WM_FTD_SELECTRESULT, OnFindSelectResult)
 	ON_REGISTERED_MESSAGE(WM_FW_FOCUSCHANGE, OnFocusChange)
+	ON_REGISTERED_MESSAGE(WM_TDLKS_MODIFYSHORTCUTS, OnModifyKeyboardShortcuts)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnPreferencesClearMRU)
 	ON_REGISTERED_MESSAGE(WM_PGP_EDITLANGFILE, OnPreferencesEditLanguageFile)
 	ON_REGISTERED_MESSAGE(WM_PTP_TESTTOOL, OnPreferencesTestTool)
@@ -4846,7 +4847,7 @@ void CToDoListWnd::OnPreferences()
 	DoPreferences();
 }
 
-void CToDoListWnd::DoPreferences(int nInitPage) 
+BOOL CToDoListWnd::DoPreferences(int nInitPage) 
 {
 	// take a copy of current userPrefs to check changes against
 	const CPreferencesDlg oldPrefs; 
@@ -4868,14 +4869,15 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 	ResetPrefs();
 
 	const CPreferencesDlg& newPrefs = Prefs();
-	
-	if (nRet == IDOK)
+	BOOL bModified = (nRet == IDOK);
+
+	if (bModified)
 	{
 		// language changes may require restart so do that first
 		if (UpdateLanguageTranslationAndCheckForRestart(oldPrefs))
 		{
 			DoExit(TRUE);
-			return;
+			return FALSE;
 		}
 
 		SetUITheme(newPrefs.GetUITheme());
@@ -5059,6 +5061,8 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 	
 	// finally set or terminate the various status check timers
 	RestoreTimers();
+
+	return bModified;
 }
 
 BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs)
@@ -12911,4 +12915,9 @@ void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
 		GetToDoCtrl().SetTaskView((FTC_VIEW)(FTCV_UIEXTENSION1 + (nCmdID - ID_ACTIVATEVIEW_UIEXTENSION1)));
 		break;
 	}
+}
+
+LRESULT CToDoListWnd::OnModifyKeyboardShortcuts(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	return DoPreferences(PREFPAGE_SHORTCUT);
 }

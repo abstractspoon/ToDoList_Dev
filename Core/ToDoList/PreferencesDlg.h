@@ -38,21 +38,22 @@
 // matches order of pages
 enum 
 { 
-	PREFPAGE_GEN, 
-	PREFPAGE_MULTIUSER, 
-	PREFPAGE_FILE, 
-	PREFPAGE_FILE2, 
-	PREFPAGE_UI, 
-	PREFPAGE_UITASK, 
-	PREFPAGE_UIFONTCOLOR, 
-	PREFPAGE_TOOLBAR, 
-	PREFPAGE_TASK, 
-	PREFPAGE_TASKCALC, 
-	PREFPAGE_TASKDEF, 
-	PREFPAGE_TASKDEF2, 
-	PREFPAGE_IMPEXP, 
-	PREFPAGE_TOOL, 
-	PREFPAGE_SHORTCUT 
+	PREFPAGE_GEN,			// CPreferencesGenPage
+	PREFPAGE_MULTIUSER, 	// CPreferencesMultiUserPage
+	PREFPAGE_FILE, 			// CPreferencesFilePage
+	PREFPAGE_FILE2, 		// CPreferencesFile2Page
+	PREFPAGE_UI, 			// CPreferencesUIPage
+	PREFPAGE_UIVIS, 		// CPreferencesUIVisibilityPage
+	PREFPAGE_UITASK, 		// CPreferencesUITasklistPage
+	PREFPAGE_UIFONTCOLOR, 	// CPreferencesUITasklistColorsPage
+	PREFPAGE_TOOLBAR, 		// CPreferencesUICustomToolbarPage
+	PREFPAGE_TASK, 			// CPreferencesTaskPage
+	PREFPAGE_TASKCALC, 		// CPreferencesTaskCalcPage
+	PREFPAGE_TASKDEF, 		// CPreferencesTaskDefPage
+	PREFPAGE_TASKDEF2, 		// CPreferencesTaskDef2Page
+	PREFPAGE_IMPEXP, 		// CPreferencesExportPage
+	PREFPAGE_TOOL, 			// CPreferencesToolPage
+	PREFPAGE_SHORTCUT 		// CPreferencesShortcutsPage
 };
 
 /////////////////////////////////////////////////////////////////////////////
