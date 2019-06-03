@@ -21,7 +21,7 @@ namespace HTMLReportExporter
 		private Translator m_Trans = null;
 		private TaskList m_Tasklist = null;
 		private Preferences m_Prefs = null;
-		
+
 		private HtmlReportTemplate m_Template = null;
 		private HtmlReportTemplate m_PrevTemplate = null;
 		private Timer m_ChangeTimer = null;
@@ -116,6 +116,11 @@ namespace HTMLReportExporter
 			this.headerEnabledCheckbox.CheckedChanged += new EventHandler(OnHeaderEnableChanged);
 			this.titleEnabledCheckbox.CheckedChanged += new EventHandler(OnTitleEnableChanged);
 			this.footerEnabledCheckbox.CheckedChanged += new EventHandler(OnFooterEnableChanged);
+
+			this.Toolbar.Renderer = new BaseToolbarRenderer();
+
+			// Place this at the end to ensure the toolbar has finished its resize
+			Toolbars.FixupButtonSizes(this.Toolbar);
 
 			OnHeaderEnableChanged(this.headerEnabledCheckbox, new EventArgs());
 			OnTitleEnableChanged(this.titleEnabledCheckbox, new EventArgs());

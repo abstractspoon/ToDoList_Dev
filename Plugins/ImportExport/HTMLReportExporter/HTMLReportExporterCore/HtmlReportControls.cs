@@ -13,8 +13,9 @@ namespace HTMLReportExporter
 {
 	partial class HtmlReportControlBase : MSDN.Html.Editor.HtmlEditorControl
 	{
-		private System.Drawing.Font m_ControlsFont;
-		private Translator m_Trans;
+		private System.Drawing.Font m_ControlsFont = null;
+		private Translator m_Trans = null;
+		private BaseToolbarRenderer m_TBRenderer = null;
 
 		// ---------------------------------------------------------------
 
@@ -77,6 +78,8 @@ namespace HTMLReportExporter
 			this.WebBrowser.Document.AttachEventHandler("onfocusout", OnLostFocus);
 			this.WebBrowser.Document.AttachEventHandler("onfocusin", OnGotFocus);
 
+			InitialiseToolbar();
+
 			// Place this at the end to ensure the toolbar has finished its resize
 			Toolbars.FixupButtonSizes(this.ToolBar);
 		}
@@ -111,6 +114,14 @@ namespace HTMLReportExporter
 			//CommandHandling.HideCommand("", ToolBar.Items);
 			//CommandHandling.HideCommand("", ToolBar.Items);
 			//CommandHandling.HideCommand("", ToolBar.Items);
+		}
+
+		virtual protected void InitialiseToolbar()
+		{
+			m_TBRenderer = new BaseToolbarRenderer();
+			m_TBRenderer.EnableDrawRowDividers(true);
+
+			this.ToolBar.Renderer = m_TBRenderer;
 		}
 
 		protected override void PreShowDialog(Form dialog)
@@ -201,6 +212,17 @@ namespace HTMLReportExporter
 
 		public HtmlReportHeaderFooterControl()
 		{
+		}
+
+		override protected void InitialiseFeatures()
+		{
+			base.InitialiseFeatures();
+		}
+
+		override protected void InitialiseToolbar()
+		{
+			base.InitialiseToolbar();
+			
 			// Add background colour button to toolbar
 			this.toolstripBackColor = new System.Windows.Forms.ToolStripButton();
 
@@ -218,13 +240,6 @@ namespace HTMLReportExporter
 			this.toolstripBackColor.Size = this.ToolBar.Items[index].Size;
 
 			ToolBar.Items.Insert((index + 1), this.toolstripBackColor);
-			Toolbars.FixupButtonSizes(ToolBar);
-		}
-
-		override protected void InitialiseFeatures()
-		{
-			base.InitialiseFeatures();
-
 		}
 
 		private void OnBackColorClick(object sender, EventArgs e)
