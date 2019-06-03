@@ -323,6 +323,9 @@ namespace HTMLReportExporter
 
 	public class HtmlReportTemplate
 	{
+		private String m_FilePath = String.Empty;
+
+		// ---------------------------------------------
 
 		public HtmlReportTemplate()
 		{
@@ -394,7 +397,18 @@ namespace HTMLReportExporter
 				return false;
 			}
 
+			m_FilePath = pathName;
 			return true;
+		}
+
+		public bool HasContents()
+		{
+			return !Equals(new HtmlReportTemplate());
+		}
+
+		public bool Save()
+		{
+			return Save(m_FilePath);
 		}
 
 		public bool Save(String pathName)
@@ -415,6 +429,7 @@ namespace HTMLReportExporter
 				return false;
 			}
 
+			m_FilePath = pathName;
 			return true;
 		}
 

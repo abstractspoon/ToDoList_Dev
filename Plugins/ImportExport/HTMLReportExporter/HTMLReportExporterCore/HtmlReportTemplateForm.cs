@@ -292,5 +292,42 @@ namespace HTMLReportExporter
 			{
 			}
 		}
+
+		private void OnNewReportTemplate(object sender, EventArgs e)
+		{
+			if (CheckSaveTemplate())
+			{
+				m_Template.Clear();
+			}
+		}
+
+		private void OnOpenReportTemplate(object sender, EventArgs e)
+		{
+
+		}
+
+		private void OnSaveReportTemplate(object sender, EventArgs e)
+		{
+
+		}
+
+		private void OnHelp(object sender, EventArgs e)
+		{
+
+		}
+
+		private bool CheckSaveTemplate()
+		{
+			if (m_Template.HasContents())
+			{
+				if (m_Template.Save())
+					return true;
+
+				// Prompt for a file path
+
+			}
+
+			return true;
+		}
 	}
 }
