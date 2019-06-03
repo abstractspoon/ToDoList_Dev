@@ -35,6 +35,7 @@ struct USERTOOLARGS
 	CString sTaskFileLink;
 	CString sTaskAllocBy;
 	CString sTaskAllocTo;
+	CString sTaskPath;
 
 	CTDCCustomAttributeDataMap mapTaskCustData;
 };

@@ -3897,6 +3897,7 @@ BEGIN
         MENUITEM "Selected Task &Alloc By",     ID_TOOLARG_SELTASKALLOCBY
         MENUITEM "Selected Task Alloc &To",     ID_TOOLARG_SELTASKALLOCTO
         MENUITEM "Selected Task C&ustom Attribute", ID_TOOLARG_SELTASKCUSTOM
+        MENUITEM "Selected Task &Path",         ID_TOOLARG_SELTASKPATH
         MENUITEM SEPARATOR
         MENUITEM "&User Date",                  ID_TOOLARG_USERDATE
         MENUITEM "Use&r Filepath",              ID_TOOLARG_USERFILEPATH

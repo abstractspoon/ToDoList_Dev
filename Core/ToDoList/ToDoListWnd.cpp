@@ -8999,6 +8999,7 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 	args.sTaskComments = tdc.GetSelectedTaskComments();
 	args.sTaskFileLink = tdc.GetSelectedTaskFileRef(0);
 	args.sTaskAllocBy = tdc.GetSelectedTaskAllocBy();
+	args.sTaskPath = tdc.GetSelectedTaskPath(FALSE);
 	
 	CDWordArray aIDs;
 	DWORD dwTemp;

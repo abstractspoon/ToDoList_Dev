@@ -44,6 +44,7 @@ CTDCToolsCmdlineParser::CTDCToolsCmdlineParser(LPCTSTR szCmdLine)
 		s_mapTypes[_T("seltallocby")] = CLAT_SELTASKALLOCBY;
 		s_mapTypes[_T("seltallocto")] = CLAT_SELTASKALLOCTO;
 		s_mapTypes[_T("seltcustom")] = CLAT_SELTASKCUSTATTRIB;
+		s_mapTypes[_T("seltpath")] = CLAT_SELTASKPATH;
 	}
 
 	SetCmdLine(szCmdLine);
@@ -56,32 +57,31 @@ CTDCToolsCmdlineParser::~CTDCToolsCmdlineParser()
 
 CString CTDCToolsCmdlineParser::GetPlaceHolder(CLA_TYPE nType)
 {
-	CString sPlaceHolder;
-
 	switch (nType)
 	{
-		case CLAT_PATHNAME:				sPlaceHolder = _T("pathname");		break;
-		case CLAT_FILETITLE:			sPlaceHolder = _T("filetitle");		break;
-		case CLAT_FOLDER:				sPlaceHolder = _T("folder");		break;
-		case CLAT_FILENAME:				sPlaceHolder = _T("filename");		break;
-		case CLAT_SELTASKID:			sPlaceHolder = _T("seltid");		break;
-		case CLAT_SELTASKTITLE:			sPlaceHolder = _T("selttitle");		break;
-		case CLAT_USERFILE:				sPlaceHolder = _T("userfile");		break;
-		case CLAT_USERFOLDER:			sPlaceHolder = _T("userfolder");	break;
-		case CLAT_USERTEXT:				sPlaceHolder = _T("usertext");		break;
-		case CLAT_USERDATE:				sPlaceHolder = _T("userdate");		break;
-		case CLAT_TODAYSDATE:			sPlaceHolder = _T("todaysdate");	break;
-		case CLAT_TODOLIST:				sPlaceHolder = _T("todolist");		break;
-		case CLAT_SELTASKEXTID:			sPlaceHolder = _T("seltextid");		break;
-		case CLAT_SELTASKCOMMENTS:		sPlaceHolder = _T("seltcomments");	break;
-		case CLAT_SELTASKFILELINK:		sPlaceHolder = _T("seltfile");		break;
-		case CLAT_SELTASKALLOCBY:		sPlaceHolder = _T("seltallocby");	break;
-		case CLAT_SELTASKALLOCTO:		sPlaceHolder = _T("seltallocto");	break;
-		case CLAT_SELTASKCUSTATTRIB:	sPlaceHolder = _T("seltcustom");	break;
+		case CLAT_PATHNAME:				return _T("pathname");		
+		case CLAT_FILETITLE:			return _T("filetitle");		
+		case CLAT_FOLDER:				return _T("folder");		
+		case CLAT_FILENAME:				return _T("filename");		
+		case CLAT_SELTASKID:			return _T("seltid");		
+		case CLAT_SELTASKTITLE:			return _T("selttitle");		
+		case CLAT_USERFILE:				return _T("userfile");		
+		case CLAT_USERFOLDER:			return _T("userfolder");	
+		case CLAT_USERTEXT:				return _T("usertext");		
+		case CLAT_USERDATE:				return _T("userdate");		
+		case CLAT_TODAYSDATE:			return _T("todaysdate");	
+		case CLAT_TODOLIST:				return _T("todolist");		
+		case CLAT_SELTASKEXTID:			return _T("seltextid");		
+		case CLAT_SELTASKCOMMENTS:		return _T("seltcomments");	
+		case CLAT_SELTASKFILELINK:		return _T("seltfile");		
+		case CLAT_SELTASKALLOCBY:		return _T("seltallocby");	
+		case CLAT_SELTASKALLOCTO:		return _T("seltallocto");	
+		case CLAT_SELTASKCUSTATTRIB:	return _T("seltcustom");	
+		case CLAT_SELTASKPATH:			return _T("seltpath");
 	}
-	ASSERT(!sPlaceHolder.IsEmpty());
-
-	return sPlaceHolder;
+	
+	ASSERT(0);
+	return _T("");
 }
 
 void CTDCToolsCmdlineParser::SetCmdLine(LPCTSTR szCmdLine)
@@ -386,6 +386,7 @@ void CTDCToolsCmdlineParser::ParseCmdLine()
 			case CLAT_SELTASKFILELINK:
 			case CLAT_SELTASKALLOCBY:
 			case CLAT_SELTASKALLOCTO:      
+			case CLAT_SELTASKPATH:
 				m_aArgs.Add(cla);
 				break;
 

@@ -218,6 +218,7 @@ BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& a
 	ReplaceToolArgument(tcp, CLAT_SELTASKFILELINK, args.sTaskFileLink, bEscapeSpaces);
 	ReplaceToolArgument(tcp, CLAT_SELTASKALLOCBY, args.sTaskAllocBy, bEscapeSpaces);
 	ReplaceToolArgument(tcp, CLAT_SELTASKALLOCTO, args.sTaskAllocTo, bEscapeSpaces);
+	ReplaceToolArgument(tcp, CLAT_SELTASKPATH, args.sTaskPath, bEscapeSpaces);
 
 	CCLArgArray aCustomArgs;
 	TDCCADATA data;
