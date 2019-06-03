@@ -139,20 +139,20 @@ namespace HTMLReportExporter
 
 		private void OnHeaderEnableChanged(object sender, EventArgs args)
 		{
-			EnableControls(headerPage, sender);
+			EnableControls(headerPage, sender, m_Template.Header.BackColor);
 		}
 
 		private void OnTitleEnableChanged(object sender, EventArgs args)
 		{
-			EnableControls(titlePage, sender);
+			EnableControls(titlePage, sender, Color.Empty);
 		}
 
 		private void OnFooterEnableChanged(object sender, EventArgs args)
 		{
-			EnableControls(footerPage, sender);
+			EnableControls(footerPage, sender, m_Template.Footer.BackColor);
 		}
 
-		private void EnableControls(TabPage page, object checkbox)
+		private void EnableControls(TabPage page, object checkbox, Color enabledBackColor)
 		{
 			if ((checkbox != null) && (checkbox is CheckBox))
 			{
@@ -161,11 +161,17 @@ namespace HTMLReportExporter
 				foreach (System.Windows.Forms.Control control in page.Controls)
 				{
 					if (control != checkbox)
+					{
 						control.Enabled = enabled;
+
+						// restore background colour
+						if (enabled && (enabledBackColor != Color.Empty) && (control is HtmlReportHeaderFooterControl))
+						{
+							(control as HtmlReportHeaderFooterControl).BodyBackColor = enabledBackColor;
+						}
+					}
 				}
 			}
-
-
 		}
 
 		private void OnPreviewLoaded(object sender, WebBrowserDocumentCompletedEventArgs e)
