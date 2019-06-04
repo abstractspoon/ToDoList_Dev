@@ -47,7 +47,13 @@ void Toolbars::FixupButtonSizes(ToolStrip^ toolbar)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-BaseToolbarRenderer::BaseToolbarRenderer() : m_DrawRowDividers(true)
+BaseToolbarRenderer::BaseToolbarRenderer() 
+	: 
+	m_DrawRowDividers(true),
+	m_DrawLeftBorder(false), 
+	m_DrawTopBorder(false), 
+	m_DrawRightBorder(false), 
+	m_DrawBottomBorder(false)
 {
 
 }
@@ -57,13 +63,46 @@ void BaseToolbarRenderer::EnableDrawRowDividers(bool enable)
 	m_DrawRowDividers = enable;
 }
 
+void BaseToolbarRenderer::EnableDrawBorders(ToolStrip^ toolbar, bool left, bool top, bool right, bool bottom)
+{
+	auto margin = toolbar->Margin;
+	int leftMargin = margin.Left, topMargin = margin.Top, rightMargin = margin.Right, botMargin = margin.Bottom;
+
+	if (m_DrawLeftBorder != left)
+	{
+		leftMargin += (left ? 2 : -2);
+		m_DrawLeftBorder = left;
+	}
+
+	if (m_DrawTopBorder != top)
+	{
+		topMargin += (top ? 2 : -2);
+		m_DrawTopBorder = top;
+	}
+	
+	if (m_DrawRightBorder != right)
+	{
+		rightMargin += (right ? 2 : -2);
+		m_DrawRightBorder = right;
+	}
+
+	if (m_DrawBottomBorder != bottom)
+	{
+		botMargin += (bottom ? 20 : -20);
+		m_DrawBottomBorder = bottom;
+	}
+
+	toolbar->Margin = Padding(leftMargin, topMargin, rightMargin, botMargin);
+}
+
 void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ e)
 {
 	ToolStripRenderer::OnRenderToolStripBackground(e);
 
+	auto toolbar = e->ToolStrip;
+
 	if (m_DrawRowDividers)
 	{
-		auto toolbar = e->ToolStrip;
 		int numItems = toolbar->Items->Count;
 
 		if (numItems > 0)
@@ -105,6 +144,30 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 			auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, rowTop, toolbar->Width, (toolbar->Bottom - rowTop));
 			DrawRowBackground(e->Graphics, rowRect, firstRow, true);
 		}
+	}
+
+	if (m_DrawLeftBorder)
+	{
+// 		e->Graphics->DrawLine(SystemPens::ButtonHighlight, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
+// 		e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom);
+	}
+
+	if (m_DrawTopBorder)
+	{
+// 		e->Graphics->DrawLine(SystemPens::ButtonHighlight, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
+// 		e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top + 1, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top + 1);
+	}
+
+	if (m_DrawRightBorder)
+	{
+// 		e->Graphics->DrawLine(SystemPens::ButtonHighlight, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
+// 		e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom);
+	}
+
+	if (m_DrawBottomBorder)
+	{
+		e->Graphics->DrawLine(gcnew Pen(Color::Red)/*SystemPens::ButtonHighlight*/, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom);
+		//e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom - 1, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom - 1);
 	}
 }
 

@@ -144,7 +144,7 @@ namespace HTMLReportExporter
 			html.WriteLine("thead { display: table-header-group; } ");
 			html.WriteLine("tfoot { display: table-footer-group; } ");
 			html.WriteLine(".title-page { border-bottom: none; } ");
-		//	html.WriteLine("tr { page-break-inside: avoid !important; margin: 4px 0 4px 0; } ");
+			html.WriteLine("tr { page-break-inside: avoid !important; margin: 4px 0 4px 0; } ");
 			html.WriteLine(" }");
 
 			html.RenderEndTag(); // Style

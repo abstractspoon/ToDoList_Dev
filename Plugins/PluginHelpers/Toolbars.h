@@ -31,9 +31,11 @@ namespace Abstractspoon
 				BaseToolbarRenderer();
 
 				void EnableDrawRowDividers(bool enable);
+				void EnableDrawBorders(ToolStrip^ toolbar, bool left, bool top, bool right, bool bottom);
 
 			private:
 				bool m_DrawRowDividers;
+				bool m_DrawLeftBorder, m_DrawTopBorder, m_DrawRightBorder, m_DrawBottomBorder;
 
 			protected:
 				virtual void OnRenderToolStripBackground(ToolStripRenderEventArgs^ e) override;

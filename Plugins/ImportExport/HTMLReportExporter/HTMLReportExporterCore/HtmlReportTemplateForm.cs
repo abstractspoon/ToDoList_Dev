@@ -111,20 +111,25 @@ namespace HTMLReportExporter
 			this.footerEnabledCheckbox.CheckedChanged += new EventHandler(OnFooterEnableChanged);
 
 			m_Trans.Translate(this);
+			
+			UpdateControls();
+			InitialiseToolbar();
 
+			m_ChangeTimer.Start();
+		}
+
+		private void InitialiseToolbar()
+		{
 			m_TBRenderer = new UIThemeToolbarRenderer();
 
 			m_TBRenderer.SetUITheme(new UITheme());
 			m_TBRenderer.EnableDrawRowDividers(true);
+			m_TBRenderer.EnableDrawBorders(this.Toolbar, false, false, false, true);
 
 			this.Toolbar.Renderer = m_TBRenderer;
 
 			// Place this at the end to ensure the toolbar has finished its resize
 			Toolbars.FixupButtonSizes(this.Toolbar);
-
-			UpdateControls();
-
-			m_ChangeTimer.Start();
 		}
 
 		private void UpdateControls()
@@ -197,7 +202,7 @@ namespace HTMLReportExporter
 		{
 			if (m_FirstPreview) // First time only
 			{
-				//SetPreviewZoom(DPIScaling.Scale(40));
+				SetPreviewZoom(DPIScaling.Scale(40));
 				m_FirstPreview = false;
 			}
 		}
