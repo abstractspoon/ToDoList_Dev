@@ -17,7 +17,8 @@ namespace HTMLReportExporter
 {
 	public partial class HtmlReportTemplateForm : Form
 	{
-		private String m_TypeId = "";
+		private String m_TypeId = String.Empty;
+		private String m_PrefsKey = String.Empty;
 		private Translator m_Trans = null;
 		private TaskList m_Tasklist = null;
 		private Preferences m_Prefs = null;
@@ -41,12 +42,15 @@ namespace HTMLReportExporter
 
 		// --------------------------------------------------------------
 
-		public HtmlReportTemplateForm(String typeId, Translator trans, TaskList tasks, Preferences prefs)
+		public HtmlReportTemplateForm(String typeId, Translator trans, TaskList tasks, Preferences prefs, String key)
 		{
 			m_TypeId = typeId;
 			m_Trans = trans;
 			m_Tasklist = tasks;
 			m_Prefs = prefs;
+			m_PrefsKey = key;
+
+			m_TemplateFilePath = prefs.GetProfileString(key, "LastOpenTemplate", "");
 
 			m_Template = new HtmlReportTemplate();
 			m_PrevTemplate = new HtmlReportTemplate();
@@ -95,27 +99,10 @@ namespace HTMLReportExporter
 				this.m_Template.Task.Text = "$(Title)";
 				this.m_Template.Footer.Text = "Footer";
 				this.m_Template.Footer.BackColor = Color.LightPink;
+
+				this.m_TemplateFilePath = "Example.rwt";
 #endif
 			}
-
-			this.htmlReportHeaderControl.InnerHtml = m_Template.Header.Text;
-			this.htmlReportHeaderControl.BodyBackColor = m_Template.Header.BackColor;
-			this.headerEnabledCheckbox.Checked = m_Template.Header.Enabled;
-			this.headerDividerCheckbox.Checked = m_Template.Header.WantDivider;
-			this.headerHeightCombobox.Text = m_Template.Header.PixelHeightText;
-
-			this.htmlReportTitleControl.InnerHtml = m_Template.Title.Text;
-			this.titleEnabledCheckbox.Checked = m_Template.Title.Enabled;
-			this.titleSeparatePageCheckbox.Checked = m_Template.Title.SeparatePage;
-
-			this.htmlReportTasksControl.InnerHtml = m_Template.Task.Text;
-			// always enabled
-
-			this.htmlReportFooterControl.InnerHtml = m_Template.Footer.Text;
-			this.htmlReportFooterControl.BodyBackColor = m_Template.Footer.BackColor;
-			this.footerEnabledCheckbox.Checked = m_Template.Footer.Enabled;
-			this.footerDividerCheckbox.Checked = m_Template.Footer.WantDivider;
-			this.footerHeightCombobox.Text = m_Template.Footer.PixelHeightText;
 
 			this.tabControl.SelectedIndexChanged += new EventHandler(OnTabPageChange);
 			this.browserPreview.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(OnPreviewLoaded);
@@ -135,13 +122,38 @@ namespace HTMLReportExporter
 			// Place this at the end to ensure the toolbar has finished its resize
 			Toolbars.FixupButtonSizes(this.Toolbar);
 
+			UpdateControls();
+
+			m_ChangeTimer.Start();
+		}
+
+		private void UpdateControls()
+		{
+			this.htmlReportHeaderControl.InnerHtml = m_Template.Header.Text;
+			this.htmlReportHeaderControl.BodyBackColor = m_Template.Header.BackColor;
+			this.headerEnabledCheckbox.Checked = m_Template.Header.Enabled;
+			this.headerDividerCheckbox.Checked = m_Template.Header.WantDivider;
+			this.headerHeightCombobox.Text = m_Template.Header.PixelHeightText;
+
+			this.htmlReportTitleControl.InnerHtml = m_Template.Title.Text;
+			this.titleEnabledCheckbox.Checked = m_Template.Title.Enabled;
+			this.titleSeparatePageCheckbox.Checked = m_Template.Title.SeparatePage;
+
+			this.htmlReportTasksControl.InnerHtml = m_Template.Task.Text;
+
+			this.htmlReportFooterControl.InnerHtml = m_Template.Footer.Text;
+			this.htmlReportFooterControl.BodyBackColor = m_Template.Footer.BackColor;
+			this.footerEnabledCheckbox.Checked = m_Template.Footer.Enabled;
+			this.footerDividerCheckbox.Checked = m_Template.Footer.WantDivider;
+			this.footerHeightCombobox.Text = m_Template.Footer.PixelHeightText;
+
+			// Refresh enable states
+			// Note: 'Task' control always enabled
 			OnHeaderEnableChanged(this.headerEnabledCheckbox, new EventArgs());
 			OnTitleEnableChanged(this.titleEnabledCheckbox, new EventArgs());
 			OnFooterEnableChanged(this.footerEnabledCheckbox, new EventArgs());
-
+			
 			RefreshPreview();
-
-			m_ChangeTimer.Start();
 		}
 
 		private void OnHeaderEnableChanged(object sender, EventArgs args)
@@ -183,9 +195,9 @@ namespace HTMLReportExporter
 
 		private void OnPreviewLoaded(object sender, WebBrowserDocumentCompletedEventArgs e)
 		{
-			if (m_FirstPreview)
+			if (m_FirstPreview) // First time only
 			{
-				SetPreviewZoom(DPIScaling.Scale(40));
+				//SetPreviewZoom(DPIScaling.Scale(40));
 				m_FirstPreview = false;
 			}
 		}
@@ -261,7 +273,10 @@ namespace HTMLReportExporter
 			base.OnClosing(e);
 
 			if (!e.Cancel)
-				m_Template.Save(m_TemplateFilePath);
+			{
+				CheckSaveTemplate(false);
+				m_Prefs.GetProfileString(m_PrefsKey, "LastOpenTemplate", m_TemplateFilePath);
+			}
 		}
 
 		private void CheckRefreshPreview()
@@ -302,9 +317,12 @@ namespace HTMLReportExporter
 
 		private void OnNewReportTemplate(object sender, EventArgs e)
 		{
-			if (CheckSaveTemplate())
+			if (CheckSaveTemplate(true))
 			{
 				m_Template.Clear();
+				m_TemplateFilePath = String.Empty;
+
+				UpdateControls();
 			}
 		}
 
@@ -331,7 +349,7 @@ namespace HTMLReportExporter
 				if (m_Template.Load(dlg.FileName))
 				{
 					m_TemplateFilePath = dlg.FileName;
-					// TODO
+					UpdateControls();
 				}
 			}
 		}
@@ -343,26 +361,46 @@ namespace HTMLReportExporter
 
 		private void OnSaveReportTemplate(object sender, EventArgs e)
 		{
-
+			CheckSaveTemplate(false);
 		}
 
 		private void OnHelp(object sender, EventArgs e)
 		{
-
+			// TODO
 		}
 
-		private bool CheckSaveTemplate()
+		private bool CheckSaveTemplate(bool mustHaveContents)
 		{
-			if (m_Template.HasContents())
+			if (mustHaveContents && !m_Template.HasContents())
+				return true;
+
+			if (m_Template.Save())
+				return true;
+
+			// Prompt for a file path
+			var dlg = new SaveFileDialog
 			{
-				if (m_Template.Save())
+				//InitialDirectory = LastBrowsedFolder,
+				Title = m_Trans.Translate("Save Template File"),
+
+				AutoUpgradeEnabled = true,
+				CheckPathExists = true,
+
+				Filter = FileFilter,
+				FilterIndex = 0,
+				RestoreDirectory = true,
+			};
+			
+			if (dlg.ShowDialog() == DialogResult.OK)
+			{
+				if (m_Template.Save(dlg.FileName))
+				{
+					m_TemplateFilePath = dlg.FileName;
 					return true;
-
-				// Prompt for a file path
-
+				}
 			}
 
-			return true;
+			return false;
 		}
 	}
 }

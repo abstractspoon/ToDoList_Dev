@@ -31,15 +31,12 @@ namespace HTMLReportExporter
 			if (!silent)
 			{
 				// Display a dialog to get the report parameters
-				using (var dialog = new HtmlReportTemplateForm(m_TypeId, m_Trans, tasks, prefs))
+				using (var dialog = new HtmlReportTemplateForm(m_TypeId, m_Trans, tasks, prefs, sKey))
 				{
 					if (dialog.ShowDialog() != DialogResult.OK)
 						return false;
 
 					m_Template = dialog.ReportTemplate;
-#if DEBUG
-//					return false;
-#endif
 				}
 			}
 			return true;

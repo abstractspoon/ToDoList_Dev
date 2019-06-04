@@ -19,7 +19,7 @@ namespace HTMLReportExporter
 		private String m_TaskBaseIndent = "";
 		private bool m_StrikeThruDone = true;
 
-		private const int ContentPadding = 40;
+		private const int ContentPadding = 0/*40*/;
 
 		// -------------------------------------------------------------
 
@@ -144,7 +144,7 @@ namespace HTMLReportExporter
 			html.WriteLine("thead { display: table-header-group; } ");
 			html.WriteLine("tfoot { display: table-footer-group; } ");
 			html.WriteLine(".title-page { border-bottom: none; } ");
-			html.WriteLine("tr { page-break-inside: avoid !important; margin: 4px 0 4px 0; } ");
+		//	html.WriteLine("tr { page-break-inside: avoid !important; margin: 4px 0 4px 0; } ");
 			html.WriteLine(" }");
 
 			html.RenderEndTag(); // Style

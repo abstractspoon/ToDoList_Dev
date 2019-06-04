@@ -415,7 +415,7 @@ namespace HTMLReportExporter
 		{
 			try
 			{
-				XDocument doc = new XDocument(new XElement("report"));
+				XDocument doc = new XDocument(new XElement("ReportWriterTemplate"));
 
 				Header.Write(doc);
 				Title.Write(doc);
