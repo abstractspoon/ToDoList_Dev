@@ -39,6 +39,7 @@ namespace Abstractspoon
 
 			protected:
 				virtual void OnRenderToolStripBackground(ToolStripRenderEventArgs^ e) override;
+				virtual void OnRenderToolStripBorder(ToolStripRenderEventArgs^ e) override;
 
 				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow);
 				virtual void DrawRowDivider(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow);

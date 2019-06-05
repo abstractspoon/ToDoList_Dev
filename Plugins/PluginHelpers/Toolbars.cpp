@@ -65,34 +65,43 @@ void BaseToolbarRenderer::EnableDrawRowDividers(bool enable)
 
 void BaseToolbarRenderer::EnableDrawBorders(ToolStrip^ toolbar, bool left, bool top, bool right, bool bottom)
 {
-	auto margin = toolbar->Margin;
-	int leftMargin = margin.Left, topMargin = margin.Top, rightMargin = margin.Right, botMargin = margin.Bottom;
+	const int BORDERSIZE = 2;
+	int leftChange = 0, topChange = 0, rightChange = 0, botChange = 0;
 
 	if (m_DrawLeftBorder != left)
 	{
-		leftMargin += (left ? 2 : -2);
+		leftChange = (left ? BORDERSIZE : -BORDERSIZE);
 		m_DrawLeftBorder = left;
 	}
 
 	if (m_DrawTopBorder != top)
 	{
-		topMargin += (top ? 2 : -2);
+		topChange = (top ? BORDERSIZE : -BORDERSIZE);
 		m_DrawTopBorder = top;
 	}
 	
 	if (m_DrawRightBorder != right)
 	{
-		rightMargin += (right ? 2 : -2);
+		rightChange = (right ? BORDERSIZE : -BORDERSIZE);
 		m_DrawRightBorder = right;
 	}
 
 	if (m_DrawBottomBorder != bottom)
 	{
-		botMargin += (bottom ? 20 : -20);
+		botChange = (bottom ? BORDERSIZE : -BORDERSIZE);
 		m_DrawBottomBorder = bottom;
 	}
 
-	toolbar->Margin = Padding(leftMargin, topMargin, rightMargin, botMargin);
+	auto padding = toolbar->Padding;
+	toolbar->Padding = Padding(padding.Left + leftChange, 
+							  padding.Top + topChange, 
+							  padding.Right + rightChange, 
+							  padding.Bottom + botChange);
+}
+
+void BaseToolbarRenderer::OnRenderToolStripBorder(ToolStripRenderEventArgs^ e)
+{
+	// Eat this to prevent the default drawing of a right hand border
 }
 
 void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ e)
@@ -166,8 +175,8 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 
 	if (m_DrawBottomBorder)
 	{
-		e->Graphics->DrawLine(gcnew Pen(Color::Red)/*SystemPens::ButtonHighlight*/, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom);
-		//e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom - 1, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom - 1);
+		e->Graphics->DrawLine(SystemPens::ButtonHighlight, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom - 3, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom - 3);
+		e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom - 2, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom - 2);
 	}
 }
 

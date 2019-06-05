@@ -124,7 +124,7 @@ namespace HTMLReportExporter
 
 			m_TBRenderer.SetUITheme(new UITheme());
 			m_TBRenderer.EnableDrawRowDividers(true);
-			m_TBRenderer.EnableDrawBorders(this.Toolbar, false, false, false, true);
+			//m_TBRenderer.EnableDrawBorders(this.Toolbar, false, false, false, true);
 
 			this.Toolbar.Renderer = m_TBRenderer;
 
