@@ -37,7 +37,7 @@ namespace HTMLReportExporter
 
 		// -------------------------------------------------------------
 
-		public HtmlReportBuilder(TaskList tasks, HtmlReportTemplate template, Preferences prefs)
+		public HtmlReportBuilder(TaskList tasks, HtmlReportTemplate template, Preferences prefs, bool preview)
 		{
 			m_Tasklist = tasks;
 			m_Template = template;
@@ -48,7 +48,7 @@ namespace HTMLReportExporter
 
 			Header = new HeaderTemplateReporter(template.Header);
 			Title = new TitleTemplateReporter(template.Title);
-			Tasks = new TaskTemplateReporter(template.Task);
+			Tasks = new TaskTemplateReporter(template.Task, preview);
 			Footer = new FooterTemplateReporter(template.Footer);
 		}
 
@@ -388,6 +388,11 @@ namespace HTMLReportExporter
 			private TaskLayout m_Layout;
 			private String m_StartHtml, m_TaskHtml, m_EndHtml;
 
+			private bool m_Preview;
+			private int m_PreviewTaskCount;
+
+			private const int MaxNumPreviewTasks = 20;
+
 			private enum TaskLayout
 			{
 				None,
@@ -398,9 +403,11 @@ namespace HTMLReportExporter
 
 			// ------------------------------------------------------
 
-			public TaskTemplateReporter(TaskTemplate task)
+			public TaskTemplateReporter(TaskTemplate task, bool preview)
 			{
 				Copy(task);
+
+				m_Preview = preview;
 			}
 
 			private void InitLayout(TaskList tasks)
@@ -409,6 +416,7 @@ namespace HTMLReportExporter
 				m_TaskHtml = Text;
 				m_StartHtml = String.Empty;
 				m_EndHtml = String.Empty;
+				m_PreviewTaskCount = 0;
 
 				try
 				{
@@ -590,6 +598,9 @@ namespace HTMLReportExporter
 
 					html.WriteLine(text);
 				}
+
+				if (m_Preview && (++m_PreviewTaskCount == MaxNumPreviewTasks))
+					return;
 
 				// First subtask
 				if (m_Layout != TaskLayout.Table)
