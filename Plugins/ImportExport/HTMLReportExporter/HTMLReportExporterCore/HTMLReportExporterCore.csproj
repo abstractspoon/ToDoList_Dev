@@ -38,7 +38,8 @@
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>HTMLReporter.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack">
@@ -101,11 +102,17 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="ToolBackColor.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="HTMLReporter.ico" />
+    <EmbeddedResource Include="Resources\HTMLReporter.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ToolbarBackColor.bmp" />
+    <EmbeddedResource Include="Resources\ToolbarFileNew.bmp" />
+    <EmbeddedResource Include="Resources\ToolbarFileOpen.bmp" />
+    <EmbeddedResource Include="Resources\ToolbarFileSave.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

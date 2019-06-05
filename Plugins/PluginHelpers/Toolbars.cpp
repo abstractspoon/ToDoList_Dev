@@ -102,6 +102,7 @@ void BaseToolbarRenderer::EnableDrawBorders(ToolStrip^ toolbar, bool left, bool 
 void BaseToolbarRenderer::OnRenderToolStripBorder(ToolStripRenderEventArgs^ e)
 {
 	// Eat this to prevent the default drawing of a right hand border
+	int breakpoint = 0;
 }
 
 void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ e)

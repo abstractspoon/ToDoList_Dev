@@ -234,7 +234,7 @@ namespace HTMLReportExporter
 			this.toolstripBackColor.Click += new System.EventHandler(OnBackColorClick);
 
 			var assembly = Assembly.GetExecutingAssembly();
-			var image = new Bitmap(assembly.GetManifestResourceStream("HTMLReportExporter.ToolBackColor.bmp"));
+			var image = new Bitmap(assembly.GetManifestResourceStream("HTMLReportExporter.Resources.ToolbarBackColor.bmp"));
 			image.MakeTransparent(Color.Magenta);
 			this.toolstripBackColor.Image = image;
 			

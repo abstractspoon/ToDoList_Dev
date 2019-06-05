@@ -19,7 +19,7 @@ namespace HTMLReportExporter
 		private String m_TaskBaseIndent = "";
 		private bool m_StrikeThruDone = true;
 
-		private const int ContentPadding = 0/*40*/;
+		private const int ContentPadding = 40;
 
 		// -------------------------------------------------------------
 
@@ -132,7 +132,6 @@ namespace HTMLReportExporter
 			html.WriteLine("body { line-height: normal; margin: 0; }");
 			html.WriteLine("table { border-collapse: collapse; }");
 			html.WriteLine(".page {	page-break-after: always; }");
-			//html.WriteLine(".avoid { page-break-inside: avoid; margin: 4px 0 4px 0; }");
 
 			Header.WriteStyles(html);
 			Footer.WriteStyles(html);
@@ -183,7 +182,7 @@ namespace HTMLReportExporter
 			html.RenderBeginTag(HtmlTextWriterTag.Tbody);
 			html.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-			html.AddAttribute("style", "padding:15mm");
+			html.AddAttribute("style", String.Format("padding-left:{0}px; padding-right:{1}px;", ContentPadding, ContentPadding));
 			html.RenderBeginTag(HtmlTextWriterTag.Td);
 
 			html.AddAttribute("class", "page");

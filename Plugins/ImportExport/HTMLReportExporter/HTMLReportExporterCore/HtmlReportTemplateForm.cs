@@ -121,10 +121,8 @@ namespace HTMLReportExporter
 		private void InitialiseToolbar()
 		{
 			m_TBRenderer = new UIThemeToolbarRenderer();
-
 			m_TBRenderer.SetUITheme(new UITheme());
 			m_TBRenderer.EnableDrawRowDividers(true);
-			//m_TBRenderer.EnableDrawBorders(this.Toolbar, false, false, false, true);
 
 			this.Toolbar.Renderer = m_TBRenderer;
 
@@ -273,15 +271,24 @@ namespace HTMLReportExporter
 			}
 		}
 
-		protected override void OnClosing(CancelEventArgs e)
+		public new DialogResult ShowDialog()
 		{
-			base.OnClosing(e);
+			var result = base.ShowDialog();
 
-			if (!e.Cancel)
+			switch (result)
 			{
-				CheckSaveTemplate(false);
-				m_Prefs.GetProfileString(m_PrefsKey, "LastOpenTemplate", m_TemplateFilePath);
+				case DialogResult.Cancel:
+					break;
+
+				case DialogResult.OK:
+					CheckSaveTemplate(false);
+					break;
 			}
+
+			// Always
+			m_Prefs.WriteProfileString(m_PrefsKey, "LastOpenTemplate", m_TemplateFilePath);
+
+			return result;
 		}
 
 		private void CheckRefreshPreview()
