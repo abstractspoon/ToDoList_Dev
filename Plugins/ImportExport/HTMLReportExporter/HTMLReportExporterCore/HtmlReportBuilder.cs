@@ -137,14 +137,15 @@ namespace HTMLReportExporter
 			Footer.WriteStyles(html);
 			Title.WriteStyles(html);
 
+			// Print styles
 			html.WriteLine("@page { margin: 0; }");
-
-			html.WriteLine("@media print { ");
+			html.WriteLine("@media print ");
+			html.WriteLine("{ "); // open
+			html.WriteLine(".title-page { border-bottom: none; } ");
 			html.WriteLine("thead { display: table-header-group; } ");
 			html.WriteLine("tfoot { display: table-footer-group; } ");
-			html.WriteLine(".title-page { border-bottom: none; } ");
 			html.WriteLine("tr { page-break-inside: avoid !important; margin: 4px 0 4px 0; } ");
-			html.WriteLine(" }");
+			html.WriteLine(" }"); // close
 
 			html.RenderEndTag(); // Style
 			html.WriteLine();
@@ -296,7 +297,7 @@ namespace HTMLReportExporter
 				html.WriteLine(".page-footer { position: fixed;	bottom: 0; width: 100%; }");
 
 				if (WantDivider)
-					html.Write(".page-footer { border-top: 1px solid black; }");
+					html.WriteLine(".page-footer { border-top: 1px solid black; }");
 
 				if (BackColor != Color.Transparent)
 					html.WriteLine(String.Format(".page-footer {{ background: {0}; }}", BackColorHtml));
