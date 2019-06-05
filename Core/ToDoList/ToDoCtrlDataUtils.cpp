@@ -3857,8 +3857,8 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 	BOOL bTitleOnly = filter.mapAttribs.HasOnly(TDCA_TASKNAME);
 	BOOL bTitleCommentsOnly = (!bTitleOnly && bParent && filter.HasFlag(TDCGTF_PARENTTITLECOMMENTSONLY));
 
-	BOOL bTextComments = filter.mapAttribs.Has(TDCA_COMMENTS);
-	BOOL bHtmlComments = filter.mapAttribs.Has(TDCA_HTMLCOMMENTS);
+	BOOL bTextComments = filter.WantAttribute(TDCA_COMMENTS);
+	BOOL bHtmlComments = filter.WantAttribute(TDCA_HTMLCOMMENTS);
 	BOOL bTransform = filter.HasFlag(TDCGTF_TRANSFORM);
 
 	// attributes

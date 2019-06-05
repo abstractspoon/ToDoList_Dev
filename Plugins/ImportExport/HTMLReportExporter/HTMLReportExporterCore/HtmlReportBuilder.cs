@@ -577,7 +577,15 @@ namespace HTMLReportExporter
 					var text = m_TaskHtml;
 
 					foreach (var attrib in Attributes)
-						text = text.Replace(attrib.PlaceHolder, task.GetAttribute(attrib.Id, true, true));
+					{
+						var attribVal = task.GetAttribute(attrib.Id, true, true);
+
+						// Special case
+						if ((attrib.Id == Task.Attribute.HtmlComments) && String.IsNullOrWhiteSpace(attribVal))
+							attribVal = task.GetComments();
+
+						text = text.Replace(attrib.PlaceHolder, attribVal);
+					}
 
 					html.WriteLine(text);
 				}
