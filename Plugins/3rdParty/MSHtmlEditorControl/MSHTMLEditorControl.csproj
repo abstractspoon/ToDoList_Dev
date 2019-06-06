@@ -130,8 +130,20 @@
     <Compile Include="Forms\FontAttributeForm.Designer.cs">
       <DependentUpon>FontAttributeForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\TableCellPropertyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TableCellPropertyForm.Designer.cs">
+      <DependentUpon>TableCellPropertyForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\TablePropertyForm.Designer.cs">
       <DependentUpon>TablePropertyForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TableRowPropertyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TableRowPropertyForm.Designer.cs">
+      <DependentUpon>TableRowPropertyForm.cs</DependentUpon>
     </Compile>
     <Compile Include="HtmlEditorControl.Designer.cs">
       <DependentUpon>HtmlEditorControl.cs</DependentUpon>
@@ -194,6 +206,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FontAttributeForm.resx">
       <DependentUpon>FontAttributeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TableCellPropertyForm.resx">
+      <DependentUpon>TableCellPropertyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TableRowPropertyForm.resx">
+      <DependentUpon>TableRowPropertyForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="HtmlEditorControl.resx">
       <DependentUpon>HtmlEditorControl.cs</DependentUpon>
