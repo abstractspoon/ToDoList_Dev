@@ -3545,14 +3545,23 @@ namespace MSDN.Html.Editor
         } //ProcessTable
 
 
-        /// <summary>
-        /// Method to determine if the current selection is a table
-        /// If found will return the table element
-        /// </summary>
-        private void GetTableElement(out mshtmlTable table, out mshtmlTableRow row)
+		/// <summary>
+		/// Method to determine if the current selection is a table
+		/// If found will return the table element
+		/// </summary>
+		private void GetTableElement(out mshtmlTable table, out mshtmlTableRow row)
+		{
+			mshtmlTableCell unused = null;
+
+			GetTableElement(out table, out row, out unused);
+		}
+		
+		private void GetTableElement(out mshtmlTable table, out mshtmlTableRow row, out mshtmlTableCell cell)
         {
             table = null;
             row = null;
+			cell = null;
+
             mshtmlTextRange range = GetTextRange();
 
             try
@@ -3563,22 +3572,27 @@ namespace MSDN.Html.Editor
                 if (table == null && range != null)
                 {
                     mshtmlElement element = (mshtmlElement)range.parentElement();
+
                     // parse up the tree until the table element is found
                     while (element != null && table == null)
                     {
-                        element = (mshtmlElement)element.parentElement;
-                        // extract the Table properties
-                        if (element is mshtmlTable)
+                        if (element is mshtmlTableCell)
                         {
-                            table = (mshtmlTable)element;
+                            cell = (mshtmlTableCell)element;
                         }
-                        // extract the Row  properties
-                        if (element is mshtmlTableRow)
+                        else if (element is mshtmlTableRow)
                         {
                             row = (mshtmlTableRow)element;
                         }
-                    }
-                }
+                        else if (element is mshtmlTable)
+                        {
+                            table = (mshtmlTable)element;
+							break;
+                        }
+
+						element = (mshtmlElement)element.parentElement;
+					}
+				}
             }
             catch (Exception)
             {
@@ -3596,8 +3610,9 @@ namespace MSDN.Html.Editor
         {
             // define the table and row elements and obtain there values
             mshtmlTable table = null;
-            mshtmlTableRow row = null;
-            GetTableElement(out table, out row);
+            mshtmlTableRow unused = null;
+
+            GetTableElement(out table, out unused);
 
             // return the defined table element
             return table;
