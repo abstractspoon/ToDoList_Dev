@@ -1,6 +1,7 @@
 #region Using directives
 
 using System;
+using System.Drawing;
 
 #endregion
 
@@ -12,7 +13,7 @@ namespace MSDN.Html.Editor
     /// Html Defaults are based on FrontPage default table
     /// </summary>
     [Serializable]
-    public struct HtmlTableProperty
+    public class HtmlTableProperty
     {
         // properties defined for the table
         public string					CaptionText;
@@ -64,4 +65,56 @@ namespace MSDN.Html.Editor
 
     } //HtmlTableProperty
     
+    /// <summary>
+    /// Struct used to define a Html Table row
+    /// Html Defaults are based on FrontPage default table
+    /// </summary>
+    [Serializable]
+    public class HtmlRowProperty
+    {
+        // properties defined for the table
+        public HorizontalAlignOption	HorzAlignment;
+        public VerticalAlignOption		VertAlignment;
+        public Color					BorderColor;
+
+        /// <summary>
+        /// Constructor defining a base row with default attributes
+        /// </summary>
+        public HtmlRowProperty()
+        {
+            HorzAlignment = HorizontalAlignOption.Default;
+            VertAlignment = VerticalAlignOption.Default;
+			BorderColor = Color.Empty;
+        }
+
+    } //HtmlRowProperty
+    
+    /// <summary>
+    /// Struct used to define a Html Table cell
+    /// Html Defaults are based on FrontPage default table
+    /// </summary>
+    [Serializable]
+    public class HtmlCellProperty
+    {
+        // properties defined for the table
+        public HorizontalAlignOption	HorzAlignment;
+        public VerticalAlignOption		VertAlignment;
+        public Color					BorderColor;
+		public int						ColSpan, RowSpan;
+		public bool						NoWrap;
+
+		/// <summary>
+		/// Constructor defining a base cell with default attributes
+		/// </summary>
+		public HtmlCellProperty()
+		{
+			HorzAlignment = HorizontalAlignOption.Default;
+			VertAlignment = VerticalAlignOption.Default;
+			BorderColor = Color.Empty;
+			ColSpan = 1;
+			RowSpan = 1;
+			NoWrap = false;
+		}
+	} //HtmlCellProperty
+
 }
