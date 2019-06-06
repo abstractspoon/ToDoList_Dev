@@ -142,6 +142,10 @@
 			this.contextInsertText = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertHtml = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertTable = new System.Windows.Forms.ToolStripMenuItem();
+			this.contextTableRowModify = new System.Windows.Forms.ToolStripMenuItem();
+			this.contextTableCellModify = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator22 = new System.Windows.Forms.ToolStripSeparator();
+			this.toolStripSeparator23 = new System.Windows.Forms.ToolStripSeparator();
 			this.browserPanel.SuspendLayout();
 			this.toolstripEditor.SuspendLayout();
 			this.contextEditor.SuspendLayout();
@@ -557,8 +561,12 @@
 			// 
 			this.contextTable.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.contextTableModify,
+            this.toolStripSeparator22,
             this.contextTableInsertRow,
-            this.contextTableDeleteRow});
+            this.contextTableDeleteRow,
+            this.toolStripSeparator23,
+            this.contextTableRowModify,
+            this.contextTableCellModify});
 			resources.ApplyResources(this.contextTable, "contextTable");
 			this.contextTable.Name = "contextTable";
 			// 
@@ -1089,6 +1097,30 @@
 			this.contextInsertTable.Tag = "InsertTable";
 			this.contextInsertTable.Click += new System.EventHandler(this.contextEditorClick);
 			// 
+			// contextTableRowModify
+			// 
+			this.contextTableRowModify.Name = "contextTableRowModify";
+			resources.ApplyResources(this.contextTableRowModify, "contextTableRowModify");
+			this.contextTableRowModify.Tag = "TableRowModify";
+			this.contextTableRowModify.Click += new System.EventHandler(this.TableRowModifyPrompt);
+			// 
+			// contextTableCellModify
+			// 
+			this.contextTableCellModify.Name = "contextTableCellModify";
+			resources.ApplyResources(this.contextTableCellModify, "contextTableCellModify");
+			this.contextTableCellModify.Tag = "TableCellModify";
+			this.contextTableCellModify.Click += new System.EventHandler(this.TableCellModifyPrompt);
+			// 
+			// toolStripSeparator22
+			// 
+			this.toolStripSeparator22.Name = "toolStripSeparator22";
+			resources.ApplyResources(this.toolStripSeparator22, "toolStripSeparator22");
+			// 
+			// toolStripSeparator23
+			// 
+			this.toolStripSeparator23.Name = "toolStripSeparator23";
+			resources.ApplyResources(this.toolStripSeparator23, "toolStripSeparator23");
+			// 
 			// HtmlEditorControl
 			// 
 			this.Controls.Add(this.toolstripEditor);
@@ -1219,5 +1251,9 @@
 		private System.Windows.Forms.ToolStripButton toolstripDocumentPrint;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
 		private System.Windows.Forms.ToolStripButton toolstripDocumentHelp;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator22;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator23;
+		private System.Windows.Forms.ToolStripMenuItem contextTableRowModify;
+		private System.Windows.Forms.ToolStripMenuItem contextTableCellModify;
 	}
 }

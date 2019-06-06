@@ -1,4 +1,4 @@
-﻿namespace MSDN.Html.Editor.Forms
+﻿namespace MSDN.Html.Editor
 {
 	partial class TableCellPropertyForm
 	{

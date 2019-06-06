@@ -281,7 +281,7 @@ namespace MSDN.Html.Editor
     /// Html Defaults are based on FrontPage default table
     /// </summary>
     [Serializable]
-    public class HtmlRowProperty
+    public class HtmlTableRowProperty
     {
         // properties defined for the table
         public HorizontalAlignOption	HorzAlignment;
@@ -291,14 +291,14 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Constructor defining a base row with default attributes
         /// </summary>
-        public HtmlRowProperty()
+        public HtmlTableRowProperty()
         {
             HorzAlignment = HorizontalAlignOption.Default;
             VertAlignment = VerticalAlignOption.Default;
 			BackColor = Color.Empty;
         }
 
-		public HtmlRowProperty(mshtml.IHTMLTableRow row) : this()
+		public HtmlTableRowProperty(mshtml.IHTMLTableRow row) : this()
 		{
 			Set(row);
 		}
@@ -348,7 +348,7 @@ namespace MSDN.Html.Editor
 	/// Html Defaults are based on FrontPage default table
 	/// </summary>
 	[Serializable]
-    public class HtmlCellProperty
+    public class HtmlTableCellProperty
     {
         // properties defined for the table
         public HorizontalAlignOption	HorzAlignment;
@@ -360,7 +360,7 @@ namespace MSDN.Html.Editor
 		/// <summary>
 		/// Constructor defining a base cell with default attributes
 		/// </summary>
-		public HtmlCellProperty()
+		public HtmlTableCellProperty()
 		{
 			HorzAlignment = HorizontalAlignOption.Default;
 			VertAlignment = VerticalAlignOption.Default;
@@ -371,7 +371,7 @@ namespace MSDN.Html.Editor
 			NoWrap = false;
 		}
 
-		public HtmlCellProperty(mshtml.IHTMLTableCell cell) : this()
+		public HtmlTableCellProperty(mshtml.IHTMLTableCell cell) : this()
 		{
 			Set(cell);
 		}

@@ -117,17 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="editorWebBrowser.Location" type="System.Drawing.Point, System.Drawing">
-    <value>-1, -1</value>
-  </data>
-  <data name="editorWebBrowser.Size" type="System.Drawing.Size, System.Drawing">
-    <value>675, 194</value>
-  </data>
-  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="editorWebBrowser.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
-  </data>
   <data name="&gt;&gt;editorWebBrowser.Name" xml:space="preserve">
     <value>editorWebBrowser</value>
   </data>
@@ -144,12 +133,14 @@
   <data name="browserPanel.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Top</value>
   </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="browserPanel.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
   <data name="browserPanel.Size" type="System.Drawing.Size, System.Drawing">
     <value>675, 194</value>
   </data>
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="browserPanel.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
   </data>
@@ -165,11 +156,53 @@
   <data name="&gt;&gt;browserPanel.ZOrder" xml:space="preserve">
     <value>2</value>
   </data>
+  <data name="editorWebBrowser.Location" type="System.Drawing.Point, System.Drawing">
+    <value>-1, -1</value>
+  </data>
+  <data name="editorWebBrowser.Size" type="System.Drawing.Size, System.Drawing">
+    <value>675, 194</value>
+  </data>
+  <data name="editorWebBrowser.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;editorWebBrowser.Name" xml:space="preserve">
+    <value>editorWebBrowser</value>
+  </data>
+  <data name="&gt;&gt;editorWebBrowser.Type" xml:space="preserve">
+    <value>System.Windows.Forms.WebBrowser, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;editorWebBrowser.Parent" xml:space="preserve">
+    <value>browserPanel</value>
+  </data>
+  <data name="&gt;&gt;editorWebBrowser.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
   <metadata name="toolstripEditor.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
   <data name="toolstripEditor.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Bottom</value>
+  </data>
+  <data name="toolstripEditor.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 197</value>
+  </data>
+  <data name="toolstripEditor.Size" type="System.Drawing.Size, System.Drawing">
+    <value>675, 46</value>
+  </data>
+  <data name="toolstripEditor.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;toolstripEditor.Name" xml:space="preserve">
+    <value>toolstripEditor</value>
+  </data>
+  <data name="&gt;&gt;toolstripEditor.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolstripEditor.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;toolstripEditor.ZOrder" xml:space="preserve">
+    <value>1</value>
   </data>
   <data name="toolstripEnableEditing.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
@@ -524,27 +557,6 @@
   <data name="toolstripDocumentHelp.Text" xml:space="preserve">
     <value>He&amp;lp</value>
   </data>
-  <data name="toolstripEditor.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 197</value>
-  </data>
-  <data name="toolstripEditor.Size" type="System.Drawing.Size, System.Drawing">
-    <value>675, 46</value>
-  </data>
-  <data name="toolstripEditor.TabIndex" type="System.Int32, mscorlib">
-    <value>2</value>
-  </data>
-  <data name="&gt;&gt;toolstripEditor.Name" xml:space="preserve">
-    <value>toolstripEditor</value>
-  </data>
-  <data name="&gt;&gt;toolstripEditor.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolstripEditor.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;toolstripEditor.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
   <metadata name="contextEditor.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>131, 12</value>
   </metadata>
@@ -552,22 +564,40 @@
     <value>Magenta</value>
   </data>
   <data name="contextTableModify.Size" type="System.Drawing.Size, System.Drawing">
-    <value>133, 22</value>
+    <value>158, 22</value>
   </data>
   <data name="contextTableModify.Text" xml:space="preserve">
-    <value>Properties</value>
+    <value>Table Properties</value>
+  </data>
+  <data name="toolStripSeparator22.Size" type="System.Drawing.Size, System.Drawing">
+    <value>155, 6</value>
   </data>
   <data name="contextTableInsertRow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>133, 22</value>
+    <value>158, 22</value>
   </data>
   <data name="contextTableInsertRow.Text" xml:space="preserve">
     <value>Insert Row</value>
   </data>
   <data name="contextTableDeleteRow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>133, 22</value>
+    <value>158, 22</value>
   </data>
   <data name="contextTableDeleteRow.Text" xml:space="preserve">
     <value>Delete Row</value>
+  </data>
+  <data name="toolStripSeparator23.Size" type="System.Drawing.Size, System.Drawing">
+    <value>155, 6</value>
+  </data>
+  <data name="contextTableRowModify.Size" type="System.Drawing.Size, System.Drawing">
+    <value>158, 22</value>
+  </data>
+  <data name="contextTableRowModify.Text" xml:space="preserve">
+    <value>Row Properties</value>
+  </data>
+  <data name="contextTableCellModify.Size" type="System.Drawing.Size, System.Drawing">
+    <value>158, 22</value>
+  </data>
+  <data name="contextTableCellModify.Text" xml:space="preserve">
+    <value>Cell Properties</value>
   </data>
   <data name="contextTable.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
@@ -577,6 +607,57 @@
   </data>
   <data name="contextTable.Text" xml:space="preserve">
     <value>Table</value>
+  </data>
+  <data name="contextEdit.Size" type="System.Drawing.Size, System.Drawing">
+    <value>127, 22</value>
+  </data>
+  <data name="contextEdit.Text" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="contextDocument.Size" type="System.Drawing.Size, System.Drawing">
+    <value>127, 22</value>
+  </data>
+  <data name="contextDocument.Text" xml:space="preserve">
+    <value>Document</value>
+  </data>
+  <data name="toolStripSeparator7.Size" type="System.Drawing.Size, System.Drawing">
+    <value>124, 6</value>
+  </data>
+  <data name="contextFormat.Size" type="System.Drawing.Size, System.Drawing">
+    <value>127, 22</value>
+  </data>
+  <data name="contextFormat.Text" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="contextJustify.Size" type="System.Drawing.Size, System.Drawing">
+    <value>127, 22</value>
+  </data>
+  <data name="contextJustify.Text" xml:space="preserve">
+    <value>Justify</value>
+  </data>
+  <data name="contextFormatting.Size" type="System.Drawing.Size, System.Drawing">
+    <value>127, 22</value>
+  </data>
+  <data name="contextFormatting.Text" xml:space="preserve">
+    <value>Formatting</value>
+  </data>
+  <data name="toolStripSeparator8.Size" type="System.Drawing.Size, System.Drawing">
+    <value>124, 6</value>
+  </data>
+  <data name="contextInsert.Size" type="System.Drawing.Size, System.Drawing">
+    <value>127, 22</value>
+  </data>
+  <data name="contextInsert.Text" xml:space="preserve">
+    <value>Insert</value>
+  </data>
+  <data name="contextEditor.Size" type="System.Drawing.Size, System.Drawing">
+    <value>128, 192</value>
+  </data>
+  <data name="&gt;&gt;contextEditor.Name" xml:space="preserve">
+    <value>contextEditor</value>
+  </data>
+  <data name="&gt;&gt;contextEditor.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="contextEditUndo.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
@@ -686,12 +767,6 @@
   <data name="contextEditDelete.Text" xml:space="preserve">
     <value>Delete</value>
   </data>
-  <data name="contextEdit.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
-  </data>
-  <data name="contextEdit.Text" xml:space="preserve">
-    <value>Edit</value>
-  </data>
   <data name="contextDocumentOpen.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
@@ -748,15 +823,6 @@
   </data>
   <data name="contextDocumentOverwrite.Text" xml:space="preserve">
     <value>Overwrite</value>
-  </data>
-  <data name="contextDocument.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
-  </data>
-  <data name="contextDocument.Text" xml:space="preserve">
-    <value>Document</value>
-  </data>
-  <data name="toolStripSeparator7.Size" type="System.Drawing.Size, System.Drawing">
-    <value>124, 6</value>
   </data>
   <data name="contextFormatFontDialog.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
@@ -908,12 +974,6 @@
   <data name="contextFormatListUnordered.Text" xml:space="preserve">
     <value>Bullet List</value>
   </data>
-  <data name="contextFormat.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
-  </data>
-  <data name="contextFormat.Text" xml:space="preserve">
-    <value>Format</value>
-  </data>
   <data name="contextJustifyLeft.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
@@ -949,12 +1009,6 @@
   </data>
   <data name="contextJustifyRight.Text" xml:space="preserve">
     <value>Right</value>
-  </data>
-  <data name="contextJustify.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
-  </data>
-  <data name="contextJustify.Text" xml:space="preserve">
-    <value>Justify</value>
   </data>
   <data name="contextFormattingNormal.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
@@ -1000,15 +1054,6 @@
   </data>
   <data name="contextFormattingFormatted.Text" xml:space="preserve">
     <value>Formatted</value>
-  </data>
-  <data name="contextFormatting.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
-  </data>
-  <data name="contextFormatting.Text" xml:space="preserve">
-    <value>Formatting</value>
-  </data>
-  <data name="toolStripSeparator8.Size" type="System.Drawing.Size, System.Drawing">
-    <value>124, 6</value>
   </data>
   <data name="contextInsertLine.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
@@ -1060,21 +1105,6 @@
   </data>
   <data name="contextInsertTable.Text" xml:space="preserve">
     <value>Table</value>
-  </data>
-  <data name="contextInsert.Size" type="System.Drawing.Size, System.Drawing">
-    <value>127, 22</value>
-  </data>
-  <data name="contextInsert.Text" xml:space="preserve">
-    <value>Insert</value>
-  </data>
-  <data name="contextEditor.Size" type="System.Drawing.Size, System.Drawing">
-    <value>128, 192</value>
-  </data>
-  <data name="&gt;&gt;contextEditor.Name" xml:space="preserve">
-    <value>contextEditor</value>
-  </data>
-  <data name="&gt;&gt;contextEditor.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -1744,6 +1774,30 @@
   </data>
   <data name="&gt;&gt;contextInsertTable.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextTableRowModify.Name" xml:space="preserve">
+    <value>contextTableRowModify</value>
+  </data>
+  <data name="&gt;&gt;contextTableRowModify.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;contextTableCellModify.Name" xml:space="preserve">
+    <value>contextTableCellModify</value>
+  </data>
+  <data name="&gt;&gt;contextTableCellModify.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator22.Name" xml:space="preserve">
+    <value>toolStripSeparator22</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator22.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator23.Name" xml:space="preserve">
+    <value>toolStripSeparator23</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator23.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>HtmlEditorControl</value>

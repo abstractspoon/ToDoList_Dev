@@ -415,14 +415,7 @@ namespace MSDN.Html.Editor
             if (!editorWebBrowser.IsWebBrowserContextMenuEnabled)
             {
                 // should disable inappropriate commands
-                if (IsParentTable())
-                {
-                    this.contextTable.Visible = true;
-                }
-                else
-                {
-                    this.contextTable.Visible = false;
-                }
+                this.contextTable.Visible = IsParentTable();
 
                 // display the text processing context menu
                 this.contextEditor.Show(this.editorWebBrowser, e.MousePosition);
@@ -3181,7 +3174,7 @@ namespace MSDN.Html.Editor
         public bool TableModify(HtmlTableProperty tableProperties)
         {
             // define the Html Table element
-            mshtmlTable table = GetTableElement();
+            mshtmlTable table = GetSelectedTable();
 
             // if a table has been selected then process
             if (table != null)
@@ -3216,7 +3209,7 @@ namespace MSDN.Html.Editor
         public bool TableModifyPrompt()
         {
             // define the Html Table element
-            mshtmlTable table = GetTableElement();
+            mshtmlTable table = GetSelectedTable();
 
             // if a table has been selected then process
             if (table != null)
@@ -3232,16 +3225,59 @@ namespace MSDN.Html.Editor
         } //TableModifyPrompt
 
 
-        /// <summary>
-        /// Method to insert a new row into the table
-        /// Based on the current user row and insertion after
-        /// </summary>
-        public void TableInsertRow()
+		private void TableRowModifyPrompt(object sender, EventArgs e)
+		{
+			var row = GetSelectedTableRow();
+
+			if (row == null)
+				return;
+
+			using (TableRowPropertyForm dialog = new TableRowPropertyForm())
+			{
+				// set the dialog properties
+				dialog.RowProperties = new HtmlTableRowProperty(row);
+				PreShowDialog(dialog);
+
+				if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+				{
+					PostShowDialog(dialog);
+					dialog.RowProperties.Get(ref row);
+				}
+			}
+
+		}
+
+
+		private void TableCellModifyPrompt(object sender, EventArgs e)
+		{
+			var cell = GetSelectedTableCell();
+
+			if (cell == null)
+				return;
+
+			using (TableCellPropertyForm dialog = new TableCellPropertyForm())
+			{
+				// set the dialog properties
+				dialog.CellProperties = new HtmlTableCellProperty(cell);
+				PreShowDialog(dialog);
+
+				if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+				{
+					PostShowDialog(dialog);
+					dialog.CellProperties.Get(ref cell);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Method to insert a new row into the table
+		/// Based on the current user row and insertion after
+		/// </summary>
+		public void TableInsertRow()
         {
             // see if a table selected or insertion point inside a table
-            mshtmlTable table = null;
-            mshtmlTableRow row = null;
-            GetTableElement(out table, out row);
+            mshtmlTable table = GetSelectedTable();
+            mshtmlTableRow row = GetSelectedTableRow();
 
             // process according to table being defined
             if (table != null && row != null)
@@ -3277,13 +3313,12 @@ namespace MSDN.Html.Editor
         /// </summary>
         public void TableDeleteRow()
         {
-            // see if a table selected or insertion point inside a table
-            mshtmlTable table = null;
-            mshtmlTableRow row = null;
-            GetTableElement(out table, out row);
+			// see if a table selected or insertion point inside a table
+			mshtmlTable table = GetSelectedTable();
+			mshtmlTableRow row = GetSelectedTableRow();
 
-            // process according to table being defined
-            if (table != null && row != null)
+			// process according to table being defined
+			if (table != null && row != null)
             {
                 try
                 {
@@ -3312,23 +3347,17 @@ namespace MSDN.Html.Editor
         {
             using (TablePropertyForm dialog = new TablePropertyForm())
             {
-                // define the base set of table properties
-                HtmlTableProperty tableProperties = GetTableProperties(table);
-
-                // set the dialog properties
-                dialog.TableProperties = tableProperties;
+                dialog.TableProperties = GetTableProperties(table);
                 PreShowDialog(dialog);
-                // based on the user interaction perform the neccessary action
+
                 if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
 					PostShowDialog(dialog);
 
-					tableProperties = dialog.TableProperties;
-
                     if (table == null)
-						TableInsert(tableProperties);
+						TableInsert(dialog.TableProperties);
                     else
-						ProcessTable(table, tableProperties);
+						ProcessTable(table, dialog.TableProperties);
 				}
 			}
 
@@ -3445,85 +3474,64 @@ namespace MSDN.Html.Editor
 		/// Method to determine if the current selection is a table
 		/// If found will return the table element
 		/// </summary>
-		private void GetTableElement(out mshtmlTable table, out mshtmlTableRow row)
-		{
-			mshtmlTableCell unused = null;
-
-			GetTableElement(out table, out row, out unused);
-		}
-		
-		private void GetTableElement(out mshtmlTable table, out mshtmlTableRow row, out mshtmlTableCell cell)
+		private mshtmlElement GetSelectedTableElement(Type elementType)
         {
-            table = null;
-            row = null;
-			cell = null;
-
             mshtmlTextRange range = GetTextRange();
 
-            try
-            {
-                // first see if the table element is selected
-                table = GetFirstControl() as mshtmlTable;
-                // if table not selected then parse up the selection tree
-                if (table == null && range != null)
-                {
-                    mshtmlElement element = (mshtmlElement)range.parentElement();
+			if (range == null)
+				return null;
 
-                    // parse up the tree until the table element is found
-                    while (element != null && table == null)
-                    {
-                        if (element is mshtmlTableCell)
-                        {
-                            cell = (mshtmlTableCell)element;
-                        }
-                        else if (element is mshtmlTableRow)
-                        {
-                            row = (mshtmlTableRow)element;
-                        }
-                        else if (element is mshtmlTable)
-                        {
-                            table = (mshtmlTable)element;
-							break;
-                        }
+			var element = GetFirstControl();
 
-						element = (mshtmlElement)element.parentElement;
-					}
-				}
-            }
-            catch (Exception)
-            {
-                // have unknown error so set return to null
-                table = null;
-                row = null;
-            }
+			if (element == null)
+				element = range.parentElement();
+
+			while (element != null)
+			{
+				if (elementType == element.GetType())
+					return element;
+
+				element = element.parentElement;
+			}
+
+			return null;
 
         } //GetTableElement
 
         /// <summary>
         /// Method to return the currently selected Html Table Element
         /// </summary>
-        private mshtmlTable GetTableElement()
+        private mshtmlTable GetSelectedTable()
         {
-            // define the table and row elements and obtain there values
-            mshtmlTable table = null;
-            mshtmlTableRow unused = null;
+			var table = GetSelectedTableElement(typeof(mshtml.HTMLTableClass));
 
-            GetTableElement(out table, out unused);
+			if (table == null)
+				return null;
 
-            // return the defined table element
-            return table;
-        
+			// else
+			return (table as mshtmlTable);
         }
 
-		private HtmlRowProperty GetRowProperties(mshtmlTableRow row)
-		{
-			// define a set of base table properties
-			return new HtmlRowProperty(row);
+        private mshtmlTableRow GetSelectedTableRow()
+        {
+			var row = GetSelectedTableElement(typeof(mshtml.HTMLTableRowClass));
+
+			if (row == null)
+				return null;
+
+			// else
+			return (row as mshtmlTableRow);
 		}
 
-		private HtmlCellProperty GetCellProperties(mshtmlTableCell cell)
-		{
-			return new HtmlCellProperty(cell);
+        private mshtmlTableCell GetSelectedTableCell()
+        {
+			var cell = GetSelectedTableElement(typeof(mshtml.HTMLTableCellClass));
+
+			if (cell == null)
+				return null;
+
+			// else
+			return (cell as mshtmlTableCell);
 		}
 
         /// <summary>
@@ -3533,17 +3541,16 @@ namespace MSDN.Html.Editor
         private HtmlTableProperty GetTableProperties(mshtmlTable table)
         {
             return new HtmlTableProperty(table, true);
-        } //GetTableProperties
+        }
 
-        
-        /// <summary>
-        /// Method to return  a table defintion based on the user selection
-        /// If table selected (or insertion point within table) returns these values
-        /// </summary>
-        public void GetTableDefinition(out HtmlTableProperty table, out bool tableFound)
+		/// <summary>
+		/// Method to return  a table defintion based on the user selection
+		/// If table selected (or insertion point within table) returns these values
+		/// </summary>
+		public void GetTableDefinition(out HtmlTableProperty table, out bool tableFound)
         {
             // see if a table selected or insertion point inside a table
-            mshtmlTable htmlTable = GetTableElement();
+            mshtmlTable htmlTable = GetSelectedTable();
 
             // process according to table being defined
             if (htmlTable == null)
@@ -3565,19 +3572,7 @@ namespace MSDN.Html.Editor
         /// </summary>
         private bool IsParentTable()
         {
-            // see if a table selected or insertion point inside a table
-            mshtmlTable htmlTable = GetTableElement();
-
-            // process according to table being defined
-            if (htmlTable == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-
+			return (GetSelectedTable() != null);
         } //IsParentTable
 
 
@@ -4363,6 +4358,5 @@ namespace MSDN.Html.Editor
 				BrowserPanel.Bounds = new Rectangle(0, toolbarBottom + 1, Bounds.Width, Bounds.Height - toolbarBottom);
 			}
 		}
-
 	} //HtmlEditorControl
 }
