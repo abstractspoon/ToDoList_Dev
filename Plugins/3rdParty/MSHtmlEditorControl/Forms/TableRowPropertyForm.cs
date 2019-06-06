@@ -16,6 +16,15 @@ namespace MSDN.Html.Editor
 		public TableRowPropertyForm()
 		{
 			InitializeComponent();
+
+			// define the dropdown list value
+			this.hAlignComboBox.Items.AddRange(Enum.GetNames(typeof(HorizontalAlignOption)));
+			this.vAlignComboBox.Items.AddRange(Enum.GetNames(typeof(VerticalAlignOption)));
+
+			// ensure default values are listed in the drop down lists
+			this.hAlignComboBox.SelectedIndex = 0;
+			this.vAlignComboBox.SelectedIndex = 0;
+
 		}
 	}
 }
