@@ -3619,6 +3619,73 @@ namespace MSDN.Html.Editor
         
         }
 
+		private HtmlRowProperty GetRowProperties(mshtmlTableRow row)
+		{
+			// define a set of base table properties
+			HtmlRowProperty rowProperties = new HtmlRowProperty();
+
+			// if user has selected a table extract those properties
+			if (row != null)
+			{
+				try
+				{
+                    if (row.align != null)
+						rowProperties.HorzAlignment = (HorizontalAlignOption)TryParseEnum(typeof(HorizontalAlignOption), row.align, HorizontalAlignOption.Default);
+
+					if (row.vAlign != null)
+						rowProperties.VertAlignment = (VerticalAlignOption)TryParseEnum(typeof(VerticalAlignOption), row.vAlign, VerticalAlignOption.Default);
+
+					if (row.bgColor != null)
+						rowProperties.BackColor = ColorTranslator.FromHtml(row.bgColor.ToString());
+				}
+				catch (Exception ex)
+				{
+					// throw an exception indicating table structure change be determined
+					throw new HtmlEditorException("Unable to determine Html Row properties.", "GetRowProperties", ex);
+				}
+			}
+
+			// return the table properties
+			return rowProperties;
+		}
+
+		private HtmlCellProperty GetCellProperties(mshtmlTableCell cell)
+		{
+			// define a set of base table properties
+			HtmlCellProperty cellProperties = new HtmlCellProperty();
+
+			// if user has selected a table extract those properties
+			if (cell != null)
+			{
+				try
+				{
+                    if (cell.align != null)
+						cellProperties.HorzAlignment = (HorizontalAlignOption)TryParseEnum(typeof(HorizontalAlignOption), cell.align, HorizontalAlignOption.Default);
+
+					if (cell.vAlign != null)
+						cellProperties.VertAlignment = (VerticalAlignOption)TryParseEnum(typeof(VerticalAlignOption), cell.vAlign, VerticalAlignOption.Default);
+					
+ 					if (cell.bgColor != null)
+						cellProperties.BackColor = ColorTranslator.FromHtml(cell.bgColor.ToString());
+
+					if (cell.borderColor != null)
+						cellProperties.BorderColor = ColorTranslator.FromHtml(cell.borderColor.ToString());
+
+
+					cellProperties.ColSpan = cell.colSpan;
+					cellProperties.RowSpan = cell.rowSpan;
+					cellProperties.NoWrap = cell.noWrap;
+				}
+				catch (Exception ex)
+				{
+					// throw an exception indicating table structure change be determined
+					throw new HtmlEditorException("Unable to determine Html Cell properties.", "GetCellProperties", ex);
+				}
+			}
+
+			// return the table properties
+			return cellProperties;
+		}
 
         /// <summary>
         /// Given an Html Table Element determines the table properties

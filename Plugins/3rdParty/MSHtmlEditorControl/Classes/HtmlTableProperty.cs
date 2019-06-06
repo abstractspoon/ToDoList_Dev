@@ -75,7 +75,7 @@ namespace MSDN.Html.Editor
         // properties defined for the table
         public HorizontalAlignOption	HorzAlignment;
         public VerticalAlignOption		VertAlignment;
-        public Color					BorderColor;
+        public Color					BackColor;
 
         /// <summary>
         /// Constructor defining a base row with default attributes
@@ -84,7 +84,7 @@ namespace MSDN.Html.Editor
         {
             HorzAlignment = HorizontalAlignOption.Default;
             VertAlignment = VerticalAlignOption.Default;
-			BorderColor = Color.Empty;
+			BackColor = Color.Empty;
         }
 
     } //HtmlRowProperty
@@ -99,7 +99,7 @@ namespace MSDN.Html.Editor
         // properties defined for the table
         public HorizontalAlignOption	HorzAlignment;
         public VerticalAlignOption		VertAlignment;
-        public Color					BorderColor;
+        public Color					BackColor, BorderColor;
 		public int						ColSpan, RowSpan;
 		public bool						NoWrap;
 
@@ -110,6 +110,7 @@ namespace MSDN.Html.Editor
 		{
 			HorzAlignment = HorizontalAlignOption.Default;
 			VertAlignment = VerticalAlignOption.Default;
+			BackColor = Color.Empty;
 			BorderColor = Color.Empty;
 			ColSpan = 1;
 			RowSpan = 1;

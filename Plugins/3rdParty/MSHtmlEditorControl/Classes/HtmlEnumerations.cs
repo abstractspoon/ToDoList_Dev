@@ -82,6 +82,7 @@ namespace MSDN.Html.Editor
     {
         Default,
         Top,
+		Middle,
         Bottom
 
     } //VerticalAlignOption
