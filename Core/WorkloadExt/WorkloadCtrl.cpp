@@ -1971,7 +1971,7 @@ void CWorkloadCtrl::OnDblClickTreeHeaderDivider(NMHDR* pNMHDR, LRESULT* /*pResul
 	int nCol = pHDN->iItem;
 	ASSERT(nCol != -1);
 
-	RecalcTreeColumnWidth(nCol, &dc);
+	RecalcTreeColumnWidth(nCol, &dc, TRUE);
 	SetSplitPos(m_hdrTasks.CalcTotalItemWidth());
 
 	Resize();
@@ -3291,7 +3291,7 @@ void CWorkloadCtrl::ResizeColumnsToFit()
 	int nNumCol = m_hdrTasks.GetItemCount();
 
 	for (int nCol = 1; nCol < nNumCol; nCol++)
-		RecalcTreeColumnWidth(GetTreeColumnID(nCol), &dc);
+		RecalcTreeColumnWidth(GetTreeColumnID(nCol), &dc, TRUE);
 
 	// list columns
 	RecalcListColumnsToFit();
@@ -3396,37 +3396,41 @@ BOOL CWorkloadCtrl::HandleEraseBkgnd(CDC* pDC)
 
 BOOL CWorkloadCtrl::RecalcTreeColumns(BOOL bResize)
 {
-	// Only need recalc non-fixed column widths
-	BOOL bTitle = !m_hdrTasks.IsItemTracked(WLCC_TITLE);
-	BOOL bTaskID = !m_hdrTasks.IsItemTracked(WLCC_TASKID);
-	BOOL bDuration = !m_hdrTasks.IsItemTracked(WLCC_DURATION);
+	CClientDC dc(&m_tcTasks);
 
-	if (bTitle || bTaskID)
+	int nNumCols = m_hdrTasks.GetItemCount();
+	BOOL bChange = FALSE;
+
+	for (int nCol = 0; nCol < nNumCols; nCol++)
 	{
-		CClientDC dc(&m_tcTasks);
+		switch (GetTreeColumnID(nCol))
+		{
+		case WLCC_TITLE:
+		case WLCC_TASKID:
+		case WLCC_DURATION:
+			if (!m_hdrTasks.IsItemTracked(nCol))
+			{
+				int nCurWidth = m_hdrTasks.GetItemWidth(nCol);
 
-		if (bTitle)
-			RecalcTreeColumnWidth(WLCC_TITLE, &dc);
-			
-		if (bTaskID)
-			RecalcTreeColumnWidth(WLCC_TASKID, &dc);
-
-		if (bDuration)
-			RecalcTreeColumnWidth(WLCC_DURATION, &dc);
-		
-		if (bResize)
-			Resize();
-
-		return TRUE;
+				if (RecalcTreeColumnWidth(nCol, &dc, FALSE) != nCurWidth)
+					bChange = TRUE;
+			}
+			break;
+		}
 	}
 
-	return FALSE;
+	if (bChange && bResize)
+		Resize();
+
+	return bChange;
 }
 
-int CWorkloadCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC)
+int CWorkloadCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)
 {
-	int nColWidth = CalcTreeColumnWidth(nCol, pDC);
+	if (!bForce && m_hdrTasks.IsItemTracked(nCol))
+		return m_hdrTasks.GetItemWidth(nCol);
 
+	int nColWidth = CalcTreeColumnWidth(nCol, pDC);
 	m_hdrTasks.SetItemWidth(nCol, nColWidth);
 
 	return nColWidth;

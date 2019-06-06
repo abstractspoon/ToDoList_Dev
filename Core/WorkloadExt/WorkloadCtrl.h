@@ -280,7 +280,7 @@ protected:
 	WLC_LISTCOLUMNTYPE GetListColumnType(int nCol) const;
 
 	BOOL RecalcTreeColumns(BOOL bResize = TRUE);
-	int RecalcTreeColumnWidth(int nCol, CDC* pDC);
+	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
 	int GetLongestVisibleDuration(HTREEITEM hti) const;
 	CString GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNID nColID) const;

@@ -5363,45 +5363,33 @@ void CGanttTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 
 BOOL CGanttTreeListCtrl::UpdateTreeColumnWidths(BOOL bResize)
 {
-	BOOL bNeedRecalc = FALSE;
+	CClientDC dc(&m_tree);
 
-	int nNumCols = m_treeHeader.GetItemCount(), nCol;
+	int nNumCols = m_treeHeader.GetItemCount();
+	BOOL bChange = FALSE;
 
-	for (nCol = 0; ((nCol < nNumCols) && !bNeedRecalc); nCol++)
+	for (int nCol = 0; nCol < nNumCols; nCol++)
 	{
 		switch (GetColumnID(nCol))
 		{
 		case GTLCC_TITLE:
 		case GTLCC_ALLOCTO:
 		case GTLCC_TASKID:
-			bNeedRecalc = !m_treeHeader.IsItemTracked(nCol);
+			if (!m_treeHeader.IsItemTracked(nCol))
+			{
+				int nCurWidth = m_treeHeader.GetItemWidth(nCol);
+
+				if (RecalcTreeColumnWidth(nCol, &dc, FALSE) != nCurWidth)
+					bChange = TRUE;
+			}
 			break;
 		}
 	}
 
-	if (bNeedRecalc)
-	{
-		CClientDC dc(&m_tree);
+	if (bChange && bResize)
+		Resize();
 
-		for (nCol = 0; nCol < nNumCols; nCol++)
-		{
-			switch (GetColumnID(nCol))
-			{
-			case GTLCC_TITLE:
-			case GTLCC_ALLOCTO:
-			case GTLCC_TASKID:
-				RecalcTreeColumnWidth(nCol, &dc, FALSE);
-				break;
-			}
-		}
-		
-		if (bResize)
-			Resize();
-
-		return TRUE;
-	}
-
-	return FALSE;
+	return bChange;
 }
 
 int CGanttTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)
