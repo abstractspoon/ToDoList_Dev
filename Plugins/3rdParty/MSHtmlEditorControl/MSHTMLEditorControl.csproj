@@ -121,6 +121,10 @@
     <Compile Include="Classes\ColorButton.Designer.cs">
       <DependentUpon>ColorButton.cs</DependentUpon>
     </Compile>
+    <Compile Include="Classes\HtmlTableProperty.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Utils.cs" />
     <Compile Include="Forms\EditHtmlForm.Designer.cs">
       <DependentUpon>EditHtmlForm.cs</DependentUpon>
     </Compile>
@@ -182,9 +186,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Classes\HtmlFontProperty.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Classes\HtmlTableProperty.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Classes\IOleCommandTarget.cs">

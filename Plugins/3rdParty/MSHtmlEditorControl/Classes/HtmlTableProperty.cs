@@ -2,17 +2,18 @@
 
 using System;
 using System.Drawing;
+using System.Globalization;
 
 #endregion
 
 namespace MSDN.Html.Editor
 {
 
-    /// <summary>
-    /// Struct used to define a Html Table
-    /// Html Defaults are based on FrontPage default table
-    /// </summary>
-    [Serializable]
+	/// <summary>
+	/// Struct used to define a Html Table
+	/// Html Defaults are based on FrontPage default table
+	/// </summary>
+	[Serializable]
     public class HtmlTableProperty
     {
         // properties defined for the table
@@ -63,8 +64,218 @@ namespace MSDN.Html.Editor
             }
         }
 
-    } //HtmlTableProperty
-    
+		public HtmlTableProperty(mshtml.IHTMLTable table, bool htmlDefaults) : this(htmlDefaults)
+		{
+			Set(table);
+		}
+
+		public bool Set(mshtml.IHTMLTable table)
+		{
+			if (table == null)
+				return false;
+
+			try
+			{
+				// have a table so extract the properties
+				mshtml.IHTMLTableCaption caption = table.caption;
+				// if have a caption persist the values
+				if (caption != null)
+				{
+					this.CaptionText = ((mshtml.IHTMLElement)table.caption).innerText;
+
+					if (caption.align != null)
+						this.CaptionAlignment = (HorizontalAlignOption)Utils.TryParseEnum(typeof(HorizontalAlignOption), caption.align, HorizontalAlignOption.Default);
+
+					if (caption.vAlign != null)
+						this.CaptionLocation = (VerticalAlignOption)Utils.TryParseEnum(typeof(VerticalAlignOption), caption.vAlign, VerticalAlignOption.Default);
+				}
+				// look at the table properties
+				if (table.border != null)
+					this.BorderSize = Utils.TryParseByte(table.border.ToString(), this.BorderSize);
+
+				if (table.align != null)
+					this.TableAlignment = (HorizontalAlignOption)Utils.TryParseEnum(typeof(HorizontalAlignOption), table.align, HorizontalAlignOption.Default);
+
+				// define the table rows and columns
+				int rows = Math.Min(table.rows.length, Byte.MaxValue);
+				int cols = Math.Min(table.cols, Byte.MaxValue);
+				if (cols == 0 && rows > 0)
+				{
+					// cols value not set to get the maxiumn number of cells in the rows
+					foreach (mshtml.IHTMLTableRow tableRow in table.rows)
+					{
+						cols = Math.Max(cols, (int)tableRow.cells.length);
+					}
+				}
+				this.TableRows = (byte)Math.Min(rows, byte.MaxValue);
+				this.TableColumns = (byte)Math.Min(cols, byte.MaxValue);
+
+				// define the remaining table properties
+				if (table.cellPadding != null)
+					this.CellPadding = Utils.TryParseByte(table.cellPadding.ToString(), this.CellPadding);
+
+				if (table.cellSpacing != null)
+					this.CellSpacing = Utils.TryParseByte(table.cellSpacing.ToString(), this.CellSpacing);
+
+				if (table.width != null)
+				{
+					string tableWidth = table.width.ToString();
+
+					if (tableWidth.TrimEnd(null).EndsWith("%"))
+					{
+						this.TableWidth = Utils.TryParseUshort(tableWidth.Remove(tableWidth.LastIndexOf("%"), 1), this.TableWidth);
+						this.TableWidthMeasurement = MeasurementOption.Percent;
+					}
+					else
+					{
+						this.TableWidth = Utils.TryParseUshort(tableWidth, this.TableWidth);
+						this.TableWidthMeasurement = MeasurementOption.Pixel;
+					}
+				}
+				else
+				{
+					this.TableWidth = 0;
+					this.TableWidthMeasurement = MeasurementOption.Pixel;
+				}
+			}
+			catch (Exception ex)
+			{
+				// throw an exception indicating table structure change be determined
+				throw new HtmlEditorException("Unable to determine Html Table properties.", "GetTableProperties", ex);
+			}
+
+			return true;
+		}
+
+		public bool Get(ref mshtml.IHTMLTable table, bool tableCreated)
+		{
+			if (table == null)
+				return false;
+
+			// define the table border, width, cell padding and spacing
+			table.border = this.BorderSize;
+			if (this.TableWidth > 0)
+				table.width = (this.TableWidthMeasurement == MeasurementOption.Pixel) ? string.Format("{0}", this.TableWidth) : string.Format("{0}%", this.TableWidth);
+			else
+				table.width = string.Empty;
+
+			if (this.TableAlignment != HorizontalAlignOption.Default)
+				table.align = this.TableAlignment.ToString().ToLower();
+			else
+				table.align = string.Empty;
+
+			table.cellPadding = this.CellPadding.ToString();
+			table.cellSpacing = this.CellSpacing.ToString();
+
+			// define the given table caption and alignment
+			string caption = this.CaptionText;
+			mshtml.IHTMLTableCaption tableCaption = table.caption;
+
+			if (caption != null && caption != string.Empty)
+			{
+				// ensure table caption correctly defined
+				if (tableCaption == null)
+					tableCaption = table.createCaption();
+
+				((mshtml.IHTMLElement)tableCaption).innerText = caption;
+
+				if (this.CaptionAlignment != HorizontalAlignOption.Default)
+					tableCaption.align = this.CaptionAlignment.ToString().ToLower();
+
+				if (this.CaptionLocation != VerticalAlignOption.Default)
+					tableCaption.vAlign = this.CaptionLocation.ToString().ToLower();
+			}
+			else
+			{
+				// if no caption specified remove the existing one
+				if (tableCaption != null)
+				{
+					// prior to deleting the caption the contents must be cleared
+					((mshtml.IHTMLElement)tableCaption).innerText = null;
+					table.deleteCaption();
+				}
+			}
+
+			// determine the number of rows one has to insert
+			int numberRows, numberCols;
+			if (tableCreated)
+			{
+				numberRows = Math.Max((int)this.TableRows, 1);
+			}
+			else
+			{
+				numberRows = Math.Max((int)this.TableRows, 1) - (int)table.rows.length;
+			}
+
+			// layout the table structure in terms of rows and columns
+			table.cols = (int)this.TableColumns;
+			if (tableCreated)
+			{
+				// this section is an optimization based on creating a new table
+				// the section below works but not as efficiently
+				numberCols = Math.Max((int)this.TableColumns, 1);
+				// insert the appropriate number of rows
+				mshtml.IHTMLTableRow tableRow;
+				for (int idxRow = 0; idxRow < numberRows; idxRow++)
+				{
+					tableRow = (mshtml.IHTMLTableRow)table.insertRow(-1);
+					// add the new columns to the end of each row
+					for (int idxCol = 0; idxCol < numberCols; idxCol++)
+					{
+						tableRow.insertCell(-1);
+					}
+				}
+			}
+			else
+			{
+				// if the number of rows is increasing insert the decrepency
+				if (numberRows > 0)
+				{
+					// insert the appropriate number of rows
+					for (int idxRow = 0; idxRow < numberRows; idxRow++)
+					{
+						table.insertRow(-1);
+					}
+				}
+				else
+				{
+					// remove the extra rows from the table
+					for (int idxRow = numberRows; idxRow < 0; idxRow++)
+					{
+						table.deleteRow(table.rows.length - 1);
+					}
+				}
+				// have the rows constructed
+				// now ensure the columns are correctly defined for each row
+				mshtml.IHTMLElementCollection rows = table.rows;
+				foreach (mshtml.IHTMLTableRow tableRow in rows)
+				{
+					numberCols = Math.Max((int)this.TableColumns, 1) - (int)tableRow.cells.length;
+					if (numberCols > 0)
+					{
+						// add the new column to the end of each row
+						for (int idxCol = 0; idxCol < numberCols; idxCol++)
+						{
+							tableRow.insertCell(-1);
+						}
+					}
+					else
+					{
+						// reduce the number of cells in the given row
+						// remove the extra rows from the table
+						for (int idxCol = numberCols; idxCol < 0; idxCol++)
+						{
+							tableRow.deleteCell(tableRow.cells.length - 1);
+						}
+					}
+				}
+			}
+
+			return true;
+		}
+
+	} //HtmlTableProperty
+
     /// <summary>
     /// Struct used to define a Html Table row
     /// Html Defaults are based on FrontPage default table
@@ -87,13 +298,56 @@ namespace MSDN.Html.Editor
 			BackColor = Color.Empty;
         }
 
-    } //HtmlRowProperty
-    
-    /// <summary>
-    /// Struct used to define a Html Table cell
-    /// Html Defaults are based on FrontPage default table
-    /// </summary>
-    [Serializable]
+		public HtmlRowProperty(mshtml.IHTMLTableRow row) : this()
+		{
+			Set(row);
+		}
+
+		public bool Set(mshtml.IHTMLTableRow row)
+		{
+			// if user has selected a table extract those properties
+			if (row == null)
+				return false;
+
+			try
+			{
+				if (row.align != null)
+					this.HorzAlignment = (HorizontalAlignOption)Utils.TryParseEnum(typeof(HorizontalAlignOption), row.align, HorizontalAlignOption.Default);
+
+				if (row.vAlign != null)
+					this.VertAlignment = (VerticalAlignOption)Utils.TryParseEnum(typeof(VerticalAlignOption), row.vAlign, VerticalAlignOption.Default);
+
+				if (row.bgColor != null)
+					this.BackColor = ColorTranslator.FromHtml(row.bgColor.ToString());
+			}
+			catch (Exception ex)
+			{
+				// throw an exception indicating table structure change be determined
+				throw new HtmlEditorException("Unable to determine Html Row properties.", "GetRowProperties", ex);
+			}
+
+			return true;
+		}
+
+		public bool Get(ref mshtml.IHTMLTableRow row)
+		{
+			if (row == null)
+				return false;
+
+			row.align = this.HorzAlignment.ToString().ToLower();
+			row.vAlign = this.VertAlignment.ToString().ToLower();
+			row.bgColor = ColorTranslator.ToHtml(this.BackColor);
+			
+			return true;
+		}
+
+	} //HtmlRowProperty
+
+	/// <summary>
+	/// Struct used to define a Html Table cell
+	/// Html Defaults are based on FrontPage default table
+	/// </summary>
+	[Serializable]
     public class HtmlCellProperty
     {
         // properties defined for the table
@@ -115,6 +369,61 @@ namespace MSDN.Html.Editor
 			ColSpan = 1;
 			RowSpan = 1;
 			NoWrap = false;
+		}
+
+		public HtmlCellProperty(mshtml.IHTMLTableCell cell) : this()
+		{
+			Set(cell);
+		}
+
+		public bool Set(mshtml.IHTMLTableCell cell)
+		{
+			// if user has selected a table extract those properties
+			if (cell == null)
+				return false;
+
+			try
+			{
+				if (cell.align != null)
+					this.HorzAlignment = (HorizontalAlignOption)Utils.TryParseEnum(typeof(HorizontalAlignOption), cell.align, HorizontalAlignOption.Default);
+
+				if (cell.vAlign != null)
+					this.VertAlignment = (VerticalAlignOption)Utils.TryParseEnum(typeof(VerticalAlignOption), cell.vAlign, VerticalAlignOption.Default);
+
+				if (cell.bgColor != null)
+					this.BackColor = ColorTranslator.FromHtml(cell.bgColor.ToString());
+
+				if (cell.borderColor != null)
+					this.BorderColor = ColorTranslator.FromHtml(cell.borderColor.ToString());
+
+
+				this.ColSpan = cell.colSpan;
+				this.RowSpan = cell.rowSpan;
+				this.NoWrap = cell.noWrap;
+			}
+			catch (Exception ex)
+			{
+				// throw an exception indicating table structure change be determined
+				throw new HtmlEditorException("Unable to determine Html Cell properties.", "GetCellProperties", ex);
+			}
+
+			return true;
+		}
+
+		public bool Get(ref mshtml.IHTMLTableCell cell)
+		{
+			if (cell == null)
+				return false;
+
+			cell.align = this.HorzAlignment.ToString().ToLower();
+			cell.vAlign = this.VertAlignment.ToString().ToLower();
+			cell.colSpan = this.ColSpan;
+			cell.rowSpan = this.RowSpan;
+			cell.noWrap = this.NoWrap;
+			cell.bgColor = ColorTranslator.ToHtml(this.BackColor);
+			cell.borderColor = ColorTranslator.ToHtml(this.BorderColor);
+
+			return true;
 		}
 	} //HtmlCellProperty
 

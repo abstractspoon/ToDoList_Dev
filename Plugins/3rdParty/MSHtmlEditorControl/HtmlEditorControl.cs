@@ -2275,7 +2275,7 @@ namespace MSDN.Html.Editor
                     imageText = image.alt;
 
                     if (image.align != null)
-						imageAlign = (ImageAlignOption)TryParseEnum(typeof(ImageAlignOption), image.align, ImageAlignOption.Left);
+						imageAlign = (ImageAlignOption)Utils.TryParseEnum(typeof(ImageAlignOption), image.align, ImageAlignOption.Left);
                 }
                 else
                 {
@@ -3355,111 +3355,7 @@ namespace MSDN.Html.Editor
                     tableCreated = true;
                 }
 
-                // define the table border, width, cell padding and spacing
-                table.border = tableProperties.BorderSize;
-                if (tableProperties.TableWidth > 0) table.width = (tableProperties.TableWidthMeasurement == MeasurementOption.Pixel) ? string.Format("{0}", tableProperties.TableWidth) : string.Format("{0}%", tableProperties.TableWidth); 
-                else table.width = string.Empty;
-                if (tableProperties.TableAlignment != HorizontalAlignOption.Default) table.align = tableProperties.TableAlignment.ToString().ToLower();
-                else table.align = string.Empty;
-                table.cellPadding = tableProperties.CellPadding.ToString();
-                table.cellSpacing = tableProperties.CellSpacing.ToString();
-
-                // define the given table caption and alignment
-                string caption = tableProperties.CaptionText;
-                mshtmlTableCaption tableCaption = table.caption;
-                if (caption != null && caption != string.Empty)
-                {
-                    // ensure table caption correctly defined
-                    if (tableCaption == null) tableCaption = table.createCaption();
-                    ((mshtmlElement)tableCaption).innerText = caption;
-                    if (tableProperties.CaptionAlignment != HorizontalAlignOption.Default) tableCaption.align = tableProperties.CaptionAlignment.ToString().ToLower();
-                    if (tableProperties.CaptionLocation != VerticalAlignOption.Default) tableCaption.vAlign = tableProperties.CaptionLocation.ToString().ToLower();
-                }
-                else
-                {
-                    // if no caption specified remove the existing one
-                    if (tableCaption != null)
-                    {
-                        // prior to deleting the caption the contents must be cleared
-                        ((mshtmlElement)tableCaption).innerText = null;
-                        table.deleteCaption();
-                    }
-                }
-
-                // determine the number of rows one has to insert
-                int numberRows, numberCols;
-                if (tableCreated)
-                {
-                    numberRows = Math.Max((int)tableProperties.TableRows, 1);
-                }
-                else
-                {
-                    numberRows = Math.Max((int)tableProperties.TableRows, 1) - (int)table.rows.length;
-                }
-
-                // layout the table structure in terms of rows and columns
-                table.cols = (int)tableProperties.TableColumns;
-                if (tableCreated)
-                {
-                    // this section is an optimization based on creating a new table
-                    // the section below works but not as efficiently
-                    numberCols = Math.Max((int)tableProperties.TableColumns, 1);
-                    // insert the appropriate number of rows
-                    mshtmlTableRow tableRow;
-                    for (int idxRow = 0; idxRow < numberRows; idxRow++)
-                    {
-                        tableRow = (mshtmlTableRow)table.insertRow(-1);
-                        // add the new columns to the end of each row
-                        for (int idxCol = 0; idxCol < numberCols; idxCol++)
-                        {
-                            tableRow.insertCell(-1);
-                        }
-                    }
-                }
-                else
-                {
-                    // if the number of rows is increasing insert the decrepency
-                    if (numberRows > 0)
-                    {
-                        // insert the appropriate number of rows
-                        for (int idxRow = 0; idxRow < numberRows; idxRow++)
-                        {
-                            table.insertRow(-1);
-                        }
-                    }
-                    else
-                    {
-                        // remove the extra rows from the table
-                        for (int idxRow = numberRows; idxRow < 0; idxRow++)
-                        {
-                            table.deleteRow(table.rows.length - 1);
-                        }
-                    }
-                    // have the rows constructed
-                    // now ensure the columns are correctly defined for each row
-                    mshtmlElementCollection rows = table.rows;
-                    foreach (mshtmlTableRow tableRow in rows)
-                    {
-                        numberCols = Math.Max((int)tableProperties.TableColumns, 1) - (int)tableRow.cells.length;
-                        if (numberCols > 0)
-                        {
-                            // add the new column to the end of each row
-                            for (int idxCol = 0; idxCol < numberCols; idxCol++)
-                            {
-                                tableRow.insertCell(-1);
-                            }
-                        }
-                        else
-                        {
-                            // reduce the number of cells in the given row
-                            // remove the extra rows from the table
-                            for (int idxCol = numberCols; idxCol < 0; idxCol++)
-                            {
-                                tableRow.deleteCell(tableRow.cells.length - 1);
-                            }				
-                        }
-                    }
-                }
+				tableProperties.Get(ref table, tableCreated);
 
                 // if the table was created then it requires insertion into the DOM
                 // otherwise property changes are sufficient
@@ -3622,69 +3518,12 @@ namespace MSDN.Html.Editor
 		private HtmlRowProperty GetRowProperties(mshtmlTableRow row)
 		{
 			// define a set of base table properties
-			HtmlRowProperty rowProperties = new HtmlRowProperty();
-
-			// if user has selected a table extract those properties
-			if (row != null)
-			{
-				try
-				{
-                    if (row.align != null)
-						rowProperties.HorzAlignment = (HorizontalAlignOption)TryParseEnum(typeof(HorizontalAlignOption), row.align, HorizontalAlignOption.Default);
-
-					if (row.vAlign != null)
-						rowProperties.VertAlignment = (VerticalAlignOption)TryParseEnum(typeof(VerticalAlignOption), row.vAlign, VerticalAlignOption.Default);
-
-					if (row.bgColor != null)
-						rowProperties.BackColor = ColorTranslator.FromHtml(row.bgColor.ToString());
-				}
-				catch (Exception ex)
-				{
-					// throw an exception indicating table structure change be determined
-					throw new HtmlEditorException("Unable to determine Html Row properties.", "GetRowProperties", ex);
-				}
-			}
-
-			// return the table properties
-			return rowProperties;
+			return new HtmlRowProperty(row);
 		}
 
 		private HtmlCellProperty GetCellProperties(mshtmlTableCell cell)
 		{
-			// define a set of base table properties
-			HtmlCellProperty cellProperties = new HtmlCellProperty();
-
-			// if user has selected a table extract those properties
-			if (cell != null)
-			{
-				try
-				{
-                    if (cell.align != null)
-						cellProperties.HorzAlignment = (HorizontalAlignOption)TryParseEnum(typeof(HorizontalAlignOption), cell.align, HorizontalAlignOption.Default);
-
-					if (cell.vAlign != null)
-						cellProperties.VertAlignment = (VerticalAlignOption)TryParseEnum(typeof(VerticalAlignOption), cell.vAlign, VerticalAlignOption.Default);
-					
- 					if (cell.bgColor != null)
-						cellProperties.BackColor = ColorTranslator.FromHtml(cell.bgColor.ToString());
-
-					if (cell.borderColor != null)
-						cellProperties.BorderColor = ColorTranslator.FromHtml(cell.borderColor.ToString());
-
-
-					cellProperties.ColSpan = cell.colSpan;
-					cellProperties.RowSpan = cell.rowSpan;
-					cellProperties.NoWrap = cell.noWrap;
-				}
-				catch (Exception ex)
-				{
-					// throw an exception indicating table structure change be determined
-					throw new HtmlEditorException("Unable to determine Html Cell properties.", "GetCellProperties", ex);
-				}
-			}
-
-			// return the table properties
-			return cellProperties;
+			return new HtmlCellProperty(cell);
 		}
 
         /// <summary>
@@ -3693,72 +3532,7 @@ namespace MSDN.Html.Editor
         /// </summary>
         private HtmlTableProperty GetTableProperties(mshtmlTable table)
         {
-            // define a set of base table properties
-            HtmlTableProperty tableProperties = new HtmlTableProperty(true);
-
-            // if user has selected a table extract those properties
-            if (table != null)
-            {
-                try
-                {
-                    // have a table so extract the properties
-                    mshtmlTableCaption caption = table.caption;
-                    // if have a caption persist the values
-                    if (caption != null)
-                    {
-                        tableProperties.CaptionText = ((mshtmlElement)table.caption).innerText;
-                        if (caption.align != null) tableProperties.CaptionAlignment = (HorizontalAlignOption)TryParseEnum(typeof(HorizontalAlignOption), caption.align, HorizontalAlignOption.Default);
-                        if (caption.vAlign != null) tableProperties.CaptionLocation = (VerticalAlignOption)TryParseEnum(typeof(VerticalAlignOption), caption.vAlign, VerticalAlignOption.Default);
-                    }
-                    // look at the table properties
-                    if (table.border != null) tableProperties.BorderSize = TryParseByte(table.border.ToString(), tableProperties.BorderSize);
-                    if (table.align != null) tableProperties.TableAlignment = (HorizontalAlignOption)TryParseEnum(typeof(HorizontalAlignOption), table.align, HorizontalAlignOption.Default);
-                    // define the table rows and columns
-                    int rows = Math.Min(table.rows.length, Byte.MaxValue);
-                    int cols = Math.Min(table.cols, Byte.MaxValue);
-                    if (cols == 0 && rows > 0)
-                    {
-                        // cols value not set to get the maxiumn number of cells in the rows
-                        foreach (mshtmlTableRow tableRow in table.rows)
-                        {
-                            cols = Math.Max(cols, (int)tableRow.cells.length);
-                        }
-                    }
-                    tableProperties.TableRows = (byte)Math.Min(rows, byte.MaxValue);
-                    tableProperties.TableColumns = (byte)Math.Min(cols, byte.MaxValue);
-                    // define the remaining table properties
-                    if (table.cellPadding != null) tableProperties.CellPadding = TryParseByte(table.cellPadding.ToString(), tableProperties.CellPadding);
-                    if (table.cellSpacing != null) tableProperties.CellSpacing = TryParseByte(table.cellSpacing.ToString(), tableProperties.CellSpacing);
-                    if (table.width != null)
-                    {
-                        string tableWidth = table.width.ToString();
-                        if (tableWidth.TrimEnd(null).EndsWith("%"))
-                        {
-                            tableProperties.TableWidth = TryParseUshort(tableWidth.Remove(tableWidth.LastIndexOf("%"), 1), tableProperties.TableWidth);
-                            tableProperties.TableWidthMeasurement = MeasurementOption.Percent;
-                        }
-                        else
-                        {
-                            tableProperties.TableWidth = TryParseUshort(tableWidth, tableProperties.TableWidth);
-                            tableProperties.TableWidthMeasurement = MeasurementOption.Pixel;
-                        }
-                    }
-                    else
-                    {
-                        tableProperties.TableWidth = 0;
-                        tableProperties.TableWidthMeasurement = MeasurementOption.Pixel;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // throw an exception indicating table structure change be determined
-                    throw new HtmlEditorException("Unable to determine Html Table properties.", "GetTableProperties", ex);
-                }
-            }
-
-            // return the table properties
-            return tableProperties;
-
+            return new HtmlTableProperty(table, true);
         } //GetTableProperties
 
         
@@ -4088,73 +3862,6 @@ namespace MSDN.Html.Editor
 
         #endregion
 
-        #region Utility Functions
-
-        /// <summary>
-        /// Method to perform a parse of a string into a byte number
-        /// </summary>
-        private byte TryParseByte(string stringValue, byte defaultValue)
-        {
-            // define the return type
-            byte result;
-
-            // try the conversion to a double number
-            if (!byte.TryParse(stringValue, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out result))
-            {
-                // default value will be returned
-                result = defaultValue;
-            }
-
-            // return the byte value
-            return result;
-
-        } //TryParseNumber
-
-
-        /// <summary>
-        /// Method to perform a parse of a string into a ushort number
-        /// </summary>
-        private ushort TryParseUshort(string stringValue, ushort defaultValue)
-        {
-            // define the return type
-            ushort result;
-
-            // try the conversion to a double number
-            if (!ushort.TryParse(stringValue, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out result))
-            {
-                // default value will be returned
-                result = defaultValue;
-            }
-
-            // return the ushort value
-            return result;
-
-        } //TryParseUshort
-
-        
-        /// <summary>
-        /// Method to perform a parse of the string into an enum
-        /// </summary>
-        private object TryParseEnum(Type enumType, string stringValue, object defaultValue)
-        {
-            // try the enum parse and return the default 
-            object result = defaultValue;
-            try
-            {
-                // try the enum parse operation
-                result = Enum.Parse(enumType, stringValue, true);
-            }
-            catch (Exception)
-            {
-                // default value will be returned
-                result = defaultValue;
-            }
-
-            // return the enum value
-            return result;
-
-        } //TryParseEnum
-
 
         /// <summary>
         /// Method to ensure dialog resembles the user form characteristics
@@ -4233,10 +3940,6 @@ namespace MSDN.Html.Editor
             
         } //RebaseAnchorUrl
 
-        #endregion
-
-        #region Internal Event Processing
-
         /// <summary>
         /// Control the sizing of the browser control
         /// </summary>
@@ -4288,9 +3991,6 @@ namespace MSDN.Html.Editor
             this.Update();
         } //SetBrowserPanelSize
 
-        #endregion
-
-        #region Toolbar Processing Operations
 
         protected System.Windows.Forms.ToolStrip ToolBar 
         {
@@ -4664,6 +4364,5 @@ namespace MSDN.Html.Editor
 			}
 		}
 
-		#endregion
 	} //HtmlEditorControl
 }
