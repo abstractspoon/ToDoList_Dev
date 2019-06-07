@@ -345,7 +345,7 @@ namespace MSDN.Html.Editor
 				row.vAlign = this.VertAlignment.ToString().ToLower();
 
 			if (this.BackColor == Color.Empty)
-				row.bgColor = null;
+				row.bgColor = "";
 			else
 				row.bgColor = ColorTranslator.ToHtml(this.BackColor);
 			
@@ -406,8 +406,7 @@ namespace MSDN.Html.Editor
 
 				if (cell.borderColor != null)
 					this.BorderColor = ColorTranslator.FromHtml(cell.borderColor.ToString());
-
-
+				
 				this.ColSpan = cell.colSpan;
 				this.RowSpan = cell.rowSpan;
 				this.NoWrap = cell.noWrap;
@@ -437,12 +436,12 @@ namespace MSDN.Html.Editor
 				cell.vAlign = this.VertAlignment.ToString().ToLower();
 
 			if (this.BackColor == Color.Empty)
-				cell.bgColor = null;
+				cell.bgColor = "";
 			else
 				cell.bgColor = ColorTranslator.ToHtml(this.BackColor);
 
 			if (this.BorderColor == Color.Empty)
-				cell.borderColor = null;
+				cell.borderColor = "";
 			else
 				cell.borderColor = ColorTranslator.ToHtml(this.BorderColor);
 

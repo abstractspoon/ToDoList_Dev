@@ -37,6 +37,9 @@ namespace MSDN.Html.Editor
 				_cellProperties.VertAlignment = (VerticalAlignOption)this.vAlignComboBox.SelectedIndex;
 				_cellProperties.BackColor = (this.checkBackColor.Checked ? this.btnBackColor.Color : Color.Empty);
 				_cellProperties.BorderColor = (this.checkBorderColor.Checked ? this.btnBorderColor.Color : Color.Empty);
+				_cellProperties.ColSpan = (int)this.numericColSpan.Value;
+				_cellProperties.RowSpan = (int)this.numericRowSpan.Value;
+				_cellProperties.NoWrap = !this.checkWrapText.Checked;
 
 				return _cellProperties;
 			}
@@ -53,6 +56,9 @@ namespace MSDN.Html.Editor
 				this.checkBorderColor.Checked = (_cellProperties.BorderColor != Color.Empty);
 				this.btnBorderColor.Color = _cellProperties.BorderColor;
 				this.btnBorderColor.Enabled = this.checkBorderColor.Checked;
+				this.numericColSpan.Value = _cellProperties.ColSpan;
+				this.numericRowSpan.Value = _cellProperties.RowSpan;
+				this.checkWrapText.Checked = !_cellProperties.NoWrap;
 			}
 
 		} //_cellProperties

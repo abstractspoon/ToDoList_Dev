@@ -43,6 +43,7 @@
 			this.checkBackColor = new System.Windows.Forms.CheckBox();
 			this.btnBorderColor = new MSDN.Html.Editor.Classes.ColorButton();
 			this.btnBackColor = new MSDN.Html.Editor.Classes.ColorButton();
+			this.checkWrapText = new System.Windows.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericRowSpan)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericColSpan)).BeginInit();
@@ -50,6 +51,7 @@
 			// 
 			// groupBox1
 			// 
+			this.groupBox1.Controls.Add(this.checkWrapText);
 			this.groupBox1.Controls.Add(this.checkBorderColor);
 			this.groupBox1.Controls.Add(this.checkBackColor);
 			this.groupBox1.Controls.Add(this.btnBorderColor);
@@ -64,13 +66,13 @@
 			this.groupBox1.Controls.Add(this.label1);
 			this.groupBox1.Location = new System.Drawing.Point(6, 3);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(271, 201);
+			this.groupBox1.Size = new System.Drawing.Size(271, 206);
 			this.groupBox1.TabIndex = 9;
 			this.groupBox1.TabStop = false;
 			// 
 			// numericRowSpan
 			// 
-			this.numericRowSpan.Location = new System.Drawing.Point(157, 108);
+			this.numericRowSpan.Location = new System.Drawing.Point(157, 95);
 			this.numericRowSpan.Minimum = new decimal(new int[] {
             1,
             0,
@@ -87,7 +89,7 @@
 			// 
 			// numericColSpan
 			// 
-			this.numericColSpan.Location = new System.Drawing.Point(157, 78);
+			this.numericColSpan.Location = new System.Drawing.Point(157, 69);
 			this.numericColSpan.Minimum = new decimal(new int[] {
             1,
             0,
@@ -105,7 +107,7 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(13, 110);
+			this.label6.Location = new System.Drawing.Point(10, 97);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(55, 13);
 			this.label6.TabIndex = 4;
@@ -114,7 +116,7 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(13, 80);
+			this.label5.Location = new System.Drawing.Point(10, 71);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(68, 13);
 			this.label5.TabIndex = 4;
@@ -124,7 +126,7 @@
 			// 
 			this.vAlignComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.vAlignComboBox.FormattingEnabled = true;
-			this.vAlignComboBox.Location = new System.Drawing.Point(157, 47);
+			this.vAlignComboBox.Location = new System.Drawing.Point(157, 42);
 			this.vAlignComboBox.Name = "vAlignComboBox";
 			this.vAlignComboBox.Size = new System.Drawing.Size(104, 21);
 			this.vAlignComboBox.TabIndex = 1;
@@ -141,7 +143,7 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(13, 50);
+			this.label2.Location = new System.Drawing.Point(10, 45);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(90, 13);
 			this.label2.TabIndex = 0;
@@ -150,7 +152,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(13, 20);
+			this.label1.Location = new System.Drawing.Point(10, 20);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(102, 13);
 			this.label1.TabIndex = 0;
@@ -160,7 +162,7 @@
 			// 
 			this.ok.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.ok.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.ok.Location = new System.Drawing.Point(121, 213);
+			this.ok.Location = new System.Drawing.Point(121, 218);
 			this.ok.Name = "ok";
 			this.ok.Size = new System.Drawing.Size(75, 23);
 			this.ok.TabIndex = 8;
@@ -171,7 +173,7 @@
 			// 
 			this.cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cancel.Location = new System.Drawing.Point(202, 213);
+			this.cancel.Location = new System.Drawing.Point(202, 218);
 			this.cancel.Name = "cancel";
 			this.cancel.Size = new System.Drawing.Size(75, 23);
 			this.cancel.TabIndex = 7;
@@ -181,7 +183,7 @@
 			// checkBorderColor
 			// 
 			this.checkBorderColor.AutoSize = true;
-			this.checkBorderColor.Location = new System.Drawing.Point(16, 171);
+			this.checkBorderColor.Location = new System.Drawing.Point(13, 153);
 			this.checkBorderColor.Name = "checkBorderColor";
 			this.checkBorderColor.Size = new System.Drawing.Size(89, 17);
 			this.checkBorderColor.TabIndex = 11;
@@ -192,7 +194,7 @@
 			// checkBackColor
 			// 
 			this.checkBackColor.AutoSize = true;
-			this.checkBackColor.Location = new System.Drawing.Point(16, 140);
+			this.checkBackColor.Location = new System.Drawing.Point(13, 125);
 			this.checkBackColor.Name = "checkBackColor";
 			this.checkBackColor.Size = new System.Drawing.Size(116, 17);
 			this.checkBackColor.TabIndex = 10;
@@ -203,7 +205,7 @@
 			// btnBorderColor
 			// 
 			this.btnBorderColor.Color = System.Drawing.Color.Empty;
-			this.btnBorderColor.Location = new System.Drawing.Point(156, 167);
+			this.btnBorderColor.Location = new System.Drawing.Point(157, 149);
 			this.btnBorderColor.Name = "btnBorderColor";
 			this.btnBorderColor.Size = new System.Drawing.Size(75, 22);
 			this.btnBorderColor.TabIndex = 8;
@@ -214,7 +216,7 @@
 			// btnBackColor
 			// 
 			this.btnBackColor.Color = System.Drawing.Color.Empty;
-			this.btnBackColor.Location = new System.Drawing.Point(156, 136);
+			this.btnBackColor.Location = new System.Drawing.Point(157, 121);
 			this.btnBackColor.Name = "btnBackColor";
 			this.btnBackColor.Size = new System.Drawing.Size(75, 22);
 			this.btnBackColor.TabIndex = 9;
@@ -222,11 +224,21 @@
 			this.btnBackColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.btnBackColor.UseVisualStyleBackColor = true;
 			// 
+			// checkWrapText
+			// 
+			this.checkWrapText.AutoSize = true;
+			this.checkWrapText.Location = new System.Drawing.Point(13, 181);
+			this.checkWrapText.Name = "checkWrapText";
+			this.checkWrapText.Size = new System.Drawing.Size(72, 17);
+			this.checkWrapText.TabIndex = 12;
+			this.checkWrapText.Text = "Wrap text";
+			this.checkWrapText.UseVisualStyleBackColor = true;
+			// 
 			// TableCellPropertyForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(284, 244);
+			this.ClientSize = new System.Drawing.Size(284, 249);
 			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.ok);
 			this.Controls.Add(this.cancel);
@@ -258,5 +270,6 @@
 		private System.Windows.Forms.CheckBox checkBackColor;
 		private Classes.ColorButton btnBorderColor;
 		private Classes.ColorButton btnBackColor;
+		private System.Windows.Forms.CheckBox checkWrapText;
 	}
 }
