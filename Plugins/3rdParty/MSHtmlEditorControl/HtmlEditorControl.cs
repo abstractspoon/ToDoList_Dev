@@ -506,6 +506,9 @@ namespace MSDN.Html.Editor
 
 					rng.moveEnd("character", (wordLen - len));
 					rng.select();
+
+					// Must reset focus else over-typing fails
+					document.focus();
 				}
 			}
 		}
