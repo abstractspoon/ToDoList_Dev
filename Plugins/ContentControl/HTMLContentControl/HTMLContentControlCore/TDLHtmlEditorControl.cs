@@ -119,7 +119,19 @@ namespace HTMLContentControl
 			// Convert size to ems because it gives us greater granularity
 			float ems = Win32.PointsToEms(pointSize);
 
-			BodyFont = new MSDN.Html.Editor.HtmlFontProperty(fontName, ems);
+			var newFont = new MSDN.Html.Editor.HtmlFontProperty(fontName, ems);
+
+			//////////////////////////////////////////////
+			Log.LogText(String.Format("TDLHtmlEditorControl.SetFont({0}, {1})", fontName, pointSize));
+			Log.LogText(String.Format("Win32.PointsToEms({0}) = {1}", pointSize, ems));
+			Log.LogText(String.Format("HtmlFontProperty: {0}", newFont.ToStringEx()));
+			//////////////////////////////////////////////
+
+			BodyFont = newFont;
+
+			//////////////////////////////////////////////
+			Log.LogText("HtmlEditorControl.BodyFont = newFont");
+			//////////////////////////////////////////////
 		}
 
 		private void OnTextChangeTimer(object sender, EventArgs e)

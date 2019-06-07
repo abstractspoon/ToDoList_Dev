@@ -314,15 +314,39 @@ namespace MSDN.Html.Editor
         /// </summary>
         public override string ToString()
         {
-            return string.Format("{0}, {1}", Name, Size);
+            return string.Format("{0}, {1}, {2}", Name, Size, SizeInEms);
 
         } //ToString
 
-        /// <summary>
-        /// Compares two Html Fonts for equality
-        /// Equality opertors not defined (Design Time issue with override of Equals)
-        /// </summary>
-        public static bool IsEqual(HtmlFontProperty font1, HtmlFontProperty font2)
+        public string ToStringEx()
+        {
+			return string.Format(
+				@"Name({0}) 
+				  Size({1})
+				  SizeInEms({2})
+				  Bold({3})
+				  Italic({4})
+				  Underline({5})
+				  Strikeout({6})
+				  Subscript({7})
+				  Superscript({8})",
+				_name,
+				_size,
+				_sizeInEms,
+				_bold,
+				_italic,
+				_underline,
+				_strikeout,
+				_subscript,
+				_superscript);
+
+		} //ToString
+
+		/// <summary>
+		/// Compares two Html Fonts for equality
+		/// Equality opertors not defined (Design Time issue with override of Equals)
+		/// </summary>
+		public static bool IsEqual(HtmlFontProperty font1, HtmlFontProperty font2)
         {
             // assume not equal
             bool equals = false;

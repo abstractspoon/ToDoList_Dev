@@ -49,6 +49,14 @@ namespace Abstractspoon
 
 			// ----------------------------------------------------------------------------
 
+			public ref class Log
+			{
+			public:
+				static void LogText(String^ text);
+
+			};
+
+
 		}
 	}
 }

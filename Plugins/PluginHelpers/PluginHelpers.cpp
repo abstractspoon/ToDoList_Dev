@@ -12,10 +12,6 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-static LPCWSTR PUBLIC_KEY = L"<RSAKeyValue><Modulus>9twJpwt/Ofe58BOdK5Cb8XKGP5bvgxGh3IYkvCqvdzOCH3pi9BvOX+/fsRo/7HFbNmPr3Txu+hBl1JVH9ACXDxm20oKqgl6TzIk33iV6SrbuiZASi1OPAiTmsWBGKTIwrG9KiQ8JGmBotV/v2gRflqKELwiMUOO9W2DlgJ6szq0=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
 class ModuleInitialiser
 {
 public:
@@ -70,3 +66,16 @@ void DialogUtils::SetFont(System::Windows::Forms::Control::ControlCollection^ ct
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+void Log::LogText(String^ text)
+{
+	String^ appFolder = System::IO::Path::GetDirectoryName(System::Reflection::Assembly::GetExecutingAssembly()->Location);
+	String^ logPath = System::IO::Path::Combine(appFolder, "ToDoList.log");
+
+	if (System::IO::File::Exists(logPath))
+	{
+		System::IO::File::AppendAllText(logPath, text + System::Environment::NewLine);
+	}
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
