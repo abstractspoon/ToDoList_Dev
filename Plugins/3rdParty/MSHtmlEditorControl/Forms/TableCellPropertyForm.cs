@@ -11,7 +11,7 @@ namespace MSDN.Html.Editor
 {
 	public partial class TableCellPropertyForm : Form
 	{
-		public HtmlTableCellProperty CellProperties;
+		public HtmlTableCellProperty _cellProperties;
 
 		public TableCellPropertyForm()
 		{
@@ -27,5 +27,45 @@ namespace MSDN.Html.Editor
 
 
 		}
+
+		public HtmlTableCellProperty CellProperties
+		{
+			get
+			{
+				// define the appropriate table caption properties
+				_cellProperties.HorzAlignment = (HorizontalAlignOption)this.hAlignComboBox.SelectedIndex;
+				_cellProperties.VertAlignment = (VerticalAlignOption)this.vAlignComboBox.SelectedIndex;
+				_cellProperties.BackColor = (this.checkBackColor.Checked ? this.btnBackColor.Color : Color.Empty);
+				_cellProperties.BorderColor = (this.checkBorderColor.Checked ? this.btnBorderColor.Color : Color.Empty);
+
+				return _cellProperties;
+			}
+			set
+			{
+				// persist the new values
+				_cellProperties = value;
+
+				this.hAlignComboBox.SelectedIndex = (int)_cellProperties.HorzAlignment;
+				this.vAlignComboBox.SelectedIndex = (int)_cellProperties.VertAlignment;
+				this.checkBackColor.Checked = (_cellProperties.BackColor != Color.Empty);
+				this.btnBackColor.Color = _cellProperties.BackColor;
+				this.btnBackColor.Enabled = this.checkBackColor.Checked;
+				this.checkBorderColor.Checked = (_cellProperties.BorderColor != Color.Empty);
+				this.btnBorderColor.Color = _cellProperties.BorderColor;
+				this.btnBorderColor.Enabled = this.checkBorderColor.Checked;
+			}
+
+		} //_cellProperties
+
+		private void checkBackColor_CheckedChanged(object sender, EventArgs e)
+		{
+			this.btnBackColor.Enabled = this.checkBackColor.Checked;
+		}
+
+		private void checkBorderColor_CheckedChanged(object sender, EventArgs e)
+		{
+			this.btnBorderColor.Enabled = this.checkBorderColor.Checked;
+		}
 	}
+
 }

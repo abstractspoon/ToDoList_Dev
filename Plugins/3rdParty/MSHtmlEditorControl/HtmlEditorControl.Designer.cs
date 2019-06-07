@@ -76,8 +76,12 @@
 			this.contextEditor = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.contextTable = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextTableModify = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator22 = new System.Windows.Forms.ToolStripSeparator();
 			this.contextTableInsertRow = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextTableDeleteRow = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator23 = new System.Windows.Forms.ToolStripSeparator();
+			this.contextTableRowModify = new System.Windows.Forms.ToolStripMenuItem();
+			this.contextTableCellModify = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextEdit = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextEditUndo = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextEditRedo = new System.Windows.Forms.ToolStripMenuItem();
@@ -142,10 +146,7 @@
 			this.contextInsertText = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertHtml = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertTable = new System.Windows.Forms.ToolStripMenuItem();
-			this.contextTableRowModify = new System.Windows.Forms.ToolStripMenuItem();
-			this.contextTableCellModify = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator22 = new System.Windows.Forms.ToolStripSeparator();
-			this.toolStripSeparator23 = new System.Windows.Forms.ToolStripSeparator();
+			this.toolStripSeparator24 = new System.Windows.Forms.ToolStripSeparator();
 			this.browserPanel.SuspendLayout();
 			this.toolstripEditor.SuspendLayout();
 			this.contextEditor.SuspendLayout();
@@ -545,6 +546,7 @@
 			this.contextEditor.AllowDrop = true;
 			this.contextEditor.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.contextTable,
+            this.toolStripSeparator24,
             this.contextEdit,
             this.contextDocument,
             this.toolStripSeparator7,
@@ -578,6 +580,11 @@
 			this.contextTableModify.Tag = "TableModify";
 			this.contextTableModify.Click += new System.EventHandler(this.contextEditorClick);
 			// 
+			// toolStripSeparator22
+			// 
+			this.toolStripSeparator22.Name = "toolStripSeparator22";
+			resources.ApplyResources(this.toolStripSeparator22, "toolStripSeparator22");
+			// 
 			// contextTableInsertRow
 			// 
 			this.contextTableInsertRow.Name = "contextTableInsertRow";
@@ -591,6 +598,25 @@
 			resources.ApplyResources(this.contextTableDeleteRow, "contextTableDeleteRow");
 			this.contextTableDeleteRow.Tag = "TableDeleteRow";
 			this.contextTableDeleteRow.Click += new System.EventHandler(this.contextEditorClick);
+			// 
+			// toolStripSeparator23
+			// 
+			this.toolStripSeparator23.Name = "toolStripSeparator23";
+			resources.ApplyResources(this.toolStripSeparator23, "toolStripSeparator23");
+			// 
+			// contextTableRowModify
+			// 
+			this.contextTableRowModify.Name = "contextTableRowModify";
+			resources.ApplyResources(this.contextTableRowModify, "contextTableRowModify");
+			this.contextTableRowModify.Tag = "TableRowModify";
+			this.contextTableRowModify.Click += new System.EventHandler(this.TableRowModifyPrompt);
+			// 
+			// contextTableCellModify
+			// 
+			this.contextTableCellModify.Name = "contextTableCellModify";
+			resources.ApplyResources(this.contextTableCellModify, "contextTableCellModify");
+			this.contextTableCellModify.Tag = "TableCellModify";
+			this.contextTableCellModify.Click += new System.EventHandler(this.TableCellModifyPrompt);
 			// 
 			// contextEdit
 			// 
@@ -1097,29 +1123,10 @@
 			this.contextInsertTable.Tag = "InsertTable";
 			this.contextInsertTable.Click += new System.EventHandler(this.contextEditorClick);
 			// 
-			// contextTableRowModify
+			// toolStripSeparator24
 			// 
-			this.contextTableRowModify.Name = "contextTableRowModify";
-			resources.ApplyResources(this.contextTableRowModify, "contextTableRowModify");
-			this.contextTableRowModify.Tag = "TableRowModify";
-			this.contextTableRowModify.Click += new System.EventHandler(this.TableRowModifyPrompt);
-			// 
-			// contextTableCellModify
-			// 
-			this.contextTableCellModify.Name = "contextTableCellModify";
-			resources.ApplyResources(this.contextTableCellModify, "contextTableCellModify");
-			this.contextTableCellModify.Tag = "TableCellModify";
-			this.contextTableCellModify.Click += new System.EventHandler(this.TableCellModifyPrompt);
-			// 
-			// toolStripSeparator22
-			// 
-			this.toolStripSeparator22.Name = "toolStripSeparator22";
-			resources.ApplyResources(this.toolStripSeparator22, "toolStripSeparator22");
-			// 
-			// toolStripSeparator23
-			// 
-			this.toolStripSeparator23.Name = "toolStripSeparator23";
-			resources.ApplyResources(this.toolStripSeparator23, "toolStripSeparator23");
+			this.toolStripSeparator24.Name = "toolStripSeparator24";
+			resources.ApplyResources(this.toolStripSeparator24, "toolStripSeparator24");
 			// 
 			// HtmlEditorControl
 			// 
@@ -1255,5 +1262,6 @@
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator23;
 		private System.Windows.Forms.ToolStripMenuItem contextTableRowModify;
 		private System.Windows.Forms.ToolStripMenuItem contextTableCellModify;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator24;
 	}
 }

@@ -416,6 +416,7 @@ namespace MSDN.Html.Editor
             {
                 // should disable inappropriate commands
                 this.contextTable.Visible = IsParentTable();
+                this.toolStripSeparator24.Visible = IsParentTable();
 
                 // display the text processing context menu
                 this.contextEditor.Show(this.editorWebBrowser, e.MousePosition);
@@ -3258,7 +3259,7 @@ namespace MSDN.Html.Editor
 			using (TableCellPropertyForm dialog = new TableCellPropertyForm())
 			{
 				// set the dialog properties
-				dialog.CellProperties = new HtmlTableCellProperty(cell);
+ 				dialog.CellProperties = new HtmlTableCellProperty(cell);
 				PreShowDialog(dialog);
 
 				if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)

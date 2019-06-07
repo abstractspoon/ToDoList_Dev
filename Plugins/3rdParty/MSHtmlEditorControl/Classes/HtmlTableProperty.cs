@@ -334,9 +334,20 @@ namespace MSDN.Html.Editor
 			if (row == null)
 				return false;
 
-			row.align = this.HorzAlignment.ToString().ToLower();
-			row.vAlign = this.VertAlignment.ToString().ToLower();
-			row.bgColor = ColorTranslator.ToHtml(this.BackColor);
+			if (this.HorzAlignment == HorizontalAlignOption.Default)
+				row.align = null;
+			else
+				row.align = this.HorzAlignment.ToString().ToLower();
+
+			if (this.VertAlignment == VerticalAlignOption.Default)
+				row.vAlign = null;
+			else
+				row.vAlign = this.VertAlignment.ToString().ToLower();
+
+			if (this.BackColor == Color.Empty)
+				row.bgColor = null;
+			else
+				row.bgColor = ColorTranslator.ToHtml(this.BackColor);
 			
 			return true;
 		}
@@ -415,13 +426,29 @@ namespace MSDN.Html.Editor
 			if (cell == null)
 				return false;
 
-			cell.align = this.HorzAlignment.ToString().ToLower();
-			cell.vAlign = this.VertAlignment.ToString().ToLower();
+			if (this.HorzAlignment == HorizontalAlignOption.Default)
+				cell.align = null;
+			else
+				cell.align = this.HorzAlignment.ToString().ToLower();
+
+			if (this.VertAlignment == VerticalAlignOption.Default)
+				cell.vAlign = null;
+			else
+				cell.vAlign = this.VertAlignment.ToString().ToLower();
+
+			if (this.BackColor == Color.Empty)
+				cell.bgColor = null;
+			else
+				cell.bgColor = ColorTranslator.ToHtml(this.BackColor);
+
+			if (this.BorderColor == Color.Empty)
+				cell.borderColor = null;
+			else
+				cell.borderColor = ColorTranslator.ToHtml(this.BorderColor);
+
 			cell.colSpan = this.ColSpan;
 			cell.rowSpan = this.RowSpan;
 			cell.noWrap = this.NoWrap;
-			cell.bgColor = ColorTranslator.ToHtml(this.BackColor);
-			cell.borderColor = ColorTranslator.ToHtml(this.BorderColor);
 
 			return true;
 		}
