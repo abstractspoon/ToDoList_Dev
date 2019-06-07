@@ -10,11 +10,75 @@ namespace MSDN.Html.Editor
 {
 
 	/// <summary>
+	/// Struct used to define a Html Table cell
+	/// Html Defaults are based on FrontPage default table
+	/// </summary>
+	[Serializable]
+	public class HtmlTableBaseProperty
+	{
+		// common properties defined for the table
+		public Color BackColor, BorderColor;
+
+		/// <summary>
+		/// Constructor defining a base cell with default attributes
+		/// </summary>
+		protected HtmlTableBaseProperty()
+		{
+			BackColor = Color.Empty;
+			BorderColor = Color.Empty;
+		}
+
+		public bool Set(object bgColor, object borderColor)
+		{
+			try
+			{
+				if (bgColor == null)
+					this.BackColor = Color.Empty;
+				else
+					this.BackColor = ColorTranslator.FromHtml(bgColor.ToString());
+
+				if (borderColor == null)
+					this.BorderColor = Color.Empty;
+				else
+					this.BorderColor = ColorTranslator.FromHtml(borderColor.ToString());
+			}
+			catch (Exception ex)
+			{
+				// throw an exception indicating table structure change be determined
+				throw new HtmlEditorException("Unable to determine Html Cell properties.", "HtmlTableBaseProperty.Set", ex);
+			}
+
+			return true;
+		}
+
+		public void Get(out object bgColor, out object borderColor)
+		{
+			try
+			{
+				if (this.BackColor == Color.Empty)
+					bgColor = null;
+				else
+					bgColor = ColorTranslator.ToHtml(this.BackColor);
+
+				if (this.BorderColor == Color.Empty)
+					borderColor = null;
+				else
+					borderColor = ColorTranslator.ToHtml(this.BorderColor);
+			}
+			catch (Exception ex)
+			{
+				// throw an exception indicating table structure change be determined
+				throw new HtmlEditorException("Unable to determine Html Cell properties.", "HtmlTableBaseProperty.Get", ex);
+			}
+		}
+	} //HtmlCellProperty
+
+	/// <summary>
 	/// Struct used to define a Html Table
 	/// Html Defaults are based on FrontPage default table
 	/// </summary>
 	[Serializable]
-    public class HtmlTableProperty
+    public class HtmlTableProperty : HtmlTableBaseProperty
     {
         // properties defined for the table
         public string					CaptionText;
@@ -28,12 +92,11 @@ namespace MSDN.Html.Editor
         public MeasurementOption		TableWidthMeasurement;
         public byte						CellPadding;
         public byte						CellSpacing;
-
-
+		
         /// <summary>
         /// Constructor defining a base table with default attributes
         /// </summary>
-        public HtmlTableProperty(bool htmlDefaults)
+        public HtmlTableProperty(bool htmlDefaults) : base()
         {
             //define base values
             CaptionText = string.Empty;
@@ -76,6 +139,8 @@ namespace MSDN.Html.Editor
 
 			try
 			{
+				base.Set(table.bgColor, table.borderColor);
+
 				// have a table so extract the properties
 				mshtml.IHTMLTableCaption caption = table.caption;
 				// if have a caption persist the values
@@ -153,7 +218,12 @@ namespace MSDN.Html.Editor
 				return false;
 
 			// define the table border, width, cell padding and spacing
-			table.border = this.BorderSize;
+			object bgColor, borderColor;
+			base.Get(out bgColor, out borderColor);
+
+			table.bgColor = bgColor;
+			table.borderColor = borderColor;
+
 			if (this.TableWidth > 0)
 				table.width = (this.TableWidthMeasurement == MeasurementOption.Pixel) ? string.Format("{0}", this.TableWidth) : string.Format("{0}%", this.TableWidth);
 			else
@@ -164,6 +234,7 @@ namespace MSDN.Html.Editor
 			else
 				table.align = string.Empty;
 
+			table.border = this.BorderSize;
 			table.cellPadding = this.CellPadding.ToString();
 			table.cellSpacing = this.CellSpacing.ToString();
 
@@ -281,21 +352,19 @@ namespace MSDN.Html.Editor
     /// Html Defaults are based on FrontPage default table
     /// </summary>
     [Serializable]
-    public class HtmlTableRowProperty
+    public class HtmlTableRowProperty : HtmlTableBaseProperty
     {
         // properties defined for the table
         public HorizontalAlignOption	HorzAlignment;
         public VerticalAlignOption		VertAlignment;
-        public Color					BackColor;
 
         /// <summary>
         /// Constructor defining a base row with default attributes
         /// </summary>
-        public HtmlTableRowProperty()
+        public HtmlTableRowProperty() : base()
         {
             HorzAlignment = HorizontalAlignOption.Default;
             VertAlignment = VerticalAlignOption.Default;
-			BackColor = Color.Empty;
         }
 
 		public HtmlTableRowProperty(mshtml.IHTMLTableRow row) : this()
@@ -311,6 +380,8 @@ namespace MSDN.Html.Editor
 
 			try
 			{
+				base.Set(row.bgColor, row.borderColor);
+
 				if (row.align != null)
 					this.HorzAlignment = (HorizontalAlignOption)Utils.TryParseEnum(typeof(HorizontalAlignOption), row.align, HorizontalAlignOption.Default);
 
@@ -334,6 +405,12 @@ namespace MSDN.Html.Editor
 			if (row == null)
 				return false;
 
+			object bgColor, borderColor;
+			base.Get(out bgColor, out borderColor);
+
+			row.bgColor = bgColor;
+			row.borderColor = borderColor;
+
 			if (this.HorzAlignment == HorizontalAlignOption.Default)
 				row.align = null;
 			else
@@ -344,11 +421,6 @@ namespace MSDN.Html.Editor
 			else
 				row.vAlign = this.VertAlignment.ToString().ToLower();
 
-			if (this.BackColor == Color.Empty)
-				row.bgColor = "";
-			else
-				row.bgColor = ColorTranslator.ToHtml(this.BackColor);
-			
 			return true;
 		}
 
@@ -359,24 +431,21 @@ namespace MSDN.Html.Editor
 	/// Html Defaults are based on FrontPage default table
 	/// </summary>
 	[Serializable]
-    public class HtmlTableCellProperty
+    public class HtmlTableCellProperty : HtmlTableBaseProperty
     {
         // properties defined for the table
         public HorizontalAlignOption	HorzAlignment;
         public VerticalAlignOption		VertAlignment;
-        public Color					BackColor, BorderColor;
 		public int						ColSpan, RowSpan;
 		public bool						NoWrap;
 
 		/// <summary>
 		/// Constructor defining a base cell with default attributes
 		/// </summary>
-		public HtmlTableCellProperty()
+		public HtmlTableCellProperty() : base()
 		{
 			HorzAlignment = HorizontalAlignOption.Default;
 			VertAlignment = VerticalAlignOption.Default;
-			BackColor = Color.Empty;
-			BorderColor = Color.Empty;
 			ColSpan = 1;
 			RowSpan = 1;
 			NoWrap = false;
@@ -395,18 +464,14 @@ namespace MSDN.Html.Editor
 
 			try
 			{
+				base.Set(cell.bgColor, cell.borderColor);
+
 				if (cell.align != null)
 					this.HorzAlignment = (HorizontalAlignOption)Utils.TryParseEnum(typeof(HorizontalAlignOption), cell.align, HorizontalAlignOption.Default);
 
 				if (cell.vAlign != null)
 					this.VertAlignment = (VerticalAlignOption)Utils.TryParseEnum(typeof(VerticalAlignOption), cell.vAlign, VerticalAlignOption.Default);
 
-				if (cell.bgColor != null)
-					this.BackColor = ColorTranslator.FromHtml(cell.bgColor.ToString());
-
-				if (cell.borderColor != null)
-					this.BorderColor = ColorTranslator.FromHtml(cell.borderColor.ToString());
-				
 				this.ColSpan = cell.colSpan;
 				this.RowSpan = cell.rowSpan;
 				this.NoWrap = cell.noWrap;
@@ -425,6 +490,12 @@ namespace MSDN.Html.Editor
 			if (cell == null)
 				return false;
 
+			object bgColor, borderColor;
+			base.Get(out bgColor, out borderColor);
+
+			cell.bgColor = bgColor;
+			cell.borderColor = borderColor;
+
 			if (this.HorzAlignment == HorizontalAlignOption.Default)
 				cell.align = null;
 			else
@@ -434,16 +505,6 @@ namespace MSDN.Html.Editor
 				cell.vAlign = null;
 			else
 				cell.vAlign = this.VertAlignment.ToString().ToLower();
-
-			if (this.BackColor == Color.Empty)
-				cell.bgColor = "";
-			else
-				cell.bgColor = ColorTranslator.ToHtml(this.BackColor);
-
-			if (this.BorderColor == Color.Empty)
-				cell.borderColor = "";
-			else
-				cell.borderColor = ColorTranslator.ToHtml(this.BorderColor);
 
 			cell.colSpan = this.ColSpan;
 			cell.rowSpan = this.RowSpan;

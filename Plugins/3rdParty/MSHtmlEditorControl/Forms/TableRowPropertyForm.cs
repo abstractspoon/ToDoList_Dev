@@ -35,6 +35,7 @@ namespace MSDN.Html.Editor
 				_rowProperties.HorzAlignment = (HorizontalAlignOption)this.hAlignComboBox.SelectedIndex;
 				_rowProperties.VertAlignment = (VerticalAlignOption)this.vAlignComboBox.SelectedIndex;
 				_rowProperties.BackColor = (this.checkBackColor.Checked ? this.btnBackColor.Color : Color.Empty);
+				_rowProperties.BorderColor = (this.checkBorderColor.Checked ? this.btnBorderColor.Color : Color.Empty);
 
 				return _rowProperties;
 			}
@@ -48,6 +49,9 @@ namespace MSDN.Html.Editor
 				this.checkBackColor.Checked = (_rowProperties.BackColor != Color.Empty);
 				this.btnBackColor.Color = _rowProperties.BackColor;
 				this.btnBackColor.Enabled = this.checkBackColor.Checked;
+				this.checkBorderColor.Checked = (_rowProperties.BorderColor != Color.Empty);
+				this.btnBorderColor.Color = _rowProperties.BorderColor;
+				this.btnBorderColor.Enabled = this.checkBorderColor.Checked;
 			}
 
 		} //_rowProperties
@@ -55,6 +59,11 @@ namespace MSDN.Html.Editor
 		private void checkBackColor_CheckedChanged(object sender, EventArgs e)
 		{
 			this.btnBackColor.Enabled = this.checkBackColor.Checked;
+		}
+
+		private void checkBorderColor_CheckedChanged(object sender, EventArgs e)
+		{
+			this.btnBorderColor.Enabled = this.checkBorderColor.Checked;
 		}
 	}
 }

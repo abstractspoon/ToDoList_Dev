@@ -93,8 +93,12 @@ namespace MSDN.Html.Editor
                 tableProperties.CellSpacing = (byte)Math.Min(this.numericCellSpacing.Value, this.numericCellSpacing.Maximum);
                 tableProperties.TableWidth = (ushort)Math.Min(this.numericTableWidth.Value, this.numericTableWidth.Maximum);
                 tableProperties.TableWidthMeasurement = (this.radioWidthPercent.Checked) ? MeasurementOption.Percent : MeasurementOption.Pixel;
-                // return the properties
-                return tableProperties;
+
+				tableProperties.BackColor = (this.checkBackColor.Checked ? this.btnBackColor.Color : Color.Empty);
+				tableProperties.BorderColor = (this.checkBorderColor.Checked ? this.btnBorderColor.Color : Color.Empty);
+
+				// return the properties
+				return tableProperties;
             }
             set
             {
@@ -115,9 +119,16 @@ namespace MSDN.Html.Editor
                 this.radioWidthPercent.Checked = (tableProperties.TableWidthMeasurement == MeasurementOption.Percent);
                 this.radioWidthPixel.Checked = (tableProperties.TableWidthMeasurement == MeasurementOption.Pixel);
                 this.numericTableWidth.Value = Math.Min(tableProperties.TableWidth, this.numericTableWidth.Maximum);
-            }
 
-        } //TableProperties
+				this.checkBackColor.Checked = (tableProperties.BackColor != Color.Empty);
+				this.btnBackColor.Color = tableProperties.BackColor;
+				this.btnBackColor.Enabled = this.checkBackColor.Checked;
+				this.checkBorderColor.Checked = (tableProperties.BorderColor != Color.Empty);
+				this.btnBorderColor.Color = tableProperties.BorderColor;
+				this.btnBorderColor.Enabled = this.checkBorderColor.Checked;
+			}
+
+		} //TableProperties
 
 
         /// <summary>
@@ -140,5 +151,14 @@ namespace MSDN.Html.Editor
 
         } //MeasurementOptionChanged
 
-    }
+		private void checkBackColor_CheckedChanged(object sender, EventArgs e)
+		{
+			this.btnBackColor.Enabled = this.checkBackColor.Checked;
+		}
+
+		private void checkBorderColor_CheckedChanged(object sender, EventArgs e)
+		{
+			this.btnBorderColor.Enabled = this.checkBorderColor.Checked;
+		}
+	}
 }

@@ -44,6 +44,11 @@ namespace MSDN.Html.Editor.Classes
 				if (Color != Color.Empty)
 				{
 					pe.Graphics.FillRectangle(new SolidBrush(Color), rColor);
+
+					// darker border
+					const float darker = 0.7f;
+					Color borderColor = Color.FromArgb(255,	(int)(Color.R * darker), (int)(Color.G * darker), (int)(Color.B * darker));
+					pe.Graphics.DrawRectangle(new Pen(borderColor), rColor);
 				}
 				else
 				{

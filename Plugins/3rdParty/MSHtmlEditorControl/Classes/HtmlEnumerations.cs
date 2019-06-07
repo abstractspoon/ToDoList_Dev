@@ -87,6 +87,14 @@ namespace MSDN.Html.Editor
 
     } //VerticalAlignOption
 
+	public enum LineStyle
+	{
+		None,
+		Dotted,
+		Dashed,
+		Solid,
+		Double
+	}
 
     /// <summary>
     /// Enum used to define the visibility of the scroll bars

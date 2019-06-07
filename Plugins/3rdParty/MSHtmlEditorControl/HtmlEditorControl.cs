@@ -26,6 +26,7 @@ using mshtmlSelection = mshtml.IHTMLSelectionObject;
 using mshtmlControlRange = mshtml.IHTMLControlRange;
 
 using mshtmlElement = mshtml.IHTMLElement;
+using mshtmlElement2 = mshtml.IHTMLElement2;
 using mshtmlElementCollection = mshtml.IHTMLElementCollection;
 using mshtmlControlElement = mshtml.IHTMLControlElement;
 using mshtmlAnchorElement = mshtml.IHTMLAnchorElement;
