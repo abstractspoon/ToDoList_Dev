@@ -113,8 +113,8 @@ namespace MSDN.Html.Editor
     /// </summary>
     public enum MeasurementOption
     {
+        Percent,
         Pixel,
-        Percent
 
     } //MeasurementOption
 

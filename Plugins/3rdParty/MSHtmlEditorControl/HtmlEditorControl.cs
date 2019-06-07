@@ -3202,7 +3202,7 @@ namespace MSDN.Html.Editor
         {
             // if user has selected a table create a reference
             mshtmlTable table = GetFirstControl() as mshtmlTable;
-            ProcessTablePrompt(table);
+            ProcessTablePrompt(table, true);
 
         } //TableInsertPrompt
 
@@ -3219,7 +3219,7 @@ namespace MSDN.Html.Editor
             // if a table has been selected then process
             if (table != null)
             {
-                ProcessTablePrompt(table);
+                ProcessTablePrompt(table, false);
                 return true;
             }
             else
@@ -3348,9 +3348,9 @@ namespace MSDN.Html.Editor
         /// Method to present to the user the table properties dialog
         /// Uses all the default properties for the table based on an insert operation
         /// </summary>
-        private void ProcessTablePrompt(mshtmlTable table)
+        private void ProcessTablePrompt(mshtmlTable table, bool insert)
         {
-            using (TablePropertyForm dialog = new TablePropertyForm())
+            using (TablePropertyForm dialog = new TablePropertyForm(insert))
             {
                 dialog.TableProperties = GetTableProperties(table);
                 PreShowDialog(dialog);

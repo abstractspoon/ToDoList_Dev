@@ -39,12 +39,15 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Default form constructor
         /// </summary>
-        public TablePropertyForm()
+        public TablePropertyForm(bool insert)
         {
             //
             // Required for Windows Form Designer support
             //
             InitializeComponent();
+
+			if (insert)
+				Text = "Insert Table";
 
             // define the dropdown list value
             this.listCaptionAlignment.Items.AddRange(Enum.GetNames(typeof(HorizontalAlignOption)));
@@ -92,7 +95,7 @@ namespace MSDN.Html.Editor
                 tableProperties.CellPadding = (byte)Math.Min(this.numericCellPadding.Value, this.numericCellPadding.Maximum);
                 tableProperties.CellSpacing = (byte)Math.Min(this.numericCellSpacing.Value, this.numericCellSpacing.Maximum);
                 tableProperties.TableWidth = (ushort)Math.Min(this.numericTableWidth.Value, this.numericTableWidth.Maximum);
-                tableProperties.TableWidthMeasurement = (this.radioWidthPercent.Checked) ? MeasurementOption.Percent : MeasurementOption.Pixel;
+                tableProperties.TableWidthMeasurement = (MeasurementOption)this.comboBoxWidthType.SelectedIndex;
 
 				tableProperties.BackColor = (this.checkBackColor.Checked ? this.btnBackColor.Color : Color.Empty);
 				tableProperties.BorderColor = (this.checkBorderColor.Checked ? this.btnBorderColor.Color : Color.Empty);
@@ -116,8 +119,7 @@ namespace MSDN.Html.Editor
                 this.numericColumns.Value = Math.Min(tableProperties.TableColumns, MAXIMUM_CELL_COL);
                 this.numericCellPadding.Value = Math.Min(tableProperties.CellPadding, MAXIMUM_CELL_PAD);
                 this.numericCellSpacing.Value = Math.Min(tableProperties.CellSpacing, MAXIMUM_CELL_PAD);
-                this.radioWidthPercent.Checked = (tableProperties.TableWidthMeasurement == MeasurementOption.Percent);
-                this.radioWidthPixel.Checked = (tableProperties.TableWidthMeasurement == MeasurementOption.Pixel);
+                this.comboBoxWidthType.SelectedIndex = (int)MeasurementOption.Percent;
                 this.numericTableWidth.Value = Math.Min(tableProperties.TableWidth, this.numericTableWidth.Maximum);
 
 				this.checkBackColor.Checked = (tableProperties.BackColor != Color.Empty);
@@ -137,13 +139,12 @@ namespace MSDN.Html.Editor
         private void MeasurementOptionChanged(object sender, System.EventArgs e)
         {
             // define a dialog for a percentage change
-            if (this.radioWidthPercent.Checked)
+            if (this.comboBoxWidthType.SelectedIndex == (int)MeasurementOption.Percent)
             {
                 this.numericTableWidth.Maximum = MAXIMUM_WIDTH_PERCENT;
                 this.numericTableWidth.Increment = MAXIMUM_WIDTH_PERCENT / WIDTH_INC_DIV;
             }
-            // define a dialog for a pixel change
-            if (this.radioWidthPixel.Checked)
+			else // define a dialog for a pixel change
             {
                 this.numericTableWidth.Maximum = MAXIMUM_WIDTH_PIXEL;
                 this.numericTableWidth.Increment = MAXIMUM_WIDTH_PIXEL / WIDTH_INC_DIV;

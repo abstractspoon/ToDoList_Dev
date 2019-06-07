@@ -36,10 +36,10 @@
 			this.cancel = new System.Windows.Forms.Button();
 			this.ok = new System.Windows.Forms.Button();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.checkBorderColor = new System.Windows.Forms.CheckBox();
 			this.checkBackColor = new System.Windows.Forms.CheckBox();
-			this.btnBorderColor = new MSDN.Html.Editor.Classes.ColorButton();
 			this.btnBackColor = new MSDN.Html.Editor.Classes.ColorButton();
+			this.checkBorderColor = new System.Windows.Forms.CheckBox();
+			this.btnBorderColor = new MSDN.Html.Editor.Classes.ColorButton();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -104,8 +104,8 @@
 			// groupBox1
 			// 
 			this.groupBox1.Controls.Add(this.checkBorderColor);
-			this.groupBox1.Controls.Add(this.checkBackColor);
 			this.groupBox1.Controls.Add(this.btnBorderColor);
+			this.groupBox1.Controls.Add(this.checkBackColor);
 			this.groupBox1.Controls.Add(this.btnBackColor);
 			this.groupBox1.Controls.Add(this.vAlignComboBox);
 			this.groupBox1.Controls.Add(this.hAlignComboBox);
@@ -117,48 +117,47 @@
 			this.groupBox1.TabIndex = 6;
 			this.groupBox1.TabStop = false;
 			// 
-			// checkBorderColor
-			// 
-			this.checkBorderColor.AutoSize = true;
-			this.checkBorderColor.Location = new System.Drawing.Point(13, 101);
-			this.checkBorderColor.Name = "checkBorderColor";
-			this.checkBorderColor.Size = new System.Drawing.Size(89, 17);
-			this.checkBorderColor.TabIndex = 15;
-			this.checkBorderColor.Text = "Border colour";
-			this.checkBorderColor.UseVisualStyleBackColor = true;
-			this.checkBorderColor.CheckedChanged += new System.EventHandler(this.checkBorderColor_CheckedChanged);
-			// 
 			// checkBackColor
 			// 
 			this.checkBackColor.AutoSize = true;
-			this.checkBackColor.Location = new System.Drawing.Point(13, 73);
+			this.checkBackColor.Location = new System.Drawing.Point(13, 101);
 			this.checkBackColor.Name = "checkBackColor";
 			this.checkBackColor.Size = new System.Drawing.Size(116, 17);
 			this.checkBackColor.TabIndex = 14;
 			this.checkBackColor.Text = "Background colour";
 			this.checkBackColor.UseVisualStyleBackColor = true;
 			// 
-			// btnBorderColor
-			// 
-			this.btnBorderColor.Color = System.Drawing.Color.Empty;
-			this.btnBorderColor.Location = new System.Drawing.Point(157, 97);
-			this.btnBorderColor.Name = "btnBorderColor";
-			this.btnBorderColor.Size = new System.Drawing.Size(75, 22);
-			this.btnBorderColor.TabIndex = 12;
-			this.btnBorderColor.Text = "Set...";
-			this.btnBorderColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.btnBorderColor.UseVisualStyleBackColor = true;
-			// 
 			// btnBackColor
 			// 
 			this.btnBackColor.Color = System.Drawing.Color.Empty;
-			this.btnBackColor.Location = new System.Drawing.Point(157, 69);
+			this.btnBackColor.Location = new System.Drawing.Point(157, 97);
 			this.btnBackColor.Name = "btnBackColor";
 			this.btnBackColor.Size = new System.Drawing.Size(75, 22);
 			this.btnBackColor.TabIndex = 13;
 			this.btnBackColor.Text = "Set...";
 			this.btnBackColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.btnBackColor.UseVisualStyleBackColor = true;
+			// 
+			// checkBorderColor
+			// 
+			this.checkBorderColor.AutoSize = true;
+			this.checkBorderColor.Location = new System.Drawing.Point(13, 73);
+			this.checkBorderColor.Name = "checkBorderColor";
+			this.checkBorderColor.Size = new System.Drawing.Size(89, 17);
+			this.checkBorderColor.TabIndex = 17;
+			this.checkBorderColor.Text = "Border colour";
+			this.checkBorderColor.UseVisualStyleBackColor = true;
+			// 
+			// btnBorderColor
+			// 
+			this.btnBorderColor.Color = System.Drawing.Color.Empty;
+			this.btnBorderColor.Location = new System.Drawing.Point(157, 69);
+			this.btnBorderColor.Name = "btnBorderColor";
+			this.btnBorderColor.Size = new System.Drawing.Size(75, 22);
+			this.btnBorderColor.TabIndex = 16;
+			this.btnBorderColor.Text = "Set...";
+			this.btnBorderColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.btnBorderColor.UseVisualStyleBackColor = true;
 			// 
 			// TableRowPropertyForm
 			// 
@@ -191,9 +190,9 @@
 		private System.Windows.Forms.Button cancel;
 		private System.Windows.Forms.Button ok;
 		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.CheckBox checkBorderColor;
 		private System.Windows.Forms.CheckBox checkBackColor;
-		private Classes.ColorButton btnBorderColor;
 		private Classes.ColorButton btnBackColor;
+		private System.Windows.Forms.CheckBox checkBorderColor;
+		private Classes.ColorButton btnBorderColor;
 	}
 }

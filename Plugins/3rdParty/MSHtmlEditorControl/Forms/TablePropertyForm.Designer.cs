@@ -36,7 +36,6 @@ namespace MSDN.Html.Editor
 			this.labelCaptionAlign = new System.Windows.Forms.Label();
 			this.labelCaption = new System.Windows.Forms.Label();
 			this.textTableCaption = new System.Windows.Forms.TextBox();
-			this.groupLayout = new System.Windows.Forms.GroupBox();
 			this.numericCellSpacing = new System.Windows.Forms.NumericUpDown();
 			this.labelSpacing = new System.Windows.Forms.Label();
 			this.numericCellPadding = new System.Windows.Forms.NumericUpDown();
@@ -45,30 +44,28 @@ namespace MSDN.Html.Editor
 			this.numericRows = new System.Windows.Forms.NumericUpDown();
 			this.label1 = new System.Windows.Forms.Label();
 			this.labelRowColumn = new System.Windows.Forms.Label();
-			this.groupPercentPixel = new System.Windows.Forms.Panel();
-			this.radioWidthPixel = new System.Windows.Forms.RadioButton();
-			this.radioWidthPercent = new System.Windows.Forms.RadioButton();
 			this.numericTableWidth = new System.Windows.Forms.NumericUpDown();
 			this.labelWidth = new System.Windows.Forms.Label();
 			this.groupTable = new System.Windows.Forms.GroupBox();
+			this.labelBorderSize = new System.Windows.Forms.Label();
+			this.numericBorderSize = new System.Windows.Forms.NumericUpDown();
 			this.checkBorderColor = new System.Windows.Forms.CheckBox();
 			this.checkBackColor = new System.Windows.Forms.CheckBox();
 			this.listTextAlignment = new System.Windows.Forms.ComboBox();
 			this.labelBorderAlign = new System.Windows.Forms.Label();
-			this.labelBorderSize = new System.Windows.Forms.Label();
-			this.numericBorderSize = new System.Windows.Forms.NumericUpDown();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.comboBoxWidthType = new System.Windows.Forms.ComboBox();
 			this.btnBorderColor = new MSDN.Html.Editor.Classes.ColorButton();
 			this.btnBackColor = new MSDN.Html.Editor.Classes.ColorButton();
 			this.groupCaption.SuspendLayout();
-			this.groupLayout.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericCellSpacing)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericCellPadding)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericColumns)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericRows)).BeginInit();
-			this.groupPercentPixel.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericTableWidth)).BeginInit();
 			this.groupTable.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericBorderSize)).BeginInit();
+			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// bCancel
@@ -76,7 +73,7 @@ namespace MSDN.Html.Editor
 			this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.bCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bCancel.Location = new System.Drawing.Point(315, 386);
+			this.bCancel.Location = new System.Drawing.Point(532, 261);
 			this.bCancel.Name = "bCancel";
 			this.bCancel.Size = new System.Drawing.Size(75, 23);
 			this.bCancel.TabIndex = 0;
@@ -87,11 +84,11 @@ namespace MSDN.Html.Editor
 			this.bInsert.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bInsert.DialogResult = System.Windows.Forms.DialogResult.OK;
 			this.bInsert.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bInsert.Location = new System.Drawing.Point(233, 386);
+			this.bInsert.Location = new System.Drawing.Point(450, 261);
 			this.bInsert.Name = "bInsert";
 			this.bInsert.Size = new System.Drawing.Size(75, 23);
 			this.bInsert.TabIndex = 1;
-			this.bInsert.Text = "Insert";
+			this.bInsert.Text = "OK";
 			// 
 			// groupCaption
 			// 
@@ -101,19 +98,19 @@ namespace MSDN.Html.Editor
 			this.groupCaption.Controls.Add(this.labelCaptionAlign);
 			this.groupCaption.Controls.Add(this.labelCaption);
 			this.groupCaption.Controls.Add(this.textTableCaption);
-			this.groupCaption.Location = new System.Drawing.Point(8, 8);
+			this.groupCaption.Location = new System.Drawing.Point(8, 147);
 			this.groupCaption.Name = "groupCaption";
-			this.groupCaption.Size = new System.Drawing.Size(384, 111);
+			this.groupCaption.Size = new System.Drawing.Size(338, 104);
 			this.groupCaption.TabIndex = 2;
 			this.groupCaption.TabStop = false;
-			this.groupCaption.Text = "Caption Properties";
+			this.groupCaption.Text = "Caption";
 			// 
 			// listCaptionLocation
 			// 
 			this.listCaptionLocation.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.listCaptionLocation.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.listCaptionLocation.FormattingEnabled = true;
-			this.listCaptionLocation.Location = new System.Drawing.Point(157, 78);
+			this.listCaptionLocation.Location = new System.Drawing.Point(157, 71);
 			this.listCaptionLocation.Name = "listCaptionLocation";
 			this.listCaptionLocation.Size = new System.Drawing.Size(104, 21);
 			this.listCaptionLocation.TabIndex = 8;
@@ -122,7 +119,7 @@ namespace MSDN.Html.Editor
 			// 
 			this.labelLocation.AutoSize = true;
 			this.labelLocation.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelLocation.Location = new System.Drawing.Point(10, 81);
+			this.labelLocation.Location = new System.Drawing.Point(10, 74);
 			this.labelLocation.Name = "labelLocation";
 			this.labelLocation.Size = new System.Drawing.Size(93, 13);
 			this.labelLocation.TabIndex = 7;
@@ -134,7 +131,7 @@ namespace MSDN.Html.Editor
 			this.listCaptionAlignment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.listCaptionAlignment.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.listCaptionAlignment.FormattingEnabled = true;
-			this.listCaptionAlignment.Location = new System.Drawing.Point(157, 50);
+			this.listCaptionAlignment.Location = new System.Drawing.Point(157, 44);
 			this.listCaptionAlignment.Name = "listCaptionAlignment";
 			this.listCaptionAlignment.Size = new System.Drawing.Size(104, 21);
 			this.listCaptionAlignment.TabIndex = 6;
@@ -143,7 +140,7 @@ namespace MSDN.Html.Editor
 			// 
 			this.labelCaptionAlign.AutoSize = true;
 			this.labelCaptionAlign.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelCaptionAlign.Location = new System.Drawing.Point(10, 53);
+			this.labelCaptionAlign.Location = new System.Drawing.Point(10, 47);
 			this.labelCaptionAlign.Name = "labelCaptionAlign";
 			this.labelCaptionAlign.Size = new System.Drawing.Size(105, 13);
 			this.labelCaptionAlign.TabIndex = 5;
@@ -152,140 +149,97 @@ namespace MSDN.Html.Editor
 			// 
 			// labelCaption
 			// 
+			this.labelCaption.AutoSize = true;
 			this.labelCaption.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelCaption.Location = new System.Drawing.Point(10, 22);
+			this.labelCaption.Location = new System.Drawing.Point(10, 21);
 			this.labelCaption.Name = "labelCaption";
-			this.labelCaption.Size = new System.Drawing.Size(64, 23);
+			this.labelCaption.Size = new System.Drawing.Size(31, 13);
 			this.labelCaption.TabIndex = 1;
-			this.labelCaption.Text = "Caption:";
+			this.labelCaption.Text = "Text:";
 			this.labelCaption.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// textTableCaption
 			// 
-			this.textTableCaption.Location = new System.Drawing.Point(80, 24);
+			this.textTableCaption.Location = new System.Drawing.Point(157, 18);
 			this.textTableCaption.Name = "textTableCaption";
-			this.textTableCaption.Size = new System.Drawing.Size(288, 20);
+			this.textTableCaption.Size = new System.Drawing.Size(168, 20);
 			this.textTableCaption.TabIndex = 0;
-			// 
-			// groupLayout
-			// 
-			this.groupLayout.Controls.Add(this.numericCellSpacing);
-			this.groupLayout.Controls.Add(this.labelSpacing);
-			this.groupLayout.Controls.Add(this.numericCellPadding);
-			this.groupLayout.Controls.Add(this.labelPadding);
-			this.groupLayout.Controls.Add(this.numericColumns);
-			this.groupLayout.Controls.Add(this.numericRows);
-			this.groupLayout.Controls.Add(this.label1);
-			this.groupLayout.Controls.Add(this.labelRowColumn);
-			this.groupLayout.Location = new System.Drawing.Point(8, 297);
-			this.groupLayout.Name = "groupLayout";
-			this.groupLayout.Size = new System.Drawing.Size(384, 81);
-			this.groupLayout.TabIndex = 3;
-			this.groupLayout.TabStop = false;
-			this.groupLayout.Text = "Cell Properties";
 			// 
 			// numericCellSpacing
 			// 
-			this.numericCellSpacing.Location = new System.Drawing.Point(304, 47);
+			this.numericCellSpacing.Location = new System.Drawing.Point(157, 20);
 			this.numericCellSpacing.Name = "numericCellSpacing";
-			this.numericCellSpacing.Size = new System.Drawing.Size(64, 20);
+			this.numericCellSpacing.Size = new System.Drawing.Size(75, 20);
 			this.numericCellSpacing.TabIndex = 6;
 			// 
 			// labelSpacing
 			// 
+			this.labelSpacing.AutoSize = true;
 			this.labelSpacing.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelSpacing.Location = new System.Drawing.Point(204, 44);
+			this.labelSpacing.Location = new System.Drawing.Point(10, 22);
 			this.labelSpacing.Name = "labelSpacing";
-			this.labelSpacing.Size = new System.Drawing.Size(98, 23);
+			this.labelSpacing.Size = new System.Drawing.Size(69, 13);
 			this.labelSpacing.TabIndex = 5;
 			this.labelSpacing.Text = "Cell Spacing:";
 			this.labelSpacing.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// numericCellPadding
 			// 
-			this.numericCellPadding.Location = new System.Drawing.Point(120, 47);
+			this.numericCellPadding.Location = new System.Drawing.Point(157, 46);
 			this.numericCellPadding.Name = "numericCellPadding";
-			this.numericCellPadding.Size = new System.Drawing.Size(64, 20);
+			this.numericCellPadding.Size = new System.Drawing.Size(75, 20);
 			this.numericCellPadding.TabIndex = 4;
 			// 
 			// labelPadding
 			// 
+			this.labelPadding.AutoSize = true;
 			this.labelPadding.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelPadding.Location = new System.Drawing.Point(10, 44);
+			this.labelPadding.Location = new System.Drawing.Point(10, 48);
 			this.labelPadding.Name = "labelPadding";
-			this.labelPadding.Size = new System.Drawing.Size(106, 23);
+			this.labelPadding.Size = new System.Drawing.Size(69, 13);
 			this.labelPadding.TabIndex = 3;
 			this.labelPadding.Text = "Cell Padding:";
 			this.labelPadding.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// numericColumns
 			// 
-			this.numericColumns.Location = new System.Drawing.Point(304, 21);
+			this.numericColumns.Location = new System.Drawing.Point(157, 46);
 			this.numericColumns.Name = "numericColumns";
-			this.numericColumns.Size = new System.Drawing.Size(64, 20);
+			this.numericColumns.Size = new System.Drawing.Size(75, 20);
 			this.numericColumns.TabIndex = 2;
 			// 
 			// numericRows
 			// 
-			this.numericRows.Location = new System.Drawing.Point(120, 21);
+			this.numericRows.Location = new System.Drawing.Point(157, 20);
 			this.numericRows.Name = "numericRows";
-			this.numericRows.Size = new System.Drawing.Size(64, 20);
+			this.numericRows.Size = new System.Drawing.Size(75, 20);
 			this.numericRows.TabIndex = 1;
 			// 
 			// label1
 			// 
+			this.label1.AutoSize = true;
 			this.label1.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.label1.Location = new System.Drawing.Point(204, 18);
+			this.label1.Location = new System.Drawing.Point(10, 48);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(98, 23);
+			this.label1.Size = new System.Drawing.Size(101, 13);
 			this.label1.TabIndex = 0;
-			this.label1.Text = "Column count:";
+			this.label1.Text = "Number of columns:";
 			this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// labelRowColumn
 			// 
+			this.labelRowColumn.AutoSize = true;
 			this.labelRowColumn.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelRowColumn.Location = new System.Drawing.Point(10, 18);
+			this.labelRowColumn.Location = new System.Drawing.Point(10, 22);
 			this.labelRowColumn.Name = "labelRowColumn";
-			this.labelRowColumn.Size = new System.Drawing.Size(106, 23);
+			this.labelRowColumn.Size = new System.Drawing.Size(84, 13);
 			this.labelRowColumn.TabIndex = 0;
-			this.labelRowColumn.Text = "Row count:";
+			this.labelRowColumn.Text = "Number of rows:";
 			this.labelRowColumn.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			// 
-			// groupPercentPixel
-			// 
-			this.groupPercentPixel.Controls.Add(this.radioWidthPixel);
-			this.groupPercentPixel.Controls.Add(this.radioWidthPercent);
-			this.groupPercentPixel.Location = new System.Drawing.Point(240, 18);
-			this.groupPercentPixel.Name = "groupPercentPixel";
-			this.groupPercentPixel.Size = new System.Drawing.Size(144, 32);
-			this.groupPercentPixel.TabIndex = 9;
-			// 
-			// radioWidthPixel
-			// 
-			this.radioWidthPixel.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.radioWidthPixel.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.radioWidthPixel.Location = new System.Drawing.Point(80, 2);
-			this.radioWidthPixel.Name = "radioWidthPixel";
-			this.radioWidthPixel.Size = new System.Drawing.Size(56, 24);
-			this.radioWidthPixel.TabIndex = 1;
-			this.radioWidthPixel.Text = "Pixels";
-			this.radioWidthPixel.CheckedChanged += new System.EventHandler(this.MeasurementOptionChanged);
-			// 
-			// radioWidthPercent
-			// 
-			this.radioWidthPercent.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.radioWidthPercent.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.radioWidthPercent.Location = new System.Drawing.Point(10, 2);
-			this.radioWidthPercent.Name = "radioWidthPercent";
-			this.radioWidthPercent.Size = new System.Drawing.Size(64, 24);
-			this.radioWidthPercent.TabIndex = 0;
-			this.radioWidthPercent.Text = "Percent";
-			this.radioWidthPercent.CheckedChanged += new System.EventHandler(this.MeasurementOptionChanged);
 			// 
 			// numericTableWidth
 			// 
-			this.numericTableWidth.Location = new System.Drawing.Point(157, 22);
+			this.numericTableWidth.Location = new System.Drawing.Point(157, 72);
 			this.numericTableWidth.Name = "numericTableWidth";
 			this.numericTableWidth.Size = new System.Drawing.Size(75, 20);
 			this.numericTableWidth.TabIndex = 8;
@@ -294,7 +248,7 @@ namespace MSDN.Html.Editor
 			// 
 			this.labelWidth.AutoSize = true;
 			this.labelWidth.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelWidth.Location = new System.Drawing.Point(10, 24);
+			this.labelWidth.Location = new System.Drawing.Point(10, 74);
 			this.labelWidth.Name = "labelWidth";
 			this.labelWidth.Size = new System.Drawing.Size(65, 13);
 			this.labelWidth.TabIndex = 7;
@@ -303,28 +257,45 @@ namespace MSDN.Html.Editor
 			// 
 			// groupTable
 			// 
-			this.groupTable.Controls.Add(this.listTextAlignment);
-			this.groupTable.Controls.Add(this.labelBorderAlign);
+			this.groupTable.Controls.Add(this.numericCellSpacing);
 			this.groupTable.Controls.Add(this.labelBorderSize);
+			this.groupTable.Controls.Add(this.labelSpacing);
+			this.groupTable.Controls.Add(this.numericCellPadding);
 			this.groupTable.Controls.Add(this.numericBorderSize);
+			this.groupTable.Controls.Add(this.labelPadding);
 			this.groupTable.Controls.Add(this.checkBorderColor);
 			this.groupTable.Controls.Add(this.checkBackColor);
 			this.groupTable.Controls.Add(this.btnBorderColor);
 			this.groupTable.Controls.Add(this.btnBackColor);
-			this.groupTable.Controls.Add(this.labelWidth);
-			this.groupTable.Controls.Add(this.numericTableWidth);
-			this.groupTable.Controls.Add(this.groupPercentPixel);
-			this.groupTable.Location = new System.Drawing.Point(8, 125);
+			this.groupTable.Location = new System.Drawing.Point(361, 12);
 			this.groupTable.Name = "groupTable";
-			this.groupTable.Size = new System.Drawing.Size(384, 166);
+			this.groupTable.Size = new System.Drawing.Size(245, 239);
 			this.groupTable.TabIndex = 4;
 			this.groupTable.TabStop = false;
-			this.groupTable.Text = "Table Properties";
+			this.groupTable.Text = "Attributes";
+			// 
+			// labelBorderSize
+			// 
+			this.labelBorderSize.AutoSize = true;
+			this.labelBorderSize.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.labelBorderSize.Location = new System.Drawing.Point(10, 74);
+			this.labelBorderSize.Name = "labelBorderSize";
+			this.labelBorderSize.Size = new System.Drawing.Size(69, 13);
+			this.labelBorderSize.TabIndex = 17;
+			this.labelBorderSize.Text = "Border width:";
+			this.labelBorderSize.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
+			// numericBorderSize
+			// 
+			this.numericBorderSize.Location = new System.Drawing.Point(157, 72);
+			this.numericBorderSize.Name = "numericBorderSize";
+			this.numericBorderSize.Size = new System.Drawing.Size(75, 20);
+			this.numericBorderSize.TabIndex = 16;
 			// 
 			// checkBorderColor
 			// 
 			this.checkBorderColor.AutoSize = true;
-			this.checkBorderColor.Location = new System.Drawing.Point(13, 133);
+			this.checkBorderColor.Location = new System.Drawing.Point(13, 102);
 			this.checkBorderColor.Name = "checkBorderColor";
 			this.checkBorderColor.Size = new System.Drawing.Size(89, 17);
 			this.checkBorderColor.TabIndex = 15;
@@ -335,7 +306,7 @@ namespace MSDN.Html.Editor
 			// checkBackColor
 			// 
 			this.checkBackColor.AutoSize = true;
-			this.checkBackColor.Location = new System.Drawing.Point(13, 105);
+			this.checkBackColor.Location = new System.Drawing.Point(13, 130);
 			this.checkBackColor.Name = "checkBackColor";
 			this.checkBackColor.Size = new System.Drawing.Size(116, 17);
 			this.checkBackColor.TabIndex = 14;
@@ -348,7 +319,7 @@ namespace MSDN.Html.Editor
 			this.listTextAlignment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.listTextAlignment.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.listTextAlignment.FormattingEnabled = true;
-			this.listTextAlignment.Location = new System.Drawing.Point(157, 48);
+			this.listTextAlignment.Location = new System.Drawing.Point(157, 98);
 			this.listTextAlignment.Name = "listTextAlignment";
 			this.listTextAlignment.Size = new System.Drawing.Size(104, 21);
 			this.listTextAlignment.TabIndex = 19;
@@ -357,35 +328,47 @@ namespace MSDN.Html.Editor
 			// 
 			this.labelBorderAlign.AutoSize = true;
 			this.labelBorderAlign.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelBorderAlign.Location = new System.Drawing.Point(10, 51);
+			this.labelBorderAlign.Location = new System.Drawing.Point(10, 101);
 			this.labelBorderAlign.Name = "labelBorderAlign";
-			this.labelBorderAlign.Size = new System.Drawing.Size(79, 13);
+			this.labelBorderAlign.Size = new System.Drawing.Size(98, 13);
 			this.labelBorderAlign.TabIndex = 18;
-			this.labelBorderAlign.Text = "Text alignment:";
+			this.labelBorderAlign.Text = "Alignment on page:";
 			this.labelBorderAlign.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
-			// labelBorderSize
+			// groupBox1
 			// 
-			this.labelBorderSize.AutoSize = true;
-			this.labelBorderSize.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelBorderSize.Location = new System.Drawing.Point(10, 77);
-			this.labelBorderSize.Name = "labelBorderSize";
-			this.labelBorderSize.Size = new System.Drawing.Size(69, 13);
-			this.labelBorderSize.TabIndex = 17;
-			this.labelBorderSize.Text = "Border width:";
-			this.labelBorderSize.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.groupBox1.Controls.Add(this.comboBoxWidthType);
+			this.groupBox1.Controls.Add(this.listTextAlignment);
+			this.groupBox1.Controls.Add(this.numericRows);
+			this.groupBox1.Controls.Add(this.labelBorderAlign);
+			this.groupBox1.Controls.Add(this.labelRowColumn);
+			this.groupBox1.Controls.Add(this.numericColumns);
+			this.groupBox1.Controls.Add(this.label1);
+			this.groupBox1.Controls.Add(this.numericTableWidth);
+			this.groupBox1.Controls.Add(this.labelWidth);
+			this.groupBox1.Location = new System.Drawing.Point(8, 12);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(338, 129);
+			this.groupBox1.TabIndex = 5;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Layout";
 			// 
-			// numericBorderSize
+			// comboBoxWidthType
 			// 
-			this.numericBorderSize.Location = new System.Drawing.Point(157, 75);
-			this.numericBorderSize.Name = "numericBorderSize";
-			this.numericBorderSize.Size = new System.Drawing.Size(75, 20);
-			this.numericBorderSize.TabIndex = 16;
+			this.comboBoxWidthType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxWidthType.FormattingEnabled = true;
+			this.comboBoxWidthType.Items.AddRange(new object[] {
+            "% of page",
+            "pixels"});
+			this.comboBoxWidthType.Location = new System.Drawing.Point(238, 71);
+			this.comboBoxWidthType.Name = "comboBoxWidthType";
+			this.comboBoxWidthType.Size = new System.Drawing.Size(87, 21);
+			this.comboBoxWidthType.TabIndex = 20;
 			// 
 			// btnBorderColor
 			// 
 			this.btnBorderColor.Color = System.Drawing.Color.Empty;
-			this.btnBorderColor.Location = new System.Drawing.Point(157, 129);
+			this.btnBorderColor.Location = new System.Drawing.Point(157, 98);
 			this.btnBorderColor.Name = "btnBorderColor";
 			this.btnBorderColor.Size = new System.Drawing.Size(75, 22);
 			this.btnBorderColor.TabIndex = 12;
@@ -396,7 +379,7 @@ namespace MSDN.Html.Editor
 			// btnBackColor
 			// 
 			this.btnBackColor.Color = System.Drawing.Color.Empty;
-			this.btnBackColor.Location = new System.Drawing.Point(157, 101);
+			this.btnBackColor.Location = new System.Drawing.Point(157, 126);
 			this.btnBackColor.Name = "btnBackColor";
 			this.btnBackColor.Size = new System.Drawing.Size(75, 22);
 			this.btnBackColor.TabIndex = 13;
@@ -410,9 +393,9 @@ namespace MSDN.Html.Editor
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.bCancel;
-			this.ClientSize = new System.Drawing.Size(402, 418);
+			this.ClientSize = new System.Drawing.Size(619, 293);
+			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.groupTable);
-			this.Controls.Add(this.groupLayout);
 			this.Controls.Add(this.groupCaption);
 			this.Controls.Add(this.bInsert);
 			this.Controls.Add(this.bCancel);
@@ -423,19 +406,19 @@ namespace MSDN.Html.Editor
 			this.Name = "TablePropertyForm";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-			this.Text = "Table Properties";
+			this.Text = "Modify Table";
 			this.groupCaption.ResumeLayout(false);
 			this.groupCaption.PerformLayout();
-			this.groupLayout.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.numericCellSpacing)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericCellPadding)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericColumns)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericRows)).EndInit();
-			this.groupPercentPixel.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.numericTableWidth)).EndInit();
 			this.groupTable.ResumeLayout(false);
 			this.groupTable.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericBorderSize)).EndInit();
+			this.groupBox1.ResumeLayout(false);
+			this.groupBox1.PerformLayout();
 			this.ResumeLayout(false);
 
         }
@@ -447,7 +430,6 @@ namespace MSDN.Html.Editor
         private System.Windows.Forms.Label labelCaption;
         private System.Windows.Forms.Label labelCaptionAlign;
         private System.Windows.Forms.Label labelLocation;
-        private System.Windows.Forms.GroupBox groupLayout;
         private System.Windows.Forms.GroupBox groupCaption;
         private System.Windows.Forms.Label labelRowColumn;
         private System.Windows.Forms.NumericUpDown numericRows;
@@ -461,9 +443,6 @@ namespace MSDN.Html.Editor
         private System.Windows.Forms.ComboBox listCaptionAlignment;
         private System.Windows.Forms.ComboBox listCaptionLocation;
         private System.Windows.Forms.GroupBox groupTable;
-        private System.Windows.Forms.RadioButton radioWidthPercent;
-        private System.Windows.Forms.Panel groupPercentPixel;
-        private System.Windows.Forms.RadioButton radioWidthPixel;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.CheckBox checkBorderColor;
 		private System.Windows.Forms.CheckBox checkBackColor;
@@ -473,6 +452,8 @@ namespace MSDN.Html.Editor
 		private System.Windows.Forms.Label labelBorderAlign;
 		private System.Windows.Forms.Label labelBorderSize;
 		private System.Windows.Forms.NumericUpDown numericBorderSize;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.ComboBox comboBoxWidthType;
 	}
 }
 
