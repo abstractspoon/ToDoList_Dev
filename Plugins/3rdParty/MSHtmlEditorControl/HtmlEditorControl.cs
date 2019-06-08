@@ -885,7 +885,7 @@ namespace MSDN.Html.Editor
 
 		private bool IsEditable
 		{
-			get { return (!_readOnly && _editEnabled); }
+			get { return (!_readOnly && _editEnabled && Enabled); }
 		}
 
         /// <summary>
@@ -1969,7 +1969,7 @@ namespace MSDN.Html.Editor
 		{
 			base.OnEnabledChanged(e);
 
-			this.WebBrowser.Document.BackColor = (Enabled ? SystemColors.Window : SystemColors.ControlLight);
+			UpdateEnabledState();
 		}
 
 		protected void UpdateEnabledState()
@@ -2005,12 +2005,14 @@ namespace MSDN.Html.Editor
 			this.toolstripEnableEditing.Checked = IsEditable;
 
 			this.toolstripDocumentPrint.Enabled = true; // always
+
+			this.WebBrowser.Document.BackColor = (IsEditable ? SystemColors.Window : SystemColors.ControlLight);
 		}
 
-	/// <summary>
-	/// Method using the document to set the font name
-	/// </summary>
-	public void FormatFontName(string name)
+		/// <summary>
+		/// Method using the document to set the font name
+		/// </summary>
+		public void FormatFontName(string name)
         {
             ExecuteCommandRange(HTML_COMMAND_FONT_NAME, name);
 

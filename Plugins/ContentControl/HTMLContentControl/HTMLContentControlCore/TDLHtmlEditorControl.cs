@@ -204,26 +204,6 @@ namespace HTMLContentControl
 			DialogUtils.SetFont(dialog, m_ControlsFont);
 			m_Trans.Translate(dialog);
 
-            // Centre dialogs over our client area
-            dialog.StartPosition = FormStartPosition.Manual;
-
-            Rectangle parentPos = RectangleToScreen(Bounds);
-            Point parentCentre = new Point((parentPos.Right + parentPos.Left) / 2, (parentPos.Bottom + parentPos.Top) / 2);
-
-            int dialogLeft = (parentCentre.X - (dialog.Width / 2));
-            int dialogTop = (parentCentre.Y - (dialog.Height / 2));
-
-			// but keep within screen
-			Rectangle screenArea = Screen.FromControl(this).WorkingArea;
-
-			dialogLeft = Math.Max(screenArea.Left, dialogLeft);
-			dialogLeft = Math.Min(screenArea.Right - dialog.Width, dialogLeft);
-
-			dialogTop = Math.Max(screenArea.Top, dialogTop);
-			dialogTop = Math.Min(screenArea.Bottom - dialog.Height, dialogTop);
-			
-			dialog.Location = new Point(dialogLeft, dialogTop);
-
             // Add icon for identification
             dialog.ShowIcon = true;
             dialog.Icon = HTMLContentControlCore.html;
