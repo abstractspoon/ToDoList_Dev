@@ -28,18 +28,17 @@ namespace HTMLReportExporter
 
 		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
-			if (!silent)
+			// Display a dialog to get the report parameters
+			// or to return the last saved template
+			using (var dialog = new HtmlReportTemplateForm(m_TypeId, m_Trans, tasks, prefs, sKey))
 			{
-				// Display a dialog to get the report parameters
-				using (var dialog = new HtmlReportTemplateForm(m_TypeId, m_Trans, tasks, prefs, sKey))
-				{
-					if (dialog.ShowDialog() != DialogResult.OK)
-						return false;
+				if (!silent && (dialog.ShowDialog() != DialogResult.OK))
+					return false;
 
-					m_Template = dialog.ReportTemplate;
-				}
+				m_Template = dialog.ReportTemplate;
 			}
-			return true;
+
+			return m_Template.HasContents();
 		}
 
 		public bool Export(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)

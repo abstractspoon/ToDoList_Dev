@@ -52,14 +52,14 @@ namespace HTMLReportExporter
 
 			m_TemplateFilePath = prefs.GetProfileString(key, "LastOpenTemplate", "");
 
-			m_Template = new HtmlReportTemplate();
+			m_Template = new HtmlReportTemplate(m_TemplateFilePath);
 			m_PrevTemplate = new HtmlReportTemplate();
 
 			m_ChangeTimer = new Timer();
 			m_ChangeTimer.Tick += new EventHandler(OnChangeTimer);
 			m_ChangeTimer.Interval = 500;
 
-			InitializeComponentEx();
+			InitializeComponent();
 		}
 
 		public HtmlReportTemplate ReportTemplate
@@ -67,10 +67,8 @@ namespace HTMLReportExporter
 			get { return m_Template; }
 		}
 
-		private void InitializeComponentEx()
+		protected override void OnLoad(EventArgs e)
 		{
-			InitializeComponent();
-
 			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, 0/*20*/);
 
 			this.Height = (this.Height + bannerHeight);
@@ -90,7 +88,7 @@ namespace HTMLReportExporter
 			this.htmlReportTasksControl.Translator = m_Trans;
 			this.htmlReportFooterControl.Translator = m_Trans;
 
-			if (!m_Template.Load(m_TemplateFilePath))
+			if (!m_Template.HasContents())
 			{
 #if DEBUG
 				this.m_Template.Header.Text = "Header";
