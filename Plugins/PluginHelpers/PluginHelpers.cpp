@@ -68,13 +68,17 @@ void DialogUtils::SetFont(System::Windows::Forms::Control::ControlCollection^ ct
 
 void Log::LogText(String^ text)
 {
-	String^ appFolder = System::IO::Path::GetDirectoryName(System::Reflection::Assembly::GetExecutingAssembly()->Location);
-	String^ logPath = System::IO::Path::Combine(appFolder, "ToDoList.log");
-
-	if (System::IO::File::Exists(logPath))
+	if (s_sLogPath == nullptr)
 	{
-		System::IO::File::AppendAllText(logPath, text + System::Environment::NewLine);
+		String^ appFolder = System::IO::Path::GetDirectoryName(System::Reflection::Assembly::GetExecutingAssembly()->Location);
+		s_sLogPath = System::IO::Path::Combine(appFolder, "ToDoList.log");
+
+		if (!System::IO::File::Exists(s_sLogPath))
+			s_sLogPath = String::Empty;
 	}
+
+	if (!String::IsNullOrEmpty(s_sLogPath))
+		System::IO::File::AppendAllText(s_sLogPath, text + System::Environment::NewLine);
 }
 
 

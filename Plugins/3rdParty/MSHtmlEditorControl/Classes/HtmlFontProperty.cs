@@ -108,6 +108,18 @@ namespace MSDN.Html.Editor
             }
         } //Size
 
+		public String SizeAsString
+		{
+			get
+			{
+				if (SizeInEms > 0)
+					return String.Format(CultureInfo.InvariantCulture, "{0}em", SizeInEms);
+
+				// else
+				return HtmlFontConversion.HtmlFontSizeString(Size);
+			}
+		}
+
         /// <summary>
         /// Property for the Bold Indication of the Font
         /// </summary>
@@ -314,13 +326,13 @@ namespace MSDN.Html.Editor
         /// </summary>
         public override string ToString()
         {
-            return string.Format("{0}, {1}, {2}", Name, Size, SizeInEms);
+            return string.Format(CultureInfo.InvariantCulture, "{0}, {1}", Name, SizeAsString);
 
         } //ToString
 
         public string ToStringEx()
         {
-			return string.Format(
+			return string.Format(CultureInfo.InvariantCulture,
 				@"Name({0}) 
 				  Size({1})
 				  SizeInEms({2})

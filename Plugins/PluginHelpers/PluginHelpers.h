@@ -51,6 +51,9 @@ namespace Abstractspoon
 
 			public ref class Log
 			{
+			private:
+				static String^ s_sLogPath = nullptr;
+
 			public:
 				static void LogText(String^ text);
 

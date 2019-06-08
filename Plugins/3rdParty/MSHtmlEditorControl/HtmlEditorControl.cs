@@ -1343,11 +1343,7 @@ namespace MSDN.Html.Editor
                         // set the body styles based on the defined value
                         bodyStyle.fontFamily = _bodyFont.Name;
                         bodyStyle.fontWeight = HtmlFontConversion.HtmlFontBoldString(_bodyFont.Bold);
-
-						if (_bodyFont.SizeInEms > 0)
-							bodyStyle.fontSize = String.Format("{0}em", _bodyFont.SizeInEms);
-						else
-							bodyStyle.fontSize = HtmlFontConversion.HtmlFontSizeString(_bodyFont.Size);
+						bodyStyle.fontSize = _bodyFont.SizeAsString;
                     }
                 }
             }
