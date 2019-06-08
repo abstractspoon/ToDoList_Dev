@@ -126,6 +126,7 @@
 			this.checkBackColor.TabIndex = 14;
 			this.checkBackColor.Text = "Background colour";
 			this.checkBackColor.UseVisualStyleBackColor = true;
+			this.checkBackColor.CheckedChanged += new System.EventHandler(this.checkBackColor_CheckedChanged);
 			// 
 			// btnBackColor
 			// 
@@ -147,6 +148,7 @@
 			this.checkBorderColor.TabIndex = 17;
 			this.checkBorderColor.Text = "Border colour";
 			this.checkBorderColor.UseVisualStyleBackColor = true;
+			this.checkBorderColor.CheckedChanged += new System.EventHandler(this.checkBorderColor_CheckedChanged);
 			// 
 			// btnBorderColor
 			// 

@@ -221,6 +221,7 @@
 			this.checkBorderColor.TabIndex = 14;
 			this.checkBorderColor.Text = "Border colour";
 			this.checkBorderColor.UseVisualStyleBackColor = true;
+			this.checkBorderColor.CheckedChanged += new System.EventHandler(this.checkBorderColor_CheckedChanged);
 			// 
 			// btnBorderColor
 			// 
