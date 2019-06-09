@@ -31,6 +31,16 @@
 
 //////////////////////////////////////////////////////////////////////
 
+#ifndef ETDT_DISABLE
+#	define ETDT_DISABLE        0x00000001
+#	define ETDT_ENABLE         0x00000002
+#	define ETDT_USETABTEXTURE  0x00000004
+#	define ETDT_ENABLETAB      (ETDT_ENABLE  | ETDT_USETABTEXTURE)
+#endif // !ETDT_DISABLE
+
+
+//////////////////////////////////////////////////////////////////////
+
 #if (WINVER < 0x0500)
 #	define DFCS_TRANSPARENT        0x0800
 #	define DFCS_HOT                0x1000
@@ -85,14 +95,13 @@ public:
 	
 	static BOOL DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nType, UINT nState, LPCRECT prClip = NULL);
 	static BOOL DrawEdge(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nType, UINT nState, UINT nEdge, UINT nFlags);
-	static BOOL DrawCaption(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nFlags);
-
 	static BOOL SetWindowTheme(const CWnd* pWnd, LPCTSTR szAppName);
+	static BOOL EnableDialogTexture(const CWnd* pWnd, DWORD dwFlags);
 	
-	static HPAINTBUFFER BeginBufferedPaint(HDC, LPCRECT , TH_BUFFERFORMAT, TH_PAINTPARAMS *, HDC *);
-	static BOOL GetBufferedPaintBits(HPAINTBUFFER, RGBQUAD **, int*);
-	static BOOL EndBufferedPaint(HPAINTBUFFER, BOOL);
-	
+	static HPAINTBUFFER BeginBufferedPaint(HDC hdcTarget, const RECT* rTarget, TH_BUFFERFORMAT dwFormat, TH_PAINTPARAMS * pParams, HDC* hdcBuffered);
+	static BOOL GetBufferedPaintBits(HPAINTBUFFER pb, RGBQUAD** pBits, int* nBitsCount);
+	static BOOL EndBufferedPaint(HPAINTBUFFER pb, BOOL bUpdatetarget);
+
 	BOOL Open(HWND hWnd, LPCTSTR szClassList);
 	BOOL Open(const CWnd* pWnd, LPCTSTR szClassList);
 	BOOL IsValid() { return (s_hUxTheme && m_hTheme); }
@@ -122,10 +131,12 @@ protected:
 	
 	// uxtheme functions
 	static DWORD GetAppThemeProperties();
+
 	HTHEME OpenThemeData(HWND hwnd, LPCWSTR pszClassList);
 	BOOL CloseThemeData(HTHEME hTheme);
 	BOOL DrawThemeBackground(HDC hdc, int iPartId, int iStateId, LPCRECT pRect, 
 		LPCRECT pClipRect);
+	BOOL EnableThemeDialogTexture(HWND hWnd, DWORD dwFlags);
 	BOOL DrawThemeParentBackground(HWND hWnd, HDC hdc, LPCRECT pRect);
 	BOOL DrawThemeText(HDC hdc, int iPartId, int iStateId, LPCWSTR pszText, int iCharCount, 
 		DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect);

@@ -22,6 +22,7 @@ typedef HRESULT (STDAPICALLTYPE *PFNSETWINDOWTHEME)(HWND hwnd, LPCWSTR pszSubApp
 typedef HRESULT (STDAPICALLTYPE *PFNCLOSETHEMEDATA)(HTHEME hTheme);
 typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMEBACKGROUND)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, 
 														 LPCRECT pRect, LPCRECT pClipRect);
+typedef HRESULT (STDAPICALLTYPE *PFNENABLETHEMEDIALOGTEXTURE)(HWND  hwnd, DWORD dwFlags); 
 typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMEPARENTBACKGROUND)(HWND hWnd, HDC hdc, LPCRECT pRect);
 typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMETEXT)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, 
 												   LPCWSTR pszText, int iCharCount, DWORD dwTextFlags, 
@@ -213,6 +214,16 @@ BOOL CThemed::SetWindowTheme(const CWnd* pWnd, LPCTSTR szAppName)
 	return FALSE;
 }
 
+BOOL CThemed::EnableDialogTexture(const CWnd* pWnd, DWORD dwFlags)
+{
+	CThemed th;
+	
+	if (th.AreControlsThemed())
+		return th.EnableThemeDialogTexture(*pWnd, dwFlags);
+
+	return FALSE;
+}
+
 BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nType, UINT nState, LPCRECT pClip)
 {
 	CThemed th;
@@ -292,10 +303,10 @@ BOOL CThemed::DrawBackground(CDC* pDC, int nPart, int nState, const CRect& rect,
 
 BOOL CThemed::DrawParentBackground(const CWnd* pWnd, CDC* pDC, LPCRECT pRect)
 {
-	ASSERT (m_hTheme);
-	ASSERT_VALID (pDC);
-	ASSERT_VALID (pWnd);
-	
+	ASSERT(m_hTheme);
+	ASSERT_VALID(pDC);
+	ASSERT_VALID(pWnd);
+
 	return DrawThemeParentBackground(*pWnd, *pDC, pRect);
 }
 
@@ -500,6 +511,19 @@ BOOL CThemed::DrawThemeBackground(HDC hdc, int iPartId, int iStateId, LPCRECT pR
 			return (SUCCEEDED(fnDrawThemeBackground(m_hTheme, hdc, iPartId, iStateId, pRect, pClipRect)));
 	}
 	
+	return FALSE;
+}
+
+BOOL CThemed::EnableThemeDialogTexture(HWND hWnd, DWORD dwFlags)
+{
+	if (InitUxTheme())
+	{
+		PFNENABLETHEMEDIALOGTEXTURE fnEnableThemeDialogTexture = (PFNENABLETHEMEDIALOGTEXTURE)GetProcAddress(s_hUxTheme, "EnableThemeDialogTexture");
+
+		if (fnEnableThemeDialogTexture)
+			return (SUCCEEDED(fnEnableThemeDialogTexture(hWnd, dwFlags)));
+	}
+
 	return FALSE;
 }
 

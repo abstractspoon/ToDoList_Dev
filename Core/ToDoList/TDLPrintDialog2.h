@@ -34,16 +34,17 @@
 
 class CTDLPrintStylePage : public CPropertyPage
 {
-	DECLARE_DYNCREATE(CTDLPrintStylePage)
-
 // Construction
 public:
-	CTDLPrintStylePage(LPCTSTR szStylesheet = NULL, LPCTSTR szPrefsKey = NULL,
-					   BOOL bSupportsExportToImage = TRUE);
+	CTDLPrintStylePage(LPCTSTR szStylesheet, 
+					   const CTDCImportExportMgr& mgrImpExp,
+					   LPCTSTR szPrefsKey,
+					   BOOL bSupportsExportToImage);
 	~CTDLPrintStylePage();
 	
 	TDLPD_STYLE GetExportStyle() const;
 	BOOL GetStylesheet(CString& sStylesheet) const;
+	BOOL GetOtherExporterTypeID(CString& sExporterID) const;
 
 protected:
 // Dialog Data
@@ -53,12 +54,14 @@ protected:
 	CComboBox	m_cbSimpleOptions;
 	//}}AFX_DATA
 
-	COwnerdrawComboBoxBase	m_cbOtherExporters;
+	const CTDCImportExportMgr& m_mgrImpExp;
+	CImportExportComboBox m_cbOtherExporters;
 	CFileEdit m_eStylesheet;
 	CString	m_sStylesheet;
 	int m_nStyleOption;
 	BOOL m_bSupportsExportToImage;
 	CString m_sPrefsKey;
+	CString m_sOtherExporterTypeID;
 
 // Overrides
 	// ClassWizard generate virtual function overrides
@@ -139,15 +142,21 @@ class CTDLPrintDialog2 : public CTDLDialog
 {
 // Construction
 public:
-	CTDLPrintDialog2(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet,
-					const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-					BOOL bSupportsExportToImage, CWnd* pParent = NULL);
+	CTDLPrintDialog2(LPCTSTR szTitle, 
+					 BOOL bPreview, 
+					 const CTDCImportExportMgr& mgrImpExp,
+					 FTC_VIEW nView, 
+					 LPCTSTR szStylesheet,	
+					 const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+					 BOOL bSupportsExportToImage, 
+					 CWnd* pParent = NULL);
 
 	CString GetTitle() const { return m_sTitle; }
 	COleDateTime GetDate() const;
 
 	TDLPD_STYLE GetExportStyle() const { return m_pageStyle.GetExportStyle(); }
 	BOOL GetStylesheet(CString& sStylesheet) const { return m_pageStyle.GetStylesheet(sStylesheet); }
+	BOOL GetOtherExporterTypeID(CString& sExporterID) const { return m_pageStyle.GetOtherExporterTypeID(sExporterID); }
 
 	const CTaskSelectionDlg& GetTaskSelection() const { return m_pageTaskSel.GetTaskSelection(); }
 
@@ -164,7 +173,6 @@ protected:
 	CTDLPrintStylePage m_pageStyle;
 	CTDLPrintTaskSelectionPage m_pageTaskSel;
 	CTabbedPropertyPageHost m_ppHost;
-
 
 // Overrides
 	// ClassWizard generated virtual function overrides

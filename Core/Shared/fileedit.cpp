@@ -218,9 +218,9 @@ void CFileEdit::OnPaint()
 				// fill bkgnd
 				HBRUSH hBkgnd = NULL;
 				
-				if (!IsWindowEnabled() || (GetStyle() & ES_READONLY))
-					hBkgnd = GetSysColorBrush(COLOR_3DFACE);
-				else
+// 				if (!IsWindowEnabled() || (GetStyle() & ES_READONLY))
+// 					hBkgnd = GetSysColorBrush(COLOR_3DFACE);
+// 				else
 					hBkgnd = (HBRUSH)GetParent()->SendMessage(WM_CTLCOLOREDIT, (WPARAM)(HDC)dc, (LPARAM)(HWND)GetSafeHwnd());
 				
 				if (!hBkgnd || hBkgnd == GetStockObject(NULL_BRUSH))
@@ -258,9 +258,9 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	// Background color
 	HBRUSH hBkgnd = NULL;
 	
-	if (!IsWindowEnabled() || (GetStyle() & ES_READONLY))
-		hBkgnd = GetSysColorBrush(COLOR_3DFACE);
-	else
+// 	if (!IsWindowEnabled() || (GetStyle() & ES_READONLY))
+// 		hBkgnd = GetSysColorBrush(COLOR_3DFACE);
+// 	else
 		hBkgnd = (HBRUSH)GetParent()->SendMessage(WM_CTLCOLOREDIT, (WPARAM)pDC->GetSafeHdc(), (LPARAM)(HWND)GetSafeHwnd());
 	
 	if (!hBkgnd || hBkgnd == GetStockObject(NULL_BRUSH))

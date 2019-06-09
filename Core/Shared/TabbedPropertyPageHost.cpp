@@ -5,6 +5,8 @@
 #include "stdafx.h"
 #include "TabbedPropertyPageHost.h"
 #include "misc.h"
+#include "themed.h"
+#include "DlgUnits.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -142,11 +144,16 @@ BOOL CTabbedPropertyPageHost::SetActivePage(int nIndex, BOOL bAndFocus)
 {
 	if (CPropertyPageHost::SetActivePage(nIndex, bAndFocus))
 	{
+		CPropertyPage* pActive = GetActivePage();
+		ASSERT(pActive);
+
+		CThemed::EnableDialogTexture(pActive, ETDT_ENABLETAB);
+
 		// resize new page
 		CRect rTabs, rPages;
-
+		
 		if (CalcTabPageRects(0, 0, rTabs, rPages))
-			GetActivePage()->MoveWindow(rPages);
+			pActive->MoveWindow(rPages);
 
 		if (nIndex != m_tabCtrl.GetCurSel())
 			m_tabCtrl.SetCurSel(nIndex);
@@ -208,7 +215,9 @@ BOOL CTabbedPropertyPageHost::CalcTabPageRects(int nWidth, int nHeight, CRect& r
 
 	rTabs.SetRect(0, 0, nWidth, nHeight);
 	rPages.SetRect(0, 0, nWidth, nHeight);
-	rPages.DeflateRect(10, 10);
+
+	CDlgUnits dlu(GetParent(), TRUE);
+	rPages.DeflateRect(dlu.ToPixelsX(7), dlu.ToPixelsY(7));
 
 	switch (m_tabCtrl.GetOrientation())
 	{

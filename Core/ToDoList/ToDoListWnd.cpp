@@ -6314,7 +6314,9 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 
 	// export to html and then print in IE
-	CTDLPrintDialog2 dialog(sTitle, bPreview, 
+	CTDLPrintDialog2 dialog(sTitle, 
+							bPreview, 
+							m_mgrImportExport,
 							tdc.GetTaskView(), 
 							tdc.GetStylesheetPath(),
 							tdc.GetCustomAttributeDefs(),

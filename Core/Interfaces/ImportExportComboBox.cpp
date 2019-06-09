@@ -17,12 +17,14 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportExportComboBox
 
-CImportExportComboBox::CImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly)
+CImportExportComboBox::CImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, 
+											 BOOL bFileBasedOnly, LPCTSTR szFileExts)
 	: 
 	m_mgrImpExp(mgrImpExp), 
 	m_bImporting(bImport), 
-	m_bFileBasedOnly(bFileBasedOnly)
+	m_bFileBasedOnly(FALSE)
 {
+	SetFileBasedOnly(bFileBasedOnly, szFileExts);
 }
 
 CImportExportComboBox::~CImportExportComboBox()
@@ -39,9 +41,16 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportExportComboBox message handlers
 
-void CImportExportComboBox::SetFileBasedOnly(BOOL bFileBased)
+void CImportExportComboBox::SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts)
 {
+	ASSERT(bFileBased || (szFileExts == NULL));
+
 	m_bFileBasedOnly = bFileBased;
+
+	if (bFileBased && !Misc::IsEmpty(szFileExts))
+		Misc::Split(szFileExts, m_aFileExt, '|');
+	else
+		m_aFileExt.RemoveAll();
 
 	if (GetSafeHwnd())
 	{
@@ -130,17 +139,23 @@ void CImportExportComboBox::BuildCombo()
 	{
 		CString sExt = GetImpExpFileExtension(nImpExp);
 
-		if (!m_bFileBasedOnly || !sExt.IsEmpty())
+		if (m_bFileBasedOnly)
 		{
-			CString sItem, sMenu(GetImpExpMenuText(nImpExp));
+			if (sExt.IsEmpty())
+				continue;
 
-			if (!sExt.IsEmpty())
-				sItem.Format(_T("%s (.%s)"), sMenu, sExt);
-			else
-				sItem = sMenu;
-
-			CDialogHelper::AddString(*this, sItem, nImpExp);
+			if (m_aFileExt.GetSize() && !Misc::Contains(sExt, m_aFileExt, FALSE, TRUE))
+				continue;
 		}
+
+		CString sItem, sMenu(GetImpExpMenuText(nImpExp));
+
+		if (!sExt.IsEmpty())
+			sItem.Format(_T("%s (.%s)"), sMenu, sExt);
+		else
+			sItem = sMenu;
+
+		CDialogHelper::AddString(*this, sItem, nImpExp);
 	}
 }
 
@@ -185,22 +200,26 @@ CString CImportExportComboBox::GetSelectedTypeID() const
 
 int CImportExportComboBox::SetSelectedTypeID(LPCTSTR szTypeID)
 {
-	int nImpExp = CB_ERR;
+	return SetCurSel(FindItem(szTypeID));
+}
+
+int CImportExportComboBox::FindItem(LPCTSTR szTypeID) const
+{
+	int nItem = CB_ERR;
 
 	if (!Misc::IsEmpty(szTypeID))
 	{
+		int nImpExp = -1;
+
 		if (m_bImporting)
 			nImpExp = m_mgrImpExp.FindImporterByType(szTypeID);
 		else
 			nImpExp = m_mgrImpExp.FindExporterByType(szTypeID);
+
+		nItem = CDialogHelper::FindItemByData(*this, nImpExp);
 	}
 
-	if (nImpExp == CB_ERR)
-		SetCurSel(CB_ERR);
-	else
-		CDialogHelper::SelectItemByData(*this, nImpExp);
-
-	return nImpExp;
+	return nItem;
 }
 
 void CImportExportComboBox::DDX(CDataExchange* pDX, CString& value)

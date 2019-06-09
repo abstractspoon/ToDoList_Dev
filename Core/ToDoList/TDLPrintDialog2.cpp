@@ -6,6 +6,7 @@
 #include "TDLPrintDialog.h"
 #include "TDLPrintDialog2.h"
 #include "TDLStylesheetParamConfigDlg.h"
+#include "TDCImportExportMgr.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
@@ -36,13 +37,18 @@ enum
 // CTDLPrintDialog2 dialog
 
 
-CTDLPrintDialog2::CTDLPrintDialog2(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet, 
-									const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-									BOOL bSupportsExportToImage, CWnd* pParent /*=NULL*/)
+CTDLPrintDialog2::CTDLPrintDialog2(LPCTSTR szTitle, 
+								   BOOL bPreview, 
+								   const CTDCImportExportMgr& mgrImpExp,
+								   FTC_VIEW nView, 
+								   LPCTSTR szStylesheet, 
+								   const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+								   BOOL bSupportsExportToImage, 
+								   CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_PRINT_DIALOG2, _T("Print"), pParent), 
 	m_bPrintPreview(bPreview), 
-	m_pageStyle(szStylesheet, m_sPrefsKey, bSupportsExportToImage),
+	m_pageStyle(szStylesheet, mgrImpExp, m_sPrefsKey, bSupportsExportToImage),
 	m_pageTaskSel(aAttribDefs, m_sPrefsKey, nView),
 	m_sTitle(szTitle)
 {
@@ -60,6 +66,7 @@ CTDLPrintDialog2::CTDLPrintDialog2(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nVie
 void CTDLPrintDialog2::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
+
 	//{{AFX_DATA_MAP(CTDLPrintDialog2)
 	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_PRINTTITLE, m_sTitle);
@@ -79,10 +86,13 @@ void CTDLPrintDialog2::OnOK()
 {
 	CTDLDialog::OnOK();
 
+	m_ppHost.OnOK();
+
 	// save settings
 	CPreferences prefs;
 
 	m_cbTitle.Save(prefs, m_sPrefsKey);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("WantDate"), m_bDate);
 }
 
 BOOL CTDLPrintDialog2::OnInitDialog() 
@@ -113,26 +123,22 @@ COleDateTime CTDLPrintDialog2::GetDate() const
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPrintStylePage property page
 
-IMPLEMENT_DYNCREATE(CTDLPrintStylePage, CPropertyPage)
-
-CTDLPrintStylePage::CTDLPrintStylePage(LPCTSTR szStylesheet, LPCTSTR szPrefsKey,
+CTDLPrintStylePage::CTDLPrintStylePage(LPCTSTR szStylesheet, 
+									   const CTDCImportExportMgr& mgrImpExp,
+									   LPCTSTR szPrefsKey,
 									   BOOL bSupportsExportToImage)
 	: 
 	CPropertyPage(CTDLPrintStylePage::IDD),
+	m_mgrImpExp(mgrImpExp),
 	m_bSupportsExportToImage(bSupportsExportToImage),
 	m_sPrefsKey(szPrefsKey),
+	m_cbOtherExporters(mgrImpExp, FALSE, TRUE, _T("html|htm")),
 	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
 {
 	//{{AFX_DATA_INIT(CTDLPrintStylePage)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
-	CPreferences prefs;
-
-	m_nStyleOption = prefs.GetProfileEnum(m_sPrefsKey, _T("ExportStyle"), TDLPDS_WRAP);
-
-	if (!m_bSupportsExportToImage && (m_nStyleOption == TDLPDS_IMAGE))
-		m_nStyleOption = TDLPDS_WRAP;
-
+	m_sOtherExporterTypeID = CPreferences().GetProfileString(m_sPrefsKey, _T("OtherExporter"));
 	InitStylesheet(szStylesheet);
 }
 
@@ -152,7 +158,8 @@ void CTDLPrintStylePage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STYLESHEET, m_eStylesheet);
 	DDX_Text(pDX, IDC_STYLESHEET, m_sStylesheet);
 	DDX_Radio(pDX, IDC_STYLE_STYLESHEET, m_nStyleOption);
-	//DDX_Check(pDX, IDC_USESTYLESHEET, m_bUseStylesheet);
+
+	m_cbOtherExporters.DDX(pDX, m_sOtherExporterTypeID);
 }
 
 
@@ -180,8 +187,9 @@ void CTDLPrintStylePage::OnOK()
 	// save settings
 	CPreferences prefs;
 
-	prefs.WriteProfileInt(m_sPrefsKey, _T("ExportStyle"), (int)m_nStyleOption);
-	//prefs.WriteProfileString(m_sPrefsKey, _T("Stylesheet"), m_bUseStylesheet ? m_sStylesheet : _T(""));
+	prefs.WriteProfileInt(m_sPrefsKey, _T("ExportStyle"), GetExportStyle());
+	prefs.WriteProfileString(m_sPrefsKey, _T("Stylesheet"), m_sStylesheet);
+	prefs.WriteProfileString(m_sPrefsKey, _T("OtherExporter"), m_cbOtherExporters.GetSelectedTypeID());
 
 	// we store whether this is the same as the default print stylesheet
 	// so we can update as it does
@@ -193,12 +201,55 @@ BOOL CTDLPrintStylePage::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
+	// Remove 'simple web page' exporter from droplist
+	int nSimpleExp = m_cbOtherExporters.FindItem(m_mgrImpExp.GetTypeID(TDCET_HTML));
+	ASSERT(nSimpleExp != CB_ERR);
+
+	m_cbOtherExporters.DeleteString(nSimpleExp);
+
+	if (m_cbOtherExporters.GetCount() == 1)
+	{
+		m_cbOtherExporters.SetCurSel(0);
+		m_sOtherExporterTypeID = m_cbOtherExporters.GetSelectedTypeID();
+	}
+
 	CDialogHelper::AddString(m_cbSimpleOptions, _T("Wrapped"), TDLPDS_WRAP);
 	CDialogHelper::AddString(m_cbSimpleOptions, _T("Paragraph"), TDLPDS_PARA);
 	CDialogHelper::AddString(m_cbSimpleOptions, _T("Table"), TDLPDS_TABLE);
-	m_cbSimpleOptions.SetCurSel(0);
 
+	TDLPD_STYLE nExportStyle = CPreferences().GetProfileEnum(m_sPrefsKey, _T("ExportStyle"), TDLPDS_WRAP);
+
+	switch (nExportStyle)
+	{
+	case TDLPDS_STYLESHEET:
+		m_nStyleOption = OPT_STYLESHEET;
+		break;
+
+	case TDLPDS_WRAP:
+	case TDLPDS_TABLE:
+	case TDLPDS_PARA:
+		m_nStyleOption = OPT_SIMPLE;
+		CDialogHelper::SelectItemByData(m_cbSimpleOptions, nExportStyle);
+		break;
+		
+	case TDLPDS_IMAGE:
+		m_nStyleOption = OPT_SCREENSHOT;
+		break;
+
+	case TDLPDS_OTHEREXPORTER:
+		m_nStyleOption = OPT_OTHEREXPORTER;
+		break;
+	}
+
+	if (!m_bSupportsExportToImage && (m_nStyleOption == OPT_SCREENSHOT))
+	{
+		m_nStyleOption = OPT_SIMPLE;
+		CDialogHelper::SelectItemByData(m_cbSimpleOptions, TDLPDS_WRAP);
+	}
+
+	UpdateData(FALSE);
 	EnableDisableControls();
+	OnSelchangeSimplePageOption();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
@@ -230,7 +281,6 @@ void CTDLPrintStylePage::InitStylesheet(LPCTSTR szStylesheet)
 	}
 
 	m_sStylesheet = FileMisc::GetRelativePath(m_sStylesheet, sFolder, FALSE);
-	//m_bUseStylesheet = (!m_sStylesheet.IsEmpty());
 }
 
 void CTDLPrintStylePage::OnUsestylesheet()
@@ -318,7 +368,6 @@ HBRUSH CTDLPrintStylePage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	{
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->SetTextColor(255);
-		hbr = GetSysColorBrush(COLOR_3DFACE);
 	}
 
 	return hbr;
@@ -339,8 +388,6 @@ void CTDLPrintStylePage::OnConfigureStylesheet()
 void CTDLPrintStylePage::OnSelchangeSimplePageOption()
 {
 	// Update the associated icon
-	UpdateData();
-
 	switch (CDialogHelper::GetSelectedItemData(m_cbSimpleOptions, TDLPDS_WRAP))
 	{
 	case TDLPDS_WRAP:
@@ -359,7 +406,6 @@ void CTDLPrintStylePage::OnSelchangeSimplePageOption()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPrintTaskSelectionPage dialog
-
 
 CTDLPrintTaskSelectionPage::CTDLPrintTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs,
 													   LPCTSTR szRegKey, FTC_VIEW nView)

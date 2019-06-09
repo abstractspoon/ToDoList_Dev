@@ -19,12 +19,13 @@ class CImportExportComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
-	CImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly = FALSE);
+	CImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly = FALSE, LPCTSTR szFileExts = NULL);
 
-	void SetFileBasedOnly(BOOL bFileBased);
+	void SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts = NULL); // File-extensions delimited by '|'
 
 	CString GetSelectedTypeID() const;
 	int SetSelectedTypeID(LPCTSTR szTypeID);
+	int FindItem(LPCTSTR szTypeID) const;
 
 	void DDX(CDataExchange* pDX, CString& value);
 
@@ -32,6 +33,7 @@ protected:
 	const CImportExportMgr& m_mgrImpExp;
 
 	BOOL m_bImporting, m_bFileBasedOnly;
+	CStringArray m_aFileExt;
 	CSysImageList m_ilImages;
 
 // Overrides

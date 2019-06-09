@@ -65,11 +65,12 @@ public:
 	CPropertyPage* FindPage(DWORD dwItemData);
 
 	BOOL AddPage(CPropertyPage* pPage, LPCTSTR szTitle = NULL, DWORD dwItemData = 0);
-	BOOL SetActivePage(int nIndex, BOOL bAndFocus = TRUE);
-	BOOL SetActivePage(CPropertyPage* pPage, BOOL bAndFocus = TRUE);
 	int GetPageCount() const { return m_aPages.GetSize(); }
 	CString GetPageTitle(int nIndex) const;
 	DWORD GetPageItemData(int nIndex) const;
+
+	virtual BOOL SetActivePage(int nIndex, BOOL bAndFocus = TRUE);
+	virtual BOOL SetActivePage(CPropertyPage* pPage, BOOL bAndFocus = TRUE);
 
 	BOOL GetPageRect(int nIndex, LPRECT pRect) const;
 	BOOL GetOrgPageSize(int nIndex, LPSIZE pSize) const;
