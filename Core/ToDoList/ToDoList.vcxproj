@@ -489,6 +489,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="TDLPrintDialog2.cpp" />
     <ClCompile Include="TDLPriorityComboBox.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -706,6 +707,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLPasteFromClipboardDlg.h" />
     <ClInclude Include="TDLPrefMigrationDlg.h" />
     <ClInclude Include="TDLPrintDialog.h" />
+    <ClInclude Include="TDLPrintDialog2.h" />
     <ClInclude Include="TDLPriorityComboBox.h" />
     <ClInclude Include="TDLQuickFindComboBox.h" />
     <ClInclude Include="TDLRecurringTaskEdit.h" />

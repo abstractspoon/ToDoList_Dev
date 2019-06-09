@@ -696,6 +696,7 @@
 #define IDC_RADIO2                      1409
 #define IDC_BYTASK                      1409
 #define IDC_SHOWANYATTRIB               1409
+#define IDC_STYLE_SIMPLE                1409
 #define IDC_CLIPBOARDTEXT               1410
 #define IDC_BYDAY                       1410
 #define IDC_REFRESH                     1411
@@ -818,15 +819,23 @@
 #define IDC_HASLUNCHBREAK               1526
 #define IDC_STARTOFLUNCH                1527
 #define IDC_ENDOFLUNCH                  1528
+#define IDC_STYLE_STYLESHEET            1528
 #define IDC_STARTOFDAY                  1529
+#define IDC_STYLE_OTHER                 1529
+#define IDC_SIMPLEPAGE_OPTIONS          1531
+#define IDC_STYLE_TASKVIEW              1532
+#define IDC_SIMPLE_ICON                 1533
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
+#define IDD_PRINT_DIALOG2               2001
 #define IDC_REMOVEOUTLOOKTASKS          2002
 #define IDI_NOTE                        2002
 #define IDI_RESET_ELAPSED               2002
+#define IDD_PRINT_STYLE_PAGE            2002
 #define IDC_CHOOSEFOLDER                2003
 #define IDI_TASK                        2003
+#define IDD_PRINT_TASKSEL_PAGE          2003
 #define IDC_CURFOLDER                   2005
 #define IDI_CONTACT                     2005
 #define IDC_HIDEUNFLAGGEDEMAIL          2006
@@ -2287,7 +2296,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        314
 #define _APS_NEXT_COMMAND_VALUE         34643
-#define _APS_NEXT_CONTROL_VALUE         1528
+#define _APS_NEXT_CONTROL_VALUE         1534
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

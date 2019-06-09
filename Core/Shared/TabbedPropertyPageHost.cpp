@@ -93,7 +93,6 @@ BOOL CTabbedPropertyPageHost::ConstructTabControl()
 			ASSERT(0);
 	}
 
-
 	if (!m_tabCtrl.Create(dwStyles, CRect(0, 0, 0, 0), this, IDC_TABCTRL))
 		return FALSE;
 
@@ -102,6 +101,8 @@ BOOL CTabbedPropertyPageHost::ConstructTabControl()
 		m_tabCtrl.SetImageList(m_pImages);
 		m_pImages = NULL;
 	}
+
+	m_tabCtrl.SetFont(GetParent()->GetFont());
 
 	for (int nPage = 0; nPage < GetPageCount(); nPage++)
 	{
@@ -199,36 +200,32 @@ BOOL CTabbedPropertyPageHost::CalcTabPageRects(int nWidth, int nHeight, CRect& r
 		nHeight = rClient.Height();
 	}
 
-	rTabs = rPages = CRect(0, 0, nWidth, 0);
-
 	// to get round AdjustRect not being const
+	rTabs = CRect(0, 0, nWidth, 0);
 	(const_cast<CTabbedPropertyPageHost*>(this))->m_tabCtrl.AdjustRect(TRUE, rTabs);
 
 	int nTabHeight = rTabs.Height();
+
 	rTabs.SetRect(0, 0, nWidth, nHeight);
+	rPages.SetRect(0, 0, nWidth, nHeight);
+	rPages.DeflateRect(10, 10);
 
 	switch (m_tabCtrl.GetOrientation())
 	{
 		case e_tabTop:	  
-			rTabs.bottom = rTabs.top + nTabHeight - 5;
-			rTabs.right += 2;
-			rPages.top = rTabs.bottom;
+			rPages.top = nTabHeight;
 			break;
 
 		case e_tabBottom: 
-			rTabs.top = rTabs.bottom - nTabHeight + 5;
-			rTabs.right += 2;
-			rPages.bottom = rTabs.top;
+			rPages.bottom = nHeight - nTabHeight;
 			break;
 
 		case e_tabLeft:	  
-			rTabs.right = rTabs.left + nTabHeight; 
-			rPages.left = rTabs.right;
+			rPages.left = nTabHeight;
 			break;
 
 		case e_tabRight:  
-			rTabs.left = rTabs.right - nTabHeight;
-			rPages.right = rTabs.left;
+			rPages.right = nWidth - nTabHeight;
 			break;
 
 		default:

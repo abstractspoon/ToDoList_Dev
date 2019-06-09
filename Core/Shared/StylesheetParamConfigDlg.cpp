@@ -35,30 +35,6 @@ CStylesheetParamConfigDlg::CStylesheetParamConfigDlg(LPCTSTR szStylesheetPath, U
 	m_sStylesheetPath(szStylesheetPath),
 	m_nIDNoParamsMsg(nIDNoParamsMsg)
 {
-	ASSERT(!::PathIsRelative(szStylesheetPath));
-	ASSERT(FileMisc::HasExtension(szStylesheetPath, _T("xsl")));
-
-	// Load the stylesheet and params
-	CXslFile stylesheet;
-
-	if (!stylesheet.Load(m_sStylesheetPath))
-		return;
-
-	if (!stylesheet.GetGlobalParams(m_aParams))
-	{
-		AfxMessageBox(m_nIDNoParamsMsg);
-		return;
-	}
-
-	// List control for editing params
-	AddRCControl(&m_lcParams, NULL, LVS_REPORT | LVS_OWNERDRAWFIXED | WS_TABSTOP, WS_EX_CLIENTEDGE, BORDER, BORDER, LIST_CX, LIST_CY, IDC_LIST);
-
-	// add ok and cancel buttons at the bottom right
-	int nYPos = (BORDER + LIST_CY + SPACING);
-	int nXPos = (BORDER + LIST_CX);
-
-	AddRCControl(_T("PUSHBUTTON"), NULL, _T("OK"), 0, 0, (nXPos - (2 * BTN_CX) - SPACING), nYPos, BTN_CX, BTN_CY, IDOK);
-	AddRCControl(_T("PUSHBUTTON"), NULL, _T("Cancel"), 0, 0, (nXPos - BTN_CX), nYPos, BTN_CX, BTN_CY, IDCANCEL);
 }
 
 void CStylesheetParamConfigDlg::DoDataExchange(CDataExchange* pDX)
@@ -90,6 +66,35 @@ int CStylesheetParamConfigDlg::DoModal()
 
 BOOL CStylesheetParamConfigDlg::OnInitDialog()
 {
+	ASSERT(!::PathIsRelative(m_sStylesheetPath));
+	ASSERT(FileMisc::HasExtension(m_sStylesheetPath, _T("xsl")));
+
+	// Load the stylesheet and params
+	CXslFile stylesheet;
+
+	if (!stylesheet.Load(m_sStylesheetPath))
+	{
+		EndDialog(IDCANCEL);
+		return FALSE;
+	}
+
+	if (!stylesheet.GetGlobalParams(m_aParams))
+	{
+		AfxMessageBox(m_nIDNoParamsMsg);
+		EndDialog(IDCANCEL);
+		return FALSE;
+	}
+
+	// List control for editing params
+	AddRCControl(&m_lcParams, NULL, LVS_REPORT | LVS_OWNERDRAWFIXED | WS_TABSTOP, WS_EX_CLIENTEDGE, BORDER, BORDER, LIST_CX, LIST_CY, IDC_LIST);
+
+	// add ok and cancel buttons at the bottom right
+	int nYPos = (BORDER + LIST_CY + SPACING);
+	int nXPos = (BORDER + LIST_CX);
+
+	AddRCControl(_T("PUSHBUTTON"), NULL, _T("OK"), 0, 0, (nXPos - (2 * BTN_CX) - SPACING), nYPos, BTN_CX, BTN_CY, IDOK);
+	AddRCControl(_T("PUSHBUTTON"), NULL, _T("Cancel"), 0, 0, (nXPos - BTN_CX), nYPos, BTN_CX, BTN_CY, IDCANCEL);
+
 	CRuntimeDlg::OnInitDialog();
 
 	m_lcParams.AddCol(_T("Parameter Name"), (LIST_CX / 2)); // Parameter name

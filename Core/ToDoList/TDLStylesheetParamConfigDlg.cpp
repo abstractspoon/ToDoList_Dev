@@ -58,8 +58,6 @@ int CTDLStylesheetParamConfigDlg::DoModal()
 
 CString CTDLStylesheetParamConfigDlg::GetStylesheetPath() const
 { 
-	ASSERT(!::PathIsRelative(m_sStylesheetPath));
-
 	if (GetUsingConfiguredStylesheet())
 		return GetConfigStylesheetPath(m_sStylesheetPath);
 
@@ -69,8 +67,8 @@ CString CTDLStylesheetParamConfigDlg::GetStylesheetPath() const
 
 CString CTDLStylesheetParamConfigDlg::GetConfigStylesheetPath(LPCTSTR szStylesheetPath)
 { 
-	ASSERT(!::PathIsRelative(szStylesheetPath));
-	ASSERT(FileMisc::HasExtension(szStylesheetPath, _T("xsl")));
+	if (::PathIsRelative(szStylesheetPath) || !FileMisc::HasExtension(szStylesheetPath, _T("xsl")))
+		return _T("");
 
 	CString sConfigPath(szStylesheetPath);
 	return FileMisc::ReplaceExtension(sConfigPath, _T("cfg"));

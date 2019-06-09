@@ -2085,6 +2085,56 @@ BEGIN
                     IDC_LISTLABEL,7,7,380,8
 END
 
+IDD_PRINT_DIALOG2 DIALOG DISCARDABLE  0, 0, 391, 249
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Print Tasklist"
+FONT 8, "Tahoma"
+BEGIN
+    LTEXT           "&Title",-1,7,9,28,8
+    COMBOBOX        IDC_PRINTTITLE,40,7,166,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "T&oday's date",IDC_PRINTDATE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,220,9,164,10
+    CONTROL         "",IDC_PAGEHOST,"Static",SS_BLACKFRAME | NOT WS_VISIBLE | 
+                    WS_DISABLED | WS_GROUP,7,26,377,187
+    DEFPUSHBUTTON   "OK",IDOK,271,228,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,334,228,50,14
+END
+
+IDD_PRINT_STYLE_PAGE DIALOG DISCARDABLE  0, 0, 370, 159
+STYLE WS_CHILD | WS_VISIBLE
+FONT 8, "Tahoma"
+BEGIN
+    CONTROL         "Stylesheet",IDC_STYLE_STYLESHEET,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,7,7,220,10
+    CONTROL         "Simple web page",IDC_STYLE_SIMPLE,"Button",
+                    BS_AUTORADIOBUTTON,7,42,356,10
+    CONTROL         "Screenshot of active task &View",IDC_STYLE_TASKVIEW,
+                    "Button",BS_AUTORADIOBUTTON,7,77,356,10
+    CONTROL         "Other  HTML exporter",IDC_STYLE_OTHER,"Button",
+                    BS_AUTORADIOBUTTON,7,112,356,10
+    PUSHBUTTON      "Configure...",IDC_CONFIGURESTYLESHEET,232,7,63,14,NOT 
+                    WS_VISIBLE | WS_DISABLED | WS_GROUP
+    EDITTEXT        IDC_STYLESHEET,19,19,183,13,ES_AUTOHSCROLL
+    LTEXT           "Stylesheet not found",IDC_STYLESHEETNOTFOUND,209,21,154,
+                    8,NOT WS_VISIBLE
+    COMBOBOX        IDC_SIMPLEPAGE_OPTIONS,19,54,184,48,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    ICON            IDI_STYLE_WRAP,IDC_SIMPLE_ICON,209,51,21,20
+    ICON            IDI_STYLE_IMAGE,-1,18,87,21,20
+    COMBOBOX        IDC_OTHEREXPORTERS,19,124,184,30,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_PRINT_TASKSEL_PAGE DIALOG DISCARDABLE  0, 0, 370, 157
+STYLE WS_CHILD | WS_VISIBLE
+FONT 8, "Tahoma"
+BEGIN
+    CONTROL         "",IDC_FRAME,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,0,0,
+                    369,156
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -4280,6 +4330,21 @@ BEGIN
         RIGHTMARGIN, 387
         TOPMARGIN, 10
         BOTTOMMARGIN, 231
+    END
+
+    IDD_PRINT_DIALOG2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 384
+        BOTTOMMARGIN, 242
+    END
+
+    IDD_PRINT_STYLE_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 363
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 152
     END
 END
 #endif    // APSTUDIO_INVOKED

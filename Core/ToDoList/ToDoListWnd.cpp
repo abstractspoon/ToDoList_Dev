@@ -13,6 +13,7 @@
 #include "tdcmsg.h"
 #include "tdcmapping.h"
 #include "tdlprintdialog.h"
+#include "tdlprintdialog2.h"
 #include "tdltransformdialog.h"
 #include "tdstringres.h"
 #include "tdlcolumnselectiondlg.h"
@@ -6313,7 +6314,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 
 	// export to html and then print in IE
-	CTDLPrintDialog dialog(sTitle, bPreview, 
+	CTDLPrintDialog2 dialog(sTitle, bPreview, 
 							tdc.GetTaskView(), 
 							tdc.GetStylesheetPath(),
 							tdc.GetCustomAttributeDefs(),
@@ -6322,6 +6323,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	if (dialog.DoModal() != IDOK)
 		return;
 
+/*
 	RedrawWindow();
 	
 	DOPROGRESS(bPreview ? IDS_PPREVIEWPROGRESS : IDS_PRINTPROGRESS);
@@ -6355,6 +6357,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 		if (dwRes < 32)
 			CMessageBox::AfxShow(IDS_PRINTFAILED_TITLE, IDS_PRINTFAILED, MB_OK);
 	}
+*/
 }
 
 BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath)
