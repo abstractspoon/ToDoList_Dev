@@ -314,15 +314,20 @@ namespace HTMLReportExporter
 						var oldLayout = new TaskTemplate.Layout(oldTemplate.Task.Text).Style;
 						var newLayout = new TaskTemplate.Layout(newTemplate.Task.Text).Style;
 
-						if (oldLayout == TaskTemplate.Layout.StyleType.Table &&
-							newLayout != TaskTemplate.Layout.StyleType.Table)
-						{
+						bool showTableHeaderCombo = (newLayout == TaskTemplate.Layout.StyleType.Table);
 
-						}
-						else if (oldLayout != TaskTemplate.Layout.StyleType.Table &&
-								 newLayout == TaskTemplate.Layout.StyleType.Table)
+						if (showTableHeaderCombo != this.tableHeaderCombobox.Visible)
 						{
+							this.tableHeaderCombobox.Visible = showTableHeaderCombo;
+							this.tableHeaderCombobox.Enabled = showTableHeaderCombo;
 
+							// Short-term hack :)
+							int newBottom = (showTableHeaderCombo ? this.htmlReportHeaderControl.Bottom : this.htmlReportTitleControl.Bottom);
+
+							this.htmlReportTasksControl.Bounds = Rectangle.FromLTRB(this.htmlReportTasksControl.Left,
+																					this.htmlReportTasksControl.Top,
+																					this.htmlReportTasksControl.Right,
+																					newBottom);
 						}
 					}
 					break;
