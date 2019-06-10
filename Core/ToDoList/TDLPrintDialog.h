@@ -12,19 +12,11 @@
 
 #include "..\shared\fileedit.h"
 #include "..\shared\historycombobox.h"
+#include "..\shared\TabbedPropertyPageHost.h"
+
+#include "..\interfaces\ImportExportComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLPrintDialog dialog
-
-// enum TDLPD_STYLE
-// {
-// 	TDLPDS_STYLESHEET = -1,
-// 
-// 	TDLPDS_WRAP,
-// 	TDLPDS_TABLE,
-// 	TDLPDS_PARA,
-// 	TDLPDS_IMAGE,
-// };
 
 enum TDLPD_STYLE
 {
@@ -38,65 +30,168 @@ enum TDLPD_STYLE
 	TDLPDS_OTHEREXPORTER,
 };
 
-class CTDLPrintDialog : public CTDLDialog
+/////////////////////////////////////////////////////////////////////////////
+
+class CTDLPrintStylePage : public CPropertyPage
 {
 // Construction
 public:
-	CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet,
-					const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-					BOOL bSupportsExportToImage, CWnd* pParent = NULL);
-
-	BOOL GetStylesheet(CString& sStylesheet) const;
-	CString GetTitle() const { return m_sTitle; }
-	COleDateTime GetDate() const;
+	CTDLPrintStylePage(LPCTSTR szStylesheet, 
+					   const CTDCImportExportMgr& mgrImpExp,
+					   LPCTSTR szPrefsKey,
+					   BOOL bSupportsExportToImage);
+	~CTDLPrintStylePage();
+	
 	TDLPD_STYLE GetExportStyle() const;
-
-	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
+	BOOL GetStylesheet(CString& sStylesheet) const;
+	BOOL GetOtherExporterTypeID(CString& sExporterID) const;
 
 protected:
 // Dialog Data
-	//{{AFX_DATA(CTDLPrintDialog)
-	enum { IDD = IDD_PRINT_DIALOG };
-	CFileEdit	m_eStylesheet;
-	CString	m_sStylesheet;
-    CTaskSelectionDlg m_dlgTaskSel;
+	//{{AFX_DATA(CTDLPrintStylePage)
+	enum { IDD = IDD_PRINT_STYLE_PAGE };
+	CStatic	m_stSimpleIcon;
+	CComboBox	m_cbSimpleOptions;
 	//}}AFX_DATA
-	TDLPD_STYLE	m_nExportStyle;
-	CString	m_sTitle;
-	BOOL	m_bDate;
-	BOOL	m_bUseStylesheet;
-	BOOL	m_bPreview;
-	BOOL	m_bSupportsExportToImage;
-	CHistoryComboBox m_cbTitle;
+
+	const CTDCImportExportMgr& m_mgrImpExp;
+	CImportExportComboBox m_cbOtherExporters;
+	CFileEdit m_eStylesheet;
+	CString	m_sStylesheet;
+	int m_nStyleOption;
+	BOOL m_bSupportsExportToImage;
+	CString m_sPrefsKey;
+	CString m_sOtherExporterTypeID;
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLPrintDialog)
-	public:
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(CTDLPrintStylePage)
+protected:
 	virtual void OnOK();
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
-
 	// Generated message map functions
-	//{{AFX_MSG(CTDLPrintDialog)
-	virtual BOOL OnInitDialog();
+	//{{AFX_MSG(CTDLPrintStylePage)
+	afx_msg void OnSelchangeSimplePageOption();
+	//}}AFX_MSG
 	afx_msg void OnChangeStylesheet();
 	afx_msg void OnChangeStyle();
 	afx_msg void OnConfigureStylesheet();
-	//}}AFX_MSG
-    afx_msg void OnUsestylesheet();
+	afx_msg void OnUsestylesheet();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	void InitStylesheet(LPCTSTR szStylesheet);
 	void EnableDisableControls();
-	
+
 	CString GetBaseStylesheetPath() const;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// CTDLPrintTaskSelectionPage dialog
+
+class CTDLPrintTaskSelectionPage : public CPropertyPage
+{
+// Construction
+public:
+	CTDLPrintTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+							   LPCTSTR szRegKey, FTC_VIEW nView);
+	~CTDLPrintTaskSelectionPage();
+
+	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
+
+	void SetOutputStyle(TDLPD_STYLE nStyle);
+
+protected:
+// Dialog Data
+	//{{AFX_DATA(CTDLPrintTaskSelectionPage)
+	enum { IDD = IDD_PRINT_TASKSEL_PAGE };
+		// NOTE: the ClassWizard will add data members here
+	//}}AFX_DATA
+
+	CTaskSelectionDlg m_dlgTaskSel;
+	TDLPD_STYLE	m_nExportStyle;
+
+// Overrides
+protected:
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CTDLPrintTaskSelectionPage)
+	virtual void OnOK();
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	//}}AFX_VIRTUAL
+
+	// Generated message map functions
+	//{{AFX_MSG(CTDLPrintTaskSelectionPage)
+		// NOTE: the ClassWizard will add member functions here
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+// Implementation
+protected:
+};
+/////////////////////////////////////////////////////////////////////////////
+// CTDLPrintDialog dialog
+
+class CTDLPrintDialog : public CTDLDialog
+{
+// Construction
+public:
+	CTDLPrintDialog(LPCTSTR szTitle, 
+					 BOOL bPreview, 
+					 const CTDCImportExportMgr& mgrImpExp,
+					 FTC_VIEW nView, 
+					 LPCTSTR szStylesheet,	
+					 const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+					 BOOL bSupportsExportToImage, 
+					 CWnd* pParent = NULL);
+
+	CString GetTitle() const { return m_sTitle; }
+	COleDateTime GetDate() const;
+
+	TDLPD_STYLE GetExportStyle() const { return m_pageStyle.GetExportStyle(); }
+	BOOL GetStylesheet(CString& sStylesheet) const { return m_pageStyle.GetStylesheet(sStylesheet); }
+	BOOL GetOtherExporterTypeID(CString& sExporterID) const { return m_pageStyle.GetOtherExporterTypeID(sExporterID); }
+
+	const CTaskSelectionDlg& GetTaskSelection() const { return m_pageTaskSel.GetTaskSelection(); }
+
+protected:
+// Dialog Data
+	//{{AFX_DATA(CTDLPrintDialog2)
+	enum { IDD = IDD_PRINT_DIALOG };
+	//}}AFX_DATA
+	CString	m_sTitle;
+	BOOL	m_bDate;
+	BOOL	m_bPrintPreview;
+	CHistoryComboBox m_cbTitle;
+	
+	CTDLPrintStylePage m_pageStyle;
+	CTDLPrintTaskSelectionPage m_pageTaskSel;
+	CTabbedPropertyPageHost m_ppHost;
+
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CTDLPrintDialog2)
+protected:
+	virtual void OnOK();
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog();
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+
+	// Generated message map functions
+	//{{AFX_MSG(CTDLPrintDialog2)
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+protected:
 };
 
 //{{AFX_INSERT_LOCATION}}

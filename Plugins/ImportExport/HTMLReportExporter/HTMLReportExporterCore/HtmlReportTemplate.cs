@@ -340,7 +340,7 @@ namespace HTMLReportExporter
 			Footer = new FooterTemplate();
 		}
 
-		public HtmlReportTemplate(String pathName)
+		public HtmlReportTemplate(String pathName) : this()
 		{
 			Load(pathName);
 		}

@@ -13,7 +13,6 @@
 #include "tdcmsg.h"
 #include "tdcmapping.h"
 #include "tdlprintdialog.h"
-#include "tdlprintdialog2.h"
 #include "tdltransformdialog.h"
 #include "tdstringres.h"
 #include "tdlcolumnselectiondlg.h"
@@ -3747,19 +3746,6 @@ void CToDoListWnd::UpdateTooltip()
     m_trayIcon.SetTip(sTooltip);
 }
 
-BOOL CToDoListWnd::Export2Html(const CTaskFile& tasks, const CString& sFilePath, const CString& sStylesheet) const
-{
-	CWaitCursor cursor;
-	
-	if (FileMisc::FileExists(sStylesheet))
-	{
-		return tasks.TransformToFile(sStylesheet, sFilePath);
-	}
-	
-	// else default export
-	return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, TDCET_HTML) == IIER_SUCCESS);
-}
-
 void CToDoListWnd::OnSaveas() 
 {
 	int nSel = GetSelToDoCtrl();
@@ -6314,7 +6300,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 
 	// export to html and then print in IE
-	CTDLPrintDialog2 dialog(sTitle, 
+	CTDLPrintDialog dialog(sTitle, 
 							bPreview, 
 							m_mgrImportExport,
 							tdc.GetTaskView(), 
@@ -6325,7 +6311,6 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	if (dialog.DoModal() != IDOK)
 		return;
 
-/*
 	RedrawWindow();
 	
 	DOPROGRESS(bPreview ? IDS_PPREVIEWPROGRESS : IDS_PRINTPROGRESS);
@@ -6359,82 +6344,114 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 		if (dwRes < 32)
 			CMessageBox::AfxShow(IDS_PRINTFAILED_TITLE, IDS_PRINTFAILED, MB_OK);
 	}
-*/
 }
 
 BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath)
 {
 	TDLPD_STYLE nStyle = dlg.GetExportStyle();
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	if (nStyle == TDLPDS_IMAGE)
+	switch (nStyle)
 	{
-		CString sTempImg = FileMisc::GetTempFilePath(_T("tdl.view"), _T("bmp"));
-
-		if (GetToDoCtrl().SaveTaskViewToImage(sTempImg))
+	case TDLPDS_IMAGE:
 		{
-			CString sHtmlOutput(_T("<!DOCTYPE html>\n"));
-			
-			sHtmlOutput += _T("<html>\n<head>\n");
-			sHtmlOutput += _T("</head>\n<style>\n");
+			CString sTempImg = FileMisc::GetTempFilePath(_T("tdl.view"), _T("bmp"));
 
-			sHtmlOutput += _T("img { max-width: 100%; } \n");
-
-			sHtmlOutput += _T("</style>\n<body>\n");
-			CString sTitle = dlg.GetTitle(), sDate = CDateHelper::FormatDate(dlg.GetDate());
-
-			if (!sDate.IsEmpty() || !sTitle.IsEmpty())
+			if (tdc.SaveTaskViewToImage(sTempImg))
 			{
-				CString sTitleTag;
-				sTitleTag.Format(_T("<font face='%s' size='%d'>\n<h2>%s</h2>%s<p/>"), 
-								Prefs().GetHtmlFont(), Prefs().GetHtmlFontSize(),
-								sTitle, sDate);
-				
-				sHtmlOutput += sTitleTag;
+				// Make a simple web page container
+				CString sHtmlOutput(_T("<!DOCTYPE html>\n"));
+
+				sHtmlOutput += _T("<html>\n<head>\n");
+				sHtmlOutput += _T("</head>\n<style>\n");
+
+				sHtmlOutput += _T("img { max-width: 100%; } \n");
+
+				sHtmlOutput += _T("</style>\n<body>\n");
+				CString sTitle = dlg.GetTitle(), sDate = CDateHelper::FormatDate(dlg.GetDate());
+
+				if (!sDate.IsEmpty() || !sTitle.IsEmpty())
+				{
+					CString sTitleTag;
+					sTitleTag.Format(_T("<font face='%s' size='%d'>\n<h2>%s</h2>%s<p/>"),
+									 Prefs().GetHtmlFont(), Prefs().GetHtmlFontSize(),
+									 sTitle, sDate);
+
+					sHtmlOutput += sTitleTag;
+				}
+
+				CString sImage;
+				sImage.Format(_T("<img src=\"%s\">"), sTempImg);
+
+				sHtmlOutput += sImage;
+				sHtmlOutput += _T("</body>\n</html>\n");
+
+				return FileMisc::SaveFile(sFilePath, sHtmlOutput, SFEF_UTF8WITHOUTBOM);
 			}
-
-			CString sImage;
-			sImage.Format(_T("<img src=\"%s\">"), sTempImg);
-
-			sHtmlOutput += sImage;
-			sHtmlOutput += _T("</body>\n</html>\n");
-
-			FileMisc::SaveFile(sFilePath, sHtmlOutput, SFEF_UTF8WITHOUTBOM);
 		}
-		else
+		break;
+
+	case TDLPDS_STYLESHEET:
 		{
-			// Error handling
-			// TODO
+			CString sStylesheet;
+			VERIFY(dlg.GetStylesheet(sStylesheet));
 
-			return FALSE;
+			CTaskFile tasks;
+			GetTasks(tdc, TRUE, TRUE, dlg.GetTaskSelection(), tasks, NULL);
+
+			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
+
+			// save intermediate tasklist to file as required
+			LogIntermediateTaskList(tasks, tdc.GetFilePath());
+
+			// export
+			CWaitCursor cursor;
+			return tasks.TransformToFile(sStylesheet, sFilePath);
 		}
-	}
-	else
-	{
-		CFilteredToDoCtrl& tdc = GetToDoCtrl();
+		break;
 
-		CString sStylesheet;
-		BOOL bTransform = dlg.GetStylesheet(sStylesheet);
+	case TDLPDS_OTHEREXPORTER:
+		{
+			CString sExporterTypeID;
+			VERIFY(dlg.GetOtherExporterTypeID(sExporterTypeID));
 
-		CTaskFile tasks;
-		GetTasks(tdc, TRUE, bTransform, dlg.GetTaskSelection(), tasks, NULL);
-		
-		if (!bTransform)
+			CTaskFile tasks;
+			GetTasks(tdc, TRUE, FALSE, dlg.GetTaskSelection(), tasks, NULL);
+
+			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
+
+			// save intermediate tasklist to file as required
+			LogIntermediateTaskList(tasks, tdc.GetFilePath());
+
+			// export
+			CWaitCursor cursor;
+			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, sExporterTypeID, FALSE) == IIER_SUCCESS);
+		}
+		break;
+
+	case TDLPDS_WRAP:
+	case TDLPDS_TABLE:
+	case TDLPDS_PARA:
+		// simple web page
+		{
+			CTaskFile tasks;
+			GetTasks(tdc, TRUE, FALSE, dlg.GetTaskSelection(), tasks, NULL);
+
 			tasks.SetMetaData(TDL_EXPORTSTYLE, Misc::Format(nStyle));
+			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
-		tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
+			// save intermediate tasklist to file as required
+			LogIntermediateTaskList(tasks, tdc.GetFilePath());
 
-		// save intermediate tasklist to file as required
-		LogIntermediateTaskList(tasks, tdc.GetFilePath());
-
-		// export
-		if (!Export2Html(tasks, sFilePath, sStylesheet))
-		{
-			// cancelled
-			return FALSE; 
+			// export
+			CWaitCursor cursor;
+			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, TDCET_HTML) == IIER_SUCCESS);
 		}
+		break;
 	}
 
-	return TRUE;
+	ASSERT(0);
+	return FALSE;
 }
 
 void CToDoListWnd::OnUpdatePrint(CCmdUI* pCmdUI) 

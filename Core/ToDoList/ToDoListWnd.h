@@ -729,8 +729,6 @@ protected:
 	void UpdateTimeTrackerTasks(const CFilteredToDoCtrl& tdc, BOOL bAllTasks);
 	BOOL ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 					int nImporter, TDLID_IMPORTTO nImportTo);
-	BOOL Export2Html(const CTaskFile& tasks, const CString& sFilePath, 
-					const CString& sStylesheet) const;
 	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath);
 	UINT GetNewTaskCmdID() const;
 	UINT GetNewSubtaskCmdID() const;

@@ -94,7 +94,7 @@ namespace HTMLReportExporter
 				this.m_Template.Header.Text = "Header";
 				this.m_Template.Header.BackColor = Color.LightBlue;
 				this.m_Template.Title.Text = "Title";
-				this.m_Template.Task.Text = "$(Title)";
+				this.m_Template.Task.Text = "$(title)";
 				this.m_Template.Footer.Text = "Footer";
 				this.m_Template.Footer.BackColor = Color.LightPink;
 

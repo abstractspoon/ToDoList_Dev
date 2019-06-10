@@ -6,6 +6,7 @@
 #include "TasklistHtmlExporter.h"
 #include "tdlrecurringtaskedit.h"
 #include "TDCCustomAttributeHelper.h"
+#include "TDLPrintDialog.h"
 
 #include "..\shared\xmlfile.h"
 #include "..\shared\filemisc.h"
@@ -36,10 +37,12 @@ static LPCTSTR DOCTYPE = _T("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD XHTML 1.0 Trans
 static LPCTSTR TAB = _T("&nbsp;&nbsp;&nbsp;&nbsp;");
 static LPCTSTR SPACE = _T("&nbsp;");
 
-enum { STYLE_WRAP, STYLE_TABLE, STYLE_PARA };
-
 CTaskListHtmlExporter::CTaskListHtmlExporter() 
-	: STRIKETHRUDONE(TRUE), EXPORTSTYLE(STYLE_WRAP), ROOT(TRUE), COMMENTSPERCENTWIDTH(30)
+	: 
+	STRIKETHRUDONE(TRUE), 
+	EXPORTSTYLE(TDLPDS_WRAP),
+	ROOT(TRUE), 
+	COMMENTSPERCENTWIDTH(30)
 {
 	// override base class ENDL
 	ENDL = "\n";
@@ -192,7 +195,7 @@ CString CTaskListHtmlExporter::FormatTitle(const ITASKLISTBASE* pTasks) const
 		sTitleBlock += _T("<p/>");
 	}
 	
-	if (EXPORTSTYLE == STYLE_TABLE)
+	if (EXPORTSTYLE == TDLPDS_TABLE)
 	{
 		sTitleBlock += _T("<table border=\"1\">\n");
 	}
@@ -204,7 +207,7 @@ CString CTaskListHtmlExporter::FormatHeader(const ITASKLISTBASE* pTasks) const
 {
 	CString sHeader = CTaskListExporterBase::FormatHeader(pTasks);
 
-	if ((EXPORTSTYLE == STYLE_TABLE) && !sHeader.IsEmpty())
+	if ((EXPORTSTYLE == TDLPDS_TABLE) && !sHeader.IsEmpty())
 	{
 		sHeader = _T("<thead><tr>") + sHeader + _T("</tr></thead>");
 	}
@@ -216,7 +219,7 @@ CString CTaskListHtmlExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttrib, const CSt
 {
 	CString sItem;
 
-	if (EXPORTSTYLE == STYLE_TABLE)
+	if (EXPORTSTYLE == TDLPDS_TABLE)
 	{
 		if (nAttrib == TDCA_COMMENTS)
 			sItem.Format(_T("<th width=\"%d%%\">%s</th>"), COMMENTSPERCENTWIDTH, sAttribLabel);
@@ -236,8 +239,8 @@ CString CTaskListHtmlExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM
 
 	switch (EXPORTSTYLE)
 	{
-	case STYLE_WRAP:
-	case STYLE_PARA:
+	case TDLPDS_WRAP:
+	case TDLPDS_PARA:
 		// figure out indent
 		if (pTasks->IsAttributeAvailable(TDCA_POSITION))
 		{
@@ -260,15 +263,18 @@ CString CTaskListHtmlExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM
 		}
 
 		// wrapped tasks without subtasks
-		if (EXPORTSTYLE == STYLE_WRAP && !pTasks->GetFirstTask(hTask))
+		if ((EXPORTSTYLE == TDLPDS_WRAP) && !pTasks->GetFirstTask(hTask))
 			sTask += _T("<br>");
 
 		sTask += _T("<br>");
 		break;
 		
-	case STYLE_TABLE:
+	case TDLPDS_TABLE:
 		sTask = _T("<tr>") + sTask + _T("</tr>");
 		break;
+
+	default:
+		ASSERT(0);
 	}
 
 	return sTask;
@@ -280,7 +286,7 @@ CString CTaskListHtmlExporter::ExportSubtasks(const ITASKLISTBASE* pTasks, HTASK
 
 	if (!sSubtasks.IsEmpty()) // at least one sub-task
 	{
-		if (EXPORTSTYLE != STYLE_TABLE)
+		if (EXPORTSTYLE != TDLPDS_TABLE)
 		{
 			if (pTasks->IsAttributeAvailable(TDCA_POSITION))
 				sSubtasks += _T("</blockquote>");
@@ -293,7 +299,7 @@ CString CTaskListHtmlExporter::ExportSubtasks(const ITASKLISTBASE* pTasks, HTASK
 	{
 		ASSERT(hTask == NULL);
 
-		if (EXPORTSTYLE == STYLE_TABLE)
+		if (EXPORTSTYLE == TDLPDS_TABLE)
 		{
 			sSubtasks += _T("</table>\n");
 		}
@@ -318,7 +324,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 		TXT2XML(sAttribVal);
 
 	// Must process empty values in table format
-	if (!sAttribVal.IsEmpty() || (EXPORTSTYLE == STYLE_TABLE))
+	if (!sAttribVal.IsEmpty() || (EXPORTSTYLE == TDLPDS_TABLE))
 	{
 		switch (nAttrib)
 		{
@@ -334,7 +340,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 				else
 					sFmtAttrib += sAttribVal;
 
-				if (EXPORTSTYLE == STYLE_PARA)
+				if (EXPORTSTYLE == TDLPDS_PARA)
 					sFmtAttrib += _T("<br>");
 			}
 			break;
@@ -344,7 +350,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 			{
 				switch (EXPORTSTYLE)
 				{
-				case STYLE_WRAP:
+				case TDLPDS_WRAP:
 					if (nAttrib == TDCA_COMMENTS)
 					{
 						sFmtAttrib = ENDL + sAttribVal;
@@ -358,7 +364,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 					}				
 					break;
 					
-				case STYLE_TABLE:
+				case TDLPDS_TABLE:
 					// special case: custom attrib
 					if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
 						sFmtAttrib = FormatTableCell(sAttribVal);
@@ -366,7 +372,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 						sFmtAttrib = sAttribVal;
 					break;
 					
-				case STYLE_PARA:
+				case TDLPDS_PARA:
 					if (sAttribLabel.IsEmpty())
 						sFmtAttrib = sAttribVal;
 					else
@@ -402,7 +408,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	case TDCA_POSITION:
 	case TDCA_TASKNAME:
 		// Indent subtasks in table view only
-		if (EXPORTSTYLE == STYLE_TABLE)
+		if (EXPORTSTYLE == TDLPDS_TABLE)
 		{
 			if ((nAttrib == TDCA_POSITION) || !pTasks->IsAttributeAvailable(TDCA_POSITION))
 			{
@@ -484,7 +490,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 			
 			bColor = FALSE;
 			bStrikeThru = FALSE;
-			bBlockQuote = (EXPORTSTYLE != STYLE_TABLE);
+			bBlockQuote = (EXPORTSTYLE != TDLPDS_TABLE);
 		}
 		else if (!sItem.IsEmpty())
 		{
@@ -533,7 +539,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	}
 
 	// we've already handled custom attrib above
-	if ((EXPORTSTYLE == STYLE_TABLE) && !CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
+	if ((EXPORTSTYLE == TDLPDS_TABLE) && !CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
 	{
 		if (sItem.IsEmpty())
 			sItem = SPACE;

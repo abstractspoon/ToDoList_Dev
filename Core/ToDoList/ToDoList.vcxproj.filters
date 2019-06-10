@@ -412,9 +412,6 @@
     <ClCompile Include="TDCMainMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDLPrintDialog2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FilteredToDoCtrl.h">
@@ -859,9 +856,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCMainMenu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TDLPrintDialog2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

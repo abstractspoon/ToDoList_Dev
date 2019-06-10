@@ -828,7 +828,6 @@
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
-#define IDD_PRINT_DIALOG2               2001
 #define IDC_REMOVEOUTLOOKTASKS          2002
 #define IDI_NOTE                        2002
 #define IDI_RESET_ELAPSED               2002
