@@ -385,7 +385,7 @@ namespace HTMLReportExporter
 
 		public class TaskTemplateReporter : TaskTemplate
 		{
-			private TaskTemplateLayout m_Layout;
+			private Layout m_Layout;
 
 			private bool m_Preview;
 			private int m_PreviewTaskCount;
@@ -399,7 +399,7 @@ namespace HTMLReportExporter
 				Copy(task);
 
 				m_Preview = preview;
-				m_Layout = new TaskTemplateLayout(Text);
+				m_Layout = new Layout(Text);
 			}
 
 			public bool WriteTableContent(TaskList tasks, HtmlTextWriter html)
@@ -448,12 +448,12 @@ namespace HTMLReportExporter
 					return;
 
 				// First subtask
-				if (m_Layout.Style != TaskTemplateLayout.StyleType.Table)
+				if (m_Layout.Style != Layout.StyleType.Table)
 					html.WriteLine(m_Layout.StartHtml);
 
 				WriteTask(task.GetFirstSubtask(), depth + 1, html);
 
-				if (m_Layout.Style != TaskTemplateLayout.StyleType.Table)
+				if (m_Layout.Style != Layout.StyleType.Table)
 					html.WriteLine(m_Layout.EndHtml);
 
 				// Next task

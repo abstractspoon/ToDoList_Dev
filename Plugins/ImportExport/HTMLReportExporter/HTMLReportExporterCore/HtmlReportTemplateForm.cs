@@ -235,7 +235,9 @@ namespace HTMLReportExporter
 		{
 			if (!IsDisposed)
 			{
-				switch ((PageType)tabControl.SelectedIndex)
+				var page = (PageType)tabControl.SelectedIndex;
+
+				switch (page)
 				{
 					case PageType.Header:
 						m_Template.Header.Text = this.htmlReportHeaderControl.InnerHtml ?? "";
@@ -265,7 +267,15 @@ namespace HTMLReportExporter
 						break;
 				}
 
-				CheckRefreshPreview();
+				if (!m_Template.Equals(m_PrevTemplate))
+				{
+					m_ChangeTimer.Stop();
+
+					OnChangeTemplate(page, m_PrevTemplate, m_Template);
+					m_PrevTemplate.Copy(m_Template);
+
+					m_ChangeTimer.Start();
+				}
 			}
 		}
 
@@ -289,17 +299,39 @@ namespace HTMLReportExporter
 			return result;
 		}
 
-		private void CheckRefreshPreview()
+		private void OnChangeTemplate(PageType page, HtmlReportTemplate oldTemplate, HtmlReportTemplate newTemplate)
 		{
-			if (!m_Template.Equals(m_PrevTemplate))
+			switch (page)
 			{
-				m_ChangeTimer.Stop();
+				case PageType.Header:
+					break;
 
-				m_PrevTemplate.Copy(m_Template);
-				RefreshPreview();
+				case PageType.Title:
+					break;
 
-				m_ChangeTimer.Start();
+				case PageType.Tasks:
+					{
+						var oldLayout = new TaskTemplate.Layout(oldTemplate.Task.Text).Style;
+						var newLayout = new TaskTemplate.Layout(newTemplate.Task.Text).Style;
+
+						if (oldLayout == TaskTemplate.Layout.StyleType.Table &&
+							newLayout != TaskTemplate.Layout.StyleType.Table)
+						{
+
+						}
+						else if (oldLayout != TaskTemplate.Layout.StyleType.Table &&
+								 newLayout == TaskTemplate.Layout.StyleType.Table)
+						{
+
+						}
+					}
+					break;
+
+				case PageType.Footer:
+					break;
 			}
+
+			RefreshPreview();
 		}
 
 		private void RefreshPreview()

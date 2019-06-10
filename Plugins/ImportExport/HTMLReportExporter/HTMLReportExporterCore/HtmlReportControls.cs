@@ -23,7 +23,7 @@ namespace HTMLReportExporter
 
 		// ---------------------------------------------------------------
 
-		public HtmlReportControlBase()
+		protected HtmlReportControlBase()
 		{
 			InitializeComponentEx();
 		}
@@ -45,8 +45,8 @@ namespace HTMLReportExporter
 			set
 			{
 				m_Trans = value;
-				// Toolbar handled by parent
 				m_Trans.Translate(ContextMenu.Items);
+				// Toolbar handled by parent
 			}
 		}
 
