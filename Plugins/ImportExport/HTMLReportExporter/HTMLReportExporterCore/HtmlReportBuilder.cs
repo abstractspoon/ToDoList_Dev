@@ -385,21 +385,12 @@ namespace HTMLReportExporter
 
 		public class TaskTemplateReporter : TaskTemplate
 		{
-			private TaskLayout m_Layout;
-			private String m_StartHtml, m_TaskHtml, m_EndHtml;
+			private TaskTemplateLayout m_Layout;
 
 			private bool m_Preview;
 			private int m_PreviewTaskCount;
 
 			private const int MaxNumPreviewTasks = 20;
-
-			private enum TaskLayout
-			{
-				None,
-				Table,
-				OrderedList,
-				UnorderedList
-			}
 
 			// ------------------------------------------------------
 
@@ -408,151 +399,7 @@ namespace HTMLReportExporter
 				Copy(task);
 
 				m_Preview = preview;
-			}
-
-			private void InitLayout(TaskList tasks)
-			{
-				m_Layout = TaskLayout.None;
-				m_TaskHtml = Text;
-				m_StartHtml = String.Empty;
-				m_EndHtml = String.Empty;
-				m_PreviewTaskCount = 0;
-
-				try
-				{
-					var doc = new HtmlAgilityPack.HtmlDocument();
-					doc.LoadHtml(Text);
-
-					// Remove everything before the first bit of text
-					// or the first major structural element
-					var elm = doc.DocumentNode.FirstChild;
-
-					while (elm != null)
-					{
-						// get next sibling in case we need to delete this node
-						var nextElm = elm.NextSibling;
-
-						if (ElementHasContent(elm))
-							break;
-
-						elm.Remove();
-						elm = nextElm;
-					}
-
-					if (elm != null)
-					{
-						switch (elm.Name.ToUpper())
-						{
-							case "TABLE":
-								m_Layout = TaskLayout.Table;
-								m_TaskHtml = GetElementInnerHtml(elm, "TBODY");
-								break;
-
-							case "UL":
-								m_Layout = TaskLayout.UnorderedList;
-								m_TaskHtml = elm.InnerHtml;
-								break;
-
-							case "OL":
-								m_Layout = TaskLayout.OrderedList;
-								m_TaskHtml = elm.InnerHtml;
-								break;
-						}
-
-						if (m_Layout != TaskLayout.None)
-						{
-							int taskStart = elm.OuterHtml.IndexOf(m_TaskHtml);
-
-							m_StartHtml = elm.OuterHtml.Substring(0, taskStart);
-							m_EndHtml = elm.OuterHtml.Substring(taskStart + m_TaskHtml.Length);
-
-							if (m_Layout == TaskLayout.Table)
-							{
-								// Prefix 'Table:Tbody' with header row
-								int tbodyStart = m_StartHtml.ToUpper().IndexOf("<TBODY>");
-
-								if (tbodyStart != -1)
-								{
-									var theadStyle = "style=font-weight:bold;font-size:1.5em;display:table-header-group;";
-									var theadHtml = String.Format("\n<thead {0}>{1}</thead>", theadStyle, FormatTableHeader());
-
-									m_StartHtml = m_StartHtml.Insert(tbodyStart, theadHtml);
-								}
-
-								// Wrap <td> in <div> to prevent breaks across page
-								//m_TaskHtml = m_TaskHtml.Replace("<td>", "<td><div class=\"avoid\">");
-								//m_TaskHtml = m_TaskHtml.Replace("</td>", "</div></td>");
-
-							}
-
-						}
-					}
-				}
-				catch
-				{
-				}
-			}
-
-			static private HtmlAgilityPack.HtmlNode FindElement(HtmlAgilityPack.HtmlNode elm, string name, bool recursive = true)
-			{
-				if (elm.Name.ToUpper().Equals(name))
-					return elm;
-
-				if (recursive)
-				{
-					var child = elm.FirstChild;
-
-					while (child != null)
-					{
-						var find = FindElement(child, name, recursive);
-
-						if (find != null)
-							return find;
-
-						child = child.NextSibling;
-					}
-				}
-
-				return null;
-			}
-
-			static private String GetElementInnerHtml(HtmlAgilityPack.HtmlNode elm, string name, bool recursive = true)
-			{
-				var find = FindElement(elm, name, recursive);
-
-				return (find == null ? String.Empty : find.InnerHtml);
-			}
-
-			private static bool ElementHasContent(HtmlAgilityPack.HtmlNode elm)
-			{
-				if (elm == null)
-					return false;
-
-				if (IsContent(elm.InnerText))
-					return true;
-
-				// process children
-				var child = elm.FirstChild;
-
-				while (child != null)
-				{
-					if (ElementHasContent(child))
-						return true;
-
-					child = child.NextSibling;
-				}
-
-				return false;
-			}
-
-			private static bool IsContent(String text)
-			{
-				var content = text.Replace("\r", "")
-									.Replace("\n", "")
-									.Replace("&nbsp;", "")
-									.Trim();
-
-				return !String.IsNullOrWhiteSpace(content);
+				m_Layout = new TaskTemplateLayout(Text);
 			}
 
 			public bool WriteTableContent(TaskList tasks, HtmlTextWriter html)
@@ -563,14 +410,12 @@ namespace HTMLReportExporter
 				if (task == null)
 					return false;
 
-				InitLayout(tasks);
-
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.WriteLine(m_StartHtml);
+				html.WriteLine(m_Layout.StartHtml);
 
 				WriteTask(task, 0, html);
 				
-				html.WriteLine(m_EndHtml);
+				html.WriteLine(m_Layout.EndHtml);
 				html.RenderEndTag(); // Div
 
 				return true;
@@ -583,7 +428,7 @@ namespace HTMLReportExporter
 
 				if (!String.IsNullOrWhiteSpace(EnabledText))
 				{
-					var text = m_TaskHtml;
+					var text = m_Layout.TaskHtml;
 
 					foreach (var attrib in Attributes)
 					{
@@ -603,32 +448,16 @@ namespace HTMLReportExporter
 					return;
 
 				// First subtask
-				if (m_Layout != TaskLayout.Table)
-					html.WriteLine(m_StartHtml);
+				if (m_Layout.Style != TaskTemplateLayout.StyleType.Table)
+					html.WriteLine(m_Layout.StartHtml);
 
 				WriteTask(task.GetFirstSubtask(), depth + 1, html);
 
-				if (m_Layout != TaskLayout.Table)
-					html.WriteLine(m_EndHtml);
+				if (m_Layout.Style != TaskTemplateLayout.StyleType.Table)
+					html.WriteLine(m_Layout.EndHtml);
 
 				// Next task
 				WriteTask(task.GetNextTask(), depth, html);
-			}
-
-			public String FormatTableHeader()
-			{
-				if (m_Layout != TaskLayout.Table)
-					return String.Empty;
-
-				var header = m_TaskHtml;
-
-				if (!String.IsNullOrWhiteSpace(header))
-				{
-					foreach (var attrib in Attributes)
-						header = header.Replace(attrib.PlaceHolder, attrib.Label);
-				}
-
-				return header;
 			}
 		}
 	}

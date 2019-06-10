@@ -65,6 +65,7 @@
     <Compile Include="..\..\..\Utils\Utils.cs">
       <Link>Utils.cs</Link>
     </Compile>
+    <Compile Include="AgilityUtils.cs" />
     <Compile Include="HTMLReportExporterCore.cs" />
     <Compile Include="HtmlReportTemplate.cs" />
     <Compile Include="HtmlReportTemplateForm.cs">
