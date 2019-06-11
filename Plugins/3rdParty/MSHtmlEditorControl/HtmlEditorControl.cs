@@ -3773,7 +3773,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Gets the selected Html Range Element
         /// </summary>
-        private mshtmlTextRange GetTextRange()
+        protected mshtmlTextRange GetTextRange()
         {
             // define the selected range object
             mshtmlSelection selection;

@@ -132,6 +132,7 @@ namespace HTMLReportExporter
 			this.WebBrowser.Document.AttachEventHandler("onfocusout", OnLostFocus);
 			this.WebBrowser.Document.AttachEventHandler("onfocusin", OnGotFocus);
 
+			m_ToolStripAttributeMenu = new ToolStripMenuItem();
 			InitialiseToolbar();
 
 			// Place this at the end to ensure the toolbar has finished its resize
@@ -195,7 +196,6 @@ namespace HTMLReportExporter
 
 		virtual protected void InitialiseToolbarAttributeMenu()
 		{
-			m_ToolStripAttributeMenu = new ToolStripMenuItem();
 		}
 
 		private void OnAttributeMenuClick(object sender, EventArgs args)
@@ -363,12 +363,19 @@ namespace HTMLReportExporter
 
 				menuItem.Text = attrib.Label;
 				menuItem.Tag = attrib.Id;
-				menuItem.Name = attrib.Id.ToString();
+				menuItem.Name = attrib.PlaceHolder;
 
 				ToolStripAttributeMenu.DropDownItems.Add(menuItem);
 			}
 		}
+		
+		override protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
+		{
+			var selText = GetTextRange();
 
+			if (selText != null)
+				selText.text = menuItem.Name;
+		}
 
 	}
 
