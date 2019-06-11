@@ -23,6 +23,7 @@ namespace Abstractspoon
 			{
 			public:
 				static void FixupButtonSizes(ToolStrip^ toolbar);
+				static void Sort(ToolStripItemCollection^ items);
 
 				static bool IsButton(ToolStripItem^ item);
 				static bool IsMenu(ToolStripItem^ item);
@@ -31,6 +32,15 @@ namespace Abstractspoon
 				static ToolStripButton^ AsButton(ToolStripItem^ item);
 				static ToolStripMenuItem^ AsMenu(ToolStripItem^ item);
 				static ToolStripSeparator^ AsSeparator(ToolStripItem^ item);
+
+
+			protected:
+				ref class ToolStripItemComparer : System::Collections::IComparer
+				{
+				public:
+					virtual int Compare(System::Object^ x, System::Object^ y);
+				};
+
 			};
 
 			public ref class BaseToolbarRenderer : ToolStripProfessionalRenderer

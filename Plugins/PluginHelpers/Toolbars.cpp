@@ -80,6 +80,26 @@ ToolStripSeparator^ Toolbars::AsSeparator(ToolStripItem^ item)
 	return dynamic_cast<ToolStripSeparator^>(item);
 }
 
+void Toolbars::Sort(ToolStripItemCollection^ items)
+{
+	auto oAList = gcnew System::Collections::ArrayList(items);
+	oAList->Sort(gcnew ToolStripItemComparer());
+	items->Clear();
+
+	for (int i = 0; i < oAList->Count; i++)
+	{
+		items->Add(dynamic_cast<ToolStripItem^>(oAList[i]));
+	}
+}
+
+int Toolbars::ToolStripItemComparer::Compare(System::Object^ obj1, System::Object^ obj2)
+{
+	auto oItem1 = dynamic_cast<ToolStripItem^>(obj1);
+	auto oItem2 = dynamic_cast<ToolStripItem^>(obj2);
+
+	return String::Compare(oItem1->Text, oItem2->Text, true);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 BaseToolbarRenderer::BaseToolbarRenderer() 

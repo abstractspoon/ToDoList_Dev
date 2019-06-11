@@ -94,7 +94,10 @@ namespace HTMLReportExporter
 			{
 				m_Trans = value;
 				m_Trans.Translate(ContextMenu.Items);
+
 				m_Trans.Translate(m_ToolStripAttributeMenu.DropDownItems);
+				Toolbars.Sort(m_ToolStripAttributeMenu.DropDownItems);
+
 				// Toolbar handled by parent
 			}
 		}
