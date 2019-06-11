@@ -501,7 +501,7 @@ namespace HTMLReportExporter
 		{
 			base.Write(doc);
 
-			doc.Root.Element(XmlTag).Add(new XElement("tableHeaderOption", TableHeaderRow));
+			doc.Root.Element(XmlTag).Add(new XElement("tableHeaderOption", (int)TableHeaderRow));
 		}
 
 		override public void Clear()

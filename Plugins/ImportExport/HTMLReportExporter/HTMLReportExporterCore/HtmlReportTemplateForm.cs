@@ -325,8 +325,7 @@ namespace HTMLReportExporter
 							this.tableHeaderRowCombobox.Visible = showTableHeaderCombo;
 							this.tableHeaderRowCombobox.Enabled = showTableHeaderCombo;
 
-							// Short-term hack :)
-							int newBottom = (showTableHeaderCombo ? this.htmlReportHeaderControl.Bottom : this.htmlReportTitleControl.Bottom);
+							int newBottom = (showTableHeaderCombo ? this.htmlReportHeaderControl.Bottom : this.tableHeaderRowCombobox.Bottom);
 
 							this.htmlReportTasksControl.Bounds = Rectangle.FromLTRB(this.htmlReportTasksControl.Left,
 																					this.htmlReportTasksControl.Top,

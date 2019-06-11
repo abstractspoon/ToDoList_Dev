@@ -169,13 +169,11 @@
 			// browserPreview
 			// 
 			this.browserPreview.AllowWebBrowserDrop = false;
-			this.browserPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.browserPreview.Location = new System.Drawing.Point(-1, -1);
+			this.browserPreview.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.browserPreview.Location = new System.Drawing.Point(0, 0);
 			this.browserPreview.MinimumSize = new System.Drawing.Size(20, 20);
 			this.browserPreview.Name = "browserPreview";
-			this.browserPreview.Size = new System.Drawing.Size(448, 452);
+			this.browserPreview.Size = new System.Drawing.Size(447, 452);
 			this.browserPreview.TabIndex = 0;
 			this.browserPreview.WebBrowserShortcutsEnabled = false;
 			// 
@@ -233,7 +231,7 @@
             "80",
             "90",
             "100"});
-			this.headerHeightCombobox.Location = new System.Drawing.Point(48, 387);
+			this.headerHeightCombobox.Location = new System.Drawing.Point(48, 389);
 			this.headerHeightCombobox.Name = "headerHeightCombobox";
 			this.headerHeightCombobox.Size = new System.Drawing.Size(52, 21);
 			this.headerHeightCombobox.TabIndex = 34;
@@ -242,7 +240,7 @@
 			// 
 			this.headerPixelLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.headerPixelLabel.AutoSize = true;
-			this.headerPixelLabel.Location = new System.Drawing.Point(106, 391);
+			this.headerPixelLabel.Location = new System.Drawing.Point(106, 392);
 			this.headerPixelLabel.Name = "headerPixelLabel";
 			this.headerPixelLabel.Size = new System.Drawing.Size(33, 13);
 			this.headerPixelLabel.TabIndex = 32;
@@ -264,7 +262,7 @@
 			this.headerDividerCheckbox.AutoSize = true;
 			this.headerDividerCheckbox.Checked = true;
 			this.headerDividerCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.headerDividerCheckbox.Location = new System.Drawing.Point(279, 390);
+			this.headerDividerCheckbox.Location = new System.Drawing.Point(279, 391);
 			this.headerDividerCheckbox.Name = "headerDividerCheckbox";
 			this.headerDividerCheckbox.Size = new System.Drawing.Size(103, 17);
 			this.headerDividerCheckbox.TabIndex = 28;
@@ -314,11 +312,11 @@
 			// 
 			// titleSeparatePageCheckbox
 			// 
-			this.titleSeparatePageCheckbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.titleSeparatePageCheckbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.titleSeparatePageCheckbox.AutoSize = true;
 			this.titleSeparatePageCheckbox.Checked = true;
 			this.titleSeparatePageCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.titleSeparatePageCheckbox.Location = new System.Drawing.Point(4, 410);
+			this.titleSeparatePageCheckbox.Location = new System.Drawing.Point(243, 391);
 			this.titleSeparatePageCheckbox.Name = "titleSeparatePageCheckbox";
 			this.titleSeparatePageCheckbox.Size = new System.Drawing.Size(139, 17);
 			this.titleSeparatePageCheckbox.TabIndex = 29;
@@ -348,7 +346,7 @@
 			this.htmlReportTitleControl.LastBrowsedImageFolder = null;
 			this.htmlReportTitleControl.Location = new System.Drawing.Point(7, 26);
 			this.htmlReportTitleControl.Name = "htmlReportTitleControl";
-			this.htmlReportTitleControl.Size = new System.Drawing.Size(375, 378);
+			this.htmlReportTitleControl.Size = new System.Drawing.Size(375, 357);
 			this.htmlReportTitleControl.TabIndex = 26;
 			this.htmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
 			this.htmlReportTitleControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
@@ -369,8 +367,9 @@
 			this.tableHeaderRowCombobox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.tableHeaderRowCombobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.tableHeaderRowCombobox.FormattingEnabled = true;
-			this.tableHeaderRowCombobox.Location = new System.Drawing.Point(7, 393);
+			this.tableHeaderRowCombobox.Location = new System.Drawing.Point(7, 389);
 			this.tableHeaderRowCombobox.Name = "tableHeaderRowCombobox";
+			this.tableHeaderRowCombobox.SelectedOption = HTMLReportExporter.TaskTemplate.Layout.TableHeaderRowType.None;
 			this.tableHeaderRowCombobox.Size = new System.Drawing.Size(162, 21);
 			this.tableHeaderRowCombobox.TabIndex = 27;
 			this.tableHeaderRowCombobox.Visible = false;
@@ -423,7 +422,7 @@
             "80",
             "90",
             "100"});
-			this.footerHeightCombobox.Location = new System.Drawing.Point(48, 387);
+			this.footerHeightCombobox.Location = new System.Drawing.Point(48, 389);
 			this.footerHeightCombobox.Name = "footerHeightCombobox";
 			this.footerHeightCombobox.Size = new System.Drawing.Size(52, 21);
 			this.footerHeightCombobox.TabIndex = 31;
@@ -454,7 +453,7 @@
 			this.footerDividerCheckbox.AutoSize = true;
 			this.footerDividerCheckbox.Checked = true;
 			this.footerDividerCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.footerDividerCheckbox.Location = new System.Drawing.Point(279, 390);
+			this.footerDividerCheckbox.Location = new System.Drawing.Point(279, 391);
 			this.footerDividerCheckbox.Name = "footerDividerCheckbox";
 			this.footerDividerCheckbox.Size = new System.Drawing.Size(103, 17);
 			this.footerDividerCheckbox.TabIndex = 29;
