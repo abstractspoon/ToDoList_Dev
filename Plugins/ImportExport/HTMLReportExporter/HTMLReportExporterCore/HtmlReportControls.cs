@@ -63,6 +63,8 @@ namespace HTMLReportExporter
 		private Translator m_Trans = null;
 		private UIThemeToolbarRenderer m_TBRenderer = null;
 
+		private ToolStripMenuItem m_ToolStripAttributeMenu = null;
+
 		// ---------------------------------------------------------------
 
 		public new event EventHandler GotFocus;
@@ -102,6 +104,11 @@ namespace HTMLReportExporter
 			set { ToolBar.BackColor = value; }
 		}
 
+		protected ToolStripMenuItem ToolStripAttributeMenu
+		{
+			get { return m_ToolStripAttributeMenu; }
+		}
+
 		private void InitializeComponentEx()
 		{
 			InitialiseFeatures();
@@ -123,6 +130,8 @@ namespace HTMLReportExporter
 
 			this.WebBrowser.Document.AttachEventHandler("onfocusout", OnLostFocus);
 			this.WebBrowser.Document.AttachEventHandler("onfocusin", OnGotFocus);
+
+			m_ToolStripAttributeMenu = new ToolStripMenuItem();
 
 			InitialiseToolbar();
 
@@ -164,12 +173,36 @@ namespace HTMLReportExporter
 
 		virtual protected void InitialiseToolbar()
 		{
+			if ((m_ToolStripAttributeMenu != null) && (m_ToolStripAttributeMenu.DropDownItems.Count != 0))
+			{
+				m_ToolStripAttributeMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+				m_ToolStripAttributeMenu.Text = m_Trans.Translate("Attributes");
+
+				foreach (ToolStripItem item in m_ToolStripAttributeMenu.DropDownItems)
+					item.Click += new System.EventHandler(this.OnAttributeMenuClick);
+
+				ToolBar.Items.Add(m_ToolStripAttributeMenu);
+			}
+
 			m_TBRenderer = new UIThemeToolbarRenderer();
 
 			m_TBRenderer.SetUITheme(new UITheme());
 			m_TBRenderer.EnableDrawRowDividers(true);
 
 			this.ToolBar.Renderer = m_TBRenderer;
+		}
+
+		private void OnAttributeMenuClick(object sender, EventArgs args)
+		{
+			ToolStripMenuItem menuItem = (ToolStripMenuItem)sender;
+			string command = (string)menuItem.Tag;
+
+			HandleAttributeMenuClick(command);
+		}
+
+		virtual protected void HandleAttributeMenuClick(string command)
+		{
+			// Derived classes do the handling
 		}
 
 		protected override void PreShowDialog(Form dialog)
