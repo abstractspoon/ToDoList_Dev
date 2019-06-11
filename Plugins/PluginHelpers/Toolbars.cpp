@@ -19,30 +19,65 @@ void Toolbars::FixupButtonSizes(ToolStrip^ toolbar)
 
 	for (int i = 0; i < numItems; i++)
 	{
-		auto button = dynamic_cast<ToolStripButton^>(toolbar->Items[i]);
+		auto item = toolbar->Items[i];
 
-		if (button != nullptr)
+		if (Toolbars::IsButton(item))
 		{
+			auto button = Toolbars::AsButton(item);
+
 			// From 'Shared\EnToolBar.cpp'
 			int xPadding = (imageSize.Width + 7 - button->Size.Width);
 			int yPadding = (imageSize.Height + 7 - button->Size.Height);
 
-			//System::Diagnostics::Trace::WriteLine(String::Format("Toolbars::FixupButtonSizes({0}, size({1}, {2}), padding({3}, {4}))", 
-			//													 i, button->Size.Width, button->Size.Height, xPadding, yPadding));
-
 			button->Padding = Padding(xPadding / 2, yPadding / 2, xPadding - xPadding / 2, yPadding - yPadding / 2);
 		}
-		else
+		else if (Toolbars::IsMenu(item))
 		{
-			auto sep = dynamic_cast<ToolStripSeparator^>(toolbar->Items[i]);
+			auto menu = Toolbars::AsMenu(item);
 
-			if (sep != nullptr)
-			{
-				sep->AutoSize = false;
-				sep->Height = (imageSize.Height + 7);
-			}
+			// From 'Shared\EnToolBar.cpp'
+			int yPadding = (imageSize.Height + 7 - menu->Size.Height);
+
+			menu->Padding = Padding(0, (yPadding / 2), 0, (yPadding - (yPadding / 2)));
+		}
+		else if (Toolbars::IsSeparator(item))
+		{
+			auto sep = Toolbars::AsSeparator(item);
+
+			sep->AutoSize = false;
+			sep->Height = (imageSize.Height + 7);
 		}
 	}
+}
+
+bool Toolbars::IsButton(ToolStripItem^ item)
+{
+	return (nullptr != AsButton(item));
+}
+
+bool Toolbars::IsMenu(ToolStripItem^ item)
+{
+	return (nullptr != AsMenu(item));
+}
+
+bool Toolbars::IsSeparator(ToolStripItem^ item)
+{
+	return (nullptr != AsSeparator(item));
+}
+
+ToolStripButton^ Toolbars::AsButton(ToolStripItem^ item)
+{
+	return dynamic_cast<ToolStripButton^>(item);
+}
+
+ToolStripMenuItem^ Toolbars::AsMenu(ToolStripItem^ item)
+{
+	return dynamic_cast<ToolStripMenuItem^>(item);
+}
+
+ToolStripSeparator^ Toolbars::AsSeparator(ToolStripItem^ item)
+{
+	return dynamic_cast<ToolStripSeparator^>(item);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -117,32 +152,32 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 
 		if (numItems > 0)
 		{
-			auto prevBtnRect = Drawing::Rectangle::Empty;
+			auto prevItemRect = Drawing::Rectangle::Empty;
 			int rowTop = toolbar->Top, rowBottom = 0;
 			bool firstRow = true;
 
 			for (int i = 0; i < numItems; i++)
 			{
-				auto button = dynamic_cast<ToolStripButton^>(toolbar->Items[i]);
+				auto item = toolbar->Items[i];
 
-				if ((button != nullptr) && (button->Visible))
+				if ((Toolbars::IsButton(item) || Toolbars::IsMenu(item)) && item->Visible)
 				{
-					if (prevBtnRect.IsEmpty)
+					if (prevItemRect.IsEmpty)
 					{
-						prevBtnRect = button->Bounds;
+						prevItemRect = item->Bounds;
 					}
 					else
 					{
-						auto btnRect = button->Bounds;
+						auto itemRect = item->Bounds;
 
-						if (btnRect.Top > prevBtnRect.Top)
+						if (itemRect.Top > prevItemRect.Top)
 						{
-							rowBottom = ((btnRect.Top + prevBtnRect.Bottom) / 2);
+							rowBottom = ((itemRect.Top + prevItemRect.Bottom) / 2);
 
 							auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, rowTop, toolbar->Width, (rowBottom - rowTop));
 							DrawRowBackground(e->Graphics, rowRect, firstRow, false);
 							
-							prevBtnRect = btnRect;
+							prevItemRect = itemRect;
 							rowTop = rowBottom + 1;
 							firstRow = false;
 						}

@@ -23,6 +23,14 @@ namespace Abstractspoon
 			{
 			public:
 				static void FixupButtonSizes(ToolStrip^ toolbar);
+
+				static bool IsButton(ToolStripItem^ item);
+				static bool IsMenu(ToolStripItem^ item);
+				static bool IsSeparator(ToolStripItem^ item);
+
+				static ToolStripButton^ AsButton(ToolStripItem^ item);
+				static ToolStripMenuItem^ AsMenu(ToolStripItem^ item);
+				static ToolStripSeparator^ AsSeparator(ToolStripItem^ item);
 			};
 
 			public ref class BaseToolbarRenderer : ToolStripProfessionalRenderer

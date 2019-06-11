@@ -134,8 +134,7 @@ void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
 bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs^ e)
 {
 	auto item = e->Item;
-	auto button = dynamic_cast<ToolStripButton^>(item);
-	bool checkedButton = ((button != nullptr) && button->Checked);
+	bool checkedButton = (Toolbars::IsButton(item) && Toolbars::AsButton(item)->Checked);
 
 	if (ValidColours() && (item->Selected || item->Pressed || checkedButton))
 	{
@@ -143,6 +142,13 @@ bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs
 
 		rect->Width--;
 		rect->Height--;
+
+		// menu items get place 1 pixel too high
+		if (Toolbars::IsMenu(item))
+		{
+			rect->Y++;
+			rect->Height--;
+		}
 
 		if (item->Pressed || checkedButton)
 		{
@@ -169,6 +175,12 @@ void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventAr
 {
 	if (!RenderButtonBackground(e))
 		BaseToolbarRenderer::OnRenderButtonBackground(e);
+}
+
+void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEventArgs^ e)
+{
+	if (!RenderButtonBackground(e))
+		BaseToolbarRenderer::OnRenderMenuItemBackground(e);
 }
 
 void UIThemeToolbarRenderer::OnRenderDropDownButtonBackground(ToolStripItemRenderEventArgs^ e)

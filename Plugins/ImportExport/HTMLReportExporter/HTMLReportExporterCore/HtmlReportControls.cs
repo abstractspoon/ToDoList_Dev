@@ -94,6 +94,7 @@ namespace HTMLReportExporter
 			{
 				m_Trans = value;
 				m_Trans.Translate(ContextMenu.Items);
+				m_Trans.Translate(m_ToolStripAttributeMenu.DropDownItems);
 				// Toolbar handled by parent
 			}
 		}
@@ -130,8 +131,6 @@ namespace HTMLReportExporter
 
 			this.WebBrowser.Document.AttachEventHandler("onfocusout", OnLostFocus);
 			this.WebBrowser.Document.AttachEventHandler("onfocusin", OnGotFocus);
-
-			m_ToolStripAttributeMenu = new ToolStripMenuItem();
 
 			InitialiseToolbar();
 
@@ -173,10 +172,12 @@ namespace HTMLReportExporter
 
 		virtual protected void InitialiseToolbar()
 		{
+			InitialiseToolbarAttributeMenu();
+
 			if ((m_ToolStripAttributeMenu != null) && (m_ToolStripAttributeMenu.DropDownItems.Count != 0))
 			{
 				m_ToolStripAttributeMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-				m_ToolStripAttributeMenu.Text = m_Trans.Translate("Attributes");
+				m_ToolStripAttributeMenu.Text = "Attributes";
 
 				foreach (ToolStripItem item in m_ToolStripAttributeMenu.DropDownItems)
 					item.Click += new System.EventHandler(this.OnAttributeMenuClick);
@@ -192,15 +193,17 @@ namespace HTMLReportExporter
 			this.ToolBar.Renderer = m_TBRenderer;
 		}
 
-		private void OnAttributeMenuClick(object sender, EventArgs args)
+		virtual protected void InitialiseToolbarAttributeMenu()
 		{
-			ToolStripMenuItem menuItem = (ToolStripMenuItem)sender;
-			string command = (string)menuItem.Tag;
-
-			HandleAttributeMenuClick(command);
+			m_ToolStripAttributeMenu = new ToolStripMenuItem();
 		}
 
-		virtual protected void HandleAttributeMenuClick(string command)
+		private void OnAttributeMenuClick(object sender, EventArgs args)
+		{
+			HandleAttributeMenuClick(sender as ToolStripMenuItem);
+		}
+
+		virtual protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
 		{
 			// Derived classes do the handling
 		}
@@ -348,6 +351,22 @@ namespace HTMLReportExporter
 		override protected void InitialiseFeatures()
 		{
 			base.InitialiseFeatures();
+		}
+
+		override protected void InitialiseToolbarAttributeMenu()
+		{
+			base.InitialiseToolbarAttributeMenu();
+
+			foreach (var attrib in TaskTemplate.Attributes)
+			{
+				var menuItem = new ToolStripMenuItem();
+
+				menuItem.Text = attrib.Label;
+				menuItem.Tag = attrib.Id;
+				menuItem.Name = attrib.Id.ToString();
+
+				ToolStripAttributeMenu.DropDownItems.Add(menuItem);
+			}
 		}
 
 

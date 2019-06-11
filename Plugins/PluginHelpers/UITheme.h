@@ -79,6 +79,7 @@ namespace Abstractspoon
 
 			protected:
 				virtual void OnRenderButtonBackground(ToolStripItemRenderEventArgs^ e) override;
+				virtual void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs^ e) override;
 				virtual void OnRenderDropDownButtonBackground(ToolStripItemRenderEventArgs^ e) override;
 				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow) override;
 
