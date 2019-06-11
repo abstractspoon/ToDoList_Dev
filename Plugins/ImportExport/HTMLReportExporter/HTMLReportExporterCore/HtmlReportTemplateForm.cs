@@ -88,6 +88,8 @@ namespace HTMLReportExporter
 			this.htmlReportTasksControl.Translator = m_Trans;
 			this.htmlReportFooterControl.Translator = m_Trans;
 
+			this.tableHeaderRowCombobox.Initialise(m_Trans);
+
 			if (!m_Template.HasContents())
 			{
 #if DEBUG
@@ -141,6 +143,7 @@ namespace HTMLReportExporter
 			this.titleSeparatePageCheckbox.Checked = m_Template.Title.SeparatePage;
 
 			this.htmlReportTasksControl.InnerHtml = m_Template.Task.Text;
+			this.tableHeaderRowCombobox.SelectedOption = m_Template.Task.TableHeaderRow;
 
 			this.htmlReportFooterControl.InnerHtml = m_Template.Footer.Text;
 			this.htmlReportFooterControl.BodyBackColor = m_Template.Footer.BackColor;
@@ -256,6 +259,7 @@ namespace HTMLReportExporter
 					case PageType.Tasks:
 						m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
 						m_Template.Task.Enabled = true; // always
+						m_Template.Task.TableHeaderRow = this.tableHeaderRowCombobox.SelectedOption;
 						break;
 
 					case PageType.Footer:
@@ -311,15 +315,15 @@ namespace HTMLReportExporter
 
 				case PageType.Tasks:
 					{
-						var oldLayout = new TaskTemplate.Layout(oldTemplate.Task.Text).Style;
-						var newLayout = new TaskTemplate.Layout(newTemplate.Task.Text).Style;
+						var oldLayout = oldTemplate.Task.GetLayout().Style;
+						var newLayout = newTemplate.Task.GetLayout().Style;
 
 						bool showTableHeaderCombo = (newLayout == TaskTemplate.Layout.StyleType.Table);
 
-						if (showTableHeaderCombo != this.tableHeaderCombobox.Visible)
+						if (showTableHeaderCombo != this.tableHeaderRowCombobox.Visible)
 						{
-							this.tableHeaderCombobox.Visible = showTableHeaderCombo;
-							this.tableHeaderCombobox.Enabled = showTableHeaderCombo;
+							this.tableHeaderRowCombobox.Visible = showTableHeaderCombo;
+							this.tableHeaderRowCombobox.Enabled = showTableHeaderCombo;
 
 							// Short-term hack :)
 							int newBottom = (showTableHeaderCombo ? this.htmlReportHeaderControl.Bottom : this.htmlReportTitleControl.Bottom);

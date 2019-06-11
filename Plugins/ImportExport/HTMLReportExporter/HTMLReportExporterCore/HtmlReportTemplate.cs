@@ -87,6 +87,7 @@ namespace HTMLReportExporter
 
 			return ((xElm == null) ? defValue : (bool)xElm);
 		}
+
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -327,8 +328,11 @@ namespace HTMLReportExporter
 
 		public class Layout
 		{
-			public StyleType Style;
-			public String StartHtml, TaskHtml, EndHtml;
+			public StyleType Style { get; private set; }
+			public TableHeaderRowType TableHeaderRow { get; private set; }
+			public String StartHtml { get; private set; }
+			public String TaskHtml { get; private set; }
+			public String EndHtml { get; private set; }
 
 			// ------------------------------------------------------
 
@@ -340,22 +344,32 @@ namespace HTMLReportExporter
 				UnorderedList
 			}
 
+			public enum TableHeaderRowType
+			{
+				None,
+				AutoGenerate,
+				FirstRow,
+				NotRequired,
+			}
+
 			// ------------------------------------------------------
 
-			public Layout(String text)
+			public Layout(String text, TableHeaderRowType type)
 			{
-				InitLayout(text);
+				Initialise(text, type);
 			}
 
 			public void Clear()
 			{
 				Style = StyleType.None;
+				TableHeaderRow = TableHeaderRowType.None;
+
 				TaskHtml = String.Empty;
 				StartHtml = String.Empty;
 				EndHtml = String.Empty;
 			}
 
-			public void InitLayout(string text)
+			private void Initialise(string text, TableHeaderRowType type)
 			{
 				Clear();
 
@@ -364,7 +378,9 @@ namespace HTMLReportExporter
 
 				try
 				{
-					TaskHtml = text; // default
+					// Defaults
+					TaskHtml = text;
+					this.TableHeaderRow = TableHeaderRowType.None;
 
 					var doc = new HtmlAgilityPack.HtmlDocument();
 					doc.LoadHtml(text);
@@ -387,32 +403,34 @@ namespace HTMLReportExporter
 
 					if (elm != null)
 					{
+
 						switch (elm.Name.ToUpper())
 						{
 							case "TABLE":
-								this.Style = Layout.StyleType.Table;
+								this.Style = StyleType.Table;
 								this.TaskHtml = AgilityUtils.GetElementInnerHtml(elm, "TBODY");
+								this.TableHeaderRow = type;
 								break;
 
 							case "UL":
-								this.Style = Layout.StyleType.UnorderedList;
+								this.Style = StyleType.UnorderedList;
 								this.TaskHtml = elm.InnerHtml;
 								break;
 
 							case "OL":
-								this.Style = Layout.StyleType.OrderedList;
+								this.Style = StyleType.OrderedList;
 								this.TaskHtml = elm.InnerHtml;
 								break;
 						}
 
-						if (this.Style != Layout.StyleType.None)
+						if (this.Style != StyleType.None)
 						{
 							int taskStart = elm.OuterHtml.IndexOf(this.TaskHtml);
 
 							this.StartHtml = elm.OuterHtml.Substring(0, taskStart);
 							this.EndHtml = elm.OuterHtml.Substring(taskStart + this.TaskHtml.Length);
 
-							if (this.Style == Layout.StyleType.Table)
+							if (this.Style == StyleType.Table)
 							{
 								// Prefix 'Table:Tbody' with header row
 								int tbodyStart = this.StartHtml.ToUpper().IndexOf("<TBODY>");
@@ -452,16 +470,61 @@ namespace HTMLReportExporter
 
 				return header;
 			}
-
 		}
 
-
 		// -----------------------------------------------------------
+
+		public Layout.TableHeaderRowType TableHeaderRow = Layout.TableHeaderRowType.AutoGenerate;
 
 		public TaskTemplate() : base("task")
 		{
 		}
 
+		public Layout GetLayout()
+		{
+			return new Layout(Text, TableHeaderRow);
+		}
+
+		override public void Read(XDocument doc)
+		{
+			base.Read(doc);
+
+			var xElm = doc.Root.Element(XmlTag).Element("tableHeaderOption");
+
+			if (xElm == null)
+				TableHeaderRow = Layout.TableHeaderRowType.AutoGenerate;
+			else
+				TableHeaderRow = (Layout.TableHeaderRowType)(int)xElm;
+		}
+
+		override public void Write(XDocument doc)
+		{
+			base.Write(doc);
+
+			doc.Root.Element(XmlTag).Add(new XElement("tableHeaderOption", TableHeaderRow));
+		}
+
+		override public void Clear()
+		{
+			base.Clear();
+
+			TableHeaderRow = Layout.TableHeaderRowType.AutoGenerate;
+		}
+
+		public bool Equals(TaskTemplate other)
+		{
+			return (base.Equals(other) &&
+					(TableHeaderRow == other.TableHeaderRow));
+		}
+
+		public bool Copy(TaskTemplate other)
+		{
+			if (!base.Copy(other))
+				return false;
+
+			TableHeaderRow = other.TableHeaderRow;
+			return true;
+		}
 
 	}
 

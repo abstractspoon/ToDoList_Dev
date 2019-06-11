@@ -11,6 +11,52 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLReportExporter
 {
+	partial class TableHeaderRowOptionCombobox : ComboBox
+	{
+		private struct Item
+		{
+			public String Text;
+			public TaskTemplate.Layout.TableHeaderRowType Option;
+
+			public override String ToString() { return Text; }
+		}
+
+		public TableHeaderRowOptionCombobox() {}
+
+		public void Initialise(Translator trans)
+		{
+			Items.Add(new Item() { Text = trans.Translate("Auto-generate header row"), Option = TaskTemplate.Layout.TableHeaderRowType.AutoGenerate });
+			Items.Add(new Item() { Text = trans.Translate("First row is header row"), Option = TaskTemplate.Layout.TableHeaderRowType.FirstRow });
+			Items.Add(new Item() { Text = trans.Translate("Header row is not required"), Option = TaskTemplate.Layout.TableHeaderRowType.NotRequired });
+
+			SelectedIndex = 0;
+		}
+
+		public TaskTemplate.Layout.TableHeaderRowType SelectedOption
+		{
+			get
+			{
+				if (SelectedItem != null)
+					return ((Item)SelectedItem).Option;
+
+				// else
+				return TaskTemplate.Layout.TableHeaderRowType.None;
+			}
+
+			set
+			{
+				foreach (var item in Items)
+				{
+					if (((Item)item).Option == value)
+					{
+						SelectedItem = item;
+						break;
+					}
+				}
+			}
+		}
+	}
+	
 	partial class HtmlReportControlBase : MSDN.Html.Editor.HtmlEditorControl
 	{
 		private System.Drawing.Font m_ControlsFont = null;

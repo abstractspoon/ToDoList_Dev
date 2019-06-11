@@ -399,7 +399,7 @@ namespace HTMLReportExporter
 				Copy(task);
 
 				m_Preview = preview;
-				m_Layout = new Layout(Text);
+				m_Layout = task.GetLayout();
 			}
 
 			public bool WriteTableContent(TaskList tasks, HtmlTextWriter html)
