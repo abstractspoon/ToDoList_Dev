@@ -309,6 +309,22 @@ namespace HTMLReportExporter
 			ToolBar.Items.Insert((index + 1), this.toolstripBackColor);
 		}
 
+		override protected void InitialiseToolbarAttributeMenu()
+		{
+			base.InitialiseToolbarAttributeMenu();
+
+			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Title") { Tag = "$(reportTitle)" });
+			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Date") { Tag = "$(reportDate)" });
+		}
+
+		override protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
+		{
+			var selText = GetTextRange();
+
+			if (selText != null)
+				selText.text = menuItem.Name;
+		}
+
 		private void OnBackColorClick(object sender, EventArgs e)
 		{
 			using (ColorDialog colorDialog = new ColorDialog())
