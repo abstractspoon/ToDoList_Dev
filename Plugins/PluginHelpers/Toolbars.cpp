@@ -246,8 +246,7 @@ void BaseToolbarRenderer::DrawRowDivider(Drawing::Graphics^ g, Drawing::Rectangl
 	// Draw highlight line at top if not first row
 	if (!firstRow)
 		g->DrawLine(SystemPens::ButtonHighlight, rowRect->Left, rowRect->Top, rowRect->Right, rowRect->Top);
-
-
+	
 	// Draw shadow line at bottom if not last row
 	if (!lastRow)
 		g->DrawLine(SystemPens::ButtonShadow, rowRect->Left, rowRect->Bottom, rowRect->Right, rowRect->Bottom);

@@ -143,13 +143,6 @@ bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs
 		rect->Width--;
 		rect->Height--;
 
-		// menu items get place 1 pixel too high
-		if (Toolbars::IsMenu(item))
-		{
-			rect->Y++;
-			rect->Height--;
-		}
-
 		if (item->Pressed || checkedButton)
 		{
 			Brush^ brush = gcnew SolidBrush(*m_PressedFillColor);

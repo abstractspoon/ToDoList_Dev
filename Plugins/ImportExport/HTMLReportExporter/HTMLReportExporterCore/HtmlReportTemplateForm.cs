@@ -89,6 +89,7 @@ namespace HTMLReportExporter
 			this.htmlReportFooterControl.Translator = m_Trans;
 
 			this.tableHeaderRowCombobox.Initialise(m_Trans);
+			this.htmlReportHeaderControl.SetActive();
 
 			if (!m_Template.HasContents())
 			{

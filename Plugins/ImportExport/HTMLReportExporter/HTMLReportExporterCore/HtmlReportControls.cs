@@ -98,7 +98,7 @@ namespace HTMLReportExporter
 				m_Trans.Translate(m_ToolStripAttributeMenu.DropDownItems);
 				Toolbars.Sort(m_ToolStripAttributeMenu.DropDownItems);
 
-				// Toolbar handled by parent
+				// Toolbar translation handled by parent
 			}
 		}
 
@@ -154,6 +154,8 @@ namespace HTMLReportExporter
 		public void SetActive()
 		{
 			FixupControlPositions();
+
+			WebBrowser.Document.Focus();
 		}
 
 		virtual protected void InitialiseFeatures()
@@ -183,6 +185,9 @@ namespace HTMLReportExporter
 				m_ToolStripAttributeMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
 				m_ToolStripAttributeMenu.Text = "Attributes";
 
+				// Menu items appear one pixel too high when placed in a toolbar
+				m_ToolStripAttributeMenu.Margin = new Padding(0, 1, 0, 0);
+
 				foreach (ToolStripItem item in m_ToolStripAttributeMenu.DropDownItems)
 					item.Click += new System.EventHandler(this.OnAttributeMenuClick);
 
@@ -199,6 +204,7 @@ namespace HTMLReportExporter
 
 		virtual protected void InitialiseToolbarAttributeMenu()
 		{
+			// For derived classes
 		}
 
 		private void OnAttributeMenuClick(object sender, EventArgs args)
@@ -208,7 +214,7 @@ namespace HTMLReportExporter
 
 		virtual protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
 		{
-			// Derived classes do the handling
+			// For derived classes
 		}
 
 		protected override void PreShowDialog(Form dialog)
@@ -273,6 +279,8 @@ namespace HTMLReportExporter
 		}
 	}
 
+	/////////////////////////////////////////////////////////////////////
+
 	partial class HtmlReportHeaderFooterControl : HtmlReportControlBase
 	{
 		private System.Windows.Forms.ToolStripButton toolstripBackColor;
@@ -308,13 +316,13 @@ namespace HTMLReportExporter
 
 			ToolBar.Items.Insert((index + 1), this.toolstripBackColor);
 		}
-
+		
 		override protected void InitialiseToolbarAttributeMenu()
 		{
 			base.InitialiseToolbarAttributeMenu();
 
-			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Title") { Tag = "$(reportTitle)" });
-			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Date") { Tag = "$(reportDate)" });
+			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Title") { Name = "$(reportTitle)" });
+			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Date") { Name = "$(reportDate)" });
 		}
 
 		override protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
@@ -344,6 +352,8 @@ namespace HTMLReportExporter
 		}
 	}
 
+	/////////////////////////////////////////////////////////////////////
+
 	partial class HtmlReportHeaderControl : HtmlReportHeaderFooterControl
 	{
 		override protected void InitialiseFeatures()
@@ -355,6 +365,8 @@ namespace HTMLReportExporter
 
 	}
 
+	/////////////////////////////////////////////////////////////////////
+
 	partial class HtmlReportTitleControl : HtmlReportControlBase
 	{
 		override protected void InitialiseFeatures()
@@ -363,7 +375,25 @@ namespace HTMLReportExporter
 
 		}
 
+		override protected void InitialiseToolbarAttributeMenu()
+		{
+			base.InitialiseToolbarAttributeMenu();
+
+			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Title") { Name = "$(reportTitle)" });
+			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Date") { Name = "$(reportDate)" });
+		}
+
+		override protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
+		{
+			var selText = GetTextRange();
+
+			if (selText != null)
+				selText.text = menuItem.Name;
+		}
+
 	}
+
+	/////////////////////////////////////////////////////////////////////
 
 	partial class HtmlReportTaskFormatControl : HtmlReportControlBase
 	{
@@ -381,7 +411,6 @@ namespace HTMLReportExporter
 				var menuItem = new ToolStripMenuItem();
 
 				menuItem.Text = attrib.Label;
-				menuItem.Tag = attrib.Id;
 				menuItem.Name = attrib.PlaceHolder;
 
 				ToolStripAttributeMenu.DropDownItems.Add(menuItem);
@@ -397,6 +426,8 @@ namespace HTMLReportExporter
 		}
 
 	}
+
+	/////////////////////////////////////////////////////////////////////
 
 	partial class HtmlReportFooterControl : HtmlReportHeaderFooterControl
 	{
