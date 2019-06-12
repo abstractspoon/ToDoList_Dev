@@ -31,14 +31,14 @@ void Toolbars::FixupButtonSizes(ToolStrip^ toolbar)
 
 			button->Padding = Padding(xPadding / 2, yPadding / 2, xPadding - xPadding / 2, yPadding - yPadding / 2);
 		}
-		else if (Toolbars::IsMenu(item))
+		else if (Toolbars::IsDropDown(item))
 		{
-			auto menu = Toolbars::AsMenu(item);
+			auto drop = Toolbars::AsDropDown(item);
 
 			// From 'Shared\EnToolBar.cpp'
-			int yPadding = (imageSize.Height + 7 - menu->Size.Height);
+			int yPadding = (imageSize.Height + 7 - drop->Size.Height);
 
-			menu->Padding = Padding(0, (yPadding / 2), 0, (yPadding - (yPadding / 2)));
+			drop->Padding = Padding(0, (yPadding / 2), 0, (yPadding - (yPadding / 2)));
 		}
 		else if (Toolbars::IsSeparator(item))
 		{
@@ -55,6 +55,11 @@ bool Toolbars::IsButton(ToolStripItem^ item)
 	return (nullptr != AsButton(item));
 }
 
+bool Toolbars::IsDropDown(ToolStripItem^ item)
+{
+	return (nullptr != AsDropDown(item));
+}
+
 bool Toolbars::IsMenu(ToolStripItem^ item)
 {
 	return (nullptr != AsMenu(item));
@@ -68,6 +73,11 @@ bool Toolbars::IsSeparator(ToolStripItem^ item)
 ToolStripButton^ Toolbars::AsButton(ToolStripItem^ item)
 {
 	return dynamic_cast<ToolStripButton^>(item);
+}
+
+ToolStripDropDownItem^ Toolbars::AsDropDown(ToolStripItem^ item)
+{
+	return dynamic_cast<ToolStripDropDownItem^>(item);
 }
 
 ToolStripMenuItem^ Toolbars::AsMenu(ToolStripItem^ item)
@@ -180,7 +190,7 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 			{
 				auto item = toolbar->Items[i];
 
-				if ((Toolbars::IsButton(item) || Toolbars::IsMenu(item)) && item->Visible)
+				if (!Toolbars::IsSeparator(item) && item->Visible)
 				{
 					if (prevItemRect.IsEmpty)
 					{

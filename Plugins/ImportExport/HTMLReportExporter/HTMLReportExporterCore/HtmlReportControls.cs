@@ -63,7 +63,7 @@ namespace HTMLReportExporter
 		private Translator m_Trans = null;
 		private UIThemeToolbarRenderer m_TBRenderer = null;
 
-		private ToolStripMenuItem m_ToolStripAttributeMenu = null;
+		private ToolStripDropDownButton m_ToolStripAttributeMenu = null;
 
 		// ---------------------------------------------------------------
 
@@ -108,7 +108,7 @@ namespace HTMLReportExporter
 			set { ToolBar.BackColor = value; }
 		}
 
-		protected ToolStripMenuItem ToolStripAttributeMenu
+		protected ToolStripDropDownButton ToolStripAttributeMenu
 		{
 			get { return m_ToolStripAttributeMenu; }
 		}
@@ -135,7 +135,7 @@ namespace HTMLReportExporter
 			this.WebBrowser.Document.AttachEventHandler("onfocusout", OnLostFocus);
 			this.WebBrowser.Document.AttachEventHandler("onfocusin", OnGotFocus);
 
-			m_ToolStripAttributeMenu = new ToolStripMenuItem();
+			m_ToolStripAttributeMenu = new ToolStripDropDownButton();
 			InitialiseToolbar();
 
 			// Place this at the end to ensure the toolbar has finished its resize
@@ -182,9 +182,6 @@ namespace HTMLReportExporter
 
 			if ((m_ToolStripAttributeMenu != null) && (m_ToolStripAttributeMenu.DropDownItems.Count != 0))
 			{
-				m_ToolStripAttributeMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-				m_ToolStripAttributeMenu.Text = "Attributes";
-
 				// Menu items appear one pixel too high when placed in a toolbar
 				m_ToolStripAttributeMenu.Margin = new Padding(0, 1, 0, 0);
 
@@ -323,6 +320,9 @@ namespace HTMLReportExporter
 
 			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Title") { Name = "$(reportTitle)" });
 			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Date") { Name = "$(reportDate)" });
+
+			ToolStripAttributeMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			ToolStripAttributeMenu.Text = "Report Attributes";
 		}
 
 		override protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
@@ -361,8 +361,15 @@ namespace HTMLReportExporter
 			base.InitialiseFeatures();
 
 		}
+	}
 
+	partial class HtmlReportFooterControl : HtmlReportHeaderFooterControl
+	{
+		override protected void InitialiseFeatures()
+		{
+			base.InitialiseFeatures();
 
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -381,6 +388,9 @@ namespace HTMLReportExporter
 
 			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Title") { Name = "$(reportTitle)" });
 			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Date") { Name = "$(reportDate)" });
+
+			ToolStripAttributeMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			ToolStripAttributeMenu.Text = "Report Attributes";
 		}
 
 		override protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
@@ -415,8 +425,11 @@ namespace HTMLReportExporter
 
 				ToolStripAttributeMenu.DropDownItems.Add(menuItem);
 			}
+
+			ToolStripAttributeMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			ToolStripAttributeMenu.Text = "Task Attributes";
 		}
-		
+
 		override protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
 		{
 			var selText = GetTextRange();
@@ -427,16 +440,5 @@ namespace HTMLReportExporter
 
 	}
 
-	/////////////////////////////////////////////////////////////////////
-
-	partial class HtmlReportFooterControl : HtmlReportHeaderFooterControl
-	{
-		override protected void InitialiseFeatures()
-		{
-			base.InitialiseFeatures();
-
-		}
-
-	}
 
 } // HTMLReportExporter
