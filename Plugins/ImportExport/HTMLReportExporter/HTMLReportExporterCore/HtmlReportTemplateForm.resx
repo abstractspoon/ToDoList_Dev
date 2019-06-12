@@ -152,6 +152,17 @@
         bZgGoGMZlS9Y2cgYqp0SwMAAAFkTZvo7qBWfAAAAAElFTkSuQmCC
 </value>
   </data>
+  <data name="toolStripSaveAsReport.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEdSURBVDhPY6AKkHN/9Z8YDFWOCUCSWw79/5/a/O+/cfjT
+        /zduP/r//PlzOE6ufU2aAWfP34Czr1y99n/qqv+EDaie+g+uae/eoygYJEfQAJBmkEJsGCSHbMAFCQlU
+        w0CSYSV//9snPge7AB2D5GAGuLu7/7+envH/kIwMwhCYASDFID8jY2QDQJqPHDn2f8ns2WAD4C5BNgA5
+        9EEYZsDmIIb/WxeV/J85c+b/NWvWgA0DawYBQgbMDWT4/+/bxP//T6f+3zWrAFUzCIAMAIU2SPG3X79R
+        MFjzsyKw5tdT1MAugWpDAJAB2DBI8/t1pmDNIBrEh2ohDJA1g2wmSTMIgDQ83puC29n4AEjzs3V+YI0k
+        2wwCzMzMRNrKwAAAwdSFyASWItUAAAAASUVORK5CYII=
+</value>
+  </data>
   <data name="toolStripHelp.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
@@ -168,7 +179,7 @@
 </value>
   </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>25</value>
+    <value>151</value>
   </metadata>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

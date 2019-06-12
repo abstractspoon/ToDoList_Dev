@@ -294,7 +294,7 @@ namespace HTMLReportExporter
 					break;
 
 				case DialogResult.OK:
-					CheckSaveTemplate(false);
+					CheckSaveTemplate(false, false);
 					break;
 			}
 
@@ -368,7 +368,7 @@ namespace HTMLReportExporter
 
 		private void OnNewReportTemplate(object sender, EventArgs e)
 		{
-			if (CheckSaveTemplate(true))
+			if (CheckSaveTemplate(true, false))
 			{
 				m_Template.Clear();
 				m_TemplateFilePath = String.Empty;
@@ -412,7 +412,7 @@ namespace HTMLReportExporter
 
 		private void OnSaveReportTemplate(object sender, EventArgs e)
 		{
-			CheckSaveTemplate(false);
+			CheckSaveTemplate(false, false);
 		}
 
 		private void OnHelp(object sender, EventArgs e)
@@ -420,12 +420,12 @@ namespace HTMLReportExporter
 			// TODO
 		}
 
-		private bool CheckSaveTemplate(bool mustHaveContents)
+		private bool CheckSaveTemplate(bool mustHaveContents, bool newFileName)
 		{
 			if (mustHaveContents && !m_Template.HasContents())
 				return true;
 
-			if (m_Template.Save())
+			if (!newFileName && m_Template.Save())
 				return true;
 
 			// Prompt for a file path
@@ -452,6 +452,11 @@ namespace HTMLReportExporter
 			}
 
 			return false;
+		}
+
+		private void OnSaveReportTemplateAs(object sender, EventArgs e)
+		{
+			CheckSaveTemplate(false, true);
 		}
 	}
 }

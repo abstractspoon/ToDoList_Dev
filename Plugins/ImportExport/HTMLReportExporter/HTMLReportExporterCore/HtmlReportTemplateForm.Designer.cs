@@ -34,6 +34,7 @@
 			this.toolStripNewReport = new System.Windows.Forms.ToolStripButton();
 			this.toolStripOpenReport = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSaveReport = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSaveAsReport = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
 			this.toolStripHelp = new System.Windows.Forms.ToolStripButton();
 			this.panel1 = new System.Windows.Forms.Panel();
@@ -99,13 +100,14 @@
             this.toolStripNewReport,
             this.toolStripOpenReport,
             this.toolStripSaveReport,
+            this.toolStripSaveAsReport,
             this.toolStripSeparator,
             this.toolStripHelp});
 			this.Toolbar.Location = new System.Drawing.Point(12, 4);
 			this.Toolbar.Margin = new System.Windows.Forms.Padding(0, 0, 0, 20);
 			this.Toolbar.Name = "Toolbar";
 			this.Toolbar.Padding = new System.Windows.Forms.Padding(0);
-			this.Toolbar.Size = new System.Drawing.Size(100, 25);
+			this.Toolbar.Size = new System.Drawing.Size(154, 25);
 			this.Toolbar.TabIndex = 0;
 			this.Toolbar.Text = "toolStrip1";
 			// 
@@ -138,6 +140,17 @@
 			this.toolStripSaveReport.Size = new System.Drawing.Size(23, 22);
 			this.toolStripSaveReport.Text = "&Save Report Template";
 			this.toolStripSaveReport.Click += new System.EventHandler(this.OnSaveReportTemplate);
+			// 
+			// toolStripSaveAsReport
+			// 
+			this.toolStripSaveAsReport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolStripSaveAsReport.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSaveAsReport.Image")));
+			this.toolStripSaveAsReport.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.toolStripSaveAsReport.Name = "toolStripSaveAsReport";
+			this.toolStripSaveAsReport.Size = new System.Drawing.Size(23, 22);
+			this.toolStripSaveAsReport.Text = "toolStripButton1";
+			this.toolStripSaveAsReport.ToolTipText = "Save Report Template As";
+			this.toolStripSaveAsReport.Click += new System.EventHandler(this.OnSaveReportTemplateAs);
 			// 
 			// toolStripSeparator
 			// 
@@ -576,5 +589,6 @@
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
 		private System.Windows.Forms.ToolStripButton toolStripHelp;
 		private HTMLReportExporter.TableHeaderRowOptionCombobox tableHeaderRowCombobox;
+		private System.Windows.Forms.ToolStripButton toolStripSaveAsReport;
 	}
 }
