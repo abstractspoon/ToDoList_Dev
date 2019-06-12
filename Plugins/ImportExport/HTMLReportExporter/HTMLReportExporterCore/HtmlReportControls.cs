@@ -18,6 +18,12 @@ namespace HTMLReportExporter
 			public String Text;
 			public TaskTemplate.Layout.TableHeaderRowType Option;
 
+			public Item(String text, TaskTemplate.Layout.TableHeaderRowType option)
+			{
+				Text = text;
+				Option = option;
+			}
+
 			public override String ToString() { return Text; }
 		}
 
@@ -25,9 +31,9 @@ namespace HTMLReportExporter
 
 		public void Initialise(Translator trans)
 		{
-			Items.Add(new Item() { Text = trans.Translate("Auto-generate header row"), Option = TaskTemplate.Layout.TableHeaderRowType.AutoGenerate });
-			Items.Add(new Item() { Text = trans.Translate("First row is header row"), Option = TaskTemplate.Layout.TableHeaderRowType.FirstRow });
-			Items.Add(new Item() { Text = trans.Translate("Header row is not required"), Option = TaskTemplate.Layout.TableHeaderRowType.NotRequired });
+			Items.Add(new Item(trans.Translate("Auto-generate header row"), TaskTemplate.Layout.TableHeaderRowType.AutoGenerate));
+			Items.Add(new Item(trans.Translate("Use first row as header row"), TaskTemplate.Layout.TableHeaderRowType.FirstRow));
+			Items.Add(new Item(trans.Translate("Table has no header row"), TaskTemplate.Layout.TableHeaderRowType.NotRequired));
 
 			SelectedIndex = 0;
 		}
@@ -40,7 +46,7 @@ namespace HTMLReportExporter
 					return ((Item)SelectedItem).Option;
 
 				// else
-				return TaskTemplate.Layout.TableHeaderRowType.None;
+				return TaskTemplate.Layout.TableHeaderRowType.NotRequired;
 			}
 
 			set

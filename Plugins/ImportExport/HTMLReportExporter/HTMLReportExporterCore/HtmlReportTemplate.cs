@@ -346,7 +346,6 @@ namespace HTMLReportExporter
 
 			public enum TableHeaderRowType
 			{
-				None,
 				AutoGenerate,
 				FirstRow,
 				NotRequired,
@@ -362,14 +361,14 @@ namespace HTMLReportExporter
 			public void Clear()
 			{
 				Style = StyleType.None;
-				TableHeaderRow = TableHeaderRowType.None;
+				TableHeaderRow = TableHeaderRowType.NotRequired;
 
 				TaskHtml = String.Empty;
 				StartHtml = String.Empty;
 				EndHtml = String.Empty;
 			}
 
-			private void Initialise(string text, TableHeaderRowType type)
+			private void Initialise(string text, TableHeaderRowType tableHeaderType)
 			{
 				Clear();
 
@@ -379,8 +378,8 @@ namespace HTMLReportExporter
 				try
 				{
 					// Defaults
-					TaskHtml = text;
-					this.TableHeaderRow = TableHeaderRowType.None;
+					this.TaskHtml = text;
+					this.TableHeaderRow = TableHeaderRowType.NotRequired;
 
 					var doc = new HtmlAgilityPack.HtmlDocument();
 					doc.LoadHtml(text);
@@ -403,13 +402,12 @@ namespace HTMLReportExporter
 
 					if (elm != null)
 					{
-
 						switch (elm.Name.ToUpper())
 						{
 							case "TABLE":
 								this.Style = StyleType.Table;
 								this.TaskHtml = AgilityUtils.GetElementInnerHtml(elm, "TBODY");
-								this.TableHeaderRow = type;
+								this.TableHeaderRow = tableHeaderType;
 								break;
 
 							case "UL":
@@ -430,17 +428,42 @@ namespace HTMLReportExporter
 							this.StartHtml = elm.OuterHtml.Substring(0, taskStart);
 							this.EndHtml = elm.OuterHtml.Substring(taskStart + this.TaskHtml.Length);
 
+							// Handle table header row
 							if (this.Style == StyleType.Table)
 							{
-								// Prefix 'Table:Tbody' with header row
-								int tbodyStart = this.StartHtml.ToUpper().IndexOf("<TBODY>");
-
-								if (tbodyStart != -1)
+								if (tableHeaderType != TableHeaderRowType.NotRequired)
 								{
-									var theadStyle = "style=font-weight:bold;font-size:1.5em;display:table-header-group;";
-									var theadHtml = String.Format("\n<thead {0}>{1}</thead>", theadStyle, FormatHeader());
+									// Prefix 'Table:Tbody' with header row
+									int tbodyStart = this.StartHtml.ToUpper().IndexOf("<TBODY>");
 
-									this.StartHtml = this.StartHtml.Insert(tbodyStart, theadHtml);
+									if (tbodyStart != -1)
+									{
+										if (tableHeaderType == TableHeaderRowType.AutoGenerate)
+										{
+											var theadStyle = "style=font-weight:bold;font-size:1.5em;display:table-header-group;";
+											var theadHtml = String.Format("\n<thead {0}>{1}</thead>", theadStyle, FormatHeader());
+
+											this.StartHtml = this.StartHtml.Insert(tbodyStart, theadHtml);
+										}
+										else if (tableHeaderType == TableHeaderRowType.FirstRow)
+										{
+											// Move the first row from 'TaskHtml' to 'StartHtml' and
+											// change its type to 'thead'
+											var tableBody = AgilityUtils.FindElement(elm, "TBODY");
+											var firstRow = AgilityUtils.FindElement(tableBody, "TR");
+
+											if (firstRow != null)
+											{
+												var theadHtml = String.Format("\n<thead>{0}</thead>", firstRow.OuterHtml);
+												this.StartHtml = this.StartHtml.Insert(tbodyStart, theadHtml);
+
+												tableBody.ChildNodes.Remove(firstRow);
+												this.TaskHtml = tableBody.OuterHtml;
+											}
+										}
+									}
+
+									this.TableHeaderRow = tableHeaderType;
 								}
 
 								// Wrap <td> in <div> to prevent breaks across page

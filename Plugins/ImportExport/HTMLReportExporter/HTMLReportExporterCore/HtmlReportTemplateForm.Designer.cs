@@ -382,7 +382,7 @@
 			this.tableHeaderRowCombobox.FormattingEnabled = true;
 			this.tableHeaderRowCombobox.Location = new System.Drawing.Point(7, 389);
 			this.tableHeaderRowCombobox.Name = "tableHeaderRowCombobox";
-			this.tableHeaderRowCombobox.SelectedOption = HTMLReportExporter.TaskTemplate.Layout.TableHeaderRowType.None;
+			this.tableHeaderRowCombobox.SelectedOption = HTMLReportExporter.TaskTemplate.Layout.TableHeaderRowType.NotRequired;
 			this.tableHeaderRowCombobox.Size = new System.Drawing.Size(162, 21);
 			this.tableHeaderRowCombobox.TabIndex = 27;
 			this.tableHeaderRowCombobox.Visible = false;

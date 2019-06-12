@@ -258,9 +258,14 @@ namespace HTMLReportExporter
 						break;
 
 					case PageType.Tasks:
-						m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
-						m_Template.Task.Enabled = true; // always
-						m_Template.Task.TableHeaderRow = this.tableHeaderRowCombobox.SelectedOption;
+						// don't update if the header row combo is dropped down
+						// because it's inconsistent with the rest of the updates
+						if (!this.tableHeaderRowCombobox.DroppedDown)
+						{
+							m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
+							m_Template.Task.Enabled = true; // always
+							m_Template.Task.TableHeaderRow = this.tableHeaderRowCombobox.SelectedOption;
+						}
 						break;
 
 					case PageType.Footer:
