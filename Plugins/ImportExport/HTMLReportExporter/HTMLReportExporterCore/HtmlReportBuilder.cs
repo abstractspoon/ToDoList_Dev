@@ -436,7 +436,9 @@ namespace HTMLReportExporter
 
 						// Special case
 						if ((attrib.Id == Task.Attribute.HtmlComments) && String.IsNullOrWhiteSpace(attribVal))
-							attribVal = task.GetComments();
+						{
+							attribVal = task.GetComments().Trim().Replace("\n", "<br>");
+						}
 
 						text = text.Replace(attrib.PlaceHolder, attribVal);
 					}
