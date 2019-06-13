@@ -428,21 +428,7 @@ namespace HTMLReportExporter
 
 				if (!String.IsNullOrWhiteSpace(EnabledText))
 				{
-					var text = m_Layout.TaskHtml;
-
-					foreach (var attrib in Attributes)
-					{
-						var attribVal = task.GetAttribute(attrib.Id, true, true);
-
-						// Special case
-						if ((attrib.Id == Task.Attribute.HtmlComments) && String.IsNullOrWhiteSpace(attribVal))
-						{
-							attribVal = task.GetComments().Trim().Replace("\n", "<br>");
-						}
-
-						text = text.Replace(attrib.PlaceHolder, attribVal);
-					}
-
+					var text = m_Layout.FormatRow(task, depth);
 					html.WriteLine(text);
 				}
 

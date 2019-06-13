@@ -427,7 +427,7 @@ namespace HTMLReportExporter
 				var menuItem = new ToolStripMenuItem();
 
 				menuItem.Text = attrib.Label;
-				menuItem.Name = attrib.PlaceHolder;
+				menuItem.Name = attrib.PlaceHolder();
 
 				ToolStripAttributeMenu.DropDownItems.Add(menuItem);
 			}

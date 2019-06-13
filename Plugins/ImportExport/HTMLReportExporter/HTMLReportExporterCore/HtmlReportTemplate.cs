@@ -275,53 +275,65 @@ namespace HTMLReportExporter
 	{
 		public struct Attribute
 		{
-			public Attribute(Task.Attribute id, String label, String placeHolder)
+			private String PlaceHolderText;
+
+			// ------------------------------------------------------
+
+			public Attribute(Task.Attribute id, String label, String placeHolderText)
 			{
 				Id = id;
 				Label = label;
-				PlaceHolder = placeHolder;
+				PlaceHolderText = placeHolderText;
 			}
 
 			public Task.Attribute Id;
 			public String Label;
-			public String PlaceHolder;
+
+			public String PlaceHolder(int level = -1)
+			{
+				if (level < 0)
+					return String.Format("$({0})", PlaceHolderText);
+
+				// else
+				return String.Format("$({0}.{1})", PlaceHolderText, (level + 1));
+			}
 		}
 
 		// -----------------------------------------------------------
 
 		public static Attribute[] Attributes =
 		{
-			new Attribute(Task.Attribute.AllocatedBy,       "Allocated By",             "$(allocBy)" ),
-			new Attribute(Task.Attribute.AllocatedTo,       "Allocated To",             "$(allocTo)" ),
-			new Attribute(Task.Attribute.Category,          "Category",                 "$(cat)" ),
-			new Attribute(Task.Attribute.Cost,              "Cost",                     "$(cost)" ),
-			new Attribute(Task.Attribute.CreatedBy,         "Created By",               "$(createBy)" ),
-			new Attribute(Task.Attribute.CreationDate,      "Creation Date",            "$(createDate)" ),
-			new Attribute(Task.Attribute.Dependency,        "Dependency",               "$(depends)" ),
-			new Attribute(Task.Attribute.DoneDate,          "Completion Date",          "$(doneDate)" ),
-			new Attribute(Task.Attribute.DueDate,           "Due Date",                 "$(dueDate)" ),
-			new Attribute(Task.Attribute.ExternalId,        "ExternalId",               "$(extId)" ),
-			new Attribute(Task.Attribute.FileReference,     "File Link",                "$(filelink)" ),
-			new Attribute(Task.Attribute.Flag,              "Flag",                     "$(flag)" ),
-			new Attribute(Task.Attribute.HtmlComments,      "Comments",                 "$(comments)" ),
-			new Attribute(Task.Attribute.Id,                "Id",                       "$(id)" ),
-			new Attribute(Task.Attribute.LastModifiedBy,    "Last Modified By",         "$(modBy)" ),
-			new Attribute(Task.Attribute.LastModifiedDate,  "Last Modified Date",       "$(modDate)" ),
-			new Attribute(Task.Attribute.ParentId,          "Parent Id",                "$(pid)" ),
-			new Attribute(Task.Attribute.Path,              "Path",                     "$(path)" ),
-			new Attribute(Task.Attribute.Percent,           "Percentage Completion",    "$(percent)" ),
-			new Attribute(Task.Attribute.Position,          "Position",                 "$(pos)" ),
-			new Attribute(Task.Attribute.Priority,          "Priority",                 "$(priority)" ),
-			new Attribute(Task.Attribute.Recurrence,        "Recurrence",               "$(recurs)" ),
-			new Attribute(Task.Attribute.Risk,              "Risk",                     "$(risk)" ),
-			new Attribute(Task.Attribute.StartDate,         "Start Date",               "$(startDate)" ),
-			new Attribute(Task.Attribute.Status,            "Status",                   "$(status)" ),
-			new Attribute(Task.Attribute.SubtaskDone,       "Subtask Done",             "$(subtaskDone)" ),
-			new Attribute(Task.Attribute.Tags,              "Tags",                     "$(tag)" ),
-			new Attribute(Task.Attribute.TimeEstimate,      "Time Estimate",            "$(est)" ),
-			new Attribute(Task.Attribute.TimeSpent,         "Time Spent",               "$(spent)" ),
-			new Attribute(Task.Attribute.Title,             "Title",                    "$(title)" ),
-			new Attribute(Task.Attribute.Version,           "Version",                  "$(ver)" ),
+			new Attribute(Task.Attribute.AllocatedBy,       "Allocated By",             "allocBy" ),
+			new Attribute(Task.Attribute.AllocatedTo,       "Allocated To",             "allocTo" ),
+			new Attribute(Task.Attribute.Category,          "Category",                 "cat" ),
+			new Attribute(Task.Attribute.Cost,              "Cost",                     "cost" ),
+			new Attribute(Task.Attribute.CreatedBy,         "Created By",               "createBy" ),
+			new Attribute(Task.Attribute.CreationDate,      "Creation Date",            "createDate" ),
+			new Attribute(Task.Attribute.Dependency,        "Dependency",               "depends" ),
+			new Attribute(Task.Attribute.DoneDate,          "Completion Date",          "doneDate" ),
+			new Attribute(Task.Attribute.DueDate,           "Due Date",                 "dueDate" ),
+			new Attribute(Task.Attribute.ExternalId,        "ExternalId",               "extId" ),
+			new Attribute(Task.Attribute.FileReference,     "File Link",                "filelink" ),
+			new Attribute(Task.Attribute.Flag,              "Flag",                     "flag" ),
+			new Attribute(Task.Attribute.HtmlComments,      "Comments",                 "comments" ),
+			new Attribute(Task.Attribute.Id,                "Id",                       "id" ),
+			new Attribute(Task.Attribute.LastModifiedBy,    "Last Modified By",         "modBy" ),
+			new Attribute(Task.Attribute.LastModifiedDate,  "Last Modified Date",       "modDate" ),
+			new Attribute(Task.Attribute.ParentId,          "Parent Id",                "pid" ),
+			new Attribute(Task.Attribute.Path,              "Path",                     "path" ),
+			new Attribute(Task.Attribute.Percent,           "Percentage Completion",    "percent" ),
+			new Attribute(Task.Attribute.Position,          "Position",                 "pos" ),
+			new Attribute(Task.Attribute.Priority,          "Priority",                 "priority" ),
+			new Attribute(Task.Attribute.Recurrence,        "Recurrence",               "recurs" ),
+			new Attribute(Task.Attribute.Risk,              "Risk",                     "risk" ),
+			new Attribute(Task.Attribute.StartDate,         "Start Date",               "startDate" ),
+			new Attribute(Task.Attribute.Status,            "Status",                   "status" ),
+			new Attribute(Task.Attribute.SubtaskDone,       "Subtask Done",             "subtaskDone" ),
+			new Attribute(Task.Attribute.Tags,              "Tags",                     "tag" ),
+			new Attribute(Task.Attribute.TimeEstimate,      "Time Estimate",            "est" ),
+			new Attribute(Task.Attribute.TimeSpent,         "Time Spent",               "spent" ),
+			new Attribute(Task.Attribute.Title,             "Title",                    "title" ),
+			new Attribute(Task.Attribute.Version,           "Version",                  "ver" ),
 		};
 
 		// -----------------------------------------------------------
@@ -499,7 +511,7 @@ namespace HTMLReportExporter
 						cell.InnerHtml = cell.InnerHtml.TrimStart('\r', '\n');
 
 						// If the first element in this cell is a paragraph and it's
-						// empty, replace it with the contents of that paragraph 
+						// NOT EMPTY, replace it with the contents of that paragraph 
 						// else once a paragraph has been added it's impossible to get 
 						// rid of it through the UI
 						// Note: if the paragraph is empty we assume that it's intentional
@@ -509,8 +521,7 @@ namespace HTMLReportExporter
 
 							if ((curFirstChild.Name.ToUpper() == "P") && !String.IsNullOrEmpty(curFirstChild.InnerHtml))
 							{
-								var newFirstChild = HtmlAgilityPack.HtmlNode.CreateNode(curFirstChild.InnerHtml);
-								cell.ReplaceChild(newFirstChild, curFirstChild);
+								cell.RemoveChild(cell.FirstChild, true);
 							}
 
 							// Handle nested tables
@@ -533,10 +544,59 @@ namespace HTMLReportExporter
 				if (!String.IsNullOrWhiteSpace(header))
 				{
 					foreach (var attrib in Attributes)
-						header = header.Replace(attrib.PlaceHolder, attrib.Label);
+					{
+						// Clear all placeholder except the 'root' one
+						for (int level = 1; level <= 9; level++)
+							header = header.Replace(attrib.PlaceHolder(level), String.Empty);
+
+						header = header.Replace(attrib.PlaceHolder(), attrib.Label);
+					}
 				}
 
 				return header;
+			}
+
+			public String FormatRow(Task task, int depth)
+			{
+				var row = TaskHtml;
+
+				if (!String.IsNullOrWhiteSpace(row))
+				{
+					foreach (var attrib in Attributes)
+					{
+						var attribVal = task.GetAttribute(attrib.Id, true, true);
+
+						// Special case
+						if ((attrib.Id == Task.Attribute.HtmlComments) && String.IsNullOrWhiteSpace(attribVal))
+						{
+							attribVal = task.GetComments().Trim().Replace("\n", "<br>");
+						}
+
+						// Replace only the placeholder at the level specified
+						String placeHolder = attrib.PlaceHolder(depth);
+						int placeHolderDepth = depth;
+
+						if (row.IndexOf(placeHolder) == -1)
+						{
+							placeHolderDepth = -1;
+							placeHolder = attrib.PlaceHolder(-1);
+						}
+						else
+						{
+							int breakpoint = 0;
+						}
+
+						for (int d = -1; d < 9; d++)
+						{
+							if (d == placeHolderDepth)
+								row = row.Replace(placeHolder, attribVal);
+							else
+								row = row.Replace(attrib.PlaceHolder(d), String.Empty);
+						}
+					}
+				}
+
+				return row;
 			}
 		}
 
