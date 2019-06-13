@@ -6329,13 +6329,10 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	
 	if (m_IE.GetSafeHwnd() || m_IE.Create(NULL, WS_CHILD | WS_VISIBLE, rHidden, this, (UINT)IDC_STATIC))
 	{
-		double dFileSize = FileMisc::GetFileSize(sTempFile);
-		BOOL bPrintBkgnd = Prefs().GetColorTaskBackground();
-
 		if (bPreview)
-			m_IE.PrintPreview(sTempFile, bPrintBkgnd);
+			m_IE.PrintPreview(sTempFile, TRUE); // TRUE = Print background colours
 		else
-			m_IE.Print(sTempFile, bPrintBkgnd);
+			m_IE.Print(sTempFile, TRUE); // TRUE = Print background colours
 	}
 	else // try sending to browser
 	{
