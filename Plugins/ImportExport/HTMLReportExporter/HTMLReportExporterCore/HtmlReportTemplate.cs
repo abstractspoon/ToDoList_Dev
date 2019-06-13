@@ -661,6 +661,7 @@ namespace HTMLReportExporter
 	public class HtmlReportTemplate
 	{
 		private String m_FilePath = String.Empty;
+		private const String RootNodeName = "ReportWriterTemplate";
 
 		// ---------------------------------------------
 
@@ -725,6 +726,9 @@ namespace HTMLReportExporter
 			{
 				var doc = XDocument.Load(pathName);
 
+				if ((doc == null) || (doc.Root == null) || !doc.Root.Name.LocalName.Equals(RootNodeName))
+					return false;
+
 				Header.Read(doc);
 				Title.Read(doc);
 				Task.Read(doc);
@@ -754,7 +758,7 @@ namespace HTMLReportExporter
 		{
 			try
 			{
-				XDocument doc = new XDocument(new XElement("ReportWriterTemplate"));
+				XDocument doc = new XDocument(new XElement(RootNodeName));
 
 				Header.Write(doc);
 				Title.Write(doc);
