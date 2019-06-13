@@ -671,6 +671,8 @@ namespace HTMLReportExporter
 
 		public void Clear()
 		{
+			m_FilePath = String.Empty;
+
 			Header = new HeaderTemplate();
 			Title = new TitleTemplate();
 			Task = new TaskTemplate();
