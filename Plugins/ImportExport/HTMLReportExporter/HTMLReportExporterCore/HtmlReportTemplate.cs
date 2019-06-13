@@ -546,8 +546,8 @@ namespace HTMLReportExporter
 					foreach (var attrib in Attributes)
 					{
 						// Clear all placeholder except the 'root' one
-						for (int level = 1; level <= 9; level++)
-							header = header.Replace(attrib.PlaceHolder(level), String.Empty);
+						for (int d = 0; d < 9; d++)
+							header = header.Replace(attrib.PlaceHolder(d), String.Empty);
 
 						header = header.Replace(attrib.PlaceHolder(), attrib.Label);
 					}
