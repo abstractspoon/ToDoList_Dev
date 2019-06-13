@@ -405,6 +405,8 @@ namespace HTMLReportExporter
 						switch (elm.Name.ToUpper())
 						{
 							case "TABLE":
+								CleanTableCellContents(elm);
+
 								this.Style = StyleType.Table;
 								this.TaskHtml = AgilityUtils.GetElementInnerHtml(elm, "TBODY");
 								this.TableHeaderRow = tableHeaderType;
@@ -479,6 +481,49 @@ namespace HTMLReportExporter
 				{
 					this.Clear();
 				}
+			}
+
+			private bool CleanTableCellContents(HtmlAgilityPack.HtmlNode table)
+			{
+				if ((table == null) || (table.Name.ToUpper() != "TABLE"))
+					return false;
+
+				var row = AgilityUtils.FindElement(AgilityUtils.FindElement(table, "TBODY"), "TR");
+
+				while (row != null)
+				{
+					var cell = AgilityUtils.FindElement(row, "TD");
+
+					while (cell != null)
+					{
+						cell.InnerHtml = cell.InnerHtml.TrimStart('\r', '\n');
+
+						// If the first element in this cell is a paragraph and it's
+						// empty, replace it with the contents of that paragraph 
+						// else once a paragraph has been added it's impossible to get 
+						// rid of it through the UI
+						// Note: if the paragraph is empty we assume that it's intentional
+						if (cell.HasChildNodes)
+						{
+							var curFirstChild = cell.FirstChild;
+
+							if ((curFirstChild.Name.ToUpper() == "P") && !String.IsNullOrEmpty(curFirstChild.InnerHtml))
+							{
+								var newFirstChild = HtmlAgilityPack.HtmlNode.CreateNode(curFirstChild.InnerHtml);
+								cell.ReplaceChild(newFirstChild, curFirstChild);
+							}
+
+							// Handle nested tables
+							CleanTableCellContents(AgilityUtils.FindElement(cell, "TABLE"));
+						}
+
+						cell = cell.NextSibling;
+					}
+
+					row = row.NextSibling;
+				}
+				
+				return true;
 			}
 
 			private String FormatHeader()
