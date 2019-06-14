@@ -89,7 +89,9 @@ namespace HTMLReportExporter
 			this.htmlReportFooterControl.Translator = m_Trans;
 
 			this.tableHeaderRowCombobox.Initialise(m_Trans);
-			this.htmlReportHeaderControl.SetActive();
+
+			this.tabControl.SelectedIndex = (int)PageType.Tasks;
+			this.htmlReportTasksControl.SetActive();
 
 			if (!m_Template.HasContents())
 			{
@@ -258,10 +260,10 @@ namespace HTMLReportExporter
 						break;
 
 					case PageType.Tasks:
-						// don't update if the header row combo is dropped down
-						// because it's inconsistent with the rest of the updates
 						if (!this.tableHeaderRowCombobox.DroppedDown)
 						{
+							// Only update if the header row combo is NOT dropped down
+							// else it's inconsistent with the rest of the updates
 							m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
 							m_Template.Task.Enabled = true; // always
 							m_Template.Task.TableHeaderRow = this.tableHeaderRowCombobox.SelectedOption;
@@ -412,7 +414,7 @@ namespace HTMLReportExporter
 
 		private String FileFilter
 		{
-			get { return String.Format("{0} (*.rwt)|*.rwt;", m_Trans.Translate("Report Writer Templates"));	}
+			get { return String.Format("{0} (*.rbt)|*.rbt;", m_Trans.Translate("Report Templates")); }
 		}
 
 		private void OnSaveReportTemplate(object sender, EventArgs e)

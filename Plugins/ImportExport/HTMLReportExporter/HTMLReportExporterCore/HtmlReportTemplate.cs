@@ -661,7 +661,7 @@ namespace HTMLReportExporter
 	public class HtmlReportTemplate
 	{
 		private String m_FilePath = String.Empty;
-		private const String RootNodeName = "ReportWriterTemplate";
+		private const String RootNodeName = "ReportBuilderTemplate";
 
 		// ---------------------------------------------
 

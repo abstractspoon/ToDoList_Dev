@@ -535,7 +535,7 @@
 			this.Name = "HtmlReportTemplateForm";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "Report Writer";
+			this.Text = "Report Builder";
 			this.Content.ResumeLayout(false);
 			this.Content.PerformLayout();
 			this.Toolbar.ResumeLayout(false);
