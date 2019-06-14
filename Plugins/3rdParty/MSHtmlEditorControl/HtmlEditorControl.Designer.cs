@@ -82,6 +82,7 @@
 			this.toolStripSeparator23 = new System.Windows.Forms.ToolStripSeparator();
 			this.contextTableRowModify = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextTableCellModify = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator24 = new System.Windows.Forms.ToolStripSeparator();
 			this.contextEdit = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextEditUndo = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextEditRedo = new System.Windows.Forms.ToolStripMenuItem();
@@ -92,7 +93,6 @@
 			this.toolStripSeparator15 = new System.Windows.Forms.ToolStripSeparator();
 			this.contextEditFindReplace = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator16 = new System.Windows.Forms.ToolStripSeparator();
-			this.contextEditUnselect = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextEditSelectAll = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextEditDelete = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocument = new System.Windows.Forms.ToolStripMenuItem();
@@ -146,7 +146,6 @@
 			this.contextInsertText = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertHtml = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertTable = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator24 = new System.Windows.Forms.ToolStripSeparator();
 			this.browserPanel.SuspendLayout();
 			this.toolstripEditor.SuspendLayout();
 			this.contextEditor.SuspendLayout();
@@ -618,6 +617,11 @@
 			this.contextTableCellModify.Tag = "TableCellModify";
 			this.contextTableCellModify.Click += new System.EventHandler(this.TableCellModifyPrompt);
 			// 
+			// toolStripSeparator24
+			// 
+			this.toolStripSeparator24.Name = "toolStripSeparator24";
+			resources.ApplyResources(this.toolStripSeparator24, "toolStripSeparator24");
+			// 
 			// contextEdit
 			// 
 			this.contextEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -630,7 +634,6 @@
             this.toolStripSeparator15,
             this.contextEditFindReplace,
             this.toolStripSeparator16,
-            this.contextEditUnselect,
             this.contextEditSelectAll,
             this.contextEditDelete});
 			this.contextEdit.Name = "contextEdit";
@@ -698,13 +701,6 @@
 			// 
 			this.toolStripSeparator16.Name = "toolStripSeparator16";
 			resources.ApplyResources(this.toolStripSeparator16, "toolStripSeparator16");
-			// 
-			// contextEditUnselect
-			// 
-			this.contextEditUnselect.Name = "contextEditUnselect";
-			resources.ApplyResources(this.contextEditUnselect, "contextEditUnselect");
-			this.contextEditUnselect.Tag = "ClearSelect";
-			this.contextEditUnselect.Click += new System.EventHandler(this.contextEditorClick);
 			// 
 			// contextEditSelectAll
 			// 
@@ -851,6 +847,7 @@
 			// 
 			// contextFormatNormal
 			// 
+			this.contextFormatNormal.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontNormal;
 			this.contextFormatNormal.Name = "contextFormatNormal";
 			resources.ApplyResources(this.contextFormatNormal, "contextFormatNormal");
 			this.contextFormatNormal.Tag = "FontNormal";
@@ -1012,7 +1009,6 @@
 			// 
 			// contextFormattingNormal
 			// 
-			this.contextFormattingNormal.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontNormal;
 			resources.ApplyResources(this.contextFormattingNormal, "contextFormattingNormal");
 			this.contextFormattingNormal.Name = "contextFormattingNormal";
 			this.contextFormattingNormal.Tag = "FormattedNormal";
@@ -1123,11 +1119,6 @@
 			this.contextInsertTable.Tag = "InsertTable";
 			this.contextInsertTable.Click += new System.EventHandler(this.contextEditorClick);
 			// 
-			// toolStripSeparator24
-			// 
-			this.toolStripSeparator24.Name = "toolStripSeparator24";
-			resources.ApplyResources(this.toolStripSeparator24, "toolStripSeparator24");
-			// 
 			// HtmlEditorControl
 			// 
 			this.Controls.Add(this.toolstripEditor);
@@ -1194,7 +1185,6 @@
         private System.Windows.Forms.ToolStripMenuItem contextEditCopy;
         private System.Windows.Forms.ToolStripMenuItem contextEditPaste;
         private System.Windows.Forms.ToolStripMenuItem contextEditFindReplace;
-        private System.Windows.Forms.ToolStripMenuItem contextEditUnselect;
         private System.Windows.Forms.ToolStripMenuItem contextEditSelectAll;
         private System.Windows.Forms.ToolStripMenuItem contextEditDelete;
         private System.Windows.Forms.ToolStripMenuItem contextDocumentOpen;

@@ -216,8 +216,8 @@ namespace MSDN.Html.Editor
         // constants for displaying the HTML dialog
         private const string HTML_TITLE_EDIT = "Edit Html";
         private const string HTML_TITLE_VIEW = "View Html";
-        private const string PASTE_TITLE_HTML = "Enter Html";
-        private const string PASTE_TITLE_TEXT = "Enter Text";
+        private const string PASTE_TITLE_HTML = "Insert Html";
+        private const string PASTE_TITLE_TEXT = "Insert Text";
         private const string HTML_TITLE_OPENFILE = "Open Html File";
         private const string HTML_TITLE_SAVEFILE = "Save Html File";
         private const string HTML_FILTER = "Html files (*.html,*.htm)|*.html;*htm|All files (*.*)|*.*";

@@ -86,6 +86,5 @@ namespace MSDN.Html.Editor
             }
 
         } //ReadOnly
-
-    }
+	}
 }

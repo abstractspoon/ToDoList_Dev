@@ -74,18 +74,20 @@ namespace MSDN.Html.Editor
 			// 
 			// labelText
 			// 
-			this.labelText.Location = new System.Drawing.Point(8, 13);
+			this.labelText.AutoSize = true;
+			this.labelText.Location = new System.Drawing.Point(9, 19);
 			this.labelText.Name = "labelText";
-			this.labelText.Size = new System.Drawing.Size(40, 23);
+			this.labelText.Size = new System.Drawing.Size(28, 13);
 			this.labelText.TabIndex = 3;
 			this.labelText.Text = "Text";
 			this.labelText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// labelHref
 			// 
-			this.labelHref.Location = new System.Drawing.Point(8, 47);
+			this.labelHref.AutoSize = true;
+			this.labelHref.Location = new System.Drawing.Point(8, 51);
 			this.labelHref.Name = "labelHref";
-			this.labelHref.Size = new System.Drawing.Size(40, 23);
+			this.labelHref.Size = new System.Drawing.Size(29, 13);
 			this.labelHref.TabIndex = 4;
 			this.labelHref.Text = "URL";
 			this.labelHref.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -114,9 +116,10 @@ namespace MSDN.Html.Editor
 			// 
 			// labelTarget
 			// 
-			this.labelTarget.Location = new System.Drawing.Point(8, 74);
+			this.labelTarget.AutoSize = true;
+			this.labelTarget.Location = new System.Drawing.Point(8, 83);
 			this.labelTarget.Name = "labelTarget";
-			this.labelTarget.Size = new System.Drawing.Size(42, 30);
+			this.labelTarget.Size = new System.Drawing.Size(38, 13);
 			this.labelTarget.TabIndex = 7;
 			this.labelTarget.Text = "Target";
 			this.labelTarget.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
