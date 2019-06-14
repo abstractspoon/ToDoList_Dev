@@ -8,6 +8,8 @@
 #include <Interfaces\ITransText.h>
 
 using namespace System::Windows::Forms;
+using namespace System::Collections::Generic;
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,6 +28,14 @@ String^ Translator::Translate(String^ sText)
 {
 	if (m_pTransText == nullptr)
 		return sText;
+
+	if (m_mapPreTranslate != nullptr)
+	{
+		String^ sPreTrans;
+
+		if (m_mapPreTranslate->TryGetValue(sText, sPreTrans))
+			sText = sPreTrans;
+	}
 
 	LPWSTR szTemp = NULL;
 
@@ -96,6 +106,14 @@ void Translator::Translate(Control::ControlCollection^ items)
 			Translate(ctrl->Controls);
 		}
 	}
+}
+
+void Translator::AddPreTranslate(String^ sText, String^ sTranslation)
+{
+	if (m_mapPreTranslate == nullptr)
+		m_mapPreTranslate = gcnew Dictionary<String^, String^>();
+
+	m_mapPreTranslate->Add(sText, sTranslation);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

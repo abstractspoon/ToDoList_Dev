@@ -22,8 +22,11 @@ namespace Abstractspoon
 				void Translate(System::Windows::Forms::Control::ControlCollection^ items);
 				void Translate(System::Windows::Forms::ToolStripItemCollection^ items);
 
+				void AddPreTranslate(String^ sText, String^ sTranslation);
+
 			private:
 				ITransText* m_pTransText;
+				System::Collections::Generic::Dictionary<String^, String^>^ m_mapPreTranslate;
 
 			private:
 				Translator();
