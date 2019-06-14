@@ -63,12 +63,8 @@ namespace HTMLReportExporter
 		}
 	}
 	
-	partial class HtmlReportControlBase : MSDN.Html.Editor.HtmlEditorControl
+	partial class HtmlReportControlBase : HtmlEditorControlEx
 	{
-		private System.Drawing.Font m_ControlsFont = null;
-		private Translator m_Trans = null;
-		private UIThemeToolbarRenderer m_TBRenderer = null;
-
 		private ToolStripDropDownButton m_ToolStripAttributeMenu = null;
 
 		// ---------------------------------------------------------------
@@ -77,35 +73,28 @@ namespace HTMLReportExporter
 
 		// ---------------------------------------------------------------
 
-		protected HtmlReportControlBase()
+		protected HtmlReportControlBase() : base(null, null)
 		{
 			InitializeComponentEx();
 		}
 
-		public String LastBrowsedImageFolder { get; set; }
-		public String LastBrowsedFileFolder { get; set; }
-
-		public Font ControlFont
+		public new void SetControlFont(Font font)
 		{
-			set
-			{
-				m_ControlsFont = value;
-				this.ToolBar.Font = m_ControlsFont;
-			}
+			base.SetControlFont(font);
+
+			this.ToolBar.Font = m_ControlsFont;
 		}
 
-		public Translator Translator
+		public new void SetTranslator(Translator trans)
 		{
-			set
-			{
-				m_Trans = value;
-				m_Trans.Translate(ContextMenu.Items);
+			base.SetTranslator(trans);
 
-				m_Trans.Translate(m_ToolStripAttributeMenu.DropDownItems);
-				Toolbars.Sort(m_ToolStripAttributeMenu.DropDownItems);
+			m_Trans.Translate(ContextMenu.Items);
+			m_Trans.Translate(m_ToolStripAttributeMenu.DropDownItems);
 
-				// Toolbar translation handled by parent
-			}
+			Toolbars.Sort(m_ToolStripAttributeMenu.DropDownItems);
+
+			// Toolbar translation handled by parent
 		}
 
 		public Color ToolbarBackColor
@@ -119,17 +108,9 @@ namespace HTMLReportExporter
 			get { return m_ToolStripAttributeMenu; }
 		}
 
-		private void InitializeComponentEx()
+		private new void InitializeComponentEx()
 		{
-			InitialiseFeatures();
-
-			if (DPIScaling.WantScaling())
-			{
-				int imageSize = DPIScaling.Scale(16);
-
-				this.ToolBar.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
-				this.ContextMenu.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
-			}
+			base.InitializeComponentEx();
 
 			this.ToolbarDock = DockStyle.Top;
 			this.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
@@ -141,6 +122,8 @@ namespace HTMLReportExporter
 			this.WebBrowser.Document.AttachEventHandler("onfocusout", OnLostFocus);
 			this.WebBrowser.Document.AttachEventHandler("onfocusin", OnGotFocus);
 
+			InitialiseFeatures();
+
 			m_ToolStripAttributeMenu = new ToolStripDropDownButton();
 			InitialiseToolbar();
 
@@ -148,13 +131,12 @@ namespace HTMLReportExporter
 			Toolbars.FixupButtonSizes(this.ToolBar);
 		}
 
-		public void SetFont(string fontName, int htmlSize)
+		public new void SetBodyFont(string fontName, int htmlSize)
 		{
 			// Convert size to ems because it gives us greater granularity
 			int pointSize = (int)MSDN.Html.Editor.HtmlFontConversion.PointsFromHtml(htmlSize);
-			float ems = Win32.PointsToEms(pointSize);
 
-			BodyFont = new MSDN.Html.Editor.HtmlFontProperty(fontName, ems);
+			base.SetBodyFont(fontName, pointSize);
 		}
 
 		public void SetActive()
@@ -167,14 +149,10 @@ namespace HTMLReportExporter
 		virtual protected void InitialiseFeatures()
 		{
 			// remove whole 'Document' submenu
-			CommandHandling.HideCommand("contextDocument", ContextMenu.Items);
-			CommandHandling.HideCommand("contextInsertLink", ContextMenu.Items);
+			base.InitialiseFeatures(true);
 
-			CommandHandling.HideCommand("toolstripDocumentNew", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripDocumentOpen", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripDocumentSave", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripDocumentPrint", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripDocumentHelp", ToolBar.Items);
+			// extras
+			CommandHandling.HideCommand("contextInsertLink", ContextMenu.Items);
 			CommandHandling.HideCommand("toolstripEnableEditing", ToolBar.Items);
 			CommandHandling.HideCommand("toolstripInsertLink", ToolBar.Items);
 			//CommandHandling.HideCommand("", ToolBar.Items);
@@ -197,12 +175,7 @@ namespace HTMLReportExporter
 				ToolBar.Items.Add(m_ToolStripAttributeMenu);
 			}
 
-			m_TBRenderer = new UIThemeToolbarRenderer();
-
-			m_TBRenderer.SetUITheme(new UITheme());
-			m_TBRenderer.EnableDrawRowDividers(true);
-
-			this.ToolBar.Renderer = m_TBRenderer;
+			base.SetUITheme(new UITheme());
 		}
 
 		virtual protected void InitialiseToolbarAttributeMenu()
@@ -222,45 +195,7 @@ namespace HTMLReportExporter
 
 		protected override void PreShowDialog(Form dialog)
 		{
-			base.PreShowDialog(dialog);
-
-			// Operations that change dialog size
-			DialogUtils.SetFont(dialog, m_ControlsFont);
-			m_Trans.Translate(dialog);
-
-			// Add icon for identification
-			dialog.ShowIcon = true;
-			dialog.Icon = HTMLReportExporter.Properties.Resources.HTMLReporter;
-
-			// Per dialog customisations
-			if (dialog is MSDN.Html.Editor.EnterHrefForm)
-			{
-				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
-
-				urlDialog.EnforceHrefTarget(MSDN.Html.Editor.NavigateActionOption.Default);
-				urlDialog.LastBrowsedFolder = LastBrowsedFileFolder;
-			}
-			else if (dialog is MSDN.Html.Editor.EnterImageForm)
-			{
-				var imageDialog = (dialog as MSDN.Html.Editor.EnterImageForm);
-
-				imageDialog.LastBrowsedFolder = LastBrowsedImageFolder;
-			}
-		}
-
-		protected override void PostShowDialog(Form dialog)
-		{
-			// Per dialog customisations
-			if (dialog is MSDN.Html.Editor.EnterHrefForm)
-			{
-				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
-				LastBrowsedFileFolder = urlDialog.LastBrowsedFolder;
-			}
-			else if (dialog is MSDN.Html.Editor.EnterImageForm)
-			{
-				var imageDialog = (dialog as MSDN.Html.Editor.EnterImageForm);
-				LastBrowsedImageFolder = imageDialog.LastBrowsedFolder;
-			}
+			base.PreShowDialog(dialog, HTMLReportExporter.Properties.Resources.HTMLReporter);
 		}
 
 		public new bool Focused

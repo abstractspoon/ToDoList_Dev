@@ -86,7 +86,7 @@ namespace HTMLContentControl
 
 		public void SetContentFont(String fontName, int pointSize)
 		{
-			m_HtmlEditControl.SetFont(fontName, pointSize);
+			m_HtmlEditControl.SetBodyFont(fontName, pointSize);
 		}
 
 		public void SetReadOnly(bool bReadOnly)

@@ -81,15 +81,15 @@ namespace HTMLReportExporter
 			var defFontName = m_Prefs.GetProfileString("Preferences", "HTMLFont", "Verdana");
 			var defFontSize = m_Prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
 
-			this.htmlReportHeaderControl.SetFont(defFontName, defFontSize);
-			this.htmlReportTitleControl.SetFont(defFontName, defFontSize);
-			this.htmlReportTasksControl.SetFont(defFontName, defFontSize);
-			this.htmlReportFooterControl.SetFont(defFontName, defFontSize);
+			this.htmlReportHeaderControl.SetBodyFont(defFontName, defFontSize);
+			this.htmlReportTitleControl.SetBodyFont(defFontName, defFontSize);
+			this.htmlReportTasksControl.SetBodyFont(defFontName, defFontSize);
+			this.htmlReportFooterControl.SetBodyFont(defFontName, defFontSize);
 
-			this.htmlReportHeaderControl.Translator = m_Trans;
-			this.htmlReportTitleControl.Translator = m_Trans;
-			this.htmlReportTasksControl.Translator = m_Trans;
-			this.htmlReportFooterControl.Translator = m_Trans;
+			this.htmlReportHeaderControl.SetTranslator(m_Trans);
+			this.htmlReportTitleControl.SetTranslator(m_Trans);
+			this.htmlReportTasksControl.SetTranslator(m_Trans);
+			this.htmlReportFooterControl.SetTranslator(m_Trans);
 
 			this.tableHeaderRowCombobox.Initialise(m_Trans);
 

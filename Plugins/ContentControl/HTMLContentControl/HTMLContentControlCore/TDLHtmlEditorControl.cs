@@ -20,11 +20,8 @@ namespace HTMLContentControl
 	}
 
 	[System.ComponentModel.DesignerCategory("")]
-    class TDLHtmlEditorControl : MSDN.Html.Editor.HtmlEditorControl
+    class TDLHtmlEditorControl : HtmlEditorControlEx //MSDN.Html.Editor.HtmlEditorControl
     {
-        private UIThemeToolbarRenderer m_toolbarRenderer;
-        private System.Drawing.Font m_ControlsFont;
-        private Translator m_Trans;
         private Timer m_TextChangeTimer;
         private String m_PrevTextChange = "";
 		private Boolean m_SettingContent = false;
@@ -36,41 +33,16 @@ namespace HTMLContentControl
 
 		// ---------------------------------------------------------------
 
-		public TDLHtmlEditorControl(System.Drawing.Font font, Translator trans)
+		public TDLHtmlEditorControl(System.Drawing.Font font, Translator trans) : base(font, trans)
         {
-            m_ControlsFont = font;
-            m_Trans = trans;
-            m_toolbarRenderer = new UIThemeToolbarRenderer();
             m_TextChangeTimer = new Timer();
 
             InitializeComponent();
         }
 
-        public void SetUITheme(UITheme theme)
-        {
-            m_toolbarRenderer.SetUITheme(theme);
-
-            BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-            ToolBar.BackColor = BackColor;
-        }
-
-		public String LastBrowsedImageFolder { get; set; }
-		public String LastBrowsedFileFolder { get; set; }
-
 		private void InitializeComponent()
         {
-			InitialiseFeatures();
-
-            this.ToolBar.Renderer = m_toolbarRenderer;
-            this.ToolBar.Font = m_ControlsFont;
-
-			if (DPIScaling.WantScaling())
-            {
-                int imageSize = DPIScaling.Scale(16);
-
-                this.ToolBar.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
-				this.ContextMenu.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
-			}
+			base.InitializeComponentEx();
 
             this.ToolbarDock = DockStyle.Top;
             this.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
@@ -83,8 +55,7 @@ namespace HTMLContentControl
 
 			this.BrowserPanel.Anchor = AnchorStyles.None; // we handle positioning ourselves
 
-            m_Trans.Translate(ToolBar.Items);
-            m_Trans.Translate(ContextMenu.Items);
+			InitialiseFeatures();
 
             m_TextChangeTimer.Tick += new EventHandler(OnTextChangeTimer);
             m_TextChangeTimer.Interval = 200;
@@ -100,26 +71,7 @@ namespace HTMLContentControl
 		private void InitialiseFeatures()
         {
             // remove whole 'Document' submenu
-            CommandHandling.HideCommand("contextDocument", ContextMenu.Items);
-
-			CommandHandling.HideCommand("toolstripDocumentNew", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripDocumentOpen", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripDocumentSave", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripDocumentPrint", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripDocumentHelp", ToolBar.Items);
-			// 
-			//             CommandHandling.SetMenuShortcut("contextFormatStrikeout", Keys.Control | Keys.Subtract, ContextMenu.Items);
-			//             CommandHandling.SetMenuShortcut("contextFormatIncrease", Keys.Control | Keys.Decimal, ContextMenu.Items);
-			//             CommandHandling.SetMenuShortcut("contextFormatDecrease", Keys.Control | Keys.Oemcomma, ContextMenu.Items);
-			// TODO
-		}
-
-		public void SetFont(string fontName, int pointSize)
-		{
-			// Convert size to ems because it gives us greater granularity
-			float ems = Win32.PointsToEms(pointSize);
-
-			BodyFont = new MSDN.Html.Editor.HtmlFontProperty(fontName, ems);
+			base.InitialiseFeatures(true);
 		}
 
 		private void OnTextChangeTimer(object sender, EventArgs e)
@@ -198,47 +150,9 @@ namespace HTMLContentControl
 
         protected override void PreShowDialog(Form dialog)
         {
-            base.PreShowDialog(dialog);
-
-			// Operations that change dialog size
-			DialogUtils.SetFont(dialog, m_ControlsFont);
-			m_Trans.Translate(dialog);
-
-            // Add icon for identification
-            dialog.ShowIcon = true;
-            dialog.Icon = HTMLContentControlCore.html;
-
-			// Per dialog customisations
-			if (dialog is MSDN.Html.Editor.EnterHrefForm)
-			{
-				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
-
-				urlDialog.EnforceHrefTarget(MSDN.Html.Editor.NavigateActionOption.Default);
-				urlDialog.LastBrowsedFolder = LastBrowsedFileFolder;
-			}
-			else if (dialog is MSDN.Html.Editor.EnterImageForm)
-			{
-				var imageDialog = (dialog as MSDN.Html.Editor.EnterImageForm);
-
-				imageDialog.LastBrowsedFolder = LastBrowsedImageFolder;
-			}
+            base.PreShowDialog(dialog, HTMLContentControlCore.html);
 		}
 
-		protected override void PostShowDialog(Form dialog)
-		{
-			// Per dialog customisations
-			if (dialog is MSDN.Html.Editor.EnterHrefForm)
-			{
-				var urlDialog = (dialog as MSDN.Html.Editor.EnterHrefForm);
-				LastBrowsedFileFolder = urlDialog.LastBrowsedFolder;
-			}
-			else if (dialog is MSDN.Html.Editor.EnterImageForm)
-			{
-				var imageDialog = (dialog as MSDN.Html.Editor.EnterImageForm);
-				LastBrowsedImageFolder = imageDialog.LastBrowsedFolder;
-			}
-		}
-		
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
             // Handle keyboard shortcuts

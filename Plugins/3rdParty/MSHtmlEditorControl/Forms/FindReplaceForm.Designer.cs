@@ -213,7 +213,7 @@ namespace MSDN.Html.Editor
 			this.Name = "FindReplaceForm";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-			this.Text = "Find and Replace";
+			this.Text = "Find/Replace";
 			this.tabControl.ResumeLayout(false);
 			this.panelInput.ResumeLayout(false);
 			this.panelInput.PerformLayout();
