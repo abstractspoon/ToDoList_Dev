@@ -33,7 +33,7 @@ namespace HTMLReportExporter
 		{
 			Items.Add(new Item(trans.Translate("Auto-generate header row"), TaskTemplate.Layout.TableHeaderRowType.AutoGenerate));
 			Items.Add(new Item(trans.Translate("First row is header row"), TaskTemplate.Layout.TableHeaderRowType.FirstRow));
-			Items.Add(new Item(trans.Translate("Table does not use header row"), TaskTemplate.Layout.TableHeaderRowType.NotRequired));
+			Items.Add(new Item(trans.Translate("No header row is required"), TaskTemplate.Layout.TableHeaderRowType.NotRequired));
 
 			SelectedIndex = 0;
 		}
