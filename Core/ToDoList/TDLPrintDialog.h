@@ -62,6 +62,7 @@ protected:
 	BOOL m_bSupportsExportToImage;
 	CString m_sPrefsKey;
 	CString m_sOtherExporterTypeID;
+	TDLPD_STYLE m_nSimpleStyle;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

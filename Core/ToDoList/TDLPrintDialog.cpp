@@ -132,12 +132,17 @@ CTDLPrintStylePage::CTDLPrintStylePage(LPCTSTR szStylesheet,
 	m_bSupportsExportToImage(bSupportsExportToImage),
 	m_sPrefsKey(szPrefsKey),
 	m_cbOtherExporters(mgrImpExp, FALSE, TRUE, _T("html|htm")),
-	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
+	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER)),
+	m_nSimpleStyle(TDLPDS_WRAP)
 {
 	//{{AFX_DATA_INIT(CTDLPrintStylePage)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
-	m_sOtherExporterTypeID = CPreferences().GetProfileString(m_sPrefsKey, _T("OtherExporter"));
+	CPreferences prefs;
+
+	m_sOtherExporterTypeID = prefs.GetProfileString(m_sPrefsKey, _T("OtherExporter"));
+	m_nSimpleStyle = prefs.GetProfileEnum(m_sPrefsKey, _T("SimpleStyle"), TDLPDS_WRAP);
+
 	InitStylesheet(szStylesheet);
 }
 
@@ -159,6 +164,8 @@ void CTDLPrintStylePage::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_STYLE_STYLESHEET, m_nStyleOption);
 
 	m_cbOtherExporters.DDX(pDX, m_sOtherExporterTypeID);
+
+	CDialogHelper::DDX_CBData(pDX, m_cbSimpleOptions, m_nSimpleStyle, TDLPDS_WRAP);
 }
 
 
@@ -187,6 +194,7 @@ void CTDLPrintStylePage::OnOK()
 	CPreferences prefs;
 
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ExportStyle"), GetExportStyle());
+	prefs.WriteProfileInt(m_sPrefsKey, _T("SimpleStyle"), m_nSimpleStyle);
 	prefs.WriteProfileString(m_sPrefsKey, _T("Stylesheet"), m_sStylesheet);
 	prefs.WriteProfileString(m_sPrefsKey, _T("OtherExporter"), m_cbOtherExporters.GetSelectedTypeID());
 
@@ -228,11 +236,14 @@ BOOL CTDLPrintStylePage::OnInitDialog()
 	case TDLPDS_TABLE:
 	case TDLPDS_PARA:
 		m_nStyleOption = OPT_SIMPLE;
-		CDialogHelper::SelectItemByData(m_cbSimpleOptions, nExportStyle);
+		m_nSimpleStyle = nExportStyle;
 		break;
 		
 	case TDLPDS_IMAGE:
-		m_nStyleOption = OPT_SCREENSHOT;
+		if (m_bSupportsExportToImage)
+			m_nStyleOption = OPT_SCREENSHOT;
+		else
+			m_nStyleOption = OPT_SIMPLE;
 		break;
 
 	case TDLPDS_OTHEREXPORTER:
@@ -240,14 +251,10 @@ BOOL CTDLPrintStylePage::OnInitDialog()
 		break;
 	}
 
-	if (!m_bSupportsExportToImage && (m_nStyleOption == OPT_SCREENSHOT))
-	{
-		m_nStyleOption = OPT_SIMPLE;
-		CDialogHelper::SelectItemByData(m_cbSimpleOptions, TDLPDS_WRAP);
-	}
-
 	UpdateData(FALSE);
 	EnableDisableControls();
+
+	CDialogHelper::SelectItemByData(m_cbSimpleOptions, m_nSimpleStyle);
 	OnSelchangeSimplePageOption();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -345,7 +352,7 @@ TDLPD_STYLE CTDLPrintStylePage::GetExportStyle() const
 			return TDLPDS_NONE;
 	}
 
-	return CDialogHelper::GetSelectedItemData(m_cbSimpleOptions, TDLPDS_WRAP);
+	return m_nSimpleStyle;
 }
 
 BOOL CTDLPrintStylePage::GetStylesheet(CString& sStylesheet) const
