@@ -156,6 +156,7 @@
 			// 
 			this.toolStripSeparator.Name = "toolStripSeparator";
 			this.toolStripSeparator.Size = new System.Drawing.Size(6, 25);
+			this.toolStripSeparator.Visible = false;
 			// 
 			// toolStripHelp
 			// 
@@ -165,6 +166,7 @@
 			this.toolStripHelp.Name = "toolStripHelp";
 			this.toolStripHelp.Size = new System.Drawing.Size(23, 22);
 			this.toolStripHelp.Text = "He&lp";
+			this.toolStripHelp.Visible = false;
 			this.toolStripHelp.Click += new System.EventHandler(this.OnHelp);
 			// 
 			// panel1
