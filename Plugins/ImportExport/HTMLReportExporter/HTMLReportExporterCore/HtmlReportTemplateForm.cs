@@ -50,10 +50,13 @@ namespace HTMLReportExporter
 			m_Prefs = prefs;
 			m_PrefsKey = key;
 
+			m_Template = new HtmlReportTemplate();
+			m_PrevTemplate = new HtmlReportTemplate();
+
 			m_TemplateFilePath = prefs.GetProfileString(key, "LastOpenTemplate", "");
 
-			m_Template = new HtmlReportTemplate(m_TemplateFilePath);
-			m_PrevTemplate = new HtmlReportTemplate();
+			if (!m_Template.Load(m_TemplateFilePath))
+				m_TemplateFilePath = String.Empty;
 
 			m_ChangeTimer = new Timer();
 			m_ChangeTimer.Tick += new EventHandler(OnChangeTimer);
@@ -93,20 +96,6 @@ namespace HTMLReportExporter
 			this.tabControl.SelectedIndex = (int)PageType.Tasks;
 			this.htmlReportTasksControl.SetActive();
 
-			if (!m_Template.HasContents())
-			{
-#if DEBUG
-				this.m_Template.Header.Text = "Header";
-				this.m_Template.Header.BackColor = Color.LightBlue;
-				this.m_Template.Title.Text = "Title";
-				this.m_Template.Task.Text = "$(title)<br>";
-				this.m_Template.Footer.Text = "Footer";
-				this.m_Template.Footer.BackColor = Color.LightPink;
-
-				this.m_TemplateFilePath = "Example.rwt";
-#endif
-			}
-
 			this.tabControl.SelectedIndexChanged += new EventHandler(OnTabPageChange);
 			this.browserPreview.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(OnPreviewLoaded);
 			this.headerEnabledCheckbox.CheckedChanged += new EventHandler(OnHeaderEnableChanged);
@@ -114,8 +103,10 @@ namespace HTMLReportExporter
 			this.footerEnabledCheckbox.CheckedChanged += new EventHandler(OnFooterEnableChanged);
 
 			m_Trans.Translate(this);
-			
+
+			UpdateCaption();
 			UpdateControls();
+
 			InitialiseToolbar();
 
 			m_ChangeTimer.Start();
@@ -380,6 +371,7 @@ namespace HTMLReportExporter
 				m_Template.Clear();
 				m_TemplateFilePath = String.Empty;
 
+				UpdateCaption();
 				UpdateControls();
 			}
 		}
@@ -407,9 +399,23 @@ namespace HTMLReportExporter
 				if (m_Template.Load(dlg.FileName))
 				{
 					m_TemplateFilePath = dlg.FileName;
+
+					UpdateCaption();
 					UpdateControls();
 				}
 			}
+		}
+
+		private void UpdateCaption()
+		{
+			String title = m_Trans.Translate("Report Builder"), fileName = "";
+
+			if (!String.IsNullOrEmpty(m_TemplateFilePath))
+				fileName = Path.GetFileName(m_TemplateFilePath);
+			else
+				fileName = m_Trans.Translate("Untitled");
+
+			this.Text = String.Format("{0} - {1}", title, fileName);
 		}
 
 		private String FileFilter
@@ -454,6 +460,8 @@ namespace HTMLReportExporter
 				if (m_Template.Save(dlg.FileName))
 				{
 					m_TemplateFilePath = dlg.FileName;
+					UpdateCaption();
+
 					return true;
 				}
 			}

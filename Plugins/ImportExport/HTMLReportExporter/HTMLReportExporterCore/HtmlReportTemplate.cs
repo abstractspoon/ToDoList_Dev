@@ -678,11 +678,15 @@ namespace HTMLReportExporter
 			Title = new TitleTemplate();
 			Task = new TaskTemplate();
 			Footer = new FooterTemplate();
-		}
-
-		public HtmlReportTemplate(String pathName) : this()
-		{
-			Load(pathName);
+#if DEBUG
+			Header.Text = "Header";
+			Header.BackColor = Color.LightBlue;
+			Title.Text = "Title";
+			Task.Text = "$(title)<br>";
+			Footer.Text = "Footer";
+			Footer.BackColor = Color.LightPink;
+			m_FilePath = "Example.rbt";
+#endif
 		}
 
 		public HeaderTemplate Header { get; private set; }
