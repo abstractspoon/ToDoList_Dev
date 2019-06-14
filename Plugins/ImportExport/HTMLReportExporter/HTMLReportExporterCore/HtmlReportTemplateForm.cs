@@ -27,7 +27,7 @@ namespace HTMLReportExporter
 		private HtmlReportTemplate m_Template = null;
 		private HtmlReportTemplate m_PrevTemplate = null;
 		private Timer m_ChangeTimer = null;
-		private String m_TemplateFilePath = "HtmlReportTemplate.txt";
+		private String m_TemplateFilePath = "";
 		private bool m_FirstPreview = true;
 
 		// --------------------------------------------------------------

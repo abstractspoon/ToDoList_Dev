@@ -581,10 +581,10 @@ namespace HTMLReportExporter
 							placeHolderDepth = -1;
 							placeHolder = attrib.PlaceHolder(-1);
 						}
-						else
-						{
-							int breakpoint = 0;
-						}
+						//else
+						//{
+						//	int breakpoint = 0;
+						//}
 
 						for (int d = -1; d < 9; d++)
 						{
