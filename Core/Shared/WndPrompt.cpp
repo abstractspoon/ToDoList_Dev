@@ -167,7 +167,6 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 	rClient.DeflateRect(2, 1, 2, 0);
 
 	UINT nFlags = (DT_TOP | DT_NOPREFIX | (bCentred ? DT_CENTER : DT_LEFT));
-	COLORREF crText = GetSysColor(COLOR_3DDKSHADOW);
 
 	if (CWinClasses::IsComboBox(szClass))
 	{
@@ -176,12 +175,6 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 	}
 	else if (CWinClasses::IsEditControl(hWnd))
 	{
-		if (CThemed::AreControlsThemed())
-		{
-			static COLORREF crThemedCue = CThemed(hWnd).GetThemeColor(EP_EDITTEXT, ETS_CUEBANNER, TMT_TEXTCOLOR);
-			crText = crThemedCue;
-		}
-
 		HBRUSH hbrBkgnd = NULL;
 
 		if (!::IsWindowEnabled(hWnd) || (::GetWindowLong(hWnd, GWL_STYLE) & ES_READONLY))
@@ -201,7 +194,7 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 	}
 
 	::SetBkMode(hdc, TRANSPARENT);
-	::SetTextColor(hdc, crText);
+	::SetTextColor(hdc, GetTextColor(hWnd));
 	
 	// draw prompt
 	::DrawText(hdc, szPrompt, -1, rClient, nFlags);
@@ -212,6 +205,26 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 		::RestoreDC(hdc, nSaveDC);
 		::ReleaseDC(hWnd, hdc);
 	}
+}
+
+COLORREF CWndPrompt::GetTextColor(HWND hWnd)
+{
+	static COLORREF TEXT_COLOR = CLR_NONE;
+
+	if (TEXT_COLOR == CLR_NONE)
+	{
+		if (CThemed::AreControlsThemed())
+		{
+			// We keep trying until we hit an edit control
+			CThemed(hWnd).GetThemeColor(EP_EDITTEXT, ETS_CUEBANNER, TMT_TEXTCOLOR, TEXT_COLOR);
+		}
+		else
+		{
+			TEXT_COLOR = GetSysColor(COLOR_3DDKSHADOW);
+		}
+	}
+
+	return ((TEXT_COLOR == CLR_NONE) ? GetSysColor(COLOR_3DDKSHADOW) : TEXT_COLOR);
 }
 
 //////////////////////////////////////////////////////////////////////

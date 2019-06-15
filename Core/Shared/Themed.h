@@ -118,7 +118,7 @@ public:
 	BOOL GetTextExtent(CDC* pDC, int nPart, int nState, const CString& sText, DWORD dwTextFlags, CRect& rExtent, LPCRECT prBounding = NULL);
 	BOOL BuildImageList(CImageList& il, int nPart, const int nStates[], int nNumStates, COLORREF crMask = 255);
 
-	COLORREF GetThemeColor(int nPart, int nState, int nProp);
+	BOOL GetThemeColor(int nPart, int nState, int nProp, COLORREF& color);
 	BOOL GetThemeBackgroundContentRect(CDC* pDC, int nPart,	int nState, const CRect& rBounding, CRect& rContent);
 
 protected:
@@ -148,7 +148,6 @@ protected:
 	BOOL GetThemePartSize(int iPartId, int iStateId, THEMESIZE eSize, SIZE *psz);
 	BOOL GetThemeTextExtent(HDC hdc, int iPartId, int iStateId, LPCWSTR pszText, int iCharCount, 
 		DWORD dwTextFlags, LPCRECT pBoundingRect, RECT *pExtentRect);
-	BOOL GetThemeColor(int iPartId, int iStateId, int iPropId, COLORREF *pColor);
 	BOOL GetThemeBackgroundContentRect(HDC hdc, int iPartId, int iStateId, 
 										LPCRECT pBoundingRect, LPRECT pContentRect);
 

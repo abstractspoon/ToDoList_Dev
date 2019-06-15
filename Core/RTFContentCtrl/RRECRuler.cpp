@@ -165,18 +165,11 @@ void CRRECRuler::OnPaint()
 	{
 		winRect.InflateRect(0, 1, 0, 1);
 
-		int nState = ETS_NORMAL;
-
-		if (!bEnabled)
-			nState = ETS_DISABLED;
-		else if (GetStyle() & ES_READONLY)
-			
-			nState = ETS_READONLY;
-
+		int nState = (bEnabled ? ETS_NORMAL : ETS_DISABLED);
 		th.DrawBackground(&dc, EP_EDITTEXT, nState, winRect);
 
 		// get the theme bk color for the text
-		crBack = th.GetThemeColor(EP_EDITTEXT, nState, TMT_FILLCOLOR);
+		th.GetThemeColor(EP_EDITTEXT, nState, TMT_FILLCOLOR, crBack);
 	}
 	else
 	{

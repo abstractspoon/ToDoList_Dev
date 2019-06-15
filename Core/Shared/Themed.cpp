@@ -412,18 +412,6 @@ BOOL CThemed::BuildImageList(CImageList& il, int nPart, const int nStates[], int
 	return (il.GetSafeHandle() != NULL);
 }
 
-COLORREF CThemed::GetThemeColor(int nPart, int nState, int nProp)
-{
-	ASSERT (m_hTheme);
-
-	COLORREF color;
-	
-	if (GetThemeColor(nPart, nState, nProp, &color))
-		return color;
-
-	return 0; // black
-}
-
 BOOL CThemed::GetThemeBackgroundContentRect(CDC* pDC, int nPart, int nState, const CRect& rBounding, CRect& rContent)
 {
 	ASSERT (m_hTheme);
@@ -622,14 +610,14 @@ BOOL CThemed::GetThemeTextExtent(HDC hdc, int iPartId, int iStateId, LPCWSTR psz
 	return FALSE;
 }
 
-BOOL CThemed::GetThemeColor(int iPartId, int iStateId, int iPropId, COLORREF *pColor)
+BOOL CThemed::GetThemeColor(int iPartId, int iStateId, int iPropId, COLORREF& color)
 {
 	if (InitUxTheme() && m_hTheme)
 	{
 		PFNGETTHEMECOLOR fnGetThemeColor = (PFNGETTHEMECOLOR)GetProcAddress(s_hUxTheme, "GetThemeColor");
 		
 		if (fnGetThemeColor)
-			return (SUCCEEDED(fnGetThemeColor(m_hTheme, iPartId, iStateId, iPropId, pColor)));
+			return (SUCCEEDED(fnGetThemeColor(m_hTheme, iPartId, iStateId, iPropId, &color)));
 	}
 	
 	return FALSE;
