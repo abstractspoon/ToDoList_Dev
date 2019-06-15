@@ -68,17 +68,17 @@ void Translator::Translate(ToolStripItemCollection^ items)
 
 	while (nItem--)
 	{
-		auto tsi = items[nItem];
+		auto item = items[nItem];
 
-		tsi->Text = Translate(tsi->Text);
-		tsi->ToolTipText = Translate(tsi->ToolTipText);
+		item->Text = Translate(item->Text);
+		item->ToolTipText = Translate(item->ToolTipText);
 
 		// children
-		auto tsmi = dynamic_cast<ToolStripMenuItem^>(tsi);
+		auto menu = ASTYPE(item, ToolStripMenuItem);
 
-		if ((tsmi != nullptr) && tsmi->HasDropDownItems)
+		if ((menu != nullptr) && menu->HasDropDownItems)
 		{
-			Translate(tsmi->DropDownItems); // RECURSIVE CALL
+			Translate(menu->DropDownItems); // RECURSIVE CALL
 		}
 	}
 }

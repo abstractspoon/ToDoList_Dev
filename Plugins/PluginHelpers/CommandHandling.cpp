@@ -29,15 +29,10 @@ bool CommandHandling::HideCommand(String^ commandId, ToolStripItemCollection^ it
 		int iItem = items->IndexOf(cmd);
 		
 		// Handle nested menus
-		if (iItem == -1)
+		if ((iItem == -1) && ISTYPE(cmd->OwnerItem, ToolStripMenuItem))
 		{
-			ToolStripMenuItem^ menu = dynamic_cast<ToolStripMenuItem^>(cmd->OwnerItem);
-
-			if ((menu != nullptr) && menu->HasDropDownItems)
-			{
-				items = menu->DropDownItems;
-				iItem = items->IndexOf(cmd);
-			}
+			items = ASTYPE(cmd->OwnerItem, ToolStripMenuItem)->DropDownItems;
+			iItem = items->IndexOf(cmd);
 		}
 
 		if (iItem != -1)
@@ -62,12 +57,13 @@ bool CommandHandling::HideCommand(String^ commandId, ToolStripItemCollection^ it
 				}
 			}
 
-			if (IsSeparator(nextVisCmd) && IsNullOrSeparator(prevVisCmd))
+			if (ISTYPE(nextVisCmd, ToolStripSeparator) && 
+				((prevVisCmd == nullptr) || ISTYPE(prevVisCmd, ToolStripSeparator)))
 			{
 				nextVisCmd->Visible = false;
 				nextVisCmd->Enabled = false;
 			}
-			else if (IsSeparator(prevVisCmd) && (nextVisCmd == nullptr))
+			else if (ISTYPE(prevVisCmd, ToolStripSeparator) && (nextVisCmd == nullptr))
 			{
 				prevVisCmd->Visible = false;
 				prevVisCmd->Enabled = false;
@@ -78,16 +74,6 @@ bool CommandHandling::HideCommand(String^ commandId, ToolStripItemCollection^ it
 	}
 
 	return false;
-}
-
-bool CommandHandling::IsNullOrSeparator(System::Windows::Forms::ToolStripItem^ item)
-{
-	return ((item == nullptr) || IsSeparator(item));
-}
-
-bool CommandHandling::IsSeparator(System::Windows::Forms::ToolStripItem^ item)
-{
-	return (dynamic_cast<ToolStripSeparator^>(item) != nullptr);
 }
 
 bool CommandHandling::ProcessMenuShortcut(Keys keyPress, ToolStripItemCollection^ items)
@@ -171,7 +157,7 @@ ToolStripMenuItem^ CommandHandling::GetMenuItem(Keys keyPress, ToolStripItemColl
 
 	while (nItem--)
 	{
-		ToolStripMenuItem^ menu = dynamic_cast<ToolStripMenuItem^>(items[nItem]);
+		ToolStripMenuItem^ menu = ASTYPE(items[nItem], ToolStripMenuItem);
 
 		if (menu != nullptr)
 		{

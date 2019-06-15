@@ -29,8 +29,6 @@ namespace Abstractspoon
 				static System::Windows::Forms::ToolStripMenuItem^ GetMenuItem(System::Windows::Forms::Keys keyPress, System::Windows::Forms::ToolStripItemCollection^ items);
 
 			protected:
-				static bool IsSeparator(System::Windows::Forms::ToolStripItem^ item);
-				static bool IsNullOrSeparator(System::Windows::Forms::ToolStripItem^ item);
 
 			};
 		}

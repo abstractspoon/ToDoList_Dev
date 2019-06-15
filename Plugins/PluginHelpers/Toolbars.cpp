@@ -58,9 +58,7 @@ void Toolbars::Sort(ToolStripItemCollection^ items)
 	items->Clear();
 
 	for (int i = 0; i < oAList->Count; i++)
-	{
-		items->Add(dynamic_cast<ToolStripItem^>(oAList[i]));
-	}
+		items->Add(ASTYPE(oAList[i], ToolStripItem));
 }
 
 int Toolbars::ToolStripItemComparer::Compare(System::Object^ obj1, System::Object^ obj2)

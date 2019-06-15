@@ -123,39 +123,35 @@ void HtmlEditorControlEx::PreShowDialog(System::Windows::Forms::Form^ dialog, Sy
 	dialog->ShowIcon = (icon != nullptr);
 
 	// Per dialog customisations
-	auto urlDialog = dynamic_cast<MSDN::Html::Editor::EnterHrefForm^>(dialog);
-
-	if (urlDialog != nullptr)
+	if (ISTYPE(dialog, MSDN::Html::Editor::EnterHrefForm))
 	{
+		auto urlDialog = ASTYPE(dialog, MSDN::Html::Editor::EnterHrefForm);
+
 		urlDialog->EnforceHrefTarget(MSDN::Html::Editor::NavigateActionOption::Default);
 		urlDialog->LastBrowsedFolder = LastBrowsedFileFolder;
 	}
-	else
+	else if (ISTYPE(dialog, MSDN::Html::Editor::EnterImageForm))
 	{
-		auto imageDialog = dynamic_cast<MSDN::Html::Editor::EnterImageForm^>(dialog);
+		auto imageDialog = ASTYPE(dialog, MSDN::Html::Editor::EnterImageForm);
 
-		if (imageDialog != nullptr)
-		{
-			imageDialog->LastBrowsedFolder = LastBrowsedImageFolder;
-		}
+		imageDialog->LastBrowsedFolder = LastBrowsedImageFolder;
 	}
 }
 
 void HtmlEditorControlEx::PostShowDialog(System::Windows::Forms::Form^ dialog)
 {
 	// Per dialog customisations
-	auto urlDialog = dynamic_cast<MSDN::Html::Editor::EnterHrefForm^>(dialog);
-
-	if (urlDialog != nullptr)
+	if (ISTYPE(dialog, MSDN::Html::Editor::EnterHrefForm))
 	{
+		auto urlDialog = ASTYPE(dialog, MSDN::Html::Editor::EnterHrefForm);
+
 		LastBrowsedFileFolder = urlDialog->LastBrowsedFolder;
 	}
-	else
+	else if (ISTYPE(dialog, MSDN::Html::Editor::EnterImageForm))
 	{
-		auto imageDialog = dynamic_cast<MSDN::Html::Editor::EnterImageForm^>(dialog);
+		auto imageDialog = ASTYPE(dialog, MSDN::Html::Editor::EnterImageForm);
 
-		if (imageDialog != nullptr)
-			LastBrowsedImageFolder = imageDialog->LastBrowsedFolder;
+		LastBrowsedImageFolder = imageDialog->LastBrowsedFolder;
 	}
 }
 
