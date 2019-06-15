@@ -49,14 +49,11 @@ namespace MSDN.Html.Editor
     /// </summary>
     public enum ImageAlignOption
     {
-        AbsBottom,
-        AbsMiddle,
-        Baseline,
+        Default,
         Bottom,
         Left,
         Middle,
         Right,
-        TextTop,
         Top
 
     } //ImageAlignOption

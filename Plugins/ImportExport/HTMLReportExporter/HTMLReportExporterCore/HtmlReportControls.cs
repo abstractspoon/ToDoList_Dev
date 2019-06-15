@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Diagnostics;
 using System.Reflection;
+using System.Web.UI;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -13,26 +14,18 @@ namespace HTMLReportExporter
 {
 	partial class TableHeaderRowOptionCombobox : ComboBox
 	{
-		private struct Item
+		private class Item : Tuple<String, TaskTemplate.Layout.TableHeaderRowType>
 		{
-			public String Text;
-			public TaskTemplate.Layout.TableHeaderRowType Option;
-
-			public Item(String text, TaskTemplate.Layout.TableHeaderRowType option)
-			{
-				Text = text;
-				Option = option;
-			}
-
-			public override String ToString() { return Text; }
+			public Item(String text, TaskTemplate.Layout.TableHeaderRowType option) : base(text, option) { }
+			public override String ToString() { return Item1; }
 		}
 
 		public TableHeaderRowOptionCombobox() {}
 
 		public void Initialise(Translator trans)
 		{
-			Items.Add(new Item(trans.Translate("Auto-generate header row"), TaskTemplate.Layout.TableHeaderRowType.AutoGenerate));
-			Items.Add(new Item(trans.Translate("First row is header row"), TaskTemplate.Layout.TableHeaderRowType.FirstRow));
+			Items.Add(new Item(trans.Translate("Auto-generate header row"),  TaskTemplate.Layout.TableHeaderRowType.AutoGenerate));
+			Items.Add(new Item(trans.Translate("First row is header row"),   TaskTemplate.Layout.TableHeaderRowType.FirstRow));
 			Items.Add(new Item(trans.Translate("No header row is required"), TaskTemplate.Layout.TableHeaderRowType.NotRequired));
 
 			SelectedIndex = 0;
@@ -43,7 +36,7 @@ namespace HTMLReportExporter
 			get
 			{
 				if (SelectedItem != null)
-					return ((Item)SelectedItem).Option;
+					return ((Item)SelectedItem).Item2;
 
 				// else
 				return TaskTemplate.Layout.TableHeaderRowType.NotRequired;
@@ -53,7 +46,7 @@ namespace HTMLReportExporter
 			{
 				foreach (var item in Items)
 				{
-					if (((Item)item).Option == value)
+					if (((Item)item).Item2 == value)
 					{
 						SelectedItem = item;
 						break;

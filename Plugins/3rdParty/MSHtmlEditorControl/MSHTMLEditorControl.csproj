@@ -192,7 +192,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Forms\TablePropertyForm.cs">
-      <SubType>Form</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

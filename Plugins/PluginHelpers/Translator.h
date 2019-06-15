@@ -31,6 +31,8 @@ namespace Abstractspoon
 
 			private:
 				Translator();
+
+				void RecalcDropWidth(System::Windows::Forms::ComboBox^ combo);
 			};
 		}
 	}

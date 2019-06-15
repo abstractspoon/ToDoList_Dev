@@ -26,6 +26,7 @@ namespace MSDN.Html.Editor
         /// </summary>
         private void InitializeComponent()
         {
+			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EnterImageForm));
 			this.bInsert = new System.Windows.Forms.Button();
 			this.bCancel = new System.Windows.Forms.Button();
@@ -36,6 +37,7 @@ namespace MSDN.Html.Editor
 			this.labelAlign = new System.Windows.Forms.Label();
 			this.listAlign = new System.Windows.Forms.ComboBox();
 			this.fileBrowseBtn = new System.Windows.Forms.Button();
+			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.SuspendLayout();
 			// 
 			// bInsert
@@ -43,7 +45,7 @@ namespace MSDN.Html.Editor
 			this.bInsert.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bInsert.DialogResult = System.Windows.Forms.DialogResult.OK;
 			this.bInsert.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bInsert.Location = new System.Drawing.Point(258, 109);
+			this.bInsert.Location = new System.Drawing.Point(178, 100);
 			this.bInsert.Name = "bInsert";
 			this.bInsert.Size = new System.Drawing.Size(75, 23);
 			this.bInsert.TabIndex = 4;
@@ -54,7 +56,7 @@ namespace MSDN.Html.Editor
 			this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.bCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bCancel.Location = new System.Drawing.Point(346, 109);
+			this.bCancel.Location = new System.Drawing.Point(259, 100);
 			this.bCancel.Name = "bCancel";
 			this.bCancel.Size = new System.Drawing.Size(75, 23);
 			this.bCancel.TabIndex = 5;
@@ -63,7 +65,7 @@ namespace MSDN.Html.Editor
 			// labelText
 			// 
 			this.labelText.AutoSize = true;
-			this.labelText.Location = new System.Drawing.Point(12, 19);
+			this.labelText.Location = new System.Drawing.Point(9, 19);
 			this.labelText.Name = "labelText";
 			this.labelText.Size = new System.Drawing.Size(28, 13);
 			this.labelText.TabIndex = 3;
@@ -73,7 +75,7 @@ namespace MSDN.Html.Editor
 			// labelHref
 			// 
 			this.labelHref.AutoSize = true;
-			this.labelHref.Location = new System.Drawing.Point(12, 52);
+			this.labelHref.Location = new System.Drawing.Point(9, 45);
 			this.labelHref.Name = "labelHref";
 			this.labelHref.Size = new System.Drawing.Size(29, 13);
 			this.labelHref.TabIndex = 4;
@@ -87,23 +89,25 @@ namespace MSDN.Html.Editor
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.hrefText.Location = new System.Drawing.Point(70, 16);
 			this.hrefText.Name = "hrefText";
-			this.hrefText.Size = new System.Drawing.Size(350, 20);
+			this.hrefText.Size = new System.Drawing.Size(263, 20);
 			this.hrefText.TabIndex = 3;
+			this.hrefText.WordWrap = false;
 			// 
 			// hrefLink
 			// 
 			this.hrefLink.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.hrefLink.Location = new System.Drawing.Point(70, 48);
+			this.hrefLink.Location = new System.Drawing.Point(70, 42);
 			this.hrefLink.Name = "hrefLink";
-			this.hrefLink.Size = new System.Drawing.Size(315, 20);
+			this.hrefLink.Size = new System.Drawing.Size(233, 20);
 			this.hrefLink.TabIndex = 0;
+			this.hrefLink.WordWrap = false;
 			// 
 			// labelAlign
 			// 
 			this.labelAlign.AutoSize = true;
-			this.labelAlign.Location = new System.Drawing.Point(12, 83);
+			this.labelAlign.Location = new System.Drawing.Point(9, 71);
 			this.labelAlign.Name = "labelAlign";
 			this.labelAlign.Size = new System.Drawing.Size(53, 13);
 			this.labelAlign.TabIndex = 7;
@@ -115,19 +119,20 @@ namespace MSDN.Html.Editor
 			this.listAlign.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.listAlign.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.listAlign.FormattingEnabled = true;
-			this.listAlign.Location = new System.Drawing.Point(70, 80);
+			this.listAlign.Location = new System.Drawing.Point(70, 68);
 			this.listAlign.Name = "listAlign";
-			this.listAlign.Size = new System.Drawing.Size(121, 21);
+			this.listAlign.Size = new System.Drawing.Size(263, 21);
 			this.listAlign.TabIndex = 2;
 			// 
 			// fileBrowseBtn
 			// 
-			this.fileBrowseBtn.Location = new System.Drawing.Point(390, 47);
+			this.fileBrowseBtn.Location = new System.Drawing.Point(304, 41);
 			this.fileBrowseBtn.Margin = new System.Windows.Forms.Padding(0);
 			this.fileBrowseBtn.Name = "fileBrowseBtn";
 			this.fileBrowseBtn.Size = new System.Drawing.Size(30, 22);
 			this.fileBrowseBtn.TabIndex = 1;
 			this.fileBrowseBtn.Text = "...";
+			this.toolTip1.SetToolTip(this.fileBrowseBtn, "Browse");
 			this.fileBrowseBtn.UseVisualStyleBackColor = true;
 			this.fileBrowseBtn.Click += new System.EventHandler(this.fileBrowseBtn_Click);
 			// 
@@ -137,7 +142,7 @@ namespace MSDN.Html.Editor
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.bCancel;
-			this.ClientSize = new System.Drawing.Size(432, 141);
+			this.ClientSize = new System.Drawing.Size(345, 131);
 			this.Controls.Add(this.fileBrowseBtn);
 			this.Controls.Add(this.listAlign);
 			this.Controls.Add(this.labelAlign);
@@ -170,6 +175,7 @@ namespace MSDN.Html.Editor
         private System.Windows.Forms.Label labelAlign;
         private System.Windows.Forms.ComboBox listAlign;
 		private System.Windows.Forms.Button fileBrowseBtn;
+		private System.Windows.Forms.ToolTip toolTip1;
 	}
 }
 

@@ -26,6 +26,7 @@ namespace MSDN.Html.Editor
         /// </summary>
         private void InitializeComponent()
         {
+			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EnterHrefForm));
 			this.bInsert = new System.Windows.Forms.Button();
 			this.bRemove = new System.Windows.Forms.Button();
@@ -37,6 +38,7 @@ namespace MSDN.Html.Editor
 			this.labelTarget = new System.Windows.Forms.Label();
 			this.listTargets = new System.Windows.Forms.ComboBox();
 			this.fileBrowseBtn = new System.Windows.Forms.Button();
+			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.SuspendLayout();
 			// 
 			// bInsert
@@ -44,7 +46,7 @@ namespace MSDN.Html.Editor
 			this.bInsert.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bInsert.DialogResult = System.Windows.Forms.DialogResult.Yes;
 			this.bInsert.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bInsert.Location = new System.Drawing.Point(178, 109);
+			this.bInsert.Location = new System.Drawing.Point(97, 100);
 			this.bInsert.Name = "bInsert";
 			this.bInsert.Size = new System.Drawing.Size(75, 23);
 			this.bInsert.TabIndex = 4;
@@ -55,7 +57,7 @@ namespace MSDN.Html.Editor
 			this.bRemove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bRemove.DialogResult = System.Windows.Forms.DialogResult.No;
 			this.bRemove.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bRemove.Location = new System.Drawing.Point(262, 109);
+			this.bRemove.Location = new System.Drawing.Point(178, 100);
 			this.bRemove.Name = "bRemove";
 			this.bRemove.Size = new System.Drawing.Size(75, 23);
 			this.bRemove.TabIndex = 5;
@@ -66,7 +68,7 @@ namespace MSDN.Html.Editor
 			this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.bCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bCancel.Location = new System.Drawing.Point(346, 109);
+			this.bCancel.Location = new System.Drawing.Point(259, 100);
 			this.bCancel.Name = "bCancel";
 			this.bCancel.Size = new System.Drawing.Size(75, 23);
 			this.bCancel.TabIndex = 6;
@@ -85,7 +87,7 @@ namespace MSDN.Html.Editor
 			// labelHref
 			// 
 			this.labelHref.AutoSize = true;
-			this.labelHref.Location = new System.Drawing.Point(8, 51);
+			this.labelHref.Location = new System.Drawing.Point(9, 45);
 			this.labelHref.Name = "labelHref";
 			this.labelHref.Size = new System.Drawing.Size(29, 13);
 			this.labelHref.TabIndex = 4;
@@ -99,25 +101,27 @@ namespace MSDN.Html.Editor
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.hrefText.Location = new System.Drawing.Point(70, 16);
 			this.hrefText.Name = "hrefText";
-			this.hrefText.Size = new System.Drawing.Size(350, 20);
+			this.hrefText.Size = new System.Drawing.Size(263, 20);
 			this.hrefText.TabIndex = 3;
+			this.hrefText.WordWrap = false;
 			// 
 			// hrefLink
 			// 
 			this.hrefLink.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.hrefLink.Location = new System.Drawing.Point(70, 48);
+			this.hrefLink.Location = new System.Drawing.Point(70, 42);
 			this.hrefLink.Name = "hrefLink";
-			this.hrefLink.Size = new System.Drawing.Size(315, 20);
+			this.hrefLink.Size = new System.Drawing.Size(234, 20);
 			this.hrefLink.TabIndex = 0;
 			this.hrefLink.Text = "https://";
+			this.hrefLink.WordWrap = false;
 			this.hrefLink.TextChanged += new System.EventHandler(this.hrefLink_TextChanged);
 			// 
 			// labelTarget
 			// 
 			this.labelTarget.AutoSize = true;
-			this.labelTarget.Location = new System.Drawing.Point(8, 83);
+			this.labelTarget.Location = new System.Drawing.Point(9, 71);
 			this.labelTarget.Name = "labelTarget";
 			this.labelTarget.Size = new System.Drawing.Size(38, 13);
 			this.labelTarget.TabIndex = 7;
@@ -128,19 +132,20 @@ namespace MSDN.Html.Editor
 			// 
 			this.listTargets.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.listTargets.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.listTargets.Location = new System.Drawing.Point(70, 80);
+			this.listTargets.Location = new System.Drawing.Point(70, 68);
 			this.listTargets.Name = "listTargets";
-			this.listTargets.Size = new System.Drawing.Size(121, 21);
+			this.listTargets.Size = new System.Drawing.Size(263, 21);
 			this.listTargets.TabIndex = 2;
 			// 
 			// fileBrowseBtn
 			// 
-			this.fileBrowseBtn.Location = new System.Drawing.Point(391, 47);
+			this.fileBrowseBtn.Location = new System.Drawing.Point(304, 41);
 			this.fileBrowseBtn.Margin = new System.Windows.Forms.Padding(0);
 			this.fileBrowseBtn.Name = "fileBrowseBtn";
 			this.fileBrowseBtn.Size = new System.Drawing.Size(30, 22);
 			this.fileBrowseBtn.TabIndex = 1;
 			this.fileBrowseBtn.Text = "...";
+			this.toolTip1.SetToolTip(this.fileBrowseBtn, "Browse");
 			this.fileBrowseBtn.UseVisualStyleBackColor = true;
 			this.fileBrowseBtn.Click += new System.EventHandler(this.fileBrowseBtn_Click);
 			// 
@@ -150,7 +155,7 @@ namespace MSDN.Html.Editor
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.bCancel;
-			this.ClientSize = new System.Drawing.Size(432, 141);
+			this.ClientSize = new System.Drawing.Size(345, 132);
 			this.Controls.Add(this.fileBrowseBtn);
 			this.Controls.Add(this.listTargets);
 			this.Controls.Add(this.labelTarget);
@@ -185,6 +190,7 @@ namespace MSDN.Html.Editor
         private System.Windows.Forms.Label labelTarget;
         private System.Windows.Forms.ComboBox listTargets;
 		private System.Windows.Forms.Button fileBrowseBtn;
+		private System.Windows.Forms.ToolTip toolTip1;
 	}
 }
 

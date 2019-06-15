@@ -71,10 +71,6 @@ void HtmlEditorControlEx::Translate()
 	{
 		// Prepare pre-translation of enum comboboxes 
 		m_Trans->AddPreTranslation(gcnew String("Center"), gcnew String("Centre"));
-		//m_Trans->AddPreTranslation(gcnew String(""), gcnew String(""));
-		//m_Trans->AddPreTranslation(gcnew String(""), gcnew String(""));
-		//m_Trans->AddPreTranslation(gcnew String(""), gcnew String(""));
-		//m_Trans->AddPreTranslation(gcnew String(""), gcnew String(""));
 
 		m_Trans->Translate(ToolBar->Items);
 		m_Trans->Translate(ContextMenu->Items);

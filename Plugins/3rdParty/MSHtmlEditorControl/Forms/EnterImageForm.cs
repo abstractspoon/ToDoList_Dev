@@ -6,8 +6,6 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
-using ImageAlignOption = MSDN.Html.Editor.ImageAlignOption;
-
 #endregion
 
 namespace MSDN.Html.Editor

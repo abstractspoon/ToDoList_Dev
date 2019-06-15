@@ -124,15 +124,38 @@ void Translator::Translate(ComboBox^ combo)
 		return;
 
 	int nItem = combo->Items->Count;
-	bool bStrings = ((nItem == 0) || ISTYPE(combo->Items[0], String));
 
-	if (bStrings)
+	while (nItem--)
 	{
-		combo->Text = Translate(combo->Text);
+		auto item = ASTYPE(combo->Items[nItem], String);
 
-		while (nItem--)
-			combo->Items[nItem] = Translate(ASTYPE(combo->Items[nItem], String));
+		if (item == nullptr)
+			return;
+
+		combo->Items[nItem] = Translate(item);
 	}
+
+	combo->Text = Translate(combo->Text);
+	RecalcDropWidth(combo);
+}
+
+void Translator::RecalcDropWidth(ComboBox^ combo)
+{
+	int maxWidth = 0;
+	int nItem = combo->Items->Count;
+
+	while (nItem--)
+	{
+		auto item = ASTYPE(combo->Items[nItem], String);
+
+		if (item == nullptr)
+			return;
+
+		int itemWidth = TextRenderer::MeasureText(item, combo->Font).Width;
+		maxWidth = Math::Max(itemWidth, maxWidth);
+	}
+
+	combo->DropDownWidth = (maxWidth + SystemInformation::VerticalScrollBarWidth);
 }
 
 void Translator::AddPreTranslation(String^ sText, String^ sTranslation)
