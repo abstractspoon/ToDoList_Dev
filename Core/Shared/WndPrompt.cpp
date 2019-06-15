@@ -8,6 +8,7 @@
 #include "wclassdefines.h"
 #include "enstring.h"
 #include "misc.h"
+#include "themed.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -166,7 +167,7 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 	rClient.DeflateRect(2, 1, 2, 0);
 
 	UINT nFlags = (DT_TOP | DT_NOPREFIX | (bCentred ? DT_CENTER : DT_LEFT));
-	COLORREF crText = GetSysColor(COLOR_3DSHADOW);
+	COLORREF crText = GetSysColor(COLOR_3DDKSHADOW);
 
 	if (CWinClasses::IsComboBox(szClass))
 	{
@@ -175,12 +176,17 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 	}
 	else if (CWinClasses::IsEditControl(hWnd))
 	{
+		if (CThemed::AreControlsThemed())
+		{
+			static COLORREF crThemedCue = CThemed(hWnd).GetThemeColor(EP_EDITTEXT, ETS_CUEBANNER, TMT_TEXTCOLOR);
+			crText = crThemedCue;
+		}
+
 		HBRUSH hbrBkgnd = NULL;
 
 		if (!::IsWindowEnabled(hWnd) || (::GetWindowLong(hWnd, GWL_STYLE) & ES_READONLY))
 		{
 			hbrBkgnd = GetSysColorBrush(COLOR_3DFACE);
-			crText = GetSysColor(COLOR_3DDKSHADOW);
 		}
 		else
 		{

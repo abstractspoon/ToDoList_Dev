@@ -1052,6 +1052,7 @@ BEGIN_TM_PART_STATES(EDITTEXT)
     TM_STATE(5, ETS, FOCUSED)
     TM_STATE(6, ETS, READONLY)
     TM_STATE(7, ETS, ASSIST)
+	TM_STATE(8, ETS, CUEBANNER)
 END_TM_PART_STATES()
 
 //---------------------------------------------------------------------------------------
