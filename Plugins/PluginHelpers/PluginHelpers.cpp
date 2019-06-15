@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "pluginhelpers.h"
+#include "win32.h"
 
 #include <Interfaces\IEnums.h>
 
@@ -62,6 +63,27 @@ void DialogUtils::SetFont(System::Windows::Forms::Control::ControlCollection^ ct
 
 	while (nCtrl--)
 		SetFont(ctrls[nCtrl], font); // RECURSIVE CALL
+}
+
+System::Windows::Forms::Control^ DialogUtils::Find(System::Windows::Forms::Control^ parent, String^ childName, bool recursive)
+{
+	auto ctrls = parent->Controls->Find(childName, recursive);
+
+	return ((ctrls != nullptr) ? ctrls[0] : nullptr);
+}
+
+bool DialogUtils::SetEditCue(System::Windows::Forms::Control^ ctrl, String^ sCueText)
+{
+	if ((ctrl != nullptr) && (sCueText != nullptr))
+		return Win32::SetEditCue(ctrl->Handle, sCueText);
+
+	// else
+	return false;
+}
+
+bool DialogUtils::SetEditCue(System::Windows::Forms::Control^ parent, String^ childName, String^ sCueText, bool recursiveSearch)
+{
+	return SetEditCue(Find(parent, childName, recursiveSearch), sCueText);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

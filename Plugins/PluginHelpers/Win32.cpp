@@ -3,6 +3,8 @@
 
 #include "stdafx.h"
 #include "Win32.h"
+#include "CommCtrl.h"
+#include "PluginHelpers.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -126,6 +128,11 @@ float Win32::PointsToEms(int nPointSize)
 	const float PtToEm = 0.08365f; // https://www.convertunits.com/from/pt/to/em
 
 	return (nPointSize * PtToEm);
+}
+
+bool Win32::SetEditCue(IntPtr hWnd, String^ sCueText)
+{
+	return (0 != ::SendMessage(GetHwnd(hWnd), EM_SETCUEBANNER, FALSE, (LPARAM)(LPCWSTR)MS(sCueText)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

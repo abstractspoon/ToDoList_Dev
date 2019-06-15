@@ -35,6 +35,8 @@ namespace Abstractspoon
 				static String^ GetFaceName(HFONT hFont);
 				static int GetPointSize(HFONT hFont);
 				static float PointsToEms(int nPointSize);
+
+				static bool SetEditCue(IntPtr hWnd, String^ sCueText);
 			};
 
 			public ref class DlgUnits

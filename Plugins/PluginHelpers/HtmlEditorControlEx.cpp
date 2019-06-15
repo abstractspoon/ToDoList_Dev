@@ -8,7 +8,11 @@
 #include "PluginHelpers.h"
 #include "HtmlEditorControlEx.h"
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 HtmlEditorControlEx::HtmlEditorControlEx(System::Drawing::Font^ font, Translator^ trans)
 {
@@ -131,6 +135,7 @@ void HtmlEditorControlEx::PreShowDialog(System::Windows::Forms::Form^ dialog, Sy
 		auto imageDialog = ASTYPE(dialog, MSDN::Html::Editor::EnterImageForm);
 
 		imageDialog->LastBrowsedFolder = LastBrowsedImageFolder;
+		DialogUtils::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional")), false);
 	}
 }
 
