@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Toolbars.h"
+#include "PluginHelpers.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -21,9 +22,9 @@ void Toolbars::FixupButtonSizes(ToolStrip^ toolbar)
 	{
 		auto item = toolbar->Items[i];
 
-		if (Toolbars::IsButton(item))
+		if (ISTYPE(item, ToolStripButton))
 		{
-			auto button = Toolbars::AsButton(item);
+			auto button = ASTYPE(item, ToolStripButton);
 
 			// From 'Shared\EnToolBar.cpp'
 			int xPadding = (imageSize.Width + 7 - button->Size.Width);
@@ -31,63 +32,23 @@ void Toolbars::FixupButtonSizes(ToolStrip^ toolbar)
 
 			button->Padding = Padding(xPadding / 2, yPadding / 2, xPadding - xPadding / 2, yPadding - yPadding / 2);
 		}
-		else if (Toolbars::IsDropDown(item))
+		else if (ISTYPE(item, ToolStripDropDownItem))
 		{
-			auto drop = Toolbars::AsDropDown(item);
+			auto drop = ASTYPE(item, ToolStripDropDownItem);
 
 			// From 'Shared\EnToolBar.cpp'
 			int yPadding = (imageSize.Height + 7 - drop->Size.Height);
 
 			drop->Padding = Padding(0, (yPadding / 2), 0, (yPadding - (yPadding / 2)));
 		}
-		else if (Toolbars::IsSeparator(item))
+		else if (ISTYPE(item, ToolStripSeparator))
 		{
-			auto sep = Toolbars::AsSeparator(item);
+			auto sep = ASTYPE(item, ToolStripSeparator);
 
 			sep->AutoSize = false;
 			sep->Height = (imageSize.Height + 7);
 		}
 	}
-}
-
-bool Toolbars::IsButton(ToolStripItem^ item)
-{
-	return (nullptr != AsButton(item));
-}
-
-bool Toolbars::IsDropDown(ToolStripItem^ item)
-{
-	return (nullptr != AsDropDown(item));
-}
-
-bool Toolbars::IsMenu(ToolStripItem^ item)
-{
-	return (nullptr != AsMenu(item));
-}
-
-bool Toolbars::IsSeparator(ToolStripItem^ item)
-{
-	return (nullptr != AsSeparator(item));
-}
-
-ToolStripButton^ Toolbars::AsButton(ToolStripItem^ item)
-{
-	return dynamic_cast<ToolStripButton^>(item);
-}
-
-ToolStripDropDownItem^ Toolbars::AsDropDown(ToolStripItem^ item)
-{
-	return dynamic_cast<ToolStripDropDownItem^>(item);
-}
-
-ToolStripMenuItem^ Toolbars::AsMenu(ToolStripItem^ item)
-{
-	return dynamic_cast<ToolStripMenuItem^>(item);
-}
-
-ToolStripSeparator^ Toolbars::AsSeparator(ToolStripItem^ item)
-{
-	return dynamic_cast<ToolStripSeparator^>(item);
 }
 
 void Toolbars::Sort(ToolStripItemCollection^ items)
@@ -190,7 +151,7 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 			{
 				auto item = toolbar->Items[i];
 
-				if (!Toolbars::IsSeparator(item) && item->Visible)
+				if (!ISTYPE(item, ToolStripSeparator) && item->Visible)
 				{
 					if (prevItemRect.IsEmpty)
 					{

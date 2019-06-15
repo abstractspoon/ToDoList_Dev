@@ -59,6 +59,8 @@ namespace Abstractspoon
 
 			};
 
+#define		ASTYPE(obj, objtype) dynamic_cast<objtype^>(obj)
+#define		ISTYPE(obj, objtype) (ASTYPE(obj, objtype) != nullptr)
 
 		}
 	}

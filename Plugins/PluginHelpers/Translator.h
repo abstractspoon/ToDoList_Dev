@@ -19,10 +19,11 @@ namespace Abstractspoon
 
 				String^ Translate(String^ sText);
 				void Translate(System::Windows::Forms::Form^ window);
+				void Translate(System::Windows::Forms::ComboBox^ combo);
 				void Translate(System::Windows::Forms::Control::ControlCollection^ items);
 				void Translate(System::Windows::Forms::ToolStripItemCollection^ items);
 
-				void AddPreTranslate(String^ sText, String^ sTranslation);
+				void AddPreTranslation(String^ sText, String^ sTranslation);
 
 			private:
 				ITransText* m_pTransText;

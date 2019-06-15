@@ -25,17 +25,6 @@ namespace Abstractspoon
 				static void FixupButtonSizes(ToolStrip^ toolbar);
 				static void Sort(ToolStripItemCollection^ items);
 
-				static bool IsButton(ToolStripItem^ item);
-				static bool IsDropDown(ToolStripItem^ item);
-				static bool IsMenu(ToolStripItem^ item);
-				static bool IsSeparator(ToolStripItem^ item);
-
-				static ToolStripButton^ AsButton(ToolStripItem^ item);
-				static ToolStripDropDownItem^ AsDropDown(ToolStripItem^ item);
-				static ToolStripMenuItem^ AsMenu(ToolStripItem^ item);
-				static ToolStripSeparator^ AsSeparator(ToolStripItem^ item);
-
-
 			protected:
 				ref class ToolStripItemComparer : System::Collections::IComparer
 				{

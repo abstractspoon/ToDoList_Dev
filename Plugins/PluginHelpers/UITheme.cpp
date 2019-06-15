@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "UITheme.h"
 #include "ColorUtil.h"
+#include "PluginHelpers.h"
 
 #include <Interfaces\UITheme.h>
 
@@ -134,7 +135,7 @@ void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
 bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs^ e)
 {
 	auto item = e->Item;
-	bool checkedButton = (Toolbars::IsButton(item) && Toolbars::AsButton(item)->Checked);
+	bool checkedButton = (ISTYPE(item, ToolStripButton) && ASTYPE(item, ToolStripButton)->Checked);
 
 	if (ValidColours() && (item->Selected || item->Pressed || checkedButton))
 	{

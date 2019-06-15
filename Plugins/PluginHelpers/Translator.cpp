@@ -26,9 +26,11 @@ Translator::Translator() : m_pTransText(nullptr)
 
 String^ Translator::Translate(String^ sText)
 {
-	if (m_pTransText == nullptr)
-		return sText;
+	if (String::IsNullOrWhiteSpace(sText))
+		return String::Empty;
 
+	// Allow pre-translate to operate regardless of
+	// the embedded translator pointer
 	if (m_mapPreTranslate != nullptr)
 	{
 		String^ sPreTrans;
@@ -36,6 +38,9 @@ String^ Translator::Translate(String^ sText)
 		if (m_mapPreTranslate->TryGetValue(sText, sPreTrans))
 			sText = sPreTrans;
 	}
+
+	if (m_pTransText == nullptr)
+		return sText;
 
 	LPWSTR szTemp = NULL;
 
@@ -87,16 +92,20 @@ void Translator::Translate(Control::ControlCollection^ items)
 		auto ctrl = items[nItem];
 
 		// Special cases
-		if ((dynamic_cast<WebBrowser^>(ctrl) != nullptr) ||
-			(dynamic_cast<TextBox^>(ctrl) != nullptr) ||
-			(dynamic_cast<RichTextBox^>(ctrl) != nullptr))
+		if (ISTYPE(ctrl, WebBrowser) ||
+			ISTYPE(ctrl, TextBox) ||
+			ISTYPE(ctrl, RichTextBox))
 		{
 			continue;
 		}
 
-		if (dynamic_cast<ToolStrip^>(ctrl) != nullptr)
+		if (ISTYPE(ctrl, ToolStrip))
 		{
-			Translate(dynamic_cast<ToolStrip^>(ctrl)->Items);
+			Translate(ASTYPE(ctrl, ToolStrip)->Items);
+		}
+		else if (ISTYPE(ctrl, ComboBox))
+		{
+			Translate(ASTYPE(ctrl, ComboBox));
 		}
 		else
 		{
@@ -108,12 +117,30 @@ void Translator::Translate(Control::ControlCollection^ items)
 	}
 }
 
-void Translator::AddPreTranslate(String^ sText, String^ sTranslation)
+void Translator::Translate(ComboBox^ combo)
+{
+	// Don't translate dynamic content
+	if (combo->DropDownStyle != ComboBoxStyle::DropDownList)
+		return;
+
+	int nItem = combo->Items->Count;
+	bool bStrings = ((nItem == 0) || ISTYPE(combo->Items[0], String));
+
+	if (bStrings)
+	{
+		combo->Text = Translate(combo->Text);
+
+		while (nItem--)
+			combo->Items[nItem] = Translate(ASTYPE(combo->Items[nItem], String));
+	}
+}
+
+void Translator::AddPreTranslation(String^ sText, String^ sTranslation)
 {
 	if (m_mapPreTranslate == nullptr)
 		m_mapPreTranslate = gcnew Dictionary<String^, String^>();
 
-	m_mapPreTranslate->Add(sText, sTranslation);
+	m_mapPreTranslate[sText] = sTranslation;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

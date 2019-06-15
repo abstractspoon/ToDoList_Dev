@@ -35,6 +35,8 @@ namespace Abstractspoon
 
 				void PreShowDialog(System::Windows::Forms::Form^ dialog, System::Drawing::Icon^ icon);
 				void PostShowDialog(System::Windows::Forms::Form^ dialog) new;
+
+				void Translate();
 			};
 		}
 	}

@@ -13,8 +13,12 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 HtmlEditorControlEx::HtmlEditorControlEx(System::Drawing::Font^ font, Translator^ trans)
 {
 	m_ControlsFont = font;
-	m_Trans = trans;
 	m_toolbarRenderer = gcnew UIThemeToolbarRenderer();
+
+	if (trans != nullptr)
+		m_Trans = trans;
+	else
+		m_Trans = gcnew Translator(nullptr); // for pre-translation
 }
 
 void HtmlEditorControlEx::SetControlFont(System::Drawing::Font^ font)
@@ -32,11 +36,7 @@ void HtmlEditorControlEx::SetTranslator(Translator^ trans)
 {
 	m_Trans = trans;
 
-	if (m_Trans != nullptr)
-	{
-		m_Trans->Translate(ToolBar->Items);
-		m_Trans->Translate(ContextMenu->Items);
-	}
+	Translate();
 }
 
 void HtmlEditorControlEx::SetUITheme(UITheme^ theme)
@@ -62,8 +62,20 @@ void HtmlEditorControlEx::InitializeComponentEx()
 		ContextMenu->ImageScalingSize = System::Drawing::Size(imageSize, imageSize);
 	}
 
+	Translate();
+}
+
+void HtmlEditorControlEx::Translate()
+{
 	if (m_Trans != nullptr)
 	{
+		// Prepare pre-translation of enum comboboxes 
+		m_Trans->AddPreTranslation(gcnew String("Center"), gcnew String("Centre"));
+		//m_Trans->AddPreTranslation(gcnew String(""), gcnew String(""));
+		//m_Trans->AddPreTranslation(gcnew String(""), gcnew String(""));
+		//m_Trans->AddPreTranslation(gcnew String(""), gcnew String(""));
+		//m_Trans->AddPreTranslation(gcnew String(""), gcnew String(""));
+
 		m_Trans->Translate(ToolBar->Items);
 		m_Trans->Translate(ContextMenu->Items);
 	}
