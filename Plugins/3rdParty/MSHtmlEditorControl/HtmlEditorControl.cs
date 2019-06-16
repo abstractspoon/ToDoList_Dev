@@ -415,8 +415,12 @@ namespace MSDN.Html.Editor
             // otherwise display the editing context menu
             if (!editorWebBrowser.IsWebBrowserContextMenuEnabled)
             {
-                // should disable inappropriate commands
-                this.contextTable.Visible = IsParentTable();
+				// Ensure selection is up to date
+				Application.DoEvents();
+				FormatSelectionChange();
+
+				// should disable inappropriate commands
+				this.contextTable.Visible = IsParentTable();
                 this.toolStripSeparator24.Visible = IsParentTable();
 
                 // display the text processing context menu
