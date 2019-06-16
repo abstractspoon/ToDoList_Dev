@@ -75,6 +75,7 @@ REM .Net Plugins are obfuscated first
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll"
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLReportExporterBridge.dll"
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLReportExporterCore.dll"
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll"
 
 REM Copy latest Resources
 del %OUTDIR%\Resources\ /Q /S
