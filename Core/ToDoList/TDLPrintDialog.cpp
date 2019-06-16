@@ -33,7 +33,7 @@ enum
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLPrintDialog2 dialog
+// CTDLPrintDialog dialog
 
 
 CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, 
@@ -51,7 +51,7 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle,
 	m_pageTaskSel(aAttribDefs, m_sPrefsKey, nView),
 	m_sTitle(szTitle)
 {
-	//{{AFX_DATA_INIT(CTDLPrintDialog2)
+	//{{AFX_DATA_INIT(CTDLPrintDialog)
 	//}}AFX_DATA_INIT
 	CPreferences prefs;
 
@@ -66,7 +66,7 @@ void CTDLPrintDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 
-	//{{AFX_DATA_MAP(CTDLPrintDialog2)
+	//{{AFX_DATA_MAP(CTDLPrintDialog)
 	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_PRINTTITLE, m_sTitle);
 	DDX_Check(pDX, IDC_PRINTDATE, m_bDate);
@@ -74,12 +74,12 @@ void CTDLPrintDialog::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CTDLPrintDialog, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLPrintDialog2)
+	//{{AFX_MSG_MAP(CTDLPrintDialog)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLPrintDialog2 message handlers
+// CTDLPrintDialog message handlers
 
 void CTDLPrintDialog::OnOK() 
 {

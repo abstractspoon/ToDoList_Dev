@@ -163,7 +163,7 @@ public:
 
 protected:
 // Dialog Data
-	//{{AFX_DATA(CTDLPrintDialog2)
+	//{{AFX_DATA(CTDLPrintDialog)
 	enum { IDD = IDD_PRINT_DIALOG };
 	//}}AFX_DATA
 	CString	m_sTitle;
@@ -177,7 +177,7 @@ protected:
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLPrintDialog2)
+	//{{AFX_VIRTUAL(CTDLPrintDialog)
 protected:
 	virtual void OnOK();
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -188,7 +188,7 @@ protected:
 protected:
 
 	// Generated message map functions
-	//{{AFX_MSG(CTDLPrintDialog2)
+	//{{AFX_MSG(CTDLPrintDialog)
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
