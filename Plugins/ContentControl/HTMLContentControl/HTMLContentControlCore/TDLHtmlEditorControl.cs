@@ -63,9 +63,6 @@ namespace HTMLContentControl
 
 			// Dynamic tooltip handling
 			this.WebBrowser.Document.MouseOver += new HtmlElementEventHandler(OnDocumentMouseOver);
-
-			// Place this at the end to ensure the toolbar has finished its resize
-			Toolbars.FixupButtonSizes(this.ToolBar);
 		}
 
 		private void InitialiseFeatures()

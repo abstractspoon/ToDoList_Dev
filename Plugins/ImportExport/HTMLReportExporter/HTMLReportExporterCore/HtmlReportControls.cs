@@ -119,9 +119,6 @@ namespace HTMLReportExporter
 
 			m_ToolStripAttributeMenu = new ToolStripDropDownButton();
 			InitialiseToolbar();
-
-			// Place this at the end to ensure the toolbar has finished its resize
-			Toolbars.FixupButtonSizes(this.ToolBar);
 		}
 
 		public new void SetBodyFont(string fontName, int htmlSize)

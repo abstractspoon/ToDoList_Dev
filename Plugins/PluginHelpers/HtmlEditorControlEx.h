@@ -30,11 +30,14 @@ namespace Abstractspoon
 				Translator^ m_Trans;
 
 			protected:
+				virtual void OnLoad(System::EventArgs^ args) override;
+
+			protected:
 				void InitializeComponentEx();
 				void InitialiseFeatures(bool hideDocumentCommands);
 
 				void PreShowDialog(System::Windows::Forms::Form^ dialog, System::Drawing::Icon^ icon);
-				void PostShowDialog(System::Windows::Forms::Form^ dialog) new;
+				virtual void PostShowDialog(System::Windows::Forms::Form^ dialog) override;
 
 				void Translate();
 			};

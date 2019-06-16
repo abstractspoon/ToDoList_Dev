@@ -69,6 +69,13 @@ void HtmlEditorControlEx::InitializeComponentEx()
 	Translate();
 }
 
+void HtmlEditorControlEx::OnLoad(System::EventArgs^ args)
+{
+	MSDN::Html::Editor::HtmlEditorControl::OnLoad(args);
+
+	Toolbars::FixupButtonSizes(ToolBar);
+}
+
 void HtmlEditorControlEx::Translate()
 {
 	if (m_Trans != nullptr)
