@@ -511,10 +511,6 @@ SOURCE=.\TDLPrintDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLPrintDialog2.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\TDLPriorityComboBox.cpp
 # End Source File
 # Begin Source File
@@ -1100,10 +1096,6 @@ SOURCE=.\TDLPrefMigrationDlg.h
 # Begin Source File
 
 SOURCE=.\TDLPrintDialog.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\TDLPrintDialog2.h
 # End Source File
 # Begin Source File
 
