@@ -479,7 +479,7 @@ namespace MSDN.Html.Editor
 				SelectWord(document.selection.createRange() as mshtmlTextRange);
 		}
 
-		private void SelectWordAtPoint(Point pos)
+		private mshtmlTextRange SelectAtPoint(Point pos)
 		{
 			if (document.selection != null)
 			{
@@ -488,9 +488,19 @@ namespace MSDN.Html.Editor
 				if (rng != null)
 				{
 					rng.moveToPoint(pos.X, pos.Y);
-					SelectWord(rng);
+					return rng;
 				}
 			}
+
+			return null;
+		}
+
+		private void SelectWordAtPoint(Point pos)
+		{
+			var rng = SelectAtPoint(pos);
+
+			if (rng != null)
+				SelectWord(rng);
 		}
 
 		private void SelectWord(mshtmlTextRange rng)
