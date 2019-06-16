@@ -120,6 +120,12 @@ namespace HTMLReportExporter
 
 			this.Toolbar.Renderer = m_TBRenderer;
 
+			if (DPIScaling.WantScaling())
+			{
+				int imageSize = DPIScaling.Scale(16);
+				this.Toolbar.ImageScalingSize = new System.Drawing.Size(imageSize, imageSize);
+			}
+
 			// Place this at the end to ensure the toolbar has finished its resize
 			Toolbars.FixupButtonSizes(this.Toolbar);
 		}
