@@ -12,9 +12,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace Abstractspoon::Tdl::PluginHelpers;
 using namespace System;
-using namespace Windows::Forms;
+using namespace System::Reflection;
+using namespace System::IO;
+using namespace System::Windows::Forms;
+using namespace System::Windows::Forms::VisualStyles;
+using namespace System::Drawing;
+
+using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -460,12 +465,12 @@ UIExtension::SelectionRect::SelectionRect()
 	const int LVP_LISTITEM = 1;
 	const int LISS_MORESELECTED = 6;
 
-	if (VisualStyles::VisualStyleRenderer::IsSupported)
+	if (VisualStyleRenderer::IsSupported)
 	{
-		auto visElm = VisualStyles::VisualStyleElement::CreateElement("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
+		auto visElm = VisualStyleElement::CreateElement("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
 
-		if (visElm && VisualStyles::VisualStyleRenderer::IsElementDefined(visElm))
-			m_visExplorerSelected = gcnew VisualStyles::VisualStyleRenderer(visElm);
+		if (visElm && VisualStyleRenderer::IsElementDefined(visElm))
+			m_visExplorerSelected = gcnew VisualStyleRenderer(visElm);
 	}
 }
 
@@ -477,11 +482,11 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 
 	return Draw(dc, x, y, cx, cy, focused);
 }
 
-bool UIExtension::SelectionRect::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused)
+bool UIExtension::SelectionRect::Draw(Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused)
 {
 	if (m_visExplorerSelected)
 	{
-		dc->FillRectangle(Drawing::Brushes::White, x, y, cx, cy);
+		dc->FillRectangle(Brushes::White, x, y, cx, cy);
 
 		auto rect = gcnew Drawing::Rectangle(x, y, cx, cy);
 
@@ -501,8 +506,8 @@ bool UIExtension::SelectionRect::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, I
 			textColour = Drawing::Color::FromArgb(GetSysColor(COLOR_3DSHADOW));
 		}
 
-		auto brush = gcnew Drawing::SolidBrush(fillColour);
-		auto pen = gcnew Drawing::Pen(textColour);
+		auto brush = gcnew SolidBrush(fillColour);
+		auto pen = gcnew Pen(textColour);
 
 		dc->FillRectangle(brush, x, y, cx, cy);
 		dc->DrawRectangle(pen, x, y, cx, cy);
@@ -515,22 +520,22 @@ bool UIExtension::SelectionRect::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, I
 
 Windows::Forms::Cursor^ UIExtension::AppCursor(UIExtension::AppCursorType cursorType)
 {
-	String^ appFolder = System::IO::Path::GetDirectoryName(System::Reflection::Assembly::GetExecutingAssembly()->Location);
-	String^ cursorFolder = System::IO::Path::Combine(appFolder, "Resources\\Cursors");
+	String^ appFolder = Path::GetDirectoryName(Assembly::GetExecutingAssembly()->Location);
+	String^ cursorFolder = Path::Combine(appFolder, "Resources\\Cursors");
 	String^ cursorFile = nullptr;
 
 	switch (cursorType)
 	{
 	case UIExtension::AppCursorType::LockedTask:
-		cursorFile = System::IO::Path::Combine(cursorFolder, "Locked.cur");
+		cursorFile = Path::Combine(cursorFolder, "Locked.cur");
 		break;
 
 	case UIExtension::AppCursorType::NoDrag:
-		cursorFile = System::IO::Path::Combine(cursorFolder, "NoDrag.cur");
+		cursorFile = Path::Combine(cursorFolder, "NoDrag.cur");
 		break;
 	}
 
-	if ((cursorFile != nullptr) && System::IO::File::Exists(cursorFile))
+	if ((cursorFile != nullptr) && File::Exists(cursorFile))
 	{
 		HCURSOR hCursor = (HCURSOR)::LoadImage(NULL, 
 											MS(cursorFile), 
@@ -539,7 +544,7 @@ Windows::Forms::Cursor^ UIExtension::AppCursor(UIExtension::AppCursorType cursor
 											GetSystemMetrics(SM_CYCURSOR), 
 											LR_LOADFROMFILE | LR_MONOCHROME | LR_SHARED);
 		
-		return gcnew Windows::Forms::Cursor(static_cast<IntPtr>(hCursor));
+		return gcnew Cursor(static_cast<IntPtr>(hCursor));
 	}
 	
 	return nullptr;
@@ -549,7 +554,7 @@ Windows::Forms::Cursor^ UIExtension::HandCursor()
 {
 	static HCURSOR hCursor = ::LoadCursor(NULL, IDC_HAND);
 
-	return gcnew Windows::Forms::Cursor(static_cast<IntPtr>(hCursor));
+	return gcnew Cursor(static_cast<IntPtr>(hCursor));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

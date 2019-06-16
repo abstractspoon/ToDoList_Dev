@@ -7,7 +7,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace System;
+using namespace System::Drawing;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
@@ -23,14 +23,14 @@ int DPIScaling::Scale(int nValue)
 	return ::MulDiv(nValue, Win32::GetSystemDPI(), 96);
 }
 
-Drawing::Point DPIScaling::Scale(Drawing::Point point)
+Point DPIScaling::Scale(Point point)
 {
-	return Drawing::Point(Scale(point.X), Scale(point.Y));
+	return Point(Scale(point.X), Scale(point.Y));
 }
 
-Drawing::Size DPIScaling::Scale(Drawing::Size size)
+Size DPIScaling::Scale(Size size)
 {
-	return Drawing::Size(Scale(size.Width), Scale(size.Height));
+	return Size(Scale(size.Width), Scale(size.Height));
 }
 
 Drawing::Rectangle DPIScaling::Scale(Drawing::Rectangle rect)

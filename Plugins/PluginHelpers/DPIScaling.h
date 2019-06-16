@@ -2,7 +2,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct UITHEME;
+using namespace System;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,9 +18,9 @@ namespace Abstractspoon
 				static bool WantScaling();
 				static int Scale(int nValue);
 
-				static System::Drawing::Point Scale(System::Drawing::Point point);
-				static System::Drawing::Size Scale(System::Drawing::Size size);
-				static System::Drawing::Rectangle Scale(System::Drawing::Rectangle rect);
+				static Drawing::Point Scale(Drawing::Point point);
+				static Drawing::Size Scale(Drawing::Size size);
+				static Drawing::Rectangle Scale(Drawing::Rectangle rect);
 			};
 		}
 	}

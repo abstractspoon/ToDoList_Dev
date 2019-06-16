@@ -6,7 +6,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct UITHEME;
+using namespace System;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -19,11 +19,11 @@ namespace Abstractspoon
 			public ref class TreeCtrl
 			{
 			public:
-				static bool SetItemIntegral(System::Windows::Forms::TreeNode^ node, int integral);
+				static bool SetItemIntegral(Windows::Forms::TreeNode^ node, int integral);
 
 			protected:
-				static HTREEITEM GetTreeItem(System::Windows::Forms::TreeNode^ node);
-				static HWND GetTreeHwnd(System::Windows::Forms::TreeNode^ node);
+				static HTREEITEM GetTreeItem(Windows::Forms::TreeNode^ node);
+				static HWND GetTreeHwnd(Windows::Forms::TreeNode^ node);
 			};
 
 		}

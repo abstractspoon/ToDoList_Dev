@@ -7,7 +7,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#using <system.dll>
+using namespace System::Windows::Forms;
+using namespace System::Drawing;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 

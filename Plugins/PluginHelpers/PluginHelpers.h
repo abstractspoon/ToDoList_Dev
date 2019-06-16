@@ -3,7 +3,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System;
-using namespace System::Runtime::InteropServices;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -20,7 +19,7 @@ namespace Abstractspoon
 		namespace PluginHelpers
 		{
 			// ----------------------------------------------------------------------------
-			// converts System::String to LPCWSTR, and frees memory on exit
+			// converts String to LPCWSTR, and frees memory on exit
 			// DO NOT USE TO RETURN STRINGS
 
 			public ref class MarshalledString
@@ -42,14 +41,15 @@ namespace Abstractspoon
 			public ref class DialogUtils
 			{
 			public:
-				static void SetFont(System::Windows::Forms::Control^ ctrl, System::Drawing::Font^ font);
-				static void SetFont(System::Windows::Forms::Control::ControlCollection^ ctrls, System::Drawing::Font^ font);
+				static void SetFont(Windows::Forms::Control^ ctrl, Drawing::Font^ font);
+				static void SetFont(Windows::Forms::Control::ControlCollection^ ctrls, Drawing::Font^ font);
 
-				static bool SetEditCue(System::Windows::Forms::Control^ ctrl, String^ sCueText);
-				static bool SetEditCue(System::Windows::Forms::Control^ parent, String^ childName, String^ sCueText, bool recursiveSearch);
+				static bool SetEditCue(Windows::Forms::Control^ ctrl, String^ sCueText);
+				static bool SetEditCue(Windows::Forms::Control^ parent, String^ childName, String^ sCueText, bool recursiveSearch);
 
-				static System::Windows::Forms::Control^ Find(System::Windows::Forms::Control^ parent, String^ childName, bool recursive);
+				static Windows::Forms::Control^ Find(Windows::Forms::Control^ parent, String^ childName, bool recursive);
 
+				static void RecalcDropWidth(Windows::Forms::ComboBox^ combo);
 			};
 
 			// ----------------------------------------------------------------------------

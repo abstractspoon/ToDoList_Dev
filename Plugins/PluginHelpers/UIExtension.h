@@ -13,6 +13,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+using namespace System;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct UITHEME;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -185,7 +189,7 @@ namespace Abstractspoon
 					TaskIcon(IntPtr hwndParent);
 
 					bool Get(UInt32 dwTaskID);
-					bool Draw(System::Drawing::Graphics^ dc, Int32 x, Int32 y);
+					bool Draw(Drawing::Graphics^ dc, Int32 x, Int32 y);
 					
 				private:
 					HWND m_hwndParent;
@@ -198,12 +202,12 @@ namespace Abstractspoon
 				public:
 					SelectionRect();
 
-					bool Draw(IntPtr hwnd, System::Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy);
-					bool Draw(System::Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused);
+					bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy);
+					bool Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused);
 
 				private:
-					System::Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerSelected;
-					System::Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerFocused;
+					Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerSelected;
+					Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerFocused;
 				};
 			};
 

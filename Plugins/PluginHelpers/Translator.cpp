@@ -7,6 +7,8 @@
 
 #include <Interfaces\ITransText.h>
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 using namespace System::Windows::Forms;
 using namespace System::Collections::Generic;
 
@@ -136,26 +138,8 @@ void Translator::Translate(ComboBox^ combo)
 	}
 
 	combo->Text = Translate(combo->Text);
-	RecalcDropWidth(combo);
-}
-
-void Translator::RecalcDropWidth(ComboBox^ combo)
-{
-	int maxWidth = 0;
-	int nItem = combo->Items->Count;
-
-	while (nItem--)
-	{
-		auto item = ASTYPE(combo->Items[nItem], String);
-
-		if (item == nullptr)
-			return;
-
-		int itemWidth = TextRenderer::MeasureText(item, combo->Font).Width;
-		maxWidth = Math::Max(itemWidth, maxWidth);
-	}
-
-	combo->DropDownWidth = (maxWidth + SystemInformation::VerticalScrollBarWidth);
+	
+	DialogUtils::RecalcDropWidth(combo);
 }
 
 void Translator::AddPreTranslation(String^ sText, String^ sTranslation)

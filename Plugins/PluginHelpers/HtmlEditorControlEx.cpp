@@ -10,11 +10,15 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+using namespace System::Drawing;
+using namespace System::Windows::Forms;
+
+using namespace MSDN::Html::Editor;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-HtmlEditorControlEx::HtmlEditorControlEx(System::Drawing::Font^ font, Translator^ trans)
+HtmlEditorControlEx::HtmlEditorControlEx(Drawing::Font^ font, Translator^ trans)
 {
 	m_ControlsFont = font;
 	m_toolbarRenderer = gcnew UIThemeToolbarRenderer();
@@ -25,7 +29,7 @@ HtmlEditorControlEx::HtmlEditorControlEx(System::Drawing::Font^ font, Translator
 		m_Trans = gcnew Translator(nullptr); // for pre-translation
 }
 
-void HtmlEditorControlEx::SetControlFont(System::Drawing::Font^ font)
+void HtmlEditorControlEx::SetControlFont(Drawing::Font^ font)
 {
 	m_ControlsFont = font;
 
@@ -62,8 +66,8 @@ void HtmlEditorControlEx::InitializeComponentEx()
 	{
 		int imageSize = DPIScaling::Scale(16);
 
-		ToolBar->ImageScalingSize = System::Drawing::Size(imageSize, imageSize);
-		ContextMenu->ImageScalingSize = System::Drawing::Size(imageSize, imageSize);
+		ToolBar->ImageScalingSize = Drawing::Size(imageSize, imageSize);
+		ContextMenu->ImageScalingSize = Drawing::Size(imageSize, imageSize);
 	}
 
 	Translate();
@@ -71,7 +75,7 @@ void HtmlEditorControlEx::InitializeComponentEx()
 
 void HtmlEditorControlEx::OnLoad(System::EventArgs^ args)
 {
-	MSDN::Html::Editor::HtmlEditorControl::OnLoad(args);
+	HtmlEditorControl::OnLoad(args);
 
 	Toolbars::FixupButtonSizes(ToolBar);
 }
@@ -114,12 +118,12 @@ void HtmlEditorControlEx::SetBodyFont(String^ fontName, int pointSize)
 	// Convert size to ems because it gives us greater granularity
 	float ems = Win32::PointsToEms(pointSize);
 
-	BodyFont = MSDN::Html::Editor::HtmlFontProperty(fontName, ems);
+	BodyFont = HtmlFontProperty(fontName, ems);
 }
 
-void HtmlEditorControlEx::PreShowDialog(System::Windows::Forms::Form^ dialog, System::Drawing::Icon^ icon)
+void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 {
-	MSDN::Html::Editor::HtmlEditorControl::PreShowDialog(dialog);
+	HtmlEditorControl::PreShowDialog(dialog);
 
 	// Operations that change dialog size
 	DialogUtils::SetFont(dialog, m_ControlsFont);
@@ -130,34 +134,34 @@ void HtmlEditorControlEx::PreShowDialog(System::Windows::Forms::Form^ dialog, Sy
 	dialog->ShowIcon = (icon != nullptr);
 
 	// Per dialog customisations
-	if (ISTYPE(dialog, MSDN::Html::Editor::EnterHrefForm))
+	if (ISTYPE(dialog, EnterHrefForm))
 	{
-		auto urlDialog = ASTYPE(dialog, MSDN::Html::Editor::EnterHrefForm);
+		auto urlDialog = ASTYPE(dialog, EnterHrefForm);
 
-		urlDialog->EnforceHrefTarget(MSDN::Html::Editor::NavigateActionOption::Default);
+		urlDialog->EnforceHrefTarget(NavigateActionOption::Default);
 		urlDialog->LastBrowsedFolder = LastBrowsedFileFolder;
 	}
-	else if (ISTYPE(dialog, MSDN::Html::Editor::EnterImageForm))
+	else if (ISTYPE(dialog, EnterImageForm))
 	{
-		auto imageDialog = ASTYPE(dialog, MSDN::Html::Editor::EnterImageForm);
+		auto imageDialog = ASTYPE(dialog, EnterImageForm);
 
 		imageDialog->LastBrowsedFolder = LastBrowsedImageFolder;
 		DialogUtils::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional")), false);
 	}
 }
 
-void HtmlEditorControlEx::PostShowDialog(System::Windows::Forms::Form^ dialog)
+void HtmlEditorControlEx::PostShowDialog(Form^ dialog)
 {
 	// Per dialog customisations
-	if (ISTYPE(dialog, MSDN::Html::Editor::EnterHrefForm))
+	if (ISTYPE(dialog, EnterHrefForm))
 	{
-		auto urlDialog = ASTYPE(dialog, MSDN::Html::Editor::EnterHrefForm);
+		auto urlDialog = ASTYPE(dialog, EnterHrefForm);
 
 		LastBrowsedFileFolder = urlDialog->LastBrowsedFolder;
 	}
-	else if (ISTYPE(dialog, MSDN::Html::Editor::EnterImageForm))
+	else if (ISTYPE(dialog, EnterImageForm))
 	{
-		auto imageDialog = ASTYPE(dialog, MSDN::Html::Editor::EnterImageForm);
+		auto imageDialog = ASTYPE(dialog, EnterImageForm);
 
 		LastBrowsedImageFolder = imageDialog->LastBrowsedFolder;
 	}
