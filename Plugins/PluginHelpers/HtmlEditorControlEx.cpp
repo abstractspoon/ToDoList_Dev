@@ -5,6 +5,7 @@
 #include "CommandHandling.h"
 #include "DPIScaling.h"
 #include "Translator.h"
+#include "FormsUtil.h"
 #include "PluginHelpers.h"
 #include "HtmlEditorControlEx.h"
 
@@ -35,7 +36,7 @@ void HtmlEditorControlEx::SetControlFont(Drawing::Font^ font)
 
 	if (m_ControlsFont != nullptr)
 	{
-		DialogUtils::SetFont(this, font);
+		FormsUtil::SetFont(this, font);
 		Toolbars::FixupButtonSizes(ToolBar);
 	}
 }
@@ -126,7 +127,7 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 	HtmlEditorControl::PreShowDialog(dialog);
 
 	// Operations that change dialog size
-	DialogUtils::SetFont(dialog, m_ControlsFont);
+	FormsUtil::SetFont(dialog, m_ControlsFont);
 	m_Trans->Translate(dialog);
 
 	// Add icon for identification
@@ -146,7 +147,7 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 		auto imageDialog = ASTYPE(dialog, EnterImageForm);
 
 		imageDialog->LastBrowsedFolder = LastBrowsedImageFolder;
-		DialogUtils::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional")), false);
+		FormsUtil::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional")), false);
 	}
 }
 

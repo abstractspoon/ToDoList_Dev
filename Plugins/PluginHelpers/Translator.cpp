@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "pluginhelpers.h"
+#include "FormsUtil.h"
 #include "Translator.h"
 
 #include <Interfaces\ITransText.h>
@@ -139,7 +140,7 @@ void Translator::Translate(ComboBox^ combo)
 
 	combo->Text = Translate(combo->Text);
 	
-	DialogUtils::RecalcDropWidth(combo);
+	FormsUtil::RecalcDropWidth(combo);
 }
 
 void Translator::AddPreTranslation(String^ sText, String^ sTranslation)

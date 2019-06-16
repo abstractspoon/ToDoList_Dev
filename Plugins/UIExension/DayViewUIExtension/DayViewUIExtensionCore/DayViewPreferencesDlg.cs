@@ -46,7 +46,7 @@ namespace DayViewUIExtension
 			
             InitializeComponent();
 
-			DialogUtils.SetFont(this, font);
+			FormsUtil.SetFont(this, font);
 			m_Trans.Translate(this);
 
 			// Build 'slot minutes' combo
