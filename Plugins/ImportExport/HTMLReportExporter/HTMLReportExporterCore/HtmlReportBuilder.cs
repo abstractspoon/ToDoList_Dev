@@ -410,6 +410,9 @@ namespace HTMLReportExporter
 				if (task == null)
 					return false;
 
+				if (m_Preview)
+					m_PreviewTaskCount = 0;
+
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
 				html.WriteLine(m_Layout.StartHtml);
 
@@ -432,7 +435,7 @@ namespace HTMLReportExporter
 					html.WriteLine(text);
 				}
 
-				if (m_Preview && (++m_PreviewTaskCount == MaxNumPreviewTasks))
+				if (m_Preview && (++m_PreviewTaskCount >= MaxNumPreviewTasks))
 					return;
 
 				// First subtask
