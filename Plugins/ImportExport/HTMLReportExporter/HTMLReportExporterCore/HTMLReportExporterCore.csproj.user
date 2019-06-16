@@ -5,4 +5,7 @@
     <StartAction>Program</StartAction>
     <StartProgram>$(SolutionDir)debug\ToDoList.exe</StartProgram>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
+  </PropertyGroup>
 </Project>

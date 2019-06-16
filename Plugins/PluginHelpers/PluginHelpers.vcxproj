@@ -63,7 +63,6 @@
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(SolutionDir)$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
 copy $(SolutionDir)3rdParty\HtmlAgilityPack\HtmlAgilityPack.dll "$(SolutionDir)$(ConfigurationName)\"
 
 mkdir "$(SolutionDir)..\Core\ToDoList"
