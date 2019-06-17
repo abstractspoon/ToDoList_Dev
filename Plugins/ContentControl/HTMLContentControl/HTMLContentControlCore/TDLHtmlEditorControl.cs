@@ -249,6 +249,15 @@ namespace HTMLContentControl
 				var href = new StringBuilder(m_CurrentHRef).ToString();
 				m_CurrentHRef = "";
 
+				// Verify that the mouse hasn't moved
+				var element = this.WebBrowser.Document.GetElementFromPoint(e.ClientMousePosition);
+
+				if (element == null)
+					return;
+
+				if (!href.Equals(element.GetAttribute("href")))
+					return;
+
 				if (HtmlNavigation != null)
 				{
 					HtmlNavigation(this, new MSDN.Html.Editor.HtmlNavigationEventArgs(href));
