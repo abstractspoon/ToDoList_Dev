@@ -65,6 +65,12 @@ namespace MSDN.Html.Editor
             {
                 return (NavigateActionOption)this.listTargets.SelectedIndex;
             }
+
+			set
+			{
+				if (this.listTargets.Enabled)
+					this.listTargets.SelectedIndex = (int)value;
+			}
 		}
 
 		public void EnforceHrefTarget(NavigateActionOption action)

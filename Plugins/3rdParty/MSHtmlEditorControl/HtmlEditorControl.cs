@@ -1810,7 +1810,7 @@ namespace MSDN.Html.Editor
 
 				if (EnterImageForm.IsImagePath(text))
 				{
-					if (!IsValidHref(text))
+					if (File.Exists(text) || !IsValidHref(text))
 						text = new System.Uri(text).AbsoluteUri;
 
 					InsertImagePrompt(text);
@@ -1826,7 +1826,17 @@ namespace MSDN.Html.Editor
 			{
 				var filePath = Clipboard.GetFileDropList()[0];
 
-				InsertImagePrompt(new System.Uri(filePath).AbsoluteUri);
+				if (File.Exists(filePath) || !IsValidHref(filePath))
+					filePath = new System.Uri(filePath).AbsoluteUri;
+
+				if (EnterImageForm.IsImagePath(filePath))
+				{
+					InsertImagePrompt(filePath);
+				}
+				else
+				{
+					InsertLinkPrompt(filePath);
+				}
 				return;
 			}
 
@@ -2370,6 +2380,7 @@ namespace MSDN.Html.Editor
 			}
 
 			string hrefText = (range.text == null ? String.Empty : range.text);
+			string hrefTarget = String.Empty;
 
 			// calculate the items working with
 			mshtmlAnchorElement anchor = null;
@@ -2392,6 +2403,7 @@ namespace MSDN.Html.Editor
 						hrefLink = anchor.href;
 
 					hrefText = element.innerText;
+					hrefTarget = anchor.target;
 				}
 			}
 			
@@ -2418,6 +2430,15 @@ namespace MSDN.Html.Editor
 				dialog.HrefText = hrefText;
 				dialog.HrefLink = hrefLink;
 
+				if (hrefTarget == TARGET_WINDOW_NEW)
+				{
+					dialog.HrefTarget = NavigateActionOption.NewWindow;
+				}
+				else if (hrefTarget == TARGET_WINDOW_SAME)
+				{
+					dialog.HrefTarget = NavigateActionOption.SameWindow;
+				}
+
 				PreShowDialog(dialog);
 
 				DialogResult result = dialog.ShowDialog(/*this.ParentForm*/);
@@ -2433,7 +2454,7 @@ namespace MSDN.Html.Editor
 						string newHrefText = dialog.HrefText;
 						var target = dialog.HrefTarget;
 						
-						hrefLink = dialog.HrefLink.ToLower();
+						hrefLink = dialog.HrefLink/*.ToLower()*/;
 
 						if (!String.IsNullOrEmpty(newHrefText) && IsValidHref(hrefLink))
 						{
