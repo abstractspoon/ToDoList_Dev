@@ -90,6 +90,9 @@ namespace MSDN.Html.Editor
 
 		public static bool IsImagePath(string path)
 		{
+			if (!System.IO.File.Exists(path))
+				return false;
+
 			string extension = System.IO.Path.GetExtension(path);
 
 			if (String.IsNullOrEmpty(extension))
