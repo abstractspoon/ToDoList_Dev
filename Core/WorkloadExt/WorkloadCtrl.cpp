@@ -2613,7 +2613,8 @@ BOOL CWorkloadCtrl::OnListLButtonUp(UINT /*nFlags*/, CPoint /*point*/)
 
 BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT /*nFlags*/, CPoint point)
 {
-	int nHit = m_lcColumns.HitTest(point);
+	int nCol = -1;
+	int nHit = ListHitTestItem(point, FALSE, nCol);
 	
 	if (nHit == -1)
 		return FALSE;
@@ -2631,7 +2632,9 @@ BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT /*nFlags*/, CPoint point)
 	if (m_bReadOnly)
 		return FALSE;
 
-	return CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKALLOCATIONS, 0, GetTaskID(nHit));
+	CString sAllocTo(m_hdrColumns.GetItemText(nCol));
+
+	return CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKALLOCATIONS, (WPARAM)(LPCTSTR)sAllocTo, GetTaskID(nHit));
 }
 
 BOOL CWorkloadCtrl::GetLabelEditRect(LPRECT pEdit) const

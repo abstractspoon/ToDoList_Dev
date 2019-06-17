@@ -55,6 +55,23 @@ BOOL CMapDayAllocations::Get(const CString& sAllocTo, WORKLOADALLOCATION& wa) co
 	return Lookup(Misc::ToUpper(sAllocTo), wa);
 }
 
+int CMapDayAllocations::GetKeys(CStringArray& aKeys) const
+{
+	aKeys.RemoveAll();
+
+	CString sKey;
+	WORKLOADALLOCATION wa;
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, sKey, wa);
+		aKeys.Add(sKey);
+	}
+
+	return aKeys.GetSize();
+}
+
 double CMapDayAllocations::GetDays(const CString& sAllocTo) const
 {
 	WORKLOADALLOCATION wa;
@@ -62,6 +79,11 @@ double CMapDayAllocations::GetDays(const CString& sAllocTo) const
 	Lookup(Misc::ToUpper(sAllocTo), wa);
 
 	return wa.dDays;
+}
+
+BOOL CMapDayAllocations::SetDays(const CString& sAllocTo, const CString& sDays)
+{
+	return SetDays(sAllocTo, Misc::Atof(sDays));
 }
 
 BOOL CMapDayAllocations::SetDays(const CString& sAllocTo, double dValue)
@@ -87,16 +109,21 @@ BOOL CMapDayAllocations::SetDays(const CString& sAllocTo, double dValue)
 	return TRUE;
 }
 
+BOOL CMapDayAllocations::AddDays(const CString& sAllocTo, double dValue)
+{
+	return SetDays(sAllocTo, (GetDays(sAllocTo) + dValue));
+}
+
+BOOL CMapDayAllocations::AddDays(const CString& sAllocTo, const CString& sDays)
+{
+	return AddDays(sAllocTo, Misc::Atof(sDays));
+}
+
 CString CMapDayAllocations::FormatDays(const CString& sAllocTo, int nDecimals) const
 {
 	double dValue = GetDays(sAllocTo);
 
 	return FormatDays(dValue, nDecimals);
-}
-
-BOOL CMapDayAllocations::SetDays(const CString& sAllocTo, const CString& sDays)
-{
-	return SetDays(sAllocTo, Misc::Atof(sDays));
 }
 
 BOOL CMapDayAllocations::AppendOverlaps(const CMapDayAllocations& mapOther)
@@ -392,6 +419,28 @@ BOOL WORKLOADITEM::operator==(const WORKLOADITEM& wi) const
 WORKLOADITEM::~WORKLOADITEM()
 {
 	
+}
+
+int WORKLOADITEM::GetNames(const CStringArray& aAllNames, CStringArray& aNames) const
+{
+	aNames.Copy(aAllocTo);
+
+	CStringArray aKeys;
+	int nKey = mapAllocatedDays.GetKeys(aKeys);
+
+	while (nKey--)
+	{
+		if (!Misc::Contains(aKeys[nKey], aNames))
+		{
+			int nName = Misc::Find(aKeys[nKey], aAllNames);
+			ASSERT(nName != -1);
+
+			if (nName != -1)
+				aNames.Add(aAllNames[nName]);
+		}
+	}
+
+	return aNames.GetSize();
 }
 
 BOOL WORKLOADITEM::HasStartDate() const

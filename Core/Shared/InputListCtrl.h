@@ -55,7 +55,6 @@ public:
 	void SetAutoColPrompt(const CString& sPrompt);
 	virtual BOOL CanEditSelectedCell() const;
 	void EditSelectedCell();
-	void EndEdit(BOOL bCancel);
 	virtual BOOL CanDeleteSelectedCell() const;
 	virtual BOOL DeleteSelectedCell();
 	BOOL SetCellText(int nRow, int nCol, const CString& sText);

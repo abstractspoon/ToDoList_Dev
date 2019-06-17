@@ -66,9 +66,12 @@ void CEditAllocationsListCtrl::InitState()
 	AutoAdd(TRUE, FALSE);
 
 	// Build list
-	for (int nAllocTo = 0; nAllocTo < m_wi.aAllocTo.GetSize(); nAllocTo++)
+	CStringArray aAllocTo;
+	m_wi.GetNames(m_aAllocTo, aAllocTo);
+
+	for (int nAllocTo = 0; nAllocTo < aAllocTo.GetSize(); nAllocTo++)
 	{
-		const CString& sAllocTo = m_wi.aAllocTo[nAllocTo];
+		const CString& sAllocTo = aAllocTo[nAllocTo];
 		CString sDays = m_wi.mapAllocatedDays.FormatDays(sAllocTo, 2);
 
 		int nRow = AddRow(sAllocTo);
@@ -165,8 +168,9 @@ void CEditAllocationsListCtrl::OnDestroy()
 		CString sAllocTo = GetItemText(nRow, ALLOCTO_COL);
 		CString sDays = GetItemText(nRow, ALLOCDAYS_COL);
 
-		m_wi.mapAllocatedDays.SetDays(sAllocTo, sDays);
-		m_wi.aAllocTo.Add(sAllocTo);
+		// Allow for the user adding the same name more than once
+		m_wi.mapAllocatedDays.AddDays(sAllocTo, sDays);
+		Misc::AddUniqueItem(sAllocTo, m_wi.aAllocTo);
 	}
 
 	CInputListCtrl::OnDestroy();

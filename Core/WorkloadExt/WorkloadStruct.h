@@ -66,6 +66,7 @@ public:
 	virtual ~CMapDayAllocations();
 
 	BOOL Get(const CString& sAllocTo, WORKLOADALLOCATION& wa) const;
+	int GetKeys(CStringArray& aKeys) const;
 
 	double GetDays(const CString& sAllocTo) const;
 	CString FormatDays(const CString& sAllocTo, int nDecimals) const;
@@ -75,6 +76,8 @@ public:
 
 	BOOL SetDays(const CString& sAllocTo, double dValue);
 	BOOL SetDays(const CString& sAllocTo, const CString& sValue);
+	BOOL AddDays(const CString& sAllocTo, double dValue);
+	BOOL AddDays(const CString& sAllocTo, const CString& sValue);
 
 	BOOL AppendOverlaps(const CMapDayAllocations& mapAlloc);
 	BOOL IsOverlapping(const CString& sAllocTo) const;
@@ -151,6 +154,8 @@ struct WORKLOADITEM
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	BOOL HasColor() const;
+
+	int GetNames(const CStringArray& aAllNames, CStringArray& aNames) const;
 
 };
 

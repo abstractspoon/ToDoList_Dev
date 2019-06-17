@@ -861,14 +861,14 @@ LRESULT CWorkloadWnd::OnWorkloadMoveTask(WPARAM wp, LPARAM lp)
 	return GetParent()->SendMessage(WM_IUI_MOVESELECTEDTASK, wp, lp);
 }
 
-void CWorkloadWnd::OnWorkloadEditAllocations() 
+void CWorkloadWnd::EditSelectedWorkloadAllocations(LPCTSTR szAllocTo)
 {
 	ASSERT(CanEditSelectedTaskAllocations());
 
 	WORKLOADITEM wi;
 	VERIFY(m_ctrlWorkload.GetSelectedTask(wi));
 
-	CEditAllocationsDlg dialog(wi, m_ctrlWorkload.GetAllocatedToList());
+	CEditAllocationsDlg dialog(wi, m_ctrlWorkload.GetAllocatedToList(), szAllocTo);
 	
 	if (dialog.DoModal() == IDOK)
 	{
@@ -903,13 +903,18 @@ void CWorkloadWnd::OnWorkloadEditAllocations()
 	}
 }
 
-LRESULT CWorkloadWnd::OnWorkloadEditTaskAllocations(WPARAM /*wp*/, LPARAM lp)
+void CWorkloadWnd::OnWorkloadEditAllocations() 
+{
+	EditSelectedWorkloadAllocations(NULL);
+}
+
+LRESULT CWorkloadWnd::OnWorkloadEditTaskAllocations(WPARAM wp, LPARAM lp)
 {
 	ASSERT(!m_bReadOnly);
 
 	if (CanEditSelectedTaskAllocations((DWORD)lp))
 	{
-		OnWorkloadEditAllocations();
+		EditSelectedWorkloadAllocations((LPCTSTR)wp);
 		return TRUE;
 	}
 

@@ -5,6 +5,8 @@
 #include "resource.h"
 #include "EditAllocationsDlg.h"
 
+#include "..\Shared\Misc.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -15,7 +17,7 @@ static char THIS_FILE[] = __FILE__;
 // CEditAllocationsDlg dialog
 
 
-CEditAllocationsDlg::CEditAllocationsDlg(const WORKLOADITEM& wi, const CStringArray& aAllocTo, CWnd* pParent /*=NULL*/)
+CEditAllocationsDlg::CEditAllocationsDlg(const WORKLOADITEM& wi, const CStringArray& aAllocTo, LPCTSTR szAllocTo, CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(CEditAllocationsDlg::IDD, pParent), m_lcAllocations(wi, aAllocTo)
 {
@@ -23,6 +25,7 @@ CEditAllocationsDlg::CEditAllocationsDlg(const WORKLOADITEM& wi, const CStringAr
 	//}}AFX_DATA_INIT
 
 	m_sTaskTitle = wi.sTitle;
+	m_sAllocTo = szAllocTo;
 }
 
 
@@ -48,7 +51,21 @@ BOOL CEditAllocationsDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	
-	// TODO: Add extra initialization here
+	if (!m_sAllocTo.IsEmpty())
+	{
+		int nAllocTo = m_lcAllocations.FindItemFromLabel(m_sAllocTo);
+
+		if (nAllocTo == -1)
+		{
+			nAllocTo = m_lcAllocations.AddRow(m_sAllocTo);
+
+			// Make sure there's something to select
+			m_lcAllocations.SetItemText(nAllocTo, 1, Misc::Format(0.0, 2));
+		}
+
+		m_lcAllocations.SetCurSel(nAllocTo, 1, FALSE);
+		m_lcAllocations.EditSelectedCell();
+	}
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

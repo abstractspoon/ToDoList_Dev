@@ -1669,20 +1669,20 @@ COLORREF CInputListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, B
 	{
 		// if focused then draw item in focused colors 
 		if (bWndFocus)
+		{
 			return ::GetSysColor(COLOR_HIGHLIGHTTEXT);
-
-		// else if not focused then draw selection else
-		// draw in column colors as below unless we're the prompt and 
-		// readonly - then draw in back color (ie hide it)
+		}
 		else if (bSelected)
+		{
+			// else if not focused then draw selection else
+			// draw in column colors as below unless we're the prompt and 
+			// readonly - then draw in back color (ie hide it)
 			return ::GetSysColor(COLOR_WINDOWTEXT);
+		}
 	}
 
 	// else 
-	if (bIsPrompt)
-		return ::GetSysColor(COLOR_3DSHADOW);
-
-	if (!IsWindowEnabled())
+	if (bIsPrompt || !IsWindowEnabled())
 		return ::GetSysColor(COLOR_3DDKSHADOW);
 	
 	// else

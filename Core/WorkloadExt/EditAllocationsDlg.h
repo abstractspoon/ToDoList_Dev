@@ -16,7 +16,7 @@ class CEditAllocationsDlg : public CDialog
 {
 // Construction
 public:
-	CEditAllocationsDlg(const WORKLOADITEM& wi, const CStringArray& aAllocTo, CWnd* pParent = NULL);   // standard constructor
+	CEditAllocationsDlg(const WORKLOADITEM& wi, const CStringArray& aAllocTo, LPCTSTR szAllocTo, CWnd* pParent = NULL);   // standard constructor
 
 	const WORKLOADITEM& GetAllocations() const;
 
@@ -27,6 +27,7 @@ protected:
 	CEditAllocationsListCtrl m_lcAllocations;
 	CString	m_sTaskTitle;
 	//}}AFX_DATA
+	CString	m_sAllocTo;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

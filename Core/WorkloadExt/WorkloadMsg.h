@@ -23,7 +23,7 @@ const UINT WM_WLC_MOVETASK				= ::RegisterWindowMessage(_T("WM_WLC_MOVETASK"));
 // WPARAM = 0, LPARAM = Task ID
 const UINT WM_WLC_EDITTASKTITLE			= ::RegisterWindowMessage(_T("WM_WLC_EDITTASKTITLE"));
 
-// WPARAM = 0, LPARAM = Task ID
+// WPARAM = Alloc to name or NULL, LPARAM = Task ID
 const UINT WM_WLC_EDITTASKALLOCATIONS	= ::RegisterWindowMessage(_T("WM_WLC_EDITTASKALLOCATIONS"));
 
 /////////////////////////////////////////////////////////////////////////////
