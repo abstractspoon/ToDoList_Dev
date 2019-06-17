@@ -25,10 +25,12 @@ namespace HTMLContentControl
         private Timer m_TextChangeTimer;
         private String m_PrevTextChange = "";
 		private Boolean m_SettingContent = false;
+		private String m_CurrentHRef = "";
 
         // ---------------------------------------------------------------
 
         public new event EventHandler TextChanged;
+		public new event MSDN.Html.Editor.HtmlNavigationEventHandler HtmlNavigation;
 		public event NeedLinkTooltipEventHandler NeedLinkTooltip;
 
 		// ---------------------------------------------------------------
@@ -63,6 +65,13 @@ namespace HTMLContentControl
 
 			// Dynamic tooltip handling
 			this.WebBrowser.Document.MouseOver += new HtmlElementEventHandler(OnDocumentMouseOver);
+
+			// Handle link clicking
+			this.WebBrowser.Document.MouseDown += new HtmlElementEventHandler(OnDocumentMouseDown);
+			this.WebBrowser.Document.MouseUp += new HtmlElementEventHandler(OnDocumentMouseUp);
+
+			base.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnBaseNavigateLink);
+
 		}
 
 		private void InitialiseFeatures()
@@ -216,5 +225,60 @@ namespace HTMLContentControl
 				}
 			}
 		}
+
+		private void OnDocumentMouseDown(object sender, HtmlElementEventArgs e)
+		{
+			if (!IsEditable)
+			{
+				// We handle links ourselves because the web browser 
+				// doesn't always send a navigation notification
+				// ie. It silently eats urls it doesn't like
+				var element = this.WebBrowser.Document.GetElementFromPoint(e.ClientMousePosition);
+
+				if (element == null)
+					return;
+
+				m_CurrentHRef = element.GetAttribute("href");
+			}
+		}
+
+		private void OnDocumentMouseUp(object sender, HtmlElementEventArgs e)
+		{
+			if (!IsEditable && !String.IsNullOrWhiteSpace(m_CurrentHRef))
+			{
+				var href = new StringBuilder(m_CurrentHRef).ToString();
+				m_CurrentHRef = "";
+
+				if (HtmlNavigation != null)
+				{
+					HtmlNavigation(this, new MSDN.Html.Editor.HtmlNavigationEventArgs(href));
+				}
+			}
+		}
+
+		private void OnBaseNavigateLink(object sender, MSDN.Html.Editor.HtmlNavigationEventArgs e)
+		{
+			if (e.Url.ToLower() == "about:blank")
+			{
+				e.Cancel = false; // allow
+			}
+			else
+			{
+				e.Cancel = true; // everything else
+
+				if (IsEditable)
+				{
+					// Move selection to mouse location
+					var pos = WebBrowser.PointToClient(Cursor.Position);
+
+					Focus();
+					SelectAtPoint(pos);
+
+					// Must be drag and drop
+					InsertLinkPrompt(e.Url);
+				}
+			}
+		}
+
 	}
 }

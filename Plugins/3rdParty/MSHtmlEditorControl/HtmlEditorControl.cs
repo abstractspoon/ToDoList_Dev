@@ -477,13 +477,13 @@ namespace MSDN.Html.Editor
 
 		} //DocumentDoubleClick
 
-		private void SelectWordAtCaret()
+		protected void SelectWordAtCaret()
 		{
 			if (document.selection != null)
 				SelectWord(document.selection.createRange() as mshtmlTextRange);
 		}
 
-		private mshtmlTextRange SelectAtPoint(Point pos)
+		protected mshtmlTextRange SelectAtPoint(Point pos)
 		{
 			if (document.selection != null)
 			{
@@ -499,7 +499,7 @@ namespace MSDN.Html.Editor
 			return null;
 		}
 
-		private void SelectWordAtPoint(Point pos)
+		protected void SelectWordAtPoint(Point pos)
 		{
 			var rng = SelectAtPoint(pos);
 
@@ -507,7 +507,7 @@ namespace MSDN.Html.Editor
 				SelectWord(rng);
 		}
 
-		private void SelectWord(mshtmlTextRange rng)
+		protected void SelectWord(mshtmlTextRange rng)
 		{
 			if ((rng != null) && String.IsNullOrEmpty(rng.text))
 			{
@@ -897,7 +897,7 @@ namespace MSDN.Html.Editor
 
         } //ReadOnly
 
-		private bool IsEditable
+		protected bool IsEditable
 		{
 			get { return (!_readOnly && _editEnabled && Enabled); }
 		}
@@ -3837,7 +3837,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Gets the first selected Html Control as an Element
         /// </summary>
-        private mshtmlElement GetFirstControl()
+        protected mshtmlElement GetFirstControl()
         {
             // define the selected range object
             mshtmlSelection selection;
