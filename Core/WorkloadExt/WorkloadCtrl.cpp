@@ -2545,6 +2545,10 @@ BOOL CWorkloadCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 
 BOOL CWorkloadCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 {
+	// For reasons I don't understand, the resource context is
+	// wrong when handling the double-click
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	HTREEITEM hti = m_tcTasks.HitTest(point, &nFlags);
 				
 	if (!(nFlags & (TVHT_ONITEM | TVHT_ONITEMRIGHT)))
@@ -2557,6 +2561,10 @@ BOOL CWorkloadCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 	}
 	else
 	{
+		// Kill any built-in timers for label editing
+		m_tcTasks.KillTimer(0x2A);
+		m_tcTasks.KillTimer(0x2B);
+
 		ExpandItem(hti, !TCH().IsItemExpanded(hti), TRUE);
 		return TRUE;
 	}
