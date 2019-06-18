@@ -2404,6 +2404,9 @@ namespace MSDN.Html.Editor
 
 					hrefText = element.innerText;
 					hrefTarget = anchor.target;
+
+					range.moveToElementText(element);
+					range.select();
 				}
 			}
 			
@@ -2462,7 +2465,7 @@ namespace MSDN.Html.Editor
 							// it over the current selection and then reselect it
 							if (!hrefText.Equals(newHrefText))
 							{
-								ExecuteCommandRange(range, HTML_COMMAND_TEXT_PASTE, newHrefText);
+								SelectedText = newHrefText;
 
 								range = GetTextRange();
 								range.moveStart("character", -newHrefText.Length);

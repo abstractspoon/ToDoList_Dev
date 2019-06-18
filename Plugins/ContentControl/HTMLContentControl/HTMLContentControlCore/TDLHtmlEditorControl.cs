@@ -275,16 +275,45 @@ namespace HTMLContentControl
 			{
 				e.Cancel = true; // everything else
 
-				if (IsEditable)
+				if (IsEditable) // Must be drag and drop
 				{
-					// Move selection to mouse location
+					bool isImage = IsValidImageHref(e.Url);
+					var rng = GetTextRange();
+
+					if (rng == null)
+						return;
+
+					// Get the element under the mouse and move the select
+					// before or after whichever is closer
 					var pos = WebBrowser.PointToClient(Cursor.Position);
+					var element = this.WebBrowser.Document.GetElementFromPoint(pos);
 
-					Focus();
-					SelectAtPoint(pos);
+					if (element == null)
+						return;
 
-					// Must be drag and drop
-					InsertLinkPrompt(e.Url);
+					// Create a new element after
+					var newElm = this.WebBrowser.Document.CreateElement("A");
+
+					if (newElm == null)
+						return;
+
+					if (isImage)
+						newElm.InnerText = "[...]";
+					else
+						newElm.InnerText = e.Url;
+
+					if (element.TagName == "BODY")
+						element.AppendChild(newElm);
+					else
+						element.InsertAdjacentElement(HtmlElementInsertionOrientation.AfterEnd, newElm);
+
+					rng.moveToElementText(newElm.DomElement as mshtml.IHTMLElement);
+					rng.select();
+
+					if (isImage)
+						InsertImagePrompt(e.Url);
+					else
+						InsertLinkPrompt(e.Url);
 				}
 			}
 		}
