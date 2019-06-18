@@ -2268,12 +2268,12 @@ namespace MSDN.Html.Editor
 		/// Method to insert a image and prompt a user for the link
 		/// Calls the public InsertImage method
 		/// </summary>
-		public void InsertImagePrompt()
+		public bool InsertImagePrompt()
 		{
-			InsertImagePrompt("");
+			return InsertImagePrompt("");
 		}
 
-		public void InsertImagePrompt(string imageHref)
+		public bool InsertImagePrompt(string imageHref)
         {
             // set default image and text tags
             string imageText = string.Empty;
@@ -2318,9 +2318,11 @@ namespace MSDN.Html.Editor
                 {
 					PostShowDialog(dialog);
 
-					InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign);
+					return InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign);
 				}
 			}
+
+			return false;
 
         } //InsertImagePrompt
 
@@ -2363,12 +2365,12 @@ namespace MSDN.Html.Editor
 		/// Calls the public InsertLink method
 		/// </summary>
 		/// 
-		public void InsertLinkPrompt()
+		public bool InsertLinkPrompt()
 		{
-			InsertLinkPrompt("");
+			return InsertLinkPrompt("");
 		}
 
-		protected void InsertLinkPrompt(string hrefLink)
+		protected bool InsertLinkPrompt(string hrefLink)
         {
             // get the text range working with
             mshtmlTextRange range = GetTextRange();
@@ -2376,7 +2378,7 @@ namespace MSDN.Html.Editor
 			if (range == null)
 			{
 				Console.Beep();
-				return;
+				return false;
 			}
 
 			string hrefText = (range.text == null ? String.Empty : range.text);
@@ -2448,7 +2450,7 @@ namespace MSDN.Html.Editor
 
 				// based on the user interaction perform the necessary action
 				// after one has a valid href
-				if ((result != DialogResult.Cancel))
+				if (result != DialogResult.Cancel)
 				{
 					PostShowDialog(dialog);
 
@@ -2496,16 +2498,22 @@ namespace MSDN.Html.Editor
 
 							range.collapse(false);
 							range.select();
+
+							return true;
 						}
 					}
 					else if (result == DialogResult.No)
 					{
 						// remove the current link assuming present
 						if (anchor != null)
-							ExecuteCommandRange(range, HTML_COMMAND_REMOVE_LINK, null); ;
+							ExecuteCommandRange(range, HTML_COMMAND_REMOVE_LINK, null);
+
+						return true;
 					}
 
 				}
+
+				return false;
 			}
 		} //InsertLinkPrompt
 

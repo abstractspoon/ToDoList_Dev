@@ -310,10 +310,10 @@ namespace HTMLContentControl
 					rng.moveToElementText(newElm.DomElement as mshtml.IHTMLElement);
 					rng.select();
 
-					if (isImage)
-						InsertImagePrompt(e.Url);
-					else
-						InsertLinkPrompt(e.Url);
+					bool success = (isImage ? InsertImagePrompt(e.Url) : InsertLinkPrompt(e.Url));
+
+					if (!success)
+						element.OuterHtml = "";
 				}
 			}
 		}
