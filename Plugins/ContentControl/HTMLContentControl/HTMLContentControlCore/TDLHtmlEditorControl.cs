@@ -292,15 +292,12 @@ namespace HTMLContentControl
 						return;
 
 					// Create a new element after
-					var newElm = this.WebBrowser.Document.CreateElement("A");
+					var newElm = this.WebBrowser.Document.CreateElement("span");
 
 					if (newElm == null)
 						return;
 
-					if (isImage)
-						newElm.InnerText = "[...]";
-					else
-						newElm.InnerText = e.Url;
+					newElm.InnerText = (isImage ? "." : e.Url);
 
 					if (element.TagName == "BODY")
 						element.AppendChild(newElm);
@@ -310,7 +307,12 @@ namespace HTMLContentControl
 					rng.moveToElementText(newElm.DomElement as mshtml.IHTMLElement);
 					rng.select();
 
-					bool success = (isImage ? InsertImagePrompt(e.Url) : InsertLinkPrompt(e.Url));
+					bool success = false;
+
+					if (isImage)
+						success = InsertImage(e.Url, "", MSDN.Html.Editor.ImageAlignOption.Default);
+					else
+						success = InsertLinkPrompt(e.Url);
 
 					if (!success)
 						element.OuterHtml = "";

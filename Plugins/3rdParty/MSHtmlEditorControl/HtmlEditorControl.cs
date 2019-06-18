@@ -2343,7 +2343,7 @@ namespace MSDN.Html.Editor
 					mshtmlImageElement image = (mshtmlImageElement)control;
 					image.alt = (String.IsNullOrEmpty(imageText) ? imageHref : imageText);
 
-					if (imageAlign != ImageAlignOption.Left)
+					if (imageAlign != ImageAlignOption.Default)
 						image.align = imageAlign.ToString().ToLower();
 				}
 			}
