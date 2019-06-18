@@ -2279,15 +2279,16 @@ namespace MSDN.Html.Editor
             string imageText = string.Empty;
 
             ImageAlignOption imageAlign = ImageAlignOption.Left;
-            mshtmlElement control = null;
 
-            // look to see if an image has been selected
-            control = GetFirstControl();
-            if (control != null)
+			// look to see if an image has been selected
+			mshtmlElement control = GetFirstControl();
+			mshtmlImageElement image = null;
+
+			if (control != null)
             {
                 if (IsStringEqual(control.tagName, IMAGE_TAG))
                 {
-                    mshtmlImageElement image = (mshtmlImageElement)control;
+                    image = (mshtmlImageElement)control;
 
 					if (string.IsNullOrEmpty(imageHref))
 						imageHref = image.href;
@@ -2311,14 +2312,25 @@ namespace MSDN.Html.Editor
                 dialog.ImageLink = imageHref;
                 dialog.ImageText = imageText;
                 dialog.ImageAlign = imageAlign;
+
                 PreShowDialog(dialog);
+
                 // based on the user interaction perform the neccessary action
                 // after one has a valid image href
                 if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
 					PostShowDialog(dialog);
 
-					return InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign);
+					if (image == null)
+						return InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign);
+
+					// else
+					image.alt = dialog.ImageText;
+
+					if (imageAlign != ImageAlignOption.Default)
+						image.align = imageAlign.ToString().ToLower();
+					else
+						image.align = "";
 				}
 			}
 
@@ -2345,6 +2357,8 @@ namespace MSDN.Html.Editor
 
 					if (imageAlign != ImageAlignOption.Default)
 						image.align = imageAlign.ToString().ToLower();
+					else
+						image.align = "";
 				}
 			}
 

@@ -67,6 +67,9 @@ namespace MSDN.Html.Editor
             set
             {
                 this.hrefLink.Text = value.Trim();
+
+				// Can't change the image link once it's set
+				this.hrefLink.ReadOnly = !String.IsNullOrEmpty(this.hrefLink.Text);
             }
 
         } //ImageLink
