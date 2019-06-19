@@ -35,6 +35,7 @@ public:
 	bool SetContent(const unsigned char* pContent, int nLength, bool bResetSelection);
 	int GetTextContent(LPTSTR szContent, int nLength = -1) const;
 	bool SetTextContent(LPCTSTR szContent, bool bResetSelection);
+	bool InsertTextContent(LPCWSTR szContent, bool bAtEnd);
 	void SetReadOnly(bool bReadOnly);
 	HWND GetHwnd() const;
 	LPCTSTR GetTypeID() const { return RTF_TYPEID; }

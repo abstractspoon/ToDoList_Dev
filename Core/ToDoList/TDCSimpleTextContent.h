@@ -60,6 +60,7 @@ public:
 	LPCWSTR GetTypeID() const;
 	int GetTextContent(LPTSTR szContent, int nLength = -1) const;
 	bool SetTextContent(LPCTSTR szContent, bool bResetSelection);
+	bool InsertTextContent(LPCWSTR szContent, bool bAtEnd);
 	void SetReadOnly(bool bReadOnly);
 	HWND GetHwnd() const;
 	bool ProcessMessage(MSG* pMsg);

@@ -300,6 +300,15 @@ bool CRTFContentControl::SetTextContent(LPCTSTR szContent, bool bResetSelection)
 	return true; 
 }
 
+bool CRTFContentControl::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CAutoFlag af(m_bAllowNotify, TRUE);
+
+	return (m_rtf.InsertSimpleText(szContent, (bAtEnd ? TRUE : FALSE)) != FALSE);
+}
+
 bool CRTFContentControl::Undo() 
 { 
 	return (m_rtf.Undo() != FALSE); 

@@ -39,8 +39,8 @@ public:
 	static BOOL IsDialog(HWND hWnd);
 	static BOOL IsCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType = WCD_ANY);
 
-	static BOOL IsEditControl(LPCTSTR szClass);
-	static BOOL IsEditControl(HWND hWnd);
+	static BOOL IsEditControl(LPCTSTR szClass, BOOL bOrRichEdit = TRUE);
+	static BOOL IsEditControl(HWND hWnd, BOOL bOrRichEdit = TRUE);
 	static BOOL IsRichEditControl(LPCTSTR szClass);
 	static BOOL IsRichEditControl(HWND hWnd);
 	static BOOL IsComboBox(LPCTSTR szClass);

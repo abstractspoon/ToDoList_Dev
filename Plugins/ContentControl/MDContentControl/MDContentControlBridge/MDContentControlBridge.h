@@ -56,6 +56,7 @@ public:
    // text content if supported. return false if not supported
    int GetTextContent(LPWSTR szContent, int nLength = -1) const;
    bool SetTextContent(LPCWSTR szContent, bool bResetSelection);
+   bool InsertTextContent(LPCWSTR szContent, bool bAtEnd);
 
    bool FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord);
 

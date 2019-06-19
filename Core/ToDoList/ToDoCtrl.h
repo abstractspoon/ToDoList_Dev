@@ -778,7 +778,7 @@ protected:
 
 	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);
 	UINT MapColumnToCtrlID(TDC_COLUMN nColID) const;
-	TDC_COLUMN MapCtrlIDToColumn(UINT nCtrlID) const;
+	TDC_ATTRIBUTE MapCtrlIDToAttribute(UINT nCtrlID) const;
 
 	BOOL IsClipboardEmpty(BOOL bCheckID = FALSE) const;
 	CString GetClipboardID() const;

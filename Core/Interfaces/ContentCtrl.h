@@ -38,6 +38,8 @@ public:
 	BOOL SetContent(const unsigned char* pContent, int nLength, BOOL bResetSelection);
 	BOOL SetContent(const CBinaryData& sContent, BOOL bResetSelection);
 	BOOL SetTextContent(LPCTSTR szContent, BOOL bResetSelection);
+	BOOL InsertTextContent(LPCTSTR szContent, BOOL bAtEnd = FALSE);
+
 	BOOL IsSettingContent() const { return m_bSettingContent; }
 	BOOL FindReplaceAll(LPCTSTR szFind, LPCTSTR szReplace, BOOL bCaseSensitive, BOOL bWholeWord);
 

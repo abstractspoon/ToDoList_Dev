@@ -175,6 +175,15 @@ bool CTDLSimpleTextContentCtrl::SetTextContent(LPCTSTR szContent, bool bResetSel
 	return true; 
 }
 
+bool CTDLSimpleTextContentCtrl::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CAutoFlag af(m_bAllowNotify, TRUE);
+
+	return (InsertSimpleText(szContent, (bAtEnd ? TRUE : FALSE)) != FALSE);
+}
+
 int CTDLSimpleTextContentCtrl::GetContent(unsigned char* /*pContent*/) const 
 { 
 	return 0; 

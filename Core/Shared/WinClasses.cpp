@@ -240,14 +240,17 @@ BOOL CWinClasses::IsControlClass(LPCTSTR szClass)
 	return s_mapCtrlClasses.Lookup(sClass, pTemp);
 }
 
-BOOL CWinClasses::IsEditControl(HWND hWnd)
+BOOL CWinClasses::IsEditControl(HWND hWnd, BOOL bOrRichEdit)
 {
-	return IsEditControl(GetClass(hWnd));
+	return IsEditControl(GetClass(hWnd), bOrRichEdit);
 }
 
-BOOL CWinClasses::IsEditControl(LPCTSTR szClass)
+BOOL CWinClasses::IsEditControl(LPCTSTR szClass, BOOL bOrRichEdit)
 {
-	return (IsRichEditControl(szClass) || IsClass(szClass, WC_EDIT));
+	if (IsClass(szClass, WC_EDIT))
+		return TRUE;
+
+	return (bOrRichEdit && IsRichEditControl(szClass));
 }
 
 BOOL CWinClasses::IsRichEditControl(HWND hWnd)

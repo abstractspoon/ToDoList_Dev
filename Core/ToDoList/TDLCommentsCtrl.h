@@ -43,6 +43,7 @@ public:
 
 	BOOL GetContent(CString& sTextContent, CBinaryData& customContent) const;
 	BOOL SetContent(const CString& sTextContent, const CBinaryData& customContent, BOOL bResetSelection);
+	BOOL InsertTextContent(LPCWSTR szContent, BOOL bAtEnd);
 	void ClearContent();
 
 	BOOL FindReplaceAll(LPCTSTR szFind, LPCTSTR szReplace, BOOL bCaseSensitive, BOOL bWholeWord);

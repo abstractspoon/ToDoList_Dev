@@ -196,6 +196,23 @@ BOOL CRichEditBaseCtrl::PasteSimpleText()
 	return TRUE;
 }
 
+BOOL CRichEditBaseCtrl::InsertSimpleText(LPCWSTR szText, bool bAtEnd)
+{
+	if (!CanEdit() || (Misc::IsEmpty(szText) && bAtEnd))
+		return FALSE;
+
+	if (bAtEnd)
+		MoveCaretToEnd();
+
+	ReplaceSel(szText, TRUE);
+
+	// update caret
+	if (bAtEnd)
+		MoveCaretToEnd();
+
+	return TRUE;
+}
+
 BOOL CRichEditBaseCtrl::CopySimpleText()
 {
 	CString sSelText(GetSelText());

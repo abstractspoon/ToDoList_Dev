@@ -138,6 +138,7 @@ public:
 
 	BOOL PasteSpecial(CLIPFORMAT nFormat); // EM_PASTESPECIAL
 	BOOL PasteSimpleText();
+	BOOL InsertSimpleText(LPCWSTR szText, bool bAtEnd);
 	BOOL CanPasteSimpleText() const;
 	BOOL CopySimpleText();
 	BOOL CanCopySelectedText() const;

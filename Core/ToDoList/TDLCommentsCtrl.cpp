@@ -449,6 +449,11 @@ BOOL CTDLCommentsCtrl::SetContent(const CString& sTextContent, const CBinaryData
 	return bSet;
 }
 
+BOOL CTDLCommentsCtrl::InsertTextContent(LPCWSTR szContent, BOOL bAtEnd)
+{
+	return m_ctrlComments.InsertTextContent(szContent, bAtEnd);
+}
+
 void CTDLCommentsCtrl::ClearContent()
 {
 	m_ctrlComments.SetTextContent(_T(""), FALSE);

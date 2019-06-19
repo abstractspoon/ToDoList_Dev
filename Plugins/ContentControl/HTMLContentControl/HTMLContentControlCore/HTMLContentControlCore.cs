@@ -57,7 +57,12 @@ namespace HTMLContentControl
             return m_HtmlEditControl.SetTextContent(content, bResetSelection);
         }
 
-        public int FindReplaceAll(string findText, string replaceText, bool matchWhole, bool matchCase)
+		public bool InsertTextContent(String content, bool bAtEnd)
+		{
+            return m_HtmlEditControl.InsertTextContent(content, bAtEnd);
+		}
+		
+		public int FindReplaceAll(string findText, string replaceText, bool matchWhole, bool matchCase)
         {
             return m_HtmlEditControl.FindReplaceAll(findText, replaceText, matchWhole, matchCase, true);
         }

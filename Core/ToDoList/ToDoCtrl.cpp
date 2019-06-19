@@ -2669,7 +2669,8 @@ BOOL CToDoCtrl::CanPasteText()
 {
 	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
 	
-	return (CanEditSelectedTask(nAttribID) && CWinClasses::IsEditControl(::GetFocus()));
+	return (CanEditSelectedTask(nAttribID) && 
+			((nAttribID == TDCA_COMMENTS) || CWinClasses::IsEditControl(::GetFocus())));
 }
 
 BOOL CToDoCtrl::PasteText(const CString& sText)
@@ -2677,6 +2678,10 @@ BOOL CToDoCtrl::PasteText(const CString& sText)
 	if (!CanPasteText() || sText.IsEmpty())
 		return FALSE;
 
+	if (GetFocusedControlAttribute() == TDCA_COMMENTS)
+		return m_ctrlComments.InsertTextContent(sText, FALSE);
+
+	// else
 	HWND hFocus = ::GetFocus();
 	::SendMessage(hFocus, EM_REPLACESEL, TRUE, (LPARAM)(LPCTSTR)sText);
 	
@@ -8530,37 +8535,30 @@ UINT CToDoCtrl::MapColumnToCtrlID(TDC_COLUMN nColID) const
 	return 0L;
 }
 
-TDC_COLUMN CToDoCtrl::MapCtrlIDToColumn(UINT nCtrlID) const
+TDC_ATTRIBUTE CToDoCtrl::MapCtrlIDToAttribute(UINT nCtrlID) const
 {
+	if (nCtrlID == 0)
+		return TDCA_NONE;
+
 	int nCtrl;
 	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
 	{
 		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
 
 		if (ctrl.nCtrlID == nCtrlID)
-			return TDC::MapAttributeToColumn(ctrl.nAttrib);
+			return ctrl.nAttrib;
 	}
 
 	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
 	{
-		const CTRLITEM& ctrl = m_aCustomControls[nCtrl];
+		const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
 
-		if (ctrl.nCtrlID == nCtrlID)
-			return TDC::MapAttributeToColumn(ctrl.nAttrib);
+		if ((ctrl.nCtrlID == nCtrlID) || (ctrl.nBuddyCtrlID == nCtrlID))
+			return ctrl.nAttrib;
 	}
 
-	// pick up any stragglers
-	switch (nCtrlID)
-	{
-	case IDC_DONEDATE:
-		return TDCC_DONE;
-
-	case IDC_TIMESPENT:
-		return TDCC_TRACKTIME;
-	}
-
-//	ASSERT(0);
-	return TDCC_NONE;
+	// Not everything is an attribute field
+	return TDCA_NONE;
 }
 
 BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
@@ -11685,24 +11683,26 @@ TDC_ATTRIBUTE CToDoCtrl::GetFocusedControlAttribute() const
 {
 	HWND hFocus = ::GetFocus();
 	UINT nCtrlID = ::GetDlgCtrlID(hFocus);
-	TDC_COLUMN nColID = MapCtrlIDToColumn(nCtrlID);
+	TDC_ATTRIBUTE nAttrib = MapCtrlIDToAttribute(nCtrlID);
 
-	// handle edit controls of combos
-	if (nColID == TDCC_NONE && CWinClasses::IsEditControl(hFocus))
+	// handle edit controls of combos and custom comments plugins
+	if (nAttrib == TDCA_NONE)
 	{
-		hFocus = ::GetParent(hFocus);
-
-		if (CWinClasses::IsComboBox(hFocus))
+		if (IsChildOrSame(m_ctrlComments, hFocus))
 		{
-			nCtrlID = ::GetDlgCtrlID(hFocus);
-			nColID = MapCtrlIDToColumn(nCtrlID);
+			nAttrib = TDCA_COMMENTS;
+		}
+		else if (CWinClasses::IsEditControl(hFocus))
+		{
+			hFocus = ::GetParent(hFocus);
+
+			if (CWinClasses::IsComboBox(hFocus))
+			{
+				nCtrlID = ::GetDlgCtrlID(hFocus);
+				nAttrib = MapCtrlIDToAttribute(nCtrlID);
+			}
 		}
 	}
-
-	TDC_ATTRIBUTE nAttrib = TDC::MapColumnToAttribute(nColID);
-
-	if (nAttrib == TDCA_NONE)
-		nAttrib = CTDCCustomAttributeHelper::GetAttributeID(nColID, m_aCustomAttribDefs);
 
 	return nAttrib;
 }

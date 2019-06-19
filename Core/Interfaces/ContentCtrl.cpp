@@ -321,6 +321,17 @@ BOOL CContentCtrl::SetTextContent(LPCTSTR szContent, BOOL bResetSelection)
 	return FALSE;
 }
 
+BOOL CContentCtrl::InsertTextContent(LPCTSTR szContent, BOOL bAtEnd)
+{
+	CAutoFlag af(m_bSettingContent, TRUE);
+
+	if (m_pContentCtrl)
+		return m_pContentCtrl->InsertTextContent(szContent, (bAtEnd != FALSE));
+
+	// else
+	return FALSE;
+}
+
 LPCTSTR CContentCtrl::GetTypeID() const
 {
 	return m_sTypeID;

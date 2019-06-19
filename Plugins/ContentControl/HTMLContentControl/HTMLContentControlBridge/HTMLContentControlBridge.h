@@ -7,7 +7,7 @@
 
 #include <Interfaces\IContentControl.h>
 
-#include <vcclr.h>
+#include <msclr\auto_gcroot.h>
 using namespace HTMLContentControl;
 
 // This class is exported from ExporterBridge.dll
@@ -57,6 +57,7 @@ public:
    // text content if supported. return false if not supported
    int GetTextContent(LPWSTR szContent, int nLength = -1) const;
    bool SetTextContent(LPCWSTR szContent, bool bResetSelection);
+   bool InsertTextContent(LPCWSTR szContent, bool bAtEnd);
 
    bool FindReplaceAll(LPCWSTR szSearchFor, LPCWSTR szReplaceWith, bool bCaseSensitive, bool bWholeWord);
 
@@ -79,7 +80,7 @@ public:
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
 
 protected:
-   gcroot<HTMLContentControlCore^> m_wnd;
+   msclr::auto_gcroot<HTMLContentControlCore^> m_wnd;
    ITransText* m_pTT;
 };
 

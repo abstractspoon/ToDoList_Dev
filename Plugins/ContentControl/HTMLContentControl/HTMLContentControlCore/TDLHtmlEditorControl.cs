@@ -154,7 +154,13 @@ namespace HTMLContentControl
             return true;
         }
 
-        protected override void PreShowDialog(Form dialog)
+		public bool InsertTextContent(String content, bool bAtEnd)
+		{
+			// TODO
+			return false;
+		}
+
+		protected override void PreShowDialog(Form dialog)
         {
             base.PreShowDialog(dialog, HTMLContentControlCore.html);
 		}

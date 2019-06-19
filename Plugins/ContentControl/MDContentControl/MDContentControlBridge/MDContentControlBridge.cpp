@@ -190,6 +190,12 @@ bool CMDContentControlBridge::SetTextContent(LPCWSTR szContent, bool bResetSelec
 	return m_wnd->SetTextContent(content.get(), bResetSelection);
 }
 
+bool CMDContentControlBridge::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
+{
+	// TODO
+	return false;
+}
+
 bool CMDContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord)
 {
 	// TODO
