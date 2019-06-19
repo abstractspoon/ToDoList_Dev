@@ -156,8 +156,32 @@ namespace HTMLContentControl
 
 		public bool InsertTextContent(String content, bool bAtEnd)
 		{
-			// TODO
-			return false;
+			var rng = GetTextRange();
+
+			if (rng == null)
+				return false;
+
+			// Get the element under the mouse and move the select
+			// before or after whichever is closer
+			var element = rng.parentElement();
+
+			if (element == null)
+				return false;
+
+			// Create a new element after
+			var newElm = this.WebBrowser.Document.CreateElement("span");
+
+			if (newElm == null)
+				return false;
+
+			newElm.InnerText = content;
+
+			if ((element.tagName == "BODY") || bAtEnd)
+				return (null != WebBrowser.Document.Body.AppendChild(newElm));
+
+			// else
+			element.insertAdjacentText("AfterEnd", content);
+			return true;
 		}
 
 		protected override void PreShowDialog(Form dialog)
