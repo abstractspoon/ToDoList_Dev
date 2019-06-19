@@ -67,6 +67,9 @@ namespace MSDN.Html.Editor
             set
             {
                 this.hrefLink.Text = value.Trim();
+
+				// Can't change the image link once it's set
+				this.hrefLink.ReadOnly = !String.IsNullOrEmpty(this.hrefLink.Text);
             }
 
         } //ImageLink
@@ -90,17 +93,21 @@ namespace MSDN.Html.Editor
 
 		public static bool IsImagePath(string path)
 		{
-			if (!System.IO.File.Exists(path))
+			try
+			{
+				string extension = System.IO.Path.GetExtension(path);
+
+				if (String.IsNullOrEmpty(extension))
+					return false;
+
+				string filter = String.Format("*{0};", extension);
+
+				return ImageFilter.Contains(filter);
+			}
+			catch (Exception e)
+			{
 				return false;
-
-			string extension = System.IO.Path.GetExtension(path);
-
-			if (String.IsNullOrEmpty(extension))
-				return false;
-
-			string filter = String.Format("*{0};", extension);
-
-			return ImageFilter.Contains(filter);
+			}
 		}
 
 		private void fileBrowseBtn_Click(object sender, EventArgs e)

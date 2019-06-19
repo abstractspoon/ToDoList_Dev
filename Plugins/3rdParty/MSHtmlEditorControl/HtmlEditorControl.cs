@@ -2268,26 +2268,27 @@ namespace MSDN.Html.Editor
 		/// Method to insert a image and prompt a user for the link
 		/// Calls the public InsertImage method
 		/// </summary>
-		public void InsertImagePrompt()
+		public bool InsertImagePrompt()
 		{
-			InsertImagePrompt("");
+			return InsertImagePrompt("");
 		}
 
-		public void InsertImagePrompt(string imageHref)
+		public bool InsertImagePrompt(string imageHref)
         {
             // set default image and text tags
             string imageText = string.Empty;
 
             ImageAlignOption imageAlign = ImageAlignOption.Left;
-            mshtmlElement control = null;
 
-            // look to see if an image has been selected
-            control = GetFirstControl();
-            if (control != null)
+			// look to see if an image has been selected
+			mshtmlElement control = GetFirstControl();
+			mshtmlImageElement image = null;
+
+			if (control != null)
             {
                 if (IsStringEqual(control.tagName, IMAGE_TAG))
                 {
-                    mshtmlImageElement image = (mshtmlImageElement)control;
+                    image = (mshtmlImageElement)control;
 
 					if (string.IsNullOrEmpty(imageHref))
 						imageHref = image.href;
@@ -2311,16 +2312,29 @@ namespace MSDN.Html.Editor
                 dialog.ImageLink = imageHref;
                 dialog.ImageText = imageText;
                 dialog.ImageAlign = imageAlign;
+
                 PreShowDialog(dialog);
+
                 // based on the user interaction perform the neccessary action
                 // after one has a valid image href
                 if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
                 {
 					PostShowDialog(dialog);
 
-					InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign);
+					if (image == null)
+						return InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign);
+
+					// else
+					image.alt = dialog.ImageText;
+
+					if (imageAlign != ImageAlignOption.Default)
+						image.align = imageAlign.ToString().ToLower();
+					else
+						image.align = "";
 				}
 			}
+
+			return false;
 
         } //InsertImagePrompt
 
@@ -2341,8 +2355,10 @@ namespace MSDN.Html.Editor
 					mshtmlImageElement image = (mshtmlImageElement)control;
 					image.alt = (String.IsNullOrEmpty(imageText) ? imageHref : imageText);
 
-					if (imageAlign != ImageAlignOption.Left)
+					if (imageAlign != ImageAlignOption.Default)
 						image.align = imageAlign.ToString().ToLower();
+					else
+						image.align = "";
 				}
 			}
 
@@ -2363,12 +2379,12 @@ namespace MSDN.Html.Editor
 		/// Calls the public InsertLink method
 		/// </summary>
 		/// 
-		public void InsertLinkPrompt()
+		public bool InsertLinkPrompt()
 		{
-			InsertLinkPrompt("");
+			return InsertLinkPrompt("");
 		}
 
-		protected void InsertLinkPrompt(string hrefLink)
+		protected bool InsertLinkPrompt(string hrefLink)
         {
             // get the text range working with
             mshtmlTextRange range = GetTextRange();
@@ -2376,7 +2392,7 @@ namespace MSDN.Html.Editor
 			if (range == null)
 			{
 				Console.Beep();
-				return;
+				return false;
 			}
 
 			string hrefText = (range.text == null ? String.Empty : range.text);
@@ -2404,6 +2420,9 @@ namespace MSDN.Html.Editor
 
 					hrefText = element.innerText;
 					hrefTarget = anchor.target;
+
+					range.moveToElementText(element);
+					range.select();
 				}
 			}
 			
@@ -2445,7 +2464,7 @@ namespace MSDN.Html.Editor
 
 				// based on the user interaction perform the necessary action
 				// after one has a valid href
-				if ((result != DialogResult.Cancel))
+				if (result != DialogResult.Cancel)
 				{
 					PostShowDialog(dialog);
 
@@ -2462,7 +2481,7 @@ namespace MSDN.Html.Editor
 							// it over the current selection and then reselect it
 							if (!hrefText.Equals(newHrefText))
 							{
-								ExecuteCommandRange(range, HTML_COMMAND_TEXT_PASTE, newHrefText);
+								SelectedText = newHrefText;
 
 								range = GetTextRange();
 								range.moveStart("character", -newHrefText.Length);
@@ -2493,16 +2512,22 @@ namespace MSDN.Html.Editor
 
 							range.collapse(false);
 							range.select();
+
+							return true;
 						}
 					}
 					else if (result == DialogResult.No)
 					{
 						// remove the current link assuming present
 						if (anchor != null)
-							ExecuteCommandRange(range, HTML_COMMAND_REMOVE_LINK, null); ;
+							ExecuteCommandRange(range, HTML_COMMAND_REMOVE_LINK, null);
+
+						return true;
 					}
 
 				}
+
+				return false;
 			}
 		} //InsertLinkPrompt
 
