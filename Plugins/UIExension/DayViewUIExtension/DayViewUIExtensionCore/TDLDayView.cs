@@ -14,6 +14,7 @@ namespace DayViewUIExtension
 	class TDLDayView : Calendar.DayView
     {
         private UInt32 m_SelectedTaskID = 0;
+		private UInt32 m_VisibleSelectedTaskID = 0;
 
 		private int m_UserMinSlotHeight = -1;
 
@@ -115,7 +116,7 @@ namespace DayViewUIExtension
                 if (value != m_HideParentTasks)
                 {
                     m_HideParentTasks = value;
-                    FixupSelection(false);
+                    FixupSelection(false, true);
                 }
             }
         }
@@ -128,7 +129,7 @@ namespace DayViewUIExtension
 				if (value != m_DisplayTasksContinuous)
 				{
 					m_DisplayTasksContinuous = value;
-					FixupSelection(false);
+					FixupSelection(false, true);
 				}
 			}
 		}
@@ -141,7 +142,7 @@ namespace DayViewUIExtension
                 if (value != m_HideTasksWithoutTimes)
                 {
                     m_HideTasksWithoutTimes = value;
-                    FixupSelection(false);
+                    FixupSelection(false, true);
                 }
             }
         }
@@ -154,7 +155,7 @@ namespace DayViewUIExtension
                 if (value != m_HideTasksSpanningWeekends)
                 {
                     m_HideTasksSpanningWeekends = value;
-                    FixupSelection(false);
+                    FixupSelection(false, true);
                 }
             }
         }
@@ -167,7 +168,7 @@ namespace DayViewUIExtension
                 if (value != m_HideTasksSpanningDays)
                 {
                     m_HideTasksSpanningDays = value;
-                    FixupSelection(false);
+                    FixupSelection(false, true);
                 }
             }
         }
@@ -198,12 +199,16 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-		public void FixupSelection(bool scrollToTask)
+		public void FixupSelection(bool scrollToTask, bool allowNotify)
         {
-            UInt32 prevSelTaskID = SelectedAppointmentId;
+			// Our base class clears the selected appointment whenever
+			// the week changes so we can't rely on 'SelectedAppointmentId'
+            UInt32 prevSelTaskID = m_VisibleSelectedTaskID;
             UInt32 selTaskID = GetSelectedTaskID();
 
-            if (selTaskID > 0)
+			m_VisibleSelectedTaskID = selTaskID;
+			
+			if (selTaskID > 0)
             {
                 CalendarItem item;
 
@@ -217,29 +222,32 @@ namespace DayViewUIExtension
                             SelectedAppointment = item;
 
                             ScrollToTop();
-                            return;
                         }
                     }
                     else if (IsItemWithinRange(item, StartDate, EndDate))
                     {
                         SelectedAppointment = item;
-                        return;
                     }
                 }
-            }
-
-            // all else
-            SelectedAppointment = null;
-
-            // Notify parent of changes
-            if (SelectedAppointmentId != prevSelTaskID)
+				else
+				{
+					SelectedAppointment = null;
+				}
+			}
+			else
+			{
+				SelectedAppointment = null;
+			}
+			
+			// Notify parent of changes
+			if (allowNotify && (GetSelectedTaskID() != prevSelTaskID))
                 RaiseSelectionChanged();
         }
 
 		public bool SelectTask(UInt32 dwTaskID)
 		{
             m_SelectedTaskID = dwTaskID;
-            FixupSelection(true);
+            FixupSelection(true, false);
 
 			return (GetSelectedTaskID() != 0);
 		}
@@ -528,12 +536,17 @@ namespace DayViewUIExtension
         private void OnSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
         {
             if (args.Appointment != null)
-                m_SelectedTaskID = args.Appointment.Id;
-        }
+			{
+				m_SelectedTaskID = args.Appointment.Id;
+
+				// User made this selection so the task must be visible
+				m_VisibleSelectedTaskID = m_SelectedTaskID;
+			}
+		}
 
         private void OnWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
         {
-            FixupSelection(false);
+            FixupSelection(false, true);
         }
 
         protected override void OnGotFocus(EventArgs e)
