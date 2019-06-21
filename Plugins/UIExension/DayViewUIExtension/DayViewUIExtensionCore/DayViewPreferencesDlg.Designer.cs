@@ -31,6 +31,7 @@
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DayViewPreferencesDlg));
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.m_DisplayContinuous = new System.Windows.Forms.CheckBox();
 			this.m_HideParentTasks = new System.Windows.Forms.CheckBox();
 			this.m_HideTasksSpanningDays = new System.Windows.Forms.CheckBox();
 			this.m_HideTasksSpanningWeekends = new System.Windows.Forms.CheckBox();
@@ -62,20 +63,33 @@
 			this.panel1.Margin = new System.Windows.Forms.Padding(0);
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(501, 306);
-			this.panel1.TabIndex = 0;
+			this.panel1.TabIndex = 2;
 			// 
 			// groupBox1
 			// 
+			this.groupBox1.Controls.Add(this.m_DisplayContinuous);
 			this.groupBox1.Controls.Add(this.m_HideParentTasks);
 			this.groupBox1.Controls.Add(this.m_HideTasksSpanningDays);
 			this.groupBox1.Controls.Add(this.m_HideTasksSpanningWeekends);
 			this.groupBox1.Controls.Add(this.m_HideTasksWithoutTimes);
 			this.groupBox1.Location = new System.Drawing.Point(13, 68);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(475, 114);
-			this.groupBox1.TabIndex = 5;
+			this.groupBox1.Size = new System.Drawing.Size(475, 138);
+			this.groupBox1.TabIndex = 4;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Task Visibility";
+			// 
+			// m_DisplayContinuous
+			// 
+			this.m_DisplayContinuous.AutoSize = true;
+			this.m_DisplayContinuous.Checked = true;
+			this.m_DisplayContinuous.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.m_DisplayContinuous.Location = new System.Drawing.Point(10, 42);
+			this.m_DisplayContinuous.Name = "m_DisplayContinuous";
+			this.m_DisplayContinuous.Size = new System.Drawing.Size(330, 17);
+			this.m_DisplayContinuous.TabIndex = 1;
+			this.m_DisplayContinuous.Text = "&Display tasks as continuous between their \'Start\' and \'Due\' dates";
+			this.m_DisplayContinuous.UseVisualStyleBackColor = true;
 			// 
 			// m_HideParentTasks
 			// 
@@ -92,20 +106,20 @@
 			// m_HideTasksSpanningDays
 			// 
 			this.m_HideTasksSpanningDays.AutoSize = true;
-			this.m_HideTasksSpanningDays.Location = new System.Drawing.Point(10, 88);
+			this.m_HideTasksSpanningDays.Location = new System.Drawing.Point(10, 111);
 			this.m_HideTasksSpanningDays.Name = "m_HideTasksSpanningDays";
 			this.m_HideTasksSpanningDays.Size = new System.Drawing.Size(338, 17);
-			this.m_HideTasksSpanningDays.TabIndex = 1;
+			this.m_HideTasksSpanningDays.TabIndex = 4;
 			this.m_HideTasksSpanningDays.Text = "&Hide tasks whose Start and Due dates do not fall on the same day";
 			this.m_HideTasksSpanningDays.UseVisualStyleBackColor = true;
 			// 
 			// m_HideTasksSpanningWeekends
 			// 
 			this.m_HideTasksSpanningWeekends.AutoSize = true;
-			this.m_HideTasksSpanningWeekends.Location = new System.Drawing.Point(10, 65);
+			this.m_HideTasksSpanningWeekends.Location = new System.Drawing.Point(10, 88);
 			this.m_HideTasksSpanningWeekends.Name = "m_HideTasksSpanningWeekends";
 			this.m_HideTasksSpanningWeekends.Size = new System.Drawing.Size(348, 17);
-			this.m_HideTasksSpanningWeekends.TabIndex = 1;
+			this.m_HideTasksSpanningWeekends.TabIndex = 3;
 			this.m_HideTasksSpanningWeekends.Text = "Hi&de tasks whose Start or Due date does not fall in the current week";
 			this.m_HideTasksSpanningWeekends.UseVisualStyleBackColor = true;
 			// 
@@ -114,10 +128,10 @@
 			this.m_HideTasksWithoutTimes.AutoSize = true;
 			this.m_HideTasksWithoutTimes.Checked = true;
 			this.m_HideTasksWithoutTimes.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.m_HideTasksWithoutTimes.Location = new System.Drawing.Point(10, 42);
+			this.m_HideTasksWithoutTimes.Location = new System.Drawing.Point(10, 65);
 			this.m_HideTasksWithoutTimes.Name = "m_HideTasksWithoutTimes";
 			this.m_HideTasksWithoutTimes.Size = new System.Drawing.Size(259, 17);
-			this.m_HideTasksWithoutTimes.TabIndex = 0;
+			this.m_HideTasksWithoutTimes.TabIndex = 2;
 			this.m_HideTasksWithoutTimes.Text = "Hid&e tasks whose Start and Due times are not set";
 			this.m_HideTasksWithoutTimes.UseVisualStyleBackColor = true;
 			// 
@@ -127,7 +141,7 @@
 			this.label2.Location = new System.Drawing.Point(10, 40);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(156, 13);
-			this.label2.TabIndex = 4;
+			this.label2.TabIndex = 2;
 			this.label2.Text = "Minimum height of each interval";
 			this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
@@ -147,7 +161,7 @@
 			this.m_SlotMinuteCombo.Location = new System.Drawing.Point(229, 9);
 			this.m_SlotMinuteCombo.Name = "m_SlotMinuteCombo";
 			this.m_SlotMinuteCombo.Size = new System.Drawing.Size(142, 21);
-			this.m_SlotMinuteCombo.TabIndex = 3;
+			this.m_SlotMinuteCombo.TabIndex = 1;
 			// 
 			// label1
 			// 
@@ -155,7 +169,7 @@
 			this.label1.Location = new System.Drawing.Point(10, 12);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(123, 13);
-			this.label1.TabIndex = 2;
+			this.label1.TabIndex = 0;
 			this.label1.Text = "Smallest editable interval";
 			this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
@@ -178,7 +192,7 @@
 			this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
 			this.BtnOK.Name = "BtnOK";
 			this.BtnOK.Size = new System.Drawing.Size(75, 23);
-			this.BtnOK.TabIndex = 1;
+			this.BtnOK.TabIndex = 0;
 			this.BtnOK.Text = "OK";
 			this.BtnOK.UseVisualStyleBackColor = true;
 			// 
@@ -221,5 +235,6 @@
 		private System.Windows.Forms.ComboBox m_MinSlotHeightCombo;
 		private System.Windows.Forms.ComboBox m_SlotMinuteCombo;
 		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.CheckBox m_DisplayContinuous;
 	}
 }

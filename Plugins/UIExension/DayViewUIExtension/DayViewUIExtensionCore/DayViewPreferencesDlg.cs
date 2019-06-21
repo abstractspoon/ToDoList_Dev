@@ -67,6 +67,7 @@ namespace DayViewUIExtension
             string prefsKey = (key + "\\Preferences");
 
             prefs.WriteProfileBool(prefsKey, "HideParentTasks", HideParentTasks);
+            prefs.WriteProfileBool(prefsKey, "DisplayContinuous", DisplayTasksContinuous);
             prefs.WriteProfileBool(prefsKey, "HideTasksWithoutTimes", HideTasksWithoutTimes);
             prefs.WriteProfileBool(prefsKey, "HideTasksSpanningWeekends", HideTasksSpanningWeekends);
             prefs.WriteProfileBool(prefsKey, "HideTasksSpanningDays", HideTasksSpanningDays);
@@ -80,7 +81,8 @@ namespace DayViewUIExtension
             string prefsKey = (key + "\\Preferences");
 
             m_HideParentTasks.Checked = prefs.GetProfileBool(prefsKey, "HideParentTasks", true);
-            m_HideTasksWithoutTimes.Checked = prefs.GetProfileBool(prefsKey, "HideTasksWithoutTimes", true);
+			m_DisplayContinuous.Checked = prefs.GetProfileBool(prefsKey, "DisplayContinuous", true);
+			m_HideTasksWithoutTimes.Checked = prefs.GetProfileBool(prefsKey, "HideTasksWithoutTimes", true);
             m_HideTasksSpanningWeekends.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningWeekends", false);
             m_HideTasksSpanningDays.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningDays", false);
 
@@ -92,6 +94,7 @@ namespace DayViewUIExtension
         public bool HideTasksWithoutTimes { get { return m_HideTasksWithoutTimes.Checked; } }
         public bool HideTasksSpanningWeekends { get { return m_HideTasksSpanningWeekends.Checked; } }
         public bool HideTasksSpanningDays { get { return m_HideTasksSpanningDays.Checked; } }
+		public bool DisplayTasksContinuous { get { return m_DisplayContinuous.Checked; } }
 
 		public int SlotMinutes
 		{

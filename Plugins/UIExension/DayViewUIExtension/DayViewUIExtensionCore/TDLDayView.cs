@@ -18,7 +18,8 @@ namespace DayViewUIExtension
 		private int m_UserMinSlotHeight = -1;
 
         private Boolean m_HideParentTasks = true;
-        private Boolean m_HideTasksWithoutTimes = true;
+		private Boolean m_DisplayTasksContinuous = true;
+		private Boolean m_HideTasksWithoutTimes = true;
         private Boolean m_HideTasksSpanningWeekends = false;
         private Boolean m_HideTasksSpanningDays = false;
 
@@ -119,7 +120,20 @@ namespace DayViewUIExtension
             }
         }
 
-        public Boolean HideTasksWithoutTimes
+		public Boolean DisplayTasksContinuous
+		{
+			get { return m_DisplayTasksContinuous; }
+			set
+			{
+				if (value != m_DisplayTasksContinuous)
+				{
+					m_DisplayTasksContinuous = value;
+					FixupSelection(false);
+				}
+			}
+		}
+
+		public Boolean HideTasksWithoutTimes
         {
             get { return m_HideTasksWithoutTimes; }
             set
@@ -156,38 +170,6 @@ namespace DayViewUIExtension
                     FixupSelection(false);
                 }
             }
-        }
-
-        public bool IsItemDisplayable(CalendarItem item)
-        {
-            if (item == null)
-                return false;
-
-            if (HideParentTasks && item.IsParent)
-                return false;
-
-            if (!item.HasValidDates())
-                return false;
-
-            if (HideTasksSpanningWeekends)
-            {
-                if (DateUtil.WeekOfYear(item.StartDate) != DateUtil.WeekOfYear(item.EndDate))
-                return false;
-            }
-
-            if (HideTasksSpanningDays)
-            {
-                if (item.StartDate.Date != item.EndDate.Date)
-                return false;
-            }
-
-            if (HideTasksWithoutTimes)
-            {
-                if (CalendarItem.IsStartOfDay(item.StartDate) && CalendarItem.IsEndOfDay(item.EndDate))
-                return false;
-            }
-
-            return true;
         }
 
         public UInt32 GetSelectedTaskID()
@@ -330,7 +312,15 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-    	private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
+		public bool IsItemDisplayable(CalendarItem item)
+		{
+			// Provide infinite range because this check
+			// is uninterested in the current week, it's more
+			// of a 'static' kind of check
+			return IsItemWithinRange(item, DateTime.MinValue, DateTime.MaxValue);
+		}
+
+		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
 		{
             if (HideParentTasks && item.IsParent)
                 return false;
@@ -338,18 +328,23 @@ namespace DayViewUIExtension
 			if (!item.HasValidDates())
 				return false;
 
-			bool startDateInRange = IsDateWithinRange(item.StartDate, startDate, endDate);
-			bool endDateInRange = IsDateWithinRange(item.EndDate, startDate, endDate);
-
-			// As a bare minimum, at least one of the task's dates must fall in the week
-			if (!startDateInRange && !endDateInRange)
+			// Task must at least intersect the range
+			if ((item.StartDate > endDate) || (item.EndDate < startDate))
+			{
 				return false;
+			}
 
-            if (HideTasksSpanningWeekends)
-            {
-				if (!startDateInRange || !endDateInRange)
-                    return false;
-            }
+			if (!DisplayTasksContinuous)
+			{
+				if ((item.StartDate < startDate) && (item.EndDate > endDate))
+					return false;
+			}
+
+			if (HideTasksSpanningWeekends)
+			{
+				if (DateUtil.WeekOfYear(item.StartDate) != DateUtil.WeekOfYear(item.EndDate))
+					return false;
+			}
 
             if (HideTasksSpanningDays)
             {
@@ -364,11 +359,6 @@ namespace DayViewUIExtension
 			}
 
             return true;
-		}
-
-		private bool IsDateWithinRange(DateTime date, DateTime startDate, DateTime endDate)
-		{
-			return ((date.Date >= startDate) && (date.Date < endDate));
 		}
 
 		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type)
@@ -513,7 +503,8 @@ namespace DayViewUIExtension
 				gripRect.X = rect.X;
 				gripRect.Width = 0;
 			}
-			else if (appointment.EndDate >= EndDate)
+
+			if (appointment.EndDate >= EndDate)
 			{
 				rect.Width += 5;
 			}
