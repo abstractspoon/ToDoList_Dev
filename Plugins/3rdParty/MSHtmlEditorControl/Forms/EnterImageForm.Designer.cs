@@ -48,7 +48,7 @@ namespace MSDN.Html.Editor
 			this.bInsert.Location = new System.Drawing.Point(178, 95);
 			this.bInsert.Name = "bInsert";
 			this.bInsert.Size = new System.Drawing.Size(75, 23);
-			this.bInsert.TabIndex = 7;
+			this.bInsert.TabIndex = 5;
 			this.bInsert.Text = "OK";
 			// 
 			// bCancel
@@ -59,7 +59,7 @@ namespace MSDN.Html.Editor
 			this.bCancel.Location = new System.Drawing.Point(259, 95);
 			this.bCancel.Name = "bCancel";
 			this.bCancel.Size = new System.Drawing.Size(75, 23);
-			this.bCancel.TabIndex = 8;
+			this.bCancel.TabIndex = 6;
 			this.bCancel.Text = "Cancel";
 			// 
 			// labelText
@@ -68,7 +68,7 @@ namespace MSDN.Html.Editor
 			this.labelText.Location = new System.Drawing.Point(9, 15);
 			this.labelText.Name = "labelText";
 			this.labelText.Size = new System.Drawing.Size(28, 13);
-			this.labelText.TabIndex = 0;
+			this.labelText.TabIndex = 7;
 			this.labelText.Text = "Text";
 			this.labelText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
@@ -78,7 +78,7 @@ namespace MSDN.Html.Editor
 			this.labelHref.Location = new System.Drawing.Point(9, 41);
 			this.labelHref.Name = "labelHref";
 			this.labelHref.Size = new System.Drawing.Size(29, 13);
-			this.labelHref.TabIndex = 2;
+			this.labelHref.TabIndex = 0;
 			this.labelHref.Text = "URL";
 			this.labelHref.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
@@ -90,7 +90,7 @@ namespace MSDN.Html.Editor
 			this.hrefText.Location = new System.Drawing.Point(70, 12);
 			this.hrefText.Name = "hrefText";
 			this.hrefText.Size = new System.Drawing.Size(263, 20);
-			this.hrefText.TabIndex = 1;
+			this.hrefText.TabIndex = 8;
 			this.hrefText.WordWrap = false;
 			// 
 			// hrefLink
@@ -101,7 +101,7 @@ namespace MSDN.Html.Editor
 			this.hrefLink.Location = new System.Drawing.Point(70, 38);
 			this.hrefLink.Name = "hrefLink";
 			this.hrefLink.Size = new System.Drawing.Size(234, 20);
-			this.hrefLink.TabIndex = 3;
+			this.hrefLink.TabIndex = 1;
 			this.hrefLink.WordWrap = false;
 			// 
 			// labelAlign
@@ -110,7 +110,7 @@ namespace MSDN.Html.Editor
 			this.labelAlign.Location = new System.Drawing.Point(9, 67);
 			this.labelAlign.Name = "labelAlign";
 			this.labelAlign.Size = new System.Drawing.Size(53, 13);
-			this.labelAlign.TabIndex = 5;
+			this.labelAlign.TabIndex = 3;
 			this.labelAlign.Text = "Alignment";
 			this.labelAlign.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
@@ -122,7 +122,7 @@ namespace MSDN.Html.Editor
 			this.listAlign.Location = new System.Drawing.Point(70, 64);
 			this.listAlign.Name = "listAlign";
 			this.listAlign.Size = new System.Drawing.Size(263, 21);
-			this.listAlign.TabIndex = 6;
+			this.listAlign.TabIndex = 4;
 			// 
 			// fileBrowseBtn
 			// 
@@ -130,7 +130,7 @@ namespace MSDN.Html.Editor
 			this.fileBrowseBtn.Margin = new System.Windows.Forms.Padding(0);
 			this.fileBrowseBtn.Name = "fileBrowseBtn";
 			this.fileBrowseBtn.Size = new System.Drawing.Size(30, 22);
-			this.fileBrowseBtn.TabIndex = 4;
+			this.fileBrowseBtn.TabIndex = 2;
 			this.fileBrowseBtn.Text = "...";
 			this.toolTip1.SetToolTip(this.fileBrowseBtn, "Browse");
 			this.fileBrowseBtn.UseVisualStyleBackColor = true;
