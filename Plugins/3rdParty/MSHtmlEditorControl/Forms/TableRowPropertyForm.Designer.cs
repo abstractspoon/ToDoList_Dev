@@ -36,10 +36,10 @@
 			this.cancel = new System.Windows.Forms.Button();
 			this.ok = new System.Windows.Forms.Button();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.checkBackColor = new System.Windows.Forms.CheckBox();
-			this.btnBackColor = new MSDN.Html.Editor.Classes.ColorButton();
 			this.checkBorderColor = new System.Windows.Forms.CheckBox();
 			this.btnBorderColor = new MSDN.Html.Editor.Classes.ColorButton();
+			this.checkBackColor = new System.Windows.Forms.CheckBox();
+			this.btnBackColor = new MSDN.Html.Editor.Classes.ColorButton();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -58,7 +58,7 @@
 			this.label2.Location = new System.Drawing.Point(10, 45);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(90, 13);
-			this.label2.TabIndex = 0;
+			this.label2.TabIndex = 2;
 			this.label2.Text = "Vertical alignment";
 			// 
 			// hAlignComboBox
@@ -77,7 +77,7 @@
 			this.vAlignComboBox.Location = new System.Drawing.Point(157, 42);
 			this.vAlignComboBox.Name = "vAlignComboBox";
 			this.vAlignComboBox.Size = new System.Drawing.Size(104, 21);
-			this.vAlignComboBox.TabIndex = 1;
+			this.vAlignComboBox.TabIndex = 3;
 			// 
 			// cancel
 			// 
@@ -86,7 +86,7 @@
 			this.cancel.Location = new System.Drawing.Point(202, 141);
 			this.cancel.Name = "cancel";
 			this.cancel.Size = new System.Drawing.Size(75, 23);
-			this.cancel.TabIndex = 4;
+			this.cancel.TabIndex = 2;
 			this.cancel.Text = "Cancel";
 			this.cancel.UseVisualStyleBackColor = true;
 			// 
@@ -97,7 +97,7 @@
 			this.ok.Location = new System.Drawing.Point(121, 141);
 			this.ok.Name = "ok";
 			this.ok.Size = new System.Drawing.Size(75, 23);
-			this.ok.TabIndex = 5;
+			this.ok.TabIndex = 1;
 			this.ok.Text = "OK";
 			this.ok.UseVisualStyleBackColor = true;
 			// 
@@ -114,30 +114,8 @@
 			this.groupBox1.Location = new System.Drawing.Point(6, 3);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(271, 130);
-			this.groupBox1.TabIndex = 6;
+			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
-			// 
-			// checkBackColor
-			// 
-			this.checkBackColor.AutoSize = true;
-			this.checkBackColor.Location = new System.Drawing.Point(13, 101);
-			this.checkBackColor.Name = "checkBackColor";
-			this.checkBackColor.Size = new System.Drawing.Size(116, 17);
-			this.checkBackColor.TabIndex = 14;
-			this.checkBackColor.Text = "Background colour";
-			this.checkBackColor.UseVisualStyleBackColor = true;
-			this.checkBackColor.CheckedChanged += new System.EventHandler(this.checkBackColor_CheckedChanged);
-			// 
-			// btnBackColor
-			// 
-			this.btnBackColor.Color = System.Drawing.Color.Empty;
-			this.btnBackColor.Location = new System.Drawing.Point(157, 97);
-			this.btnBackColor.Name = "btnBackColor";
-			this.btnBackColor.Size = new System.Drawing.Size(75, 22);
-			this.btnBackColor.TabIndex = 13;
-			this.btnBackColor.Text = "Set...";
-			this.btnBackColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.btnBackColor.UseVisualStyleBackColor = true;
 			// 
 			// checkBorderColor
 			// 
@@ -145,7 +123,7 @@
 			this.checkBorderColor.Location = new System.Drawing.Point(13, 73);
 			this.checkBorderColor.Name = "checkBorderColor";
 			this.checkBorderColor.Size = new System.Drawing.Size(89, 17);
-			this.checkBorderColor.TabIndex = 17;
+			this.checkBorderColor.TabIndex = 4;
 			this.checkBorderColor.Text = "Border colour";
 			this.checkBorderColor.UseVisualStyleBackColor = true;
 			this.checkBorderColor.CheckedChanged += new System.EventHandler(this.checkBorderColor_CheckedChanged);
@@ -156,10 +134,32 @@
 			this.btnBorderColor.Location = new System.Drawing.Point(157, 69);
 			this.btnBorderColor.Name = "btnBorderColor";
 			this.btnBorderColor.Size = new System.Drawing.Size(75, 22);
-			this.btnBorderColor.TabIndex = 16;
+			this.btnBorderColor.TabIndex = 5;
 			this.btnBorderColor.Text = "Set...";
 			this.btnBorderColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.btnBorderColor.UseVisualStyleBackColor = true;
+			// 
+			// checkBackColor
+			// 
+			this.checkBackColor.AutoSize = true;
+			this.checkBackColor.Location = new System.Drawing.Point(13, 101);
+			this.checkBackColor.Name = "checkBackColor";
+			this.checkBackColor.Size = new System.Drawing.Size(116, 17);
+			this.checkBackColor.TabIndex = 6;
+			this.checkBackColor.Text = "Background colour";
+			this.checkBackColor.UseVisualStyleBackColor = true;
+			this.checkBackColor.CheckedChanged += new System.EventHandler(this.checkBackColor_CheckedChanged);
+			// 
+			// btnBackColor
+			// 
+			this.btnBackColor.Color = System.Drawing.Color.Empty;
+			this.btnBackColor.Location = new System.Drawing.Point(157, 97);
+			this.btnBackColor.Name = "btnBackColor";
+			this.btnBackColor.Size = new System.Drawing.Size(75, 22);
+			this.btnBackColor.TabIndex = 7;
+			this.btnBackColor.Text = "Set...";
+			this.btnBackColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.btnBackColor.UseVisualStyleBackColor = true;
 			// 
 			// TableRowPropertyForm
 			// 

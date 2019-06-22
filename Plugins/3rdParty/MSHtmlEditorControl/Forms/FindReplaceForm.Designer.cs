@@ -96,7 +96,7 @@ namespace MSDN.Html.Editor
 			this.bCancel.Location = new System.Drawing.Point(317, 146);
 			this.bCancel.Name = "bCancel";
 			this.bCancel.Size = new System.Drawing.Size(75, 23);
-			this.bCancel.TabIndex = 4;
+			this.bCancel.TabIndex = 5;
 			this.bCancel.Text = "Cancel";
 			this.bCancel.UseVisualStyleBackColor = false;
 			// 
@@ -115,7 +115,7 @@ namespace MSDN.Html.Editor
 			this.bFindNext.Location = new System.Drawing.Point(317, 48);
 			this.bFindNext.Name = "bFindNext";
 			this.bFindNext.Size = new System.Drawing.Size(75, 23);
-			this.bFindNext.TabIndex = 3;
+			this.bFindNext.TabIndex = 2;
 			this.bFindNext.Text = "Find Next";
 			this.bFindNext.UseVisualStyleBackColor = false;
 			this.bFindNext.Click += new System.EventHandler(this.bFindNext_Click);
@@ -127,7 +127,7 @@ namespace MSDN.Html.Editor
 			this.labelReplace.Location = new System.Drawing.Point(8, 52);
 			this.labelReplace.Name = "labelReplace";
 			this.labelReplace.Size = new System.Drawing.Size(69, 13);
-			this.labelReplace.TabIndex = 0;
+			this.labelReplace.TabIndex = 2;
 			this.labelReplace.Text = "Replace with";
 			// 
 			// textReplace
@@ -135,7 +135,7 @@ namespace MSDN.Html.Editor
 			this.textReplace.Location = new System.Drawing.Point(112, 48);
 			this.textReplace.Name = "textReplace";
 			this.textReplace.Size = new System.Drawing.Size(171, 20);
-			this.textReplace.TabIndex = 2;
+			this.textReplace.TabIndex = 3;
 			this.textReplace.TextChanged += new System.EventHandler(this.textReplace_TextChanged);
 			// 
 			// bReplaceAll
@@ -145,7 +145,7 @@ namespace MSDN.Html.Editor
 			this.bReplaceAll.Location = new System.Drawing.Point(317, 113);
 			this.bReplaceAll.Name = "bReplaceAll";
 			this.bReplaceAll.Size = new System.Drawing.Size(75, 23);
-			this.bReplaceAll.TabIndex = 7;
+			this.bReplaceAll.TabIndex = 4;
 			this.bReplaceAll.Text = "Replace All";
 			this.bReplaceAll.UseVisualStyleBackColor = false;
 			this.bReplaceAll.Click += new System.EventHandler(this.bReplaceAll_Click);
@@ -157,7 +157,7 @@ namespace MSDN.Html.Editor
 			this.bReplace.Location = new System.Drawing.Point(317, 80);
 			this.bReplace.Name = "bReplace";
 			this.bReplace.Size = new System.Drawing.Size(75, 23);
-			this.bReplace.TabIndex = 6;
+			this.bReplace.TabIndex = 3;
 			this.bReplace.Text = "Replace";
 			this.bReplace.UseVisualStyleBackColor = false;
 			this.bReplace.Click += new System.EventHandler(this.bReplace_Click);
@@ -174,7 +174,7 @@ namespace MSDN.Html.Editor
 			this.panelInput.Location = new System.Drawing.Point(11, 33);
 			this.panelInput.Name = "panelInput";
 			this.panelInput.Size = new System.Drawing.Size(287, 136);
-			this.panelInput.TabIndex = 9;
+			this.panelInput.TabIndex = 1;
 			// 
 			// optionMatchWhole
 			// 
@@ -182,7 +182,7 @@ namespace MSDN.Html.Editor
 			this.optionMatchWhole.Location = new System.Drawing.Point(11, 102);
 			this.optionMatchWhole.Name = "optionMatchWhole";
 			this.optionMatchWhole.Size = new System.Drawing.Size(240, 24);
-			this.optionMatchWhole.TabIndex = 9;
+			this.optionMatchWhole.TabIndex = 5;
 			this.optionMatchWhole.Text = "Match whole word only";
 			// 
 			// optionMatchCase
@@ -191,7 +191,7 @@ namespace MSDN.Html.Editor
 			this.optionMatchCase.Location = new System.Drawing.Point(11, 77);
 			this.optionMatchCase.Name = "optionMatchCase";
 			this.optionMatchCase.Size = new System.Drawing.Size(240, 24);
-			this.optionMatchCase.TabIndex = 8;
+			this.optionMatchCase.TabIndex = 4;
 			this.optionMatchCase.Text = "Match case";
 			// 
 			// FindReplaceForm

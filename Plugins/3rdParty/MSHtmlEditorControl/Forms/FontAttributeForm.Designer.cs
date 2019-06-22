@@ -50,7 +50,7 @@ namespace MSDN.Html.Editor
 			this.bCancel.Location = new System.Drawing.Point(240, 200);
 			this.bCancel.Name = "bCancel";
 			this.bCancel.Size = new System.Drawing.Size(75, 23);
-			this.bCancel.TabIndex = 0;
+			this.bCancel.TabIndex = 11;
 			this.bCancel.Text = "Cancel";
 			// 
 			// bApply
@@ -61,7 +61,7 @@ namespace MSDN.Html.Editor
 			this.bApply.Location = new System.Drawing.Point(160, 200);
 			this.bApply.Name = "bApply";
 			this.bApply.Size = new System.Drawing.Size(75, 23);
-			this.bApply.TabIndex = 1;
+			this.bApply.TabIndex = 10;
 			this.bApply.Text = "OK";
 			// 
 			// checkBold
@@ -70,7 +70,7 @@ namespace MSDN.Html.Editor
 			this.checkBold.Location = new System.Drawing.Point(160, 57);
 			this.checkBold.Name = "checkBold";
 			this.checkBold.Size = new System.Drawing.Size(104, 16);
-			this.checkBold.TabIndex = 2;
+			this.checkBold.TabIndex = 4;
 			this.checkBold.Text = "Bold";
 			this.checkBold.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
 			// 
@@ -80,7 +80,7 @@ namespace MSDN.Html.Editor
 			this.checkUnderline.Location = new System.Drawing.Point(160, 96);
 			this.checkUnderline.Name = "checkUnderline";
 			this.checkUnderline.Size = new System.Drawing.Size(104, 16);
-			this.checkUnderline.TabIndex = 3;
+			this.checkUnderline.TabIndex = 6;
 			this.checkUnderline.Text = "Underline";
 			this.checkUnderline.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
 			// 
@@ -90,7 +90,7 @@ namespace MSDN.Html.Editor
 			this.checkItalic.Location = new System.Drawing.Point(160, 77);
 			this.checkItalic.Name = "checkItalic";
 			this.checkItalic.Size = new System.Drawing.Size(104, 16);
-			this.checkItalic.TabIndex = 4;
+			this.checkItalic.TabIndex = 5;
 			this.checkItalic.Text = "Italic";
 			this.checkItalic.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
 			// 
@@ -99,7 +99,7 @@ namespace MSDN.Html.Editor
 			this.labelSize.Location = new System.Drawing.Point(160, 8);
 			this.labelSize.Name = "labelSize";
 			this.labelSize.Size = new System.Drawing.Size(120, 16);
-			this.labelSize.TabIndex = 6;
+			this.labelSize.TabIndex = 2;
 			this.labelSize.Text = "Font Size";
 			// 
 			// checkStrikeout
@@ -137,7 +137,7 @@ namespace MSDN.Html.Editor
 			this.listFontName.Location = new System.Drawing.Point(16, 24);
 			this.listFontName.Name = "listFontName";
 			this.listFontName.Size = new System.Drawing.Size(121, 160);
-			this.listFontName.TabIndex = 10;
+			this.listFontName.TabIndex = 1;
 			this.listFontName.SelectedIndexChanged += new System.EventHandler(this.FontSelectionChanged);
 			// 
 			// listFontSize
@@ -157,14 +157,14 @@ namespace MSDN.Html.Editor
 			this.listFontSize.Location = new System.Drawing.Point(160, 24);
 			this.listFontSize.Name = "listFontSize";
 			this.listFontSize.Size = new System.Drawing.Size(121, 21);
-			this.listFontSize.TabIndex = 11;
+			this.listFontSize.TabIndex = 3;
 			// 
 			// labelName
 			// 
 			this.labelName.Location = new System.Drawing.Point(16, 8);
 			this.labelName.Name = "labelName";
 			this.labelName.Size = new System.Drawing.Size(120, 16);
-			this.labelName.TabIndex = 12;
+			this.labelName.TabIndex = 0;
 			this.labelName.Text = "Font Name";
 			// 
 			// labelSample
@@ -173,7 +173,7 @@ namespace MSDN.Html.Editor
 			this.labelSample.Location = new System.Drawing.Point(16, 192);
 			this.labelSample.Name = "labelSample";
 			this.labelSample.Size = new System.Drawing.Size(120, 23);
-			this.labelSample.TabIndex = 13;
+			this.labelSample.TabIndex = 12;
 			this.labelSample.Text = "Sample AaZa";
 			this.labelSample.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
 			// 
