@@ -346,6 +346,8 @@ namespace HTMLReportExporter
 			public String TaskHtml { get; private set; }
 			public String EndHtml { get; private set; }
 
+			private const String ColorPlaceholder = "$(textColor)";
+
 			// ------------------------------------------------------
 
 			public enum StyleType
@@ -420,27 +422,26 @@ namespace HTMLReportExporter
 								CleanTableCellContents(elm);
 
 								this.Style = StyleType.Table;
-								this.TaskHtml = AgilityUtils.GetElementInnerHtml(elm, "TBODY");
 								this.TableHeaderRow = tableHeaderType;
 								break;
 
 							case "UL":
 								this.Style = StyleType.UnorderedList;
-								this.TaskHtml = elm.InnerHtml;
 								break;
 
 							case "OL":
 								this.Style = StyleType.OrderedList;
-								this.TaskHtml = elm.InnerHtml;
 								break;
 						}
 
 						if (this.Style != StyleType.None)
 						{
-							int taskStart = elm.OuterHtml.IndexOf(this.TaskHtml);
+							String taskHtml = GetTaskHtml(elm);
+
+							int taskStart = elm.OuterHtml.IndexOf(taskHtml);
 
 							this.StartHtml = elm.OuterHtml.Substring(0, taskStart);
-							this.EndHtml = elm.OuterHtml.Substring(taskStart + this.TaskHtml.Length);
+							this.EndHtml = elm.OuterHtml.Substring(taskStart + taskHtml.Length);
 
 							// Handle table header row
 							if (this.Style == StyleType.Table)
@@ -455,7 +456,7 @@ namespace HTMLReportExporter
 										if (tableHeaderType == TableHeaderRowType.AutoGenerate)
 										{
 											var theadStyle = "style=font-weight:bold;font-size:1.5em;display:table-header-group;";
-											var theadHtml = String.Format("\n<thead {0}>{1}</thead>", theadStyle, FormatHeader());
+											var theadHtml = String.Format("\n<thead {0}>{1}</thead>", theadStyle, FormatHeader(taskHtml));
 
 											this.StartHtml = this.StartHtml.Insert(tbodyStart, theadHtml);
 										}
@@ -472,20 +473,15 @@ namespace HTMLReportExporter
 												this.StartHtml = this.StartHtml.Insert(tbodyStart, theadHtml);
 
 												tableBody.ChildNodes.Remove(firstRow);
-												this.TaskHtml = tableBody.OuterHtml;
 											}
 										}
 									}
 
 									this.TableHeaderRow = tableHeaderType;
 								}
-
-								// Wrap <td> in <div> to prevent breaks across page
-								//this.TaskHtml = this.TaskHtml.Replace("<td>", "<td><div class=\"avoid\">");
-								//this.TaskHtml = this.TaskHtml.Replace("</td>", "</div></td>");
-
 							}
 
+							this.TaskHtml = InjectTextColourPlaceholder(elm).Trim();
 						}
 					}
 				}
@@ -493,6 +489,49 @@ namespace HTMLReportExporter
 				{
 					this.Clear();
 				}
+			}
+
+			private static String GetTaskHtml(HtmlAgilityPack.HtmlNode container)
+			{
+				switch (container.Name.ToUpper())
+				{
+					case "TABLE":
+						return AgilityUtils.GetElementInnerHtml(container, "TBODY");
+
+					case "UL":
+						return container.InnerHtml;
+
+					case "OL":
+						return container.InnerHtml;
+				}
+
+				return container.OuterHtml;
+			}
+
+			private static String InjectTextColourPlaceholder(HtmlAgilityPack.HtmlNode container)
+			{
+				HtmlAgilityPack.HtmlNode taskElm = null;
+
+				switch (container.Name.ToUpper())
+				{
+					case "TABLE":
+						taskElm = AgilityUtils.FindElement(container, "TR");
+						break;
+
+					case "UL":
+						taskElm = AgilityUtils.FindElement(container, "LI");
+						break;
+
+					case "OL":
+						taskElm = AgilityUtils.FindElement(container, "LI");
+						break;
+				}
+
+				if (taskElm != null)
+					taskElm.Attributes.Add("style", String.Format("color:{0}", ColorPlaceholder));
+
+				// else
+				return GetTaskHtml(container);
 			}
 
 			private bool CleanTableCellContents(HtmlAgilityPack.HtmlNode table)
@@ -537,9 +576,9 @@ namespace HTMLReportExporter
 				return true;
 			}
 
-			private String FormatHeader()
+			private static String FormatHeader(String taskHtml)
 			{
-				var header = TaskHtml;
+				var header = taskHtml;
 
 				if (!String.IsNullOrWhiteSpace(header))
 				{
@@ -594,6 +633,8 @@ namespace HTMLReportExporter
 								row = row.Replace(attrib.PlaceHolder(d), String.Empty);
 						}
 					}
+
+					row = row.Replace(ColorPlaceholder, task.GetTextForeWebColor());
 				}
 
 				return row;
