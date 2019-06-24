@@ -9,11 +9,19 @@ namespace HTMLReportExporter
 	{
 		public static HtmlAgilityPack.HtmlNode FindElement(HtmlAgilityPack.HtmlNode elm, string name, bool recursive = true)
 		{
+			return FindElement(elm, name, null, recursive);
+		}
+
+		public static HtmlAgilityPack.HtmlNode FindElement(HtmlAgilityPack.HtmlNode elm, string name, string contents, bool recursive = true)
+		{
 			if (elm == null)
 				return null;
 
 			if (elm.Name.ToUpper().Equals(name))
-				return elm;
+			{
+				if (String.IsNullOrEmpty(contents) || elm.InnerText.Contains(contents))
+					return elm;
+			}
 
 			if (recursive)
 			{
