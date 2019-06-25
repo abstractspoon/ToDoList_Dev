@@ -60,6 +60,23 @@ namespace HTMLContentControl
             m_TextChangeTimer.Tick += new EventHandler(OnTextChangeTimer);
             m_TextChangeTimer.Interval = 200;
             m_TextChangeTimer.Start();
+		}
+
+		protected IntPtr GetBrowserDropTarget(object sender, IntPtr args)
+		{
+			return IntPtr.Zero;
+		}
+
+		protected override void InitialiseDocument()
+		{
+			// Drag and drop handler must be set BEFORE document initialisation
+			this.WebBrowser.GetDropTarget += new WebBrowserEx.GetDropTargetEventHandler(GetBrowserDropTarget);
+
+			base.InitialiseDocument();
+
+			// The rest can only be set AFTER document initialisation
+            this.InnerText = "";
+			this.ContentMargin = 8;
 
 			// Dynamic tooltip handling
 			this.WebBrowser.Document.MouseOver += new HtmlElementEventHandler(OnDocumentMouseOver);
@@ -68,23 +85,7 @@ namespace HTMLContentControl
 			this.WebBrowser.Document.MouseDown += new HtmlElementEventHandler(OnDocumentMouseDown);
 			this.WebBrowser.Document.MouseUp += new HtmlElementEventHandler(OnDocumentMouseUp);
 
-			// Drag and drop
-			this.WebBrowser.GetDropTarget += new WebBrowserEx.GetDropTargetEventHandler(GetBrowserDropTarget);
-
 			base.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnBaseNavigateLink);
-		}
-
-		protected IntPtr GetBrowserDropTarget(object sender, IntPtr args)
-		{
-			return IntPtr.Zero;
-		}
-
-		protected override void OnLoad(EventArgs args)
-		{
-			base.OnLoad(args);
-
-            this.InnerText = "";
-			this.ContentMargin = 8;
 		}
 
 		private void InitialiseFeatures()

@@ -340,14 +340,14 @@ namespace MSDN.Html.Editor
             this.contextDocumentWordwrap.Checked = true;
 			this.toolstripEnableEditing.Checked = !ReadOnly;
 
-        } //HtmlEditorControl
-
-		protected override void OnLoad(EventArgs e)
-		{
-			base.OnLoad(e);
-
 			SetBrowserPanelSize();
 
+			InitialiseDocument();
+
+		} //HtmlEditorControl
+
+		protected virtual void InitialiseDocument()
+		{
             // load the blank Html page to load the MsHtml object model
             BrowserCodeNavigate(BLANK_HTML_PAGE);
 
