@@ -21,6 +21,11 @@ namespace WebBrowserEx
 			return new WebBrowserSiteEx(this);
 		}
 
+		protected virtual IntPtr GetAlternativeDropTarget(IntPtr pDropTarget)
+		{
+			return IntPtr.Zero;
+		}
+
 		#region WebBrowserExSite
 
 		[ClassInterface(ClassInterfaceType.None)]
@@ -37,9 +42,9 @@ namespace WebBrowserEx
 			Inner _inner;
 
 			// constructor
-			public WebBrowserSiteEx(WebBrowser host) : base(host)
+			public WebBrowserSiteEx(WebBrowserEx host) : base(host)
 			{
-				_host = (WebBrowserEx)host;
+				_host = host;
 
 				// get the CCW object for this
 				_unkOuter = Marshal.GetIUnknownForObject(this);
@@ -142,13 +147,12 @@ namespace WebBrowserEx
 				if (iid == typeof(NativeMethods.IDocHostUIHandler).GUID)
 				{
 					ppv = Marshal.GetComInterfaceForObject(this, typeof(NativeMethods.IDocHostUIHandler), CustomQueryInterfaceMode.Ignore);
+					return CustomQueryInterfaceResult.Handled;
 				}
-				else
-				{
-					ppv = IntPtr.Zero;
-					return CustomQueryInterfaceResult.NotHandled;
-				}
-				return CustomQueryInterfaceResult.Handled;
+
+				// else
+				ppv = IntPtr.Zero;
+				return CustomQueryInterfaceResult.NotHandled;
 			}
 			#endregion
 
@@ -212,6 +216,15 @@ namespace WebBrowserEx
 			int NativeMethods.IDocHostUIHandler.GetDropTarget(IntPtr pDropTarget, out IntPtr ppDropTarget)
 			{
 				Debug.Print("IDocHostUIHandler.GetDropTarget");
+
+				var altTarget = _host.GetAlternativeDropTarget(pDropTarget);
+
+				if (altTarget != IntPtr.Zero)
+				{
+					ppDropTarget = altTarget;
+					return 0; // S_OK
+				}
+
 				return _baseIDocHostUIHandler.GetDropTarget(pDropTarget, out ppDropTarget);
 			}
 
@@ -261,6 +274,12 @@ namespace WebBrowserEx
 			THEME = 0x00040000,
 			NOTHEME = 0x80000,
 			DISABLE_COOKIE = 0x400
+		}
+
+		public enum RESULT
+		{
+			S_OK = 0,
+			S_FALSE = 1,
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
