@@ -95,6 +95,9 @@ BOOL CAcceleratorString::HasAccelerator(const CString& sText, TCHAR cAccel, BOOL
 
 	TCHAR cTextAccel = GetAccelerator(sText, FALSE);
 
+	if (!cTextAccel)
+		return FALSE;
+
 	if (bCaseSensitive)
 		return (cTextAccel == cAccel);
 
