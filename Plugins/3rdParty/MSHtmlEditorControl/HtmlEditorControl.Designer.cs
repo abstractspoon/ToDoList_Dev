@@ -29,7 +29,7 @@
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HtmlEditorControl));
 			this.browserPanel = new System.Windows.Forms.Panel();
-			this.editorWebBrowser = new System.Windows.Forms.WebBrowser();
+			this.editorWebBrowser = new WebBrowserEx.WebBrowserEx();
 			this.toolstripEditor = new System.Windows.Forms.ToolStrip();
 			this.toolstripEnableEditing = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator17 = new System.Windows.Forms.ToolStripSeparator();

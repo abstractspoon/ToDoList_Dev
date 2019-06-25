@@ -284,6 +284,12 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WebBrowserEx\WebBrowserEx.csproj">
+      <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>
+      <Name>WebBrowserEx</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
   <PropertyGroup>
     <PreBuildEvent>
