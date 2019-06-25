@@ -340,6 +340,12 @@ namespace MSDN.Html.Editor
             this.contextDocumentWordwrap.Checked = true;
 			this.toolstripEnableEditing.Checked = !ReadOnly;
 
+        } //HtmlEditorControl
+
+		protected override void OnLoad(EventArgs e)
+		{
+			base.OnLoad(e);
+
 			SetBrowserPanelSize();
 
             // load the blank Html page to load the MsHtml object model
@@ -348,9 +354,8 @@ namespace MSDN.Html.Editor
             // after load ensure document marked as editable
             this.ReadOnly = _readOnly;
             this.ScrollBars = _scrollBars;
+		}
 
-        } //HtmlEditorControl
-		
 		/// <summary>
 		/// Defines all the body attributes once a document has been loaded
 		/// </summary>
@@ -4060,7 +4065,7 @@ namespace MSDN.Html.Editor
             get { return browserPanel; }
         }
 
-		protected System.Windows.Forms.WebBrowser WebBrowser
+		protected WebBrowserEx.WebBrowserEx WebBrowser
 		{
 			get { return editorWebBrowser; }
 		}

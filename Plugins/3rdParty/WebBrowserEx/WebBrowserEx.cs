@@ -9,8 +9,14 @@ using System.Diagnostics;
 
 namespace WebBrowserEx
 {
+	public delegate IntPtr GetDropTargetEventHandler(object sender, IntPtr args);
+
     public class WebBrowserEx : WebBrowser
     {
+		public event GetDropTargetEventHandler GetDropTarget;
+
+		// -------------------------------------------------------------
+
 		/// <summary>
 		/// provide custom WebBrowserSite,
 		/// where we override IDocHostUIHandler and call the base implementation
@@ -23,6 +29,10 @@ namespace WebBrowserEx
 
 		protected virtual IntPtr GetAlternativeDropTarget(IntPtr pDropTarget)
 		{
+			if (GetDropTarget != null)
+				return GetDropTarget(this, pDropTarget);
+
+			// else
 			return IntPtr.Zero;
 		}
 

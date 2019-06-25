@@ -88,6 +88,10 @@
       <Project>{5873DE0F-6853-4C8E-91A4-7A6861069A9A}</Project>
       <Name>MSHTMLEditorControl</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\WebBrowserEx\WebBrowserEx.csproj">
+      <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>
+      <Name>WebBrowserEx</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="html.ico" />

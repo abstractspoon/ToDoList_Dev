@@ -1235,7 +1235,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator15;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator16;
         private System.Windows.Forms.ToolStripMenuItem contextInsertTable;
-        private System.Windows.Forms.WebBrowser editorWebBrowser;
+        private WebBrowserEx.WebBrowserEx editorWebBrowser;
 		private System.Windows.Forms.ToolStripButton toolstripEnableEditing;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator17;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator18;

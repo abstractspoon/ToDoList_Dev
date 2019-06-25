@@ -48,12 +48,10 @@ namespace HTMLContentControl
 
             this.ToolbarDock = DockStyle.Top;
             this.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
-            this.InnerText = "";
             this.TabIndex = 26;
             this.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.BorderSize = 0;
             this.NavigateAction = MSDN.Html.Editor.NavigateActionOption.NewWindow;
-			this.ContentMargin = 8;
 
 			this.BrowserPanel.Anchor = AnchorStyles.None; // we handle positioning ourselves
 
@@ -70,8 +68,23 @@ namespace HTMLContentControl
 			this.WebBrowser.Document.MouseDown += new HtmlElementEventHandler(OnDocumentMouseDown);
 			this.WebBrowser.Document.MouseUp += new HtmlElementEventHandler(OnDocumentMouseUp);
 
-			base.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnBaseNavigateLink);
+			// Drag and drop
+			this.WebBrowser.GetDropTarget += new WebBrowserEx.GetDropTargetEventHandler(GetBrowserDropTarget);
 
+			base.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnBaseNavigateLink);
+		}
+
+		protected IntPtr GetBrowserDropTarget(object sender, IntPtr args)
+		{
+			return IntPtr.Zero;
+		}
+
+		protected override void OnLoad(EventArgs args)
+		{
+			base.OnLoad(args);
+
+            this.InnerText = "";
+			this.ContentMargin = 8;
 		}
 
 		private void InitialiseFeatures()
