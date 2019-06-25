@@ -726,9 +726,6 @@ BOOL CDialogHelper::ProcessDialogCtrlShortcut(const MSG* pMsg)
 
 CWnd* CDialogHelper::FindNextMatch(CWnd* pCurrent, UINT nShortcut)
 {
-	// only the brute force method would appear to work here
-	nShortcut = toupper(nShortcut);
-
 	// if pCurrent is the edit of a combo then we want the combo
 	if (CWinClasses::IsEditControl(*pCurrent) &&
 		CWinClasses::IsClass(::GetParent(*pCurrent), WC_COMBOBOX))
@@ -795,7 +792,7 @@ CWnd* CDialogHelper::FindNextMatch(CWnd* pCurrent, UINT nShortcut)
 					CString sText;
 					pPrev->GetWindowText(sText);
 
-					if (!sText.IsEmpty() && GetShortcut(sText) == nShortcut)
+					if (!sText.IsEmpty() && CAcceleratorString::HasAccelerator(sText, nShortcut))
 						return pChild;
 				}
 			}
@@ -804,11 +801,6 @@ CWnd* CDialogHelper::FindNextMatch(CWnd* pCurrent, UINT nShortcut)
 
 	// all else
 	return NULL;
-}
-
-UINT CDialogHelper::GetShortcut(const CString& sText)
-{
-	return CAcceleratorString::GetAccelerator(sText);
 }
 
 UINT CDialogHelper::MessageBoxEx(const CWnd* pWnd, UINT nIDText, UINT nIDCaption, UINT nType)

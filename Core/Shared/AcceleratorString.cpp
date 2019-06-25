@@ -40,6 +40,11 @@ BOOL CAcceleratorString::HasAccelerator() const
 	return HasAccelerator(*this);
 }
 
+BOOL CAcceleratorString::HasAccelerator(TCHAR cAccel, BOOL bCaseSensitive) const
+{
+	return HasAccelerator(*this, cAccel, bCaseSensitive);
+}
+
 BOOL CAcceleratorString::RemoveAccelerator()
 {
 	return RemoveAccelerator(*this);
@@ -81,6 +86,20 @@ int CAcceleratorString::FindAccelerator(const CString& sText)
 BOOL CAcceleratorString::HasAccelerator(const CString& sText)
 {
 	return (FindAccelerator(sText) != -1);
+}
+
+BOOL CAcceleratorString::HasAccelerator(const CString& sText, TCHAR cAccel, BOOL bCaseSensitive)
+{
+	if (!cAccel)
+		return FALSE;
+
+	TCHAR cTextAccel = GetAccelerator(sText, FALSE);
+
+	if (bCaseSensitive)
+		return (cTextAccel == cAccel);
+
+	// else
+	return (_totlower(cTextAccel) == _totlower(cAccel));
 }
 
 TCHAR CAcceleratorString::GetAccelerator(const CString& sText, BOOL bMakeLowercase)

@@ -19,6 +19,7 @@ public:
 	TCHAR GetAccelerator(BOOL bMakeLowercase = TRUE) const;
 	int FindAccelerator() const;
 	BOOL HasAccelerator() const;
+	BOOL HasAccelerator(TCHAR cAccel, BOOL bCaseSensitive = FALSE) const;
 
 	BOOL RemoveAccelerator();
 	TCHAR EnsureUniqueAccelerator(const CString& sExclude);
@@ -29,6 +30,7 @@ public:
 	static BOOL RemoveAccelerator(CString& sText);
 	static int FindAccelerator(const CString& sText);
 	static BOOL HasAccelerator(const CString& sText);
+	static BOOL HasAccelerator(const CString& sText, TCHAR cAccel, BOOL bCaseSensitive = FALSE);
 	static TCHAR EnsureUniqueAccelerator(CString& sText, const CString& sExclude);
 	static BOOL IsValidAccelerator(TCHAR cAccel, const CString& sExclude);
 	static BOOL IsValidAccelerator(TCHAR cAccel);

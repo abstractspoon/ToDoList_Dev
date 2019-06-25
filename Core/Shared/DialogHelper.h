@@ -147,7 +147,6 @@ public:
 
 	// better dialog control shortcut handling
 	static BOOL ProcessDialogCtrlShortcut(const MSG* pMsg);
-	static UINT GetShortcut(const CString& sText);
 
 	static CRect OffsetCtrl(const CWnd* pParent, UINT nCtrlID, int dx, int dy); 
 	static CRect ResizeCtrl(const CWnd* pParent, UINT nCtrlID, int cx, int cy);
