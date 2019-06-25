@@ -149,6 +149,8 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 		imageDialog->LastBrowsedFolder = LastBrowsedImageFolder;
 		FormsUtil::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional")), false);
 	}
+
+	Win32::ActivateApp(Handle);
 }
 
 void HtmlEditorControlEx::PostShowDialog(Form^ dialog)

@@ -36,6 +36,8 @@ namespace Abstractspoon
 				static float PointsToEms(int nPointSize);
 
 				static bool SetEditCue(IntPtr hWnd, String^ sCueText);
+
+				static void ActivateApp(IntPtr hWnd);
 			};
 
 			public ref class DlgUnits

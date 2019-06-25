@@ -307,7 +307,7 @@ namespace HTMLContentControl
 					if (newElm == null)
 						return;
 
-					newElm.InnerText = (isImage ? "." : e.Url);
+					newElm.InnerText = (' ' + (isImage ? "." : e.Url) + ' ');
 
 					if (element.TagName == "BODY")
 						element.AppendChild(newElm);
@@ -325,7 +325,10 @@ namespace HTMLContentControl
 						success = InsertLinkPrompt(e.Url);
 
 					if (!success)
-						element.OuterHtml = "";
+					{
+						newElm.OuterHtml = "";
+						m_PrevTextChange = InnerHtml; // prevent change
+					}
 				}
 			}
 		}

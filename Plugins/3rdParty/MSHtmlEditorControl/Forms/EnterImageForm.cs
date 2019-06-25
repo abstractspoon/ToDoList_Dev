@@ -137,5 +137,14 @@ namespace MSDN.Html.Editor
 				LastBrowsedFolder = System.IO.Path.GetDirectoryName(dlg.FileName);
 			}
 		}
+
+		protected override void OnLoad(EventArgs e)
+		{
+			base.OnLoad(e);
+
+			if (!String.IsNullOrEmpty(ImageLink))
+				hrefText.Select();
+		}
+
 	}
 }

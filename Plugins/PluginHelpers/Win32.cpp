@@ -135,6 +135,13 @@ bool Win32::SetEditCue(IntPtr hWnd, String^ sCueText)
 	return (0 != ::SendMessage(GetHwnd(hWnd), EM_SETCUEBANNER, FALSE, (LPARAM)(LPCWSTR)MS(sCueText)));
 }
 
+void Win32::ActivateApp(IntPtr hWnd)
+{
+	HWND hwndApp = GetTopWindow(GetHwnd(hWnd));
+
+	SetForegroundWindow(hwndApp);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 DlgUnits::DlgUnits(IntPtr hWnd) : m_hWnd(Win32::GetHwnd(hWnd))
