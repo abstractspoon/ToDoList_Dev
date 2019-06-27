@@ -232,10 +232,11 @@ namespace WebBrowserEx
 				if (altTarget != IntPtr.Zero)
 				{
 					ppDropTarget = altTarget;
-					return 0; // S_OK
+					return NativeMethods.HRESULT.S_OK;
 				}
 
-				return _baseIDocHostUIHandler.GetDropTarget(pDropTarget, out ppDropTarget);
+				ppDropTarget = IntPtr.Zero;
+				return NativeMethods.HRESULT.S_FALSE;
 			}
 
 			int NativeMethods.IDocHostUIHandler.GetExternal(out object ppDispatch)
@@ -286,10 +287,10 @@ namespace WebBrowserEx
 			DISABLE_COOKIE = 0x400
 		}
 
-		public enum RESULT
+		public static class HRESULT
 		{
-			S_OK = 0,
-			S_FALSE = 1,
+			public const int S_OK = 0;
+			public const int S_FALSE = 1;
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
@@ -455,6 +456,7 @@ namespace WebBrowserEx
 				[Out]
 				out IntPtr ppDORet);
 		}
+
 		#endregion
 	}
 }

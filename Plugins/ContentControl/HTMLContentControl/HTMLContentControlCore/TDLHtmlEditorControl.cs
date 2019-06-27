@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -27,9 +28,11 @@ namespace HTMLContentControl
 		private Boolean m_SettingContent = false;
 		private String m_CurrentHRef = "";
 
-        // ---------------------------------------------------------------
+		private TDLDropTarget m_DragDrop;
 
-        public new event EventHandler TextChanged;
+		// ---------------------------------------------------------------
+
+		public new event EventHandler TextChanged;
 		public new event MSDN.Html.Editor.HtmlNavigationEventHandler HtmlNavigation;
 		public event NeedLinkTooltipEventHandler NeedLinkTooltip;
 
@@ -62,9 +65,35 @@ namespace HTMLContentControl
             m_TextChangeTimer.Start();
 		}
 
+		public class TDLDropTarget : Microsoft.VisualStudio.OLE.Interop.IDropTarget
+		{
+			public void DragEnter(Microsoft.VisualStudio.OLE.Interop.IDataObject pDataObj, uint grfKeyState, Microsoft.VisualStudio.OLE.Interop.POINTL pt, ref uint pdwEffect)
+			{
+				// TODO
+			}
+
+			public void DragLeave()
+			{
+				// TODO
+			}
+
+			public void DragOver(uint grfKeyState, Microsoft.VisualStudio.OLE.Interop.POINTL pt, ref uint pdwEffect)
+			{
+				// TODO
+			}
+
+			public void Drop(Microsoft.VisualStudio.OLE.Interop.IDataObject pDataObj, uint grfKeyState, Microsoft.VisualStudio.OLE.Interop.POINTL pt, ref uint pdwEffect)
+			{
+				// TODO
+			}
+		}
+
 		protected IntPtr GetBrowserDropTarget(object sender, IntPtr args)
 		{
-			return IntPtr.Zero;
+			if (m_DragDrop == null)
+				m_DragDrop = new TDLDropTarget();
+
+			return Marshal.GetComInterfaceForObject(m_DragDrop, typeof(Microsoft.VisualStudio.OLE.Interop.IDropTarget), CustomQueryInterfaceMode.Ignore);
 		}
 
 		protected override void InitialiseDocument()

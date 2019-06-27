@@ -18,7 +18,11 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
+#define		ASTYPE(obj, objtype) dynamic_cast<objtype^>(obj)
+#define		ISTYPE(obj, objtype) (ASTYPE(obj, objtype) != nullptr)
+
 			// ----------------------------------------------------------------------------
+
 			// converts String to LPCWSTR, and frees memory on exit
 			// DO NOT USE TO RETURN STRINGS
 
@@ -34,7 +38,7 @@ namespace Abstractspoon
 				LPCWSTR m_wszGlobal;
 			};
 
-#define MS(x) MarshalledString(x)
+#define		MS(x) MarshalledString(x)
 
 			// ----------------------------------------------------------------------------
 
@@ -48,8 +52,7 @@ namespace Abstractspoon
 
 			};
 
-#define		ASTYPE(obj, objtype) dynamic_cast<objtype^>(obj)
-#define		ISTYPE(obj, objtype) (ASTYPE(obj, objtype) != nullptr)
+			// ----------------------------------------------------------------------------
 
 		}
 	}
