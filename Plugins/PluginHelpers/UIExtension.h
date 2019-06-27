@@ -207,7 +207,6 @@ namespace Abstractspoon
 
 				private:
 					Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerSelected;
-					Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerFocused;
 				};
 			};
 
