@@ -14,7 +14,6 @@ namespace Abstractspoon
 		{
 			namespace ColorUtil
 			{
-
 				public ref class MediaColor
 				{
 				public:

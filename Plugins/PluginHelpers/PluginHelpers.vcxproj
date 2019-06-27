@@ -106,6 +106,7 @@ copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Co
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +114,7 @@ copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Co
     <ClInclude Include="CommandHandling.h" />
     <ClInclude Include="DateUtil.h" />
     <ClInclude Include="DPIScaling.h" />
+    <ClInclude Include="DragDropUtil.h" />
     <ClInclude Include="FormsUtil.h" />
     <ClInclude Include="HtmlEditorControlEx.h" />
     <ClInclude Include="PluginHelpers.h" />
@@ -141,6 +143,7 @@ copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Co
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="DPIScaling.cpp" />
+    <ClCompile Include="DragDropUtil.cpp" />
     <ClCompile Include="FormsUtil.cpp" />
     <ClCompile Include="HtmlEditorControlEx.cpp" />
     <ClCompile Include="PluginHelpers.cpp" />
@@ -159,6 +162,7 @@ copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Co
     <ClCompile Include="Win32.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
