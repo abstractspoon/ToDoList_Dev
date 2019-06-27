@@ -8,8 +8,12 @@ using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
+//////////////////////////////////////////////////////////////////////
+
 namespace HTMLContentControl
 {
+	// --------------------------------------------------------------
+
 	delegate void NeedLinkTooltipEventHandler(object sender, NeedLinkTooltipEventArgs args);
 
 	public class NeedLinkTooltipEventArgs : EventArgs
@@ -19,6 +23,8 @@ namespace HTMLContentControl
 		public String linkUri;
 		public String tooltip;
 	}
+
+	// --------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
     class TDLHtmlEditorControl : HtmlEditorControlEx //MSDN.Html.Editor.HtmlEditorControl
@@ -65,33 +71,18 @@ namespace HTMLContentControl
             m_TextChangeTimer.Start();
 		}
 
-		public class TDLDropTarget : Microsoft.VisualStudio.OLE.Interop.IDropTarget
+		protected void OnOutlookDrop(object sender, String title, String url)
 		{
-			public void DragEnter(Microsoft.VisualStudio.OLE.Interop.IDataObject pDataObj, uint grfKeyState, Microsoft.VisualStudio.OLE.Interop.POINTL pt, ref uint pdwEffect)
-			{
-				// TODO
-			}
-
-			public void DragLeave()
-			{
-				// TODO
-			}
-
-			public void DragOver(uint grfKeyState, Microsoft.VisualStudio.OLE.Interop.POINTL pt, ref uint pdwEffect)
-			{
-				// TODO
-			}
-
-			public void Drop(Microsoft.VisualStudio.OLE.Interop.IDataObject pDataObj, uint grfKeyState, Microsoft.VisualStudio.OLE.Interop.POINTL pt, ref uint pdwEffect)
-			{
-				// TODO
-			}
+			DoDrop(title, url);
 		}
 
-		protected IntPtr GetBrowserDropTarget(object sender, IntPtr args)
+		protected IntPtr GetBrowserDropTarget(object sender, IntPtr defDropTarget)
 		{
 			if (m_DragDrop == null)
-				m_DragDrop = new TDLDropTarget();
+			{
+				m_DragDrop = new TDLDropTarget(defDropTarget);
+				m_DragDrop.OutlookDrop += new TDLDropTarget.OutlookDropEventHandler(OnOutlookDrop);
+			}
 
 			return Marshal.GetComInterfaceForObject(m_DragDrop, typeof(Microsoft.VisualStudio.OLE.Interop.IDropTarget), CustomQueryInterfaceMode.Ignore);
 		}
@@ -328,53 +319,61 @@ namespace HTMLContentControl
 			{
 				e.Cancel = true; // everything else
 
-				if (IsEditable) // Must be drag and drop
-				{
-					bool isImage = IsValidImageHref(e.Url);
-					var rng = GetTextRange();
-
-					if (rng == null)
-						return;
-
-					// Get the element under the mouse and move the select
-					// before or after whichever is closer
-					var pos = WebBrowser.PointToClient(Cursor.Position);
-					var element = this.WebBrowser.Document.GetElementFromPoint(pos);
-
-					if (element == null)
-						return;
-
-					// Create a new element after
-					var newElm = this.WebBrowser.Document.CreateElement("span");
-
-					if (newElm == null)
-						return;
-
-					newElm.InnerText = (' ' + (isImage ? "." : e.Url) + ' ');
-
-					if (element.TagName == "BODY")
-						element.AppendChild(newElm);
-					else
-						element.InsertAdjacentElement(HtmlElementInsertionOrientation.AfterEnd, newElm);
-
-					rng.moveToElementText(newElm.DomElement as mshtml.IHTMLElement);
-					rng.select();
-
-					bool success = false;
-
-					if (isImage)
-						success = InsertImage(e.Url, "", MSDN.Html.Editor.ImageAlignOption.Default);
-					else
-						success = InsertLinkPrompt(e.Url);
-
-					if (!success)
-					{
-						newElm.OuterHtml = "";
-						m_PrevTextChange = InnerHtml; // prevent change
-					}
-				}
+				DoDrop(e.Url, e.Url);
 			}
 		}
 
+		private bool DoDrop(string title, string url)
+		{
+			if (!IsEditable) // Must be drag and drop
+				return false;
+
+			bool isImage = IsValidImageHref(url);
+			var rng = GetTextRange();
+
+			if (rng == null)
+				return false;
+
+			// Get the element under the mouse and move the select
+			// before or after whichever is closer
+			var pos = WebBrowser.PointToClient(Cursor.Position);
+			var element = this.WebBrowser.Document.GetElementFromPoint(pos);
+
+			if (element == null)
+				return false;
+
+			// Create a new element after
+			var newElm = this.WebBrowser.Document.CreateElement("span");
+
+			if (newElm == null)
+				return false;
+
+			newElm.InnerText = (' ' + (isImage ? "." : title) + ' ');
+
+			if (element.TagName == "BODY")
+				element.AppendChild(newElm);
+			else
+				element.InsertAdjacentElement(HtmlElementInsertionOrientation.AfterEnd, newElm);
+
+			rng.moveToElementText(newElm.DomElement as mshtml.IHTMLElement);
+			rng.select();
+
+			bool success = false;
+
+			if (isImage)
+				success = InsertImage(url, "", MSDN.Html.Editor.ImageAlignOption.Default);
+			else
+				success = InsertLinkPrompt(url, title);
+
+			if (!success)
+			{
+				newElm.OuterHtml = "";
+				m_PrevTextChange = InnerHtml; // prevent change
+			}
+
+			return success;
+		}
+
 	}
+
 }

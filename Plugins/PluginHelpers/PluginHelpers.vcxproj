@@ -117,6 +117,7 @@ copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Co
     <ClInclude Include="DragDropUtil.h" />
     <ClInclude Include="FormsUtil.h" />
     <ClInclude Include="HtmlEditorControlEx.h" />
+    <ClInclude Include="OutlookUtil.h" />
     <ClInclude Include="PluginHelpers.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -146,6 +147,7 @@ copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Co
     <ClCompile Include="DragDropUtil.cpp" />
     <ClCompile Include="FormsUtil.cpp" />
     <ClCompile Include="HtmlEditorControlEx.cpp" />
+    <ClCompile Include="OutlookUtil.cpp" />
     <ClCompile Include="PluginHelpers.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -175,6 +177,16 @@ copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Co
     <ProjectReference Include="..\3rdParty\MSHtmlEditorControl\MSHTMLEditorControl.csproj">
       <Project>{5873de0f-6853-4c8e-91a4-7a6861069a9a}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="Outlook.9.2.dll">
+      <Guid>00062fff-0000-0000-c000-000000000046</Guid>
+      <VersionMajor>9</VersionMajor>
+      <VersionMinor>2</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>false</Isolated>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

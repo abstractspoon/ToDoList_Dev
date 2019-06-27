@@ -1823,24 +1823,25 @@ namespace MSDN.Html.Editor
 				}
 				else if (IsValidHref(text))
 				{
-					InsertLinkPrompt(text);
+					InsertLinkPrompt(text, text);
 					return;
 				}
 			}
 			else if (Clipboard.ContainsFileDropList())
 			{
 				var filePath = Clipboard.GetFileDropList()[0];
+				var fileUrl = "";
 
 				if (File.Exists(filePath) || !IsValidHref(filePath))
-					filePath = new System.Uri(filePath).AbsoluteUri;
+					fileUrl = new System.Uri(filePath).AbsoluteUri;
 
 				if (EnterImageForm.IsImagePath(filePath))
 				{
-					InsertImagePrompt(filePath);
+					InsertImagePrompt(fileUrl);
 				}
 				else
 				{
-					InsertLinkPrompt(filePath);
+					InsertLinkPrompt(fileUrl, Path.GetFileName(filePath));
 				}
 				return;
 			}
@@ -2384,15 +2385,15 @@ namespace MSDN.Html.Editor
 		/// Calls the public InsertLink method
 		/// </summary>
 		/// 
-		public bool InsertLinkPrompt()
+		protected bool InsertLinkPrompt()
 		{
-			return InsertLinkPrompt("");
+			return InsertLinkPrompt("", "");
 		}
 
-		protected bool InsertLinkPrompt(string hrefLink)
-        {
-            // get the text range working with
-            mshtmlTextRange range = GetTextRange();
+		protected bool InsertLinkPrompt(string hrefLink, string hrefText)
+		{
+			// get the text range working with
+			mshtmlTextRange range = GetTextRange();
 
 			if (range == null)
 			{
@@ -2400,55 +2401,52 @@ namespace MSDN.Html.Editor
 				return false;
 			}
 
-			string hrefText = (range.text == null ? String.Empty : range.text);
-			string hrefTarget = String.Empty;
-
 			// calculate the items working with
 			mshtmlAnchorElement anchor = null;
 			mshtmlElement element = (mshtmlElement)range.parentElement();
 
-			// parse up the tree until the anchor element is found
-			while (element != null && !(element is mshtmlAnchorElement))
-			{
-				element = (mshtmlElement)element.parentElement;
-			}
+			// Where neither link nor text is specified we look for an
+			// existing anchor element from which to extract our content
+			string hrefTarget = String.Empty;
 
-			// extract the HREF properties
-			if (element is mshtmlAnchorElement)
+			if (String.IsNullOrEmpty(hrefText) && String.IsNullOrEmpty(hrefLink))
 			{
-				anchor = (mshtmlAnchorElement)element;
-
-				if (anchor.href != null)
+				while (element != null && !(element is mshtmlAnchorElement))
 				{
-					if (String.IsNullOrEmpty(hrefLink))
-						hrefLink = anchor.href;
+					element = (mshtmlElement)element.parentElement;
+				}
 
+				// extract the HREF properties
+				if (element is mshtmlAnchorElement)
+				{
+					anchor = (mshtmlAnchorElement)element;
+
+					hrefLink = anchor.href;
 					hrefText = element.innerText;
 					hrefTarget = anchor.target;
 
 					range.moveToElementText(element);
 					range.select();
 				}
-			}
-			
-			if (String.IsNullOrEmpty(hrefText))
-			{
-				SelectWordAtCaret();
+				else 
+				{
+					SelectWordAtCaret();
+					range = GetTextRange();
 
-				range = GetTextRange();
-				hrefText = ((range == null) || (range.text == null)) ? string.Empty : range.text;
+					if (range != null)
+					{
+						hrefText = range.text;
+
+						// if text is a valid href then set the link
+						if (IsValidHref(hrefText))
+							hrefLink = hrefText;
+						else
+							hrefLink = "https://";
+					}
+				}
 			}
 
-			if (String.IsNullOrEmpty(hrefLink))
-			{
-				// if text is a valid href then set the link
-				if (IsValidHref(hrefText))
-					hrefLink = hrefText;
-				else
-					hrefLink = "https://";
-			}
-
-			// prompt the user for the new href
+			// prompt the user for the new href and text
 			using (EnterHrefForm dialog = new EnterHrefForm())
 			{
 				dialog.HrefText = hrefText;
@@ -2465,7 +2463,7 @@ namespace MSDN.Html.Editor
 
 				PreShowDialog(dialog);
 
-				DialogResult result = dialog.ShowDialog(/*this.ParentForm*/);
+				DialogResult result = dialog.ShowDialog();
 
 				// based on the user interaction perform the necessary action
 				// after one has a valid href
@@ -2478,7 +2476,7 @@ namespace MSDN.Html.Editor
 						string newHrefText = dialog.HrefText;
 						var target = dialog.HrefTarget;
 						
-						hrefLink = dialog.HrefLink/*.ToLower()*/;
+						hrefLink = dialog.HrefLink;
 
 						if (!String.IsNullOrEmpty(newHrefText) && IsValidHref(hrefLink))
 						{
@@ -2529,7 +2527,6 @@ namespace MSDN.Html.Editor
 
 						return true;
 					}
-
 				}
 
 				return false;

@@ -9,7 +9,7 @@ using System.Diagnostics;
 
 namespace WebBrowserEx
 {
-	public delegate IntPtr GetDropTargetEventHandler(object sender, IntPtr args);
+	public delegate IntPtr GetDropTargetEventHandler(object sender, IntPtr defDropTarget);
 
     public class WebBrowserEx : WebBrowser
     {

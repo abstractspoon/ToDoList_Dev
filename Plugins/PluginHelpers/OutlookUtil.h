@@ -12,11 +12,12 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
-			public ref class DragDropUtil
+			public ref class OutlookUtil
 			{
 			public:
-				static bool ObjectHasFormat(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj, CLIPFORMAT cf);
+				static bool IsOutlookItem(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
 
+ 				static String^ FormatItemAsUrl(String^ title, String^ id, bool forceId);
 			};
 		}
 	}

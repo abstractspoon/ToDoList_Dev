@@ -104,7 +104,7 @@ namespace MSDN.Html.Editor
 
 				return ImageFilter.Contains(filter);
 			}
-			catch (Exception e)
+			catch (Exception /*e*/)
 			{
 				return false;
 			}
