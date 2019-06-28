@@ -225,10 +225,41 @@ namespace HTMLContentControl
                 if ((modifiers & Keys.Alt) == Keys.Alt)
                     keyPress |= Keys.Alt;
 
-                return CommandHandling.ProcessMenuShortcut(keyPress, ContextMenu.Items);
-            }
+				if (CommandHandling.ProcessMenuShortcut(keyPress, ContextMenu.Items))
+					return true;
 
-            return false;
+				// Pick up the stragglers
+				switch (keyPress)
+				{
+					case Keys.Left | Keys.Control:
+						{
+							var range = GetTextRange();
+
+							if (range != null)
+							{
+								range.move("word", -1);
+								range.collapse();
+								range.select();
+							}
+						}
+						return true;
+
+					case Keys.Right | Keys.Control:
+						{
+							var range = GetTextRange();
+
+							if (range != null)
+							{
+								range.move("word", 1);
+								range.collapse();
+								range.select();
+							}
+						}
+						return true;
+				}
+			}
+
+			return false;
         }
 
 		override protected bool IsValidHref(string href)
