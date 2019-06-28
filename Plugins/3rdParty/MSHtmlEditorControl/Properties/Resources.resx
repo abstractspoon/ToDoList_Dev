@@ -121,14 +121,14 @@
   <data name="ToolbarTabInsert" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarTabInsert.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ToolbarFileSave" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ToolbarFileSave.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="ToolbarTable" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarTable.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ToolbarFind" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarFind.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ToolbarFontNormal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarFontNormal.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ToolbarPaste" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarPaste.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -145,8 +145,8 @@
   <data name="ToolbarRedo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarRedo.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ToolbarFontUp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ToolbarFontUp.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ToolbarEdit" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarEdit.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ToolBarCut" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolBarCut.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -154,20 +154,23 @@
   <data name="ToolbarWebLink" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarWebLink.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="ToolbarImage" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarImage.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="ToolbarFileOpen" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarFileOpen.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ToolbarItalic" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarItalic.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ToolbarJustifyLeft" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarJustifyLeft.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ToolbarDelete" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarDelete.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ToolbarJustifyCenter" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ToolbarJustifyCenter.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="ToolbarUndo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarUndo.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ToolbarTextColor" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ToolbarTextColor.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ToolbarLine" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarLine.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -178,11 +181,11 @@
   <data name="ToolbarListUnordered" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarListUnordered.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ToolbarJustifyLeft" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ToolbarJustifyLeft.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="ToolbarCopy" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarCopy.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ToolbarFileSave" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarFileSave.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ToolbarBold" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarBold.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -190,8 +193,8 @@
   <data name="ToolbarFontStyle" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarFontStyle.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ToolbarItalic" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ToolbarItalic.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ToolbarJustifyCenter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarJustifyCenter.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ToolbarFontDown" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarFontDown.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -202,16 +205,16 @@
   <data name="HtmlEditor" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\HtmlEditor.ico;System.Drawing.Icon, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ToolbarImage" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ToolbarImage.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ToolbarFontUp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarFontUp.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ToolbarTabRemove" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ToolbarTabRemove.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ToolbarFontNormal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ToolbarFontNormal.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ToolbarTextColor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarTextColor.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ToolbarEdit" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ToolbarEdit.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ToolbarFileNew" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarFileNew.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

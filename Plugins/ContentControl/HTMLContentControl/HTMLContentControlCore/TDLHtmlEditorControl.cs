@@ -228,7 +228,7 @@ namespace HTMLContentControl
 				if (CommandHandling.ProcessMenuShortcut(keyPress, ContextMenu.Items))
 					return true;
 
-				// Pick up the stragglers
+				// Pick up any stragglers
 				switch (keyPress)
 				{
 					case Keys.Tab:
@@ -259,6 +259,14 @@ namespace HTMLContentControl
 								range.select();
 							}
 						}
+						return true;
+
+					case Keys.Oemcomma | Keys.Control:
+						FormatFontDecrease();
+						return true;
+
+					case Keys.OemPeriod | Keys.Control:
+						FormatFontIncrease();
 						return true;
 				}
 			}

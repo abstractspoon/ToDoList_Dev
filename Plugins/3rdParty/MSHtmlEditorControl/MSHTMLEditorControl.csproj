@@ -241,6 +241,7 @@
     <None Include="Resources\ToolbarFileOpen.bmp" />
     <None Include="Resources\ToolbarFileSave.bmp" />
     <Content Include="Resources\ToolbarEdit.bmp" />
+    <None Include="Resources\ToolbarFileNew.bmp" />
     <Content Include="Resources\ToolbarFind.bmp" />
     <Content Include="Resources\ToolbarTextColor.bmp" />
     <Content Include="Resources\ToolbarFontDown.bmp" />

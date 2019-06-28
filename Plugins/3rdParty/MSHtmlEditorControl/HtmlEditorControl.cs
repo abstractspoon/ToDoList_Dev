@@ -13,6 +13,7 @@ using System.Net;
 using System.Text;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 using mshtmlDocument = mshtml.HTMLDocument;
 using mshtmlBody = mshtml.HTMLBody;
@@ -287,11 +288,49 @@ namespace MSDN.Html.Editor
         private string _baseHref;
         private bool _autoWordWrap;
         private byte _borderSize;
+		
+		private readonly Dictionary<string, string> _toolbarToContextMenuCmdMapping =
+			new Dictionary<string, string>()
+			{
+				{ "toolstripTextCut",           "contextEditCut" },
+				{ "toolstripTextCopy",          "contextEditCopy" },
+				{ "toolstripTextPaste",         "contextEditPaste" },
+				{ "toolstripEditUndo",          "contextEditUndo" },
+				{ "toolstripEditRedo",          "contextEditRedo" },
+				{ "toolstripFormatBold",        "contextFormatBold" },
+				{ "toolstripFormatUnderline",   "contextFormatUnderline" },
+				{ "toolstripFormatItalic",      "contextFormatItalic" },
+				{ "toolstripFontDialog",        "contextFormatFontDialog" },
+				{ "toolstripFontNormal",        "contextFormatNormal" },
+				{ "toolstripTextColor",         "contextFormatColorDialog" },
+				{ "toolstripFontIncrease",      "contextFormatIncrease" },
+				{ "toolstripFontDecrease",      "contextFormatDecrease" },
+				{ "toolstripJustifyLeft",       "contextJustifyLeft" },
+				{ "toolstripJustifyCenter",     "contextJustifyCenter" },
+				{ "toolstripJustifyRight",      "contextJustifyRight" },
+				{ "toolstripListOrdered",       "contextFormatListOrdered" },
+				{ "toolstripListUnordered",     "contextFormatListUnordered" },
+				{ "toolstripFontOutdent",       "contextFormatOutdent" },
+				{ "toolstripFontIndent",        "contextFormatIndent" },
+				{ "toolstripInsertLine",        "contextInsertLine" },
+				{ "toolstripInsertTable",       "contextInsertTable" },
+				{ "toolstripInsertImage",       "contextInsertImage" },
+				{ "toolstripInsertLink",        "contextInsertLink" },
+				{ "toolstripFindReplace",       "contextEditFindReplace" },
+				{ "toolstripDocumentNew",       "contextDocumentNew" },
+				{ "toolstripDocumentOpen",      "contextDocumentOpen" },
+				{ "toolstripDocumentSave",      "contextDocumentSave" },
+				{ "toolstripDocumentPrint",     "contextDocumentPrint" },
+				{ "toolstripDocumentHelp",      "contextDocumentHelp" }
+			};
 
-        // find and replace internal text range
-        private mshtmlTextRange _findRange;
 
-        protected bool IsLoading { get { return loading; } }
+		// find and replace internal text range
+		private mshtmlTextRange _findRange;
+
+		protected Dictionary<string, string> ToolbarToContextMenuCmdMapping { get { return _toolbarToContextMenuCmdMapping; } }
+
+		protected bool IsLoading { get { return loading; } }
         protected bool IsNavigating { get { return codeNavigate; } }
         protected new ContextMenuStrip ContextMenu { get { return contextEditor; } }
 

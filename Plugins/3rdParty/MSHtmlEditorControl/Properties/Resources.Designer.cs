@@ -123,6 +123,16 @@ namespace MSDN.Html.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ToolbarFileNew {
+            get {
+                object obj = ResourceManager.GetObject("ToolbarFileNew", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ToolbarFileOpen {
             get {
                 object obj = ResourceManager.GetObject("ToolbarFileOpen", resourceCulture);
