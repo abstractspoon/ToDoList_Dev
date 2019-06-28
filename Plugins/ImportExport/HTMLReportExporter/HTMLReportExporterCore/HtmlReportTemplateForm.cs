@@ -419,9 +419,9 @@ namespace HTMLReportExporter
 			if (!String.IsNullOrEmpty(m_TemplateFilePath))
 				fileName = Path.GetFileName(m_TemplateFilePath);
 			else
-				fileName = m_Trans.Translate("Untitled");
+				fileName = m_Trans.Translate("untitled");
 
-			this.Text = String.Format("{0} - {1}", title, fileName);
+			this.Text = String.Format("{0} - {1}", fileName, title);
 		}
 
 		private String FileFilter
