@@ -159,8 +159,6 @@ namespace HTMLContentControl
                 m_SettingContent = false;
             }
 
-			ParagraphSpacing = 0;
-
 			return true;
         }
 
