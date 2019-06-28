@@ -97,6 +97,7 @@ namespace HTMLContentControl
 			// The rest can only be set AFTER document initialisation
             this.InnerText = "";
 			this.ContentMargin = 8;
+			this.ParagraphSpacing = 0;
 
 			// Dynamic tooltip handling
 			this.WebBrowser.Document.MouseOver += new HtmlElementEventHandler(OnDocumentMouseOver);
