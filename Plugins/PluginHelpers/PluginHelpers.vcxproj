@@ -178,16 +178,6 @@ copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Co
       <Project>{5873de0f-6853-4c8e-91a4-7a6861069a9a}</Project>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <COMReference Include="Outlook.9.2.dll">
-      <Guid>00062fff-0000-0000-c000-000000000046</Guid>
-      <VersionMajor>9</VersionMajor>
-      <VersionMinor>2</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>false</Isolated>
-    </COMReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

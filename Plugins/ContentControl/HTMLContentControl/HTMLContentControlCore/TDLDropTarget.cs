@@ -39,6 +39,7 @@ namespace HTMLContentControl
 			if ((OutlookDrop != null) && OutlookUtil.IsOutlookItem(pDataObj))
 			{
 				m_CurrentObject = pDataObj;
+				pdwEffect = DragDropUtil.DRAGDROP_LINK;
 			}
 			else if (m_DefaultDropTarget != null)
 			{
@@ -62,8 +63,7 @@ namespace HTMLContentControl
 		{
 			if (m_CurrentObject != null)
 			{
-				// TODO
-
+				pdwEffect = DragDropUtil.DRAGDROP_LINK;
 			}
 			else if (m_DefaultDropTarget != null)
 			{
@@ -119,6 +119,8 @@ namespace HTMLContentControl
 					{
 						var url = OutlookUtil.FormatItemAsUrl(title, id, true);
 						OutlookDrop(this, title, url);
+
+						pdwEffect = DragDropUtil.DRAGDROP_LINK;
 					}
 				}
 			}
