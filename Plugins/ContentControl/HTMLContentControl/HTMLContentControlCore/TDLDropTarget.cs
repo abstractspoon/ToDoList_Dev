@@ -44,6 +44,9 @@ namespace HTMLContentControl
 			else if (m_DefaultDropTarget != null)
 			{
 				m_DefaultDropTarget.DragEnter(pDataObj, grfKeyState, pt, pdwEffect);
+
+				if (pdwEffect != DragDropUtil.DRAGDROP_NONE)
+					pdwEffect = DragDropUtil.DRAGDROP_LINK;
 			}
 		}
 
@@ -68,6 +71,9 @@ namespace HTMLContentControl
 			else if (m_DefaultDropTarget != null)
 			{
 				m_DefaultDropTarget.DragOver(grfKeyState, pt, pdwEffect);
+
+				if (pdwEffect != DragDropUtil.DRAGDROP_NONE)
+					pdwEffect = DragDropUtil.DRAGDROP_LINK;
 			}
 		}
 
@@ -75,58 +81,69 @@ namespace HTMLContentControl
 		{
 			if (m_CurrentObject == pDataObj)
 			{
-				String title = "", id = "";
-
-				var outlook = new Application();
-				var selection = outlook.ActiveExplorer().Selection;
-
-				if ((selection != null) && (selection.Count >= 1))
+				try
 				{
-					var item = selection[1];
+					var outlook = new Application();
+					var selection = outlook.ActiveExplorer().Selection;
 
-					if (item is MailItem)
+					if ((selection != null) && (selection.Count >= 1))
 					{
-						title = (item as MailItem).Subject;
-						id = (item as MailItem).EntryID;
-					}
-					else if (item is ContactItem)
-					{
-						title = (item as ContactItem).Subject;
-						id = (item as ContactItem).EntryID;
-					}
-					else if (item is JournalItem)
-					{
-						title = (item as JournalItem).Subject;
-						id = (item as JournalItem).EntryID;
-					}
-					else if (item is TaskItem)
-					{
-						title = (item as TaskItem).Subject;
-						id = (item as TaskItem).EntryID;
-					}
-					else if (item is NoteItem)
-					{
-						title = (item as NoteItem).Subject;
-						id = (item as NoteItem).EntryID;
-					}
-					else if (item is AppointmentItem)
-					{
-						title = (item as AppointmentItem).Subject;
-						id = (item as AppointmentItem).EntryID;
-					}
+						var title = "";
+						var id = "";
 
-					if (!String.IsNullOrEmpty(title) && !String.IsNullOrEmpty(id))
-					{
-						var url = OutlookUtil.FormatItemAsUrl(title, id, true);
-						OutlookDrop(this, title, url);
+						var item = selection[1];
 
-						pdwEffect = DragDropUtil.DRAGDROP_LINK;
+						if (item is MailItem)
+						{
+							title = (item as MailItem).Subject;
+							id = (item as MailItem).EntryID;
+						}
+						else if (item is ContactItem)
+						{
+							title = (item as ContactItem).Subject;
+							id = (item as ContactItem).EntryID;
+						}
+						else if (item is JournalItem)
+						{
+							title = (item as JournalItem).Subject;
+							id = (item as JournalItem).EntryID;
+						}
+						else if (item is TaskItem)
+						{
+							title = (item as TaskItem).Subject;
+							id = (item as TaskItem).EntryID;
+						}
+						else if (item is NoteItem)
+						{
+							title = (item as NoteItem).Subject;
+							id = (item as NoteItem).EntryID;
+						}
+						else if (item is AppointmentItem)
+						{
+							title = (item as AppointmentItem).Subject;
+							id = (item as AppointmentItem).EntryID;
+						}
+
+						if (!String.IsNullOrEmpty(title) && !String.IsNullOrEmpty(id))
+						{
+							var url = OutlookUtil.FormatItemAsUrl(id);
+							OutlookDrop(this, title, url);
+
+							pdwEffect = DragDropUtil.DRAGDROP_LINK;
+						}
 					}
+				}
+				catch (System.Exception /*e*/)
+				{
+					pdwEffect = DragDropUtil.DRAGDROP_NONE;
 				}
 			}
 			else if (m_DefaultDropTarget != null)
 			{
 				m_DefaultDropTarget.Drop(pDataObj, grfKeyState, pt, pdwEffect);
+
+				if (pdwEffect != DragDropUtil.DRAGDROP_NONE)
+					pdwEffect = DragDropUtil.DRAGDROP_LINK;
 			}
 
 			m_CurrentObject = null;

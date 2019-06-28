@@ -35,9 +35,8 @@ bool OutlookUtil::IsOutlookItem(Microsoft::VisualStudio::OLE::Interop::IDataObje
 			DragDropUtil::ObjectHasFormat(obj, CF_FILEDESCRIPTOR));
 }
 
-String^ OutlookUtil::FormatItemAsUrl(String^ title, String^ id, bool forceId)
+String^ OutlookUtil::FormatItemAsUrl(String^ id)
 {
-	// TODO
 	return String::Format(L"outlook:{0}", id);
 }
 

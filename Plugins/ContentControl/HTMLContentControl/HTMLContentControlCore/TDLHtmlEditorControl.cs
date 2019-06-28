@@ -159,7 +159,9 @@ namespace HTMLContentControl
                 m_SettingContent = false;
             }
 
-            return true;
+			ParagraphSpacing = 0;
+
+			return true;
         }
 
         // text content if supported. return false if not supported
@@ -343,12 +345,12 @@ namespace HTMLContentControl
 				return false;
 
 			// Create a new element after
-			var newElm = this.WebBrowser.Document.CreateElement("span");
+			var newElm = this.WebBrowser.Document.CreateElement("P");
 
 			if (newElm == null)
 				return false;
 
-			newElm.InnerText = (' ' + (isImage ? "." : title) + ' ');
+			newElm.InnerText = (isImage ? "." : title);
 
 			if (element.TagName == "BODY")
 				element.AppendChild(newElm);
