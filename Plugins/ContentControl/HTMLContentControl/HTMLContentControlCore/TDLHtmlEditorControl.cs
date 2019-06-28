@@ -231,6 +231,10 @@ namespace HTMLContentControl
 				// Pick up the stragglers
 				switch (keyPress)
 				{
+					case Keys.Tab:
+						SelectedHtml = "&emsp;";
+						return true;
+
 					case Keys.Left | Keys.Control:
 						{
 							var range = GetTextRange();
