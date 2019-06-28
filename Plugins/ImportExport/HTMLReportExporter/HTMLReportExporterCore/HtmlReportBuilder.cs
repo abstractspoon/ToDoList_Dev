@@ -132,6 +132,7 @@ namespace HTMLReportExporter
 			html.WriteLine("body { line-height: normal; margin: 0; }");
 			html.WriteLine("table { border-collapse: collapse; }");
 			html.WriteLine(".page {	page-break-after: always; }");
+			html.WriteLine("p {	margin: 0; }");
 
 			Header.WriteStyles(html);
 			Footer.WriteStyles(html);

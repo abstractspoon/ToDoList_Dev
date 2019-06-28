@@ -111,6 +111,7 @@ namespace HTMLReportExporter
 			this.TabIndex = 26;
 			this.BorderSize = 0;
 			this.ContentMargin = 8;
+			this.ParagraphSpacing = 0;
 
 			this.WebBrowser.Document.AttachEventHandler("onfocusout", OnLostFocus);
 			this.WebBrowser.Document.AttachEventHandler("onfocusin", OnGotFocus);
