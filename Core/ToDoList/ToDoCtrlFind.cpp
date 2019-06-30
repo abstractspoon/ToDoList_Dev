@@ -231,6 +231,9 @@ CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, BOOL bVisibleOnly) con
 	case TDCC_RECURRENCE:
 		return GetLongestValue(nColID, NULL, NULL, GetLongestRecurrenceOption(), bVisibleOnly);
 
+	case TDCC_COST:
+		return GetLongestCost();
+
 	case TDCC_ALLOCTO:
 	case TDCC_CATEGORY:
 	case TDCC_TAGS:
