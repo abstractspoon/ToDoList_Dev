@@ -76,22 +76,6 @@ namespace DayViewUIExtension
         // not allow overriding the AppointmentView class
         public Rectangle IconRect { get; set; }
 
-		public override DateTime EndDate
-		{
-			get
-			{
-				return base.EndDate;
-			}
-			set
-			{
-				// Handle 'end of day'
-				if ((value != DateTime.MinValue) && (value.Date == value))
-					base.EndDate = value.AddSeconds(-1);
-				else
-					base.EndDate = value;
-			}
-		}
-
         public override TimeSpan Length
         {
             get
@@ -199,8 +183,8 @@ namespace DayViewUIExtension
 				StartDate = task.GetStartDate(false);
 				IsDone = (task.IsDone() || task.IsGoodAsDone());
 
-				m_PrevDueDate = task.GetDueDate(false);
-				EndDate = (IsDone ? task.GetDoneDate() : m_PrevDueDate);
+				m_PrevDueDate = CheckGetEndOfDay(task.GetDueDate(false));
+				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
 			}
 			else
 			{
@@ -212,7 +196,7 @@ namespace DayViewUIExtension
 					m_PrevDueDate = task.GetDueDate(false); // always
 
 					if (!IsDone)
-						EndDate = m_PrevDueDate;
+						EndDate = CheckGetEndOfDay(m_PrevDueDate);
 				}
 
 				if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
@@ -223,13 +207,13 @@ namespace DayViewUIExtension
 					if (IsDone)
 					{
 						if (!wasDone)
-							m_PrevDueDate = EndDate;
+							m_PrevDueDate = CheckGetEndOfDay(EndDate);
 
-						EndDate = task.GetDoneDate();
+						EndDate = CheckGetEndOfDay(task.GetDoneDate());
 					}
 					else if (wasDone && !IsDone)
 					{
-						EndDate = m_PrevDueDate;
+						EndDate = CheckGetEndOfDay(m_PrevDueDate);
 					}
 				}
 
@@ -256,6 +240,15 @@ namespace DayViewUIExtension
 			UpdateOriginalDates();
 
 			return true;
+		}
+
+		private DateTime CheckGetEndOfDay(DateTime date)
+		{
+			if (date == date.Date)
+				return date.AddDays(1).AddSeconds(-1);
+
+			// else
+			return date;
 		}
 	}
 
