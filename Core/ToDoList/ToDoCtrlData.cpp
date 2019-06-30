@@ -3504,7 +3504,9 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 			{
 				// process each whole or part day  
 				double dDayStart(dateStart);
-				dDuration = 0.0;
+
+				if (!CDateHelper::IsSameDay(dateStart, dateDue))
+					dDuration = 0.0;
 
 				while (dDayStart < dateDue)
 				{
