@@ -18,7 +18,7 @@ REM - Build Plugins
 cd %REPO%\Plugins
 
 REM - Rebuild PluginHelpers by itself because everything else is dependent on it
-"C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" .\PluginHelpers.sln /Rebuild "Release"
+"C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" .\PluginHelpers.sln /Build "Release"
 
 REM - Build rest of plugins
 "C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" .\ToDoList_Plugins.sln /Build "Release"
