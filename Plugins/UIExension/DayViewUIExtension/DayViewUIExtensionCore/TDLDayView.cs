@@ -11,7 +11,8 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
-	class TDLDayView : Calendar.DayView
+
+	public class TDLDayView : Calendar.DayView
     {
         private UInt32 m_SelectedTaskID = 0;
 		private UInt32 m_VisibleSelectedTaskID = 0;
@@ -241,8 +242,13 @@ namespace DayViewUIExtension
 			
 			// Notify parent of changes
 			if (allowNotify && (GetSelectedTaskID() != prevSelTaskID))
-                RaiseSelectionChanged();
-        }
+			{
+				CalendarItem item = null;
+				m_Items.TryGetValue(m_VisibleSelectedTaskID, out item);
+
+				RaiseSelectionChanged(item);
+			}
+		}
 
 		public bool SelectTask(UInt32 dwTaskID)
 		{

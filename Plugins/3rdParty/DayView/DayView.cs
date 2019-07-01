@@ -913,9 +913,9 @@ namespace Calendar
             }
         }
 
-        protected void RaiseSelectionChanged()
+        protected void RaiseSelectionChanged(Appointment appt)
         {
-            RaiseSelectionChanged(new AppointmentEventArgs(SelectedAppointment));
+            RaiseSelectionChanged(new AppointmentEventArgs(appt));
         }
 
 		internal void RaiseSelectionChanged(AppointmentEventArgs e)

@@ -587,21 +587,6 @@ namespace DayViewUIExtension
 				else
 					notify.NotifySelChange(0);
 			}
-/*
-			switch (m_DayView.Selection)
-			{
-				case Calendar.SelectionType.DateRange:
-					break;
-
-                case Calendar.SelectionType.Appointment:
-                    if (args.Appointment != null)
-					{
-						UpdatedSelectedTaskDatesText();
-                        notify.NotifySelChange(args.Appointment.Id);
-					}
-					break;
-			}
-*/
 		}
 
 		private void UpdatedSelectedTaskDatesText()

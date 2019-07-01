@@ -11,7 +11,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
-	class CalendarItem : Calendar.Appointment
+	public class CalendarItem : Calendar.Appointment
 	{
 		static DateTime NullDate = new DateTime();
 
