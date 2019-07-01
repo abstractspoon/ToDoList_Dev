@@ -16,6 +16,7 @@ namespace Abstractspoon
 
 			public ref class WorkingDay
 			{
+			public:
 				WorkingDay();
 				WorkingDay(Preferences^ prefs);
 
@@ -30,14 +31,14 @@ namespace Abstractspoon
 				DateTime^ EndOfLunch(DateTime^ date);
 
 				double CalculateDurationInHours(DateTime^ from, DateTime^ to);
-				double DayLengthInHours();
+				double DayLengthInHours(bool includingLunch);
 				double LunchBreakInHours();
 
 				void Load(Preferences^ prefs);
 
 			protected:
 				double m_StartOfDayInHours;
-				double m_EndOfDayInHours;
+				double m_WorkingLengthInHours;
 				double m_StartOfLunchInHours;
 				double m_EndOfLunchInHours;
 

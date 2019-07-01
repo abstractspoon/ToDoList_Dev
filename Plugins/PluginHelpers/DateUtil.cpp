@@ -11,12 +11,12 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-WorkingDay::WorkingDay() 
-	: 
-	m_StartOfDayInHours(9), 
+WorkingDay::WorkingDay()
+	:
+	m_StartOfDayInHours(9),
 	m_StartOfLunchInHours(13),
 	m_EndOfLunchInHours(14),
-	m_EndOfDayInHours(18)
+	m_WorkingLengthInHours(8)
 {
 
 }
@@ -24,9 +24,9 @@ WorkingDay::WorkingDay()
 WorkingDay::WorkingDay(Preferences^ prefs)
 	:
 	m_StartOfDayInHours(9),
-	m_StartOfLunchInHours(12.5),
-	m_EndOfLunchInHours(13.5),
-	m_EndOfDayInHours(17.5)
+	m_StartOfLunchInHours(13),
+	m_EndOfLunchInHours(14),
+	m_WorkingLengthInHours(8)
 {
 	Load(prefs);
 }
@@ -38,7 +38,7 @@ double WorkingDay::StartOfDayInHours()
 
 double WorkingDay::EndOfDayInHours()
 {
-	return m_EndOfDayInHours;
+	return (m_StartOfDayInHours + DayLengthInHours(true));
 }
 
 double WorkingDay::StartOfLunchInHours()
@@ -58,7 +58,7 @@ DateTime^ WorkingDay::StartOfDay(DateTime^ date)
 
 DateTime^ WorkingDay::EndOfDay(DateTime^ date)
 {
-	return date->Date.AddMilliseconds(HoursToMilleseconds(m_EndOfDayInHours));
+	return date->Date.AddMilliseconds(HoursToMilleseconds(EndOfDayInHours()));
 }
 
 DateTime^ WorkingDay::StartOfLunch(DateTime^ date)
@@ -95,10 +95,10 @@ double WorkingDay::CalculateDurationInHours(System::DateTime^ from, DateTime^ to
 	else
 	{
 		// clear days
-		dHoursDuration = ((nDaysDuration - 1) * DayLengthInHours());
+		dHoursDuration = ((nDaysDuration - 1) * DayLengthInHours(false));
 
 		// part days
-		dHoursDuration += CalculateDurationInHours(fromTimeOfDay, m_EndOfDayInHours);
+		dHoursDuration += CalculateDurationInHours(fromTimeOfDay, EndOfDayInHours());
 		dHoursDuration += CalculateDurationInHours(m_StartOfDayInHours, toTimeOfDay);
 	}
 
@@ -108,7 +108,7 @@ double WorkingDay::CalculateDurationInHours(System::DateTime^ from, DateTime^ to
 double WorkingDay::CalculateDurationInHours(double fromHour, double toHour)
 {
 	fromHour = Math::Max(fromHour, m_StartOfDayInHours);
-	toHour = Math::Min(toHour, m_EndOfDayInHours);
+	toHour = Math::Min(toHour, EndOfDayInHours());
 
 	if (fromHour >= toHour)
 		return 0;
@@ -132,9 +132,13 @@ double WorkingDay::GetTimeOfDayInHours(DateTime^ date)
 	return (double)(date->Hour + (date->Minute / 60.0) + (date->Second / 3600.0) + (date->Millisecond / 3600000));
 }
 
-double WorkingDay::DayLengthInHours()
+double WorkingDay::DayLengthInHours(bool includingLunch)
 {
-	return (m_EndOfDayInHours - m_StartOfDayInHours - LunchBreakInHours());
+	if (includingLunch)
+		return (m_WorkingLengthInHours + LunchBreakInHours());
+
+	// else
+	return m_WorkingLengthInHours;
 }
 
 double WorkingDay::LunchBreakInHours()
@@ -145,15 +149,17 @@ double WorkingDay::LunchBreakInHours()
 void WorkingDay::Load(Preferences^ prefs)
 {
 	m_StartOfDayInHours = prefs->GetProfileDouble(L"Preferences", L"StartOfWorkdayInHours", 9.0);
+	m_WorkingLengthInHours = prefs->GetProfileDouble(L"Preferences", L"HoursInDay", 8.0);
 	m_StartOfLunchInHours = prefs->GetProfileDouble(L"Preferences", L"StartOfLunchInHours", 13.0);
-	m_EndOfLunchInHours = prefs->GetProfileDouble(L"Preferences", L"EndOfLunchInHours", 14.0);
 
-	m_EndOfDayInHours = (m_StartOfDayInHours + 
-						(m_EndOfLunchInHours - m_StartOfLunchInHours) + 
-						prefs->GetProfileDouble(L"Preferences", L"HoursInDay", 8.0));
-
+	if (prefs->GetProfileBool(L"Preferences", L"HasLunchBreak", true))
+		m_EndOfLunchInHours = prefs->GetProfileDouble(L"Preferences", L"EndOfLunchInHours", 14.0);
+	else
+		m_EndOfLunchInHours = m_StartOfLunchInHours;
+	
+	// Validate lunch break
 	if ((m_StartOfLunchInHours < m_StartOfDayInHours) ||
-		(m_EndOfLunchInHours > m_EndOfDayInHours) ||
+		(m_EndOfLunchInHours > EndOfDayInHours()) ||
 		(m_StartOfLunchInHours > m_EndOfLunchInHours))
 	{
 		m_StartOfLunchInHours = m_EndOfLunchInHours;

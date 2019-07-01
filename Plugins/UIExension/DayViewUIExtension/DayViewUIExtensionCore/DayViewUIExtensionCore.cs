@@ -14,10 +14,12 @@ namespace DayViewUIExtension
 	public class DayViewUIExtensionCore : Panel, IUIExtension
 	{
 		private IntPtr m_HwndParent = IntPtr.Zero;
-		private TDLDayView m_DayView;
-		private Translator m_Trans;
-		private UIExtension.TaskIcon m_TaskIcons;
-        private String m_HelpID;
+		private TDLDayView m_DayView = null;
+		private Translator m_Trans = null;
+		private UIExtension.TaskIcon m_TaskIcons = null;
+        private String m_HelpID = "";
+		private WorkingDay m_WorkDay = null;
+
 		
         [Flags] private enum WeekendDays
         {
@@ -173,14 +175,7 @@ namespace DayViewUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
-			HoursInWorkingDay = prefs.GetProfileDouble("Preferences", "HoursInDay", 8.0);
-			StartOfDayInHours = prefs.GetProfileDouble("Preferences", "StartOfWorkdayInHours", 9.0);
-			StartOfLunchInHours = prefs.GetProfileDouble("Preferences", "StartOfLunchInHours", 13.0);
-
-			if (prefs.GetProfileBool("Preferences", "HasLunchBreak", true))
-				EndOfLunchInHours = prefs.GetProfileDouble("Preferences", "EndOfLunchInHours", 14.0);
-			else
-				EndOfLunchInHours = StartOfLunchInHours;
+			m_WorkDay = new WorkingDay(prefs);
 
 			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			m_DayView.TaskColorIsBackground = taskColorIsBkgnd;
@@ -290,22 +285,6 @@ namespace DayViewUIExtension
         }
 
 		// Internal ------------------------------------------------------------------------------
-
-		private double HoursInWorkingDay { get; set; }
-		private double StartOfDayInHours { get; set; }
-		private double StartOfLunchInHours { get; set; }
-		private double EndOfLunchInHours { get; set; }
-
-		private double EndOfDayInHours
-		{
-			get
-			{
-				var endOfDay = (StartOfDayInHours + HoursInWorkingDay);
-				endOfDay += Math.Max((EndOfLunchInHours - StartOfLunchInHours), 0.0);
-
-				return endOfDay;
-			}
-		}
 
 		protected override void Dispose(bool disposing)
         {
@@ -459,11 +438,13 @@ namespace DayViewUIExtension
 
 		private void UpdateWorkingHourDisplay()
 		{
-			m_DayView.WorkingHourStart = (int)StartOfDayInHours;
-			m_DayView.WorkingMinuteStart = (int)((StartOfDayInHours - (int)StartOfDayInHours) * 60);
+			double startOfDay = m_WorkDay.StartOfDayInHours();
+			m_DayView.WorkingHourStart = (int)startOfDay;
+			m_DayView.WorkingMinuteStart = (int)((startOfDay - (int)startOfDay) * 60);
 
-			m_DayView.WorkingHourEnd = (int)EndOfDayInHours;
-			m_DayView.WorkingMinuteEnd = (int)((EndOfDayInHours - (int)EndOfDayInHours) * 60);
+			double endOfDay = m_WorkDay.EndOfDayInHours();
+			m_DayView.WorkingHourEnd = (int)endOfDay;
+			m_DayView.WorkingMinuteEnd = (int)((endOfDay - (int)endOfDay) * 60);
 		}
 
 		private void OnHelp(object sender, EventArgs e)
