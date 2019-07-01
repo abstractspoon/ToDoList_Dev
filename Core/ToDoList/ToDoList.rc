@@ -4707,6 +4707,8 @@ BEGIN
     IDS_TDC_TASKLISTPROMPT  "This tasklist contains no tasks"
     IDS_TDC_FILTEREDTASKLISTPROMPT 
                             "There are no tasks matching the selected filter"
+    IDS_TDC_EDITPROMPT_CUSTOMEDIT "Type a value"
+    IDS_TDC_EDITPROMPT_CUSTOMCOMBO "Select a value"
     IDS_TDC_FIELD_COST      "C&ost"
     IDS_TDC_COLUMN_COST     "Cost"
     IDS_TDC_EDITPROMPT_DEPENDS "Type a task ID"
