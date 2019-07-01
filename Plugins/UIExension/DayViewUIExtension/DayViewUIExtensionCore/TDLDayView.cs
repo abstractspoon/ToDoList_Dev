@@ -337,7 +337,7 @@ namespace DayViewUIExtension
 				return false;
 
 			// Task must at least intersect the range
-			if ((item.StartDate > endDate) || (item.EndDate < startDate))
+			if ((item.StartDate >= endDate) || (item.EndDate <= startDate))
 			{
 				return false;
 			}
