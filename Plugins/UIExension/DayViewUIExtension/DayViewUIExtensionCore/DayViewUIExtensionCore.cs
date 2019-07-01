@@ -727,11 +727,16 @@ namespace DayViewUIExtension
         {
 			// Update the Time estimate if it is zero and the task is less than a day
 			// or if it used to match the previous date range
-            if ((item.TimeEstimate == 0.0) && item.TimeEstimateIsMinsOrHours && (item.Length < new TimeSpan(23, 59, 59)))
-                return true;
+            if ((item.TimeEstimate == 0.0) && 
+				item.TimeEstimateIsMinsOrHours && 
+				item.IsSingleDay() &&
+				(item.Length.Days == 0))
+			{
+				return true;
+			}
 
-            // else
-            return item.TimeEstimateMatchesOriginalLength;
+			// else
+			return item.TimeEstimateMatchesOriginalLength;
         }
 
         private int ControlTop
