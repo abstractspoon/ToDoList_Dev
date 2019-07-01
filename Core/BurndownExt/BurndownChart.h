@@ -3,13 +3,12 @@
 #include "BurndownStruct.h"
 
 #include "..\Shared\ToolTipCtrlEx.h"
-
-#include "..\3rdParty\HMXChart.h"
+#include "..\Shared\HMXChartEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
 
-class CBurndownChart : public CHMXChart
+class CBurndownChart : public CHMXChartEx
 {
 public:
 	CBurndownChart(const CStatsItemArray& data);
@@ -49,9 +48,7 @@ protected:
 	COleDateTime GetGraphStartDate() const;
 	COleDateTime GetGraphEndDate() const;
 	BURNDOWN_CHARTSCALE CalculateRequiredXScale() const;
-	double CalcYAxisInterval(double dDataMax) const;
 	int GetYSubTicks(double dInterval) const;
-	double CalcMaxYAxisValue(double dDataMax) const;
 	int HitTest(const CPoint& ptClient) const;
 
 };

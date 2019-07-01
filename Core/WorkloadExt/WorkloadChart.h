@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\3rdParty\HMXChart.h"
+#include "..\Shared\HMXChartEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -9,7 +9,7 @@ class CMapAllocationTotals;
 /////////////////////////////////////////////////////////////////////////////
 // CWorkloadChart
 
-class CWorkloadChart : public CHMXChart
+class CWorkloadChart : public CHMXChartEx
 {
 public:
 	CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocationTotals& mapPercentLoad);

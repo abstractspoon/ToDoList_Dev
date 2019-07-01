@@ -40,7 +40,7 @@ CWorkloadChart::~CWorkloadChart()
 
 /////////////////////////////////////////////////////////////////////////////
 
-BEGIN_MESSAGE_MAP(CWorkloadChart, CHMXChart)
+BEGIN_MESSAGE_MAP(CWorkloadChart, CHMXChartEx)
 	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
@@ -74,7 +74,7 @@ BOOL CWorkloadChart::SaveToImage(CBitmap& bmImage)
 
 int CWorkloadChart::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	if (CHMXChart::OnCreate(lpCreateStruct) != 0)
+	if (CHMXChartEx::OnCreate(lpCreateStruct) != 0)
 		return -1;
 
 	ModifyStyle(0, WS_BORDER);
@@ -101,6 +101,17 @@ void CWorkloadChart::RebuildChart()
 	{
 		AddData(0, m_mapPercentLoad.Get(m_aAllocTo[nAllocTo]));
 		SetXScaleLabel(nAllocTo, m_aAllocTo[nAllocTo]);
+	}
+
+	// Set the maximum Y value to be something 'nice'
+	double dMin, dMax;
+
+	if (GetMinMax(dMin, dMax, true))
+	{
+		ASSERT(dMin == 0.0);
+
+		dMax = CalcMaxYAxisValue(max(dMax, 100)); // min 100%
+		SetDatasetMax(0, dMax);
 	}
 
 	CalcDatas();
@@ -135,7 +146,7 @@ COLORREF CWorkloadChart::GetLineColor(int nDatasetIndex, double dValue) const
 	COLORREF crLine = GetValueColor(dValue);
 
 	if (crLine == CLR_NONE)
-		crLine = CHMXChart::GetLineColor(nDatasetIndex, dValue);
+		crLine = CHMXChartEx::GetLineColor(nDatasetIndex, dValue);
 
 	return crLine;
 }
@@ -162,7 +173,7 @@ COLORREF CWorkloadChart::GetFillColor(double dValue) const
 
 bool CWorkloadChart::DrawDataBkgnd( CDC& dc)
 {
-	if (!CHMXChart::DrawDataBkgnd(dc))
+	if (!CHMXChartEx::DrawDataBkgnd(dc))
 		return false;
 
 	// Draw Over/underload cutoffs
