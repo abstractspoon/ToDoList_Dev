@@ -30,14 +30,17 @@ enum WD_DAYOFWEEK
 
 class CWorkingDay
 {
-	friend class CWorkingWeek;
-
 public:
 	CWorkingDay(); // uses static initialisation set up by CWorkingWeek
 	CWorkingDay(double dStartOfDayInHours,		// eg.9
 				double dWorkingLengthInHours,	// eg.8
 				double dStartOfLunchInHours,	// eg.12
 				double dEndOfLunchInHours);		// eg.13
+
+	BOOL Initialise(double dStartOfDayInHours,		
+					double dWorkingLengthInHours,	
+					double dStartOfLunchInHours,	
+					double dEndOfLunchInHours);		
 
 	double GetStartOfDayInHours() const;
 	double GetEndOfDayInHours() const;
@@ -60,6 +63,8 @@ protected:
 	double m_dWorkingLengthInHours;
 	double m_dStartOfLunchInHours;
 	double m_dEndOfLunchInHours;
+
+protected:
 };
 
 
@@ -67,11 +72,11 @@ protected:
 
 class CWeekend
 {
-	friend class CWorkingWeek;
-
 public:
 	CWeekend();	// uses static initialisation set up by CWorkingWeek
-	CWeekend(DWORD dwDays); // eg. DHW_SATURDAY | DHW_SUNDAY
+	CWeekend(DWORD dwDays); // eg. WD_SATURDAY | WD_SUNDAY
+
+	BOOL Initialise(DWORD dwDays);
 
 	DWORD GetWeekend() const { return m_dwDays; }
 	DWORD GetWeekdays() const { return (WD_EVERYDAY & ~m_dwDays); }
@@ -104,7 +109,7 @@ public:
 				 double dStartOfLunchInHours,	// eg. 12
 				 double dEndOfLunchInHours);	// eg. 13
 
-	static void Initialise(DWORD dwWeekendDays,
+	static BOOL Initialise(DWORD dwWeekendDays,
 						   double dStartOfDayInHours,
 						   double dWorkingLengthInHours,
 						   double dStartOfLunchInHours,
@@ -115,7 +120,7 @@ public:
 	double CalculateDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo);
 
 	const CWorkingDay& GetWorkDay() { return m_WorkDay;	}
-	const CWeekend GetWeekend() const { return m_Weekend; }
+	const CWeekend& GetWeekend() const { return m_Weekend; }
 
 protected:
 	CWorkingDay m_WorkDay;

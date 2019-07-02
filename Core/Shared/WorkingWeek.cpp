@@ -72,11 +72,36 @@ CWorkingDay::CWorkingDay()
 
 CWorkingDay::CWorkingDay(double dStartOfDayInHours, double dWorkingLengthInHours, double dStartOfLunchInHours, double dEndOfLunchInHours)
 	:
-	m_dStartOfDayInHours(dStartOfDayInHours),
-	m_dStartOfLunchInHours(dStartOfLunchInHours),
-	m_dEndOfLunchInHours(dEndOfLunchInHours),
-	m_dWorkingLengthInHours(dWorkingLengthInHours)
+	m_dStartOfDayInHours(0),
+	m_dStartOfLunchInHours(0),
+	m_dEndOfLunchInHours(0),
+	m_dWorkingLengthInHours(0)
 {
+	*this = s_WorkDay;
+
+	Initialise(dStartOfDayInHours, dWorkingLengthInHours, dStartOfLunchInHours, dEndOfLunchInHours);
+}
+
+BOOL CWorkingDay::Initialise(double dStartOfDayInHours,
+							 double dWorkingLengthInHours,
+							 double dStartOfLunchInHours,
+							 double dEndOfLunchInHours)
+{
+	if (((dStartOfDayInHours + dWorkingLengthInHours) <= 24) &&
+		(dStartOfLunchInHours > dStartOfDayInHours) &&
+		(dEndOfLunchInHours > dStartOfLunchInHours) &&
+		(dEndOfLunchInHours <= (dStartOfDayInHours + dWorkingLengthInHours)))
+	{
+		m_dStartOfDayInHours = dStartOfDayInHours;
+		m_dStartOfLunchInHours = dStartOfLunchInHours;
+		m_dEndOfLunchInHours = dEndOfLunchInHours;
+		m_dWorkingLengthInHours = dWorkingLengthInHours;
+
+		return TRUE;
+	}
+
+	ASSERT(0);
+	return FALSE;
 }
 
 double CWorkingDay::GetStartOfDayInHours() const
@@ -167,9 +192,23 @@ CWeekend::CWeekend() : m_dwDays(0)
 	*this = s_Weekend;
 }
 
-CWeekend::CWeekend(DWORD dwDays) : m_dwDays(dwDays)
+CWeekend::CWeekend(DWORD dwDays) : m_dwDays(0)
 {
+	*this = s_Weekend;
+	
+	Initialise(dwDays);
+}
 
+BOOL CWeekend::Initialise(DWORD dwWeekendDays)
+{
+	if ((dwWeekendDays == 0) || ((dwWeekendDays & WD_EVERYDAY) != 0))
+	{
+		m_dwDays = dwWeekendDays;
+		return TRUE;
+	}
+
+	ASSERT(0);
+	return FALSE;
 }
 
 COleDateTime CWeekend::ToWeekday(const COleDateTime& date, BOOL bForwards) const
@@ -262,14 +301,19 @@ CWorkingWeek::CWorkingWeek(DWORD dwWeekendDays, double dStartOfDayInHours, doubl
 {
 }
 
-void CWorkingWeek::Initialise(DWORD dwWeekendDays, double dStartOfDayInHours, double dWorkingLengthInHours, double dStartOfLunchInHours, double dEndOfLunchInHours)
+BOOL CWorkingWeek::Initialise(DWORD dwWeekendDays, double dStartOfDayInHours, double dWorkingLengthInHours, double dStartOfLunchInHours, double dEndOfLunchInHours)
 {
-	s_Weekend.m_dwDays = dwWeekendDays;
+	// prevent partial initialisation
+	if (!CWorkingDay().Initialise(dStartOfDayInHours, dWorkingLengthInHours, dStartOfLunchInHours, dEndOfLunchInHours))
+		return FALSE;
 
-	s_WorkDay.m_dStartOfDayInHours = dStartOfDayInHours;
-	s_WorkDay.m_dWorkingLengthInHours = dWorkingLengthInHours;
-	s_WorkDay.m_dStartOfLunchInHours = dStartOfLunchInHours;
-	s_WorkDay.m_dEndOfLunchInHours = dEndOfLunchInHours;
+	if (!CWeekend().Initialise(dwWeekendDays))
+		return FALSE;
+
+	s_Weekend.Initialise(dwWeekendDays);
+	s_WorkDay.Initialise(dStartOfDayInHours, dWorkingLengthInHours, dStartOfLunchInHours, dEndOfLunchInHours);
+
+	return TRUE;
 }
 
 double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const COleDateTime& dtTo)
