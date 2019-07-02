@@ -68,8 +68,7 @@ LRESULT CDayOfWeekCheckListBox::OnInitListbox(WPARAM /*wp*/, LPARAM /*lp*/)
 	for (int nDay = 1; nDay <= 7; nDay++)
 	{
 		OLE_DAYOFWEEK nDOW = OLE_DAYSOFWEEK[nDay];
-		int nIndex = AddString(CDateHelper::GetDayOfWeekName(nDOW, FALSE));
-		SetItemData(nIndex, nDOW);
+		CDialogHelper::AddString(*this, CDateHelper::GetDayOfWeekName(nDOW, FALSE), nDOW);
 	}
 
 	CDialogHelper::RefreshMaxColumnWidth(*this);
@@ -91,6 +90,7 @@ DWORD CDayOfWeekCheckListBox::GetChecked(int& nNumChecked) const
 		{
 			OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)pCLB->GetItemData(nDay);
 			DH_DAYOFWEEK dwDay = CDateHelper::Map(nDOW);
+			ASSERT(dwDay);
 
 			m_dwChecked |= dwDay;
 			nNumChecked++;

@@ -9,6 +9,7 @@
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\Misc.h"
 #include "..\Shared\GraphicsMisc.h"
+#include "..\Shared\EnString.h"
 
 #include "..\Interfaces\ipreferences.h"
 

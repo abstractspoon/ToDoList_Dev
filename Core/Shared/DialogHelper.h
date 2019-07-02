@@ -102,48 +102,81 @@ public:
 	static void ModifyEditCtrlsStyle(BOOL bExStyle, const CWnd* pParent, DWORD dwRemove, 
 										DWORD dwAdd, UINT nFlags = 0);
 	
+	// Comboboxes and Listboxes
+	template <class T, class S>
+	static int FindItemByData(const S& ctrl, T itemData)
+	{
+		int nItem = ctrl.GetCount();
+
+		while (nItem--)
+		{
+			if (ctrl.GetItemData(nItem) == (DWORD)itemData)
+				break;
+		}
+
+		return nItem;
+	}
+
+	template <class T, class S>
+	static int SelectItemByData(S& ctrl, T itemData)
+	{
+		int nItem = FindItemByData(ctrl, itemData);
+		ctrl.SetCurSel(nItem);
+
+		return nItem;
+	}
+
+	template <class T, class S>
+	static T GetSelectedItemData(const S& ctrl, T fallbackValue)
+	{
+		int nSel = ctrl.GetCurSel();
+
+		if (nSel != -1)
+			return (T)ctrl.GetItemData(nSel);
+
+		// else
+		return fallbackValue;
+	}
+
+	template <class T, class S>
+	static int AddString(S& ctrl, LPCTSTR szItem, T itemData)
+	{
+		int nIndex = ctrl.AddString(szItem);
+
+		if (nIndex != -1)
+			ctrl.SetItemData(nIndex, itemData);
+
+		return nIndex;
+	}
+
+	template <class T, class S>
+	static int AddString(S& ctrl, UINT nIDItem, T itemData)
+	{
+		return AddString(ctrl, CEnString(nIDItem), itemData);
+	}
+	
 	// comboboxes
 	static int SetComboBoxItems(CComboBox& combo, const CStringArray& aItems);
 	static int GetComboBoxItems(const CComboBox& combo, CStringArray& aItems);
 	static int RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef = NULL, int nTabWidth = 0, int nExtra = 0);
 	static int CalcMaxTextWidth(CComboBox& combo, int nMinWidth = 0, BOOL bDropped = FALSE, CDC* pDCRef = NULL, int nTabWidth = 0);
 	static int SelectItemByValue(CComboBox& combo, int nValue);
-	static int SelectItemByData(CComboBox& combo, DWORD dwItemData);
 	static DWORD GetSelectedItemData(const CComboBox& combo);
 	static int GetSelectedItemAsValue(const CComboBox& combo);
 	static CString GetSelectedItem(const CComboBox& combo);
 	static CString GetItem(const CComboBox& combo, int nItem);
 
-	template <class T>
-	static T GetSelectedItemData(const CComboBox& combo, T fallbackValue)
-	{
-		int nSel = combo.GetCurSel();
-
-		if (nSel != CB_ERR)
-			return (T)combo.GetItemData(nSel);
-
-		// else
-		return fallbackValue;
-	}
-	
 	static BOOL IsDroppedComboBox(HWND hCtrl);
 	static int FindItemByValue(const CComboBox& combo, int nValue);
-	static int AddString(CComboBox& combo, LPCTSTR szItem, DWORD dwItemData);
-	static int AddString(CComboBox& combo, UINT nIDItem, DWORD dwItemData);
 	static BOOL SetAutoComboReadOnly(CComboBox& combo, BOOL bVScroll, BOOL bReadonly = TRUE, int nDropHeight = 200);
 	static void SetComboEditReadonly(CComboBox& combo, BOOL bReadonly = TRUE);
-	static int FindItemByData(const CComboBox& combo, DWORD dwItemData);
 	static BOOL ComboHasEdit(const CComboBox& combo);
 	static void MoveCombo(CComboBox& combo, const CRect& rNew, int nDropHeight = 200);
 
 	// listboxes
 	static int RefreshMaxColumnWidth(CListBox& list, CDC* pDCRef = NULL);
 	static int CalcMaxTextWidth(CListBox& list, int nMinWidth = 0, CDC* pDCRef = NULL);
-	static int FindItemByData(const CListBox& list, DWORD dwItemData);
-	static int AddString(CListBox& list, LPCTSTR szItem, DWORD dwItemData);
-	static int AddString(CListBox& list, UINT nIDItem, DWORD dwItemData);
 	static CString GetItem(const CListBox& list, int nItem);
-	static int SelectItemByData(CListBox& list, DWORD dwItemData);
 
 	// better dialog control shortcut handling
 	static BOOL ProcessDialogCtrlShortcut(const MSG* pMsg);

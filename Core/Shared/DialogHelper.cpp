@@ -902,29 +902,6 @@ int CDialogHelper::RefreshMaxColumnWidth(CListBox& list, CDC* pDCRef)
 	return nWidth;
 }
 
-int CDialogHelper::AddString(CListBox& list, UINT nIDItem, DWORD dwItemData)
-{
-	return AddString(list, CEnString(nIDItem), dwItemData);
-}
-
-int CDialogHelper::AddString(CListBox& list, LPCTSTR szItem, DWORD dwItemData)
-{
-	int nIndex = list.AddString(szItem);
-	
-	if (nIndex != LB_ERR)
-		list.SetItemData(nIndex, dwItemData);
-	
-	return nIndex;
-}
-
-int CDialogHelper::SelectItemByData(CListBox& list, DWORD dwItemData)
-{
-	int nItem = FindItemByData(list, dwItemData);
-	list.SetCurSel(nItem);
-
-	return nItem;
-}
-
 CString CDialogHelper::GetItem(const CListBox& list, int nItem)
 {
 	CString sItem;
@@ -933,19 +910,6 @@ CString CDialogHelper::GetItem(const CListBox& list, int nItem)
 		list.GetText(nItem, sItem);
 
 	return sItem;
-}
-
-int CDialogHelper::FindItemByData(const CListBox& list, DWORD dwItemData)
-{
-	int nItem = list.GetCount();
-	
-	while (nItem--)
-	{
-		if (list.GetItemData(nItem) == dwItemData)
-			break;
-	}
-
-	return nItem;
 }
 
 int CDialogHelper::CalcMaxTextWidth(CListBox& list, int nMinWidth, CDC* pDCRef)
@@ -995,8 +959,6 @@ BOOL CDialogHelper::IsChildOrSame(HWND hWnd, HWND hwndChild)
 
 BOOL CDialogHelper::IsChildOrSame(const CWnd* pWnd, const CWnd* pChild)
 {
-//	ASSERT(pWnd && pChild);
-
 	if (!pWnd || !pChild)
 		return FALSE;
 
@@ -1017,27 +979,6 @@ int CDialogHelper::FindItemByValue(const CComboBox& combo, int nValue)
 	sNum.Format(_T("%d"), nValue);
 
 	return combo.FindString(-1, sNum);
-}
-
-int CDialogHelper::SelectItemByData(CComboBox& combo, DWORD dwItemData)
-{
-	int nItem = FindItemByData(combo, dwItemData);
-	combo.SetCurSel(nItem);
-
-	return nItem;
-}
-
-int CDialogHelper::FindItemByData(const CComboBox& combo, DWORD dwItemData)
-{
-	int nItem = combo.GetCount();
-	
-	while (nItem--)
-	{
-		if (combo.GetItemData(nItem) == dwItemData)
-			break;
-	}
-
-	return nItem;
 }
 
 CString CDialogHelper::GetSelectedItem(const CComboBox& combo)
@@ -1071,21 +1012,6 @@ DWORD CDialogHelper::GetSelectedItemData(const CComboBox& combo)
 
 	// else
 	return 0;
-}
-
-int CDialogHelper::AddString(CComboBox& combo, UINT nIDItem, DWORD dwItemData)
-{
-	return AddString(combo, CEnString(nIDItem), dwItemData);
-}
-
-int CDialogHelper::AddString(CComboBox& combo, LPCTSTR szItem, DWORD dwItemData)
-{
-	int nIndex = combo.AddString(szItem);
-
-	if (nIndex != CB_ERR)
-		combo.SetItemData(nIndex, dwItemData);
-
-	return nIndex;
 }
 
 CString CDialogHelper::GetCtrlText(const CWnd* pWnd, BOOL bStripAccelerator)
