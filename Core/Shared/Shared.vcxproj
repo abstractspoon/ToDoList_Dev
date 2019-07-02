@@ -639,6 +639,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="WorkingWeek.cpp" />
     <ClCompile Include="XmlFile.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -822,6 +823,7 @@
     <ClInclude Include="winstyles.h" />
     <ClInclude Include="WndMisc.h" />
     <ClInclude Include="WndPrompt.h" />
+    <ClInclude Include="WorkingWeek.h" />
     <ClInclude Include="XmlCharMap.h" />
     <ClInclude Include="XmlFile.h" />
     <ClInclude Include="xmlfileex.h" />
