@@ -8,6 +8,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
+using namespace System::Collections::Generic;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -76,35 +77,6 @@ Int32 WorkingDay::HoursToMilleseconds(double hours)
 	return (Int32)(hours * 60 * 60 * 1000);
 }
 
-double WorkingDay::CalculateDurationInHours(System::DateTime^ from, DateTime^ to)
-{
-	int nDaysDuration = (to->Date - from->Date).Days;
-
-	if (nDaysDuration < 0)
-		return 0;
-
-	double fromTimeOfDay = GetTimeOfDayInHours(from);
-	double toTimeOfDay = GetTimeOfDayInHours(to);
-	double dHoursDuration = 0;
-	
-	if (nDaysDuration == 0)
-	{
-		// from and to are same day
-		dHoursDuration = CalculateDurationInHours(fromTimeOfDay, toTimeOfDay);
-	}
-	else
-	{
-		// clear days
-		dHoursDuration = ((nDaysDuration - 1) * DayLengthInHours(false));
-
-		// part days
-		dHoursDuration += CalculateDurationInHours(fromTimeOfDay, EndOfDayInHours());
-		dHoursDuration += CalculateDurationInHours(m_StartOfDayInHours, toTimeOfDay);
-	}
-
-	return dHoursDuration;
-}
-
 double WorkingDay::CalculateDurationInHours(double fromHour, double toHour)
 {
 	fromHour = Math::Max(fromHour, m_StartOfDayInHours);
@@ -168,13 +140,101 @@ void WorkingDay::Load(Preferences^ prefs)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-/// <summary>
-/// Get the Week number of the year
-/// (In the range 1..53)
-/// This conforms to ISO 8601 specification for week number.
-/// </summary>
-/// <param name="date"></param>
-/// <returns>Week of year</returns>
+enum 
+{
+	SUNDAY = 0X01,
+	MONDAY = 0X02,
+	TUESDAY = 0X04,
+	WEDNESDAY = 0X08,
+	THURSDAY = 0X10,
+	FRIDAY = 0X20,
+	SATURDAY = 0X40,
+};
+
+WorkingWeek::WorkingWeek() 
+	: 
+	m_WorkingDay(gcnew WorkingDay()),
+	m_WeekendDays(gcnew List<System::DayOfWeek>())
+{
+	m_WeekendDays->Add(System::DayOfWeek::Saturday);
+	m_WeekendDays->Add(System::DayOfWeek::Sunday);
+}
+
+WorkingWeek::WorkingWeek(Preferences^ prefs)
+	:
+	m_WorkingDay(gcnew WorkingDay()),
+	m_WeekendDays(gcnew List<System::DayOfWeek>())
+{
+	Load(prefs);
+}
+
+void WorkingWeek::Load(Preferences^ prefs)
+{
+	m_WorkingDay->Load(prefs);
+	m_WeekendDays->Clear();
+
+	int dwWeekends = prefs->GetProfileInt("Preferences", "Weekends", 0);
+	
+	if ((dwWeekends & SUNDAY) == SUNDAY)
+		m_WeekendDays->Add(System::DayOfWeek::Sunday);
+
+	if ((dwWeekends & SATURDAY) == SATURDAY)
+		m_WeekendDays->Add(System::DayOfWeek::Saturday);
+
+	if ((dwWeekends & MONDAY) == MONDAY)
+		m_WeekendDays->Add(System::DayOfWeek::Monday);
+
+	if ((dwWeekends & TUESDAY) == TUESDAY)
+		m_WeekendDays->Add(System::DayOfWeek::Tuesday);
+
+	if ((dwWeekends & WEDNESDAY) == WEDNESDAY)
+		m_WeekendDays->Add(System::DayOfWeek::Wednesday);
+
+	if ((dwWeekends & THURSDAY) == THURSDAY)
+		m_WeekendDays->Add(System::DayOfWeek::Thursday);
+
+	if ((dwWeekends & FRIDAY) == FRIDAY)
+		m_WeekendDays->Add(System::DayOfWeek::Friday);
+}
+
+double WorkingWeek::CalculateDurationInHours(System::DateTime^ from, DateTime^ to)
+{
+	int nDaysDuration = (to->Date - from->Date).Days;
+
+	if (nDaysDuration < 0)
+		return 0;
+
+	double fromTimeOfDay = m_WorkingDay->GetTimeOfDayInHours(from);
+	double toTimeOfDay = m_WorkingDay->GetTimeOfDayInHours(to);
+	double dHoursDuration = 0;
+
+	if (nDaysDuration == 0)
+	{
+		// from and to are same day
+		dHoursDuration = m_WorkingDay->CalculateDurationInHours(fromTimeOfDay, toTimeOfDay);
+	}
+	else
+	{
+		// clear days
+		dHoursDuration = ((nDaysDuration - 1) * m_WorkingDay->DayLengthInHours(false));
+
+		// part days
+		dHoursDuration += m_WorkingDay->CalculateDurationInHours(fromTimeOfDay, m_WorkingDay->EndOfDayInHours());
+		dHoursDuration += m_WorkingDay->CalculateDurationInHours(m_WorkingDay->StartOfDayInHours(), toTimeOfDay);
+	}
+
+	return dHoursDuration;
+}
+
+bool WorkingWeek::IsWeekend(DateTime^ date)
+{
+	return m_WeekendDays->Contains(date->DayOfWeek);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+// This conforms to ISO 8601 specification for week number.
+
 int DateUtil::WeekOfYear(DateTime^ date)
 {
 	const int moveByDays[] = { 6, 7, 8, 9, 10, 4, 5 };

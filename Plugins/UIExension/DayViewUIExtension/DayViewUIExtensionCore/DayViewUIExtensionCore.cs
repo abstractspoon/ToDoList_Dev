@@ -18,19 +18,7 @@ namespace DayViewUIExtension
 		private Translator m_Trans = null;
 		private UIExtension.TaskIcon m_TaskIcons = null;
         private String m_HelpID = "";
-		private WorkingDay m_WorkDay = null;
-
-		
-        [Flags] private enum WeekendDays
-        {
-	        SUNDAY		= 0X01,
-	        MONDAY		= 0X02,
-	        TUESDAY		= 0X04,
-	        WEDNESDAY	= 0X08,
-	        THURSDAY	= 0X10,
-	        FRIDAY		= 0X20,
-	        SATURDAY	= 0X40,
-        }
+		private WorkingWeek m_WorkWeek = null;
 
 		// --------------------------------------------------------------------------------------
 
@@ -175,41 +163,14 @@ namespace DayViewUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
-			m_WorkDay = new WorkingDay(prefs);
-
 			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			m_DayView.TaskColorIsBackground = taskColorIsBkgnd;
 
 			bool showParentsAsFolder = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
 			m_DayView.ShowParentsAsFolder = showParentsAsFolder;
 
-			// Weekends
-			WeekendDays dwWeekends = (WeekendDays)prefs.GetProfileInt("Preferences", "Weekends", 0);
-
-            List<System.DayOfWeek> weekendDays = new List<System.DayOfWeek>();
-
-            if ((dwWeekends & WeekendDays.SUNDAY) == WeekendDays.SUNDAY)
-                weekendDays.Add(System.DayOfWeek.Sunday);
-
-            if ((dwWeekends & WeekendDays.SATURDAY) == WeekendDays.SATURDAY)
-                weekendDays.Add(System.DayOfWeek.Saturday);
-
-            if ((dwWeekends & WeekendDays.MONDAY) == WeekendDays.MONDAY)
-                weekendDays.Add(System.DayOfWeek.Monday);
-
-            if ((dwWeekends & WeekendDays.TUESDAY) == WeekendDays.TUESDAY)
-                weekendDays.Add(System.DayOfWeek.Tuesday);
-
-            if ((dwWeekends & WeekendDays.WEDNESDAY) == WeekendDays.WEDNESDAY)
-                weekendDays.Add(System.DayOfWeek.Wednesday);
-
-            if ((dwWeekends & WeekendDays.THURSDAY) == WeekendDays.THURSDAY)
-                weekendDays.Add(System.DayOfWeek.Thursday);
-
-            if ((dwWeekends & WeekendDays.FRIDAY) == WeekendDays.FRIDAY)
-                weekendDays.Add(System.DayOfWeek.Friday);
-
-            m_DayView.WeekendDays = weekendDays;
+			m_WorkWeek.Load(prefs);
+            m_DayView.WeekendDays = m_WorkWeek.WeekendDays();
 
             if (!appOnly)
             {
@@ -298,6 +259,7 @@ namespace DayViewUIExtension
 			m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
 			m_ControlsFont = new Font(FontName, 8);
 			m_PrefsDlg = new DayViewPreferencesDlg(m_Trans, m_ControlsFont);
+			m_WorkWeek = new WorkingWeek();
 
 			CreateMonthYearCombos();
 			CreateToolbar();
@@ -438,11 +400,11 @@ namespace DayViewUIExtension
 
 		private void UpdateWorkingHourDisplay()
 		{
-			double startOfDay = m_WorkDay.StartOfDayInHours();
+			double startOfDay = m_WorkWeek.WorkDay().StartOfDayInHours();
 			m_DayView.WorkingHourStart = (int)startOfDay;
 			m_DayView.WorkingMinuteStart = (int)((startOfDay - (int)startOfDay) * 60);
 
-			double endOfDay = m_WorkDay.EndOfDayInHours();
+			double endOfDay = m_WorkWeek.WorkDay().EndOfDayInHours();
 			m_DayView.WorkingHourEnd = (int)endOfDay;
 			m_DayView.WorkingMinuteEnd = (int)((endOfDay - (int)endOfDay) * 60);
 		}
