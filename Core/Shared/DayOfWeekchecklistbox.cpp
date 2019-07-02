@@ -67,8 +67,9 @@ LRESULT CDayOfWeekCheckListBox::OnInitListbox(WPARAM /*wp*/, LPARAM /*lp*/)
 	// init weekdays
 	for (int nDay = 1; nDay <= 7; nDay++)
 	{
-		int nIndex = AddString(CDateHelper::GetDayOfWeekName(nDay, FALSE));
-		SetItemData(nIndex, nDay);
+		OLE_DAYOFWEEK nDOW = OLE_DAYSOFWEEK[nDay];
+		int nIndex = AddString(CDateHelper::GetDayOfWeekName(nDOW, FALSE));
+		SetItemData(nIndex, nDOW);
 	}
 
 	CDialogHelper::RefreshMaxColumnWidth(*this);
@@ -88,8 +89,8 @@ DWORD CDayOfWeekCheckListBox::GetChecked(int& nNumChecked) const
 	{
 		if (pCLB->GetCheck(nDay))
 		{
-			int nDOW = pCLB->GetItemData(nDay);
-			DWORD dwDay = MapDOWToDay(nDOW);
+			OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)pCLB->GetItemData(nDay);
+			DH_DAYOFWEEK dwDay = CDateHelper::Map(nDOW);
 
 			m_dwChecked |= dwDay;
 			nNumChecked++;
@@ -119,29 +120,11 @@ void CDayOfWeekCheckListBox::SetChecked(DWORD dwChecked)
 		{
 			for (int nDay = 0; nDay < 7; nDay++)
 			{
-				int nDOW = GetItemData(nDay);
-				DWORD dwDay = MapDOWToDay(nDOW);
+				OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)GetItemData(nDay);
+				DH_DAYOFWEEK dwDay = CDateHelper::Map(nDOW);
 
 				SetCheck(nDay, (m_dwChecked & dwDay) ? 1 : 0);
 			}
 		}
 	}
-}
-
-DWORD CDayOfWeekCheckListBox::MapDOWToDay(int nDOW)
-{
-	switch (nDOW)
-	{
-	case 1: return DHW_SUNDAY;
-	case 2: return DHW_MONDAY;
-	case 3: return DHW_TUESDAY;
-	case 4: return DHW_WEDNESDAY;
-	case 5: return DHW_THURSDAY;
-	case 6: return DHW_FRIDAY;
-	case 7: return DHW_SATURDAY;
-	}
-
-	// else
-	ASSERT(0);
-	return 0;
 }

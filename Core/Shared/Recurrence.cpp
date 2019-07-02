@@ -233,7 +233,7 @@ BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtN
 	case RECURS_MONTH_SPECIFIC_DOW_NMONTHS:
 		{
 			int nWhich = LOWORD(m_dwSpecific1);
-			int nDOW = HIWORD(m_dwSpecific1);
+			OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)HIWORD(m_dwSpecific1);
 			int nNumMonths = m_dwSpecific2;
 			
 			if (!CDateHelper::IsValidDayOfMonth(nDOW, nWhich, 1))
@@ -337,7 +337,7 @@ BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtN
 	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
 		{
 			int nWhich = LOWORD(m_dwSpecific1);
-			int nDOW = HIWORD(m_dwSpecific1);
+			OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)HIWORD(m_dwSpecific1);
 			int nMonth = m_dwSpecific2;
 			
 			// Sanity check
@@ -413,7 +413,7 @@ BOOL CRecurrence::FitDayToScheme(COleDateTime& dtRecur) const
 	case RECURS_MONTH_SPECIFIC_DOW_NMONTHS:
 		{
 			int nWhich = LOWORD(m_dwSpecific1);
-			int nDOW = HIWORD(m_dwSpecific1);
+			OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)HIWORD(m_dwSpecific1);
 			int nMonth = dtRecur.GetMonth();
 			int nYear = dtRecur.GetYear();
 			
@@ -456,7 +456,7 @@ BOOL CRecurrence::FitDayToScheme(COleDateTime& dtRecur) const
 	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
 		{
 			int nWhich = LOWORD(m_dwSpecific1);
-			int nDOW = HIWORD(m_dwSpecific1);
+			OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)HIWORD(m_dwSpecific1);
 			
 			SYSTEMTIME st;
 			dtRecur.GetAsSystemTime(st);
@@ -593,7 +593,7 @@ BOOL CRecurrence::IsValidRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, D
 
 		// LOWORD = which week (1-5)
 		// HIWORD = DOW (1-7)		
-		if (!CDateHelper::IsValidDayOfMonth(HIWORD(dwSpec1), LOWORD(dwSpec1), 1))
+		if (!CDateHelper::IsValidDayOfMonth((OLE_DAYOFWEEK)HIWORD(dwSpec1), LOWORD(dwSpec1), 1))
 			return FALSE;
 		break;
 		
@@ -632,7 +632,7 @@ BOOL CRecurrence::IsValidRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, D
 		
 		// LOWORD = which week (1-5)
 		// HIWORD = DOW (1-7)		
-		if (!CDateHelper::IsValidDayOfMonth(HIWORD(dwSpec1), LOWORD(dwSpec1), 1))
+		if (!CDateHelper::IsValidDayOfMonth((OLE_DAYOFWEEK)HIWORD(dwSpec1), LOWORD(dwSpec1), 1))
 			return FALSE;
 		break;
 		

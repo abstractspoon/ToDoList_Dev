@@ -49,8 +49,10 @@ enum
 	DHFD_NOCENTURY	= 0x0040,
 };
 
-enum // Days of week bit flags
+enum DH_DAYOFWEEK // Days of week bit flags
 {
+	DHW_NONE		= 0X00,
+
 	DHW_SUNDAY		= 0X01,
 	DHW_MONDAY		= 0X02,
 	DHW_TUESDAY		= 0X04,
@@ -62,10 +64,22 @@ enum // Days of week bit flags
 	DHW_EVERYDAY	= 0x7F
 };
 
-enum // OLE Days of week
+enum OLE_DAYOFWEEK // OLE Days of week
 {
 	DHO_UNDEF	= -1,
+
 	DHO_SUNDAY	= 1,
+	DHO_MONDAY,
+	DHO_TUESDAY,
+	DHO_WEDNESDAY,
+	DHO_THURSDAY,
+	DHO_FRIDAY,
+	DHO_SATURDAY,
+};
+
+static OLE_DAYOFWEEK OLE_DAYSOFWEEK[7] = 
+{
+	DHO_SUNDAY,
 	DHO_MONDAY,
 	DHO_TUESDAY,
 	DHO_WEDNESDAY,
@@ -161,7 +175,7 @@ public:
 	static COleDateTime NullDate();
 
 	static BOOL IsValidDayInMonth(int nDay, int nMonth, int nYear);
-	static BOOL IsValidDayOfMonth(int nDOW, int nWhich, int nMonth);
+	static BOOL IsValidDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth);
 
 	static int CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive, BOOL bWeekdays);
 	static int CalcDaysFromTo(const COleDateTime& dateFrom, DH_DATE nTo, BOOL bInclusive, BOOL bWeekdays);
@@ -189,9 +203,11 @@ public:
 	static BOOL DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bForceWeekday, BOOL bMustHaveSign = TRUE);
 	static BOOL IsValidRelativeDate(LPCTSTR szDate, BOOL bMustHaveSign = TRUE);
 
-	static int GetFirstDayOfWeek();
-	static int GetLastDayOfWeek();
-	static int GetNextDayOfWeek(int nDOW);
+	static OLE_DAYOFWEEK GetDayOfWeek(const COleDateTime& date);
+	static OLE_DAYOFWEEK GetDayOfWeek(const SYSTEMTIME& date);
+	static OLE_DAYOFWEEK GetFirstDayOfWeek();
+	static OLE_DAYOFWEEK GetLastDayOfWeek();
+	static OLE_DAYOFWEEK GetNextDayOfWeek(OLE_DAYOFWEEK nDOW);
 	static int GetDaysInMonth(int nMonth, int nYear); 
 	static int GetDaysInMonth(const COleDateTime& date); 
 	static int GetWeekofYear(const COleDateTime& date);
@@ -209,10 +225,10 @@ public:
 	static int GetDateInMonths(int nMonth, int nYear);
 	static int GetDateInMonths(const COleDateTime& date);
 
-	static COleDateTime CalcDate(int nDOW, int nWhich, int nMonth, int nYear);
-	static int CalcDayOfMonth(int nDOW, int nWhich, int nMonth, int nYear);
+	static COleDateTime CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear);
+	static int CalcDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear);
 
-	static CString GetDayOfWeekName(int nDOW, BOOL bShort = FALSE); // 1-7, sun-sat
+	static CString GetDayOfWeekName(OLE_DAYOFWEEK nDOW, BOOL bShort = FALSE); // 1-7, sun-sat
 	static CString GetMonthName(int nMonth, BOOL bShort = FALSE); // 1-12, jan-nov
 	static void GetDayOfWeekNames(BOOL bShort, CStringArray& aNames); // sun-sat
 	static void GetMonthNames(BOOL bShort, CStringArray& aMonths); // jan-dec
@@ -236,7 +252,7 @@ public:
 	static COleDateTime GetNextAvailableDay(const COleDateTime& date, DWORD dwAvailDays);
 	static BOOL ValidateDay(COleDateTime& date, DWORD dwAvailDays);
 
-	static BOOL IsWeekend(int nDOW);
+	static BOOL IsWeekend(OLE_DAYOFWEEK nDOW);
 	static BOOL IsWeekend(const COleDateTime& date);
 	static BOOL IsWeekend(double dDate);
 	static int GetWeekendDuration();
@@ -277,6 +293,9 @@ public:
 	static BOOL Min(COleDateTime& date, const COleDateTime& dtOther);
 	static BOOL Max(COleDateTime& date, const COleDateTime& dtOther);
 
+	static DH_DAYOFWEEK Map(OLE_DAYOFWEEK nDOW);
+	static OLE_DAYOFWEEK Map(DH_DAYOFWEEK nDOW);
+
 	static int Compare(const COleDateTime& date1, const COleDateTime& date2, DWORD dwCompareFlags = DHC_COMPARETIME);
 
 protected:
@@ -289,12 +308,6 @@ protected:
 	static BOOL IsValidUnit(TCHAR nUnits);
 	static BOOL DecodeOffsetEx(LPCTSTR szDate, double& dAmount, DH_UNITS& nUnits, DH_UNITS nDefUnits, BOOL bMustHaveSign);
 	static COleDateTime GetNearestDayPart(const COleDateTime& date, int nNumParts, BOOL bEnd);
-
-	// Copyright (c) Robert Walker, support@tunesmithy.co.uk
-	static void T64ToFileTime(time64_t *pt, FILETIME *pft);
-	static void FileTimeToT64(FILETIME *pft, time64_t *pt);
-	static void SystemTimeToT64(SYSTEMTIME *pst, time64_t *pt);
-	static void T64ToSystemTime(time64_t *pt, SYSTEMTIME *pst);
 };
 
 #endif // !defined(AFX_DATEHELPER_H__2A4E63F6_A106_4295_BCBA_06D03CD67AE7__INCLUDED_)

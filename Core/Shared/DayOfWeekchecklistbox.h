@@ -46,8 +46,6 @@ protected:
 	LRESULT OnInitListbox(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
-protected:
-	static DWORD MapDOWToDay(int nDow);
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -4058,7 +4058,7 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 			// first week starts at 'First DOW of month'
-			int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
+			OLE_DAYOFWEEK nFirstDOW = CDateHelper::GetFirstDayOfWeek();
 			int nDay = CDateHelper::CalcDayOfMonth(nFirstDOW, 1, nMonth, nYear);
 
 			// If this is column 1 (column 0 is hidden) then we might need

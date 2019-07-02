@@ -50,7 +50,7 @@ int CMiniCalendarCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	SetFirstDayOfWeek(CDateHelper::GetFirstDayOfWeek());
 
 	for (int nDOW = 1; nDOW <= 7; nDOW++)
-		SetDayOfWeekName(nDOW, CDateHelper::GetDayOfWeekName(nDOW));
+		SetDayOfWeekName(nDOW, CDateHelper::GetDayOfWeekName(OLE_DAYSOFWEEK[nDOW]));
 
 	return CFPSMiniCalendarCtrl::OnCreate(lpCreateStruct);
 }

@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "DayOfWeekcombobox.h"
 #include "datehelper.h"
+#include "dialoghelper.h"
 #include "localizer.h"
 
 #ifdef _DEBUG
@@ -59,8 +60,9 @@ void CDayOfWeekComboBox::InitCombo()
 	ResetContent();
 	ModifyStyle(CBS_SORT, 0); // Unsorted
 
-	for (int nDOW = 1; nDOW <= 7; nDOW++)
+	for (int nDay = 1; nDay <= 7; nDay++)
 	{
+		OLE_DAYOFWEEK nDOW = OLE_DAYSOFWEEK[nDay];
 		int nIndex = AddString(CDateHelper::GetDayOfWeekName(nDOW, FALSE));
 		SetItemData(nIndex, nDOW);
 	}

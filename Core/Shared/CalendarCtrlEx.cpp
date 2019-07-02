@@ -42,7 +42,7 @@ CString CCalendarCtrlEx::GetMonthName(const COleDateTime& date, BOOL bShort) con
 
 CString CCalendarCtrlEx::GetDayOfWeekName(const COleDateTime& date, BOOL bShort) const
 {
-	return CDateHelper::GetDayOfWeekName(date.GetDayOfWeek(), bShort);
+	return CDateHelper::GetDayOfWeekName(CDateHelper::GetDayOfWeek(date), bShort);
 }
 
 void CCalendarCtrlEx::DrawHeader(CDC* pDC)
@@ -71,7 +71,8 @@ void CCalendarCtrlEx::DrawHeader(CDC* pDC)
 	{
 		CRect txtRect(i*nWidth, 2, (i+1)*nWidth, m_nHeaderHeight);
 		int nDOW = GetDayOfWeek(i);
-		CString sDOW = CDateHelper::GetDayOfWeekName(nDOW, bShort);
+
+		CString sDOW = CDateHelper::GetDayOfWeekName((OLE_DAYOFWEEK)nDOW, bShort);
 
 		pDC->DrawText(sDOW, txtRect, DT_CENTER|DT_VCENTER);
 	}
