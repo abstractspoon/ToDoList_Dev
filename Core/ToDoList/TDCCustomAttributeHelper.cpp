@@ -22,6 +22,7 @@
 #include "..\shared\fileedit.h"
 #include "..\shared\FileComboBox.h"
 #include "..\shared\HoldRedraw.h"
+#include "..\shared\WndPrompt.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -34,9 +35,9 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 CWnd* CTDCCustomAttributeHelper::CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
-													   const CTDCImageList& ilImages, CWnd* pParent, 
-													   UINT nCtrlID, BOOL bBuddy, 
-													   BOOL bFilter, BOOL bMultiSelectionFilter)
+												 const CTDCImageList& ilImages, CWnd* pParent, 
+												 UINT nCtrlID, BOOL bBuddy, 
+												 BOOL bFilter, BOOL bMultiSelectionFilter)
 {
 	// Sanity check
 	if (bBuddy && !AttributeWantsBuddy(attribDef))
@@ -421,6 +422,29 @@ void CTDCCustomAttributeHelper::CleanupControls(CTDCCustomControlArray& aControl
 	aControls.RemoveAll();
 }
 
+void CTDCCustomAttributeHelper::AddWindowPrompts(const CTDCCustomControlArray& aControls, CWnd* pParent, CWndPromptManager& mgrPrompts)
+{
+	int nCtrl = aControls.GetSize();
+
+	while (nCtrl--)
+	{
+		const CUSTOMATTRIBCTRLITEM& ctrlCustom = aControls[nCtrl];
+		const CWnd* pCtrl = pParent->GetDlgItem(ctrlCustom.nCtrlID);
+
+		if (pCtrl)
+		{
+			if (pCtrl->IsKindOf(RUNTIME_CLASS(CEdit)))
+			{
+				mgrPrompts.SetEditPrompt(*pCtrl, IDS_TDC_EDITPROMPT_CUSTOMEDIT);
+			}
+			else if (pCtrl->IsKindOf(RUNTIME_CLASS(CComboBox)))
+			{
+				mgrPrompts.SetComboEditPrompt(*pCtrl, IDS_TDC_EDITPROMPT_CUSTOMCOMBO);
+			}
+		}
+	}
+}
+
 BOOL CTDCCustomAttributeHelper::NeedRebuildEditControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
 														const CTDCCustomAttribDefinitionArray& aNewAttribDefs, 
 														const CTDCCustomControlArray& aOldControls)
@@ -528,27 +552,27 @@ int CTDCCustomAttributeHelper::GetCustomAttributeCtrls(const CTDCCustomAttribDef
 }
 
 BOOL CTDCCustomAttributeHelper::RebuildEditControls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-													CTDCCustomControlArray& aControls, 
 													const CTDCImageList& ilImages, 
-													CWnd* pParent, UINT nCtrlIDPos)
+													CWnd* pParent, UINT nCtrlIDPos,
+													CTDCCustomControlArray& aControls)
 {
-	return RebuildControls(aAttribDefs, aControls, ilImages, pParent, nCtrlIDPos, IDC_FIRST_CUSTOMEDITFIELD, FALSE, FALSE);
+	return RebuildControls(aAttribDefs, ilImages, pParent, nCtrlIDPos, IDC_FIRST_CUSTOMEDITFIELD, FALSE, FALSE, aControls);
 }
 
 BOOL CTDCCustomAttributeHelper::RebuildFilterControls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-														CTDCCustomControlArray& aControls, 
-														const CTDCImageList& ilImages, 
-														CWnd* pParent, UINT nCtrlIDPos, 
-														BOOL bMultiSelection)
+													  const CTDCImageList& ilImages, 
+													  CWnd* pParent, UINT nCtrlIDPos, 
+													  BOOL bMultiSelection,
+													  CTDCCustomControlArray& aControls)
 {
-	return RebuildControls(aAttribDefs, aControls, ilImages, pParent, nCtrlIDPos, IDC_FIRST_CUSTOMFILTERFIELD, TRUE, bMultiSelection);
+	return RebuildControls(aAttribDefs, ilImages, pParent, nCtrlIDPos, IDC_FIRST_CUSTOMFILTERFIELD, TRUE, bMultiSelection, aControls);
 }
 
 BOOL CTDCCustomAttributeHelper::RebuildControls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-												 CTDCCustomControlArray& aControls, 
-												 const CTDCImageList& ilImages,
-												 CWnd* pParent, UINT nCtrlIDPos, UINT nCtrlIDStart, 
-												 BOOL bFilter, BOOL bMultiSelectionFilter)
+												const CTDCImageList& ilImages,
+												CWnd* pParent, UINT nCtrlIDPos, UINT nCtrlIDStart, 
+												BOOL bFilter, BOOL bMultiSelectionFilter,
+												CTDCCustomControlArray& aControls)
 {
 	ASSERT_VALID(pParent);
 

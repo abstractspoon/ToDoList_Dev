@@ -315,6 +315,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="HMXChartEx.cpp" />
     <ClCompile Include="HoldRedraw.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -714,6 +715,7 @@
     <ClInclude Include="GraphicsMisc.h" />
     <ClInclude Include="GroupLine.h" />
     <ClInclude Include="historycombobox.h" />
+    <ClInclude Include="HMXChartEx.h" />
     <ClInclude Include="HoldRedraw.h" />
     <ClInclude Include="HookMgr.h" />
     <ClInclude Include="HookWndMgr.h" />

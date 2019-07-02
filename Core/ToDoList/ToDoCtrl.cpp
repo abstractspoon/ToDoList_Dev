@@ -6133,8 +6133,14 @@ void CToDoCtrl::LoadCustomAttributeDefinitions(const CTaskFile& tasks)
 void CToDoCtrl::RebuildCustomAttributeUI()
 {
 	// and add fields after the 'version' control
- 	CTDCCustomAttributeHelper::RebuildEditControls(m_aCustomAttribDefs, m_aCustomControls, 
- 													m_ilTaskIcons, this, IDC_VERSION);
+ 	CTDCCustomAttributeHelper::RebuildEditControls(m_aCustomAttribDefs, 
+												   m_ilTaskIcons, 
+												   this, 
+												   IDC_VERSION, 
+												   m_aCustomControls);
+
+	CTDCCustomAttributeHelper::AddWindowPrompts(m_aCustomControls, this, m_mgrPrompts);
+
 	Resize();
 
 	m_taskTree.OnCustomAttributeChange();

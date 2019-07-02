@@ -585,12 +585,12 @@ void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc)
 																aNewAttribDefs,
 																m_aCustomControls))
 	{
-		CTDCCustomAttributeHelper::RebuildFilterControls(aNewAttribDefs, 
-														m_aCustomControls, 
-														tdc.GetTaskIconImageList(), 
-														this, 
-														IDC_OPTIONFILTERCOMBO, 
-														m_bMultiSelection);
+		CTDCCustomAttributeHelper::RebuildFilterControls(aNewAttribDefs,
+														 tdc.GetTaskIconImageList(), 
+														 this, 
+														 IDC_OPTIONFILTERCOMBO, 
+														 m_bMultiSelection,
+														 m_aCustomControls);
 	}
 
 	// Update data

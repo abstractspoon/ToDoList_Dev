@@ -87,7 +87,7 @@ CBurndownChart::~CBurndownChart()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-BEGIN_MESSAGE_MAP(CBurndownChart, CHMXChart)
+BEGIN_MESSAGE_MAP(CBurndownChart, CHMXChartEx)
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
@@ -188,31 +188,6 @@ void CBurndownChart::BuildBurndownGraph()
 	}
 	
 	CalcDatas();
-}
-
-double CBurndownChart::CalcMaxYAxisValue(double dDataMax) const
-{
-	return (GetYTicks() * CalcYAxisInterval(dDataMax));
-}
-
-double CBurndownChart::CalcYAxisInterval(double dDataMax) const
-{
-	const double INTERVALS[] = { 1, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000 };
-	const int NUM_INT = (sizeof(INTERVALS) / sizeof(INTERVALS[0]));
-
-	int nNumTicks = GetYTicks();
-
-	// Find the first tick increment that gives us a range
-	// greater than or equal to dDataMax
-	for (int nInc = 0; nInc < NUM_INT; nInc++)
-	{
-		double dMaxYAxis = (nNumTicks * INTERVALS[nInc]);
-
-		if (dDataMax <= dMaxYAxis)
-			return INTERVALS[nInc];
-	}
-
-	return 10000;
 }
 
 int CBurndownChart::GetYSubTicks(double dInterval) const
@@ -488,7 +463,7 @@ COleDateTime CBurndownChart::GetGraphEndDate() const
 
 void CBurndownChart::OnSize(UINT nType, int cx, int cy) 
 {
-	CHMXChart::OnSize(nType, cx, cy);
+	CHMXChartEx::OnSize(nType, cx, cy);
 	
 	int nOldScale = m_nScale;
 	RebuildXScale();
@@ -567,7 +542,7 @@ bool CBurndownChart::DrawHorzLine(CDC& dc)
 		dc.SelectObject(pPenOld);
 	}
 
-	return CHMXChart::DrawHorzLine(dc);
+	return CHMXChartEx::DrawHorzLine(dc);
 }
 
 void CBurndownChart::FilterToolTipMessage(MSG* pMsg)
