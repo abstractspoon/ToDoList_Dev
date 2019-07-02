@@ -100,25 +100,28 @@ namespace DayViewUIExtension
             }
         }
 
-        public double LengthAsTimeEstimate(bool original)
+        public double LengthAsTimeEstimate(WorkingWeek workWeek, bool original)
         {
-            var length = (original ? OriginalLength : Length);
+			if (!TimeEstimateIsMinsOrHours)
+				return 0.0;
 
-            if (TimeEstUnits == Task.TimeUnits.Minutes)
-                return length.TotalMinutes;
+			double hours = 0.0;
 
-            if (TimeEstUnits == Task.TimeUnits.Hours)
-                return length.TotalHours;
+			if (original)
+				hours = workWeek.CalculateDurationInHours(m_OrgStartDate, m_OrgEndDate);
+			else
+				hours = workWeek.CalculateDurationInHours(StartDate, EndDate);
 
-            return 0.0;
+			if (TimeEstUnits == Task.TimeUnits.Minutes)
+				return (hours * 60);
+
+			// else
+            return hours;
         }
 
-        public bool TimeEstimateMatchesOriginalLength
+        public bool TimeEstimateMatchesOriginalLength(WorkingWeek workWeek)
         {
-            get
-            {
-                return (TimeEstimate == LengthAsTimeEstimate(true));
-            }
+            return (TimeEstimate == LengthAsTimeEstimate(workWeek, true));
         }
 
         public bool TimeEstimateIsMinsOrHours
@@ -140,9 +143,9 @@ namespace DayViewUIExtension
 			return (date == date.Date);
 		}
 
-		public bool IsSingleDay()
+		public bool IsSingleDay
 		{
-			return (StartDate.Date == EndDate.Date);
+			get { return (StartDate.Date == EndDate.Date); }
 		}
 
 		public override bool IsLongAppt()

@@ -211,16 +211,31 @@ double WorkingWeek::CalculateDurationInHours(System::DateTime^ from, DateTime^ t
 	if (nDaysDuration == 0)
 	{
 		// from and to are same day
-		dHoursDuration = m_WorkingDay->CalculateDurationInHours(fromTimeOfDay, toTimeOfDay);
+		if (!IsWeekend(from))
+			dHoursDuration = m_WorkingDay->CalculateDurationInHours(fromTimeOfDay, toTimeOfDay);
 	}
 	else
 	{
-		// clear days
-		dHoursDuration = ((nDaysDuration - 1) * m_WorkingDay->DayLengthInHours(false));
+		if (nDaysDuration > 1)
+		{
+			// count whole days
+			from = from->AddDays(1).Date;
 
+			while (*from <= *to)
+			{
+				if (!IsWeekend(from))
+					dHoursDuration += m_WorkingDay->DayLengthInHours(false);
+
+				from = from->AddDays(1);
+			}
+		}
+		
 		// part days
-		dHoursDuration += m_WorkingDay->CalculateDurationInHours(fromTimeOfDay, m_WorkingDay->EndOfDayInHours());
-		dHoursDuration += m_WorkingDay->CalculateDurationInHours(m_WorkingDay->StartOfDayInHours(), toTimeOfDay);
+		if (!IsWeekend(from))
+			dHoursDuration += m_WorkingDay->CalculateDurationInHours(fromTimeOfDay, m_WorkingDay->EndOfDayInHours());
+
+		if (!IsWeekend(to))
+			dHoursDuration += m_WorkingDay->CalculateDurationInHours(m_WorkingDay->StartOfDayInHours(), toTimeOfDay);
 	}
 
 	return dHoursDuration;

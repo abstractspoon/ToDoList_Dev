@@ -28,6 +28,7 @@ namespace DayViewUIExtension
 
 		private bool m_SettingMonthYear = false;
 		private bool m_SettingDayViewStartDate = false;
+		private bool m_AllowModifyTimeEstimate = false;
 
 		private DayViewWeekLabel m_WeekLabel;
 		private DayViewMonthComboBox m_MonthCombo;
@@ -168,6 +169,8 @@ namespace DayViewUIExtension
 
 			bool showParentsAsFolder = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
 			m_DayView.ShowParentsAsFolder = showParentsAsFolder;
+
+			m_AllowModifyTimeEstimate = !prefs.GetProfileBool("Preferences", "SyncTimeEstAndDates", false);
 
 			m_WorkWeek.Load(prefs);
             m_DayView.WeekendDays = m_WorkWeek.WeekendDays();
@@ -630,14 +633,14 @@ namespace DayViewUIExtension
                         bool modifyTimeEst = WantModifyTimeEstimate(item);
 
                         if (modifyTimeEst)
-                            notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(false), item.TimeEstUnits);
+                            notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(m_WorkWeek, false), item.TimeEstUnits);
 
 						if (notify.NotifyMod())
 						{
 							item.UpdateOriginalDates();
 
 							if (modifyTimeEst)
-                                item.TimeEstimate = item.LengthAsTimeEstimate(false);
+                                item.TimeEstimate = item.LengthAsTimeEstimate(m_WorkWeek, false);
 						}
 						else
 						{
@@ -666,14 +669,14 @@ namespace DayViewUIExtension
 						bool modifyTimeEst = WantModifyTimeEstimate(item);
 
                         if (modifyTimeEst)
-                            notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(false), item.TimeEstUnits);
+                            notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(m_WorkWeek, false), item.TimeEstUnits);
 
 						if (notify.NotifyMod())
 						{
 							item.UpdateOriginalDates();
 
 							if (modifyTimeEst)
-                                item.TimeEstimate = item.LengthAsTimeEstimate(false);
+                                item.TimeEstimate = item.LengthAsTimeEstimate(m_WorkWeek, false);
 						}
 						else
 						{
@@ -687,18 +690,23 @@ namespace DayViewUIExtension
 
         private bool WantModifyTimeEstimate(CalendarItem item)
         {
-			// Update the Time estimate if it is zero and the task is less than a day
-			// or if it used to match the previous date range
-            if ((item.TimeEstimate == 0.0) && 
-				item.TimeEstimateIsMinsOrHours && 
-				item.IsSingleDay() &&
-				(item.Length.Days == 0))
-			{
+			if (!m_AllowModifyTimeEstimate)
+				return false;
+
+			if (!item.TimeEstimateIsMinsOrHours)
+				return false;
+
+			if (!item.IsSingleDay || (item.Length.Days != 0))
+				return false;
+
+			if (item.TimeEstimateMatchesOriginalLength(m_WorkWeek))
 				return true;
-			}
+
+			if (item.TimeEstimate != 0.0)
+				return false;
 
 			// else
-			return item.TimeEstimateMatchesOriginalLength;
+			return true;
         }
 
         private int ControlTop
