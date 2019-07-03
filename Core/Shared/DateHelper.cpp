@@ -1377,7 +1377,7 @@ int CDateHelper::CalcLongestDayOfWeekName(CDC* pDC, BOOL bShort)
 	int nLongestWDWidth = 0;
 		
 	// figure out the longest day in pixels
-	for (int nDOW = 1; nDOW <= 7; nDOW++)
+	for (int nDOW = 0; nDOW < 7; nDOW++)
 	{
 		int nWDWidth = pDC->GetTextExtent(GetDayOfWeekName(OLE_DAYSOFWEEK[nDOW], bShort)).cx;
 		nLongestWDWidth = max(nLongestWDWidth, nWDWidth);
@@ -1494,7 +1494,7 @@ void CDateHelper::GetDayOfWeekNames(BOOL bShort, CStringArray& aNames)
 {
 	aNames.RemoveAll();
 
-	for (int nDay = 1; nDay <= 7; nDay++)
+	for (int nDay = 0; nDay < 7; nDay++)
 		aNames.Add(GetDayOfWeekName(OLE_DAYSOFWEEK[nDay], bShort));
 }
 
