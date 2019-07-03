@@ -168,6 +168,7 @@ public:
 	BOOL GetTrackOnScreenSaver() const { return m_pageTask.GetTrackOnScreenSaver(); }
 	BOOL GetTrackHibernated() const { return m_pageTask.GetTrackHibernated(); }
 	DWORD GetWeekendDays() const { return m_pageTask.GetWeekendDays(); }
+	BOOL GetWorkingWeek(CWorkingWeek& week) const { return m_pageTask.GetWorkingWeek(week); }
 	double GetStartOfWorkday(BOOL bInDays = TRUE) const { return m_pageTask.GetStartOfWorkday(bInDays); }
 	double GetStartOfWorkdayLunch(BOOL bInDays = TRUE) const { return m_pageTask.GetStartOfWorkdayLunch(bInDays); }
 	double GetEndOfWorkday(BOOL bInDays = TRUE) const { return m_pageTask.GetEndOfWorkday(bInDays); }

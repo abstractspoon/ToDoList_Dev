@@ -22,6 +22,7 @@
 #include "..\shared\osversion.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\copywndcontents.h"
+#include "..\shared\WorkingWeek.h"
 
 #include "..\Interfaces\iuiextension.h"
 
@@ -3622,7 +3623,7 @@ BOOL CGanttTreeListCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const 
 {
 	COLORREF color = ((m_crWeekend != CLR_NONE) ? m_crWeekend : m_crNonWorkingHoursColor);
 
-	if ((color != CLR_NONE) && CDateHelper::IsWeekend(dtDay))
+	if ((color != CLR_NONE) && CWeekend().IsWeekend(dtDay))
 	{
 		// don't overdraw gridlines
 		CRect rWeekend(rDay);

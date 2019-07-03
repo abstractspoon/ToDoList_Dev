@@ -156,6 +156,7 @@ protected:
 
 	static DWORD MapColumn(WLC_COLUMNID nColumn);
 	static WLC_COLUMNID MapColumn(DWORD dwColumn);
+	static void InitWorkingWeek(const IPreferences* pPrefs);
 };
 
 /////////////////////////////////////////////////////////////////////////////

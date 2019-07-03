@@ -15,6 +15,7 @@
 #include "..\shared\enstring.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\mapex.h"
+#include "..\shared\WorkingWeek.h"
 
 #include <float.h>
 #include <math.h>
@@ -3266,7 +3267,7 @@ BOOL CToDoCtrlData::CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDepen
 	if (CDateHelper::IsDateSet(dtNewStart))
 	{
 		if (pTDI->timeEstimate.nUnits == TDCU_WEEKDAYS)
-			CDateHelper::MakeWeekday(dtNewStart);
+			CWorkingWeek().MakeWeekday(dtNewStart);
 
 		return TRUE;
 	}
@@ -3392,11 +3393,11 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 				nUnits = TDCU_WEEKDAYS;
 			}
 
-			if (CDateHelper::HasWeekend())
+			if (CWorkingWeek().HasWeekend())
 			{
 				// Adjust start date if it falls on a weekend
 				BOOL bForward = (dDuration > 0.0);
-				CDateHelper::MakeWeekday(dateStart, bForward);
+				CWorkingWeek().MakeWeekday(dateStart, bForward);
 
 				// Adjust one day at a time
 				double dDaysLeft = fabs(dDuration);
@@ -3417,7 +3418,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 					if ((dDaysLeft > 0.0) || CDateHelper::DateHasTime(dateDue))
 					{
 						// FALSE -> Don't truncate time
-						CDateHelper::MakeWeekday(dateDue, bForward, FALSE);
+						CWorkingWeek().MakeWeekday(dateDue, bForward, FALSE);
 					}
 				}
 			}
@@ -3500,7 +3501,7 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	default:
 		// Work in weekdays
 		{
-			if (CDateHelper::HasWeekend())
+			if (CWorkingWeek().HasWeekend())
 			{
 				// process each whole or part day  
 				double dDayStart(dateStart);
@@ -3513,7 +3514,7 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 					// determine the end of this day
 					double dDayEnd = (CDateHelper::GetDateOnly(dDayStart).m_dt + 1.0);
 
-					if (!CDateHelper::IsWeekend(dDayStart))
+					if (!CWorkingWeek().Weekend().IsWeekend(dDayStart))
 					{
 						dDuration += (min(dDayEnd, dateDue) - dDayStart); // in days
 					}
@@ -3523,7 +3524,7 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 				}
 
 				// handle 'whole' of due date
-				if (!CDateHelper::IsWeekend(dateDue) && IsEndOfDay(dateDue))
+				if (!CWorkingWeek().Weekend().IsWeekend(dateDue) && IsEndOfDay(dateDue))
 					dDuration += 1.0;
 			}
 			else if (IsEndOfDay(dateDue))
@@ -3542,80 +3543,6 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 
 	return dDuration;
 }
-
-/*
-double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits)
-{
-	// Sanity checks
-	if (!CDateHelper::IsDateSet(dateStart) || !CDateHelper::IsDateSet(dateDue))
-	{
-		ASSERT(0);
-		return 0.0;
-	}
-
-	// End date must be greater then start date
-	if (!IsValidDateRange(dateStart, dateDue))
-	{
-		ASSERT(0);
-		return 0.0;
-	}
-
-	double dDuration = (dateDue.m_dt - dateStart.m_dt); // in days
-	
-	switch (nUnits)
-	{
-	case TDCU_MINS:
-	case TDCU_HOURS:
-	case TDCU_WEEKS:
-	case TDCU_MONTHS:
-	case TDCU_YEARS:
-		{
-			// handle 'whole' of due date
-			if (IsEndOfDay(dateDue))
-				dDuration += 1.0;
-
-			CTimeHelper thAllDay(24.0, 7.0);
-			dDuration = thAllDay.GetTime(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
-		}
-		break;
-
-	case TDCU_WEEKDAYS:
-		if (CDateHelper::HasWeekend())
-		{
-			// process each whole or part day  
-			double dDayStart(dateStart);
-			dDuration = 0.0;
-
-			while (dDayStart < dateDue)
-			{
-				// determine the end of this day
-				double dDayEnd = (CDateHelper::GetDateOnly(dDayStart).m_dt + 1.0);
-
-				if (!CDateHelper::IsWeekend(dDayStart))
-				{
-					dDuration += (min(dDayEnd, dateDue) - dDayStart); // in days
-				}
-
-				// next day
-				dDayStart = dDayEnd;
-			}
-
-			// handle 'whole' of due date
-			if (CDateHelper::IsWeekend(dateDue) || !IsEndOfDay(dateDue))
-				break;
-		}
-		// else fall thru to handle 'whole' of due date
-
-	case TDCU_DAYS:
-		// handle 'whole' of due date
-		if (IsEndOfDay(dateDue))
-			dDuration += 1.0;
-		break;
-	}
-
-	return dDuration;
-}
-*/
 
 void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate)
 {

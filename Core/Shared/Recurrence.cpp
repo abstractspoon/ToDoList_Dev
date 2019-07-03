@@ -6,6 +6,7 @@
 #include "Recurrence.h"
 
 #include "DateHelper.h"
+#include "WorkingWeek.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -282,7 +283,7 @@ BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtN
 			int nDay = (bFirst ? 1 : CDateHelper::GetDaysInMonth(nMonth, nYear));
 			
 			dtNext.SetDate(nYear, nMonth, nDay);
-			CDateHelper::MakeWeekday(dtNext, bFirst);
+			CWorkingWeek().MakeWeekday(dtNext, bFirst);
 		}
 		break;
 		
@@ -391,7 +392,7 @@ BOOL CRecurrence::FitDayToScheme(COleDateTime& dtRecur) const
 	{
 	case RECURS_DAY_EVERY_WEEKDAY:
 	case RECURS_DAY_EVERY_NWEEKDAYS:   
-		return CDateHelper::MakeWeekday(dtRecur);
+		return CWorkingWeek().MakeWeekday(dtRecur);
 		
 	case RECURS_ONCE:
 	case RECURS_DAY_EVERY_NDAYS:  
@@ -449,7 +450,7 @@ BOOL CRecurrence::FitDayToScheme(COleDateTime& dtRecur) const
 			int nDay = (bFirst ? 1 : CDateHelper::GetDaysInMonth(nMonth, nYear));
 			
 			dtRecur.SetDate(nYear, nMonth, nDay);
-			return CDateHelper::MakeWeekday(dtRecur, bFirst);
+			return CWorkingWeek().MakeWeekday(dtRecur, bFirst);
 		}
 		break;
 		

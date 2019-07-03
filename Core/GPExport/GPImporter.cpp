@@ -10,6 +10,7 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
+#include "..\shared\WorkingWeek.h"
 
 #include "..\Interfaces\IPreferences.h"
 
@@ -342,7 +343,7 @@ void CGPImporter::InitWeekends(const CXmlItem* pXISrcPrj)
 		}
 	}
 
-	CDateHelper::SetWeekendDays(dwWeekends);
+	CWeekend::Initialise(CWeekend(dwWeekends));
 }
 
 void CGPImporter::BuildResourceMap(const CXmlItem* pXISrcPrj)

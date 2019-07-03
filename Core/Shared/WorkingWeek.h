@@ -37,10 +37,17 @@ public:
 				double dStartOfLunchInHours,	// eg.12
 				double dEndOfLunchInHours);		// eg.13
 
+	static void Initialise(const CWorkingDay& workday);
+
 	BOOL Initialise(double dStartOfDayInHours,		
 					double dWorkingLengthInHours,	
 					double dStartOfLunchInHours,	
 					double dEndOfLunchInHours);		
+
+	static BOOL IsValid(double dStartOfDayInHours,
+						double dWorkingLengthInHours,
+						double dStartOfLunchInHours,
+						double dEndOfLunchInHours);
 
 	double GetStartOfDayInHours() const;
 	double GetEndOfDayInHours() const;
@@ -76,7 +83,11 @@ public:
 	CWeekend();	// uses static initialisation set up by CWorkingWeek
 	CWeekend(DWORD dwDays); // eg. WD_SATURDAY | WD_SUNDAY
 
+	static void Initialise(const CWeekend& weekend);
+
 	BOOL Initialise(DWORD dwDays);
+
+	static BOOL IsValid(DWORD dwDays);
 
 	DWORD GetWeekend() const { return m_dwDays; }
 	DWORD GetWeekdays() const { return (WD_EVERYDAY & ~m_dwDays); }
@@ -86,15 +97,11 @@ public:
 	BOOL IsWeekend(const COleDateTime& date) const;
 	BOOL IsWeekend(double dDate) const;
 
-	int GetWeekendDuration() const;
-	BOOL HasWeekend() const;
-
-	BOOL MakeWeekday(COleDateTime& date, BOOL bForwards = TRUE, BOOL bTruncateTime = TRUE) const;
-	COleDateTime ToWeekday(const COleDateTime& date, BOOL bForwards = TRUE) const;
+	int GetDuration() const;
 
 protected:
 	DWORD m_dwDays;
-
+	int m_nDuration;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -109,23 +116,29 @@ public:
 				 double dStartOfLunchInHours,	// eg. 12
 				 double dEndOfLunchInHours);	// eg. 13
 
-	static BOOL Initialise(DWORD dwWeekendDays,
-						   double dStartOfDayInHours,
-						   double dWorkingLengthInHours,
-						   double dStartOfLunchInHours,
-						   double dEndOfLunchInHours);
+	static void Initialise(const CWorkingWeek& week);
+	
+	BOOL Initialise(DWORD dwWeekendDays,			// eg. (DHW_SATURDAY | DHW_SUNDAY),
+					double dStartOfDayInHours,		// eg. 9
+					double dWorkingLengthInHours,	// eg. 8
+					double dStartOfLunchInHours,	// eg. 12
+					double dEndOfLunchInHours);		// eg. 13
 
 	double CalculateDurationInHours(const COleDateTime& dtFrom, const COleDateTime& dtTo);
 	double CalculateDurationInDays(const COleDateTime& dtFrom, const COleDateTime& dtTo);
 	double CalculateDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo);
 
-	const CWorkingDay& GetWorkDay() { return m_WorkDay;	}
-	const CWeekend& GetWeekend() const { return m_Weekend; }
+	BOOL MakeWeekday(COleDateTime& date, BOOL bForwards = TRUE, BOOL bTruncateTime = TRUE) const;
+	COleDateTime ToWeekday(const COleDateTime& date, BOOL bForwards = TRUE) const;
+
+	BOOL HasWeekend() const;
+
+	const CWorkingDay& WorkDay() const { return m_WorkDay;	}
+	const CWeekend& Weekend() const { return m_Weekend; }
 
 protected:
 	CWorkingDay m_WorkDay;
 	CWeekend m_Weekend;
-
 };
 
 //////////////////////////////////////////////////////////////////////

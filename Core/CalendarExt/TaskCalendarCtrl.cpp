@@ -14,6 +14,7 @@
 #include "..\Shared\holdredraw.h"
 #include "..\Shared\autoflag.h"
 #include "..\Shared\enimagelist.h"
+#include "..\Shared\WorkingWeek.h"
 
 #include <math.h>
 
@@ -634,7 +635,7 @@ COLORREF CTaskCalendarCtrl::GetCellBackgroundColor(const CCalendarCell* pCell, B
 {
 	COLORREF crBkgnd = CCalendarCtrlEx::GetCellBackgroundColor(pCell, bSelected, bToday);
 
-	if (CDateHelper::IsWeekend(pCell->date))
+	if (CWeekend().IsWeekend(pCell->date))
 	{
 		crBkgnd = m_crTheme;
 
@@ -653,7 +654,7 @@ COLORREF CTaskCalendarCtrl::GetCellHeaderColor(const CCalendarCell* pCell, BOOL 
 {
 	COLORREF crHeader = CLR_NONE; // == same as background color
 
-	if (CDateHelper::IsWeekend(pCell->date))
+	if (CWeekend().IsWeekend(pCell->date))
 	{
 		if (bToday)
 		{

@@ -17,7 +17,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-// Used by CWorkingWeek
 static CWorkingDay	s_WorkDay(9, 8, 12, 13);
 static CWeekend		s_Weekend(DHW_SATURDAY | DHW_SUNDAY);
 
@@ -82,15 +81,41 @@ CWorkingDay::CWorkingDay(double dStartOfDayInHours, double dWorkingLengthInHours
 	Initialise(dStartOfDayInHours, dWorkingLengthInHours, dStartOfLunchInHours, dEndOfLunchInHours);
 }
 
+BOOL CWorkingDay::IsValid(double dStartOfDayInHours,
+						  double dWorkingLengthInHours,
+						  double dStartOfLunchInHours,
+						  double dEndOfLunchInHours)
+{
+	if ((dStartOfDayInHours + dWorkingLengthInHours) > 24)
+		return FALSE;
+
+	if (dStartOfLunchInHours < dStartOfDayInHours)
+		return FALSE;
+
+	if (dEndOfLunchInHours < dStartOfLunchInHours)
+		return FALSE;
+
+	if (dEndOfLunchInHours > (dStartOfDayInHours + dWorkingLengthInHours))
+		return FALSE;
+
+	return TRUE;
+}
+
+void CWorkingDay::Initialise(const CWorkingDay& workday)
+{
+	// workday must already be valid
+	s_WorkDay = workday;
+}
+
 BOOL CWorkingDay::Initialise(double dStartOfDayInHours,
 							 double dWorkingLengthInHours,
 							 double dStartOfLunchInHours,
 							 double dEndOfLunchInHours)
 {
-	if (((dStartOfDayInHours + dWorkingLengthInHours) <= 24) &&
-		(dStartOfLunchInHours > dStartOfDayInHours) &&
-		(dEndOfLunchInHours > dStartOfLunchInHours) &&
-		(dEndOfLunchInHours <= (dStartOfDayInHours + dWorkingLengthInHours)))
+	if (IsValid(dStartOfDayInHours, 
+				dWorkingLengthInHours, 
+				dStartOfLunchInHours, 
+				dEndOfLunchInHours))
 	{
 		m_dStartOfDayInHours = dStartOfDayInHours;
 		m_dStartOfLunchInHours = dStartOfLunchInHours;
@@ -199,48 +224,48 @@ CWeekend::CWeekend(DWORD dwDays) : m_dwDays(0)
 	Initialise(dwDays);
 }
 
+void CWeekend::Initialise(const CWeekend& weekend)
+{
+	// weekend must already be valid
+	s_Weekend = weekend;
+}
+
 BOOL CWeekend::Initialise(DWORD dwWeekendDays)
 {
-	if ((dwWeekendDays == 0) || ((dwWeekendDays & WD_EVERYDAY) != 0))
-	{
-		m_dwDays = dwWeekendDays;
-		return TRUE;
-	}
-
-	ASSERT(0);
-	return FALSE;
-}
-
-COleDateTime CWeekend::ToWeekday(const COleDateTime& date, BOOL bForwards) const
-{
-	COleDateTime weekday(date);
-	MakeWeekday(weekday, bForwards);
-
-	return weekday;
-}
-
-BOOL CWeekend::MakeWeekday(COleDateTime& date, BOOL bForwards, BOOL bTruncateTime) const
-{
-	ASSERT(CDateHelper::IsDateSet(date));
-
-	// check we don't have a 7-day weekend
-	if (!HasWeekend() || !CDateHelper::IsDateSet(date))
+	if (!IsValid(dwWeekendDays))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	COleDateTime dtOrg(date);
+	m_dwDays = (dwWeekendDays & WD_EVERYDAY);
 
-	while (IsWeekend(date))
+	// Calculate duration once only
+	m_nDuration = 0;
+
+	if (m_dwDays != 0)
 	{
-		if (bTruncateTime)
-			date = CDateHelper::GetDateOnly(date);
+		for (int nDay = 1; nDay <= 7; nDay++)
+		{
+			if (IsWeekend(OLE_DAYSOFWEEK[nDay]))
+				m_nDuration++;
+		}
+	}
+	
+	return TRUE;
+}
 
-		if (bForwards)
-			date.m_dt++;
-		else
-			date.m_dt--;
+BOOL CWeekend::IsValid(DWORD dwWeekendDays)
+{
+	if (dwWeekendDays != 0)
+	{
+		dwWeekendDays &= WD_EVERYDAY;
+
+		if (dwWeekendDays == 0)
+			return FALSE;
+
+		if (dwWeekendDays == WD_EVERYDAY)
+			return FALSE;
 	}
 
 	return TRUE;
@@ -248,6 +273,9 @@ BOOL CWeekend::MakeWeekday(COleDateTime& date, BOOL bForwards, BOOL bTruncateTim
 
 BOOL CWeekend::IsWeekend(const COleDateTime& date) const
 {
+	if (m_nDuration == 0)
+		return FALSE;
+
 	ASSERT(CDateHelper::IsDateSet(date));
 
 	return IsWeekend(CDateHelper::GetDayOfWeek(date));
@@ -255,35 +283,31 @@ BOOL CWeekend::IsWeekend(const COleDateTime& date) const
 
 BOOL CWeekend::IsWeekend(double dDate) const
 {
+	if (m_nDuration == 0)
+		return FALSE;
+
 	return IsWeekend(COleDateTime(dDate));
 }
 
 BOOL CWeekend::IsWeekend(WD_DAYOFWEEK nDOW) const
 {
+	if (m_nDuration == 0)
+		return FALSE;
+
 	return ((m_dwDays & nDOW) != 0);
 }
 
 BOOL CWeekend::IsWeekend(OLE_DAYOFWEEK nDOW) const
 {
+	if (m_nDuration == 0)
+		return FALSE;
+
 	return IsWeekend(Map(nDOW));
 }
 
-int CWeekend::GetWeekendDuration() const
+int CWeekend::GetDuration() const
 {
-	int nDuration = 0;
-
-	for (int nDay = 1; nDay <= 7; nDay++)
-	{
-		if (IsWeekend(OLE_DAYSOFWEEK[nDay]))
-			nDuration++;
-	}
-
-	return nDuration;
-}
-
-BOOL CWeekend::HasWeekend() const
-{
-	return ((m_dwDays != 0) && ((m_dwDays & WD_EVERYDAY) != WD_EVERYDAY));
+	return m_nDuration;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -301,17 +325,24 @@ CWorkingWeek::CWorkingWeek(DWORD dwWeekendDays, double dStartOfDayInHours, doubl
 {
 }
 
+void CWorkingWeek::Initialise(const CWorkingWeek& week)
+{
+	// week must already be valid
+	s_WorkDay = week.WorkDay();
+	s_Weekend = week.Weekend();
+}
+
 BOOL CWorkingWeek::Initialise(DWORD dwWeekendDays, double dStartOfDayInHours, double dWorkingLengthInHours, double dStartOfLunchInHours, double dEndOfLunchInHours)
 {
 	// prevent partial initialisation
-	if (!CWorkingDay().Initialise(dStartOfDayInHours, dWorkingLengthInHours, dStartOfLunchInHours, dEndOfLunchInHours))
+	if (!CWorkingDay::IsValid(dStartOfDayInHours, dWorkingLengthInHours, dStartOfLunchInHours, dEndOfLunchInHours))
 		return FALSE;
 
-	if (!CWeekend().Initialise(dwWeekendDays))
+	if (!CWeekend::IsValid(dwWeekendDays))
 		return FALSE;
 
-	s_Weekend.Initialise(dwWeekendDays);
-	s_WorkDay.Initialise(dStartOfDayInHours, dWorkingLengthInHours, dStartOfLunchInHours, dEndOfLunchInHours);
+	m_Weekend.Initialise(dwWeekendDays);
+	m_WorkDay.Initialise(dStartOfDayInHours, dWorkingLengthInHours, dStartOfLunchInHours, dEndOfLunchInHours);
 
 	return TRUE;
 }
@@ -330,7 +361,7 @@ double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const 
 	if (nDaysDuration == 0)
 	{
 		// from and to are same day
-		if (!CDateHelper::IsWeekend(dtFrom))
+		if (!Weekend().IsWeekend(dtFrom))
 			dHoursDuration = m_WorkDay.CalculateDurationInHours(fromTimeOfDay, toTimeOfDay);
 	}
 	else
@@ -343,7 +374,7 @@ double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const 
 
 			while (dFrom <= dtTo)
 			{
-				if (!CDateHelper::IsWeekend(dFrom))
+				if (!Weekend().IsWeekend(dFrom))
 					dHoursDuration += m_WorkDay.GetDayLengthInHours();
 
 				dFrom++;
@@ -351,10 +382,10 @@ double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const 
 		}
 
 		// part days
-		if (!CDateHelper::IsWeekend(dtFrom))
+		if (!Weekend().IsWeekend(dtFrom))
 			dHoursDuration += m_WorkDay.CalculateDurationInHours(fromTimeOfDay, m_WorkDay.GetEndOfDayInHours());
 
-		if (!CDateHelper::IsWeekend(dtTo))
+		if (!Weekend().IsWeekend(dtTo))
 			dHoursDuration += m_WorkDay.CalculateDurationInHours(m_WorkDay.GetStartOfDayInHours(), toTimeOfDay);
 	}
 
@@ -373,7 +404,7 @@ double CWorkingWeek::CalculateDurationInDays(const COleDateTime& dtFrom, const C
 
 double CWorkingWeek::CalculateDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo)
 {
-	int nNumWeekdays = (7 - CDateHelper::GetWeekendDuration());
+	int nNumWeekdays = (7 - Weekend().GetDuration());
 
 	if (nNumWeekdays == 0)
 		return 0.0;
@@ -381,3 +412,42 @@ double CWorkingWeek::CalculateDurationInWeeks(const COleDateTime& dtFrom, const 
 	// else
 	return (CalculateDurationInDays(dtFrom, dtTo) / nNumWeekdays);
 }
+
+BOOL CWorkingWeek::HasWeekend() const
+{
+	return (Weekend().GetDuration() != 0);
+}
+
+COleDateTime CWorkingWeek::ToWeekday(const COleDateTime& date, BOOL bForwards) const
+{
+	COleDateTime weekday(date);
+	MakeWeekday(weekday, bForwards);
+
+	return weekday;
+}
+
+BOOL CWorkingWeek::MakeWeekday(COleDateTime& date, BOOL bForwards, BOOL bTruncateTime) const
+{
+	if (!CDateHelper::IsDateSet(date))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (bTruncateTime)
+		date = CDateHelper::GetDateOnly(date);
+
+	if (HasWeekend())
+	{
+		while (Weekend().IsWeekend(date))
+		{
+			if (bForwards)
+				date.m_dt++;
+			else
+				date.m_dt--;
+		}
+	}
+
+	return TRUE;
+}
+

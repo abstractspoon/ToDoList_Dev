@@ -161,6 +161,7 @@ protected:
 
 	static DWORD MapColumn(GTLC_COLUMN nColumn);
 	static GTLC_COLUMN MapColumn(DWORD dwColumn);
+	static void InitWorkingWeek(const IPreferences* pPrefs);
 };
 
 /////////////////////////////////////////////////////////////////////////////

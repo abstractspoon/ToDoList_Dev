@@ -6,6 +6,7 @@
 #include "DateHelper.h"
 #include "TimeHelper.h"
 #include "misc.h"
+#include "WorkingWeek.h"
 
 #include "..\3rdParty\T64Utils.h"
 
@@ -377,10 +378,6 @@ CString COleDateTimeRange::Format(DWORD dwFlags, TCHAR cDelim) const
 
 //////////////////////////////////////////////////////////////////////
 
-DWORD CDateHelper::s_dwWeekend = (DHW_SATURDAY | DHW_SUNDAY);
-
-//////////////////////////////////////////////////////////////////////
-
 BOOL CDateHelper::IsValidDayInMonth(int nDay, int nMonth, int nYear)
 {
 	return (nMonth >= 1 && nMonth <= 12) &&
@@ -416,9 +413,9 @@ int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime
 
 		while (dFrom < dTo)
 		{
-			int nDOW = dFrom.GetDayOfWeek();
+			OLE_DAYOFWEEK nDOW = GetDayOfWeek(dFrom);
 
-			if (!IsWeekend(nDOW))
+			if (!CWeekend().IsWeekend(nDOW))
 				nDays++;
 
 			dFrom += 1;
@@ -596,8 +593,8 @@ BOOL CDateHelper::DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bF
 	}
 
 	// does the caller only want weekdays
-	if (HasWeekend() && bForceWeekday)
-		MakeWeekday(date, (dAmount >= 0.0), bTruncateTime);
+	if (CWorkingWeek().HasWeekend() && bForceWeekday)
+		CWorkingWeek().MakeWeekday(date, (dAmount >= 0.0), bTruncateTime);
 
 	return TRUE;
 }
@@ -1051,51 +1048,6 @@ OLE_DAYOFWEEK CDateHelper::GetNextDayOfWeek(OLE_DAYOFWEEK nDOW)
 	return DHO_UNDEF;
 }
 
-COleDateTime CDateHelper::ToWeekday(const COleDateTime& date, BOOL bForwards)
-{
-	COleDateTime weekday(date);
-	MakeWeekday(weekday, bForwards);
-
-	return weekday;
-}
-
-BOOL CDateHelper::MakeWeekday(COleDateTime& date, BOOL bForwards, BOOL bTruncateTime)
-{
-	ASSERT(IsDateSet(date));
-
-	// check we don't have a 7-day weekend
-	if (!HasWeekend() || !IsDateSet(date))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	COleDateTime dtOrg(date);
-
-	while (IsWeekend(date))
-	{
-		if (bTruncateTime)
-			date = GetDateOnly(date);
-
-		if (bForwards)
-			date.m_dt++;
-		else
-			date.m_dt--;
-	}
-
-	return TRUE;
-}
-
-void CDateHelper::SetWeekendDays(DWORD dwDays)
-{
-	s_dwWeekend = dwDays;
-}
-
-DWORD CDateHelper::GetWeekdays()
-{
-	return (DHW_EVERYDAY & ~s_dwWeekend);
-}
-
 COleDateTime CDateHelper::GetNextAvailableDay(const COleDateTime& date, DWORD dwAvailDays)
 {
 	COleDateTime dtNext(date);
@@ -1146,23 +1098,6 @@ BOOL CDateHelper::ValidateDay(COleDateTime& date, DWORD dwAvailDays)
 	return TRUE;
 }
 
-BOOL CDateHelper::IsWeekend(const COleDateTime& date)
-{
-	ASSERT(IsDateSet(date));
-	
-	return IsWeekend(GetDayOfWeek(date));
-}
-
-BOOL CDateHelper::IsWeekend(double dDate)
-{
-	return IsWeekend(COleDateTime(dDate));
-}
-
-BOOL CDateHelper::IsWeekend(OLE_DAYOFWEEK nDOW)
-{
-	return ((s_dwWeekend & Map(nDOW)) != 0);
-}
-
 DH_DAYOFWEEK CDateHelper::Map(OLE_DAYOFWEEK nDOW)
 {
 	switch (nDOW)
@@ -1195,24 +1130,6 @@ OLE_DAYOFWEEK CDateHelper::Map(DH_DAYOFWEEK nDOW)
 
 	ASSERT(0);
 	return DHO_UNDEF;
-}
-
-int CDateHelper::GetWeekendDuration()
-{
-	int nDuration = 0;
-
-	for (int nDOW = 1; nDOW <= 7; nDOW++)
-	{
-		if (IsWeekend(nDOW))
-			nDuration++;
-	}
-
-	return nDuration;
-}
-
-BOOL CDateHelper::HasWeekend()
-{
-	return (s_dwWeekend && (GetWeekendDuration() < 7));
 }
 
 COleDateTime CDateHelper::GetStartOfWeek(const COleDateTime& date)
@@ -1493,7 +1410,7 @@ BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits)
 				date.m_dt += (bForwards ? 1.0 : -1.0);
 
 				// skip weekends
-				MakeWeekday(date, bForwards);
+				CWorkingWeek().MakeWeekday(date, bForwards);
 			}
 		}
 		break;

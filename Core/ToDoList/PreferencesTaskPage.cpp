@@ -10,6 +10,7 @@
 #include "..\shared\DateHelper.h"
 #include "..\shared\EnString.h"
 #include "..\shared\TimeHelper.h"
+#include "..\shared\WorkingWeek.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -132,6 +133,15 @@ void CPreferencesTaskPage::OnFirstShow()
 	CDialogHelper::RefreshMaxColumnWidth(m_lbWeekends);
 
 	UpdateData(FALSE);
+}
+
+BOOL CPreferencesTaskPage::GetWorkingWeek(CWorkingWeek& week) const
+{
+	return week.Initialise(m_dwWeekends,
+						   m_dStartOfWorkdayInHours,
+						   GetHoursInOneDay(),
+						   m_dStartOfLunchInHours,
+						   m_bHasLunchBreak ? m_dEndOfLunchInHours : m_dStartOfLunchInHours);
 }
 
 double CPreferencesTaskPage::GetHoursInOneDay() const

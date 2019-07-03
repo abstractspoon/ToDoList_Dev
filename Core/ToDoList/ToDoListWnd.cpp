@@ -74,6 +74,7 @@
 #include "..\shared\ComboListboxPositioner.h"
 #include "..\shared\sendfiletoEx.h"
 #include "..\shared\ScopedTimer.h"
+#include "..\shared\WorkingWeek.h"
 
 #include "..\3rdparty\gui.h"
 
@@ -2610,7 +2611,12 @@ void CToDoListWnd::LoadSettings()
 	UpdateTimeTrackerPreferences();
 	
 	// time periods
-	CDateHelper::SetWeekendDays(userPrefs.GetWeekendDays());
+	CWorkingWeek week;
+
+	if (userPrefs.GetWorkingWeek(week))
+		CWorkingWeek::Initialise(week);
+
+	//CDateHelper::SetWeekendDays(userPrefs.GetWeekendDays());
 	CTimeHelper::SetHoursInWorkday(userPrefs.GetHoursInWorkday());
 	CTimeHelper::SetWorkdaysInWeek(userPrefs.GetWorkdaysInWeek());
 	CTimeHelper::SetStartOfWorkday(userPrefs.GetStartOfWorkday(FALSE));
@@ -4982,7 +4988,12 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 		UpdateGlobalHotkey();
 		
 		// time periods
-		CDateHelper::SetWeekendDays(newPrefs.GetWeekendDays());
+		CWorkingWeek week;
+
+		if (newPrefs.GetWorkingWeek(week))
+			CWorkingWeek::Initialise(week);
+
+		//CDateHelper::SetWeekendDays(newPrefs.GetWeekendDays());
 		CTimeHelper::SetHoursInWorkday(newPrefs.GetHoursInWorkday());
 		CTimeHelper::SetWorkdaysInWeek(newPrefs.GetWorkdaysInWeek());
 		CTimeHelper::SetStartOfWorkday(newPrefs.GetStartOfWorkday(FALSE));

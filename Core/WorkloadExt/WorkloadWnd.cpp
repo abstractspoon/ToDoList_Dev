@@ -19,6 +19,7 @@
 #include "..\shared\autoflag.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\dlgunits.h"
+#include "..\shared\WorkingWeek.h"
 
 #include "..\3rdparty\T64Utils.h"
 #include "..\3rdparty\dibdata.h"
@@ -234,11 +235,38 @@ int CWorkloadWnd::LoadColumnState(const IPreferences* pPrefs, LPCTSTR szKey, CIn
 	return aStates.GetSize();
 }
 
-void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly) 
+void CWorkloadWnd::InitWorkingWeek(const IPreferences* pPrefs)
+{
+	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
+
+	CWeekend::Initialise(CWeekend(dwWeekends));
+
+// 	double dHoursInDay = pPrefs->GetProfileDouble(_T("Preferences"), _T("HoursInDay"), 8.0);
+// 	double dStartOfDayInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("StartOfWorkdayInHours"), 9.0);
+// 	double dStartOfLunchInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("StartOfLunchInHours"), 13.0);
+// 	double dEndOfLunchInHours = dStartOfLunchInHours;
+// 
+// 	if (pPrefs->GetProfileInt(_T("Preferences"), _T("HasLunchBreak"), TRUE))
+// 		dEndOfLunchInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("EndOfLunchInHours"), 14.0);
+// 
+// 	CWorkingWeek::Initialise(CWorkingWeek(dwWeekends,
+// 										  dStartOfDayInHours,
+// 										  dHoursInDay,
+// 										  dStartOfLunchInHours,
+// 										  dEndOfLunchInHours));
+// 
+// 	CTimeHelper::SetHoursInWorkday(dHoursInDay);
+// 	CTimeHelper::SetStartOfWorkday(dStartOfDayInHours);
+// 	CTimeHelper::SetLunchBreak(dStartOfLunchInHours, dEndOfLunchInHours);
+}
+
+void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// application preferences
+	InitWorkingWeek(pPrefs);
+
 	m_ctrlWorkload.SetOption(WLCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
 	m_ctrlWorkload.SetOption(WLCF_TREATSUBCOMPLETEDASDONE, pPrefs->GetProfileInt(_T("Preferences"), _T("TreatSubCompletedAsDone"), FALSE));
 	m_ctrlWorkload.SetOption(WLCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
@@ -261,21 +289,6 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		crGrid = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("GridLines"), DEF_GRIDLINECOLOR);
 
 	m_ctrlWorkload.SetGridLineColor(crGrid);
-
-	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
-	CDateHelper::SetWeekendDays(dwWeekends);
-
-	double dHoursInDay = pPrefs->GetProfileDouble(_T("Preferences"), _T("HoursInDay"), 8.0);
-	double dStartOfDayInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("StartOfWorkdayInHours"), 9.0);
-	double dStartOfLunchInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("StartOfLunchInHours"), 13.0);
-	double dEndOfLunchInHours = dStartOfLunchInHours;
-
-	if (pPrefs->GetProfileInt(_T("Preferences"), _T("HasLunchBreak"), TRUE))
-		dEndOfLunchInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("EndOfLunchInHours"), 14.0);
-
-	CTimeHelper::SetHoursInWorkday(dHoursInDay);
-	CTimeHelper::SetStartOfWorkday(dStartOfDayInHours);
-	CTimeHelper::SetLunchBreak(dStartOfLunchInHours, dEndOfLunchInHours);
 
 	// Workload specific options
 	if (!bAppOnly)

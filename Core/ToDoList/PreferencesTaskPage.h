@@ -7,10 +7,16 @@
 // PreferencesTaskPage.h : header file
 //
 
+/////////////////////////////////////////////////////////////////////////////
+
 #include "..\shared\preferencesbase.h"
 #include "..\shared\DayOfWeekchecklistbox.h"
 #include "..\shared\SoundEdit.h"
 #include "..\shared\TimeComboBox.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CWorkingWeek;
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskPage dialog
@@ -35,12 +41,13 @@ public:
 	BOOL GetAllowParentTimeTracking() const { return m_bAllowParentTimeTracking; }
 	BOOL GetHasLunchBreak() const { return m_bHasLunchBreak; }
 	double GetHoursInOneDay() const;
+	double GetDaysInOneWeek() const;
 	double GetStartOfWorkday(BOOL bInDays = TRUE) const;
 	double GetStartOfWorkdayLunch(BOOL bInDays = TRUE) const;
 	double GetEndOfWorkday(BOOL bInDays = TRUE) const;
 	double GetEndOfWorkdayLunch(BOOL bInDays = TRUE) const;
-	double GetDaysInOneWeek() const;
 
+	BOOL GetWorkingWeek(CWorkingWeek& week) const;
 	DWORD GetWeekendDays() const { return m_dwWeekends; }
 	BOOL GetDisplayLogConfirm() const { return m_bDisplayLogConfirm; }
 	int GetTrackReminderFrequency() const { return m_bTrackReminder ? m_nTrackReminderFrequency : 0; }

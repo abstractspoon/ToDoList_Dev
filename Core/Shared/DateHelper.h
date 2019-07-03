@@ -247,19 +247,10 @@ public:
 	static COleDateTime GetTimeOnly(const COleDateTime& date);
 	static COleDateTime GetDateOnly(const COleDateTime& date);
 
-	static void SetWeekendDays(DWORD dwDays = DHW_SATURDAY | DHW_SUNDAY);
-	static DWORD GetWeekdays();
 	static COleDateTime GetNextAvailableDay(const COleDateTime& date, DWORD dwAvailDays);
 	static BOOL ValidateDay(COleDateTime& date, DWORD dwAvailDays);
 
-	static BOOL IsWeekend(OLE_DAYOFWEEK nDOW);
-	static BOOL IsWeekend(const COleDateTime& date);
-	static BOOL IsWeekend(double dDate);
-	static int GetWeekendDuration();
-	static BOOL HasWeekend();
-	static BOOL MakeWeekday(COleDateTime& date, BOOL bForwards = TRUE, BOOL bTruncateTime = TRUE);
-	static COleDateTime ToWeekday(const COleDateTime& date, BOOL bForwards = TRUE);
-
+public:
 	static COleDateTime GetStartOfWeek(const COleDateTime& date);
 	static COleDateTime GetEndOfWeek(const COleDateTime& date);
 	static COleDateTime GetStartOfMonth(const COleDateTime& date);
@@ -297,9 +288,6 @@ public:
 	static OLE_DAYOFWEEK Map(DH_DAYOFWEEK nDOW);
 
 	static int Compare(const COleDateTime& date1, const COleDateTime& date2, DWORD dwCompareFlags = DHC_COMPARETIME);
-
-protected:
-	static DWORD s_dwWeekend; 
 
 protected:
 	static int GetISODayOfWeek(const COleDateTime& date); // 1-7 Mon-Sun
