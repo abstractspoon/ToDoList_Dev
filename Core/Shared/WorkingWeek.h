@@ -11,23 +11,6 @@
 
 //////////////////////////////////////////////////////////////////////
 
-enum WD_DAYOFWEEK 
-{
-	WD_NONE			= 0X00,
-
-	WD_SUNDAY		= 0X01,
-	WD_MONDAY		= 0X02,
-	WD_TUESDAY		= 0X04,
-	WD_WEDNESDAY	= 0X08,
-	WD_THURSDAY		= 0X10,
-	WD_FRIDAY		= 0X20,
-	WD_SATURDAY		= 0X40,
-
-	WD_EVERYDAY		= 0x7F
-};
-
-//////////////////////////////////////////////////////////////////////
-
 class CWorkingDay
 {
 public:
@@ -60,7 +43,7 @@ public:
 	COleDateTime GetEndOfLunch(const COleDateTime& date) const;
 
 	double CalculateDurationInHours(double fromHour, double toHour) const;
-	double GetDayLengthInHours(bool bIncludingLunch = false) const;
+	double GetLengthOfDayInHours(bool bIncludingLunch = false) const;
 	double GetLunchLengthInHours() const;
 
 	static double GetTimeOfDayInHours(const COleDateTime& date);
@@ -71,9 +54,7 @@ protected:
 	double m_dStartOfLunchInHours;
 	double m_dEndOfLunchInHours;
 
-protected:
 };
-
 
 //////////////////////////////////////////////////////////////////////
 
@@ -89,19 +70,17 @@ public:
 
 	static BOOL IsValid(DWORD dwDays);
 
-	DWORD GetWeekend() const { return m_dwDays; }
-	DWORD GetWeekdays() const { return (WD_EVERYDAY & ~m_dwDays); }
-
-	BOOL IsWeekend(WD_DAYOFWEEK nDOW) const;
+	BOOL IsWeekend(DH_DAYOFWEEK nDOW) const;
 	BOOL IsWeekend(OLE_DAYOFWEEK nDOW) const;
 	BOOL IsWeekend(const COleDateTime& date) const;
 	BOOL IsWeekend(double dDate) const;
 
-	int GetDuration() const;
+	DWORD GetDays() const { return m_dwDays; }
+	int GetLengthInDays() const;
 
 protected:
 	DWORD m_dwDays;
-	int m_nDuration;
+	int m_nLength;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -132,6 +111,8 @@ public:
 	COleDateTime ToWeekday(const COleDateTime& date, BOOL bForwards = TRUE) const;
 
 	BOOL HasWeekend() const;
+	DWORD GetWorkingDays() const;
+	int GetLengthInDays() const;
 
 	const CWorkingDay& WorkDay() const { return m_WorkDay;	}
 	const CWeekend& Weekend() const { return m_Weekend; }

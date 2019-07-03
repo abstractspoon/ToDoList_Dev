@@ -39,13 +39,6 @@ public:
 	BOOL GetLogTaskTimeSeparately() const { return m_bLogTime && m_bLogTasksSeparately; }
 	BOOL GetExclusiveTimeTracking() const { return m_bExclusiveTimeTracking; }
 	BOOL GetAllowParentTimeTracking() const { return m_bAllowParentTimeTracking; }
-	BOOL GetHasLunchBreak() const { return m_bHasLunchBreak; }
-	double GetHoursInOneDay() const;
-	double GetDaysInOneWeek() const;
-	double GetStartOfWorkday(BOOL bInDays = TRUE) const;
-	double GetStartOfWorkdayLunch(BOOL bInDays = TRUE) const;
-	double GetEndOfWorkday(BOOL bInDays = TRUE) const;
-	double GetEndOfWorkdayLunch(BOOL bInDays = TRUE) const;
 
 	BOOL GetWorkingWeek(CWorkingWeek& week) const;
 	DWORD GetWeekendDays() const { return m_dwWeekends; }
@@ -99,6 +92,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual void OnFirstShow();
+	virtual void OnOK();
 
 // Implementation
 protected:
@@ -108,15 +102,13 @@ protected:
 	afx_msg void OnChangeWeekends();
 	afx_msg void OnNotifyTimeTracking();
 	afx_msg void OnHasLunchBreak();
-	afx_msg void OnChangeStartOfDay();
-	afx_msg void OnChangeHoursInDay();
-	afx_msg void OnChangeLunchBreak();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
+	double GetHoursInOneDay() const;
 
 };
 

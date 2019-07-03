@@ -2616,12 +2616,6 @@ void CToDoListWnd::LoadSettings()
 	if (userPrefs.GetWorkingWeek(week))
 		CWorkingWeek::Initialise(week);
 
-	//CDateHelper::SetWeekendDays(userPrefs.GetWeekendDays());
-	CTimeHelper::SetHoursInWorkday(userPrefs.GetHoursInWorkday());
-	CTimeHelper::SetWorkdaysInWeek(userPrefs.GetWorkdaysInWeek());
-	CTimeHelper::SetStartOfWorkday(userPrefs.GetStartOfWorkday(FALSE));
-	CTimeHelper::SetLunchBreak(userPrefs.GetStartOfWorkdayLunch(FALSE), userPrefs.GetEndOfWorkdayLunch(FALSE));
-	
 	// support for .tdl extension and tdl:// protocol
 	EnableTDLExtension(userPrefs.GetEnableTDLExtension(), TRUE);
 	EnableTDLProtocol(userPrefs.GetEnableTDLProtocol(), TRUE);
@@ -4993,12 +4987,6 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 		if (newPrefs.GetWorkingWeek(week))
 			CWorkingWeek::Initialise(week);
 
-		//CDateHelper::SetWeekendDays(newPrefs.GetWeekendDays());
-		CTimeHelper::SetHoursInWorkday(newPrefs.GetHoursInWorkday());
-		CTimeHelper::SetWorkdaysInWeek(newPrefs.GetWorkdaysInWeek());
-		CTimeHelper::SetStartOfWorkday(newPrefs.GetStartOfWorkday(FALSE));
-		CTimeHelper::SetLunchBreak(newPrefs.GetStartOfWorkdayLunch(FALSE), newPrefs.GetEndOfWorkdayLunch(FALSE));
-		
 		RefreshTabOrder();
 		RefreshPauseTimeTracking();
 		UpdateCaption();

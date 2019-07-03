@@ -93,14 +93,6 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_LOGTIME, OnLogtime)
 	ON_BN_CLICKED(IDC_NOTIFYTIMETRACKING, OnNotifyTimeTracking)
 	ON_BN_CLICKED(IDC_HASLUNCHBREAK, OnHasLunchBreak)
-	ON_CBN_EDITCHANGE(IDC_STARTOFDAY, OnChangeStartOfDay)
-	ON_CBN_EDITCHANGE(IDC_HOURSINONEDAY, OnChangeHoursInDay)
-	ON_CBN_SELENDOK(IDC_STARTOFDAY, OnChangeStartOfDay)
-	ON_CBN_SELENDOK(IDC_HOURSINONEDAY, OnChangeHoursInDay)
-	ON_CBN_EDITCHANGE(IDC_STARTOFLUNCH, OnChangeLunchBreak)
-	ON_CBN_SELENDOK(IDC_STARTOFLUNCH, OnChangeLunchBreak)
-	ON_CBN_EDITCHANGE(IDC_ENDOFLUNCH, OnChangeLunchBreak)
-	ON_CBN_SELENDOK(IDC_ENDOFLUNCH, OnChangeLunchBreak)
 	//}}AFX_MSG_MAP
 	ON_CONTROL(CLBN_CHKCHANGE, IDC_WEEKENDS, OnChangeWeekends)
 END_MESSAGE_MAP()
@@ -135,6 +127,18 @@ void CPreferencesTaskPage::OnFirstShow()
 	UpdateData(FALSE);
 }
 
+void CPreferencesTaskPage::OnOK()
+{
+	// Validate working day
+	double dHoursInDay = GetHoursInOneDay();
+	m_sHoursInDay = Misc::Format(dHoursInDay, 2);
+
+	m_dStartOfWorkdayInHours = min(m_dStartOfWorkdayInHours, (24 - dHoursInDay));
+	m_dStartOfLunchInHours = max(m_dStartOfWorkdayInHours, m_dStartOfLunchInHours);
+	m_dEndOfLunchInHours = min(m_dEndOfLunchInHours, (m_dStartOfWorkdayInHours + dHoursInDay));
+	m_dEndOfLunchInHours = max(m_dEndOfLunchInHours, m_dStartOfLunchInHours);
+}
+
 BOOL CPreferencesTaskPage::GetWorkingWeek(CWorkingWeek& week) const
 {
 	return week.Initialise(m_dwWeekends,
@@ -152,40 +156,6 @@ double CPreferencesTaskPage::GetHoursInOneDay() const
 		dHours = 8;
 
 	return dHours;
-}
-
-double CPreferencesTaskPage::GetStartOfWorkday(BOOL bInDays) const
-{
-	return (bInDays ? (m_dStartOfWorkdayInHours / 24) : m_dStartOfWorkdayInHours);
-}
-
-double CPreferencesTaskPage::GetStartOfWorkdayLunch(BOOL bInDays) const
-{
-	return (bInDays ? (m_dStartOfLunchInHours / 24) : m_dStartOfLunchInHours);
-}
-
-double CPreferencesTaskPage::GetEndOfWorkdayLunch(BOOL bInDays) const
-{
-	if (m_bHasLunchBreak)
-		return (bInDays ? (m_dEndOfLunchInHours / 24) : m_dEndOfLunchInHours);
-
-	// else
-	return GetStartOfWorkdayLunch(bInDays);
-}
-
-double CPreferencesTaskPage::GetEndOfWorkday(BOOL bInDays) const
-{
-	double dEndOfDay = (m_dStartOfWorkdayInHours + GetHoursInOneDay());
-
-	if (m_bHasLunchBreak && (m_dEndOfLunchInHours > m_dStartOfLunchInHours))
-		dEndOfDay += (m_dEndOfLunchInHours - m_dStartOfLunchInHours);
-	
-	return (bInDays ? (dEndOfDay / 24) : dEndOfDay);
-}
-
-double CPreferencesTaskPage::GetDaysInOneWeek() const
-{
-	return m_nDaysInWeek;
 }
 
 void CPreferencesTaskPage::OnLogtime() 
@@ -240,7 +210,7 @@ void CPreferencesTaskPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR s
 	// weekends
 	DWORD dwDefWeekend = DHW_SATURDAY | DHW_SUNDAY;
 
-	if (GetDaysInOneWeek() >= 7)
+	if (m_nDaysInWeek >= 7)
 		dwDefWeekend = 0; // some people work 7 days a week
 
 	m_dwWeekends = pPrefs->GetProfileInt(szKey, _T("Weekends"), dwDefWeekend);
@@ -298,25 +268,4 @@ void CPreferencesTaskPage::OnHasLunchBreak()
 
 	GetDlgItem(IDC_STARTOFLUNCH)->EnableWindow(m_bHasLunchBreak);
 	GetDlgItem(IDC_ENDOFLUNCH)->EnableWindow(m_bHasLunchBreak);
-}
-
-void CPreferencesTaskPage::OnChangeStartOfDay() 
-{
-	UpdateData();
-
-	CTimeHelper::SetStartOfWorkday(m_dStartOfWorkdayInHours);
-}
-
-void CPreferencesTaskPage::OnChangeHoursInDay() 
-{
-	UpdateData();
-
-	CTimeHelper::SetHoursInWorkday(GetHoursInOneDay());
-}
-
-void CPreferencesTaskPage::OnChangeLunchBreak() 
-{
-	UpdateData();
-	
-	CTimeHelper::SetLunchBreak(m_dStartOfLunchInHours, m_dEndOfLunchInHours);
 }
