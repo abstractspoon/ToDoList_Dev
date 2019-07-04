@@ -29,6 +29,7 @@ namespace HTMLReportExporter
 		private Timer m_ChangeTimer = null;
 		private String m_TemplateFilePath = "";
 		private bool m_FirstPreview = true;
+		private bool m_EditedSinceLastSave = false;
 
 		// --------------------------------------------------------------
 
@@ -53,10 +54,13 @@ namespace HTMLReportExporter
 			m_Template = new HtmlReportTemplate();
 			m_PrevTemplate = new HtmlReportTemplate();
 
+			m_EditedSinceLastSave = false;
 			m_TemplateFilePath = prefs.GetProfileString(key, "LastOpenTemplate", "");
 
 			if (!m_Template.Load(m_TemplateFilePath))
 				m_TemplateFilePath = String.Empty;
+			else
+				m_PrevTemplate.Copy(m_Template);
 
 			m_ChangeTimer = new Timer();
 			m_ChangeTimer.Tick += new EventHandler(OnChangeTimer);
@@ -128,6 +132,8 @@ namespace HTMLReportExporter
 
 			// Place this at the end to ensure the toolbar has finished its resize
 			Toolbars.FixupButtonSizes(this.Toolbar);
+
+			UpdateToolbar();
 		}
 
 		private void UpdateControls()
@@ -151,6 +157,8 @@ namespace HTMLReportExporter
 			this.footerDividerCheckbox.Checked = m_Template.Footer.WantDivider;
 			this.footerHeightCombobox.Text = m_Template.Footer.PixelHeightText;
 
+			this.toolStripSaveReport.Enabled = m_EditedSinceLastSave;
+
 			// Refresh enable states
 			// Note: 'Task' control always enabled
 			OnHeaderEnableChanged(this.headerEnabledCheckbox, new EventArgs());
@@ -158,6 +166,12 @@ namespace HTMLReportExporter
 			OnFooterEnableChanged(this.footerEnabledCheckbox, new EventArgs());
 			
 			RefreshPreview();
+		}
+
+
+		private void UpdateToolbar()
+		{
+			this.toolStripSaveReport.Enabled = m_EditedSinceLastSave;
 		}
 
 		private void OnHeaderEnableChanged(object sender, EventArgs args)
@@ -283,6 +297,9 @@ namespace HTMLReportExporter
 					OnChangeTemplate(page, m_PrevTemplate, m_Template);
 					m_PrevTemplate.Copy(m_Template);
 
+					m_EditedSinceLastSave = true;
+					UpdateToolbar();
+
 					m_ChangeTimer.Start();
 				}
 			}
@@ -376,9 +393,11 @@ namespace HTMLReportExporter
 			{
 				m_Template.Clear();
 				m_TemplateFilePath = String.Empty;
+				m_EditedSinceLastSave = false;
 
 				UpdateCaption();
 				UpdateControls();
+				UpdateToolbar();
 			}
 		}
 
@@ -405,9 +424,11 @@ namespace HTMLReportExporter
 				if (m_Template.Load(dlg.FileName))
 				{
 					m_TemplateFilePath = dlg.FileName;
+					m_EditedSinceLastSave = false;
 
 					UpdateCaption();
 					UpdateControls();
+					UpdateToolbar();
 				}
 			}
 		}
@@ -445,7 +466,14 @@ namespace HTMLReportExporter
 				return true;
 
 			if (!newFileName && m_Template.Save())
+			{
+				m_EditedSinceLastSave = false;
+
+				UpdateCaption();
+				UpdateToolbar();
+
 				return true;
+			}
 
 			// Prompt for a file path
 			var dlg = new SaveFileDialog
@@ -466,7 +494,10 @@ namespace HTMLReportExporter
 				if (m_Template.Save(dlg.FileName))
 				{
 					m_TemplateFilePath = dlg.FileName;
+					m_EditedSinceLastSave = false;
+
 					UpdateCaption();
+					UpdateToolbar();
 
 					return true;
 				}

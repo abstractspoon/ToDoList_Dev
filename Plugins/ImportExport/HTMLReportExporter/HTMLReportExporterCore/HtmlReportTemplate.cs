@@ -727,7 +727,7 @@ namespace HTMLReportExporter
 			Task.Text = "$(title)<br>";
 			Footer.Text = "Footer";
 			Footer.BackColor = Color.LightPink;
-			m_FilePath = "Example.rbt";
+			//m_FilePath = "Example.rbt";
 #endif
 		}
 
