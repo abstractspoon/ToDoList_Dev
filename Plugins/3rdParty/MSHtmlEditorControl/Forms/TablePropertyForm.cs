@@ -119,7 +119,7 @@ namespace MSDN.Html.Editor
                 this.numericColumns.Value = Math.Min(tableProperties.TableColumns, MAXIMUM_CELL_COL);
                 this.numericCellPadding.Value = Math.Min(tableProperties.CellPadding, MAXIMUM_CELL_PAD);
                 this.numericCellSpacing.Value = Math.Min(tableProperties.CellSpacing, MAXIMUM_CELL_PAD);
-                this.comboBoxWidthType.SelectedIndex = (int)MeasurementOption.Percent;
+                this.comboBoxWidthType.SelectedIndex = (int)tableProperties.TableWidthMeasurement;
                 this.numericTableWidth.Value = Math.Min(tableProperties.TableWidth, this.numericTableWidth.Maximum);
 
 				this.checkBackColor.Checked = (tableProperties.BackColor != Color.Empty);
