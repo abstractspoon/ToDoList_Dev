@@ -139,25 +139,43 @@ namespace HTMLReportExporter
 		private void UpdateControls()
 		{
 			this.htmlReportHeaderControl.InnerHtml = m_Template.Header.Text;
-			this.htmlReportHeaderControl.BodyBackColor = m_Template.Header.BackColor;
+			this.htmlReportHeaderControl.BodyImage = m_Template.BackImage;
+
+			if (m_Template.Header.HasBackColor)
+				this.htmlReportHeaderControl.BodyBackColor = m_Template.Header.BackColor;
+			else
+				this.htmlReportHeaderControl.BodyBackColor = m_Template.BackColor;
+
 			this.headerEnabledCheckbox.Checked = m_Template.Header.Enabled;
 			this.headerDividerCheckbox.Checked = m_Template.Header.WantDivider;
 			this.headerHeightCombobox.Text = m_Template.Header.PixelHeightText;
 
+			// ----------
+
 			this.htmlReportTitleControl.InnerHtml = m_Template.Title.Text;
+			this.htmlReportTitleControl.BodyImage = m_Template.BackImage;
 			this.titleEnabledCheckbox.Checked = m_Template.Title.Enabled;
 			this.titleSeparatePageCheckbox.Checked = m_Template.Title.SeparatePage;
 
+			// ----------
+
 			this.htmlReportTasksControl.InnerHtml = m_Template.Task.Text;
+			this.htmlReportTasksControl.BodyImage = m_Template.BackImage;
 			this.tableHeaderRowCombobox.SelectedOption = m_Template.Task.TableHeaderRow;
 
+			// ----------
+
 			this.htmlReportFooterControl.InnerHtml = m_Template.Footer.Text;
-			this.htmlReportFooterControl.BodyBackColor = m_Template.Footer.BackColor;
+			this.htmlReportFooterControl.BodyImage = m_Template.BackImage;
+
+			if (m_Template.Footer.HasBackColor)
+				this.htmlReportFooterControl.BodyBackColor = m_Template.Footer.BackColor;
+			else
+				this.htmlReportFooterControl.BodyBackColor = m_Template.BackColor;
+
 			this.footerEnabledCheckbox.Checked = m_Template.Footer.Enabled;
 			this.footerDividerCheckbox.Checked = m_Template.Footer.WantDivider;
 			this.footerHeightCombobox.Text = m_Template.Footer.PixelHeightText;
-
-			this.toolStripSaveReport.Enabled = m_EditedSinceLastSave;
 
 			// Refresh enable states
 			// Note: 'Task' control always enabled
@@ -510,5 +528,40 @@ namespace HTMLReportExporter
 		{
 			CheckSaveTemplate(false, true);
 		}
+
+		private void OnInsertBackgroundImage(object sender, EventArgs e)
+		{
+			var dialog = new MSDN.Html.Editor.EnterImageForm();
+
+			dialog.StartPosition = FormStartPosition.CenterParent;
+
+			if (dialog.ShowDialog() == DialogResult.OK)
+			{
+				m_Template.BackImage = dialog.ImageLink;
+				UpdateControls();
+			}
+
+		}
+
+		private void OnClearBackgroundImage(object sender, EventArgs e)
+		{
+			if (m_Template.HasBackImage)
+			{
+				m_Template.BackImage = String.Empty;
+				UpdateControls();
+			}
+		}
+
+		private void OnSetBackgroundColor(object sender, EventArgs e)
+		{
+			// TODO
+		}
+
+		private void OnClearBackgroundColor(object sender, EventArgs e)
+		{
+			// TODO
+		}
+
+
 	}
 }

@@ -12,6 +12,47 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLReportExporter
 {
+	class ColorUtil
+	{
+		public static bool IsTransparent(Color color, bool whiteIsTransparent)
+		{
+			if (color.ToArgb() == Color.Transparent.ToArgb())
+				return true;
+
+			if (whiteIsTransparent && (color.ToArgb() == Color.White.ToArgb()))
+				return true;
+
+			return false;
+		}
+
+		public static String ToHtml(Color color, bool whiteIsTransparent)
+		{
+			if (IsTransparent(color, whiteIsTransparent))
+				return String.Empty;
+
+			return ColorTranslator.ToHtml(Color.FromArgb(color.ToArgb()));
+		}
+
+		public static Color FromHtml(String color)
+		{
+			if (String.IsNullOrEmpty(color))
+				return Color.Transparent;
+
+			return ColorTranslator.FromHtml(color);
+		}
+
+		public static bool Equals(Color color1, Color color2)
+		{
+			return (color1.ToArgb() == color2.ToArgb());
+		}
+
+		public static Color Copy(Color color)
+		{
+			return Color.FromArgb(color.ToArgb());
+		}
+	}
+
+
 	public class TemplateItem
 	{
 		protected String XmlTag;
@@ -102,6 +143,11 @@ namespace HTMLReportExporter
 		public Color BackColor { get; set; }
 		public int PixelHeight { get; set; }
 
+		public bool HasBackColor
+		{
+			get { return ColorUtil.IsTransparent(BackColor, false); }
+		}
+
 		public String PixelHeightText
 		{
 			get { return PixelHeight.ToString(); }
@@ -127,15 +173,12 @@ namespace HTMLReportExporter
 		{
 			get
 			{
-				return ColorTranslator.ToHtml(Color.FromArgb(BackColor.ToArgb()));
+				return ColorUtil.ToHtml(BackColor, false); // white is solid
 			}
 
 			set
 			{
-				if (String.IsNullOrWhiteSpace(value))
-					BackColor = Color.White;
-				else
-					BackColor = ColorTranslator.FromHtml(value);
+				BackColor = ColorUtil.FromHtml(value);
 			}
 		}
 
@@ -155,7 +198,7 @@ namespace HTMLReportExporter
 			doc.Root.Element(XmlTag).Add(new XElement("wantDivider", WantDivider));
 			doc.Root.Element(XmlTag).Add(new XElement("pixelHeight", PixelHeight));
 
-			if ((BackColor != Color.Transparent) && (BackColor != Color.White))
+			if (HasBackColor)
 				doc.Root.Element(XmlTag).Add(new XElement("backColor", BackColorHtml));
 		}
 
@@ -164,7 +207,7 @@ namespace HTMLReportExporter
 			base.Clear();
 
 			WantDivider = true;
-			BackColor = Color.White;
+			BackColor = Color.Transparent;
 			PixelHeight = DefPixelHeight;
 		}
 
@@ -173,7 +216,7 @@ namespace HTMLReportExporter
 			return (base.Equals(other) && 
 					(WantDivider == other.WantDivider) &&
 					(PixelHeight == other.PixelHeight) &&
-					(BackColor.ToArgb() == other.BackColor.ToArgb()));
+					ColorUtil.Equals(BackColor, other.BackColor));
 		}
 
 		public bool Copy(HeaderFooterTemplateItem other)
@@ -183,7 +226,7 @@ namespace HTMLReportExporter
 
 			WantDivider = other.WantDivider;
 			PixelHeight = other.PixelHeight;
-			BackColor = Color.FromArgb(other.BackColor.ToArgb());
+			BackColor = ColorUtil.Copy(other.BackColor);
 
 			return true;
 		}
@@ -703,6 +746,7 @@ namespace HTMLReportExporter
 	public class HtmlReportTemplate
 	{
 		private String m_FilePath = String.Empty;
+
 		private const String RootNodeName = "ReportBuilderTemplate";
 
 		// ---------------------------------------------
@@ -715,6 +759,7 @@ namespace HTMLReportExporter
 		public void Clear()
 		{
 			m_FilePath = String.Empty;
+			BackImage = String.Empty;
 
 			Header = new HeaderTemplate();
 			Title = new TitleTemplate();
@@ -731,6 +776,32 @@ namespace HTMLReportExporter
 #endif
 		}
 
+		public String BackImage { get; set; }
+		public Color BackColor { get; set; }
+
+		public bool HasBackImage
+		{
+			get { return !String.IsNullOrEmpty(BackImage); }
+		}
+
+		public bool HasBackColor
+		{
+			get	{ return ColorUtil.IsTransparent(BackColor, true); } // white is transparent
+		}
+
+		public String BackColorHtml
+		{
+			get
+			{
+				return ColorUtil.ToHtml(BackColor, true); // white is transparent
+			}
+
+			set
+			{
+				BackColor = ColorUtil.FromHtml(value);
+			}
+		}
+
 		public HeaderTemplate Header { get; private set; }
 		public TitleTemplate Title { get; private set; }
 		public TaskTemplate Task { get; private set; }
@@ -741,16 +812,34 @@ namespace HTMLReportExporter
 			if (other == null)
 				return false;
 
-			return (Header.Equals(other.Header) &&
-					Title.Equals(other.Title) &&
-					Task.Equals(other.Task) &&
-					Footer.Equals(other.Footer));
+			if (!BackImage.Equals(other.BackImage))
+				return false;
+
+			if (ColorUtil.Equals(BackColor, other.BackColor))
+				return false;
+
+			if (!Header.Equals(other.Header))
+				return false;
+
+			if (!Title.Equals(other.Title))
+				return false;
+
+			if (!Task.Equals(other.Task))
+				return false;
+
+			if (!Footer.Equals(other.Footer))
+				return false;
+
+			return true;
 		}
 
 		public bool Copy(HtmlReportTemplate other)
 		{
 			if (other == null)
 				return false;
+
+			BackImage = String.Copy(other.BackImage);
+			BackColor = ColorUtil.Copy(other.BackColor);
 
 			Header.Copy(other.Header);
 			Title.Copy(other.Title);
@@ -774,6 +863,12 @@ namespace HTMLReportExporter
 
 				if ((doc == null) || (doc.Root == null) || !doc.Root.Name.LocalName.Equals(RootNodeName))
 					return false;
+
+				var xImage = doc.Root.Element("BackImage");
+				BackImage = ((xImage == null) ? String.Empty : xImage.Value);
+
+				var xColor = doc.Root.Element("BackColor");
+				BackColorHtml = ((xColor == null) ? String.Empty : xColor.Value);
 
 				Header.Read(doc);
 				Title.Read(doc);
@@ -805,6 +900,12 @@ namespace HTMLReportExporter
 			try
 			{
 				XDocument doc = new XDocument(new XElement(RootNodeName));
+
+				if (HasBackImage)
+					doc.Root.Add(new XElement("BackImage", BackImage));
+
+				if (HasBackColor)
+					doc.Root.Add(new XElement("BackColor", BackColorHtml));
 
 				Header.Write(doc);
 				Title.Write(doc);

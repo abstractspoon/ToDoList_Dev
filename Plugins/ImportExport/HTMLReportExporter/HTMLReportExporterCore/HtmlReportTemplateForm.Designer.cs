@@ -556,6 +556,7 @@
 			this.toolStripInsertImage.Size = new System.Drawing.Size(23, 22);
 			this.toolStripInsertImage.Text = "toolStripButton1";
 			this.toolStripInsertImage.ToolTipText = "Set Background Image";
+			this.toolStripInsertImage.Click += new System.EventHandler(this.OnInsertBackgroundImage);
 			// 
 			// toolStripClearImage
 			// 
@@ -566,6 +567,7 @@
 			this.toolStripClearImage.Size = new System.Drawing.Size(23, 22);
 			this.toolStripClearImage.Text = "toolStripButton1";
 			this.toolStripClearImage.ToolTipText = "Clear Background Image";
+			this.toolStripClearImage.Click += new System.EventHandler(this.OnClearBackgroundImage);
 			// 
 			// toolStripBackColor
 			// 
@@ -576,6 +578,7 @@
 			this.toolStripBackColor.Size = new System.Drawing.Size(23, 22);
 			this.toolStripBackColor.Text = "toolStripButton1";
 			this.toolStripBackColor.ToolTipText = "Set Background Colour";
+			this.toolStripBackColor.Click += new System.EventHandler(this.OnSetBackgroundColor);
 			// 
 			// toolStripBackColorClear
 			// 
@@ -586,6 +589,7 @@
 			this.toolStripBackColorClear.Size = new System.Drawing.Size(23, 22);
 			this.toolStripBackColorClear.Text = "toolStripButton1";
 			this.toolStripBackColorClear.ToolTipText = "Clear Background Colour";
+			this.toolStripBackColorClear.Click += new System.EventHandler(this.OnClearBackgroundColor);
 			// 
 			// toolStripSeparator2
 			// 

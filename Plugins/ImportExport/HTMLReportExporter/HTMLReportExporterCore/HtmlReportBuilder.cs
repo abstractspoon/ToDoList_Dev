@@ -169,6 +169,12 @@ namespace HTMLReportExporter
 
 		private void WriteBody(HtmlTextWriter html)
 		{
+			if (m_Template.HasBackImage)
+				html.AddAttribute("style", String.Format("background-image: url({0}) no-repeat top center;", m_Template.BackImage));
+
+			if (m_Template.HasBackColor)
+				html.AddAttribute("style", String.Format("background-color: {0};", m_Template.BackColor));
+
 			html.RenderBeginTag(HtmlTextWriterTag.Body);
 
 			Header.WriteBodyDiv(html);
@@ -300,7 +306,7 @@ namespace HTMLReportExporter
 				if (WantDivider)
 					html.WriteLine(".page-footer { border-top: 1px solid black; }");
 
-				if (BackColor != Color.Transparent)
+				if (HasBackColor)
 					html.WriteLine(String.Format(".page-footer {{ background: {0}; }}", BackColorHtml));
 
 				html.WriteLine(String.Format(".page-footer {{ height: {0}px; }}", PixelHeight));

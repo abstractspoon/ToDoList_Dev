@@ -275,9 +275,10 @@ namespace MSDN.Html.Editor
         private string _bodyText;
         private string _bodyHtml;
         private string _bodyUrl;
+		private string _bodyImage;
 
-        // internal body property values
-        private Color _bodyBackColor;
+		// internal body property values
+		private Color _bodyBackColor;
         private Color _bodyForeColor;
         private HtmlFontProperty _bodyFont;
         private int[] _customColors;
@@ -1421,6 +1422,30 @@ namespace MSDN.Html.Editor
 						bodyStyle.fontSize = _bodyFont.SizeAsString;
                     }
                 }
+            }
+
+        } //BodyFont
+
+        public String BodyImage
+        {
+            get
+            {
+                return _bodyImage;
+            }
+            set
+            {
+                // set the new value using the default if set to null
+                _bodyImage = value;
+
+                mshtmlStyle bodyStyle = body.style;
+
+				if (bodyStyle != null)
+				{
+					if (value == null)
+						bodyStyle.backgroundImage = String.Empty;
+					else
+						bodyStyle.backgroundImage = String.Format("url({0})", value);
+				}
             }
 
         } //BodyFont
