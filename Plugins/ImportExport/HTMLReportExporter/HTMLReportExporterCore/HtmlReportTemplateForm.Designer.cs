@@ -64,6 +64,12 @@
 			this.htmlReportFooterControl = new HTMLReportExporter.HtmlReportFooterControl();
 			this.BtnOK = new System.Windows.Forms.Button();
 			this.BtnCancel = new System.Windows.Forms.Button();
+			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+			this.toolStripInsertImage = new System.Windows.Forms.ToolStripButton();
+			this.toolStripClearImage = new System.Windows.Forms.ToolStripButton();
+			this.toolStripBackColor = new System.Windows.Forms.ToolStripButton();
+			this.toolStripBackColorClear = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			this.Content.SuspendLayout();
 			this.Toolbar.SuspendLayout();
 			this.panel1.SuspendLayout();
@@ -102,12 +108,18 @@
             this.toolStripSaveReport,
             this.toolStripSaveAsReport,
             this.toolStripSeparator,
+            this.toolStripInsertImage,
+            this.toolStripClearImage,
+            this.toolStripSeparator2,
+            this.toolStripBackColor,
+            this.toolStripBackColorClear,
+            this.toolStripSeparator1,
             this.toolStripHelp});
 			this.Toolbar.Location = new System.Drawing.Point(12, 4);
 			this.Toolbar.Margin = new System.Windows.Forms.Padding(0, 0, 0, 20);
 			this.Toolbar.Name = "Toolbar";
 			this.Toolbar.Padding = new System.Windows.Forms.Padding(0);
-			this.Toolbar.Size = new System.Drawing.Size(154, 25);
+			this.Toolbar.Size = new System.Drawing.Size(258, 25);
 			this.Toolbar.TabIndex = 0;
 			this.Toolbar.Text = "toolStrip1";
 			// 
@@ -289,6 +301,7 @@
 			this.htmlReportHeaderControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.htmlReportHeaderControl.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
 			this.htmlReportHeaderControl.BorderSize = ((byte)(0));
 			this.htmlReportHeaderControl.EditEnabled = true;
 			this.htmlReportHeaderControl.InnerText = null;
@@ -354,6 +367,7 @@
 			this.htmlReportTitleControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.htmlReportTitleControl.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
 			this.htmlReportTitleControl.BorderSize = ((byte)(0));
 			this.htmlReportTitleControl.EditEnabled = true;
 			this.htmlReportTitleControl.InnerText = null;
@@ -394,6 +408,7 @@
 			this.htmlReportTasksControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.htmlReportTasksControl.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
 			this.htmlReportTasksControl.BorderSize = ((byte)(0));
 			this.htmlReportTasksControl.Cursor = System.Windows.Forms.Cursors.Default;
 			this.htmlReportTasksControl.EditEnabled = true;
@@ -491,6 +506,7 @@
 			this.htmlReportFooterControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.htmlReportFooterControl.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
 			this.htmlReportFooterControl.BorderSize = ((byte)(0));
 			this.htmlReportFooterControl.EditEnabled = true;
 			this.htmlReportFooterControl.InnerText = null;
@@ -525,6 +541,56 @@
 			this.BtnCancel.TabIndex = 3;
 			this.BtnCancel.Text = "Cancel";
 			this.BtnCancel.UseVisualStyleBackColor = true;
+			// 
+			// toolStripSeparator1
+			// 
+			this.toolStripSeparator1.Name = "toolStripSeparator1";
+			this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+			// 
+			// toolStripInsertImage
+			// 
+			this.toolStripInsertImage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolStripInsertImage.Image = global::HTMLReportExporter.Properties.Resources.ToolbarImage;
+			this.toolStripInsertImage.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.toolStripInsertImage.Name = "toolStripInsertImage";
+			this.toolStripInsertImage.Size = new System.Drawing.Size(23, 22);
+			this.toolStripInsertImage.Text = "toolStripButton1";
+			this.toolStripInsertImage.ToolTipText = "Set Background Image";
+			// 
+			// toolStripClearImage
+			// 
+			this.toolStripClearImage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolStripClearImage.Image = global::HTMLReportExporter.Properties.Resources.ToolbarImageClear;
+			this.toolStripClearImage.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.toolStripClearImage.Name = "toolStripClearImage";
+			this.toolStripClearImage.Size = new System.Drawing.Size(23, 22);
+			this.toolStripClearImage.Text = "toolStripButton1";
+			this.toolStripClearImage.ToolTipText = "Clear Background Image";
+			// 
+			// toolStripBackColor
+			// 
+			this.toolStripBackColor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolStripBackColor.Image = global::HTMLReportExporter.Properties.Resources.ToolbarBackColor;
+			this.toolStripBackColor.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.toolStripBackColor.Name = "toolStripBackColor";
+			this.toolStripBackColor.Size = new System.Drawing.Size(23, 22);
+			this.toolStripBackColor.Text = "toolStripButton1";
+			this.toolStripBackColor.ToolTipText = "Set Background Colour";
+			// 
+			// toolStripBackColorClear
+			// 
+			this.toolStripBackColorClear.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolStripBackColorClear.Image = global::HTMLReportExporter.Properties.Resources.ToolbarBackColorClear;
+			this.toolStripBackColorClear.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.toolStripBackColorClear.Name = "toolStripBackColorClear";
+			this.toolStripBackColorClear.Size = new System.Drawing.Size(23, 22);
+			this.toolStripBackColorClear.Text = "toolStripButton1";
+			this.toolStripBackColorClear.ToolTipText = "Clear Background Colour";
+			// 
+			// toolStripSeparator2
+			// 
+			this.toolStripSeparator2.Name = "toolStripSeparator2";
+			this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
 			// 
 			// HtmlReportTemplateForm
 			// 
@@ -592,5 +658,11 @@
 		private System.Windows.Forms.ToolStripButton toolStripHelp;
 		private HTMLReportExporter.TableHeaderRowOptionCombobox tableHeaderRowCombobox;
 		private System.Windows.Forms.ToolStripButton toolStripSaveAsReport;
+		private System.Windows.Forms.ToolStripButton toolStripInsertImage;
+		private System.Windows.Forms.ToolStripButton toolStripClearImage;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+		private System.Windows.Forms.ToolStripButton toolStripBackColor;
+		private System.Windows.Forms.ToolStripButton toolStripBackColorClear;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
 	}
 }

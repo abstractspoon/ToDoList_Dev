@@ -122,8 +122,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\ToolbarImage.bmp" />
+    <EmbeddedResource Include="Resources\ToolbarImageClear.bmp" />
     <EmbeddedResource Include="Resources\ToolbarBackColorClear.bmp" />
-    <Content Include="Resources\ToolbarFileSaveAs.bmp" />
+    <EmbeddedResource Include="Resources\ToolbarFileSaveAs.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
