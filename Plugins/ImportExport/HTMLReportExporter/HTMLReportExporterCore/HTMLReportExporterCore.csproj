@@ -121,6 +121,10 @@
       <Name>WebBrowserEx</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ToolbarBackColorClear.bmp" />
+    <Content Include="Resources\ToolbarFileSaveAs.bmp" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)"

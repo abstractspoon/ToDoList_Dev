@@ -212,7 +212,9 @@ namespace HTMLReportExporter
 
 	partial class HtmlReportHeaderFooterControl : HtmlReportControlBase
 	{
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator99;
 		private System.Windows.Forms.ToolStripButton toolstripBackColor;
+		private System.Windows.Forms.ToolStripButton toolstripClearBackColor;
 
 		public HtmlReportHeaderFooterControl()
 		{
@@ -227,12 +229,17 @@ namespace HTMLReportExporter
 		{
 			base.InitialiseToolbar();
 			
-			// Add background colour button to toolbar
-			this.toolstripBackColor = new System.Windows.Forms.ToolStripButton();
+			// Add background colour buttons to toolbar
+			int index = ToolBar.Items.IndexOfKey("toolstripTextColor");
 
+			this.toolStripSeparator99 = new System.Windows.Forms.ToolStripSeparator();
+			ToolBar.Items.Insert((index + 1), this.toolStripSeparator99);
+
+			this.toolstripBackColor = new System.Windows.Forms.ToolStripButton();
 			this.toolstripBackColor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
 			this.toolstripBackColor.Name = "toolstripBackColor";
 			this.toolstripBackColor.Tag = "BackColor";
+			this.toolstripBackColor.ToolTipText = "Set Background Color";
 			this.toolstripBackColor.Click += new System.EventHandler(OnBackColorClick);
 
 			var assembly = Assembly.GetExecutingAssembly();
@@ -240,12 +247,27 @@ namespace HTMLReportExporter
 			image.MakeTransparent(Color.Magenta);
 			this.toolstripBackColor.Image = image;
 			
-			int index = ToolBar.Items.IndexOfKey("toolstripTextColor");
 			this.toolstripBackColor.Size = this.ToolBar.Items[index].Size;
 
-			ToolBar.Items.Insert((index + 1), this.toolstripBackColor);
+			ToolBar.Items.Insert((index + 2), this.toolstripBackColor);
+
+			this.toolstripClearBackColor = new System.Windows.Forms.ToolStripButton();
+
+			this.toolstripClearBackColor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolstripClearBackColor.Name = "toolstripClearBackColor";
+			this.toolstripClearBackColor.Tag = "ClearBackColor";
+			this.toolstripClearBackColor.ToolTipText = "Clear Background Color";
+			this.toolstripClearBackColor.Click += new System.EventHandler(OnClearBackColorClick);
+
+			var image2 = new Bitmap(assembly.GetManifestResourceStream("HTMLReportExporter.Resources.ToolbarBackColorClear.bmp"));
+			image2.MakeTransparent(Color.Magenta);
+			this.toolstripClearBackColor.Image = image2;
+
+			this.toolstripClearBackColor.Size = this.toolstripBackColor.Size;
+
+			ToolBar.Items.Insert((index + 3), this.toolstripClearBackColor);
 		}
-		
+
 		override protected void InitialiseToolbarAttributeMenu()
 		{
 			base.InitialiseToolbarAttributeMenu();
@@ -281,6 +303,11 @@ namespace HTMLReportExporter
 					BodyBackColor = colorDialog.Color;
 				}
 			}
+		}
+
+		private void OnClearBackColorClick(object sender, EventArgs e)
+		{
+			BodyBackColor = Color.Transparent;
 		}
 	}
 
