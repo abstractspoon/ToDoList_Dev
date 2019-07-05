@@ -239,7 +239,7 @@ namespace HTMLReportExporter
 		{
 			if (m_FirstPreview) // First time only
 			{
-				SetPreviewZoom(DPIScaling.Scale(40));
+				//SetPreviewZoom(DPIScaling.Scale(40));
 				m_FirstPreview = false;
 			}
 		}
