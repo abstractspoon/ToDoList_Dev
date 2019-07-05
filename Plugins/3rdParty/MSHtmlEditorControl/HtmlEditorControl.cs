@@ -2342,15 +2342,6 @@ namespace MSDN.Html.Editor
         } //InsertLine
 
 
-        /// <summary>
-        /// Method to insert an image tag at the selected location
-        /// </summary>
-        public void InsertImage(string imageLocation)
-        {
-            ExecuteCommandRange(HTML_COMMAND_INSERT_IMAGE, imageLocation);
-
-        } //InsertImage
-
 		/// <summary>
 		/// Method to insert a image and prompt a user for the link
 		/// Calls the public InsertImage method
