@@ -99,6 +99,11 @@ namespace HTMLReportExporter
 			set { m_DefaultBackColor = value; UpdateBackground(); }
 		}
 
+		public bool HasDefaultBackColor
+		{
+			get { return !DrawingColor.IsTransparent(m_DefaultBackColor, true); }
+		}
+		
 		public String DefaultBackImage
 		{
 			get { return m_DefaultBackImage; }
@@ -310,22 +315,28 @@ namespace HTMLReportExporter
 			set { m_BackColor = value; UpdateBackground(); }
 		}
 
+		private bool HasBackColor
+		{
+			get { return !DrawingColor.IsTransparent(BackColor, false); }
+		}
+
 		protected override void UpdateBackground()
 		{
 			// because Image overrides colour but we want the reverse
 			// we selectively set the background image if there is a color
-			if (!DrawingColor.IsTransparent(BackColor, false))
+			if (HasBackColor)
 			{
 				BodyBackColor = BackColor;
 				BodyBackImage = "";
 			}
-			else if (!DrawingColor.IsTransparent(DefaultBackColor, true))
+			else if (HasDefaultBackColor)
 			{
 				BodyBackColor = DefaultBackColor;
 				BodyBackImage = "";
 			}
 			else
 			{
+				BodyBackColor = Color.Transparent;
 				BodyBackImage = DefaultBackImage;
 			}
 		}
@@ -345,20 +356,20 @@ namespace HTMLReportExporter
 				colorDialog.AnyColor = true;
 				colorDialog.SolidColorOnly = true;
 				colorDialog.AllowFullOpen = true;
-				colorDialog.Color = BackColor;
+				colorDialog.Color = (HasBackColor ? BackColor : Color.White);
 				//colorDialog.CustomColors = _customColors;
 
 				if (colorDialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
 				{
 					//_customColors = colorDialog.CustomColors;
-					BodyBackColor = colorDialog.Color;
+					BackColor = colorDialog.Color;
 				}
 			}
 		}
 
 		private void OnClearBackColorClick(object sender, EventArgs e)
 		{
-			BodyBackColor = Color.Transparent;
+			BackColor = Color.Transparent;
 		}
 	}
 

@@ -130,6 +130,20 @@ namespace HTMLReportExporter
  			html.WriteLine(m_BodyFontStyle);
 
 			html.WriteLine("body { line-height: normal; margin: 0; }");
+
+			if (m_Template.HasBackImage)
+			{
+				string temp = String.Format("body {{ background-image: url({0}); }}", m_Template.BackImage);
+				html.WriteLine(temp);
+				html.WriteLine("body { background-repeat: no-repeat; }");
+				html.WriteLine("body { background-size: cover; }");
+			}
+			else if (m_Template.HasBackColor)
+			{
+				html.WriteLine(String.Format("body {{ background-color: {0}; }}", m_Template.BackColor));
+			}
+
+
 			html.WriteLine("table { border-collapse: collapse; }");
 			html.WriteLine(".page {	page-break-after: always; }");
 			html.WriteLine("p {	margin: 0; }");
@@ -169,12 +183,6 @@ namespace HTMLReportExporter
 
 		private void WriteBody(HtmlTextWriter html)
 		{
-			if (m_Template.HasBackImage)
-				html.AddAttribute("style", String.Format("background-image: url({0}) no-repeat top center;", m_Template.BackImage));
-
-			if (m_Template.HasBackColor)
-				html.AddAttribute("style", String.Format("background-color: {0};", m_Template.BackColor));
-
 			html.RenderBeginTag(HtmlTextWriterTag.Body);
 
 			Header.WriteBodyDiv(html);
