@@ -2395,7 +2395,7 @@ namespace MSDN.Html.Editor
 
                 // based on the user interaction perform the neccessary action
                 // after one has a valid image href
-                if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+                if (dialog.ShowDialog() == DialogResult.OK)
                 {
 					PostShowDialog(dialog);
 
@@ -2403,12 +2403,7 @@ namespace MSDN.Html.Editor
 						return InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign);
 
 					// else
-					image.alt = dialog.ImageText;
-
-					if (imageAlign != ImageAlignOption.Default)
-						image.align = imageAlign.ToString().ToLower();
-					else
-						image.align = "";
+					ModifyImage(image, dialog.ImageText, dialog.ImageAlign);
 				}
 			}
 
@@ -2426,31 +2421,23 @@ namespace MSDN.Html.Editor
 
 			var control = GetFirstControl();
 
-			if (control != null)
+			if ((control != null) && IsStringEqual(control.tagName, IMAGE_TAG))
 			{
-				if (IsStringEqual(control.tagName, IMAGE_TAG))
-				{
-					mshtmlImageElement image = (mshtmlImageElement)control;
-					image.alt = (String.IsNullOrEmpty(imageText) ? imageHref : imageText);
-
-					if (imageAlign != ImageAlignOption.Default)
-						image.align = imageAlign.ToString().ToLower();
-					else
-						image.align = "";
-				}
+				ModifyImage((mshtmlImageElement)control, imageText, imageAlign);
 			}
 
 			return true;
 		}
 
-		/// <summary>
-		/// Method to create a web link from the users selected text
-		/// </summary>
-		public void InsertLink(string href)
-        {
-            ExecuteCommandRange(HTML_COMMAND_INSERT_LINK, href);
+		protected void ModifyImage(mshtmlImageElement image, string imageText, ImageAlignOption imageAlign)
+		{
+			image.alt = (String.IsNullOrEmpty(imageText) ? image.href : imageText);
 
-        } //InsertLink
+			if (imageAlign != ImageAlignOption.Default)
+				image.align = imageAlign.ToString().ToLower();
+			else
+				image.align = "";
+		}
 
 		/// <summary>
 		/// Method to insert a link and prompt a user for the href
