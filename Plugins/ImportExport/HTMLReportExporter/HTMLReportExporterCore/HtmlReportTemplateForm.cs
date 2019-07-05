@@ -190,11 +190,15 @@ namespace HTMLReportExporter
 		private void UpdateToolbar()
 		{
 			this.toolStripSaveReport.Enabled = m_EditedSinceLastSave;
+			this.toolStripBackColorClear.Enabled = m_Template.HasBackColor;
+			this.toolStripClearImage.Enabled = m_Template.HasBackImage;
 		}
 
 		private void OnHeaderEnableChanged(object sender, EventArgs args)
 		{
-			EnableControls(headerPage, sender, m_Template.Header.BackColor);
+			Color backColor = (m_Template.Header.HasBackColor ? m_Template.Header.BackColor : m_Template.BackColor);
+
+			EnableControls(headerPage, sender, backColor);
 		}
 
 		private void OnTitleEnableChanged(object sender, EventArgs args)
@@ -204,7 +208,9 @@ namespace HTMLReportExporter
 
 		private void OnFooterEnableChanged(object sender, EventArgs args)
 		{
-			EnableControls(footerPage, sender, m_Template.Footer.BackColor);
+			Color backColor = (m_Template.Footer.HasBackColor ? m_Template.Footer.BackColor : m_Template.BackColor);
+
+			EnableControls(footerPage, sender, backColor);
 		}
 
 		private void EnableControls(TabPage page, object checkbox, Color enabledBackColor)
@@ -268,59 +274,61 @@ namespace HTMLReportExporter
 		
 		private void OnChangeTimer(object sender, EventArgs e)
 		{
-			if (!IsDisposed)
+			if (IsDisposed)
+				return;
+
+			var page = (PageType)tabControl.SelectedIndex;
+
+			switch (page)
 			{
-				var page = (PageType)tabControl.SelectedIndex;
+				case PageType.Header:
+					m_Template.Header.Text = this.htmlReportHeaderControl.InnerHtml ?? "";
+					m_Template.Header.Enabled = headerEnabledCheckbox.Checked;
+					m_Template.Header.WantDivider = headerDividerCheckbox.Checked;
+					m_Template.Header.BackColor = this.htmlReportHeaderControl.BackColor;
+					m_Template.Header.PixelHeightText = this.headerHeightCombobox.Text;
+					break;
 
-				switch (page)
-				{
-					case PageType.Header:
-						m_Template.Header.Text = this.htmlReportHeaderControl.InnerHtml ?? "";
-						m_Template.Header.Enabled = headerEnabledCheckbox.Checked;
-						m_Template.Header.WantDivider = headerDividerCheckbox.Checked;
-						m_Template.Header.BackColor = this.htmlReportHeaderControl.BackColor;
-						m_Template.Header.PixelHeightText = this.headerHeightCombobox.Text;
-						break;
+				case PageType.Title:
+					m_Template.Title.Text = this.htmlReportTitleControl.InnerHtml ?? "";
+					m_Template.Title.Enabled = titleEnabledCheckbox.Checked;
+					m_Template.Title.SeparatePage = this.titleSeparatePageCheckbox.Checked;
+					break;
 
-					case PageType.Title:
-						m_Template.Title.Text = this.htmlReportTitleControl.InnerHtml ?? "";
-						m_Template.Title.Enabled = titleEnabledCheckbox.Checked;
-						m_Template.Title.SeparatePage = this.titleSeparatePageCheckbox.Checked;
-						break;
+				case PageType.Tasks:
+					if (!this.tableHeaderRowCombobox.DroppedDown)
+					{
+						// Only update if the header row combo is NOT dropped down
+						// else it's inconsistent with the rest of the updates
+						m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
+						m_Template.Task.Enabled = true; // always
+						m_Template.Task.TableHeaderRow = this.tableHeaderRowCombobox.SelectedOption;
+					}
+					break;
 
-					case PageType.Tasks:
-						if (!this.tableHeaderRowCombobox.DroppedDown)
-						{
-							// Only update if the header row combo is NOT dropped down
-							// else it's inconsistent with the rest of the updates
-							m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
-							m_Template.Task.Enabled = true; // always
-							m_Template.Task.TableHeaderRow = this.tableHeaderRowCombobox.SelectedOption;
-						}
-						break;
-
-					case PageType.Footer:
-						m_Template.Footer.Text = this.htmlReportFooterControl.InnerHtml ?? "";
-						m_Template.Footer.Enabled = footerEnabledCheckbox.Checked;
-						m_Template.Footer.WantDivider = footerDividerCheckbox.Checked;
-						m_Template.Footer.BackColor = this.htmlReportFooterControl.BackColor;
-						m_Template.Footer.PixelHeightText = this.footerHeightCombobox.Text;
-						break;
-				}
-
-				if (!m_Template.Equals(m_PrevTemplate))
-				{
-					m_ChangeTimer.Stop();
-
-					OnChangeTemplate(page, m_PrevTemplate, m_Template);
-					m_PrevTemplate.Copy(m_Template);
-
-					m_EditedSinceLastSave = true;
-					UpdateToolbar();
-
-					m_ChangeTimer.Start();
-				}
+				case PageType.Footer:
+					m_Template.Footer.Text = this.htmlReportFooterControl.InnerHtml ?? "";
+					m_Template.Footer.Enabled = footerEnabledCheckbox.Checked;
+					m_Template.Footer.WantDivider = footerDividerCheckbox.Checked;
+					m_Template.Footer.BackColor = this.htmlReportFooterControl.BackColor;
+					m_Template.Footer.PixelHeightText = this.footerHeightCombobox.Text;
+					break;
 			}
+
+			if (!m_Template.Equals(m_PrevTemplate))
+			{
+				m_ChangeTimer.Stop();
+
+				OnChangeTemplate(page, m_PrevTemplate, m_Template);
+
+				m_PrevTemplate.Copy(m_Template);
+				m_EditedSinceLastSave = true;
+
+				m_ChangeTimer.Start();
+			}
+
+			// always
+			UpdateToolbar();
 		}
 
 		public new DialogResult ShowDialog()
@@ -415,7 +423,6 @@ namespace HTMLReportExporter
 
 				UpdateCaption();
 				UpdateControls();
-				UpdateToolbar();
 			}
 		}
 
@@ -446,7 +453,6 @@ namespace HTMLReportExporter
 
 					UpdateCaption();
 					UpdateControls();
-					UpdateToolbar();
 				}
 			}
 		}
@@ -488,8 +494,6 @@ namespace HTMLReportExporter
 				m_EditedSinceLastSave = false;
 
 				UpdateCaption();
-				UpdateToolbar();
-
 				return true;
 			}
 
@@ -515,8 +519,6 @@ namespace HTMLReportExporter
 					m_EditedSinceLastSave = false;
 
 					UpdateCaption();
-					UpdateToolbar();
-
 					return true;
 				}
 			}
@@ -554,14 +556,28 @@ namespace HTMLReportExporter
 
 		private void OnSetBackgroundColor(object sender, EventArgs e)
 		{
-			// TODO
+			using (ColorDialog colorDialog = new ColorDialog())
+			{
+				colorDialog.AnyColor = true;
+				colorDialog.SolidColorOnly = true;
+				colorDialog.AllowFullOpen = true;
+				colorDialog.Color = (m_Template.HasBackColor ? m_Template.BackColor : Color.White);
+				//colorDialog.CustomColors = _customColors;
+
+				if (colorDialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+				{
+					//_customColors = colorDialog.CustomColors;
+					m_Template.BackColor = colorDialog.Color;
+					UpdateControls();
+				}
+			}
 		}
 
 		private void OnClearBackgroundColor(object sender, EventArgs e)
 		{
-			// TODO
+			m_Template.BackColor = Color.Transparent;
+			UpdateControls();
 		}
-
 
 	}
 }

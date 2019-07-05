@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Xml;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace HTMLReportExporter
 {
@@ -46,10 +47,10 @@ namespace HTMLReportExporter
 			m_BodyFontStyle = FormatBodyFontStyle(prefs);
 			m_TaskBaseIndent = FormatTaskBaseIndent(prefs);
 
-			Header = new HeaderTemplateReporter(template.Header);
+			Header = new HeaderTemplateReporter(template.Header, template.BackColor);
 			Title = new TitleTemplateReporter(template.Title);
 			Tasks = new TaskTemplateReporter(template.Task, preview);
-			Footer = new FooterTemplateReporter(template.Footer);
+			Footer = new FooterTemplateReporter(template.Footer, template.BackColor);
 		}
 
 		private static String FormatBodyFontStyle(Preferences prefs)
@@ -140,10 +141,9 @@ namespace HTMLReportExporter
 			}
 			else if (m_Template.HasBackColor)
 			{
-				html.WriteLine(String.Format("body {{ background-color: {0}; }}", m_Template.BackColor));
+				html.WriteLine(String.Format("body {{ background-color: {0}; }}", m_Template.BackColorHtml));
 			}
-
-
+			
 			html.WriteLine("table { border-collapse: collapse; }");
 			html.WriteLine(".page {	page-break-after: always; }");
 			html.WriteLine("p {	margin: 0; }");
@@ -235,9 +235,51 @@ namespace HTMLReportExporter
 
 		// --------------------------------------------------------------------------
 
-		public class HeaderTemplateReporter : HeaderTemplate
+		public class HeaderFooterTemplateReporter : HeaderFooterTemplateItem
 		{
-			public HeaderTemplateReporter(HeaderTemplate header)
+			// For deriving only
+			protected HeaderFooterTemplateReporter(HeaderFooterTemplateItem item, Color defbackColor)
+				:
+				base(item.XmlTag, item.PixelHeight)
+			{
+				Copy(item);
+
+				DefaultBackColor = defbackColor;
+			}
+
+			private Color DefaultBackColor { get; set; }
+
+			new protected String BackColorHtml
+			{
+				get
+				{
+					if (base.HasBackColor)
+						return base.BackColorHtml;
+
+					if (HasDefaultBackColor)
+						return DrawingColor.ToHtml(DefaultBackColor, true);
+
+					return "";
+				}
+			}
+
+			new public bool HasBackColor
+			{
+				get { return (base.HasBackColor || HasDefaultBackColor); }
+			}
+			
+			public bool HasDefaultBackColor
+			{
+				get { return !DrawingColor.IsTransparent(DefaultBackColor, true); }
+			}
+
+		}
+
+		// --------------------------------------------------------------------------
+
+		public class HeaderTemplateReporter : HeaderFooterTemplateReporter
+		{
+			public HeaderTemplateReporter(HeaderTemplate header, Color defbackColor) : base(header, defbackColor)
 			{
 				Copy(header);
 			}
@@ -252,8 +294,10 @@ namespace HTMLReportExporter
 				if (WantDivider)
 					html.WriteLine(".page-header { border-bottom: 1px solid black; }");
 
-				if (HasBackColor)
-					html.WriteLine(String.Format(".page-header {{ background: {0}; }}", BackColorHtml));
+				String backColorHtml = BackColorHtml;
+
+				if (!String.IsNullOrEmpty(backColorHtml))
+					html.WriteLine(String.Format(".page-header {{ background: {0}; }}", backColorHtml));
 
 				html.WriteLine(String.Format(".page-header {{ height: {0}px; }}", PixelHeight));
 				html.WriteLine(String.Format(".page-header-space {{ height: {0}px; }}", PixelHeight + ContentPadding));
@@ -297,9 +341,9 @@ namespace HTMLReportExporter
 			}
 		}
 
-		public class FooterTemplateReporter : FooterTemplate
+		public class FooterTemplateReporter : HeaderFooterTemplateReporter
 		{
-			public FooterTemplateReporter(FooterTemplate footer)
+			public FooterTemplateReporter(FooterTemplate footer, Color defbackColor) : base(footer, defbackColor)
 			{
 				Copy(footer);
 			}
@@ -314,8 +358,10 @@ namespace HTMLReportExporter
 				if (WantDivider)
 					html.WriteLine(".page-footer { border-top: 1px solid black; }");
 
-				if (HasBackColor)
-					html.WriteLine(String.Format(".page-footer {{ background: {0}; }}", BackColorHtml));
+				String backColorHtml = BackColorHtml;
+
+				if (!String.IsNullOrEmpty(backColorHtml))
+					html.WriteLine(String.Format(".page-footer {{ background: {0}; }}", backColorHtml));
 
 				html.WriteLine(String.Format(".page-footer {{ height: {0}px; }}", PixelHeight));
 				html.WriteLine(String.Format(".page-footer-space {{ height: {0}px; }}", PixelHeight + ContentPadding));

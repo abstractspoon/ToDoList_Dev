@@ -15,14 +15,12 @@ namespace HTMLReportExporter
 {
 	public class TemplateItem
 	{
-		protected String XmlTag;
-
-		// ----------------------------------
 
 		public bool Enabled { set; get; }
 		public String Text { set; get; }
 		public String EnabledText { get { return (Enabled ? Text : ""); } }
-		
+		public String XmlTag { get; private set; }
+
 		// ----------------------------------
 
 		public TemplateItem(String xmlTag)
