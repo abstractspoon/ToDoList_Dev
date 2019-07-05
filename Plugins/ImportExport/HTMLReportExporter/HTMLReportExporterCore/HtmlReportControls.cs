@@ -169,9 +169,10 @@ namespace HTMLReportExporter
 			base.InitialiseFeatures(true);
 
 			// extras
-			CommandHandling.HideCommand("contextInsertLink", ContextMenu.Items);
 			CommandHandling.HideCommand("toolstripEnableEditing", ToolBar.Items);
-			CommandHandling.HideCommand("toolstripInsertLink", ToolBar.Items);
+			//CommandHandling.HideCommand("toolstripInsertLink", ToolBar.Items);
+			//CommandHandling.HideCommand("contextInsertLink", ContextMenu.Items);
+
 			//CommandHandling.HideCommand("", ToolBar.Items);
 			//CommandHandling.HideCommand("", ToolBar.Items);
 			//CommandHandling.HideCommand("", ToolBar.Items);
