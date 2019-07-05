@@ -1426,7 +1426,7 @@ namespace MSDN.Html.Editor
 
         } //BodyFont
 
-        public String BodyImage
+        public String BodyBackImage
         {
             get
             {

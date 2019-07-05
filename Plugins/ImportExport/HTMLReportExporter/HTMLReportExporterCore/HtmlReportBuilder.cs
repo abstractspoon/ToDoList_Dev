@@ -244,7 +244,7 @@ namespace HTMLReportExporter
 				if (WantDivider)
 					html.WriteLine(".page-header { border-bottom: 1px solid black; }");
 
-				if (BackColor != Color.Transparent)
+				if (HasBackColor)
 					html.WriteLine(String.Format(".page-header {{ background: {0}; }}", BackColorHtml));
 
 				html.WriteLine(String.Format(".page-header {{ height: {0}px; }}", PixelHeight));

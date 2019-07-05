@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Web.UI;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace HTMLReportExporter
 {
@@ -59,6 +60,8 @@ namespace HTMLReportExporter
 	partial class HtmlReportControlBase : HtmlEditorControlEx
 	{
 		private ToolStripDropDownButton m_ToolStripAttributeMenu = null;
+		private Color m_DefaultBackColor = Color.Transparent;
+		private String m_DefaultBackImage = String.Empty;
 
 		// ---------------------------------------------------------------
 
@@ -88,6 +91,24 @@ namespace HTMLReportExporter
 			Toolbars.Sort(m_ToolStripAttributeMenu.DropDownItems);
 
 			// Toolbar translation handled by parent
+		}
+
+		public new Color DefaultBackColor
+		{
+			get { return m_DefaultBackColor; }
+			set { m_DefaultBackColor = value; UpdateBackground(); }
+		}
+
+		public String DefaultBackImage
+		{
+			get { return m_DefaultBackImage; }
+			set { m_DefaultBackImage = value; UpdateBackground(); }
+		}
+
+		protected virtual void UpdateBackground()
+		{
+			this.BodyBackImage = DefaultBackImage;
+			this.BodyBackColor = DefaultBackColor;
 		}
 
 		public Color ToolbarBackColor
@@ -216,6 +237,10 @@ namespace HTMLReportExporter
 		private System.Windows.Forms.ToolStripButton toolstripBackColor;
 		private System.Windows.Forms.ToolStripButton toolstripClearBackColor;
 
+		private Color m_BackColor = Color.Transparent;
+
+		// -----------------------------------------------------
+
 		public HtmlReportHeaderFooterControl()
 		{
 		}
@@ -277,6 +302,32 @@ namespace HTMLReportExporter
 
 			ToolStripAttributeMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
 			ToolStripAttributeMenu.Text = "Report Attributes";
+		}
+
+		public new Color BackColor
+		{
+			get { return m_BackColor; }
+			set { m_BackColor = value; UpdateBackground(); }
+		}
+
+		protected override void UpdateBackground()
+		{
+			// because Image overrides colour but we want the reverse
+			// we selectively set the background image if there is a color
+			if (!DrawingColor.IsTransparent(BackColor, false))
+			{
+				BodyBackColor = BackColor;
+				BodyBackImage = "";
+			}
+			else if (!DrawingColor.IsTransparent(DefaultBackColor, true))
+			{
+				BodyBackColor = DefaultBackColor;
+				BodyBackImage = "";
+			}
+			else
+			{
+				BodyBackImage = DefaultBackImage;
+			}
 		}
 
 		override protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)

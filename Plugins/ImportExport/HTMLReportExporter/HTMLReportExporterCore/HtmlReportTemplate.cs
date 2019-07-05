@@ -105,7 +105,7 @@ namespace HTMLReportExporter
 
 		public bool HasBackColor
 		{
-			get { return DrawingColor.IsTransparent(BackColor, false); }
+			get { return !DrawingColor.IsTransparent(BackColor, false); } // while is opaque
 		}
 
 		public String PixelHeightText
@@ -746,7 +746,7 @@ namespace HTMLReportExporter
 
 		public bool HasBackColor
 		{
-			get	{ return DrawingColor.IsTransparent(BackColor, true); } // white is transparent
+			get	{ return !DrawingColor.IsTransparent(BackColor, true); } // white is transparent
 		}
 
 		public String BackColorHtml
@@ -775,7 +775,7 @@ namespace HTMLReportExporter
 			if (!BackImage.Equals(other.BackImage))
 				return false;
 
-			if (DrawingColor.Equals(BackColor, other.BackColor))
+			if (!DrawingColor.Equals(BackColor, other.BackColor))
 				return false;
 
 			if (!Header.Equals(other.Header))

@@ -139,12 +139,9 @@ namespace HTMLReportExporter
 		private void UpdateControls()
 		{
 			this.htmlReportHeaderControl.InnerHtml = m_Template.Header.Text;
-			this.htmlReportHeaderControl.BodyImage = m_Template.BackImage;
-
-			if (m_Template.Header.HasBackColor)
-				this.htmlReportHeaderControl.BodyBackColor = m_Template.Header.BackColor;
-			else
-				this.htmlReportHeaderControl.BodyBackColor = m_Template.BackColor;
+			this.htmlReportHeaderControl.DefaultBackImage = m_Template.BackImage;
+			this.htmlReportHeaderControl.DefaultBackColor = m_Template.BackColor;
+			this.htmlReportHeaderControl.BackColor = m_Template.Header.BackColor;
 
 			this.headerEnabledCheckbox.Checked = m_Template.Header.Enabled;
 			this.headerDividerCheckbox.Checked = m_Template.Header.WantDivider;
@@ -153,25 +150,28 @@ namespace HTMLReportExporter
 			// ----------
 
 			this.htmlReportTitleControl.InnerHtml = m_Template.Title.Text;
-			this.htmlReportTitleControl.BodyImage = m_Template.BackImage;
+			this.htmlReportTitleControl.DefaultBackImage = m_Template.BackImage;
+			this.htmlReportTitleControl.DefaultBackColor = m_Template.BackColor;
+
 			this.titleEnabledCheckbox.Checked = m_Template.Title.Enabled;
 			this.titleSeparatePageCheckbox.Checked = m_Template.Title.SeparatePage;
 
 			// ----------
 
 			this.htmlReportTasksControl.InnerHtml = m_Template.Task.Text;
-			this.htmlReportTasksControl.BodyImage = m_Template.BackImage;
+			this.htmlReportTasksControl.BodyBackImage = m_Template.BackImage;
+			this.htmlReportTasksControl.DefaultBackImage = m_Template.BackImage;
+			this.htmlReportTasksControl.DefaultBackColor = m_Template.BackColor;
+
 			this.tableHeaderRowCombobox.SelectedOption = m_Template.Task.TableHeaderRow;
 
 			// ----------
 
 			this.htmlReportFooterControl.InnerHtml = m_Template.Footer.Text;
-			this.htmlReportFooterControl.BodyImage = m_Template.BackImage;
-
-			if (m_Template.Footer.HasBackColor)
-				this.htmlReportFooterControl.BodyBackColor = m_Template.Footer.BackColor;
-			else
-				this.htmlReportFooterControl.BodyBackColor = m_Template.BackColor;
+			this.htmlReportFooterControl.BodyBackImage = m_Template.BackImage;
+			this.htmlReportFooterControl.DefaultBackImage = m_Template.BackImage;
+			this.htmlReportFooterControl.DefaultBackColor = m_Template.BackColor;
+			this.htmlReportFooterControl.BackColor = m_Template.Footer.BackColor;
 
 			this.footerEnabledCheckbox.Checked = m_Template.Footer.Enabled;
 			this.footerDividerCheckbox.Checked = m_Template.Footer.WantDivider;
