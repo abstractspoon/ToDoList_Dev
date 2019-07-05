@@ -2592,10 +2592,10 @@ namespace MSDN.Html.Editor
 			}
 		} //InsertLinkPrompt
 
-	/// <summary>
-	/// Method to remove a web link from the users selected text
-	/// </summary>
-	public void RemoveLink()
+		/// <summary>
+		/// Method to remove a web link from the users selected text
+		/// </summary>
+		public void RemoveLink()
         {
             ExecuteCommandRange(HTML_COMMAND_REMOVE_LINK, null);
 
