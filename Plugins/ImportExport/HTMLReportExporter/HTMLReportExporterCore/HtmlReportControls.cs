@@ -339,6 +339,13 @@ namespace HTMLReportExporter
 				BodyBackColor = Color.Transparent;
 				BodyBackImage = DefaultBackImage;
 			}
+
+			UpdateToolbar();
+		}
+
+		private void UpdateToolbar()
+		{
+			this.toolstripClearBackColor.Enabled = HasBackColor;
 		}
 
 		override protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
