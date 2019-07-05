@@ -81,11 +81,11 @@ namespace Abstractspoon
 				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow) override;
 
 			private:
-				Drawing::Color^ m_HotFillColor;
-				Drawing::Color^ m_HotBorderColor;
-				Drawing::Color^ m_PressedFillColor;
-				Drawing::Color^ m_BkgndLightColor;
-				Drawing::Color^ m_BkgndDarkColor;
+				Drawing::Color m_HotFillColor;
+				Drawing::Color m_HotBorderColor;
+				Drawing::Color m_PressedFillColor;
+				Drawing::Color m_BkgndLightColor;
+				Drawing::Color m_BkgndDarkColor;
 
 				bool ValidColours();
 				bool RenderButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e);

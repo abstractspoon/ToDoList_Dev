@@ -9,50 +9,10 @@ using System.Drawing;
 using System.Web.UI;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace HTMLReportExporter
 {
-	class ColorUtil
-	{
-		public static bool IsTransparent(Color color, bool whiteIsTransparent)
-		{
-			if (color.ToArgb() == Color.Transparent.ToArgb())
-				return true;
-
-			if (whiteIsTransparent && (color.ToArgb() == Color.White.ToArgb()))
-				return true;
-
-			return false;
-		}
-
-		public static String ToHtml(Color color, bool whiteIsTransparent)
-		{
-			if (IsTransparent(color, whiteIsTransparent))
-				return String.Empty;
-
-			return ColorTranslator.ToHtml(Color.FromArgb(color.ToArgb()));
-		}
-
-		public static Color FromHtml(String color)
-		{
-			if (String.IsNullOrEmpty(color))
-				return Color.Transparent;
-
-			return ColorTranslator.FromHtml(color);
-		}
-
-		public static bool Equals(Color color1, Color color2)
-		{
-			return (color1.ToArgb() == color2.ToArgb());
-		}
-
-		public static Color Copy(Color color)
-		{
-			return Color.FromArgb(color.ToArgb());
-		}
-	}
-
-
 	public class TemplateItem
 	{
 		protected String XmlTag;
@@ -145,7 +105,7 @@ namespace HTMLReportExporter
 
 		public bool HasBackColor
 		{
-			get { return ColorUtil.IsTransparent(BackColor, false); }
+			get { return DrawingColor.IsTransparent(BackColor, false); }
 		}
 
 		public String PixelHeightText
@@ -173,12 +133,12 @@ namespace HTMLReportExporter
 		{
 			get
 			{
-				return ColorUtil.ToHtml(BackColor, false); // white is solid
+				return DrawingColor.ToHtml(BackColor, false); // white is solid
 			}
 
 			set
 			{
-				BackColor = ColorUtil.FromHtml(value);
+				BackColor = DrawingColor.FromHtml(value);
 			}
 		}
 
@@ -216,7 +176,7 @@ namespace HTMLReportExporter
 			return (base.Equals(other) && 
 					(WantDivider == other.WantDivider) &&
 					(PixelHeight == other.PixelHeight) &&
-					ColorUtil.Equals(BackColor, other.BackColor));
+					DrawingColor.Equals(BackColor, other.BackColor));
 		}
 
 		public bool Copy(HeaderFooterTemplateItem other)
@@ -226,7 +186,7 @@ namespace HTMLReportExporter
 
 			WantDivider = other.WantDivider;
 			PixelHeight = other.PixelHeight;
-			BackColor = ColorUtil.Copy(other.BackColor);
+			BackColor = DrawingColor.Copy(other.BackColor);
 
 			return true;
 		}
@@ -786,19 +746,19 @@ namespace HTMLReportExporter
 
 		public bool HasBackColor
 		{
-			get	{ return ColorUtil.IsTransparent(BackColor, true); } // white is transparent
+			get	{ return DrawingColor.IsTransparent(BackColor, true); } // white is transparent
 		}
 
 		public String BackColorHtml
 		{
 			get
 			{
-				return ColorUtil.ToHtml(BackColor, true); // white is transparent
+				return DrawingColor.ToHtml(BackColor, true); // white is transparent
 			}
 
 			set
 			{
-				BackColor = ColorUtil.FromHtml(value);
+				BackColor = DrawingColor.FromHtml(value);
 			}
 		}
 
@@ -815,7 +775,7 @@ namespace HTMLReportExporter
 			if (!BackImage.Equals(other.BackImage))
 				return false;
 
-			if (ColorUtil.Equals(BackColor, other.BackColor))
+			if (DrawingColor.Equals(BackColor, other.BackColor))
 				return false;
 
 			if (!Header.Equals(other.Header))
@@ -839,7 +799,7 @@ namespace HTMLReportExporter
 				return false;
 
 			BackImage = String.Copy(other.BackImage);
-			BackColor = ColorUtil.Copy(other.BackColor);
+			BackColor = DrawingColor.Copy(other.BackColor);
 
 			Header.Copy(other.Header);
 			Title.Copy(other.Title);

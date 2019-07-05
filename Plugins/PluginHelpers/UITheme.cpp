@@ -119,11 +119,11 @@ UInt32 UITheme::GetColor(AppColor color)
 
 UIThemeToolbarRenderer::UIThemeToolbarRenderer()
 {
-	m_HotFillColor = nullptr;
-	m_HotBorderColor = nullptr;
-	m_PressedFillColor = nullptr;
-	m_BkgndLightColor = nullptr;
-	m_BkgndDarkColor = nullptr;
+	m_HotFillColor = Drawing::Color::Transparent;
+	m_HotBorderColor = Drawing::Color::Transparent;
+	m_PressedFillColor = Drawing::Color::Transparent;
+	m_BkgndLightColor = Drawing::Color::Transparent;
+	m_BkgndDarkColor = Drawing::Color::Transparent;
 }
 
 void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
@@ -150,16 +150,16 @@ bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs
 
 		if (item->Pressed || checkedButton)
 		{
-			Brush^ brush = gcnew SolidBrush(*m_PressedFillColor);
+			Brush^ brush = gcnew SolidBrush(m_PressedFillColor);
 			e->Graphics->FillRectangle(brush, *rect);
 		}
 		else if (item->Selected)
 		{
-			Brush^ brush = gcnew SolidBrush(*m_HotFillColor);
+			Brush^ brush = gcnew SolidBrush(m_HotFillColor);
 			e->Graphics->FillRectangle(brush, *rect);
 		}
 
-		Pen^ pen = gcnew Pen(*m_HotBorderColor);
+		Pen^ pen = gcnew Pen(m_HotBorderColor);
 		e->Graphics->DrawRectangle(pen, *rect);
 
 		return true;
@@ -189,18 +189,18 @@ void UIThemeToolbarRenderer::OnRenderDropDownButtonBackground(ToolStripItemRende
 
 bool UIThemeToolbarRenderer::ValidColours()
 {
-	return ((m_HotFillColor != nullptr) && 
-			(m_HotBorderColor != nullptr) && 
-			(m_PressedFillColor != nullptr));
+	return (!ColorUtil::DrawingColor::IsTransparent(m_HotFillColor, false) &&
+			!ColorUtil::DrawingColor::IsTransparent(m_HotBorderColor, false) &&
+			!ColorUtil::DrawingColor::IsTransparent(m_PressedFillColor, false));
 }
 
 void UIThemeToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow)
 {
-	if ((m_BkgndLightColor != nullptr) && 
-		(m_BkgndDarkColor != nullptr) && 
-		(*m_BkgndLightColor != *m_BkgndDarkColor))
+	if (!ColorUtil::DrawingColor::IsTransparent(m_BkgndLightColor, false) &&
+		!ColorUtil::DrawingColor::IsTransparent(m_BkgndDarkColor, false) &&
+		!ColorUtil::DrawingColor::Equals(m_BkgndLightColor, m_BkgndDarkColor))
 	{
-		auto gradientBrush = gcnew Drawing2D::LinearGradientBrush(*rowRect, *m_BkgndLightColor, *m_BkgndDarkColor, Drawing2D::LinearGradientMode::Vertical);
+		auto gradientBrush = gcnew Drawing2D::LinearGradientBrush(*rowRect, m_BkgndLightColor, m_BkgndDarkColor, Drawing2D::LinearGradientMode::Vertical);
 
 		g->FillRectangle(gradientBrush, *rowRect);
 	}
