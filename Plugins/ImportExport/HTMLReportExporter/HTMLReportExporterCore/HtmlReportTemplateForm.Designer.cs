@@ -63,9 +63,10 @@
 			this.footerHeightLabel = new System.Windows.Forms.Label();
 			this.footerDividerCheckbox = new System.Windows.Forms.CheckBox();
 			this.footerEnabledCheckbox = new System.Windows.Forms.CheckBox();
-			this.label1 = new System.Windows.Forms.Label();
+			this.labelPreview = new System.Windows.Forms.Label();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.browserPreview = new System.Windows.Forms.WebBrowser();
+			this.previewDefaultBrowser = new System.Windows.Forms.Button();
 			this.htmlReportHeaderControl = new HTMLReportExporter.HtmlReportHeaderControl();
 			this.htmlReportTitleControl = new HTMLReportExporter.HtmlReportTitleControl();
 			this.tableHeaderRowCombobox = new HTMLReportExporter.TableHeaderRowOptionCombobox();
@@ -139,7 +140,8 @@
 			// splitContainer.Panel2
 			// 
 			this.splitContainer.Panel2.BackColor = System.Drawing.SystemColors.Control;
-			this.splitContainer.Panel2.Controls.Add(this.label1);
+			this.splitContainer.Panel2.Controls.Add(this.previewDefaultBrowser);
+			this.splitContainer.Panel2.Controls.Add(this.labelPreview);
 			this.splitContainer.Panel2.Controls.Add(this.panel1);
 			this.splitContainer.Size = new System.Drawing.Size(863, 472);
 			this.splitContainer.SplitterDistance = 414;
@@ -506,14 +508,14 @@
 			this.footerEnabledCheckbox.TabStop = false;
 			this.footerEnabledCheckbox.Text = "Enable";
 			// 
-			// label1
+			// labelPreview
 			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(0, 5);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(45, 13);
-			this.label1.TabIndex = 5;
-			this.label1.Text = "Preview";
+			this.labelPreview.AutoSize = true;
+			this.labelPreview.Location = new System.Drawing.Point(1, 5);
+			this.labelPreview.Name = "labelPreview";
+			this.labelPreview.Size = new System.Drawing.Size(45, 13);
+			this.labelPreview.TabIndex = 5;
+			this.labelPreview.Text = "Preview";
 			// 
 			// panel1
 			// 
@@ -522,9 +524,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.panel1.Controls.Add(this.browserPreview);
-			this.panel1.Location = new System.Drawing.Point(3, 24);
+			this.panel1.Location = new System.Drawing.Point(3, 29);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(439, 444);
+			this.panel1.Size = new System.Drawing.Size(439, 439);
 			this.panel1.TabIndex = 5;
 			// 
 			// browserPreview
@@ -536,9 +538,22 @@
 			this.browserPreview.Location = new System.Drawing.Point(0, 0);
 			this.browserPreview.MinimumSize = new System.Drawing.Size(20, 20);
 			this.browserPreview.Name = "browserPreview";
-			this.browserPreview.Size = new System.Drawing.Size(439, 444);
+			this.browserPreview.Size = new System.Drawing.Size(439, 439);
 			this.browserPreview.TabIndex = 0;
 			this.browserPreview.WebBrowserShortcutsEnabled = false;
+			this.browserPreview.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.OnBeforeNavigate);
+			// 
+			// previewDefaultBrowser
+			// 
+			this.previewDefaultBrowser.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.previewDefaultBrowser.AutoSize = true;
+			this.previewDefaultBrowser.Location = new System.Drawing.Point(341, -1);
+			this.previewDefaultBrowser.Name = "previewDefaultBrowser";
+			this.previewDefaultBrowser.Size = new System.Drawing.Size(101, 23);
+			this.previewDefaultBrowser.TabIndex = 6;
+			this.previewDefaultBrowser.Text = "Default Browser...";
+			this.previewDefaultBrowser.UseVisualStyleBackColor = true;
+			this.previewDefaultBrowser.Click += new System.EventHandler(this.OnShowPreviewInDefaultBrowser);
 			// 
 			// htmlReportHeaderControl
 			// 
@@ -682,7 +697,7 @@
 		private System.Windows.Forms.WebBrowser browserPreview;
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.SplitContainer splitContainer;
-		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label labelPreview;
 		private System.Windows.Forms.ToolStrip Toolbar;
 		private System.Windows.Forms.ToolStripButton toolStripNewReport;
 		private System.Windows.Forms.ToolStripButton toolStripOpenReport;
@@ -718,5 +733,6 @@
 		private System.Windows.Forms.CheckBox footerDividerCheckbox;
 		private System.Windows.Forms.CheckBox footerEnabledCheckbox;
 		private HtmlReportFooterControl htmlReportFooterControl;
+		private System.Windows.Forms.Button previewDefaultBrowser;
 	}
 }

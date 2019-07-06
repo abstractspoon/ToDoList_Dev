@@ -31,6 +31,8 @@ namespace HTMLReportExporter
 		private bool m_FirstPreview = true;
 		private bool m_EditedSinceLastSave = false;
 
+		const String PreviewPageName = "HtmlReporterPreview.html";
+
 		// --------------------------------------------------------------
 
 		private enum PageType
@@ -105,6 +107,9 @@ namespace HTMLReportExporter
 			this.headerEnabledCheckbox.CheckedChanged += new EventHandler(OnHeaderEnableChanged);
 			this.titleEnabledCheckbox.CheckedChanged += new EventHandler(OnTitleEnableChanged);
 			this.footerEnabledCheckbox.CheckedChanged += new EventHandler(OnFooterEnableChanged);
+
+			// IE version
+			this.labelPreview.Text = String.Format("{0} (Internet Explorer {1})", m_Trans.Translate("Preview"), this.browserPreview.Version.Major);
 
 			m_Trans.Translate(this);
 
@@ -390,11 +395,11 @@ namespace HTMLReportExporter
 			RefreshPreview();
 		}
 
-		private void RefreshPreview()
+		private String BuildPreviewPage()
 		{
 			try
 			{
-				String previewPath = Path.Combine(Path.GetTempPath(), "HtmlReporterPreview.html");
+				String previewPath = Path.Combine(Path.GetTempPath(), PreviewPageName);
 
 				using (var file = new StreamWriter(previewPath))
 				{
@@ -406,11 +411,21 @@ namespace HTMLReportExporter
 					}
 				}
 
-				browserPreview.Navigate(new System.Uri(previewPath));
+				return previewPath;
 			}
 			catch (Exception /*e*/)
 			{
 			}
+
+			return String.Empty;
+		}
+
+		private void RefreshPreview()
+		{
+			String previewPage = BuildPreviewPage();
+
+			if (previewPage != "")
+				browserPreview.Navigate(new System.Uri(previewPage));
 		}
 
 		private void OnNewReportTemplate(object sender, EventArgs e)
@@ -535,6 +550,9 @@ namespace HTMLReportExporter
 		{
 			var dialog = new MSDN.Html.Editor.EnterImageForm();
 
+			dialog.EnableHrefText = false;
+			dialog.EnableAlignment = false;
+			dialog.EnableImageWidth = false;
 			dialog.StartPosition = FormStartPosition.CenterParent;
 
 			if (dialog.ShowDialog() == DialogResult.OK)
@@ -542,7 +560,6 @@ namespace HTMLReportExporter
 				m_Template.BackImage = dialog.ImageLink;
 				UpdateControls();
 			}
-
 		}
 
 		private void OnClearBackgroundImage(object sender, EventArgs e)
@@ -579,5 +596,20 @@ namespace HTMLReportExporter
 			UpdateControls();
 		}
 
+		private void OnBeforeNavigate(object sender, WebBrowserNavigatingEventArgs e)
+		{
+			// Disallow everything other than the preview itself
+			int lastSegment = (e.Url.Segments.Count() - 1);
+
+			e.Cancel = ((lastSegment == -1) || !e.Url.Segments[lastSegment].Equals(PreviewPageName));
+		}
+
+		private void OnShowPreviewInDefaultBrowser(object sender, EventArgs e)
+		{
+			String previewPage = BuildPreviewPage();
+
+			if (previewPage != "")
+				Process.Start(previewPage);
+		}
 	}
 }
