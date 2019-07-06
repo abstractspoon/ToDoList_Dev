@@ -38,6 +38,9 @@ namespace MSDN.Html.Editor
 			this.listAlign = new System.Windows.Forms.ComboBox();
 			this.fileBrowseBtn = new System.Windows.Forms.Button();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.enablePixelWidth = new System.Windows.Forms.CheckBox();
+			this.pixelWidth = new System.Windows.Forms.NumericUpDown();
+			((System.ComponentModel.ISupportInitialize)(this.pixelWidth)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// bInsert
@@ -45,10 +48,10 @@ namespace MSDN.Html.Editor
 			this.bInsert.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bInsert.DialogResult = System.Windows.Forms.DialogResult.OK;
 			this.bInsert.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bInsert.Location = new System.Drawing.Point(178, 95);
+			this.bInsert.Location = new System.Drawing.Point(178, 121);
 			this.bInsert.Name = "bInsert";
 			this.bInsert.Size = new System.Drawing.Size(75, 23);
-			this.bInsert.TabIndex = 5;
+			this.bInsert.TabIndex = 7;
 			this.bInsert.Text = "OK";
 			// 
 			// bCancel
@@ -56,10 +59,10 @@ namespace MSDN.Html.Editor
 			this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.bCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bCancel.Location = new System.Drawing.Point(259, 95);
+			this.bCancel.Location = new System.Drawing.Point(259, 121);
 			this.bCancel.Name = "bCancel";
 			this.bCancel.Size = new System.Drawing.Size(75, 23);
-			this.bCancel.TabIndex = 6;
+			this.bCancel.TabIndex = 8;
 			this.bCancel.Text = "Cancel";
 			// 
 			// labelText
@@ -68,7 +71,7 @@ namespace MSDN.Html.Editor
 			this.labelText.Location = new System.Drawing.Point(9, 15);
 			this.labelText.Name = "labelText";
 			this.labelText.Size = new System.Drawing.Size(28, 13);
-			this.labelText.TabIndex = 7;
+			this.labelText.TabIndex = 9;
 			this.labelText.Text = "Text";
 			this.labelText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
@@ -90,7 +93,7 @@ namespace MSDN.Html.Editor
 			this.hrefText.Location = new System.Drawing.Point(70, 12);
 			this.hrefText.Name = "hrefText";
 			this.hrefText.Size = new System.Drawing.Size(263, 20);
-			this.hrefText.TabIndex = 8;
+			this.hrefText.TabIndex = 10;
 			this.hrefText.WordWrap = false;
 			// 
 			// hrefLink
@@ -136,13 +139,48 @@ namespace MSDN.Html.Editor
 			this.fileBrowseBtn.UseVisualStyleBackColor = true;
 			this.fileBrowseBtn.Click += new System.EventHandler(this.fileBrowseBtn_Click);
 			// 
+			// enablePixelWidth
+			// 
+			this.enablePixelWidth.AutoSize = true;
+			this.enablePixelWidth.Location = new System.Drawing.Point(70, 92);
+			this.enablePixelWidth.Name = "enablePixelWidth";
+			this.enablePixelWidth.Size = new System.Drawing.Size(94, 17);
+			this.enablePixelWidth.TabIndex = 5;
+			this.enablePixelWidth.Text = "Width in pixels";
+			this.enablePixelWidth.UseVisualStyleBackColor = true;
+			this.enablePixelWidth.CheckedChanged += new System.EventHandler(this.OnPixelWidthCheckChange);
+			// 
+			// pixelWidth
+			// 
+			this.pixelWidth.Location = new System.Drawing.Point(210, 91);
+			this.pixelWidth.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+			this.pixelWidth.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.pixelWidth.Name = "pixelWidth";
+			this.pixelWidth.Size = new System.Drawing.Size(123, 20);
+			this.pixelWidth.TabIndex = 6;
+			this.pixelWidth.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			// 
 			// EnterImageForm
 			// 
 			this.AcceptButton = this.bInsert;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.bCancel;
-			this.ClientSize = new System.Drawing.Size(345, 126);
+			this.ClientSize = new System.Drawing.Size(345, 152);
+			this.Controls.Add(this.pixelWidth);
+			this.Controls.Add(this.enablePixelWidth);
 			this.Controls.Add(this.fileBrowseBtn);
 			this.Controls.Add(this.listAlign);
 			this.Controls.Add(this.labelAlign);
@@ -160,6 +198,7 @@ namespace MSDN.Html.Editor
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.Text = "Insert Image";
+			((System.ComponentModel.ISupportInitialize)(this.pixelWidth)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -176,6 +215,8 @@ namespace MSDN.Html.Editor
         private System.Windows.Forms.ComboBox listAlign;
 		private System.Windows.Forms.Button fileBrowseBtn;
 		private System.Windows.Forms.ToolTip toolTip1;
+		private System.Windows.Forms.CheckBox enablePixelWidth;
+		private System.Windows.Forms.NumericUpDown pixelWidth;
 	}
 }
 

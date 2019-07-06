@@ -10,13 +10,13 @@ using System.Windows.Forms;
 
 namespace MSDN.Html.Editor
 {
-	
+
 	/// <summary>
 	/// Form used to enter an Html Image attribute
 	/// Consists of Href, Text and Image Alignment
 	/// </summary>
 	public partial class EnterImageForm : Form
-    {
+	{
 		private static string ImageFilter = "Image files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif;";
 
 
@@ -24,72 +24,118 @@ namespace MSDN.Html.Editor
 		/// Public form constructor
 		/// </summary>
 		public EnterImageForm()
-        {
-            //
-            // Required for Windows Form Designer support
-            //
-            InitializeComponent();
+		{
+			//
+			// Required for Windows Form Designer support
+			//
+			InitializeComponent();
 
-            // define the text for the alignment
-            this.listAlign.Items.AddRange(Enum.GetNames(typeof(ImageAlignOption)));
+			// define the text for the alignment
+			this.listAlign.Items.AddRange(Enum.GetNames(typeof(ImageAlignOption)));
 
-            // ensure default value set for target
-            this.listAlign.SelectedIndex = 4;
+			// ensure default value set for target
+			this.listAlign.SelectedIndex = (int)ImageAlignOption.Default;
 
-        } //EnterHrefForm
+		} //EnterHrefForm
 
 
-        /// <summary>
-        /// Property for the text to display
-        /// </summary>
-        public string ImageText
-        {
-            get
-            {
-                return this.hrefText.Text;
-            }
-            set
-            {
-                this.hrefText.Text = value;
-            }
+		/// <summary>
+		/// Property for the text to display
+		/// </summary>
+		public string ImageText
+		{
+			get
+			{
+				return this.hrefText.Text;
+			}
+			set
+			{
+				this.hrefText.Text = value;
+			}
 
-        } //ImageText
+		} //ImageText
 
-        /// <summary>
-        /// Property for the href for the image
-        /// </summary>
-        public string ImageLink
-        {
-            get
-            {
-                return this.hrefLink.Text.Trim();
-            }
-            set
-            {
-                this.hrefLink.Text = value.Trim();
+		/// <summary>
+		/// Property for the href for the image
+		/// </summary>
+		public string ImageLink
+		{
+			get
+			{
+				return this.hrefLink.Text.Trim();
+			}
+			set
+			{
+				this.hrefLink.Text = value.Trim();
 
 				// Can't change the image link once it's set
 				this.hrefLink.ReadOnly = !String.IsNullOrEmpty(this.hrefLink.Text);
-            }
+			}
 
-        } //ImageLink
+		} //ImageLink
 
-        /// <summary>
-        /// Property for the image align
-        /// </summary>
-        public ImageAlignOption ImageAlign
-        {
-            get
-            {
-                return (ImageAlignOption)this.listAlign.SelectedIndex;
-            }
-            set
-            {
-                this.listAlign.SelectedIndex = (int)value;
-            }
-        }
+		/// <summary>
+		/// Property for the image align
+		/// </summary>
+		public ImageAlignOption ImageAlign
+		{
+			get
+			{
+				return (ImageAlignOption)this.listAlign.SelectedIndex;
+			}
+			set
+			{
+				this.listAlign.SelectedIndex = (int)value;
+			}
+		}
 
 		public String LastBrowsedFolder { get; set; }
+
+		public bool EnableHrefText
+		{
+			set { hrefText.Enabled = value; }
+		}
+
+		public bool EnableAlignment
+		{
+			set { listAlign.Enabled = value; }
+		}
+
+		public bool EnableImageWidth
+		{
+			set
+			{
+				enablePixelWidth.Enabled = value;
+				pixelWidth.Enabled = (value && enablePixelWidth.Checked);
+			}
+		}
+
+		public int ImageWidth
+		{
+			get
+			{
+				if (pixelWidth.Enabled && enablePixelWidth.Checked)
+					return Math.Max(1, (int)pixelWidth.Value);
+
+				//else
+				return -1;
+			}
+
+			set
+			{
+				if (value <= 0)
+				{
+					enablePixelWidth.Checked = false;
+					pixelWidth.Enabled = false;
+				}
+				else
+				{
+					enablePixelWidth.Checked = true;
+					pixelWidth.Enabled = true;
+					pixelWidth.Value = value;
+				}
+			}
+		} 
 
 		public static bool IsImagePath(string path)
 		{
@@ -146,5 +192,9 @@ namespace MSDN.Html.Editor
 				hrefText.Select();
 		}
 
+		private void OnPixelWidthCheckChange(object sender, EventArgs e)
+		{
+			pixelWidth.Enabled = (enablePixelWidth.Checked && pixelWidth.Enabled);
+		}
 	}
 }

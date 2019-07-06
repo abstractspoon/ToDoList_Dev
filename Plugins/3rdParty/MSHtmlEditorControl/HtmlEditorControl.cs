@@ -2390,6 +2390,7 @@ namespace MSDN.Html.Editor
                 dialog.ImageLink = imageHref;
                 dialog.ImageText = imageText;
                 dialog.ImageAlign = imageAlign;
+				dialog.ImageWidth = ((image == null) ? -1 : image.width);
 
                 PreShowDialog(dialog);
 
@@ -2400,10 +2401,10 @@ namespace MSDN.Html.Editor
 					PostShowDialog(dialog);
 
 					if (image == null)
-						return InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign);
+						return InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign, dialog.ImageWidth);
 
 					// else
-					ModifyImage(image, dialog.ImageText, dialog.ImageAlign);
+					ModifyImage(image, dialog.ImageText, dialog.ImageAlign, dialog.ImageWidth);
 				}
 			}
 
@@ -2411,7 +2412,7 @@ namespace MSDN.Html.Editor
 
         } //InsertImagePrompt
 
-		protected bool InsertImage(string imageHref, string imageText, ImageAlignOption imageAlign)
+		protected bool InsertImage(string imageHref, string imageText, ImageAlignOption imageAlign, int imageWidth = -1)
 		{
 			if (imageHref == string.Empty)
 				return false;
@@ -2423,13 +2424,13 @@ namespace MSDN.Html.Editor
 
 			if ((control != null) && IsStringEqual(control.tagName, IMAGE_TAG))
 			{
-				ModifyImage((mshtmlImageElement)control, imageText, imageAlign);
+				ModifyImage((mshtmlImageElement)control, imageText, imageAlign, imageWidth);
 			}
 
 			return true;
 		}
 
-		protected void ModifyImage(mshtmlImageElement image, string imageText, ImageAlignOption imageAlign)
+		protected void ModifyImage(mshtmlImageElement image, string imageText, ImageAlignOption imageAlign, int imageWidth)
 		{
 			image.alt = (String.IsNullOrEmpty(imageText) ? image.href : imageText);
 
@@ -2437,6 +2438,15 @@ namespace MSDN.Html.Editor
 				image.align = imageAlign.ToString().ToLower();
 			else
 				image.align = "";
+
+			// We use the image width alone to size the image proportionally
+			// so we always delete the height attribute first
+			(image as mshtmlElement).removeAttribute("height");
+
+			if (imageWidth > 0)
+				image.width = imageWidth;
+			else
+				(image as mshtmlElement).removeAttribute("width");
 		}
 
 		/// <summary>

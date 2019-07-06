@@ -717,7 +717,9 @@ namespace HTMLReportExporter
 		public void Clear()
 		{
 			m_FilePath = String.Empty;
+
 			BackImage = String.Empty;
+			BackColor = Color.Transparent;
 
 			Header = new HeaderTemplate();
 			Title = new TitleTemplate();
