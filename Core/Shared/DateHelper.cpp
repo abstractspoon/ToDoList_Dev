@@ -432,18 +432,6 @@ int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, DH_DATE nTo, BOOL 
 
 int CDateHelper::CalcDaysFromTo(DH_DATE nFrom, DH_DATE nTo, BOOL bInclusive, BOOL bWeekdays)
 {
-	ASSERT (nFrom <= nTo);
-
-	if (nFrom > nTo)
-	{
-		return 0;
-	}
-	else if (nFrom == nTo)
-	{
-		return bInclusive ? 1 : 0;
-	}
-
-	// else
 	return CalcDaysFromTo(GetDate(nFrom), GetDate(nTo), bInclusive, bWeekdays);
 }
 
