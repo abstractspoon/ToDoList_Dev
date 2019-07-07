@@ -171,7 +171,7 @@ namespace HTMLReportExporter
 
 		public bool Equals(HeaderFooterTemplateItem other)
 		{
-			return (base.Equals(other) && 
+			return (base.Equals(other) &&
 					(WantDivider == other.WantDivider) &&
 					(PixelHeight == other.PixelHeight) &&
 					DrawingColor.Equals(BackColor, other.BackColor));
@@ -516,7 +516,7 @@ namespace HTMLReportExporter
 				switch (container.Name.ToUpper())
 				{
 					case "TABLE":
-//						taskElm = AgilityUtils.FindElement(container, "TD", "$(title");
+						//taskElm = AgilityUtils.FindElement(container, "TD", "$(title");
 						taskElm = AgilityUtils.FindElement(container, "TR");
 						break;
 
@@ -574,7 +574,7 @@ namespace HTMLReportExporter
 
 					row = row.NextSibling;
 				}
-				
+
 				return true;
 			}
 
@@ -746,7 +746,7 @@ namespace HTMLReportExporter
 
 		public bool HasBackColor
 		{
-			get	{ return !DrawingColor.IsTransparent(BackColor, true); } // white is transparent
+			get { return !DrawingColor.IsTransparent(BackColor, true); } // white is transparent
 		}
 
 		public String BackColorHtml
@@ -761,6 +761,8 @@ namespace HTMLReportExporter
 				BackColor = DrawingColor.FromHtml(value);
 			}
 		}
+
+		public String FilePath { get { return m_FilePath; } }
 
 		public HeaderTemplate Header { get; private set; }
 		public TitleTemplate Title { get; private set; }

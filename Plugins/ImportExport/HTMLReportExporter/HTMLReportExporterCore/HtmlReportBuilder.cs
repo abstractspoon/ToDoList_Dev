@@ -147,7 +147,10 @@ namespace HTMLReportExporter
 			html.WriteLine("table { border-collapse: collapse; }");
 			html.WriteLine(".page {	page-break-after: always; }");
 			html.WriteLine("p {	margin: 0; }");
-
+#if DEBUG
+			if (m_Template.FilePath.Contains("index.rbt"))
+				html.WriteLine("a {	color: white; }");
+#endif
 			Header.WriteStyles(html);
 			Footer.WriteStyles(html);
 			Title.WriteStyles(html);
