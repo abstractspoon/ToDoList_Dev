@@ -3374,7 +3374,9 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 			// work in days
 			if (nUnits != TDCU_DAYS)
 			{
-				dDuration = CTimeHelper(24.0, 7.0).GetTime(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_DAYS);
+				CTwentyFourSevenWeek week;
+
+				dDuration = CTimeHelper(week).GetTime(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_DAYS);
 				nUnits = TDCU_DAYS;
 			}
 
@@ -3492,8 +3494,8 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 
 			if (nUnits != TDCU_DAYS)
 			{
-				CTimeHelper thAllDay(24.0, 7.0);
-				dDuration = thAllDay.GetTime(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
+				CTwentyFourSevenWeek week;
+				dDuration = CTimeHelper(week).GetTime(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
 			}
 		}
 		break;
@@ -3501,7 +3503,9 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	default:
 		// Work in weekdays
 		{
-			if (CWorkingWeek().HasWeekend())
+			CWorkingWeek week;
+
+			if (week.HasWeekend())
 			{
 				// process each whole or part day  
 				double dDayStart(dateStart);
@@ -3511,10 +3515,10 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 
 				while (dDayStart < dateDue)
 				{
-					// determine the end of this day
+					// determine the end of 'this' day
 					double dDayEnd = (CDateHelper::GetDateOnly(dDayStart).m_dt + 1.0);
 
-					if (!CWorkingWeek().Weekend().IsWeekend(dDayStart))
+					if (!week.Weekend().IsWeekend(dDayStart))
 					{
 						dDuration += (min(dDayEnd, dateDue) - dDayStart); // in days
 					}
@@ -3524,13 +3528,25 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 				}
 
 				// handle 'whole' of due date
-				if (!CWorkingWeek().Weekend().IsWeekend(dateDue) && IsEndOfDay(dateDue))
+				if (!week.Weekend().IsWeekend(dateDue) && IsEndOfDay(dateDue))
 					dDuration += 1.0;
 			}
 			else if (IsEndOfDay(dateDue))
 			{
 				dDuration += 1.0;
 			}
+
+#ifdef _DEBUG
+/*
+			COleDateTime dtEnd(dateDue);
+
+			if (IsEndOfDay(dtEnd))
+				dtEnd.m_dt += 1.0;
+
+			double dTestDays = week.CalculateDurationInDays(dateStart, dtEnd);
+			ASSERT(dTestDays == dDuration);
+*/
+#endif
 
 			if (nUnits != TDCU_WEEKDAYS)
 			{

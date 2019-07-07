@@ -8,6 +8,7 @@
 #include "misc.h"
 #include "localizer.h"
 #include "holdredraw.h"
+#include "workingweek.h"
 
 #include <math.h>
 
@@ -332,11 +333,10 @@ void CTimeComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
 		!Misc::IsHighContrastActive())
 	{
 		double dTime = Get24HourTime(nItem);
-		CTimeHelper th;
+		CWorkingDay wd;
 
 		if ((dTime >= 0) &&
-			((dTime < th.GetStartOfWorkday(FALSE)) ||
-			(dTime > th.GetEndOfWorkday(FALSE))))
+			((dTime < wd.GetStartOfDayInHours()) ||	(dTime > wd.GetEndOfDayInHours())))
 		{
 			crBack = GetSysColor(COLOR_3DFACE);
 			crText = GetSysColor(COLOR_3DSHADOW);

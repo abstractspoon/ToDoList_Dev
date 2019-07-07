@@ -40,8 +40,6 @@ public:
 	BOOL GetExclusiveTimeTracking() const { return m_bExclusiveTimeTracking; }
 	BOOL GetAllowParentTimeTracking() const { return m_bAllowParentTimeTracking; }
 
-	BOOL GetWorkingWeek(CWorkingWeek& week) const;
-	DWORD GetWeekendDays() const { return m_dwWeekends; }
 	BOOL GetDisplayLogConfirm() const { return m_bDisplayLogConfirm; }
 	int GetTrackReminderFrequency() const { return m_bTrackReminder ? m_nTrackReminderFrequency : 0; }
 	BOOL GetEndTrackingOnReminder() const { return m_bTrackReminder ? m_bEndTrackingOnReminder : FALSE; }
@@ -110,6 +108,7 @@ protected:
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	double GetHoursInOneDay() const;
 
+	void CheckSetWorkingWeek();
 };
 
 //{{AFX_INSERT_LOCATION}}

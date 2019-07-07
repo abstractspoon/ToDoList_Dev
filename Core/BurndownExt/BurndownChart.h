@@ -16,7 +16,6 @@ public:
 
 	BOOL SetChartType(BURNDOWN_CHARTTYPE nType);
 	BOOL SaveToImage(CBitmap& bmImage);
-	BOOL SetTimeIntervals(int nDaysInWeek, double dHoursInDay);
 
 	void RebuildGraph(BOOL bUpdateExtents);
 	void FilterToolTipMessage(MSG* pMsg);
@@ -27,10 +26,8 @@ protected:
 	CToolTipCtrlEx m_tooltip; 
 	
 	COleDateTimeRange m_dtExtents;
-	int m_nScale;
 	BURNDOWN_CHARTTYPE m_nChartType;
-	int m_nDaysInWeek;
-	double m_dHoursInDay;
+	int m_nScale;
 
 protected:
 	void OnSize(UINT nType, int cx, int cy);

@@ -2610,12 +2610,6 @@ void CToDoListWnd::LoadSettings()
 	UpdateGlobalHotkey();
 	UpdateTimeTrackerPreferences();
 	
-	// time periods
-	CWorkingWeek week;
-
-	if (userPrefs.GetWorkingWeek(week))
-		CWorkingWeek::Initialise(week);
-
 	// support for .tdl extension and tdl:// protocol
 	EnableTDLExtension(userPrefs.GetEnableTDLExtension(), TRUE);
 	EnableTDLProtocol(userPrefs.GetEnableTDLProtocol(), TRUE);
@@ -4981,12 +4975,6 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 		// hotkey
 		UpdateGlobalHotkey();
 		
-		// time periods
-		CWorkingWeek week;
-
-		if (newPrefs.GetWorkingWeek(week))
-			CWorkingWeek::Initialise(week);
-
 		RefreshTabOrder();
 		RefreshPauseTimeTracking();
 		UpdateCaption();

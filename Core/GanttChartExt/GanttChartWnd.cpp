@@ -293,15 +293,7 @@ void CGanttChartWnd::InitWorkingWeek(const IPreferences* pPrefs)
 	if (pPrefs->GetProfileInt(_T("Preferences"), _T("HasLunchBreak"), TRUE))
 		dEndOfLunchInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("EndOfLunchInHours"), 14.0);
 
-	CWorkingWeek::Initialise(CWorkingWeek(dwWeekends,
-											dStartOfDayInHours,
-											dHoursInDay,
-											dStartOfLunchInHours,
-											dEndOfLunchInHours));
-	
-	CTimeHelper::SetHoursInWorkday(dHoursInDay);
-	CTimeHelper::SetStartOfWorkday(dStartOfDayInHours);
-	CTimeHelper::SetLunchBreak(dStartOfLunchInHours, dEndOfLunchInHours);
+	CWorkingWeek::Initialise(dwWeekends, dHoursInDay, dStartOfDayInHours, dStartOfLunchInHours, dEndOfLunchInHours);
 }
 
 void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly) 

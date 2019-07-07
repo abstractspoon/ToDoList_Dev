@@ -220,7 +220,9 @@ void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 COleDateTimeSpan CPreferencesTaskCalcPage::GetRecentlyModifiedPeriod() const
 {
-	return CTimeHelper(24, 7).GetTime(m_recentModTime.dAmount, m_recentModTime.GetTHUnits(), THU_DAYS);
+	CTwentyFourSevenWeek week;
+
+	return CTimeHelper(week).GetTime(m_recentModTime.dAmount, m_recentModTime.GetTHUnits(), THU_DAYS);
 }
 
 void CPreferencesTaskCalcPage::OnSetStatusOnDone() 

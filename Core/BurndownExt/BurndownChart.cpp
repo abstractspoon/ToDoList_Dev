@@ -38,9 +38,6 @@ const COLORREF COLOR_ORANGE		= RGB(255,  91,  21);
 const COLORREF COLOR_ORANGELINE	= GraphicsMisc::Darker(COLOR_ORANGE, 0.05, FALSE);
 const COLORREF COLOR_ORANGEFILL	= GraphicsMisc::Lighter(COLOR_ORANGE, 0.25, FALSE);
 
-const int    DEF_DAYSINWEEK			= 5;
-const double DEF_HOURSINDAY			= 8.0;
-
 const int    LINE_THICKNESS			= 1;
 const double MIN_SUBINTERVAL_HEIGHT	= GraphicsMisc::ScaleByDPIFactor(10);
 
@@ -75,8 +72,6 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	: 
 	m_data(data),
 	m_nScale(1),
-	m_dHoursInDay(DEF_HOURSINDAY),
-	m_nDaysInWeek(DEF_DAYSINWEEK),
 	m_nChartType(BCT_INCOMPLETETASKS)
 {
 }
@@ -100,19 +95,6 @@ BOOL CBurndownChart::SetChartType(BURNDOWN_CHARTTYPE nType)
 	{
 		m_nChartType = nType;
 		RebuildGraph(FALSE);
-
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-BOOL CBurndownChart::SetTimeIntervals(int nDaysInWeek, double dHoursInDay)
-{
-	if ((nDaysInWeek != m_nDaysInWeek) || (dHoursInDay != m_dHoursInDay))
-	{
-		m_dHoursInDay = dHoursInDay;
-		m_nDaysInWeek = nDaysInWeek;
 
 		return TRUE;
 	}
@@ -245,7 +227,7 @@ void CBurndownChart::BuildSprintGraph()
 	COleDateTime dtStart = GetGraphStartDate();
 	COleDateTime dtEnd = GetGraphEndDate();
 	
-	double dTotalEst = m_data.CalcTotalTimeEstimateInDays(m_nDaysInWeek, m_dHoursInDay);
+	double dTotalEst = m_data.CalcTotalTimeEstimateInDays();
 	
 	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
 	
@@ -257,7 +239,7 @@ void CBurndownChart::BuildSprintGraph()
 		
 		// Time Spent
 		COleDateTime date(dtStart.m_dt + nDay);
-		double dSpent = m_data.CalcTimeSpentInDays(date, m_nDaysInWeek, m_dHoursInDay);
+		double dSpent = m_data.CalcTimeSpentInDays(date);
 		
 		AddData(SPRINT_SPENT, (dTotalEst - dSpent));
 	}

@@ -129,7 +129,12 @@ void CPreferencesTaskPage::OnFirstShow()
 
 void CPreferencesTaskPage::OnOK()
 {
-	// Validate working day
+	// Update working week
+	CheckSetWorkingWeek();
+}
+
+void CPreferencesTaskPage::CheckSetWorkingWeek()
+{
 	double dHoursInDay = GetHoursInOneDay();
 	m_sHoursInDay = Misc::Format(dHoursInDay, 2);
 
@@ -137,15 +142,12 @@ void CPreferencesTaskPage::OnOK()
 	m_dStartOfLunchInHours = max(m_dStartOfWorkdayInHours, m_dStartOfLunchInHours);
 	m_dEndOfLunchInHours = min(m_dEndOfLunchInHours, (m_dStartOfWorkdayInHours + dHoursInDay));
 	m_dEndOfLunchInHours = max(m_dEndOfLunchInHours, m_dStartOfLunchInHours);
-}
 
-BOOL CPreferencesTaskPage::GetWorkingWeek(CWorkingWeek& week) const
-{
-	return week.Initialise(m_dwWeekends,
-						   m_dStartOfWorkdayInHours,
-						   GetHoursInOneDay(),
-						   m_dStartOfLunchInHours,
-						   m_bHasLunchBreak ? m_dEndOfLunchInHours : m_dStartOfLunchInHours);
+	VERIFY(CWorkingWeek::Initialise(m_dwWeekends,
+									dHoursInDay,
+									m_dStartOfWorkdayInHours,
+									m_dStartOfLunchInHours,
+									m_dEndOfLunchInHours));
 }
 
 double CPreferencesTaskPage::GetHoursInOneDay() const
@@ -214,6 +216,8 @@ void CPreferencesTaskPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR s
 		dwDefWeekend = 0; // some people work 7 days a week
 
 	m_dwWeekends = pPrefs->GetProfileInt(szKey, _T("Weekends"), dwDefWeekend);
+
+	CheckSetWorkingWeek();
 
 //	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }

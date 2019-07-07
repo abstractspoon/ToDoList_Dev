@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "WorkingWeek.h"
+
 #include <afxtempl.h>
 
 //////////////////////////////////////////////////////////////////////
@@ -28,17 +30,6 @@ enum TH_UNITS
 
 //////////////////////////////////////////////////////////////////////
 
-enum THU_WORKDAYPERIOD
-{
-	THU_BEFORE,
-	THU_MORNING,
-	THU_LUNCH,
-	THU_AFTERNOON,
-	THU_AFTER,
-};
-
-//////////////////////////////////////////////////////////////////////
-
 enum THU_HMS
 {
 	HMS_ALLOWZERO		= 0x01,
@@ -53,31 +44,16 @@ class CTimeHelper
 {
 public:
 	CTimeHelper(); // uses statically defined hours and days
-	CTimeHelper(double dHoursInWorkday, 
-				double dWorkdaysInWeek,
-				double dDayStartInHours = 9.0,
-				double dLunchStartInHours = 13.0, 
-				double dLunchEndInHours = 14.0);
+	CTimeHelper(const CWorkingWeek& week);
 	
 	double GetTime(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits) const;
 	CString FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFlags = HMS_DECIMALPLACES) const;
 	CString FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces) const;
 	CString FormatTime(double dTime, int nDecPlaces) const;
-	double GetStartOfWorkday(BOOL bInDays = TRUE) const;
-	double GetStartOfWorkdayLunch(BOOL bInDays = TRUE) const;
-	double GetEndOfWorkday(BOOL bInDays = TRUE) const;
-	double GetEndOfWorkdayLunch(BOOL bInDays = TRUE) const;
-
-	double GetHoursInOneDay(BOOL bStatic = FALSE) const;
-	double GetWeekdaysInOneWeek(BOOL bStatic = FALSE) const;
 
 	int Compare(double dTime1, TH_UNITS nUnits1, double dTime2, TH_UNITS nUnits2) const;
 
 public:
-	static BOOL SetHoursInWorkday(double dHours);
-	static BOOL SetWorkdaysInWeek(double dDays);
-	static BOOL SetStartOfWorkday(double dHours);
-	static BOOL SetLunchBreak(double dStartInHours, double dEndInHours);
 	static void SetUnits(TH_UNITS nUnits, LPCTSTR szUnits);
 	static void SetUnits(TH_UNITS nUnits, TCHAR cUnits);
 	static TCHAR GetUnits(TH_UNITS nUnits);
@@ -90,18 +66,13 @@ public:
 	static double DecodeClockTime(LPCTSTR szTime); // returns 0-24
 	
 protected:
-	double m_dHoursInWorkday, m_dWorkdaysInWeek;
-	double m_dDayStartInHours, m_dLunchStartInHours, m_dLunchEndInHours;
+	CWorkingWeek m_week;
 
 protected:
 	double GetDaysToWeeksFactor(TH_UNITS nUnits) const;
 	TH_UNITS GetDaysToWeeksUnits(TH_UNITS nUnits) const;
 
 protected:
-	// user definable pseudo-constants
-	static double HOURSINWORKDAY, WORKDAYSINWEEK; 
-	static double DAYSTARTINHOURS, LUNCHSTARTINHOURS, LUNCHENDINHOURS;
-
 	static CMap<TH_UNITS, TH_UNITS, TCHAR, TCHAR&> MAPUNIT2CH;
 	
 protected:
@@ -115,12 +86,6 @@ protected:
 	static BOOL IsValidUnit(TH_UNITS nUnits);
 	static BOOL RemovePM(CString& sTime);
 	static BOOL RemoveAM(CString& sTime);
-
-	// Not currently used anywhere
-	void CalculatePartWorkdays(const COleDateTime& dtStart, const COleDateTime& dtEnd,
-		double& dPartStartDay, double& dPartEndDay, BOOL bInDays = TRUE) const;
-
-	THU_WORKDAYPERIOD GetWorkdayPeriod(const COleDateTime& date) const;
 };
 
 #endif // !defined(AFX_TIMEHELPER_H__BA0C1E67_FAAA_4E65_8EF3_01B011ACFBBC__INCLUDED_)

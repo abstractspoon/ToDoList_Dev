@@ -75,13 +75,13 @@ void STATSITEM::MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents)
 	}
 }
 
-double STATSITEM::CalcTimeSpentInDays(const COleDateTime& date, int nDaysInWeek, double dHoursInDay) const
+double STATSITEM::CalcTimeSpentInDays(const COleDateTime& date) const
 {
 	// Ignore tasks with no time spent
 	if (dTimeSpent == 0.0)
 		return 0.0;
 
-	double dTimeSpentDays = CalcTimeInDays(dTimeSpent, nTimeSpentUnits, nDaysInWeek, dHoursInDay);
+	double dTimeSpentDays = CalcTimeInDays(dTimeSpent, nTimeSpentUnits);
 
 	BOOL bHasStart = HasStart();
 	double dDays = 0.0;
@@ -110,12 +110,12 @@ double STATSITEM::CalcTimeSpentInDays(const COleDateTime& date, int nDaysInWeek,
 	return dDays;
 }
 
-double STATSITEM::CalcTimeEstimateInDays(int nDaysInWeek, double dHoursInDay) const
+double STATSITEM::CalcTimeEstimateInDays() const
 {
-	return CalcTimeInDays(dTimeEst, nTimeEstUnits, nDaysInWeek, dHoursInDay);
+	return CalcTimeInDays(dTimeEst, nTimeEstUnits);
 }
 
-double STATSITEM::CalcTimeInDays(double dTime, TDC_UNITS nUnits, int nDaysInWeek, double dHoursInDay)
+double STATSITEM::CalcTimeInDays(double dTime, TDC_UNITS nUnits)
 {
 	switch (nUnits)
 	{
@@ -126,9 +126,7 @@ double STATSITEM::CalcTimeInDays(double dTime, TDC_UNITS nUnits, int nDaysInWeek
 
 	// all the rest
 	TH_UNITS nTHUnits = MapUnitsToTHUnits(nUnits);
-	CTimeHelper th(dHoursInDay, nDaysInWeek);
-
-	return th.GetTime(dTime, nTHUnits, THU_WEEKDAYS);
+	return CTimeHelper().GetTime(dTime, nTHUnits, THU_WEEKDAYS);
 }
 
 TH_UNITS STATSITEM::MapUnitsToTHUnits(TDC_UNITS nUnits)
@@ -334,7 +332,7 @@ int CStatsItemArray::CompareItems(const void* pV1, const void* pV2)
 	return 0;
 }
 
-double CStatsItemArray::CalcTimeSpentInDays(const COleDateTime& date, int nDaysInWeek, double dHoursInDay) const
+double CStatsItemArray::CalcTimeSpentInDays(const COleDateTime& date) const
 {
 	int nNumItems = GetSize();
 	double dDays = 0;
@@ -347,20 +345,20 @@ double CStatsItemArray::CalcTimeSpentInDays(const COleDateTime& date, int nDaysI
 		if (pSI->HasStart() && (pSI->dtStart >= date))
 			break;
 
-		dDays += pSI->CalcTimeSpentInDays(date, nDaysInWeek, dHoursInDay);
+		dDays += pSI->CalcTimeSpentInDays(date);
 	}
 	
 	return dDays;
 }
 
-double CStatsItemArray::CalcTotalTimeEstimateInDays(int nDaysInWeek, double dHoursInDay) const
+double CStatsItemArray::CalcTotalTimeEstimateInDays() const
 {
 	double dDays = 0;
 	int nItem = GetSize();
 	
 	while (nItem--)
 	{
-		dDays += GetAt(nItem)->CalcTimeEstimateInDays(nDaysInWeek, dHoursInDay);
+		dDays += GetAt(nItem)->CalcTimeEstimateInDays();
 	}
 	
 	return dDays;

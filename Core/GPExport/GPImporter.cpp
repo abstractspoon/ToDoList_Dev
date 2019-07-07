@@ -343,7 +343,7 @@ void CGPImporter::InitWeekends(const CXmlItem* pXISrcPrj)
 		}
 	}
 
-	CWeekend::Initialise(CWeekend(dwWeekends));
+	CWeekend::Initialise(dwWeekends);
 }
 
 void CGPImporter::BuildResourceMap(const CXmlItem* pXISrcPrj)

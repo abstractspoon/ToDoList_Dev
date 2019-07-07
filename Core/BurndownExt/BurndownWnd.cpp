@@ -15,6 +15,7 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\enstring.h"
+#include "..\shared\WorkingWeek.h"
 
 #include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\GdiPlus.h"
@@ -200,11 +201,10 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	}
 
 	// application preferences
+	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
 	double dHoursInDay = _ttof(pPrefs->GetProfileString(_T("Preferences"), _T("HoursInDay"), _T("8")));
-	int nDaysInWeek = pPrefs->GetProfileInt(_T("Preferences"), _T("DaysInWeek"), 5);
 
-	if (m_graph.SetTimeIntervals(nDaysInWeek, dHoursInDay))
-		RebuildGraph(FALSE, FALSE, TRUE);
+	CWorkingWeek::Initialise(dwWeekends, dHoursInDay);
 }
 
 void CBurndownWnd::SetUITheme(const UITHEME* pTheme)

@@ -234,8 +234,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	m_BigCalendar.SetOption(TCCO_SHOWPARENTTASKSASFOLDER, pPrefs->GetProfileInt(_T("Preferences"), _T("ShowParentsAsFolders"), TRUE));
 
 	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
-
-	CWeekend::Initialise(CWeekend(dwWeekends));
+	CWeekend::Initialise(dwWeekends);
 
 	// calendar specific preferences
 	if (!bAppOnly)

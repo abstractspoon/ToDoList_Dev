@@ -10,7 +10,6 @@
 
 #include "..\shared\DialogHelper.h"
 #include "..\shared\DateHelper.h"
-#include "..\shared\timeHelper.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\TreeCtrlHelper.h"
@@ -3674,10 +3673,10 @@ void CGanttTreeListCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 
 					if (bDrawNonWorkingHours)
 					{
-						CTimeHelper th;
+						CWorkingDay wd;
 
-						nStartHour = (int)th.GetStartOfWorkday(FALSE);
-						nEndHour = (int)(th.GetEndOfWorkday(FALSE) + 0.5);
+						nStartHour = (int)wd.GetStartOfDayInHours();
+						nEndHour = (int)(wd.GetEndOfDayInHours() + 0.5);
 
 						if (m_crGridLine != CLR_NONE)
 							rHour.bottom--;
@@ -6851,19 +6850,22 @@ BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
 
 			case GTLCD_WHOLE:
 				{
-					// preserve task duration
-					COleDateTime dtDuration(dtDue - dtStart);
-
-					// handle whole days
-					if (CDateHelper::DateHasTime(dtStart) && 
-						CDateHelper::DateHasTime(dtDue) && 
-						!CDateHelper::DateHasTime(dtDuration))
-					{
-						dtDuration = CDateHelper::GetEndOfPreviousDay(dtDuration);
-					}
+					// Note: If the end date of the dragged task
+					// falls on a day-end GANTTDATERANGE will add
+					// a day because that's all it knows how to do.
+					// We however don't always want it to so we must
+					// detect those times and subtract a day as required
+					COleDateTime dtOrgStart, dtOrgDue;
+					GetTaskStartEndDates(m_giPreDrag, dtOrgStart, dtOrgDue);
+					
+					COleDateTime dtDuration(dtOrgDue - dtOrgStart);
+					COleDateTime dtEnd = (dtDrag + dtDuration);
+					
+					if (!CDateHelper::DateHasTime(dtEnd))
+						dtEnd.m_dt--;
 
 					pGI->dtRange.SetStart(dtDrag);
-					pGI->dtRange.SetEnd(dtDrag + dtDuration);
+					pGI->dtRange.SetEnd(dtEnd);
 
 					szCursor = IDC_SIZEALL;
 				}

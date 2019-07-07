@@ -35,8 +35,8 @@ struct STATSITEM
 	
 	void MinMax(COleDateTimeRange& dtExtents) const;
 
-	double CalcTimeSpentInDays(const COleDateTime& date, int nDaysInWeek, double dHoursInDay) const;
-	double CalcTimeEstimateInDays(int nDaysInWeek, double dHoursInDay) const;
+	double CalcTimeSpentInDays(const COleDateTime& date) const;
+	double CalcTimeEstimateInDays() const;
 	
 	COleDateTime dtStart, dtDone; 
 	double dTimeEst, dTimeSpent;
@@ -45,7 +45,7 @@ struct STATSITEM
 
 protected:
 	static void MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents);
-	static double CalcTimeInDays(double dTime, TDC_UNITS nUnits, int nDaysInWeek, double dHoursInDay);
+	static double CalcTimeInDays(double dTime, TDC_UNITS nUnits);
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
 
 };
@@ -70,8 +70,8 @@ public:
 	void Sort();
 	BOOL IsSorted() const;
 
-	double CalcTimeSpentInDays(const COleDateTime& date, int nDaysInWeek, double dHoursInDay) const;
-	double CalcTotalTimeEstimateInDays(int nDaysInWeek, double dHoursInDay) const;
+	double CalcTimeSpentInDays(const COleDateTime& date) const;
+	double CalcTotalTimeEstimateInDays() const;
 	int CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
 
 	void GetDataExtents(COleDateTimeRange& dtExtents) const;

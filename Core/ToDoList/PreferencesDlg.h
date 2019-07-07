@@ -167,7 +167,6 @@ public:
 	BOOL GetTrackNonSelectedTasks() const { return m_pageTask.GetTrackNonSelectedTasks(); }
 	BOOL GetTrackOnScreenSaver() const { return m_pageTask.GetTrackOnScreenSaver(); }
 	BOOL GetTrackHibernated() const { return m_pageTask.GetTrackHibernated(); }
-	BOOL GetWorkingWeek(CWorkingWeek& week) const { return m_pageTask.GetWorkingWeek(week); }
 	BOOL GetLogTimeTracking() const { return m_pageTask.GetLogTimeTracking(); }
 	BOOL GetLogTaskTimeSeparately() const { return m_pageTask.GetLogTaskTimeSeparately(); }
 	BOOL GetExclusiveTimeTracking() const { return m_pageTask.GetExclusiveTimeTracking(); }

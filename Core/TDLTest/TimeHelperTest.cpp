@@ -75,7 +75,7 @@ void CTimeHelperTest::TestGetTime()
 		const double DAYSINWEEK = 7.0;
 		const double HOURSINDAY = 24.0;
 
-		const CTimeHelper th(HOURSINDAY, DAYSINWEEK);
+		const CTimeHelper th(CWorkingWeek(0, HOURSINDAY));
 
 		// -----------------------------------------------------------------------
 
@@ -106,11 +106,7 @@ void CTimeHelperTest::TestGetTime()
 		const double DAYSINWEEK = 6.0;
 		const double HOURSINDAY = 16.0;
 
-		CTimeHelper::SetHoursInWorkday(HOURSINDAY);
-		CTimeHelper::SetWorkdaysInWeek(DAYSINWEEK);
-
-		// Must instantiate helper after static assignment
-		const CTimeHelper th;
+		const CTimeHelper th(CWorkingWeek(DHW_SUNDAY, HOURSINDAY));
 
 		// -----------------------------------------------------------------------
 
