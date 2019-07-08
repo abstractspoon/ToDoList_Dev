@@ -1729,8 +1729,13 @@ struct SEARCHPARAM
 			break;
 
 		case FT_DATERELATIVE:
-			if (!CDateHelper::DecodeRelativeDate(sValue, date, FALSE, FALSE))
-				CDateHelper::ClearDate(date);
+			{
+				CTwentyFourSevenWeek week;
+				CDateHelper dh(week);
+
+				if (!dh.DecodeRelativeDate(sValue, date, FALSE))
+					CDateHelper::ClearDate(date);
+			}
 			break;
 
 		default:

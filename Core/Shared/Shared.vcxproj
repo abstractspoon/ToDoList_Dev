@@ -677,6 +677,7 @@
     <ClInclude Include="custombutton.h" />
     <ClInclude Include="DatabaseEx.h" />
     <ClInclude Include="DateHelper.h" />
+    <ClInclude Include="DateHelperEnums.h" />
     <ClInclude Include="DateTimeCtrlEx.h" />
     <ClInclude Include="DayOfWeekchecklistbox.h" />
     <ClInclude Include="DayOfWeekcombobox.h" />

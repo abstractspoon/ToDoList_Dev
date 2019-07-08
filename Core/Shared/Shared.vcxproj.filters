@@ -1011,6 +1011,9 @@
     <ClInclude Include="WorkingWeek.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DateHelperEnums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

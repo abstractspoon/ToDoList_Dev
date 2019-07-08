@@ -285,14 +285,14 @@ bool CGPExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
 			if (tDone >= tStart) // completion date takes precedence
 			{
 				COleDateTime dtDone = CDateHelper::GetDate(tDone);
-				int nDays = CDateHelper::CalcDaysFromTo(dtStart, dtDone, TRUE, TRUE);
+				int nDays = CDateHelper().CalcDaysFromTo(dtStart, dtDone, TRUE);
 
 				pXIDestItem->AddItem(_T("duration"), nDays);
 			}
 			else if (tDue >= tStart)
 			{
 				COleDateTime dtDue = CDateHelper::GetDate(tDue);
-				int nDays = CDateHelper::CalcDaysFromTo(dtStart, dtDue, TRUE, TRUE);
+				int nDays = CDateHelper().CalcDaysFromTo(dtStart, dtDue, TRUE);
 
 				pXIDestItem->AddItem(_T("duration"), nDays);
 			}

@@ -552,9 +552,11 @@ void CTDCStartupOptions::ParseDate(const CEnCommandLineInfo& cmdInfo,
 		}
 		else // actual date
 		{ 
+			CTwentyFourSevenWeek week;
+			CDateHelper dh(week);
 			COleDateTime date;
 
-			if (CDateHelper::DecodeRelativeDate(sValue, date, FALSE) ||
+			if (dh.DecodeRelativeDate(sValue, date) ||
 				CDateHelper::DecodeDate(sValue, date, TRUE))
 			{
 				dtDate.SetValue(Misc::Format(date.m_dt));
