@@ -647,7 +647,6 @@ CTDLRecurringTaskMonthlyOptionPage::CTDLRecurringTaskMonthlyOptionPage(const TDC
 		dtDefault.GetAsSystemTime(stDefault);
 
 		m_nEveryDayOfMonth = stDefault.wDay;
-		m_nEveryNumMonths = stDefault.wMonth - 1;
 	}
 	
 	// then overwrite specific values
