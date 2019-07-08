@@ -18,7 +18,7 @@
 class CWorkingDay
 {
 public:
-	CWorkingDay(); // uses static initialisation set up by CWorkingWeek
+	CWorkingDay(); // uses static initialisation
 
 	CWorkingDay(double dWorkingLengthInHours);	// eg.8
 
@@ -70,7 +70,7 @@ protected:
 class CWeekend
 {
 public:
-	CWeekend();	// uses static initialisation set up by CWorkingWeek
+	CWeekend();	// uses static initialisation
 	CWeekend(DWORD dwDays); // eg. WD_SATURDAY | WD_SUNDAY
 	CWeekend(const CWeekend& weekend);
 
