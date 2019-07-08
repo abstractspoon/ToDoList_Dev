@@ -3500,7 +3500,9 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 		}
 		break;
 
-	default:
+	case TDCU_MINS:
+	case TDCU_HOURS:
+	case TDCU_WEEKDAYS:
 		// Work in weekdays
 		{
 			CWorkingWeek week;
@@ -3548,13 +3550,15 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 */
 #endif
 
+			// Convert to hours or minutes
 			if (nUnits != TDCU_WEEKDAYS)
-			{
-				CTimeHelper thAllDay;
-				dDuration = thAllDay.GetTime(dDuration, THU_WEEKDAYS, TDC::MapUnitsToTHUnits(nUnits));
-			}
+				dDuration = CTimeHelper(week).GetTime(dDuration, THU_WEEKDAYS, TDC::MapUnitsToTHUnits(nUnits));
 		}
 		break;
+
+	default:
+		ASSERT(0);
+		return 0.0;
 	}
 
 	return dDuration;
