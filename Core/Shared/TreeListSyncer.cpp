@@ -2159,7 +2159,9 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			
 			// resync item heights
 			RecalcItemHeights();
-			RefreshSize();
+
+			// Delay the resize until after the list has updated its header
+			PostResize(FALSE);
 		}
 		break;
 
