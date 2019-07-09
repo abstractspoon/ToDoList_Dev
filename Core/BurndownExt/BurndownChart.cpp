@@ -290,10 +290,11 @@ void CBurndownChart::RebuildXScale()
 	COleDateTime dtEnd = GetGraphEndDate();
 
 	// build ticks
+	CDateHelper dh;
 	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
 	COleDateTime dtTick = dtStart;
 	CString sTick;
-
+	
 	for (int nDay = 0; nDay <= nNumDays; nDay += m_nScale)
 	{
 		sTick = CDateHelper::FormatDate(dtTick);
@@ -307,27 +308,27 @@ void CBurndownChart::RebuildXScale()
 			break;
 			
 		case BCS_WEEK:
-			CDateHelper::OffsetDate(dtTick, 1, DHU_WEEKS);
+			dh.OffsetDate(dtTick, 1, DHU_WEEKS);
 			break;
 			
 		case BCS_MONTH:
-			CDateHelper::OffsetDate(dtTick, 1, DHU_MONTHS);
+			dh.OffsetDate(dtTick, 1, DHU_MONTHS);
 			break;
 			
 		case BCS_2MONTH:
-			CDateHelper::OffsetDate(dtTick, 2, DHU_MONTHS);
+			dh.OffsetDate(dtTick, 2, DHU_MONTHS);
 			break;
 			
 		case BCS_QUARTER:
-			CDateHelper::OffsetDate(dtTick, 3, DHU_MONTHS);
+			dh.OffsetDate(dtTick, 3, DHU_MONTHS);
 			break;
 			
 		case BCS_HALFYEAR:
-			CDateHelper::OffsetDate(dtTick, 6, DHU_MONTHS);
+			dh.OffsetDate(dtTick, 6, DHU_MONTHS);
 			break;
 			
 		case BCS_YEAR:
-			CDateHelper::OffsetDate(dtTick, 1, DHU_YEARS);
+			dh.OffsetDate(dtTick, 1, DHU_YEARS);
 			break;
 			
 		default:

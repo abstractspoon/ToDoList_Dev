@@ -127,14 +127,13 @@ BOOL COleDateTimeRange::Set(const COleDateTime& dtStart, int nEndOffset, DH_UNIT
 {
 	COleDateTime dtEnd(dtStart);
 	
-	if (!CDateHelper::OffsetDate(dtEnd, nEndOffset, nOffsetUnits))
+	if (!CDateHelper().OffsetDate(dtEnd, nEndOffset, nOffsetUnits))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 	
 	return Set(dtStart, dtEnd, bInclusive);
-
 }
 
 BOOL COleDateTimeRange::Set(DH_DATE nStart, int nEndAmount, DH_UNITS nOffsetUnits, BOOL bInclusive)
@@ -301,7 +300,10 @@ int COleDateTimeRange::GetDayCount() const
 	if (!IsValid())
 		return 0;
 
-	return CDateHelper::CalcDaysFromTo(m_dtStart, m_dtEnd, m_bInclusive, FALSE);
+	CTwentyFourSevenWeek week;
+	CDateHelper dh(week);
+
+	return dh.CalcDaysFromTo(m_dtStart, m_dtEnd, m_bInclusive);
 }
 
 int COleDateTimeRange::GetWeekdayCount() const
@@ -309,7 +311,7 @@ int COleDateTimeRange::GetWeekdayCount() const
 	if (!IsValid())
 		return 0;
 
-	return CDateHelper::CalcDaysFromTo(m_dtStart, m_dtEnd, m_bInclusive, TRUE);
+	return CDateHelper().CalcDaysFromTo(m_dtStart, m_dtEnd, m_bInclusive);
 }
 
 BOOL COleDateTimeRange::Offset(int nAmount, DH_UNITS nUnits)
@@ -318,9 +320,10 @@ BOOL COleDateTimeRange::Offset(int nAmount, DH_UNITS nUnits)
 		return FALSE;
 
 	COleDateTimeRange prevRange = *this;
+	CDateHelper dh;
 
-	if (!CDateHelper::OffsetDate(m_dtStart, nAmount, nUnits) || 
-		!CDateHelper::OffsetDate(m_dtEnd, nAmount, nUnits))
+	if (!dh.OffsetDate(m_dtStart, nAmount, nUnits) ||
+		!dh.OffsetDate(m_dtEnd, nAmount, nUnits))
 	{
 		*this = prevRange;
 		return FALSE;
@@ -336,7 +339,7 @@ BOOL COleDateTimeRange::OffsetStart(int nAmount, DH_UNITS nUnits)
 
 	COleDateTimeRange prevRange = *this;
 
-	if (!CDateHelper::OffsetDate(m_dtStart, nAmount, nUnits) || !IsValid())
+	if (!CDateHelper().OffsetDate(m_dtStart, nAmount, nUnits) || !IsValid())
 	{
 		*this = prevRange;
 		return FALSE;
@@ -352,7 +355,7 @@ BOOL COleDateTimeRange::OffsetEnd(int nAmount, DH_UNITS nUnits)
 
 	COleDateTimeRange prevRange = *this;
 
-	if (!CDateHelper::OffsetDate(m_dtEnd, nAmount, nUnits) || !IsValid())
+	if (!CDateHelper().OffsetDate(m_dtEnd, nAmount, nUnits) || !IsValid())
 	{
 		*this = prevRange;
 		return FALSE;
@@ -378,20 +381,17 @@ CString COleDateTimeRange::Format(DWORD dwFlags, TCHAR cDelim) const
 
 //////////////////////////////////////////////////////////////////////
 
-BOOL CDateHelper::IsValidDayInMonth(int nDay, int nMonth, int nYear)
+CDateHelper::CDateHelper() : m_week()
 {
-	return (nMonth >= 1 && nMonth <= 12) &&
-			(nDay >= 1 && nDay <= GetDaysInMonth(nMonth, nYear));
+
 }
 
-BOOL CDateHelper::IsValidDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth)
+CDateHelper::CDateHelper(const CWorkingWeek& week) : m_week(week)
 {
-	return (nWhich >= 1 && nWhich <= 5) &&
-			(nDOW >= 1 && nDOW <= 7) &&
-			(nMonth >= 1 && nMonth <= 12);
+
 }
 
-int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive, BOOL bWeekdays)
+int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive) const
 {
 	if (!IsDateSet(dateFrom) || !IsDateSet(dateTo))
 	{
@@ -407,7 +407,7 @@ int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime
 
 	int nDays = (int)(double)(dTo - dFrom);
 
-	if (bWeekdays && (nDays > 0))
+	if (m_week.HasWeekend() && (nDays > 0))
 	{
 		nDays = 0;
 
@@ -415,7 +415,7 @@ int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime
 		{
 			OLE_DAYOFWEEK nDOW = GetDayOfWeek(dFrom);
 
-			if (!CWeekend().IsWeekend(nDOW))
+			if (!m_week.Weekend().IsWeekend(nDOW))
 				nDays++;
 
 			dFrom += 1;
@@ -425,14 +425,136 @@ int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime
 	return nDays;
 }
 
-int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, DH_DATE nTo, BOOL bInclusive, BOOL bWeekdays)
+int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, DH_DATE nTo, BOOL bInclusive) const
 {
-	return CalcDaysFromTo(dateFrom, GetDate(nTo), bInclusive, bWeekdays);
+	return CalcDaysFromTo(dateFrom, GetDate(nTo), bInclusive);
 }
 
-int CDateHelper::CalcDaysFromTo(DH_DATE nFrom, DH_DATE nTo, BOOL bInclusive, BOOL bWeekdays)
+int CDateHelper::CalcDaysFromTo(DH_DATE nFrom, DH_DATE nTo, BOOL bInclusive) const
 {
-	return CalcDaysFromTo(GetDate(nFrom), GetDate(nTo), bInclusive, bWeekdays);
+	return CalcDaysFromTo(GetDate(nFrom), GetDate(nTo), bInclusive);
+}
+
+BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits) const
+{
+	// sanity checks
+	if (!IsDateSet(date) || (!IsValidUnit(nUnits) && (nUnits != DHU_NULL)))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (!nAmount)
+		return FALSE;
+
+	switch (nUnits)
+	{
+	case DHU_WEEKDAYS:
+		if (m_week.HasWeekend())
+		{
+			BOOL bForwards = (nAmount > 0);
+			nAmount = abs(nAmount);
+
+			while (nAmount--)
+			{
+				date.m_dt += (bForwards ? 1.0 : -1.0);
+
+				// skip weekends
+				m_week.MakeWeekday(date, bForwards);
+			}
+
+			break;
+		}
+		// else fall thru
+
+	case DHU_DAYS:
+		date += (double)nAmount;
+		break;
+
+	case DHU_WEEKS:
+		date += nAmount * 7.0;
+		break;
+
+	case DHU_MONTHS:
+		{
+			SYSTEMTIME st;
+			date.GetAsSystemTime(st);
+
+			// are we at months end?
+			int nDaysInMonth = GetDaysInMonth(st.wMonth, st.wYear);
+			BOOL bEndOfMonth = (st.wDay == nDaysInMonth);
+
+			// convert amount to years and months
+			int nYear = st.wYear, nMonth = st.wMonth;
+
+			nYear = (nYear + (nAmount / 12));
+			nMonth = (nMonth + (nAmount % 12));
+
+			// handle over/underflow
+			while (nMonth > 12)
+			{
+				nYear++;
+				nMonth -= 12;
+			}
+
+			while (nMonth < 1)
+			{
+				nYear--;
+				nMonth += 12;
+			}
+
+			st.wYear = (WORD)nYear;
+			st.wMonth = (WORD)nMonth;
+
+			// if our start date was the end of the month make
+			// sure out end date is too
+			nDaysInMonth = GetDaysInMonth(st.wMonth, st.wYear);
+
+			if (bEndOfMonth)
+			{
+				st.wDay = (WORD)nDaysInMonth;
+			}
+			else
+			{
+				// clip dates to the end of the month
+				st.wDay = min(st.wDay, (WORD)nDaysInMonth);
+			}
+
+			// update time
+			date = COleDateTime(st);
+		}
+		break;
+
+	case DHU_YEARS:
+		{
+			SYSTEMTIME st;
+			date.GetAsSystemTime(st);
+
+			// update year
+			st.wYear = (WORD)((int)st.wYear + nAmount);
+
+			// update time
+			date = COleDateTime(st);
+		}
+		break;
+	}
+
+	return IsDateSet(date);
+}
+
+// Static helpers ------------------------------------------------------------
+
+BOOL CDateHelper::IsValidDayInMonth(int nDay, int nMonth, int nYear)
+{
+	return (nMonth >= 1 && nMonth <= 12) &&
+		(nDay >= 1 && nDay <= GetDaysInMonth(nMonth, nYear));
+}
+
+BOOL CDateHelper::IsValidDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth)
+{
+	return (nWhich >= 1 && nWhich <= 5) &&
+		(nDOW >= 1 && nDOW <= 7) &&
+		(nMonth >= 1 && nMonth <= 12);
 }
 
 BOOL CDateHelper::DecodeDate(const CString& sDate, double& date, BOOL bAndTime)
@@ -518,7 +640,7 @@ BOOL CDateHelper::DecodeOffsetEx(LPCTSTR szDate, double& dAmount,
 	return TRUE;
 }
 
-BOOL CDateHelper::DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bForceWeekday, BOOL bMustHaveSign)
+BOOL CDateHelper::DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bMustHaveSign) const
 {
 	// sanity check
 	CString sDate(szDate);
@@ -580,18 +702,15 @@ BOOL CDateHelper::DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bF
 			return FALSE;
 	}
 
-	// does the caller only want weekdays
-	if (CWorkingWeek().HasWeekend() && bForceWeekday)
-		CWorkingWeek().MakeWeekday(date, (dAmount >= 0.0), bTruncateTime);
-
 	return TRUE;
 }
 
 BOOL CDateHelper::IsValidRelativeDate(LPCTSTR szDate, BOOL bMustHaveSign)
 {
 	COleDateTime dtUnused;
+	CTwentyFourSevenWeek week;
 
-	return DecodeRelativeDate(szDate, dtUnused, FALSE, bMustHaveSign);
+	return CDateHelper(week).DecodeRelativeDate(szDate, dtUnused, bMustHaveSign);
 }
 
 BOOL CDateHelper::DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAndTime)
@@ -1167,7 +1286,8 @@ COleDateTime CDateHelper::GetStartOfQuarter(const COleDateTime& date)
 COleDateTime CDateHelper::GetEndOfQuarter(const COleDateTime& date)
 {
 	COleDateTime dtEnd = GetStartOfQuarter(date);
-	VERIFY(OffsetDate(dtEnd, 3, DHU_MONTHS));
+
+	VERIFY(CDateHelper().OffsetDate(dtEnd, 3, DHU_MONTHS));
 
 	return (dtEnd.m_dt - 1.0);
 }
@@ -1372,110 +1492,6 @@ int CDateHelper::CalcLongestDayOfWeekName(CDC* pDC, BOOL bShort)
 	}
 	
 	return nLongestWDWidth;
-}
-
-BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits)
-{
-	// sanity checks
-	if (!IsDateSet(date) || (!IsValidUnit(nUnits) && (nUnits != DHU_NULL)))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	if (!nAmount)
-		return FALSE;
-
-	switch (nUnits)
-	{
-	case DHU_WEEKDAYS:
-		{
-			BOOL bForwards = (nAmount > 0);
-			nAmount = abs(nAmount);
-
-			while (nAmount--)
-			{
-				date.m_dt += (bForwards ? 1.0 : -1.0);
-
-				// skip weekends
-				CWorkingWeek().MakeWeekday(date, bForwards);
-			}
-		}
-		break;
-
-	case DHU_DAYS:
-		date += (double)nAmount;
-		break;
-
-	case DHU_WEEKS:
-		date += nAmount * 7.0;
-		break;
-
-	case DHU_MONTHS:
-		{
-			SYSTEMTIME st;
-			date.GetAsSystemTime(st);
-
-			// are we at months end?
-			int nDaysInMonth = GetDaysInMonth(st.wMonth, st.wYear);
-			BOOL bEndOfMonth = (st.wDay == nDaysInMonth);
-
-			// convert amount to years and months
-			int nYear = st.wYear, nMonth = st.wMonth;
-
-			nYear = (nYear + (nAmount / 12));
-			nMonth = (nMonth + (nAmount % 12));
-
-			// handle over/underflow
-			while (nMonth > 12)
-			{
-				nYear++;
-				nMonth -= 12;
-			}
-			
-			while (nMonth < 1)
-			{
-				nYear--;
-				nMonth += 12;
-			}
-
-			st.wYear = (WORD)nYear;
-			st.wMonth = (WORD)nMonth;
-
-			// if our start date was the end of the month make
-			// sure out end date is too
-			nDaysInMonth = GetDaysInMonth(st.wMonth, st.wYear);
-
-			if (bEndOfMonth)
-			{
-				st.wDay = (WORD)nDaysInMonth;
-			}
-			else 
-			{
-				// clip dates to the end of the month
-				st.wDay = min(st.wDay, (WORD)nDaysInMonth);
-			}
-
-			// update time
-			date = COleDateTime(st);
-		}
-		break;
-
-	case DHU_YEARS:
-		{
-			SYSTEMTIME st;
-			date.GetAsSystemTime(st);
-
-			// update year
-			st.wYear = (WORD)((int)st.wYear + nAmount);
-
-			// update time
-			date = COleDateTime(st);
-		}
-		break;
-	}
-
-	return (IsDateSet(date));
 }
 
 void CDateHelper::GetDayOfWeekNames(BOOL bShort, CStringArray& aNames)
@@ -2089,8 +2105,12 @@ COleDateTime CDateHelper::GetNearestWeek(const COleDateTime& date, BOOL bEnd)
 	while (GetWeekofYear(dtWeek) == nWeek);
 
 	// if the number of days added >= 4 then subtract a week
-	if (CalcDaysFromTo(date, dtWeek, TRUE, FALSE) >= 4)
+	CTwentyFourSevenWeek week;
+
+	if (CDateHelper(week).CalcDaysFromTo(date, dtWeek, TRUE) >= 4)
+	{
 		dtWeek.m_dt -= 7.0;
+	}
 
 	// handle end - last second of day before
 	if (bEnd)

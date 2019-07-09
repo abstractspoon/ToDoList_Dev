@@ -2096,7 +2096,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	
 	if (CDateHelper::IsDateSet(date))
 	{
-		CDateHelper::OffsetDate(date, nAmount, nDHUnits);
+		CDateHelper().OffsetDate(date, nAmount, nDHUnits);
 
 		// Special case: Task is recurring and therefore must fall on a valid date
 		if (pTDI->IsRecurring() && bFitToRecurringScheme)
@@ -3389,17 +3389,19 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 	case TDCU_WEEKDAYS:
 		{
 			// work in weekdays
+			CWorkingWeek week;
+
 			if (nUnits != TDCU_WEEKDAYS)
 			{
-				dDuration = CTimeHelper().GetTime(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_WEEKDAYS);
+				dDuration = CTimeHelper(week).GetTime(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_WEEKDAYS);
 				nUnits = TDCU_WEEKDAYS;
 			}
 
-			if (CWorkingWeek().HasWeekend())
+			if (week.HasWeekend())
 			{
 				// Adjust start date if it falls on a weekend
 				BOOL bForward = (dDuration > 0.0);
-				CWorkingWeek().MakeWeekday(dateStart, bForward);
+				week.MakeWeekday(dateStart, bForward);
 
 				// Adjust one day at a time
 				double dDaysLeft = fabs(dDuration);
@@ -3420,7 +3422,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 					if ((dDaysLeft > 0.0) || CDateHelper::DateHasTime(dateDue))
 					{
 						// FALSE -> Don't truncate time
-						CWorkingWeek().MakeWeekday(dateDue, bForward, FALSE);
+						week.MakeWeekday(dateDue, bForward, FALSE);
 					}
 				}
 			}
@@ -3500,7 +3502,9 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 		}
 		break;
 
-	default:
+	case TDCU_MINS:
+	case TDCU_HOURS:
+	case TDCU_WEEKDAYS:
 		// Work in weekdays
 		{
 			CWorkingWeek week;
@@ -3548,13 +3552,15 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 */
 #endif
 
+			// Convert to hours or minutes
 			if (nUnits != TDCU_WEEKDAYS)
-			{
-				CTimeHelper thAllDay;
-				dDuration = thAllDay.GetTime(dDuration, THU_WEEKDAYS, TDC::MapUnitsToTHUnits(nUnits));
-			}
+				dDuration = CTimeHelper(week).GetTime(dDuration, THU_WEEKDAYS, TDC::MapUnitsToTHUnits(nUnits));
 		}
 		break;
+
+	default:
+		ASSERT(0);
+		return 0.0;
 	}
 
 	return dDuration;

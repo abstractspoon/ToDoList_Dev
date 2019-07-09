@@ -133,6 +133,8 @@ BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtN
 		return FALSE;
 	
 	dtNext = dtFrom; // starting point
+
+	CDateHelper dh; // uses static working week
 	
 	switch (m_nRegularity)		
 	{
@@ -142,7 +144,7 @@ BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtN
 				return FALSE;
 			
 			// add number of days specified by dwSpecific1
-			CDateHelper::OffsetDate(dtNext, (int)m_dwSpecific1, DHU_DAYS);
+			dtNext.m_dt += (int)m_dwSpecific1;
 		}
 		break;
 		
@@ -152,14 +154,14 @@ BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtN
 				return FALSE;
 			
 			// add number of days specified by dwSpecific1
-			CDateHelper::OffsetDate(dtNext, (int)m_dwSpecific1, DHU_WEEKDAYS);
+			dh.OffsetDate(dtNext, (int)m_dwSpecific1, DHU_WEEKDAYS);
 		}
 		break;
 		
 	case RECURS_DAY_EVERY_WEEKDAY:
 		{
 			// add one day ensuring that the result is also a weekday
-			CDateHelper::OffsetDate(dtNext, 1, DHU_WEEKDAYS);
+			dh.OffsetDate(dtNext, 1, DHU_WEEKDAYS);
 		}
 		break;
 		
@@ -179,7 +181,7 @@ BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtN
 			{
 				// if no days have been set we just add 
 				// the specified number of weeks
-				CDateHelper::OffsetDate(dtNext, (int)m_dwSpecific1, DHU_WEEKS);
+				dh.OffsetDate(dtNext, (int)m_dwSpecific1, DHU_WEEKS);
 			}
 			else
 			{
@@ -193,7 +195,7 @@ BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtN
 				else
 				{
 					// Add any weeks greater than one, then increment the day
-					CDateHelper::OffsetDate(dtNext, (int)(m_dwSpecific1 - 1), DHU_WEEKS);
+					dh.OffsetDate(dtNext, (int)(m_dwSpecific1 - 1), DHU_WEEKS);
 					dtNext.m_dt += 1.0; 
 					
 					CDateHelper::ValidateDay(dtNext, m_dwSpecific2);
@@ -215,7 +217,7 @@ BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtN
 				return FALSE;
 			
 			// add number of months specified by dwSpecific1
-			CDateHelper::OffsetDate(dtNext, (int)m_dwSpecific1, DHU_MONTHS);
+			dh.OffsetDate(dtNext, (int)m_dwSpecific1, DHU_MONTHS);
 			
 			// then enforce the day
 			SYSTEMTIME st;
@@ -283,7 +285,7 @@ BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtN
 			int nDay = (bFirst ? 1 : CDateHelper::GetDaysInMonth(nMonth, nYear));
 			
 			dtNext.SetDate(nYear, nMonth, nDay);
-			CWorkingWeek().MakeWeekday(dtNext, bFirst);
+			dh.WorkingWeek().MakeWeekday(dtNext, bFirst);
 		}
 		break;
 		
@@ -293,7 +295,7 @@ BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtN
 				return FALSE;
 			
 			// add number of years specified by dwSpecific1
-			CDateHelper::OffsetDate(dtNext, (int)m_dwSpecific1, DHU_YEARS);
+			CDateHelper().OffsetDate(dtNext, (int)m_dwSpecific1, DHU_YEARS);
 			
 			// clip dates to the end of the month
 			SYSTEMTIME st;

@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 #include "WorkingWeek.h"
 
 #include <afxtempl.h>
@@ -53,7 +55,10 @@ public:
 
 	int Compare(double dTime1, TH_UNITS nUnits1, double dTime2, TH_UNITS nUnits2) const;
 
+	const CWorkingWeek& WorkingWeek() const { return m_week; }
+
 public:
+	// Helpers
 	static void SetUnits(TH_UNITS nUnits, LPCTSTR szUnits);
 	static void SetUnits(TH_UNITS nUnits, TCHAR cUnits);
 	static TCHAR GetUnits(TH_UNITS nUnits);
@@ -68,14 +73,12 @@ public:
 protected:
 	CWorkingWeek m_week;
 
+	static CMap<TH_UNITS, TH_UNITS, TCHAR, TCHAR&> MAPUNIT2CH;
+
 protected:
 	double GetDaysToWeeksFactor(TH_UNITS nUnits) const;
 	TH_UNITS GetDaysToWeeksUnits(TH_UNITS nUnits) const;
 
-protected:
-	static CMap<TH_UNITS, TH_UNITS, TCHAR, TCHAR&> MAPUNIT2CH;
-	
-protected:
 	static double GetTimeOnly(double dDate);
 	static double GetTimeOnly(const COleDateTime& date);
 	static BOOL Compare(TH_UNITS nFromUnits, TH_UNITS nToUnits); // 0=same, -1=nFrom < nTo else 1
