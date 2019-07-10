@@ -1294,15 +1294,23 @@ BOOL CKanbanColumnCtrl::HandleLButtonClick(CPoint point, BOOL bDblClk)
 	if (!hti)
 		return TRUE;
 
+	BOOL bHandled = FALSE;
+
 	if (!m_bSelected)
 	{
 		CTreeCtrl::Default();
-
-		if (bDblClk)
-			return TRUE;
+		bHandled = TRUE;
 	}
 
-	if (!bDblClk)
+	if (hti != GetSelectedItem())
+		SelectItem(hti, TRUE);
+
+	if (bDblClk)
+	{
+		bHandled = TRUE;
+		EditLabel(hti);
+	}
+	else
 	{
 		UINT nMsgID = 0;
 
@@ -1321,17 +1329,13 @@ BOOL CKanbanColumnCtrl::HandleLButtonClick(CPoint point, BOOL bDblClk)
 
 		if (nMsgID)
 		{
-			if (hti != GetSelectedItem())
-				SelectItem(hti, TRUE);
-
 			// Post message to let mouse-click time to complete
 			GetParent()->PostMessage(nMsgID, (WPARAM)GetSafeHwnd(), GetTaskID(hti));
-			return TRUE;
+			bHandled = TRUE;
 		}
 	}
 
-	// all else
-	return FALSE;
+	return bHandled;
 }
 
 BOOL CKanbanColumnCtrl::HitTestIcon(HTREEITEM hti, CPoint point) const
