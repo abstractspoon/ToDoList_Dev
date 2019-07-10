@@ -5288,14 +5288,14 @@ BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 		return FALSE;
 
 	// start
-	HTREEITEM htiSel = GetSelectedItem();
-	ASSERT (htiSel);
+	DWORD dwSelTaskID = GetSelectedTaskID();
+	ASSERT (dwSelTaskID);
 
 	if (bTaskIsNew)
-		m_dwLastAddedID = GetTaskID(htiSel);
+		m_dwLastAddedID = dwSelTaskID;
 	
 	// save task id being edited
-	SetEditTitleTaskID(GetSelectedTaskID());
+	SetEditTitleTaskID(dwSelTaskID);
 
 	// set font
 	CFont* pFontTree = m_taskTree.Tree().GetFont();
