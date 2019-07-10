@@ -282,8 +282,8 @@ BOOL CToDoCtrlData::TaskHasSibling(DWORD dwTaskID, DWORD dwSiblingID, BOOL bImme
 	// Check they have adjacent positions
 	int nPos = pTDSParent->GetSubTaskPosition(dwTaskID);
 
-	return ((pTDS->GetSubTaskID(nPos - 1) == dwSiblingID) ||
-			(pTDS->GetSubTaskID(nPos + 1) == dwSiblingID));
+	return ((pTDS->GetPreviousSubTaskID(nPos) == dwSiblingID) ||
+			(pTDS->GetNextSubTaskID(nPos) == dwSiblingID));
 }
 
 POSITION CToDoCtrlData::GetFirstTaskPosition() const
@@ -1075,7 +1075,7 @@ BOOL CToDoCtrlData::DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos, BOOL bWithUn
 
 	// save undo 
 	DWORD dwParentID = pTDSParent->GetTaskID();
-	DWORD dwPrevSiblingID = nPos ? pTDSParent->GetSubTaskID(nPos - 1) : 0;
+	DWORD dwPrevSiblingID = pTDSParent->GetPreviousSubTaskID(nPos);
 	
 	VERIFY (!bWithUndo || AddUndoElement(TDCUEO_DELETE, dwTaskID, dwParentID, dwPrevSiblingID));
 	
@@ -2796,7 +2796,7 @@ BOOL CToDoCtrlData::MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestP
 		return FALSE;
 	}
 	
-	DWORD dwSrcPrevSiblingID = pTDSSrcParent->GetSubTaskID(nSrcPos - 1);
+	DWORD dwSrcPrevSiblingID = pTDSSrcParent->GetPreviousSubTaskID(nSrcPos);
 	
 	// get destination
 	TODOSTRUCTURE* pTDSDestParent = NULL;
@@ -2932,7 +2932,7 @@ BOOL CToDoCtrlData::MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID,
 
 		if (tdsCopy.FindTask(dwTaskID, pTDSDummy, nDummyPos))
 		{
-			DWORD dwSrcPrevSiblingID = pTDSDummy->GetSubTaskID(nDummyPos - 1);
+			DWORD dwSrcPrevSiblingID = pTDSDummy->GetPreviousSubTaskID(nDummyPos);
 			nDestPos = MoveTask(pTDSSrcParent, nSrcPos, dwSrcPrevSiblingID, pTDSDestParent, nDestPos);
 			
 			if (nDestPos != -1)

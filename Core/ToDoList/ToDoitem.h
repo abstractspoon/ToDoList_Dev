@@ -244,6 +244,8 @@ public:
 	
 	DWORD GetTaskID() const { return m_dwID; }
 	DWORD GetSubTaskID(int nPos) const;
+	DWORD GetPreviousSubTaskID(int nPos) const;
+	DWORD GetNextSubTaskID(int nPos) const;
 	BOOL HasParent(DWORD dwParentID, BOOL bImmediate = TRUE) const;
 	
 	int GetSubTaskPosition(DWORD dwID) const;

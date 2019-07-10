@@ -937,6 +937,24 @@ DWORD TODOSTRUCTURE::GetSubTaskID(int nPos) const
 	return pTDS ? pTDS->GetTaskID() : 0;
 }
 
+DWORD TODOSTRUCTURE::GetPreviousSubTaskID(int nPos) const
+{
+	if (nPos == 0)
+		return 0;
+
+	// else
+	return GetSubTaskID(nPos - 1);
+}
+
+DWORD TODOSTRUCTURE::GetNextSubTaskID(int nPos) const
+{
+	if (nPos == (GetSubTaskCount() - 1))
+		return 0;
+
+	// else
+	return GetSubTaskID(nPos + 1);
+}
+
 int TODOSTRUCTURE::GetSubTaskPosition(DWORD dwID) const
 {
 	ASSERT(dwID);
@@ -1144,7 +1162,7 @@ DWORD CToDoCtrlDataStructure::GetPreviousTaskID(DWORD dwID) const
 		return 0;
 	
 	// else
-	return pTDSParent->GetSubTaskID(nPos - 1);
+	return pTDSParent->GetPreviousSubTaskID(nPos);
 }
 
 DWORD CToDoCtrlDataStructure::GetParentTaskID(DWORD dwID) const
