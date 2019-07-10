@@ -1244,13 +1244,13 @@ int CTaskCalendarCtrl::CompareTCItems(const void* pV1, const void* pV2)
 	return nCompare;
 }
 
-DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptCursor) const
+DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptClient) const
 {
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
-	return HitTest(ptCursor, nHit);
+	return HitTest(ptClient, nHit);
 }
 
-DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptCursor, TCC_HITTEST& nHit) const
+DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptClient, TCC_HITTEST& nHit) const
 {
 	nHit = TCCHT_NOWHERE;
 
@@ -1259,7 +1259,7 @@ DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptCursor, TCC_HITTEST& nHit) cons
 
 	int nRow, nCol;
 
-	if (!GetGridCellFromPoint(ptCursor, nRow, nCol))
+	if (!GetGridCellFromPoint(ptClient, nRow, nCol))
 		return 0;
 
 	const CCalendarCell* pCell = GetCell(nRow, nCol);
@@ -1279,11 +1279,11 @@ DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptCursor, TCC_HITTEST& nHit) cons
 	GetCellRect(nRow, nCol, rCell, TRUE);
 	
 	// handle clicking above tasks
-	if (ptCursor.y < rCell.top)
+	if (ptClient.y < rCell.top)
 		return 0;
 	
 	int nTaskHeight = GetTaskHeight();
-	int nPos = ((ptCursor.y - rCell.top) / nTaskHeight);
+	int nPos = ((ptClient.y - rCell.top) / nTaskHeight);
 	
 	// look thru the tasks for this pos
 	for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
@@ -1300,7 +1300,7 @@ DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptCursor, TCC_HITTEST& nHit) cons
 		{
 			// now we figure out where on the item we hit
 			COleDateTime dtHit;
-			VERIFY(GetDateFromPoint(ptCursor, dtHit));
+			VERIFY(GetDateFromPoint(ptClient, dtHit));
 			
 			// now check for closeness to ends
 			double dDateTol = CalcDateDragTolerance();
