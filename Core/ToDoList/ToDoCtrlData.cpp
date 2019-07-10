@@ -137,6 +137,8 @@ int CToDoCtrlData::BuildDataModel(const CTaskFile& tasks)
 	// add top-level items
 	VERIFY(AddTaskToDataModel(tasks, NULL, &m_struct));
 
+	RemoveOrphanTaskReferences(&m_struct);
+
 	return GetTaskCount();
 }
 
@@ -1091,12 +1093,13 @@ BOOL CToDoCtrlData::DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos, BOOL bWithUn
 	return TRUE;
 }
 
-BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD dwTaskID)
+BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD dwMatchID)
 {
-	ASSERT(pTDSParent && dwTaskID);
-	
-	if (!pTDSParent || !dwTaskID)
+	if (!pTDSParent)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
 	int nChild = pTDSParent->GetSubTaskCount();
 	BOOL bRemoved = FALSE;
@@ -1106,19 +1109,25 @@ BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD 
 		TODOSTRUCTURE* pTDSChild = pTDSParent->GetSubTask(nChild);
 		
 		// children's children first
-		if (RemoveOrphanTaskReferences(pTDSChild, dwTaskID))
+		if (RemoveOrphanTaskReferences(pTDSChild, dwMatchID))
 			bRemoved = TRUE;
 		
 		// then child
 		const TODOITEM* pTDIChild = GetTask(pTDSChild);
 		ASSERT(pTDIChild);
 		
-		if (pTDIChild)
+		if (pTDIChild && pTDIChild->IsReference())
 		{
 			// references
-			if (pTDIChild->dwTaskRefID == dwTaskID)
+			BOOL bDeleteRef = (dwMatchID && (pTDIChild->dwTaskRefID == dwMatchID));
+			BOOL bWithUndo = bDeleteRef;
+
+			if (!bDeleteRef)
+				bDeleteRef = (!dwMatchID && !HasTask(pTDIChild->dwTaskRefID)); // undo = false
+			
+			if (bDeleteRef)			
 			{
-				DeleteTask(pTDSParent, nChild, TRUE); // TRUE == with undo
+				DeleteTask(pTDSParent, nChild, bWithUndo);
 				bRemoved = TRUE;
 			}
 		}
