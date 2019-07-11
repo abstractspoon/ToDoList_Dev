@@ -39,7 +39,7 @@ public:
 	
 	BOOL CancelDrag();
 	BOOL HasTask(DWORD dwTaskID) const;
-	DWORD HitTest(const CPoint& ptCursor) const;
+	DWORD HitTest(const CPoint& ptClient) const;
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL SetVisibleWeeks(int nWeeks);
 	void SetStrikeThruDoneTasks(BOOL bStrikeThru);
@@ -162,7 +162,7 @@ protected:
 	int CalcRequiredTaskFontPointSize() const;
 	CFont* GetTaskFont(const TASKCALITEM* pTCI);
 
-	DWORD HitTest(const CPoint& ptCursor, TCC_HITTEST& nHit) const;
+	DWORD HitTest(const CPoint& ptClient, TCC_HITTEST& nHit) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	BOOL StartDragging(const CPoint& ptCursor);
 	BOOL EndDragging(const CPoint& ptCursor);

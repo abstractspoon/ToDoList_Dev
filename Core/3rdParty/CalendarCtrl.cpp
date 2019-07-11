@@ -1494,7 +1494,7 @@ void CCalendarCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 		ASSERT(pCell);
 
 		if (pCell)
-			NotifyParentClick();
+			NotifyParentDblClick();
 	}
 
 	CWnd::OnLButtonDblClk(nFlags, point);

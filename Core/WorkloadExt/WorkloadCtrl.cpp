@@ -1092,6 +1092,7 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	{
 		pWI->sTitle = pTasks->GetTaskTitle(hTask);
 		pWI->color = pTasks->GetTaskTextColor(hTask);
+		pWI->bDone = pTasks->IsTaskDone(hTask);
 		pWI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
 		pWI->bParent = pTasks->IsTaskParent(hTask);
 		pWI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
@@ -2642,8 +2643,8 @@ BOOL CWorkloadCtrl::GetLabelEditRect(LPRECT pEdit) const
 	HTREEITEM htiSel = GetSelectedItem();
 	
 	// scroll into view first
-	//m_tcTasks.EnsureVisible(htiSel);
-	
+	const_cast<CWorkloadTreeCtrl&>(m_tcTasks).EnsureVisible(htiSel);
+
 	if (m_tcTasks.GetItemRect(htiSel, pEdit, TRUE)) // label only
 	{
 		// make width of tree column or 200 whichever is larger

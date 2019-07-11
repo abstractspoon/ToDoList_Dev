@@ -137,6 +137,8 @@ int CToDoCtrlData::BuildDataModel(const CTaskFile& tasks)
 	// add top-level items
 	VERIFY(AddTaskToDataModel(tasks, NULL, &m_struct));
 
+	RemoveOrphanTaskReferences(&m_struct);
+
 	return GetTaskCount();
 }
 
@@ -280,8 +282,8 @@ BOOL CToDoCtrlData::TaskHasSibling(DWORD dwTaskID, DWORD dwSiblingID, BOOL bImme
 	// Check they have adjacent positions
 	int nPos = pTDSParent->GetSubTaskPosition(dwTaskID);
 
-	return ((pTDS->GetSubTaskID(nPos - 1) == dwSiblingID) ||
-			(pTDS->GetSubTaskID(nPos + 1) == dwSiblingID));
+	return ((pTDS->GetPreviousSubTaskID(nPos) == dwSiblingID) ||
+			(pTDS->GetNextSubTaskID(nPos) == dwSiblingID));
 }
 
 POSITION CToDoCtrlData::GetFirstTaskPosition() const
@@ -1073,7 +1075,7 @@ BOOL CToDoCtrlData::DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos, BOOL bWithUn
 
 	// save undo 
 	DWORD dwParentID = pTDSParent->GetTaskID();
-	DWORD dwPrevSiblingID = nPos ? pTDSParent->GetSubTaskID(nPos - 1) : 0;
+	DWORD dwPrevSiblingID = pTDSParent->GetPreviousSubTaskID(nPos);
 	
 	VERIFY (!bWithUndo || AddUndoElement(TDCUEO_DELETE, dwTaskID, dwParentID, dwPrevSiblingID));
 	
@@ -1091,12 +1093,13 @@ BOOL CToDoCtrlData::DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos, BOOL bWithUn
 	return TRUE;
 }
 
-BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD dwTaskID)
+BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD dwMatchID)
 {
-	ASSERT(pTDSParent && dwTaskID);
-	
-	if (!pTDSParent || !dwTaskID)
+	if (!pTDSParent)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
 	int nChild = pTDSParent->GetSubTaskCount();
 	BOOL bRemoved = FALSE;
@@ -1106,19 +1109,25 @@ BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD 
 		TODOSTRUCTURE* pTDSChild = pTDSParent->GetSubTask(nChild);
 		
 		// children's children first
-		if (RemoveOrphanTaskReferences(pTDSChild, dwTaskID))
+		if (RemoveOrphanTaskReferences(pTDSChild, dwMatchID))
 			bRemoved = TRUE;
 		
 		// then child
 		const TODOITEM* pTDIChild = GetTask(pTDSChild);
 		ASSERT(pTDIChild);
 		
-		if (pTDIChild)
+		if (pTDIChild && pTDIChild->IsReference())
 		{
 			// references
-			if (pTDIChild->dwTaskRefID == dwTaskID)
+			BOOL bDeleteRef = (dwMatchID && (pTDIChild->dwTaskRefID == dwMatchID));
+			BOOL bWithUndo = bDeleteRef;
+
+			if (!bDeleteRef)
+				bDeleteRef = (!dwMatchID && !HasTask(pTDIChild->dwTaskRefID)); // undo = false
+			
+			if (bDeleteRef)			
 			{
-				DeleteTask(pTDSParent, nChild, TRUE); // TRUE == with undo
+				DeleteTask(pTDSParent, nChild, bWithUndo);
 				bRemoved = TRUE;
 			}
 		}
@@ -2787,7 +2796,7 @@ BOOL CToDoCtrlData::MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestP
 		return FALSE;
 	}
 	
-	DWORD dwSrcPrevSiblingID = pTDSSrcParent->GetSubTaskID(nSrcPos - 1);
+	DWORD dwSrcPrevSiblingID = pTDSSrcParent->GetPreviousSubTaskID(nSrcPos);
 	
 	// get destination
 	TODOSTRUCTURE* pTDSDestParent = NULL;
@@ -2923,7 +2932,7 @@ BOOL CToDoCtrlData::MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID,
 
 		if (tdsCopy.FindTask(dwTaskID, pTDSDummy, nDummyPos))
 		{
-			DWORD dwSrcPrevSiblingID = pTDSDummy->GetSubTaskID(nDummyPos - 1);
+			DWORD dwSrcPrevSiblingID = pTDSDummy->GetPreviousSubTaskID(nDummyPos);
 			nDestPos = MoveTask(pTDSSrcParent, nSrcPos, dwSrcPrevSiblingID, pTDSDestParent, nDestPos);
 			
 			if (nDestPos != -1)

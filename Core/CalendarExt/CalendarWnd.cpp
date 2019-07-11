@@ -677,6 +677,14 @@ void CCalendarWnd::OnBigCalendarNotifyClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 void CCalendarWnd::OnBigCalendarNotifyDblClk(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	SyncMiniCalendar(FALSE);
+
+	CPoint ptBigCal(GetMessagePos());
+	m_BigCalendar.ScreenToClient(&ptBigCal);
+
+	DWORD dwTaskID = m_BigCalendar.HitTest(ptBigCal);
+
+	if (dwTaskID)
+		GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE, dwTaskID);
 	
 	*pResult = 0;
 }

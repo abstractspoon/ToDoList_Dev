@@ -5288,14 +5288,14 @@ BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 		return FALSE;
 
 	// start
-	HTREEITEM htiSel = GetSelectedItem();
-	ASSERT (htiSel);
+	DWORD dwSelTaskID = GetSelectedTaskID();
+	ASSERT (dwSelTaskID);
 
 	if (bTaskIsNew)
-		m_dwLastAddedID = GetTaskID(htiSel);
+		m_dwLastAddedID = dwSelTaskID;
 	
 	// save task id being edited
-	SetEditTitleTaskID(GetSelectedTaskID());
+	SetEditTitleTaskID(dwSelTaskID);
 
 	// set font
 	CFont* pFontTree = m_taskTree.Tree().GetFont();
@@ -6810,7 +6810,7 @@ HTREEITEM CToDoCtrl::PasteTaskToTree(const CTaskFile& tasks, HTASKITEM hTask, HT
 		m_data.ApplyLastInheritedChangeFromParent(dwTaskID, TDCA_ALL);
 				
 		// add this item to tree
-		hti = InsertTreeItem(pTDI, dwTaskID, htiParent, htiAfter);
+		hti = InsertTreeItem(pTDI, dwTaskID, htiParent, htiAfter, TRUE);
 	}
 
 	HTREEITEM htiFirstItem = (hti == TVI_ROOT) ? NULL : hti;
@@ -6834,18 +6834,21 @@ HTREEITEM CToDoCtrl::PasteTaskToTree(const CTaskFile& tasks, HTASKITEM hTask, HT
 	return htiFirstItem;
 }
 
-HTREEITEM CToDoCtrl::InsertTreeItem(const TODOITEM* pTDI, DWORD dwTaskID, HTREEITEM htiParent, HTREEITEM htiAfter)
+HTREEITEM CToDoCtrl::InsertTreeItem(const TODOITEM* pTDI, DWORD dwTaskID, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bAddToCombos)
 {
 	HTREEITEM hti = m_taskTree.InsertItem(dwTaskID,	htiParent, htiAfter);
 	ASSERT(hti);
 
 	// add unique items to comboboxes
-	m_cbAllocTo.AddUniqueItems(pTDI->aAllocTo);
-	m_cbAllocBy.AddUniqueItem(pTDI->sAllocBy);
-	m_cbStatus.AddUniqueItem(pTDI->sStatus);
-	m_cbCategory.AddUniqueItems(pTDI->aCategories);
-	m_cbTags.AddUniqueItems(pTDI->aTags);
-	m_cbVersion.AddUniqueItem(pTDI->sVersion);
+	if (bAddToCombos)
+	{
+		m_cbAllocTo.AddUniqueItems(pTDI->aAllocTo);
+		m_cbAllocBy.AddUniqueItem(pTDI->sAllocBy);
+		m_cbStatus.AddUniqueItem(pTDI->sStatus);
+		m_cbCategory.AddUniqueItems(pTDI->aCategories);
+		m_cbTags.AddUniqueItems(pTDI->aTags);
+		m_cbVersion.AddUniqueItem(pTDI->sVersion);
+	}
 
 	return hti;
 }
@@ -9195,9 +9198,9 @@ BOOL CToDoCtrl::BuildTreeItem(HTREEITEM htiParent, const TODOSTRUCTURE* pTDS, co
 	while (nSubtask--)
 	{
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-		DWORD dwTaskID = pTDSChild->GetTaskID(), dwOrgID(dwTaskID);
+		DWORD dwTaskID = pTDSChild->GetTaskID();
 
-		const TODOITEM* pTDIChild = GetTask(dwTaskID);
+		const TODOITEM* pTDIChild = m_data.GetTask(dwTaskID);
 		ASSERT(pTDIChild);
 
 		// is this task wanted?
@@ -9210,11 +9213,11 @@ BOOL CToDoCtrl::BuildTreeItem(HTREEITEM htiParent, const TODOSTRUCTURE* pTDS, co
 		if (bAddTask)
 		{
 			// add this item to tree
-			HTREEITEM htiChild = InsertTreeItem(pTDIChild, dwOrgID, htiParent, TVI_FIRST);
+			HTREEITEM htiChild = InsertTreeItem(pTDIChild, dwTaskID, htiParent, TVI_FIRST, FALSE);
 			ASSERT(htiChild);
 
 			// update next unique ID
-			m_dwNextUniqueID = max(m_dwNextUniqueID, dwOrgID + 1);
+			m_dwNextUniqueID = max(m_dwNextUniqueID, dwTaskID + 1);
 
 			// and its children
 			if (bHasChildren)
