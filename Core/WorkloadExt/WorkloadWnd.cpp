@@ -102,7 +102,7 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_UPDATE_COMMAND_UI(ID_THISMONTHPERIOD, OnUpdateResetPeriodToThisMonth)
 	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODENDFORWARDONEMONTH, OnUpdateMovePeriodEndForwardOneMonth)
 	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODENDBACKONEMONTH, OnUpdateMovePeriodEndBackOneMonth)
-	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODFORWARDONEMONTH, OnUpdateUpdateMovePeriodForwardOneMonth)
+	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODFORWARDONEMONTH, OnUpdateMovePeriodForwardOneMonth)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
@@ -979,6 +979,7 @@ LRESULT CWorkloadWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
 
 void CWorkloadWnd::UpdatePeriod()
 {
+	ValidatePeriod();
 	m_ctrlWorkload.SetCurrentPeriod(m_dtPeriod);
 
 	if (m_dtPeriod.IsValid())
@@ -1023,7 +1024,7 @@ void CWorkloadWnd::UpdateRangeSlider()
 
 void CWorkloadWnd::OnUpdateMovePeriodBackOneMonth(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(TRUE);
+	pCmdUI->Enable(CanMovePeriodStartBackwards());
 }
 
 void CWorkloadWnd::OnMovePeriodStartForwardOneMonth() 
@@ -1053,7 +1054,7 @@ void CWorkloadWnd::OnMovePeriodStartBackOneMonth()
 
 void CWorkloadWnd::OnUpdateMovePeriodStartBackOneMonth(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(TRUE);
+	pCmdUI->Enable(CanMovePeriodStartBackwards());
 }
 
 void CWorkloadWnd::OnResetPeriodToThisMonth() 
@@ -1066,7 +1067,9 @@ void CWorkloadWnd::OnResetPeriodToThisMonth()
 
 void CWorkloadWnd::OnUpdateResetPeriodToThisMonth(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(TRUE);
+	COleDateTimeRange dtTemp(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH);
+
+	pCmdUI->Enable(m_ctrlWorkload.GetDataDateRange().Contains(dtTemp));
 }
 
 void CWorkloadWnd::OnMovePeriodEndForwardOneMonth() 
@@ -1078,9 +1081,9 @@ void CWorkloadWnd::OnMovePeriodEndForwardOneMonth()
 	}
 }
 
-void CWorkloadWnd::OnUpdateMovePeriodEndForwardOneMonth(CCmdUI* pCmdUI) 
+void CWorkloadWnd::OnUpdateMovePeriodForwardOneMonth(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(TRUE);
+	pCmdUI->Enable(CanMovePeriodEndForwards());
 }
 
 void CWorkloadWnd::OnMovePeriodEndBackOneMonth() 
@@ -1107,8 +1110,55 @@ void CWorkloadWnd::OnMovePeriodForwardOneMonth()
 	UpdateRangeSlider();
 }
 
-void CWorkloadWnd::OnUpdateUpdateMovePeriodForwardOneMonth(CCmdUI* pCmdUI) 
+void CWorkloadWnd::OnUpdateMovePeriodEndForwardOneMonth(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(TRUE);
+	pCmdUI->Enable(CanMovePeriodEndForwards());
 }
 
+BOOL CWorkloadWnd::CanMovePeriodEndForwards() const
+{
+	return (m_dtPeriod.IsValid() && 
+			m_ctrlWorkload.GetDataDateRange().IsValid() &&
+			(m_dtPeriod.GetEnd() < m_ctrlWorkload.GetDataDateRange().GetEnd()));
+}
+
+BOOL CWorkloadWnd::CanMovePeriodStartBackwards() const
+{
+	return (m_dtPeriod.IsValid() && 
+			m_ctrlWorkload.GetDataDateRange().IsValid() &&
+			(m_dtPeriod.GetStart() > m_ctrlWorkload.GetDataDateRange().GetStart()));
+}
+
+BOOL CWorkloadWnd::ValidatePeriod()
+{
+	COleDateTimeRange dtValid(m_dtPeriod);
+
+	// Prevent current period from leaving data date range
+	int nDiff = (int)(m_ctrlWorkload.GetDataDateRange().GetStart() - dtValid.GetStart());
+
+	if (nDiff > 0)
+	{
+		dtValid.Offset(nDiff, DHU_DAYS);
+
+		if (dtValid.GetEnd() > m_ctrlWorkload.GetDataDateRange().GetEnd())
+			dtValid.GetEnd() = m_ctrlWorkload.GetDataDateRange().GetEnd();
+	}
+	else
+	{
+		int nDiff = (int)(m_ctrlWorkload.GetDataDateRange().GetEnd() - dtValid.GetEnd());
+
+		if (nDiff < 0)
+		{
+			dtValid.Offset(nDiff, DHU_DAYS);
+
+			if (dtValid.GetStart() < m_ctrlWorkload.GetDataDateRange().GetStart())
+				dtValid.GetStart() = m_ctrlWorkload.GetDataDateRange().GetStart();
+		}
+	}
+
+	if (dtValid == m_dtPeriod)
+		return FALSE;
+
+	m_dtPeriod = dtValid;
+	return TRUE;
+}

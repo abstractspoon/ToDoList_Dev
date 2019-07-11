@@ -124,7 +124,7 @@ protected:
 	afx_msg void OnMovePeriodEndBackOneMonth();
 	afx_msg void OnUpdateMovePeriodEndBackOneMonth(CCmdUI* pCmdUI);
 	afx_msg void OnMovePeriodForwardOneMonth();
-	afx_msg void OnUpdateUpdateMovePeriodForwardOneMonth(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateMovePeriodForwardOneMonth(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnHelp();
@@ -153,6 +153,9 @@ protected:
 	void UpdatePeriod();
 	void UpdateRangeSlider();
 	void EditSelectedWorkloadAllocations(LPCTSTR szAllocTo);
+	BOOL ValidatePeriod();
+	BOOL CanMovePeriodEndForwards() const;
+	BOOL CanMovePeriodStartBackwards() const;
 
 	static DWORD MapColumn(WLC_COLUMNID nColumn);
 	static WLC_COLUMNID MapColumn(DWORD dwColumn);
