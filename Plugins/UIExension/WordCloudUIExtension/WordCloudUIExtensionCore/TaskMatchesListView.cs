@@ -440,7 +440,7 @@ namespace WordCloudUIExtension
                     {
                         cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
                     }
-                    else if (CalcIconRect(hit.Item.Bounds).Contains(e.Location))
+                    else if (IconRect(hit.Item.Bounds).Contains(e.Location))
                     {
                         cursor = UIExtension.HandCursor();
                     }
@@ -468,36 +468,54 @@ namespace WordCloudUIExtension
             base.OnMouseDown(e);
         }
 
-        protected override void OnMouseClick(MouseEventArgs e)
+		private void HandleMouseClick(MouseEventArgs e, bool doubleClick)
+		{
+			if (e.Button != MouseButtons.Left)
+				return;
+
+			if (!m_TaskMatchesHaveIcons && !m_ShowCompletionCheckboxes && !doubleClick)
+				return;
+
+			var hit = HitTest(e.Location);
+
+			if (hit.Item == null)
+				return;
+
+			var item = (hit.Item.Tag as CloudTaskItem);
+
+			if ((item == null) || item.IsLocked)
+				return;
+
+			if (CheckboxRect(hit.Item.Bounds).Contains(e.Location))
+			{
+				EditTaskDone?.Invoke(this, item.Id, !item.IsDone(false));
+			}
+			else if (IconRect(hit.Item.Bounds).Contains(e.Location))
+			{
+				EditTaskIcon?.Invoke(this, item.Id);
+			}
+			else if (doubleClick)
+			{
+				EditTaskLabel?.Invoke(this, item.Id);
+
+			}
+		}
+
+		protected override void OnMouseClick(MouseEventArgs e)
         {
             base.OnMouseClick(e);
 
-            if (m_TaskMatchesHaveIcons || m_ShowCompletionCheckboxes)
-            {
-                var hit = HitTest(e.Location);
-
-                if (hit.Item != null)
-                {
-                    var item = (hit.Item.Tag as CloudTaskItem);
-
-                    if ((item != null) && !item.IsLocked)
-                    {
-                        if (CalcCheckboxRect(hit.Item.Bounds).Contains(e.Location))
-                        {
-                            if (EditTaskDone != null)
-                                EditTaskDone(this, item.Id, !item.IsDone(false));
-                        }
-                        else if (CalcIconRect(hit.Item.Bounds).Contains(e.Location))
-                        {
-                            if (EditTaskIcon != null)
-                                EditTaskIcon(this, item.Id);
-                        }
-                    }
-                }
-            }
+			HandleMouseClick(e, false);
         }
 
-        protected override void OnBeforeLabelEdit(LabelEditEventArgs e)
+		protected override void OnMouseDoubleClick(MouseEventArgs e)
+		{
+			base.OnMouseDoubleClick(e);
+
+			HandleMouseClick(e, true);
+		}
+
+		protected override void OnBeforeLabelEdit(LabelEditEventArgs e)
         {
             if ((e.Item != -1) && (EditTaskLabel != null))
             {
@@ -562,7 +580,7 @@ namespace WordCloudUIExtension
                         if (m_CheckBoxSize.IsEmpty)
                             m_CheckBoxSize = CheckBoxRenderer.GetGlyphSize(e.Graphics, CheckBoxState.UncheckedNormal);
 
-                        var checkRect = CalcCheckboxRect(itemRect);
+                        var checkRect = CheckboxRect(itemRect);
 
                         CheckBoxRenderer.DrawCheckBox(e.Graphics, checkRect.Location, GetItemCheckboxState(item));
 
@@ -601,7 +619,7 @@ namespace WordCloudUIExtension
 			}
 		}
 
-        private Rectangle CalcCheckboxRect(Rectangle labelRect)
+        private Rectangle CheckboxRect(Rectangle labelRect)
         {
             if (!m_ShowCompletionCheckboxes)
                 return Rectangle.Empty;
@@ -611,7 +629,7 @@ namespace WordCloudUIExtension
             return new Rectangle(labelRect.X, top, m_CheckBoxSize.Width, m_CheckBoxSize.Height);
         }
 
-        private Rectangle CalcIconRect(Rectangle labelRect)
+        private Rectangle IconRect(Rectangle labelRect)
         {
             if (!m_TaskMatchesHaveIcons)
                 return Rectangle.Empty;
