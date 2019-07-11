@@ -187,7 +187,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	DWORD dwStyle = (WS_CHILD | (bVisible ? WS_VISIBLE : 0));
 	
-	if (!m_tcTasks.Create((dwStyle | WS_TABSTOP | TVS_SHOWSELALWAYS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_NONEVENHEIGHT | TVS_NOTOOLTIPS),
+	if (!m_tcTasks.Create((dwStyle | WS_TABSTOP | TVS_SHOWSELALWAYS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_NONEVENHEIGHT | TVS_NOTOOLTIPS | TVS_EDITLABELS),
 							rect, 
 							this, 
 							IDC_TASKTREE))
@@ -1901,7 +1901,15 @@ void CWorkloadCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	
 	// notify app to edit
 	if (!m_bReadOnly)
-		CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKTITLE);
+	{
+		CPoint point(GetMessagePos());
+		CWnd::ScreenToClient(&point);
+
+		if (TreeHitTestItemColumn(point, FALSE) == WLCC_TITLE)
+		{
+			CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKTITLE);
+		}
+	}
 }
 
 void CWorkloadCtrl::OnEndDragTreeHeader(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
@@ -2557,8 +2565,11 @@ BOOL CWorkloadCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 	
 	if (!TCH().TreeCtrl().ItemHasChildren(hti))
 	{
-		m_tcTasks.EditLabel(hti);
-		return TRUE;
+		if (TreeHitTestItemColumn(point, FALSE) == WLCC_TITLE)
+		{
+			m_tcTasks.EditLabel(hti);
+			return TRUE;
+		}
 	}
 	else
 	{
@@ -3517,11 +3528,13 @@ int CWorkloadCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd)
 	// Prepare font
 	HFONT hFont = NULL, hOldFont = NULL;
 	
-// 	if (bEnd)
-// 	{
-// 		hFont = m_tcTasks.Fonts().GetHFont((htiParent == NULL) ? GMFS_BOLD : 0);
-// 		hOldFont = (HFONT)pDC->SelectObject(hFont);
-// 	}
+	if (bEnd)
+	{
+		CFontCache& fonts = const_cast<CFontCache&>(m_tcTasks.Fonts());
+
+		hFont = fonts.GetHFont((htiParent == NULL) ? GMFS_BOLD : 0);
+		hOldFont = (HFONT)pDC->SelectObject(hFont);
+	}
 	
 	// else try children
 	int nWidest = 0;
@@ -3827,6 +3840,27 @@ HTREEITEM CWorkloadCtrl::TreeHitTestItem(const CPoint& point, BOOL bScreen) cons
 		m_tcTasks.ScreenToClient(&ptTree);
 	
 	return m_tcTasks.HitTest(ptTree);
+}
+
+WLC_COLUMNID CWorkloadCtrl::TreeHitTestItemColumn(const CPoint& point, BOOL bScreen) const
+{
+	if (TreeHitTestItem(point, bScreen) == NULL)
+		return WLCC_NONE;
+
+	CPoint ptHeader(point);
+
+	if (bScreen)
+		m_tcTasks.ScreenToClient(&ptHeader);
+
+	ptHeader.y = 4;
+
+	int nCol = m_hdrTasks.HitTest(ptHeader);
+
+	if (nCol == -1)
+		return WLCC_NONE;
+
+	// else
+	return (WLC_COLUMNID)m_hdrTasks.GetItemData(nCol);
 }
 
 HTREEITEM CWorkloadCtrl::GetItem(CPoint ptScreen) const
