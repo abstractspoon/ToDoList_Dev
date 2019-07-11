@@ -628,29 +628,36 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		
 	case WM_LBUTTONDBLCLK:
 	case WM_RBUTTONDBLCLK:
+		if (hRealWnd == m_lcTasks)
+		{
+			KillTimer(TIMER_EDITLABEL);
+
+			// let parent handle any focus changes first
+			m_lcTasks.SetFocus();
+
+			// don't let the selection to be set to -1
+			// when clicking below the last item
+			if (m_lcTasks.HitTest(lp) == -1)
+				return 0; // eat it
+
+			if ((msg == WM_LBUTTONDBLCLK) && CTreeListSyncer::HasStyle(hRealWnd, LVS_EDITLABELS, FALSE))
+			{
+				NotifyParentOfColumnEditClick(TDCC_CLIENT, GetSelectedTaskID());
+				return 0L; // eat it
+			}
+		}
+		break;
+
 	case WM_RBUTTONDOWN:
 		// Don't let the selection to be set to -1 when clicking below the last item
 		// BUT NOT ON Linux because it interferes with context menu handling
-		if (COSVersion() != OSV_LINUX)
+		if ((hRealWnd == m_lcTasks) && (COSVersion() != OSV_LINUX))
 		{
-			if (hRealWnd == m_lcTasks)
-			{
-				// let parent handle any focus changes first
-				m_lcTasks.SetFocus();
+			// let parent handle any focus changes first
+			m_lcTasks.SetFocus();
 
-				if (m_lcTasks.HitTest(lp) == -1)
-				{
-					CPoint pt(lp);
-					::ClientToScreen(hRealWnd, &pt);
- 
-					// we don't want to disable drag selecting
-					if (!::DragDetect(m_lcColumns, pt))
-					{
-						TRACE(_T("Ate Listview ButtonDown\n"));
-						return 0; // eat it
-					}
-				}
-			}
+			if (m_lcTasks.HitTest(lp) == -1)
+				return 0L; // eat it
 		}
 		break;
 

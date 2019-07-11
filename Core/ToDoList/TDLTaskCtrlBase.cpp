@@ -3769,6 +3769,17 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			
 		case WM_LBUTTONDBLCLK:
 		case WM_RBUTTONDBLCLK:
+			{
+				// let parent handle any focus changes first
+				m_lcColumns.SetFocus();
+
+				// don't let the selection to be set to -1
+				// when clicking below the last item
+				if (m_lcColumns.HitTest(lp) == -1)
+					return 0L; // eat it
+			}
+			break;
+
 		case WM_RBUTTONDOWN:
 			// Don't let the selection to be set to -1 when clicking below the last item
 			// BUT NOT ON Linux because it interferes with context menu handling
@@ -3788,7 +3799,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					if (!::DragDetect(m_lcColumns, pt))
 					{
 						TRACE(_T("Ate Listview ButtonDown\n"));
-						return 0; // eat it
+						return 0L; // eat it
 					}
 				}
 			}
