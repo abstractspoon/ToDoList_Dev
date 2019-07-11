@@ -1618,7 +1618,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			break;
 */
 #endif
-
 		case WM_LBUTTONDOWN:
 			// Selecting or de-selecting a lot of items can be slow
 			// because OnListSelectionChange is called once for each.
@@ -1650,6 +1649,31 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				}
 
 				return 0; // eat it
+			}
+			break;
+
+		case WM_LBUTTONDBLCLK:
+			{
+				// let parent handle any focus changes first
+				m_lcColumns.SetFocus();
+
+				// don't let the selection to be set to -1
+				// when clicking below the last item
+				int nHit = m_lcColumns.HitTest(lp);
+				HTREEITEM hti = CTreeListSyncer::GetTreeItem(m_tcTasks, m_lcColumns, nHit);
+
+				if (hti == NULL)
+					return 0L; // eat it
+
+				// Allow double-clicking to expand tree item 
+				// if not on an 'active' column
+				ASSERT(hti == GetTreeSelItem(m_tcTasks));
+
+				if (TCH().TreeCtrl().ItemHasChildren(hti))
+				{
+					ExpandItem(hti, !TCH().IsItemExpanded(hti));
+					return 0L; // eat it
+				}
 			}
 			break;
 		}
