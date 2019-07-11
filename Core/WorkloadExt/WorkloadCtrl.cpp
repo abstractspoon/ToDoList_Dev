@@ -2618,7 +2618,7 @@ BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT /*nFlags*/, CPoint point)
 	int nHit = ListHitTestItem(point, FALSE, nCol);
 	
 	if (nHit == -1)
-		return FALSE;
+		return TRUE; // prevent null selection
 
 	HTREEITEM hti = CTreeListSyncer::GetTreeItem(m_tcTasks, m_lcColumns, nHit);
 	ASSERT(hti == GetTreeSelItem(m_tcTasks));
