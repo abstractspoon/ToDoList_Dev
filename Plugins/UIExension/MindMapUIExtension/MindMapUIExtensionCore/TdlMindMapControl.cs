@@ -350,8 +350,9 @@ namespace MindMapUIExtension
 
 		public new Rectangle GetSelectedItemLabelRect()
 		{
-			var labelRect = base.GetSelectedItemLabelRect();
+			EnsureItemVisible(SelectedItem);
 
+			var labelRect = base.GetSelectedItemLabelRect();
 			labelRect.X += GetExtraWidth(SelectedNode);
 
 			return labelRect;
@@ -976,6 +977,15 @@ namespace MindMapUIExtension
 		protected override int GetMinItemHeight()
 		{
             return (ScaleByDPIFactor(16) + 2);
+		}
+
+		protected override void OnMouseDoubleClick(MouseEventArgs e)
+		{
+			if (base.HandleMouseDoubleClick(e) || (EditTaskLabel == null))
+				return;
+
+			if (HitTestPositions(e.Location) != null)
+				EditTaskLabel(this, UniqueID(SelectedNode));
 		}
 
 		protected override void OnMouseClick(MouseEventArgs e)

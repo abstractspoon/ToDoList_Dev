@@ -471,8 +471,8 @@ namespace MindMapUIExtension
 			//base.OnPaintBackground(e);
 		}
 
-        protected override void OnMouseDoubleClick(MouseEventArgs e)
-        {
+		protected bool HandleMouseDoubleClick(MouseEventArgs e)
+		{
 			m_DragTimer.Stop();
 
 			base.OnMouseDoubleClick(e);
@@ -482,11 +482,11 @@ namespace MindMapUIExtension
 				TreeNode hit = HitTestPositions(e.Location);
 
 				if ((hit != null) && HitTestExpansionButton(hit, e.Location))
-					return;
+					return true;
 
 				ExpandNode expand = ExpandNode.ExpandNone;
 
-				if (IsRoot(hit))
+				if (IsRoot(hit) && IsParent(hit))
 				{
 					if (IsAnyNodeExpanded(RootNode.Nodes))
 						expand = ExpandNode.CollapseAll;
@@ -502,8 +502,18 @@ namespace MindMapUIExtension
 				}
 
 				if (expand != ExpandNode.ExpandNone)
+				{
 					Expand(expand);
+					return true;
+				}
 			}
+
+			return false;
+		}
+
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
+        {
+			HandleMouseDoubleClick(e);
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
