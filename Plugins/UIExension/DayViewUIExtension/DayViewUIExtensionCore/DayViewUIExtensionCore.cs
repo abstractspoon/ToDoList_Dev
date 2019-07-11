@@ -282,6 +282,7 @@ namespace DayViewUIExtension
 			m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
 			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
 			m_DayView.MouseWheel += new MouseEventHandler(OnDayViewMouseWheel);
+			m_DayView.MouseDoubleClick += new MouseEventHandler(OnDayViewMouseDoubleClick);
 
 			// Performing icon editing from a 'MouseUp' or 'MouseClick' event 
 			// causes the edit icon dialog to fail to correctly get focus but
@@ -482,28 +483,42 @@ namespace DayViewUIExtension
             Invalidate(true);
         }
 
-        private void OnDayViewMouseClick(object sender, MouseEventArgs e)
+		private void HandleDayViewMouseClick(MouseEventArgs e, bool doubleClick)
+		{
+			if (m_DayView.ReadOnly)
+				return;
+
+			Calendar.Appointment appointment = m_DayView.GetAppointmentAt(e.Location.X, e.Location.Y);
+
+			if (appointment == null)
+				return;
+
+			var taskItem = (appointment as CalendarItem);
+
+			if ((taskItem == null) || taskItem.IsLocked)
+				return;
+
+			if (taskItem.IconRect.Contains(e.Location))
+			{
+				var notify = new UIExtension.ParentNotify(m_HwndParent);
+				notify.NotifyEditIcon();
+			}
+			else if (doubleClick)
+			{
+				var notify = new UIExtension.ParentNotify(m_HwndParent);
+				notify.NotifyEditLabel();
+			}
+		}
+
+		private void OnDayViewMouseClick(object sender, MouseEventArgs e)
         {
-            if (m_DayView.ReadOnly)
-                return;
-
-            Calendar.Appointment appointment = m_DayView.GetAppointmentAt(e.Location.X, e.Location.Y);
-
-            if (appointment == null)
-                return;
-
-            var taskItem = (appointment as CalendarItem);
-
-            if ((taskItem == null) || taskItem.IsLocked)
-                return;
-
-            if (taskItem.IconRect.Contains(e.Location))
-            {
-                var notify = new UIExtension.ParentNotify(m_HwndParent);
-
-                notify.NotifyEditIcon();
-            }
+			HandleDayViewMouseClick(e, false);
         }
+
+		private void OnDayViewMouseDoubleClick(object sender, MouseEventArgs e)
+		{
+			HandleDayViewMouseClick(e, true);
+		}
 
 		private void OnDayViewMouseWheel(object sender, MouseEventArgs e)
 		{

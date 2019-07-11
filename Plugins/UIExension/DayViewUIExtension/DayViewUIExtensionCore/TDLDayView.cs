@@ -294,6 +294,8 @@ namespace DayViewUIExtension
 					// Gripper
 					if (SelectedAppointment.StartDate >= StartDate)
 						rect.X += 8;
+					else
+						rect.X -= 3;
 
 					if (hasIcon)
 						rect.X += 16;
