@@ -3357,8 +3357,8 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(TDC_ATTRIBUTE nAttrib)
 	// Sanity check
 	switch (nAttrib)
 	{
-	case TDCA_NEWTASK: 
 	case TDCA_DELETE:
+	case TDCA_NEWTASK: 
 	case TDCA_UNDO:
 	case TDCA_PASTE:
 	case TDCA_MERGE:
@@ -3389,7 +3389,8 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(TDC_ATTRIBUTE nAttrib)
 
 			CTaskFile tasks;
 
-			if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks))
+			if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks) ||
+				((nAttrib == TDCA_DELETE) && (GetTaskCount() == 0)))
 			{
 				CWaitCursor cursor;
 				BeginExtensionProgress(pVData);
