@@ -153,9 +153,9 @@ protected:
 	void UpdatePeriod();
 	void UpdateRangeSlider();
 	void EditSelectedWorkloadAllocations(LPCTSTR szAllocTo);
-	BOOL ValidatePeriod();
 	BOOL CanMovePeriodEndForwards() const;
 	BOOL CanMovePeriodStartBackwards() const;
+	BOOL ValidatePeriod();
 
 	static DWORD MapColumn(WLC_COLUMNID nColumn);
 	static WLC_COLUMNID MapColumn(DWORD dwColumn);

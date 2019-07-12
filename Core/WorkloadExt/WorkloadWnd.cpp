@@ -1131,34 +1131,38 @@ BOOL CWorkloadWnd::CanMovePeriodStartBackwards() const
 
 BOOL CWorkloadWnd::ValidatePeriod()
 {
-	COleDateTimeRange dtValid(m_dtPeriod);
-
 	// Prevent current period from leaving data date range
-	int nDiff = (int)(m_ctrlWorkload.GetDataDateRange().GetStart() - dtValid.GetStart());
+	const COleDateTimeRange& dtData = m_ctrlWorkload.GetDataDateRange();
+
+	if (!dtData.IsValid())
+		return FALSE;
+
+	if (!m_dtPeriod.IsValid())
+	{
+		m_dtPeriod = dtData;
+		return TRUE;
+	}
+
+	int nDiff = (int)(dtData.GetStart() - m_dtPeriod.GetStart());
 
 	if (nDiff > 0)
 	{
-		dtValid.Offset(nDiff, DHU_DAYS);
+		m_dtPeriod.Offset(nDiff, DHU_DAYS);
+		m_dtPeriod.GetIntersection(m_dtPeriod, dtData);
 
-		if (dtValid.GetEnd() > m_ctrlWorkload.GetDataDateRange().GetEnd())
-			dtValid.GetEnd() = m_ctrlWorkload.GetDataDateRange().GetEnd();
+		return TRUE;
 	}
-	else
+
+	nDiff = (int)(dtData.GetEnd() - m_dtPeriod.GetEnd());
+
+	if (nDiff < 0)
 	{
-		int nDiff = (int)(m_ctrlWorkload.GetDataDateRange().GetEnd() - dtValid.GetEnd());
-
-		if (nDiff < 0)
-		{
-			dtValid.Offset(nDiff, DHU_DAYS);
-
-			if (dtValid.GetStart() < m_ctrlWorkload.GetDataDateRange().GetStart())
-				dtValid.GetStart() = m_ctrlWorkload.GetDataDateRange().GetStart();
-		}
+		m_dtPeriod.Offset(nDiff, DHU_DAYS);
+		m_dtPeriod.GetIntersection(m_dtPeriod, dtData);
+		
+		return TRUE;
 	}
 
-	if (dtValid == m_dtPeriod)
-		return FALSE;
-
-	m_dtPeriod = dtValid;
-	return TRUE;
+	// no change
+	return FALSE;
 }
