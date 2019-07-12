@@ -500,12 +500,7 @@ int CHMXChart::CalcYScaleFontSize(BOOL bTitle) const
 
 int CHMXChart::CalcXScaleFontSize(BOOL bTitle) const
 {
-	int nSize = CalcYScaleFontSize(bTitle);
-
-	if (!bTitle && (m_nXLabelDegrees != 0))
-		nSize++;
-	
-	return nSize;
+	return CalcYScaleFontSize(bTitle);
 }
 
 //
