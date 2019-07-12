@@ -1295,7 +1295,7 @@ void CWorkloadCtrl::Resize(int cx, int cy)
 	if (cx && cy)
 	{
 		CRect rTreeList(0, 0, ((cx * 2) / 3), cy);
-		rTreeList.bottom = (cy - (m_tcTasks.GetItemHeight() * NUM_TOTALS) - LV_COLPADDING);
+		rTreeList.bottom = (cy - (GetItemHeight(m_lcTotalsLabels) * NUM_TOTALS) - LV_COLPADDING);
 
 		CRect rChart(rTreeList.right + LV_COLPADDING, 0, cx, cy);
 		m_barChart.MoveWindow(rChart);
