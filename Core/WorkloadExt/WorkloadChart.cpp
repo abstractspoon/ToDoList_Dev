@@ -110,8 +110,13 @@ void CWorkloadChart::RebuildChart()
 	{
 		ASSERT(dMin == 0.0);
 
-		dMax = CalcMaxYAxisValue(max(dMax, 100)); // min 100%
-		SetDatasetMax(0, dMax);
+		int nNumTicks = 10; // minimum default
+
+		if (dMax > 100)
+			nNumTicks = (int)((dMax / 10) + 1);
+
+		SetYTicks(nNumTicks);
+		SetDatasetMax(0, (nNumTicks * 10));
 	}
 
 	CalcDatas();
