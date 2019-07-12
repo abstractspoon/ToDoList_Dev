@@ -508,7 +508,7 @@ int CHMXChart::CalcXScaleFontSize(BOOL bTitle) const
 //
 //	arguments
 //
-//		dc = Decive Context
+//		dc = Device Context
 //
 //	return
 //
@@ -1018,7 +1018,6 @@ bool CHMXChart::CalcDatas()
 	m_rectData.left    = m_rectYAxis.right;
 	m_rectData.right   = m_rectGraph.right;
 
-	// reset 
 	m_nXMax = 0;
 
 	for(f=0; f<HMX_MAX_DATASET; f++) 
@@ -1027,11 +1026,6 @@ bool CHMXChart::CalcDatas()
 		m_nXMax = max(m_nXMax, nTemp3);
 	}
 	
-	// Hey man, there's nothing to draw
-	if(m_nXMax == 0)
-		return false;
-
-	// Get the min and max of all our datasets
 	GetMinMax(m_nYMin, m_nYMax, false);
 
 	// with this 'strange' function I can set m_nYmin & m_nYMax so that 

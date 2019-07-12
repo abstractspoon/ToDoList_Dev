@@ -119,28 +119,28 @@ bool CHMXDataset::SetSize(int nSize)
 
 bool CHMXDataset::GetMinMax(double& nMin, double& nMax, bool bDataOnly) const
 {
-	double dMin, dMax, temp;
+	// following lines help me to solve some problems with invalid values
+	double dMin = HMX_DATASET_VALUE_INVALID, dMax = -HMX_DATASET_VALUE_INVALID;
 
 	if (GetDatasetSize() > 0) 
 	{
+		double temp = 0;
 		GetData(0, temp);
 		
-		// following lines help me to solve some problems with invalid values
-		if (temp == HMX_DATASET_VALUE_INVALID) 
+		if (temp != HMX_DATASET_VALUE_INVALID) 
 		{
-			dMin = HMX_DATASET_VALUE_INVALID;
-			dMax = -HMX_DATASET_VALUE_INVALID;
-		}
-		else
 			dMin = dMax = temp;
+		}
 
-		for (int f=1; f<GetDatasetSize(); f++) 
+		for (int f=1; f<GetDatasetSize(); f++)
 		{
 			GetData(f, temp);
+
 			if (temp != HMX_DATASET_VALUE_INVALID) 
 			{
 				if (temp < dMin)
 					dMin = temp;
+
 				if (temp > dMax)
 					dMax = temp;
 			}
@@ -158,8 +158,16 @@ bool CHMXDataset::GetMinMax(double& nMin, double& nMax, bool bDataOnly) const
 
 		return true;
 	} 
-	else
-		return false;
+	else if (!bDataOnly && m_bSetMinTo && m_bSetMaxTo)
+	{
+		nMin = m_dSetMinTo;
+		nMax = m_dSetMaxTo;
+
+		return true;
+	}
+
+	// else
+	return false;
 }
 
 void CHMXDataset::SetMin(double dMin)
