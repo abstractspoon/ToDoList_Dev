@@ -33,9 +33,7 @@ public:
 	void SetOptions(DWORD dwOptions);
 
 	void OnUpdateTasks();
-
-public:
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	void FilterToolTipMessage(MSG* pMsg);
 
 protected:
 	const CTaskCalItemMap& m_mapData;

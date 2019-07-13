@@ -66,21 +66,24 @@ int CWorkloadTreeCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-int CWorkloadTreeCtrl::OnToolHitTest(CPoint pt, TOOLINFO* pTI) const
+int CWorkloadTreeCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	UINT nFlags = 0;
-	HTREEITEM hti = HitTest(pt, &nFlags);
+	HTREEITEM hti = HitTest(point, &nFlags);
 
-	if ((hti == NULL) || !(nFlags & TVHT_ONITEMLABEL) || (pt.x > m_nTitleColumnWidth))
-		return -1;
+	if (hti && (nFlags & TVHT_ONITEMLABEL) && (point.x <= m_nTitleColumnWidth))
+	{
+		CRect rLabel;
+		VERIFY(GetItemRect(hti, rLabel, TRUE));
 
-	CRect rLabel;
-	VERIFY(GetItemRect(hti, rLabel, TRUE));
+		if (rLabel.right > m_nTitleColumnWidth)
+		{
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, GetItemText(hti), (int)hti, rLabel);
+		}
+	}
 
-	if (rLabel.right <= m_nTitleColumnWidth)
-		return -1;
-
-	return CToolTipCtrlEx::SetToolInfo(*pTI, this, GetItemText(hti), (int)hti, rLabel);
+	// else
+	return CTreeCtrl::OnToolHitTest(point, pTI);
 }
 
 bool CWorkloadTreeCtrl::ProcessMessage(MSG* /*pMsg*/) 

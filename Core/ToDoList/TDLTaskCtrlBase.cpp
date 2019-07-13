@@ -257,18 +257,15 @@ int CTDLTaskCtrlBase::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 	CString sTooltip;
 	int nHitTest = GetTaskColumnTooltip(point, sTooltip);
 	
-	if (nHitTest == -1)
-		return -1;
+	if ((nHitTest != -1) && !sTooltip.IsEmpty())
+	{
+		CRect rBounds;
+		CWnd::GetClientRect(rBounds);
 
-	// Fill in the TOOLINFO structure
-	pTI->hwnd = m_lcColumns;
-	pTI->uId = (UINT)nHitTest;
-	pTI->lpszText = _tcsdup(sTooltip);
-	pTI->uFlags = 0;
+		return CToolTipCtrlEx::SetToolInfo(*pTI, &m_lcColumns, sTooltip, nHitTest, rBounds);
+	}
 
-	CWnd::GetClientRect(&pTI->rect);
-
-	return nHitTest;
+	return CWnd::OnToolHitTest(point, pTI);
 }
 
 int CTDLTaskCtrlBase::GetUniqueToolTipID(DWORD dwTaskID, TDC_COLUMN nColID, int nIndex)

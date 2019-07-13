@@ -253,20 +253,22 @@ BOOL CWorkloadChart::IsUnderloaded(double dValue) const
 	return (HasUnderload() && (dValue <= m_dUnderloadValue));
 }
 
-int CWorkloadChart::OnToolHitTest(CPoint pt, TOOLINFO* pTI) const
+int CWorkloadChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	int nAllocTo = HitTest(pt);
+	int nAllocTo = HitTest(point);
 
-	if (nAllocTo == -1)
-		return -1;
+	if (nAllocTo != -1)
+	{
+		CString sAllocTo = m_aAllocTo[nAllocTo];
+		double dPercent = m_mapPercentLoad.Get(sAllocTo);
 
-	CString sAllocTo = m_aAllocTo[nAllocTo];
-	double dPercent = m_mapPercentLoad.Get(sAllocTo);
+		CString sTooltip;
+		sTooltip.Format(_T("%s: %.2f%%"), sAllocTo, dPercent);
 
-	CString sTooltip;
-	sTooltip.Format(_T("%s: %.2f%%"), sAllocTo, dPercent);
+		return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, (nAllocTo + 1), m_rectData);
+	}
 
-	return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, (nAllocTo + 1), m_rectData);
+	return CHMXChartEx::OnToolHitTest(point, pTI);
 }
 
 int CWorkloadChart::HitTest(const CPoint& ptClient) const

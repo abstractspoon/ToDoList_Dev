@@ -526,41 +526,39 @@ int CBurndownChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	int nHit = HitTest(point);
 
-	if (nHit == -1)
-		return 0;
-
-	double dDate = (GetGraphStartDate().m_dt + nHit);
-
-	CEnString sTooltip;
-
-	switch (m_nChartType)
+	if (nHit != -1)
 	{
-	case BCT_INCOMPLETETASKS:
+		double dDate = (GetGraphStartDate().m_dt + nHit);
+
+		CEnString sTooltip;
+
+		switch (m_nChartType)
 		{
-			double dNumTasks;
-			VERIFY(m_dataset[0].GetData(nHit, dNumTasks));
+		case BCT_INCOMPLETETASKS:
+			{
+				double dNumTasks;
+				VERIFY(m_dataset[0].GetData(nHit, dNumTasks));
 
-			sTooltip.Format(IDS_TOOLTIP_INCOMPLETE, CDateHelper::FormatDate(dDate), (int)dNumTasks);
+				sTooltip.Format(IDS_TOOLTIP_INCOMPLETE, CDateHelper::FormatDate(dDate), (int)dNumTasks);
+			}
+			break;
+
+		case BCT_REMAININGDAYS:
+			{
+				double dNumEst, dNumSpent;
+				VERIFY(m_dataset[SPRINT_SPENT].GetData(nHit, dNumSpent));
+				VERIFY(m_dataset[SPRINT_EST].GetData(nHit, dNumEst));
+
+				sTooltip.Format(IDS_TOOLTIP_REMAINING, CDateHelper::FormatDate(dDate), (int)dNumEst, (int)dNumSpent);
+			}
+			break;
 		}
-		break;
 
-	case BCT_REMAININGDAYS:
-		{
-			double dNumEst, dNumSpent;
-			VERIFY(m_dataset[SPRINT_SPENT].GetData(nHit, dNumSpent));
-			VERIFY(m_dataset[SPRINT_EST].GetData(nHit, dNumEst));
-
-			sTooltip.Format(IDS_TOOLTIP_REMAINING, CDateHelper::FormatDate(dDate), (int)dNumEst, (int)dNumSpent);
-		}
-		break;
+		if (!sTooltip.IsEmpty())
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
 	}
 
-	pTI->hwnd = GetSafeHwnd();
-	pTI->uId = MAKELONG(point.x, point.y);
-	pTI->lpszText = _tcsdup(sTooltip); // MFC will free the duplicated string
-	pTI->rect = m_rectData;
-	
-	return (int)pTI->uId;
+	return CHMXChartEx::OnToolHitTest(point, pTI);
 }
 
 int CBurndownChart::HitTest(const CPoint& ptClient) const

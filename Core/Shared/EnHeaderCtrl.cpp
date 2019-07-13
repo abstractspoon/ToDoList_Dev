@@ -933,21 +933,18 @@ int CEnHeaderCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	
 	if ((nItem != -1) && IsItemVisible(nItem))
 	{
-#ifdef _DEBUG
-// 		if (m_tooltips.GetLastHitToolInfo().uId != (UINT)nItem)
-// 			TRACE(_T("CEnHeaderCtrl::OnToolHitTest(%d, %s)\n"), nItem, GetItemToolTip(nItem));
-#endif
+		CString sTooltip = GetItemToolTip(nItem);
 
-		pTI->hwnd = GetSafeHwnd();
-		pTI->uId = nItem;
-		pTI->lpszText = _tcsdup(GetItemToolTip(nItem)); // MFC will free the duplicated string
+		if (!sTooltip.IsEmpty())
+		{
+			CRect rBounds;
+			GetItemRect(nItem, rBounds);
 
-		GetItemRect(nItem, &pTI->rect);
-
-		return nItem;
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, (nItem + 1), rBounds);
+		}
 	}
 
-	return -1;
+	return CHeaderCtrl::OnToolHitTest(point, pTI);
 }
 
 BOOL CEnHeaderCtrl::EnableToolTips(BOOL bEnable)

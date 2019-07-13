@@ -618,16 +618,10 @@ int CFileEdit::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 		if (rClient.PtInRect(point))
 		{
-			pTI->hwnd = m_hWnd;
-			pTI->uId = (UINT)GetButtonTooltipID(0);
-			pTI->uFlags = TTF_NOTBUTTON;
-			pTI->rect = rClient;
-
 			CString sFilePath;
 			GetWindowText(sFilePath);
-			pTI->lpszText = _tcsdup(sFilePath);
 
-			return (int)pTI->uId;
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sFilePath, 0xffff, rClient);
 		}
 	}
 

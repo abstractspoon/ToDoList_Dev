@@ -149,12 +149,9 @@ void CTaskMiniCalendarCtrl::DisableHeatMap()
 	}
 }
 
-BOOL CTaskMiniCalendarCtrl::PreTranslateMessage(MSG* pMsg)
+void CTaskMiniCalendarCtrl::FilterToolTipMessage(MSG* pMsg)
 {
-	if (m_tooltip.GetSafeHwnd())
-		m_tooltip.FilterToolTipMessage(pMsg);
-
-	return CMiniCalendarCtrl::PreTranslateMessage(pMsg);
+	m_tooltip.FilterToolTipMessage(pMsg);
 }
 
 int CTaskMiniCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
@@ -167,17 +164,11 @@ int CTaskMiniCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 		if (nHeat > 0)
 		{
-			pTI->hwnd = GetSafeHwnd();
-			pTI->uId = (DWORD)(int)pSpot->m_dt;
-			pTI->uFlags |= TTF_TRANSPARENT;
-			pTI->rect = pSpot->m_rect;
-
 			CEnString sTooltip(IDS_MINICAL_TOOLTIP, nHeat);
-			pTI->lpszText = _tcsdup(sTooltip); // MFC will free the duplicated string
 
-			return (int)pTI->uId;
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, (int)pSpot->m_dt, pSpot->m_rect);
 		}
 	}
 
-	return -1;
+	return CMiniCalendarCtrl::OnToolHitTest(point, pTI);
 }

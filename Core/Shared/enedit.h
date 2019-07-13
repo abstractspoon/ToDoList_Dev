@@ -133,6 +133,7 @@ protected:
 	afx_msg LRESULT OnHotChange(WPARAM /*wp*/, LPARAM /*lp*/);
 	afx_msg void OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct);
 	afx_msg void OnNcPaint();
+	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 	CRect GetButtonRectByIndex(int nBtn) const; // screen coords
@@ -140,7 +141,6 @@ protected:
 	int ButtonHitTest(CPoint ptScreen) const;
 	int ButtonHitTest(UINT nID) const;
 	int GetButtonWidthByIndex(int nBtn) const;
-	int GetButtonTooltipID(UINT nID) const;
 	CRect GetButtonsRect() const;
 	int GetButtonsWidth() const;
 	BOOL InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth, 

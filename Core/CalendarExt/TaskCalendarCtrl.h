@@ -95,6 +95,9 @@ protected:
 	mutable int m_nMaxDayTaskCount;
 	mutable TCC_SNAPMODE m_nSnapMode;
 
+protected:
+	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
+
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CTaskCalendarCtrl)
@@ -113,7 +116,6 @@ protected:
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
 
 #if _MSC_VER >= 1400
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);

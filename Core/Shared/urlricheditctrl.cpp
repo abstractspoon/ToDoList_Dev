@@ -1230,17 +1230,11 @@ int CUrlRichEditCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 	if (!m_sContextUrl.IsEmpty() && GetUrlTooltip(m_sContextUrl, sTooltip))
 	{
-		int nHit = MAKELONG(point.x, point.y);
-		
-		pTI->hwnd = m_hWnd;
-		pTI->uId  = nHit;
-		pTI->rect = CRect(CPoint(point.x-1,point.y-1),CSize(2,2));
-		pTI->uFlags |= TTF_NOTBUTTON | TTF_ALWAYSTIP;
-		pTI->lpszText = _tcsdup(sTooltip);
-		
-		return nHit;
+		CRect rBounds(CPoint(point.x - 1, point.y - 1),CSize(2, 2));
+		UINT nID = MAKELONG(point.x, point.y);
+
+		return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, nID, rBounds);
 	}
 
-	// else
-	return 0;
+	return CRichEditBaseCtrl::OnToolHitTest(point, pTI);
 }

@@ -387,6 +387,8 @@ bool CKanbanWnd::ProcessMessage(MSG* pMsg)
 
 void CKanbanWnd::FilterToolTipMessage(MSG* pMsg)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	// Our tooltips
 	m_tooltips.RelayEvent(pMsg);
 

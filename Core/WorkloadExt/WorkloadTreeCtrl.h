@@ -44,13 +44,13 @@ protected:
 
 protected:
 	virtual void PreSubclassWindow();
+	virtual int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
 	
 protected:
 	afx_msg void OnDestroy();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
-	afx_msg int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
 
 	DECLARE_MESSAGE_MAP()
 

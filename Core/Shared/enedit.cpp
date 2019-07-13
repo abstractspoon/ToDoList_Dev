@@ -77,6 +77,7 @@ BEGIN_MESSAGE_MAP(CEnEdit, CMaskEdit)
 	ON_WM_NCHITTEST()
 	//}}AFX_MSG_MAP
 	ON_REGISTERED_MESSAGE(WM_HTHOTCHANGE, OnHotChange)
+	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 	ON_WM_ENABLE()
 	ON_MESSAGE(EM_SETREADONLY, OnSetReadOnly)
 	ON_WM_STYLECHANGED()
@@ -1020,6 +1021,14 @@ void CEnEdit::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct)
 	}
 }
 
+LRESULT CEnEdit::OnToolHitTest(WPARAM wp, LPARAM lp)
+{
+	CPoint pt(wp);
+	TOOLINFO* pTI = (TOOLINFO*)lp;
+
+	return OnToolHitTest(pt, pTI);
+}
+
 int CEnEdit::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	ClientToScreen(&point);
@@ -1032,28 +1041,14 @@ int CEnEdit::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 		if (!btn.sTip.IsEmpty())
 		{
-			int nTool = GetButtonTooltipID(btn.nID);
+			CRect rBounds;
+			GetWindowRect(rBounds);
+			ScreenToClient(rBounds);
 
-			pTI->hwnd = m_hWnd;
-			pTI->uId = (UINT)nTool;
-			pTI->uFlags = TTF_NOTBUTTON;
-			pTI->lpszText = _tcsdup(btn.sTip);
-
-			GetWindowRect(&pTI->rect);
-			CWnd::ScreenToClient(&pTI->rect);
-
-			return nTool;
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, btn.sTip, (nBtn + 1), rBounds);
 		}
 	}
 
 	// else
 	return CMaskEdit::OnToolHitTest(point, pTI);
-}
-
-int CEnEdit::GetButtonTooltipID(UINT nID) const
-{
-	CRect rWindow;
-	GetWindowRect(rWindow);
-
-	return (int)(MAKELPARAM(rWindow.left, rWindow.top) + nID);
 }

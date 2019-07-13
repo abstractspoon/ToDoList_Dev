@@ -98,7 +98,6 @@ BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrlEx)
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
-	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 
 END_MESSAGE_MAP()
 
@@ -2416,11 +2415,8 @@ void CTaskCalendarCtrl::FilterToolTipMessage(MSG* pMsg)
 	m_tooltip.FilterToolTipMessage(pMsg);
 }
 
-LRESULT CTaskCalendarCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
+int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	CPoint point(wp);
-	TOOLINFO* pTI = (TOOLINFO*)lp;
-	
 	// perform a hit-test
 	DWORD dwTaskID = HitTest(point);
 
@@ -2440,15 +2436,7 @@ LRESULT CTaskCalendarCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
 
 			if (rLabel.PtInRect(point))
 			{
-				pTI->hwnd = GetSafeHwnd();
-				pTI->uId = dwTaskID;
-				pTI->uFlags |= TTF_TRANSPARENT;
-				pTI->rect = rLabel;
-				
-				// MFC will free the duplicated string
-				pTI->lpszText = _tcsdup(pTCI->GetName());
-
-				return (int)dwTaskID;
+				return CToolTipCtrlEx::SetToolInfo(*pTI, this, pTCI->GetName(), dwTaskID, rLabel);
 			}
 		}
 	}

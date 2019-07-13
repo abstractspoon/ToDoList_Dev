@@ -328,7 +328,10 @@ LPCTSTR CCalendarWnd::GetMenuText() const
 
 void CCalendarWnd::FilterToolTipMessage(MSG* pMsg)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	m_BigCalendar.FilterToolTipMessage(pMsg);
+	m_MiniCalendar.FilterToolTipMessage(pMsg);
 }
 
 bool CCalendarWnd::ProcessMessage(MSG* pMsg) 
