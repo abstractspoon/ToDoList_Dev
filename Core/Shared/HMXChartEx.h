@@ -9,6 +9,8 @@
 
 #include "..\3rdParty\HMXChart.h"
 
+#include "..\Shared\TooltipCtrlEx.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChartEx window
 
@@ -18,11 +20,10 @@ class CHMXChartEx : public CHMXChart
 public:
 	CHMXChartEx();
 
-// Attributes
-public:
+	void FilterToolTipMessage(MSG* pMsg);
 
-// Operations
-public:
+protected:
+	CToolTipCtrlEx m_tooltip;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -44,6 +45,7 @@ protected:
 	double CalcYAxisInterval(double dDataMax) const;
 	double CalcMaxYAxisValue(double dDataMax) const;
 
+	BOOL InitTooltip(BOOL bMultiline);
 };
 
 /////////////////////////////////////////////////////////////////////////////

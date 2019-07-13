@@ -2,7 +2,6 @@
 
 #include "BurndownStruct.h"
 
-#include "..\Shared\ToolTipCtrlEx.h"
 #include "..\Shared\HMXChartEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -18,13 +17,10 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 
 	void RebuildGraph(BOOL bUpdateExtents);
-	void FilterToolTipMessage(MSG* pMsg);
 
 protected:
 	const CStatsItemArray& m_data;
 
-	CToolTipCtrlEx m_tooltip; 
-	
 	COleDateTimeRange m_dtExtents;
 	BURNDOWN_CHARTTYPE m_nChartType;
 	int m_nScale;

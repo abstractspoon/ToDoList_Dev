@@ -489,13 +489,7 @@ void CBurndownChart::PreSubclassWindow()
 	SetXLabelAngle(45);
 	SetYTicks(10);
 
-	if (m_tooltip.Create(this))
-	{
-		m_tooltip.SetDelayTime(TTDT_INITIAL, 0);
-		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
-		m_tooltip.SetDelayTime(TTDT_RESHOW, 0);
-		m_tooltip.SetMaxTipWidth(1024); // for '\n' support
-	}
+	VERIFY(InitTooltip(TRUE));
 }
 
 bool CBurndownChart::DrawHorzLine(CDC& dc)
@@ -526,11 +520,6 @@ bool CBurndownChart::DrawHorzLine(CDC& dc)
 	}
 
 	return CHMXChartEx::DrawHorzLine(dc);
-}
-
-void CBurndownChart::FilterToolTipMessage(MSG* pMsg)
-{
-	m_tooltip.FilterToolTipMessage(pMsg);
 }
 
 int CBurndownChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const

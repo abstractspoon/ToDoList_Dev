@@ -57,3 +57,24 @@ double CHMXChartEx::CalcYAxisInterval(double dDataMax) const
 	return 10000;
 }
 
+void CHMXChartEx::FilterToolTipMessage(MSG* pMsg)
+{
+	m_tooltip.FilterToolTipMessage(pMsg);
+}
+
+BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
+{
+	if (!m_tooltip.Create(this))
+		return FALSE;
+
+	// else
+	m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
+	m_tooltip.SetDelayTime(TTDT_INITIAL, 0);
+	m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
+	m_tooltip.SetDelayTime(TTDT_RESHOW, 0);
+
+	if (bMultiline)
+		m_tooltip.SetMaxTipWidth(1024); // for '\n' support
+
+	return TRUE;
+}
