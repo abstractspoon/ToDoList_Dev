@@ -216,7 +216,7 @@ int CToolTipCtrlEx::DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti)
 	return pOwner->SendMessage(WM_TTC_TOOLHITTEST, MAKEWPARAM(point.x, point.y), (LPARAM)&ti);
 }
 
-int CToolTipCtrlEx::SetToolInfo(TOOLINFO& ti, const CWnd* pWnd, const CString sTooltip, int nID, const CRect& rBounds, BOOL bTransparent)
+int CToolTipCtrlEx::SetToolInfo(TOOLINFO& ti, const CWnd* pWnd, const CString sTooltip, int nID, const CRect& rBounds, UINT nFlags)
 {
 	ASSERT(pWnd);
 	ASSERT(!sTooltip.IsEmpty());
@@ -227,9 +227,7 @@ int CToolTipCtrlEx::SetToolInfo(TOOLINFO& ti, const CWnd* pWnd, const CString sT
 	ti.uId = nID;
 	ti.lpszText = _tcsdup(sTooltip); // MFC will free the duplicated string
 	ti.rect = rBounds;
-
-	if (bTransparent)
-		ti.uFlags |= TTF_TRANSPARENT;
+	ti.uFlags = nFlags;
 
 	return nID;
 }

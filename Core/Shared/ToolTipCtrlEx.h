@@ -29,7 +29,7 @@ public:
 	const TOOLINFO& GetLastHitToolInfo() const;
 
 	static BOOL WantMessage(const MSG* pMsg);
-	static int SetToolInfo(TOOLINFO& ti, const CWnd* pWnd, const CString sTooltip, int nID, const CRect& rBounds, BOOL bTransparent = TRUE);
+	static int SetToolInfo(TOOLINFO& ti, const CWnd* pWnd, const CString sTooltip, int nID, const CRect& rBounds, UINT nFlags = TTF_TRANSPARENT | TTF_NOTBUTTON);
 
 protected:
 	BOOL m_bUsingRelayEvent;
