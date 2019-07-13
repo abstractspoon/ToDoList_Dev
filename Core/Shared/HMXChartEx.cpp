@@ -32,6 +32,11 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChartEx message handlers
 
+BOOL CHMXChartEx::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID)
+{
+	return CHMXChart::Create(NULL, NULL, dwStyle, rect, pParentWnd, nID);
+}
+
 double CHMXChartEx::CalcMaxYAxisValue(double dDataMax) const
 {
 	return (GetYTicks() * CalcYAxisInterval(dDataMax));

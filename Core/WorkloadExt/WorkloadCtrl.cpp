@@ -249,7 +249,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Bar Chart ------------------------------------------------------------------------
 	// Initialise graph
-	VERIFY(m_barChart.Create(WC_STATIC, NULL, WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), this, IDC_BARCHART));
+	VERIFY(m_barChart.Create(WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), this, IDC_BARCHART));
 
 	m_barChart.SetBkGnd(GetSysColor(COLOR_WINDOW));
 	m_barChart.SetXLabelsAreTicks(true);
@@ -4195,6 +4195,7 @@ void CWorkloadCtrl::FilterToolTipMessage(MSG* pMsg)
 	m_tcTasks.FilterToolTipMessage(pMsg);
 	m_hdrTasks.FilterToolTipMessage(pMsg);
 	m_hdrColumns.FilterToolTipMessage(pMsg);
+	m_barChart.FilterToolTipMessage(pMsg);
 }
 
 bool CWorkloadCtrl::ProcessMessage(MSG* pMsg) 

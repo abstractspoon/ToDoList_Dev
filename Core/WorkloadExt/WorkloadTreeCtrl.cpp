@@ -40,7 +40,6 @@ BEGIN_MESSAGE_MAP(CWorkloadTreeCtrl, CTreeCtrl)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
-	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
@@ -67,33 +66,21 @@ int CWorkloadTreeCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-LRESULT CWorkloadTreeCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
+int CWorkloadTreeCtrl::OnToolHitTest(CPoint pt, TOOLINFO* pTI) const
 {
-	CPoint point(wp);
-	TOOLINFO* pTI = (TOOLINFO*)lp;
-	
 	UINT nFlags = 0;
-	HTREEITEM hti = HitTest(point, &nFlags);
+	HTREEITEM hti = HitTest(pt, &nFlags);
 
-	if (hti && (nFlags & TVHT_ONITEMLABEL) && (point.x <= m_nTitleColumnWidth))
-	{
-		CRect rLabel;
-		VERIFY(GetItemRect(hti, rLabel, TRUE));
+	if ((hti == NULL) || !(nFlags & TVHT_ONITEMLABEL) || (pt.x > m_nTitleColumnWidth))
+		return -1;
 
-		if (rLabel.right > m_nTitleColumnWidth)
-		{
-			pTI->hwnd = GetSafeHwnd();
-			pTI->uId = (DWORD)hti;
-			pTI->uFlags |= TTF_TRANSPARENT;
-			pTI->lpszText = _tcsdup(GetItemText(hti)); // MFC will free the duplicated string
-			pTI->rect = rLabel;
+	CRect rLabel;
+	VERIFY(GetItemRect(hti, rLabel, TRUE));
 
-			return (DWORD)hti;
-		}
-	}
+	if (rLabel.right <= m_nTitleColumnWidth)
+		return -1;
 
-	// else
-	return CTreeCtrl::OnToolHitTest(point, pTI);
+	return CToolTipCtrlEx::SetToolInfo(*pTI, this, GetItemText(hti), (int)hti, rLabel);
 }
 
 bool CWorkloadTreeCtrl::ProcessMessage(MSG* /*pMsg*/) 

@@ -20,6 +20,7 @@ class CHMXChartEx : public CHMXChart
 public:
 	CHMXChartEx();
 
+	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	void FilterToolTipMessage(MSG* pMsg);
 
 protected:

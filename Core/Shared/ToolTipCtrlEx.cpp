@@ -216,6 +216,24 @@ int CToolTipCtrlEx::DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti)
 	return pOwner->SendMessage(WM_TTC_TOOLHITTEST, MAKEWPARAM(point.x, point.y), (LPARAM)&ti);
 }
 
+int CToolTipCtrlEx::SetToolInfo(TOOLINFO& ti, const CWnd* pWnd, const CString sTooltip, int nID, const CRect& rBounds, BOOL bTransparent)
+{
+	ASSERT(pWnd);
+	ASSERT(!sTooltip.IsEmpty());
+	ASSERT(nID > 0);
+	ASSERT(!rBounds.IsRectEmpty());
+
+	ti.hwnd = pWnd->GetSafeHwnd();
+	ti.uId = nID;
+	ti.lpszText = _tcsdup(sTooltip); // MFC will free the duplicated string
+	ti.rect = rBounds;
+
+	if (bTransparent)
+		ti.uFlags |= TTF_TRANSPARENT;
+
+	return nID;
+}
+
 BOOL CToolTipCtrlEx::IsTopParentActive(CWnd* pOwner)
 {
 	ASSERT(pOwner);

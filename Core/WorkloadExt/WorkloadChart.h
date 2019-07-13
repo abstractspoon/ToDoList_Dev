@@ -37,7 +37,9 @@ protected:
 	double m_dOverloadValue, m_dUnderloadValue;
 	
 protected:
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
+
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -50,6 +52,7 @@ protected:
 
 	BOOL HasOverload() const;
 	BOOL HasUnderload() const;
+	int HitTest(const CPoint& ptClient) const;
 
 };
 

@@ -50,7 +50,7 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
+	afx_msg int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
 
 	DECLARE_MESSAGE_MAP()
 

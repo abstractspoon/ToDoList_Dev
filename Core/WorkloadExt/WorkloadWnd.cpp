@@ -340,6 +340,8 @@ void CWorkloadWnd::SetUITheme(const UITHEME* pTheme)
 
 void CWorkloadWnd::FilterToolTipMessage(MSG* pMsg) 
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	m_ctrlWorkload.FilterToolTipMessage(pMsg);
 }
 
