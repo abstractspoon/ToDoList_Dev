@@ -3,8 +3,8 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "KanbanListCtrl.h"
-#include "KanbanListCtrlArray.h"
+#include "KanbanColumnCtrl.h"
+#include "KanbanColumnCtrlArray.h"
 
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\enbitmap.h"

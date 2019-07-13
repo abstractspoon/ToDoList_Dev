@@ -1,5 +1,5 @@
-#if !defined(AFX_KANBANLISTCTRL_H__059495EC_3D8D_4607_A4CF_20C142F8A294__INCLUDED_)
-#define AFX_KANBANLISTCTRL_H__059495EC_3D8D_4607_A4CF_20C142F8A294__INCLUDED_
+#if !defined(AFX_KANBANCOLUMNCTRL_H__059495EC_3D8D_4607_A4CF_20C142F8A294__INCLUDED_)
+#define AFX_KANBANCOLUMNCTRL_H__059495EC_3D8D_4607_A4CF_20C142F8A294__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -134,6 +134,9 @@ protected:
 public:
 	virtual ~CKanbanColumnCtrl();
 
+protected:
+	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
+
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CKanbanListCtrlEx)
@@ -146,7 +149,6 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg void OnTooltipShow(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 
 	DECLARE_MESSAGE_MAP()
@@ -194,4 +196,4 @@ protected:
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_KANBANLISTCTRL_H__059495EC_3D8D_4607_A4CF_20C142F8A294__INCLUDED_)
+#endif // !defined(AFX_KANBANCOLUMNCTRL_H__059495EC_3D8D_4607_A4CF_20C142F8A294__INCLUDED_)

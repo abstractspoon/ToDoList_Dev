@@ -11,7 +11,7 @@
 
 #include "Kanbanstruct.h"
 #include "Kanbanenum.h"
-#include "KanbanlistctrlArray.h"
+#include "KanbanColumnctrlArray.h"
 
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\fontcache.h"

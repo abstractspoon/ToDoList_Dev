@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "KanbanListCtrl.h"
+#include "KanbanColumnCtrl.h"
 #include "Kanbanstatic.h"
 #include "Kanbanenum.h"
 
@@ -126,7 +126,6 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	ON_WM_SETCURSOR()
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
-	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1550,11 +1549,8 @@ BOOL CKanbanColumnCtrl::InitTooltip()
 	return TRUE;
 }
 
-LRESULT CKanbanColumnCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
+int CKanbanColumnCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	CPoint point(wp);
-	TOOLINFO* pTI = (TOOLINFO*)lp;
-	
 	HTREEITEM hti = HitTest(point);
 
 	if (hti)
@@ -1563,20 +1559,13 @@ LRESULT CKanbanColumnCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
 
 		if (GetItemTooltipRect(hti, rTip, NULL))
 		{
-			pTI->hwnd = GetSafeHwnd();
-			pTI->uId = GetTaskID(hti);
-			pTI->uFlags |= TTF_TRANSPARENT;
-			pTI->lpszText = _tcsdup(GetItemText(hti)); // MFC will free the duplicated string
-
 			GetItemRect(hti, rTip, NULL);
-			pTI->rect = rTip;
-			
-			return pTI->uId;
+
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, GetItemText(hti), GetTaskID(hti), rTip);
 		}
 	}
 
-	// else
-	return -1;
+	return CTreeCtrl::OnToolHitTest(point, pTI);
 }
 
 void CKanbanColumnCtrl::OnTooltipShow(NMHDR* /*pNMHDR*/, LRESULT* pResult)

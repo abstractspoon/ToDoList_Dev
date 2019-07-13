@@ -13,9 +13,6 @@
     <ClCompile Include="KanbanFixedColumnListCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="KanbanListCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="KanbanPreferencesDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -34,7 +31,10 @@
     <ClCompile Include="KanbanCustomAttributeComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="KanbanListCtrlArray.cpp">
+    <ClCompile Include="KanbanColumnCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="KanbanColumnCtrlArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,9 +60,6 @@
     <ClInclude Include="KanbanFixedColumnListCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KanbanListCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="KanbanPreferencesDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -84,7 +81,10 @@
     <ClInclude Include="KanbanCustomAttributeComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KanbanListCtrlArray.h">
+    <ClInclude Include="KanbanColumnCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KanbanColumnCtrlArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

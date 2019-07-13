@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "KanbanCtrl.h"
-#include "KanbanListCtrl.h"
+#include "KanbanColumnCtrl.h"
 #include "KanbanColors.h"
 #include "KanbanMsg.h"
 
