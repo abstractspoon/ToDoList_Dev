@@ -392,7 +392,7 @@ void CEnEdit::OnSize(UINT nType, int cx, int cy)
 BOOL CEnEdit::InitializeTooltips()
 {
 	// Tooltips don't work when we're part of a combobox
-	if (!CWinClasses::IsClass(::GetParent(m_hWnd), WC_COMBOBOX))
+	if (!m_bParentIsCombo)
 	{
 		if (m_tooltip.GetSafeHwnd())
 		{
