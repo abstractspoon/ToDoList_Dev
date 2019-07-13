@@ -6421,7 +6421,13 @@ int CGanttTreeListCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& 
 	if (bScreen)
 		m_list.ScreenToClient(&(lvht.pt));
 
-	if ((ListView_SubItemHitTest(m_list, &lvht) != -1) &&	(lvht.iSubItem > 0))
+	CRect rClient;
+	GetClientRect(rClient);
+
+	if (!rClient.PtInRect(point))
+		return -1;
+
+	if ((ListView_SubItemHitTest(m_list, &lvht) != -1) && (lvht.iSubItem > 0))
 	{
 		ASSERT(lvht.iItem != -1);
 

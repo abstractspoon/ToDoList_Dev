@@ -3950,6 +3950,12 @@ int CWorkloadCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol)
 	if (bScreen)
 		m_lcColumns.ScreenToClient(&(lvht.pt));
 
+	CRect rClient;
+	CWnd::GetClientRect(rClient);
+
+	if (!rClient.PtInRect(point))
+		return -1;
+
 	if ((ListView_SubItemHitTest(m_lcColumns, &lvht) != -1) &&	(lvht.iSubItem > 0))
 	{
 		ASSERT(lvht.iItem != -1);
