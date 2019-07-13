@@ -255,10 +255,15 @@ void CEnEdit::SetBorders(int nTop, int nBottom)
 	}
 }
 
-BOOL CEnEdit::PreTranslateMessage(MSG* pMsg) 
+void CEnEdit::FilterToolTipMessage(MSG* pMsg)
 {
-	if (m_tooltip.GetSafeHwnd())
+	if (m_tooltip.GetSafeHwnd() && CToolTipCtrlEx::WantMessage(pMsg))
 		m_tooltip.FilterToolTipMessage(pMsg);
+}
+
+BOOL CEnEdit::PreTranslateMessage(MSG* pMsg)
+{
+	FilterToolTipMessage(pMsg);
 
 	// Treat 'return' as a button click for single button controls
 	if ((pMsg->message == WM_KEYDOWN) && 
@@ -386,17 +391,23 @@ void CEnEdit::OnSize(UINT nType, int cx, int cy)
 
 BOOL CEnEdit::InitializeTooltips()
 {
-	if (m_tooltip.GetSafeHwnd())
+	// Tooltips don't work when we're part of a combobox
+	if (!CWinClasses::IsClass(::GetParent(m_hWnd), WC_COMBOBOX))
 	{
-		return TRUE;
-	}
-	else if (m_tooltip.Create(this))
-	{
-		// hot tracking
-		if (CThemed().AreControlsThemed())
-			m_hotTrack.Initialize(this);
+		if (m_tooltip.GetSafeHwnd())
+		{
+			return TRUE;
+		}
+		else if (m_tooltip.Create(this))
+		{
+			m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
 
-		return TRUE;
+			// hot tracking
+			if (CThemed().AreControlsThemed())
+				m_hotTrack.Initialize(this);
+
+			return TRUE;
+		}
 	}
 
 	return FALSE;

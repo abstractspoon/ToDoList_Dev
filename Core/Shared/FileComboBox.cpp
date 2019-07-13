@@ -123,12 +123,11 @@ void CFileComboBox::OnSize(UINT nType, int cx, int cy)
 
 	ResizeEdit();
 
-	// CFileEdit tooltips don't work when embedded in a combobox
-	if (m_fileEdit.m_tooltip.GetSafeHwnd())
-	{
-		m_fileEdit.m_tooltip.Activate(FALSE);
-		EnableToolTips(TRUE);
-	}
+	// CFileEdit disables its tooltips when embedded in a combobox
+	// simply because they don't seem to work
+	ASSERT(!m_fileEdit.m_tooltip.GetSafeHwnd());
+
+	EnableToolTips(TRUE);
 }
 
 void CFileComboBox::ResizeEdit()

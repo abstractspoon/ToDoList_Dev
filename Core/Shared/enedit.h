@@ -69,6 +69,7 @@ public:
 	UINT TrackPopupMenu(UINT nID, CMenu* pMenu, DWORD dwFlags = EETPM_BELOW);
 
 	void SetBorders(int nTop, int nBottom);
+	void FilterToolTipMessage(MSG* pMsg);
 
 // Attributes
 protected:
