@@ -136,6 +136,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 				{
 					// allow the tooltip to popup when it should
 					Activate(TRUE);
+					//TRACE(_T("CToolTipCtrlEx::Activate(TRUE, \"%s\")\n"), tiHit.lpszText);
 
 // 					if (m_nFlags & WF_TRACKINGTOOLTIPS)
 // 						SendMessage(TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
