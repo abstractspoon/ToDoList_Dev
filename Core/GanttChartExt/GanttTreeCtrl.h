@@ -38,6 +38,7 @@ protected:
 
 protected:
 	virtual void PreSubclassWindow();
+	virtual int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
 	
 protected:
 	afx_msg void OnDestroy();
@@ -45,7 +46,6 @@ protected:
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnTitleColumnWidthChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 

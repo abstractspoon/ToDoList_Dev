@@ -437,6 +437,8 @@ void CGanttChartWnd::SetUITheme(const UITHEME* pTheme)
 
 void CGanttChartWnd::FilterToolTipMessage(MSG* pMsg) 
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	m_ctrlGantt.FilterToolTipMessage(pMsg);
 }
 
