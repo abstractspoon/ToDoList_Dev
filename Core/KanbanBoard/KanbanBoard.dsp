@@ -118,6 +118,14 @@ SOURCE=.\KanbanBoard.rc
 # End Source File
 # Begin Source File
 
+SOURCE=.\KanbanColumnCtrl.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\KanbanColumnCtrlArray.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\KanbanCtrl.cpp
 # End Source File
 # Begin Source File
@@ -127,14 +135,6 @@ SOURCE=.\KanbanCustomAttributeComboBox.cpp
 # Begin Source File
 
 SOURCE=.\KanbanFixedColumnListCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\KanbanListCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\KanbanListCtrlArray.cpp
 # End Source File
 # Begin Source File
 
@@ -176,6 +176,14 @@ SOURCE=.\KanbanColors.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\KanbanColumnCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\KanbanColumnCtrlArray.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\KanbanCtrl.h
 # End Source File
 # Begin Source File
@@ -189,14 +197,6 @@ SOURCE=.\KanbanEnum.h
 # Begin Source File
 
 SOURCE=.\KanbanFixedColumnListCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\KanbanListCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\KanbanListCtrlArray.h
 # End Source File
 # Begin Source File
 

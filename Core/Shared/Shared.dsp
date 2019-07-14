@@ -329,6 +329,10 @@ SOURCE=.\historycombobox.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\HMXChartEx.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\HoldRedraw.cpp
 # End Source File
 # Begin Source File
@@ -709,6 +713,10 @@ SOURCE=.\WndPrompt.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\WorkingWeek.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\XmlFile.cpp
 # End Source File
 # Begin Source File
@@ -814,6 +822,10 @@ SOURCE=.\DatabaseEx.h
 # Begin Source File
 
 SOURCE=.\DateHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DateHelperEnums.h
 # End Source File
 # Begin Source File
 
@@ -970,6 +982,10 @@ SOURCE=.\GroupLine.h
 # Begin Source File
 
 SOURCE=.\historycombobox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\HMXChartEx.h
 # End Source File
 # Begin Source File
 
@@ -1390,6 +1406,10 @@ SOURCE=.\WndMisc.h
 # Begin Source File
 
 SOURCE=.\WndPrompt.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\WorkingWeek.h
 # End Source File
 # Begin Source File
 
