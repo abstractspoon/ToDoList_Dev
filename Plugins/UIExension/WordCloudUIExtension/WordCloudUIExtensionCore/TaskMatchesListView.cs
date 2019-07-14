@@ -488,16 +488,18 @@ namespace WordCloudUIExtension
 
 			if (CheckboxRect(hit.Item.Bounds).Contains(e.Location))
 			{
-				EditTaskDone?.Invoke(this, item.Id, !item.IsDone(false));
+				if (EditTaskDone != null)
+					EditTaskDone(this, item.Id, !item.IsDone(false));
 			}
 			else if (IconRect(hit.Item.Bounds).Contains(e.Location))
 			{
-				EditTaskIcon?.Invoke(this, item.Id);
+				if (EditTaskIcon != null)
+					EditTaskIcon(this, item.Id);
 			}
 			else if (doubleClick)
 			{
-				EditTaskLabel?.Invoke(this, item.Id);
-
+				if (EditTaskLabel != null)
+					EditTaskLabel(this, item.Id);
 			}
 		}
 
