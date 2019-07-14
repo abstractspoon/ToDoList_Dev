@@ -3302,7 +3302,9 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 		break;	
 
 	case TDCA_POSITION: // == move
-		if (m_nExtModifyingAttrib != TDCA_POSITION)
+	case TDCA_POSITION_SAMEPARENT:
+	case TDCA_POSITION_DIFFERENTPARENT:
+		if (m_nExtModifyingAttrib != nAttrib)
 			UpdateExtensionViewsTasks(nAttrib);
 		break;	
 
