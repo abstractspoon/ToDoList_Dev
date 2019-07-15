@@ -9269,6 +9269,7 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 	{
 		HTREEITEM hti = selection.GetNext(pos);
 		DWORD dwTaskID = GetTaskID(hti);
+		BOOL bHasParent = m_taskTree.ItemHasParent(hti);
 
 		// do we need to resolve task references?
 		if (bResolveReferences)
@@ -9276,32 +9277,47 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 			DWORD dwRefID = GetTrueTaskID(hti);
 			
 			if (dwRefID != dwTaskID)
+			{
+				dwTaskID = dwRefID;
 				hti = m_taskTree.GetItem(dwRefID); // true task
+			}
 		}
 		
 		// does the user want this task's parent(s) ?
-		if (bWantAllParents || bWantImmediateParent)
+		if ((bWantAllParents || bWantImmediateParent) && bHasParent)
 		{
-			VERIFY(AddTreeItemAndParentToTaskFile(hti, tasks, filter, bWantAllParents, bWantSubtasks));
+			if (AddTreeItemAndParentToTaskFile(hti, tasks, filter, bWantAllParents, bWantSubtasks))
+			{
+				aSelTaskIDs.Add(dwTaskID);
+			}
 		}
 		else
 		{
 			// find the parent task previously added (or not)
-			DWORD dwParentID = m_taskTree.GetTaskParentID(hti);
-			HTASKITEM hParent = tasks.FindTask(dwParentID);
+			DWORD dwParentID = 0;
+			HTASKITEM hParent = NULL;
 
-			VERIFY(AddTreeItemToTaskFile(hti, dwTaskID, tasks, hParent, filter, bWantSubtasks, dwParentID));
+			if (bHasParent)
+			{
+				dwParentID = m_taskTree.GetTaskParentID(hti);
+				hParent = tasks.FindTask(dwParentID);
+			}
+
+			if (AddTreeItemToTaskFile(hti, dwTaskID, tasks, hParent, filter, bWantSubtasks, dwParentID))
+			{
+				aSelTaskIDs.Add(dwTaskID);
+			}
 		}
 	}
 
 	// extra processing to identify the originally selected tasks
 	// in case the user wants to paste as references.
-	// Note: References are excluded of bResolveReferences is true
-	pos = TSH().GetFirstItemPos();
+	// Note: References are excluded if bResolveReferences is true
+	pos = aSelTaskIDs.GetStartPosition();
 
 	while (pos)
 	{
-		DWORD dwSelID = TSH().GetNextItemData(pos);
+		DWORD dwSelID = aSelTaskIDs.GetNext(pos);
 		ASSERT(dwSelID);
 
 		if (!bResolveReferences || !m_data.IsTaskReference(dwSelID))
