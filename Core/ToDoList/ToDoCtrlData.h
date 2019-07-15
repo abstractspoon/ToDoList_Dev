@@ -204,6 +204,10 @@ public:
 	TDC_SET InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date, BOOL bAndSubtasks);
 	TDC_SET MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
 
+	TDC_SET IncrementTaskPercentDone(DWORD dwTaskID, int nAmount, BOOL& bDoneChange);
+	TDC_SET IncrementTaskPriority(DWORD dwTaskID, int nAmount);
+	TDC_SET IncrementTaskRisk(DWORD dwTaskID, int nAmount);
+
 	TDC_SET ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bAndChildren = FALSE);
 	TDC_SET ClearTaskCustomAttribute(DWORD dwTaskID, const CString& sAttribID, BOOL bAndChildren = FALSE);
 
@@ -247,7 +251,6 @@ protected:
 	BOOL AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, TODOSTRUCTURE* pTDSParent);
 	int GetReferencesToTask(DWORD dwTaskID, const TODOSTRUCTURE* pTDS, CDWordArray& aRefIDs) const;
 	BOOL IsTaskReferenced(DWORD dwTaskID, const TODOSTRUCTURE* pTDS) const;
-	BOOL RemoveOrphanTaskReferences();
 	BOOL RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD dwMatchID = 0);
 	
 	BOOL FindTaskLocalDependency(DWORD dwTaskID, DWORD dwDependsID, CDWordSet& mapVisited) const;
@@ -323,6 +326,7 @@ protected:
 	static COleDateTime AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits);
 	static BOOL IsEndOfDay(const COleDateTime& date);
 	static BOOL IsValidDateRange(const COleDateTime& dateStart, const COleDateTime& dateDue);
+	static int GetNextValue(int nValue, int nIncrement);
 
 };
 

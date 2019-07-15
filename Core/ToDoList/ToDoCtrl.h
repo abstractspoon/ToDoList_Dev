@@ -750,7 +750,6 @@ protected:
 	void UpdateDateTimeControls(BOOL bHasSelection);
 	void SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin = 0.0);
 	void IncrementTrackedTime(BOOL bEnding);
-	int GetNextPercentDone(int nPercent, BOOL bUp);
 	BOOL FindReplaceSelectedTaskAttribute();
 
 	// internal versions so we can tell how we've been called

@@ -2952,18 +2952,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 		if (mapProcessed.Has(dwTaskID))
 			continue;
 
-		int nPriority = (m_data.GetTaskPriority(dwTaskID) + nAmount);
-
-		// need to jump over -1
-		if (nPriority < 0)
-		{
-			if (nAmount < 0)
-				nPriority = FM_NOPRIORITY;
-			else
-				nPriority = 0;
-		}
-
-		if (!HandleModResult(dwTaskID, m_data.SetTaskPriority(dwTaskID, nPriority), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.IncrementTaskPriority(dwTaskID, nAmount), aModTaskIDs))
 			return FALSE;
 
 		mapProcessed.Add(dwTaskID);
@@ -2971,7 +2960,15 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 	
 	if (aModTaskIDs.GetSize())
 	{
-		m_nPriority = m_cbPriority.IncrementPriority(nAmount);
+		// Only update if all values ended up the same
+		int nPriority = m_taskTree.GetSelectedTaskPriority();
+
+		if (nPriority != -1)
+		{
+			m_nPriority = nPriority;
+			m_cbPriority.SetSelectedPriority(nPriority);
+		}
+
 		SetModified(TDCA_PRIORITY, aModTaskIDs);
 	}
 	
@@ -3968,30 +3965,6 @@ void CToDoCtrl::SetPercentDoneIncrement(int nAmount)
 	}
 }
 
-int CToDoCtrl::GetNextPercentDone(int nPercent, BOOL bUp)
-{
-	int nIncrement = (bUp ? m_nPercentIncrement : -m_nPercentIncrement);
-
-	// we need to replicate the arithmetic performed by the 
-	// spin button control, so that to the user the result
-	// is the same as clicking the spin buttons
-	if (m_nPercentIncrement > 1)
-	{
-		// bump the % to the next upper (if +ve) or
-		// next lower (if -ve) whole increment
-		// before adding the increment
-		if (nPercent % m_nPercentIncrement)
-		{
-			if (bUp)
-				nPercent = ((nPercent / m_nPercentIncrement) + 1) * m_nPercentIncrement;
-			else
-				nPercent = (nPercent / m_nPercentIncrement) * m_nPercentIncrement;
-		}
-	}
-
-	return (nPercent + nIncrement);
-}
-
 BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 {
 	if (!CanEditSelectedTask(TDCA_PERCENT))
@@ -4009,6 +3982,8 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 	// the same task multiple times via references
 	CDWordSet mapProcessed;
 
+	int nAmount = (bUp ? m_nPercentIncrement : -m_nPercentIncrement);
+
 	while (pos)
 	{
 		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
@@ -4016,28 +3991,13 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 		if (mapProcessed.Has(dwTaskID))
 			continue;
 
-		BOOL bDone = m_data.IsTaskDone(dwTaskID);
+		BOOL bDoneChange = FALSE;
 
-		int nPercent = m_data.GetTaskPercent(dwTaskID, TRUE);
-		nPercent = GetNextPercentDone(nPercent, bUp);
-				
-		// need to handle transition to/from 100% as special case
-		if (bDone && (nPercent < 100))
-		{
-			m_data.SetTaskDate(dwTaskID, TDCD_DONE, 0.0);
-		}
-		else if (!bDone && (nPercent >= 100))
-		{
-			m_data.SetTaskDate(dwTaskID, TDCD_DONE, COleDateTime::GetCurrentTime());
-		}
+		if (!HandleModResult(dwTaskID, m_data.IncrementTaskPercentDone(dwTaskID, nAmount, bDoneChange), aModTaskIDs))
+			return FALSE;
 
-		TDC_SET nItemRes = m_data.SetTaskPercent(dwTaskID, nPercent);
-		
-		if (nItemRes == SET_CHANGE)
-		{
-			nRes = SET_CHANGE;
-			aModTaskIDs.Add(dwTaskID);
-		}
+		if (bDoneChange)
+			m_taskTree.InvalidateTask(dwTaskID);
 
 		mapProcessed.Add(dwTaskID);
 	}
@@ -4046,15 +4006,12 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 	{
 		// don't update m_nPercentDone for multiple selection
 		// else they all end up as the same value
-		if (GetSelectedCount() == 1)
-		{
-			int nPercent = GetNextPercentDone(m_nPercentDone, bUp);
+		int nPercent = m_taskTree.GetSelectedTaskPercent();
 
-			if (m_nPercentDone != nPercent)
-			{
-				m_nPercentDone = nPercent;
-				UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
-			}
+		if (nPercent != -1)
+		{
+			m_nPercentDone = nPercent;
+			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 		}
 		
 		SetModified(TDCA_PERCENT, aModTaskIDs);

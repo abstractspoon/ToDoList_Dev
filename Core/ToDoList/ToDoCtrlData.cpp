@@ -2242,6 +2242,98 @@ TDC_SET CToDoCtrlData::SetTaskPercent(DWORD dwTaskID, int nPercent)
 	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_PERCENT, pTDI->nPercentDone, nPercent);
 }
 
+TDC_SET CToDoCtrlData::IncrementTaskPercentDone(DWORD dwTaskID, int nAmount, BOOL& bDoneChange)
+{
+	BOOL bDone = IsTaskDone(dwTaskID);
+	bDoneChange = FALSE;
+
+	int nPercent = GetTaskPercent(dwTaskID, TRUE);
+
+	nPercent = GetNextValue(nPercent, nAmount);
+	nPercent = max(0, min(nPercent, 100));
+
+	TDC_SET nRes = SetTaskPercent(dwTaskID, nPercent);
+
+	if (nRes == SET_CHANGE)
+	{
+		// need to handle transition to/from 100% as special case
+		if (bDone && (nPercent < 100))
+		{
+			SetTaskDate(dwTaskID, TDCD_DONE, 0.0);
+			bDoneChange = TRUE;
+		}
+		else if (!bDone && (nPercent >= 100))
+		{
+			SetTaskDate(dwTaskID, TDCD_DONE, COleDateTime::GetCurrentTime());
+			bDoneChange = TRUE;
+		}
+	}
+
+	return nRes;
+}
+
+int CToDoCtrlData::GetNextValue(int nValue, int nIncrement)
+{
+	ASSERT(nIncrement != 0);
+	ASSERT(nValue >= 0);
+
+	BOOL bUp = (nIncrement > 0);
+	int nAmount = abs(nIncrement);
+
+	// we need to replicate the arithmetic performed by the 
+	// spin button control, so that to the user the result
+	// is the same as clicking the spin buttons
+	if (nAmount > 1)
+	{
+		// bump the % to the next upper (if +ve) or
+		// next lower (if -ve) whole increment
+		// before adding the increment
+		if (nValue % nAmount)
+		{
+			if (bUp)
+				nValue = (((nValue / nAmount) + 1) * nAmount);
+			else
+				nValue = ((nValue / nAmount) * nAmount);
+		}
+	}
+
+	return (nValue + nIncrement);
+}
+
+TDC_SET CToDoCtrlData::IncrementTaskPriority(DWORD dwTaskID, int nAmount)
+{
+	int nPriority = GetTaskPriority(dwTaskID);
+
+	ASSERT((nPriority == FM_NOPRIORITY) || ((nPriority >= 0) && (nPriority <= 10)));
+	
+	// Exclude '<none>'
+	if (nPriority == FM_NOPRIORITY)
+		return SET_NOCHANGE;
+	
+	nPriority += nAmount;
+	nPriority = max(0, nPriority);
+	nPriority = min(10, nPriority);
+
+	return SetTaskPriority(dwTaskID, nPriority);
+}
+
+TDC_SET CToDoCtrlData::IncrementTaskRisk(DWORD dwTaskID, int nAmount)
+{
+	int nRisk = GetTaskRisk(dwTaskID);
+
+	ASSERT((nRisk == FM_NORISK) || ((nRisk >= 0) && (nRisk <= 10)));
+	
+	// Exclude '<none>'
+	if (nRisk == FM_NORISK)
+		return SET_NOCHANGE;
+	
+	nRisk += nAmount;
+	nRisk = max(0, nRisk);
+	nRisk = min(10, nRisk);
+
+	return SetTaskPriority(dwTaskID, nRisk);
+}
+
 TDC_SET CToDoCtrlData::SetTaskCost(DWORD dwTaskID, const TDCCOST& cost)
 {
 	TODOITEM* pTDI = NULL;
