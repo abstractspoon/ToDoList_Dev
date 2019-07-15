@@ -511,26 +511,33 @@ BOOL CXmlItem::DeleteItem(const CString& sItemName, const CString& sSubItemName)
 
 BOOL CXmlItem::AddSibling(CXmlItem* pXI)
 {
-	ASSERT (pXI);
-	
 	if (!pXI)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
 	// must share the same name and parent
-	ASSERT (m_sName.CompareNoCase(pXI->GetName()) == 0 && m_pParent == pXI->GetParent());
-	
-	if (!(m_sName.CompareNoCase(pXI->GetName()) == 0 && m_pParent == pXI->GetParent()))
+	if (!((m_sName.CompareNoCase(pXI->GetName()) == 0) && (m_pParent == pXI->GetParent())))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	// Note: DO NOT USE RECURSION HERE because 
 	// too many siblings will over flow the stack
 	CXmlItem* pXISib = this;
 	
 	while (pXISib->m_pSibling)
+	{
+		ASSERT(pXISib->GetType() == XIT_ELEMENT);
 		pXISib = pXISib->m_pSibling;
+	}
 		
 	ASSERT(pXISib->m_pSibling == NULL);
+
 	pXISib->m_pSibling = pXI;
+	pXISib->SetType(XIT_ELEMENT);
 	
 	return TRUE;
 }
