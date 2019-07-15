@@ -1241,14 +1241,25 @@ BOOL CToDoListWnd::InitTimeTrackDlg()
 
 void CToDoListWnd::UpdateTimeTrackerTasks(const CFilteredToDoCtrl& tdc, BOOL bAllTasks)
 {
-	CTaskFile tasks;
+	if (m_dlgTimeTracker.IsSelectedTasklist(&tdc))
+	{
+		CTaskFile tasks;
+		TDCGETTASKS filter(TDCGT_NOTDONE);
 
-	if (bAllTasks)
-		tdc.GetFilteredTasks(tasks);
-	else
-		tdc.GetSelectedTasks(tasks, TDCGT_ALL, TDCGSTF_ALLPARENTS);
+		filter.mapAttribs.Add(TDCA_TASKNAME);
+
+		if (bAllTasks)
+		{
+			tdc.GetFilteredTasks(tasks, filter);
+		}
+		else
+		{
+			filter.dwFlags |= TDCGSTF_ALLPARENTS;
+			tdc.GetSelectedTasks(tasks, filter);
+		}
 	
-	m_dlgTimeTracker.UpdateTasks(&tdc, tasks);
+		m_dlgTimeTracker.UpdateTasks(&tdc, tasks);
+	}
 }
 
 void CToDoListWnd::UpdateTimeTrackerPreferences()
@@ -9804,9 +9815,17 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 	}
 		
 	TDCGETTASKS filter(nFilter);
+
+	// attributes to export
+	taskSel.GetSelectedAttributes(tdc, filter.mapAttribs);
+
+	// special case
+	if (bHtmlComments)
+		filter.mapAttribs.Add(TDCA_HTMLCOMMENTS);
+
 	TSD_TASKS nWhatTasks = taskSel.GetWantWhatTasks();
 
-	if (taskSel.GetWantSelectedTasks())
+	if (nWhatTasks == TSDT_SELECTED)
 	{
 		if (!taskSel.GetWantSelectedSubtasks())
 			filter.dwFlags |= TDCGSTF_NOTSUBTASKS;
@@ -9814,9 +9833,6 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 		if (taskSel.GetWantSelectedParentTask())
 			filter.dwFlags |= TDCGSTF_IMMEDIATEPARENT;
 	}
-
-	// attributes to export
-	taskSel.GetSelectedAttributes(tdc, filter.mapAttribs);
 
 	// get the tasks
 	return GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, tasks, szHtmlImageDir);
