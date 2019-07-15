@@ -601,8 +601,12 @@ namespace TDC
 	{
 		switch (nAttrib)
 		{
-		case TDCA_UNDO:
 		case TDCA_POSITION: // == move
+		case TDCA_POSITION_SAMEPARENT:
+		case TDCA_POSITION_DIFFERENTPARENT:
+			return IUI_ALL;
+
+		case TDCA_UNDO:
 		case TDCA_PASTE:
 		case TDCA_NEWTASK:			
 			return IUI_ALL;

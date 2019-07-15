@@ -2105,7 +2105,7 @@ LRESULT CWorkloadCtrl::OnTreeDragDrop(WPARAM /*wp*/, LPARAM /*lp*/)
 			
 			// If copying a task, app will send us a full update 
 			// so we do not need to perform the move ourselves
-			if (CWnd::SendMessage(WM_WLC_MOVETASK, 0, (LPARAM)&move) && !move.bCopy)
+			if (CWnd::GetParent()->SendMessage(WM_WLC_MOVETASK, 0, (LPARAM)&move) && !move.bCopy)
 			{
 				htiSel = TCH().MoveTree(htiSel, htiDropTarget, htiAfterSibling, TRUE, TRUE);
 				
