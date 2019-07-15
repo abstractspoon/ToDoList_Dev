@@ -9482,12 +9482,13 @@ void CToDoListWnd::OnExport()
 
 	const CPreferencesDlg& userPrefs = Prefs();
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CString sTasklistPath = m_mgrToDoCtrls.GetFilePath(nSelTDC, FALSE);
 
 	CTDLExportDlg dialog(m_mgrImportExport, 
 						nTDCCount == 1, 
 						GetToDoCtrl().GetTaskView(),
 						userPrefs.GetExportVisibleColsOnly(), 
-						m_mgrToDoCtrls.GetFilePath(nSelTDC, FALSE), 
+						sTasklistPath, 
 						userPrefs.GetSaveExportFolderPath(), 
 						tdc.GetCustomAttributeDefs());
 	
@@ -9503,6 +9504,14 @@ void CToDoListWnd::OnExport()
 			return;
 
 		sExportPath = dialog.GetExportPath();
+
+		// Never allow the tasklist to get overwritten
+		if (FileMisc::IsSamePath(sExportPath, sTasklistPath))
+		{
+			CMessageBox::AfxShow(IDS_ERROR_EXPORT_OVERWRITETASKLIST, MB_ICONERROR | MB_OK);
+			continue;
+		}
+
 		nExporter = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
 
 		UINT nMsgFlags = (MB_OKCANCEL | MB_ICONWARNING);

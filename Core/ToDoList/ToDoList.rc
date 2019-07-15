@@ -5597,6 +5597,12 @@ BEGIN
     IDS_FILTERPLACEHOLDER   "Filters"
 END
 
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ERROR_EXPORT_OVERWRITETASKLIST 
+                            "You must select a filename that does not match the tasklist being exported."
+END
+
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 
