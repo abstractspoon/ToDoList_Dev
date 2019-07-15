@@ -711,7 +711,7 @@ protected:
 	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
 					const CTaskSelectionDlg& taskSel, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
 	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
-					TSD_TASKS nWhatTasks, TDCGETTASKS& filter, DWORD dwSelFlags, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
+					TSD_TASKS nWhatTasks, TDCGETTASKS& filter, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
 	
 	void DoSendTasks(BOOL bSelected);
 	BOOL DoPreferences(int nInitPage = -1);

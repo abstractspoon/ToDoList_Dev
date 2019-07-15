@@ -1083,9 +1083,11 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 															DWORD dwFlags, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter;
-	filter.mapAttribs.Copy(mapAttrib);
 
-	VERIFY(GetSelectedTasks(tasks, FTCV_TASKTREE, filter, dwFlags));
+	filter.mapAttribs.Copy(mapAttrib);
+	filter.dwFlags |= dwFlags;
+
+	VERIFY(GetSelectedTasks(tasks, FTCV_TASKTREE, filter));
 
 	// Globals
 	if (!mapAttrib.IsEmpty())
@@ -2182,18 +2184,18 @@ void CTabbedToDoCtrl::SelectAll()
 	}
 }
 
-int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter, DWORD dwFlags) const
+int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
-	return GetSelectedTasks(tasks, GetTaskView(), filter, dwFlags);
+	return GetSelectedTasks(tasks, GetTaskView(), filter);
 }
 
-int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter, DWORD dwFlags) const
+int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const
 {
 	switch (nView)
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::GetSelectedTasks(tasks, filter, dwFlags);
+		return CToDoCtrl::GetSelectedTasks(tasks, filter);
 
 	case FTCV_TASKLIST:
 		{
@@ -2212,7 +2214,7 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 				
 				// Add immediate parent as required.
 				// Note: we can assume that the selected task is always added successfully
-				if (dwParentID && (dwFlags & TDCGSTF_IMMEDIATEPARENT))
+				if (dwParentID && filter.HasFlag(TDCGSTF_IMMEDIATEPARENT))
 				{
 					DWORD dwParentsParentID = m_data.GetTaskParentID(dwParentID);
 					
@@ -2243,7 +2245,7 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		return CToDoCtrl::GetSelectedTasks(tasks, filter, dwFlags); // for now
+		return CToDoCtrl::GetSelectedTasks(tasks, filter); // for now
 
 	default:
 		ASSERT(0);

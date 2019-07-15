@@ -65,7 +65,7 @@ public:
 	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere = TDC_INSERTATTOPOFSELTASKPARENT, 
 						BOOL bEditText = TRUE, DWORD dwDependency = 0);
 
-	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL, DWORD dwFlags = 0) const;
+	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect); 
 	BOOL SelectTask(DWORD dwTaskID, BOOL bTrue = FALSE);
@@ -334,7 +334,7 @@ protected:
 	BOOL GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, DWORD dwFlags, CTaskFile& tasks) const;
 	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttrib) const;
 	int GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
-	int GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter, DWORD dwFlags) const;
+	int GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
 	BOOL CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const;
 
 	BOOL AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;

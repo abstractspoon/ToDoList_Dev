@@ -319,7 +319,14 @@ struct TDCGETTASKS
 		return FALSE;
 	}
 
-	BOOL HasFlag(DWORD dwFlag) const { return Misc::HasFlag(dwFlags, dwFlag); }
+	BOOL HasFlag(DWORD dwFlag) const 
+	{ 
+		// Dependent flags
+		if ((dwFlag == TDCGSTF_IMMEDIATEPARENT) && HasFlag(TDCGSTF_ALLPARENTS))
+			return TRUE;
+
+		return Misc::HasFlag(dwFlags, dwFlag); 
+	}
 
 	TDC_GETTASKS nFilter;
 	COleDateTime dateDueBy;

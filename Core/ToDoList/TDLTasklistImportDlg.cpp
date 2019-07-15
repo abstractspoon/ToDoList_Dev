@@ -149,7 +149,14 @@ void CTDLTasklistImportDlg::OnOK()
 	CDialog::OnOK();
 
 	if (m_nLoadRes == TDCF_SUCCESS)
-		m_tdc.GetSelectedTasks(m_tasksSelected, TDCGT_ALL, (m_bImportSubtasks ? 0 : TDCGSTF_NOTSUBTASKS));
+	{
+		TDCGETTASKS filter;
+
+		if (!m_bImportSubtasks)
+			filter.dwFlags = TDCGSTF_NOTSUBTASKS;
+
+		m_tdc.GetSelectedTasks(m_tasksSelected, filter);
+	}
 }
 
 IIMPORTEXPORT_RESULT CTDLTasklistImportDlg::GetSelectedTasks(ITaskList* pTasks)

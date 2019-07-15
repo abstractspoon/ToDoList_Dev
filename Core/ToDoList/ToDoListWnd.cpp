@@ -2037,7 +2037,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
 		}
 
-		GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, 0, pExport->tasks, sImgFolder); 
+		GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, pExport->tasks, sImgFolder); 
 	}
 	else
 	{
@@ -5241,7 +5241,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 		if (startup.GetSaveIntermediateAll())
 		{
-			GetTasks(tdc, TRUE, TRUE, TSDT_ALL, TDCGETTASKS(), 0, tasks, sHtmlImgFolder);
+			GetTasks(tdc, TRUE, TRUE, TSDT_ALL, TDCGETTASKS(), tasks, sHtmlImgFolder);
 		}
 		else // use last state of transform dialog to determine what tasks to output
 		{
@@ -9712,7 +9712,7 @@ void CToDoListWnd::OnExport()
 }
 
 int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
-						  TSD_TASKS nWhatTasks, TDCGETTASKS& filter, DWORD dwSelFlags, 
+						  TSD_TASKS nWhatTasks, TDCGETTASKS& filter,  
 						  CTaskFile& tasks, LPCTSTR szHtmlImageDir) const
 {
 	// preferences
@@ -9776,7 +9776,7 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 		break;
 
 	case TSDT_SELECTED:
-		tdc.GetSelectedTasks(tasks, filter, dwSelFlags);
+		tdc.GetSelectedTasks(tasks, filter);
 		break;
 	}
 	
@@ -9791,18 +9791,6 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
 							const CTaskSelectionDlg& taskSel, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const
 {
-	DWORD dwSelFlags = 0;
-    TSD_TASKS nWhatTasks = taskSel.GetWantWhatTasks();
-	
-	if (taskSel.GetWantSelectedTasks())
-	{
-		if (!taskSel.GetWantSelectedSubtasks()) 
-			dwSelFlags |= TDCGSTF_NOTSUBTASKS;
-
-		if (taskSel.GetWantSelectedParentTask())
-			dwSelFlags |= TDCGSTF_IMMEDIATEPARENT;
-	}
-
 	TDC_GETTASKS nFilter = TDCGT_ALL;
 	
 	// build filter
@@ -9816,12 +9804,22 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 	}
 		
 	TDCGETTASKS filter(nFilter);
+	TSD_TASKS nWhatTasks = taskSel.GetWantWhatTasks();
+
+	if (taskSel.GetWantSelectedTasks())
+	{
+		if (!taskSel.GetWantSelectedSubtasks())
+			filter.dwFlags |= TDCGSTF_NOTSUBTASKS;
+
+		if (taskSel.GetWantSelectedParentTask())
+			filter.dwFlags |= TDCGSTF_IMMEDIATEPARENT;
+	}
 
 	// attributes to export
 	taskSel.GetSelectedAttributes(tdc, filter.mapAttribs);
 
 	// get the tasks
-	return GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, dwSelFlags, tasks, szHtmlImageDir);
+	return GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, tasks, szHtmlImageDir);
 }
 
 void CToDoListWnd::OnUpdateExport(CCmdUI* pCmdUI) 

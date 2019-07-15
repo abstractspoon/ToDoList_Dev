@@ -6492,7 +6492,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 int CToDoCtrl::GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly) const
 {
 	if (bSelectedOnly)
-		return GetSelectedTasks(tasks, TDCGT_ALL, TDCGSTF_ALLPARENTS);
+		return GetSelectedTasks(tasks, TDCGETTASKS(TDCGT_ALL, TDCGSTF_ALLPARENTS));
 
 	// else
 	return GetTasks(tasks, TDCGT_DONE);
@@ -7283,12 +7283,10 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 
 			// if pasting references then we don't want all subtasks just 
 			// the ones actually selected
-			DWORD dwFlags = 0;
-
 			if (nDrop == TDC_DROPREFERENCE)
-				dwFlags = TDCGSTF_NOTSUBTASKS;
+				filter.dwFlags = TDCGSTF_NOTSUBTASKS;
 
-			if (GetSelectedTasks(tasks, filter, dwFlags))
+			if (GetSelectedTasks(tasks, filter))
 			{
 				IMPLEMENT_DATA_UNDO(m_data, TDCUAT_COPY);
 				HOLD_REDRAW(*this, m_taskTree);
@@ -9246,25 +9244,25 @@ BOOL CToDoCtrl::WantAddTask(const TODOITEM* /*pTDI*/, const TODOSTRUCTURE* /*pTD
 	return TRUE;
 }
 
-int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter, DWORD dwFlags) const
+int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
 	if (!GetSelectedCount())
 		return 0;
 	
 	PrepareTaskfileForTasks(tasks, filter);
 
-	BOOL bWantSubtasks = !(dwFlags & TDCGSTF_NOTSUBTASKS);
-	BOOL bResolveReferences = (dwFlags & TDCGSTF_RESOLVEREFERENCES);
-	BOOL bWantAllParents = (dwFlags & TDCGSTF_ALLPARENTS);
-	BOOL bWantImmediateParent = (bWantAllParents ? FALSE : (dwFlags & TDCGSTF_IMMEDIATEPARENT));
+	BOOL bWantSubtasks = !filter.HasFlag(TDCGSTF_NOTSUBTASKS);
+	BOOL bResolveReferences = filter.HasFlag(TDCGSTF_RESOLVEREFERENCES);
+	BOOL bWantAllParents = filter.HasFlag(TDCGSTF_ALLPARENTS);
+	BOOL bWantImmediateParent = filter.HasFlag(TDCGSTF_IMMEDIATEPARENT);
 
-	// get selected tasks ordered
-	// remove duplicate subtasks if we will be processing
-	// subtasks anyway
+	// get selected tasks ordered, removing duplicate subtasks 
+	// if we will be processing subtasks anyway
 	CHTIList selection;
 	TSH().CopySelection(selection, bWantSubtasks, TRUE);
 	
-	// get items
+	// Keep track of the selected tasks added
+	CDWordSet aSelTaskIDs;
 	POSITION pos = selection.GetHeadPosition();
 
 	while (pos)
