@@ -501,6 +501,7 @@ BOOL CTaskFile::CopyFrom(const ITaskList* pTasks)
 	// copy header
 	SetProjectName(pTasks->GetProjectName());
 	SetFileVersion(pTasks->GetFileVersion());
+	SetXmlHeader(DEFAULT_UNICODE_HEADER);
 	
 	CTDCCustomAttribDefinitionArray aAttrib;
 	
