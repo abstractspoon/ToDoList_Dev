@@ -443,6 +443,7 @@
 #define IDC_FILTEROPTIONS               1106
 #define IDC_SORTBY2                     1106
 #define IDC_STARTTASKCOLOR              1106
+#define IDC_SNOOZEALL                   1106
 #define IDC_NOTIFYDUEBYONSWITCH         1107
 #define IDC_COMMENTSFORMAT              1107
 #define IDC_ALLOCTOLIST                 1107
