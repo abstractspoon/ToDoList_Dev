@@ -5386,21 +5386,24 @@ CString CTDLTaskCtrlBase::GetSelectedTaskTitle() const
 
 int CTDLTaskCtrlBase::GetSelectedTaskPriority() const
 {
-   int nPriority = -1;
-   POSITION pos = GetFirstSelectedTaskPos();
+	int nPriority = -1;
+	POSITION pos = GetFirstSelectedTaskPos();
 
-   while (pos)
-   {
-      DWORD dwTaskID = GetNextSelectedTaskID(pos);
-      int nTaskPriority = m_data.GetTaskPriority(dwTaskID);
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+		int nTaskPriority = m_data.GetTaskPriority(dwTaskID);
 
-      if (nPriority == -1)
-         nPriority = nTaskPriority;
+		if (nPriority == -1)
+		{
+			nPriority = nTaskPriority;
+		}
+		else if (nPriority != nTaskPriority)
+		{
+			return -1;
+		}
+	}
 
-      else if (nPriority != nTaskPriority)
-         return -1;
-   }
-	
 	return nPriority;
 }
 
@@ -5431,21 +5434,24 @@ DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const
 
 int CTDLTaskCtrlBase::GetSelectedTaskRisk() const
 {
-   int nRisk = -1;
-   POSITION pos = GetFirstSelectedTaskPos();
+	int nRisk = -1;
+	POSITION pos = GetFirstSelectedTaskPos();
 
-   while (pos)
-   {
-      DWORD dwTaskID = GetNextSelectedTaskID(pos);
-      int nTaskRisk = m_data.GetTaskRisk(dwTaskID);
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+		int nTaskRisk = m_data.GetTaskRisk(dwTaskID);
 
-      if (nRisk == -1)
-         nRisk = nTaskRisk;
+		if (nRisk == -1)
+		{
+			nRisk = nTaskRisk;
+		}
+		else if (nRisk != nTaskRisk)
+		{
+			return -1; // == various
+		}
+	}
 
-      else if (nRisk != nTaskRisk)
-         return -1; // == various
-   }
-	
 	return nRisk;
 }
 
