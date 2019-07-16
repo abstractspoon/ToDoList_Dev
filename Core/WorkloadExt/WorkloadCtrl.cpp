@@ -4131,8 +4131,6 @@ BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
 	if (m_tcTasks.GetCount() == 0)
 		return FALSE;
 
-	CLockUpdates lock(m_tcTasks);
-
 	// Resize tree header width to suit title text width
 	int nColWidth = m_hdrTasks.GetItemWidth(0);
 	BOOL bTracked = m_hdrTasks.IsItemTracked(0);

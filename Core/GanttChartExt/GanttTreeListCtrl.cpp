@@ -7446,8 +7446,6 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 	if (m_tree.GetCount() == 0)
 		return FALSE;
 
-	CLockUpdates lock(m_tree);
-
 	// Resize tree header width to suit title text width
 	int nPrevWidth = m_treeHeader.GetItemWidth(0);
 	BOOL bTracked = m_treeHeader.IsItemTracked(0);
