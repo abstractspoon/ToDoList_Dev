@@ -5213,7 +5213,7 @@ BOOL CTDLTaskCtrlBase::SelectionHasSameParent() const
 
 	default:
 		{
-			DWORD dwFirstParent = -1;
+			DWORD dwFirstParent = (DWORD)-1;
 			POSITION pos = GetFirstSelectedTaskPos();
 
 			while (pos)
