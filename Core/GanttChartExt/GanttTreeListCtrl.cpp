@@ -7457,7 +7457,7 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 	Resize();
 
 	// Calculate the date range in scroll units
-	// allowing a month's buffer at each end is there is space
+	// allowing a month's buffer at each end if there is space
 	COleDateTime dtFrom = CDateHelper::GetStartOfMonth(ActiveDateRange().GetStart());
 	COleDateTime dtTo = CDateHelper::GetEndOfMonth(ActiveDateRange().GetEnd());
  
