@@ -1318,6 +1318,9 @@ void CWorkloadCtrl::ResyncTotalsPositions()
 	rTreeTotals.top = rColumnTotals.top = (max(rTreeTotals.bottom, rColumnTotals.bottom) + LV_COLPADDING);
 	rTreeTotals.bottom = rColumnTotals.bottom = rClient.bottom;
 
+	// Adjust for splitter border
+	rColumnTotals.left--;
+
 	// Adjust for border drawn by CTreeListSyncer
 	rColumnTotals.right++;
 
@@ -2134,10 +2137,6 @@ void CWorkloadCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	// because we know it's temporary only
 	if ((pNMTV->itemNew.hItem == NULL) && (m_tcTasks.GetCount() != 0))
 		return;
-	
-	// ignore notifications arising out of SelectTask()
-// 	if (/*m_bInSelectTask && */(pNMTV->action == TVC_UNKNOWN))
-// 		return;
 	
 	// we're only interested in non-keyboard changes
 	// because keyboard gets handled in OnKeyUpWorkload
@@ -3118,8 +3117,8 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 		// Offset for allocation label horz scroll
 		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
 			
-		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, FALSE);
 		rColumn.right--;
+		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, FALSE);
 
 		CString sValue = GetListItemColumnTotal(mapTotals, nCol, nDecimals);
 			
@@ -3166,6 +3165,7 @@ void CWorkloadCtrl::DrawTotalsHeader(CDC* pDC)
 
 		// Offset for allocation label horz scroll
 		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
+		rColumn.right--;
 
 		DrawListHeaderRect(pDC, rColumn, m_hdrColumns.GetItemText(nCol));
 	}
@@ -4132,10 +4132,14 @@ BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
 		return FALSE;
 
 	// Resize tree header width to suit title text width
-	int nColWidth = m_hdrTasks.GetItemWidth(0);
+	int nPrevWidth = m_hdrTasks.GetItemWidth(0);
 	BOOL bTracked = m_hdrTasks.IsItemTracked(0);
 
-	ResizeColumnsToFit();	
+	CClientDC dc(&m_tcTasks);
+	int nColWidth = CalcTreeColumnWidth(0, &dc);
+
+	m_hdrTasks.SetItemWidth(0, nColWidth);
+	Resize();
 
 	int nFrom = 0, nTo = -1;
 	// TODO
@@ -4143,7 +4147,7 @@ BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
 	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage, nFrom, nTo);
 	
 	// Restore title column width
-	m_hdrTasks.SetItemWidth(0, nColWidth);
+	m_hdrTasks.SetItemWidth(0, nPrevWidth);
 	m_hdrTasks.SetItemTracked(0, bTracked);
 
 	Resize();
