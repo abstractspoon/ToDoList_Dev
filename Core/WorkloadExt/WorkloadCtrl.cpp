@@ -4141,10 +4141,9 @@ BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
 	m_hdrTasks.SetItemWidth(0, nColWidth);
 	Resize();
 
-	int nFrom = 0, nTo = -1;
 	// TODO
 	
-	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage, nFrom, nTo);
+	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage);
 	
 	// Restore title column width
 	m_hdrTasks.SetItemWidth(0, nPrevWidth);
