@@ -983,6 +983,7 @@ void CTabbedToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttr
 	switch (nAttrib)
 	{
 	case TDCA_ALL:
+	case TDCA_NEWTASK:
 		GetAllExtensionViewsWantedAttributes(mapAttrib);
 		break;
 
@@ -1905,12 +1906,18 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 	
 	BOOL bSuccess = FALSE;
-	m_nExtModifyingAttrib = TDCA_POSITION;
 
 	try
 	{
 		const IUITASKMOVE* pMove = (const IUITASKMOVE*)lParam;
 
+		DWORD dwSrcParentID = GetSelectedTaskParentID(); // zero for multiple parents
+
+		if (m_taskTree.SelectionHasSameParent() && (dwSrcParentID == pMove->dwParentID))
+			m_nExtModifyingAttrib = TDCA_POSITION_SAMEPARENT;
+		else
+			m_nExtModifyingAttrib = TDCA_POSITION_DIFFERENTPARENT;
+		
 		HTREEITEM htiDropItem = m_taskTree.GetItem(pMove->dwSelectedTaskID);
 		ASSERT(htiDropItem == GetSelectedItem());
 
@@ -3449,6 +3456,8 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 	CTDCAttributeMap mapAttrib;
 	IUI_UPDATETYPE nUpdate = IUI_EDIT; // default
 	
+	GetAttributesAffectedByMod(nAttrib, mapAttrib);
+
 	switch (nAttrib)
 	{
 	case TDCA_NEWTASK:
@@ -3458,8 +3467,6 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 
 			// Special update type
 			nUpdate = IUI_NEW;
-
-			// Note: We leave mapAttrib empty to retrieve all attributes
 		}
 		break;
 
@@ -3467,8 +3474,6 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 		{
 			// We don't need to proceed if no extension wants 
 			// any of the changes
-			GetAttributesAffectedByMod(nAttrib, mapAttrib);
-		
 			if (!AnyExtensionViewWantsChange(mapAttrib))
 				return;
 
@@ -3485,7 +3490,6 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 	}
 
 	// Get the actual tasks for the update
-	FTC_VIEW nCurView = GetTaskView();
 	CTaskFile tasks;
 
 	switch (nAttrib)
@@ -4829,7 +4833,7 @@ BOOL CTabbedToDoCtrl::GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nD
 			{
 				dwDestPrevSiblingID = 0;
 			}
-			else if (!ValidatePreviousSiblingTaskID(dwSelTaskID, dwDestPrevSiblingID))
+			else if (m_data.GetTaskParentID(dwDestPrevSiblingID) != dwDestParentID)
 			{
 				return FALSE;
 			}

@@ -7270,7 +7270,7 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 			IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 			HOLD_REDRAW(*this, m_taskTree);
 
-			DWORD dwSrcParentID = GetSelectedTaskParentID();
+			DWORD dwSrcParentID = GetSelectedTaskParentID(); // zero for multiple parents
 			
 			DWORD dwDestParentID = m_taskTree.GetTaskID(htiDropTarget);
 			DWORD dwDestPrevSiblingID = m_taskTree.GetTaskID(htiDropAfter);
@@ -7288,7 +7288,7 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 				// then mark the parent as incomplete too
 				FixupParentCompletion(dwDestParentID);
 
-				if (dwSrcParentID == dwDestParentID)
+				if (m_taskTree.SelectionHasSameParent() && (dwSrcParentID == dwDestParentID))
 					SetModified(TDCA_POSITION_SAMEPARENT);
 				else
 					SetModified(TDCA_POSITION_DIFFERENTPARENT);

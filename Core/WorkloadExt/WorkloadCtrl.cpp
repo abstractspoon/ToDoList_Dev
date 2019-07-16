@@ -2107,6 +2107,8 @@ LRESULT CWorkloadCtrl::OnTreeDragDrop(WPARAM /*wp*/, LPARAM /*lp*/)
 			// so we do not need to perform the move ourselves
 			if (CWnd::GetParent()->SendMessage(WM_WLC_MOVETASK, 0, (LPARAM)&move) && !move.bCopy)
 			{
+				CAutoFlag af(m_bMovingTask, TRUE);
+
 				htiSel = TCH().MoveTree(htiSel, htiDropTarget, htiAfterSibling, TRUE, TRUE);
 				
 				RefreshTreeItemMap();

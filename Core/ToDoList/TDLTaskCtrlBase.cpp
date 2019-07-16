@@ -5200,6 +5200,42 @@ BOOL CTDLTaskCtrlBase::SelectionHasReferences() const
 	return FALSE;
 }
 
+BOOL CTDLTaskCtrlBase::SelectionHasSameParent() const
+{
+	switch (GetSelectedCount())
+	{
+	case 0:
+		ASSERT(0);
+		return FALSE;
+
+	case 1:
+		return TRUE;
+
+	default:
+		{
+			DWORD dwFirstParent = -1;
+			POSITION pos = GetFirstSelectedTaskPos();
+
+			while (pos)
+			{
+				DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+				if (dwFirstParent == -1)
+				{
+					dwFirstParent = m_data.GetTaskParentID(dwTaskID);
+				}
+				else if (dwFirstParent != m_data.GetTaskParentID(dwTaskID))
+				{
+					return FALSE;
+				}
+			}
+		}
+		break;
+	}
+
+	return TRUE;
+}
+
 BOOL CTDLTaskCtrlBase::SelectionHasNonReferences() const
 {
 	POSITION pos = GetFirstSelectedTaskPos();

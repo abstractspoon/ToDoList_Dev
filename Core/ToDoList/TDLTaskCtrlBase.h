@@ -157,6 +157,7 @@ public:
 	int SelectionHasCircularDependencies(CDWordArray& aTaskIDs) const;
 	BOOL SelectionHasDates(TDC_DATE nDate, BOOL bAll = FALSE) const;
 	BOOL SelectionHasReferences() const;
+	BOOL SelectionHasSameParent() const;
 	BOOL SelectionHasNonReferences() const;
 	BOOL SelectionHasDependents() const;
 	BOOL SelectionHasSubtasks() const; // == SelectionHasParents

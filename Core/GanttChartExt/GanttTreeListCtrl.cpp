@@ -2226,6 +2226,7 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					// so we do not need to perform the move ourselves
 					if (SendMessage(WM_GTLC_MOVETASK, 0, (LPARAM)&move) && !move.bCopy)
 					{
+						CAutoFlag af(m_bMovingTask, TRUE);
 						DWORD dwSrcParentID = GetTaskID(m_tree.GetParentItem(htiSel));
 						
 						htiSel = TCH().MoveTree(htiSel, htiDropTarget, htiAfterSibling, TRUE, TRUE);

@@ -282,8 +282,8 @@ BOOL CToDoCtrlData::TaskHasSibling(DWORD dwTaskID, DWORD dwSiblingID, BOOL bImme
 	// Check they have adjacent positions
 	int nPos = pTDSParent->GetSubTaskPosition(dwTaskID);
 
-	return ((pTDS->GetPreviousSubTaskID(nPos) == dwSiblingID) ||
-			(pTDS->GetNextSubTaskID(nPos) == dwSiblingID));
+	return ((pTDSParent->GetPreviousSubTaskID(nPos) == dwSiblingID) ||
+			(pTDSParent->GetNextSubTaskID(nPos) == dwSiblingID));
 }
 
 POSITION CToDoCtrlData::GetFirstTaskPosition() const
