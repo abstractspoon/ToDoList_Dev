@@ -115,8 +115,8 @@ public:
 	BOOL HasFocus() const;
 	void SetFocus();
 	void Show(BOOL bShow = TRUE);
-	BOOL SaveToImage(CBitmap& bmImage, COLORREF crGridline = CLR_NONE);
-	BOOL SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crGridline = CLR_NONE);
+	BOOL SaveToImage(CBitmap& bmImage, COLORREF crDivider = CLR_NONE);
+	BOOL SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crDivider = CLR_NONE);
 
 	HTREEITEM GetTreeSelItem() const;
 	void SelectTreeItem(HTREEITEM hti, BOOL bClear = TRUE);
@@ -203,6 +203,7 @@ protected:
  	static void SelectTreeItem(HWND hwnd, HTREEITEM hti, BOOL bClear = TRUE);
 	static BOOL OsIsXP();
 	static BOOL OsIsLinux();
+	static BOOL SaveToImage(HWND hWnd, CBitmap& bmImage);
 
 	static DWORD GetStyle(HWND hwnd, BOOL bExStyle);
 	static BOOL HasStyle(HWND hwnd, DWORD dwStyle, BOOL bExStyle);
@@ -292,5 +293,5 @@ private:
 
 	static int CALLBACK SortListProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static BOOL ConvertNonClientToClientMouseMsg(HWND hWnd, UINT& nMsg, WPARAM& wParam, LPARAM& lParam);
-	static BOOL SaveToImage(HWND hWnd, CBitmap& bmImage, const CRect& rFromTo = CRect(0, 0, -1, -1));
+	static BOOL SaveToImage(HWND hWnd, CBitmap& bmImage, const CRect& rFromTo);
 };

@@ -4141,9 +4141,60 @@ BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
 	m_hdrTasks.SetItemWidth(0, nColWidth);
 	Resize();
 
-	// TODO
-	
-	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage);
+	CEnBitmap bmBase;
+	BOOL bRes = CTreeListSyncer::SaveToImage(bmBase);
+
+	if (bRes)
+	{
+		// Add totals and graph
+		CEnBitmap bmLabels, bmTotals, bmChart;
+
+		if (!CTreeListSyncer::SaveToImage(m_lcTotalsLabels, bmLabels))
+			return FALSE;
+
+		if (!CTreeListSyncer::SaveToImage(m_lcColumnTotals, bmTotals))
+			return FALSE;
+
+		if (!m_barChart.SaveToImage(bmChart))
+			return FALSE;
+
+		// Join them all together
+		CDC dcImage, dcParts;
+
+		if (dcImage.CreateCompatibleDC(&dc) && dcParts.CreateCompatibleDC(&dc))
+		{
+			CSize sizeBase = bmBase.GetSize();
+			CSize sizeLabels = bmLabels.GetSize();
+			CSize sizeTotals = bmTotals.GetSize();
+			CSize sizeChart = bmChart.GetSize();
+
+			CSize sizeImage;
+
+			sizeImage.cx = (sizeBase.cx + sizeChart.cx);
+			sizeImage.cy = max((sizeBase.cy + sizeTotals.cy), sizeChart.cy);
+
+			if (bmImage.CreateCompatibleBitmap(&dc, sizeImage.cx, sizeImage.cy))
+			{
+				CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
+				dcImage.FillSolidRect(0, 0, sizeImage.cx, sizeImage.cy, GetSysColor(COLOR_WINDOW));
+
+				CBitmap* pOldPart = dcParts.SelectObject(&bmBase);
+				dcImage.BitBlt(0, 0, sizeBase.cx, sizeBase.cy, &dcParts, 0, 0, SRCCOPY);
+
+				dcParts.SelectObject(bmLabels);
+				dcImage.BitBlt(0, sizeBase.cy, sizeLabels.cx, sizeLabels.cy, &dcParts, 0, 0, SRCCOPY);
+
+				dcParts.SelectObject(bmTotals);
+				dcImage.BitBlt(sizeLabels.cx, sizeBase.cy, sizeTotals.cx, sizeTotals.cy, &dcParts, 0, 0, SRCCOPY);
+
+				dcParts.SelectObject(bmChart);
+				dcImage.BitBlt(sizeBase.cx, 0, sizeChart.cx, sizeChart.cy, &dcParts, 0, 0, SRCCOPY);
+
+				dcParts.SelectObject(pOldPart);
+				dcImage.SelectObject(pOldImage);
+			}
+		}
+	}
 	
 	// Restore title column width
 	m_hdrTasks.SetItemWidth(0, nPrevWidth);

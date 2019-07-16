@@ -3134,12 +3134,17 @@ int CALLBACK CTreeListSyncer::SortListProc(LPARAM lParam1, LPARAM lParam2, LPARA
 	return 0;
 }
 
-BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, COLORREF crGridline)
+BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, COLORREF crDivider)
 {
-	return SaveToImage(bmImage, 0, -1, crGridline);
+	return SaveToImage(bmImage, 0, -1, crDivider);
 }
 
-BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crGridline)
+BOOL CTreeListSyncer::SaveToImage(HWND hWnd, CBitmap& bmImage)
+{
+	return SaveToImage(hWnd, bmImage, CRect(0, 0, -1, -1));
+}
+
+BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crDivider)
 {
 	HWND hwndPrimary = PrimaryWnd();
 	BOOL bPrimaryIsLeft = IsLeft(hwndPrimary);
@@ -3235,12 +3240,12 @@ BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo
 				dcImage.BitBlt(0, 0, sizeOther.cx, sizeOther.cy, &dcParts, 0, 0, SRCCOPY);
 
 			// Draw a column divider between primary and other
-			if (crGridline != CLR_NONE)
+			if (crDivider != CLR_NONE)
 			{
 				if (bPrimaryIsLeft)
-					dcImage.FillSolidRect(sizePrimary.cx - 1, sizeHeader.cy, 1, sizePrimary.cy, crGridline);
+					dcImage.FillSolidRect(sizePrimary.cx - 1, sizeHeader.cy, 1, sizePrimary.cy, crDivider);
 				else
-					dcImage.FillSolidRect(sizeOther.cx - 1, sizeHeader.cy, 1, sizeOther.cy, crGridline);
+					dcImage.FillSolidRect(sizeOther.cx - 1, sizeHeader.cy, 1, sizeOther.cy, crDivider);
 			}
 
 			dcParts.SelectObject(pOldPart);
