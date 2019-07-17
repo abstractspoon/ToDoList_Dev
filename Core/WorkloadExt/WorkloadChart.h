@@ -48,8 +48,8 @@ protected:
 
 	COLORREF GetNormalColor() const;
 	COLORREF GetValueColor(double dValue) const;
-	bool DrawDataBkgnd( CDC& dc);
 
+	bool DrawGrid(CDC& dc);
 	BOOL HasOverload() const;
 	BOOL HasUnderload() const;
 	int HitTest(const CPoint& ptClient) const;

@@ -128,7 +128,6 @@ void CHMXChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 
 	dc.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
-	DrawDataBkgnd(dc);
 	DrawGrid(dc);
 	DrawDatasets(dc);
 	DrawTitle(dc);
@@ -167,7 +166,6 @@ bool CHMXChart::CopyToClipboard()
 	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
 
 	PaintBkGnd(memDC);
-	DrawDataBkgnd(memDC);
 	DrawGrid(memDC);
 	DrawDatasets(memDC);
 	DrawTitle(memDC);
@@ -212,7 +210,6 @@ bool CHMXChart::CopyToFile(CString sFile)
 	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
 	
 	PaintBkGnd(memDC);
-	DrawDataBkgnd(memDC);
 	DrawGrid(memDC);
 	DrawDatasets(memDC);
 	DrawTitle(memDC);
@@ -322,8 +319,8 @@ bool CHMXChart::DrawTitle(CDC & dc)
 //
 bool CHMXChart::DrawGrid(CDC & dc)
 {
-	DrawVertLine(dc);
-	DrawHorzLine(dc);
+	DrawVertGridLines(dc);
+	DrawHorzGridLines(dc);
 
 	return true;
 }
@@ -352,7 +349,7 @@ bool CHMXChart::DrawAxes(CDC &dc)
 }
 
 //
-//	DrawHorzLine
+//	DrawHorzGridLines
 //
 //	arguments
 //
@@ -362,7 +359,7 @@ bool CHMXChart::DrawAxes(CDC &dc)
 //
 //		true if ok, else false
 //
-bool CHMXChart::DrawHorzLine(CDC & dc)
+bool CHMXChart::DrawHorzGridLines(CDC & dc)
 {
 	int nTicks = GetYTicks();
 	
@@ -397,7 +394,7 @@ bool CHMXChart::DrawHorzLine(CDC & dc)
 //
 //		true if ok, else false
 //
-bool CHMXChart::DrawVertLine(CDC & dc)
+bool CHMXChart::DrawVertGridLines(CDC & dc)
 {
 	if(!m_nXMax)
 		return false;
@@ -484,16 +481,16 @@ int CHMXChart::CalcYScaleFontSize(BOOL bTitle) const
 	int nSize = m_nFontPixelSize;
 
 	if (nSize == -1)
-	{
 		nSize = (m_rectYAxis.Width() / 4);
+
+	if (bTitle)
+	{
+		nSize *= 2;
 
 		// also check length of scale text
 		if (!m_strYText.IsEmpty())
-			nSize = min(nSize, (m_rectYAxis.Height() / m_strYText.GetLength()));
+			nSize = min(nSize, 2 * (m_rectYAxis.Height() / m_strYText.GetLength()));
 	}
-
-	if (bTitle)
-		nSize *= 2;
 
 	return nSize;
 }

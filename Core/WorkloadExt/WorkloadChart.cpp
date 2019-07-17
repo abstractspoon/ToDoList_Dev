@@ -9,6 +9,7 @@
 #include "..\Shared\EnString.h"
 
 #include "..\3rdParty\ColorDef.h"
+#include "..\3rdParty\GdiPlus.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -177,26 +178,33 @@ COLORREF CWorkloadChart::GetFillColor(double dValue) const
 	return GetFillColor(0, dValue);
 }
 
-bool CWorkloadChart::DrawDataBkgnd( CDC& dc)
+bool CWorkloadChart::DrawGrid( CDC& dc)
 {
-	if (!CHMXChartEx::DrawDataBkgnd(dc))
+	if (!CHMXChartEx::DrawGrid(dc))
 		return false;
 
-	// Draw Over/underload cutoffs
-	if (HasOverload())
+	if (HasOverload() || HasUnderload())
 	{
-		CRect rOverload(m_rectData);
-		rOverload.bottom -= (int)(rOverload.Height() * (m_dOverloadValue / m_nYMax));
+		// Draw Over/underload cutoffs
+		CGdiPlusGraphics graphics(dc);
 
-		dc.FillSolidRect(rOverload, GetBkgndColor(m_dOverloadValue));
-	}
+		if (HasOverload())
+		{
+			CRect rOverload(m_rectData);
+			rOverload.bottom -= (int)(rOverload.Height() * (m_dOverloadValue / m_nYMax));
 
-	if (HasUnderload())
-	{
-		CRect rUnderload(m_rectData);
-		rUnderload.top = (rUnderload.bottom - (int)(rUnderload.Height() * (m_dUnderloadValue / m_nYMax)));
+			CGdiPlusBrush brush(m_crOverload, 50);
+			CGdiPlus::FillRect(graphics, brush, rOverload);
+		}
 
-		dc.FillSolidRect(rUnderload, GetBkgndColor(m_dUnderloadValue));
+		if (HasUnderload())
+		{
+			CRect rUnderload(m_rectData);
+			rUnderload.top = (rUnderload.bottom - (int)(rUnderload.Height() * (m_dUnderloadValue / m_nYMax)));
+
+			CGdiPlusBrush brush(m_crUnderload, 50);
+			CGdiPlus::FillRect(graphics, brush, rUnderload);
+		}
 	}
 
 	return true;
