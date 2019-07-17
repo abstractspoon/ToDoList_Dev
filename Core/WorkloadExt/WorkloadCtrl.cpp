@@ -25,6 +25,7 @@
 #include "..\shared\copywndcontents.h"
 #include "..\shared\wclassdefines.h"
 #include "..\shared\mousewheelmgr.h"
+#include "..\shared\CopyWndContents.h"
 
 #include "..\3rdparty\shellicons.h"
 
@@ -1295,7 +1296,11 @@ void CWorkloadCtrl::Resize(int cx, int cy)
 	if (cx && cy)
 	{
 		CRect rTreeList(0, 0, ((cx * 2) / 3), cy);
-		rTreeList.bottom = (cy - (GetItemHeight(m_lcTotalsLabels) * NUM_TOTALS) - LV_COLPADDING);
+
+		rTreeList.bottom = cy;
+		rTreeList.bottom -= (GetItemHeight(m_lcTotalsLabels) * NUM_TOTALS); // rows
+		rTreeList.bottom -= LV_COLPADDING; // spacing
+		rTreeList.bottom -= 2; // totals border
 
 		CRect rChart(rTreeList.right + LV_COLPADDING, 0, cx, cy);
 		m_barChart.MoveWindow(rChart);
@@ -1590,13 +1595,13 @@ LRESULT CWorkloadCtrl::OnTotalsLabelsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			m_lcTotalsLabels.GetClientRect(rClient);
 
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-			pDC->FillSolidRect(rClient, m_crBkgnd);
+			pDC->FillSolidRect(rClient, (m_bSavingToImage ? GetSysColor(COLOR_WINDOW) : m_crBkgnd));
 		}
 		return CDRF_NOTIFYITEMDRAW;
 
 	case CDDS_ITEMPREPAINT:
 		{
-			pLVCD->clrTextBk = m_crBkgnd;
+			pLVCD->clrTextBk = (m_bSavingToImage ? GetSysColor(COLOR_WINDOW) : m_crBkgnd);
 
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 
@@ -1648,7 +1653,7 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				{
 					pDC->FillSolidRect(rFullWidth, GetRowColor(nItem + 1));
 					
-					if ((nItem + 1) != ID_LASTTOTAL)
+					if (m_bSavingToImage || ((nItem + 1) != ID_LASTTOTAL))
 						DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
 				}
 				break;
@@ -1706,16 +1711,15 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 			
 			// draw item bkgnd and gridlines full width of list
-			COLORREF crBack = GetRowColor(nItem);
-			pLVCD->clrTextBk = pLVCD->clrText = crBack;
-			
 			CRect rItem;
 			m_lcColumns.GetItemRect(nItem, rItem, LVIR_BOUNDS);
 
-			CRect rFullWidth(rItem);
-			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_lcColumns);
+			COLORREF crBack = GetRowColor(nItem);
+			pLVCD->clrTextBk = pLVCD->clrText = crBack;
+			
+			GraphicsMisc::FillItemRect(pDC, rItem, crBack, m_lcColumns);
 
-			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
+			DrawItemDivider(pDC, rItem, DIV_HORZ, FALSE);
 			
 			// draw background
 			GM_ITEMSTATE nState = GetItemState(nItem);
@@ -1738,7 +1742,7 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 COLORREF CWorkloadCtrl::GetRowColor(int nItem) const
 {
-	BOOL bAlternate = (!IsListItemLineOdd(nItem) && (m_crAltLine != CLR_NONE));
+	BOOL bAlternate = (!m_bSavingToImage && !IsListItemLineOdd(nItem) && HasAltLineColor());
 	COLORREF crBack = (bAlternate ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 
 	return crBack;
@@ -2703,16 +2707,23 @@ void CWorkloadCtrl::SetSplitBarColor(COLORREF crSplitBar)
 
 void CWorkloadCtrl::SetBackgroundColor(COLORREF crBkgnd)
 {
-	SetColor(m_crBkgnd, crBkgnd);
-	m_lcTotalsLabels.SetBkColor(m_crBkgnd);
+	if (SetColor(m_crBkgnd, crBkgnd) && m_lcTotalsLabels.GetSafeHwnd())
+	{
+		m_lcTotalsLabels.SetBkColor(m_crBkgnd);
+		m_lcTotalsLabels.SetTextBkColor(m_crBkgnd);
+	}
 }
 
-void CWorkloadCtrl::SetColor(COLORREF& color, COLORREF crNew)
+BOOL CWorkloadCtrl::SetColor(COLORREF& color, COLORREF crNew)
 {
-	if (IsHooked() && (crNew != color))
+	if (crNew == color)
+		return FALSE;
+
+	if (IsHooked())
 		InvalidateAll();
 
 	color = crNew;
+	return TRUE;
 }
 
 CString CWorkloadCtrl::FormatDate(const COleDateTime& date, DWORD dwFlags) const
@@ -3115,10 +3126,7 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 		m_lcColumnTotals.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
 			
 		// Offset for allocation label horz scroll
-		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
-			
-		rColumn.right--;
-		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, FALSE);
+		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ) - 1, 0);
 
 		CString sValue = GetListItemColumnTotal(mapTotals, nCol, nDecimals);
 			
@@ -3148,9 +3156,13 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 				sValue += '%';
 			}
 		
-			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
-			pDC->DrawText(sValue, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
+			CRect rText(rColumn);
+			rText.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
+
+			pDC->DrawText(sValue, (LPRECT)(LPCRECT)rText, DT_CENTER);
 		}
+			
+		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, FALSE);
 	}
 }
 
@@ -3211,7 +3223,7 @@ COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelecte
 
 	if (crTextBk == CLR_NONE)
 	{
-		if (bAlternate && HasAltLineColor())
+		if (!m_bSavingToImage && bAlternate && HasAltLineColor())
 			crTextBk = m_crAltLine;
 		else
 			crTextBk = GetSysColor(COLOR_WINDOW);
@@ -3225,13 +3237,16 @@ COLORREF CWorkloadCtrl::GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected,
 	COLORREF crText = wi.GetTextColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
 	ASSERT(crText != CLR_NONE);
 
-	if (bSelected)
+	if (!m_bSavingToImage)
 	{
-		crText = GraphicsMisc::GetExplorerItemTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
-	}
-	else if (bLighter)
-	{
-		crText = GraphicsMisc::Lighter(crText, 0.5);
+		if (bSelected)
+		{
+			crText = GraphicsMisc::GetExplorerItemTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
+		}
+		else if (bLighter)
+		{
+			crText = GraphicsMisc::Lighter(crText, 0.5);
+		}
 	}
 
 	return crText;
@@ -4131,17 +4146,23 @@ BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
 	if (m_tcTasks.GetCount() == 0)
 		return FALSE;
 
-	// Resize tree header width to suit title text width
-	int nPrevWidth = m_hdrTasks.GetItemWidth(0);
+	CClientDC dc(&m_tcTasks);
+
 	BOOL bTracked = m_hdrTasks.IsItemTracked(0);
 
-	CClientDC dc(&m_tcTasks);
-	int nColWidth = CalcTreeColumnWidth(0, &dc);
+	// Resize tree width to suit title text width
+	int nPrevTitleWidth = m_hdrTasks.GetItemWidth(0);
+	int nPrevTreeWidth = m_hdrTasks.CalcTotalItemWidth();
 
-	m_hdrTasks.SetItemWidth(0, nColWidth);
+	int nReqTitleWidth = CalcTreeColumnWidth(0, &dc);
+	int nReqTreeWidth = (nReqTitleWidth + (nPrevTreeWidth - nPrevTitleWidth));
+
+	m_hdrTasks.SetItemWidth(0, nReqTitleWidth);
 	Resize();
 
+	CAutoFlag af(m_bSavingToImage, TRUE);
 	CEnBitmap bmBase;
+
 	BOOL bRes = CTreeListSyncer::SaveToImage(bmBase);
 
 	if (bRes)
@@ -4149,16 +4170,27 @@ BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
 		// Add totals and graph
 		CEnBitmap bmLabels, bmTotals, bmChart;
 
-		if (!CTreeListSyncer::SaveToImage(m_lcTotalsLabels, bmLabels))
+		if (!CCopyListCtrlContents(m_lcTotalsLabels).DoCopy(bmLabels))
 			return FALSE;
 
-		if (!CTreeListSyncer::SaveToImage(m_lcColumnTotals, bmTotals))
+		// Manually resize the totals full width because it doesn't scroll
+		int nReqWidth = m_hdrColumns.CalcTotalItemWidth();
+
+		CRect rTotals = CDialogHelper::GetChildRect(&m_lcColumnTotals), rTemp(rTotals);
+		rTemp.right = rTemp.left + nReqWidth;
+		rTemp.bottom += 2; // else the bottom border is not always drawn
+
+		m_lcColumnTotals.MoveWindow(rTemp);
+		
+		if (!CCopyListCtrlContents(m_lcColumnTotals).DoCopy(bmTotals))
 			return FALSE;
+
+		m_lcColumnTotals.MoveWindow(rTotals);
 
 		if (!m_barChart.SaveToImage(bmChart))
 			return FALSE;
 
-		// Join them all together
+		// Join them all the bits together
 		CDC dcImage, dcParts;
 
 		if (dcImage.CreateCompatibleDC(&dc) && dcParts.CreateCompatibleDC(&dc))
@@ -4178,15 +4210,27 @@ BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
 				CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
 				dcImage.FillSolidRect(0, 0, sizeImage.cx, sizeImage.cy, GetSysColor(COLOR_WINDOW));
 
+				// Base-class
 				CBitmap* pOldPart = dcParts.SelectObject(&bmBase);
 				dcImage.BitBlt(0, 0, sizeBase.cx, sizeBase.cy, &dcParts, 0, 0, SRCCOPY);
 
+				// Totals labels
 				dcParts.SelectObject(bmLabels);
 				dcImage.BitBlt(0, sizeBase.cy, sizeLabels.cx, sizeLabels.cy, &dcParts, 0, 0, SRCCOPY);
 
+				// Column Totals
 				dcParts.SelectObject(bmTotals);
-				dcImage.BitBlt(sizeLabels.cx, sizeBase.cy, sizeTotals.cx, sizeTotals.cy, &dcParts, 0, 0, SRCCOPY);
+				dcImage.BitBlt(sizeLabels.cx + 2, sizeBase.cy, sizeTotals.cx, sizeTotals.cy, &dcParts, 0, 0, SRCCOPY);
 
+				// Draw vertical divider between labels and totals
+				CRect rDivider(0, sizeBase.cy, (sizeLabels.cx + 1), (sizeBase.cy + sizeTotals.cy));
+				DrawItemDivider(&dcImage, rDivider, DIV_VERT_LIGHT, FALSE);
+
+				// Draw vertical divider at end of totals
+				rDivider.right = sizeBase.cx;
+				DrawItemDivider(&dcImage, rDivider, DIV_VERT_LIGHT, FALSE);
+
+				// Bar chart
 				dcParts.SelectObject(bmChart);
 				dcImage.BitBlt(sizeBase.cx, 0, sizeChart.cx, sizeChart.cy, &dcParts, 0, 0, SRCCOPY);
 
@@ -4197,7 +4241,7 @@ BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
 	}
 	
 	// Restore title column width
-	m_hdrTasks.SetItemWidth(0, nPrevWidth);
+	m_hdrTasks.SetItemWidth(0, nPrevTitleWidth);
 	m_hdrTasks.SetItemTracked(0, bTracked);
 
 	Resize();

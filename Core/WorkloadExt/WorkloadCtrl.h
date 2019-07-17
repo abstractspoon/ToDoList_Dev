@@ -298,7 +298,7 @@ protected:
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
  	COLORREF GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter = FALSE) const;
 	COLORREF GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bAlternate) const;
-	void SetColor(COLORREF& color, COLORREF crNew);
+	BOOL SetColor(COLORREF& color, COLORREF crNew);
 	COLORREF GetRowColor(int nItem) const;
 
 	void RebuildTree(const ITASKLISTBASE* pTasks);
