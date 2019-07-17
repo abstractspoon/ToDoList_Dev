@@ -20,8 +20,6 @@ public:
 	BOOL DoCopy(CBitmap& bmp, const CRect& rFromTo = CRect(0, 0, -1, -1));
 
 protected:
-
-protected:
 	CWnd& m_wnd;
 
 protected:
@@ -41,12 +39,12 @@ protected:
 	CSize GetContentsSize() const { return m_sizeContent; }
 	CSize GetPageSize() const { return m_sizePage; }
 
+	BOOL HasStyle(DWORD dwStyle) const { return ((m_wnd.GetStyle() & dwStyle) == dwStyle); }
+
 	static void DoPrint(HWND hwnd, HDC hdc, DWORD dwFlags = PRF_CLIENT);
 
 private:
 	CSize m_sizeContent, m_sizePage;
-
-private:
 
 };
 
