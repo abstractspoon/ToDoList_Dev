@@ -3139,11 +3139,6 @@ BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, COLORREF crDivider)
 	return SaveToImage(bmImage, 0, -1, crDivider);
 }
 
-BOOL CTreeListSyncer::SaveToImage(HWND hWnd, CBitmap& bmImage)
-{
-	return SaveToImage(hWnd, bmImage, CRect(0, 0, -1, -1));
-}
-
 BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crDivider)
 {
 	HWND hwndPrimary = PrimaryWnd();
