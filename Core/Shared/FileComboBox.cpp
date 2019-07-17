@@ -98,6 +98,8 @@ HBRUSH CFileComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 int CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
+	ASSERT (m_fileEdit.GetSafeHwnd());
+
 	ClientToScreen(&point);
 	m_fileEdit.ScreenToClient(&point);
 
@@ -122,12 +124,6 @@ void CFileComboBox::OnSize(UINT nType, int cx, int cy)
 	CAutoComboBox::OnSize(nType, cx, cy);
 
 	ResizeEdit();
-
-	// CFileEdit disables its tooltips when embedded in a combobox
-	// simply because they don't seem to work
-	ASSERT(!m_fileEdit.m_tooltip.GetSafeHwnd());
-
-	EnableToolTips(TRUE);
 }
 
 void CFileComboBox::ResizeEdit()
@@ -154,6 +150,13 @@ BOOL CFileComboBox::InitFileEdit()
 
 		m_fileEdit.SendMessage(EM_SETREADONLY, m_bReadOnly);
 		ResizeEdit();
+
+		// CFileEdit disables its tooltips when embedded in a combobox
+		// simply because they don't seem to work
+		ASSERT(!m_fileEdit.m_tooltip.GetSafeHwnd());
+
+		// So we have to handle it ourselves
+		EnableToolTips(TRUE);
 	}
 
 	return TRUE;
