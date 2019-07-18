@@ -478,14 +478,19 @@ BOOL CHMXChart::CreateYAxisFont(BOOL bTitle, CFont& font) const
 
 int CHMXChart::CalcYScaleFontSize(BOOL bTitle) const
 {
+	int nDefSize = (m_rectYAxis.Width() / 4);
 	int nSize = m_nFontPixelSize;
 
 	if (nSize == -1)
-		nSize = (m_rectYAxis.Width() / 4);
+		nSize = nDefSize;
 
-	if (bTitle)
+	if (!bTitle)
 	{
-		nSize *= 2;
+		nSize = min(nSize, (m_rectYAxis.Height() / GetYTicks()));
+	}
+	else
+	{
+		nSize += min(8, nSize); // bit bigger
 
 		// also check length of scale text
 		if (!m_strYText.IsEmpty())
