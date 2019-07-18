@@ -578,6 +578,8 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 
 void CWorkloadWnd::SetTaskFont(HFONT hFont)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CHoldRedraw hr(*this);
 	
 	m_ctrlWorkload.SetFont(hFont, TRUE);

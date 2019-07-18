@@ -412,6 +412,8 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 
 void CCalendarWnd::SetTaskFont(HFONT hFont)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
 	m_BigCalendar.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE);
 }
 

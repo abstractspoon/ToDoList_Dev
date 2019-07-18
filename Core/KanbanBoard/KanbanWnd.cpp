@@ -588,6 +588,8 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 
 void CKanbanWnd::SetTaskFont(HFONT hFont)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
 	m_ctrlKanban.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE);
 }
 

@@ -715,6 +715,8 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 
 void CGanttChartWnd::SetTaskFont(HFONT hFont)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CHoldRedraw hr(*this);
 	
 	m_ctrlGantt.SetFont(hFont, TRUE);

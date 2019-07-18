@@ -226,6 +226,8 @@ void CBurndownWnd::SetUITheme(const UITHEME* pTheme)
 
 void CBurndownWnd::SetTaskFont(HFONT hFont)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CString sFontName;
 	int nFontSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFontName);
 

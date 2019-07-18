@@ -3331,7 +3331,7 @@ void CWorkloadCtrl::ResizeColumnsToFit()
 	int nNumCol = m_hdrTasks.GetItemCount();
 
 	for (int nCol = 1; nCol < nNumCol; nCol++)
-		RecalcTreeColumnWidth(GetTreeColumnID(nCol), &dc, TRUE);
+		RecalcTreeColumnWidth(nCol, &dc, TRUE);
 
 	// list columns
 	RecalcListColumnsToFit();
