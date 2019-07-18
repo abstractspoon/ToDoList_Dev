@@ -83,12 +83,18 @@ public:
 	BOOL IsOverlapping(const CString& sAllocTo) const;
 	void ClearOverlaps();
 	
-	void Decode(const CString& sAllocations);
+	BOOL IsAutoCalculated() const { return bAutoCalculated; }
+	void AutoCalculate(const CStringArray& aAllocTo, double dDuration);
+
+	BOOL Decode(const CString& sAllocations);
 	CString Encode() const;
 
 	BOOL MatchAll(const CMapDayAllocations& other) const;
 	void Copy(const CMapDayAllocations& other);
 	void RemoveAll();
+
+protected:
+	BOOL bAutoCalculated;
 	
 protected:
 	static CString FormatDays(double dValue, int nDecimals);
@@ -146,8 +152,8 @@ struct WORKLOADITEM
 	BOOL bLocked, bHasIcon;
 	BOOL bGoodAsDone, bSomeSubtaskDone;
 
-	BOOL HasStartDate() const;
-	BOOL HasDueDate() const;
+	BOOL HasStartDate() const { return dtRange.HasStart(); }
+	BOOL HasDueDate() const { return dtRange.HasEnd(); }
 	BOOL HasValidDates() const { return dtRange.IsValid(); }
 	BOOL IsDone() const { return (bDone || bGoodAsDone); }
 

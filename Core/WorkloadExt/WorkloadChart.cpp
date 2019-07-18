@@ -110,8 +110,6 @@ void CWorkloadChart::RebuildChart()
 
 	if (GetMinMax(dMin, dMax, true))
 	{
-		ASSERT(dMin == 0.0);
-
 		int nNumTicks = 10; // minimum default
 
 		if (dMax > 100)

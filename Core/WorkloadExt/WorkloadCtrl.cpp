@@ -844,6 +844,8 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 	}
 
 	// take a snapshot we can check changes against
+	// Note: No need to check meta-data because we're 
+	// the only one who can change it
 	WORKLOADITEM giOrg = *pWI;
 
 	// can't use a switch here because we also need to check for IUI_ALL
@@ -919,6 +921,9 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
+
+	if (pWI->mapAllocatedDays.IsAutoCalculated())
+		pWI->mapAllocatedDays.AutoCalculate(pWI->aAllocTo, pWI->dtRange.GetWeekdayCount());
 	
 	return bChange;
 }
@@ -1114,7 +1119,8 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
 			pWI->dtRange.m_dtEnd = CDateHelper::GetDate(tDate);
 
-		pWI->mapAllocatedDays.Decode(pTasks->GetTaskMetaData(hTask, WORKLOAD_TYPEID));
+		if (!pWI->mapAllocatedDays.Decode(pTasks->GetTaskMetaData(hTask, WORKLOAD_TYPEID)))
+			pWI->mapAllocatedDays.AutoCalculate(pWI->aAllocTo, pWI->dtRange.GetWeekdayCount());
 	}
 	
 	// add item to tree
@@ -2646,7 +2652,7 @@ BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT /*nFlags*/, CPoint point)
 	}
 
 	// else
-	if (m_bReadOnly)
+	if (m_bReadOnly || (GetListColumnType(nCol) != WLCT_VALUE))
 		return FALSE;
 
 	CString sAllocTo(m_hdrColumns.GetItemText(nCol));
@@ -3970,7 +3976,7 @@ int CWorkloadCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol)
 	CRect rClient;
 	CWnd::GetClientRect(rClient);
 
-	if (!rClient.PtInRect(point))
+	if (!rClient.PtInRect(lvht.pt))
 		return -1;
 
 	if ((ListView_SubItemHitTest(m_lcColumns, &lvht) != -1) &&	(lvht.iSubItem > 0))

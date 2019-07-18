@@ -1541,11 +1541,25 @@ WCHAR* Misc::MultiByteToWide(const char* szFrom, int& nLength, UINT nCodepage)
 
 int Misc::Round(double dValue)
 {
+	if (dValue == 0)
+		return 0.0;
+
 	if (dValue > 0)
 		return (int)(dValue + 0.5);
 
 	// else
 	return (int)(dValue - 0.5);
+}
+
+double Misc::Round(double dValue, int nDecimals)
+{
+	if (dValue == 0)
+		return 0.0;
+
+	if (nDecimals == 0)
+		return Round(dValue);
+
+	return _ttof(Misc::Format(dValue, 2));
 }
 
 BOOL Misc::IsNumber(const CString& sValue)

@@ -16,7 +16,7 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-CMapDayAllocations::CMapDayAllocations() 
+CMapDayAllocations::CMapDayAllocations() : bAutoCalculated(FALSE)
 {
 }
 
@@ -106,6 +106,8 @@ BOOL CMapDayAllocations::SetDays(const CString& sAllocTo, double dValue)
 		SetAt(Misc::ToUpper(sAllocTo), wa);
 	}
 
+	bAutoCalculated = FALSE;
+
 	return TRUE;
 }
 
@@ -183,24 +185,62 @@ void CMapDayAllocations::ClearOverlaps()
 	}
 }
 
-void CMapDayAllocations::Decode(const CString& sAllocations)
+void CMapDayAllocations::AutoCalculate(const CStringArray& aAllocTo, double dDuration)
+{
+	ASSERT((GetCount() == 0) || bAutoCalculated);
+
+	int nAllocTo = aAllocTo.GetSize();
+
+	if (nAllocTo && dDuration)
+	{
+		double dAllocation = Misc::Round((dDuration / nAllocTo), 2);
+
+		WORKLOADALLOCATION wa;
+		wa.dDays = dAllocation;
+
+		while (nAllocTo--)
+		{
+			if (nAllocTo == 0)
+				wa.dDays = dDuration; // leftover
+
+			// Don't use 'SetDays' because it will clear 'bAutoCalculated'
+			SetAt(Misc::ToUpper(aAllocTo[nAllocTo]), wa);
+
+			// Handle rounding
+			dDuration -= dAllocation;
+		}
+	}
+
+	bAutoCalculated = TRUE;
+}
+
+int CMapDayAllocations::Decode(const CString& sAllocations)
 {
 	RemoveAll();
 
-	CStringArray aAllocations;
-	int nAllocTo = Misc::Split(sAllocations, aAllocations, '\n');
-
-	while (nAllocTo--)
+	if (!sAllocations.IsEmpty())
 	{
-		CString sDays, sAllocTo = aAllocations[nAllocTo];
-		Misc::Split(sAllocTo, sDays, ':');
+		CStringArray aAllocations;
+		int nAllocTo = Misc::Split(sAllocations, aAllocations, '\n');
 
-		SetDays(sAllocTo, sDays);
+		while (nAllocTo--)
+		{
+			CString sDays, sAllocTo = aAllocations[nAllocTo];
+
+			if (Misc::Split(sAllocTo, sDays, ':'))
+				SetDays(sAllocTo, sDays);
+		}
 	}
+
+	bAutoCalculated = FALSE;
+
+	return GetCount();
 }
 
 CString CMapDayAllocations::Encode() const
 {
+	ASSERT(!bAutoCalculated);
+
 	CString sAllocations, sAllocTo;
 	CStringArray aAllocations;
 	WORKLOADALLOCATION wa;
@@ -257,7 +297,7 @@ CString CMapDayAllocations::FormatDays(double dValue, int nDecimals)
 
 CMapAllocationTotals::CMapAllocationTotals(BOOL bReturnAverageForTotal) 
 	:
-m_bReturnAverageForTotal(bReturnAverageForTotal)
+	m_bReturnAverageForTotal(bReturnAverageForTotal)
 {
 }
 
@@ -441,16 +481,6 @@ int WORKLOADITEM::GetNames(const CStringArray& aAllNames, CStringArray& aNames) 
 	}
 
 	return aNames.GetSize();
-}
-
-BOOL WORKLOADITEM::HasStartDate() const
-{
-	return dtRange.HasStart();
-}
-
-BOOL WORKLOADITEM::HasDueDate() const
-{
-	return dtRange.HasEnd();
 }
 
 COLORREF WORKLOADITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
