@@ -330,6 +330,21 @@ void CDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, double& value, int nD
 ////////////////////////////////////////////////////////////////////////////////
 // combo
 
+void CDialogHelper::DDX_CBValue(CDataExchange* pDX, int nIDC, int& value, int fallbackValue)
+{
+	HWND hwnd = pDX->PrepareCtrl(nIDC);
+
+	if (!hwnd || !CWinClasses::IsComboBox(hwnd))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	CWnd* pCombo = CWnd::FromHandle(hwnd);
+	
+	return DDX_CBValue(pDX, static_cast<CComboBox&>(*pCombo), value, fallbackValue);
+}
+
 void CDialogHelper::DDX_CBValue(CDataExchange* pDX, CComboBox& combo, int& value, int fallbackValue)
 {
 	if (!combo.GetCount())

@@ -44,6 +44,7 @@ public:
 	static void DDX_Text(CDataExchange* pDX, int nIDC, float& value, int nDecimals = -1);
 	static void DDX_Text(CDataExchange* pDX, int nIDC, double& value, int nDecimals = -1);
 
+	static void DDX_CBValue(CDataExchange* pDX, int nIDC, int& value, int fallbackValue);
 	static void DDX_CBValue(CDataExchange* pDX, CComboBox& combo, int& value, int fallbackValue);
 
 	template <class T>
