@@ -39,6 +39,14 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CColorButton message handlers
 
+void CColorButton::DDX(CDataExchange* pDX, COLORREF& value)
+{
+	if (pDX->m_bSaveAndValidate)
+		value = GetColor();
+	else
+		SetColor(value);
+}
+
 void CColorButton::DoExtraPaint(CDC* pDC, const CRect& rExtra)
 {
 	int nCornerRadius = m_bRoundRect ? (rExtra.Width() / 4) : 0;
