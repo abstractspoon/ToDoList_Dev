@@ -70,7 +70,7 @@ END
 IDD_GANTTTREE_DIALOG DIALOGEX 0, 0, 594, 316
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,151,8
     COMBOBOX        IDC_DISPLAY,0,13,152,118,CBS_DROPDOWNLIST | 
@@ -207,11 +207,11 @@ BEGIN
     GROUPBOX        "Parent Tasks",IDC_STATIC,7,250,333,63
     CONTROL         "Us&e default colours",IDC_DEFAULTPARENTCOLORS,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,16,264,320,10
-    CONTROL         "Use '&No' colour",IDC_NOPARENTCOLOR,"Button",
+    CONTROL         "Use &no colour",IDC_NOPARENTCOLOR,"Button",
                     BS_AUTORADIOBUTTON,16,279,320,10
     CONTROL         "Use this &colour",IDC_SPECIFYPARENTCOLOR,"Button",
-                    BS_AUTORADIOBUTTON,16,295,133,10
-    PUSHBUTTON      "S&et...   ",IDC_SETPARENTCOLOR,178,293,52,13,BS_RIGHT | 
+                    BS_AUTORADIOBUTTON,16,294,133,10
+    PUSHBUTTON      "S&et...   ",IDC_SETPARENTCOLOR,178,292,52,13,BS_RIGHT | 
                     WS_GROUP
     LTEXT           "Dates",IDC_DATESGROUP,7,322,333,8
     CONTROL         "A&uto-calculate parent task dates to include all subtasks",
