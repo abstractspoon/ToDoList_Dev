@@ -581,8 +581,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 	case IUI_NEW:
 	case IUI_EDIT:
 		{
-			CHoldRedraw hr(m_tree);
-			CHoldRedraw hr2(m_list);
+			CHoldRedraw hr(GetHwnd());
 			
 			// cache current year range to test for changes
 			int nNumMonths = GetNumMonths(m_nMonthDisplay);
@@ -602,8 +601,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 		
 	case IUI_DELETE:
 		{
-			CHoldRedraw hr(m_tree);
-			CHoldRedraw hr2(m_list);
+			CHoldRedraw hr(GetHwnd());
 
 			CSet<DWORD> mapIDs;
 			BuildTaskMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
@@ -1601,8 +1599,7 @@ void CGanttTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildr
 	CAutoFlag af(m_bTreeExpanding, TRUE);
 	EnableResync(FALSE);
 
-	CHoldRedraw hr(m_list);
-	CHoldRedraw hr2(m_tree);
+	CHoldRedraw hr(GetHwnd());
 
 	TCH().ExpandItem(hti, bExpand, bAndChildren);
 
@@ -2215,17 +2212,7 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					// so we do not need to perform the move ourselves
 					if (SendMessage(WM_GTLC_MOVETASK, 0, (LPARAM)&move) && !move.bCopy)
 					{
-						CAutoFlag af(m_bMovingTask, TRUE);
-						DWORD dwSrcParentID = GetTaskID(m_tree.GetParentItem(htiSel));
-						
-						htiSel = TCH().MoveTree(htiSel, htiDropTarget, htiAfterSibling, TRUE, TRUE);
-
-						RefreshTreeItemMap();
-
-						UpdateParentStatus(dwSrcParentID);
-						UpdateParentStatus(move.dwParentID);
-
-						SelectItem(htiSel);
+						MoveSelectedItem(move);
 					}
 				}
 			}
@@ -7550,13 +7537,10 @@ BOOL CGanttTreeListCtrl::MoveSelectedItem(const IUITASKMOVE& move)
 	HTREEITEM htiDestParent = GetTreeItem(move.dwParentID);
 	HTREEITEM htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
 	
-	{
-		CHoldRedraw hr2(m_tree, NCR_UPDATE);
-		CHoldRedraw hr3(m_list);
+	CLockUpdates lu(GetHwnd());
+	CHoldRedraw hr(GetHwnd());
 
-		htiNew = TCH().MoveTree(htiSel, htiDestParent, htiDestAfterSibling, TRUE, TRUE);
-		ASSERT(htiNew);
-	}
+	htiNew = TCH().MoveTree(htiSel, htiDestParent, htiDestAfterSibling, TRUE, TRUE);
 
 	if (htiNew)
 	{
@@ -7570,5 +7554,6 @@ BOOL CGanttTreeListCtrl::MoveSelectedItem(const IUITASKMOVE& move)
 		return TRUE;
 	}
 
+	ASSERT(0);
 	return FALSE;
 }

@@ -4366,7 +4366,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 	// create a new todoltrl for this tasklist 
 	const CPreferencesDlg& userPrefs = Prefs();
 	CFilteredToDoCtrl* pTDC = NewToDoCtrl();
-	CHoldRedraw hr(pTDC->GetSafeHwnd());
+	CHoldRedraw hr(*pTDC);
 	
 	// handles simple and storage tasklists
 	// we use szFilePath because it may be storage Info not a true path
@@ -7576,7 +7576,7 @@ const CFilteredToDoCtrl& CToDoListWnd::GetToDoCtrl(int nIndex) const
 CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 {
 	BOOL bWantHoldRedraw = ((m_bVisible > 0) && !IsIconic());
-	CHoldRedraw hr(bWantHoldRedraw ? GetSafeHwnd() : NULL);
+	CHoldRedraw hr(bWantHoldRedraw ? *this : NULL);
 	
 	// if the active tasklist is unsaved and unmodified then delete it
 	BOOL bFirstTDC = (GetTDCCount() == 0);

@@ -150,7 +150,6 @@ BEGIN_MESSAGE_MAP(CTDLTaskCtrlBase, CWnd)
 ON_WM_DESTROY()
 ON_WM_SIZE()
 ON_WM_CREATE()
-ON_MESSAGE(WM_SETREDRAW, OnSetRedraw)
 ON_WM_SETCURSOR()
 ON_WM_TIMER()
 ON_WM_HELPINFO()
@@ -473,14 +472,6 @@ void CTDLTaskCtrlBase::OnSize(UINT nType, int cx, int cy)
 		if (m_bAutoFitSplitter)
 			AdjustSplitterToFitAttributeColumns();
 	}
-}
-
-LRESULT CTDLTaskCtrlBase::OnSetRedraw(WPARAM wp, LPARAM /*lp*/)
-{
-	::SendMessage(Tasks(), WM_SETREDRAW, wp, 0);
-	m_lcColumns.SetRedraw(wp);
-
-	return 0L;
 }
 
 BOOL CTDLTaskCtrlBase::IsListItemSelected(HWND hwnd, int nItem) const
@@ -4622,12 +4613,12 @@ void CTDLTaskCtrlBase::RedrawTasks(BOOL bErase) const
 void CTDLTaskCtrlBase::OnBeginRebuild()
 {
 	EnableResync(FALSE);
-	OnSetRedraw(FALSE, 0);
+	CWnd::SendMessage(WM_SETREDRAW, FALSE);
 }
 
 void CTDLTaskCtrlBase::OnEndRebuild()
 {
-	OnSetRedraw(TRUE, 0);
+	CWnd::SendMessage(WM_SETREDRAW, TRUE);
 	EnableResync(TRUE, Tasks());
 }
 

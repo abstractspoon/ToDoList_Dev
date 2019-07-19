@@ -1173,8 +1173,6 @@ BOOL CTDLTaskListCtrl::EnsureSelectionVisible()
 		}
 		else
 		{
-			//CHoldRedraw hr(*this);
-			
 			m_lcTasks.EnsureVisible(GetSelectedItem(), FALSE);
 		}
 

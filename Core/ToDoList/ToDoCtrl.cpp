@@ -7655,7 +7655,7 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	log.LogTimeElapsed(_T("m_data.MoveTasks"));
 
 	CLockUpdates lu(*this);
-	HOLD_REDRAW(*this, m_taskTree);
+ 	HOLD_REDRAW(*this, m_taskTree);
 	
 	m_taskTree.MoveSelection(nDirection);
 
@@ -9067,7 +9067,7 @@ HTREEITEM CToDoCtrl::RebuildTree(const void* pContext)
 	TDCSELECTIONCACHE cache;
 	CacheTreeSelection(cache);
 		
-	CHoldRedraw hr(GetSafeHwnd());
+	CHoldRedraw hr(*this);
 	CWaitCursor cursor;
 	CDWordArray aExpanded;
 	

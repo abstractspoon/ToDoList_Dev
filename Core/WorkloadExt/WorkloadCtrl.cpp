@@ -1373,8 +1373,7 @@ void CWorkloadCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 	CAutoFlag af(m_bTreeExpanding, TRUE);
 	EnableResync(FALSE);
 
-	CHoldRedraw hr(m_lcColumns);
-	CHoldRedraw hr2(m_tcTasks);
+	CHoldRedraw hr(*this);
 
 	TCH().ExpandItem(hti, bExpand, bAndChildren);
 
@@ -2120,12 +2119,7 @@ LRESULT CWorkloadCtrl::OnTreeDragDrop(WPARAM /*wp*/, LPARAM /*lp*/)
 			// so we do not need to perform the move ourselves
 			if (CWnd::GetParent()->SendMessage(WM_WLC_MOVETASK, 0, (LPARAM)&move) && !move.bCopy)
 			{
-				CAutoFlag af(m_bMovingTask, TRUE);
-
-				htiSel = TCH().MoveTree(htiSel, htiDropTarget, htiAfterSibling, TRUE, TRUE);
-				
-				RefreshTreeItemMap();
-				SelectItem(htiSel);
+				MoveSelectedItem(move);
 			}
 		}
 	}
@@ -4330,20 +4324,20 @@ BOOL CWorkloadCtrl::MoveSelectedItem(const IUITASKMOVE& move)
 	HTREEITEM htiSel = GetSelectedItem(), htiNew = NULL;
 	HTREEITEM htiDestParent = GetTreeItem(move.dwParentID);
 	HTREEITEM htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
-	
-	{
-		CHoldRedraw hr2(m_tcTasks, NCR_UPDATE);
-		CHoldRedraw hr3(m_lcColumns);
 
-		htiNew = TCH().MoveTree(htiSel, htiDestParent, htiDestAfterSibling, TRUE, TRUE);
-		ASSERT(htiNew);
-	}
+	CLockUpdates lu(*this);
+	CHoldRedraw hr(*this);
+
+	htiNew = TCH().MoveTree(htiSel, htiDestParent, htiDestAfterSibling, TRUE, TRUE);
 
 	if (htiNew)
 	{
+		RefreshTreeItemMap();
 		SelectItem(htiNew);
+
 		return TRUE;
 	}
 
+	ASSERT(0);
 	return FALSE;
 }

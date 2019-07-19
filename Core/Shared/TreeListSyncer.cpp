@@ -1406,6 +1406,14 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			HandleEraseBkgnd(pDC);
 		}
 		break;
+
+	case WM_SETREDRAW:
+		m_scLeft.SetRedraw(wp);
+		m_scRight.SetRedraw(wp);
+		
+		if (m_hwndPrimaryHeader)
+			::SendMessage(m_hwndPrimaryHeader, WM_SETREDRAW, wp, lp);
+		break;
 		
 	case WM_RESIZE:
 		RefreshSize();
@@ -1647,8 +1655,7 @@ void CTreeListSyncer::HandleItemExpanded(HWND hwndTree, HTREEITEM hti, BOOL bExp
 
 		HWND hwndList = OtherWnd(hwndTree);
 		
-		CHoldRedraw hr(hwndList);
-		CHoldRedraw hr2(hwndTree);
+		CHoldRedraw hr(GetHwnd());
 		EnableResync(FALSE);
 		
 		if (bExpand)

@@ -309,7 +309,6 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg int  OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg LRESULT OnSetRedraw(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
