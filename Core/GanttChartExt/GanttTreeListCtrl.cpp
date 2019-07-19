@@ -1001,28 +1001,17 @@ void CGanttTreeListCtrl::UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKIT
 	}
 }
 
-void CGanttTreeListCtrl::UpdateParentStatus(DWORD dwOldParentID, DWORD dwNewParentID)
+void CGanttTreeListCtrl::UpdateParentStatus(DWORD dwParentID)
 {
-	if (dwOldParentID)
+	if (dwParentID)
 	{
 		GANTTITEM* pGIParent = NULL;
-		GET_GI(dwOldParentID, pGIParent);
+		GET_GI(dwParentID, pGIParent);
 
-		HTREEITEM htiParent = GetTreeItem(dwOldParentID);
+		HTREEITEM htiParent = GetTreeItem(dwParentID);
 		ASSERT(htiParent);
 
 		pGIParent->bParent = m_tree.ItemHasChildren(htiParent);
-	}
-
-	if (dwNewParentID)
-	{
-		GANTTITEM* pGIParent = NULL;
-		GET_GI(dwNewParentID, pGIParent);
-
-		HTREEITEM htiParent = GetTreeItem(dwNewParentID);
-		ASSERT(htiParent);
-
-		pGIParent->bParent = m_tree.ItemHasChildren(htiParent);;
 	}
 }
 
@@ -2232,7 +2221,10 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						htiSel = TCH().MoveTree(htiSel, htiDropTarget, htiAfterSibling, TRUE, TRUE);
 
 						RefreshTreeItemMap();
-						UpdateParentStatus(dwSrcParentID, move.dwParentID);
+
+						UpdateParentStatus(dwSrcParentID);
+						UpdateParentStatus(move.dwParentID);
+
 						SelectItem(htiSel);
 					}
 				}
@@ -7568,9 +7560,11 @@ BOOL CGanttTreeListCtrl::MoveSelectedItem(const IUITASKMOVE& move)
 
 	if (htiNew)
 	{
-		UpdateParentStatus(GetTaskID(htiSrcParent), move.dwParentID);
-
 		RefreshTreeItemMap();
+
+		UpdateParentStatus(GetTaskID(htiSrcParent));
+		UpdateParentStatus(move.dwParentID);
+
 		SelectItem(htiNew);
 
 		return TRUE;
