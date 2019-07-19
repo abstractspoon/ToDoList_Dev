@@ -7576,7 +7576,7 @@ const CFilteredToDoCtrl& CToDoListWnd::GetToDoCtrl(int nIndex) const
 CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 {
 	BOOL bWantHoldRedraw = ((m_bVisible > 0) && !IsIconic());
-	CHoldRedraw hr(bWantHoldRedraw ? *this : NULL);
+	CHoldRedraw hr(bWantHoldRedraw ? GetSafeHwnd() : NULL);
 	
 	// if the active tasklist is unsaved and unmodified then delete it
 	BOOL bFirstTDC = (GetTDCCount() == 0);
