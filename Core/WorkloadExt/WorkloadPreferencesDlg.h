@@ -9,6 +9,7 @@
 
 #include "..\Shared\preferencesbase.h"
 #include "..\Shared\checklistboxex.h"
+#include "..\Shared\colorbutton.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -23,13 +24,24 @@ public:
 
 	void GetColumnVisibility(CDWordArray& aColumnVis) const;
 
+	BOOL GetOverload(int& nFromPercent, COLORREF& color) const;
+	BOOL GetUnderload(int& nToPercent, COLORREF& color) const;
+
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CWorkloadPreferencesPage)
+	BOOL	m_bEnableOverload;
+	BOOL	m_bEnableUnderload;
 	//}}AFX_DATA
+	int		m_nOverloadFromPercent;
+	int		m_nUnderloadToPercent;
+	COLORREF m_crOverload, m_crUnderload;
+
+	CColorButton m_btnOverloadColor;
+	CColorButton m_btnUnderloadColor;
 	CCheckListBoxEx m_lbColumnVisibility;
 	CDWordArray m_aColumnVis;
 
@@ -46,6 +58,8 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CWorkloadPreferencesPage)
+	afx_msg void OnEnableOverload();
+	afx_msg void OnEnableUnderload();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
@@ -62,8 +76,14 @@ public:
 	CWorkloadPreferencesDlg(CWnd* pParent);
 
 	void GetColumnVisibility(CDWordArray& aColumnVis) const { m_page.GetColumnVisibility(aColumnVis); }
+	
+	BOOL GetOverload(int& nFromPercent, COLORREF& color) const { return m_page.GetOverload(nFromPercent, color); }
+	BOOL GetUnderload(int& nToPercent, COLORREF& color) const { return m_page.GetUnderload(nToPercent, color); }
 
 protected:
+// Dialog Data
+	//{{AFX_DATA(CWorkloadPreferencesDlg)
+	//}}AFX_DATA
 	CWorkloadPreferencesPage m_page;
 
 protected:

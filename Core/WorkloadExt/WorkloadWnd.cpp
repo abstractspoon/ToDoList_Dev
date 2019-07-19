@@ -807,6 +807,15 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 	CDWordArray aColumnVis;
 	m_dlgPrefs.GetColumnVisibility(aColumnVis);
 	m_ctrlWorkload.SetTreeColumnVisibility(aColumnVis);
+
+	int nPercent;
+	COLORREF color;
+	
+	BOOL bEnable = m_dlgPrefs.GetOverload(nPercent, color);
+	m_ctrlWorkload.EnableOverload(bEnable, nPercent, color);
+
+	bEnable = m_dlgPrefs.GetUnderload(nPercent, color);
+	m_ctrlWorkload.EnableUnderload(bEnable, nPercent, color);
 }
 
 void CWorkloadWnd::OnWorkloadPreferences() 

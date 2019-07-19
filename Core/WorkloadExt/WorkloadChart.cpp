@@ -13,8 +13,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-const COLORREF COLOR_GREEN	= RGB(122, 204,   0); 
-const COLORREF COLOR_RED	= RGB(204,   0,   0); 
 const COLORREF COLOR_YELLOW = RGB(204, 164,   0); 
 const COLORREF COLOR_BLUE	= RGB(0,     0, 244); 
 const COLORREF COLOR_PINK	= RGB(234,  28,  74); 
@@ -27,10 +25,10 @@ CWorkloadChart::CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocatio
 	: 
 	m_mapPercentLoad(mapPercentLoad), 
 	m_aAllocTo(aAllocTo),
-	m_crOverload(COLOR_RED),
-	m_dOverloadValue(80.0),
-	m_crUnderload(COLOR_GREEN),
-	m_dUnderloadValue(50.0)
+	m_crOverload(CLR_NONE),
+	m_dOverloadValue(100.0),
+	m_crUnderload(CLR_NONE),
+	m_dUnderloadValue(0.0)
 {
 	SetDatasetLineColor(0, COLOR_BLUE);
 }
@@ -123,16 +121,38 @@ void CWorkloadChart::RebuildChart()
 	Invalidate(FALSE);
 }
 
-void CWorkloadChart::SetOverloadColor(double dOverloadValue, COLORREF crOverload)
+void CWorkloadChart::EnableOverload(BOOL bEnable, double dOverloadValue, COLORREF crOverload)
 {
-	m_dOverloadValue = dOverloadValue;
-	m_crOverload = crOverload;
+	if (bEnable)
+	{
+		m_dOverloadValue = dOverloadValue;
+		m_crOverload = crOverload;
+	}
+	else
+	{
+		m_dUnderloadValue = 0.0;
+		m_crUnderload = CLR_NONE;
+	}
+
+	if (GetSafeHwnd())
+		Invalidate();
 }
 
-void CWorkloadChart::SetUnderloadColor(double dUnderloadValue, COLORREF crUnderload)
+void CWorkloadChart::EnableUnderload(BOOL bEnable, double dUnderloadValue, COLORREF crUnderload)
 {
-	m_dUnderloadValue = dUnderloadValue;
-	m_crUnderload = crUnderload;
+	if (bEnable)
+	{
+		m_dUnderloadValue = dUnderloadValue;
+		m_crUnderload = crUnderload;
+	}
+	else
+	{
+		m_dUnderloadValue = 0.0;
+		m_crUnderload = CLR_NONE;
+	}
+
+	if (GetSafeHwnd())
+		Invalidate();
 }
 
 BOOL CWorkloadChart::SetNormalColor(COLORREF crNormal)
@@ -211,7 +231,7 @@ bool CWorkloadChart::DrawGrid( CDC& dc)
 COLORREF CWorkloadChart::GetBkgndColor(double dValue) const
 {
 	if (IsOverloaded(dValue) || IsUnderloaded(dValue))
-		return RGBX::AdjustLighting(GetValueColor(dValue), 0.5, FALSE);
+		return RGBX::AdjustLighting(GetValueColor(dValue), 0.8, TRUE);
 
 	// else
 	return CLR_NONE;

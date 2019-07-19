@@ -2700,6 +2700,18 @@ void CWorkloadCtrl::SetAllocationColor(COLORREF crAllocation)
 	SetColor(m_crAllocation, crAllocation);
 }
 
+void CWorkloadCtrl::EnableOverload(BOOL bEnable, double dOverloadValue, COLORREF crOverload)
+{
+	m_barChart.EnableOverload(bEnable, dOverloadValue, crOverload);
+	m_lcColumnTotals.Invalidate();		
+}
+
+void CWorkloadCtrl::EnableUnderload(BOOL bEnable, double dUnderloadValue, COLORREF crUnderload)
+{
+	m_barChart.EnableUnderload(bEnable, dUnderloadValue, crUnderload);
+	m_lcColumnTotals.Invalidate();
+}
+
 void CWorkloadCtrl::SetSplitBarColor(COLORREF crSplitBar) 
 { 
 	CTreeListSyncer::SetSplitBarColor(crSplitBar); 

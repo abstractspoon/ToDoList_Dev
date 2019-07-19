@@ -110,6 +110,9 @@ public:
 	void SetOverlapColor(COLORREF crOverlap);
 	void SetAllocationColor(COLORREF crAllocation);
 
+	void EnableOverload(BOOL bEnable, double dOverloadValue, COLORREF crOverload);
+	void EnableUnderload(BOOL bEnable, double dUnderloadValue, COLORREF crUnderload);
+
 	BOOL CancelOperation();
 	void SetReadOnly(bool bReadOnly);
 	BOOL GetLabelEditRect(LPRECT pEdit) const;
