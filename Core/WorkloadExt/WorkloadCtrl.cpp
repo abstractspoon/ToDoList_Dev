@@ -167,6 +167,7 @@ BEGIN_MESSAGE_MAP(CWorkloadCtrl, CWnd)
 	ON_WM_SIZE()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_MOUSEWHEEL()
+	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 
@@ -2532,6 +2533,32 @@ BOOL CWorkloadCtrl::OnMouseWheel(UINT /*nFlags*/, short zDelta, CPoint pt)
 	return FALSE;
 }
 
+BOOL CWorkloadCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	if (pWnd == &m_lcColumns)
+	{
+		int nCol, nHit = ListHitTestItem(GetMessagePos(), TRUE, nCol);
+
+		if (nHit != -1)
+		{
+			BOOL bCanEdit = (GetListColumnType(nCol) == WLCT_VALUE);
+
+			if (bCanEdit)
+			{
+				const WORKLOADITEM* pWI = NULL;
+				GET_WI_RET(GetTaskID(nHit), pWI, FALSE);
+
+				bCanEdit = !pWI->bParent;
+			}
+
+			if (!bCanEdit)
+				return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+		}
+	}
+
+	return CWnd::OnSetCursor(pWnd, nHitTest, message);
+}
+
 void CWorkloadCtrl::OnListHeaderClick(NMHEADER* pHDN)
 {
 	if (pHDN->iButton == 0) // left button
@@ -2708,8 +2735,7 @@ BOOL CWorkloadCtrl::OnListLButtonUp(UINT /*nFlags*/, CPoint /*point*/)
 
 BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT /*nFlags*/, CPoint point)
 {
-	int nCol = -1;
-	int nHit = ListHitTestItem(point, FALSE, nCol);
+	int nCol = -1, nHit = ListHitTestItem(point, FALSE, nCol);
 	
 	if (nHit == -1)
 		return TRUE; // prevent null selection
