@@ -4610,18 +4610,6 @@ void CTDLTaskCtrlBase::RedrawTasks(BOOL bErase) const
 	::UpdateWindow(Tasks());
 }
 
-void CTDLTaskCtrlBase::OnBeginRebuild()
-{
-	EnableResync(FALSE);
-	CWnd::SendMessage(WM_SETREDRAW, FALSE);
-}
-
-void CTDLTaskCtrlBase::OnEndRebuild()
-{
-	CWnd::SendMessage(WM_SETREDRAW, TRUE);
-	EnableResync(TRUE, Tasks());
-}
-
 int CTDLTaskCtrlBase::CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustomWantsTime) const
 {
 	COleDateTime dateMax(2000, 12, 31, 23, 59, 0);

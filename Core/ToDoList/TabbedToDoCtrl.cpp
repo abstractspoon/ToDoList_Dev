@@ -2875,7 +2875,7 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 	// note: the call to m_taskList.RestoreSelection at the bottom fails if the 
 	// list has redraw disabled so it must happen outside the scope of hr2
 	{
-		CHoldRedraw hr(GetSafeHwnd());
+		CHoldRedraw hr(*this);
 		CHoldRedraw hr2(m_taskList);
 		CWaitCursor cursor;
 

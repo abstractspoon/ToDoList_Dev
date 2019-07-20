@@ -1408,8 +1408,6 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		break;
 
 	case WM_SETREDRAW:
-		ASSERT(IsWindowVisible());
-
 		m_scLeft.SetRedraw(wp);
 		m_scRight.SetRedraw(wp);
 		

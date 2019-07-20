@@ -315,14 +315,20 @@ HTREEITEM CTDLTaskTreeCtrl::GetItem(DWORD dwTaskID) const
 
 void CTDLTaskTreeCtrl::OnBeginRebuild()
 {
-	CTDLTaskCtrlBase::OnBeginRebuild();
+	EnableResync(FALSE);
+
+	if (CWnd::IsWindowVisible())
+		CWnd::SendMessage(WM_SETREDRAW, FALSE);
 
 	m_mapHTItems.RemoveAll();
 }
 
 void CTDLTaskTreeCtrl::OnEndRebuild()
 {
-	CTDLTaskCtrlBase::OnEndRebuild();
+	if (CWnd::IsWindowVisible())
+		CWnd::SendMessage(WM_SETREDRAW, TRUE);
+
+	EnableResync(TRUE, Tasks());
 
 	ExpandList();
 	RecalcUntrackedColumnWidths();
