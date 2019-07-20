@@ -43,47 +43,14 @@ CEnString::CEnString(LPCTSTR lpszFormat, ... )
 	}
 }
 
-CEnString::CEnString(UINT nFormatID, LPCTSTR szText)
+CEnString::CEnString(UINT nStrID, HWND hwndRef)
 {
-	if (nFormatID)
-	{
-		CString strFormat;
-		
-		if (LoadString(nFormatID, NULL, strFormat))
-		{
-			if (szText && *szText)
-				CString::Format(strFormat, szText);
-			else
-				*this = strFormat;
-			
-			CompareIgnoreString(strFormat);
-		}
-	}
+	LoadString(nStrID, hwndRef);
 }
 
-CEnString::CEnString(UINT nFormatID, int nData)
+CEnString::CEnString(UINT nStrID, HMENU hMenu)
 {
-	if (nFormatID)
-	{
-		CString strFormat;
-		
-		if (LoadString(nFormatID, NULL, strFormat))
-		{
-			CString::Format(strFormat, nData);
-
-			CompareIgnoreString(strFormat);
-		}
-	}
-}
-
-CEnString::CEnString(UINT nID, HWND hwndRef)
-{
-	LoadString(nID, hwndRef);
-}
-
-CEnString::CEnString(UINT nID, HMENU hMenu)
-{
-	LoadString(nID, hMenu);
+	LoadString(nStrID, hMenu);
 }
 
 CEnString::CEnString(const CString& str) : CString(str)

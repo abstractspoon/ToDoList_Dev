@@ -15,6 +15,8 @@
 #define IDS_TOTALDAYSPERPERSON          2016
 #define IDS_NUMACTIVITIESPERPERSON      2017
 #define IDS_PERCENTLOADPERPERSON        2018
+#define IDS_COL_TIMEEST                 2019
+#define IDS_TIMEEST_FORMAT              2020
 #define IDC_DIVIDER                     16001
 #define IDD_PREFERENCES_DIALOG          16002
 #define IDC_PREFERENCES                 16003
@@ -70,6 +72,7 @@
 #define IDS_TOTALSDATERANGE             57690
 #define IDS_PERIODDURATION              57691
 #define IDS_ACTIVEDATERANGE             57692
+#define IDS_ATTRIB_TIMEEST              57693
 
 // Next default values for new objects
 // 

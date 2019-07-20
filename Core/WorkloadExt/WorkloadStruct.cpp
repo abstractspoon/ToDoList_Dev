@@ -8,6 +8,8 @@
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\misc.h"
 
+#include <math.h>
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -27,6 +29,8 @@ CMapDayAllocations::~CMapDayAllocations()
 void CMapDayAllocations::Copy(const CMapDayAllocations& other)
 {
 	Misc::CopyStrT<WORKLOADALLOCATION>(other, *this);
+
+	bAutoCalculated = other.bAutoCalculated;
 }
 
 BOOL CMapDayAllocations::MatchAll(const CMapDayAllocations& other) const
@@ -185,15 +189,15 @@ void CMapDayAllocations::ClearOverlaps()
 	}
 }
 
-void CMapDayAllocations::AutoCalculate(const CStringArray& aAllocTo, double dDuration)
+void CMapDayAllocations::AutoCalculate(const CStringArray& aAllocTo, double dTotal)
 {
 	ASSERT((GetCount() == 0) || bAutoCalculated);
 
 	int nAllocTo = aAllocTo.GetSize();
 
-	if (nAllocTo && dDuration)
+	if (nAllocTo && dTotal)
 	{
-		double dAllocation = Misc::Round((dDuration / nAllocTo), 2);
+		double dAllocation = Misc::Round((dTotal / nAllocTo), 2);
 
 		WORKLOADALLOCATION wa;
 		wa.dDays = dAllocation;
@@ -201,13 +205,13 @@ void CMapDayAllocations::AutoCalculate(const CStringArray& aAllocTo, double dDur
 		while (nAllocTo--)
 		{
 			if (nAllocTo == 0)
-				wa.dDays = dDuration; // leftover
+				wa.dDays = dTotal; // leftover
 
 			// Don't use 'SetDays' because it will clear 'bAutoCalculated'
 			SetAt(Misc::ToUpper(aAllocTo[nAllocTo]), wa);
 
 			// Handle rounding
-			dDuration -= dAllocation;
+			dTotal -= dAllocation;
 		}
 	}
 
@@ -404,7 +408,8 @@ WORKLOADITEM::WORKLOADITEM(DWORD dwID, LPCTSTR szTitle)
 	bDone(FALSE),
 	nPosition(-1),
 	bLocked(FALSE),
-	bSomeSubtaskDone(FALSE)
+	bSomeSubtaskDone(FALSE),
+	dTimeEst(0.0)
 {
 }
 
@@ -429,6 +434,7 @@ WORKLOADITEM& WORKLOADITEM::operator=(const WORKLOADITEM& wi)
 	bLocked = wi.bLocked;
 	bHasIcon = wi.bHasIcon;
 	bSomeSubtaskDone = wi.bSomeSubtaskDone;
+	dTimeEst = wi.dTimeEst;
 	
 	aAllocTo.Copy(wi.aAllocTo);
 	mapAllocatedDays.Copy(wi.mapAllocatedDays);
@@ -514,6 +520,16 @@ BOOL WORKLOADITEM::HasColor() const
 	return ((color != CLR_NONE) && (color != GetSysColor(COLOR_WINDOWTEXT)));
 }
 
+void WORKLOADITEM::AutoCalculateAllocations(BOOL bPreferTimeEstimate)
+{
+	double dDuration = (bPreferTimeEstimate ? dTimeEst : dtRange.GetWeekdayCount());
+
+	if (dDuration == 0.0)
+		dDuration = (bPreferTimeEstimate ? dtRange.GetWeekdayCount() : dTimeEst);
+
+	mapAllocatedDays.AutoCalculate(aAllocTo, dDuration);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 CWorkloadItemMap::~CWorkloadItemMap()
@@ -540,8 +556,8 @@ void CWorkloadItemMap::RemoveAll()
 }
 
 void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
-										CMapAllocationTotals& mapTotalDays, 
-										CMapAllocationTotals& mapTotalTasks) const
+									   CMapAllocationTotals& mapTotalDays, 
+									   CMapAllocationTotals& mapTotalTasks) const
 {
 	mapTotalDays.RemoveAll();
 	mapTotalTasks.RemoveAll();
@@ -627,6 +643,17 @@ WORKLOADITEM* CWorkloadItemMap::GetItem(DWORD dwKey) const
 	if (Lookup(dwKey, pWI))
 		ASSERT(pWI);
 	
+	return pWI;
+}
+
+WORKLOADITEM* CWorkloadItemMap::GetNextItem(POSITION& pos) const
+{
+	WORKLOADITEM* pWI = NULL;
+	DWORD dwKey = 0;
+
+	GetNextAssoc(pos, dwKey, pWI);
+	ASSERT(dwKey && pWI);
+
 	return pWI;
 }
 

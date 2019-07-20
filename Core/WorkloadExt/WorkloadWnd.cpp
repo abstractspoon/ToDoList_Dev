@@ -816,6 +816,9 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 
 	bEnable = m_dlgPrefs.GetUnderload(nPercent, color);
 	m_ctrlWorkload.EnableUnderload(bEnable, nPercent, color);
+
+	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGALLOCATIONS, m_dlgPrefs.GetAutoCalculateMissingAllocations());
+	m_ctrlWorkload.SetOption(WLCF_PREFERTIMEESTFORCALCS, m_dlgPrefs.GetPreferTimeEstimateForCalcs());
 }
 
 void CWorkloadWnd::OnWorkloadPreferences() 

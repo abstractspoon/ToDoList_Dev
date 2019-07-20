@@ -291,7 +291,7 @@ int CWorkloadChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		CString sTooltip;
 		sTooltip.Format(_T("%s: %.2f%%"), sAllocTo, dPercent);
 
-		return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, (nAllocTo + 1), m_rectData);
+		return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
 	}
 
 	return CHMXChartEx::OnToolHitTest(point, pTI);

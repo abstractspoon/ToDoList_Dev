@@ -287,6 +287,7 @@ protected:
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
 	int GetLongestVisibleDuration(HTREEITEM hti) const;
+	double GetLargestVisibleTimeEstimate(HTREEITEM hti) const;
 	CString GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNID nColID) const;
 	CString GetListItemColumnText(const WORKLOADITEM& wi, int nCol, int nDecimals, BOOL bSelected, COLORREF& crBack) const;
 	CString GetListItemColumnTotal(const CMapAllocationTotals& mapAlloc, int nCol, int nDecimals) const;
@@ -297,6 +298,7 @@ protected:
 	void PopulateTotalsLists();
 	void RemoveTotalsScrollbars();
 	void UpdateTotalsDateRangeLabel();
+	void RefreshMissingAllocations();
 
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
  	COLORREF GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter = FALSE) const;
@@ -325,6 +327,7 @@ protected:
 	
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
 	static int GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aAllocTo);
+	static double GetTaskTimeEstimate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static int Compare(const CString& sText1, const CString& sText2);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL IsVerticalDivider(DIV_TYPE nType);

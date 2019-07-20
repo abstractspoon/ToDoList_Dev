@@ -27,12 +27,17 @@ public:
 	BOOL GetOverload(int& nFromPercent, COLORREF& color) const;
 	BOOL GetUnderload(int& nToPercent, COLORREF& color) const;
 
+	BOOL GetAutoCalculateMissingAllocations() const { return m_bAutoCalcAllocations; }
+	BOOL GetPreferTimeEstimateForCalcs() const { return m_bPreferTimeEstimateInCalcs; }
+
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CWorkloadPreferencesPage)
+	BOOL	m_bPreferTimeEstimateInCalcs;
+	BOOL	m_bAutoCalcAllocations;
 	BOOL	m_bEnableOverload;
 	BOOL	m_bEnableUnderload;
 	//}}AFX_DATA
@@ -79,6 +84,9 @@ public:
 	
 	BOOL GetOverload(int& nFromPercent, COLORREF& color) const { return m_page.GetOverload(nFromPercent, color); }
 	BOOL GetUnderload(int& nToPercent, COLORREF& color) const { return m_page.GetUnderload(nToPercent, color); }
+
+	BOOL GetAutoCalculateMissingAllocations() const { return m_page.GetAutoCalculateMissingAllocations(); }
+	BOOL GetPreferTimeEstimateForCalcs() const { return m_page.GetPreferTimeEstimateForCalcs(); }
 
 protected:
 // Dialog Data

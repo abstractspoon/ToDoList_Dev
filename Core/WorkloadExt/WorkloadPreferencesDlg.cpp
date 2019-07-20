@@ -29,6 +29,8 @@ CWorkloadPreferencesPage::CWorkloadPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	: CPreferencesPageBase(IDD_PREFERENCES_PAGE)
 {
 	//{{AFX_DATA_INIT(CWorkloadPreferencesPage)
+	m_bPreferTimeEstimateInCalcs = FALSE;
+	m_bAutoCalcAllocations = FALSE;
 	m_bEnableOverload = FALSE;
 	m_bEnableUnderload = FALSE;
 	//}}AFX_DATA_INIT
@@ -40,6 +42,8 @@ void CWorkloadPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CWorkloadPreferencesPage)
+	DDX_Check(pDX, IDC_USETIMESTIMATEFORDURATION, m_bPreferTimeEstimateInCalcs);
+	DDX_Check(pDX, IDC_AUTOCALCALLOCATIONS, m_bAutoCalcAllocations);
 	DDX_Check(pDX, IDC_ENABLEOVERLOAD, m_bEnableOverload);
 	DDX_Check(pDX, IDC_ENABLEUNDERLOAD, m_bEnableUnderload);
 	//}}AFX_DATA_MAP
@@ -96,6 +100,8 @@ void CWorkloadPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 		pPrefs->WriteProfileInt(sColVis, sCol, m_aColumnVis[nColID]);
 	}
 
+	pPrefs->WriteProfileInt(szKey, _T("PreferTimeEstimateInCalcs"), m_bPreferTimeEstimateInCalcs);
+	pPrefs->WriteProfileInt(szKey, _T("AutoCalcAllocations"), m_bAutoCalcAllocations);
 	pPrefs->WriteProfileInt(szKey, _T("EnableOverload"), m_bEnableOverload);
 	pPrefs->WriteProfileInt(szKey, _T("EnableUnderload"), m_bEnableUnderload);
 	pPrefs->WriteProfileInt(szKey, _T("OverloadPercentFrom"), m_nOverloadFromPercent);
@@ -117,6 +123,8 @@ void CWorkloadPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 		m_aColumnVis[nColID] = pPrefs->GetProfileInt(sColVis, sCol, WORKLOADTREECOLUMNS[nCol].bDefaultVis);
 	}
 
+	m_bPreferTimeEstimateInCalcs = pPrefs->GetProfileInt(szKey, _T("PreferTimeEstimateInCalcs"), TRUE);
+	m_bAutoCalcAllocations = pPrefs->GetProfileInt(szKey, _T("AutoCalcAllocations"), TRUE);
 	m_bEnableOverload = pPrefs->GetProfileInt(szKey, _T("EnableOverload"), TRUE);
 	m_bEnableUnderload = pPrefs->GetProfileInt(szKey, _T("EnableUnderload"), TRUE);
 	m_nOverloadFromPercent = pPrefs->GetProfileInt(szKey, _T("OverloadPercentFrom"), 80);

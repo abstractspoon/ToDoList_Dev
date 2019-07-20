@@ -164,12 +164,12 @@ BEGIN
                     LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Allocations",IDC_ALLOCATIONGROUP,7,70,333,8
-    CONTROL         "Use 'Time Estimate' in preference to 'Due Date - Start Date' for a task's duration",
+    CONTROL         "Use 'Time Estimate' in preference to 'Duration' when calculating allocations",
                     IDC_USETIMESTIMATEFORDURATION,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,85,333,10
+                    WS_TABSTOP,19,100,321,10
     CONTROL         "Auto-calculate missing allocations",
                     IDC_AUTOCALCALLOCATIONS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,100,333,10
+                    WS_TABSTOP,7,85,333,10
     CONTROL         "&Enable 'Overload' display",IDC_ENABLEOVERLOAD,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,115,207,10
     COMBOBOX        IDC_OVERLOADFROMPERCENT,18,129,31,143,CBS_DROPDOWNLIST | 
@@ -429,6 +429,7 @@ BEGIN
     IDS_TOTALSDATERANGE     "Current Period: %s"
     IDS_PERIODDURATION      "Current Period: %d weekdays"
     IDS_ACTIVEDATERANGE     "Cu&rrent Period Range (%s)"
+    IDS_ATTRIB_TIMEEST      "Time Estimate"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -436,6 +437,8 @@ BEGIN
     IDS_TOTALDAYSPERPERSON  "Total Allocated Days"
     IDS_NUMACTIVITIESPERPERSON "Number of Allocated Tasks"
     IDS_PERCENTLOADPERPERSON "Percentage Load"
+    IDS_COL_TIMEEST         "Time Est."
+    IDS_TIMEEST_FORMAT      "%.2f w"
 END
 
 STRINGTABLE DISCARDABLE 

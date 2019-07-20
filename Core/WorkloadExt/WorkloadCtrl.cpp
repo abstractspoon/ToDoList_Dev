@@ -708,6 +708,33 @@ int CWorkloadCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 	return aAllocTo.GetSize();
 }
 
+double CWorkloadCtrl::GetTaskTimeEstimate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+{
+	TDC_UNITS nUnits = TDCU_NULL;
+	double dTimeEst = pTasks->GetTaskTimeEstimate(hTask, nUnits, true);
+
+	TH_UNITS nTHUnits = THU_NULL;
+
+	switch (nUnits)
+	{
+	case TDCU_MINS:		nTHUnits = THU_MINS;	break;
+	case TDCU_HOURS:	nTHUnits = THU_HOURS;	break;
+	case TDCU_WEEKS:	nTHUnits = THU_WEEKS;	break;
+	case TDCU_MONTHS:	nTHUnits = THU_MONTHS;	break;
+	case TDCU_YEARS:	nTHUnits = THU_YEARS;	break;
+
+	case TDCU_DAYS:
+	case TDCU_WEEKDAYS:
+		return dTimeEst;
+
+	default:
+		ASSERT(0);
+		return 0.0;
+	}
+
+	return CTimeHelper().GetTime(dTimeEst, nTHUnits, THU_WEEKDAYS);
+}
+
 BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
@@ -723,6 +750,7 @@ BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
 	case TDCA_STARTDATE:
 	case TDCA_SUBTASKDONE:
 	case TDCA_TASKNAME:
+	case TDCA_TIMEEST:
 		return TRUE;
 	}
 	
@@ -773,7 +801,7 @@ WLC_COLUMNID CWorkloadCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
 	{
 	case TDCA_TASKNAME:		return WLCC_TITLE;		
 	case TDCA_DUEDATE:		return WLCC_DUEDATE;		
-	case TDCA_STARTDATE:		return WLCC_STARTDATE;	
+	case TDCA_STARTDATE:	return WLCC_STARTDATE;	
 	case TDCA_PERCENT:		return WLCC_PERCENT;		
 	case TDCA_ID:			return WLCC_TASKID;		
 	case TDCA_ALLOCTO:		return WLCC_ALLOCTO;		
@@ -850,6 +878,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 
 	// can't use a switch here because we also need to check for IUI_ALL
 	time64_t tDate = 0;
+	BOOL bRecalcMissingAllocations = FALSE;
 	
 	if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
 		pWI->sTitle = pTasks->GetTaskTitle(hTask);
@@ -872,6 +901,8 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 			pWI->dtRange.m_dtStart = CDateHelper::GetDate(tDate);
 		else
 			CDateHelper::ClearDate(pWI->dtRange.m_dtStart);
+
+		bRecalcMissingAllocations = HasOption(WLCF_CALCMISSINGALLOCATIONS);
 	}
 	
 	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
@@ -880,6 +911,15 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 			pWI->dtRange.m_dtEnd = CDateHelper::GetDate(tDate);
 		else
 			CDateHelper::ClearDate(pWI->dtRange.m_dtEnd);
+
+		bRecalcMissingAllocations = HasOption(WLCF_CALCMISSINGALLOCATIONS);
+	}
+
+	if (pTasks->IsAttributeAvailable(TDCA_TIMEEST))
+	{
+		pWI->dTimeEst = GetTaskTimeEstimate(pTasks, hTask);
+
+		bRecalcMissingAllocations = HasOption(WLCF_CALCMISSINGALLOCATIONS);
 	}
 	
 	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
@@ -922,8 +962,8 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 		}
 	}
 
-	if (pWI->mapAllocatedDays.IsAutoCalculated())
-		pWI->mapAllocatedDays.AutoCalculate(pWI->aAllocTo, pWI->dtRange.GetWeekdayCount());
+	if (bRecalcMissingAllocations && pWI->mapAllocatedDays.IsAutoCalculated())
+		pWI->AutoCalculateAllocations(HasOption(WLCF_PREFERTIMEESTFORCALCS));
 	
 	return bChange;
 }
@@ -1119,8 +1159,11 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
 			pWI->dtRange.m_dtEnd = CDateHelper::GetDate(tDate);
 
+		pWI->dTimeEst = GetTaskTimeEstimate(pTasks, hTask);
+
+		// This wants to be last so that time estimate and date range are up to date
 		if (!pWI->mapAllocatedDays.Decode(pTasks->GetTaskMetaData(hTask, WORKLOAD_TYPEID)))
-			pWI->mapAllocatedDays.AutoCalculate(pWI->aAllocTo, pWI->dtRange.GetWeekdayCount());
+			pWI->AutoCalculateAllocations(HasOption(WLCF_PREFERTIMEESTFORCALCS));
 	}
 	
 	// add item to tree
@@ -1224,10 +1267,42 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 			case WLCF_SHOWTREECHECKBOXES:
 				m_tcTasks.ShowCheckboxes(bSet);
 				break;
+
+			case WLCF_CALCMISSINGALLOCATIONS:
+				RefreshMissingAllocations();
+				break;
+
+			case WLCF_PREFERTIMEESTFORCALCS:
+				if (HasOption(WLCF_CALCMISSINGALLOCATIONS))
+					RefreshMissingAllocations();
+				else
+					m_tcTasks.Invalidate();
+				break;
 			}
 
 			if (IsSyncing())
 				RedrawList();
+		}
+	}
+}
+
+void CWorkloadCtrl::RefreshMissingAllocations()
+{
+	BOOL bAutoCalc = HasOption(WLCF_CALCMISSINGALLOCATIONS);
+	BOOL bPreferTimeEst = HasOption(WLCF_PREFERTIMEESTFORCALCS);
+
+	POSITION pos = m_data.GetStartPosition();
+
+	while (pos)
+	{
+		WORKLOADITEM* pWI = m_data.GetNextItem(pos);
+
+		if (pWI && pWI->mapAllocatedDays.IsAutoCalculated())
+		{
+			if (bAutoCalc)
+				pWI->AutoCalculateAllocations(bPreferTimeEst);
+			else
+				pWI->ClearAllocations();
 		}
 	}
 }
@@ -1245,9 +1320,6 @@ int CWorkloadCtrl::GetRequiredListColumnCount() const
 
 void CWorkloadCtrl::BuildTaskTreeColumns()
 {
-	// delete existing columns
-//	while (m_hdrTasks.DeleteItem(0));
-
 	// add columns
 	m_hdrTasks.InsertItem(0, 0, _T("Task"), (HDF_LEFT | HDF_STRING), 0, WLCC_TITLE);
 	m_hdrTasks.EnableItemDragging(0, FALSE);
@@ -2731,10 +2803,11 @@ BOOL CWorkloadCtrl::SetColor(COLORREF& color, COLORREF crNew)
 	if (crNew == color)
 		return FALSE;
 
-	if (IsHooked())
+	color = crNew;
+
+	if (GetSafeHwnd())
 		InvalidateAll();
 
-	color = crNew;
 	return TRUE;
 }
 
@@ -2769,15 +2842,44 @@ int CWorkloadCtrl::GetLongestVisibleDuration(HTREEITEM hti) const
 		while (htiChild)
 		{
 			int nLongestChild = GetLongestVisibleDuration(htiChild);
-
-			if (nLongestChild > nLongest)
-				nLongest = nLongestChild;
+			nLongest = max(nLongest, nLongestChild);
 
 			htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
 		}
 	}
 
 	return nLongest;
+}
+
+double CWorkloadCtrl::GetLargestVisibleTimeEstimate(HTREEITEM hti) const
+{
+	double dLargest = 0.0;
+
+	if (hti)
+	{
+		DWORD dwTaskID = GetTaskID(hti);
+
+		const WORKLOADITEM* pWI = NULL;
+		GET_WI_RET(dwTaskID, pWI, 0);
+
+		dLargest = pWI->dTimeEst;
+	}
+
+	// children
+	if (!hti || TCH().IsItemExpanded(hti))
+	{
+		HTREEITEM htiChild = m_tcTasks.GetChildItem(hti);
+
+		while (htiChild)
+		{
+			double dLargestChild = GetLongestVisibleDuration(htiChild);
+			dLargest = max(dLargest, dLargestChild);
+
+			htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
+		}
+	}
+
+	return dLargest;
 }
 
 CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNID nCol) const
@@ -2802,6 +2904,11 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNI
 		case WLCC_DUEDATE:
 			if (wi.HasDueDate())
 				sItem = FormatDate(wi.dtRange.m_dtEnd);
+			break;
+
+		case WLCC_TIMEEST:
+			if (wi.dTimeEst > 0)
+				sItem.Format(CEnString(IDS_TIMEEST_FORMAT), wi.dTimeEst);
 			break;
 
 		case WLCC_DURATION:
@@ -3007,6 +3114,7 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		case WLCC_DUEDATE:
 		case WLCC_PERCENT:
 		case WLCC_DURATION:
+		case WLCC_TIMEEST:
 			{
 				CRect rHdrItem;
 				m_hdrTasks.GetItemRect(nCol, rHdrItem);
@@ -3519,6 +3627,10 @@ int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 	case WLCC_DURATION:
 		nColWidth = pDC->GetTextExtent(CEnString(IDS_ALLOCATION_FORMAT, GetLongestVisibleDuration(NULL))).cx;
 		break;
+
+	case WLCC_TIMEEST:
+		nColWidth = pDC->GetTextExtent(CEnString(IDS_TIMEEST_FORMAT, GetLargestVisibleTimeEstimate(NULL))).cx;
+		break;
 		
 	case WLCC_PERCENT: 
 		nColWidth = GraphicsMisc::GetAverageMaxStringWidth(_T("100%"), pDC);
@@ -3744,7 +3856,15 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 			break;
 
 		case WLCC_DURATION:
-			nCompare = (pWI1->dtRange.GetWeekdayCount() - pWI1->dtRange.GetWeekdayCount());
+			nCompare = (pWI1->dtRange.GetWeekdayCount() - pWI2->dtRange.GetWeekdayCount());
+			break;
+
+		case WLCC_TIMEEST:
+			{
+				double dDiff = pWI1->dTimeEst - pWI2->dTimeEst;
+				
+				nCompare = ((dDiff > 0.0) ? 1 : ((dDiff < 0.0) ? -1 : 0));
+			}
 			break;
 
 		case WLCC_PERCENT:
