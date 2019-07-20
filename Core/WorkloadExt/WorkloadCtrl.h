@@ -286,7 +286,7 @@ protected:
 	BOOL RecalcTreeColumns(BOOL bResize = TRUE);
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
-	int GetLongestVisibleDuration(HTREEITEM hti) const;
+	int GetLargestVisibleDuration(HTREEITEM hti) const;
 	double GetLargestVisibleTimeEstimate(HTREEITEM hti) const;
 	CString GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNID nColID) const;
 	CString GetListItemColumnText(const WORKLOADITEM& wi, int nCol, int nDecimals, BOOL bSelected, COLORREF& crBack) const;
@@ -331,6 +331,7 @@ protected:
 	static int Compare(const CString& sText1, const CString& sText2);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL IsVerticalDivider(DIV_TYPE nType);
+	static CString FormatTimeSpan(double dDays, int nDecimals);
 
 private:
 	void PreFixVScrollSyncBug();

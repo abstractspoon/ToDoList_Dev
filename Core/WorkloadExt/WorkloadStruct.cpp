@@ -458,6 +458,7 @@ BOOL WORKLOADITEM::operator==(const WORKLOADITEM& wi) const
 			(bLocked == wi.bLocked) &&
 			(bHasIcon == wi.bHasIcon) &&
 			(bSomeSubtaskDone == wi.bSomeSubtaskDone) &&
+			(dTimeEst == wi.dTimeEst) &&
 			Misc::MatchAll(aAllocTo, wi.aAllocTo) &&
 			mapAllocatedDays.MatchAll(wi.mapAllocatedDays));
 }
@@ -522,12 +523,19 @@ BOOL WORKLOADITEM::HasColor() const
 
 void WORKLOADITEM::AutoCalculateAllocations(BOOL bPreferTimeEstimate)
 {
-	double dDuration = (bPreferTimeEstimate ? dTimeEst : dtRange.GetWeekdayCount());
+	if (bParent)
+	{
+		ClearAllocations();
+	}
+	else
+	{
+		double dDuration = (bPreferTimeEstimate ? dTimeEst : dtRange.GetWeekdayCount());
 
-	if (dDuration == 0.0)
-		dDuration = (bPreferTimeEstimate ? dtRange.GetWeekdayCount() : dTimeEst);
+		if (dDuration == 0.0)
+			dDuration = (bPreferTimeEstimate ? dtRange.GetWeekdayCount() : dTimeEst);
 
-	mapAllocatedDays.AutoCalculate(aAllocTo, dDuration);
+		mapAllocatedDays.AutoCalculate(aAllocTo, dDuration);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////

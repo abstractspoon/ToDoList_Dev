@@ -878,7 +878,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 
 	// can't use a switch here because we also need to check for IUI_ALL
 	time64_t tDate = 0;
-	BOOL bRecalcMissingAllocations = FALSE;
+	BOOL bAllocationChange = FALSE;
 	
 	if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
 		pWI->sTitle = pTasks->GetTaskTitle(hTask);
@@ -887,6 +887,8 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 	{
  		GetTaskAllocTo(pTasks, hTask, pWI->aAllocTo);
 		Misc::AddUniqueItems(pWI->aAllocTo, m_aAllocTo);
+
+		bAllocationChange = TRUE;
 	}
 	
 	if (pTasks->IsAttributeAvailable(TDCA_ICON))
@@ -902,7 +904,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 		else
 			CDateHelper::ClearDate(pWI->dtRange.m_dtStart);
 
-		bRecalcMissingAllocations = HasOption(WLCF_CALCMISSINGALLOCATIONS);
+		bAllocationChange = TRUE;
 	}
 	
 	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
@@ -912,14 +914,14 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 		else
 			CDateHelper::ClearDate(pWI->dtRange.m_dtEnd);
 
-		bRecalcMissingAllocations = HasOption(WLCF_CALCMISSINGALLOCATIONS);
+		bAllocationChange = TRUE;
 	}
 
 	if (pTasks->IsAttributeAvailable(TDCA_TIMEEST))
 	{
 		pWI->dTimeEst = GetTaskTimeEstimate(pTasks, hTask);
 
-		bRecalcMissingAllocations = HasOption(WLCF_CALCMISSINGALLOCATIONS);
+		bAllocationChange = TRUE;
 	}
 	
 	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
@@ -962,8 +964,12 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 		}
 	}
 
-	if (bRecalcMissingAllocations && pWI->mapAllocatedDays.IsAutoCalculated())
+	if (bAllocationChange &&
+		HasOption(WLCF_CALCMISSINGALLOCATIONS) &&
+		pWI->mapAllocatedDays.IsAutoCalculated())
+	{
 		pWI->AutoCalculateAllocations(HasOption(WLCF_PREFERTIMEESTFORCALCS));
+	}
 	
 	return bChange;
 }
@@ -2819,7 +2825,7 @@ CString CWorkloadCtrl::FormatDate(const COleDateTime& date, DWORD dwFlags) const
 	return CDateHelper::FormatDate(date, dwFlags);
 }
 
-int CWorkloadCtrl::GetLongestVisibleDuration(HTREEITEM hti) const
+int CWorkloadCtrl::GetLargestVisibleDuration(HTREEITEM hti) const
 {
 	int nLongest = 0;
 
@@ -2841,7 +2847,7 @@ int CWorkloadCtrl::GetLongestVisibleDuration(HTREEITEM hti) const
 
 		while (htiChild)
 		{
-			int nLongestChild = GetLongestVisibleDuration(htiChild);
+			int nLongestChild = GetLargestVisibleDuration(htiChild);
 			nLongest = max(nLongest, nLongestChild);
 
 			htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
@@ -2872,7 +2878,7 @@ double CWorkloadCtrl::GetLargestVisibleTimeEstimate(HTREEITEM hti) const
 
 		while (htiChild)
 		{
-			double dLargestChild = GetLongestVisibleDuration(htiChild);
+			double dLargestChild = GetLargestVisibleDuration(htiChild);
 			dLargest = max(dLargest, dLargestChild);
 
 			htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
@@ -2907,13 +2913,11 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNI
 			break;
 
 		case WLCC_TIMEEST:
-			if (wi.dTimeEst > 0)
-				sItem.Format(CEnString(IDS_TIMEEST_FORMAT), wi.dTimeEst);
+			sItem = FormatTimeSpan(wi.dTimeEst, 1);
 			break;
 
 		case WLCC_DURATION:
-			if (wi.HasValidDates())
-				sItem.Format(CEnString(IDS_ALLOCATION_FORMAT), wi.dtRange.GetWeekdayCount());
+			sItem = FormatTimeSpan(wi.dtRange.GetWeekdayCount(), 0);
 			break;
 
 		case WLCC_PERCENT:
@@ -2922,6 +2926,19 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNI
 	}
 
 	return sItem;
+}
+
+CString CWorkloadCtrl::FormatTimeSpan(double dDays, int nDecimals)
+{
+	if (dDays == 0.0)
+		return _T("");
+
+	CString sValue = Misc::Format(dDays, nDecimals);
+
+	if (nDecimals > 0)
+		sValue.TrimRight(_T(".0"));
+
+	return CEnString(IDS_TIMESPAN_FORMAT, sValue);
 }
 
 void CWorkloadCtrl::DrawTreeItem(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack)
@@ -3625,11 +3642,16 @@ int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 		break;
 
 	case WLCC_DURATION:
-		nColWidth = pDC->GetTextExtent(CEnString(IDS_ALLOCATION_FORMAT, GetLongestVisibleDuration(NULL))).cx;
+		nColWidth = pDC->GetTextExtent(FormatTimeSpan(GetLargestVisibleDuration(NULL), 0)).cx;
 		break;
 
 	case WLCC_TIMEEST:
-		nColWidth = pDC->GetTextExtent(CEnString(IDS_TIMEEST_FORMAT, GetLargestVisibleTimeEstimate(NULL))).cx;
+		{
+			int nWidthLargest = pDC->GetTextExtent(FormatTimeSpan(GetLargestVisibleTimeEstimate(NULL), 1)).cx;
+			int nWidthSmallest = pDC->GetTextExtent(FormatTimeSpan(0.1, 1)).cx;
+
+			nColWidth = max(nWidthLargest, nWidthSmallest);
+		}
 		break;
 		
 	case WLCC_PERCENT: 

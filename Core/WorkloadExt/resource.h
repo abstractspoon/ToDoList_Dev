@@ -11,12 +11,11 @@
 #define IDS_WORKLOAD_WEEKS              2002
 #define IDS_ATTRIB_DURATION             2013
 #define IDS_COL_DURATION                2014
-#define IDS_ALLOCATION_FORMAT           2015
+#define IDS_TIMESPAN_FORMAT             2015
 #define IDS_TOTALDAYSPERPERSON          2016
 #define IDS_NUMACTIVITIESPERPERSON      2017
 #define IDS_PERCENTLOADPERPERSON        2018
 #define IDS_COL_TIMEEST                 2019
-#define IDS_TIMEEST_FORMAT              2020
 #define IDC_DIVIDER                     16001
 #define IDD_PREFERENCES_DIALOG          16002
 #define IDC_PREFERENCES                 16003
