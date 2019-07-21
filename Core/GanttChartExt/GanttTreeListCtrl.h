@@ -348,7 +348,6 @@ protected:
 	BOOL NotifyParentDateChange(GTLC_DRAG nDrag);
 	void NotifyParentDragChange();
 
-	int GetTotalTreeColumnsWidth() const;
 	BOOL UpdateTreeColumnWidths(BOOL bResize = TRUE);
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
