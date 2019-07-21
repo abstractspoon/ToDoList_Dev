@@ -56,7 +56,7 @@ static char THIS_FILE[]=__FILE__;
 
 const int MIN_COL_WIDTH			= GraphicsMisc::ScaleByDPIFactor(6);
 const int MIN_LABEL_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
-const int TREE_TITLE_MIN_WIDTH	= GraphicsMisc::ScaleByDPIFactor(75); 
+const int MIN_TREE_TITLE_WIDTH	= GraphicsMisc::ScaleByDPIFactor(75); 
 const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int TV_TIPPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
@@ -2034,7 +2034,7 @@ void CWorkloadCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
 			switch (nColID)
 			{
 			case WLCC_TITLE:
-				if (pHDN->pitem->cxy < TREE_TITLE_MIN_WIDTH)
+				if (pHDN->pitem->cxy < MIN_TREE_TITLE_WIDTH)
 					*pResult = TRUE; // prevent change
 				break;
 				
@@ -3651,7 +3651,7 @@ int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 	{
 	case WLCC_TITLE:
 		nColWidth = CalcWidestItemTitle(NULL, pDC, TRUE);
-		nColWidth = max(nColWidth, TREE_TITLE_MIN_WIDTH);
+		nColWidth = max(nColWidth, MIN_TREE_TITLE_WIDTH);
 		break;
 
 	case WLCC_TASKID:
@@ -3748,7 +3748,7 @@ int CWorkloadCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd)
 			}
 			else
 			{
-				nWidth = (rChild.left + TREE_TITLE_MIN_WIDTH);
+				nWidth = (rChild.left + MIN_TREE_TITLE_WIDTH);
 			}
 			
 			int nWidestChild = CalcWidestItemTitle(htiChild, pDC, bEnd); // RECURSIVE CALL
