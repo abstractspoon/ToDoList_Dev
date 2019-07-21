@@ -315,19 +315,32 @@ void CWorkloadCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
 		AdjustSplitterToFitAttributeColumns();
 }
 
-void CWorkloadCtrl::AdjustSplitterToFitAttributeColumns()
+int CWorkloadCtrl::CalcMaxAllocationColumnsWidth() const
 {
 	int nColsWidth = m_hdrColumns.CalcTotalItemWidth();
 
 	if (HasVScrollBar(m_lcColumns))
 		nColsWidth += GetSystemMetrics(SM_CXVSCROLL);
 	
+	return nColsWidth;
+}
+
+int CWorkloadCtrl::CalcSplitPosToFitAllocationColumns() const
+{
+	int nColsWidth = CalcMaxAllocationColumnsWidth();
+	
+	// adjust for graph
 	CRect rClient;
 	CWnd::GetClientRect(rClient);
 
 	rClient.right = MulDiv(rClient.Width(), 2, 3);
 	
-	int nNewSplitPos = (rClient.right - nColsWidth - GetSplitBarWidth() - LV_COLPADDING);
+	return (rClient.right - nColsWidth - GetSplitBarWidth() - LV_COLPADDING);
+}
+
+void CWorkloadCtrl::AdjustSplitterToFitAttributeColumns()
+{
+	int nNewSplitPos = CalcSplitPosToFitAllocationColumns();
 	nNewSplitPos = max(MIN_LABEL_EDIT_WIDTH, nNewSplitPos);
 	
 	CTreeListSyncer::SetSplitPos(nNewSplitPos);
