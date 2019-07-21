@@ -1466,26 +1466,28 @@ void CWorkloadCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 	CAutoFlag af(m_bTreeExpanding, TRUE);
 	EnableResync(FALSE);
 
-	CHoldRedraw hr(*this);
-
-	TCH().ExpandItem(hti, bExpand, bAndChildren);
-
-	if (bExpand)
 	{
-		if (hti)
+		CHoldRedraw hr(*this);
+
+		TCH().ExpandItem(hti, bExpand, bAndChildren);
+
+		if (bExpand)
 		{
-			int nNextIndex = (GetListItem(hti) + 1);
-			ExpandList(hti, nNextIndex);
+			if (hti)
+			{
+				int nNextIndex = (GetListItem(hti) + 1);
+				ExpandList(hti, nNextIndex);
+			}
+			else
+				ExpandList(); // all
 		}
 		else
-			ExpandList(); // all
-	}
-	else
-	{
-		CollapseList(hti);
-	}
+		{
+			CollapseList(hti);
+		}
 	
-	m_tcTasks.EnsureVisible(hti);
+		m_tcTasks.EnsureVisible(hti);
+	}
 
 	EnableResync(TRUE, m_tcTasks);
 	UpdateTreeColumnWidths(bExpand);
@@ -2765,7 +2767,7 @@ BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT /*nFlags*/, CPoint point)
 	if (TCH().TreeCtrl().ItemHasChildren(hti))
 	{
 		ExpandItem(hti, !TCH().IsItemExpanded(hti));
-		InvalidateAll(FALSE, TRUE);
+		//InvalidateAll(FALSE, TRUE);
 
 		return TRUE;
 	}
