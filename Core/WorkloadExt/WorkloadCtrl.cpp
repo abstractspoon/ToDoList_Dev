@@ -333,9 +333,9 @@ int CWorkloadCtrl::CalcSplitPosToFitAllocationColumns() const
 	CRect rClient;
 	CWnd::GetClientRect(rClient);
 
-	rClient.right = MulDiv(rClient.Width(), 2, 3);
+	int nAvailWidth = MulDiv(rClient.Width(), 2, 3);
 	
-	return (rClient.right - nColsWidth - GetSplitBarWidth() - LV_COLPADDING);
+	return (nAvailWidth - nColsWidth - GetSplitBarWidth() - LV_COLPADDING);
 }
 
 void CWorkloadCtrl::AdjustSplitterToFitAttributeColumns()
@@ -625,7 +625,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	InitItemHeights();
 	UpdateListColumns();
 	FixupListSortColumn();
-	RecalcTreeColumns(TRUE);
+	UpdateTreeColumnWidths(TRUE);
 	RecalcAllocationTotals();
 	RecalcDataDateRange();
 
@@ -645,6 +645,8 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 
 			UnlockWindowUpdate();
 			EnableResync(TRUE, m_tcTasks);
+
+			AdjustSplitterToFitAttributeColumns();
 		}
 		break;
 
@@ -1442,7 +1444,7 @@ void CWorkloadCtrl::ExpandAll(BOOL bExpand)
 {
 	ExpandItem(NULL, bExpand, TRUE);
 
-	RecalcTreeColumns(TRUE);
+	UpdateTreeColumnWidths(bExpand);
 }
 
 BOOL CWorkloadCtrl::CanExpandAll() const
@@ -1486,7 +1488,7 @@ void CWorkloadCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 	m_tcTasks.EnsureVisible(hti);
 
 	EnableResync(TRUE, m_tcTasks);
-	RecalcTreeColumns(TRUE);
+	UpdateTreeColumnWidths(bExpand);
 }
 
 BOOL CWorkloadCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const
@@ -2155,9 +2157,11 @@ void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	}
 }
 
-void CWorkloadCtrl::OnTreeItemExpanded(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
+void CWorkloadCtrl::OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
-	RecalcTreeColumns(TRUE);
+	LPNMTREEVIEW pNMTV = (LPNMTREEVIEW)pNMHDR;
+	
+	UpdateTreeColumnWidths(pNMTV->action == TVE_EXPAND);
 }
 
 LRESULT CWorkloadCtrl::OnTreeDragEnter(WPARAM /*wp*/, LPARAM /*lp*/)
@@ -3038,8 +3042,9 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 			nFlags |= DT_END_ELLIPSIS;
 			break;
 
-		case  WLCC_TASKID:
+		case WLCC_TASKID:
 		case WLCC_DURATION:
+		case WLCC_TIMEEST:
 			nFlags |= DT_RIGHT;
 			break;
 			
@@ -3609,18 +3614,18 @@ BOOL CWorkloadCtrl::HandleEraseBkgnd(CDC* pDC)
 	return TRUE;
 }
 
-BOOL CWorkloadCtrl::RecalcTreeColumns(BOOL bResize)
+BOOL CWorkloadCtrl::UpdateTreeColumnWidths(BOOL bExpanding)
 {
 	CClientDC dc(&m_tcTasks);
 
 	int nNumCols = m_hdrTasks.GetItemCount();
 	BOOL bChange = FALSE;
 
-	for (int nCol = 0; nCol < nNumCols; nCol++)
+	// Save title column until last
+	for (int nCol = 1; nCol < nNumCols; nCol++)
 	{
 		switch (GetTreeColumnID(nCol))
 		{
-		case WLCC_TITLE:
 		case WLCC_TASKID:
 		case WLCC_DURATION:
 		case WLCC_TIMEEST:
@@ -3635,7 +3640,63 @@ BOOL CWorkloadCtrl::RecalcTreeColumns(BOOL bResize)
 		}
 	}
 
-	if (bChange && bResize)
+	// Title column, preserving width of allocation columns
+	CRect rClient;
+	CWnd::GetClientRect(rClient);
+
+	int nAvailWidth = MulDiv(rClient.Width(), 2, 3);
+	int nSplitPos = GetSplitPos();
+	int nSplitBarWidth = GetSplitBarWidth();
+
+	int nAllocColsWidth = (nAvailWidth - nSplitPos - nSplitBarWidth - LV_COLPADDING);
+	int nMaxAllocColsWidth = CalcMaxAllocationColumnsWidth();
+
+	int nCurTitleWidth = m_hdrTasks.GetItemWidth(0);
+	int nMaxTitleWidth = CalcWidestItemTitle(NULL, &dc, TRUE);
+	int nNewTitleWidth = nCurTitleWidth;
+
+	if (nCurTitleWidth > nMaxTitleWidth)
+	{
+		// adjust the width of the title column only if
+		// the allocation columns do not have enough space
+		if (nAllocColsWidth < nMaxAllocColsWidth)
+		{
+			int nOffset = min(nMaxTitleWidth - nCurTitleWidth, nMaxAllocColsWidth - nAllocColsWidth);
+
+			nNewTitleWidth -= nOffset;
+			nAllocColsWidth += nOffset;
+		}
+	}
+	else if (nAllocColsWidth > nMaxAllocColsWidth)
+	{
+		// adjust the width of the title column only if
+		// it does not have enough space
+		if (nCurTitleWidth < nMaxTitleWidth)
+		{
+			int nOffset = min(nMaxTitleWidth - nCurTitleWidth, nAllocColsWidth - nMaxAllocColsWidth);
+
+			// Allow for the difference between the required width of the
+			// rest of the tree columns and the actual amount visible
+			int nRestTreeColsWidth = m_hdrTasks.CalcTotalItemWidth(0);
+			int nVisibleRestTreeColsWidth = (nSplitPos - nCurTitleWidth);
+
+			nOffset -= (nRestTreeColsWidth - nVisibleRestTreeColsWidth);
+
+			nNewTitleWidth += nOffset;
+			nAllocColsWidth -= nOffset;
+		}
+	}
+
+	if ((bExpanding && (nNewTitleWidth > nCurTitleWidth)) ||
+		(!bExpanding && (nNewTitleWidth < nCurTitleWidth)))
+	{
+		m_hdrTasks.SetItemWidth(0, nNewTitleWidth);
+		m_tcTasks.SetTitleColumnWidth(nNewTitleWidth);
+
+		bChange = TRUE;
+	}
+
+	if (bChange)
 		Resize();
 
 	return bChange;

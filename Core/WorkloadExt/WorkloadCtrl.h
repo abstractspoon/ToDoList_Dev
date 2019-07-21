@@ -89,6 +89,7 @@ public:
 	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
 
 	void ResizeColumnsToFit();
+	void AdjustSplitterToFitAttributeColumns();
 
 	void SetFocus();
 	BOOL HasFocus() const { return CTreeListSyncer::HasFocus(); }
@@ -260,7 +261,6 @@ protected:
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
 	void RecalcAllocationTotals();
 	void RecalcDataDateRange();
-	void AdjustSplitterToFitAttributeColumns();
 	int CalcSplitPosToFitAllocationColumns() const;
 	int CalcMaxAllocationColumnsWidth() const;
 	void ResyncTotalsPositions();
@@ -286,7 +286,7 @@ protected:
 	WLC_COLUMNID GetTreeColumnID(int nCol) const;
 	WLC_LISTCOLUMNTYPE GetListColumnType(int nCol) const;
 
-	BOOL RecalcTreeColumns(BOOL bResize = TRUE);
+	BOOL UpdateTreeColumnWidths(BOOL bExpanding);
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
 	int GetLargestVisibleDuration(HTREEITEM hti) const;
