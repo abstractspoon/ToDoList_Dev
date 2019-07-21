@@ -699,7 +699,6 @@ BOOL CWorkloadWnd::OnInitDialog()
 	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
 	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
 
-	m_ctrlWorkload.ExpandAll();
  	m_ctrlWorkload.SetFocus();
 	
 	return FALSE;  // return TRUE unless you set the focus to a control
