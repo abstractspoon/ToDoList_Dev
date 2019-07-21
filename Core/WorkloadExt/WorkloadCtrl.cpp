@@ -2751,6 +2751,9 @@ BOOL CWorkloadCtrl::OnListLButtonUp(UINT /*nFlags*/, CPoint /*point*/)
 
 BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT /*nFlags*/, CPoint point)
 {
+	// Required for string loading to work
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
 	int nCol = -1, nHit = ListHitTestItem(point, FALSE, nCol);
 	
 	if (nHit == -1)
