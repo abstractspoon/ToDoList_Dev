@@ -2762,6 +2762,8 @@ BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT /*nFlags*/, CPoint point)
 	if (TCH().TreeCtrl().ItemHasChildren(hti))
 	{
 		ExpandItem(hti, !TCH().IsItemExpanded(hti));
+		InvalidateAll(FALSE, TRUE);
+
 		return TRUE;
 	}
 
