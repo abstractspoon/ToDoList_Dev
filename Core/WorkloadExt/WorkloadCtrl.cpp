@@ -3623,6 +3623,7 @@ BOOL CWorkloadCtrl::RecalcTreeColumns(BOOL bResize)
 		case WLCC_TITLE:
 		case WLCC_TASKID:
 		case WLCC_DURATION:
+		case WLCC_TIMEEST:
 			if (!m_hdrTasks.IsItemTracked(nCol))
 			{
 				int nCurWidth = m_hdrTasks.GetItemWidth(nCol);
