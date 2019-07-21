@@ -325,8 +325,7 @@ void CWorkloadCtrl::AdjustSplitterToFitAttributeColumns()
 	CRect rClient;
 	CWnd::GetClientRect(rClient);
 
-	// adjust for graph
-	rClient.right = ((rClient.Width() * 2) / 3);
+	rClient.right = MulDiv(rClient.Width(), 2, 3);
 	
 	int nNewSplitPos = (rClient.right - nColsWidth - GetSplitBarWidth() - LV_COLPADDING);
 	nNewSplitPos = max(MIN_LABEL_EDIT_WIDTH, nNewSplitPos);
@@ -1380,7 +1379,7 @@ void CWorkloadCtrl::Resize(int cx, int cy)
 
 	if (cx && cy)
 	{
-		CRect rTreeList(0, 0, ((cx * 2) / 3), cy);
+		CRect rTreeList(0, 0, MulDiv(cx, 2, 3), cy);
 
 		rTreeList.bottom = cy;
 		rTreeList.bottom -= (GetItemHeight(m_lcTotalsLabels) * NUM_TOTALS); // rows
