@@ -302,7 +302,7 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		if (!LoadColumnState(pPrefs, (sKey + _T("\\TreeWidths")), aTreeWidths) ||
 			!m_ctrlWorkload.SetTreeColumnWidths(aTreeWidths))
 		{
-			m_ctrlWorkload.ResizeColumnsToFit();
+			m_ctrlWorkload.ResizeAttributeColumnsToFit();
 		}
 		
 		// column tracking
@@ -512,7 +512,7 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		return true;
 
 	case IUI_RESIZEATTRIBCOLUMNS:
-		m_ctrlWorkload.ResizeColumnsToFit();
+		m_ctrlWorkload.ResizeAttributeColumnsToFit(TRUE);
 		return true;
 		
 	case IUI_SELECTTASK:

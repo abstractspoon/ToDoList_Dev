@@ -88,7 +88,7 @@ public:
 	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
 
-	void ResizeColumnsToFit();
+	void ResizeAttributeColumnsToFit(BOOL bForce = FALSE);
 	void AdjustSplitterToFitAttributeColumns();
 
 	void SetFocus();

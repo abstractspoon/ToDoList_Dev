@@ -1596,31 +1596,34 @@ void CGanttTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildr
 	if (hti && !CanExpandItem(hti, bExpand))
 		return;
 
-	CAutoFlag af(m_bTreeExpanding, TRUE);
-	EnableResync(FALSE);
-
-	CHoldRedraw hr(GetHwnd());
-
-	TCH().ExpandItem(hti, bExpand, bAndChildren);
-
-	if (bExpand)
 	{
-		if (hti)
+		CHoldRedraw hr(GetHwnd());
+		CAutoFlag af(m_bTreeExpanding, TRUE);
+
+		EnableResync(FALSE);
+
+		TCH().ExpandItem(hti, bExpand, bAndChildren);
+
+		if (bExpand)
 		{
-			int nNextIndex = (GetListItem(hti) + 1);
-			ExpandList(hti, nNextIndex);
+			if (hti)
+			{
+				int nNextIndex = (GetListItem(hti) + 1);
+				ExpandList(hti, nNextIndex);
+			}
+			else
+				ExpandList(); // all
 		}
 		else
-			ExpandList(); // all
-	}
-	else
-	{
-		CollapseList(hti);
-	}
-	
-	m_tree.EnsureVisible(hti);
+		{
+			CollapseList(hti);
+		}
 
-	EnableResync(TRUE, m_tree);
+		m_tree.EnsureVisible(hti);
+
+		EnableResync(TRUE, m_tree);
+	}
+
 	UpdateTreeColumnWidths(bExpand);
 }
 
@@ -5290,10 +5293,7 @@ void CGanttTreeListCtrl::ResizeAttributeColumnsToFit(BOOL bForce)
 
 	for (nCol = 1; nCol < nNumCols; nCol++)
 	{
-		int nColWidth = RecalcTreeColumnWidth(nCol, &dc, bForce);
-
-		if (m_treeHeader.IsItemVisible(nCol))
-			nTotalColWidth += nColWidth;
+		nTotalColWidth += RecalcTreeColumnWidth(nCol, &dc, bForce);
 	}
 
 	SetSplitPos(nTotalColWidth);
@@ -5371,7 +5371,7 @@ BOOL CGanttTreeListCtrl::UpdateTreeColumnWidths(BOOL bExpanding)
 		{
 		case GTLCC_ALLOCTO:
 		case GTLCC_TASKID:
-			if (!m_treeHeader.IsItemTracked(nCol))
+//			if (m_treeHeader.IsItemVisible(nCol) && !m_treeHeader.IsItemTracked(nCol))
 			{
 				int nCurWidth = m_treeHeader.GetItemWidth(nCol);
 
@@ -5386,7 +5386,7 @@ BOOL CGanttTreeListCtrl::UpdateTreeColumnWidths(BOOL bExpanding)
 	CRect rClient;
 	GetClientRect(rClient);
 
-	int nAvailWidth = MulDiv(rClient.Width(), 2, 3);
+	int nAvailWidth = rClient.Width();
 	int nSplitPos = GetSplitPos();
 	int nSplitBarWidth = GetSplitBarWidth();
 
@@ -5446,6 +5446,9 @@ BOOL CGanttTreeListCtrl::UpdateTreeColumnWidths(BOOL bExpanding)
 
 int CGanttTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)
 {
+	if (!m_treeHeader.IsItemVisible(nCol))
+		return 0;
+
 	if (!bForce && m_treeHeader.IsItemTracked(nCol))
 		return m_treeHeader.GetItemWidth(nCol);
 

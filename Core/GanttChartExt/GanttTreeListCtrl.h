@@ -297,7 +297,6 @@ protected:
 	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
 	void ScrollTo(const COleDateTime& date);
 	void InitItemHeights();
-	int CalcTreeWidth() const;
 	int GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const;
 	int GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const;
 	COleDateTime GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const;

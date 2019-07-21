@@ -1463,11 +1463,11 @@ void CWorkloadCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 	if (hti && !CanExpandItem(hti, bExpand))
 		return;
 
-	CAutoFlag af(m_bTreeExpanding, TRUE);
-	EnableResync(FALSE);
-
 	{
 		CHoldRedraw hr(*this);
+		CAutoFlag af(m_bTreeExpanding, TRUE);
+	
+		EnableResync(FALSE);
 
 		TCH().ExpandItem(hti, bExpand, bAndChildren);
 
@@ -1487,9 +1487,10 @@ void CWorkloadCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 		}
 	
 		m_tcTasks.EnsureVisible(hti);
+	
+		EnableResync(TRUE, m_tcTasks);
 	}
 
-	EnableResync(TRUE, m_tcTasks);
 	UpdateTreeColumnWidths(bExpand);
 }
 
@@ -2767,8 +2768,6 @@ BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT /*nFlags*/, CPoint point)
 	if (TCH().TreeCtrl().ItemHasChildren(hti))
 	{
 		ExpandItem(hti, !TCH().IsItemExpanded(hti));
-		//InvalidateAll(FALSE, TRUE);
-
 		return TRUE;
 	}
 
@@ -3511,14 +3510,14 @@ WLC_LISTCOLUMNTYPE CWorkloadCtrl::GetListColumnType(int nCol) const
 	return (WLC_LISTCOLUMNTYPE)m_hdrColumns.GetItemData(nCol);
 }
 
-void CWorkloadCtrl::ResizeColumnsToFit()
+void CWorkloadCtrl::ResizeAttributeColumnsToFit(BOOL bForce)
 {
 	// tree columns
 	CClientDC dc(&m_tcTasks);
 	int nNumCol = m_hdrTasks.GetItemCount();
 
 	for (int nCol = 1; nCol < nNumCol; nCol++)
-		RecalcTreeColumnWidth(nCol, &dc, TRUE);
+		RecalcTreeColumnWidth(nCol, &dc, bForce);
 
 	// list columns
 	RecalcListColumnsToFit();
@@ -3636,7 +3635,6 @@ BOOL CWorkloadCtrl::UpdateTreeColumnWidths(BOOL bExpanding)
 		case WLCC_TASKID:
 		case WLCC_DURATION:
 		case WLCC_TIMEEST:
-			if (!m_hdrTasks.IsItemTracked(nCol))
 			{
 				int nCurWidth = m_hdrTasks.GetItemWidth(nCol);
 
@@ -3711,6 +3709,9 @@ BOOL CWorkloadCtrl::UpdateTreeColumnWidths(BOOL bExpanding)
 
 int CWorkloadCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)
 {
+	if (!m_hdrTasks.IsItemVisible(nCol))
+		return 0;
+
 	if (!bForce && m_hdrTasks.IsItemTracked(nCol))
 		return m_hdrTasks.GetItemWidth(nCol);
 
@@ -4545,7 +4546,7 @@ BOOL CWorkloadCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 	m_lcColumnTotals.SetFont(pFont, bRedraw);
 	m_hdrColumns.SetFont(pFont, bRedraw);
 
-	ResizeColumnsToFit();
+	ResizeAttributeColumnsToFit();
 
 	CString sFontName;
 	int nFontSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFontName);
