@@ -129,11 +129,6 @@ void CWorkloadTreeCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	m_tooltip.SetWindowPos(NULL, rTip.left, rTip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
 }
 
-void CWorkloadTreeCtrl::SetTitleColumnWidth(int nWidth)
-{
-	m_nTitleColumnWidth = nWidth;
-}
-
 LRESULT CWorkloadTreeCtrl::OnSetFont(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	m_fonts.Clear();
