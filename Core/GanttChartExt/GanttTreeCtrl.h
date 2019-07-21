@@ -26,6 +26,7 @@ public:
 
 	void ShowCheckboxes(BOOL bShow = TRUE);
 	void ShowTaskIcons(BOOL bShow = TRUE);
+	void SetTitleColumnWidth(int nWidth) { m_nTitleColumnWidth = nWidth; }
 
 	HIMAGELIST GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const;
 	

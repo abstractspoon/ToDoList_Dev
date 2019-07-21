@@ -40,7 +40,6 @@ BEGIN_MESSAGE_MAP(CGanttTreeCtrl, CTreeCtrl)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
-	ON_REGISTERED_MESSAGE(WM_GTCN_TITLECOLUMNWIDTHCHANGE, OnTitleColumnWidthChange)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
@@ -128,16 +127,6 @@ void CGanttTreeCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	rTip.bottom = rLabel.bottom;
 
 	m_tooltip.SetWindowPos(NULL, rTip.left, rTip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
-}
-
-LRESULT CGanttTreeCtrl::OnTitleColumnWidthChange(WPARAM wp, LPARAM lp)
-{
-	if ((HWND)lp == GetSafeHwnd())
-	{
-		m_nTitleColumnWidth = wp;
-	}
-
-	return 0L;
 }
 
 LRESULT CGanttTreeCtrl::OnSetFont(WPARAM /*wp*/, LPARAM /*lp*/)

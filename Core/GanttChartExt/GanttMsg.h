@@ -45,9 +45,4 @@ const UINT WM_GANTTDEPENDDLG_CLOSE			= ::RegisterWindowMessage(_T("WM_GANTTDEPEN
 
 /////////////////////////////////////////////////////////////////////////////
 
-// WPARAM = width, LPARAM = HWND
-const UINT WM_GTCN_TITLECOLUMNWIDTHCHANGE	= ::RegisterWindowMessage(_T("WM_GTCN_TITLECOLUMNWIDTHCHANGE"));
-
-/////////////////////////////////////////////////////////////////////////////
-
 #endif // !defined(AFX_GANTTMSG_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)

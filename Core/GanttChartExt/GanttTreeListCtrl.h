@@ -79,6 +79,8 @@ public:
 	void Resize(const CRect& rect);
 	void ResizeAttributeColumnsToFit(BOOL bForce = FALSE);
 	void AdjustSplitterToFitAttributeColumns();
+	int CalcMaxAttributeColumnsWidth() const;
+	int CalcSplitPosToFitAttributeColumns() const;
 	BOOL PtInSplitter(const CPoint& pt, BOOL bScreen = FALSE) const { return CTreeListSyncer::PtInSplitter(pt, bScreen); }
 
 	BOOL ZoomIn(BOOL bIn = TRUE);
@@ -328,7 +330,7 @@ protected:
 	DWORD GetTaskID(HTREEITEM hti) const;
 	DWORD GetTaskID(int nItem) const;
 	DWORD GetListTaskID(DWORD nItemData) const;
-	GTLC_COLUMN GetColumnID(int nCol) const;
+	GTLC_COLUMN GetTreeColumnID(int nCol) const;
 
 	BOOL StartDragging(const CPoint& ptCursor);
 	BOOL EndDragging(const CPoint& ptCursor);
