@@ -597,6 +597,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="TreeListCtrl.cpp" />
     <ClCompile Include="TreeListSyncer.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -810,6 +811,7 @@
     <ClInclude Include="TRAYICON.H" />
     <ClInclude Include="TreeCtrlHelper.h" />
     <ClInclude Include="TreeDragDropHelper.h" />
+    <ClInclude Include="TreeListCtrl.h" />
     <ClInclude Include="TreeListSyncer.h" />
     <ClInclude Include="TreeSelectionHelper.h" />
     <ClInclude Include="Unzipper.h" />
