@@ -779,7 +779,7 @@ void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	// we're only interested in non-keyboard changes
 	// because keyboard gets handled in OnKeyUpWorkload
 	if (pNMTV->action != TVC_BYKEYBOARD)
-		CWnd::GetParent()->SendMessage(WM_TLC_ITEMCHECKCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)pNMTV->itemNew.hItem);
+		CWnd::GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)pNMTV->itemNew.hItem);
 }
 
 LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -1036,11 +1036,6 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 }
 
-void CTreeListCtrl::OnListHeaderClick(NMHEADER* pHDN)
-{
-	// Placeholder
-}
-
 void CTreeListCtrl::SetDropHighlight(HTREEITEM hti, int nItem)
 {
 	if (m_nPrevDropHilitedItem != -1)
@@ -1054,35 +1049,15 @@ void CTreeListCtrl::SetDropHighlight(HTREEITEM hti, int nItem)
 	m_nPrevDropHilitedItem = nItem;
 }
 
-BOOL CTreeListCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint /*point*/)
-{
-// 	if (!m_bReadOnly)
-// 	{
-// 	}
-
-	// not handled
-	return FALSE;
-}
-
 BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 {
 	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
 	
 	// Don't process if expanding an item
-	if (nFlags & TVHT_ONITEMBUTTON)
-		return FALSE;
-
-// 	if (!m_bReadOnly)
-// 	{
-// 	}
-
-	if (!(nFlags & TVHT_ONITEMBUTTON))
+	if (!(nFlags & TVHT_ONITEMBUTTON) && hti && (hti != GetTreeSelItem(m_tree)))
 	{
-		if (hti && (hti != GetTreeSelItem(m_tree)))
-		{
-			SelectTreeItem(m_tree, hti);
-			return TRUE;
-		}
+		SelectTreeItem(m_tree, hti);
+		return TRUE;
 	}
 
 	// not handled
@@ -1141,16 +1116,6 @@ BOOL CTreeListCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 	return FALSE;
 }
 
-BOOL CTreeListCtrl::OnListMouseMove(UINT /*nFlags*/, CPoint /*point*/)
-{
-	if (!m_bReadOnly)
-	{
-	}
-
-	// not handled
-	return FALSE;
-}
-
 BOOL CTreeListCtrl::OnListLButtonDown(UINT /*nFlags*/, CPoint point)
 {
 	if (!m_bReadOnly)
@@ -1167,12 +1132,6 @@ BOOL CTreeListCtrl::OnListLButtonDown(UINT /*nFlags*/, CPoint point)
 		return TRUE; // eat
 	}
 
-	// not handled
-	return FALSE;
-}
-
-BOOL CTreeListCtrl::OnListLButtonUp(UINT /*nFlags*/, CPoint /*point*/)
-{
 	// not handled
 	return FALSE;
 }
@@ -1425,12 +1384,6 @@ BOOL CTreeListCtrl::HandleEraseBkgnd(CDC* pDC)
 	return TRUE;
 }
 
-BOOL CTreeListCtrl::WantRecalcTreeColumn(int nCol)
-{
-	// Placeholder
-	return TRUE;
-}
-
 BOOL CTreeListCtrl::UpdateTreeColumnWidths(BOOL bExpanding)
 {
 	CClientDC dc(&m_tree);
@@ -1525,13 +1478,6 @@ int CTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)
 	m_treeHeader.SetItemWidth(nCol, nColWidth);
 
 	return nColWidth;
-}
-
-int CTreeListCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
-{
-	// Placeholder
-
-	return 0;
 }
 
 int CTreeListCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const
@@ -1766,11 +1712,6 @@ DWORD CTreeListCtrl::GetItemData(HTREEITEM htiFrom) const
 		return 0;
 
 	return CTreeListSyncer::GetTreeItemData(m_tree, htiFrom);
-}
-
-DWORD CTreeListCtrl::GetTreeItemData(int nItem) const
-{
-	return GetItemData(GetTreeItem(nItem));
 }
 
 void CTreeListCtrl::RedrawList(BOOL bErase)

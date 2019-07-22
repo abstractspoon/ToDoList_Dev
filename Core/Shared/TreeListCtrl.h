@@ -205,7 +205,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	// derived class callback
+	// base class callbacks
 	void OnNotifySplitterChange(int nSplitPos);
 	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
@@ -213,12 +213,14 @@ protected:
 	virtual BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);
 	virtual BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);
 	virtual BOOL OnTreeLButtonDblClk(UINT nFlags, CPoint point);
-	virtual BOOL OnTreeMouseMove(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDown(UINT nFlags, CPoint point);
-	virtual BOOL OnListLButtonUp(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
-	virtual BOOL OnListMouseMove(UINT nFlags, CPoint point);
-	virtual void OnListHeaderClick(NMHEADER* HDN);
+
+	virtual void OnListHeaderClick(NMHEADER* HDN) {}
+	virtual BOOL OnTreeMouseMove(UINT nFlags, CPoint point) { return FALSE; }
+	virtual BOOL OnListLButtonUp(UINT nFlags, CPoint point) { return FALSE; }
+	virtual BOOL OnListMouseMove(UINT nFlags, CPoint point) { return FALSE; }
+	virtual BOOL OnDragDropItem(const TLCITEMMOVE& move) { return FALSE; }
 
 	virtual GM_ITEMSTATE GetItemState(int nItem) const;
 	virtual GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
@@ -229,10 +231,9 @@ protected:
 	virtual void RecalcTreeColumnsToFit(BOOL bForce);
 	virtual void RecalcListColumnsToFit(BOOL bForce);
 	virtual BOOL UpdateTreeColumnWidths(BOOL bExpanding);
-	virtual BOOL WantRecalcTreeColumn(int nCol);
-	virtual int CalcMaxListColumnsWidth() const;
-	virtual BOOL OnDragDropItem(const TLCITEMMOVE& move) { return FALSE; }
-	
+	virtual BOOL WantRecalcTreeColumn(int nCol) const { return TRUE; }
+	virtual int CalcTreeColumnWidth(int nCol, CDC* pDC) const { return 0; }
+		
 	virtual void Resize(int cx = 0, int cy = 0);
 
 	void RedrawList(BOOL bErase = FALSE);
@@ -246,7 +247,11 @@ protected:
 	BOOL IsListItemLineOdd(int nItem) const;
 	BOOL DeleteItem(HTREEITEM hti);
 	void InitItemHeights();
+
 	int CalcSplitPosToFitListColumns() const;
+	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
+	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
+	int CalcMaxListColumnsWidth() const;
 
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;
@@ -261,12 +266,7 @@ protected:
 	void RefreshTreeItemMap();
 	CString GetItemLabelTip(CPoint ptScreen) const;
 	DWORD GetItemData(HTREEITEM htiFrom) const;
-	DWORD GetTreeItemData(int nItem) const;
-
-	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
-	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
-	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
-
+	
 	BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
 	BOOL SetColor(COLORREF& color, COLORREF crNew);
