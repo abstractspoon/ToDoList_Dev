@@ -65,7 +65,7 @@ public:
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 	HTREEITEM GetSelectedItem() const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
-	int GetTaskCount() const { return (int)m_tcTasks.GetCount(); }
+	int GetTaskCount() const { return (int)m_tree.GetCount(); }
 
 	BOOL GetSelectedTask(WORKLOADITEM& wi) const;
 	BOOL SetSelectedTask(const WORKLOADITEM& wi);
@@ -134,11 +134,11 @@ public:
 	static WLC_COLUMNID MapAttributeToColumn(TDC_ATTRIBUTE nAttrib);
 
 protected:
-	CWorkloadTreeCtrl m_tcTasks;
+	CWorkloadTreeCtrl m_tree;
 	CWorkloadChart m_barChart;
-	CListCtrl m_lcColumns;
+	CListCtrl m_list;
 	CListCtrl m_lcTotalsLabels, m_lcColumnTotals;
-	CEnHeaderCtrl m_hdrColumns, m_hdrTasks;
+	CEnHeaderCtrl m_listHeader, m_treeHeader;
 
 	BOOL m_bReadOnly;
 	BOOL m_bMovingTask;
@@ -322,8 +322,8 @@ protected:
 	int GetExpandedState(CDWordArray& aExpanded, HTREEITEM hti = NULL) const;
 	void SetExpandedState(const CDWordArray& aExpanded);
 
-	CTreeCtrlHelper& TCH() { return m_tcTasks.TCH(); }
-	const CTreeCtrlHelper& TCH() const { return m_tcTasks.TCH(); }
+	CTreeCtrlHelper& TCH() { return m_tree.TCH(); }
+	const CTreeCtrlHelper& TCH() const { return m_tree.TCH(); }
 
 	static int CALLBACK MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
