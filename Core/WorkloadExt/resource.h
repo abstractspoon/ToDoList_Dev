@@ -72,6 +72,7 @@
 #define IDS_PERIODDURATION              57691
 #define IDS_ACTIVEDATERANGE             57692
 #define IDS_ATTRIB_TIMEEST              57693
+#define IDS_COL_WEEKDAYS                57694
 
 // Next default values for new objects
 // 

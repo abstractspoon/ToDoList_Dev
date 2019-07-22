@@ -6,6 +6,7 @@
 #include "EditAllocationsListCtrl.h"
 
 #include "..\Shared\misc.h"
+#include "..\Shared\graphicsmisc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -58,8 +59,8 @@ void CEditAllocationsListCtrl::InitState()
 
 	CreateControl(m_cbAllocTo, IDC_ALLOCTO_COMBO);
 
-	AddCol(_T("Allocated To"), 200);
-	AddCol(_T("Days"), 75);
+	AddCol(CEnString(IDS_ATTRIB_ALLOCTO), GraphicsMisc::ScaleByDPIFactor(200));
+	AddCol(CEnString(IDS_COL_WEEKDAYS), GraphicsMisc::ScaleByDPIFactor(75));
 
 	SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
 	SetAutoRowPrompt(CEnString(IDS_NEW_ALLOCATION));

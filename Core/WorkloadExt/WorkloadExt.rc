@@ -430,6 +430,7 @@ BEGIN
     IDS_PERIODDURATION      "Current Period: %d weekdays"
     IDS_ACTIVEDATERANGE     "Cu&rrent Period Range (%s)"
     IDS_ATTRIB_TIMEEST      "Time Estimate"
+    IDS_COL_WEEKDAYS        "Weekdays"
 END
 
 STRINGTABLE DISCARDABLE 
