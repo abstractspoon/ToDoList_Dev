@@ -217,11 +217,11 @@ protected:
 	virtual BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	virtual void OnResize(int cx, int cy);
 
-	virtual void OnListHeaderClick(NMHEADER* HDN) {}
-	virtual BOOL OnTreeMouseMove(UINT nFlags, CPoint point) { return FALSE; }
-	virtual BOOL OnListLButtonUp(UINT nFlags, CPoint point) { return FALSE; }
-	virtual BOOL OnListMouseMove(UINT nFlags, CPoint point) { return FALSE; }
-	virtual BOOL OnDragDropItem(const TLCITEMMOVE& move) { return FALSE; }
+	virtual void OnListHeaderClick(NMHEADER* /*HDN*/) {}
+	virtual BOOL OnTreeMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
+	virtual BOOL OnListLButtonUp(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
+	virtual BOOL OnListMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
+	virtual BOOL OnDragDropItem(const TLCITEMMOVE& /*move*/) { return FALSE; }
 
 	virtual GM_ITEMSTATE GetItemState(int nItem) const;
 	virtual GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
@@ -230,9 +230,9 @@ protected:
 	virtual void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem);
 	
 	virtual void RecalcTreeColumnsToFit(BOOL bForce);
-	virtual void RecalcListColumnsToFit(BOOL bForce) {}
-	virtual BOOL UpdateTreeColumnWidths(BOOL bExpanding);
-	virtual BOOL WantRecalcTreeColumn(int nCol) const { return TRUE; }
+	virtual void RecalcListColumnsToFit(BOOL /*bForce*/) {}
+	virtual BOOL UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding);
+	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, BOOL /*bExpanding*/) { return FALSE; }
 	virtual int CalcTreeColumnWidth(int nCol, CDC* pDC) const { return 0; }
 
 	void RedrawList(BOOL bErase = FALSE);
@@ -247,6 +247,7 @@ protected:
 	BOOL DeleteItem(HTREEITEM hti);
 	void InitItemHeights();
 	void Resize(int cx = 0, int cy = 0);
+	void UpdateColumnWidths(BOOL bExpanding);
 
 	int CalcSplitPosToFitListColumns() const;
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);

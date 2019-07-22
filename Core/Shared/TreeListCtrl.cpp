@@ -566,7 +566,7 @@ void CTreeListCtrl::ExpandAll(BOOL bExpand)
 {
 	ExpandItem(NULL, bExpand, TRUE);
 
-	UpdateTreeColumnWidths(bExpand);
+	UpdateColumnWidths(bExpand);
 }
 
 BOOL CTreeListCtrl::CanExpandAll() const
@@ -613,7 +613,7 @@ void CTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 		EnableResync(TRUE, m_tree);
 	}
 
-	UpdateTreeColumnWidths(bExpand);
+	UpdateColumnWidths(bExpand);
 }
 
 BOOL CTreeListCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const
@@ -737,7 +737,7 @@ void CTreeListCtrl::OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
 	LPNMTREEVIEW pNMTV = (LPNMTREEVIEW)pNMHDR;
 	
-	UpdateTreeColumnWidths(pNMTV->action == TVE_EXPAND);
+	UpdateColumnWidths(pNMTV->action == TVE_EXPAND);
 }
 
 LRESULT CTreeListCtrl::OnTreeDragEnter(WPARAM /*wp*/, LPARAM /*lp*/)
@@ -1399,25 +1399,9 @@ BOOL CTreeListCtrl::HandleEraseBkgnd(CDC* pDC)
 	return TRUE;
 }
 
-BOOL CTreeListCtrl::UpdateTreeColumnWidths(BOOL bExpanding)
+BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding)
 {
-	CClientDC dc(&m_tree);
-
-	int nNumCols = m_treeHeader.GetItemCount();
-	BOOL bChange = FALSE;
-
-	// Save title column until last
-	for (int nCol = 1; nCol < nNumCols; nCol++)
-	{
-		if (WantRecalcTreeColumn(nCol))
-		{
-			int nCurWidth = m_treeHeader.GetItemWidth(nCol);
-
-			if (RecalcTreeColumnWidth(nCol, &dc, FALSE) != nCurWidth)
-				bChange = TRUE;
-		}
-		break;
-	}
+	// Derived class responsible for other columns
 
 	// Title column, preserving width of list columns
 	CRect rClient;
@@ -1431,7 +1415,7 @@ BOOL CTreeListCtrl::UpdateTreeColumnWidths(BOOL bExpanding)
 	int nMaxListColsWidth = CalcMaxListColumnsWidth();
 
 	int nCurTitleWidth = m_treeHeader.GetItemWidth(0);
-	int nMaxTitleWidth = CalcWidestItemTitle(NULL, &dc, TRUE);
+	int nMaxTitleWidth = CalcWidestItemTitle(NULL, pDC, TRUE);
 	int nNewTitleWidth = nCurTitleWidth;
 
 	if (nCurTitleWidth > nMaxTitleWidth)
@@ -1472,13 +1456,18 @@ BOOL CTreeListCtrl::UpdateTreeColumnWidths(BOOL bExpanding)
 		m_treeHeader.SetItemWidth(0, nNewTitleWidth);
 		m_tree.SetTitleColumnWidth(nNewTitleWidth);
 
-		bChange = TRUE;
+		return TRUE;
 	}
 
-	if (bChange)
-		Resize();
+	return FALSE;
+}
 
-	return bChange;
+void CTreeListCtrl::UpdateColumnWidths(BOOL bExpanding)
+{
+	UpdateListColumnWidths(&CClientDC(&m_list), bExpanding);
+
+	if (UpdateTreeColumnWidths(&CClientDC(&m_tree), bExpanding))
+		Resize();
 }
 
 int CTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)
