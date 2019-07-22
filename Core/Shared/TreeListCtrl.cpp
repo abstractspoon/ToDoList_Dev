@@ -5,28 +5,11 @@
 #include "stdafx.h"
 #include "TreeListCtrl.h"
 
-#include "DialogHelper.h"
-#include "DateHelper.h"
-#include "timeHelper.h"
 #include "holdredraw.h"
 #include "graphicsMisc.h"
-#include "TreeCtrlHelper.h"
+#include "Misc.h"
 #include "autoflag.h"
-#include "misc.h"
-#include "enstring.h"
-#include "localizer.h"
-#include "themed.h"
 #include "osversion.h"
-#include "enbitmap.h"
-#include "copywndcontents.h"
-#include "wclassdefines.h"
-#include "mousewheelmgr.h"
-#include "CopyWndContents.h"
-
-#include "..\3rdparty\shellicons.h"
-
-#include <float.h> // for DBL_MAX
-#include <math.h>  // for fabs()
 
 //////////////////////////////////////////////////////////////////////
 
@@ -57,11 +40,7 @@ const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 
 //////////////////////////////////////////////////////////////////////
-
-int TIPPADDING = 2;
-
-//////////////////////////////////////////////////////////////////////
-// CWorkloadTreeCtrl
+// CTreeListTreeCtrl
 
 IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
 
@@ -92,13 +71,12 @@ END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////
 
-// CWorkloadTreeCtrl message handlers
+// CTreeListTreeCtrl message handlers
 
 void CTreeListTreeCtrl::PreSubclassWindow()
 {
 	CTreeCtrl::PreSubclassWindow();
 
-	//InitTooltip();
 	m_fonts.Initialise(*this);
 }
 
@@ -156,7 +134,7 @@ void CTreeListTreeCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = TRUE; // we do the positioning
 
 	// First set up the font
-	BOOL bBold = (GetItemState(hti, TVIS_BOLD) == TVIS_BOLD);
+	BOOL bBold = TCH().IsItemBold(hti);
 	m_tooltip.SetFont(m_fonts.GetFont(bBold ? GMFS_BOLD : 0));
 
 	CRect rLabel;
@@ -168,7 +146,7 @@ void CTreeListTreeCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	// Calculate exact position required
 	CRect rTip(rLabel);
 	m_tooltip.AdjustRect(rTip, TRUE);
-	rTip.OffsetRect(TIPPADDING, 0);
+	rTip.OffsetRect(2, 0);
 
 	rTip.top = rLabel.top;
 	rTip.bottom = rLabel.bottom;
@@ -218,7 +196,7 @@ void CTreeListTreeCtrl::ShowIcons(BOOL bShow)
 {
 	if (bShow)
 	{
-		// Create dummy image to make a space for drawing in
+		// Create dummy imagelist to make a space for drawing in
 		int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
 
 		if (!m_ilIconPlaceholder.GetSafeHandle())
@@ -239,36 +217,6 @@ void CTreeListTreeCtrl::OnDestroy()
 
 	CTreeCtrl::OnDestroy();
 }
-
-//////////////////////////////////////////////////////////////////////
-
-class CTreeListLockUpdates : public CLockUpdates
-{
-public:
-	CTreeListLockUpdates(CTreeListCtrl* pCtrl, BOOL bTree, BOOL bAndSync) 
-		: 
-	CLockUpdates(bTree ? pCtrl->m_tree.GetSafeHwnd() : pCtrl->m_list.GetSafeHwnd()),
-		m_bAndSync(bAndSync), 
-		m_pCtrl(pCtrl)
-	{
-		ASSERT(m_pCtrl);
-		
-		if (m_bAndSync)
-			m_pCtrl->EnableResync(FALSE);
-	}
-	
-	~CTreeListLockUpdates()
-	{
-		ASSERT(m_pCtrl);
-		
-		if (m_bAndSync)
-			m_pCtrl->EnableResync(TRUE, m_hWnd);
-	}
-	
-private:
-	BOOL m_bAndSync;
-	CTreeListCtrl* m_pCtrl;
-};
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -491,19 +439,6 @@ void CTreeListCtrl::SetExpandedState(const CDWordArray& aExpanded)
 		}
 
 		ExpandList();
-	}
-}
-
-void CTreeListCtrl::PreFixVScrollSyncBug()
-{
-	// Odd bug: The very last tree item will not scroll into view. 
-	// Expanding and collapsing an item is enough to resolve the issue.
-	HTREEITEM hti = TCH().FindFirstParent();
-		
-	if (hti)
-	{
-		TCH().ExpandItem(hti, TRUE);
-		TCH().ExpandItem(hti, FALSE);
 	}
 }
 
@@ -881,9 +816,6 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			}
 			return TRUE;
 
-		case WM_SETCURSOR:
-			break;
-
 		case WM_LBUTTONDBLCLK:
 			if (OnListLButtonDblClk(wp, lp))
 			{
@@ -910,12 +842,6 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			{
 				return FALSE; // eat
 			}
-			break;
-
-		case WM_CAPTURECHANGED:
-			break;
-
-		case WM_KEYDOWN:
 			break;
 
 		case WM_RBUTTONDOWN:
@@ -1076,7 +1002,7 @@ BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 	// Don't process if expanding an item
 	if (!(nFlags & TVHT_ONITEMBUTTON) && hti && (hti != GetTreeSelItem(m_tree)))
 	{
-		SelectTreeItem(m_tree, hti);
+		SelectItem(hti);
 		return TRUE;
 	}
 
@@ -1237,41 +1163,32 @@ BOOL CTreeListCtrl::SetColor(COLORREF& color, COLORREF crNew)
 	return TRUE;
 }
 
-void CTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText) const
+BOOL CTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText) const
 {
 	rItem.SetRectEmpty();
 
-	if (m_tree.GetItemRect(hti, rItem, TRUE)) // text rect only
+	if (!m_tree.GetItemRect(hti, rItem, TRUE)) // text rect only
+		return FALSE;
+
+	if (nCol == 0) // title
 	{
-		if (nCol == 0) // title
-		{
-			int nColWidth = m_treeHeader.GetItemWidth(0); // always
-	
-			if (!bText)
-				rItem.right = nColWidth;
-			else
-				rItem.right = min(rItem.right, nColWidth);
-		}
-		else // all the rest
-		{
-			CRect rHdrItem;
-			m_treeHeader.GetItemRect(nCol, rHdrItem);
+		int nColWidth = m_treeHeader.GetItemWidth(0); // always
 
-			rItem.left = rHdrItem.left;
-			rItem.right = rHdrItem.right;
-		}
+		if (!bText)
+			rItem.right = nColWidth;
+		else
+			rItem.right = min(rItem.right, nColWidth);
 	}
-}
+	else // all the rest
+	{
+		CRect rHdrItem;
+		m_treeHeader.GetItemRect(nCol, rHdrItem);
 
-void CTreeListCtrl::DrawListHeaderItem(CDC* /*pDC*/, int nCol)
-{
-	CRect rItem;
-	m_listHeader.GetItemRect(nCol, rItem);
+		rItem.left = rHdrItem.left;
+		rItem.right = rHdrItem.right;
+	}
 
-	if (nCol == 0)
-		return;
-
-	// TODO
+	return TRUE;
 }
 
 void CTreeListCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem)
@@ -1352,7 +1269,7 @@ void CTreeListCtrl::CollapseList(HTREEITEM htiFrom)
 void CTreeListCtrl::ResizeColumnsToFit(BOOL bForce)
 {
 	RecalcTreeColumnsToFit(bForce);
-	RecalcListColumnsToFit(bForce);
+	RecalcListColumnsToFit();
 }
 
 void CTreeListCtrl::RecalcTreeColumnsToFit(BOOL bForce)
@@ -1392,11 +1309,16 @@ BOOL CTreeListCtrl::HandleEraseBkgnd(CDC* pDC)
 {
 	CTreeListSyncer::HandleEraseBkgnd(pDC);
 
-	CRect rClient;
-	CWnd::GetClientRect(rClient);
-	
-	pDC->FillSolidRect(rClient, m_crBkgnd);
+ 	CRect rClient;
+ 	CWnd::GetClientRect(rClient);
+ 	
+ 	pDC->FillSolidRect(rClient, m_crBkgnd);
 	return TRUE;
+}
+
+void CTreeListCtrl::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar)
+{
+	GraphicsMisc::DrawSplitBar(pDC, rSplitter, crSplitBar);
 }
 
 BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding)
@@ -1810,6 +1732,7 @@ BOOL CTreeListCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 	
 	m_tree.SetFont(pFont, bRedraw);
 	m_list.SetFont(pFont, bRedraw);
+	m_listHeader.SetFont(pFont, bRedraw);
 
 	ResizeColumnsToFit();
 	return TRUE;

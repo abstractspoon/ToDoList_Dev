@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_WORKLOADTREELISTCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
-#define AFX_WORKLOADTREELISTCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_
+#if !defined(AFX_TREELISTCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
+#define AFX_TREELISTCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -14,11 +14,9 @@
 #include "graphicsmisc.h"
 #include "treectrlhelper.h"
 #include "fontcache.h"
-#include "mapex.h"
 #include "TreeDragDropHelper.h"
 #include "TreeSelectionHelper.h"
 #include "themed.h"
-#include "DateHelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -32,16 +30,13 @@ struct TLCITEMMOVE
 	HTREEITEM htiDestParent;
 	HTREEITEM htiDestAfterSibling;
 
-	bool bCopy;
+	BOOL bCopy;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
 // WPARAM = GetDlgCtrlID, LPARAM = TLCITEMMOVE*
 const UINT WM_TLC_MOVEITEM			= ::RegisterWindowMessage(_T("WM_TLC_MOVEITEM"));
-
-// WPARAM = GetDlgCtrlID, LPARAM = HTREEITEM
-const UINT WM_TLC_EDITITEMLABEL		= ::RegisterWindowMessage(_T("WM_TLC_EDITITEMLABEL"));
 
 // WPARAM = GetDlgCtrlID, LPARAM = HTREEITEM
 const UINT WM_TLC_ITEMSELCHANGE		= ::RegisterWindowMessage(_T("WM_TLC_ITEMSELCHANGE"));
@@ -109,8 +104,6 @@ protected:
 
 class CTreeListCtrl : public CWnd, protected CTreeListSyncer  
 {
-	friend class CTreeListLockUpdates;
-
 public:
 	CTreeListCtrl();
 	virtual ~CTreeListCtrl();
@@ -119,15 +112,18 @@ public:
 	
 	BOOL Create(CWnd* pParentWnd, const CRect& rect, UINT nID, BOOL bVisible = TRUE);
 	void Show(BOOL bShow = TRUE) { CTreeListSyncer::Show(bShow); }
+
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
+	HTREEITEM GetSelectedItem() const;
 
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
+	void SetFocus();
 
-	HTREEITEM GetSelectedItem() const;
 	BOOL CanMoveItem(const TLCITEMMOVE& move) const;
 	BOOL MoveItem(const TLCITEMMOVE& move);
+	BOOL IsMovingTask() const { return m_bMovingTask; }
 
 	BOOL PointInHeader(const CPoint& ptScreen) const;
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader = TRUE) const;
@@ -141,9 +137,6 @@ public:
 
 	void ResizeColumnsToFit(BOOL bForce = FALSE);
 	void AdjustSplitterToFitColumns();
-
-	void SetFocus();
-	BOOL HasFocus() const { return CTreeListSyncer::HasFocus(); }
 
 	BOOL SetAlternateLineColor(COLORREF crAltLine);
 	BOOL SetGridLineColor(COLORREF crGridLine);
@@ -221,26 +214,29 @@ protected:
 	virtual BOOL OnTreeMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
 	virtual BOOL OnListLButtonUp(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
 	virtual BOOL OnListMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
+
+	virtual UINT OnDragOverItem(UINT nCursor) { return nCursor; }
 	virtual BOOL OnDragDropItem(const TLCITEMMOVE& /*move*/) { return FALSE; }
 
 	virtual GM_ITEMSTATE GetItemState(int nItem) const;
 	virtual GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
 	
-	virtual void DrawListHeaderItem(CDC* pDC, int nCol);
+	virtual void DrawListHeaderItem(CDC* /*pDC*/, int /*nCol*/) {}
 	virtual void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem);
 	
 	virtual void RecalcTreeColumnsToFit(BOOL bForce);
-	virtual void RecalcListColumnsToFit(BOOL /*bForce*/) {}
+	virtual void RecalcListColumnsToFit() {}
 	virtual BOOL UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding);
 	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, BOOL /*bExpanding*/) { return FALSE; }
-	virtual int CalcTreeColumnWidth(int nCol, CDC* pDC) const { return 0; }
+	virtual int CalcTreeColumnWidth(int /*nCol*/, CDC* /*pDC*/) const { return 0; }
 
+	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	void RedrawList(BOOL bErase = FALSE);
 	void RedrawTree(BOOL bErase = FALSE);
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HTREEITEM hti);
 	void ExpandList();
-	void GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
+	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
 	void SetDropHighlight(HTREEITEM hti, int nItem);
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
@@ -282,9 +278,6 @@ protected:
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
 	static int Compare(const CString& sText1, const CString& sText2);
 
-private:
-	void PreFixVScrollSyncBug();
-
 };
 
-#endif // !defined(AFX_WORKLOADTREELIST_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
+#endif // !defined(AFX_TREELIST_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)

@@ -27,9 +27,6 @@
     <ClCompile Include="WorkloadStruct.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WorkloadTreeCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="WorkloadWnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -74,9 +71,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WorkloadStruct.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WorkloadTreeCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WorkloadWnd.h">

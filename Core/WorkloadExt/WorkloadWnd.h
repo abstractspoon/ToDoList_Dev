@@ -7,7 +7,6 @@
 // WorkloadWnd.h : header file
 //
 
-#include "WorkloadTreeCtrl.h"
 #include "WorkloadCtrl.h"
 #include "WorkloadPreferencesDlg.h"
 

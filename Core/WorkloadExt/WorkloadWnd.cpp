@@ -568,7 +568,7 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		{
 			ASSERT(pData->move.dwSelectedTaskID == m_ctrlWorkload.GetSelectedTaskID());
 
-			return (m_ctrlWorkload.MoveSelectedItem(pData->move) != FALSE);
+			return (m_ctrlWorkload.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;
 	}
@@ -650,7 +650,7 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 
 	case IUI_MOVETASK:
 		if (pData)
-			return (m_ctrlWorkload.CanMoveSelectedItem(pData->move) != FALSE);
+			return (m_ctrlWorkload.CanMoveSelectedTask(pData->move) != FALSE);
 		break;
 	}
 
