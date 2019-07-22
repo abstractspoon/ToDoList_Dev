@@ -130,7 +130,6 @@ protected:
 			
 	// derived class callback
 	void OnNotifySplitterChange(int nSplitPos);
-	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 	BOOL OnDragDropItem(const TLCITEMMOVE& move);
 	UINT OnDragOverItem(UINT nCursor);
 
@@ -150,10 +149,6 @@ protected:
 	void DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocationTotals& mapAlloc, int nDecimals);
 	void DrawTotalsHeader(CDC* pDC);
 
-	enum DIV_TYPE { DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ };
-
-	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected);
-
 	HFONT GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_COLUMNID nColID);
 	void BuildTaskTreeColumns();
 	void BuildListColumns();
@@ -161,7 +156,7 @@ protected:
 	int GetRequiredListColumnCount() const;
 	void DeleteTreeItem(HTREEITEM hti);
 	void RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
-	BOOL RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CSet<DWORD>& mapIDs);
+	BOOL RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CDWordSet& mapIDs);
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
 	void RecalcAllocationTotals();
 	void RecalcDataDateRange();
@@ -212,8 +207,7 @@ protected:
 	
 	static int GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aAllocTo);
 	static double GetTaskTimeEstimate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
-	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
-	static BOOL IsVerticalDivider(DIV_TYPE nType);
+	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
 	static CString FormatTimeSpan(double dDays, int nDecimals);
 
 private:

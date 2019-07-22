@@ -28,9 +28,6 @@ const UINT WM_WLC_EDITTASKALLOCATIONS	= ::RegisterWindowMessage(_T("WM_WLC_EDITT
 
 /////////////////////////////////////////////////////////////////////////////
 
-// WPARAM = 0, LPARAM = Task ID
-const UINT WM_WLCN_SELCHANGE			= ::RegisterWindowMessage(_T("WM_WLCN_SELCHANGE"));
-
 // WPARAM = , LPARAM = TRUE/FALSE
 const UINT WM_WLCN_COMPLETIONCHANGE		= ::RegisterWindowMessage(_T("WM_WLCN_COMPLETIONCHANGE"));
 

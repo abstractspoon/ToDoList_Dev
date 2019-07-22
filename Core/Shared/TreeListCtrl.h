@@ -231,6 +231,8 @@ protected:
 	virtual int CalcTreeColumnWidth(int /*nCol*/, CDC* /*pDC*/) const { return 0; }
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
+	void DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BOOL bSelected) const;
+
 	void RedrawList(BOOL bErase = FALSE);
 	void RedrawTree(BOOL bErase = FALSE);
 	void ExpandList(HTREEITEM hti, int& nNextIndex);

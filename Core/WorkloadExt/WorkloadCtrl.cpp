@@ -162,7 +162,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	BuildListColumns();
 	PopulateTotalsLists();
 	
-	// prevent column reordering on columns
+	// prevent column reordering on list
 	m_listHeader.ModifyStyle(HDS_DRAGDROP, 0);
 
 	// prevent translation of the list header
@@ -447,8 +447,6 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 
 			UnlockWindowUpdate();
 			EnableResync(TRUE, m_tree);
-
-			AdjustSplitterToFitAttributeColumns();
 		}
 		break;
 
@@ -791,8 +789,8 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 	return bChange;
 }
 
-void CWorkloadCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
-									  CSet<DWORD>& mapIDs, BOOL bAndSiblings)
+void CWorkloadCtrl::BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
+								   CDWordSet& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return;
@@ -800,7 +798,7 @@ void CWorkloadCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	mapIDs.Add(pTasks->GetTaskID(hTask));
 
 	// children
-	BuildTaskMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);
+	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);
 
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
@@ -810,7 +808,7 @@ void CWorkloadCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			BuildTaskMap(pTasks, hSibling, mapIDs, FALSE);
+			BuildTaskIDMap(pTasks, hSibling, mapIDs, FALSE);
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
@@ -818,8 +816,8 @@ void CWorkloadCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 
 void CWorkloadCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 {
-	CSet<DWORD> mapIDs;
-	BuildTaskMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
+	CDWordSet mapIDs;
+	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
 
 	if (RemoveDeletedTasks(NULL, pTasks, mapIDs))
 	{
@@ -828,7 +826,7 @@ void CWorkloadCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 	}
 }
 
-BOOL CWorkloadCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CSet<DWORD>& mapIDs)
+BOOL CWorkloadCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CDWordSet& mapIDs)
 {
 	// traverse the tree looking for items that do not 
 	// exist in pTasks and delete them
@@ -1249,7 +1247,7 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				BOOL bSelected = (nState != GMIS_NONE);
 
 				// draw horz gridline before selection
-				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
+				DrawItemDivider(pDC, pTVCD->nmcd.rc, FALSE, bSelected);
 
 				// Draw icon
 				if (pWI->bHasIcon || pWI->bParent)
@@ -1428,7 +1426,7 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					pDC->FillSolidRect(rFullWidth, GetRowColor(nItem + 1));
 					
 					if (m_bSavingToImage || ((nItem + 1) != ID_LASTTOTAL))
-						DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
+						DrawItemDivider(pDC, rFullWidth, FALSE, FALSE);
 				}
 				break;
 				
@@ -1493,7 +1491,7 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			
 			GraphicsMisc::FillItemRect(pDC, rItem, crBack, m_list);
 
-			DrawItemDivider(pDC, rItem, DIV_HORZ, FALSE);
+			DrawItemDivider(pDC, rItem, FALSE, FALSE);
 			
 			// draw background
 			GM_ITEMSTATE nState = GetItemState(nItem);
@@ -1789,22 +1787,6 @@ BOOL CWorkloadCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 	return TRUE; // prevent base class handling
 }
 
-void CWorkloadCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
-{
-	if (m_bMovingTask)
-		return;
-	
-	// Ignore setting selection to 'NULL' unless there are no tasks at all
-	// because we know it's temporary only
-	if ((pNMTV->itemNew.hItem == NULL) && (m_tree.GetCount() != 0))
-		return;
-	
-	// we're only interested in non-keyboard changes
-	// because keyboard gets handled in OnKeyUpWorkload
-	if (pNMTV->action != TVC_BYKEYBOARD)
-		CWnd::GetParent()->SendMessage(WM_WLCN_SELCHANGE, 0, GetTaskID(pNMTV->itemNew.hItem));
-}
-
 LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (!IsResyncEnabled())
@@ -2018,14 +2000,6 @@ BOOL CWorkloadCtrl::SetBackgroundColor(COLORREF crBkgnd)
 	return TRUE;
 }
 
-CString CWorkloadCtrl::FormatDate(const COleDateTime& date, DWORD dwFlags) const
-{
-	dwFlags &= ~DHFD_ISO;
-	dwFlags |= (HasOption(WLCF_DISPLAYISODATES) ? DHFD_ISO : 0);
-
-	return CDateHelper::FormatDate(date, dwFlags);
-}
-
 int CWorkloadCtrl::GetLargestVisibleDuration(HTREEITEM hti) const
 {
 	int nLongest = 0;
@@ -2129,6 +2103,14 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNI
 	return sItem;
 }
 
+CString CWorkloadCtrl::FormatDate(const COleDateTime& date, DWORD dwFlags) const
+{
+	dwFlags &= ~DHFD_ISO;
+	dwFlags |= (HasOption(WLCF_DISPLAYISODATES) ? DHFD_ISO : 0);
+
+	return CDateHelper::FormatDate(date, dwFlags);
+}
+
 CString CWorkloadCtrl::FormatTimeSpan(double dDays, int nDecimals)
 {
 	if (dDays == 0.0)
@@ -2158,7 +2140,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 	if (rItem.Width() == 0)
 		return;
 
-	DrawItemDivider(pDC, rItem, DIV_VERT_LIGHT, bSelected);
+	DrawItemDivider(pDC, rItem, TRUE, bSelected);
 
 	WLC_COLUMNID nColID = GetTreeColumnID(nCol);
 	BOOL bTitleCol = (nColID == WLCC_TITLE);
@@ -2241,63 +2223,6 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 		ShellIcons::DrawIcon(pDC, ShellIcons::SI_SHORTCUT, ptIcon, true);
 	}
 }
-
-BOOL CWorkloadCtrl::IsVerticalDivider(DIV_TYPE nType)
-{
-	switch (nType)
-	{
-	case DIV_VERT_LIGHT:
-	case DIV_VERT_MID:
-	case DIV_VERT_DARK:
-		return TRUE;
-	}
-	
-	// else
-	return FALSE;
-}
-
-void CWorkloadCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected)
-{
-	if (!HasGridlines() || (nType == DIV_NONE) || (IsVerticalDivider(nType) && (rItem.right < 0)))
-		return;
-
-	COLORREF color = m_crGridLine;
-
-	switch (nType)
-	{
-	case DIV_VERT_LIGHT:
-	case DIV_HORZ:
-		break;
-		
-	case DIV_VERT_MID:
-		color = GraphicsMisc::Darker(m_crGridLine, 0.25);
-		break;
-		
-	case DIV_VERT_DARK:
-		color = GraphicsMisc::Darker(m_crGridLine, 0.5);
-		break;
-	}
-
-	CRect rDiv(rItem);
-
-	if (nType == DIV_HORZ)
-	{
-		rDiv.top = (rDiv.bottom - 1);
-	}
-	else
-	{
-		rDiv.left = (rDiv.right - 1);
-		
-		if (bSelected)
-			rDiv.DeflateRect(0, 1);
-	}
-
-	COLORREF crOld = pDC->GetBkColor();
-
-	pDC->FillSolidRect(rDiv, color);
-	pDC->SetBkColor(crOld);
-}
-
 
 HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_COLUMNID nCol)
 {
@@ -2388,7 +2313,7 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 		CRect rColumn;
 		m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
 		
-		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, bSelected);
+		DrawItemDivider(pDC, rColumn, TRUE, bSelected);
 		rColumn.right--;
 		rColumn.bottom--;
 
@@ -2467,7 +2392,7 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 			pDC->DrawText(sValue, (LPRECT)(LPCRECT)rText, DT_CENTER);
 		}
 			
-		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, FALSE);
+		DrawItemDivider(pDC, rColumn, TRUE, FALSE);
 	}
 }
 
@@ -3090,11 +3015,11 @@ BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
 
 				// Draw vertical divider between labels and totals
 				CRect rDivider(0, sizeBase.cy, (sizeLabels.cx + 1), (sizeBase.cy + sizeTotals.cy));
-				DrawItemDivider(&dcImage, rDivider, DIV_VERT_LIGHT, FALSE);
+				DrawItemDivider(&dcImage, rDivider, TRUE, FALSE);
 
 				// Draw vertical divider at end of totals
 				rDivider.right = sizeBase.cx;
-				DrawItemDivider(&dcImage, rDivider, DIV_VERT_LIGHT, FALSE);
+				DrawItemDivider(&dcImage, rDivider, TRUE, FALSE);
 
 				// Bar chart
 				dcParts.SelectObject(bmChart);

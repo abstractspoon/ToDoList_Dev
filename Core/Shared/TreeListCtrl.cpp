@@ -1321,6 +1321,31 @@ void CTreeListCtrl::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSp
 	GraphicsMisc::DrawSplitBar(pDC, rSplitter, crSplitBar);
 }
 
+void CTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BOOL bSelected) const
+{
+	if (!HasGridlines() || (bVert && (rItem.right < 0)))
+		return;
+
+	CRect rDiv(rItem);
+
+	if (bVert)
+	{
+		rDiv.left = (rDiv.right - 1);
+
+		if (bSelected)
+			rDiv.DeflateRect(0, 1);
+	}
+	else
+	{
+		rDiv.top = (rDiv.bottom - 1);
+	}
+
+	COLORREF crOld = pDC->GetBkColor();
+
+	pDC->FillSolidRect(rDiv, m_crGridLine);
+	pDC->SetBkColor(crOld);
+}
+
 BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding)
 {
 	// Derived class responsible for other columns
