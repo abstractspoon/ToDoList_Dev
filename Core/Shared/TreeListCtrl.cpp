@@ -539,7 +539,27 @@ void CTreeListCtrl::OnSize(UINT nType, int cx, int cy)
 
 void CTreeListCtrl::Resize(int cx, int cy)
 {
-	// Placeholder
+	if (!cx || !cy)
+	{
+		CRect rClient;
+		CWnd::GetClientRect(rClient);
+
+		cx = rClient.Width();
+		cy = rClient.Height();
+	}
+
+	if (cx && cy)
+	{
+		OnResize(cx, cy);
+
+		if (m_treeHeader.GetItemCount())
+			m_tree.SetTitleColumnWidth(m_treeHeader.GetItemWidth(0));
+	}
+}
+
+void CTreeListCtrl::OnResize(int cx, int cy)
+{
+	CTreeListSyncer::Resize(CRect(0, 0, cx, cy), GetSplitPos());
 }
 
 void CTreeListCtrl::ExpandAll(BOOL bExpand)
@@ -1342,11 +1362,6 @@ void CTreeListCtrl::RecalcTreeColumnsToFit(BOOL bForce)
 
 	for (int nCol = 1; nCol < nNumCol; nCol++)
 		RecalcTreeColumnWidth(nCol, &dc, bForce);
-}
-
-void CTreeListCtrl::RecalcListColumnsToFit(BOOL bForce)
-{
-	// Placeholder
 }
 
 void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)

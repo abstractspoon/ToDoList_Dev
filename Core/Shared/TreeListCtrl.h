@@ -215,6 +215,7 @@ protected:
 	virtual BOOL OnTreeLButtonDblClk(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDown(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
+	virtual void OnResize(int cx, int cy);
 
 	virtual void OnListHeaderClick(NMHEADER* HDN) {}
 	virtual BOOL OnTreeMouseMove(UINT nFlags, CPoint point) { return FALSE; }
@@ -229,12 +230,10 @@ protected:
 	virtual void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem);
 	
 	virtual void RecalcTreeColumnsToFit(BOOL bForce);
-	virtual void RecalcListColumnsToFit(BOOL bForce);
+	virtual void RecalcListColumnsToFit(BOOL bForce) {}
 	virtual BOOL UpdateTreeColumnWidths(BOOL bExpanding);
 	virtual BOOL WantRecalcTreeColumn(int nCol) const { return TRUE; }
 	virtual int CalcTreeColumnWidth(int nCol, CDC* pDC) const { return 0; }
-		
-	virtual void Resize(int cx = 0, int cy = 0);
 
 	void RedrawList(BOOL bErase = FALSE);
 	void RedrawTree(BOOL bErase = FALSE);
@@ -247,6 +246,7 @@ protected:
 	BOOL IsListItemLineOdd(int nItem) const;
 	BOOL DeleteItem(HTREEITEM hti);
 	void InitItemHeights();
+	void Resize(int cx = 0, int cy = 0);
 
 	int CalcSplitPosToFitListColumns() const;
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
