@@ -156,7 +156,7 @@ protected:
 	void BuildListColumns();
 	void UpdateListColumns();
 	int GetRequiredListColumnCount() const;
-	void DeleteTreeItem(HTREEITEM hti);
+	void DeleteItem(HTREEITEM hti);
 	void RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	BOOL RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CDWordSet& mapIDs);
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
@@ -166,7 +166,6 @@ protected:
 	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
 
 	WORKLOADITEM* GetWorkloadItem(DWORD dwTaskID, BOOL bCopyRefID = TRUE) const;
-	WLC_COLUMNID TreeHitTestItemColumn(const CPoint& point, BOOL bScreen) const;
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
 	BOOL SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards);
 

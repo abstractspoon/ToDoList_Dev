@@ -273,8 +273,8 @@ protected:
 	virtual LRESULT OnListGetDispInfo(NMLVDISPINFO* pLVDI);
 	virtual LRESULT OnTreeGetDispInfo(NMTVDISPINFO* pTVDI);
 
-	virtual void OnListSelectionChange(NMLISTVIEW* pNMLV);
-	virtual void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	virtual BOOL OnListSelectionChange(NMLISTVIEW* pNMLV);
+	virtual BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
 private:
 	static TLS_TYPE GetType(HWND hwnd);

@@ -677,7 +677,7 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetColumnItemState(int nItem) const
 	return GetTreeItemState((HTREEITEM)m_lcColumns.GetItemData(nItem));
 }
 
-void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
+BOOL CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 {
 	// only called when the focus is actually on the columns
 	// ie. not when Syncing Column Selection)
@@ -717,20 +717,23 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 	if (Misc::IsCursorKeyPressed(MKC_UPDOWN))
 	{
 		// vertical scrolling
-		return;
+		return FALSE;
 	}
-	else if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
+
+	if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
 	{
 		// In the middle of a simple click
-		return;
+		return FALSE;
 	}
-	else if (IsBoundSelecting() && ((nHit == -1) || (m_lcColumns.GetSelectedCount() > 2)))
+
+	if (IsBoundSelecting() && ((nHit == -1) || (m_lcColumns.GetSelectedCount() > 2)))
 	{
 		// bulk selecting
-		return;
+		return FALSE;
 	}
 
 	NotifyParentSelChange();
+	return TRUE;
 }
 
 void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
@@ -770,7 +773,7 @@ void CTDLTaskTreeCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
 	RepackageAndSendToParent(WM_NOTIFY, 0, (LPARAM)&nmtv);
 }
 
-void CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
+BOOL CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
 	// we don't support nothing having being selected unless there
 	// are no items in the tree
@@ -779,65 +782,65 @@ void CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	
 	// cursor handled here
 	// <shift>+cursor handled here
-	if (m_wKeyPress)
+	if (m_wKeyPress == 0)
+		return FALSE;
+
+	HTREEITEM hti = pNMTV->itemNew.hItem;
+
+	// snapshot current selection to test for changes
+	CHTIList lstPrevSel;
+	TSH().CopySelection(lstPrevSel);
+
+	switch (m_wKeyPress)
 	{
-		HTREEITEM hti = pNMTV->itemNew.hItem;
-
-		// snapshot current selection to test for changes
-		CHTIList lstPrevSel;
-		TSH().CopySelection(lstPrevSel);
-		
-		switch (m_wKeyPress)
+	case VK_NEXT:
+	case VK_DOWN:
+	case VK_UP:
+	case VK_PRIOR:
+	case VK_RIGHT:
+	case VK_LEFT:
+	case VK_HOME:
+	case VK_END:
+		if (!bCtrl)
 		{
-		case VK_NEXT:  
-		case VK_DOWN:
-		case VK_UP:
-		case VK_PRIOR: 
-		case VK_RIGHT:
-		case VK_LEFT:
-		case VK_HOME:
-		case VK_END:
-			if (!bCtrl)
-			{
-				TSH().RemoveAll();
-				
-				if (bShift)
-				{	
-					TSH().AddItems(TSH().GetAnchor(), hti);
-				}
-				else
-				{
-					TSH().SetAnchor(hti);
-					TSH().AddItem(hti);
-				}
-			}
-			break;
-			
-		default:
-			// else handle alphanum method of changing selection
 			TSH().RemoveAll();
-			TSH().SetAnchor(hti);
-			TSH().AddItem(hti);
-			break;
-		}
 
- 		SyncColumnSelectionToTasks();
- 			
-		if (hti)
-		{
-			CHoldHScroll hhs(m_tcTasks);
-			TCH().EnsureItemVisible(hti, FALSE);
+			if (bShift)
+			{
+				TSH().AddItems(TSH().GetAnchor(), hti);
+			}
+			else
+			{
+				TSH().SetAnchor(hti);
+				TSH().AddItem(hti);
+			}
 		}
- 		
-		// notify parent of selection change
-		// unless up/down cursor key still pressed
-		if (!TSH().Matches(lstPrevSel) && !Misc::IsCursorKeyPressed(MKC_UPDOWN))
-		{
-			NotifyParentSelChange(SC_BYKEYBOARD);
-		}
+		break;
 
-		m_wKeyPress = 0;
+	default:
+		// else handle alphanum method of changing selection
+		TSH().RemoveAll();
+		TSH().SetAnchor(hti);
+		TSH().AddItem(hti);
+		break;
 	}
+	m_wKeyPress = 0; // always
+
+	SyncColumnSelectionToTasks();
+
+	if (hti)
+	{
+		CHoldHScroll hhs(m_tcTasks);
+		TCH().EnsureItemVisible(hti, FALSE);
+	}
+
+	// notify parent of selection change
+	// unless up/down cursor key still pressed
+	if (TSH().Matches(lstPrevSel) || Misc::IsCursorKeyPressed(MKC_UPDOWN))
+		return FALSE;
+
+	NotifyParentSelChange(SC_BYKEYBOARD);
+	return TRUE;
 }
 
 BOOL CTDLTaskTreeCtrl::PreTranslateMessage(MSG* pMsg)

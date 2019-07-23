@@ -38,6 +38,9 @@ const UINT WM_GTLC_EDITTASKICON				= ::RegisterWindowMessage(_T("WM_GTLC_EDITTAS
 // WPARAM = 0, LPARAM = IUITASKMOVE*
 const UINT WM_GTLC_MOVETASK					= ::RegisterWindowMessage(_T("WM_GTLC_MOVETASK"));
 
+// WPARAM = 0, LPARAM = Task ID
+const UINT WM_GTLC_EDITTASKTITLE			= ::RegisterWindowMessage(_T("WM_GTLC_EDITTASKTITLE"));
+
 /////////////////////////////////////////////////////////////////////////////
 
 // WPARAM = GCDD_MODE, LPARAM = HWND

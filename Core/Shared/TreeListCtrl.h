@@ -115,11 +115,14 @@ public:
 
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
 	HTREEITEM GetSelectedItem() const;
+	DWORD GetSelectedItemData() const;
 
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
 	void SetFocus();
+	void ShowCheckboxes(UINT nUnthemedBitmapID, BOOL bShow = TRUE) { m_tree.ShowCheckboxes(nUnthemedBitmapID, bShow); }
+	void ShowIcons(BOOL bShow = TRUE) { m_tree.ShowIcons(bShow); }
 
 	BOOL CanMoveItem(const TLCITEMMOVE& move) const;
 	BOOL MoveItem(const TLCITEMMOVE& move);
@@ -132,7 +135,7 @@ public:
 	void ExpandAll(BOOL bExpand = TRUE);
 	BOOL CanExpandAll() const;
 	BOOL CanCollapseAll() const;
-	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
+	virtual void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
 
 	void ResizeColumnsToFit(BOOL bForce = FALSE);
@@ -198,7 +201,7 @@ protected:
 protected:
 	// base class callbacks
 	void OnNotifySplitterChange(int nSplitPos);
-	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
 	// pseudo-message handlers
 	virtual BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);
@@ -228,21 +231,20 @@ protected:
 	virtual BOOL UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding);
 	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, BOOL /*bExpanding*/) { return FALSE; }
 	virtual int CalcTreeColumnWidth(int /*nCol*/, CDC* /*pDC*/) const { return 0; }
+	virtual void InitItemHeights();
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
-	void DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BOOL bSelected) const;
+	void DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BOOL bSelected, COLORREF crDiv = CLR_NONE) const;
 
 	void RedrawList(BOOL bErase = FALSE);
 	void RedrawTree(BOOL bErase = FALSE);
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HTREEITEM hti);
 	void ExpandList();
-	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
 	void SetDropHighlight(HTREEITEM hti, int nItem);
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
 	BOOL DeleteItem(HTREEITEM hti);
-	void InitItemHeights();
 	void Resize(int cx = 0, int cy = 0);
 	void UpdateColumnWidths(BOOL bExpanding);
 
@@ -264,6 +266,8 @@ protected:
 	void RefreshTreeItemMap();
 	CString GetItemLabelTip(CPoint ptScreen) const;
 	DWORD GetItemData(HTREEITEM htiFrom) const;
+	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
+	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
 	
 	BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }

@@ -50,6 +50,7 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 /////////////////////////////////////////////////////////////////////////////
 
 const int PADDING = 3;
+const UINT IDC_GANTTCTRL = 1001;
 
 /////////////////////////////////////////////////////////////////////////////
 // CGanttChartWnd
@@ -57,7 +58,6 @@ const int PADDING = 3;
 CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_GANTTTREE_DIALOG, pParent), 
-	m_ctrlGantt(m_tree, m_list),
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
 #pragma warning(disable:4355)
@@ -76,8 +76,6 @@ void CGanttChartWnd::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CGanttChartWnd)
 	DDX_Control(pDX, IDC_SNAPMODES, m_cbSnapModes);
-	DDX_Control(pDX, IDC_GANTTLIST, m_list);
-	DDX_Control(pDX, IDC_GANTTTREE, m_tree);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplayOptions);
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
@@ -90,7 +88,6 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_NOTIFY(TVN_KEYUP, IDC_GANTTTREE, OnKeyUpGantt)
 	ON_CBN_SELCHANGE(IDC_DISPLAY, OnSelchangeDisplay)
 	ON_NOTIFY(NM_CLICK, IDC_GANTTLIST, OnClickGanttList)
-	ON_NOTIFY(TVN_SELCHANGED, IDC_GANTTTREE, OnSelchangedGanttTree)
 	ON_COMMAND(ID_GANTT_GOTOTODAY, OnGanttGotoToday)
 	ON_UPDATE_COMMAND_UI(ID_GANTT_GOTOTODAY, OnUpdateGanttGotoToday)
 	ON_COMMAND(ID_GANTT_NEWDEPENDS, OnGanttNewDepends)
@@ -106,21 +103,23 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_WM_SETFOCUS()
-	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_GANTTTREE, OnBeginEditTreeLabel)
 	ON_WM_ERASEBKGND()
 	ON_WM_NCDESTROY()
 	ON_WM_LBUTTONDBLCLK()
 
+	ON_REGISTERED_MESSAGE(WM_GTLC_EDITTASKTITLE, OnGanttEditTaskTitle)
 	ON_REGISTERED_MESSAGE(WM_GTLC_DATECHANGE, OnGanttNotifyDateChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_DRAGCHANGE, OnGanttNotifyDragChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_COMPLETIONCHANGE, OnGanttNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYSORT, OnGanttNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYZOOM, OnGanttNotifyZoomChange)
-	ON_REGISTERED_MESSAGE(WM_GANTTDEPENDDLG_CLOSE, OnGanttDependencyDlgClose)
 	ON_REGISTERED_MESSAGE(WM_GTLC_PREFSHELP, OnGanttPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_GTLC_GETTASKICON, OnGanttGetTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_GTLC_EDITTASKICON, OnGanttEditTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_GTLC_MOVETASK, OnGanttMoveTask)
+	ON_REGISTERED_MESSAGE(WM_TLC_ITEMSELCHANGE, OnGanttNotifySelChanged)
+
+	ON_REGISTERED_MESSAGE(WM_GANTTDEPENDDLG_CLOSE, OnGanttDependencyDlgClose)
 	ON_REGISTERED_MESSAGE(RANGE_CHANGED, OnActiveDateRangeChange)
 	ON_CBN_SELCHANGE(IDC_SNAPMODES, OnSelchangeSnapMode)
 END_MESSAGE_MAP()
@@ -310,7 +309,7 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 	m_ctrlGantt.SetOption(GTLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 	m_ctrlGantt.SetOption(GTLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
 
-	m_tree.ShowCheckboxes(pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
+	m_ctrlGantt.ShowCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
 
 	// get alternate line color from app prefs
 	COLORREF crAlt = CLR_NONE;
@@ -327,8 +326,7 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 		crGrid = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("GridLines"), DEF_GRIDLINECOLOR);
 
 	m_ctrlGantt.SetGridLineColor(crGrid);
-
-
+	
 	// gantt specific options
 	if (!bAppOnly)
 	{
@@ -447,31 +445,8 @@ bool CGanttChartWnd::ProcessMessage(MSG* pMsg)
 	if (!IsWindowEnabled())
 		return false;
 
-	switch (pMsg->message)
-	{
-	// handle 'escape' during dependency editing
-	case WM_KEYDOWN:
-		{
-			AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-			switch (pMsg->wParam)
-			{
-			case VK_ESCAPE:
-				if (m_ctrlGantt.CancelOperation())
-					return true;
-				break;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-			case VK_ADD:
-				// Eat because Windows own processing does not understand how we do things!
-				if (Misc::ModKeysArePressed(MKS_CTRL) && (m_list.GetSafeHwnd() == pMsg->hwnd))
-					return true;
-				break;
-			}
-		}
-		break;
-	}
-
-	// Drag and drop messages
 	if (m_ctrlGantt.ProcessMessage(pMsg))
 		return true;
 
@@ -493,7 +468,7 @@ bool CGanttChartWnd::GetLabelEditRect(LPRECT pEdit)
 	if (m_ctrlGantt.GetLabelEditRect(pEdit))
 	{
 		// convert to screen coords
-		ClientToScreen(pEdit);
+		m_ctrlGantt.CWnd::ClientToScreen(pEdit);
 		return true;
 	}
 
@@ -503,36 +478,18 @@ bool CGanttChartWnd::GetLabelEditRect(LPRECT pEdit)
 IUI_HITTEST CGanttChartWnd::HitTest(const POINT& ptScreen) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+
 	// try tree header
-	// 6.9: disable header click because it changes the 
-	// tree/list columns not the gantt columns
 	if (m_ctrlGantt.PointInHeader(ptScreen))
 		return IUI_NOWHERE;//IUI_COLUMNHEADER;
 
-	// then specific task
+						   // then specific task
 	if (m_ctrlGantt.HitTestTask(ptScreen))
 		return IUI_TASK;
-
-	// else check else where in tree or list client
-	CRect rGantt;
-	
-	m_tree.GetClientRect(rGantt);
-	m_tree.ClientToScreen(rGantt);
-
-	if (rGantt.PtInRect(ptScreen))
-		return IUI_TASKLIST;
-
-	m_list.GetClientRect(rGantt);
-	m_list.ClientToScreen(rGantt);
-
-	if (rGantt.PtInRect(ptScreen))
-		return IUI_TASKLIST;
 
 	// else 
 	return IUI_NOWHERE;
 }
-
 
 bool CGanttChartWnd::SelectTask(DWORD dwTaskID)
 {
@@ -704,7 +661,7 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		{
 			ASSERT(pData->move.dwSelectedTaskID == m_ctrlGantt.GetSelectedTaskID());
 
-			return (m_ctrlGantt.MoveSelectedItem(pData->move) != FALSE);
+			return (m_ctrlGantt.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;
 
@@ -729,17 +686,17 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 	switch (nCmd)
 	{
 	case IUI_EXPANDALL:
-		return (m_tree.TCH().IsAnyItemCollapsed() != FALSE);
+		return (m_ctrlGantt.CanExpandAll() != FALSE);
 
 	case IUI_COLLAPSEALL:
-		return (m_tree.TCH().IsAnyItemExpanded() != FALSE);
+		return (m_ctrlGantt.CanCollapseAll() != FALSE);
 
 	case IUI_RESIZEATTRIBCOLUMNS:
 	case IUI_SELECTTASK:
 		return true;
 
 	case IUI_SAVETOIMAGE:
-		return (m_tree.GetCount() > 0);
+		return (m_ctrlGantt.GetTaskCount() > 0);
 
 	case IUI_EXPANDSELECTED:
 		{
@@ -787,7 +744,7 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 
 	case IUI_MOVETASK:
 		if (pData)
-			return (m_ctrlGantt.CanMoveSelectedItem(pData->move) != FALSE);
+			return (m_ctrlGantt.CanMoveSelectedTask(pData->move) != FALSE);
 		break;
 	}
 
@@ -832,21 +789,15 @@ BOOL CGanttChartWnd::OnInitDialog()
 		m_toolbar.RefreshButtonStates(TRUE);
 	}
 		
-	// init syncer
-	m_ctrlGantt.Initialize(IDC_TREEHEADER);
-	m_ctrlGantt.ExpandAll();
-
-	CRect rClient;
-	GetClientRect(rClient);
-	Resize(rClient.Width(), rClient.Height());
+	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_GANTTCHART_FRAME);
+	VERIFY(m_ctrlGantt.Create(this, rCtrl, IDC_GANTTCTRL));
 
 	BuildSnapCombo();
 	BuildDisplayCombo();
 	
+	m_ctrlGantt.ShowIcons();
 	m_ctrlGantt.ScrollToToday();
 	m_ctrlGantt.SetFocus();
-	
-	m_tree.ShowTaskIcons();
 
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -854,12 +805,12 @@ BOOL CGanttChartWnd::OnInitDialog()
 
 void CGanttChartWnd::Resize(int cx, int cy)
 {
-	if (m_tree.GetSafeHwnd())
+	if (m_ctrlGantt.GetSafeHwnd())
 	{
 		CRect rGantt(0, 0, cx, cy);
 		rGantt.top = CDlgUnits(this).ToPixelsY(28);
 
-		m_ctrlGantt.Resize(rGantt);
+		m_ctrlGantt.MoveWindow(rGantt);
 
 		// selected task dates takes available space
 		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
@@ -1013,42 +964,24 @@ LRESULT CGanttChartWnd::OnGanttNotifySortChange(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
-void CGanttChartWnd::OnSelchangedGanttTree(NMHDR* pNMHDR, LRESULT* pResult) 
+LRESULT CGanttChartWnd::OnGanttNotifySelChanged(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	// Ignore selection changes during a move because we
-	// _Know_ that the logical selection does not change
-	if (m_ctrlGantt.IsMovingTask())
-		return;
+	SendParentSelectionUpdate();
 
-	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
-	*pResult = 0;
-
-	// Ignore setting selection to 'NULL' unless there are no tasks at all
-	// because we know it's temporary only
-	if ((pNMTreeView->itemNew.hItem == NULL) && (m_tree.GetCount() != 0))
-		return;
-		
-	// ignore notifications arising out of SelectTask()
-	if (m_bInSelectTask && (pNMTreeView->action == TVC_UNKNOWN))
-		return;
-
-	// we're only interested in non-keyboard changes
-	// because keyboard gets handled in OnKeyUpGantt
-	if (pNMTreeView->action != TVC_BYKEYBOARD)
-		SendParentSelectionUpdate();
+	return 0L;
 }
 
-void CGanttChartWnd::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+LRESULT CGanttChartWnd::OnGanttEditTaskTitle(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	*pResult = TRUE; // cancel our edit
-	
 	// notify app to edit
 	GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE);
+
+	return 0L;
 }
 
 void CGanttChartWnd::OnSetFocus(CWnd* /*pOldWnd*/) 
 {
-	m_tree.SetFocus();
+	m_ctrlGantt.SetFocus();
 }
 
 void CGanttChartWnd::UpdateGanttCtrlPreferences()

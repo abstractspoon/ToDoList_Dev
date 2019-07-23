@@ -180,8 +180,8 @@ protected:
 	
  	LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
 
-	void OnListSelectionChange(NMLISTVIEW* pNMLV);
-	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	BOOL OnListSelectionChange(NMLISTVIEW* pNMLV);
+	BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
 	BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
 	DWORD GetColumnItemTaskID(int nItem) const;

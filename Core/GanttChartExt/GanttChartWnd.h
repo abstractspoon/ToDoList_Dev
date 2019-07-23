@@ -7,7 +7,6 @@
 // GanttChartWnd.h : header file
 //
 
-#include "GanttTreeCtrl.h"
 #include "GanttTreeListCtrl.h"
 #include "GanttPreferencesDlg.h"
 #include "GanttCreateDependsDlg.h"
@@ -69,10 +68,8 @@ protected:
 	//{{AFX_DATA(CGanttChartWnd)
 	//}}AFX_DATA
 	CComboBox m_cbSnapModes;
-	CListCtrl m_list;
-	CGanttTreeCtrl m_tree;
-	CTabbedComboBox	m_cbDisplayOptions;
 	CGanttTreeListCtrl m_ctrlGantt;
+	CTabbedComboBox	m_cbDisplayOptions;
 	CGanttPreferencesDlg m_dlgPrefs;
 	CGanttCreateDependsDlg m_dlgDepends;
 	CEnToolBar m_toolbar;
@@ -107,7 +104,6 @@ protected:
 	afx_msg void OnKeyUpGantt(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeDisplay();
 	afx_msg void OnClickGanttList(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnSelchangedGanttTree(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnGanttGotoToday();
 	afx_msg void OnUpdateGanttGotoToday(CCmdUI* pCmdUI);
@@ -121,7 +117,6 @@ protected:
 	afx_msg void OnGanttDeleteDepends();
 	afx_msg void OnUpdateGanttDeleteDepends(CCmdUI* pCmdUI);
 	//}}AFX_MSG
-	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnSelchangeSnapMode();
 	afx_msg void OnHelp();
@@ -129,6 +124,8 @@ protected:
 	afx_msg void OnNcDestroy();
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 
+	afx_msg LRESULT OnGanttEditTaskTitle(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnGanttNotifySelChanged(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifyDateChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifyDragChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifyCompletionChange(WPARAM wp, LPARAM lp);

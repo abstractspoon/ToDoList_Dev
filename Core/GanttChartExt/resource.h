@@ -60,6 +60,8 @@
 #define IDC_DISPLAYPROGRESS             16022
 #define IDC_TB_PLACEHOLDER              16024
 #define IDC_CURRENTSTAGE                16025
+#define IDC_WORKLOAD_FRAME              16025
+#define IDC_GANTTCHART_FRAME            16025
 #define IDC_DISPLAY_LABEL               16026
 #define IDC_SNAPMODES_LABEL             16027
 #define IDC_SELECTEDTASKDATES_LABEL     16028

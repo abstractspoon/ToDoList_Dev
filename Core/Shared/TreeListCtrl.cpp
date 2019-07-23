@@ -376,6 +376,11 @@ HTREEITEM CTreeListCtrl::GetSelectedItem() const
 	return GetTreeSelItem();
 }
 
+DWORD CTreeListCtrl::GetSelectedItemData() const
+{
+	return GetItemData(GetSelectedItem());
+}
+
 BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 {
 	if (hti == NULL)
@@ -720,20 +725,23 @@ LRESULT CTreeListCtrl::OnTreeDragAbort(WPARAM /*wp*/, LPARAM /*lp*/)
 	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
 }
 
-void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
+BOOL CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
 	if (m_bMovingTask)
-		return;
+		return FALSE;
 	
 	// Ignore setting selection to 'NULL' unless there are no tasks at all
 	// because we know it's temporary only
 	if ((pNMTV->itemNew.hItem == NULL) && (m_tree.GetCount() != 0))
-		return;
+		return FALSE;
 	
-	// we're only interested in non-keyboard changes
+	// we're NOT interested in keyboard changes
 	// because keyboard gets handled in OnKeyUpWorkload
-	if (pNMTV->action != TVC_BYKEYBOARD)
-		CWnd::GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)pNMTV->itemNew.hItem);
+	if (pNMTV->action == TVC_BYKEYBOARD)
+		return FALSE;
+
+	CWnd::GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)pNMTV->itemNew.hItem);
+	return TRUE;
 }
 
 LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -1317,7 +1325,7 @@ void CTreeListCtrl::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSp
 	GraphicsMisc::DrawSplitBar(pDC, rSplitter, crSplitBar);
 }
 
-void CTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BOOL bSelected) const
+void CTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BOOL bSelected, COLORREF crDiv) const
 {
 	if (!HasGridlines() || (bVert && (rItem.right < 0)))
 		return;
@@ -1338,7 +1346,7 @@ void CTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BO
 
 	COLORREF crOld = pDC->GetBkColor();
 
-	pDC->FillSolidRect(rDiv, m_crGridLine);
+	pDC->FillSolidRect(rDiv, ((crDiv == CLR_NONE) ? m_crGridLine : crDiv));
 	pDC->SetBkColor(crOld);
 }
 
@@ -1492,6 +1500,22 @@ int CTreeListCtrl::Compare(const CString& sText1, const CString& sText2)
 		return (bEmpty1 ? 1 : -1);
 	
 	return Misc::NaturalCompare(sText1, sText2);
+}
+
+BOOL CTreeListCtrl::GetListColumnRect(int nCol, CRect& rColumn, BOOL bScrolled) const
+{
+	if (m_list.GetSubItemRect(0, nCol, LVIR_BOUNDS, rColumn))
+	{
+		if (!bScrolled)
+		{
+			int nScroll = m_list.GetScrollPos(SB_HORZ);
+			rColumn.OffsetRect(nScroll, 0);
+		}
+
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 HTREEITEM CTreeListCtrl::HitTestItem(const CPoint& ptScreen) const
@@ -1768,6 +1792,31 @@ void CTreeListCtrl::FilterToolTipMessage(MSG* pMsg)
 
 BOOL CTreeListCtrl::ProcessMessage(MSG* pMsg) 
 {
+	switch (pMsg->message)
+	{
+		// handle 'escape' during dependency editing
+	case WM_KEYDOWN:
+		{
+			AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+			switch (pMsg->wParam)
+			{
+			case VK_ESCAPE:
+				if (CancelOperation())
+					return true;
+				break;
+
+			case VK_ADD:
+				// Eat because Windows own processing does not understand how we do things!
+				if (Misc::ModKeysArePressed(MKS_CTRL) && (m_list.GetSafeHwnd() == pMsg->hwnd))
+					return true;
+				break;
+			}
+		}
+		break;
+	}
+
+	// all else
 	return m_treeDragDrop.ProcessMessage(pMsg);
 }
 

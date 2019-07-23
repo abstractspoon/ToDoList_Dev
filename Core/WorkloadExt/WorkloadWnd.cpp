@@ -352,29 +352,6 @@ bool CWorkloadWnd::ProcessMessage(MSG* pMsg)
 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	switch (pMsg->message)
-	{
-	// handle 'escape' during editing
-	case WM_KEYDOWN:
-		{
-			switch (pMsg->wParam)
-			{
-			case VK_ESCAPE:
-				if (m_ctrlWorkload.CancelOperation())
-					return true;
-				break;
-
-			case VK_ADD:
-				// Eat because Windows own processing does not understand how we do things!
-// 				if (Misc::ModKeysArePressed(MKS_CTRL) && (m_list.GetSafeHwnd() == pMsg->hwnd))
-// 					return true;
-				break;
-			}
-		}
-		break;
-	}
-
-	// Drag and drop messages
 	if (m_ctrlWorkload.ProcessMessage(pMsg))
 		return true;
 
@@ -408,8 +385,6 @@ IUI_HITTEST CWorkloadWnd::HitTest(const POINT& ptScreen) const
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// try tree header
-	// 6.9: disable header click because it changes the 
-	// tree/list columns not the Workload columns
 	if (m_ctrlWorkload.PointInHeader(ptScreen))
 		return IUI_NOWHERE;//IUI_COLUMNHEADER;
 
@@ -420,7 +395,6 @@ IUI_HITTEST CWorkloadWnd::HitTest(const POINT& ptScreen) const
 	// else 
 	return IUI_NOWHERE;
 }
-
 
 bool CWorkloadWnd::SelectTask(DWORD dwTaskID)
 {
@@ -695,7 +669,6 @@ BOOL CWorkloadWnd::OnInitDialog()
 		m_toolbar.RefreshButtonStates(TRUE);
 	}
 		
-	// init syncer
 	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
 	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
 

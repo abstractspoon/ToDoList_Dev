@@ -36,9 +36,6 @@
     <ClCompile Include="StdAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GanttTreeCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GanttStatic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -100,9 +97,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StdAfx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GanttTreeCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GanttMsg.h">

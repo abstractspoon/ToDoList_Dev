@@ -205,7 +205,7 @@ void CWorkloadCtrl::AdjustSplitterToFitAttributeColumns()
 
 DWORD CWorkloadCtrl::GetSelectedTaskID() const
 {
-	return GetTaskID(GetSelectedItem());
+	return GetSelectedItemData();
 }
 
 BOOL CWorkloadCtrl::GetSelectedTask(WORKLOADITEM& wi) const
@@ -829,7 +829,7 @@ BOOL CWorkloadCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTask
 	// exist in pTasks and delete them
 	if (hti && !mapIDs.Has(GetTaskID(hti)))
 	{
-		DeleteTreeItem(hti);
+		DeleteItem(hti);
 		return TRUE;
 	}
 
@@ -1660,19 +1660,23 @@ void CWorkloadCtrl::Sort(const WORKLOADSORTCOLUMNS& multi)
 
 void CWorkloadCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
-	*pResult = TRUE; // cancel our edit
+	*pResult = TRUE; // cancel our edit always
 	
-	// notify app to edit
-	if (!m_bReadOnly)
-	{
-		CPoint point(GetMessagePos());
-		CWnd::ScreenToClient(&point);
+	if (m_bReadOnly)
+		return;
 
-		if (TreeHitTestItemColumn(point, FALSE) == WLCC_TITLE)
-		{
-			CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKTITLE);
-		}
-	}
+	CPoint point(GetMessagePos());
+	int nCol = -1;
+	HTREEITEM hti = TreeHitTestItem(point, TRUE, nCol);
+
+	if (!hti || (nCol == -1))
+		return;
+
+	if (m_treeHeader.GetItemData(nCol) != WLCC_TITLE)
+		return;
+
+	// notify app to edit
+	CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKTITLE, 0, GetTaskID(hti));
 }
 
 void CWorkloadCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
@@ -1817,15 +1821,6 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	{
 		switch (msg)
 		{
-		case WM_RBUTTONDOWN:
-			{
-				DWORD dwTaskID = TreeHitTestTask(lp, FALSE);
-
-				if (dwTaskID)
-					SelectTask(dwTaskID);
-			}
-			break;
-
 		case WM_SETCURSOR:
 			if (!m_bReadOnly)
 			{
@@ -2440,8 +2435,7 @@ COLORREF CWorkloadCtrl::GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected,
 	return crText;
 }
 
-
-void CWorkloadCtrl::DeleteTreeItem(HTREEITEM hti)
+void CWorkloadCtrl::DeleteItem(HTREEITEM hti)
 {
 	DWORD dwTaskID = GetTaskID(hti);
 	ASSERT(dwTaskID);
@@ -2847,17 +2841,6 @@ DWORD CWorkloadCtrl::TreeHitTestTask(const CPoint& ptScreen, BOOL bScreen) const
 	HTREEITEM hti = TreeHitTestItem(ptScreen, bScreen);
 	
 	return GetTaskID(hti);
-}
-
-WLC_COLUMNID CWorkloadCtrl::TreeHitTestItemColumn(const CPoint& point, BOOL bScreen) const
-{
-	int nCol;
-
-	if ((TreeHitTestItem(point, bScreen, nCol) == NULL) || (nCol == -1))
-		return WLCC_NONE;
-
-	// else
-	return (WLC_COLUMNID)m_treeHeader.GetItemData(nCol);
 }
 
 DWORD CWorkloadCtrl::GetTaskID(HTREEITEM htiFrom) const
