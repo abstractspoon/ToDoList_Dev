@@ -304,6 +304,9 @@ BOOL CWorkloadCtrl::SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL 
 
 BOOL CWorkloadCtrl::CanMoveSelectedTask(const IUITASKMOVE& move) const
 {
+	if (m_bReadOnly)
+		return FALSE;
+
 	TLCITEMMOVE itemMove = { 0 };
 
 	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
@@ -315,6 +318,9 @@ BOOL CWorkloadCtrl::CanMoveSelectedTask(const IUITASKMOVE& move) const
 
 BOOL CWorkloadCtrl::MoveSelectedTask(const IUITASKMOVE& move)
 {
+	if (m_bReadOnly)
+		return FALSE;
+
 	TLCITEMMOVE itemMove = { 0 };
 
 	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
@@ -397,26 +403,19 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		
 	case IUI_NEW:
 	case IUI_EDIT:
-		{
-			m_tree.SetRedraw(FALSE);
-			m_list.SetRedraw(FALSE);
+		CWnd::SetRedraw(FALSE);
 			
-			// update the task(s)
-			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE))
-			{
-				if (pTasks->IsAttributeAvailable(TDCA_DUEDATE) || pTasks->IsAttributeAvailable(TDCA_STARTDATE))
-					m_data.RecalculateOverlaps();
-			}
+		// update the task(s)
+		if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE))
+		{
+			if (pTasks->IsAttributeAvailable(TDCA_DUEDATE) || pTasks->IsAttributeAvailable(TDCA_STARTDATE))
+				m_data.RecalculateOverlaps();
 		}
 		break;
 		
 	case IUI_DELETE:
-		{
-			m_tree.SetRedraw(FALSE);
-			m_list.SetRedraw(FALSE);
-		
-			RemoveDeletedTasks(pTasks);
-		}
+		CWnd::SetRedraw(FALSE);
+		RemoveDeletedTasks(pTasks);
 		break;
 		
 	default:
@@ -453,10 +452,8 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	case IUI_NEW:
 	case IUI_EDIT:
 	case IUI_DELETE:
-		{
-			m_tree.SetRedraw(TRUE);
-			m_list.SetRedraw(TRUE);
-		}
+		CWnd::SetRedraw(TRUE);
+		InvalidateAll();
 		break;
 
 	default:
@@ -1928,24 +1925,19 @@ void CWorkloadCtrl::OnListHeaderClick(NMHEADER* pHDN)
 	}
 }
 
-BOOL CWorkloadCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
+BOOL CWorkloadCtrl::OnItemCheckChange(HTREEITEM hti)
 {
-	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
-
-	if (!m_bReadOnly && (nFlags & TVHT_ONITEMSTATEICON))
+	if (!m_bReadOnly)
 	{
 		DWORD dwTaskID = GetTaskID(hti);
 		const WORKLOADITEM* pWI = m_data.GetItem(dwTaskID);
 		ASSERT(pWI);
-		
+
 		if (pWI)
 			CWnd::GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), !pWI->bDone);
-		
-		return TRUE; // eat
 	}
 
-	// not handled
-	return FALSE;
+	return TRUE; // always
 }
 
 BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT nFlags, CPoint point)
@@ -3085,3 +3077,9 @@ void CWorkloadCtrl::FilterToolTipMessage(MSG* pMsg)
 	m_barChart.FilterToolTipMessage(pMsg);
 }
 
+void CWorkloadCtrl::SetReadOnly(BOOL bReadOnly)
+{
+	m_bReadOnly = bReadOnly;
+
+	EnableDragAndDrop(!bReadOnly);
+}

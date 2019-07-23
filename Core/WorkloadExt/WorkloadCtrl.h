@@ -39,6 +39,7 @@ public:
 
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
+	void SetReadOnly(BOOL bReadOnly);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	bool PrepareNewTask(ITaskList* pTask) const;
@@ -96,6 +97,7 @@ protected:
 	int m_nSortByAllocToCol;
 	COleDateTimeRange m_dtPeriod, m_dtDataRange;
 	COLORREF m_crAllocation, m_crOverlap;
+	BOOL m_bReadOnly;
 
 	WORKLOADSORT m_sort;
 	CStringArray m_aAllocTo;
@@ -134,7 +136,7 @@ protected:
 	UINT OnDragOverItem(UINT nCursor);
 
 	// pseudo-message handlers
-	BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);
+	BOOL OnItemCheckChange(HTREEITEM hti);
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	void OnListHeaderClick(NMHEADER* HDN);
 	void OnResize(int cx, int cy);

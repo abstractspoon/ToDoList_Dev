@@ -228,7 +228,6 @@ CTreeListCtrl::CTreeListCtrl()
 	m_crAltLine(CLR_NONE),
 	m_crGridLine(CLR_NONE),
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
-	m_bReadOnly(FALSE),
 	m_bMovingTask(FALSE),
 	m_nPrevDropHilitedItem(-1),
 	m_tshDragDrop(m_tree),
@@ -1014,9 +1013,10 @@ BOOL CTreeListCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 {
 	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
 
-	if (!m_bReadOnly && (nFlags & TVHT_ONITEMSTATEICON))
+	if (hti && (nFlags & TVHT_ONITEMSTATEICON))
 	{
-		if (GetItemData(hti))
+		// Derived class gets first refusal
+		if (!OnItemCheckChange(hti))
 			CWnd::GetParent()->SendMessage(WM_TLC_ITEMCHECKCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)hti);
 		
 		return TRUE; // eat
@@ -1064,10 +1064,6 @@ BOOL CTreeListCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 
 BOOL CTreeListCtrl::OnListLButtonDown(UINT /*nFlags*/, CPoint point)
 {
-	if (!m_bReadOnly)
-	{
-	}
-	
 	// don't let the selection to be set to -1
 	CPoint ptScreen(point);
 	m_list.ClientToScreen(&ptScreen);
@@ -1677,11 +1673,9 @@ void CTreeListCtrl::RedrawTree(BOOL bErase)
 	m_tree.UpdateWindow();
 }
 
-void CTreeListCtrl::SetReadOnly(bool bReadOnly) 
+void CTreeListCtrl::EnableDragAndDrop(BOOL bEnable) 
 { 
-	m_bReadOnly = bReadOnly;
-
-	m_treeDragDrop.EnableDragDrop(!bReadOnly);
+	m_treeDragDrop.EnableDragDrop(bEnable);
 }
 
 BOOL CTreeListCtrl::CancelOperation()
@@ -1779,8 +1773,7 @@ BOOL CTreeListCtrl::ProcessMessage(MSG* pMsg)
 
 BOOL CTreeListCtrl::CanMoveItem(const TLCITEMMOVE& move) const
 {
-	return (!m_bReadOnly && 
-			!move.bCopy &&
+	return (!move.bCopy &&
 			((move.htiSel == NULL) || GetItemData(move.htiSel)) &&
 			((move.htiDestParent == NULL) || GetItemData(move.htiDestParent)) &&
 			((move.htiDestAfterSibling == NULL) || GetItemData(move.htiDestAfterSibling)));

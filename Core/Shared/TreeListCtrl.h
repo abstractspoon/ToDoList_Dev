@@ -144,7 +144,7 @@ public:
 	BOOL SetBackgroundColor(COLORREF crBkgnd);
 
 	BOOL CancelOperation();
-	void SetReadOnly(bool bReadOnly);
+	void EnableDragAndDrop(BOOL bEnable = TRUE);
 	BOOL GetLabelEditRect(LPRECT pEdit) const;
 
 	int GetTreeColumnOrder(CIntArray& aOrder) const;
@@ -160,9 +160,7 @@ protected:
 	CListCtrl m_list;
 	CEnHeaderCtrl m_listHeader, m_treeHeader;
 
-	BOOL m_bReadOnly;
 	BOOL m_bMovingTask;
-
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
 
@@ -208,7 +206,6 @@ protected:
 	virtual BOOL OnTreeLButtonDblClk(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDown(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
-	virtual void OnResize(int cx, int cy);
 
 	virtual void OnListHeaderClick(NMHEADER* /*HDN*/) {}
 	virtual BOOL OnTreeMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
@@ -217,6 +214,8 @@ protected:
 
 	virtual UINT OnDragOverItem(UINT nCursor) { return nCursor; }
 	virtual BOOL OnDragDropItem(const TLCITEMMOVE& /*move*/) { return FALSE; }
+	virtual void OnResize(int cx, int cy);
+	virtual BOOL OnItemCheckChange(HTREEITEM /*hti*/) { return FALSE; }
 
 	virtual GM_ITEMSTATE GetItemState(int nItem) const;
 	virtual GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
