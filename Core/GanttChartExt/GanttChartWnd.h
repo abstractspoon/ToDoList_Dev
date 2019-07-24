@@ -7,7 +7,7 @@
 // GanttChartWnd.h : header file
 //
 
-#include "GanttTreeListCtrl.h"
+#include "GanttCtrl.h"
 #include "GanttPreferencesDlg.h"
 #include "GanttCreateDependsDlg.h"
 #include "GanttDateRangeSlider.h"
@@ -68,7 +68,7 @@ protected:
 	//{{AFX_DATA(CGanttChartWnd)
 	//}}AFX_DATA
 	CComboBox m_cbSnapModes;
-	CGanttTreeListCtrl m_ctrlGantt;
+	CGanttCtrl m_ctrlGantt;
 	CTabbedComboBox	m_cbDisplayOptions;
 	CGanttPreferencesDlg m_dlgPrefs;
 	CGanttCreateDependsDlg m_dlgDepends;
@@ -122,7 +122,6 @@ protected:
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnNcDestroy();
-	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 
 	afx_msg LRESULT OnGanttEditTaskTitle(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifySelChanged(WPARAM wp, LPARAM lp);

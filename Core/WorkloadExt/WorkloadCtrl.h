@@ -36,10 +36,10 @@ public:
 
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
+	void SetReadOnly(BOOL bReadOnly);
 
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
-	void SetReadOnly(BOOL bReadOnly);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	bool PrepareNewTask(ITaskList* pTask) const;
@@ -105,12 +105,8 @@ protected:
 	CMapAllocationTotals m_mapTotalDays, m_mapTotalTasks, m_mapPercentLoad;
 
 protected:
-	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
-
-protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
-	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 
 	afx_msg void OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
@@ -121,7 +117,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	// base-class virtual message handlers
+	// virtual overrides
+	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+
 	LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
@@ -130,23 +128,26 @@ protected:
 	LRESULT OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 	LRESULT OnTotalsLabelsListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 			
-	// derived class callback
 	void OnNotifySplitterChange(int nSplitPos);
 	BOOL OnDragDropItem(const TLCITEMMOVE& move);
 	UINT OnDragOverItem(UINT nCursor);
 
-	// pseudo-message handlers
 	BOOL OnItemCheckChange(HTREEITEM hti);
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	void OnListHeaderClick(NMHEADER* HDN);
 	void OnResize(int cx, int cy);
 
+	GM_ITEMSTATE GetItemState(int nItem) const;
+	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
+	int CalcSplitPosToFitListColumns(int nTotalWidth) const;
+	BOOL UpdateTreeTitleColumnWidth(CDC* pDC, int nTotalWidth, UPDATECOLWIDTHACTION nAction);
+	BOOL UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction);
+	void DeleteItem(HTREEITEM hti);
+	
+	// Non-virtual members
 	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack = CLR_NONE);
 	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack = CLR_NONE);
 	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, const CRect& rItem, const CRect& rClient, BOOL bSelected);
-	GM_ITEMSTATE GetItemState(int nItem) const;
-	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
-	
 	void DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected);
 	void DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocationTotals& mapAlloc, int nDecimals);
 	void DrawTotalsHeader(CDC* pDC);
@@ -156,7 +157,6 @@ protected:
 	void BuildListColumns();
 	void UpdateListColumns();
 	int GetRequiredListColumnCount() const;
-	void DeleteItem(HTREEITEM hti);
 	void RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	BOOL RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CDWordSet& mapIDs);
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
@@ -171,7 +171,6 @@ protected:
 
 	DWORD GetTaskID(HTREEITEM hti) const;
 	DWORD GetTaskID(int nItem) const;
-	DWORD GetListTaskID(DWORD nItemData) const;
 	WLC_COLUMNID GetTreeColumnID(int nCol) const;
 	WLC_LISTCOLUMNTYPE GetListColumnType(int nCol) const;
 
@@ -188,7 +187,6 @@ protected:
 	void RemoveTotalsScrollbars();
 	void UpdateTotalsDateRangeLabel();
 	void RefreshMissingAllocations();
-	BOOL UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding);
 	HIMAGELIST GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const;
 
  	COLORREF GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter = FALSE) const;

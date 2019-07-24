@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "GanttTreeListCtrl.h"
+#include "GanttCtrl.h"
 #include "GanttMsg.h"
 #include "GanttStatic.h"
 
@@ -12,18 +12,14 @@
 #include "..\shared\DateHelper.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\graphicsMisc.h"
-#include "..\shared\TreeCtrlHelper.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\misc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
 #include "..\shared\themed.h"
-#include "..\shared\osversion.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\copywndcontents.h"
 #include "..\shared\WorkingWeek.h"
-
-#include "..\Interfaces\iuiextension.h"
 
 #include "..\3rdparty\shellicons.h"
 
@@ -66,7 +62,9 @@ const int DONE_BOX				= GraphicsMisc::ScaleByDPIFactor(6);
 const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 const int PARENT_ARROW_SIZE		= GraphicsMisc::ScaleByDPIFactor(6);
 
-const LONG DEPENDPICKPOS_NONE	= 0xFFFFFFFF;
+//////////////////////////////////////////////////////////////////////
+
+const LONG DEPENDPICKPOS_NONE		= 0xFFFFFFFF;
 
 const double DAY_WEEK_MULTIPLIER	= 1.5;
 const double HOUR_DAY_MULTIPLIER	= 6;
@@ -97,14 +95,10 @@ const int MAX_HEADER_WIDTH			= 32000; // (SHRT_MAX - tolerance)
 }
 
 //////////////////////////////////////////////////////////////////////
-
-#define FROMISABOVE(t) ((t == GCDDT_FROMISABOVELEFT) || (t == GCDDT_FROMISABOVERIGHT))
-
-//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CGanttTreeListCtrl::CGanttTreeListCtrl() 
+CGanttCtrl::CGanttCtrl() 
 	:
 	m_nMonthWidth(DEF_MONTH_WIDTH),
 	m_nMonthDisplay(GTLC_DISPLAY_MONTHS_LONG),
@@ -124,26 +118,21 @@ CGanttTreeListCtrl::CGanttTreeListCtrl()
 
 }
 
-CGanttTreeListCtrl::~CGanttTreeListCtrl()
+CGanttCtrl::~CGanttCtrl()
 {
 }
 
-BEGIN_MESSAGE_MAP(CGanttTreeListCtrl, CTreeListCtrl)
+BEGIN_MESSAGE_MAP(CGanttCtrl, CTreeListCtrl)
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_TREELISTTREE, OnBeginEditTreeLabel)
 	ON_NOTIFY(HDN_ITEMCLICK, IDC_TREELISTTREEHEADER, OnClickTreeHeader)
 	ON_NOTIFY(HDN_ITEMCHANGING, IDC_TREELISTTREEHEADER, OnItemChangingTreeHeader)
 	ON_NOTIFY(TVN_GETDISPINFO, IDC_TREELISTTREE, OnTreeGetDispInfo)
-// 	ON_NOTIFY(NM_CLICK, IDC_ALLOCATIONCOLUMNS, OnClickColumns)
-// 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_TOTALSLABELS, OnTotalsListsCustomDraw)
-// 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ALLOCATIONTOTALS, OnTotalsListsCustomDraw)
 
 	ON_WM_CREATE()
-// 	ON_WM_MOUSEWHEEL()
-// 	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 
-int CGanttTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CGanttCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CTreeListCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -165,19 +154,19 @@ int CGanttTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CGanttTreeListCtrl::InitItemHeights()
+void CGanttCtrl::InitItemHeights()
 {
 	CTreeListCtrl::InitItemHeights();
 
 	GANTTDEPENDENCY::STUB = (m_tree.GetItemHeight() / 2);
 }
 
-DWORD CGanttTreeListCtrl::GetSelectedTaskID() const
+DWORD CGanttCtrl::GetSelectedTaskID() const
 {
 	return GetSelectedItemData();
 }
 
-BOOL CGanttTreeListCtrl::GetSelectedTaskDependencies(CDWordArray& aDepends) const
+BOOL CGanttCtrl::GetSelectedTaskDependencies(CDWordArray& aDepends) const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
 	const GANTTITEM* pGI = NULL;
@@ -188,7 +177,7 @@ BOOL CGanttTreeListCtrl::GetSelectedTaskDependencies(CDWordArray& aDepends) cons
 	return TRUE;
 }
 
-BOOL CGanttTreeListCtrl::SetSelectedTaskDependencies(const CDWordArray& aDepends)
+BOOL CGanttCtrl::SetSelectedTaskDependencies(const CDWordArray& aDepends)
 {
 	DWORD dwTaskID = GetSelectedTaskID();
 	GANTTITEM* pGI = NULL;
@@ -201,7 +190,7 @@ BOOL CGanttTreeListCtrl::SetSelectedTaskDependencies(const CDWordArray& aDepends
 	return TRUE;
 }
 
-BOOL CGanttTreeListCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const
+BOOL CGanttCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
 	const GANTTITEM* pGI = NULL;
@@ -230,14 +219,14 @@ BOOL CGanttTreeListCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTim
 	return FALSE;
 }
 
-BOOL CGanttTreeListCtrl::SelectTask(DWORD dwTaskID)
+BOOL CGanttCtrl::SelectTask(DWORD dwTaskID)
 {
 	HTREEITEM hti = FindTreeItem(m_tree, dwTaskID);
 
 	return SelectItem(hti);
 }
 
-BOOL CGanttTreeListCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
+BOOL CGanttCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 {
 	HTREEITEM htiStart = NULL;
 	BOOL bForwards = TRUE;
@@ -277,7 +266,7 @@ BOOL CGanttTreeListCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& se
 	return SelectTask(htiStart, select, bForwards);
 }
 
-BOOL CGanttTreeListCtrl::SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards)
+BOOL CGanttCtrl::SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards)
 {
 	if (!hti)
 		return FALSE;
@@ -299,7 +288,7 @@ BOOL CGanttTreeListCtrl::SelectTask(HTREEITEM hti, const IUISELECTTASK& select, 
 	return SelectTask(m_tree.TCH().GetPrevItem(hti), select, FALSE);
 }
 
-void CGanttTreeListCtrl::RecalcParentDates()
+void CGanttCtrl::RecalcParentDates()
 {
 	GANTTITEM dummy;
 	GANTTITEM* pGI = &dummy;
@@ -307,7 +296,7 @@ void CGanttTreeListCtrl::RecalcParentDates()
 	RecalcParentDates(NULL, pGI);
 }
 
-void CGanttTreeListCtrl::RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI)
+void CGanttCtrl::RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI)
 {
 	// ignore root
 	DWORD dwTaskID = 0;
@@ -358,7 +347,7 @@ void CGanttTreeListCtrl::RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI)
 	}
 }
 
-BOOL CGanttTreeListCtrl::EditWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const
+BOOL CGanttCtrl::EditWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const
 {
 	switch (nUpdate)
 	{
@@ -396,7 +385,7 @@ BOOL CGanttTreeListCtrl::EditWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATE
 	return FALSE;
 }
 
-void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
+void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 {
 	// we must have been initialized already
 	ASSERT(m_list.GetSafeHwnd() && m_tree.GetSafeHwnd());
@@ -415,9 +404,10 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 	switch (nUpdate)
 	{
 	case IUI_ALL:
+		EnableResync(FALSE);
 		{
 			CLockUpdates lu(*this);
-			
+
 			CDWordArray aExpanded;
 			GetExpandedState(aExpanded);
 			
@@ -440,6 +430,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			else
 				ScrollToToday();
 		}
+		EnableResync(TRUE, m_tree);
 		break;
 		
 	case IUI_NEW:
@@ -483,7 +474,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 	}
 	
 	InitItemHeights();
-	UpdateColumnWidths(TRUE);
+	UpdateColumnWidths(UCWA_ANY);
 
 	if (EditWantsResort(pTasks, nUpdate))
 	{
@@ -498,7 +489,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 	}
 }
 
-void CGanttTreeListCtrl::PreFixVScrollSyncBug()
+void CGanttCtrl::PreFixVScrollSyncBug()
 {
 	// Odd bug: The very last tree item will not scroll into view. 
 	// Expanding and collapsing an item is enough to resolve the issue.
@@ -511,7 +502,7 @@ void CGanttTreeListCtrl::PreFixVScrollSyncBug()
 	}
 }
 
-CString CGanttTreeListCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+CString CGanttCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
 	int nAllocTo = pTasks->GetTaskAllocatedToCount(hTask);
 	
@@ -533,7 +524,7 @@ CString CGanttTreeListCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITE
 	return Misc::FormatArray(aAllocTo);
 }
 
-BOOL CGanttTreeListCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
+BOOL CGanttCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
@@ -557,7 +548,7 @@ BOOL CGanttTreeListCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
 	return (nAttrib == IUI_ALL);
 }
 
-BOOL CGanttTreeListCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib)
+BOOL CGanttCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
@@ -580,7 +571,7 @@ BOOL CGanttTreeListCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib)
 	return FALSE;
 }
 
-TDC_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttribute(GTLC_COLUMN nCol)
+TDC_ATTRIBUTE CGanttCtrl::MapColumnToAttribute(GTLC_COLUMN nCol)
 {
 	switch (nCol)
 	{
@@ -599,7 +590,7 @@ TDC_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttribute(GTLC_COLUMN nCol)
 	return TDCA_NONE;
 }
 
-GTLC_COLUMN CGanttTreeListCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
+GTLC_COLUMN CGanttCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
@@ -618,7 +609,7 @@ GTLC_COLUMN CGanttTreeListCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
 	return GTLCC_NONE;
 }
 
-BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings)
+BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return FALSE;
@@ -785,7 +776,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	return bChange;
 }
 
-void CGanttTreeListCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
+void CGanttCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 									  CDWordSet& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -810,7 +801,7 @@ void CGanttTreeListCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTa
 	}
 }
 
-void CGanttTreeListCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CDWordSet& mapIDs)
+void CGanttCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CDWordSet& mapIDs)
 {
 	// traverse the tree looking for items that do not 
 	// exist in pTasks and delete them
@@ -833,7 +824,7 @@ void CGanttTreeListCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* 
 	}
 }
 
-void CGanttTreeListCtrl::UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
+void CGanttCtrl::UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return;
@@ -863,7 +854,7 @@ void CGanttTreeListCtrl::UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKIT
 	}
 }
 
-void CGanttTreeListCtrl::UpdateParentStatus(DWORD dwParentID)
+void CGanttCtrl::UpdateParentStatus(DWORD dwParentID)
 {
 	if (dwParentID)
 	{
@@ -877,7 +868,7 @@ void CGanttTreeListCtrl::UpdateParentStatus(DWORD dwParentID)
 	}
 }
 
-GANTTITEM* CGanttTreeListCtrl::GetGanttItem(DWORD dwTaskID, BOOL bCopyRefID) const
+GANTTITEM* CGanttCtrl::GetGanttItem(DWORD dwTaskID, BOOL bCopyRefID) const
 {
 	GANTTITEM* pGI = m_data.GetItem(dwTaskID);
 	ASSERT(pGI);
@@ -906,7 +897,7 @@ GANTTITEM* CGanttTreeListCtrl::GetGanttItem(DWORD dwTaskID, BOOL bCopyRefID) con
 	return pGI;
 }
 
-BOOL CGanttTreeListCtrl::RestoreGanttItem(const GANTTITEM& giPrev)
+BOOL CGanttCtrl::RestoreGanttItem(const GANTTITEM& giPrev)
 {
 	if (m_data.RestoreItem(giPrev))
 	{
@@ -920,7 +911,7 @@ BOOL CGanttTreeListCtrl::RestoreGanttItem(const GANTTITEM& giPrev)
 	return FALSE;
 }
 
-void CGanttTreeListCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
+void CGanttCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 {
 	m_tree.DeleteAllItems();
 	m_list.DeleteAllItems();
@@ -935,7 +926,7 @@ void CGanttTreeListCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 	ExpandList();
 }
 
-void CGanttTreeListCtrl::RecalcDateRange()
+void CGanttCtrl::RecalcDateRange()
 {
 	if (m_data.GetCount())
 	{
@@ -956,7 +947,7 @@ void CGanttTreeListCtrl::RecalcDateRange()
 	}
 }
 
-void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
+void CGanttCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 										HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd)
 {
 	if (hTask == NULL)
@@ -1069,7 +1060,7 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 	}
 }
 
-void CGanttTreeListCtrl::IncrementItemPositions(HTREEITEM htiParent, int nFromPos)
+void CGanttCtrl::IncrementItemPositions(HTREEITEM htiParent, int nFromPos)
 {
 	HTREEITEM htiChild = m_tree.GetChildItem(htiParent);
 
@@ -1087,21 +1078,21 @@ void CGanttTreeListCtrl::IncrementItemPositions(HTREEITEM htiParent, int nFromPo
 	}
 }
 
-BOOL CGanttTreeListCtrl::GetActiveDateRange(GANTTDATERANGE& dtRange) const
+BOOL CGanttCtrl::GetActiveDateRange(GANTTDATERANGE& dtRange) const
 {
 	dtRange = ActiveDateRange();
 
 	return dtRange.IsValid();
 }
 
-BOOL CGanttTreeListCtrl::GetDataDateRange(GANTTDATERANGE& dtRange) const
+BOOL CGanttCtrl::GetDataDateRange(GANTTDATERANGE& dtRange) const
 {
 	dtRange = m_dtDataRange;
 
 	return dtRange.IsValid();
 }
 
-const GANTTDATERANGE& CGanttTreeListCtrl::ActiveDateRange() const
+const GANTTDATERANGE& CGanttCtrl::ActiveDateRange() const
 {
 	if (m_dtActiveRange.IsValid())
 		return m_dtActiveRange;
@@ -1110,7 +1101,7 @@ const GANTTDATERANGE& CGanttTreeListCtrl::ActiveDateRange() const
 	return m_dtDataRange;
 }
 
-void CGanttTreeListCtrl::ClearActiveDateRange()
+void CGanttCtrl::ClearActiveDateRange()
 {
 	if (m_dtActiveRange.IsValid())
 	{
@@ -1121,7 +1112,7 @@ void CGanttTreeListCtrl::ClearActiveDateRange()
 	}
 }
 
-BOOL CGanttTreeListCtrl::SetActiveDateRange(const GANTTDATERANGE& dtRange)
+BOOL CGanttCtrl::SetActiveDateRange(const GANTTDATERANGE& dtRange)
 {
 	if (!dtRange.IsValid())
 		return FALSE;
@@ -1146,32 +1137,32 @@ BOOL CGanttTreeListCtrl::SetActiveDateRange(const GANTTDATERANGE& dtRange)
 	return TRUE;
 }
 
-COleDateTime CGanttTreeListCtrl::GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const
+COleDateTime CGanttCtrl::GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const
 {
 	return ActiveDateRange().GetStart(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
 }
 
-COleDateTime CGanttTreeListCtrl::GetEndDate(GTLC_MONTH_DISPLAY nDisplay) const
+COleDateTime CGanttCtrl::GetEndDate(GTLC_MONTH_DISPLAY nDisplay) const
 {
 	return ActiveDateRange().GetEnd(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
 }
 
-int CGanttTreeListCtrl::GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const
+int CGanttCtrl::GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const
 {
 	return ActiveDateRange().GetStartYear(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
 }
 
-int CGanttTreeListCtrl::GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const
+int CGanttCtrl::GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const
 {
 	return ActiveDateRange().GetEndYear(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
 }
 
-int CGanttTreeListCtrl::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const
+int CGanttCtrl::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const
 {
 	return ActiveDateRange().GetNumMonths(nDisplay);
 }
 
-void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
+void CGanttCtrl::SetOption(DWORD dwOption, BOOL bSet)
 {
 	if (dwOption)
 	{
@@ -1224,7 +1215,7 @@ void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
 	}
 }
 
-CString CGanttTreeListCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const
+CString CGanttCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const
 {
 	if (nMonth == 0)
 		return _T("");
@@ -1314,22 +1305,22 @@ CString CGanttTreeListCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDispl
 	return sDate;
 }
 
-double CGanttTreeListCtrl::GetMonthWidth(int nColWidth) const
+double CGanttCtrl::GetMonthWidth(int nColWidth) const
 {
 	return GetMonthWidth(m_nMonthDisplay, nColWidth);
 }
 
-double CGanttTreeListCtrl::GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth)
+double CGanttCtrl::GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth)
 {
 	return (nColWidth / (double)GetNumMonthsPerColumn(nDisplay));
 }
 
-int CGanttTreeListCtrl::GetRequiredListColumnCount() const
+int CGanttCtrl::GetRequiredListColumnCount() const
 {
 	return GetRequiredListColumnCount(m_nMonthDisplay);
 }
 
-int CGanttTreeListCtrl::GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const
+int CGanttCtrl::GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const
 {
 	int nNumCols = GetRequiredColumnCount(ActiveDateRange(), nDisplay);
 	
@@ -1342,17 +1333,17 @@ int CGanttTreeListCtrl::GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) 
 	return nNumCols;
 }
 
-int CGanttTreeListCtrl::GetColumnWidth() const
+int CGanttCtrl::GetColumnWidth() const
 {
 	return GetColumnWidth(m_nMonthDisplay, m_nMonthWidth);
 }
 
-int CGanttTreeListCtrl::GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth)
+int CGanttCtrl::GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth)
 {
 	return (GetNumMonthsPerColumn(nDisplay) * nMonthWidth);
 }
 
-BOOL CGanttTreeListCtrl::GetListColumnDate(int nCol, int& nMonth, int& nYear) const
+BOOL CGanttCtrl::GetListColumnDate(int nCol, int& nMonth, int& nYear) const
 {
 	ASSERT (nCol > 0);
 	nMonth = nYear = 0;
@@ -1368,7 +1359,7 @@ BOOL CGanttTreeListCtrl::GetListColumnDate(int nCol, int& nMonth, int& nYear) co
 	return (nMonth >= 1 && nMonth <= 12);
 }
 
-BOOL CGanttTreeListCtrl::GetListColumnDate(int nCol, COleDateTime& date, BOOL bEndOfMonth) const
+BOOL CGanttCtrl::GetListColumnDate(int nCol, COleDateTime& date, BOOL bEndOfMonth) const
 {
 	int nMonth, nYear;
 
@@ -1383,7 +1374,7 @@ BOOL CGanttTreeListCtrl::GetListColumnDate(int nCol, COleDateTime& date, BOOL bE
 	return TRUE;
 }
 
-void CGanttTreeListCtrl::BuildTreeColumns()
+void CGanttCtrl::BuildTreeColumns()
 {
 	// delete existing columns
 	while (m_treeHeader.DeleteItem(0));
@@ -1403,7 +1394,7 @@ void CGanttTreeListCtrl::BuildTreeColumns()
 	}
 }
 
-void CGanttTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
+void CGanttCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 {
 	// clear pick line first
 	ClearDependencyPickLine();
@@ -1411,7 +1402,7 @@ void CGanttTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildr
 	CTreeListCtrl::ExpandItem(hti, bExpand, bAndChildren);
 }
 
-LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
+LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 {
 	HTREEITEM hti = (HTREEITEM)pTVCD->nmcd.dwItemSpec;
 	
@@ -1498,7 +1489,7 @@ LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 	return CDRF_DODEFAULT;
 }
 
-HIMAGELIST CGanttTreeListCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
+HIMAGELIST CGanttCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
 {
 	if (m_tree.GetImageList(TVSIL_NORMAL) == NULL)
 		return NULL;
@@ -1506,7 +1497,7 @@ HIMAGELIST CGanttTreeListCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) con
 	return (HIMAGELIST)CWnd::GetParent()->SendMessage(WM_GTLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
 }
 
-COLORREF CGanttTreeListCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected)
+COLORREF CGanttCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected)
 {
 	BOOL bAlternate = (HasAltLineColor() && !IsTreeItemLineOdd(hti));
 	COLORREF crBack = GetTreeTextBkColor(gi, bSelected, bAlternate);
@@ -1529,7 +1520,7 @@ COLORREF CGanttTreeListCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, con
 	return crBack;
 }
 
-GM_ITEMSTATE CGanttTreeListCtrl::GetItemState(int nItem) const
+GM_ITEMSTATE CGanttCtrl::GetItemState(int nItem) const
 {
 	if (m_bSavingToImage)
 		return GMIS_NONE;
@@ -1538,7 +1529,7 @@ GM_ITEMSTATE CGanttTreeListCtrl::GetItemState(int nItem) const
 	return CTreeListCtrl::GetItemState(nItem);
 }
 
-GM_ITEMSTATE CGanttTreeListCtrl::GetItemState(HTREEITEM hti) const
+GM_ITEMSTATE CGanttCtrl::GetItemState(HTREEITEM hti) const
 {
 	if (m_bSavingToImage)
 		return GMIS_NONE;
@@ -1547,7 +1538,7 @@ GM_ITEMSTATE CGanttTreeListCtrl::GetItemState(HTREEITEM hti) const
 	return CTreeListCtrl::GetItemState(hti);
 }
 
-LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
 	int nItem = (int)pLVCD->nmcd.dwItemSpec;
@@ -1632,7 +1623,7 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CGanttTreeListCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
+LRESULT CGanttCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 {
 	if (pNMCD->hdr.hwndFrom == m_listHeader)
 	{
@@ -1692,14 +1683,14 @@ LRESULT CGanttTreeListCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 }
 
 // Called by parent
-void CGanttTreeListCtrl::Sort(GTLC_COLUMN nBy, BOOL bAscending)
+void CGanttCtrl::Sort(GTLC_COLUMN nBy, BOOL bAscending)
 {
 	ASSERT(bAscending != -1);
 
 	Sort(nBy, FALSE, bAscending, FALSE);
 }
 
-void CGanttTreeListCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent)
+void CGanttCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent)
 {
 	// clear pick line first
 	ClearDependencyPickLine();
@@ -1717,7 +1708,7 @@ void CGanttTreeListCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscendin
 		GetCWnd()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nBy);
 }
 
-void CGanttTreeListCtrl::Sort(const GANTTSORTCOLUMNS multi)
+void CGanttCtrl::Sort(const GANTTSORTCOLUMNS multi)
 {
 	// clear pick line first
 	ClearDependencyPickLine();
@@ -1732,7 +1723,7 @@ void CGanttTreeListCtrl::Sort(const GANTTSORTCOLUMNS multi)
 	m_treeHeader.Invalidate(FALSE);
 }
 
-void CGanttTreeListCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CGanttCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = TRUE; // cancel our edit
 
@@ -1753,7 +1744,7 @@ void CGanttTreeListCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResul
 	CWnd::GetParent()->SendMessage(WM_GTLC_EDITTASKTITLE, 0, GetTaskID(hti));
 }
 
-void CGanttTreeListCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
+void CGanttCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
 	HD_NOTIFY *pHDN = (HD_NOTIFY *)pNMHDR;
 
@@ -1764,7 +1755,7 @@ void CGanttTreeListCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	}
 }
 
-void CGanttTreeListCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
+void CGanttCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
 	*pResult = 0;
@@ -1800,7 +1791,7 @@ void CGanttTreeListCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResul
 	}
 }
 
-void CGanttTreeListCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
+void CGanttCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
 	TV_DISPINFO* pDispInfo = (TV_DISPINFO*)pNMHDR;
 	DWORD dwTaskID = pDispInfo->item.lParam;
@@ -1834,7 +1825,7 @@ void CGanttTreeListCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	}
 }
 
-BOOL CGanttTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
+BOOL CGanttCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
 	if (!CTreeListCtrl::OnTreeSelectionChange(pNMTV))
 		return FALSE;
@@ -1845,7 +1836,7 @@ BOOL CGanttTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	return TRUE;
 }
 
-UINT CGanttTreeListCtrl::OnDragOverItem(UINT nCursor)
+UINT CGanttCtrl::OnDragOverItem(UINT nCursor)
 {
 	// We currently DON'T support 'linking'
 	if (nCursor == DD_DROPEFFECT_LINK)
@@ -1854,7 +1845,7 @@ UINT CGanttTreeListCtrl::OnDragOverItem(UINT nCursor)
 	return nCursor;
 }
 
-BOOL CGanttTreeListCtrl::OnDragDropItem(const TLCITEMMOVE& move)
+BOOL CGanttCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 {
 	// Notify parent of move
 	IUITASKMOVE taskMove = { 0 };
@@ -1874,7 +1865,7 @@ BOOL CGanttTreeListCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 	return TRUE; // prevent base class handling
 }
 
-void CGanttTreeListCtrl::ClearDependencyPickLine(CDC* pDC)
+void CGanttCtrl::ClearDependencyPickLine(CDC* pDC)
 {
 	if (IsPickingDependencyToTask() && IsDependencyPickLinePosValid())
 	{
@@ -1905,7 +1896,7 @@ void CGanttTreeListCtrl::ClearDependencyPickLine(CDC* pDC)
 	}
 }
 
-BOOL CGanttTreeListCtrl::IsDependencyPickLinePosValid() const
+BOOL CGanttCtrl::IsDependencyPickLinePosValid() const
 {
 	if (IsPickingDependencyToTask()) 
 	{
@@ -1917,12 +1908,12 @@ BOOL CGanttTreeListCtrl::IsDependencyPickLinePosValid() const
 	return FALSE;
 }
 
-void CGanttTreeListCtrl::ResetDependencyPickLinePos()
+void CGanttCtrl::ResetDependencyPickLinePos()
 {
 	m_ptLastDependPick.x = m_ptLastDependPick.y = DEPENDPICKPOS_NONE;
 }
 
-BOOL CGanttTreeListCtrl::DrawDependencyPickLine(const CPoint& ptClient)
+BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 {
 	if (IsPickingDependencyToTask())
 	{
@@ -1980,7 +1971,7 @@ BOOL CGanttTreeListCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 	return FALSE;
 }
 
-BOOL CGanttTreeListCtrl::SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const
+BOOL CGanttCtrl::SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const
 {
 	if (nHit != GTLCHT_NOWHERE)
 	{
@@ -2012,7 +2003,7 @@ BOOL CGanttTreeListCtrl::SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) co
 	return FALSE;
 }
 
-LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (!IsResyncEnabled())
 		return CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
@@ -2170,7 +2161,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 	return CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
 }
 
-BOOL CGanttTreeListCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint point)
+BOOL CGanttCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint point)
 {
 	if (!m_bReadOnly)
 	{
@@ -2195,7 +2186,7 @@ BOOL CGanttTreeListCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint point)
 	return FALSE;
 }
 
-BOOL CGanttTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
+BOOL CGanttCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 {
 	if (CTreeListCtrl::OnTreeLButtonDown(nFlags, point))
 		return TRUE;
@@ -2240,7 +2231,7 @@ BOOL CGanttTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 	return FALSE;
 }
 
-BOOL CGanttTreeListCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
+BOOL CGanttCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 {
 	if (CTreeListCtrl::OnTreeLButtonUp(nFlags, point))
 		return TRUE;
@@ -2260,7 +2251,7 @@ BOOL CGanttTreeListCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 	return FALSE;
 }
 
-BOOL CGanttTreeListCtrl::OnItemCheckChange(HTREEITEM hti)
+BOOL CGanttCtrl::OnItemCheckChange(HTREEITEM hti)
 {
 	if (m_bReadOnly)
 		return FALSE;
@@ -2275,7 +2266,7 @@ BOOL CGanttTreeListCtrl::OnItemCheckChange(HTREEITEM hti)
 	return TRUE; // always
 }
 
-BOOL CGanttTreeListCtrl::OnListMouseMove(UINT /*nFlags*/, CPoint point)
+BOOL CGanttCtrl::OnListMouseMove(UINT /*nFlags*/, CPoint point)
 {
 	if (!m_bReadOnly)
 	{
@@ -2311,7 +2302,7 @@ BOOL CGanttTreeListCtrl::OnListMouseMove(UINT /*nFlags*/, CPoint point)
 	return FALSE;
 }
 
-BOOL CGanttTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
+BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 {
 	if (!m_bReadOnly)
 	{
@@ -2385,7 +2376,7 @@ BOOL CGanttTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 	return CTreeListCtrl::OnListLButtonDown(nFlags, point);
 }
 
-BOOL CGanttTreeListCtrl::OnListLButtonUp(UINT /*nFlags*/, CPoint point)
+BOOL CGanttCtrl::OnListLButtonUp(UINT /*nFlags*/, CPoint point)
 {
 	if (IsDragging() && EndDragging(point))
 	{
@@ -2396,7 +2387,7 @@ BOOL CGanttTreeListCtrl::OnListLButtonUp(UINT /*nFlags*/, CPoint point)
 	return FALSE;
 }
 
-BOOL CGanttTreeListCtrl::OnListLButtonDblClk(UINT nFlags, CPoint point)
+BOOL CGanttCtrl::OnListLButtonDblClk(UINT nFlags, CPoint point)
 {
 	if (IsDependencyEditing())
 		return FALSE;
@@ -2404,27 +2395,27 @@ BOOL CGanttTreeListCtrl::OnListLButtonDblClk(UINT nFlags, CPoint point)
 	return CTreeListCtrl::OnListLButtonDblClk(nFlags, point);
 }
 
-void CGanttTreeListCtrl::SetTodayColor(COLORREF crToday)
+void CGanttCtrl::SetTodayColor(COLORREF crToday)
 {
 	SetColor(m_crToday, crToday);
 }
 
-void CGanttTreeListCtrl::SetWeekendColor(COLORREF crWeekend)
+void CGanttCtrl::SetWeekendColor(COLORREF crWeekend)
 {
 	SetColor(m_crWeekend, crWeekend);
 }
 
-void CGanttTreeListCtrl::SetNonWorkingHoursColor(COLORREF crNonWorkingHoursColor)
+void CGanttCtrl::SetNonWorkingHoursColor(COLORREF crNonWorkingHoursColor)
 {
 	SetColor(m_crNonWorkingHoursColor, crNonWorkingHoursColor);
 }
 
-void CGanttTreeListCtrl::SetDefaultColor(COLORREF crDefault)
+void CGanttCtrl::SetDefaultColor(COLORREF crDefault)
 {
 	SetColor(m_crDefault, crDefault);
 }
 
-void CGanttTreeListCtrl::SetMilestoneTag(const CString& sTag)
+void CGanttCtrl::SetMilestoneTag(const CString& sTag)
 {
 	if (sTag != m_sMilestoneTag)
 	{
@@ -2435,7 +2426,7 @@ void CGanttTreeListCtrl::SetMilestoneTag(const CString& sTag)
 	}
 }
 
-void CGanttTreeListCtrl::SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF color)
+void CGanttCtrl::SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF color)
 {
 	SetColor(m_crParent, color);
 
@@ -2445,7 +2436,7 @@ void CGanttTreeListCtrl::SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF
 	m_nParentColoring = nOption;
 }
 
-CString CGanttTreeListCtrl::FormatDate(const COleDateTime& date, DWORD dwFlags) const
+CString CGanttCtrl::FormatDate(const COleDateTime& date, DWORD dwFlags) const
 {
 	dwFlags &= ~DHFD_ISO;
 	dwFlags |= (HasOption(GTLCF_DISPLAYISODATES) ? DHFD_ISO : 0);
@@ -2453,7 +2444,7 @@ CString CGanttTreeListCtrl::FormatDate(const COleDateTime& date, DWORD dwFlags) 
 	return CDateHelper::FormatDate(date, dwFlags);
 }
 
-CString CGanttTreeListCtrl::GetTreeItemColumnText(const GANTTITEM& gi, GTLC_COLUMN nCol) const
+CString CGanttCtrl::GetTreeItemColumnText(const GANTTITEM& gi, GTLC_COLUMN nCol) const
 {
 	CString sItem;
 
@@ -2494,7 +2485,7 @@ CString CGanttTreeListCtrl::GetTreeItemColumnText(const GANTTITEM& gi, GTLC_COLU
 	return sItem;
 }
 
-void CGanttTreeListCtrl::DrawTreeItem(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack)
+void CGanttCtrl::DrawTreeItem(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack)
 {
 	int nNumCol = m_treeHeader.GetItemCount();
 
@@ -2502,7 +2493,7 @@ void CGanttTreeListCtrl::DrawTreeItem(CDC* pDC, HTREEITEM hti, const GANTTITEM& 
 		DrawTreeItemText(pDC, hti, nCol, gi, bSelected, crBack);
 }
 
-void CGanttTreeListCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack)
+void CGanttCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack)
 {
 	CRect rItem;
 	GetTreeItemRect(hti, nCol, rItem);
@@ -2608,7 +2599,7 @@ void CGanttTreeListCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, con
 	}
 }
 
-CGanttTreeListCtrl::DIV_TYPE CGanttTreeListCtrl::GetVerticalDivider(int nMonth, int nYear) const
+CGanttCtrl::DIV_TYPE CGanttCtrl::GetVerticalDivider(int nMonth, int nYear) const
 {
 	switch (m_nMonthDisplay)
 	{
@@ -2699,7 +2690,7 @@ CGanttTreeListCtrl::DIV_TYPE CGanttTreeListCtrl::GetVerticalDivider(int nMonth, 
 	return DIV_NONE;
 }
 
-BOOL CGanttTreeListCtrl::IsVerticalDivider(DIV_TYPE nType)
+BOOL CGanttCtrl::IsVerticalDivider(DIV_TYPE nType)
 {
 	switch (nType)
 	{
@@ -2713,7 +2704,7 @@ BOOL CGanttTreeListCtrl::IsVerticalDivider(DIV_TYPE nType)
 	return FALSE;
 }
 
-void CGanttTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected)
+void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected)
 {
 	ASSERT(nType != DIV_NONE);
 
@@ -2738,7 +2729,7 @@ void CGanttTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE 
 	return CTreeListCtrl::DrawItemDivider(pDC, rItem, bVert, bSelected, color);
 }
 
-CString CGanttTreeListCtrl::GetLongestVisibleAllocTo(HTREEITEM hti) const
+CString CGanttCtrl::GetLongestVisibleAllocTo(HTREEITEM hti) const
 {
 	CString sLongest;
 
@@ -2771,7 +2762,7 @@ CString CGanttTreeListCtrl::GetLongestVisibleAllocTo(HTREEITEM hti) const
 	return sLongest;
 }
 
-HFONT CGanttTreeListCtrl::GetTreeItemFont(HTREEITEM hti, const GANTTITEM& gi, GTLC_COLUMN nCol)
+HFONT CGanttCtrl::GetTreeItemFont(HTREEITEM hti, const GANTTITEM& gi, GTLC_COLUMN nCol)
 {
 	BOOL bStrikThru = (HasOption(GTLCF_STRIKETHRUDONETASKS) && gi.IsDone(FALSE));
 	BOOL bBold = ((nCol == GTLCC_TITLE) && (m_tree.GetParentItem(hti) == NULL));
@@ -2779,7 +2770,7 @@ HFONT CGanttTreeListCtrl::GetTreeItemFont(HTREEITEM hti, const GANTTITEM& gi, GT
 	return m_tree.Fonts().GetHFont(bBold, FALSE, FALSE, bStrikThru);
 }
 
-BOOL CGanttTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText) const
+BOOL CGanttCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText) const
 {
 	if (!CTreeListCtrl::GetTreeItemRect(hti, nCol, rItem, bText))
 		return FALSE;
@@ -2790,7 +2781,7 @@ BOOL CGanttTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, 
 	return TRUE;
 }
 
-void CGanttTreeListCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem, 
+void CGanttCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem, 
 											int nYear, int nNumYears, const GANTTITEM& gi,
 											BOOL bSelected, BOOL bRollup, BOOL& bToday)
 {
@@ -2811,14 +2802,14 @@ void CGanttTreeListCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem,
 	}
 }
 
-void CGanttTreeListCtrl::DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
+void CGanttCtrl::DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
 											const GANTTITEM& gi, BOOL bSelected, 
 											BOOL bRollup, BOOL& bToday)
 {
 	DrawListItemMonths(pDC, rYear, 1, 12, nYear, gi, bSelected, bRollup, bToday);
 }
 
-void CGanttTreeListCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem, 
+void CGanttCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem, 
 											int nMonth, int nNumMonths, int nYear, 
 											const GANTTITEM& gi, BOOL bSelected, 
 											BOOL bRollup, BOOL& bToday)
@@ -2840,7 +2831,7 @@ void CGanttTreeListCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem,
 	}
 }
 
-void CGanttTreeListCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth, 
+void CGanttCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth, 
 											int nMonth, int nYear, 
 											const GANTTITEM& gi, BOOL bSelected, 
 											BOOL bRollup, BOOL& bToday)
@@ -2858,7 +2849,7 @@ void CGanttTreeListCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth,
 	DrawGanttDone(pDC, rMonth, nMonth, nYear, gi);
 }
 
-void CGanttTreeListCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth, 
+void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth, 
 											int nMonth, int nYear, 
 											const GANTTITEM& gi, BOOL bSelected, 
 											BOOL bRollup, BOOL& bToday)
@@ -2898,7 +2889,7 @@ void CGanttTreeListCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bToday);
 }
 
-BOOL CGanttTreeListCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay)
+BOOL CGanttCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay)
 {
 	COLORREF color = ((m_crWeekend != CLR_NONE) ? m_crWeekend : m_crNonWorkingHoursColor);
 
@@ -2917,7 +2908,7 @@ BOOL CGanttTreeListCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const 
 	return FALSE;
 }
 
-void CGanttTreeListCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth, 
+void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth, 
 											int nMonth, int nYear, const GANTTITEM& gi, 
 											BOOL bSelected, BOOL bRollup, 
 											BOOL& bToday, BOOL bDrawHours)
@@ -2994,7 +2985,7 @@ void CGanttTreeListCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bToday);
 }
 
-void CGanttTreeListCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSelected)
+void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
@@ -3051,7 +3042,7 @@ void CGanttTreeListCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, 
 	}
 }
 
-void CGanttTreeListCtrl::DrawListItemRollupText(CDC* pDC, HTREEITEM htiParent, const CRect& rItem, const CRect& rClip, COLORREF crRow)
+void CGanttCtrl::DrawListItemRollupText(CDC* pDC, HTREEITEM htiParent, const CRect& rItem, const CRect& rClip, COLORREF crRow)
 {
 	HTREEITEM htiChild = m_tree.GetChildItem(htiParent);
 
@@ -3075,7 +3066,7 @@ void CGanttTreeListCtrl::DrawListItemRollupText(CDC* pDC, HTREEITEM htiParent, c
 	}
 }
 
-void CGanttTreeListCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rItem, const CRect& rClip, COLORREF crRow)
+void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rItem, const CRect& rClip, COLORREF crRow)
 {
 	BOOL bDrawTitle = HasOption(GTLCF_DISPLAYTRAILINGTASKTITLE);
 	BOOL bDrawAllocTo = (HasOption(GTLCF_DISPLAYTRAILINGALLOCTO) && !gi.sAllocTo.IsEmpty());
@@ -3127,7 +3118,7 @@ void CGanttTreeListCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const C
 	pDC->DrawText(sTrailing, rText, (DT_LEFT | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_list)));
 }
 
-void CGanttTreeListCtrl::DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, const CRect& rColumn, BOOL bSelected)
+void CGanttCtrl::DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, const CRect& rColumn, BOOL bSelected)
 {
 	HTREEITEM htiChild = m_tree.GetChildItem(htiParent);
 
@@ -3151,7 +3142,7 @@ void CGanttTreeListCtrl::DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int n
 	}
 }
 
-BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTITEM& gi, 
+BOOL CGanttCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTITEM& gi, 
 											BOOL bSelected, BOOL bRollup)
 {
 	if (nCol == 0)
@@ -3176,7 +3167,7 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const
 	return DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected, bRollup);
 }
 
-BOOL CGanttTreeListCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const GANTTITEM& gi, 
+BOOL CGanttCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const GANTTITEM& gi, 
 												BOOL bSelected, BOOL bRollup)
 {
 	// get the date range for this column
@@ -3252,7 +3243,7 @@ BOOL CGanttTreeListCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect&
 	return TRUE;
 }
 
-void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
+void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 {
 	CRect rItem;
 	m_listHeader.GetItemRect(nCol, rItem);
@@ -3478,7 +3469,7 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 	pDC->RestoreDC(nSaveDC);
 }
 
-void CGanttTreeListCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme)
+void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme)
 {
 	if (!pTheme)
 	{
@@ -3501,7 +3492,7 @@ void CGanttTreeListCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const 
 	}
 }
 
-BOOL CGanttTreeListCtrl::GetTaskStartEndDates(const GANTTITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const
+BOOL CGanttCtrl::GetTaskStartEndDates(const GANTTITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const
 {
 	return gi.GetStartEndDates(HasOption(GTLCF_CALCPARENTDATES),
 								HasOption(GTLCF_CALCMISSINGSTARTDATES),
@@ -3510,7 +3501,7 @@ BOOL CGanttTreeListCtrl::GetTaskStartEndDates(const GANTTITEM& gi, COleDateTime&
 								dtDue);
 }
 
-COLORREF CGanttTreeListCtrl::GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOOL bAlternate) const
+COLORREF CGanttCtrl::GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOOL bAlternate) const
 {
 	COLORREF crTextBk = gi.GetTextBkColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
 
@@ -3533,7 +3524,7 @@ COLORREF CGanttTreeListCtrl::GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelec
 	return crTextBk;
 }
 
-COLORREF CGanttTreeListCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL bLighter) const
+COLORREF CGanttCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL bLighter) const
 {
 	COLORREF crText = gi.GetTextColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
 	ASSERT(crText != CLR_NONE);
@@ -3550,7 +3541,7 @@ COLORREF CGanttTreeListCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelecte
 	return crText;
 }
 
-void CGanttTreeListCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLORREF& crFill) const
+void CGanttCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLORREF& crFill) const
 {
 	// darker shade of the item crText/crBack
 	COLORREF crDefFill = gi.GetFillColor();
@@ -3605,7 +3596,7 @@ void CGanttTreeListCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBord
 	}
 }
 
-BOOL CGanttTreeListCtrl::CalcDateRect(const CRect& rMonth, int nMonth, int nYear, 
+BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, int nMonth, int nYear, 
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate)
 {
 	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
@@ -3619,7 +3610,7 @@ BOOL CGanttTreeListCtrl::CalcDateRect(const CRect& rMonth, int nMonth, int nYear
 	return CalcDateRect(rMonth, nDaysInMonth, dtMonthStart, dtMonthEnd, dtFrom, dtTo, rDate);
 }
 
-BOOL CGanttTreeListCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth, 
+BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth, 
 							const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate)
 {
@@ -3644,7 +3635,7 @@ BOOL CGanttTreeListCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth,
 	return (rDate.right > 0);
 }
 
-DWORD CGanttTreeListCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
+DWORD CGanttCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
 {
 	CGanttDependArray aDepends;
 	
@@ -3664,7 +3655,7 @@ DWORD CGanttTreeListCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwTo
 	return 0;
 }
 
-int CGanttTreeListCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) const
+int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) const
 {
 	aDepends.RemoveAll();
 
@@ -3690,7 +3681,7 @@ int CGanttTreeListCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) 
 	return aDepends.GetSize();
 }
 
-int CGanttTreeListCtrl::BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray& aDepends) const
+int CGanttCtrl::BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray& aDepends) const
 {
 	DWORD dwFromTaskID = GetTaskID(htiFrom);
 
@@ -3732,7 +3723,7 @@ int CGanttTreeListCtrl::BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDepe
 	return aDepends.GetSize();
 }
 
-BOOL CGanttTreeListCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, GANTTDEPENDENCY& depend) const
+BOOL CGanttCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, GANTTDEPENDENCY& depend) const
 {
 	if (!m_data.HasItem(dwFromTaskID) || !m_data.HasItem(dwToTaskID))
 	{
@@ -3750,7 +3741,7 @@ BOOL CGanttTreeListCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, G
 	return FALSE;
 }
 
-BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
+BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
 	ASSERT(m_data.HasItem(dwTaskID));
 
@@ -3774,7 +3765,7 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& d
 	return CalcDependencyEndPos(dwTaskID, nItem, depend, bFrom, lpp);
 }
 
-BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
+BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
 	if (nItem == -1)
 		return FALSE;
@@ -3826,7 +3817,7 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDE
 	return TRUE;
 }
 
-void CGanttTreeListCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi)
+void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi)
 {
 	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
 
@@ -3957,7 +3948,7 @@ void CGanttTreeListCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth,
 	DrawGanttParentEnds(pDC, gi, rBar, dtMonthStart, dtMonthEnd);
 }
 
-void CGanttTreeListCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
+void CGanttCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
 											 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd)
 {
 	if (!gi.bParent || !HasOption(GTLCF_CALCPARENTDATES))
@@ -4005,7 +3996,7 @@ void CGanttTreeListCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, cons
 	}
 }
 
-void CGanttTreeListCtrl::DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi)
+void CGanttCtrl::DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi)
 {
 	if (!gi.HasDoneDate(HasOption(GTLCF_CALCPARENTDATES)) || gi.IsMilestone(m_sMilestoneTag))
 		return;
@@ -4040,7 +4031,7 @@ void CGanttTreeListCtrl::DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth
 	pDC->FillSolidRect(rDone, crBorder);
 }
 
-void CGanttTreeListCtrl::DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int /*nMonth*/, int /*nYear*/, const GANTTITEM& gi)
+void CGanttCtrl::DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int /*nMonth*/, int /*nYear*/, const GANTTITEM& gi)
 {
 	CRect rMilestone;
 
@@ -4086,7 +4077,7 @@ void CGanttTreeListCtrl::DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int /
 	pDC->SelectObject(poldPen);
 }
 
-BOOL CGanttTreeListCtrl::CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMonth, CRect& rMilestone) const
+BOOL CGanttCtrl::CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMonth, CRect& rMilestone) const
 {
 	if (!gi.IsMilestone(m_sMilestoneTag))
 		return FALSE;
@@ -4118,7 +4109,7 @@ BOOL CGanttTreeListCtrl::CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMo
 	return TRUE;
 }
 
-int CGanttTreeListCtrl::GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth) const
+int CGanttCtrl::GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth) const
 {
 	COleDateTime dtDue;
 	
@@ -4158,7 +4149,7 @@ int CGanttTreeListCtrl::GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth)
 	return (nPos + 2);
 }
 
-BOOL CGanttTreeListCtrl::DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected)
+BOOL CGanttCtrl::DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected)
 {
 	if (m_crToday == CLR_NONE)
 		return TRUE; // so we don't keep trying to draw it
@@ -4203,7 +4194,7 @@ BOOL CGanttTreeListCtrl::DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, in
 	return TRUE;
 }
 
-void CGanttTreeListCtrl::DeleteItem(HTREEITEM hti)
+void CGanttCtrl::DeleteItem(HTREEITEM hti)
 {
 	DWORD dwTaskID = GetTaskID(hti);
 	ASSERT(dwTaskID);
@@ -4212,7 +4203,7 @@ void CGanttTreeListCtrl::DeleteItem(HTREEITEM hti)
 	VERIFY(m_data.RemoveKey(dwTaskID));
 }
 
-BOOL CGanttTreeListCtrl::ZoomIn(BOOL bIn)
+BOOL CGanttCtrl::ZoomIn(BOOL bIn)
 {
 	GTLC_MONTH_DISPLAY nNewDisplay = (bIn ? GetNextDisplay(m_nMonthDisplay) : GetPreviousDisplay(m_nMonthDisplay));
 	ASSERT(nNewDisplay != GTLC_DISPLAY_NONE);
@@ -4220,7 +4211,7 @@ BOOL CGanttTreeListCtrl::ZoomIn(BOOL bIn)
 	return SetMonthDisplay(nNewDisplay);
 }
 
-BOOL CGanttTreeListCtrl::SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay)
+BOOL CGanttCtrl::SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay)
 {
 	if (!IsValidDisplay(nNewDisplay))
 	{
@@ -4270,12 +4261,12 @@ BOOL CGanttTreeListCtrl::SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay)
 	return ZoomTo(nNewDisplay, max(MIN_MONTH_WIDTH, nMinMonthWidth));
 }
 
-BOOL CGanttTreeListCtrl::CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay) const
+BOOL CGanttCtrl::CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay) const
 {
 	return CanSetMonthDisplay(nDisplay, GetMinMonthWidth(nDisplay));
 }
 
-BOOL CGanttTreeListCtrl::CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth) const
+BOOL CGanttCtrl::CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth) const
 {
 	ASSERT(nMonthWidth > 0);
 
@@ -4293,7 +4284,7 @@ BOOL CGanttTreeListCtrl::CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, int nMo
 	return (nTotalReqdWidth <= MAX_HEADER_WIDTH);
 }
 
-BOOL CGanttTreeListCtrl::ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay) const
+BOOL CGanttCtrl::ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay) const
 {
 	if (!IsValidDisplay(nDisplay))
 	{
@@ -4306,7 +4297,7 @@ BOOL CGanttTreeListCtrl::ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay) cons
 	return ValidateMonthDisplay(nDisplay, nWidth);
 }
 
-BOOL CGanttTreeListCtrl::ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int& nMonthWidth) const
+BOOL CGanttCtrl::ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int& nMonthWidth) const
 {
 	if (!IsValidDisplay(nDisplay))
 	{
@@ -4339,7 +4330,7 @@ BOOL CGanttTreeListCtrl::ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int&
 	return TRUE;
 }
 
-void CGanttTreeListCtrl::ValidateMonthDisplay()
+void CGanttCtrl::ValidateMonthDisplay()
 {
 	GTLC_MONTH_DISPLAY nPrevDisplay = m_nMonthDisplay, nDisplay = nPrevDisplay;
 	int nMonthWidth = m_nMonthWidth;
@@ -4353,7 +4344,7 @@ void CGanttTreeListCtrl::ValidateMonthDisplay()
 	}
 }
 
-BOOL CGanttTreeListCtrl::BeginDependencyEdit(IGanttDependencyEditor* pDependEdit)
+BOOL CGanttCtrl::BeginDependencyEdit(IGanttDependencyEditor* pDependEdit)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(m_pDependEdit == NULL);
@@ -4369,7 +4360,7 @@ BOOL CGanttTreeListCtrl::BeginDependencyEdit(IGanttDependencyEditor* pDependEdit
 	return FALSE;
 }
 
-void CGanttTreeListCtrl::OnEndDepedencyEdit()
+void CGanttCtrl::OnEndDepedencyEdit()
 {
 	m_pDependEdit = NULL;
 	
@@ -4383,7 +4374,7 @@ void CGanttTreeListCtrl::OnEndDepedencyEdit()
 	m_nPrevDropHilitedItem = -1;
 }
 
-void CGanttTreeListCtrl::EndDependencyEdit()
+void CGanttCtrl::EndDependencyEdit()
 {
 	if (IsDependencyEditing())
 		m_pDependEdit->Cancel();
@@ -4391,37 +4382,37 @@ void CGanttTreeListCtrl::EndDependencyEdit()
 	OnEndDepedencyEdit();
 }
 
-BOOL CGanttTreeListCtrl::IsDependencyEditing() const
+BOOL CGanttCtrl::IsDependencyEditing() const
 {
 	return (m_pDependEdit && m_pDependEdit->IsPicking());
 }
 
-BOOL CGanttTreeListCtrl::IsPickingDependencyFromTask() const
+BOOL CGanttCtrl::IsPickingDependencyFromTask() const
 {
 	return (m_pDependEdit && m_pDependEdit->IsPickingFromTask());
 }
 
-BOOL CGanttTreeListCtrl::IsPickingFromDependency() const
+BOOL CGanttCtrl::IsPickingFromDependency() const
 {
 	return (m_pDependEdit && m_pDependEdit->IsPickingFromDependency());
 }
 
-BOOL CGanttTreeListCtrl::IsPickingDependencyToTask() const
+BOOL CGanttCtrl::IsPickingDependencyToTask() const
 {
 	return (m_pDependEdit && m_pDependEdit->IsPickingToTask());
 }
 
-BOOL CGanttTreeListCtrl::IsDependencyEditingCancelled() const
+BOOL CGanttCtrl::IsDependencyEditingCancelled() const
 {
 	return (!m_pDependEdit || m_pDependEdit->IsPickingCancelled());
 }
 
-BOOL CGanttTreeListCtrl::IsDependencyEditingComplete() const
+BOOL CGanttCtrl::IsDependencyEditingComplete() const
 {
 	return (m_pDependEdit && m_pDependEdit->IsPickingCompleted());
 }
 
-BOOL CGanttTreeListCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth)
+BOOL CGanttCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth)
 {
 	// validate new display
 	if (!ValidateMonthDisplay(nNewDisplay, nNewMonthWidth))
@@ -4483,7 +4474,7 @@ BOOL CGanttTreeListCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWid
 	return TRUE;
 }
 
-BOOL CGanttTreeListCtrl::ZoomBy(int nAmount)
+BOOL CGanttCtrl::ZoomBy(int nAmount)
 {
 	int nNewMonthWidth = (m_nMonthWidth + nAmount);
 
@@ -4493,7 +4484,7 @@ BOOL CGanttTreeListCtrl::ZoomBy(int nAmount)
 	return ZoomTo(nNewMonthDisplay, nNewMonthWidth);
 }
 
-void CGanttTreeListCtrl::RecalcListColumnWidths(int nFromWidth, int nToWidth)
+void CGanttCtrl::RecalcListColumnWidths(int nFromWidth, int nToWidth)
 {
 	// resize the required number of columns
 	// remember to ignore hidden dummy first column
@@ -4523,84 +4514,31 @@ void CGanttTreeListCtrl::RecalcListColumnWidths(int nFromWidth, int nToWidth)
 	}
 }
 
-GTLC_COLUMN CGanttTreeListCtrl::GetTreeColumnID(int nCol) const
+GTLC_COLUMN CGanttCtrl::GetTreeColumnID(int nCol) const
 {
 	return (GTLC_COLUMN)m_treeHeader.GetItemData(nCol);
 }
 
-void CGanttTreeListCtrl::ResizeAttributeColumnsToFit(BOOL bForce)
+void CGanttCtrl::ResizeAttributeColumnsToFit(BOOL bForce)
 {
-	// tree columns (except title column)
-	CClientDC dc(&m_tree);
-	int nNumCols = m_treeHeader.GetItemCount(), nTotalColWidth = m_treeHeader.GetItemWidth(0), nCol;
+	ResizeColumnsToFit(bForce);
+}
 
-	for (nCol = 1; nCol < nNumCols; nCol++)
-	{
-		nTotalColWidth += RecalcTreeColumnWidth(nCol, &dc, bForce);
-	}
-
-	SetSplitPos(nTotalColWidth);
-	
+void CGanttCtrl::RecalcListColumnsToFit()
+{
 	// list columns (except first dummy column)
-	nNumCols = GetRequiredListColumnCount();
+	int nNumCols = GetRequiredListColumnCount();
 	
-	for (nCol = 1; nCol <= nNumCols; nCol++)
+	for (int nCol = 1; nCol <= nNumCols; nCol++)
 		m_listHeader.SetItemWidth(nCol, GetColumnWidth());
-
-	Resize();
 }
 
-int CGanttTreeListCtrl::CalcMaxAttributeColumnsWidth() const
+void CGanttCtrl::AdjustSplitterToFitAttributeColumns()
 {
-	int nColsWidth = m_listHeader.CalcTotalItemWidth();
-
-	if (HasVScrollBar(m_list))
-		nColsWidth += GetSystemMetrics(SM_CXVSCROLL);
-
-	return nColsWidth;
+	AdjustSplitterToFitColumns();
 }
 
-int CGanttTreeListCtrl::CalcSplitPosToFitAttributeColumns() const
-{
-	CRect rClient;
-	CWnd::GetClientRect(rClient);
-
-	int nColsWidth = CalcMaxAttributeColumnsWidth();
-
-	return (rClient.Width() - nColsWidth - GetSplitBarWidth() - LV_COLPADDING);
-}
-
-void CGanttTreeListCtrl::AdjustSplitterToFitAttributeColumns()
-{
-	int nNewSplitPos = CalcSplitPosToFitAttributeColumns();
-	nNewSplitPos = max(MIN_LABEL_EDIT_WIDTH, nNewSplitPos);
-	
-	CTreeListCtrl::SetSplitPos(nNewSplitPos);
-}
-
-void CGanttTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
-{
-	CTreeListCtrl::OnNotifySplitterChange(nSplitPos);
-
-	// Adjust 'Title' column to suit
-	int nRestOfColsWidth = m_treeHeader.CalcTotalItemWidth(0);
-
-	CClientDC dc(&m_tree);
-	int nMinColWidth = CalcWidestItemTitle(NULL, &dc, FALSE);
-
-	int nTitleColWidth = max(nMinColWidth, (nSplitPos - nRestOfColsWidth));
-
-	m_treeHeader.SetItemWidth(GTLCC_TITLE, nTitleColWidth);
-
-	if (m_bSplitting)
-		m_treeHeader.SetItemTracked(GTLCC_TITLE, TRUE);
-
-	m_treeHeader.UpdateWindow();
-
-	m_tree.SetTitleColumnWidth(nTitleColWidth);
-}
-
-BOOL CGanttTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding)
+BOOL CGanttCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction)
 {
 	int nNumCols = m_treeHeader.GetItemCount();
 	BOOL bChange = FALSE;
@@ -4622,12 +4560,12 @@ BOOL CGanttTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding)
 		}
 	}
 
-	bChange |= CTreeListCtrl::UpdateTreeColumnWidths(pDC, bExpanding);
+	bChange |= CTreeListCtrl::UpdateTreeColumnWidths(pDC, nAction);
 
 	return bChange;
 }
 
-int CGanttTreeListCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
+int CGanttCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 {
 	ASSERT(pDC);
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_tree);
@@ -4682,7 +4620,7 @@ int CGanttTreeListCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 	return max(nTitleWidth, nColWidth);
 }
 
-void CGanttTreeListCtrl::UpdateListColumnsWidthAndText(int nWidth)
+void CGanttCtrl::UpdateListColumnsWidthAndText(int nWidth)
 {
 	CHoldRedraw hr(m_list);
 	CHoldRedraw hr2(m_listHeader);
@@ -4790,7 +4728,7 @@ void CGanttTreeListCtrl::UpdateListColumnsWidthAndText(int nWidth)
 	m_aPrevTrackedCols.RemoveAll();
 }
 
-void CGanttTreeListCtrl::BuildListColumns()
+void CGanttCtrl::BuildListColumns()
 {
 	// once only
 	if (m_listHeader.GetItemCount())
@@ -4818,7 +4756,7 @@ void CGanttTreeListCtrl::BuildListColumns()
 	UpdateListColumnsWidthAndText();
 }
 
-void CGanttTreeListCtrl::UpdateListColumns(int nWidth)
+void CGanttCtrl::UpdateListColumns(int nWidth)
 {
 	// cache the scrolled position
 	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
@@ -4876,7 +4814,7 @@ void CGanttTreeListCtrl::UpdateListColumns(int nWidth)
 	}
 }
 
-int CGanttTreeListCtrl::GetMinMonthWidth(GTLC_MONTH_DISPLAY nDisplay) const
+int CGanttCtrl::GetMinMonthWidth(GTLC_MONTH_DISPLAY nDisplay) const
 {
 	int nWidth = 0;
 	VERIFY(m_mapMinMonthWidths.Lookup(nDisplay, nWidth) && (nWidth >= MIN_MONTH_WIDTH));
@@ -4884,7 +4822,7 @@ int CGanttTreeListCtrl::GetMinMonthWidth(GTLC_MONTH_DISPLAY nDisplay) const
 	return max(nWidth, MIN_MONTH_WIDTH);
 }
 
-void CGanttTreeListCtrl::CalcMinMonthWidths()
+void CGanttCtrl::CalcMinMonthWidths()
 {
 	CClientDC dcClient(&m_treeHeader);
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dcClient, m_list);
@@ -5012,7 +4950,7 @@ void CGanttTreeListCtrl::CalcMinMonthWidths()
 	dcClient.SelectObject(pOldFont);
 }
 
-GTLC_MONTH_DISPLAY CGanttTreeListCtrl::GetColumnDisplay(int nMonthWidth)
+GTLC_MONTH_DISPLAY CGanttCtrl::GetColumnDisplay(int nMonthWidth)
 {
 	int nMinWidth = 0;
 
@@ -5031,9 +4969,9 @@ GTLC_MONTH_DISPLAY CGanttTreeListCtrl::GetColumnDisplay(int nMonthWidth)
 	return GetLastDisplay();
 }
 
-int CALLBACK CGanttTreeListCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+int CALLBACK CGanttCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	const CGanttTreeListCtrl* pThis = (CGanttTreeListCtrl*)lParamSort;
+	const CGanttCtrl* pThis = (CGanttCtrl*)lParamSort;
 	const GANTTSORTCOLUMNS& sort = pThis->m_sort.multi;
 
 	int nCompare = 0;
@@ -5049,14 +4987,14 @@ int CALLBACK CGanttTreeListCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, L
 	return nCompare;
 }
 
-int CALLBACK CGanttTreeListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+int CALLBACK CGanttCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	const CGanttTreeListCtrl* pThis = (CGanttTreeListCtrl*)lParamSort;
+	const CGanttCtrl* pThis = (CGanttCtrl*)lParamSort;
 	
 	return pThis->CompareTasks(lParam1, lParam2, pThis->m_sort.single);
 }
 
-int CGanttTreeListCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCOLUMN& col) const
+int CGanttCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCOLUMN& col) const
 {
 	int nCompare = 0;
 
@@ -5139,17 +5077,17 @@ int CGanttTreeListCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GAN
 	return (col.bAscending ? nCompare : -nCompare);
 }
 
-void CGanttTreeListCtrl::ScrollToToday()
+void CGanttCtrl::ScrollToToday()
 {
 	ScrollTo(COleDateTime::GetCurrentTime());
 }
 
-void CGanttTreeListCtrl::ScrollToSelectedTask()
+void CGanttCtrl::ScrollToSelectedTask()
 {
 	ScrollToTask(GetSelectedTaskID());
 }
 
-void CGanttTreeListCtrl::ScrollToTask(DWORD dwTaskID)
+void CGanttCtrl::ScrollToTask(DWORD dwTaskID)
 {
 	GANTTITEM* pGI = NULL;
 	GET_GI(dwTaskID, pGI);
@@ -5166,7 +5104,7 @@ void CGanttTreeListCtrl::ScrollToTask(DWORD dwTaskID)
 	}
 }
 
-void CGanttTreeListCtrl::ScrollTo(const COleDateTime& date)
+void CGanttCtrl::ScrollTo(const COleDateTime& date)
 {
 	ClearDependencyPickLine();
 
@@ -5197,7 +5135,7 @@ void CGanttTreeListCtrl::ScrollTo(const COleDateTime& date)
 	}
 }
 
-BOOL CGanttTreeListCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date)
+BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date)
 {
 	CRect rMonth(rColumn);
 
@@ -5245,7 +5183,7 @@ BOOL CGanttTreeListCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY
 	return CDateHelper::IsDateSet(date);
 }
 
-BOOL CGanttTreeListCtrl::GetDateFromScrollPos(int nScrollPos, COleDateTime& date) const
+BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, COleDateTime& date) const
 {
 	// find the column containing this scroll pos
 	int nCol = FindColumn(nScrollPos);
@@ -5264,7 +5202,7 @@ BOOL CGanttTreeListCtrl::GetDateFromScrollPos(int nScrollPos, COleDateTime& date
 	return GetDateFromScrollPos(nScrollPos, m_nMonthDisplay, nMonth, nYear, rColumn, date);
 }
 
-BOOL CGanttTreeListCtrl::GetDrawPosFromDate(const COleDateTime& date, int& nPos) const
+BOOL CGanttCtrl::GetDrawPosFromDate(const COleDateTime& date, int& nPos) const
 {
 	if (!GetScrollPosFromDate(date, nPos))
 		return FALSE;
@@ -5273,7 +5211,7 @@ BOOL CGanttTreeListCtrl::GetDrawPosFromDate(const COleDateTime& date, int& nPos)
 	return TRUE;
 }
 
-BOOL CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date, int& nPos) const
+BOOL CGanttCtrl::GetScrollPosFromDate(const COleDateTime& date, int& nPos) const
 {
 	// figure out which column contains 'date'
 	int nCol = FindColumn(date);
@@ -5354,7 +5292,7 @@ BOOL CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date, int& nPo
 	return FALSE;
 }
 
-int CGanttTreeListCtrl::FindColumn(int nMonth, int nYear) const
+int CGanttCtrl::FindColumn(int nMonth, int nYear) const
 {	
 	int nMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
 	int nNumReqColumns = GetRequiredListColumnCount();
@@ -5390,12 +5328,12 @@ int CGanttTreeListCtrl::FindColumn(int nMonth, int nYear) const
 	return -1;
 }
 
-int CGanttTreeListCtrl::FindColumn(const COleDateTime& date) const
+int CGanttCtrl::FindColumn(const COleDateTime& date) const
 {
 	return FindColumn(date.GetMonth(), date.GetYear());
 }
 
-int CGanttTreeListCtrl::FindColumn(int nScrollPos) const
+int CGanttCtrl::FindColumn(int nScrollPos) const
 {
 	int nNumReqColumns = GetRequiredListColumnCount();
 
@@ -5412,7 +5350,7 @@ int CGanttTreeListCtrl::FindColumn(int nScrollPos) const
 	return -1;
 }
 
-bool CGanttTreeListCtrl::PrepareNewTask(ITaskList* pTaskList) const
+bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 {
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
 
@@ -5438,7 +5376,7 @@ bool CGanttTreeListCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	return true;
 }
 
-DWORD CGanttTreeListCtrl::HitTestTask(const CPoint& ptScreen) const
+DWORD CGanttCtrl::HitTestTask(const CPoint& ptScreen) const
 {
 	// try list first
 	GTLC_HITTEST nHit = GTLCHT_NOWHERE;
@@ -5451,7 +5389,7 @@ DWORD CGanttTreeListCtrl::HitTestTask(const CPoint& ptScreen) const
 	return dwTaskID;
 }
 
-DWORD CGanttTreeListCtrl::TreeHitTestTask(const CPoint& ptScreen, BOOL bScreen) const
+DWORD CGanttCtrl::TreeHitTestTask(const CPoint& ptScreen, BOOL bScreen) const
 {
 	HTREEITEM htiHit = TreeHitTestItem(ptScreen, bScreen);
 	
@@ -5461,7 +5399,7 @@ DWORD CGanttTreeListCtrl::TreeHitTestTask(const CPoint& ptScreen, BOOL bScreen) 
 	return 0;
 }
 
-BOOL CGanttTreeListCtrl::GetListItemRect(int nItem, CRect& rItem) const
+BOOL CGanttCtrl::GetListItemRect(int nItem, CRect& rItem) const
 {
 	if (m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS))
 	{
@@ -5476,7 +5414,7 @@ BOOL CGanttTreeListCtrl::GetListItemRect(int nItem, CRect& rItem) const
 	return FALSE;
 }
 
-DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const
+DWORD CGanttCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const
 {
 	nHit = GTLCHT_NOWHERE;
 
@@ -5571,37 +5509,32 @@ DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTL
 	return dwTaskID;
 }
 
-DWORD CGanttTreeListCtrl::GetTaskID(HTREEITEM htiFrom) const
+DWORD CGanttCtrl::GetTaskID(HTREEITEM htiFrom) const
 {
 	return GetItemData(htiFrom);
 }
 
-DWORD CGanttTreeListCtrl::GetTaskID(int nItem) const
+DWORD CGanttCtrl::GetTaskID(int nItem) const
 {
-	return GetListTaskID(GetListItemData(m_list, nItem));
+	return GetItemData(GetTreeItem(nItem));
 }
 
-DWORD CGanttTreeListCtrl::GetListTaskID(DWORD dwItemData) const
-{
-	return GetTaskID((HTREEITEM)dwItemData);
-}
-
-BOOL CGanttTreeListCtrl::IsDragging() const
+BOOL CGanttCtrl::IsDragging() const
 {
 	return IsDragging(m_nDragging);
 }
 
-BOOL CGanttTreeListCtrl::IsDragging(GTLC_DRAG nDrag)
+BOOL CGanttCtrl::IsDragging(GTLC_DRAG nDrag)
 {
 	return ((nDrag != GTLCD_ANY) && (nDrag != GTLCD_NONE));
 }
 
-BOOL CGanttTreeListCtrl::IsDraggingEnds(GTLC_DRAG nDrag)
+BOOL CGanttCtrl::IsDraggingEnds(GTLC_DRAG nDrag)
 {
 	return ((nDrag == GTLCD_START) || (nDrag == GTLCD_END));
 }
 
-BOOL CGanttTreeListCtrl::IsValidDragPoint(const CPoint& ptDrag) const
+BOOL CGanttCtrl::IsValidDragPoint(const CPoint& ptDrag) const
 {
 	if (!IsDragging())
 		return FALSE;
@@ -5612,7 +5545,7 @@ BOOL CGanttTreeListCtrl::IsValidDragPoint(const CPoint& ptDrag) const
 	return rLimits.PtInRect(ptDrag);
 }
 
-void CGanttTreeListCtrl::GetDragLimits(CRect& rLimits) const
+void CGanttCtrl::GetDragLimits(CRect& rLimits) const
 {
 	m_list.GetClientRect(rLimits);
 
@@ -5625,7 +5558,7 @@ void CGanttTreeListCtrl::GetDragLimits(CRect& rLimits) const
 	rLimits.InflateRect(DRAG_BUFFER, 0);
 }
 
-BOOL CGanttTreeListCtrl::ValidateDragPoint(CPoint& ptDrag) const
+BOOL CGanttCtrl::ValidateDragPoint(CPoint& ptDrag) const
 {
 	if (!IsValidDragPoint(ptDrag))
 		return FALSE;
@@ -5642,7 +5575,7 @@ BOOL CGanttTreeListCtrl::ValidateDragPoint(CPoint& ptDrag) const
 	return TRUE;
 }
 
-BOOL CGanttTreeListCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
+BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 {
 	if (m_data.ItemIsLocked(dwTaskID))
 		return FALSE;
@@ -5661,7 +5594,7 @@ BOOL CGanttTreeListCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 	return TRUE;
 }
 
-BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
+BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(!IsDependencyEditing());
@@ -5733,7 +5666,7 @@ BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 	return TRUE;
 }
 
-BOOL CGanttTreeListCtrl::EndDragging(const CPoint& ptCursor)
+BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(!IsDependencyEditing());
@@ -5784,13 +5717,13 @@ BOOL CGanttTreeListCtrl::EndDragging(const CPoint& ptCursor)
 	return FALSE;
 }
 
-BOOL CGanttTreeListCtrl::DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2)
+BOOL CGanttCtrl::DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2)
 {
 	return ((gi1.dtRange.GetStart() != gi2.dtRange.GetStart()) || 
 			(gi1.dtRange.GetEnd() != gi2.dtRange.GetEnd()));
 }
 
-void CGanttTreeListCtrl::NotifyParentDragChange()
+void CGanttCtrl::NotifyParentDragChange()
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(GetSelectedTaskID());
@@ -5798,7 +5731,7 @@ void CGanttTreeListCtrl::NotifyParentDragChange()
 	GetCWnd()->SendMessage(WM_GTLC_DRAGCHANGE, (WPARAM)GetSnapMode(), GetSelectedTaskID());
 }
 
-BOOL CGanttTreeListCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
+BOOL CGanttCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(GetSelectedTaskID());
@@ -5810,7 +5743,7 @@ BOOL CGanttTreeListCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
 	return 0L;
 }
 
-BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
+BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(!IsDependencyEditing());
@@ -5917,7 +5850,7 @@ BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
 	return FALSE; // not dragging
 }
 
-double CGanttTreeListCtrl::CalcMinDragDuration() const
+double CGanttCtrl::CalcMinDragDuration() const
 {
 	ASSERT((m_nDragging == GTLCD_START) || (m_nDragging == GTLCD_END));
 	
@@ -5968,7 +5901,7 @@ double CGanttTreeListCtrl::CalcMinDragDuration() const
 	return dMin;
 }
 
-BOOL CGanttTreeListCtrl::CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin)
+BOOL CGanttCtrl::CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin)
 {
 	dMin = -1;
 
@@ -6003,7 +5936,7 @@ BOOL CGanttTreeListCtrl::CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin)
 	return TRUE;
 }
 
-BOOL CGanttTreeListCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const
+BOOL CGanttCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const
 {
 	ASSERT(IsDragging());
 	CPoint ptDrag(ptCursor);
@@ -6035,7 +5968,7 @@ BOOL CGanttTreeListCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& 
 	return TRUE;
 }
 
-BOOL CGanttTreeListCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const
+BOOL CGanttCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const
 {
 	// convert pos to date
 	int nScrollPos = (m_list.GetScrollPos(SB_HORZ) + ptCursor.x);
@@ -6071,7 +6004,7 @@ BOOL CGanttTreeListCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& 
 	return FALSE;
 }
 
-void CGanttTreeListCtrl::SetReadOnly(bool bReadOnly) 
+void CGanttCtrl::SetReadOnly(bool bReadOnly) 
 { 
 	m_bReadOnly = bReadOnly;
 
@@ -6079,7 +6012,7 @@ void CGanttTreeListCtrl::SetReadOnly(bool bReadOnly)
 }
 
 // external version
-BOOL CGanttTreeListCtrl::CancelOperation()
+BOOL CGanttCtrl::CancelOperation()
 {
 	if (CTreeListCtrl::CancelOperation())
 		return TRUE;
@@ -6101,7 +6034,7 @@ BOOL CGanttTreeListCtrl::CancelOperation()
 }
 
 // internal version
-void CGanttTreeListCtrl::CancelDrag(BOOL bReleaseCapture)
+void CGanttCtrl::CancelDrag(BOOL bReleaseCapture)
 {
 	ASSERT(IsDragging());
 
@@ -6116,7 +6049,7 @@ void CGanttTreeListCtrl::CancelDrag(BOOL bReleaseCapture)
 	NotifyParentDragChange();
 }
 
-void CGanttTreeListCtrl::GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths) const
+void CGanttCtrl::GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths) const
 {
 	m_treeHeader.GetItemWidths(aTreeWidths);
 	m_listHeader.GetItemWidths(aListWidths);
@@ -6130,7 +6063,7 @@ void CGanttTreeListCtrl::GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aLis
 		aListWidths.RemoveAt(nItem);
 }
 
-BOOL CGanttTreeListCtrl::SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& aListWidths)
+BOOL CGanttCtrl::SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& aListWidths)
 {
 	if (aTreeWidths.GetSize() != (NUM_TREECOLUMNS + 1))
 		return FALSE;
@@ -6147,7 +6080,7 @@ BOOL CGanttTreeListCtrl::SetColumnWidths(const CIntArray& aTreeWidths, const CIn
 	return TRUE;
 }
 
-void CGanttTreeListCtrl::GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& aListTracked) const
+void CGanttCtrl::GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& aListTracked) const
 {
 	m_treeHeader.GetTrackedItems(aTreeTracked);
 	m_listHeader.GetTrackedItems(aListTracked);
@@ -6161,7 +6094,7 @@ void CGanttTreeListCtrl::GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& a
 		aListTracked.RemoveAt(nItem);
 }
 
-BOOL CGanttTreeListCtrl::SetTrackedColumns(const CIntArray& aTreeTracked, const CIntArray& aListTracked)
+BOOL CGanttCtrl::SetTrackedColumns(const CIntArray& aTreeTracked, const CIntArray& aListTracked)
 {
 	if (aTreeTracked.GetSize() != (NUM_TREECOLUMNS + 1))
 		return FALSE;
@@ -6178,7 +6111,7 @@ BOOL CGanttTreeListCtrl::SetTrackedColumns(const CIntArray& aTreeTracked, const 
 	return TRUE;
 }
 
-GTLC_SNAPMODE CGanttTreeListCtrl::GetSnapMode() const
+GTLC_SNAPMODE CGanttCtrl::GetSnapMode() const
 {
 	if (IsDragging())
 	{
@@ -6304,7 +6237,7 @@ GTLC_SNAPMODE CGanttTreeListCtrl::GetSnapMode() const
 	return m_nSnapMode;
 }
 
-COleDateTime CGanttTreeListCtrl::GetNearestDate(const COleDateTime& dtDrag) const
+COleDateTime CGanttCtrl::GetNearestDate(const COleDateTime& dtDrag) const
 {
 	ASSERT(IsDragging());
 
@@ -6362,7 +6295,7 @@ COleDateTime CGanttTreeListCtrl::GetNearestDate(const COleDateTime& dtDrag) cons
 	return dtDrag;
 }
 
-DWORD CGanttTreeListCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
+DWORD CGanttCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
 	HTREEITEM hti = FindTreeItem(m_tree, dwTaskID);
 	
@@ -6411,7 +6344,7 @@ DWORD CGanttTreeListCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	return dwNextID;
 }
 
-BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
+BOOL CGanttCtrl::SaveToImage(CBitmap& bmImage)
 {
 	if (m_tree.GetCount() == 0)
 		return FALSE;
@@ -6460,7 +6393,7 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 	return bRes;
 }
 
-void CGanttTreeListCtrl::RefreshItemBoldState(HTREEITEM htiFrom, BOOL bAndChildren)
+void CGanttCtrl::RefreshItemBoldState(HTREEITEM htiFrom, BOOL bAndChildren)
 {
 	if (htiFrom && (htiFrom != TVI_ROOT))
 	{
@@ -6480,7 +6413,7 @@ void CGanttTreeListCtrl::RefreshItemBoldState(HTREEITEM htiFrom, BOOL bAndChildr
 	}
 }
 
-BOOL CGanttTreeListCtrl::SetFont(HFONT hFont, BOOL bRedraw)
+BOOL CGanttCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 {
 	if (!hFont || !m_tree.GetSafeHwnd() || !m_list.GetSafeHwnd())
 	{
@@ -6492,12 +6425,12 @@ BOOL CGanttTreeListCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 
 	CalcMinMonthWidths();
 	SetMonthDisplay(m_nMonthDisplay);
-	ResizeAttributeColumnsToFit();
+	ResizeAttributeColumnsToFit(TRUE);
 
 	return TRUE;
 }
 
-BOOL CGanttTreeListCtrl::CanMoveSelectedTask(const IUITASKMOVE& move) const
+BOOL CGanttCtrl::CanMoveSelectedTask(const IUITASKMOVE& move) const
 {
 	if (m_bReadOnly)
 		return FALSE;
@@ -6511,7 +6444,7 @@ BOOL CGanttTreeListCtrl::CanMoveSelectedTask(const IUITASKMOVE& move) const
 	return CTreeListCtrl::CanMoveItem(itemMove);
 }
 
-BOOL CGanttTreeListCtrl::MoveSelectedTask(const IUITASKMOVE& move)
+BOOL CGanttCtrl::MoveSelectedTask(const IUITASKMOVE& move)
 {
 	if (m_bReadOnly)
 		return FALSE;

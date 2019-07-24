@@ -145,17 +145,6 @@ BOOL CGanttChartWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 	return TRUE;
 }
 
-void CGanttChartWnd::OnLButtonDblClk(UINT nFlags, CPoint point)
-{
-	if (m_ctrlGantt.PtInSplitter(point))
-	{
-		m_ctrlGantt.AdjustSplitterToFitAttributeColumns();
-		return;
-	}
-
-	CDialog::OnLButtonDblClk(nFlags, point);
-}
-
 LRESULT CGanttChartWnd::OnGanttPrefsHelp(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	CString sHelpID(GetTypeID());
@@ -511,7 +500,7 @@ bool CGanttChartWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return (CGanttTreeListCtrl::WantEditUpdate(nAttribute) != FALSE);
+	return (CGanttCtrl::WantEditUpdate(nAttribute) != FALSE);
 }
 
 void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
@@ -714,7 +703,7 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 
 	case IUI_SORT:
 		if (pData)
-			return (CGanttTreeListCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
+			return (CGanttCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
 		break;
 
 	case IUI_MULTISORT:
@@ -754,12 +743,12 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 
 GTLC_COLUMN CGanttChartWnd::MapColumn(DWORD dwColumn)
 {
-	return CGanttTreeListCtrl::MapAttributeToColumn((TDC_ATTRIBUTE)dwColumn);
+	return CGanttCtrl::MapAttributeToColumn((TDC_ATTRIBUTE)dwColumn);
 }
 
 DWORD CGanttChartWnd::MapColumn(GTLC_COLUMN nColumn)
 {
-	return (DWORD)CGanttTreeListCtrl::MapColumnToAttribute(nColumn);
+	return (DWORD)CGanttCtrl::MapColumnToAttribute(nColumn);
 }
 
 void CGanttChartWnd::OnSize(UINT nType, int cx, int cy) 
@@ -836,7 +825,7 @@ HBRUSH CGanttChartWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 BOOL CGanttChartWnd::OnEraseBkgnd(CDC* pDC) 
 {
-	// CGanttTreeListCtrl will do its own thing
+	// CGanttCtrl will do its own thing
 
 	// clip out our children
 	CDialogHelper::ExcludeChild(&m_toolbar, pDC);

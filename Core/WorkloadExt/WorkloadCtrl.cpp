@@ -14,22 +14,15 @@
 #include "..\shared\timeHelper.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\graphicsMisc.h"
-#include "..\shared\TreeCtrlHelper.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\misc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
-#include "..\shared\themed.h"
-#include "..\shared\osversion.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\copywndcontents.h"
-#include "..\shared\wclassdefines.h"
-#include "..\shared\mousewheelmgr.h"
 #include "..\shared\CopyWndContents.h"
 
 #include "..\3rdparty\shellicons.h"
-
-#include "..\Interfaces\iuiextension.h"
 
 #include <float.h> // for DBL_MAX
 #include <math.h>  // for fabs()
@@ -106,13 +99,11 @@ BEGIN_MESSAGE_MAP(CWorkloadCtrl, CTreeListCtrl)
 	ON_NOTIFY(HDN_ITEMCLICK, IDC_TASKHEADER, OnClickTreeHeader)
 	ON_NOTIFY(HDN_ITEMCHANGING, IDC_TASKHEADER, OnItemChangingTreeHeader)
 	ON_NOTIFY(TVN_GETDISPINFO, IDC_TASKTREE, OnTreeGetDispInfo)
-	ON_NOTIFY(NM_CLICK, IDC_ALLOCATIONCOLUMNS, OnClickColumns)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_TOTALSLABELS, OnTotalsListsCustomDraw)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ALLOCATIONTOTALS, OnTotalsListsCustomDraw)
 
 	ON_WM_CREATE()
 	ON_WM_MOUSEWHEEL()
-	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 
@@ -164,6 +155,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	// prevent column reordering on list
 	m_listHeader.ModifyStyle(HDS_DRAGDROP, 0);
+	m_listHeader.EnableTracking(FALSE);
 
 	// prevent translation of the list header
 	CLocalizer::EnableTranslation(m_listHeader, FALSE);
@@ -201,6 +193,18 @@ void CWorkloadCtrl::UpdateTotalsDateRangeLabel()
 void CWorkloadCtrl::AdjustSplitterToFitAttributeColumns()
 {
 	AdjustSplitterToFitColumns();
+}
+
+int CWorkloadCtrl::CalcSplitPosToFitListColumns(int nTotalWidth) const
+{
+	// Adjust for bar chart
+	return CTreeListCtrl::CalcSplitPosToFitListColumns(MulDiv(nTotalWidth, 2, 3));
+}
+
+BOOL CWorkloadCtrl::UpdateTreeTitleColumnWidth(CDC* pDC, int nTotalWidth, UPDATECOLWIDTHACTION nAction)
+{
+	// Adjust for bar chart
+	return CTreeListCtrl::UpdateTreeTitleColumnWidth(pDC, MulDiv(nTotalWidth, 2, 3), nAction);
 }
 
 DWORD CWorkloadCtrl::GetSelectedTaskID() const
@@ -426,7 +430,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	InitItemHeights();
 	UpdateListColumns();
 	FixupListSortColumn();
-	UpdateColumnWidths(TRUE);
+	UpdateColumnWidths(UCWA_ANY);
 	RecalcAllocationTotals();
 	RecalcDataDateRange();
 
@@ -1815,6 +1819,29 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				m_lcColumnTotals.UpdateWindow();
 			}
 			return 0L;
+
+		case WM_SETCURSOR:
+			if (!m_bReadOnly)
+			{
+				int nCol, nHit = ListHitTestItem(GetMessagePos(), TRUE, nCol);
+
+				if (nHit != -1)
+				{
+					BOOL bCanEdit = (GetListColumnType(nCol) == WLCT_VALUE);
+
+					if (bCanEdit)
+					{
+						const WORKLOADITEM* pWI = NULL;
+						GET_WI_RET(GetTaskID(nHit), pWI, FALSE);
+
+						bCanEdit = !pWI->bParent;
+					}
+
+					if (!bCanEdit)
+						return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+				}
+			}
+			break;
 		}
 	}
 	else if (hRealWnd == m_tree)
@@ -1857,32 +1884,6 @@ BOOL CWorkloadCtrl::OnMouseWheel(UINT /*nFlags*/, short zDelta, CPoint pt)
 	}
 
 	return FALSE;
-}
-
-BOOL CWorkloadCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
-{
-	if (pWnd == &m_list)
-	{
-		int nCol, nHit = ListHitTestItem(GetMessagePos(), TRUE, nCol);
-
-		if (nHit != -1)
-		{
-			BOOL bCanEdit = (GetListColumnType(nCol) == WLCT_VALUE);
-
-			if (bCanEdit)
-			{
-				const WORKLOADITEM* pWI = NULL;
-				GET_WI_RET(GetTaskID(nHit), pWI, FALSE);
-
-				bCanEdit = !pWI->bParent;
-			}
-
-			if (!bCanEdit)
-				return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
-		}
-	}
-
-	return CWnd::OnSetCursor(pWnd, nHitTest, message);
 }
 
 void CWorkloadCtrl::OnListHeaderClick(NMHEADER* pHDN)
@@ -2532,12 +2533,12 @@ BOOL CWorkloadCtrl::HandleEraseBkgnd(CDC* pDC)
 	return CTreeListCtrl::HandleEraseBkgnd(pDC);
 }
 
-BOOL CWorkloadCtrl::UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding)
+BOOL CWorkloadCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction)
 {
 	int nNumCols = m_treeHeader.GetItemCount();
 	BOOL bChange = FALSE;
 
-	// Save title column until last
+	// Base class handles title column
 	for (int nCol = 1; nCol < nNumCols; nCol++)
 	{
 		switch (GetTreeColumnID(nCol))
@@ -2555,7 +2556,7 @@ BOOL CWorkloadCtrl::UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding)
 		}
 	}
 
-	bChange |= CTreeListCtrl::UpdateTreeColumnWidths(pDC, bExpanding);
+	bChange |= CTreeListCtrl::UpdateTreeColumnWidths(pDC, nAction);
 
 	return bChange;
 }
@@ -2850,12 +2851,7 @@ DWORD CWorkloadCtrl::GetTaskID(HTREEITEM htiFrom) const
 
 DWORD CWorkloadCtrl::GetTaskID(int nItem) const
 {
-	return GetListTaskID(GetListItemData(m_list, nItem));
-}
-
-DWORD CWorkloadCtrl::GetListTaskID(DWORD dwItemData) const
-{
-	return GetTaskID((HTREEITEM)dwItemData);
+	return GetTaskID(GetTreeItem(nItem));
 }
 
 DWORD CWorkloadCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const

@@ -27,17 +27,18 @@ class CThemed;
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CGanttTreeListCtrl : public CTreeListCtrl  
+class CGanttCtrl : public CTreeListCtrl  
 {
 public:
-	CGanttTreeListCtrl();
-	virtual ~CGanttTreeListCtrl();
+	CGanttCtrl();
+	virtual ~CGanttCtrl();
 
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	bool PrepareNewTask(ITaskList* pTask) const;
+	BOOL CancelOperation();
 
 	DWORD GetSelectedTaskID() const;
 	BOOL SelectTask(DWORD dwTaskID);
@@ -58,9 +59,6 @@ public:
 
 	void ResizeAttributeColumnsToFit(BOOL bForce = FALSE);
 	void AdjustSplitterToFitAttributeColumns();
-	int CalcMaxAttributeColumnsWidth() const;
-	int CalcSplitPosToFitAttributeColumns() const;
-	BOOL PtInSplitter(const CPoint& pt, BOOL bScreen = FALSE) const { return CTreeListSyncer::PtInSplitter(pt, bScreen); }
 
 	BOOL ZoomIn(BOOL bIn = TRUE);
 	BOOL ZoomBy(int nAmount);
@@ -83,17 +81,14 @@ public:
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 
-	BOOL HandleEraseBkgnd(CDC* pDC) { return CTreeListSyncer::HandleEraseBkgnd(pDC); }
 	void SetTodayColor(COLORREF crToday);
 	void SetWeekendColor(COLORREF crWeekend);
 	void SetNonWorkingHoursColor(COLORREF crNonWorkingHoursColor);
 	void SetDefaultColor(COLORREF crDefault);
 	void SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF color);
 	void SetMilestoneTag(const CString& sTag);
-
-	BOOL CancelOperation();
 	void SetReadOnly(bool bReadOnly);
-
+	
 	void SetSnapMode(GTLC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }
 	GTLC_SNAPMODE GetSnapMode() const;
 
@@ -154,22 +149,18 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
+	// virtual overrides
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
-protected:
-	// base-class virtual message handlers
 	LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
 			
-	// derived class callback
-	void OnNotifySplitterChange(int nSplitPos);
 	BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 	BOOL OnDragDropItem(const TLCITEMMOVE& move);
 	UINT OnDragOverItem(UINT nCursor);
 	BOOL OnItemCheckChange(HTREEITEM hti);
 
-	// pseudo-message handlers
 	BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);
 	BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);
 	BOOL OnTreeMouseMove(UINT nFlags, CPoint point);
@@ -178,13 +169,16 @@ protected:
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	BOOL OnListMouseMove(UINT nFlags, CPoint point);
 
+	GM_ITEMSTATE GetItemState(int nItem) const;
+	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
+	void RecalcListColumnsToFit();
+
+	// Local methods
 	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
 	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
 	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected);
 	void DrawListHeaderItem(CDC* pDC, int nCol);
 	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme);
-	GM_ITEMSTATE GetItemState(int nItem) const;
-	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
 	
 	void DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSelected);
 	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTITEM& gi, BOOL bSelected, BOOL bRollup);
@@ -218,7 +212,6 @@ protected:
 	enum DIV_TYPE { DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ };
 
 	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected);
-
 	DIV_TYPE GetVerticalDivider(int nMonth, int nYear) const;
 
 	void ClearDependencyPickLine(CDC* pDC = NULL);
@@ -276,7 +269,6 @@ protected:
 
 	DWORD GetTaskID(HTREEITEM hti) const;
 	DWORD GetTaskID(int nItem) const;
-	DWORD GetListTaskID(DWORD nItemData) const;
 	GTLC_COLUMN GetTreeColumnID(int nCol) const;
 
 	BOOL StartDragging(const CPoint& ptCursor);
@@ -297,7 +289,7 @@ protected:
 	BOOL NotifyParentDateChange(GTLC_DRAG nDrag);
 	void NotifyParentDragChange();
 
-	BOOL UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding);
+	BOOL UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
 	CString GetLongestVisibleAllocTo(HTREEITEM hti) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);

@@ -187,8 +187,6 @@ protected:
 	afx_msg void OnDblClickTreeHeaderDivider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnRightClickTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnTreeKeyUp(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnClickColumns(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnTreeDragEnter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTreePreDragMove(WPARAM wp, LPARAM lp);
@@ -228,10 +226,14 @@ protected:
 	
 	virtual void RecalcTreeColumnsToFit(BOOL bForce);
 	virtual void RecalcListColumnsToFit() {}
-	virtual BOOL UpdateTreeColumnWidths(CDC* pDC, BOOL bExpanding);
-	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, BOOL /*bExpanding*/) { return FALSE; }
 	virtual int CalcTreeColumnWidth(int /*nCol*/, CDC* /*pDC*/) const { return 0; }
 	virtual void InitItemHeights();
+	virtual int CalcSplitPosToFitListColumns(int nAvailWidth) const;
+
+	enum UPDATECOLWIDTHACTION { UCWA_ANY, UCWA_EXPAND, UCWA_COLLAPSE };
+	virtual BOOL UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction);
+	virtual BOOL UpdateTreeTitleColumnWidth(CDC* pDC, int nAvailWidth, UPDATECOLWIDTHACTION nAction);
+	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, UPDATECOLWIDTHACTION /*nAction*/) { return FALSE; }
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	void DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BOOL bSelected, COLORREF crDiv = CLR_NONE) const;
@@ -246,9 +248,8 @@ protected:
 	BOOL IsListItemLineOdd(int nItem) const;
 	BOOL DeleteItem(HTREEITEM hti);
 	void Resize(int cx = 0, int cy = 0);
-	void UpdateColumnWidths(BOOL bExpanding);
+	void UpdateColumnWidths(UPDATECOLWIDTHACTION nAction);
 
-	int CalcSplitPosToFitListColumns() const;
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 	int CalcMaxListColumnsWidth() const;

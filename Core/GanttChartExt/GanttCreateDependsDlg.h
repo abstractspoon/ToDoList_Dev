@@ -7,7 +7,7 @@
 // GanttCreateDependsDlg.h : header file
 //
 
-#include "GanttTreeListCtrl.h"
+#include "GanttStruct.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CGanttCreateDependsDlg dialog
