@@ -257,6 +257,7 @@ protected:
 	BOOL PtInSplitter(const CPoint& pt, BOOL bScreen = FALSE) const;
 	BOOL IsSplitting() { return m_bSplitting; }
 	void CheckBottomAlignment() const;
+	int GetBoundingWidth() const;
 
 	// callbacks for derived classes
 	virtual BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;

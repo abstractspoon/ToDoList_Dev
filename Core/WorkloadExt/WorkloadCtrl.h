@@ -109,7 +109,6 @@ protected:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 
 	afx_msg void OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTotalsListsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);

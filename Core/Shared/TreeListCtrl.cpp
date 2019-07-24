@@ -31,13 +31,10 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const int MIN_COL_WIDTH			= GraphicsMisc::ScaleByDPIFactor(6);
+const int MIN_SPLIT_POS			= GraphicsMisc::ScaleByDPIFactor(200);
 const int MIN_LABEL_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
-const int MIN_TREE_TITLE_WIDTH	= GraphicsMisc::ScaleByDPIFactor(75); 
 const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int TV_TIPPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
-const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
-const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 
 //////////////////////////////////////////////////////////////////////
 // CTreeListTreeCtrl
@@ -46,8 +43,12 @@ IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
 
 //////////////////////////////////////////////////////////////////////
 
-CTreeListTreeCtrl::CTreeListTreeCtrl()
+CTreeListTreeCtrl::CTreeListTreeCtrl(int nMinLabelWidth, int nMinColWidth)
 	:
+	MIN_LABEL_WIDTH(GraphicsMisc::ScaleByDPIFactor(nMinLabelWidth)),
+	MIN_COL_WIDTH(GraphicsMisc::ScaleByDPIFactor(nMinColWidth)),
+	IMAGE_SIZE(GraphicsMisc::ScaleByDPIFactor(16)),
+
 	m_nTitleColumnWidth(-1),
 #pragma warning (disable: 4355)
 	m_tch(*this)
@@ -218,6 +219,56 @@ void CTreeListTreeCtrl::OnDestroy()
 	CTreeCtrl::OnDestroy();
 }
 
+int CTreeListTreeCtrl::CalcWidestItemTitle(HTREEITEM hti, CDC* pDC, BOOL bEnd) const
+{
+	int nWidest = 0;
+
+	// This item
+	if (hti)
+	{
+		CRect rText;
+
+		if (GetItemRect(hti, rText, TRUE)) // text rect only
+		{
+			if (bEnd)
+			{
+				CFontCache& fonts = const_cast<CFontCache&>(m_fonts);
+
+				BOOL bBold = TCH().IsItemBold(hti);
+				HFONT hFont = fonts.GetHFont(bBold ? GMFS_BOLD : 0);
+				HFONT hOldFont = (HFONT)pDC->SelectObject(hFont);
+
+				CString sItemText = GetItemText(hti);
+				int nTextWidth = pDC->GetTextExtent(sItemText).cx;
+
+				nWidest = max(nTextWidth, (rText.left + nTextWidth));
+
+				pDC->SelectObject(hOldFont);
+			}
+			else
+			{
+				nWidest = (rText.left + MIN_LABEL_WIDTH);
+			}
+		}
+	}
+
+	// else try children if an expanded parent
+	if (!hti || TCH().IsItemExpanded(hti) > 0)
+	{
+		HTREEITEM htiChild = GetChildItem(hti);
+
+		while (htiChild)
+		{
+			int nWidestChild = CalcWidestItemTitle(htiChild, pDC, bEnd);
+			nWidest = max(nWidest, nWidestChild);
+
+			htiChild = GetNextItem(htiChild, TVGN_NEXT);
+		}
+	}
+
+	return nWidest;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -243,6 +294,7 @@ CTreeListCtrl::~CTreeListCtrl()
 BEGIN_MESSAGE_MAP(CTreeListCtrl, CWnd)
 	ON_NOTIFY(HDN_ENDDRAG, IDC_TREELISTTREEHEADER, OnEndDragTreeHeader)
 	ON_NOTIFY(HDN_ITEMCHANGED, IDC_TREELISTTREEHEADER, OnItemChangedTreeHeader)
+	ON_NOTIFY(HDN_ITEMCHANGING, IDC_TREELISTTREEHEADER, OnItemChangingTreeHeader)
 	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_TREELISTTREEHEADER, OnDblClickTreeHeaderDivider)
 	ON_NOTIFY(NM_RCLICK, IDC_TREELISTTREEHEADER, OnRightClickTreeHeader)
 	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TREELISTTREE, OnTreeItemExpanded)
@@ -356,7 +408,7 @@ void CTreeListCtrl::AdjustSplitterToFitColumns()
 	CWnd::GetClientRect(rClient);
 
 	int nNewSplitPos = CalcSplitPosToFitListColumns(rClient.Width());
-	nNewSplitPos = max(MIN_LABEL_EDIT_WIDTH, nNewSplitPos);
+	nNewSplitPos = max(MIN_SPLIT_POS, nNewSplitPos);
 	
 	CTreeListSyncer::SetSplitPos(nNewSplitPos);
 }
@@ -484,10 +536,19 @@ void CTreeListCtrl::Resize(int cx, int cy)
 
 	if (cx && cy)
 	{
+		int nCurWidth = GetBoundingWidth();
+
 		OnResize(cx, cy);
 
 		if (m_treeHeader.GetItemCount())
+		{
 			m_tree.SetTitleColumnWidth(m_treeHeader.GetItemWidth(0));
+
+			int nNewWidth = GetBoundingWidth();
+
+			if (nNewWidth != nCurWidth)
+				UpdateColumnWidths((nNewWidth > nCurWidth) ? UCWA_EXPAND : UCWA_COLLAPSE);
+		}
 	}
 }
 
@@ -773,8 +834,8 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 						// don't let user drag column too narrow
 						if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
 						{
-							if (m_listHeader.IsItemTrackable(pHDN->iItem) && (pHDN->pitem->cxy < MIN_COL_WIDTH))
-								pHDN->pitem->cxy = MIN_COL_WIDTH;
+							if (m_listHeader.IsItemTrackable(pHDN->iItem))
+								pHDN->pitem->cxy = max(pHDN->pitem->cxy, m_tree.MIN_COL_WIDTH);
 
 							m_list.Invalidate(FALSE);
 						}
@@ -960,6 +1021,28 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	}
 	
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+}
+
+void CTreeListCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
+	*pResult = 0;
+
+	if (pHDN->iButton != 0) // left button
+		return;
+
+	if (!(pHDN->pitem->mask & HDI_WIDTH))
+		return;
+
+	// don't allow columns get too small
+	if (pHDN->iItem == 0)
+	{
+		// Handled in OnNotifySplitterChange
+	}
+	else if (m_treeHeader.IsItemVisible(pHDN->iItem))
+	{
+		pHDN->pitem->cxy = max(pHDN->pitem->cxy, m_tree.MIN_COL_WIDTH);
+	}
 }
 
 void CTreeListCtrl::SetDropHighlight(HTREEITEM hti, int nItem)
@@ -1268,7 +1351,7 @@ void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 	CClientDC dc(this);
 	GraphicsMisc::PrepareDCFont(&dc, m_tree);
 
-	int nMinColWidth = CalcWidestItemTitle(NULL, &dc, FALSE);
+	int nMinColWidth = m_tree.CalcWidestItemTitle(NULL, &dc, FALSE);
 	int nTitleColWidth = max(nMinColWidth, (nSplitPos - nRestTreeColsWidth));
 
 	m_treeHeader.SetItemWidth(0, nTitleColWidth);
@@ -1345,7 +1428,7 @@ BOOL CTreeListCtrl::UpdateTreeTitleColumnWidth(CDC* pDC, int nTotalWidth, UPDATE
 	int nMaxListColsWidth = CalcMaxListColumnsWidth();
 
 	int nCurTitleWidth = m_treeHeader.GetItemWidth(0);
-	int nMinTitleWidth = CalcWidestItemTitle(NULL, pDC, FALSE);
+	int nMinTitleWidth = m_tree.CalcWidestItemTitle(NULL, pDC, FALSE);
 	int nNewTitleWidth = nCurTitleWidth;
 
 	// Reduce the width of the title column only if the columns do not have enough space
@@ -1354,12 +1437,12 @@ BOOL CTreeListCtrl::UpdateTreeTitleColumnWidth(CDC* pDC, int nTotalWidth, UPDATE
 		int nOffset = min(nCurTitleWidth - nMinTitleWidth, nMaxListColsWidth - nCurListColsWidth);
 
 		nNewTitleWidth -= nOffset;
-		nCurListColsWidth += nOffset;
 	}
 	else if (nCurListColsWidth > nMaxListColsWidth)
 	{
 		// Increase the width of the title column only if it does not have enough space
-		int nMaxTitleWidth = CalcWidestItemTitle(NULL, pDC, TRUE);
+		int nMaxTitleWidth = m_tree.CalcWidestItemTitle(NULL, pDC, TRUE);
+		nMaxTitleWidth += (2 * LV_COLPADDING);
 
 		if (nCurTitleWidth < nMaxTitleWidth)
 		{
@@ -1373,7 +1456,6 @@ BOOL CTreeListCtrl::UpdateTreeTitleColumnWidth(CDC* pDC, int nTotalWidth, UPDATE
 			nOffset -= (nRestTreeColsWidth - nVisibleRestTreeColsWidth);
 
 			nNewTitleWidth += nOffset;
-			nCurListColsWidth -= nOffset;
 		}
 	}
 
@@ -1417,62 +1499,6 @@ int CTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)
 	m_treeHeader.SetItemWidth(nCol, nColWidth);
 
 	return nColWidth;
-}
-
-int CTreeListCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const
-{
-	// we only want parents
-	HTREEITEM htiChild = m_tree.GetChildItem(htiParent);
-	
-	if (htiChild == NULL)
-		return 0;
-	
-	// or we only want expanded items
-	if (htiParent && !TCH().IsItemExpanded(htiParent, FALSE))
-		return 0;
-	
-	// Prepare font
-	HFONT hFont = NULL, hOldFont = NULL;
-	
-	if (bEnd)
-	{
-		CFontCache& fonts = const_cast<CFontCache&>(m_tree.Fonts());
-
-		hFont = fonts.GetHFont((htiParent == NULL) ? GMFS_BOLD : 0);
-		hOldFont = (HFONT)pDC->SelectObject(hFont);
-	}
-	
-	// else try children
-	int nWidest = 0;
-	
-	while (htiChild)
-	{
-		CRect rChild;
-		
-		if (m_tree.GetItemRect(htiChild, rChild, TRUE)) // text rect only
-		{
-			int nWidth = 0;
-
-			if (bEnd)
-			{
-				int nTextWidth = pDC->GetTextExtent(m_tree.GetItemText(htiChild)).cx;
-				nWidth = max(nTextWidth, (rChild.left + nTextWidth));
-			}
-			else
-			{
-				nWidth = (rChild.left + MIN_TREE_TITLE_WIDTH);
-			}
-			
-			int nWidestChild = CalcWidestItemTitle(htiChild, pDC, bEnd); // RECURSIVE CALL
-			nWidest = max(max(nWidest, nWidth), nWidestChild);
-		}
-		
-		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
-	}
-	
-	pDC->SelectObject(hOldFont);
-	
-	return nWidest;
 }
 
 int CTreeListCtrl::Compare(const CString& sText1, const CString& sText2)

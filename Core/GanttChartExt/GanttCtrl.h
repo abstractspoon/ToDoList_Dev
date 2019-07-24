@@ -140,9 +140,7 @@ private:
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-
 	afx_msg void OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
 

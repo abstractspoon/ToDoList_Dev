@@ -48,18 +48,13 @@ using namespace GanttStatic;
 
 //////////////////////////////////////////////////////////////////////
 
-const int MIN_COL_WIDTH			= GraphicsMisc::ScaleByDPIFactor(6);
-const int MIN_LABEL_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
 const int DEF_MONTH_WIDTH		= GraphicsMisc::ScaleByDPIFactor(72);
-const int MIN_TREE_TITLE_WIDTH	= GraphicsMisc::ScaleByDPIFactor(75); 
 const int COLUMN_PADDING		= GraphicsMisc::ScaleByDPIFactor(15);
 const int MIN_MONTH_WIDTH		= GraphicsMisc::ScaleByDPIFactor(2);
 const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
-const int TV_TIPPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 const int DRAG_BUFFER			= GraphicsMisc::ScaleByDPIFactor(50);
 const int DONE_BOX				= GraphicsMisc::ScaleByDPIFactor(6);
-const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 const int PARENT_ARROW_SIZE		= GraphicsMisc::ScaleByDPIFactor(6);
 
 //////////////////////////////////////////////////////////////////////
@@ -125,9 +120,7 @@ CGanttCtrl::~CGanttCtrl()
 BEGIN_MESSAGE_MAP(CGanttCtrl, CTreeListCtrl)
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_TREELISTTREE, OnBeginEditTreeLabel)
 	ON_NOTIFY(HDN_ITEMCLICK, IDC_TREELISTTREEHEADER, OnClickTreeHeader)
-	ON_NOTIFY(HDN_ITEMCHANGING, IDC_TREELISTTREEHEADER, OnItemChangingTreeHeader)
 	ON_NOTIFY(TVN_GETDISPINFO, IDC_TREELISTTREE, OnTreeGetDispInfo)
-
 	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
@@ -431,6 +424,7 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 				ScrollToToday();
 		}
 		EnableResync(TRUE, m_tree);
+		UpdateColumnWidths(UCWA_ANY);
 		break;
 		
 	case IUI_NEW:
@@ -472,9 +466,7 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	default:
 		ASSERT(0);
 	}
-	
 	InitItemHeights();
-	UpdateColumnWidths(UCWA_ANY);
 
 	if (EditWantsResort(pTasks, nUpdate))
 	{
@@ -1466,8 +1458,8 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 						m_tree.GetItemRect(hti, rItem, TRUE);
 
 						CRect rIcon(rItem);
-						rIcon.left -= (IMAGE_SIZE + 2);
-						rIcon.bottom = (rIcon.top + IMAGE_SIZE);
+						rIcon.left -= (m_tree.IMAGE_SIZE + 2);
+						rIcon.bottom = (rIcon.top + m_tree.IMAGE_SIZE);
 						GraphicsMisc::CentreRect(rIcon, rItem, FALSE, TRUE);
 
 						ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
@@ -1660,7 +1652,7 @@ LRESULT CGanttCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 				// don't draw columns having min width
 				CRect rItem(pNMCD->rc);
 				
-				if (rItem.Width() <= MIN_COL_WIDTH)
+				if (rItem.Width() <= m_tree.MIN_COL_WIDTH)
 					return CDRF_DODEFAULT;
 			}
 			return CDRF_NOTIFYPOSTPAINT;
@@ -1752,42 +1744,6 @@ void CGanttCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	{
 		GTLC_COLUMN nColID = GetTreeColumnID(pHDN->iItem);
 		Sort(nColID, TRUE, -1, TRUE);
-	}
-}
-
-void CGanttCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
-	*pResult = 0;
-
-	if (pHDN->iButton == 0) // left button
-	{
-		if (pHDN->pitem->mask & HDI_WIDTH)
-		{
-			// don't allow columns get too small
-			GTLC_COLUMN nColID = GetTreeColumnID(pHDN->iItem);
-
-			switch (nColID)
-			{
-			case GTLCC_TITLE:
-				if (pHDN->pitem->cxy < MIN_TREE_TITLE_WIDTH)
-					*pResult = TRUE; // prevent change
-				break;
-
-			case GTLCC_STARTDATE:
-			case GTLCC_DUEDATE:
-			case GTLCC_DONEDATE:
-			case GTLCC_ALLOCTO:
-			case GTLCC_PERCENT:
-			case GTLCC_TASKID:
-				if (m_treeHeader.IsItemVisible(pHDN->iItem))
-				{
-					if (pHDN->pitem->cxy < MIN_COL_WIDTH)
-						pHDN->pitem->cxy = MIN_COL_WIDTH;
-				}
-				break;
-			}
-		}
 	}
 }
 
@@ -2521,7 +2477,7 @@ void CGanttCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTT
 		pDC->FillSolidRect(rBack, crBack);
 	}
 	
-	if (rItem.Width() <= MIN_COL_WIDTH)
+	if (rItem.Width() <= m_tree.MIN_COL_WIDTH)
 		return;
 
 	// draw text
@@ -4576,8 +4532,7 @@ int CGanttCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 	switch (nColID)
 	{
 	case GTLCC_TITLE:
-		nColWidth = CalcWidestItemTitle(NULL, pDC, TRUE);
-		nColWidth = max(nColWidth, MIN_TREE_TITLE_WIDTH);
+		nColWidth = m_tree.CalcWidestItemTitle(NULL, pDC, TRUE);
 		break;
 
 	case GTLCC_TASKID:
@@ -4606,8 +4561,8 @@ int CGanttCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 		ASSERT(0);
 	}
 
-	if (nColWidth < MIN_COL_WIDTH)
-		nColWidth = MIN_COL_WIDTH;
+	if (nColWidth < m_tree.MIN_COL_WIDTH)
+		nColWidth = m_tree.MIN_COL_WIDTH;
 	else
 		nColWidth += (2 * LV_COLPADDING);
 	

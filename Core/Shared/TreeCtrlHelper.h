@@ -190,7 +190,7 @@ public:
 	HTREEITEM FindItem(DWORD dwItemData, HTREEITEM htiStart = NULL) const;
  	const CTreeCtrl& TreeCtrl() const { return m_tree; }
 
-	BOOL IsItemBold(HTREEITEM hti);
+	BOOL IsItemBold(HTREEITEM hti) const;
 	void SetItemBold(HTREEITEM hti, BOOL bBold = TRUE);
 	void SetTopLevelItemsBold(BOOL bBold = TRUE);
 

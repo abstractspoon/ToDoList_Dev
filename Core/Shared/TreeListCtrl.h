@@ -61,7 +61,7 @@ class CTreeListTreeCtrl : public CTreeCtrl
 	DECLARE_DYNAMIC(CTreeListTreeCtrl)
 
 public:
-	CTreeListTreeCtrl();
+	CTreeListTreeCtrl(int nMinLabelWidth = 75, int nMinColWidth = 6);
 	virtual ~CTreeListTreeCtrl();
 
 	CTreeCtrlHelper& TCH() { return m_tch; }
@@ -76,7 +76,13 @@ public:
 	void ShowCheckboxes(UINT nUnthemedBitmapID, BOOL bShow = TRUE);
 	void ShowIcons(BOOL bShow = TRUE);
 	void SetTitleColumnWidth(int nWidth) { m_nTitleColumnWidth = nWidth; }
+	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 
+public:
+	const int MIN_COL_WIDTH;
+	const int MIN_LABEL_WIDTH;
+	const int IMAGE_SIZE;
+	
 protected:
 	int m_nTitleColumnWidth;
 	CToolTipCtrlEx m_tooltip;
@@ -184,6 +190,7 @@ protected:
 
 	afx_msg void OnEndDragTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemChangedTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDblClickTreeHeaderDivider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnRightClickTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* pResult);
@@ -251,7 +258,6 @@ protected:
 	void UpdateColumnWidths(UPDATECOLWIDTHACTION nAction);
 
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
-	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 	int CalcMaxListColumnsWidth() const;
 
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;

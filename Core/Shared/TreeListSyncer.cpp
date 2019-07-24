@@ -2964,6 +2964,14 @@ void CTreeListSyncer::GetBoundingRect(CRect& rect) const
 		rect.InflateRect(1, 1);
 }
 
+int CTreeListSyncer::GetBoundingWidth() const
+{
+	CRect rBounds;
+	GetBoundingRect(rBounds);
+
+	return rBounds.Width();
+}
+
 void CTreeListSyncer::GetBoundingRect(HWND hwnd, CRect& rect) const
 {
 	::GetWindowRect(hwnd, rect);

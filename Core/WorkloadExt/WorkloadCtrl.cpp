@@ -47,11 +47,8 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const int MIN_COL_WIDTH			= GraphicsMisc::ScaleByDPIFactor(6);
-const int MIN_TREE_TITLE_WIDTH	= GraphicsMisc::ScaleByDPIFactor(75); 
 const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
-const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -97,7 +94,6 @@ CWorkloadCtrl::~CWorkloadCtrl()
 BEGIN_MESSAGE_MAP(CWorkloadCtrl, CTreeListCtrl)
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_TASKTREE, OnBeginEditTreeLabel)
 	ON_NOTIFY(HDN_ITEMCLICK, IDC_TASKHEADER, OnClickTreeHeader)
-	ON_NOTIFY(HDN_ITEMCHANGING, IDC_TASKHEADER, OnItemChangingTreeHeader)
 	ON_NOTIFY(TVN_GETDISPINFO, IDC_TASKTREE, OnTreeGetDispInfo)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_TOTALSLABELS, OnTotalsListsCustomDraw)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ALLOCATIONTOTALS, OnTotalsListsCustomDraw)
@@ -430,7 +426,6 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	InitItemHeights();
 	UpdateListColumns();
 	FixupListSortColumn();
-	UpdateColumnWidths(UCWA_ANY);
 	RecalcAllocationTotals();
 	RecalcDataDateRange();
 
@@ -450,6 +445,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 
 			UnlockWindowUpdate();
 			EnableResync(TRUE, m_tree);
+			UpdateColumnWidths(UCWA_ANY);
 		}
 		break;
 
@@ -1262,8 +1258,8 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 						m_tree.GetItemRect(hti, rItem, TRUE);
 
 						CRect rIcon(rItem);
-						rIcon.left -= (IMAGE_SIZE + 2);
-						rIcon.bottom = (rIcon.top + IMAGE_SIZE);
+						rIcon.left -= (m_tree.IMAGE_SIZE + 2);
+						rIcon.bottom = (rIcon.top + m_tree.IMAGE_SIZE);
 						GraphicsMisc::CentreRect(rIcon, rItem, FALSE, TRUE);
 
 						ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
@@ -1565,7 +1561,7 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 				// don't draw columns having min width
 				CRect rItem(pNMCD->rc);
 				
-				if (rItem.Width() <= MIN_COL_WIDTH)
+				if (rItem.Width() <= m_tree.MIN_COL_WIDTH)
 					return CDRF_DODEFAULT;
 			}
 			return CDRF_NOTIFYPOSTPAINT;
@@ -1691,41 +1687,6 @@ void CWorkloadCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	{
 		WLC_COLUMNID nColID = GetTreeColumnID(pHDN->iItem);
 		Sort(nColID, TRUE, -1, TRUE);
-	}
-}
-
-void CWorkloadCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	NMHEADER* pHDN = (NMHEADER*) pNMHDR;
-	*pResult = 0;
-	
-	if (pHDN->iButton == 0) // left button
-	{
-		if (pHDN->pitem->mask & HDI_WIDTH)
-		{
-			// don't allow columns get too small
-			WLC_COLUMNID nColID = GetTreeColumnID(pHDN->iItem);
-			
-			switch (nColID)
-			{
-			case WLCC_TITLE:
-				if (pHDN->pitem->cxy < MIN_TREE_TITLE_WIDTH)
-					*pResult = TRUE; // prevent change
-				break;
-				
-			case WLCC_STARTDATE:
-			case WLCC_DUEDATE:
-			case WLCC_PERCENT:
-			case WLCC_TASKID:
-			case WLCC_DURATION:
-				if (m_treeHeader.IsItemVisible(pHDN->iItem))
-				{
-					if (pHDN->pitem->cxy < MIN_COL_WIDTH)
-						pHDN->pitem->cxy = MIN_COL_WIDTH;
-				}
-				break;
-			}
-		}
 	}
 }
 
@@ -2148,7 +2109,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 		pDC->FillSolidRect(rBack, crBack);
 	}
 	
-	if (rItem.Width() <= MIN_COL_WIDTH)
+	if (rItem.Width() <= m_tree.MIN_COL_WIDTH)
 		return;
 
 	// draw text
@@ -2572,8 +2533,7 @@ int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 	switch (nColID)
 	{
 	case WLCC_TITLE:
-		nColWidth = CalcWidestItemTitle(NULL, pDC, TRUE);
-		nColWidth = max(nColWidth, MIN_TREE_TITLE_WIDTH);
+		nColWidth = m_tree.CalcWidestItemTitle(NULL, pDC, TRUE);
 		break;
 
 	case WLCC_TASKID:
@@ -2610,8 +2570,8 @@ int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 		ASSERT(0);
 	}
 
-	if (nColWidth < MIN_COL_WIDTH)
-		nColWidth = MIN_COL_WIDTH;
+	if (nColWidth < m_tree.MIN_COL_WIDTH)
+		nColWidth = m_tree.MIN_COL_WIDTH;
 	else
 		nColWidth += (2 * LV_COLPADDING);
 	

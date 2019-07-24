@@ -1026,7 +1026,7 @@ int CTreeCtrlHelper::FindItem(HTREEITEM htiFind, HTREEITEM htiStart)
 	return 0;
 }
 
-BOOL CTreeCtrlHelper::IsItemBold(HTREEITEM hti)
+BOOL CTreeCtrlHelper::IsItemBold(HTREEITEM hti) const
 {
 	return (m_tree.GetItemState(hti, TVIS_BOLD) & TVIS_BOLD);
 }
