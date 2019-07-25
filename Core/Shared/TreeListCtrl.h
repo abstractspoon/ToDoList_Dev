@@ -76,8 +76,8 @@ public:
 	void ShowCheckboxes(UINT nUnthemedBitmapID, BOOL bShow = TRUE);
 	void ShowIcons(BOOL bShow = TRUE);
 	void SetTitleColumnWidth(int nWidth) { m_nTitleColumnWidth = nWidth; }
-	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
-	HFONT GetColumnFont(int nCol) const;
+	
+	int CalcWidestItemTitle(CDC* pDC, BOOL bMaximum) const;
 
 public:
 	const int MIN_COL_WIDTH;
@@ -105,6 +105,7 @@ protected:
 
 protected:
 	BOOL InitTooltip();
+	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bMaximum) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -260,6 +261,8 @@ protected:
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcMaxListColumnsWidth() const;
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
+	int CalcTreeTitleColumnWidth(CDC* pDC, BOOL bMaximum) const;
+	int CalcTreeColumnWidth(int nCol, CDC* pDC, int nTextWidth) const;
 
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;

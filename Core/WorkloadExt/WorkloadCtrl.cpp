@@ -108,6 +108,13 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CTreeListCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	
+	// prevent column reordering on list
+	m_listHeader.ModifyStyle(HDS_DRAGDROP, 0);
+	m_listHeader.EnableTracking(FALSE);
+
+	// prevent translation of the list header
+	CLocalizer::EnableTranslation(m_listHeader, FALSE);
+	
 	BOOL bVisible = (lpCreateStruct->style & WS_VISIBLE);
 	CRect rect(0, 0, lpCreateStruct->cx, lpCreateStruct->cy);
 	
@@ -148,13 +155,6 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	BuildTaskTreeColumns();
 	BuildListColumns();
 	PopulateTotalsLists();
-	
-	// prevent column reordering on list
-	m_listHeader.ModifyStyle(HDS_DRAGDROP, 0);
-	m_listHeader.EnableTracking(FALSE);
-
-	// prevent translation of the list header
-	CLocalizer::EnableTranslation(m_listHeader, FALSE);
 	
 	return 0;
 }
@@ -1510,7 +1510,7 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 		switch (pNMCD->dwDrawStage)
 		{
 		case CDDS_PREPAINT:
-			// only need handle drawing for single sorting or double row height
+			// only need handle drawing for coloumn sorting or double row height
 			if (m_sort.IsSingleSortingBy(WLCC_ALLOCTO) || (m_listHeader.GetRowCount() > 1))
 			{
 				return CDRF_NOTIFYITEMDRAW;
