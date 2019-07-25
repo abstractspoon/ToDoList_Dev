@@ -197,12 +197,6 @@ int CWorkloadCtrl::CalcSplitPosToFitListColumns(int nTotalWidth) const
 	return CTreeListCtrl::CalcSplitPosToFitListColumns(MulDiv(nTotalWidth, 2, 3));
 }
 
-BOOL CWorkloadCtrl::UpdateTreeTitleColumnWidth(CDC* pDC, int nTotalWidth, UPDATECOLWIDTHACTION nAction)
-{
-	// Adjust for bar chart
-	return CTreeListCtrl::UpdateTreeTitleColumnWidth(pDC, MulDiv(nTotalWidth, 2, 3), nAction);
-}
-
 DWORD CWorkloadCtrl::GetSelectedTaskID() const
 {
 	return GetSelectedItemData();
@@ -2492,34 +2486,6 @@ BOOL CWorkloadCtrl::HandleEraseBkgnd(CDC* pDC)
 	CDialogHelper::ExcludeChild(&m_barChart, pDC);
 	
 	return CTreeListCtrl::HandleEraseBkgnd(pDC);
-}
-
-BOOL CWorkloadCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction)
-{
-	int nNumCols = m_treeHeader.GetItemCount();
-	BOOL bChange = FALSE;
-
-	// Base class handles title column
-	for (int nCol = 1; nCol < nNumCols; nCol++)
-	{
-		switch (GetTreeColumnID(nCol))
-		{
-		case WLCC_TASKID:
-		case WLCC_DURATION:
-		case WLCC_TIMEEST:
-			{
-				int nCurWidth = m_treeHeader.GetItemWidth(nCol);
-
-				if (RecalcTreeColumnWidth(nCol, pDC, FALSE) != nCurWidth)
-					bChange = TRUE;
-			}
-			break;
-		}
-	}
-
-	bChange |= CTreeListCtrl::UpdateTreeColumnWidths(pDC, nAction);
-
-	return bChange;
 }
 
 int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const

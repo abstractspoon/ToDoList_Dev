@@ -1408,22 +1408,23 @@ void CTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BO
 
 BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction)
 {
-	// Derived class responsible for other columns
+	int nNumCols = m_treeHeader.GetItemCount();
+	BOOL bChange = FALSE;
+
+	for (int nCol = 1; nCol < nNumCols; nCol++)
+	{
+		int nCurWidth = m_treeHeader.GetItemWidth(nCol);
+
+		if (RecalcTreeColumnWidth(nCol, pDC, FALSE) != nCurWidth)
+			bChange = TRUE;
+	}
 
 	// Title column
-	CRect rClient;
-	CWnd::GetClientRect(rClient);
-
-	return UpdateTreeTitleColumnWidth(pDC, rClient.Width(), nAction);
-}
-
-BOOL CTreeListCtrl::UpdateTreeTitleColumnWidth(CDC* pDC, int nTotalWidth, UPDATECOLWIDTHACTION nAction)
-{
-	// Preserve width of list columns 
-	int nAvailWidth = nTotalWidth;
+	int nAvailWidth = GetBoundingWidth();
 	int nSplitPos = GetSplitPos();
 	int nSplitBarWidth = GetSplitBarWidth();
 
+	// Preserve width of list columns 
 	int nCurListColsWidth = (nAvailWidth - nSplitPos - nSplitBarWidth - LV_COLPADDING);
 	int nMaxListColsWidth = CalcMaxListColumnsWidth();
 
@@ -1474,7 +1475,7 @@ BOOL CTreeListCtrl::UpdateTreeTitleColumnWidth(CDC* pDC, int nTotalWidth, UPDATE
 		m_tree.SetTitleColumnWidth(nNewTitleWidth);
 	}
 
-	return FALSE;
+	return (bUpdateWidth | bChange);
 }
 
 void CTreeListCtrl::UpdateColumnWidths(UPDATECOLWIDTHACTION nAction)

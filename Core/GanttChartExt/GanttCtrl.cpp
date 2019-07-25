@@ -2502,7 +2502,7 @@ void CGanttCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTT
 			nFlags |= DT_END_ELLIPSIS;
 			break;
 
-		case  GTLCC_TASKID:
+		case GTLCC_TASKID:
 			nFlags |= DT_RIGHT;
 			break;
 			
@@ -4492,33 +4492,6 @@ void CGanttCtrl::RecalcListColumnsToFit()
 void CGanttCtrl::AdjustSplitterToFitAttributeColumns()
 {
 	AdjustSplitterToFitColumns();
-}
-
-BOOL CGanttCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction)
-{
-	int nNumCols = m_treeHeader.GetItemCount();
-	BOOL bChange = FALSE;
-
-	// Base class handles tree column
-	for (int nCol = 1; nCol < nNumCols; nCol++)
-	{
-		switch (GetTreeColumnID(nCol))
-		{
-		case GTLCC_ALLOCTO:
-		case GTLCC_TASKID:
-			{
-				int nCurWidth = m_treeHeader.GetItemWidth(nCol);
-
-				if (RecalcTreeColumnWidth(nCol, pDC, FALSE) != nCurWidth)
-					bChange = TRUE;
-			}
-			break;
-		}
-	}
-
-	bChange |= CTreeListCtrl::UpdateTreeColumnWidths(pDC, nAction);
-
-	return bChange;
 }
 
 int CGanttCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const

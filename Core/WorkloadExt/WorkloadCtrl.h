@@ -139,8 +139,6 @@ protected:
 	GM_ITEMSTATE GetItemState(int nItem) const;
 	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
 	int CalcSplitPosToFitListColumns(int nTotalWidth) const;
-	BOOL UpdateTreeTitleColumnWidth(CDC* pDC, int nTotalWidth, UPDATECOLWIDTHACTION nAction);
-	BOOL UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction);
 	void DeleteItem(HTREEITEM hti);
 	
 	// Non-virtual members

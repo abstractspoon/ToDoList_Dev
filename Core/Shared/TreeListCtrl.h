@@ -238,8 +238,6 @@ protected:
 	virtual int CalcSplitPosToFitListColumns(int nAvailWidth) const;
 
 	enum UPDATECOLWIDTHACTION { UCWA_ANY, UCWA_EXPAND, UCWA_COLLAPSE };
-	virtual BOOL UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction);
-	virtual BOOL UpdateTreeTitleColumnWidth(CDC* pDC, int nAvailWidth, UPDATECOLWIDTHACTION nAction);
 	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, UPDATECOLWIDTHACTION /*nAction*/) { return FALSE; }
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
@@ -254,9 +252,10 @@ protected:
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
 	BOOL DeleteItem(HTREEITEM hti);
+
 	void Resize(int cx = 0, int cy = 0);
 	void UpdateColumnWidths(UPDATECOLWIDTHACTION nAction);
-
+	BOOL UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction);
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcMaxListColumnsWidth() const;
 
