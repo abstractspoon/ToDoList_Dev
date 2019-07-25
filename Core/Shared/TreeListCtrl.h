@@ -61,7 +61,7 @@ class CTreeListTreeCtrl : public CTreeCtrl
 	DECLARE_DYNAMIC(CTreeListTreeCtrl)
 
 public:
-	CTreeListTreeCtrl(int nMinLabelWidth = 75, int nMinColWidth = 6);
+	CTreeListTreeCtrl(const CEnHeaderCtrl& header, int nMinLabelWidth = 75, int nMinColWidth = 6);
 	virtual ~CTreeListTreeCtrl();
 
 	CTreeCtrlHelper& TCH() { return m_tch; }
@@ -75,9 +75,10 @@ public:
 
 	void ShowCheckboxes(UINT nUnthemedBitmapID, BOOL bShow = TRUE);
 	void ShowIcons(BOOL bShow = TRUE);
-	void SetTitleColumnWidth(int nWidth) { m_nTitleColumnWidth = nWidth; }
 	
 	int CalcWidestItemTitle(CDC* pDC, BOOL bMaximum) const;
+	int CalcTitleColumnWidth(CDC* pDC, BOOL bMaximum) const;
+	int CalcColumnWidth(int nCol, CDC* pDC, int nMaxItemTextWidth) const;
 
 public:
 	const int MIN_COL_WIDTH;
@@ -85,12 +86,13 @@ public:
 	const int IMAGE_SIZE;
 	
 protected:
-	int m_nTitleColumnWidth;
 	CToolTipCtrlEx m_tooltip;
 	CFontCache m_fonts;
 	CTreeCtrlHelper m_tch;
 	CImageList m_ilCheckboxes, m_ilIconPlaceholder;
 
+	const CEnHeaderCtrl& m_header;
+	
 protected:
 	virtual void PreSubclassWindow();
 	virtual int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
@@ -171,17 +173,19 @@ protected:
 	CListCtrl m_list;
 	CEnHeaderCtrl m_listHeader, m_treeHeader;
 
-	BOOL m_bMovingTask;
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
+	CHTIMap m_mapHTItems;
 
-	int m_nPrevDropHilitedItem;
 	CTreeDragDropHelper m_treeDragDrop;
 	CTreeSelectionHelper m_tshDragDrop;
 	CThemed m_themeHeader;
 
-	CHTIMap m_mapHTItems;
+	BOOL m_bMovingTask;
+	int m_nPrevDropHilitedItem;
 
+	mutable int m_nMinTreeTitleColumnWidth;
+	
 protected:
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
@@ -190,11 +194,11 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 
-	afx_msg void OnEndDragTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnItemChangedTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnDblClickTreeHeaderDivider(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnRightClickTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTreeHeaderEndDrag(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTreeHeaderItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTreeHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTreeHeaderDblClickDivider(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTreeHeaderRightClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnTreeDragEnter(WPARAM wp, LPARAM lp);
@@ -261,8 +265,6 @@ protected:
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcMaxListColumnsWidth() const;
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
-	int CalcTreeTitleColumnWidth(CDC* pDC, BOOL bMaximum) const;
-	int CalcTreeColumnWidth(int nCol, CDC* pDC, int nTextWidth) const;
 
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;
