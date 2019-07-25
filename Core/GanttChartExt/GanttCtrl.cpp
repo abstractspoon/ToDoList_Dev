@@ -3463,7 +3463,7 @@ COLORREF CGanttCtrl::GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOO
 
 	if (crTextBk == CLR_NONE)
 	{
-		if (bAlternate && HasAltLineColor())
+		if (!m_bSavingToImage && bAlternate && HasAltLineColor())
 		{
 			crTextBk = m_crAltLine;
 		}
@@ -3485,13 +3485,16 @@ COLORREF CGanttCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL 
 	COLORREF crText = gi.GetTextColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
 	ASSERT(crText != CLR_NONE);
 
-	if (bSelected)
+	if (!m_bSavingToImage)
 	{
-		crText = GraphicsMisc::GetExplorerItemTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
-	}
-	else if (bLighter)
-	{
-		crText = GraphicsMisc::Lighter(crText, 0.5);
+		if (bSelected)
+		{
+			crText = GraphicsMisc::GetExplorerItemTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
+		}
+		else if (bLighter)
+		{
+			crText = GraphicsMisc::Lighter(crText, 0.5);
+		}
 	}
 
 	return crText;
