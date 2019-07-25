@@ -77,6 +77,7 @@ public:
 	void ShowIcons(BOOL bShow = TRUE);
 	void SetTitleColumnWidth(int nWidth) { m_nTitleColumnWidth = nWidth; }
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
+	HFONT GetColumnFont(int nCol) const;
 
 public:
 	const int MIN_COL_WIDTH;
@@ -233,7 +234,7 @@ protected:
 	
 	virtual void RecalcTreeColumnsToFit(BOOL bForce);
 	virtual void RecalcListColumnsToFit() {}
-	virtual int CalcTreeColumnWidth(int /*nCol*/, CDC* /*pDC*/) const { return 0; }
+	virtual int CalcTreeColumnTextWidth(int /*nCol*/, CDC* /*pDC*/) const { return 0; }
 	virtual void InitItemHeights();
 	virtual int CalcSplitPosToFitListColumns(int nAvailWidth) const;
 
@@ -258,6 +259,7 @@ protected:
 	BOOL UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction);
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcMaxListColumnsWidth() const;
+	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
 
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;

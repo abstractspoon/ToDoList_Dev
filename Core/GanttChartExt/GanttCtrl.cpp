@@ -4494,58 +4494,36 @@ void CGanttCtrl::AdjustSplitterToFitAttributeColumns()
 	AdjustSplitterToFitColumns();
 }
 
-int CGanttCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
+int CGanttCtrl::CalcTreeColumnTextWidth(int nCol, CDC* pDC) const
 {
 	ASSERT(pDC);
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_tree);
 
-	int nColWidth = 0;
-	GTLC_COLUMN nColID = GetTreeColumnID(nCol);
-
-	switch (nColID)
+	switch (GetTreeColumnID(nCol))
 	{
 	case GTLCC_TITLE:
-		nColWidth = m_tree.CalcWidestItemTitle(NULL, pDC, TRUE);
-		break;
+		break; // handled by base class
 
 	case GTLCC_TASKID:
-		nColWidth = pDC->GetTextExtent(Misc::Format(m_dwMaxTaskID)).cx;
-		break;
+		return pDC->GetTextExtent(Misc::Format(m_dwMaxTaskID)).cx;
 		
 	case GTLCC_ALLOCTO:
-		nColWidth = GraphicsMisc::GetAverageMaxStringWidth(GetLongestVisibleAllocTo(NULL), pDC);
-		break;
+		return GraphicsMisc::GetAverageMaxStringWidth(GetLongestVisibleAllocTo(NULL), pDC);
 		
-	// rest of attributes are fixed width
 	case GTLCC_STARTDATE:
 	case GTLCC_DUEDATE: 
 	case GTLCC_DONEDATE: 
 		{
 			COleDateTime date(2015, 12, 31, 23, 59, 59);
-			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(FormatDate(date), pDC);
+			return GraphicsMisc::GetAverageMaxStringWidth(FormatDate(date), pDC);
 		}
 		break;
 		
 	case GTLCC_PERCENT: 
-		nColWidth = GraphicsMisc::GetAverageMaxStringWidth(_T("100%"), pDC);
-		break;
-
-	default:
-		ASSERT(0);
+		return GraphicsMisc::GetAverageMaxStringWidth(_T("100%"), pDC);
 	}
 
-	if (nColWidth < m_tree.MIN_COL_WIDTH)
-		nColWidth = m_tree.MIN_COL_WIDTH;
-	else
-		nColWidth += (2 * LV_COLPADDING);
-	
-	// take max of this and column title
-	int nTitleWidth = (m_treeHeader.GetItemTextWidth(nCol, pDC) + (2 * HD_COLPADDING));
-	ASSERT(nTitleWidth);
-
-	pDC->SelectObject(pOldFont);
-
-	return max(nTitleWidth, nColWidth);
+	ASSERT(0);
+	return 0;
 }
 
 void CGanttCtrl::UpdateListColumnsWidthAndText(int nWidth)

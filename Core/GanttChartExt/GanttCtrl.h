@@ -287,7 +287,7 @@ protected:
 	BOOL NotifyParentDateChange(GTLC_DRAG nDrag);
 	void NotifyParentDragChange();
 
-	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
+	int CalcTreeColumnTextWidth(int nCol, CDC* pDC) const;
 	CString GetLongestVisibleAllocTo(HTREEITEM hti) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;

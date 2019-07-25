@@ -2488,66 +2488,46 @@ BOOL CWorkloadCtrl::HandleEraseBkgnd(CDC* pDC)
 	return CTreeListCtrl::HandleEraseBkgnd(pDC);
 }
 
-int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
+int CWorkloadCtrl::CalcTreeColumnTextWidth(int nCol, CDC* pDC) const
 {
-	ASSERT(pDC);
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_tree);
-
-	int nColWidth = 0;
 	WLC_COLUMNID nColID = GetTreeColumnID(nCol);
 
 	switch (nColID)
 	{
 	case WLCC_TITLE:
-		nColWidth = m_tree.CalcWidestItemTitle(NULL, pDC, TRUE);
-		break;
+		break; // handled by base class
 
 	case WLCC_TASKID:
-		nColWidth = pDC->GetTextExtent(Misc::Format(m_dwMaxTaskID)).cx;
-		break;
+		return pDC->GetTextExtent(Misc::Format(m_dwMaxTaskID)).cx;
 		
 	// rest of attributes are fixed width
 	case WLCC_STARTDATE:
 	case WLCC_DUEDATE: 
 		{
 			COleDateTime date(2015, 12, 31, 23, 59, 59);
-			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(FormatDate(date), pDC);
+			return GraphicsMisc::GetAverageMaxStringWidth(FormatDate(date), pDC);
 		}
 		break;
 
 	case WLCC_DURATION:
-		nColWidth = pDC->GetTextExtent(FormatTimeSpan(GetLargestVisibleDuration(NULL), 0)).cx;
-		break;
+		return pDC->GetTextExtent(FormatTimeSpan(GetLargestVisibleDuration(NULL), 0)).cx;
 
 	case WLCC_TIMEEST:
 		{
 			int nWidthLargest = pDC->GetTextExtent(FormatTimeSpan(GetLargestVisibleTimeEstimate(NULL), 1)).cx;
 			int nWidthSmallest = pDC->GetTextExtent(FormatTimeSpan(0.1, 1)).cx;
 
-			nColWidth = max(nWidthLargest, nWidthSmallest);
+			return max(nWidthLargest, nWidthSmallest);
 		}
 		break;
 		
 	case WLCC_PERCENT: 
-		nColWidth = GraphicsMisc::GetAverageMaxStringWidth(_T("100%"), pDC);
+		return GraphicsMisc::GetAverageMaxStringWidth(_T("100%"), pDC);
 		break;
-
-	default:
-		ASSERT(0);
 	}
 
-	if (nColWidth < m_tree.MIN_COL_WIDTH)
-		nColWidth = m_tree.MIN_COL_WIDTH;
-	else
-		nColWidth += (2 * LV_COLPADDING);
-	
-	// take max of this and column title
-	int nTitleWidth = (m_treeHeader.GetItemTextWidth(nCol, pDC) + (2 * HD_COLPADDING));
-	ASSERT(nTitleWidth);
-
-	pDC->SelectObject(pOldFont);
-
-	return max(nTitleWidth, nColWidth);
+	ASSERT(0);
+	return 0;
 }
 
 void CWorkloadCtrl::BuildListColumns()

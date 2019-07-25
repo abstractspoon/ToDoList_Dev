@@ -171,7 +171,7 @@ protected:
 	WLC_COLUMNID GetTreeColumnID(int nCol) const;
 	WLC_LISTCOLUMNTYPE GetListColumnType(int nCol) const;
 
-	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
+	int CalcTreeColumnTextWidth(int nCol, CDC* pDC) const;
 	int GetLargestVisibleDuration(HTREEITEM hti) const;
 	double GetLargestVisibleTimeEstimate(HTREEITEM hti) const;
 	CString GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNID nColID) const;

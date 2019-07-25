@@ -35,6 +35,7 @@ const int MIN_SPLIT_POS			= GraphicsMisc::ScaleByDPIFactor(200);
 const int MIN_LABEL_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
 const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int TV_TIPPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
+const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 
 //////////////////////////////////////////////////////////////////////
 // CTreeListTreeCtrl
@@ -233,9 +234,9 @@ int CTreeListTreeCtrl::CalcWidestItemTitle(HTREEITEM hti, CDC* pDC, BOOL bEnd) c
 			if (bEnd)
 			{
 				CFontCache& fonts = const_cast<CFontCache&>(m_fonts);
-
 				BOOL bBold = TCH().IsItemBold(hti);
-				HFONT hFont = fonts.GetHFont(bBold ? GMFS_BOLD : 0);
+
+				HFONT hFont = fonts.GetHFont(bBold, FALSE, FALSE, FALSE);
 				HFONT hOldFont = (HFONT)pDC->SelectObject(hFont);
 
 				CString sItemText = GetItemText(hti);
@@ -688,11 +689,12 @@ void CTreeListCtrl::OnItemChangedTreeHeader(NMHDR* /*pNMHDR*/, LRESULT* /*pResul
 
 void CTreeListCtrl::OnDblClickTreeHeaderDivider(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
-	CClientDC dc(&m_tree);
 	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
 
 	int nCol = pHDN->iItem;
 	ASSERT(nCol != -1);
+
+	CClientDC dc(&m_tree);
 
 	RecalcTreeColumnWidth(nCol, &dc, TRUE);
 	SetSplitPos(m_treeHeader.CalcTotalItemWidth());
@@ -1349,7 +1351,6 @@ void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 	int nRestTreeColsWidth = m_treeHeader.CalcTotalItemWidth(0);
 
 	CClientDC dc(this);
-	GraphicsMisc::PrepareDCFont(&dc, m_tree);
 
 	int nMinColWidth = m_tree.CalcWidestItemTitle(NULL, &dc, FALSE);
 	int nTitleColWidth = max(nMinColWidth, (nSplitPos - nRestTreeColsWidth));
@@ -1408,6 +1409,7 @@ void CTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BO
 
 BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction)
 {
+	// Recalculate all but the title column
 	int nNumCols = m_treeHeader.GetItemCount();
 	BOOL bChange = FALSE;
 
@@ -1419,12 +1421,11 @@ BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nActio
 			bChange = TRUE;
 	}
 
-	// Title column
+	// Recalculate the title column, preserving width of list columns 
 	int nAvailWidth = GetBoundingWidth();
 	int nSplitPos = GetSplitPos();
 	int nSplitBarWidth = GetSplitBarWidth();
 
-	// Preserve width of list columns 
 	int nCurListColsWidth = (nAvailWidth - nSplitPos - nSplitBarWidth - LV_COLPADDING);
 	int nMaxListColsWidth = CalcMaxListColumnsWidth();
 
@@ -1493,13 +1494,52 @@ int CTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)
 	if (!m_treeHeader.IsItemVisible(nCol))
 		return 0;
 
+	int nCurWidth = m_treeHeader.GetItemWidth(nCol);
+
 	if (!bForce && m_treeHeader.IsItemTracked(nCol))
-		return m_treeHeader.GetItemWidth(nCol);
+		return nCurWidth;
 
-	int nColWidth = CalcTreeColumnWidth(nCol, pDC);
-	m_treeHeader.SetItemWidth(nCol, nColWidth);
+	int nNewWidth = CalcTreeColumnWidth(nCol, pDC);
 
-	return nColWidth;
+	if (nNewWidth != nCurWidth)
+		m_treeHeader.SetItemWidth(nCol, nNewWidth);
+
+	return nNewWidth;
+}
+
+int CTreeListCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
+{
+	ASSERT(pDC);
+
+	int nTextWidth = 0;
+
+	switch (nCol)
+	{
+	case 0:
+		nTextWidth = m_tree.CalcWidestItemTitle(NULL, pDC, TRUE);
+		break;
+
+	default:
+		{
+			CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_tree);
+			nTextWidth = CalcTreeColumnTextWidth(nCol, pDC);
+			pDC->SelectObject(pOldFont);
+		}
+		break;
+	}
+
+	int nColWidth = nTextWidth;
+
+	if (nColWidth < m_tree.MIN_COL_WIDTH)
+		nColWidth = m_tree.MIN_COL_WIDTH;
+	else
+		nColWidth += (2 * LV_COLPADDING);
+
+	// take max of this and column title
+	int nTitleWidth = (m_treeHeader.GetItemTextWidth(nCol, pDC) + (2 * HD_COLPADDING));
+	ASSERT(nTitleWidth);
+
+	return max(nTitleWidth, nColWidth);
 }
 
 int CTreeListCtrl::Compare(const CString& sText1, const CString& sText2)
