@@ -237,8 +237,15 @@ protected:
 	virtual void InitItemHeights();
 	virtual int CalcSplitPosToFitListColumns(int nAvailWidth) const;
 
-	enum UPDATECOLWIDTHACTION { UCWA_ANY, UCWA_EXPAND, UCWA_COLLAPSE };
-	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, UPDATECOLWIDTHACTION /*nAction*/) { return FALSE; }
+	enum UPDATETITLEWIDTHACTION 
+	{ 
+		UTWA_ANY, 
+		UTWA_EXPAND, 
+		UTWA_COLLAPSE,
+		UTWA_WIDER,	// OnSize
+		UTWA_NARROWER,	// OnSize
+	};
+	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, UPDATETITLEWIDTHACTION /*nAction*/) { return FALSE; }
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	void DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BOOL bSelected, COLORREF crDiv = CLR_NONE) const;
@@ -254,8 +261,8 @@ protected:
 	BOOL DeleteItem(HTREEITEM hti);
 
 	void Resize(int cx = 0, int cy = 0);
-	void UpdateColumnWidths(UPDATECOLWIDTHACTION nAction);
-	BOOL UpdateTreeColumnWidths(CDC* pDC, UPDATECOLWIDTHACTION nAction);
+	void UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction);
+	BOOL UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAction);
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcMaxListColumnsWidth() const;
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
@@ -292,6 +299,7 @@ protected:
 
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
 	static int Compare(const CString& sText1, const CString& sText2);
+	static BOOL WantTitleWidthUpdate(int nOldWidth, int nNewWidth, UPDATETITLEWIDTHACTION nAction);
 
 };
 

@@ -439,7 +439,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 
 			UnlockWindowUpdate();
 			EnableResync(TRUE, m_tree);
-			UpdateColumnWidths(UCWA_ANY);
+			UpdateColumnWidths(UTWA_ANY);
 		}
 		break;
 
