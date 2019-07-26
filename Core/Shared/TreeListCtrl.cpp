@@ -1307,12 +1307,12 @@ void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 	// Adjust 'Title' column to suit
 	int nRestTreeColsWidth = m_treeHeader.CalcTotalItemWidth(0);
 
-	CClientDC dc(&m_tree);
-	int nMinColWidth = CalcTreeTitleColumnWidth(&dc, FALSE);
+	//CClientDC dc(&m_tree);
+	//int nMinColWidth = CalcTreeTitleColumnWidth(&dc, FALSE);
 
 	//ASSERT((m_nMinTreeTitleColumnWidth == -1) || (nMinColWidth == m_nMinTreeTitleColumnWidth));
 
-	int nTitleColWidth = max(nMinColWidth, (nSplitPos - nRestTreeColsWidth));
+	int nTitleColWidth = max(m_nMinTreeTitleColumnWidth, (nSplitPos - nRestTreeColsWidth));
 	m_treeHeader.SetItemWidth(0, nTitleColWidth);
 
 	if (m_bSplitting)
@@ -1490,7 +1490,7 @@ int CTreeListCtrl::CalcTreeTitleColumnWidth(CDC* pDC, BOOL bMaximum) const
 int CTreeListCtrl::CalcWidestTreeItem(BOOL bMaximum) const
 {
 	if (bMaximum)
-		return GetContentSize(m_tree).cx;
+		return CalcMaxVisibleTreeItemWidth(m_tree);
 
 	// else
 	int nWidest = 0;

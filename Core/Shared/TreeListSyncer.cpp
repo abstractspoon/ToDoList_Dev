@@ -2886,19 +2886,20 @@ CSize CTreeListSyncer::GetContentSize(HWND hwnd) const
 	// Content WIDTH is trickier
 	if (bIsTree)
 	{
-		HTREEITEM hti = TreeView_GetFirstVisible(hwnd);
-		RECT rItem = { 0 };
-
-		while (hti)
+		int nMin = 0, nMax = -1;
+		
+		if (HasHScrollBar(hwnd) && ::GetScrollRange(hwnd, SB_HORZ, &nMin, &nMax))
 		{
-			if (TreeView_GetItemRect(hwnd, hti, &rItem, TRUE)) // text only
-				size.cx = max(size.cx, rItem.right);
-
-			hti = TreeView_GetNextVisible(hwnd, hti);
+#ifdef _DEBUG
+			//int nCheck = CalcMaxVisibleTreeItemWidth(hwnd);
+#endif
+			// Scroll range always seems to be 1 pixel low
+			size.cx = nMax + 1;
 		}
-
-		// Adjust for scroll pos
-		size.cx += ::GetScrollPos(hwnd, SB_HORZ);
+		else
+		{
+			size.cx = CalcMaxVisibleTreeItemWidth(hwnd);
+		}
 	}
 	else
 	{
@@ -2915,6 +2916,32 @@ CSize CTreeListSyncer::GetContentSize(HWND hwnd) const
 	}
 
 	return size;
+}
+
+int CTreeListSyncer::CalcMaxVisibleTreeItemWidth(HWND hwnd) const
+{
+	if (!IsTree(hwnd))
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	int nWidest = 0;
+	HTREEITEM hti = TreeView_GetFirstVisible(hwnd);
+	RECT rItem = { 0 };
+
+	while (hti)
+	{
+		if (TreeView_GetItemRect(hwnd, hti, &rItem, TRUE)) // text only
+			nWidest = max(nWidest, rItem.right);
+
+		hti = TreeView_GetNextVisible(hwnd, hti);
+	}
+
+	// Adjust for scroll pos
+	nWidest += ::GetScrollPos(hwnd, SB_HORZ);
+
+	return nWidest;
 }
 
 BOOL CTreeListSyncer::HasVScrollBar() const
