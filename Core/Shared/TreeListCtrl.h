@@ -76,7 +76,7 @@ public:
 	void ShowCheckboxes(UINT nUnthemedBitmapID, BOOL bShow = TRUE);
 	void ShowIcons(BOOL bShow = TRUE);
 	
-	int CalcWidestItemTitle(CDC* pDC, BOOL bMaximum) const;
+	int CalcWidestItemTitle(BOOL bMaximum) const;
 	int CalcTitleColumnWidth(CDC* pDC, BOOL bMaximum) const;
 	int CalcColumnWidth(int nCol, CDC* pDC, int nMaxItemTextWidth) const;
 
@@ -107,7 +107,6 @@ protected:
 
 protected:
 	BOOL InitTooltip();
-	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bMaximum) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

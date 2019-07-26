@@ -162,7 +162,8 @@ protected:
 #ifdef _DEBUG
 	static int GetListSelItem(HWND hwnd, CString& sText);
 	static HTREEITEM GetTreeSelItem(HWND hwnd, CString& sText);
-	
+	static CString GetTreeItemText(HWND hwndTree, HTREEITEM hti);
+
 	int GetListItem(HWND hwndList, HWND hwndTree, HTREEITEM hti, CString& sText) const;
 	HTREEITEM GetTreeItem(HWND hwndTree, HWND hwndList, int nItem, CString& sText) const;
 

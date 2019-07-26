@@ -1195,6 +1195,13 @@ HTREEITEM CTreeListSyncer::GetTreeItem(HWND hwndTree, HWND hwndList, int nItem, 
 	
 	return hti;
 }
+
+CString CTreeListSyncer::GetTreeItemText(HWND hwndTree, HTREEITEM hti)
+{
+	const CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(hwndTree);
+	return pTree->GetItemText(hti);
+}
+
 #endif // --------------------------------------------------------------------------------------------
 
 TLS_TYPE CTreeListSyncer::GetType(HWND hwnd)
@@ -2803,8 +2810,15 @@ void CTreeListSyncer::WindowNeedsScrollBars(HWND hwnd, const CRect& rect, BOOL& 
 {
 	bNeedHScroll = bNeedVScroll = FALSE;
 
-	BOOL bTree = IsTree(hwnd);
-	int nNumItems = (bTree ? TreeView_GetCount(hwnd) : ListView_GetItemCount(hwnd));
+	// Don't need scrollbars if this pane is hidden
+	if (IsHiding(hwnd))
+		return;
+
+	BOOL bIsTree = IsTree(hwnd);
+	BOOL bIsLeft = IsLeft(hwnd);
+
+	// Don't need scrollbars if no content
+	int nNumItems = (bIsTree ? TreeView_GetCount(hwnd) : ListView_GetItemCount(hwnd));
 
 	if (!nNumItems)
 		return;
@@ -2815,7 +2829,7 @@ void CTreeListSyncer::WindowNeedsScrollBars(HWND hwnd, const CRect& rect, BOOL& 
 	CRect rClient(rect);
 
 	// adjust list top for its header
-	if (!bTree)
+	if (!bIsTree)
 	{
 		HWND hwndHdr = ListView_GetHeader(hwnd);
 
@@ -2828,20 +2842,21 @@ void CTreeListSyncer::WindowNeedsScrollBars(HWND hwnd, const CRect& rect, BOOL& 
 	CRect rContent;
 	GetContentSize(hwnd, rContent);
 
-	// Don't need HScroll if this pane is hidden
-	BOOL bHidden = IsHiding(hwnd);
-
-	bNeedHScroll = (!bHidden && (rClient.Width() <= rContent.Width()));
-	bNeedVScroll = (rClient.Height() <= rContent.Height());
-
-	// the presence of one scrollbar can cause the need for the other
-	if (bNeedHScroll && !bNeedVScroll)
+	// Check for VScrollbar on RHS only
+	if (!bIsLeft && rClient.Height() < rContent.Height())
 	{
-		bNeedVScroll = ((rClient.Height() - nCyScroll) <= rContent.Height());
+		bNeedVScroll = TRUE;
+		rClient.right -= nCxScroll;
+
+		bNeedHScroll = (rClient.Width() < rContent.Width());
 	}
-	else if (!bNeedHScroll && bNeedVScroll && !bHidden)
+	// Check for HScrollbar on both
+	else if (rClient.Width() < rContent.Width())
 	{
-		bNeedHScroll = ((rClient.Width() - nCxScroll) <= rContent.Width());
+		bNeedHScroll = TRUE;
+		rClient.bottom -= nCyScroll;
+
+		bNeedVScroll = (!bIsLeft && (rClient.Height() < rContent.Height()));
 	}
 }
 
@@ -2862,19 +2877,56 @@ BOOL CTreeListSyncer::IsHiding(HWND hwnd) const
 
 void CTreeListSyncer::GetContentSize(HWND hwnd, CRect& rContent) const
 {
+	// Total window size including scrollbars
 	::GetWindowRect(hwnd, rContent);
 	rContent.OffsetRect(-rContent.TopLeft());
-	
-	// we get the content width via the scrollbar info
-	SCROLLINFO si = { sizeof(SCROLLINFO), SIF_RANGE, 0 };
-
-	if (::GetScrollInfo(hwnd, SB_HORZ, &si))
-		rContent.right = si.nMax;
-
-	// get content height via list item count
-	HWND hwndList = (IsTree(hwnd) ? OtherWnd(hwnd) : hwnd);
+		
+	// Content HEIGHT
+	// Use list item count because tree item count includes collapsed items
+	BOOL bIsTree = IsTree(hwnd);
+	HWND hwndList = (bIsTree ? OtherWnd(hwnd) : hwnd);
 
 	rContent.bottom = (ListView_GetItemCount(hwndList) * GetItemHeight(hwnd));
+
+	// Content WIDTH is trickier
+	if (bIsTree)
+	{
+		HTREEITEM hti = TreeView_GetFirstVisible(hwnd);
+		int nWidest = 0;
+		RECT rItem = { 0 };
+
+		while (hti)
+		{
+			if (TreeView_GetItemRect(hwnd, hti, &rItem, TRUE)) // text only
+				nWidest = max(nWidest, rItem.right);
+
+			hti = TreeView_GetNextVisible(hwnd, hti);
+		}
+
+		// Adjust for scroll pos
+		SCROLLINFO si = { sizeof(SCROLLINFO), SIF_POS, 0 };
+
+		if (HasHScrollBar(hwnd) && ::GetScrollInfo(hwnd, SB_HORZ, &si))
+			nWidest += si.nPos;
+		
+		rContent.right = nWidest;
+	}
+	else
+	{
+		HWND hwndheader = ListView_GetHeader(hwnd);
+		
+		int nCol = Header_GetItemCount(hwndheader);
+		int nTotalWidth = 0;
+		HD_ITEM hdi = { HDI_WIDTH, 0 };
+
+		while (nCol--)
+		{
+			if (Header_GetItem(hwndheader, nCol, &hdi))
+				nTotalWidth += hdi.cxy;
+		}
+
+		rContent.right = nTotalWidth;
+	}
 }
 
 BOOL CTreeListSyncer::HasVScrollBar() const

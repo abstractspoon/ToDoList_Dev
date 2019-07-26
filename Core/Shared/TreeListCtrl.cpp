@@ -225,61 +225,39 @@ void CTreeListTreeCtrl::OnDestroy()
 	CTreeCtrl::OnDestroy();
 }
 
-int CTreeListTreeCtrl::CalcWidestItemTitle(CDC* pDC, BOOL bMaximum) const
-{
-	return CalcWidestItemTitle(NULL, pDC, bMaximum);
-}
-
 int CTreeListTreeCtrl::CalcTitleColumnWidth(CDC* pDC, BOOL bMaximum) const
 {
-	return CalcColumnWidth(0, pDC, CalcWidestItemTitle(pDC, bMaximum));
+	return CalcColumnWidth(0, pDC, CalcWidestItemTitle(bMaximum));
 }
 
-int CTreeListTreeCtrl::CalcWidestItemTitle(HTREEITEM hti, CDC* pDC, BOOL bMaximum) const
+int CTreeListTreeCtrl::CalcWidestItemTitle(BOOL bMaximum) const
 {
 	int nWidest = 0;
+	HTREEITEM hti = GetFirstVisibleItem();
 
-	// This item
-	if (hti)
+	while (hti)
 	{
 		CRect rText;
 
 		if (GetItemRect(hti, rText, TRUE)) // text rect only
 		{
+			int nWidth = 0;
+
 			if (bMaximum)
-			{
-				CFontCache& fonts = const_cast<CFontCache&>(m_fonts);
-				BOOL bBold = TCH().IsItemBold(hti);
-
-				HFONT hFont = fonts.GetHFont(bBold, FALSE, FALSE, FALSE);
-				HFONT hOldFont = (HFONT)pDC->SelectObject(hFont);
-
-				CString sItemText = GetItemText(hti);
-				int nTextWidth = pDC->GetTextExtent(sItemText).cx;
-
-				nWidest = max(nTextWidth, (rText.left + nTextWidth));
-
-				pDC->SelectObject(hOldFont);
-			}
+				nWidth = rText.right;
 			else
-			{
-				nWidest = (rText.left + MIN_LABEL_WIDTH);
-			}
+				nWidth = (rText.left + MIN_LABEL_WIDTH);
+
+			// adjust for scroll pos
+			SCROLLINFO si = { sizeof(SCROLLINFO), SIF_POS, 0 };
+
+			if (::GetScrollInfo(GetSafeHwnd(), SB_HORZ, &si))
+				nWidth += si.nPos;
+
+			nWidest = max(nWidest, nWidth);
 		}
-	}
 
-	// else try children if an expanded parent
-	if (!hti || TCH().IsItemExpanded(hti) > 0)
-	{
-		HTREEITEM htiChild = GetChildItem(hti);
-
-		while (htiChild)
-		{
-			int nWidestChild = CalcWidestItemTitle(htiChild, pDC, bMaximum);
-			nWidest = max(nWidest, nWidestChild);
-
-			htiChild = GetNextItem(htiChild, TVGN_NEXT);
-		}
+		hti = GetNextVisibleItem(hti);
 	}
 
 	return nWidest;
@@ -1386,7 +1364,7 @@ void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 	CClientDC dc(&m_tree);
 	int nMinColWidth = m_tree.CalcTitleColumnWidth(&dc, FALSE);
 
-	ASSERT((m_nMinTreeTitleColumnWidth == -1) || (nMinColWidth == m_nMinTreeTitleColumnWidth));
+	//ASSERT((m_nMinTreeTitleColumnWidth == -1) || (nMinColWidth == m_nMinTreeTitleColumnWidth));
 
 	int nTitleColWidth = max(nMinColWidth, (nSplitPos - nRestTreeColsWidth));
 	m_treeHeader.SetItemWidth(0, nTitleColWidth);
