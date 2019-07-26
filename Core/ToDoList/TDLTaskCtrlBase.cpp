@@ -121,7 +121,8 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 	m_formatter(data),
 	m_bAutoFitSplitter(TRUE),
 	m_imageIcons(16, 16),
-	m_bEnableRecalcColumns(TRUE)
+	m_bEnableRecalcColumns(TRUE),
+	m_bCalculatingColumns(FALSE)
 {
 	// build one time column map
 	if (s_mapColumns.IsEmpty())
@@ -817,6 +818,8 @@ BOOL CTDLTaskCtrlBase::IsColumnShowing(TDC_COLUMN nColID) const
 
 BOOL CTDLTaskCtrlBase::SetColumnOrder(const CDWordArray& aColumns)
 {
+	CAutoFlag af(m_bCalculatingColumns, TRUE);
+
 	CIntArray aOrder;
 	aOrder.SetSize(aColumns.GetSize() + 1);
 
@@ -858,6 +861,8 @@ BOOL CTDLTaskCtrlBase::GetColumnOrder(CDWordArray& aColumnIDs) const
 
 void CTDLTaskCtrlBase::SetColumnWidths(const CDWordArray& aWidths)
 {
+	CAutoFlag af(m_bCalculatingColumns, TRUE);
+
 	int nNumCols = aWidths.GetSize();
 	
 	// omit first column because that's our dummy column
@@ -922,6 +927,8 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 		
 	// add empty column as placeholder so we can easily replace the 
 	// other columns without losing all our items too
+	CAutoFlag af(m_bCalculatingColumns, TRUE);
+
 	m_lcColumns.InsertColumn(0, _T(""));
 	m_hdrColumns.ShowItem(0, FALSE);
 	m_hdrColumns.SetItemWidth(0, 0);
@@ -1013,8 +1020,6 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()
 
 	VERIFY(m_ilFileRef.Initialize());
 
-	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcColumnWidths(%s)"), GetDebugName());
-
 	RecalcUntrackedColumnWidths(FALSE); // Standard and Custom cols
 }
 
@@ -1054,6 +1059,8 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
 	BOOL bVisibleTasksOnly = IsTreeList();
+
+	CAutoFlag af(m_bCalculatingColumns, TRUE);
 
 	// Optimise for single columns
 	if (!bZeroOthers && (aColIDs.GetCount() == 1))
@@ -3705,22 +3712,39 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					break;
 
 				case HDN_ITEMCHANGING:
-					if (hwnd == m_hdrColumns)
+					if ((hwnd == m_hdrColumns) && !m_bCalculatingColumns)
 					{
 						NMHEADER* pHDN = (NMHEADER*)pNMHDR;
 						
 						// don't let user drag column too narrow
 						// Exclude first column which is always zero width
-						if (pHDN->iItem == 0)
+						if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
 						{
-							pHDN->pitem->cxy = 0;
-						}
-						else if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
-						{
-							if (IsColumnShowing(GetColumnID(pHDN->iItem)))
+							if (pHDN->iItem == 0)
+							{
+								pHDN->pitem->cxy = 0;
+							}
+							else if (IsColumnShowing(GetColumnID(pHDN->iItem)))
 							{
 								pHDN->pitem->cxy = max(MIN_COL_WIDTH, pHDN->pitem->cxy);
 							}
+						}
+					}
+					break;
+
+				case HDN_ITEMCHANGED:
+					if ((hwnd == m_hdrColumns) && !m_bCalculatingColumns)
+					{
+						NMHEADER* pHDN = (NMHEADER*)pNMHDR;
+
+						if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
+						{
+							CRect rect;
+							GetBoundingRect(rect);
+
+							//CLockUpdates lu(m_lcColumns);
+							CTreeListSyncer::Resize(rect);
+							UpdateWindow();
 						}
 					}
 					break;

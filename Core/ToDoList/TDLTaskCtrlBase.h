@@ -298,6 +298,7 @@ private:
 	BOOL m_bBoundSelecting;
 	BOOL m_bAutoFitSplitter;
 	BOOL m_bEnableRecalcColumns;
+	BOOL m_bCalculatingColumns;
 
 protected:
 	// Virtual function overrides
