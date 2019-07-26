@@ -61,7 +61,7 @@ class CTreeListTreeCtrl : public CTreeCtrl
 	DECLARE_DYNAMIC(CTreeListTreeCtrl)
 
 public:
-	CTreeListTreeCtrl(const CEnHeaderCtrl& header, int nMinLabelWidth = 75, int nMinColWidth = 6);
+	CTreeListTreeCtrl(const CEnHeaderCtrl& header);
 	virtual ~CTreeListTreeCtrl();
 
 	CTreeCtrlHelper& TCH() { return m_tch; }
@@ -75,16 +75,7 @@ public:
 
 	void ShowCheckboxes(UINT nUnthemedBitmapID, BOOL bShow = TRUE);
 	void ShowIcons(BOOL bShow = TRUE);
-	
-	int CalcWidestItemTitle(BOOL bMaximum) const;
-	int CalcTitleColumnWidth(CDC* pDC, BOOL bMaximum) const;
-	int CalcColumnWidth(int nCol, CDC* pDC, int nMaxItemTextWidth) const;
 
-public:
-	const int MIN_COL_WIDTH;
-	const int MIN_LABEL_WIDTH;
-	const int IMAGE_SIZE;
-	
 protected:
 	CToolTipCtrlEx m_tooltip;
 	CFontCache m_fonts;
@@ -114,7 +105,7 @@ protected:
 class CTreeListCtrl : public CWnd, protected CTreeListSyncer  
 {
 public:
-	CTreeListCtrl();
+	CTreeListCtrl(int nMinLabelWidth = 75, int nMinColWidth = 6);
 	virtual ~CTreeListCtrl();
 
 	operator HWND() const { return GetSafeHwnd(); }
@@ -184,7 +175,11 @@ protected:
 	int m_nPrevDropHilitedItem;
 
 	mutable int m_nMinTreeTitleColumnWidth;
-	
+
+	const int MIN_COL_WIDTH;
+	const int MIN_LABEL_WIDTH;
+	const int IMAGE_SIZE;
+
 protected:
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
@@ -264,6 +259,9 @@ protected:
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce);
 	int CalcMaxListColumnsWidth() const;
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
+	int CalcWidestTreeItem(BOOL bMaximum) const;
+	int CalcTreeTitleColumnWidth(CDC* pDC, BOOL bMaximum) const;
+	int CalcTreeColumnWidth(int nCol, CDC* pDC, int nMaxItemTextWidth) const;
 
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;

@@ -1458,8 +1458,8 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 						m_tree.GetItemRect(hti, rItem, TRUE);
 
 						CRect rIcon(rItem);
-						rIcon.left -= (m_tree.IMAGE_SIZE + 2);
-						rIcon.bottom = (rIcon.top + m_tree.IMAGE_SIZE);
+						rIcon.left -= (IMAGE_SIZE + 2);
+						rIcon.bottom = (rIcon.top + IMAGE_SIZE);
 						GraphicsMisc::CentreRect(rIcon, rItem, FALSE, TRUE);
 
 						ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
@@ -1652,7 +1652,7 @@ LRESULT CGanttCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 				// don't draw columns having min width
 				CRect rItem(pNMCD->rc);
 				
-				if (rItem.Width() <= m_tree.MIN_COL_WIDTH)
+				if (rItem.Width() <= MIN_COL_WIDTH)
 					return CDRF_DODEFAULT;
 			}
 			return CDRF_NOTIFYPOSTPAINT;
@@ -2477,7 +2477,7 @@ void CGanttCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTT
 		pDC->FillSolidRect(rBack, crBack);
 	}
 	
-	if (rItem.Width() <= m_tree.MIN_COL_WIDTH)
+	if (rItem.Width() <= MIN_COL_WIDTH)
 		return;
 
 	// draw text

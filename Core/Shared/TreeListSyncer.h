@@ -242,7 +242,7 @@ protected:
 	void InitialiseStyles(HWND hwndLeft, HWND hwndRight);
 	HWND PrimaryWnd() const;
 	int GetSelectedListItems(HWND hwndList, CIntArray& aItems);
-	void GetContentSize(HWND hwnd, CRect& rContent) const;
+	CSize GetContentSize(HWND hwnd) const;
 	BOOL ResyncListToTreeSelection(HWND hwndTree, const CList<HTREEITEM, HTREEITEM>& htItems, HTREEITEM htiFocused);
 
 	void ExpandList(HWND hwndList, HWND hwndTree, HTREEITEM hti, int& nNextIndex);

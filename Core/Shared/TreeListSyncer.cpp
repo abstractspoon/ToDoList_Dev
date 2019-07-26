@@ -1188,14 +1188,12 @@ HTREEITEM CTreeListSyncer::GetTreeItem(HWND hwndTree, HWND hwndList, int nItem, 
 	HTREEITEM hti = GetTreeItem(hwndTree, hwndList, nItem);
 	
 	if (hti)
-	{
-		const CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(hwndTree);
-		sText = pTree->GetItemText(hti);
-	}
-	
+		sText = GetTreeItemText(hwndTree, hti);
+
 	return hti;
 }
 
+// DEBUG build only
 CString CTreeListSyncer::GetTreeItemText(HWND hwndTree, HTREEITEM hti)
 {
 	const CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(hwndTree);
@@ -2839,8 +2837,7 @@ void CTreeListSyncer::WindowNeedsScrollBars(HWND hwnd, const CRect& rect, BOOL& 
 		rClient.top += rHeader.Height();
 	}
 
-	CRect rContent;
-	GetContentSize(hwnd, rContent);
+	CRect rContent(CPoint(0, 0), GetContentSize(hwnd));
 
 	// Check for VScrollbar on RHS only
 	if (!bIsLeft && rClient.Height() < rContent.Height())
@@ -2875,58 +2872,49 @@ BOOL CTreeListSyncer::IsHiding(HWND hwnd) const
 	return FALSE;
 }
 
-void CTreeListSyncer::GetContentSize(HWND hwnd, CRect& rContent) const
+CSize CTreeListSyncer::GetContentSize(HWND hwnd) const
 {
-	// Total window size including scrollbars
-	::GetWindowRect(hwnd, rContent);
-	rContent.OffsetRect(-rContent.TopLeft());
+	CSize size(0, 0);
 		
 	// Content HEIGHT
 	// Use list item count because tree item count includes collapsed items
 	BOOL bIsTree = IsTree(hwnd);
 	HWND hwndList = (bIsTree ? OtherWnd(hwnd) : hwnd);
 
-	rContent.bottom = (ListView_GetItemCount(hwndList) * GetItemHeight(hwnd));
+	size.cy = (ListView_GetItemCount(hwndList) * GetItemHeight(hwnd));
 
 	// Content WIDTH is trickier
 	if (bIsTree)
 	{
 		HTREEITEM hti = TreeView_GetFirstVisible(hwnd);
-		int nWidest = 0;
 		RECT rItem = { 0 };
 
 		while (hti)
 		{
 			if (TreeView_GetItemRect(hwnd, hti, &rItem, TRUE)) // text only
-				nWidest = max(nWidest, rItem.right);
+				size.cx = max(size.cx, rItem.right);
 
 			hti = TreeView_GetNextVisible(hwnd, hti);
 		}
 
 		// Adjust for scroll pos
-		SCROLLINFO si = { sizeof(SCROLLINFO), SIF_POS, 0 };
-
-		if (HasHScrollBar(hwnd) && ::GetScrollInfo(hwnd, SB_HORZ, &si))
-			nWidest += si.nPos;
-		
-		rContent.right = nWidest;
+		size.cx += ::GetScrollPos(hwnd, SB_HORZ);
 	}
 	else
 	{
 		HWND hwndheader = ListView_GetHeader(hwnd);
 		
 		int nCol = Header_GetItemCount(hwndheader);
-		int nTotalWidth = 0;
 		HD_ITEM hdi = { HDI_WIDTH, 0 };
 
 		while (nCol--)
 		{
 			if (Header_GetItem(hwndheader, nCol, &hdi))
-				nTotalWidth += hdi.cxy;
+				size.cx += hdi.cxy;
 		}
-
-		rContent.right = nTotalWidth;
 	}
+
+	return size;
 }
 
 BOOL CTreeListSyncer::HasVScrollBar() const
