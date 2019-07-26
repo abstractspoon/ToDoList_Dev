@@ -825,10 +825,9 @@ HBRUSH CGanttChartWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 BOOL CGanttChartWnd::OnEraseBkgnd(CDC* pDC) 
 {
-	// CGanttCtrl will do its own thing
-
 	// clip out our children
 	CDialogHelper::ExcludeChild(&m_toolbar, pDC);
+	CDialogHelper::ExcludeChild(&m_ctrlGantt, pDC);
 
 	CDialogHelper::ExcludeCtrl(this, IDC_ACTIVEDATERANGE_LABEL, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_ACTIVEDATERANGE, pDC);
