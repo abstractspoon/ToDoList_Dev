@@ -228,6 +228,9 @@ CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, BOOL bVisibleOnly) con
 	// attributes requiring subtask values
 	switch (nColID)
 	{
+	case TDCC_POSITION:
+		return GetLongestPosition(NULL, NULL, NULL, bVisibleOnly);
+
 	case TDCC_RECURRENCE:
 		return GetLongestValue(nColID, NULL, NULL, GetLongestRecurrenceOption(), bVisibleOnly);
 
