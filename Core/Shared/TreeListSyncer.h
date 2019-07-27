@@ -178,6 +178,7 @@ protected:
 	static int GetItemHeight(HWND hwnd);
 	static BOOL HasVScrollBar(HWND hwnd);
 	static BOOL HasHScrollBar(HWND hwnd);
+	static BOOL HasScrollBars(HWND hwnd, BOOL bHScroll, BOOL bVScroll);
 	static DWORD GetTreeItemData(HWND hwnd, HTREEITEM hti);
 	static DWORD GetListItemData(HWND hwnd, int nItem);
 	static BOOL SetListItemData(HWND hwnd, int nItem, DWORD dwItemData);

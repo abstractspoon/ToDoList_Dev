@@ -2772,6 +2772,21 @@ void CTreeListSyncer::Resize(const CRect& rLeft, const CRect& rRight)
 	//CheckBottomAlignment();
 }
 
+BOOL CTreeListSyncer::HasScrollBars(HWND hwnd, BOOL bHScroll, BOOL bVScroll)
+{
+	BOOL bHasHScroll = HasHScrollBar(hwnd);
+
+	if ((bHScroll && !bHasHScroll) && (!bHScroll && bHasHScroll))
+		return FALSE;
+
+	BOOL bHasVScroll = HasVScrollBar(hwnd);
+
+	if ((bVScroll && !bHasVScroll) && (!bVScroll && bHasVScroll))
+		return FALSE;
+
+	return TRUE;
+}
+
 void CTreeListSyncer::CheckBottomAlignment() const
 {
 	BOOL bLeftHasHScrollbar = HasHScrollBar(Left());
