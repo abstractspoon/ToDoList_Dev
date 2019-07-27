@@ -259,14 +259,14 @@ protected:
 	void CheckBottomAlignment() const;
 	int GetBoundingWidth() const;
 	int CalcMaxVisibleTreeItemWidth(HWND hwnd) const;
-	CSize GetContentSize(HWND hwnd) const;
-
+	
 	// callbacks for derived classes
 	virtual BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
 	virtual BOOL IsListItemSelected(HWND hwnd, int nItem) const;
 	virtual void OnNotifySplitterChange(int nSplitPos);
 	virtual void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	virtual void HandleItemExpanded(HWND hwndTree, HTREEITEM hti, BOOL bExpand);
+	virtual CSize GetContentSize(HWND hwnd) const;
 
 	// pseudo message handlers
 	virtual LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
