@@ -331,8 +331,6 @@ protected:
 	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
 
 protected:
-	void Resize();
-
 	enum SELCHANGE_ACTION
 	{
 		SC_NONE = -1,

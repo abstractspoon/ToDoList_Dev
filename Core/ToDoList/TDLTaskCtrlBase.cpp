@@ -1692,14 +1692,6 @@ void CTDLTaskCtrlBase::Resize(const CRect& rect)
 		CTreeListSyncer::Resize(rect);
 }
 
-void CTDLTaskCtrlBase::Resize()
-{
-	CRect rect;
-	GetBoundingRect(rect);
-	
-	Resize(rect);
-}
-
 POSITION CTDLTaskCtrlBase::GetFirstSelectedTaskPos() const
 {
 	return m_lcColumns.GetFirstSelectedItemPosition();
