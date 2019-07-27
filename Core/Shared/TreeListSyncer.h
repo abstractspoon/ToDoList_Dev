@@ -257,7 +257,7 @@ protected:
 	void AdjustForBorder(CRect& rLeft, CRect& rRight) const;
 	BOOL PtInSplitter(const CPoint& pt, BOOL bScreen = FALSE) const;
 	BOOL IsSplitting() { return m_bSplitting; }
-	void CheckBottomAlignment() const;
+	BOOL CheckBottomAlignment() const;
 	int GetBoundingWidth() const;
 	int CalcMaxVisibleTreeItemWidth(HWND hwnd) const;
 	

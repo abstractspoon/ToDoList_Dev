@@ -2769,7 +2769,7 @@ void CTreeListSyncer::Resize(const CRect& rLeft, const CRect& rRight)
 	if (HasFlag(TLSF_BORDER))
 		::InvalidateRect(GetHwnd(), NULL, TRUE);
 
-	//CheckBottomAlignment();
+	//ASSERT(CheckBottomAlignment());
 }
 
 BOOL CTreeListSyncer::HasScrollBars(HWND hwnd, BOOL bHScroll, BOOL bVScroll)
@@ -2787,7 +2787,7 @@ BOOL CTreeListSyncer::HasScrollBars(HWND hwnd, BOOL bHScroll, BOOL bVScroll)
 	return TRUE;
 }
 
-void CTreeListSyncer::CheckBottomAlignment() const
+BOOL CTreeListSyncer::CheckBottomAlignment() const
 {
 	BOOL bLeftHasHScrollbar = HasHScrollBar(Left());
 	BOOL bRightHasHScrollbar = HasHScrollBar(Right());
@@ -2796,19 +2796,16 @@ void CTreeListSyncer::CheckBottomAlignment() const
 	::GetWindowRect(Left(), rLeft);
 	::GetWindowRect(Right(), rRight);
 
-	if ((bLeftHasHScrollbar && bRightHasHScrollbar) || 
-		(!bLeftHasHScrollbar && !bRightHasHScrollbar))
+	if (bLeftHasHScrollbar && !bRightHasHScrollbar)
 	{
-		ASSERT(rLeft.bottom == rRight.bottom);
+		return (rRight.bottom == (rLeft.bottom - GetSystemMetrics(SM_CYHSCROLL)));
 	}
-	else if (bLeftHasHScrollbar && !bRightHasHScrollbar)
+	else if (!bLeftHasHScrollbar && bRightHasHScrollbar)
 	{
-		ASSERT(rRight.bottom == (rLeft.bottom - GetSystemMetrics(SM_CYHSCROLL)));
+		return (rLeft.bottom == (rRight.bottom - GetSystemMetrics(SM_CYHSCROLL)));
 	}
-	else // (!bLeftHasScrollbar && bRightHasScrollbar)
-	{
-		ASSERT(rLeft.bottom == (rRight.bottom - GetSystemMetrics(SM_CYHSCROLL)));
-	}
+
+	return (rLeft.bottom == rRight.bottom);
 }
 
 void CTreeListSyncer::RefreshSize()
