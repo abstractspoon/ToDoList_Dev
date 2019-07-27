@@ -3702,44 +3702,6 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						return 0L;
 					}
 					break;
-
-				case HDN_ITEMCHANGING:
-					if ((hwnd == m_hdrColumns) && !m_bCalculatingColumns)
-					{
-						NMHEADER* pHDN = (NMHEADER*)pNMHDR;
-						
-						// don't let user drag column too narrow
-						// Exclude first column which is always zero width
-						if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
-						{
-							if (pHDN->iItem == 0)
-							{
-								pHDN->pitem->cxy = 0;
-							}
-							else if (IsColumnShowing(GetColumnID(pHDN->iItem)))
-							{
-								pHDN->pitem->cxy = max(MIN_COL_WIDTH, pHDN->pitem->cxy);
-							}
-						}
-					}
-					break;
-
-				case HDN_ITEMCHANGED:
-					if ((hwnd == m_hdrColumns) && !m_bCalculatingColumns)
-					{
-						NMHEADER* pHDN = (NMHEADER*)pNMHDR;
-
-						if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
-						{
-							CRect rect;
-							GetBoundingRect(rect);
-
-							//CLockUpdates lu(m_lcColumns);
-							CTreeListSyncer::Resize(rect);
-							UpdateWindow();
-						}
-					}
-					break;
 				}
 			}
 			break;
@@ -3817,6 +3779,31 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	}
 	
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+}
+
+LRESULT CTDLTaskCtrlBase::OnListHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
+{
+	if ((pHDN->hdr.hwndFrom == m_hdrColumns) && !m_bCalculatingColumns)
+	{
+		if (pHDN->iItem == 0)
+		{
+			pHDN->pitem->cxy = 0;
+			return 0L;
+		}
+
+		if (IsColumnShowing(GetColumnID(pHDN->iItem)))
+			return CTreeListSyncer::OnListHeaderItemWidthChanging(pHDN, MIN_COL_WIDTH);
+	}
+
+	return 0L;
+}
+
+LRESULT CTDLTaskCtrlBase::OnListHeaderItemWidthChanged(NMHEADER* pHDN, int nMinWidth)
+{
+	if ((pHDN->hdr.hwndFrom == m_hdrColumns) && !m_bCalculatingColumns)
+		return CTreeListSyncer::OnListHeaderItemWidthChanged(pHDN, nMinWidth);
+
+	return 0L;
 }
 
 void CTDLTaskCtrlBase::HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoint pt)

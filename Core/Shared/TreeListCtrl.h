@@ -189,8 +189,6 @@ protected:
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 
 	afx_msg void OnTreeHeaderEndDrag(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnTreeHeaderItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnTreeHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeHeaderDblClickDivider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeHeaderRightClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* pResult);
@@ -214,6 +212,10 @@ protected:
 	virtual BOOL OnTreeLButtonDblClk(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDown(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
+
+	virtual LRESULT OnListHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
+	virtual LRESULT OnListHeaderItemWidthChanged(NMHEADER* pHDN, int nMinWidth);
+	virtual LRESULT OnPrimaryHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
 
 	virtual void OnListHeaderClick(NMHEADER* /*HDN*/) {}
 	virtual BOOL OnTreeMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }

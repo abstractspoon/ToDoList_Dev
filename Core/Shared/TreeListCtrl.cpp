@@ -10,6 +10,7 @@
 #include "Misc.h"
 #include "autoflag.h"
 #include "osversion.h"
+#include "dialoghelper.h"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -250,8 +251,6 @@ CTreeListCtrl::~CTreeListCtrl()
 
 BEGIN_MESSAGE_MAP(CTreeListCtrl, CWnd)
 	ON_NOTIFY(HDN_ENDDRAG, IDC_TREELISTTREEHEADER, OnTreeHeaderEndDrag)
-	ON_NOTIFY(HDN_ITEMCHANGED, IDC_TREELISTTREEHEADER, OnTreeHeaderItemChanged)
-	ON_NOTIFY(HDN_ITEMCHANGING, IDC_TREELISTTREEHEADER, OnTreeHeaderItemChanging)
 	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_TREELISTTREEHEADER, OnTreeHeaderDblClickDivider)
 	ON_NOTIFY(NM_RCLICK, IDC_TREELISTTREEHEADER, OnTreeHeaderRightClick)
 	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TREELISTTREE, OnTreeItemExpanded)
@@ -632,37 +631,6 @@ void CTreeListCtrl::OnTreeHeaderEndDrag(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 	m_tree.InvalidateRect(NULL, TRUE);
 }
 
-void CTreeListCtrl::OnTreeHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
-	*pResult = 0;
-
-	if (pHDN->iButton != 0) // left button
-		return;
-
-	if (!(pHDN->pitem->mask & HDI_WIDTH))
-		return;
-
-	// don't allow columns get too small
-	if (pHDN->iItem == 0)
-	{
-		pHDN->pitem->cxy = max(pHDN->pitem->cxy, m_nMinTreeTitleColumnWidth);
-	}
-	else if (m_treeHeader.IsItemVisible(pHDN->iItem))
-	{
-		pHDN->pitem->cxy = max(pHDN->pitem->cxy, MIN_COL_WIDTH);
-	}
-}
-
-void CTreeListCtrl::OnTreeHeaderItemChanged(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
-{
-	SetSplitPos(m_treeHeader.CalcTotalItemWidth());
-	Resize();
-	
-	m_tree.UpdateWindow();
-	m_list.UpdateWindow();
-}
-
 void CTreeListCtrl::OnTreeHeaderDblClickDivider(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
 	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
@@ -803,23 +771,6 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 						OnListHeaderClick((NMHEADER*)pNMHDR);
 					}
 					break;
-
-				case HDN_ITEMCHANGING:
-					if (hwnd == m_listHeader)
-					{
-						NMHEADER* pHDN = (NMHEADER*)pNMHDR;
-						
-						// don't let user drag column too narrow
-						if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
-						{
-							if (m_listHeader.IsItemTrackable(pHDN->iItem))
-								pHDN->pitem->cxy = max(pHDN->pitem->cxy, MIN_COL_WIDTH);
-
-							m_list.Invalidate(FALSE);
-						}
-					}
-					break;
-
 				}
 				return lr;
 			}
@@ -999,6 +950,39 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	}
 	
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+}
+
+LRESULT CTreeListCtrl::OnListHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
+{
+	ASSERT (pHDN->hdr.hwndFrom == m_listHeader);
+
+	if (m_listHeader.IsItemTrackable(pHDN->iItem))
+		return CTreeListSyncer::OnListHeaderItemWidthChanging(pHDN, MIN_COL_WIDTH);
+
+	return 0L;
+}
+
+LRESULT CTreeListCtrl::OnListHeaderItemWidthChanged(NMHEADER* pHDN, int nMinWidth)
+{
+	if (!Misc::IsKeyPressed(VK_LBUTTON))
+	{
+		CRect rClient;
+		CWnd::GetClientRect(rClient);
+
+		CTreeListSyncer::Resize(rClient);
+	}
+
+	return 0L;
+}
+
+LRESULT CTreeListCtrl::OnPrimaryHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
+{
+	ASSERT(pHDN->hdr.hwndFrom == m_treeHeader);
+
+	// don't allow columns get too small
+	nMinWidth = ((pHDN->iItem == 0) ? m_nMinTreeTitleColumnWidth : MIN_COL_WIDTH);
+
+	return CTreeListSyncer::OnPrimaryHeaderItemWidthChanging(pHDN, nMinWidth);
 }
 
 void CTreeListCtrl::SetDropHighlight(HTREEITEM hti, int nItem)
@@ -1468,7 +1452,7 @@ void CTreeListCtrl::UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction)
 	UpdateListColumnWidths(&dcList, nAction);
 	
 	if (UpdateTreeColumnWidths(&dcTree, nAction))
-		Resize();
+		PostResize();
 }
 
 int CTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)

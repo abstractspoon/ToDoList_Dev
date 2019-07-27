@@ -325,8 +325,10 @@ protected:
 	
  	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
  	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
-	void OnNotifySplitterChange(int nSplitPos);
+	LRESULT OnListHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
+	LRESULT OnListHeaderItemWidthChanged(NMHEADER* pHDN, int nMinWidth);
 
+	void OnNotifySplitterChange(int nSplitPos);
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
 

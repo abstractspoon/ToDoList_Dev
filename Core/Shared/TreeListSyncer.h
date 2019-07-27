@@ -157,7 +157,8 @@ protected:
 	BOOL Resync(HWND hwnd, HWND hwndTo);
 	void PostResync(HWND hwnd);
 	void EnableResync(BOOL bEnable, HWND hwnd = NULL);
-	void WindowNeedsScrollBars(HWND hwnd, const CRect& rect, BOOL& bNeedHScroll, BOOL& bNeedVScroll) const;
+	void WindowNeedsScrollBars(HWND hwnd, const CRect& rAvail, BOOL& bNeedHScroll, BOOL& bNeedVScroll) const;
+	void WindowNeedsScrollBars(HWND hwnd, const CRect& rAvail, const CSize& sizeContent, BOOL& bNeedHScroll, BOOL& bNeedVScroll) const;
 	
 #ifdef _DEBUG
 	static int GetListSelItem(HWND hwnd, CString& sText);
@@ -205,6 +206,7 @@ protected:
  	static void SelectTreeItem(HWND hwnd, HTREEITEM hti, BOOL bClear = TRUE);
 	static BOOL OsIsXP();
 	static BOOL OsIsLinux();
+	static int CalcTotalHeaderItemWidth(HWND hwndHeader);
 
 	static DWORD GetStyle(HWND hwnd, BOOL bExStyle);
 	static BOOL HasStyle(HWND hwnd, DWORD dwStyle, BOOL bExStyle);
@@ -273,6 +275,10 @@ protected:
 	virtual LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
 	virtual LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 	virtual LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
+	virtual LRESULT OnListHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth = 0);
+	virtual LRESULT OnListHeaderItemWidthChanged(NMHEADER* pHDN, int nMinWidth = 0);
+	virtual LRESULT OnPrimaryHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth = 0);
+	virtual LRESULT OnPrimaryHeaderItemWidthChanged(NMHEADER* pHDN, int nMinWidth = 0);
 
 	virtual LRESULT OnListGetDispInfo(NMLVDISPINFO* pLVDI);
 	virtual LRESULT OnTreeGetDispInfo(NMTVDISPINFO* pTVDI);
