@@ -1044,9 +1044,9 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 
 	for (int nItem = 1; nItem < nNumCols; nItem++)
 	{
-		if (m_hdrColumns.IsItemVisible(nItem) && 
-			m_hdrColumns.IsItemTracked(nItem))
+		if (m_hdrColumns.IsItemTracked(nItem))
 		{
+			ASSERT(m_hdrColumns.IsItemVisible(nItem));
 			mapCols.RemoveKey(GetColumnID(nItem));
 		}
 	}
@@ -1108,7 +1108,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 					nColWidth = CalcColumnWidth(nItem, &dc, bVisibleTasksOnly);
 				}
 			}
-			else if (!bZeroOthers)
+			else if (!bZeroOthers || m_hdrColumns.IsItemTracked(nItem))
 			{
 				continue;
 			}
