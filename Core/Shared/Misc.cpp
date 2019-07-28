@@ -1542,7 +1542,7 @@ WCHAR* Misc::MultiByteToWide(const char* szFrom, int& nLength, UINT nCodepage)
 int Misc::Round(double dValue)
 {
 	if (dValue == 0)
-		return 0.0;
+		return 0;
 
 	if (dValue > 0)
 		return (int)(dValue + 0.5);
