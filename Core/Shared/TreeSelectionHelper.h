@@ -91,7 +91,7 @@ public:
 	inline HTREEITEM GetNextItem(POSITION& pos) const { return m_lstSelection.GetNext(pos); }
 
 	inline BOOL HasSingleSelection() const { return (GetCount() == 1); }
-	inline BOOL HasItem(HTREEITEM hti) const { return (GetCount() && (m_lstSelection.Find(hti) != NULL)); }
+	inline BOOL HasItem(HTREEITEM hti) const { return (hti && GetCount() && (m_lstSelection.Find(hti) != NULL)); }
 	BOOL IsItemSelected(HTREEITEM hti, BOOL bCheckParents) const;
 	int GetCount() const;
 
