@@ -159,6 +159,7 @@ protected:
 	void EnableResync(BOOL bEnable, HWND hwnd = NULL);
 	void WindowNeedsScrollBars(HWND hwnd, const CRect& rAvail, BOOL& bNeedHScroll, BOOL& bNeedVScroll) const;
 	void WindowNeedsScrollBars(HWND hwnd, const CRect& rAvail, const CSize& sizeContent, BOOL& bNeedHScroll, BOOL& bNeedVScroll) const;
+	CSize GetContentSize(HWND hwnd, BOOL bAddLeftListVScrollZone) const;
 	
 #ifdef _DEBUG
 	static int GetListSelItem(HWND hwnd, CString& sText);
@@ -207,6 +208,7 @@ protected:
 	static BOOL OsIsXP();
 	static BOOL OsIsLinux();
 	static int CalcTotalHeaderItemWidth(HWND hwndHeader);
+	static int CalcMaxVisibleTreeItemWidth(HWND hwnd);
 
 	static DWORD GetStyle(HWND hwnd, BOOL bExStyle);
 	static BOOL HasStyle(HWND hwnd, DWORD dwStyle, BOOL bExStyle);
@@ -261,7 +263,6 @@ protected:
 	BOOL IsSplitting() { return m_bSplitting; }
 	BOOL CheckBottomAlignment() const;
 	int GetBoundingWidth() const;
-	int CalcMaxVisibleTreeItemWidth(HWND hwnd) const;
 	
 	// callbacks for derived classes
 	virtual BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
@@ -269,7 +270,6 @@ protected:
 	virtual void OnNotifySplitterChange(int nSplitPos);
 	virtual void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	virtual void HandleItemExpanded(HWND hwndTree, HTREEITEM hti, BOOL bExpand);
-	virtual CSize GetContentSize(HWND hwnd) const;
 
 	// pseudo message handlers
 	virtual LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);

@@ -3095,7 +3095,7 @@ int CTreeListSyncer::CalcTotalHeaderItemWidth(HWND hwndHeader)
 	return nWidth;
 }
 
-int CTreeListSyncer::CalcMaxVisibleTreeItemWidth(HWND hwnd) const
+int CTreeListSyncer::CalcMaxVisibleTreeItemWidth(HWND hwnd)
 {
 	if (!IsTree(hwnd))
 	{
