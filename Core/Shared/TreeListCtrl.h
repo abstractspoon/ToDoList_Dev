@@ -213,9 +213,10 @@ protected:
 	virtual BOOL OnListLButtonDown(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 
-	virtual LRESULT OnListHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
-	virtual LRESULT OnListHeaderItemWidthChanged(NMHEADER* pHDN, int nMinWidth);
-	virtual LRESULT OnPrimaryHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
+	virtual BOOL OnListHeaderBeginTracking(NMHEADER* pHDN);
+	virtual BOOL OnTreeHeaderBeginTracking(NMHEADER* pHDN);
+	virtual BOOL OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
+	virtual BOOL OnHeaderDblClkDivider(NMHEADER* pHDN);
 
 	virtual void OnListHeaderClick(NMHEADER* /*HDN*/) {}
 	virtual BOOL OnTreeMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }

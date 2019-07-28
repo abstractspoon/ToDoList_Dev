@@ -1959,6 +1959,22 @@ BOOL CGanttCtrl::SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const
 	return FALSE;
 }
 
+BOOL CGanttCtrl::OnHeaderDblClkDivider(NMHEADER* pHDN)
+{
+	if (pHDN->hdr.hwndFrom == m_listHeader)
+	{
+		int nCol = pHDN->iItem;
+		ASSERT(nCol != -1);
+
+		if (nCol > 0) // first column always zero width
+			m_listHeader.SetItemWidth(nCol, GetColumnWidth());
+
+		return TRUE; // no default handling
+	}
+
+	return CTreeListCtrl::OnHeaderDblClkDivider(pHDN);
+}
+
 LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (!IsResyncEnabled())
@@ -1968,31 +1984,6 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		switch (msg)
 		{
-		case WM_NOTIFY:
-			{
-				LPNMHDR pNMHDR = (LPNMHDR)lp;
-				HWND hwnd = pNMHDR->hwndFrom;
-				
-				if (hwnd == m_listHeader)
-				{
-					switch (pNMHDR->code)
-					{
-					case HDN_DIVIDERDBLCLICK:
-						{
-							NMHEADER* pHDN = (NMHEADER*)pNMHDR;
-
-							int nCol = pHDN->iItem;
-							ASSERT(nCol != -1);
-
-							if (nCol > 0) // first column always zero width
-								m_listHeader.SetItemWidth(nCol, GetColumnWidth());
-						}
-						return 0L; // no default handling
-					}
-				}
-			}
-			break;
-			
 		case WM_SETCURSOR:
 			if (!m_bReadOnly && !IsDependencyEditing())
 			{

@@ -121,8 +121,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 	m_formatter(data),
 	m_bAutoFitSplitter(TRUE),
 	m_imageIcons(16, 16),
-	m_bEnableRecalcColumns(TRUE),
-	m_bCalculatingColumns(FALSE)
+	m_bEnableRecalcColumns(TRUE)
 {
 	// build one time column map
 	if (s_mapColumns.IsEmpty())
@@ -818,8 +817,6 @@ BOOL CTDLTaskCtrlBase::IsColumnShowing(TDC_COLUMN nColID) const
 
 BOOL CTDLTaskCtrlBase::SetColumnOrder(const CDWordArray& aColumns)
 {
-	CAutoFlag af(m_bCalculatingColumns, TRUE);
-
 	CIntArray aOrder;
 	aOrder.SetSize(aColumns.GetSize() + 1);
 
@@ -861,8 +858,6 @@ BOOL CTDLTaskCtrlBase::GetColumnOrder(CDWordArray& aColumnIDs) const
 
 void CTDLTaskCtrlBase::SetColumnWidths(const CDWordArray& aWidths)
 {
-	CAutoFlag af(m_bCalculatingColumns, TRUE);
-
 	int nNumCols = aWidths.GetSize();
 	
 	// omit first column because that's our dummy column
@@ -927,8 +922,6 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 		
 	// add empty column as placeholder so we can easily replace the 
 	// other columns without losing all our items too
-	CAutoFlag af(m_bCalculatingColumns, TRUE);
-
 	m_lcColumns.InsertColumn(0, _T(""));
 	m_hdrColumns.ShowItem(0, FALSE);
 	m_hdrColumns.SetItemWidth(0, 0);
@@ -1059,8 +1052,6 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
 	BOOL bVisibleTasksOnly = IsTreeList();
-
-	CAutoFlag af(m_bCalculatingColumns, TRUE);
 
 	// Optimise for single columns
 	if (!bZeroOthers && (aColIDs.GetCount() == 1))
@@ -3781,29 +3772,35 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 }
 
-LRESULT CTDLTaskCtrlBase::OnListHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
+BOOL CTDLTaskCtrlBase::OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
 {
-	if ((pHDN->hdr.hwndFrom == m_hdrColumns) && !m_bCalculatingColumns)
+	if (pHDN->hdr.hwndFrom == m_hdrColumns)
+	{
+		// Prevent changing the first hidden column
+		if (pHDN->iItem == 0)
+			pHDN->pitem->cxy = 0;
+		else
+			nMinWidth = MIN_COL_WIDTH;
+	}
+	else if (pHDN->hdr.hwndFrom == m_hwndPrimaryHeader)
 	{
 		if (pHDN->iItem == 0)
-		{
-			pHDN->pitem->cxy = 0;
-			return 0L;
-		}
-
-		if (IsColumnShowing(GetColumnID(pHDN->iItem)))
-			return CTreeListSyncer::OnListHeaderItemWidthChanging(pHDN, MIN_COL_WIDTH);
+			nMinWidth = MIN_TASKS_WIDTH;
+		else
+			nMinWidth = MIN_COL_WIDTH;
 	}
 
-	return 0L;
+	return CTreeListSyncer::OnHeaderItemWidthChanging(pHDN, nMinWidth);
 }
 
-LRESULT CTDLTaskCtrlBase::OnListHeaderItemWidthChanged(NMHEADER* pHDN, int nMinWidth)
+BOOL CTDLTaskCtrlBase::OnListHeaderBeginTracking(NMHEADER* pHDN)
 {
-	if ((pHDN->hdr.hwndFrom == m_hdrColumns) && !m_bCalculatingColumns)
-		return CTreeListSyncer::OnListHeaderItemWidthChanged(pHDN, nMinWidth);
+	// Prevent tracking the first hidden column
+	if (pHDN->iItem == 0)
+		return FALSE;
 
-	return 0L;
+	// else
+	return m_hdrColumns.IsItemTrackable(pHDN->iItem);
 }
 
 void CTDLTaskCtrlBase::HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoint pt)

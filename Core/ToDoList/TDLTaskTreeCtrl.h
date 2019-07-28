@@ -185,7 +185,6 @@ protected:
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	BOOL IsColumnShowing(TDC_COLUMN nColID) const;
 	void NotifyParentSelChange(SELCHANGE_ACTION nAction = SC_UNKNOWN);
-	CSize GetContentSize(HWND hwnd) const;
 
 protected:
 	// pseudo-message handlers

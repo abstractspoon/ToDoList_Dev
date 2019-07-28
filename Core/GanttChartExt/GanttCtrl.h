@@ -166,6 +166,7 @@ protected:
 	BOOL OnListLButtonUp(UINT nFlags, CPoint point);
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	BOOL OnListMouseMove(UINT nFlags, CPoint point);
+	BOOL OnHeaderDblClkDivider(NMHEADER* pHDN);
 
 	GM_ITEMSTATE GetItemState(int nItem) const;
 	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;

@@ -1735,25 +1735,6 @@ DWORD CTDLTaskTreeCtrl::GetColumnItemTaskID(int nItem) const
 	return GetTaskID((HTREEITEM)m_lcColumns.GetItemData(nItem));
 }
 
-CSize CTDLTaskTreeCtrl::GetContentSize(HWND hwnd) const
-{
-	CSize size = CTDLTaskCtrlBase::GetContentSize(hwnd);
-
-	// Bizarre bug: When tree is on the right and has a vertical
-	// scrollbar (which is hidden on the left) the list still 
-	// seems to believe the scrollbar is there!
-	if (hwnd == m_lcColumns)
-	{
-		if (!HasStyle(TDCS_RIGHTSIDECOLUMNS) && HasVScrollBar(m_tcTasks))
-		{
-			if (HasVScrollBar(m_lcColumns))
-				size.cx += GetSystemMetrics(SM_CXVSCROLL);
-		}
-	}
-
-	return size;
-}
-
 BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_TITLERECT nArea, CRect& rect, CDC* pDC, LPCTSTR szTitle) const
 {
 	ASSERT(hti);

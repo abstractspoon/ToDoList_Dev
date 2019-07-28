@@ -367,6 +367,7 @@ void CTreeListCtrl::AdjustSplitterToFitColumns()
 	nNewSplitPos = max(MIN_SPLIT_POS, nNewSplitPos);
 	
 	CTreeListSyncer::SetSplitPos(nNewSplitPos);
+	RefreshSize();
 }
 
 void CTreeListCtrl::InitItemHeights()
@@ -514,8 +515,6 @@ void CTreeListCtrl::OnResize(int cx, int cy)
 void CTreeListCtrl::ExpandAll(BOOL bExpand)
 {
 	ExpandItem(NULL, bExpand, TRUE);
-
-	UpdateColumnWidths(bExpand ? UTWA_EXPAND : UTWA_COLLAPSE);
 }
 
 BOOL CTreeListCtrl::CanExpandAll() const
@@ -631,19 +630,29 @@ void CTreeListCtrl::OnTreeHeaderEndDrag(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 	m_tree.InvalidateRect(NULL, TRUE);
 }
 
-void CTreeListCtrl::OnTreeHeaderDblClickDivider(NMHDR* pNMHDR, LRESULT* /*pResult*/)
+void CTreeListCtrl::OnTreeHeaderDblClickDivider(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
+	*pResult = OnHeaderDblClkDivider((NMHEADER*)pNMHDR);
+}
 
-	int nCol = pHDN->iItem;
-	ASSERT(nCol != -1);
+BOOL CTreeListCtrl::OnHeaderDblClkDivider(NMHEADER* pHDN)
+{
+	if (pHDN->hdr.hwndFrom == m_treeHeader)
+	{
+		int nCol = pHDN->iItem;
+		ASSERT(nCol != -1);
 
-	CClientDC dc(&m_tree);
+		CClientDC dc(&m_tree);
 
-	RecalcTreeColumnWidth(nCol, &dc, TRUE);
-	SetSplitPos(m_treeHeader.CalcTotalItemWidth());
+		RecalcTreeColumnWidth(nCol, &dc, TRUE);
+		SetSplitPos(m_treeHeader.CalcTotalItemWidth());
 
-	Resize();
+		Resize();
+
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 void CTreeListCtrl::OnTreeHeaderRightClick(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
@@ -759,17 +768,17 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				{
 				case NM_RCLICK:
 					if (hwnd == m_listHeader)
-					{
-						// pass on to parent
 						::SendMessage(GetHwnd(), WM_CONTEXTMENU, (WPARAM)hwnd, (LPARAM)::GetMessagePos());
-					}
 					break;
 
 				case HDN_ITEMCLICK:
 					if (hwnd == m_listHeader)
-					{
 						OnListHeaderClick((NMHEADER*)pNMHDR);
-					}
+					break;
+
+				case HDN_DIVIDERDBLCLICK:
+					if (hwnd == m_listHeader)
+						lr = OnHeaderDblClkDivider((NMHEADER*)pNMHDR);
 					break;
 				}
 				return lr;
@@ -952,37 +961,46 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 }
 
-LRESULT CTreeListCtrl::OnListHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
+BOOL CTreeListCtrl::OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
 {
-	ASSERT (pHDN->hdr.hwndFrom == m_listHeader);
-
-	if (m_listHeader.IsItemTrackable(pHDN->iItem))
-		return CTreeListSyncer::OnListHeaderItemWidthChanging(pHDN, MIN_COL_WIDTH);
-
-	return 0L;
-}
-
-LRESULT CTreeListCtrl::OnListHeaderItemWidthChanged(NMHEADER* pHDN, int nMinWidth)
-{
-	if (!Misc::IsKeyPressed(VK_LBUTTON))
+	if (pHDN->hdr.hwndFrom == m_listHeader)
 	{
-		CRect rClient;
-		CWnd::GetClientRect(rClient);
-
-		CTreeListSyncer::Resize(rClient);
+		if (!m_listHeader.IsItemVisible(pHDN->iItem))
+			pHDN->pitem->cxy = 0;
+		else
+			nMinWidth = MIN_COL_WIDTH;
+	}
+	else if (pHDN->hdr.hwndFrom == m_treeHeader)
+	{
+		if (!m_treeHeader.IsItemVisible(pHDN->iItem))
+		{
+			pHDN->pitem->cxy = 0;
+		}
+		else
+		{
+			if (pHDN->iItem == 0)
+				nMinWidth = m_nMinTreeTitleColumnWidth;
+			else
+				nMinWidth = MIN_COL_WIDTH;
+		}
 	}
 
-	return 0L;
+	return CTreeListSyncer::OnHeaderItemWidthChanging(pHDN, nMinWidth);
 }
 
-LRESULT CTreeListCtrl::OnPrimaryHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
+BOOL CTreeListCtrl::OnListHeaderBeginTracking(NMHEADER* pHDN)
 {
-	ASSERT(pHDN->hdr.hwndFrom == m_treeHeader);
+	// Prevent tracking the first hidden column
+	if (pHDN->iItem == 0)
+		return FALSE;
 
-	// don't allow columns get too small
-	nMinWidth = ((pHDN->iItem == 0) ? m_nMinTreeTitleColumnWidth : MIN_COL_WIDTH);
+	// else
+	return m_listHeader.IsItemTrackable(pHDN->iItem);
+}
 
-	return CTreeListSyncer::OnPrimaryHeaderItemWidthChanging(pHDN, nMinWidth);
+BOOL CTreeListCtrl::OnTreeHeaderBeginTracking(NMHEADER* pHDN)
+{
+	return m_treeHeader.IsItemTrackable(pHDN->iItem);
 }
 
 void CTreeListCtrl::SetDropHighlight(HTREEITEM hti, int nItem)
@@ -1290,13 +1308,8 @@ void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 
 	// Adjust 'Title' column to suit
 	int nRestTreeColsWidth = m_treeHeader.CalcTotalItemWidth(0);
-
-	//CClientDC dc(&m_tree);
-	//int nMinColWidth = CalcTreeTitleColumnWidth(&dc, FALSE);
-
-	//ASSERT((m_nMinTreeTitleColumnWidth == -1) || (nMinColWidth == m_nMinTreeTitleColumnWidth));
-
 	int nTitleColWidth = max(m_nMinTreeTitleColumnWidth, (nSplitPos - nRestTreeColsWidth));
+
 	m_treeHeader.SetItemWidth(0, nTitleColWidth);
 
 	if (m_bSplitting)
@@ -1450,9 +1463,9 @@ void CTreeListCtrl::UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction)
 	CClientDC dcList(&m_list), dcTree(&m_tree);
 
 	UpdateListColumnWidths(&dcList, nAction);
+	UpdateTreeColumnWidths(&dcTree, nAction);
 	
-	if (UpdateTreeColumnWidths(&dcTree, nAction))
-		PostResize();
+	PostResize();
 }
 
 int CTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)

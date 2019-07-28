@@ -298,7 +298,6 @@ private:
 	BOOL m_bBoundSelecting;
 	BOOL m_bAutoFitSplitter;
 	BOOL m_bEnableRecalcColumns;
-	BOOL m_bCalculatingColumns;
 
 protected:
 	// Virtual function overrides
@@ -325,10 +324,12 @@ protected:
 	
  	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
  	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
-	LRESULT OnListHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
-	LRESULT OnListHeaderItemWidthChanged(NMHEADER* pHDN, int nMinWidth);
 
 	void OnNotifySplitterChange(int nSplitPos);
+	BOOL OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
+	BOOL OnListHeaderBeginTracking(NMHEADER* pHDN);
+	BOOL OnPrimaryHeaderBeginTracking(NMHEADER* /*pHDN*/) { return FALSE; }
+
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
 

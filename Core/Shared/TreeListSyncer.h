@@ -148,6 +148,8 @@ private:
 	BOOL m_bResyncing, m_bResyncPending, m_bResizePending;
 	BOOL m_bResyncEnabled;
 	TLS_HIDE m_nHidden;
+	HWND m_hwndTrackedHeader;
+	HWND m_hwndIgnoreNcCalcSize;
 
 protected:
 	inline BOOL CanResync() const { return (IsResyncEnabled() && !m_bResyncing); }
@@ -157,7 +159,7 @@ protected:
 	BOOL Resync(HWND hwnd, HWND hwndTo);
 	void PostResync(HWND hwnd);
 	void EnableResync(BOOL bEnable, HWND hwnd = NULL);
-	void WindowNeedsScrollBars(HWND hwnd, const CRect& rAvail, BOOL& bNeedHScroll, BOOL& bNeedVScroll) const;
+	void WindowNeedsScrollBars(HWND hwnd, const CRect& rAvail, BOOL& bNeedHScroll, BOOL& bNeedVScroll, BOOL bCheckForLeftListVScroll) const;
 	void WindowNeedsScrollBars(HWND hwnd, const CRect& rAvail, const CSize& sizeContent, BOOL& bNeedHScroll, BOOL& bNeedVScroll) const;
 	CSize GetContentSize(HWND hwnd, BOOL bAddLeftListVScrollZone) const;
 	
@@ -275,16 +277,21 @@ protected:
 	virtual LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
 	virtual LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 	virtual LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
-	virtual LRESULT OnListHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth = 0);
-	virtual LRESULT OnListHeaderItemWidthChanged(NMHEADER* pHDN, int nMinWidth = 0);
-	virtual LRESULT OnPrimaryHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth = 0);
-	virtual LRESULT OnPrimaryHeaderItemWidthChanged(NMHEADER* pHDN, int nMinWidth = 0);
 
 	virtual LRESULT OnListGetDispInfo(NMLVDISPINFO* pLVDI);
 	virtual LRESULT OnTreeGetDispInfo(NMTVDISPINFO* pTVDI);
 
 	virtual BOOL OnListSelectionChange(NMLISTVIEW* pNMLV);
 	virtual BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+
+	virtual BOOL OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth = 0);
+
+	virtual BOOL OnListHeaderBeginTracking(NMHEADER* /*pHDN*/) { return TRUE; }
+	virtual BOOL OnListHeaderTrackItem(NMHEADER* pHDN, int nMinWidth = 0);
+	virtual void OnListHeaderEndTracking(NMHEADER* pHDN);
+	virtual BOOL OnPrimaryHeaderBeginTracking(NMHEADER* /*pHDN*/) { return TRUE; }
+	virtual BOOL OnPrimaryHeaderTrackItem(NMHEADER* pHDN, int nMinWidth = 0);
+	virtual void OnPrimaryHeaderEndTracking(NMHEADER* pHDN);
 
 private:
 	static TLS_TYPE GetType(HWND hwnd);
