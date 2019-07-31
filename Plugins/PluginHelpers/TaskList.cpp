@@ -1027,8 +1027,8 @@ TDC_ATTRIBUTE Task::MapAttribute(Task::Attribute attrib)
 {
 	switch (attrib)
 	{
-	case Task::Attribute::AllocatedBy:		return TDCA_ALLOCTO;
-	case Task::Attribute::AllocatedTo:		return TDCA_ALLOCBY;
+	case Task::Attribute::AllocatedBy:		return TDCA_ALLOCBY;
+	case Task::Attribute::AllocatedTo:		return TDCA_ALLOCTO;
 	case Task::Attribute::Category:			return TDCA_CATEGORY;
 	case Task::Attribute::Color:			return TDCA_COLOR;
 	case Task::Attribute::Comments:			return TDCA_COMMENTS;
