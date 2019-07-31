@@ -322,7 +322,7 @@ BOOL CTDCMainMenu::HandlePostTranslateMenu(HMENU hMenu)
 
 	if (pSortMenu && (hMenu == pSortMenu->GetSafeHmenu()))
 	{
-		CEnMenu::SortMenuStrings(hMenu, ID_SORTBY_DEFAULTCOLUMNS_FIRST, ID_SORTBY_DEFAULTCOLUMNS_LAST);
+		CEnMenu::SortMenuStrings(hMenu, ID_SORTBY_ALLCOLUMNS_FIRST, ID_SORTBY_ALLCOLUMNS_LAST);
 		return TRUE;
 	}
 
@@ -549,9 +549,9 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 		}
 	}
 
-	// custom sort columns
+	// custom attributes
 
-	// first delete all custom columns and the related separator
+	// first delete all custom columns
 	int nItem = (int)pMenu->GetMenuItemCount();
 
 	while (nItem--)
@@ -562,24 +562,13 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 			pMenu->DeleteMenu(nItem, MF_BYPOSITION);
 	}
 
-	// separator is just before the separator before 'unsorted entry'
-	int nInsert = CEnMenu::GetMenuItemPos(*pMenu, ID_SORTBY_NONE) - 1;
-	ASSERT(nInsert >= 0);
-
-	// delete separator if exist
-	if ((nInsert > 0) && CEnMenu::IsSeparator(*pMenu, (nInsert - 1)))
-	{
-		nInsert--;
-		pMenu->DeleteMenu(nInsert, MF_BYPOSITION);
-	}
-
-	// then re-add
+	// then re-add just before the separator before 'unsorted entry'
 	CTDCCustomAttribDefinitionArray aAttribDefs;
 
 	if (tdc.GetCustomAttributeDefs(aAttribDefs))
 	{
-		// re-add separator on demand
-		BOOL bWantSep = TRUE;
+		int nInsert = CEnMenu::GetMenuItemPos(*pMenu, ID_SORTBY_NONE) - 1;
+		ASSERT(nInsert >= 0);
 
 		for (int nCol = 0; nCol < aAttribDefs.GetSize(); nCol++)
 		{
@@ -591,19 +580,17 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 			ASSERT(attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT));
 
-			if (bWantSep)
-			{
-				bWantSep = FALSE;
-				pMenu->InsertMenu(nInsert, MF_BYPOSITION);
-				nInsert++;
-			}
-
 			UINT nMenuID = ((nColID - TDCC_CUSTOMCOLUMN_FIRST) + ID_SORTBY_CUSTOMCOLUMN_FIRST);
 			CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
 
 			pMenu->InsertMenu(nInsert, MF_BYPOSITION, nMenuID, sColumn);
 			nInsert++;
 		}
+
+		// Resort the menu if we're not translated else 
+		// it'll get done in HandlePostTranslateMenu()
+		if (!CLocalizer::IsInitialized())
+			CEnMenu::SortMenuStrings(*pMenu, ID_SORTBY_DEFAULTCOLUMNS_FIRST, ID_SORTBY_CUSTOMCOLUMN_LAST);
 	}
 }
 
