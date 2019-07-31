@@ -91,6 +91,11 @@ String^ TaskList::GetMetaData(String^ sKey)
 	return GETSTR_ARG(GetMetaData, MS(sKey));
 }
 
+Boolean TaskList::HasCustomAttributes()
+{
+	return (GetCustomAttributeCount() > 0);
+}
+
 UInt32 TaskList::GetCustomAttributeCount()
 {
 	return GETVAL(GetCustomAttributeCount, 0);
@@ -222,7 +227,7 @@ Boolean Task::IsAttributeAvailable(Attribute attrib)
 			(m_pTaskList ? m_pTaskList->IsAttributeAvailable(nAttrib) : false));
 }
 
-String^ Task::GetAttribute(Task::Attribute attrib, bool calculated, bool display)
+String^ Task::GetAttributeValue(Task::Attribute attrib, bool calculated, bool display)
 {
 	TDC_ATTRIBUTE nAttrib = MapAttribute(attrib);
 
@@ -696,7 +701,7 @@ Boolean Task::GetRecurrence()
 	return false;
 }
 
-String^ Task::GetCustomAttributeData(String^ sID)
+String^ Task::GetCustomAttributeValue(String^ sID)
 {
 	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID), false) : 
 						(m_pTaskList ? m_pTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID), false) : L""));
@@ -704,7 +709,7 @@ String^ Task::GetCustomAttributeData(String^ sID)
 	return gcnew String(szValue);
 }
 
-String^ Task::GetMetaData(String^ sKey)
+String^ Task::GetMetaDataValue(String^ sKey)
 {
 	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskMetaData(m_hTask, MS(sKey)) : 
 						(m_pTaskList ? m_pTaskList->GetTaskMetaData(m_hTask, MS(sKey)) : L""));
@@ -891,22 +896,22 @@ Boolean Task::SetTimeSpent(double dTime, TimeUnits cUnits)
 	return (m_pTaskList ? m_pTaskList->SetTaskTimeSpent(m_hTask, dTime, MapUnits(cUnits)) : false);
 }
 
-Boolean Task::SetCustomAttributeData(String^ sID, String^ sValue)
+Boolean Task::SetCustomAttributeValue(String^ sID, String^ sValue)
 {
 	return (m_pTaskList ? m_pTaskList->SetTaskCustomAttributeData(m_hTask, MS(sID), MS(sValue)) : false);
 }
 
-Boolean Task::ClearCustomAttributeData(String^ sID)
+Boolean Task::ClearCustomAttributeValue(String^ sID)
 {
 	return (m_pTaskList ? m_pTaskList->ClearTaskCustomAttributeData(m_hTask, MS(sID)) : false);
 }
 
-Boolean Task::SetMetaData(String^ sKey, String^ sValue)
+Boolean Task::SetMetaDataValue(String^ sKey, String^ sValue)
 {
 	return (m_pTaskList ? m_pTaskList->SetTaskMetaData(m_hTask, MS(sKey), MS(sValue)) : false);
 }
 
-Boolean Task::ClearMetaData(String^ sKey)
+Boolean Task::ClearMetaDataValue(String^ sKey)
 {
 	return (m_pTaskList ? m_pTaskList->ClearTaskMetaData(m_hTask, MS(sKey)) : false);
 }

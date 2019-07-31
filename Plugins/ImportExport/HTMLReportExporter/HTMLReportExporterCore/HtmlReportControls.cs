@@ -201,7 +201,7 @@ namespace HTMLReportExporter
 			// For derived classes
 		}
 
-		private void OnAttributeMenuClick(object sender, EventArgs args)
+		protected void OnAttributeMenuClick(object sender, EventArgs args)
 		{
 			HandleAttributeMenuClick(sender as ToolStripMenuItem);
 		}
@@ -450,7 +450,7 @@ namespace HTMLReportExporter
 				var menuItem = new ToolStripMenuItem();
 
 				menuItem.Text = attrib.Label;
-				menuItem.Name = attrib.PlaceHolder();
+				menuItem.Name = attrib.Placeholder();
 
 				ToolStripAttributeMenu.DropDownItems.Add(menuItem);
 			}
@@ -467,6 +467,16 @@ namespace HTMLReportExporter
 				selText.text = menuItem.Name;
 		}
 
+		public void SetCustomAttributes(Dictionary<String, String> customAttributes)
+		{
+			foreach (var attrib in customAttributes)
+			{
+				var menuItem = new ToolStripMenuItem();
+
+				menuItem.Text = String.Format("{0} (Custom)", attrib.Value);
+				menuItem.Name = String.Format("$({0})", attrib.Key.ToLower());
+			}
+		}
 	}
 
 

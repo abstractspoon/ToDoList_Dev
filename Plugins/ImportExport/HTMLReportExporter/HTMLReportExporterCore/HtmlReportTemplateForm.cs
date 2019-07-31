@@ -30,6 +30,7 @@ namespace HTMLReportExporter
 		private String m_TemplateFilePath = "";
 		private bool m_FirstPreview = true;
 		private bool m_EditedSinceLastSave = false;
+		private Dictionary<String, String> m_CustomAttributes = null;
 
 		const String PreviewPageName = "HtmlReporterPreview.html";
 
@@ -55,6 +56,7 @@ namespace HTMLReportExporter
 
 			m_Template = new HtmlReportTemplate();
 			m_PrevTemplate = new HtmlReportTemplate();
+			m_CustomAttributes = new Dictionary<String, String>();
 
 			m_EditedSinceLastSave = false;
 			m_TemplateFilePath = prefs.GetProfileString(key, "LastOpenTemplate", "");
@@ -69,6 +71,21 @@ namespace HTMLReportExporter
 			m_ChangeTimer.Interval = 500;
 
 			InitializeComponent();
+
+			// Build list custom attribute IDs for later use
+			if (tasks.HasCustomAttributes())
+			{
+				var numAttrib = tasks.GetCustomAttributeCount();
+				var attribs = new Dictionary<String, String>();
+
+				for (var attrib = 0; attrib < numAttrib; attrib++)
+				{
+					m_CustomAttributes.Add(tasks.GetCustomAttributeLabel(attrib).ToLower(),
+											tasks.GetCustomAttributeLabel(attrib));
+				}
+			}
+
+			this.htmlReportTasksControl.SetCustomAttributes(m_CustomAttributes);
 		}
 
 		public HtmlReportTemplate ReportTemplate
@@ -368,8 +385,8 @@ namespace HTMLReportExporter
 
 				case PageType.Tasks:
 					{
-						var oldLayout = oldTemplate.Task.GetLayout().Style;
-						var newLayout = newTemplate.Task.GetLayout().Style;
+						var oldLayout = oldTemplate.Task.LayoutStyle;
+						var newLayout = newTemplate.Task.LayoutStyle;
 
 						bool showTableHeaderCombo = (newLayout == TaskTemplate.Layout.StyleType.Table);
 

@@ -276,27 +276,32 @@ namespace HTMLReportExporter
 	{
 		public struct Attribute
 		{
-			private String PlaceHolderText;
 
 			// ------------------------------------------------------
 
-			public Attribute(Task.Attribute id, String label, String placeHolderText)
+			public Attribute(Task.Attribute id, String label, String placeholderText)
 			{
 				Id = id;
 				Label = label;
-				PlaceHolderText = placeHolderText;
+				PlaceholderText = placeholderText;
 			}
 
-			public Task.Attribute Id;
-			public String Label;
+			public Task.Attribute Id { get; private set; }
+			public String Label { get; private set; }
+			public String PlaceholderText { get; private set; }
 
-			public String PlaceHolder(int level = -1)
+			public String Placeholder(int depth = -1)
 			{
-				if (level < 0)
-					return String.Format("$({0})", PlaceHolderText);
+				return Placeholder(PlaceholderText, depth);
+			}
+
+			static public String Placeholder(String placeholderText, int depth = 1)
+			{
+				if (depth < 0)
+					return String.Format("$({0})", placeholderText);
 
 				// else
-				return String.Format("$({0}.{1})", PlaceHolderText, (level + 1));
+				return String.Format("$({0}.{1})", placeholderText, (depth + 1));
 			}
 		}
 
@@ -347,7 +352,10 @@ namespace HTMLReportExporter
 			public String TaskHtml { get; private set; }
 			public String EndHtml { get; private set; }
 
+			private Dictionary<String, String> CustomAttributes;
+
 			private const String ColorPlaceholder = "$(textColor)";
+
 
 			// ------------------------------------------------------
 
@@ -368,9 +376,9 @@ namespace HTMLReportExporter
 
 			// ------------------------------------------------------
 
-			public Layout(String text, TableHeaderRowType type)
+			public Layout(String text, TableHeaderRowType type, Dictionary<String, String> customAttributes)
 			{
-				Initialise(text, type);
+				Initialise(text, type, customAttributes);
 			}
 
 			public void Clear()
@@ -383,7 +391,7 @@ namespace HTMLReportExporter
 				EndHtml = String.Empty;
 			}
 
-			private void Initialise(string text, TableHeaderRowType tableHeaderType)
+			private void Initialise(string text, TableHeaderRowType tableHeaderType, Dictionary<String, String> customAttributes)
 			{
 				Clear();
 
@@ -395,6 +403,7 @@ namespace HTMLReportExporter
 					// Defaults
 					this.TaskHtml = text;
 					this.TableHeaderRow = TableHeaderRowType.NotRequired;
+					this.CustomAttributes = customAttributes;
 
 					var doc = new HtmlAgilityPack.HtmlDocument();
 					doc.LoadHtml(text);
@@ -457,7 +466,9 @@ namespace HTMLReportExporter
 										if (tableHeaderType == TableHeaderRowType.AutoGenerate)
 										{
 											var theadStyle = "style=font-weight:bold;font-size:1.5em;display:table-header-group;";
-											var theadHtml = String.Format("\n<thead {0}>{1}</thead>", theadStyle, FormatHeader(taskHtml));
+
+											var header = FormatHeader(taskHtml);
+											var theadHtml = String.Format("\n<thead {0}>{1}</thead>", theadStyle, header);
 
 											this.StartHtml = this.StartHtml.Insert(tbodyStart, theadHtml);
 										}
@@ -578,7 +589,7 @@ namespace HTMLReportExporter
 				return true;
 			}
 
-			private static String FormatHeader(String taskHtml)
+			private String FormatHeader(String taskHtml)
 			{
 				var header = taskHtml;
 
@@ -588,9 +599,19 @@ namespace HTMLReportExporter
 					{
 						// Clear all placeholder except the 'root' one
 						for (int d = 0; d < 9; d++)
-							header = header.Replace(attrib.PlaceHolder(d), String.Empty);
+							header = header.Replace(attrib.Placeholder(d), String.Empty);
 
-						header = header.Replace(attrib.PlaceHolder(), attrib.Label);
+						header = header.Replace(attrib.Placeholder(), attrib.Label);
+					}
+
+					// Custom attributes
+					foreach (var attrib in CustomAttributes)
+					{
+						// Clear all placeholder except the 'root' one
+						for (int d = 0; d < 9; d++)
+							header = header.Replace(Attribute.Placeholder(attrib.Key, d), String.Empty);
+
+						header = header.Replace(Attribute.Placeholder(attrib.Key), attrib.Value);
 					}
 				}
 
@@ -603,9 +624,10 @@ namespace HTMLReportExporter
 
 				if (!String.IsNullOrWhiteSpace(row))
 				{
+					// Default attributes
 					foreach (var attrib in Attributes)
 					{
-						var attribVal = task.GetAttribute(attrib.Id, true, true);
+						var attribVal = task.GetAttributeValue(attrib.Id, true, true);
 
 						// Special case
 						if ((attrib.Id == Task.Attribute.HtmlComments) && String.IsNullOrWhiteSpace(attribVal))
@@ -613,30 +635,42 @@ namespace HTMLReportExporter
 							attribVal = task.GetComments().Trim().Replace("\n", "<br>");
 						}
 
-						// Replace only the placeholder at the level specified
-						String placeHolder = attrib.PlaceHolder(depth);
-						int placeHolderDepth = depth;
+						row = ReplacePlaceholder(row, attribVal, attrib.PlaceholderText, depth);
+					}
 
-						if (row.IndexOf(placeHolder) == -1)
-						{
-							placeHolderDepth = -1;
-							placeHolder = attrib.PlaceHolder(-1);
-						}
-						//else
-						//{
-						//	int breakpoint = 0;
-						//}
-
-						for (int d = -1; d < 9; d++)
-						{
-							if (d == placeHolderDepth)
-								row = row.Replace(placeHolder, attribVal);
-							else
-								row = row.Replace(attrib.PlaceHolder(d), String.Empty);
-						}
+					// Custom attributes
+					foreach (var attrib in CustomAttributes)
+					{
+						var attribVal = task.GetCustomAttributeValue(attrib.Key);
+						
+						row = ReplacePlaceholder(row, attribVal, attrib.Key, depth);
 					}
 
 					row = row.Replace(ColorPlaceholder, task.GetTextForeWebColor());
+				}
+
+				return row;
+			}
+
+			static String ReplacePlaceholder(String row, String attribVal, String defaultPlaceholderText, int depth)
+			{
+				// Replace only the placeholder at the level specified
+				String placeHolder = Attribute.Placeholder(defaultPlaceholderText, depth);
+				int placeHolderDepth = depth;
+
+				if (row.IndexOf(placeHolder) == -1)
+				{
+					// We didn't find it so use the default placeholder
+					placeHolderDepth = -1;
+					placeHolder = Attribute.Placeholder(defaultPlaceholderText, -1);
+				}
+
+				for (int d = -1; d < 9; d++)
+				{
+					if (d == placeHolderDepth)
+						row = row.Replace(placeHolder, attribVal);
+					else
+						row = row.Replace(Attribute.Placeholder(defaultPlaceholderText, d), String.Empty);
 				}
 
 				return row;
@@ -651,9 +685,14 @@ namespace HTMLReportExporter
 		{
 		}
 
-		public Layout GetLayout()
+		public Layout GetLayout(Dictionary<String, String> customAttributes)
 		{
-			return new Layout(Text, TableHeaderRow);
+			return new Layout(Text, TableHeaderRow, customAttributes);
+		}
+
+		public Layout.StyleType LayoutStyle
+		{
+			get { return new Layout(Text, TableHeaderRow, new Dictionary<String, String>()).Style; }
 		}
 
 		override public void Read(XDocument doc)
