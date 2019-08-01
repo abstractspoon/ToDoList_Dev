@@ -215,12 +215,15 @@ protected:
 	BOOL MultiSelectItem(HTREEITEM hti, TSH_SELECT nState = TSHS_SELECT, BOOL bRedraw = TRUE);
 	BOOL MultiSelectItems(HTREEITEM htiFrom, HTREEITEM htiTo, TSH_SELECT nState = TSHS_SELECT, BOOL bRedraw = TRUE);
 	BOOL HandleClientColumnClick(const CPoint& pt, BOOL bDblClk);
-	BOOL CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const;
 	void BeginLabelEditTimer();
 	void EndLabelEditTimer();
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	BOOL TaskHasLockedSubtasks(DWORD dwTaskID) const;
 	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bAndParents, BOOL bUpdateList = TRUE);
+
+	BOOL CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const;
+	HTREEITEM MoveItemRaw(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
+	HTREEITEM MoveSelectionRaw(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
 
 	GM_ITEMSTATE GetTreeItemState(HTREEITEM hti) const;
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;

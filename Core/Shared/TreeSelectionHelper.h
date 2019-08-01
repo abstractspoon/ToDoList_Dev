@@ -113,8 +113,6 @@ public:
 	BOOL ItemsAreAllSiblings() const;
 	BOOL ItemsAreAllSiblings(const CHTIList& selection) const;
 
-	void SortIfAllSiblings(BOOL bAscending);
-
 	// removes any items which are children of other items in the list
 	void RemoveChildDuplicates();
 	void RemoveChildDuplicates(CHTIList& selection) const;
@@ -146,9 +144,6 @@ public:
 	BOOL FixupTreeSelection(); // returns TRUE if the tree selection changed
 	BOOL GetBoundingRect(CRect& rSelection) const;
  
-	void OrderItems(BOOL bVisibleOnly = TRUE);
-	void OrderItems(CHTIList& selection, BOOL bVisibleOnly = TRUE) const;
-
 	int GetItemTitles(const CHTIList& selection, CStringArray& aTitles) const; 
 	int GetItemData(const CHTIList& selection, CDWordArray& aData) const;
 
@@ -178,8 +173,8 @@ protected:
 protected:
 	void InvalidateItem(HTREEITEM hti);
 	BOOL HasSelectedParent(HTREEITEM hti, const CHTIList& selection) const;
-	int GetItemPos(HTREEITEM hti);
 	void AddAll(HTREEITEM hti);
+	void Sort(CHTIList& selection, BOOL bAscending) const;
 
 	struct SORTITEM
 	{
@@ -189,7 +184,7 @@ protected:
 
 	typedef CArray<SORTITEM, SORTITEM&> CSortArray;
 
-	int BuildSortArray(CSortArray& aItems);
+	int BuildSortArray(const CHTIList& lstSelection, CSortArray& aItems) const;
 	static int SortProc(const void* item1, const void* item2);
 
 	int Convert(const CHTIList& lstFrom, CIDArray& aTo) const;
@@ -197,8 +192,6 @@ protected:
 
 	int FindPrevValidSelection() const;
 	int FindNextValidSelection() const;
-
-	BOOL BuildOrderedItems(const CHTIList& selection, HTREEITEM hti, BOOL bVisibleOnly, CHTIList& lstOrdered) const;
 };
 
 #endif // !defined(AFX_TREESELECTIONHELPER_H__098294B4_8B41_4369_8522_FE1637BA7EA1__INCLUDED_)

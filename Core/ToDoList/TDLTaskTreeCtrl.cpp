@@ -1811,13 +1811,117 @@ BOOL CTDLTaskTreeCtrl::RemoveOrphanTreeItemReferences(HTREEITEM hti)
 	return bRemoved;
 }
 
+BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
+{
+	if (!CanMoveSelection(nDirection))
+		return FALSE;
+
+	HTREEITEM htiFirst = NULL;
+	{
+		TDCSELECTIONCACHE cache;
+		CacheSelection(cache);
+
+		CAutoFlag af(m_bMovingItem, TRUE);
+		//CHoldRedraw hr(*this);
+
+		HTREEITEM htiDestParent = NULL, htiDestAfter = NULL;
+		VERIFY(GetInsertLocation(nDirection, htiDestParent, htiDestAfter));
+	
+		htiFirst = MoveSelectionRaw(htiDestParent, htiDestAfter);
+
+		if (cache.aSelTaskIDs.GetSize() == 1)
+			SelectItem(htiFirst);
+		else
+			RestoreSelection(cache);
+	}
+
+	if (nDirection == TDCM_UP || nDirection == TDCM_DOWN)
+	{
+		// if moving up or down make sure we scroll ahead a bit
+		TCH().SetMinDistanceToEdge(TSH().GetFirstItem(), TCHE_TOP, 2);
+		
+		if (GetSelectedCount() > 1)
+			TCH().SetMinDistanceToEdge(TSH().GetLastItem(), TCHE_BOTTOM, 2);
+	}
+
+	return TRUE;
+}
+
+// External version - DON'T CALL INTERNALLY
+void CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
+{
+	TDCSELECTIONCACHE cache;
+	CacheSelection(cache);
+
+	{
+		CAutoFlag af(m_bMovingItem, TRUE);
+		CHoldRedraw hr(*this);
+
+		HTREEITEM hti =	MoveSelectionRaw(htiDestParent, htiDestPrevSibling);
+
+		RestoreSelection(cache);
+		
+		// make sure first moved item is visible
+		CHoldHScroll hhs(m_tcTasks);
+		m_tcTasks.EnsureVisible(hti);
+	}
+
+	UpdateAll();
+}
+
+// Internal version
+HTREEITEM CTDLTaskTreeCtrl::MoveSelectionRaw(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
+{
+	ASSERT(m_bMovingItem);
+	ASSERT(HasSelection());
+
+	HTREEITEM htiFirst = NULL;
+
+	// expand the destination ahead of the move
+	m_tcTasks.Expand(htiDestParent, TVE_EXPAND);
+	ExpandList(htiDestParent);
+
+	// get selected tasks ordered, and without duplicate subtasks
+	CHTIList selection;
+	TSH().CopySelection(selection, TRUE, TRUE);
+
+	TSH().RemoveAll(FALSE, FALSE); // no redraw
+	TCH().SelectItem(NULL);
+
+	// move the tree items
+	POSITION pos = selection.GetHeadPosition();
+	HTREEITEM htiAfter = htiDestPrevSibling;
+
+	if (htiAfter == NULL)
+		htiAfter = TVI_FIRST;
+
+	while (pos)
+	{
+		HTREEITEM hti = selection.GetNext(pos);
+		htiAfter = MoveItemRaw(hti, htiDestParent, htiAfter);
+
+		if (!htiFirst)
+			htiFirst = htiAfter;
+	}
+
+	return htiFirst;
+}
+
+// External version - DON'T CALL INTERNALLY
 HTREEITEM CTDLTaskTreeCtrl::MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
 {
-	ASSERT(hti);
-
 	// prevent list updating until we have finished
 	CWaitCursor wait;
 	CAutoFlag af(m_bMovingItem, TRUE);
+
+	return MoveItemRaw(hti, htiDestParent, htiDestPrevSibling);
+}
+
+// Internal version
+HTREEITEM CTDLTaskTreeCtrl::MoveItemRaw(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
+{
+	ASSERT(hti);
+	ASSERT(m_bMovingItem);
 
 	// make sure the destination parent is expanded so that the new items 
 	// get automatically handled by CTreeListSyncer
@@ -1835,78 +1939,6 @@ HTREEITEM CTDLTaskTreeCtrl::MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTR
 
 	// return the new tree item
 	return hti;
-}
-
-BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
-{
-	if (!CanMoveSelection(nDirection))
-		return FALSE;
-
-	CAutoFlag af(m_bMovingItem, TRUE);
-
-	HTREEITEM htiDestParent = NULL, htiDestAfter = NULL;
-	VERIFY(GetInsertLocation(nDirection, htiDestParent, htiDestAfter));
-	
-	MoveSelection(htiDestParent, htiDestAfter);
-
-	if (nDirection == TDCM_UP || nDirection == TDCM_DOWN)
-	{
-		// if moving up or down make sure we scroll ahead a bit
-		TCH().SetMinDistanceToEdge(TSH().GetFirstItem(), TCHE_TOP, 2);
-		
-		if (GetSelectedCount() > 1)
-			TCH().SetMinDistanceToEdge(TSH().GetLastItem(), TCHE_BOTTOM, 2);
-	}
-
-	return TRUE;
-}
-
-void CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
-{
-	HTREEITEM htiFirst = NULL;
-
-	// expand the destination ahead of the move
-	m_tcTasks.Expand(htiDestParent, TVE_EXPAND);
-	ExpandList(htiDestParent);
-
-	{
-		CAutoFlag af(m_bMovingItem, TRUE);
-		CHoldRedraw hr(*this);
-
-		TDCSELECTIONCACHE cache;
-		CacheSelection(cache);
-		
-		// get selected tasks ordered, and without duplicate subtasks
-		CHTIList selection;
-		TSH().CopySelection(selection, TRUE, TRUE);
-		
-		TSH().RemoveAll(FALSE, FALSE); // no redraw
-		TCH().SelectItem(NULL);
-		
-		// move the tree items
-		POSITION pos = selection.GetHeadPosition();
-		HTREEITEM htiAfter = htiDestPrevSibling;
-
-		if (htiAfter == NULL)
-			htiAfter = TVI_FIRST;
-		
-		while (pos)
-		{
-			HTREEITEM hti = selection.GetNext(pos);
-			htiAfter = MoveItem(hti, htiDestParent, htiAfter);
-
-			if (!htiFirst)
-				htiFirst = htiAfter;
-		}
-		
-		RestoreSelection(cache);
-	}
-		
-	// make sure first moved item is visible
-	CHoldHScroll hhs(m_tcTasks);
-	m_tcTasks.EnsureVisible(htiFirst);
-
-	UpdateAll();
 }
 
 BOOL CTDLTaskTreeCtrl::CanMoveSelection(TDC_MOVETASK nDirection) const
