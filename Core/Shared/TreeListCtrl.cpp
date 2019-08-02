@@ -1056,7 +1056,8 @@ BOOL CTreeListCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 
 	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
 				
-	if (!(nFlags & (TVHT_ONITEM | TVHT_ONITEMRIGHT)))
+	// Allow double-clicking on label and right of label
+	if ((nFlags & (TVHT_ONITEMLABEL | TVHT_ONITEMRIGHT)) == 0)
 		return FALSE;
 	
 	if (!TCH().TreeCtrl().ItemHasChildren(hti))
