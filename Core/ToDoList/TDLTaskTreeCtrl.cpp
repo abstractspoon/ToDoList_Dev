@@ -1816,24 +1816,11 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
 	if (!CanMoveSelection(nDirection))
 		return FALSE;
 
-	HTREEITEM htiFirst = NULL;
-	{
-		TDCSELECTIONCACHE cache;
-		CacheSelection(cache);
+	HTREEITEM htiDestParent = NULL, htiDestAfter = NULL;
+	VERIFY(GetInsertLocation(nDirection, htiDestParent, htiDestAfter));
 
-		CAutoFlag af(m_bMovingItem, TRUE);
-		//CHoldRedraw hr(*this);
-
-		HTREEITEM htiDestParent = NULL, htiDestAfter = NULL;
-		VERIFY(GetInsertLocation(nDirection, htiDestParent, htiDestAfter));
-	
-		htiFirst = MoveSelectionRaw(htiDestParent, htiDestAfter);
-
-		if (cache.aSelTaskIDs.GetSize() == 1)
-			SelectItem(htiFirst);
-		else
-			RestoreSelection(cache);
-	}
+	if (!MoveSelection(htiDestParent, htiDestAfter, FALSE))
+		return FALSE;
 
 	if (nDirection == TDCM_UP || nDirection == TDCM_DOWN)
 	{
@@ -1848,29 +1835,40 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
 }
 
 // External version - DON'T CALL INTERNALLY
-void CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
+BOOL CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, BOOL bEnsureVisible)
 {
-	TDCSELECTIONCACHE cache;
-	CacheSelection(cache);
-
 	{
 		CAutoFlag af(m_bMovingItem, TRUE);
-		CHoldRedraw hr(*this);
+		// No 'hold redraw' needed here
 
-		HTREEITEM hti =	MoveSelectionRaw(htiDestParent, htiDestPrevSibling);
+		CHTIList moved;
+		HTREEITEM htiFirst = MoveSelectionRaw(htiDestParent, htiDestPrevSibling, moved);
 
-		RestoreSelection(cache);
-		
+		if (htiFirst == NULL)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		TSH().SetItems(moved, TSHS_SELECT, FALSE);
+		TSH().SetAnchor(htiFirst);
+		TCH().SelectItem(htiFirst);
+
 		// make sure first moved item is visible
-		CHoldHScroll hhs(m_tcTasks);
-		m_tcTasks.EnsureVisible(hti);
+		if (bEnsureVisible)
+		{
+			CHoldHScroll hhs(m_tcTasks);
+			TCH().EnsureItemVisible(htiFirst, FALSE, FALSE);
+		}
 	}
 
-	UpdateAll();
+	// No need to notify parent of selection change
+	// because logically the selection hasn't changed
+	return TRUE;
 }
 
 // Internal version
-HTREEITEM CTDLTaskTreeCtrl::MoveSelectionRaw(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
+HTREEITEM CTDLTaskTreeCtrl::MoveSelectionRaw(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, CHTIList& moved)
 {
 	ASSERT(m_bMovingItem);
 	ASSERT(HasSelection());
@@ -1895,16 +1893,19 @@ HTREEITEM CTDLTaskTreeCtrl::MoveSelectionRaw(HTREEITEM htiDestParent, HTREEITEM 
 	if (htiAfter == NULL)
 		htiAfter = TVI_FIRST;
 
+	moved.RemoveAll();
+
 	while (pos)
 	{
 		HTREEITEM hti = selection.GetNext(pos);
-		htiAfter = MoveItemRaw(hti, htiDestParent, htiAfter);
+		hti = MoveItemRaw(hti, htiDestParent, htiAfter);
 
-		if (!htiFirst)
-			htiFirst = htiAfter;
+		moved.AddTail(hti);
+		htiAfter = hti;
 	}
+	ASSERT(moved.GetCount());
 
-	return htiFirst;
+	return (moved.GetCount() ? moved.GetHead() : NULL);
 }
 
 // External version - DON'T CALL INTERNALLY

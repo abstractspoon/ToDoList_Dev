@@ -110,10 +110,10 @@ public:
 	HTREEITEM InsertItem(DWORD dwTaskID, HTREEITEM htiParent, HTREEITEM htiAfter);
 	BOOL DeleteItem(HTREEITEM hti);
 
-	HTREEITEM MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
-	void MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
 	BOOL MoveSelection(TDC_MOVETASK nDirection);
 	BOOL CanMoveSelection(TDC_MOVETASK nDirection) const;
+	HTREEITEM MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
+	BOOL MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, BOOL bEnsureVisible = TRUE);
 	
 	inline HTREEITEM GetSelectedItem() const { return TSH().GetFirstItem(); }
 	inline HTREEITEM GetTreeSelectedItem() const { return m_tcTasks.GetSelectedItem(); }
@@ -223,7 +223,7 @@ protected:
 
 	BOOL CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const;
 	HTREEITEM MoveItemRaw(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
-	HTREEITEM MoveSelectionRaw(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
+	HTREEITEM MoveSelectionRaw(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, CHTIList& moved);
 
 	GM_ITEMSTATE GetTreeItemState(HTREEITEM hti) const;
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;
