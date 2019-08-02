@@ -2176,7 +2176,7 @@ BOOL CGanttCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 		HTREEITEM hti = m_tree.HitTest(point, &nFlags);
 
 		if (nFlags & TVHT_ONITEMICON)
-			GetCWnd()->SendMessage(WM_GTLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
+			CWnd::GetParent()->SendMessage(WM_GTLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
 		
 		return TRUE; // eat
 	}
