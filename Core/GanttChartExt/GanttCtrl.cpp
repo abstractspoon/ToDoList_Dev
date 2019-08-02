@@ -846,20 +846,6 @@ void CGanttCtrl::UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	}
 }
 
-void CGanttCtrl::UpdateParentStatus(DWORD dwParentID)
-{
-	if (dwParentID)
-	{
-		GANTTITEM* pGIParent = NULL;
-		GET_GI(dwParentID, pGIParent);
-
-		HTREEITEM htiParent = GetTreeItem(dwParentID);
-		ASSERT(htiParent);
-
-		pGIParent->bParent = m_tree.ItemHasChildren(htiParent);
-	}
-}
-
 GANTTITEM* CGanttCtrl::GetGanttItem(DWORD dwTaskID, BOOL bCopyRefID) const
 {
 	GANTTITEM* pGI = m_data.GetItem(dwTaskID);
