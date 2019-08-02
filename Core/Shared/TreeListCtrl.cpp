@@ -1880,10 +1880,19 @@ BOOL CTreeListCtrl::ProcessMessage(MSG* pMsg)
 
 BOOL CTreeListCtrl::CanMoveItem(const TLCITEMMOVE& move) const
 {
-	return (!move.bCopy &&
-			((move.htiSel == NULL) || GetItemData(move.htiSel)) &&
-			((move.htiDestParent == NULL) || GetItemData(move.htiDestParent)) &&
-			((move.htiDestAfterSibling == NULL) || GetItemData(move.htiDestAfterSibling)));
+	if (move.bCopy)
+		return FALSE;
+	
+	if ((move.htiSel != NULL) && !GetItemData(move.htiSel))
+		return FALSE;
+
+	if ((move.htiDestParent != NULL) && !GetItemData(move.htiDestParent))
+		return FALSE;
+
+	if ((move.htiDestAfterSibling != NULL) && !GetItemData(move.htiDestAfterSibling))
+		return FALSE;
+
+	return TRUE;
 }
 
 BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
@@ -1897,7 +1906,9 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 	CHoldRedraw hr(*this);
 
 	HTREEITEM htiSel = ((move.htiSel == NULL) ? GetSelectedItem() : move.htiSel);
-	HTREEITEM htiNew = TCH().MoveTree(htiSel, move.htiDestParent, move.htiDestAfterSibling, TRUE, TRUE);
+	HTREEITEM htiAfter = ((move.htiDestAfterSibling == NULL) ? TVI_FIRST : move.htiDestAfterSibling);
+
+	HTREEITEM htiNew = TCH().MoveTree(htiSel, move.htiDestParent, htiAfter, TRUE, TRUE);
 
 	if (htiNew)
 	{

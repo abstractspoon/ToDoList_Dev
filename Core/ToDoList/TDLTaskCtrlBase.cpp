@@ -5425,9 +5425,13 @@ DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const
 {
 	// If multiple tasks are selected they must all
 	// have the same parent else we return 0
-	DWORD dwParentID = (DWORD)-1;
 	POSITION pos = GetFirstSelectedTaskPos();
+
+	if (!pos)
+		return 0;
 	
+	DWORD dwParentID = (DWORD)-1;
+
 	while (pos)
 	{
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
