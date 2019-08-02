@@ -29,7 +29,6 @@
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HtmlEditorControl));
 			this.browserPanel = new System.Windows.Forms.Panel();
-			this.editorWebBrowser = new WebBrowserEx.WebBrowserEx();
 			this.toolstripEditor = new System.Windows.Forms.ToolStrip();
 			this.toolStripSeparator17 = new System.Windows.Forms.ToolStripSeparator();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -63,6 +62,7 @@
 			this.contextDocumentScrollbar = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocumentWordwrap = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocumentOverwrite = new System.Windows.Forms.ToolStripMenuItem();
+			this.contextDocumentHelp = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
 			this.contextFormat = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
@@ -126,6 +126,7 @@
 			this.contextEditDelete = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocumentNew = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocumentOpen = new System.Windows.Forms.ToolStripMenuItem();
+			this.contextDocumentEditHTML = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocumentSave = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocumentPrint = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextFormatFontDialog = new System.Windows.Forms.ToolStripMenuItem();
@@ -147,7 +148,8 @@
 			this.contextInsertLink = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertImage = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertTable = new System.Windows.Forms.ToolStripMenuItem();
-			this.contextDocumentHelp = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripDocumentEditHTML = new System.Windows.Forms.ToolStripButton();
+			this.editorWebBrowser = new WebBrowserEx.WebBrowserEx();
 			this.browserPanel.SuspendLayout();
 			this.toolstripEditor.SuspendLayout();
 			this.contextEditor.SuspendLayout();
@@ -160,15 +162,6 @@
 			resources.ApplyResources(this.browserPanel, "browserPanel");
 			this.browserPanel.Name = "browserPanel";
 			this.browserPanel.Resize += new System.EventHandler(this.browserPanelResize);
-			// 
-			// editorWebBrowser
-			// 
-			this.editorWebBrowser.IsWebBrowserContextMenuEnabled = false;
-			resources.ApplyResources(this.editorWebBrowser, "editorWebBrowser");
-			this.editorWebBrowser.Name = "editorWebBrowser";
-			this.editorWebBrowser.ScriptErrorsSuppressed = true;
-			this.editorWebBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.BrowserDocumentComplete);
-			this.editorWebBrowser.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.BrowserBeforeNavigate);
 			// 
 			// toolstripEditor
 			// 
@@ -214,6 +207,7 @@
             this.toolstripFindReplace,
             this.toolstripDocumentNew,
             this.toolstripDocumentOpen,
+            this.toolStripDocumentEditHTML,
             this.toolstripDocumentSave,
             this.toolstripDocumentPrint,
             this.toolStripSeparator,
@@ -395,6 +389,7 @@
 			this.contextDocument.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.contextDocumentNew,
             this.contextDocumentOpen,
+            this.contextDocumentEditHTML,
             this.contextDocumentSave,
             this.toolStripSeparator9,
             this.contextDocumentPrint,
@@ -444,6 +439,11 @@
 			resources.ApplyResources(this.contextDocumentOverwrite, "contextDocumentOverwrite");
 			this.contextDocumentOverwrite.Tag = "ToggleOverwrite";
 			this.contextDocumentOverwrite.Click += new System.EventHandler(this.contextEditorClick);
+			// 
+			// contextDocumentHelp
+			// 
+			this.contextDocumentHelp.Name = "contextDocumentHelp";
+			resources.ApplyResources(this.contextDocumentHelp, "contextDocumentHelp");
 			// 
 			// toolStripSeparator7
 			// 
@@ -961,6 +961,14 @@
 			this.contextDocumentOpen.Tag = "OpenFile";
 			this.contextDocumentOpen.Click += new System.EventHandler(this.contextEditorClick);
 			// 
+			// contextDocumentEditHTML
+			// 
+			this.contextDocumentEditHTML.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarEditHtml;
+			resources.ApplyResources(this.contextDocumentEditHTML, "contextDocumentEditHTML");
+			this.contextDocumentEditHTML.Name = "contextDocumentEditHTML";
+			this.contextDocumentEditHTML.Tag = "EditHTML";
+			this.contextDocumentEditHTML.Click += new System.EventHandler(this.contextEditorClick);
+			// 
 			// contextDocumentSave
 			// 
 			this.contextDocumentSave.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFileSave;
@@ -1129,10 +1137,23 @@
 			this.contextInsertTable.Tag = "InsertTable";
 			this.contextInsertTable.Click += new System.EventHandler(this.contextEditorClick);
 			// 
-			// contextDocumentHelp
+			// toolStripDocumentEditHTML
 			// 
-			this.contextDocumentHelp.Name = "contextDocumentHelp";
-			resources.ApplyResources(this.contextDocumentHelp, "contextDocumentHelp");
+			this.toolStripDocumentEditHTML.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolStripDocumentEditHTML.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarEditHtml;
+			resources.ApplyResources(this.toolStripDocumentEditHTML, "toolStripDocumentEditHTML");
+			this.toolStripDocumentEditHTML.Name = "toolStripDocumentEditHTML";
+			this.toolStripDocumentEditHTML.Tag = "EditHTML";
+			this.toolStripDocumentEditHTML.Click += new System.EventHandler(this.toolstripEditorClick);
+			// 
+			// editorWebBrowser
+			// 
+			this.editorWebBrowser.IsWebBrowserContextMenuEnabled = false;
+			resources.ApplyResources(this.editorWebBrowser, "editorWebBrowser");
+			this.editorWebBrowser.Name = "editorWebBrowser";
+			this.editorWebBrowser.ScriptErrorsSuppressed = true;
+			this.editorWebBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.BrowserDocumentComplete);
+			this.editorWebBrowser.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.BrowserBeforeNavigate);
 			// 
 			// HtmlEditorControl
 			// 
@@ -1270,5 +1291,7 @@
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator24;
 		private System.Windows.Forms.ToolStripMenuItem contextDocumentNew;
 		private System.Windows.Forms.ToolStripMenuItem contextDocumentHelp;
+		private System.Windows.Forms.ToolStripMenuItem contextDocumentEditHTML;
+		private System.Windows.Forms.ToolStripButton toolStripDocumentEditHTML;
 	}
 }

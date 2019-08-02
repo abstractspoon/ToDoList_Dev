@@ -97,8 +97,12 @@ void HtmlEditorControlEx::InitialiseFeatures(bool hideDocumentCommands)
 {
 	if (hideDocumentCommands)
 	{
-		// remove whole 'Document' submenu
-		CommandHandling::HideCommand("contextDocument", ContextMenu->Items);
+		CommandHandling::HideCommand("contextEditorDocumentNew", ContextMenu->Items);
+		CommandHandling::HideCommand("contextEditorDocumentOpen", ContextMenu->Items);
+		CommandHandling::HideCommand("contextEditorDocumentSave", ContextMenu->Items);
+		CommandHandling::HideCommand("contextEditorDocumentPrint", ContextMenu->Items);
+		CommandHandling::HideCommand("contextEditorDocumentHelp", ContextMenu->Items);
+
 
 		CommandHandling::HideCommand("toolstripDocumentNew", ToolBar->Items);
 		CommandHandling::HideCommand("toolstripDocumentOpen", ToolBar->Items);
@@ -149,6 +153,13 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 		imageDialog->LastBrowsedFolder = LastBrowsedImageFolder;
 		FormsUtil::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional")), false);
 	}
+	else if (ISTYPE(dialog, EditHtmlForm))
+	{
+		auto htmlDialog = ASTYPE(dialog, EditHtmlForm);
+
+		htmlDialog->FontName = gcnew String("Courier New");
+	}
+
 
 	Win32::ActivateApp(Handle);
 }

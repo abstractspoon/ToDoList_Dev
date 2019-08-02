@@ -16,7 +16,7 @@ namespace MSDN.Html.Editor
     /// If a property RedOnly is true contents are considered viewable
     /// No Html parsing is performed on the resultant data
     /// </summary>
-    internal partial class EditHtmlForm : Form
+    public partial class EditHtmlForm : Form
     {
 
         // read only property for the form
@@ -49,6 +49,14 @@ namespace MSDN.Html.Editor
         {
             this.Text = caption;
         }
+
+		public string FontName
+		{
+			set
+			{
+				this.htmlText.Font = new Font(value, 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			}
+		}
 
         /// <summary>
         /// Property to set and get the HTML contents
