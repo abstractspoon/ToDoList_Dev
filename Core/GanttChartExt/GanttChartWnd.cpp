@@ -298,7 +298,7 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 	m_ctrlGantt.SetOption(GTLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 	m_ctrlGantt.SetOption(GTLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
 
-	m_ctrlGantt.ShowCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
+	m_ctrlGantt.EnableCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
 
 	// get alternate line color from app prefs
 	COLORREF crAlt = CLR_NONE;
@@ -784,7 +784,6 @@ BOOL CGanttChartWnd::OnInitDialog()
 	BuildSnapCombo();
 	BuildDisplayCombo();
 	
-	m_ctrlGantt.ShowIcons();
 	m_ctrlGantt.ScrollToToday();
 	m_ctrlGantt.SetFocus();
 

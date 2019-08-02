@@ -181,9 +181,9 @@ BOOL CTreeListTreeCtrl::InitTooltip()
 	return TRUE;
 }
 
-void CTreeListTreeCtrl::ShowCheckboxes(UINT nUnthemedBitmapID, BOOL bShow)
+void CTreeListTreeCtrl::EnableCheckboxes(UINT nUnthemedBitmapID, BOOL bEnable)
 {
-	if (bShow)
+	if (bEnable)
 	{
 		if (!m_ilCheckboxes.GetSafeHandle())
 			VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, nUnthemedBitmapID, 255));
@@ -196,17 +196,17 @@ void CTreeListTreeCtrl::ShowCheckboxes(UINT nUnthemedBitmapID, BOOL bShow)
 	}
 }
 
-void CTreeListTreeCtrl::ShowIcons(BOOL bShow)
+void CTreeListTreeCtrl::EnableImagePlaceholder(BOOL bEnable)
 {
-	if (bShow)
+	if (bEnable)
 	{
 		// Create dummy imagelist to make a space for drawing in
 		int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
 
-		if (!m_ilIconPlaceholder.GetSafeHandle())
-			VERIFY(m_ilIconPlaceholder.Create(nImageSize, nImageSize, 0, 1, 0));
+		if (!m_ilImagePlaceholder.GetSafeHandle())
+			VERIFY(m_ilImagePlaceholder.Create(nImageSize, nImageSize, 0, 1, 0));
 
-		SetImageList(&m_ilIconPlaceholder, TVSIL_NORMAL);
+		SetImageList(&m_ilImagePlaceholder, TVSIL_NORMAL);
 	}
 	else
 	{
@@ -217,7 +217,7 @@ void CTreeListTreeCtrl::ShowIcons(BOOL bShow)
 void CTreeListTreeCtrl::OnDestroy()
 {
 	// Prevent icon requests during destruction
-	ShowIcons(FALSE);
+	EnableImagePlaceholder(FALSE);
 
 	CTreeCtrl::OnDestroy();
 }

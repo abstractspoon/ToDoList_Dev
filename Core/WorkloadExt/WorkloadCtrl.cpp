@@ -155,7 +155,8 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	BuildTaskTreeColumns();
 	BuildListColumns();
 	PopulateTotalsLists();
-	
+	EnableImagePlaceholder();
+
 	return 0;
 }
 
@@ -1072,7 +1073,7 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				break;
 
 			case WLCF_SHOWTREECHECKBOXES:
-				m_tree.ShowCheckboxes(bSet);
+				m_tree.EnableCheckboxes(bSet);
 				break;
 
 			case WLCF_CALCMISSINGALLOCATIONS:

@@ -134,6 +134,7 @@ int CGanttCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	BuildListColumns();
 
 	CalcMinMonthWidths();
+	EnableImagePlaceholder();
 
 	if (m_nMonthWidth != DEF_MONTH_WIDTH)
 		RecalcListColumnWidths(DEF_MONTH_WIDTH, m_nMonthWidth);

@@ -73,14 +73,14 @@ public:
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 
-	void ShowCheckboxes(UINT nUnthemedBitmapID, BOOL bShow = TRUE);
-	void ShowIcons(BOOL bShow = TRUE);
+	void EnableCheckboxes(UINT nUnthemedBitmapID, BOOL bEnable = TRUE);
+	void EnableImagePlaceholder(BOOL bEnable = TRUE);
 
 protected:
 	CToolTipCtrlEx m_tooltip;
 	CFontCache m_fonts;
 	CTreeCtrlHelper m_tch;
-	CImageList m_ilCheckboxes, m_ilIconPlaceholder;
+	CImageList m_ilCheckboxes, m_ilImagePlaceholder;
 
 	const CEnHeaderCtrl& m_header;
 	
@@ -121,8 +121,8 @@ public:
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
 	void SetFocus();
-	void ShowCheckboxes(UINT nUnthemedBitmapID, BOOL bShow = TRUE) { m_tree.ShowCheckboxes(nUnthemedBitmapID, bShow); }
-	void ShowIcons(BOOL bShow = TRUE) { m_tree.ShowIcons(bShow); }
+	void EnableCheckboxes(UINT nUnthemedBitmapID, BOOL bEnable = TRUE) { m_tree.EnableCheckboxes(nUnthemedBitmapID, bEnable); }
+	void EnableImagePlaceholder(BOOL bEnable = TRUE) { m_tree.EnableImagePlaceholder(bEnable); }
 
 	BOOL CanMoveItem(const TLCITEMMOVE& move) const;
 	BOOL MoveItem(const TLCITEMMOVE& move);
