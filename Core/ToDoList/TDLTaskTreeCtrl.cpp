@@ -1911,8 +1911,6 @@ HTREEITEM CTDLTaskTreeCtrl::MoveSelectionRaw(HTREEITEM htiDestParent, HTREEITEM 
 // External version - DON'T CALL INTERNALLY
 HTREEITEM CTDLTaskTreeCtrl::MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
 {
-	// prevent list updating until we have finished
-	CWaitCursor wait;
 	CAutoFlag af(m_bMovingItem, TRUE);
 
 	return MoveItemRaw(hti, htiDestParent, htiDestPrevSibling);
