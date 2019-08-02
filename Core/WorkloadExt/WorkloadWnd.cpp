@@ -118,6 +118,7 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_TLC_ITEMSELCHANGE, OnWorkloadNotifySelChange)
 	ON_REGISTERED_MESSAGE(RANGE_CHANGED, OnActiveDateRangeChange)
 
+	ON_REGISTERED_MESSAGE(WM_WLC_EDITTASKICON, OnWorkloadEditTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_WLC_EDITTASKTITLE, OnWorkloadEditTaskTitle)
 	ON_REGISTERED_MESSAGE(WM_WLC_EDITTASKALLOCATIONS, OnWorkloadEditTaskAllocations)
 	ON_REGISTERED_MESSAGE(WM_WLC_PREFSHELP, OnWorkloadPrefsHelp)
@@ -837,6 +838,11 @@ LRESULT CWorkloadWnd::OnWorkloadNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp)
 LRESULT CWorkloadWnd::OnWorkloadGetTaskIcon(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_GETTASKICON, wp, lp);
+}
+
+LRESULT CWorkloadWnd::OnWorkloadEditTaskIcon(WPARAM wp, LPARAM lp)
+{
+	return GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKICON, wp, lp);
 }
 
 LRESULT CWorkloadWnd::OnWorkloadMoveTask(WPARAM wp, LPARAM lp)

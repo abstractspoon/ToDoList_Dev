@@ -131,6 +131,7 @@ protected:
 	BOOL OnDragDropItem(const TLCITEMMOVE& move);
 	UINT OnDragOverItem(UINT nCursor);
 
+	BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);
 	BOOL OnItemCheckChange(HTREEITEM hti);
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	void OnListHeaderClick(NMHEADER* HDN);

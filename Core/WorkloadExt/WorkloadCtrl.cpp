@@ -1753,6 +1753,26 @@ void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	}
 }
 
+BOOL CWorkloadCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
+{
+	if (CTreeListCtrl::OnTreeLButtonUp(nFlags, point))
+		return TRUE;
+
+	// else
+	if (!m_bReadOnly)
+	{
+		HTREEITEM hti = m_tree.HitTest(point, &nFlags);
+
+		if (nFlags & TVHT_ONITEMICON)
+			CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
+
+		return TRUE; // eat
+	}
+
+	// not handled
+	return FALSE;
+}
+
 UINT CWorkloadCtrl::OnDragOverItem(UINT nCursor)
 {
 	// We currently DON'T support 'linking'
@@ -1842,10 +1862,19 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			if (!m_bReadOnly)
 			{
 				CPoint ptCursor(GetMessagePos());
-				DWORD dwTaskID = TreeHitTestTask(ptCursor, TRUE);
+				m_tree.ScreenToClient(&ptCursor);
 
-				if (dwTaskID && m_data.ItemIsLocked(dwTaskID))
-					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				UINT nFlags = 0;
+				HTREEITEM htiHit = m_tree.HitTest(ptCursor, &nFlags);
+
+				if (htiHit)
+				{
+					if (m_data.ItemIsLocked(m_tree.GetItemData(htiHit)))
+						return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+
+					if (nFlags & TVHT_ONITEMICON)
+						return GraphicsMisc::SetHandCursor();
+				}
 			}
 			break;
 		}

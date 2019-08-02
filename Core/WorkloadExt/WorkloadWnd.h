@@ -135,6 +135,7 @@ protected:
 	afx_msg LRESULT OnWorkloadNotifySelChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnActiveDateRangeChange(WPARAM wp, LPARAM lp);
 
+	afx_msg LRESULT OnWorkloadEditTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadEditTaskTitle(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadPrefsHelp(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadGetTaskIcon(WPARAM wp, LPARAM lp);
