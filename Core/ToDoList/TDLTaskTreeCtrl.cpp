@@ -1834,7 +1834,7 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
 	return TRUE;
 }
 
-// External version - DON'T CALL INTERNALLY
+// External version - DON'T CALL INTERNALLY - Except from above
 BOOL CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, BOOL bEnsureVisible)
 {
 	{
