@@ -156,6 +156,7 @@ protected:
 	int GetRequiredListColumnCount() const;
 	void RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	BOOL RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CDWordSet& mapIDs);
+	void UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
 	void RecalcAllocationTotals();
 	void RecalcDataDateRange();

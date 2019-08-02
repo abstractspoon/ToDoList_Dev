@@ -409,8 +409,12 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		break;
 		
 	case IUI_DELETE:
-		CWnd::SetRedraw(FALSE);
-		RemoveDeletedTasks(pTasks);
+		{
+			CHoldRedraw hr(GetHwnd());
+
+			RemoveDeletedTasks(pTasks);
+			UpdateParentStatus(pTasks, pTasks->GetFirstTask(), TRUE);
+		}
 		break;
 		
 	default:
@@ -842,6 +846,36 @@ BOOL CWorkloadCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTask
 	}
 
 	return bSomeRemoved;
+}
+
+void CWorkloadCtrl::UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
+{
+	if (hTask == NULL)
+		return;
+
+	// this task
+	DWORD dwTaskID = pTasks->GetTaskID(hTask);
+
+	WORKLOADITEM* pWI = NULL;
+	GET_WI(dwTaskID, pWI);
+
+	pWI->bParent = pTasks->IsTaskParent(hTask);
+
+	// children
+	UpdateParentStatus(pTasks, pTasks->GetFirstTask(hTask), TRUE);
+
+	// handle siblings WITHOUT RECURSION
+	if (bAndSiblings)
+	{
+		HTASKITEM hSibling = pTasks->GetNextTask(hTask);
+
+		while (hSibling)
+		{
+			// FALSE == not siblings
+			UpdateParentStatus(pTasks, hSibling, FALSE);
+			hSibling = pTasks->GetNextTask(hSibling);
+		}
+	}
 }
 
 WORKLOADITEM* CWorkloadCtrl::GetWorkloadItem(DWORD dwTaskID, BOOL bCopyRefID) const
