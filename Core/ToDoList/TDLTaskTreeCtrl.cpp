@@ -1854,6 +1854,8 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestP
 		TSH().SetAnchor(htiFirst);
 		TCH().SelectItem(htiFirst);
 
+		ResyncSelection(m_lcColumns, m_tcTasks, FALSE);
+
 		// make sure first moved item is visible
 		if (bEnsureVisible)
 		{
