@@ -3578,7 +3578,6 @@ void CTDLTaskCtrlBase::RepackageAndSendToParent(UINT msg, WPARAM /*wp*/, LPARAM 
 	}
 }
 
-// messages and notifications sent to m_lcColumns 
 LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (!IsResyncEnabled())
