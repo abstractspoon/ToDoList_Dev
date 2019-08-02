@@ -1515,11 +1515,12 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			COLORREF crBack = GetRowColor(nItem);
 			pLVCD->clrTextBk = pLVCD->clrText = crBack;
 			
-			GraphicsMisc::FillItemRect(pDC, rItem, crBack, m_list);
+			CRect rFullWidth(rItem);
+			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_list);
 
-			DrawItemDivider(pDC, rItem, FALSE, FALSE);
+			DrawItemDivider(pDC, rFullWidth, FALSE, FALSE);
 			
-			// draw background
+			// draw selection rect only as far as the last column
 			GM_ITEMSTATE nState = GetItemState(nItem);
 			BOOL bSelected = (nState != GMIS_NONE);
 			DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_CLIPLEFT);
