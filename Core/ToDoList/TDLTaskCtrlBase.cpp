@@ -5679,25 +5679,29 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCost(TDCCOST& cost) const
 	{
 		// get first item's value as initial
 		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		VERIFY(m_data.GetTaskCost(dwTaskID, cost));
-		
-		while (pos)
+		if (pos)
 		{
-			dwTaskID = GetNextSelectedTaskID(pos);
+			DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-			TDCCOST taskCost;
-			VERIFY(m_data.GetTaskCost(dwTaskID, taskCost));
-
-			if (!(cost == taskCost))
+			VERIFY(m_data.GetTaskCost(dwTaskID, cost));
+		
+			while (pos)
 			{
-				cost.dAmount = 0.0;
-				cost.bIsRate = FALSE;
-			}
-		}
+				dwTaskID = GetNextSelectedTaskID(pos);
 
-		return TRUE;
+				TDCCOST taskCost;
+				VERIFY(m_data.GetTaskCost(dwTaskID, taskCost));
+
+				if (!(cost == taskCost))
+				{
+					cost.dAmount = 0.0;
+					cost.bIsRate = FALSE;
+				}
+			}
+
+			return TRUE;
+		}
 	}
 	
 	return FALSE;
