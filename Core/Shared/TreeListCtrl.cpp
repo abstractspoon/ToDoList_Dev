@@ -393,19 +393,21 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 	BOOL bWasVisible = IsTreeItemVisible(m_tree, hti);
 
 	SelectTreeItem(hti, FALSE);
-	ResyncSelection(m_list, m_tree, FALSE);
 
 	if (!bWasVisible)
 		ExpandList();
 
 #ifdef _DEBUG
-	POSITION pos = m_list.GetFirstSelectedItemPosition();
-	ASSERT(pos);
+	if (CanResync())
+	{
+		POSITION pos = m_list.GetFirstSelectedItemPosition();
+		ASSERT(pos);
 
-	int nSel = m_list.GetNextSelectedItem(pos);
-	ASSERT(nSel != -1);
+		int nSel = m_list.GetNextSelectedItem(pos);
+		ASSERT(nSel != -1);
 
-	ASSERT(m_list.GetItemData(nSel) == (DWORD)hti);
+		ASSERT(m_list.GetItemData(nSel) == (DWORD)hti);
+	}
 #endif
 
 	return TRUE;

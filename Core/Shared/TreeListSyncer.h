@@ -152,7 +152,7 @@ private:
 	HWND m_hwndIgnoreNcCalcSize;
 
 protected:
-	inline BOOL CanResync() const { return (IsResyncEnabled() && !m_bResyncing); }
+	inline BOOL CanResync() const { return (m_bResyncEnabled && !m_bResyncing); }
 	inline BOOL IsResyncEnabled() const { return m_bResyncEnabled; }
 	inline BOOL IsResyncing() const { return m_bResyncing; }
 
