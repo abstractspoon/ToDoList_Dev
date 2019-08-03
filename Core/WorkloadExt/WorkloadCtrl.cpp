@@ -2836,40 +2836,40 @@ DWORD CWorkloadCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	}
 
 	DWORD dwNextID(dwTaskID);
+	HTREEITEM htiNext = NULL;
 
 	switch (nCmd)
 	{
+	case IUI_GETNEXTTASK:
+		htiNext = m_tree.GetNextItem(hti, TVGN_NEXT);
+		break;
+		
+	case IUI_GETPREVTASK:
+		htiNext = m_tree.GetNextItem(hti, TVGN_PREVIOUS);
+		break;
+		
 	case IUI_GETNEXTVISIBLETASK:
-		{
-			HTREEITEM htiNext = TCH().GetNextVisibleItem(hti);
-			
-			if (htiNext)
-				dwNextID = GetTreeItemData(m_tree, htiNext);
-		}
+		htiNext = TCH().GetNextVisibleItem(hti);
 		break;
 		
 	case IUI_GETPREVVISIBLETASK:
-		{
-			HTREEITEM htiPrev = TCH().GetPrevVisibleItem(hti);
-			
-			if (htiPrev)
-				dwNextID = GetTreeItemData(m_tree, htiPrev);
-		}
+		htiNext = TCH().GetPrevVisibleItem(hti);
 		break;
 		
 	case IUI_GETNEXTTOPLEVELTASK:
+		htiNext = TCH().GetNextTopLevelItem(hti, TRUE);
+		break;
+
 	case IUI_GETPREVTOPLEVELTASK:
-		{
-			HTREEITEM htiNext = TCH().GetNextTopLevelItem(hti, (nCmd == IUI_GETNEXTTOPLEVELTASK));
-			
-			if (htiNext)
-				dwNextID = GetTreeItemData(m_tree, htiNext);
-		}
+		htiNext = TCH().GetNextTopLevelItem(hti, FALSE);
 		break;
 		
 	default:
 		ASSERT(0);
 	}
+			
+	if (htiNext)
+		dwNextID = GetTreeItemData(m_tree, htiNext);
 	
 	return dwNextID;
 }

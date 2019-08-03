@@ -52,8 +52,10 @@ namespace Abstractspoon
 				enum class GetTask
 				{ 
 					GetNextTask,		
+					GetNextVisibleTask,		
 					GetNextTopLevelTask,
 					GetPrevTask,		
+					GetPrevVisibleTask,
 					GetPrevTopLevelTask,
 				};
 

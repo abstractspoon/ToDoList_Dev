@@ -221,6 +221,8 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 
 	case IUI_GETNEXTTASK:
 	case IUI_GETPREVTASK:
+	case IUI_GETNEXTVISIBLETASK:
+	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTOPLEVELTASK:
 		if (pData)
@@ -273,6 +275,14 @@ DWORD CMindMapUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dw
 			getTask = UIExtension::GetTask::GetPrevTask;
 			break;
 
+		case IUI_GETNEXTVISIBLETASK:
+			getTask = UIExtension::GetTask::GetNextVisibleTask;
+			break;
+
+		case IUI_GETPREVVISIBLETASK:
+			getTask = UIExtension::GetTask::GetPrevVisibleTask;
+			break;
+
 		case IUI_GETNEXTTOPLEVELTASK:
 			getTask = UIExtension::GetTask::GetNextTopLevelTask;
 			break;
@@ -320,8 +330,8 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 			return m_wnd->CanMoveTask(pData->move.dwSelectedTaskID, pData->move.dwParentID, pData->move.dwAfterSiblingID);
 		break;
 
-	case IUI_GETNEXTTASK:
-	case IUI_GETPREVTASK:
+	case IUI_GETNEXTVISIBLETASK:
+	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTOPLEVELTASK:
 		if (pData)

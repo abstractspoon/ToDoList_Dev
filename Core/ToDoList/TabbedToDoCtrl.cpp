@@ -2631,6 +2631,7 @@ DWORD CTabbedToDoCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bE
 
 			switch (nNext)
 			{
+			case TTCNT_NEXT:
 			case TTCNT_NEXTVISIBLE:
 			case TTCNT_NEXTTOPLEVEL: // Look forwards
 				{
@@ -2656,6 +2657,7 @@ DWORD CTabbedToDoCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bE
 				}
 				break;
 				
+			case TTCNT_PREV:
 			case TTCNT_PREVVISIBLE:
 			case TTCNT_PREVTOPLEVEL: // look backwards
 				{
@@ -2744,9 +2746,12 @@ IUI_APPCOMMAND CTabbedToDoCtrl::MapGetNextToCommand(TTC_NEXTTASK nNext)
 {
 	switch (nNext)
 	{
-	case TTCNT_NEXTVISIBLE:			return IUI_GETNEXTVISIBLETASK;
+	case TTCNT_NEXT:			return IUI_GETNEXTTASK;
+	case TTCNT_NEXTVISIBLE:		return IUI_GETNEXTVISIBLETASK;
 	case TTCNT_NEXTTOPLEVEL:	return IUI_GETNEXTTOPLEVELTASK;
-	case TTCNT_PREVVISIBLE:			return IUI_GETPREVVISIBLETASK;
+
+	case TTCNT_PREV:			return IUI_GETPREVTASK;
+	case TTCNT_PREVVISIBLE:		return IUI_GETPREVVISIBLETASK;
 	case TTCNT_PREVTOPLEVEL:	return IUI_GETPREVTOPLEVELTASK;
 	}
 

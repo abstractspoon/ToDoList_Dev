@@ -192,6 +192,7 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 		break;
 
 	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
 		if (pData)
 		{
 			UInt32 taskID = pData->dwTaskID;
@@ -208,6 +209,7 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 		break;
 
 	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
 		if (pData)
 		{
 			UInt32 taskID = pData->dwTaskID;
@@ -250,8 +252,8 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 	case IUI_SETFOCUS:
 		return !m_wnd->Focused;
 
-	case IUI_GETNEXTTASK:
-	case IUI_GETPREVTASK:
+	case IUI_GETNEXTVISIBLETASK:
+	case IUI_GETPREVVISIBLETASK:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
