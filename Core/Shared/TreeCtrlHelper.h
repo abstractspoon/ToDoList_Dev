@@ -178,6 +178,7 @@ public:
 	TCH_CHECK GetItemCheckState(HTREEITEM hti) const;
 
 	BOOL SelectItem(HTREEITEM hti); // won't auto edit if item already selected
+	BOOL IsSelectedItem(HTREEITEM hti) const;
 	inline void EndLabelEdit(BOOL bCancel) { SendMessage(m_tree, TVM_ENDEDITLABELNOW, bCancel, 0); }
 
 	BOOL InvalidateItem(HTREEITEM hti, BOOL bChildren = TRUE);

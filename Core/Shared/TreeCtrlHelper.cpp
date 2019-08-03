@@ -150,12 +150,12 @@ CTreeCtrlHelper::~CTreeCtrlHelper()
 
 BOOL CTreeCtrlHelper::SelectItem(HTREEITEM hti)
 {
+	// Don't double-select -> triggers label edit
+	if (IsSelectedItem(hti))
+		return FALSE;
+
 	// save restore focus if setting to NULL
 	CWnd* pFocus = (hti ? NULL : CWnd::GetFocus());
-
-	// won't auto edit if item already selected
-	if (hti && m_tree.GetSelectedItem() == hti)
-		return FALSE;
 
 	m_tree.SelectItem(hti);
 
@@ -164,6 +164,11 @@ BOOL CTreeCtrlHelper::SelectItem(HTREEITEM hti)
 		pFocus->PostMessage(WM_SETFOCUS);
 
 	return TRUE;
+}
+
+BOOL CTreeCtrlHelper::IsSelectedItem(HTREEITEM hti) const
+{
+	return (hti && m_tree.GetSelectedItem() == hti);
 }
 
 int CTreeCtrlHelper::GetItemHeight(HTREEITEM hti)
