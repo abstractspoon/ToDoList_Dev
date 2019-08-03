@@ -381,7 +381,7 @@ protected:
 
 	int CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
 	void RecalcUntrackedColumnWidths(BOOL bCustomOnly);
-	void RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers);
+	void RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers = FALSE, BOOL bCustomOnly = FALSE);
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);
 	BOOL GetColumnOrder(CDWordArray& aColumns) const;

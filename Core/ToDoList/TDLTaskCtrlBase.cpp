@@ -449,7 +449,7 @@ void CTDLTaskCtrlBase::SetNextUniqueTaskID(DWORD dwTaskID)
 		m_dwNextUniqueTaskID = dwTaskID;
 
 		if (GetSafeHwnd())
-			RecalcUntrackedColumnWidths(CTDCColumnIDMap(TDCC_ID), FALSE);
+			RecalcUntrackedColumnWidths(CTDCColumnIDMap(TDCC_ID));
 	}
 }
 
@@ -729,7 +729,7 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChange
 	if (mapChanges.Has(TDCC_ICON) || mapChanges.Has(TDCC_DONE))
 		OnImageListChange();
 
-	RecalcUntrackedColumnWidths(mapChanges, FALSE);
+	RecalcUntrackedColumnWidths(mapChanges);
 
 	if (m_bAutoFitSplitter)
 		AdjustSplitterToFitAttributeColumns();
@@ -1008,16 +1008,13 @@ void CTDLTaskCtrlBase::RecalcAllColumnWidths()
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()
 {
-	if (!m_bEnableRecalcColumns)
-		return;
-
-	VERIFY(m_ilFileRef.Initialize());
-
-	RecalcUntrackedColumnWidths(FALSE); // Standard and Custom cols
+	if (m_bEnableRecalcColumns)
+		RecalcUntrackedColumnWidths(FALSE); // Standard and Custom cols
 }
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 {
+
 	// Get a list of all the visible column attributes
 	CTDCColumnIDMap mapCols;
 
@@ -1026,11 +1023,14 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 	
 	CTDCCustomAttributeHelper::GetVisibleColumnIDs(m_aCustomAttribDefs, mapCols, TRUE); // append
 
-	RecalcUntrackedColumnWidths(mapCols, TRUE);
+	RecalcUntrackedColumnWidths(mapCols, TRUE, bCustomOnly);
 }
 
-void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers)
+void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers, BOOL bCustomOnly)
 {
+	if (!bZeroOthers && !aColIDs.GetCount())
+		return;
+
 	// Weed out all the tracked columns
 	CTDCColumnIDMap mapCols(aColIDs);
 	int nNumCols = m_hdrColumns.GetItemCount();
@@ -1044,11 +1044,13 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 		}
 	}
 
-	if (aColIDs.GetCount() == 0)
+	if (!bZeroOthers && !aColIDs.GetCount())
 		return;
 
 	CHoldRedraw hr(m_lcColumns);
 	CClientDC dc(&m_lcColumns);
+
+	VERIFY(m_ilFileRef.Initialize());
 
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
 	BOOL bVisibleTasksOnly = IsTreeList();
@@ -1100,6 +1102,10 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 				}
 			}
 			else if (!bZeroOthers || m_hdrColumns.IsItemTracked(nItem))
+			{
+				continue;
+			}
+			else if (bCustomOnly && !CTDCCustomAttributeHelper::IsCustomColumn(nColID))
 			{
 				continue;
 			}
@@ -4278,9 +4284,12 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 	case TDCA_ARCHIVE:
 	case TDCA_UNDO:
 	case TDCA_NEWTASK:
+		aColIDs.Copy(m_mapVisibleCols);
+		break;
+
 	case TDCA_CUSTOMATTRIB:
 	case TDCA_CUSTOMATTRIBDEFS:
-		aColIDs.Copy(m_mapVisibleCols);
+		// Handled in OnCustomAttributeChange
 		break;
 		
 	case TDCA_NONE:
@@ -4297,7 +4306,7 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 		break;
 	}
 
-	RecalcUntrackedColumnWidths(aColIDs, FALSE);
+	RecalcUntrackedColumnWidths(aColIDs);
 	
 	if (bRedrawTasks)
 	{
