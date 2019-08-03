@@ -7497,17 +7497,7 @@ void CToDoListWnd::OnUpdateArchiveSelectedCompletedTasks(CCmdUI* pCmdUI)
 	pCmdUI->Enable(!tdc.IsReadOnly() && !tdc.IsArchive() && !tdc.IsArchive());
 }
 
-void CToDoListWnd::OnMovetaskdown() 
-{
-	GetToDoCtrl().MoveSelectedTask(TDCM_DOWN);	
-}
-
-void CToDoListWnd::OnUpdateMovetaskdown(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().CanMoveSelectedTask(TDCM_DOWN));	
-}
-
-void CToDoListWnd::OnMovetaskup() 
+void CToDoListWnd::DoMoveTask(TDC_MOVETASK nDirection)
 {
 	// DEBUGGING /////////////////////////////////////////////////////////
 	static DWORD dwLastTick = GetTickCount();
@@ -7523,9 +7513,26 @@ void CToDoListWnd::OnMovetaskup()
 #endif
 
 	dwLastTick = GetTickCount();
+
+	CScopedLogTimer log(_T("CToDoCtrl::MoveSelectedTask()"));
 	//////////////////////////////////////////////////////////////////////
 
-	GetToDoCtrl().MoveSelectedTask(TDCM_UP);	
+	GetToDoCtrl().MoveSelectedTask(nDirection);
+}
+
+void CToDoListWnd::OnMovetaskdown()
+{
+	DoMoveTask(TDCM_DOWN);
+}
+
+void CToDoListWnd::OnUpdateMovetaskdown(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().CanMoveSelectedTask(TDCM_DOWN));
+}
+
+void CToDoListWnd::OnMovetaskup() 
+{
+	DoMoveTask(TDCM_UP);	
 }
 
 void CToDoListWnd::OnUpdateMovetaskup(CCmdUI* pCmdUI) 
@@ -7535,7 +7542,7 @@ void CToDoListWnd::OnUpdateMovetaskup(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnMovetaskright() 
 {
-	GetToDoCtrl().MoveSelectedTask(TDCM_RIGHT);	
+	DoMoveTask(TDCM_RIGHT);
 }
 
 void CToDoListWnd::OnUpdateMovetaskright(CCmdUI* pCmdUI) 
@@ -7545,7 +7552,7 @@ void CToDoListWnd::OnUpdateMovetaskright(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnMovetaskleft() 
 {
-	GetToDoCtrl().MoveSelectedTask(TDCM_LEFT);	
+	DoMoveTask(TDCM_LEFT);
 }
 
 void CToDoListWnd::OnUpdateMovetaskleft(CCmdUI* pCmdUI) 
