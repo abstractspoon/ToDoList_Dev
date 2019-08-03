@@ -2597,10 +2597,10 @@ DWORD CTabbedToDoCtrl::GetNextNonSelectedTaskID() const
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_NEXT, TRUE);
+			dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_NEXTVISIBLE, TRUE);
 
 			if (!dwNextSelID)
-				dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_PREV, TRUE);
+				dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_PREVVISIBLE, TRUE);
 		}
 		break;
 	}
@@ -2631,7 +2631,7 @@ DWORD CTabbedToDoCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bE
 
 			switch (nNext)
 			{
-			case TTCNT_NEXT:
+			case TTCNT_NEXTVISIBLE:
 			case TTCNT_NEXTTOPLEVEL: // Look forwards
 				{
 					BOOL bTopLevelOnly = (nNext == TTCNT_NEXTTOPLEVEL);
@@ -2656,7 +2656,7 @@ DWORD CTabbedToDoCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bE
 				}
 				break;
 				
-			case TTCNT_PREV:
+			case TTCNT_PREVVISIBLE:
 			case TTCNT_PREVTOPLEVEL: // look backwards
 				{
 					BOOL bTopLevelOnly = (nNext == TTCNT_PREVTOPLEVEL);
@@ -2744,9 +2744,9 @@ IUI_APPCOMMAND CTabbedToDoCtrl::MapGetNextToCommand(TTC_NEXTTASK nNext)
 {
 	switch (nNext)
 	{
-	case TTCNT_NEXT:			return IUI_GETNEXTVISIBLETASK;
+	case TTCNT_NEXTVISIBLE:			return IUI_GETNEXTVISIBLETASK;
 	case TTCNT_NEXTTOPLEVEL:	return IUI_GETNEXTTOPLEVELTASK;
-	case TTCNT_PREV:			return IUI_GETPREVVISIBLETASK;
+	case TTCNT_PREVVISIBLE:			return IUI_GETPREVVISIBLETASK;
 	case TTCNT_PREVTOPLEVEL:	return IUI_GETPREVTOPLEVELTASK;
 	}
 
@@ -4806,7 +4806,7 @@ BOOL CTabbedToDoCtrl::GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nD
 	case TDCM_DOWN:
 		{
 			dwDestParentID = GetSelectedTaskParentID();
-			dwDestPrevSiblingID = GetNextTaskID(dwSelTaskID, TTCNT_NEXT, TRUE);
+			dwDestPrevSiblingID = GetNextTaskID(dwSelTaskID, TTCNT_NEXTVISIBLE, TRUE);
 
 			if (!ValidatePreviousSiblingTaskID(dwSelTaskID, dwDestPrevSiblingID))
 				return FALSE;
@@ -4816,7 +4816,7 @@ BOOL CTabbedToDoCtrl::GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nD
 	case TDCM_UP:
 		{
 			dwDestParentID = GetSelectedTaskParentID();
-			dwDestPrevSiblingID = GetNextTaskID(dwSelTaskID, TTCNT_PREV, TRUE);
+			dwDestPrevSiblingID = GetNextTaskID(dwSelTaskID, TTCNT_PREVVISIBLE, TRUE);
 
 			// Can't be parent because we need to look two tasks above
 			if (dwDestPrevSiblingID == dwDestParentID)
@@ -4825,7 +4825,7 @@ BOOL CTabbedToDoCtrl::GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nD
 			if (!ValidatePreviousSiblingTaskID(dwSelTaskID, dwDestPrevSiblingID))
 				return FALSE;
 
-			dwDestPrevSiblingID = GetNextTaskID(dwDestPrevSiblingID, TTCNT_PREV, TRUE);
+			dwDestPrevSiblingID = GetNextTaskID(dwDestPrevSiblingID, TTCNT_PREVVISIBLE, TRUE);
 
 			// If this is the parent task we set the sibling to zero
 			// so that the task is added to the top
@@ -4922,10 +4922,10 @@ CTabbedToDoCtrl::TTC_NEXTTASK CTabbedToDoCtrl::MapGotoToGetNext(TDC_GOTO nDirect
 	switch (nDirection)
 	{
 	case TDCG_NEXT:
-		return (bTopLevel ? TTCNT_NEXTTOPLEVEL : TTCNT_NEXT);
+		return (bTopLevel ? TTCNT_NEXTTOPLEVEL : TTCNT_NEXTVISIBLE);
 
 	case TDCG_PREV:
-		return (bTopLevel ? TTCNT_PREVTOPLEVEL : TTCNT_PREV);
+		return (bTopLevel ? TTCNT_PREVTOPLEVEL : TTCNT_PREVVISIBLE);
 	}
 
 	ASSERT(0);
