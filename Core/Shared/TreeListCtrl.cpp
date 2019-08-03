@@ -391,15 +391,21 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 		return FALSE;
 
 	BOOL bWasVisible = IsTreeItemVisible(m_tree, hti);
+	BOOL bWasSelected = TCH().IsSelectedItem(hti);
 
 	SelectTreeItem(hti, FALSE);
 
 	if (!bWasVisible)
 		ExpandList();
 
-#ifdef _DEBUG
 	if (CanResync())
 	{
+		// If the item is already selected then we won't get a
+		// notification with which to resync the list selection
+		if (bWasSelected)
+			ResyncSelection(m_list, m_tree, FALSE);
+
+#ifdef _DEBUG
 		POSITION pos = m_list.GetFirstSelectedItemPosition();
 		ASSERT(pos);
 
@@ -407,8 +413,8 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 		ASSERT(nSel != -1);
 
 		ASSERT(m_list.GetItemData(nSel) == (DWORD)hti);
-	}
 #endif
+	}
 
 	return TRUE;
 }
