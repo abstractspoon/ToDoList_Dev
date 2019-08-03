@@ -6196,7 +6196,7 @@ DWORD CGanttCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 
 	switch (nCmd)
 	{
-	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
 		{
 			HTREEITEM htiNext = TCH().GetNextVisibleItem(hti);
 			
@@ -6205,7 +6205,7 @@ DWORD CGanttCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 		}
 		break;
 		
-	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
 		{
 			HTREEITEM htiPrev = TCH().GetPrevVisibleItem(hti);
 			

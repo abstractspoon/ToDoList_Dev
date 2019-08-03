@@ -2521,7 +2521,7 @@ DWORD CKanbanCtrl::HitTestTask(const CPoint& ptScreen) const
 
 DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
-	BOOL bForward = ((nCmd == IUI_GETPREVTASK) || (nCmd == IUI_GETPREVTOPLEVELTASK));
+	BOOL bForward = ((nCmd == IUI_GETPREVVISIBLETASK) || (nCmd == IUI_GETPREVTOPLEVELTASK));
 
 	HTREEITEM hti = NULL;
 	const CKanbanColumnCtrl* pCol = LocateTask(dwTaskID, hti, bForward);
@@ -2538,11 +2538,11 @@ DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 
 	switch (nCmd)
 	{
-	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
 		hti = pCol->GetNextSiblingItem(hti);
 		break;
 
-	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
 		hti = pCol->GetPrevSiblingItem(hti);
 		break;
 
