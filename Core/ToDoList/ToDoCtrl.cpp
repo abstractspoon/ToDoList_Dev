@@ -7627,8 +7627,7 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 {
 	if (!CanMoveSelectedTask(nDirection))
 		return FALSE;
-	
-	// else
+
 	Flush(); // end any editing action
 	SetFocusToTasks(); // else datetime controls get their focus screwed
 
@@ -7644,9 +7643,7 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	if (!m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
 		return FALSE;
 
-	CLockUpdates lu(*this);
- 	HOLD_REDRAW(*this, m_taskTree);
-	
+	// Move the associated tree items
 	m_taskTree.MoveSelection(nDirection);
 
 	// refresh parent states if moving to the right (adding subtasks)

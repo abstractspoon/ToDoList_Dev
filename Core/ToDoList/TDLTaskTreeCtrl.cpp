@@ -1838,7 +1838,8 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
 BOOL CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, BOOL bEnsureVisible)
 {
 	CAutoFlag af(m_bMovingItem, TRUE);
-	// No 'hold redraw' needed here
+	CLockUpdates lu(*this);
+	CHoldRedraw hr(*this);
 
 	CHTIList moved;
 	HTREEITEM htiFirst = MoveSelectionRaw(htiDestParent, htiDestPrevSibling, moved);
@@ -1852,8 +1853,6 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestP
 	TSH().SetItems(moved, TSHS_SELECT, FALSE);
 	TSH().SetAnchor(htiFirst);
 	TCH().SelectItem(htiFirst);
-
-	SyncColumnSelectionToTasks();
 
 	// make sure first moved item is visible
 	if (bEnsureVisible)
