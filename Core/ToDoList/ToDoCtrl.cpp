@@ -7628,18 +7628,10 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	if (!CanMoveSelectedTask(nDirection))
 		return FALSE;
 	
-	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTimer log(_T("CToDoCtrl::MoveSelectedTask()"));
-	log.LogStart();
-	///////////////////////////////////////////////////////////////////
-
 	// else
 	Flush(); // end any editing action
 	SetFocusToTasks(); // else datetime controls get their focus screwed
 
-	log.LogTimeElapsed(_T("Flush&SetFocusToTasks"));
-
-	// do the move
 	// move the tasks
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 
@@ -7652,14 +7644,10 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	if (!m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
 		return FALSE;
 
-	log.LogTimeElapsed(_T("m_data.MoveTasks"));
-
 	CLockUpdates lu(*this);
  	HOLD_REDRAW(*this, m_taskTree);
 	
 	m_taskTree.MoveSelection(nDirection);
-
-	log.LogTimeElapsed(_T("m_taskTree.MoveSelection"));
 
 	// refresh parent states if moving to the right (adding subtasks)
 	if (nDirection == TDCM_RIGHT)
@@ -7669,8 +7657,6 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 		SetModified(TDCA_POSITION_SAMEPARENT);
 	else
 		SetModified(TDCA_POSITION_DIFFERENTPARENT);
-
-	log.LogTimeElapsed(_T("SetModified"));
 
 	return TRUE;
 }
