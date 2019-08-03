@@ -1825,10 +1825,15 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
 		return FALSE;
 
 	// if moving up or down make sure we scroll ahead a bit
-	if ((nDirection == TDCM_UP) || (nDirection == TDCM_DOWN))
+	switch (nDirection)
 	{
-		if (!TCH().SetMinDistanceToEdge(TSH().GetFirstItem(), TCHE_TOP, 2))
-			TCH().SetMinDistanceToEdge(TSH().GetLastItem(), TCHE_BOTTOM, 2);
+	case TDCM_UP:
+		TCH().SetMinDistanceToEdge(TSH().GetFirstItem(), TCHE_TOP, 2);
+		break;
+
+	case TDCM_DOWN:
+		TCH().SetMinDistanceToEdge(TSH().GetLastItem(), TCHE_BOTTOM, 2);
+		break;
 	}
 
 	return TRUE;

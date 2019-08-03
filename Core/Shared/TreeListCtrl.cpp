@@ -1920,7 +1920,9 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 
 	HTREEITEM htiSel = ((move.htiSel == NULL) ? GetSelectedItem() : move.htiSel);
 	HTREEITEM htiAfter = ((move.htiDestAfterSibling == NULL) ? TVI_FIRST : move.htiDestAfterSibling);
+
 	BOOL bSameParent = (move.htiDestParent == m_tree.GetParentItem(htiSel));
+	int nPrevPos = TCH().GetItemTop(htiSel);
 
 	HTREEITEM htiNew = NULL;
 	{
@@ -1939,9 +1941,16 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 
 		if (bSameParent)
 		{
-			// if moving up or down make sure we scroll ahead a bit
- 			if (!TCH().SetMinDistanceToEdge(htiNew, TCHE_TOP, 2))
- 				TCH().SetMinDistanceToEdge(htiNew, TCHE_BOTTOM, 2);
+			int nNewPos = TCH().GetItemTop(htiNew);
+
+			if (nNewPos < nPrevPos)
+			{
+				TCH().SetMinDistanceToEdge(htiNew, TCHE_TOP, 2);
+			}
+			else if (nNewPos > nPrevPos)
+			{
+				TCH().SetMinDistanceToEdge(htiNew, TCHE_BOTTOM, 2);
+			}
 		}
 
 		return TRUE;

@@ -537,15 +537,10 @@ int CTreeSelectionHelper::BuildSortArray(const CHTIList& selection, CSortArray& 
 
 	while (pos)
 	{
-		HTREEITEM hti = selection.GetNext(pos);
+		SORTITEM& si = aItems[nItem++];
 
-		CRect rItem;
-		VERIFY(m_tree.GetItemRect(hti, rItem, FALSE));
-
-		aItems[nItem].hti = hti;
-		aItems[nItem].nPos = rItem.top;
-
-		nItem++;
+		si.hti = selection.GetNext(pos);
+		si.nPos = m_tch.GetItemTop(si.hti);
 	}
 
 	return aItems.GetSize();

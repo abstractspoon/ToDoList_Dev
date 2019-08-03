@@ -183,7 +183,7 @@ public:
 
 	BOOL InvalidateItem(HTREEITEM hti, BOOL bChildren = TRUE);
 	void GetClientRect(LPRECT lpRect, HTREEITEM htiFrom);
-	int GetItemHeight(HTREEITEM hti = NULL);
+	int GetItemTop(HTREEITEM hti) const;
 
 	int GetItemPos(HTREEITEM hti, HTREEITEM htiParent);
 	int GetItemLevel(HTREEITEM hti);

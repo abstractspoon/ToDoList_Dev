@@ -171,22 +171,15 @@ BOOL CTreeCtrlHelper::IsSelectedItem(HTREEITEM hti) const
 	return (hti && m_tree.GetSelectedItem() == hti);
 }
 
-int CTreeCtrlHelper::GetItemHeight(HTREEITEM hti)
+int CTreeCtrlHelper::GetItemTop(HTREEITEM hti) const
 {
-	if (m_tree.GetSafeHwnd())
-	{
-		if (hti == NULL)
-			hti = m_tree.GetChildItem(NULL);
-	}
-
-	if (hti == NULL)
-		return 16;
-
-	// else
 	CRect rItem;
-	m_tree.GetItemRect(hti, rItem, FALSE);
+	
+	if (m_tree.GetItemRect(hti, rItem, FALSE))
+		return rItem.top;
 
-	return rItem.Height();
+	ASSERT(0);
+	return 0;
 }
 
 int CTreeCtrlHelper::GetItemPos(HTREEITEM hti, HTREEITEM htiParent)
