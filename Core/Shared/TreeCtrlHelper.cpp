@@ -768,7 +768,7 @@ int CTreeCtrlHelper::GetDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge) cons
 	return 0;
 }
 
-void CTreeCtrlHelper::SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, int nItems)
+BOOL CTreeCtrlHelper::SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, int nItems)
 {
 	switch (nToEdge)
 	{
@@ -776,10 +776,15 @@ void CTreeCtrlHelper::SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, 
 		{
 			int nBorder = GetDistanceToEdge(htiFrom, TCHE_BOTTOM);
 
-			while (nBorder < nItems)
+			if (nBorder < nItems)
 			{
-				m_tree.SendMessage(WM_VSCROLL, SB_LINEDOWN);
-				nBorder++;
+				while (nBorder < nItems)
+				{
+					m_tree.SendMessage(WM_VSCROLL, SB_LINEDOWN);
+					nBorder++;
+				}
+
+				return TRUE;
 			}
 		}
 		break;
@@ -788,14 +793,22 @@ void CTreeCtrlHelper::SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, 
 		{
 			int nBorder = GetDistanceToEdge(htiFrom, TCHE_TOP);
 
-			while (nBorder < nItems)
+			if (nBorder < nItems)
 			{
-				m_tree.SendMessage(WM_VSCROLL, SB_LINEUP);
-				nBorder++;
+				while (nBorder < nItems)
+				{
+					m_tree.SendMessage(WM_VSCROLL, SB_LINEUP);
+					nBorder++;
+				}
+
+				return TRUE;
 			}
 		}
 		break;
 	}
+
+	// else no change
+	return FALSE;
 }
 
 HTREEITEM CTreeCtrlHelper::GetNextPageVisibleItem(HTREEITEM hti) const

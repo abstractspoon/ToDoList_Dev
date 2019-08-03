@@ -592,13 +592,15 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 			return SelectTask(pData->dwTaskID);
 		break;
 		
+	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
+	case IUI_GETPREVTASK:
 	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETPREVTOPLEVELTASK:
 		if (pData)
 		{
-			DWORD dwNextID =  m_ctrlGantt.GetNextTask(pData->dwTaskID, nCmd);
+			DWORD dwNextID = m_ctrlGantt.GetNextTask(pData->dwTaskID, nCmd);
 			
 			if (dwNextID && (dwNextID != pData->dwTaskID))
 			{

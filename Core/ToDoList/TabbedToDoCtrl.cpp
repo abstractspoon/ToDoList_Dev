@@ -4811,7 +4811,7 @@ BOOL CTabbedToDoCtrl::GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nD
 	case TDCM_DOWN:
 		{
 			dwDestParentID = GetSelectedTaskParentID();
-			dwDestPrevSiblingID = GetNextTaskID(dwSelTaskID, TTCNT_NEXTVISIBLE, TRUE);
+			dwDestPrevSiblingID = GetNextTaskID(dwSelTaskID, TTCNT_NEXT, TRUE);
 
 			if (!ValidatePreviousSiblingTaskID(dwSelTaskID, dwDestPrevSiblingID))
 				return FALSE;
@@ -4821,7 +4821,7 @@ BOOL CTabbedToDoCtrl::GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nD
 	case TDCM_UP:
 		{
 			dwDestParentID = GetSelectedTaskParentID();
-			dwDestPrevSiblingID = GetNextTaskID(dwSelTaskID, TTCNT_PREVVISIBLE, TRUE);
+			dwDestPrevSiblingID = GetNextTaskID(dwSelTaskID, TTCNT_PREV, TRUE);
 
 			// Can't be parent because we need to look two tasks above
 			if (dwDestPrevSiblingID == dwDestParentID)
@@ -4830,7 +4830,7 @@ BOOL CTabbedToDoCtrl::GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nD
 			if (!ValidatePreviousSiblingTaskID(dwSelTaskID, dwDestPrevSiblingID))
 				return FALSE;
 
-			dwDestPrevSiblingID = GetNextTaskID(dwDestPrevSiblingID, TTCNT_PREVVISIBLE, TRUE);
+			dwDestPrevSiblingID = GetNextTaskID(dwDestPrevSiblingID, TTCNT_PREV, TRUE);
 
 			// If this is the parent task we set the sibling to zero
 			// so that the task is added to the top

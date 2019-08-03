@@ -1822,12 +1822,10 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
 	if (!MoveSelection(htiDestParent, htiDestAfter, FALSE))
 		return FALSE;
 
-	if (nDirection == TDCM_UP || nDirection == TDCM_DOWN)
+	// if moving up or down make sure we scroll ahead a bit
+	if ((nDirection == TDCM_UP) || (nDirection == TDCM_DOWN))
 	{
-		// if moving up or down make sure we scroll ahead a bit
-		TCH().SetMinDistanceToEdge(TSH().GetFirstItem(), TCHE_TOP, 2);
-		
-		if (GetSelectedCount() > 1)
+		if (!TCH().SetMinDistanceToEdge(TSH().GetFirstItem(), TCHE_TOP, 2))
 			TCH().SetMinDistanceToEdge(TSH().GetLastItem(), TCHE_BOTTOM, 2);
 	}
 
@@ -1837,31 +1835,29 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
 // External version - DON'T CALL INTERNALLY - Except from above
 BOOL CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, BOOL bEnsureVisible)
 {
+	CAutoFlag af(m_bMovingItem, TRUE);
+	// No 'hold redraw' needed here
+
+	CHTIList moved;
+	HTREEITEM htiFirst = MoveSelectionRaw(htiDestParent, htiDestPrevSibling, moved);
+
+	if (htiFirst == NULL)
 	{
-		CAutoFlag af(m_bMovingItem, TRUE);
-		// No 'hold redraw' needed here
+		ASSERT(0);
+		return FALSE;
+	}
 
-		CHTIList moved;
-		HTREEITEM htiFirst = MoveSelectionRaw(htiDestParent, htiDestPrevSibling, moved);
+	TSH().SetItems(moved, TSHS_SELECT, FALSE);
+	TSH().SetAnchor(htiFirst);
+	TCH().SelectItem(htiFirst);
 
-		if (htiFirst == NULL)
-		{
-			ASSERT(0);
-			return FALSE;
-		}
+	ResyncSelection(m_lcColumns, m_tcTasks, FALSE);
 
-		TSH().SetItems(moved, TSHS_SELECT, FALSE);
-		TSH().SetAnchor(htiFirst);
-		TCH().SelectItem(htiFirst);
-
-		ResyncSelection(m_lcColumns, m_tcTasks, FALSE);
-
-		// make sure first moved item is visible
-		if (bEnsureVisible)
-		{
-			CHoldHScroll hhs(m_tcTasks);
-			TCH().EnsureItemVisible(htiFirst, FALSE, FALSE);
-		}
+	// make sure first moved item is visible
+	if (bEnsureVisible)
+	{
+		CHoldHScroll hhs(m_tcTasks);
+		TCH().EnsureItemVisible(htiFirst, FALSE, FALSE);
 	}
 
 	// No need to notify parent of selection change

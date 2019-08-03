@@ -398,6 +398,16 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 	if (!bWasVisible)
 		ExpandList();
 
+#ifdef _DEBUG
+	POSITION pos = m_list.GetFirstSelectedItemPosition();
+	ASSERT(pos);
+
+	int nSel = m_list.GetNextSelectedItem(pos);
+	ASSERT(nSel != -1);
+
+	ASSERT(m_list.GetItemData(nSel) == (DWORD)hti);
+#endif
+
 	return TRUE;
 }
 
@@ -1900,20 +1910,31 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 	if (!CanMoveItem(move))
 		return FALSE;
 
-	CAutoFlag af(m_bMovingTask, TRUE);
-	
-	CLockUpdates lu(*this);
-	CHoldRedraw hr(*this);
-
 	HTREEITEM htiSel = ((move.htiSel == NULL) ? GetSelectedItem() : move.htiSel);
 	HTREEITEM htiAfter = ((move.htiDestAfterSibling == NULL) ? TVI_FIRST : move.htiDestAfterSibling);
+	BOOL bSameParent = (move.htiDestParent == m_tree.GetParentItem(htiSel));
 
-	HTREEITEM htiNew = TCH().MoveTree(htiSel, move.htiDestParent, htiAfter, TRUE, TRUE);
+	HTREEITEM htiNew = NULL;
+	{
+		CAutoFlag af(m_bMovingTask, TRUE);
+
+		CLockUpdates lu(*this);
+		CHoldRedraw hr(*this);
+
+		htiNew = TCH().MoveTree(htiSel, move.htiDestParent, htiAfter, TRUE, TRUE);
+	}
 
 	if (htiNew)
 	{
 		RefreshTreeItemMap();
 		SelectItem(htiNew);
+
+		if (bSameParent)
+		{
+			// if moving up or down make sure we scroll ahead a bit
+ 			if (!TCH().SetMinDistanceToEdge(htiNew, TCHE_TOP, 2))
+ 				TCH().SetMinDistanceToEdge(htiNew, TCHE_BOTTOM, 2);
+		}
 
 		return TRUE;
 	}

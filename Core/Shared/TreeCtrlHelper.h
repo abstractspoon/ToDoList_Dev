@@ -215,8 +215,10 @@ public:
 	void ResetIndexMap() const;
 
 	// return increments of item height
-	void SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, int nItems);
 	int GetDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge) const;
+
+	// returns TRUE if the view moved
+	BOOL SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, int nItems);
 
 	// get next/prev selectable items, NULL if none
 	HTREEITEM GetNextPageVisibleItem(HTREEITEM hti) const;
