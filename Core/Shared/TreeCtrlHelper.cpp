@@ -1292,28 +1292,12 @@ TCH_WHERE CTreeCtrlHelper::GetMoveTarget(HTREEITEM htiDestParent, HTREEITEM htiD
 HTREEITEM CTreeCtrlHelper::MoveTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 
 									BOOL bUsesTextCallback, BOOL bUsesImageCallback)
 {
-#ifdef _DEBUG
-// 	DWORD dwTick = GetTickCount();
-#endif
-	
 	HTREEITEM htiCopy = CopyTree(hti, htiDestParent, htiDestPrevSibling, bUsesTextCallback, bUsesImageCallback);
 
-#ifdef _DEBUG
-// 	TRACE(_T("CTreeCtrlHelper::MoveTree(CopyTree took %ld ms)\n"), GetTickCount() - dwTick);
-// 	dwTick = GetTickCount();
-#endif
-
 	if (htiCopy)
-	{
 		m_tree.DeleteItem(hti);
 
-#ifdef _DEBUG
-// 		TRACE(_T("CTreeCtrlHelper::MoveTree(DeleteItem took %ld ms)\n"), GetTickCount() - dwTick);
-#endif
-		return htiCopy;
-	}
-
-	return NULL;
+	return htiCopy;
 }
 
 HTREEITEM CTreeCtrlHelper::CopyTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 
