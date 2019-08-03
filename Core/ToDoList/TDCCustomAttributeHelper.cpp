@@ -758,7 +758,9 @@ int CTDCCustomAttributeHelper::GetVisibleColumnIDs(const CTDCCustomAttribDefinit
 	while (nDef--)
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION& def = aAttribDefs.GetData()[nDef];
-		mapCols.Add(def.GetColumnID());
+
+		if (def.bEnabled)
+			mapCols.Add(def.GetColumnID());
 	}
 
 	return (mapCols.GetCount() - nColsSize);
