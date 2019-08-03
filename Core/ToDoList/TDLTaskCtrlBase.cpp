@@ -2350,7 +2350,6 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 
 	// draw each column separately
 	int nNumCol = m_hdrColumns.GetItemCount();
-	int nLastCol = m_hdrColumns.GetLastVisibleItem();
 
 	CRect rSubItem, rClient, rClip;
 	m_lcColumns.GetClientRect(rClient);
@@ -2363,20 +2362,24 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 
 	for (int nCol = 1; nCol < nNumCol; nCol++)
 	{
+		if (!m_hdrColumns.IsItemVisible(nCol))
+			continue;
+
 		if (!m_lcColumns.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rSubItem))
 			continue;
 
 		// don't draw columns outside of client rect
-		if (rSubItem.IsRectEmpty() || (rSubItem.right <= rClient.left))
+		if (rSubItem.IsRectEmpty())
+			continue;
+
+		if (rSubItem.right <= rClient.left)
 			continue;
 
 		if (rSubItem.left >= rClient.right)
 			continue;
 
-		// draw vertical gridlines for all but the
-		// last item if the row is selected
-		if (!(bSelected && (nCol == nLastCol)))
-			DrawGridlines(pDC, rSubItem, bSelected, FALSE, TRUE);
+		// vertical gridlines
+		DrawGridlines(pDC, rSubItem, bSelected, FALSE, TRUE);
 
 		// don't draw min sized columns
 		if (rSubItem.Width() <= MIN_COL_WIDTH)
@@ -2417,6 +2420,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_TIMESPENT:
+			if (!sTaskColText.IsEmpty())
 			{
 				// show text in red if we're currently tracking
 				COLORREF crTemp = ((m_dwTimeTrackTaskID == dwTrueID) ? 255 : crText);
@@ -3359,7 +3363,6 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		case TDCC_CREATEDBY:	return pTDI->sCreatedBy;
 
 		case TDCC_POSITION:		return m_formatter.GetTaskPosition(pTDS);
-		case TDCC_PRIORITY:		return m_formatter.GetTaskPriority(pTDI, pTDS);
 		case TDCC_RISK:			return m_formatter.GetTaskRisk(pTDI, pTDS);
 		case TDCC_RECURRENCE:	return m_formatter.GetTaskRecurrence(pTDI);
 		case TDCC_RECENTEDIT:	return m_formatter.GetTaskRecentlyModified(pTDI, pTDS);
@@ -3392,6 +3395,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		case TDCC_LOCK:
 		case TDCC_REMINDER:
 		case TDCC_FILEREF:
+		case TDCC_PRIORITY:
 			// items having no text or rendered differently
 			return _T("");
 
