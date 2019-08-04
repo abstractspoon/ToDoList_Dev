@@ -4834,7 +4834,7 @@ BOOL CTabbedToDoCtrl::GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nD
 
 			// If this is the parent task we set the sibling to zero
 			// so that the task is added to the top
-			if (dwDestPrevSiblingID == dwDestParentID)
+			if (!dwDestPrevSiblingID || (dwDestPrevSiblingID == dwDestParentID))
 			{
 				dwDestPrevSiblingID = 0;
 			}
