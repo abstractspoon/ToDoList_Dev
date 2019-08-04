@@ -2660,7 +2660,7 @@ void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, B
 		break;
 	}
 
-	return CTreeListCtrl::DrawItemDivider(pDC, rItem, bVert, bSelected, color);
+	CTreeListCtrl::DrawItemDivider(pDC, rItem, bVert, bSelected, color);
 }
 
 CString CGanttCtrl::GetLongestVisibleAllocTo(HTREEITEM hti) const

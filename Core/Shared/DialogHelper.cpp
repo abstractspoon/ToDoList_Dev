@@ -342,7 +342,7 @@ void CDialogHelper::DDX_CBValue(CDataExchange* pDX, int nIDC, int& value, int fa
 
 	CWnd* pCombo = CWnd::FromHandle(hwnd);
 	
-	return DDX_CBValue(pDX, static_cast<CComboBox&>(*pCombo), value, fallbackValue);
+	DDX_CBValue(pDX, static_cast<CComboBox&>(*pCombo), value, fallbackValue);
 }
 
 void CDialogHelper::DDX_CBValue(CDataExchange* pDX, CComboBox& combo, int& value, int fallbackValue)

@@ -145,10 +145,6 @@ SOURCE=.\WorkloadStruct.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\WorkloadTreeCtrl.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\WorkloadWnd.cpp
 # End Source File
 # End Group
@@ -202,10 +198,6 @@ SOURCE=.\WorkloadStatic.h
 # Begin Source File
 
 SOURCE=.\WorkloadStruct.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\WorkloadTreeCtrl.h
 # End Source File
 # Begin Source File
 

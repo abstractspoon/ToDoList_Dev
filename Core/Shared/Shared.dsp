@@ -665,6 +665,10 @@ SOURCE=.\TreeDragDropHelper.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TreeListCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TreeListSyncer.cpp
 # End Source File
 # Begin Source File
@@ -1350,6 +1354,10 @@ SOURCE=.\TreeCtrlHelper.h
 # Begin Source File
 
 SOURCE=.\TreeDragDropHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TreeListCtrl.h
 # End Source File
 # Begin Source File
 

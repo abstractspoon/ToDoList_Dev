@@ -169,6 +169,10 @@ SOURCE=.\IEncryption.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\IEnums.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\IFileStorage.h
 # End Source File
 # Begin Source File

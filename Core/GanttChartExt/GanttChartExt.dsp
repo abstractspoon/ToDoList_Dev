@@ -124,6 +124,10 @@ SOURCE=.\GanttCreateDependsDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\GanttCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\GanttDateRangeSlider.cpp
 # End Source File
 # Begin Source File
@@ -137,14 +141,6 @@ SOURCE=.\GanttStatic.cpp
 # Begin Source File
 
 SOURCE=.\GanttStruct.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\GanttTreeCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\GanttTreeListCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -169,6 +165,10 @@ SOURCE=.\GanttCreateDependsDlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\GanttCtrl.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\GanttDateRangeSlider.h
 # End Source File
 # Begin Source File
@@ -190,14 +190,6 @@ SOURCE=.\GanttStatic.h
 # Begin Source File
 
 SOURCE=.\GanttStruct.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\GanttTreeCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\GanttTreeListCtrl.h
 # End Source File
 # Begin Source File
 

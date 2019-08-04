@@ -39,6 +39,12 @@ const int TV_TIPPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 
 //////////////////////////////////////////////////////////////////////
+
+#ifndef GET_WHEEL_DELTA_WPARAM
+#	define GET_WHEEL_DELTA_WPARAM(wParam)  ((short)HIWORD(wParam))
+#endif 
+
+//////////////////////////////////////////////////////////////////////
 // CTreeListTreeCtrl
 
 IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
@@ -1580,7 +1586,7 @@ int CTreeListCtrl::Compare(const CString& sText1, const CString& sText2)
 
 BOOL CTreeListCtrl::GetListColumnRect(int nCol, CRect& rColumn, BOOL bScrolled) const
 {
-	if (m_list.GetSubItemRect(0, nCol, LVIR_BOUNDS, rColumn))
+	if (const_cast<CListCtrl&>(m_list).GetSubItemRect(0, nCol, LVIR_BOUNDS, rColumn))
 	{
 		if (!bScrolled)
 		{
