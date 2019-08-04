@@ -197,16 +197,16 @@ UINT CTreeDragDropHelper::ProcessMessage(const MSG* pMsg)
 	if (pMsg->message == WM_DD_DRAGENTER)
 		return OnDragEnter(pDDI);
 
-	else if (pMsg->message == WM_DD_PREDRAGMOVE)
+	if (pMsg->message == WM_DD_PREDRAGMOVE)
 		return OnDragPreMove(pDDI);
 
-	else if (pMsg->message == WM_DD_DRAGOVER)
+	if (pMsg->message == WM_DD_DRAGOVER)
 		return OnDragOver(pDDI);
 
-	else if (pMsg->message == WM_DD_DRAGDROP)
+	if (pMsg->message == WM_DD_DRAGDROP)
 		return OnDragDrop(pDDI);
 
-	else if (pMsg->message == WM_DD_DRAGABORT)
+	if (pMsg->message == WM_DD_DRAGABORT)
 		return OnDragAbort();
 
 	// else
@@ -271,22 +271,22 @@ UINT CTreeDragDropHelper::OnDragOver(const DRAGDROPINFO* pDDI)
 		CRect rect;
 		GetClientRect(pDDI->hwndTarget, rect);
 
-		int cy = rect.Height();
-		
-		if ((pDDI->pt.y >= 0 && pDDI->pt.y <= SCROLL_MARGIN) || 
-			(pDDI->pt.y >= cy - SCROLL_MARGIN && pDDI->pt.y <= cy))
+		rect.DeflateRect(0, SCROLL_MARGIN);
+
+		if (!rect.PtInRect(pDDI->pt))
 		{
 			SetTimer(TIMER_SCROLL, DELAY_INTERVAL);
 		}
-		
-		if (htiDrop != NULL && m_tree.ItemHasChildren(htiDrop) &&
-			!(m_tree.GetItemState(htiDrop, TVIS_EXPANDED) & TVIS_EXPANDED))
+
+		if (htiDrop && (m_dropPos.nWhere == DD_ON) && !m_selection.TCH().IsItemExpanded(htiDrop))
 		{
 			SetTimer(TIMER_EXPAND, EXPAND_INTERVAL);
 		}
 	}
 	else
+	{
 		HighlightDropTarget(OUTERSPACE);
+	}
 			
 	if (htiDrop)
 	{
@@ -295,8 +295,9 @@ UINT CTreeDragDropHelper::OnDragOver(const DRAGDROPINFO* pDDI)
 			BOOL bCopy = Misc::IsKeyPressed(VK_CONTROL);
 			return bCopy ? DD_DROPEFFECT_COPY : DD_DROPEFFECT_MOVE;
 		}
-		else
-			return DD_DROPEFFECT_MOVE;
+
+		// else
+		return DD_DROPEFFECT_MOVE;
 	}
 
 	// else
@@ -306,13 +307,9 @@ UINT CTreeDragDropHelper::OnDragOver(const DRAGDROPINFO* pDDI)
 BOOL CTreeDragDropHelper::OnDragDrop(const DRAGDROPINFO* pDDI)
 {
 	ASSERT(m_bEnabled && m_selection.GetCount());
-	//TRACE ("CTreeDragDropHelper::OnDragDrop(enter)\n");
 
 	if (pDDI->hwndTarget == m_tree.GetSafeHwnd() && m_dropPos.htiDrop)
 	{
-		//TRACE ("CTreeDragDropHelper::OnDragDrop(%s, %s)\n", m_tree.GetItemText(m_dropPos.htiDrop),
-		//			(m_dropPos.nWhere == DD_ON) ? "On" : (m_dropPos.nWhere == DD_ABOVE) ? "Above" : "Below");
-		
 		// figure out where to drop
 		switch (m_dropPos.nWhere)
 		{
@@ -340,7 +337,6 @@ BOOL CTreeDragDropHelper::OnDragDrop(const DRAGDROPINFO* pDDI)
 	}
 	else
 	{
-		//TRACE ("CTreeDragDropHelper::OnDragDrop(not on tree)\n");
 		m_htiDropTarget = m_htiDropAfter = NULL;
 	}
 	
@@ -351,8 +347,6 @@ BOOL CTreeDragDropHelper::OnDragDrop(const DRAGDROPINFO* pDDI)
 	m_tree.SelectDropTarget(NULL);
 	m_tree.Invalidate(FALSE);
 
-	//TRACE ("CTreeDragDropHelper::OnDragDrop(leave)\n");
-	
 	return (m_htiDropTarget || m_htiDropAfter);
 }
 
@@ -436,14 +430,8 @@ HTREEITEM CTreeDragDropHelper::HighlightDropTarget(CPoint point)
 	DDWHERE nWhere;
 	HTREEITEM hItem = HitTest(point, nWhere);
 
-	// don't do nuthin' if nuthin's changed
-	if (hItem == m_dropPos.htiDrop && nWhere == m_dropPos.nWhere)
-	{
-	//	TRACE("CTreeDragDropHelper::HighlightDropTarget(nothing's changed)\n");
-	}
-
 	// drop item cannot be selected unless this is a copy
-   // nor can it be a child of a selected item unless its a copy
+	// nor can it be a child of a selected item unless its a copy
 	BOOL bCopy = Misc::IsKeyPressed(VK_CONTROL);
 
 	if (!bCopy && (m_selection.HasItem(hItem) || m_selection.HasSelectedParent(hItem)))
@@ -479,46 +467,52 @@ HTREEITEM CTreeDragDropHelper::HighlightDropTarget(CPoint point)
 
 void CTreeDragDropHelper::OnTimer(UINT nIDEvent)
 {
-	//TRACE ("CTreeDragDropHelper::OnTimer\n");
-
 	if (nIDEvent == m_nScrollTimer)
 	{
 		// Reset the timer
 		SetTimer(TIMER_SCROLL, SCROLL_INTERVAL);
 			
-		// Get the current cursor position and window height.
+		// Get the first visible task so we can determine if
+		// anything happened at the end
+		HTREEITEM hFirstVisible = m_tree.GetFirstVisibleItem();
+
+		// Scroll the window if the cursor is still near the top or bottom.
 		CPoint point(::GetMessagePos());
 		ScreenToClient(m_tree, &point);
 			
 		CRect rect;
 		m_tree.GetClientRect(rect);
-		int cy = rect.Height();
 
-		HTREEITEM hFirstVisible = m_tree.GetFirstVisibleItem();
-			
-		// Scroll the window if the cursor is near the top or bottom.
-		m_ddMgr.DragShowNolock(FALSE);
-
-		if (point.y >= 0 && point.y <= SCROLL_MARGIN) 
+		if (rect.PtInRect(point))
 		{
-			m_tree.SelectDropTarget(NULL);
-			m_tree.SetInsertMark(NULL);
-			m_tree.SendMessage(WM_VSCROLL, MAKEWPARAM(SB_LINEUP, 0), NULL);
-		}
-		else if (point.y >= cy - SCROLL_MARGIN && point.y <= cy) 
-		{
-			m_tree.SelectDropTarget(NULL);
-			m_tree.SetInsertMark(NULL);
-			m_tree.SendMessage(WM_VSCROLL, MAKEWPARAM(SB_LINEDOWN, 0), NULL);
-		}
+			rect.DeflateRect(0, SCROLL_MARGIN);
 
-		m_ddMgr.DragShowNolock(TRUE);
+			if (!rect.PtInRect(point))
+			{
+				m_ddMgr.DragShowNolock(FALSE);
+
+				if (point.y <= rect.top)
+				{
+					m_tree.SelectDropTarget(NULL);
+					m_tree.SetInsertMark(NULL);
+					m_tree.SendMessage(WM_VSCROLL, MAKEWPARAM(SB_LINEUP, 0), NULL);
+				}
+				else if (point.y >= rect.bottom)
+				{
+					m_tree.SelectDropTarget(NULL);
+					m_tree.SetInsertMark(NULL);
+					m_tree.SendMessage(WM_VSCROLL, MAKEWPARAM(SB_LINEDOWN, 0), NULL);
+				}
+
+				m_ddMgr.DragShowNolock(TRUE);
+			}
+		}
 				
 		// Kill the timer if the window did not scroll
-		// redraw the drop target highlight regardless
 		if (m_tree.GetFirstVisibleItem() == hFirstVisible)
 			SetTimer(TIMER_SCROLL, 0);
 
+		// redraw the drop target highlight regardless
 		HighlightDropTarget();
 	}
 	else if (nIDEvent == m_nExpandTimer)
@@ -528,12 +522,9 @@ void CTreeDragDropHelper::OnTimer(UINT nIDEvent)
 		m_tree.ScreenToClient(&point);
 		
 		DDWHERE nWhere;
-		HTREEITEM hItem = HitTest(point, nWhere);
+		HTREEITEM htiHit = HitTest(point, nWhere);
 		
-		if ((hItem != NULL) && 
-			(nWhere == DD_ON) && 
-			(m_tree.ItemHasChildren(hItem)) &&
-			(m_tree.GetItemState(hItem, TVIS_EXPANDED) == 0)) 
+		if (htiHit && (nWhere == DD_ON) && !m_selection.TCH().IsItemExpanded(htiHit))
 		{
 			SetTimer(TIMER_EXPAND, 0); // kill the timer
 
@@ -541,7 +532,7 @@ void CTreeDragDropHelper::OnTimer(UINT nIDEvent)
 
 			m_tree.SelectDropTarget(NULL);
 			m_tree.SetInsertMark(NULL);
-			m_tree.Expand(hItem, TVE_EXPAND);
+			m_tree.Expand(htiHit, TVE_EXPAND);
 
 			m_ddMgr.DragShowNolock(TRUE);
 			HighlightDropTarget();
@@ -556,16 +547,17 @@ void CTreeDragDropHelper::OnTimer(UINT nIDEvent)
 
 			nmtv.ptDrag = point;
 			nmtv.action = TVE_EXPAND;
-			nmtv.itemNew.hItem = hItem;
+			nmtv.itemNew.hItem = htiHit;
 
 			m_tree.GetParent()->SendMessage(WM_NOTIFY, nmtv.hdr.idFrom, (LPARAM)&nmtv);
-			return;
 		}
 	}
 }
 
 VOID CALLBACK CTreeDragDropHelper::TimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT idEvent, DWORD /*dwTime*/)
 {
+	ASSERT(s_pTDDH);
+
 	if (s_pTDDH)
 		s_pTDDH->OnTimer(idEvent); // pseudo message handler
 }
