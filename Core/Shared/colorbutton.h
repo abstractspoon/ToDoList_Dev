@@ -23,8 +23,10 @@ class CColorButton : public CCustomButton
 public:
 	CColorButton(BOOL bRoundRect = FALSE);
 
-	COLORREF GetColor() { return m_color; }
+	COLORREF GetColor() const { return m_color; }
 	void SetColor(COLORREF color);
+
+	void DDX(CDataExchange* pDX, COLORREF& value);
 
 	static void LoadPreferences(const IPreferences* pPrefs);
 	static void SavePreferences(IPreferences* pPrefs);

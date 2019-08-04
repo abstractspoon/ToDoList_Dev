@@ -2952,18 +2952,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 		if (mapProcessed.Has(dwTaskID))
 			continue;
 
-		int nPriority = (m_data.GetTaskPriority(dwTaskID) + nAmount);
-
-		// need to jump over -1
-		if (nPriority < 0)
-		{
-			if (nAmount < 0)
-				nPriority = FM_NOPRIORITY;
-			else
-				nPriority = 0;
-		}
-
-		if (!HandleModResult(dwTaskID, m_data.SetTaskPriority(dwTaskID, nPriority), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.IncrementTaskPriority(dwTaskID, nAmount), aModTaskIDs))
 			return FALSE;
 
 		mapProcessed.Add(dwTaskID);
@@ -2971,7 +2960,15 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 	
 	if (aModTaskIDs.GetSize())
 	{
-		m_nPriority = m_cbPriority.IncrementPriority(nAmount);
+		// Only update if all values ended up the same
+		int nPriority = m_taskTree.GetSelectedTaskPriority();
+
+		if (nPriority != -1)
+		{
+			m_nPriority = nPriority;
+			m_cbPriority.SetSelectedPriority(nPriority);
+		}
+
 		SetModified(TDCA_PRIORITY, aModTaskIDs);
 	}
 	
@@ -3968,30 +3965,6 @@ void CToDoCtrl::SetPercentDoneIncrement(int nAmount)
 	}
 }
 
-int CToDoCtrl::GetNextPercentDone(int nPercent, BOOL bUp)
-{
-	int nIncrement = (bUp ? m_nPercentIncrement : -m_nPercentIncrement);
-
-	// we need to replicate the arithmetic performed by the 
-	// spin button control, so that to the user the result
-	// is the same as clicking the spin buttons
-	if (m_nPercentIncrement > 1)
-	{
-		// bump the % to the next upper (if +ve) or
-		// next lower (if -ve) whole increment
-		// before adding the increment
-		if (nPercent % m_nPercentIncrement)
-		{
-			if (bUp)
-				nPercent = ((nPercent / m_nPercentIncrement) + 1) * m_nPercentIncrement;
-			else
-				nPercent = (nPercent / m_nPercentIncrement) * m_nPercentIncrement;
-		}
-	}
-
-	return (nPercent + nIncrement);
-}
-
 BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 {
 	if (!CanEditSelectedTask(TDCA_PERCENT))
@@ -4009,6 +3982,8 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 	// the same task multiple times via references
 	CDWordSet mapProcessed;
 
+	int nAmount = (bUp ? m_nPercentIncrement : -m_nPercentIncrement);
+
 	while (pos)
 	{
 		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
@@ -4016,28 +3991,13 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 		if (mapProcessed.Has(dwTaskID))
 			continue;
 
-		BOOL bDone = m_data.IsTaskDone(dwTaskID);
+		BOOL bDoneChange = FALSE;
 
-		int nPercent = m_data.GetTaskPercent(dwTaskID, TRUE);
-		nPercent = GetNextPercentDone(nPercent, bUp);
-				
-		// need to handle transition to/from 100% as special case
-		if (bDone && (nPercent < 100))
-		{
-			m_data.SetTaskDate(dwTaskID, TDCD_DONE, 0.0);
-		}
-		else if (!bDone && (nPercent >= 100))
-		{
-			m_data.SetTaskDate(dwTaskID, TDCD_DONE, COleDateTime::GetCurrentTime());
-		}
+		if (!HandleModResult(dwTaskID, m_data.IncrementTaskPercentDone(dwTaskID, nAmount, bDoneChange), aModTaskIDs))
+			return FALSE;
 
-		TDC_SET nItemRes = m_data.SetTaskPercent(dwTaskID, nPercent);
-		
-		if (nItemRes == SET_CHANGE)
-		{
-			nRes = SET_CHANGE;
-			aModTaskIDs.Add(dwTaskID);
-		}
+		if (bDoneChange)
+			m_taskTree.InvalidateTask(dwTaskID);
 
 		mapProcessed.Add(dwTaskID);
 	}
@@ -4046,15 +4006,12 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 	{
 		// don't update m_nPercentDone for multiple selection
 		// else they all end up as the same value
-		if (GetSelectedCount() == 1)
-		{
-			int nPercent = GetNextPercentDone(m_nPercentDone, bUp);
+		int nPercent = m_taskTree.GetSelectedTaskPercent();
 
-			if (m_nPercentDone != nPercent)
-			{
-				m_nPercentDone = nPercent;
-				UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
-			}
+		if (nPercent != -1)
+		{
+			m_nPercentDone = nPercent;
+			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 		}
 		
 		SetModified(TDCA_PERCENT, aModTaskIDs);
@@ -6492,7 +6449,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 int CToDoCtrl::GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly) const
 {
 	if (bSelectedOnly)
-		return GetSelectedTasks(tasks, TDCGT_ALL, TDCGSTF_ALLPARENTS);
+		return GetSelectedTasks(tasks, TDCGETTASKS(TDCGT_ALL, TDCGSTF_ALLPARENTS));
 
 	// else
 	return GetTasks(tasks, TDCGT_DONE);
@@ -7283,12 +7240,10 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 
 			// if pasting references then we don't want all subtasks just 
 			// the ones actually selected
-			DWORD dwFlags = 0;
-
 			if (nDrop == TDC_DROPREFERENCE)
-				dwFlags = TDCGSTF_NOTSUBTASKS;
+				filter.dwFlags = TDCGSTF_NOTSUBTASKS;
 
-			if (GetSelectedTasks(tasks, filter, dwFlags))
+			if (GetSelectedTasks(tasks, filter))
 			{
 				IMPLEMENT_DATA_UNDO(m_data, TDCUAT_COPY);
 				HOLD_REDRAW(*this, m_taskTree);
@@ -7315,7 +7270,7 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 			IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 			HOLD_REDRAW(*this, m_taskTree);
 
-			DWORD dwSrcParentID = GetSelectedTaskParentID();
+			DWORD dwSrcParentID = GetSelectedTaskParentID(); // zero for multiple parents
 			
 			DWORD dwDestParentID = m_taskTree.GetTaskID(htiDropTarget);
 			DWORD dwDestPrevSiblingID = m_taskTree.GetTaskID(htiDropAfter);
@@ -7333,7 +7288,7 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 				// then mark the parent as incomplete too
 				FixupParentCompletion(dwDestParentID);
 
-				if (dwSrcParentID == dwDestParentID)
+				if (m_taskTree.SelectionHasSameParent() && (dwSrcParentID == dwDestParentID))
 					SetModified(TDCA_POSITION_SAMEPARENT);
 				else
 					SetModified(TDCA_POSITION_DIFFERENTPARENT);
@@ -7672,19 +7627,10 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 {
 	if (!CanMoveSelectedTask(nDirection))
 		return FALSE;
-	
-	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTimer log(_T("CToDoCtrl::MoveSelectedTask()"));
-	log.LogStart();
-	///////////////////////////////////////////////////////////////////
 
-	// else
 	Flush(); // end any editing action
 	SetFocusToTasks(); // else datetime controls get their focus screwed
 
-	log.LogTimeElapsed(_T("Flush&SetFocusToTasks"));
-
-	// do the move
 	// move the tasks
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 
@@ -7697,14 +7643,11 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	if (!m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
 		return FALSE;
 
-	log.LogTimeElapsed(_T("m_data.MoveTasks"));
-
+	// Move the associated tree items
 	CLockUpdates lu(*this);
 	HOLD_REDRAW(*this, m_taskTree);
-	
-	m_taskTree.MoveSelection(nDirection);
 
-	log.LogTimeElapsed(_T("m_taskTree.MoveSelection"));
+	m_taskTree.MoveSelection(nDirection);
 
 	// refresh parent states if moving to the right (adding subtasks)
 	if (nDirection == TDCM_RIGHT)
@@ -7714,8 +7657,6 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 		SetModified(TDCA_POSITION_SAMEPARENT);
 	else
 		SetModified(TDCA_POSITION_DIFFERENTPARENT);
-
-	log.LogTimeElapsed(_T("SetModified"));
 
 	return TRUE;
 }
@@ -9112,7 +9053,7 @@ HTREEITEM CToDoCtrl::RebuildTree(const void* pContext)
 	TDCSELECTIONCACHE cache;
 	CacheTreeSelection(cache);
 		
-	CHoldRedraw hr(GetSafeHwnd());
+	CHoldRedraw hr(*this);
 	CWaitCursor cursor;
 	CDWordArray aExpanded;
 	
@@ -9246,31 +9187,32 @@ BOOL CToDoCtrl::WantAddTask(const TODOITEM* /*pTDI*/, const TODOSTRUCTURE* /*pTD
 	return TRUE;
 }
 
-int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter, DWORD dwFlags) const
+int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
 	if (!GetSelectedCount())
 		return 0;
 	
 	PrepareTaskfileForTasks(tasks, filter);
 
-	BOOL bWantSubtasks = !(dwFlags & TDCGSTF_NOTSUBTASKS);
-	BOOL bResolveReferences = (dwFlags & TDCGSTF_RESOLVEREFERENCES);
-	BOOL bWantAllParents = (dwFlags & TDCGSTF_ALLPARENTS);
-	BOOL bWantImmediateParent = (bWantAllParents ? FALSE : (dwFlags & TDCGSTF_IMMEDIATEPARENT));
+	BOOL bWantSubtasks = !filter.HasFlag(TDCGSTF_NOTSUBTASKS);
+	BOOL bResolveReferences = filter.HasFlag(TDCGSTF_RESOLVEREFERENCES);
+	BOOL bWantAllParents = filter.HasFlag(TDCGSTF_ALLPARENTS);
+	BOOL bWantImmediateParent = filter.HasFlag(TDCGSTF_IMMEDIATEPARENT);
 
-	// get selected tasks ordered
-	// remove duplicate subtasks if we will be processing
-	// subtasks anyway
+	// get selected tasks ordered, removing duplicate subtasks 
+	// if we will be processing subtasks anyway
 	CHTIList selection;
 	TSH().CopySelection(selection, bWantSubtasks, TRUE);
 	
-	// get items
+	// Keep track of the selected tasks added
+	CDWordSet aSelTaskIDs;
 	POSITION pos = selection.GetHeadPosition();
 
 	while (pos)
 	{
 		HTREEITEM hti = selection.GetNext(pos);
 		DWORD dwTaskID = GetTaskID(hti);
+		BOOL bHasParent = m_taskTree.ItemHasParent(hti);
 
 		// do we need to resolve task references?
 		if (bResolveReferences)
@@ -9278,32 +9220,47 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter, DWO
 			DWORD dwRefID = GetTrueTaskID(hti);
 			
 			if (dwRefID != dwTaskID)
+			{
+				dwTaskID = dwRefID;
 				hti = m_taskTree.GetItem(dwRefID); // true task
+			}
 		}
 		
 		// does the user want this task's parent(s) ?
-		if (bWantAllParents || bWantImmediateParent)
+		if ((bWantAllParents || bWantImmediateParent) && bHasParent)
 		{
-			VERIFY(AddTreeItemAndParentToTaskFile(hti, tasks, filter, bWantAllParents, bWantSubtasks));
+			if (AddTreeItemAndParentToTaskFile(hti, tasks, filter, bWantAllParents, bWantSubtasks))
+			{
+				aSelTaskIDs.Add(dwTaskID);
+			}
 		}
 		else
 		{
 			// find the parent task previously added (or not)
-			DWORD dwParentID = m_taskTree.GetTaskParentID(hti);
-			HTASKITEM hParent = tasks.FindTask(dwParentID);
+			DWORD dwParentID = 0;
+			HTASKITEM hParent = NULL;
 
-			VERIFY(AddTreeItemToTaskFile(hti, dwTaskID, tasks, hParent, filter, bWantSubtasks, dwParentID));
+			if (bHasParent)
+			{
+				dwParentID = m_taskTree.GetTaskParentID(hti);
+				hParent = tasks.FindTask(dwParentID);
+			}
+
+			if (AddTreeItemToTaskFile(hti, dwTaskID, tasks, hParent, filter, bWantSubtasks, dwParentID))
+			{
+				aSelTaskIDs.Add(dwTaskID);
+			}
 		}
 	}
 
 	// extra processing to identify the originally selected tasks
 	// in case the user wants to paste as references.
-	// Note: References are excluded of bResolveReferences is true
-	pos = TSH().GetFirstItemPos();
+	// Note: References are excluded if bResolveReferences is true
+	pos = aSelTaskIDs.GetStartPosition();
 
 	while (pos)
 	{
-		DWORD dwSelID = TSH().GetNextItemData(pos);
+		DWORD dwSelID = aSelTaskIDs.GetNext(pos);
 		ASSERT(dwSelID);
 
 		if (!bResolveReferences || !m_data.IsTaskReference(dwSelID))

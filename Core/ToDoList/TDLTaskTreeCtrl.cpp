@@ -315,14 +315,20 @@ HTREEITEM CTDLTaskTreeCtrl::GetItem(DWORD dwTaskID) const
 
 void CTDLTaskTreeCtrl::OnBeginRebuild()
 {
-	CTDLTaskCtrlBase::OnBeginRebuild();
+	EnableResync(FALSE);
+
+	if (CWnd::IsWindowVisible())
+		CWnd::SendMessage(WM_SETREDRAW, FALSE);
 
 	m_mapHTItems.RemoveAll();
 }
 
 void CTDLTaskTreeCtrl::OnEndRebuild()
 {
-	CTDLTaskCtrlBase::OnEndRebuild();
+	if (CWnd::IsWindowVisible())
+		CWnd::SendMessage(WM_SETREDRAW, TRUE);
+
+	EnableResync(TRUE, Tasks());
 
 	ExpandList();
 	RecalcUntrackedColumnWidths();
@@ -671,7 +677,7 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetColumnItemState(int nItem) const
 	return GetTreeItemState((HTREEITEM)m_lcColumns.GetItemData(nItem));
 }
 
-void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
+BOOL CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 {
 	// only called when the focus is actually on the columns
 	// ie. not when Syncing Column Selection)
@@ -711,24 +717,29 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 	if (Misc::IsCursorKeyPressed(MKC_UPDOWN))
 	{
 		// vertical scrolling
-		return;
+		return FALSE;
 	}
-	else if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
+
+	if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
 	{
 		// In the middle of a simple click
-		return;
+		return FALSE;
 	}
-	else if (IsBoundSelecting() && ((nHit == -1) || (m_lcColumns.GetSelectedCount() > 2)))
+
+	if (IsBoundSelecting() && ((nHit == -1) || (m_lcColumns.GetSelectedCount() > 2)))
 	{
 		// bulk selecting
-		return;
+		return FALSE;
 	}
 
 	NotifyParentSelChange();
+	return TRUE;
 }
 
 void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
 {
+	ASSERT(CanResync());
+
 	CHTIList selection;
 	TSH().CopySelection(selection);
 
@@ -764,7 +775,7 @@ void CTDLTaskTreeCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
 	RepackageAndSendToParent(WM_NOTIFY, 0, (LPARAM)&nmtv);
 }
 
-void CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
+BOOL CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
 	// we don't support nothing having being selected unless there
 	// are no items in the tree
@@ -773,65 +784,65 @@ void CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	
 	// cursor handled here
 	// <shift>+cursor handled here
-	if (m_wKeyPress)
+	if (m_wKeyPress == 0)
+		return FALSE;
+
+	HTREEITEM hti = pNMTV->itemNew.hItem;
+
+	// snapshot current selection to test for changes
+	CHTIList lstPrevSel;
+	TSH().CopySelection(lstPrevSel);
+
+	switch (m_wKeyPress)
 	{
-		HTREEITEM hti = pNMTV->itemNew.hItem;
-
-		// snapshot current selection to test for changes
-		CHTIList lstPrevSel;
-		TSH().CopySelection(lstPrevSel);
-		
-		switch (m_wKeyPress)
+	case VK_NEXT:
+	case VK_DOWN:
+	case VK_UP:
+	case VK_PRIOR:
+	case VK_RIGHT:
+	case VK_LEFT:
+	case VK_HOME:
+	case VK_END:
+		if (!bCtrl)
 		{
-		case VK_NEXT:  
-		case VK_DOWN:
-		case VK_UP:
-		case VK_PRIOR: 
-		case VK_RIGHT:
-		case VK_LEFT:
-		case VK_HOME:
-		case VK_END:
-			if (!bCtrl)
-			{
-				TSH().RemoveAll();
-				
-				if (bShift)
-				{	
-					TSH().AddItems(TSH().GetAnchor(), hti);
-				}
-				else
-				{
-					TSH().SetAnchor(hti);
-					TSH().AddItem(hti);
-				}
-			}
-			break;
-			
-		default:
-			// else handle alphanum method of changing selection
 			TSH().RemoveAll();
-			TSH().SetAnchor(hti);
-			TSH().AddItem(hti);
-			break;
-		}
 
- 		SyncColumnSelectionToTasks();
- 			
-		if (hti)
-		{
-			CHoldHScroll hhs(m_tcTasks);
-			TCH().EnsureItemVisible(hti, FALSE);
+			if (bShift)
+			{
+				TSH().AddItems(TSH().GetAnchor(), hti);
+			}
+			else
+			{
+				TSH().SetAnchor(hti);
+				TSH().AddItem(hti);
+			}
 		}
- 		
-		// notify parent of selection change
-		// unless up/down cursor key still pressed
-		if (!TSH().Matches(lstPrevSel) && !Misc::IsCursorKeyPressed(MKC_UPDOWN))
-		{
-			NotifyParentSelChange(SC_BYKEYBOARD);
-		}
+		break;
 
-		m_wKeyPress = 0;
+	default:
+		// else handle alphanum method of changing selection
+		TSH().RemoveAll();
+		TSH().SetAnchor(hti);
+		TSH().AddItem(hti);
+		break;
 	}
+	m_wKeyPress = 0; // always
+
+	SyncColumnSelectionToTasks();
+
+	if (hti)
+	{
+		CHoldHScroll hhs(m_tcTasks);
+		TCH().EnsureItemVisible(hti, FALSE);
+	}
+
+	// notify parent of selection change
+	// unless up/down cursor key still pressed
+	if (TSH().Matches(lstPrevSel) || Misc::IsCursorKeyPressed(MKC_UPDOWN))
+		return FALSE;
+
+	NotifyParentSelChange(SC_BYKEYBOARD);
+	return TRUE;
 }
 
 BOOL CTDLTaskTreeCtrl::PreTranslateMessage(MSG* pMsg)
@@ -1802,13 +1813,119 @@ BOOL CTDLTaskTreeCtrl::RemoveOrphanTreeItemReferences(HTREEITEM hti)
 	return bRemoved;
 }
 
+BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
+{
+	if (!CanMoveSelection(nDirection))
+		return FALSE;
+
+	HTREEITEM htiDestParent = NULL, htiDestAfter = NULL;
+	VERIFY(GetInsertLocation(nDirection, htiDestParent, htiDestAfter));
+
+	if (!MoveSelection(htiDestParent, htiDestAfter, FALSE))
+		return FALSE;
+
+	// if moving up or down make sure we scroll ahead a bit
+	switch (nDirection)
+	{
+	case TDCM_UP:
+		TCH().SetMinDistanceToEdge(TSH().GetFirstItem(), TCHE_TOP, 2);
+		break;
+
+	case TDCM_DOWN:
+		TCH().SetMinDistanceToEdge(TSH().GetLastItem(), TCHE_BOTTOM, 2);
+		break;
+	}
+
+	return TRUE;
+}
+
+// External version - DON'T CALL INTERNALLY - Except from above
+BOOL CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, BOOL bEnsureVisible)
+{
+	CAutoFlag af(m_bMovingItem, TRUE);
+	// No 'hold redraw' here
+
+	CHTIList moved;
+	HTREEITEM htiFirst = MoveSelectionRaw(htiDestParent, htiDestPrevSibling, moved);
+
+	if (htiFirst == NULL)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	TSH().SetItems(moved, TSHS_SELECT, FALSE);
+	TSH().SetAnchor(htiFirst);
+	TCH().SelectItem(htiFirst);
+
+	ResyncListToTreeSelection(m_tcTasks, moved, htiFirst);
+
+	// make sure first moved item is visible
+	if (bEnsureVisible)
+	{
+		CHoldHScroll hhs(m_tcTasks);
+		TCH().EnsureItemVisible(htiFirst, FALSE, FALSE);
+	}
+
+	// No need to notify parent of selection change
+	// because logically the selection hasn't changed
+	return TRUE;
+}
+
+// Internal version
+HTREEITEM CTDLTaskTreeCtrl::MoveSelectionRaw(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, CHTIList& moved)
+{
+	ASSERT(m_bMovingItem);
+	ASSERT(HasSelection());
+
+	HTREEITEM htiFirst = NULL;
+
+	// expand the destination ahead of the move
+	m_tcTasks.Expand(htiDestParent, TVE_EXPAND);
+	ExpandList(htiDestParent);
+
+	// get selected tasks ordered, and without duplicate subtasks
+	CHTIList selection;
+	TSH().CopySelection(selection, TRUE, TRUE);
+
+	TSH().RemoveAll(FALSE, FALSE); // no redraw
+	TCH().SelectItem(NULL);
+
+	// move the tree items
+	POSITION pos = selection.GetHeadPosition();
+	HTREEITEM htiAfter = htiDestPrevSibling;
+
+	if (htiAfter == NULL)
+		htiAfter = TVI_FIRST;
+
+	moved.RemoveAll();
+
+	while (pos)
+	{
+		HTREEITEM hti = selection.GetNext(pos);
+		hti = MoveItemRaw(hti, htiDestParent, htiAfter);
+
+		moved.AddTail(hti);
+		htiAfter = hti;
+	}
+	ASSERT(moved.GetCount());
+
+	return (moved.GetCount() ? moved.GetHead() : NULL);
+}
+
+// External version - DON'T CALL INTERNALLY
 HTREEITEM CTDLTaskTreeCtrl::MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
 {
-	ASSERT(hti);
-
-	// prevent list updating until we have finished
-	CWaitCursor wait;
 	CAutoFlag af(m_bMovingItem, TRUE);
+
+	return MoveItemRaw(hti, htiDestParent, htiDestPrevSibling);
+}
+
+// Internal version
+HTREEITEM CTDLTaskTreeCtrl::MoveItemRaw(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
+{
+	ASSERT(hti);
+	ASSERT(m_bMovingItem);
 
 	// make sure the destination parent is expanded so that the new items 
 	// get automatically handled by CTreeListSyncer
@@ -1826,78 +1943,6 @@ HTREEITEM CTDLTaskTreeCtrl::MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTR
 
 	// return the new tree item
 	return hti;
-}
-
-BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
-{
-	if (!CanMoveSelection(nDirection))
-		return FALSE;
-
-	CAutoFlag af(m_bMovingItem, TRUE);
-
-	HTREEITEM htiDestParent = NULL, htiDestAfter = NULL;
-	VERIFY(GetInsertLocation(nDirection, htiDestParent, htiDestAfter));
-	
-	MoveSelection(htiDestParent, htiDestAfter);
-
-	if (nDirection == TDCM_UP || nDirection == TDCM_DOWN)
-	{
-		// if moving up or down make sure we scroll ahead a bit
-		TCH().SetMinDistanceToEdge(TSH().GetFirstItem(), TCHE_TOP, 2);
-		
-		if (GetSelectedCount() > 1)
-			TCH().SetMinDistanceToEdge(TSH().GetLastItem(), TCHE_BOTTOM, 2);
-	}
-
-	return TRUE;
-}
-
-void CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
-{
-	HTREEITEM htiFirst = NULL;
-
-	// expand the destination ahead of the move
-	m_tcTasks.Expand(htiDestParent, TVE_EXPAND);
-	ExpandList(htiDestParent);
-
-	{
-		CAutoFlag af(m_bMovingItem, TRUE);
-		CHoldRedraw hr(*this);
-
-		TDCSELECTIONCACHE cache;
-		CacheSelection(cache);
-		
-		// get selected tasks ordered, and without duplicate subtasks
-		CHTIList selection;
-		TSH().CopySelection(selection, TRUE, TRUE);
-		
-		TSH().RemoveAll(FALSE, FALSE); // no redraw
-		TCH().SelectItem(NULL);
-		
-		// move the tree items
-		POSITION pos = selection.GetHeadPosition();
-		HTREEITEM htiAfter = htiDestPrevSibling;
-
-		if (htiAfter == NULL)
-			htiAfter = TVI_FIRST;
-		
-		while (pos)
-		{
-			HTREEITEM hti = selection.GetNext(pos);
-			htiAfter = MoveItem(hti, htiDestParent, htiAfter);
-
-			if (!htiFirst)
-				htiFirst = htiAfter;
-		}
-		
-		RestoreSelection(cache);
-	}
-		
-	// make sure first moved item is visible
-	CHoldHScroll hhs(m_tcTasks);
-	m_tcTasks.EnsureVisible(htiFirst);
-
-	UpdateAll();
 }
 
 BOOL CTDLTaskTreeCtrl::CanMoveSelection(TDC_MOVETASK nDirection) const

@@ -558,8 +558,10 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		break;
 		
 	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETPREVTOPLEVELTASK:
 		if (pData)
 		{
@@ -588,6 +590,8 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 
 void CKanbanWnd::SetTaskFont(HFONT hFont)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
 	m_ctrlKanban.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE);
 }
 
@@ -619,9 +623,9 @@ bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* p
 	case IUI_SELECTTASK:
 		return true;
 		
-	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
-	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETPREVTOPLEVELTASK:
 		return (m_ctrlKanban.GetVisibleTaskCount() > 0);
 

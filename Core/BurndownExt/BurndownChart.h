@@ -32,8 +32,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-	virtual bool DrawHorzLine(CDC& dc);						
-	
 protected:
 	void BuildSprintGraph();
 	void BuildBurndownGraph();
@@ -41,7 +39,6 @@ protected:
 	COleDateTime GetGraphStartDate() const;
 	COleDateTime GetGraphEndDate() const;
 	BURNDOWN_CHARTSCALE CalculateRequiredXScale() const;
-	int GetYSubTicks(double dInterval) const;
 	int HitTest(const CPoint& ptClient) const;
 
 };

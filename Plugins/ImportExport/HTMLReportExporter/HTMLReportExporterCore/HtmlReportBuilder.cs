@@ -33,8 +33,8 @@ namespace HTMLReportExporter
 
 		static String DocType = @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD XHTML 1.0 Transitional//EN"" ""http://www.w3.org/TR/html4/loose.dtd"">";
 
-		static String CommentsDoneColor = @"#808080";
-		static String Endl = @"\n";
+		//static String CommentsDoneColor = @"#808080";
+		//static String Endl = @"\n";
 
 		// -------------------------------------------------------------
 
@@ -49,8 +49,10 @@ namespace HTMLReportExporter
 
 			Header = new HeaderTemplateReporter(template.Header, template.BackColor);
 			Title = new TitleTemplateReporter(template.Title);
-			Tasks = new TaskTemplateReporter(template.Task, preview);
 			Footer = new FooterTemplateReporter(template.Footer, template.BackColor);
+
+			var custAttribs = HtmlReportUtils.GetCustomAttributes(tasks);
+			Tasks = new TaskTemplateReporter(template.Task, preview);
 		}
 
 		private static String FormatBodyFontStyle(Preferences prefs)
@@ -449,8 +451,7 @@ namespace HTMLReportExporter
 
 		public class TaskTemplateReporter : TaskTemplate
 		{
-			private Layout m_Layout;
-
+			private TaskTemplate m_Template;
 			private bool m_Preview;
 			private int m_PreviewTaskCount;
 
@@ -463,7 +464,7 @@ namespace HTMLReportExporter
 				Copy(task);
 
 				m_Preview = preview;
-				m_Layout = task.GetLayout();
+				m_Template = task;
 			}
 
 			public bool WriteTableContent(TaskList tasks, HtmlTextWriter html)
@@ -477,25 +478,28 @@ namespace HTMLReportExporter
 				if (m_Preview)
 					m_PreviewTaskCount = 0;
 
-				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.WriteLine(m_Layout.StartHtml);
+				var custAttribs = HtmlReportUtils.GetCustomAttributes(tasks);
+				var layout = m_Template.GetLayout(custAttribs);
 
-				WriteTask(task, 0, html);
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
+				html.WriteLine(layout.StartHtml);
+
+				WriteTask(task, layout, 0, html);
 				
-				html.WriteLine(m_Layout.EndHtml);
+				html.WriteLine(layout.EndHtml);
 				html.RenderEndTag(); // Div
 
 				return true;
 			}
 			
-			public void WriteTask(Task task, int depth, HtmlTextWriter html)
+			public void WriteTask(Task task, Layout layout, int depth, HtmlTextWriter html)
 			{
 				if ((task == null) || !task.IsValid())
 					return;
 
 				if (!String.IsNullOrWhiteSpace(EnabledText))
 				{
-					var text = m_Layout.FormatRow(task, depth);
+					var text = layout.FormatRow(task, depth);
 					html.WriteLine(text);
 				}
 
@@ -503,16 +507,16 @@ namespace HTMLReportExporter
 					return;
 
 				// First subtask
-				if (m_Layout.Style != Layout.StyleType.Table)
-					html.WriteLine(m_Layout.StartHtml);
+				if (layout.Style != Layout.StyleType.Table)
+					html.WriteLine(layout.StartHtml);
 
-				WriteTask(task.GetFirstSubtask(), depth + 1, html);
+				WriteTask(task.GetFirstSubtask(), layout, depth + 1, html);
 
-				if (m_Layout.Style != Layout.StyleType.Table)
-					html.WriteLine(m_Layout.EndHtml);
+				if (layout.Style != Layout.StyleType.Table)
+					html.WriteLine(layout.EndHtml);
 
 				// Next task
-				WriteTask(task.GetNextTask(), depth, html);
+				WriteTask(task.GetNextTask(), layout, depth, html);
 			}
 		}
 	}

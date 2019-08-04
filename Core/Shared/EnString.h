@@ -18,11 +18,24 @@ class CEnString : public CString
 public:
 	CEnString();
 	CEnString(LPCTSTR lpszFormat, ... );
-	CEnString(UINT nFormatID, LPCTSTR szText = NULL);
-	CEnString(UINT nFormatID, int nData);
-	CEnString(UINT nID, HWND hwndRef);
-	CEnString(UINT nID, HMENU hMenu);
+	CEnString(UINT nStrID, HWND hwndRef = NULL);
+	CEnString(UINT nStrID, HMENU hMenu);
 	CEnString(const CString& str);
+
+	template <class T>
+	CEnString(UINT nFormatID, T data)
+	{
+		if (nFormatID)
+		{
+			CString strFormat;
+
+			if (LoadString(nFormatID, NULL, strFormat))
+			{
+				CString::Format(strFormat, data);
+				CompareIgnoreString(strFormat);
+			}
+		}
+	}
 
 	~CEnString(); // non-virtual else it messes up LPCTSTR operator
 
@@ -31,6 +44,7 @@ public:
 
 	BOOL LoadString(UINT nFormatID, HWND hwndRef = NULL);
 	BOOL LoadString(UINT nFormatID, HMENU hMenu);
+
 	CSize FormatDC(CDC* pDC, int nWidth, int nStyle = ES_END);
 	CSize Draw(CDC* pDC, LPRECT lpRect, int nStyle = ES_END);
 	int GetCharacterCount(TCHAR nChar, BOOL bCaseSensitive = TRUE) const;

@@ -902,33 +902,38 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	return CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
 }
 
-void CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
+BOOL CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 {
 	// only called for the list that currently has the focus
 	
-	// notify parent of selection change
-	// Unless:
-	// 1. The up/down cursor key is still pressed
-	//   OR
-	// 2. The mouse button is down, over an item, 
-	//    the selection is empty, and the CTRL
-	//    key is not pressed. ie. the user is in 
-	//    the middle of selecting a new item
+	// Don't notify if the up/down cursor key is still pressed
 	if (Misc::IsCursorKeyPressed(MKC_UPDOWN))
 	{
-		// don't notify
+		return FALSE;
 	}
-	else if (Misc::IsKeyPressed(VK_LBUTTON) &&
+
+	// Or if the mouse button is down, over an item, 
+	// the selection is empty, and the CTRL
+	// key is not pressed. ie. the user is in 
+	// the middle of selecting a new item
+	if (Misc::IsKeyPressed(VK_LBUTTON) &&
 			HitTestTask(GetMessagePos()) &&
 			!Misc::IsKeyPressed(VK_CONTROL) &&
 			!GetSelectedCount())
 	{
-		// don't notify
+		return FALSE;
 	}
-	else if (!IsBoundSelecting() || (m_lcColumns.GetSelectedCount() <= 2))
-	{
-		NotifyParentSelChange();
-	}
+
+	// Or we are bounds selecting
+	if (IsBoundSelecting())
+		return FALSE;
+
+	// Or more than 2 tasks are selected
+	if (m_lcColumns.GetSelectedCount() > 2)
+		return FALSE;
+
+	NotifyParentSelChange();
+	return TRUE;
 }
 
 BOOL CTDLTaskListCtrl::HasHitTestFlag(UINT nFlags, UINT nFlag)
@@ -1173,8 +1178,6 @@ BOOL CTDLTaskListCtrl::EnsureSelectionVisible()
 		}
 		else
 		{
-			//CHoldRedraw hr(*this);
-			
 			m_lcTasks.EnsureVisible(GetSelectedItem(), FALSE);
 		}
 

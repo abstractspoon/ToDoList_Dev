@@ -16,8 +16,8 @@ public:
 	virtual ~CWorkloadChart();
 
 	BOOL SaveToImage(CBitmap& bmImage);
-	void SetOverloadColor(double dOverloadValue, COLORREF crOverload);
-	void SetUnderloadColor(double dUnderloadValue, COLORREF crUnderload);
+	void EnableOverload(BOOL bEnable, double dOverloadValue, COLORREF crOverload);
+	void EnableUnderload(BOOL bEnable, double dUnderloadValue, COLORREF crUnderload);
 	BOOL SetNormalColor(COLORREF crNormal);
 
 	BOOL IsOverloaded(double dValue) const;
@@ -48,8 +48,8 @@ protected:
 
 	COLORREF GetNormalColor() const;
 	COLORREF GetValueColor(double dValue) const;
-	bool DrawDataBkgnd( CDC& dc);
 
+	bool DrawGrid(CDC& dc);
 	BOOL HasOverload() const;
 	BOOL HasUnderload() const;
 	int HitTest(const CPoint& ptClient) const;

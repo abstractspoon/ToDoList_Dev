@@ -23,13 +23,13 @@ const UINT WM_WLC_MOVETASK				= ::RegisterWindowMessage(_T("WM_WLC_MOVETASK"));
 // WPARAM = 0, LPARAM = Task ID
 const UINT WM_WLC_EDITTASKTITLE			= ::RegisterWindowMessage(_T("WM_WLC_EDITTASKTITLE"));
 
+// WPARAM = 0, LPARAM = Task ID
+const UINT WM_WLC_EDITTASKICON			= ::RegisterWindowMessage(_T("WM_WLC_EDITTASKICON"));
+
 // WPARAM = Alloc to name or NULL, LPARAM = Task ID
 const UINT WM_WLC_EDITTASKALLOCATIONS	= ::RegisterWindowMessage(_T("WM_WLC_EDITTASKALLOCATIONS"));
 
 /////////////////////////////////////////////////////////////////////////////
-
-// WPARAM = 0, LPARAM = Task ID
-const UINT WM_WLCN_SELCHANGE			= ::RegisterWindowMessage(_T("WM_WLCN_SELCHANGE"));
 
 // WPARAM = , LPARAM = TRUE/FALSE
 const UINT WM_WLCN_COMPLETIONCHANGE		= ::RegisterWindowMessage(_T("WM_WLCN_COMPLETIONCHANGE"));

@@ -1241,14 +1241,25 @@ BOOL CToDoListWnd::InitTimeTrackDlg()
 
 void CToDoListWnd::UpdateTimeTrackerTasks(const CFilteredToDoCtrl& tdc, BOOL bAllTasks)
 {
-	CTaskFile tasks;
+	if (m_dlgTimeTracker.IsSelectedTasklist(&tdc))
+	{
+		CTaskFile tasks;
+		TDCGETTASKS filter(TDCGT_NOTDONE);
 
-	if (bAllTasks)
-		tdc.GetFilteredTasks(tasks);
-	else
-		tdc.GetSelectedTasks(tasks, TDCGT_ALL, TDCGSTF_ALLPARENTS);
+		filter.mapAttribs.Add(TDCA_TASKNAME);
+
+		if (bAllTasks)
+		{
+			tdc.GetFilteredTasks(tasks, filter);
+		}
+		else
+		{
+			filter.dwFlags |= TDCGSTF_ALLPARENTS;
+			tdc.GetSelectedTasks(tasks, filter);
+		}
 	
-	m_dlgTimeTracker.UpdateTasks(&tdc, tasks);
+		m_dlgTimeTracker.UpdateTasks(&tdc, tasks);
+	}
 }
 
 void CToDoListWnd::UpdateTimeTrackerPreferences()
@@ -2037,7 +2048,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
 		}
 
-		GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, 0, pExport->tasks, sImgFolder); 
+		GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, pExport->tasks, sImgFolder); 
 	}
 	else
 	{
@@ -4355,7 +4366,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 	// create a new todoltrl for this tasklist 
 	const CPreferencesDlg& userPrefs = Prefs();
 	CFilteredToDoCtrl* pTDC = NewToDoCtrl();
-	CHoldRedraw hr(pTDC->GetSafeHwnd());
+	CHoldRedraw hr(*pTDC);
 	
 	// handles simple and storage tasklists
 	// we use szFilePath because it may be storage Info not a true path
@@ -5241,7 +5252,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 		if (startup.GetSaveIntermediateAll())
 		{
-			GetTasks(tdc, TRUE, TRUE, TSDT_ALL, TDCGETTASKS(), 0, tasks, sHtmlImgFolder);
+			GetTasks(tdc, TRUE, TRUE, TSDT_ALL, TDCGETTASKS(), tasks, sHtmlImgFolder);
 		}
 		else // use last state of transform dialog to determine what tasks to output
 		{
@@ -7486,17 +7497,7 @@ void CToDoListWnd::OnUpdateArchiveSelectedCompletedTasks(CCmdUI* pCmdUI)
 	pCmdUI->Enable(!tdc.IsReadOnly() && !tdc.IsArchive() && !tdc.IsArchive());
 }
 
-void CToDoListWnd::OnMovetaskdown() 
-{
-	GetToDoCtrl().MoveSelectedTask(TDCM_DOWN);	
-}
-
-void CToDoListWnd::OnUpdateMovetaskdown(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().CanMoveSelectedTask(TDCM_DOWN));	
-}
-
-void CToDoListWnd::OnMovetaskup() 
+void CToDoListWnd::DoMoveTask(TDC_MOVETASK nDirection)
 {
 	// DEBUGGING /////////////////////////////////////////////////////////
 	static DWORD dwLastTick = GetTickCount();
@@ -7512,9 +7513,26 @@ void CToDoListWnd::OnMovetaskup()
 #endif
 
 	dwLastTick = GetTickCount();
+
+	CScopedLogTimer log(_T("CToDoCtrl::MoveSelectedTask()"));
 	//////////////////////////////////////////////////////////////////////
 
-	GetToDoCtrl().MoveSelectedTask(TDCM_UP);	
+	GetToDoCtrl().MoveSelectedTask(nDirection);
+}
+
+void CToDoListWnd::OnMovetaskdown()
+{
+	DoMoveTask(TDCM_DOWN);
+}
+
+void CToDoListWnd::OnUpdateMovetaskdown(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().CanMoveSelectedTask(TDCM_DOWN));
+}
+
+void CToDoListWnd::OnMovetaskup() 
+{
+	DoMoveTask(TDCM_UP);	
 }
 
 void CToDoListWnd::OnUpdateMovetaskup(CCmdUI* pCmdUI) 
@@ -7524,7 +7542,7 @@ void CToDoListWnd::OnUpdateMovetaskup(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnMovetaskright() 
 {
-	GetToDoCtrl().MoveSelectedTask(TDCM_RIGHT);	
+	DoMoveTask(TDCM_RIGHT);
 }
 
 void CToDoListWnd::OnUpdateMovetaskright(CCmdUI* pCmdUI) 
@@ -7534,7 +7552,7 @@ void CToDoListWnd::OnUpdateMovetaskright(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnMovetaskleft() 
 {
-	GetToDoCtrl().MoveSelectedTask(TDCM_LEFT);	
+	DoMoveTask(TDCM_LEFT);
 }
 
 void CToDoListWnd::OnUpdateMovetaskleft(CCmdUI* pCmdUI) 
@@ -9471,12 +9489,13 @@ void CToDoListWnd::OnExport()
 
 	const CPreferencesDlg& userPrefs = Prefs();
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CString sTasklistPath = m_mgrToDoCtrls.GetFilePath(nSelTDC, FALSE);
 
 	CTDLExportDlg dialog(m_mgrImportExport, 
 						nTDCCount == 1, 
 						GetToDoCtrl().GetTaskView(),
 						userPrefs.GetExportVisibleColsOnly(), 
-						m_mgrToDoCtrls.GetFilePath(nSelTDC, FALSE), 
+						sTasklistPath, 
 						userPrefs.GetSaveExportFolderPath(), 
 						tdc.GetCustomAttributeDefs());
 	
@@ -9492,6 +9511,14 @@ void CToDoListWnd::OnExport()
 			return;
 
 		sExportPath = dialog.GetExportPath();
+
+		// Never allow the tasklist to get overwritten
+		if (FileMisc::IsSamePath(sExportPath, sTasklistPath))
+		{
+			CMessageBox::AfxShow(IDS_ERROR_EXPORT_OVERWRITETASKLIST, MB_ICONERROR | MB_OK);
+			continue;
+		}
+
 		nExporter = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
 
 		UINT nMsgFlags = (MB_OKCANCEL | MB_ICONWARNING);
@@ -9712,7 +9739,7 @@ void CToDoListWnd::OnExport()
 }
 
 int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
-						  TSD_TASKS nWhatTasks, TDCGETTASKS& filter, DWORD dwSelFlags, 
+						  TSD_TASKS nWhatTasks, TDCGETTASKS& filter,  
 						  CTaskFile& tasks, LPCTSTR szHtmlImageDir) const
 {
 	// preferences
@@ -9776,7 +9803,7 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 		break;
 
 	case TSDT_SELECTED:
-		tdc.GetSelectedTasks(tasks, filter, dwSelFlags);
+		tdc.GetSelectedTasks(tasks, filter);
 		break;
 	}
 	
@@ -9791,18 +9818,6 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
 							const CTaskSelectionDlg& taskSel, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const
 {
-	DWORD dwSelFlags = 0;
-    TSD_TASKS nWhatTasks = taskSel.GetWantWhatTasks();
-	
-	if (taskSel.GetWantSelectedTasks())
-	{
-		if (!taskSel.GetWantSelectedSubtasks()) 
-			dwSelFlags |= TDCGSTF_NOTSUBTASKS;
-
-		if (taskSel.GetWantSelectedParentTask())
-			dwSelFlags |= TDCGSTF_IMMEDIATEPARENT;
-	}
-
 	TDC_GETTASKS nFilter = TDCGT_ALL;
 	
 	// build filter
@@ -9820,8 +9835,23 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 	// attributes to export
 	taskSel.GetSelectedAttributes(tdc, filter.mapAttribs);
 
+	// special case
+	if (bHtmlComments)
+		filter.mapAttribs.Add(TDCA_HTMLCOMMENTS);
+
+	TSD_TASKS nWhatTasks = taskSel.GetWantWhatTasks();
+
+	if (nWhatTasks == TSDT_SELECTED)
+	{
+		if (!taskSel.GetWantSelectedSubtasks())
+			filter.dwFlags |= TDCGSTF_NOTSUBTASKS;
+
+		if (taskSel.GetWantSelectedParentTask())
+			filter.dwFlags |= TDCGSTF_IMMEDIATEPARENT;
+	}
+
 	// get the tasks
-	return GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, dwSelFlags, tasks, szHtmlImageDir);
+	return GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, tasks, szHtmlImageDir);
 }
 
 void CToDoListWnd::OnUpdateExport(CCmdUI* pCmdUI) 

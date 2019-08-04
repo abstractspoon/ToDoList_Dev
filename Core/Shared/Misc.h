@@ -447,6 +447,7 @@ namespace Misc
 	int Replace(const CString& sSearchFor, const CString& sReplaceWith, CStringArray& aSearchIn, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
 
 	int Round(double dValue);
+	double Round(double dValue, int nDecimals);
 	double Atof(const CString& sValue);
 	BOOL IsNumber(const CString& sValue);
 	BOOL IsSymbol(const CString& sValue);

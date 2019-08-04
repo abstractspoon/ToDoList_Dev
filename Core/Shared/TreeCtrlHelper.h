@@ -178,11 +178,12 @@ public:
 	TCH_CHECK GetItemCheckState(HTREEITEM hti) const;
 
 	BOOL SelectItem(HTREEITEM hti); // won't auto edit if item already selected
+	BOOL IsSelectedItem(HTREEITEM hti) const;
 	inline void EndLabelEdit(BOOL bCancel) { SendMessage(m_tree, TVM_ENDEDITLABELNOW, bCancel, 0); }
 
 	BOOL InvalidateItem(HTREEITEM hti, BOOL bChildren = TRUE);
 	void GetClientRect(LPRECT lpRect, HTREEITEM htiFrom);
-	int GetItemHeight(HTREEITEM hti = NULL);
+	int GetItemTop(HTREEITEM hti) const;
 
 	int GetItemPos(HTREEITEM hti, HTREEITEM htiParent);
 	int GetItemLevel(HTREEITEM hti);
@@ -190,7 +191,7 @@ public:
 	HTREEITEM FindItem(DWORD dwItemData, HTREEITEM htiStart = NULL) const;
  	const CTreeCtrl& TreeCtrl() const { return m_tree; }
 
-	BOOL IsItemBold(HTREEITEM hti);
+	BOOL IsItemBold(HTREEITEM hti) const;
 	void SetItemBold(HTREEITEM hti, BOOL bBold = TRUE);
 	void SetTopLevelItemsBold(BOOL bBold = TRUE);
 
@@ -215,8 +216,10 @@ public:
 	void ResetIndexMap() const;
 
 	// return increments of item height
-	void SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, int nItems);
 	int GetDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge) const;
+
+	// returns TRUE if the view moved
+	BOOL SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, int nItems);
 
 	// get next/prev selectable items, NULL if none
 	HTREEITEM GetNextPageVisibleItem(HTREEITEM hti) const;

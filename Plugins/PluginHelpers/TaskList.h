@@ -177,11 +177,11 @@ namespace Abstractspoon
 				double GetTimeEstimate(TimeUnits% cUnits, bool calculated);
 				double GetTimeSpent(TimeUnits% cUnits, bool calculated);
 
-				String^ GetAttribute(Attribute attrib, bool calculated, bool display);
+				String^ GetAttributeValue(Attribute attrib, bool calculated, bool display);
 				Boolean HasAttribute(Attribute attrib);
 
-				String^ GetCustomAttributeData(String^ sID);
-				String^ GetMetaData(String^ sKey);
+				String^ GetCustomAttributeValue(String^ sID);
+				String^ GetMetaDataValue(String^ sKey);
 
 				// TODO
 				Boolean GetRecurrence();
@@ -222,10 +222,10 @@ namespace Abstractspoon
 
 				Boolean SetTimeEstimate(double dTime, TimeUnits cUnits);
 				Boolean SetTimeSpent(double dTime, TimeUnits cUnits);
-				Boolean SetCustomAttributeData(String^ sID, String^ sValue);
-				Boolean ClearCustomAttributeData(String^ sID);
-				Boolean SetMetaData(String^ sKey, String^ sValue);
-				Boolean ClearMetaData(String^ sKey);
+				Boolean SetCustomAttributeValue(String^ sID, String^ sValue);
+				Boolean ClearCustomAttributeValue(String^ sID);
+				Boolean SetMetaDataValue(String^ sKey, String^ sValue);
+				Boolean ClearMetaDataValue(String^ sKey);
 
 				// MISC -------------------------------------------------------
 
@@ -263,6 +263,7 @@ namespace Abstractspoon
 				String^ GetProjectName();
 				String^ GetMetaData(String^ sKey);
 
+				Boolean HasCustomAttributes();
 				UInt32  GetCustomAttributeCount();
 				String^ GetCustomAttributeLabel(int nIndex);
 				String^ GetCustomAttributeID(int nIndex);

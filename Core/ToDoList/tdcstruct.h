@@ -292,6 +292,10 @@ struct TDCGETTASKS
 
 	BOOL WantAttribute(TDC_ATTRIBUTE nAttrib) const
 	{
+		// Special case due to its cost
+		if (nAttrib == TDCA_HTMLCOMMENTS)
+			return (!mapAttribs.Has(TDCA_NONE) && mapAttribs.Has(TDCA_HTMLCOMMENTS));
+
 		if ((mapAttribs.GetCount() == 0) || mapAttribs.Has(TDCA_ALL))
 			return TRUE;
 
@@ -319,7 +323,14 @@ struct TDCGETTASKS
 		return FALSE;
 	}
 
-	BOOL HasFlag(DWORD dwFlag) const { return Misc::HasFlag(dwFlags, dwFlag); }
+	BOOL HasFlag(DWORD dwFlag) const 
+	{ 
+		// Dependent flags
+		if ((dwFlag == TDCGSTF_IMMEDIATEPARENT) && HasFlag(TDCGSTF_ALLPARENTS))
+			return TRUE;
+
+		return Misc::HasFlag(dwFlags, dwFlag); 
+	}
 
 	TDC_GETTASKS nFilter;
 	COleDateTime dateDueBy;

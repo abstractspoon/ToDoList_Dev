@@ -14,21 +14,15 @@
 #include "..\shared\timeHelper.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\graphicsMisc.h"
-#include "..\shared\TreeCtrlHelper.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\misc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
-#include "..\shared\themed.h"
-#include "..\shared\osversion.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\copywndcontents.h"
-#include "..\shared\wclassdefines.h"
-#include "..\shared\mousewheelmgr.h"
+#include "..\shared\CopyWndContents.h"
 
 #include "..\3rdparty\shellicons.h"
-
-#include "..\Interfaces\iuiextension.h"
 
 #include <float.h> // for DBL_MAX
 #include <math.h>  // for fabs()
@@ -53,13 +47,8 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const int MIN_COL_WIDTH			= GraphicsMisc::ScaleByDPIFactor(6);
-const int MIN_LABEL_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
-const int TREE_TITLE_MIN_WIDTH	= GraphicsMisc::ScaleByDPIFactor(75); 
 const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
-const int TV_TIPPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
-const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -79,35 +68,6 @@ const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 	if (wi == NULL)	return;	\
 }
 
-//////////////////////////////////////////////////////////////////////
-
-class CWorkloadLockUpdates : public CLockUpdates
-{
-public:
-	CWorkloadLockUpdates(CWorkloadCtrl* pCtrl, BOOL bTree, BOOL bAndSync) 
-		: 
-	CLockUpdates(bTree ? pCtrl->m_tcTasks.GetSafeHwnd() : pCtrl->m_lcColumns.GetSafeHwnd()),
-		m_bAndSync(bAndSync), 
-		m_pCtrl(pCtrl)
-	{
-		ASSERT(m_pCtrl);
-		
-		if (m_bAndSync)
-			m_pCtrl->EnableResync(FALSE);
-	}
-	
-	~CWorkloadLockUpdates()
-	{
-		ASSERT(m_pCtrl);
-		
-		if (m_bAndSync)
-			m_pCtrl->EnableResync(TRUE, m_hWnd);
-	}
-	
-private:
-	BOOL m_bAndSync;
-	CWorkloadCtrl* m_pCtrl;
-};
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -115,19 +75,10 @@ private:
 
 CWorkloadCtrl::CWorkloadCtrl() 
 	:
-	CTreeListSyncer(TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
 	m_dwOptions(WLCF_SHOWSPLITTERBAR),
-	m_crAltLine(CLR_NONE),
-	m_crGridLine(CLR_NONE),
-	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
 	m_crAllocation(RGB(255, 180, 180)),
 	m_crOverlap(RGB(255, 0, 0)),
 	m_dwMaxTaskID(0),
-	m_bReadOnly(FALSE),
-	m_bMovingTask(FALSE),
-	m_nPrevDropHilitedItem(-1),
-	m_tshDragDrop(m_tcTasks),
-	m_treeDragDrop(m_tshDragDrop, m_tcTasks),
 	m_mapTotalDays(FALSE),
 	m_mapTotalTasks(FALSE),
 	m_mapPercentLoad(TRUE), // average
@@ -138,92 +89,37 @@ CWorkloadCtrl::CWorkloadCtrl()
 
 CWorkloadCtrl::~CWorkloadCtrl()
 {
-	//CTreeListSyncer::Release();
 }
 
-BEGIN_MESSAGE_MAP(CWorkloadCtrl, CWnd)
+BEGIN_MESSAGE_MAP(CWorkloadCtrl, CTreeListCtrl)
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_TASKTREE, OnBeginEditTreeLabel)
-	ON_NOTIFY(HDN_ENDDRAG, IDC_TASKHEADER, OnEndDragTreeHeader)
 	ON_NOTIFY(HDN_ITEMCLICK, IDC_TASKHEADER, OnClickTreeHeader)
-	ON_NOTIFY(HDN_ITEMCHANGING, IDC_TASKHEADER, OnItemChangingTreeHeader)
-	ON_NOTIFY(HDN_ITEMCHANGED, IDC_TASKHEADER, OnItemChangedTreeHeader)
-	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_TASKHEADER, OnDblClickTreeHeaderDivider)
-	ON_NOTIFY(NM_RCLICK, IDC_TASKHEADER, OnRightClickTreeHeader)
 	ON_NOTIFY(TVN_GETDISPINFO, IDC_TASKTREE, OnTreeGetDispInfo)
-	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TASKTREE, OnTreeItemExpanded)
-	ON_NOTIFY(TVN_KEYUP, IDC_TASKTREE, OnTreeKeyUp)
-	ON_NOTIFY(NM_CLICK, IDC_ALLOCATIONCOLUMNS, OnClickColumns)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_TOTALSLABELS, OnTotalsListsCustomDraw)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ALLOCATIONTOTALS, OnTotalsListsCustomDraw)
 
-	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragEnter)
-	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreePreDragMove)
-	ON_REGISTERED_MESSAGE(WM_DD_DRAGOVER, OnTreeDragOver)
-	ON_REGISTERED_MESSAGE(WM_DD_DRAGDROP, OnTreeDragDrop)
-	ON_REGISTERED_MESSAGE(WM_DD_DRAGABORT, OnTreeDragAbort)
-
 	ON_WM_CREATE()
-	ON_WM_SIZE()
-	ON_WM_LBUTTONDBLCLK()
 	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 
-BOOL CWorkloadCtrl::Create(CWnd* pParentWnd, const CRect& rect, UINT nID, BOOL bVisible)
-{
-	DWORD dwStyle = (WS_CHILD | (bVisible ? WS_VISIBLE : 0) | WS_TABSTOP);
-	
-	// create ourselves
-	return CWnd::CreateEx(WS_EX_CONTROLPARENT, NULL, NULL, dwStyle, rect, pParentWnd, nID);
-}
-
 int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	if (CWnd::OnCreate(lpCreateStruct) == -1)
+	if (CTreeListCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
+	
+	// prevent column reordering on list
+	m_listHeader.ModifyStyle(HDS_DRAGDROP, 0);
+	m_listHeader.EnableTracking(FALSE);
+
+	// prevent translation of the list header
+	CLocalizer::EnableTranslation(m_listHeader, FALSE);
 	
 	BOOL bVisible = (lpCreateStruct->style & WS_VISIBLE);
 	CRect rect(0, 0, lpCreateStruct->cx, lpCreateStruct->cy);
 	
 	DWORD dwStyle = (WS_CHILD | (bVisible ? WS_VISIBLE : 0));
 	
-	if (!m_tcTasks.Create((dwStyle | WS_TABSTOP | TVS_SHOWSELALWAYS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_NONEVENHEIGHT | TVS_NOTOOLTIPS | TVS_EDITLABELS),
-							rect, 
-							this, 
-							IDC_TASKTREE))
-	{
-		return -1;
-	}
-	
-	// Tasks Header ---------------------------------------------------------------------
-	if (!m_hdrTasks.Create((dwStyle | HDS_HOTTRACK | HDS_BUTTONS | HDS_DRAGDROP | HDS_FULLDRAG), rect, this, IDC_TASKHEADER))
-	{
-		return -1;
-	}
-	
-	// Column List ---------------------------------------------------------------------
-	if (!m_lcColumns.Create((dwStyle | WS_TABSTOP),	rect, this, IDC_ALLOCATIONCOLUMNS))
-	{
-		return -1;
-	}
-	
-	ListView_SetExtendedListViewStyleEx(m_lcColumns, LVS_EX_HEADERDRAGDROP, LVS_EX_HEADERDRAGDROP);
-	ListView_SetExtendedListViewStyleEx(m_lcColumns, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
-
-	// subclass the tree and list
-	if (!Sync(m_tcTasks, m_lcColumns, TLSL_RIGHTDATA_IS_LEFTITEM, m_hdrTasks))
-	{
-		return -1;
-	}
-	
-	// Column Header ---------------------------------------------------------------------
-	if (!m_hdrColumns.SubclassWindow(ListView_GetHeader(m_lcColumns)))
-	{
-		return FALSE;
-	}
-	m_hdrColumns.EnableToolTips();
-	m_hdrColumns.EnableTracking(FALSE);
-
 	// Totals are disabled so they can't grab the focus
 	dwStyle |= LVS_REPORT | LVS_NOCOLUMNHEADER | LVS_SINGLESEL | LVS_NOSCROLL | WS_TABSTOP | WS_DISABLED;
 
@@ -259,22 +155,8 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	BuildTaskTreeColumns();
 	BuildListColumns();
 	PopulateTotalsLists();
-	
-	// prevent column reordering on columns
-	m_hdrColumns.ModifyStyle(HDS_DRAGDROP, 0);
+	EnableImagePlaceholder();
 
-	// prevent translation of the list header
-	CLocalizer::EnableTranslation(m_hdrColumns, FALSE);
-
-	// Initialise tree drag and drop
-	m_treeDragDrop.Initialize(m_tcTasks.GetParent(), TRUE, FALSE);
-
-	// misc
-	m_tcTasks.ModifyStyle(TVS_SHOWSELALWAYS, 0, 0);
-	m_lcColumns.ModifyStyle(LVS_SHOWSELALWAYS, 0, 0);
-
- 	PostResize();
-	
 	return 0;
 }
 
@@ -305,48 +187,20 @@ void CWorkloadCtrl::UpdateTotalsDateRangeLabel()
 	}
 }
 
-void CWorkloadCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
-{
-	CRect rSplitter;
-	
-	if (GetSplitterRect(rSplitter) && rSplitter.PtInRect(point))
-		AdjustSplitterToFitAttributeColumns();
-}
-
 void CWorkloadCtrl::AdjustSplitterToFitAttributeColumns()
 {
-	int nColsWidth = m_hdrColumns.CalcTotalItemWidth();
-
-	if (HasVScrollBar(m_lcColumns))
-		nColsWidth += GetSystemMetrics(SM_CXVSCROLL);
-	
-	CRect rClient;
-	CWnd::GetClientRect(rClient);
-
-	// adjust for graph
-	rClient.right = ((rClient.Width() * 2) / 3);
-	
-	int nNewSplitPos = (rClient.right - nColsWidth - GetSplitBarWidth() - LV_COLPADDING);
-	nNewSplitPos = max(MIN_LABEL_EDIT_WIDTH, nNewSplitPos);
-	
-	CTreeListSyncer::SetSplitPos(nNewSplitPos);
+	AdjustSplitterToFitColumns();
 }
 
-void CWorkloadCtrl::InitItemHeights()
+int CWorkloadCtrl::CalcSplitPosToFitListColumns(int nTotalWidth) const
 {
-	CTreeListSyncer::InitItemHeights();
-}
-
-HTREEITEM CWorkloadCtrl::GetSelectedItem() const
-{
-	return GetTreeSelItem();
+	// Adjust for bar chart
+	return CTreeListCtrl::CalcSplitPosToFitListColumns(MulDiv(nTotalWidth, 2, 3));
 }
 
 DWORD CWorkloadCtrl::GetSelectedTaskID() const
 {
-	HTREEITEM hti = GetTreeSelItem();
-
-	return (hti ? GetTaskID(hti) : 0);
+	return GetSelectedItemData();
 }
 
 BOOL CWorkloadCtrl::GetSelectedTask(WORKLOADITEM& wi) const
@@ -376,25 +230,9 @@ BOOL CWorkloadCtrl::SetSelectedTask(const WORKLOADITEM& wi)
 
 BOOL CWorkloadCtrl::SelectTask(DWORD dwTaskID)
 {
-	HTREEITEM hti = FindTreeItem(m_tcTasks, dwTaskID);
+	HTREEITEM hti = GetTreeItem(dwTaskID);
 
 	return SelectItem(hti);
-}
-
-BOOL CWorkloadCtrl::SelectItem(HTREEITEM hti)
-{
-	if (hti == NULL)
-		return FALSE;
-
-	BOOL bWasVisible = IsTreeItemVisible(m_tcTasks, hti);
-
-	SelectTreeItem(hti, FALSE);
-	ResyncSelection(m_lcColumns, m_tcTasks, FALSE);
-
-	if (!bWasVisible)
-		ExpandList();
-
-	return TRUE;
 }
 
 BOOL CWorkloadCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
@@ -405,11 +243,11 @@ BOOL CWorkloadCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 	switch (nCmd)
 	{
 	case IUI_SELECTFIRSTTASK:
-		htiStart = m_tcTasks.TCH().GetFirstItem();
+		htiStart = m_tree.TCH().GetFirstItem();
 		break;
 
 	case IUI_SELECTNEXTTASK:
-		htiStart = m_tcTasks.TCH().GetNextItem(GetSelectedItem());
+		htiStart = m_tree.TCH().GetNextItem(GetSelectedItem());
 		break;
 		
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -417,16 +255,16 @@ BOOL CWorkloadCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 		break;
 
 	case IUI_SELECTPREVTASK:
-		htiStart = m_tcTasks.TCH().GetPrevItem(GetSelectedItem());
+		htiStart = m_tree.TCH().GetPrevItem(GetSelectedItem());
 
 		if (htiStart == NULL) // we were on the first task
-			htiStart = m_tcTasks.TCH().GetLastItem();
+			htiStart = m_tree.TCH().GetLastItem();
 		
 		bForwards = FALSE;
 		break;
 
 	case IUI_SELECTLASTTASK:
-		htiStart = m_tcTasks.TCH().GetLastItem();
+		htiStart = m_tree.TCH().GetLastItem();
 		bForwards = FALSE;
 		break;
 
@@ -442,7 +280,7 @@ BOOL CWorkloadCtrl::SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL 
 	if (!hti)
 		return FALSE;
 
-	CString sTitle = m_tcTasks.GetItemText(hti);
+	CString sTitle = m_tree.GetItemText(hti);
 
 	if (Misc::Find(select.szWords, sTitle, select.bCaseSensitive, select.bWholeWord) != -1)
 	{
@@ -453,59 +291,38 @@ BOOL CWorkloadCtrl::SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL 
 	}
 
 	if (bForwards)
-		return SelectTask(m_tcTasks.TCH().GetNextItem(hti), select, TRUE);
+		return SelectTask(m_tree.TCH().GetNextItem(hti), select, TRUE);
 
 	// else
-	return SelectTask(m_tcTasks.TCH().GetPrevItem(hti), select, FALSE);
+	return SelectTask(m_tree.TCH().GetPrevItem(hti), select, FALSE);
 }
 
-int CWorkloadCtrl::GetExpandedState(CDWordArray& aExpanded, HTREEITEM hti) const
+BOOL CWorkloadCtrl::CanMoveSelectedTask(const IUITASKMOVE& move) const
 {
-	int nStart = 0;
+	if (m_bReadOnly)
+		return FALSE;
 
-	if (hti == NULL)
-	{
-		// guestimate initial size
-		aExpanded.SetSize(0, m_tcTasks.GetCount() / 4);
-	}
-	else if (TCH().IsItemExpanded(hti) <= 0)
-	{
-		return 0; // nothing added
-	}
-	else // expanded
-	{
-		nStart = aExpanded.GetSize();
-		aExpanded.Add(GetTaskID(hti));
-	}
+	TLCITEMMOVE itemMove = { 0 };
 
-	// process children
-	HTREEITEM htiChild = m_tcTasks.GetChildItem(hti);
+	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
+	itemMove.htiDestParent = GetTreeItem(move.dwParentID);
+	itemMove.htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
 
-	while (htiChild)
-	{
-		GetExpandedState(aExpanded, htiChild);
-		htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
-	}
-
-	return (aExpanded.GetSize() - nStart);
+	return CTreeListCtrl::CanMoveItem(itemMove);
 }
 
-void CWorkloadCtrl::SetExpandedState(const CDWordArray& aExpanded)
+BOOL CWorkloadCtrl::MoveSelectedTask(const IUITASKMOVE& move)
 {
-	int nNumExpanded = aExpanded.GetSize();
+	if (m_bReadOnly)
+		return FALSE;
 
-	if (nNumExpanded)
-	{
-		for (int nItem = 0; nItem < nNumExpanded; nItem++)
-		{
-			HTREEITEM hti = GetTreeItem(aExpanded[nItem]);
+	TLCITEMMOVE itemMove = { 0 };
 
-			if (hti)
-				m_tcTasks.Expand(hti, TVE_EXPAND);
-		}
+	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
+	itemMove.htiDestParent = GetTreeItem(move.dwParentID);
+	itemMove.htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
 
-		ExpandList();
-	}
+	return CTreeListCtrl::MoveItem(itemMove);
 }
 
 BOOL CWorkloadCtrl::EditWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const
@@ -549,7 +366,7 @@ BOOL CWorkloadCtrl::EditWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE 
 void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 {
 	// we must have been initialized already
-	ASSERT(m_lcColumns.GetSafeHwnd() && m_tcTasks.GetSafeHwnd());
+	ASSERT(m_list.GetSafeHwnd() && m_tree.GetSafeHwnd());
 
 	// always cancel any ongoing operation
 	CancelOperation();
@@ -581,25 +398,22 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		
 	case IUI_NEW:
 	case IUI_EDIT:
-		{
-			m_tcTasks.SetRedraw(FALSE);
-			m_lcColumns.SetRedraw(FALSE);
+		CWnd::SetRedraw(FALSE);
 			
-			// update the task(s)
-			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE))
-			{
-				if (pTasks->IsAttributeAvailable(TDCA_DUEDATE) || pTasks->IsAttributeAvailable(TDCA_STARTDATE))
-					m_data.RecalculateOverlaps();
-			}
+		// update the task(s)
+		if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE))
+		{
+			if (pTasks->IsAttributeAvailable(TDCA_DUEDATE) || pTasks->IsAttributeAvailable(TDCA_STARTDATE))
+				m_data.RecalculateOverlaps();
 		}
 		break;
 		
 	case IUI_DELETE:
 		{
-			m_tcTasks.SetRedraw(FALSE);
-			m_lcColumns.SetRedraw(FALSE);
-		
+			CHoldRedraw hr(GetHwnd());
+
 			RemoveDeletedTasks(pTasks);
+			UpdateParentStatus(pTasks, pTasks->GetFirstTask(), TRUE);
 		}
 		break;
 		
@@ -611,7 +425,6 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	InitItemHeights();
 	UpdateListColumns();
 	FixupListSortColumn();
-	RecalcTreeColumns(TRUE);
 	RecalcAllocationTotals();
 	RecalcDataDateRange();
 
@@ -630,17 +443,16 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			SelectTask(dwSelID);
 
 			UnlockWindowUpdate();
-			EnableResync(TRUE, m_tcTasks);
+			EnableResync(TRUE, m_tree);
+			UpdateColumnWidths(UTWA_ANY);
 		}
 		break;
 
 	case IUI_NEW:
 	case IUI_EDIT:
 	case IUI_DELETE:
-		{
-			m_tcTasks.SetRedraw(TRUE);
-			m_lcColumns.SetRedraw(TRUE);
-		}
+		CWnd::SetRedraw(TRUE);
+		InvalidateAll();
 		break;
 
 	default:
@@ -652,12 +464,25 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	{
 		ASSERT(m_sort.IsSorting());
 
-		CHoldRedraw hr(m_tcTasks);
+		CHoldRedraw hr(m_tree);
 
 		if (m_sort.bMultiSort)
-			CTreeListSyncer::Sort(MultiSortProc, (DWORD)this);
+			CTreeListCtrl::Sort(MultiSortProc, (DWORD)this);
 		else
-			CTreeListSyncer::Sort(SortProc, (DWORD)this);
+			CTreeListCtrl::Sort(SortProc, (DWORD)this);
+	}
+}
+
+void CWorkloadCtrl::PreFixVScrollSyncBug()
+{
+	// Odd bug: The very last tree item will not scroll into view. 
+	// Expanding and collapsing an item is enough to resolve the issue.
+	HTREEITEM hti = TCH().FindFirstParent();
+
+	if (hti)
+	{
+		TCH().ExpandItem(hti, TRUE);
+		TCH().ExpandItem(hti, FALSE);
 	}
 }
 
@@ -683,19 +508,6 @@ void CWorkloadCtrl::RecalcAllocationTotals()
 	m_barChart.RebuildChart();
 }
 
-void CWorkloadCtrl::PreFixVScrollSyncBug()
-{
-	// Odd bug: The very last tree item will not scroll into view. 
-	// Expanding and collapsing an item is enough to resolve the issue.
-	HTREEITEM hti = TCH().FindFirstParent();
-		
-	if (hti)
-	{
-		TCH().ExpandItem(hti, TRUE);
-		TCH().ExpandItem(hti, FALSE);
-	}
-}
-
 int CWorkloadCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aAllocTo)
 {
 	aAllocTo.RemoveAll();
@@ -705,6 +517,33 @@ int CWorkloadCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 		aAllocTo.InsertAt(0, pTasks->GetTaskAllocatedTo(hTask, nAllocTo));
 	
 	return aAllocTo.GetSize();
+}
+
+double CWorkloadCtrl::GetTaskTimeEstimate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+{
+	TDC_UNITS nUnits = TDCU_NULL;
+	double dTimeEst = pTasks->GetTaskTimeEstimate(hTask, nUnits, true);
+
+	TH_UNITS nTHUnits = THU_NULL;
+
+	switch (nUnits)
+	{
+	case TDCU_MINS:		nTHUnits = THU_MINS;	break;
+	case TDCU_HOURS:	nTHUnits = THU_HOURS;	break;
+	case TDCU_WEEKS:	nTHUnits = THU_WEEKS;	break;
+	case TDCU_MONTHS:	nTHUnits = THU_MONTHS;	break;
+	case TDCU_YEARS:	nTHUnits = THU_YEARS;	break;
+
+	case TDCU_DAYS:
+	case TDCU_WEEKDAYS:
+		return dTimeEst;
+
+	default:
+		ASSERT(0);
+		return 0.0;
+	}
+
+	return CTimeHelper().GetTime(dTimeEst, nTHUnits, THU_WEEKDAYS);
 }
 
 BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
@@ -722,6 +561,7 @@ BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
 	case TDCA_STARTDATE:
 	case TDCA_SUBTASKDONE:
 	case TDCA_TASKNAME:
+	case TDCA_TIMEEST:
 		return TRUE;
 	}
 	
@@ -772,7 +612,7 @@ WLC_COLUMNID CWorkloadCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
 	{
 	case TDCA_TASKNAME:		return WLCC_TITLE;		
 	case TDCA_DUEDATE:		return WLCC_DUEDATE;		
-	case TDCA_STARTDATE:		return WLCC_STARTDATE;	
+	case TDCA_STARTDATE:	return WLCC_STARTDATE;	
 	case TDCA_PERCENT:		return WLCC_PERCENT;		
 	case TDCA_ID:			return WLCC_TASKID;		
 	case TDCA_ALLOCTO:		return WLCC_ALLOCTO;		
@@ -843,10 +683,13 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 	}
 
 	// take a snapshot we can check changes against
+	// Note: No need to check meta-data because we're 
+	// the only one who can change it
 	WORKLOADITEM giOrg = *pWI;
 
 	// can't use a switch here because we also need to check for IUI_ALL
 	time64_t tDate = 0;
+	BOOL bAllocationChange = FALSE;
 	
 	if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
 		pWI->sTitle = pTasks->GetTaskTitle(hTask);
@@ -855,6 +698,8 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 	{
  		GetTaskAllocTo(pTasks, hTask, pWI->aAllocTo);
 		Misc::AddUniqueItems(pWI->aAllocTo, m_aAllocTo);
+
+		bAllocationChange = TRUE;
 	}
 	
 	if (pTasks->IsAttributeAvailable(TDCA_ICON))
@@ -869,6 +714,8 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 			pWI->dtRange.m_dtStart = CDateHelper::GetDate(tDate);
 		else
 			CDateHelper::ClearDate(pWI->dtRange.m_dtStart);
+
+		bAllocationChange = TRUE;
 	}
 	
 	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
@@ -877,6 +724,15 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 			pWI->dtRange.m_dtEnd = CDateHelper::GetDate(tDate);
 		else
 			CDateHelper::ClearDate(pWI->dtRange.m_dtEnd);
+
+		bAllocationChange = TRUE;
+	}
+
+	if (pTasks->IsAttributeAvailable(TDCA_TIMEEST))
+	{
+		pWI->dTimeEst = GetTaskTimeEstimate(pTasks, hTask);
+
+		bAllocationChange = TRUE;
 	}
 	
 	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
@@ -918,12 +774,19 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
+
+	if (bAllocationChange &&
+		HasOption(WLCF_CALCMISSINGALLOCATIONS) &&
+		pWI->mapAllocatedDays.IsAutoCalculated())
+	{
+		pWI->AutoCalculateAllocations(HasOption(WLCF_PREFERTIMEESTFORCALCS));
+	}
 	
 	return bChange;
 }
 
-void CWorkloadCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
-									  CSet<DWORD>& mapIDs, BOOL bAndSiblings)
+void CWorkloadCtrl::BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
+								   CDWordSet& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return;
@@ -931,7 +794,7 @@ void CWorkloadCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	mapIDs.Add(pTasks->GetTaskID(hTask));
 
 	// children
-	BuildTaskMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);
+	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);
 
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
@@ -941,7 +804,7 @@ void CWorkloadCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			BuildTaskMap(pTasks, hSibling, mapIDs, FALSE);
+			BuildTaskIDMap(pTasks, hSibling, mapIDs, FALSE);
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
@@ -949,8 +812,8 @@ void CWorkloadCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 
 void CWorkloadCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 {
-	CSet<DWORD> mapIDs;
-	BuildTaskMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
+	CDWordSet mapIDs;
+	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
 
 	if (RemoveDeletedTasks(NULL, pTasks, mapIDs))
 	{
@@ -959,30 +822,60 @@ void CWorkloadCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 	}
 }
 
-BOOL CWorkloadCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CSet<DWORD>& mapIDs)
+BOOL CWorkloadCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CDWordSet& mapIDs)
 {
 	// traverse the tree looking for items that do not 
 	// exist in pTasks and delete them
 	if (hti && !mapIDs.Has(GetTaskID(hti)))
 	{
-		DeleteTreeItem(hti);
+		DeleteItem(hti);
 		return TRUE;
 	}
 
 	// check its children
 	BOOL bSomeRemoved = FALSE;
-	HTREEITEM htiChild = m_tcTasks.GetChildItem(hti);
+	HTREEITEM htiChild = m_tree.GetChildItem(hti);
 	
 	while (htiChild)
 	{
 		// get next sibling before we (might) delete this one
-		HTREEITEM htiNext = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
+		HTREEITEM htiNext = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 		
 		bSomeRemoved |= RemoveDeletedTasks(htiChild, pTasks, mapIDs);
 		htiChild = htiNext;
 	}
 
 	return bSomeRemoved;
+}
+
+void CWorkloadCtrl::UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
+{
+	if (hTask == NULL)
+		return;
+
+	// this task
+	DWORD dwTaskID = pTasks->GetTaskID(hTask);
+
+	WORKLOADITEM* pWI = NULL;
+	GET_WI(dwTaskID, pWI);
+
+	pWI->bParent = pTasks->IsTaskParent(hTask);
+
+	// children
+	UpdateParentStatus(pTasks, pTasks->GetFirstTask(hTask), TRUE);
+
+	// handle siblings WITHOUT RECURSION
+	if (bAndSiblings)
+	{
+		HTASKITEM hSibling = pTasks->GetNextTask(hTask);
+
+		while (hSibling)
+		{
+			// FALSE == not siblings
+			UpdateParentStatus(pTasks, hSibling, FALSE);
+			hSibling = pTasks->GetNextTask(hSibling);
+		}
+	}
 }
 
 WORKLOADITEM* CWorkloadCtrl::GetWorkloadItem(DWORD dwTaskID, BOOL bCopyRefID) const
@@ -1016,8 +909,8 @@ WORKLOADITEM* CWorkloadCtrl::GetWorkloadItem(DWORD dwTaskID, BOOL bCopyRefID) co
 
 void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 {
-	m_tcTasks.DeleteAllItems();
-	m_lcColumns.DeleteAllItems();
+	m_tree.DeleteAllItems();
+	m_list.DeleteAllItems();
 
 	m_aAllocTo.RemoveAll();
 	m_data.RemoveAll();
@@ -1042,11 +935,6 @@ void CWorkloadCtrl::RecalcDataDateRange()
 
 	m_dtDataRange.Set(CDateHelper::GetStartOfMonth(dtRange.GetStart()), 
 					  CDateHelper::GetEndOfMonth(dtRange.GetEnd()));
-}
-
-void CWorkloadCtrl::RefreshTreeItemMap()
-{
-	m_mapHTItems.BuildMap(m_tcTasks);
 }
 
 void CWorkloadCtrl::PopulateTotalsLists()
@@ -1113,7 +1001,11 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
 			pWI->dtRange.m_dtEnd = CDateHelper::GetDate(tDate);
 
-		pWI->mapAllocatedDays.Decode(pTasks->GetTaskMetaData(hTask, WORKLOAD_TYPEID));
+		pWI->dTimeEst = GetTaskTimeEstimate(pTasks, hTask);
+
+		// This wants to be last so that time estimate and date range are up to date
+		if (!pWI->mapAllocatedDays.Decode(pTasks->GetTaskMetaData(hTask, WORKLOAD_TYPEID)))
+			pWI->AutoCalculateAllocations(HasOption(WLCF_PREFERTIMEESTFORCALCS));
 	}
 	
 	// add item to tree
@@ -1122,11 +1014,11 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	if (!bInsertAtEnd)
 	{
 		// Find the sibling task whose position is one less
-		HTREEITEM htiSibling = m_tcTasks.GetChildItem(htiParent);
+		HTREEITEM htiSibling = m_tree.GetChildItem(htiParent);
 
 		while (htiSibling)
 		{
-			DWORD dwSiblingID = m_tcTasks.GetItemData(htiSibling);
+			DWORD dwSiblingID = m_tree.GetItemData(htiSibling);
 			const WORKLOADITEM* pWISibling = GetWorkloadItem(dwSiblingID);
 			ASSERT(pWISibling);
 
@@ -1136,11 +1028,11 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 				break;
 			}
 
-			htiSibling = m_tcTasks.GetNextItem(htiSibling, TVGN_NEXT);
+			htiSibling = m_tree.GetNextItem(htiSibling, TVGN_NEXT);
 		}
 	}
 
-	HTREEITEM hti = m_tcTasks.TCH().InsertItem(LPSTR_TEXTCALLBACK, 
+	HTREEITEM hti = m_tree.TCH().InsertItem(LPSTR_TEXTCALLBACK, 
 											I_IMAGECALLBACK, 
 											I_IMAGECALLBACK, 
 											dwTaskID, // lParam
@@ -1169,7 +1061,7 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 
 void CWorkloadCtrl::IncrementItemPositions(HTREEITEM htiParent, int nFromPos)
 {
-	HTREEITEM htiChild = m_tcTasks.GetChildItem(htiParent);
+	HTREEITEM htiChild = m_tree.GetChildItem(htiParent);
 
 	while (htiChild)
 	{
@@ -1181,7 +1073,7 @@ void CWorkloadCtrl::IncrementItemPositions(HTREEITEM htiParent, int nFromPos)
 		if (pWI->nPosition >= nFromPos)
 			pWI->nPosition++;
 		
-		htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
+		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 	}
 }
 
@@ -1202,12 +1094,12 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 			switch (dwOption)
 			{
 			case WLCF_STRIKETHRUDONETASKS:
-				m_tcTasks.Fonts().Clear();
+				m_tree.Fonts().Clear();
 				CWnd::Invalidate(FALSE);
 				break;
 
 			case WLCF_SHOWSPLITTERBAR:
-				CTreeListSyncer::SetSplitBarWidth(bSet ? 10 : 0);
+				CTreeListCtrl::SetSplitBarWidth(bSet ? 10 : 0);
 				break;
 
 			case WLCF_DISPLAYISODATES:
@@ -1215,12 +1107,44 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				break;
 
 			case WLCF_SHOWTREECHECKBOXES:
-				m_tcTasks.ShowCheckboxes(bSet);
+				m_tree.EnableCheckboxes(bSet);
+				break;
+
+			case WLCF_CALCMISSINGALLOCATIONS:
+				RefreshMissingAllocations();
+				break;
+
+			case WLCF_PREFERTIMEESTFORCALCS:
+				if (HasOption(WLCF_CALCMISSINGALLOCATIONS))
+					RefreshMissingAllocations();
+				else
+					m_tree.Invalidate();
 				break;
 			}
 
 			if (IsSyncing())
 				RedrawList();
+		}
+	}
+}
+
+void CWorkloadCtrl::RefreshMissingAllocations()
+{
+	BOOL bAutoCalc = HasOption(WLCF_CALCMISSINGALLOCATIONS);
+	BOOL bPreferTimeEst = HasOption(WLCF_PREFERTIMEESTFORCALCS);
+
+	POSITION pos = m_data.GetStartPosition();
+
+	while (pos)
+	{
+		WORKLOADITEM* pWI = m_data.GetNextItem(pos);
+
+		if (pWI && pWI->mapAllocatedDays.IsAutoCalculated())
+		{
+			if (bAutoCalc)
+				pWI->AutoCalculateAllocations(bPreferTimeEst);
+			else
+				pWI->ClearAllocations();
 		}
 	}
 }
@@ -1238,16 +1162,13 @@ int CWorkloadCtrl::GetRequiredListColumnCount() const
 
 void CWorkloadCtrl::BuildTaskTreeColumns()
 {
-	// delete existing columns
-//	while (m_hdrTasks.DeleteItem(0));
-
 	// add columns
-	m_hdrTasks.InsertItem(0, 0, _T("Task"), (HDF_LEFT | HDF_STRING), 0, WLCC_TITLE);
-	m_hdrTasks.EnableItemDragging(0, FALSE);
+	m_treeHeader.InsertItem(0, 0, _T("Task"), (HDF_LEFT | HDF_STRING), 0, WLCC_TITLE);
+	m_treeHeader.EnableItemDragging(0, FALSE);
 
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
 	{
-		m_hdrTasks.InsertItem(nCol + 1, 
+		m_treeHeader.InsertItem(nCol + 1, 
 								0, 
 								CEnString(WORKLOADTREECOLUMNS[nCol].nIDColName), 
 								(WORKLOADTREECOLUMNS[nCol].nColAlign | HDF_STRING),
@@ -1263,47 +1184,21 @@ void CWorkloadCtrl::BuildTaskTreeColumns()
 	m_lcTotalsLabels.SetColumn(0, &lvc);
 }
 
-BOOL CWorkloadCtrl::IsTreeItemLineOdd(HTREEITEM hti) const
+void CWorkloadCtrl::OnResize(int cx, int cy)
 {
-	int nItem = GetListItem(hti);
-
-	return IsListItemLineOdd(nItem);
-}
-
-BOOL CWorkloadCtrl::IsListItemLineOdd(int nItem) const
-{
-	return ((nItem % 2) == 1);
-}
-
-void CWorkloadCtrl::SetFocus()
-{
-	if (!HasFocus())
-		m_tcTasks.SetFocus();
-}
-
-void CWorkloadCtrl::Resize(int cx, int cy)
-{
-	if (!cx || !cy)
-	{
-		CRect rClient;
-		CWnd::GetClientRect(rClient);
-
-		cx = rClient.Width();
-		cy = rClient.Height();
-	}
-
 	if (cx && cy)
 	{
-		CRect rTreeList(0, 0, ((cx * 2) / 3), cy);
-		rTreeList.bottom = (cy - (GetItemHeight(m_lcTotalsLabels) * NUM_TOTALS) - LV_COLPADDING);
+		CRect rTreeList(0, 0, MulDiv(cx, 2, 3), cy);
+
+		rTreeList.bottom = cy;
+		rTreeList.bottom -= (GetItemHeight(m_lcTotalsLabels) * NUM_TOTALS); // rows
+		rTreeList.bottom -= LV_COLPADDING; // spacing
+		rTreeList.bottom -= 2; // totals border
 
 		CRect rChart(rTreeList.right + LV_COLPADDING, 0, cx, cy);
 		m_barChart.MoveWindow(rChart);
 				
-		CTreeListSyncer::Resize(rTreeList, GetSplitPos());
-
-		if (m_hdrTasks.GetItemCount())
-			m_tcTasks.SetTitleColumnWidth(m_hdrTasks.GetItemWidth(0));
+		CTreeListCtrl::OnResize(rTreeList.Width(), rTreeList.Height());
 	}
 }
 
@@ -1312,11 +1207,14 @@ void CWorkloadCtrl::ResyncTotalsPositions()
 	CRect rClient;
 	CWnd::GetClientRect(rClient);
 
-	CRect rTreeTotals = CDialogHelper::GetChildRect(&m_tcTasks);
-	CRect rColumnTotals = CDialogHelper::GetChildRect(&m_lcColumns);
+	CRect rTreeTotals = CDialogHelper::GetChildRect(&m_tree);
+	CRect rColumnTotals = CDialogHelper::GetChildRect(&m_list);
 
 	rTreeTotals.top = rColumnTotals.top = (max(rTreeTotals.bottom, rColumnTotals.bottom) + LV_COLPADDING);
 	rTreeTotals.bottom = rColumnTotals.bottom = rClient.bottom;
+
+	// Adjust for splitter border
+	rColumnTotals.left--;
 
 	// Adjust for border drawn by CTreeListSyncer
 	rColumnTotals.right++;
@@ -1324,82 +1222,6 @@ void CWorkloadCtrl::ResyncTotalsPositions()
 	m_lcColumnTotals.MoveWindow(rColumnTotals);
 	m_lcTotalsLabels.MoveWindow(rTreeTotals);
 	m_lcTotalsLabels.SetColumnWidth(0, rTreeTotals.Width());
-}
-
-void CWorkloadCtrl::OnSize(UINT nType, int cx, int cy)
-{
-	CWnd::OnSize(nType, cx, cy);
-	
-	Resize(cx, cy);
-}
-
-void CWorkloadCtrl::ExpandAll(BOOL bExpand)
-{
-	ExpandItem(NULL, bExpand, TRUE);
-
-	RecalcTreeColumns(TRUE);
-}
-
-BOOL CWorkloadCtrl::CanExpandAll() const
-{
-	return TCH().IsAnyItemCollapsed();
-}
-
-BOOL CWorkloadCtrl::CanCollapseAll() const
-{
-	return TCH().IsAnyItemExpanded();
-}
-
-void CWorkloadCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
-{
-	// avoid unnecessary processing
-	if (hti && !CanExpandItem(hti, bExpand))
-		return;
-
-	CAutoFlag af(m_bTreeExpanding, TRUE);
-	EnableResync(FALSE);
-
-	CHoldRedraw hr(m_lcColumns);
-	CHoldRedraw hr2(m_tcTasks);
-
-	TCH().ExpandItem(hti, bExpand, bAndChildren);
-
-	if (bExpand)
-	{
-		if (hti)
-		{
-			int nNextIndex = (GetListItem(hti) + 1);
-			ExpandList(hti, nNextIndex);
-		}
-		else
-			ExpandList(); // all
-	}
-	else
-	{
-		CollapseList(hti);
-	}
-	
-	m_tcTasks.EnsureVisible(hti);
-
-	EnableResync(TRUE, m_tcTasks);
-	RecalcTreeColumns(TRUE);
-}
-
-BOOL CWorkloadCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const
-{
-	int nFullyExpanded = TCH().IsItemExpanded(hti, TRUE);
-			
-	if (nFullyExpanded == -1)	// item has no children
-	{
-		return FALSE; // can neither expand nor collapse
-	}
-	else if (bExpand)
-	{
-		return !nFullyExpanded;
-	}
-			
-	// else
-	return TCH().IsItemExpanded(hti, FALSE);
 }
 
 LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
@@ -1436,7 +1258,7 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 			GetTreeItemRect(hti, WLCC_TITLE, rItem);
 
 			CRect rClient;
-			m_tcTasks.GetClientRect(rClient);
+			m_tree.GetClientRect(rClient);
 			
 			if ((rItem.bottom > 0) && (rItem.top < rClient.bottom))
 			{
@@ -1451,18 +1273,18 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				BOOL bSelected = (nState != GMIS_NONE);
 
 				// draw horz gridline before selection
-				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
+				DrawItemDivider(pDC, pTVCD->nmcd.rc, FALSE, bSelected);
 
 				// Draw icon
 				if (pWI->bHasIcon || pWI->bParent)
 				{
 					int iImageIndex = -1;
-					HIMAGELIST hilTask = m_tcTasks.GetTaskIcon(pWI->dwTaskID, iImageIndex);
+					HIMAGELIST hilTask = GetTaskIcon(pWI->dwTaskID, iImageIndex);
 
 					if (hilTask && (iImageIndex != -1))
 					{
 						CRect rItem;
-						m_tcTasks.GetItemRect(hti, rItem, TRUE);
+						m_tree.GetItemRect(hti, rItem, TRUE);
 
 						CRect rIcon(rItem);
 						rIcon.left -= (IMAGE_SIZE + 2);
@@ -1487,6 +1309,14 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 	return CDRF_DODEFAULT;
 }
 
+HIMAGELIST CWorkloadCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
+{
+	if (m_tree.GetImageList(TVSIL_NORMAL) == NULL)
+		return NULL;
+
+	return (HIMAGELIST)CWnd::GetParent()->SendMessage(WM_WLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
+}
+
 COLORREF CWorkloadCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, const CRect& rItem, const CRect& rClient, BOOL bSelected)
 {
 	BOOL bAlternate = (HasAltLineColor() && !IsTreeItemLineOdd(hti));
@@ -1504,7 +1334,7 @@ COLORREF CWorkloadCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WO
 	else
 	{
 		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT);
-		GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_tcTasks, GetItemState(hti), rItem, dwFlags);
+		GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
 	}
 
 	return crBack;
@@ -1513,19 +1343,7 @@ COLORREF CWorkloadCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WO
 GM_ITEMSTATE CWorkloadCtrl::GetItemState(int nItem) const
 {
 	if (!m_bSavingToImage)
-	{
-		if (IsListItemSelected(m_lcColumns, nItem))
-		{
-			if (HasFocus())
-				return GMIS_SELECTED;
-			else
-				return GMIS_SELECTEDNOTFOCUSED;
-		}
-		else if (ListItemHasState(m_lcColumns, nItem, LVIS_DROPHILITED))
-		{
-			return GMIS_DROPHILITED;
-		}
-	}
+		return CTreeListCtrl::GetItemState(nItem);
 
 	// else
 	return GMIS_NONE;
@@ -1534,19 +1352,7 @@ GM_ITEMSTATE CWorkloadCtrl::GetItemState(int nItem) const
 GM_ITEMSTATE CWorkloadCtrl::GetItemState(HTREEITEM hti) const
 {
 	if (!m_bSavingToImage)
-	{
-		if (IsTreeItemSelected(m_tcTasks, hti))
-		{
-			if (HasFocus())
-				return GMIS_SELECTED;
-			else
-				return GMIS_SELECTEDNOTFOCUSED;
-		}
-		else if (TreeItemHasState(m_tcTasks, hti, TVIS_DROPHILITED))
-		{
-			return GMIS_DROPHILITED;
-		}
-	}
+		return CTreeListCtrl::GetItemState(hti);
 
 	// else
 	return GMIS_NONE;
@@ -1587,20 +1393,20 @@ LRESULT CWorkloadCtrl::OnTotalsLabelsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			m_lcTotalsLabels.GetClientRect(rClient);
 
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-			pDC->FillSolidRect(rClient, m_crBkgnd);
+			pDC->FillSolidRect(rClient, (m_bSavingToImage ? GetSysColor(COLOR_WINDOW) : m_crBkgnd));
 		}
 		return CDRF_NOTIFYITEMDRAW;
 
 	case CDDS_ITEMPREPAINT:
 		{
-			pLVCD->clrTextBk = m_crBkgnd;
+			pLVCD->clrTextBk = (m_bSavingToImage ? GetSysColor(COLOR_WINDOW) : m_crBkgnd);
 
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 
 			if (pLVCD->nmcd.lItemlParam == ID_TOTALCOLUMNHEADER)
-				pDC->SelectObject(m_tcTasks.Fonts().GetFont(GMFS_BOLD));
+				pDC->SelectObject(m_tree.Fonts().GetFont(GMFS_BOLD));
 			else
-				pDC->SelectObject(m_tcTasks.Fonts().GetFont());
+				pDC->SelectObject(m_tree.Fonts().GetFont());
 		}
 		return CDRF_NEWFONT;
 	}
@@ -1645,8 +1451,8 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				{
 					pDC->FillSolidRect(rFullWidth, GetRowColor(nItem + 1));
 					
-					if ((nItem + 1) != ID_LASTTOTAL)
-						DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
+					if (m_bSavingToImage || ((nItem + 1) != ID_LASTTOTAL))
+						DrawItemDivider(pDC, rFullWidth, FALSE, FALSE);
 				}
 				break;
 				
@@ -1703,23 +1509,23 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 			
 			// draw item bkgnd and gridlines full width of list
+			CRect rItem;
+			m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS);
+
 			COLORREF crBack = GetRowColor(nItem);
 			pLVCD->clrTextBk = pLVCD->clrText = crBack;
 			
-			CRect rItem;
-			m_lcColumns.GetItemRect(nItem, rItem, LVIR_BOUNDS);
-
 			CRect rFullWidth(rItem);
-			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_lcColumns);
+			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_list);
 
-			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
+			DrawItemDivider(pDC, rFullWidth, FALSE, FALSE);
 			
-			// draw background
+			// draw selection rect only as far as the last column
 			GM_ITEMSTATE nState = GetItemState(nItem);
 			BOOL bSelected = (nState != GMIS_NONE);
 			DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_CLIPLEFT);
 
-			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_lcColumns, nState, rItem, dwFlags);
+			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_list, nState, rItem, dwFlags);
 
 			// draw row
 			COLORREF crText = GetTreeTextColor(*pWI, bSelected, FALSE);
@@ -1733,23 +1539,15 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	return CDRF_DODEFAULT;
 }
 
-COLORREF CWorkloadCtrl::GetRowColor(int nItem) const
-{
-	BOOL bAlternate = (!IsListItemLineOdd(nItem) && (m_crAltLine != CLR_NONE));
-	COLORREF crBack = (bAlternate ? m_crAltLine : GetSysColor(COLOR_WINDOW));
-
-	return crBack;
-}
-
 LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 {
-	if (pNMCD->hdr.hwndFrom == m_hdrColumns)
+	if (pNMCD->hdr.hwndFrom == m_listHeader)
 	{
 		switch (pNMCD->dwDrawStage)
 		{
 		case CDDS_PREPAINT:
-			// only need handle drawing for single sorting or double row height
-			if (m_sort.IsSingleSortingBy(WLCC_ALLOCTO) || (m_hdrColumns.GetRowCount() > 1))
+			// only need handle drawing for coloumn sorting or double row height
+			if (m_sort.IsSingleSortingBy(WLCC_ALLOCTO) || (m_listHeader.GetRowCount() > 1))
 			{
 				return CDRF_NOTIFYITEMDRAW;
 			}
@@ -1757,7 +1555,7 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 							
 		case CDDS_ITEMPREPAINT:
 			// only need handle drawing for double row height
-			if (m_hdrColumns.GetRowCount() > 1)
+			if (m_listHeader.GetRowCount() > 1)
 			{
 				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
 				int nCol = (int)pNMCD->dwItemSpec;
@@ -1775,13 +1573,13 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 				if (nCol == m_nSortByAllocToCol)
 				{
 					CDC* pDC = CDC::FromHandle(pNMCD->hdc);
-					m_hdrColumns.DrawItemSortArrow(pDC, nCol, m_sort.single.bAscending);
+					m_listHeader.DrawItemSortArrow(pDC, nCol, m_sort.single.bAscending);
 				}
 			}
 			break;
 		}
 	}
-	else if (pNMCD->hdr.hwndFrom == m_hdrTasks)
+	else if (pNMCD->hdr.hwndFrom == m_treeHeader)
 	{
 		switch (pNMCD->dwDrawStage)
 		{
@@ -1807,7 +1605,7 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 				
 				if (m_sort.IsSingleSortingBy(nColID))
 				{
-					m_hdrTasks.DrawItemSortArrow(pDC, nCol, m_sort.single.bAscending);
+					m_treeHeader.DrawItemSortArrow(pDC, nCol, m_sort.single.bAscending);
 				}
 			}
 			break;
@@ -1815,11 +1613,6 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 	}
 	
 	return CDRF_DODEFAULT;
-}
-
-void CWorkloadCtrl::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar)
-{
-	GraphicsMisc::DrawSplitBar(pDC, rSplitter, crSplitBar);
 }
 
 // Called by parent
@@ -1850,7 +1643,7 @@ void CWorkloadCtrl::FixupListSortColumn(LPCTSTR szAllocTo)
 
 	if (m_sSortByAllocTo == ALLOCTO_TOTALID)
 	{
-		m_nSortByAllocToCol = (m_hdrColumns.GetItemCount() - 1);
+		m_nSortByAllocToCol = (m_listHeader.GetItemCount() - 1);
 	}
 	else
 	{
@@ -1868,14 +1661,14 @@ void CWorkloadCtrl::Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending, B
 	m_sort.Sort(nBy, bAllowToggle, bAscending);
 
 	// do the sort
-	CHoldRedraw hr(m_tcTasks);
-	CTreeListSyncer::Sort(SortProc, (DWORD)this);
+	CHoldRedraw hr(m_tree);
+	CTreeListCtrl::Sort(SortProc, (DWORD)this);
 
 	// update sort arrow
 	if (nBy == WLCC_ALLOCTO)
-		m_hdrColumns.Invalidate(FALSE);
+		m_listHeader.Invalidate(FALSE);
 	else
-		m_hdrTasks.Invalidate(FALSE);
+		m_treeHeader.Invalidate(FALSE);
 
 	if (bNotifyParent)
 		CWnd::GetParent()->PostMessage(WM_WLCN_SORTCHANGE, m_sort.single.bAscending, m_sort.single.nBy);
@@ -1888,33 +1681,32 @@ void CWorkloadCtrl::Sort(const WORKLOADSORTCOLUMNS& multi)
 	m_sort.Sort(multi);
 
 	// do the sort
-	CHoldRedraw hr(m_tcTasks);
-	CTreeListSyncer::Sort(MultiSortProc, (DWORD)this);
+	CHoldRedraw hr(m_tree);
+	CTreeListCtrl::Sort(MultiSortProc, (DWORD)this);
 
 	// hide sort arrow
-	m_hdrTasks.Invalidate(FALSE);
+	m_treeHeader.Invalidate(FALSE);
 }
 
 void CWorkloadCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
-	*pResult = TRUE; // cancel our edit
+	*pResult = TRUE; // cancel our edit always
 	
+	if (m_bReadOnly)
+		return;
+
+	CPoint point(GetMessagePos());
+	int nCol = -1;
+	HTREEITEM hti = TreeHitTestItem(point, TRUE, nCol);
+
+	if (!hti || (nCol == -1))
+		return;
+
+	if (m_treeHeader.GetItemData(nCol) != WLCC_TITLE)
+		return;
+
 	// notify app to edit
-	if (!m_bReadOnly)
-	{
-		CPoint point(GetMessagePos());
-		CWnd::ScreenToClient(&point);
-
-		if (TreeHitTestItemColumn(point, FALSE) == WLCC_TITLE)
-		{
-			CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKTITLE);
-		}
-	}
-}
-
-void CWorkloadCtrl::OnEndDragTreeHeader(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
-{
-	m_tcTasks.InvalidateRect(NULL, TRUE);
+	CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKTITLE, 0, GetTaskID(hti));
 }
 
 void CWorkloadCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
@@ -1926,96 +1718,6 @@ void CWorkloadCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		WLC_COLUMNID nColID = GetTreeColumnID(pHDN->iItem);
 		Sort(nColID, TRUE, -1, TRUE);
 	}
-}
-
-void CWorkloadCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	NMHEADER* pHDN = (NMHEADER*) pNMHDR;
-	*pResult = 0;
-	
-	if (pHDN->iButton == 0) // left button
-	{
-		if (pHDN->pitem->mask & HDI_WIDTH)
-		{
-			// don't allow columns get too small
-			WLC_COLUMNID nColID = GetTreeColumnID(pHDN->iItem);
-			
-			switch (nColID)
-			{
-			case WLCC_TITLE:
-				if (pHDN->pitem->cxy < TREE_TITLE_MIN_WIDTH)
-					*pResult = TRUE; // prevent change
-				break;
-				
-			case WLCC_STARTDATE:
-			case WLCC_DUEDATE:
-			case WLCC_PERCENT:
-			case WLCC_TASKID:
-			case WLCC_DURATION:
-				if (m_hdrTasks.IsItemVisible(pHDN->iItem))
-				{
-					if (pHDN->pitem->cxy < MIN_COL_WIDTH)
-						pHDN->pitem->cxy = MIN_COL_WIDTH;
-				}
-				break;
-			}
-		}
-	}
-}
-
-void CWorkloadCtrl::OnItemChangedTreeHeader(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
-{
-	SetSplitPos(m_hdrTasks.CalcTotalItemWidth());
-	Resize();
-	
-	m_tcTasks.UpdateWindow();
-	m_lcColumns.UpdateWindow();
-}
-
-void CWorkloadCtrl::OnDblClickTreeHeaderDivider(NMHDR* pNMHDR, LRESULT* /*pResult*/)
-{
-	CClientDC dc(&m_tcTasks);
-	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
-
-	int nCol = pHDN->iItem;
-	ASSERT(nCol != -1);
-
-	RecalcTreeColumnWidth(nCol, &dc, TRUE);
-	SetSplitPos(m_hdrTasks.CalcTotalItemWidth());
-
-	Resize();
-}
-
-void CWorkloadCtrl::OnRightClickTreeHeader(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
-{
-	// pass on to parent
-	CWnd::GetParent()->SendMessage(WM_CONTEXTMENU, (WPARAM)GetSafeHwnd(), (LPARAM)::GetMessagePos());
-}
-
-void CWorkloadCtrl::OnTreeKeyUp(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	NMTVKEYDOWN* pTVKD = (NMTVKEYDOWN*)pNMHDR;
-	
-	switch (pTVKD->wVKey)
-	{
-	case VK_UP:
-	case VK_DOWN:
-	case VK_PRIOR:
-	case VK_NEXT:
-		//UpdateSelectedTaskDates();
-		//SendParentSelectionUpdate();
-		break;
-	}
-	
-	*pResult = 0;
-}
-
-void CWorkloadCtrl::OnClickColumns(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
-{
-	//UpdateSelectedTaskDates();
-	//SendParentSelectionUpdate();
-	
-	*pResult = 0;
 }
 
 void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
@@ -2052,108 +1754,66 @@ void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	}
 }
 
-void CWorkloadCtrl::OnTreeItemExpanded(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
+BOOL CWorkloadCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 {
-	RecalcTreeColumns(TRUE);
+	if (CTreeListCtrl::OnTreeLButtonUp(nFlags, point))
+		return TRUE;
+
+	// else
+	if (!m_bReadOnly)
+	{
+		HTREEITEM hti = m_tree.HitTest(point, &nFlags);
+
+		if (nFlags & TVHT_ONITEMICON)
+			CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
+
+		return TRUE; // eat
+	}
+
+	// not handled
+	return FALSE;
 }
 
-LRESULT CWorkloadCtrl::OnTreeDragEnter(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	// Make sure the selection helper is synchronised
-	// with the tree's current selection
-	m_tshDragDrop.ClearHistory();
-	m_tshDragDrop.RemoveAll(TRUE, FALSE);
-	m_tshDragDrop.AddItem(m_tcTasks.GetSelectedItem(), FALSE);
-	
-	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
-}
-
-LRESULT CWorkloadCtrl::OnTreePreDragMove(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
-}
-
-LRESULT CWorkloadCtrl::OnTreeDragOver(WPARAM /*wp*/, LPARAM /*lp*/)
+UINT CWorkloadCtrl::OnDragOverItem(UINT nCursor)
 {
 	// We currently DON'T support 'linking'
-	UINT nCursor = m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
-	
 	if (nCursor == DD_DROPEFFECT_LINK)
 		nCursor = DD_DROPEFFECT_NONE;
 	
 	return nCursor;
 }
 
-LRESULT CWorkloadCtrl::OnTreeDragDrop(WPARAM /*wp*/, LPARAM /*lp*/)
+BOOL CWorkloadCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 {
-	if (m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage()))
+	// Notify parent of move
+	IUITASKMOVE taskMove = { 0 };
+			
+	taskMove.dwSelectedTaskID = GetTaskID(move.htiSel);
+	taskMove.dwParentID = GetTaskID(move.htiDestParent);
+	taskMove.dwAfterSiblingID = GetTaskID(move.htiDestAfterSibling);
+	taskMove.bCopy = (move.bCopy != FALSE);
+			
+	// If copying a task, app will send us a full update 
+	// so we do not need to perform the move ourselves
+	if (CWnd::GetParent()->SendMessage(WM_WLC_MOVETASK, 0, (LPARAM)&taskMove) && !taskMove.bCopy)
 	{
-		HTREEITEM htiDropTarget = NULL, htiAfterSibling = NULL;
-		
-		if (m_treeDragDrop.GetDropTarget(htiDropTarget, htiAfterSibling))
-		{
-			// Notify parent of move
-			HTREEITEM htiSel = GetSelectedItem();
-			ASSERT(htiSel);
-			
-			IUITASKMOVE move = { 0 };
-			
-			move.dwSelectedTaskID = GetTaskID(htiSel);
-			move.dwParentID = GetTaskID(htiDropTarget);
-			move.dwAfterSiblingID = GetTaskID(htiAfterSibling);
-			move.bCopy = (Misc::ModKeysArePressed(MKS_CTRL) != FALSE);
-			
-			// If copying a task, app will send us a full update 
-			// so we do not need to perform the move ourselves
-			if (CWnd::SendMessage(WM_WLC_MOVETASK, 0, (LPARAM)&move) && !move.bCopy)
-			{
-				htiSel = TCH().MoveTree(htiSel, htiDropTarget, htiAfterSibling, TRUE, TRUE);
-				
-				RefreshTreeItemMap();
-				SelectItem(htiSel);
-			}
-		}
+		VERIFY(MoveItem(move));
 	}
 
-	return 0L;
-}
-
-LRESULT CWorkloadCtrl::OnTreeDragAbort(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
-}
-
-void CWorkloadCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
-{
-	if (m_bMovingTask)
-		return;
-	
-	// Ignore setting selection to 'NULL' unless there are no tasks at all
-	// because we know it's temporary only
-	if ((pNMTV->itemNew.hItem == NULL) && (m_tcTasks.GetCount() != 0))
-		return;
-	
-	// ignore notifications arising out of SelectTask()
-// 	if (/*m_bInSelectTask && */(pNMTV->action == TVC_UNKNOWN))
-// 		return;
-	
-	// we're only interested in non-keyboard changes
-	// because keyboard gets handled in OnKeyUpWorkload
-	if (pNMTV->action != TVC_BYKEYBOARD)
-		CWnd::GetParent()->SendMessage(WM_WLCN_SELCHANGE, 0, GetTaskID(pNMTV->itemNew.hItem));
+	return TRUE; // prevent base class handling
 }
 
 LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (!IsResyncEnabled())
-		return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+		return CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
 
-	if (hRealWnd == m_lcColumns)
+	if (hRealWnd == m_list)
 	{
 		switch (msg)
 		{
 		case WM_HSCROLL:
-			CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+			CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
 
 			// Keep totals synced
 			m_lcColumnTotals.Invalidate(FALSE);
@@ -2161,7 +1821,7 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			return 0L;
 
 		case WM_MOUSEWHEEL:
-			CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+			CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
 
 			if (HasHScrollBar(hRealWnd) && !HasVScrollBar(hRealWnd))
 			{
@@ -2171,266 +1831,63 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			}
 			return 0L;
 
-		case WM_TIMER:
-			switch (wp)
-			{
-			case 0x2A:
-			case 0x2B:
-				// These are timers internal to the list view associated
-				// with editing labels and which cause unwanted selection
-				// changes. Given that we have disabled label editing for 
-				// the attribute columns we can safely kill these timers
-				::KillTimer(hRealWnd, wp);
-				return TRUE;
-			}
-			break;
-			
-		case WM_NOTIFY:
-			{
-				LPNMHDR pNMHDR = (LPNMHDR)lp;
-				HWND hwnd = pNMHDR->hwndFrom;
-				
-				// let base class have its turn first
-				LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
-
-				switch (pNMHDR->code)
-				{
-				case NM_RCLICK:
-					if (hwnd == m_hdrColumns)
-					{
-						// pass on to parent
-						::SendMessage(GetHwnd(), WM_CONTEXTMENU, (WPARAM)hwnd, (LPARAM)::GetMessagePos());
-					}
-					break;
-
-				case HDN_ITEMCLICK:
-					if (hwnd == m_hdrColumns)
-					{
-						OnListHeaderClick((NMHEADER*)pNMHDR);
-					}
-					break;
-
-				case HDN_ITEMCHANGING:
-					if (hwnd == m_hdrColumns)
-					{
-						NMHEADER* pHDN = (NMHEADER*)pNMHDR;
-						
-						// don't let user drag column too narrow
-						if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
-						{
-							if (m_hdrColumns.IsItemTrackable(pHDN->iItem) && (pHDN->pitem->cxy < MIN_COL_WIDTH))
-								pHDN->pitem->cxy = MIN_COL_WIDTH;
-
-							m_lcColumns.Invalidate(FALSE);
-						}
-					}
-					break;
-
-				}
-				return lr;
-			}
-			break;
-			
-		case WM_ERASEBKGND:
-			if (COSVersion() == OSV_LINUX)
-			{
-				CRect rClient;
-				m_lcColumns.GetClientRect(rClient);
-				
-				CDC::FromHandle((HDC)wp)->FillSolidRect(rClient, GetSysColor(COLOR_WINDOW));
-			}
-			return TRUE;
-
 		case WM_SETCURSOR:
-			break;
-
-		case WM_LBUTTONDBLCLK:
-			if (OnListLButtonDblClk(wp, lp))
+			if (!m_bReadOnly)
 			{
-				return FALSE; // eat
+				int nCol, nHit = ListHitTestItem(GetMessagePos(), TRUE, nCol);
+
+				if (nHit != -1)
+				{
+					BOOL bCanEdit = (GetListColumnType(nCol) == WLCT_VALUE);
+
+					if (bCanEdit)
+					{
+						const WORKLOADITEM* pWI = NULL;
+						GET_WI_RET(GetTaskID(nHit), pWI, FALSE);
+
+						bCanEdit = !pWI->bParent;
+					}
+
+					if (!bCanEdit)
+						return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+				}
 			}
-			break;
-
-		case WM_LBUTTONDOWN:
-			if (OnListLButtonDown(wp, lp))
-			{
-				return FALSE; // eat
-			}
-			break;
-
-		case WM_LBUTTONUP:
-			if (OnListLButtonUp(wp, lp))
-			{
-				return FALSE; // eat
-			}
-			break;
-
-		case WM_MOUSEMOVE:
-			if (OnListMouseMove(wp, lp))
-			{
-				return FALSE; // eat
-			}
-			break;
-
-		case WM_CAPTURECHANGED:
-			break;
-
-		case WM_KEYDOWN:
-			break;
-
-		case WM_RBUTTONDOWN:
-			{
-				DWORD dwTaskID = ListHitTestTask(lp, FALSE);
-
-				if (dwTaskID != 0)
-					SelectTask(dwTaskID);
-			}
-			break;
-
-		case WM_SETFOCUS:
-			m_tcTasks.SetFocus();
 			break;
 		}
 	}
-	else if (hRealWnd == m_tcTasks)
+	else if (hRealWnd == m_tree)
 	{
 		switch (msg)
 		{
-		case WM_RBUTTONDOWN:
-			{
-				DWORD dwTaskID = TreeHitTestTask(lp, FALSE);
-
-				if (dwTaskID)
-					SelectTask(dwTaskID);
-			}
-			break;
-
-		case WM_LBUTTONDOWN:
-			if (OnTreeLButtonDown(wp, lp))
-			{
-				return FALSE; // eat
-			}
-			break;
-
-		case WM_LBUTTONUP:
-			if (OnTreeLButtonUp(wp, lp))
-			{
-				return FALSE; // eat
-			}
-			break;
-
-		case WM_LBUTTONDBLCLK:
-			if (OnTreeLButtonDblClk(wp, lp))
-			{
-				return FALSE; // eat
-			}
-			break;
-
-		case WM_MOUSEMOVE:
-			if (OnTreeMouseMove(wp, lp))
-			{
-				return FALSE; // eat
-			}
-			break;
-
-		case WM_MOUSELEAVE:
-			// Remove any drophilighting from the list
-			if (m_nPrevDropHilitedItem != -1)
-			{
-				m_lcColumns.SetItemState(m_nPrevDropHilitedItem, 0, LVIS_DROPHILITED);
-				m_nPrevDropHilitedItem = -1;
-			}
-			break;
-
-		case WM_MOUSEWHEEL:
-			// if we have a horizontal scrollbar but NOT a vertical scrollbar
-			// then we need to redraw the whole tree to prevent artifacts
-			if (HasHScrollBar(hRealWnd) && !HasVScrollBar(hRealWnd))
-			{
-				CHoldRedraw hr(hRealWnd, NCR_PAINT | NCR_UPDATE);
-
-				return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
-			}
-			break;
-
-		case WM_HSCROLL:
-			{
-				CHoldRedraw hr(hRealWnd, NCR_PAINT | NCR_UPDATE);
-
-				return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
-			}
-			break;
-
 		case WM_SETCURSOR:
 			if (!m_bReadOnly)
 			{
 				CPoint ptCursor(GetMessagePos());
-				DWORD dwTaskID = TreeHitTestTask(ptCursor, TRUE);
+				m_tree.ScreenToClient(&ptCursor);
 
-				if (dwTaskID && m_data.ItemIsLocked(dwTaskID))
-					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				UINT nFlags = 0;
+				HTREEITEM htiHit = m_tree.HitTest(ptCursor, &nFlags);
+
+				if (htiHit)
+				{
+					if (m_data.ItemIsLocked(m_tree.GetItemData(htiHit)))
+						return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+
+					if (nFlags & TVHT_ONITEMICON)
+						return GraphicsMisc::SetHandCursor();
+				}
 			}
 			break;
 		}
 	}
 
-	// else tree or list
-	switch (msg)
-	{
-	case WM_MOUSEWHEEL:
-		{
-			int zDelta = GET_WHEEL_DELTA_WPARAM(wp);
-
-			if (zDelta != 0)
-			{
-				WORD wKeys = LOWORD(wp);
-				
-				if (wKeys == MK_CONTROL)
-				{
-					// TODO
-				}
-				else
-				{
-					CHoldHScroll hhs(m_tcTasks);
-					
-					return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
-				}
-			}
-		}
-		break;
-
-	case WM_KEYUP:
-		{
-			LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
-
-			NMTVKEYDOWN tvkd = { 0 };
-
-			tvkd.hdr.hwndFrom = hRealWnd;
-			tvkd.hdr.idFrom = ::GetDlgCtrlID(hRealWnd);
-			tvkd.hdr.code = TVN_KEYUP;
-			tvkd.wVKey = LOWORD(wp);
-			tvkd.flags = lp;
-
-			CWnd::SendMessage(WM_NOTIFY, ::GetDlgCtrlID(hRealWnd), (LPARAM)&tvkd);
-			return lr;
-		}
-		
-	case WM_VSCROLL:
-		{
-			CHoldHScroll hhs(m_tcTasks);
-			
-			return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
-		}
-		break;
-	}
-	
-	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+	return CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
 }
 
 BOOL CWorkloadCtrl::OnMouseWheel(UINT /*nFlags*/, short zDelta, CPoint pt)
 {
 	// We have to handle mouse wheel over the totals because we have disabled it
-	if (HasHScrollBar(m_lcColumns))
+	if (HasHScrollBar(m_list))
 	{
 		CWnd::ScreenToClient(&pt);
 
@@ -2440,7 +1897,7 @@ BOOL CWorkloadCtrl::OnMouseWheel(UINT /*nFlags*/, short zDelta, CPoint pt)
 			int nScroll = 3;
 
 			while (nScroll--)
-				m_lcColumns.SendMessage(WM_HSCROLL, (bScrollRight ? SB_LINERIGHT : SB_LINELEFT), 0L);
+				m_list.SendMessage(WM_HSCROLL, (bScrollRight ? SB_LINERIGHT : SB_LINELEFT), 0L);
 
 			return TRUE;
 		}
@@ -2462,7 +1919,7 @@ void CWorkloadCtrl::OnListHeaderClick(NMHEADER* pHDN)
 			break;
 
 		case WLCT_VALUE:
-			sSortByAllocTo = m_hdrColumns.GetItemText(pHDN->iItem);
+			sSortByAllocTo = m_listHeader.GetItemText(pHDN->iItem);
 			break;
 
 		default:
@@ -2484,205 +1941,35 @@ void CWorkloadCtrl::OnListHeaderClick(NMHEADER* pHDN)
 	}
 }
 
-void CWorkloadCtrl::SetDropHilite(HTREEITEM hti, int nItem)
+BOOL CWorkloadCtrl::OnItemCheckChange(HTREEITEM hti)
 {
-	if (m_nPrevDropHilitedItem != -1)
-		m_lcColumns.SetItemState(m_nPrevDropHilitedItem, 0, LVIS_DROPHILITED);
-	
-	m_tcTasks.SelectDropTarget(hti);
-	
-	if (nItem != -1)
-		m_lcColumns.SetItemState(nItem, LVIS_DROPHILITED, LVIS_DROPHILITED);
-	
-	m_nPrevDropHilitedItem = nItem;
-}
-
-BOOL CWorkloadCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint /*point*/)
-{
-// 	if (!m_bReadOnly)
-// 	{
-// 	}
-
-	// not handled
-	return FALSE;
-}
-
-BOOL CWorkloadCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
-{
-	HTREEITEM hti = m_tcTasks.HitTest(point, &nFlags);
-	
-	// Don't process if expanding an item
-	if (nFlags & TVHT_ONITEMBUTTON)
-		return FALSE;
-
-// 	if (!m_bReadOnly)
-// 	{
-// 	}
-
-	if (!(nFlags & TVHT_ONITEMBUTTON))
-	{
-		if (hti && (hti != GetTreeSelItem(m_tcTasks)))
-		{
-			SelectTreeItem(m_tcTasks, hti);
-			return TRUE;
-		}
-	}
-
-	// not handled
-	return FALSE;
-}
-
-BOOL CWorkloadCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
-{
-	HTREEITEM hti = m_tcTasks.HitTest(point, &nFlags);
-
-	if (!m_bReadOnly && (nFlags & TVHT_ONITEMSTATEICON))
+	if (!m_bReadOnly)
 	{
 		DWORD dwTaskID = GetTaskID(hti);
 		const WORKLOADITEM* pWI = m_data.GetItem(dwTaskID);
 		ASSERT(pWI);
-		
+
 		if (pWI)
-			CWnd::GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)m_tcTasks.GetSafeHwnd(), !pWI->bDone);
-		
-		return TRUE; // eat
+			CWnd::GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), !pWI->bDone);
 	}
 
-	// not handled
-	return FALSE;
+	return TRUE; // always
 }
 
-BOOL CWorkloadCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
+BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT nFlags, CPoint point)
 {
-	// For reasons I don't understand, the resource context is
-	// wrong when handling the double-click
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	HTREEITEM hti = m_tcTasks.HitTest(point, &nFlags);
-				
-	if (!(nFlags & (TVHT_ONITEM | TVHT_ONITEMRIGHT)))
-		return FALSE;
-	
-	if (!TCH().TreeCtrl().ItemHasChildren(hti))
-	{
-		if (TreeHitTestItemColumn(point, FALSE) == WLCC_TITLE)
-		{
-			m_tcTasks.EditLabel(hti);
-			return TRUE;
-		}
-	}
-	else
-	{
-		// Kill any built-in timers for label editing
-		m_tcTasks.KillTimer(0x2A);
-		m_tcTasks.KillTimer(0x2B);
-
-		ExpandItem(hti, !TCH().IsItemExpanded(hti), TRUE);
+	if (CTreeListCtrl::OnListLButtonDblClk(nFlags, point))
 		return TRUE;
-	}
-
-	// not handled
-	return FALSE;
-}
-
-BOOL CWorkloadCtrl::OnListMouseMove(UINT /*nFlags*/, CPoint /*point*/)
-{
-	if (!m_bReadOnly)
-	{
-	}
-
-	// not handled
-	return FALSE;
-}
-
-BOOL CWorkloadCtrl::OnListLButtonDown(UINT /*nFlags*/, CPoint point)
-{
-	if (!m_bReadOnly)
-	{
-	}
-	
-	// don't let the selection to be set to -1
-	{
-		CPoint ptScreen(point);
-		m_lcColumns.ClientToScreen(&ptScreen);
-		
-		if (HitTestTask(ptScreen) == 0)
-		{
-			SetFocus();
-			return TRUE; // eat
-		}
-	}
-
-	// not handled
-	return FALSE;
-}
-
-BOOL CWorkloadCtrl::OnListLButtonUp(UINT /*nFlags*/, CPoint /*point*/)
-{
-	// not handled
-	return FALSE;
-}
-
-BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT /*nFlags*/, CPoint point)
-{
-	int nCol = -1;
-	int nHit = ListHitTestItem(point, FALSE, nCol);
-	
-	if (nHit == -1)
-		return TRUE; // prevent null selection
-
-	HTREEITEM hti = CTreeListSyncer::GetTreeItem(m_tcTasks, m_lcColumns, nHit);
-	ASSERT(hti == GetTreeSelItem(m_tcTasks));
-
-	if (TCH().TreeCtrl().ItemHasChildren(hti))
-	{
-		ExpandItem(hti, !TCH().IsItemExpanded(hti));
-		return TRUE;
-	}
 
 	// else
-	if (m_bReadOnly)
+	int nCol = -1, nHit = ListHitTestItem(point, FALSE, nCol);
+
+	if (m_bReadOnly || (GetListColumnType(nCol) != WLCT_VALUE))
 		return FALSE;
 
-	CString sAllocTo(m_hdrColumns.GetItemText(nCol));
+	CString sAllocTo(m_listHeader.GetItemText(nCol));
 
 	return CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKALLOCATIONS, (WPARAM)(LPCTSTR)sAllocTo, GetTaskID(nHit));
-}
-
-BOOL CWorkloadCtrl::GetLabelEditRect(LPRECT pEdit) const
-{
-	HTREEITEM htiSel = GetSelectedItem();
-	
-	// scroll into view first
-	const_cast<CWorkloadTreeCtrl&>(m_tcTasks).EnsureVisible(htiSel);
-
-	if (m_tcTasks.GetItemRect(htiSel, pEdit, TRUE)) // label only
-	{
-		// make width of tree column or 200 whichever is larger
-		int nWidth = (m_hdrTasks.GetItemWidth(0) - pEdit->left);
-		nWidth = max(nWidth, MIN_LABEL_EDIT_WIDTH);
-
-		pEdit->right = (pEdit->left + nWidth);
-
-		// convert from tree to 'our' coords
-		m_tcTasks.ClientToScreen(pEdit);
-		CWnd::ScreenToClient(pEdit);
-
-		return true;
-	}
-	
-	return false;
-}
-
-
-void CWorkloadCtrl::SetAlternateLineColor(COLORREF crAltLine)
-{
-	SetColor(m_crAltLine, crAltLine);
-}
-
-void CWorkloadCtrl::SetGridLineColor(COLORREF crGridLine)
-{
-	SetColor(m_crGridLine, crGridLine);
 }
 
 void CWorkloadCtrl::SetOverlapColor(COLORREF crOverlap)
@@ -2695,34 +1982,33 @@ void CWorkloadCtrl::SetAllocationColor(COLORREF crAllocation)
 	SetColor(m_crAllocation, crAllocation);
 }
 
-void CWorkloadCtrl::SetSplitBarColor(COLORREF crSplitBar) 
-{ 
-	CTreeListSyncer::SetSplitBarColor(crSplitBar); 
-}
-
-void CWorkloadCtrl::SetBackgroundColor(COLORREF crBkgnd)
+void CWorkloadCtrl::EnableOverload(BOOL bEnable, double dOverloadValue, COLORREF crOverload)
 {
-	SetColor(m_crBkgnd, crBkgnd);
-	m_lcTotalsLabels.SetBkColor(m_crBkgnd);
+	m_barChart.EnableOverload(bEnable, dOverloadValue, crOverload);
+	m_lcColumnTotals.Invalidate();		
 }
 
-void CWorkloadCtrl::SetColor(COLORREF& color, COLORREF crNew)
+void CWorkloadCtrl::EnableUnderload(BOOL bEnable, double dUnderloadValue, COLORREF crUnderload)
 {
-	if (IsHooked() && (crNew != color))
-		InvalidateAll();
-
-	color = crNew;
+	m_barChart.EnableUnderload(bEnable, dUnderloadValue, crUnderload);
+	m_lcColumnTotals.Invalidate();
 }
 
-CString CWorkloadCtrl::FormatDate(const COleDateTime& date, DWORD dwFlags) const
+BOOL CWorkloadCtrl::SetBackgroundColor(COLORREF crBkgnd)
 {
-	dwFlags &= ~DHFD_ISO;
-	dwFlags |= (HasOption(WLCF_DISPLAYISODATES) ? DHFD_ISO : 0);
+	if (!CTreeListCtrl::SetBackgroundColor(crBkgnd))
+		return FALSE;
+	
+	if (m_lcTotalsLabels.GetSafeHwnd())
+	{
+		m_lcTotalsLabels.SetBkColor(m_crBkgnd);
+		m_lcTotalsLabels.SetTextBkColor(m_crBkgnd);
+	}
 
-	return CDateHelper::FormatDate(date, dwFlags);
+	return TRUE;
 }
 
-int CWorkloadCtrl::GetLongestVisibleDuration(HTREEITEM hti) const
+int CWorkloadCtrl::GetLargestVisibleDuration(HTREEITEM hti) const
 {
 	int nLongest = 0;
 
@@ -2740,20 +2026,49 @@ int CWorkloadCtrl::GetLongestVisibleDuration(HTREEITEM hti) const
 	// children
 	if (!hti || TCH().IsItemExpanded(hti))
 	{
-		HTREEITEM htiChild = m_tcTasks.GetChildItem(hti);
+		HTREEITEM htiChild = m_tree.GetChildItem(hti);
 
 		while (htiChild)
 		{
-			int nLongestChild = GetLongestVisibleDuration(htiChild);
+			int nLongestChild = GetLargestVisibleDuration(htiChild);
+			nLongest = max(nLongest, nLongestChild);
 
-			if (nLongestChild > nLongest)
-				nLongest = nLongestChild;
-
-			htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
+			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 		}
 	}
 
 	return nLongest;
+}
+
+double CWorkloadCtrl::GetLargestVisibleTimeEstimate(HTREEITEM hti) const
+{
+	double dLargest = 0.0;
+
+	if (hti)
+	{
+		DWORD dwTaskID = GetTaskID(hti);
+
+		const WORKLOADITEM* pWI = NULL;
+		GET_WI_RET(dwTaskID, pWI, 0);
+
+		dLargest = pWI->dTimeEst;
+	}
+
+	// children
+	if (!hti || TCH().IsItemExpanded(hti))
+	{
+		HTREEITEM htiChild = m_tree.GetChildItem(hti);
+
+		while (htiChild)
+		{
+			double dLargestChild = GetLargestVisibleDuration(htiChild);
+			dLargest = max(dLargest, dLargestChild);
+
+			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
+		}
+	}
+
+	return dLargest;
 }
 
 CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNID nCol) const
@@ -2780,9 +2095,12 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNI
 				sItem = FormatDate(wi.dtRange.m_dtEnd);
 			break;
 
+		case WLCC_TIMEEST:
+			sItem = FormatTimeSpan(wi.dTimeEst, 1);
+			break;
+
 		case WLCC_DURATION:
-			if (wi.HasValidDates())
-				sItem.Format(CEnString(IDS_ALLOCATION_FORMAT), wi.dtRange.GetWeekdayCount());
+			sItem = FormatTimeSpan(wi.dtRange.GetWeekdayCount(), 0);
 			break;
 
 		case WLCC_PERCENT:
@@ -2793,9 +2111,30 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNI
 	return sItem;
 }
 
+CString CWorkloadCtrl::FormatDate(const COleDateTime& date, DWORD dwFlags) const
+{
+	dwFlags &= ~DHFD_ISO;
+	dwFlags |= (HasOption(WLCF_DISPLAYISODATES) ? DHFD_ISO : 0);
+
+	return CDateHelper::FormatDate(date, dwFlags);
+}
+
+CString CWorkloadCtrl::FormatTimeSpan(double dDays, int nDecimals)
+{
+	if (dDays == 0.0)
+		return _T("");
+
+	CString sValue = Misc::Format(dDays, nDecimals);
+
+	if (nDecimals > 0)
+		sValue.TrimRight(_T(".0"));
+
+	return CEnString(IDS_TIMESPAN_FORMAT, sValue);
+}
+
 void CWorkloadCtrl::DrawTreeItem(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack)
 {
-	int nNumCol = m_hdrTasks.GetItemCount();
+	int nNumCol = m_treeHeader.GetItemCount();
 
 	for (int nCol = 0; nCol < nNumCol; nCol++)
 		DrawTreeItemText(pDC, hti, nCol, wi, bSelected, crBack);
@@ -2809,7 +2148,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 	if (rItem.Width() == 0)
 		return;
 
-	DrawItemDivider(pDC, rItem, DIV_VERT_LIGHT, bSelected);
+	DrawItemDivider(pDC, rItem, TRUE, bSelected);
 
 	WLC_COLUMNID nColID = GetTreeColumnID(nCol);
 	BOOL bTitleCol = (nColID == WLCC_TITLE);
@@ -2844,7 +2183,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 
 		// text color and alignment
 		BOOL bLighter = FALSE; 
-		UINT nFlags = (DT_LEFT | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_tcTasks));
+		UINT nFlags = (DT_LEFT | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_tree));
 
 		switch (nColID)
 		{
@@ -2852,8 +2191,9 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 			nFlags |= DT_END_ELLIPSIS;
 			break;
 
-		case  WLCC_TASKID:
+		case WLCC_TASKID:
 		case WLCC_DURATION:
+		case WLCC_TIMEEST:
 			nFlags |= DT_RIGHT;
 			break;
 			
@@ -2892,115 +2232,25 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 	}
 }
 
-BOOL CWorkloadCtrl::IsVerticalDivider(DIV_TYPE nType)
-{
-	switch (nType)
-	{
-	case DIV_VERT_LIGHT:
-	case DIV_VERT_MID:
-	case DIV_VERT_DARK:
-		return TRUE;
-	}
-	
-	// else
-	return FALSE;
-}
-
-void CWorkloadCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected)
-{
-	if (!HasGridlines() || (nType == DIV_NONE) || (IsVerticalDivider(nType) && (rItem.right < 0)))
-		return;
-
-	COLORREF color = m_crGridLine;
-
-	switch (nType)
-	{
-	case DIV_VERT_LIGHT:
-	case DIV_HORZ:
-		break;
-		
-	case DIV_VERT_MID:
-		color = GraphicsMisc::Darker(m_crGridLine, 0.25);
-		break;
-		
-	case DIV_VERT_DARK:
-		color = GraphicsMisc::Darker(m_crGridLine, 0.5);
-		break;
-	}
-
-	CRect rDiv(rItem);
-
-	if (nType == DIV_HORZ)
-	{
-		rDiv.top = (rDiv.bottom - 1);
-	}
-	else
-	{
-		rDiv.left = (rDiv.right - 1);
-		
-		if (bSelected)
-			rDiv.DeflateRect(0, 1);
-	}
-
-	COLORREF crOld = pDC->GetBkColor();
-
-	pDC->FillSolidRect(rDiv, color);
-	pDC->SetBkColor(crOld);
-}
-
-
 HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_COLUMNID nCol)
 {
 	BOOL bStrikThru = (HasOption(WLCF_STRIKETHRUDONETASKS) && wi.bDone);
-	BOOL bBold = ((nCol == WLCC_TITLE) && (m_tcTasks.GetParentItem(hti) == NULL));
+	BOOL bBold = ((nCol == WLCC_TITLE) && (m_tree.GetParentItem(hti) == NULL));
 	
-	return m_tcTasks.Fonts().GetHFont(bBold, FALSE, FALSE, bStrikThru);
+	return m_tree.Fonts().GetHFont(bBold, FALSE, FALSE, bStrikThru);
 }
 
-void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText) const
+BOOL CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText) const
 {
-	rItem.SetRectEmpty();
+	if (!CTreeListCtrl::GetTreeItemRect(hti, nCol, rItem, bText))
+		return FALSE;
 
-	if (m_tcTasks.GetItemRect(hti, rItem, TRUE)) // text rect only
-	{
-		WLC_COLUMNID nColID = GetTreeColumnID(nCol);
-
-		switch (nColID)
-		{
-		case WLCC_TITLE:
-			{
-				int nColWidth = m_hdrTasks.GetItemWidth(0); // always
-	
-				if (!bText)
-					rItem.right = nColWidth;
-				else
-					rItem.right = min(rItem.right, nColWidth);
-			}
-			break;
-
-		case WLCC_TASKID:
-		case WLCC_STARTDATE:
-		case WLCC_DUEDATE:
-		case WLCC_PERCENT:
-		case WLCC_DURATION:
-			{
-				CRect rHdrItem;
-				m_hdrTasks.GetItemRect(nCol, rHdrItem);
-				
-				rItem.left = rHdrItem.left;
-				rItem.right = rHdrItem.right;
-			}
-			break;
-
-		case WLCC_NONE:
-		default:
-			ASSERT(0);
-			break;
-		}
-	}
+	ASSERT(GetTreeColumnID(nCol) != WLCC_NONE);
 
 	if (m_bSavingToImage)
 		rItem.OffsetRect(-1, 0);
+
+	return TRUE;
 }
 
 CString CWorkloadCtrl::GetListItemColumnText(const WORKLOADITEM& wi, int nCol, int nDecimals, BOOL bSelected, COLORREF& crBack) const
@@ -3069,9 +2319,9 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 	for (int nCol = 1; nCol < nNumCol; nCol++)
 	{
 		CRect rColumn;
-		m_lcColumns.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
+		m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
 		
-		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, bSelected);
+		DrawItemDivider(pDC, rColumn, TRUE, bSelected);
 		rColumn.right--;
 		rColumn.bottom--;
 
@@ -3114,10 +2364,7 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 		m_lcColumnTotals.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
 			
 		// Offset for allocation label horz scroll
-		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
-			
-		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, FALSE);
-		rColumn.right--;
+		rColumn.OffsetRect(-m_list.GetScrollPos(SB_HORZ) - 1, 0);
 
 		CString sValue = GetListItemColumnTotal(mapTotals, nCol, nDecimals);
 			
@@ -3147,9 +2394,13 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 				sValue += '%';
 			}
 		
-			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
-			pDC->DrawText(sValue, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
+			CRect rText(rColumn);
+			rText.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
+
+			pDC->DrawText(sValue, (LPRECT)(LPCRECT)rText, DT_CENTER);
 		}
+			
+		DrawItemDivider(pDC, rColumn, TRUE, FALSE);
 	}
 }
 
@@ -3163,43 +2414,10 @@ void CWorkloadCtrl::DrawTotalsHeader(CDC* pDC)
 		m_lcColumnTotals.GetSubItemRect(ID_TOTALCOLUMNHEADER, nCol, LVIR_BOUNDS, rColumn);
 
 		// Offset for allocation label horz scroll
-		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
+		rColumn.OffsetRect(-m_list.GetScrollPos(SB_HORZ), 0);
+		rColumn.right--;
 
-		DrawListHeaderRect(pDC, rColumn, m_hdrColumns.GetItemText(nCol));
-	}
-}
-
-void CWorkloadCtrl::DrawListHeaderItem(CDC* /*pDC*/, int nCol)
-{
-	CRect rItem;
-	m_hdrColumns.GetItemRect(nCol, rItem);
-
-	if (nCol == 0)
-		return;
-
-	// TODO
-}
-
-void CWorkloadCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem)
-{
-	if (m_themeHeader.AreControlsThemed())
-	{
-		m_themeHeader.DrawBackground(pDC, HP_HEADERITEM, HIS_NORMAL, rItem);
-	}
-	else
-	{
-		pDC->FillSolidRect(rItem, ::GetSysColor(COLOR_3DFACE));
-		pDC->Draw3dRect(rItem, ::GetSysColor(COLOR_3DHIGHLIGHT), ::GetSysColor(COLOR_3DSHADOW));
-	}
-	
-	// text
-	if (!sItem.IsEmpty())
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
-
-		const UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_CENTER | GraphicsMisc::GetRTLDrawTextFlags(m_hdrColumns));
-		pDC->DrawText(sItem, (LPRECT)(LPCRECT)rItem, nFlags);
+		DrawListHeaderRect(pDC, rColumn, m_listHeader.GetItemText(nCol));
 	}
 }
 
@@ -3209,7 +2427,7 @@ COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelecte
 
 	if (crTextBk == CLR_NONE)
 	{
-		if (bAlternate && HasAltLineColor())
+		if (!m_bSavingToImage && bAlternate && HasAltLineColor())
 			crTextBk = m_crAltLine;
 		else
 			crTextBk = GetSysColor(COLOR_WINDOW);
@@ -3223,115 +2441,57 @@ COLORREF CWorkloadCtrl::GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected,
 	COLORREF crText = wi.GetTextColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
 	ASSERT(crText != CLR_NONE);
 
-	if (bSelected)
+	if (!m_bSavingToImage)
 	{
-		crText = GraphicsMisc::GetExplorerItemTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
-	}
-	else if (bLighter)
-	{
-		crText = GraphicsMisc::Lighter(crText, 0.5);
+		if (bSelected)
+		{
+			crText = GraphicsMisc::GetExplorerItemTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
+		}
+		else if (bLighter)
+		{
+			crText = GraphicsMisc::Lighter(crText, 0.5);
+		}
 	}
 
 	return crText;
 }
 
-HTREEITEM CWorkloadCtrl::GetTreeItem(DWORD dwTaskID) const
+void CWorkloadCtrl::DeleteItem(HTREEITEM hti)
 {
-	HTREEITEM hti = NULL;
-	m_mapHTItems.Lookup(dwTaskID, hti);
-	
-	return hti;
-}
+	DWORD dwTaskID = GetTaskID(hti);
+	ASSERT(dwTaskID);
 
-int CWorkloadCtrl::GetListItem(DWORD dwTaskID) const
-{
-	HTREEITEM hti = GetTreeItem(dwTaskID);
-
-	return (hti ? GetListItem(hti) : -1);
-}
-
-COLORREF CWorkloadCtrl::GetColor(COLORREF crBase, double dLighter, BOOL bSelected)
-{
-	COLORREF crResult(crBase);
-
-	if (dLighter > 0.0)
-		crResult = GraphicsMisc::Lighter(crResult, dLighter);
-
-	if (bSelected)
-		crResult = GraphicsMisc::Darker(crResult, 0.15);
-
-	return crResult;
-}
-
-int CWorkloadCtrl::GetListItem(HTREEITEM htiFrom) const
-{
-	if (!htiFrom)
-		return -1;
-
-	return CTreeListSyncer::FindListItem(m_lcColumns, (DWORD)htiFrom);
-}
-
-void CWorkloadCtrl::ExpandList()
-{
-	int nNextIndex = 0;
-	ExpandList(NULL, nNextIndex);
-}
-
-void CWorkloadCtrl::ExpandList(HTREEITEM htiFrom, int& nNextIndex)
-{
-	CTreeListSyncer::ExpandList(m_lcColumns, m_tcTasks, htiFrom, nNextIndex);
-}
-
-void CWorkloadCtrl::CollapseList(HTREEITEM htiFrom)
-{
-	CTreeListSyncer::CollapseList(m_lcColumns, m_tcTasks, htiFrom);
-}
-
-void CWorkloadCtrl::DeleteTreeItem(HTREEITEM htiFrom)
-{
-	ASSERT(htiFrom);
-
-	DWORD dwTaskID = GetTaskID(htiFrom);
-
-	m_tcTasks.DeleteItem(htiFrom);
+	VERIFY(CTreeListCtrl::DeleteItem(hti));
 	VERIFY(m_data.RemoveKey(dwTaskID));
 }
 
 WLC_COLUMNID CWorkloadCtrl::GetTreeColumnID(int nCol) const
 {
-	return (WLC_COLUMNID)m_hdrTasks.GetItemData(nCol);
+	return (WLC_COLUMNID)m_treeHeader.GetItemData(nCol);
 }
 
 WLC_LISTCOLUMNTYPE CWorkloadCtrl::GetListColumnType(int nCol) const
 {
-	return (WLC_LISTCOLUMNTYPE)m_hdrColumns.GetItemData(nCol);
+	return (WLC_LISTCOLUMNTYPE)m_listHeader.GetItemData(nCol);
 }
 
-void CWorkloadCtrl::ResizeColumnsToFit()
+void CWorkloadCtrl::ResizeAttributeColumnsToFit(BOOL bForce)
 {
-	// tree columns
-	CClientDC dc(&m_tcTasks);
-	int nNumCol = m_hdrTasks.GetItemCount();
-
-	for (int nCol = 1; nCol < nNumCol; nCol++)
-		RecalcTreeColumnWidth(GetTreeColumnID(nCol), &dc, TRUE);
-
-	// list columns
-	RecalcListColumnsToFit();
+	ResizeColumnsToFit(bForce);
 }
 
 void CWorkloadCtrl::RecalcListColumnsToFit()
 {
 	// Calc widest column first
-	CClientDC dc(&m_lcColumns);
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
+	CClientDC dc(&m_list);
+	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_list);
 
 	int nMaxHeaderWidth = dc.GetTextExtent("100.0%").cx;
 	int nCol = GetRequiredListColumnCount();
 
 	while (nCol--)
 	{
-		CString sAllocTo = m_hdrColumns.GetItemText(nCol);
+		CString sAllocTo = m_listHeader.GetItemText(nCol);
 
 		int nHeaderWidth = dc.GetTextExtent(sAllocTo).cx;
 		nMaxHeaderWidth = max(nMaxHeaderWidth, nHeaderWidth);
@@ -3353,12 +2513,12 @@ void CWorkloadCtrl::RecalcListColumnsToFit()
 		{
 			int nWidth = GraphicsMisc::ScaleByDPIFactor(10);
 
-			m_hdrColumns.SetItemWidth(nCol, nWidth);
+			m_listHeader.SetItemWidth(nCol, nWidth);
 			m_lcColumnTotals.SetColumnWidth(nCol, nWidth);
 		}
 		else
 		{
-			m_hdrColumns.SetItemWidth(nCol, nMaxHeaderWidth);
+			m_listHeader.SetItemWidth(nCol, nMaxHeaderWidth);
 			m_lcColumnTotals.SetColumnWidth(nCol, nMaxHeaderWidth);
 		}
 	}
@@ -3378,25 +2538,7 @@ void CWorkloadCtrl::RemoveTotalsScrollbars()
 
 void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
 {
-	CTreeListSyncer::OnNotifySplitterChange(nSplitPos);
-
-	// Adjust 'Title' column to suit
-	int nRestOfColsWidth = m_hdrTasks.CalcTotalItemWidth(0);
-
-	CClientDC dc(this);
-	GraphicsMisc::PrepareDCFont(&dc, m_tcTasks);
-
-	int nMinColWidth = CalcWidestItemTitle(NULL, &dc, FALSE);
-	int nTitleColWidth = max(nMinColWidth, (nSplitPos - nRestOfColsWidth));
-
-	m_hdrTasks.SetItemWidth(WLCC_TITLE, nTitleColWidth);
-
-	if (m_bSplitting)
-		m_hdrTasks.SetItemTracked(WLCC_TITLE, TRUE);
-
-	m_hdrTasks.UpdateWindow();
-
-	m_tcTasks.SetTitleColumnWidth(nTitleColWidth);
+	CTreeListCtrl::OnNotifySplitterChange(nSplitPos);
 
 	ResyncTotalsPositions();
 	UpdateWindow();
@@ -3404,180 +2546,59 @@ void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
 
 BOOL CWorkloadCtrl::HandleEraseBkgnd(CDC* pDC)
 {
-	CTreeListSyncer::HandleEraseBkgnd(pDC);
-
 	CDialogHelper::ExcludeChild(&m_lcTotalsLabels, pDC);
 	CDialogHelper::ExcludeChild(&m_lcColumnTotals, pDC);
 	CDialogHelper::ExcludeChild(&m_barChart, pDC);
 	
-	CRect rClient;
-	CWnd::GetClientRect(rClient);
-	
-	pDC->FillSolidRect(rClient, m_crBkgnd);
-	return TRUE;
+	return CTreeListCtrl::HandleEraseBkgnd(pDC);
 }
 
-BOOL CWorkloadCtrl::RecalcTreeColumns(BOOL bResize)
+int CWorkloadCtrl::CalcTreeColumnTextWidth(int nCol, CDC* pDC) const
 {
-	CClientDC dc(&m_tcTasks);
-
-	int nNumCols = m_hdrTasks.GetItemCount();
-	BOOL bChange = FALSE;
-
-	for (int nCol = 0; nCol < nNumCols; nCol++)
-	{
-		switch (GetTreeColumnID(nCol))
-		{
-		case WLCC_TITLE:
-		case WLCC_TASKID:
-		case WLCC_DURATION:
-			if (!m_hdrTasks.IsItemTracked(nCol))
-			{
-				int nCurWidth = m_hdrTasks.GetItemWidth(nCol);
-
-				if (RecalcTreeColumnWidth(nCol, &dc, FALSE) != nCurWidth)
-					bChange = TRUE;
-			}
-			break;
-		}
-	}
-
-	if (bChange && bResize)
-		Resize();
-
-	return bChange;
-}
-
-int CWorkloadCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC, BOOL bForce)
-{
-	if (!bForce && m_hdrTasks.IsItemTracked(nCol))
-		return m_hdrTasks.GetItemWidth(nCol);
-
-	int nColWidth = CalcTreeColumnWidth(nCol, pDC);
-	m_hdrTasks.SetItemWidth(nCol, nColWidth);
-
-	return nColWidth;
-}
-
-int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
-{
-	ASSERT(pDC);
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_tcTasks);
-
-	int nColWidth = 0;
 	WLC_COLUMNID nColID = GetTreeColumnID(nCol);
 
 	switch (nColID)
 	{
 	case WLCC_TITLE:
-		nColWidth = CalcWidestItemTitle(NULL, pDC, TRUE);
-		nColWidth = max(nColWidth, TREE_TITLE_MIN_WIDTH);
-		break;
+		break; // handled by base class
 
 	case WLCC_TASKID:
-		nColWidth = pDC->GetTextExtent(Misc::Format(m_dwMaxTaskID)).cx;
-		break;
+		return pDC->GetTextExtent(Misc::Format(m_dwMaxTaskID)).cx;
 		
 	// rest of attributes are fixed width
 	case WLCC_STARTDATE:
 	case WLCC_DUEDATE: 
 		{
 			COleDateTime date(2015, 12, 31, 23, 59, 59);
-			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(FormatDate(date), pDC);
+			return GraphicsMisc::GetAverageMaxStringWidth(FormatDate(date), pDC);
 		}
 		break;
 
 	case WLCC_DURATION:
-		nColWidth = pDC->GetTextExtent(CEnString(IDS_ALLOCATION_FORMAT, GetLongestVisibleDuration(NULL))).cx;
+		return pDC->GetTextExtent(FormatTimeSpan(GetLargestVisibleDuration(NULL), 0)).cx;
+
+	case WLCC_TIMEEST:
+		{
+			int nWidthLargest = pDC->GetTextExtent(FormatTimeSpan(GetLargestVisibleTimeEstimate(NULL), 1)).cx;
+			int nWidthSmallest = pDC->GetTextExtent(FormatTimeSpan(0.1, 1)).cx;
+
+			return max(nWidthLargest, nWidthSmallest);
+		}
 		break;
 		
 	case WLCC_PERCENT: 
-		nColWidth = GraphicsMisc::GetAverageMaxStringWidth(_T("100%"), pDC);
+		return GraphicsMisc::GetAverageMaxStringWidth(_T("100%"), pDC);
 		break;
-
-	default:
-		ASSERT(0);
 	}
 
-	if (nColWidth < MIN_COL_WIDTH)
-		nColWidth = MIN_COL_WIDTH;
-	else
-		nColWidth += (2 * LV_COLPADDING);
-	
-	// take max of this and column title
-	int nTitleWidth = (m_hdrTasks.GetItemTextWidth(nCol, pDC) + (2 * HD_COLPADDING));
-	ASSERT(nTitleWidth);
-
-	pDC->SelectObject(pOldFont);
-
-	return max(nTitleWidth, nColWidth);
-}
-
-int CWorkloadCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const
-{
-	// we only want parents
-	HTREEITEM htiChild = m_tcTasks.GetChildItem(htiParent);
-	
-	if (htiChild == NULL)
-		return 0;
-	
-	// or we only want expanded items
-	if (htiParent && !TCH().IsItemExpanded(htiParent, FALSE))
-		return 0;
-	
-	// Prepare font
-	HFONT hFont = NULL, hOldFont = NULL;
-	
-	if (bEnd)
-	{
-		CFontCache& fonts = const_cast<CFontCache&>(m_tcTasks.Fonts());
-
-		hFont = fonts.GetHFont((htiParent == NULL) ? GMFS_BOLD : 0);
-		hOldFont = (HFONT)pDC->SelectObject(hFont);
-	}
-	
-	// else try children
-	int nWidest = 0;
-	
-	while (htiChild)
-	{
-		CRect rChild;
-		
-		if (m_tcTasks.GetItemRect(htiChild, rChild, TRUE)) // text rect only
-		{
-			int nWidth = 0;
-
-			if (bEnd)
-			{
-				DWORD dwTaskID = GetTaskID(htiChild);
-				const WORKLOADITEM* pWI = NULL;
-			
-				GET_WI_RET(dwTaskID, pWI, 0);
-			
-				int nTextWidth = pDC->GetTextExtent(pWI->sTitle).cx;
-				nWidth = max(nTextWidth, (rChild.left + nTextWidth));
-			}
-			else
-			{
-				nWidth = (rChild.left + TREE_TITLE_MIN_WIDTH);
-			}
-			
-			int nWidestChild = CalcWidestItemTitle(htiChild, pDC, bEnd); // RECURSIVE CALL
-			nWidest = max(max(nWidest, nWidth), nWidestChild);
-		}
-		
-		htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
-	}
-	
-	pDC->SelectObject(hOldFont);
-	
-	return nWidest;
+	ASSERT(0);
+	return 0;
 }
 
 void CWorkloadCtrl::BuildListColumns()
 {
 	// once only
-	if (m_hdrColumns.GetItemCount())
+	if (m_listHeader.GetItemCount())
 		return;
 
 	// add empty column as placeholder so we can
@@ -3585,8 +2606,8 @@ void CWorkloadCtrl::BuildListColumns()
 	// losing all our items too
 	LVCOLUMN lvc = { LVCF_FMT | LVCF_WIDTH | LVCF_TEXT, 0 };
 	
-	m_lcColumns.InsertColumn(0, &lvc);
-	m_hdrColumns.SetItemData(0, WLCT_EMPTY);
+	m_list.InsertColumn(0, &lvc);
+	m_listHeader.SetItemData(0, WLCT_EMPTY);
 	m_lcColumnTotals.InsertColumn(0, &lvc);
 
 	UpdateListColumns();
@@ -3596,7 +2617,7 @@ void CWorkloadCtrl::UpdateListColumns()
 {
 	Misc::SortArray(m_aAllocTo);
 
-	int nNumCols = m_hdrColumns.GetItemCount();
+	int nNumCols = m_listHeader.GetItemCount();
 	int nReqCols = GetRequiredListColumnCount();
 	int nDiffCols = (nReqCols - nNumCols);
 
@@ -3612,7 +2633,7 @@ void CWorkloadCtrl::UpdateListColumns()
 		
 		for (int i = 0, nCol = nNumCols; i < nDiffCols; i++, nCol++)
 		{
-			m_lcColumns.InsertColumn(nCol, &lvc);
+			m_list.InsertColumn(nCol, &lvc);
 			m_lcColumnTotals.InsertColumn(nCol, &lvc);
 		}
 	}
@@ -3623,11 +2644,11 @@ void CWorkloadCtrl::UpdateListColumns()
 
 		while (i-- > nReqCols)
 		{
-			m_lcColumns.DeleteColumn(i);
+			m_list.DeleteColumn(i);
 			m_lcColumnTotals.DeleteColumn(i);
 		}
 	}
-	ASSERT(m_hdrColumns.GetItemCount() == nReqCols);
+	ASSERT(m_listHeader.GetItemCount() == nReqCols);
 
 	if (nDiffCols != 0)
 		PostResize();
@@ -3637,18 +2658,18 @@ void CWorkloadCtrl::UpdateListColumns()
 	{
 		if (nCol == (nReqCols - 2))
 		{
-			m_hdrColumns.SetItemData(nCol, WLCT_EMPTY);
-			m_hdrColumns.SetItemText(nCol, _T(""));
+			m_listHeader.SetItemData(nCol, WLCT_EMPTY);
+			m_listHeader.SetItemText(nCol, _T(""));
 		}
 		else if (nCol == (nReqCols - 1))
 		{
-			m_hdrColumns.SetItemData(nCol, WLCT_TOTAL);
-			m_hdrColumns.SetItemText(nCol, CEnString(IDS_COL_TOTAL));
+			m_listHeader.SetItemData(nCol, WLCT_TOTAL);
+			m_listHeader.SetItemText(nCol, CEnString(IDS_COL_TOTAL));
 		}
 		else
 		{
-			m_hdrColumns.SetItemData(nCol, WLCT_VALUE);
-			m_hdrColumns.SetItemText(nCol, m_aAllocTo[nCol - 1]);
+			m_listHeader.SetItemData(nCol, WLCT_VALUE);
+			m_listHeader.SetItemText(nCol, m_aAllocTo[nCol - 1]);
 		}
 	}
 
@@ -3715,7 +2736,15 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 			break;
 
 		case WLCC_DURATION:
-			nCompare = (pWI1->dtRange.GetWeekdayCount() - pWI1->dtRange.GetWeekdayCount());
+			nCompare = (pWI1->dtRange.GetWeekdayCount() - pWI2->dtRange.GetWeekdayCount());
+			break;
+
+		case WLCC_TIMEEST:
+			{
+				double dDiff = pWI1->dTimeEst - pWI2->dTimeEst;
+				
+				nCompare = ((dDiff > 0.0) ? 1 : ((dDiff < 0.0) ? -1 : 0));
+			}
 			break;
 
 		case WLCC_PERCENT:
@@ -3746,33 +2775,6 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 	return (col.bAscending ? nCompare : -nCompare);
 }
 
-int CWorkloadCtrl::Compare(const CString& sText1, const CString& sText2)
-{
-	BOOL bEmpty1 = sText1.IsEmpty();
-	BOOL bEmpty2 = sText2.IsEmpty();
-		
-	if (bEmpty1 != bEmpty2)
-		return (bEmpty1 ? 1 : -1);
-	
-	return Misc::NaturalCompare(sText1, sText2);
-}
-
-BOOL CWorkloadCtrl::GetListColumnRect(int nCol, CRect& rColumn, BOOL bScrolled) const
-{
-	if (ListView_GetSubItemRect(m_lcColumns, 0, nCol, LVIR_BOUNDS, &rColumn))
-	{
-		if (!bScrolled)
-		{
-			int nScroll = m_lcColumns.GetScrollPos(SB_HORZ);
-			rColumn.OffsetRect(nScroll, 0);
-		}
-
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
 bool CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
 {
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
@@ -3801,283 +2803,31 @@ bool CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
 
 DWORD CWorkloadCtrl::HitTestTask(const CPoint& ptScreen) const
 {
-	// try list first
-	DWORD dwTaskID = ListHitTestTask(ptScreen, TRUE);
+	HTREEITEM hti = HitTestItem(ptScreen);
 
-	// then tree
-	if (!dwTaskID)
-		dwTaskID = TreeHitTestTask(ptScreen, TRUE);
-
-	return dwTaskID;
-}
-
-DWORD CWorkloadCtrl::ListHitTestTask(const CPoint& ptScreen, BOOL bScreen) const
-{
-	int nUnused = -1;
-	int nItem = ListHitTestItem(ptScreen, bScreen, nUnused);
-	
-	if (nItem != -1)
-		return GetTaskID(nItem);
-
-	return 0;
+	return GetItemData(hti);
 }
 
 DWORD CWorkloadCtrl::TreeHitTestTask(const CPoint& ptScreen, BOOL bScreen) const
 {
-	HTREEITEM htiHit = TreeHitTestItem(ptScreen, bScreen);
+	HTREEITEM hti = TreeHitTestItem(ptScreen, bScreen);
 	
-	if (htiHit)
-		return GetTaskID(htiHit);
-	
-	return 0;
-}
-
-HTREEITEM CWorkloadCtrl::TreeHitTestItem(const CPoint& point, BOOL bScreen) const
-{
-	CPoint ptTree(point);
-
-	if (bScreen)
-		m_tcTasks.ScreenToClient(&ptTree);
-	
-	return m_tcTasks.HitTest(ptTree);
-}
-
-WLC_COLUMNID CWorkloadCtrl::TreeHitTestItemColumn(const CPoint& point, BOOL bScreen) const
-{
-	if (TreeHitTestItem(point, bScreen) == NULL)
-		return WLCC_NONE;
-
-	CPoint ptHeader(point);
-
-	if (bScreen)
-		m_tcTasks.ScreenToClient(&ptHeader);
-
-	ptHeader.y = 4;
-
-	int nCol = m_hdrTasks.HitTest(ptHeader);
-
-	if (nCol == -1)
-		return WLCC_NONE;
-
-	// else
-	return (WLC_COLUMNID)m_hdrTasks.GetItemData(nCol);
-}
-
-HTREEITEM CWorkloadCtrl::GetItem(CPoint ptScreen) const
-{
-	return TreeHitTestItem(ptScreen, TRUE);
-}
-
-CString CWorkloadCtrl::GetItemTip(CPoint ptScreen) const
-{
-	HTREEITEM htiHit = GetItem(ptScreen);
-
-	if (htiHit)
-	{
-		CRect rItem;
-
-		if (m_tcTasks.GetItemRect(htiHit, rItem, TRUE))
-		{
-			int nColWidth = m_hdrTasks.GetItemWidth(0);
-
-			rItem.left = max(rItem.left, 0);
-			rItem.right = nColWidth;
-
-			CPoint ptClient(ptScreen);
-			m_tcTasks.ScreenToClient(&ptClient);
-
-			if (rItem.PtInRect(ptClient))
-			{
-				DWORD dwTaskID = GetTaskID(htiHit);
-				WORKLOADITEM* pWI = NULL;
-
-				GET_WI_RET(dwTaskID, pWI, _T(""));
-
-				int nTextLen = GraphicsMisc::GetTextWidth(pWI->sTitle, m_tcTasks);
-				rItem.DeflateRect(TV_TIPPADDING, 0);
-
-				if (nTextLen > rItem.Width())
-					return pWI->sTitle;
-			}
-		}
-	}
-
-	// else
-	return _T("");
-}
-
-BOOL CWorkloadCtrl::PointInHeader(const CPoint& ptScreen) const
-{
-	CRect rHeader;
-
-	// try tree
-	m_hdrTasks.GetWindowRect(rHeader);
-
-	if (rHeader.PtInRect(ptScreen))
-		return TRUE;
-
-	// then list
-	m_hdrColumns.GetWindowRect(rHeader);
-
-	return rHeader.PtInRect(ptScreen);
-}
-
-void CWorkloadCtrl::GetWindowRect(CRect& rWindow, BOOL bWithHeader) const
-{
-	CRect rTree, rList;
-
-	m_tcTasks.GetWindowRect(rTree);
-	m_lcColumns.GetWindowRect(rList);
-
-	if (bWithHeader)
-		rWindow = rList; // height will include header
-	else
-		rWindow = rTree; // height will not include header
-
-	rWindow.left  = min(rTree.left, rList.left);
-	rWindow.right = max(rTree.right, rList.right);
-}
-
-int CWorkloadCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const
-{
-	if (m_data.GetCount() == 0)
-		return -1;
-
-	// convert to list coords
-	LVHITTESTINFO lvht = { 0 };
-	lvht.pt = point;
-
-	if (bScreen)
-		m_lcColumns.ScreenToClient(&(lvht.pt));
-
-	CRect rClient;
-	CWnd::GetClientRect(rClient);
-
-	if (!rClient.PtInRect(point))
-		return -1;
-
-	if ((ListView_SubItemHitTest(m_lcColumns, &lvht) != -1) &&	(lvht.iSubItem > 0))
-	{
-		ASSERT(lvht.iItem != -1);
-
-		nCol = lvht.iSubItem;
-		return lvht.iItem;
-	}
-
-	// all else
-	return -1;
+	return GetTaskID(hti);
 }
 
 DWORD CWorkloadCtrl::GetTaskID(HTREEITEM htiFrom) const
 {
-	if ((htiFrom == NULL) || (htiFrom == TVI_FIRST) || (htiFrom == TVI_ROOT))
-		return 0;
-
-	return GetTreeItemData(m_tcTasks, htiFrom);
+	return GetItemData(htiFrom);
 }
 
 DWORD CWorkloadCtrl::GetTaskID(int nItem) const
 {
-	return GetListTaskID(GetListItemData(m_lcColumns, nItem));
-}
-
-DWORD CWorkloadCtrl::GetListTaskID(DWORD dwItemData) const
-{
-	return GetTaskID((HTREEITEM)dwItemData);
-}
-
-void CWorkloadCtrl::RedrawList(BOOL bErase)
-{
-	m_lcColumns.InvalidateRect(NULL, bErase);
-	m_lcColumns.UpdateWindow();
-}
-
-void CWorkloadCtrl::RedrawTree(BOOL bErase)
-{
-	m_tcTasks.InvalidateRect(NULL, bErase);
-	m_tcTasks.UpdateWindow();
-}
-
-void CWorkloadCtrl::SetReadOnly(bool bReadOnly) 
-{ 
-	m_bReadOnly = bReadOnly;
-
-	m_treeDragDrop.EnableDragDrop(!bReadOnly);
-}
-
-// external version
-BOOL CWorkloadCtrl::CancelOperation()
-{
-	if (m_treeDragDrop.IsDragging())
-	{
-		m_treeDragDrop.CancelDrag();
-		return TRUE;
-	}
-	
-	// else 
-	return FALSE;
-}
-
-int CWorkloadCtrl::GetTreeColumnOrder(CIntArray& aOrder) const
-{
-	return m_hdrTasks.GetItemOrder(aOrder);
-}
-
-void CWorkloadCtrl::SetTreeColumnVisibility(const CDWordArray& aColumnVis)
-{
-	int nNumCols = aColumnVis.GetSize();
-
-	for (int nColID = 1; nColID < nNumCols; nColID++)
-	{
-		int nCol = m_hdrTasks.FindItem(nColID);
-		m_hdrTasks.ShowItem(nCol, aColumnVis[nColID]);
-	}
-
-	Resize();
-}
-
-BOOL CWorkloadCtrl::SetTreeColumnOrder(const CIntArray& aOrder)
-{
-	if (!(aOrder.GetSize() && (aOrder[0] == 0)))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	return m_hdrTasks.SetItemOrder(aOrder);
-}
-
-void CWorkloadCtrl::GetTreeColumnWidths(CIntArray& aWidths) const
-{
-	m_hdrTasks.GetItemWidths(aWidths);
-}
-
-BOOL CWorkloadCtrl::SetTreeColumnWidths(const CIntArray& aWidths)
-{
-	if (aWidths.GetSize() != (NUM_TREECOLUMNS + 1))
-		return FALSE;
-
-	m_hdrTasks.SetItemWidths(aWidths);
-	return TRUE;
-}
-
-void CWorkloadCtrl::GetTreeTrackedColumns(CIntArray& aTracked) const
-{
-	m_hdrTasks.GetTrackedItems(aTracked);
-}
-
-BOOL CWorkloadCtrl::SetTrackedTreeColumns(const CIntArray& aTracked)
-{
-	if (aTracked.GetSize() != (NUM_TREECOLUMNS + 1))
-		return FALSE;
-	
-	m_hdrTasks.SetTrackedItems(aTracked); 
-	return TRUE;
+	return GetTaskID(GetTreeItem(nItem));
 }
 
 DWORD CWorkloadCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
-	HTREEITEM hti = FindTreeItem(m_tcTasks, dwTaskID);
+	HTREEITEM hti = FindTreeItem(m_tree, dwTaskID);
 	
 	if (!hti)
 	{
@@ -4086,65 +2836,146 @@ DWORD CWorkloadCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	}
 
 	DWORD dwNextID(dwTaskID);
+	HTREEITEM htiNext = NULL;
 
 	switch (nCmd)
 	{
 	case IUI_GETNEXTTASK:
-		{
-			HTREEITEM htiNext = TCH().GetNextVisibleItem(hti);
-			
-			if (htiNext)
-				dwNextID = GetTreeItemData(m_tcTasks, htiNext);
-		}
+		htiNext = m_tree.GetNextItem(hti, TVGN_NEXT);
 		break;
 		
 	case IUI_GETPREVTASK:
-		{
-			HTREEITEM htiPrev = TCH().GetPrevVisibleItem(hti);
-			
-			if (htiPrev)
-				dwNextID = GetTreeItemData(m_tcTasks, htiPrev);
-		}
+		htiNext = m_tree.GetNextItem(hti, TVGN_PREVIOUS);
+		break;
+		
+	case IUI_GETNEXTVISIBLETASK:
+		htiNext = TCH().GetNextVisibleItem(hti);
+		break;
+		
+	case IUI_GETPREVVISIBLETASK:
+		htiNext = TCH().GetPrevVisibleItem(hti);
 		break;
 		
 	case IUI_GETNEXTTOPLEVELTASK:
+		htiNext = TCH().GetNextTopLevelItem(hti, TRUE);
+		break;
+
 	case IUI_GETPREVTOPLEVELTASK:
-		{
-			HTREEITEM htiNext = TCH().GetNextTopLevelItem(hti, (nCmd == IUI_GETNEXTTOPLEVELTASK));
-			
-			if (htiNext)
-				dwNextID = GetTreeItemData(m_tcTasks, htiNext);
-		}
+		htiNext = TCH().GetNextTopLevelItem(hti, FALSE);
 		break;
 		
 	default:
 		ASSERT(0);
 	}
+			
+	if (htiNext)
+		dwNextID = GetTreeItemData(m_tree, htiNext);
 	
 	return dwNextID;
 }
 
 BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
 {
-	if (m_tcTasks.GetCount() == 0)
+	if (m_tree.GetCount() == 0)
 		return FALSE;
 
-	CLockUpdates lock(m_tcTasks);
+	CClientDC dc(&m_tree);
 
-	// Resize tree header width to suit title text width
-	int nColWidth = m_hdrTasks.GetItemWidth(0);
-	BOOL bTracked = m_hdrTasks.IsItemTracked(0);
+	BOOL bTracked = m_treeHeader.IsItemTracked(0);
 
-	ResizeColumnsToFit();	
+	// Resize tree width to suit title text width
+	int nPrevTitleWidth = m_treeHeader.GetItemWidth(0);
+	int nPrevTreeWidth = m_treeHeader.CalcTotalItemWidth();
 
-	int nFrom = 0, nTo = -1;
-	// TODO
-	
-	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage, nFrom, nTo);
+	int nReqTitleWidth = CalcTreeColumnWidth(0, &dc);
+	int nReqTreeWidth = (nReqTitleWidth + (nPrevTreeWidth - nPrevTitleWidth));
+
+	m_treeHeader.SetItemWidth(0, nReqTitleWidth);
+	Resize();
+
+	CAutoFlag af(m_bSavingToImage, TRUE);
+	CEnBitmap bmBase;
+
+	BOOL bRes = CTreeListCtrl::SaveToImage(bmBase);
+
+	if (bRes)
+	{
+		// Add totals and graph
+		CEnBitmap bmLabels, bmTotals, bmChart;
+
+		if (!CCopyListCtrlContents(m_lcTotalsLabels).DoCopy(bmLabels))
+			return FALSE;
+
+		// Manually resize the totals full width because it doesn't scroll
+		int nReqWidth = m_listHeader.CalcTotalItemWidth();
+
+		CRect rTotals = CDialogHelper::GetChildRect(&m_lcColumnTotals), rTemp(rTotals);
+		rTemp.right = rTemp.left + nReqWidth;
+		rTemp.bottom += 2; // else the bottom border is not always drawn
+
+		m_lcColumnTotals.MoveWindow(rTemp);
+		
+		if (!CCopyListCtrlContents(m_lcColumnTotals).DoCopy(bmTotals))
+			return FALSE;
+
+		m_lcColumnTotals.MoveWindow(rTotals);
+
+		if (!m_barChart.SaveToImage(bmChart))
+			return FALSE;
+
+		// Join them all the bits together
+		CDC dcImage, dcParts;
+
+		if (dcImage.CreateCompatibleDC(&dc) && dcParts.CreateCompatibleDC(&dc))
+		{
+			CSize sizeBase = bmBase.GetSize();
+			CSize sizeLabels = bmLabels.GetSize();
+			CSize sizeTotals = bmTotals.GetSize();
+			CSize sizeChart = bmChart.GetSize();
+
+			CSize sizeImage;
+
+			sizeImage.cx = (sizeBase.cx + sizeChart.cx);
+			sizeImage.cy = max((sizeBase.cy + sizeTotals.cy), sizeChart.cy);
+
+			if (bmImage.CreateCompatibleBitmap(&dc, sizeImage.cx, sizeImage.cy))
+			{
+				CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
+				dcImage.FillSolidRect(0, 0, sizeImage.cx, sizeImage.cy, GetSysColor(COLOR_WINDOW));
+
+				// Base-class
+				CBitmap* pOldPart = dcParts.SelectObject(&bmBase);
+				dcImage.BitBlt(0, 0, sizeBase.cx, sizeBase.cy, &dcParts, 0, 0, SRCCOPY);
+
+				// Totals labels
+				dcParts.SelectObject(bmLabels);
+				dcImage.BitBlt(0, sizeBase.cy, sizeLabels.cx, sizeLabels.cy, &dcParts, 0, 0, SRCCOPY);
+
+				// Column Totals
+				dcParts.SelectObject(bmTotals);
+				dcImage.BitBlt(sizeLabels.cx + 2, sizeBase.cy, sizeTotals.cx, sizeTotals.cy, &dcParts, 0, 0, SRCCOPY);
+
+				// Draw vertical divider between labels and totals
+				CRect rDivider(0, sizeBase.cy, (sizeLabels.cx + 1), (sizeBase.cy + sizeTotals.cy));
+				DrawItemDivider(&dcImage, rDivider, TRUE, FALSE);
+
+				// Draw vertical divider at end of totals
+				rDivider.right = sizeBase.cx;
+				DrawItemDivider(&dcImage, rDivider, TRUE, FALSE);
+
+				// Bar chart
+				dcParts.SelectObject(bmChart);
+				dcImage.BitBlt(sizeBase.cx, 0, sizeChart.cx, sizeChart.cy, &dcParts, 0, 0, SRCCOPY);
+
+				dcParts.SelectObject(pOldPart);
+				dcImage.SelectObject(pOldImage);
+			}
+		}
+	}
 	
 	// Restore title column width
-	m_hdrTasks.SetItemWidth(0, nColWidth);
-	m_hdrTasks.SetItemTracked(0, bTracked);
+	m_treeHeader.SetItemWidth(0, nPrevTitleWidth);
+	m_treeHeader.SetItemTracked(0, bTracked);
 
 	Resize();
 	
@@ -4155,38 +2986,31 @@ void CWorkloadCtrl::RefreshItemBoldState(HTREEITEM htiFrom, BOOL bAndChildren)
 {
 	if (htiFrom && (htiFrom != TVI_ROOT))
 	{
-		TCH().SetItemBold(htiFrom, (m_tcTasks.GetParentItem(htiFrom) == NULL));
+		TCH().SetItemBold(htiFrom, (m_tree.GetParentItem(htiFrom) == NULL));
 	}
 	
 	// children
 	if (bAndChildren)
 	{
-		HTREEITEM htiChild = m_tcTasks.GetChildItem(htiFrom);
+		HTREEITEM htiChild = m_tree.GetChildItem(htiFrom);
 		
 		while (htiChild)
 		{
 			RefreshItemBoldState(htiChild);
-			htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
+			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 		}
 	}
 }
 
 BOOL CWorkloadCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 {
-	if (!hFont || !m_tcTasks.GetSafeHwnd() || !m_lcColumns.GetSafeHwnd())
-	{
-		ASSERT(0);
+	if (!CTreeListCtrl::SetFont(hFont, bRedraw))
 		return FALSE;
-	}
 
 	CFont* pFont = CFont::FromHandle(hFont);
-	
-	m_tcTasks.SetFont(pFont, bRedraw);
-	m_lcTotalsLabels.SetFont(pFont, bRedraw);
-	m_lcColumnTotals.SetFont(pFont, bRedraw);
-	m_hdrColumns.SetFont(pFont, bRedraw);
 
-	ResizeColumnsToFit();
+	m_lcColumnTotals.SetFont(pFont);
+	m_lcTotalsLabels.SetFont(pFont);
 
 	CString sFontName;
 	int nFontSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFontName);
@@ -4198,48 +3022,14 @@ BOOL CWorkloadCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 
 void CWorkloadCtrl::FilterToolTipMessage(MSG* pMsg)
 {
-	m_tcTasks.FilterToolTipMessage(pMsg);
-	m_hdrTasks.FilterToolTipMessage(pMsg);
-	m_hdrColumns.FilterToolTipMessage(pMsg);
+	CTreeListCtrl::FilterToolTipMessage(pMsg);
+
 	m_barChart.FilterToolTipMessage(pMsg);
 }
 
-bool CWorkloadCtrl::ProcessMessage(MSG* pMsg) 
+void CWorkloadCtrl::SetReadOnly(BOOL bReadOnly)
 {
-	return (m_treeDragDrop.ProcessMessage(pMsg) != FALSE);
-}
+	m_bReadOnly = bReadOnly;
 
-BOOL CWorkloadCtrl::CanMoveSelectedItem(const IUITASKMOVE& move) const
-{
-	return (GetSelectedTaskID() && 
-			((move.dwParentID == 0) || m_data.HasItem(move.dwParentID)) &&
-			((move.dwAfterSiblingID == 0) || m_data.HasItem(move.dwAfterSiblingID)));
-}
-
-BOOL CWorkloadCtrl::MoveSelectedItem(const IUITASKMOVE& move)
-{
-	if (!CanMoveSelectedItem(move))
-		return FALSE;
-
-	CAutoFlag af(m_bMovingTask, TRUE);
-	
-	HTREEITEM htiSel = GetSelectedItem(), htiNew = NULL;
-	HTREEITEM htiDestParent = GetTreeItem(move.dwParentID);
-	HTREEITEM htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
-	
-	{
-		CHoldRedraw hr2(m_tcTasks, NCR_UPDATE);
-		CHoldRedraw hr3(m_lcColumns);
-
-		htiNew = TCH().MoveTree(htiSel, htiDestParent, htiDestAfterSibling, TRUE, TRUE);
-		ASSERT(htiNew);
-	}
-
-	if (htiNew)
-	{
-		SelectItem(htiNew);
-		return TRUE;
-	}
-
-	return FALSE;
+	EnableDragAndDrop(!bReadOnly);
 }

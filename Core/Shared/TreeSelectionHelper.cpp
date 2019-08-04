@@ -479,7 +479,7 @@ BOOL CTreeSelectionHelper::ItemsAreAllSiblings() const
 
 BOOL CTreeSelectionHelper::ItemsAreAllSiblings(const CHTIList& selection) const
 {
-	if (selection.GetCount() < 2)
+	if (selection.GetCount() == 1)
 		return TRUE;
 
 	POSITION pos = selection.GetHeadPosition();
@@ -501,57 +501,46 @@ BOOL CTreeSelectionHelper::ItemsAreAllSiblings(const CHTIList& selection) const
 	return TRUE;
 }
 
-void CTreeSelectionHelper::SortIfAllSiblings(BOOL bAscending)
+void CTreeSelectionHelper::Sort(CHTIList& selection, BOOL bAscending) const
 {
-	if (ItemsAreAllSiblings())
+	if (selection.GetCount() < 2)
+		return;
+
+	CSortArray aItems;
+
+	if (!BuildSortArray(selection, aItems))
+		return;
+
+	// sort that array
+	qsort(aItems.GetData(), aItems.GetSize(), sizeof(SORTITEM), SortProc);
+
+	// rebuild the selection
+	selection.RemoveAll();
+
+	for (int nItem = 0; nItem < aItems.GetSize(); nItem++)
 	{
-		// build an array of the current selection
-		CSortArray aItems;
-
-		if (!BuildSortArray(aItems))
-			return;
-
-		// sort that array
-		qsort(aItems.GetData(), aItems.GetSize(), sizeof(SORTITEM), SortProc);
-
-		// rebuild the selection
-		RemoveAll(FALSE);
+		const SORTITEM& si = aItems[nItem];
 
 		if (bAscending)
-		{
-			for (int nItem = aItems.GetSize() - 1; nItem >= 0 ; nItem--)
-			{
-				const SORTITEM& si = aItems[nItem];
-				AddItem(si.hti, FALSE);
-			}
-		}
+			selection.AddTail(si.hti);
 		else
-		{
-			for (int nItem = 0; nItem < aItems.GetSize(); nItem++)
-			{
-				const SORTITEM& si = aItems[nItem];
-				AddItem(si.hti, FALSE);
-			}
-		}
+			selection.AddHead(si.hti);
 	}
 }
 
-int CTreeSelectionHelper::BuildSortArray(CSortArray& aItems)
+int CTreeSelectionHelper::BuildSortArray(const CHTIList& selection, CSortArray& aItems) const
 {
-	aItems.SetSize(GetCount());
+	aItems.SetSize(selection.GetCount());
 
-	POSITION pos = GetFirstItemPos();
+	POSITION pos = selection.GetHeadPosition();
 	int nItem = 0;
 
 	while (pos)
 	{
-		HTREEITEM hti = GetNextItem(pos);
+		SORTITEM& si = aItems[nItem++];
 
-		int nPos = GetItemPos(hti);
-		SORTITEM si = { hti, nPos };
-
-		aItems.SetAt(nItem, si);
-		nItem++;
+		si.hti = selection.GetNext(pos);
+		si.nPos = m_tch.GetItemTop(si.hti);
 	}
 
 	return aItems.GetSize();
@@ -562,32 +551,7 @@ int CTreeSelectionHelper::SortProc(const void* item1, const void* item2)
 	const SORTITEM* pItem1 = (const SORTITEM*)item1;
 	const SORTITEM* pItem2 = (const SORTITEM*)item2;
 
-	if (pItem1->nPos < pItem2->nPos)
-		return -1;
-
-	else if (pItem1->nPos > pItem2->nPos)
-		return 1;
-	else
-		return 0;
-}
-
-int CTreeSelectionHelper::GetItemPos(HTREEITEM hti)
-{
-	HTREEITEM htiParent = m_tree.GetParentItem(hti);
-	HTREEITEM htiChild = m_tree.GetChildItem(htiParent);
-	int nPos = 0;
-
-	while (htiChild)
-	{
-		if (hti == htiChild)
-			return nPos;
-
-		nPos++;
-		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
-	}
-
-	// not found ??
-	return -1;
+	return (pItem1->nPos - pItem2->nPos);
 }
 
 void CTreeSelectionHelper::RemoveChildDuplicates() 
@@ -617,9 +581,9 @@ int CTreeSelectionHelper::CopySelection(CHTIList& selection, BOOL bRemoveChildDu
 		RemoveChildDuplicates(selection);
 
 	if (bOrdered)
-		OrderItems(selection);
+		Sort(selection, TRUE);
 
-	return (selection.GetCount());
+	return selection.GetCount();
 }
 
 BOOL CTreeSelectionHelper::HasSelectedParent(HTREEITEM hti) const
@@ -902,51 +866,6 @@ BOOL CTreeSelectionHelper::FixupTreeSelection()
 		m_htiAnchor = m_tree.GetSelectedItem();
 
 	return bTreeSelChanged;
-}
-
-void CTreeSelectionHelper::OrderItems(BOOL bVisibleOnly)
-{
-	OrderItems(m_lstSelection, bVisibleOnly);
-}
-
-void CTreeSelectionHelper::OrderItems(CHTIList& selection, BOOL bVisibleOnly) const
-{
-	if (selection.GetCount() > 1)
-	{
-		CHTIList lstOrdered;
-		VERIFY(BuildOrderedItems(selection, m_tree.GetChildItem(NULL), bVisibleOnly, lstOrdered));
-
-		selection.Copy(lstOrdered);
-	}
-}
-
-BOOL CTreeSelectionHelper::BuildOrderedItems(const CHTIList& selection, 
-	HTREEITEM hti, BOOL bVisibleOnly, CHTIList& lstOrdered) const
-{
-	if (hti)
-	{
-		if (selection.Find(hti) != NULL)
-		{
-			lstOrdered.AddTail(hti);
-
-			// Can stop when ordered list has same length as input
-			if (lstOrdered.GetCount() == selection.GetCount())
-				return TRUE;
-		}
-
-		// children
-		if (!bVisibleOnly || (m_tree.GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED))
-		{
-			if (BuildOrderedItems(selection, m_tree.GetChildItem(hti), bVisibleOnly, lstOrdered))
-				return TRUE;
-		}
-
-		// siblings
-		if (BuildOrderedItems(selection, m_tree.GetNextItem(hti, TVGN_NEXT), bVisibleOnly, lstOrdered))
-			return TRUE;
-	}
-
-	return FALSE;
 }
 
 int CTreeSelectionHelper::GetItemTitles(const CHTIList& selection, CStringArray& aTitles) const

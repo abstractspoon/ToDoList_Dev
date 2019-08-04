@@ -150,7 +150,6 @@ BEGIN_MESSAGE_MAP(CTDLTaskCtrlBase, CWnd)
 ON_WM_DESTROY()
 ON_WM_SIZE()
 ON_WM_CREATE()
-ON_MESSAGE(WM_SETREDRAW, OnSetRedraw)
 ON_WM_SETCURSOR()
 ON_WM_TIMER()
 ON_WM_HELPINFO()
@@ -450,7 +449,7 @@ void CTDLTaskCtrlBase::SetNextUniqueTaskID(DWORD dwTaskID)
 		m_dwNextUniqueTaskID = dwTaskID;
 
 		if (GetSafeHwnd())
-			RecalcUntrackedColumnWidths(CTDCColumnIDMap(TDCC_ID), FALSE);
+			RecalcUntrackedColumnWidths(CTDCColumnIDMap(TDCC_ID));
 	}
 }
 
@@ -473,14 +472,6 @@ void CTDLTaskCtrlBase::OnSize(UINT nType, int cx, int cy)
 		if (m_bAutoFitSplitter)
 			AdjustSplitterToFitAttributeColumns();
 	}
-}
-
-LRESULT CTDLTaskCtrlBase::OnSetRedraw(WPARAM wp, LPARAM /*lp*/)
-{
-	::SendMessage(Tasks(), WM_SETREDRAW, wp, 0);
-	m_lcColumns.SetRedraw(wp);
-
-	return 0L;
 }
 
 BOOL CTDLTaskCtrlBase::IsListItemSelected(HWND hwnd, int nItem) const
@@ -738,7 +729,7 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChange
 	if (mapChanges.Has(TDCC_ICON) || mapChanges.Has(TDCC_DONE))
 		OnImageListChange();
 
-	RecalcUntrackedColumnWidths(mapChanges, FALSE);
+	RecalcUntrackedColumnWidths(mapChanges);
 
 	if (m_bAutoFitSplitter)
 		AdjustSplitterToFitAttributeColumns();
@@ -1017,18 +1008,13 @@ void CTDLTaskCtrlBase::RecalcAllColumnWidths()
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()
 {
-	if (!m_bEnableRecalcColumns)
-		return;
-
-	VERIFY(m_ilFileRef.Initialize());
-
-	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcColumnWidths(%s)"), GetDebugName());
-
-	RecalcUntrackedColumnWidths(FALSE); // Standard and Custom cols
+	if (m_bEnableRecalcColumns)
+		RecalcUntrackedColumnWidths(FALSE); // Standard and Custom cols
 }
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 {
+
 	// Get a list of all the visible column attributes
 	CTDCColumnIDMap mapCols;
 
@@ -1037,29 +1023,34 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 	
 	CTDCCustomAttributeHelper::GetVisibleColumnIDs(m_aCustomAttribDefs, mapCols, TRUE); // append
 
-	RecalcUntrackedColumnWidths(mapCols, TRUE);
+	RecalcUntrackedColumnWidths(mapCols, TRUE, bCustomOnly);
 }
 
-void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers)
+void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers, BOOL bCustomOnly)
 {
+	if (!bZeroOthers && !aColIDs.GetCount())
+		return;
+
 	// Weed out all the tracked columns
 	CTDCColumnIDMap mapCols(aColIDs);
 	int nNumCols = m_hdrColumns.GetItemCount();
 
 	for (int nItem = 1; nItem < nNumCols; nItem++)
 	{
-		if (m_hdrColumns.IsItemVisible(nItem) && 
-			m_hdrColumns.IsItemTracked(nItem))
+		if (m_hdrColumns.IsItemTracked(nItem))
 		{
+			ASSERT(m_hdrColumns.IsItemVisible(nItem));
 			mapCols.RemoveKey(GetColumnID(nItem));
 		}
 	}
 
-	if (aColIDs.GetCount() == 0)
+	if (!bZeroOthers && !aColIDs.GetCount())
 		return;
 
 	CHoldRedraw hr(m_lcColumns);
 	CClientDC dc(&m_lcColumns);
+
+	VERIFY(m_ilFileRef.Initialize());
 
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
 	BOOL bVisibleTasksOnly = IsTreeList();
@@ -1110,7 +1101,11 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 					nColWidth = CalcColumnWidth(nItem, &dc, bVisibleTasksOnly);
 				}
 			}
-			else if (!bZeroOthers)
+			else if (!bZeroOthers || m_hdrColumns.IsItemTracked(nItem))
+			{
+				continue;
+			}
+			else if (bCustomOnly && !CTDCCustomAttributeHelper::IsCustomColumn(nColID))
 			{
 				continue;
 			}
@@ -1692,14 +1687,6 @@ void CTDLTaskCtrlBase::Resize(const CRect& rect)
 		MoveWindow(rect);
 	else
 		CTreeListSyncer::Resize(rect);
-}
-
-void CTDLTaskCtrlBase::Resize()
-{
-	CRect rect;
-	GetBoundingRect(rect);
-	
-	Resize(rect);
 }
 
 POSITION CTDLTaskCtrlBase::GetFirstSelectedTaskPos() const
@@ -2369,7 +2356,6 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 
 	// draw each column separately
 	int nNumCol = m_hdrColumns.GetItemCount();
-	int nLastCol = m_hdrColumns.GetLastVisibleItem();
 
 	CRect rSubItem, rClient, rClip;
 	m_lcColumns.GetClientRect(rClient);
@@ -2382,20 +2368,24 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 
 	for (int nCol = 1; nCol < nNumCol; nCol++)
 	{
+		if (!m_hdrColumns.IsItemVisible(nCol))
+			continue;
+
 		if (!m_lcColumns.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rSubItem))
 			continue;
 
 		// don't draw columns outside of client rect
-		if (rSubItem.IsRectEmpty() || (rSubItem.right <= rClient.left))
+		if (rSubItem.IsRectEmpty())
+			continue;
+
+		if (rSubItem.right <= rClient.left)
 			continue;
 
 		if (rSubItem.left >= rClient.right)
 			continue;
 
-		// draw vertical gridlines for all but the
-		// last item if the row is selected
-		if (!(bSelected && (nCol == nLastCol)))
-			DrawGridlines(pDC, rSubItem, bSelected, FALSE, TRUE);
+		// vertical gridlines
+		DrawGridlines(pDC, rSubItem, bSelected, FALSE, TRUE);
 
 		// don't draw min sized columns
 		if (rSubItem.Width() <= MIN_COL_WIDTH)
@@ -2436,6 +2426,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_TIMESPENT:
+			if (!sTaskColText.IsEmpty())
 			{
 				// show text in red if we're currently tracking
 				COLORREF crTemp = ((m_dwTimeTrackTaskID == dwTrueID) ? 255 : crText);
@@ -3378,7 +3369,6 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		case TDCC_CREATEDBY:	return pTDI->sCreatedBy;
 
 		case TDCC_POSITION:		return m_formatter.GetTaskPosition(pTDS);
-		case TDCC_PRIORITY:		return m_formatter.GetTaskPriority(pTDI, pTDS);
 		case TDCC_RISK:			return m_formatter.GetTaskRisk(pTDI, pTDS);
 		case TDCC_RECURRENCE:	return m_formatter.GetTaskRecurrence(pTDI);
 		case TDCC_RECENTEDIT:	return m_formatter.GetTaskRecentlyModified(pTDI, pTDS);
@@ -3411,6 +3401,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		case TDCC_LOCK:
 		case TDCC_REMINDER:
 		case TDCC_FILEREF:
+		case TDCC_PRIORITY:
 			// items having no text or rendered differently
 			return _T("");
 
@@ -3597,7 +3588,6 @@ void CTDLTaskCtrlBase::RepackageAndSendToParent(UINT msg, WPARAM /*wp*/, LPARAM 
 	}
 }
 
-// messages and notifications sent to m_lcColumns 
 LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (!IsResyncEnabled())
@@ -3712,27 +3702,6 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						return 0L;
 					}
 					break;
-
-				case HDN_ITEMCHANGING:
-					if (hwnd == m_hdrColumns)
-					{
-						NMHEADER* pHDN = (NMHEADER*)pNMHDR;
-						
-						// don't let user drag column too narrow
-						// Exclude first column which is always zero width
-						if (pHDN->iItem == 0)
-						{
-							pHDN->pitem->cxy = 0;
-						}
-						else if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
-						{
-							if (IsColumnShowing(GetColumnID(pHDN->iItem)))
-							{
-								pHDN->pitem->cxy = max(MIN_COL_WIDTH, pHDN->pitem->cxy);
-							}
-						}
-					}
-					break;
 				}
 			}
 			break;
@@ -3810,6 +3779,37 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	}
 	
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+}
+
+BOOL CTDLTaskCtrlBase::OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
+{
+	if (pHDN->hdr.hwndFrom == m_hdrColumns)
+	{
+		// Prevent changing the first hidden column
+		if (pHDN->iItem == 0)
+			pHDN->pitem->cxy = 0;
+		else
+			nMinWidth = MIN_COL_WIDTH;
+	}
+	else if (pHDN->hdr.hwndFrom == m_hwndPrimaryHeader)
+	{
+		if (pHDN->iItem == 0)
+			nMinWidth = MIN_TASKS_WIDTH;
+		else
+			nMinWidth = MIN_COL_WIDTH;
+	}
+
+	return CTreeListSyncer::OnHeaderItemWidthChanging(pHDN, nMinWidth);
+}
+
+BOOL CTDLTaskCtrlBase::OnListHeaderBeginTracking(NMHEADER* pHDN)
+{
+	// Prevent tracking the first hidden column
+	if (pHDN->iItem == 0)
+		return FALSE;
+
+	// else
+	return m_hdrColumns.IsItemTrackable(pHDN->iItem);
 }
 
 void CTDLTaskCtrlBase::HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoint pt)
@@ -4284,9 +4284,12 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 	case TDCA_ARCHIVE:
 	case TDCA_UNDO:
 	case TDCA_NEWTASK:
+		aColIDs.Copy(m_mapVisibleCols);
+		break;
+
 	case TDCA_CUSTOMATTRIB:
 	case TDCA_CUSTOMATTRIBDEFS:
-		aColIDs.Copy(m_mapVisibleCols);
+		// Handled in OnCustomAttributeChange
 		break;
 		
 	case TDCA_NONE:
@@ -4303,7 +4306,7 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 		break;
 	}
 
-	RecalcUntrackedColumnWidths(aColIDs, FALSE);
+	RecalcUntrackedColumnWidths(aColIDs);
 	
 	if (bRedrawTasks)
 	{
@@ -4617,18 +4620,6 @@ void CTDLTaskCtrlBase::RedrawTasks(BOOL bErase) const
 {
 	::InvalidateRect(Tasks(), NULL, bErase);
 	::UpdateWindow(Tasks());
-}
-
-void CTDLTaskCtrlBase::OnBeginRebuild()
-{
-	EnableResync(FALSE);
-	OnSetRedraw(FALSE, 0);
-}
-
-void CTDLTaskCtrlBase::OnEndRebuild()
-{
-	OnSetRedraw(TRUE, 0);
-	EnableResync(TRUE, Tasks());
 }
 
 int CTDLTaskCtrlBase::CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustomWantsTime) const
@@ -5200,6 +5191,42 @@ BOOL CTDLTaskCtrlBase::SelectionHasReferences() const
 	return FALSE;
 }
 
+BOOL CTDLTaskCtrlBase::SelectionHasSameParent() const
+{
+	switch (GetSelectedCount())
+	{
+	case 0:
+		ASSERT(0);
+		return FALSE;
+
+	case 1:
+		return TRUE;
+
+	default:
+		{
+			DWORD dwFirstParent = (DWORD)-1;
+			POSITION pos = GetFirstSelectedTaskPos();
+
+			while (pos)
+			{
+				DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+				if (dwFirstParent == -1)
+				{
+					dwFirstParent = m_data.GetTaskParentID(dwTaskID);
+				}
+				else if (dwFirstParent != m_data.GetTaskParentID(dwTaskID))
+				{
+					return FALSE;
+				}
+			}
+		}
+		break;
+	}
+
+	return TRUE;
+}
+
 BOOL CTDLTaskCtrlBase::SelectionHasNonReferences() const
 {
 	POSITION pos = GetFirstSelectedTaskPos();
@@ -5386,21 +5413,24 @@ CString CTDLTaskCtrlBase::GetSelectedTaskTitle() const
 
 int CTDLTaskCtrlBase::GetSelectedTaskPriority() const
 {
-   int nPriority = -1;
-   POSITION pos = GetFirstSelectedTaskPos();
+	int nPriority = -1;
+	POSITION pos = GetFirstSelectedTaskPos();
 
-   while (pos)
-   {
-      DWORD dwTaskID = GetNextSelectedTaskID(pos);
-      int nTaskPriority = m_data.GetTaskPriority(dwTaskID);
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+		int nTaskPriority = m_data.GetTaskPriority(dwTaskID);
 
-      if (nPriority == -1)
-         nPriority = nTaskPriority;
+		if (nPriority == -1)
+		{
+			nPriority = nTaskPriority;
+		}
+		else if (nPriority != nTaskPriority)
+		{
+			return -1;
+		}
+	}
 
-      else if (nPriority != nTaskPriority)
-         return -1;
-   }
-	
 	return nPriority;
 }
 
@@ -5408,9 +5438,13 @@ DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const
 {
 	// If multiple tasks are selected they must all
 	// have the same parent else we return 0
-	DWORD dwParentID = (DWORD)-1;
 	POSITION pos = GetFirstSelectedTaskPos();
+
+	if (!pos)
+		return 0;
 	
+	DWORD dwParentID = (DWORD)-1;
+
 	while (pos)
 	{
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
@@ -5431,21 +5465,24 @@ DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const
 
 int CTDLTaskCtrlBase::GetSelectedTaskRisk() const
 {
-   int nRisk = -1;
-   POSITION pos = GetFirstSelectedTaskPos();
+	int nRisk = -1;
+	POSITION pos = GetFirstSelectedTaskPos();
 
-   while (pos)
-   {
-      DWORD dwTaskID = GetNextSelectedTaskID(pos);
-      int nTaskRisk = m_data.GetTaskRisk(dwTaskID);
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+		int nTaskRisk = m_data.GetTaskRisk(dwTaskID);
 
-      if (nRisk == -1)
-         nRisk = nTaskRisk;
+		if (nRisk == -1)
+		{
+			nRisk = nTaskRisk;
+		}
+		else if (nRisk != nTaskRisk)
+		{
+			return -1; // == various
+		}
+	}
 
-      else if (nRisk != nTaskRisk)
-         return -1; // == various
-   }
-	
 	return nRisk;
 }
 
@@ -5659,25 +5696,29 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCost(TDCCOST& cost) const
 	{
 		// get first item's value as initial
 		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		VERIFY(m_data.GetTaskCost(dwTaskID, cost));
-		
-		while (pos)
+		if (pos)
 		{
-			dwTaskID = GetNextSelectedTaskID(pos);
+			DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-			TDCCOST taskCost;
-			VERIFY(m_data.GetTaskCost(dwTaskID, taskCost));
-
-			if (!(cost == taskCost))
+			VERIFY(m_data.GetTaskCost(dwTaskID, cost));
+		
+			while (pos)
 			{
-				cost.dAmount = 0.0;
-				cost.bIsRate = FALSE;
-			}
-		}
+				dwTaskID = GetNextSelectedTaskID(pos);
 
-		return TRUE;
+				TDCCOST taskCost;
+				VERIFY(m_data.GetTaskCost(dwTaskID, taskCost));
+
+				if (!(cost == taskCost))
+				{
+					cost.dAmount = 0.0;
+					cost.bIsRate = FALSE;
+				}
+			}
+
+			return TRUE;
+		}
 	}
 	
 	return FALSE;

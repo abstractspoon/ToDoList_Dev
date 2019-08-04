@@ -87,6 +87,7 @@ protected:
 	afx_msg void OnSnoozeFor();
 	afx_msg void OnSnoozeUntil();
 	afx_msg void OnItemchangedReminders(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnSnoozeAll();
 	//}}AFX_MSG
 	afx_msg void OnDblClkReminders(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClose();
@@ -97,10 +98,12 @@ protected:
 	int FindListReminder(const TDCREMINDER& rem);
 	int GetSelectedReminder(TDCREMINDER& rem) const;
 	int GetSelectedReminders(CTDCReminderArray& aRem) const;
+	int GetVisibleReminders(CTDCReminderArray& aRem) const;
 	void EnableControls();
 	void UpdateControls();
 	void UpdateTitleText();
 	void UpdateColumnWidths();
+	void SnoozeReminders(BOOL bAll);
 };
 
 //{{AFX_INSERT_LOCATION}}

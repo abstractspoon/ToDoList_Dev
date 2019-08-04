@@ -112,6 +112,7 @@ BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	ON_BN_CLICKED(IDC_SNOOZEOPTIONFOR, OnSnoozeFor)
 	ON_BN_CLICKED(IDC_SNOOZEOPTIONUNTIL, OnSnoozeUntil)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_REMINDERS, OnItemchangedReminders)
+	ON_BN_CLICKED(IDC_SNOOZEALL, OnSnoozeAll)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(NM_DBLCLK, IDC_REMINDERS, OnDblClkReminders)
 	ON_WM_CLOSE()
@@ -304,6 +305,11 @@ void CTDLShowReminderDlg::OnSnooze()
 {
 	ASSERT(m_lcReminders.GetSelectedCount());
 
+	SnoozeReminders(FALSE);
+}
+
+void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
+{
 	UpdateData();
 
 	// save snooze value for next time
@@ -312,7 +318,7 @@ void CTDLShowReminderDlg::OnSnooze()
 
 	CTDCReminderArray aRem;
 
-	if (GetSelectedReminders(aRem))
+	if ((bAll && GetVisibleReminders(aRem)) || (!bAll && GetSelectedReminders(aRem)))
 	{
 		CAutoFlag af(m_bChangingReminders, TRUE);
 
@@ -321,6 +327,31 @@ void CTDLShowReminderDlg::OnSnooze()
 	}
 
 	UpdateControls();
+}
+
+
+void CTDLShowReminderDlg::OnSnoozeAll() 
+{
+	ASSERT(m_lcReminders.GetItemCount());
+	
+	SnoozeReminders(TRUE);
+}
+
+int CTDLShowReminderDlg::GetVisibleReminders(CTDCReminderArray& aRem) const
+{
+	int nRem = m_lcReminders.GetItemCount();
+
+	aRem.SetSize(nRem);
+
+	while (nRem--)
+	{
+		DWORD dwRemID = m_lcReminders.GetItemData(nRem);
+		ASSERT(dwRemID);
+
+		VERIFY(m_mapReminders.Lookup(dwRemID, aRem[nRem]));
+	}
+
+	return aRem.GetSize();
 }
 
 int CTDLShowReminderDlg::GetSelectedReminder(TDCREMINDER& rem) const
@@ -435,14 +466,17 @@ void CTDLShowReminderDlg::EnableControls()
 {
 	UpdateData();
 	
+	int nNumRem = m_lcReminders.GetItemCount();
 	int nNumSel = m_lcReminders.GetSelectedCount();
 
-	GetDlgItem(IDC_SNOOZEFOR)->EnableWindow(nNumSel && !m_bSnoozeUntil);
-	GetDlgItem(IDC_SNOOZEUNTILDATE)->EnableWindow(nNumSel && m_bSnoozeUntil);
-	GetDlgItem(IDC_SNOOZEUNTILTIME)->EnableWindow(nNumSel && m_bSnoozeUntil);
+	GetDlgItem(IDC_SNOOZEFOR)->EnableWindow(nNumRem && !m_bSnoozeUntil);
+	GetDlgItem(IDC_SNOOZEUNTILDATE)->EnableWindow(nNumRem && m_bSnoozeUntil);
+	GetDlgItem(IDC_SNOOZEUNTILTIME)->EnableWindow(nNumRem && m_bSnoozeUntil);
 
-	GetDlgItem(IDC_SNOOZEOPTIONFOR)->EnableWindow(nNumSel);
-	GetDlgItem(IDC_SNOOZEOPTIONUNTIL)->EnableWindow(nNumSel);
+	GetDlgItem(IDC_SNOOZEOPTIONFOR)->EnableWindow(nNumRem);
+	GetDlgItem(IDC_SNOOZEOPTIONUNTIL)->EnableWindow(nNumRem);
+	GetDlgItem(IDC_SNOOZEALL)->EnableWindow(nNumRem);
+
 	GetDlgItem(IDC_SNOOZE)->EnableWindow(nNumSel);
 	GetDlgItem(IDC_DISMISS)->EnableWindow(nNumSel);
 	GetDlgItem(IDC_DISMISSANDGOTOTASK)->EnableWindow(nNumSel == 1);

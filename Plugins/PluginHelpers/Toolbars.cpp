@@ -49,6 +49,14 @@ void Toolbars::FixupButtonSizes(ToolStrip^ toolbar)
 			sep->AutoSize = false;
 			sep->Height = (imageSize.Height + 7);
 		}
+
+		auto margin = item->Margin;
+
+		// To match MFC's CToolbar
+		margin.Top = 3;
+		margin.Bottom = 3;
+
+		item->Margin = margin;
 	}
 }
 

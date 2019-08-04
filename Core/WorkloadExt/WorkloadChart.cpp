@@ -9,11 +9,10 @@
 #include "..\Shared\EnString.h"
 
 #include "..\3rdParty\ColorDef.h"
+#include "..\3rdParty\GdiPlus.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
-const COLORREF COLOR_GREEN	= RGB(122, 204,   0); 
-const COLORREF COLOR_RED	= RGB(204,   0,   0); 
 const COLORREF COLOR_YELLOW = RGB(204, 164,   0); 
 const COLORREF COLOR_BLUE	= RGB(0,     0, 244); 
 const COLORREF COLOR_PINK	= RGB(234,  28,  74); 
@@ -26,10 +25,10 @@ CWorkloadChart::CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocatio
 	: 
 	m_mapPercentLoad(mapPercentLoad), 
 	m_aAllocTo(aAllocTo),
-	m_crOverload(COLOR_RED),
-	m_dOverloadValue(80.0),
-	m_crUnderload(COLOR_GREEN),
-	m_dUnderloadValue(50.0)
+	m_crOverload(CLR_NONE),
+	m_dOverloadValue(100.0),
+	m_crUnderload(CLR_NONE),
+	m_dUnderloadValue(0.0)
 {
 	SetDatasetLineColor(0, COLOR_BLUE);
 }
@@ -109,8 +108,6 @@ void CWorkloadChart::RebuildChart()
 
 	if (GetMinMax(dMin, dMax, true))
 	{
-		ASSERT(dMin == 0.0);
-
 		int nNumTicks = 10; // minimum default
 
 		if (dMax > 100)
@@ -124,16 +121,38 @@ void CWorkloadChart::RebuildChart()
 	Invalidate(FALSE);
 }
 
-void CWorkloadChart::SetOverloadColor(double dOverloadValue, COLORREF crOverload)
+void CWorkloadChart::EnableOverload(BOOL bEnable, double dOverloadValue, COLORREF crOverload)
 {
-	m_dOverloadValue = dOverloadValue;
-	m_crOverload = crOverload;
+	if (bEnable)
+	{
+		m_dOverloadValue = dOverloadValue;
+		m_crOverload = crOverload;
+	}
+	else
+	{
+		m_dUnderloadValue = 0.0;
+		m_crUnderload = CLR_NONE;
+	}
+
+	if (GetSafeHwnd())
+		Invalidate();
 }
 
-void CWorkloadChart::SetUnderloadColor(double dUnderloadValue, COLORREF crUnderload)
+void CWorkloadChart::EnableUnderload(BOOL bEnable, double dUnderloadValue, COLORREF crUnderload)
 {
-	m_dUnderloadValue = dUnderloadValue;
-	m_crUnderload = crUnderload;
+	if (bEnable)
+	{
+		m_dUnderloadValue = dUnderloadValue;
+		m_crUnderload = crUnderload;
+	}
+	else
+	{
+		m_dUnderloadValue = 0.0;
+		m_crUnderload = CLR_NONE;
+	}
+
+	if (GetSafeHwnd())
+		Invalidate();
 }
 
 BOOL CWorkloadChart::SetNormalColor(COLORREF crNormal)
@@ -177,26 +196,33 @@ COLORREF CWorkloadChart::GetFillColor(double dValue) const
 	return GetFillColor(0, dValue);
 }
 
-bool CWorkloadChart::DrawDataBkgnd( CDC& dc)
+bool CWorkloadChart::DrawGrid( CDC& dc)
 {
-	if (!CHMXChartEx::DrawDataBkgnd(dc))
+	if (!CHMXChartEx::DrawGrid(dc))
 		return false;
 
-	// Draw Over/underload cutoffs
-	if (HasOverload())
+	if (HasOverload() || HasUnderload())
 	{
-		CRect rOverload(m_rectData);
-		rOverload.bottom -= (int)(rOverload.Height() * (m_dOverloadValue / m_nYMax));
+		// Draw Over/underload cutoffs
+		CGdiPlusGraphics graphics(dc);
 
-		dc.FillSolidRect(rOverload, GetBkgndColor(m_dOverloadValue));
-	}
+		if (HasOverload())
+		{
+			CRect rOverload(m_rectData);
+			rOverload.bottom -= (int)(rOverload.Height() * (m_dOverloadValue / m_nYMax));
 
-	if (HasUnderload())
-	{
-		CRect rUnderload(m_rectData);
-		rUnderload.top = (rUnderload.bottom - (int)(rUnderload.Height() * (m_dUnderloadValue / m_nYMax)));
+			CGdiPlusBrush brush(m_crOverload, 50);
+			CGdiPlus::FillRect(graphics, brush, rOverload);
+		}
 
-		dc.FillSolidRect(rUnderload, GetBkgndColor(m_dUnderloadValue));
+		if (HasUnderload())
+		{
+			CRect rUnderload(m_rectData);
+			rUnderload.top = (rUnderload.bottom - (int)(rUnderload.Height() * (m_dUnderloadValue / m_nYMax)));
+
+			CGdiPlusBrush brush(m_crUnderload, 50);
+			CGdiPlus::FillRect(graphics, brush, rUnderload);
+		}
 	}
 
 	return true;
@@ -205,7 +231,7 @@ bool CWorkloadChart::DrawDataBkgnd( CDC& dc)
 COLORREF CWorkloadChart::GetBkgndColor(double dValue) const
 {
 	if (IsOverloaded(dValue) || IsUnderloaded(dValue))
-		return RGBX::AdjustLighting(GetValueColor(dValue), 0.5, FALSE);
+		return RGBX::AdjustLighting(GetValueColor(dValue), 0.8, TRUE);
 
 	// else
 	return CLR_NONE;
@@ -265,7 +291,7 @@ int CWorkloadChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		CString sTooltip;
 		sTooltip.Format(_T("%s: %.2f%%"), sAllocTo, dPercent);
 
-		return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, (nAllocTo + 1), m_rectData);
+		return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
 	}
 
 	return CHMXChartEx::OnToolHitTest(point, pTI);

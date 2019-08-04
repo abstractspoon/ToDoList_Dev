@@ -983,6 +983,7 @@ void CTabbedToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttr
 	switch (nAttrib)
 	{
 	case TDCA_ALL:
+	case TDCA_NEWTASK:
 		GetAllExtensionViewsWantedAttributes(mapAttrib);
 		break;
 
@@ -1083,9 +1084,11 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 															DWORD dwFlags, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter;
-	filter.mapAttribs.Copy(mapAttrib);
 
-	VERIFY(GetSelectedTasks(tasks, FTCV_TASKTREE, filter, dwFlags));
+	filter.mapAttribs.Copy(mapAttrib);
+	filter.dwFlags |= dwFlags;
+
+	VERIFY(GetSelectedTasks(tasks, FTCV_TASKTREE, filter));
 
 	// Globals
 	if (!mapAttrib.IsEmpty())
@@ -1903,12 +1906,18 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 	
 	BOOL bSuccess = FALSE;
-	m_nExtModifyingAttrib = TDCA_POSITION;
 
 	try
 	{
 		const IUITASKMOVE* pMove = (const IUITASKMOVE*)lParam;
 
+		DWORD dwSrcParentID = GetSelectedTaskParentID(); // zero for multiple parents
+
+		if (m_taskTree.SelectionHasSameParent() && (dwSrcParentID == pMove->dwParentID))
+			m_nExtModifyingAttrib = TDCA_POSITION_SAMEPARENT;
+		else
+			m_nExtModifyingAttrib = TDCA_POSITION_DIFFERENTPARENT;
+		
 		HTREEITEM htiDropItem = m_taskTree.GetItem(pMove->dwSelectedTaskID);
 		ASSERT(htiDropItem == GetSelectedItem());
 
@@ -2182,18 +2191,18 @@ void CTabbedToDoCtrl::SelectAll()
 	}
 }
 
-int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter, DWORD dwFlags) const
+int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
-	return GetSelectedTasks(tasks, GetTaskView(), filter, dwFlags);
+	return GetSelectedTasks(tasks, GetTaskView(), filter);
 }
 
-int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter, DWORD dwFlags) const
+int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const
 {
 	switch (nView)
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::GetSelectedTasks(tasks, filter, dwFlags);
+		return CToDoCtrl::GetSelectedTasks(tasks, filter);
 
 	case FTCV_TASKLIST:
 		{
@@ -2212,7 +2221,7 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 				
 				// Add immediate parent as required.
 				// Note: we can assume that the selected task is always added successfully
-				if (dwParentID && (dwFlags & TDCGSTF_IMMEDIATEPARENT))
+				if (dwParentID && filter.HasFlag(TDCGSTF_IMMEDIATEPARENT))
 				{
 					DWORD dwParentsParentID = m_data.GetTaskParentID(dwParentID);
 					
@@ -2243,7 +2252,7 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		return CToDoCtrl::GetSelectedTasks(tasks, filter, dwFlags); // for now
+		return CToDoCtrl::GetSelectedTasks(tasks, filter); // for now
 
 	default:
 		ASSERT(0);
@@ -2588,10 +2597,10 @@ DWORD CTabbedToDoCtrl::GetNextNonSelectedTaskID() const
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_NEXT, TRUE);
+			dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_NEXTVISIBLE, TRUE);
 
 			if (!dwNextSelID)
-				dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_PREV, TRUE);
+				dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_PREVVISIBLE, TRUE);
 		}
 		break;
 	}
@@ -2623,6 +2632,7 @@ DWORD CTabbedToDoCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bE
 			switch (nNext)
 			{
 			case TTCNT_NEXT:
+			case TTCNT_NEXTVISIBLE:
 			case TTCNT_NEXTTOPLEVEL: // Look forwards
 				{
 					BOOL bTopLevelOnly = (nNext == TTCNT_NEXTTOPLEVEL);
@@ -2648,6 +2658,7 @@ DWORD CTabbedToDoCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bE
 				break;
 				
 			case TTCNT_PREV:
+			case TTCNT_PREVVISIBLE:
 			case TTCNT_PREVTOPLEVEL: // look backwards
 				{
 					BOOL bTopLevelOnly = (nNext == TTCNT_PREVTOPLEVEL);
@@ -2736,8 +2747,11 @@ IUI_APPCOMMAND CTabbedToDoCtrl::MapGetNextToCommand(TTC_NEXTTASK nNext)
 	switch (nNext)
 	{
 	case TTCNT_NEXT:			return IUI_GETNEXTTASK;
+	case TTCNT_NEXTVISIBLE:		return IUI_GETNEXTVISIBLETASK;
 	case TTCNT_NEXTTOPLEVEL:	return IUI_GETNEXTTOPLEVELTASK;
+
 	case TTCNT_PREV:			return IUI_GETPREVTASK;
+	case TTCNT_PREVVISIBLE:		return IUI_GETPREVVISIBLETASK;
 	case TTCNT_PREVTOPLEVEL:	return IUI_GETPREVTOPLEVELTASK;
 	}
 
@@ -2866,7 +2880,7 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 	// note: the call to m_taskList.RestoreSelection at the bottom fails if the 
 	// list has redraw disabled so it must happen outside the scope of hr2
 	{
-		CHoldRedraw hr(GetSafeHwnd());
+		CHoldRedraw hr(*this);
 		CHoldRedraw hr2(m_taskList);
 		CWaitCursor cursor;
 
@@ -3302,7 +3316,9 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 		break;	
 
 	case TDCA_POSITION: // == move
-		if (m_nExtModifyingAttrib != TDCA_POSITION)
+	case TDCA_POSITION_SAMEPARENT:
+	case TDCA_POSITION_DIFFERENTPARENT:
+		if (m_nExtModifyingAttrib != nAttrib)
 			UpdateExtensionViewsTasks(nAttrib);
 		break;	
 
@@ -3445,6 +3461,8 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 	CTDCAttributeMap mapAttrib;
 	IUI_UPDATETYPE nUpdate = IUI_EDIT; // default
 	
+	GetAttributesAffectedByMod(nAttrib, mapAttrib);
+
 	switch (nAttrib)
 	{
 	case TDCA_NEWTASK:
@@ -3454,8 +3472,6 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 
 			// Special update type
 			nUpdate = IUI_NEW;
-
-			// Note: We leave mapAttrib empty to retrieve all attributes
 		}
 		break;
 
@@ -3463,8 +3479,6 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 		{
 			// We don't need to proceed if no extension wants 
 			// any of the changes
-			GetAttributesAffectedByMod(nAttrib, mapAttrib);
-		
 			if (!AnyExtensionViewWantsChange(mapAttrib))
 				return;
 
@@ -3481,7 +3495,6 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 	}
 
 	// Get the actual tasks for the update
-	FTC_VIEW nCurView = GetTaskView();
 	CTaskFile tasks;
 
 	switch (nAttrib)
@@ -4821,11 +4834,11 @@ BOOL CTabbedToDoCtrl::GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nD
 
 			// If this is the parent task we set the sibling to zero
 			// so that the task is added to the top
-			if (dwDestPrevSiblingID == dwDestParentID)
+			if (!dwDestPrevSiblingID || (dwDestPrevSiblingID == dwDestParentID))
 			{
 				dwDestPrevSiblingID = 0;
 			}
-			else if (!ValidatePreviousSiblingTaskID(dwSelTaskID, dwDestPrevSiblingID))
+			else if (m_data.GetTaskParentID(dwDestPrevSiblingID) != dwDestParentID)
 			{
 				return FALSE;
 			}
@@ -4914,10 +4927,10 @@ CTabbedToDoCtrl::TTC_NEXTTASK CTabbedToDoCtrl::MapGotoToGetNext(TDC_GOTO nDirect
 	switch (nDirection)
 	{
 	case TDCG_NEXT:
-		return (bTopLevel ? TTCNT_NEXTTOPLEVEL : TTCNT_NEXT);
+		return (bTopLevel ? TTCNT_NEXTTOPLEVEL : TTCNT_NEXTVISIBLE);
 
 	case TDCG_PREV:
-		return (bTopLevel ? TTCNT_PREVTOPLEVEL : TTCNT_PREV);
+		return (bTopLevel ? TTCNT_PREVTOPLEVEL : TTCNT_PREVVISIBLE);
 	}
 
 	ASSERT(0);

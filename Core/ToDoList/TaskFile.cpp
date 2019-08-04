@@ -501,6 +501,7 @@ BOOL CTaskFile::CopyFrom(const ITaskList* pTasks)
 	// copy header
 	SetProjectName(pTasks->GetProjectName());
 	SetFileVersion(pTasks->GetFileVersion());
+	SetXmlHeader(DEFAULT_UNICODE_HEADER);
 	
 	CTDCCustomAttribDefinitionArray aAttrib;
 	
@@ -650,7 +651,8 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		
 		int nNumCat = pTL5Src->GetTaskCategoryCount(hTaskSrc);
 		
-		for (int nCat = 0; nCat < nNumCat; nCat++)
+		// First value already added by default
+		for (int nCat = 1; nCat < nNumCat; nCat++)
 			pTL5Dest->AddTaskCategory(hTaskDest, pTL5Src->GetTaskCategory(hTaskSrc, nCat));
 		
 		// ---------------------------------------------------------------------------
@@ -678,7 +680,8 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		
 		int nNumAllocTo = pTL7Src->GetTaskAllocatedToCount(hTaskSrc);
 		
-		for (int nAlloc = 0; nAlloc < nNumAllocTo; nAlloc++)
+		// First value already added by default
+		for (int nAlloc = 1; nAlloc < nNumAllocTo; nAlloc++)
 			pTL7Dest->AddTaskAllocatedTo(hTaskDest, pTL7Src->GetTaskAllocatedTo(hTaskSrc, nAlloc));
 		
 		// ---------------------------------------------------------------------------
@@ -785,7 +788,8 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 
 		int nNumFile = pTL14Src->GetTaskFileLinkCount(hTaskSrc);
 		
-		for (int nFile = 0; nFile < nNumFile; nFile++)
+		// First value already added by default
+		for (int nFile = 1; nFile < nNumFile; nFile++)
 			pTL14Dest->AddTaskFileLink(hTaskDest, pTL14Src->GetTaskFileLink(hTaskSrc, nFile));
 
 		// ---------------------------------------------------------------------------

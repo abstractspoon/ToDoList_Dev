@@ -195,6 +195,7 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 		break;
 
 	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
 		if (pData)
 		{
 			UInt32 taskID = 0;
@@ -208,6 +209,7 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 		break;
 
 	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
 		if (pData)
 		{
 			UInt32 taskID = 0;
@@ -259,8 +261,8 @@ bool CWordCloudUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, con
 	switch (nCmd)
 	{
 	case IUI_SELECTTASK:
-	case IUI_GETNEXTTASK:
-	case IUI_GETPREVTASK:
+	case IUI_GETNEXTVISIBLETASK:
+	case IUI_GETPREVVISIBLETASK:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:

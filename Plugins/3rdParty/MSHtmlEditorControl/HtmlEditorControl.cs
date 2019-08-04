@@ -163,7 +163,8 @@ namespace MSDN.Html.Editor
         private const string INTERNAL_COMMAND_CLEARSELECT = "ClearSelect";
         private const string INTERNAL_COMMAND_SELECTALL = "SelectAll";
         private const string INTERNAL_COMMAND_EDITUNDO = "EditUndo";
-        private const string INTERNAL_COMMAND_EDITREDO = "EditRedo";
+		private const string INTERNAL_COMMAND_EDITHTML = "EditHTML";
+		private const string INTERNAL_COMMAND_EDITREDO = "EditRedo";
         private const string INTERNAL_COMMAND_FORMATBOLD = "FormatBold";
         private const string INTERNAL_COMMAND_FORMATUNDERLINE = "FormatUnderline";
         private const string INTERNAL_COMMAND_FORMATITALIC = "FormatItalic";
@@ -4145,7 +4146,6 @@ namespace MSDN.Html.Editor
             ToolStripButton button = (ToolStripButton)sender;
             string command = (string)button.Tag;
             ProcessCommand(command);
-
         }
 
 		private void toolstripEnableEditClick(object sender, EventArgs e)
@@ -4176,7 +4176,10 @@ namespace MSDN.Html.Editor
                 // Evaluate the Button property to determine which button was clicked.
                 switch(command)
                 {
-                    case INTERNAL_COMMAND_TEXTCUT:
+					case INTERNAL_COMMAND_EDITHTML:
+						HtmlContentsEdit();
+						break;
+					case INTERNAL_COMMAND_TEXTCUT:
                         // Browser CUT command
                         TextCut();
                         break; 

@@ -17,11 +17,14 @@ public:
 	CFontCache();
 	virtual ~CFontCache();
 
+	CFont* GetFont() const { return CFont::FromHandle(GetBaseFont()); }
+	HFONT GetHFont() const { return GetBaseFont(); }
+
 	CFont* GetFont(BOOL bBold, BOOL bItalic, BOOL bUnderline, BOOL bStrikeThru);
 	HFONT GetHFont(BOOL bBold, BOOL bItalic, BOOL bUnderline, BOOL bStrikeThru);
 
-	CFont* GetFont(DWORD dwFontStyle = 0); // GraphicsMisc.h
-	HFONT GetHFont(DWORD dwFontStyle = 0); // GraphicsMisc.h
+	CFont* GetFont(DWORD dwFontStyle); // GraphicsMisc.h
+	HFONT GetHFont(DWORD dwFontStyle); // GraphicsMisc.h
 
 	BOOL Initialise(HWND hWnd);
 	BOOL Initialise(HFONT hFont, BOOL bAutoCleanup = FALSE);
@@ -30,7 +33,6 @@ public:
 	void Clear();
 
 	HWND GetHwnd() const { return m_hWnd; }
-	HFONT GetHFont() const { return m_hFont; }
 
 protected:
 	HWND m_hWnd;

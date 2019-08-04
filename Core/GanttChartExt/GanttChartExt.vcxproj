@@ -185,8 +185,7 @@ copy unicode_debug\GanttChartExt.dll ..\todolist\unicode_debug /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="GanttTreeCtrl.cpp" />
-    <ClCompile Include="GanttTreeListCtrl.cpp">
+    <ClCompile Include="GanttCtrl.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -222,8 +221,7 @@ copy unicode_debug\GanttChartExt.dll ..\todolist\unicode_debug /y
     <ClInclude Include="GanttPreferencesDlg.h" />
     <ClInclude Include="GanttStatic.h" />
     <ClInclude Include="GanttStruct.h" />
-    <ClInclude Include="GanttTreeCtrl.h" />
-    <ClInclude Include="GanttTreeListCtrl.h" />
+    <ClInclude Include="GanttCtrl.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>

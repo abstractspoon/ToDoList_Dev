@@ -43,10 +43,13 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	double CalcYAxisInterval(double dDataMax) const;
-	double CalcMaxYAxisValue(double dDataMax) const;
+	static double CalcYAxisInterval(double dDataMax, int nNumTicks);
+	static double CalcMaxYAxisValue(double dDataMax, int nNumTicks);
 
 	BOOL InitTooltip(BOOL bMultiline);
+	int GetYSubTicks(double dInterval) const;
+
+	virtual bool DrawHorzGridLines(CDC& dc);
 };
 
 /////////////////////////////////////////////////////////////////////////////

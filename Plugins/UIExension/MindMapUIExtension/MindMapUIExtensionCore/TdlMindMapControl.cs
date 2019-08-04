@@ -417,6 +417,22 @@ namespace MindMapUIExtension
 			switch (getTask)
 			{
 				case UIExtension.GetTask.GetNextTask:
+					if (node.NextNode != null)
+					{
+						taskID = UniqueID(node.NextNode);
+						return true;
+					}
+					break;
+
+				case UIExtension.GetTask.GetPrevTask:
+					if (node.PrevVisibleNode != null)
+					{
+						taskID = UniqueID(node.PrevNode);
+						return true;
+					}
+					break;
+
+				case UIExtension.GetTask.GetNextVisibleTask:
 					if (node.NextVisibleNode != null)
 					{
 						taskID = UniqueID(node.NextVisibleNode);
@@ -424,7 +440,7 @@ namespace MindMapUIExtension
 					}
 					break;
 
-				case UIExtension.GetTask.GetPrevTask:
+				case UIExtension.GetTask.GetPrevVisibleTask:
 					if (node.PrevVisibleNode != null)
 					{
 						taskID = UniqueID(node.PrevVisibleNode);

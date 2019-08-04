@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-     <ProjectGuid>{19F9E07E-7448-45EC-101E-8855E65841B1}</ProjectGuid>
+    <ProjectGuid>{19F9E07E-7448-45EC-101E-8855E65841B1}</ProjectGuid>
     <Keyword>MFCProj</Keyword>
-   <SccProjectName>
+    <SccProjectName>
     </SccProjectName>
     <SccLocalPath>
     </SccLocalPath>
@@ -162,7 +162,6 @@ copy unicode_release\WorkloadExt.dll ..\todolist\unicode_release /y</Command>
     <ClCompile Include="WorkloadExt.cpp" />
     <ClCompile Include="WorkloadPreferencesDlg.cpp" />
     <ClCompile Include="WorkloadStruct.cpp" />
-    <ClCompile Include="WorkloadTreeCtrl.cpp" />
     <ClCompile Include="WorkloadWnd.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -198,7 +197,6 @@ copy unicode_release\WorkloadExt.dll ..\todolist\unicode_release /y</Command>
     <ClInclude Include="WorkloadPreferencesDlg.h" />
     <ClInclude Include="WorkloadStatic.h" />
     <ClInclude Include="WorkloadStruct.h" />
-    <ClInclude Include="WorkloadTreeCtrl.h" />
     <ClInclude Include="WorkloadWnd.h" />
   </ItemGroup>
   <ItemGroup>

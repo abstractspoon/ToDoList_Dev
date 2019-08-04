@@ -110,10 +110,10 @@ public:
 	HTREEITEM InsertItem(DWORD dwTaskID, HTREEITEM htiParent, HTREEITEM htiAfter);
 	BOOL DeleteItem(HTREEITEM hti);
 
-	HTREEITEM MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
-	void MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
 	BOOL MoveSelection(TDC_MOVETASK nDirection);
 	BOOL CanMoveSelection(TDC_MOVETASK nDirection) const;
+	HTREEITEM MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
+	BOOL MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, BOOL bEnsureVisible = TRUE);
 	
 	inline HTREEITEM GetSelectedItem() const { return TSH().GetFirstItem(); }
 	inline HTREEITEM GetTreeSelectedItem() const { return m_tcTasks.GetSelectedItem(); }
@@ -166,9 +166,6 @@ protected:
 	BOOL m_bEditLabelTimerStarted;
 
 protected:
-	// Virtual function overrides
-	
-protected:
 	// Message map functions
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	DECLARE_MESSAGE_MAP()
@@ -180,8 +177,8 @@ protected:
 	
  	LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
 
-	void OnListSelectionChange(NMLISTVIEW* pNMLV);
-	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	BOOL OnListSelectionChange(NMLISTVIEW* pNMLV);
+	BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
 	BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
 	DWORD GetColumnItemTaskID(int nItem) const;
@@ -218,12 +215,15 @@ protected:
 	BOOL MultiSelectItem(HTREEITEM hti, TSH_SELECT nState = TSHS_SELECT, BOOL bRedraw = TRUE);
 	BOOL MultiSelectItems(HTREEITEM htiFrom, HTREEITEM htiTo, TSH_SELECT nState = TSHS_SELECT, BOOL bRedraw = TRUE);
 	BOOL HandleClientColumnClick(const CPoint& pt, BOOL bDblClk);
-	BOOL CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const;
 	void BeginLabelEditTimer();
 	void EndLabelEditTimer();
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	BOOL TaskHasLockedSubtasks(DWORD dwTaskID) const;
 	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bAndParents, BOOL bUpdateList = TRUE);
+
+	BOOL CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const;
+	HTREEITEM MoveItemRaw(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
+	HTREEITEM MoveSelectionRaw(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, CHTIList& moved);
 
 	GM_ITEMSTATE GetTreeItemState(HTREEITEM hti) const;
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;

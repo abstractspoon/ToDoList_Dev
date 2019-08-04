@@ -940,7 +940,8 @@ int CEnHeaderCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			CRect rBounds;
 			GetItemRect(nItem, rBounds);
 
-			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, (nItem + 1), rBounds);
+			if (!rBounds.IsRectEmpty())
+				return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, (nItem + 1), rBounds);
 		}
 	}
 

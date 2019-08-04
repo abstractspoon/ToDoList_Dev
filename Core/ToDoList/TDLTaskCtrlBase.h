@@ -76,8 +76,6 @@ public:
 	void OnUndoRedo(BOOL bUndo);
 	void OnImageListChange();
 	void OnReminderChange();
-	void OnBeginRebuild();
-	void OnEndRebuild();
  
 	// setter responsible for deleting these shared resources
 	HFONT GetFont() const;
@@ -157,6 +155,7 @@ public:
 	int SelectionHasCircularDependencies(CDWordArray& aTaskIDs) const;
 	BOOL SelectionHasDates(TDC_DATE nDate, BOOL bAll = FALSE) const;
 	BOOL SelectionHasReferences() const;
+	BOOL SelectionHasSameParent() const;
 	BOOL SelectionHasNonReferences() const;
 	BOOL SelectionHasDependents() const;
 	BOOL SelectionHasSubtasks() const; // == SelectionHasParents
@@ -308,7 +307,6 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg int  OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg LRESULT OnSetRedraw(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
@@ -326,14 +324,16 @@ protected:
 	
  	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
  	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
+
 	void OnNotifySplitterChange(int nSplitPos);
+	BOOL OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
+	BOOL OnListHeaderBeginTracking(NMHEADER* pHDN);
+	BOOL OnPrimaryHeaderBeginTracking(NMHEADER* /*pHDN*/) { return FALSE; }
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
 
 protected:
-	void Resize();
-
 	enum SELCHANGE_ACTION
 	{
 		SC_NONE = -1,
@@ -381,7 +381,7 @@ protected:
 
 	int CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
 	void RecalcUntrackedColumnWidths(BOOL bCustomOnly);
-	void RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers);
+	void RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers = FALSE, BOOL bCustomOnly = FALSE);
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);
 	BOOL GetColumnOrder(CDWordArray& aColumns) const;

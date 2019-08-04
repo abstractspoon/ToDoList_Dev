@@ -226,6 +226,8 @@ void CBurndownWnd::SetUITheme(const UITHEME* pTheme)
 
 void CBurndownWnd::SetTaskFont(HFONT hFont)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CString sFontName;
 	int nFontSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFontName);
 
@@ -552,8 +554,10 @@ bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_SETFOCUS:
 	case IUI_RESIZEATTRIBCOLUMNS:
 	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETPREVTOPLEVELTASK:
 		// not handled
 		break;
@@ -578,9 +582,9 @@ bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	case IUI_SORT:
 	case IUI_SETFOCUS:
 	case IUI_RESIZEATTRIBCOLUMNS:
-	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
-	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETPREVTOPLEVELTASK:
 	case IUI_SELECTTASK:
 		// not handled

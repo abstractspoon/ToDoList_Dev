@@ -83,12 +83,18 @@ public:
 	BOOL IsOverlapping(const CString& sAllocTo) const;
 	void ClearOverlaps();
 	
-	void Decode(const CString& sAllocations);
+	BOOL IsAutoCalculated() const { return (bAutoCalculated || !GetCount()); }
+	void AutoCalculate(const CStringArray& aAllocTo, double dTotal);
+
+	BOOL Decode(const CString& sAllocations);
 	CString Encode() const;
 
 	BOOL MatchAll(const CMapDayAllocations& other) const;
 	void Copy(const CMapDayAllocations& other);
 	void RemoveAll();
+
+protected:
+	BOOL bAutoCalculated;
 	
 protected:
 	static CString FormatDays(double dValue, int nDecimals);
@@ -132,6 +138,7 @@ struct WORKLOADITEM
 	WORKLOADITEM& operator=(const WORKLOADITEM& wi);
 	BOOL operator==(const WORKLOADITEM& wi) const;
 	
+public:
 	CString sTitle;
 	COleDateTimeRange dtRange; 
 	COLORREF color;
@@ -139,17 +146,22 @@ struct WORKLOADITEM
 	DWORD dwTaskID, dwRefID, dwOrgRefID;
 	int nPercent;
 	int nPosition;
+	double dTimeEst; // weekdays
 	CMapDayAllocations mapAllocatedDays;
-
+	
+public:
 	BOOL bDone;
 	bool bParent; // 'bool' to match ITaskList
 	BOOL bLocked, bHasIcon;
 	BOOL bGoodAsDone, bSomeSubtaskDone;
 
-	BOOL HasStartDate() const;
-	BOOL HasDueDate() const;
+	BOOL HasStartDate() const { return dtRange.HasStart(); }
+	BOOL HasDueDate() const { return dtRange.HasEnd(); }
 	BOOL HasValidDates() const { return dtRange.IsValid(); }
 	BOOL IsDone() const { return (bDone || bGoodAsDone); }
+
+	void AutoCalculateAllocations(BOOL bPreferTimeEstimate);
+	void ClearAllocations() { mapAllocatedDays.RemoveAll(); }
 
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
@@ -170,11 +182,12 @@ public:
 	BOOL RemoveKey(DWORD dwKey);
 	BOOL HasItem(DWORD dwKey) const;
 	WORKLOADITEM* GetItem(DWORD dwKey) const;
+	WORKLOADITEM* GetNextItem(POSITION& pos) const;
 	BOOL ItemIsLocked(DWORD dwTaskID) const;
 
 	void CalculateTotals(const COleDateTimeRange& dtPeriod,
-							CMapAllocationTotals& mapTotalDays, 
-							CMapAllocationTotals& mapTotalTasks) const;
+						CMapAllocationTotals& mapTotalDays, 
+						CMapAllocationTotals& mapTotalTasks) const;
 
 	void RecalculateOverlaps();
 	BOOL CalcDateRange(COleDateTimeRange& dtRange) const;

@@ -443,6 +443,7 @@
 #define IDC_FILTEROPTIONS               1106
 #define IDC_SORTBY2                     1106
 #define IDC_STARTTASKCOLOR              1106
+#define IDC_SNOOZEALL                   1106
 #define IDC_NOTIFYDUEBYONSWITCH         1107
 #define IDC_COMMENTSFORMAT              1107
 #define IDC_ALLOCTOLIST                 1107
@@ -2289,6 +2290,7 @@
 #define IDS_CAD_FRACTION                58493
 #define IDS_CUSTOM_FEATURE_PERCENTAGE   58494
 #define IDS_FILTERPLACEHOLDER           58495
+#define IDS_ERROR_EXPORT_OVERWRITETASKLIST 58496
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects

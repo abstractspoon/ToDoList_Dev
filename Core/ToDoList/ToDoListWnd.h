@@ -711,7 +711,7 @@ protected:
 	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
 					const CTaskSelectionDlg& taskSel, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
 	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
-					TSD_TASKS nWhatTasks, TDCGETTASKS& filter, DWORD dwSelFlags, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
+					TSD_TASKS nWhatTasks, TDCGETTASKS& filter, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
 	
 	void DoSendTasks(BOOL bSelected);
 	BOOL DoPreferences(int nInitPage = -1);
@@ -722,6 +722,7 @@ protected:
 	BOOL DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere);
 	TDC_FILE DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int nIndex, CTaskFile& tasks, LPCTSTR szFilePath = NULL, BOOL bFlush = TRUE);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
+	void DoMoveTask(TDC_MOVETASK nDirection);
 
 	TDCEXPORTTASKLIST* PrepareNewDueTaskNotification(int nTDC, int nDueBy);
 	TDCEXPORTTASKLIST* PrepareNewExportAfterSave(int nTDC, const CTaskFile& tasks);

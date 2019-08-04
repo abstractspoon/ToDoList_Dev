@@ -115,9 +115,10 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 
 	ON_REGISTERED_MESSAGE(WM_WLCN_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SORTCHANGE, OnWorkloadNotifySortChange)
-	ON_REGISTERED_MESSAGE(WM_WLCN_SELCHANGE, OnWorkloadNotifySelChange)
+	ON_REGISTERED_MESSAGE(WM_TLC_ITEMSELCHANGE, OnWorkloadNotifySelChange)
 	ON_REGISTERED_MESSAGE(RANGE_CHANGED, OnActiveDateRangeChange)
 
+	ON_REGISTERED_MESSAGE(WM_WLC_EDITTASKICON, OnWorkloadEditTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_WLC_EDITTASKTITLE, OnWorkloadEditTaskTitle)
 	ON_REGISTERED_MESSAGE(WM_WLC_EDITTASKALLOCATIONS, OnWorkloadEditTaskAllocations)
 	ON_REGISTERED_MESSAGE(WM_WLC_PREFSHELP, OnWorkloadPrefsHelp)
@@ -302,7 +303,7 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		if (!LoadColumnState(pPrefs, (sKey + _T("\\TreeWidths")), aTreeWidths) ||
 			!m_ctrlWorkload.SetTreeColumnWidths(aTreeWidths))
 		{
-			m_ctrlWorkload.ResizeColumnsToFit();
+			m_ctrlWorkload.ResizeAttributeColumnsToFit();
 		}
 		
 		// column tracking
@@ -352,29 +353,6 @@ bool CWorkloadWnd::ProcessMessage(MSG* pMsg)
 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	switch (pMsg->message)
-	{
-	// handle 'escape' during editing
-	case WM_KEYDOWN:
-		{
-			switch (pMsg->wParam)
-			{
-			case VK_ESCAPE:
-				if (m_ctrlWorkload.CancelOperation())
-					return true;
-				break;
-
-			case VK_ADD:
-				// Eat because Windows own processing does not understand how we do things!
-// 				if (Misc::ModKeysArePressed(MKS_CTRL) && (m_list.GetSafeHwnd() == pMsg->hwnd))
-// 					return true;
-				break;
-			}
-		}
-		break;
-	}
-
-	// Drag and drop messages
 	if (m_ctrlWorkload.ProcessMessage(pMsg))
 		return true;
 
@@ -408,8 +386,6 @@ IUI_HITTEST CWorkloadWnd::HitTest(const POINT& ptScreen) const
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// try tree header
-	// 6.9: disable header click because it changes the 
-	// tree/list columns not the Workload columns
 	if (m_ctrlWorkload.PointInHeader(ptScreen))
 		return IUI_NOWHERE;//IUI_COLUMNHEADER;
 
@@ -420,7 +396,6 @@ IUI_HITTEST CWorkloadWnd::HitTest(const POINT& ptScreen) const
 	// else 
 	return IUI_NOWHERE;
 }
-
 
 bool CWorkloadWnd::SelectTask(DWORD dwTaskID)
 {
@@ -512,7 +487,7 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		return true;
 
 	case IUI_RESIZEATTRIBCOLUMNS:
-		m_ctrlWorkload.ResizeColumnsToFit();
+		m_ctrlWorkload.ResizeAttributeColumnsToFit(TRUE);
 		return true;
 		
 	case IUI_SELECTTASK:
@@ -521,8 +496,10 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		break;
 		
 	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETPREVTOPLEVELTASK:
 		if (pData)
 		{
@@ -568,7 +545,7 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		{
 			ASSERT(pData->move.dwSelectedTaskID == m_ctrlWorkload.GetSelectedTaskID());
 
-			return (m_ctrlWorkload.MoveSelectedItem(pData->move) != FALSE);
+			return (m_ctrlWorkload.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;
 	}
@@ -578,6 +555,8 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 
 void CWorkloadWnd::SetTaskFont(HFONT hFont)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CHoldRedraw hr(*this);
 	
 	m_ctrlWorkload.SetFont(hFont, TRUE);
@@ -627,9 +606,9 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	case IUI_SETFOCUS:
 		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
 		
-	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
-	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETPREVTOPLEVELTASK:
 		if (pData)
 		{
@@ -648,7 +627,7 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 
 	case IUI_MOVETASK:
 		if (pData)
-			return (m_ctrlWorkload.CanMoveSelectedItem(pData->move) != FALSE);
+			return (m_ctrlWorkload.CanMoveSelectedTask(pData->move) != FALSE);
 		break;
 	}
 
@@ -693,11 +672,9 @@ BOOL CWorkloadWnd::OnInitDialog()
 		m_toolbar.RefreshButtonStates(TRUE);
 	}
 		
-	// init syncer
 	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
 	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
 
-	m_ctrlWorkload.ExpandAll();
  	m_ctrlWorkload.SetFocus();
 	
 	return FALSE;  // return TRUE unless you set the focus to a control
@@ -805,6 +782,18 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 	CDWordArray aColumnVis;
 	m_dlgPrefs.GetColumnVisibility(aColumnVis);
 	m_ctrlWorkload.SetTreeColumnVisibility(aColumnVis);
+
+	int nPercent;
+	COLORREF color;
+	
+	BOOL bEnable = m_dlgPrefs.GetOverload(nPercent, color);
+	m_ctrlWorkload.EnableOverload(bEnable, nPercent, color);
+
+	bEnable = m_dlgPrefs.GetUnderload(nPercent, color);
+	m_ctrlWorkload.EnableUnderload(bEnable, nPercent, color);
+
+	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGALLOCATIONS, m_dlgPrefs.GetAutoCalculateMissingAllocations());
+	m_ctrlWorkload.SetOption(WLCF_PREFERTIMEESTFORCALCS, m_dlgPrefs.GetPreferTimeEstimateForCalcs());
 }
 
 void CWorkloadWnd::OnWorkloadPreferences() 
@@ -851,6 +840,11 @@ LRESULT CWorkloadWnd::OnWorkloadNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp)
 LRESULT CWorkloadWnd::OnWorkloadGetTaskIcon(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_GETTASKICON, wp, lp);
+}
+
+LRESULT CWorkloadWnd::OnWorkloadEditTaskIcon(WPARAM wp, LPARAM lp)
+{
+	return GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKICON, wp, lp);
 }
 
 LRESULT CWorkloadWnd::OnWorkloadMoveTask(WPARAM wp, LPARAM lp)

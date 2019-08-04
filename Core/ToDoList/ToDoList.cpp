@@ -64,7 +64,7 @@ LPCTSTR UNINSTALLREGKEY		= _T("Software\\Microsoft\\Windows\\CurrentVersion\\Uni
 LPCTSTR APPDATAINI			= _T("Abstractspoon\\ToDoList\\ToDoList.ini");
 
 LPCTSTR WIKI_URL			= _T("http://www.abstractspoon.com/wiki/doku.php?id="); 
-LPCTSTR GOOGLEGROUP_URL		= _T("https://groups.google.com/forum/#!forum/abstractspoon-todolist-support"); 
+LPCTSTR GOOGLEGROUP_URL		= _T("https://www.abstractspoon.com/phpBB/"); 
 LPCTSTR LICENSE_URL			= _T("http://www.abstractspoon.com/wiki/doku.php?id=free-open-source-software"); 
 LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=abstractspoon2%40optusnet%2ecom%2eau&item_name=Software"); 
 LPCTSTR FACEBOOK_URL		= _T("https://www.facebook.com/abstr.todolist/"); 

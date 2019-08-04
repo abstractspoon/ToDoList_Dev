@@ -124,6 +124,7 @@ public:
 	BOOL UpdateTracking(const CFilteredToDoCtrl* pTDC);
 	void UpdateTaskTime(const CFilteredToDoCtrl* pTDC);
 	void UpdateTasklistName(const CFilteredToDoCtrl* pTDC);
+	BOOL IsSelectedTasklist(const CFilteredToDoCtrl* pTDC) const;
 
 	BOOL SelectTaskList(const CFilteredToDoCtrl* pTDC);
 	const CFilteredToDoCtrl* GetSelectedTasklist() const;
@@ -204,7 +205,6 @@ protected:
 	COLORREF GetBkgndColor() const;
 	BOOL IsTrackingSelectedTasklistAndTask() const;
 	BOOL IsSelectedTask(DWORD dwTaskID) const;
-	BOOL IsSelectedTasklist(const CFilteredToDoCtrl* pTDC) const;
 	int QuickFindNextTaskComboItem(int nFrom, BOOL bForward) const;
 	BOOL QuickFindNextTaskComboItem(int nFrom, int nTo, int nIncrement, int& nNext) const;
 	void LoadSettings();

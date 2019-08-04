@@ -115,8 +115,8 @@ public:
 	BOOL HasFocus() const;
 	void SetFocus();
 	void Show(BOOL bShow = TRUE);
-	BOOL SaveToImage(CBitmap& bmImage, COLORREF crGridline = CLR_NONE);
-	BOOL SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crGridline = CLR_NONE);
+	BOOL SaveToImage(CBitmap& bmImage, COLORREF crDivider = CLR_NONE);
+	BOOL SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crDivider = CLR_NONE);
 
 	HTREEITEM GetTreeSelItem() const;
 	void SelectTreeItem(HTREEITEM hti, BOOL bClear = TRUE);
@@ -148,21 +148,26 @@ private:
 	BOOL m_bResyncing, m_bResyncPending, m_bResizePending;
 	BOOL m_bResyncEnabled;
 	TLS_HIDE m_nHidden;
+	HWND m_hwndTrackedHeader;
+	HWND m_hwndIgnoreNcCalcSize;
 
 protected:
-	inline BOOL CanResync() const { return (IsResyncEnabled() && !m_bResyncing); }
+	inline BOOL CanResync() const { return (m_bResyncEnabled && !m_bResyncing); }
 	inline BOOL IsResyncEnabled() const { return m_bResyncEnabled; }
 	inline BOOL IsResyncing() const { return m_bResyncing; }
 
 	BOOL Resync(HWND hwnd, HWND hwndTo);
 	void PostResync(HWND hwnd);
 	void EnableResync(BOOL bEnable, HWND hwnd = NULL);
-	void WindowNeedsScrollBars(HWND hwnd, const CRect& rect, BOOL& bNeedHScroll, BOOL& bNeedVScroll) const;
+	void WindowNeedsScrollBars(HWND hwnd, const CRect& rAvail, BOOL& bNeedHScroll, BOOL& bNeedVScroll, BOOL bCheckForLeftListVScroll) const;
+	void WindowNeedsScrollBars(HWND hwnd, const CRect& rAvail, const CSize& sizeContent, BOOL& bNeedHScroll, BOOL& bNeedVScroll) const;
+	CSize GetContentSize(HWND hwnd, BOOL bAddLeftListVScrollZone) const;
 	
 #ifdef _DEBUG
 	static int GetListSelItem(HWND hwnd, CString& sText);
 	static HTREEITEM GetTreeSelItem(HWND hwnd, CString& sText);
-	
+	static CString GetTreeItemText(HWND hwndTree, HTREEITEM hti);
+
 	int GetListItem(HWND hwndList, HWND hwndTree, HTREEITEM hti, CString& sText) const;
 	HTREEITEM GetTreeItem(HWND hwndTree, HWND hwndList, int nItem, CString& sText) const;
 
@@ -177,6 +182,7 @@ protected:
 	static int GetItemHeight(HWND hwnd);
 	static BOOL HasVScrollBar(HWND hwnd);
 	static BOOL HasHScrollBar(HWND hwnd);
+	static BOOL HasScrollBars(HWND hwnd, BOOL bHScroll, BOOL bVScroll);
 	static DWORD GetTreeItemData(HWND hwnd, HTREEITEM hti);
 	static DWORD GetListItemData(HWND hwnd, int nItem);
 	static BOOL SetListItemData(HWND hwnd, int nItem, DWORD dwItemData);
@@ -203,6 +209,8 @@ protected:
  	static void SelectTreeItem(HWND hwnd, HTREEITEM hti, BOOL bClear = TRUE);
 	static BOOL OsIsXP();
 	static BOOL OsIsLinux();
+	static int CalcTotalHeaderItemWidth(HWND hwndHeader);
+	static int CalcMaxVisibleTreeItemWidth(HWND hwnd);
 
 	static DWORD GetStyle(HWND hwnd, BOOL bExStyle);
 	static BOOL HasStyle(HWND hwnd, DWORD dwStyle, BOOL bExStyle);
@@ -241,7 +249,6 @@ protected:
 	void InitialiseStyles(HWND hwndLeft, HWND hwndRight);
 	HWND PrimaryWnd() const;
 	int GetSelectedListItems(HWND hwndList, CIntArray& aItems);
-	void GetContentSize(HWND hwnd, CRect& rContent) const;
 	BOOL ResyncListToTreeSelection(HWND hwndTree, const CList<HTREEITEM, HTREEITEM>& htItems, HTREEITEM htiFocused);
 
 	void ExpandList(HWND hwndList, HWND hwndTree, HTREEITEM hti, int& nNextIndex);
@@ -256,8 +263,9 @@ protected:
 	void AdjustForBorder(CRect& rLeft, CRect& rRight) const;
 	BOOL PtInSplitter(const CPoint& pt, BOOL bScreen = FALSE) const;
 	BOOL IsSplitting() { return m_bSplitting; }
-	void CheckBottomAlignment() const;
-
+	BOOL CheckBottomAlignment() const;
+	int GetBoundingWidth() const;
+	
 	// callbacks for derived classes
 	virtual BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
 	virtual BOOL IsListItemSelected(HWND hwnd, int nItem) const;
@@ -273,8 +281,17 @@ protected:
 	virtual LRESULT OnListGetDispInfo(NMLVDISPINFO* pLVDI);
 	virtual LRESULT OnTreeGetDispInfo(NMTVDISPINFO* pTVDI);
 
-	virtual void OnListSelectionChange(NMLISTVIEW* pNMLV);
-	virtual void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	virtual BOOL OnListSelectionChange(NMLISTVIEW* pNMLV);
+	virtual BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+
+	virtual BOOL OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth = 0);
+
+	virtual BOOL OnListHeaderBeginTracking(NMHEADER* /*pHDN*/) { return TRUE; }
+	virtual BOOL OnListHeaderTrackItem(NMHEADER* pHDN, int nMinWidth = 0);
+	virtual void OnListHeaderEndTracking(NMHEADER* pHDN);
+	virtual BOOL OnPrimaryHeaderBeginTracking(NMHEADER* /*pHDN*/) { return TRUE; }
+	virtual BOOL OnPrimaryHeaderTrackItem(NMHEADER* pHDN, int nMinWidth = 0);
+	virtual void OnPrimaryHeaderEndTracking(NMHEADER* pHDN);
 
 private:
 	static TLS_TYPE GetType(HWND hwnd);

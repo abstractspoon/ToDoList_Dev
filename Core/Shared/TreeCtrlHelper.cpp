@@ -150,12 +150,12 @@ CTreeCtrlHelper::~CTreeCtrlHelper()
 
 BOOL CTreeCtrlHelper::SelectItem(HTREEITEM hti)
 {
+	// Don't double-select -> triggers label edit
+	if (IsSelectedItem(hti))
+		return FALSE;
+
 	// save restore focus if setting to NULL
 	CWnd* pFocus = (hti ? NULL : CWnd::GetFocus());
-
-	// won't auto edit if item already selected
-	if (hti && m_tree.GetSelectedItem() == hti)
-		return FALSE;
 
 	m_tree.SelectItem(hti);
 
@@ -166,22 +166,20 @@ BOOL CTreeCtrlHelper::SelectItem(HTREEITEM hti)
 	return TRUE;
 }
 
-int CTreeCtrlHelper::GetItemHeight(HTREEITEM hti)
+BOOL CTreeCtrlHelper::IsSelectedItem(HTREEITEM hti) const
 {
-	if (m_tree.GetSafeHwnd())
-	{
-		if (hti == NULL)
-			hti = m_tree.GetChildItem(NULL);
-	}
+	return (hti && m_tree.GetSelectedItem() == hti);
+}
 
-	if (hti == NULL)
-		return 16;
-
-	// else
+int CTreeCtrlHelper::GetItemTop(HTREEITEM hti) const
+{
 	CRect rItem;
-	m_tree.GetItemRect(hti, rItem, FALSE);
+	
+	if (m_tree.GetItemRect(hti, rItem, FALSE))
+		return rItem.top;
 
-	return rItem.Height();
+	ASSERT(0);
+	return 0;
 }
 
 int CTreeCtrlHelper::GetItemPos(HTREEITEM hti, HTREEITEM htiParent)
@@ -768,7 +766,7 @@ int CTreeCtrlHelper::GetDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge) cons
 	return 0;
 }
 
-void CTreeCtrlHelper::SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, int nItems)
+BOOL CTreeCtrlHelper::SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, int nItems)
 {
 	switch (nToEdge)
 	{
@@ -776,10 +774,15 @@ void CTreeCtrlHelper::SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, 
 		{
 			int nBorder = GetDistanceToEdge(htiFrom, TCHE_BOTTOM);
 
-			while (nBorder < nItems)
+			if (nBorder < nItems)
 			{
-				m_tree.SendMessage(WM_VSCROLL, SB_LINEDOWN);
-				nBorder++;
+				while (nBorder < nItems)
+				{
+					m_tree.SendMessage(WM_VSCROLL, SB_LINEDOWN);
+					nBorder++;
+				}
+
+				return TRUE;
 			}
 		}
 		break;
@@ -788,14 +791,22 @@ void CTreeCtrlHelper::SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, 
 		{
 			int nBorder = GetDistanceToEdge(htiFrom, TCHE_TOP);
 
-			while (nBorder < nItems)
+			if (nBorder < nItems)
 			{
-				m_tree.SendMessage(WM_VSCROLL, SB_LINEUP);
-				nBorder++;
+				while (nBorder < nItems)
+				{
+					m_tree.SendMessage(WM_VSCROLL, SB_LINEUP);
+					nBorder++;
+				}
+
+				return TRUE;
 			}
 		}
 		break;
 	}
+
+	// else no change
+	return FALSE;
 }
 
 HTREEITEM CTreeCtrlHelper::GetNextPageVisibleItem(HTREEITEM hti) const
@@ -1026,7 +1037,7 @@ int CTreeCtrlHelper::FindItem(HTREEITEM htiFind, HTREEITEM htiStart)
 	return 0;
 }
 
-BOOL CTreeCtrlHelper::IsItemBold(HTREEITEM hti)
+BOOL CTreeCtrlHelper::IsItemBold(HTREEITEM hti) const
 {
 	return (m_tree.GetItemState(hti, TVIS_BOLD) & TVIS_BOLD);
 }
@@ -1279,28 +1290,12 @@ TCH_WHERE CTreeCtrlHelper::GetMoveTarget(HTREEITEM htiDestParent, HTREEITEM htiD
 HTREEITEM CTreeCtrlHelper::MoveTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 
 									BOOL bUsesTextCallback, BOOL bUsesImageCallback)
 {
-#ifdef _DEBUG
-// 	DWORD dwTick = GetTickCount();
-#endif
-	
 	HTREEITEM htiCopy = CopyTree(hti, htiDestParent, htiDestPrevSibling, bUsesTextCallback, bUsesImageCallback);
 
-#ifdef _DEBUG
-// 	TRACE(_T("CTreeCtrlHelper::MoveTree(CopyTree took %ld ms)\n"), GetTickCount() - dwTick);
-// 	dwTick = GetTickCount();
-#endif
-
 	if (htiCopy)
-	{
 		m_tree.DeleteItem(hti);
 
-#ifdef _DEBUG
-// 		TRACE(_T("CTreeCtrlHelper::MoveTree(DeleteItem took %ld ms)\n"), GetTickCount() - dwTick);
-#endif
-		return htiCopy;
-	}
-
-	return NULL;
+	return htiCopy;
 }
 
 HTREEITEM CTreeCtrlHelper::CopyTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 

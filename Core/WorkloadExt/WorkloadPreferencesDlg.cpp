@@ -18,12 +18,21 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+const COLORREF DEF_UNDERLOAD_COLOR = RGB(122, 204, 0);
+const COLORREF DEF_OVERLOAD_COLOR  = RGB(204, 0, 0);
+
+/////////////////////////////////////////////////////////////////////////////
 // CWorkloadPreferencesPage dialog
 
 CWorkloadPreferencesPage::CWorkloadPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	: CPreferencesPageBase(IDD_PREFERENCES_PAGE)
 {
 	//{{AFX_DATA_INIT(CWorkloadPreferencesPage)
+	m_bPreferTimeEstimateInCalcs = FALSE;
+	m_bAutoCalcAllocations = FALSE;
+	m_bEnableOverload = FALSE;
+	m_bEnableUnderload = FALSE;
 	//}}AFX_DATA_INIT
 	m_aColumnVis.SetSize(NUM_TREECOLUMNS + 1);
 }
@@ -33,13 +42,27 @@ void CWorkloadPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CWorkloadPreferencesPage)
+	DDX_Check(pDX, IDC_USETIMESTIMATEFORDURATION, m_bPreferTimeEstimateInCalcs);
+	DDX_Check(pDX, IDC_AUTOCALCALLOCATIONS, m_bAutoCalcAllocations);
+	DDX_Check(pDX, IDC_ENABLEOVERLOAD, m_bEnableOverload);
+	DDX_Check(pDX, IDC_ENABLEUNDERLOAD, m_bEnableUnderload);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_COLUMNVISIBILITY, m_lbColumnVisibility);
+	DDX_Control(pDX, IDC_SETOVERLOADCOLOR, m_btnOverloadColor);
+	DDX_Control(pDX, IDC_SETUNDERLOADCOLOR, m_btnUnderloadColor);
+
+	DDX_CBValue(pDX, IDC_OVERLOADFROMPERCENT, m_nOverloadFromPercent, 80);
+	DDX_CBValue(pDX, IDC_UNDERLOADTOPERCENT, m_nUnderloadToPercent, 50);
+
+	m_btnOverloadColor.DDX(pDX, m_crOverload);
+	m_btnUnderloadColor.DDX(pDX, m_crUnderload);
 }
 
 
 BEGIN_MESSAGE_MAP(CWorkloadPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CWorkloadPreferencesPage)
+	ON_BN_CLICKED(IDC_ENABLEOVERLOAD, OnEnableOverload)
+	ON_BN_CLICKED(IDC_ENABLEUNDERLOAD, OnEnableUnderload)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -58,6 +81,8 @@ BOOL CWorkloadPreferencesPage::OnInitDialog()
 		m_lbColumnVisibility.SetCheck(nItem, m_aColumnVis[colVis.nColID]);
 	}
 
+	AddGroupLine(IDC_ALLOCATIONGROUP);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -74,6 +99,15 @@ void CWorkloadPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 		pPrefs->WriteProfileInt(sColVis, sCol, m_aColumnVis[nColID]);
 	}
+
+	pPrefs->WriteProfileInt(szKey, _T("PreferTimeEstimateInCalcs"), m_bPreferTimeEstimateInCalcs);
+	pPrefs->WriteProfileInt(szKey, _T("AutoCalcAllocations"), m_bAutoCalcAllocations);
+	pPrefs->WriteProfileInt(szKey, _T("EnableOverload"), m_bEnableOverload);
+	pPrefs->WriteProfileInt(szKey, _T("EnableUnderload"), m_bEnableUnderload);
+	pPrefs->WriteProfileInt(szKey, _T("OverloadPercentFrom"), m_nOverloadFromPercent);
+	pPrefs->WriteProfileInt(szKey, _T("UnderloadPercentTo"), m_nUnderloadToPercent);
+	pPrefs->WriteProfileInt(szKey, _T("OverloadColor"), m_crOverload);
+	pPrefs->WriteProfileInt(szKey, _T("UnderloadColor"), m_crUnderload);
 }
 
 void CWorkloadPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
@@ -88,6 +122,15 @@ void CWorkloadPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 
 		m_aColumnVis[nColID] = pPrefs->GetProfileInt(sColVis, sCol, WORKLOADTREECOLUMNS[nCol].bDefaultVis);
 	}
+
+	m_bPreferTimeEstimateInCalcs = pPrefs->GetProfileInt(szKey, _T("PreferTimeEstimateInCalcs"), TRUE);
+	m_bAutoCalcAllocations = pPrefs->GetProfileInt(szKey, _T("AutoCalcAllocations"), TRUE);
+	m_bEnableOverload = pPrefs->GetProfileInt(szKey, _T("EnableOverload"), TRUE);
+	m_bEnableUnderload = pPrefs->GetProfileInt(szKey, _T("EnableUnderload"), TRUE);
+	m_nOverloadFromPercent = pPrefs->GetProfileInt(szKey, _T("OverloadPercentFrom"), 80);
+	m_nUnderloadToPercent = pPrefs->GetProfileInt(szKey, _T("UnderloadPercentTo"), 50);
+	m_crOverload = (COLORREF)pPrefs->GetProfileInt(szKey, _T("OverloadColor"), DEF_OVERLOAD_COLOR);
+	m_crUnderload = (COLORREF)pPrefs->GetProfileInt(szKey, _T("UnderloadColor"), DEF_UNDERLOAD_COLOR);
 }
 
 void CWorkloadPreferencesPage::OnOK()
@@ -107,6 +150,28 @@ void CWorkloadPreferencesPage::GetColumnVisibility(CDWordArray& aColumnVis) cons
 	aColumnVis[WLCC_TITLE] = TRUE; // for completeness
 }
 
+BOOL CWorkloadPreferencesPage::GetOverload(int& nFromPercent, COLORREF& color) const
+{
+	if (!m_bEnableOverload)
+		return FALSE;
+
+	nFromPercent = m_nOverloadFromPercent;
+	color = m_crOverload;
+
+	return TRUE;
+}
+
+BOOL CWorkloadPreferencesPage::GetUnderload(int& nToPercent, COLORREF& color) const
+{
+	if (!m_bEnableUnderload)
+		return FALSE;
+
+	nToPercent = m_nUnderloadToPercent;
+	color = m_crUnderload;
+
+	return TRUE;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CWorkloadPreferencesDlg dialog
 
@@ -123,7 +188,7 @@ CWorkloadPreferencesDlg::CWorkloadPreferencesDlg(CWnd* pParent /*=NULL*/)
 }
 
 BEGIN_MESSAGE_MAP(CWorkloadPreferencesDlg, CPreferencesDlgBase)
-	//{{AFX_MSG_MAP(CWorkloadPreferencesPage)
+	//{{AFX_MSG_MAP(CWorkloadPreferencesDlg)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -143,3 +208,15 @@ void CWorkloadPreferencesDlg::DoHelp()
 		m_pParentWnd->SendMessage(WM_WLC_PREFSHELP);
 }
 
+
+void CWorkloadPreferencesPage::OnEnableOverload() 
+{
+	
+	
+}
+
+void CWorkloadPreferencesPage::OnEnableUnderload() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
