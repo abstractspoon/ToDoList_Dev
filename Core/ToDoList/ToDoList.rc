@@ -5602,6 +5602,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_ERROR_EXPORT_OVERWRITETASKLIST 
                             "Export Tasklist|You must select a filename that does not match the tasklist being exported."
+    IDS_UPDATER_FILEMISSING "The updater is missing from the installation folder.\n\nWould you like to try downloading the update file manually?"
 END
 
 #endif    // English (Australia) resources

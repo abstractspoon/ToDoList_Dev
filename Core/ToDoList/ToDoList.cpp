@@ -39,6 +39,8 @@
 
 #include "..\Interfaces\Preferences.h"
 
+#include "..\TDLUpdate\TDLWebUpdater.h" // for URIs
+
 #include <afxpriv.h>
 
 #include <shlwapi.h>
@@ -1393,44 +1395,15 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 		
 	// the helper app path
 	CString sAppFolder = FileMisc::GetAppFolder();
+	CString sAppPath = GetHelperAppPath(sAppName, bTestDownload);
 
-#ifdef _DEBUG // -----------------------------------------------------------------------
+#ifdef _DEBUG // ----------------------------------------------------
 
 	if (bTestDownload)
-	{
 		params.SetOption(SWITCH_TESTDOWNLOAD);
 
-		if (bPreRelease)
-			params.SetOption(SWITCH_PRERELEASE);
-		
-		CString sAppPath;
-		FileMisc::MakePath(sAppPath, NULL, sAppFolder, sAppName, _T("exe"));
-		
-		DWORD dwRes = FileMisc::Run(NULL, 
-									sAppPath, 
-									params.GetCommandLine(), 
-									SW_SHOWNORMAL,
-									NULL, 
-									szVerb);
-		
-		return dwRes;
-	}
+#else // ------------------------------------------------------------
 
-	
-	// Copy ourselves to a temp location
-	CString sTempFolder = (FileMisc::TerminatePath(sAppFolder) + _T("Debug") + sAppName);
-	
-	// sanity check
-	VERIFY(FileMisc::DeleteFolder(sTempFolder, FMDF_SUBFOLDERS | FMDF_HIDDENREADONLY));
-	
-	// create folder and copy
-	VERIFY(FileMisc::CreateFolder(sTempFolder));
-	VERIFY(FileMisc::CopyFolder(sAppFolder, sTempFolder, _T("*.exe;*.dll;*.ini"), FMDF_HIDDENREADONLY));
-
-	// set the temp folder as the app folder
-	sAppFolder = sTempFolder;
-
-#else // Release -----------------------------------------------------------------------
 	UNREFERENCED_PARAMETER(bTestDownload);
 
 	// try to close all open instances of TDL
@@ -1438,21 +1411,18 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	{
 		return 0; // user cancelled
 	}
-
-#endif // ------------------------------------------------------------------------------
-	
-	CString sAppPath;
-	FileMisc::MakePath(sAppPath, NULL, sAppFolder, sAppName, _T("exe"));
 	
 	// and the commandline we were started with
 	// use base64 encoding to mangle it so that the update
 	// doesn't try to interpret the commandline itself
 	params.SetOption(SWITCH_CMDLINE, Base64Coder::Encode(m_lpCmdLine));
-	
-	if (CRTLStyleMgr::IsRTL())
-		params.SetOption(SWITCH_RTL);
+
+#endif // -----------------------------------------------------------
 	
 	// and the current language
+	if (CRTLStyleMgr::IsRTL())
+		params.SetOption(SWITCH_RTL);
+
 	if (m_sLanguageFile != CTDLLanguageComboBox::GetDefaultLanguage())
 	{
 		CString sLangFile = FileMisc::GetFullPath(m_sLanguageFile, FileMisc::GetAppFolder());
@@ -1471,8 +1441,13 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	if (bPreRelease)
 		params.SetOption(SWITCH_PRERELEASE);
 
+	return RunHelperApp(sAppPath, params, nIDGenErrorMsg, nIDSmartScreenErrorMsg, szVerb);
+}
+
+DWORD CToDoListApp::RunHelperApp(LPCTSTR szAppPath, const CEnCommandLineInfo& params, UINT nIDGenErrorMsg, UINT nIDSmartScreenErrorMsg, LPCTSTR szVerb)
+{
 	DWORD dwRes = FileMisc::Run(NULL, 
-								sAppPath, 
+								szAppPath, 
 								params.GetCommandLine(), 
 								SW_SHOWNORMAL,
 								NULL, 
@@ -1502,14 +1477,64 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	return dwRes;
 }
 
+CString CToDoListApp::GetHelperAppPath(const CString& sAppName, BOOL bTestDownload)
+{
+	CString sAppFolder = FileMisc::GetAppFolder();
+
+#ifdef _DEBUG // -----------------------------------------------------------------------
+	if (!bTestDownload)
+	{
+		// Copy ourselves to a temp location
+		CString sTempFolder = (FileMisc::TerminatePath(sAppFolder) + _T("Debug") + sAppName);
+
+		// sanity check
+		VERIFY(FileMisc::DeleteFolder(sTempFolder, FMDF_SUBFOLDERS | FMDF_HIDDENREADONLY));
+
+		// create folder and copy
+		VERIFY(FileMisc::CreateFolder(sTempFolder));
+		VERIFY(FileMisc::CopyFolder(sAppFolder, sTempFolder, _T("*.exe;*.dll;*.ini"), FMDF_HIDDENREADONLY));
+
+		// set the temp folder as the app folder
+		sAppFolder = sTempFolder;
+	}
+#endif // ------------------------------------------------------------------------------
+	
+	CString sAppPath;
+	FileMisc::MakePath(sAppPath, NULL, sAppFolder, sAppName, _T("exe"));
+
+	return sAppPath;
+}
+
 void CToDoListApp::RunUninstaller()
 {
-	RunHelperApp(_T("TDLUninstall"), IDS_UNINSTALLER_RUNFAILURE, IDS_UNINSTALLER_SMARTSCREENBLOCK);
+	CString sAppPath = GetHelperAppPath(_T("TDLUninstall"));
+
+	if (FileMisc::FileExists(sAppPath))
+	{
+		RunHelperApp(_T("TDLUninstall"), IDS_UNINSTALLER_RUNFAILURE, IDS_UNINSTALLER_SMARTSCREENBLOCK);
+		return;
+	}
+
+	// Fallback
+	CString sAppFolder = FileMisc::GetAppFolder();
+	FileMisc::DeleteFolder(sAppFolder, FMDF_SUBFOLDERS | FMDF_HIDDENREADONLY | FMDF_ALLOWDELETEONREBOOT);
 }
 
 void CToDoListApp::RunUpdater(BOOL bPreRelease, BOOL bTestDownload)
 {
-	RunHelperApp(_T("TDLUpdate"), IDS_UPDATER_RUNFAILURE, IDS_UPDATER_SMARTSCREENBLOCK, bPreRelease, bTestDownload);
+	CString sAppPath = GetHelperAppPath(_T("TDLUpdate"));
+
+	if (FileMisc::FileExists(sAppPath))
+	{
+		RunHelperApp(_T("TDLUpdate"), IDS_UPDATER_RUNFAILURE, IDS_UPDATER_SMARTSCREENBLOCK, bPreRelease, bTestDownload);
+		return;
+	}
+
+	// Fallback
+	if (AfxMessageBox(CEnString(IDS_UPDATER_FILEMISSING), MB_YESNO) == IDYES)
+	{
+		FileMisc::Run(NULL, (bPreRelease ? DOWNLOAD_URI_PRERELEASE : DOWNLOAD_URI));
+	}
 }
 
 BOOL CToDoListApp::CloseAllToDoListWnds()

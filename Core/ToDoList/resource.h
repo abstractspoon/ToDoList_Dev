@@ -2291,6 +2291,7 @@
 #define IDS_CUSTOM_FEATURE_PERCENTAGE   58494
 #define IDS_FILTERPLACEHOLDER           58495
 #define IDS_ERROR_EXPORT_OVERWRITETASKLIST 58496
+#define IDS_UPDATER_FILEMISSING         58497
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects

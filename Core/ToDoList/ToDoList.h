@@ -102,7 +102,6 @@ protected:
 	static BOOL ValidateTasklistPath(CString& sPath);
 	static BOOL ValidateIniPath(CString& sIniPath, BOOL bCheckExists);
 	static BOOL GetDefaultIniPath(CString& sIniPath, BOOL bCheckExists);
-	static CString GetResourcePath(LPCTSTR szSubFolder = NULL, LPCTSTR szFile = NULL);
 	static void CleanupAppFolder(LPCTSTR szPrevVer);
 	static void FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer);
 
@@ -111,6 +110,9 @@ protected:
 	static BOOL WaitForInstanceToClose(DWORD dwProcessID);
 	static BOOL CommandRequiresUI(UINT nCmdID);
 
+	static CString GetResourcePath(LPCTSTR szSubFolder = NULL, LPCTSTR szFile = NULL);
+	static CString GetHelperAppPath(const CString& sAppName, BOOL bTestDownload = FALSE);
+	static DWORD RunHelperApp(LPCTSTR szAppName, const CEnCommandLineInfo& params, UINT nIDGenErrorMsg, UINT nIDSmartScreenErrorMsg, LPCTSTR szVerb);
 };
 
 
