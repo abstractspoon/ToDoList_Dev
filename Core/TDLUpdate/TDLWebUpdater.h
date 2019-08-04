@@ -13,6 +13,11 @@
 
 //////////////////////////////////////////////////////////////////////
 
+const LPCTSTR DOWNLOAD_URI				= _T("http://abstractspoon.pbworks.com/f/todolist_exe.zip");
+const LPCTSTR DOWNLOAD_URI_PRERELEASE	= _T("http://abstractspoon.pbworks.com/f/todolist_exe_pre.zip");
+
+//////////////////////////////////////////////////////////////////////
+
 enum TDL_WEBUPDATE_RESULT
 {
 	TDLWUR_CANCELLED = -1,

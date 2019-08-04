@@ -22,11 +22,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const LPCTSTR DOWNLOAD_URI				= _T("http://abstractspoon.pbworks.com/f/todolist_exe.zip");
-const LPCTSTR DOWNLOAD_URI_PRERELEASE	= _T("http://abstractspoon.pbworks.com/f/todolist_exe_pre.zip");
-
-//////////////////////////////////////////////////////////////////////
-
 CTDLWebUpdater::CTDLWebUpdater(const CPoint& ptPos, BOOL bPreRelease)
 	: 
 	m_sDownloadUri(bPreRelease ? DOWNLOAD_URI_PRERELEASE : DOWNLOAD_URI),
