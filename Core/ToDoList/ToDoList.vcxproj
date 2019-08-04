@@ -125,7 +125,7 @@ copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y
       </HeaderFileName>
     </Midl>
     <ClCompile>
-      <Optimization>MinSpace</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <PreprocessorDefinitions>USE_TRANSTEXT;NDEBUG;NO_DIAGRAM_TEMPLATE;NO_XML_TEMPLATE;WIN32;_WINDOWS;_MBCS;UNICODE;PNG_SUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
