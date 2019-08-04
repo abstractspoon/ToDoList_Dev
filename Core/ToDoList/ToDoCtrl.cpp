@@ -7644,6 +7644,9 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 		return FALSE;
 
 	// Move the associated tree items
+	CLockUpdates lu(*this);
+	HOLD_REDRAW(*this, m_taskTree);
+
 	m_taskTree.MoveSelection(nDirection);
 
 	// refresh parent states if moving to the right (adding subtasks)

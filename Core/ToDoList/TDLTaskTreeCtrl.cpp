@@ -1843,8 +1843,7 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
 BOOL CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, BOOL bEnsureVisible)
 {
 	CAutoFlag af(m_bMovingItem, TRUE);
-	CLockUpdates lu(*this);
-	CHoldRedraw hr(*this);
+	// No 'hold redraw' here
 
 	CHTIList moved;
 	HTREEITEM htiFirst = MoveSelectionRaw(htiDestParent, htiDestPrevSibling, moved);
