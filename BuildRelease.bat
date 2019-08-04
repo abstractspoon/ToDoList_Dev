@@ -17,6 +17,9 @@ cd %REPO%\Core
 REM - Build Plugins
 cd %REPO%\Plugins
 
+REM - Rebuild 3rdParty by itself because PluginHelpers is dependent on it
+"C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" .\3rdParty.sln /Build "Release"
+
 REM - Rebuild PluginHelpers by itself because everything else is dependent on it
 "C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" .\PluginHelpers.sln /Build "Release"
 
