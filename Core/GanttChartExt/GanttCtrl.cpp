@@ -1684,7 +1684,7 @@ void CGanttCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL 
 	m_treeHeader.Invalidate(FALSE);
 
 	if (bNotifyParent)
-		GetCWnd()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nBy);
+		CWnd::GetParent()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nBy);
 }
 
 void CGanttCtrl::Sort(const GANTTSORTCOLUMNS multi)
@@ -2085,7 +2085,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 					}
 					
 					// notify parent
-					GetCWnd()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
+					CWnd::GetParent()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
 				}
 			}
 		}
@@ -2195,7 +2195,7 @@ BOOL CGanttCtrl::OnItemCheckChange(HTREEITEM hti)
 	ASSERT(pGI);
 
 	if (pGI)
-		GetCWnd()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), !pGI->IsDone(FALSE));
+		CWnd::GetParent()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), !pGI->IsDone(FALSE));
 
 	return TRUE; // always
 }
@@ -3196,7 +3196,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_listHeader);
 	
 	CThemed th;
-	BOOL bThemed = (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")));
+	BOOL bThemed = (th.AreControlsThemed() && th.Open(&m_listHeader, _T("HEADER")));
 	CThemed* pThemed = (bThemed ? &th :NULL);
 
 	CRect rClip;
@@ -4277,7 +4277,7 @@ void CGanttCtrl::ValidateMonthDisplay()
 	if (m_nMonthDisplay != nDisplay)
 	{
 		VERIFY(SetMonthDisplay(nDisplay));
-		GetCWnd()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
+		CWnd::GetParent()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
 	}
 }
 
@@ -5615,7 +5615,7 @@ void CGanttCtrl::NotifyParentDragChange()
 	ASSERT(!m_bReadOnly);
 	ASSERT(GetSelectedTaskID());
 
-	GetCWnd()->SendMessage(WM_GTLC_DRAGCHANGE, (WPARAM)GetSnapMode(), GetSelectedTaskID());
+	CWnd::GetParent()->SendMessage(WM_GTLC_DRAGCHANGE, (WPARAM)GetSnapMode(), GetSelectedTaskID());
 }
 
 BOOL CGanttCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
@@ -5624,7 +5624,7 @@ BOOL CGanttCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
 	ASSERT(GetSelectedTaskID());
 
 	if (IsDragging(nDrag))
-		return GetCWnd()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)nDrag, (LPARAM)&m_giPreDrag);
+		return CWnd::GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)nDrag, (LPARAM)&m_giPreDrag);
 
 	// else
 	return 0L;
