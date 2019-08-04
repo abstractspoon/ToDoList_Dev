@@ -68,6 +68,9 @@ public:
 	CTreeSelectionHelper(CTreeCtrl& tree);
 	virtual ~CTreeSelectionHelper();
 
+	const CTreeCtrl& TreeCtrl() const { return m_tree; }
+	const CTreeCtrlHelper& TCH() const { return m_tch; }
+
 	BOOL IsEmpty() const { return (m_lstSelection.GetCount() == 0); }
  	BOOL Matches(const CHTIList& list) { return (m_lstSelection == list); }
 
@@ -132,8 +135,6 @@ public:
 	BOOL HasPrevSelection() const;
     void ClearHistory();
     void RemoveItemFromHistory(HTREEITEM hti);
-
-	const CTreeCtrl& TreeCtrl() const { return m_tree; }
 
 	void SetAnchor(HTREEITEM htiAnchor) { m_htiAnchor = htiAnchor; }
 	HTREEITEM GetAnchor() const { return m_htiAnchor; }
