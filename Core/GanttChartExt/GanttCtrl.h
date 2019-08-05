@@ -49,7 +49,6 @@ public:
 
 	BOOL CanMoveSelectedTask(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedTask(const IUITASKMOVE& move);
-	BOOL IsMovingTask() const { return m_bMovingTask; }
 
 	BOOL GetSelectedTaskDependencies(CDWordArray& aDepends) const;
 	BOOL SetSelectedTaskDependencies(const CDWordArray& aDepends);
@@ -111,7 +110,6 @@ public:
 	static GTLC_COLUMN MapAttributeToColumn(TDC_ATTRIBUTE nAttrib);
 
 protected:
-	BOOL m_bMovingTask;
 	BOOL m_bReadOnly;
 
 	GANTTDATERANGE m_dtDataRange, m_dtActiveRange;
