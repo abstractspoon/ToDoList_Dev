@@ -571,7 +571,7 @@ BOOL CToDoCtrlFind::WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const
 		return TRUE;
 
 	// else
-	return (m_tch.TreeCtrl().GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED);
+	return m_tch.IsItemExpanded(hti);
 }
 
 CString CToDoCtrlFind::GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* pTDI, 
@@ -775,9 +775,7 @@ BOOL CToDoCtrlFind::FindVisibleTaskWithDueTime(HTREEITEM hti) const
 		return TRUE;
 
 	// check children
-	BOOL bVisible = (m_tch.TreeCtrl().GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED);
-
-	if (bVisible)
+	if (m_tch.IsItemExpanded(hti))
 	{
 		HTREEITEM htiChild = m_tch.TreeCtrl().GetChildItem(hti);
 
@@ -820,9 +818,7 @@ BOOL CToDoCtrlFind::FindVisibleTaskWithStartTime(HTREEITEM hti) const
 		return TRUE;
 
 	// check children
-	BOOL bVisible = (m_tch.TreeCtrl().GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED);
-
-	if (bVisible)
+	if (m_tch.IsItemExpanded(hti))
 	{
 		HTREEITEM htiChild = m_tch.TreeCtrl().GetChildItem(hti);
 
@@ -865,9 +861,7 @@ BOOL CToDoCtrlFind::FindVisibleTaskWithDoneTime(HTREEITEM hti) const
 		return TRUE;
 
 	// check children
-	BOOL bVisible = (m_tch.TreeCtrl().GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED);
-
-	if (bVisible)
+	if (m_tch.IsItemExpanded(hti))
 	{
 		HTREEITEM htiChild = m_tch.TreeCtrl().GetChildItem(hti);
 

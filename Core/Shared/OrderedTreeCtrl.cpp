@@ -414,7 +414,7 @@ LRESULT COrderedTreeCtrl::OnGutterGetFirstChildItem(WPARAM /*wParam*/, LPARAM lP
 {
 	HTREEITEM hti = (HTREEITEM)lParam;
 	
-	if (ItemHasChildren(hti) && (GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED))
+	if (ItemHasChildren(hti) && m_ht.IsItemExpanded(hti))
 		return (LRESULT)GetChildItem(hti);
 	
 	return 0;
@@ -747,7 +747,7 @@ UINT COrderedTreeCtrl::GetGutterWidth(HTREEITEM hti, int nLevel, int nPos, CDC* 
 {
 	UINT nMaxWidth = 0;
 	
-	if (GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED)
+	if (m_ht.IsItemExpanded(hti))
 	{
 		HTREEITEM htiChild = GetChildItem(hti);
 		int nPosChild = 1;
