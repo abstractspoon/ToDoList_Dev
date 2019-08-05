@@ -1398,12 +1398,9 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	CString sAppPath = GetHelperAppPath(sAppName, bTestDownload);
 
 #ifdef _DEBUG // ----------------------------------------------------
-
 	if (bTestDownload)
 		params.SetOption(SWITCH_TESTDOWNLOAD);
-
 #else // ------------------------------------------------------------
-
 	UNREFERENCED_PARAMETER(bTestDownload);
 
 	// try to close all open instances of TDL
@@ -1416,7 +1413,6 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	// use base64 encoding to mangle it so that the update
 	// doesn't try to interpret the commandline itself
 	params.SetOption(SWITCH_CMDLINE, Base64Coder::Encode(m_lpCmdLine));
-
 #endif // -----------------------------------------------------------
 	
 	// and the current language
@@ -1497,6 +1493,8 @@ CString CToDoListApp::GetHelperAppPath(const CString& sAppName, BOOL bTestDownlo
 		// set the temp folder as the app folder
 		sAppFolder = sTempFolder;
 	}
+#else // ------------------------------------------------------------
+	UNREFERENCED_PARAMETER(bTestDownload);
 #endif // ------------------------------------------------------------------------------
 	
 	CString sAppPath;
