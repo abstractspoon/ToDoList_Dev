@@ -2827,7 +2827,7 @@ DWORD CWorkloadCtrl::GetTaskID(int nItem) const
 
 DWORD CWorkloadCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
-	HTREEITEM hti = FindTreeItem(m_tree, dwTaskID);
+	HTREEITEM hti = FindItem(dwTaskID);
 	
 	if (!hti)
 	{

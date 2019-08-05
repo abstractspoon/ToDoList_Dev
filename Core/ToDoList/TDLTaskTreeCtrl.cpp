@@ -2088,7 +2088,7 @@ BOOL CTDLTaskTreeCtrl::InvalidateTask(DWORD dwTaskID, BOOL bUpdate)
 	if (dwTaskID == 0)
 		return TRUE; // nothing to do
 	
-	HTREEITEM hti = FindTreeItem(m_tcTasks, NULL, dwTaskID);
+	HTREEITEM hti = m_mapHTItems.GetItem(dwTaskID);
 
 	if (hti)
 		return InvalidateItem(hti, bUpdate);

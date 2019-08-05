@@ -215,7 +215,7 @@ BOOL CGanttCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue
 
 BOOL CGanttCtrl::SelectTask(DWORD dwTaskID)
 {
-	HTREEITEM hti = FindTreeItem(m_tree, dwTaskID);
+	HTREEITEM hti = FindItem(dwTaskID);
 
 	return SelectItem(hti);
 }
@@ -6184,7 +6184,7 @@ COleDateTime CGanttCtrl::GetNearestDate(const COleDateTime& dtDrag) const
 
 DWORD CGanttCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
-	HTREEITEM hti = FindTreeItem(m_tree, dwTaskID);
+	HTREEITEM hti = FindItem(dwTaskID);
 	
 	if (!hti)
 	{

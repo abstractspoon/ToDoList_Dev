@@ -1611,6 +1611,11 @@ HTREEITEM CTreeListCtrl::HitTestItem(const CPoint& ptScreen) const
 	return GetTreeItem(ListHitTestItem(ptScreen, TRUE));
 }
 
+HTREEITEM CTreeListCtrl::FindItem(DWORD dwItemData) const
+{
+	return m_mapHTItems.GetItem(dwItemData);
+}
+
 HTREEITEM CTreeListCtrl::TreeHitTestItem(const CPoint& point, BOOL bScreen) const
 {
 	int nUnused;
