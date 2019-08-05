@@ -126,7 +126,7 @@ public:
 
 	BOOL CanMoveItem(const TLCITEMMOVE& move) const;
 	BOOL MoveItem(const TLCITEMMOVE& move);
-	BOOL IsMovingTask() const { return m_bMovingTask; }
+	BOOL IsMovingItem() const { return m_bMovingItem; }
 
 	BOOL PointInHeader(const CPoint& ptScreen) const;
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader = TRUE) const;
@@ -171,7 +171,7 @@ protected:
 	CTreeSelectionHelper m_tshDragDrop;
 	CThemed m_themeHeader;
 
-	BOOL m_bMovingTask;
+	BOOL m_bMovingItem;
 	int m_nPrevDropHilitedItem;
 
 	mutable int m_nMinTreeTitleColumnWidth;

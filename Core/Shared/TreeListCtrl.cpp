@@ -238,7 +238,7 @@ CTreeListCtrl::CTreeListCtrl(int nMinLabelWidth, int nMinColWidth)
 	m_crAltLine(CLR_NONE),
 	m_crGridLine(CLR_NONE),
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
-	m_bMovingTask(FALSE),
+	m_bMovingItem(FALSE),
 	m_nPrevDropHilitedItem(-1),
 	m_nMinTreeTitleColumnWidth(-1),
 	m_tshDragDrop(m_tree),
@@ -740,7 +740,7 @@ LRESULT CTreeListCtrl::OnTreeDragAbort(WPARAM /*wp*/, LPARAM /*lp*/)
 
 BOOL CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
-	if (m_bMovingTask)
+	if (m_bMovingItem)
 		return FALSE;
 	
 	// Ignore setting selection to 'NULL' unless there are no tasks at all
@@ -1932,7 +1932,7 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 
 	HTREEITEM htiNew = NULL;
 	{
-		CAutoFlag af(m_bMovingTask, TRUE);
+		CAutoFlag af(m_bMovingItem, TRUE);
 
 		CLockUpdates lu(*this);
 		CHoldRedraw hr(*this);

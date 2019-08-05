@@ -1773,7 +1773,7 @@ BOOL CGanttCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	if (!CTreeListCtrl::OnTreeSelectionChange(pNMTV))
 		return FALSE;
 
-	if (!m_bMovingTask && HasOption(GTLCF_AUTOSCROLLTOTASK))
+	if (!m_bMovingItem && HasOption(GTLCF_AUTOSCROLLTOTASK))
 		ScrollToSelectedTask();
 
 	return TRUE;
