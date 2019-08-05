@@ -70,6 +70,13 @@ public:
 	CFontCache& Fonts() { return m_fonts; }
 	const CFontCache& Fonts() const { return m_fonts; }
 	
+	HTREEITEM InsertItem(LPCTSTR lpszItem, int nImage, int nSelImage,
+						 LPARAM lParam, HTREEITEM htiParent, HTREEITEM htiAfter);
+	BOOL DeleteItem(HTREEITEM hti);
+	void DeleteAllItems();
+	HTREEITEM GetItem(DWORD dwItemData) const;
+	HTREEITEM MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
+
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 
@@ -83,6 +90,9 @@ protected:
 	CImageList m_ilCheckboxes, m_ilImagePlaceholder;
 
 	const CEnHeaderCtrl& m_header;
+
+private:
+	CHTIMap m_mapHTItems;
 	
 protected:
 	virtual void PreSubclassWindow();
@@ -131,7 +141,6 @@ public:
 	BOOL PointInHeader(const CPoint& ptScreen) const;
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader = TRUE) const;
 	HTREEITEM HitTestItem(const CPoint& ptScreen) const;
-	HTREEITEM FindItem(DWORD dwItemData) const;
 
 	void ExpandAll(BOOL bExpand = TRUE);
 	BOOL CanExpandAll() const;
@@ -166,7 +175,6 @@ protected:
 
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
-	CHTIMap m_mapHTItems;
 
 	CTreeDragDropHelper m_treeDragDrop;
 	CTreeSelectionHelper m_tshDragDrop;
@@ -262,7 +270,6 @@ protected:
 	void SetDropHighlight(HTREEITEM hti, int nItem);
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
-	BOOL DeleteItem(HTREEITEM hti);
 
 	void Resize(int cx = 0, int cy = 0);
 	void UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction);
@@ -284,7 +291,6 @@ protected:
 	HTREEITEM GetTreeItem(DWORD dwItemData) const;
 	HTREEITEM GetTreeItem(int nItem) const { return CTreeListSyncer::GetTreeItem(m_tree, m_list, nItem); }
 	BOOL SelectItem(HTREEITEM hti);
-	void RefreshTreeItemMap();
 	CString GetItemLabelTip(CPoint ptScreen) const;
 	DWORD GetItemData(HTREEITEM htiFrom) const;
 	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;

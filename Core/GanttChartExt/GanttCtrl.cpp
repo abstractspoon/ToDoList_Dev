@@ -215,7 +215,7 @@ BOOL CGanttCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue
 
 BOOL CGanttCtrl::SelectTask(DWORD dwTaskID)
 {
-	HTREEITEM hti = FindItem(dwTaskID);
+	HTREEITEM hti = GetTreeItem(dwTaskID);
 
 	return SelectItem(hti);
 }
@@ -458,8 +458,6 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 			
 			RemoveDeletedTasks(NULL, pTasks, mapIDs);
 			UpdateParentStatus(pTasks, pTasks->GetFirstTask(), TRUE);
-
-			RefreshTreeItemMap();
 			RecalcDateRange();
 		}
 		break;
@@ -646,7 +644,6 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 		IncrementItemPositions(htiParent, nPos);
 
 		BuildTreeItem(pTasks, hTask, htiParent, FALSE, FALSE);
-		RefreshTreeItemMap();
 
 		return TRUE;
 	}
@@ -894,13 +891,12 @@ void CGanttCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 {
 	m_tree.DeleteAllItems();
 	m_list.DeleteAllItems();
-
 	m_data.RemoveAll();
+
 	m_dwMaxTaskID = 0;
 
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
 
-	RefreshTreeItemMap();
 	RefreshItemBoldState();
 	ExpandList();
 }
@@ -1012,14 +1008,12 @@ void CGanttCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		}
 	}
 
-	HTREEITEM hti = m_tree.TCH().InsertItem(LPSTR_TEXTCALLBACK, 
-											I_IMAGECALLBACK, 
-											I_IMAGECALLBACK, 
-											dwTaskID, // lParam
-											htiParent, 
-											htiAfter,
-											FALSE,
-											FALSE);
+	HTREEITEM hti = m_tree.InsertItem(LPSTR_TEXTCALLBACK,
+									  I_IMAGECALLBACK,
+									  I_IMAGECALLBACK,
+									  dwTaskID,
+									  htiParent,
+									  htiAfter);
 	
 	// add first child which will add all the rest
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(hTask), hti, TRUE);
@@ -3687,7 +3681,7 @@ BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, B
 	if (nItem == -1) // Collapsed 
 	{
 		// Use first visible parent as surrogate
-		HTREEITEM hti = m_mapHTItems.GetItem(dwTaskID);
+		HTREEITEM hti = GetTreeItem(dwTaskID);
 		ASSERT(hti);
 
 		while (!TCH().IsParentItemExpanded(hti))
@@ -4136,7 +4130,7 @@ void CGanttCtrl::DeleteItem(HTREEITEM hti)
 	DWORD dwTaskID = GetTaskID(hti);
 	ASSERT(dwTaskID);
 
-	VERIFY(CTreeListCtrl::DeleteItem(hti));
+	VERIFY(m_tree.DeleteItem(hti));
 	VERIFY(m_data.RemoveKey(dwTaskID));
 }
 
@@ -6184,7 +6178,7 @@ COleDateTime CGanttCtrl::GetNearestDate(const COleDateTime& dtDrag) const
 
 DWORD CGanttCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
-	HTREEITEM hti = FindItem(dwTaskID);
+	HTREEITEM hti = GetTreeItem(dwTaskID);
 	
 	if (!hti)
 	{

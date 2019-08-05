@@ -77,6 +77,70 @@ END_MESSAGE_MAP()
 //////////////////////////////////////////////////////////////////////
 
 // CTreeListTreeCtrl message handlers
+HTREEITEM CTreeListTreeCtrl::InsertItem(LPCTSTR lpszItem, int nImage, int nSelImage,
+										LPARAM lParam, HTREEITEM htiParent, HTREEITEM htiAfter)
+{
+	ASSERT(GetItem(lParam) == NULL);
+
+	HTREEITEM hti = TCH().InsertItem(lpszItem,
+											nImage,
+											nSelImage,
+											lParam,
+											htiParent,
+											htiAfter,
+											FALSE,
+											FALSE);
+
+	if (!hti)
+		ASSERT(0);
+	else
+		m_mapHTItems[lParam] = hti;
+
+	return hti;
+}
+
+BOOL CTreeListTreeCtrl::DeleteItem(HTREEITEM hti)
+{
+	if (!hti)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_mapHTItems.RemoveItem(*this, hti);
+	
+	return CTreeCtrl::DeleteItem(hti);
+}
+
+void CTreeListTreeCtrl::DeleteAllItems()
+{
+	m_mapHTItems.RemoveAll();
+	CTreeCtrl::DeleteAllItems();
+}
+
+HTREEITEM CTreeListTreeCtrl::GetItem(DWORD dwItemData) const
+{
+	HTREEITEM hti = NULL;
+	m_mapHTItems.Lookup(dwItemData, hti);
+
+	return hti;
+}
+
+HTREEITEM CTreeListTreeCtrl::MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
+{
+	if (!htiDestPrevSibling)
+		htiDestPrevSibling = TVI_FIRST;
+
+	// Remove the existing task and its children from the map
+	m_mapHTItems.RemoveItem(*this, hti);
+
+	HTREEITEM htiNew = TCH().MoveTree(hti, htiDestParent, htiDestPrevSibling, TRUE, TRUE);
+
+	// Add the 'new' task and its children to the map
+	m_mapHTItems.AddItem(*this, htiNew);
+
+	return htiNew;
+}
 
 void CTreeListTreeCtrl::PreSubclassWindow()
 {
@@ -472,11 +536,6 @@ void CTreeListCtrl::SetExpandedState(const CDWordArray& aExpanded)
 
 		ExpandList();
 	}
-}
-
-void CTreeListCtrl::RefreshTreeItemMap()
-{
-	m_mapHTItems.BuildMap(m_tree);
 }
 
 BOOL CTreeListCtrl::IsTreeItemLineOdd(HTREEITEM hti) const
@@ -1259,10 +1318,7 @@ void CTreeListCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CStri
 
 HTREEITEM CTreeListCtrl::GetTreeItem(DWORD dwItemData) const
 {
-	HTREEITEM hti = NULL;
-	m_mapHTItems.Lookup(dwItemData, hti);
-	
-	return hti;
+	return m_tree.GetItem(dwItemData);
 }
 
 int CTreeListCtrl::GetListItem(DWORD dwTreeItemData) const
@@ -1611,11 +1667,6 @@ HTREEITEM CTreeListCtrl::HitTestItem(const CPoint& ptScreen) const
 	return GetTreeItem(ListHitTestItem(ptScreen, TRUE));
 }
 
-HTREEITEM CTreeListCtrl::FindItem(DWORD dwItemData) const
-{
-	return m_mapHTItems.GetItem(dwItemData);
-}
-
 HTREEITEM CTreeListCtrl::TreeHitTestItem(const CPoint& point, BOOL bScreen) const
 {
 	int nUnused;
@@ -1673,28 +1724,6 @@ int CTreeListCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol)
 
 	// all else
 	return -1;
-}
-
-BOOL CTreeListCtrl::DeleteItem(HTREEITEM hti)
-{
-	if (!hti)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-#ifdef _DEBUG
-	DWORD dwItemData = GetItemData(hti);
-	ASSERT(dwItemData && (GetTreeItem(dwItemData) == hti));
-#endif
-
-	m_tree.DeleteItem(hti); // this will update the hti map
-
-#ifdef _DEBUG
-	ASSERT(dwItemData && (GetTreeItem(dwItemData) == NULL));
-#endif
-
-	return TRUE;
 }
 
 CString CTreeListCtrl::GetItemLabelTip(CPoint ptScreen) const
@@ -1930,24 +1959,20 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 		return FALSE;
 
 	HTREEITEM htiSel = ((move.htiSel == NULL) ? GetSelectedItem() : move.htiSel);
-	HTREEITEM htiAfter = ((move.htiDestAfterSibling == NULL) ? TVI_FIRST : move.htiDestAfterSibling);
+	HTREEITEM htiNew = NULL;
+	{
+		CAutoFlag af(m_bMovingItem, TRUE);
+		CLockUpdates lu(*this);
+		CHoldRedraw hr(*this);
+
+		htiNew = m_tree.MoveItem(htiSel, move.htiDestParent, move.htiDestAfterSibling);
+	}
 
 	BOOL bSameParent = (move.htiDestParent == m_tree.GetParentItem(htiSel));
 	int nPrevPos = TCH().GetItemTop(htiSel);
 
-	HTREEITEM htiNew = NULL;
-	{
-		CAutoFlag af(m_bMovingItem, TRUE);
-
-		CLockUpdates lu(*this);
-		CHoldRedraw hr(*this);
-
-		htiNew = TCH().MoveTree(htiSel, move.htiDestParent, htiAfter, TRUE, TRUE);
-	}
-
 	if (htiNew)
 	{
-		RefreshTreeItemMap();
 		SelectItem(htiNew);
 
 		if (bSameParent)

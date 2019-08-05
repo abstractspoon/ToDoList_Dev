@@ -667,7 +667,6 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 		IncrementItemPositions(htiParent, nPos);
 
 		BuildTreeItem(pTasks, hTask, htiParent, FALSE, FALSE);
-		RefreshTreeItemMap();
 
 		return TRUE;
 	}
@@ -818,7 +817,6 @@ void CWorkloadCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 	if (RemoveDeletedTasks(NULL, pTasks, mapIDs))
 	{
 		m_data.RecalculateOverlaps();
-		RefreshTreeItemMap();
 	}
 }
 
@@ -911,17 +909,15 @@ void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 {
 	m_tree.DeleteAllItems();
 	m_list.DeleteAllItems();
-
-	m_aAllocTo.RemoveAll();
 	m_data.RemoveAll();
 
+	m_aAllocTo.RemoveAll();
 	m_dwMaxTaskID = 0;
 
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
 
 	m_data.RecalculateOverlaps();
 
-	RefreshTreeItemMap();
 	ExpandList();
 	RefreshItemBoldState();
 }
@@ -1032,15 +1028,13 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		}
 	}
 
-	HTREEITEM hti = m_tree.TCH().InsertItem(LPSTR_TEXTCALLBACK, 
-											I_IMAGECALLBACK, 
-											I_IMAGECALLBACK, 
-											dwTaskID, // lParam
-											htiParent, 
-											htiAfter,
-											FALSE,
-											FALSE);
-	
+	HTREEITEM hti = m_tree.InsertItem(LPSTR_TEXTCALLBACK,
+									  I_IMAGECALLBACK,
+									  I_IMAGECALLBACK,
+									  dwTaskID,
+									  htiParent,
+									  htiAfter);
+
 	// add first child which will add all the rest
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(hTask), hti, TRUE);
 	
@@ -2461,7 +2455,7 @@ void CWorkloadCtrl::DeleteItem(HTREEITEM hti)
 	DWORD dwTaskID = GetTaskID(hti);
 	ASSERT(dwTaskID);
 
-	VERIFY(CTreeListCtrl::DeleteItem(hti));
+	VERIFY(m_tree.DeleteItem(hti));
 	VERIFY(m_data.RemoveKey(dwTaskID));
 }
 
@@ -2827,7 +2821,7 @@ DWORD CWorkloadCtrl::GetTaskID(int nItem) const
 
 DWORD CWorkloadCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
-	HTREEITEM hti = FindItem(dwTaskID);
+	HTREEITEM hti = GetTreeItem(dwTaskID);
 	
 	if (!hti)
 	{
