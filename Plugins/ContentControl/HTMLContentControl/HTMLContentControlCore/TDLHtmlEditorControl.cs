@@ -27,7 +27,7 @@ namespace HTMLContentControl
 	// --------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
-    class TDLHtmlEditorControl : HtmlEditorControlEx //MSDN.Html.Editor.HtmlEditorControl
+    class TDLHtmlEditorControl : HtmlEditorControlEx
     {
         private Timer m_TextChangeTimer;
         private String m_PrevTextChange = "";
@@ -61,6 +61,7 @@ namespace HTMLContentControl
             this.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.BorderSize = 0;
             this.NavigateAction = MSDN.Html.Editor.NavigateActionOption.NewWindow;
+			this.EditEnabled = true;
 
 			this.BrowserPanel.Anchor = AnchorStyles.None; // we handle positioning ourselves
 
@@ -113,6 +114,9 @@ namespace HTMLContentControl
         {
             // remove whole 'Document' submenu
 			base.InitialiseFeatures(true);
+
+			// Don't need the Enable Edit because we implement Ctrl+Click
+			CommandHandling.HideCommand("toolstripEnableEditing", ToolBar.Items);
 		}
 
 		private void OnTextChangeTimer(object sender, EventArgs e)
@@ -301,6 +305,9 @@ namespace HTMLContentControl
 						tooltip = args.tooltip;
 				}
 
+				if (IsEditable)
+					tooltip = tooltip + "\n" + m_Trans.Translate("(Ctrl+click to follow link)");
+
 				if (!tooltip.Equals(element.GetAttribute("title")))
 				{
 					// Prevent setting the tooltip causing a text change notification
@@ -316,7 +323,7 @@ namespace HTMLContentControl
 
 		private void OnDocumentMouseDown(object sender, HtmlElementEventArgs e)
 		{
-			if (!IsEditable)
+			if (!IsEditable || e.CtrlKeyPressed)
 			{
 				// We handle links ourselves because the web browser 
 				// doesn't always send a navigation notification
@@ -332,7 +339,7 @@ namespace HTMLContentControl
 
 		private void OnDocumentMouseUp(object sender, HtmlElementEventArgs e)
 		{
-			if (!IsEditable && !String.IsNullOrWhiteSpace(m_CurrentHRef))
+			if ((!IsEditable || e.CtrlKeyPressed) && !String.IsNullOrWhiteSpace(m_CurrentHRef))
 			{
 				var href = new StringBuilder(m_CurrentHRef).ToString();
 				m_CurrentHRef = "";
@@ -369,7 +376,7 @@ namespace HTMLContentControl
 
 		private bool DoDrop(string title, string url)
 		{
-			if (!IsEditable) // Must be drag and drop
+			if (!IsEditable) 
 				return false;
 
 			bool isImage = IsValidImageHref(url);

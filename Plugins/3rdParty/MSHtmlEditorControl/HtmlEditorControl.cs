@@ -2093,7 +2093,7 @@ namespace MSDN.Html.Editor
             this.toolstripEditUndo.Enabled = IsEditable;
             this.toolstripEditRedo.Enabled = IsEditable;
             this.toolstripFormatBold.Enabled = IsEditable;
-            this.toolstripFormatUnderline.Enabled = IsEditable;
+			this.toolstripFormatUnderline.Enabled = IsEditable;
             this.toolstripFormatItalic.Enabled = IsEditable;
             this.toolstripFontDialog.Enabled = IsEditable;
             this.toolstripFontNormal.Enabled = IsEditable;
@@ -2116,6 +2116,7 @@ namespace MSDN.Html.Editor
             this.toolstripEnableEditing.Enabled = !_readOnly;
 			this.toolstripEnableEditing.Checked = IsEditable;
 
+			this.toolstripDocumentEditHTML.Enabled = IsEditable;
 			this.toolstripDocumentPrint.Enabled = true; // always
 
 			this.WebBrowser.Document.BackColor = (IsEditable ? SystemColors.Window : SystemColors.ControlLight);
