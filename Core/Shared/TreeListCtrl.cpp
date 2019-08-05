@@ -58,7 +58,6 @@ CTreeListTreeCtrl::CTreeListTreeCtrl(const CEnHeaderCtrl& header)
 	m_tch(*this)
 #pragma warning (default: 4355)
 {
-
 }
 
 CTreeListTreeCtrl::~CTreeListTreeCtrl()
@@ -1959,6 +1958,10 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 		return FALSE;
 
 	HTREEITEM htiSel = ((move.htiSel == NULL) ? GetSelectedItem() : move.htiSel);
+	
+	BOOL bSameParent = (move.htiDestParent == m_tree.GetParentItem(htiSel));
+	int nPrevPos = TCH().GetItemTop(htiSel);
+
 	HTREEITEM htiNew = NULL;
 	{
 		CAutoFlag af(m_bMovingItem, TRUE);
@@ -1967,10 +1970,7 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 
 		htiNew = m_tree.MoveItem(htiSel, move.htiDestParent, move.htiDestAfterSibling);
 	}
-
-	BOOL bSameParent = (move.htiDestParent == m_tree.GetParentItem(htiSel));
-	int nPrevPos = TCH().GetItemTop(htiSel);
-
+	
 	if (htiNew)
 	{
 		SelectItem(htiNew);
