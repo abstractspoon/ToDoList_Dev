@@ -15,16 +15,16 @@ public:
 protected:
 	DWORD m_dwTickStart, m_dwIntermediateStart;
 	CString m_sScope;
+	BOOL m_bStartLogged;
 
 protected:
 	CScopedTimer();
 	CScopedTimer(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3);
 
 	CString FormatStart() const;
-	CString FormatEnd() const;
 
 protected:
-	static CString FormatTimeElapsed(LPCTSTR szScope, DWORD& dwTickFrom);
+	static CString FormatTimeElapsed(LPCTSTR szScope, DWORD& dwTickFrom, BOOL bLogEnd);
 	static CString Format(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3);
 };
 
@@ -38,7 +38,6 @@ public:
 	~CScopedLogTimer();
 
 	void LogStart();
-	void LogEnd();
 	void LogTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1 = NULL, LPCTSTR szArg2 = NULL, LPCTSTR szArg3 = NULL);
 };
 
@@ -52,7 +51,6 @@ public:
 	~CScopedTraceTimer();
 
 	void TraceStart();
-	void TraceEnd();
 	void TraceTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1 = NULL, LPCTSTR szArg2 = NULL, LPCTSTR szArg3 = NULL);
 };
 
