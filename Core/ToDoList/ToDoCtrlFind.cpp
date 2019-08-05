@@ -734,7 +734,7 @@ int CToDoCtrlFind::GetTaskBreadcrumbs(HTREEITEM hti, CDWordArray& aBreadcrumbs, 
 	return aBreadcrumbs.GetSize();
 }
 
-BOOL CToDoCtrlFind::FindVisibleTaskWithTime(TDC_DATE nDate)
+BOOL CToDoCtrlFind::FindVisibleTaskWithTime(TDC_DATE nDate) const
 {
 	switch (nDate)
 	{

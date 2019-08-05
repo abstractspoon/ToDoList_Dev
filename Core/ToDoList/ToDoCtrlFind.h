@@ -85,7 +85,7 @@ public:
 	BOOL FindVisibleTaskWithDueTime() const;
 	BOOL FindVisibleTaskWithStartTime() const;
 	BOOL FindVisibleTaskWithDoneTime() const;
-	BOOL FindVisibleTaskWithTime(TDC_DATE nDate);
+	BOOL FindVisibleTaskWithTime(TDC_DATE nDate) const;
 
 	// Finds tasks only in the tree
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
