@@ -24,6 +24,7 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\icon.h"
+#include "..\shared\ScopedTimer.h"
 
 #include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\GdiPlus.h"
@@ -4751,16 +4752,23 @@ BOOL CTabbedToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
+			CScopedLogTimer log(_T("CTabbedToDoCtrl::MoveSelectedTask"));
+			log.LogStart();
+
 			DWORD dwSelTaskID = ((m_taskTree.GetSelectedCount() == 1) ? GetSelectedTaskID() : 0);
 			DWORD dwDestParentID = 0, dwDestPrevSiblingID = 0;
 
 			if (!GetExtensionInsertLocation(nView, nDirection, dwDestParentID, dwDestPrevSiblingID))
 				return FALSE;
 
+			log.LogTimeElapsed(_T("GetExtensionInsertLocation"));
+
 			CUIExtensionAppCmdData data(dwSelTaskID, dwDestParentID, dwDestPrevSiblingID);
 
 			if (ExtensionDoAppCommand(nView, IUI_MOVETASK, data))
 			{
+				log.LogTimeElapsed(_T("ExtensionDoAppCommand(IUI_MOVETASK)"));
+
 				IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 
 				// Update the underlying data
@@ -4774,6 +4782,8 @@ BOOL CTabbedToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 					HTREEITEM htiDestPrevSibling = m_taskTree.GetItem(dwDestPrevSiblingID);
 
 					m_taskTree.MoveSelection(htiDestParent, htiDestPrevSibling);
+
+					log.LogTimeElapsed(_T("m_taskTree.MoveSelection"));
 
 					// Enable the move to be saved
 					if (nDirection == TDCM_DOWN || nDirection == TDCM_UP)
