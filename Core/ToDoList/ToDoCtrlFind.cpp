@@ -193,14 +193,6 @@ CToDoCtrlFind::~CToDoCtrlFind()
 {
 }
 
-HTREEITEM CToDoCtrlFind::GetItem(DWORD dwID) const 
-{ 
-	if (dwID == 0)
-		return NULL;
-
-	return CTreeCtrlHelper(m_tree).FindItem(dwID);
-}
-
 DWORD CToDoCtrlFind::GetTaskID(HTREEITEM hti) const 
 { 
 	if (!hti || (hti == TVI_ROOT) || (hti == TVI_FIRST) || (hti == TVI_LAST))

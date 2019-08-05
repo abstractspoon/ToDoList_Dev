@@ -59,7 +59,6 @@ public:
 	CToDoCtrlFind(const CTreeCtrlHelper& tch, const CToDoCtrlData& data);
 	virtual ~CToDoCtrlFind();
 	
-	HTREEITEM GetItem(DWORD dwID) const;
 	DWORD GetTaskID(HTREEITEM hti) const;
 	const TODOITEM* GetTask(HTREEITEM hti, BOOL bTrue) const;
 
