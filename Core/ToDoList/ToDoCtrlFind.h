@@ -18,6 +18,7 @@
 class TODOSTRUCTURE;
 class CToDoCtrlData;
 class CTDCLongestItemMap;
+class CTreeCtrlHelper;
 
 struct TODOITEM;
 struct TDCCUSTOMATTRIBUTEDEFINITION;
@@ -55,7 +56,7 @@ class CToDoCtrlFind
 	friend struct LONGESTITEM;
 
 public:
-	CToDoCtrlFind(CTreeCtrl& tree, const CToDoCtrlData& data);
+	CToDoCtrlFind(const CTreeCtrlHelper& tch, const CToDoCtrlData& data);
 	virtual ~CToDoCtrlFind();
 	
 	HTREEITEM GetItem(DWORD dwID) const;
@@ -95,8 +96,9 @@ public:
 	void WalkTree(BOOL bVisibleOnly) const;
 
 protected:
-	CTreeCtrl& m_tree; 
+	const CTreeCtrlHelper& m_tch; 
 	const CToDoCtrlData& m_data;
+
 	CTDCTaskMatcher m_matcher;
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;

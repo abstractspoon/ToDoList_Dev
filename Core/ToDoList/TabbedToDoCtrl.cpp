@@ -2720,7 +2720,7 @@ DWORD CTabbedToDoCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bE
 					
 					if (bExcludeSelected)
 					{
-						HTREEITEM htiNext = TCF().GetItem(data.dwTaskID);
+						HTREEITEM htiNext = m_taskTree.GetItem(data.dwTaskID);
 						ASSERT(htiNext);
 						
 						if (TSH().IsItemSelected(htiNext, TRUE))

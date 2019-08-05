@@ -72,7 +72,7 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 	m_tsh(m_tcTasks),
 	m_tch(m_tcTasks),
 	m_htiLastHandledLBtnDown(NULL),
-	m_find(m_tcTasks, data),
+	m_find(m_tch, data),
 	m_wKeyPress(0),
 	m_bMovingItem(FALSE),
 	m_bEditLabelTimerStarted(FALSE)
@@ -2130,7 +2130,7 @@ int CTDLTaskTreeCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcru
 			HTREEITEM htiFocus = m_tcTasks.GetSelectedItem();
 		
 			if (htiFocus == NULL)
-				htiFocus = m_find.GetItem(cache.dwFocusedTaskID);
+				htiFocus = GetItem(cache.dwFocusedTaskID);
 		
 			m_find.GetTaskBreadcrumbs(htiFocus, cache.aBreadcrumbs, TCFBC_VISIBLEONLY);
 			m_find.GetTaskBreadcrumbs(htiFocus, cache.aBreadcrumbs, TCFBC_VISIBLEONLY | TCFBC_APPEND | TCFBC_UP);
