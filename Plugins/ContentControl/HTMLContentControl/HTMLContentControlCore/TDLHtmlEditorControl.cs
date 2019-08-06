@@ -306,7 +306,15 @@ namespace HTMLContentControl
 				}
 
 				if (IsEditable)
-					tooltip = tooltip + "\n" + m_Trans.Translate("(Ctrl+click to follow link)");
+				{
+					// No need for tooltip if the same as the visible text
+					if (tooltip.Equals(element.InnerText))
+						tooltip = String.Empty;
+					else
+						tooltip = tooltip + "\n";
+
+					tooltip = tooltip + m_Trans.Translate("'CTRL + click' to follow link");
+				}
 
 				if (!tooltip.Equals(element.GetAttribute("title")))
 				{
