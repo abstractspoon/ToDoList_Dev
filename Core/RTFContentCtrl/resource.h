@@ -81,6 +81,7 @@
 #define ID_EDIT_COPYURL                 32815
 #define ID_EDIT_LOCKCOLORS              32817
 #define ID_EDIT_INLINESPELLCHECK        34545
+#define IDS_CTRLCLICKTOFOLLOWLINK       58498
 
 // Next default values for new objects
 // 

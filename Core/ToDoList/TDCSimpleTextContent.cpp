@@ -134,6 +134,7 @@ const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
 
 CTDLSimpleTextContentCtrl::CTDLSimpleTextContentCtrl() 
 	: 
+	CUrlRichEditCtrl(CTRLCLICKTOFOLLOW, IDS_CTRLCLICKTOFOLLOWLINK),
 	m_bAllowNotify(TRUE), 
 	m_bWordWrap(TRUE),
 #pragma warning (disable: 4355)

@@ -33,8 +33,9 @@ const UINT PAUSE = 1000; // 1 second
 /////////////////////////////////////////////////////////////////////////////
 // CUrlRichEditCtrl
 
-CUrlRichEditCtrl::CUrlRichEditCtrl() 
+CUrlRichEditCtrl::CUrlRichEditCtrl(URE_LINKHANDLING nLinkHandling, UINT nIDInstructionMsg)
 	: 
+	m_nLinkHandling(nLinkHandling),
 	m_lpDragObject(NULL),
 	m_nFileProtocol(-1), 
 	m_nFileProtocol2(-1)
@@ -57,6 +58,9 @@ CUrlRichEditCtrl::CUrlRichEditCtrl()
 	// but we use the incorrect one to pick up badly formatted URIs
 	m_nFileProtocol = AddProtocol(_T("file:///"), FALSE);
 	m_nFileProtocol2 = AddProtocol(_T("file://"), FALSE);
+
+	if (nIDInstructionMsg)
+		m_sLinkInstruction = CEnString(nIDInstructionMsg);
 }
 
 CUrlRichEditCtrl::~CUrlRichEditCtrl()
@@ -629,6 +633,8 @@ LRESULT CUrlRichEditCtrl::SendNotifyFailedUrl(LPCTSTR szUrl) const
 
 BOOL CUrlRichEditCtrl::GetUrlTooltip(const CString& sUrl, CString& sTooltip) const
 {
+	sTooltip.Empty();
+
 	TOOLTIPTEXT tip = { 0 };
 
 	tip.hdr.hwndFrom = GetSafeHwnd();
@@ -638,8 +644,6 @@ BOOL CUrlRichEditCtrl::GetUrlTooltip(const CString& sUrl, CString& sTooltip) con
 
 	if (GetParent()->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)&tip))
 	{
-		sTooltip.Empty();
-
 		if (tip.szText[0])
 		{
 			sTooltip = tip.szText;
@@ -648,11 +652,17 @@ BOOL CUrlRichEditCtrl::GetUrlTooltip(const CString& sUrl, CString& sTooltip) con
 		{
 			sTooltip = tip.lpszText;
 		}
-
-		return !sTooltip.IsEmpty();
 	}
 
-	return FALSE;
+	if (!m_sLinkInstruction.IsEmpty())
+	{
+		if (!sTooltip.IsEmpty())
+			sTooltip += '\n';
+
+		sTooltip += m_sLinkInstruction;
+	}
+
+	return !sTooltip.IsEmpty();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1086,9 +1096,29 @@ void CUrlRichEditCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	CRichEditBaseCtrl::OnMouseMove(nFlags, point);
 }
 
+BOOL CUrlRichEditCtrl::WantFollowLink(BOOL bCtrl, BOOL bShift) const
+{
+	if (bShift && bCtrl)
+		return FALSE;
+
+	switch (m_nLinkHandling)
+	{
+	case SHIFTCLICKTOEDIT:
+		return !bShift;
+
+	case CTRLCLICKTOFOLLOW:
+		return bCtrl;
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
 BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
+	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+
 	ENLINK* pENL = (ENLINK*)pNMHDR;
 
 	switch (pENL->msg)
@@ -1096,7 +1126,7 @@ BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 	case WM_SETCURSOR:
 		m_sContextUrl = GetTextRange(pENL->chrg);
 
-		if (bShift)
+		if (!WantFollowLink(bCtrl, bShift))
 		{
 			// because we're overriding the default behaviour we need to
 			// handle the cursor being over a selected block
@@ -1123,9 +1153,8 @@ BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 
 	case WM_LBUTTONDOWN:
 		m_sContextUrl = GetTextRange(pENL->chrg);
-		
-		// Shift allows clicking on the link without opening it
-		if (bShift)
+
+		if (!WantFollowLink(bCtrl, bShift))
 		{
 			SetFocus();
 			
@@ -1139,7 +1168,7 @@ BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 		break;
 
 	case WM_LBUTTONUP:
-		if (!bShift)
+		if (!WantFollowLink(bCtrl, bShift))
 		{
 			CString sUrl = GetTextRange(pENL->chrg);
 

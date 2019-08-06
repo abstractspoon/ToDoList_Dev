@@ -573,6 +573,11 @@ BEGIN
     ID_EDIT_LOCKCOLORS      "\nLock Colour Selection"
 END
 
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_CTRLCLICKTOFOLLOWLINK "'CTRL + click' to follow link"
+END
+
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 

@@ -10,17 +10,23 @@
 #include "richeditbasectrl.h"
 #include "richeditncborder.h"
 
+#include <afxtempl.h>
+
 /////////////////////////////////////////////////////////////////////////////
-// CUrlRichEditCtrl window
 
 const UINT WM_UREN_CUSTOMURL  = ::RegisterWindowMessage(_T("WM_UREN_CUSTOMURL"));  // lParam == full url
 const UINT WM_UREN_FAILEDURL  = ::RegisterWindowMessage(_T("WM_UREN_FAILEDURL"));  // lParam == full url
+
+/////////////////////////////////////////////////////////////////////////////
 
 struct URLITEM
 {
 	CHARRANGE cr;
 	CString sUrl;
 };
+typedef CArray<URLITEM, URLITEM&> CUrlArray;
+
+/////////////////////////////////////////////////////////////////////////////
 
 struct PROTOCOL
 {
@@ -29,17 +35,23 @@ struct PROTOCOL
 	CString sProtocol;
 	BOOL bWantNotify;
 };
-
-#include <afxtempl.h>
-
-typedef CArray<URLITEM, URLITEM&> CUrlArray;
 typedef CArray<PROTOCOL, PROTOCOL&> CProtocolArray;
 
+/////////////////////////////////////////////////////////////////////////////
+
+enum URE_LINKHANDLING
+{
+	CTRLCLICKTOFOLLOW,
+	SHIFTCLICKTOEDIT,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// CUrlRichEditCtrl window
 class CUrlRichEditCtrl : public CRichEditBaseCtrl
 {
 	// Construction
 public:
-	CUrlRichEditCtrl();
+	CUrlRichEditCtrl(URE_LINKHANDLING nLinkHandling = CTRLCLICKTOFOLLOW, UINT nIDLinkInstructionMsg = 0);
 	
 	void PathReplaceSel(LPCTSTR lpszPath, BOOL bFile);
 	BOOL GoToUrl(const CString& sUrl) const;
@@ -60,9 +72,11 @@ protected:
 
 	CPoint m_ptContextMenu;
 	CString m_sContextUrl;
+	CString m_sLinkInstruction;
 	CHARRANGE m_crDropSel;
 	LPDATAOBJECT m_lpDragObject;
 	int m_nFileProtocol, m_nFileProtocol2;
+	URE_LINKHANDLING m_nLinkHandling;
 
 	// Overrides
 	// ClassWizard generated virtual function overrides
@@ -120,6 +134,7 @@ protected:
 	BOOL EnableAutoUrlDetection();
 	void Initialise();
 	BOOL FindStartOfUrl(LPCTSTR szText, int nTextLen, LPCTSTR& szPos) const;
+	BOOL WantFollowLink(BOOL bCtrl, BOOL bShift) const;
 	
 	static BOOL FindEndOfUrl(LPCTSTR& szPos, int& nUrlLen, BOOL bBraced, BOOL bFile);
 	static BOOL IsBaseDelim(LPCTSTR szText);

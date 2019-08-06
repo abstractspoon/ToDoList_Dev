@@ -1335,7 +1335,13 @@ CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLI
 BOOL CRichEditBaseCtrl::EnableToolTips(BOOL bEnable)
 {
 	if (bEnable && !m_tooltip.GetSafeHwnd())
-		return m_tooltip.Create(this, (TTS_NOPREFIX | TTS_ALWAYSTIP));
+	{
+		if (!m_tooltip.Create(this, (TTS_NOPREFIX | TTS_ALWAYSTIP)))
+			return FALSE;
+
+		m_tooltip.SetMaxTipWidth(1024); // for '\n' support
+		return TRUE;
+	}
 	
 	// else
 	if (!bEnable && m_tooltip.GetSafeHwnd())

@@ -137,6 +137,7 @@ BOOL CRulerRichEdit::s_bPasteSourceUrls = TRUE;
 
 CRulerRichEdit::CRulerRichEdit(CRtfHtmlConverter& rtfHtml) 
 	: 
+	CUrlRichEditCtrl(CTRLCLICKTOFOLLOW, IDS_CTRLCLICKTOFOLLOWLINK),
 	m_bIMEComposing(FALSE), 
 	m_nFileLinkOption(REP_ASIMAGE), 
 	m_bReduceImageColors(TRUE),
