@@ -29,7 +29,9 @@ public:
 
 	BOOL GetAutoCalculateMissingAllocations() const { return m_bAutoCalcAllocations; }
 	BOOL GetPreferTimeEstimateForCalcs() const { return m_bPreferTimeEstimateInCalcs; }
-
+	BOOL GetRecalculateAllocations() const { return m_bRecalcAllocations; }
+	BOOL GetRecalculateAllocationsProportionally() const { return m_bRecalcProportionally; }
+	
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
@@ -40,6 +42,8 @@ protected:
 	BOOL	m_bAutoCalcAllocations;
 	BOOL	m_bEnableOverload;
 	BOOL	m_bEnableUnderload;
+	BOOL	m_bRecalcAllocations;
+	int		m_bRecalcProportionally;
 	//}}AFX_DATA
 	int		m_nOverloadFromPercent;
 	int		m_nUnderloadToPercent;
@@ -56,19 +60,22 @@ protected:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
+	virtual void OnOK();
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CWorkloadPreferencesPage)
 	afx_msg void OnEnableOverload();
 	afx_msg void OnEnableUnderload();
+	afx_msg void OnSetRecalcAllocations();
+	afx_msg void OnSetAutoCalcAllocations();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-public:
-	virtual void OnOK();
+
+protected:
+	void EnableDisableControls();
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -87,6 +94,8 @@ public:
 
 	BOOL GetAutoCalculateMissingAllocations() const { return m_page.GetAutoCalculateMissingAllocations(); }
 	BOOL GetPreferTimeEstimateForCalcs() const { return m_page.GetPreferTimeEstimateForCalcs(); }
+	BOOL GetRecalculateAllocations() const { return m_page.GetRecalculateAllocations(); }
+	BOOL GetRecalculateAllocationsProportionally() const { return m_page.GetRecalculateAllocationsProportionally(); }
 
 protected:
 // Dialog Data

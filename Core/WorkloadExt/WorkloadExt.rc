@@ -154,7 +154,7 @@ BEGIN
     CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185
 END
 
-IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 197
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 238
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -164,25 +164,33 @@ BEGIN
                     LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Allocations",IDC_ALLOCATIONGROUP,7,70,333,8
-    CONTROL         "Use 'Time Estimate' in preference to 'Duration' when calculating allocations",
-                    IDC_USETIMESTIMATEFORDURATION,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,19,100,321,10
     CONTROL         "Auto-calculate missing allocations",
                     IDC_AUTOCALCALLOCATIONS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,85,333,10
+    CONTROL         "Use 'Time Estimate' in preference to 'Duration' when calculating allocations",
+                    IDC_USETIMESTIMATEFORDURATION,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,18,100,321,10
+    CONTROL         "Recalculate allocations when the 'Time Estimate' or 'Duration' changes",
+                    IDC_RECALCALLOCATIONS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,18,115,321,10
+    CONTROL         "Adjust allocations equally",IDC_RECALCEQUALLY,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,29,130,311,10
+    CONTROL         "Adjust allocations in proportion to their existing values",
+                    IDC_RECALCPROPORTIONALLY,"Button",BS_AUTORADIOBUTTON,29,
+                    143,311,10
     CONTROL         "&Enable 'Overload' display",IDC_ENABLEOVERLOAD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,115,207,10
-    COMBOBOX        IDC_OVERLOADFROMPERCENT,18,129,31,143,CBS_DROPDOWNLIST | 
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,160,333,10
+    COMBOBOX        IDC_OVERLOADFROMPERCENT,18,174,31,143,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "% - 100%",IDC_STATIC,51,129,34,12,SS_CENTERIMAGE
-    PUSHBUTTON      "Set...",IDC_SETOVERLOADCOLOR,95,129,47,14,BS_RIGHT
+    LTEXT           "% - 100%",IDC_STATIC,51,174,34,12,SS_CENTERIMAGE
+    PUSHBUTTON      "Set...",IDC_SETOVERLOADCOLOR,95,174,47,14,BS_RIGHT
     CONTROL         "&Enable 'Underload' display",IDC_ENABLEUNDERLOAD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,150,208,10
-    LTEXT           "0% - ",IDC_STATIC,19,165,19,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_UNDERLOADTOPERCENT,37,165,31,143,CBS_DROPDOWNLIST | 
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,195,333,10
+    LTEXT           "0% - ",IDC_STATIC,19,210,19,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_UNDERLOADTOPERCENT,37,210,31,143,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "%",IDC_STATIC,71,165,8,12,SS_CENTERIMAGE
-    PUSHBUTTON      "Set...",IDC_SETUNDERLOADCOLOR,95,164,47,14,BS_RIGHT
+    LTEXT           "%",IDC_STATIC,71,210,8,12,SS_CENTERIMAGE
+    PUSHBUTTON      "Set...",IDC_SETUNDERLOADCOLOR,95,210,47,14,BS_RIGHT
 END
 
 IDD_EDITALLOCATIONS_DIALOG DIALOG DISCARDABLE  0, 0, 270, 163
@@ -222,7 +230,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 340
         TOPMARGIN, 7
-        BOTTOMMARGIN, 190
+        BOTTOMMARGIN, 231
     END
 
     IDD_EDITALLOCATIONS_DIALOG, DIALOG

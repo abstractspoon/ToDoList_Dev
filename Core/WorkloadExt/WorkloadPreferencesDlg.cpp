@@ -29,10 +29,6 @@ CWorkloadPreferencesPage::CWorkloadPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	: CPreferencesPageBase(IDD_PREFERENCES_PAGE)
 {
 	//{{AFX_DATA_INIT(CWorkloadPreferencesPage)
-	m_bPreferTimeEstimateInCalcs = FALSE;
-	m_bAutoCalcAllocations = FALSE;
-	m_bEnableOverload = FALSE;
-	m_bEnableUnderload = FALSE;
 	//}}AFX_DATA_INIT
 	m_aColumnVis.SetSize(NUM_TREECOLUMNS + 1);
 }
@@ -46,6 +42,8 @@ void CWorkloadPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_AUTOCALCALLOCATIONS, m_bAutoCalcAllocations);
 	DDX_Check(pDX, IDC_ENABLEOVERLOAD, m_bEnableOverload);
 	DDX_Check(pDX, IDC_ENABLEUNDERLOAD, m_bEnableUnderload);
+	DDX_Check(pDX, IDC_RECALCALLOCATIONS, m_bRecalcAllocations);
+	DDX_Radio(pDX, IDC_RECALCEQUALLY, m_bRecalcProportionally);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_COLUMNVISIBILITY, m_lbColumnVisibility);
 	DDX_Control(pDX, IDC_SETOVERLOADCOLOR, m_btnOverloadColor);
@@ -63,6 +61,8 @@ BEGIN_MESSAGE_MAP(CWorkloadPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CWorkloadPreferencesPage)
 	ON_BN_CLICKED(IDC_ENABLEOVERLOAD, OnEnableOverload)
 	ON_BN_CLICKED(IDC_ENABLEUNDERLOAD, OnEnableUnderload)
+	ON_BN_CLICKED(IDC_RECALCALLOCATIONS, OnSetRecalcAllocations)
+	ON_BN_CLICKED(IDC_AUTOCALCALLOCATIONS, OnSetAutoCalcAllocations)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -82,9 +82,34 @@ BOOL CWorkloadPreferencesPage::OnInitDialog()
 	}
 
 	AddGroupLine(IDC_ALLOCATIONGROUP);
+	EnableDisableControls();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CWorkloadPreferencesPage::OnEnableOverload() 
+{
+	UpdateData();
+	EnableDisableControls();
+}
+
+void CWorkloadPreferencesPage::OnEnableUnderload() 
+{
+	UpdateData();
+	EnableDisableControls();
+}
+
+void CWorkloadPreferencesPage::OnSetRecalcAllocations() 
+{
+	UpdateData();
+	EnableDisableControls();
+}
+
+void CWorkloadPreferencesPage::OnSetAutoCalcAllocations() 
+{
+	UpdateData();
+	EnableDisableControls();
 }
 
 void CWorkloadPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
@@ -100,8 +125,10 @@ void CWorkloadPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 		pPrefs->WriteProfileInt(sColVis, sCol, m_aColumnVis[nColID]);
 	}
 
-	pPrefs->WriteProfileInt(szKey, _T("PreferTimeEstimateInCalcs"), m_bPreferTimeEstimateInCalcs);
 	pPrefs->WriteProfileInt(szKey, _T("AutoCalcAllocations"), m_bAutoCalcAllocations);
+	pPrefs->WriteProfileInt(szKey, _T("PreferTimeEstimateInCalcs"), m_bPreferTimeEstimateInCalcs);
+	pPrefs->WriteProfileInt(szKey, _T("RecalcAllocations"), m_bRecalcAllocations);
+	pPrefs->WriteProfileInt(szKey, _T("RecalcProportionally"), m_bRecalcProportionally);
 	pPrefs->WriteProfileInt(szKey, _T("EnableOverload"), m_bEnableOverload);
 	pPrefs->WriteProfileInt(szKey, _T("EnableUnderload"), m_bEnableUnderload);
 	pPrefs->WriteProfileInt(szKey, _T("OverloadPercentFrom"), m_nOverloadFromPercent);
@@ -123,8 +150,10 @@ void CWorkloadPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 		m_aColumnVis[nColID] = pPrefs->GetProfileInt(sColVis, sCol, WORKLOADTREECOLUMNS[nCol].bDefaultVis);
 	}
 
-	m_bPreferTimeEstimateInCalcs = pPrefs->GetProfileInt(szKey, _T("PreferTimeEstimateInCalcs"), TRUE);
 	m_bAutoCalcAllocations = pPrefs->GetProfileInt(szKey, _T("AutoCalcAllocations"), TRUE);
+	m_bPreferTimeEstimateInCalcs = pPrefs->GetProfileInt(szKey, _T("PreferTimeEstimateInCalcs"), TRUE);
+	m_bRecalcAllocations = pPrefs->GetProfileInt(szKey, _T("RecalcAllocations"), TRUE);
+	m_bRecalcProportionally = pPrefs->GetProfileInt(szKey, _T("RecalcProportionally"), TRUE);
 	m_bEnableOverload = pPrefs->GetProfileInt(szKey, _T("EnableOverload"), TRUE);
 	m_bEnableUnderload = pPrefs->GetProfileInt(szKey, _T("EnableUnderload"), TRUE);
 	m_nOverloadFromPercent = pPrefs->GetProfileInt(szKey, _T("OverloadPercentFrom"), 80);
@@ -172,6 +201,20 @@ BOOL CWorkloadPreferencesPage::GetUnderload(int& nToPercent, COLORREF& color) co
 	return TRUE;
 }
 
+void CWorkloadPreferencesPage::EnableDisableControls()
+{
+	GetDlgItem(IDC_USETIMESTIMATEFORDURATION)->EnableWindow(m_bAutoCalcAllocations);
+	GetDlgItem(IDC_RECALCALLOCATIONS)->EnableWindow(m_bAutoCalcAllocations);
+	GetDlgItem(IDC_RECALCEQUALLY)->EnableWindow(m_bAutoCalcAllocations & m_bRecalcAllocations);
+	GetDlgItem(IDC_RECALCPROPORTIONALLY)->EnableWindow(m_bAutoCalcAllocations & m_bRecalcAllocations);
+
+	GetDlgItem(IDC_SETOVERLOADCOLOR)->EnableWindow(m_bEnableOverload);
+	GetDlgItem(IDC_OVERLOADFROMPERCENT)->EnableWindow(m_bEnableOverload);
+	
+	GetDlgItem(IDC_SETUNDERLOADCOLOR)->EnableWindow(m_bEnableUnderload);
+	GetDlgItem(IDC_UNDERLOADTOPERCENT)->EnableWindow(m_bEnableUnderload);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CWorkloadPreferencesDlg dialog
 
@@ -208,15 +251,3 @@ void CWorkloadPreferencesDlg::DoHelp()
 		m_pParentWnd->SendMessage(WM_WLC_PREFSHELP);
 }
 
-
-void CWorkloadPreferencesPage::OnEnableOverload() 
-{
-	
-	
-}
-
-void CWorkloadPreferencesPage::OnEnableUnderload() 
-{
-	// TODO: Add your control notification handler code here
-	
-}
