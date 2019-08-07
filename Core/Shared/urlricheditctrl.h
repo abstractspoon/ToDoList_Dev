@@ -135,7 +135,9 @@ protected:
 	void Initialise();
 	BOOL FindStartOfUrl(LPCTSTR szText, int nTextLen, LPCTSTR& szPos) const;
 	BOOL WantFollowLink(BOOL bCtrl, BOOL bShift) const;
-	
+	BOOL SelectionContainsMessagePos() const;
+	BOOL SelectionContainsPos(const CPoint& ptClient) const;
+
 	static BOOL FindEndOfUrl(LPCTSTR& szPos, int& nUrlLen, BOOL bBraced, BOOL bFile);
 	static BOOL IsBaseDelim(LPCTSTR szText);
 	static void InsertInOrder(URLITEM& urli, CUrlArray& aUrls);

@@ -1027,18 +1027,12 @@ void CUrlRichEditCtrl::OnSysKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CUrlRichEditCtrl::OnRButtonDown(UINT nFlags, CPoint point) 
 {
-	// move the caret to the pos clicked
-	int nChar = CharFromPoint(point);
-	
-	if (nChar >= 0)
+	// move the caret to the pos clicked unless
+	// the character falls within the current selection
+	if (!SelectionContainsPos(point))
 	{
-		// don't reset the selection if the character
-		// falls within the current selection
-		CHARRANGE crSel;
-		GetSel(crSel);
-		
-		if (!ContainsPos(crSel, nChar))
-			SetSel(nChar, nChar);
+		int nPos = CharFromPoint(point);
+		SetSel(nPos, nPos);
 	}
 
 	// OnNotifyLink will handle setting this
@@ -1114,6 +1108,30 @@ BOOL CUrlRichEditCtrl::WantFollowLink(BOOL bCtrl, BOOL bShift) const
 	return FALSE;
 }
 
+BOOL CUrlRichEditCtrl::SelectionContainsMessagePos() const
+{
+	CPoint ptCursor(GetMessagePos());
+	ScreenToClient(&ptCursor);
+
+	return SelectionContainsPos(ptCursor);
+}
+
+BOOL CUrlRichEditCtrl::SelectionContainsPos(const CPoint& ptClient) const
+{
+	CHARRANGE crSel;
+	GetSel(crSel);
+
+	if (crSel.cpMin == crSel.cpMax)
+		return FALSE;
+
+	int nChar = CharFromPoint(ptClient);
+
+	if (nChar == -1)
+		return FALSE;
+
+	return ContainsPos(crSel, nChar);
+}
+
 BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
@@ -1130,18 +1148,14 @@ BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 		{
 			// because we're overriding the default behaviour we need to
 			// handle the cursor being over a selected block
-			CHARRANGE crSel;
-			GetSel(crSel);
+			LPCTSTR nCursor = IDC_IBEAM;
 
-			CPoint ptCursor(GetMessagePos());
-			ScreenToClient(&ptCursor);
-
-			int nChar = CharFromPoint(ptCursor);
-			LPCTSTR nCursor = (ContainsPos(crSel, nChar) ? IDC_ARROW : IDC_IBEAM);
+			if (SelectionContainsMessagePos())
+				nCursor = IDC_ARROW;
 
 			SetCursor(AfxGetApp()->LoadStandardCursor(nCursor));
-
 			*pResult = TRUE;
+
 			return TRUE;
 		}
 		break;
@@ -1154,7 +1168,7 @@ BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 	case WM_LBUTTONDOWN:
 		m_sContextUrl = GetTextRange(pENL->chrg);
 
-		if (!WantFollowLink(bCtrl, bShift))
+		if (!WantFollowLink(bCtrl, bShift) && !SelectionContainsMessagePos())
 		{
 			SetFocus();
 			
@@ -1168,7 +1182,7 @@ BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 		break;
 
 	case WM_LBUTTONUP:
-		if (!WantFollowLink(bCtrl, bShift))
+		if (WantFollowLink(bCtrl, bShift))
 		{
 			CString sUrl = GetTextRange(pENL->chrg);
 
