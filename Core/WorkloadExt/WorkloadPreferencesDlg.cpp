@@ -62,7 +62,6 @@ BEGIN_MESSAGE_MAP(CWorkloadPreferencesPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_ENABLEOVERLOAD, OnEnableOverload)
 	ON_BN_CLICKED(IDC_ENABLEUNDERLOAD, OnEnableUnderload)
 	ON_BN_CLICKED(IDC_RECALCALLOCATIONS, OnSetRecalcAllocations)
-	ON_BN_CLICKED(IDC_AUTOCALCALLOCATIONS, OnSetAutoCalcAllocations)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -103,12 +102,13 @@ void CWorkloadPreferencesPage::OnEnableUnderload()
 void CWorkloadPreferencesPage::OnSetRecalcAllocations() 
 {
 	UpdateData();
-	EnableDisableControls();
-}
 
-void CWorkloadPreferencesPage::OnSetAutoCalcAllocations() 
-{
-	UpdateData();
+	if (m_bRecalcAllocations)
+	{
+		m_bAutoCalcAllocations = TRUE;
+		UpdateData(FALSE);
+	}
+
 	EnableDisableControls();
 }
 
@@ -203,10 +203,9 @@ BOOL CWorkloadPreferencesPage::GetUnderload(int& nToPercent, COLORREF& color) co
 
 void CWorkloadPreferencesPage::EnableDisableControls()
 {
-	GetDlgItem(IDC_USETIMESTIMATEFORDURATION)->EnableWindow(m_bAutoCalcAllocations);
-	GetDlgItem(IDC_RECALCALLOCATIONS)->EnableWindow(m_bAutoCalcAllocations);
-	GetDlgItem(IDC_RECALCEQUALLY)->EnableWindow(m_bAutoCalcAllocations & m_bRecalcAllocations);
-	GetDlgItem(IDC_RECALCPROPORTIONALLY)->EnableWindow(m_bAutoCalcAllocations & m_bRecalcAllocations);
+	GetDlgItem(IDC_AUTOCALCALLOCATIONS)->EnableWindow(!m_bRecalcAllocations);
+	GetDlgItem(IDC_RECALCEQUALLY)->EnableWindow(m_bRecalcAllocations);
+	GetDlgItem(IDC_RECALCPROPORTIONALLY)->EnableWindow(m_bRecalcAllocations);
 
 	GetDlgItem(IDC_SETOVERLOADCOLOR)->EnableWindow(m_bEnableOverload);
 	GetDlgItem(IDC_OVERLOADFROMPERCENT)->EnableWindow(m_bEnableOverload);

@@ -27,8 +27,8 @@ public:
 	BOOL GetOverload(int& nFromPercent, COLORREF& color) const;
 	BOOL GetUnderload(int& nToPercent, COLORREF& color) const;
 
-	BOOL GetAutoCalculateMissingAllocations() const { return m_bAutoCalcAllocations; }
 	BOOL GetPreferTimeEstimateForCalcs() const { return m_bPreferTimeEstimateInCalcs; }
+	BOOL GetAutoCalculateMissingAllocations() const { return m_bAutoCalcAllocations || m_bRecalcAllocations; }
 	BOOL GetRecalculateAllocations() const { return m_bRecalcAllocations; }
 	BOOL GetRecalculateAllocationsProportionally() const { return m_bRecalcProportionally; }
 	
@@ -70,7 +70,6 @@ protected:
 	afx_msg void OnEnableOverload();
 	afx_msg void OnEnableUnderload();
 	afx_msg void OnSetRecalcAllocations();
-	afx_msg void OnSetAutoCalcAllocations();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
