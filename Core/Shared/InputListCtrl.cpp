@@ -600,8 +600,8 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			// fill cell
 			if (bSel && IsSelectionThemed(FALSE))
 			{
-				if ((nCol > 0) && IsSelectionThemed(TRUE))
-					rBack.left++;
+// 				if ((nCol > 0) && IsSelectionThemed(TRUE))
+// 					rBack.left++;
 
 				DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
 				GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
