@@ -185,7 +185,8 @@ protected:
 	void PopulateTotalsLists();
 	void RemoveTotalsScrollbars();
 	void UpdateTotalsDateRangeLabel();
-	void RefreshMissingAllocations();
+	void RefreshCalculatedAllocations();
+	void UpdateAllocationCalculations(WORKLOADITEM& wi) const;
 	HIMAGELIST GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const;
 
  	COLORREF GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter = FALSE) const;

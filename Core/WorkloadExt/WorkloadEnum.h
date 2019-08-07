@@ -33,6 +33,8 @@ enum // options
 	WLCF_DISPLAYISODATES			= 0x0020,
 	WLCF_CALCMISSINGALLOCATIONS		= 0x0040,
 	WLCF_PREFERTIMEESTFORCALCS		= 0x0080,
+	WLCF_RECALCALLOCATIONS			= 0x0100,
+	WLCF_RECALCPROPORTIONALLY		= 0x0200,
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -84,7 +84,7 @@ public:
 	void ClearOverlaps();
 	
 	BOOL IsAutoCalculated() const { return (bAutoCalculated || !GetCount()); }
-	void AutoCalculate(const CStringArray& aAllocTo, double dTotal);
+	void Recalculate(const CStringArray& aAllocTo, double dTotal, BOOL bProportionally);
 
 	BOOL Decode(const CString& sAllocations);
 	CString Encode() const;
@@ -160,7 +160,7 @@ public:
 	BOOL HasValidDates() const { return dtRange.IsValid(); }
 	BOOL IsDone() const { return (bDone || bGoodAsDone); }
 
-	void AutoCalculateAllocations(BOOL bPreferTimeEstimate);
+	void UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL bPreferTimeEstimate, BOOL bProportionally);
 	void ClearAllocations() { mapAllocatedDays.RemoveAll(); }
 
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;

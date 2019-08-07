@@ -41,6 +41,7 @@ BOOL CMapDayAllocations::MatchAll(const CMapDayAllocations& other) const
 void CMapDayAllocations::RemoveAll()
 {
 	CMap<CString, LPCTSTR, WORKLOADALLOCATION, WORKLOADALLOCATION&>::RemoveAll();
+	bAutoCalculated = FALSE;
 }
 
 BOOL CMapDayAllocations::Get(const CString& sAllocTo, WORKLOADALLOCATION& wa) const
@@ -189,33 +190,63 @@ void CMapDayAllocations::ClearOverlaps()
 	}
 }
 
-void CMapDayAllocations::AutoCalculate(const CStringArray& aAllocTo, double dTotal)
+void CMapDayAllocations::Recalculate(const CStringArray& aAllocTo, double dTotal, BOOL bProportionally)
 {
-	ASSERT((GetCount() == 0) || bAutoCalculated);
-
 	int nAllocTo = aAllocTo.GetSize();
 
-	if (nAllocTo && dTotal)
+	if (!nAllocTo || (dTotal <= 0.0))
 	{
-		double dAllocation = Misc::Round((dTotal / nAllocTo), 2);
+		RemoveAll();
+		return;
+	}
 
-		WORKLOADALLOCATION wa;
-		wa.dDays = dAllocation;
+	double dPrevTotal = GetTotalDays();
+
+	if (dTotal == dPrevTotal)
+		return;
+
+	BOOL bAutoCalced = IsAutoCalculated();
+
+	if (!bAutoCalced && bProportionally && (dPrevTotal > 0.0))
+	{
+		double dLeftover = dTotal;
 
 		while (nAllocTo--)
 		{
 			if (nAllocTo == 0)
-				wa.dDays = dTotal; // leftover
+			{
+				SetDays(aAllocTo[nAllocTo], dLeftover);
+			}
+			else
+			{
+				double dWeighting = (GetDays(aAllocTo[nAllocTo]) / dPrevTotal);
+				double dAllocation = Misc::Round((dTotal * dWeighting), 2);
 
-			// Don't use 'SetDays' because it will clear 'bAutoCalculated'
-			SetAt(Misc::ToUpper(aAllocTo[nAllocTo]), wa);
+				SetDays(aAllocTo[nAllocTo], dAllocation);
+				dLeftover -= dAllocation;
+			}
+		}
+	}
+	else // equal split
+	{
+		double dAllocation = Misc::Round((dTotal / nAllocTo), 2), dLeftover = dTotal;
 
-			// Handle rounding
-			dTotal -= dAllocation;
+		while (nAllocTo--)
+		{
+			if (nAllocTo == 0)
+			{
+				SetDays(aAllocTo[nAllocTo], dLeftover);
+			}
+			else
+			{
+				SetDays(aAllocTo[nAllocTo], dAllocation);
+				dLeftover -= dAllocation;
+			}
 		}
 	}
 
-	bAutoCalculated = TRUE;
+	// Restore
+	bAutoCalculated = bAutoCalced;
 }
 
 int CMapDayAllocations::Decode(const CString& sAllocations)
@@ -521,20 +552,20 @@ BOOL WORKLOADITEM::HasColor() const
 	return ((color != CLR_NONE) && (color != GetSysColor(COLOR_WINDOWTEXT)));
 }
 
-void WORKLOADITEM::AutoCalculateAllocations(BOOL bPreferTimeEstimate)
+void WORKLOADITEM::UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL bPreferTimeEstimate, BOOL bProportionally)
 {
 	if (bParent)
 	{
 		ClearAllocations();
 	}
-	else
+	else if (!bAutoCalculatedOnly || mapAllocatedDays.IsAutoCalculated())
 	{
 		double dDuration = (bPreferTimeEstimate ? dTimeEst : dtRange.GetWeekdayCount());
 
 		if (dDuration == 0.0)
 			dDuration = (bPreferTimeEstimate ? dtRange.GetWeekdayCount() : dTimeEst);
 
-		mapAllocatedDays.AutoCalculate(aAllocTo, dDuration);
+		mapAllocatedDays.Recalculate(aAllocTo, dDuration, bProportionally);
 	}
 }
 

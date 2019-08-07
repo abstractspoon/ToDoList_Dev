@@ -774,14 +774,24 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 		}
 	}
 
-	if (bAllocationChange &&
-		HasOption(WLCF_CALCMISSINGALLOCATIONS) &&
-		pWI->mapAllocatedDays.IsAutoCalculated())
-	{
-		pWI->AutoCalculateAllocations(HasOption(WLCF_PREFERTIMEESTFORCALCS));
-	}
+	if (bAllocationChange)
+		UpdateAllocationCalculations(*pWI);
 	
 	return bChange;
+}
+
+void CWorkloadCtrl::UpdateAllocationCalculations(WORKLOADITEM& wi) const
+{
+	if (!HasOption(WLCF_CALCMISSINGALLOCATIONS) && 
+		!HasOption(WLCF_RECALCALLOCATIONS) &&
+		wi.mapAllocatedDays.IsAutoCalculated())
+	{
+		wi.ClearAllocations();
+	}
+	
+	wi.UpdateAllocationCalculations(!HasOption(WLCF_RECALCALLOCATIONS),
+									  HasOption(WLCF_PREFERTIMEESTFORCALCS),
+									  HasOption(WLCF_RECALCPROPORTIONALLY));
 }
 
 void CWorkloadCtrl::BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
@@ -1000,8 +1010,8 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		pWI->dTimeEst = GetTaskTimeEstimate(pTasks, hTask);
 
 		// This wants to be last so that time estimate and date range are up to date
-		if (!pWI->mapAllocatedDays.Decode(pTasks->GetTaskMetaData(hTask, WORKLOAD_TYPEID)))
-			pWI->AutoCalculateAllocations(HasOption(WLCF_PREFERTIMEESTFORCALCS));
+		pWI->mapAllocatedDays.Decode(pTasks->GetTaskMetaData(hTask, WORKLOAD_TYPEID));
+		UpdateAllocationCalculations(*pWI);
 	}
 	
 	// add item to tree
@@ -1104,15 +1114,11 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				m_tree.EnableCheckboxes(bSet);
 				break;
 
-			case WLCF_CALCMISSINGALLOCATIONS:
-				RefreshMissingAllocations();
-				break;
-
 			case WLCF_PREFERTIMEESTFORCALCS:
-				if (HasOption(WLCF_CALCMISSINGALLOCATIONS))
-					RefreshMissingAllocations();
-				else
-					m_tree.Invalidate();
+			case WLCF_CALCMISSINGALLOCATIONS:
+			case WLCF_RECALCALLOCATIONS:
+			case WLCF_RECALCPROPORTIONALLY:
+				RefreshCalculatedAllocations();
 				break;
 			}
 
@@ -1122,24 +1128,14 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 	}
 }
 
-void CWorkloadCtrl::RefreshMissingAllocations()
+void CWorkloadCtrl::RefreshCalculatedAllocations()
 {
-	BOOL bAutoCalc = HasOption(WLCF_CALCMISSINGALLOCATIONS);
-	BOOL bPreferTimeEst = HasOption(WLCF_PREFERTIMEESTFORCALCS);
-
 	POSITION pos = m_data.GetStartPosition();
 
 	while (pos)
 	{
 		WORKLOADITEM* pWI = m_data.GetNextItem(pos);
-
-		if (pWI && pWI->mapAllocatedDays.IsAutoCalculated())
-		{
-			if (bAutoCalc)
-				pWI->AutoCalculateAllocations(bPreferTimeEst);
-			else
-				pWI->ClearAllocations();
-		}
+		UpdateAllocationCalculations(*pWI);
 	}
 }
 
@@ -2120,7 +2116,7 @@ CString CWorkloadCtrl::FormatTimeSpan(double dDays, int nDecimals)
 
 	CString sValue = Misc::Format(dDays, nDecimals);
 
-	if (nDecimals > 0)
+	if ((nDecimals > 0) && (sValue.Find('.') != -1))
 		sValue.TrimRight(_T(".0"));
 
 	return CEnString(IDS_TIMESPAN_FORMAT, sValue);
