@@ -2894,7 +2894,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	// title edit notification unless they are the active view
 	DWORD dwModTaskID = (aModTaskIDs.GetSize() ? aModTaskIDs[0] : 0);
 
-	BOOL bNewSingleTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && 
+	BOOL bNewSingleTask = (mapAttribIDs.Has(TDCA_NEWTASK) && 
 							(aModTaskIDs.GetSize() == 1));
 
 	BOOL bNewTaskTitleEdit = (mapAttribIDs.HasOnly(TDCA_TASKNAME) &&
@@ -3209,20 +3209,16 @@ void CTabbedToDoCtrl::UpdateExtensionViewsProjectName()
 void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttribIDs)
 {
 	// Sanity check
-	if (!mapAttribIDs.Has(TDCA_DELETE) &&
-		!mapAttribIDs.Has(TDCA_UNDO) &&
-		!mapAttribIDs.Has(TDCA_PASTE) &&
-		!mapAttribIDs.Has(TDCA_MERGE) &&
-		!mapAttribIDs.Has(TDCA_ARCHIVE) &&
-		!mapAttribIDs.Has(TDCA_PROJECTNAME) &&
-		!mapAttribIDs.Has(TDCA_ENCRYPT) &&
-		!mapAttribIDs.Has(TDCA_POSITION) &&
-		!mapAttribIDs.Has(TDCA_POSITION_SAMEPARENT) &&
-		!mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT))
-	{
-		ASSERT(0);
-		return;
-	}
+	ASSERT(mapAttribIDs.HasOnly(TDCA_DELETE) ||
+			mapAttribIDs.HasOnly(TDCA_UNDO) ||
+			mapAttribIDs.HasOnly(TDCA_PASTE) ||
+			mapAttribIDs.HasOnly(TDCA_MERGE) ||
+			mapAttribIDs.HasOnly(TDCA_ARCHIVE) ||
+			mapAttribIDs.HasOnly(TDCA_PROJECTNAME) ||
+			mapAttribIDs.HasOnly(TDCA_ENCRYPT) ||
+			mapAttribIDs.HasOnly(TDCA_POSITION) ||
+			mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
+			mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
 
 	FTC_VIEW nView = GetTaskView();
 

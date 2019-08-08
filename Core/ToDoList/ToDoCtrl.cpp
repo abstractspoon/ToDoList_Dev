@@ -9704,52 +9704,55 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 
 		if (!bMatch) //  no children matched -> 'Check ourselves'
 		{
-			BOOL bDone = pTDI->IsDone();
-			BOOL bGoodAsDone = (bDone ? TRUE : m_calculator.IsTaskDone(dwTaskID));
-			
-			switch (filter.nFilter)
+			if (filter.nFilter == TDCGT_ALL)
 			{
-			case TDCGT_ALL:
 				bMatch = TRUE; // always
-				break;
-				
-			case TDCGT_DUE:
-			case TDCGT_DUETOMORROW:
-			case TDCGT_DUETHISWEEK:
-			case TDCGT_DUENEXTWEEK:
-			case TDCGT_DUETHISMONTH:
-			case TDCGT_DUENEXTMONTH:
-				// remember to check for 'Auto-Due-Today' tasks
-				if (!bGoodAsDone)
+			}
+			else
+			{
+				BOOL bDone = pTDI->IsDone();
+				BOOL bGoodAsDone = (bDone ? TRUE : m_calculator.IsTaskDone(dwTaskID));
+			
+				switch (filter.nFilter)
 				{
-					if (pTDI->HasDue())
+				case TDCGT_DUE:
+				case TDCGT_DUETOMORROW:
+				case TDCGT_DUETHISWEEK:
+				case TDCGT_DUENEXTWEEK:
+				case TDCGT_DUETHISMONTH:
+				case TDCGT_DUENEXTMONTH:
+					// remember to check for 'Auto-Due-Today' tasks
+					if (!bGoodAsDone)
 					{
-						bMatch = pTDI->IsDue(filter.dateDueBy);
-					}
-					else if (HasStyle(TDCS_NODUEDATEISDUETODAYORSTART))
-					{
-						COleDateTime dtDue(CDateHelper::GetDate(DHD_TODAY));
+						if (pTDI->HasDue())
+						{
+							bMatch = pTDI->IsDue(filter.dateDueBy);
+						}
+						else if (HasStyle(TDCS_NODUEDATEISDUETODAYORSTART))
+						{
+							COleDateTime dtDue(CDateHelper::GetDate(DHD_TODAY));
 
-						if (CDateHelper::Max(dtDue, pTDI->dateStart))
-							bMatch = (dtDue <= filter.dateDueBy);
+							if (CDateHelper::Max(dtDue, pTDI->dateStart))
+								bMatch = (dtDue <= filter.dateDueBy);
+						}
 					}
+					break;
+
+				case TDCGT_DONE:
+					bMatch |= (bGoodAsDone || bDone);
+					break;
+
+				case TDCGT_NOTDONE:
+					bMatch |= !bGoodAsDone; // 'good as' includes 'done'
+
+					// check 'flagged' flag
+					if (!bMatch && filter.HasFlag(TDCGTF_KEEPFLAGGED) && pTDI->bFlagged)
+						bMatch = TRUE;
+					break;
+
+				default:
+					bMatch = FALSE;
 				}
-				break;
-				
-			case TDCGT_DONE:
-				bMatch |= (bGoodAsDone || bDone);
-				break;
-				
-			case TDCGT_NOTDONE:
-				bMatch |= !bGoodAsDone; // 'good as' includes 'done'
-
-				// check 'flagged' flag
-				if (!bMatch && filter.HasFlag(TDCGTF_KEEPFLAGGED) && pTDI->bFlagged) 
-					bMatch = TRUE;
-				break;
-				
-			default:
-				bMatch = FALSE;
 			}
 
 			// then check 'allocated to' if set
