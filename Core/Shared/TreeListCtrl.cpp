@@ -1943,10 +1943,10 @@ BOOL CTreeListCtrl::CanMoveItem(const TLCITEMMOVE& move) const
 	if ((move.htiSel != NULL) && !GetItemData(move.htiSel))
 		return FALSE;
 
-	if ((move.htiDestParent != NULL) && !GetItemData(move.htiDestParent))
+	if ((move.htiDestParent != NULL) && (move.htiDestParent != TVI_ROOT) && !GetItemData(move.htiDestParent))
 		return FALSE;
 
-	if ((move.htiDestAfterSibling != NULL) && !GetItemData(move.htiDestAfterSibling))
+	if ((move.htiDestAfterSibling != NULL) && (move.htiDestAfterSibling != TVI_FIRST) && !GetItemData(move.htiDestAfterSibling))
 		return FALSE;
 
 	return TRUE;
