@@ -4138,173 +4138,184 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	return FALSE;
 }
 
-void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
+void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs/*, BOOL bAllowResort*/)
 {
-	if (AttribMatchesSort(nAttrib))
+	if (AttribsMatchSort(mapAttribIDs))
 		m_sort.bModSinceLastSort = TRUE;
 
 	// Recalc or redraw columns as required
-	BOOL bRedrawCols = FALSE, bRedrawTasks = ModCausesTaskTextColorChange(nAttrib);
+	BOOL bRedrawCols = FALSE, bRedrawTasks = ModsCauseTaskTextColorChange(mapAttribIDs);
 	
-	TDC_COLUMN nColID = TDC::MapAttributeToColumn(nAttrib);
 	CTDCColumnIDMap aColIDs;
-	
-	switch (nAttrib)
+	POSITION pos = mapAttribIDs.GetStartPosition();
+
+	while (pos)
 	{
-	case TDCA_CREATIONDATE:
-		// this can only be modified for new tasks via the commandline
-		// so nothing needs to be done
-		break;
-		
-	case TDCA_DONEDATE:
-		AccumulateRecalcColumn(TDCC_DONEDATE, aColIDs);
-		AccumulateRecalcColumn(TDCC_DUEDATE, aColIDs);
-		AccumulateRecalcColumn(TDCC_DONE, aColIDs);
-		
-		if (HasStyle(TDCS_USEPERCENTDONEINTIMEEST))
-			AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
-		
-		if (!m_sCompletionStatus.IsEmpty())
-			AccumulateRecalcColumn(TDCC_STATUS, aColIDs);
-		break;
-		
-	case TDCA_DUEDATE:
-		if (!AccumulateRecalcColumn(TDCC_DUEDATE, aColIDs))
-			bRedrawCols = IsColumnShowing(TDCC_PRIORITY);
-		break;
-		
-	case TDCA_PRIORITY:
-		if (!bRedrawTasks)
+		TDC_ATTRIBUTE nAttribID = mapAttribIDs.GetNext(pos);
+		TDC_COLUMN nColID = TDC::MapAttributeToColumn(nAttribID);
+
+		switch (nAttribID)
 		{
-			bRedrawCols = IsColumnShowing(TDCC_PRIORITY);
-			
-			if (!bRedrawCols && HasStyle(TDCS_SHOWPERCENTASPROGRESSBAR))
-				bRedrawCols = IsColumnShowing(TDCC_PERCENT);
-		}
-		break;
-		
-	case TDCA_ALLOCTO:
-	case TDCA_ALLOCBY:
-	case TDCA_STATUS:
-	case TDCA_VERSION:
-	case TDCA_CATEGORY:
-	case TDCA_TAGS:
-	case TDCA_COST:
-	case TDCA_STARTDATE:
-	case TDCA_EXTERNALID:
-	case TDCA_RECURRENCE:
-	case TDCA_FILEREF:
-		AccumulateRecalcColumn(nColID, aColIDs);
-		break;
-		
-	case TDCA_TIMEEST:
-		bRedrawCols |= !AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
-		
-		if (HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
-			bRedrawCols |= !AccumulateRecalcColumn(TDCC_REMAINING, aColIDs);
+		case TDCA_CREATIONDATE:
+			// this can only be modified for new tasks via the commandline
+			// so nothing needs to be done
+			break;
 
-		if (bRedrawCols)
-			bRedrawCols = HasStyle(TDCS_AUTOCALCPERCENTDONE);
-		break;
-		
-	case TDCA_TIMESPENT:
-		bRedrawCols |= !AccumulateRecalcColumn(TDCC_TIMESPENT, aColIDs);
+		case TDCA_DONEDATE:
+			AccumulateRecalcColumn(TDCC_DONEDATE, aColIDs);
+			AccumulateRecalcColumn(TDCC_DUEDATE, aColIDs);
+			AccumulateRecalcColumn(TDCC_DONE, aColIDs);
 
-		if (HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
-			bRedrawCols |= !AccumulateRecalcColumn(TDCC_REMAINING, aColIDs);
-		
-		if (bRedrawCols)
-			bRedrawCols = HasStyle(TDCS_AUTOCALCPERCENTDONE);
-		break;
-		
-	case TDCA_DEPENDENCY:
-	case TDCA_RISK:
-	case TDCA_FLAG:
-	case TDCA_LOCK:
-	case TDCA_PERCENT:
-		if (!bRedrawTasks)
-			bRedrawCols = IsColumnShowing(nColID);
-		break;
-		
-	case TDCA_ICON:
-		if (IsColumnShowing(TDCC_ICON))
-			bRedrawCols = TRUE;
-		else
-			bRedrawTasks = TRUE;
-		break;
-		
-	case TDCA_TASKNAME:
-		bRedrawCols = IsColumnShowing(TDCC_PATH);
-		break;
-		
-	case TDCA_PROJECTNAME:
-	case TDCA_COMMENTS:
-	case TDCA_ENCRYPT:
-	case TDCA_METADATA:
-		break;
-		
-	case TDCA_COLOR:
-		bRedrawTasks = TRUE;
-		break;
+			if (HasStyle(TDCS_USEPERCENTDONEINTIMEEST))
+				AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
 
-	case TDCA_POSITION:	
-		ASSERT(0);
-		// fallthru
+			if (!m_sCompletionStatus.IsEmpty())
+				AccumulateRecalcColumn(TDCC_STATUS, aColIDs);
+			break;
 
-	case TDCA_POSITION_DIFFERENTPARENT:
-		{
-			AccumulateRecalcColumn(TDCC_POSITION, aColIDs);
+		case TDCA_DUEDATE:
+			if (!AccumulateRecalcColumn(TDCC_DUEDATE, aColIDs))
+				bRedrawCols = IsColumnShowing(TDCC_PRIORITY);
+			break;
 
-			// Add all auto-calculated attributes
-			AccumulateRecalcColumn(TDCC_COST, aColIDs);
-			AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
-			AccumulateRecalcColumn(TDCC_TIMESPENT, aColIDs);
-
-			for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
+		case TDCA_PRIORITY:
+			if (!bRedrawTasks)
 			{
-				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs.GetData()[nAttrib];
+				bRedrawCols = IsColumnShowing(TDCC_PRIORITY);
 
-				if (attribDef.HasFeature(TDCCAF_ACCUMULATE) ||
-					attribDef.HasFeature(TDCCAF_MINIMIZE) ||
-					attribDef.HasFeature(TDCCAF_MAXIMIZE))
+				if (!bRedrawCols && HasStyle(TDCS_SHOWPERCENTASPROGRESSBAR))
+					bRedrawCols = IsColumnShowing(TDCC_PERCENT);
+			}
+			break;
+
+		case TDCA_ALLOCTO:
+		case TDCA_ALLOCBY:
+		case TDCA_STATUS:
+		case TDCA_VERSION:
+		case TDCA_CATEGORY:
+		case TDCA_TAGS:
+		case TDCA_COST:
+		case TDCA_STARTDATE:
+		case TDCA_EXTERNALID:
+		case TDCA_RECURRENCE:
+		case TDCA_FILEREF:
+			AccumulateRecalcColumn(nColID, aColIDs);
+			break;
+
+		case TDCA_TIMEEST:
+			bRedrawCols |= !AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
+
+			if (HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
+				bRedrawCols |= !AccumulateRecalcColumn(TDCC_REMAINING, aColIDs);
+
+			if (bRedrawCols)
+				bRedrawCols = HasStyle(TDCS_AUTOCALCPERCENTDONE);
+			break;
+
+		case TDCA_TIMESPENT:
+			bRedrawCols |= !AccumulateRecalcColumn(TDCC_TIMESPENT, aColIDs);
+
+			if (HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
+				bRedrawCols |= !AccumulateRecalcColumn(TDCC_REMAINING, aColIDs);
+
+			if (bRedrawCols)
+				bRedrawCols = HasStyle(TDCS_AUTOCALCPERCENTDONE);
+			break;
+
+		case TDCA_DEPENDENCY:
+		case TDCA_RISK:
+		case TDCA_FLAG:
+		case TDCA_LOCK:
+		case TDCA_PERCENT:
+			if (!bRedrawTasks)
+				bRedrawCols = IsColumnShowing(nColID);
+			break;
+
+		case TDCA_ICON:
+			if (IsColumnShowing(TDCC_ICON))
+				bRedrawCols = TRUE;
+			else
+				bRedrawTasks = TRUE;
+			break;
+
+		case TDCA_TASKNAME:
+			bRedrawCols = IsColumnShowing(TDCC_PATH);
+			break;
+
+		case TDCA_PROJECTNAME:
+		case TDCA_COMMENTS:
+		case TDCA_ENCRYPT:
+		case TDCA_METADATA:
+			break;
+
+		case TDCA_COLOR:
+			bRedrawTasks = TRUE;
+			break;
+
+		case TDCA_POSITION:
+			ASSERT(0);
+			// fallthru
+
+		case TDCA_POSITION_DIFFERENTPARENT:
+			{
+				AccumulateRecalcColumn(TDCC_POSITION, aColIDs);
+
+				// Add all auto-calculated attributes
+				AccumulateRecalcColumn(TDCC_COST, aColIDs);
+				AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
+				AccumulateRecalcColumn(TDCC_TIMESPENT, aColIDs);
+
+				for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
 				{
-					AccumulateRecalcColumn(attribDef.GetColumnID(), aColIDs);
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs.GetData()[nAttrib];
+
+					if (attribDef.HasFeature(TDCCAF_ACCUMULATE) ||
+						attribDef.HasFeature(TDCCAF_MINIMIZE) ||
+						attribDef.HasFeature(TDCCAF_MAXIMIZE))
+					{
+						AccumulateRecalcColumn(attribDef.GetColumnID(), aColIDs);
+					}
 				}
 			}
-		}
-		break;
-		
-	case TDCA_POSITION_SAMEPARENT:		// moved within the same parent
-		bRedrawCols = IsColumnShowing(TDCC_POSITION);
-		break;
-		
-	case TDCA_PASTE:
-	case TDCA_MERGE:
-	case TDCA_DELETE:
-	case TDCA_ARCHIVE:
-	case TDCA_UNDO:
-	case TDCA_NEWTASK:
-		aColIDs.Copy(m_mapVisibleCols);
-		break;
+			break;
 
-	case TDCA_CUSTOMATTRIB:
-	case TDCA_CUSTOMATTRIBDEFS:
-		// Handled in OnCustomAttributeChange
-		break;
-		
-	case TDCA_NONE:
-	case TDCA_TASKNAMEORCOMMENTS:
-	case TDCA_ANYTEXTATTRIBUTE:
-		ASSERT(0);
-		break;
+		case TDCA_POSITION_SAMEPARENT:		// moved within the same parent
+			bRedrawCols = IsColumnShowing(TDCC_POSITION);
+			break;
 
-	default:
-		if (CTDCCustomAttributeHelper::IsCustomColumn(nColID))
-			aColIDs.Add(nColID);
-		else
+		case TDCA_PASTE:
+		case TDCA_MERGE:
+		case TDCA_DELETE:
+		case TDCA_ARCHIVE:
+		case TDCA_UNDO:
+		case TDCA_NEWTASK:
+			aColIDs.Copy(m_mapVisibleCols);
+			break;
+
+		case TDCA_CUSTOMATTRIB:
+		case TDCA_CUSTOMATTRIBDEFS:
+			// Handled in OnCustomAttributeChange
+			break;
+
+		case TDCA_NONE:
+		case TDCA_TASKNAMEORCOMMENTS:
+		case TDCA_ANYTEXTATTRIBUTE:
 			ASSERT(0);
-		break;
+			break;
+
+		default:
+			if (CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+				aColIDs.Add(nColID);
+			else
+				ASSERT(0);
+			break;
+		}
 	}
+
+// 	if (bAllowResort && ModsNeedResort(mapAttribIDs))
+// 	{
+// 		Resort();
+// 	}
 
 	RecalcUntrackedColumnWidths(aColIDs);
 	
@@ -4340,6 +4351,19 @@ int CTDLTaskCtrlBase::GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray
 	}
 
 	return aCols.GetSize();
+}
+
+BOOL CTDLTaskCtrlBase::ModsCauseTaskTextColorChange(const CTDCAttributeMap& mapAttribIDs) const
+{
+	POSITION pos = mapAttribIDs.GetStartPosition();
+
+	while (pos)
+	{
+		if (ModCausesTaskTextColorChange(mapAttribIDs.GetNext(pos)))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::ModCausesTaskTextColorChange(TDC_ATTRIBUTE nModType) const
@@ -4395,12 +4419,25 @@ BOOL CTDLTaskCtrlBase::AccumulateRecalcColumn(TDC_COLUMN nColID, CSet<TDC_COLUMN
 	return FALSE;
 }
 
-BOOL CTDLTaskCtrlBase::ModNeedsResort(TDC_ATTRIBUTE nModType) const
+BOOL CTDLTaskCtrlBase::ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) const
 {
 	if (!HasStyle(TDCS_RESORTONMODIFY))
 		return FALSE;
 
-	return AttribMatchesSort(nModType);
+	return AttribsMatchSort(mapAttribIDs);
+}
+
+BOOL CTDLTaskCtrlBase::AttribsMatchSort(const CTDCAttributeMap& mapAttribIDs) const
+{
+	POSITION pos = mapAttribIDs.GetStartPosition();
+
+	while (pos)
+	{
+		if (AttribMatchesSort(mapAttribIDs.GetNext(pos)))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const
@@ -4411,24 +4448,22 @@ BOOL CTDLTaskCtrlBase::AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const
 	if (nAttrib == TDCA_ALL)
 		return TRUE;
 	
-	BOOL bNeedSort = FALSE;
-	
 	if (m_sort.bMulti)
 	{
-		for (int nCol = 0; ((nCol < 3) && !bNeedSort); nCol++)
+		for (int nCol = 0; nCol < 3; nCol++)
 		{
 			if (!m_sort.multi.IsSorting(nCol))
 				break;
 
-			bNeedSort = ModNeedsResort(nAttrib, m_sort.multi.GetSortBy(nCol));
+			if (ModNeedsResort(nAttrib, m_sort.multi.GetSortBy(nCol)))
+				return TRUE;
 		}
+
+		return FALSE;
 	}
-	else
-	{
-		bNeedSort = ModNeedsResort(nAttrib, m_sort.single.nBy);
-	}
-	
-	return bNeedSort;
+
+	// else
+	return ModNeedsResort(nAttrib, m_sort.single.nBy);
 }
 
 BOOL CTDLTaskCtrlBase::ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy) const

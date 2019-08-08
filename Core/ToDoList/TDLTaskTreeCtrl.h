@@ -140,7 +140,7 @@ public:
 	void DeleteAll();
 	void DeselectAll();
 	BOOL PreTranslateMessage(MSG* pMsg);
-	void SetModified(TDC_ATTRIBUTE nAttrib);
+	void SetModified(const CTDCAttributeMap& attribIDs/*, BOOL bAllowResort*/);
 
 	void OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate);
 	void OnStylesUpdated();

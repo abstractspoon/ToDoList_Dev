@@ -708,7 +708,9 @@ protected:
 	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	
-	virtual void SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs);
+	virtual BOOL ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) const;
+	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs);
+	virtual void GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const;
 
 	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
 	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
@@ -725,7 +727,6 @@ protected:
 	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildingTree = FALSE); // returns the previously selected item if any
 
 	virtual void RebuildCustomAttributeUI();
-	virtual BOOL ModNeedsResort(TDC_ATTRIBUTE nModType) const;
 
 	virtual BOOL CopyCurrentSelection() const;
 	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rAvailable /*in*/);
@@ -881,14 +882,17 @@ protected:
 
 	void AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate);
 	void InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate);
-
 	int CreateTasksFromOutlookObjects(const TLDT_DATA* pData);
 
+	void SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs = CDWordArray());
+	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttribIDs) const;
+	BOOL ModCausesColorChange(TDC_ATTRIBUTE nModType) const;
+	BOOL ModsCauseColorChange(const CTDCAttributeMap& attribIDs) const;
+	
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
 	void BuildTasksForSave(CTaskFile& tasks/*, BOOL bFirstSave*/) const;
 	BOOL SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty);
 	void OnAutoComboListChange(TDC_ATTRIBUTE nAttribID, CAutoComboBox& combo, CStringArray& aItems);
-	void SetModified(TDC_ATTRIBUTE nAttrib);
 	void UpdateAutoListData(TDC_ATTRIBUTE nAttrib = TDCA_ALL);
 
 	static BOOL HandleModResult(DWORD dwTaskID, TDC_SET nRes, CDWordArray& aModTaskIDs);

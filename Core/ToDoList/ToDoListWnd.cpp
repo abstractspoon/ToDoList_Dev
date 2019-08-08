@@ -3596,6 +3596,8 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyRecreateRecurringTask(WPARAM wp, LPARAM lp
 
 LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 {
+	ASSERT(wp && lp);
+
 	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wp);
 
 	if (nTDC == -1)
@@ -3604,56 +3606,61 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		return 0L;
 	}
 
+	const TDCNOTIFYMOD* pMod = (TDCNOTIFYMOD*)lp;
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
-	TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)lp;
 
-	switch (nAttrib)
+	if (pMod->mapAttrib.Has(TDCA_PROJECTNAME))
 	{
-	case TDCA_PROJECTNAME:
 		if (Prefs().GetKeepTabsOrdered())
 			RefreshTabOrder();
-		break;
+	}
 
-	case TDCA_DUEDATE:
+	if (pMod->mapAttrib.Has(TDCA_DUEDATE) || 
+		pMod->mapAttrib.Has(TDCA_DONEDATE))
+	{
 		OnTimerDueItems(nTDC);
-		break;
-		
-	case TDCA_DONEDATE:
-		OnTimerDueItems(nTDC);
+	}
+
+	if (pMod->mapAttrib.Has(TDCA_DONEDATE) || 
+		pMod->mapAttrib.Has(TDCA_TASKNAME) || 
+		(pMod->mapAttrib.Has(TDCA_NEWTASK) && !tdc.IsTaskLabelEditing()))
+	{
 		UpdateTimeTrackerTasks(tdc, FALSE);
+	}
 
+	if (pMod->mapAttrib.Has(TDCA_TIMEEST) ||
+		pMod->mapAttrib.Has(TDCA_TIMESPENT))
+	{
+		m_dlgTimeTracker.UpdateTaskTime(&tdc);
+	}
+
+	if (pMod->mapAttrib.Has(TDCA_DONEDATE))
+	{
 		m_dlgTimeTracker.RemoveCompletedTasks(&tdc);
 
 		if (m_reminders.RemoveCompletedTasks(&tdc))
 			tdc.RedrawReminders();
-		break;
+	}
 
-	case TDCA_DELETE:
+	if (pMod->mapAttrib.Has(TDCA_DELETE))
+	{
 		m_dlgTimeTracker.RemoveDeletedTasks(&tdc);
 
 		if (m_reminders.RemoveDeletedTasks(&tdc))
 			tdc.RedrawReminders();
-		break;
+	}
 
-	case TDCA_TIMEEST:
-	case TDCA_TIMESPENT:
-		m_dlgTimeTracker.UpdateTaskTime(&tdc);
-		break;
-
-	case TDCA_TASKNAME:
-		UpdateTimeTrackerTasks(tdc, FALSE);
-		break;
-
-	case TDCA_NEWTASK:
-		if (!tdc.IsTaskLabelEditing())
-			UpdateTimeTrackerTasks(tdc, FALSE);
-		break;
-
-	case TDCA_CUSTOMATTRIBDEFS:
+	if (pMod->mapAttrib.Has(TDCA_CUSTOMATTRIBDEFS))
+	{
 		// Ignore modification callback if it came from us
 		if (m_bSettingAttribDefs)
+		{
 			return 0L;
-		break;
+		}
+		else if (m_findDlg.GetSafeHwnd())
+		{
+			UpdateFindDialogActiveTasklist(&tdc);
+		}
 	}
 
 	// Update UI
@@ -3662,13 +3669,6 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 
 	// refresh toolbar states
 	PostMessage(WM_IDLEUPDATECMDUI, TRUE);
-
-	// do we need to update the current todoctrl's
-	// custom attributes on the find dialog?
-	if (m_findDlg.GetSafeHwnd() && (nAttrib == TDCA_CUSTOMATTRIBDEFS))
-	{
-		UpdateFindDialogActiveTasklist(&tdc);
-	}
 
 	return 0L;
 }

@@ -597,6 +597,20 @@ namespace TDC
 		return TDCD_NONE;
 	}
 
+	static IUI_UPDATETYPE MapAttributeToIUIUpdateType(const CTDCAttributeMap& mapAttribIDs)
+	{
+		// Sanity check
+		POSITION pos = mapAttribIDs.GetStartPosition();
+
+		if (!pos)
+		{
+			ASSERT(0);
+			return IUI_EDIT;
+		}
+
+		return MapAttributeToIUIUpdateType(mapAttribIDs.GetNext(pos));
+	}
+
 	static IUI_UPDATETYPE MapAttributeToIUIUpdateType(TDC_ATTRIBUTE nAttrib)
 	{
 		switch (nAttrib)

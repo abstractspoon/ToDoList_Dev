@@ -2913,17 +2913,7 @@ BOOL CToDoCtrl::SetSelectedTaskLock(BOOL bLocked)
 	}
 	
 	if (aModTaskIDs.GetSize())
-	{
 		SetModified(TDCA_LOCK, aModTaskIDs);
-	
-		if (IsColumnShowing(TDCC_LOCK))
-		{
-			if (aModTaskIDs.GetSize() > 1)
-				m_taskTree.RedrawColumns();
-			else
-				m_taskTree.InvalidateTask(aModTaskIDs[0]);
-		}
-	}
 
 	return TRUE;
 }
@@ -3231,9 +3221,11 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_OFFSET nOffs
 	
 	if (aModTaskIDs.GetSize())
 	{
-		SetModified(TDCA_STARTDATE, aModTaskIDs); 
-		SetModified(TDCA_DUEDATE, aModTaskIDs); 
-		
+		CTDCAttributeMap mapAttribIDs;
+		mapAttribIDs.Add(TDCA_STARTDATE);
+		mapAttribIDs.Add(TDCA_DUEDATE);
+
+		SetModified(mapAttribIDs, aModTaskIDs); 
 		UpdateControls(FALSE); // don't update comments
 	}
 	
@@ -3614,6 +3606,8 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 		// if some tasks have recurred then we also need to report 
 		// that the start/due dates have changed and selectively
 		// update their state
+		CTDCAttributeMap mapAttribIDs;
+
 		if (bSomeRecurred)
 		{
 			COleDateTime dtStart(GetSelectedTaskDate(TDCD_START));
@@ -3625,8 +3619,8 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 			m_cbTimeStart.SetOleTime(dtStart.m_dt);
 			m_cbTimeDue.SetOleTime(dtDue.m_dt);
 
-			SetModified(TDCA_STARTDATE, aModTaskIDs);
-			SetModified(TDCA_DUEDATE, aModTaskIDs);
+			mapAttribIDs.Add(TDCA_STARTDATE);
+			mapAttribIDs.Add(TDCA_DUEDATE);
 		}
 		
 		// If some of the tasks were recurring and need to be created
@@ -3640,7 +3634,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 		// if some tasks have recurred or some tasks were completed
 		// then we also need to report that the done date has changed
 		if (bSomeDone || bSomeRecurred)
-			SetModified(TDCA_DONEDATE, aModTaskIDs);
+			mapAttribIDs.Add(TDCA_DONEDATE);
 
 		// if some were completed and the status also changed
 		// we may also need to update the UI
@@ -3649,8 +3643,10 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 			m_cbStatus.AddUniqueItem(m_sCompletionStatus);
 			UpdateDataEx(this, IDC_STATUS, m_cbStatus, FALSE);
 
-			SetModified(TDCA_STATUS, aModTaskIDs);
+			mapAttribIDs.Add(TDCA_STATUS);
 		}
+
+		SetModified(mapAttribIDs, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -4081,18 +4077,20 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst)
 				SetCtrlDate(m_dtcStart, dtStart, dtStart);
 			}
 		}
-		
-		SetModified(TDCA_TIMEEST, aModTaskIDs);
 
+		CTDCAttributeMap mapAttribIDs(TDCA_TIMEEST);
+		
 		// may also need to report percent and/or date changes
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
-			SetModified(TDCA_PERCENT, aModTaskIDs);
+			mapAttribIDs.Add(TDCA_PERCENT);
 
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 		{
-			SetModified(TDCA_STARTDATE, aModTaskIDs);
-			SetModified(TDCA_DUEDATE, aModTaskIDs);
+			mapAttribIDs.Add(TDCA_STARTDATE);
+			mapAttribIDs.Add(TDCA_DUEDATE);
 		}
+
+		SetModified(mapAttribIDs, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -4213,15 +4211,8 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 				SetCtrlDate(m_dtcDue, dtDue, dtDue);
 			}
 		}
-		
+			
 		SetModified(TDCA_TIMEEST, aModTaskIDs);
-		
-		// may also need to report percent and/or date changes
-		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
-			SetModified(TDCA_PERCENT, aModTaskIDs);
-		
-		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
-			SetModified(TDCA_DUEDATE, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -6869,28 +6860,35 @@ BOOL CToDoCtrl::IsModified() const
 	return (m_nCommentsState == CS_PENDING);
 }
 
-void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib)
+void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs)
 {
-	SetModified(nAttrib, CDWordArray());
+	CTDCAttributeMap mapAttribIDs;
+	
+	GetAttributesAffectedByMod(nAttribID, mapAttribIDs);
+	SetModified(mapAttribIDs, aModTaskIDs);
 }
 
-void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& /*aModTaskIDs*/)
+void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs)
 {
 	if (IsReadOnly())
 		return;
 	
 	SetModified(TRUE);
 	
-	m_taskTree.SetModified(nAttrib);
+	// Don't sort during find/replace operation because
+	// it messes up the order of the items	
+	m_taskTree.SetModified(mapAttribIDs/*, !m_findReplace.IsReplacing()*/);
 
-	if (ModNeedsResort(nAttrib))
+	if (ModsNeedResort(mapAttribIDs))
 	{
+		ASSERT(!m_findReplace.IsReplacing());
+
 		// if the mod was a task completion and the parent completed state 
 		// is based on this then we need to resort the entire tree 
 		// likewise for start dates and due dates
-		if ((nAttrib == TDCA_DONEDATE && HasStyle(TDCS_TREATSUBCOMPLETEDASDONE)) ||
-			(nAttrib == TDCA_DUEDATE && (HasStyle(TDCS_USEEARLIESTDUEDATE) || HasStyle(TDCS_USELATESTDUEDATE))) ||
-			(nAttrib == TDCA_STARTDATE && (HasStyle(TDCS_USEEARLIESTSTARTDATE) || HasStyle(TDCS_USELATESTSTARTDATE))))
+		if ((mapAttribIDs.Has(TDCA_DONEDATE) && HasStyle(TDCS_TREATSUBCOMPLETEDASDONE)) ||
+			(mapAttribIDs.Has(TDCA_DUEDATE) && (HasStyle(TDCS_USEEARLIESTDUEDATE) || HasStyle(TDCS_USELATESTDUEDATE))) ||
+			(mapAttribIDs.Has(TDCA_STARTDATE) && (HasStyle(TDCS_USEEARLIESTSTARTDATE) || HasStyle(TDCS_USELATESTSTARTDATE))))
 		{
 			Resort();
 		}
@@ -6900,31 +6898,205 @@ void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& /*aModTask
 		}
 	}
 
-	GetParent()->PostMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)nAttrib);
+	TDCNOTIFYMOD mod(mapAttribIDs, aModTaskIDs);
+	GetParent()->SendMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)&mod);
 
-	// special cases: 
-	switch (nAttrib)
-	{
-	case TDCA_PROJECTNAME:
-		// if this was the project name being edited make sure
-		// the focus is set back to the name
+	// if this was the project name being edited make sure
+	// the focus is set back to the name
+	if (mapAttribIDs.Has(TDCA_PROJECTNAME))
 		GetDlgItem(IDC_PROJECTNAME)->SetFocus();
-		break;
 
-	case TDCA_LOCK:
+	if (mapAttribIDs.Has(TDCA_LOCK))
 		UpdateControls(FALSE);
-		break;
-	}
 }
 
-BOOL CToDoCtrl::ModNeedsResort(TDC_ATTRIBUTE nModType) const
+BOOL CToDoCtrl::ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) const
 {
 	// Don't sort during find/replace operation because
 	// it messes up the order of the items
-	if (m_findReplace.IsReplacing())
+	if (m_findReplace.IsReplacing() || !HasStyle(TDCS_RESORTONMODIFY))
 		return FALSE;
 
-	return m_taskTree.ModNeedsResort(nModType);
+	return m_taskTree.ModsNeedResort(mapAttribIDs);
+}
+
+void CToDoCtrl::GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const
+{
+	POSITION pos = mapModAttribIDs.GetStartPosition();
+
+	while (pos)
+		GetAttributesAffectedByMod(mapModAttribIDs.GetNext(pos), mapAffectedAttribIDs);
+}
+
+void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttribIDs) const
+{
+	// Check for attribute dependencies
+	switch (nAttrib)
+	{
+	case TDCA_ALL:
+	case TDCA_NEWTASK:
+		mapAttribIDs.Add(TDCA_ALL);
+		break;
+
+	case TDCA_DEPENDENCY:
+		mapAttribIDs.Add(nAttrib);
+
+		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+		{
+			mapAttribIDs.Add(TDCA_DUEDATE);
+			mapAttribIDs.Add(TDCA_STARTDATE);
+		}
+		break;
+
+	case TDCA_DUEDATE:
+		mapAttribIDs.Add(nAttrib);
+
+		// If this extension view wants due or start dates and dependents may
+		// have changed then we send all tasks with dates
+		if (m_taskTree.SelectionHasDependents() &&
+			HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+		{
+			mapAttribIDs.Add(TDCA_STARTDATE);
+		}
+
+		if (HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) &&
+			HasStyle(TDCS_USEHIGHESTPRIORITY))
+		{
+			mapAttribIDs.Add(TDCA_PRIORITY);
+		}
+
+		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
+		{
+			mapAttribIDs.Add(TDCA_STARTDATE);
+			mapAttribIDs.Add(TDCA_TIMEEST);
+		}
+		break;
+
+	case TDCA_STARTDATE:
+		mapAttribIDs.Add(nAttrib);
+
+		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
+		{
+			mapAttribIDs.Add(TDCA_DUEDATE);
+			mapAttribIDs.Add(TDCA_TIMEEST);
+		}
+		break;
+
+	case TDCA_DONEDATE:
+		mapAttribIDs.Add(nAttrib);
+		mapAttribIDs.Add(TDCA_SUBTASKDONE);
+
+		if (m_taskTree.SelectionHasDependents() &&
+			HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+		{
+			mapAttribIDs.Add(TDCA_DUEDATE);
+			mapAttribIDs.Add(TDCA_STARTDATE);
+		}
+
+		if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) &&
+			HasStyle(TDCS_INCLUDEDONEINAVERAGECALC))
+		{
+			mapAttribIDs.Add(TDCA_PERCENT);
+		}
+
+		if (HasStyle(TDCS_INCLUDEDONEINRISKCALC) &&
+			HasStyle(TDCS_USEHIGHESTRISK))
+		{
+			mapAttribIDs.Add(TDCA_RISK);
+		}
+
+		if (HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) &&
+			HasStyle(TDCS_USEHIGHESTPRIORITY))
+		{
+			mapAttribIDs.Add(TDCA_PRIORITY);
+		}
+
+		if (!m_sCompletionStatus.IsEmpty())
+		{
+			mapAttribIDs.Add(TDCA_STATUS);
+		}
+		break;
+
+	case TDCA_CUSTOMATTRIBDEFS:
+		mapAttribIDs.Add(TDCA_CUSTOMATTRIB);
+		break;
+
+	case TDCA_TIMEEST:
+		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
+		{
+			mapAttribIDs.Add(TDCA_PERCENT);
+		}
+
+		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
+		{
+			mapAttribIDs.Add(TDCA_DUEDATE);
+		}
+		break;
+
+	default: // all else
+		mapAttribIDs.Add(nAttrib);
+		break;
+	}
+
+	// Finally check for colour change
+	if (ModsCauseColorChange(mapAttribIDs))
+		mapAttribIDs.Add(TDCA_COLOR);
+}
+
+BOOL CToDoCtrl::ModCausesColorChange(TDC_ATTRIBUTE nModType) const
+{
+	switch (nModType)
+	{
+	case TDCA_ALL:
+		return TRUE;
+
+	case TDCA_COLOR:
+		return !HasStyle(TDCS_COLORTEXTBYPRIORITY) &&
+				!HasStyle(TDCS_COLORTEXTBYATTRIBUTE) &&
+				!HasStyle(TDCS_COLORTEXTBYNONE);
+
+	case TDCA_CATEGORY:
+	case TDCA_ALLOCBY:
+	case TDCA_ALLOCTO:
+	case TDCA_STATUS:
+	case TDCA_VERSION:
+	case TDCA_EXTERNALID:
+	case TDCA_TAGS:
+		return (HasStyle(TDCS_COLORTEXTBYATTRIBUTE) && (m_taskTree.GetColorByAttribute() == nModType));
+
+	case TDCA_DONEDATE:
+		return (m_taskTree.GetCompletedTaskColor() != CLR_NONE);
+
+	case TDCA_DUEDATE:
+		{
+			COLORREF crDue, crDueToday;
+			m_taskTree.GetDueTaskColors(crDue, crDueToday);
+
+			return ((crDue != CLR_NONE) || (crDueToday != CLR_NONE));
+		}
+
+	case TDCA_PRIORITY:
+		return HasStyle(TDCS_COLORTEXTBYPRIORITY);
+	}
+
+	// all else
+	return FALSE;
+}
+
+BOOL CToDoCtrl::ModsCauseColorChange(const CTDCAttributeMap& mapAttrib) const
+{
+	POSITION pos = mapAttrib.GetStartPosition();
+
+	while (pos)
+	{
+		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
+
+		if (ModCausesColorChange(nAttrib))
+			return TRUE;
+	}
+
+	// else
+	return FALSE;
 }
 
 LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)

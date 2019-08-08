@@ -1158,11 +1158,11 @@ BOOL CFilteredToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	return CTabbedToDoCtrl::CanCreateNewTask(nInsertWhere);
 }
 
-void CFilteredToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs)
+void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs)
 {
 	BOOL bTreeRefiltered = FALSE, bListRefiltered = FALSE;
 
-	if (ModNeedsRefilter(nAttrib, FTCV_TASKTREE, aModTaskIDs))
+	if (ModsNeedRefilter(mapAttribIDs, FTCV_TASKTREE, aModTaskIDs))
 	{
 		// This will also refresh the list view if it is active
 		RefreshFilter();
@@ -1171,12 +1171,12 @@ void CFilteredToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aM
 		bListRefiltered = (GetTaskView() == FTCV_TASKLIST);
 		bTreeRefiltered = TRUE;
 	}
-	else if (ModNeedsRefilter(nAttrib, FTCV_TASKLIST, aModTaskIDs))
+	else if (ModsNeedRefilter(mapAttribIDs, FTCV_TASKLIST, aModTaskIDs))
 	{
 		// if undoing then we must also refresh the list filter because
 		// otherwise ResyncListSelection will fail in the case where
 		// we are undoing a delete because the undone item will not yet be in the list.
-		if (InListView() || (nAttrib == TDCA_UNDO))
+		if (InListView() || mapAttribIDs.Has(TDCA_UNDO))
 		{
 			RefreshListFilter();
 		}
@@ -1191,9 +1191,9 @@ void CFilteredToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aM
 	CAutoFlag af(m_bIgnoreListRebuild, bListRefiltered);
 	CAutoFlag af2(m_bIgnoreExtensionUpdate, bTreeRefiltered);
 
-	CTabbedToDoCtrl::SetModified(nAttrib, aModTaskIDs);
+	CTabbedToDoCtrl::SetModified(mapAttribIDs, aModTaskIDs);
 
-	if ((bListRefiltered || bTreeRefiltered) && (nAttrib == TDCA_UNDO) && aModTaskIDs.GetSize())
+	if ((bListRefiltered || bTreeRefiltered) && mapAttribIDs.Has(TDCA_UNDO) && aModTaskIDs.GetSize())
 	{
 		// Restore the selection at the time of the undo if possible
 		TDCSELECTIONCACHE cache;
@@ -1217,6 +1217,22 @@ void CFilteredToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 	{
 		RefreshFilter();
 	}
+}
+
+BOOL CFilteredToDoCtrl::ModsNeedRefilter(const CTDCAttributeMap& mapAttribIDs, FTC_VIEW nView, const CDWordArray& aModTaskIDs) const
+{
+	if (!m_filter.HasAnyFilter())
+		return FALSE;
+
+	POSITION pos = mapAttribIDs.GetStartPosition();
+
+	while (pos)
+	{
+		if (ModNeedsRefilter(mapAttribIDs.GetNext(pos), nView, aModTaskIDs))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView, const CDWordArray& aModTaskIDs) const

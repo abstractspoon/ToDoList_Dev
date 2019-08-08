@@ -207,9 +207,9 @@ public:
 	BOOL IsMultiSorting() const;
 	BOOL IsSortingBy(TDC_COLUMN nBy) const;
 	const TDSORT& GetSort() const { return m_sort; }
-	BOOL ModNeedsResort(TDC_ATTRIBUTE nModType) const;
+	BOOL ModsNeedResort(const CTDCAttributeMap& attribIDs) const;
 
-	void SetModified(TDC_ATTRIBUTE nAttrib);
+	void SetModified(const CTDCAttributeMap& attribIDs/*, BOOL bAllowResort*/);
 	void SetAlternateLineColor(COLORREF crAltLine);
 	void SetGridlineColor(COLORREF crGridLine);
 	void SetSplitBarColor(COLORREF crSplitBar) { CTreeListSyncer::SetSplitBarColor(crSplitBar); }
@@ -228,6 +228,7 @@ public:
 	BOOL SetDueTaskColors(COLORREF crDue, COLORREF crDueToday);
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) const { crDue = m_crDue; crDueToday = m_crDueToday; }
 	BOOL ModCausesTaskTextColorChange(TDC_ATTRIBUTE nModType) const;
+	BOOL ModsCauseTaskTextColorChange(const CTDCAttributeMap& mapAttribIDs) const;
 
 	void SetReadOnly(bool bReadOnly) { m_bReadOnly = bReadOnly; }
 	void Resize(const CRect& rect);
@@ -401,9 +402,9 @@ protected:
 	void DoSort();
 	BOOL ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy) const;
 	BOOL AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const;
+	BOOL AttribsMatchSort(const CTDCAttributeMap& attribIDs) const;
 	int GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const;
 
-	// private structures to help with sorting --------------------------
 	struct TDSORTFLAGS
 	{
 		TDSORTFLAGS() 

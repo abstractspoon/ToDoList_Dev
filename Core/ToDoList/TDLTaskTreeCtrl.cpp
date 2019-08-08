@@ -2680,39 +2680,51 @@ void CTDLTaskTreeCtrl::RefreshItemBoldState(HTREEITEM hti, BOOL bAndChildren)
 	}
 }
 
-void CTDLTaskTreeCtrl::SetModified(TDC_ATTRIBUTE nAttrib)
+void CTDLTaskTreeCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs/*, BOOL bAllowResort*/)
 {
 	// Note: Tree item map should already be up to date
 	// so we just assert on it
+	ASSERT (!mapAttribIDs.Has(TDCA_POSITION));
 
-	// Update bold-states
-	switch (nAttrib)
+	if (mapAttribIDs.Has(TDCA_NEWTASK))
 	{
-	case TDCA_NEWTASK:
 		// Already handled in InsertTreeItem
 		ASSERT(m_mapHTItems.GetCount() == (int)m_tcTasks.GetCount());
-		break;
-
-	case TDCA_POSITION:
-		ASSERT(0);
-		//fallthru
-
-	case TDCA_UNDO:
-	case TDCA_PASTE:
-	case TDCA_POSITION_DIFFERENTPARENT:
-		RefreshItemBoldState();
-		ASSERT(m_mapHTItems.GetCount() == (int)m_tcTasks.GetCount());
-		break;
-
-	case TDCA_DELETE:
-	case TDCA_ARCHIVE:
-		// No bold change
-
-		// Note: we don't both to remove items because 
-		// Task IDs cannot be reused
-		ASSERT(m_mapHTItems.GetCount() >= (int)m_tcTasks.GetCount());
-		break;
 	}
 
-	CTDLTaskCtrlBase::SetModified(nAttrib);
+	if (mapAttribIDs.Has(TDCA_UNDO) ||
+		mapAttribIDs.Has(TDCA_PASTE) ||
+		mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT))
+	{
+		ASSERT(m_mapHTItems.GetCount() == (int)m_tcTasks.GetCount());
+		RefreshItemBoldState();
+	}
+
+	if (mapAttribIDs.Has(TDCA_DELETE) ||
+		mapAttribIDs.Has(TDCA_ARCHIVE))
+	{
+		ASSERT(m_mapHTItems.GetCount() >= (int)m_tcTasks.GetCount());
+	}
+	
+/*
+	if (bAllowResort && ModsNeedResort(mapAttribIDs))
+	{
+		// if the mod was a task completion and the parent completed state 
+		// is based on this then we need to resort the entire tree 
+		// likewise for start dates and due dates
+		if ((mapAttribIDs.Has(TDCA_DONEDATE) && HasStyle(TDCS_TREATSUBCOMPLETEDASDONE)) ||
+			(mapAttribIDs.Has(TDCA_DUEDATE) && (HasStyle(TDCS_USEEARLIESTDUEDATE) || HasStyle(TDCS_USELATESTDUEDATE))) ||
+			(mapAttribIDs.Has(TDCA_STARTDATE) && (HasStyle(TDCS_USEEARLIESTSTARTDATE) || HasStyle(TDCS_USELATESTSTARTDATE))))
+		{
+			// handled by base class
+		}
+		else // attributes that only have a local effect
+		{ 
+			ResortSelectedTaskParents();
+			bAllowResort = FALSE;
+		}
+	}
+*/
+
+	CTDLTaskCtrlBase::SetModified(mapAttribIDs/*, bAllowResort*/);
 }

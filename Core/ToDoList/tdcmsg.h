@@ -11,7 +11,7 @@ static LPCTSTR TDL_PROTOCOL = _T("tdl://");
 static LPCTSTR TDL_EXTENSION = _T(".tdl");
 
 // notification messages
-const UINT WM_TDCN_MODIFY					= ::RegisterWindowMessage(_T("WM_TDCN_MODIFY"));				// lParam == <TDC_ATTRIBUTE>
+const UINT WM_TDCN_MODIFY					= ::RegisterWindowMessage(_T("WM_TDCN_MODIFY"));				// lParam = TDCNOTIFYMOD*
 const UINT WM_TDCN_SORT						= ::RegisterWindowMessage(_T("WM_TDCN_SORT")); 
 const UINT WM_TDCN_TIMETRACK				= ::RegisterWindowMessage(_T("WM_TDCN_TIMETRACK"));				// lParam = 0/1 => stop/start
 const UINT WM_TDCN_VIEWPRECHANGE			= ::RegisterWindowMessage(_T("WM_TDCN_VIEWPRECHANGE"));

@@ -221,12 +221,11 @@ protected:
 	void OnListSelChanged();
 
 protected:
-	BOOL ModNeedsResort(TDC_ATTRIBUTE nModType) const;
-	BOOL ModCausesColorChange(TDC_ATTRIBUTE nModType) const;
-	BOOL ModCausesColorChange(const CTDCAttributeMap& mapAttrib) const;
 	const TDSORT& GetSort() const;
 
-	virtual void SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs);
+	virtual BOOL CTabbedToDoCtrl::ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) const;
+	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs);
+	virtual void GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const;
 	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos);
 	virtual BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate); // one style at a time only 
 	virtual void UpdateTasklistVisibility();
@@ -254,7 +253,9 @@ protected:
 	void LoadPrefs();
 	void SavePrefs();
 	BOOL IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const;
-	void UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0);
+	BOOL HasCalculatedAttributes(const CTDCAttributeMap& mapAttribIDs) const;
+	BOOL WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const;
+	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID = 0);
 
 	void SyncActiveViewSelectionToTree();
 	void SyncListSelectionToTree();
@@ -298,7 +299,7 @@ protected:
 	BOOL ViewSupportsNewTask(FTC_VIEW nView) const;
 	BOOL ViewHasTaskSelection(FTC_VIEW nView) const;
 
-	void UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0);
+	void UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID = 0);
 	BOOL ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd);
 	BOOL ExtensionCanDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd) const;
 	BOOL ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA& data);
@@ -308,8 +309,8 @@ protected:
 	BOOL GetExtensionWnd(FTC_VIEW nView, IUIExtensionWindow*& pExtWnd, VIEWDATA*& pData) const;
 	BOOL HasAnyExtensionViews() const;
 	BOOL AnyExtensionViewWantsChange(TDC_ATTRIBUTE nAttrib) const;
-	BOOL AnyExtensionViewWantsChange(const CTDCAttributeMap& mapAttrib) const;
-	BOOL ExtensionViewWantsChange(int nExt, const CTDCAttributeMap& mapAttrib) const;
+	BOOL AnyExtensionViewWantsChange(const CTDCAttributeMap& mapAttribIDs) const;
+	BOOL ExtensionViewWantsChange(int nExt, const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) const;
 	BOOL AllExtensionViewsNeedFullUpdate() const;
 	void BeginExtensionProgress(const VIEWDATA* pData, UINT nMsg = 0);
@@ -319,10 +320,10 @@ protected:
 	void SetExtensionsNeedFontUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
 	void SetListViewNeedFontUpdate(BOOL bUpdate);
 	DWORD ProcessUIExtensionMod(const IUITASKMOD& mod);
-	int GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttrib) const;
+	int GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttribIDs) const;
 	CString GetExtensionPrefsSubKey(const IUIExtensionWindow* pExtWnd);
-	void UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib);
-	void UpdateExtensionViewsTasks(TDC_ATTRIBUTE nAttrib);
+	void UpdateExtensionViewsSelection(const CTDCAttributeMap& mapAttribIDs);
+	void UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttribIDs);
 	void UpdateExtensionViewsProjectName();
 	BOOL IsExtensionView(HWND hWnd) const;
 	BOOL ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
@@ -332,22 +333,21 @@ protected:
 	BOOL ValidatePreviousSiblingTaskID(DWORD dwTaskID, DWORD& dwPrevSiblingID) const;
 	BOOL AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttrib) const;
 
-	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const;
-	BOOL GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, DWORD dwFlags, CTaskFile& tasks) const;
-	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttrib) const;
+	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, CTaskFile& tasks) const;
+	BOOL GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, DWORD dwFlags, CTaskFile& tasks) const;
 	int GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
 	int GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
 	BOOL CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const;
 
 	BOOL AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
 	BOOL AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hParentTask, const TDCGETTASKS& filter) const;
-	void AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const;
+	void AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttributeMap& mapAttribIDs) const;
 	int GetGlobals(TDC_ATTRIBUTE nAttrib, TDCAUTOLISTDATA& tld) const;
 
 	virtual VIEWDATA* NewViewData() { return new VIEWDATA(); }
 
 	static BOOL IsExtensionView(FTC_VIEW nView);
-	static int GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTDCAttributeMap& mapAttrib);
+	static int GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTDCAttributeMap& mapAttribIDs);
 	static IUI_APPCOMMAND MapGetNextToCommand(TTC_NEXTTASK nNext);
 	static TTC_NEXTTASK MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLevel);
 };

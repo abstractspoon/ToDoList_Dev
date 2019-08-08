@@ -82,6 +82,17 @@ struct TDCITEMCOLORS
 
 struct TDCNOTIFYMOD
 {
+	TDCNOTIFYMOD(TDC_ATTRIBUTE nAttribID) : mapAttrib(nAttribID) {}
+	TDCNOTIFYMOD(TDC_ATTRIBUTE nAttribID, const CDWordArray& taskIDs) : mapAttrib(nAttribID) 
+	{
+		aTaskIDs.Copy(taskIDs);
+	}
+
+	TDCNOTIFYMOD(const CTDCAttributeMap& attribIDs, const CDWordArray& taskIDs) : mapAttrib(attribIDs)
+	{
+		aTaskIDs.Copy(taskIDs);
+	}
+	
 	CTDCAttributeMap mapAttrib;
 	CDWordArray aTaskIDs;
 };

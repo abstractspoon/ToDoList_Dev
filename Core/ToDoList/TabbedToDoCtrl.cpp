@@ -976,111 +976,6 @@ BOOL CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTA
 }
 
 
-void CTabbedToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttrib) const
-{
-	mapAttrib.RemoveAll();
-
-	// Check for attribute dependencies
-	switch (nAttrib)
-	{
-	case TDCA_ALL:
-	case TDCA_NEWTASK:
-		GetAllExtensionViewsWantedAttributes(mapAttrib);
-		break;
-
-	case TDCA_DEPENDENCY:
-		mapAttrib.Add(nAttrib);
-
-		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
-		{
-			mapAttrib.Add(TDCA_DUEDATE);
-			mapAttrib.Add(TDCA_STARTDATE);
-		}
-		break;
-
-	case TDCA_DUEDATE:
-		mapAttrib.Add(nAttrib);
-
-		// If this extension view wants due or start dates and dependents may
-		// have changed then we send all tasks with dates
-		if (m_taskTree.SelectionHasDependents() && 
-			HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
-		{
-			mapAttrib.Add(TDCA_STARTDATE);
-		}
-
-		if (HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && 
-			HasStyle(TDCS_USEHIGHESTPRIORITY))
-		{
-			mapAttrib.Add(TDCA_PRIORITY);
-		}
-
-		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
-		{
-			mapAttrib.Add(TDCA_STARTDATE);
-			mapAttrib.Add(TDCA_TIMEEST);
-		}
-		break;
-
-	case TDCA_STARTDATE:
-		mapAttrib.Add(nAttrib);
-
-		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
-		{
-			mapAttrib.Add(TDCA_DUEDATE);
-			mapAttrib.Add(TDCA_TIMEEST);
-		}
-		break;
-
-	case TDCA_DONEDATE:
-		mapAttrib.Add(nAttrib);
-		mapAttrib.Add(TDCA_SUBTASKDONE);
-
-		if (m_taskTree.SelectionHasDependents() && 
-			HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
-		{
-			mapAttrib.Add(TDCA_DUEDATE);
-			mapAttrib.Add(TDCA_STARTDATE);
-		}
-		
-		if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && 
-			HasStyle(TDCS_INCLUDEDONEINAVERAGECALC))
-		{
-			mapAttrib.Add(TDCA_PERCENT);
-		}
-		
-		if (HasStyle(TDCS_INCLUDEDONEINRISKCALC) && 
-			HasStyle(TDCS_USEHIGHESTRISK))
-		{
-			mapAttrib.Add(TDCA_RISK);
-		}
-		
-		if (HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) && 
-			HasStyle(TDCS_USEHIGHESTPRIORITY))
-		{
-			mapAttrib.Add(TDCA_PRIORITY);
-		}
-
-		if (!m_sCompletionStatus.IsEmpty())
-		{
-			mapAttrib.Add(TDCA_STATUS);
-		}
-		break;
-
-	case TDCA_CUSTOMATTRIBDEFS:
-		mapAttrib.Add(TDCA_CUSTOMATTRIB);
-		break;
-
-	default: // all else
-		mapAttrib.Add(nAttrib);
-		break;
-	}
-
-	// Finally check for colour change
-	if (ModCausesColorChange(mapAttrib))
-		mapAttrib.Add(TDCA_COLOR);
-}
-
 int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, 
 															DWORD dwFlags, CTaskFile& tasks) const
 {
@@ -2989,9 +2884,9 @@ void CTabbedToDoCtrl::SetListViewNeedFontUpdate(BOOL bUpdate)
 		pVData->bNeedFontUpdate = bUpdate;
 }
 
-void CTabbedToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs)
+void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs)
 {
-	CToDoCtrl::SetModified(nAttrib, aModTaskIDs);
+	CToDoCtrl::SetModified(mapAttribIDs, aModTaskIDs);
 
 	DWORD dwModTaskID = (aModTaskIDs.GetSize() ? aModTaskIDs[0] : 0);
 
@@ -2999,13 +2894,12 @@ void CTabbedToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aMod
 	// so as not to delay the appearance of the title edit field.
 	// So, we don't update 'other' views until we receive a successful 
 	// title edit notification unless they are the active view
-	BOOL bNewSingleTask = ((nAttrib == TDCA_NEWTASK) &&
-		(aModTaskIDs.GetSize() == 1));
+	BOOL bNewSingleTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && 
+							(aModTaskIDs.GetSize() == 1));
 
-	BOOL bNewTaskTitleEdit = ((nAttrib == TDCA_TASKNAME) &&
-		(aModTaskIDs.GetSize() == 1) &&
-							  (dwModTaskID == m_dwLastAddedID));
-
+	BOOL bNewTaskTitleEdit = (mapAttribIDs.HasOnly(TDCA_TASKNAME) &&
+								(aModTaskIDs.GetSize() == 1) &&
+								(dwModTaskID == m_dwLastAddedID));
 	switch (GetTaskView())
 	{
 	case FTCV_TASKTREE:
@@ -3017,13 +2911,13 @@ void CTabbedToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aMod
 		}
 		else if (!bNewSingleTask)
 		{
-			UpdateListView(nAttrib, dwModTaskID);
-			UpdateExtensionViews(nAttrib, dwModTaskID);
+			UpdateListView(mapAttribIDs, dwModTaskID);
+			UpdateExtensionViews(mapAttribIDs, dwModTaskID);
 		}
 		break;
 
 	case FTCV_TASKLIST:
-		UpdateListView(nAttrib, dwModTaskID);
+		UpdateListView(mapAttribIDs, dwModTaskID);
 
 		if (bNewTaskTitleEdit)
 		{
@@ -3031,7 +2925,7 @@ void CTabbedToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aMod
 		}
 		else if (!bNewSingleTask)
 		{
-			UpdateExtensionViews(nAttrib, dwModTaskID);
+			UpdateExtensionViews(mapAttribIDs, dwModTaskID);
 		}
 		else
 		{
@@ -3056,7 +2950,7 @@ void CTabbedToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aMod
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		UpdateExtensionViews(nAttrib, dwModTaskID);
+		UpdateExtensionViews(mapAttribIDs, dwModTaskID);
 
 		if (bNewTaskTitleEdit)
 		{
@@ -3064,7 +2958,7 @@ void CTabbedToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aMod
 		}
 		else if (!bNewSingleTask)
 		{
-			UpdateListView(nAttrib, dwModTaskID);
+			UpdateListView(mapAttribIDs, dwModTaskID);
 		}
 		else
 		{
@@ -3075,7 +2969,15 @@ void CTabbedToDoCtrl::SetModified(TDC_ATTRIBUTE nAttrib, const CDWordArray& aMod
 	}
 }
 
-void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
+void CTabbedToDoCtrl::GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const
+{
+	CToDoCtrl::GetAttributesAffectedByMods(mapModAttribIDs, mapAffectedAttribIDs);
+
+	if (mapModAttribIDs.Has(TDCA_ALL) || mapModAttribIDs.Has(TDCA_NEWTASK))
+		GetAllExtensionViewsWantedAttributes(mapAffectedAttribIDs);
+}
+
+void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID)
 {
 	// Don't do anything if we are not active and we are waiting
 	// for a full task update
@@ -3084,40 +2986,34 @@ void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 	if (!InListView() && pVData->bNeedFullTaskUpdate)
 		return;
 
-	m_taskList.SetModified(nAttrib); // always
+	m_taskList.SetModified(mapAttribIDs/*, TRUE*/);
 
-	switch (nAttrib)
+	if (mapAttribIDs.Has(TDCA_DELETE))
 	{
-	case TDCA_DELETE:
 		// Deletion operations are fairly quick so we do those 
 		// even if the List View is not active
 		if (m_taskTree.GetItemCount())
 			m_taskList.RemoveDeletedItems();
 		else
 			m_taskList.DeleteAll();
-		break;
-
-	case TDCA_ARCHIVE:
+	}
+	else if (mapAttribIDs.Has(TDCA_ARCHIVE))
+	{
 		m_taskList.RemoveDeletedItems();
-		break;
+	}
+	else if (mapAttribIDs.Has(TDCA_NEWTASK) && dwTaskID)
+	{
+		int nSel = m_taskList.GetSelectedItem();
 
-	case TDCA_NEWTASK:
-		// If this is a 'single new task' we add it to the list
-		// below the currently selected item
-		if (dwTaskID)
-		{
-			int nSel = m_taskList.GetSelectedItem();
+		if (nSel != -1)
+			nSel++;
 
-			if (nSel != -1)
-				nSel++;
-
-			m_taskList.InsertItem(dwTaskID, nSel);
-			break;
-		}
-		// else fall thru to rebuild list
-
-	case TDCA_UNDO:
-	case TDCA_PASTE:
+		m_taskList.InsertItem(dwTaskID, nSel);
+	}
+	else if (mapAttribIDs.Has(TDCA_NEWTASK) ||
+			 mapAttribIDs.Has(TDCA_UNDO) ||
+			 mapAttribIDs.Has(TDCA_PASTE))
+	{
 		if (InListView())
 		{
 			// The tree will have selected the undone items
@@ -3132,70 +3028,12 @@ void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 		{
 			pVData->bNeedFullTaskUpdate = TRUE;
 		}
-		break;
-
-	case TDCA_MERGE:
-	default: // all other attributes
+	}
+	else // TDCA_MERGE and all other attributes
+	{
 		if (InListView())
 			m_taskList.InvalidateSelection();
-		break;
 	}
-}
-
-BOOL CTabbedToDoCtrl::ModCausesColorChange(TDC_ATTRIBUTE nModType) const
-{
-	switch (nModType)
-	{
-	case TDCA_ALL:
-		return TRUE;
-
-	case TDCA_COLOR:
-		return !HasStyle(TDCS_COLORTEXTBYPRIORITY) &&
-				!HasStyle(TDCS_COLORTEXTBYATTRIBUTE) &&
-				!HasStyle(TDCS_COLORTEXTBYNONE);
-
-	case TDCA_CATEGORY:
-	case TDCA_ALLOCBY:
-	case TDCA_ALLOCTO:
-	case TDCA_STATUS:
-	case TDCA_VERSION:
-	case TDCA_EXTERNALID:
-	case TDCA_TAGS:
-		return (HasStyle(TDCS_COLORTEXTBYATTRIBUTE) && (m_taskList.GetColorByAttribute() == nModType));
-
- 	case TDCA_DONEDATE:
- 		return (m_taskList.GetCompletedTaskColor() != CLR_NONE);
-
- 	case TDCA_DUEDATE:
-		{
-			COLORREF crDue, crDueToday;
-			m_taskList.GetDueTaskColors(crDue, crDueToday);
-
- 			return ((crDue != CLR_NONE) || (crDueToday != CLR_NONE));
-		}
-
-	case TDCA_PRIORITY:
-		return HasStyle(TDCS_COLORTEXTBYPRIORITY);
-	}
-
-	// all else
-	return FALSE;
-}
-
-BOOL CTabbedToDoCtrl::ModCausesColorChange(const CTDCAttributeMap& mapAttrib) const
-{
-	POSITION pos = mapAttrib.GetStartPosition();
-	
-	while (pos)
-	{
-		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
-
-		if (ModCausesColorChange(nAttrib))
-			return TRUE;
-	}
-
-	// else
-	return FALSE;
 }
 
 int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTDCAttributeMap& mapAttrib)
@@ -3232,10 +3070,10 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 	return mapAttrib.GetCount();
 }
 
-int CTabbedToDoCtrl::GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttrib) const
+int CTabbedToDoCtrl::GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttribIDs) const
 {
 	// Build a map of wanted attributes for all extensions
-	mapAttrib.RemoveAll();
+	mapAttribIDs.RemoveAll();
 	int nExt = m_aExtViews.GetSize();
 	
 	while (nExt--)
@@ -3247,97 +3085,95 @@ int CTabbedToDoCtrl::GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapA
 			CTDCAttributeMap mapExtAttrib;
 
 			if (GetExtensionViewAttributes(pExtWnd, mapExtAttrib))
-				mapAttrib.Append(mapExtAttrib);
+				mapAttribIDs.Append(mapExtAttrib);
 		}
 	}
 
-	return mapAttrib.GetCount();
+	return mapAttribIDs.GetCount();
 }
 
-void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
+void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID)
 {
-	if (!HasAnyExtensionViews() || (nAttrib == TDCA_NONE))
+	if (!HasAnyExtensionViews() || mapAttribIDs.Has(TDCA_NONE))
 		return;
 
 	FTC_VIEW nCurView = GetTaskView();
 
-	switch (nAttrib)
+	if (mapAttribIDs.Has(TDCA_NEWTASK))
 	{
-	// for a simple attribute change (or addition) update all extensions
-	// at the same time so that they won't need updating when the user switches view
-	case TDCA_TASKNAME:
-	case TDCA_ALL:
-	case TDCA_DONEDATE:
-	case TDCA_DUEDATE:
-	case TDCA_STARTDATE:
-	case TDCA_PRIORITY:
-	case TDCA_COLOR:
-	case TDCA_ALLOCTO:
-	case TDCA_ALLOCBY:
-	case TDCA_STATUS:
-	case TDCA_CATEGORY:
-	case TDCA_TAGS:
-	case TDCA_PERCENT:
-	case TDCA_TIMEEST:
-	case TDCA_TIMESPENT:
-	case TDCA_FILEREF:
-	case TDCA_COMMENTS:
-	case TDCA_FLAG:
-	case TDCA_LOCK:
-	case TDCA_CREATIONDATE:
-	case TDCA_CREATEDBY:
-	case TDCA_RISK: 
-	case TDCA_EXTERNALID: 
-	case TDCA_COST: 
-	case TDCA_DEPENDENCY: 
-	case TDCA_RECURRENCE: 
-	case TDCA_VERSION:
-	case TDCA_CUSTOMATTRIBDEFS:
-	case TDCA_ICON:
-		UpdateExtensionViewsSelection(nAttrib);
-		break;
-		
-	case TDCA_NEWTASK: 
 		// Special case: if dwTaskID is set then it's a single task
 		// so we treat it like an edit
 		if (dwTaskID)
-			UpdateExtensionViewsSelection(nAttrib);
+		{
+			UpdateExtensionViewsSelection(mapAttribIDs);
+		}
 		else
-			UpdateExtensionViewsTasks(nAttrib);
-		break;
-
-	// These attributes require an entire refresh of the current view 
-	// (if it's an extension) and mark the others as needing updates
-	case TDCA_DELETE:
-	case TDCA_UNDO:
-	case TDCA_PASTE:
-	case TDCA_MERGE:
-	case TDCA_ARCHIVE:
-		UpdateExtensionViewsTasks(nAttrib);
-		break;	
-
-	case TDCA_POSITION: // == move
-	case TDCA_POSITION_SAMEPARENT:
-	case TDCA_POSITION_DIFFERENTPARENT:
-		if (m_nExtModifyingAttrib != nAttrib)
-			UpdateExtensionViewsTasks(nAttrib);
-		break;	
-
-	case TDCA_PROJECTNAME:
+		{
+			UpdateExtensionViewsTasks(mapAttribIDs);
+		}
+	}
+	else if (mapAttribIDs.Has(TDCA_DELETE) ||
+			 mapAttribIDs.Has(TDCA_UNDO) ||
+			 mapAttribIDs.Has(TDCA_PASTE) ||
+			 mapAttribIDs.Has(TDCA_MERGE) ||
+			 mapAttribIDs.Has(TDCA_ARCHIVE))
+	{
+		// These attributes require an entire refresh of the current view 
+		// (if it's an extension) and mark the others as needing updates
+		UpdateExtensionViewsTasks(mapAttribIDs);
+	}
+	else if (mapAttribIDs.Has(TDCA_POSITION) ||
+			 mapAttribIDs.Has(TDCA_POSITION_SAMEPARENT) ||
+			 mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT))
+	{
+		if (!mapAttribIDs.HasOnly(m_nExtModifyingAttrib))
+		{
+			UpdateExtensionViewsTasks(mapAttribIDs);
+		}
+	}
+	else if (mapAttribIDs.Has(TDCA_PROJECTNAME))
+	{
 		UpdateExtensionViewsProjectName();
-		break;
-
-	case TDCA_ENCRYPT:
-	case TDCA_METADATA:
+	}
+	else if (mapAttribIDs.Has(TDCA_ENCRYPT) || 
+			 mapAttribIDs.Has(TDCA_METADATA))
+	{
 		// do nothing
-		break;
-
-	default:
-		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
-			UpdateExtensionViewsSelection(nAttrib);
-		else
-			ASSERT(0);
-		break;
+	}
+	else // all else
+	{
+		// for a simple attribute change (or addition) update all extensions
+		// at the same time so that they won't need updating when the user switches view
+		// TDCA_TASKNAME:
+		// TDCA_ALL:
+		// TDCA_DONEDATE:
+		// TDCA_DUEDATE:
+		// TDCA_STARTDATE:
+		// TDCA_PRIORITY:
+		// TDCA_COLOR:
+		// TDCA_ALLOCTO:
+		// TDCA_ALLOCBY:
+		// TDCA_STATUS:
+		// TDCA_CATEGORY:
+		// TDCA_TAGS:
+		// TDCA_PERCENT:
+		// TDCA_TIMEEST:
+		// TDCA_TIMESPENT:
+		// TDCA_FILEREF:
+		// TDCA_COMMENTS:
+		// TDCA_FLAG:
+		// TDCA_LOCK:
+		// TDCA_CREATIONDATE:
+		// TDCA_CREATEDBY:
+		// TDCA_RISK: 
+		// TDCA_EXTERNALID: 
+		// TDCA_COST: 
+		// TDCA_DEPENDENCY: 
+		// TDCA_RECURRENCE: 
+		// TDCA_VERSION:
+		// TDCA_CUSTOMATTRIBDEFS:
+		// TDCA_ICON:
+		UpdateExtensionViewsSelection(mapAttribIDs);
 	}
 }
 
@@ -3369,26 +3205,20 @@ void CTabbedToDoCtrl::UpdateExtensionViewsProjectName()
 	}
 }
 
-void CTabbedToDoCtrl::UpdateExtensionViewsTasks(TDC_ATTRIBUTE nAttrib)
+void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttribIDs)
 {
 	// Sanity check
-	switch (nAttrib)
+	if (!mapAttribIDs.Has(TDCA_DELETE) &&
+		!mapAttribIDs.Has(TDCA_UNDO) &&
+		!mapAttribIDs.Has(TDCA_PASTE) &&
+		!mapAttribIDs.Has(TDCA_MERGE) &&
+		!mapAttribIDs.Has(TDCA_ARCHIVE) &&
+		!mapAttribIDs.Has(TDCA_PROJECTNAME) &&
+		!mapAttribIDs.Has(TDCA_ENCRYPT) &&
+		!mapAttribIDs.Has(TDCA_POSITION) &&
+		!mapAttribIDs.Has(TDCA_POSITION_SAMEPARENT) &&
+		!mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT))
 	{
-	case TDCA_DELETE:
-	case TDCA_NEWTASK: 
-	case TDCA_UNDO:
-	case TDCA_PASTE:
-	case TDCA_MERGE:
-	case TDCA_ARCHIVE:
-		break;
-
-	case TDCA_POSITION:
-	case TDCA_POSITION_SAMEPARENT:
-	case TDCA_POSITION_DIFFERENTPARENT:
-		// move
-		break;
-
-	default:
 		ASSERT(0);
 		return;
 	}
@@ -3402,12 +3232,12 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(TDC_ATTRIBUTE nAttrib)
 
 		if (pVData && pExtWnd)
 		{
-			IUI_UPDATETYPE nUpdate = TDC::MapAttributeToIUIUpdateType(nAttrib);
+			IUI_UPDATETYPE nUpdate = TDC::MapAttributeToIUIUpdateType(mapAttribIDs);
 
 			CTaskFile tasks;
 
 			if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks) ||
-				((nAttrib == TDCA_DELETE) && (GetTaskCount() == 0)))
+				(mapAttribIDs.Has(TDCA_DELETE) && (GetTaskCount() == 0)))
 			{
 				CWaitCursor cursor;
 				BeginExtensionProgress(pVData);
@@ -3425,26 +3255,22 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(TDC_ATTRIBUTE nAttrib)
 	SetExtensionsNeedTaskUpdate(TRUE, nView);
 }
 
-void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
+void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapAttribIDs)
 {
 	ASSERT(HasAnyExtensionViews());
 
-	switch (nAttrib)
+	// Sanity check
+	if (mapAttribIDs.Has(TDCA_DELETE) ||
+		mapAttribIDs.Has(TDCA_UNDO) ||
+		mapAttribIDs.Has(TDCA_PASTE) ||
+		mapAttribIDs.Has(TDCA_MERGE) ||
+		mapAttribIDs.Has(TDCA_ARCHIVE) ||
+		mapAttribIDs.Has(TDCA_PROJECTNAME) ||
+		mapAttribIDs.Has(TDCA_ENCRYPT) ||
+		mapAttribIDs.Has(TDCA_POSITION) ||
+		mapAttribIDs.Has(TDCA_POSITION_SAMEPARENT) ||
+		mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT))
 	{
-	case TDCA_DELETE:
-	case TDCA_UNDO:
-	case TDCA_PASTE:
-	case TDCA_MERGE:
-	case TDCA_ARCHIVE:
-	case TDCA_PROJECTNAME:
-	case TDCA_ENCRYPT:
-		ASSERT(0);
-		return;
-
-	case TDCA_POSITION:
-	case TDCA_POSITION_SAMEPARENT:
-	case TDCA_POSITION_DIFFERENTPARENT: 
-		// == move
 		ASSERT(0);
 		return;
 	}
@@ -3459,62 +3285,49 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 
 	// Work out what tasks we want
 	DWORD dwFlags = TDCGSTF_RESOLVEREFERENCES;
-	CTDCAttributeMap mapAttrib;
 	IUI_UPDATETYPE nUpdate = IUI_EDIT; // default
 	
-	GetAttributesAffectedByMod(nAttrib, mapAttrib);
-
-	switch (nAttrib)
+	if (mapAttribIDs.Has(TDCA_NEWTASK))
 	{
-	case TDCA_NEWTASK:
-		{
-			// Always include parent chain but not subtasks
-			dwFlags |= (TDCGSTF_ALLPARENTS | TDCGSTF_NOTSUBTASKS);
+		// Always include parent chain but not subtasks
+		dwFlags |= (TDCGSTF_ALLPARENTS | TDCGSTF_NOTSUBTASKS);
 
-			// Special update type
-			nUpdate = IUI_NEW;
-		}
-		break;
+		// Special update type
+		nUpdate = IUI_NEW;
+	}
+	else
+	{
+		// We don't need to proceed if no extension wants 
+		// any of the changes
+		if (!AnyExtensionViewWantsChange(mapAttribIDs))
+			return;
 
-	default:
-		{
-			// We don't need to proceed if no extension wants 
-			// any of the changes
-			if (!AnyExtensionViewWantsChange(mapAttrib))
-				return;
+		// Include parents if there is a colour change 
+		// or a calculated attribute change
+		if (mapAttribIDs.Has(TDCA_COLOR) || HasCalculatedAttributes(mapAttribIDs))
+			dwFlags |= TDCGSTF_ALLPARENTS;
 
-			// Include parents if there is a colour change 
-			// or a calculated attribute change
-			if (mapAttrib.Has(TDCA_COLOR) || IsCalculatedAttribute(nAttrib))
-				dwFlags |= TDCGSTF_ALLPARENTS;
-
-			// DONT include subtasks UNLESS the completion date has changed
-			// OR this is an inherited attribute
-			if ((nAttrib != TDCA_DONEDATE) && !m_data.WantUpdateInheritedAttibute(nAttrib))
-				dwFlags |= TDCGSTF_NOTSUBTASKS;
-		}
+		// DONT include subtasks UNLESS the completion date has changed
+		// OR this is an inherited attribute
+		if (!mapAttribIDs.Has(TDCA_DONEDATE) && !WantUpdateInheritedAttibutes(mapAttribIDs))
+			dwFlags |= TDCGSTF_NOTSUBTASKS;
 	}
 
 	// Get the actual tasks for the update
 	CTaskFile tasks;
 
-	switch (nAttrib)
+	if ((mapAttribIDs.Has(TDCA_DEPENDENCY) ||
+		mapAttribIDs.Has(TDCA_DUEDATE) ||
+		mapAttribIDs.Has(TDCA_DONEDATE) ||
+		mapAttribIDs.Has(TDCA_STARTDATE)) &&
+		m_taskTree.SelectionHasDependents())
 	{
-	case TDCA_DEPENDENCY:
-	case TDCA_DUEDATE:
-	case TDCA_DONEDATE:
-	case TDCA_STARTDATE:
 		// For the moment 
-		if (m_taskTree.SelectionHasDependents())
-		{
-			GetAllTasksForExtensionViewUpdate(mapAttrib, tasks);
-			break;
-		}
-		// else fall thru
-
-	default:
-		GetSelectedTasksForExtensionViewUpdate(mapAttrib, dwFlags, tasks);
-		break;
+		GetAllTasksForExtensionViewUpdate(mapAttribIDs, tasks);
+	}
+	else
+	{
+		GetSelectedTasksForExtensionViewUpdate(mapAttribIDs, dwFlags, tasks);
 	}
 	
 	// refresh all extensions 
@@ -3543,6 +3356,32 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 			pVData->bNeedFullTaskUpdate = TRUE;
 		}
 	}
+}
+
+BOOL CTabbedToDoCtrl::HasCalculatedAttributes(const CTDCAttributeMap& mapAttribIDs) const
+{
+	POSITION pos = mapAttribIDs.GetStartPosition();
+
+	while (pos)
+	{
+		if (IsCalculatedAttribute(mapAttribIDs.GetNext(pos)))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTabbedToDoCtrl::WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const
+{
+	POSITION pos = mapAttribIDs.GetStartPosition();
+
+	while (pos)
+	{
+		if (m_data.WantUpdateInheritedAttibute(mapAttribIDs.GetNext(pos)))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CTabbedToDoCtrl::IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const
@@ -3835,15 +3674,15 @@ void CTabbedToDoCtrl::ResortSelectedTaskParents()
 	}
 }
 
-BOOL CTabbedToDoCtrl::ModNeedsResort(TDC_ATTRIBUTE nModType) const
+BOOL CTabbedToDoCtrl::ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) const
 {
 	if (!HasStyle(TDCS_RESORTONMODIFY) || m_findReplace.IsReplacing())
 		return FALSE;
 
 	VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
 
-	BOOL bTreeNeedsResort = CToDoCtrl::ModNeedsResort(nModType);
-	BOOL bListNeedsResort = m_taskList.ModNeedsResort(nModType);
+	BOOL bTreeNeedsResort = m_taskTree.ModsNeedResort(mapAttribIDs);
+	BOOL bListNeedsResort = m_taskList.ModsNeedResort(mapAttribIDs);
 	
 	FTC_VIEW nView = GetTaskView();
 
