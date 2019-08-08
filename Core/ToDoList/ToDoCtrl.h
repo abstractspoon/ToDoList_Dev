@@ -345,7 +345,6 @@ public:
 	virtual BOOL IsMultiSorting() const { return m_taskTree.IsMultiSorting(); }
 	virtual BOOL IsSortingBy(TDC_COLUMN nBy) const { return m_taskTree.IsSortingBy(nBy); }
 	virtual void Resort(BOOL bAllowToggle = FALSE) { m_taskTree.Resort(bAllowToggle); }
-	virtual void ResortSelectedTaskParents() { m_taskTree.ResortSelectedTaskParents(); }
 
 	// move functions
 	virtual BOOL MoveSelectedTask(TDC_MOVETASK nDirection);
@@ -708,8 +707,7 @@ protected:
 	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	
-	virtual BOOL ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) const;
-	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs);
+	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	virtual void GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const;
 
 	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);

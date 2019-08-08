@@ -3225,7 +3225,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_OFFSET nOffs
 		mapAttribIDs.Add(TDCA_STARTDATE);
 		mapAttribIDs.Add(TDCA_DUEDATE);
 
-		SetModified(mapAttribIDs, aModTaskIDs); 
+		SetModified(mapAttribIDs, aModTaskIDs, TRUE); 
 		UpdateControls(FALSE); // don't update comments
 	}
 	
@@ -3646,7 +3646,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 			mapAttribIDs.Add(TDCA_STATUS);
 		}
 
-		SetModified(mapAttribIDs, aModTaskIDs);
+		SetModified(mapAttribIDs, aModTaskIDs, TRUE);
 	}
 	
 	return TRUE;
@@ -4090,7 +4090,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst)
 			mapAttribIDs.Add(TDCA_DUEDATE);
 		}
 
-		SetModified(mapAttribIDs, aModTaskIDs);
+		SetModified(mapAttribIDs, aModTaskIDs, TRUE);
 	}
 	
 	return TRUE;
@@ -6863,40 +6863,21 @@ BOOL CToDoCtrl::IsModified() const
 void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs)
 {
 	CTDCAttributeMap mapAttribIDs;
-	
 	GetAttributesAffectedByMod(nAttribID, mapAttribIDs);
-	SetModified(mapAttribIDs, aModTaskIDs);
+	
+	// Don't allow sorting during find/replace operation because
+	// it messes up the order of the items	
+	SetModified(mapAttribIDs, aModTaskIDs, !m_findReplace.IsReplacing());
 }
 
-void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs)
+void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
 {
 	if (IsReadOnly())
 		return;
 	
 	SetModified(TRUE);
 	
-	// Don't sort during find/replace operation because
-	// it messes up the order of the items	
-	m_taskTree.SetModified(mapAttribIDs/*, !m_findReplace.IsReplacing()*/);
-
-	if (ModsNeedResort(mapAttribIDs))
-	{
-		ASSERT(!m_findReplace.IsReplacing());
-
-		// if the mod was a task completion and the parent completed state 
-		// is based on this then we need to resort the entire tree 
-		// likewise for start dates and due dates
-		if ((mapAttribIDs.Has(TDCA_DONEDATE) && HasStyle(TDCS_TREATSUBCOMPLETEDASDONE)) ||
-			(mapAttribIDs.Has(TDCA_DUEDATE) && (HasStyle(TDCS_USEEARLIESTDUEDATE) || HasStyle(TDCS_USELATESTDUEDATE))) ||
-			(mapAttribIDs.Has(TDCA_STARTDATE) && (HasStyle(TDCS_USEEARLIESTSTARTDATE) || HasStyle(TDCS_USELATESTSTARTDATE))))
-		{
-			Resort();
-		}
-		else // attributes that only have a local effect
-		{
-			ResortSelectedTaskParents();
-		}
-	}
+	m_taskTree.SetModified(mapAttribIDs, bAllowResort);
 
 	TDCNOTIFYMOD mod(mapAttribIDs, aModTaskIDs);
 	GetParent()->SendMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)&mod);
@@ -6908,16 +6889,6 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 
 	if (mapAttribIDs.Has(TDCA_LOCK))
 		UpdateControls(FALSE);
-}
-
-BOOL CToDoCtrl::ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) const
-{
-	// Don't sort during find/replace operation because
-	// it messes up the order of the items
-	if (m_findReplace.IsReplacing() || !HasStyle(TDCS_RESORTONMODIFY))
-		return FALSE;
-
-	return m_taskTree.ModsNeedResort(mapAttribIDs);
 }
 
 void CToDoCtrl::GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const
@@ -6933,8 +6904,10 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 	// Check for attribute dependencies
 	switch (nAttrib)
 	{
-	case TDCA_ALL:
+	
+
 	case TDCA_NEWTASK:
+		mapAttribIDs.Add(nAttrib);
 		mapAttribIDs.Add(TDCA_ALL);
 		break;
 
@@ -7039,7 +7012,7 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 	}
 
 	// Finally check for colour change
-	if (ModsCauseColorChange(mapAttribIDs))
+	if (ModsCauseColorChange(mapAttribIDs) && !mapAttribIDs.Has(TDCA_ALL))
 		mapAttribIDs.Add(TDCA_COLOR);
 }
 

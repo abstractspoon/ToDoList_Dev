@@ -4138,7 +4138,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	return FALSE;
 }
 
-void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs/*, BOOL bAllowResort*/)
+void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort)
 {
 	if (AttribsMatchSort(mapAttribIDs))
 		m_sort.bModSinceLastSort = TRUE;
@@ -4156,6 +4156,11 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs/*, BOOL 
 
 		switch (nAttribID)
 		{
+		case TDCA_ALL:
+			// Only valid in conjunction with TDCA_NEWTASK
+			ASSERT(mapAttribIDs.Has(TDCA_NEWTASK));
+			continue;
+
 		case TDCA_CREATIONDATE:
 			// this can only be modified for new tasks via the commandline
 			// so nothing needs to be done
@@ -4312,10 +4317,10 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs/*, BOOL 
 		}
 	}
 
-// 	if (bAllowResort && ModsNeedResort(mapAttribIDs))
-// 	{
-// 		Resort();
-// 	}
+	if (bAllowResort && ModsNeedResort(mapAttribIDs))
+	{
+		Resort();
+	}
 
 	RecalcUntrackedColumnWidths(aColIDs);
 	

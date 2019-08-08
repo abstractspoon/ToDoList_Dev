@@ -597,20 +597,6 @@ namespace TDC
 		return TDCD_NONE;
 	}
 
-	static IUI_UPDATETYPE MapAttributeToIUIUpdateType(const CTDCAttributeMap& mapAttribIDs)
-	{
-		// Sanity check
-		POSITION pos = mapAttribIDs.GetStartPosition();
-
-		if (!pos)
-		{
-			ASSERT(0);
-			return IUI_EDIT;
-		}
-
-		return MapAttributeToIUIUpdateType(mapAttribIDs.GetNext(pos));
-	}
-
 	static IUI_UPDATETYPE MapAttributeToIUIUpdateType(TDC_ATTRIBUTE nAttrib)
 	{
 		switch (nAttrib)
@@ -672,6 +658,21 @@ namespace TDC
 
 		ASSERT(0);
 		return IUI_EDIT;
+	}
+
+	static IUI_UPDATETYPE MapAttributesToIUIUpdateType(const CTDCAttributeMap& mapAttribIDs)
+	{
+		// Sanity check
+		POSITION pos = mapAttribIDs.GetStartPosition();
+
+		if (!pos)
+		{
+			ASSERT(0);
+			return IUI_EDIT;
+		}
+
+		// Just check the first
+		return MapAttributeToIUIUpdateType(mapAttribIDs.GetNext(pos));
 	}
 
 	static void MapSortColumnsToIUIMultiSort(const TDSORTCOLUMN* pSortCols, IUIMULTISORT& multiSort)

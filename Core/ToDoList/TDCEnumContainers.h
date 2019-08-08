@@ -74,7 +74,9 @@ public:
 	void Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt);
 
 protected:
-	static BOOL CanAdd(TDC_ATTRIBUTE nAttrib);
+	BOOL CanAdd(TDC_ATTRIBUTE nAttrib) const;
+	
+	static BOOL IsRegularAttribute(TDC_ATTRIBUTE nAttrib);
 };
 
 //////////////////////////////////////////////////////////////////////

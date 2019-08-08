@@ -2680,7 +2680,7 @@ void CTDLTaskTreeCtrl::RefreshItemBoldState(HTREEITEM hti, BOOL bAndChildren)
 	}
 }
 
-void CTDLTaskTreeCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs/*, BOOL bAllowResort*/)
+void CTDLTaskTreeCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort)
 {
 	// Note: Tree item map should already be up to date
 	// so we just assert on it
@@ -2706,7 +2706,6 @@ void CTDLTaskTreeCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs/*, BOOL 
 		ASSERT(m_mapHTItems.GetCount() >= (int)m_tcTasks.GetCount());
 	}
 	
-/*
 	if (bAllowResort && ModsNeedResort(mapAttribIDs))
 	{
 		// if the mod was a task completion and the parent completed state 
@@ -2724,7 +2723,6 @@ void CTDLTaskTreeCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs/*, BOOL 
 			bAllowResort = FALSE;
 		}
 	}
-*/
 
-	CTDLTaskCtrlBase::SetModified(mapAttribIDs/*, bAllowResort*/);
+	CTDLTaskCtrlBase::SetModified(mapAttribIDs, bAllowResort);
 }

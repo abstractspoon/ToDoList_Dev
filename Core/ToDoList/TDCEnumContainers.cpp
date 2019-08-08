@@ -55,61 +55,94 @@ int CTDCAttributeMap::Append(const CTDCAttributeMap& other)
 	return nAdded;
 }
 
-BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib)
+BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib) const
+{
+	BOOL bCanAdd = FALSE;
+
+	switch (nAttrib)
+	{
+	case TDCA_ALL:
+		// Must be empty or only contain TDCA_NEWTASK
+		bCanAdd = (IsEmpty() || HasOnly(TDCA_NEWTASK));
+		break;
+
+	case TDCA_NEWTASK:
+		// Must be empty or only contain TDCA_ALL
+		bCanAdd = (IsEmpty() || HasOnly(TDCA_ALL));
+		break;
+
+	default:
+		if (IsRegularAttribute(nAttrib))
+		{
+			// May not contain pseudo-attributes
+			// which could only ever be the first attribute
+			POSITION pos = GetStartPosition();
+
+			if (pos)
+				bCanAdd = IsRegularAttribute(GetNext(pos));
+			else
+				bCanAdd = TRUE;
+		}
+		else // rest of pseudo-attributes
+		{
+			// Must be empty
+			bCanAdd = IsEmpty();
+		}
+	}
+
+	ASSERT(bCanAdd);
+	return bCanAdd;
+}
+
+BOOL CTDCAttributeMap::IsRegularAttribute(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case TDCA_ALL:			
-	case TDCA_ALLOCBY:			
-	case TDCA_ALLOCTO:			
-	case TDCA_CATEGORY:			
-	case TDCA_COLOR:			
-	case TDCA_COMMENTS:			
-	case TDCA_COST:				
-	case TDCA_CREATEDBY:		
-	case TDCA_CREATIONDATE:		
-	case TDCA_DEPENDENCY:		
-	case TDCA_DONEDATE:			
-	case TDCA_DONETIME:			
-	case TDCA_DUEDATE:			
-	case TDCA_DUETIME:			
-	case TDCA_EXTERNALID:		
-	case TDCA_FILEREF:			
-	case TDCA_FLAG:				
+	case TDCA_ALLOCBY:
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_COLOR:
+	case TDCA_COMMENTS:
+	case TDCA_COST:
+	case TDCA_CREATEDBY:
+	case TDCA_CREATIONDATE:
+	case TDCA_DEPENDENCY:
+	case TDCA_DONEDATE:
+	case TDCA_DONETIME:
+	case TDCA_DUEDATE:
+	case TDCA_DUETIME:
+	case TDCA_EXTERNALID:
+	case TDCA_FILEREF:
+	case TDCA_FLAG:
 	case TDCA_HTMLCOMMENTS:
-	case TDCA_ICON:				
+	case TDCA_ICON:
 	case TDCA_ID:
-	case TDCA_LOCK:				
-	case TDCA_LASTMODDATE:	
-	case TDCA_LASTMODBY:	
-	case TDCA_METADATA:	
+	case TDCA_LOCK:
+	case TDCA_LASTMODDATE:
+	case TDCA_LASTMODBY:
+	case TDCA_METADATA:
 	case TDCA_PARENTID:
 	case TDCA_PATH:
-	case TDCA_PERCENT:			
-	case TDCA_POSITION:	
+	case TDCA_PERCENT:
+	case TDCA_POSITION:
 	case TDCA_PROJECTNAME:
-	case TDCA_PRIORITY:			
-	case TDCA_RECURRENCE:		
-	case TDCA_RISK:				
-	case TDCA_STARTDATE:		
-	case TDCA_STARTTIME:		
-	case TDCA_STATUS:			
-	case TDCA_SUBTASKDONE:			
-	case TDCA_TAGS:				
-	case TDCA_TASKNAME:			
-	case TDCA_TIMEEST:			
-	case TDCA_TIMESPENT:		
-	case TDCA_VERSION:	
+	case TDCA_PRIORITY:
+	case TDCA_RECURRENCE:
+	case TDCA_RISK:
+	case TDCA_STARTDATE:
+	case TDCA_STARTTIME:
+	case TDCA_STATUS:
+	case TDCA_SUBTASKDONE:
+	case TDCA_TAGS:
+	case TDCA_TASKNAME:
+	case TDCA_TIMEEST:
+	case TDCA_TIMESPENT:
+	case TDCA_VERSION:
 		return TRUE;
-
-	default:
-		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
-			return TRUE;
-		break;
 	}
 
-	ASSERT(0);
-	return FALSE;
+	// all else
+	return CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib);
 }
 
 void CTDCAttributeMap::Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)

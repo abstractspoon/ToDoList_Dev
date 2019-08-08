@@ -2884,40 +2884,41 @@ void CTabbedToDoCtrl::SetListViewNeedFontUpdate(BOOL bUpdate)
 		pVData->bNeedFontUpdate = bUpdate;
 }
 
-void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs)
+void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
 {
-	CToDoCtrl::SetModified(mapAttribIDs, aModTaskIDs);
-
-	DWORD dwModTaskID = (aModTaskIDs.GetSize() ? aModTaskIDs[0] : 0);
+	CToDoCtrl::SetModified(mapAttribIDs, aModTaskIDs, (bAllowResort && InTreeView()));
 
 	// For new tasks we want to do as little processing as possible 
 	// so as not to delay the appearance of the title edit field.
 	// So, we don't update 'other' views until we receive a successful 
 	// title edit notification unless they are the active view
+	DWORD dwModTaskID = (aModTaskIDs.GetSize() ? aModTaskIDs[0] : 0);
+
 	BOOL bNewSingleTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && 
 							(aModTaskIDs.GetSize() == 1));
 
 	BOOL bNewTaskTitleEdit = (mapAttribIDs.HasOnly(TDCA_TASKNAME) &&
 								(aModTaskIDs.GetSize() == 1) &&
 								(dwModTaskID == m_dwLastAddedID));
+
 	switch (GetTaskView())
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
 		if (bNewTaskTitleEdit)
 		{
-			UpdateListView(TDCA_NEWTASK, dwModTaskID);
+			UpdateListView(TDCA_NEWTASK, dwModTaskID, FALSE);
 			UpdateExtensionViews(TDCA_NEWTASK, dwModTaskID);
 		}
 		else if (!bNewSingleTask)
 		{
-			UpdateListView(mapAttribIDs, dwModTaskID);
+			UpdateListView(mapAttribIDs, dwModTaskID, FALSE);
 			UpdateExtensionViews(mapAttribIDs, dwModTaskID);
 		}
 		break;
 
 	case FTCV_TASKLIST:
-		UpdateListView(mapAttribIDs, dwModTaskID);
+		UpdateListView(mapAttribIDs, dwModTaskID, bAllowResort);
 
 		if (bNewTaskTitleEdit)
 		{
@@ -2954,11 +2955,11 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 
 		if (bNewTaskTitleEdit)
 		{
-			UpdateListView(TDCA_NEWTASK, dwModTaskID);
+			UpdateListView(TDCA_NEWTASK, dwModTaskID, FALSE);
 		}
 		else if (!bNewSingleTask)
 		{
-			UpdateListView(mapAttribIDs, dwModTaskID);
+			UpdateListView(mapAttribIDs, dwModTaskID, FALSE);
 		}
 		else
 		{
@@ -2967,6 +2968,8 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 		}
 		break;
 	}
+
+	UpdateSortStates(mapAttribIDs, bAllowResort);
 }
 
 void CTabbedToDoCtrl::GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const
@@ -2977,16 +2980,18 @@ void CTabbedToDoCtrl::GetAttributesAffectedByMods(const CTDCAttributeMap& mapMod
 		GetAllExtensionViewsWantedAttributes(mapAffectedAttribIDs);
 }
 
-void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID)
+void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID, BOOL bAllowResort)
 {
 	// Don't do anything if we are not active and we are waiting
 	// for a full task update
 	VIEWDATA* pVData = GetViewData(FTCV_TASKLIST);
+	BOOL bInListView = InListView();
 
-	if (!InListView() && pVData->bNeedFullTaskUpdate)
+	if (!bInListView && pVData->bNeedFullTaskUpdate)
 		return;
 
-	m_taskList.SetModified(mapAttribIDs/*, TRUE*/);
+	m_taskList.SetModified(mapAttribIDs, (bInListView && bAllowResort));
+	pVData->bNeedResort = (!bAllowResort || !bInListView);
 
 	if (mapAttribIDs.Has(TDCA_DELETE))
 	{
@@ -3014,7 +3019,7 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD
 			 mapAttribIDs.Has(TDCA_UNDO) ||
 			 mapAttribIDs.Has(TDCA_PASTE))
 	{
-		if (InListView())
+		if (bInListView)
 		{
 			// The tree will have selected the undone items
 			// so that's what the list also needs to show
@@ -3031,7 +3036,7 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD
 	}
 	else // TDCA_MERGE and all other attributes
 	{
-		if (InListView())
+		if (bInListView)
 			m_taskList.InvalidateSelection();
 	}
 }
@@ -3104,13 +3109,9 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 		// Special case: if dwTaskID is set then it's a single task
 		// so we treat it like an edit
 		if (dwTaskID)
-		{
 			UpdateExtensionViewsSelection(mapAttribIDs);
-		}
 		else
-		{
 			UpdateExtensionViewsTasks(mapAttribIDs);
-		}
 	}
 	else if (mapAttribIDs.Has(TDCA_DELETE) ||
 			 mapAttribIDs.Has(TDCA_UNDO) ||
@@ -3232,7 +3233,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 
 		if (pVData && pExtWnd)
 		{
-			IUI_UPDATETYPE nUpdate = TDC::MapAttributeToIUIUpdateType(mapAttribIDs);
+			IUI_UPDATETYPE nUpdate = TDC::MapAttributesToIUIUpdateType(mapAttribIDs);
 
 			CTaskFile tasks;
 
@@ -3635,50 +3636,8 @@ BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChange(const CTDCAttributeMap& mapAtt
 	return FALSE;
 }
 
-void CTabbedToDoCtrl::ResortSelectedTaskParents()
+void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort)
 {
-	FTC_VIEW nView = GetTaskView();
-	
-	switch (nView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-		CToDoCtrl::ResortSelectedTaskParents();
-		break;
-		
-	case FTCV_TASKLIST:
-		m_taskList.Resort(); // resort all
-		break;
-		
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		// resorting handled by the extension itself
-		break;
-		
-	default:
-		ASSERT(0);
-	}
-}
-
-BOOL CTabbedToDoCtrl::ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) const
-{
-	if (!HasStyle(TDCS_RESORTONMODIFY) || m_findReplace.IsReplacing())
-		return FALSE;
-
 	VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
 
 	BOOL bTreeNeedsResort = m_taskTree.ModsNeedResort(mapAttribIDs);
@@ -3690,12 +3649,14 @@ BOOL CTabbedToDoCtrl::ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) const
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
+		m_bTreeNeedResort = !bAllowResort;
 		pLVData->bNeedResort |= bListNeedsResort;
-		return bTreeNeedsResort;
+		break;
 
 	case FTCV_TASKLIST:
 		m_bTreeNeedResort |= bTreeNeedsResort;
-		return bListNeedsResort;
+		pLVData->bNeedResort = !bAllowResort;
+		break;
 
 	case FTCV_UIEXTENSION1:
 	case FTCV_UIEXTENSION2:
@@ -3721,8 +3682,6 @@ BOOL CTabbedToDoCtrl::ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) const
 	default:
 		ASSERT(0);
 	}
-
-	return FALSE;
 }
 
 const TDSORT& CTabbedToDoCtrl::GetSort() const 

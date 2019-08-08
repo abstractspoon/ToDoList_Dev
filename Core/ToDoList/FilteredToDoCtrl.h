@@ -120,7 +120,7 @@ protected:
 	BOOL ModsNeedRefilter(const CTDCAttributeMap& attribIDs, FTC_VIEW nView, const CDWordArray& aModTaskIDs) const;
 	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView, const CDWordArray& aModTaskIDs) const;
 
-	virtual void SetModified(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs);
+	virtual void SetModified(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	virtual BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate); // one style at a time only 
 
 	virtual BOOL LoadTasks(const CTaskFile& tasks);

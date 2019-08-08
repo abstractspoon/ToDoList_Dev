@@ -209,7 +209,7 @@ public:
 	const TDSORT& GetSort() const { return m_sort; }
 	BOOL ModsNeedResort(const CTDCAttributeMap& attribIDs) const;
 
-	void SetModified(const CTDCAttributeMap& attribIDs/*, BOOL bAllowResort*/);
+	void SetModified(const CTDCAttributeMap& attribIDs, BOOL bAllowResort);
 	void SetAlternateLineColor(COLORREF crAltLine);
 	void SetGridlineColor(COLORREF crGridLine);
 	void SetSplitBarColor(COLORREF crSplitBar) { CTreeListSyncer::SetSplitBarColor(crSplitBar); }

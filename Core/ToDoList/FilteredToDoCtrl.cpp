@@ -1158,7 +1158,7 @@ BOOL CFilteredToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	return CTabbedToDoCtrl::CanCreateNewTask(nInsertWhere);
 }
 
-void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs)
+void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
 {
 	BOOL bTreeRefiltered = FALSE, bListRefiltered = FALSE;
 
@@ -1191,7 +1191,7 @@ void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const 
 	CAutoFlag af(m_bIgnoreListRebuild, bListRefiltered);
 	CAutoFlag af2(m_bIgnoreExtensionUpdate, bTreeRefiltered);
 
-	CTabbedToDoCtrl::SetModified(mapAttribIDs, aModTaskIDs);
+	CTabbedToDoCtrl::SetModified(mapAttribIDs, aModTaskIDs, bAllowResort);
 
 	if ((bListRefiltered || bTreeRefiltered) && mapAttribIDs.Has(TDCA_UNDO) && aModTaskIDs.GetSize())
 	{

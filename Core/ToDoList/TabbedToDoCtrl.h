@@ -162,13 +162,14 @@ protected:
 	BOOL m_bUpdatingExtensions;
 	BOOL m_bRecreatingRecurringTasks;
 
-	TDC_ATTRIBUTE m_nExtModifyingAttrib;
-	CDWordArray m_aRecreatedRecurringTasks;
-
 	// almost all of the tree's view data is stored in CToDoCtrl
 	// the only extra piece is whether or not the tree needs to
 	// be resorted when we switch to it from another view
-	mutable BOOL m_bTreeNeedResort;
+	BOOL m_bTreeNeedResort;
+
+	TDC_ATTRIBUTE m_nExtModifyingAttrib;
+	CDWordArray m_aRecreatedRecurringTasks;
+
 
 	static CStringArray s_aDefTaskViews;
 
@@ -223,8 +224,7 @@ protected:
 protected:
 	const TDSORT& GetSort() const;
 
-	virtual BOOL CTabbedToDoCtrl::ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) const;
-	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs);
+	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	virtual void GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const;
 	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos);
 	virtual BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate); // one style at a time only 
@@ -249,13 +249,13 @@ protected:
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);
 	int FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttrib, int nStart, BOOL bNext, BOOL bCaseSensitive, BOOL bWholeWord) const;
 	void SetEditTitleTaskID(DWORD dwTaskID);
-	void ResortSelectedTaskParents();
 	void LoadPrefs();
 	void SavePrefs();
 	BOOL IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const;
 	BOOL HasCalculatedAttributes(const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const;
-	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID = 0);
+	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID, BOOL bAllowResort);
+	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 
 	void SyncActiveViewSelectionToTree();
 	void SyncListSelectionToTree();
