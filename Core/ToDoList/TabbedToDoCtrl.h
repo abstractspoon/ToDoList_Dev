@@ -37,6 +37,11 @@ struct VIEWDATA
 
 	virtual ~VIEWDATA() {}
 
+	BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const const
+	{
+		return mapWantedAttrib.Has(nAttribID);
+	}
+
 	TDSORT sort;
 	CTaskListDropTarget dropTgt;
 	IUIExtension* pExtension;
@@ -346,7 +351,7 @@ protected:
 	virtual VIEWDATA* NewViewData() { return new VIEWDATA(); }
 
 	static BOOL IsExtensionView(FTC_VIEW nView);
-	static int GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTDCAttributeMap& mapAttribIDs);
+	static int PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, VIEWDATA* pData);
 	static IUI_APPCOMMAND MapGetNextToCommand(TTC_NEXTTASK nNext);
 	static TTC_NEXTTASK MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLevel);
 };

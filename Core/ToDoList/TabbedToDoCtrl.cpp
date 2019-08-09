@@ -636,7 +636,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 		pVData->bCanPrepareNewTask = pExtWnd->PrepareNewTask(&task);
 	}
 	
-	GetExtensionViewAttributes(pExtWnd, pVData->mapWantedAttrib);
+	PopulateExtensionViewAttributes(pExtWnd, pVData);
 
 	// insert the view after the list in z-order
 	::SetWindowPos(pExtWnd->GetHwnd(), m_taskList, 0, 0, 0, 0, (SWP_NOMOVE | SWP_NOSIZE));
@@ -980,9 +980,22 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 															DWORD dwFlags, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter;
+	filter.dwFlags = dwFlags;
 
-	filter.mapAttribs.Copy(mapAttrib);
-	filter.dwFlags |= dwFlags;
+	CTDCAttributeMap mapAllAttribIDs;
+	GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
+
+	// Special cases
+	if (mapAttrib.Has(TDCA_NEWTASK) || mapAttrib.Has(TDCA_ALL))
+	{
+		ASSERT(mapAttrib.HasOnly(TDCA_NEWTASK) || mapAttrib.HasOnly(TDCA_ALL));
+
+		filter.mapAttribs.Copy(mapAllAttribIDs);
+	}
+	else
+	{
+		VERIFY(mapAttrib.GetIntersection(mapAllAttribIDs, filter.mapAttribs));
+	}
 
 	VERIFY(GetSelectedTasks(tasks, FTCV_TASKTREE, filter));
 
@@ -2341,9 +2354,9 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 
 				// if this extension is active and wants a 
 				// color update we want to start progress
-				BOOL bWantColorUpdate = (m_bTaskColorChange && pExtWnd->WantTaskUpdate(TDCA_COLOR));
+				BOOL bWantColorUpdate = (m_bTaskColorChange && pVData->WantAttribute(TDCA_COLOR));
 
-				if (bWantColorUpdate && nExtView == nCurView)
+				if (bWantColorUpdate && (nExtView == nCurView))
 					BeginExtensionProgress(pVData);
 
 				// notify all extensions of prefs change
@@ -2354,13 +2367,10 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 				{
 					if (nExtView == nCurView)
 					{
-						CTDCAttributeMap mapAttribs;
-						mapAttribs.Add(TDCA_COLOR);
-						
 						CTaskFile tasks;
 						CWaitCursor cursor;
 						
-						if (GetAllTasksForExtensionViewUpdate(mapAttribs, tasks))
+						if (GetAllTasksForExtensionViewUpdate(TDCA_COLOR, tasks))
 						{
 							pVData->bNeedFullTaskUpdate = FALSE;
 							UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
@@ -2894,7 +2904,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	// title edit notification unless they are the active view
 	DWORD dwModTaskID = (aModTaskIDs.GetSize() ? aModTaskIDs[0] : 0);
 
-	BOOL bNewSingleTask = (mapAttribIDs.Has(TDCA_NEWTASK) && 
+	BOOL bNewSingleTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && 
 							(aModTaskIDs.GetSize() == 1));
 
 	BOOL bNewTaskTitleEdit = (mapAttribIDs.HasOnly(TDCA_TASKNAME) &&
@@ -3033,38 +3043,49 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD
 	}
 }
 
-int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTDCAttributeMap& mapAttrib)
+int CTabbedToDoCtrl::PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, VIEWDATA* pData)
 {
-	ASSERT(pExtWnd);
+	// Sanity checks
+	if (!pExtWnd || !pData || !pData->pExtension)
+	{
+		ASSERT(0);
+		return 0;
+	}
+	else if (Misc::NaturalCompare(pExtWnd->GetTypeID(), pData->pExtension->GetTypeID()) != 0)
+	{
+		ASSERT(0);
+		return 0;
+	}
 
-	mapAttrib.RemoveAll();
-	
-	if (pExtWnd) // specific extension
+	// Once only
+	ASSERT(pData->mapWantedAttrib.IsEmpty());
+
+	if (pData->mapWantedAttrib.IsEmpty())
 	{
 		int nAttrib = TDCA_ALLATTRIB;
 		
 		while (nAttrib--)
 		{
 			if (pExtWnd->WantTaskUpdate((TDC_ATTRIBUTE)nAttrib))
-				mapAttrib.Add((TDC_ATTRIBUTE)nAttrib);
+				pData->mapWantedAttrib.Add((TDC_ATTRIBUTE)nAttrib);
 		}
 
 		// Misc
 		if (pExtWnd->WantTaskUpdate(TDCA_CUSTOMATTRIB))
-			mapAttrib.Add(TDCA_CUSTOMATTRIB_ALL);
+			pData->mapWantedAttrib.Add(TDCA_CUSTOMATTRIB_ALL);
 
 		// Always
-		mapAttrib.Add(TDCA_LOCK);
-		mapAttrib.Add(TDCA_METADATA);
+		pData->mapWantedAttrib.Add(TDCA_LOCK);
+		pData->mapWantedAttrib.Add(TDCA_METADATA);
 
 		// Include 'position' if extension supports 'unsorted'
 		CUIExtensionAppCmdData data(TDCA_NONE, TRUE);
 
 		if (pExtWnd->CanDoAppCommand(IUI_SORT, &data))
-			mapAttrib.Add(TDCA_POSITION);
+			pData->mapWantedAttrib.Add(TDCA_POSITION);
 	}
 
-	return mapAttrib.GetCount();
+	return pData->mapWantedAttrib.GetCount();
 }
 
 int CTabbedToDoCtrl::GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttribIDs) const
@@ -3075,15 +3096,11 @@ int CTabbedToDoCtrl::GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapA
 	
 	while (nExt--)
 	{
-		IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
-		
-		if (pExtWnd)
-		{
-			CTDCAttributeMap mapExtAttrib;
+		FTC_VIEW nView = (FTC_VIEW)(nExt + FTCV_FIRSTUIEXTENSION);
+		VIEWDATA* pVData = GetViewData(nView);
 
-			if (GetExtensionViewAttributes(pExtWnd, mapExtAttrib))
-				mapAttribIDs.Append(mapExtAttrib);
-		}
+		if (pVData)
+			mapAttribIDs.Append(pVData->mapWantedAttrib);
 	}
 
 	return mapAttribIDs.GetCount();
@@ -3177,21 +3194,22 @@ void CTabbedToDoCtrl::UpdateExtensionViewsProjectName()
 		CTaskFile tasks;
 		AppendTaskFileHeader(tasks);
 
-		tasks.SetAvailableAttributes(CTDCAttributeMap(TDCA_PROJECTNAME));
+		tasks.SetAvailableAttributes(TDCA_PROJECTNAME);
 
 		int nExt = m_aExtViews.GetSize();
 
 		while (nExt--)
 		{
-			IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
+			FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+			VIEWDATA* pVData = GetViewData(nExtView);
+			ASSERT(pVData);
 
-			if (pExtWnd && pExtWnd->WantTaskUpdate(TDCA_PROJECTNAME))
+			if (pVData && !pVData->bNeedFullTaskUpdate && pVData->WantAttribute(TDCA_PROJECTNAME))
 			{
-				FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
-				VIEWDATA* pVData = GetViewData(nExtView);
-				ASSERT(pVData);
+				IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
+				ASSERT(pExtWnd);
 
-				if (pVData && !pVData->bNeedFullTaskUpdate)
+				if (pExtWnd)
 					pExtWnd->UpdateTasks(&tasks, IUI_EDIT);
 			}
 		}
@@ -3200,7 +3218,9 @@ void CTabbedToDoCtrl::UpdateExtensionViewsProjectName()
 
 void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttribIDs)
 {
-	// Sanity check
+	// Sanity checks
+	ASSERT(HasAnyExtensionViews());
+
 	ASSERT(mapAttribIDs.HasOnly(TDCA_DELETE) ||
 			mapAttribIDs.HasOnly(TDCA_UNDO) ||
 			mapAttribIDs.HasOnly(TDCA_PASTE) ||
@@ -3241,28 +3261,25 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 		}
 	}
 
+	// Mark all the rest as needing a full update
 	SetExtensionsNeedTaskUpdate(TRUE, nView);
 }
 
 void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapAttribIDs)
 {
+	// Sanity checks
 	ASSERT(HasAnyExtensionViews());
 
-	// Sanity check
-	if (mapAttribIDs.Has(TDCA_DELETE) ||
-		mapAttribIDs.Has(TDCA_UNDO) ||
-		mapAttribIDs.Has(TDCA_PASTE) ||
-		mapAttribIDs.Has(TDCA_MERGE) ||
-		mapAttribIDs.Has(TDCA_ARCHIVE) ||
-		mapAttribIDs.Has(TDCA_PROJECTNAME) ||
-		mapAttribIDs.Has(TDCA_ENCRYPT) ||
-		mapAttribIDs.Has(TDCA_POSITION) ||
-		mapAttribIDs.Has(TDCA_POSITION_SAMEPARENT) ||
-		mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT))
-	{
-		ASSERT(0);
-		return;
-	}
+	ASSERT(!mapAttribIDs.Has(TDCA_DELETE) &&
+			!mapAttribIDs.Has(TDCA_UNDO) &&
+			!mapAttribIDs.Has(TDCA_PASTE) &&
+			!mapAttribIDs.Has(TDCA_MERGE) &&
+			!mapAttribIDs.Has(TDCA_ARCHIVE) &&
+			!mapAttribIDs.Has(TDCA_PROJECTNAME) &&
+			!mapAttribIDs.Has(TDCA_ENCRYPT) &&
+			!mapAttribIDs.Has(TDCA_POSITION) &&
+			!mapAttribIDs.Has(TDCA_POSITION_SAMEPARENT) &&
+			!mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT));
 
 	// If all extension views require a full task update
 	// then we've nothing to do
@@ -3311,8 +3328,11 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 		mapAttribIDs.Has(TDCA_STARTDATE)) &&
 		m_taskTree.SelectionHasDependents())
 	{
-		// For the moment 
-		GetAllTasksForExtensionViewUpdate(mapAttribIDs, tasks);
+		// Be cautious
+		CTDCAttributeMap mapAllAttribIDs;
+		GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
+		
+		GetAllTasksForExtensionViewUpdate(mapAllAttribIDs, tasks);
 	}
 	else
 	{
@@ -3514,14 +3534,14 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 	FTC_VIEW nCurView = GetTaskView();
 	FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
 
+	const VIEWDATA* pVData = GetViewData(nExtView);
+
 	// if the window is not active and is already marked
 	// for a full update then we don't need to do
 	// anything more because it will get this update when
 	// it is next activated
 	if (nExtView != nCurView)
 	{
-		const VIEWDATA* pVData = GetViewData(nExtView);
-
 		if (!pVData || pVData->bNeedFullTaskUpdate)
 			return FALSE;
 	}
@@ -3538,10 +3558,7 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 	if (nAttrib == TDCA_ALL)
 		return TRUE;
 	
-	IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
-	ASSERT(pExtWnd);
-	
-	return (pExtWnd && pExtWnd->WantTaskUpdate(nAttrib));
+	return pVData->WantAttribute(nAttrib);
 }
 
 BOOL CTabbedToDoCtrl::AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttrib) const
@@ -3605,17 +3622,17 @@ BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChange(const CTDCAttributeMap& mapAtt
 {
 	ASSERT (!mapAttrib.IsEmpty());
 
-	// Else check one by one
+	// Mandate lock state changes
+	if (mapAttrib.Has(TDCA_LOCK))
+		return TRUE;
+
+	// else check one by one
 	POSITION pos = mapAttrib.GetStartPosition();
 	
 	while (pos)
 	{
 		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
 
-		// Mandate lock state changes
-		if (nAttrib == TDCA_LOCK)
-			return TRUE;
-		
 		if (AnyExtensionViewWantsChange(nAttrib))
 			return TRUE;
 	}
