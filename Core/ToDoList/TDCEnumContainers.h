@@ -76,7 +76,7 @@ public:
 protected:
 	BOOL CanAdd(TDC_ATTRIBUTE nAttrib) const;
 	
-	static BOOL IsRegularAttribute(TDC_ATTRIBUTE nAttrib);
+	static BOOL IsTaskAttribute(TDC_ATTRIBUTE nAttrib);
 };
 
 //////////////////////////////////////////////////////////////////////

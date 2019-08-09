@@ -59,42 +59,28 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib) const
 {
 	BOOL bCanAdd = FALSE;
 
-	switch (nAttrib)
+	if (IsTaskAttribute(nAttrib))
 	{
-	case TDCA_ALL:
-		// Must be empty or only contain TDCA_NEWTASK
-		bCanAdd = (IsEmpty() || HasOnly(TDCA_NEWTASK));
-		break;
+		// May not contain non-task attributes
+		// which could only ever be the first attribute
+		POSITION pos = GetStartPosition();
 
-	case TDCA_NEWTASK:
-		// Must be empty or only contain TDCA_ALL
-		bCanAdd = (IsEmpty() || HasOnly(TDCA_ALL));
-		break;
-
-	default:
-		if (IsRegularAttribute(nAttrib))
-		{
-			// May not contain pseudo-attributes
-			// which could only ever be the first attribute
-			POSITION pos = GetStartPosition();
-
-			if (pos)
-				bCanAdd = IsRegularAttribute(GetNext(pos));
-			else
-				bCanAdd = TRUE;
-		}
-		else // rest of pseudo-attributes
-		{
-			// Must be empty
-			bCanAdd = IsEmpty();
-		}
+		if (pos)
+			bCanAdd = IsTaskAttribute(GetNext(pos));
+		else
+			bCanAdd = TRUE;
+	}
+	else // rest of pseudo-attributes
+	{
+		// Must be empty
+		bCanAdd = IsEmpty();
 	}
 
 	ASSERT(bCanAdd);
 	return bCanAdd;
 }
 
-BOOL CTDCAttributeMap::IsRegularAttribute(TDC_ATTRIBUTE nAttrib)
+BOOL CTDCAttributeMap::IsTaskAttribute(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
@@ -125,7 +111,6 @@ BOOL CTDCAttributeMap::IsRegularAttribute(TDC_ATTRIBUTE nAttrib)
 	case TDCA_PATH:
 	case TDCA_PERCENT:
 	case TDCA_POSITION:
-	case TDCA_PROJECTNAME:
 	case TDCA_PRIORITY:
 	case TDCA_RECURRENCE:
 	case TDCA_RISK:
