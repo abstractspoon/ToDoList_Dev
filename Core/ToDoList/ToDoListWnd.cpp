@@ -5031,12 +5031,27 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 		m_mgrContent.LoadPreferences(CPreferences(), _T("ContentControls"), TRUE);
 
 		// UDTs in toolbar
-		// don't ask me for the full details on this but it seems as
-		// though the CSysImageList class is waiting to process a 
-		// message before we can switch image sizes so we put it
-		// right at the end after everything is done.
-		//Misc::ProcessMsgLoop();
-		UpdateUDTsInToolbar(UDT_PREFERENCES);
+		BOOL bUDTChange = bCustomToolbarChange;
+
+		if (!bUDTChange)
+		{
+			CUserToolArray aOldTools, aNewTools;
+
+			int nNumOldTools = oldPrefs.GetUserTools(aOldTools);
+			int nNumNewTools = newPrefs.GetUserTools(aNewTools);
+
+			bUDTChange = ((nNumOldTools != nNumNewTools) || !Misc::MatchAllT(aOldTools, aNewTools, TRUE));
+		}
+
+		if (bUDTChange)
+		{
+			// don't ask me for the full details on this but it seems as
+			// though the CSysImageList class is waiting to process a 
+			// message before we can switch image sizes so we put it
+			// right at the end after everything is done.
+			//Misc::ProcessMsgLoop();
+			UpdateUDTsInToolbar(UDT_PREFERENCES);
+		}
 	}
 	
 	// finally set or terminate the various status check timers

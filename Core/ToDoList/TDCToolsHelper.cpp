@@ -31,6 +31,17 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+BOOL USERTOOL::operator==(const USERTOOL& other) const
+{
+	return ((sToolName == other.sToolName) &&
+			(sToolPath == other.sToolPath) &&
+			(sCmdline == other.sCmdline) &&
+			(bRunMinimized == other.bRunMinimized) &&
+			(sIconPath == other.sIconPath));
+}
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 

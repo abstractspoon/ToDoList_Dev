@@ -18,6 +18,8 @@
 
 struct USERTOOL
 {
+	BOOL operator==(const USERTOOL& other) const;
+
 	CString sToolName;
 	CString sToolPath;
 	CString sCmdline;
