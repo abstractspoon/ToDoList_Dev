@@ -107,6 +107,10 @@ public:
 	static void ModifyEditCtrlsStyle(BOOL bExStyle, const CWnd* pParent, DWORD dwRemove, 
 										DWORD dwAdd, UINT nFlags = 0);
 	
+	// CEdit and CRichEditCtrl
+	static BOOL SelectText(const CWnd* pEdit, LPCTSTR szText, int nSearchStart, int nSearchLen);
+	static BOOL SelectText(const CWnd* pParent, UINT nCtrlID, LPCTSTR szText, int nSearchStart, int nSearchLen);
+
 	// Comboboxes and Listboxes
 	template <class T, class S>
 	static int FindItemByData(const S& ctrl, T itemData)

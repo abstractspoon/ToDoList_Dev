@@ -611,12 +611,7 @@ void CPreferencesToolPage::OnInsertPlaceholder(UINT nCmdID)
 		int nSelTextLen = sSelText.GetLength();
 		int nPlaceholderLen = sPlaceholder.GetLength();
 
-		int nFind = m_sCommandLine.Find(sSelText, nSelStart);
-
-		if ((nFind > 0) && (nFind < (nSelStart + nPlaceholderLen - nSelTextLen)))
-			m_eCmdLine.SetSel(nFind, nFind + nSelTextLen, FALSE);
-		else
-			ASSERT(0);
+		VERIFY(SelectText(&m_eCmdLine, sSelText, nSelStart, (nPlaceholderLen - nSelTextLen)));
 	}
 
 	CPreferencesPageBase::OnControlChange();

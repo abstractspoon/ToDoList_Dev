@@ -1969,3 +1969,33 @@ BOOL CDialogHelper::TrackMouseLeave(HWND hWnd, BOOL bEnable, BOOL bIncludeNonCli
 	TRACKMOUSEEVENT tme = { sizeof(tme), dwFlags, hWnd, 0 };
 	return _TrackMouseEvent(&tme);
 }
+
+BOOL CDialogHelper::SelectText(const CWnd* pEdit, LPCTSTR szText, int nSearchStart, int nSearchLen)
+{
+	if (!pEdit || !pEdit->GetWindowTextLength())
+		return FALSE;
+
+	if (!CWinClasses::IsEditControl(*pEdit))
+		return FALSE;
+
+	CString sEditText;
+	pEdit->GetWindowText(sEditText);
+
+	// Search for the text forward of the insertion point
+	// and before the end of the inserted text
+	int nTextLen = lstrlen(szText);
+	int nFind = sEditText.Find(szText, nSearchStart);
+
+	if ((nFind < nSearchStart) || (nFind > (nSearchStart + nSearchLen - nTextLen)))
+		return FALSE;
+
+	pEdit->SendMessage(EM_SETSEL, nFind, nFind + nTextLen);
+	pEdit->SendMessage(EM_SCROLLCARET, 0, 0);
+
+	return TRUE;
+}
+
+BOOL CDialogHelper::SelectText(const CWnd* pParent, UINT nCtrlID, LPCTSTR szText, int nSearchStart, int nSearchLen)
+{
+	return SelectText(pParent->GetDlgItem(nCtrlID), szText, nSearchStart, nSearchLen);
+}
