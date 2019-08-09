@@ -1056,9 +1056,9 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	BOOL bVisibleTasksOnly = IsTreeList();
 
 	// Optimise for single columns
-	if (!bZeroOthers && (aColIDs.GetCount() == 1))
+	if (!bZeroOthers && (mapCols.GetCount() == 1))
 	{
-		int nCol = m_hdrColumns.FindItem(aColIDs.GetFirst());
+		int nCol = m_hdrColumns.FindItem(mapCols.GetFirst());
 		ASSERT(nCol != -1);
 
 		int nColWidth = CalcColumnWidth(nCol, &dc, bVisibleTasksOnly);
