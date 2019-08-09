@@ -57,23 +57,32 @@ int CTDCAttributeMap::Append(const CTDCAttributeMap& other)
 
 BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib) const
 {
+	// Anything can be added if we are empty
+	POSITION pos = GetStartPosition();
+
+	if (pos == NULL)
+		return TRUE;
+
+	// All the rest
 	BOOL bCanAdd = FALSE;
+
+	// TDCA_HTMLCOMMENTS is special because of its cost.
+	// It must be explicitly specified even if TDCA_ALL is set
+	switch (nAttrib)
+	{
+		case TDCA_ALL:
+			bCanAdd = HasOnly(TDCA_HTMLCOMMENTS);
+			break;
+
+		case TDCA_HTMLCOMMENTS:
+			bCanAdd = (HasOnly(TDCA_ALL) || IsTaskAttribute(nAttrib));
+			break;
+	}
 
 	if (IsTaskAttribute(nAttrib))
 	{
-		// May not contain non-task attributes
-		// which could only ever be the first attribute
-		POSITION pos = GetStartPosition();
-
-		if (pos)
-			bCanAdd = IsTaskAttribute(GetNext(pos));
-		else
-			bCanAdd = TRUE;
-	}
-	else // rest of pseudo-attributes
-	{
-		// Must be empty
-		bCanAdd = IsEmpty();
+		TDC_ATTRIBUTE nExistAttrib = GetNext(pos);
+		bCanAdd = IsTaskAttribute(nExistAttrib);
 	}
 
 	ASSERT(bCanAdd);

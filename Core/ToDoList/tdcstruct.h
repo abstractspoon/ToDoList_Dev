@@ -311,7 +311,7 @@ struct TDCGETTASKS
 
 	BOOL WantAttribute(TDC_ATTRIBUTE nAttrib) const
 	{
-		// Special case due to its cost
+		// Must be explicitly specified due to its cost
 		if (nAttrib == TDCA_HTMLCOMMENTS)
 			return (!mapAttribs.Has(TDCA_NONE) && mapAttribs.Has(TDCA_HTMLCOMMENTS));
 
