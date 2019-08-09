@@ -76,6 +76,7 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CPreferencesToolPage)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
 	//}}AFX_MSG
 	afx_msg void OnNewTool();
 	afx_msg void OnDeleteTool();

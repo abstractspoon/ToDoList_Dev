@@ -74,6 +74,7 @@ void CPreferencesToolPage::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CPreferencesToolPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CPreferencesToolPage)
 	ON_WM_SIZE()
+	ON_WM_INITMENUPOPUP()
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_UDTPREFS_NEW, OnNewTool)
 	ON_COMMAND(ID_UDTPREFS_DELETE, OnDeleteTool)
@@ -583,6 +584,11 @@ void CPreferencesToolPage::OnChangeCmdline()
 
 		CPreferencesPageBase::OnControlChange();
 	}
+}
+
+void CPreferencesToolPage::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu)
+{
+	CPreferencesPageBase::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
 }
 
 void CPreferencesToolPage::OnInsertPlaceholder(UINT nCmdID) 
