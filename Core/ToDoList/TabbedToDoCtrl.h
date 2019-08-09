@@ -37,7 +37,7 @@ struct VIEWDATA
 
 	virtual ~VIEWDATA() {}
 
-	BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const const
+	BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const
 	{
 		return mapWantedAttrib.Has(nAttribID);
 	}
