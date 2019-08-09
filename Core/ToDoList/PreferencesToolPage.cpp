@@ -579,6 +579,7 @@ void CPreferencesToolPage::OnChangeCmdline()
 		UpdateData();
 
 		m_lcTools.SetItemText(nSel, 2, m_sCommandLine);
+		m_eCmdLine.SetFocus();
 
 		CPreferencesPageBase::OnControlChange();
 	}
@@ -586,7 +587,37 @@ void CPreferencesToolPage::OnChangeCmdline()
 
 void CPreferencesToolPage::OnInsertPlaceholder(UINT nCmdID) 
 {
-	m_eCmdLine.ReplaceSel(MapCmdIDToPlaceholder(nCmdID), TRUE);
+	CString sPlaceholder(MapCmdIDToPlaceholder(nCmdID));
+	int nSelStart = LOWORD(m_eCmdLine.GetSel());
+
+	m_eCmdLine.ReplaceSel(sPlaceholder, TRUE);
+
+	// Auto-select the most probable text for the user to edit
+	CEnString sSelText;
+
+	switch (MapCmdIDToType(nCmdID))
+	{
+	case CLAT_USERDATE:				sSelText.LoadString(IDS_USERTOOL_DATEPROMPT);	break;
+	case CLAT_USERFILE:				sSelText.LoadString(IDS_USERTOOL_FILEPROMPT);	break;
+	case CLAT_USERFOLDER:			sSelText.LoadString(IDS_USERTOOL_FOLDERPROMPT);	break;
+	case CLAT_USERTEXT:				sSelText.LoadString(IDS_USERTOOL_TEXTPROMPT);	break;
+	case CLAT_SELTASKCUSTATTRIB:	sSelText = _T("var_cust1");	break;
+	}
+
+	if (!sSelText.IsEmpty())
+	{
+		// Search for the text forward of the insertion point
+		// and before the end of the inserted text
+		int nSelTextLen = sSelText.GetLength();
+		int nPlaceholderLen = sPlaceholder.GetLength();
+
+		int nFind = m_sCommandLine.Find(sSelText, nSelStart);
+
+		if ((nFind > 0) && (nFind < (nSelStart + nPlaceholderLen - nSelTextLen)))
+			m_eCmdLine.SetSel(nFind, nFind + nSelTextLen, FALSE);
+		else
+			ASSERT(0);
+	}
 
 	CPreferencesPageBase::OnControlChange();
 }
