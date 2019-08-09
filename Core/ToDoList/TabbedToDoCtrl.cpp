@@ -2972,14 +2972,6 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	UpdateSortStates(mapAttribIDs, bAllowResort);
 }
 
-void CTabbedToDoCtrl::GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const
-{
-	CToDoCtrl::GetAttributesAffectedByMods(mapModAttribIDs, mapAffectedAttribIDs);
-
-	if (mapModAttribIDs.Has(TDCA_ALL) || mapModAttribIDs.Has(TDCA_NEWTASK))
-		GetAllExtensionViewsWantedAttributes(mapAffectedAttribIDs);
-}
-
 void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID, BOOL bAllowResort)
 {
 	// Don't do anything if we are not active and we are waiting

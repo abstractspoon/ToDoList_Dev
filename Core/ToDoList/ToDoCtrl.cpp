@@ -6904,13 +6904,6 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 	// Check for attribute dependencies
 	switch (nAttrib)
 	{
-	
-
-	case TDCA_NEWTASK:
-		mapAttribIDs.Add(nAttrib);
-		mapAttribIDs.Add(TDCA_ALL);
-		break;
-
 	case TDCA_DEPENDENCY:
 		mapAttribIDs.Add(nAttrib);
 
