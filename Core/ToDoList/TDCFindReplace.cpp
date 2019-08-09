@@ -16,7 +16,11 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-CTDCFindReplace::CTDCFindReplace(const CToDoCtrl& tdc) : m_tdc(tdc), m_nAttribute(TDCA_NONE)
+CTDCFindReplace::CTDCFindReplace(const CToDoCtrl& tdc) 
+	: 
+	m_tdc(tdc), 
+	m_nAttribute(TDCA_NONE),
+	m_bReplacing(FALSE)
 {
 }
 
