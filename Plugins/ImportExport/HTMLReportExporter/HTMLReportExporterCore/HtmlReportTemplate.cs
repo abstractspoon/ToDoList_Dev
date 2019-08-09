@@ -641,7 +641,7 @@ namespace HTMLReportExporter
 					// Custom attributes
 					foreach (var attrib in CustomAttributes)
 					{
-						var attribVal = task.GetCustomAttributeValue(attrib.Key);
+						var attribVal = task.GetCustomAttributeValue(attrib.Key, true);
 						
 						row = ReplacePlaceholder(row, attribVal, attrib.Key, depth);
 					}

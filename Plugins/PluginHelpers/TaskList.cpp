@@ -701,10 +701,10 @@ Boolean Task::GetRecurrence()
 	return false;
 }
 
-String^ Task::GetCustomAttributeValue(String^ sID)
+String^ Task::GetCustomAttributeValue(String^ sID, bool display)
 {
-	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID), false) : 
-						(m_pTaskList ? m_pTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID), false) : L""));
+	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID), display) :
+						(m_pTaskList ? m_pTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID), display) : L""));
 
 	return gcnew String(szValue);
 }

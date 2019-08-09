@@ -180,7 +180,7 @@ namespace Abstractspoon
 				String^ GetAttributeValue(Attribute attrib, bool calculated, bool display);
 				Boolean HasAttribute(Attribute attrib);
 
-				String^ GetCustomAttributeValue(String^ sID);
+				String^ GetCustomAttributeValue(String^ sID, bool display);
 				String^ GetMetaDataValue(String^ sKey);
 
 				// TODO
