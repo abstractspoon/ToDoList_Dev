@@ -37,7 +37,6 @@ public:
 	CWnd* GetActiveWnd() const;
 	FTC_VIEW GetActiveView() const;
 	void ActivateNextView(BOOL bNext = TRUE);
-	BOOL ShowViewTab(FTC_VIEW nView);
 	
 	HWND GetViewHwnd(FTC_VIEW nView) const;
 	BOOL SetViewHwnd(FTC_VIEW nView, HWND hWnd);
