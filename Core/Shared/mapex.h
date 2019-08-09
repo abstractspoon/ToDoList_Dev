@@ -67,6 +67,12 @@ public:
 		SetAt(key, val);
 	}
 
+	void Set(KEY key)
+	{
+		RemoveAll();
+		Add(key);
+	}
+
 	void Remove(KEY key)
 	{
 		CMap<KEY, ARG_KEY, char, char&>::RemoveKey(key);
@@ -126,6 +132,23 @@ public:
 		}
 
 		return diffs.GetCount();
+	}
+
+	int GetIntersection(const CSetBase& other, CSetBase& intersection) const
+	{
+		intersection.RemoveAll();
+
+		POSITION pos = GetStartPosition();
+
+		while (pos)
+		{
+			KEY val = GetNext(pos);
+
+			if (other.Has(val))
+				intersection.Add(val);
+		}
+
+		return intersection.GetCount();
 	}
 
 	void Append(const CSetBase& other)
