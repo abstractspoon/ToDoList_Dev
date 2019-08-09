@@ -475,6 +475,9 @@ namespace HTMLReportExporter
 
 				menuItem.Text = String.Format("{0} (Custom)", attrib.Value);
 				menuItem.Name = String.Format("$({0})", attrib.Key.ToLower());
+				menuItem.Click += new System.EventHandler(base.OnAttributeMenuClick);
+				
+				ToolStripAttributeMenu.DropDownItems.Add(menuItem);
 			}
 		}
 	}

@@ -80,7 +80,7 @@ namespace HTMLReportExporter
 
 				for (var attrib = 0; attrib < numAttrib; attrib++)
 				{
-					m_CustomAttributes.Add(tasks.GetCustomAttributeLabel(attrib).ToLower(),
+					m_CustomAttributes.Add(tasks.GetCustomAttributeID(attrib).ToLower(),
 											tasks.GetCustomAttributeLabel(attrib));
 				}
 			}
