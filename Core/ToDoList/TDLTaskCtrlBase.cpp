@@ -1044,7 +1044,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 		}
 	}
 
-	if (!bZeroOthers && !aColIDs.GetCount())
+	if (!bZeroOthers && !mapCols.GetCount())
 		return;
 
 	CHoldRedraw hr(m_lcColumns);
@@ -4156,11 +4156,6 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 
 		switch (nAttribID)
 		{
-		case TDCA_ALL:
-			// Only valid in conjunction with TDCA_NEWTASK
-			ASSERT(mapAttribIDs.Has(TDCA_NEWTASK));
-			continue;
-
 		case TDCA_CREATIONDATE:
 			// this can only be modified for new tasks via the commandline
 			// so nothing needs to be done
@@ -4297,7 +4292,6 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 			aColIDs.Copy(m_mapVisibleCols);
 			break;
 
-		case TDCA_CUSTOMATTRIB:
 		case TDCA_CUSTOMATTRIBDEFS:
 			// Handled in OnCustomAttributeChange
 			break;
