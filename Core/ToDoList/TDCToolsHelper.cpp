@@ -45,11 +45,12 @@ BOOL USERTOOL::operator==(const USERTOOL& other) const
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDCToolsHelper::CTDCToolsHelper(BOOL bTDLEnabled, UINT nStart, int nSize) 
+CTDCToolsHelper::CTDCToolsHelper(BOOL bTDLEnabled, BOOL bISODates, UINT nStart, int nSize)
 	: 
 	m_nStartID(nStart), 
 	m_nSize(nSize), 
-	m_bTDLEnabled(bTDLEnabled)
+	m_bTDLEnabled(bTDLEnabled),
+	m_bISODates(bISODates)
 {
 	
 }
@@ -246,15 +247,15 @@ BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& a
 	
 	if (tcp.IsUserInputRequired())
 	{
-		CTDLToolsUserInputDlg dialog(tcp);
+		CCLArgArray aArgs;
+		int nArg = tcp.GetUserArguments(aArgs);
+
+		CTDLToolsUserInputDlg dialog(aArgs, m_bISODates);
 		
 		if (dialog.DoModal(tool.sToolName) != IDOK)
 			return FALSE;
 		
 		// process the results
-		CCLArgArray aArgs;
-		int nArg = tcp.GetUserArguments(aArgs);
-		
 		while (nArg--)
 		{
 			CString sResult(dialog.GetResult(aArgs[nArg].sName));

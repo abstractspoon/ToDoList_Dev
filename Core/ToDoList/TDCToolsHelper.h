@@ -57,7 +57,7 @@ typedef CArray<USERTOOL, USERTOOL&> CUserToolArray;
 class CTDCToolsHelper  
 {
 public:
-	CTDCToolsHelper(BOOL bTDLEnabled, UINT nStart, int nSize = 16);
+	CTDCToolsHelper(BOOL bTDLEnabled, BOOL bISODates, UINT nStart, int nSize = 16);
 	virtual ~CTDCToolsHelper();
 	
 	BOOL RunTool(const USERTOOL& tool, const USERTOOLARGS& args);
@@ -70,7 +70,7 @@ public:
 protected:
 	UINT m_nStartID;
 	int m_nSize;
-	BOOL m_bTDLEnabled;
+	BOOL m_bTDLEnabled, m_bISODates;
 	
 protected:
 	BOOL PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 

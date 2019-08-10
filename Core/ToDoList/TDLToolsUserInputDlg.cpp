@@ -32,18 +32,18 @@ const UINT BTN_CY	= 14;
 /////////////////////////////////////////////////////////////////////////////
 // CToolsUserInputDlg dialog
 
-CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CTDCToolsCmdlineParser& tcp) 
+CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CCLArgArray& aArgs, BOOL bISODates)
 	: 
 	CRuntimeDlg(),
 	m_rWindowOrg(0, 0, 0, 0),
 	m_rClientOrg(0, 0, 0, 0),
 	m_nDividerID(0),
 	m_nHelpBtnID(0),
+	m_bISODates(bISODates),
 	m_btnHelp(IDD_USERTOOL_DIALOG)
 {
 	// process the user input items and save them off
-	CCLArgArray aArgs;
-	int nArgCount = tcp.GetArguments(aArgs);
+	int nArgCount = aArgs.GetSize();
 	UINT nCtrlID = 100;
 	
 	CPreferences prefs;
@@ -211,14 +211,13 @@ void CTDLToolsUserInputDlg::OnOK()
 			break;
 
 		case CLAT_USERDATE:
-			// make sure dates are formatted to ISO standards ie yyyy-mm-dd
 			{
 				SYSTEMTIME sysTime;
 
 				if (GDT_VALID == tuii.pCtrl->SendMessage(DTM_GETSYSTEMTIME, 0, (LPARAM) &sysTime))
 				{
 					COleDateTime date(sysTime);
-					sResult = date.Format(_T("%Y-%m-%d"));
+					sResult = CDateHelper::FormatDate(date, (m_bISODates ? DHFD_ISO : 0));
 				}
 				else
 					ASSERT(0);
