@@ -27,25 +27,26 @@ namespace MSDN.Html.Editor
         private void InitializeComponent()
         {
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EditHtmlForm));
-			this.htmlText = new System.Windows.Forms.TextBox();
+			this.htmlText = new System.Windows.Forms.RichTextBox();
 			this.bOK = new System.Windows.Forms.Button();
 			this.bCancel = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// htmlText
 			// 
-			this.htmlText.AcceptsReturn = true;
 			this.htmlText.AcceptsTab = true;
 			this.htmlText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.htmlText.AutoWordSelection = true;
+			this.htmlText.BackColor = System.Drawing.SystemColors.Window;
+			this.htmlText.EnableAutoDragDrop = true;
 			this.htmlText.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.htmlText.Location = new System.Drawing.Point(12, 12);
-			this.htmlText.Multiline = true;
 			this.htmlText.Name = "htmlText";
-			this.htmlText.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
 			this.htmlText.Size = new System.Drawing.Size(567, 309);
 			this.htmlText.TabIndex = 0;
+			this.htmlText.Text = "";
 			// 
 			// bOK
 			// 
@@ -88,12 +89,11 @@ namespace MSDN.Html.Editor
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
 			this.Text = "Insert ...";
 			this.ResumeLayout(false);
-			this.PerformLayout();
 
         }
         #endregion
 
-        private System.Windows.Forms.TextBox htmlText;
+        private System.Windows.Forms.RichTextBox htmlText;
         private System.Windows.Forms.Button bOK;
         private System.Windows.Forms.Button bCancel;
     }
