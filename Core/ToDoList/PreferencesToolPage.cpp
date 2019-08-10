@@ -8,6 +8,7 @@
 
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
+#include "..\shared\graphicsmisc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\enfiledialog.h"
 #include "..\shared\enmenu.h"
@@ -139,9 +140,9 @@ void CPreferencesToolPage::OnFirstShow()
 	CRect rList;
 	m_lcTools.GetClientRect(rList);
 
-	m_lcTools.InsertColumn(0, CEnString(IDS_PTP_TOOLNAME), LVCFMT_LEFT, 150);
-	m_lcTools.InsertColumn(1, CEnString(IDS_PTP_TOOLPATH), LVCFMT_LEFT, 250);
-	m_lcTools.InsertColumn(2, CEnString(IDS_PTP_ARGUMENTS), LVCFMT_LEFT, rList.Width() - 400);
+	m_lcTools.InsertColumn(0, CEnString(IDS_PTP_TOOLNAME), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(150));
+	m_lcTools.InsertColumn(1, CEnString(IDS_PTP_TOOLPATH), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(250));
+	m_lcTools.InsertColumn(2, CEnString(IDS_PTP_ARGUMENTS), LVCFMT_LEFT, rList.Width() - GraphicsMisc::ScaleByDPIFactor(400));
 	m_lcTools.InsertColumn(3, CEnString(IDS_PTP_ICONPATH), LVCFMT_LEFT, 0);
 
 	m_lcTools.SetExtendedStyle(m_lcTools.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
@@ -646,7 +647,7 @@ void CPreferencesToolPage::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL 
 			{
 				CEnMenu::SetMenuString(*pPopupMenu, nAdded, m_aCustomAttribDefs[nAttrib].sLabel, MF_BYPOSITION);
 
-				m_aMenuCustomAttribIDs.Add(m_aCustomAttribDefs[nAttrib].sUniqueID);
+				m_aMenuCustomAttribIDs.Add(Misc::ToLower(m_aCustomAttribDefs[nAttrib].sUniqueID));
 				nAdded++;
 			}
 		}
@@ -688,7 +689,7 @@ void CPreferencesToolPage::OnInsertCustomAttribute(UINT nCmdID)
 	}
 
 	CString sPlaceholder;
-	sPlaceholder.Format(_T("$(%s)"), m_aMenuCustomAttribIDs[nAttrib]);
+	sPlaceholder.Format(_T("$(seltcustom, %s)"), m_aMenuCustomAttribIDs[nAttrib]);
 
 	m_eCmdLine.ReplaceSel(sPlaceholder, TRUE);
 }
@@ -696,6 +697,8 @@ void CPreferencesToolPage::OnInsertCustomAttribute(UINT nCmdID)
 void CPreferencesToolPage::OnInsertPlaceholder(UINT nCmdID) 
 {
 	CString sPlaceholder(MapCmdIDToPlaceholder(nCmdID));
+	ASSERT(!sPlaceholder.IsEmpty());
+
 	int nSelStart = LOWORD(m_eCmdLine.GetSel());
 
 	m_eCmdLine.ReplaceSel(sPlaceholder, TRUE);
@@ -705,11 +708,10 @@ void CPreferencesToolPage::OnInsertPlaceholder(UINT nCmdID)
 
 	switch (MapCmdIDToType(nCmdID))
 	{
-	case CLAT_USERDATE:				sSelText.LoadString(IDS_USERTOOL_DATEPROMPT);	break;
-	case CLAT_USERFILE:				sSelText.LoadString(IDS_USERTOOL_FILEPROMPT);	break;
-	case CLAT_USERFOLDER:			sSelText.LoadString(IDS_USERTOOL_FOLDERPROMPT);	break;
-	case CLAT_USERTEXT:				sSelText.LoadString(IDS_USERTOOL_TEXTPROMPT);	break;
-	case CLAT_SELTASKCUSTATTRIB:	sSelText = _T("var_cust1");	break;
+	case CLAT_USERDATE:		sSelText.LoadString(IDS_USERTOOL_DATEPROMPT);	break;
+	case CLAT_USERFILE:		sSelText.LoadString(IDS_USERTOOL_FILEPROMPT);	break;
+	case CLAT_USERFOLDER:	sSelText.LoadString(IDS_USERTOOL_FOLDERPROMPT);	break;
+	case CLAT_USERTEXT:		sSelText.LoadString(IDS_USERTOOL_TEXTPROMPT);	break;
 	}
 
 	if (!sSelText.IsEmpty())
@@ -814,10 +816,6 @@ CString CPreferencesToolPage::MapCmdIDToPlaceholder(UINT nCmdID)
 	case ID_TOOLARG_USERTEXT:		
 		sText.Format(_T("$(%s, var_text1, \"%s\", default_text)"), sPlaceHolder, CEnString(IDS_USERTOOL_TEXTPROMPT));       
 		break;
-
-	case ID_TOOLARG_SELTASKCUSTOM:		
-		sText.Format(_T("$(%s, var_cust1)"), sPlaceHolder);
-		break;
 	}
 	
 	return sText;
@@ -840,7 +838,6 @@ CLA_TYPE CPreferencesToolPage::MapCmdIDToType(UINT nCmdID)
 	case ID_TOOLARG_SELTASKFILELINK:	return CLAT_SELTASKFILELINK;
 	case ID_TOOLARG_SELTASKALLOCBY:		return CLAT_SELTASKALLOCBY;
 	case ID_TOOLARG_SELTASKALLOCTO:		return CLAT_SELTASKALLOCTO;	
-	case ID_TOOLARG_SELTASKCUSTOM:		return CLAT_SELTASKCUSTATTRIB;	
 	case ID_TOOLARG_SELTASKPATH:		return CLAT_SELTASKPATH;
 	case ID_TOOLARG_USERDATE:			return CLAT_USERDATE;
 	case ID_TOOLARG_USERFILEPATH:		return CLAT_USERFILE;

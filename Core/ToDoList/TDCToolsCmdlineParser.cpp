@@ -26,25 +26,25 @@ CTDCToolsCmdlineParser::CTDCToolsCmdlineParser(LPCTSTR szCmdLine)
 	// init static map first time only
 	if (s_mapTypes.GetCount() == 0)
 	{
-		s_mapTypes[_T("pathname")] = CLAT_PATHNAME;
-		s_mapTypes[_T("filetitle")] = CLAT_FILETITLE;
-		s_mapTypes[_T("folder")] = CLAT_FOLDER;
-		s_mapTypes[_T("filename")] = CLAT_FILENAME;
-		s_mapTypes[_T("seltid")] = CLAT_SELTASKID;
-		s_mapTypes[_T("selttitle")] = CLAT_SELTASKTITLE;
-		s_mapTypes[_T("userfile")] = CLAT_USERFILE;
-		s_mapTypes[_T("userfolder")] = CLAT_USERFOLDER;
-		s_mapTypes[_T("usertext")] = CLAT_USERTEXT;
-		s_mapTypes[_T("userdate")] = CLAT_USERDATE;
-		s_mapTypes[_T("todaysdate")] = CLAT_TODAYSDATE;
-		s_mapTypes[_T("todolist")] = CLAT_TODOLIST;
-		s_mapTypes[_T("seltextid")] = CLAT_SELTASKEXTID;
-		s_mapTypes[_T("seltcomments")] = CLAT_SELTASKCOMMENTS;
-		s_mapTypes[_T("seltfile")] = CLAT_SELTASKFILELINK;
-		s_mapTypes[_T("seltallocby")] = CLAT_SELTASKALLOCBY;
-		s_mapTypes[_T("seltallocto")] = CLAT_SELTASKALLOCTO;
-		s_mapTypes[_T("seltcustom")] = CLAT_SELTASKCUSTATTRIB;
-		s_mapTypes[_T("seltpath")] = CLAT_SELTASKPATH;
+		s_mapTypes[_T("pathname")]		= CLAT_PATHNAME;
+		s_mapTypes[_T("filetitle")]		= CLAT_FILETITLE;
+		s_mapTypes[_T("folder")]		= CLAT_FOLDER;
+		s_mapTypes[_T("filename")]		= CLAT_FILENAME;
+		s_mapTypes[_T("seltid")]		= CLAT_SELTASKID;
+		s_mapTypes[_T("selttitle")]		= CLAT_SELTASKTITLE;
+		s_mapTypes[_T("userfile")]		= CLAT_USERFILE;
+		s_mapTypes[_T("userfolder")]	= CLAT_USERFOLDER;
+		s_mapTypes[_T("usertext")]		= CLAT_USERTEXT;
+		s_mapTypes[_T("userdate")]		= CLAT_USERDATE;
+		s_mapTypes[_T("todaysdate")]	= CLAT_TODAYSDATE;
+		s_mapTypes[_T("todolist")]		= CLAT_TODOLIST;
+		s_mapTypes[_T("seltextid")]		= CLAT_SELTASKEXTID;
+		s_mapTypes[_T("seltcomments")]	= CLAT_SELTASKCOMMENTS;
+		s_mapTypes[_T("seltfile")]		= CLAT_SELTASKFILELINK;
+		s_mapTypes[_T("seltallocby")]	= CLAT_SELTASKALLOCBY;
+		s_mapTypes[_T("seltallocto")]	= CLAT_SELTASKALLOCTO;
+		s_mapTypes[_T("seltcustom")]	= CLAT_SELTASKCUSTATTRIB;
+		s_mapTypes[_T("seltpath")]		= CLAT_SELTASKPATH;
 	}
 
 	SetCmdLine(szCmdLine);
