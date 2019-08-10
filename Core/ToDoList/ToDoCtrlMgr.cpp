@@ -1350,6 +1350,17 @@ void CToDoCtrlMgr::PreparePopupMenu(CMenu& menu, UINT nID1, int nMax) const
 
 }
 
+int CToDoCtrlMgr::GetAllCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs) const
+{
+	aAttribDefs.RemoveAll();
+	int nTDC = GetCount();
+
+	while (nTDC--)
+		aAttribDefs.Append(GetToDoCtrl(nTDC).GetCustomAttributeDefs());
+
+	return aAttribDefs.GetSize();
+}
+
 BOOL CToDoCtrlMgr::AnyIsModified() const
 {
 	int nCtrl = GetCount();

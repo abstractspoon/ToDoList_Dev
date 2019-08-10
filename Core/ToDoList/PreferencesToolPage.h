@@ -7,6 +7,7 @@
 // PreferencesToolPage.h : header file
 //
 
+#include "tdcstruct.h"
 #include "TDCToolsHelper.h"
 
 #include "..\shared\fileedit.h"
@@ -23,6 +24,10 @@
 const UINT WM_PTP_TESTTOOL = ::RegisterWindowMessage(_T("WM_PTP_TESTTOOL"));
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CTDCCustomAttribDefinitionArray;
+
+/////////////////////////////////////////////////////////////////////////////
 // CPreferencesToolPage dialog
 
 class CPreferencesToolPage : public CPreferencesPageBase
@@ -37,28 +42,34 @@ public:
 	int GetUserTools(CUserToolArray& aTools) const; // returns the number of tools
 	BOOL GetUserTool(int nTool, USERTOOL& tool) const; 
 	BOOL GetDisplayUDTsInToolbar() const { return m_bDisplayUDTsInToolbar; }
+	void SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 protected:
 
 // Dialog Data
 	//{{AFX_DATA(CPreferencesToolPage)
 	enum { IDD = IDD_PREFTOOLS_PAGE };
+	//}}AFX_DATA
+	CSysImageList m_ilSys;
+	CMenuButton	m_btnArgMenu;
+	CEnToolBar m_toolbar;
+	CToolbarHelper m_tbHelper;
 	CEdit	m_eCmdLine;
 	CFileEdit	m_eToolPath;
 	CListCtrl	m_lcTools;
+	CFileEdit	m_eIconPath;
+
+	int m_nMaxNumTools;
+	BOOL m_bDisplayUDTsInToolbar;
 	CString	m_sToolPath;
 	CString	m_sCommandLine;
 	BOOL	m_bRunMinimized;
 	CString		m_sIconPath;
-	CFileEdit	m_eIconPath;
-	//}}AFX_DATA
+	
 	CUserToolArray m_aTools;
-	CSysImageList m_ilSys;
-	int m_nMaxNumTools;
-	CMenuButton	m_btnArgMenu;
-	CEnToolBar m_toolbar;
-	CToolbarHelper m_tbHelper;
-	BOOL m_bDisplayUDTsInToolbar;
+	CStringArray m_aMenuCustomAttribIDs;
+	CStringArray m_aMenuUserVariableIDs;
+	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 // Overrides
 	// ClassWizard generate virtual function overrides
@@ -97,6 +108,8 @@ protected:
 	afx_msg void OnKeydownToollist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnChangeCmdline();
 	afx_msg void OnInsertPlaceholder(UINT nCmdID);
+	afx_msg void OnInsertUserVariable(UINT nCmdID);
+	afx_msg void OnInsertCustomAttribute(UINT nCmdID);
 	afx_msg void OnRunminimized();
 	afx_msg void OnTestTool();
 	afx_msg void OnChangeIconPath();

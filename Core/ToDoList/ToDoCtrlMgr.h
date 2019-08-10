@@ -133,9 +133,9 @@ public:
 	BOOL GetNeedsPreferenceUpdate(int nIndex) const;
 	void SetAllNeedPreferenceUpdate(BOOL bNeed, int nExcept = -1);
 
-	void PreparePopupMenu(CMenu& menu, UINT nID1, int nMax = 20) const;
-
 	BOOL DoBackup(int nIndex) const;
+	void PreparePopupMenu(CMenu& menu, UINT nID1, int nMax = 20) const;
+	int GetAllCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs) const;
 
 	// Implementation
 protected:

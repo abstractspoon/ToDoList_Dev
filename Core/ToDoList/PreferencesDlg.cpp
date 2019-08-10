@@ -524,6 +524,10 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 			defaultListData.AppendUnique(m_autoListData);
 			m_pageUITasklistColors.SetDefaultListData(defaultListData);
 		}
+		else if (pPage == &m_pageTools)
+		{
+			m_pageTools.SetCustomAttributeDefs(m_aCustomAttribDefs);
+		}
 		
 		// update caption
 		m_sPageTitle = GetItemPath(htiSel);
@@ -590,6 +594,11 @@ int CPreferencesDlg::GetDefaultListItems(TDCAUTOLISTDATA& tld) const
 void CPreferencesDlg::SetAutoListData(const TDCAUTOLISTDATA& autoListData)
 {
 	m_autoListData.Copy(autoListData);
+}
+
+void CPreferencesDlg::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttribDefs)
+{
+	m_aCustomAttribDefs.Copy(aAttribDefs);
 }
 
 LRESULT CPreferencesDlg::OnToolPageTestTool(WPARAM wp, LPARAM lp)

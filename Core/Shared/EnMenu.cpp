@@ -701,11 +701,14 @@ BOOL CEnMenu::SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd)
 {
 	int nNumCmdItems = (nCmdIDEnd - nCmdIDStart + 1);
 
-	if (!hMenu || (nNumCmdItems < 2))
+	if (!hMenu || !nNumCmdItems)
 	{
 		ASSERT(0);
 		return FALSE;
 	}
+
+	if (nNumCmdItems == 1)
+		return TRUE;
 	
 	// Update the menu
 	int nNumMenuItems = ::GetMenuItemCount(hMenu);

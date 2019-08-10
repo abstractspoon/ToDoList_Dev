@@ -75,6 +75,7 @@ public:
 	
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetAutoListData(const TDCAUTOLISTDATA& autoListData);
+	void SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 	// CPreferencesGenPage
 	BOOL GetAlwaysOnTop() const { return m_pageGen.GetAlwaysOnTop(); }
@@ -335,6 +336,7 @@ protected:
 	CString m_sPageTitle;
 	CUIThemeFile m_theme;
 	TDCAUTOLISTDATA m_autoListData;
+	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 	BOOL m_bInitialisingDialog;
 	BOOL m_bBuildingTree;

@@ -4541,24 +4541,11 @@ void CToDoListWnd::UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pTDC)
 		return; // nothing to do
 
 	CTDCCustomAttribDefinitionArray aTDCAttribDefs, aAllAttribDefs;
-
-	// all tasklists
-	int nTDC = GetTDCCount();
-
-	while (nTDC--)
-	{
-		const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
-		tdc.GetCustomAttributeDefs(aTDCAttribDefs);
-
-		aAllAttribDefs.Append(aTDCAttribDefs);
-	}
+	m_mgrToDoCtrls.GetAllCustomAttributeDefinitions(aAllAttribDefs);
 	
 	// active tasklist
 	if (pTDC == NULL)
-	{
-		ASSERT(GetTDCCount() > 0);
 		pTDC = &GetToDoCtrl();
-	}
 
 	ASSERT (pTDC);
 	pTDC->GetCustomAttributeDefs(aTDCAttribDefs);
@@ -4853,6 +4840,11 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 	TDCAUTOLISTDATA autoListData;
 	GetToDoCtrl().GetAutoListData(autoListData);
 	m_pPrefs->SetAutoListData(autoListData);
+
+	// And all the custom attributes definitionsa
+	CTDCCustomAttribDefinitionArray aAttribDefs;
+	m_mgrToDoCtrls.GetAllCustomAttributeDefinitions(aAttribDefs);
+	m_pPrefs->SetCustomAttributeDefs(aAttribDefs);
 
 	UINT nRet = m_pPrefs->DoModal(nInitPage);
 	
@@ -10375,6 +10367,7 @@ void CToDoListWnd::OnToolsShowtasksDue(UINT nCmdID)
 void CToDoListWnd::ResetPrefs()
 {
 	delete m_pPrefs;
+
 	m_pPrefs = new CPreferencesDlg(&m_mgrShortcuts, 
 									&m_mgrContent, 
 									&m_mgrImportExport,

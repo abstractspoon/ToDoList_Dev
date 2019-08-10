@@ -34,7 +34,7 @@ static LPCTSTR SAFEQUOTE = _T("{QUOTES}");
 
 IMPLEMENT_DYNCREATE(CPreferencesToolPage, CPreferencesPageBase)
 
-CPreferencesToolPage::CPreferencesToolPage(int nMaxNumTools) 
+CPreferencesToolPage::CPreferencesToolPage(int nMaxNumTools)
 	: 
 	CPreferencesPageBase(CPreferencesToolPage::IDD),
 	m_eToolPath(FES_COMBOSTYLEBTN | FES_ALLOWURL),
@@ -94,12 +94,15 @@ BEGIN_MESSAGE_MAP(CPreferencesToolPage, CPreferencesPageBase)
 	ON_EN_CHANGE(IDC_TOOLPATH, OnChangeToolpath)
 	ON_NOTIFY(LVN_KEYDOWN, IDC_TOOLLIST, OnKeydownToollist)
 	ON_EN_CHANGE(IDC_CMDLINE, OnChangeCmdline)
-	ON_COMMAND_RANGE(ID_TOOLARG_PATHNAME, ID_TOOLARG_SELTASKPATH, OnInsertPlaceholder)
 	ON_BN_CLICKED(IDC_RUNMINIMIZED, OnRunminimized)
 	ON_BN_CLICKED(IDC_TESTTOOL, OnTestTool)
 	ON_EN_CHANGE(IDC_ICONPATH, OnChangeIconPath)
 	ON_BN_CLICKED(IDC_IMPORT, OnImportTools)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
+
+	ON_COMMAND_RANGE(ID_TOOLARG_CUSTOMATTRIB1, ID_TOOLARG_CUSTOMATTRIB16, OnInsertCustomAttribute)
+	ON_COMMAND_RANGE(ID_TOOLARG_USERVAR1, ID_TOOLARG_USERVAR10, OnInsertUserVariable)
+	ON_COMMAND_RANGE(ID_TOOLARG_PATHNAME, ID_TOOLARG_SELTASKPATH, OnInsertPlaceholder)
 
 END_MESSAGE_MAP()
 
@@ -112,6 +115,11 @@ BOOL CPreferencesToolPage::OnInitDialog()
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPreferencesToolPage::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttribDefs)
+{
+	m_aCustomAttribDefs.Copy(aAttribDefs);
 }
 
 void CPreferencesToolPage::OnFirstShow()
@@ -588,7 +596,101 @@ void CPreferencesToolPage::OnChangeCmdline()
 
 void CPreferencesToolPage::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu)
 {
+	// Replace user-variable placeholder text with actual variable names
+	// in the order they appear so we can reverse-lookup their names
+	if (CEnMenu::GetMenuItemPos(*pPopupMenu, ID_TOOLARG_USERVAR1) == 0)
+	{
+		ASSERT(pPopupMenu->GetMenuItemCount() == 16);
+	
+		m_aMenuUserVariableIDs.RemoveAll();
+
+		CTDCToolsCmdlineParser tcp(m_sCommandLine);
+	
+		CCLArgArray aArgs;
+		int nNumArgs = tcp.GetUserArguments(aArgs), nAdded = 0;
+		
+		for (int nArg = 0; ((nArg < nNumArgs) && (nAdded < 16)); nArg++)
+		{
+			switch (aArgs[nArg].nType)
+			{
+			case CLAT_USERDATE:
+			case CLAT_USERFILE:
+			case CLAT_USERFOLDER:
+			case CLAT_USERTEXT:
+				CEnMenu::SetMenuString(*pPopupMenu, nAdded, aArgs[nArg].sName, MF_BYPOSITION);
+
+				m_aMenuUserVariableIDs.Add(aArgs[nArg].sName);
+				nAdded++;
+				break;
+			}
+		}
+
+		// Delete any outstanding placeholders
+		while (pPopupMenu->DeleteMenu(nAdded, MF_BYPOSITION));
+
+		// And sort the rest
+		CEnMenu::SortMenuStrings(*pPopupMenu, ID_TOOLARG_USERVAR1, ID_TOOLARG_USERVAR16);
+	}
+	// Likewise for custom attributes
+	else if (CEnMenu::GetMenuItemPos(*pPopupMenu, ID_TOOLARG_CUSTOMATTRIB1) == 0)
+	{
+		ASSERT(pPopupMenu->GetMenuItemCount() == 16);
+	
+		m_aMenuCustomAttribIDs.RemoveAll();
+
+		int nNumAttrib = m_aCustomAttribDefs.GetSize(), nAdded = 0;
+		
+		for (int nAttrib = 0; ((nAttrib < nNumAttrib) && (nAdded < 16)); nAttrib++)
+		{
+			if (m_aCustomAttribDefs[nAttrib].bEnabled)
+			{
+				CEnMenu::SetMenuString(*pPopupMenu, nAdded, m_aCustomAttribDefs[nAttrib].sLabel, MF_BYPOSITION);
+
+				m_aMenuCustomAttribIDs.Add(m_aCustomAttribDefs[nAttrib].sUniqueID);
+				nAdded++;
+			}
+		}
+
+		// Delete any outstanding placeholders
+		while (pPopupMenu->DeleteMenu(nAdded, MF_BYPOSITION));
+
+		// And sort the rest
+		CEnMenu::SortMenuStrings(*pPopupMenu, ID_TOOLARG_CUSTOMATTRIB1, ID_TOOLARG_CUSTOMATTRIB16);
+	}
+	
 	CPreferencesPageBase::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
+}
+
+void CPreferencesToolPage::OnInsertUserVariable(UINT nCmdID)
+{
+	int nVar = (nCmdID - ID_TOOLARG_USERVAR1);
+
+	if (nVar >= m_aMenuUserVariableIDs.GetSize())
+	{
+		ASSERT(0);
+		return;
+	}
+
+	CString sPlaceholder;
+	sPlaceholder.Format(_T("$(%s)"), m_aMenuUserVariableIDs[nVar]);
+
+	m_eCmdLine.ReplaceSel(sPlaceholder, TRUE);
+}
+
+void CPreferencesToolPage::OnInsertCustomAttribute(UINT nCmdID)
+{
+	int nAttrib = (nCmdID - ID_TOOLARG_CUSTOMATTRIB1);
+
+	if (nAttrib >= m_aMenuCustomAttribIDs.GetSize())
+	{
+		ASSERT(0);
+		return;
+	}
+
+	CString sPlaceholder;
+	sPlaceholder.Format(_T("$(%s)"), m_aMenuCustomAttribIDs[nAttrib]);
+
+	m_eCmdLine.ReplaceSel(sPlaceholder, TRUE);
 }
 
 void CPreferencesToolPage::OnInsertPlaceholder(UINT nCmdID) 

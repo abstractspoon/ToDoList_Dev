@@ -3911,13 +3911,57 @@ BEGIN
         MENUITEM "Selected Task File &Link",    ID_TOOLARG_SELTASKFILELINK
         MENUITEM "Selected Task &Alloc By",     ID_TOOLARG_SELTASKALLOCBY
         MENUITEM "Selected Task Alloc &To",     ID_TOOLARG_SELTASKALLOCTO
-        MENUITEM "Selected Task C&ustom Attribute", ID_TOOLARG_SELTASKCUSTOM
         MENUITEM "Selected Task &Path",         ID_TOOLARG_SELTASKPATH
+        POPUP "Selected Task C&ustom Attribute"
+        BEGIN
+            MENUITEM "Attribute 1",                 ID_TOOLARG_CUSTOMATTRIB1
+            MENUITEM "Attribute 2",                 ID_TOOLARG_CUSTOMATTRIB2
+            MENUITEM "Attribute 3",                 ID_TOOLARG_CUSTOMATTRIB3
+            MENUITEM "Attribute 4",                 ID_TOOLARG_CUSTOMATTRIB4
+            MENUITEM "Attribute 5",                 ID_TOOLARG_CUSTOMATTRIB5
+            MENUITEM "Attribute 6",                 ID_TOOLARG_CUSTOMATTRIB6
+            MENUITEM "Attribute 7",                 ID_TOOLARG_CUSTOMATTRIB7
+            MENUITEM "Attribute 8",                 ID_TOOLARG_CUSTOMATTRIB8
+            MENUITEM "Attribute 9",                 ID_TOOLARG_CUSTOMATTRIB9
+            MENUITEM "Attribute 10",                ID_TOOLARG_CUSTOMATTRIB10
+
+            MENUITEM "Attribute 11",                ID_TOOLARG_CUSTOMATTRIB11
+
+            MENUITEM "Attribute 12",                ID_TOOLARG_CUSTOMATTRIB12
+
+            MENUITEM "Attribute 13",                ID_TOOLARG_CUSTOMATTRIB13
+
+            MENUITEM "Attribute 14",                ID_TOOLARG_CUSTOMATTRIB14
+
+            MENUITEM "Attribute 15",                ID_TOOLARG_CUSTOMATTRIB15
+
+            MENUITEM "Attribute 16",                ID_TOOLARG_CUSTOMATTRIB16
+
+        END
         MENUITEM SEPARATOR
         MENUITEM "&User Date",                  ID_TOOLARG_USERDATE
         MENUITEM "Use&r Filepath",              ID_TOOLARG_USERFILEPATH
         MENUITEM "User &Folder",                ID_TOOLARG_USERFOLDER
         MENUITEM "User Te&xt",                  ID_TOOLARG_USERTEXT
+        POPUP "User &Variables"
+        BEGIN
+            MENUITEM "Variable 1",                  ID_TOOLARG_USERVAR1
+            MENUITEM "Variable 2",                  ID_TOOLARG_USERVAR2
+            MENUITEM "Variable 3",                  ID_TOOLARG_USERVAR3
+            MENUITEM "Variable 4",                  ID_TOOLARG_USERVAR4
+            MENUITEM "Variable 5",                  ID_TOOLARG_USERVAR5
+            MENUITEM "Variable 6",                  ID_TOOLARG_USERVAR6
+            MENUITEM "Variable 7",                  ID_TOOLARG_USERVAR7
+            MENUITEM "Variable 8",                  ID_TOOLARG_USERVAR8
+            MENUITEM "Variable 9",                  ID_TOOLARG_USERVAR9
+            MENUITEM "Variable 10",                 ID_TOOLARG_USERVAR10
+            MENUITEM "Variable 11",                 ID_TOOLARG_USERVAR11
+            MENUITEM "Variable 12",                 ID_TOOLARG_USERVAR12
+            MENUITEM "Variable 13",                 ID_TOOLARG_USERVAR13
+            MENUITEM "Variable 14",                 ID_TOOLARG_USERVAR14
+            MENUITEM "Variable 15",                 ID_TOOLARG_USERVAR15
+            MENUITEM "Variable 16",                 ID_TOOLARG_USERVAR16
+        END
         MENUITEM SEPARATOR
         MENUITEM "T&oday's Date",               ID_TOOLARG_TODAYSDATE
     END
