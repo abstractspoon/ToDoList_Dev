@@ -32,19 +32,19 @@ const static CStringArray	EMPTY_STRARRAY;
 
 //////////////////////////////////////////////////////////////////////
 
-#define SEARCH_SUBTASKS_LONGEST_STR(hti, maxVal, fn)              \
-{																  \
-	HTREEITEM htiChild = m_tch.TreeCtrl().GetChildItem(hti);				  \
-																  \
-	while (htiChild)											  \
-	{															  \
-		CString sChildLongest = fn;								  \
-																  \
-		if (sChildLongest.GetLength() > maxVal.GetLength())		  \
-			maxVal = sChildLongest;								  \
-																  \
-		htiChild = m_tch.TreeCtrl().GetNextItem(htiChild, TVGN_NEXT);		  \
-	}															  \
+#define SEARCH_SUBTASKS_LONGEST_STR(hti, maxVal, fn)					\
+{																		\
+	HTREEITEM htiChild = m_tch.TreeCtrl().GetChildItem(hti);			\
+																		\
+	while (htiChild)													\
+	{																	\
+		CString sChildLongest = fn;										\
+																		\
+		if (sChildLongest.GetLength() > maxVal.GetLength())				\
+			maxVal = sChildLongest;										\
+																		\
+		htiChild = m_tch.TreeCtrl().GetNextItem(htiChild, TVGN_NEXT);	\
+	}																	\
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -152,8 +152,8 @@ BOOL CTDCLongestItemMap::IsSupportedColumn(TDC_COLUMN nColID)
 		return TRUE;
 	}
 
-	// else
-	return CTDCCustomAttributeHelper::IsCustomColumn(nColID);
+	// all else
+	return FALSE;
 }
 
 BOOL CTDCLongestItemMap::HasColumn(TDC_COLUMN nColID) const
