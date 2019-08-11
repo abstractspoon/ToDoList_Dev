@@ -65,7 +65,11 @@ public:
 	int GetTaskBreadcrumbs(HTREEITEM hti, CDWordArray& aBreadcrumbs, DWORD dwFlags = TCFBC_PARENTSONLY | TCFBC_UP) const;
 	
 	// generic
-	int GetLongestValues(const CTDCColumnIDMap& mapCols, CTDCLongestItemMap& mapLongest, BOOL bVisibleOnly) const;
+	int GetLongestValues(const CTDCColumnIDMap& mapCols, 
+						 const CTDCCustomAttribDefinitionArray& aCustAttribDefs, 
+						 CTDCLongestItemMap& mapLongest, 
+						 BOOL bVisibleOnly) const;
+
 	CString GetLongestValue(TDC_COLUMN nCol, BOOL bVisibleOnly) const;
 	CString GetLongestValue(TDC_COLUMN nCol, const CStringArray& aPossible, BOOL bVisibleOnly) const;
 	CString GetLongestTime(TDC_COLUMN nCol, BOOL bVisibleOnly) const;
@@ -75,6 +79,7 @@ public:
 	CString GetLongestTimeEstimate(BOOL bVisibleOnly) const;
 	CString GetLongestTimeSpent(BOOL bVisibleOnly) const;
 	CString GetLongestTimeRemaining(BOOL bVisibleOnly) const;
+	CString GetLongestCalculatedCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
 	CString GetLongestCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
 	CString GetLargestCommentsSizeInKB(BOOL bVisibleOnly) const;
 
@@ -110,7 +115,14 @@ protected:
 	BOOL FindVisibleTaskWithDoneTime(HTREEITEM hti) const;
 	
 	// generic
-	void GetLongestValues(const CTDCColumnIDMap& mapCols, HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTDCLongestItemMap& mapLongest, BOOL bVisibleOnly) const;
+	void GetLongestValues(const CTDCColumnIDMap& mapCols, 
+						  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+						  HTREEITEM hti, 
+						  const TODOITEM* pTDI, 
+						  const TODOSTRUCTURE* pTDS, 
+						  CTDCLongestItemMap& mapLongest, 
+						  BOOL bVisibleOnly) const;
+
 	CString GetLongestValue(TDC_COLUMN nCol, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	CString GetLongestValue(TDC_COLUMN nCol, HTREEITEM hti, const TODOITEM* pTDI, const CString& sLongestPossible, BOOL bVisibleOnly) const;
 

@@ -830,6 +830,13 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 				SupportsFeature(TDCCAF_MINIMIZE);
 	}
 
+	BOOL IsCalculated() const
+	{
+		return HasFeature(TDCCAF_ACCUMULATE) ||
+				HasFeature(TDCCAF_MAXIMIZE) ||
+				HasFeature(TDCCAF_MINIMIZE);
+	}
+
 	CString GetNextListItem(const CString& sItem, BOOL bNext) const
 	{
 		DWORD dwListType = GetListType();

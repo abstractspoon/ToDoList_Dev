@@ -1068,7 +1068,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	{
 		// Get the longest task values for the remaining attributes
 		CTDCLongestItemMap mapLongest;
-		m_find.GetLongestValues(mapCols, mapLongest, bVisibleTasksOnly);
+		m_find.GetLongestValues(mapCols, m_aCustomAttribDefs, mapLongest, bVisibleTasksOnly);
 
 		m_hdrColumns.SetItemWidth(0, 0); // always
 
@@ -4269,12 +4269,8 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 				{
 					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs.GetData()[nAttrib];
 
-					if (attribDef.HasFeature(TDCCAF_ACCUMULATE) ||
-						attribDef.HasFeature(TDCCAF_MINIMIZE) ||
-						attribDef.HasFeature(TDCCAF_MAXIMIZE))
-					{
+					if (attribDef.IsCalculated())
 						AccumulateRecalcColumn(attribDef.GetColumnID(), aColIDs);
-					}
 				}
 			}
 			break;
