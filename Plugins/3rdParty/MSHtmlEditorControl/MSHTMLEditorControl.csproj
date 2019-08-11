@@ -291,6 +291,10 @@
       <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>
       <Name>WebBrowserEx</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WinFormsSyntaxHighlighter\WinFormsSyntaxHighlighter.csproj">
+      <Project>{a84b044a-f5dd-4220-baff-a18f17585e31}</Project>
+      <Name>WinFormsSyntaxHighlighter</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
   <PropertyGroup>

@@ -6,7 +6,11 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
+using WinFormsSyntaxHighlighter;
+using System.Text.RegularExpressions;
+
 #endregion
+
 
 namespace MSDN.Html.Editor
 {
@@ -18,6 +22,8 @@ namespace MSDN.Html.Editor
     /// </summary>
     public partial class EditHtmlForm : Form
     {
+
+		private SyntaxHighlighter _syntaxHighlighting = null;
 
         // read only property for the form
         private bool _readOnly;
@@ -36,16 +42,50 @@ namespace MSDN.Html.Editor
             //
             InitializeComponent();
 
-            // ensure content is empty
-            this.htmlText.Text = string.Empty;
+			// Set up syntax highlighting
+			InitializeSyntaxHighlighting();
+			
+			// ensure content is empty
+			this.htmlText.Text = string.Empty;
             this.ReadOnly = true;
 
         } //EditHtmlForm
 
-        /// <summary>
-        /// Property to modify the caption of the display
-        /// </summary>
-        public void SetCaption(string caption)
+		private void InitializeSyntaxHighlighting()
+		{
+
+			_syntaxHighlighting = new SyntaxHighlighter(htmlText);
+
+			// double quote strings
+			_syntaxHighlighting.AddPattern(new PatternDefinition(@"\""([^""]|\""\"")*\"""), new SyntaxStyle(Color.Blue));
+
+			// single quote strings
+			_syntaxHighlighting.AddPattern(new PatternDefinition(@"\'([^']|\'\')*\'"), new SyntaxStyle(Color.Salmon));
+
+			AddHtmlPattern("SPAN", Color.Red);
+			AddHtmlPattern("P", Color.DarkCyan);
+			AddHtmlPattern("A", Color.Blue);
+			AddHtmlPattern("TABLE", Color.Tan);
+			AddHtmlPattern("TR", Color.Brown);
+			AddHtmlPattern("TD", Color.Brown);
+			AddHtmlPattern("IMG", Color.Red);
+		}
+
+		private void AddHtmlPattern(string keyword, Color color)
+		{
+			// Begin tag
+			var regex = string.Format("<{0}.*?>", keyword);
+			_syntaxHighlighting.AddPattern(new PatternDefinition(new Regex(regex, RegexOptions.IgnoreCase)), new SyntaxStyle(color));
+
+			// End Tag
+			regex = string.Format("</{0}>", keyword);
+			_syntaxHighlighting.AddPattern(new PatternDefinition(new Regex(regex, RegexOptions.IgnoreCase)), new SyntaxStyle(color));
+		}
+
+		/// <summary>
+		/// Property to modify the caption of the display
+		/// </summary>
+		public void SetCaption(string caption)
         {
             this.Text = caption;
         }
@@ -55,6 +95,8 @@ namespace MSDN.Html.Editor
 			set
 			{
 				this.htmlText.Font = new Font(value, 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+
+				_syntaxHighlighting.ReHighlight();
 			}
 		}
 
