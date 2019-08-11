@@ -109,7 +109,7 @@ protected:
 	const TODOITEM* GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
 	static double GetBestDate(double dBest, double dDate, BOOL bEarliest);
-	static double GetCalculationValue(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDC_UNITS nUnits);
+	static BOOL GetCalculationValue(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits);
 
 };
 
@@ -163,6 +163,7 @@ public:
 
 	CString GetTaskTime(DWORD dwTaskID, TDC_COLUMN nColID) const;
 	CString GetTaskTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
+	CString GetTaskTime(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 
 protected:
 	const CToDoCtrlData& m_data;

@@ -426,6 +426,7 @@ namespace Misc
 	TCHAR TrimFirst(CString& sText);
 	TCHAR TrimLast(CString& sText);
 	BOOL TrimFirstIf(TCHAR cText, CString& sText);
+	BOOL TrimTrailingDecimalZeros(CString& sText);
 	BOOL TrimLastIf(TCHAR cText, CString& sText);
 	CString& Trim(CString& sText, TCHAR cChar);
 	CString& Trim(CString& sText, LPCTSTR lpszTargets = NULL);

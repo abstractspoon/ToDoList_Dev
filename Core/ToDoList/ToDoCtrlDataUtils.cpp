@@ -1712,35 +1712,43 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUS
 	return GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
 }
 
-double CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDC_UNITS nUnits)
+BOOL CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits)
 {
-	double dValue = DBL_NULL;
-
-	if (IsValidUnits(nUnits) && attribDef.IsDataType(TDCCA_TIMEPERIOD))
+	switch (attribDef.GetDataType())
 	{
-		TDCTIMEPERIOD time;
+	case TDCCA_TIMEPERIOD:
+		if (IsValidUnits(nUnits))
+		{
+			TDCTIMEPERIOD time;
 
-		// Convert to requested units
-		if (data.AsTimePeriod(time))
-			time.SetUnits(nUnits, TRUE);
+			if (data.AsTimePeriod(time))
+			{
+				time.SetUnits(nUnits, TRUE); // Convert to requested units
+				dValue = time.dAmount;
 
-		dValue = time.dAmount;
-	}
-	else if (attribDef.IsDataType(TDCCA_FRACTION))
-	{
+				return TRUE;
+			}
+		}
+		break;
+
+	case TDCCA_FRACTION:
 		dValue = data.AsFraction();
-	}
-	else // double/int
-	{
+		return TRUE;
+
+	case TDCCA_DOUBLE:
+	case TDCCA_INTEGER:
+	case TDCCA_DATE:
 		dValue = data.AsDouble();
+		return TRUE;
 	}
 
-	return dValue;
+	// All else
+	return FALSE;
 }
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
 {
-	double dCalcValue = DBL_NULL;
+	double dCalcValue = DBL_NULL, dSubtaskVal;
 
 	TDCCADATA data;
 	pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
@@ -1751,12 +1759,11 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE));
 
 		// our value
-		dCalcValue = GetCalculationValue(data, attribDef, nUnits);
+		GetCalculationValue(data, attribDef, dCalcValue, nUnits);
 
 		// our children's values
 		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 		{
-			double dSubtaskVal;
 			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
 
 			// ignore references else risk of infinite loop
@@ -1775,12 +1782,11 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		if (data.IsEmpty())
 			dCalcValue = -DBL_MAX;
 		else
-			dCalcValue = GetCalculationValue(data, attribDef, nUnits);
+			GetCalculationValue(data, attribDef, dCalcValue, nUnits);
 
 		// our children's values
 		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 		{
-			double dSubtaskVal;
 			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
 
 			// ignore references else risk of infinite loop
@@ -1799,12 +1805,11 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		if (data.IsEmpty())
 			dCalcValue = DBL_MAX;
 		else
-			dCalcValue = GetCalculationValue(data, attribDef, nUnits);
+			GetCalculationValue(data, attribDef, dCalcValue, nUnits);
 
 		// our children's values
 		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 		{
-			double dSubtaskVal;
 			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
 
 			// ignore references else risk of infinite loop
@@ -1817,7 +1822,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 	}
 	else
 	{
-		dCalcValue = GetCalculationValue(data, attribDef, nUnits);
+		GetCalculationValue(data, attribDef, dCalcValue, nUnits);
 	}
 
 	if (dCalcValue == DBL_NULL)
@@ -3544,61 +3549,60 @@ CString CTDCTaskFormatter::GetTaskTimeRemaining(const TODOITEM* pTDI, const TODO
 
 CString CTDCTaskFormatter::GetTaskTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const
 {
-	ASSERT(pTDI && pTDS);
-
 	if (pTDI && pTDS)
 	{
 		double dTime = 0.0;
 		TDC_UNITS nUnits = TDCU_NULL;
-		int nDecPlaces = (m_data.HasStyle(TDCS_ROUNDTIMEFRACTIONS) ? 0 : 2);
 
 		switch (nColID)
 		{
 		case TDCC_TIMEEST:
-			if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-				nUnits = pTDI->timeEstimate.nUnits;
-			else
-				nUnits = m_data.GetDefaultTimeEstimateUnits();
+			{
+				if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+					nUnits = pTDI->timeEstimate.nUnits;
+				else
+					nUnits = m_data.GetDefaultTimeEstimateUnits();
 
-			dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, nUnits);
-
-			// check for negative times
-			if (dTime < 0.0)
-				return EMPTY_STR;
-			break;
+				dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, nUnits);
+			}
+			return GetTaskTime(dTime, nUnits, FALSE);
 
 		case TDCC_TIMESPENT:
-			if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-				nUnits = pTDI->timeSpent.nUnits;
-			else
-				nUnits = m_data.GetDefaultTimeSpentUnits();
+			{
+				if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+					nUnits = pTDI->timeSpent.nUnits;
+				else
+					nUnits = m_data.GetDefaultTimeSpentUnits();
 
-			dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, nUnits);
-			break;
+				dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, nUnits);
+			}
+			return GetTaskTime(dTime, nUnits, TRUE);
 
 		case TDCC_REMAINING:
 			return GetTaskTimeRemaining(pTDI, pTDS);
-
-		default:
-			nUnits = TDCU_NULL;
-			ASSERT(0);
-			return EMPTY_STR;
-		}
-
-		if ((dTime != 0.0) || !m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
-		{
-			TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
-
-			if (m_data.HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
-				return CTimeHelper().FormatTimeHMS(dTime, nTHUnits, (BOOL)nDecPlaces);
-
-			// else
-			return CTimeHelper().FormatTime(dTime, nTHUnits, nDecPlaces);
 		}
 	}
 
-	// else
+	ASSERT(0);
 	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskTime(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const
+{
+	if ((dTime == 0.0) && m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
+		return EMPTY_STR;
+
+	if (!bAllowNegative && (dTime < 0.0))
+		return EMPTY_STR;
+
+	TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
+	int nDecPlaces = (m_data.HasStyle(TDCS_ROUNDTIMEFRACTIONS) ? 0 : 2);
+
+	if (m_data.HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
+		return CTimeHelper().FormatTimeHMS(dTime, nTHUnits, (BOOL)nDecPlaces);
+
+	// else
+	return CTimeHelper().FormatTime(dTime, nTHUnits, nDecPlaces);
 }
 
 CString CTDCTaskFormatter::GetTaskAllocTo(const TODOITEM* pTDI) const

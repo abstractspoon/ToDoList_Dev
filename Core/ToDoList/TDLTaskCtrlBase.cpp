@@ -1079,7 +1079,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 
 			if (mapCols.Has(nColID))
 			{
-				if (mapLongest.IsSupportedColumn(nColID))
+				if (mapLongest.HasColumn(nColID))
 				{
 					CString sLongest = mapLongest.GetLongestValue(nColID);
 
@@ -2923,10 +2923,11 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			double dValue = 0.0;
 			TDC_UNITS nUnits = data.GetTimeUnits();
 
-			m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
-
-			CString sText(CTDCCustomAttributeHelper::FormatData(dValue, attribDef));
-			DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
+			if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
+			{
+				CString sText = m_formatter.GetTaskTime(dValue, nUnits, TRUE);
+				DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
+			}
 		}
 		break;
 

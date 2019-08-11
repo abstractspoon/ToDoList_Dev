@@ -45,6 +45,7 @@ public:
 	BOOL HasColumn(TDC_COLUMN nColID) const;
 	CString GetLongestValue(TDC_COLUMN nColID) const;
 
+protected:
 	static BOOL IsSupportedColumn(TDC_COLUMN nColID);
 };
 
@@ -79,7 +80,6 @@ public:
 	CString GetLongestTimeEstimate(BOOL bVisibleOnly) const;
 	CString GetLongestTimeSpent(BOOL bVisibleOnly) const;
 	CString GetLongestTimeRemaining(BOOL bVisibleOnly) const;
-	CString GetLongestCalculatedCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
 	CString GetLongestCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
 	CString GetLargestCommentsSizeInKB(BOOL bVisibleOnly) const;
 
@@ -136,6 +136,8 @@ protected:
 	DWORD GetLargestReferenceID(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	float GetLargestCommentsSizeInKB(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	int GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
+	BOOL GetLongestCalculatedCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CString& sLongest) const;
+
 	BOOL WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const;
 	BOOL CheckGetTask(HTREEITEM hti, const TODOITEM*& pTDI, BOOL bTrueTask) const;
 	BOOL CheckGetTask(HTREEITEM hti, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS) const;

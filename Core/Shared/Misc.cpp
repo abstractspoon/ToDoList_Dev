@@ -927,6 +927,23 @@ TCHAR Misc::TrimLast(CString& sText)
 	return nLast;
 }
 
+BOOL Misc::TrimTrailingDecimalZeros(CString& sText)
+{
+	CString sSep = GetDecimalSeparator();
+	int nDecimal = sText.Find(sSep);
+
+	if (nDecimal < 0)
+		return FALSE;
+
+	sText.TrimRight('0');
+
+	// Remove decimal if it's now at the end
+	if (nDecimal == (sText.GetLength() - sSep.GetLength()))
+		sText = sText.Left(nDecimal);
+
+	return TRUE;
+}
+
 int Misc::Split(const CString& sText, CDWordArray& aValues, TCHAR cDelim, BOOL bAllowEmpty)
 {
 	TCHAR szSep[2] = { cDelim, 0 };
@@ -1962,9 +1979,14 @@ CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 	CString sValue;
 
 	if (nDecPlaces < 0)
+	{
 		sValue.Format(_T("%f"), dVal);
+		TrimTrailingDecimalZeros(sValue);
+	}
 	else
+	{
 		sValue.Format(_T("%.*f"), nDecPlaces, dVal);
+	}
 				
 	// restore locale
 	setlocale(LC_NUMERIC, szLocale);

@@ -114,6 +114,13 @@ const CString& TDCCADATA::AsString() const
 	return sData; 
 }
 
+BOOL TDCCADATA::IsFraction() const
+{
+	int nDiv = sData.Find('/');
+
+	return ((nDiv > 0) && (nDiv < Misc::LastIndex(sData)));
+}
+
 double TDCCADATA::AsFraction() const 
 { 
 	ASSERT(sExtra.IsEmpty());
@@ -192,6 +199,11 @@ int TDCCADATA::AsArray(const CString& sValue, CStringArray& aValues)
 	
 	// else
 	return Misc::Split(sValue, aValues, '\n', TRUE); 
+}
+
+BOOL TDCCADATA::IsTimePeriod() const
+{
+	return (IsEmpty() || (GetTimeUnits() != TDCU_NULL));
 }
 
 BOOL TDCCADATA::AsTimePeriod(TDCTIMEPERIOD& time) const

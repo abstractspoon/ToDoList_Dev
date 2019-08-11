@@ -89,8 +89,8 @@ public:
 									  const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 	static CString FormatData(const TDCCADATA& data, const CString& sUniqueID,
-							  const CTDCCustomAttribDefinitionArray& aAttribDefs);
-	static CString FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
+							  const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bISODates = FALSE);
+	static CString FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bISODates = FALSE);
 
 	static TDC_ATTRIBUTE GetAttributeID(TDC_COLUMN nColID,
 										const CTDCCustomAttribDefinitionArray& aAttribDefs);

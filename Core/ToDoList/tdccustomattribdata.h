@@ -51,7 +51,10 @@ struct TDCCADATA
 	int AsArrays(CStringArray& aValues, CStringArray& aExtra) const;
 	BOOL AsTimePeriod(TDCTIMEPERIOD& time) const;
 	BOOL AsCost(TDCCOST& cost) const;
-
+	
+	BOOL IsFraction() const;
+	BOOL IsTimePeriod() const;
+	
 	TDC_UNITS GetTimeUnits() const;
 
 	void Set(double dValue);
@@ -65,7 +68,7 @@ struct TDCCADATA
 	void Set(const CStringArray& aValues, const CStringArray& aExtra);
 
 	CString FormatAsArray(TCHAR cSep = 0) const;
-	CString FormatAsDate(BOOL bISO = FALSE) const;
+	CString FormatAsDate(BOOL bISO) const;
 	CString FormatAsTimePeriod(int nDecimalPlaces = 2) const;
 
 protected:

@@ -1212,17 +1212,17 @@ void CTDCCustomAttributeHelper::DDX(CDataExchange* pDX, const CTDCCustomControlA
 }
 
 CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const CString& sUniqueID, 
-												const CTDCCustomAttribDefinitionArray& aAttribDefs)
+												const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bISODates)
 {
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
 	if (!data.IsEmpty())
 		VERIFY(GetAttributeDef(sUniqueID, aAttribDefs, attribDef));
 
-	return FormatData(data, attribDef);
+	return FormatData(data, attribDef, bISODates);
 }
 
-CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
+CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bISODates)
 {
 	if (attribDef.IsList())
 	{
@@ -1233,7 +1233,7 @@ CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const TDCCU
 		switch (attribDef.GetDataType())
 		{
 		case TDCCA_DATE:
-			return data.FormatAsDate();
+			return data.FormatAsDate(bISODates);
 
 		case TDCCA_DOUBLE:
 		case TDCCA_INTEGER:
@@ -1241,6 +1241,16 @@ CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const TDCCU
 
 		case TDCCA_FRACTION:
 			return FormatNumber(data.AsFraction(), attribDef);
+
+		case TDCCA_TIMEPERIOD:
+			{
+				TDCTIMEPERIOD time;
+
+				if (data.AsTimePeriod(time))
+				{
+
+				}
+			}
 		}
 	}
 
@@ -1301,11 +1311,40 @@ void CTDCCustomAttributeHelper::UpdateControl(const CWnd* pParent, const CUSTOMA
 		switch (dwDataType)
 		{
 		case TDCCA_STRING:
-		case TDCCA_INTEGER:
-		case TDCCA_DOUBLE:
 		case TDCCA_FILELINK:
-		case TDCCA_FRACTION:
 			pCtrl->SetWindowText(data.AsString());
+			break;
+
+		case TDCCA_INTEGER:
+			if (data.IsEmpty())
+				pCtrl->SetWindowText(data.AsString());
+			else
+				pCtrl->SetWindowText(Misc::Format(data.AsInteger()));
+			break;
+
+		case TDCCA_FRACTION:
+			if (data.IsEmpty())
+			{
+				pCtrl->SetWindowText(data.AsString());
+			}
+			else if (data.IsFraction())
+			{
+				CString sValue(data.AsString());
+				Misc::TrimTrailingDecimalZeros(sValue);
+
+				pCtrl->SetWindowText(sValue);
+			}
+			else
+			{
+				pCtrl->SetWindowText(Misc::Format(data.AsDouble()));
+			}
+			break;
+
+		case TDCCA_DOUBLE:
+			if (data.IsEmpty())
+				pCtrl->SetWindowText(data.AsString());
+			else
+				pCtrl->SetWindowText(Misc::Format(data.AsDouble()));
 			break;
 
 		case TDCCA_DATE:
@@ -1322,18 +1361,18 @@ void CTDCCustomAttributeHelper::UpdateControl(const CWnd* pParent, const CUSTOMA
 				{
 					pDTC->SetTime(date);
 				}
-				pDTC->SetMonthCalStyle(MCS_WEEKNUMBERS);
 
+				pDTC->SetMonthCalStyle(MCS_WEEKNUMBERS);
 
 				if (ctrl.HasBuddy() && CDateHelper::DateHasTime(date))
 				{
 					CTimeComboBox* pBuddy = (CTimeComboBox*)pParent->GetDlgItem(ctrl.nBuddyCtrlID);
 					ASSERT_VALID(pBuddy);
 
-					if (pBuddy == NULL)
-						return;
-
-					pBuddy->SetOleTime(date);
+					if (pBuddy)
+						pBuddy->SetOleTime(date);
+					else
+						ASSERT(0);
 				}
 			}
 			break;
@@ -1341,7 +1380,9 @@ void CTDCCustomAttributeHelper::UpdateControl(const CWnd* pParent, const CUSTOMA
 		case TDCCA_TIMEPERIOD:
 			{
 				TDCTIMEPERIOD time;
-				VERIFY(data.AsTimePeriod(time));
+
+				if (!data.AsTimePeriod(time))
+					time.SetTime(0.0, TDCU_HOURS);
 
 				((CTimeEdit*)pCtrl)->SetTime(time.dAmount, time.GetTHUnits());
 			}

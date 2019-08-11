@@ -96,7 +96,7 @@ BOOL TDCTIMEPERIOD::SetUnits(TDC_UNITS nNewUnits, BOOL bRecalc)
 
 BOOL TDCTIMEPERIOD::AddTime(double dTime, TDC_UNITS nTimeUnits)
 {
-	if ((nTimeUnits == TDCU_NULL) || (nUnits == TDCU_NULL))
+	if (!IsValidUnits(nTimeUnits) || !IsValidUnits(nUnits))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -106,6 +106,20 @@ BOOL TDCTIMEPERIOD::AddTime(double dTime, TDC_UNITS nTimeUnits)
 		return FALSE;
 	
 	dAmount += CTimeHelper().GetTime(dTime, TDC::MapUnitsToTHUnits(nTimeUnits), GetTHUnits());
+	return TRUE;
+}
+
+BOOL TDCTIMEPERIOD::SetTime(double dTime, TDC_UNITS nTimeUnits)
+{
+	if (!IsValidUnits(nTimeUnits))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	nUnits = nTimeUnits;
+	dAmount = dTime;
+
 	return TRUE;
 }
 

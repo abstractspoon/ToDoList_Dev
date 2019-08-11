@@ -2116,8 +2116,8 @@ CString CWorkloadCtrl::FormatTimeSpan(double dDays, int nDecimals)
 
 	CString sValue = Misc::Format(dDays, nDecimals);
 
-	if ((nDecimals > 0) && (sValue.Find('.') != -1))
-		sValue.TrimRight(_T(".0"));
+	if (nDecimals > 0)
+		Misc::TrimTrailingDecimalZeros(sValue);
 
 	return CEnString(IDS_TIMESPAN_FORMAT, sValue);
 }

@@ -813,6 +813,8 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 		case TDCCA_FRACTION:
 			return ((dwFeature == TDCCAF_DISPLAYASPERCENT) ||
+					(dwFeature == TDCCAF_MAXIMIZE) || 
+					(dwFeature == TDCCAF_MINIMIZE) ||
 					(dwFeature == TDCCAF_HIDEZERO));
 
 		default:
@@ -1060,6 +1062,9 @@ private:
 class CTDCCustomAttribDefinitionArray : public CArray<TDCCUSTOMATTRIBUTEDEFINITION, TDCCUSTOMATTRIBUTEDEFINITION&>
 {
 public:
+	CTDCCustomAttribDefinitionArray() {}
+	CTDCCustomAttribDefinitionArray(const CTDCCustomAttribDefinitionArray& other) { Copy(other); }
+
 	int Add(TDCCUSTOMATTRIBUTEDEFINITION& newElement)
 	{
 		int nIndex = CArray<TDCCUSTOMATTRIBUTEDEFINITION, TDCCUSTOMATTRIBUTEDEFINITION&>::Add(newElement);

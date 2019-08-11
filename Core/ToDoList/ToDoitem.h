@@ -47,6 +47,7 @@ struct TDCTIMEPERIOD
 	BOOL SetTHUnits(TH_UNITS nTHUnits, BOOL bRecalc);
 	BOOL SetUnits(TDC_UNITS nNewUnits, BOOL bRecalc);
 
+	BOOL SetTime(double dAmount, TDC_UNITS nUnits);
 	BOOL AddTime(double dAmount, TDC_UNITS nUnits);
 
 	double dAmount;
