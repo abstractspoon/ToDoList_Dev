@@ -171,9 +171,6 @@ BOOL CTDCToolsCmdlineParser::ReplaceArgument(CLA_TYPE nType, LPCTSTR szValue)
 BOOL CTDCToolsCmdlineParser::ReplaceArgument(LPCTSTR szName, LPCTSTR szValue)
 {
 	// see if we have a user item with that name
-	CString sName(szName);
-	sName.MakeLower();
-
 	int nArg = m_aArgs.GetSize();
 
 	while (nArg--)
@@ -184,12 +181,12 @@ BOOL CTDCToolsCmdlineParser::ReplaceArgument(LPCTSTR szName, LPCTSTR szValue)
 		case CLAT_USERFOLDER:
 		case CLAT_USERTEXT:
 		case CLAT_USERDATE:
-			if (sName.CompareNoCase(m_aArgs[nArg].sName) == 0)
+			if (m_aArgs[nArg].sName.CompareNoCase(szName) == 0)
 				return ReplaceArgument(nArg, szValue);
 			break;
 
 		case CLAT_SELTASKCUSTATTRIB:
-			if (sName.CompareNoCase(m_aArgs[nArg].sPlaceHolder) == 0)
+			if (m_aArgs[nArg].sPlaceHolder.CompareNoCase(szName) == 0)
 				return ReplaceArgument(nArg, szValue);
 			break;
 		}
