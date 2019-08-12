@@ -70,21 +70,29 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib) const
 	// It must be explicitly specified even if TDCA_ALL is set
 	switch (nAttrib)
 	{
-		case TDCA_ALL:
-			bCanAdd = HasOnly(TDCA_HTMLCOMMENTS);
-			break;
+	case TDCA_ALL:
+		bCanAdd = HasOnly(TDCA_HTMLCOMMENTS);
+		break;
 
-		case TDCA_HTMLCOMMENTS:
-			bCanAdd = (HasOnly(TDCA_ALL) || IsTaskAttribute(nAttrib));
-			break;
+	case TDCA_HTMLCOMMENTS:
+		bCanAdd = (HasOnly(TDCA_ALL) || IsTaskAttribute(nAttrib));
+		break;
+
+	default:
+		if (IsTaskAttribute(nAttrib))
+		{
+			TDC_ATTRIBUTE nExistAttrib = GetNext(pos);
+			bCanAdd = IsTaskAttribute(nExistAttrib);
+		}
+		else
+		{
+			// we are a non-task attribute which can
+			// only be added to an empty set so we fail
+			ASSERT(!bCanAdd);
+		}
+		break;
 	}
-
-	if (IsTaskAttribute(nAttrib))
-	{
-		TDC_ATTRIBUTE nExistAttrib = GetNext(pos);
-		bCanAdd = IsTaskAttribute(nExistAttrib);
-	}
-
+	
 	ASSERT(bCanAdd);
 	return bCanAdd;
 }

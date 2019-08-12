@@ -352,8 +352,11 @@ CString TDCCADATA::FormatAsDate(BOOL bISO, BOOL bWithTime) const
 CString TDCCADATA::FormatAsTimePeriod(int nDecimalPlaces) const
 {
 	TDCTIMEPERIOD time;
-	VERIFY(AsTimePeriod(time));
+	
+	if (!AsTimePeriod(time))
+		return _T("");
 
+	// else
 	return time.Format(nDecimalPlaces);
 }
 
