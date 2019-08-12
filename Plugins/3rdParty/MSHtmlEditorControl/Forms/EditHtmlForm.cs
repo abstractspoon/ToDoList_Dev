@@ -53,7 +53,6 @@ namespace MSDN.Html.Editor
 
 		private void InitializeSyntaxHighlighting()
 		{
-
 			_syntaxHighlighting = new SyntaxHighlighter(htmlText);
 
 			// double quote strings
@@ -98,6 +97,11 @@ namespace MSDN.Html.Editor
 
 				_syntaxHighlighting.ReHighlight();
 			}
+		}
+
+		public SyntaxHighlighter SyntaxHighlighting
+		{
+			get { return _syntaxHighlighting; }
 		}
 
         /// <summary>
