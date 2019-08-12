@@ -37,16 +37,19 @@ enum // GetTaskBreadcrumbs
 
 class CTDCLongestItemMap : public CMap<TDC_COLUMN, TDC_COLUMN, CString, LPCTSTR>
 {
+	friend class CToDoCtrlFind;
+
 public:
-	BOOL Initialise(const CTDCColumnIDMap& mapCols);
-	BOOL CheckUpdateValue(const CTDCColumnIDMap& mapCols, TDC_COLUMN nColID, const CString& sValue);
-	BOOL CheckUpdateValue(const CTDCColumnIDMap& mapCols, TDC_COLUMN nColID, const CStringArray& aValues);
+	BOOL Initialise(const CTDCColumnIDMap& mapCols, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+	BOOL CheckUpdateValue(TDC_COLUMN nColID, const CString& sValue);
+	BOOL CheckUpdateValue(TDC_COLUMN nColID, const CStringArray& aValues);
 	BOOL UpdateValue(TDC_COLUMN nColID, const CString& sValue);
 	BOOL HasColumn(TDC_COLUMN nColID) const;
 	CString GetLongestValue(TDC_COLUMN nColID) const;
 
 protected:
 	static BOOL IsSupportedColumn(TDC_COLUMN nColID);
+	static BOOL IsSupportedColumn(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -74,13 +77,13 @@ public:
 	CString GetLongestValue(TDC_COLUMN nCol, BOOL bVisibleOnly) const;
 	CString GetLongestValue(TDC_COLUMN nCol, const CStringArray& aPossible, BOOL bVisibleOnly) const;
 	CString GetLongestTime(TDC_COLUMN nCol, BOOL bVisibleOnly) const;
+	CString GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
 
 	// specific
 	CString GetLongestCost() const;
 	CString GetLongestTimeEstimate(BOOL bVisibleOnly) const;
 	CString GetLongestTimeSpent(BOOL bVisibleOnly) const;
 	CString GetLongestTimeRemaining(BOOL bVisibleOnly) const;
-	CString GetLongestCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
 	CString GetLargestCommentsSizeInKB(BOOL bVisibleOnly) const;
 
 	DWORD GetLargestReferenceID(BOOL bVisibleOnly) const;
@@ -97,7 +100,7 @@ public:
 	HTREEITEM FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards = TRUE) const;
 
 	// For debugging
-	void WalkTree(BOOL bVisibleOnly) const;
+	//void WalkTree(BOOL bVisibleOnly) const;
 
 protected:
 	const CTreeCtrlHelper& m_tch; 
@@ -125,10 +128,10 @@ protected:
 
 	CString GetLongestValue(TDC_COLUMN nCol, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	CString GetLongestValue(TDC_COLUMN nCol, HTREEITEM hti, const TODOITEM* pTDI, const CString& sLongestPossible, BOOL bVisibleOnly) const;
+	CString GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 
 	// specific
  	CString GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nCol, BOOL bVisibleOnly) const;
- 	CString GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* pTDI, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
 	CString GetLongestSubtaskDone(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const;
 	CString GetLongestPosition(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const;
 	CString GetLongestPath(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const CString& sParentPath, BOOL bVisibleOnly) const;
@@ -136,17 +139,18 @@ protected:
 	DWORD GetLargestReferenceID(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	float GetLargestCommentsSizeInKB(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	int GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
-	BOOL GetLongestCalculatedCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CString& sLongest) const;
+	BOOL GetLongestCalculatedValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CString& sLongest) const;
 
 	BOOL WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const;
 	BOOL CheckGetTask(HTREEITEM hti, const TODOITEM*& pTDI, BOOL bTrueTask) const;
 	BOOL CheckGetTask(HTREEITEM hti, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS) const;
 
 	// For debugging
-	CString WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const;
+	//CString WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const;
 
 	static CString GetLongerString(const CString& str1, const CString& str2);
 	static BOOL EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible);
+	static CString GetLongestRecurrenceOption();
 };
 
 #endif // !defined(AFX_TODOCTRLTREEDATA_H__02C3C360_45AB_45DC_B1BF_BCBEA472F0C7__INCLUDED_)

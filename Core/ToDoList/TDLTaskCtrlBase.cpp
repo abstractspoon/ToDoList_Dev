@@ -2912,7 +2912,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			
 			if ((dValue != 0.0) || !attribDef.HasFeature(TDCCAF_HIDEZERO))
 			{
-				CString sText(CTDCCustomAttributeHelper::FormatData(dValue, attribDef));
+				CString sText(CTDCCustomAttributeHelper::FormatNumber(dValue, attribDef));
 				DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
 			}			
 		}
@@ -4984,7 +4984,7 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 			case TDCCA_INTEGER:
 				{
 					// numerals are always the same width so we don't need average width
-					CString sLongest = m_find.GetLongestCustomAttribute(attribDef, bVisibleTasksOnly);
+					CString sLongest = m_find.GetLongestValue(attribDef, bVisibleTasksOnly);
 					return pDC->GetTextExtent(sLongest).cx;
 				}
 				break;
@@ -4994,7 +4994,7 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 
 			default:
 				{
-					CString sLongest = m_find.GetLongestCustomAttribute(attribDef, bVisibleTasksOnly);
+					CString sLongest = m_find.GetLongestValue(attribDef, bVisibleTasksOnly);
 					return GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
 				}
 				break;
@@ -5815,7 +5815,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 		}
 
 		if (bFormatted && !data.IsEmpty())
-			data.Set(CTDCCustomAttributeHelper::FormatData(data, sAttribID, m_aCustomAttribDefs));
+			data.Set(CTDCCustomAttributeHelper::FormatData(data, attribDef, HasStyle(TDCS_SHOWDATESINISO)));
 	}
 	
 	return !data.IsEmpty();

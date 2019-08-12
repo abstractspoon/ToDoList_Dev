@@ -1211,47 +1211,28 @@ void CTDCCustomAttributeHelper::DDX(CDataExchange* pDX, const CTDCCustomControlA
 	}
 }
 
-CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const CString& sUniqueID, 
-												const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bISODates)
-{
-	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-
-	if (!data.IsEmpty())
-		VERIFY(GetAttributeDef(sUniqueID, aAttribDefs, attribDef));
-
-	return FormatData(data, attribDef, bISODates);
-}
-
 CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bISODates)
 {
 	if (attribDef.IsList())
-	{
 		return data.FormatAsArray('+');
-	}
-	else
+
+	// else
+	switch (attribDef.GetDataType())
 	{
-		switch (attribDef.GetDataType())
-		{
-		case TDCCA_DATE:
-			return data.FormatAsDate(bISODates);
+	case TDCCA_DATE:
+		return data.FormatAsDate(bISODates, attribDef.HasFeature(TDCCAF_SHOWTIME));
 
-		case TDCCA_DOUBLE:
-		case TDCCA_INTEGER:
-			return FormatNumber(data.AsDouble(), attribDef);
+	case TDCCA_DOUBLE:
+	case TDCCA_INTEGER:
+		return FormatNumber(data.AsDouble(), attribDef);
 
-		case TDCCA_FRACTION:
-			return FormatNumber(data.AsFraction(), attribDef);
+	case TDCCA_FRACTION:
+		return FormatNumber(data.AsFraction(), attribDef);
 
-		case TDCCA_TIMEPERIOD:
-			{
-				TDCTIMEPERIOD time;
-
-				if (data.AsTimePeriod(time))
-				{
-
-				}
-			}
-		}
+	case TDCCA_TIMEPERIOD:
+		if (data.IsTimePeriod())
+			return data.FormatAsTimePeriod();
+		break;
 	}
 
 	// all else
@@ -1260,28 +1241,24 @@ CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const TDCCU
 
 CString CTDCCustomAttributeHelper::FormatNumber(double dValue, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
 {
-	DWORD dwDataType = attribDef.GetDataType();
-	BOOL bAsPercentage = attribDef.HasFeature(TDCCAF_DISPLAYASPERCENT);
-	LPCTSTR szTrail = (bAsPercentage ? _T("%") : NULL);
-
-	switch (dwDataType)
+	switch (attribDef.GetDataType())
 	{
 	case TDCCA_FRACTION:
-		if (bAsPercentage)
-			dValue *= 100;
-		// fall thru
+		if (attribDef.HasFeature(TDCCAF_DISPLAYASPERCENT))
+			return Misc::Format((dValue * 100), 1, _T("%"));
+		// else fall thru
 
 	case TDCCA_DOUBLE:
-		return Misc::Format(dValue, (bAsPercentage ? 1 : 2), szTrail);
+		return Misc::Format(dValue, 2);
 
 	case TDCCA_INTEGER:
-		return Misc::Format(dValue, 0, szTrail);
+		return Misc::Format(dValue, 0);
 	}
 
+	// All else
 	ASSERT(0);
 	return _T("");
 }
-
 
 void CTDCCustomAttributeHelper::ClearControl(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs)

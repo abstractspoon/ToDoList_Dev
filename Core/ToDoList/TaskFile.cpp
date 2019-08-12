@@ -2141,7 +2141,7 @@ BOOL CTaskFile::SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCu
 		switch (dwAttribType & TDCCA_DATAMASK)
 		{
 		case TDCCA_DATE:
-			pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsDate(m_bISODates));
+			pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsDate(m_bISODates, TRUE));
 			break;
 
 		case TDCCA_TIMEPERIOD:

@@ -88,9 +88,8 @@ public:
 	static DWORD GetAttributeDataType(const CString& sUniqueID,
 									  const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
-	static CString FormatData(const TDCCADATA& data, const CString& sUniqueID,
-							  const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bISODates = FALSE);
-	static CString FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bISODates = FALSE);
+	static CString FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bISODates);
+	static CString FormatNumber(double dValue, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 
 	static TDC_ATTRIBUTE GetAttributeID(TDC_COLUMN nColID,
 										const CTDCCustomAttribDefinitionArray& aAttribDefs);
@@ -176,7 +175,6 @@ protected:
 									   CTDCCustomControlArray& aControls, UINT nCtrlIDStart, BOOL bFilter);
 	static BOOL WantControl(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bFilter);
 	static CString GetControlTooltip(UINT nCtrlID, CWnd* pParent);
-	static CString FormatNumber(double dValue, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 };
 
 #endif // !defined(AFX_TDCCUSTOMATTRIBUTEHELPER_H__4044B3B7_1EA0_4279_9620_F2035DAE87DF__INCLUDED_)

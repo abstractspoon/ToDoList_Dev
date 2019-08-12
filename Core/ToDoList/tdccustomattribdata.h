@@ -68,7 +68,7 @@ struct TDCCADATA
 	void Set(const CStringArray& aValues, const CStringArray& aExtra);
 
 	CString FormatAsArray(TCHAR cSep = 0) const;
-	CString FormatAsDate(BOOL bISO) const;
+	CString FormatAsDate(BOOL bISO, BOOL bWithTime) const;
 	CString FormatAsTimePeriod(int nDecimalPlaces = 2) const;
 
 protected:

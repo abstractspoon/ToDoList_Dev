@@ -331,7 +331,7 @@ CString TDCCADATA::FormatAsArray(TCHAR cSep) const
 	return sArray;
 }
 
-CString TDCCADATA::FormatAsDate(BOOL bISO) const
+CString TDCCADATA::FormatAsDate(BOOL bISO, BOOL bWithTime) const
 {
 	if (IsEmpty())
 		return sData;
@@ -340,7 +340,7 @@ CString TDCCADATA::FormatAsDate(BOOL bISO) const
 	COleDateTime date(AsDate());
 	DWORD dwFlags = DHFD_NOSEC;
 	
-	if (CDateHelper::DateHasTime(date))
+	if (bWithTime && CDateHelper::DateHasTime(date))
 		dwFlags |= DHFD_TIME;
 	
 	if (bISO)
