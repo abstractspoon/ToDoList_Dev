@@ -2504,15 +2504,15 @@ namespace MSDN.Html.Editor
 					SelectWordAtCaret();
 					range = GetTextRange();
 
-					if (range != null)
+					hrefLink = "https://"; // default
+
+					if ((range != null) && (range.text != null))
 					{
 						hrefText = range.text;
 
 						// if text is a valid href then set the link
 						if (IsValidHref(hrefText))
 							hrefLink = hrefText;
-						else
-							hrefLink = "https://";
 					}
 				}
 			}
