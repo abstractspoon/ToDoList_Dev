@@ -74,7 +74,12 @@ namespace WinFormsSyntaxHighlighter
                 throw new ArgumentException("A pattern style pair with the same name already exists");
 
             _patternStyles.Add(new PatternStyleMap(name, patternDefinition, syntaxStyle));
-        }
+
+			// always clear the runtime list of styles else
+			// the new pattern will not be recognised wheh parsing
+			_styleGroupPairs = null;
+
+		}
 
         protected SyntaxStyle GetDefaultStyle()
         {

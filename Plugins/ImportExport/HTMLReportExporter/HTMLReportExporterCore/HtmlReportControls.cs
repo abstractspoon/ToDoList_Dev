@@ -216,14 +216,15 @@ namespace HTMLReportExporter
 
 		protected override void PreShowDialog(Form dialog)
 		{
-			// Must do this before calling the base class
-			// else the extra pattern is not recognised
+			base.PreShowDialog(dialog, HTMLReportExporter.Properties.Resources.HTMLReporter);
+
 			var htmlForm = (dialog as EditHtmlForm);
 
 			if (htmlForm != null)
+			{
 				htmlForm.SyntaxHighlighting.AddPattern(new PatternDefinition(@"\$\(([^)]+)\)"), new SyntaxStyle(Color.Black, true, true));
-
-			base.PreShowDialog(dialog, HTMLReportExporter.Properties.Resources.HTMLReporter);
+				htmlForm.SyntaxHighlighting.ReHighlight();
+			}
 		}
 
 		public new bool Focused
