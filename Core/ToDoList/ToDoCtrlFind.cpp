@@ -1167,14 +1167,13 @@ int CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols,
 		}
 
 		// All the rest
-		GetLongestValues(mapCols, aRestAttribDefs, NULL, NULL, NULL, mapLongest, bVisibleOnly);
+		GetLongestValues(aRestAttribDefs, NULL, NULL, NULL, mapLongest, bVisibleOnly);
 	}
 
 	return mapLongest.GetCount();
 }
 
-void CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols, 
-									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+void CToDoCtrlFind::GetLongestValues(const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 									 HTREEITEM hti,
 									 const TODOITEM* pTDI, 
 									 const TODOSTRUCTURE* pTDS,
@@ -1204,7 +1203,7 @@ void CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols,
 		// Note: Cost handled elsewhere
 		// Note: Don't use CheckUpdateValue() because all the work
 		//       has to be done up front and it might be wasted effort
-		if (mapCols.Has(TDCC_PATH))
+		if (mapLongest.HasColumn(TDCC_PATH))
 		{
 			// The longest path string will always be a leaf/collapsed task
 			// so we don't update the 'cache' until then
@@ -1212,7 +1211,7 @@ void CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols,
 				mapLongest.UpdateValue(TDCC_PATH, m_formatter.GetTaskPath(pTDI, pTDS));
 		}
 
-		if (mapCols.Has(TDCC_POSITION))
+		if (mapLongest.HasColumn(TDCC_POSITION))
 		{
 			// The longest position string will always be a leaf/collapsed task
 			// so we don't update the 'cache' until then
@@ -1220,16 +1219,16 @@ void CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols,
 				mapLongest.UpdateValue(TDCC_POSITION, m_formatter.GetTaskPosition(pTDS));
 		}
 
-		if (mapCols.Has(TDCC_SUBTASKDONE))
+		if (mapLongest.HasColumn(TDCC_SUBTASKDONE))
 			mapLongest.UpdateValue(TDCC_SUBTASKDONE, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
 
-		if (mapCols.Has(TDCC_TIMEEST))
+		if (mapLongest.HasColumn(TDCC_TIMEEST))
 			mapLongest.UpdateValue(TDCC_TIMEEST, m_formatter.GetTaskTimeEstimate(pTDI, pTDS));
 
-		if (mapCols.Has(TDCC_TIMESPENT))
+		if (mapLongest.HasColumn(TDCC_TIMESPENT))
 			mapLongest.UpdateValue(TDCC_TIMESPENT, m_formatter.GetTaskTimeSpent(pTDI, pTDS));
 
-		if (mapCols.Has(TDCC_REMAINING))
+		if (mapLongest.HasColumn(TDCC_REMAINING))
 			mapLongest.UpdateValue(TDCC_REMAINING, m_formatter.GetTaskTimeRemaining(pTDI, pTDS));
 
 		// Rest of Custom columns
@@ -1239,7 +1238,7 @@ void CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols,
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aCustAttribDefs[nCust];
 
-			if (attribDef.bEnabled && mapCols.Has(attribDef.GetColumnID()))
+			if (attribDef.bEnabled && mapLongest.HasColumn(attribDef.GetColumnID()))
 			{
 				CString sLongest = GetLongestValue(attribDef, hti, pTDI, bVisibleOnly);
 				mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
@@ -1253,7 +1252,7 @@ void CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols,
 
 		while (htiChild)
 		{
-			GetLongestValues(mapCols, aCustAttribDefs, htiChild, NULL, NULL, mapLongest, bVisibleOnly);
+			GetLongestValues(aCustAttribDefs, htiChild, NULL, NULL, mapLongest, bVisibleOnly);
 			htiChild = m_tch.TreeCtrl().GetNextItem(htiChild, TVGN_NEXT);
 		}
 	}
