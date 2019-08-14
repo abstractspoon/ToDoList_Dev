@@ -53,39 +53,28 @@ namespace MSDN.Html.Editor
 
 		private void InitializeSyntaxHighlighting()
 		{
+			// Match Visual Studio as far as possible
 			_syntaxHighlighting = new SyntaxHighlighter(htmlText);
 
-			// double quote strings
+			// Double quote strings
 			_syntaxHighlighting.AddPattern(new PatternDefinition(@"\""([^""]|\""\"")*\"""), new SyntaxStyle(Color.Blue));
 
-			// single quote strings
-			_syntaxHighlighting.AddPattern(new PatternDefinition(@"\'([^']|\'\')*\'"), new SyntaxStyle(Color.Salmon));
+			// Single quote strings
+			_syntaxHighlighting.AddPattern(new PatternDefinition(@"\'([^']|\'\')*\'"), new SyntaxStyle(Color.Blue));
 
-			//_syntaxHighlighting.AddPattern(new PatternDefinition(@"</?([A-Za-z][^\s>/]*)(?:\s*(?:""[^\""]*\""|'[^']*'|[^\s>]+)|[^>])*(?:>|$)"), new SyntaxStyle(Color.Salmon));
-			AddHtmlPattern("SPAN", Color.Red);
-			AddHtmlPattern("P", Color.DarkCyan);
-			AddHtmlPattern("A", Color.Blue);
-			AddHtmlPattern("TABLE", Color.Tan);
-			AddHtmlPattern("TR", Color.Brown);
-			AddHtmlPattern("TD", Color.Brown);
-			AddHtmlPattern("IMG", Color.Red);
-			// 
-			// 			// <, >
-			// 			_syntaxHighlighting.AddPattern(new PatternDefinition(@"</?"), new SyntaxStyle(Color.Blue));
-			// 			_syntaxHighlighting.AddPattern(new PatternDefinition(@"/?>"), new SyntaxStyle(Color.Blue));
-		}
+			// Tags within but excluding angled brackets
+			var tags = "[a-zA-Z][a-zA-Z0-9]*";
+			var withinAngledBrackets = "(?<=</?)({0})(?=[/?>| ])";
 
-		private void AddHtmlPattern(string keyword, Color color)
-		{
-			var regex = string.Format(@"</?({0}[^\s>/]*)(?:\s*(?:""[^\""]*\""|'[^']*'|[^\s>]+)|[^>])*(?:>|$)", keyword);
-			_syntaxHighlighting.AddPattern(new PatternDefinition(regex), new SyntaxStyle(color));
-			// Begin tag
-// 			var regex = string.Format(@"<({0}\b)", keyword);
-// 			_syntaxHighlighting.AddPattern(new PatternDefinition(new Regex(regex, RegexOptions.IgnoreCase)), new SyntaxStyle(color));
-// 
-// 			// End Tag
-// 			regex = string.Format("(/{0})>", keyword);
-// 			_syntaxHighlighting.AddPattern(new PatternDefinition(new Regex(regex, RegexOptions.IgnoreCase)), new SyntaxStyle(color));
+			var regex = string.Format(withinAngledBrackets, tags);
+ 			_syntaxHighlighting.AddPattern(new PatternDefinition(regex), new SyntaxStyle(Color.DarkRed));
+
+			// Attributes within tags
+
+
+			// Angled brackets
+			_syntaxHighlighting.AddPattern(new PatternDefinition(@"</?"), new SyntaxStyle(Color.Blue));
+			_syntaxHighlighting.AddPattern(new PatternDefinition(@"/?>"), new SyntaxStyle(Color.Blue));
 		}
 
 		/// <summary>
