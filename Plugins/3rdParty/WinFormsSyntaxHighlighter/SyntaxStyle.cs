@@ -6,18 +6,23 @@ namespace WinFormsSyntaxHighlighter
     {
         public bool Bold { get; set; }
         public bool Italic { get; set; }
-        public Color Color { get; set; }
+        public Color TextColor { get; set; }
 
-        public SyntaxStyle(Color color, bool bold, bool italic)
+        public SyntaxStyle(Color textColor, bool bold, bool italic)
         {
-            Color = color;
+			TextColor = textColor;
             Bold = bold;
             Italic = italic;
         }
 
-        public SyntaxStyle(Color color)
-            : this(color, false, false)
+        public SyntaxStyle(Color textColor)
+            : this(textColor, false, false)
         {
         }
-    }
+
+		public SyntaxStyle(SyntaxStyle other)
+			: this(other.TextColor, other.Bold, other.Italic)
+		{
+		}
+	}
 }

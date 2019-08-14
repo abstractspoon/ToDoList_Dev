@@ -238,7 +238,7 @@ namespace WinFormsSyntaxHighlighter
             foreach (var patternStyle in _patternStyles)
             {
                 var style = patternStyle.SyntaxStyle;
-                yield return new StyleGroupPair(new SyntaxStyle(style.Color, style.Bold, style.Italic), patternStyle.Name);
+                yield return new StyleGroupPair(new SyntaxStyle(style), patternStyle.Name);
             }
         }
 
@@ -348,7 +348,7 @@ namespace WinFormsSyntaxHighlighter
 
             foreach (var styleGroup in styleGroupPairs)
             {
-                sbRtfColorTable.AppendFormat("{0};", ColorUtils.ColorToRtfTableEntry(styleGroup.SyntaxStyle.Color));
+                sbRtfColorTable.AppendFormat("{0};", ColorUtils.ColorToRtfTableEntry(styleGroup.SyntaxStyle.TextColor));
             }
 
             sbRtfColorTable.Append("}");
