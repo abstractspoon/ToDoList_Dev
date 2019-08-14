@@ -15,6 +15,8 @@ namespace MSHtmlEditorDemo
 		public Form1()
 		{
 			InitializeComponent();
+
+			CenterToScreen();
 		}
 	}
 }
