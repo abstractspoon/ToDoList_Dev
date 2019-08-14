@@ -97,7 +97,7 @@ namespace WinFormsSyntaxHighlighter
         /// </summary>
         public void ReHighlight()
         {
-            if (!DisableHighlighting)
+            if (!DisableHighlighting && !String.IsNullOrEmpty(_richTextBox.Text))
             {
                 if (_isDuringHighlight) 
                     return;

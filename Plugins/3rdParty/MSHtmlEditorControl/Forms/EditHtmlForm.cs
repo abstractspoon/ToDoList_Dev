@@ -57,28 +57,64 @@ namespace MSDN.Html.Editor
 			_syntaxHighlighting = new SyntaxHighlighter(htmlText);
 
 			// Double quote strings
-			_syntaxHighlighting.AddPattern(new PatternDefinition(@"\""([^""]|\""\"")*\"""), new SyntaxStyle(Color.Blue));
+			//AddSyntaxPattern(@"\""([^""]|\""\"")*\""", Color.Blue);
 
 			// Single quote strings
-			_syntaxHighlighting.AddPattern(new PatternDefinition(@"\'([^']|\'\')*\'"), new SyntaxStyle(Color.Blue));
-
-			// Tags within but excluding angled brackets
-			var tags = @"[a-zA-Z][a-zA-Z0-9]*";
-			var withinAngledBrackets = @"(?<=</?)({0})(?=[/?>| ])";
-
-			var regex = string.Format(withinAngledBrackets, tags);
- 			_syntaxHighlighting.AddPattern(new PatternDefinition(regex), new SyntaxStyle(Color.DarkRed));
+			//AddSyntaxPattern(@"\'([^']|\'\')*\'", Color.Blue);
 
 			// Attributes within tags
-			var attribs = @"\s([a-zA-Z][a-zA-Z0-9]*)=";
-			var withinTags = "{0}";// @"(?<=</?)({0})(?=[/?>| ])";
+			// Must come before the tags themselves (strangely)
+			{
+				var attribs = @"([a-zA-Z][a-zA-Z0-9]*)";
+				var withinTags = @"(?<=<[^>]+\s)({0})(?=[\s=>])";
 
-			regex = string.Format(withinTags, attribs);
-			_syntaxHighlighting.AddPattern(new PatternDefinition(regex), new SyntaxStyle(Color.Red));
-			
+				AddSyntaxPattern(string.Format(withinTags, attribs), Color.Red);
+			}
+
+			// Attribute equals (=)
+			{/*
+				var equals = @"(=)";
+				var besideAttrib = @"(?<=<([^>]+))({0})(?=[a-zA-Z0-9""])";
+
+				AddSyntaxPattern(string.Format(besideAttrib, equals), Color.Blue);
+			*/}
+
+			// Attribute values
+			{/*
+				var values = @"(.+?)";
+				var besideAttrib = @"(?<=<([^>]+)=)({0})(?=[>/ ])";
+
+				AddSyntaxPattern(string.Format(besideAttrib, values), Color.Blue);
+			*/}
+
+			// Tags within but excluding angled brackets
+			{
+				var tags = @"[a-zA-Z][a-zA-Z0-9]*";
+				var withinAngledBrackets = @"(?<=</?)({0})(?=[/?>| ])";
+
+				AddSyntaxPattern(string.Format(withinAngledBrackets, tags), Color.DarkRed);
+			}
+
 			// Angled brackets
-			_syntaxHighlighting.AddPattern(new PatternDefinition(@"</?"), new SyntaxStyle(Color.Blue));
-			_syntaxHighlighting.AddPattern(new PatternDefinition(@"/?>"), new SyntaxStyle(Color.Blue));
+			AddSyntaxPattern(@"</?", Color.Blue);
+			AddSyntaxPattern(@"/?>", Color.Blue);
+		}
+
+		public void AddSyntaxPattern(string pattern, Color textColor, Color backColor, bool bold = false, bool italic = false, bool reHighlight = false)
+		{
+			// Ignore back color For now
+			_syntaxHighlighting.AddPattern(new PatternDefinition(pattern), new SyntaxStyle(textColor, bold, italic));
+
+			if (reHighlight)
+				_syntaxHighlighting.ReHighlight();
+		}
+
+		public void AddSyntaxPattern(string pattern, Color textColor, bool bold = false, bool italic = false, bool reHighlight = false)
+		{
+			_syntaxHighlighting.AddPattern(new PatternDefinition(pattern), new SyntaxStyle(textColor, bold, italic));
+
+			if (reHighlight)
+				_syntaxHighlighting.ReHighlight();
 		}
 
 		/// <summary>
@@ -97,11 +133,6 @@ namespace MSDN.Html.Editor
 
 				_syntaxHighlighting.ReHighlight();
 			}
-		}
-
-		public SyntaxHighlighter SyntaxHighlighting
-		{
-			get { return _syntaxHighlighting; }
 		}
 
         /// <summary>

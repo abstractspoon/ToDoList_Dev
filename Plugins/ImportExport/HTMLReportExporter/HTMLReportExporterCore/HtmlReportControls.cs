@@ -221,10 +221,7 @@ namespace HTMLReportExporter
 			var htmlForm = (dialog as EditHtmlForm);
 
 			if (htmlForm != null)
-			{
-				htmlForm.SyntaxHighlighting.AddPattern(new PatternDefinition(@"\$\(([^)]+)\)"), new SyntaxStyle(Color.Black, true, true));
-				htmlForm.SyntaxHighlighting.ReHighlight();
-			}
+				htmlForm.AddSyntaxPattern(@"\$\(([^)]+)\)", Color.Black, true, true, true);
 		}
 
 		public new bool Focused
