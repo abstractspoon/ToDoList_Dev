@@ -302,22 +302,22 @@ namespace WinFormsSyntaxHighlighter
 
                         if (styleToApply != null)
                         {
-                            string opening = String.Empty, cloing = String.Empty;
+                            string opening = String.Empty, closing = String.Empty;
 
                             if (styleToApply.SyntaxStyle.Bold)
                             {
                                 opening += @"\b";
-                                cloing += @"\b0";
+                                closing += @"\b0";
                             }
 
                             if (styleToApply.SyntaxStyle.Italic)
                             {
                                 opening += @"\i";
-                                cloing += @"\i0";
+                                closing += @"\i0";
                             }
 
                             sb.AppendFormat(@"\cf{0}{2} {1}\cf0{3} ", styleToApply.Index,
-                                content, opening, cloing);
+                                content, opening, closing);
                         }
                         else
                         {
