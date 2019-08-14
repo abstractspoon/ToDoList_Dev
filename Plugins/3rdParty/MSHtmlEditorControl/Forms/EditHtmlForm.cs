@@ -118,6 +118,9 @@ namespace MSDN.Html.Editor
                 this.htmlText.Text = (value != null)?value.Trim():string.Empty;
                 this.htmlText.SelectionStart = 0;
                 this.htmlText.SelectionLength = 0;
+
+				if (_syntaxHighlighting != null)
+					_syntaxHighlighting.ReHighlight();
             }
 
         } //HTML
