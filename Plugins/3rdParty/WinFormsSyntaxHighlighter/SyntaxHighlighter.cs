@@ -59,7 +59,7 @@ namespace WinFormsSyntaxHighlighter
             AddPattern((_patternStyles.Count + 1).ToString(CultureInfo.InvariantCulture), patternDefinition, syntaxStyle);
         }
 
-        public void AddPattern(string name, PatternDefinition patternDefinition, SyntaxStyle syntaxStyle)
+        private void AddPattern(string name, PatternDefinition patternDefinition, SyntaxStyle syntaxStyle)
         {
             if (patternDefinition == null)
                 throw new ArgumentNullException("patternDefinition");
