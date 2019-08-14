@@ -118,8 +118,7 @@ protected:
 	BOOL FindVisibleTaskWithDoneTime(HTREEITEM hti) const;
 	
 	// generic
-	void GetLongestValues(const CTDCColumnIDMap& mapCols, 
-						  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+	void GetLongestValues(const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 						  HTREEITEM hti, 
 						  const TODOITEM* pTDI, 
 						  const TODOSTRUCTURE* pTDS, 

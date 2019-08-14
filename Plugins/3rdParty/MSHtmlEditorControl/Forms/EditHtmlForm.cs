@@ -61,6 +61,7 @@ namespace MSDN.Html.Editor
 			// single quote strings
 			_syntaxHighlighting.AddPattern(new PatternDefinition(@"\'([^']|\'\')*\'"), new SyntaxStyle(Color.Salmon));
 
+			//_syntaxHighlighting.AddPattern(new PatternDefinition(@"</?([A-Za-z][^\s>/]*)(?:\s*(?:""[^\""]*\""|'[^']*'|[^\s>]+)|[^>])*(?:>|$)"), new SyntaxStyle(Color.Salmon));
 			AddHtmlPattern("SPAN", Color.Red);
 			AddHtmlPattern("P", Color.DarkCyan);
 			AddHtmlPattern("A", Color.Blue);
@@ -68,17 +69,23 @@ namespace MSDN.Html.Editor
 			AddHtmlPattern("TR", Color.Brown);
 			AddHtmlPattern("TD", Color.Brown);
 			AddHtmlPattern("IMG", Color.Red);
+			// 
+			// 			// <, >
+			// 			_syntaxHighlighting.AddPattern(new PatternDefinition(@"</?"), new SyntaxStyle(Color.Blue));
+			// 			_syntaxHighlighting.AddPattern(new PatternDefinition(@"/?>"), new SyntaxStyle(Color.Blue));
 		}
 
 		private void AddHtmlPattern(string keyword, Color color)
 		{
+			var regex = string.Format(@"</?({0}[^\s>/]*)(?:\s*(?:""[^\""]*\""|'[^']*'|[^\s>]+)|[^>])*(?:>|$)", keyword);
+			_syntaxHighlighting.AddPattern(new PatternDefinition(regex), new SyntaxStyle(color));
 			// Begin tag
-			var regex = string.Format("<{0}.*?>", keyword);
-			_syntaxHighlighting.AddPattern(new PatternDefinition(new Regex(regex, RegexOptions.IgnoreCase)), new SyntaxStyle(color));
-
-			// End Tag
-			regex = string.Format("</{0}>", keyword);
-			_syntaxHighlighting.AddPattern(new PatternDefinition(new Regex(regex, RegexOptions.IgnoreCase)), new SyntaxStyle(color));
+// 			var regex = string.Format(@"<({0}\b)", keyword);
+// 			_syntaxHighlighting.AddPattern(new PatternDefinition(new Regex(regex, RegexOptions.IgnoreCase)), new SyntaxStyle(color));
+// 
+// 			// End Tag
+// 			regex = string.Format("(/{0})>", keyword);
+// 			_syntaxHighlighting.AddPattern(new PatternDefinition(new Regex(regex, RegexOptions.IgnoreCase)), new SyntaxStyle(color));
 		}
 
 		/// <summary>

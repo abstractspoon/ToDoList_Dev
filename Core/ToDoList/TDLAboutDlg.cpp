@@ -33,7 +33,7 @@ static char THIS_FILE[] = __FILE__;
 
 static LPCTSTR ABOUTCONTRIBUTION = 
 
-_T("AWIcons\Toolbar icons\n")
+_T("AWIcons\tToolbar icons\n")
 _T("Abin\tIni class for tools importing\n")
 _T("Alex Cohn\tMenu icon code\n")
 _T("Alex Hazanov\tMSXML wrapper classes\n")
@@ -53,7 +53,7 @@ _T("Hugo Tant\tDutch translation\n")
 _T("Isaac Aparicio\tSpanish translation\n")
 _T("Jadran Rudec\tSlovenian translation\n")
 _T("James Fancy\tChinese translation\n")
-_T("Johan Rosengren\RTF comments control\n")
+_T("Johan Rosengren\tRTF comments control\n")
 _T("Martin Seibert\tGerman translation\n")
 _T("Massimo Colurcio\tBurnDown chart control\n")
 _T("Matt Gullett\tMini calendar control\n")
