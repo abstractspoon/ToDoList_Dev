@@ -63,15 +63,19 @@ namespace MSDN.Html.Editor
 			_syntaxHighlighting.AddPattern(new PatternDefinition(@"\'([^']|\'\')*\'"), new SyntaxStyle(Color.Blue));
 
 			// Tags within but excluding angled brackets
-			var tags = "[a-zA-Z][a-zA-Z0-9]*";
-			var withinAngledBrackets = "(?<=</?)({0})(?=[/?>| ])";
+			var tags = @"[a-zA-Z][a-zA-Z0-9]*";
+			var withinAngledBrackets = @"(?<=</?)({0})(?=[/?>| ])";
 
 			var regex = string.Format(withinAngledBrackets, tags);
  			_syntaxHighlighting.AddPattern(new PatternDefinition(regex), new SyntaxStyle(Color.DarkRed));
 
 			// Attributes within tags
+			var attribs = @"\s([a-zA-Z][a-zA-Z0-9]*)=";
+			var withinTags = "{0}";// @"(?<=</?)({0})(?=[/?>| ])";
 
-
+			regex = string.Format(withinTags, attribs);
+			_syntaxHighlighting.AddPattern(new PatternDefinition(regex), new SyntaxStyle(Color.Red));
+			
 			// Angled brackets
 			_syntaxHighlighting.AddPattern(new PatternDefinition(@"</?"), new SyntaxStyle(Color.Blue));
 			_syntaxHighlighting.AddPattern(new PatternDefinition(@"/?>"), new SyntaxStyle(Color.Blue));
