@@ -114,10 +114,6 @@
       <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>
       <Name>WebBrowserEx</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\3rdParty\WinFormsSyntaxHighlighter\WinFormsSyntaxHighlighter.csproj">
-      <Project>{a84b044a-f5dd-4220-baff-a18f17585e31}</Project>
-      <Name>WinFormsSyntaxHighlighter</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
       <Name>PluginHelpers</Name>

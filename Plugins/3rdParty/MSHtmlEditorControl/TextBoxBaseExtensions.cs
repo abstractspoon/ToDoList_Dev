@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace WinFormsSyntaxHighlighter
+namespace MSDN.Html.Editor
 {
     public static class TextBoxBaseExtensions
     {
@@ -13,7 +13,7 @@ namespace WinFormsSyntaxHighlighter
         /// </summary>
         /// <param name="textBox"></param>
         /// <param name="action"></param>
-        public static void DisableThenDoThenEnable(this TextBoxBase textBox, Action action)
+        public static void DisableThenDoActionThenReenable(this TextBoxBase textBox, Action action)
         {
             IntPtr stateLocked = IntPtr.Zero;
 

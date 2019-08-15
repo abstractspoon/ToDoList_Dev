@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Web.UI;
 
 using MSDN.Html.Editor;
-using WinFormsSyntaxHighlighter;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
@@ -221,7 +220,10 @@ namespace HTMLReportExporter
 			var htmlForm = (dialog as EditHtmlForm);
 
 			if (htmlForm != null)
-				htmlForm.AddSyntaxPattern(@"\$\(([^)]+)\)", Color.Black, true, true, true);
+			{
+				htmlForm.AddSyntaxPattern(@"\$\(([^)]+)\)", Color.Black, Color.LightGray, FontStyle.Bold);
+				htmlForm.RefreshHighlighting();
+			}
 		}
 
 		public new bool Focused
