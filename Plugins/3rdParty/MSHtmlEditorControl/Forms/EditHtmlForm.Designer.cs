@@ -80,9 +80,7 @@ namespace MSDN.Html.Editor
 			this.Controls.Add(this.bCancel);
 			this.Controls.Add(this.bOK);
 			this.Controls.Add(this.htmlText);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "EditHtmlForm";
 			this.ShowInTaskbar = false;

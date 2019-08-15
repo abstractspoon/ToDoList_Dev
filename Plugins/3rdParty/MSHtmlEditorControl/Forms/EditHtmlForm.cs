@@ -8,6 +8,8 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
+using RichEditExtensions;
+
 #endregion
 
 
@@ -39,18 +41,18 @@ namespace MSDN.Html.Editor
 
 		// -------------------------------------------------------------------
 
-// 		private SyntaxHighlighter _syntaxHighlighting = null;
-
-		// read only property for the form
 		private bool _readOnly = false;
 		private bool _highlighting = false;
+		private bool _highlightNeeded = false;
 
 		// string values for the form title
 		private const string editCommand = "Cancel";
 		private const string viewCommand = "Close";
 		
 		private List<HtmlSyntaxPattern> _syntaxPatterns = null;
-		HtmlSyntaxPattern _commentsPattern = null; // always run last
+		private HtmlSyntaxPattern _commentsPattern = null; // always run last
+
+		private Timer _changeTimer = null;
 
 		// -------------------------------------------------------------------
 
@@ -75,8 +77,6 @@ namespace MSDN.Html.Editor
 
 		private void InitializeSyntaxHighlighting()
 		{
-			this.htmlText.TextChanged += new System.EventHandler(this.OnTextChanged);
-
 			// Match Visual Studio as far as possible
 
 			// Tags within but excluding angled brackets
@@ -97,9 +97,14 @@ namespace MSDN.Html.Editor
 
 			// Attribute values
 			{
-				var values = @"(.+?)";
-				var besideAttrib = @"(?<=<([^>]+))(={0})(?=[>/ ])";
+				var besideAttrib = @"(?<=<([^>]+))({0})(?=[>/ ])";
 
+				// Unquoted values
+				var values = @"(=\s*.+?)";
+				AddSyntaxPattern(string.Format(besideAttrib, values), Color.Blue);
+
+				// Double quoted values
+				values = @"\""([^""]|\""\"")*\""";
 				AddSyntaxPattern(string.Format(besideAttrib, values), Color.Blue);
 			}
 
@@ -109,6 +114,14 @@ namespace MSDN.Html.Editor
 
 			// Comments kept separate to overwrite any other (custom) formatting
 			_commentsPattern = new HtmlSyntaxPattern(@"(<!--.*?-->)|(<!--.*)", RegexOptions.Singleline, Color.Green, Color.Transparent, FontStyle.Regular);
+			
+			// Change handling
+			_changeTimer = new Timer();
+			_changeTimer.Tick += new EventHandler(OnChangeTimer);
+			_changeTimer.Interval = 500;
+			_changeTimer.Start();
+
+			this.htmlText.TextChanged += new System.EventHandler(this.OnTextChanged);
 		}
 
 		public void AddSyntaxPattern(string pattern, Color textColor, FontStyle style = FontStyle.Regular)
@@ -132,6 +145,16 @@ namespace MSDN.Html.Editor
 				_syntaxPatterns = new List<HtmlSyntaxPattern>();
 
 			_syntaxPatterns.Add(new HtmlSyntaxPattern(pattern, options, textColor, backColor, style));
+			_highlightNeeded = true;
+		}
+
+		private void OnChangeTimer(object sender, EventArgs e)
+		{
+			if (IsDisposed)
+				return;
+
+			if (_highlightNeeded)
+				RefreshHighlighting();
 		}
 
 		/// <summary>
@@ -142,33 +165,31 @@ namespace MSDN.Html.Editor
             this.Text = caption;
         }
 
-		public void RefreshHighlighting()
+		private void RefreshHighlighting()
 		{
-			if ((_syntaxPatterns != null) && (htmlText != null) && !String.IsNullOrWhiteSpace(htmlText.Text))
+			if (_highlightNeeded && (_syntaxPatterns != null) && (htmlText != null) && !String.IsNullOrWhiteSpace(htmlText.Text))
 			{
-				htmlText.DisableThenDoActionThenReenable(DoHighlighting);
+				htmlText.DoActionWithHoldRedraw(DoHighlighting);
 			}
 		}
 
 		private void DoHighlighting()
 		{
-			if ((_syntaxPatterns != null) && (htmlText != null) && !String.IsNullOrWhiteSpace(htmlText.Text))
+			_highlightNeeded = false;
+			_highlighting = true;
+
+			// removes any previous highlighting (so modified words won't remain highlighted)
+			htmlText.SelectionStart = 0;
+			htmlText.SelectionLength = htmlText.Text.Length;
+			htmlText.SelectionColor = htmlText.ForeColor;
+
+			foreach (var syntax in _syntaxPatterns)
 			{
-				_highlighting = true;
-
-				// removes any previous highlighting (so modified words won't remain highlighted)
-				htmlText.SelectionStart = 0;
-				htmlText.SelectionLength = htmlText.Text.Length;
-				htmlText.SelectionColor = htmlText.ForeColor;
-
-				foreach (var syntax in _syntaxPatterns)
-				{
-					HightlightPattern(syntax);
-				}
-
-				// Comments always comes last
-				HightlightPattern(_commentsPattern);
+				HightlightPattern(syntax);
 			}
+
+			// Comments always comes last
+			HightlightPattern(_commentsPattern);
 
 			_highlighting = false;
 		}
@@ -183,7 +204,7 @@ namespace MSDN.Html.Editor
 				htmlText.SelectionLength = match.Length;
 				htmlText.SelectionColor = syntax.TextColor;
 				htmlText.SelectionBackColor = syntax.BackColor;
-				htmlText.SelectionFont = new Font("Courier New", 10, syntax.Style);
+				htmlText.SelectionFont = new Font(htmlText.Font, syntax.Style);
 			}
 		}
 
@@ -192,8 +213,6 @@ namespace MSDN.Html.Editor
 			set
 			{
 				this.htmlText.Font = new Font(value, 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-
-				RefreshHighlighting();
 			}
 		}
 
@@ -211,8 +230,6 @@ namespace MSDN.Html.Editor
                 this.htmlText.Text = (value != null)?value.Trim():string.Empty;
                 this.htmlText.SelectionStart = 0;
                 this.htmlText.SelectionLength = 0;
-
-				RefreshHighlighting();
             }
 
         } //HTML
@@ -239,7 +256,7 @@ namespace MSDN.Html.Editor
 		private void OnTextChanged(object sender, EventArgs e)
 		{
 			if (!_highlighting)
-				RefreshHighlighting();
+				_highlightNeeded = true;
 		}
 	}
 }

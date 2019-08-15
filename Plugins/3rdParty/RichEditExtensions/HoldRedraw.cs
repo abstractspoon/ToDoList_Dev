@@ -2,9 +2,9 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace MSDN.Html.Editor
+namespace RichEditExtensions
 {
-    public static class TextBoxBaseExtensions
+    public static class HoldRedraw
     {
         /// <summary>
         /// In order to make flicker free changes to the TextBox's text, it will 
@@ -13,7 +13,7 @@ namespace MSDN.Html.Editor
         /// </summary>
         /// <param name="textBox"></param>
         /// <param name="action"></param>
-        public static void DisableThenDoActionThenReenable(this TextBoxBase textBox, Action action)
+        public static void DoActionWithHoldRedraw(this TextBoxBase textBox, Action action)
         {
             IntPtr stateLocked = IntPtr.Zero;
 

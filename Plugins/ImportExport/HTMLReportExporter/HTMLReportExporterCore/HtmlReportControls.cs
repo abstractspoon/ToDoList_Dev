@@ -220,10 +220,7 @@ namespace HTMLReportExporter
 			var htmlForm = (dialog as EditHtmlForm);
 
 			if (htmlForm != null)
-			{
 				htmlForm.AddSyntaxPattern(@"\$\(([^)]+)\)", Color.Black, Color.LightGray, FontStyle.Bold);
-				htmlForm.RefreshHighlighting();
-			}
 		}
 
 		public new bool Focused

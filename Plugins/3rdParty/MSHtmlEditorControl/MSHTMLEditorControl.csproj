@@ -199,7 +199,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="TextBoxBaseExtensions.cs" />
     <EmbeddedResource Include="Forms\EditHtmlForm.resx">
       <DependentUpon>EditHtmlForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -288,6 +287,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RichEditExtensions\RichEditExtensions.csproj">
+      <Project>{106d75d9-0012-416e-8c25-85124406171d}</Project>
+      <Name>RichEditExtensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WebBrowserEx\WebBrowserEx.csproj">
       <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>
       <Name>WebBrowserEx</Name>
