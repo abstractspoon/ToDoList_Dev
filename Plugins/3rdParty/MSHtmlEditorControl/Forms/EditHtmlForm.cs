@@ -62,6 +62,8 @@ namespace MSDN.Html.Editor
 			// Single quote strings
 			//AddSyntaxPattern(@"\'([^']|\'\')*\'", Color.Blue);
 
+			AddSyntaxPattern(new Regex(@"(<!--.*?-->)|(<!--.*)", RegexOptions.Singleline), Color.Green);
+
 			// Attributes within tags
 			// Must come before the tags themselves (strangely)
 			{
@@ -103,15 +105,28 @@ namespace MSDN.Html.Editor
 		public void AddSyntaxPattern(string pattern, Color textColor, Color backColor, bool bold = false, bool italic = false, bool reHighlight = false)
 		{
 			// Ignore back color For now
-			_syntaxHighlighting.AddPattern(new PatternDefinition(pattern), new SyntaxStyle(textColor, bold, italic));
-
-			if (reHighlight)
-				_syntaxHighlighting.ReHighlight();
+			AddSyntaxPattern(pattern, textColor, bold, italic, reHighlight);
 		}
 
 		public void AddSyntaxPattern(string pattern, Color textColor, bool bold = false, bool italic = false, bool reHighlight = false)
 		{
-			_syntaxHighlighting.AddPattern(new PatternDefinition(pattern), new SyntaxStyle(textColor, bold, italic));
+			AddSyntaxPattern(new PatternDefinition(pattern), new SyntaxStyle(textColor, bold, italic), reHighlight);
+		}
+
+		public void AddSyntaxPattern(Regex regex, Color textColor, Color backColor, bool bold = false, bool italic = false, bool reHighlight = false)
+		{
+			// Ignore back color For now
+			AddSyntaxPattern(regex, textColor, bold, italic, reHighlight);
+		}
+
+		public void AddSyntaxPattern(Regex regex, Color textColor, bool bold = false, bool italic = false, bool reHighlight = false)
+		{
+			AddSyntaxPattern(new PatternDefinition(regex), new SyntaxStyle(textColor, bold, italic), reHighlight);
+		}
+
+		public void AddSyntaxPattern(PatternDefinition pattern, SyntaxStyle style, bool reHighlight = false)
+		{
+			_syntaxHighlighting.AddPattern(pattern, style);
 
 			if (reHighlight)
 				_syntaxHighlighting.ReHighlight();
