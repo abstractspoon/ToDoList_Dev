@@ -17,6 +17,9 @@ namespace MSHtmlEditorDemo
 			InitializeComponent();
 
 			CenterToScreen();
+
+			if (String.IsNullOrEmpty(htmlEditorControl1.InnerHtml))
+				htmlEditorControl1.InnerHtml = @"<TABLE cellSpacing=2 cols=3 cellPadding=1 width=""50%"" border=2></TABLE>";
 		}
 	}
 }

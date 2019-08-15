@@ -198,8 +198,9 @@ namespace WinFormsSyntaxHighlighter
                     var regex = patternStyleMap.PatternDefinition.Regex;
 
                     int lastProcessedIndex = -1;
+					var matches = regex.Matches(inputExpression.Content).Cast<Match>().OrderBy(m => m.Index);
 
-                    foreach (var match in regex.Matches(inputExpression.Content).Cast<Match>().OrderBy(m => m.Index))
+					foreach (var match in matches)
                     {
                         if (match.Success)
                         {
