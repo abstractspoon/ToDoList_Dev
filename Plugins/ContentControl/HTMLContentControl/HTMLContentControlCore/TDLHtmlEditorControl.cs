@@ -297,7 +297,7 @@ namespace HTMLContentControl
 		{
 			var element = e.ToElement;
 
-			if ((element != null) && (element.TagName.Equals("A")))
+			if ((element != null) && (element.TagName.Equals("A", StringComparison.InvariantCultureIgnoreCase)))
 			{
 				String href = element.GetAttribute("href"), tooltip = href;
 

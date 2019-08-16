@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Reflection;
 using System.Web.UI;
+using System.Text.RegularExpressions;
 
 using MSDN.Html.Editor;
 
@@ -64,6 +65,8 @@ namespace HTMLReportExporter
 		private ToolStripDropDownButton m_ToolStripAttributeMenu = null;
 		private Color m_DefaultBackColor = Color.Transparent;
 		private String m_DefaultBackImage = String.Empty;
+
+		private const String PlaceHolderTag = "SPAN";
 
 		// ---------------------------------------------------------------
 
@@ -141,6 +144,8 @@ namespace HTMLReportExporter
 			this.ContentMargin = 8;
 			this.ParagraphSpacing = 0;
 
+			this.WebBrowser.Document.MouseOver += new HtmlElementEventHandler(OnDocumentMouseOver);
+
 			this.WebBrowser.Document.AttachEventHandler("onfocusout", OnLostFocus);
 			this.WebBrowser.Document.AttachEventHandler("onfocusin", OnGotFocus);
 
@@ -150,6 +155,43 @@ namespace HTMLReportExporter
 			InitialiseToolbar();
 		}
 
+		private void OnDocumentMouseOver(object sender, HtmlElementEventArgs e)
+		{
+			var element = e.ToElement;
+
+			// Work our way up looking for a containing DIV
+			while (element != null)
+			{
+				if (element.TagName.Equals(PlaceHolderTag, StringComparison.InvariantCultureIgnoreCase))
+				{
+					// Match on the pattern '$(...)' and get the contained attribute
+					var match = Regex.Match(element.InnerText, @"(?<=\$\()(.*?)(?=\))");
+
+					if (match.Success)
+					{
+						// Prevent setting the tooltip causing a text change notification
+						// TODO
+
+						// Get the attribute label as the tooltip
+						String tooltip = GetPlaceholderLabel(match.Value);
+
+						if ((tooltip != String.Empty) && !tooltip.Equals(element.GetAttribute("title")))
+							element.SetAttribute("title", tooltip);
+					}
+
+					break;
+				}
+
+				// else
+				element = element.Parent;
+			}
+		}
+
+		protected virtual String GetPlaceholderLabel(string placeHolder)
+		{
+			return String.Empty;
+		}
+		
 		public new void SetBodyFont(string fontName, int htmlSize)
 		{
 			// Convert size to ems because it gives us greater granularity
@@ -205,12 +247,16 @@ namespace HTMLReportExporter
 
 		protected void OnAttributeMenuClick(object sender, EventArgs args)
 		{
-			HandleAttributeMenuClick(sender as ToolStripMenuItem);
-		}
+			var menuItem = (sender as ToolStripMenuItem);
 
-		virtual protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
-		{
-			// For derived classes
+			if (menuItem != null)
+			{
+				var selText = GetTextRange();
+
+				// Wrap with a tag so we can later add tooltips
+				if (selText != null)
+					selText.pasteHTML(String.Format("<{0}>{1}</{0}>", PlaceHolderTag, menuItem.Name));
+			}
 		}
 
 		protected override void PreShowDialog(Form dialog)
@@ -356,14 +402,6 @@ namespace HTMLReportExporter
 			this.toolstripClearBackColor.Enabled = HasBackColor;
 		}
 
-		override protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
-		{
-			var selText = GetTextRange();
-
-			if (selText != null)
-				selText.text = menuItem.Name;
-		}
-
 		private void OnBackColorClick(object sender, EventArgs e)
 		{
 			using (ColorDialog colorDialog = new ColorDialog())
@@ -429,14 +467,6 @@ namespace HTMLReportExporter
 			ToolStripAttributeMenu.Text = "Report Attributes";
 		}
 
-		override protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
-		{
-			var selText = GetTextRange();
-
-			if (selText != null)
-				selText.text = menuItem.Name;
-		}
-
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -446,6 +476,20 @@ namespace HTMLReportExporter
 		override protected void InitialiseFeatures()
 		{
 			base.InitialiseFeatures();
+
+		}
+
+		protected override String GetPlaceholderLabel(string placeHolder)
+		{
+			foreach (var attrib in TaskTemplate.Attributes)
+			{
+				if (placeHolder.StartsWith(attrib.PlaceholderText))
+				{
+					return attrib.Label;
+				}
+			}
+
+			return String.Empty;
 		}
 
 		override protected void InitialiseToolbarAttributeMenu()
@@ -464,14 +508,6 @@ namespace HTMLReportExporter
 
 			ToolStripAttributeMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
 			ToolStripAttributeMenu.Text = "Task Attributes";
-		}
-
-		override protected void HandleAttributeMenuClick(ToolStripMenuItem menuItem)
-		{
-			var selText = GetTextRange();
-
-			if (selText != null)
-				selText.text = menuItem.Name;
 		}
 
 		public void SetCustomAttributes(Dictionary<String, String> customAttributes)
