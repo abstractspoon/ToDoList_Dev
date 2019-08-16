@@ -157,7 +157,7 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 	{
 		auto htmlDialog = ASTYPE(dialog, EditHtmlForm);
 
-		htmlDialog->FontName = gcnew String("Courier New");
+		htmlDialog->FontName = gcnew String("Lucida Console");
 
 		if ((m_SizeEditHtmlForm.Width > 0) && (m_SizeEditHtmlForm.Height > 0))
 			htmlDialog->Size = m_SizeEditHtmlForm;

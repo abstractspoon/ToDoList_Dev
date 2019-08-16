@@ -178,10 +178,11 @@ namespace MSDN.Html.Editor
 			_highlighting = true;
 			_reOLE.EnableUndo(false);
 
-			// removes any previous highlighting (so modified words won't remain highlighted)
+			// Clear any existing formatting
 			htmlText.SelectionStart = 0;
 			htmlText.SelectionLength = htmlText.Text.Length;
 			htmlText.SelectionColor = htmlText.ForeColor;
+			htmlText.SelectionFont = htmlText.Font;
 
 			foreach (var syntax in _syntaxPatterns)
 			{
