@@ -164,7 +164,7 @@ namespace HTMLReportExporter
 			{
 				if (element.TagName.Equals(PlaceHolderTag, StringComparison.InvariantCultureIgnoreCase))
 				{
-					// Match on the pattern '$(...)' and get the contained attribute
+					// Match on the pattern '$(...)' and get the contained placeHolder text
 					var match = Regex.Match(element.InnerText, @"(?<=\$\()(.*?)(?=\))");
 
 					if (match.Success)
@@ -175,7 +175,7 @@ namespace HTMLReportExporter
 						// Get the attribute label as the tooltip
 						String tooltip = GetPlaceholderLabel(match.Value);
 
-						if ((tooltip != String.Empty) && !tooltip.Equals(element.GetAttribute("title")))
+						if (!String.IsNullOrWhiteSpace(tooltip) && !tooltip.Equals(element.GetAttribute("title")))
 							element.SetAttribute("title", tooltip);
 					}
 
@@ -187,7 +187,7 @@ namespace HTMLReportExporter
 			}
 		}
 
-		protected virtual String GetPlaceholderLabel(string placeHolder)
+		protected virtual String GetPlaceholderLabel(string placeHolderText)
 		{
 			return String.Empty;
 		}
@@ -363,6 +363,17 @@ namespace HTMLReportExporter
 			ToolStripAttributeMenu.Text = "Report Attributes";
 		}
 
+		protected override String GetPlaceholderLabel(string placeHolderText)
+		{
+			switch (placeHolderText)
+			{
+				case "reportTitle": return m_Trans.Translate("Report Title");
+				case "reportDate": return m_Trans.Translate("Report Date");
+			}
+
+			return base.GetPlaceholderLabel(placeHolderText);
+		}
+
 		public new Color BackColor
 		{
 			get { return m_BackColor; }
@@ -433,7 +444,6 @@ namespace HTMLReportExporter
 		override protected void InitialiseFeatures()
 		{
 			base.InitialiseFeatures();
-
 		}
 	}
 
@@ -453,7 +463,6 @@ namespace HTMLReportExporter
 		override protected void InitialiseFeatures()
 		{
 			base.InitialiseFeatures();
-
 		}
 
 		override protected void InitialiseToolbarAttributeMenu()
@@ -467,6 +476,16 @@ namespace HTMLReportExporter
 			ToolStripAttributeMenu.Text = "Report Attributes";
 		}
 
+		protected override String GetPlaceholderLabel(string placeHolderText)
+		{
+			switch (placeHolderText)
+			{
+				case "reportTitle":	return m_Trans.Translate("Report Title");
+				case "reportDate":	return m_Trans.Translate("Report Date");
+			}
+
+			return base.GetPlaceholderLabel(placeHolderText);
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -476,16 +495,15 @@ namespace HTMLReportExporter
 		override protected void InitialiseFeatures()
 		{
 			base.InitialiseFeatures();
-
 		}
 
-		protected override String GetPlaceholderLabel(string placeHolder)
+		protected override String GetPlaceholderLabel(string placeHolderText)
 		{
 			foreach (var attrib in TaskTemplate.Attributes)
 			{
-				if (placeHolder.StartsWith(attrib.PlaceholderText))
+				if (placeHolderText.StartsWith(attrib.PlaceholderText))
 				{
-					return attrib.Label;
+					return m_Trans.Translate(attrib.Label);
 				}
 			}
 
