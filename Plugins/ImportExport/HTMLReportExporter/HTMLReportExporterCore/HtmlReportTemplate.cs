@@ -103,7 +103,7 @@ namespace HTMLReportExporter
 
 		public bool HasBackColor
 		{
-			get { return !DrawingColor.IsTransparent(BackColor, false); } // while is opaque
+			get { return !DrawingColor.IsTransparent(BackColor, false); } // white is opaque
 		}
 
 		public String PixelHeightText
@@ -131,7 +131,7 @@ namespace HTMLReportExporter
 		{
 			get
 			{
-				return DrawingColor.ToHtml(BackColor, false); // white is solid
+				return DrawingColor.ToHtml(BackColor, false); // white is opaque
 			}
 
 			set
@@ -274,12 +274,9 @@ namespace HTMLReportExporter
 
 	public class TaskTemplate : TemplateItem
 	{
-		public struct Attribute
+		public struct TaskAttribute
 		{
-
-			// ------------------------------------------------------
-
-			public Attribute(Task.Attribute id, String label, String placeholderText)
+			public TaskAttribute(Task.Attribute id, String label, String placeholderText)
 			{
 				Id = id;
 				Label = label;
@@ -307,39 +304,39 @@ namespace HTMLReportExporter
 
 		// -----------------------------------------------------------
 
-		public static Attribute[] Attributes =
+		public static TaskAttribute[] Attributes =
 		{
-			new Attribute(Task.Attribute.AllocatedBy,       "Allocated By",             "allocBy" ),
-			new Attribute(Task.Attribute.AllocatedTo,       "Allocated To",             "allocTo" ),
-			new Attribute(Task.Attribute.Category,          "Category",                 "cat" ),
-			new Attribute(Task.Attribute.Cost,              "Cost",                     "cost" ),
-			new Attribute(Task.Attribute.CreatedBy,         "Created By",               "createBy" ),
-			new Attribute(Task.Attribute.CreationDate,      "Creation Date",            "createDate" ),
-			new Attribute(Task.Attribute.Dependency,        "Dependency",               "depends" ),
-			new Attribute(Task.Attribute.DoneDate,          "Completion Date",          "doneDate" ),
-			new Attribute(Task.Attribute.DueDate,           "Due Date",                 "dueDate" ),
-			new Attribute(Task.Attribute.ExternalId,        "ExternalId",               "extId" ),
-			new Attribute(Task.Attribute.FileReference,     "File Link",                "filelink" ),
-			new Attribute(Task.Attribute.Flag,              "Flag",                     "flag" ),
-			new Attribute(Task.Attribute.HtmlComments,      "Comments",                 "comments" ),
-			new Attribute(Task.Attribute.Id,                "Id",                       "id" ),
-			new Attribute(Task.Attribute.LastModifiedBy,    "Last Modified By",         "modBy" ),
-			new Attribute(Task.Attribute.LastModifiedDate,  "Last Modified Date",       "modDate" ),
-			new Attribute(Task.Attribute.ParentId,          "Parent Id",                "pid" ),
-			new Attribute(Task.Attribute.Path,              "Path",                     "path" ),
-			new Attribute(Task.Attribute.Percent,           "Percentage Completion",    "percent" ),
-			new Attribute(Task.Attribute.Position,          "Position",                 "pos" ),
-			new Attribute(Task.Attribute.Priority,          "Priority",                 "priority" ),
-			new Attribute(Task.Attribute.Recurrence,        "Recurrence",               "recurs" ),
-			new Attribute(Task.Attribute.Risk,              "Risk",                     "risk" ),
-			new Attribute(Task.Attribute.StartDate,         "Start Date",               "startDate" ),
-			new Attribute(Task.Attribute.Status,            "Status",                   "status" ),
-			new Attribute(Task.Attribute.SubtaskDone,       "Subtask Done",             "subtaskDone" ),
-			new Attribute(Task.Attribute.Tags,              "Tags",                     "tag" ),
-			new Attribute(Task.Attribute.TimeEstimate,      "Time Estimate",            "est" ),
-			new Attribute(Task.Attribute.TimeSpent,         "Time Spent",               "spent" ),
-			new Attribute(Task.Attribute.Title,             "Title",                    "title" ),
-			new Attribute(Task.Attribute.Version,           "Version",                  "ver" ),
+			new TaskAttribute(Task.Attribute.AllocatedBy,       "Allocated By",             "allocBy" ),
+			new TaskAttribute(Task.Attribute.AllocatedTo,       "Allocated To",             "allocTo" ),
+			new TaskAttribute(Task.Attribute.Category,          "Category",                 "cat" ),
+			new TaskAttribute(Task.Attribute.Cost,              "Cost",                     "cost" ),
+			new TaskAttribute(Task.Attribute.CreatedBy,         "Created By",               "createBy" ),
+			new TaskAttribute(Task.Attribute.CreationDate,      "Creation Date",            "createDate" ),
+			new TaskAttribute(Task.Attribute.Dependency,        "Dependency",               "depends" ),
+			new TaskAttribute(Task.Attribute.DoneDate,          "Completion Date",          "doneDate" ),
+			new TaskAttribute(Task.Attribute.DueDate,           "Due Date",                 "dueDate" ),
+			new TaskAttribute(Task.Attribute.ExternalId,        "External Id",              "extId" ),
+			new TaskAttribute(Task.Attribute.FileReference,     "File Link",                "filelink" ),
+			new TaskAttribute(Task.Attribute.Flag,              "Flag",                     "flag" ),
+			new TaskAttribute(Task.Attribute.HtmlComments,      "Comments",                 "comments" ),
+			new TaskAttribute(Task.Attribute.Id,                "Id",                       "id" ),
+			new TaskAttribute(Task.Attribute.LastModifiedBy,    "Last Modified By",         "modBy" ),
+			new TaskAttribute(Task.Attribute.LastModifiedDate,  "Last Modified Date",       "modDate" ),
+			new TaskAttribute(Task.Attribute.ParentId,          "Parent Id",                "pid" ),
+			new TaskAttribute(Task.Attribute.Path,              "Path",                     "path" ),
+			new TaskAttribute(Task.Attribute.Percent,           "Percentage Completion",    "percent" ),
+			new TaskAttribute(Task.Attribute.Position,          "Position",                 "pos" ),
+			new TaskAttribute(Task.Attribute.Priority,          "Priority",                 "priority" ),
+			new TaskAttribute(Task.Attribute.Recurrence,        "Recurrence",               "recurs" ),
+			new TaskAttribute(Task.Attribute.Risk,              "Risk",                     "risk" ),
+			new TaskAttribute(Task.Attribute.StartDate,         "Start Date",               "startDate" ),
+			new TaskAttribute(Task.Attribute.Status,            "Status",                   "status" ),
+			new TaskAttribute(Task.Attribute.SubtaskDone,       "Subtask Done",             "subtaskDone" ),
+			new TaskAttribute(Task.Attribute.Tags,              "Tags",                     "tag" ),
+			new TaskAttribute(Task.Attribute.TimeEstimate,      "Time Estimate",            "est" ),
+			new TaskAttribute(Task.Attribute.TimeSpent,         "Time Spent",               "spent" ),
+			new TaskAttribute(Task.Attribute.Title,             "Title",                    "title" ),
+			new TaskAttribute(Task.Attribute.Version,           "Version",                  "ver" ),
 		};
 
 		// -----------------------------------------------------------
@@ -355,8 +352,7 @@ namespace HTMLReportExporter
 			private Dictionary<String, String> CustomAttributes;
 
 			private const String ColorPlaceholder = "$(textColor)";
-
-
+			
 			// ------------------------------------------------------
 
 			public enum StyleType
@@ -609,9 +605,9 @@ namespace HTMLReportExporter
 					{
 						// Clear all placeholder except the 'root' one
 						for (int d = 0; d < 9; d++)
-							header = header.Replace(Attribute.Placeholder(attrib.Key, d), String.Empty);
+							header = header.Replace(TaskAttribute.Placeholder(attrib.Key, d), String.Empty);
 
-						header = header.Replace(Attribute.Placeholder(attrib.Key), attrib.Value);
+						header = header.Replace(TaskAttribute.Placeholder(attrib.Key), attrib.Value);
 					}
 				}
 
@@ -655,13 +651,13 @@ namespace HTMLReportExporter
 			static String ReplacePlaceholder(String row, String attribVal, String defaultPlaceholderText, int depth, bool isLeafTask)
 			{
 				// Replace only the placeholder at the level specified
-				String placeHolder = Attribute.Placeholder(defaultPlaceholderText, depth);
+				String placeHolder = TaskAttribute.Placeholder(defaultPlaceholderText, depth);
 				int placeHolderDepth = depth;
 
 				// Note: Leaf tasks formats take precedence
 				if (isLeafTask)
 				{
-					String leafPlaceHolder = Attribute.Placeholder(defaultPlaceholderText, 0);
+					String leafPlaceHolder = TaskAttribute.Placeholder(defaultPlaceholderText, 0);
 
 					if (row.IndexOf(leafPlaceHolder) != -1)
 					{
@@ -674,7 +670,7 @@ namespace HTMLReportExporter
 				{
 					// We didn't find it so use the default placeholder
 					placeHolderDepth = -1;
-					placeHolder = Attribute.Placeholder(defaultPlaceholderText);
+					placeHolder = TaskAttribute.Placeholder(defaultPlaceholderText);
 				}
 
 				for (int d = -1; d < 9; d++)
@@ -682,7 +678,7 @@ namespace HTMLReportExporter
 					if (d == placeHolderDepth)
 						row = row.Replace(placeHolder, attribVal);
 					else
-						row = row.Replace(Attribute.Placeholder(defaultPlaceholderText, d), String.Empty);
+						row = row.Replace(TaskAttribute.Placeholder(defaultPlaceholderText, d), String.Empty);
 				}
 
 				return row;
