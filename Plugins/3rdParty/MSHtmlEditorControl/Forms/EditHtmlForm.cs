@@ -53,6 +53,7 @@ namespace MSDN.Html.Editor
 		private HtmlSyntaxPattern _commentsPattern = null; // always run last
 
 		private Timer _changeTimer = null;
+		private RichOLE _reOLE = null;
 
 		// -------------------------------------------------------------------
 
@@ -142,8 +143,11 @@ namespace MSDN.Html.Editor
 		public void AddSyntaxPattern(string pattern, RegexOptions options, Color textColor, Color backColor, FontStyle style = FontStyle.Regular)
 		{
 			if (_syntaxPatterns == null)
+			{
 				_syntaxPatterns = new List<HtmlSyntaxPattern>();
-
+				_reOLE = new RichOLE(this.htmlText);
+			}
+			
 			_syntaxPatterns.Add(new HtmlSyntaxPattern(pattern, options, textColor, backColor, style));
 			_highlightNeeded = true;
 		}
@@ -177,6 +181,7 @@ namespace MSDN.Html.Editor
 		{
 			_highlightNeeded = false;
 			_highlighting = true;
+			_reOLE.EnableUndo(false);
 
 			// removes any previous highlighting (so modified words won't remain highlighted)
 			htmlText.SelectionStart = 0;
@@ -191,6 +196,7 @@ namespace MSDN.Html.Editor
 			// Comments always comes last
 			HightlightPattern(_commentsPattern);
 
+			_reOLE.EnableUndo(true);
 			_highlighting = false;
 		}
 
