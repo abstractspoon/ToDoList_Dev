@@ -52,7 +52,7 @@ namespace HTMLReportExporter
 				{
 					using (var html = new HtmlTextWriter(file))
 					{
-						var report = new HtmlReportBuilder(tasks, m_Template, prefs, false);
+						var report = new HtmlReportBuilder(m_Trans, tasks, prefs, m_Template, false);
 
 						return report.BuildReport(html);
 					}

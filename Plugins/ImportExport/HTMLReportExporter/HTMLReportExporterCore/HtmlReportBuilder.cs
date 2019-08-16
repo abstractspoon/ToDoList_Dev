@@ -38,7 +38,7 @@ namespace HTMLReportExporter
 
 		// -------------------------------------------------------------
 
-		public HtmlReportBuilder(TaskList tasks, HtmlReportTemplate template, Preferences prefs, bool preview)
+		public HtmlReportBuilder(Translator trans, TaskList tasks, Preferences prefs, HtmlReportTemplate template, bool preview)
 		{
 			m_Tasklist = tasks;
 			m_Template = template;
@@ -52,7 +52,7 @@ namespace HTMLReportExporter
 			Footer = new FooterTemplateReporter(template.Footer, template.BackColor);
 
 			var custAttribs = HtmlReportUtils.GetCustomAttributes(tasks);
-			Tasks = new TaskTemplateReporter(template.Task, preview);
+			Tasks = new TaskTemplateReporter(trans, template.Task, preview);
 		}
 
 		private static String FormatBodyFontStyle(Preferences prefs)
@@ -452,6 +452,7 @@ namespace HTMLReportExporter
 		public class TaskTemplateReporter : TaskTemplate
 		{
 			private TaskTemplate m_Template;
+			private Translator m_Trans;
 			private bool m_Preview;
 			private int m_PreviewTaskCount;
 
@@ -459,10 +460,11 @@ namespace HTMLReportExporter
 
 			// ------------------------------------------------------
 
-			public TaskTemplateReporter(TaskTemplate task, bool preview)
+			public TaskTemplateReporter(Translator trans, TaskTemplate task, bool preview)
 			{
 				Copy(task);
 
+				m_Trans = trans;
 				m_Preview = preview;
 				m_Template = task;
 			}
@@ -492,7 +494,7 @@ namespace HTMLReportExporter
 				if (m_Preview && (m_PreviewTaskCount >= MaxNumPreviewTasks) && (tasks.GetTaskCount() > m_PreviewTaskCount))
 				{
 					html.RenderBeginTag(HtmlTextWriterTag.P);
-					html.WriteLine("(more tasks not shown...)");
+					html.WriteLine(m_Trans.Translate("(more tasks not shown...)"));
 					html.RenderEndTag(); // P
 				}
 

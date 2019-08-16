@@ -446,7 +446,7 @@ namespace HTMLReportExporter
 				{
 					using (var html = new HtmlTextWriter(file))
 					{
-						var report = new HtmlReportBuilder(m_Tasklist, m_Template, m_Prefs, true);
+						var report = new HtmlReportBuilder(m_Trans, m_Tasklist, m_Prefs, m_Template, true);
 
 						report.BuildReport(html);
 					}
