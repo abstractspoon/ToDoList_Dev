@@ -486,7 +486,7 @@ namespace HTMLReportExporter
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
 				html.WriteLine(layout.StartHtml);
 
-				WriteTask(task, layout, 0, html);
+				WriteTask(task, layout, 1, html); // level '0' is used for leaf tasks
 				
 				html.WriteLine(layout.EndHtml);
 				html.RenderEndTag(); // Div

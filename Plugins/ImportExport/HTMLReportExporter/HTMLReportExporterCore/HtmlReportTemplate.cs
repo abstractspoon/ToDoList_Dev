@@ -295,13 +295,13 @@ namespace HTMLReportExporter
 				return Placeholder(PlaceholderText, depth);
 			}
 
-			static public String Placeholder(String placeholderText, int depth = 1)
+			static public String Placeholder(String placeholderText, int depth = -1)
 			{
 				if (depth < 0)
 					return String.Format("$({0})", placeholderText);
 
 				// else
-				return String.Format("$({0}.{1})", placeholderText, (depth + 1));
+				return String.Format("$({0}.{1})", placeholderText, depth);
 			}
 		}
 
@@ -635,7 +635,7 @@ namespace HTMLReportExporter
 							attribVal = task.GetComments().Trim().Replace("\n", "<br>");
 						}
 
-						row = ReplacePlaceholder(row, attribVal, attrib.PlaceholderText, depth);
+						row = ReplacePlaceholder(row, attribVal, attrib.PlaceholderText, depth, !task.IsParent());
 					}
 
 					// Custom attributes
@@ -643,7 +643,7 @@ namespace HTMLReportExporter
 					{
 						var attribVal = task.GetCustomAttributeValue(attrib.Key, true);
 						
-						row = ReplacePlaceholder(row, attribVal, attrib.Key, depth);
+						row = ReplacePlaceholder(row, attribVal, attrib.Key, depth, !task.IsParent());
 					}
 
 					row = row.Replace(ColorPlaceholder, task.GetTextForeWebColor());
@@ -652,17 +652,29 @@ namespace HTMLReportExporter
 				return row;
 			}
 
-			static String ReplacePlaceholder(String row, String attribVal, String defaultPlaceholderText, int depth)
+			static String ReplacePlaceholder(String row, String attribVal, String defaultPlaceholderText, int depth, bool isLeafTask)
 			{
 				// Replace only the placeholder at the level specified
 				String placeHolder = Attribute.Placeholder(defaultPlaceholderText, depth);
 				int placeHolderDepth = depth;
 
+				// Note: Leaf tasks formats take precedence
+				if (isLeafTask)
+				{
+					String leafPlaceHolder = Attribute.Placeholder(defaultPlaceholderText, 0);
+
+					if (row.IndexOf(leafPlaceHolder) != -1)
+					{
+						placeHolder = leafPlaceHolder;
+						placeHolderDepth = 0;
+					}
+				}
+				
 				if (row.IndexOf(placeHolder) == -1)
 				{
 					// We didn't find it so use the default placeholder
 					placeHolderDepth = -1;
-					placeHolder = Attribute.Placeholder(defaultPlaceholderText, -1);
+					placeHolder = Attribute.Placeholder(defaultPlaceholderText);
 				}
 
 				for (int d = -1; d < 9; d++)
