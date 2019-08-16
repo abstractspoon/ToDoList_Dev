@@ -101,10 +101,12 @@ namespace HTMLContentControl
 
         public void SavePreferences(Preferences prefs, String key)
         {
-			// TODO
 			prefs.WriteProfileBool(key, "EditEnabled", m_HtmlEditControl.EditEnabled);
 			prefs.WriteProfileString(key, "LastBrowsedFileFolder", m_HtmlEditControl.LastBrowsedFileFolder);
 			prefs.WriteProfileString(key, "LastBrowsedImageFolder", m_HtmlEditControl.LastBrowsedImageFolder);
+
+			prefs.WriteProfileInt(key, "HtmlFormWidth", HtmlEditorControlEx.SizeEditHtmlForm.Width);
+			prefs.WriteProfileInt(key, "HtmlFormHeight", HtmlEditorControlEx.SizeEditHtmlForm.Height);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -115,6 +117,9 @@ namespace HTMLContentControl
 				m_HtmlEditControl.EditEnabled = prefs.GetProfileBool(key, "EditEnabled", true);
 				m_HtmlEditControl.LastBrowsedFileFolder = prefs.GetProfileString(key, "LastBrowsedFileFolder", @"C:\");
 				m_HtmlEditControl.LastBrowsedImageFolder = prefs.GetProfileString(key, "LastBrowsedImageFolder", @"C:\");
+
+				HtmlEditorControlEx.SizeEditHtmlForm = new Size(prefs.GetProfileInt(key, "HtmlFormWidth", -1),
+																prefs.GetProfileInt(key, "HtmlFormHeight", -1));
 			}
 		}
 

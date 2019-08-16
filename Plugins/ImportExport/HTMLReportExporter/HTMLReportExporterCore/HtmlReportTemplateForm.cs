@@ -86,6 +86,15 @@ namespace HTMLReportExporter
 			}
 
 			this.htmlReportTasksControl.SetCustomAttributes(m_CustomAttributes);
+
+			HtmlEditorControlEx.SizeEditHtmlForm = new Size(prefs.GetProfileInt(key, "HtmlFormWidth", -1),
+															prefs.GetProfileInt(key, "HtmlFormHeight", -1));
+
+			var prevSize = new Size(prefs.GetProfileInt(key, "TemplateFormWidth", -1),
+									prefs.GetProfileInt(key, "TemplateFormHeight", -1));
+
+			if ((prevSize.Width > 0) && (prevSize.Height > 0))
+				this.Size = prevSize;
 		}
 
 		public HtmlReportTemplate ReportTemplate
@@ -369,6 +378,21 @@ namespace HTMLReportExporter
 
 			// Always
 			m_Prefs.WriteProfileString(m_PrefsKey, "LastOpenTemplate", m_TemplateFilePath);
+
+			m_Prefs.WriteProfileInt(m_PrefsKey, "HtmlFormWidth", HtmlEditorControlEx.SizeEditHtmlForm.Width);
+			m_Prefs.WriteProfileInt(m_PrefsKey, "HtmlFormHeight", HtmlEditorControlEx.SizeEditHtmlForm.Height);
+
+			// Save the unmaximised size
+			if (WindowState == FormWindowState.Maximized)
+			{
+				m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormWidth", RestoreBounds.Width);
+				m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormHeight", RestoreBounds.Height);
+			}
+			else
+			{
+				m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormWidth", Size.Width);
+				m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormHeight", Size.Height);
+			}
 
 			return result;
 		}

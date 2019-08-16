@@ -44,7 +44,7 @@ namespace MSDN.Html.Editor
 			this.htmlText.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.htmlText.Location = new System.Drawing.Point(12, 12);
 			this.htmlText.Name = "htmlText";
-			this.htmlText.Size = new System.Drawing.Size(567, 309);
+			this.htmlText.Size = new System.Drawing.Size(559, 304);
 			this.htmlText.TabIndex = 0;
 			this.htmlText.Text = "";
 			// 
@@ -53,7 +53,7 @@ namespace MSDN.Html.Editor
 			this.bOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bOK.DialogResult = System.Windows.Forms.DialogResult.OK;
 			this.bOK.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bOK.Location = new System.Drawing.Point(416, 333);
+			this.bOK.Location = new System.Drawing.Point(408, 328);
 			this.bOK.Name = "bOK";
 			this.bOK.Size = new System.Drawing.Size(75, 23);
 			this.bOK.TabIndex = 1;
@@ -64,7 +64,7 @@ namespace MSDN.Html.Editor
 			this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.bCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bCancel.Location = new System.Drawing.Point(504, 333);
+			this.bCancel.Location = new System.Drawing.Point(496, 328);
 			this.bCancel.Name = "bCancel";
 			this.bCancel.Size = new System.Drawing.Size(75, 23);
 			this.bCancel.TabIndex = 2;
@@ -76,12 +76,13 @@ namespace MSDN.Html.Editor
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.bCancel;
-			this.ClientSize = new System.Drawing.Size(592, 366);
+			this.ClientSize = new System.Drawing.Size(584, 361);
 			this.Controls.Add(this.bCancel);
 			this.Controls.Add(this.bOK);
 			this.Controls.Add(this.htmlText);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MinimizeBox = false;
+			this.MinimumSize = new System.Drawing.Size(600, 400);
 			this.Name = "EditHtmlForm";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;

@@ -158,8 +158,10 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 		auto htmlDialog = ASTYPE(dialog, EditHtmlForm);
 
 		htmlDialog->FontName = gcnew String("Courier New");
-	}
 
+		if ((m_SizeEditHtmlForm.Width > 0) && (m_SizeEditHtmlForm.Height > 0))
+			htmlDialog->Size = m_SizeEditHtmlForm;
+	}
 
 	Win32::ActivateApp(Handle);
 }
@@ -178,6 +180,16 @@ void HtmlEditorControlEx::PostShowDialog(Form^ dialog)
 		auto imageDialog = ASTYPE(dialog, EnterImageForm);
 
 		LastBrowsedImageFolder = imageDialog->LastBrowsedFolder;
+	}
+	else if (ISTYPE(dialog, EditHtmlForm))
+	{
+		auto htmlDialog = ASTYPE(dialog, EditHtmlForm);
+
+		// Save the unmaximised size
+		if (htmlDialog->WindowState == FormWindowState::Maximized)
+			m_SizeEditHtmlForm = htmlDialog->RestoreBounds.Size;
+		else
+			m_SizeEditHtmlForm = htmlDialog->Size;
 	}
 }
 
