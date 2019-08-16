@@ -489,6 +489,13 @@ namespace HTMLReportExporter
 				html.WriteLine(layout.EndHtml);
 				html.RenderEndTag(); // Div
 
+				if (m_Preview && (m_PreviewTaskCount >= MaxNumPreviewTasks) && (tasks.GetTaskCount() > m_PreviewTaskCount))
+				{
+					html.RenderBeginTag(HtmlTextWriterTag.P);
+					html.WriteLine("(more tasks not shown...)");
+					html.RenderEndTag(); // P
+				}
+
 				return true;
 			}
 			
