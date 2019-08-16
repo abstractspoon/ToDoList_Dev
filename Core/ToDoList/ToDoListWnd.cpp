@@ -4898,24 +4898,6 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 		// default task attributes
 		newPrefs.GetDefaultTaskAttributes(m_tdiDefault);
 
-		// source control
-		BOOL bAutoCheckOut = newPrefs.GetAutoCheckOut();
-		BOOL bWantCheckOut = newPrefs.GetKeepTryingToCheckout();
-
-		// update all open files to ensure they're in the right state
-		int nCtrl = GetTDCCount();
-			
-		while (nCtrl--)
-		{
-			if (m_mgrToDoCtrls.IsSourceControlled(nCtrl))
-			{
-				if (bWantCheckOut && !m_mgrToDoCtrls.IsCheckedOut(nCtrl))
-					m_mgrToDoCtrls.CheckOut(nCtrl);
-
-				GetToDoCtrl(nCtrl).SetStyle(TDCS_CHECKOUTONLOAD, bAutoCheckOut);
-			}
-		}
-
 		// menu icons
 		UINT nPrevID = MapNewTaskPos(oldPrefs.GetNewTaskPos(), FALSE);
 		m_mgrMenuIcons.ChangeImageID(nPrevID, GetNewTaskCmdID());
