@@ -71,7 +71,7 @@ namespace MSDN.Html.Editor
 			InitializeSyntaxHighlighting();
 			
 			// ensure content is empty
-			this.htmlText.Text = string.Empty;
+			this.HTML = string.Empty;
             this.ReadOnly = true;
 
 		} //EditHtmlForm
@@ -79,6 +79,8 @@ namespace MSDN.Html.Editor
 		private void InitializeSyntaxHighlighting()
 		{
 			// Match Visual Studio as far as possible
+			_syntaxPatterns = new List<HtmlSyntaxPattern>();
+			_reOLE = new RichOLE(this.htmlText);
 
 			// Tags within but excluding angled brackets
 			{
@@ -142,12 +144,6 @@ namespace MSDN.Html.Editor
 
 		public void AddSyntaxPattern(string pattern, RegexOptions options, Color textColor, Color backColor, FontStyle style = FontStyle.Regular)
 		{
-			if (_syntaxPatterns == null)
-			{
-				_syntaxPatterns = new List<HtmlSyntaxPattern>();
-				_reOLE = new RichOLE(this.htmlText);
-			}
-			
 			_syntaxPatterns.Add(new HtmlSyntaxPattern(pattern, options, textColor, backColor, style));
 			_highlightNeeded = true;
 		}
@@ -157,8 +153,7 @@ namespace MSDN.Html.Editor
 			if (IsDisposed)
 				return;
 
-			if (_highlightNeeded)
-				RefreshHighlighting();
+			RefreshHighlighting();
 		}
 
 		/// <summary>
@@ -210,7 +205,11 @@ namespace MSDN.Html.Editor
 				htmlText.SelectionLength = match.Length;
 				htmlText.SelectionColor = syntax.TextColor;
 				htmlText.SelectionBackColor = syntax.BackColor;
-				htmlText.SelectionFont = new Font(htmlText.Font, syntax.Style);
+
+				if (syntax.Style == FontStyle.Regular)
+					htmlText.SelectionFont = htmlText.Font;
+				else
+					htmlText.SelectionFont = new Font(htmlText.Font, syntax.Style);
 			}
 		}
 
@@ -219,6 +218,8 @@ namespace MSDN.Html.Editor
 			set
 			{
 				this.htmlText.Font = new Font(value, 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+
+				_highlightNeeded = true;
 			}
 		}
 
@@ -236,6 +237,8 @@ namespace MSDN.Html.Editor
                 this.htmlText.Text = (value != null)?value.Trim():string.Empty;
                 this.htmlText.SelectionStart = 0;
                 this.htmlText.SelectionLength = 0;
+
+				_highlightNeeded = true;
             }
 
         } //HTML
