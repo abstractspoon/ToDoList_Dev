@@ -285,6 +285,11 @@ namespace HTMLContentControl
 			if (Uri.TryCreate(href, UriKind.Absolute, out unused))
 				return true;
 
+			return IsOutlookLink(href);
+		}
+
+		private static bool IsOutlookLink(string href)
+		{
 			return href.ToLower().StartsWith("outlook://");
 		}
 
@@ -308,7 +313,7 @@ namespace HTMLContentControl
 				if (IsEditable)
 				{
 					// No need for tooltip if the same as the visible text
-					if (tooltip.Equals(element.InnerText))
+					if (tooltip.Contains(element.InnerText))
 						tooltip = String.Empty;
 					else
 						tooltip = tooltip + "\n";
