@@ -446,7 +446,7 @@ BEGIN
     IDS_TOTALDAYSPERPERSON  "Total Allocated Days"
     IDS_NUMACTIVITIESPERPERSON "Number of Allocated Tasks"
     IDS_PERCENTLOADPERPERSON "Percentage Load"
-    IDS_COL_TIMEEST         "Time Est."
+    IDS_COL_TIMEEST         "Time Est"
 END
 
 STRINGTABLE DISCARDABLE 
