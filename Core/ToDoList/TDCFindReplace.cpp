@@ -65,6 +65,7 @@ BOOL CTDCFindReplace::Initialise(TDC_ATTRIBUTE nAttrib)
 		strFind.Empty();
 	}
 
+	BOOL bFindOnly = !m_tdc.CanEditSelectedTask(nAttrib);
 	CEnString sTitle;
 	
 	switch (nAttrib)
@@ -81,8 +82,6 @@ BOOL CTDCFindReplace::Initialise(TDC_ATTRIBUTE nAttrib)
 		ASSERT(0);
 		return FALSE;
 	}
-
-	BOOL bFindOnly = !m_tdc.CanEditSelectedTask(nAttrib);
 
 	if (!FIND_STATE::Initialise(m_tdc, this, bFindOnly, sTitle))
 	{

@@ -2076,7 +2076,7 @@ BEGIN
                     BS_AUTORADIOBUTTON,7,42,356,10
     CONTROL         "Screenshot of active task &view",IDC_STYLE_TASKVIEW,
                     "Button",BS_AUTORADIOBUTTON,7,77,356,10
-    CONTROL         "Other  HTML exporter",IDC_STYLE_OTHER,"Button",
+    CONTROL         "Other HTML exporter",IDC_STYLE_OTHER,"Button",
                     BS_AUTORADIOBUTTON,7,112,356,10
     PUSHBUTTON      "Configure...",IDC_CONFIGURESTYLESHEET,232,7,63,14,NOT 
                     WS_VISIBLE | WS_DISABLED | WS_GROUP
@@ -3124,7 +3124,7 @@ BEGIN
         MENUITEM "Find/&Replace in Task Titles...", 
                                                 ID_EDIT_FINDREPLACEINTASKTITLES
 
-        MENUITEM "Find/R&eplace in Task Comments...", 
+        MENUITEM "Find/R&eplace in Comments...", 
                                                 ID_EDIT_FINDREPLACEINTASKCOMMENTS
 
         MENUITEM SEPARATOR
@@ -3780,7 +3780,7 @@ BEGIN
         MENUITEM "Select Task D&ependents",     ID_MOVE_SELECTTASKDEPENDENTS
         MENUITEM SEPARATOR
         MENUITEM "Spell Chec&k Task Title",     ID_EDIT_SPELLCHECKTITLE
-        MENUITEM "Spell Chec&k Task Comments",  ID_EDIT_SPELLCHECKCOMMENTS
+        MENUITEM "Spell Chec&k Comments",       ID_EDIT_SPELLCHECKCOMMENTS
         MENUITEM SEPARATOR
         MENUITEM "C&ut",                        ID_EDIT_CUT
         MENUITEM "&Copy",                       ID_EDIT_COPY
@@ -3998,7 +3998,7 @@ END
 
 IDR_FINDTASKS MENU DISCARDABLE 
 BEGIN
-    POPUP "Relative Date Placeholders"
+    POPUP "RelativeDatePlaceholders"
     BEGIN
         MENUITEM "&Today",                      ID_RELATIVEDATE_TODAY
         MENUITEM "T&omorrow",                   ID_RELATIVEDATE_TOMORROW
@@ -4965,8 +4965,8 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_FIND_TITLE          "Find In Comments"
-    IDS_REPLACE_TITLE       "Replace In Comments"
+    IDS_FIND_TITLE          "Find in Comments"
+    IDS_REPLACE_TITLE       "Replace in Comments"
     IDS_CAD_BROWSEIMAGES    "Images..."
     IDS_CAD_INSERTSYMBOL    "Symbols..."
     IDS_TDLBC_CREATETIME    "Creation Time"
@@ -5633,11 +5633,11 @@ BEGIN
     IDS_HANDLERNOTINSTALLED "(handler not installed)"
     IDS_CUSTOM_FEATURE_FILTERABLE "Filterable"
     IDS_TABTIP_TIMETRACKING "Time Tracking"
-    IDS_REPLACEINTASKCOMMENTS "Replace in Task Comments"
-    IDS_FINDINTASKCOMMENTS  "Find in Task Comments"
+    IDS_REPLACEINTASKCOMMENTS "Replace in Comments"
+    IDS_FINDINTASKCOMMENTS  "Find in Comments"
     IDS_SEARCHPREFS_PROMPT  "Search Preferences"
     IDS_SD_TITLE            "Remote Server Details"
-    IDS_CAD_FRACTION        "Number (Fraction eg. 2/3)"
+    IDS_CAD_FRACTION        "Number (fraction eg. 2/3)"
     IDS_CUSTOM_FEATURE_PERCENTAGE "Display as percentage"
     IDS_FILTERPLACEHOLDER   "Filters"
 END

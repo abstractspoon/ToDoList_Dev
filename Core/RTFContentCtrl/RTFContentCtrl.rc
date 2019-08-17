@@ -519,8 +519,8 @@ BEGIN
     IDS_BROWSE_TITLE        "Select File"
     IDS_COMMENTSGOTOERRMSG  "The selected file could not be opened.\n\nPlease check that the file exists and that there is an application \nregistered for opening the selected file type."
     IDS_FILELINK_PREFS_TITLE "File Link Preferences"
-    IDS_FIND_TITLE          "Find In Comments"
-    IDS_REPLACE_TITLE       "Replace In Comments"
+    IDS_FIND_TITLE          "Find in Comments"
+    IDS_REPLACE_TITLE       "Replace in Comments"
     IDS_PASTE_ERROR         "There was a problem accessing the dragged or copied files.\n\nPlease re-copy the files and then perform the operation again."
 END
 

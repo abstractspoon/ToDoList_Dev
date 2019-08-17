@@ -271,7 +271,7 @@
     <value>23, 20</value>
   </data>
   <data name="toolstripFontDialog.Text" xml:space="preserve">
-    <value>Font Dialog</value>
+    <value>Font Attributes</value>
   </data>
   <data name="toolstripFontNormal.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
@@ -819,7 +819,7 @@
     <value>228, 22</value>
   </data>
   <data name="contextFormatFontDialog.Text" xml:space="preserve">
-    <value>Font Dialog</value>
+    <value>Font Attributes</value>
   </data>
   <data name="contextFormatColorDialog.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
