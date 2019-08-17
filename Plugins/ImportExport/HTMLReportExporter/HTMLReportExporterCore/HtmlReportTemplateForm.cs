@@ -487,7 +487,7 @@ namespace HTMLReportExporter
 			var dlg = new OpenFileDialog
 			{
 				//InitialDirectory = LastBrowsedFolder,
-				Title = m_Trans.Translate("Open Template File"),
+				Title = m_Trans.Translate("Open Report Template"),
 
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
@@ -557,7 +557,7 @@ namespace HTMLReportExporter
 			var dlg = new SaveFileDialog
 			{
 				//InitialDirectory = LastBrowsedFolder,
-				Title = m_Trans.Translate("Save Template File"),
+				Title = m_Trans.Translate("Save Report Template"),
 
 				AutoUpgradeEnabled = true,
 				CheckPathExists = true,
