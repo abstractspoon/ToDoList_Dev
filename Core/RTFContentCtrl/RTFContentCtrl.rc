@@ -541,7 +541,7 @@ BEGIN
     ID_EDIT_OUTDENT         "\nDecrease Indent"
     ID_EDIT_BULLET          "\nBullet List"
     ID_EDIT_STRIKETHRU      "\nStrikethrough"
-    ID_EDIT_WORDWRAP        "\nWordwrap"
+    ID_EDIT_WORDWRAP        "\nWord Wrap"
     ID_EDIT_NUMBER          "\nNumbered List"
     ID_EDIT_TEXTCOLOR       "\nText Colour"
     ID_PREFERENCES          "\nRich Text Preferences"

@@ -3892,7 +3892,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "C&heck Spelling",             ID_COMMENTS_SPELLCHECK
         MENUITEM SEPARATOR
-        MENUITEM "&WordWrap",                   ID_COMMENTS_WORDWRAP
+        MENUITEM "&Word Wrap",                  ID_COMMENTS_WORDWRAP
         MENUITEM "I&nline Spell Checking",      ID_COMMENTS_INLINESPELLCHECK
     END
     POPUP "ToolsDialog"
