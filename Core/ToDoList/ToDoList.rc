@@ -2074,7 +2074,7 @@ BEGIN
                     BS_AUTORADIOBUTTON | WS_GROUP,7,7,220,10
     CONTROL         "Simple web page",IDC_STYLE_SIMPLE,"Button",
                     BS_AUTORADIOBUTTON,7,42,356,10
-    CONTROL         "Screenshot of active task &View",IDC_STYLE_TASKVIEW,
+    CONTROL         "Screenshot of active task &view",IDC_STYLE_TASKVIEW,
                     "Button",BS_AUTORADIOBUTTON,7,77,356,10
     CONTROL         "Other  HTML exporter",IDC_STYLE_OTHER,"Button",
                     BS_AUTORADIOBUTTON,7,112,356,10
@@ -2085,8 +2085,8 @@ BEGIN
                     8,NOT WS_VISIBLE
     COMBOBOX        IDC_SIMPLEPAGE_OPTIONS,19,54,184,48,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    ICON            IDI_STYLE_WRAP,IDC_SIMPLE_ICON,209,51,21,20
-    ICON            IDI_STYLE_IMAGE,-1,18,87,21,20
+    ICON            IDI_STYLE_WRAP,IDC_SIMPLE_ICON,209,51,20,20
+    ICON            IDI_STYLE_IMAGE,-1,18,87,20,20
     COMBOBOX        IDC_OTHEREXPORTERS,19,124,184,30,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
                     WS_VSCROLL | WS_TABSTOP
