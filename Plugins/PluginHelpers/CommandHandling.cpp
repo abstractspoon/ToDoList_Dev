@@ -30,6 +30,7 @@ bool CommandHandling::HideCommand(String^ commandId, ToolStripItemCollection^ it
 		int iItem = items->IndexOf(cmd);
 		
 		// Handle nested menus
+		// ie. cmd may not be an immediate child of items
 		if ((iItem == -1) && ISTYPE(cmd->OwnerItem, ToolStripMenuItem))
 		{
 			items = ASTYPE(cmd->OwnerItem, ToolStripMenuItem)->DropDownItems;
