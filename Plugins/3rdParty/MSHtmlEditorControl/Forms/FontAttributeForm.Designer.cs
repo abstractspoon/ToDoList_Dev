@@ -109,7 +109,7 @@ namespace MSDN.Html.Editor
 			this.checkStrikeout.Name = "checkStrikeout";
 			this.checkStrikeout.Size = new System.Drawing.Size(104, 16);
 			this.checkStrikeout.TabIndex = 7;
-			this.checkStrikeout.Text = "Strikeout";
+			this.checkStrikeout.Text = "Strikethrough";
 			this.checkStrikeout.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
 			// 
 			// checkSubscript

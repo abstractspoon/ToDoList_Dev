@@ -99,7 +99,7 @@
 			this.checkWrapText.Name = "checkWrapText";
 			this.checkWrapText.Size = new System.Drawing.Size(72, 17);
 			this.checkWrapText.TabIndex = 12;
-			this.checkWrapText.Text = "Word Wrap";
+			this.checkWrapText.Text = "Wrap text";
 			this.checkWrapText.UseVisualStyleBackColor = true;
 			// 
 			// checkBackColor

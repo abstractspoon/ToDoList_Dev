@@ -86,7 +86,7 @@ namespace MSDN.Html.Editor
 			this.Name = "EditHtmlForm";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
-			this.Text = "Insert ...";
+			this.Text = "Insert Html";
 			this.ResumeLayout(false);
 
         }
