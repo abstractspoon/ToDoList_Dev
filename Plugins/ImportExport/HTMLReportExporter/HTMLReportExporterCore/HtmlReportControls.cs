@@ -534,7 +534,7 @@ namespace HTMLReportExporter
 			{
 				var menuItem = new ToolStripMenuItem();
 
-				menuItem.Text = String.Format("{0} (Custom)", attrib.Value);
+				menuItem.Text = String.Format(m_Trans.Translate("{0} (Custom)"), attrib.Value);
 				menuItem.Name = String.Format("$({0})", attrib.Key.ToLower());
 				menuItem.Click += new System.EventHandler(base.OnAttributeMenuClick);
 				

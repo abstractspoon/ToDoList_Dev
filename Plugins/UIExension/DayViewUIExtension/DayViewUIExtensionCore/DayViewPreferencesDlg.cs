@@ -31,7 +31,7 @@ namespace DayViewUIExtension
 
 			public static String ToString(int numMinutes, Translator trans)
 			{
-				return trans.Translate(String.Format("{0} minutes", numMinutes));
+				return String.Format(trans.Translate("{0} minutes"), numMinutes);
 			}
 
 			public int numMinutes;
