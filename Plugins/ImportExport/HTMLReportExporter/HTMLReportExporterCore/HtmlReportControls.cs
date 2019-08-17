@@ -173,7 +173,7 @@ namespace HTMLReportExporter
 						// TODO
 
 						// Get the attribute label as the tooltip
-						String tooltip = GetPlaceholderLabel(match.Value);
+						String tooltip = GetPlaceholderTooltip(match.Value);
 
 						if (!String.IsNullOrWhiteSpace(tooltip) && !tooltip.Equals(element.GetAttribute("title")))
 							element.SetAttribute("title", tooltip);
@@ -187,7 +187,7 @@ namespace HTMLReportExporter
 			}
 		}
 
-		protected virtual String GetPlaceholderLabel(string placeHolderText)
+		protected virtual String GetPlaceholderTooltip(string placeHolderText)
 		{
 			return String.Empty;
 		}
@@ -363,7 +363,7 @@ namespace HTMLReportExporter
 			ToolStripAttributeMenu.Text = "Report Attributes";
 		}
 
-		protected override String GetPlaceholderLabel(string placeHolderText)
+		protected override String GetPlaceholderTooltip(string placeHolderText)
 		{
 			switch (placeHolderText)
 			{
@@ -371,7 +371,7 @@ namespace HTMLReportExporter
 				case "reportDate": return m_Trans.Translate("Report Date");
 			}
 
-			return base.GetPlaceholderLabel(placeHolderText);
+			return base.GetPlaceholderTooltip(placeHolderText);
 		}
 
 		public new Color BackColor
@@ -476,7 +476,7 @@ namespace HTMLReportExporter
 			ToolStripAttributeMenu.Text = "Report Attributes";
 		}
 
-		protected override String GetPlaceholderLabel(string placeHolderText)
+		protected override String GetPlaceholderTooltip(string placeHolderText)
 		{
 			switch (placeHolderText)
 			{
@@ -484,7 +484,7 @@ namespace HTMLReportExporter
 				case "reportDate":	return m_Trans.Translate("Report Date");
 			}
 
-			return base.GetPlaceholderLabel(placeHolderText);
+			return base.GetPlaceholderTooltip(placeHolderText);
 		}
 	}
 
@@ -497,11 +497,49 @@ namespace HTMLReportExporter
 			base.InitialiseFeatures();
 		}
 
-		protected override String GetPlaceholderLabel(string placeHolderText)
+		protected override String GetPlaceholderTooltip(string placeHolder)
+		{
+			// Split the placeholder on '.' to extract the optional level
+			var parts = placeHolder.Split('.');
+
+			if ((parts == null) || (parts.Count() == 0))
+				return String.Empty;
+
+			string attribLabel = GetPlaceholderLabel(parts[0]);
+
+			if (parts.Count() == 1)
+				return attribLabel;
+
+			int level = -1;
+
+			if (!Int32.TryParse(parts[1], out level) || (level > 10))
+				return attribLabel;
+
+			String format = String.Empty;
+
+			switch (level)
+			{
+				case 0:		format = "{0} for all 'leaf' tasks";			break;
+				case 1:		format = "{0} for top-level tasks";				break;
+				case 2:		format = "{0} for first level of subtasks";		break;
+				case 3:		format = "{0} for second level of subtasks";	break;
+				case 4:		format = "{0} for third level of subtasks";		break;
+				case 5:		format = "{0} for fourth level of subtasks";	break;
+				case 6:		format = "{0} for fifth level of subtasks";		break;
+				case 7:		format = "{0} for sixth level of subtasks";		break;
+				case 8:		format = "{0} for seventh level of subtasks";	break;
+				case 9:		format = "{0} for eighth level of subtasks";	break;
+				case 10:	format = "{0} for ninth level of subtasks";		break;
+			}
+
+			return String.Format(m_Trans.Translate(format), attribLabel);
+		}
+
+		string GetPlaceholderLabel(string placeHolderText)
 		{
 			foreach (var attrib in TaskTemplate.Attributes)
 			{
-				if (placeHolderText.StartsWith(attrib.PlaceholderText))
+				if (placeHolderText.Equals(attrib.PlaceholderText))
 				{
 					return m_Trans.Translate(attrib.Label);
 				}

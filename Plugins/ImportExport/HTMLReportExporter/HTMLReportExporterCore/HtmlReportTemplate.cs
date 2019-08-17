@@ -488,9 +488,9 @@ namespace HTMLReportExporter
 									this.TableHeaderRow = tableHeaderType;
 								}
 							}
-
-							this.TaskHtml = InjectTextColourPlaceholder(elm).Trim();
 						}
+
+						this.TaskHtml = InjectTextColourPlaceholder(elm).Trim();
 					}
 				}
 				catch
@@ -518,22 +518,24 @@ namespace HTMLReportExporter
 
 			private static String InjectTextColourPlaceholder(HtmlAgilityPack.HtmlNode container)
 			{
-				HtmlAgilityPack.HtmlNode taskElm = null;
+				HtmlAgilityPack.HtmlNode taskElm = AgilityUtils.FindElement(container, "SPAN", "$(title");
 
-				switch (container.Name.ToUpper())
+				if (taskElm == null)
 				{
-					case "TABLE":
-						//taskElm = AgilityUtils.FindElement(container, "TD", "$(title");
-						taskElm = AgilityUtils.FindElement(container, "TR");
-						break;
+					switch (container.Name.ToUpper())
+					{
+						case "TABLE":
+							taskElm = AgilityUtils.FindElement(container, "TR");
+							break;
 
-					case "UL":
-						taskElm = AgilityUtils.FindElement(container, "LI");
-						break;
+						case "UL":
+							taskElm = AgilityUtils.FindElement(container, "LI");
+							break;
 
-					case "OL":
-						taskElm = AgilityUtils.FindElement(container, "LI");
-						break;
+						case "OL":
+							taskElm = AgilityUtils.FindElement(container, "LI");
+							break;
+					}
 				}
 
 				if (taskElm != null)
