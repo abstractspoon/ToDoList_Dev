@@ -97,12 +97,7 @@ void HtmlEditorControlEx::InitialiseFeatures(bool hideDocumentCommands)
 {
 	if (hideDocumentCommands)
 	{
-		CommandHandling::HideCommand("contextEditorDocumentNew", ContextMenu->Items);
-		CommandHandling::HideCommand("contextEditorDocumentOpen", ContextMenu->Items);
-		CommandHandling::HideCommand("contextEditorDocumentSave", ContextMenu->Items);
-		CommandHandling::HideCommand("contextEditorDocumentPrint", ContextMenu->Items);
-		CommandHandling::HideCommand("contextEditorDocumentHelp", ContextMenu->Items);
-
+		CommandHandling::HideCommand("contextDocument", ContextMenu->Items);
 
 		CommandHandling::HideCommand("toolstripDocumentNew", ToolBar->Items);
 		CommandHandling::HideCommand("toolstripDocumentOpen", ToolBar->Items);

@@ -99,7 +99,6 @@
 			this.contextDocument = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocumentNew = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocumentOpen = new System.Windows.Forms.ToolStripMenuItem();
-			this.contextDocumentEditHTML = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocumentSave = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
 			this.contextDocumentPrint = new System.Windows.Forms.ToolStripMenuItem();
@@ -150,6 +149,8 @@
 			this.contextInsertText = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertHtml = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertTable = new System.Windows.Forms.ToolStripMenuItem();
+			this.contextDocumentEditHTML = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator25 = new System.Windows.Forms.ToolStripSeparator();
 			this.browserPanel.SuspendLayout();
 			this.toolstripEditor.SuspendLayout();
 			this.contextEditor.SuspendLayout();
@@ -649,7 +650,9 @@
             this.contextEditFindReplace,
             this.toolStripSeparator16,
             this.contextEditSelectAll,
-            this.contextEditDelete});
+            this.contextEditDelete,
+            this.toolStripSeparator25,
+            this.contextDocumentEditHTML});
 			this.contextEdit.Name = "contextEdit";
 			resources.ApplyResources(this.contextEdit, "contextEdit");
 			// 
@@ -736,7 +739,6 @@
 			this.contextDocument.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.contextDocumentNew,
             this.contextDocumentOpen,
-            this.contextDocumentEditHTML,
             this.contextDocumentSave,
             this.toolStripSeparator9,
             this.contextDocumentPrint,
@@ -762,14 +764,6 @@
 			this.contextDocumentOpen.Name = "contextDocumentOpen";
 			this.contextDocumentOpen.Tag = "OpenFile";
 			this.contextDocumentOpen.Click += new System.EventHandler(this.contextEditorClick);
-			// 
-			// contextDocumentEditHTML
-			// 
-			this.contextDocumentEditHTML.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarEditHtml;
-			resources.ApplyResources(this.contextDocumentEditHTML, "contextDocumentEditHTML");
-			this.contextDocumentEditHTML.Name = "contextDocumentEditHTML";
-			this.contextDocumentEditHTML.Tag = "EditHTML";
-			this.contextDocumentEditHTML.Click += new System.EventHandler(this.contextEditorClick);
 			// 
 			// contextDocumentSave
 			// 
@@ -1155,6 +1149,19 @@
 			this.contextInsertTable.Tag = "InsertTable";
 			this.contextInsertTable.Click += new System.EventHandler(this.contextEditorClick);
 			// 
+			// contextDocumentEditHTML
+			// 
+			this.contextDocumentEditHTML.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarEditHtml;
+			resources.ApplyResources(this.contextDocumentEditHTML, "contextDocumentEditHTML");
+			this.contextDocumentEditHTML.Name = "contextDocumentEditHTML";
+			this.contextDocumentEditHTML.Tag = "EditHTML";
+			this.contextDocumentEditHTML.Click += new System.EventHandler(this.contextEditorClick);
+			// 
+			// toolStripSeparator25
+			// 
+			this.toolStripSeparator25.Name = "toolStripSeparator25";
+			resources.ApplyResources(this.toolStripSeparator25, "toolStripSeparator25");
+			// 
 			// HtmlEditorControl
 			// 
 			this.Controls.Add(this.toolstripEditor);
@@ -1291,7 +1298,8 @@
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator24;
 		private System.Windows.Forms.ToolStripMenuItem contextDocumentNew;
 		private System.Windows.Forms.ToolStripMenuItem contextDocumentHelp;
-		private System.Windows.Forms.ToolStripMenuItem contextDocumentEditHTML;
 		private System.Windows.Forms.ToolStripButton toolstripDocumentEditHTML;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator25;
+		private System.Windows.Forms.ToolStripMenuItem contextDocumentEditHTML;
 	}
 }
