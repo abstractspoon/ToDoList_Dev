@@ -3877,11 +3877,38 @@ namespace MSDN.Html.Editor
             return false;
         } // ExecuteCommandDocumentPrompt
 
+		public bool EnableAtomicSelection(bool enable = true)
+		{
+			mshtml.IHTMLDocument2 doc = (document as mshtml.IHTMLDocument2);
 
-        /// <summary>
-        /// Determines the value of the command
-        /// </summary>
-        protected object QueryCommandRange(string command)
+			try
+			{
+				IOleCommandTarget target = (IOleCommandTarget)document;
+				int hResult = HRESULT.S_OK;
+				// try to obtain the command target for the web browser document
+				try
+				{
+					// set the appropriate no url fixups on paste
+					object VT_TRUE = true;
+					hResult = target.Exec(ref CommandGroup.CGID_MSHTML, (int)CommandId.IDM_ATOMICSELECTION, (int)CommandOption.OLECMDEXECOPT_DONTPROMPTUSER, ref VT_TRUE, ref EMPTY_PARAMETER);
+				}
+				// catch any exception and map back to the HRESULT
+				catch (Exception ex)
+				{
+					hResult = Marshal.GetHRForException(ex);
+				}
+			}
+			catch (Exception e)
+			{
+			}
+
+			return false;
+		}
+
+		/// <summary>
+		/// Determines the value of the command
+		/// </summary>
+		protected object QueryCommandRange(string command)
         {
             // obtain the selected range object and execute command
             mshtmlTextRange range = GetTextRange();

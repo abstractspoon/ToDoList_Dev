@@ -71,7 +71,8 @@ namespace Pavonis.COM
         IDM_NOACTIVATENORMALOLECONTROLS        = 2332,
         IDM_NOACTIVATEDESIGNTIMECONTROLS       = 2333,
         IDM_NOACTIVATEJAVAAPPLETS              = 2334,
-        IDM_NOFIXUPURLSONPASTE                 = 2335
+        IDM_NOFIXUPURLSONPASTE                 = 2335,
+        IDM_ATOMICSELECTION                    = 2399,
 
     } //CommandId
 
