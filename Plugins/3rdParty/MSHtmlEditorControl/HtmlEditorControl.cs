@@ -2027,7 +2027,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Ensures the toolbar is correctly displaying state
         /// </summary>
-        private void FormatSelectionChange()
+        virtual protected void FormatSelectionChange()
         {
             this.toolstripEditUndo.Enabled = CanEditUndo();
             this.contextEditUndo.Enabled = CanEditUndo();

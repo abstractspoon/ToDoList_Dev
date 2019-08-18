@@ -67,6 +67,63 @@ namespace HTMLReportExporter
 		private String m_DefaultBackImage = String.Empty;
 
 		private const String PlaceHolderTag = "SPAN";
+		private const String PlaceHolderRegex = @"(?<=\$\()(.*?)(?=\))";
+
+		protected static bool IsPlaceholder(HtmlElement element)
+		{
+			return element.TagName.Equals(PlaceHolderTag, StringComparison.InvariantCultureIgnoreCase);
+		}
+
+		protected static bool IsPlaceholder(string innerText)
+		{
+			string unused;
+			return ParsePlaceholder(innerText, out unused);
+		}
+
+		protected static bool IsPlaceholder(mshtml.IHTMLTxtRange rng)
+		{
+			if (rng == null)
+				return false;
+
+			string unused;
+			return ParsePlaceholder(rng.text, out unused);
+		}
+
+		protected static bool ParsePlaceholder(HtmlElement element, out string placeholderText)
+		{
+			placeholderText = String.Empty;
+
+			if (!IsPlaceholder(element))
+				return false;
+
+			return ParsePlaceholder(element.InnerText, out placeholderText);
+		}
+
+		protected static bool ParsePlaceholder(mshtml.IHTMLTxtRange rng, out string placeholderText)
+		{
+			placeholderText = String.Empty;
+
+			if (rng == null)
+				return false;
+
+			return ParsePlaceholder(rng.text, out placeholderText);
+		}
+
+		protected static bool ParsePlaceholder(string innerText, out string placeholderText)
+		{
+			placeholderText = String.Empty;
+
+			if (String.IsNullOrWhiteSpace(innerText))
+				return false;
+
+			var match = Regex.Match(innerText, PlaceHolderRegex);
+
+			if (!match.Success)
+				return false;
+
+			placeholderText = match.Value;
+			return true;
+		}
 
 		// ---------------------------------------------------------------
 
@@ -153,33 +210,35 @@ namespace HTMLReportExporter
 
 			m_ToolStripAttributeMenu = new ToolStripDropDownButton();
 			InitialiseToolbar();
+
+			EnableAtomicSelection();
 		}
 
 		private void OnDocumentMouseOver(object sender, HtmlElementEventArgs e)
 		{
 			var element = e.ToElement;
 
-			// Work our way up looking for a containing DIV
+			// Work our way up looking for one of our placeholders
+			string placeholderText;
+
 			while (element != null)
 			{
-				if (element.TagName.Equals(PlaceHolderTag, StringComparison.InvariantCultureIgnoreCase))
+				if (ParsePlaceholder(element, out placeholderText))
 				{
-					// Match on the pattern '$(...)' and get the contained placeHolder text
-					var match = Regex.Match(element.InnerText, @"(?<=\$\()(.*?)(?=\))");
+					// Prevent setting the tooltip causing a text change notification
+					// TODO
 
-					if (match.Success)
+					// Get the attribute label as the tooltip
+					String tooltip;
+					
+					if (GetPlaceholderTooltip(placeholderText, out tooltip) &&
+						!String.IsNullOrWhiteSpace(tooltip) && 
+						!tooltip.Equals(element.GetAttribute("title")))
 					{
-						// Prevent setting the tooltip causing a text change notification
-						// TODO
-
-						// Get the attribute label as the tooltip
-						String tooltip = GetPlaceholderTooltip(match.Value);
-
-						if (!String.IsNullOrWhiteSpace(tooltip) && !tooltip.Equals(element.GetAttribute("title")))
-							element.SetAttribute("title", tooltip);
+						element.SetAttribute("title", tooltip);
 					}
 
-					break;
+					break; // always
 				}
 
 				// else
@@ -187,9 +246,10 @@ namespace HTMLReportExporter
 			}
 		}
 
-		protected virtual String GetPlaceholderTooltip(string placeHolderText)
+		protected virtual bool GetPlaceholderTooltip(string placeHolderText, out string tooltip)
 		{
-			return String.Empty;
+			tooltip = String.Empty;
+			return false;
 		}
 		
 		public new void SetBodyFont(string fontName, int htmlSize)
@@ -253,10 +313,15 @@ namespace HTMLReportExporter
 			{
 				var selText = GetTextRange();
 
-				// Wrap with a tag so we can later add tooltips
 				if (selText != null)
-					selText.pasteHTML(String.Format("<{0}>{1}</{0}>", PlaceHolderTag, menuItem.Name));
+					selText.pasteHTML(FormatPlaceholderHtml(menuItem.Name));
 			}
+		}
+
+		protected string FormatPlaceholderHtml(string placeholder)
+		{
+			// Wrap with a tag so we can later add tooltips
+			return String.Format(@"<{0} ATOMICSELECTION=""true"">{1}</{0}>", PlaceHolderTag, placeholder);
 		}
 
 		protected override void PreShowDialog(Form dialog)
@@ -363,15 +428,15 @@ namespace HTMLReportExporter
 			ToolStripAttributeMenu.Text = "Report Attributes";
 		}
 
-		protected override String GetPlaceholderTooltip(string placeHolderText)
+		protected override bool GetPlaceholderTooltip(string placeHolderText, out string tooltip)
 		{
 			switch (placeHolderText)
 			{
-				case "reportTitle": return m_Trans.Translate("Report Title");
-				case "reportDate": return m_Trans.Translate("Report Date");
+				case "reportTitle": tooltip = m_Trans.Translate("Report Title"); return true;
+				case "reportDate": tooltip = m_Trans.Translate("Report Date"); return true;
 			}
 
-			return base.GetPlaceholderTooltip(placeHolderText);
+			return base.GetPlaceholderTooltip(placeHolderText, out tooltip);
 		}
 
 		public new Color BackColor
@@ -476,15 +541,15 @@ namespace HTMLReportExporter
 			ToolStripAttributeMenu.Text = "Report Attributes";
 		}
 
-		protected override String GetPlaceholderTooltip(string placeHolderText)
+		protected override bool GetPlaceholderTooltip(string placeHolderText, out string tooltip)
 		{
 			switch (placeHolderText)
 			{
-				case "reportTitle":	return m_Trans.Translate("Report Title");
-				case "reportDate":	return m_Trans.Translate("Report Date");
+				case "reportTitle": tooltip = m_Trans.Translate("Report Title"); return true;
+				case "reportDate": tooltip = m_Trans.Translate("Report Date"); return true;
 			}
 
-			return base.GetPlaceholderTooltip(placeHolderText);
+			return base.GetPlaceholderTooltip(placeHolderText, out tooltip);
 		}
 	}
 
@@ -492,60 +557,175 @@ namespace HTMLReportExporter
 
 	partial class HtmlReportTaskFormatControl : HtmlReportControlBase
 	{
+		private ToolStripDropDownButton m_ToolStripAttributeLevelMenu = null;
+
+		// -----------------------------------------------------
+
 		override protected void InitialiseFeatures()
 		{
 			base.InitialiseFeatures();
 		}
 
-		protected override String GetPlaceholderTooltip(string placeHolder)
+		protected override void FormatSelectionChange()
 		{
+			base.FormatSelectionChange();
+
+			// Enable 'attribute level' if placeholder is selected
+			var selText = GetTextRange();
+
+			m_ToolStripAttributeLevelMenu.Enabled = IsPlaceholder(selText);
+		}
+		
+		protected override bool GetPlaceholderTooltip(string placeHolder, out string tooltip)
+		{
+			string basePlaceholder;
+			int level;
+
+			if (!ParsePlaceholder(placeHolder, out basePlaceholder, out level))
+			{
+				tooltip = String.Empty;
+				return false;
+			}
+
+			if (!GetPlaceholderLabel(basePlaceholder, out tooltip))
+				return false;
+
+			string levelLabel;
+
+			if (GetLevelLabel(level, out levelLabel))
+				tooltip = String.Format("{0}\n{1}", tooltip, levelLabel);
+
+			return true;
+		}
+
+		bool ParsePlaceholder(mshtml.IHTMLTxtRange rng, out string placeholderText, out int level)
+		{
+			placeholderText = string.Empty;
+			level = -1;
+
+			string placeholder;
+
+			if (!ParsePlaceholder(rng, out placeholder))
+				return false;
+
+			return ParsePlaceholder(placeholder, out placeholderText, out level);
+		}
+
+		bool ParsePlaceholder(string placeHolder, out string placeholderText, out int level)
+		{
+			placeholderText = string.Empty;
+			level = -1;
+
 			// Split the placeholder on '.' to extract the optional level
 			var parts = placeHolder.Split('.');
 
 			if ((parts == null) || (parts.Count() == 0))
-				return String.Empty;
+				return false;
 
-			string attribLabel = GetPlaceholderLabel(parts[0]);
+			placeholderText = parts[0];
 
-			if (parts.Count() == 1)
-				return attribLabel;
+			if ((parts.Count() > 1) && Int32.TryParse(parts[1], out level) && (level > 10))
+				level = -1;
 
-			int level = -1;
+			return true;
+		}
 
-			if (!Int32.TryParse(parts[1], out level) || (level > 10))
-				return attribLabel;
+		string GetLevelLabel(int level)
+		{
+			string label;
+			GetLevelLabel(level, out label);
 
-			String format = String.Empty;
+			return label;
+		}
+		
+		bool GetLevelLabel(int level, out string label)
+		{
+			label = String.Empty;
 
 			switch (level)
 			{
-				case 0:		format = "{0} for all 'leaf' tasks";			break;
-				case 1:		format = "{0} for top-level tasks";				break;
-				case 2:		format = "{0} for first level of subtasks";		break;
-				case 3:		format = "{0} for second level of subtasks";	break;
-				case 4:		format = "{0} for third level of subtasks";		break;
-				case 5:		format = "{0} for fourth level of subtasks";	break;
-				case 6:		format = "{0} for fifth level of subtasks";		break;
-				case 7:		format = "{0} for sixth level of subtasks";		break;
-				case 8:		format = "{0} for seventh level of subtasks";	break;
-				case 9:		format = "{0} for eighth level of subtasks";	break;
-				case 10:	format = "{0} for ninth level of subtasks";		break;
+				case 0:		label = m_Trans.Translate("All 'leaf' tasks");			break;
+				case 1:		label = m_Trans.Translate("Top-level tasks");			break;
+				case 2:		label = m_Trans.Translate("First level of subtasks");	break;
+				case 3:		label = m_Trans.Translate("Second level of subtasks");	break;
+				case 4:		label = m_Trans.Translate("Third level of subtasks");	break;
+				case 5:		label = m_Trans.Translate("Fourth level of subtasks");	break;
+				case 6:		label = m_Trans.Translate("Fifth level of subtasks");	break;
+				case 7:		label = m_Trans.Translate("Sixth level of subtasks");	break;
+				case 8:		label = m_Trans.Translate("Seventh level of subtasks");	break;
+				case 9:		label = m_Trans.Translate("Eighth level of subtasks");	break;
+				case 10:	label = m_Trans.Translate("Ninth level of subtasks");	break;
 			}
 
-			return String.Format(m_Trans.Translate(format), attribLabel);
+			return !String.IsNullOrEmpty(label);
 		}
 
-		string GetPlaceholderLabel(string placeHolderText)
+		bool GetPlaceholderLabel(string basePlaceholder, out string label)
 		{
 			foreach (var attrib in TaskTemplate.Attributes)
 			{
-				if (placeHolderText.Equals(attrib.PlaceholderText))
+				if (basePlaceholder.Equals(attrib.BasePlaceholder))
 				{
-					return m_Trans.Translate(attrib.Label);
+					label = m_Trans.Translate(attrib.Label);
+					return true;
 				}
 			}
 
-			return String.Empty;
+			label = String.Empty;
+			return false;
+		}
+
+		override protected void InitialiseToolbar()
+		{
+			base.InitialiseToolbar();
+
+			// additional 'level' menu
+			m_ToolStripAttributeLevelMenu = new ToolStripDropDownButton();
+
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(1)) { Name = "1" });
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripSeparator());
+
+			for (int level = 2; level <= 9; level++)
+				m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(level))	{ Name = level.ToString() });
+
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripSeparator());
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(0))	{ Name = "0" });
+
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripSeparator());
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem("Clear Level") { Name = "-1" });
+			
+			m_ToolStripAttributeLevelMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			m_ToolStripAttributeLevelMenu.Text = "Attribute Levels";
+
+			// Menu items appear one pixel too high when placed in a toolbar
+			m_ToolStripAttributeLevelMenu.Margin = new Padding(0, 1, 0, 0);
+
+ 			foreach (ToolStripItem item in m_ToolStripAttributeLevelMenu.DropDownItems)
+ 				item.Click += new System.EventHandler(this.OnAttributeLevelMenuClick);
+
+			ToolBar.Items.Add(m_ToolStripAttributeLevelMenu);
+		}
+
+		protected void OnAttributeLevelMenuClick(object sender, EventArgs args)
+		{
+			var menuItem = (sender as ToolStripMenuItem);
+
+			if (menuItem != null)
+			{
+				var selText = GetTextRange();
+
+				string basePlaceholder;
+				int level;
+
+				if (ParsePlaceholder(selText, out basePlaceholder, out level))
+				{
+					if (!Int32.TryParse(menuItem.Name, out level))
+						level = -1;
+
+					string placeholder = TaskTemplate.TaskAttribute.FormatPlaceholder(basePlaceholder, level);
+					selText.pasteHTML(FormatPlaceholderHtml(placeholder));
+				}
+			}
 		}
 
 		override protected void InitialiseToolbarAttributeMenu()
@@ -557,7 +737,7 @@ namespace HTMLReportExporter
 				var menuItem = new ToolStripMenuItem();
 
 				menuItem.Text = attrib.Label;
-				menuItem.Name = attrib.Placeholder();
+				menuItem.Name = attrib.FormatPlaceholder();
 
 				ToolStripAttributeMenu.DropDownItems.Add(menuItem);
 			}

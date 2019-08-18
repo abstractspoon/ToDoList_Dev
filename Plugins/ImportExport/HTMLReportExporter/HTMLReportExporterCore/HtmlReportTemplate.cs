@@ -276,29 +276,39 @@ namespace HTMLReportExporter
 	{
 		public struct TaskAttribute
 		{
-			public TaskAttribute(Task.Attribute id, String label, String placeholderText)
+			public TaskAttribute(Task.Attribute id, String label, String basePlaceholder)
 			{
 				Id = id;
 				Label = label;
-				PlaceholderText = placeholderText;
+				BasePlaceholder = basePlaceholder;
 			}
 
 			public Task.Attribute Id { get; private set; }
 			public String Label { get; private set; }
-			public String PlaceholderText { get; private set; }
+			public String BasePlaceholder { get; private set; }
 
-			public String Placeholder(int depth = -1)
+			public String FormatPlaceholder(int depth = -1)
 			{
-				return Placeholder(PlaceholderText, depth);
+				return FormatPlaceholder(BasePlaceholder, depth);
 			}
 
-			static public String Placeholder(String placeholderText, int depth = -1)
+			public String FormatPlaceholderText(int depth = -1)
+			{
+				return FormatPlaceholderText(BasePlaceholder, depth);
+			}
+
+			static public String FormatPlaceholder(String basePlaceholder, int depth = -1)
+			{
+				return String.Format("$({0})", FormatPlaceholderText(basePlaceholder, depth));
+			}
+
+			static public String FormatPlaceholderText(String basePlaceholder, int depth = -1)
 			{
 				if (depth < 0)
-					return String.Format("$({0})", placeholderText);
+					return basePlaceholder;
 
 				// else
-				return String.Format("$({0}.{1})", placeholderText, depth);
+				return String.Format("{0}.{1}", basePlaceholder, depth);
 			}
 		}
 
@@ -597,9 +607,9 @@ namespace HTMLReportExporter
 					{
 						// Clear all placeholder except the 'root' one
 						for (int d = 0; d < 9; d++)
-							header = header.Replace(attrib.Placeholder(d), String.Empty);
+							header = header.Replace(attrib.FormatPlaceholder(d), String.Empty);
 
-						header = header.Replace(attrib.Placeholder(), attrib.Label);
+						header = header.Replace(attrib.FormatPlaceholder(), attrib.Label);
 					}
 
 					// Custom attributes
@@ -607,9 +617,9 @@ namespace HTMLReportExporter
 					{
 						// Clear all placeholder except the 'root' one
 						for (int d = 0; d < 9; d++)
-							header = header.Replace(TaskAttribute.Placeholder(attrib.Key, d), String.Empty);
+							header = header.Replace(TaskAttribute.FormatPlaceholder(attrib.Key, d), String.Empty);
 
-						header = header.Replace(TaskAttribute.Placeholder(attrib.Key), attrib.Value);
+						header = header.Replace(TaskAttribute.FormatPlaceholder(attrib.Key), attrib.Value);
 					}
 				}
 
@@ -633,7 +643,7 @@ namespace HTMLReportExporter
 							attribVal = task.GetComments().Trim().Replace("\n", "<br>");
 						}
 
-						row = ReplacePlaceholder(row, attribVal, attrib.PlaceholderText, depth, !task.IsParent());
+						row = ReplacePlaceholder(row, attribVal, attrib.BasePlaceholder, depth, !task.IsParent());
 					}
 
 					// Custom attributes
@@ -653,13 +663,13 @@ namespace HTMLReportExporter
 			static String ReplacePlaceholder(String row, String attribVal, String defaultPlaceholderText, int depth, bool isLeafTask)
 			{
 				// Replace only the placeholder at the level specified
-				String placeHolder = TaskAttribute.Placeholder(defaultPlaceholderText, depth);
+				String placeHolder = TaskAttribute.FormatPlaceholder(defaultPlaceholderText, depth);
 				int placeHolderDepth = depth;
 
 				// Note: Leaf tasks formats take precedence
 				if (isLeafTask)
 				{
-					String leafPlaceHolder = TaskAttribute.Placeholder(defaultPlaceholderText, 0);
+					String leafPlaceHolder = TaskAttribute.FormatPlaceholder(defaultPlaceholderText, 0);
 
 					if (row.IndexOf(leafPlaceHolder) != -1)
 					{
@@ -672,7 +682,7 @@ namespace HTMLReportExporter
 				{
 					// We didn't find it so use the default placeholder
 					placeHolderDepth = -1;
-					placeHolder = TaskAttribute.Placeholder(defaultPlaceholderText);
+					placeHolder = TaskAttribute.FormatPlaceholder(defaultPlaceholderText);
 				}
 
 				for (int d = -1; d < 9; d++)
@@ -680,7 +690,7 @@ namespace HTMLReportExporter
 					if (d == placeHolderDepth)
 						row = row.Replace(placeHolder, attribVal);
 					else
-						row = row.Replace(TaskAttribute.Placeholder(defaultPlaceholderText, d), String.Empty);
+						row = row.Replace(TaskAttribute.FormatPlaceholder(defaultPlaceholderText, d), String.Empty);
 				}
 
 				return row;
