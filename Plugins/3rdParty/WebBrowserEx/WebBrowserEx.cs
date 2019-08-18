@@ -17,6 +17,20 @@ namespace WebBrowserEx
 
 		// -------------------------------------------------------------
 
+		private void SetZoom(int percent)
+		{
+			int OLECMDID_OPTICAL_ZOOM = 63;
+			int OLECMDEXECOPT_DONTPROMPTUSER = 2;
+
+			if ((percent >= 10) && (percent <= 1000))
+			{
+				dynamic ax = this.ActiveXInstance;
+
+				if (ax != null)
+					ax.ExecWB(OLECMDID_OPTICAL_ZOOM, OLECMDEXECOPT_DONTPROMPTUSER, new VariantWrapper(percent), new VariantWrapper(0));
+			}
+		}
+
 		/// <summary>
 		/// provide custom WebBrowserSite,
 		/// where we override IDocHostUIHandler and call the base implementation

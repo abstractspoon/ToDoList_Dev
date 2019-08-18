@@ -275,20 +275,6 @@ namespace HTMLReportExporter
 			}
 		}
 
-		private void SetPreviewZoom(int percent)
-		{
-			int OLECMDID_OPTICAL_ZOOM = 63;
-			int OLECMDEXECOPT_DONTPROMPTUSER = 2;
-
-			if ((percent >= 10) && (percent <= 1000))
-			{
-				dynamic ax = this.browserPreview.ActiveXInstance;
-
-				if (ax != null)
-					ax.ExecWB(OLECMDID_OPTICAL_ZOOM, OLECMDEXECOPT_DONTPROMPTUSER, new VariantWrapper(percent), new VariantWrapper(0));
-			}
-		}
-
 		private void OnTabPageChange(object sender, EventArgs e)
 		{
 			if (!IsDisposed)
