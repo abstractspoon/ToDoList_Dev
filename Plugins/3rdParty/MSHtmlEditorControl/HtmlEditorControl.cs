@@ -562,6 +562,24 @@ namespace MSDN.Html.Editor
 			return null;
 		}
 
+		public String GetWordAtPoint(Point pos)
+		{
+			if (document.selection != null)
+			{
+				var rng = (document.selection.createRange() as mshtmlTextRange);
+
+				if (rng != null)
+				{
+					rng.moveToPoint(pos.X, pos.Y);
+					rng.expand("word");
+
+					return rng.text;
+				}
+			}
+
+			return String.Empty;
+		}
+
 		protected void SelectWordAtPoint(Point pos)
 		{
 			var rng = SelectAtPoint(pos);
@@ -4133,7 +4151,7 @@ namespace MSDN.Html.Editor
             get { return browserPanel; }
         }
 
-		protected WebBrowserEx.WebBrowserEx WebBrowser
+		public WebBrowserEx.WebBrowserEx WebBrowser
 		{
 			get { return editorWebBrowser; }
 		}
