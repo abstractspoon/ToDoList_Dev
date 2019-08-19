@@ -566,7 +566,7 @@ void CTDLTaskCtrlBase::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate
 		if (IsColumnShowing(TDCC_REMINDER))
 		{
 			// Reset 'tracked' flag to ensure correct resize
-			int nCol = m_hdrColumns.FindItem(TDCC_REMINDER);
+			int nCol = GetColumnIndex(TDCC_REMINDER);
 			ASSERT(nCol != -1);
 
 			m_hdrColumns.SetItemTracked(nCol, FALSE);
@@ -772,7 +772,7 @@ void CTDLTaskCtrlBase::OnCustomAttributeChange()
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs.GetData()[nAttrib];
 		
-		int nItem = m_hdrColumns.FindItem(attribDef.GetColumnID());
+		int nItem = GetColumnIndex(attribDef.GetColumnID());
 		ASSERT(nItem != -1);
 
 		m_hdrColumns.EnableItemTracking(nItem, attribDef.bEnabled);
@@ -815,6 +815,26 @@ BOOL CTDLTaskCtrlBase::IsColumnShowing(TDC_COLUMN nColID) const
 	return m_mapVisibleCols.Has(nColID);
 }
 
+int CTDLTaskCtrlBase::GetColumnIndex(TDC_COLUMN nColID) const
+{
+	int nItem = m_hdrColumns.FindItem(nColID);
+
+	if (nItem == -1)
+	{
+		// Some fallbacks
+		switch (nColID)
+		{
+		case TDCC_STARTTIME:	nItem = m_hdrColumns.FindItem(TDCC_STARTDATE);		break;
+		case TDCC_DUETIME:		nItem = m_hdrColumns.FindItem(TDCC_DUEDATE);		break;
+		case TDCC_DONETIME:		nItem = m_hdrColumns.FindItem(TDCC_DONEDATE);		break;
+		case TDCC_CREATIONTIME: nItem = m_hdrColumns.FindItem(TDCC_CREATIONDATE);	break;
+		}
+	}
+
+	ASSERT(nItem != -1);
+	return nItem;
+}
+
 BOOL CTDLTaskCtrlBase::SetColumnOrder(const CDWordArray& aColumns)
 {
 	CIntArray aOrder;
@@ -828,7 +848,7 @@ BOOL CTDLTaskCtrlBase::SetColumnOrder(const CDWordArray& aColumns)
 	
 	for (int nCol = 0; nCol < nNumCols; nCol++)
 	{		
-		int nItem = m_hdrColumns.FindItem((DWORD)aColumns[nCol]);
+		int nItem = GetColumnIndex((TDC_COLUMN)aColumns[nCol]);
 		ASSERT(nItem != -1);
 
 		aOrder[nCol + 1] = nItem;
@@ -1058,7 +1078,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	// Optimise for single columns
 	if (!bZeroOthers && (mapCols.GetCount() == 1))
 	{
-		int nCol = m_hdrColumns.FindItem(mapCols.GetFirst());
+		int nCol = GetColumnIndex(mapCols.GetFirst());
 		ASSERT(nCol != -1);
 
 		int nColWidth = CalcColumnWidth(nCol, &dc, bVisibleTasksOnly);
@@ -3834,7 +3854,7 @@ void CTDLTaskCtrlBase::HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoi
 		
 	default: // > 1 file links
 		{
-			int nCol = m_hdrColumns.FindItem(TDCC_FILEREF);
+			int nCol = GetColumnIndex(TDCC_FILEREF);
 			ASSERT(nCol != -1);
 			ASSERT(m_hdrColumns.IsItemVisible(nCol));
 			
@@ -4626,7 +4646,7 @@ void CTDLTaskCtrlBase::RedrawColumns(BOOL bErase) const
 
 void CTDLTaskCtrlBase::RedrawColumn(TDC_COLUMN nColID) const
 {
-	int nCol = m_hdrColumns.FindItem(nColID);
+	int nCol = GetColumnIndex(nColID);
 
 	if (m_hdrColumns.IsItemVisible(nCol))
 	{

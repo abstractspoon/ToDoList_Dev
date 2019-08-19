@@ -370,6 +370,7 @@ protected:
 	BOOL GetTaskReminder(DWORD dwTaskID, COleDateTime& dtRem) const;
 	time_t GetTaskReminder(DWORD dwTaskID) const;
 	TDC_COLUMN GetColumnID(int nCol) const; // zero is always 'tasks'
+	int GetColumnIndex(TDC_COLUMN nColID) const;
 	CFont* GetTaskFont(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bColumns = TRUE);
 	BOOL HasThemedState(GM_ITEMSTATE nState) const;
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
