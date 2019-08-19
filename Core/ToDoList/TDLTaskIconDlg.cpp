@@ -93,6 +93,9 @@ BOOL CTDLTaskIconDlg::OnInitDialog()
 	EnableDisable();
 	m_lcIcons.SetFocus();
 
+	ListView_SetExtendedListViewStyleEx(m_lcIcons, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+	ListView_SetExtendedListViewStyleEx(m_lcIcons, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+
 	CThemed::SetWindowTheme(&m_lcIcons, _T("Explorer"));
 
 	return FALSE;  // return TRUE unless you set the focus to a control

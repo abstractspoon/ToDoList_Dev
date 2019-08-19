@@ -219,8 +219,9 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	m_lcAttributes.InsertColumn(COL_FEATURES, CEnString(IDS_CAD_COLFEATURES), LVCFMT_LEFT, 75);
 	m_lcAttributes.InsertColumn(COL_LISTTYPE, CEnString(IDS_CAD_COLLISTTYPE), LVCFMT_LEFT, rList.Width() - 475);
 
-	m_lcAttributes.SetExtendedStyle(m_lcAttributes.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
-	
+	ListView_SetExtendedListViewStyleEx(m_lcAttributes, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+	ListView_SetExtendedListViewStyleEx(m_lcAttributes, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+
 	for (int nAttrib = 0; nAttrib < m_aAttrib.GetSize(); nAttrib++)
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nAttrib];
@@ -231,8 +232,6 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	OnItemchangedAttriblist(NULL, NULL);
 
 	ListView_SetImageList(m_lcAttributes, m_tdc.GetCheckImageList(), LVSIL_SMALL);
-	ListView_SetExtendedListViewStyle(m_lcAttributes, LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
-
 	CThemed::SetWindowTheme(&m_lcAttributes, _T("Explorer"));
 
 	// initialize buttons

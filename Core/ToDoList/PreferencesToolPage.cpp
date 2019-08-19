@@ -145,8 +145,9 @@ void CPreferencesToolPage::OnFirstShow()
 	m_lcTools.InsertColumn(2, CEnString(IDS_PTP_ARGUMENTS), LVCFMT_LEFT, rList.Width() - GraphicsMisc::ScaleByDPIFactor(400));
 	m_lcTools.InsertColumn(3, CEnString(IDS_PTP_ICONPATH), LVCFMT_LEFT, 0);
 
-	m_lcTools.SetExtendedStyle(m_lcTools.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
-	
+	ListView_SetExtendedListViewStyleEx(m_lcTools, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+	ListView_SetExtendedListViewStyleEx(m_lcTools, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+
 	// add tools we loaded from the registry
 	for (int nTool = 0; nTool < m_aTools.GetSize(); nTool++)
 	{
