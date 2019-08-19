@@ -592,7 +592,7 @@ namespace HTMLReportExporter
 					foreach (var attrib in Attributes)
 					{
 						// Clear all placeholder except the 'root' one
-						for (int d = 0; d < 9; d++)
+						for (int d = 0; d <= 9; d++)
 							header = header.Replace(attrib.FormatPlaceholder(d), String.Empty);
 
 						header = header.Replace(attrib.FormatPlaceholder(), attrib.Label);
@@ -602,7 +602,7 @@ namespace HTMLReportExporter
 					foreach (var attrib in CustomAttributes)
 					{
 						// Clear all placeholder except the 'root' one
-						for (int d = 0; d < 9; d++)
+						for (int d = 0; d <= 9; d++)
 							header = header.Replace(HtmlReportUtils.FormatPlaceholder(attrib.Key, d), String.Empty);
 
 						header = header.Replace(HtmlReportUtils.FormatPlaceholder(attrib.Key), attrib.Value);
@@ -671,7 +671,7 @@ namespace HTMLReportExporter
 					placeHolder = HtmlReportUtils.FormatPlaceholder(defaultPlaceholderText);
 				}
 
-				for (int d = -1; d < 9; d++)
+				for (int d = -1; d <= 9; d++)
 				{
 					if (d == placeHolderDepth)
 						row = row.Replace(placeHolder, attribVal);

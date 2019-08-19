@@ -11,10 +11,30 @@ namespace HTMLReportExporter
 	{
 		private const String PlaceHolderTag = "SPAN";
 		private const String PlaceHolderRegex = @"(?<=\$\()(.*?)(?=\))";
+		private const String AtomicAttribute = "ATOMICSELECTION";
 
-		public static bool IsPlaceholder(HtmlElement element)
+		public static bool IsPlaceholder(mshtml.IHTMLElement element, bool atomic = false)
 		{
-			return element.TagName.Equals(PlaceHolderTag, StringComparison.InvariantCultureIgnoreCase);
+			if (element == null)
+				return false;
+
+			if (!element.tagName.Equals(PlaceHolderTag, StringComparison.InvariantCultureIgnoreCase))
+				return false;
+
+			if (!atomic)
+				return true;
+
+			var result = element.getAttribute(AtomicAttribute);
+
+			return ((result != null) && result.ToString().Equals("true", StringComparison.InvariantCultureIgnoreCase));
+		}
+
+		public static bool IsPlaceholder(HtmlElement element, bool atomic = false)
+		{
+			if (element == null)
+				return false;
+
+			return IsPlaceholder((element.DomElement as mshtml.IHTMLElement), atomic);
 		}
 
 		public static bool IsPlaceholder(string innerText)
@@ -23,30 +43,37 @@ namespace HTMLReportExporter
 			return ParsePlaceholder(innerText, out unused);
 		}
 
-		public static bool IsPlaceholder(mshtml.IHTMLTxtRange rng)
+		public static bool IsPlaceholder(mshtml.IHTMLTxtRange rng, bool atomic = false)
 		{
 			if (rng == null)
 				return false;
 
 			string unused;
-			return ParsePlaceholder(rng.text, out unused);
+
+			if (!ParsePlaceholder(rng.text, out unused))
+				return false;
+
+			if (!atomic)
+				return true;
+
+			return IsPlaceholder(rng.parentElement(), atomic);
 		}
 
-		public static bool ParsePlaceholder(HtmlElement element, out string placeholderText)
+		public static bool ParsePlaceholder(HtmlElement element, out string placeholderText, bool atomic = false)
 		{
 			placeholderText = String.Empty;
 
-			if (!IsPlaceholder(element))
+			if (!IsPlaceholder(element, atomic))
 				return false;
 
 			return ParsePlaceholder(element.InnerText, out placeholderText);
 		}
 
-		public static bool ParsePlaceholder(mshtml.IHTMLTxtRange rng, out string placeholderText)
+		public static bool ParsePlaceholder(mshtml.IHTMLTxtRange rng, out string placeholderText, bool atomic = false)
 		{
 			placeholderText = String.Empty;
 
-			if (rng == null)
+			if (!IsPlaceholder(rng, atomic))
 				return false;
 
 			return ParsePlaceholder(rng.text, out placeholderText);
@@ -87,14 +114,14 @@ namespace HTMLReportExporter
 			return true;
 		}
 
-		public static bool ParsePlaceholder(mshtml.IHTMLTxtRange rng, out string placeholderText, out int level)
+		public static bool ParsePlaceholder(mshtml.IHTMLTxtRange rng, out string placeholderText, out int level, bool atomic = false)
 		{
 			placeholderText = string.Empty;
 			level = -1;
 
 			string placeholder;
 
-			if (!ParsePlaceholder(rng, out placeholder))
+			if (!ParsePlaceholder(rng, out placeholder, atomic))
 				return false;
 
 			return ParsePlaceholder(placeholder, out placeholderText, out level);
@@ -114,14 +141,14 @@ namespace HTMLReportExporter
 			return String.Format("{0}.{1}", basePlaceholder, depth);
 		}
 
-		public static string FormatPlaceholderHtml(string placeholder)
+		public static string FormatAtomicPlaceholderHtml(string placeholder)
 		{
-			return String.Format(@"<{0} ATOMICSELECTION=""true"">{1}</{0}>", PlaceHolderTag, placeholder);
+			return String.Format(@"<{0} {2}=""true"">{1}</{0}>", PlaceHolderTag, placeholder, AtomicAttribute);
 		}
 
-		public static string FormatPlaceholderHtml(String basePlaceholder, int level)
+		public static string FormatAtomicPlaceholderHtml(String basePlaceholder, int level)
 		{
-			return HtmlReportUtils.FormatPlaceholderHtml(FormatPlaceholder(basePlaceholder, level));
+			return HtmlReportUtils.FormatAtomicPlaceholderHtml(FormatPlaceholder(basePlaceholder, level));
 		}
 
 		// ----------------------------------------------------

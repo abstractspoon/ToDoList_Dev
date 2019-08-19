@@ -163,12 +163,8 @@ namespace HTMLReportExporter
 
 			while (element != null)
 			{
-				if (HtmlReportUtils.ParsePlaceholder(element, out placeholderText))
+				if (HtmlReportUtils.ParsePlaceholder(element, out placeholderText, true))
 				{
-					// Prevent setting the tooltip causing a text change notification
-					// TODO
-
-					// Get the attribute label as the tooltip
 					String tooltip;
 					
 					if (GetPlaceholderTooltip(placeholderText, out tooltip) &&
@@ -188,7 +184,7 @@ namespace HTMLReportExporter
 
 		protected virtual bool GetPlaceholderTooltip(string placeHolderText, out string tooltip)
 		{
-			tooltip = String.Empty;
+			tooltip = null;
 			return false;
 		}
 		
@@ -257,7 +253,7 @@ namespace HTMLReportExporter
 				var selText = GetTextRange();
 
 				if (selText != null)
-					selText.pasteHTML(HtmlReportUtils.FormatPlaceholderHtml(menuItem.Name));
+					selText.pasteHTML(HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name));
 			}
 		}
 
@@ -600,7 +596,7 @@ namespace HTMLReportExporter
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem("Clear Level") { Name = "-1" });
 			
 			m_ToolStripAttributeLevelMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-			m_ToolStripAttributeLevelMenu.Text = "Attribute Levels";
+			m_ToolStripAttributeLevelMenu.Text = "Task Depth";
 
 			// Menu items appear one pixel too high when placed in a toolbar
 			m_ToolStripAttributeLevelMenu.Margin = new Padding(0, 1, 0, 0);
@@ -622,12 +618,19 @@ namespace HTMLReportExporter
 				string basePlaceholder;
 				int level;
 
-				if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level))
+				if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level, true))
 				{
 					if (!Int32.TryParse(menuItem.Name, out level))
 						level = -1;
 
-					selText.pasteHTML(HtmlReportUtils.FormatPlaceholderHtml(basePlaceholder, level));
+					selText.pasteHTML(HtmlReportUtils.FormatAtomicPlaceholderHtml(basePlaceholder, level));
+				}
+				else if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level)) // plain text
+				{
+					if (!Int32.TryParse(menuItem.Name, out level))
+						level = -1;
+
+					selText.text = HtmlReportUtils.FormatPlaceholder(basePlaceholder, level);
 				}
 			}
 		}
