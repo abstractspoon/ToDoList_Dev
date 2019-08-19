@@ -257,6 +257,27 @@ namespace HTMLReportExporter
 			}
 		}
 
+		protected override void OnSelectionChange()
+		{
+			base.OnSelectionChange();
+
+			// update menu check-state
+			CommandHandling.ClearChecked(m_ToolStripAttributeMenu.DropDownItems);
+			
+			var selText = GetTextRange();
+
+			string basePlaceholder;
+			int level;
+
+			if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level))
+			{
+				ToolStripItem item = m_ToolStripAttributeMenu.DropDownItems[HtmlReportUtils.FormatPlaceholder(basePlaceholder)];
+
+				if ((item != null) && (item is ToolStripMenuItem))
+					(item as ToolStripMenuItem).Checked = true;
+			}
+		}
+
 		protected override void PreShowDialog(Form dialog)
 		{
 			base.PreShowDialog(dialog, HTMLReportExporter.Properties.Resources.HTMLReporter);
@@ -506,7 +527,24 @@ namespace HTMLReportExporter
 			// Enable 'attribute level' if placeholder is selected
 			var selText = GetTextRange();
 
-			m_ToolStripAttributeLevelMenu.Enabled = HtmlReportUtils.IsPlaceholder(selText);
+			string placeholderText;
+			int level;
+
+			if (HtmlReportUtils.ParsePlaceholder(selText, out placeholderText, out level))
+			{
+				m_ToolStripAttributeLevelMenu.Enabled = true;
+
+				CommandHandling.ClearChecked(m_ToolStripAttributeLevelMenu.DropDownItems);
+
+				ToolStripItem item = m_ToolStripAttributeLevelMenu.DropDownItems[level.ToString()];
+
+				if (item != null && item is ToolStripMenuItem)
+					(item as ToolStripMenuItem).Checked = true;
+			}
+			else
+			{
+				m_ToolStripAttributeLevelMenu.Enabled = false;
+			}
 		}
 		
 		protected override bool GetPlaceholderTooltip(string placeHolder, out string tooltip)

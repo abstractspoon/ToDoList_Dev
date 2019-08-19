@@ -127,6 +127,24 @@ ToolStripMenuItem^ CommandHandling::GetMenuItem(String^ commandId, ToolStripItem
 	return nullptr;
 }
 
+void CommandHandling::ClearChecked(Windows::Forms::ToolStripItemCollection^ items)
+{
+	int nItem = items->Count;
+
+	while (nItem--)
+	{
+		ToolStripMenuItem^ menu = ASTYPE(items[nItem], ToolStripMenuItem);
+
+		if (menu != nullptr)
+		{
+			menu->Checked = false;
+
+			// sub menu items
+			ClearChecked(menu->DropDownItems); // RECURSIVE CALL
+		}
+	}
+}
+
 ToolStripItem^ CommandHandling::GetCommandItem(String^ commandId, ToolStripItemCollection^ items)
 {
 	int nItem = items->Count;
@@ -139,10 +157,10 @@ ToolStripItem^ CommandHandling::GetCommandItem(String^ commandId, ToolStripItemC
 			return cmd;
 
 		// else sub menu items
-		ToolStripMenuItem^ menu = dynamic_cast<ToolStripMenuItem^>(cmd);
-
-		if ((menu != nullptr) && menu->HasDropDownItems)
+		if (ISTYPE(cmd, ToolStripMenuItem))
 		{
+			ToolStripMenuItem^ menu = ASTYPE(cmd, ToolStripMenuItem);
+
 			cmd = GetCommandItem(commandId, menu->DropDownItems); // RECURSIVE CALL
 
 			if (cmd != nullptr)

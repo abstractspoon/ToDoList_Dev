@@ -15,6 +15,7 @@ namespace Abstractspoon
 			public ref class CommandHandling
 			{
 			public:
+				static void ClearChecked(Windows::Forms::ToolStripItemCollection^ items);
 				static bool HideCommand(String^ commandId, Windows::Forms::ToolStripItemCollection^ items);
 				static bool ProcessMenuShortcut(Windows::Forms::Keys keyPress, Windows::Forms::ToolStripItemCollection^ items);
 				static bool SetMenuShortcut(String^ commandId, Windows::Forms::Keys keyPress, Windows::Forms::ToolStripItemCollection^ items);
