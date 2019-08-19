@@ -566,9 +566,9 @@ namespace HTMLReportExporter
 			base.InitialiseFeatures();
 		}
 
-		protected override void FormatSelectionChange()
+		protected override void OnSelectionChange()
 		{
-			base.FormatSelectionChange();
+			base.OnSelectionChange();
 
 			// Enable 'attribute level' if placeholder is selected
 			var selText = GetTextRange();

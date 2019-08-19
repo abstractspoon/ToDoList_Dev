@@ -463,7 +463,7 @@ namespace MSDN.Html.Editor
             {
 				// Ensure selection is up to date
 				Application.DoEvents();
-				FormatSelectionChange();
+				OnSelectionChange();
 
 				// should disable inappropriate commands
 				this.contextTable.Visible = IsParentTable();
@@ -521,7 +521,7 @@ namespace MSDN.Html.Editor
         {
             // if not in readonly mode process the selection change
             if (IsEditable)
-                FormatSelectionChange();
+                OnSelectionChange();
 
         } //DocumentSelectionChange
 
@@ -2027,7 +2027,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Ensures the toolbar is correctly displaying state
         /// </summary>
-        virtual protected void FormatSelectionChange()
+        virtual protected void OnSelectionChange()
         {
             this.toolstripEditUndo.Enabled = CanEditUndo();
             this.contextEditUndo.Enabled = CanEditUndo();
@@ -2165,7 +2165,7 @@ namespace MSDN.Html.Editor
         public void FormatBold()
         {
             ExecuteCommandRange(HTML_COMMAND_BOLD, null);
-            FormatSelectionChange();
+            OnSelectionChange();
 
         } //FormatBold
 
@@ -2175,7 +2175,7 @@ namespace MSDN.Html.Editor
         public void FormatUnderline()
         {
             ExecuteCommandRange(HTML_COMMAND_UNDERLINE, null);
-            FormatSelectionChange();
+            OnSelectionChange();
 
         } //FormatUnderline
 
@@ -2185,7 +2185,7 @@ namespace MSDN.Html.Editor
         public void FormatItalic()
         {
             ExecuteCommandRange(HTML_COMMAND_ITALIC, null);
-            FormatSelectionChange();
+            OnSelectionChange();
 
         } //FormatItalic
 
@@ -2195,7 +2195,7 @@ namespace MSDN.Html.Editor
         public void FormatSubscript()
         {
             ExecuteCommandRange(HTML_COMMAND_SUBSCRIPT, null);
-            FormatSelectionChange();
+            OnSelectionChange();
 
         } //FormatSubscript
 
@@ -2205,7 +2205,7 @@ namespace MSDN.Html.Editor
         public void FormatSuperscript()
         {
             ExecuteCommandRange(HTML_COMMAND_SUPERSCRIPT, null);
-            FormatSelectionChange();
+            OnSelectionChange();
 
         } //FormatSuperscript
 
@@ -2215,7 +2215,7 @@ namespace MSDN.Html.Editor
         public void FormatStrikeout()
         {
             ExecuteCommandRange(HTML_COMMAND_STRIKE_THROUGH, null);
-            FormatSelectionChange();
+            OnSelectionChange();
 
         } //FormatStrikeout
 
