@@ -289,26 +289,12 @@ namespace HTMLReportExporter
 
 			public String FormatPlaceholder(int depth = -1)
 			{
-				return FormatPlaceholder(BasePlaceholder, depth);
+				return HtmlReportUtils.FormatPlaceholder(BasePlaceholder, depth);
 			}
 
 			public String FormatPlaceholderText(int depth = -1)
 			{
-				return FormatPlaceholderText(BasePlaceholder, depth);
-			}
-
-			static public String FormatPlaceholder(String basePlaceholder, int depth = -1)
-			{
-				return String.Format("$({0})", FormatPlaceholderText(basePlaceholder, depth));
-			}
-
-			static public String FormatPlaceholderText(String basePlaceholder, int depth = -1)
-			{
-				if (depth < 0)
-					return basePlaceholder;
-
-				// else
-				return String.Format("{0}.{1}", basePlaceholder, depth);
+				return HtmlReportUtils.FormatPlaceholderText(BasePlaceholder, depth);
 			}
 		}
 
@@ -617,9 +603,9 @@ namespace HTMLReportExporter
 					{
 						// Clear all placeholder except the 'root' one
 						for (int d = 0; d < 9; d++)
-							header = header.Replace(TaskAttribute.FormatPlaceholder(attrib.Key, d), String.Empty);
+							header = header.Replace(HtmlReportUtils.FormatPlaceholder(attrib.Key, d), String.Empty);
 
-						header = header.Replace(TaskAttribute.FormatPlaceholder(attrib.Key), attrib.Value);
+						header = header.Replace(HtmlReportUtils.FormatPlaceholder(attrib.Key), attrib.Value);
 					}
 				}
 
@@ -663,13 +649,13 @@ namespace HTMLReportExporter
 			static String ReplacePlaceholder(String row, String attribVal, String defaultPlaceholderText, int depth, bool isLeafTask)
 			{
 				// Replace only the placeholder at the level specified
-				String placeHolder = TaskAttribute.FormatPlaceholder(defaultPlaceholderText, depth);
+				String placeHolder = HtmlReportUtils.FormatPlaceholder(defaultPlaceholderText, depth);
 				int placeHolderDepth = depth;
 
 				// Note: Leaf tasks formats take precedence
 				if (isLeafTask)
 				{
-					String leafPlaceHolder = TaskAttribute.FormatPlaceholder(defaultPlaceholderText, 0);
+					String leafPlaceHolder = HtmlReportUtils.FormatPlaceholder(defaultPlaceholderText, 0);
 
 					if (row.IndexOf(leafPlaceHolder) != -1)
 					{
@@ -682,7 +668,7 @@ namespace HTMLReportExporter
 				{
 					// We didn't find it so use the default placeholder
 					placeHolderDepth = -1;
-					placeHolder = TaskAttribute.FormatPlaceholder(defaultPlaceholderText);
+					placeHolder = HtmlReportUtils.FormatPlaceholder(defaultPlaceholderText);
 				}
 
 				for (int d = -1; d < 9; d++)
@@ -690,7 +676,7 @@ namespace HTMLReportExporter
 					if (d == placeHolderDepth)
 						row = row.Replace(placeHolder, attribVal);
 					else
-						row = row.Replace(TaskAttribute.FormatPlaceholder(defaultPlaceholderText, d), String.Empty);
+						row = row.Replace(HtmlReportUtils.FormatPlaceholder(defaultPlaceholderText, d), String.Empty);
 				}
 
 				return row;

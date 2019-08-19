@@ -7,7 +7,6 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Reflection;
 using System.Web.UI;
-using System.Text.RegularExpressions;
 
 using MSDN.Html.Editor;
 
@@ -65,65 +64,6 @@ namespace HTMLReportExporter
 		private ToolStripDropDownButton m_ToolStripAttributeMenu = null;
 		private Color m_DefaultBackColor = Color.Transparent;
 		private String m_DefaultBackImage = String.Empty;
-
-		private const String PlaceHolderTag = "SPAN";
-		private const String PlaceHolderRegex = @"(?<=\$\()(.*?)(?=\))";
-
-		protected static bool IsPlaceholder(HtmlElement element)
-		{
-			return element.TagName.Equals(PlaceHolderTag, StringComparison.InvariantCultureIgnoreCase);
-		}
-
-		protected static bool IsPlaceholder(string innerText)
-		{
-			string unused;
-			return ParsePlaceholder(innerText, out unused);
-		}
-
-		protected static bool IsPlaceholder(mshtml.IHTMLTxtRange rng)
-		{
-			if (rng == null)
-				return false;
-
-			string unused;
-			return ParsePlaceholder(rng.text, out unused);
-		}
-
-		protected static bool ParsePlaceholder(HtmlElement element, out string placeholderText)
-		{
-			placeholderText = String.Empty;
-
-			if (!IsPlaceholder(element))
-				return false;
-
-			return ParsePlaceholder(element.InnerText, out placeholderText);
-		}
-
-		protected static bool ParsePlaceholder(mshtml.IHTMLTxtRange rng, out string placeholderText)
-		{
-			placeholderText = String.Empty;
-
-			if (rng == null)
-				return false;
-
-			return ParsePlaceholder(rng.text, out placeholderText);
-		}
-
-		protected static bool ParsePlaceholder(string innerText, out string placeholderText)
-		{
-			placeholderText = String.Empty;
-
-			if (String.IsNullOrWhiteSpace(innerText))
-				return false;
-
-			var match = Regex.Match(innerText, PlaceHolderRegex);
-
-			if (!match.Success)
-				return false;
-
-			placeholderText = match.Value;
-			return true;
-		}
 
 		// ---------------------------------------------------------------
 
@@ -223,7 +163,7 @@ namespace HTMLReportExporter
 
 			while (element != null)
 			{
-				if (ParsePlaceholder(element, out placeholderText))
+				if (HtmlReportUtils.ParsePlaceholder(element, out placeholderText))
 				{
 					// Prevent setting the tooltip causing a text change notification
 					// TODO
@@ -317,14 +257,8 @@ namespace HTMLReportExporter
 				var selText = GetTextRange();
 
 				if (selText != null)
-					selText.pasteHTML(FormatPlaceholderHtml(menuItem.Name));
+					selText.pasteHTML(HtmlReportUtils.FormatPlaceholderHtml(menuItem.Name));
 			}
-		}
-
-		protected string FormatPlaceholderHtml(string placeholder)
-		{
-			// Wrap with a tag so we can later add tooltips
-			return String.Format(@"<{0} ATOMICSELECTION=""true"">{1}</{0}>", PlaceHolderTag, placeholder);
 		}
 
 		protected override void PreShowDialog(Form dialog)
@@ -576,7 +510,7 @@ namespace HTMLReportExporter
 			// Enable 'attribute level' if placeholder is selected
 			var selText = GetTextRange();
 
-			m_ToolStripAttributeLevelMenu.Enabled = IsPlaceholder(selText);
+			m_ToolStripAttributeLevelMenu.Enabled = HtmlReportUtils.IsPlaceholder(selText);
 		}
 		
 		protected override bool GetPlaceholderTooltip(string placeHolder, out string tooltip)
@@ -584,7 +518,7 @@ namespace HTMLReportExporter
 			string basePlaceholder;
 			int level;
 
-			if (!ParsePlaceholder(placeHolder, out basePlaceholder, out level))
+			if (!HtmlReportUtils.ParsePlaceholder(placeHolder, out basePlaceholder, out level))
 			{
 				tooltip = String.Empty;
 				return false;
@@ -597,38 +531,6 @@ namespace HTMLReportExporter
 
 			if (GetLevelLabel(level, out levelLabel))
 				tooltip = String.Format("{0}\n{1}", tooltip, levelLabel);
-
-			return true;
-		}
-
-		bool ParsePlaceholder(mshtml.IHTMLTxtRange rng, out string placeholderText, out int level)
-		{
-			placeholderText = string.Empty;
-			level = -1;
-
-			string placeholder;
-
-			if (!ParsePlaceholder(rng, out placeholder))
-				return false;
-
-			return ParsePlaceholder(placeholder, out placeholderText, out level);
-		}
-
-		bool ParsePlaceholder(string placeHolder, out string placeholderText, out int level)
-		{
-			placeholderText = string.Empty;
-			level = -1;
-
-			// Split the placeholder on '.' to extract the optional level
-			var parts = placeHolder.Split('.');
-
-			if ((parts == null) || (parts.Count() == 0))
-				return false;
-
-			placeholderText = parts[0];
-
-			if ((parts.Count() > 1) && Int32.TryParse(parts[1], out level) && (level > 10))
-				level = -1;
 
 			return true;
 		}
@@ -720,13 +622,12 @@ namespace HTMLReportExporter
 				string basePlaceholder;
 				int level;
 
-				if (ParsePlaceholder(selText, out basePlaceholder, out level))
+				if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level))
 				{
 					if (!Int32.TryParse(menuItem.Name, out level))
 						level = -1;
 
-					string placeholder = TaskTemplate.TaskAttribute.FormatPlaceholder(basePlaceholder, level);
-					selText.pasteHTML(FormatPlaceholderHtml(placeholder));
+					selText.pasteHTML(HtmlReportUtils.FormatPlaceholderHtml(basePlaceholder, level));
 				}
 			}
 		}
