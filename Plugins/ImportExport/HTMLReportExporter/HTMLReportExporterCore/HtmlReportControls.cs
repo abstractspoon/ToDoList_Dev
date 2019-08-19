@@ -265,6 +265,9 @@ namespace HTMLReportExporter
 			FixupControlPositions();
 
 			WebBrowser.Document.Focus();
+
+			OnSelectionChange();
+
 		}
 
 		virtual protected void InitialiseFeatures()
