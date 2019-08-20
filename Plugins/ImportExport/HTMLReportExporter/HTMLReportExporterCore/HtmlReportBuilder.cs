@@ -17,7 +17,6 @@ namespace HTMLReportExporter
 		private HtmlReportTemplate m_Template = null;
 
 		private String m_BodyFontStyle = "";
-		private String m_TaskBaseIndent = "";
 		private bool m_StrikeThruDone = true;
 
 		private const int ContentPadding = 40;
@@ -45,14 +44,13 @@ namespace HTMLReportExporter
 
 			m_StrikeThruDone = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 			m_BodyFontStyle = FormatBodyFontStyle(prefs);
-			m_TaskBaseIndent = FormatTaskBaseIndent(prefs);
 
 			Header = new HeaderTemplateReporter(template.Header, template.BackColor);
 			Title = new TitleTemplateReporter(template.Title);
 			Footer = new FooterTemplateReporter(template.Footer, template.BackColor);
 
 			var custAttribs = HtmlReportUtils.GetCustomAttributes(tasks);
-			Tasks = new TaskTemplateReporter(trans, template.Task, preview);
+			Tasks = new TaskTemplateReporter(trans, template.Task, FormatTaskBaseIndent(prefs), preview);
 		}
 
 		private static String FormatBodyFontStyle(Preferences prefs)
@@ -67,22 +65,18 @@ namespace HTMLReportExporter
 
 		private static String FormatTaskBaseIndent(Preferences prefs)
 		{
-			const String Tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
+			const String Tab = "&emsp;";
 			const String Space = "&nbsp;";
 
-			String indent = "";
+			if (!prefs.GetProfileBool("Preferences", "UseSpaceIndents", true))
+				return Tab;
 
-			if (prefs.GetProfileBool("Preferences", "UseSpaceIndents", true))
-			{
-				int nSpace = prefs.GetProfileInt("Preferences", "TextIndent", 2);
+			// else
+			String indent = Space;
+			int nSpace = prefs.GetProfileInt("Preferences", "TextIndent", 2);
 
-				while (nSpace-- > 0)
-					indent = (indent + Space);
-			}
-			else
-			{
-				indent = Tab;
-			}
+			while (--nSpace > 0)
+				indent = (indent + Space);
 
 			return indent;
 		}
@@ -221,21 +215,6 @@ namespace HTMLReportExporter
 			html.RenderEndTag(); // Table
 			html.RenderEndTag(); // Body
 			html.WriteLine();
-		}
-
-		protected void ExportTask(Task task, int depth, HtmlTextWriter html)
-		{
-
-		}
-		
-		protected String FormatTaskDepthIndent(int depth)
-		{
-			String depthIndent = "";
-
-			while (depth-- > 0)
-				depthIndent = (depthIndent + m_TaskBaseIndent);
-
-			return depthIndent;
 		}
 
 		// --------------------------------------------------------------------------
@@ -455,18 +434,20 @@ namespace HTMLReportExporter
 			private Translator m_Trans;
 			private bool m_Preview;
 			private int m_PreviewTaskCount;
+			private String m_BaseIndent = "";
 
 			private const int MaxNumPreviewTasks = 20;
 
 			// ------------------------------------------------------
 
-			public TaskTemplateReporter(Translator trans, TaskTemplate task, bool preview)
+			public TaskTemplateReporter(Translator trans, TaskTemplate task, String baseIndent, bool preview)
 			{
 				Copy(task);
 
 				m_Trans = trans;
 				m_Preview = preview;
 				m_Template = task;
+				m_BaseIndent = baseIndent;
 			}
 
 			public bool WriteTableContent(TaskList tasks, HtmlTextWriter html)
@@ -509,6 +490,10 @@ namespace HTMLReportExporter
 				if (!String.IsNullOrWhiteSpace(EnabledText))
 				{
 					var text = layout.FormatRow(task, depth);
+
+					// Handle indent
+					text = text.Replace("$(indent)", FormatTaskDepthIndent(depth));
+
 					html.WriteLine(text);
 				}
 
