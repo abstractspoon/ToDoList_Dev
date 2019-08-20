@@ -254,6 +254,18 @@ namespace HTMLReportExporter
 
 				if (selText != null)
 				{
+					// If what is selected is an atomic placeholder
+					// and it's the only visible element then pasting the
+					// new placeholder's html over the top causes the element to
+					// be deleted for unknown reasons. So we detect the
+					// selected atomic placeholder and just update its text
+					// since the rest of its definition is already correct
+					if (HtmlReportUtils.IsPlaceholder(selText, true))
+					{
+						selText.text = menuItem.Name;
+					}
+					else
+					{
 						String placeholder = HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name);
 
 						// If empty add a trailing space to make it easier to deselect
@@ -261,6 +273,7 @@ namespace HTMLReportExporter
 							placeholder = (placeholder + ' ');
 					
 						selText.pasteHTML(placeholder);
+					}
 				}
 			}
 		}
