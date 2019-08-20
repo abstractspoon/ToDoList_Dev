@@ -551,7 +551,8 @@ namespace HTMLReportExporter
 			string placeholderText;
 			int level;
 
-			if (HtmlReportUtils.ParsePlaceholder(selText, out placeholderText, out level))
+			if (HtmlReportUtils.ParsePlaceholder(selText, out placeholderText, out level) &&
+				!placeholderText.Equals("indent"))
 			{
 				m_ToolStripAttributeLevelMenu.Enabled = true;
 
@@ -652,7 +653,7 @@ namespace HTMLReportExporter
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(0))	{ Name = "0" });
 
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripSeparator());
-			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem("Clear Level") { Name = "-1" });
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem("Unspecified Levels") { Name = "-1" });
 			
 			m_ToolStripAttributeLevelMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
 			m_ToolStripAttributeLevelMenu.Text = "Task Depth";
