@@ -467,7 +467,11 @@ namespace HTMLReportExporter
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
 				html.WriteLine(layout.StartHtml);
 
-				WriteTask(task, layout, 1, html); // level '0' is used for leaf tasks
+				WriteTask(task, 
+						  layout, 
+						  1,		// level '0' is used for leaf tasks
+						  true,		// export siblings
+						  html);
 				
 				html.WriteLine(layout.EndHtml);
 				html.RenderEndTag(); // Div
@@ -482,7 +486,7 @@ namespace HTMLReportExporter
 				return true;
 			}
 			
-			public void WriteTask(Task task, Layout layout, int depth, HtmlTextWriter html)
+			public void WriteTask(Task task, Layout layout, int depth, bool andSiblings, HtmlTextWriter html)
 			{
 				if ((task == null) || !task.IsValid())
 					return;
@@ -504,14 +508,36 @@ namespace HTMLReportExporter
 				if (layout.Style != Layout.StyleType.Table)
 					html.WriteLine(layout.StartHtml);
 
-				WriteTask(task.GetFirstSubtask(), layout, depth + 1, html);
+				WriteTask(task.GetFirstSubtask(), layout, depth + 1, true, html); // and siblings
 
 				if (layout.Style != Layout.StyleType.Table)
 					html.WriteLine(layout.EndHtml);
 
-				// Next task
-				WriteTask(task.GetNextTask(), layout, depth, html);
+				// Sibling tasks WITHOUT recursion
+				if (andSiblings)
+				{
+					task = task.GetNextTask();
+
+					while (task.IsValid())
+					{
+						WriteTask(task, layout, depth, false, html); // not siblings
+
+						task = task.GetNextTask();
+					}
+				}
 			}
+			
+			private String FormatTaskDepthIndent(int depth)
+			{
+				String depthIndent = "";
+
+				// No indent for top-level(1) tasks
+				while (--depth > 0)
+					depthIndent = (depthIndent + m_BaseIndent);
+
+				return depthIndent;
+			}
+
 		}
 	}
 }
