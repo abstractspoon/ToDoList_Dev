@@ -1361,6 +1361,19 @@ int CToDoCtrlMgr::GetAllCustomAttributeDefinitions(CTDCCustomAttribDefinitionArr
 	return aAttribDefs.GetSize();
 }
 
+BOOL CToDoCtrlMgr::AnyHasCustomAttributeFeature(DWORD dwFeature) const
+{
+	int nTDC = GetCount();
+
+	while (nTDC--)
+	{
+		if (GetToDoCtrl(nTDC).GetCustomAttributeDefs().AnyHasFeature(dwFeature))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
 BOOL CToDoCtrlMgr::AnyIsModified() const
 {
 	int nCtrl = GetCount();

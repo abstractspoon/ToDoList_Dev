@@ -1155,6 +1155,21 @@ public:
 		return (GetSize() - nOrgSize);
 	}
 
+	BOOL AnyHasFeature(DWORD dwFeature) const
+	{
+		int nDef = GetSize();
+
+		while (nDef--)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& def = ElementAt(nDef);
+
+			if (def.HasFeature(dwFeature))
+				return TRUE;x
+		}
+
+		return FALSE;
+	}
+	
 protected:
 	void RebuildIDs()
 	{
