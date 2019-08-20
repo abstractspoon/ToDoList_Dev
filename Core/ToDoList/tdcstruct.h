@@ -1164,7 +1164,7 @@ public:
 			const TDCCUSTOMATTRIBUTEDEFINITION& def = ElementAt(nDef);
 
 			if (def.HasFeature(dwFeature))
-				return TRUE;x
+				return TRUE;
 		}
 
 		return FALSE;

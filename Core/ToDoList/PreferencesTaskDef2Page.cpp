@@ -122,6 +122,7 @@ void CPreferencesTaskDef2Page::OnFirstShow()
 		m_lbInheritAttrib.SetItemData(nIndex, m_aAttribPrefs[nItem].nAttrib);
 		m_lbInheritAttrib.SetCheck(nIndex, m_aAttribPrefs[nItem].bUse ? 1 : 0);
 	}
+	UpdateCustomAttributeInfoVisibility();
 
 	m_mgrPrompts.SetEditPrompt(IDC_ALLOCTOLIST, *this, CEnString(IDS_PTDP_NAMEPROMPT));
 	m_mgrPrompts.SetEditPrompt(IDC_ALLOCBYLIST, *this, CEnString(IDS_PTDP_NAMEPROMPT));
@@ -139,6 +140,7 @@ void CPreferencesTaskDef2Page::OnOK()
 void CPreferencesTaskDef2Page::OnUseparentattrib() 
 {
 	UpdateData();
+	UpdateCustomAttributeInfoVisibility();
 
 	GetDlgItem(IDC_INHERITATTRIBUTES)->EnableWindow(m_bInheritParentAttributes);
 	GetDlgItem(IDC_UPDATEINHERITATTRIB)->EnableWindow(m_bInheritParentAttributes);
@@ -286,10 +288,22 @@ void CPreferencesTaskDef2Page::OnAttribUseChange()
 			}
 		}
 	}
-
-	GetDlgItem(IDC_UPDATEINHERITATTRIB)->EnableWindow(m_bInheritParentAttributes);
+	UpdateCustomAttributeInfoVisibility();
 
 	CPreferencesPageBase::OnControlChange();
+}
+
+void CPreferencesTaskDef2Page::UpdateCustomAttributeInfoVisibility()
+{
+	BOOL bShowInfo = m_bInheritParentAttributes;
+
+	if (bShowInfo)
+	{
+		int nCustAttrib = FindItemByData(m_lbInheritAttrib, TDCA_CUSTOMATTRIB);
+		bShowInfo = ((nCustAttrib != -1) && m_lbInheritAttrib.GetCheck(nCustAttrib));
+	}
+
+	GetDlgItem(IDC_CUSTOMATTRIB_INFO)->ShowWindow(bShowInfo ? SW_SHOW : SW_HIDE);
 }
 
 BOOL CPreferencesTaskDef2Page::HasCheckedAttributes() const

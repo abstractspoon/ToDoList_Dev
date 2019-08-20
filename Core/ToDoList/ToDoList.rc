@@ -520,6 +520,8 @@ BEGIN
                     ES_WANTRETURN | WS_VSCROLL
     CONTROL         "&Make this list read-only",IDC_TAGLIST_READONLY,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,269,317,127,10
+    LTEXT           "Note: You will also need to enable the 'Inheritable' feature on each relevant custom attribute.",
+                    IDC_CUSTOMATTRIB_INFO,297,47,91,56,NOT WS_VISIBLE
 END
 
 IDD_PREFTOOLS_PAGE DIALOG DISCARDABLE  0, 0, 400, 239

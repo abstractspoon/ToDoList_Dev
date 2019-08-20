@@ -103,6 +103,7 @@ protected:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	
+	void UpdateCustomAttributeInfoVisibility();
 	BOOL HasCheckedAttributes() const;
 	CString* GetListText(TDC_ATTRIBUTE nList);
 
