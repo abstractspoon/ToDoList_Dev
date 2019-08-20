@@ -253,7 +253,15 @@ namespace HTMLReportExporter
 				var selText = GetTextRange();
 
 				if (selText != null)
-					selText.pasteHTML(HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name));
+				{
+						String placeholder = HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name);
+
+						// If empty add a trailing space to make it easier to deselect
+						if (String.IsNullOrEmpty(selText.text))
+							placeholder = (placeholder + ' ');
+					
+						selText.pasteHTML(placeholder);
+				}
 			}
 		}
 
