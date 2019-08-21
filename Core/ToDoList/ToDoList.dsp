@@ -247,7 +247,11 @@ SOURCE=.\TDCCustomAttribData.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCCustomAttributeHelper.cpp
+SOURCE=.\TDCCustomAttributeDef.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCCustomAttributeUIHelper.cpp
 # End Source File
 # Begin Source File
 
@@ -811,7 +815,11 @@ SOURCE=.\tdccustomattribdata.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCCustomAttributeHelper.h
+SOURCE=.\TDCCustomAttributeDef.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCCustomAttributeUIHelper.h
 # End Source File
 # Begin Source File
 
