@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLCustomAttributeDlg.h"
-#include "TDCCustomAttributeHelper.h"
 #include "TDLTaskIconDlg.h"
 
 #include "..\shared\EnString.h"

@@ -7,7 +7,6 @@
 #include "tdcmergetasklist.h"
 #include "tdcstruct.h"
 #include "todoitem.h"
-#include "tdccustomattribdata.h"
 
 #include "..\shared\timeedit.h"
 #include "..\shared\datehelper.h"

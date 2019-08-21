@@ -94,9 +94,6 @@
     <ClCompile Include="TDCAnonymizeTasklist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDCCustomAttributeHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TDCEnumContainers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -412,6 +409,12 @@
     <ClCompile Include="TDCMainMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDCCustomAttributeDef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCCustomAttributeUIHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FilteredToDoCtrl.h">
@@ -514,9 +517,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCAnonymizeTasklist.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TDCCustomAttributeHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tdcenum.h">
@@ -856,6 +856,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCMainMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCCustomAttributeDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCCustomAttributeUIHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

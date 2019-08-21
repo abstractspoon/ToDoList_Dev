@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "TaskListcsvExporter.h"
 #include "tdlrecurringtaskedit.h"
-#include "TDCCustomAttributeHelper.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
@@ -142,7 +141,7 @@ CString CTaskListCsvExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttrib, const CStr
 {
 	CString sHeader;
 	
-	if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 	{
 		sHeader = (sAttribLabel + DELIM);
 	}

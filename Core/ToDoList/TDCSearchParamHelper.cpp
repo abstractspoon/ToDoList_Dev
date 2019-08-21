@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "TDCSearchParamHelper.h"
-#include "TDCCustomattributehelper.h"
+#include "TDCStruct.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -125,12 +125,12 @@ BOOL CTDCSearchParamHelper::DecodeAttribute(const CString& sAttrib, DWORD dwFlag
 			nAttrib = (TDC_ATTRIBUTE)_ttoi(sAttrib);
 			ASSERT (nAttrib != TDCA_NONE);
 
-			if (SEARCHPARAM::IsCustomAttribute(nAttrib))
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 			{
-				sUniqueID = CTDCCustomAttributeHelper::GetAttributeTypeID(nAttrib, aCustAttribDefs);
+				sUniqueID = aCustAttribDefs.GetAttributeTypeID(nAttrib);
 				ASSERT(!sUniqueID.IsEmpty());
 	
-				nFindType = CTDCCustomAttributeHelper::GetAttributeFindType(sUniqueID, dwFlags, aCustAttribDefs);
+				nFindType = GetAttributeFindType(sUniqueID, dwFlags, aCustAttribDefs);
 			}
 			else
 			{
@@ -144,7 +144,7 @@ BOOL CTDCSearchParamHelper::DecodeAttribute(const CString& sAttrib, DWORD dwFlag
 			sUniqueID = sAttrib;
 			ASSERT(!sUniqueID.IsEmpty());
 
-			nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sUniqueID, aCustAttribDefs);
+			nAttrib = aCustAttribDefs.GetAttributeID(sUniqueID);
 
 			// fallback
 			if (nAttrib == TDCA_NONE)
@@ -154,9 +154,9 @@ BOOL CTDCSearchParamHelper::DecodeAttribute(const CString& sAttrib, DWORD dwFlag
 			}
 			else
 			{
-				ASSERT(SEARCHPARAM::IsCustomAttribute(nAttrib));
+				ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib));
 			
-				nFindType = CTDCCustomAttributeHelper::GetAttributeFindType(sUniqueID, dwFlags, aCustAttribDefs);
+				nFindType = GetAttributeFindType(sUniqueID, dwFlags, aCustAttribDefs);
 				ASSERT(nFindType != FT_NONE);
 			}
 		}
@@ -166,10 +166,10 @@ BOOL CTDCSearchParamHelper::DecodeAttribute(const CString& sAttrib, DWORD dwFlag
 		sUniqueID = aParts[1];
 		ASSERT(!sUniqueID.IsEmpty());
 
-		nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sUniqueID, aCustAttribDefs);
- 		ASSERT(SEARCHPARAM::IsCustomAttribute(nAttrib));
+		nAttrib = aCustAttribDefs.GetAttributeID(sUniqueID);
+ 		ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib));
 
-		nFindType = CTDCCustomAttributeHelper::GetAttributeFindType(sUniqueID, dwFlags, aCustAttribDefs);
+		nFindType = GetAttributeFindType(sUniqueID, dwFlags, aCustAttribDefs);
 		ASSERT(nFindType != FT_NONE);
 		break;
 
@@ -180,3 +180,119 @@ BOOL CTDCSearchParamHelper::DecodeAttribute(const CString& sAttrib, DWORD dwFlag
 
 	return ((nAttrib != TDCA_NONE) && (nFindType != FT_NONE));
 }
+
+FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(const CString& sUniqueID, BOOL bRelativeDate,
+																const CTDCCustomAttribDefinitionArray& aAttribDefs)
+{
+	TDC_ATTRIBUTE nAttribID = aAttribDefs.GetAttributeID(sUniqueID);
+
+	if (nAttribID == TDCA_NONE)
+		return FT_NONE;
+
+	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+	{
+		ASSERT(0);
+		return FT_NONE;
+	}
+
+	return GetAttributeFindType(nAttribID, bRelativeDate, aAttribDefs);
+}
+
+FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate,
+																const CTDCCustomAttribDefinitionArray& aAttribDefs)
+{
+	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		return SEARCHPARAM::GetAttribType(nAttribID, bRelativeDate);
+
+	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+	VERIFY(aAttribDefs.GetAttributeDef(nAttribID, attribDef));
+
+	// treat lists as strings, except for icon lists
+	if (attribDef.IsList() && (attribDef.GetDataType() != TDCCA_ICON))
+		return FT_STRING;
+
+	// else
+	DWORD dwDataType = attribDef.GetDataType();
+
+	switch (dwDataType)
+	{
+	case TDCCA_STRING:		return FT_STRING;
+	case TDCCA_INTEGER:		return FT_INTEGER;
+	case TDCCA_DOUBLE:		return FT_DOUBLE;
+	case TDCCA_FRACTION:	return FT_DOUBLE; // TODO
+	case TDCCA_DATE:		return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
+	case TDCCA_BOOL:		return FT_BOOL;
+	case TDCCA_ICON:		return FT_ICON;
+	case TDCCA_TIMEPERIOD:	return FT_TIMEPERIOD;
+	}
+
+	return FT_NONE;
+}
+
+BOOL CTDCSearchParamHelper::AppendFilterRules(const CTDCCustomAttributeDataMap& mapData,
+												  const CTDCCustomAttribDefinitionArray& aAttribDefs,
+												  CSearchParamArray& aRules)
+{
+	BOOL bRulesAdded = FALSE;
+	POSITION pos = mapData.GetStartPosition();
+
+	while (pos)
+	{
+		CString sAttribID;
+		TDCCADATA data;
+		mapData.GetNextAssoc(pos, sAttribID, data);
+
+		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+		VERIFY(aAttribDefs.GetAttributeDef(sAttribID, attribDef));
+
+		if (attribDef.GetListType() == TDCCA_NOTALIST)
+		{
+			switch (attribDef.GetDataType())
+			{
+			case TDCCA_STRING:
+			case TDCCA_INTEGER:
+			case TDCCA_DOUBLE:
+			case TDCCA_FRACTION:
+			case TDCCA_FILELINK:
+			case TDCCA_DATE:
+			case TDCCA_TIMEPERIOD:
+			case TDCCA_ICON:
+			case TDCCA_BOOL:
+				// Not yet supported
+				ASSERT(0);
+				break;
+			}
+		}
+		else // list types
+		{
+			CStringArray aValues;
+
+			if (data.AsArray(aValues))
+			{
+				SEARCHPARAM rule;
+
+				rule.SetCustomAttribute(attribDef.GetAttributeID(), sAttribID, FT_STRING);
+				rule.SetMatchWholeWord(TRUE); // because lists are read-only
+
+				CString sMatchBy = Misc::FormatArray(aValues);
+
+				// special case: 1 empty value
+				if ((aValues.GetSize() == 1) && sMatchBy.IsEmpty())
+				{
+					rule.SetOperator(FOP_NOT_SET);
+				}
+				else
+				{
+					rule.SetOperator(FOP_INCLUDES);
+					rule.SetValue(sMatchBy);
+				}
+
+				aRules.Add(rule);
+				bRulesAdded = TRUE;
+			}
+		}
+	}
+
+	return bRulesAdded;
+}
+

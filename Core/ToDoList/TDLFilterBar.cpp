@@ -6,7 +6,7 @@
 #include "TDLFilterBar.h"
 #include "tdcmsg.h"
 #include "filteredtodoctrl.h"
-#include "tdccustomattributeHelper.h"
+#include "tdccustomattributeUIHelper.h"
 
 #include "..\shared\deferwndmove.h"
 #include "..\shared\dlgunits.h"
@@ -301,7 +301,7 @@ BOOL CTDLFilterBar::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 
 void CTDLFilterBar::OnDestroy()
 {
-	CTDCCustomAttributeHelper::CleanupControls(m_aCustomControls, this);
+	CTDCCustomAttributeUIHelper::CleanupControls(m_aCustomControls, this);
 
 	CDialog::OnDestroy();
 }
@@ -335,7 +335,7 @@ void CTDLFilterBar::ClearCheckboxHistory()
 		m_cbTagFilter.CheckAll(CCBC_UNCHECKED);
 		m_cbVersionFilter.CheckAll(CCBC_UNCHECKED);
 
-		CTDCCustomAttributeHelper::ClearFilterCheckboxHistory(m_aCustomControls, this);
+		CTDCCustomAttributeUIHelper::ClearFilterCheckboxHistory(m_aCustomControls, this);
 	}
 }
 
@@ -581,11 +581,11 @@ void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc)
 	CTDCCustomAttribDefinitionArray aNewAttribDefs;
 	tdc.GetCustomAttributeDefs(aNewAttribDefs);
 
-	if (CTDCCustomAttributeHelper::NeedRebuildFilterControls(m_aCustomAttribDefs, 
+	if (CTDCCustomAttributeUIHelper::NeedRebuildFilterControls(m_aCustomAttribDefs, 
 																aNewAttribDefs,
 																m_aCustomControls))
 	{
-		CTDCCustomAttributeHelper::RebuildFilterControls(aNewAttribDefs,
+		CTDCCustomAttributeUIHelper::RebuildFilterControls(aNewAttribDefs,
 														 tdc.GetTaskIconImageList(), 
 														 this, 
 														 IDC_OPTIONFILTERCOMBO, 
@@ -594,7 +594,7 @@ void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc)
 	}
 
 	// Update data
-	CTDCCustomAttributeHelper::UpdateControls(this, m_aCustomControls, aNewAttribDefs, m_filter.mapCustomAttrib);
+	CTDCCustomAttributeUIHelper::UpdateControls(this, m_aCustomControls, aNewAttribDefs, m_filter.mapCustomAttrib);
 
 	m_aCustomAttribDefs.Copy(aNewAttribDefs);
 }
@@ -697,7 +697,7 @@ void CTDLFilterBar::EnableMultiSelection(BOOL bEnable)
 		m_cbVersionFilter.EnableMultiSelection(bEnable);
 		m_cbTagFilter.EnableMultiSelection(bEnable);
 
-		CTDCCustomAttributeHelper::EnableMultiSelectionFilter(m_aCustomControls, this, bEnable);
+		CTDCCustomAttributeUIHelper::EnableMultiSelectionFilter(m_aCustomControls, this, bEnable);
 	}
 }
 
@@ -951,8 +951,8 @@ BOOL CTDLFilterBar::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
             break;
 			
 		default:
-			if (CTDCCustomAttributeHelper::IsCustomFilterControl(nID))
-				sTooltip = CTDCCustomAttributeHelper::GetFilterControlTooltip(nID, this);
+			if (CTDCCustomAttributeUIHelper::IsCustomFilterControl(nID))
+				sTooltip = CTDCCustomAttributeUIHelper::GetFilterControlTooltip(nID, this);
 			break;
         }
 
@@ -1094,17 +1094,17 @@ HBRUSH CTDLFilterBar::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 void CTDLFilterBar::OnCustomAttributeFilterChange(UINT nCtrlID)
 {
-	ASSERT(CTDCCustomAttributeHelper::IsCustomFilterControl(nCtrlID));
+	ASSERT(CTDCCustomAttributeUIHelper::IsCustomFilterControl(nCtrlID));
 
 	CUSTOMATTRIBCTRLITEM ctrl;
 
-	if (CTDCCustomAttributeHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
+	if (CTDCCustomAttributeUIHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
 	{
-		ASSERT(CTDCCustomAttributeHelper::IsCustomAttribute(ctrl.nAttrib));
+		ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
 
 		TDCCADATA data;
 		
-		if (CTDCCustomAttributeHelper::GetControlData(this, ctrl, m_aCustomAttribDefs, data))
+		if (CTDCCustomAttributeUIHelper::GetControlData(this, ctrl, m_aCustomAttribDefs, data))
 			m_filter.mapCustomAttrib[ctrl.sAttribID] = data;
 		else
 			m_filter.mapCustomAttrib.RemoveKey(ctrl.sAttribID);

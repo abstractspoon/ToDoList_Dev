@@ -5,7 +5,6 @@
 #include "resource.h"
 #include "tdcmsg.h"
 #include "TDLFindTasksDlg.h"
-#include "TDCCustomAttributeHelper.h"
 #include "TDCsearchparamHelper.h"
 
 #include "..\shared\deferwndmove.h"

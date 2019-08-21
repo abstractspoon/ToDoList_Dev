@@ -8,7 +8,6 @@
 #include "resource.h"
 #include "tdcstatic.h"
 #include "tdcmsg.h"
-#include "TDCCustomAttributeHelper.h"
 #include "TDCSearchParamHelper.h"
 #include "taskclipboard.h"
 
@@ -1452,7 +1451,7 @@ void CFilteredToDoCtrl::OnTimerNow()
 				break;
 
 			default:
-				if (CTDCCustomAttributeHelper::IsCustomAttribute(nNowAttrib))
+				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nNowAttrib))
 				{
 					// TODO
 					//bRefilter = (AfxMessageBox(CEnString(IDS_CUSTOMBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);

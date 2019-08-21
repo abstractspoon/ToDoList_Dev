@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataDefines.h"
-#include "TDCCustomAttributeHelper.h"
 #include "resource.h"
 
 #include "..\shared\timehelper.h"
@@ -108,11 +107,11 @@ BOOL CToDoCtrlData::WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib) const
 {
 	if (m_bUpdateInheritAttrib)
 	{
-		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib) && 
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib) &&
 			m_mapParentAttribs.Has(TDCA_CUSTOMATTRIB))
 		{
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-			VERIFY(CTDCCustomAttributeHelper::GetAttributeDef(nAttrib, m_aCustomAttribDefs, attribDef));
+			VERIFY(m_aCustomAttribDefs.GetAttributeDef(nAttrib, attribDef));
 
 			return attribDef.HasFeature(TDCCAF_INHERITPARENTCHANGES);
 		}
@@ -1480,7 +1479,7 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRI
 				return FALSE;
 		}
 	}
-	else if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib) &&
+	else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib) &&
 			WantUpdateInheritedAttibute(TDCA_CUSTOMATTRIB))
 	{
 		return ApplyLastChangeToSubtasks(dwTaskID, nAttrib);
@@ -1699,10 +1698,10 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 		break;
 
 	default:
-		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 		{
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-			VERIFY(CTDCCustomAttributeHelper::GetAttributeDef(nAttrib, m_aCustomAttribDefs, attribDef));
+			VERIFY(m_aCustomAttribDefs.GetAttributeDef(nAttrib, attribDef));
 
 			if (attribDef.HasFeature(TDCCAF_INHERITPARENTCHANGES))
 			{
@@ -1826,7 +1825,7 @@ TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString&
 {
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-	if (!CTDCCustomAttributeHelper::GetAttributeDef(sAttribID, m_aCustomAttribDefs, attribDef))
+	if (!m_aCustomAttribDefs.GetAttributeDef(sAttribID, attribDef))
 	{
 		ASSERT(0);
 		return SET_FAILED;

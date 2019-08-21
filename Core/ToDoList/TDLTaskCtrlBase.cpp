@@ -7,7 +7,6 @@
 #include "todoctrldata.h"
 #include "tdcstatic.h"
 #include "tdcmsg.h"
-#include "tdccustomattributehelper.h"
 #include "tdcimagelist.h"
 #include "resource.h"
 
@@ -807,9 +806,9 @@ BOOL CTDLTaskCtrlBase::IsColumnShowing(TDC_COLUMN nColID) const
 	{
 		return TRUE;
 	}
-	else if (CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+	else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 	{
-		return CTDCCustomAttributeHelper::IsCustomColumnEnabled(nColID, m_aCustomAttribDefs);
+		return m_aCustomAttribDefs.IsColumnEnabled(nColID);
 	}
 
 	return m_mapVisibleCols.Has(nColID);
@@ -1041,7 +1040,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 	if (!bCustomOnly)
 		mapCols.Copy(m_mapVisibleCols);
 	
-	CTDCCustomAttributeHelper::GetVisibleColumnIDs(m_aCustomAttribDefs, mapCols, TRUE); // append
+	m_aCustomAttribDefs.GetVisibleColumnIDs(mapCols, TRUE); // append
 
 	RecalcUntrackedColumnWidths(mapCols, TRUE, bCustomOnly);
 }
@@ -1125,7 +1124,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 			{
 				continue;
 			}
-			else if (bCustomOnly && !CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+			else if (bCustomOnly && !TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 			{
 				continue;
 			}
@@ -1298,7 +1297,7 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 		
 		// this can still fail
-		if (!CTDCCustomAttributeHelper::GetAttributeDef(sort.nBy, base.m_aCustomAttribDefs, attribDef))
+		if (!base.m_aCustomAttribDefs.GetAttributeDef(sort.nBy, attribDef))
 			return 0;
 		
 		return base.m_comparer.CompareTasks(dwTaskID1, dwTaskID2, attribDef, sort.bAscending);
@@ -1614,7 +1613,7 @@ void CTDLTaskCtrlBase::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 			{
 				bAscending = pTDCC->bSortAscending;
 			}
-			else if (CTDCCustomAttributeHelper::IsCustomColumn(nBy))
+			else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nBy))
 			{
 				// TODO
 				bAscending = FALSE;//(m_ctrlTreeList.Tree().GetGutterColumnSort(nBy) != NCGSORT_DOWN);
@@ -2897,12 +2896,12 @@ BOOL CTDLTaskCtrlBase::CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int
 BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, 
 											CDC* pDC, const CRect& rSubItem, COLORREF crText)
 {
-	if (!CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		return FALSE;
 
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 	
-	if (!CTDCCustomAttributeHelper::GetAttributeDef(nColID, m_aCustomAttribDefs, attribDef))
+	if (!m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef))
 		return TRUE;
 
 	TDCCADATA data;
@@ -2931,10 +2930,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue);
 			
 			if ((dValue != 0.0) || !attribDef.HasFeature(TDCCAF_HIDEZERO))
-			{
-				CString sText(CTDCCustomAttributeHelper::FormatNumber(dValue, attribDef));
-				DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
-			}			
+				DrawColumnText(pDC, attribDef.FormatNumber(dValue), rCol, attribDef.nTextAlignment, crText);
 		}
 		break;
 
@@ -3340,7 +3336,7 @@ const CEnHeaderCtrl& CTDLTaskCtrlBase::GetColumnHeaderCtrl(TDC_COLUMN nColID) co
 
 const TDCCOLUMN* CTDLTaskCtrlBase::GetColumn(TDC_COLUMN nColID)
 {
-	if (CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		return NULL;
 
 	ASSERT(!s_mapColumns.IsEmpty());
@@ -3428,7 +3424,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 
 		default:
 			// handled during drawing
-			ASSERT(CTDCCustomAttributeHelper::IsCustomColumn(nColID));
+			ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID));
 			return _T("");
 		}
 	}
@@ -4036,7 +4032,7 @@ void CTDLTaskCtrlBase::OnHeaderClick(TDC_COLUMN nColID)
 	{
 		nSortBy = nColID;
 	}	
-	else if (CTDCCustomAttributeHelper::IsColumnSortable(nColID, m_aCustomAttribDefs))
+	else if (m_aCustomAttribDefs.IsColumnSortable(nColID))
 	{
 		nSortBy = nColID;
 	}
@@ -4093,11 +4089,11 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 					(!bTaskSelected || bSingleSelection));
 
 		default: // try custom columns
-			if (!bLocked && CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+			if (!bLocked && TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 			{
 				TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 			
-				if (CTDCCustomAttributeHelper::GetAttributeDef(nColID, m_aCustomAttribDefs, attribDef))
+				if (m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef))
 				{
 					switch (attribDef.GetDataType())
 					{
@@ -4139,11 +4135,11 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 		return m_data.IsTaskDependent(dwTaskID);
 			
 	default: // try custom columns
-		if (CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		{
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 			
-			if (CTDCCustomAttributeHelper::GetAttributeDef(nColID, m_aCustomAttribDefs, attribDef))
+			if (m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef))
 			{
 				switch (attribDef.GetDataType())
 				{
@@ -4320,7 +4316,7 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 			break;
 
 		default:
-			if (CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 				aColIDs.Add(nColID);
 			else
 				ASSERT(0);
@@ -4568,12 +4564,12 @@ BOOL CTDLTaskCtrlBase::ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy
 
 	case TDCA_CUSTOMATTRIBDEFS:	// Resort all custom columns
 		ASSERT(nModCol == TDCC_NONE);
-		return CTDCCustomAttributeHelper::IsCustomColumn(nSortBy);
+		return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nSortBy);
 
 	default:
-		if (CTDCCustomAttributeHelper::IsCustomAttribute(nModType))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nModType))
 		{
-			ASSERT(CTDCCustomAttributeHelper::IsColumnSortable(nModCol, m_aCustomAttribDefs));
+			ASSERT(m_aCustomAttribDefs.IsColumnSortable(nModCol));
 			return (nModCol == nSortBy);
 		}
 		// else unhandled attribute
@@ -4955,7 +4951,7 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly
 
 int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC, BOOL bVisibleTasksOnly) const
 {
-	if (!CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 	{
 		ASSERT(0);
 		return 0;
@@ -4964,7 +4960,7 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 	// determine the longest visible string depending on type
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-	if (CTDCCustomAttributeHelper::GetAttributeDef(nColID, m_aCustomAttribDefs, attribDef))
+	if (m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef))
 	{
 		if (!attribDef.bEnabled)
 		{
@@ -5784,7 +5780,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 	if (nSelCount)
 	{
 		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-		VERIFY(CTDCCustomAttributeHelper::GetAttributeDef(sAttribID, m_aCustomAttribDefs, attribDef));
+		VERIFY(m_aCustomAttribDefs.GetAttributeDef(sAttribID, attribDef));
 
 		// Multi-selection check lists need special handling
 		if (attribDef.IsMultiList())
@@ -5835,7 +5831,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 		}
 
 		if (bFormatted && !data.IsEmpty())
-			data.Set(CTDCCustomAttributeHelper::FormatData(data, attribDef, HasStyle(TDCS_SHOWDATESINISO)));
+			data.Set(attribDef.FormatData(data, HasStyle(TDCS_SHOWDATESINISO)));
 	}
 	
 	return !data.IsEmpty();

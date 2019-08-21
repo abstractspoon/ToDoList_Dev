@@ -16,7 +16,7 @@
 #include "tdltaskicondlg.h"
 #include "tdlreuserecurringtaskdlg.h"
 #include "tdlimportoutlookobjectsdlg.h"
-#include "tdccustomattributehelper.h"
+#include "tdccustomattributeUIhelper.h"
 #include "tdladdloggedtimedlg.h"
 #include "tdcoutlookimporthelper.h"
 #include "ToDoCtrlDataDefines.h"
@@ -310,7 +310,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	m_eRecurrence.DDX(pDX, m_tRecurrence);
 	m_cbFileRef.DDX(pDX, m_aFileRefs);
 	
-	CTDCCustomAttributeHelper::DDX(pDX, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
+	CTDCCustomAttributeUIHelper::DDX(pDX, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
 
 	// custom
 	if (pDX->m_bSaveAndValidate)
@@ -1261,11 +1261,11 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 
 	// handle custom attributes
 	default:
-		if (CTDCCustomAttributeHelper::IsCustomEditControl(ctrl.nCtrlID))
+		if (CTDCCustomAttributeUIHelper::IsCustomEditControl(ctrl.nCtrlID))
 		{
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-			if (CTDCCustomAttributeHelper::GetAttributeDef(ctrl.nAttrib, m_aCustomAttribDefs, attribDef))
+			if (m_aCustomAttribDefs.GetAttributeDef(ctrl.nAttrib, attribDef))
 			{
 				if (attribDef.IsList())
 				{
@@ -1495,7 +1495,7 @@ void CToDoCtrl::EnableDisableCustomControl(const CUSTOMATTRIBCTRLITEM& ctrl, DWO
 	if (ctrl.GetBuddy(buddy))
 	{
 		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-		CTDCCustomAttributeHelper::GetAttributeDef(ctrl, m_aCustomAttribDefs, attribDef);
+		m_aCustomAttribDefs.GetAttributeDef(ctrl.sAttribID, attribDef);
 
 		switch (attribDef.GetDataType())
 		{
@@ -1698,7 +1698,7 @@ BOOL CToDoCtrl::IsCtrlShowing(const CTRLITEM& ctrl) const
 		return FALSE;
 
 	// is this a custom control?
-	if (CTDCCustomAttributeHelper::IsCustomEditControl(ctrl.nCtrlID))
+	if (CTDCCustomAttributeUIHelper::IsCustomEditControl(ctrl.nCtrlID))
 		return TRUE;
 
 	// other special cases
@@ -2156,9 +2156,9 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		
 	default:
 		// handle custom attributes
-		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 		{
-			CString sAttribID = CTDCCustomAttributeHelper::GetAttributeTypeID(nAttrib, m_aCustomAttribDefs);
+			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttrib);
 			TDCCADATA data;
 
 			if (m_mapCustomCtrlData.Lookup(sAttribID, data))
@@ -2229,11 +2229,11 @@ void CToDoCtrl::OnCustomAttributeChange(UINT nCtrlID, NMHDR* /*pNMHDR*/, LRESULT
 
 void CToDoCtrl::OnCustomAttributeChange(UINT nCtrlID)
 {
-	ASSERT(CTDCCustomAttributeHelper::IsCustomEditControl(nCtrlID));
+	ASSERT(CTDCCustomAttributeUIHelper::IsCustomEditControl(nCtrlID));
 
 	CUSTOMATTRIBCTRLITEM ctrl;
 
-	if (CTDCCustomAttributeHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
+	if (CTDCCustomAttributeUIHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
 	{
 		UpdateTask(ctrl.nAttrib);
 	}
@@ -2241,17 +2241,17 @@ void CToDoCtrl::OnCustomAttributeChange(UINT nCtrlID)
 
 void CToDoCtrl::OnCustomAttributeCancel(UINT nCtrlID)
 {
-	ASSERT(CTDCCustomAttributeHelper::IsCustomEditControl(nCtrlID));
+	ASSERT(CTDCCustomAttributeUIHelper::IsCustomEditControl(nCtrlID));
 
 	CUSTOMATTRIBCTRLITEM ctrl;
 
-	if (CTDCCustomAttributeHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
+	if (CTDCCustomAttributeUIHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
 	{
 		// Restore previous control values
 		TDCCADATA data;
 		m_mapCustomCtrlData.Lookup(ctrl.sAttribID, data);
 
-		CTDCCustomAttributeHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, data);
+		CTDCCustomAttributeUIHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, data);
 	}
 }
 
@@ -2287,16 +2287,16 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 	
 	if (aModTaskIDs.GetSize())
 	{
-		TDC_ATTRIBUTE nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sAttribID, m_aCustomAttribDefs);
+		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sAttribID);
  		SetModified(nAttrib, aModTaskIDs);
 
 		// update UI except if it's already up to date
 		CUSTOMATTRIBCTRLITEM ctrl;
 		
-		if (CTDCCustomAttributeHelper::GetControl(sAttribID, m_aCustomControls, ctrl))
+		if (CTDCCustomAttributeUIHelper::GetControl(sAttribID, m_aCustomControls, ctrl))
 		{
 			if (!bCtrlEdited)
-				CTDCCustomAttributeHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, data);
+				CTDCCustomAttributeUIHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, data);
 
 			if (ctrl.HasBuddy())
 				EnableDisableControls(GetSelectedItem());
@@ -5809,7 +5809,7 @@ int CToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
 
 BOOL CToDoCtrl::IsColumnShowing(TDC_COLUMN nColumn) const
 {
-	if ((nColumn == TDCC_CLIENT) || CTDCCustomAttributeHelper::IsCustomColumn(nColumn))
+	if ((nColumn == TDCC_CLIENT) || TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColumn))
 		return TRUE;
 
 	return m_visColEdit.IsColumnVisible(nColumn);
@@ -5817,7 +5817,7 @@ BOOL CToDoCtrl::IsColumnShowing(TDC_COLUMN nColumn) const
 
 BOOL CToDoCtrl::IsEditFieldShowing(TDC_ATTRIBUTE nAttrib) const
 {
-	if (nAttrib == TDCA_TASKNAME || CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
+	if (nAttrib == TDCA_TASKNAME || TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 		return TRUE; // always visible
 
 	return m_visColEdit.IsEditFieldVisible(nAttrib);
@@ -6045,7 +6045,7 @@ void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTAS
 {
 	// save auto combobox contents to definition first
 	// just like we do with standard combos
-	CTDCCustomAttributeHelper::SaveAutoListDataToDefs(this, m_aCustomControls, m_aCustomAttribDefs);
+	CTDCCustomAttributeUIHelper::SaveAutoListDataToDefs(this, m_aCustomControls, m_aCustomAttribDefs);
 
 	if (filter.mapAttribs.HasOnly(TDCA_ALL))
 	{
@@ -6081,13 +6081,13 @@ void CToDoCtrl::LoadCustomAttributeDefinitions(const CTaskFile& tasks)
 void CToDoCtrl::RebuildCustomAttributeUI()
 {
 	// and add fields after the 'version' control
- 	CTDCCustomAttributeHelper::RebuildEditControls(m_aCustomAttribDefs, 
+ 	CTDCCustomAttributeUIHelper::RebuildEditControls(m_aCustomAttribDefs, 
 												   m_ilTaskIcons, 
 												   this, 
 												   IDC_VERSION, 
 												   m_aCustomControls);
 
-	CTDCCustomAttributeHelper::AddWindowPrompts(m_aCustomControls, this, m_mgrPrompts);
+	CTDCCustomAttributeUIHelper::AddWindowPrompts(m_aCustomControls, this, m_mgrPrompts);
 
 	Resize();
 
@@ -6826,7 +6826,7 @@ void CToDoCtrl::OnDestroy()
 	}
 	
 	// clean up custom controls
-	CTDCCustomAttributeHelper::CleanupControls(m_aCustomControls, this);
+	CTDCCustomAttributeUIHelper::CleanupControls(m_aCustomControls, this);
 	
 	CRuntimeDlg::OnDestroy();
 }
@@ -7991,7 +7991,7 @@ LRESULT CToDoCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 		break;
 
 	default:
-		if (CTDCCustomAttributeHelper::IsCustomEditControl(nCtrlID))
+		if (CTDCCustomAttributeUIHelper::IsCustomEditControl(nCtrlID))
 		{
 			GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, TDCA_CUSTOMATTRIB);
 		}
@@ -8384,7 +8384,7 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 		CTDCCustomAttributeDataMap mapData;
 		
 		if (GetSelectedTaskCustomAttributeData(mapData))
-			CTDCCustomAttributeHelper::UpdateControls(this, m_aCustomControls, m_aCustomAttribDefs, mapData);
+			CTDCCustomAttributeUIHelper::UpdateControls(this, m_aCustomControls, m_aCustomAttribDefs, mapData);
 	}
 	
 	return TRUE;
@@ -8651,11 +8651,11 @@ TDC_ATTRIBUTE CToDoCtrl::MapCtrlIDToAttribute(UINT nCtrlID) const
 
 BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 {
-	if (!CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		return FALSE;
 
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-	VERIFY (CTDCCustomAttributeHelper::GetAttributeDef(nColID, m_aCustomAttribDefs, attribDef));
+	VERIFY (m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef));
 	
 	TDCCADATA data;
 	GetSelectedTaskCustomAttributeData(attribDef.sUniqueID, data);
@@ -10165,7 +10165,7 @@ void CToDoCtrl::Flush(BOOL bEndTimeTracking) // called to end current editing ac
 		}
 		else
 		{
-			CTDCCustomAttributeHelper::FlushEditControl(pFocus, this, m_aCustomControls);
+			CTDCCustomAttributeUIHelper::FlushEditControl(pFocus, this, m_aCustomControls);
 		}
 	}
 
@@ -10566,7 +10566,7 @@ LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM /*lParam*/)
 			break;
 
 		default:
-			ASSERT(CTDCCustomAttributeHelper::IsCustomEditControl(wParam));
+			ASSERT(CTDCCustomAttributeUIHelper::IsCustomEditControl(wParam));
 			break;
 		}
 	}
@@ -11843,7 +11843,7 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib) const
 			 nAttrib < TDCA_ATTRIBUTECOUNT &&
 			 nAttrib != TDCA_TASKNAME && 
 			 nAttrib != TDCA_PROJECTNAME) ||
-			CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib));
+			TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib));
 }
 
 BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
@@ -11930,7 +11930,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	}
 
 	// fall thru to custom attributes
-	CString sCustomAttribID = CTDCCustomAttributeHelper::GetAttributeTypeID(nAttrib, m_aCustomAttribDefs);
+	CString sCustomAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttrib);
 
 	if (!sCustomAttribID.IsEmpty())
 		return ClearSelectedTaskCustomAttributeData(sCustomAttribID, FALSE);
@@ -12029,7 +12029,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 		return GetSelectedCount();
 
 	default:
-		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 			return SelectedTaskIsUnlocked(dwTaskID);
 		break;
 	}
@@ -12072,7 +12072,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const C
 {
 	TDCCUSTOMATTRIBUTEDEFINITION attribDefTo;
 
-	if (!CTDCCustomAttributeHelper::GetAttributeDef(sToCustomAttribID, m_aCustomAttribDefs, attribDefTo))
+	if (!m_aCustomAttribDefs.GetAttributeDef(sToCustomAttribID, attribDefTo))
 		return FALSE;
 	
 	if (!CanCopyAttributeData(nFromAttrib, attribDefTo))
@@ -12095,15 +12095,15 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const C
 
 	if (aModTaskIDs.GetSize())
 	{
-		TDC_ATTRIBUTE nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sToCustomAttribID, m_aCustomAttribDefs);
+		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
 		SetModified(nAttrib, aModTaskIDs);
 		
 		// update UI
 // 		CUSTOMATTRIBCTRLITEM ctrl;
 // 		
-// 		if (CTDCCustomAttributeHelper::GetControl(sToCustomAttribID, m_aCustomControls, ctrl))
+// 		if (CTDCCustomAttributeUIHelper::GetControl(sToCustomAttribID, m_aCustomControls, ctrl))
 // 		{
-// 			CTDCCustomAttributeHelper::UpdateCustomAttributeControl(this, ctrl, m_aCustomAttribDefs, data);
+// 			CTDCCustomAttributeUIHelper::UpdateCustomAttributeControl(this, ctrl, m_aCustomAttribDefs, data);
 // 		
 // 			if (ctrl.HasBuddy())
 // 				EnableDisableControls(GetSelectedItem());
@@ -12118,7 +12118,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 {
 	TDCCUSTOMATTRIBUTEDEFINITION attribDefFrom;
 
-	if (!CTDCCustomAttributeHelper::GetAttributeDef(sFromCustomAttribID, m_aCustomAttribDefs, attribDefFrom))
+	if (!m_aCustomAttribDefs.GetAttributeDef(sFromCustomAttribID, attribDefFrom))
 		return FALSE;
 
 	if (!CanCopyAttributeData(attribDefFrom, nToAttrib))
@@ -12158,8 +12158,8 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 		return FALSE;
 	}
 
-	DWORD dwFromType = CTDCCustomAttributeHelper::GetAttributeDataType(sFromCustomAttribID, m_aCustomAttribDefs);
-	DWORD dwToType = CTDCCustomAttributeHelper::GetAttributeDataType(sToCustomAttribID, m_aCustomAttribDefs);
+	DWORD dwFromType = m_aCustomAttribDefs.GetAttributeDataType(sFromCustomAttribID);
+	DWORD dwToType = m_aCustomAttribDefs.GetAttributeDataType(sToCustomAttribID);
 
 	if (dwFromType != dwToType)
 		return FALSE;
@@ -12182,14 +12182,14 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 
 	if (aModTaskIDs.GetSize())
 	{
-		TDC_ATTRIBUTE nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sToCustomAttribID, m_aCustomAttribDefs);
+		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
 		SetModified(nAttrib, aModTaskIDs);
 
 // 		CUSTOMATTRIBCTRLITEM ctrl;
 // 		
-// 		if (CTDCCustomAttributeHelper::GetControl(sToCustomAttribID, m_aCustomControls, ctrl))
+// 		if (CTDCCustomAttributeUIHelper::GetControl(sToCustomAttribID, m_aCustomControls, ctrl))
 // 		{
-// 			CTDCCustomAttributeHelper::UpdateCustomAttributeControl(this, ctrl, m_aCustomAttribDefs, data);
+// 			CTDCCustomAttributeUIHelper::UpdateCustomAttributeControl(this, ctrl, m_aCustomAttribDefs, data);
 // 		
 // 			if (ctrl.HasBuddy())
 // 				EnableDisableControls(GetSelectedItem());

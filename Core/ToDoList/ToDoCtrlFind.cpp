@@ -6,7 +6,7 @@
 #include "ToDoCtrlFind.h"
 #include "ToDoCtrlData.h"
 #include "ToDoitem.h"
-#include "TDCCustomAttributeHelper.h"
+#include "TDCCustomAttributeUIHelper.h"
 
 #include "..\shared\timehelper.h"
 #include "..\shared\datehelper.h"
@@ -62,10 +62,10 @@ BOOL CTDCLongestItemMap::Initialise(const CTDCColumnIDMap& mapCols, const CTDCCu
 		if (!IsSupportedColumn(nColID))
 			continue;
 
-		if (CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		{
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-			VERIFY(CTDCCustomAttributeHelper::GetAttributeDef(nColID, aCustAttribDefs, attribDef));
+			VERIFY(aCustAttribDefs.GetAttributeDef(nColID, attribDef));
 
 			if (!IsSupportedColumn(attribDef))
 				continue;
@@ -148,7 +148,7 @@ BOOL CTDCLongestItemMap::IsSupportedColumn(TDC_COLUMN nColID)
 	}
 
 	// all else
-	return CTDCCustomAttributeHelper::IsCustomColumn(nColID);
+	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID);
 }
 
 BOOL CTDCLongestItemMap::IsSupportedColumn(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
@@ -243,7 +243,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, BOOL bVisibleOnly) con
 		return EMPTY_STR;
 
 	default:
-		if (CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		{
 			// Should use the version taking an attribute definition
 			ASSERT(0);
@@ -486,7 +486,7 @@ CString CToDoCtrlFind::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attri
 	if (sLongest.IsEmpty())
 	{
 		if (attribDef.SupportsFeature(TDCCAF_HIDEZERO) && !attribDef.HasFeature(TDCCAF_HIDEZERO))
-			sLongest = CTDCCustomAttributeHelper::FormatData(0.0, attribDef, FALSE);
+			sLongest = attribDef.FormatData(0.0, FALSE);
 	}
 	
 	return sLongest;
@@ -527,7 +527,7 @@ BOOL CToDoCtrlFind::GetLongestCalculatedValue(const TDCCUSTOMATTRIBUTEDEFINITION
 				hti = m_tch.TreeCtrl().GetNextItem(hti, TVGN_NEXT);
 			}
 
-			sLongest = CTDCCustomAttributeHelper::FormatNumber(dBiggest, attribDef);
+			sLongest = attribDef.FormatNumber(dBiggest);
 			return TRUE;
 		}
 		break;
@@ -684,9 +684,12 @@ CString CToDoCtrlFind::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attri
 			switch (attribDef.GetDataType())
 			{
 			case TDCCA_FRACTION:
+				sLongest = attribDef.FormatNumber(data.AsFraction());
+				break;
+
 			case TDCCA_DOUBLE:
 			case TDCCA_INTEGER:
-				sLongest = CTDCCustomAttributeHelper::FormatNumber(data.AsDouble(), attribDef);
+				sLongest = attribDef.FormatNumber(data.AsDouble());
 				break;
 
 			case TDCCA_TIMEPERIOD:
@@ -1160,7 +1163,7 @@ int CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols,
 				else if (attribDef.SupportsFeature(TDCCAF_HIDEZERO) && !attribDef.HasFeature(TDCCAF_HIDEZERO))
 				{
 					// initialise zero value once only
-					sLongest = CTDCCustomAttributeHelper::FormatData(0.0, attribDef, FALSE);
+					sLongest = attribDef.FormatData(0.0, FALSE);
 					mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
 				}
 			}

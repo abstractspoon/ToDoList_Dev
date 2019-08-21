@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "TDCEnumContainers.h"
-#include "TDCCustomAttributeHelper.h"
+#include "TDCCustomAttributeDef.h"
 
 #include "..\shared\Misc.h"
 
@@ -144,7 +144,7 @@ BOOL CTDCAttributeMap::IsTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	}
 
 	// all else
-	return CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib);
+	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib);
 }
 
 void CTDCAttributeMap::Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)

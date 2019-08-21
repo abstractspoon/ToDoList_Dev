@@ -8,7 +8,7 @@
 #include "resource.h"
 #include "tdcstatic.h"
 #include "tdcmsg.h"
-#include "tdccustomattributehelper.h"
+#include "tdccustomattributeUIhelper.h"
 #include "tdltaskicondlg.h"
 #include "TDLTaskViewListBox.h"
 #include "ToDoCtrlDataDefines.h"
@@ -3468,10 +3468,8 @@ BOOL CTabbedToDoCtrl::IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const
 		{
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-			if (CTDCCustomAttributeHelper::GetAttributeDef(nAttrib, m_aCustomAttribDefs, attribDef))
-			{
+			if (m_aCustomAttribDefs.GetAttributeDef(nAttrib, attribDef))
 				return attribDef.SupportsCalculation();
-			}
 		}
 		break;
 	}

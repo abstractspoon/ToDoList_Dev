@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLAttribListBox.h"
-#include "TDCCustomAttributeHelper.h"
 
 #include "..\shared\dialoghelper.h"
 
@@ -166,7 +165,7 @@ void CTDLAttributeListBox::SetSelectedAttributes(const CTDCAttributeMap& mapAttr
 		}
 		else
 		{
-			ASSERT (CTDCCustomAttributeHelper::IsCustomAttribute(vis.nTDCAttrib));
+			ASSERT (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(vis.nTDCAttrib));
 
 			vis.bVisible = mapCustomAttribIDs.Has(vis.sCustAttribID);
 		}
@@ -199,7 +198,7 @@ int CTDLAttributeListBox::GetSelectedAttributes(CTDCAttributeMap& mapAttrib, CSt
 			}
 			else
 			{
-				ASSERT (CTDCCustomAttributeHelper::IsCustomAttribute(vis.nTDCAttrib));
+				ASSERT (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(vis.nTDCAttrib));
 
 				mapCustomAttribIDs.Add(vis.sCustAttribID);
 			}

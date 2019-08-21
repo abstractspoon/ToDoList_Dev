@@ -14,6 +14,7 @@
 #include "tdcenumcontainers.h"
 #include "TDCImportExportMgr.h"
 #include "tdccustomattribdata.h"
+#include "tdccustomattributedef.h"
 
 #include "..\shared\TreeSelectionHelper.h"
 #include "..\shared\TreeCtrlHelper.h"
@@ -583,611 +584,6 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-struct TDCCUSTOMATTRIBUTEDEFINITION
-{
-	friend class CTDCCustomAttribDefinitionArray;
-
-	TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel = NULL) 
-		: 
-		sLabel(szLabel),
-		dwAttribType(TDCCA_STRING), 
-		nTextAlignment(DT_LEFT), 
-		dwFeatures(TDCCAF_SORT),
-		nColID(TDCC_NONE),
-		nAttribID(TDCA_NONE),
-		bEnabled(TRUE)
-	{
-
-	}
-
-	TDCCUSTOMATTRIBUTEDEFINITION(const TDCCUSTOMATTRIBUTEDEFINITION& otherDef)
-	{
-		*this = otherDef;
-	}
-
-	TDCCUSTOMATTRIBUTEDEFINITION& operator=(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
-	{
-		dwAttribType = attribDef.dwAttribType;
-		sUniqueID = attribDef.sUniqueID;
-		sColumnTitle = attribDef.sColumnTitle;
-		sLabel = attribDef.sLabel;
-		nTextAlignment = attribDef.nTextAlignment;
-		dwFeatures = attribDef.dwFeatures;
-		nColID = attribDef.nColID;
-		nAttribID = attribDef.nAttribID;
-		bEnabled = attribDef.bEnabled;
-
-		if (attribDef.IsList())
-		{
-			aDefaultListData.Copy(attribDef.aDefaultListData);
-			
-			if (attribDef.IsAutoList())
-				aAutoListData.Copy(attribDef.aAutoListData);
-		}
-
-		return *this;
-	}
-
-	BOOL operator==(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const
-	{
-		// NOTE: we ignore auto data which is temporary
-		return ((dwAttribType == attribDef.dwAttribType) &&
-				(sUniqueID.CompareNoCase(attribDef.sUniqueID) == 0) &&
-				(sColumnTitle == attribDef.sColumnTitle) &&
-				(sLabel == attribDef.sLabel) &&
-				(nTextAlignment == attribDef.nTextAlignment) &&
-				(dwFeatures == attribDef.dwFeatures) &&
-				(nColID == attribDef.nColID) &&
-				(nAttribID == attribDef.nAttribID) &&
-				(bEnabled == attribDef.bEnabled) &&
-				Misc::MatchAll(aDefaultListData, attribDef.aDefaultListData));
-	}
-
-	CString GetColumnTitle() const
-	{
-		return (sColumnTitle.IsEmpty() ? sLabel : sColumnTitle);
-	}
-
-	CString GetToolTip() const
-	{
-		return (sColumnTitle.GetLength() > sLabel.GetLength() ? sColumnTitle : sLabel);
-	}
-
-	inline TDC_COLUMN GetColumnID() const { return nColID; }
-	inline TDC_ATTRIBUTE GetAttributeID() const { return nAttribID; }
-	inline DWORD GetAttributeType() const { return dwAttribType; }
-
-	UINT GetColumnHeaderAlignment() const
-	{
-		switch (nTextAlignment)
-		{
-		case DT_CENTER: return HDF_CENTER;
-		case DT_RIGHT:	return HDF_RIGHT;
-		case DT_LEFT:	return HDF_LEFT;
-		}
-		
-		// all else
-		ASSERT(0);
-		return HDF_LEFT;
-	}
-
-	static UINT GetDefaultTextAlignment(DWORD dwAttribType)
-	{
-		switch (dwAttribType & TDCCA_DATAMASK)
-		{
-		case TDCCA_DATE:
-		case TDCCA_INTEGER:
-		case TDCCA_DOUBLE:
-		case TDCCA_TIMEPERIOD:
-		case TDCCA_FRACTION:
-			return TA_RIGHT;
-		}
-
-		// All else
-		return TA_LEFT;
-	}
-
-	BOOL HasDefaultTextAlignment() const
-	{
-		return (nTextAlignment == GetDefaultTextAlignment(dwAttribType));
-	}
-
-	void SetAttributeType(DWORD dwType)
-	{
-		SetTypes((dwType & TDCCA_DATAMASK), (dwType & TDCCA_LISTMASK));
-	}
-
-	void SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment = TRUE)
-	{
-		DWORD dwPrevType = GetDataType();
-
-		SetTypes((dwDataType & TDCCA_DATAMASK), GetListType());
-
-		// Set default alignment if the previous also had the default
-		if (bUpdateDefaultAlignment)
-		{
-			if (nTextAlignment == GetDefaultTextAlignment(dwPrevType))
-				nTextAlignment = GetDefaultTextAlignment(dwAttribType);
-		}
-	}
-
-	void SetListType(DWORD dwListType)
-	{
-		SetTypes(GetDataType(), (dwListType & TDCCA_LISTMASK));
-	}
-
-	inline DWORD GetDataType() const { return (dwAttribType & TDCCA_DATAMASK); }
-	inline DWORD GetListType() const { return (dwAttribType & TDCCA_LISTMASK); }
-	inline BOOL HasFeature(DWORD dwFeature) const { return SupportsFeature(dwFeature) && (dwFeatures & dwFeature); }
-
-	inline BOOL IsDataType(DWORD dwDataType) const { return (GetDataType() == dwDataType); }
-	inline BOOL IsList() const { return (GetListType() != TDCCA_NOTALIST); }
-	inline BOOL IsAutoList() const { return ((GetListType() == TDCCA_AUTOLIST) || (GetListType() == TDCCA_AUTOMULTILIST)); }
-	inline BOOL IsMultiList() const { return ((GetListType() == TDCCA_FIXEDMULTILIST) || (GetListType() == TDCCA_AUTOMULTILIST)); }
-	inline BOOL IsFixedList() const { return ((GetListType() == TDCCA_FIXEDLIST) || (GetListType() == TDCCA_FIXEDMULTILIST)); }
-
-	int GetUniqueListData(CStringArray& aData) const
-	{
-		aData.Copy(aAutoListData);
-		Misc::AddUniqueItems(aDefaultListData, aData);
-
-		return aData.GetSize();
-	}
-
-	CString EncodeListData() const
-	{
-		if (!IsList())
-			return _T("");
-
-		CString sListData = Misc::FormatArray(aDefaultListData, '\n');
-
-		if (IsAutoList())
-		{
-			sListData += '\t';
-			sListData += Misc::FormatArray(aAutoListData, '\n');
-		}
-
-		return sListData;
-	}
-	
-	BOOL DecodeListData(const CString& sListData)
-	{
-		if (IsList() && !sListData.IsEmpty())
-		{
-			CString sDefData(sListData), sAutoData;
-
-			Misc::Split(sDefData, sAutoData, '\t');
-			Misc::Split(sDefData, aDefaultListData, '\n');
-
-			if (IsAutoList())
-				Misc::Split(sAutoData, aAutoListData, '\n');
-
-			return TRUE;
-		}
-
-		// else
-		return FALSE;
-	}
-
-	BOOL SupportsFeature(DWORD dwFeature) const
-	{
-		switch (dwFeature)
-		{
-		// sorting and inheritance works on all data types
-		case TDCCAF_SORT:
-		case TDCCAF_INHERITPARENTCHANGES:
-			return TRUE;
-
-		case TDCCAF_FILTER:
-			return IsList();
-
-		default: 
-			// calculations not supported on multi-list types
-			if (IsMultiList())
-				return FALSE;
-			break;
-		}
-
-		DWORD dwDataType = GetDataType();
-
-		switch (dwDataType)
-		{
-		case TDCCA_DOUBLE:
-		case TDCCA_INTEGER:
-		case TDCCA_TIMEPERIOD:
-			return ((dwFeature == TDCCAF_ACCUMULATE) || 
-					(dwFeature == TDCCAF_MAXIMIZE) || 
-					(dwFeature == TDCCAF_MINIMIZE) ||
-					(dwFeature == TDCCAF_HIDEZERO));
-			
-		case TDCCA_DATE:
-			return ((dwFeature == TDCCAF_MAXIMIZE) || 
-					(dwFeature == TDCCAF_MINIMIZE) ||
-					(dwFeature == TDCCAF_SHOWTIME));
-			
-		case TDCCA_STRING:
-		case TDCCA_FILELINK:
-		case TDCCA_BOOL:
-		case TDCCA_ICON:
-			break;
-
-		case TDCCA_FRACTION:
-			return ((dwFeature == TDCCAF_DISPLAYASPERCENT) ||
-					(dwFeature == TDCCAF_MAXIMIZE) || 
-					(dwFeature == TDCCAF_MINIMIZE) ||
-					(dwFeature == TDCCAF_HIDEZERO));
-
-		default:
-			ASSERT(0);
-			break;
-		}
-		
-		return FALSE;
-	}
-
-	BOOL SupportsCalculation() const
-	{
-		return SupportsFeature(TDCCAF_ACCUMULATE) ||
-				SupportsFeature(TDCCAF_MAXIMIZE) ||
-				SupportsFeature(TDCCAF_MINIMIZE);
-	}
-
-	BOOL IsCalculated() const
-	{
-		return HasFeature(TDCCAF_ACCUMULATE) ||
-				HasFeature(TDCCAF_MAXIMIZE) ||
-				HasFeature(TDCCAF_MINIMIZE);
-	}
-
-	CString GetNextListItem(const CString& sItem, BOOL bNext) const
-	{
-		DWORD dwListType = GetListType();
-
-		ASSERT (dwListType != TDCCA_NOTALIST);
-
-		switch (aDefaultListData.GetSize())
-		{
-		case 0:
-			return sItem;
-
-		default:
-			{
-				int nFind = Misc::Find(sItem, aDefaultListData, FALSE, FALSE);
-				ASSERT((nFind != -1) || sItem.IsEmpty());
-
-				if (bNext)
-				{
-					nFind++;
-
-					if (nFind < aDefaultListData.GetSize())
-						return aDefaultListData[nFind];
-				}
-				else // prev
-				{
-					if (nFind == -1)
-						nFind = aDefaultListData.GetSize();
-
-					nFind--;
-
-					if (nFind >= 0)
-						return aDefaultListData[nFind];
-				}
-
-				// all else
-				return _T("");
-			}
-			break;
-		}
-	}
-
-	CString GetImageName(const CString& sImage) const
-	{
-		CString sName;
-		int nTag = Misc::Find(sImage, aDefaultListData);
-
-		if (nTag != -1)
-		{
-			CString sTag = aDefaultListData[nTag], sDummy;
-			VERIFY(DecodeImageTag(sTag, sDummy, sName));
-		}
-
-		return sName;
-	}
-	
-	int CalcLongestListItem(CDC* pDC) const
-	{
-		if (!IsList())
-		{
-			ASSERT(0);
-			return 0;
-		}
-
-		int nItem = aDefaultListData.GetSize(), nLongest = 0;
-
-		while (nItem--)
-		{
-			const CString& sItem = Misc::GetItem(aDefaultListData, nItem);
-			int nItemLen = 0;
-
-			switch (GetDataType())
-			{
-			case TDCCA_STRING:
-			case TDCCA_INTEGER:	
-			case TDCCA_DOUBLE:	
-			case TDCCA_FRACTION:
-			case TDCCA_DATE:	
-			case TDCCA_BOOL:
-			case TDCCA_TIMEPERIOD:
-				nItemLen = pDC->GetTextExtent(sItem).cx;
-				break;
-
-			case TDCCA_ICON:
-				{
-					nItemLen = 20; // for the icon
-
-					// check for trailing text
-					CString sDummy, sName;
-
-					if (DecodeImageTag(sItem, sDummy, sName) && !sName.IsEmpty())
-						nItemLen += pDC->GetTextExtent(sName).cx;
-				}
-				break;
-
-			default:
-				ASSERT(0);
-				break;
-			}
-
-			nLongest = max(nLongest, nItemLen);
-		}
-
-		return nLongest;
-	}
-
-	static BOOL IsEncodedImageTag(const CString& sImage)
-	{
-		return (sImage.Find(':') != -1);
-	}
-
-	static CString EncodeImageTag(const CString& sImage, const CString& sName) 
-	{ 
-		if (IsEncodedImageTag(sImage))
-			return sImage;
-
-		return (sImage + ':' + sName);
-	}
-
-	static BOOL DecodeImageTag(const CString& sTag, CString& sImage, CString& sName)
-	{
-		sImage.Empty();
-		sName.Empty();
-
-		CStringArray aParts;
-		int nNumParts = Misc::Split(sTag, aParts, ':');
-
-		switch (nNumParts)
-		{
-		case 2:
-			sName = aParts[1];
-			// fall thru
-		case 1:
-			sImage = aParts[0];
-			break;
-
-		case 0:
-			break;
-		}
-
-		return !sImage.IsEmpty();
-	}
-	
-	///////////////////////////////////////////////////////////////////////////////
-	CString sUniqueID;
-	CString sColumnTitle;
-	CString sLabel;
-	UINT nTextAlignment;
-	DWORD dwFeatures;
-	CStringArray aDefaultListData;
-	mutable CStringArray aAutoListData;
-	BOOL bEnabled;
-
-private:
-	// these are managed internally
-	DWORD dwAttribType;
-	TDC_COLUMN nColID;
-	TDC_ATTRIBUTE nAttribID;
-	///////////////////////////////////////////////////////////////////////////////
-
-	void SetTypes(DWORD dwDataType, DWORD dwListType)
-	{
-		dwAttribType = (dwDataType | ValidateListType(dwDataType, dwListType));
-	}
-
-	static DWORD ValidateListType(DWORD dwDataType, DWORD dwListType)
-	{
-		// ensure list-type cannot be applied to dates or times,
-		// or only partially to icons, flags and file links
-		switch (dwDataType)
-		{
-		case TDCCA_STRING:
-		case TDCCA_INTEGER:
-		case TDCCA_DOUBLE:
-			// all types supported
-			break;
-
-		case TDCCA_DATE:
-		case TDCCA_TIMEPERIOD:
-			dwListType = TDCCA_NOTALIST;
-			break;
-
-		case TDCCA_FRACTION:
-			if (dwListType)
-			{
-				if ((dwListType != TDCCA_FIXEDLIST) && (dwListType != TDCCA_AUTOLIST))
-					dwListType = TDCCA_FIXEDLIST;
-			}
-			break;
-
-		case TDCCA_BOOL:
-			if (dwListType)
-			{
-				dwListType = TDCCA_FIXEDLIST;
-			}
-			break;
-
-		case TDCCA_ICON:
-			if (dwListType)
-			{
-				if ((dwListType != TDCCA_FIXEDLIST) && (dwListType != TDCCA_FIXEDMULTILIST))
-					dwListType = TDCCA_FIXEDLIST;
-			}
-			break;
-			
-		case TDCCA_FILELINK:
-			if (dwListType)
-			{
-				dwListType = TDCCA_AUTOLIST;
-			}
-			break;
-
-		default:
-			ASSERT(0);
-			break;
-		}
-
-		return dwListType;
-	}
-};
-
-class CTDCCustomAttribDefinitionArray : public CArray<TDCCUSTOMATTRIBUTEDEFINITION, TDCCUSTOMATTRIBUTEDEFINITION&>
-{
-public:
-	CTDCCustomAttribDefinitionArray() {}
-	CTDCCustomAttribDefinitionArray(const CTDCCustomAttribDefinitionArray& other) { Copy(other); }
-
-	int Add(TDCCUSTOMATTRIBUTEDEFINITION& newElement)
-	{
-		int nIndex = CArray<TDCCUSTOMATTRIBUTEDEFINITION, TDCCUSTOMATTRIBUTEDEFINITION&>::Add(newElement);
-		RebuildIDs();
-
-		return nIndex;
-	};
-
-	void InsertAt(int nIndex, TDCCUSTOMATTRIBUTEDEFINITION& newElement, int nCount = 1)
-	{
-		CArray<TDCCUSTOMATTRIBUTEDEFINITION, TDCCUSTOMATTRIBUTEDEFINITION&>::InsertAt(nIndex, newElement, nCount);
-		RebuildIDs();
-	}
-
-	void RemoveAt(int nIndex, int nCount = 1)
-	{
-		CArray<TDCCUSTOMATTRIBUTEDEFINITION, TDCCUSTOMATTRIBUTEDEFINITION&>::RemoveAt(nIndex, nCount);
-		RebuildIDs();
-	}
-
-	BOOL MatchAny(const CTDCCustomAttribDefinitionArray& aAttribDefs) const
-	{
-		for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
-		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttrib];
-
-			if (Find(attribDef.sUniqueID) != -1)
-				return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	int Find(const CString& sAttribID, int nIgnore = -1) const
-	{
-		ASSERT(!sAttribID.IsEmpty());
-
-		if (!sAttribID.IsEmpty())
-		{
-			int nAttrib = GetSize();
-
-			while (nAttrib--)
-			{
-				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
-
-				if ((nAttrib != nIgnore) && (attribDef.sUniqueID.CompareNoCase(sAttribID) == 0))
-					return nAttrib;
-			}
-		}
-
-		return -1;
-	}
-
-	int Find(TDC_ATTRIBUTE nAttribID, int nIgnore = -1) const
-	{
-		ASSERT(nAttribID != TDCA_NONE);
-
-		int nAttrib = GetSize();
-
-		while (nAttrib--)
-		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
-
-			if ((nAttrib != nIgnore) && (attribDef.GetAttributeID() == nAttribID))
-				return nAttrib;
-		}
-
-		return -1;
-	}
-
-	int Append(const CTDCCustomAttribDefinitionArray& aSrc)
-	{
-		int nOrgSize = GetSize();
-
-		for (int nAttrib = 0; nAttrib < aSrc.GetSize(); nAttrib++)
-		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aSrc.GetData()[nAttrib];
-
-			// Append unique items only
-			if (Find(attribDef.sUniqueID) == -1)
-			{
-				TDCCUSTOMATTRIBUTEDEFINITION def = aSrc[nAttrib];
-				Add(def);
-			}
-			// else skip
-		}
-
-		return (GetSize() - nOrgSize);
-	}
-
-	BOOL AnyHasFeature(DWORD dwFeature) const
-	{
-		int nDef = GetSize();
-
-		while (nDef--)
-		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& def = ElementAt(nDef);
-
-			if (def.HasFeature(dwFeature))
-				return TRUE;
-		}
-
-		return FALSE;
-	}
-	
-protected:
-	void RebuildIDs()
-	{
-		int nColID = TDCC_CUSTOMCOLUMN_FIRST;
-		int nAttribID = TDCA_CUSTOMATTRIB_FIRST;
-
-		for (int nAttrib = 0; nAttrib < GetSize(); nAttrib++)
-		{
-			TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAttrib);
-
-			attribDef.nColID = (TDC_COLUMN)nColID++;
-			attribDef.nAttribID = (TDC_ATTRIBUTE)nAttribID++;
-		}
-	}
-};
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
 struct TDCOPERATOR
 {
 	FIND_OPERATOR op;
@@ -1314,11 +710,12 @@ struct SEARCHPARAM
 
 	BOOL SetAttribute(TDC_ATTRIBUTE a, FIND_ATTRIBTYPE t = FT_NONE)
 	{
-		ASSERT(!IsCustomAttribute(a));
-
 		// custom attributes must have a custom ID
-		if (IsCustomAttribute(a))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(a))
+		{
+			ASSERT(0);
 			return FALSE;
+		}
 
 		// handle deprecated relative date attributes
 		switch (attrib)
@@ -1353,7 +750,7 @@ struct SEARCHPARAM
 	FIND_OPERATOR GetOperator() const { return op; }
 	BOOL GetAnd() const { return bAnd; }
 	BOOL GetOr() const { return !bAnd; }
-	BOOL IsCustomAttribute() const { return IsCustomAttribute(attrib); }
+	BOOL IsCustomAttribute() const { return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(attrib); }
 
 	BOOL IsRelativeDate() const
 	{
@@ -1373,12 +770,11 @@ struct SEARCHPARAM
 
 	BOOL SetCustomAttribute(TDC_ATTRIBUTE a, const CString& id, FIND_ATTRIBTYPE t)
 	{
-		ASSERT (IsCustomAttribute(a));
-		ASSERT (t != FT_NONE);
-		ASSERT (!id.IsEmpty());
-
-		if (!IsCustomAttribute(a) || id.IsEmpty() || t == FT_NONE)
+		if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(a) || id.IsEmpty() || t == FT_NONE)
+		{
+			ASSERT(0);
 			return FALSE;
+		}
 
 		attrib = a;
 		nType = t;
@@ -1425,18 +821,18 @@ struct SEARCHPARAM
 
 	void SetAttribType(FIND_ATTRIBTYPE nAttribType)
 	{
-		ASSERT (nAttribType != FT_NONE);
-		ASSERT (IsCustomAttribute(attrib));
-
-		if ((nAttribType != FT_NONE) && IsCustomAttribute(attrib))
+		if ((nAttribType == FT_NONE) && !TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(attrib))
 		{
-			nType = nAttribType;
+			ASSERT(0);
+			return;
+		}
 
-			// handle relative dates
-			if ((nType == FT_DATE) || (nType == FT_DATERELATIVE)) 
-			{
-				bRelativeDate = (nType == FT_DATERELATIVE);
-			}
+		nType = nAttribType;
+
+		// handle relative dates
+		if ((nType == FT_DATE) || (nType == FT_DATERELATIVE))
+		{
+			bRelativeDate = (nType == FT_DATERELATIVE);
 		}
 	}
 
@@ -1445,11 +841,6 @@ struct SEARCHPARAM
 		sValue.Empty();
 		dValue = 0.0;
 		nValue = 0;
-	}
-
-	static BOOL IsCustomAttribute(TDC_ATTRIBUTE attrib)
-	{
-		return (attrib >= TDCA_CUSTOMATTRIB_FIRST && attrib <= TDCA_CUSTOMATTRIB_LAST);
 	}
 
 	static FIND_ATTRIBTYPE GetAttribType(TDC_ATTRIBUTE attrib, BOOL bRelativeDate)

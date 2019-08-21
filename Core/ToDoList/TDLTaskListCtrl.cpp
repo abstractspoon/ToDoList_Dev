@@ -8,7 +8,6 @@
 #include "todoctrldata.h"
 #include "tdcstatic.h"
 #include "tdcmsg.h"
-#include "tdccustomattributehelper.h"
 #include "tdcimagelist.h"
 
 #include "..\shared\graphicsmisc.h"

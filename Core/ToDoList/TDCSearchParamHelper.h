@@ -14,6 +14,8 @@
 // predecs
 class CPreferences;
 class CTDCCustomAttribDefinitionArray;
+class CTDCCustomAttributeDataMap;
+class CSearchParamArray;
 
 struct SEARCHPARAM;
 
@@ -25,6 +27,15 @@ public:
 						const CTDCCustomAttribDefinitionArray& aCustAttribDefs, SEARCHPARAM& rule);
 
 	static BOOL SaveRule(CPreferences& prefs, const CString& sRule, const SEARCHPARAM& rule);
+
+	static FIND_ATTRIBTYPE GetAttributeFindType(const CString& sUniqueID, BOOL bRelativeDate,
+												const CTDCCustomAttribDefinitionArray& aAttribDefs);
+
+	static FIND_ATTRIBTYPE GetAttributeFindType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate,
+												const CTDCCustomAttribDefinitionArray& aAttribDefs);
+
+	static BOOL AppendFilterRules(const CTDCCustomAttributeDataMap& mapData,
+								  const CTDCCustomAttribDefinitionArray& aAttribDefs, CSearchParamArray& aRules);
 
 protected:
 	static BOOL DecodeAttribute(const CString& sAttrib, DWORD dwFlags,

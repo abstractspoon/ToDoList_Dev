@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataUtils.h"
-#include "TDCCustomAttributeHelper.h"
 #include "tdlTaskCtrlBase.h"
 
 #include "..\shared\timehelper.h"
@@ -571,7 +570,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 				TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-				if (CTDCCustomAttributeHelper::GetAttributeDef(sUniqueID, query.aAttribDefs, attribDef))
+				if (query.aAttribDefs.GetAttributeDef(sUniqueID, attribDef))
 				{
 					TDCCADATA data;
 					pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);

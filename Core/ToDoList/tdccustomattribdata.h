@@ -7,7 +7,7 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "..\interfaces\ITaskList.h"
+#include "..\interfaces\ITaskList.h" // for TDC_UNITS
 
 #include <afxtempl.h>
 

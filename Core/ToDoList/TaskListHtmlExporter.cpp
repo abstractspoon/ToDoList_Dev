@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "TasklistHtmlExporter.h"
 #include "tdlrecurringtaskedit.h"
-#include "TDCCustomAttributeHelper.h"
 #include "TDLPrintDialog.h"
 
 #include "..\shared\xmlfile.h"
@@ -366,7 +365,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 					
 				case TDLPDS_TABLE:
 					// special case: custom attrib
-					if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
+					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 						sFmtAttrib = FormatTableCell(sAttribVal);
 					else
 						sFmtAttrib = sAttribVal;
@@ -539,7 +538,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	}
 
 	// we've already handled custom attrib above
-	if ((EXPORTSTYLE == TDLPDS_TABLE) && !CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
+	if ((EXPORTSTYLE == TDLPDS_TABLE) && !TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 	{
 		if (sItem.IsEmpty())
 			sItem = SPACE;

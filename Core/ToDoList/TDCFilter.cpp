@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "TDCFilter.h"
 #include "TDCSearchParamHelper.h"
-#include "TDCCustomAttributeHelper.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -457,7 +456,7 @@ void CTDCFilter::AddNonDateFilterQueryRules(const TDCFILTER& filter, const CTDCC
 	AppendPriorityRiskRule(filter.nRisk, TDCA_RISK, params.aRules, FM_ANYRISK, FM_NORISK);
 
 	// Custom Attributes
-	bWantCustomAttrib = CTDCCustomAttributeHelper::AppendFilterRules(filter.mapCustomAttrib, aCustomAttribDefs, params.aRules);
+	bWantCustomAttrib = CTDCSearchParamHelper::AppendFilterRules(filter.mapCustomAttrib, aCustomAttribDefs, params.aRules);
 
 	// special case: no rules + ignore completed
 	if (params.bIgnoreDone && (params.aRules.GetSize() == 0))
@@ -908,10 +907,10 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 				break;
 
 			default:
-				if (CTDCCustomAttributeHelper::IsCustomAttribute(nModType))
+				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nModType))
 				{
 					TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-					VERIFY(CTDCCustomAttributeHelper::GetAttributeDef(nModType, aCustomAttribDefs, attribDef));
+					VERIFY(aCustomAttribDefs.GetAttributeDef(nModType, attribDef));
 
 					if (!attribDef.IsList())
 					{

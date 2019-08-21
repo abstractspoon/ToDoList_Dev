@@ -5,7 +5,6 @@
 #include "resource.h"
 #include "TDLFindTaskExpressionListCtrl.h"
 #include "tdcstatic.h"
-#include "TDCCustomAttributeHelper.h"
 #include "TDLTaskIconDlg.h"
 
 #include "..\shared\HoldRedraw.h"
@@ -292,7 +291,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 					{
 						TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-						if (CTDCCustomAttributeHelper::GetAttributeDef(rule.GetAttribute(), m_aAttribDefs, attribDef))
+						if (m_aAttribDefs.GetAttributeDef(rule.GetAttribute(), attribDef))
 						{
 							if (attribDef.IsList())
 							{
@@ -368,7 +367,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 					{
 						TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-						if (CTDCCustomAttributeHelper::GetAttributeDef(rule.GetAttribute(), m_aAttribDefs, attribDef))
+						if (m_aAttribDefs.GetAttributeDef(rule.GetAttribute(), attribDef))
 							bBrowse = !attribDef.IsList();
 					}
 					
@@ -454,7 +453,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 					TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 					BOOL bList = FALSE;
 
-					if (CTDCCustomAttributeHelper::GetAttributeDef(rule.GetAttribute(), m_aAttribDefs, attribDef))
+					if (m_aAttribDefs.GetAttributeDef(rule.GetAttribute(), attribDef))
 						bList = attribDef.IsList();
 
 					return (bList ? ILCT_DROPLIST : ILCT_BROWSE);
@@ -493,7 +492,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 						{
 							TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-							if (CTDCCustomAttributeHelper::GetAttributeDef(nAttrib, m_aAttribDefs, attribDef))
+							if (m_aAttribDefs.GetAttributeDef(nAttrib, attribDef))
 							{
 								if (attribDef.IsList())
 								{
@@ -828,7 +827,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 		{
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-			if (CTDCCustomAttributeHelper::GetAttributeDef(rule.GetAttribute(), m_aAttribDefs, attribDef))
+			if (m_aAttribDefs.GetAttributeDef(rule.GetAttribute(), attribDef))
 			{
 				ASSERT(attribDef.IsList());
 
@@ -846,7 +845,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-			if (CTDCCustomAttributeHelper::GetAttributeDef(rule.GetAttribute(), m_aAttribDefs, attribDef))
+			if (m_aAttribDefs.GetAttributeDef(rule.GetAttribute(), attribDef))
 			{
 				if (attribDef.IsList())
 				{

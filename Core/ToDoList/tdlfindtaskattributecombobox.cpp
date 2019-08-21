@@ -5,7 +5,7 @@
 #include "resource.h"
 #include "tdcstatic.h"
 #include "tdlfindtaskattributecombobox.h"
-#include "TDCCustomAttributeHelper.h"
+#include "TDCSearchParamHelper.h"
 
 #include "..\shared\dialoghelper.h"
 #include "..\shared\enstring.h"
@@ -87,10 +87,10 @@ BOOL CTDLFindTaskAttributeComboBox::GetSelectedAttribute(SEARCHPARAM& rule) cons
 		DWORD dwItemData = GetItemData(nSel);
 		DecodeItemData(dwItemData, nAttrib, bRelative);
 
-		if (SEARCHPARAM::IsCustomAttribute(nAttrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 		{
-			CString sUniqueID = CTDCCustomAttributeHelper::GetAttributeTypeID(nAttrib, m_aAttribDefs);
-			nType = CTDCCustomAttributeHelper::GetAttributeFindType(sUniqueID, bRelative, m_aAttribDefs);
+			CString sUniqueID = m_aAttribDefs.GetAttributeTypeID(nAttrib);
+			nType = CTDCSearchParamHelper::GetAttributeFindType(sUniqueID, bRelative, m_aAttribDefs);
 
 			rule.SetCustomAttribute(nAttrib, sUniqueID, nType);
 		}
@@ -188,7 +188,7 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule)
 		break;
 
 	default:
-		if (CTDCCustomAttributeHelper::IsCustomAttribute(attrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(attrib))
 		{
 			// try custom attributes
 			int nAttrib = m_aAttribDefs.GetSize();
@@ -262,12 +262,12 @@ BOOL CTDLFindTaskAttributeComboBox::AttributeIsTime(TDC_ATTRIBUTE attrib) const
 		return TRUE;
 
 	default:
-		if (CTDCCustomAttributeHelper::IsCustomAttribute(attrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(attrib))
 		{
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
 			// check for user date attributes
-			if (CTDCCustomAttributeHelper::GetAttributeDef(attrib, m_aAttribDefs, attribDef))
+			if (m_aAttribDefs.GetAttributeDef(attrib, attribDef))
 			{
 				return (attribDef.GetDataType() == TDCCA_TIMEPERIOD);
 			}
@@ -291,12 +291,12 @@ BOOL CTDLFindTaskAttributeComboBox::AttributeIsDate(TDC_ATTRIBUTE attrib) const
 		return TRUE;
 		
 	default:
-		if (CTDCCustomAttributeHelper::IsCustomAttribute(attrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(attrib))
 		{
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 			
 			// check for user date attributes
-			if (CTDCCustomAttributeHelper::GetAttributeDef(attrib, m_aAttribDefs, attribDef))
+			if (m_aAttribDefs.GetAttributeDef(attrib, attribDef))
 			{
 				return (attribDef.GetDataType() == TDCCA_DATE);
 			}

@@ -1,4 +1,4 @@
-// TDCCustomAttributeHelper.h: interface for the CTDCCustomAttributeHelper class.
+// TDCCustomAttributeHelper.h: interface for the CTDCCustomAttributeUIHelper class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -18,9 +18,11 @@ class CTDCCustomControlArray;
 class CTDCImageList;
 class CWndPromptManager;
 
+struct TDCCUSTOMATTRIBUTEDEFINITION;
+
 //////////////////////////////////////////////////////////////////////
 
-class CTDCCustomAttributeHelper
+class CTDCCustomAttributeUIHelper
 {
 public:
 	static BOOL RebuildEditControls(const CTDCCustomAttribDefinitionArray& aAttribDefs,
@@ -53,52 +55,11 @@ public:
 	static BOOL FlushEditControl(CWnd* pCtrl, CWnd* pParent,
 								 const CTDCCustomControlArray& aControls);
 
-	// -------------------------------------------------------------------------
-
-	static CString GetAttributeTypeID(UINT nCtrlID, const CTDCCustomControlArray& aControls);
-	static CString GetAttributeTypeID(TDC_COLUMN nColID, const CTDCCustomAttribDefinitionArray& aAttribDefs);
-	static CString GetAttributeTypeID(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs);
-
-	static BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
-	static BOOL IsCustomAttributeEnabled(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs);
-	static BOOL IsCustomColumn(TDC_COLUMN nColID);
-	static BOOL IsCustomColumnEnabled(TDC_COLUMN nColID, const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	static BOOL IsCustomEditControl(UINT nCtrlID);
 	static BOOL IsCustomFilterControl(UINT nCtrlID);
 
 	static CString GetFilterControlTooltip(UINT nCtrlID, CWnd* pParent);
 	static CString GetEditControlTooltip(UINT nCtrlID, CWnd* pParent);
-
-	static BOOL GetAttributeDef(TDC_COLUMN nColID,
-								const CTDCCustomAttribDefinitionArray& aAttribDefs,
-								TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
-
-	static BOOL GetAttributeDef(TDC_ATTRIBUTE nAttribID,
-								const CTDCCustomAttribDefinitionArray& aAttribDefs,
-								TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
-
-	static BOOL GetAttributeDef(const CUSTOMATTRIBCTRLITEM& ctrl,
-								const CTDCCustomAttribDefinitionArray& aAttribDefs,
-								TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
-
-	static BOOL GetAttributeDef(const CString& sUniqueID,
-								const CTDCCustomAttribDefinitionArray& aAttribDefs,
-								TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
-
-	static DWORD GetAttributeDataType(const CString& sUniqueID,
-									  const CTDCCustomAttribDefinitionArray& aAttribDefs);
-
-	static CString FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bISODates);
-	static CString FormatNumber(double dValue, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
-
-	static TDC_ATTRIBUTE GetAttributeID(TDC_COLUMN nColID,
-										const CTDCCustomAttribDefinitionArray& aAttribDefs);
-
-	static TDC_ATTRIBUTE GetAttributeID(const CString& sUniqueID,
-										const CTDCCustomAttribDefinitionArray& aAttribDefs);
-
-	static BOOL IsColumnSortable(TDC_COLUMN nColID,
-								 const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 	static void SaveAutoListDataToDefs(const CWnd* pParent, const CTDCCustomControlArray& aControls,
 									   const CTDCCustomAttribDefinitionArray& aAttribDefs);
@@ -133,18 +94,6 @@ public:
 							   const CTDCCustomAttribDefinitionArray& aAttribDefs,
 							   CTDCCustomAttributeDataMap& mapData);
 
-	static FIND_ATTRIBTYPE GetAttributeFindType(const CString& sUniqueID, BOOL bRelativeDate,
-												const CTDCCustomAttribDefinitionArray& aAttribDefs);
-
-	static FIND_ATTRIBTYPE GetAttributeFindType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate,
-												const CTDCCustomAttribDefinitionArray& aAttribDefs);
-
-	static BOOL AppendFilterRules(const CTDCCustomAttributeDataMap& mapData,
-								  const CTDCCustomAttribDefinitionArray& aAttribDefs, CSearchParamArray& aRules);
-
-	static int GetVisibleColumnIDs(const CTDCCustomAttribDefinitionArray& aAttribDefs,
-								   CTDCColumnIDMap& mapCols, BOOL bAppend = TRUE);
-
 	static void DDX(CDataExchange* pDX, const CTDCCustomControlArray& aControls,
 					const CTDCCustomAttribDefinitionArray& aAttribDefs, CTDCCustomAttributeDataMap& value);
 
@@ -153,11 +102,11 @@ public:
 											const CTDCCustomControlArray& aControls);
 
 protected:
-	static CWnd* CreateAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
+	static CWnd* CreateAttributeCtrl(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
 								 const CTDCImageList& ilImages, CWnd* pParent,
 								 UINT nCtrlID, BOOL bBuddy, BOOL bFilter, BOOL bMultiSelectionFilter);
 
-	static CWnd* CreateAttributeLabel(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
+	static CWnd* CreateAttributeLabelCtrl(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
 									  CWnd* pParent, UINT nCtrlID, BOOL bBuddy);
 
 	static BOOL AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);

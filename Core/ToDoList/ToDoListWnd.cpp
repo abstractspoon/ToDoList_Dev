@@ -26,7 +26,6 @@
 #include "multitaskfile.h"
 #include "tdcstatic.h"
 #include "tdlcustomattributedlg.h"
-#include "tdccustomattributehelper.h"
 #include "tdlwelcomewizard.h"
 #include "tdlpastefromclipboarddlg.h"
 #include "tdlanalyseloggedtimedlg.h"

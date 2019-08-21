@@ -6,7 +6,6 @@
 #include "TDLAnalyseLoggedTimeDlg.h"
 #include "TDCStruct.h"
 #include "TDCTaskTimeLog.h"
-#include "TDCCustomAttributeHelper.h"
 
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\enstring.h"
@@ -82,7 +81,7 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, con
 	m_bGroupBy = prefs.GetProfileInt(m_sPrefsKey, _T("GroupBy"), FALSE);
 	m_nGroupByAttrib = prefs.GetProfileEnum(m_sPrefsKey, _T("GroupByAttrib"), TDCA_NONE);
 
-	if (CTDCCustomAttributeHelper::IsCustomAttribute(m_nGroupByAttrib))
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(m_nGroupByAttrib))
 	{
 		int nCust = m_aCustomAttribDefs.Find(prefs.GetProfileString(m_sPrefsKey, _T("GroupByCustomAttrib")));
 
@@ -224,7 +223,7 @@ void CTDLAnalyseLoggedTimeDlg::OnOK()
 	prefs.WriteProfileInt(m_sPrefsKey, _T("GroupBy"), m_bGroupBy);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("GroupByAttrib"), m_nGroupByAttrib);
 
-	if (CTDCCustomAttributeHelper::IsCustomAttribute(m_nGroupByAttrib))
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(m_nGroupByAttrib))
 	{
 		int nCust = (m_nGroupByAttrib - TDCA_CUSTOMATTRIB);
 		prefs.WriteProfileString(m_sPrefsKey, _T("GroupByCustomAttrib"), m_aCustomAttribDefs[nCust].sUniqueID);
