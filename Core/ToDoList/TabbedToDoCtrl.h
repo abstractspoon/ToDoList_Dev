@@ -93,7 +93,7 @@ public:
 	BOOL CanSaveTaskViewToImage() const;
 
 	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
-	TDC_COLUMN ColumnHitTest(const CPoint& ptScreen) const;
+	TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
 	BOOL WantTaskContextMenu() const;
 
 	virtual BOOL IsSorting() const;

@@ -3883,13 +3883,13 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 			if (tdc.WantTaskContextMenu())
 			{
 				nMenuID = MM_TASKCONTEXT;
-				nColID = tdc.ColumnHitTest(point);
+				nColID = tdc.HitTestColumn(point);
 			}
 			break;
 
 		case TDCHT_COLUMNHEADER:
 			nMenuID = MM_HEADERCONTEXT;
-			nColID = tdc.ColumnHitTest(point);
+			nColID = tdc.HitTestColumn(point);
 			break;
 		}
 	}

@@ -4072,9 +4072,41 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen) const
 	return TDCHT_NOWHERE;
 }
 
-TDC_COLUMN CTabbedToDoCtrl::ColumnHitTest(const CPoint& ptScreen) const
+TDC_COLUMN CTabbedToDoCtrl::HitTestColumn(const CPoint& ptScreen) const
 {
-	return CToDoCtrl::ColumnHitTest(ptScreen);
+	FTC_VIEW nView = GetTaskView();
+	
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		return CToDoCtrl::HitTestColumn(ptScreen);
+
+	case FTCV_TASKLIST:
+		return m_taskList.HitTestColumn(ptScreen);
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		break;
+		
+	default:
+		ASSERT(0);
+	}
+	return TDCC_NONE;
 }
 
 int CTabbedToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const

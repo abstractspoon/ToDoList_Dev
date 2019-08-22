@@ -430,7 +430,7 @@ public:
 	virtual void NotifyEndPreferencesUpdate() { /* do nothing */ }
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
 	virtual TDC_HITTEST HitTest(const CPoint& ptScreen) const;
-	virtual TDC_COLUMN ColumnHitTest(const CPoint& ptScreen) const;
+	virtual TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
 
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
 	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);

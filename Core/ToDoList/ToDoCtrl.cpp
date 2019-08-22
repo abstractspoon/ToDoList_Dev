@@ -7961,7 +7961,7 @@ TDC_HITTEST CToDoCtrl::HitTest(const CPoint& ptScreen) const
 	return m_taskTree.HitTest(ptScreen);
 }
 
-TDC_COLUMN CToDoCtrl::ColumnHitTest(const CPoint& ptScreen) const
+TDC_COLUMN CToDoCtrl::HitTestColumn(const CPoint& ptScreen) const
 {
 	return m_taskTree.HitTestColumn(ptScreen);
 }
