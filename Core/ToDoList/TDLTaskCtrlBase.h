@@ -113,7 +113,7 @@ public:
 	BOOL CanSaveToImage() const;
 
 	BOOL CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly);
+	BOOL CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
 
 	COLORREF GetSelectedTaskColor() const; // -1 on no item selected
 	CString GetSelectedTaskIcon() const;
@@ -395,6 +395,7 @@ protected:
 	void SetTrackedColumns(const CDWordArray& aTracked);
 	void GetTrackedColumns(CDWordArray& aTracked) const;
 
+	int GetAllTaskIDs(CDWordArray& aTaskIDs) const;
 	POSITION GetFirstSelectedTaskPos() const;
 	DWORD GetNextSelectedTaskID(POSITION& pos) const;
 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;

@@ -2203,11 +2203,8 @@ int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) cons
 	int nNumIDs = GetSelectedTaskIDs(aTaskIDs, dwFocusID, FALSE);
 
 	// extra processing
-	if (bTrue)
-	{
-		for (int nID = 0; nID < nNumIDs; nID++)
-			aTaskIDs[nID] = m_data.GetTrueTaskID(aTaskIDs[nID]);
-	}
+	if (nNumIDs && bTrue)
+		m_data.GetTrueTaskIDs(aTaskIDs);
 
 	return nNumIDs;
 }

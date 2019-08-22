@@ -308,7 +308,7 @@ public:
 	BOOL CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, const CString& sToCustomAttribID);
 
 	BOOL CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly);
+	BOOL CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
 
 	BOOL CanClearSelectedTaskFocusedAttribute() const;
 	BOOL ClearSelectedTaskFocusedAttribute();

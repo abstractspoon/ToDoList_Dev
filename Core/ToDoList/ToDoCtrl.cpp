@@ -8177,9 +8177,9 @@ BOOL CToDoCtrl::CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) 
 	return m_taskTree.CanCopyColumnValues(nColID, bSelectedTasksOnly);
 }
 
-BOOL CToDoCtrl::CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
+BOOL CToDoCtrl::CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
 {
-	return m_taskTree.CopyColumnValues(nColID, bSelectedTasksOnly);
+	return m_taskTree.CopyColumnValues(nColID, bSelectedTasksOnly, aValues);
 }
 
 BOOL CToDoCtrl::CopySelectedTasks() const

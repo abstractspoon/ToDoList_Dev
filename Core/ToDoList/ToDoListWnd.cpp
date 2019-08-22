@@ -3913,13 +3913,18 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 					break;
 				}
 				
-				CToolbarHelper::PrepareMenuItems(pPopup, this);
-
 				// prevent re-entrancy
 				CAutoFlagT<UINT> af(m_nContextMenuID, nMenuID);
 				CAutoFlagT<TDC_COLUMN> af2(m_nContextColumnID, nColID);
 
-				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, point.x, point.y, this);
+				CToolbarHelper::PrepareMenuItems(pPopup, this);
+
+				// Ensure that the command is handled before the
+				// auto-flags are restored to their original values
+				UINT nCmdID = pPopup->TrackPopupMenu(TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON, point.x, point.y, this);
+
+				if (nCmdID)
+					SendMessage(WM_COMMAND, nCmdID, 0);
 			}
 		}
 	}
@@ -12964,20 +12969,37 @@ LRESULT CToDoListWnd::OnModifyKeyboardShortcuts(WPARAM /*wp*/, LPARAM /*lp*/)
 
 void CToDoListWnd::OnTasklistCopyColumnValues() 
 {
-	GetToDoCtrl().CopyColumnValues(m_nContextColumnID, FALSE);
+	OnTasklistCopyColumnValues(FALSE);
 }
 
 void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().CanCopyColumnValues(m_nContextColumnID, FALSE));
+	OnUpdateTasklistCopyColumnValues(pCmdUI, FALSE);
 }
 
 void CToDoListWnd::OnTasklistCopySelectedTaskColumnValues() 
 {
-	GetToDoCtrl().CopyColumnValues(m_nContextColumnID, TRUE);
+	OnTasklistCopyColumnValues(TRUE);
 }
 
 void CToDoListWnd::OnUpdateTasklistCopySelectedTaskColumnValues(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().CanCopyColumnValues(m_nContextColumnID, TRUE));
+	OnUpdateTasklistCopyColumnValues(pCmdUI, TRUE);
+}
+
+void CToDoListWnd::OnTasklistCopyColumnValues(BOOL bSelectedTasks)
+{
+	ASSERT(m_nContextColumnID != TDCC_NONE);
+
+	CStringArray aValues;
+
+	if (GetToDoCtrl().CopyColumnValues(m_nContextColumnID, bSelectedTasks, aValues))
+	{
+		VERIFY(CClipboard(*this).SetText(Misc::FormatArray(aValues, '\n', TRUE)));
+	}
+}
+
+void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks)
+{
+	pCmdUI->Enable(GetToDoCtrl().CanCopyColumnValues(m_nContextColumnID, bSelectedTasks));
 }

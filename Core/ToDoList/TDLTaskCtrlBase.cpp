@@ -836,14 +836,103 @@ int CTDLTaskCtrlBase::GetColumnIndex(TDC_COLUMN nColID) const
 
 BOOL CTDLTaskCtrlBase::CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
 {
-	// TODO
-	return FALSE;
+	switch (nColID)
+	{
+		case TDCC_PRIORITY:
+		case TDCC_PERCENT:
+		case TDCC_TIMEEST:
+		case TDCC_TIMESPENT:
+		case TDCC_STARTDATE:
+		case TDCC_DUEDATE:
+		case TDCC_DONEDATE:
+		case TDCC_ALLOCTO:
+		case TDCC_ALLOCBY:
+		case TDCC_STATUS:
+		case TDCC_CATEGORY:
+		case TDCC_FILEREF:
+		case TDCC_POSITION:
+		case TDCC_ID:
+		case TDCC_CREATIONDATE:
+		case TDCC_CREATEDBY:
+		case TDCC_LASTMODDATE:
+		case TDCC_RISK:
+		case TDCC_EXTERNALID:
+		case TDCC_COST:
+		case TDCC_DEPENDENCY:
+		case TDCC_RECURRENCE:
+		case TDCC_VERSION:
+		case TDCC_REMAINING:
+		case TDCC_REMINDER:
+		case TDCC_PARENTID:
+		case TDCC_PATH:
+		case TDCC_TAGS:
+		case TDCC_SUBTASKDONE:
+		case TDCC_STARTTIME:
+		case TDCC_DUETIME:
+		case TDCC_DONETIME:
+		case TDCC_CREATIONTIME:
+		case TDCC_LASTMODBY:
+		case TDCC_COMMENTSSIZE:
+		case TDCC_CLIENT: 
+			break;
+
+		case TDCC_ICON:
+		case TDCC_RECENTEDIT:
+		case TDCC_LOCK:
+		case TDCC_COLOR:
+		case TDCC_DONE:
+		case TDCC_TRACKTIME:
+		case TDCC_FLAG:
+			return FALSE;
+
+		default:
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+			{
+				TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+				VERIFY(m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef));
+
+				switch (attribDef.GetAttributeType())
+				{
+				case TDCCA_BOOL:
+				case TDCCA_ICON:
+					return FALSE;
+				}
+			}
+			else
+			{
+				// Missed values
+				ASSERT(0);
+				return FALSE;
+			}
+			break;
+	}
+
+	return (bSelectedTasksOnly ? HasSelection() : m_lcColumns.GetItemCount());
 }
 
-BOOL CTDLTaskCtrlBase::CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
+BOOL CTDLTaskCtrlBase::CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
 {
-	// TODO
-	return FALSE;
+	if (!CanCopyColumnValues(nColID, bSelectedTasksOnly))
+		return FALSE;
+
+	CDWordArray aTaskIDs;
+	
+	int nItem = (bSelectedTasksOnly ? GetSelectedTaskIDs(aTaskIDs, FALSE) : GetAllTaskIDs(aTaskIDs));
+	ASSERT(nItem);
+	
+	aValues.SetSize(nItem);
+
+	while (nItem--)
+	{
+		const TODOITEM* pTDI = NULL;
+		const TODOSTRUCTURE* pTDS = NULL;
+
+		VERIFY(m_data.GetTrueTask(aTaskIDs[nItem], pTDI, pTDS));
+		
+		aValues[nItem] = GetTaskColumnText(aTaskIDs[nItem], pTDI, pTDS, nColID);
+	}
+
+	return aValues.GetSize();
 }
 
 BOOL CTDLTaskCtrlBase::SetColumnOrder(const CDWordArray& aColumns)
@@ -1479,7 +1568,7 @@ DWORD CTDLTaskCtrlBase::HitTestColumnsTask(const CPoint& ptScreen) const
 
 TDC_COLUMN CTDLTaskCtrlBase::HitTestColumn(const CPoint& ptScreen) const
 {
-	if (PtInClientRect(ptScreen, m_hdrColumns, TRUE) || // tree header
+	if (PtInClientRect(ptScreen, m_hdrTasks, TRUE) || // tree header
 		PtInClientRect(ptScreen, Tasks(), TRUE)) // tree
 	{
 		return TDCC_CLIENT;
@@ -1736,6 +1825,17 @@ DWORD CTDLTaskCtrlBase::GetNextSelectedTaskID(POSITION& pos) const
 		return 0;
 
 	return GetColumnItemTaskID(nSel);
+}
+
+int CTDLTaskCtrlBase::GetAllTaskIDs(CDWordArray& aTaskIDs) const
+{
+	int nItem = m_lcColumns.GetItemCount();
+	aTaskIDs.SetSize(nItem);
+
+	while (nItem--)
+		aTaskIDs[nItem] = GetColumnItemTaskID(nItem);
+
+	return aTaskIDs.GetSize();
 }
 
 void CTDLTaskCtrlBase::OnNotifySplitterChange(int /*nSplitPos*/)

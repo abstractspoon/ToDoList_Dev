@@ -579,6 +579,8 @@ protected:
 
 	void OnViewIncrementTaskViewFontSize(BOOL bLarger);
 	void OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI, BOOL bLarger);
+	void OnTasklistCopyColumnValues(BOOL bSelectedTasks);
+	void OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks);
 
 	void KillTimers();
 	void RestoreTimers();
