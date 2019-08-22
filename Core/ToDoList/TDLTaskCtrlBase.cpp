@@ -916,8 +916,21 @@ BOOL CTDLTaskCtrlBase::CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOn
 		return FALSE;
 
 	CDWordArray aTaskIDs;
-	
-	int nItem = (bSelectedTasksOnly ? GetSelectedTaskIDs(aTaskIDs, FALSE) : GetAllTaskIDs(aTaskIDs));
+
+	if (bSelectedTasksOnly)
+	{
+		GetSelectedTaskIDs(aTaskIDs, FALSE);
+	}
+	else
+	{
+		int nItem = m_lcColumns.GetItemCount();
+		aTaskIDs.SetSize(nItem);
+
+		while (nItem--)
+			aTaskIDs[nItem] = GetColumnItemTaskID(nItem);
+	}
+
+	int nItem = aTaskIDs.GetSize();
 	ASSERT(nItem);
 	
 	aValues.SetSize(nItem);
@@ -1825,17 +1838,6 @@ DWORD CTDLTaskCtrlBase::GetNextSelectedTaskID(POSITION& pos) const
 		return 0;
 
 	return GetColumnItemTaskID(nSel);
-}
-
-int CTDLTaskCtrlBase::GetAllTaskIDs(CDWordArray& aTaskIDs) const
-{
-	int nItem = m_lcColumns.GetItemCount();
-	aTaskIDs.SetSize(nItem);
-
-	while (nItem--)
-		aTaskIDs[nItem] = GetColumnItemTaskID(nItem);
-
-	return aTaskIDs.GetSize();
 }
 
 void CTDLTaskCtrlBase::OnNotifySplitterChange(int /*nSplitPos*/)

@@ -395,7 +395,6 @@ protected:
 	void SetTrackedColumns(const CDWordArray& aTracked);
 	void GetTrackedColumns(CDWordArray& aTracked) const;
 
-	int GetAllTaskIDs(CDWordArray& aTaskIDs) const;
 	POSITION GetFirstSelectedTaskPos() const;
 	DWORD GetNextSelectedTaskID(POSITION& pos) const;
 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
