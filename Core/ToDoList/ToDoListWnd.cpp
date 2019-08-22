@@ -193,12 +193,13 @@ CToDoListWnd::CToDoListWnd()
 	m_bShowTasklistBar(TRUE), 
 	m_bShowTreeListBar(TRUE),
 	m_bEndingSession(FALSE),
-	m_nContextColumnID(TDCC_NONE),
 	m_bSettingAttribDefs(FALSE),
 	m_bReshowTimeTrackerOnEnable(FALSE),
 	m_bPromptLanguageChangeRestartOnActivate(FALSE),
 	m_bIgnoreNextResize(FALSE),
-	m_bAllowForcedCheckOut(FALSE)
+	m_bAllowForcedCheckOut(FALSE),
+	m_nContextColumnID(TDCC_NONE),
+	m_nContextMenuID(0)
 {
 	// must do this before initializing any controls
 	SetupUIStrings();
@@ -3797,8 +3798,8 @@ void CToDoListWnd::OnUpdateSaveas(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point) 
 {
-	static UINT nActiveMenuID = 0; // prevent reentrancy
 	UINT nMenuID = 0;
+	TDC_COLUMN nColID = TDCC_NONE;
 
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	BOOL bKeyboard = (point.x == -1 && point.y == -1);
@@ -3876,17 +3877,21 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 		case TDCHT_TASKLIST:
 		case TDCHT_TASK:
 			if (tdc.WantTaskContextMenu())
+			{
 				nMenuID = MM_TASKCONTEXT;
+				nColID = tdc.ColumnHitTest(point);
+			}
 			break;
 
 		case TDCHT_COLUMNHEADER:
 			nMenuID = MM_HEADERCONTEXT;
+			nColID = tdc.ColumnHitTest(point);
 			break;
 		}
 	}
 	
 	// show the menu
-	if (nMenuID && nMenuID != nActiveMenuID)
+	if (nMenuID && (nMenuID != m_nContextMenuID))
 	{
 		CEnMenu menu;
 		
@@ -3900,16 +3905,17 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 				switch (nMenuID)
 				{
 				case MM_TASKCONTEXT:
-					m_nContextColumnID = tdc.ColumnHitTest(point);
 					m_menubar.PrepareEditMenu(pPopup, tdc, Prefs());
 					break;
 				}
 				
 				CToolbarHelper::PrepareMenuItems(pPopup, this);
-				
-				nActiveMenuID = nMenuID;
+
+				// prevent re-entrancy
+				CAutoFlagT<UINT> af(m_nContextMenuID, nMenuID);
+				CAutoFlagT<TDC_COLUMN> af2(m_nContextColumnID, nColID);
+
 				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, point.x, point.y, this);
-				nActiveMenuID = 0;
 			}
 		}
 	}

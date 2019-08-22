@@ -113,7 +113,6 @@ protected:
 	CWindowIcons m_icons;
 	HWND m_hwndLastFocus;
 	CTDCStartupOptions m_startupOptions;
-	TDC_COLUMN m_nContextColumnID;
 	TDC_MAXSTATE m_nMaxState, m_nPrevMaxState;
 	TODOITEM m_tdiDefault;
 	CTDLTimeTrackerDlg m_dlgTimeTracker;
@@ -122,6 +121,8 @@ protected:
 
 	int m_nLastSelItem; // just for flicker-free todoctrl switching
 	int m_nToolbarEndSepWidth;
+	UINT m_nContextMenuID;
+	TDC_COLUMN m_nContextColumnID;
 
 	CShortcutManager m_mgrShortcuts;
 	CTDCImportExportMgr m_mgrImportExport;

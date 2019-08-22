@@ -7,9 +7,6 @@
     <ClCompile Include="autocombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AutoFlag.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BaseTabCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
