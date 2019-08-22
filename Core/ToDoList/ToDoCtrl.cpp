@@ -8172,7 +8172,17 @@ BOOL CToDoCtrl::IsClipboardEmpty(BOOL bCheckID) const
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CopyCurrentSelection() const
+BOOL CToDoCtrl::CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+{
+	return m_taskTree.CanCopyColumnValues(nColID, bSelectedTasksOnly);
+}
+
+BOOL CToDoCtrl::CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
+{
+	return m_taskTree.CopyColumnValues(nColID, bSelectedTasksOnly);
+}
+
+BOOL CToDoCtrl::CopySelectedTasks() const
 {
 	if (!GetSelectedCount())
 		return FALSE;
@@ -8198,12 +8208,12 @@ BOOL CToDoCtrl::CopyCurrentSelection() const
 
 BOOL CToDoCtrl::CopySelectedTask() const
 {
-	return CopyCurrentSelection();
+	return CopySelectedTasks();
 }
 
 BOOL CToDoCtrl::CutSelectedTask()
 {
-	if (CanEditSelectedTask(TDCA_DELETE) && CopyCurrentSelection())
+	if (CanEditSelectedTask(TDCA_DELETE) && CopySelectedTasks())
 	{
 		IMPLEMENT_DATA_UNDO(m_data, TDCUAT_DELETE);
 			

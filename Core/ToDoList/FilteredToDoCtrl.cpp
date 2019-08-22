@@ -335,7 +335,7 @@ LRESULT CFilteredToDoCtrl::OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView)
 }
 
 
-BOOL CFilteredToDoCtrl::CopyCurrentSelection() const
+BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 {
 	// NOTE: we are overriding this function else
 	// filtered out subtasks will not get copied

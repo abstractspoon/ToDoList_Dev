@@ -834,6 +834,18 @@ int CTDLTaskCtrlBase::GetColumnIndex(TDC_COLUMN nColID) const
 	return nItem;
 }
 
+BOOL CTDLTaskCtrlBase::CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+{
+	// TODO
+	return FALSE;
+}
+
+BOOL CTDLTaskCtrlBase::CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
+{
+	// TODO
+	return FALSE;
+}
+
 BOOL CTDLTaskCtrlBase::SetColumnOrder(const CDWordArray& aColumns)
 {
 	CIntArray aOrder;

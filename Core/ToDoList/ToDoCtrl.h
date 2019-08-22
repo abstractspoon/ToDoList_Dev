@@ -307,6 +307,9 @@ public:
 	BOOL CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib);
 	BOOL CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, const CString& sToCustomAttribID);
 
+	BOOL CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
+	BOOL CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly);
+
 	BOOL CanClearSelectedTaskFocusedAttribute() const;
 	BOOL ClearSelectedTaskFocusedAttribute();
 	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib) const;
@@ -724,7 +727,7 @@ protected:
 
 	virtual void RebuildCustomAttributeUI();
 
-	virtual BOOL CopyCurrentSelection() const;
+	virtual BOOL CopySelectedTasks() const;
 	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rAvailable /*in*/);
 
 	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);

@@ -252,6 +252,10 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWREMINDERS, OnUpdateViewShowRemindersWindow)
 	ON_COMMAND(ID_EDIT_FINDREPLACEINTASKCOMMENTS, OnEditFindReplaceInTaskComments)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_FINDREPLACEINTASKCOMMENTS, OnUpdateEditFindReplaceInTaskComments)
+	ON_COMMAND(ID_TASKLIST_COPYCOLUMNVALUES, OnTasklistCopyColumnValues)
+	ON_UPDATE_COMMAND_UI(ID_TASKLIST_COPYCOLUMNVALUES, OnUpdateTasklistCopyColumnValues)
+	ON_COMMAND(ID_TASKLIST_COPYSELTASKSCOLUMNVALUES, OnTasklistCopySelectedTaskColumnValues)
+	ON_UPDATE_COMMAND_UI(ID_TASKLIST_COPYSELTASKSCOLUMNVALUES, OnUpdateTasklistCopySelectedTaskColumnValues)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
@@ -12956,4 +12960,24 @@ void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
 LRESULT CToDoListWnd::OnModifyKeyboardShortcuts(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	return DoPreferences(PREFPAGE_SHORTCUT);
+}
+
+void CToDoListWnd::OnTasklistCopyColumnValues() 
+{
+	GetToDoCtrl().CopyColumnValues(m_nContextColumnID, FALSE);
+}
+
+void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(GetToDoCtrl().CanCopyColumnValues(m_nContextColumnID, FALSE));
+}
+
+void CToDoListWnd::OnTasklistCopySelectedTaskColumnValues() 
+{
+	GetToDoCtrl().CopyColumnValues(m_nContextColumnID, TRUE);
+}
+
+void CToDoListWnd::OnUpdateTasklistCopySelectedTaskColumnValues(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(GetToDoCtrl().CanCopyColumnValues(m_nContextColumnID, TRUE));
 }

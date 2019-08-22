@@ -3873,6 +3873,11 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Resi&ze Attribute Columns to Fit", ID_VIEW_RESIZECOLSTOFIT
         MENUITEM SEPARATOR
+        MENUITEM "Copy Column Values",          ID_TASKLIST_COPYCOLUMNVALUES
+        MENUITEM "Copy Selected Task Column Values", 
+                                                ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
+
+        MENUITEM SEPARATOR
         MENUITEM "Cancel\tEsc",                 IDCLOSE
     END
     POPUP "CommentsPopup"
