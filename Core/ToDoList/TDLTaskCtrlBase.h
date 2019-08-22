@@ -366,8 +366,6 @@ protected:
 	BOOL IsShowingColumnsOnRight() const;
 	BOOL IsReadOnly() const { return HasStyle(TDCS_READONLY); }
 	BOOL GetAttributeColor(const CString& sAttrib, COLORREF& color) const;
-	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;
-	CString GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
 	int GetTaskColumnTooltip(const CPoint& ptScreen, CString& sTooltip) const;
 	BOOL TaskHasReminder(DWORD dwTaskID) const;
 	BOOL GetTaskReminder(DWORD dwTaskID, COleDateTime& dtRem) const;
@@ -378,11 +376,16 @@ protected:
 	BOOL HasThemedState(GM_ITEMSTATE nState) const;
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
 	void UpdateHeaderSorting();
-	CString FormatInfoTip(DWORD dwTaskID, int nMaxLen) const;
 	const CEnHeaderCtrl& GetColumnHeaderCtrl(TDC_COLUMN nColID) const;
 	BOOL IsVisible() const;
 	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize = 16, int nImage = 0, int nCount = 1) const;
 	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0, int nCount = 1) const;
+
+	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;
+	CString GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, BOOL bDrawing) const;
+	CString FormatTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_DATE nDate) const;
+	CString FormatTaskDate(const COleDateTime& date, TDC_DATE nDate) const;
+	CString FormatInfoTip(DWORD dwTaskID, int nMaxLen) const;
 
 	int CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
 	void RecalcUntrackedColumnWidths(BOOL bCustomOnly);

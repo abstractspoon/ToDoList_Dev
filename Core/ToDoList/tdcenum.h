@@ -449,6 +449,7 @@ enum TDC_DATE
 	TDCD_DONETIME,	// setting or getting (time only)
 	TDCD_LASTMOD,
 	TDCD_CUSTOM,
+	TDCD_REMINDER,
 };
  
 /////////////////////////////////////////////////////////////////////////////

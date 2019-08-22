@@ -60,7 +60,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	CString GetNextListItem(const CString& sItem, BOOL bNext) const;
 	CString GetImageName(const CString& sImage) const;
 
-	CString FormatData(const TDCCADATA& data, BOOL bISODates) const;
+	CString FormatData(const TDCCADATA& data, BOOL bISODates, TCHAR cListSep = 0) const;
 	CString FormatNumber(double dValue) const;
 	
 	int CalcLongestListItem(CDC* pDC) const;

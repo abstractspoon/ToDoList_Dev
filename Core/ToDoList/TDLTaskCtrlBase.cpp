@@ -67,10 +67,13 @@ enum
 
 //////////////////////////////////////////////////////////////////////
 
-
 CTDCColumnMap	CTDLTaskCtrlBase::s_mapColumns;
 short			CTDLTaskCtrlBase::s_nExtendedSelection = HOTKEYF_CONTROL | HOTKEYF_SHIFT;
 double			CTDLTaskCtrlBase::s_dRecentModPeriod = 0.0;												
+
+//////////////////////////////////////////////////////////////////////
+
+const CString EMPTY_STR(_T(""));
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -790,8 +793,8 @@ void CTDLTaskCtrlBase::OnCustomAttributeChange()
 		}
 		else
 		{
-			m_hdrColumns.SetItemText(nItem, _T(""));
-			m_hdrColumns.SetItemToolTip(nItem, _T(""));
+			m_hdrColumns.SetItemText(nItem, EMPTY_STR);
+			m_hdrColumns.SetItemToolTip(nItem, EMPTY_STR);
 		}
 	}
 
@@ -940,9 +943,10 @@ BOOL CTDLTaskCtrlBase::CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOn
 		const TODOITEM* pTDI = NULL;
 		const TODOSTRUCTURE* pTDS = NULL;
 
-		VERIFY(m_data.GetTrueTask(aTaskIDs[nItem], pTDI, pTDS));
-		
-		aValues[nItem] = GetTaskColumnText(aTaskIDs[nItem], pTDI, pTDS, nColID);
+		DWORD dwTaskID = aTaskIDs[nItem];
+		VERIFY(m_data.GetTrueTask(dwTaskID, pTDI, pTDS));
+
+		aValues[nItem] = GetTaskColumnText(dwTaskID, pTDI, pTDS, nColID, FALSE);
 	}
 
 	return aValues.GetSize();
@@ -1055,7 +1059,7 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 		
 	// add empty column as placeholder so we can easily replace the 
 	// other columns without losing all our items too
-	m_lcColumns.InsertColumn(0, _T(""));
+	m_lcColumns.InsertColumn(0, EMPTY_STR);
 	m_hdrColumns.ShowItem(0, FALSE);
 	m_hdrColumns.SetItemWidth(0, 0);
 	
@@ -1100,7 +1104,7 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 
 	for (nCol = 0; nCol < nNumCols; nCol++)
 	{
-		m_lcColumns.InsertColumn((NUM_COLUMNS + nCol), _T(""), LVCFMT_LEFT, 0);
+		m_lcColumns.InsertColumn((NUM_COLUMNS + nCol), EMPTY_STR, LVCFMT_LEFT, 0);
 	}
 
 	// and their IDs
@@ -2528,7 +2532,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 
 		// Note: we pass dwTaskID NOT dwTrueID here so that references 
 		// can be handled correctly
-		CString sTaskColText = GetTaskColumnText(dwTaskID, pTDI, pTDS, nColID);
+		CString sTaskColText = GetTaskColumnText(dwTaskID, pTDI, pTDS, nColID, TRUE);
 		
 		const TDCCOLUMN* pCol = GetColumn(nColID);
 
@@ -3150,12 +3154,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 
 	default:
 		if (!data.IsEmpty())
-		{
-			if (attribDef.IsMultiList())
-				DrawColumnText(pDC, data.FormatAsArray(), rCol, attribDef.nTextAlignment, crText);
-			else
-				DrawColumnText(pDC, data.AsString(), rCol, attribDef.nTextAlignment, crText);
-		}
+			DrawColumnText(pDC, attribDef.FormatData(data, HasStyle(TDCS_SHOWDATESINISO)), rCol, attribDef.nTextAlignment, crText);
 		break;
 	}
 
@@ -3485,66 +3484,165 @@ void CTDLTaskCtrlBase::SetCompletionStatus(const CString& sStatus)
 	}
 }
 
-CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, 
-	const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const
+CString CTDLTaskCtrlBase::FormatTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_DATE nDate) const
 {
-	if (pTDS && pTDI && dwTaskID && (nColID != TDCC_NONE))
+	COleDateTime date;
+
+	switch (nDate)
 	{
-		switch (nColID)
-		{
-		case TDCC_CLIENT:		return pTDI->sTitle;
-		case TDCC_EXTERNALID:	return pTDI->sExternalID;
-		case TDCC_VERSION:		return pTDI->sVersion;
-		case TDCC_LASTMODBY:	return pTDI->sLastModifiedBy;
-		case TDCC_ALLOCBY:		return pTDI->sAllocBy;
-		case TDCC_CREATEDBY:	return pTDI->sCreatedBy;
+	case TDCD_CREATE:	return FormatTaskDate(pTDI->GetDate(nDate), nDate);
+	case TDCD_DONE:		return FormatTaskDate(pTDI->GetDate(nDate), nDate);
+	case TDCD_START:	return FormatTaskDate(m_calculator.GetTaskStartDate(pTDI, pTDS), nDate);
+	case TDCD_DUE:		return FormatTaskDate(m_calculator.GetTaskDueDate(pTDI, pTDS), nDate);
+	case TDCD_LASTMOD:	return FormatTaskDate(m_calculator.GetTaskLastModifiedDate(pTDI, pTDS), nDate);
 
-		case TDCC_POSITION:		return m_formatter.GetTaskPosition(pTDS);
-		case TDCC_RISK:			return m_formatter.GetTaskRisk(pTDI, pTDS);
-		case TDCC_RECURRENCE:	return m_formatter.GetTaskRecurrence(pTDI);
-		case TDCC_RECENTEDIT:	return m_formatter.GetTaskRecentlyModified(pTDI, pTDS);
-		case TDCC_COST:			return m_formatter.GetTaskCost(pTDI, pTDS);
-		case TDCC_ALLOCTO:		return m_formatter.GetTaskAllocTo(pTDI);
-		case TDCC_STATUS:		return m_formatter.GetTaskStatus(pTDI, pTDS, m_sCompletionStatus);
-		case TDCC_CATEGORY:		return m_formatter.GetTaskCategories(pTDI);
-		case TDCC_TAGS:			return m_formatter.GetTaskTags(pTDI);
-		case TDCC_PERCENT:		return m_formatter.GetTaskPercentDone(pTDI, pTDS);
-		case TDCC_REMAINING:	return m_formatter.GetTaskTimeRemaining(pTDI, pTDS);
-		case TDCC_TIMEEST:		return m_formatter.GetTaskTimeEstimate(pTDI, pTDS);
-		case TDCC_TIMESPENT:	return m_formatter.GetTaskTimeSpent(pTDI, pTDS);
-		case TDCC_PATH:			return m_formatter.GetTaskPath(pTDI, pTDS);
-		case TDCC_SUBTASKDONE:	return m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
-		case TDCC_COMMENTSSIZE:	return m_formatter.GetTaskCommentSize(pTDI);
-
-		case TDCC_ID:			return m_formatter.GetID(pTDS->GetTaskID(), dwTaskID);
-		case TDCC_PARENTID:		return m_formatter.GetID(pTDS->GetParentTaskID());
-
-		case TDCC_STARTDATE:
-		case TDCC_DUEDATE:
-		case TDCC_DONEDATE:
-		case TDCC_CREATIONDATE:
-		case TDCC_LASTMODDATE:
-		case TDCC_ICON:
-		case TDCC_DEPENDENCY:
-		case TDCC_DONE:
-		case TDCC_TRACKTIME:
-		case TDCC_FLAG:
-		case TDCC_LOCK:
-		case TDCC_REMINDER:
-		case TDCC_FILEREF:
-		case TDCC_PRIORITY:
-			// items having no text or rendered differently
-			return _T("");
-
-		default:
-			// handled during drawing
-			ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID));
-			return _T("");
-		}
+	default:
+		ASSERT(0);
+		break;
 	}
 
-	ASSERT(0);
-	return _T("");
+	return EMPTY_STR;
+}
+
+CString CTDLTaskCtrlBase::FormatTaskDate(const COleDateTime& date, TDC_DATE nDate) const
+{
+	switch (nDate)
+	{
+	case TDCD_CREATE:
+	case TDCD_DONE:
+	case TDCD_START:
+	case TDCD_DUE:
+	case TDCD_LASTMOD:
+	case TDCD_REMINDER:
+		{
+			CString sDate, sTime, sDow;
+
+			if (FormatDate(date, nDate, sDate, sTime, sDow))
+				return (sDow + ' ' + sDate + ' ' + sTime);
+		}
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+
+	return EMPTY_STR;
+}
+
+CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, BOOL bDrawing) const
+{
+	if (!pTDS || !pTDI || !dwTaskID || (nColID == TDCC_NONE))
+	{
+		ASSERT(0);
+		return EMPTY_STR;
+	}
+
+	switch (nColID)
+	{
+	case TDCC_CLIENT:		return pTDI->sTitle;
+	case TDCC_EXTERNALID:	return pTDI->sExternalID;
+	case TDCC_VERSION:		return pTDI->sVersion;
+	case TDCC_LASTMODBY:	return pTDI->sLastModifiedBy;
+	case TDCC_ALLOCBY:		return pTDI->sAllocBy;
+	case TDCC_CREATEDBY:	return pTDI->sCreatedBy;
+
+	case TDCC_POSITION:		return m_formatter.GetTaskPosition(pTDS);
+	case TDCC_RISK:			return m_formatter.GetTaskRisk(pTDI, pTDS);
+	case TDCC_RECURRENCE:	return m_formatter.GetTaskRecurrence(pTDI);
+	case TDCC_RECENTEDIT:	return m_formatter.GetTaskRecentlyModified(pTDI, pTDS);
+	case TDCC_COST:			return m_formatter.GetTaskCost(pTDI, pTDS);
+	case TDCC_ALLOCTO:		return m_formatter.GetTaskAllocTo(pTDI);
+	case TDCC_STATUS:		return m_formatter.GetTaskStatus(pTDI, pTDS, m_sCompletionStatus);
+	case TDCC_CATEGORY:		return m_formatter.GetTaskCategories(pTDI);
+	case TDCC_TAGS:			return m_formatter.GetTaskTags(pTDI);
+	case TDCC_PERCENT:		return m_formatter.GetTaskPercentDone(pTDI, pTDS);
+	case TDCC_REMAINING:	return m_formatter.GetTaskTimeRemaining(pTDI, pTDS);
+	case TDCC_TIMEEST:		return m_formatter.GetTaskTimeEstimate(pTDI, pTDS);
+	case TDCC_TIMESPENT:	return m_formatter.GetTaskTimeSpent(pTDI, pTDS);
+	case TDCC_PATH:			return m_formatter.GetTaskPath(pTDI, pTDS);
+	case TDCC_SUBTASKDONE:	return m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
+	case TDCC_COMMENTSSIZE:	return m_formatter.GetTaskCommentSize(pTDI);
+
+	case TDCC_ID:			return m_formatter.GetID(pTDS->GetTaskID(), dwTaskID);
+	case TDCC_PARENTID:		return m_formatter.GetID(pTDS->GetParentTaskID());
+
+		// items having no text
+	case TDCC_ICON:
+	case TDCC_DONE:
+	case TDCC_FLAG:
+	case TDCC_LOCK:
+	case TDCC_TRACKTIME:
+		return EMPTY_STR;
+
+		// items rendered differently
+	case TDCC_STARTDATE:
+	case TDCC_DUEDATE:
+	case TDCC_DONEDATE:
+	case TDCC_CREATIONDATE:
+	case TDCC_LASTMODDATE:
+		if (!bDrawing)
+			return FormatTaskDate(pTDI, pTDS, TDC::MapColumnToDate(nColID));
+		break;
+
+	case TDCC_DEPENDENCY:
+		if (!bDrawing)
+			return Misc::FormatArray(pTDI->aDependencies, '+');
+		break;
+
+	case TDCC_REMINDER:
+		if (!bDrawing)
+		{
+			time_t tRem = GetTaskReminder(m_data.GetTrueTaskID(dwTaskID));
+
+			// Reminder must be set and start/due date must be set
+			if ((tRem != 0) && (tRem != -1))
+				return FormatTaskDate(COleDateTime(tRem), TDCD_REMINDER);
+		}
+		break;
+
+	case TDCC_FILEREF:
+		if (!bDrawing)
+			return Misc::FormatArray(pTDI->aFileLinks, '+');
+		break;
+
+	case TDCC_PRIORITY:
+		if (!bDrawing)
+			return m_formatter.GetTaskPriority(pTDI, pTDS);
+		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+		{
+			if (!bDrawing)
+			{
+				TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+
+				if (m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef))
+				{
+					switch (attribDef.GetDataType())
+					{
+					case TDCCA_BOOL:
+					case TDCCA_ICON:
+						return EMPTY_STR;
+					}
+
+					TDCCADATA data;
+
+					if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
+						return attribDef.FormatData(data, HasStyle(TDCS_SHOWDATESINISO));
+				}
+			}
+			return EMPTY_STR;
+		}
+		else
+		{
+			ASSERT(0);
+		}
+		break;
+	}
+
+	return EMPTY_STR;
 }
 
 // message and notifications for 'us'
@@ -4835,6 +4933,7 @@ BOOL CTDLTaskCtrlBase::WantDrawColumnTime(TDC_DATE nDate, BOOL bCustomWantsTime)
 		return (bCustomWantsTime || HasStyle(TDCS_SHOWREMINDERSASDATEANDTIME));
 		
 	case TDCD_LASTMOD:
+	case TDCD_REMINDER:
 		return TRUE; // always
 	}
 	
@@ -5526,7 +5625,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskComments() const
 		return m_data.GetTaskComments(GetSelectedTaskID());
 	
 	// else
-	return _T("");
+	return EMPTY_STR;
 }
 
 const CBinaryData& CTDLTaskCtrlBase::GetSelectedTaskCustomComments(CString& sCommentsTypeID) const
@@ -5569,7 +5668,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskTitle() const
 		return m_data.GetTaskTitle(GetSelectedTaskID());
 	
 	// else
-	return _T("");
+	return EMPTY_STR;
 }
 
 int CTDLTaskCtrlBase::GetSelectedTaskPriority() const
@@ -5665,7 +5764,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskIcon() const
 			CString sTaskIcon = m_data.GetTaskIcon(dwTaskID);
 			
 			if (sIcon != sTaskIcon)
-				return _T("");
+				return EMPTY_STR;
 		}
 	}
 	
@@ -5837,7 +5936,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen
 	if (GetSelectedCount() == 1)
 	{
 		DWORD dwTaskID = GetSelectedTaskID();
-		CString sTaskTitle = bIncludeTaskName ? m_data.GetTaskTitle(dwTaskID) : _T("");
+		CString sTaskTitle = bIncludeTaskName ? m_data.GetTaskTitle(dwTaskID) : EMPTY_STR;
 
 		if (bIncludeTaskName && nMaxLen != -1)
 			nMaxLen -= sTaskTitle.GetLength();
@@ -5979,7 +6078,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskAllocBy() const
 			CString sTaskAllocBy = m_data.GetTaskAllocBy(dwTaskID);
 			
 			if (sAllocBy != sTaskAllocBy)
-				return _T("");
+				return EMPTY_STR;
 		}
 	}
 	
@@ -6004,7 +6103,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskVersion() const
 			CString sTaskVersion = m_data.GetTaskVersion(dwTaskID);
 			
 			if (sVersion != sTaskVersion)
-				return _T("");
+				return EMPTY_STR;
 		}
 	}
 	
@@ -6029,7 +6128,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskStatus() const
 			CString sTaskStatus = m_data.GetTaskStatus(dwTaskID);
 			
 			if (sStatus != sTaskStatus)
-				return _T("");
+				return EMPTY_STR;
 		}
 	}
 	
@@ -6145,7 +6244,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskFileRef(int nFile) const
 		return m_data.GetTaskFileRef(GetSelectedTaskID(), nFile);
 	
 	// else
-	return _T("");
+	return EMPTY_STR;
 }
 
 int CTDLTaskCtrlBase::GetSelectedTaskFileRefs(CStringArray& aFiles) const
@@ -6173,7 +6272,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskExtID() const
 		return m_data.GetTaskExtID(GetSelectedTaskID());
 	
 	// else
-	return _T("");
+	return EMPTY_STR;
 }
 
 BOOL CTDLTaskCtrlBase::CanSplitSelectedTask() const

@@ -5037,6 +5037,42 @@ BOOL CTabbedToDoCtrl::CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) con
 	return FALSE; // not supported
 }
 
+BOOL CTabbedToDoCtrl::CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+{
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		return CToDoCtrl::CanCopyColumnValues(nColID, bSelectedTasksOnly);
+
+	case FTCV_TASKLIST:
+		return m_taskList.CanCopyColumnValues(nColID, bSelectedTasksOnly);
+	}
+	
+	// all else (for now)
+	return FALSE;
+}
+
+BOOL CTabbedToDoCtrl::CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
+{
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		return CToDoCtrl::CopyColumnValues(nColID, bSelectedTasksOnly, aValues);
+
+	case FTCV_TASKLIST:
+		return m_taskList.CopyColumnValues(nColID, bSelectedTasksOnly, aValues);
+	}
+	
+	// all else (for now)
+	return FALSE;
+}
+
 BOOL CTabbedToDoCtrl::ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd)
 {
 	IUIExtensionWindow* pExt = GetExtensionWnd(nView);

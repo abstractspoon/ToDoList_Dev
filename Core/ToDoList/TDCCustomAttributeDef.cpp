@@ -464,10 +464,10 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(TDC_COLUMN nColID)
 	return (nColID >= TDCC_CUSTOMCOLUMN_FIRST && nColID <= TDCC_CUSTOMCOLUMN_LAST);
 }
 
-CString TDCCUSTOMATTRIBUTEDEFINITION::FormatData(const TDCCADATA& data, BOOL bISODates) const
+CString TDCCUSTOMATTRIBUTEDEFINITION::FormatData(const TDCCADATA& data, BOOL bISODates, TCHAR cListSep) const
 {
 	if (IsList())
-		return data.FormatAsArray('+');
+		return data.FormatAsArray(cListSep);
 
 	// else
 	switch (GetDataType())
