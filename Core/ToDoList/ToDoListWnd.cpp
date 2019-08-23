@@ -12991,17 +12991,12 @@ void CToDoListWnd::OnTasklistCopyColumnValues(BOOL bSelectedTasks)
 {
 	ASSERT(m_nContextColumnID != TDCC_NONE);
 
-	CStringArray aValues;
-
-	if (GetToDoCtrl().CopyColumnValues(m_nContextColumnID, bSelectedTasks, aValues))
-	{
-		VERIFY(CClipboard(*this).SetText(Misc::FormatArray(aValues, '\n', TRUE)));
-	}
+	VERIFY(GetToDoCtrl().CopyTaskColumnValues(m_nContextColumnID, bSelectedTasks));
 }
 
 void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks)
 {
-	BOOL bEnable = GetToDoCtrl().CanCopyColumnValues(m_nContextColumnID, bSelectedTasks);
+	BOOL bEnable = GetToDoCtrl().CanCopyTaskColumnValues(m_nContextColumnID, bSelectedTasks);
 
 	pCmdUI->Enable(bEnable);
 

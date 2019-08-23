@@ -112,8 +112,8 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL CanSaveToImage() const;
 
-	BOOL CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
+	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
+	int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
 
 	COLORREF GetSelectedTaskColor() const; // -1 on no item selected
 	CString GetSelectedTaskIcon() const;

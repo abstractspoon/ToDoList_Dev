@@ -8172,14 +8172,25 @@ BOOL CToDoCtrl::IsClipboardEmpty(BOOL bCheckID) const
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+BOOL CToDoCtrl::CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
 {
-	return m_taskTree.CanCopyColumnValues(nColID, bSelectedTasksOnly);
+	return m_taskTree.CanCopyTaskColumnValues(nColID, bSelectedTasksOnly);
 }
 
-BOOL CToDoCtrl::CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
+BOOL CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
 {
-	return m_taskTree.CopyColumnValues(nColID, bSelectedTasksOnly, aValues);
+	CStringArray aValues;
+
+	if (!CopyTaskColumnValues(nColID, bSelectedTasksOnly, aValues))
+		return FALSE;
+
+	// else
+	return CClipboard(GetSafeHwnd()).SetText(Misc::FormatArray(aValues, '\n', TRUE));
+}
+
+int CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
+{
+	return m_taskTree.CopyTaskColumnValues(nColID, bSelectedTasksOnly, aValues);
 }
 
 BOOL CToDoCtrl::CopySelectedTasks() const

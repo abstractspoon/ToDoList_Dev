@@ -125,8 +125,8 @@ public:
 	virtual BOOL CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const;
 	virtual void ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand = TRUE);
 	
-	BOOL CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
+	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
+	BOOL CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 
 	void SetFocusToTasks();
 	BOOL TasksHaveFocus() const;
@@ -243,6 +243,7 @@ protected:
 	virtual DWORD GetNextNonSelectedTaskID() const;
 	virtual BOOL SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
+	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
 
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildTree = FALSE) const; 

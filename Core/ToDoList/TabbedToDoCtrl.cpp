@@ -5037,7 +5037,7 @@ BOOL CTabbedToDoCtrl::CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) con
 	return FALSE; // not supported
 }
 
-BOOL CTabbedToDoCtrl::CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+BOOL CTabbedToDoCtrl::CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
 {
 	FTC_VIEW nView = GetTaskView();
 
@@ -5045,17 +5045,22 @@ BOOL CTabbedToDoCtrl::CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasks
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::CanCopyColumnValues(nColID, bSelectedTasksOnly);
+		return CToDoCtrl::CanCopyTaskColumnValues(nColID, bSelectedTasksOnly);
 
 	case FTCV_TASKLIST:
-		return m_taskList.CanCopyColumnValues(nColID, bSelectedTasksOnly);
+		return m_taskList.CanCopyTaskColumnValues(nColID, bSelectedTasksOnly);
 	}
 	
 	// all else (for now)
 	return FALSE;
 }
 
-BOOL CTabbedToDoCtrl::CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
+BOOL CTabbedToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+{
+	return CToDoCtrl::CopyTaskColumnValues(nColID, bSelectedTasksOnly);
+}
+
+int CTabbedToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
 {
 	FTC_VIEW nView = GetTaskView();
 
@@ -5063,14 +5068,14 @@ BOOL CTabbedToDoCtrl::CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnl
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::CopyColumnValues(nColID, bSelectedTasksOnly, aValues);
+		return CToDoCtrl::CopyTaskColumnValues(nColID, bSelectedTasksOnly, aValues);
 
 	case FTCV_TASKLIST:
-		return m_taskList.CopyColumnValues(nColID, bSelectedTasksOnly, aValues);
+		return m_taskList.CopyTaskColumnValues(nColID, bSelectedTasksOnly, aValues);
 	}
 	
 	// all else (for now)
-	return FALSE;
+	return 0;
 }
 
 BOOL CTabbedToDoCtrl::ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd)

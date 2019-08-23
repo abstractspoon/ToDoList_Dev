@@ -307,8 +307,8 @@ public:
 	BOOL CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib);
 	BOOL CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, const CString& sToCustomAttribID);
 
-	BOOL CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
+	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
+	BOOL CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 
 	BOOL CanClearSelectedTaskFocusedAttribute() const;
 	BOOL ClearSelectedTaskFocusedAttribute();
@@ -711,7 +711,8 @@ protected:
 	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
-	
+	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
+
 	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
 	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
 	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
