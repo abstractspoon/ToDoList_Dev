@@ -3801,6 +3801,11 @@ BEGIN
             MENUITEM "Task &Path",                  ID_EDIT_COPYAS_PATH
         END
         MENUITEM SEPARATOR
+        MENUITEM "Copy All Values from Column", ID_TASKLIST_COPYCOLUMNVALUES
+        MENUITEM "Copy Selected Value(s) from Column", 
+                                                ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
+
+        MENUITEM SEPARATOR
         MENUITEM "Paste as a Subtask",          ID_EDIT_PASTESUB
         MENUITEM "Paste after",                 ID_EDIT_PASTEAFTER
         MENUITEM "Paste as &Reference",         ID_EDIT_PASTEASREF
@@ -3873,8 +3878,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Resi&ze Attribute Columns to Fit", ID_VIEW_RESIZECOLSTOFIT
         MENUITEM SEPARATOR
-        MENUITEM "Copy Column Values",          ID_TASKLIST_COPYCOLUMNVALUES
-        MENUITEM "Copy Selected Task Column Values", 
+        MENUITEM "Copy All Values from Column", ID_TASKLIST_COPYCOLUMNVALUES
+        MENUITEM "Copy Selected Value(s) from Column", 
                                                 ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
 
         MENUITEM SEPARATOR
@@ -5655,6 +5660,9 @@ BEGIN
                             "Export Tasklist|You must select a filename that does not match the tasklist being exported."
     IDS_UPDATER_FILEMISSING "The updater is missing from the installation folder.\n\nWould you like to try downloading the update file manually?"
     IDS_CTRLCLICKTOFOLLOWLINK "'CTRL + click' to follow link"
+    IDS_TASKLIST_COPYCOLUMNVALUES "Copy All Values from '%s' Column"
+    IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES 
+                            "Copy Selected Value(s) from '%s' Column"
 END
 
 #endif    // English (Australia) resources

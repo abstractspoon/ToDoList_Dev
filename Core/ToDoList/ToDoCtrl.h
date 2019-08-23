@@ -435,6 +435,7 @@ public:
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
 	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);
 	static void SetRecentlyModifiedPeriod(const COleDateTimeSpan& dtSpan);
+	static const TDCCOLUMN* GetColumnDefinition(TDC_COLUMN nColID) { return CTDLTaskCtrlBase::GetColumn(nColID); }
 
 protected:
 	enum  // visible for derived classes

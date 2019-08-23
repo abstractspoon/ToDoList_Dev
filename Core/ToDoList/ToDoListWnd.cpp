@@ -13001,5 +13001,31 @@ void CToDoListWnd::OnTasklistCopyColumnValues(BOOL bSelectedTasks)
 
 void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks)
 {
-	pCmdUI->Enable(GetToDoCtrl().CanCopyColumnValues(m_nContextColumnID, bSelectedTasks));
+	BOOL bEnable = GetToDoCtrl().CanCopyColumnValues(m_nContextColumnID, bSelectedTasks);
+
+	pCmdUI->Enable(bEnable);
+
+	if (bEnable)
+	{
+		CString sColLabel;
+
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nContextColumnID))
+		{
+			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+			VERIFY(GetToDoCtrl().GetCustomAttributeDefs().GetAttributeDef(m_nContextColumnID, attribDef));
+
+			sColLabel = attribDef.sLabel;
+		}
+		else
+		{
+			const TDCCOLUMN* pCol = CToDoCtrl::GetColumnDefinition(m_nContextColumnID);
+			ASSERT(pCol);
+
+			sColLabel = CEnString(pCol->nIDLongName);
+		}
+
+		UINT nMenuStrID = (bSelectedTasks ? IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES : IDS_TASKLIST_COPYCOLUMNVALUES);
+
+		pCmdUI->SetText(CEnString(nMenuStrID, sColLabel));
+	}
 }

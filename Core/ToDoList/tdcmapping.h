@@ -578,7 +578,7 @@ namespace TDC
 	{
 		switch (nCol)
 		{
-		case TDCC_LASTMODDATE:		return TDCD_LASTMOD;
+		case TDCC_LASTMODDATE:	return TDCD_LASTMOD;
 		case TDCC_DUEDATE:		return TDCD_DUE;
 		case TDCC_CREATIONDATE:	return TDCD_CREATE;
 		case TDCC_STARTDATE:	return TDCD_START;
@@ -714,9 +714,7 @@ namespace TDC
 
 	static TDC_ATTRIBUTE MapCommandLineSwitchToAttribute(LPCTSTR szSwitch)
 	{
-#define MATCHSWITCH(s, a) \
-	if (_tcsicmp(szSwitch, s) == 0)\
-		return a
+#define MATCHSWITCH(s, a) if (_tcsicmp(szSwitch, s) == 0) return a
 
 		MATCHSWITCH(SWITCH_TASKCOMMENTS,		TDCA_COMMENTS);
 		MATCHSWITCH(SWITCH_TASKEXTID,			TDCA_EXTERNALID);	
