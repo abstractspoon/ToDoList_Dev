@@ -149,7 +149,7 @@ namespace WordCloudUIExtension
 
 			if (base.m_ItemUnderMouse != null)
 			{
-				string format = m_Trans.Translate("'{0}' appears in {1} task(s)");
+				string format = m_Trans.Translate("'{0}' appears in {1} tasks");
 				string tooltip = string.Format(format,
 												base.m_ItemUnderMouse.Word.Text,
 												base.m_ItemUnderMouse.Word.Occurrences);

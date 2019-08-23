@@ -325,7 +325,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_ATTRIBVALUES        "Attribute Value(s)"
+    IDS_ATTRIBVALUES        "Attribute Values"
     IDS_MAXTASKCOUNT        "Maximum Tasks"
     IDS_NEWCOLUMN           "<New Column>"
     IDS_CATEGORYATTRIB      "Category"

@@ -142,8 +142,8 @@ BEGIN
     EDITTEXT        IDC_TABWIDTHS,25,187,40,13,ES_AUTOHSCROLL | ES_NUMBER
     GROUPBOX        "HTML",IDC_STATIC,7,89,195,49
     GROUPBOX        "Text",IDC_STATIC,7,147,195,61
-    LTEXT           "space(s)",IDC_TEXTINDENTTRAIL,69,189,125,8
-    LTEXT           "line(s)",IDC_NUMLINESPACETRAIL,61,69,144,8
+    LTEXT           "spaces",IDC_TEXTINDENTTRAIL,69,189,125,8
+    LTEXT           "lines",IDC_NUMLINESPACETRAIL,61,69,144,8
 END
 
 IDD_PREFFILE_PAGE DIALOG DISCARDABLE  0, 0, 400, 370
@@ -886,10 +886,10 @@ BEGIN
     EDITTEXT        IDC_BY,50,71,22,13,ES_AUTOHSCROLL | ES_NUMBER
     COMBOBOX        IDC_BYUNITS,75,71,72,87,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "Offs&et date(s) from today",IDC_OFFSETFROMTODAY,"Button",
+    CONTROL         "Offs&et dates from today",IDC_OFFSETFROMTODAY,"Button",
                     BS_AUTOCHECKBOX | BS_TOP | BS_MULTILINE | NOT WS_VISIBLE | 
                     WS_DISABLED | WS_TABSTOP,50,90,251,10
-    CONTROL         "&Offset subtask date(s) by the same amount",
+    CONTROL         "&Offset subtask dates by the same amount",
                     IDC_OFFSETSUBTASKS,"Button",BS_AUTOCHECKBOX | BS_TOP | 
                     BS_MULTILINE | WS_TABSTOP,50,105,251,10
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,121,294,1
@@ -1654,9 +1654,9 @@ BEGIN
     CONTROL         "Every &weekday",IDC_WEEKDAYS,"Button",
                     BS_AUTORADIOBUTTON,0,62,253,10
     EDITTEXT        IDC_EVERYDAYS,10,13,25,13,ES_AUTOHSCROLL | WS_GROUP
-    LTEXT           "day(s)",IDC_STATIC,42,15,211,8
+    LTEXT           "days",IDC_STATIC,42,15,211,8
     EDITTEXT        IDC_EVERYWEEKDAYS,10,44,25,13,ES_AUTOHSCROLL | WS_GROUP
-    LTEXT           "weekday(s)",IDC_STATIC,42,46,211,8
+    LTEXT           "weekdays",IDC_STATIC,42,46,211,8
 END
 
 IDD_RECURRING_WEEKLY_PAGE DIALOG DISCARDABLE  0, 0, 254, 112
@@ -1669,9 +1669,9 @@ BEGIN
     CONTROL         "&Every",IDC_EVERY,"Button",BS_AUTORADIOBUTTON,0,31,254,
                     10
     EDITTEXT        IDC_RECREATEWEEKS,10,13,25,13,ES_AUTOHSCROLL | WS_GROUP
-    LTEXT           "week(s)",IDC_STATIC,42,15,193,8
+    LTEXT           "weeks",IDC_STATIC,42,15,193,8
     EDITTEXT        IDC_EVERYNWEEKS,10,44,25,13,ES_AUTOHSCROLL
-    LTEXT           "week(s) &on",IDC_STATIC,42,46,193,8
+    LTEXT           "weeks &on",IDC_STATIC,42,46,193,8
     LISTBOX         IDC_WEEKDAYS,10,61,243,44,LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | 
                     LBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
@@ -1688,18 +1688,18 @@ BEGIN
     CONTROL         "&The",IDC_SPECIFIC,"Button",BS_AUTORADIOBUTTON,0,62,253,
                     10
     EDITTEXT        IDC_RECREATEMONTHS,10,13,25,13,ES_AUTOHSCROLL | WS_GROUP
-    LTEXT           "month(s)",IDC_STATIC,42,15,211,8
+    LTEXT           "months",IDC_STATIC,42,15,211,8
     EDITTEXT        IDC_DAYMONTHDAY,10,44,25,13,ES_AUTOHSCROLL
     LTEXT           "of e&very",IDC_STATIC,42,45,44,8
     EDITTEXT        IDC_DAYMONTHS,99,44,25,13,ES_AUTOHSCROLL
-    LTEXT           "month(s)",IDC_STATIC,131,45,81,8
+    LTEXT           "months",IDC_STATIC,131,45,81,8
     COMBOBOX        IDC_THESPECIFICWEEK,10,75,81,107,CBS_DROPDOWNLIST | 
                     WS_TABSTOP
     COMBOBOX        IDC_THEWEEKDAY,99,75,81,107,CBS_DROPDOWNLIST | 
                     WS_TABSTOP
     LTEXT           "of e&very",IDC_STATIC,187,78,66,8
     EDITTEXT        IDC_THEMONTHS,10,92,25,13,ES_AUTOHSCROLL
-    LTEXT           "month(s)",IDC_STATIC,42,94,211,8
+    LTEXT           "months",IDC_STATIC,42,94,211,8
 END
 
 IDD_RECURRING_YEARLY_PAGE DIALOG DISCARDABLE  0, 0, 254, 113
@@ -1714,7 +1714,7 @@ BEGIN
     CONTROL         "&The",IDC_SPECIFIC,"Button",BS_AUTORADIOBUTTON,0,62,253,
                     10
     EDITTEXT        IDC_RECREATEYEARS,10,13,25,13,ES_AUTOHSCROLL | WS_GROUP
-    LTEXT           "year(s)",IDC_STATIC,42,15,210,8
+    LTEXT           "years",IDC_STATIC,42,15,210,8
     COMBOBOX        IDC_EVERYMONTHLIST,10,44,81,30,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     EDITTEXT        IDC_EVERYMONTHDAY,99,44,25,13,ES_AUTOHSCROLL
@@ -3671,8 +3671,8 @@ BEGIN
                                                 ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK
 
         MENUITEM SEPARATOR
-        MENUITEM "Split Task(s) into Two (2) Subtasks", ID_SPLITTASKINTO_TWO
-        POPUP "Split Task(s) into"
+        MENUITEM "Split Tasks into Two (2) Subtasks", ID_SPLITTASKINTO_TWO
+        POPUP "Split Tasks into"
         BEGIN
             MENUITEM "Two (2) Subtasks",            ID_SPLITTASKINTO_TWO
             MENUITEM "Three (3) Subtasks",          ID_SPLITTASKINTO_THREE
@@ -3802,7 +3802,7 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "Copy All Values from Column", ID_TASKLIST_COPYCOLUMNVALUES
-        MENUITEM "Copy Selected Value(s) from Column", 
+        MENUITEM "Copy Selected Values from Column", 
                                                 ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
 
         MENUITEM SEPARATOR
@@ -3814,9 +3814,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Select A&ll",                 ID_EDIT_SELECTALL
         MENUITEM SEPARATOR
-        MENUITEM "Archi&ve Selected Task(s)",   ID_ARCHIVE_SELECTEDTASKS
+        MENUITEM "Archi&ve Selected Tasks",   ID_ARCHIVE_SELECTEDTASKS
         MENUITEM SEPARATOR
-        MENUITEM "Email Selected &Task(s)...",  ID_SEND_SELTASKS
+        MENUITEM "Email Selected &Tasks...",  ID_SEND_SELTASKS
         MENUITEM SEPARATOR
         MENUITEM "Cancel\tEsc",                 IDCLOSE
     END
@@ -3879,7 +3879,7 @@ BEGIN
         MENUITEM "Resi&ze Attribute Columns to Fit", ID_VIEW_RESIZECOLSTOFIT
         MENUITEM SEPARATOR
         MENUITEM "Copy All Values from Column", ID_TASKLIST_COPYCOLUMNVALUES
-        MENUITEM "Copy Selected Value(s) from Column", 
+        MENUITEM "Copy Selected Values from Column", 
                                                 ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
 
         MENUITEM SEPARATOR
@@ -4711,7 +4711,7 @@ BEGIN
     IDS_TDCTIP_RISK         "Risk:\t\t"
     IDS_TDCTIP_EXTID        "External ID:\t"
     IDS_TDC_CONFIRMDELETESEL 
-                            "Are you sure you want to delete the selected task(s)?"
+                            "Are you sure you want to delete the selected tasks?"
     IDS_TDC_CONFIRMDELETEONEWARNSUBTASKS 
                             "\n\n(ATTENTION: This task has subtasks which will also be deleted)"
     IDS_TDC_CONFIRMDELETEMOREWARNSUBTASKS 
@@ -4823,7 +4823,7 @@ BEGIN
     IDS_DUETASKONLOADPROGRESS "Preparing due task notifications..."
     IDS_LOGANALYSIS_ERRNOACCESS 
                             "Logged Time Analysis|Please check that neither the log file nor the report file are open in another application."
-    IDS_SOURCECONTROLCHANGE_BALLOONTITLE "Source Control Change(s)"
+    IDS_SOURCECONTROLCHANGE_BALLOONTITLE "Source Control Changes"
     IDS_SELECTSTYLESHEET_TITLE "Select Stylesheet"
     IDS_UNINSTALLER_SMARTSCREENBLOCK 
                             "The uninstaller could not be run at this time.\n\nIf this was due to Windows SmartScreen, you may need to temporarily disable SmartScreen before trying again."
@@ -4888,7 +4888,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_SB_SELCOUNT          "%d task(s) selected"
+    ID_SB_SELCOUNT          "%d tasks selected"
     ID_SB_SELTIMEEST        "Est: %s"
     ID_SB_SELTIMESPENT      "Spent: %s"
     ID_SB_SELCOST           "Cost: %s"
@@ -4994,7 +4994,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_CMDLINE_TASKALLOCTO "-at <alloc to>\tSets the 'Allocated To(s)' for the currently selected task"
+    IDS_CMDLINE_TASKALLOCTO "-at <alloc to>\tSets the 'Allocated To' for the currently selected task"
     IDS_CMDLINE_TASKSTARTDATE 
                             "-sd <date>\tSets the 'Start Date' for the currently selected task"
     IDS_CMDLINE_TASKSTARTTIME 
@@ -5125,8 +5125,8 @@ BEGIN
     IDS_FILTER_FLAGGED      "Flagged Tasks"
     IDS_BEGINWHENREMINDERREST "begins in %s at %s"
     IDS_DUEWHENREMINDERREST "is due in %s at %s"
-    IDS_BEGINWHENREMINDERMINS "begins in %.0f minute(s) at %s"
-    IDS_DUEWHENREMINDERMINS "is due in %.0f minute(s) at %s"
+    IDS_BEGINWHENREMINDERMINS "begins in %.0f minutes at %s"
+    IDS_DUEWHENREMINDERMINS "is due in %.0f minutes at %s"
     IDS_TDC_FIELD_STARTTIME "St&art Time"
     IDS_UITHEMEFILEFILTER   "Theme Files (*.xml)|*.xml||"
     IDS_NEEDRESTARTTODOLISTLIGHTBOXCHANGE 
@@ -5208,8 +5208,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_RESTARTTOCHANGELANGUAGE 
                             "Language Change|The user interface language will be changed next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
-    IDS_SAVINGPROGRESS      "Saving tasklist(s)..."
-    IDS_LOADINGPROGRESS     "Loading tasklist(s)..."
+    IDS_SAVINGPROGRESS      "Saving tasklists..."
+    IDS_LOADINGPROGRESS     "Loading tasklists..."
     IDS_SAVENOTCHECKEDOUT   "'%s' must be checked out before it can be saved."
     IDS_TDLBC_PATH          "Path (list view only)"
     IDS_TDC_COLUMN_PATH     "Path"
@@ -5299,11 +5299,11 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_PRINTPROGRESS       "Printing tasklist(s)..."
+    IDS_PRINTPROGRESS       "Printing tasklists..."
     IDS_IMPORTPROGRESS      "Importing tasklist..."
-    IDS_EXPORTPROGRESS      "Exporting tasklist(s)..."
+    IDS_EXPORTPROGRESS      "Exporting tasklists..."
     IDS_TRANSFORMPROGRESS   "Transforming tasklist..."
-    IDS_STARTUPPROGRESS     "Restoring tasklist(s)..."
+    IDS_STARTUPPROGRESS     "Restoring tasklists..."
     IDS_BROWSEFILE_TITLE    "Select File"
     IDS_READONLYCHANGE_BALLOONTITLE "Read-only Status Change"
     IDS_TIMESTAMPCHANGE_BALLOONTITLE "File Timestamp Change"
@@ -5609,15 +5609,15 @@ BEGIN
                             "-cm <comments>\tAdds to the 'Comments' for the currently selected task"
     IDS_CMDLINE_TASKEXTID   "-xid <ext_id>\tSets the 'external ID' for the currently selected task"
     IDS_CMDLINE_TASKCATEGORY 
-                            "-c <categories>\tSets the 'Category(s) for the currently selected task"
+                            "-c <categories>\tSets the 'Categories' for the currently selected task"
     IDS_CMDLINE_TASKSTATUS  "-s <status>\tSets the 'Status' for the currently selected task"
     IDS_CMDLINE_TASKPRIORITY 
                             "-p <priority>\tSets the 'Priority' for the currently selected task"
     IDS_CMDLINE_TASKRISK    "-r <risk>\tSets the 'Risk' for the currently selected task"
-    IDS_CMDLINE_TASKTAGS    "-tg <tags>\tSets the 'Tag(s)' for the currently selected task"
+    IDS_CMDLINE_TASKTAGS    "-tg <tags>\tSets the 'Tags' for the currently selected task"
     IDS_CMDLINE_TASKCOST    "-cs <cost>\tSets the 'Cost' for the currently selected task"
     IDS_CMDLINE_TASKDEPENDENCY 
-                            "-dp <id>\tSets the 'Dependency(s)' for the currently selected task"
+                            "-dp <id>\tSets the 'Dependencies' for the currently selected task"
     IDS_CMDLINE_TASKTIMEEST "-te <hrs>\tSets the 'Time Estimate' for the currently selected task"
     IDS_CMDLINE_TASKTIMESPENT 
                             "-ts <hrs>\tSets the 'Time Spent' for the currently selected task"
@@ -5662,7 +5662,7 @@ BEGIN
     IDS_CTRLCLICKTOFOLLOWLINK "'CTRL + click' to follow link"
     IDS_TASKLIST_COPYCOLUMNVALUES "Copy All Values from '%s' Column"
     IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES 
-                            "Copy Selected Value(s) from '%s' Column"
+                            "Copy Selected Values from '%s' Column"
 END
 
 #endif    // English (Australia) resources
