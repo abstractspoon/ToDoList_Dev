@@ -76,6 +76,56 @@ double			CTDLTaskCtrlBase::s_dRecentModPeriod = 0.0;
 const CString EMPTY_STR(_T(""));
 
 //////////////////////////////////////////////////////////////////////
+// Private classes
+
+CTDLTaskCtrlBase::TDSORTFLAGS::TDSORTFLAGS()
+	:
+	bSortChildren(TRUE),
+	bSortDueTodayHigh(FALSE),
+	dwTimeTrackID(0),
+	bIncStartTime(FALSE),
+	bIncCreateTime(FALSE),
+	bIncDueTime(FALSE),
+	bIncDoneTime(FALSE)
+{
+}
+
+BOOL CTDLTaskCtrlBase::TDSORTFLAGS::WantIncludeTime(TDC_COLUMN nColID) const
+{
+	switch (nColID)
+	{
+	case TDCC_CREATIONDATE:
+	case TDCC_CREATIONTIME:
+		return bIncCreateTime;
+
+	case TDCC_STARTDATE:
+	case TDCC_STARTTIME:
+		return bIncStartTime;
+
+	case TDCC_DUEDATE:
+	case TDCC_DUETIME:
+		return bIncDueTime;
+
+	case TDCC_DONEDATE:
+	case TDCC_DONETIME:
+		return bIncDoneTime;
+
+	case TDCC_LASTMODDATE:
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+CTDLTaskCtrlBase::TDSORTPARAMS::TDSORTPARAMS(const CTDLTaskCtrlBase& tcb) 
+	: 
+	base(tcb)
+{
+}
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 

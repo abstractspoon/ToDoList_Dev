@@ -403,55 +403,12 @@ protected:
 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const;
 
-	void ClearSortColumn();
-	void SetSortColumn(TDC_COLUMN nColID, TDC_SORTDIR nSortDir);
-	TDC_COLUMN GetSortColumn(TDC_SORTDIR& nSortDir) const;
-	void DoSort();
-	BOOL ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy) const;
-	BOOL AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const;
-	BOOL AttribsMatchSort(const CTDCAttributeMap& attribIDs) const;
-	int GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const;
-
+protected:
 	struct TDSORTFLAGS
 	{
-		TDSORTFLAGS() 
-			: 
-			bSortChildren(TRUE), 
-			bSortDueTodayHigh(FALSE), 
-			dwTimeTrackID(0), 
-			bIncStartTime(FALSE), 
-			bIncCreateTime(FALSE), 
-			bIncDueTime(FALSE), 
-			bIncDoneTime(FALSE)
-		{
-		}
+		TDSORTFLAGS();
 
-		BOOL WantIncludeTime(TDC_COLUMN nColID) const
-		{
-			switch (nColID)
-			{
-			case TDCC_CREATIONDATE:
-			case TDCC_CREATIONTIME:
-				return bIncCreateTime;
-
-			case TDCC_STARTDATE:
-			case TDCC_STARTTIME:
-				return bIncStartTime;
-
-			case TDCC_DUEDATE:
-			case TDCC_DUETIME:
-				return bIncDueTime;
-
-			case TDCC_DONEDATE:
-			case TDCC_DONETIME:
-				return bIncDoneTime;
-
-			case TDCC_LASTMODDATE:
-				return TRUE;
-			}
-
-			return FALSE;
-		}
+		BOOL WantIncludeTime(TDC_COLUMN nColID) const;
 		
 		BOOL bSortChildren;
 		BOOL bSortDueTodayHigh;
@@ -464,9 +421,7 @@ protected:
 		
 	struct TDSORTPARAMS
 	{
-		TDSORTPARAMS(const CTDLTaskCtrlBase& tcb) : base(tcb)
-		{
-		}
+		TDSORTPARAMS(const CTDLTaskCtrlBase& tcb);
 		
 		const CTDLTaskCtrlBase& base;
 		TDSORT sort;
@@ -474,8 +429,18 @@ protected:
 	};
 	// ------------------------------------------------------------------
 
+	void ClearSortColumn();
+	void SetSortColumn(TDC_COLUMN nColID, TDC_SORTDIR nSortDir);
+	TDC_COLUMN GetSortColumn(TDC_SORTDIR& nSortDir) const;
+	void DoSort();
+	BOOL ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy) const;
+	BOOL AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const;
+	BOOL AttribsMatchSort(const CTDCAttributeMap& attribIDs) const;
+	int GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const;
+
 	PFNTLSCOMPARE PrepareSort(TDSORTPARAMS& ss) const;
 	
+protected:
 	int CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustomWantsTime = FALSE) const;
 	int CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC, BOOL bVisibleTasksOnly) const;
 	BOOL WantDrawColumnTime(TDC_DATE nDate, BOOL bCustomWantsTime = FALSE) const;
