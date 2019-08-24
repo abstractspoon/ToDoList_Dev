@@ -12996,30 +12996,15 @@ void CToDoListWnd::OnTasklistCopyColumnValues(BOOL bSelectedTasks)
 
 void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks)
 {
-	BOOL bEnable = GetToDoCtrl().CanCopyTaskColumnValues(m_nContextColumnID, bSelectedTasks);
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
+	BOOL bEnable = tdc.CanCopyTaskColumnValues(m_nContextColumnID, bSelectedTasks);
 	pCmdUI->Enable(bEnable);
 
 	if (bEnable)
 	{
-		CString sColLabel;
-
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nContextColumnID))
-		{
-			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-			VERIFY(GetToDoCtrl().GetCustomAttributeDefs().GetAttributeDef(m_nContextColumnID, attribDef));
-
-			sColLabel = attribDef.sLabel;
-		}
-		else
-		{
-			const TDCCOLUMN* pCol = CToDoCtrl::GetColumnDefinition(m_nContextColumnID);
-			ASSERT(pCol);
-
-			sColLabel = CEnString(pCol->nIDLongName);
-		}
-
 		UINT nMenuStrID = (bSelectedTasks ? IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES : IDS_TASKLIST_COPYCOLUMNVALUES);
+		CString sColLabel = tdc.GetColumnName(m_nContextColumnID);
 
 		pCmdUI->SetText(CEnString(nMenuStrID, sColLabel));
 	}

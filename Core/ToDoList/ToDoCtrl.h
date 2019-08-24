@@ -309,6 +309,7 @@ public:
 
 	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 	BOOL CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
+	CString GetColumnName(TDC_COLUMN nColID) const { return m_taskTree.GetColumnName(nColID); }
 
 	BOOL CanClearSelectedTaskFocusedAttribute() const;
 	BOOL ClearSelectedTaskFocusedAttribute();
@@ -435,7 +436,6 @@ public:
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
 	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);
 	static void SetRecentlyModifiedPeriod(const COleDateTimeSpan& dtSpan);
-	static const TDCCOLUMN* GetColumnDefinition(TDC_COLUMN nColID) { return CTDLTaskCtrlBase::GetColumn(nColID); }
 
 protected:
 	enum  // visible for derived classes

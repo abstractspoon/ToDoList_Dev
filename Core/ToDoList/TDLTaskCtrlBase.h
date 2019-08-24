@@ -114,6 +114,7 @@ public:
 
 	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 	int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
+	CString GetColumnName(TDC_COLUMN nColID) const;
 
 	COLORREF GetSelectedTaskColor() const; // -1 on no item selected
 	CString GetSelectedTaskIcon() const;
@@ -244,7 +245,6 @@ public:
 	void ClientToScreen(LPRECT pRect) const { CWnd::ClientToScreen(pRect); }
 	void ScreenToClient(LPRECT pRect) const { CWnd::ScreenToClient(pRect); }
 
-	static const TDCCOLUMN* GetColumn(TDC_COLUMN nColID);
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
 	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);
 
@@ -520,6 +520,7 @@ protected:
 							COLORREF& crBack, BOOL bRef, BOOL bSelected) const;
 	COLORREF GetTaskCommentsTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
+	static const TDCCOLUMN* GetColumn(TDC_COLUMN nColID);
 	static BOOL InvalidateSelection(CListCtrl& lc, BOOL bUpdate = FALSE);
 	static BOOL InvalidateItem(CListCtrl& lc, int nItem, BOOL bUpdate = FALSE);
 	static BOOL PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords);

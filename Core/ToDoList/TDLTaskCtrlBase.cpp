@@ -952,6 +952,23 @@ int CTDLTaskCtrlBase::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTask
 	return aValues.GetSize();
 }
 
+CString CTDLTaskCtrlBase::GetColumnName(TDC_COLUMN nColID) const
+{
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+	{
+		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+		VERIFY(m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef));
+
+		return attribDef.sLabel;
+	}
+
+	// else
+	const TDCCOLUMN* pCol = GetColumn(nColID);
+	ASSERT(pCol);
+
+	return (pCol ? CEnString(pCol->nIDLongName) : EMPTY_STR);
+}
+
 BOOL CTDLTaskCtrlBase::SetColumnOrder(const CDWordArray& aColumns)
 {
 	CIntArray aOrder;
