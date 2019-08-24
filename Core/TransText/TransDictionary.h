@@ -101,13 +101,13 @@ public:
 	CString GetDictionaryPath() const { return m_sDictFile; }
 	CString GetDictionaryVersion() const { return m_sDictVersion; }
 	WORD GetDictionaryLanguageID() const { return m_wDictLanguageID; }
+	CString GetDictionaryTwoLetterLanguageCode() const;
 
 	BOOL LoadDictionary(LPCTSTR szDictPath, BOOL bDecodeChars = TRUE);
 	BOOL SaveDictionary(LPCTSTR szAltPath = NULL, BOOL bForce = FALSE);
 	BOOL IsEmpty() const { return (m_mapItems.GetCount() == 0); }
 	BOOL IsReadOnly() const;
 
-	BOOL Translate(CString& sText);
 	BOOL Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID = NULL, BOOL bValidateAccelerator = TRUE);
 	BOOL Translate(CString& sText, HMENU hMenu, BOOL bValidateAccelerator = TRUE);
 

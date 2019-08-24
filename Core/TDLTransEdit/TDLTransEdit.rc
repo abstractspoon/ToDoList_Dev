@@ -211,6 +211,8 @@ BEGIN
     POPUP "&Tools"
     BEGIN
         MENUITEM "&Clean Up...",                ID_TOOLS_CLEANUP
+        MENUITEM SEPARATOR
+        MENUITEM "Google Translate",            ID_TOOLS_GOOGLETRANSLATE
     END
 END
 

@@ -64,8 +64,8 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CTDLTransEditDlg)
-	afx_msg void OnOptionsShowTooltips();
 	//}}AFX_MSG
+	afx_msg void OnOptionsShowTooltips();
 	afx_msg void OnToolsCleanUp();
 	afx_msg void OnFileNewTranslation();
 	afx_msg void OnFileOpenTranslation();
@@ -82,6 +82,8 @@ protected:
 	afx_msg void OnChangeTranslation();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnOptionsSortUntranslatedAtTop();
+	afx_msg void OnToolsGoogleTranslate();
+	afx_msg void OnUpdateToolsGoogleTranslate(CCmdUI* pCmdUI);
 	DECLARE_MESSAGE_MAP()
 
 protected:

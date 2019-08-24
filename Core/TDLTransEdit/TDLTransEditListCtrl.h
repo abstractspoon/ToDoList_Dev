@@ -32,6 +32,7 @@ public:
 	void SetSortUntranslatedAtTop(BOOL bEnable);
 	void Sort();
 	CString GetEnglishText(int nItem) const;
+	BOOL IsTranslated(int nItem) const;
 
 protected:
 	BOOL m_bSortUntranslatedAtTop;

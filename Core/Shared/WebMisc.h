@@ -34,6 +34,7 @@ namespace WebMisc
 	BOOL IsFileURI(LPCTSTR szFilePath);
 	BOOL IsRelativeFileURI(LPCTSTR szFilePath);
 	BOOL TrimFileProtocol(CString& sFilePath);
+	BOOL Encode(CString& sUrlOrFragment, DWORD dwFlags);
 
 	BOOL RegisterProtocol(LPCTSTR szProtocol, LPCTSTR szAppName, LPCTSTR szCommand);
 	BOOL UnregisterProtocol(LPCTSTR szProtocol);

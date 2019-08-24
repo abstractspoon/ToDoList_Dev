@@ -85,6 +85,24 @@ BOOL WebMisc::IsURL(LPCTSTR szURL)
 	return ((sURL.Find(_T("www.")) == 0) || (sURL.Find(_T("ftp.")) == 0));
 }
 
+BOOL WebMisc::Encode(CString& sUrlOrFragment, DWORD dwFlags)
+{
+	DWORD dwLen = (sUrlOrFragment.GetLength() * 4);
+	CString sEncoded;
+
+	HRESULT hr = ::UrlEscape(sUrlOrFragment, sEncoded.GetBuffer(dwLen + 1), &dwLen, 0);
+	sEncoded.ReleaseBuffer(dwLen);
+
+	if (hr == S_OK)
+	{
+		sUrlOrFragment = sEncoded;
+		return TRUE;
+	}
+
+	sUrlOrFragment.Empty();
+	return FALSE;
+}
+
 BOOL WebMisc::IsBrowser(LPCTSTR szFilePath)
 {
 	CString sFileName = FileMisc::GetFileNameFromPath(szFilePath, FALSE);

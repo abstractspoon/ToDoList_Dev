@@ -634,17 +634,22 @@ CTransDictionary::CTransDictionary()
 {
 	LANGID nLangID = Misc::GetUserDefaultUILanguage();
 	m_wDictLanguageID = (WORD)PRIMARYLANGID(nLangID);
-
-	// estimated size of dictionary
-	m_mapItems.InitHashTable(1991); // prime number closest to 2000
-
-	// estimated size of ignore list
-	m_mapStringIgnore.InitHashTable(1991); // prime number closest to 2000
 }
 
 CTransDictionary::~CTransDictionary()
 {
 	DeleteDictionary();
+}
+
+CString CTransDictionary::GetDictionaryTwoLetterLanguageCode() const
+{
+	LCID nLocaleID = MAKELANGID(GetDictionaryLanguageID(), 0);
+
+	CString sLangCode;
+	int nLen = ::GetLocaleInfo(nLocaleID, LOCALE_SABBREVLANGNAME, sLangCode.GetBuffer(5), 5);
+	sLangCode.ReleaseBuffer(nLen);
+
+	return sLangCode.Left(2);
 }
 
 BOOL CTransDictionary::LoadCsvDictionary(LPCTSTR szDictPath)

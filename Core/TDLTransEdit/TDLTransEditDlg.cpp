@@ -13,6 +13,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
+#include "..\shared\webmisc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\mousewheelmgr.h"
@@ -57,8 +58,10 @@ void CTDLTransEditDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLTransEditDlg, CDialog)
 	//{{AFX_MSG_MAP(CTDLTransEditDlg)
-	ON_COMMAND(ID_OPTIONS_SHOWTOOLTIPS, OnOptionsShowTooltips)
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_OPTIONS_SHOWTOOLTIPS, OnOptionsShowTooltips)
+	ON_COMMAND(ID_TOOLS_GOOGLETRANSLATE, OnToolsGoogleTranslate)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_GOOGLETRANSLATE, OnUpdateToolsGoogleTranslate)
 	ON_COMMAND(ID_TOOLS_CLEANUP, OnToolsCleanUp)
 	ON_COMMAND(ID_FILE_OPEN_TRANSLATION, OnFileOpenTranslation)
 	ON_COMMAND(ID_FILE_SAVE_TRANSLATION, OnFileSaveTranslation)
@@ -740,4 +743,43 @@ void CTDLTransEditDlg::OnOptionsSortUntranslatedAtTop()
 	m_bSortUntranslatedAtTop = !m_bSortUntranslatedAtTop;
 
 	m_lcDictItems.SetSortUntranslatedAtTop(m_bSortUntranslatedAtTop);
+}
+
+void CTDLTransEditDlg::OnToolsGoogleTranslate()
+{
+	LPCTSTR szUrlFormat = _T("http://translate.google.com/translate_a/t?client=j&text=%s&hl=en&sl=en&tl=%s");
+
+	CString sLangCode = m_dictionary.GetDictionaryTwoLetterLanguageCode();
+	ASSERT(!sLangCode.IsEmpty());
+
+	BOOL bRebuildList = FALSE;
+	int nNumItems = m_lcDictItems.GetItemCount();
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		if (!m_lcDictItems.IsTranslated(nItem))
+		{
+			CString sTextIn = m_lcDictItems.GetEnglishText(nItem);
+			WebMisc::Encode(sTextIn, URL_ESCAPE_SEGMENT_ONLY);
+
+			CString sQueryUrl;
+			sQueryUrl.Format(szUrlFormat, sTextIn, sLangCode);
+
+			CString sTextOut;
+
+			if (WebMisc::DownloadPage(sQueryUrl, sTextOut))
+			{
+				Misc::MakeUnquoted(sTextOut);
+				ModifyDictionaryItem(nItem, sTextOut);
+			}
+		}
+	}
+
+	if (bRebuildList)
+		m_lcDictItems.RebuildList(m_dictionary, m_bShowAlternatives, m_sFilter);
+}
+
+void CTDLTransEditDlg::OnUpdateToolsGoogleTranslate(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(!m_dictionary.IsEmpty() && (m_sLastBrowsePath != m_sYourLanguagePath));
 }

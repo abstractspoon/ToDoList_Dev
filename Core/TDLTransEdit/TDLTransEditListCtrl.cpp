@@ -137,6 +137,11 @@ CString CTDLTransEditListCtrl::GetEnglishText(int nItem) const
 	return sEnglish;
 }
 
+BOOL CTDLTransEditListCtrl::IsTranslated(int nItem) const
+{
+	return !GetItemText(nItem, TRANS_COL).IsEmpty();
+}
+
 BOOL CTDLTransEditListCtrl::MatchesFilter(const DICTITEM* pDI, const CString& sFilter)
 {
 	if (!pDI || pDI->GetTextIn().IsEmpty())
