@@ -154,6 +154,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HTMLContentControlBridge", 
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSHTMLEditorControl", "3rdParty\MSHtmlEditorControl\MSHTMLEditorControl.csproj", "{5873DE0F-6853-4C8E-91A4-7A6861069A9A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{106D75D9-0012-416E-8C25-85124406171D} = {106D75D9-0012-416E-8C25-85124406171D}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HtmlReportExporter", "HtmlReportExporter", "{C20A74AF-A6C4-4E7A-AA8C-B946F18D6ACE}"
 EndProject
@@ -163,6 +166,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HTMLReportExporterBridge", 
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTMLReportExporterCore", "ImportExport\HTMLReportExporter\HTMLReportExporterCore\HTMLReportExporterCore.csproj", "{512862D8-FABA-494C-865F-8B18910E467D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5873DE0F-6853-4C8E-91A4-7A6861069A9A} = {5873DE0F-6853-4C8E-91A4-7A6861069A9A}
+		{106D75D9-0012-416E-8C25-85124406171D} = {106D75D9-0012-416E-8C25-85124406171D}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3rdParty", "3rdParty", "{8ED6C235-FB52-45C1-8E1A-B6540BDED274}"
 EndProject

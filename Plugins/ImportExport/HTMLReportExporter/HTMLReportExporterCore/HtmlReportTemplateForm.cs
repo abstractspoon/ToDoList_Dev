@@ -71,6 +71,7 @@ namespace HTMLReportExporter
 			m_ChangeTimer.Interval = 500;
 
 			InitializeComponent();
+			DoHighDPIFixups();
 
 			// Build list custom attribute IDs for later use
 			if (tasks.HasCustomAttributes())
@@ -95,6 +96,31 @@ namespace HTMLReportExporter
 
 			if ((prevSize.Width > 0) && (prevSize.Height > 0))
 				this.Size = prevSize;
+		}
+
+		private void DoHighDPIFixups()
+		{
+			if (DPIScaling.WantScaling())
+			{
+				// LHS
+				this.Toolbar.Width = this.splitContainer.Panel1.Width;
+				this.tabControl.Width = this.splitContainer.Panel1.Width;
+				this.tabControl.Height = this.splitContainer.Panel1.Height - this.tabControl.Top;
+
+				// RHS
+				this.panel1.Width = this.splitContainer.Panel2.Width - DPIScaling.Scale(3);
+				this.panel1.Height = this.splitContainer.Panel2.Height - this.panel1.Top;
+
+				this.browserPreview.Width = this.panel1.Width;
+				this.browserPreview.Height = this.panel1.Height - this.browserPreview.Top;
+
+				this.previewDefaultBrowser.Location = new Point(this.panel1.Width - this.previewDefaultBrowser.Size.Width, 0);
+				this.labelPreview.Width = this.previewDefaultBrowser.Left;
+
+				this.splitContainer.Panel1.AutoSize = true;
+				this.splitContainer.Panel2.AutoSize = true;
+				this.splitContainer.SplitterDistance = DPIScaling.Scale(this.splitContainer.SplitterDistance);
+			}
 		}
 
 		public HtmlReportTemplate ReportTemplate

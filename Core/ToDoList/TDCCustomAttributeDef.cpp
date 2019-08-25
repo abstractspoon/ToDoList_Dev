@@ -621,7 +621,7 @@ BOOL CTDCCustomAttribDefinitionArray::AnyHasFeature(DWORD dwFeature) const
 
 	while (nDef--)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& def = ElementAt(nDef);
+		const TDCCUSTOMATTRIBUTEDEFINITION& def = GetData()[nDef];
 
 		if (def.HasFeature(dwFeature))
 			return TRUE;

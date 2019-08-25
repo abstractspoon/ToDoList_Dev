@@ -1989,8 +1989,8 @@ BOOL CDialogHelper::SelectText(const CWnd* pEdit, LPCTSTR szText, int nSearchSta
 	if ((nFind < nSearchStart) || (nFind > (nSearchStart + nSearchLen - nTextLen)))
 		return FALSE;
 
-	pEdit->SendMessage(EM_SETSEL, nFind, nFind + nTextLen);
-	pEdit->SendMessage(EM_SCROLLCARET, 0, 0);
+	::SendMessage(*pEdit, EM_SETSEL, nFind, nFind + nTextLen);
+	::SendMessage(*pEdit, EM_SCROLLCARET, 0, 0);
 
 	return TRUE;
 }

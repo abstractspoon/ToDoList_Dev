@@ -512,7 +512,7 @@
 			// 
 			this.previewDefaultBrowser.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.previewDefaultBrowser.AutoSize = true;
-			this.previewDefaultBrowser.Location = new System.Drawing.Point(346, -1);
+			this.previewDefaultBrowser.Location = new System.Drawing.Point(346, 0);
 			this.previewDefaultBrowser.Name = "previewDefaultBrowser";
 			this.previewDefaultBrowser.Size = new System.Drawing.Size(101, 23);
 			this.previewDefaultBrowser.TabIndex = 6;

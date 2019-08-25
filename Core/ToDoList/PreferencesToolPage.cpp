@@ -28,10 +28,18 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesToolPage property page
+
+#ifndef LVS_EX_DOUBLEBUFFER
+#define LVS_EX_DOUBLEBUFFER 0x00010000
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
 
 static LPCTSTR REALQUOTE = _T("\"");
 static LPCTSTR SAFEQUOTE = _T("{QUOTES}");
+
+/////////////////////////////////////////////////////////////////////////////
+// CPreferencesToolPage property page
 
 IMPLEMENT_DYNCREATE(CPreferencesToolPage, CPreferencesPageBase)
 
