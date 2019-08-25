@@ -82,8 +82,7 @@ protected:
 	afx_msg void OnChangeTranslation();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnOptionsSortUntranslatedAtTop();
-	afx_msg void OnToolsGoogleTranslate();
-	afx_msg void OnUpdateToolsGoogleTranslate(CCmdUI* pCmdUI);
+	afx_msg void OnToolsExportUntranslated();
 	DECLARE_MESSAGE_MAP()
 
 protected:

@@ -59,9 +59,8 @@ void CTDLTransEditDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTDLTransEditDlg, CDialog)
 	//{{AFX_MSG_MAP(CTDLTransEditDlg)
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_TOOLS_EXPORTUNTRANSLATED, OnToolsExportUntranslated)
 	ON_COMMAND(ID_OPTIONS_SHOWTOOLTIPS, OnOptionsShowTooltips)
-	ON_COMMAND(ID_TOOLS_GOOGLETRANSLATE, OnToolsGoogleTranslate)
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_GOOGLETRANSLATE, OnUpdateToolsGoogleTranslate)
 	ON_COMMAND(ID_TOOLS_CLEANUP, OnToolsCleanUp)
 	ON_COMMAND(ID_FILE_OPEN_TRANSLATION, OnFileOpenTranslation)
 	ON_COMMAND(ID_FILE_SAVE_TRANSLATION, OnFileSaveTranslation)
@@ -616,15 +615,33 @@ BOOL CTDLTransEditDlg::PreTranslateMessage(MSG* pMsg)
 
 void CTDLTransEditDlg::OnToolsCleanUp() 
 {
-	if (!RecheckYourLanguagePath(m_dictionary.GetDictionaryPath()))
-		return;
+	CFileOpenDialog dialog(_T("Select Multiple Translations"), _T(".csv"), m_sLastBrowsePath, EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT, _T("Translations (*.csv)|*.csv||"));
 
-	// Save any changes first
-	OnFileSaveTranslation();
-	
-	if (TransText::CleanupDictionary(m_sYourLanguagePath, m_dictionary.GetDictionaryPath()))
+	const UINT BUFSIZE = (MAX_PATH * 50);
+	static TCHAR FILEBUF[BUFSIZE] = { 0 };
+
+	dialog.m_ofn.lpstrFile = FILEBUF;
+	dialog.m_ofn.nMaxFile = BUFSIZE;
+
+	if (dialog.DoModal() == IDOK)
 	{
-		LoadDictionary(m_dictionary.GetDictionaryPath());
+		CWaitCursor cursor;
+		CStringArray aFilePaths;
+
+		int nFile = dialog.GetPathNames(aFilePaths);
+
+		while (nFile--)
+		{
+			const CString& sTranslation = aFilePaths[nFile];
+
+			if (sTranslation.Find(_T("YourLanguage.csv")) != -1)
+				continue;
+
+			if (!RecheckYourLanguagePath(sTranslation))
+				return;
+
+			VERIFY(TransText::CleanupDictionary(m_sYourLanguagePath, sTranslation));
+		}
 	}
 }
 
@@ -745,41 +762,9 @@ void CTDLTransEditDlg::OnOptionsSortUntranslatedAtTop()
 	m_lcDictItems.SetSortUntranslatedAtTop(m_bSortUntranslatedAtTop);
 }
 
-void CTDLTransEditDlg::OnToolsGoogleTranslate()
+void CTDLTransEditDlg::OnToolsExportUntranslated() 
 {
-	LPCTSTR szUrlFormat = _T("http://translate.google.com/translate_a/t?client=j&text=%s&hl=en&sl=en&tl=%s");
-
-	CString sLangCode = m_dictionary.GetDictionaryTwoLetterLanguageCode();
-	ASSERT(!sLangCode.IsEmpty());
-
-	BOOL bRebuildList = FALSE;
-	int nNumItems = m_lcDictItems.GetItemCount();
-
-	for (int nItem = 0; nItem < nNumItems; nItem++)
-	{
-		if (!m_lcDictItems.IsTranslated(nItem))
-		{
-			CString sTextIn = m_lcDictItems.GetEnglishText(nItem);
-			WebMisc::Encode(sTextIn, URL_ESCAPE_SEGMENT_ONLY);
-
-			CString sQueryUrl;
-			sQueryUrl.Format(szUrlFormat, sTextIn, sLangCode);
-
-			CString sTextOut;
-
-			if (WebMisc::DownloadPage(sQueryUrl, sTextOut))
-			{
-				Misc::MakeUnquoted(sTextOut);
-				ModifyDictionaryItem(nItem, sTextOut);
-			}
-		}
-	}
-
-	if (bRebuildList)
-		m_lcDictItems.RebuildList(m_dictionary, m_bShowAlternatives, m_sFilter);
+	// TODO: Add your command handler code here
+	
 }
 
-void CTDLTransEditDlg::OnUpdateToolsGoogleTranslate(CCmdUI* pCmdUI)
-{
-	pCmdUI->Enable(!m_dictionary.IsEmpty() && (m_sLastBrowsePath != m_sYourLanguagePath));
-}
