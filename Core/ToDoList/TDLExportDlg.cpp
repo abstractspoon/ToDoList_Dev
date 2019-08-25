@@ -65,7 +65,7 @@ CTDLExportDlg::CTDLExportDlg(const CTDCImportExportMgr& mgr,
 		if (nFormat != -1)
 			m_sFormatTypeID = mgr.GetExporterTypeID(nFormat);
 		else
-			m_sFormatTypeID = mgr.GetTypeID(TDCET_TDL);
+			m_sFormatTypeID = mgr.GetTypeID(TDCET_CSV);
 	}
 
 	if (m_sFolderPath.IsEmpty())
