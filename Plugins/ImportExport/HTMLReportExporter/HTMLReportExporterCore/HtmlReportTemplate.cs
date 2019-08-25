@@ -165,7 +165,7 @@ namespace HTMLReportExporter
 			base.Clear();
 
 			WantDivider = true;
-			BackColor = Color.Transparent;
+			BackColor = Color.White;
 			PixelHeight = DefPixelHeight;
 		}
 
@@ -485,6 +485,10 @@ namespace HTMLReportExporter
 								}
 							}
 						}
+						else
+						{
+							elm = doc.DocumentNode;
+						}
 
 						this.TaskHtml = InjectTextColourPlaceholder(elm).Trim();
 					}
@@ -771,12 +775,12 @@ namespace HTMLReportExporter
 			Task = new TaskTemplate();
 			Footer = new FooterTemplate();
 #if DEBUG
-			Header.Text = "Header";
-			Header.BackColor = Color.LightBlue;
-			Title.Text = "Title";
-			Task.Text = "$(title)<br>";
-			Footer.Text = "Footer";
-			Footer.BackColor = Color.LightPink;
+			//Header.Text = "Header";
+			//Header.BackColor = Color.LightBlue;
+			//Title.Text = "Title";
+			//Task.Text = "$(title)<br>";
+			//Footer.Text = "Footer";
+			//Footer.BackColor = Color.LightPink;
 			//m_FilePath = "Example.rbt";
 #endif
 		}
