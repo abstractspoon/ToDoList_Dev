@@ -89,6 +89,7 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib) const
 			// we are a non-task attribute which can
 			// only be added to an empty set so we fail
 			ASSERT(!bCanAdd);
+			return FALSE;
 		}
 		break;
 	}
