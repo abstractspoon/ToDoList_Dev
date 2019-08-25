@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,2,997,6
+ FILEVERSION 7,2,997,7
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 2, 997, 6\0"
+            VALUE "FileVersion", "7, 2, 997, 7\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-19\0"
             VALUE "LegalTrademarks", "\0"
@@ -3814,9 +3814,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Select A&ll",                 ID_EDIT_SELECTALL
         MENUITEM SEPARATOR
-        MENUITEM "Archi&ve Selected Tasks",   ID_ARCHIVE_SELECTEDTASKS
+        MENUITEM "Archi&ve Selected Tasks",     ID_ARCHIVE_SELECTEDTASKS
         MENUITEM SEPARATOR
-        MENUITEM "Email Selected &Tasks...",  ID_SEND_SELTASKS
+        MENUITEM "Email Selected &Tasks...",    ID_SEND_SELTASKS
         MENUITEM SEPARATOR
         MENUITEM "Cancel\tEsc",                 IDCLOSE
     END
