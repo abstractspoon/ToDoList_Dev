@@ -97,10 +97,6 @@ SOURCE=.\autocombobox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\AutoFlag.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\BaseTabCtrl.cpp
 # End Source File
 # Begin Source File

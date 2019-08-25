@@ -759,6 +759,7 @@ void CTDLTransEditDlg::OnToolsGoogleTranslate()
 	{
 		if (!m_lcDictItems.IsTranslated(nItem))
 		{
+/*
 			CString sTextIn = m_lcDictItems.GetEnglishText(nItem);
 			WebMisc::Encode(sTextIn, URL_ESCAPE_SEGMENT_ONLY);
 
@@ -772,6 +773,7 @@ void CTDLTransEditDlg::OnToolsGoogleTranslate()
 				Misc::MakeUnquoted(sTextOut);
 				ModifyDictionaryItem(nItem, sTextOut);
 			}
+*/
 		}
 	}
 
