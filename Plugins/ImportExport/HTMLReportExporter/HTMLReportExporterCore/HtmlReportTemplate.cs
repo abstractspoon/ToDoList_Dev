@@ -276,7 +276,7 @@ namespace HTMLReportExporter
 	{
 		public struct TaskAttribute
 		{
-			public TaskAttribute(Task.Attribute id, String label, String basePlaceholder)
+			public TaskAttribute(Task.Attribute id, String label, String basePlaceholder) : this()
 			{
 				Id = id;
 				Label = label;

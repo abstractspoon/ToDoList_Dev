@@ -283,19 +283,22 @@ namespace HTMLReportExporter
 			base.OnSelectionChange();
 
 			// update menu check-state
-			CommandHandling.ClearChecked(m_ToolStripAttributeMenu.DropDownItems);
-			
-			var selText = GetTextRange();
-
-			string basePlaceholder;
-			int level;
-
-			if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level))
+			if (m_ToolStripAttributeMenu != null)
 			{
-				ToolStripItem item = m_ToolStripAttributeMenu.DropDownItems[HtmlReportUtils.FormatPlaceholder(basePlaceholder)];
+				CommandHandling.ClearChecked(m_ToolStripAttributeMenu.DropDownItems);
 
-				if ((item != null) && (item is ToolStripMenuItem))
-					(item as ToolStripMenuItem).Checked = true;
+				var selText = GetTextRange();
+
+				string basePlaceholder;
+				int level;
+
+				if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level))
+				{
+					ToolStripItem item = m_ToolStripAttributeMenu.DropDownItems[HtmlReportUtils.FormatPlaceholder(basePlaceholder)];
+
+					if ((item != null) && (item is ToolStripMenuItem))
+						(item as ToolStripMenuItem).Checked = true;
+				}
 			}
 		}
 
@@ -545,27 +548,30 @@ namespace HTMLReportExporter
 		{
 			base.OnSelectionChange();
 
-			// Enable 'attribute level' if placeholder is selected
-			var selText = GetTextRange();
-
-			string placeholderText;
-			int level;
-
-			if (HtmlReportUtils.ParsePlaceholder(selText, out placeholderText, out level) &&
-				!placeholderText.Equals("indent"))
+			if (m_ToolStripAttributeLevelMenu != null)
 			{
-				m_ToolStripAttributeLevelMenu.Enabled = true;
+				// Enable 'attribute level' if placeholder is selected
+				var selText = GetTextRange();
 
-				CommandHandling.ClearChecked(m_ToolStripAttributeLevelMenu.DropDownItems);
+				string placeholderText;
+				int level;
 
-				ToolStripItem item = m_ToolStripAttributeLevelMenu.DropDownItems[level.ToString()];
+				if (HtmlReportUtils.ParsePlaceholder(selText, out placeholderText, out level) &&
+					!placeholderText.Equals("indent"))
+				{
+					m_ToolStripAttributeLevelMenu.Enabled = true;
 
-				if (item != null && item is ToolStripMenuItem)
-					(item as ToolStripMenuItem).Checked = true;
-			}
-			else
-			{
-				m_ToolStripAttributeLevelMenu.Enabled = false;
+					CommandHandling.ClearChecked(m_ToolStripAttributeLevelMenu.DropDownItems);
+
+					ToolStripItem item = m_ToolStripAttributeLevelMenu.DropDownItems[level.ToString()];
+
+					if (item != null && item is ToolStripMenuItem)
+						(item as ToolStripMenuItem).Checked = true;
+				}
+				else
+				{
+					m_ToolStripAttributeLevelMenu.Enabled = false;
+				}
 			}
 		}
 		
