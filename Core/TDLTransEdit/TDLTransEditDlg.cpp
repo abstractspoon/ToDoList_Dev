@@ -609,38 +609,6 @@ BOOL CTDLTransEditDlg::PreTranslateMessage(MSG* pMsg)
 	return CDialog::PreTranslateMessage(pMsg);
 }
 
-void CTDLTransEditDlg::OnToolsCleanUp() 
-{
-	CFileOpenDialog dialog(_T("Select Multiple Translations"), _T(".csv"), m_sLastBrowsePath, EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT, _T("Translations (*.csv)|*.csv||"));
-
-	const UINT BUFSIZE = (MAX_PATH * 50);
-	static TCHAR FILEBUF[BUFSIZE] = { 0 };
-
-	dialog.m_ofn.lpstrFile = FILEBUF;
-	dialog.m_ofn.nMaxFile = BUFSIZE;
-
-	if (dialog.DoModal() == IDOK)
-	{
-		CWaitCursor cursor;
-		CStringArray aFilePaths;
-
-		int nFile = dialog.GetPathNames(aFilePaths);
-
-		while (nFile--)
-		{
-			const CString& sTranslation = aFilePaths[nFile];
-
-			if (sTranslation.Find(_T("YourLanguage.csv")) != -1)
-				continue;
-
-			if (!RecheckYourLanguagePath(sTranslation))
-				return;
-
-			VERIFY(TransText::CleanupDictionary(m_sYourLanguagePath, sTranslation));
-		}
-	}
-}
-
 void CTDLTransEditDlg::OnFileNewTranslation() 
 {
 	CString sYourLangPath(m_sYourLanguagePath);
@@ -756,6 +724,38 @@ void CTDLTransEditDlg::OnOptionsSortUntranslatedAtTop()
 	m_bSortUntranslatedAtTop = !m_bSortUntranslatedAtTop;
 
 	m_lcDictItems.SetSortUntranslatedAtTop(m_bSortUntranslatedAtTop);
+}
+
+void CTDLTransEditDlg::OnToolsCleanUp()
+{
+	CFileOpenDialog dialog(_T("Select Multiple Translations"), _T(".csv"), m_sLastBrowsePath, EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT, _T("Translations (*.csv)|*.csv||"));
+
+	const UINT BUFSIZE = (MAX_PATH * 50);
+	static TCHAR FILEBUF[BUFSIZE] = { 0 };
+
+	dialog.m_ofn.lpstrFile = FILEBUF;
+	dialog.m_ofn.nMaxFile = BUFSIZE;
+
+	if (dialog.DoModal() == IDOK)
+	{
+		CWaitCursor cursor;
+		CStringArray aFilePaths;
+
+		int nFile = dialog.GetPathNames(aFilePaths);
+
+		while (nFile--)
+		{
+			const CString& sTranslation = aFilePaths[nFile];
+
+			if (sTranslation.Find(_T("YourLanguage.csv")) != -1)
+				continue;
+
+			if (!RecheckYourLanguagePath(sTranslation))
+				return;
+
+			VERIFY(TransText::CleanupDictionary(m_sYourLanguagePath, sTranslation));
+		}
+	}
 }
 
 void CTDLTransEditDlg::OnToolsExportUntranslated() 
