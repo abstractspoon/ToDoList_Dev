@@ -84,9 +84,9 @@ static const CString EMPTY_STR;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CToDoCtrlData::CToDoCtrlData(const CWordArray& aStyles, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs)	
+CToDoCtrlData::CToDoCtrlData(const CTDCStyleMap& styles, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs)
 	: 
-	m_aStyles(aStyles),
+	m_styles(styles),
 	m_aCustomAttribDefs(aCustomAttribDefs),
 	m_bUndoRedoing(FALSE)
 {

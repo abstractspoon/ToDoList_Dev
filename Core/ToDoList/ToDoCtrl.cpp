@@ -191,7 +191,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_cbVersion(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cfDefault(cfDefault),
 	m_dTrackedTimeElapsedHours(0),
-	m_data(m_aStyles, m_aCustomAttribDefs),
+	m_data(m_styles, m_aCustomAttribDefs),
 	m_dwEditTitleTaskID(0),
 	m_dwLastAddedID(0),
 	m_dwNextUniqueID(1), 
@@ -214,7 +214,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_visColEdit(visDefault),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
 	m_timeTracking(m_data, m_taskTree.TSH()),
-	m_taskTree(m_ilTaskIcons, m_data, m_aStyles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs),
+	m_taskTree(m_ilTaskIcons, m_data, m_styles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs),
 	m_exporter(m_data, m_taskTree, m_mgrContent),
 #pragma warning (disable: 4355)
 	m_sourceControl(*this),
@@ -232,10 +232,6 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 					ctrl.dwStyle, ctrl.dwExStyle,
 					ctrl.nX, ctrl.nY, ctrl.nCx, ctrl.nCy, ctrl.nID);
 	}
-	
-    // init styles array
-    // MFC sets all elements to zero
-    m_aStyles.SetSize(TDCS_LAST);
 	
 	// set up number masks
 	m_ePercentDone.SetMask(_T("0123456789"));
@@ -2552,16 +2548,17 @@ void CToDoCtrl::NewList()
 {
 	Flush();
 
+	// Temporarily disable delete confirmation
 	BOOL bConfirmDelete = HasStyle(TDCS_CONFIRMDELETE);
 	
 	if (bConfirmDelete)
-		SetStyle(TDCS_CONFIRMDELETE, FALSE, FALSE);
+		m_styles[TDCS_CONFIRMDELETE] = FALSE;
 	
 	DeleteAllTasks();
 	
 	if (bConfirmDelete)
-		SetStyle(TDCS_CONFIRMDELETE, TRUE, FALSE);
-	
+		m_styles[TDCS_CONFIRMDELETE] = TRUE;
+
 	m_sProjectName.Empty();
 	m_nFileVersion = 0;
 	m_bModified = FALSE;
@@ -5440,188 +5437,160 @@ BOOL CToDoCtrl::DeleteAllTasks()
 	return TRUE;
 }
 
-BOOL CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
+DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 {
 	ASSERT (GetSafeHwnd());
 	
-	bOn = bOn ? TRUE : FALSE; // normalize
+	DWORD dwResult = 0;
 	
-	if (bOn != HasStyle(nStyle))
+	m_styles[nStyle] = bEnable;
+
+	switch (nStyle)
 	{
-        m_aStyles[(int)nStyle] = (WORD)bOn;
-		
-		switch (nStyle)
+	case TDCS_SHOWDEFAULTTASKICONS:
+		LoadTaskIcons();
+		break;
+
+	case TDCS_SHOWDATESINISO:
 		{
-		case TDCS_SHOWDEFAULTTASKICONS:
-			LoadTaskIcons();
-			break;
-			
-		case TDCS_SHOWDATESINISO:
-			{
-				DWORD dwStyle = m_cbTimeDue.GetStyle();
-				
-				if (bOn)
-					dwStyle |= TCB_ISO;
-				else
-					dwStyle &= ~(TCB_ISO);
-				
-				m_cbTimeStart.SetStyle(dwStyle);
-				m_cbTimeDue.SetStyle(dwStyle);
-				m_cbTimeDone.SetStyle(dwStyle);
-			}
-			break;
+			DWORD dwStyle = m_cbTimeDue.GetStyle();
+			Misc::SetFlag(dwStyle, TCB_ISO, bEnable);
 
-		case TDCS_NODUEDATEISDUETODAYORSTART:
-		case TDCS_SHOWPATHINHEADER:
-		case TDCS_SHOWINFOTIPS:
-		case TDCS_SHOWCOMMENTSINLIST:
-		case TDCS_SHOWFIRSTCOMMENTLINEINLIST:
-		case TDCS_STRIKETHOUGHDONETASKS:
-		case TDCS_RIGHTSIDECOLUMNS:
-		case TDCS_DISPLAYHMSTIMEFORMAT:
-		case TDCS_TREATSUBCOMPLETEDASDONE:
-		case TDCS_CALCREMAININGTIMEBYDUEDATE:
-		case TDCS_CALCREMAININGTIMEBYSPENT:
-		case TDCS_CALCREMAININGTIMEBYPERCENT:
-		case TDCS_USEHIGHESTPRIORITY:
-		case TDCS_INCLUDEDONEINPRIORITYCALC:
-		case TDCS_HIDEPRIORITYNUMBER:
-		case TDCS_USEHIGHESTRISK:
-		case TDCS_INCLUDEDONEINRISKCALC:
-		case TDCS_SHOWNONFILEREFSASTEXT:
-		case TDCS_USEPERCENTDONEINTIMEEST:
-		case TDCS_HIDEZEROTIMECOST:
-		case TDCS_ROUNDTIMEFRACTIONS:
-		case TDCS_HIDEPERCENTFORDONETASKS:
-		case TDCS_INCLUDEDONEINAVERAGECALC:
-		case TDCS_WEIGHTPERCENTCALCBYNUMSUB:
-		case TDCS_SHOWPERCENTASPROGRESSBAR:
-		case TDCS_HIDEZEROPERCENTDONE:
-		case TDCS_AVERAGEPERCENTSUBCOMPLETION:
-		case TDCS_AUTOCALCPERCENTDONE:
-		case TDCS_HIDESTARTDUEFORDONETASKS:
-		case TDCS_SHOWWEEKDAYINDATES:
-			// handled solely by tree-list
-			break;
-						
-		case TDCS_USEEARLIESTDUEDATE:
-			if (bOn)
-				m_aStyles[TDCS_USELATESTDUEDATE] = FALSE; // mutually exclusive
-			break;
-
-		case TDCS_USELATESTDUEDATE:
-			if (bOn)
-				m_aStyles[TDCS_USEEARLIESTDUEDATE] = FALSE; // mutually exclusive
-			break;
-
-		case TDCS_USEEARLIESTSTARTDATE:
-			if (bOn)
-				m_aStyles[TDCS_USELATESTSTARTDATE] = FALSE; // mutually exclusive
-			break;
-
-		case TDCS_USELATESTSTARTDATE:
-			if (bOn)
-				m_aStyles[TDCS_USEEARLIESTSTARTDATE] = FALSE; // mutually exclusive
-			break;
-	
-		case TDCS_TASKCOLORISBACKGROUND:
-			if (bOn)
-			{
-				m_cpColour.SetSelectionMode(CP_MODE_BK);
-				m_cpColour.SetBkColour(m_cpColour.GetTextColour());
-				m_cpColour.SetTextColour(CLR_DEFAULT);
-				
-			}
-			else
-			{
-				m_cpColour.SetSelectionMode(CP_MODE_TEXT);
-				m_cpColour.SetTextColour(m_cpColour.GetBkColour());
-				m_cpColour.SetBkColour(CLR_DEFAULT);
-			}
-			break;
-			
-		case TDCS_SORTDONETASKSATBOTTOM:
-			if (bWantUpdate)
-				Resort();
-			break;
-			
-		case TDCS_DUEHAVEHIGHESTPRIORITY:
-		case TDCS_DONEHAVELOWESTPRIORITY:
-			if (bWantUpdate && (GetSortBy() == TDCC_PRIORITY))
-				Resort();
-			break;
-			
-		case TDCS_DONEHAVELOWESTRISK:
-			if (bWantUpdate && (GetSortBy() == TDCC_RISK))
-				Resort();
-			break;
-
-		case TDCS_SHOWPROJECTNAME:
-			{
-				// ensure focus is ok
-				if (!bOn && (GetFocus() == GetDlgItem(IDC_PROJECTNAME)))
-					SetFocusToTasks();
-				
-				if (bWantUpdate)
-				{
-					HOLD_REDRAW(*this, 0);
-					Resize();
-				}
-			}
-			break;
-			
-		case TDCS_SHOWCOMMENTSALWAYS:
-		case TDCS_AUTOREPOSCTRLS:
-		case TDCS_COLORTEXTBYPRIORITY:
-		case TDCS_COLORTEXTBYATTRIBUTE:
-		case TDCS_COLORTEXTBYNONE:
-		case TDCS_ALLOWCOMMENTSSTACKING:
-		case TDCS_STACKCOMMENTSABOVEEDITS:
-			if (bWantUpdate)
-				Resize();
-			break;
-			
-		case TDCS_READONLY:
-		case TDCS_CONFIRMDELETE:
-		case TDCS_CHECKOUTONLOAD:
-		case TDCS_SYNCTIMEESTIMATESANDDATES:
-		case TDCS_FOCUSTREEONENTER:
-		case TDCS_LOGTIMETRACKING:
-		case TDCS_LOGTASKTIMESEPARATELY:
-		case TDCS_WARNADDDELETEARCHIVE:
-		case TDCS_ALLOWPARENTTIMETRACKING:
-		case TDCS_USES3RDPARTYSOURCECONTROL:
-		case TDCS_REFILTERONMODIFY:
-		case TDCS_SHOWPARENTSASFOLDERS:
-		case TDCS_INCLUDEUSERINCHECKOUT:
-		case TDCS_DISPLAYLOGCONFIRM:
-		case TDCS_SYNCCOMPLETIONTOSTATUS:
-		case TDCS_DISABLEPASSWORDPROMPTING:
-		case TDCS_SAVEUIVISINTASKLIST:
-		case TDCS_AUTOADJUSTDEPENDENCYDATES:
-		case TDCS_TRACKSELECTEDTASKONLY:
-		case TDCS_COMMENTSUSETREEFONT:
-			// do nothing
-			break;
-
-		default:
-			//ASSERT(0); // just to help catch forgotten styles
-			break;
+			m_cbTimeStart.SetStyle(dwStyle);
+			m_cbTimeDue.SetStyle(dwStyle);
+			m_cbTimeDone.SetStyle(dwStyle);
 		}
-		
-		if (bWantUpdate)
-			UpdateControls();
+		break;
 
-		// notify tree-list to update itself
-		m_taskTree.OnStyleUpdated(nStyle, bOn, bWantUpdate);
-		
-		return TRUE; // style was changed
+	case TDCS_NODUEDATEISDUETODAYORSTART:
+	case TDCS_SHOWPATHINHEADER:
+	case TDCS_SHOWINFOTIPS:
+	case TDCS_SHOWCOMMENTSINLIST:
+	case TDCS_SHOWFIRSTCOMMENTLINEINLIST:
+	case TDCS_STRIKETHOUGHDONETASKS:
+	case TDCS_RIGHTSIDECOLUMNS:
+	case TDCS_DISPLAYHMSTIMEFORMAT:
+	case TDCS_TREATSUBCOMPLETEDASDONE:
+	case TDCS_CALCREMAININGTIMEBYDUEDATE:
+	case TDCS_CALCREMAININGTIMEBYSPENT:
+	case TDCS_CALCREMAININGTIMEBYPERCENT:
+	case TDCS_USEHIGHESTPRIORITY:
+	case TDCS_INCLUDEDONEINPRIORITYCALC:
+	case TDCS_HIDEPRIORITYNUMBER:
+	case TDCS_USEHIGHESTRISK:
+	case TDCS_INCLUDEDONEINRISKCALC:
+	case TDCS_SHOWNONFILEREFSASTEXT:
+	case TDCS_USEPERCENTDONEINTIMEEST:
+	case TDCS_HIDEZEROTIMECOST:
+	case TDCS_ROUNDTIMEFRACTIONS:
+	case TDCS_HIDEPERCENTFORDONETASKS:
+	case TDCS_INCLUDEDONEINAVERAGECALC:
+	case TDCS_WEIGHTPERCENTCALCBYNUMSUB:
+	case TDCS_SHOWPERCENTASPROGRESSBAR:
+	case TDCS_HIDEZEROPERCENTDONE:
+	case TDCS_AVERAGEPERCENTSUBCOMPLETION:
+	case TDCS_AUTOCALCPERCENTDONE:
+	case TDCS_HIDESTARTDUEFORDONETASKS:
+	case TDCS_SHOWWEEKDAYINDATES:
+	case TDCS_SORTDONETASKSATBOTTOM:
+	case TDCS_DUEHAVEHIGHESTPRIORITY:
+	case TDCS_DONEHAVELOWESTPRIORITY:
+	case TDCS_DONEHAVELOWESTRISK:
+		// handled solely by tree-list
+		break;
+
+	case TDCS_USEEARLIESTDUEDATE:
+		if (bEnable)
+			m_styles[TDCS_USELATESTDUEDATE] = FALSE; // mutually exclusive
+		break;
+
+	case TDCS_USELATESTDUEDATE:
+		if (bEnable)
+			m_styles[TDCS_USEEARLIESTDUEDATE] = FALSE; // mutually exclusive
+		break;
+
+	case TDCS_USEEARLIESTSTARTDATE:
+		if (bEnable)
+			m_styles[TDCS_USELATESTSTARTDATE] = FALSE; // mutually exclusive
+		break;
+
+	case TDCS_USELATESTSTARTDATE:
+		if (bEnable)
+			m_styles[TDCS_USEEARLIESTSTARTDATE] = FALSE; // mutually exclusive
+		break;
+
+	case TDCS_TASKCOLORISBACKGROUND:
+		if (bEnable)
+		{
+			m_cpColour.SetSelectionMode(CP_MODE_BK);
+			m_cpColour.SetBkColour(m_cpColour.GetTextColour());
+			m_cpColour.SetTextColour(CLR_DEFAULT);
+		}
+		else
+		{
+			m_cpColour.SetSelectionMode(CP_MODE_TEXT);
+			m_cpColour.SetTextColour(m_cpColour.GetBkColour());
+			m_cpColour.SetBkColour(CLR_DEFAULT);
+		}
+		break;
+
+
+	case TDCS_SHOWPROJECTNAME:
+		// Fix up focus
+		if (!bEnable && (GetFocus() == GetDlgItem(IDC_PROJECTNAME)))
+		{
+			SetFocusToTasks();
+		}
+		dwResult = TDCSS_WANTRESIZE;
+		break;
+
+	case TDCS_SHOWCOMMENTSALWAYS:
+	case TDCS_AUTOREPOSCTRLS:
+	case TDCS_COLORTEXTBYPRIORITY:
+	case TDCS_COLORTEXTBYATTRIBUTE:
+	case TDCS_COLORTEXTBYNONE:
+	case TDCS_ALLOWCOMMENTSSTACKING:
+	case TDCS_STACKCOMMENTSABOVEEDITS:
+		dwResult = TDCSS_WANTRESIZE;
+		break;
+
+	case TDCS_READONLY:
+	case TDCS_CONFIRMDELETE:
+	case TDCS_CHECKOUTONLOAD:
+	case TDCS_SYNCTIMEESTIMATESANDDATES:
+	case TDCS_FOCUSTREEONENTER:
+	case TDCS_LOGTIMETRACKING:
+	case TDCS_LOGTASKTIMESEPARATELY:
+	case TDCS_WARNADDDELETEARCHIVE:
+	case TDCS_ALLOWPARENTTIMETRACKING:
+	case TDCS_USES3RDPARTYSOURCECONTROL:
+	case TDCS_REFILTERONMODIFY:
+	case TDCS_SHOWPARENTSASFOLDERS:
+	case TDCS_INCLUDEUSERINCHECKOUT:
+	case TDCS_DISPLAYLOGCONFIRM:
+	case TDCS_SYNCCOMPLETIONTOSTATUS:
+	case TDCS_DISABLEPASSWORDPROMPTING:
+	case TDCS_SAVEUIVISINTASKLIST:
+	case TDCS_AUTOADJUSTDEPENDENCYDATES:
+	case TDCS_TRACKSELECTEDTASKONLY:
+	case TDCS_COMMENTSUSETREEFONT:
+		// do nothing
+		break;
+
+	default:
+		//ASSERT(0); // just to help catch forgotten styles
+		break;
 	}
 	
-	return FALSE; // no change
+	return dwResult;
 }
 
-BOOL CToDoCtrl::ModifyStyles(const CTDCStylesMap& modStyles)
+void CToDoCtrl::SetReadonly(BOOL bReadOnly)
+{
+	ModifyStyles(CTDCStyleMap(TDCS_READONLY, bReadOnly));
+}
+
+BOOL CToDoCtrl::ModifyStyles(const CTDCStyleMap& modStyles)
 {
 	if (modStyles.GetCount() == 0)
 		return FALSE;
@@ -5631,28 +5600,33 @@ BOOL CToDoCtrl::ModifyStyles(const CTDCStylesMap& modStyles)
 	CHoldRedraw hr(*this, (NCR_PAINT | NCR_ERASEBKGND));
 	
 	POSITION pos = modStyles.GetStartPosition();
-	TDC_STYLE nStyle;
-	BOOL bWantOn;
+	DWORD dwResult = 0;
 
 	while (pos)
 	{
+		TDC_STYLE nStyle;
+		BOOL bWantOn;
 		modStyles.GetNextAssoc(pos, nStyle, bWantOn);
 
-		// FALSE -> Don't update until the very end
-		SetStyle(nStyle, bWantOn, FALSE);
+		dwResult |= SetStyle(nStyle, bWantOn);
 	}
 
 	// notify tree-list we've finished changing styles
-	OnStylesUpdated();
-	
-	// misc
-	Resize();
-	Invalidate(TRUE);
+	OnStylesUpdated(modStyles);
 
+	if (Misc::HasFlag(dwResult, TDCSS_WANTRESIZE)) 
+		Resize();
+
+	Invalidate(TRUE);
 	UpdateControls();
-	Resort(); 
 
 	return TRUE;
+}
+
+void CToDoCtrl::Resort(BOOL bAllowToggle)
+{
+	if (IsResortAllowed())
+		m_taskTree.Resort(bAllowToggle);
 }
 
 BOOL CToDoCtrl::HasStyle(TDC_STYLE nStyle) const 
@@ -5671,7 +5645,7 @@ BOOL CToDoCtrl::HasStyle(TDC_STYLE nStyle) const
 		break;
 	}
 	
-	return (m_aStyles[nStyle] ? TRUE : FALSE); 
+	return m_styles.IsStyleEnabled(nStyle); 
 }
 
 void CToDoCtrl::SetCompletionStatus(const CString& sStatus) 
@@ -6339,7 +6313,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	m_findReplace.LoadState(prefs);
 
 	if (tasks.IsPasswordPromptingDisabled())
-		SetStyle(TDCS_DISABLEPASSWORDPROMPTING, TRUE, FALSE);
+		m_styles[TDCS_DISABLEPASSWORDPROMPTING] = TRUE;
 	
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	log.LogTimeElapsed(_T("CToDoCtrl::LoadTasks(Process header)"));
@@ -10102,7 +10076,7 @@ void CToDoCtrl::LoadAttributeVisibility(const CTaskFile& tasks, const CPreferenc
 	if (tasks.GetAttributeVisibility(vis))
 	{
 		// update style to match
-		SetStyle(TDCS_SAVEUIVISINTASKLIST, TRUE, FALSE);
+		m_styles[TDCS_SAVEUIVISINTASKLIST] = TRUE;
 	}
 	else if (!vis.Load(prefs, GetPreferencesKey()))
 	{

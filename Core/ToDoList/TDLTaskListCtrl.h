@@ -42,7 +42,7 @@ public:
 	CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data,
 					 const CToDoCtrlFind& find,
-					 const CWordArray& aStyles,
+					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
 					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
@@ -93,7 +93,7 @@ public:
 	void RemoveDeletedItems();
 	BOOL SaveToImage(CBitmap& bmImage);
 
-	void OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate);
+	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 
 protected:
 	CListCtrl m_lcTasks;

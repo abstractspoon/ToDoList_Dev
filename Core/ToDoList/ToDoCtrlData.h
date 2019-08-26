@@ -48,7 +48,7 @@ class CToDoCtrlData
 	friend class CTDCTaskExporter;
 
 public:
-	CToDoCtrlData(const CWordArray& aStyles, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs);
+	CToDoCtrlData(const CTDCStyleMap& styles, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs);
 	virtual ~CToDoCtrlData();
 
 	int BuildDataModel(const CTaskFile& tasks);
@@ -223,7 +223,7 @@ public:
 	BOOL ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
 	BOOL ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
 	
-	inline BOOL HasStyle(TDC_STYLE nStyle) const { return m_aStyles[(int)nStyle] ? TRUE : FALSE; }
+	inline BOOL HasStyle(TDC_STYLE nStyle) const { return m_styles.IsStyleEnabled(nStyle); }
 	
 	void SetDefaultCommentsFormat(const CString& format);
 	void SetDefaultTimeUnits(TDC_UNITS nTimeEstUnits, TDC_UNITS nTimeSpentUnits);
@@ -238,7 +238,7 @@ protected:
 	CToDoCtrlDataStructure m_struct;
 	BOOL m_bUndoRedoing;
 
-	const CWordArray& m_aStyles;
+	const CTDCStyleMap& m_styles;
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
 	CString m_cfDefault;

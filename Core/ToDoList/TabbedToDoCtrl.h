@@ -229,7 +229,7 @@ protected:
 
 	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos);
-	virtual BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate); // one style at a time only 
+	virtual DWORD SetStyle(TDC_STYLE nStyle, BOOL bOn);
 	virtual void UpdateTasklistVisibility();
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
@@ -245,7 +245,8 @@ protected:
 	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildTree = FALSE);
 
 	virtual void Resize(int cx = 0, int cy = 0, BOOL bSplitting = FALSE);
-	virtual void OnStylesUpdated();
+	virtual BOOL IsResortAllowed() const;
+	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
 	virtual void OnTaskIconsChanged();
 
 	void UpdateSelectedTaskPath();
@@ -321,6 +322,7 @@ protected:
 	void BeginExtensionProgress(const VIEWDATA* pData, UINT nMsg = 0);
 	void EndExtensionProgress();
 	void UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, IUI_UPDATETYPE nType);
+	void SetExtensionsReadOnly(BOOL bReadOnly);
 	void SetExtensionsNeedTaskUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
 	void SetExtensionsNeedFontUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
 	void SetListViewNeedFontUpdate(BOOL bUpdate);

@@ -137,7 +137,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 								   const CTDCImageList& ilIcons,
 								   const CToDoCtrlData& data, 
 								   const CToDoCtrlFind& find,
-								   const CWordArray& aStyles,
+								   const CTDCStyleMap& styles,
 								   const TDCAUTOLISTDATA& tld,
 								   const CTDCColumnIDMap& mapVisibleCols,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
@@ -145,7 +145,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 	CTreeListSyncer(TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER | (bSyncSelection ? TLSF_SYNCSELECTION : 0)),
 	m_data(data),
 	m_find(find),
-	m_aStyles(aStyles),
+	m_styles(styles),
 	m_tld(tld),
 	m_ilTaskIcons(ilIcons),
 	m_mapVisibleCols(mapVisibleCols),
@@ -531,172 +531,206 @@ BOOL CTDLTaskCtrlBase::IsListItemSelected(HWND hwnd, int nItem) const
 	return (ListView_GetItemState(hwnd, nItem, LVIS_SELECTED) & LVIS_SELECTED);
 }
 
-void CTDLTaskCtrlBase::OnStylesUpdated()
+void CTDLTaskCtrlBase::SetTasksWndStyle(DWORD dwStyles, BOOL bSet, BOOL bExStyle)
 {
-	SetTasksImageList(m_ilCheckboxes, TRUE, (!IsColumnShowing(TDCC_DONE) && HasStyle(TDCS_ALLOWTREEITEMCHECKBOX)));
-
-	RecalcUntrackedColumnWidths();
-	UpdateHeaderSorting();
-	PostResize();
-
-	if (IsVisible())
-		InvalidateAll();
+	CTreeListSyncer::ModifyStyle(Tasks(), (bSet ? 0 : dwStyles), (bSet ? dwStyles : 0), bExStyle);
 }
 
-void CTDLTaskCtrlBase::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate)
+void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort)
 {
-	switch (nStyle)
+	BOOL bRecalcUntrackedCols = FALSE;
+	BOOL bInvalidateAll = FALSE;
+	BOOL bResort = FALSE;
+	BOOL bSwapSides = FALSE;
+
+	for (int nItem = TDCS_FIRST; nItem < TDCS_LAST; nItem++)
 	{
-	case TDCS_NODUEDATEISDUETODAYORSTART:
-	case TDCS_SHOWDATESINISO:
-	case TDCS_USEEARLIESTDUEDATE:
-	case TDCS_USELATESTDUEDATE:
-	case TDCS_USEEARLIESTSTARTDATE:
-	case TDCS_USELATESTSTARTDATE:
-	case TDCS_SHOWCOMMENTSINLIST:
-	case TDCS_SHOWFIRSTCOMMENTLINEINLIST:
-	case TDCS_STRIKETHOUGHDONETASKS:
-	case TDCS_TASKCOLORISBACKGROUND:
-	case TDCS_CALCREMAININGTIMEBYDUEDATE:
-	case TDCS_CALCREMAININGTIMEBYSPENT:
-	case TDCS_CALCREMAININGTIMEBYPERCENT:
-	case TDCS_COLORTEXTBYATTRIBUTE:
-		if (bDoUpdate)
-			InvalidateAll();
-		break;
+		TDC_STYLE nStyle = (TDC_STYLE)nItem;
 
-	case TDCS_SORTDONETASKSATBOTTOM:
- 		Resort();
-		break;
-		
-	case TDCS_DUEHAVEHIGHESTPRIORITY:
-	case TDCS_DONEHAVELOWESTPRIORITY:
-		if (IsSortingBy(TDCC_PRIORITY))
-			Resort();
-		break;
-		
-	case TDCS_DONEHAVELOWESTRISK:
-		if (IsSortingBy(TDCC_RISK))
-			Resort();
-		break;
-		
-	case TDCS_RIGHTSIDECOLUMNS:
-		if (bOn != IsShowingColumnsOnRight())
-			SwapSides();
-		break;
-		
-	case TDCS_DISPLAYHMSTIMEFORMAT:
-	case TDCS_TREATSUBCOMPLETEDASDONE:
-		if (bDoUpdate)
-			RecalcUntrackedColumnWidths();
-		break;
-		
-	case TDCS_USEHIGHESTPRIORITY:
-	case TDCS_INCLUDEDONEINPRIORITYCALC:
-	case TDCS_HIDEPRIORITYNUMBER:
-		if (bDoUpdate && IsColumnShowing(TDCC_PRIORITY))
-			InvalidateAll();
-		break;
-		
-	case TDCS_USEHIGHESTRISK:
-	case TDCS_INCLUDEDONEINRISKCALC:
-		if (bDoUpdate && IsColumnShowing(TDCC_RISK))
-			InvalidateAll();
-		break;
-		
-	case TDCS_SHOWNONFILEREFSASTEXT:
-		if (bDoUpdate && IsColumnShowing(TDCC_FILEREF))
-			RecalcUntrackedColumnWidths();
-		break;
-		
-	case TDCS_USEPERCENTDONEINTIMEEST:
-		if (bDoUpdate && IsColumnShowing(TDCC_TIMEEST))
-			RecalcUntrackedColumnWidths();
-		break;
-		
-	case TDCS_SHOWREMINDERSASDATEANDTIME:
-		if (IsColumnShowing(TDCC_REMINDER))
-		{
-			// Reset 'tracked' flag to ensure correct resize
-			int nCol = GetColumnIndex(TDCC_REMINDER);
-			ASSERT(nCol != -1);
+		if (!styles.HasStyle(nStyle))
+			continue;
 
-			m_hdrColumns.SetItemTracked(nCol, FALSE);
+		BOOL bEnable = styles.IsStyleEnabled(nStyle);
 
-			if (bDoUpdate)
-				RecalcUntrackedColumnWidths();
-		}
-		break;
-		
-	case TDCS_HIDEZEROTIMECOST:
-		if (bDoUpdate && 
-			(IsColumnShowing(TDCC_TIMEEST) || 
-			IsColumnShowing(TDCC_TIMESPENT) || 
-			IsColumnShowing(TDCC_COST)))
+		switch (nStyle)
 		{
-			RecalcUntrackedColumnWidths();
-		}
-		break;
-		
-	case TDCS_ROUNDTIMEFRACTIONS:
-		if (bDoUpdate && 
-			(IsColumnShowing(TDCC_TIMEEST) || 
-			IsColumnShowing(TDCC_TIMESPENT)))
-		{
-			RecalcUntrackedColumnWidths();
-		}
-		break;
-		
-	case TDCS_HIDEPERCENTFORDONETASKS:
-	case TDCS_INCLUDEDONEINAVERAGECALC:
-	case TDCS_WEIGHTPERCENTCALCBYNUMSUB:
-	case TDCS_SHOWPERCENTASPROGRESSBAR:
-	case TDCS_HIDEZEROPERCENTDONE:
-		if (bDoUpdate && IsColumnShowing(TDCC_PERCENT))
-			InvalidateAll();
-		break;
-		
-	case TDCS_AVERAGEPERCENTSUBCOMPLETION:
-	case TDCS_AUTOCALCPERCENTDONE:
-		if (bDoUpdate)
-		{
+		case TDCS_NODUEDATEISDUETODAYORSTART:
+		case TDCS_SHOWDATESINISO:
+		case TDCS_USEEARLIESTDUEDATE:
+		case TDCS_USELATESTDUEDATE:
+		case TDCS_USEEARLIESTSTARTDATE:
+		case TDCS_USELATESTSTARTDATE:
+		case TDCS_SHOWCOMMENTSINLIST:
+		case TDCS_SHOWFIRSTCOMMENTLINEINLIST:
+		case TDCS_STRIKETHOUGHDONETASKS:
+		case TDCS_TASKCOLORISBACKGROUND:
+		case TDCS_CALCREMAININGTIMEBYDUEDATE:
+		case TDCS_CALCREMAININGTIMEBYSPENT:
+		case TDCS_CALCREMAININGTIMEBYPERCENT:
+		case TDCS_COLORTEXTBYATTRIBUTE:
+			bInvalidateAll = TRUE;
+			break;
+
+		case TDCS_SORTDONETASKSATBOTTOM:
+			bResort = TRUE;
+			break;
+
+		case TDCS_DUEHAVEHIGHESTPRIORITY:
+		case TDCS_DONEHAVELOWESTPRIORITY:
+			if (IsSortingBy(TDCC_PRIORITY))
+				bResort = TRUE;
+			break;
+
+		case TDCS_DONEHAVELOWESTRISK:
+			if (IsSortingBy(TDCC_RISK))
+				bResort = TRUE;
+			break;
+
+		case TDCS_RIGHTSIDECOLUMNS:
+			bSwapSides = (bEnable != IsShowingColumnsOnRight());
+			break;
+
+		case TDCS_DISPLAYHMSTIMEFORMAT:
+		case TDCS_TREATSUBCOMPLETEDASDONE:
+			bRecalcUntrackedCols = TRUE;
+			break;
+
+		case TDCS_USEHIGHESTPRIORITY:
+		case TDCS_INCLUDEDONEINPRIORITYCALC:
+		case TDCS_HIDEPRIORITYNUMBER:
+			if (IsColumnShowing(TDCC_PRIORITY))
+				bInvalidateAll = TRUE;
+			break;
+
+		case TDCS_USEHIGHESTRISK:
+		case TDCS_INCLUDEDONEINRISKCALC:
+			if (IsColumnShowing(TDCC_RISK))
+				bInvalidateAll = TRUE;
+			break;
+
+		case TDCS_SHOWNONFILEREFSASTEXT:
+			if (IsColumnShowing(TDCC_FILEREF))
+				bRecalcUntrackedCols = TRUE;
+			break;
+
+		case TDCS_USEPERCENTDONEINTIMEEST:
+			if (IsColumnShowing(TDCC_TIMEEST))
+				bRecalcUntrackedCols = TRUE;
+			break;
+
+		case TDCS_SHOWREMINDERSASDATEANDTIME:
+			if (IsColumnShowing(TDCC_REMINDER))
+			{
+				// Reset 'tracked' flag to ensure correct resize
+				int nCol = GetColumnIndex(TDCC_REMINDER);
+				ASSERT(nCol != -1);
+
+				m_hdrColumns.SetItemTracked(nCol, FALSE);
+
+				bRecalcUntrackedCols = TRUE;
+			}
+			break;
+
+		case TDCS_HIDEZEROTIMECOST:
+			if (IsColumnShowing(TDCC_TIMEEST) ||
+				IsColumnShowing(TDCC_TIMESPENT) ||
+				IsColumnShowing(TDCC_COST))
+			{
+				bRecalcUntrackedCols = TRUE;
+			}
+			break;
+
+		case TDCS_ROUNDTIMEFRACTIONS:
+			if (IsColumnShowing(TDCC_TIMEEST) ||
+				IsColumnShowing(TDCC_TIMESPENT))
+			{
+				bRecalcUntrackedCols = TRUE;
+			}
+			break;
+
+		case TDCS_HIDEPERCENTFORDONETASKS:
+		case TDCS_INCLUDEDONEINAVERAGECALC:
+		case TDCS_WEIGHTPERCENTCALCBYNUMSUB:
+		case TDCS_SHOWPERCENTASPROGRESSBAR:
+		case TDCS_HIDEZEROPERCENTDONE:
 			if (IsColumnShowing(TDCC_PERCENT))
-				RecalcUntrackedColumnWidths();
-			else
-				InvalidateAll();
-		}
-		break;
-		
-	case TDCS_HIDESTARTDUEFORDONETASKS:
-		if (bDoUpdate && 
-			(IsColumnShowing(TDCC_STARTDATE) || 
-			IsColumnShowing(TDCC_DUEDATE)))
-		{
-			RecalcUntrackedColumnWidths();
-		}
-		break;
-		
-	case TDCS_SHOWWEEKDAYINDATES:
-		if (bDoUpdate && 
-			(IsColumnShowing(TDCC_STARTDATE) || 
-			IsColumnShowing(TDCC_LASTMODDATE) ||
-			IsColumnShowing(TDCC_DUEDATE) || 
-			IsColumnShowing(TDCC_DONEDATE)))
-		{
-			RecalcUntrackedColumnWidths();
-		}
-		break;
-		
-	case TDCS_SHOWPATHINHEADER:
-		UpdateSelectedTaskPath();
-		break;
-		
-	case TDCS_HIDEPANESPLITBAR:
-		CTreeListSyncer::SetSplitBarWidth(bOn ? 0 : 10);
-		break;
+				bInvalidateAll = TRUE;
+			break;
 
-	// all else not handled
+		case TDCS_AVERAGEPERCENTSUBCOMPLETION:
+		case TDCS_AUTOCALCPERCENTDONE:
+			if (IsColumnShowing(TDCC_PERCENT))
+				bRecalcUntrackedCols = TRUE;
+			else
+				bInvalidateAll = TRUE;
+			break;
+
+		case TDCS_HIDESTARTDUEFORDONETASKS:
+			if (IsColumnShowing(TDCC_STARTDATE) ||
+				IsColumnShowing(TDCC_DUEDATE))
+			{
+				bRecalcUntrackedCols = TRUE;
+			}
+			break;
+
+		case TDCS_SHOWWEEKDAYINDATES:
+			if (IsColumnShowing(TDCC_STARTDATE) ||
+				IsColumnShowing(TDCC_LASTMODDATE) ||
+				IsColumnShowing(TDCC_DUEDATE) ||
+				IsColumnShowing(TDCC_DONEDATE))
+			{
+				bRecalcUntrackedCols = TRUE;
+			}
+			break;
+
+		case TDCS_SHOWPATHINHEADER:
+			UpdateSelectedTaskPath();
+			break;
+
+		case TDCS_HIDEPANESPLITBAR:
+			CTreeListSyncer::SetSplitBarWidth(bEnable ? 0 : 10);
+			break;
+
+		case TDCS_ALLOWTREEITEMCHECKBOX:
+			SetTasksImageList(m_ilCheckboxes, TRUE, (bEnable && !IsColumnShowing(TDCC_DONE)));
+			break;
+
+		case TDCS_COLUMNHEADERSORTING:
+			{
+				DWORD dwAdd(bEnable ? HDS_BUTTONS : 0), dwRemove(bEnable ? 0 : HDS_BUTTONS);
+
+				if (m_hdrTasks.GetSafeHwnd())
+					m_hdrTasks.ModifyStyle(dwRemove, dwAdd);
+
+				if (m_hdrColumns)
+					m_hdrColumns.ModifyStyle(dwRemove, dwAdd);
+			}
+			break;
+		}
 	}
+
+	if (bResort && bAllowResort)
+	{
+		Resort();
+		bInvalidateAll = FALSE;
+	}
+
+	if (bRecalcUntrackedCols)
+	{
+		RecalcUntrackedColumnWidths();
+		bInvalidateAll = FALSE;
+	}
+
+	if (bSwapSides)
+	{
+		SwapSides();
+		bInvalidateAll = FALSE;
+	}
+
+	if (bInvalidateAll && IsVisible())
+		InvalidateAll();
+
+	PostResize();
 }
 
 BOOL CTDLTaskCtrlBase::InvalidateColumnItem(int nItem, BOOL bUpdate)
@@ -1747,18 +1781,6 @@ BOOL CTDLTaskCtrlBase::IsSortingBy(TDC_COLUMN nSortBy) const
 	return (m_sort.IsSortingBy(nSortBy, TRUE));
 }
 
-void CTDLTaskCtrlBase::UpdateHeaderSorting()
-{
-	BOOL bEnable = HasStyle(TDCS_COLUMNHEADERSORTING);
-	DWORD dwAdd(bEnable ? HDS_BUTTONS : 0), dwRemove(bEnable ? 0 : HDS_BUTTONS);
-
-	if (m_hdrTasks.GetSafeHwnd())
-		m_hdrTasks.ModifyStyle(dwRemove, dwAdd);
-
-	if (m_hdrColumns)
-		m_hdrColumns.ModifyStyle(dwRemove, dwAdd);
-}
-
 void CTDLTaskCtrlBase::Resort(BOOL bAllowToggle) 
 { 
 	if (IsMultiSorting())
@@ -2179,7 +2201,7 @@ BOOL CTDLTaskCtrlBase::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 		if (GetSafeHwnd())
 		{
 			if (bResort)
-				Resort(FALSE);
+				Resort();
 			else
 				InvalidateAll();
 		}
@@ -4889,7 +4911,7 @@ void CTDLTaskCtrlBase::OnReminderChange()
 	if (IsColumnShowing(TDCC_REMINDER))
 	{
 		if (IsSortingBy(TDCC_REMINDER))
-			Resort(FALSE);
+			Resort();
 		else
 			RedrawColumn(TDCC_REMINDER);
 	}

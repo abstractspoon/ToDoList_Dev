@@ -1930,7 +1930,7 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 				} // sFilePath.IsEmpty()
 
 				// update source control status
-				tdc.ModifyStyles(CTDCStylesMap(TDCS_CHECKOUTONLOAD, userPrefs.GetAutoCheckOut()));
+				tdc.ModifyStyles(CTDCStyleMap(TDCS_CHECKOUTONLOAD, userPrefs.GetAutoCheckOut()));
 
 				// do the save
 				nResult = DoSaveWithBackupAndProgress(tdc, nTDC, tasks, sFilePath, bFlush);
@@ -4466,7 +4466,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 					sFilePath = pTDC->GetFilePath(); // ie. reload
 			}
 
-			pTDC->ModifyStyles(CTDCStylesMap(TDCS_CHECKOUTONLOAD, Prefs().GetAutoCheckOut()));
+			pTDC->ModifyStyles(CTDCStyleMap(TDCS_CHECKOUTONLOAD, Prefs().GetAutoCheckOut()));
 		}
 		break;
 		
@@ -7660,7 +7660,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 		
 		// set global styles once only allowing the taskfile 
 		// itself to override from this point on
-		CTDCStylesMap styles;
+		CTDCStyleMap styles;
 		styles[TDCS_SAVEUIVISINTASKLIST] = m_bSaveUIVisInTaskList;
 		styles[TDCS_DISABLEPASSWORDPROMPTING] = !m_bPasswordPrompting;
 
@@ -11223,7 +11223,7 @@ void CToDoListWnd::OnViewProjectname()
 	m_mgrToDoCtrls.SetAllNeedPreferenceUpdate(TRUE);
 	
 	// then update active tasklist
-	GetToDoCtrl().ModifyStyles(CTDCStylesMap(TDCS_SHOWPROJECTNAME, m_bShowProjectName));
+	GetToDoCtrl().ModifyStyles(CTDCStyleMap(TDCS_SHOWPROJECTNAME, m_bShowProjectName));
 
 	m_mgrToDoCtrls.SetNeedsPreferenceUpdate(GetSelToDoCtrl(), FALSE);
 }
@@ -12495,7 +12495,7 @@ void CToDoListWnd::OnViewShowTreeListTabbar()
 {
 	m_bShowTreeListBar = !m_bShowTreeListBar; 
 
-	GetToDoCtrl().ModifyStyles(CTDCStylesMap(TDCS_SHOWTREELISTBAR, m_bShowTreeListBar));
+	GetToDoCtrl().ModifyStyles(CTDCStyleMap(TDCS_SHOWTREELISTBAR, m_bShowTreeListBar));
 
 	// refresh all the other tasklists
 	m_mgrToDoCtrls.SetAllNeedPreferenceUpdate(TRUE, GetSelToDoCtrl());

@@ -46,7 +46,7 @@ class CTDLTaskTreeCtrl : public CTDLTaskCtrlBase
 public:
 	CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data,
-					 const CWordArray& aStyles,
+					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
 					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
@@ -142,8 +142,7 @@ public:
 	BOOL PreTranslateMessage(MSG* pMsg);
 	void SetModified(const CTDCAttributeMap& attribIDs, BOOL bAllowResort);
 
-	void OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate);
-	void OnStylesUpdated();
+	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnBeginRebuild();
 	void OnEndRebuild();
 	

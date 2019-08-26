@@ -73,7 +73,7 @@ public:
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 
 	BOOL SplitSelectedTask(int nNumSubtasks);
-	BOOL ModifyStyles(const CTDCStylesMap& styles);
+	BOOL ModifyStyles(const CTDCStyleMap& styles);
 	void Sort(TDC_COLUMN nBy, BOOL bAllowToggle = TRUE);
 	void SetModified(BOOL bMod = TRUE) { CTabbedToDoCtrl::SetModified(bMod); }
 
@@ -120,7 +120,7 @@ protected:
 	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView, const CDWordArray& aModTaskIDs) const;
 
 	virtual void SetModified(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
-	virtual BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate); // one style at a time only 
+	virtual DWORD SetStyle(TDC_STYLE nStyle, BOOL bEnable);
 
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual BOOL RemoveArchivedTask(DWORD dwTaskID);
