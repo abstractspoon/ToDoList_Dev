@@ -111,7 +111,6 @@ public:
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }
 	void SetModified(BOOL bMod = TRUE) { CToDoCtrl::SetModified(bMod); }
-	BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn = TRUE) { return CToDoCtrl::SetStyle(nStyle, bOn); }
 	void SetMaximizeState(TDC_MAXSTATE nState);
 
 	BOOL MoveSelectedTask(TDC_MOVETASK nDirection);
@@ -166,18 +165,14 @@ protected:
 	CArray<IUIExtensionWindow*, IUIExtensionWindow*> m_aExtViews;
 	const CUIExtensionMgr& m_mgrUIExt;
 
-	BOOL m_bTaskColorChange;
+	CTDCAttributeMap m_mapAttribsAffectedByPrefs;
+
 	BOOL m_bUpdatingExtensions;
 	BOOL m_bRecreatingRecurringTasks;
-
-	// almost all of the tree's view data is stored in CToDoCtrl
-	// the only extra piece is whether or not the tree needs to
-	// be resorted when we switch to it from another view
 	BOOL m_bTreeNeedResort;
-
+	
 	TDC_ATTRIBUTE m_nExtModifyingAttrib;
 	CDWordArray m_aRecreatedRecurringTasks;
-
 
 	static CStringArray s_aDefTaskViews;
 
@@ -317,8 +312,10 @@ protected:
 	BOOL GetExtensionWnd(FTC_VIEW nView, IUIExtensionWindow*& pExtWnd, VIEWDATA*& pData) const;
 	BOOL HasAnyExtensionViews() const;
 	BOOL AnyExtensionViewWantsChange(TDC_ATTRIBUTE nAttrib) const;
-	BOOL AnyExtensionViewWantsChange(const CTDCAttributeMap& mapAttribIDs) const;
-	BOOL ExtensionViewWantsChange(int nExt, const CTDCAttributeMap& mapAttribIDs) const;
+	BOOL AnyExtensionViewWantsChanges(const CTDCAttributeMap& mapAttribIDs) const;
+	BOOL GetExtensionViewsWantedChanges(const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const;
+	BOOL ExtensionViewWantsChanges(int nExt, const CTDCAttributeMap& mapAttribIDs) const;
+	BOOL GetExtensionViewWantedChanges(int nExt, const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const;
 	BOOL ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) const;
 	BOOL AllExtensionViewsNeedFullUpdate() const;
 	void BeginExtensionProgress(const VIEWDATA* pData, UINT nMsg = 0);

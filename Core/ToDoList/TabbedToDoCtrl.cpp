@@ -85,7 +85,6 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, CTDLContentMgr& mgrC
 	:
 	CToDoCtrl(mgrContent, cfDefault, visDefault), 
 	m_bTreeNeedResort(FALSE),
-	m_bTaskColorChange(FALSE),
 	m_bUpdatingExtensions(FALSE),
 	m_bRecreatingRecurringTasks(FALSE),
 	m_nExtModifyingAttrib(TDCA_NONE),
@@ -2213,22 +2212,55 @@ BOOL CTabbedToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
 				Resize();
 			break;
 
-		// detect preferences that can affect task text colors
+		// detect preferences that can affect calculated task attributes
 		// and then handle this in NotifyEndPreferencesUpdate
 		case TDCS_COLORTEXTBYPRIORITY:
 		case TDCS_COLORTEXTBYATTRIBUTE:
 		case TDCS_COLORTEXTBYNONE:
+		case TDCS_TASKCOLORISBACKGROUND:
 		case TDCS_TREATSUBCOMPLETEDASDONE:
+			m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
+			break;
+
 		case TDCS_USEEARLIESTDUEDATE:
 		case TDCS_USELATESTDUEDATE:
+		case TDCS_NODUEDATEISDUETODAYORSTART:
+			m_mapAttribsAffectedByPrefs.Add(TDCA_DUEDATE);
+			m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
+			break;
+
 		case TDCS_USEEARLIESTSTARTDATE:
 		case TDCS_USELATESTSTARTDATE:
+			m_mapAttribsAffectedByPrefs.Add(TDCA_STARTDATE);
+			m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
+			break;
+
 		case TDCS_USEHIGHESTPRIORITY:
 		case TDCS_INCLUDEDONEINPRIORITYCALC:
 		case TDCS_DUEHAVEHIGHESTPRIORITY:
 		case TDCS_DONEHAVELOWESTPRIORITY:
-		case TDCS_TASKCOLORISBACKGROUND:
-			m_bTaskColorChange = TRUE;
+			m_mapAttribsAffectedByPrefs.Add(TDCA_PRIORITY);
+			m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
+			break;
+
+		case TDCS_USEHIGHESTRISK:
+		case TDCS_INCLUDEDONEINRISKCALC:
+		case TDCS_DONEHAVELOWESTRISK:
+			m_mapAttribsAffectedByPrefs.Add(TDCA_RISK);
+			break;
+
+		case TDCS_AUTOCALCPERCENTDONE:
+		case TDCS_WEIGHTPERCENTCALCBYNUMSUB:
+		case TDCS_AVERAGEPERCENTSUBCOMPLETION:
+			m_mapAttribsAffectedByPrefs.Add(TDCA_PERCENT);
+			break;
+
+		case TDCS_USEPERCENTDONEINTIMEEST:
+			m_mapAttribsAffectedByPrefs.Add(TDCA_TIMEEST);
+			break;
+
+		case TDCS_SHOWPARENTSASFOLDERS:
+			m_mapAttribsAffectedByPrefs.Add(TDCA_ICON);
 			break;
 
 		case TDCS_READONLY:
@@ -2256,7 +2288,7 @@ BOOL CTabbedToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
 void CTabbedToDoCtrl::SetPriorityColors(const CDWordArray& aColors)
 {
 	if (m_taskList.SetPriorityColors(aColors))
-		m_bTaskColorChange = TRUE;
+		m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
 
 	CToDoCtrl::SetPriorityColors(aColors);
 }
@@ -2264,7 +2296,7 @@ void CTabbedToDoCtrl::SetPriorityColors(const CDWordArray& aColors)
 void CTabbedToDoCtrl::SetCompletedTaskColor(COLORREF color)
 {
 	if (m_taskList.SetCompletedTaskColor(color))
-		m_bTaskColorChange = TRUE;
+		m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
 
 	CToDoCtrl::SetCompletedTaskColor(color);
 }
@@ -2272,7 +2304,7 @@ void CTabbedToDoCtrl::SetCompletedTaskColor(COLORREF color)
 void CTabbedToDoCtrl::SetFlaggedTaskColor(COLORREF color)
 {
 	if (m_taskList.SetFlaggedTaskColor(color))
-		m_bTaskColorChange = TRUE;
+		m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
 
 	CToDoCtrl::SetFlaggedTaskColor(color);
 }
@@ -2280,7 +2312,7 @@ void CTabbedToDoCtrl::SetFlaggedTaskColor(COLORREF color)
 void CTabbedToDoCtrl::SetReferenceTaskColor(COLORREF color)
 {
 	if (m_taskList.SetReferenceTaskColor(color))
-		m_bTaskColorChange = TRUE;
+		m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
 
 	CToDoCtrl::SetReferenceTaskColor(color);
 }
@@ -2288,7 +2320,7 @@ void CTabbedToDoCtrl::SetReferenceTaskColor(COLORREF color)
 void CTabbedToDoCtrl::SetAttributeColors(TDC_ATTRIBUTE nAttrib, const CTDCColorMap& colors)
 {
 	if (m_taskList.SetAttributeColors(nAttrib, colors))
-		m_bTaskColorChange = TRUE;
+		m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
 
 	CToDoCtrl::SetAttributeColors(nAttrib, colors);
 }
@@ -2296,7 +2328,7 @@ void CTabbedToDoCtrl::SetAttributeColors(TDC_ATTRIBUTE nAttrib, const CTDCColorM
 void CTabbedToDoCtrl::SetStartedTaskColors(COLORREF crStarted, COLORREF crStartedToday)
 {
 	if (m_taskList.SetStartedTaskColors(crStarted, crStartedToday))
-		m_bTaskColorChange = TRUE;
+		m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
 
 	CToDoCtrl::SetStartedTaskColors(crStarted, crStartedToday);
 }
@@ -2304,7 +2336,7 @@ void CTabbedToDoCtrl::SetStartedTaskColors(COLORREF crStarted, COLORREF crStarte
 void CTabbedToDoCtrl::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 {
 	if (m_taskList.SetDueTaskColors(crDue, crDueToday))
-		m_bTaskColorChange = TRUE;
+		m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
 
 	CToDoCtrl::SetDueTaskColors(crDue, crDueToday);
 }
@@ -2333,7 +2365,7 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 	{
 		// we need to update in 2 ways:
 		// 1. Tell the extensions that application settings have changed
-		// 2. Refresh tasks if their text colour may have changed
+		// 2. Refresh tasks if one or more calculated attributes has changed
 		CPreferences prefs;
 		CString sKey = GetPreferencesKey(_T("UIExtensions"));
 		
@@ -2354,23 +2386,24 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 
 				// if this extension is active and wants a 
 				// color update we want to start progress
-				BOOL bWantColorUpdate = (m_bTaskColorChange && pVData->WantAttribute(TDCA_COLOR));
+				CTDCAttributeMap mapWantedAttribs;
+				BOOL bWantTaskUpdate = GetExtensionViewWantedChanges(nExt, m_mapAttribsAffectedByPrefs, mapWantedAttribs);
 
-				if (bWantColorUpdate && (nExtView == nCurView))
+				if (bWantTaskUpdate && (nExtView == nCurView))
 					BeginExtensionProgress(pVData);
 
 				// notify all extensions of prefs change
 				pExtWnd->LoadPreferences(prefs, sKey, true);
 
 				// Update task colours on the active view if necessary
-				if (bWantColorUpdate)
+				if (bWantTaskUpdate)
 				{
 					if (nExtView == nCurView)
 					{
 						CTaskFile tasks;
 						CWaitCursor cursor;
 						
-						if (GetAllTasksForExtensionViewUpdate(TDCA_COLOR, tasks))
+						if (GetAllTasksForExtensionViewUpdate(mapWantedAttribs, tasks))
 						{
 							pVData->bNeedFullTaskUpdate = FALSE;
 							UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
@@ -2383,13 +2416,13 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 				}
 
 				// cleanup progress
-				if (bWantColorUpdate && nExtView == nCurView)
+				if (bWantTaskUpdate && nExtView == nCurView)
 					EndExtensionProgress();
 			}
 		}
 	}
 
-	m_bTaskColorChange = FALSE; // always
+	m_mapAttribsAffectedByPrefs.RemoveAll(); // always
 }
 
 void CTabbedToDoCtrl::BeginExtensionProgress(const VIEWDATA* pVData, UINT nMsg)
@@ -3305,7 +3338,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 	{
 		// We don't need to proceed if no extension wants 
 		// any of the changes
-		if (!AnyExtensionViewWantsChange(mapAttribIDs))
+		if (!AnyExtensionViewWantsChanges(mapAttribIDs))
 			return;
 
 		// Include parents if there is a colour change 
@@ -3509,22 +3542,30 @@ int CTabbedToDoCtrl::GetGlobals(TDC_ATTRIBUTE nAttrib, TDCAUTOLISTDATA& tld) con
 	return 0;
 }
 
-BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, const CTDCAttributeMap& mapAttrib) const
+BOOL CTabbedToDoCtrl::ExtensionViewWantsChanges(int nExt, const CTDCAttributeMap& mapAttrib) const
+{
+	CTDCAttributeMap mapUnused;
+
+	return (GetExtensionViewWantedChanges(nExt, mapAttrib, mapUnused) > 0);
+}
+
+int CTabbedToDoCtrl::GetExtensionViewWantedChanges(int nExt, const CTDCAttributeMap& mapAttrib, CTDCAttributeMap& mapAttribsWanted) const
 {
 	ASSERT (!mapAttrib.IsEmpty());
+	mapAttribsWanted.RemoveAll();
 
 	POSITION pos = mapAttrib.GetStartPosition();
 	
 	while (pos)
 	{
 		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
+		CTDCAttributeMap mapExtAttribsWanted;
 
 		if (ExtensionViewWantsChange(nExt, nAttrib))
-			return TRUE;
+			mapAttribsWanted.Add(nAttrib);
 	}
 
-	// else
-	return FALSE;
+	return mapAttribsWanted.GetCount();
 }
 
 BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) const
@@ -3616,27 +3657,35 @@ BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChange(TDC_ATTRIBUTE nAttrib) const
 	return FALSE;
 }
 
-BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChange(const CTDCAttributeMap& mapAttrib) const
+BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChanges(const CTDCAttributeMap& mapAttrib) const
+{
+	CTDCAttributeMap mapUnused;
+
+	return (GetExtensionViewsWantedChanges(mapAttrib, mapUnused) > 0);
+}
+
+int CTabbedToDoCtrl::GetExtensionViewsWantedChanges(const CTDCAttributeMap& mapAttrib, CTDCAttributeMap& mapAttribsWanted) const
 {
 	ASSERT (!mapAttrib.IsEmpty());
+	mapAttribsWanted.RemoveAll();
 
 	// Mandate lock state changes
 	if (mapAttrib.Has(TDCA_LOCK))
-		return TRUE;
-
-	// else check one by one
-	POSITION pos = mapAttrib.GetStartPosition();
-	
-	while (pos)
 	{
-		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
-
-		if (AnyExtensionViewWantsChange(nAttrib))
-			return TRUE;
+		mapAttribsWanted.Add(TDCA_LOCK);
+		return TRUE;
 	}
-	
-	// else
-	return FALSE;
+
+	int nExt = m_aExtViews.GetSize();
+	CTDCAttributeMap mapExtAttribsWanted;
+
+	while (nExt--)
+	{
+		if (GetExtensionViewWantedChanges(nExt, mapAttrib, mapExtAttribsWanted))
+			mapAttribsWanted.Append(mapExtAttribsWanted);
+	}
+
+	return mapAttribsWanted.GetCount();
 }
 
 void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort)

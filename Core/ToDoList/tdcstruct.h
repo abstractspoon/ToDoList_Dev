@@ -28,10 +28,6 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef CMap<TDC_STYLE, TDC_STYLE, BOOL, BOOL&> CTDCStylesMap;
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
 class CFilteredToDoCtrl;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +61,43 @@ public:
 	BOOL MatchAll(const CTDCColorMap& other) const
 	{
 		return Misc::MatchAllStrT<COLORREF>(other, *this);
+	}
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+class CTDCStylesMap : public CMap<TDC_STYLE, TDC_STYLE, BOOL, BOOL&>
+{
+public:
+	CTDCStylesMap()
+	{
+	}
+
+	CTDCStylesMap(TDC_STYLE nStyle, BOOL bEnabled) 
+	{
+		SetAt(nStyle, bEnabled);
+	}
+
+	CTDCStylesMap(const CTDCStylesMap& mapStyles) 
+	{
+		Misc::CopyT(mapStyles, *this);
+	}
+
+	virtual ~CTDCStylesMap() 
+	{
+	}
+
+	BOOL HasStyle(TDC_STYLE nStyle) const
+	{
+		return (GetState(nStyle) != FALSE);
+	}
+
+	BOOL GetState(TDC_STYLE nStyle) const
+	{
+		BOOL bEnabled = FALSE;
+		Lookup(nStyle, bEnabled);
+		
+		return bEnabled;
 	}
 };
 

@@ -1084,9 +1084,9 @@ void CFilteredToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 	}
 }
 
-BOOL CFilteredToDoCtrl::SetStyles(const CTDCStylesMap& styles)
+BOOL CFilteredToDoCtrl::ModifyStyles(const CTDCStylesMap& styles)
 {
-	if (CTabbedToDoCtrl::SetStyles(styles))
+	if (CTabbedToDoCtrl::ModifyStyles(styles))
 	{
 		// do we need to re-filter?
 		if (HasAnyFilter() && GetViewData2(FTCV_TASKLIST)->bNeedRefilter)
@@ -1588,7 +1588,7 @@ void CFilteredToDoCtrl::LoadAttributeVisibility(const CTaskFile& tasks, const CP
 	if (tasks.GetAttributeVisibility(vis))
 	{
 		// update style to match
-		SetStyle(TDCS_SAVEUIVISINTASKLIST);
+		SetStyle(TDCS_SAVEUIVISINTASKLIST, TRUE, FALSE);
 	}
 	else if (!vis.Load(prefs, GetPreferencesKey()))
 	{

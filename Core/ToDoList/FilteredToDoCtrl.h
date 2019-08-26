@@ -73,10 +73,9 @@ public:
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 
 	BOOL SplitSelectedTask(int nNumSubtasks);
-	BOOL SetStyles(const CTDCStylesMap& styles);
+	BOOL ModifyStyles(const CTDCStylesMap& styles);
 	void Sort(TDC_COLUMN nBy, BOOL bAllowToggle = TRUE);
 	void SetModified(BOOL bMod = TRUE) { CTabbedToDoCtrl::SetModified(bMod); }
-	BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn = TRUE) { return CTabbedToDoCtrl::SetStyle(nStyle, bOn); }
 
 	int GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly) const;
 	void EndTimeTracking(BOOL bAllowConfirm) { CTabbedToDoCtrl::EndTimeTracking(bAllowConfirm); }

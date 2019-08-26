@@ -2555,12 +2555,12 @@ void CToDoCtrl::NewList()
 	BOOL bConfirmDelete = HasStyle(TDCS_CONFIRMDELETE);
 	
 	if (bConfirmDelete)
-		SetStyle(TDCS_CONFIRMDELETE, FALSE);
+		SetStyle(TDCS_CONFIRMDELETE, FALSE, FALSE);
 	
 	DeleteAllTasks();
 	
 	if (bConfirmDelete)
-		SetStyle(TDCS_CONFIRMDELETE, TRUE);
+		SetStyle(TDCS_CONFIRMDELETE, TRUE, FALSE);
 	
 	m_sProjectName.Empty();
 	m_nFileVersion = 0;
@@ -5440,13 +5440,6 @@ BOOL CToDoCtrl::DeleteAllTasks()
 	return TRUE;
 }
 
-BOOL CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn)
-{
-	HandleUnsavedComments();
-
-	return SetStyle(nStyle, bOn, TRUE);
-}
-
 BOOL CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
 {
 	ASSERT (GetSafeHwnd());
@@ -5628,24 +5621,22 @@ BOOL CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
 	return FALSE; // no change
 }
 
-BOOL CToDoCtrl::SetStyles(const CTDCStylesMap& mapNewStyles)
+BOOL CToDoCtrl::ModifyStyles(const CTDCStylesMap& modStyles)
 {
-	HandleUnsavedComments();
-
-	CTDCStylesMap mapChangedStyles;
-
-	if (!GetChangedStyles(mapNewStyles, mapChangedStyles))
+	if (modStyles.GetCount() == 0)
 		return FALSE;
+
+	HandleUnsavedComments();
 
 	CHoldRedraw hr(*this, (NCR_PAINT | NCR_ERASEBKGND));
 	
-	POSITION pos = mapChangedStyles.GetStartPosition();
+	POSITION pos = modStyles.GetStartPosition();
 	TDC_STYLE nStyle;
 	BOOL bWantOn;
 
 	while (pos)
 	{
-		mapChangedStyles.GetNextAssoc(pos, nStyle, bWantOn);
+		modStyles.GetNextAssoc(pos, nStyle, bWantOn);
 
 		// FALSE -> Don't update until the very end
 		SetStyle(nStyle, bWantOn, FALSE);
@@ -5662,25 +5653,6 @@ BOOL CToDoCtrl::SetStyles(const CTDCStylesMap& mapNewStyles)
 	Resort(); 
 
 	return TRUE;
-}
-
-int CToDoCtrl::GetChangedStyles(const CTDCStylesMap& mapNewStyles, CTDCStylesMap& mapChangedStyles) const
-{
-	mapChangedStyles.RemoveAll();
-	
-	for (int nItem = TDCS_FIRST; nItem < TDCS_LAST; nItem++)
-	{
-		TDC_STYLE nStyle = (TDC_STYLE)nItem;
-		BOOL bWantOn = -1, bIsOn = HasStyle(nStyle);
-		
-		if (mapNewStyles.Lookup(nStyle, bWantOn))
-		{
-			if ((bWantOn && !bIsOn) || (!bWantOn && bIsOn))
-				mapChangedStyles[nStyle] = bWantOn;
-		}
-	}
-	
-	return mapChangedStyles.GetCount();
 }
 
 BOOL CToDoCtrl::HasStyle(TDC_STYLE nStyle) const 
@@ -6367,7 +6339,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	m_findReplace.LoadState(prefs);
 
 	if (tasks.IsPasswordPromptingDisabled())
-		SetStyle(TDCS_DISABLEPASSWORDPROMPTING);
+		SetStyle(TDCS_DISABLEPASSWORDPROMPTING, TRUE, FALSE);
 	
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	log.LogTimeElapsed(_T("CToDoCtrl::LoadTasks(Process header)"));
@@ -10130,7 +10102,7 @@ void CToDoCtrl::LoadAttributeVisibility(const CTaskFile& tasks, const CPreferenc
 	if (tasks.GetAttributeVisibility(vis))
 	{
 		// update style to match
-		SetStyle(TDCS_SAVEUIVISINTASKLIST);
+		SetStyle(TDCS_SAVEUIVISINTASKLIST, TRUE, FALSE);
 	}
 	else if (!vis.Load(prefs, GetPreferencesKey()))
 	{

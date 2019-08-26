@@ -200,6 +200,8 @@ void CTDLTaskTreeCtrl::OnStylesUpdated()
 {
 	CTDLTaskCtrlBase::OnStylesUpdated();
 
+
+
 	SyncColumnSelectionToTasks();
 }
 

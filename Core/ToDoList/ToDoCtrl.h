@@ -134,12 +134,11 @@ public:
 	BOOL PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL bSelectAll = TRUE);
 	BOOL MergeTasks(const CTaskFile& tasks, BOOL bMergeByID);
 
-	void SetReadonly(BOOL bReadOnly) { SetStyle(TDCS_READONLY, bReadOnly); }
+	void SetReadonly(BOOL bReadOnly) { SetStyle(TDCS_READONLY, bReadOnly, TRUE); }
 	BOOL IsReadOnly() const { return HasStyle(TDCS_READONLY); }
 
-	BOOL SetStyles(const CTDCStylesMap& styles);
-	BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn = TRUE); // one style at a time only 
-	BOOL HasStyle(TDC_STYLE nStyle) const; // one style at a time only 
+	BOOL ModifyStyles(const CTDCStylesMap& styles);
+	BOOL HasStyle(TDC_STYLE nStyle) const;
 	
 	virtual BOOL IsColumnShowing(TDC_COLUMN nColumn) const;
 	BOOL IsEditFieldShowing(TDC_ATTRIBUTE nAttrib) const;
@@ -892,12 +891,11 @@ protected:
 	void GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const;
 	
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
-	void BuildTasksForSave(CTaskFile& tasks/*, BOOL bFirstSave*/) const;
+	void BuildTasksForSave(CTaskFile& tasks) const;
 	BOOL SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty);
 	void OnAutoComboListChange(TDC_ATTRIBUTE nAttribID, CAutoComboBox& combo, CStringArray& aItems);
 	void UpdateAutoListData(TDC_ATTRIBUTE nAttrib = TDCA_ALL);
-	int GetChangedStyles(const CTDCStylesMap& mapNewStyles, CTDCStylesMap& mapChangedStyles) const;
-
+	
 	static BOOL HandleModResult(DWORD dwTaskID, TDC_SET nRes, CDWordArray& aModTaskIDs);
 	static void SetDefaultListContent(CAutoComboBox& combo, const CStringArray& aNewDefs, const CStringArray& aOldDefs, BOOL bAddEmpty = FALSE);
 	static int AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems);

@@ -139,8 +139,21 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	styles[TDCS_WARNADDDELETEARCHIVE] = prefs.GetWarnAddDeleteArchive();
 	styles[TDCS_WEIGHTPERCENTCALCBYNUMSUB] = prefs.GetWeightPercentCompletionByNumSubtasks();
 	styles[TDCS_USELATESTLASTMODIFIED] = prefs.GetUseLatestLastModifiedDate();
+
+	// Weed out styles that haven't changed
+	for (int nItem = TDCS_FIRST; nItem < TDCS_LAST; nItem++)
+	{
+		TDC_STYLE nStyle = (TDC_STYLE)nItem;
+		BOOL bWantStyle, bHasStyle = tdc.HasStyle(nStyle);
+
+		if (!styles.Lookup(nStyle, bWantStyle) ||
+			((!bHasStyle && !bWantStyle) || (bHasStyle && bWantStyle)))
+		{
+			styles.RemoveKey(nStyle);
+		}
+	}
 	
-	tdc.SetStyles(styles);
+	tdc.ModifyStyles(styles);
 
 	// layout
 	tdc.SetLayoutPositions((TDC_UILOCATION)prefs.GetControlsPos(), 
