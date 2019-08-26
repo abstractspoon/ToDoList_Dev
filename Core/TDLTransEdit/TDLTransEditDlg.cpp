@@ -582,10 +582,6 @@ void CTDLTransEditDlg::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSys
 		pPopupMenu->CheckMenuItem(ID_OPTIONS_SHOWTOOLTIPS, (m_bShowTooltips ? MF_CHECKED : MF_UNCHECKED));
 		pPopupMenu->CheckMenuItem(ID_OPTIONS_SORTUNTRANSATTOP, (m_bSortUntranslatedAtTop ? MF_CHECKED : MF_UNCHECKED));
 		break;
-
-	case 2: // Tools
-		pPopupMenu->EnableMenuItem(ID_TOOLS_CLEANUP, ((!IsReadOnly() && !m_dictionary.IsEmpty()) ? MF_ENABLED : MF_DISABLED));
-		break;
 	}
 }
 
@@ -764,7 +760,41 @@ void CTDLTransEditDlg::OnOptionsSortUntranslatedAtTop()
 
 void CTDLTransEditDlg::OnToolsExportUntranslated() 
 {
-	// TODO: Add your command handler code here
-	
+	CFileOpenDialog dialog(_T("Select Multiple Translations"), _T(".csv"), m_sLastBrowsePath, EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT, _T("Translations (*.csv)|*.csv||"));
+
+	const UINT BUFSIZE = (MAX_PATH * 50);
+	static TCHAR FILEBUF[BUFSIZE] = { 0 };
+
+	dialog.m_ofn.lpstrFile = FILEBUF;
+	dialog.m_ofn.nMaxFile = BUFSIZE;
+
+	if (dialog.DoModal() == IDOK)
+	{
+		CWaitCursor cursor;
+		CStringArray aFilePaths;
+
+		int nFile = dialog.GetPathNames(aFilePaths);
+
+		while (nFile--)
+		{
+			const CString& sTranslation = aFilePaths[nFile];
+
+			if (sTranslation.Find(_T("YourLanguage.csv")) != -1)
+				continue;
+
+			CTransDictionary dict;
+			CStringArray aUntranslated;
+
+			if (dict.LoadDictionary(sTranslation, FALSE) && dict.GetUntranslatedItems(aUntranslated, TRUE))
+			{
+				CString sUntransFilePath(sTranslation);
+
+				FileMisc::ReplaceExtension(sUntransFilePath, _T(".txt"));
+				FileMisc::AddToFileName(sUntransFilePath, _T(".untranslated"));
+
+				FileMisc::SaveFile(sUntransFilePath, Misc::FormatArray(aUntranslated, '\n'), SFEF_UTF8);
+			}
+		}
+	}
 }
 

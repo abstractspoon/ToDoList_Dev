@@ -114,6 +114,7 @@ public:
 	BOOL ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut);
 
 	TD_CLEANUP CleanupDictionary(const CTransDictionary& tdMaster, CTransDictionary& tdRemoved);
+	int GetUntranslatedItems(CStringArray& aItems, BOOL bSorted) const;
 	void DeleteDictionary();
 	
 	void IgnoreString(const CString& sText, BOOL bPrepare);

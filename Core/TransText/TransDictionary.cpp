@@ -1065,6 +1065,32 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 	return FileMisc::SaveFile(szDictPath, sFileContents, SFEF_UTF8);
 }
 
+int CTransDictionary::GetUntranslatedItems(CStringArray& aItems, BOOL bSorted) const
+{
+	aItems.RemoveAll();
+	POSITION pos = m_mapItems.GetStartPosition();
+
+	while (pos)
+	{
+		DICTITEM* pDI = NULL;
+		CString sKey;
+		CStringArray aTransLines, aNeedTransLines;
+
+		m_mapItems.GetNextAssoc(pos, sKey, pDI);
+		ASSERT(KeyMatches(sKey, pDI));
+
+		if (!pDI->IsTranslated())
+			aItems.Add(pDI->GetTextIn());
+	}
+
+	if (bSorted && (aItems.GetSize() > 1))
+	{
+		Misc::SortArray(aItems);
+	}
+
+	return aItems.GetSize();
+}
+
 int CTransDictionary::CompareProc(const void* pFirst, const void* pSecond)
 {
 	ASSERT(pFirst && pSecond);
