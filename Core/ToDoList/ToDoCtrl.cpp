@@ -5628,38 +5628,27 @@ BOOL CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
 	return FALSE; // no change
 }
 
-BOOL CToDoCtrl::SetStyles(const CTDCStylesMap& styles)
+BOOL CToDoCtrl::SetStyles(const CTDCStylesMap& mapNewStyles)
 {
 	HandleUnsavedComments();
 
-	// first evaluate whether there any changes or not
-	// without changing anything
-	BOOL bChange = FALSE;
-	int nStyle;
-	
-	for (nStyle = TDCS_FIRST; nStyle < TDCS_LAST && !bChange; nStyle++)
-	{
-		BOOL bWantOn = -1, bIsOn = HasStyle((TDC_STYLE)nStyle); // undefined
-		
-		if (styles.Lookup((TDC_STYLE)nStyle, bWantOn))
-		{
-			bWantOn = bWantOn ? 1 : 0; // normalize
-			bChange = (bWantOn != bIsOn);
-		}
-	}
-	
-	if (!bChange)
+	CTDCStylesMap mapChangedStyles;
+
+	if (!GetChangedStyles(mapNewStyles, mapChangedStyles))
 		return FALSE;
-	
-	// then update the styles
+
 	CHoldRedraw hr(*this, (NCR_PAINT | NCR_ERASEBKGND));
 	
-	for (nStyle = TDCS_FIRST; nStyle < TDCS_LAST; nStyle++)
+	POSITION pos = mapChangedStyles.GetStartPosition();
+	TDC_STYLE nStyle;
+	BOOL bWantOn;
+
+	while (pos)
 	{
-		BOOL bOn = -1; // undefined
-		
-		if (styles.Lookup((TDC_STYLE)nStyle, bOn))
-			SetStyle((TDC_STYLE)nStyle, bOn, FALSE); // FALSE => don't update
+		mapChangedStyles.GetNextAssoc(pos, nStyle, bWantOn);
+
+		// FALSE -> Don't update until the very end
+		SetStyle(nStyle, bWantOn, FALSE);
 	}
 
 	// notify tree-list we've finished changing styles
@@ -5673,6 +5662,25 @@ BOOL CToDoCtrl::SetStyles(const CTDCStylesMap& styles)
 	Resort(); 
 
 	return TRUE;
+}
+
+int CToDoCtrl::GetChangedStyles(const CTDCStylesMap& mapNewStyles, CTDCStylesMap& mapChangedStyles) const
+{
+	mapChangedStyles.RemoveAll();
+	
+	for (int nItem = TDCS_FIRST; nItem < TDCS_LAST; nItem++)
+	{
+		TDC_STYLE nStyle = (TDC_STYLE)nItem;
+		BOOL bWantOn = -1, bIsOn = HasStyle(nStyle);
+		
+		if (mapNewStyles.Lookup(nStyle, bWantOn))
+		{
+			if ((bWantOn && !bIsOn) || (!bWantOn && bIsOn))
+				mapChangedStyles[nStyle] = bWantOn;
+		}
+	}
+	
+	return mapChangedStyles.GetCount();
 }
 
 BOOL CToDoCtrl::HasStyle(TDC_STYLE nStyle) const 

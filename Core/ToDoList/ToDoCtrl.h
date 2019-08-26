@@ -896,6 +896,7 @@ protected:
 	BOOL SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty);
 	void OnAutoComboListChange(TDC_ATTRIBUTE nAttribID, CAutoComboBox& combo, CStringArray& aItems);
 	void UpdateAutoListData(TDC_ATTRIBUTE nAttrib = TDCA_ALL);
+	int GetChangedStyles(const CTDCStylesMap& mapNewStyles, CTDCStylesMap& mapChangedStyles) const;
 
 	static BOOL HandleModResult(DWORD dwTaskID, TDC_SET nRes, CDWordArray& aModTaskIDs);
 	static void SetDefaultListContent(CAutoComboBox& combo, const CStringArray& aNewDefs, const CStringArray& aOldDefs, BOOL bAddEmpty = FALSE);
