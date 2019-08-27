@@ -75,6 +75,8 @@ public:
 
 	CTDCStyleMap(TDC_STYLE nStyle, BOOL bEnabled) 
 	{
+		ASSERT(IsValidStyle(nStyle));
+
 		SetAt(nStyle, bEnabled);
 	}
 
@@ -89,6 +91,8 @@ public:
 
 	BOOL IsStyleEnabled(TDC_STYLE nStyle) const
 	{
+		ASSERT(IsValidStyle(nStyle));
+
 		BOOL bEnabled = FALSE;
 		
 		return (Lookup(nStyle, bEnabled) && bEnabled);
@@ -96,9 +100,24 @@ public:
 
 	BOOL HasStyle(TDC_STYLE nStyle) const
 	{
+		ASSERT(IsValidStyle(nStyle));
+
 		BOOL bUnused;
 		
 		return Lookup(nStyle, bUnused);
+	}
+
+	BOOL& operator[](TDC_STYLE nStyle)
+	{
+		ASSERT(IsValidStyle(nStyle));
+
+		return CMap<TDC_STYLE, TDC_STYLE, BOOL, BOOL&>::operator[](nStyle);
+	}
+	
+protected:
+	BOOL IsValidStyle(TDC_STYLE nStyle) const
+	{
+		return ((nStyle >= TDCS_FIRST) && (nStyle < TDCS_LAST));
 	}
 };
 

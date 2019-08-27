@@ -2207,6 +2207,12 @@ void CTabbedToDoCtrl::SetEditTitleTaskID(DWORD dwTaskID)
 
 DWORD CTabbedToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 {
+	// Sanity check
+#ifdef _DEBUG
+	BOOL bEnabled = HasStyle(nStyle);
+	ASSERT ((bEnabled && !bEnable) || (!bEnabled && bEnable));
+#endif
+
 	// base class processing
 	DWORD dwResult = CToDoCtrl::SetStyle(nStyle, bEnable);
 
@@ -2304,12 +2310,6 @@ DWORD CTabbedToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 	case TDCS_USEPERCENTDONEINTIMEEST:
 		{
 			m_mapAttribsAffectedByPrefs.Add(TDCA_TIMEEST);
-		}
-		break;
-
-	case TDCS_SHOWPARENTSASFOLDERS:
-		{
-			m_mapAttribsAffectedByPrefs.Add(TDCA_ICON);
 		}
 		break;
 	}
