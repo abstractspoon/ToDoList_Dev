@@ -3839,7 +3839,7 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	// calculated percent
 	int nPercent = m_calculator.GetTaskPercentDone(pTDI, pTDS);
 
-	if (nPercent > 0)
+	if ((nPercent > 0) || (pTDI->nPercentDone > 0))
 		tasks.SetTaskCalcCompletion(hTask, nPercent);
 
 	// cost
