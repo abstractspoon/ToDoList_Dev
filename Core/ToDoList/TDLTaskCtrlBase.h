@@ -40,6 +40,7 @@ class CTreeCtrlHelper;
 class CToDoCtrlData;
 class CPreferences;
 class CTDCImageList;
+class CTDCStyleMap;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +55,7 @@ protected: // base class only
 					 const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data, 
 					 const CToDoCtrlFind& find, 
-					 const CWordArray& aStyles,
+					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
 					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
@@ -71,8 +72,7 @@ public:
 
 	void OnCustomAttributeChange();
 	void OnColumnVisibilityChange(const CTDCColumnIDMap& mapChanges);
-	void OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate);
-	void OnStylesUpdated();
+	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnUndoRedo(BOOL bUndo);
 	void OnImageListChange();
 	void OnReminderChange();
@@ -255,7 +255,7 @@ protected:
 
 	const CToDoCtrlData& m_data;
 	const CToDoCtrlFind& m_find;
-	const CWordArray& m_aStyles;
+	const CTDCStyleMap& m_styles;
 	const TDCAUTOLISTDATA& m_tld;
 	const CTDCImageList& m_ilTaskIcons;
 	const CTDCColumnIDMap& m_mapVisibleCols;
@@ -356,13 +356,12 @@ protected:
 	virtual GM_ITEMSTATE GetColumnItemState(int nItem) const = 0;
 	virtual void DeselectAll() = 0;
 	virtual DWORD GetHelpID() const = 0;
-
 	virtual BOOL IsColumnShowing(TDC_COLUMN nColID) const;
 
 	DWORD HitTestColumnsTask(const CPoint& ptScreen) const;
 	BOOL IsColumnLineOdd(int nItem) const;
 	void SetColor(COLORREF& color, COLORREF crNew);
-	BOOL HasStyle(TDC_STYLE nStyle) const { return (m_aStyles[nStyle] ? TRUE : FALSE); }
+	BOOL HasStyle(TDC_STYLE nStyle) const { return m_styles.IsStyleEnabled(nStyle); }
 	BOOL IsShowingColumnsOnRight() const;
 	BOOL IsReadOnly() const { return HasStyle(TDCS_READONLY); }
 	BOOL GetAttributeColor(const CString& sAttrib, COLORREF& color) const;
@@ -375,11 +374,11 @@ protected:
 	CFont* GetTaskFont(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bColumns = TRUE);
 	BOOL HasThemedState(GM_ITEMSTATE nState) const;
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
-	void UpdateHeaderSorting();
 	const CEnHeaderCtrl& GetColumnHeaderCtrl(TDC_COLUMN nColID) const;
 	BOOL IsVisible() const;
 	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize = 16, int nImage = 0, int nCount = 1) const;
 	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0, int nCount = 1) const;
+	void SetTasksWndStyle(DWORD dwStyles, BOOL bSet, BOOL bExStyle);
 
 	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;
 	CString GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, BOOL bDrawing) const;

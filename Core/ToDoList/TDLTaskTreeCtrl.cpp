@@ -62,12 +62,12 @@ IMPLEMENT_DYNAMIC(CTDLTaskTreeCtrl, CTDLTaskCtrlBase)
 
 CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 								   const CToDoCtrlData& data, 
-								   const CWordArray& aStyles,
+								   const CTDCStyleMap& styles,
 								   const TDCAUTOLISTDATA& tld,
 								   const CTDCColumnIDMap& mapVisibleCols,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
 	: 
-	CTDLTaskCtrlBase(FALSE, ilIcons, data, m_find, aStyles, tld, mapVisibleCols, aCustAttribDefs),
+	CTDLTaskCtrlBase(FALSE, ilIcons, data, m_find, styles, tld, mapVisibleCols, aCustAttribDefs),
 	m_tsh(m_tcTasks),
 	m_tch(m_tcTasks),
 	m_htiLastHandledLBtnDown(NULL),
@@ -196,27 +196,13 @@ BOOL CTDLTaskTreeCtrl::SelectAll()
 	return FALSE;
 }
 
-void CTDLTaskTreeCtrl::OnStylesUpdated()
+void CTDLTaskTreeCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort)
 {
-	CTDLTaskCtrlBase::OnStylesUpdated();
+	CTDLTaskCtrlBase::OnStylesUpdated(styles, bAllowResort);
 
-
-
+	// Our extra handling
+	SetTasksWndStyle(TVS_INFOTIP, styles.IsStyleEnabled(TDCS_SHOWINFOTIPS), FALSE);
 	SyncColumnSelectionToTasks();
-}
-
-void CTDLTaskTreeCtrl::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate)
-{
-	// base class
-	CTDLTaskCtrlBase::OnStyleUpdated(nStyle, bOn, bDoUpdate);
-
-	// our handling
-	switch (nStyle)
-	{
-	case TDCS_SHOWINFOTIPS:
-		m_tcTasks.ModifyStyle(bOn ? 0 : TVS_INFOTIP, (bOn ? TVS_INFOTIP : 0));
-		break;
-	}
 }
 
 BOOL CTDLTaskTreeCtrl::BuildColumns()

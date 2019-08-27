@@ -134,10 +134,10 @@ public:
 	BOOL PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL bSelectAll = TRUE);
 	BOOL MergeTasks(const CTaskFile& tasks, BOOL bMergeByID);
 
-	void SetReadonly(BOOL bReadOnly) { SetStyle(TDCS_READONLY, bReadOnly, TRUE); }
+	void SetReadonly(BOOL bReadOnly);
 	BOOL IsReadOnly() const { return HasStyle(TDCS_READONLY); }
 
-	BOOL ModifyStyles(const CTDCStylesMap& styles);
+	BOOL ModifyStyles(const CTDCStyleMap& styles);
 	BOOL HasStyle(TDC_STYLE nStyle) const;
 	
 	virtual BOOL IsColumnShowing(TDC_COLUMN nColumn) const;
@@ -347,7 +347,8 @@ public:
 	virtual BOOL IsSorting() const { return m_taskTree.IsSorting(); }
 	virtual BOOL IsMultiSorting() const { return m_taskTree.IsMultiSorting(); }
 	virtual BOOL IsSortingBy(TDC_COLUMN nBy) const { return m_taskTree.IsSortingBy(nBy); }
-	virtual void Resort(BOOL bAllowToggle = FALSE) { m_taskTree.Resort(bAllowToggle); }
+	virtual void Resort(BOOL bAllowToggle = FALSE);
+	virtual BOOL IsResortAllowed() const { return TRUE; }
 
 	// move functions
 	virtual BOOL MoveSelectedTask(TDC_MOVETASK nDirection);
@@ -471,7 +472,7 @@ protected:
 	CUIThemeFile m_theme;
 	CIcon m_iconTrackTime, m_iconAddTime, m_iconLink;
 
-	CWordArray m_aStyles;
+	CTDCStyleMap m_styles;
 	CString m_sXmlHeader, m_sXslHeader;
 	CTaskListDropTarget m_dtTree, m_dtFileRef;
 	CString m_sLastSavePath;
@@ -698,13 +699,18 @@ protected:
 
 	virtual void InvalidateItem(HTREEITEM hti, BOOL bUpdate = FALSE) { m_taskTree.InvalidateItem(hti, bUpdate); }
 	virtual void UpdateSelectedTaskPath();
-	virtual BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate);
 	virtual void EndLabelEdit(BOOL bCancel);
 	virtual BOOL GetLabelEditRect(CRect& rScreen);
 	virtual void SetEditTitleTaskID(DWORD dwTaskID);
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
 	virtual DWORD GetNextNonSelectedTaskID() const;
+
+	enum
+	{
+		TDCSS_WANTRESIZE = 0x01,
+	};
+	virtual DWORD SetStyle(TDC_STYLE nStyle, BOOL bEnable);
 
 	virtual TODOITEM* CreateNewTask(HTREEITEM htiParent);
 	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
@@ -718,7 +724,7 @@ protected:
 	
 	virtual void Resize(int cx = 0, int cy = 0, BOOL bSplitting = FALSE);
 	virtual void UpdateTasklistVisibility();
-	virtual void OnStylesUpdated() { m_taskTree.OnStylesUpdated(); }
+	virtual void OnStylesUpdated(const CTDCStyleMap& styles) { m_taskTree.OnStylesUpdated(styles, IsResortAllowed()); }
 	virtual void OnTaskIconsChanged() { m_taskTree.OnImageListChange(); }
 	
 	virtual HTREEITEM GetUpdateControlsItem() const { return GetSelectedItem(); }

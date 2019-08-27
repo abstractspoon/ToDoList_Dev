@@ -80,8 +80,10 @@ CStringArray CTabbedToDoCtrl::s_aDefTaskViews;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, CTDLContentMgr& mgrContent, 
-								 const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault) 
+CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, 
+								 CTDLContentMgr& mgrContent, 
+								 const CONTENTFORMAT& cfDefault, 
+								 const TDCCOLEDITFILTERVISIBILITY& visDefault) 
 	:
 	CToDoCtrl(mgrContent, cfDefault, visDefault), 
 	m_bTreeNeedResort(FALSE),
@@ -89,7 +91,7 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, CTDLContentMgr& mgrC
 	m_bRecreatingRecurringTasks(FALSE),
 	m_nExtModifyingAttrib(TDCA_NONE),
 	m_mgrUIExt(mgrUIExt),
-	m_taskList(m_ilTaskIcons, m_data, TCF(), m_aStyles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs)
+	m_taskList(m_ilTaskIcons, m_data, TCF(), m_styles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs)
 {
 	// add extra controls to implement list-view
 	for (int nCtrl = 0; nCtrl < NUM_FTDCCTRLS; nCtrl++)
@@ -102,7 +104,7 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, CTDLContentMgr& mgrC
 	}
 
 	// tab is on by default
-	m_aStyles.SetAt(TDCS_SHOWTREELISTBAR, 1);
+	m_styles[TDCS_SHOWTREELISTBAR] = TRUE;
 
 	// Will be enabled on first showing
 	m_taskList.EnableRecalcColumns(FALSE);
@@ -194,11 +196,17 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 	return FALSE;
 }
 
-void CTabbedToDoCtrl::OnStylesUpdated()
+BOOL CTabbedToDoCtrl::IsResortAllowed() const
 {
-	CToDoCtrl::OnStylesUpdated();
+	return InTreeView();
+}
 
-	m_taskList.OnStylesUpdated();
+void CTabbedToDoCtrl::OnStylesUpdated(const CTDCStyleMap& styles)
+{
+	CToDoCtrl::OnStylesUpdated(styles);
+
+	// Only allow resort if in list view
+	m_taskList.OnStylesUpdated(styles, InListView());
 }
 
 void CTabbedToDoCtrl::OnTaskIconsChanged()
@@ -2197,92 +2205,116 @@ void CTabbedToDoCtrl::SetEditTitleTaskID(DWORD dwTaskID)
 	m_taskList.SetEditTitleTaskID(dwTaskID);
 }
 
-BOOL CTabbedToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
+DWORD CTabbedToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 {
 	// base class processing
-	if (CToDoCtrl::SetStyle(nStyle, bOn, bWantUpdate))
+	DWORD dwResult = CToDoCtrl::SetStyle(nStyle, bEnable);
+
+	// our processing
+	switch (nStyle)
 	{
-		// post-precessing
-		switch (nStyle)
+	case TDCS_SHOWTREELISTBAR:
+		m_tabViews.ShowTabControl(bEnable);
+		dwResult |= TDCSS_WANTRESIZE;
+		break;
+
+	case TDCS_READONLY:
+		SetExtensionsReadOnly(bEnable);
+		break;
+
+	// For the rest we have two tasks:
+	// 1. Keep track of tree resorts if not in tree view
+	// 2. Keep track of styles which affect calculated task attributes
+	case TDCS_SORTDONETASKSATBOTTOM:
 		{
-		case TDCS_SHOWTREELISTBAR:
-			m_tabViews.ShowTabControl(bOn);
+			m_bTreeNeedResort = !InTreeView();
+		}
+		break;
 
-			if (bWantUpdate)
-				Resize();
-			break;
+	case TDCS_DUEHAVEHIGHESTPRIORITY:
+	case TDCS_DONEHAVELOWESTPRIORITY:
+		{
+			if (!InTreeView() && CToDoCtrl::IsSortingBy(TDCC_PRIORITY))
+				m_bTreeNeedResort = TRUE;
 
-		// detect preferences that can affect calculated task attributes
-		// and then handle this in NotifyEndPreferencesUpdate
-		case TDCS_COLORTEXTBYPRIORITY:
-		case TDCS_COLORTEXTBYATTRIBUTE:
-		case TDCS_COLORTEXTBYNONE:
-		case TDCS_TASKCOLORISBACKGROUND:
-		case TDCS_TREATSUBCOMPLETEDASDONE:
-			m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
-			break;
-
-		case TDCS_USEEARLIESTDUEDATE:
-		case TDCS_USELATESTDUEDATE:
-		case TDCS_NODUEDATEISDUETODAYORSTART:
-			m_mapAttribsAffectedByPrefs.Add(TDCA_DUEDATE);
-			m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
-			break;
-
-		case TDCS_USEEARLIESTSTARTDATE:
-		case TDCS_USELATESTSTARTDATE:
-			m_mapAttribsAffectedByPrefs.Add(TDCA_STARTDATE);
-			m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
-			break;
-
-		case TDCS_USEHIGHESTPRIORITY:
-		case TDCS_INCLUDEDONEINPRIORITYCALC:
-		case TDCS_DUEHAVEHIGHESTPRIORITY:
-		case TDCS_DONEHAVELOWESTPRIORITY:
 			m_mapAttribsAffectedByPrefs.Add(TDCA_PRIORITY);
 			m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
-			break;
-
-		case TDCS_USEHIGHESTRISK:
-		case TDCS_INCLUDEDONEINRISKCALC:
-		case TDCS_DONEHAVELOWESTRISK:
-			m_mapAttribsAffectedByPrefs.Add(TDCA_RISK);
-			break;
-
-		case TDCS_AUTOCALCPERCENTDONE:
-		case TDCS_WEIGHTPERCENTCALCBYNUMSUB:
-		case TDCS_AVERAGEPERCENTSUBCOMPLETION:
-			m_mapAttribsAffectedByPrefs.Add(TDCA_PERCENT);
-			break;
-
-		case TDCS_USEPERCENTDONEINTIMEEST:
-			m_mapAttribsAffectedByPrefs.Add(TDCA_TIMEEST);
-			break;
-
-		case TDCS_SHOWPARENTSASFOLDERS:
-			m_mapAttribsAffectedByPrefs.Add(TDCA_ICON);
-			break;
-
-		case TDCS_READONLY:
-			{
-				int nView = m_aExtViews.GetSize();
-				
-				while (nView--)
-				{
-					if (m_aExtViews[nView] != NULL)
-						m_aExtViews[nView]->SetReadOnly(bOn != FALSE);
-				}
-			}
-			break;
 		}
+		break;
 
-		// notify list-list to update itself
-		m_taskList.OnStyleUpdated(nStyle, bOn, bWantUpdate);
+	case TDCS_DONEHAVELOWESTRISK:
+		{
+			if (!InTreeView() && CToDoCtrl::IsSortingBy(TDCC_RISK))
+				m_bTreeNeedResort = TRUE;
 
-		return TRUE;
+			m_mapAttribsAffectedByPrefs.Add(TDCA_RISK);
+		}
+		break;
+
+	case TDCS_COLORTEXTBYPRIORITY:
+	case TDCS_COLORTEXTBYATTRIBUTE:
+	case TDCS_COLORTEXTBYNONE:
+	case TDCS_TASKCOLORISBACKGROUND:
+	case TDCS_TREATSUBCOMPLETEDASDONE:
+		{
+			m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
+		}
+		break;
+
+	case TDCS_USEEARLIESTDUEDATE:
+	case TDCS_USELATESTDUEDATE:
+	case TDCS_NODUEDATEISDUETODAYORSTART:
+		{
+			m_mapAttribsAffectedByPrefs.Add(TDCA_DUEDATE);
+			m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
+		}
+		break;
+
+	case TDCS_USEEARLIESTSTARTDATE:
+	case TDCS_USELATESTSTARTDATE:
+		{
+			m_mapAttribsAffectedByPrefs.Add(TDCA_STARTDATE);
+			m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
+		}
+		break;
+
+	case TDCS_USEHIGHESTPRIORITY:
+	case TDCS_INCLUDEDONEINPRIORITYCALC:
+		{
+			m_mapAttribsAffectedByPrefs.Add(TDCA_PRIORITY);
+			m_mapAttribsAffectedByPrefs.Add(TDCA_COLOR);
+		}
+		break;
+
+	case TDCS_USEHIGHESTRISK:
+	case TDCS_INCLUDEDONEINRISKCALC:
+		{
+			m_mapAttribsAffectedByPrefs.Add(TDCA_RISK);
+		}
+		break;
+
+	case TDCS_AUTOCALCPERCENTDONE:
+	case TDCS_WEIGHTPERCENTCALCBYNUMSUB:
+	case TDCS_AVERAGEPERCENTSUBCOMPLETION:
+		{
+			m_mapAttribsAffectedByPrefs.Add(TDCA_PERCENT);
+		}
+		break;
+
+	case TDCS_USEPERCENTDONEINTIMEEST:
+		{
+			m_mapAttribsAffectedByPrefs.Add(TDCA_TIMEEST);
+		}
+		break;
+
+	case TDCS_SHOWPARENTSASFOLDERS:
+		{
+			m_mapAttribsAffectedByPrefs.Add(TDCA_ICON);
+		}
+		break;
 	}
 
-	return FALSE;
+	return dwResult;
 }
 
 void CTabbedToDoCtrl::SetPriorityColors(const CDWordArray& aColors)
@@ -2884,9 +2916,22 @@ void CTabbedToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 	}
 }
 
+void CTabbedToDoCtrl::SetExtensionsReadOnly(BOOL bReadOnly)
+{
+	int nExt = m_aExtViews.GetSize();
+
+	while (nExt--)
+	{
+		if (m_aExtViews[nExt] != NULL)
+			m_aExtViews[nExt]->SetReadOnly(bReadOnly != FALSE);
+	}
+}
+
 void CTabbedToDoCtrl::SetExtensionsNeedTaskUpdate(BOOL bUpdate, FTC_VIEW nIgnore)
 {
-	for (int nExt = 0; nExt < m_aExtViews.GetSize(); nExt++)
+	int nExt = m_aExtViews.GetSize();
+
+	while (nExt--)
 	{
 		FTC_VIEW nView = (FTC_VIEW)(FTCV_UIEXTENSION1 + nExt);
 		
@@ -2903,7 +2948,9 @@ void CTabbedToDoCtrl::SetExtensionsNeedTaskUpdate(BOOL bUpdate, FTC_VIEW nIgnore
 
 void CTabbedToDoCtrl::SetExtensionsNeedFontUpdate(BOOL bUpdate, FTC_VIEW nIgnore)
 {
-	for (int nExt = 0; nExt < m_aExtViews.GetSize(); nExt++)
+	int nExt = m_aExtViews.GetSize();
+
+	while (nExt--)
 	{
 		FTC_VIEW nView = (FTC_VIEW)(FTCV_UIEXTENSION1 + nExt);
 		

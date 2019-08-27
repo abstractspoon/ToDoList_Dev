@@ -245,12 +245,12 @@ void CFilteredToDoCtrl::OnEditChangeDueTime()
 	BOOL bNeedsRefilter = ModNeedsRefilter(TDCA_DUEDATE, FTCV_TASKTREE, aSelTaskIDs);
 	
 	if (bNeedsRefilter)
-		SetStyle(TDCS_REFILTERONMODIFY, FALSE, FALSE);
+		m_styles[TDCS_REFILTERONMODIFY] = FALSE;
 	
 	CTabbedToDoCtrl::OnSelChangeDueTime();
 	
 	if (bNeedsRefilter)
-		SetStyle(TDCS_REFILTERONMODIFY, TRUE, FALSE);
+		m_styles[TDCS_REFILTERONMODIFY] = TRUE;
 }
 
 void CFilteredToDoCtrl::OnTreeExpandItem(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
@@ -1084,7 +1084,7 @@ void CFilteredToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 	}
 }
 
-BOOL CFilteredToDoCtrl::ModifyStyles(const CTDCStylesMap& styles)
+BOOL CFilteredToDoCtrl::ModifyStyles(const CTDCStyleMap& styles)
 {
 	if (CTabbedToDoCtrl::ModifyStyles(styles))
 	{
@@ -1103,26 +1103,19 @@ BOOL CFilteredToDoCtrl::ModifyStyles(const CTDCStylesMap& styles)
 	return FALSE;
 }
 
-BOOL CFilteredToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
+DWORD CFilteredToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 {
-	// base class processing
-	if (CTabbedToDoCtrl::SetStyle(nStyle, bOn, bWantUpdate))
+	switch (nStyle)
 	{
-		// post-precessing
-		switch (nStyle)
-		{
-		case TDCS_DUEHAVEHIGHESTPRIORITY:
-		case TDCS_DONEHAVELOWESTPRIORITY:
-		case TDCS_ALWAYSHIDELISTPARENTS:
-		case TDCS_TREATSUBCOMPLETEDASDONE:
-			GetViewData2(FTCV_TASKLIST)->bNeedRefilter = TRUE;
-			break;
-		}
-
-		return TRUE;
+	case TDCS_DUEHAVEHIGHESTPRIORITY:
+	case TDCS_DONEHAVELOWESTPRIORITY:
+	case TDCS_ALWAYSHIDELISTPARENTS:
+	case TDCS_TREATSUBCOMPLETEDASDONE:
+		GetViewData2(FTCV_TASKLIST)->bNeedRefilter = TRUE;
+		break;
 	}
 
-	return FALSE;
+	return CTabbedToDoCtrl::SetStyle(nStyle, bEnable);
 }
 
 BOOL CFilteredToDoCtrl::SplitSelectedTask(int nNumSubtasks)
@@ -1588,7 +1581,7 @@ void CFilteredToDoCtrl::LoadAttributeVisibility(const CTaskFile& tasks, const CP
 	if (tasks.GetAttributeVisibility(vis))
 	{
 		// update style to match
-		SetStyle(TDCS_SAVEUIVISINTASKLIST, TRUE, FALSE);
+		m_styles[TDCS_SAVEUIVISINTASKLIST] = TRUE;
 	}
 	else if (!vis.Load(prefs, GetPreferencesKey()))
 	{

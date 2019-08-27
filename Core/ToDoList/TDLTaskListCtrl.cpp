@@ -81,12 +81,12 @@ IMPLEMENT_DYNAMIC(CTDLTaskListCtrl, CTDLTaskCtrlBase)
 CTDLTaskListCtrl::CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 								   const CToDoCtrlData& data, 
 								   const CToDoCtrlFind& find,
-								   const CWordArray& aStyles,
+								   const CTDCStyleMap& styles,
 								   const TDCAUTOLISTDATA& tld,
 								   const CTDCColumnIDMap& mapVisibleCols,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
 	: 
-	CTDLTaskCtrlBase(TRUE, ilIcons, data, find, aStyles, tld, mapVisibleCols, aCustAttribDefs)
+	CTDLTaskCtrlBase(TRUE, ilIcons, data, find, styles, tld, mapVisibleCols, aCustAttribDefs)
 {
 }
 
@@ -143,16 +143,12 @@ BOOL CTDLTaskListCtrl::IsListItemSelected(HWND hwnd, int nItem) const
 	return (ListView_GetItemState(hwnd, nItem, LVIS_SELECTED) & LVIS_SELECTED);
 }
 
-void CTDLTaskListCtrl::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate)
+void CTDLTaskListCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort)
 {
-	switch (nStyle)
-	{
-	case TDCS_SHOWINFOTIPS:
-		ListView_SetExtendedListViewStyleEx(m_lcTasks, LVS_EX_INFOTIP, (bOn ? LVS_EX_INFOTIP : 0));
-		break;
-	}
+	CTDLTaskCtrlBase::OnStylesUpdated(styles, bAllowResort);
 
-	CTDLTaskCtrlBase::OnStyleUpdated(nStyle, bOn, bDoUpdate);
+	// Our extra handling
+	SetTasksWndStyle(LVS_EX_INFOTIP, styles.IsStyleEnabled(TDCS_SHOWINFOTIPS), TRUE);
 }
 
 BOOL CTDLTaskListCtrl::BuildColumns()

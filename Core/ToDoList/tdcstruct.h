@@ -66,38 +66,39 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-class CTDCStylesMap : public CMap<TDC_STYLE, TDC_STYLE, BOOL, BOOL&>
+class CTDCStyleMap : public CMap<TDC_STYLE, TDC_STYLE, BOOL, BOOL&>
 {
 public:
-	CTDCStylesMap()
+	CTDCStyleMap()
 	{
 	}
 
-	CTDCStylesMap(TDC_STYLE nStyle, BOOL bEnabled) 
+	CTDCStyleMap(TDC_STYLE nStyle, BOOL bEnabled) 
 	{
 		SetAt(nStyle, bEnabled);
 	}
 
-	CTDCStylesMap(const CTDCStylesMap& mapStyles) 
+	CTDCStyleMap(const CTDCStyleMap& mapStyles) 
 	{
 		Misc::CopyT(mapStyles, *this);
 	}
 
-	virtual ~CTDCStylesMap() 
+	virtual ~CTDCStyleMap() 
 	{
+	}
+
+	BOOL IsStyleEnabled(TDC_STYLE nStyle) const
+	{
+		BOOL bEnabled = FALSE;
+		
+		return (Lookup(nStyle, bEnabled) && bEnabled);
 	}
 
 	BOOL HasStyle(TDC_STYLE nStyle) const
 	{
-		return (GetState(nStyle) != FALSE);
-	}
-
-	BOOL GetState(TDC_STYLE nStyle) const
-	{
-		BOOL bEnabled = FALSE;
-		Lookup(nStyle, bEnabled);
+		BOOL bUnused;
 		
-		return bEnabled;
+		return Lookup(nStyle, bUnused);
 	}
 };
 

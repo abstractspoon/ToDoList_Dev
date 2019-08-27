@@ -60,7 +60,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 {
 	tdc.NotifyBeginPreferencesUpdate();
 
-	CTDCStylesMap styles;
+	CTDCStyleMap styles;
 
 	styles[TDCS_ALLOWCOMMENTSSTACKING] = prefs.GetStackEditFieldsAndComments();
 	styles[TDCS_ALLOWPARENTTIMETRACKING] = prefs.GetAllowParentTimeTracking();
