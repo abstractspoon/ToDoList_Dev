@@ -807,7 +807,7 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	SetWindowPos(NULL, 0, 0, 0, 0, SWP_DRAWFRAME | SWP_NOSIZE | SWP_NOZORDER | SWP_NOMOVE);
 
 	// Various key UI elements
-	if (!LoadMenubar())
+	if (!InitMenubar())
 		return -1;
 
 	if (!m_dropTarget.Register(this, this))
@@ -1927,10 +1927,7 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 					// else make sure the file is not readonly
 					sFilePath = dialog.GetPathName();
 
-				} // sFilePath.IsEmpty()
-
-				// update source control status
-				tdc.ModifyStyles(CTDCStyleMap(TDCS_CHECKOUTONLOAD, userPrefs.GetAutoCheckOut()));
+				}
 
 				// do the save
 				nResult = DoSaveWithBackupAndProgress(tdc, nTDC, tasks, sFilePath, bFlush);
@@ -4456,17 +4453,13 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 		break;
 		
 	case TDCPP_FILE:
+		if (sFilePath.IsEmpty()) // handle bad path
 		{
-			// handle bad path
-			if (sFilePath.IsEmpty())
-			{
-				if (!Misc::IsEmpty(szFilePath))
-					return TDCF_NOTEXIST;
-				else
-					sFilePath = pTDC->GetFilePath(); // ie. reload
-			}
+			if (!Misc::IsEmpty(szFilePath))
+				return TDCF_NOTEXIST;
 
-			pTDC->ModifyStyles(CTDCStyleMap(TDCS_CHECKOUTONLOAD, Prefs().GetAutoCheckOut()));
+			// else
+			sFilePath = pTDC->GetFilePath(); // ie. reload
 		}
 		break;
 		
@@ -4920,7 +4913,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 		m_mgrMenuIcons.ChangeImageID(nPrevID, GetNewSubtaskCmdID());
 		
 		// reload menu 
-		LoadMenubar();
+		InitMenubar();
 		
 		// tab bar
 		if (newPrefs.GetShowTasklistTabCloseButton())
@@ -5087,7 +5080,7 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 }
 
 
-BOOL CToDoListWnd::LoadMenubar()
+BOOL CToDoListWnd::InitMenubar()
 {
 	if (!m_menubar.LoadMenu(Prefs()))
 		return FALSE;
@@ -7660,11 +7653,6 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 		
 		// set global styles once only allowing the taskfile 
 		// itself to override from this point on
-		CTDCStyleMap styles;
-		styles[TDCS_SAVEUIVISINTASKLIST] = m_bSaveUIVisInTaskList;
-		styles[TDCS_DISABLEPASSWORDPROMPTING] = !m_bPasswordPrompting;
-
-		pTDC->ModifyStyles(styles);
 
 		// Set initial theme before it becomes visible
 		pTDC->SetUITheme(m_theme);
@@ -7686,6 +7674,19 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 	// else
 	delete pTDC;
 	return NULL;
+}
+
+void CToDoListWnd::InitGlobalStyles(CFilteredToDoCtrl& tdc)
+{
+	CTDCStyleMap styles;
+
+	if (m_bSaveUIVisInTaskList)
+		styles[TDCS_SAVEUIVISINTASKLIST] = TRUE;
+
+	if (!m_bPasswordPrompting)
+		styles[TDCS_DISABLEPASSWORDPROMPTING] = TRUE;
+
+	tdc.ModifyStyles(styles);
 }
 
 void CToDoListWnd::OnTabCtrlGetBackColor(NMHDR* pNMHDR, LRESULT* pResult)
@@ -11209,7 +11210,7 @@ void CToDoListWnd::OnTasklistSelectColumns()
 
 		// reload the menu if we dynamically alter it
 		if (Prefs().GetShowEditMenuAsColumns())
-			LoadMenubar();
+			InitMenubar();
 
 		Resize();
 	}

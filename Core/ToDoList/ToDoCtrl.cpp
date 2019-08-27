@@ -5587,7 +5587,10 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 
 void CToDoCtrl::SetReadonly(BOOL bReadOnly)
 {
-	ModifyStyles(CTDCStyleMap(TDCS_READONLY, bReadOnly));
+	BOOL bIsReadOnly = HasStyle(TDCS_READONLY);
+
+	if ((bIsReadOnly && !bReadOnly) || (!bIsReadOnly && bReadOnly))
+		ModifyStyles(CTDCStyleMap(TDCS_READONLY, bReadOnly));
 }
 
 BOOL CToDoCtrl::ModifyStyles(const CTDCStyleMap& modStyles)

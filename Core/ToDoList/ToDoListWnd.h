@@ -603,7 +603,7 @@ protected:
 	void InitShortcutManager();
 	void InitMenuIconManager();
 	void InitUIFont();
-	BOOL LoadMenubar();
+	BOOL InitMenubar();
 	BOOL InitTrayIcon();
 	BOOL InitMainToolbar();
 	BOOL InitCustomToolbar();
@@ -612,6 +612,7 @@ protected:
 	BOOL InitTimeTrackDlg();
 	BOOL InitTabCtrl();
 	BOOL InitFindDialog(BOOL bShow = FALSE);
+	void InitGlobalStyles(CFilteredToDoCtrl& tdc);
 
 	BOOL CreateNewTask(const CString& sTitle, TDC_INSERTWHERE nInsertWhere, BOOL bEdit = TRUE, DWORD dwDependency = 0);
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependent = FALSE) const;
