@@ -34,7 +34,7 @@ public:
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
 
 	// IUIExtensionWindow
-	LPCTSTR GetMenuText() const { return _T("Burndown"); }
+	LPCTSTR GetMenuText() const { return STATS_MENUTEXT; }
 	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return STATS_TYPEID; }
 

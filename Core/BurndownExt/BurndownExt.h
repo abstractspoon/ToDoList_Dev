@@ -18,6 +18,7 @@
 //////////////////////////////////////////////////////////////////////
 
 const LPCTSTR STATS_TYPEID = _T("0AA35779-4BB4-4151-BA8E-D471281B6A08");
+const LPCTSTR STATS_MENUTEXT = _T("Graphs");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -30,7 +31,7 @@ public:
     void Release(); // releases the interface
 	void SetLocalizer(ITransText* pTT);
 
-	LPCTSTR GetMenuText() const { return _T("Burndown"); }
+	LPCTSTR GetMenuText() const { return _T("Graphs"); }
 	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return STATS_TYPEID; }
 
