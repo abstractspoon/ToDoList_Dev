@@ -882,6 +882,9 @@ int CToDoCtrlMgr::AddToDoCtrl(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* 
 	if (!sKey.IsEmpty())
 		tdci.crTab = (COLORREF)CPreferences().GetProfileInt(sKey, _T("TabColor"), CLR_NONE);
 
+	// Assume prefs are set
+	tdci.bNeedPrefUpdate = FALSE;
+
 	// add to tab
 	int nSel = m_aToDoCtrls.Add(tdci);
 	m_tabCtrl.InsertItem(nSel, _T(""));
