@@ -714,6 +714,7 @@ protected:
 	void CheckUpdateActiveToDoCtrlPreferences();
 	const CPreferencesDlg& Prefs() const;
 	void ResetPrefs();
+	void ToggleActiveTasklistStyle(TDC_STYLE nStyle, BOOL& bFlag);
 	
 	// helpers
 	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 

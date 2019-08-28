@@ -8374,9 +8374,6 @@ void CToDoListWnd::CheckUpdateActiveToDoCtrlPreferences()
 
 		// and filter bar relies on this tdc's visible columns
 		m_filterBar.SetVisibleFilters(tdc.GetVisibleFilterFields());
-		
-		// reset flag
-		m_mgrToDoCtrls.SetNeedsPreferenceUpdate(nSel, FALSE);
 	}
 }
 
@@ -8388,6 +8385,7 @@ void CToDoListWnd::UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pTDC)
 	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(tdc, userPrefs, m_tdiDefault, 
 												m_bShowProjectName, m_bShowTreeListBar, 
 												m_fontMain, m_fontTree, m_fontComments);
+
 }
 
 void CToDoListWnd::OnSaveall() 
@@ -11218,15 +11216,7 @@ void CToDoListWnd::OnTasklistSelectColumns()
 
 void CToDoListWnd::OnViewProjectname() 
 {
-	m_bShowProjectName = !m_bShowProjectName;
-	
-	// mark all tasklists as needing update
-	m_mgrToDoCtrls.SetAllNeedPreferenceUpdate(TRUE);
-	
-	// then update active tasklist
-	GetToDoCtrl().ModifyStyles(CTDCStyleMap(TDCS_SHOWPROJECTNAME, m_bShowProjectName));
-
-	m_mgrToDoCtrls.SetNeedsPreferenceUpdate(GetSelToDoCtrl(), FALSE);
+	ToggleActiveTasklistStyle(TDCS_SHOWPROJECTNAME, m_bShowProjectName);
 }
 
 void CToDoListWnd::OnUpdateViewProjectname(CCmdUI* pCmdUI) 
@@ -12494,12 +12484,25 @@ void CToDoListWnd::OnUpdateViewShowTasklistTabbar(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnViewShowTreeListTabbar() 
 {
-	m_bShowTreeListBar = !m_bShowTreeListBar; 
+	ToggleActiveTasklistStyle(TDCS_SHOWTREELISTBAR, m_bShowTreeListBar);
+}
 
-	GetToDoCtrl().ModifyStyles(CTDCStyleMap(TDCS_SHOWTREELISTBAR, m_bShowTreeListBar));
+void CToDoListWnd::ToggleActiveTasklistStyle(TDC_STYLE nStyle, BOOL& bWantStyle)
+{
+	bWantStyle = !bWantStyle;
 
-	// refresh all the other tasklists
-	m_mgrToDoCtrls.SetAllNeedPreferenceUpdate(TRUE, GetSelToDoCtrl());
+	int nSelTDC = GetSelToDoCtrl();
+	BOOL bHasStyle = GetToDoCtrl().HasStyle(nStyle);
+
+	// Sanity checks
+	ASSERT(!m_mgrToDoCtrls.GetNeedsPreferenceUpdate(nSelTDC));
+	ASSERT((bWantStyle && !bHasStyle) || (!bWantStyle && bHasStyle));
+
+	// Update active tasklist
+	GetToDoCtrl().ModifyStyles(CTDCStyleMap(nStyle, bWantStyle));
+
+	// mark all other tasklists as needing update
+	m_mgrToDoCtrls.SetAllNeedPreferenceUpdate(TRUE, nSelTDC);
 }
 
 void CToDoListWnd::OnUpdateViewShowTreeListTabbar(CCmdUI* pCmdUI) 
