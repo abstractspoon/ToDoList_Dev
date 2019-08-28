@@ -249,21 +249,26 @@ void CBurndownChart::PreSubclassWindow()
 
 int CBurndownChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	CString sTooltip;
+	int nHit = HitTest(point);
 
-	switch (m_nChartType)
+	if (nHit != -1)
 	{
+		CString sTooltip;
+
+		switch (m_nChartType)
+		{
 		case BCT_INCOMPLETETASKS:
-			sTooltip = CIncompleteDaysGraph::GetTooltip(m_dataset, m_dtExtents, m_nScale, HitTest(point));
+			sTooltip = CIncompleteDaysGraph::GetTooltip(m_dataset, m_dtExtents, m_nScale, nHit);
 			break;
 
 		case BCT_REMAININGDAYS:
-			sTooltip = CRemainingDaysGraph::GetTooltip(m_dataset, m_dtExtents, m_nScale, HitTest(point));
+			sTooltip = CRemainingDaysGraph::GetTooltip(m_dataset, m_dtExtents, m_nScale, nHit);
 			break;
-	}
+		}
 
-	if (!sTooltip.IsEmpty())
-		return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
+		if (!sTooltip.IsEmpty())
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
+	}
 
 	// else
 	return CHMXChartEx::OnToolHitTest(point, pTI);

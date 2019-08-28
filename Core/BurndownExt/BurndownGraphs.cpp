@@ -186,15 +186,13 @@ COleDateTime CIncompleteDaysGraph::GetGraphEndDate(const COleDateTimeRange& dtEx
 
 CString CIncompleteDaysGraph::GetTooltip(const CHMXDataset datasets[HMX_MAX_DATASET], const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit)
 {
-	CEnString sTooltip;
+	ASSERT(nHit != -1);
 
-	if (nHit != -1)
-	{
-		double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit), dNumTasks;
-		VERIFY(datasets[0].GetData(nHit, dNumTasks));
+	double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit), dNumTasks;
+	VERIFY(datasets[0].GetData(nHit, dNumTasks));
 
-		sTooltip.Format(IDS_TOOLTIP_INCOMPLETE, CDateHelper::FormatDate(dDate), (int)dNumTasks);
-	}
+	CString sTooltip;
+	sTooltip.Format(CEnString(IDS_TOOLTIP_INCOMPLETE), CDateHelper::FormatDate(dDate), (int)dNumTasks);
 
 	return sTooltip;
 }
@@ -268,16 +266,14 @@ COleDateTime CRemainingDaysGraph::GetGraphEndDate(const COleDateTimeRange& dtExt
 
 CString CRemainingDaysGraph::GetTooltip(const CHMXDataset datasets[HMX_MAX_DATASET], const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit)
 {
-	CEnString sTooltip;
+	ASSERT(nHit != -1);
 
-	if (nHit != -1)
-	{
-		double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit), dNumEst, dNumSpent;
-		VERIFY(datasets[REMAINING_ESTIMATE].GetData(nHit, dNumSpent));
-		VERIFY(datasets[REMAINING_SPENT].GetData(nHit, dNumEst));
+	double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit), dNumEst, dNumSpent;
+	VERIFY(datasets[REMAINING_ESTIMATE].GetData(nHit, dNumSpent));
+	VERIFY(datasets[REMAINING_SPENT].GetData(nHit, dNumEst));
 
-		sTooltip.Format(IDS_TOOLTIP_REMAINING, CDateHelper::FormatDate(dDate), (int)dNumEst, (int)dNumSpent);
-	}
+	CString sTooltip;
+	sTooltip.Format(CEnString(IDS_TOOLTIP_REMAINING), CDateHelper::FormatDate(dDate), (int)dNumEst, (int)dNumSpent);
 
 	return sTooltip;
 }
