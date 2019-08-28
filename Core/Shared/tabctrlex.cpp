@@ -1079,33 +1079,6 @@ void CTabCtrlEx::InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	}
 }
 
-CSpinButtonCtrl* CTabCtrlEx::GetSpinButtonCtrl() const
-{
-	return (CSpinButtonCtrl*)GetDlgItem(1);
-}
-
-BOOL CTabCtrlEx::HasSpinButtonCtrl() const
-{
-	return (GetSpinButtonCtrl() != NULL);
-}
-
-BOOL CTabCtrlEx::GetSpinButtonCtrlRect(CRect& rSpin) const
-{
-	const CSpinButtonCtrl* pSpin = GetSpinButtonCtrl();
-
-	if (pSpin == NULL)
-		return FALSE;
-
-	CRect rClient;
-	GetClientRect(rClient);
-
-	pSpin->GetWindowRect(rSpin);
-	ScreenToClient(rSpin);
-
-	rSpin.OffsetRect(rClient.right - rSpin.right, 0);
-	return TRUE;
-}
-
 int CTabCtrlEx::GetScrollPos() const
 {
 	const CSpinButtonCtrl* pSpin = GetSpinButtonCtrl();
@@ -1119,7 +1092,7 @@ int CTabCtrlEx::GetScrollPos() const
 
 BOOL CTabCtrlEx::SetScrollPos(int nPos)
 {
-	if ((nPos < 0) || (nPos >= GetItemCount()))
+	if ((nPos < 0) || ((nPos > 0) && (nPos >= GetItemCount())))
 	{
 		ASSERT(0);
 		return FALSE;

@@ -90,6 +90,33 @@ void CXPTabCtrl::SetBackgroundColor(COLORREF color)
 	}
 }
 
+CSpinButtonCtrl* CXPTabCtrl::GetSpinButtonCtrl() const
+{
+	return (CSpinButtonCtrl*)GetDlgItem(1);
+}
+
+BOOL CXPTabCtrl::HasSpinButtonCtrl() const
+{
+	return (GetSpinButtonCtrl() != NULL);
+}
+
+BOOL CXPTabCtrl::GetSpinButtonCtrlRect(CRect& rSpin) const
+{
+	const CSpinButtonCtrl* pSpin = GetSpinButtonCtrl();
+
+	if (pSpin == NULL)
+		return FALSE;
+
+	CRect rClient;
+	GetClientRect(rClient);
+
+	pSpin->GetWindowRect(rSpin);
+	ScreenToClient(rSpin);
+
+	rSpin.OffsetRect(rClient.right - rSpin.right, 0);
+	return TRUE;
+}
+
 BOOL CXPTabCtrl::OnEraseBkgnd(CDC* pDC)
 {
 	if (IsExtendedTabThemedXP())
@@ -98,7 +125,6 @@ BOOL CXPTabCtrl::OnEraseBkgnd(CDC* pDC)
 		return TRUE;
 	}
 
-	// else default
 	return CTabCtrl::OnEraseBkgnd(pDC);
 }
 
@@ -113,9 +139,13 @@ void CXPTabCtrl::OnPaint()
 
 void CXPTabCtrl::DoPaint(CDC* pDC)
 {
-	CRect rcClip; 
-	
-	rcClip.SetRectEmpty();
+	// always clip out the spin button control
+	// before filling the background
+	CRect rSpin, rcClip;
+
+	if (GetSpinButtonCtrlRect(rSpin))
+		pDC->ExcludeClipRect(rSpin);
+
 	pDC->GetClipBox(rcClip);
 	pDC->FillSolidRect(rcClip, m_crBkgnd);
 

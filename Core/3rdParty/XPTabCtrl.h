@@ -76,6 +76,10 @@ protected:
 	void DoPaint(CDC* pDC);
 	void DrawThemesXpTabItem(CDC* pDC, int ixItem, const CRect& rcItem, UINT uiFlag);
 
+	CSpinButtonCtrl* GetSpinButtonCtrl() const;
+	BOOL HasSpinButtonCtrl() const;
+	BOOL GetSpinButtonCtrlRect(CRect& rSpin) const;
+
 	virtual CRect GetTabTextRect(int nTab, LPCRECT pRect);
 	virtual CFont* GetTabFont(int nTab);
 	virtual void DrawTabItem(CDC* pDC, int ixItem, const CRect& rcItemC, UINT uiFlags);
