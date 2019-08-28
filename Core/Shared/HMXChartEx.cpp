@@ -13,6 +13,61 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+bool HMXUtils::GetMinMax(const CHMXDataset datasets[], int nNumSets, double& nMin, double& nMax, bool bDataOnly)
+{
+	bool first = true;
+
+	for (int i = 0; i < nNumSets; i++)
+	{
+		double dMinSet, dMaxSet;
+
+		if (datasets[i].GetMinMax(dMinSet, dMaxSet, bDataOnly))
+		{
+			if (first)
+			{
+				nMin = dMinSet;
+				nMax = dMaxSet;
+
+				first = false;
+			}
+			else
+			{
+				nMin = min(nMin, dMinSet);
+				nMax = min(nMax, dMaxSet);
+			}
+		}
+	}
+
+	return !first;
+}
+
+double HMXUtils::CalcMaxYAxisValue(double dDataMax, int nNumTicks)
+{
+	return (nNumTicks * CalcYAxisInterval(dDataMax, nNumTicks));
+}
+
+double HMXUtils::CalcYAxisInterval(double dDataMax, int nNumTicks)
+{
+	ASSERT(nNumTicks > 0);
+
+	const double INTERVALS[] = { 1, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000 };
+	const int NUM_INT = (sizeof(INTERVALS) / sizeof(INTERVALS[0]));
+
+	// Find the first tick increment that gives us a range
+	// greater than or equal to dDataMax
+	for (int nInc = 0; nInc < NUM_INT; nInc++)
+	{
+		double dMaxYAxis = (nNumTicks * INTERVALS[nInc]);
+
+		if (dDataMax <= dMaxYAxis)
+			return INTERVALS[nInc];
+	}
+
+	return 10000;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 const double MIN_SUBINTERVAL_HEIGHT = GraphicsMisc::ScaleByDPIFactor(5);
 
 /////////////////////////////////////////////////////////////////////////////
@@ -40,31 +95,6 @@ END_MESSAGE_MAP()
 BOOL CHMXChartEx::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID)
 {
 	return CHMXChart::Create(NULL, NULL, dwStyle, rect, pParentWnd, nID);
-}
-
-double CHMXChartEx::CalcMaxYAxisValue(double dDataMax, int nNumTicks)
-{
-	return (nNumTicks * CalcYAxisInterval(dDataMax, nNumTicks));
-}
-
-double CHMXChartEx::CalcYAxisInterval(double dDataMax, int nNumTicks)
-{
-	ASSERT(nNumTicks > 0);
-
-	const double INTERVALS[] = { 1, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000 };
-	const int NUM_INT = (sizeof(INTERVALS) / sizeof(INTERVALS[0]));
-
-	// Find the first tick increment that gives us a range
-	// greater than or equal to dDataMax
-	for (int nInc = 0; nInc < NUM_INT; nInc++)
-	{
-		double dMaxYAxis = (nNumTicks * INTERVALS[nInc]);
-
-		if (dDataMax <= dMaxYAxis)
-			return INTERVALS[nInc];
-	}
-
-	return 10000;
 }
 
 int CHMXChartEx::GetYSubTicks(double dInterval) const
@@ -126,7 +156,7 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 
 bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
 {
-	double dInterval = CalcYAxisInterval(m_nYMax, 10);
+	double dInterval = HMXUtils::CalcYAxisInterval(m_nYMax, 10);
 	int nNumSubTicks = GetYSubTicks(dInterval);
 
 	if (nNumSubTicks > 1)

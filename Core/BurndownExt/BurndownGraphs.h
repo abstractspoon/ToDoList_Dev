@@ -2,6 +2,8 @@
 
 #include "BurndownEnum.h"
 
+#include "..\3rdParty\HMXChart.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 class COleDateTimeRange;
@@ -13,8 +15,8 @@ class CStatsItemArray;
 class CIncompleteDaysGraph
 {
 public:
-	static void BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CBurndownChart& chart);
-	static CString GetTooltip(const CBurndownChart& chart, const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit);
+	static void BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CHMXDataset datasets[HMX_MAX_DATASET]);
+	static CString GetTooltip(const CHMXDataset datasets[HMX_MAX_DATASET], const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit);
 
 	static COleDateTime GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale);
 	static COleDateTime GetGraphEndDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale);
@@ -25,8 +27,8 @@ public:
 class CRemainingDaysGraph
 {
 public:
-	static void BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CBurndownChart& chart);
-	static CString GetTooltip(const CBurndownChart& chart, const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit);
+	static void BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CHMXDataset datasets[HMX_MAX_DATASET]);
+	static CString GetTooltip(const CHMXDataset datasets[HMX_MAX_DATASET], const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit);
 
 	static COleDateTime GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale);
 	static COleDateTime GetGraphEndDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale);

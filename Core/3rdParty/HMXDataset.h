@@ -46,6 +46,9 @@ enum HMX_DATASET_MARKER
 class CHMXDataset : public CObject  
 {
 public:
+	CHMXDataset();
+	virtual ~CHMXDataset();
+
 	virtual bool		SetStyle( HMX_DATASET_STYLE nStyle );			// set data style
 	virtual HMX_DATASET_STYLE GetStyle() const;							// get data style
 
@@ -58,6 +61,7 @@ public:
 	virtual bool		SetSize( int nSize );							// set pen size (in pixel)
 																		// set bar size (range 1-10)
 																		// unused if area
+	virtual bool		ClearData();
 
 	virtual bool		SetMarker( HMX_DATASET_MARKER nMarker );		// set marker type (see #define section) unused if style is bar or area
 	virtual HMX_DATASET_MARKER GetMarker() const;						// get marker
@@ -70,11 +74,6 @@ public:
 	virtual bool		GetMinMax( double& nMin, double& nMax, bool bDataOnly ) const;	// get min & max
 	virtual void		SetMin(double dMin);
 	virtual void		SetMax(double dMax);
-
-	virtual bool		ClearData();
-
-	CHMXDataset();
-	virtual ~CHMXDataset();
 
 protected:
 	CArray<double,double>	m_data;			// the data

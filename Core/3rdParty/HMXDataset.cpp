@@ -109,7 +109,6 @@ HMX_DATASET_MARKER CHMXDataset::GetMarker() const
 
 bool CHMXDataset::SetSize(int nSize)
 {
-	
 	// between 1 an 10	
 	m_nSize = min(nSize, 10);
 	m_nSize = max(m_nSize,  1);

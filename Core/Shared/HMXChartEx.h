@@ -12,6 +12,16 @@
 #include "..\Shared\TooltipCtrlEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
+
+namespace HMXUtils
+{
+	bool GetMinMax(const CHMXDataset datasets[], int nNumSets, double& nMin, double& nMax, bool bDataOnly);	// get min & max
+
+	double CalcYAxisInterval(double dDataMax, int nNumTicks);
+	double CalcMaxYAxisValue(double dDataMax, int nNumTicks);
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // CHMXChartEx window
 
 class CHMXChartEx : public CHMXChart
@@ -23,8 +33,6 @@ public:
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	void FilterToolTipMessage(MSG* pMsg);
 
-	static double CalcYAxisInterval(double dDataMax, int nNumTicks);
-	static double CalcMaxYAxisValue(double dDataMax, int nNumTicks);
 
 protected:
 	CToolTipCtrlEx m_tooltip;

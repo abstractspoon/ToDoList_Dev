@@ -42,15 +42,13 @@ const int    LINE_THICKNESS			= 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CIncompleteDaysGraph::BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CBurndownChart& chart)
+void CIncompleteDaysGraph::BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CHMXDataset datasets[HMX_MAX_DATASET])
 {
-	chart.ClearData();
-		
-	chart.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
-	chart.SetDatasetLineColor(0, COLOR_GREENLINE);
-	chart.SetDatasetFillColor(0, COLOR_GREENFILL);
-	chart.SetDatasetSizeFactor(0, LINE_THICKNESS);
-	chart.SetDatasetMin(0, 0.0);
+	datasets[0].SetStyle(HMX_DATASET_STYLE_AREALINE);
+	datasets[0].SetLineColor(COLOR_GREENLINE);
+	datasets[0].SetFillColor(COLOR_GREENFILL);
+	datasets[0].SetSize(LINE_THICKNESS);
+	datasets[0].SetMin(0.0);
 
 	// build the graph
 	COleDateTime dtStart = GetGraphStartDate(dtExtents, nScale);
@@ -65,27 +63,25 @@ void CIncompleteDaysGraph::BuildGraph(const COleDateTimeRange& dtExtents, BURNDO
 		
 		if (dtExtents.GetStart() > date)
 		{
-			chart.AddData(0, 0);
+			datasets[0].AddData(0);
 		}
 		else
 		{
 			int nNumNotDone = data.CalculateIncompleteTaskCount(date, nItemFrom, nItemFrom);
-			chart.AddData(0, nNumNotDone);
+			datasets[0].AddData(nNumNotDone);
 		}
 	}
 
 	// Set the maximum Y value to be something 'nice'
 	double dMin, dMax;
 
-	if (chart.GetMinMax(dMin, dMax, true))
+	if (HMXUtils::GetMinMax(datasets, 1, dMin, dMax, true))
 	{
 		ASSERT(dMin == 0.0);
 
-		dMax = chart.CalcMaxYAxisValue(dMax, 10);
-		chart.SetDatasetMax(0, dMax);
+		dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
+		datasets[0].SetMax(dMax);
 	}
-	
-	chart.CalcDatas();
 }
 
 COleDateTime CIncompleteDaysGraph::GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale)
@@ -188,14 +184,14 @@ COleDateTime CIncompleteDaysGraph::GetGraphEndDate(const COleDateTimeRange& dtEx
 	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
 }
 
-CString CIncompleteDaysGraph::GetTooltip(const CBurndownChart& chart, const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit)
+CString CIncompleteDaysGraph::GetTooltip(const CHMXDataset datasets[HMX_MAX_DATASET], const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit)
 {
 	CEnString sTooltip;
 
 	if (nHit != -1)
 	{
 		double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit), dNumTasks;
-		VERIFY(chart.GetData(0, nHit, dNumTasks));
+		VERIFY(datasets[0].GetData(nHit, dNumTasks));
 
 		sTooltip.Format(IDS_TOOLTIP_INCOMPLETE, CDateHelper::FormatDate(dDate), (int)dNumTasks);
 	}
@@ -211,21 +207,19 @@ enum
 	REMAINING_SPENT
 };
 
-void CRemainingDaysGraph::BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CBurndownChart& chart)
+void CRemainingDaysGraph::BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CHMXDataset datasets[HMX_MAX_DATASET])
 {
-	chart.ClearData();
-
-	chart.SetDatasetStyle(REMAINING_ESTIMATE, HMX_DATASET_STYLE_AREALINE);
-	chart.SetDatasetLineColor(REMAINING_ESTIMATE,  COLOR_BLUELINE);
-	chart.SetDatasetFillColor(REMAINING_ESTIMATE,  COLOR_BLUEFILL);
-	chart.SetDatasetSizeFactor(REMAINING_ESTIMATE, LINE_THICKNESS);
-	chart.SetDatasetMin(REMAINING_ESTIMATE, 0.0);
+	datasets[REMAINING_ESTIMATE].SetStyle(HMX_DATASET_STYLE_AREALINE);
+	datasets[REMAINING_ESTIMATE].SetLineColor(COLOR_BLUELINE);
+	datasets[REMAINING_ESTIMATE].SetFillColor(COLOR_BLUEFILL);
+	datasets[REMAINING_ESTIMATE].SetSize(LINE_THICKNESS);
+	datasets[REMAINING_ESTIMATE].SetMin(0.0);
 	
-	chart.SetDatasetStyle(REMAINING_SPENT, HMX_DATASET_STYLE_AREALINE);
-	chart.SetDatasetLineColor(REMAINING_SPENT, COLOR_YELLOWLINE);
-	chart.SetDatasetFillColor(REMAINING_SPENT, COLOR_YELLOWFILL);
-	chart.SetDatasetSizeFactor(REMAINING_SPENT, LINE_THICKNESS);
-	chart.SetDatasetMin(REMAINING_SPENT, 0.0);
+	datasets[REMAINING_SPENT].SetStyle(HMX_DATASET_STYLE_AREALINE);
+	datasets[REMAINING_SPENT].SetLineColor(COLOR_YELLOWLINE);
+	datasets[REMAINING_SPENT].SetFillColor(COLOR_YELLOWFILL);
+	datasets[REMAINING_SPENT].SetSize(LINE_THICKNESS);
+	datasets[REMAINING_SPENT].SetMin(0.0);
 	
 	// build the graph
 	COleDateTime dtStart = GetGraphStartDate(dtExtents, nScale);
@@ -239,28 +233,27 @@ void CRemainingDaysGraph::BuildGraph(const COleDateTimeRange& dtExtents, BURNDOW
 	{
 		// Time Estimate
 		double dEst = ((nDay * dTotalEst) / nNumDays);
-		chart.AddData(REMAINING_ESTIMATE, (dTotalEst - dEst));
+		datasets[REMAINING_ESTIMATE].AddData(dTotalEst - dEst);
 		
 		// Time Spent
 		COleDateTime date(dtStart.m_dt + nDay);
 		double dSpent = data.CalcTimeSpentInDays(date);
 		
-		chart.AddData(REMAINING_SPENT, (dTotalEst - dSpent));
+		datasets[REMAINING_SPENT].AddData(dTotalEst - dSpent);
 	}
 	
 	// Set the maximum Y value to be something 'nice'
 	double dMin, dMax;
 
-	if (chart.GetMinMax(dMin, dMax, true))
+	if (HMXUtils::GetMinMax(datasets, 2, dMin, dMax, true))
 	{
 		ASSERT(dMin == 0.0);
 
-		dMax = chart.CalcMaxYAxisValue(dMax, 10);
-		chart.SetDatasetMax(REMAINING_ESTIMATE, dMax);
-		chart.SetDatasetMax(REMAINING_SPENT, dMax);
+		dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
+
+		datasets[REMAINING_ESTIMATE].SetMax(dMax);
+		datasets[REMAINING_SPENT].SetMax(dMax);
 	}
-	
-	chart.CalcDatas();
 }
 
 COleDateTime CRemainingDaysGraph::GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE /*nScale*/)
@@ -273,15 +266,15 @@ COleDateTime CRemainingDaysGraph::GetGraphEndDate(const COleDateTimeRange& dtExt
 	return dtExtents.GetEnd();
 }
 
-CString CRemainingDaysGraph::GetTooltip(const CBurndownChart& chart, const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit)
+CString CRemainingDaysGraph::GetTooltip(const CHMXDataset datasets[HMX_MAX_DATASET], const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit)
 {
 	CEnString sTooltip;
 
 	if (nHit != -1)
 	{
 		double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit), dNumEst, dNumSpent;
-		VERIFY(chart.GetData(REMAINING_ESTIMATE, nHit, dNumSpent));
-		VERIFY(chart.GetData(REMAINING_SPENT, nHit, dNumEst));
+		VERIFY(datasets[REMAINING_ESTIMATE].GetData(nHit, dNumSpent));
+		VERIFY(datasets[REMAINING_SPENT].GetData(nHit, dNumEst));
 
 		sTooltip.Format(IDS_TOOLTIP_REMAINING, CDateHelper::FormatDate(dDate), (int)dNumEst, (int)dNumSpent);
 	}

@@ -226,13 +226,15 @@ void CBurndownChart::RebuildGraph(BOOL bUpdateExtents)
 	switch (STATSDISPLAY[m_nChartType].nDisplay)
 	{
 	case BCT_INCOMPLETETASKS:
-		CIncompleteDaysGraph::BuildGraph(m_dtExtents, m_nScale, m_data, *this);
+		CIncompleteDaysGraph::BuildGraph(m_dtExtents, m_nScale, m_data, m_dataset);
 		break;
 		
 	case BCT_REMAININGDAYS:
-		CRemainingDaysGraph::BuildGraph(m_dtExtents, m_nScale, m_data, *this);
+		CRemainingDaysGraph::BuildGraph(m_dtExtents, m_nScale, m_data, m_dataset);
 		break;
 	}
+
+	CalcDatas();
 }
 
 void CBurndownChart::PreSubclassWindow()
@@ -252,11 +254,11 @@ int CBurndownChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	switch (m_nChartType)
 	{
 		case BCT_INCOMPLETETASKS:
-			sTooltip = CIncompleteDaysGraph::GetTooltip(*this, m_dtExtents, m_nScale, HitTest(point));
+			sTooltip = CIncompleteDaysGraph::GetTooltip(m_dataset, m_dtExtents, m_nScale, HitTest(point));
 			break;
 
 		case BCT_REMAININGDAYS:
-			sTooltip = CRemainingDaysGraph::GetTooltip(*this, m_dtExtents, m_nScale, HitTest(point));
+			sTooltip = CRemainingDaysGraph::GetTooltip(m_dataset, m_dtExtents, m_nScale, HitTest(point));
 			break;
 	}
 
