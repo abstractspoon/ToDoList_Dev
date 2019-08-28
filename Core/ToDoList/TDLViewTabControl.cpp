@@ -417,6 +417,9 @@ void CTDLViewTabControl::ShowTabControl(BOOL bShow)
 	{
 		ShowWindow(bShow ? SW_SHOW : SW_HIDE);
 		EnableWindow(bShow);
+
+		if (bShow)
+			EnsureSelVisible();
 	}
 }
 
@@ -425,45 +428,48 @@ BOOL CTDLViewTabControl::CalcTabViewRects(const CRect& rPos, CRect& rTabs, CRect
 	if (!GetSafeHwnd())
 		return FALSE;
 
-	if (m_bShowingTabs)
+	// Always recalculate the tab rect so that we maintain
+	// its position for when we switch between invisible and visible.
+	// We just don't adjust the view rect if we are invisible.
+	rTabs = rPos;
+	rTabs.bottom = rTabs.top;
+	AdjustRect(TRUE, rTabs);
+
+	int nTabHeight = rTabs.Height();
+	rTabs = rView = rPos;
+
+	switch (GetOrientation())
 	{
-		rTabs = rPos;
-		rTabs.bottom = rTabs.top;
-		AdjustRect(TRUE, rTabs);
+	case e_tabTop:
+		rTabs.bottom = rTabs.top + nTabHeight - 7;
 
-		int nTabHeight = rTabs.Height();
-		rTabs = rView = rPos;
+		if (m_bShowingTabs)
+			rView.top = rTabs.bottom;
+		break;
 
-		switch (GetOrientation())
-		{
-			case e_tabTop:	  
-				rTabs.bottom = rTabs.top + nTabHeight - 7;
-				rView.top = rTabs.bottom;
-				break;
+	case e_tabBottom:
+		rTabs.top = rTabs.bottom - nTabHeight + 7;
 
-			case e_tabBottom: 
-				rTabs.top = rTabs.bottom - nTabHeight + 7;
-				rView.bottom = rTabs.top;
-				break;
+		if (m_bShowingTabs)
+			rView.bottom = rTabs.top;
+		break;
 
-			case e_tabLeft:	  
-				rTabs.right = rTabs.left + nTabHeight; 
-				rView.left = rTabs.right;
-				break;
+	case e_tabLeft:
+		rTabs.right = rTabs.left + nTabHeight;
 
-			case e_tabRight:  
-				rTabs.left = rTabs.right - nTabHeight;
-				rView.right = rTabs.left;
-				break;
+		if (m_bShowingTabs)
+			rView.left = rTabs.right;
+		break;
 
-			default:
-				return FALSE;
-		}
-	}
-	else
-	{
-		rTabs.SetRectEmpty();
-		rView = rPos;
+	case e_tabRight:
+		rTabs.left = rTabs.right - nTabHeight;
+
+		if (m_bShowingTabs)
+			rView.right = rTabs.left;
+		break;
+
+	default:
+		return FALSE;
 	}
 
 	return TRUE;
