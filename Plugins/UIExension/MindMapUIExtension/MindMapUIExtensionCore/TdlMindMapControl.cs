@@ -259,7 +259,10 @@ namespace MindMapUIExtension
 			{
 				case UIExtension.UpdateType.Edit:
 				case UIExtension.UpdateType.New:
-					UpdateTaskAttributes(tasks);
+					if (RootNode == null)
+						RebuildTreeView(tasks);
+					else
+						UpdateTaskAttributes(tasks);
 					break;
 
 				case UIExtension.UpdateType.Delete:
@@ -269,6 +272,23 @@ namespace MindMapUIExtension
 
 				case UIExtension.UpdateType.Unknown:
 					return;
+			}
+
+			// If the root task is not a real task update the project name
+			if (tasks.IsAttributeAvailable(Task.Attribute.ProjectName))
+			{
+				var rootItem = TaskItem(RootNode);
+	
+				if ((rootItem != null) && !rootItem.IsTask)
+				{
+					var projName = GetProjectName(tasks);
+	
+					if (!projName.Equals(rootItem.Title))
+					{
+						rootItem.Title = projName;
+						RootNode.Text = projName;
+					}
+				}
 			}
 		}
 
@@ -413,6 +433,9 @@ namespace MindMapUIExtension
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
 		{
 			TreeNode node = FindNode(taskID);
+
+			if (node == null)
+				return false;
 
 			switch (getTask)
 			{
@@ -564,16 +587,9 @@ namespace MindMapUIExtension
 		{
 			var rootItem = TaskItem(RootNode);
 
-			if ((rootItem != null) && !rootItem.IsTask)
-			{
-				var projName = GetProjectName(tasks);
-
-				if (!projName.Equals(rootItem.Title))
-				{
-					rootItem.Title = projName;
-					RootNode.Text = projName;
-				}
-			}
+			// A root item must already exist
+			if (rootItem == null)
+				return;
 
 			var changedTaskIds = new HashSet<UInt32>();
 			Task task = tasks.GetFirstTask();
@@ -603,6 +619,29 @@ namespace MindMapUIExtension
 			{
 				var parentId = task.GetParentTask().GetID();
 				var parentNode = FindNode(parentId);
+
+				if ((parentId == 0) && (parentNode == null))
+				{
+					// If our parent's ID is zero and couldn't be found then it 
+					// means the existing root item is a sibling of ours.
+					// So we need to create a new non-task root, move the existing
+					// root to the new root and use the new root as our parent
+					var rootItem = TaskItem(RootNode);
+
+					if (rootItem.IsTask)
+					{
+						var prevRootNode = RootNode;
+						base.Clear();
+
+						parentNode = AddRootNode(new MindMapTaskItem(m_Trans.Translate("Root")));
+						parentNode.Nodes.Add(prevRootNode);
+					}
+					else
+					{
+						// ????
+						parentNode = RootNode;
+					}
+				}
 
 				AddTaskToTree(task, parentNode, true);
 			}
@@ -1092,6 +1131,9 @@ namespace MindMapUIExtension
                             // counter-intuitively it works from 'MouseDown'
                             if (!m_IgnoreMouseClick && !ReadOnly && HitTestIcon(hit, e.Location))
                             {
+								// Ensure the node is selected
+								SelectedNode = hit;
+
                                 if (EditTaskIcon != null)
                                     EditTaskIcon(this, UniqueID(SelectedNode));
                             }
