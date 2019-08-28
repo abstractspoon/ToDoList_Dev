@@ -641,7 +641,6 @@ protected:
 	afx_msg LRESULT OnTDCFailedLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
 
- 	afx_msg LRESULT OnGutterNotifyScroll(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCustomUrl(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTimeUnitsChange(WPARAM wParam, LPARAM lParam);

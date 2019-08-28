@@ -9048,12 +9048,6 @@ void CToDoCtrl::SelectAll()
 	m_treeDragDrop.EnableDragDrop(FALSE);
 }
 
-LRESULT CToDoCtrl::OnGutterNotifyScroll(WPARAM /*wParam*/, LPARAM /*lParam*/)
-{
-	m_eTaskName.EndEdit(FALSE);
-	return 0L;
-}
-
 BOOL CToDoCtrl::GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const
 {
 	nAttrib = TDC::MapColumnToAttribute(nCol);
