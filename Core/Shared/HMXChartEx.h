@@ -23,6 +23,9 @@ public:
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	void FilterToolTipMessage(MSG* pMsg);
 
+	static double CalcYAxisInterval(double dDataMax, int nNumTicks);
+	static double CalcMaxYAxisValue(double dDataMax, int nNumTicks);
+
 protected:
 	CToolTipCtrlEx m_tooltip;
 
@@ -43,9 +46,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	static double CalcYAxisInterval(double dDataMax, int nNumTicks);
-	static double CalcMaxYAxisValue(double dDataMax, int nNumTicks);
-
 	BOOL InitTooltip(BOOL bMultiline);
 	int GetYSubTicks(double dInterval) const;
 

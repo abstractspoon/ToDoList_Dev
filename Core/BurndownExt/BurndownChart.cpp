@@ -5,48 +5,12 @@
 #include "resource.h"
 #include "BurndownChart.h"
 #include "BurndownStatic.h"
+#include "BurndownGraphs.h"
 
 #include "..\shared\datehelper.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
 #include "..\shared\graphicsmisc.h"
-
-////////////////////////////////////////////////////////////////////////////////
-
- 
-const COLORREF COLOR_GREEN		= RGB(122, 204,   0); 
-const COLORREF COLOR_GREENLINE	= GraphicsMisc::Darker(COLOR_GREEN, 0.05, FALSE);
-const COLORREF COLOR_GREENFILL	= GraphicsMisc::Lighter(COLOR_GREEN, 0.25, FALSE);
-
-const COLORREF COLOR_RED		= RGB(204,   0,   0); 
-const COLORREF COLOR_REDLINE	= GraphicsMisc::Darker(COLOR_RED, 0.05, FALSE);
-const COLORREF COLOR_REDFILL	= GraphicsMisc::Lighter(COLOR_RED, 0.25, FALSE);
-
-const COLORREF COLOR_YELLOW		= RGB(204, 164,   0); 
-const COLORREF COLOR_YELLOWLINE	= GraphicsMisc::Darker(COLOR_YELLOW, 0.05, FALSE);
-const COLORREF COLOR_YELLOWFILL	= GraphicsMisc::Lighter(COLOR_YELLOW, 0.25, FALSE);
-
-const COLORREF COLOR_BLUE		= RGB(0,     0, 244); 
-const COLORREF COLOR_BLUELINE	= GraphicsMisc::Darker(COLOR_BLUE, 0.05, FALSE);
-const COLORREF COLOR_BLUEFILL	= GraphicsMisc::Lighter(COLOR_BLUE, 0.25, FALSE);
-
-const COLORREF COLOR_PINK		= RGB(234,  28,  74); 
-const COLORREF COLOR_PINKLINE	= GraphicsMisc::Darker(COLOR_PINK, 0.05, FALSE);
-const COLORREF COLOR_PINKFILL	= GraphicsMisc::Lighter(COLOR_PINK, 0.25, FALSE);
-
-const COLORREF COLOR_ORANGE		= RGB(255,  91,  21);
-const COLORREF COLOR_ORANGELINE	= GraphicsMisc::Darker(COLOR_ORANGE, 0.05, FALSE);
-const COLORREF COLOR_ORANGEFILL	= GraphicsMisc::Lighter(COLOR_ORANGE, 0.25, FALSE);
-
-const int    LINE_THICKNESS			= 1;
-
-/////////////////////////////////////////////////////////////////////////////
-
-enum 
-{ 
-	SPRINT_EST,
-	SPRINT_SPENT
-};
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -70,7 +34,7 @@ static int NUM_SCALES = sizeof(SCALES) / sizeof(int);
 CBurndownChart::CBurndownChart(const CStatsItemArray& data) 
 	: 
 	m_data(data),
-	m_nScale(1),
+	m_nScale(BCS_DAY),
 	m_nChartType(BCT_INCOMPLETETASKS)
 {
 }
@@ -123,104 +87,6 @@ BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
 	}
 
 	return (bmImage.GetSafeHandle() != NULL);
-}
-
-void CBurndownChart::BuildBurndownGraph()
-{
-	ClearData();
-		
-	SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
-	SetDatasetLineColor(0, COLOR_GREENLINE);
-	SetDatasetFillColor(0, COLOR_GREENFILL);
-	SetDatasetSizeFactor(0, LINE_THICKNESS);
-	SetDatasetMin(0, 0.0);
-
-	// build the graph
-	COleDateTime dtStart = GetGraphStartDate();
-	COleDateTime dtEnd = GetGraphEndDate();
-	
-	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
-	int nItemFrom = 0;
-	
-	for (int nDay = 0; nDay <= nNumDays; nDay++)
-	{
-		COleDateTime date(dtStart.m_dt + nDay);
-		
-		if (m_dtExtents.GetStart() > date)
-		{
-			AddData(0, 0);
-		}
-		else
-		{
-			int nNumNotDone = m_data.CalculateIncompleteTaskCount(date, nItemFrom, nItemFrom);
-			AddData(0, nNumNotDone);
-		}
-	}
-
-	// Set the maximum Y value to be something 'nice'
-	double dMin, dMax;
-
-	if (GetMinMax(dMin, dMax, true))
-	{
-		ASSERT(dMin == 0.0);
-
-		dMax = CalcMaxYAxisValue(dMax, 10);
-		SetDatasetMax(0, dMax);
-	}
-	
-	CalcDatas();
-}
-
-void CBurndownChart::BuildSprintGraph()
-{
-	ClearData();
-
-	SetDatasetStyle(SPRINT_EST, HMX_DATASET_STYLE_AREALINE);
-	SetDatasetLineColor(SPRINT_EST,  COLOR_BLUELINE);
-	SetDatasetFillColor(SPRINT_EST,  COLOR_BLUEFILL);
-	SetDatasetSizeFactor(SPRINT_EST, LINE_THICKNESS);
-	SetDatasetMin(SPRINT_EST, 0.0);
-	
-	SetDatasetStyle(SPRINT_SPENT, HMX_DATASET_STYLE_AREALINE);
-	SetDatasetLineColor(SPRINT_SPENT, COLOR_YELLOWLINE);
-	SetDatasetFillColor(SPRINT_SPENT, COLOR_YELLOWFILL);
-	SetDatasetSizeFactor(SPRINT_SPENT, LINE_THICKNESS);
-	SetDatasetMin(SPRINT_SPENT, 0.0);
-	
-	// build the graph
-	COleDateTime dtStart = GetGraphStartDate();
-	COleDateTime dtEnd = GetGraphEndDate();
-	
-	double dTotalEst = m_data.CalcTotalTimeEstimateInDays();
-	
-	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
-	
-	for (int nDay = 0; nDay <= nNumDays; nDay++)
-	{
-		// Time Estimate
-		double dEst = ((nDay * dTotalEst) / nNumDays);
-		AddData(SPRINT_EST, (dTotalEst - dEst));
-		
-		// Time Spent
-		COleDateTime date(dtStart.m_dt + nDay);
-		double dSpent = m_data.CalcTimeSpentInDays(date);
-		
-		AddData(SPRINT_SPENT, (dTotalEst - dSpent));
-	}
-	
-	// Set the maximum Y value to be something 'nice'
-	double dMin, dMax;
-
-	if (GetMinMax(dMin, dMax, true))
-	{
-		ASSERT(dMin == 0.0);
-
-		dMax = CalcMaxYAxisValue(dMax, 10);
-		SetDatasetMax(SPRINT_EST, dMax);
-		SetDatasetMax(SPRINT_SPENT, dMax);
-	}
-	
-	CalcDatas();
 }
 
 BURNDOWN_CHARTSCALE CBurndownChart::CalculateRequiredXScale() const
@@ -303,109 +169,32 @@ void CBurndownChart::RebuildXScale()
 
 COleDateTime CBurndownChart::GetGraphStartDate() const
 {
-	if (m_nChartType == BCT_REMAININGDAYS)
-		return m_dtExtents.GetStart();
-
-	// else
-	COleDateTime dtStart(m_dtExtents.GetStart());
-
-	// back up a bit to always show first completion
-	dtStart -= COleDateTimeSpan(7.0);
-
-	SYSTEMTIME st = { 0 };
-	VERIFY(dtStart.GetAsSystemTime(st));
-
-	switch (m_nScale)
+	switch (m_nChartType)
 	{
-	case BCS_DAY:
-	case BCS_WEEK:
-		// make sure we start at the beginning of a week
-		dtStart.m_dt -= st.wDayOfWeek;
-		return dtStart;
-		
-	case BCS_MONTH:
-		st.wDay = 1; // start of month;
-		break;
-		
-	case BCS_2MONTH:
-		st.wDay = 1; // start of month;
-		st.wMonth = (WORD)(st.wMonth - ((st.wMonth - 1) % 2)); // previous even month
-		break;
+	case BCT_INCOMPLETETASKS:
+		return CIncompleteDaysGraph::GetGraphStartDate(m_dtExtents, m_nScale);
 
-	case BCS_QUARTER:
-		st.wDay = 1; // start of month;
-		st.wMonth = (WORD)(st.wMonth - ((st.wMonth - 1) % 3)); // previous quarter
-		break;
-		
-	case BCS_HALFYEAR:
-		st.wDay = 1; // start of month;
-		st.wMonth = (WORD)(st.wMonth - ((st.wMonth - 1) % 6)); // previous half-year
-		break;
-		
-	case BCS_YEAR:
-		st.wDay = 1; // start of month;
-		st.wMonth = 1; // start of year
-		break;
-
-	default:
-		ASSERT(0);
+	case BCT_REMAININGDAYS:
+		return CRemainingDaysGraph::GetGraphStartDate(m_dtExtents, m_nScale);
 	}
 
-	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
+	ASSERT(0);
+	return m_dtExtents.GetStart();
 }
 
 COleDateTime CBurndownChart::GetGraphEndDate() const
 {
-	if (m_nChartType == BCT_REMAININGDAYS)
-		return m_dtExtents.GetEnd();
-
-	COleDateTime dtEnd = (m_dtExtents.GetEnd() + COleDateTimeSpan(7.0));
-
-	// avoid unnecessary call to GetAsSystemTime()
-	if (m_nScale == BCS_DAY)
-		return dtEnd;
-
-	SYSTEMTIME st = { 0 };
-	VERIFY(dtEnd.GetAsSystemTime(st));
-
-	switch (m_nScale)
+	switch (m_nChartType)
 	{
-	case BCS_DAY:
-		ASSERT(0); // handled above
-		break;
-		
-	case BCS_WEEK:
-		break;
-		
-	case BCS_MONTH:
-		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
-		break;
-		
-	case BCS_2MONTH:
-		CDateHelper::IncrementMonth(st, ((st.wMonth - 1) % 2)); // next even month
-		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
-		break;
+	case BCT_INCOMPLETETASKS:
+		return CIncompleteDaysGraph::GetGraphEndDate(m_dtExtents, m_nScale);
 
-	case BCS_QUARTER:
-		CDateHelper::IncrementMonth(st, ((st.wMonth - 1) % 3)); // next quarter
-		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
-		break;
-		
-	case BCS_HALFYEAR:
-		CDateHelper::IncrementMonth(st, ((st.wMonth - 1) % 6)); // next half-year
-		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
-		break;
-		
-	case BCS_YEAR:
-		st.wDay = 31;
-		st.wMonth = 12;
-		break;
-
-	default:
-		ASSERT(0);
+	case BCT_REMAININGDAYS:
+		return CRemainingDaysGraph::GetGraphEndDate(m_dtExtents, m_nScale);
 	}
 
-	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
+	ASSERT(0);
+	return m_dtExtents.GetStart();
 }
 
 void CBurndownChart::OnSize(UINT nType, int cx, int cy) 
@@ -437,11 +226,11 @@ void CBurndownChart::RebuildGraph(BOOL bUpdateExtents)
 	switch (STATSDISPLAY[m_nChartType].nDisplay)
 	{
 	case BCT_INCOMPLETETASKS:
-		BuildBurndownGraph();
+		CIncompleteDaysGraph::BuildGraph(m_dtExtents, m_nScale, m_data, *this);
 		break;
 		
 	case BCT_REMAININGDAYS:
-		BuildSprintGraph();
+		CRemainingDaysGraph::BuildGraph(m_dtExtents, m_nScale, m_data, *this);
 		break;
 	}
 }
@@ -458,40 +247,23 @@ void CBurndownChart::PreSubclassWindow()
 
 int CBurndownChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	int nHit = HitTest(point);
+	CString sTooltip;
 
-	if (nHit != -1)
+	switch (m_nChartType)
 	{
-		double dDate = (GetGraphStartDate().m_dt + nHit);
-
-		CEnString sTooltip;
-
-		switch (m_nChartType)
-		{
 		case BCT_INCOMPLETETASKS:
-			{
-				double dNumTasks;
-				VERIFY(m_dataset[0].GetData(nHit, dNumTasks));
-
-				sTooltip.Format(IDS_TOOLTIP_INCOMPLETE, CDateHelper::FormatDate(dDate), (int)dNumTasks);
-			}
+			sTooltip = CIncompleteDaysGraph::GetTooltip(*this, m_dtExtents, m_nScale, HitTest(point));
 			break;
 
 		case BCT_REMAININGDAYS:
-			{
-				double dNumEst, dNumSpent;
-				VERIFY(m_dataset[SPRINT_SPENT].GetData(nHit, dNumSpent));
-				VERIFY(m_dataset[SPRINT_EST].GetData(nHit, dNumEst));
-
-				sTooltip.Format(IDS_TOOLTIP_REMAINING, CDateHelper::FormatDate(dDate), (int)dNumEst, (int)dNumSpent);
-			}
+			sTooltip = CRemainingDaysGraph::GetTooltip(*this, m_dtExtents, m_nScale, HitTest(point));
 			break;
-		}
-
-		if (!sTooltip.IsEmpty())
-			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
 	}
 
+	if (!sTooltip.IsEmpty())
+		return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
+
+	// else
 	return CHMXChartEx::OnToolHitTest(point, pTI);
 }
 

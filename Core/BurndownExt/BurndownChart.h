@@ -23,7 +23,7 @@ protected:
 
 	COleDateTimeRange m_dtExtents;
 	BURNDOWN_CHARTTYPE m_nChartType;
-	int m_nScale;
+	BURNDOWN_CHARTSCALE m_nScale;
 
 protected:
 	void OnSize(UINT nType, int cx, int cy);
@@ -33,8 +33,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void BuildSprintGraph();
-	void BuildBurndownGraph();
 	void RebuildXScale();
 	COleDateTime GetGraphStartDate() const;
 	COleDateTime GetGraphEndDate() const;
@@ -42,8 +40,4 @@ protected:
 	int HitTest(const CPoint& ptClient) const;
 
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-
 

@@ -1,0 +1,294 @@
+// BurndownChart.cpp : implementation file
+//
+
+#include "stdafx.h"
+#include "resource.h"
+#include "BurndownGraphs.h"
+#include "BurndownChart.h"
+#include "BurndownStatic.h"
+
+#include "..\shared\datehelper.h"
+#include "..\shared\holdredraw.h"
+#include "..\shared\enstring.h"
+#include "..\shared\graphicsmisc.h"
+
+////////////////////////////////////////////////////////////////////////////////
+
+const COLORREF COLOR_GREEN		= RGB(122, 204,   0); 
+const COLORREF COLOR_GREENLINE	= GraphicsMisc::Darker(COLOR_GREEN, 0.05, FALSE);
+const COLORREF COLOR_GREENFILL	= GraphicsMisc::Lighter(COLOR_GREEN, 0.25, FALSE);
+
+const COLORREF COLOR_RED		= RGB(204,   0,   0); 
+const COLORREF COLOR_REDLINE	= GraphicsMisc::Darker(COLOR_RED, 0.05, FALSE);
+const COLORREF COLOR_REDFILL	= GraphicsMisc::Lighter(COLOR_RED, 0.25, FALSE);
+
+const COLORREF COLOR_YELLOW		= RGB(204, 164,   0); 
+const COLORREF COLOR_YELLOWLINE	= GraphicsMisc::Darker(COLOR_YELLOW, 0.05, FALSE);
+const COLORREF COLOR_YELLOWFILL	= GraphicsMisc::Lighter(COLOR_YELLOW, 0.25, FALSE);
+
+const COLORREF COLOR_BLUE		= RGB(0,     0, 244); 
+const COLORREF COLOR_BLUELINE	= GraphicsMisc::Darker(COLOR_BLUE, 0.05, FALSE);
+const COLORREF COLOR_BLUEFILL	= GraphicsMisc::Lighter(COLOR_BLUE, 0.25, FALSE);
+
+const COLORREF COLOR_PINK		= RGB(234,  28,  74); 
+const COLORREF COLOR_PINKLINE	= GraphicsMisc::Darker(COLOR_PINK, 0.05, FALSE);
+const COLORREF COLOR_PINKFILL	= GraphicsMisc::Lighter(COLOR_PINK, 0.25, FALSE);
+
+const COLORREF COLOR_ORANGE		= RGB(255,  91,  21);
+const COLORREF COLOR_ORANGELINE	= GraphicsMisc::Darker(COLOR_ORANGE, 0.05, FALSE);
+const COLORREF COLOR_ORANGEFILL	= GraphicsMisc::Lighter(COLOR_ORANGE, 0.25, FALSE);
+
+const int    LINE_THICKNESS			= 1;
+
+/////////////////////////////////////////////////////////////////////////////
+
+void CIncompleteDaysGraph::BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CBurndownChart& chart)
+{
+	chart.ClearData();
+		
+	chart.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
+	chart.SetDatasetLineColor(0, COLOR_GREENLINE);
+	chart.SetDatasetFillColor(0, COLOR_GREENFILL);
+	chart.SetDatasetSizeFactor(0, LINE_THICKNESS);
+	chart.SetDatasetMin(0, 0.0);
+
+	// build the graph
+	COleDateTime dtStart = GetGraphStartDate(dtExtents, nScale);
+	COleDateTime dtEnd = GetGraphEndDate(dtExtents, nScale);
+	
+	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
+	int nItemFrom = 0;
+	
+	for (int nDay = 0; nDay <= nNumDays; nDay++)
+	{
+		COleDateTime date(dtStart.m_dt + nDay);
+		
+		if (dtExtents.GetStart() > date)
+		{
+			chart.AddData(0, 0);
+		}
+		else
+		{
+			int nNumNotDone = data.CalculateIncompleteTaskCount(date, nItemFrom, nItemFrom);
+			chart.AddData(0, nNumNotDone);
+		}
+	}
+
+	// Set the maximum Y value to be something 'nice'
+	double dMin, dMax;
+
+	if (chart.GetMinMax(dMin, dMax, true))
+	{
+		ASSERT(dMin == 0.0);
+
+		dMax = chart.CalcMaxYAxisValue(dMax, 10);
+		chart.SetDatasetMax(0, dMax);
+	}
+	
+	chart.CalcDatas();
+}
+
+COleDateTime CIncompleteDaysGraph::GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale)
+{
+	COleDateTime dtStart(dtExtents.GetStart());
+
+	// back up a bit to always show first completion
+	dtStart -= COleDateTimeSpan(7.0);
+
+	SYSTEMTIME st = { 0 };
+	VERIFY(dtStart.GetAsSystemTime(st));
+
+	switch (nScale)
+	{
+	case BCS_DAY:
+	case BCS_WEEK:
+		// make sure we start at the beginning of a week
+		dtStart.m_dt -= st.wDayOfWeek;
+		return dtStart;
+
+	case BCS_MONTH:
+		st.wDay = 1; // start of month;
+		break;
+
+	case BCS_2MONTH:
+		st.wDay = 1; // start of month;
+		st.wMonth = (WORD)(st.wMonth - ((st.wMonth - 1) % 2)); // previous even month
+		break;
+
+	case BCS_QUARTER:
+		st.wDay = 1; // start of month;
+		st.wMonth = (WORD)(st.wMonth - ((st.wMonth - 1) % 3)); // previous quarter
+		break;
+
+	case BCS_HALFYEAR:
+		st.wDay = 1; // start of month;
+		st.wMonth = (WORD)(st.wMonth - ((st.wMonth - 1) % 6)); // previous half-year
+		break;
+
+	case BCS_YEAR:
+		st.wDay = 1; // start of month;
+		st.wMonth = 1; // start of year
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
+}
+
+COleDateTime CIncompleteDaysGraph::GetGraphEndDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale)
+{
+	COleDateTime dtEnd = (dtExtents.GetEnd() + COleDateTimeSpan(7.0));
+
+	// avoid unnecessary call to GetAsSystemTime()
+	if (nScale == BCS_DAY)
+		return dtEnd;
+
+	SYSTEMTIME st = { 0 };
+	VERIFY(dtEnd.GetAsSystemTime(st));
+
+	switch (nScale)
+	{
+	case BCS_DAY:
+		ASSERT(0); // handled above
+		break;
+
+	case BCS_WEEK:
+		break;
+
+	case BCS_MONTH:
+		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
+		break;
+
+	case BCS_2MONTH:
+		CDateHelper::IncrementMonth(st, ((st.wMonth - 1) % 2)); // next even month
+		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
+		break;
+
+	case BCS_QUARTER:
+		CDateHelper::IncrementMonth(st, ((st.wMonth - 1) % 3)); // next quarter
+		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
+		break;
+
+	case BCS_HALFYEAR:
+		CDateHelper::IncrementMonth(st, ((st.wMonth - 1) % 6)); // next half-year
+		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
+		break;
+
+	case BCS_YEAR:
+		st.wDay = 31;
+		st.wMonth = 12;
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
+}
+
+CString CIncompleteDaysGraph::GetTooltip(const CBurndownChart& chart, const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit)
+{
+	CEnString sTooltip;
+
+	if (nHit != -1)
+	{
+		double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit), dNumTasks;
+		VERIFY(chart.GetData(0, nHit, dNumTasks));
+
+		sTooltip.Format(IDS_TOOLTIP_INCOMPLETE, CDateHelper::FormatDate(dDate), (int)dNumTasks);
+	}
+
+	return sTooltip;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+enum
+{
+	REMAINING_ESTIMATE,
+	REMAINING_SPENT
+};
+
+void CRemainingDaysGraph::BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CBurndownChart& chart)
+{
+	chart.ClearData();
+
+	chart.SetDatasetStyle(REMAINING_ESTIMATE, HMX_DATASET_STYLE_AREALINE);
+	chart.SetDatasetLineColor(REMAINING_ESTIMATE,  COLOR_BLUELINE);
+	chart.SetDatasetFillColor(REMAINING_ESTIMATE,  COLOR_BLUEFILL);
+	chart.SetDatasetSizeFactor(REMAINING_ESTIMATE, LINE_THICKNESS);
+	chart.SetDatasetMin(REMAINING_ESTIMATE, 0.0);
+	
+	chart.SetDatasetStyle(REMAINING_SPENT, HMX_DATASET_STYLE_AREALINE);
+	chart.SetDatasetLineColor(REMAINING_SPENT, COLOR_YELLOWLINE);
+	chart.SetDatasetFillColor(REMAINING_SPENT, COLOR_YELLOWFILL);
+	chart.SetDatasetSizeFactor(REMAINING_SPENT, LINE_THICKNESS);
+	chart.SetDatasetMin(REMAINING_SPENT, 0.0);
+	
+	// build the graph
+	COleDateTime dtStart = GetGraphStartDate(dtExtents, nScale);
+	COleDateTime dtEnd = GetGraphEndDate(dtExtents, nScale);
+	
+	double dTotalEst = data.CalcTotalTimeEstimateInDays();
+	
+	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
+	
+	for (int nDay = 0; nDay <= nNumDays; nDay++)
+	{
+		// Time Estimate
+		double dEst = ((nDay * dTotalEst) / nNumDays);
+		chart.AddData(REMAINING_ESTIMATE, (dTotalEst - dEst));
+		
+		// Time Spent
+		COleDateTime date(dtStart.m_dt + nDay);
+		double dSpent = data.CalcTimeSpentInDays(date);
+		
+		chart.AddData(REMAINING_SPENT, (dTotalEst - dSpent));
+	}
+	
+	// Set the maximum Y value to be something 'nice'
+	double dMin, dMax;
+
+	if (chart.GetMinMax(dMin, dMax, true))
+	{
+		ASSERT(dMin == 0.0);
+
+		dMax = chart.CalcMaxYAxisValue(dMax, 10);
+		chart.SetDatasetMax(REMAINING_ESTIMATE, dMax);
+		chart.SetDatasetMax(REMAINING_SPENT, dMax);
+	}
+	
+	chart.CalcDatas();
+}
+
+COleDateTime CRemainingDaysGraph::GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE /*nScale*/)
+{
+	return dtExtents.GetStart();
+}
+
+COleDateTime CRemainingDaysGraph::GetGraphEndDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE /*nScale*/)
+{
+	return dtExtents.GetEnd();
+}
+
+CString CRemainingDaysGraph::GetTooltip(const CBurndownChart& chart, const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit)
+{
+	CEnString sTooltip;
+
+	if (nHit != -1)
+	{
+		double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit), dNumEst, dNumSpent;
+		VERIFY(chart.GetData(REMAINING_ESTIMATE, nHit, dNumSpent));
+		VERIFY(chart.GetData(REMAINING_SPENT, nHit, dNumEst));
+
+		sTooltip.Format(IDS_TOOLTIP_REMAINING, CDateHelper::FormatDate(dDate), (int)dNumEst, (int)dNumSpent);
+	}
+
+	return sTooltip;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+
