@@ -510,12 +510,20 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	m_ctrlGantt.UpdateTasks(pTasks, nUpdate);
 
 	GANTTDATERANGE dtDataRange;
-	VERIFY(m_ctrlGantt.GetDataDateRange(dtDataRange));
+
+	if (!m_ctrlGantt.GetDataDateRange(dtDataRange))
+	{
+		ASSERT(!m_ctrlGantt.GetTaskCount());
+
+		m_sliderDateRange.EnableWindow(FALSE);
+		return;
+	}
 
 	GTLC_MONTH_DISPLAY nDisplay = m_ctrlGantt.GetMonthDisplay();
 
 	m_sliderDateRange.SetMonthDisplay(nDisplay);
 	m_sliderDateRange.SetMaxRange(dtDataRange);
+	m_sliderDateRange.EnableWindow(TRUE);
 
 	if (m_dtPrevActiveRange.IsValid())
 	{
@@ -905,8 +913,13 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 		{
 			m_sliderDateRange.SetMonthDisplay(nDisplay);
 			m_sliderDateRange.SetMaxRange(dtRange);
+			m_sliderDateRange.EnableWindow(TRUE);
 
 			UpdateActiveRangeLabel();
+		}
+		else
+		{
+			m_sliderDateRange.EnableWindow(FALSE);
 		}
 
 		return TRUE;
