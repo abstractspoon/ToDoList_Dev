@@ -42,7 +42,7 @@ const int    LINE_THICKNESS			= 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CIncompleteDaysGraph::BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CHMXDataset datasets[HMX_MAX_DATASET])
+void CIncompleteDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	datasets[0].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[0].SetLineColor(COLOR_GREENLINE);
@@ -55,32 +55,36 @@ void CIncompleteDaysGraph::BuildGraph(const COleDateTimeRange& dtExtents, BURNDO
 	COleDateTime dtEnd = GetGraphEndDate(dtExtents, nScale);
 	
 	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
-	int nItemFrom = 0;
+
+	if (nNumDays)
+	{
+		int nItemFrom = 0;
 	
-	for (int nDay = 0; nDay <= nNumDays; nDay++)
-	{
-		COleDateTime date(dtStart.m_dt + nDay);
+		for (int nDay = 0; nDay <= nNumDays; nDay++)
+		{
+			COleDateTime date(dtStart.m_dt + nDay);
 		
-		if (dtExtents.GetStart() > date)
-		{
-			datasets[0].AddData(0);
+			if (dtExtents.GetStart() > date)
+			{
+				datasets[0].AddData(0);
+			}
+			else
+			{
+				int nNumNotDone = calculator.GetIncompleteTaskCount(date, nItemFrom, nItemFrom);
+				datasets[0].AddData(nNumNotDone);
+			}
 		}
-		else
+
+		// Set the maximum Y value to be something 'nice'
+		double dMin, dMax;
+
+		if (HMXUtils::GetMinMax(datasets, 1, dMin, dMax, true))
 		{
-			int nNumNotDone = data.CalculateIncompleteTaskCount(date, nItemFrom, nItemFrom);
-			datasets[0].AddData(nNumNotDone);
+			ASSERT(dMin == 0.0);
+
+			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
+			datasets[0].SetMax(dMax);
 		}
-	}
-
-	// Set the maximum Y value to be something 'nice'
-	double dMin, dMax;
-
-	if (HMXUtils::GetMinMax(datasets, 1, dMin, dMax, true))
-	{
-		ASSERT(dMin == 0.0);
-
-		dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
-		datasets[0].SetMax(dMax);
 	}
 }
 
@@ -205,7 +209,7 @@ enum
 	REMAINING_SPENT
 };
 
-void CRemainingDaysGraph::BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CHMXDataset datasets[HMX_MAX_DATASET])
+void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	datasets[REMAINING_ESTIMATE].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[REMAINING_ESTIMATE].SetLineColor(COLOR_BLUELINE);
@@ -223,34 +227,37 @@ void CRemainingDaysGraph::BuildGraph(const COleDateTimeRange& dtExtents, BURNDOW
 	COleDateTime dtStart = GetGraphStartDate(dtExtents, nScale);
 	COleDateTime dtEnd = GetGraphEndDate(dtExtents, nScale);
 	
-	double dTotalEst = data.CalcTotalTimeEstimateInDays();
+	double dTotalEst = calculator.GetTotalTimeEstimateInDays();
 	
 	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
 	
-	for (int nDay = 0; nDay <= nNumDays; nDay++)
+	if (nNumDays > 0)
 	{
-		// Time Estimate
-		double dEst = ((nDay * dTotalEst) / nNumDays);
-		datasets[REMAINING_ESTIMATE].AddData(dTotalEst - dEst);
+		for (int nDay = 0; nDay <= nNumDays; nDay++)
+		{
+			// Time Estimate
+			double dEst = ((nDay * dTotalEst) / nNumDays);
+			datasets[REMAINING_ESTIMATE].AddData(dTotalEst - dEst);
 		
-		// Time Spent
-		COleDateTime date(dtStart.m_dt + nDay);
-		double dSpent = data.CalcTimeSpentInDays(date);
+			// Time Spent
+			COleDateTime date(dtStart.m_dt + nDay);
+			double dSpent = calculator.GetTimeSpentInDays(date);
 		
-		datasets[REMAINING_SPENT].AddData(dTotalEst - dSpent);
-	}
+			datasets[REMAINING_SPENT].AddData(dTotalEst - dSpent);
+		}
 	
-	// Set the maximum Y value to be something 'nice'
-	double dMin, dMax;
+		// Set the maximum Y value to be something 'nice'
+		double dMin, dMax;
 
-	if (HMXUtils::GetMinMax(datasets, 2, dMin, dMax, true))
-	{
-		ASSERT(dMin == 0.0);
+		if (HMXUtils::GetMinMax(datasets, 2, dMin, dMax, true))
+		{
+			ASSERT(dMin == 0.0);
 
-		dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
+			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
 
-		datasets[REMAINING_ESTIMATE].SetMax(dMax);
-		datasets[REMAINING_SPENT].SetMax(dMax);
+			datasets[REMAINING_ESTIMATE].SetMax(dMax);
+			datasets[REMAINING_SPENT].SetMax(dMax);
+		}
 	}
 }
 
@@ -269,11 +276,13 @@ CString CRemainingDaysGraph::GetTooltip(const CHMXDataset datasets[HMX_MAX_DATAS
 	ASSERT(nHit != -1);
 
 	double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit), dNumEst, dNumSpent;
-	VERIFY(datasets[REMAINING_ESTIMATE].GetData(nHit, dNumSpent));
-	VERIFY(datasets[REMAINING_SPENT].GetData(nHit, dNumEst));
-
 	CString sTooltip;
-	sTooltip.Format(CEnString(IDS_TOOLTIP_REMAINING), CDateHelper::FormatDate(dDate), (int)dNumEst, (int)dNumSpent);
+
+	if (datasets[REMAINING_SPENT].GetData(nHit, dNumSpent) &&
+		datasets[REMAINING_ESTIMATE].GetData(nHit, dNumEst))
+	{
+		sTooltip.Format(CEnString(IDS_TOOLTIP_REMAINING), CDateHelper::FormatDate(dDate), (int)dNumEst, (int)dNumSpent);
+	}
 
 	return sTooltip;
 }

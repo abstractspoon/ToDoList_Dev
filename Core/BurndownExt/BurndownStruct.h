@@ -34,18 +34,6 @@ struct STATSITEM
 	BOOL IsDone() const;
 	
 	void MinMax(COleDateTimeRange& dtExtents) const;
-
-	// Totals
-	double CalcTimeEstimateInDays() const;
-	double CalcTimeSpentInDays() const;
-	double CalcCostEstimate() const;
-	double CalcCostSpent() const;
-
-	// Proportions
-	double CalcTimeEstimateInDays(const COleDateTime& date) const;
-	double CalcTimeSpentInDays(const COleDateTime& date) const;
-	double CalcCostEstimate(const COleDateTime& date) const;
-	double CalcCostSpent(const COleDateTime& date) const;
 	
 	COleDateTime dtStart, dtDone; 
 	double dTimeEst, dTimeSpent;
@@ -56,10 +44,7 @@ struct STATSITEM
 
 protected:
 	static void MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents);
-	static double CalcTimeInDays(double dTime, TDC_UNITS nUnits);
-	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
 
-	double CalcProportionAtDate(double dDays, const COleDateTime& date) const;
 
 };
 
@@ -83,20 +68,6 @@ public:
 	void Sort();
 	BOOL IsSorted() const;
 
-	double CalcTimeSpentInDays(const COleDateTime& date) const;
-	double CalcTimeEstimateInDays(const COleDateTime& date) const;
-	double CalcTotalTimeEstimateInDays() const;
-	double CalcTotalTimeSpentInDays() const;
-
-	double CalcCostSpent(const COleDateTime& date) const;
-	double CalcCostEstimate(const COleDateTime& date) const;
-	double CalcTotalCostEstimate() const;
-	double CalcTotalCostSpent() const;
-
-	int CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
-
-	void GetDataExtents(COleDateTimeRange& dtExtents) const;
-
 	STATSITEM* operator[](int nIndex) const;
 
 protected:
@@ -106,6 +77,48 @@ protected:
 	int FindItem(DWORD dwTaskID) const;
 
 	static int CompareItems(const void* pV1, const void* pV2);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CStatsItemCalculator
+{
+public:
+	CStatsItemCalculator(const CStatsItemArray& aItems);
+	virtual ~CStatsItemCalculator();
+
+	void GetDataExtents(COleDateTimeRange& dtExtents) const;
+	int GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
+	
+	// Totals
+	double GetTotalTimeEstimateInDays() const;
+	double GetTotalTimeSpentInDays() const;
+	double GetTotalCostEstimate() const;
+	double GetTotalCostSpent() const;
+
+	// Proportions
+	double GetTimeSpentInDays(const COleDateTime& date) const;
+	double GetTimeEstimateInDays(const COleDateTime& date) const;
+	double GetCostSpent(const COleDateTime& date) const;
+	double GetCostEstimate(const COleDateTime& date) const;
+
+protected:
+	const CStatsItemArray& m_aItems;
+
+protected:
+	double CalcProportionOfValue(const STATSITEM& si, double dValue, const COleDateTime& date) const;
+
+	enum ATTRIB { TIME, COST };
+	enum ATTRIBTYPE { ESTIMATE, SPENT };
+
+	double GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nType) const;
+	double GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nType, const COleDateTime& date) const;
+
+	double GetAttribValue(const STATSITEM& si, ATTRIB nAttrib, ATTRIBTYPE nType) const;
+	double GetAttribValue(const STATSITEM& si, ATTRIB nAttrib, ATTRIBTYPE nType, const COleDateTime& date) const;
+
+	static double GetTimeInDays(double dTime, TDC_UNITS nUnits);
+	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
 };
 
 #endif // !defined(AFX_BURNDOWNSTRUCT_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_)

@@ -20,6 +20,7 @@ public:
 
 protected:
 	const CStatsItemArray& m_data;
+	CStatsItemCalculator m_calculator;
 
 	COleDateTimeRange m_dtExtents;
 	BURNDOWN_CHARTTYPE m_nChartType;

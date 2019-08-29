@@ -113,74 +113,36 @@ double STATSITEM::CalcCostEstimate() const
 	return 0.0;
 }
 
-double STATSITEM::CalcCostSpent() const
+BOOL STATSITEM::HasStart() const
 {
-	// TODO
-	return 0.0;
+	return CDateHelper::IsDateSet(dtStart);
 }
 
-double STATSITEM::CalcProportionAtDate(double dDays, const COleDateTime& date) const
+BOOL STATSITEM::IsDone() const
 {
-	// Ignore tasks with no time spent
-	if (dDays == 0.0)
-		return 0.0;
-
-	BOOL bHasStart = HasStart();
-	double dProportion = 0.0;
-
-	if (IsDone())
-	{
-		if (date >= dtDone)
-		{
-			dProportion = 1.0;
-		}
-		else if (bHasStart && (date > dtStart))
-		{
-			dProportion = (date.m_dt - dtStart.m_dt) / (dtDone.m_dt - dtStart.m_dt);
-		}
-	}
-	else if (bHasStart && (date > dtStart))
-	{
-		COleDateTime dtNow(COleDateTime::GetCurrentTime());
-		dProportion = (date.m_dt - dtStart.m_dt) / (dtNow.m_dt - dtStart.m_dt);
-	}
-
-	dProportion = max(0.0, min(dProportion, 1.0));
-	
-	return (dDays * dProportion);
+	return CDateHelper::IsDateSet(dtDone);
 }
 
-double STATSITEM::CalcTimeInDays(double dTime, TDC_UNITS nUnits)
+void STATSITEM::MinMax(COleDateTimeRange& dtExtents) const
 {
-	switch (nUnits)
-	{
-	case TDCU_WEEKDAYS:
-	case TDCU_DAYS:
-		return dTime;
-	}
-
-	// all the rest
-	TH_UNITS nTHUnits = MapUnitsToTHUnits(nUnits);
-	return CTimeHelper().GetTime(dTime, nTHUnits, THU_WEEKDAYS);
+	MinMax(dtStart, dtExtents);
+	MinMax(dtDone, dtExtents);
 }
 
-TH_UNITS STATSITEM::MapUnitsToTHUnits(TDC_UNITS nUnits)
+void STATSITEM::MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents)
 {
-	switch (nUnits)
+	if (CDateHelper::IsDateSet(date))
 	{
-	case TDCU_NULL:		return THU_NULL;
-	case TDCU_MINS:		return THU_MINS;
-	case TDCU_HOURS:	return THU_HOURS;
-	case TDCU_DAYS:		return THU_DAYS;
-	case TDCU_WEEKDAYS:	return THU_WEEKDAYS;
-	case TDCU_WEEKS:	return THU_WEEKS;
-	case TDCU_MONTHS:	return THU_MONTHS;
-	case TDCU_YEARS:	return THU_YEARS;
+		if (CDateHelper::IsDateSet(dtExtents.m_dtStart))
+			dtExtents.m_dtStart = min(dtExtents.m_dtStart, date);
+		else
+			dtExtents.m_dtStart = date;
+		
+		if (CDateHelper::IsDateSet(dtExtents.m_dtEnd))
+			dtExtents.m_dtEnd = max(dtExtents.m_dtEnd, date);
+		else
+			dtExtents.m_dtEnd = date;
 	}
-
-	// all else
-	ASSERT(0);
-	return THU_NULL;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -367,143 +329,29 @@ int CStatsItemArray::CompareItems(const void* pV1, const void* pV2)
 	return 0;
 }
 
-double CStatsItemArray::CalcTimeSpentInDays(const COleDateTime& date) const
-{
-	int nNumItems = GetSize();
-	double dDays = 0;
-	
-	for (int nItem = 0; nItem < nNumItems; nItem++)
-	{
-		const STATSITEM* pSI = GetAt(nItem);
-		
-		// We can stop as soon as we pass a task's start date
-		if (pSI->HasStart() && (pSI->dtStart >= date))
-			break;
+///////////////////////////////////////////////////////////////////////////
 
-		dDays += pSI->CalcTimeSpentInDays(date);
-	}
-	
-	return dDays;
+CStatsItemCalculator::CStatsItemCalculator(const CStatsItemArray& aItems)
+	:
+	m_aItems(aItems)
+{
 }
 
-double CStatsItemArray::CalcTimeEstimateInDays(const COleDateTime& date) const
+CStatsItemCalculator::~CStatsItemCalculator()
 {
-	int nNumItems = GetSize();
-	double dDays = 0;
-	
-	for (int nItem = 0; nItem < nNumItems; nItem++)
-	{
-		const STATSITEM* pSI = GetAt(nItem);
-		
-		// We can stop as soon as we pass a task's start date
-		if (pSI->HasStart() && (pSI->dtStart >= date))
-			break;
 
-		dDays += pSI->CalcTimeEstimateInDays(date);
-	}
-	
-	return dDays;
 }
 
-double CStatsItemArray::CalcTotalTimeEstimateInDays() const
+void CStatsItemCalculator::GetDataExtents(COleDateTimeRange& dtExtents) const
 {
-	double dDays = 0;
-	int nItem = GetSize();
-	
-	while (nItem--)
-	{
-		dDays += GetAt(nItem)->CalcTimeEstimateInDays();
-	}
-	
-	return dDays;
-}
+	int nItem = m_aItems.GetSize();
 
-double CStatsItemArray::CalcTotalTimeSpentInDays() const
-{
-	double dDays = 0;
-	int nItem = GetSize();
-
-	while (nItem--)
-	{
-		dDays += GetAt(nItem)->CalcTimeSpentInDays();
-	}
-
-	return dDays;
-}
-
-double CStatsItemArray::CalcCostSpent(const COleDateTime& date) const
-{
-	int nNumItems = GetSize();
-	double dDays = 0;
-	
-	for (int nItem = 0; nItem < nNumItems; nItem++)
-	{
-		const STATSITEM* pSI = GetAt(nItem);
-		
-		// We can stop as soon as we pass a task's start date
-		if (pSI->HasStart() && (pSI->dtStart >= date))
-			break;
-
-		dDays += pSI->CalcCostSpent(date);
-	}
-	
-	return dDays;
-}
-
-double CStatsItemArray::CalcCostEstimate(const COleDateTime& date) const
-{
-	int nNumItems = GetSize();
-	double dDays = 0;
-	
-	for (int nItem = 0; nItem < nNumItems; nItem++)
-	{
-		const STATSITEM* pSI = GetAt(nItem);
-		
-		// We can stop as soon as we pass a task's start date
-		if (pSI->HasStart() && (pSI->dtStart >= date))
-			break;
-
-		dDays += pSI->CalcCostEstimate(date);
-	}
-	
-	return dDays;
-}
-
-double CStatsItemArray::CalcTotalCostEstimate() const
-{
-	double dDays = 0;
-	int nItem = GetSize();
-	
-	while (nItem--)
-	{
-		dDays += GetAt(nItem)->CalcCostEstimate();
-	}
-	
-	return dDays;
-}
-
-double CStatsItemArray::CalcTotalCostSpent() const
-{
-	double dDays = 0;
-	int nItem = GetSize();
-
-	while (nItem--)
-	{
-		dDays += GetAt(nItem)->CalcCostSpent();
-	}
-
-	return dDays;
-}
-
-void CStatsItemArray::GetDataExtents(COleDateTimeRange& dtExtents) const
-{
-	if (GetSize())
+	if (nItem > 0)
 	{
 		dtExtents.Reset();
-		int nItem = GetSize();
 		
 		while (nItem--)
-			GetAt(nItem)->MinMax(dtExtents);
+			m_aItems[nItem]->MinMax(dtExtents);
 	}
 	else
 	{
@@ -511,15 +359,15 @@ void CStatsItemArray::GetDataExtents(COleDateTimeRange& dtExtents) const
 	}
 }
 
-int CStatsItemArray::CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const
+int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const
 {
-	int nNumItems = GetSize();
+	int nNumItems = m_aItems.GetSize();
 	int nNumNotDone = 0;
 	int nEarliestNotDone = -1, nLatestDone = -1;
 	
 	for (int nItem = nItemFrom; nItem < nNumItems; nItem++)
 	{
-		const STATSITEM* pSI = GetAt(nItem);
+		const STATSITEM* pSI = m_aItems[nItem];
 		
 		if (pSI->dtStart > date)
 			break;
@@ -535,7 +383,7 @@ int CStatsItemArray::CalculateIncompleteTaskCount(const COleDateTime& date, int 
 		{
 			nLatestDone = nItem;
 		}
-		else if (pSI->dtDone > GetAt(nLatestDone)->dtDone)
+		else if (pSI->dtDone > m_aItems[nLatestDone]->dtDone)
 		{
 			nLatestDone = nItem;
 		}
@@ -550,5 +398,183 @@ int CStatsItemArray::CalculateIncompleteTaskCount(const COleDateTime& date, int 
 		nNextItemFrom = nEarliestNotDone;
 	
 	return nNumNotDone;
+}
+
+double CStatsItemCalculator::GetTimeEstimateInDays(const COleDateTime& date) const
+{
+	return GetTotalAttribValue(TIME, ESTIMATE, date);
+}
+
+double CStatsItemCalculator::GetTimeSpentInDays(const COleDateTime& date) const
+{
+	return GetTotalAttribValue(TIME, SPENT, date);
+}
+
+double CStatsItemCalculator::GetTotalTimeEstimateInDays() const
+{
+	return GetTotalAttribValue(TIME, ESTIMATE);
+}
+
+double CStatsItemCalculator::GetTotalTimeSpentInDays() const
+{
+	return GetTotalAttribValue(TIME, SPENT);
+}
+
+double CStatsItemCalculator::GetCostSpent(const COleDateTime& date) const
+{
+	return GetTotalAttribValue(COST, SPENT, date);
+}
+
+double CStatsItemCalculator::GetCostEstimate(const COleDateTime& date) const
+{
+	return GetTotalAttribValue(COST, ESTIMATE, date);
+}
+
+double CStatsItemCalculator::GetTotalCostEstimate() const
+{
+	return GetTotalAttribValue(COST, ESTIMATE);
+}
+
+double CStatsItemCalculator::GetTotalCostSpent() const
+{
+	return GetTotalAttribValue(COST, SPENT);
+}
+
+double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nType) const
+{
+	double dTotal = 0;
+	int nItem = m_aItems.GetSize();
+
+	while (nItem--)
+	{
+		const STATSITEM* pSI = m_aItems[nItem];
+
+		dTotal += GetAttribValue(*pSI, nAttrib, nType);
+	}
+
+	return dTotal;
+}
+
+double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nType, const COleDateTime& date) const
+{
+	double dTotal = 0;
+	int nItem = m_aItems.GetSize();
+
+	while (nItem--)
+	{
+		const STATSITEM* pSI = m_aItems[nItem];
+
+		dTotal += GetAttribValue(*pSI, nAttrib, nType, date);
+	}
+
+	return dTotal;
+}
+
+double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib, ATTRIBTYPE nType) const
+{
+	switch (nAttrib)
+	{
+	case TIME:
+		{
+			switch (nType)
+			{
+			case ESTIMATE:
+				return GetTimeInDays(si.dTimeEst, si.nTimeEstUnits);
+
+			case SPENT:
+				return GetTimeInDays(si.dTimeSpent, si.nTimeSpentUnits);
+			}
+		}
+		break;
+
+
+	case COST:
+		{
+			switch (nType)
+			{
+			case ESTIMATE:
+				return (si.bCostIsRate ? (si.dTimeEst * si.dCost) : si.dCost);
+
+			case SPENT:
+				return (si.bCostIsRate ? (si.dTimeSpent * si.dCost) : si.dCost);
+			}
+		}
+		break;
+	}
+
+	// all else
+	ASSERT(0);
+	return 0.0;
+}
+
+double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib, ATTRIBTYPE nType, const COleDateTime& date) const
+{
+	double dValue = GetAttribValue(si, nAttrib, nType);
+
+	return CalcProportionOfValue(si, dValue, date);
+}
+
+double CStatsItemCalculator::CalcProportionOfValue(const STATSITEM& si, double dDays, const COleDateTime& date) const
+{
+	// Ignore tasks with no time spent
+	if (dDays == 0.0)
+		return 0.0;
+
+	BOOL bHasStart = si.HasStart();
+	double dProportion = 0.0;
+
+	if (si.IsDone())
+	{
+		if (date >= si.dtDone)
+		{
+			dProportion = 1.0;
+		}
+		else if (bHasStart && (date > si.dtStart))
+		{
+			dProportion = (date.m_dt - si.dtStart.m_dt) / (si.dtDone.m_dt - si.dtStart.m_dt);
+		}
+	}
+	else if (bHasStart && (date > si.dtStart))
+	{
+		COleDateTime dtNow(COleDateTime::GetCurrentTime());
+		dProportion = (date.m_dt - si.dtStart.m_dt) / (dtNow.m_dt - si.dtStart.m_dt);
+	}
+
+	dProportion = max(0.0, min(dProportion, 1.0));
+
+	return (dDays * dProportion);
+}
+
+double CStatsItemCalculator::GetTimeInDays(double dTime, TDC_UNITS nUnits)
+{
+	switch (nUnits)
+	{
+	case TDCU_WEEKDAYS:
+	case TDCU_DAYS:
+		return dTime;
+	}
+
+	// all the rest
+	TH_UNITS nTHUnits = MapUnitsToTHUnits(nUnits);
+	return CTimeHelper().GetTime(dTime, nTHUnits, THU_WEEKDAYS);
+}
+
+TH_UNITS CStatsItemCalculator::MapUnitsToTHUnits(TDC_UNITS nUnits)
+{
+	switch (nUnits)
+	{
+	case TDCU_NULL:		return THU_NULL;
+	case TDCU_MINS:		return THU_MINS;
+	case TDCU_HOURS:	return THU_HOURS;
+	case TDCU_DAYS:		return THU_DAYS;
+	case TDCU_WEEKDAYS:	return THU_WEEKDAYS;
+	case TDCU_WEEKS:	return THU_WEEKS;
+	case TDCU_MONTHS:	return THU_MONTHS;
+	case TDCU_YEARS:	return THU_YEARS;
+	}
+
+	// all else
+	ASSERT(0);
+	return THU_NULL;
 }
 

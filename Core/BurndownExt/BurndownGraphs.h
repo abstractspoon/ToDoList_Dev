@@ -7,14 +7,14 @@
 /////////////////////////////////////////////////////////////////////////////
 
 class COleDateTimeRange;
-class CStatsItemArray;
+class CStatsItemCalculator;
 
 /////////////////////////////////////////////////////////////////////////////
 
 class CIncompleteDaysGraph
 {
 public:
-	static void BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CHMXDataset datasets[HMX_MAX_DATASET]);
+	static void BuildGraph(const CStatsItemCalculator& calculator, const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, CHMXDataset datasets[HMX_MAX_DATASET]);
 	static CString GetTooltip(const CHMXDataset datasets[HMX_MAX_DATASET], const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit);
 
 	static COleDateTime GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale);
@@ -26,7 +26,7 @@ public:
 class CRemainingDaysGraph
 {
 public:
-	static void BuildGraph(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, const CStatsItemArray& data, CHMXDataset datasets[HMX_MAX_DATASET]);
+	static void BuildGraph(const CStatsItemCalculator& calculator, const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, CHMXDataset datasets[HMX_MAX_DATASET]);
 	static CString GetTooltip(const CHMXDataset datasets[HMX_MAX_DATASET], const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit);
 
 	static COleDateTime GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale);

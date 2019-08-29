@@ -35,7 +35,8 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	: 
 	m_data(data),
 	m_nScale(BCS_DAY),
-	m_nChartType(BCT_INCOMPLETETASKS)
+	m_nChartType(BCT_INCOMPLETETASKS),
+	m_calculator(data)
 {
 }
 
@@ -215,7 +216,7 @@ void CBurndownChart::RebuildGraph(BOOL bUpdateExtents)
 	CHoldRedraw hr(*this);
 	
 	if (bUpdateExtents || (m_dtExtents.GetDayCount() == 0))
-		m_data.GetDataExtents(m_dtExtents);
+		m_calculator.GetDataExtents(m_dtExtents);
 	
 	ClearData();
 	SetYText(CEnString(STATSDISPLAY[m_nChartType].nYAxisID));
@@ -226,11 +227,11 @@ void CBurndownChart::RebuildGraph(BOOL bUpdateExtents)
 	switch (STATSDISPLAY[m_nChartType].nDisplay)
 	{
 	case BCT_INCOMPLETETASKS:
-		CIncompleteDaysGraph::BuildGraph(m_dtExtents, m_nScale, m_data, m_dataset);
+		CIncompleteDaysGraph::BuildGraph(m_calculator, m_dtExtents, m_nScale, m_dataset);
 		break;
 		
 	case BCT_REMAININGDAYS:
-		CRemainingDaysGraph::BuildGraph(m_dtExtents, m_nScale, m_data, m_dataset);
+		CRemainingDaysGraph::BuildGraph(m_calculator, m_dtExtents, m_nScale, m_dataset);
 		break;
 	}
 
