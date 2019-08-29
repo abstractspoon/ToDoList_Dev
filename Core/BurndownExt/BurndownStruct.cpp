@@ -427,9 +427,23 @@ int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int n
 	return nNumNotDone;
 }
 
+// ----------------------------------------------------
+
+double CStatsItemCalculator::GetTotalTimeEstimateInDays() const
+{
+	return GetTotalAttribValue(TIME, ESTIMATE);
+}
+
 double CStatsItemCalculator::GetTimeEstimateInDays(const COleDateTime& date) const
 {
 	return GetTotalAttribValue(TIME, ESTIMATE, date);
+}
+
+// ----------------------------------------------------
+
+double CStatsItemCalculator::GetTotalTimeSpentInDays() const
+{
+	return GetTotalAttribValue(TIME, SPENT);
 }
 
 double CStatsItemCalculator::GetTimeSpentInDays(const COleDateTime& date) const
@@ -437,19 +451,11 @@ double CStatsItemCalculator::GetTimeSpentInDays(const COleDateTime& date) const
 	return GetTotalAttribValue(TIME, SPENT, date);
 }
 
-double CStatsItemCalculator::GetTotalTimeEstimateInDays() const
-{
-	return GetTotalAttribValue(TIME, ESTIMATE);
-}
+// ----------------------------------------------------
 
-double CStatsItemCalculator::GetTotalTimeSpentInDays() const
+double CStatsItemCalculator::GetTotalCostEstimate() const
 {
-	return GetTotalAttribValue(TIME, SPENT);
-}
-
-double CStatsItemCalculator::GetCostSpent(const COleDateTime& date) const
-{
-	return GetTotalAttribValue(COST, SPENT, date);
+	return GetTotalAttribValue(COST, ESTIMATE);
 }
 
 double CStatsItemCalculator::GetCostEstimate(const COleDateTime& date) const
@@ -457,15 +463,19 @@ double CStatsItemCalculator::GetCostEstimate(const COleDateTime& date) const
 	return GetTotalAttribValue(COST, ESTIMATE, date);
 }
 
-double CStatsItemCalculator::GetTotalCostEstimate() const
-{
-	return GetTotalAttribValue(COST, ESTIMATE);
-}
+// ----------------------------------------------------
 
 double CStatsItemCalculator::GetTotalCostSpent() const
 {
 	return GetTotalAttribValue(COST, SPENT);
 }
+
+double CStatsItemCalculator::GetCostSpent(const COleDateTime& date) const
+{
+	return GetTotalAttribValue(COST, SPENT, date);
+}
+
+// ----------------------------------------------------
 
 double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nType) const
 {
@@ -541,10 +551,10 @@ double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib,
 	return CalcProportionOfValue(si, dValue, date);
 }
 
-double CStatsItemCalculator::CalcProportionOfValue(const STATSITEM& si, double dDays, const COleDateTime& date) const
+double CStatsItemCalculator::CalcProportionOfValue(const STATSITEM& si, double dValue, const COleDateTime& date) const
 {
 	// Ignore tasks with no time spent
-	if (dDays == 0.0)
+	if (dValue == 0.0)
 		return 0.0;
 
 	BOOL bHasStart = si.HasStart();
@@ -569,7 +579,7 @@ double CStatsItemCalculator::CalcProportionOfValue(const STATSITEM& si, double d
 
 	dProportion = max(0.0, min(dProportion, 1.0));
 
-	return (dDays * dProportion);
+	return (dValue * dProportion);
 }
 
 double CStatsItemCalculator::GetTimeInDays(double dTime, TDC_UNITS nUnits)
