@@ -281,7 +281,7 @@ bool CBurndownWnd::SelectTask(DWORD /*dwTaskID*/)
 	
 	// because we can't change the selection
 	// in this plugin we don't care what it's set to
-	return true;
+	return false;
 }
 
 bool CBurndownWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
@@ -290,7 +290,7 @@ bool CBurndownWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
 	
 	// because we can't change the selection
 	// in this plugin we don't care what it's set to
-	return true;
+	return false;
 }
 
 bool CBurndownWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
@@ -304,6 +304,7 @@ bool CBurndownWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 	case TDCA_CREATIONDATE:
 	case TDCA_TIMEEST:
 	case TDCA_TIMESPENT:
+	case TDCA_COST:
 		return true;
 	}
 
@@ -325,16 +326,7 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 			STATSITEM* pSI = m_data.AddItem(pTasks->GetTaskID(hTask));
 
 			if (pSI) // means it's new
-			{
-				pSI->dtStart = GetTaskStartDate(pTasks, hTask);
-				pSI->dtDone = GetTaskDoneDate(pTasks, hTask);
-				pSI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pSI->nTimeEstUnits, false);
-				pSI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pSI->nTimeSpentUnits, false);
-
-				// make sure start is less than done
-				if (pSI->IsDone() && pSI->HasStart())
-					pSI->dtStart = min(pSI->dtStart, pSI->dtDone);
-			}
+				pSI->Set(pTasks, hTask);
 		}
 		else // Process children
 		{
@@ -426,23 +418,7 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 		
 		if (pSI)
 		{
-			if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
-				pSI->dtDone = GetTaskDoneDate(pTasks, hTask);
-
-			if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
-			{
-				pSI->dtStart = GetTaskStartDate(pTasks, hTask);
-				
-				// make sure start is less than done
-				if (pSI->IsDone() && pSI->HasStart())
-					pSI->dtStart = min(pSI->dtStart, pSI->dtDone);
-			}
-
-			if (pTasks->IsAttributeAvailable(TDCA_TIMEEST))
-				pSI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pSI->nTimeEstUnits, false);
-
-			if (pTasks->IsAttributeAvailable(TDCA_TIMESPENT))
-				pSI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pSI->nTimeSpentUnits, false);
+			pSI->Update(pTasks, hTask);
 		}
 		else
 		{
@@ -466,36 +442,6 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
-}
-
-COleDateTime CBurndownWnd::GetTaskStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
-{
-	time64_t tDate = 0;
-	COleDateTime dtStart;
-
-	if (pTasks->GetTaskStartDate64(hTask, FALSE, tDate))
-		dtStart = GetTaskDate(tDate);
-	
-	if (!CDateHelper::IsDateSet(dtStart) && pTasks->GetTaskCreationDate64(hTask, tDate))
-		dtStart = GetTaskDate(tDate);
-	
-	return dtStart;
-}
-
-COleDateTime CBurndownWnd::GetTaskDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
-{
-	time64_t tDate = 0;
-	COleDateTime dtDone;
-	
-	if (pTasks->GetTaskDoneDate64(hTask, tDate))
-		dtDone = GetTaskDate(tDate);
-
-	return dtDone;
-}
-
-COleDateTime CBurndownWnd::GetTaskDate(time64_t tDate)
-{
-	return (tDate > 0) ? CDateHelper::GetDate(tDate) : COleDateTime();
 }
 
 BOOL CBurndownWnd::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)

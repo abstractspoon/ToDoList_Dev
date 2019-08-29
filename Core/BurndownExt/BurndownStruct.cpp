@@ -43,74 +43,101 @@ STATSITEM::~STATSITEM()
 {
 }
 
-BOOL STATSITEM::HasStart() const
+void STATSITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
-	return CDateHelper::IsDateSet(dtStart);
+	// Sanity Checks
+	ASSERT(!pTasks->IsTaskReference(hTask));
+	ASSERT(!pTasks->IsTaskParent(hTask));
+
+	dtDone = GetDoneDate(pTasks, hTask);
+	dtStart = GetStartDate(pTasks, hTask);
+
+	// make sure start is less than done
+	if (IsDone() && HasStart())
+		dtStart = min(dtStart, dtDone);
+
+	dTimeEst = pTasks->GetTaskTimeEstimate(hTask, nTimeEstUnits, false);
+	dTimeSpent = pTasks->GetTaskTimeSpent(hTask, nTimeSpentUnits, false);
+	dCost = GetCost(pTasks, hTask, bCostIsRate);
 }
 
-BOOL STATSITEM::IsDone() const
+void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
-	return CDateHelper::IsDateSet(dtDone);
-}
+	// Sanity Checks
+	ASSERT(!pTasks->IsTaskReference(hTask));
+	ASSERT(!pTasks->IsTaskParent(hTask));
 
-void STATSITEM::MinMax(COleDateTimeRange& dtExtents) const
-{
-	MinMax(dtStart, dtExtents);
-	MinMax(dtDone, dtExtents);
-}
+	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
+		dtDone = GetDoneDate(pTasks, hTask);
 
-void STATSITEM::MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents)
-{
-	if (CDateHelper::IsDateSet(date))
+	if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
 	{
-		if (CDateHelper::IsDateSet(dtExtents.m_dtStart))
-			dtExtents.m_dtStart = min(dtExtents.m_dtStart, date);
-		else
-			dtExtents.m_dtStart = date;
-		
-		if (CDateHelper::IsDateSet(dtExtents.m_dtEnd))
-			dtExtents.m_dtEnd = max(dtExtents.m_dtEnd, date);
-		else
-			dtExtents.m_dtEnd = date;
+		dtStart = GetStartDate(pTasks, hTask);
+
+		// make sure start is less than done
+		if (IsDone() && HasStart())
+			dtStart = min(dtStart, dtDone);
 	}
+
+	if (pTasks->IsAttributeAvailable(TDCA_TIMEEST))
+		dTimeEst = pTasks->GetTaskTimeEstimate(hTask, nTimeEstUnits, false);
+
+	if (pTasks->IsAttributeAvailable(TDCA_TIMESPENT))
+		dTimeSpent = pTasks->GetTaskTimeSpent(hTask, nTimeSpentUnits, false);
+
+	if (pTasks->IsAttributeAvailable(TDCA_COST))
+		dCost = GetCost(pTasks, hTask, bCostIsRate);
 }
 
-double STATSITEM::CalcTimeSpentInDays() const
+double STATSITEM::GetCost(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL& bIsRate)
 {
-	return CalcTimeInDays(dTimeSpent, nTimeSpentUnits);
+	LPCTSTR szCost = pTasks->GetTaskAttribute(hTask, TDCA_COST, false);
+
+	if (Misc::IsEmpty(szCost))
+	{
+		bIsRate = FALSE;
+		return 0.0;
+	}
+
+	if (szCost[0] == '@')
+	{
+		bIsRate = TRUE;
+		return _tcstod((szCost + 1), NULL);
+	}
+
+	// else
+	bIsRate = FALSE;
+	return _tcstod(szCost, NULL);
 }
 
-double STATSITEM::CalcTimeSpentInDays(const COleDateTime& date) const
+COleDateTime STATSITEM::GetStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
-	return CalcProportionAtDate(CalcTimeSpentInDays(), date);
+	time64_t tDate = 0;
+	COleDateTime date;
+
+	if (pTasks->GetTaskStartDate64(hTask, FALSE, tDate))
+		date = GetDate(tDate);
+
+	if (!CDateHelper::IsDateSet(date) && pTasks->GetTaskCreationDate64(hTask, tDate))
+		date = GetDate(tDate);
+
+	return date;
 }
 
-double STATSITEM::CalcTimeEstimateInDays() const
+COleDateTime STATSITEM::GetDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
-	return CalcTimeInDays(dTimeEst, nTimeEstUnits);
+	time64_t tDate = 0;
+	COleDateTime date;
+
+	if (pTasks->GetTaskDoneDate64(hTask, tDate))
+		date = GetDate(tDate);
+
+	return date;
 }
 
-double STATSITEM::CalcTimeEstimateInDays(const COleDateTime& date) const
+COleDateTime STATSITEM::GetDate(time64_t tDate)
 {
-	return CalcProportionAtDate(CalcTimeEstimateInDays(), date);
-}
-
-double STATSITEM::CalcCostEstimate(const COleDateTime& date) const
-{
-	// TODO
-	return 0.0;
-}
-
-double STATSITEM::CalcCostSpent(const COleDateTime& date) const
-{
-	// TODO
-	return 0.0;
-}
-
-double STATSITEM::CalcCostEstimate() const
-{
-	// TODO
-	return 0.0;
+	return (tDate > 0) ? CDateHelper::GetDate(tDate) : COleDateTime();
 }
 
 BOOL STATSITEM::HasStart() const

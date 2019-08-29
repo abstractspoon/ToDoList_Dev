@@ -30,6 +30,9 @@ struct STATSITEM
 	STATSITEM();
 	virtual ~STATSITEM();
 
+	void Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
+	void Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
+
 	BOOL HasStart() const;
 	BOOL IsDone() const;
 	
@@ -45,6 +48,10 @@ struct STATSITEM
 protected:
 	static void MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents);
 
+	static double GetCost(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL& bIsRate);
+	static COleDateTime GetStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
+	static COleDateTime GetDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
+	static COleDateTime GetDate(time64_t tDate);
 
 };
 
