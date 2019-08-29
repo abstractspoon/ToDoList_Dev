@@ -35,18 +35,31 @@ struct STATSITEM
 	
 	void MinMax(COleDateTimeRange& dtExtents) const;
 
-	double CalcTimeSpentInDays(const COleDateTime& date) const;
+	// Totals
 	double CalcTimeEstimateInDays() const;
+	double CalcTimeSpentInDays() const;
+	double CalcCostEstimate() const;
+	double CalcCostSpent() const;
+
+	// Proportions
+	double CalcTimeEstimateInDays(const COleDateTime& date) const;
+	double CalcTimeSpentInDays(const COleDateTime& date) const;
+	double CalcCostEstimate(const COleDateTime& date) const;
+	double CalcCostSpent(const COleDateTime& date) const;
 	
 	COleDateTime dtStart, dtDone; 
 	double dTimeEst, dTimeSpent;
 	TDC_UNITS nTimeEstUnits, nTimeSpentUnits;
+	double dCost;
+	BOOL bCostIsRate;
 	DWORD dwTaskID;
 
 protected:
 	static void MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents);
 	static double CalcTimeInDays(double dTime, TDC_UNITS nUnits);
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
+
+	double CalcProportionAtDate(double dDays, const COleDateTime& date) const;
 
 };
 
@@ -71,7 +84,15 @@ public:
 	BOOL IsSorted() const;
 
 	double CalcTimeSpentInDays(const COleDateTime& date) const;
+	double CalcTimeEstimateInDays(const COleDateTime& date) const;
 	double CalcTotalTimeEstimateInDays() const;
+	double CalcTotalTimeSpentInDays() const;
+
+	double CalcCostSpent(const COleDateTime& date) const;
+	double CalcCostEstimate(const COleDateTime& date) const;
+	double CalcTotalCostEstimate() const;
+	double CalcTotalCostSpent() const;
+
 	int CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
 
 	void GetDataExtents(COleDateTimeRange& dtExtents) const;

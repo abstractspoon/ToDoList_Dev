@@ -75,16 +75,57 @@ void STATSITEM::MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents)
 	}
 }
 
+double STATSITEM::CalcTimeSpentInDays() const
+{
+	return CalcTimeInDays(dTimeSpent, nTimeSpentUnits);
+}
+
 double STATSITEM::CalcTimeSpentInDays(const COleDateTime& date) const
 {
+	return CalcProportionAtDate(CalcTimeSpentInDays(), date);
+}
+
+double STATSITEM::CalcTimeEstimateInDays() const
+{
+	return CalcTimeInDays(dTimeEst, nTimeEstUnits);
+}
+
+double STATSITEM::CalcTimeEstimateInDays(const COleDateTime& date) const
+{
+	return CalcProportionAtDate(CalcTimeEstimateInDays(), date);
+}
+
+double STATSITEM::CalcCostEstimate(const COleDateTime& date) const
+{
+	// TODO
+	return 0.0;
+}
+
+double STATSITEM::CalcCostSpent(const COleDateTime& date) const
+{
+	// TODO
+	return 0.0;
+}
+
+double STATSITEM::CalcCostEstimate() const
+{
+	// TODO
+	return 0.0;
+}
+
+double STATSITEM::CalcCostSpent() const
+{
+	// TODO
+	return 0.0;
+}
+
+double STATSITEM::CalcProportionAtDate(double dDays, const COleDateTime& date) const
+{
 	// Ignore tasks with no time spent
-	if (dTimeSpent == 0.0)
+	if (dDays == 0.0)
 		return 0.0;
 
-	double dTimeSpentDays = CalcTimeInDays(dTimeSpent, nTimeSpentUnits);
-
 	BOOL bHasStart = HasStart();
-	double dDays = 0.0;
 	double dProportion = 0.0;
 
 	if (IsDone())
@@ -105,14 +146,8 @@ double STATSITEM::CalcTimeSpentInDays(const COleDateTime& date) const
 	}
 
 	dProportion = max(0.0, min(dProportion, 1.0));
-	dDays += (dTimeSpentDays * dProportion);
 	
-	return dDays;
-}
-
-double STATSITEM::CalcTimeEstimateInDays() const
-{
-	return CalcTimeInDays(dTimeEst, nTimeEstUnits);
+	return (dDays * dProportion);
 }
 
 double STATSITEM::CalcTimeInDays(double dTime, TDC_UNITS nUnits)
@@ -351,6 +386,25 @@ double CStatsItemArray::CalcTimeSpentInDays(const COleDateTime& date) const
 	return dDays;
 }
 
+double CStatsItemArray::CalcTimeEstimateInDays(const COleDateTime& date) const
+{
+	int nNumItems = GetSize();
+	double dDays = 0;
+	
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const STATSITEM* pSI = GetAt(nItem);
+		
+		// We can stop as soon as we pass a task's start date
+		if (pSI->HasStart() && (pSI->dtStart >= date))
+			break;
+
+		dDays += pSI->CalcTimeEstimateInDays(date);
+	}
+	
+	return dDays;
+}
+
 double CStatsItemArray::CalcTotalTimeEstimateInDays() const
 {
 	double dDays = 0;
@@ -361,6 +415,83 @@ double CStatsItemArray::CalcTotalTimeEstimateInDays() const
 		dDays += GetAt(nItem)->CalcTimeEstimateInDays();
 	}
 	
+	return dDays;
+}
+
+double CStatsItemArray::CalcTotalTimeSpentInDays() const
+{
+	double dDays = 0;
+	int nItem = GetSize();
+
+	while (nItem--)
+	{
+		dDays += GetAt(nItem)->CalcTimeSpentInDays();
+	}
+
+	return dDays;
+}
+
+double CStatsItemArray::CalcCostSpent(const COleDateTime& date) const
+{
+	int nNumItems = GetSize();
+	double dDays = 0;
+	
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const STATSITEM* pSI = GetAt(nItem);
+		
+		// We can stop as soon as we pass a task's start date
+		if (pSI->HasStart() && (pSI->dtStart >= date))
+			break;
+
+		dDays += pSI->CalcCostSpent(date);
+	}
+	
+	return dDays;
+}
+
+double CStatsItemArray::CalcCostEstimate(const COleDateTime& date) const
+{
+	int nNumItems = GetSize();
+	double dDays = 0;
+	
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const STATSITEM* pSI = GetAt(nItem);
+		
+		// We can stop as soon as we pass a task's start date
+		if (pSI->HasStart() && (pSI->dtStart >= date))
+			break;
+
+		dDays += pSI->CalcCostEstimate(date);
+	}
+	
+	return dDays;
+}
+
+double CStatsItemArray::CalcTotalCostEstimate() const
+{
+	double dDays = 0;
+	int nItem = GetSize();
+	
+	while (nItem--)
+	{
+		dDays += GetAt(nItem)->CalcCostEstimate();
+	}
+	
+	return dDays;
+}
+
+double CStatsItemArray::CalcTotalCostSpent() const
+{
+	double dDays = 0;
+	int nItem = GetSize();
+
+	while (nItem--)
+	{
+		dDays += GetAt(nItem)->CalcCostSpent();
+	}
+
 	return dDays;
 }
 
