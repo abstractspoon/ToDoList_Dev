@@ -256,6 +256,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TASKLIST_COPYCOLUMNVALUES, OnUpdateTasklistCopyColumnValues)
 	ON_COMMAND(ID_TASKLIST_COPYSELTASKSCOLUMNVALUES, OnTasklistCopySelectedTaskColumnValues)
 	ON_UPDATE_COMMAND_UI(ID_TASKLIST_COPYSELTASKSCOLUMNVALUES, OnUpdateTasklistCopySelectedTaskColumnValues)
+	ON_COMMAND(ID_EDIT_SETPERCENTTOTODAY, OnEditSetPercentToToday)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_SETPERCENTTOTODAY, OnUpdateEditSetPercentToToday)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
@@ -13016,4 +13018,14 @@ void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelect
 
 		pCmdUI->SetText(CEnString(nMenuStrID, sColLabel));
 	}
+}
+
+void CToDoListWnd::OnEditSetPercentToToday() 
+{
+	GetToDoCtrl().SetSelectedTaskPercentDoneToToday();
+}
+
+void CToDoListWnd::OnUpdateEditSetPercentToToday(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(GetToDoCtrl().CanSetSelectedTaskPercentDoneToToday());	
 }

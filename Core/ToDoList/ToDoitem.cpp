@@ -637,6 +637,13 @@ COleDateTime TODOITEM::GetDate(TDC_DATE nDate) const
 	return 0.0;
 }
 
+BOOL TODOITEM::GetStartDueDates(COleDateTimeRange& dtRange) const
+{
+	dtRange.Set(dateStart, dateDue);
+
+	return dtRange.IsValid();
+}
+
 BOOL TODOITEM::GetCustomAttributeValue(const CString& sAttribID, TDCCADATA& data) const
 {
 	if (mapCustomData.Lookup(sAttribID, data) && !data.IsEmpty())

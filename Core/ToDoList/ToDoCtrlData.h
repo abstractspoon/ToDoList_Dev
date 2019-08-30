@@ -101,6 +101,7 @@ public:
 	CString GetTaskTitle(DWORD dwTaskID) const;
 	CString GetTaskIcon(DWORD dwTaskID) const;
 	COleDateTime GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const;
+	BOOL GetTaskStartDueDates(DWORD dwTaskID, COleDateTimeRange& dtRange) const;
 	BOOL TaskHasDate(DWORD dwTaskID, TDC_DATE nDate) const;
 	COLORREF GetTaskColor(DWORD dwTaskID) const; // -1 on no item selected
 	CString GetTaskComments(DWORD dwTaskID) const;

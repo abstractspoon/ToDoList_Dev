@@ -3008,6 +3008,9 @@ BEGIN
             MENUITEM "&Decrement Task % Completion", 
                                                     ID_EDIT_DECTASKPERCENTDONE
 
+            MENUITEM "Adjust Task % Completion to match today's date", 
+                                                    ID_EDIT_SETPERCENTTOTODAY
+
             MENUITEM SEPARATOR
             POPUP "Set Task &Priority"
             BEGIN
@@ -3697,6 +3700,9 @@ BEGIN
 
             MENUITEM "&Decrement Task % Completion", 
                                                     ID_EDIT_DECTASKPERCENTDONE
+
+            MENUITEM "Adjust Task % Completion to match today's date", 
+                                                    ID_EDIT_SETPERCENTTOTODAY
 
             MENUITEM SEPARATOR
             POPUP "Set Task &Priority"

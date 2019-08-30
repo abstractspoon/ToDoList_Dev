@@ -190,6 +190,8 @@ protected:
 	afx_msg void OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI);
 	afx_msg void OnTasklistCopySelectedTaskColumnValues();
 	afx_msg void OnUpdateTasklistCopySelectedTaskColumnValues(CCmdUI* pCmdUI);
+	afx_msg void OnEditSetPercentToToday();
+	afx_msg void OnUpdateEditSetPercentToToday(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg void OnViewShowTimeTracker();
 	afx_msg BOOL OnQueryOpen();

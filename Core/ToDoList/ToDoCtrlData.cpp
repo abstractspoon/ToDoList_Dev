@@ -941,6 +941,14 @@ COleDateTime CToDoCtrlData::GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const
 	return pTDI->GetDate(nDate);
 }
 
+BOOL CToDoCtrlData::GetTaskStartDueDates(DWORD dwTaskID, COleDateTimeRange& dtRange) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, FALSE);
+	
+	return pTDI->GetStartDueDates(dtRange);
+}
+
 BOOL CToDoCtrlData::TaskHasDate(DWORD dwTaskID, TDC_DATE nDate) const
 {
 	return CDateHelper::IsDateSet(GetTaskDate(dwTaskID, nDate));

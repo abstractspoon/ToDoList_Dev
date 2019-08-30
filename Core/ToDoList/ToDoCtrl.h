@@ -270,10 +270,13 @@ public:
 	double CalcSelectedTaskCost() const { return m_taskTree.CalcSelectedTaskCost(); }
 
 	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
+	BOOL CanSetSelectedTaskPercentDoneToToday() const;
+
 	BOOL SetSelectedTaskColor(COLORREF color);
 	BOOL ClearSelectedTaskColor() { return SetSelectedTaskColor(CLR_NONE); }
 	BOOL SetSelectedTaskTitle(const CString& sTitle);
 	BOOL SetSelectedTaskPercentDone(int nPercent);
+	BOOL SetSelectedTaskPercentDoneToToday();
 	BOOL SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst);
 	BOOL SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent);
 	BOOL SetSelectedTaskAllocBy(const CString& sAllocBy);

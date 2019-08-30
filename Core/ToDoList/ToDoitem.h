@@ -122,7 +122,8 @@ public:
 	BOOL IsRecentlyModified() const; // 1 hour default
 	COleDateTimeSpan GetRemainingDueTime() const; // in days
 	COleDateTime GetDate(TDC_DATE nDate) const;
-	
+	BOOL GetStartDueDates(COleDateTimeRange& dtRange) const;
+
 	BOOL HasCustomAttributeValue(const CString& sAttribID) const;
 	BOOL GetCustomAttributeValue(const CString& sAttribID, TDCCADATA& data) const;
 	void SetCustomAttributeValue(const CString& sAttribID, const TDCCADATA& data);
