@@ -1813,12 +1813,17 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 		// percent done
 		if (IsSelectedTaskDone())
+		{
 			m_nPercentDone = 100;
-		
+		}
 		else if (bEditPercent)
+		{
 			m_nPercentDone = GetSelectedTaskPercent();
+		}
 		else
-			m_nPercentDone = m_calculator.GetTaskPercentDone(dwTaskID);		
+		{
+			m_nPercentDone = m_calculator.GetTaskPercentDone(dwTaskID);
+		}
 		
 		// Misc
 		GetSelectedTaskCost(m_cost);
@@ -3839,132 +3844,51 @@ TDC_SET CToDoCtrl::SetTaskDone(DWORD dwTaskID, const COleDateTime& date,
 
 BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent)
 {
-	if (!CanEditSelectedTask(TDCA_PERCENT))
-		return FALSE;
-
-	Flush();
-	
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-		
-	CDWordArray aModTaskIDs;
-	POSITION pos = TSH().GetFirstItemPos();
-	
-	while (pos)
-	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		
-		if (!HandleModResult(dwTaskID, m_data.SetTaskPercent(dwTaskID, nPercent), aModTaskIDs))
-			return FALSE;
-	}
-	
-	if (aModTaskIDs.GetSize())
-	{
-		if (m_nPercentDone != nPercent)
-		{
-			m_nPercentDone = nPercent;
-			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
-		}
-		
-		SetModified(TDCA_PERCENT, aModTaskIDs);
-	}
-	
-	return TRUE;
+	return SetSelectedTaskPercentDone(nPercent, CDateHelper::NullDate());
 }
 
-// BOOL CToDoCtrl::CanSetSelectedTaskPercentDone() const
-// {
-// 	if (!CanEditSelectedTask(TDCA_PERCENT))
-// 		return FALSE;
-// 
-// 	if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
-// 		return FALSE;
-// 
-// 	if (SelectedTasksHaveChildren() && // ie. some are parents
-// 		HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION))
-// 	{
-// 		return FALSE;
-// 	}
-// 
-// 	return TRUE;
-// }
-
-BOOL CToDoCtrl::CanSetSelectedTaskPercentDoneToToday() const
+BOOL CToDoCtrl::CanSetSelectedTaskPercentDone(BOOL bToToday) const
 {
 	if (!CanEditSelectedTask(TDCA_PERCENT))
 		return FALSE;
 
-	if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		return FALSE;
-
-	if (SelectedTasksHaveChildren() && // ie. some are parents
-		HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION))
+	// Extra date processing
+	if (bToToday)
 	{
-		return FALSE;
+		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
+			return FALSE;
+
+		if (SelectedTasksHaveChildren() && // ie. some are parents
+			HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION))
+		{
+			return FALSE;
+		}
 	}
 
 	return TRUE;
+}
+
+BOOL CToDoCtrl::CanSetSelectedTaskPercentDoneToToday() const
+{
+	return CanSetSelectedTaskPercentDone(TRUE);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskPercentDoneToToday()
 {
-	if (!CanSetSelectedTaskPercentDoneToToday())
-		return FALSE;
-
-	Flush();
-
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-
-	CDWordArray aModTaskIDs;
-	POSITION pos = TSH().GetFirstItemPos();
-
-	COleDateTime dtToday(COleDateTime::GetCurrentTime());
-
-	while (pos)
-	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-
-		COleDateTimeRange dtStartDue;
-
-		if (m_data.GetTaskStartDueDates(dwTaskID, dtStartDue))
-		{
-			int nPercent = (int)(dtStartDue.CalcProportion(dtToday) * 100);
-
-	 		if (!HandleModResult(dwTaskID, m_data.SetTaskPercent(dwTaskID, nPercent), aModTaskIDs))
-	 			return FALSE;
-		}
-	}
-
-	if (aModTaskIDs.GetSize())
-	{
-		int nPercent = GetSelectedTaskPercent();
-
-		if (m_nPercentDone != nPercent)
-		{
-			m_nPercentDone = nPercent;
-			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
-		}
-
-		SetModified(TDCA_PERCENT, aModTaskIDs);
-	}
-
-	return TRUE;
-
+	return SetSelectedTaskPercentDone(-1, CDateHelper::GetEndOfDay(COleDateTime::GetCurrentTime()));
 }
 
 // internal helper
-/*
 BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, const COleDateTime& date)
 {
 	// Sanity check
-	ASSERT(((nPercent == -1) && CDateHelper::IsDateSet(date)) ||
-		   ((nPercent >= 0) && !CDateHelper::IsDateSet(date)));
+	BOOL bDateIsvalid = CDateHelper::IsDateSet(date);
 
-	if (!CanEditSelectedTask(TDCA_PERCENT))
+	ASSERT(((nPercent == -1) && bDateIsvalid) ||
+		   ((nPercent >= 0) && !bDateIsvalid));
+
+	if (!CanSetSelectedTaskPercentDone(bDateIsvalid))
 		return FALSE;
-
-	if (nPercent == -1)
-		return CanSetSelectedTaskPercentDoneToToday();
-
 
 	Flush();
 
@@ -3973,28 +3897,32 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, const COleDateTime& dat
 	CDWordArray aModTaskIDs;
 	POSITION pos = TSH().GetFirstItemPos();
 
-	COleDateTime dtToday(COleDateTime::GetCurrentTime());
-
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-
-		COleDateTimeRange dtStartDue;
-
-		if (m_data.GetTaskStartDueDates(dwTaskID, dtStartDue))
+		TDC_SET nRes = SET_FAILED;
+		
+		if (bDateIsvalid)
 		{
-			int nPercent = (int)(dtStartDue.CalcProportion(dtToday) * 100);
+			COleDateTimeRange dtStartDue;
 
-			if (!HandleModResult(dwTaskID, m_data.SetTaskPercent(dwTaskID, nPercent), aModTaskIDs))
-				return FALSE;
+			if (!m_data.GetTaskStartDueDates(dwTaskID, dtStartDue))
+				continue;
+
+			nPercent = (int)(dtStartDue.CalcProportion(date) * 100);
 		}
+
+		if (!HandleModResult(dwTaskID, m_data.SetTaskPercent(dwTaskID, nPercent), aModTaskIDs))
+			return FALSE;
 	}
 
 	if (aModTaskIDs.GetSize())
 	{
 		int nPercent = GetSelectedTaskPercent();
 
-		if (m_nPercentDone != nPercent)
+		// don't update m_nPercentDone for multiple selection
+		// else they all end up as the same value
+		if ((nPercent != -1) && (m_nPercentDone != nPercent))
 		{
 			m_nPercentDone = nPercent;
 			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
@@ -4006,7 +3934,6 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, const COleDateTime& dat
 	return TRUE;
 
 }
-*/
 
 BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost)
 {
@@ -4134,11 +4061,11 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 	
 	if (aModTaskIDs.GetSize())
 	{
+		int nPercent = GetSelectedTaskPercent();
+
 		// don't update m_nPercentDone for multiple selection
 		// else they all end up as the same value
-		int nPercent = m_taskTree.GetSelectedTaskPercent();
-
-		if (nPercent != -1)
+		if ((nPercent != -1) && (m_nPercentDone != nPercent))
 		{
 			m_nPercentDone = nPercent;
 			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);

@@ -381,18 +381,18 @@ CString COleDateTimeRange::Format(DWORD dwFlags, TCHAR cDelim) const
 
 double COleDateTimeRange::CalcProportion(const COleDateTime& date) const
 {
-	COleDateTime dtEnd = GetEndInclusive();
-
 	if (!IsValid())
 		return -1;
 
-	if ((dtEnd == m_dtStart) || (date < m_dtStart))
+	COleDateTime dtEnd = GetEndInclusive();
+
+	if ((dtEnd == m_dtStart) || (date <= m_dtStart))
 		return 0.0;
 
-	if (date > dtEnd)
+	if (date >= dtEnd)
 		return 1.0;
 
-	return (date.m_dt / (dtEnd - m_dtStart));
+	return ((date.m_dt - m_dtStart.m_dt) / (dtEnd.m_dt - m_dtStart.m_dt));
 }
 
 //////////////////////////////////////////////////////////////////////

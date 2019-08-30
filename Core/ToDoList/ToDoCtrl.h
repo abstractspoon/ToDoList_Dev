@@ -778,6 +778,8 @@ protected:
 	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, CDWordSet& mapProcessed);
 	HTREEITEM InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEdit, DWORD dwDependency);
 	int GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
+	BOOL SetSelectedTaskPercentDone(int nPercent, const COleDateTime& date);
+	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 
 	void SaveGlobals(CTaskFile& tasks) const;
 	void LoadGlobals(const CTaskFile& tasks);
