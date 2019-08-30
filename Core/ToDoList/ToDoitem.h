@@ -34,9 +34,11 @@ struct TDCTIMEPERIOD
 {
 	TDCTIMEPERIOD(double dAmount = 0.0, TDC_UNITS nUnits = TDCU_HOURS);
 	TDCTIMEPERIOD(double dAmount, TH_UNITS nUnits);
+	
+	TDCTIMEPERIOD& operator=(const TDCTIMEPERIOD& other);
 
 	BOOL operator==(const TDCTIMEPERIOD& other) const;
-	TDCTIMEPERIOD& operator=(const TDCTIMEPERIOD& other);
+	BOOL operator!=(const TDCTIMEPERIOD& other) const;
 
 	CString Format(int nDecPlaces) const;
 	TH_UNITS GetTHUnits() const;
@@ -61,8 +63,10 @@ struct TDCCOST
 	TDCCOST(LPCTSTR szCost);
 	TDCCOST(double dCost = 0.0, BOOL bCostIsRate = FALSE);
 
-	BOOL operator==(const TDCCOST& other) const;
 	TDCCOST& operator=(const TDCCOST& other);
+
+	BOOL operator==(const TDCCOST& other) const;
+	BOOL operator!=(const TDCCOST& other) const;
 
 	CString Format(int nDecimals = -1) const;
 	BOOL Parse(LPCTSTR szCost);

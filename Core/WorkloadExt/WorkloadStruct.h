@@ -207,7 +207,9 @@ struct WORKLOADSORTCOLUMN
 
 	BOOL Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending);
 	BOOL Matches(WLC_COLUMNID nBy, BOOL bAscending) const;
+
 	BOOL operator==(const WORKLOADSORTCOLUMN& col) const;
+	BOOL operator!=(const WORKLOADSORTCOLUMN& col) const;
 
 	WLC_COLUMNID nBy;
 	CString sAllocTo;
@@ -221,7 +223,9 @@ struct WORKLOADSORTCOLUMNS
 	WORKLOADSORTCOLUMNS();
 
 	BOOL Sort(const WORKLOADSORTCOLUMNS& sort);
-	BOOL operator==(const WORKLOADSORTCOLUMNS& sort) const;
+
+	BOOL operator==(const WORKLOADSORTCOLUMNS& other) const;
+	BOOL operator!=(const WORKLOADSORTCOLUMNS& other) const;
 
 	WORKLOADSORTCOLUMN cols[3];
 };

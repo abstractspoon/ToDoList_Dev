@@ -3957,7 +3957,7 @@ BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost)
 	
 	if (aModTaskIDs.GetSize())
 	{
-		if (!(m_cost == cost))
+		if (m_cost != cost)
 		{
 			m_cost = cost;
 			CTDCDialogHelper().UpdateDataEx(this, IDC_COST, m_cost, FALSE, DECIMALS);
@@ -4110,7 +4110,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst)
 	
 	if (aModTaskIDs.GetSize())
 	{
-		if (!(m_timeEstimate == timeEst))
+		if (m_timeEstimate != timeEst)
 		{
 			// note: setting the time field changes m_timeEstimate.nUnits
 			// so we have to do them separately
@@ -4190,7 +4190,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent)
 	
 	if (aModTaskIDs.GetSize())
 	{
-		if (!(m_timeSpent == timeSpent))
+		if (m_timeSpent != timeSpent)
 		{
 			// note: setting the time field changes m_timeSpent.nUnits
 			// so we have to do them separately

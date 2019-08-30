@@ -914,7 +914,7 @@ void CGanttCtrl::RecalcDateRange()
 							HasOption(GTLCF_CALCMISSINGDUEDATES), 
 							m_dtDataRange);
 
-		if (!(m_dtDataRange == prevRange))
+		if (m_dtDataRange != prevRange)
 		{
 			ValidateMonthDisplay();
 			UpdateListColumns();

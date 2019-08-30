@@ -66,7 +66,9 @@ struct GANTTDATERANGE : protected COleDateTimeRange
 	BOOL Contains(const GANTTDATERANGE& dtRange) const;
 
 	BOOL operator==(const GANTTDATERANGE& dtOther) const;
+	BOOL operator!=(const GANTTDATERANGE& dtOther) const;
 	BOOL operator==(const COleDateTimeRange& dtOther) const;
+	BOOL operator!=(const COleDateTimeRange& dtOther) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -193,7 +195,9 @@ struct GANTTSORTCOLUMN
 
 	BOOL Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
 	BOOL Matches(GTLC_COLUMN nBy, BOOL bAscending) const;
-	BOOL operator==(const GANTTSORTCOLUMN& col) const;
+
+	BOOL operator==(const GANTTSORTCOLUMN& other) const;
+	BOOL operator!=(const GANTTSORTCOLUMN& other) const;
 
 	GTLC_COLUMN nBy;
 	BOOL bAscending;
@@ -206,7 +210,9 @@ struct GANTTSORTCOLUMNS
 	GANTTSORTCOLUMNS();
 
 	BOOL Sort(const GANTTSORTCOLUMNS& sort);
-	BOOL operator==(const GANTTSORTCOLUMNS& sort) const;
+
+	BOOL operator==(const GANTTSORTCOLUMNS& other) const;
+	BOOL operator!=(const GANTTSORTCOLUMNS& other) const;
 
 	GANTTSORTCOLUMN cols[3];
 };

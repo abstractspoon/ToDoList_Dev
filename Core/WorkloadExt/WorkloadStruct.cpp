@@ -818,9 +818,14 @@ BOOL WORKLOADSORTCOLUMN::Matches(WLC_COLUMNID nSortBy, BOOL bSortAscending) cons
 	return ((nBy == nSortBy) && (bAscending == bSortAscending));
 }
 
-BOOL WORKLOADSORTCOLUMN::operator==(const WORKLOADSORTCOLUMN& col) const
+BOOL WORKLOADSORTCOLUMN::operator==(const WORKLOADSORTCOLUMN& other) const
 {
-	return Matches(col.nBy, col.bAscending);
+	return Matches(other.nBy, other.bAscending);
+}
+
+BOOL WORKLOADSORTCOLUMN::operator!=(const WORKLOADSORTCOLUMN& other) const
+{
+	return !(*this == other);
 }
 
 BOOL WORKLOADSORTCOLUMN::Sort(WLC_COLUMNID nSortBy, BOOL bAllowToggle, BOOL bSortAscending)
@@ -884,16 +889,21 @@ BOOL WORKLOADSORTCOLUMNS::Sort(const WORKLOADSORTCOLUMNS& sort)
 	return TRUE;
 }
 
-BOOL WORKLOADSORTCOLUMNS::operator==(const WORKLOADSORTCOLUMNS& sort) const
+BOOL WORKLOADSORTCOLUMNS::operator==(const WORKLOADSORTCOLUMNS& other) const
 {
 	for (int nCol = 0; nCol < 3; nCol++)
 	{
-		if (!(cols[nCol] == sort.cols[nCol]))
+		if (cols[nCol] != other.cols[nCol])
 			return FALSE;
 	}
 
 	// else
 	return TRUE;
+}
+
+BOOL WORKLOADSORTCOLUMNS::operator!=(const WORKLOADSORTCOLUMNS& other) const
+{
+	return !(*this == other);
 }
 
 /////////////////////////////////////////////////////////////////////////////

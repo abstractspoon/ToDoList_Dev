@@ -71,23 +71,28 @@ COleDateTimeRange::COleDateTimeRange(DH_DATE nStart, int nEndOffset, DH_UNITS nO
 	VERIFY(Set(nStart, nEndOffset, nOffsetUnits, bInclusive));
 }
 
-COleDateTimeRange& COleDateTimeRange::operator=(const COleDateTimeRange& range)
+COleDateTimeRange& COleDateTimeRange::operator=(const COleDateTimeRange& other)
 {
-	m_dtStart = range.m_dtStart;
-	m_dtEnd = range.m_dtEnd;
-	m_bInclusive = range.m_bInclusive;
+	m_dtStart = other.m_dtStart;
+	m_dtEnd = other.m_dtEnd;
+	m_bInclusive = other.m_bInclusive;
 
 	return *this;
 }
 
-BOOL COleDateTimeRange::operator==(const COleDateTimeRange& range) const
+BOOL COleDateTimeRange::operator==(const COleDateTimeRange& other) const
 {
-	if (!IsValid() || !range.IsValid())
+	if (!IsValid() || !other.IsValid())
 		return FALSE;
 
-	return ((m_dtStart == range.m_dtStart) && 
-			(m_dtEnd == range.m_dtEnd) && 
-			(m_bInclusive == range.m_bInclusive));
+	return ((m_dtStart == other.m_dtStart) && 
+			(m_dtEnd == other.m_dtEnd) && 
+			(m_bInclusive == other.m_bInclusive));
+}
+
+BOOL COleDateTimeRange::operator!=(const COleDateTimeRange& other) const
+{
+	return !(*this == other);
 }
 
 void COleDateTimeRange::Reset()

@@ -31,8 +31,9 @@ public:
 	COleDateTimeRange(const COleDateTime& dtStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
 	COleDateTimeRange(DH_DATE nStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
 
-	COleDateTimeRange& operator=(const COleDateTimeRange& wi);
-	BOOL operator==(const COleDateTimeRange& wi) const;
+	COleDateTimeRange& operator=(const COleDateTimeRange& other);
+	BOOL operator==(const COleDateTimeRange& other) const;
+	BOOL operator!=(const COleDateTimeRange& other) const;
 
 	void Reset();
 

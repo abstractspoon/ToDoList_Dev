@@ -823,6 +823,11 @@ BOOL GANTTDATERANGE::operator==(const GANTTDATERANGE& dtOther) const
 	return operator==((const COleDateTimeRange&)dtOther);
 }
 
+BOOL GANTTDATERANGE::operator!=(const GANTTDATERANGE& dtOther) const
+{
+	return !(*this == dtOther);
+}
+
 BOOL GANTTDATERANGE::operator==(const COleDateTimeRange& dtOther) const
 {
 	if (!IsValid() || !dtOther.IsValid())
@@ -831,6 +836,11 @@ BOOL GANTTDATERANGE::operator==(const COleDateTimeRange& dtOther) const
 	ASSERT(!m_bInclusive && !dtOther.m_bInclusive); // always
 
 	return ((m_dtStart == dtOther.m_dtStart) && (m_dtEnd == dtOther.m_dtEnd));
+}
+
+BOOL GANTTDATERANGE::operator!=(const COleDateTimeRange& dtOther) const
+{
+	return !(*this == dtOther);
 }
 
 void GANTTDATERANGE::Set(const GANTTDATERANGE& dtOther)
@@ -957,9 +967,14 @@ BOOL GANTTSORTCOLUMN::Matches(GTLC_COLUMN nSortBy, BOOL bSortAscending) const
 	return ((nBy == nSortBy) && (bAscending == bSortAscending));
 }
 
-BOOL GANTTSORTCOLUMN::operator==(const GANTTSORTCOLUMN& col) const
+BOOL GANTTSORTCOLUMN::operator==(const GANTTSORTCOLUMN& other) const
 {
-	return Matches(col.nBy, col.bAscending);
+	return Matches(other.nBy, other.bAscending);
+}
+
+BOOL GANTTSORTCOLUMN::operator!=(const GANTTSORTCOLUMN& other) const
+{
+	return !(*this == other);
 }
 
 BOOL GANTTSORTCOLUMN::Sort(GTLC_COLUMN nSortBy, BOOL bAllowToggle, BOOL bSortAscending)
@@ -1023,16 +1038,21 @@ BOOL GANTTSORTCOLUMNS::Sort(const GANTTSORTCOLUMNS& sort)
 	return TRUE;
 }
 
-BOOL GANTTSORTCOLUMNS::operator==(const GANTTSORTCOLUMNS& sort) const
+BOOL GANTTSORTCOLUMNS::operator==(const GANTTSORTCOLUMNS& other) const
 {
 	for (int nCol = 0; nCol < 3; nCol++)
 	{
-		if (!(cols[nCol] == sort.cols[nCol]))
+		if (cols[nCol] != other.cols[nCol])
 			return FALSE;
 	}
 
 	// else
 	return TRUE;
+}
+
+BOOL GANTTSORTCOLUMNS::operator!=(const GANTTSORTCOLUMNS& other) const
+{
+	return !(*this == other);
 }
 
 /////////////////////////////////////////////////////////////////////////////

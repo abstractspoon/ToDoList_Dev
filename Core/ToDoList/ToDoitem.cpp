@@ -48,6 +48,11 @@ BOOL TDCTIMEPERIOD::operator==(const TDCTIMEPERIOD& other) const
 	return ((dAmount == other.dAmount) && (nUnits == other.nUnits));
 }
 
+BOOL TDCTIMEPERIOD::operator!=(const TDCTIMEPERIOD& other) const
+{
+	return !(*this == other);
+}
+
 TDCTIMEPERIOD& TDCTIMEPERIOD::operator=(const TDCTIMEPERIOD& other)
 {
 	dAmount = other.dAmount;
@@ -143,6 +148,11 @@ TDCCOST::TDCCOST(double dCost, BOOL bCostIsRate) : dAmount(dCost), bIsRate(bCost
 BOOL TDCCOST::operator==(const TDCCOST& other) const
 {
 	return ((dAmount == other.dAmount) && (bIsRate == other.bIsRate));
+}
+
+BOOL TDCCOST::operator!=(const TDCCOST& other) const
+{
+	return !(*this == other);
 }
 
 TDCCOST& TDCCOST::operator=(const TDCCOST& other)
