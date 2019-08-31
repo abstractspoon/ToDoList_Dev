@@ -178,6 +178,14 @@ void CPreferencesTaskDefPage::OnOK()
 	CPreferencesPageBase::OnOK();
 }
 
+BOOL CPreferencesTaskDefPage::PreTranslateMessage(MSG* pMsg)
+{
+	if (m_ctrlComments.ProcessMessage(pMsg))
+		return TRUE;
+
+	return CPreferencesPageBase::PreTranslateMessage(pMsg);
+}
+
 void CPreferencesTaskDefPage::OnSetdefaultcolor() 
 {
 	m_crDef = m_btDefColor.GetColor();

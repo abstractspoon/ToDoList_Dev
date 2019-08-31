@@ -29,7 +29,21 @@ namespace HTMLContentControl
 	[System.ComponentModel.DesignerCategory("")]
     class TDLHtmlEditorControl : HtmlEditorControlEx
     {
-        private Timer m_TextChangeTimer;
+		[DllImport("user32.dll", SetLastError = true)]
+		static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
+
+		[DllImport("User32.dll")]
+		static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
+
+		const int WM_CHAR = 0x0102;
+		const int WM_KEYDOWN = 0x0100;
+		const int WM_SYSKEYDOWN = 0x0104;
+
+		const int VK_RETURN = 0x0D;
+
+		// ---------------------------------------------------------------
+
+		private Timer m_TextChangeTimer;
         private String m_PrevTextChange = "";
 		private Boolean m_SettingContent = false;
 		private String m_CurrentHRef = "";
@@ -210,73 +224,93 @@ namespace HTMLContentControl
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
-            // Handle keyboard shortcuts
-            if ((message == 0x0100) || (message == 0x0104) && (Control.ModifierKeys != Keys.None))
-            {
-                Keys keyPress = (Keys)wParam;
+			switch (message)
+			{
+				case WM_KEYDOWN:
+				case WM_SYSKEYDOWN:
+					// Handle <enter> manually because the default handling
+					// appears to fail when we are hosted in a win32 modal dialog
+					if (wParam == VK_RETURN)
+					{
+						IntPtr hwndFind = FindWindowEx(WebBrowser.Handle, IntPtr.Zero, "Shell Embedding", "");
+						hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Shell DocObject View", "");
+						hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Internet Explorer_Server", "");
 
-                if (keyPress == Keys.ControlKey)
-                    return false;
-                
-                var modifiers = Control.ModifierKeys;
+						if (hwndFind != null)
+							SendMessage(hwndFind, WM_CHAR, VK_RETURN, 0);
 
-                if ((modifiers & Keys.Control) == Keys.Control)
-                    keyPress |= Keys.Control;
-
-                if ((modifiers & Keys.Shift) == Keys.Shift)
-                    keyPress |= Keys.Shift;
-
-                if ((modifiers & Keys.Alt) == Keys.Alt)
-                    keyPress |= Keys.Alt;
-
-				if (CommandHandling.ProcessMenuShortcut(keyPress, ContextMenu.Items))
-					return true;
-
-				// Pick up any stragglers
-				switch (keyPress)
-				{
-					case Keys.Tab:
-						SelectedHtml = "&emsp;";
 						return true;
+					}
+					else if (Control.ModifierKeys != Keys.None)
+					{
+						// Handle keyboard shortcuts
+						Keys keyPress = (Keys)wParam;
 
-					case Keys.Left | Keys.Control:
+						if (keyPress == Keys.ControlKey)
+							return false;
+
+						var modifiers = Control.ModifierKeys;
+
+						if ((modifiers & Keys.Control) == Keys.Control)
+							keyPress |= Keys.Control;
+
+						if ((modifiers & Keys.Shift) == Keys.Shift)
+							keyPress |= Keys.Shift;
+
+						if ((modifiers & Keys.Alt) == Keys.Alt)
+							keyPress |= Keys.Alt;
+
+						if (CommandHandling.ProcessMenuShortcut(keyPress, ContextMenu.Items))
+							return true;
+
+						// Pick up any stragglers
+						switch (keyPress)
 						{
-							var range = GetTextRange();
 
-							if (range != null)
-							{
-								range.move("word", -1);
-								range.collapse();
-								range.select();
-							}
+							case Keys.Tab:
+								SelectedHtml = "&emsp;";
+								return true;
+
+							case Keys.Left | Keys.Control:
+								{
+									var range = GetTextRange();
+
+									if (range != null)
+									{
+										range.move("word", -1);
+										range.collapse();
+										range.select();
+									}
+								}
+								return true;
+
+							case Keys.Right | Keys.Control:
+								{
+									var range = GetTextRange();
+
+									if (range != null)
+									{
+										range.move("word", 1);
+										range.collapse();
+										range.select();
+									}
+								}
+								return true;
+
+							case Keys.Oemcomma | Keys.Control:
+								FormatFontDecrease();
+								return true;
+
+							case Keys.OemPeriod | Keys.Control:
+								FormatFontIncrease();
+								return true;
 						}
-						return true;
-
-					case Keys.Right | Keys.Control:
-						{
-							var range = GetTextRange();
-
-							if (range != null)
-							{
-								range.move("word", 1);
-								range.collapse();
-								range.select();
-							}
-						}
-						return true;
-
-					case Keys.Oemcomma | Keys.Control:
-						FormatFontDecrease();
-						return true;
-
-					case Keys.OemPeriod | Keys.Control:
-						FormatFontIncrease();
-						return true;
-				}
+					}
+					break;
 			}
 
 			return false;
-        }
+		}
 
 		override protected bool IsValidHref(string href)
 		{
