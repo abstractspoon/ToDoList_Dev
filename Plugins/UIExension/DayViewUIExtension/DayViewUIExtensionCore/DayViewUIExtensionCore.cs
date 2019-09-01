@@ -35,7 +35,7 @@ namespace DayViewUIExtension
 		private DayViewYearComboBox m_YearCombo;
         private DayViewPreferencesDlg m_PrefsDlg;
 
-        private ToolStrip m_Toolbar;
+        private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
 		private Label m_SelectedTaskDatesLabel;
@@ -331,7 +331,7 @@ namespace DayViewUIExtension
             m_TBImageList.TransparentColor = Color.Magenta;
             m_TBImageList.Images.AddStrip(images);
             
-			m_Toolbar = new ToolStrip();
+			m_Toolbar = new IIControls.ToolStripEx();
 			m_Toolbar.Anchor = AnchorStyles.None;
 			m_Toolbar.GripStyle = ToolStripGripStyle.Hidden;
             m_Toolbar.ImageList = m_TBImageList;

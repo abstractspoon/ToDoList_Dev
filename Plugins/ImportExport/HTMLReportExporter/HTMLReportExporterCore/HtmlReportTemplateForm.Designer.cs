@@ -33,7 +33,7 @@
 			this.BtnOK = new System.Windows.Forms.Button();
 			this.BtnCancel = new System.Windows.Forms.Button();
 			this.splitContainer = new System.Windows.Forms.SplitContainer();
-			this.Toolbar = new System.Windows.Forms.ToolStrip();
+			this.Toolbar = new IIControls.ToolStripEx();
 			this.toolStripNewReport = new System.Windows.Forms.ToolStripButton();
 			this.toolStripOpenReport = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSaveReport = new System.Windows.Forms.ToolStripButton();
@@ -700,7 +700,7 @@
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.SplitContainer splitContainer;
 		private System.Windows.Forms.Label labelPreview;
-		private System.Windows.Forms.ToolStrip Toolbar;
+		private IIControls.ToolStripEx Toolbar;
 		private System.Windows.Forms.ToolStripButton toolStripNewReport;
 		private System.Windows.Forms.ToolStripButton toolStripOpenReport;
 		private System.Windows.Forms.ToolStripButton toolStripSaveReport;

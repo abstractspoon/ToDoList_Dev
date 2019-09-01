@@ -30,7 +30,7 @@
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HtmlEditorControl));
 			this.browserPanel = new System.Windows.Forms.Panel();
 			this.editorWebBrowser = new WebBrowserEx.WebBrowserEx();
-			this.toolstripEditor = new System.Windows.Forms.ToolStrip();
+			this.toolstripEditor = new IIControls.ToolStripEx();
 			this.toolstripEnableEditing = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator17 = new System.Windows.Forms.ToolStripSeparator();
 			this.toolstripTextCut = new System.Windows.Forms.ToolStripButton();
@@ -1179,7 +1179,7 @@
         #endregion
 
         private System.Windows.Forms.Panel browserPanel;
-        private System.Windows.Forms.ToolStrip toolstripEditor;
+        private IIControls.ToolStripEx toolstripEditor;
         private System.Windows.Forms.ToolStripButton toolstripTextCut;
         private System.Windows.Forms.ToolStripButton toolstripTextCopy;
         private System.Windows.Forms.ToolStripButton toolstripTextPaste;

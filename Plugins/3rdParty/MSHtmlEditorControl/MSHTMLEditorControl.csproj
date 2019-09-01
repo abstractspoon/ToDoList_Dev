@@ -291,6 +291,10 @@
       <Project>{106d75d9-0012-416e-8c25-85124406171d}</Project>
       <Name>RichEditExtensions</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ToolStripEx\ToolStripEx.csproj">
+      <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
+      <Name>ToolStripEx</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WebBrowserEx\WebBrowserEx.csproj">
       <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>
       <Name>WebBrowserEx</Name>
