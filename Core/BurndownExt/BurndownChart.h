@@ -10,19 +10,20 @@
 class CBurndownChart : public CHMXChartEx
 {
 public:
-	CBurndownChart(const CStatsItemArray& data);
+	CBurndownChart(const CStatsItemArray& data, const COleDateTimeRange& dtExtents);
 	virtual ~CBurndownChart();
 
 	BOOL SetChartType(BURNDOWN_CHARTTYPE nType);
 	BOOL SaveToImage(CBitmap& bmImage);
 
-	void RebuildGraph(BOOL bUpdateExtents);
+	void RebuildGraph();
 
 protected:
 	const CStatsItemArray& m_data;
+	const COleDateTimeRange& m_dtExtents;
+
 	CStatsItemCalculator m_calculator;
 
-	COleDateTimeRange m_dtExtents;
 	BURNDOWN_CHARTTYPE m_nChartType;
 	BURNDOWN_CHARTSCALE m_nScale;
 

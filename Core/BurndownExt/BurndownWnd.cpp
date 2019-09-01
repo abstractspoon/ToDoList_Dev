@@ -16,6 +16,7 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\enstring.h"
 #include "..\shared\WorkingWeek.h"
+#include "..\shared\AutoFlag.h"
 
 #include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\GdiPlus.h"
@@ -60,11 +61,16 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	CDialog(IDD_STATISTICS_DLG, pParent),
 	m_nChartType(BCT_REMAININGDAYS),
 	m_dwUpdateGraphOnShow(0),
-	m_graph(m_data)
+	m_dtData(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
+	m_dtActive(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
+	m_graph(m_data, m_dtActive),
+	m_bUpdatingSlider(FALSE),
+	m_sliderDateRange(TBS_BOTTOM)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
 	m_icon.LoadIcon(IDR_STATISTICS);
+	m_sliderDateRange.SetMinimumRange(1.0); // 1 month
 }
 
 CBurndownWnd::~CBurndownWnd()
@@ -79,6 +85,7 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_FRAME, m_stFrame);
 	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplay);
 	//}}AFX_DATA_MAP
+	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
 
 	CDialogHelper::DDX_CBData(pDX, m_cbDisplay, m_nChartType, BCT_REMAININGDAYS);
 }
@@ -94,8 +101,10 @@ BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
 	ON_CBN_SELCHANGE(IDC_DISPLAY, OnSelchangeDisplay)
 	ON_WM_SHOWWINDOW()
 	ON_WM_ERASEBKGND()
-	ON_MESSAGE(WM_REBUILDGRAPH, OnRebuildGraph)
 	ON_WM_NCDESTROY()
+
+	ON_MESSAGE(WM_REBUILDGRAPH, OnRebuildGraph)
+	ON_REGISTERED_MESSAGE(RANGE_CHANGED, OnActiveDateRangeChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -221,6 +230,8 @@ void CBurndownWnd::SetUITheme(const UITHEME* pTheme)
 		// intentionally set background colours to be same as ours
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+		m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
 	}
 }
 
@@ -589,6 +600,12 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 
 		rFrame.DeflateRect(1, 1);
 		m_graph.MoveWindow(rFrame);
+
+		// selected task dates takes available space
+		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
+		rSlider.right = (cx - 10);
+
+		m_sliderDateRange.MoveWindow(rSlider);
 	}
 }
 
@@ -606,7 +623,13 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 	if (bSortData)
 		m_data.Sort();
 
-	m_graph.RebuildGraph(bUpdateExtents);
+	if (bUpdateExtents)
+	{
+		m_data.GetDataExtents(m_dtData);
+		UpdateRangeSlider();
+	}
+
+	m_graph.RebuildGraph();
 }
 
 void CBurndownWnd::OnSelchangeDisplay()
@@ -623,7 +646,6 @@ void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
 	if (bShow && m_dwUpdateGraphOnShow)
 	{
 		ASSERT(m_dwUpdateGraphOnShow & REBUILD_GRAPH);
-//		PostMessage(WM_REBUILDGRAPH);
 		SendMessage(WM_REBUILDGRAPH);
 	}
 }
@@ -642,3 +664,74 @@ LRESULT CBurndownWnd::OnRebuildGraph(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0L;
 }
 
+LRESULT CBurndownWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	if (!m_bUpdatingSlider)
+	{
+		COleDateTime dtActiveStart(CDateHelper::GetDateFromMonths((int)m_sliderDateRange.GetLeft()));
+		COleDateTime dtActiveEnd(CDateHelper::GetDateFromMonths((int)m_sliderDateRange.GetRight()));
+
+		if (m_dtActive.Set(dtActiveStart, dtActiveEnd))
+		{
+			UpdateActiveRangeLabel();
+			m_graph.RebuildGraph();
+		}
+	}
+
+	return 0L;
+}
+
+void CBurndownWnd::UpdateRangeSlider()
+{
+	CAutoFlag af(m_bUpdatingSlider, TRUE);
+
+	if (m_dtData.IsValid())
+	{
+		int nDataStart = CDateHelper::GetDateInMonths(m_dtData.GetStart());
+		int nDataEnd = CDateHelper::GetDateInMonths(m_dtData.GetEnd());
+		nDataEnd = max(nDataEnd, nDataStart + 1);
+
+		m_sliderDateRange.SetMinMax(nDataStart, nDataEnd);
+
+		int nActiveStart = CDateHelper::GetDateInMonths(m_dtActive.GetStart());
+		int nActiveEnd = CDateHelper::GetDateInMonths(m_dtActive.GetEnd());
+
+		nActiveStart = max(nActiveStart, nDataStart);
+		nActiveEnd = min(nActiveEnd, nDataEnd);
+
+		m_sliderDateRange.SetRange(nActiveStart, nActiveEnd);
+		m_sliderDateRange.EnableWindow(TRUE);
+	}
+	else
+	{
+		m_sliderDateRange.SetRange(0.0, 1.0);
+		m_sliderDateRange.EnableWindow(FALSE);
+	}
+
+	m_sliderDateRange.SetStep(1); // 1 month
+}
+
+void CBurndownWnd::UpdateActiveRangeLabel()
+{
+	CString sRange;
+
+	if (m_sliderDateRange.GetLeft() == (m_sliderDateRange.GetRight() - 1))
+	{
+		COleDateTime dtStart = m_dtActive.GetStart();
+		sRange.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
+
+	}
+	else
+	{
+		COleDateTime dtStart = m_dtActive.GetStart();
+		COleDateTime dtEnd = m_dtActive.GetEnd();
+
+		CString sStart, sEnd;
+		sStart.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
+		sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth() - 1, TRUE), dtEnd.GetYear());
+
+		sRange.Format(_T("%s - %s"), sStart, sEnd);
+	}
+
+	GetDlgItem(IDC_ACTIVEDATERANGE_LABEL)->SetWindowText(CEnString(IDS_ACTIVEDATERANGE, sRange));
+}

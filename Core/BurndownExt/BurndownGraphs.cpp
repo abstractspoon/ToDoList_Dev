@@ -90,6 +90,8 @@ void CIncompleteDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, co
 
 COleDateTime CIncompleteDaysGraph::GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale)
 {
+	return dtExtents.GetStart();
+
 	COleDateTime dtStart(dtExtents.GetStart());
 
 	// back up a bit to always show first completion
@@ -139,6 +141,8 @@ COleDateTime CIncompleteDaysGraph::GetGraphStartDate(const COleDateTimeRange& dt
 
 COleDateTime CIncompleteDaysGraph::GetGraphEndDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale)
 {
+	return dtExtents.GetEnd();
+
 	COleDateTime dtEnd = (dtExtents.GetEnd() + COleDateTimeSpan(7.0));
 
 	// avoid unnecessary call to GetAsSystemTime()

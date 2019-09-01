@@ -19,12 +19,15 @@
 #define IDS_TOOLTIP_REMAINING           6008
 #define IDR_TOOLBAR                     16006
 #define IDC_TB_PLACEHOLDER              16024
+#define IDC_ACTIVEDATERANGE_LABEL       16028
+#define IDC_ACTIVEDATERANGE             16034
 #define IDD_BURNDOWN_DLG                17000
 #define IDD_STATISTICS_DLG              17000
 #define IDC_GRAPH                       17002
 #define IDB_TOOLBAR_STD                 17002
 #define IDC_FRAME                       17003
 #define IDC_DIVIDER                     17004
+#define IDS_ACTIVEDATERANGE             57688
 
 // Next default values for new objects
 // 

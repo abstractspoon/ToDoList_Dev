@@ -49,6 +49,7 @@ void STATSITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 	ASSERT(!pTasks->IsTaskReference(hTask));
 	ASSERT(!pTasks->IsTaskParent(hTask));
 
+	dtDue = GetDueDate(pTasks, hTask);
 	dtDone = GetDoneDate(pTasks, hTask);
 	dtStart = GetStartDate(pTasks, hTask);
 
@@ -66,6 +67,9 @@ void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 	// Sanity Checks
 	ASSERT(!pTasks->IsTaskReference(hTask));
 	ASSERT(!pTasks->IsTaskParent(hTask));
+
+	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
+		dtDue = GetDueDate(pTasks, hTask);
 
 	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
 		dtDone = GetDoneDate(pTasks, hTask);
@@ -115,7 +119,7 @@ COleDateTime STATSITEM::GetStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTas
 	time64_t tDate = 0;
 	COleDateTime date;
 
-	if (pTasks->GetTaskStartDate64(hTask, FALSE, tDate))
+	if (pTasks->GetTaskStartDate64(hTask, false, tDate))
 		date = GetDate(tDate);
 
 	if (!CDateHelper::IsDateSet(date) && pTasks->GetTaskCreationDate64(hTask, tDate))
@@ -135,6 +139,17 @@ COleDateTime STATSITEM::GetDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	return date;
 }
 
+COleDateTime STATSITEM::GetDueDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+{
+	time64_t tDate = 0;
+	COleDateTime date;
+
+	if (pTasks->GetTaskDueDate64(hTask, false, tDate))
+		date = GetDate(tDate);
+
+	return date;
+}
+
 COleDateTime STATSITEM::GetDate(time64_t tDate)
 {
 	return (tDate > 0) ? CDateHelper::GetDate(tDate) : COleDateTime();
@@ -145,14 +160,31 @@ BOOL STATSITEM::HasStart() const
 	return CDateHelper::IsDateSet(dtStart);
 }
 
+BOOL STATSITEM::HasDue() const
+{
+	return CDateHelper::IsDateSet(dtDue);
+}
+
 BOOL STATSITEM::IsDone() const
 {
 	return CDateHelper::IsDateSet(dtDone);
 }
 
+COleDateTime STATSITEM::GetEndDate() const
+{
+	if (IsDone())
+		return dtDone;
+
+	if (HasDue())
+		return dtDue;
+
+	return dtStart;
+}
+
 void STATSITEM::MinMax(COleDateTimeRange& dtExtents) const
 {
 	MinMax(dtStart, dtExtents);
+	MinMax(dtDue, dtExtents);
 	MinMax(dtDone, dtExtents);
 }
 
@@ -356,11 +388,29 @@ int CStatsItemArray::CompareItems(const void* pV1, const void* pV2)
 	return 0;
 }
 
+void CStatsItemArray::GetDataExtents(COleDateTimeRange& dtExtents) const
+{
+	int nItem = GetSize();
+
+	if (nItem > 0)
+	{
+		dtExtents.Reset();
+
+		while (nItem--)
+			GetAt(nItem)->MinMax(dtExtents);
+	}
+	else
+	{
+		dtExtents.Set(DHD_NOW, DHD_NOW);
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////
 
-CStatsItemCalculator::CStatsItemCalculator(const CStatsItemArray& aItems)
+CStatsItemCalculator::CStatsItemCalculator(const CStatsItemArray& data, const COleDateTimeRange& dtExtents)
 	:
-	m_aItems(aItems)
+	m_data(data),
+	m_dtExtents(dtExtents)
 {
 }
 
@@ -369,34 +419,24 @@ CStatsItemCalculator::~CStatsItemCalculator()
 
 }
 
-void CStatsItemCalculator::GetDataExtents(COleDateTimeRange& dtExtents) const
-{
-	int nItem = m_aItems.GetSize();
-
-	if (nItem > 0)
-	{
-		dtExtents.Reset();
-		
-		while (nItem--)
-			m_aItems[nItem]->MinMax(dtExtents);
-	}
-	else
-	{
-		dtExtents.Set(DHD_NOW, DHD_NOW);
-	}
-}
-
 int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const
 {
-	int nNumItems = m_aItems.GetSize();
+	// Sanity check
+	if (date < m_dtExtents.GetStart())
+		return 0;
+	
+	int nNumItems = m_data.GetSize();
 	int nNumNotDone = 0;
 	int nEarliestNotDone = -1, nLatestDone = -1;
 	
 	for (int nItem = nItemFrom; nItem < nNumItems; nItem++)
 	{
-		const STATSITEM* pSI = m_aItems[nItem];
+		const STATSITEM* pSI = m_data[nItem];
+
+		if (pSI->dtStart < m_dtExtents.GetStart())
+			continue;
 		
-		if (pSI->dtStart > date)
+		if ((pSI->dtStart > date) || (pSI->dtStart > m_dtExtents.GetEndInclusive()))
 			break;
 		
 		if (!pSI->IsDone() || (pSI->dtDone > date))
@@ -410,7 +450,7 @@ int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int n
 		{
 			nLatestDone = nItem;
 		}
-		else if (pSI->dtDone > m_aItems[nLatestDone]->dtDone)
+		else if (pSI->dtDone > m_data[nLatestDone]->dtDone)
 		{
 			nLatestDone = nItem;
 		}
@@ -480,11 +520,19 @@ double CStatsItemCalculator::GetCostSpent(const COleDateTime& date) const
 double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nType) const
 {
 	double dTotal = 0;
-	int nItem = m_aItems.GetSize();
+	int nNumItems = m_data.GetSize();
 
-	while (nItem--)
+	COleDateTime dtExtentEnd = m_dtExtents.GetEndInclusive();
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
-		const STATSITEM* pSI = m_aItems[nItem];
+		const STATSITEM* pSI = m_data[nItem];
+
+		if (pSI->GetEndDate() < m_dtExtents.GetStart())
+			continue;
+
+		if (pSI->dtStart > dtExtentEnd)
+			break;
 
 		dTotal += GetAttribValue(*pSI, nAttrib, nType);
 	}
@@ -495,11 +543,19 @@ double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nTyp
 double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nType, const COleDateTime& date) const
 {
 	double dTotal = 0;
-	int nItem = m_aItems.GetSize();
+	int nNumItems = m_data.GetSize();
 
-	while (nItem--)
+	COleDateTime dtExtentEnd = m_dtExtents.GetEndInclusive();
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
-		const STATSITEM* pSI = m_aItems[nItem];
+		const STATSITEM* pSI = m_data[nItem];
+
+		if (pSI->GetEndDate() < m_dtExtents.GetStart())
+			continue;
+
+		if (pSI->dtStart > dtExtentEnd)
+			break;
 
 		dTotal += GetAttribValue(*pSI, nAttrib, nType, date);
 	}
@@ -509,6 +565,8 @@ double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nTyp
 
 double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib, ATTRIBTYPE nType) const
 {
+	double dValue = 0.0;
+
 	switch (nAttrib)
 	{
 	case TIME:
@@ -516,10 +574,16 @@ double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib,
 			switch (nType)
 			{
 			case ESTIMATE:
-				return GetTimeInDays(si.dTimeEst, si.nTimeEstUnits);
+				dValue = GetTimeInDays(si.dTimeEst, si.nTimeEstUnits);
+				break;
 
 			case SPENT:
-				return GetTimeInDays(si.dTimeSpent, si.nTimeSpentUnits);
+				dValue = GetTimeInDays(si.dTimeSpent, si.nTimeSpentUnits);
+				break;
+
+			default:
+				ASSERT(0);
+				break;
 			}
 		}
 		break;
@@ -530,18 +594,26 @@ double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib,
 			switch (nType)
 			{
 			case ESTIMATE:
-				return (si.bCostIsRate ? (si.dTimeEst * si.dCost) : si.dCost);
+				dValue = (si.bCostIsRate ? (si.dTimeEst * si.dCost) : si.dCost);
+				break;
 
 			case SPENT:
-				return (si.bCostIsRate ? (si.dTimeSpent * si.dCost) : si.dCost);
+				dValue = (si.bCostIsRate ? (si.dTimeSpent * si.dCost) : si.dCost);
+				break;
+
+			default:
+				ASSERT(0);
+				break;
 			}
 		}
 		break;
+
+	default:
+		ASSERT(0);
+		break;
 	}
 
-	// all else
-	ASSERT(0);
-	return 0.0;
+	return dValue;
 }
 
 double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib, ATTRIBTYPE nType, const COleDateTime& date) const

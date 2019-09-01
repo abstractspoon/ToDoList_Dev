@@ -34,11 +34,14 @@ struct STATSITEM
 	void Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 
 	BOOL HasStart() const;
+	BOOL HasDue() const;
 	BOOL IsDone() const;
+
+	COleDateTime GetEndDate() const;
 	
 	void MinMax(COleDateTimeRange& dtExtents) const;
 	
-	COleDateTime dtStart, dtDone; 
+	COleDateTime dtStart, dtDue, dtDone; 
 	double dTimeEst, dTimeSpent;
 	TDC_UNITS nTimeEstUnits, nTimeSpentUnits;
 	double dCost;
@@ -50,6 +53,7 @@ protected:
 
 	static double GetCost(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL& bIsRate);
 	static COleDateTime GetStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
+	static COleDateTime GetDueDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static COleDateTime GetDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static COleDateTime GetDate(time64_t tDate);
 
@@ -76,6 +80,7 @@ public:
 	BOOL IsSorted() const;
 
 	STATSITEM* operator[](int nIndex) const;
+	void GetDataExtents(COleDateTimeRange& dtExtents) const;
 
 protected:
 	CDWordSet m_setTaskIDs;
@@ -91,10 +96,9 @@ protected:
 class CStatsItemCalculator
 {
 public:
-	CStatsItemCalculator(const CStatsItemArray& aItems);
+	CStatsItemCalculator(const CStatsItemArray& data, const COleDateTimeRange& dtExtents);
 	virtual ~CStatsItemCalculator();
 
-	void GetDataExtents(COleDateTimeRange& dtExtents) const;
 	int GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
 	
 	// Totals
@@ -110,7 +114,8 @@ public:
 	double GetCostEstimate(const COleDateTime& date) const;
 
 protected:
-	const CStatsItemArray& m_aItems;
+	const CStatsItemArray& m_data;
+	const COleDateTimeRange& m_dtExtents;
 
 protected:
 	double CalcProportionOfValue(const STATSITEM& si, double dValue, const COleDateTime& date) const;

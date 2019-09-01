@@ -15,6 +15,7 @@
 #include "..\Shared\mapex.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
+#include "..\Shared\RangeSliderCtrl.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\ITaskList.h"
@@ -72,16 +73,19 @@ protected:
 	CBrush m_brBack;
 	UITHEME m_theme;
 
+	CStatsItemArray m_data;
+	COleDateTimeRange m_dtData, m_dtActive;
+
 	CStatic	m_stFrame;
 	CBurndownChart m_graph;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CComboBox m_cbDisplay;
+	CRangeSliderCtrl m_sliderDateRange;
 
 	DWORD m_dwUpdateGraphOnShow;
 	BURNDOWN_CHARTTYPE m_nChartType;
-
-	CStatsItemArray m_data;
+	BOOL m_bUpdatingSlider;
 
 protected:
 // Overrides
@@ -107,8 +111,10 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnSelchangeDisplay();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-	afx_msg LRESULT OnRebuildGraph(WPARAM wp, LPARAM lp);
 	afx_msg void OnNcDestroy();
+
+	afx_msg LRESULT OnRebuildGraph(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnActiveDateRangeChange(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -117,6 +123,8 @@ protected:
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings, BOOL bCheckExist);
 
 	void RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility);
+	void UpdateRangeSlider();
+	void UpdateActiveRangeLabel();
 
 };
 

@@ -31,12 +31,13 @@ static int NUM_SCALES = sizeof(SCALES) / sizeof(int);
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
 
-CBurndownChart::CBurndownChart(const CStatsItemArray& data) 
+CBurndownChart::CBurndownChart(const CStatsItemArray& data, const COleDateTimeRange& dtExtents)
 	: 
 	m_data(data),
 	m_nScale(BCS_DAY),
 	m_nChartType(BCT_INCOMPLETETASKS),
-	m_calculator(data)
+	m_dtExtents(dtExtents),
+	m_calculator(data, dtExtents)
 {
 }
 
@@ -58,7 +59,7 @@ BOOL CBurndownChart::SetChartType(BURNDOWN_CHARTTYPE nType)
 	if (nType != m_nChartType)
 	{
 		m_nChartType = nType;
-		RebuildGraph(FALSE);
+		RebuildGraph();
 
 		return TRUE;
 	}
@@ -207,16 +208,13 @@ void CBurndownChart::OnSize(UINT nType, int cx, int cy)
 		
 	// handle scale change
 	if (m_nScale != nOldScale)
-		RebuildGraph(FALSE);
+		RebuildGraph();
 }
 
-void CBurndownChart::RebuildGraph(BOOL bUpdateExtents)
+void CBurndownChart::RebuildGraph()
 {
 	CWaitCursor cursor;
 	CHoldRedraw hr(*this);
-	
-	if (bUpdateExtents || (m_dtExtents.GetDayCount() == 0))
-		m_calculator.GetDataExtents(m_dtExtents);
 	
 	ClearData();
 	SetYText(CEnString(STATSDISPLAY[m_nChartType].nYAxisID));
