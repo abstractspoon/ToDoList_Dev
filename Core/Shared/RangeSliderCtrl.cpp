@@ -21,7 +21,8 @@ static char THIS_FILE[] = __FILE__;
 CRangeSliderCtrl::CRangeSliderCtrl(UINT nThumbStyle) 
 	: 
 	m_crParentBkgnd(CLR_NONE), 
-	m_nSliderDrawStyles(nThumbStyle)
+	m_nSliderDrawStyles(nThumbStyle),
+	m_dMinRange(0.0)
 {
 }
 
@@ -41,6 +42,18 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CRangeSliderCtrl message handlers
+
+void CRangeSliderCtrl::SetMinimumRange(double dWidth)
+{
+	ASSERT(dWidth >= 0.0);
+
+	m_dMinRange = max(0.0, dWidth);
+}
+
+BOOL CRangeSliderCtrl::IsValidMove(double dLeft, double dRight) const
+{
+	return ((dRight - dLeft) >= m_dMinRange);
+}
 
 void CRangeSliderCtrl::SetParentBackgroundColor(COLORREF crBkgnd)
 {

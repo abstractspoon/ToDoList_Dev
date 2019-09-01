@@ -21,11 +21,13 @@ public:
 	CRangeSliderCtrl(UINT nThumbStyle = TBS_BOTTOM | TBS_NOTICKS);
 
 	void SetParentBackgroundColor(COLORREF crBkgnd);
+	void SetMinimumRange(double dWidth);
 
 protected:
 	CHotTracker m_hotTrack;
 	COLORREF m_crParentBkgnd;
 	UINT m_nSliderDrawStyles;
+	double m_dMinRange;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -49,6 +51,7 @@ protected:
 
 	virtual void DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion);
 	virtual void DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton, const CString& sText);
+	virtual BOOL IsValidMove(double dLeft, double dRight) const;
 
 	void DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, double dTo);
 	void RegionToTrack(CRect& rRegion) const;

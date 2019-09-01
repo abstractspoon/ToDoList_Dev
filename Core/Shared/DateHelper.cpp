@@ -2007,6 +2007,17 @@ int CDateHelper::GetDateInMonths(int nMonth, int nYear)
 	return ((nYear * 12) + (nMonth - 1));
 }
 
+COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
+{
+	int nYear = (nNumMonths / 12);
+	int nMonth = ((nNumMonths % 12) + 1);
+
+	COleDateTime date(nYear, nMonth, 1, 0, 0, 0);
+	ASSERT(GetDateInMonths(date) == nNumMonths);
+
+	return date;
+}
+
 int CDateHelper::GetDateInMonths(const COleDateTime& date)
 {
 	return GetDateInMonths(date.GetMonth(), date.GetYear());
