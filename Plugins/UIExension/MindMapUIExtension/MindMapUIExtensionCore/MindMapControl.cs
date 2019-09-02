@@ -134,6 +134,7 @@ namespace MindMapUIExtension
         private DropPos m_DropPos = DropPos.None;
 		private Timer m_DragTimer;
 		private Color m_ConnectionColor = Color.Magenta;
+		private int m_LastDragTick = 0;
 
         private Boolean m_FirstPaint = true;
         private Boolean m_HoldRedraw = false;
@@ -634,9 +635,15 @@ namespace MindMapUIExtension
 				{
 					m_DropTarget = dropTarget;
                     m_DropPos = dropPos;
+					m_LastDragTick = Environment.TickCount;
 
                     Invalidate();
 					Update();
+				}
+				else if ((Environment.TickCount - m_LastDragTick) >= 500)
+				{
+					if (IsParent(m_DropTarget) && !m_DropTarget.IsExpanded)
+						m_DropTarget.Expand();
 				}
 			}
 		}
@@ -812,6 +819,10 @@ namespace MindMapUIExtension
 
 			if (IsAcceptableDragSource(hit))
 			{
+				// DoDragDrop is a modal loop so we can't use a timer
+				// to implement auto-expansion of dragged-over parent nodes
+				m_LastDragTick = Environment.TickCount;
+
 				DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
 				return true;
 			}
