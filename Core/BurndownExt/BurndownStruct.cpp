@@ -181,6 +181,78 @@ COleDateTime STATSITEM::GetEndDate() const
 	return dtStart;
 }
 
+BOOL STATSITEM::GetRange(COleDateTimeRange& dtRange) const
+{
+	return dtRange.Set(dtStart, GetEndDate());
+}
+
+BOOL STATSITEM::GetIntersection(const COleDateTimeRange& dtExtents, COleDateTimeRange& dtIntersection) const
+{
+	ASSERT(dtExtents.IsValid());
+
+	COleDateTimeRange dtThis;
+
+	if (!GetRange(dtThis))
+		return FALSE;
+
+	return dtIntersection.GetIntersection(dtExtents, dtThis);
+}
+
+double STATSITEM::GetIntersectionProportion(const COleDateTimeRange& dtExtents, BOOL bWeekdays) const
+{
+	return GetIntersectionProportion(dtStart, GetEndDate(), dtExtents, bWeekdays);
+}
+
+// static helper
+double STATSITEM::GetIntersectionProportion(const COleDateTime& dtStart, const COleDateTime& dtEnd, const COleDateTimeRange& dtExtents, BOOL bWeekdays)
+{
+	if (!dtExtents.IsValid())
+	{
+		ASSERT(0);
+		return 0.0;
+	}
+
+	COleDateTimeRange dtRange;
+	
+	if (!dtRange.Set(dtStart, dtEnd))
+		return 0.0;
+	
+	COleDateTimeRange dtIntersection;
+
+	if (!dtIntersection.GetIntersection(dtExtents, dtRange))
+		return 0.0;
+
+	double dTotalDays = (bWeekdays ? dtRange.GetWeekdayCount() : dtRange.GetDayCount());
+	double dPartDays = (bWeekdays ? dtIntersection.GetWeekdayCount() : dtIntersection.GetDayCount());
+
+	if (!dTotalDays || !dPartDays)
+		return 0.0;
+
+	// else
+	ASSERT(dPartDays <= dTotalDays);
+
+	double dProportion(dPartDays / dTotalDays);
+	dProportion = max(0.0, min(dProportion, 1.0));
+
+	return dProportion;
+}
+
+double STATSITEM::GetIntersectionProportionAtDate(const COleDateTimeRange& dtExtents, const COleDateTime& date, BOOL bWeekdays) const
+{
+	if (!dtExtents.Contains(date))
+	{
+		ASSERT(0);
+		return 0.0;
+	}
+
+	COleDateTime dtEnd = GetEndDate();
+
+	if (date < dtEnd)
+		dtEnd = date;
+
+	return GetIntersectionProportion(dtStart, dtEnd, dtExtents, bWeekdays);
+}
+
 void STATSITEM::MinMax(COleDateTimeRange& dtExtents) const
 {
 	MinMax(dtStart, dtExtents);
@@ -565,6 +637,11 @@ double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nTyp
 
 double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib, ATTRIBTYPE nType) const
 {
+	double dProportion = si.GetIntersectionProportion(m_dtExtents, FALSE);
+
+	if (dProportion <= 0.0)
+		return 0.0;
+
 	double dValue = 0.0;
 
 	switch (nAttrib)
@@ -613,7 +690,7 @@ double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib,
 		break;
 	}
 
-	return dValue;
+	return (dValue * dProportion);
 }
 
 double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib, ATTRIBTYPE nType, const COleDateTime& date) const

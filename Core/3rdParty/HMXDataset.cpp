@@ -36,6 +36,10 @@ CHMXDataset::~CHMXDataset()
 bool CHMXDataset::ClearData()
 {
 	m_data.RemoveAll();
+
+	m_bSetMinTo = m_bSetMaxTo = false;
+	m_dSetMinTo = m_dSetMaxTo = -1;
+
 	return true;
 }
 

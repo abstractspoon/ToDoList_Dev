@@ -241,7 +241,12 @@ void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, con
 		{
 			// Time Estimate
 			double dEst = ((nDay * dTotalEst) / nNumDays);
-			datasets[REMAINING_ESTIMATE].AddData(dTotalEst - dEst);
+
+			// last value is always zero
+			if (nDay == nNumDays)
+				datasets[REMAINING_ESTIMATE].AddData(0.0);
+			else
+				datasets[REMAINING_ESTIMATE].AddData(dTotalEst - dEst);
 		
 			// Time Spent
 			COleDateTime date(dtStart.m_dt + nDay);

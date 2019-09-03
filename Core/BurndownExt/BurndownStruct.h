@@ -38,7 +38,12 @@ struct STATSITEM
 	BOOL IsDone() const;
 
 	COleDateTime GetEndDate() const;
+	BOOL GetRange(COleDateTimeRange& dtRange) const;
+	BOOL GetIntersection(const COleDateTimeRange& dtExtents, COleDateTimeRange& dtIntersection) const;
 	
+	double GetIntersectionProportion(const COleDateTimeRange& dtExtents, BOOL bWeekdays) const; // return 0.0-1.0
+	double GetIntersectionProportionAtDate(const COleDateTimeRange& dtExtents, const COleDateTime& date, BOOL bWeekdays) const; // return 0.0-1.0
+
 	void MinMax(COleDateTimeRange& dtExtents) const;
 	
 	COleDateTime dtStart, dtDue, dtDone; 
@@ -50,6 +55,7 @@ struct STATSITEM
 
 protected:
 	static void MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents);
+	static double GetIntersectionProportion(const COleDateTime& dtStart, const COleDateTime& dtEnd, const COleDateTimeRange& dtExtents, BOOL bWeekdays); // return 0.0-1.0
 
 	static double GetCost(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL& bIsRate);
 	static COleDateTime GetStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
