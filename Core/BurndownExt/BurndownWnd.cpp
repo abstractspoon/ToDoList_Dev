@@ -61,16 +61,15 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	CDialog(IDD_STATISTICS_DLG, pParent),
 	m_nChartType(BCT_REMAININGDAYS),
 	m_dwUpdateGraphOnShow(0),
-	m_dtData(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
-	m_dtActive(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
-	m_graph(m_data, m_dtActive),
+	m_dtDataRange(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
+	m_graph(m_data),
 	m_bUpdatingSlider(FALSE),
 	m_sliderDateRange(TBS_BOTTOM)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
 	m_icon.LoadIcon(IDR_STATISTICS);
-	m_sliderDateRange.SetMinimumRange(1.0); // 1 month
+	m_sliderDateRange.SetMinMaxRangeWidths(1.0); // 1 month
 }
 
 CBurndownWnd::~CBurndownWnd()
@@ -190,6 +189,19 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	//CString sKey(szKey);
 
 	pPrefs->WriteProfileInt(szKey, _T("GraphType"), m_nChartType);
+
+	// Active date range
+	pPrefs->DeleteProfileSection(_T("ActiveRange"));
+
+	COleDateTimeRange dtActiveRange;
+
+	if (m_sliderDateRange.HasSelectedRange())
+	{
+		VERIFY(GetSliderDateRange(dtActiveRange));
+
+		pPrefs->WriteProfileDouble(_T("ActiveRange"), _T("Start"), dtActiveRange.GetStart().m_dt);
+		pPrefs->WriteProfileDouble(_T("ActiveRange"), _T("End"), dtActiveRange.GetEnd().m_dt);
+	}
 }
 
 void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly) 
@@ -207,6 +219,15 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 		CDialogHelper::SelectItemByData(m_cbDisplay, m_nChartType);
 		m_graph.SetChartType(m_nChartType);
+
+		// Active range
+		m_dtPrevActiveRange.Reset();
+
+		double dStart = pPrefs->GetProfileDouble(_T("ActiveRange"), _T("Start"), 0);
+		double dEnd = pPrefs->GetProfileDouble(_T("ActiveRange"), _T("End"), -1);
+
+		if (dEnd > dStart)
+			VERIFY(m_dtPrevActiveRange.Set(dStart, dEnd));
 	}
 
 	// application preferences
@@ -623,13 +644,30 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 	if (bSortData)
 		m_data.Sort();
 
+
 	if (bUpdateExtents)
+		m_data.GetDataExtents(m_dtDataRange);
+
+	// Only restore previous range if it's wholly contained within the data
+	COleDateTimeRange dtActiveRange(m_dtDataRange);
+
+	if (m_dtPrevActiveRange.IsValid() && m_dtDataRange.IsValid())
 	{
-		m_data.GetDataExtents(m_dtData);
-		UpdateRangeSlider();
+		COleDateTime dtDataStart = CDateHelper::GetStartOfMonth(m_dtDataRange.GetStart());
+		COleDateTime dtDataEnd = CDateHelper::GetEndOfMonth(m_dtDataRange.GetEnd());
+		
+		COleDateTimeRange dtDataRange;
+
+		if (dtDataRange.Set(dtDataStart, dtDataEnd) && dtDataRange.Contains(m_dtPrevActiveRange))
+			dtActiveRange = m_dtPrevActiveRange;
+
+		m_dtPrevActiveRange.Reset(); // always
 	}
 
-	m_graph.RebuildGraph();
+	UpdateRangeSlider(dtActiveRange);
+	UpdateActiveRangeLabel(dtActiveRange);
+
+	m_graph.RebuildGraph(dtActiveRange);
 }
 
 void CBurndownWnd::OnSelchangeDisplay()
@@ -664,43 +702,53 @@ LRESULT CBurndownWnd::OnRebuildGraph(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0L;
 }
 
+BOOL CBurndownWnd::GetSliderDateRange(COleDateTimeRange& dtActiveRange) const
+{
+	COleDateTime dtActiveStart(CDateHelper::GetDateFromMonths((int)m_sliderDateRange.GetLeft()));
+	COleDateTime dtActiveEnd(CDateHelper::GetDateFromMonths((int)m_sliderDateRange.GetRight()));
+
+	return dtActiveRange.Set(dtActiveStart, dtActiveEnd);
+}
+
 LRESULT CBurndownWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	if (!m_bUpdatingSlider)
 	{
-		COleDateTime dtActiveStart(CDateHelper::GetDateFromMonths((int)m_sliderDateRange.GetLeft()));
-		COleDateTime dtActiveEnd(CDateHelper::GetDateFromMonths((int)m_sliderDateRange.GetRight()));
-
-		if (m_dtActive.Set(dtActiveStart, dtActiveEnd))
+		COleDateTimeRange dtActiveRange;
+		
+		if (GetSliderDateRange(dtActiveRange))
 		{
-			UpdateActiveRangeLabel();
-			m_graph.RebuildGraph();
+			UpdateActiveRangeLabel(dtActiveRange);
+			m_graph.RebuildGraph(dtActiveRange);
 		}
 	}
 
 	return 0L;
 }
 
-void CBurndownWnd::UpdateRangeSlider()
+void CBurndownWnd::UpdateRangeSlider(const COleDateTimeRange& dtActiveRange)
 {
 	CAutoFlag af(m_bUpdatingSlider, TRUE);
 
-	if (m_dtData.IsValid())
+	if (m_dtDataRange.IsValid())
 	{
-		int nDataStart = CDateHelper::GetDateInMonths(m_dtData.GetStart());
-		int nDataEnd = CDateHelper::GetDateInMonths(m_dtData.GetEnd());
+		int nDataStart = CDateHelper::GetDateInMonths(m_dtDataRange.GetStart());
+		int nDataEnd = CDateHelper::GetDateInMonths(m_dtDataRange.GetEnd());
 		nDataEnd = max(nDataEnd, nDataStart + 1);
 
 		m_sliderDateRange.SetMinMax(nDataStart, nDataEnd);
 
-		int nActiveStart = CDateHelper::GetDateInMonths(m_dtActive.GetStart());
-		int nActiveEnd = CDateHelper::GetDateInMonths(m_dtActive.GetEnd());
+		int nActiveStart = CDateHelper::GetDateInMonths(dtActiveRange.GetStart());
+		int nActiveEnd = CDateHelper::GetDateInMonths(dtActiveRange.GetEnd());
+		nActiveEnd = max(nActiveEnd, nActiveStart + 1);
 
 		nActiveStart = max(nActiveStart, nDataStart);
 		nActiveEnd = min(nActiveEnd, nDataEnd);
 
 		m_sliderDateRange.SetRange(nActiveStart, nActiveEnd);
 		m_sliderDateRange.EnableWindow(TRUE);
+
+
 	}
 	else
 	{
@@ -711,27 +759,29 @@ void CBurndownWnd::UpdateRangeSlider()
 	m_sliderDateRange.SetStep(1); // 1 month
 }
 
-void CBurndownWnd::UpdateActiveRangeLabel()
+void CBurndownWnd::UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange)
 {
 	CString sRange;
 
-	if (m_sliderDateRange.GetLeft() == (m_sliderDateRange.GetRight() - 1))
+	if (dtActiveRange.IsValid())
 	{
-		COleDateTime dtStart = m_dtActive.GetStart();
-		sRange.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
+		COleDateTime dtStart = dtActiveRange.GetStart();
 
+		if (m_sliderDateRange.GetRangeWidth() == 1.0)
+		{
+			sRange.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
+		}
+		else
+		{
+			COleDateTime dtEnd = dtActiveRange.GetEnd();
+			CString sStart, sEnd;
+
+			sStart.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
+			sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth() - 1, TRUE), dtEnd.GetYear());
+
+			sRange.Format(_T("%s - %s"), sStart, sEnd);
+		}
 	}
-	else
-	{
-		COleDateTime dtStart = m_dtActive.GetStart();
-		COleDateTime dtEnd = m_dtActive.GetEnd();
-
-		CString sStart, sEnd;
-		sStart.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
-		sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth() - 1, TRUE), dtEnd.GetYear());
-
-		sRange.Format(_T("%s - %s"), sStart, sEnd);
-	}
-
+	
 	GetDlgItem(IDC_ACTIVEDATERANGE_LABEL)->SetWindowText(CEnString(IDS_ACTIVEDATERANGE, sRange));
 }

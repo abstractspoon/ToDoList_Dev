@@ -42,7 +42,7 @@ const int    LINE_THICKNESS			= 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CIncompleteDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, CHMXDataset datasets[HMX_MAX_DATASET])
+void CIncompleteDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, BURNDOWN_CHARTSCALE nScale, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	datasets[0].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[0].SetLineColor(COLOR_GREENLINE);
@@ -51,6 +51,8 @@ void CIncompleteDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, co
 	datasets[0].SetMin(0.0);
 
 	// build the graph
+	const COleDateTimeRange& dtExtents = calculator.GetDateRange();
+
 	COleDateTime dtStart = GetGraphStartDate(dtExtents, nScale);
 	COleDateTime dtEnd = GetGraphEndDate(dtExtents, nScale);
 	
@@ -196,11 +198,14 @@ CString CIncompleteDaysGraph::GetTooltip(const CHMXDataset datasets[HMX_MAX_DATA
 {
 	ASSERT(nHit != -1);
 
-	double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit), dNumTasks;
-	VERIFY(datasets[0].GetData(nHit, dNumTasks));
-
 	CString sTooltip;
-	sTooltip.Format(CEnString(IDS_TOOLTIP_INCOMPLETE), CDateHelper::FormatDate(dDate), (int)dNumTasks);
+	double dNumTasks;
+
+	if (datasets[0].GetData(nHit, dNumTasks))
+	{
+		double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit);
+		sTooltip.Format(CEnString(IDS_TOOLTIP_INCOMPLETE), CDateHelper::FormatDate(dDate), (int)dNumTasks);
+	}
 
 	return sTooltip;
 }
@@ -213,7 +218,7 @@ enum
 	REMAINING_SPENT
 };
 
-void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, CHMXDataset datasets[HMX_MAX_DATASET])
+void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, BURNDOWN_CHARTSCALE nScale, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	datasets[REMAINING_ESTIMATE].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[REMAINING_ESTIMATE].SetLineColor(COLOR_BLUELINE);
@@ -228,6 +233,8 @@ void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, con
 	datasets[REMAINING_SPENT].SetMin(0.0);
 	
 	// build the graph
+	const COleDateTimeRange& dtExtents = calculator.GetDateRange();
+
 	COleDateTime dtStart = GetGraphStartDate(dtExtents, nScale);
 	COleDateTime dtEnd = GetGraphEndDate(dtExtents, nScale);
 	

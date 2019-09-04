@@ -74,7 +74,7 @@ protected:
 	UITHEME m_theme;
 
 	CStatsItemArray m_data;
-	COleDateTimeRange m_dtData, m_dtActive;
+	COleDateTimeRange m_dtDataRange, m_dtPrevActiveRange;
 
 	CStatic	m_stFrame;
 	CBurndownChart m_graph;
@@ -123,8 +123,9 @@ protected:
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings, BOOL bCheckExist);
 
 	void RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility);
-	void UpdateRangeSlider();
-	void UpdateActiveRangeLabel();
+	void UpdateRangeSlider(const COleDateTimeRange& dtActiveRange);
+	void UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange);
+	BOOL GetSliderDateRange(COleDateTimeRange& dtActiveRange) const;
 
 };
 

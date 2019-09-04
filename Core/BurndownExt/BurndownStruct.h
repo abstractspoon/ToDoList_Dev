@@ -102,10 +102,11 @@ protected:
 class CStatsItemCalculator
 {
 public:
-	CStatsItemCalculator(const CStatsItemArray& data, const COleDateTimeRange& dtExtents);
+	CStatsItemCalculator(const CStatsItemArray& data);
 	virtual ~CStatsItemCalculator();
 
-	int GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
+	BOOL SetDateRange(const COleDateTimeRange& dtExtents);
+	const COleDateTimeRange& GetDateRange() const { return m_dtExtents; }
 	
 	// Totals
 	double GetTotalTimeEstimateInDays() const;
@@ -119,9 +120,12 @@ public:
 	double GetCostSpent(const COleDateTime& date) const;
 	double GetCostEstimate(const COleDateTime& date) const;
 
+	int GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
+
 protected:
 	const CStatsItemArray& m_data;
-	const COleDateTimeRange& m_dtExtents;
+
+	COleDateTimeRange m_dtExtents;
 
 protected:
 	double CalcProportionOfValue(const STATSITEM& si, double dValue, const COleDateTime& date) const;

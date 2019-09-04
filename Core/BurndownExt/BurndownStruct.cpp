@@ -479,16 +479,20 @@ void CStatsItemArray::GetDataExtents(COleDateTimeRange& dtExtents) const
 
 ///////////////////////////////////////////////////////////////////////////
 
-CStatsItemCalculator::CStatsItemCalculator(const CStatsItemArray& data, const COleDateTimeRange& dtExtents)
+CStatsItemCalculator::CStatsItemCalculator(const CStatsItemArray& data)
 	:
-	m_data(data),
-	m_dtExtents(dtExtents)
+	m_data(data)
 {
 }
 
 CStatsItemCalculator::~CStatsItemCalculator()
 {
 
+}
+
+BOOL CStatsItemCalculator::SetDateRange(const COleDateTimeRange& dtExtents)
+{
+	return m_dtExtents.Set(dtExtents);
 }
 
 int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const
