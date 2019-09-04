@@ -1183,6 +1183,7 @@ void CGanttChartWnd::BuildDisplayCombo()
 		CDialogHelper::AddString(m_cbDisplayOptions, mode.nStringID, mode.nDisplay);
 	}
 	
+	CDialogHelper::RefreshMaxDropWidth(m_cbDisplayOptions);
 	CDialogHelper::SelectItemByData(m_cbDisplayOptions, nCurDisplay);
 }
 
