@@ -37,6 +37,7 @@ public:
 
 	void Reset();
 
+	BOOL Set(const COleDateTimeRange& dtRange);
 	BOOL Set(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive = TRUE);
 	BOOL Set(DH_DATE nStart, DH_DATE nEnd, BOOL bInclusive = TRUE);
 	BOOL Set(const COleDateTime& dtStart, DH_DATE nEnd, BOOL bInclusive = TRUE);

@@ -37,10 +37,11 @@ public:
 	void SetRange(double left, double right); //< Set Selected Range in [Min, Max] 
 	void SetStep(double step = -1); // -1 == no step
 
-	double GetMin(void) const { return (m_bInvertedMode) ? -m_Max : m_Min; };    
-	double GetMax(void) const { return (m_bInvertedMode) ? -m_Min : m_Max; };
-	double GetLeft(void) const { return (m_bInvertedMode) ? -m_Right : m_Left; };
-	double GetRight(void) const { return (m_bInvertedMode) ? -m_Left : m_Right; };
+	double GetMin(void) const { return (m_bInvertedMode ? -m_Max : m_Min); };    
+	double GetMax(void) const { return (m_bInvertedMode ? -m_Min : m_Max); };
+	double GetLeft(void) const { return (m_bInvertedMode ? -m_Right : m_Left); };
+	double GetRight(void) const { return (m_bInvertedMode ? -m_Left : m_Right); };
+	double GetRangeWidth() const { return (m_Right - m_Left); }
 
 	void GetMinMax(double &min, double &max) const 
 	{ 

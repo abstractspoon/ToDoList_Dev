@@ -125,7 +125,7 @@ BOOL CGanttDateRangeSlider::HasSelectedRange() const
 		return FALSE;
 	}
 
-	return (m_dtMaxRange.IsValid() && ((m_Left > m_Min) || (m_Right < m_Max)));
+	return (m_dtMaxRange.IsValid() && CRangeSliderCtrl::HasSelectedRange());
 }
 
 BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const

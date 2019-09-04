@@ -22,7 +22,8 @@ CRangeSliderCtrl::CRangeSliderCtrl(UINT nThumbStyle)
 	: 
 	m_crParentBkgnd(CLR_NONE), 
 	m_nSliderDrawStyles(nThumbStyle),
-	m_dMinRange(0.0)
+	m_dMinRangeWidth(0.0),
+	m_dMaxRangeWidth(-1.0)
 {
 }
 
@@ -43,20 +44,47 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CRangeSliderCtrl message handlers
 
-void CRangeSliderCtrl::SetMinimumRange(double dWidth)
+BOOL CRangeSliderCtrl::SetMinMaxRangeWidths(double dMinWidth, double dMaxWidth)
 {
-	ASSERT(dWidth >= 0.0);
+	if (dMinWidth < 0.0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+		
+	if (dMaxWidth != -1)
+	{
+		if ((dMaxWidth < 0.0) || (dMaxWidth < dMinWidth))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+	}
 
-	m_dMinRange = max(0.0, dWidth);
+	m_dMinRangeWidth = dMinWidth;
+	m_dMaxRangeWidth = dMaxWidth;
+
+	return TRUE;
 }
 
 BOOL CRangeSliderCtrl::IsValidMove(double dLeft, double dRight) const
 {
-	return ((dRight - dLeft) >= m_dMinRange);
+	if ((dRight - dLeft) < m_dMinRangeWidth)
+		return FALSE;
+
+	if (m_dMaxRangeWidth != -1)
+	{
+		if ((dRight - dLeft) > m_dMaxRangeWidth)
+			return FALSE;
+	}
+
+	return TRUE;
 }
 
 void CRangeSliderCtrl::SetParentBackgroundColor(COLORREF crBkgnd)
 {
+	ASSERT(crBkgnd != CLR_NONE);
+
 	if (crBkgnd != m_crParentBkgnd)
 	{
 		m_crParentBkgnd = crBkgnd;
@@ -64,6 +92,11 @@ void CRangeSliderCtrl::SetParentBackgroundColor(COLORREF crBkgnd)
 		if (GetSafeHwnd())
 			Invalidate(FALSE);
 	}
+}
+
+BOOL CRangeSliderCtrl::HasSelectedRange() const
+{
+	return ((m_Left > m_Min) || (m_Right < m_Max));
 }
 
 void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion)

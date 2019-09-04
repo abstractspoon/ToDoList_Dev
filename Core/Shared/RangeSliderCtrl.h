@@ -21,13 +21,14 @@ public:
 	CRangeSliderCtrl(UINT nThumbStyle = TBS_BOTTOM | TBS_NOTICKS);
 
 	void SetParentBackgroundColor(COLORREF crBkgnd);
-	void SetMinimumRange(double dWidth);
+	BOOL SetMinMaxRangeWidths(double dMinWidth = 0, double dMaxWidth = -1);
+	BOOL HasSelectedRange() const;
 
 protected:
 	CHotTracker m_hotTrack;
 	COLORREF m_crParentBkgnd;
 	UINT m_nSliderDrawStyles;
-	double m_dMinRange;
+	double m_dMinRangeWidth, m_dMaxRangeWidth;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

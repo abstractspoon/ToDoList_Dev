@@ -103,6 +103,15 @@ void COleDateTimeRange::Reset()
 	CDateHelper::ClearDate(m_dtEnd);
 }
 
+BOOL COleDateTimeRange::Set(const COleDateTimeRange& dtRange)
+{
+	if (!dtRange.IsValid())
+		return FALSE;
+
+	*this = dtRange;
+	return TRUE;
+}
+
 BOOL COleDateTimeRange::Set(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive)
 {
 	if (!CDateHelper::IsDateSet(dtStart) || !CDateHelper::IsDateSet(dtEnd) || (dtEnd < dtStart))
