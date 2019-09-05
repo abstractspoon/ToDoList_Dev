@@ -11,12 +11,14 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+/*
 static DISPLAYITEM STATSDISPLAY[] = 
 {
 	{ IDS_DISPLAY_INCOMPLETE, BCT_INCOMPLETETASKS	},
 	{ IDS_DISPLAY_REMAINING, BCT_REMAININGDAYS },
 };
 static int NUM_DISPLAY = sizeof(STATSDISPLAY) / sizeof(DISPLAYITEM);
+*/
 
 
 #endif // !defined(AFX_BURNDOWNSTATIC_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_)

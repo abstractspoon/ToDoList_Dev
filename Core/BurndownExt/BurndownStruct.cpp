@@ -470,6 +470,9 @@ void CStatsItemArray::GetDataExtents(COleDateTimeRange& dtExtents) const
 
 		while (nItem--)
 			GetAt(nItem)->MinMax(dtExtents);
+
+		// One day earlier to visually encapsulate the first date
+		dtExtents.m_dtStart.m_dt--; 
 	}
 	else
 	{

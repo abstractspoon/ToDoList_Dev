@@ -170,11 +170,8 @@ BOOL CBurndownWnd::OnInitDialog()
 	VERIFY(m_graph.SubclassDlgItem(IDC_GRAPH, this));
 
 	// Init combo
-	for (int nDisplay = 0; nDisplay < NUM_DISPLAY; nDisplay++)
-	{
-		const DISPLAYITEM& di = STATSDISPLAY[nDisplay];
-		CDialogHelper::AddString(m_cbDisplay, di.nYAxisID, nDisplay);
-	}
+	for (int nGraph = 0; nGraph < BCT_NUMGRAPHS; nGraph++)
+		CDialogHelper::AddString(m_cbDisplay, m_graph.GetGraphTitle((BURNDOWN_CHARTTYPE)nGraph), nGraph);
 
 	RebuildGraph(FALSE, FALSE, FALSE);
 
@@ -214,11 +211,11 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		//CString sKey(szKey);
 		m_nChartType = (BURNDOWN_CHARTTYPE)pPrefs->GetProfileInt(szKey, _T("GraphType"), BCT_INCOMPLETETASKS);
 
-		if (m_nChartType > NUM_DISPLAY)
+		if (m_nChartType >= BCT_NUMGRAPHS)
 			m_nChartType = BCT_INCOMPLETETASKS;
 
 		CDialogHelper::SelectItemByData(m_cbDisplay, m_nChartType);
-		m_graph.SetChartType(m_nChartType);
+		m_graph.SetActiveGraph(m_nChartType);
 
 		// Active range
 		m_dtPrevActiveRange.Reset();
@@ -674,7 +671,7 @@ void CBurndownWnd::OnSelchangeDisplay()
 {
 	UpdateData();
 
-	m_graph.SetChartType(m_nChartType);
+	m_graph.SetActiveGraph(m_nChartType);
 }
 
 void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)

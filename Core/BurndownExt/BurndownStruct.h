@@ -106,7 +106,9 @@ public:
 	virtual ~CStatsItemCalculator();
 
 	BOOL SetDateRange(const COleDateTimeRange& dtExtents);
-	const COleDateTimeRange& GetDateRange() const { return m_dtExtents; }
+
+	COleDateTime GetStartDate() const { return m_dtExtents.GetStart(); }
+	COleDateTime GetEndDate() const { return m_dtExtents.GetEndInclusive(); }
 	
 	// Totals
 	double GetTotalTimeEstimateInDays() const;

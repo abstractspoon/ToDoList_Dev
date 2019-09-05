@@ -42,7 +42,12 @@ const int    LINE_THICKNESS			= 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CIncompleteDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, BURNDOWN_CHARTSCALE nScale, CHMXDataset datasets[HMX_MAX_DATASET])
+CString CIncompleteDaysGraph::GetTitle() const
+{
+	return CEnString(IDS_DISPLAY_INCOMPLETE);
+}
+
+void CIncompleteDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	datasets[0].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[0].SetLineColor(COLOR_GREENLINE);
@@ -51,11 +56,9 @@ void CIncompleteDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, BU
 	datasets[0].SetMin(0.0);
 
 	// build the graph
-	const COleDateTimeRange& dtExtents = calculator.GetDateRange();
+	COleDateTime dtStart = calculator.GetStartDate();
+	COleDateTime dtEnd = calculator.GetEndDate();
 
-	COleDateTime dtStart = GetGraphStartDate(dtExtents, nScale);
-	COleDateTime dtEnd = GetGraphEndDate(dtExtents, nScale);
-	
 	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
 
 	if (nNumDays)
@@ -66,7 +69,7 @@ void CIncompleteDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, BU
 		{
 			COleDateTime date(dtStart.m_dt + nDay);
 		
-			if (dtExtents.GetStart() > date)
+			if (dtStart > date)
 			{
 				datasets[0].AddData(0);
 			}
@@ -90,111 +93,7 @@ void CIncompleteDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, BU
 	}
 }
 
-COleDateTime CIncompleteDaysGraph::GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale)
-{
-	return dtExtents.GetStart();
-
-	COleDateTime dtStart(dtExtents.GetStart());
-
-	// back up a bit to always show first completion
-	dtStart -= COleDateTimeSpan(7.0);
-
-	SYSTEMTIME st = { 0 };
-	VERIFY(dtStart.GetAsSystemTime(st));
-
-	switch (nScale)
-	{
-	case BCS_DAY:
-	case BCS_WEEK:
-		// make sure we start at the beginning of a week
-		dtStart.m_dt -= st.wDayOfWeek;
-		return dtStart;
-
-	case BCS_MONTH:
-		st.wDay = 1; // start of month;
-		break;
-
-	case BCS_2MONTH:
-		st.wDay = 1; // start of month;
-		st.wMonth = (WORD)(st.wMonth - ((st.wMonth - 1) % 2)); // previous even month
-		break;
-
-	case BCS_QUARTER:
-		st.wDay = 1; // start of month;
-		st.wMonth = (WORD)(st.wMonth - ((st.wMonth - 1) % 3)); // previous quarter
-		break;
-
-	case BCS_HALFYEAR:
-		st.wDay = 1; // start of month;
-		st.wMonth = (WORD)(st.wMonth - ((st.wMonth - 1) % 6)); // previous half-year
-		break;
-
-	case BCS_YEAR:
-		st.wDay = 1; // start of month;
-		st.wMonth = 1; // start of year
-		break;
-
-	default:
-		ASSERT(0);
-	}
-
-	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
-}
-
-COleDateTime CIncompleteDaysGraph::GetGraphEndDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale)
-{
-	return dtExtents.GetEnd();
-
-	COleDateTime dtEnd = (dtExtents.GetEnd() + COleDateTimeSpan(7.0));
-
-	// avoid unnecessary call to GetAsSystemTime()
-	if (nScale == BCS_DAY)
-		return dtEnd;
-
-	SYSTEMTIME st = { 0 };
-	VERIFY(dtEnd.GetAsSystemTime(st));
-
-	switch (nScale)
-	{
-	case BCS_DAY:
-		ASSERT(0); // handled above
-		break;
-
-	case BCS_WEEK:
-		break;
-
-	case BCS_MONTH:
-		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
-		break;
-
-	case BCS_2MONTH:
-		CDateHelper::IncrementMonth(st, ((st.wMonth - 1) % 2)); // next even month
-		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
-		break;
-
-	case BCS_QUARTER:
-		CDateHelper::IncrementMonth(st, ((st.wMonth - 1) % 3)); // next quarter
-		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
-		break;
-
-	case BCS_HALFYEAR:
-		CDateHelper::IncrementMonth(st, ((st.wMonth - 1) % 6)); // next half-year
-		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
-		break;
-
-	case BCS_YEAR:
-		st.wDay = 31;
-		st.wMonth = 12;
-		break;
-
-	default:
-		ASSERT(0);
-	}
-
-	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
-}
-
-CString CIncompleteDaysGraph::GetTooltip(const CHMXDataset datasets[HMX_MAX_DATASET], const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit)
+CString CIncompleteDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	ASSERT(nHit != -1);
 
@@ -203,7 +102,7 @@ CString CIncompleteDaysGraph::GetTooltip(const CHMXDataset datasets[HMX_MAX_DATA
 
 	if (datasets[0].GetData(nHit, dNumTasks))
 	{
-		double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit);
+		double dDate = (calculator.GetStartDate().m_dt + nHit);
 		sTooltip.Format(CEnString(IDS_TOOLTIP_INCOMPLETE), CDateHelper::FormatDate(dDate), (int)dNumTasks);
 	}
 
@@ -218,7 +117,12 @@ enum
 	REMAINING_SPENT
 };
 
-void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, BURNDOWN_CHARTSCALE nScale, CHMXDataset datasets[HMX_MAX_DATASET])
+CString CRemainingDaysGraph::GetTitle() const
+{
+	return CEnString(IDS_DISPLAY_REMAINING);
+}
+
+void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	datasets[REMAINING_ESTIMATE].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[REMAINING_ESTIMATE].SetLineColor(COLOR_BLUELINE);
@@ -233,10 +137,8 @@ void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, BUR
 	datasets[REMAINING_SPENT].SetMin(0.0);
 	
 	// build the graph
-	const COleDateTimeRange& dtExtents = calculator.GetDateRange();
-
-	COleDateTime dtStart = GetGraphStartDate(dtExtents, nScale);
-	COleDateTime dtEnd = GetGraphEndDate(dtExtents, nScale);
+	COleDateTime dtStart = calculator.GetStartDate();
+	COleDateTime dtEnd = calculator.GetEndDate();
 	
 	double dTotalEst = calculator.GetTotalTimeEstimateInDays();
 	
@@ -277,21 +179,11 @@ void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, BUR
 	}
 }
 
-COleDateTime CRemainingDaysGraph::GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE /*nScale*/)
-{
-	return dtExtents.GetStart();
-}
-
-COleDateTime CRemainingDaysGraph::GetGraphEndDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE /*nScale*/)
-{
-	return dtExtents.GetEnd();
-}
-
-CString CRemainingDaysGraph::GetTooltip(const CHMXDataset datasets[HMX_MAX_DATASET], const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit)
+CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	ASSERT(nHit != -1);
 
-	double dDate = (GetGraphStartDate(dtExtents, nScale).m_dt + nHit), dNumEst, dNumSpent;
+	double dDate = (calculator.GetStartDate().m_dt + nHit), dNumEst, dNumSpent;
 	CString sTooltip;
 
 	if (datasets[REMAINING_SPENT].GetData(nHit, dNumSpent) &&

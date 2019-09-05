@@ -11,26 +11,37 @@ class CStatsItemCalculator;
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CIncompleteDaysGraph
+class CGraphBase
 {
 public:
-	static void BuildGraph(const CStatsItemCalculator& calculator, BURNDOWN_CHARTSCALE nScale, CHMXDataset datasets[HMX_MAX_DATASET]);
-	static CString GetTooltip(const CHMXDataset datasets[HMX_MAX_DATASET], const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit);
+	virtual ~CGraphBase() {}
 
-	static COleDateTime GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale);
-	static COleDateTime GetGraphEndDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale);
+	virtual CString GetTitle() const  = 0;
+	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
+	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const = 0;
+
+protected:
+	CGraphBase() {}
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CRemainingDaysGraph
+class CIncompleteDaysGraph : public CGraphBase
 {
 public:
-	static void BuildGraph(const CStatsItemCalculator& calculator, BURNDOWN_CHARTSCALE nScale, CHMXDataset datasets[HMX_MAX_DATASET]);
-	static CString GetTooltip(const CHMXDataset datasets[HMX_MAX_DATASET], const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale, int nHit);
+	CString GetTitle() const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
+};
 
-	static COleDateTime GetGraphStartDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale);
-	static COleDateTime GetGraphEndDate(const COleDateTimeRange& dtExtents, BURNDOWN_CHARTSCALE nScale);
+/////////////////////////////////////////////////////////////////////////////
+
+class CRemainingDaysGraph : public CGraphBase
+{
+public:
+	CString GetTitle() const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

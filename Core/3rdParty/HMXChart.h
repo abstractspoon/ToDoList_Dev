@@ -174,7 +174,7 @@ protected:
 	int				m_nXMax;								// max x value
 	double			m_nYMax;								// max y value
 	double			m_nYMin;								// min y value
-	CHMXDataset		m_dataset[HMX_MAX_DATASET];				// datasets
+	CHMXDataset		m_datasets[HMX_MAX_DATASET];				// datasets
 	int				m_nCountDataset;						// dataset counter
 	CString			m_strTitle;								// main title
 	CString			m_strYText;								// Y text

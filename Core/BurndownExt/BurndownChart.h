@@ -5,6 +5,10 @@
 #include "..\Shared\HMXChartEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CGraphBase;
+
+/////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
 
 class CBurndownChart : public CHMXChartEx
@@ -13,13 +17,15 @@ public:
 	CBurndownChart(const CStatsItemArray& data);
 	virtual ~CBurndownChart();
 
-	BOOL SetChartType(BURNDOWN_CHARTTYPE nType);
+	CString GetGraphTitle(BURNDOWN_CHARTTYPE nType) const;
+	BOOL SetActiveGraph(BURNDOWN_CHARTTYPE nType);
 	BOOL SaveToImage(CBitmap& bmImage);
 
 	void RebuildGraph(const COleDateTimeRange& dtExtents);
 
 protected:
 	const CStatsItemArray& m_data;
+	CArray<CGraphBase*, CGraphBase*> m_graphs;
 
 	COleDateTimeRange m_dtExtents;
 	CStatsItemCalculator m_calculator;
@@ -36,8 +42,6 @@ protected:
 
 protected:
 	void RebuildXScale();
-	COleDateTime GetGraphStartDate() const;
-	COleDateTime GetGraphEndDate() const;
 	BURNDOWN_CHARTSCALE CalculateRequiredXScale() const;
 	int HitTest(const CPoint& ptClient) const;
 

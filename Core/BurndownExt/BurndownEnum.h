@@ -7,7 +7,9 @@ enum BURNDOWN_CHARTTYPE
 {
 	BCT_INCOMPLETETASKS,
 	BCT_REMAININGDAYS,
+	// new graphs here
 
+	BCT_NUMGRAPHS // always last
 };
 
 enum BURNDOWN_CHARTSCALE

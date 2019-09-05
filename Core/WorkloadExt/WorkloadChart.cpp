@@ -305,7 +305,7 @@ int CWorkloadChart::HitTest(const CPoint& ptClient) const
 	if (!m_rectData.PtInRect(ptClient))
 		return -1;
 
-	int nNumData = m_dataset[0].GetDatasetSize();
+	int nNumData = m_datasets[0].GetDatasetSize();
 	int nXOffset = (ptClient.x - m_rectData.left);
 
 	int nAllocTo = ((nXOffset * nNumData) / m_rectData.Width());

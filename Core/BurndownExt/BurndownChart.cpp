@@ -38,10 +38,21 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_nChartType(BCT_INCOMPLETETASKS),
 	m_calculator(data)
 {
+	VERIFY(m_graphs.Add(new CIncompleteDaysGraph()) == BCT_INCOMPLETETASKS);
+	VERIFY(m_graphs.Add(new CRemainingDaysGraph()) == BCT_REMAININGDAYS);
+	//m_graphs.Add(new ());
+
 }
 
 CBurndownChart::~CBurndownChart()
 {
+	int nGraph = m_graphs.GetSize();
+
+	while (nGraph--)
+	{
+		delete m_graphs[nGraph];
+		m_graphs.RemoveAt(nGraph);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +64,19 @@ END_MESSAGE_MAP()
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart message handlers
 
-BOOL CBurndownChart::SetChartType(BURNDOWN_CHARTTYPE nType)
+CString CBurndownChart::GetGraphTitle(BURNDOWN_CHARTTYPE nType) const
+{
+	if (nType >= BCT_NUMGRAPHS)
+	{
+		ASSERT(0);
+		return _T("");
+	}
+
+	// else
+	return m_graphs[nType]->GetTitle();
+}
+
+BOOL CBurndownChart::SetActiveGraph(BURNDOWN_CHARTTYPE nType)
 {
 	if (nType != m_nChartType)
 	{
@@ -117,8 +140,8 @@ void CBurndownChart::RebuildXScale()
 	SetXLabelStep(m_nScale);
 
 	// Get new start and end dates
-	COleDateTime dtStart = GetGraphStartDate();
-	COleDateTime dtEnd = GetGraphEndDate();
+	COleDateTime dtStart = m_dtExtents.GetStart();
+	COleDateTime dtEnd = m_dtExtents.GetEndInclusive();
 
 	// build ticks
 	CDateHelper dh;
@@ -168,36 +191,6 @@ void CBurndownChart::RebuildXScale()
 	}
 }
 
-COleDateTime CBurndownChart::GetGraphStartDate() const
-{
-	switch (m_nChartType)
-	{
-	case BCT_INCOMPLETETASKS:
-		return CIncompleteDaysGraph::GetGraphStartDate(m_dtExtents, m_nScale);
-
-	case BCT_REMAININGDAYS:
-		return CRemainingDaysGraph::GetGraphStartDate(m_dtExtents, m_nScale);
-	}
-
-	ASSERT(0);
-	return m_dtExtents.GetStart();
-}
-
-COleDateTime CBurndownChart::GetGraphEndDate() const
-{
-	switch (m_nChartType)
-	{
-	case BCT_INCOMPLETETASKS:
-		return CIncompleteDaysGraph::GetGraphEndDate(m_dtExtents, m_nScale);
-
-	case BCT_REMAININGDAYS:
-		return CRemainingDaysGraph::GetGraphEndDate(m_dtExtents, m_nScale);
-	}
-
-	ASSERT(0);
-	return m_dtExtents.GetStart();
-}
-
 void CBurndownChart::OnSize(UINT nType, int cx, int cy) 
 {
 	CHMXChartEx::OnSize(nType, cx, cy);
@@ -224,21 +217,12 @@ void CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	CHoldRedraw hr(*this);
 	
 	ClearData();
-	SetYText(CEnString(STATSDISPLAY[m_nChartType].nYAxisID));
+	SetYText(m_graphs[m_nChartType]->GetTitle());
 	
 	if (!m_data.IsEmpty())
 		RebuildXScale();
 	
-	switch (STATSDISPLAY[m_nChartType].nDisplay)
-	{
-	case BCT_INCOMPLETETASKS:
-		CIncompleteDaysGraph::BuildGraph(m_calculator, m_nScale, m_dataset);
-		break;
-		
-	case BCT_REMAININGDAYS:
-		CRemainingDaysGraph::BuildGraph(m_calculator, m_nScale, m_dataset);
-		break;
-	}
+	m_graphs[m_nChartType]->BuildGraph(m_calculator, m_datasets);
 
 	CalcDatas();
 }
@@ -259,18 +243,7 @@ int CBurndownChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 	if (nHit != -1)
 	{
-		CString sTooltip;
-
-		switch (m_nChartType)
-		{
-		case BCT_INCOMPLETETASKS:
-			sTooltip = CIncompleteDaysGraph::GetTooltip(m_dataset, m_dtExtents, m_nScale, nHit);
-			break;
-
-		case BCT_REMAININGDAYS:
-			sTooltip = CRemainingDaysGraph::GetTooltip(m_dataset, m_dtExtents, m_nScale, nHit);
-			break;
-		}
+		CString sTooltip = m_graphs[m_nChartType]->GetTooltip(m_calculator, m_datasets, nHit);
 
 		if (!sTooltip.IsEmpty())
 			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
@@ -288,7 +261,7 @@ int CBurndownChart::HitTest(const CPoint& ptClient) const
 	if (!m_rectData.PtInRect(ptClient))
 		return -1;
 
-	int nNumData = m_dataset[0].GetDatasetSize();
+	int nNumData = m_datasets[0].GetDatasetSize();
 	int nXOffset = (ptClient.x - m_rectData.left);
 
 	return ((nXOffset * nNumData) / m_rectData.Width());
