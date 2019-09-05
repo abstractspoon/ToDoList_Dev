@@ -44,6 +44,6 @@ protected:
 	void RebuildXScale();
 	BURNDOWN_CHARTSCALE CalculateRequiredXScale() const;
 	int HitTest(const CPoint& ptClient) const;
-
+	BOOL IsValidType(BURNDOWN_CHARTTYPE nType) const;
 };
 

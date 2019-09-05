@@ -64,9 +64,14 @@ END_MESSAGE_MAP()
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart message handlers
 
+BOOL CBurndownChart::IsValidType(BURNDOWN_CHARTTYPE nType) const
+{
+	return ((nType >= 0) && (nType < BCT_NUMGRAPHS) && (nType < m_graphs.GetSize()));
+}
+
 CString CBurndownChart::GetGraphTitle(BURNDOWN_CHARTTYPE nType) const
 {
-	if (nType >= BCT_NUMGRAPHS)
+	if (!IsValidType(nType))
 	{
 		ASSERT(0);
 		return _T("");
@@ -78,6 +83,12 @@ CString CBurndownChart::GetGraphTitle(BURNDOWN_CHARTTYPE nType) const
 
 BOOL CBurndownChart::SetActiveGraph(BURNDOWN_CHARTTYPE nType)
 {
+	if (!IsValidType(nType))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	if (nType != m_nChartType)
 	{
 		m_nChartType = nType;
