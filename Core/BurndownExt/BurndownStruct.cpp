@@ -437,28 +437,39 @@ int CStatsItemArray::CompareItems(const void* pV1, const void* pV2)
 
 	ASSERT(pSI1 && pSI2 && (pSI1 != pSI2));
 
-	// Sort by start date
-	// Tasks without a start date come last to optimise searching
-	BOOL bStart1 = CDateHelper::IsDateSet(pSI1->dtStart);
-	BOOL bStart2 = CDateHelper::IsDateSet(pSI2->dtStart);
+	// Sort by start date and then done date
+	int nCmp = CompareDates(pSI1->dtStart, pSI2->dtStart);
 
-	if (bStart1 != bStart2)
-	{
-		return (bStart1 ? -1 : 1);
-	}
-	else if (!bStart1 && !bStart2)
-	{
-		return 0;
-	}
+	if (nCmp == 0)
+		nCmp = CompareDates(pSI1->dtDone, pSI2->dtDone);
 
-	if (pSI1->dtStart < pSI2->dtStart)
+	return nCmp;
+}
+
+int CStatsItemArray::CompareDates(const COleDateTime& date1, const COleDateTime& date2)
+{
+	// Tasks without a date come last to optimise searching
+	BOOL bDate1 = CDateHelper::IsDateSet(date1);
+	BOOL bDate2 = CDateHelper::IsDateSet(date2);
+
+	if (bDate1 && !bDate2)
 		return -1;
 
-	if (pSI1->dtStart > pSI2->dtStart)
+	if (!bDate1 && bDate2)
+		return 1;
+
+	if (!bDate1 && !bDate2)
+		return 0;
+
+	if (date1 < date2)
+		return -1;
+
+	if (date1 > date2)
 		return 1;
 
 	return 0;
 }
+
 
 void CStatsItemArray::GetDataExtents(COleDateTimeRange& dtExtents) const
 {

@@ -95,6 +95,7 @@ protected:
 	int FindItem(DWORD dwTaskID) const;
 
 	static int CompareItems(const void* pV1, const void* pV2);
+	static int CompareDates(const COleDateTime& date1, const COleDateTime& date2);
 };
 
 /////////////////////////////////////////////////////////////////////////////
