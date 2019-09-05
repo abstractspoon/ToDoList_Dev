@@ -32,10 +32,11 @@ public:
 
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	void FilterToolTipMessage(MSG* pMsg);
-
+	void SetTooltipOffset(int x, int y);
 
 protected:
 	CToolTipCtrlEx m_tooltip;
+	CPoint m_ptTooltipOffset;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -51,7 +52,8 @@ protected:
 	//{{AFX_MSG(CHMXChartEx)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
+DECLARE_MESSAGE_MAP()
 
 protected:
 	BOOL InitTooltip(BOOL bMultiline);

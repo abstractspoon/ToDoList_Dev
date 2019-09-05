@@ -37,7 +37,8 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_data(data),
 	m_nScale(BCS_DAY),
 	m_nChartType(BCT_INCOMPLETETASKS),
-	m_calculator(data)
+	m_calculator(data),
+	m_nLastTooltipHit(-1)
 {
 	VERIFY(m_graphs.Add(new CIncompleteTasksGraph()) == BCT_INCOMPLETETASKS);
 	VERIFY(m_graphs.Add(new CRemainingDaysGraph()) == BCT_REMAININGDAYS);
@@ -148,10 +149,10 @@ BURNDOWN_CHARTSCALE CBurndownChart::CalculateRequiredXScale() const
 void CBurndownChart::RebuildXScale()
 {
 	ClearXScaleLabels();
+	SetXLabelStep(1); // Because we often have an uneven label spacing
 
 	// calc new scale
 	m_nScale = CalculateRequiredXScale();
-	SetXLabelStep(m_nScale);
 
 	// Get new start and end dates
 	COleDateTime dtStart = m_dtExtents.GetStart();
@@ -163,45 +164,51 @@ void CBurndownChart::RebuildXScale()
 	COleDateTime dtTick = dtStart;
 	CString sTick;
 	
-	for (int nDay = 0; nDay <= nNumDays; nDay += m_nScale)
+	for (int nDay = 0; nDay <= nNumDays; )
 	{
 		sTick = CDateHelper::FormatDate(dtTick);
 		SetXScaleLabel(nDay, sTick);
 
 		// next Tick date
+		COleDateTime dtNextTick(dtTick);
+
 		switch (m_nScale)
 		{
 		case BCS_DAY:
-			dtTick.m_dt += 1.0;
+			dtNextTick.m_dt += 1.0;
 			break;
 			
 		case BCS_WEEK:
-			dh.OffsetDate(dtTick, 1, DHU_WEEKS);
+			dh.OffsetDate(dtNextTick, 1, DHU_WEEKS);
 			break;
 			
 		case BCS_MONTH:
-			dh.OffsetDate(dtTick, 1, DHU_MONTHS);
+			dh.OffsetDate(dtNextTick, 1, DHU_MONTHS);
 			break;
 			
 		case BCS_2MONTH:
-			dh.OffsetDate(dtTick, 2, DHU_MONTHS);
+			dh.OffsetDate(dtNextTick, 2, DHU_MONTHS);
 			break;
 			
 		case BCS_QUARTER:
-			dh.OffsetDate(dtTick, 3, DHU_MONTHS);
+			dh.OffsetDate(dtNextTick, 3, DHU_MONTHS);
 			break;
 			
 		case BCS_HALFYEAR:
-			dh.OffsetDate(dtTick, 6, DHU_MONTHS);
+			dh.OffsetDate(dtNextTick, 6, DHU_MONTHS);
 			break;
 			
 		case BCS_YEAR:
-			dh.OffsetDate(dtTick, 1, DHU_YEARS);
+			dh.OffsetDate(dtNextTick, 1, DHU_YEARS);
 			break;
 			
 		default:
 			ASSERT(0);
 		}
+
+		nDay += (int)(dtNextTick.m_dt - dtTick.m_dt);
+
+		dtTick = dtNextTick;
 	}
 }
 
@@ -249,10 +256,15 @@ void CBurndownChart::PreSubclassWindow()
 	SetYTicks(10);
 
 	VERIFY(InitTooltip(TRUE));
+
+	SetTooltipOffset(16, 0);
 }
 
 int CBurndownChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
+	if (m_nLastTooltipHit != -1)
+		HighlightDataPoints(m_nLastTooltipHit);
+
 	int nHit = HitTest(point);
 
 	if (nHit != -1)
@@ -260,11 +272,50 @@ int CBurndownChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		CString sTooltip = m_graphs[m_nChartType]->GetTooltip(m_calculator, m_datasets, nHit);
 
 		if (!sTooltip.IsEmpty())
+		{
+			if (HighlightDataPoints(nHit))
+				m_nLastTooltipHit = nHit;
+						
 			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
+		}
 	}
 
 	// else
 	return CHMXChartEx::OnToolHitTest(point, pTI);
+}
+
+BOOL CBurndownChart::HighlightDataPoints(int nIndex) const
+{
+	// Draw boxes around data point(s)
+	CDC* pDC = NULL;
+	int nDataset = m_graphs[m_nChartType]->GetNumDatasets();
+
+	while (nDataset--)
+	{
+		CPoint ptData;
+
+		if (!GetPointXY(nDataset, nIndex, ptData))
+			break;
+
+		if (pDC == NULL)
+			pDC = const_cast<CBurndownChart*>(this)->GetDC();
+
+		CRect rData(ptData, CSize(1, 1));
+		rData.InflateRect(2, 2);
+
+		pDC->SetROP2(R2_NOT);
+
+		pDC->MoveTo(rData.left, rData.bottom);
+		pDC->LineTo(rData.left, rData.top);
+		pDC->LineTo(rData.right, rData.top);
+		pDC->LineTo(rData.right, rData.bottom);
+		pDC->LineTo(rData.left, rData.bottom);
+	}
+
+	if (pDC)
+		const_cast<CBurndownChart*>(this)->ReleaseDC(pDC);
+
+	return (pDC != NULL);
 }
 
 int CBurndownChart::HitTest(const CPoint& ptClient) const

@@ -19,6 +19,7 @@ public:
 	virtual CString GetTitle() const  = 0;
 	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const = 0;
+	virtual int GetNumDatasets() const { return 1; }
 
 protected:
 	CGraphBase() {}
@@ -42,6 +43,7 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
+	int GetNumDatasets() const { return 2; }
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -52,6 +54,7 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
+	int GetNumDatasets() const { return 2; }
 };
 
 /////////////////////////////////////////////////////////////////////////////

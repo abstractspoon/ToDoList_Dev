@@ -402,10 +402,15 @@ bool CHMXChart::DrawVertGridLines(CDC & dc)
 	double nX = (double)m_rectData.Width()/(double)m_nXMax;
 	CPen* pPenOld = dc.SelectObject(&m_penGrid);
 
-	for(int f=0; f<m_nXMax; f=f+m_nXLabelStep) 
+	int nCount = min(m_strarrScaleXLabel.GetSize(), m_nXMax);
+
+	for(int f=0; f < nCount; f += m_nXLabelStep)
 	{
-		dc.MoveTo(m_rectData.left + (int)(nX*(f+0.5)), m_rectData.top);
-		dc.LineTo(m_rectData.left + (int)(nX*(f+0.5)), m_rectData.bottom + 8);
+		if (!m_strarrScaleXLabel[f].IsEmpty())
+		{
+			dc.MoveTo(m_rectData.left + (int)(nX*(f+0.5)), m_rectData.top);
+			dc.LineTo(m_rectData.left + (int)(nX*(f+0.5)), m_rectData.bottom + 8);
+		}
 	}
 
 	dc.MoveTo(m_rectData.left + m_rectData.Width() - 1, m_rectData.top);
@@ -536,24 +541,29 @@ bool CHMXChart::DrawXScale(CDC & dc)
 
 		for(int f=0; f<nCount; f=f+m_nXLabelStep) 
 		{
-			CRect rText(m_rectXAxis);
+			const CString& sLabel = m_strarrScaleXLabel.GetAt(f);
+
+			if (!sLabel.IsEmpty())
+			{
+				CRect rText(m_rectXAxis);
 			
-			rText.top += HMX_XSCALE_OFFSET;
-			rText.left += (int)(dX*(f+0.5)) + 4;
+				rText.top += HMX_XSCALE_OFFSET;
+				rText.left += (int)(dX*(f+0.5)) + 4;
 
-			if (m_nXLabelDegrees > 0)
-			{
-				dc.SetTextAlign(TA_BASELINE | TA_RIGHT);
-				dc.TextOut(rText.left, rText.top, m_strarrScaleXLabel.GetAt(f));
-			}
-			else
-			{
-				rText.right = rText.left + (int)(dX * m_nXLabelStep);
-
-				if (m_bXLabelsAreTicks)
-					dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+				if (m_nXLabelDegrees > 0)
+				{
+					dc.SetTextAlign(TA_BASELINE | TA_RIGHT);
+					dc.TextOut(rText.left, rText.top, sLabel);
+				}
 				else
-					dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+				{
+					rText.right = rText.left + (int)(dX * m_nXLabelStep);
+
+					if (m_bXLabelsAreTicks)
+						dc.DrawText(sLabel, rText, DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+					else
+						dc.DrawText(sLabel, rText, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+				}
 			}
 		}
 	
@@ -962,6 +972,40 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&
 	}
 
 	return points.GetSize();
+}
+
+BOOL CHMXChart::GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double nBarWidth) const
+{
+	gdix_PointF ptTemp;
+
+	if (!GetPointXY(nDatasetIndex, nIndex, ptTemp, nBarWidth))
+		return FALSE;
+
+	point.x = (int)ptTemp.x;
+	point.y = (int)ptTemp.y;
+
+	return TRUE;
+}
+
+BOOL CHMXChart::GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, double nBarWidth) const
+{
+	double nSample;
+
+	if (!GetData(nDatasetIndex, nIndex, nSample))
+		return FALSE;
+
+	if (nSample == HMX_DATASET_VALUE_INVALID)
+		return FALSE;
+
+	if (nBarWidth <= 0)
+		nBarWidth = (double)m_rectData.Width() / (double)m_nXMax;
+
+	double nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
+
+	point.x = m_rectData.left + (float)(nBarWidth/2.0) + (int)(nBarWidth*nIndex);
+	point.y = m_rectData.bottom - (float) nTemp;
+
+	return TRUE;
 }
 
 //

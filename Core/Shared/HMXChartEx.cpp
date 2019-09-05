@@ -86,6 +86,7 @@ BEGIN_MESSAGE_MAP(CHMXChartEx, CHMXChart)
 	//{{AFX_MSG_MAP(CHMXChartEx)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
+	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 END_MESSAGE_MAP()
 
 
@@ -152,6 +153,28 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 		m_tooltip.SetMaxTipWidth(1024); // for '\n' support
 
 	return TRUE;
+}
+
+void CHMXChartEx::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = 0;
+
+	if (m_ptTooltipOffset.x || m_ptTooltipOffset.y)
+	{
+		CRect rTooltip;
+		m_tooltip.GetWindowRect(rTooltip);
+
+		rTooltip.OffsetRect(m_ptTooltipOffset);
+		m_tooltip.MoveWindow(rTooltip);
+
+		*pResult = TRUE; // we handled it
+	}
+}
+
+void CHMXChartEx::SetTooltipOffset(int x, int y)
+{
+	m_ptTooltipOffset.x = x;
+	m_ptTooltipOffset.y = y;
 }
 
 bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
