@@ -134,16 +134,16 @@ EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Dis&play",IDC_STATIC,0,2,159,8
-    COMBOBOX        IDC_DISPLAY,0,13,79,118,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_DISPLAY,0,13,121,118,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "",IDC_FRAME,"Static",SS_GRAYFRAME,0,28,314,253
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,87,12,122,13
+                    WS_VISIBLE,126,12,122,13
     CONTROL         "",IDC_GRAPH,"Button",BS_OWNERDRAW | WS_TABSTOP,8,38,298,
                     234
-    LTEXT           "Acti&ve Date Range",IDC_ACTIVEDATERANGE_LABEL,216,2,233,
+    LTEXT           "Acti&ve Date Range",IDC_ACTIVEDATERANGE_LABEL,255,2,167,
                     8
-    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,215,
+    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,254,
                     12,112,13
 END
 
@@ -199,6 +199,8 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_ACTIVEDATERANGE     "Acti&ve Date Range (%s)"
+    IDS_TOOLTIP_STARTEDCOMPLETED "%s\n%d Tasks"
+    IDS_DISPLAY_STARTEDCOMPLETED "Started/Completed Tasks"
 END
 
 #endif    // English (Australia) resources

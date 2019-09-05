@@ -40,6 +40,7 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 {
 	VERIFY(m_graphs.Add(new CIncompleteTasksGraph()) == BCT_INCOMPLETETASKS);
 	VERIFY(m_graphs.Add(new CRemainingDaysGraph()) == BCT_REMAININGDAYS);
+	VERIFY(m_graphs.Add(new CStartedCompletedTasksGraph()) == BCT_STARTEDCOMPLETEDTASKS);
 	//m_graphs.Add(new ());
 
 }

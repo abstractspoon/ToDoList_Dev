@@ -197,4 +197,36 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 
 //////////////////////////////////////////////////////////////////////////////////////
 
+enum
+{
+	STARTED_TASKS,
+	ENDED_TASKS
+};
 
+CString CStartedCompletedTasksGraph::GetTitle() const
+{
+	return CEnString(IDS_DISPLAY_STARTEDCOMPLETED);
+}
+
+void CStartedCompletedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+{
+	// TODO
+}
+
+CString CStartedCompletedTasksGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+{
+	ASSERT(nHit != -1);
+
+	double dDate = (calculator.GetStartDate().m_dt + nHit), dNumStarted, dNumCompleted;
+	CString sTooltip;
+
+	if (datasets[STARTED_TASKS].GetData(nHit, dNumCompleted) &&
+		datasets[ENDED_TASKS].GetData(nHit, dNumStarted))
+	{
+		sTooltip.Format(CEnString(IDS_TOOLTIP_STARTEDCOMPLETED), CDateHelper::FormatDate(dDate), (int)dNumStarted, (int)dNumCompleted);
+	}
+
+	return sTooltip;
+}
+
+/////////////////////////////////////////////////////////////////////////////

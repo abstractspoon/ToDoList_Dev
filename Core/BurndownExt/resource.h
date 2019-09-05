@@ -28,6 +28,8 @@
 #define IDC_FRAME                       17003
 #define IDC_DIVIDER                     17004
 #define IDS_ACTIVEDATERANGE             57688
+#define IDS_TOOLTIP_STARTEDCOMPLETED    57689
+#define IDS_DISPLAY_STARTEDCOMPLETED    57690
 
 // Next default values for new objects
 // 
