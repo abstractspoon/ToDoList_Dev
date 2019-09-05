@@ -526,8 +526,7 @@ int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int n
 		return 0;
 	
 	int nNumItems = m_data.GetSize();
-	int nNumNotDone = 0;
-	int nEarliestNotDone = -1, nLatestDone = -1;
+	int nNumStarted = 0, nNumDone = 0;
 	
 	for (int nItem = nItemFrom; nItem < nNumItems; nItem++)
 	{
@@ -535,36 +534,22 @@ int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int n
 
 		if (pSI->dtStart < m_dtExtents.GetStart())
 			continue;
-		
+
 		if ((pSI->dtStart > date) || (pSI->dtStart > m_dtExtents.GetEndInclusive()))
 			break;
-		
-		if (!pSI->IsDone() || (pSI->dtDone > date))
-		{
-			nNumNotDone++;
-			
-			if ((nEarliestNotDone == -1) && pSI->HasStart())
-				nEarliestNotDone = nItem;
-		}
-		else if (nLatestDone == -1)
-		{
-			nLatestDone = nItem;
-		}
-		else if (pSI->dtDone > m_data[nLatestDone]->dtDone)
-		{
-			nLatestDone = nItem;
-		}
+
+		nNumStarted++;
+
+		if (pSI->IsDone() && (pSI->dtDone < date))
+			nNumDone++;
+
+		// Optimisation: If we ever hit zero then we only need 
+		// calculate from this point on for later dates
+		if (nNumDone == nNumStarted)
+			nNextItemFrom = (nItem + 1);
 	}
 	
-	// If the earliest incomplete task in the sequence starts before 
-	// the very last completed task then in the next iteration we need 
-	// only process tasks beginning with the earliest incomplete task
-	// because we have proved that all tasks starting before this
-	// task have also been completed
-	if ((nEarliestNotDone != -1) && (nLatestDone != -1) && (nEarliestNotDone > nLatestDone))
-		nNextItemFrom = nEarliestNotDone;
-	
-	return nNumNotDone;
+	return (nNumStarted - nNumDone);
 }
 
 BOOL CStatsItemCalculator::GetStartedCompletedTaskCounts(const COleDateTime& date, int &nNumStarted, int &nNumDone) const

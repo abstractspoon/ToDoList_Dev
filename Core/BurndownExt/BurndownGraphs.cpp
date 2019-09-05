@@ -11,6 +11,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
 #include "..\shared\graphicsmisc.h"
+#include "..\shared\ScopedTimer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -60,22 +61,20 @@ void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, C
 
 	if (nNumDays)
 	{
+		//CScopedLogTimer timer(_T("CIncompleteTasksGraph::BuildGraph"));
 		COleDateTime dtStart = calculator.GetStartDate();
 		int nItemFrom = 0;
-	
+
 		for (int nDay = 0; nDay <= nNumDays; nDay++)
 		{
 			COleDateTime date(dtStart.m_dt + nDay);
-		
-			if (dtStart > date)
-			{
-				datasets[0].AddData(0);
-			}
-			else
-			{
-				int nNumNotDone = calculator.GetIncompleteTaskCount(date, nItemFrom, nItemFrom);
-				datasets[0].AddData(nNumNotDone);
-			}
+
+			int nNumNotDone = 0;
+
+			if (date > dtStart)
+				nNumNotDone = calculator.GetIncompleteTaskCount(date, nItemFrom, nItemFrom);
+
+			datasets[0].AddData(nNumNotDone);
 		}
 
 		// Set the maximum Y value to be something 'nice'
@@ -223,6 +222,7 @@ void CStartedCompletedTasksGraph::BuildGraph(const CStatsItemCalculator& calcula
 
 	if (nNumDays > 0)
 	{
+		//CScopedLogTimer timer(_T("CStartedCompletedTasksGraph::BuildGraph"));
 		COleDateTime dtStart = calculator.GetStartDate();
 
 		for (int nDay = 0; nDay <= nNumDays; nDay++)
@@ -238,14 +238,10 @@ void CStartedCompletedTasksGraph::BuildGraph(const CStatsItemCalculator& calcula
 		}
 
 		// Set the maximum Y value to be something 'nice'
-		double dMin, dMax;
-
-		// Note: started count is always greater than completed count
-		// so we only need to get the max/min of the started tasks
-		if (HMXUtils::GetMinMax(datasets, 1, dMin, dMax, true))
+		double dMax = 0.0;
+		
+		if (datasets[STARTED_TASKS].GetData(nNumDays, dMax))
 		{
-			ASSERT(dMin == 0.0);
-
 			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
 
 			datasets[STARTED_TASKS].SetMax(dMax);

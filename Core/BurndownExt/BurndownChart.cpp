@@ -11,6 +11,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
 #include "..\shared\graphicsmisc.h"
+//#include "..\shared\filemisc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -43,6 +44,7 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	VERIFY(m_graphs.Add(new CStartedCompletedTasksGraph()) == BCT_STARTEDCOMPLETEDTASKS);
 	//m_graphs.Add(new ());
 
+	//FileMisc::EnableLogging(TRUE);
 }
 
 CBurndownChart::~CBurndownChart()
