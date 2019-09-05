@@ -42,12 +42,12 @@ const int    LINE_THICKNESS			= 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
-CString CIncompleteDaysGraph::GetTitle() const
+CString CIncompleteTasksGraph::GetTitle() const
 {
 	return CEnString(IDS_DISPLAY_INCOMPLETE);
 }
 
-void CIncompleteDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	datasets[0].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[0].SetLineColor(COLOR_GREENLINE);
@@ -93,7 +93,7 @@ void CIncompleteDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CH
 	}
 }
 
-CString CIncompleteDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	ASSERT(nHit != -1);
 

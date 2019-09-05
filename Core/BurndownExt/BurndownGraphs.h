@@ -26,7 +26,7 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CIncompleteDaysGraph : public CGraphBase
+class CIncompleteTasksGraph : public CGraphBase
 {
 public:
 	CString GetTitle() const;
