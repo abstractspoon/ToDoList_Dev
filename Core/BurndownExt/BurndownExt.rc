@@ -199,7 +199,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_ACTIVEDATERANGE     "Acti&ve Date Range (%s)"
-    IDS_TOOLTIP_STARTEDCOMPLETED "%s\n%d Tasks"
+    IDS_TOOLTIP_STARTEDCOMPLETED "%s\n%d Started\n%d Completed"
     IDS_DISPLAY_STARTEDCOMPLETED "Started/Completed Tasks"
 END
 

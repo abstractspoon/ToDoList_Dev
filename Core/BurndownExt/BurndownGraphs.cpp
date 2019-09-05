@@ -56,13 +56,11 @@ void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, C
 	datasets[0].SetMin(0.0);
 
 	// build the graph
-	COleDateTime dtStart = calculator.GetStartDate();
-	COleDateTime dtEnd = calculator.GetEndDate();
-
-	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
+	int nNumDays = calculator.GetTotalDays();
 
 	if (nNumDays)
 	{
+		COleDateTime dtStart = calculator.GetStartDate();
 		int nItemFrom = 0;
 	
 		for (int nDay = 0; nDay <= nNumDays; nDay++)
@@ -137,15 +135,13 @@ void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHM
 	datasets[REMAINING_SPENT].SetMin(0.0);
 	
 	// build the graph
-	COleDateTime dtStart = calculator.GetStartDate();
-	COleDateTime dtEnd = calculator.GetEndDate();
-	
-	double dTotalEst = calculator.GetTotalTimeEstimateInDays();
-	
-	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
+	int nNumDays = calculator.GetTotalDays();
 	
 	if (nNumDays > 0)
 	{
+		COleDateTime dtStart = calculator.GetStartDate();
+		double dTotalEst = calculator.GetTotalTimeEstimateInDays();
+
 		for (int nDay = 0; nDay <= nNumDays; nDay++)
 		{
 			// Time Estimate
@@ -210,20 +206,65 @@ CString CStartedCompletedTasksGraph::GetTitle() const
 
 void CStartedCompletedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	// TODO
+	datasets[STARTED_TASKS].SetStyle(HMX_DATASET_STYLE_AREALINE);
+	datasets[STARTED_TASKS].SetLineColor(COLOR_GREENLINE);
+	datasets[STARTED_TASKS].SetFillColor(COLOR_GREENFILL);
+	datasets[STARTED_TASKS].SetSize(LINE_THICKNESS);
+	datasets[STARTED_TASKS].SetMin(0.0);
+
+	datasets[ENDED_TASKS].SetStyle(HMX_DATASET_STYLE_AREALINE);
+	datasets[ENDED_TASKS].SetLineColor(COLOR_REDLINE);
+	datasets[ENDED_TASKS].SetFillColor(COLOR_REDFILL);
+	datasets[ENDED_TASKS].SetSize(LINE_THICKNESS);
+	datasets[ENDED_TASKS].SetMin(0.0);
+
+	// build the graph
+	int nNumDays = calculator.GetTotalDays();
+
+	if (nNumDays > 0)
+	{
+		COleDateTime dtStart = calculator.GetStartDate();
+
+		for (int nDay = 0; nDay <= nNumDays; nDay++)
+		{
+			COleDateTime date(dtStart.m_dt + nDay);
+			int nNumStarted = 0, nNumDone = 0;
+
+			if (date > dtStart)
+				calculator.GetStartedCompletedTaskCounts(date, nNumStarted, nNumDone);
+
+			datasets[STARTED_TASKS].AddData(nNumStarted);
+			datasets[ENDED_TASKS].AddData(nNumDone);
+		}
+
+		// Set the maximum Y value to be something 'nice'
+		double dMin, dMax;
+
+		// Note: started count is always greater than completed count
+		// so we only need to get the max/min of the started tasks
+		if (HMXUtils::GetMinMax(datasets, 1, dMin, dMax, true))
+		{
+			ASSERT(dMin == 0.0);
+
+			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
+
+			datasets[STARTED_TASKS].SetMax(dMax);
+			datasets[ENDED_TASKS].SetMax(dMax);
+		}
+	}
 }
 
 CString CStartedCompletedTasksGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	ASSERT(nHit != -1);
 
-	double dDate = (calculator.GetStartDate().m_dt + nHit), dNumStarted, dNumCompleted;
+	double dDate = (calculator.GetStartDate().m_dt + nHit), dNumStarted, nNumDone;
 	CString sTooltip;
 
-	if (datasets[STARTED_TASKS].GetData(nHit, dNumCompleted) &&
-		datasets[ENDED_TASKS].GetData(nHit, dNumStarted))
+	if (datasets[STARTED_TASKS].GetData(nHit, dNumStarted) &&
+		datasets[ENDED_TASKS].GetData(nHit, nNumDone))
 	{
-		sTooltip.Format(CEnString(IDS_TOOLTIP_STARTEDCOMPLETED), CDateHelper::FormatDate(dDate), (int)dNumStarted, (int)dNumCompleted);
+		sTooltip.Format(CEnString(IDS_TOOLTIP_STARTEDCOMPLETED), CDateHelper::FormatDate(dDate), (int)dNumStarted, (int)nNumDone);
 	}
 
 	return sTooltip;

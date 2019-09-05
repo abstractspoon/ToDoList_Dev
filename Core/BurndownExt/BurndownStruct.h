@@ -123,7 +123,10 @@ public:
 	double GetCostSpent(const COleDateTime& date) const;
 	double GetCostEstimate(const COleDateTime& date) const;
 
+	int GetTotalDays() const;
+	int GetTotalWeekdays() const;
 	int GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
+	BOOL GetStartedCompletedTaskCounts(const COleDateTime& date, int &nNumStarted, int &nNumDone) const;
 
 protected:
 	const CStatsItemArray& m_data;

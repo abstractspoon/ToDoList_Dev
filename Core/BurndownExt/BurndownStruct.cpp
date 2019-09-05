@@ -509,6 +509,16 @@ BOOL CStatsItemCalculator::SetDateRange(const COleDateTimeRange& dtExtents)
 	return m_dtExtents.Set(dtExtents);
 }
 
+int CStatsItemCalculator::GetTotalDays() const
+{
+	return m_dtExtents.GetDayCount();
+}
+
+int CStatsItemCalculator::GetTotalWeekdays() const
+{
+	return m_dtExtents.GetWeekdayCount();
+}
+
 int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const
 {
 	// Sanity check
@@ -555,6 +565,37 @@ int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int n
 		nNextItemFrom = nEarliestNotDone;
 	
 	return nNumNotDone;
+}
+
+BOOL CStatsItemCalculator::GetStartedCompletedTaskCounts(const COleDateTime& date, int &nNumStarted, int &nNumDone) const
+{
+	nNumStarted = nNumDone = 0;
+
+	// Sanity check
+	if (date < m_dtExtents.GetStart())
+		return 0;
+	
+	int nNumItems = m_data.GetSize();
+	
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const STATSITEM* pSI = m_data[nItem];
+
+		if (pSI->dtStart < m_dtExtents.GetStart())
+			continue;
+		
+		if ((pSI->dtStart > date) || (pSI->dtStart > m_dtExtents.GetEndInclusive()))
+			break;
+		
+		nNumStarted++;
+
+		if (pSI->IsDone() && (pSI->dtDone < date))
+			nNumDone++;
+	}
+
+	ASSERT(nNumDone <= nNumStarted);
+	
+	return (nNumStarted > 0);
 }
 
 // ----------------------------------------------------
