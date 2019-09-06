@@ -159,6 +159,7 @@ protected:
 	virtual bool DrawYScale( CDC& dc );						
 	virtual bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);	
 	virtual bool DrawDatasets(CDC &dc);						
+	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 
 	virtual COLORREF GetLineColor(int nDatasetIndex, double dValue) const;
 	virtual COLORREF GetFillColor(int nDatasetIndex, double dValue) const;
@@ -205,7 +206,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 	int GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&>& points, BOOL bArea) const;
 	BOOL GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int nSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const;
 	int CalcAxisSize(const CRect& rAvail, CDC& dc) const;

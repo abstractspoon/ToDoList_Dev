@@ -84,11 +84,14 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 	{
 		Activate(FALSE);
 	}
-	else if ((message == WM_MOUSEMOVE || message == WM_NCMOUSEMOVE ||
-				message == WM_LBUTTONUP || message == WM_RBUTTONUP ||
-				message == WM_MBUTTONUP) &&
-				(GetKeyState(VK_LBUTTON) >= 0 && GetKeyState(VK_RBUTTON) >= 0 &&
-				GetKeyState(VK_MBUTTON) >= 0))
+	else if (((message == WM_MOUSEMOVE) || 
+			  (message == WM_NCMOUSEMOVE) ||
+			  (message == WM_LBUTTONUP) || 
+			  (message == WM_RBUTTONUP) || 
+			  (message == WM_MBUTTONUP)) &&
+			((GetKeyState(VK_LBUTTON) >= 0) && 
+			 (GetKeyState(VK_RBUTTON) >= 0) &&
+			 (GetKeyState(VK_MBUTTON) >= 0)))
 	{
 		// Check it's within our owner's rect
 		CWnd* pOwner = GetOwner();
@@ -187,22 +190,44 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 
 		if (pWnd != this)
 			return;
-
+		
 		BOOL bKeys = (message >= WM_KEYFIRST && message <= WM_KEYLAST) ||
 					(message >= WM_SYSKEYFIRST && message <= WM_SYSKEYLAST);
 
-		if ((m_nFlags & WF_TRACKINGTOOLTIPS) == 0 &&
-			(bKeys ||
-			(message == WM_LBUTTONDOWN || message == WM_LBUTTONDBLCLK) ||
-			(message == WM_RBUTTONDOWN || message == WM_RBUTTONDBLCLK) ||
-			(message == WM_MBUTTONDOWN || message == WM_MBUTTONDBLCLK) ||
-			(message == WM_NCLBUTTONDOWN || message == WM_NCLBUTTONDBLCLK) ||
-			(message == WM_NCRBUTTONDOWN || message == WM_NCRBUTTONDBLCLK) ||
-			(message == WM_NCMBUTTONDOWN || message == WM_NCMBUTTONDBLCLK)))
+		if (!(m_nFlags & WF_TRACKINGTOOLTIPS) && 
+			(IsKeypress(message) || IsMouseDown(message)))
 		{
 			Activate(FALSE);
 		}
 	}
+}
+
+BOOL CToolTipCtrlEx::IsMouseDown(UINT nMsgID)
+{
+	switch (nMsgID)
+	{
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONDBLCLK:
+	case WM_RBUTTONDOWN:
+	case WM_RBUTTONDBLCLK:
+	case WM_MBUTTONDOWN:
+	case WM_MBUTTONDBLCLK:
+	case WM_NCLBUTTONDOWN:
+	case WM_NCLBUTTONDBLCLK:
+	case WM_NCRBUTTONDOWN:
+	case WM_NCRBUTTONDBLCLK:
+	case WM_NCMBUTTONDOWN:
+	case WM_NCMBUTTONDBLCLK:
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CToolTipCtrlEx::IsKeypress(UINT nMsgID)
+{
+	return ((nMsgID >= WM_KEYFIRST && nMsgID <= WM_KEYLAST) ||
+			(nMsgID >= WM_SYSKEYFIRST && nMsgID <= WM_SYSKEYLAST));
 }
 
 int CToolTipCtrlEx::DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti)
@@ -258,11 +283,9 @@ HWND CToolTipCtrlEx::GetParentOwner(HWND hWnd)
 	return ::GetWindow(hWnd, GW_OWNER);
 }
 
-BOOL CToolTipCtrlEx::WantMessage(const MSG* pMsg)
+BOOL CToolTipCtrlEx::WantMessage(UINT nMsgID)
 {
-	UINT message = pMsg->message;
-
-	switch (message)
+	switch (nMsgID)
 	{
 	case WM_MOUSELEAVE:
 	case WM_NCMOUSELEAVE:
@@ -271,21 +294,11 @@ BOOL CToolTipCtrlEx::WantMessage(const MSG* pMsg)
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
 	case WM_MBUTTONUP:
-	case WM_LBUTTONDOWN:
-	case WM_RBUTTONDOWN:
-	case WM_MBUTTONDOWN:
-	case WM_LBUTTONDBLCLK:
-	case WM_RBUTTONDBLCLK:
-	case WM_MBUTTONDBLCLK:
-	case WM_NCLBUTTONDBLCLK:
-	case WM_NCRBUTTONDBLCLK:
-	case WM_NCMBUTTONDBLCLK:
 		return TRUE;
 	}
 
-	// all else
-	return (message >= WM_KEYFIRST && message <= WM_KEYLAST) ||
-			(message >= WM_SYSKEYFIRST && message <= WM_SYSKEYLAST);
+	// else
+	return (IsKeypress(nMsgID) || IsMouseDown(nMsgID));
 }
 
 void CToolTipCtrlEx::Activate(BOOL bActivate)

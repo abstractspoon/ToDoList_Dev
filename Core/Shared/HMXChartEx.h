@@ -50,12 +50,15 @@ protected:
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 	virtual CString GetTooltip(int nHit) const;
 	virtual int HitTest(const CPoint& ptClient) const;
+	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd);
 
 	// Generated message map functions
 	//{{AFX_MSG(CHMXChartEx)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnMouseLeave();
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -63,6 +66,7 @@ protected:
 	int GetYSubTicks(double dInterval) const;
 	
 	BOOL HighlightDataPoints(int nIndex);
+	void HideLastHighlightedPoint();
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -257,8 +257,10 @@ void CEnEdit::SetBorders(int nTop, int nBottom)
 
 void CEnEdit::FilterToolTipMessage(MSG* pMsg)
 {
-	if (m_tooltip.GetSafeHwnd() && CToolTipCtrlEx::WantMessage(pMsg))
+	if (m_tooltip.GetSafeHwnd() && CToolTipCtrlEx::WantMessage(pMsg->message))
+	{
 		m_tooltip.FilterToolTipMessage(pMsg);
+	}
 }
 
 BOOL CEnEdit::PreTranslateMessage(MSG* pMsg)

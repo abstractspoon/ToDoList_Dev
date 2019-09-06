@@ -96,6 +96,9 @@ BEGIN_MESSAGE_MAP(CHMXChartEx, CHMXChart)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
+	ON_WM_MOUSEMOVE()
+	ON_WM_MOUSELEAVE()
+	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 
@@ -254,9 +257,7 @@ BOOL CHMXChartEx::HighlightDataPoints(int nIndex)
 
 int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	if (m_nLastTooltipHit != -1)
-		const_cast<CHMXChartEx*>(this)->HighlightDataPoints(m_nLastTooltipHit);
-
+	const_cast<CHMXChartEx*>(this)->HideLastHighlightedPoint(); // always
 	int nHit = HitTest(point);
 
 	if (nHit != -1)
@@ -293,4 +294,33 @@ int CHMXChartEx::HitTest(const CPoint& ptClient) const
 	int nXOffset = (ptClient.x - m_rectData.left);
 
 	return ((nXOffset * nNumData) / m_rectData.Width());
+}
+
+void CHMXChartEx::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// Tooltip is handled in OnToolHitTest but we still need
+	// to check for when the mouse leaves the graph area
+	if (!m_rectData.PtInRect(point))
+		HideLastHighlightedPoint();
+}
+
+void CHMXChartEx::OnMouseLeave()
+{
+	HideLastHighlightedPoint();
+}
+
+void CHMXChartEx::DoPaint(CDC& dc, BOOL bPaintBkgnd)
+{
+	m_nLastTooltipHit = -1;
+
+	CHMXChart::DoPaint(dc, bPaintBkgnd);
+}
+
+void CHMXChartEx::HideLastHighlightedPoint()
+{
+	if (m_nLastTooltipHit != -1)
+	{
+		HighlightDataPoints(m_nLastTooltipHit);
+		m_nLastTooltipHit = -1;
+	}
 }

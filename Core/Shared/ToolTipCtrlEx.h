@@ -28,7 +28,9 @@ public:
 
 	const TOOLINFO& GetLastHitToolInfo() const;
 
-	static BOOL WantMessage(const MSG* pMsg);
+	static BOOL IsKeypress(UINT nMsgID);
+	static BOOL IsMouseDown(UINT nMsgID);
+	static BOOL WantMessage(UINT nMsgID);
 	static int SetToolInfo(TOOLINFO& ti, const CWnd* pWnd, const CString sTooltip, int nID, const CRect& rBounds, UINT nFlags = TTF_TRANSPARENT | TTF_NOTBUTTON);
 
 protected:
@@ -43,7 +45,6 @@ protected:
 	static int DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti);
 	static BOOL IsTopParentActive(CWnd* pOwner);
 	static HWND GetParentOwner(HWND hWnd);
-
 };
 
 #endif // AFX_TOOLTIPCTRLEX_H__09FB7C3D_BBA8_43B3_A7B3_1D95C946892B__INCLUDED_
