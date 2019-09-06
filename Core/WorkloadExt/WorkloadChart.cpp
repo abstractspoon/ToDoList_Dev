@@ -279,36 +279,23 @@ BOOL CWorkloadChart::IsUnderloaded(double dValue) const
 	return (HasUnderload() && (dValue <= m_dUnderloadValue));
 }
 
-int CWorkloadChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+CString CWorkloadChart::GetTooltip(int nHit) const
 {
-	int nAllocTo = HitTest(point);
+	ASSERT(nHit != -1);
 
-	if (nAllocTo != -1)
-	{
-		CString sAllocTo = m_aAllocTo[nAllocTo];
-		double dPercent = m_mapPercentLoad.Get(sAllocTo);
+	CString sAllocTo = m_aAllocTo[nHit];
+	double dPercent = m_mapPercentLoad.Get(sAllocTo);
 
-		CString sTooltip;
-		sTooltip.Format(_T("%s: %.2f%%"), sAllocTo, dPercent);
+	CString sTooltip;
+	sTooltip.Format(_T("%s: %.2f%%"), sAllocTo, dPercent);
 
-		return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
-	}
-
-	return CHMXChartEx::OnToolHitTest(point, pTI);
+	return sTooltip;
 }
 
 int CWorkloadChart::HitTest(const CPoint& ptClient) const
 {
-	if (!m_rectData.Width() || !m_aAllocTo.GetSize())
+	if (!m_aAllocTo.GetSize())
 		return -1;
 
-	if (!m_rectData.PtInRect(ptClient))
-		return -1;
-
-	int nNumData = m_datasets[0].GetDatasetSize();
-	int nXOffset = (ptClient.x - m_rectData.left);
-
-	int nAllocTo = ((nXOffset * nNumData) / m_rectData.Width());
-	
-	return min(nAllocTo, m_aAllocTo.GetSize());
+	return CHMXChartEx::HitTest(ptClient);
 }

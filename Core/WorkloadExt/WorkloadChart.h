@@ -38,7 +38,6 @@ protected:
 	
 protected:
 	int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
 
 	DECLARE_MESSAGE_MAP()
 
@@ -52,7 +51,10 @@ protected:
 	bool DrawGrid(CDC& dc);
 	BOOL HasOverload() const;
 	BOOL HasUnderload() const;
+
+	// virtual overrides
 	int HitTest(const CPoint& ptClient) const;
+	CString GetTooltip(int) const;
 
 };
 

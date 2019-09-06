@@ -37,8 +37,7 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_data(data),
 	m_nScale(BCS_DAY),
 	m_nChartType(BCT_INCOMPLETETASKS),
-	m_calculator(data),
-	m_nLastTooltipHit(-1)
+	m_calculator(data)
 {
 	VERIFY(m_graphs.Add(new CIncompleteTasksGraph()) == BCT_INCOMPLETETASKS);
 	VERIFY(m_graphs.Add(new CRemainingDaysGraph()) == BCT_REMAININGDAYS);
@@ -256,79 +255,19 @@ void CBurndownChart::PreSubclassWindow()
 	SetYTicks(10);
 
 	VERIFY(InitTooltip(TRUE));
-
-	SetTooltipOffset(16, 0);
 }
 
-int CBurndownChart::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+CString CBurndownChart::GetTooltip(int nHit) const
 {
-	if (m_nLastTooltipHit != -1)
-		HighlightDataPoints(m_nLastTooltipHit);
+	ASSERT(nHit != -1);
 
-	int nHit = HitTest(point);
-
-	if (nHit != -1)
-	{
-		CString sTooltip = m_graphs[m_nChartType]->GetTooltip(m_calculator, m_datasets, nHit);
-
-		if (!sTooltip.IsEmpty())
-		{
-			if (HighlightDataPoints(nHit))
-				m_nLastTooltipHit = nHit;
-						
-			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
-		}
-	}
-
-	// else
-	return CHMXChartEx::OnToolHitTest(point, pTI);
-}
-
-BOOL CBurndownChart::HighlightDataPoints(int nIndex) const
-{
-	// Draw boxes around data point(s)
-	CDC* pDC = NULL;
-	int nDataset = m_graphs[m_nChartType]->GetNumDatasets();
-
-	while (nDataset--)
-	{
-		CPoint ptData;
-
-		if (!GetPointXY(nDataset, nIndex, ptData))
-			break;
-
-		if (pDC == NULL)
-			pDC = const_cast<CBurndownChart*>(this)->GetDC();
-
-		CRect rData(ptData, CSize(1, 1));
-		rData.InflateRect(2, 2);
-
-		pDC->SetROP2(R2_NOT);
-
-		pDC->MoveTo(rData.left, rData.bottom);
-		pDC->LineTo(rData.left, rData.top);
-		pDC->LineTo(rData.right, rData.top);
-		pDC->LineTo(rData.right, rData.bottom);
-		pDC->LineTo(rData.left, rData.bottom);
-	}
-
-	if (pDC)
-		const_cast<CBurndownChart*>(this)->ReleaseDC(pDC);
-
-	return (pDC != NULL);
+	return m_graphs[m_nChartType]->GetTooltip(m_calculator, m_datasets, nHit);
 }
 
 int CBurndownChart::HitTest(const CPoint& ptClient) const
 {
-	if (!m_rectData.Width() || !m_dtExtents.IsValid())
+	if (!m_dtExtents.IsValid())
 		return -1;
 
-	if (!m_rectData.PtInRect(ptClient))
-		return -1;
-
-	int nNumData = m_datasets[0].GetDatasetSize();
-	int nXOffset = (ptClient.x - m_rectData.left);
-
-	return ((nXOffset * nNumData) / m_rectData.Width());
+	return CHMXChartEx::HitTest(ptClient);
 }
-

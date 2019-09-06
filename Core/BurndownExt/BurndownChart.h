@@ -32,22 +32,20 @@ protected:
 
 	BURNDOWN_CHARTTYPE m_nChartType;
 	BURNDOWN_CHARTSCALE m_nScale;
-	
-	mutable int m_nLastTooltipHit;
 
 protected:
 	void OnSize(UINT nType, int cx, int cy);
 	void PreSubclassWindow();
-	int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	void RebuildXScale();
 	BURNDOWN_CHARTSCALE CalculateRequiredXScale() const;
-	int HitTest(const CPoint& ptClient) const;
 	BOOL IsValidType(BURNDOWN_CHARTTYPE nType) const;
 
-	BOOL HighlightDataPoints(int nIndex) const;
+	// virtual overrides
+	CString GetTooltip(int nHit) const;
+	int HitTest(const CPoint& ptClient) const;
 };
 

@@ -13,6 +13,12 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+const CString EMPTY_STR;
+
+const int HILITEBOXSIZE = GraphicsMisc::ScaleByDPIFactor(3);
+
+/////////////////////////////////////////////////////////////////////////////
+
 bool HMXUtils::GetMinMax(const CHMXDataset datasets[], int nNumSets, double& nMin, double& nMax, bool bDataOnly)
 {
 	bool first = true;
@@ -73,7 +79,10 @@ const double MIN_SUBINTERVAL_HEIGHT = GraphicsMisc::ScaleByDPIFactor(5);
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChartEx
 
-CHMXChartEx::CHMXChartEx()
+CHMXChartEx::CHMXChartEx() 
+	: 
+	m_nLastTooltipHit(-1), 
+	m_ptTooltipOffset(0, 0)
 {
 }
 
@@ -152,6 +161,8 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 	if (bMultiline)
 		m_tooltip.SetMaxTipWidth(1024); // for '\n' support
 
+	SetTooltipOffset(16, 0);
+
 	return TRUE;
 }
 
@@ -207,3 +218,79 @@ bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
 	return CHMXChart::DrawHorzGridLines(dc);
 }
 
+BOOL CHMXChartEx::HighlightDataPoints(int nIndex)
+{
+	// Draw boxes around data point(s)
+	CDC* pDC = NULL;
+
+	for (int nDataset = 0; nDataset < HMX_MAX_DATASET; nDataset++)
+	{
+		CPoint ptData;
+
+		if (!GetPointXY(nDataset, nIndex, ptData))
+			break;
+
+		if (pDC == NULL)
+		{
+			pDC = GetDC();
+			pDC->SetROP2(R2_NOT);
+		}
+
+		CRect rData(ptData, CSize(1, 1));
+		rData.InflateRect(HILITEBOXSIZE, HILITEBOXSIZE);
+
+		pDC->MoveTo(rData.left, rData.bottom);
+		pDC->LineTo(rData.left, rData.top);
+		pDC->LineTo(rData.right, rData.top);
+		pDC->LineTo(rData.right, rData.bottom);
+		pDC->LineTo(rData.left, rData.bottom);
+	}
+
+	if (pDC)
+		ReleaseDC(pDC);
+
+	return (pDC != NULL);
+}
+
+int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	if (m_nLastTooltipHit != -1)
+		const_cast<CHMXChartEx*>(this)->HighlightDataPoints(m_nLastTooltipHit);
+
+	int nHit = HitTest(point);
+
+	if (nHit != -1)
+	{
+		CString sTooltip = GetTooltip(nHit);
+
+		if (!sTooltip.IsEmpty())
+		{
+			if (const_cast<CHMXChartEx*>(this)->HighlightDataPoints(nHit))
+				m_nLastTooltipHit = nHit;
+
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
+		}
+	}
+
+	// else
+	return CHMXChart::OnToolHitTest(point, pTI);
+}
+
+CString CHMXChartEx::GetTooltip(int nHit) const
+{
+	return EMPTY_STR;
+}
+
+int CHMXChartEx::HitTest(const CPoint& ptClient) const
+{
+	if (!m_rectData.Width())
+		return -1;
+
+	if (!m_rectData.PtInRect(ptClient))
+		return -1;
+
+	int nNumData = m_datasets[0].GetDatasetSize();
+	int nXOffset = (ptClient.x - m_rectData.left);
+
+	return ((nXOffset * nNumData) / m_rectData.Width());
+}

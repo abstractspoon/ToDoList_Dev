@@ -29,6 +29,7 @@ class CHMXChartEx : public CHMXChart
 // Construction
 public:
 	CHMXChartEx();
+	virtual ~CHMXChartEx();
 
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	void FilterToolTipMessage(MSG* pMsg);
@@ -38,28 +39,30 @@ protected:
 	CToolTipCtrlEx m_tooltip;
 	CPoint m_ptTooltipOffset;
 
+	mutable int m_nLastTooltipHit;
+
+protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CHMXChartEx)
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CHMXChartEx();
+	virtual bool DrawHorzGridLines(CDC& dc);
+	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
+	virtual CString GetTooltip(int nHit) const;
+	virtual int HitTest(const CPoint& ptClient) const;
 
 	// Generated message map functions
-protected:
 	//{{AFX_MSG(CHMXChartEx)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
-DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP()
 
 protected:
 	BOOL InitTooltip(BOOL bMultiline);
 	int GetYSubTicks(double dInterval) const;
-
-	virtual bool DrawHorzGridLines(CDC& dc);
+	
+	BOOL HighlightDataPoints(int nIndex);
 };
 
 /////////////////////////////////////////////////////////////////////////////
