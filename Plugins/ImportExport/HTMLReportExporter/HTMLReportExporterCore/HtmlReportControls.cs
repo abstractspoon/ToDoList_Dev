@@ -254,25 +254,64 @@ namespace HTMLReportExporter
 
 				if (selText != null)
 				{
-					// If what is selected is an atomic placeholder
-					// and it's the only visible element then pasting the
-					// new placeholder's html over the top causes the element to
-					// be deleted for unknown reasons. So we detect the
-					// selected atomic placeholder and just update its text
-					// since the rest of its definition is already correct
-					if (HtmlReportUtils.IsPlaceholder(selText, true))
+					string unused;
+					int level;
+
+					if (HtmlReportUtils.ParsePlaceholder(selText, out unused, out level))
+					{
+						selText.text = HtmlReportUtils.FormatPlaceholderText(menuItem.Name, level);
+					}
+					else if (HtmlReportUtils.IsPlaceholder(selText))
 					{
 						selText.text = menuItem.Name;
 					}
-					else
+					else 
 					{
-						String placeholder = HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name);
-
-						// If empty add a trailing space to make it easier to deselect
 						if (String.IsNullOrEmpty(selText.text))
-							placeholder = (placeholder + ' ');
-					
-						selText.pasteHTML(placeholder);
+						{
+							// This is the trickiest bit because if we are
+							// butted up against an atomic placeholder our
+							// text can end up merged with that so we have to
+							// do a bit of detective work and shift the selection
+							// to a safer location
+							selText.moveStart("character", -1);
+
+							bool placeHolderToLeft = selText.text.Equals(")");
+
+							// Revert the change
+							selText.moveStart("character", 1);
+
+							// Shift right one space
+							selText.moveEnd("character", 1);
+
+							bool placeHolderToRight = selText.text.Equals("$");
+
+							// Revert the change
+							selText.moveEnd("character", -1);
+
+							if (placeHolderToLeft)
+							{
+								if (!placeHolderToRight)
+									selText.move("character", 1);
+							}
+							else if (placeHolderToRight)
+							{
+								if (!placeHolderToLeft)
+									selText.move("character", -1);
+							}
+
+							// if we have placeholders on both sides then we have to tell 
+							// the user to insert a space first and then try again
+							if (placeHolderToLeft && placeHolderToRight)
+							{
+								MessageBox.Show(m_Trans.Translate("Please insert at least 2 spaces between the existing placeholders and then try again."), m_Trans.Translate("caption"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+								Focus();
+								return;
+							}
+						}
+
+						// Then just paste over the top
+						selText.pasteHTML(HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name));
 					}
 				}
 			}
@@ -686,14 +725,8 @@ namespace HTMLReportExporter
 				string basePlaceholder;
 				int level;
 
-				if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level, true))
-				{
-					if (!Int32.TryParse(menuItem.Name, out level))
-						level = -1;
-
-					selText.pasteHTML(HtmlReportUtils.FormatAtomicPlaceholderHtml(basePlaceholder, level));
-				}
-				else if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level)) // plain text
+				if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level, true) ||
+					HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level, false))
 				{
 					if (!Int32.TryParse(menuItem.Name, out level))
 						level = -1;
