@@ -259,60 +259,59 @@ namespace HTMLReportExporter
 
 					if (HtmlReportUtils.ParsePlaceholder(selText, out unused, out level))
 					{
-						selText.text = HtmlReportUtils.FormatPlaceholderText(menuItem.Name, level);
+						selText.text = HtmlReportUtils.FormatPlaceholder(menuItem.Name, level);
 					}
 					else if (HtmlReportUtils.IsPlaceholder(selText))
 					{
-						selText.text = menuItem.Name;
+						selText.text = HtmlReportUtils.FormatPlaceholder(menuItem.Name);
 					}
-					else 
+					else if (String.IsNullOrEmpty(selText.text))
 					{
-						if (String.IsNullOrEmpty(selText.text))
+						// This is the trickiest bit because if we are
+						// butted up against an atomic placeholder our
+						// text can end up merged with that so we have to
+						// do a bit of detective work and shift the selection
+						// to a safer location
+
+						// Look to the left
+						var tempSel = selText.duplicate();
+
+						tempSel.moveStart("character", -1);
+						bool placeHolderToLeft = ((tempSel.text != null) && tempSel.text.Equals(")"));
+
+						// Look to the right
+						tempSel = selText.duplicate();
+
+						tempSel.moveEnd("character", 1);
+						bool placeHolderToRight = ((tempSel.text != null) && tempSel.text.Equals("$"));
+
+						if (placeHolderToLeft)
 						{
-							// This is the trickiest bit because if we are
-							// butted up against an atomic placeholder our
-							// text can end up merged with that so we have to
-							// do a bit of detective work and shift the selection
-							// to a safer location
-							selText.moveStart("character", -1);
-
-							bool placeHolderToLeft = selText.text.Equals(")");
-
-							// Revert the change
-							selText.moveStart("character", 1);
-
-							// Shift right one space
-							selText.moveEnd("character", 1);
-
-							bool placeHolderToRight = selText.text.Equals("$");
-
-							// Revert the change
-							selText.moveEnd("character", -1);
-
-							if (placeHolderToLeft)
-							{
-								if (!placeHolderToRight)
-									selText.move("character", 1);
-							}
-							else if (placeHolderToRight)
-							{
-								if (!placeHolderToLeft)
-									selText.move("character", -1);
-							}
-
-							// if we have placeholders on both sides then we have to tell 
-							// the user to insert a space first and then try again
-							if (placeHolderToLeft && placeHolderToRight)
-							{
-								MessageBox.Show(m_Trans.Translate("Please insert at least 2 spaces between the existing placeholders and then try again."), m_Trans.Translate("caption"), MessageBoxButtons.OK, MessageBoxIcon.Information);
-								Focus();
-								return;
-							}
+							selText.move("character", 1);
+						}
+						else if (placeHolderToRight)
+						{
+							selText.move("character", -1);
 						}
 
-						// Then just paste over the top
-						selText.pasteHTML(HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name));
+						// if we have placeholders on both sides then we have to tell 
+						// the user to insert a space first and then try again
+						if (placeHolderToLeft && placeHolderToRight)
+						{
+							MessageBox.Show(m_Trans.Translate("Please insert at least one space between the existing placeholders and then try again."), m_Trans.Translate("Report Builder"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+							Focus();
+
+							return;
+						}
+
+						selText.pasteHTML(HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name, -1));
 					}
+					else
+					{
+						selText.pasteHTML(HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name, -1));
+					}
+
+					selText.collapse();
 				}
 			}
 		}
@@ -333,7 +332,7 @@ namespace HTMLReportExporter
 
 				if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level))
 				{
-					ToolStripItem item = m_ToolStripAttributeMenu.DropDownItems[HtmlReportUtils.FormatPlaceholder(basePlaceholder)];
+					ToolStripItem item = m_ToolStripAttributeMenu.DropDownItems[basePlaceholder];
 
 					if ((item != null) && (item is ToolStripMenuItem))
 						(item as ToolStripMenuItem).Checked = true;
@@ -438,8 +437,8 @@ namespace HTMLReportExporter
 		{
 			base.InitialiseToolbarAttributeMenu();
 
-			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Title") { Name = "$(reportTitle)" });
-			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Date") { Name = "$(reportDate)" });
+			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Title") { Name = "reportTitle" });
+			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Date") { Name = "reportDate" });
 
 			ToolStripAttributeMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
 			ToolStripAttributeMenu.Text = "Report Attributes";
@@ -551,8 +550,8 @@ namespace HTMLReportExporter
 		{
 			base.InitialiseToolbarAttributeMenu();
 
-			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Title") { Name = "$(reportTitle)" });
-			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Date") { Name = "$(reportDate)" });
+			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Title") { Name = "reportTitle" });
+			ToolStripAttributeMenu.DropDownItems.Add(new ToolStripMenuItem("Report Date") { Name = "reportDate" });
 
 			ToolStripAttributeMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
 			ToolStripAttributeMenu.Text = "Report Attributes";
@@ -725,8 +724,8 @@ namespace HTMLReportExporter
 				string basePlaceholder;
 				int level;
 
-				if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level, true) ||
-					HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level, false))
+				if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level) ||
+					HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder))
 				{
 					if (!Int32.TryParse(menuItem.Name, out level))
 						level = -1;
@@ -745,7 +744,7 @@ namespace HTMLReportExporter
 				var menuItem = new ToolStripMenuItem();
 
 				menuItem.Text = attrib.Label;
-				menuItem.Name = attrib.FormatPlaceholder();
+				menuItem.Name = attrib.BasePlaceholder;
 
 				ToolStripAttributeMenu.DropDownItems.Add(menuItem);
 			}
@@ -761,7 +760,7 @@ namespace HTMLReportExporter
 				var menuItem = new ToolStripMenuItem();
 
 				menuItem.Text = String.Format(m_Trans.Translate("{0} (Custom)"), attrib.Value);
-				menuItem.Name = String.Format("$({0})", attrib.Key.ToLower());
+				menuItem.Name = attrib.Key.ToLower();
 				menuItem.Click += new System.EventHandler(base.OnAttributeMenuClick);
 				
 				ToolStripAttributeMenu.DropDownItems.Add(menuItem);
