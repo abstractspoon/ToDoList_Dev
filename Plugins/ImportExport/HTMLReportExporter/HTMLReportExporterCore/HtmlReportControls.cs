@@ -622,6 +622,8 @@ namespace HTMLReportExporter
 				case 8:		label = m_Trans.Translate("Seventh level of subtasks");	break;
 				case 9:		label = m_Trans.Translate("Eighth level of subtasks");	break;
 				case 10:	label = m_Trans.Translate("Ninth level of subtasks");	break;
+
+				case -1:	label = m_Trans.Translate("Unspecified Levels");		break;
 			}
 
 			return !String.IsNullOrEmpty(label);
@@ -659,7 +661,7 @@ namespace HTMLReportExporter
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(0))	{ Name = "0" });
 
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripSeparator());
-			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem("Unspecified Levels") { Name = "-1" });
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(-1)) { Name = "-1" });
 			
 			m_ToolStripAttributeLevelMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
 			m_ToolStripAttributeLevelMenu.Text = "Task Depth";

@@ -656,8 +656,8 @@ namespace HTMLReportExporter
 				String placeHolder = HtmlReportUtils.FormatPlaceholder(defaultPlaceholderText, depth);
 				int placeHolderDepth = depth;
 
-				// Note: Leaf tasks formats take precedence
-				if (isLeafTask)
+				// Note: Leaf-task formatting take precedence over every level EXCEPT THE FIRST
+				if (isLeafTask && (depth != 1))
 				{
 					String leafPlaceHolder = HtmlReportUtils.FormatPlaceholder(defaultPlaceholderText, 0);
 
