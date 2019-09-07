@@ -248,72 +248,78 @@ namespace HTMLReportExporter
 		{
 			var menuItem = (sender as ToolStripMenuItem);
 
-			if (menuItem != null)
+			if (menuItem == null)
+				return;
+
+			var selText = GetTextRange();
+
+			if (selText == null)
+				return;
+
+			string unused;
+			int level;
+
+			if (HtmlReportUtils.ParsePlaceholder(selText, out unused, out level, true)) // atomic
 			{
-				var selText = GetTextRange();
+				var placeHolder = HtmlReportUtils.FormatPlaceholder(menuItem.Name, level);
+				var element = selText.parentElement();
 
-				if (selText != null)
-				{
-					string unused;
-					int level;
-
-					if (HtmlReportUtils.ParsePlaceholder(selText, out unused, out level))
-					{
-						selText.text = HtmlReportUtils.FormatPlaceholder(menuItem.Name, level);
-					}
-					else if (HtmlReportUtils.IsPlaceholder(selText))
-					{
-						selText.text = HtmlReportUtils.FormatPlaceholder(menuItem.Name);
-					}
-					else if (String.IsNullOrEmpty(selText.text))
-					{
-						// This is the trickiest bit because if we are
-						// butted up against an atomic placeholder our
-						// text can end up merged with that so we have to
-						// do a bit of detective work and shift the selection
-						// to a safer location
-
-						// Look to the left
-						var tempSel = selText.duplicate();
-
-						tempSel.moveStart("character", -1);
-						bool placeHolderToLeft = ((tempSel.text != null) && tempSel.text.Equals(")"));
-
-						// Look to the right
-						tempSel = selText.duplicate();
-
-						tempSel.moveEnd("character", 1);
-						bool placeHolderToRight = ((tempSel.text != null) && tempSel.text.Equals("$"));
-
-						if (placeHolderToLeft)
-						{
-							selText.move("character", 1);
-						}
-						else if (placeHolderToRight)
-						{
-							selText.move("character", -1);
-						}
-
-						// if we have placeholders on both sides then we have to tell 
-						// the user to insert a space first and then try again
-						if (placeHolderToLeft && placeHolderToRight)
-						{
-							MessageBox.Show(m_Trans.Translate("Please insert at least one space between the existing placeholders and then try again."), m_Trans.Translate("Report Builder"), MessageBoxButtons.OK, MessageBoxIcon.Information);
-							Focus();
-
-							return;
-						}
-
-						selText.pasteHTML(HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name, -1));
-					}
-					else
-					{
-						selText.pasteHTML(HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name, -1));
-					}
-
-					selText.collapse();
-				}
+				if (element != null)
+					element.innerText = placeHolder;
+				else
+					selText.text = placeHolder; // should never happen
 			}
+			else if (HtmlReportUtils.ParsePlaceholder(selText, out unused, out level)) // plain text
+			{
+				selText.text = HtmlReportUtils.FormatPlaceholder(menuItem.Name, level);
+			}
+			else if (String.IsNullOrEmpty(selText.text)) // insertion point
+			{
+				// This is the trickiest bit because if we are
+				// butted up against an atomic placeholder our
+				// text can end up merged with that so we have to
+				// do a bit of detective work and shift the selection
+				// to a safer location
+
+				// Look to the left
+				var tempSel = selText.duplicate();
+
+				tempSel.moveStart("character", -1);
+				bool placeHolderToLeft = ((tempSel.text != null) && tempSel.text.Equals(")"));
+
+				// Look to the right
+				tempSel = selText.duplicate();
+
+				tempSel.moveEnd("character", 1);
+				bool placeHolderToRight = ((tempSel.text != null) && tempSel.text.Equals("$"));
+
+				if (placeHolderToLeft)
+				{
+					selText.move("character", 1);
+				}
+				else if (placeHolderToRight)
+				{
+					selText.move("character", -1);
+				}
+
+				// if we have placeholders on both sides then we have to tell 
+				// the user to insert a space first and then try again
+				if (placeHolderToLeft && placeHolderToRight)
+				{
+					MessageBox.Show(m_Trans.Translate("Please insert at least one space between the existing placeholders and then try again."), m_Trans.Translate("Report Builder"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+					Focus();
+
+					return;
+				}
+
+				selText.pasteHTML(HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name, -1));
+			}
+			else // some other text selected
+			{
+				selText.pasteHTML(HtmlReportUtils.FormatAtomicPlaceholderHtml(menuItem.Name, -1));
+			}
+
+			OnSelectionChange();
 		}
 
 		protected override void OnSelectionChange()
@@ -649,7 +655,7 @@ namespace HTMLReportExporter
 
 			switch (level)
 			{
-				case 0:		label = m_Trans.Translate("All 'leaf' tasks");			break;
+				case 0:		label = m_Trans.Translate("'Leaf' tasks");				break;
 				case 1:		label = m_Trans.Translate("Top-level tasks");			break;
 				case 2:		label = m_Trans.Translate("First level of subtasks");	break;
 				case 3:		label = m_Trans.Translate("Second level of subtasks");	break;
@@ -717,22 +723,38 @@ namespace HTMLReportExporter
 		{
 			var menuItem = (sender as ToolStripMenuItem);
 
-			if (menuItem != null)
+			if (menuItem == null)
+				return;
+
+			var selText = GetTextRange();
+
+			if (selText == null)
+				return;
+
+			int level = -1;
+
+			if (!Int32.TryParse(menuItem.Name, out level))
+				level = -1;
+
+			string basePlaceholder;
+			int unused;
+
+			if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out unused, true)) // atomic
 			{
-				var selText = GetTextRange();
+				var placeHolder = HtmlReportUtils.FormatPlaceholder(basePlaceholder, level);
+				var element = selText.parentElement();
 
-				string basePlaceholder;
-				int level;
-
-				if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out level) ||
-					HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder))
-				{
-					if (!Int32.TryParse(menuItem.Name, out level))
-						level = -1;
-
-					selText.text = HtmlReportUtils.FormatPlaceholder(basePlaceholder, level);
-				}
+				if (element != null)
+					element.innerText = placeHolder;
+				else
+					selText.text = placeHolder; // should never happen
 			}
+			else if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out unused)) // plain text
+			{
+				selText.text = HtmlReportUtils.FormatPlaceholder(basePlaceholder, level);
+			}
+
+			OnSelectionChange();
 		}
 
 		override protected void InitialiseToolbarAttributeMenu()
