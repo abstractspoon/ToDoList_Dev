@@ -90,3 +90,20 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
+class CEstimatedSpentCostGraph : public CGraphBase
+{
+public:
+	CString GetTitle() const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
+
+protected:
+	enum
+	{
+		ESTIMATED_COST,
+		SPENT_COST,
+	};
+};
+
+/////////////////////////////////////////////////////////////////////////////
+

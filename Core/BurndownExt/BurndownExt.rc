@@ -202,7 +202,8 @@ BEGIN
     IDS_ACTIVEDATERANGE     "Acti&ve Date Range (%s)"
     IDS_TOOLTIP_STARTEDENDED "%s\n%d Started\n%d Completed"
     IDS_DISPLAY_STARTEDENDED "Started/Completed Tasks"
-    IDS_DISPLAY_ESTIMATEDSPENT "Estimated/Spent Days"
+    IDS_DISPLAY_ESTIMATEDSPENTDAYS "Estimated/Spent Days"
+    IDS_DISPLAY_ESTIMATEDSPENTCOST "Estimated/Spent Cost"
 END
 
 #endif    // English (Australia) resources

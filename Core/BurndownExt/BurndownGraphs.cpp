@@ -150,13 +150,9 @@ void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHM
 		}
 	
 		// Set the maximum Y value to be something 'nice'
-		double dMin, dMax;
-
-		if (HMXUtils::GetMinMax(datasets, 2, dMin, dMax, true))
+		if (dTotalEst > 0)
 		{
-			ASSERT(dMin == 0.0);
-
-			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
+			double dMax = HMXUtils::CalcMaxYAxisValue(dTotalEst, 10);
 
 			datasets[REMAINING_ESTIMATE].SetMax(dMax);
 			datasets[REMAINING_SPENT].SetMax(dMax);
@@ -222,6 +218,7 @@ void CStartedEndedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator,
 		// Set the maximum Y value to be something 'nice'
 		double dMax = 0.0;
 		
+		// Last started value will always be largest
 		if (datasets[STARTED_TASKS].GetData(nNumDays, dMax))
 		{
 			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
@@ -252,7 +249,7 @@ CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculat
 
 CString CEstimatedSpentDaysGraph::GetTitle() const
 {
-	return CEnString(IDS_DISPLAY_ESTIMATEDSPENT);
+	return CEnString(IDS_DISPLAY_ESTIMATEDSPENTDAYS);
 }
 
 void CEstimatedSpentDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
@@ -288,11 +285,15 @@ void CEstimatedSpentDaysGraph::BuildGraph(const CStatsItemCalculator& calculator
 		}
 
 		// Set the maximum Y value to be something 'nice'
-		double dMax = 0.0;
+		double dMaxEst = 0.0, dMaxSpent = 0.0;
 		
-		if (datasets[ESTIMATED_DAYS].GetData(nNumDays, dMax))
+		// Last values will always be largest
+		bool bHasMax = datasets[ESTIMATED_DAYS].GetData(nNumDays, dMaxEst);
+		bHasMax |= datasets[SPENT_DAYS].GetData(nNumDays, dMaxSpent);
+			
+		if (bHasMax)
 		{
-			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
+			double dMax = HMXUtils::CalcMaxYAxisValue(max(dMaxEst, dMaxSpent), 10);
 
 			datasets[ESTIMATED_DAYS].SetMax(dMax);
 			datasets[SPENT_DAYS].SetMax(dMax);
@@ -312,6 +313,80 @@ CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calcula
 		datasets[SPENT_DAYS].GetData(nHit, dDaysSpent))
 	{
 		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), CDateHelper::FormatDate(dDate), (int)dDaysEst, (int)dDaysSpent);
+	}
+
+	return sTooltip;
+
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+CString CEstimatedSpentCostGraph::GetTitle() const
+{
+	return CEnString(IDS_DISPLAY_ESTIMATEDSPENTCOST);
+}
+
+void CEstimatedSpentCostGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+{
+	SetDatasetColor(datasets, ESTIMATED_COST, COLOR_PINK);
+	SetDatasetColor(datasets, SPENT_COST, COLOR_GREEN);
+
+	datasets[ESTIMATED_COST].SetStyle(HMX_DATASET_STYLE_AREALINE);
+	datasets[ESTIMATED_COST].SetSize(LINE_THICKNESS);
+	datasets[ESTIMATED_COST].SetMin(0.0);
+
+	datasets[SPENT_COST].SetStyle(HMX_DATASET_STYLE_AREALINE);
+	datasets[SPENT_COST].SetSize(LINE_THICKNESS);
+	datasets[SPENT_COST].SetMin(0.0);
+
+	// build the graph
+	int nNumDays = calculator.GetTotalDays();
+
+	if (nNumDays > 0)
+	{
+		COleDateTime dtStart = calculator.GetStartDate();
+
+		for (int nDay = 0; nDay <= nNumDays; nDay++)
+		{
+			COleDateTime date(dtStart.m_dt + nDay);
+			double dCostEst = 0.0, dCostSpent = 0;
+
+			if (date > dtStart)
+				calculator.GetCostEstimatedSpent(date, dCostEst, dCostSpent);
+
+			datasets[ESTIMATED_COST].AddData(dCostEst);
+			datasets[SPENT_COST].AddData(dCostSpent);
+		}
+
+		// Set the maximum Y value to be something 'nice'
+		double dMaxEst = 0.0, dMaxSpent = 0.0;
+		
+		// Last values will always be largest
+		bool bHasMax = datasets[ESTIMATED_COST].GetData(nNumDays, dMaxEst);
+		bHasMax |= datasets[SPENT_COST].GetData(nNumDays, dMaxSpent);
+			
+		if (bHasMax)
+		{
+			double dMax = HMXUtils::CalcMaxYAxisValue(max(dMaxEst, dMaxSpent), 10);
+
+			datasets[ESTIMATED_COST].SetMax(dMax);
+			datasets[SPENT_COST].SetMax(dMax);
+		}
+	}
+
+}
+
+CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+{
+	ASSERT(nHit != -1);
+
+	double dDate = (calculator.GetStartDate().m_dt + nHit), dCostEst, dCostSpent;
+	CString sTooltip;
+
+	if (datasets[ESTIMATED_COST].GetData(nHit, dCostEst) &&
+		datasets[SPENT_COST].GetData(nHit, dCostSpent))
+	{
+		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), CDateHelper::FormatDate(dDate), (int)dCostEst, (int)dCostSpent);
 	}
 
 	return sTooltip;
