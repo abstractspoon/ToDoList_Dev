@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "HMXChartEx.h"
 #include "GraphicsMisc.h"
+#include "Mapex.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -79,10 +80,7 @@ const double MIN_SUBINTERVAL_HEIGHT = GraphicsMisc::ScaleByDPIFactor(5);
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChartEx
 
-CHMXChartEx::CHMXChartEx() 
-	: 
-	m_nLastTooltipHit(-1), 
-	m_ptTooltipOffset(0, 0)
+CHMXChartEx::CHMXChartEx() : m_nLastTooltipHit(-1)
 {
 }
 
@@ -164,8 +162,6 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 	if (bMultiline)
 		m_tooltip.SetMaxTipWidth(1024); // for '\n' support
 
-	SetTooltipOffset(16, 0);
-
 	return TRUE;
 }
 
@@ -173,22 +169,14 @@ void CHMXChartEx::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	*pResult = 0;
 
-	if (m_ptTooltipOffset.x || m_ptTooltipOffset.y)
+	CRect rTooltip;
+	m_tooltip.GetWindowRect(rTooltip);
+
+	if (AdjustTooltipRect(rTooltip))
 	{
-		CRect rTooltip;
-		m_tooltip.GetWindowRect(rTooltip);
-
-		rTooltip.OffsetRect(m_ptTooltipOffset);
 		m_tooltip.MoveWindow(rTooltip);
-
-		*pResult = TRUE; // we handled it
+		*pResult = TRUE; // handled
 	}
-}
-
-void CHMXChartEx::SetTooltipOffset(int x, int y)
-{
-	m_ptTooltipOffset.x = x;
-	m_ptTooltipOffset.y = y;
 }
 
 bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
@@ -223,8 +211,11 @@ bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
 
 BOOL CHMXChartEx::HighlightDataPoints(int nIndex)
 {
-	// Draw boxes around data point(s)
+	// Draw inverted boxes around data point(s)
 	CDC* pDC = NULL;
+
+	// Prevent drawing over the same X,Y more than once
+	CDWordSet mapPoints;
 
 	for (int nDataset = 0; nDataset < HMX_MAX_DATASET; nDataset++)
 	{
@@ -232,6 +223,11 @@ BOOL CHMXChartEx::HighlightDataPoints(int nIndex)
 
 		if (!GetPointXY(nDataset, nIndex, ptData))
 			break;
+
+		if (mapPoints.Has(MAKELONG(ptData.x, ptData.y)))
+			continue;
+
+		mapPoints.Add(MAKELONG(ptData.x, ptData.y));
 
 		if (pDC == NULL)
 		{
@@ -268,6 +264,8 @@ int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		{
 			if (const_cast<CHMXChartEx*>(this)->HighlightDataPoints(nHit))
 				m_nLastTooltipHit = nHit;
+			else
+				ASSERT(0);
 
 			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
 		}
@@ -280,6 +278,51 @@ int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 CString CHMXChartEx::GetTooltip(int nHit) const
 {
 	return EMPTY_STR;
+}
+
+BOOL CHMXChartEx::AdjustTooltipRect(CRect& rScreen)
+{
+	ASSERT(m_nLastTooltipHit != -1);
+
+	// Offset to the right and place close to the relevant data point
+	CPoint ptAveData;
+
+	if (GetAveragePointXY(m_nLastTooltipHit, ptAveData))
+	{
+		ClientToScreen(&ptAveData);
+		rScreen.OffsetRect(16, ptAveData.y - rScreen.CenterPoint().y);
+
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+
+}
+
+BOOL CHMXChartEx::GetAveragePointXY(int nIndex, CPoint& point) const
+{
+	int nNumSets = 0;
+	CPoint ptTotal(0, 0);
+
+	for (int nDataset = 0; nDataset < HMX_MAX_DATASET; nDataset++)
+	{
+		CPoint ptTemp;
+
+		if (GetPointXY(nDataset, nIndex, ptTemp))
+		{
+			ptTotal += ptTemp;
+			nNumSets++;
+		}
+	}
+
+	if (nNumSets == 0)
+		return FALSE;
+
+	point.x = (ptTotal.x / nNumSets);
+	point.y = (ptTotal.y / nNumSets);
+
+	return TRUE;
 }
 
 int CHMXChartEx::HitTest(const CPoint& ptClient) const

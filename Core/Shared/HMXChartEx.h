@@ -33,11 +33,9 @@ public:
 
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	void FilterToolTipMessage(MSG* pMsg);
-	void SetTooltipOffset(int x, int y);
 
 protected:
 	CToolTipCtrlEx m_tooltip;
-	CPoint m_ptTooltipOffset;
 
 	mutable int m_nLastTooltipHit;
 
@@ -51,6 +49,7 @@ protected:
 	virtual CString GetTooltip(int nHit) const;
 	virtual int HitTest(const CPoint& ptClient) const;
 	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd);
+	virtual BOOL AdjustTooltipRect(CRect& rScreen);
 
 	// Generated message map functions
 	//{{AFX_MSG(CHMXChartEx)
@@ -64,7 +63,8 @@ protected:
 protected:
 	BOOL InitTooltip(BOOL bMultiline);
 	int GetYSubTicks(double dInterval) const;
-	
+	BOOL GetAveragePointXY(int nIndex, CPoint& point) const;
+
 	BOOL HighlightDataPoints(int nIndex);
 	void HideLastHighlightedPoint();
 };
