@@ -249,25 +249,33 @@ namespace HTMLReportExporter
 			var menuItem = (sender as ToolStripMenuItem);
 
 			if (menuItem == null)
+			{
+				Debug.Assert(false);
 				return;
+			}
 
 			var selText = GetTextRange();
 
 			if (selText == null)
+			{
+				Debug.Assert(false);
 				return;
+			}
 
 			string unused;
 			int level;
 
 			if (HtmlReportUtils.ParsePlaceholder(selText, out unused, out level, true)) // atomic
 			{
-				var placeHolder = HtmlReportUtils.FormatPlaceholder(menuItem.Name, level);
 				var element = selText.parentElement();
 
-				if (element != null)
-					element.innerText = placeHolder;
-				else
-					selText.text = placeHolder; // should never happen
+				if (!HtmlReportUtils.IsPlaceholder(element))
+				{
+					Debug.Assert(false);
+					return;
+				}
+
+				element.innerText = HtmlReportUtils.FormatPlaceholder(menuItem.Name, level);
 			}
 			else if (HtmlReportUtils.ParsePlaceholder(selText, out unused, out level)) // plain text
 			{
@@ -724,12 +732,18 @@ namespace HTMLReportExporter
 			var menuItem = (sender as ToolStripMenuItem);
 
 			if (menuItem == null)
+			{
+				Debug.Assert(false);
 				return;
+			}
 
 			var selText = GetTextRange();
 
 			if (selText == null)
+			{
+				Debug.Assert(false);
 				return;
+			}
 
 			int level = -1;
 
@@ -741,13 +755,15 @@ namespace HTMLReportExporter
 
 			if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out unused, true)) // atomic
 			{
-				var placeHolder = HtmlReportUtils.FormatPlaceholder(basePlaceholder, level);
 				var element = selText.parentElement();
 
-				if (element != null)
-					element.innerText = placeHolder;
-				else
-					selText.text = placeHolder; // should never happen
+				if (!HtmlReportUtils.IsPlaceholder(element))
+				{
+					Debug.Assert(false);
+					return;
+				}
+
+				element.innerText = HtmlReportUtils.FormatPlaceholder(basePlaceholder, level);
 			}
 			else if (HtmlReportUtils.ParsePlaceholder(selText, out basePlaceholder, out unused)) // plain text
 			{
