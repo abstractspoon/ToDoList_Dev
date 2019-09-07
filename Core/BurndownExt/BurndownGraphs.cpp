@@ -11,35 +11,33 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
 #include "..\shared\graphicsmisc.h"
-#include "..\shared\ScopedTimer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const COLORREF COLOR_GREEN		= RGB(122, 204,   0); 
-const COLORREF COLOR_GREENLINE	= GraphicsMisc::Darker(COLOR_GREEN, 0.05, FALSE);
-const COLORREF COLOR_GREENFILL	= GraphicsMisc::Lighter(COLOR_GREEN, 0.25, FALSE);
+const COLORREF	COLOR_GREEN		= RGB(122, 204,   0); 
+const COLORREF	COLOR_RED		= RGB(204,   0,   0); 
+const COLORREF	COLOR_YELLOW	= RGB(204, 164,   0); 
+const COLORREF	COLOR_BLUE		= RGB(0,     0, 244); 
+const COLORREF	COLOR_PINK		= RGB(234,  28,  74); 
+const COLORREF	COLOR_ORANGE	= RGB(255,  91,  21);
 
-const COLORREF COLOR_RED		= RGB(204,   0,   0); 
-const COLORREF COLOR_REDLINE	= GraphicsMisc::Darker(COLOR_RED, 0.05, FALSE);
-const COLORREF COLOR_REDFILL	= GraphicsMisc::Lighter(COLOR_RED, 0.25, FALSE);
+const int		LINE_THICKNESS	= 1;
 
-const COLORREF COLOR_YELLOW		= RGB(204, 164,   0); 
-const COLORREF COLOR_YELLOWLINE	= GraphicsMisc::Darker(COLOR_YELLOW, 0.05, FALSE);
-const COLORREF COLOR_YELLOWFILL	= GraphicsMisc::Lighter(COLOR_YELLOW, 0.25, FALSE);
+/////////////////////////////////////////////////////////////////////////////
 
-const COLORREF COLOR_BLUE		= RGB(0,     0, 244); 
-const COLORREF COLOR_BLUELINE	= GraphicsMisc::Darker(COLOR_BLUE, 0.05, FALSE);
-const COLORREF COLOR_BLUEFILL	= GraphicsMisc::Lighter(COLOR_BLUE, 0.25, FALSE);
+CGraphBase::CGraphBase()
+{
+}
 
-const COLORREF COLOR_PINK		= RGB(234,  28,  74); 
-const COLORREF COLOR_PINKLINE	= GraphicsMisc::Darker(COLOR_PINK, 0.05, FALSE);
-const COLORREF COLOR_PINKFILL	= GraphicsMisc::Lighter(COLOR_PINK, 0.25, FALSE);
+CGraphBase::~CGraphBase()
+{
+}
 
-const COLORREF COLOR_ORANGE		= RGB(255,  91,  21);
-const COLORREF COLOR_ORANGELINE	= GraphicsMisc::Darker(COLOR_ORANGE, 0.05, FALSE);
-const COLORREF COLOR_ORANGEFILL	= GraphicsMisc::Lighter(COLOR_ORANGE, 0.25, FALSE);
-
-const int    LINE_THICKNESS			= 1;
+void CGraphBase::SetDatasetColor(CHMXDataset datasets[HMX_MAX_DATASET], int nDataset, COLORREF crBase)
+{
+	datasets[nDataset].SetLineColor(GraphicsMisc::Darker(crBase, 0.05, FALSE));
+	datasets[nDataset].SetFillColor(GraphicsMisc::Lighter(crBase, 0.25, FALSE));
+}
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -50,9 +48,9 @@ CString CIncompleteTasksGraph::GetTitle() const
 
 void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
+	SetDatasetColor(datasets, 0, COLOR_GREEN);
+
 	datasets[0].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[0].SetLineColor(COLOR_GREENLINE);
-	datasets[0].SetFillColor(COLOR_GREENFILL);
 	datasets[0].SetSize(LINE_THICKNESS);
 	datasets[0].SetMin(0.0);
 
@@ -61,7 +59,6 @@ void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, C
 
 	if (nNumDays)
 	{
-		//CScopedLogTimer timer(_T("CIncompleteTasksGraph::BuildGraph"));
 		COleDateTime dtStart = calculator.GetStartDate();
 		int nItemFrom = 0;
 
@@ -108,12 +105,6 @@ CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-enum
-{
-	REMAINING_ESTIMATE,
-	REMAINING_SPENT
-};
-
 CString CRemainingDaysGraph::GetTitle() const
 {
 	return CEnString(IDS_DISPLAY_REMAINING);
@@ -121,15 +112,14 @@ CString CRemainingDaysGraph::GetTitle() const
 
 void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
+	SetDatasetColor(datasets, REMAINING_ESTIMATE, COLOR_BLUE);
+	SetDatasetColor(datasets, REMAINING_SPENT, COLOR_YELLOW);
+
 	datasets[REMAINING_ESTIMATE].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[REMAINING_ESTIMATE].SetLineColor(COLOR_BLUELINE);
-	datasets[REMAINING_ESTIMATE].SetFillColor(COLOR_BLUEFILL);
 	datasets[REMAINING_ESTIMATE].SetSize(LINE_THICKNESS);
 	datasets[REMAINING_ESTIMATE].SetMin(0.0);
 	
 	datasets[REMAINING_SPENT].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[REMAINING_SPENT].SetLineColor(COLOR_YELLOWLINE);
-	datasets[REMAINING_SPENT].SetFillColor(COLOR_YELLOWFILL);
 	datasets[REMAINING_SPENT].SetSize(LINE_THICKNESS);
 	datasets[REMAINING_SPENT].SetMin(0.0);
 	
@@ -139,7 +129,7 @@ void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHM
 	if (nNumDays > 0)
 	{
 		COleDateTime dtStart = calculator.GetStartDate();
-		double dTotalEst = calculator.GetTotalTimeEstimateInDays();
+		double dTotalEst = calculator.GetDaysEstimated();
 
 		for (int nDay = 0; nDay <= nNumDays; nDay++)
 		{
@@ -154,7 +144,7 @@ void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHM
 		
 			// Time Spent
 			COleDateTime date(dtStart.m_dt + nDay);
-			double dSpent = calculator.GetTimeSpentInDays(date);
+			double dSpent = calculator.GetDaysSpent(date);
 		
 			datasets[REMAINING_SPENT].AddData(dTotalEst - dSpent);
 		}
@@ -192,28 +182,21 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-enum
+CString CStartedEndedTasksGraph::GetTitle() const
 {
-	STARTED_TASKS,
-	ENDED_TASKS
-};
-
-CString CStartedCompletedTasksGraph::GetTitle() const
-{
-	return CEnString(IDS_DISPLAY_STARTEDCOMPLETED);
+	return CEnString(IDS_DISPLAY_STARTEDENDED);
 }
 
-void CStartedCompletedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CStartedEndedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
+	SetDatasetColor(datasets, STARTED_TASKS, COLOR_GREEN);
+	SetDatasetColor(datasets, ENDED_TASKS, COLOR_RED);
+
 	datasets[STARTED_TASKS].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[STARTED_TASKS].SetLineColor(COLOR_GREENLINE);
-	datasets[STARTED_TASKS].SetFillColor(COLOR_GREENFILL);
 	datasets[STARTED_TASKS].SetSize(LINE_THICKNESS);
 	datasets[STARTED_TASKS].SetMin(0.0);
 
 	datasets[ENDED_TASKS].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[ENDED_TASKS].SetLineColor(COLOR_REDLINE);
-	datasets[ENDED_TASKS].SetFillColor(COLOR_REDFILL);
 	datasets[ENDED_TASKS].SetSize(LINE_THICKNESS);
 	datasets[ENDED_TASKS].SetMin(0.0);
 
@@ -222,7 +205,6 @@ void CStartedCompletedTasksGraph::BuildGraph(const CStatsItemCalculator& calcula
 
 	if (nNumDays > 0)
 	{
-		//CScopedLogTimer timer(_T("CStartedCompletedTasksGraph::BuildGraph"));
 		COleDateTime dtStart = calculator.GetStartDate();
 
 		for (int nDay = 0; nDay <= nNumDays; nDay++)
@@ -231,7 +213,7 @@ void CStartedCompletedTasksGraph::BuildGraph(const CStatsItemCalculator& calcula
 			int nNumStarted = 0, nNumDone = 0;
 
 			if (date > dtStart)
-				calculator.GetStartedCompletedTaskCounts(date, nNumStarted, nNumDone);
+				calculator.GetStartedEndedTasks(date, nNumStarted, nNumDone);
 
 			datasets[STARTED_TASKS].AddData(nNumStarted);
 			datasets[ENDED_TASKS].AddData(nNumDone);
@@ -250,7 +232,7 @@ void CStartedCompletedTasksGraph::BuildGraph(const CStatsItemCalculator& calcula
 	}
 }
 
-CString CStartedCompletedTasksGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	ASSERT(nHit != -1);
 
@@ -260,10 +242,80 @@ CString CStartedCompletedTasksGraph::GetTooltip(const CStatsItemCalculator& calc
 	if (datasets[STARTED_TASKS].GetData(nHit, dNumStarted) &&
 		datasets[ENDED_TASKS].GetData(nHit, nNumDone))
 	{
-		sTooltip.Format(CEnString(IDS_TOOLTIP_STARTEDCOMPLETED), CDateHelper::FormatDate(dDate), (int)dNumStarted, (int)nNumDone);
+		sTooltip.Format(CEnString(IDS_TOOLTIP_STARTEDENDED), CDateHelper::FormatDate(dDate), (int)dNumStarted, (int)nNumDone);
 	}
 
 	return sTooltip;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+CString CEstimatedSpentDaysGraph::GetTitle() const
+{
+	return CEnString(IDS_DISPLAY_ESTIMATEDSPENT);
+}
+
+void CEstimatedSpentDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+{
+	SetDatasetColor(datasets, ESTIMATED_DAYS, COLOR_PINK);
+	SetDatasetColor(datasets, SPENT_DAYS, COLOR_GREEN);
+
+	datasets[ESTIMATED_DAYS].SetStyle(HMX_DATASET_STYLE_AREALINE);
+	datasets[ESTIMATED_DAYS].SetSize(LINE_THICKNESS);
+	datasets[ESTIMATED_DAYS].SetMin(0.0);
+
+	datasets[SPENT_DAYS].SetStyle(HMX_DATASET_STYLE_AREALINE);
+	datasets[SPENT_DAYS].SetSize(LINE_THICKNESS);
+	datasets[SPENT_DAYS].SetMin(0.0);
+
+	// build the graph
+	int nNumDays = calculator.GetTotalDays();
+
+	if (nNumDays > 0)
+	{
+		COleDateTime dtStart = calculator.GetStartDate();
+
+		for (int nDay = 0; nDay <= nNumDays; nDay++)
+		{
+			COleDateTime date(dtStart.m_dt + nDay);
+			double dDaysEst = 0.0, dDaysSpent = 0;
+
+			if (date > dtStart)
+				calculator.GetDaysEstimatedSpent(date, dDaysEst, dDaysSpent);
+
+			datasets[ESTIMATED_DAYS].AddData(dDaysEst);
+			datasets[SPENT_DAYS].AddData(dDaysSpent);
+		}
+
+		// Set the maximum Y value to be something 'nice'
+		double dMax = 0.0;
+		
+		if (datasets[ESTIMATED_DAYS].GetData(nNumDays, dMax))
+		{
+			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
+
+			datasets[ESTIMATED_DAYS].SetMax(dMax);
+			datasets[SPENT_DAYS].SetMax(dMax);
+		}
+	}
+
+}
+
+CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+{
+	ASSERT(nHit != -1);
+
+	double dDate = (calculator.GetStartDate().m_dt + nHit), dDaysEst, dDaysSpent;
+	CString sTooltip;
+
+	if (datasets[ESTIMATED_DAYS].GetData(nHit, dDaysEst) &&
+		datasets[SPENT_DAYS].GetData(nHit, dDaysSpent))
+	{
+		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), CDateHelper::FormatDate(dDate), (int)dDaysEst, (int)dDaysSpent);
+	}
+
+	return sTooltip;
+
 }
 
 /////////////////////////////////////////////////////////////////////////////

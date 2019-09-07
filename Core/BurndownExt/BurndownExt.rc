@@ -134,8 +134,8 @@ EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Dis&play",IDC_STATIC,0,2,159,8
-    COMBOBOX        IDC_DISPLAY,0,13,121,118,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
+    COMBOBOX        IDC_DISPLAY,0,13,121,118,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_FRAME,"Static",SS_GRAYFRAME,0,28,314,253
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,126,12,122,13
@@ -194,13 +194,15 @@ BEGIN
     IDS_DISPLAY_REMAINING   "Days Remaining"
     IDS_TOOLTIP_INCOMPLETE  "%s\n%d Tasks"
     IDS_TOOLTIP_REMAINING   "%s\n%d Estimated\n%d Actual"
+    IDS_TOOLTIP_ESTIMATEDSPENT "%s\n%d Estimated\n%d Spent"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_ACTIVEDATERANGE     "Acti&ve Date Range (%s)"
-    IDS_TOOLTIP_STARTEDCOMPLETED "%s\n%d Started\n%d Completed"
-    IDS_DISPLAY_STARTEDCOMPLETED "Started/Completed Tasks"
+    IDS_TOOLTIP_STARTEDENDED "%s\n%d Started\n%d Completed"
+    IDS_DISPLAY_STARTEDENDED "Started/Completed Tasks"
+    IDS_DISPLAY_ESTIMATEDSPENT "Estimated/Spent Days"
 END
 
 #endif    // English (Australia) resources

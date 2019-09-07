@@ -38,12 +38,7 @@ struct STATSITEM
 	BOOL IsDone() const;
 
 	COleDateTime GetEndDate() const;
-	BOOL GetRange(COleDateTimeRange& dtRange) const;
-	BOOL GetIntersection(const COleDateTimeRange& dtExtents, COleDateTimeRange& dtIntersection) const;
-	
-	double GetIntersectionProportion(const COleDateTimeRange& dtExtents, BOOL bWeekdays) const; // return 0.0-1.0
-	double GetIntersectionProportionAtDate(const COleDateTimeRange& dtExtents, const COleDateTime& date, BOOL bWeekdays) const; // return 0.0-1.0
-
+	BOOL GetEndDate(COleDateTime& dtEnd) const;
 	void MinMax(COleDateTimeRange& dtExtents) const;
 	
 	COleDateTime dtStart, dtDue, dtDone; 
@@ -54,8 +49,9 @@ struct STATSITEM
 	DWORD dwTaskID;
 
 protected:
+	void ValidateStartDate();
+
 	static void MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents);
-	static double GetIntersectionProportion(const COleDateTime& dtStart, const COleDateTime& dtEnd, const COleDateTimeRange& dtExtents, BOOL bWeekdays); // return 0.0-1.0
 
 	static double GetCost(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL& bIsRate);
 	static COleDateTime GetStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
@@ -108,35 +104,41 @@ public:
 
 	BOOL SetDateRange(const COleDateTimeRange& dtExtents);
 
-	COleDateTime GetStartDate() const { return m_dtExtents.GetStart(); }
-	COleDateTime GetEndDate() const { return m_dtExtents.GetEndInclusive(); }
+	COleDateTime GetStartDate() const { return m_dtStartExtents; }
+	COleDateTime GetEndDate() const { return m_dtEndExtents; }
 	
 	// Totals
-	double GetTotalTimeEstimateInDays() const;
-	double GetTotalTimeSpentInDays() const;
-	double GetTotalCostEstimate() const;
-	double GetTotalCostSpent() const;
+	double GetDaysEstimated() const;
+	double GetDaysSpent() const;
+	double GetCostEstimate() const;
+	double GetCostSpent() const;
 
 	// Proportions
-	double GetTimeSpentInDays(const COleDateTime& date) const;
-	double GetTimeEstimateInDays(const COleDateTime& date) const;
+	double GetDaysSpent(const COleDateTime& date) const;
+	double GetDaysEstimated(const COleDateTime& date) const;
 	double GetCostSpent(const COleDateTime& date) const;
-	double GetCostEstimate(const COleDateTime& date) const;
+	double GetCostEstimated(const COleDateTime& date) const;
 
 	int GetTotalDays() const;
 	int GetTotalWeekdays() const;
+
 	int GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
-	BOOL GetStartedCompletedTaskCounts(const COleDateTime& date, int &nNumStarted, int &nNumDone) const;
+	BOOL GetStartedEndedTasks(const COleDateTime& date, int &nNumStarted, int &nNumDone) const;
+	BOOL GetDaysEstimatedSpent(const COleDateTime& date, double &dEstDays, double &dSpentDays) const;
+	BOOL GetCostEstimatedSpent(const COleDateTime& date, double &dEstCost, double &dSpentCost) const;
 
 protected:
 	const CStatsItemArray& m_data;
 
-	COleDateTimeRange m_dtExtents;
+	COleDateTime m_dtStartExtents, m_dtEndExtents;
+
+	mutable int m_nTotalDays, m_nTotalWeekdays;
 
 protected:
 	double CalcProportionOfValue(const STATSITEM& si, double dValue, const COleDateTime& date) const;
+	double GetIntersectionProportion(const STATSITEM& si, BOOL bWeekdays) const;
 
-	enum ATTRIB { TIME, COST };
+	enum ATTRIB { DAYS, COST };
 	enum ATTRIBTYPE { ESTIMATE, SPENT };
 
 	double GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nType) const;

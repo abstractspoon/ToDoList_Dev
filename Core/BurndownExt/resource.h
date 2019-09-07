@@ -17,6 +17,7 @@
 #define IDS_DISPLAY_BURNDOWN2           6007
 #define IDS_TOOLTIP_INCOMPLETE          6007
 #define IDS_TOOLTIP_REMAINING           6008
+#define IDS_TOOLTIP_ESTIMATEDSPENT      6009
 #define IDR_TOOLBAR                     16006
 #define IDC_TB_PLACEHOLDER              16024
 #define IDC_ACTIVEDATERANGE_LABEL       16028
@@ -29,7 +30,10 @@
 #define IDC_DIVIDER                     17004
 #define IDS_ACTIVEDATERANGE             57688
 #define IDS_TOOLTIP_STARTEDCOMPLETED    57689
+#define IDS_TOOLTIP_STARTEDENDED        57689
 #define IDS_DISPLAY_STARTEDCOMPLETED    57690
+#define IDS_DISPLAY_STARTEDENDED        57690
+#define IDS_DISPLAY_ESTIMATEDSPENT      57691
 
 // Next default values for new objects
 // 

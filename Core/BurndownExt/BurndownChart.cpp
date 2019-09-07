@@ -41,7 +41,8 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 {
 	VERIFY(m_graphs.Add(new CIncompleteTasksGraph()) == BCT_INCOMPLETETASKS);
 	VERIFY(m_graphs.Add(new CRemainingDaysGraph()) == BCT_REMAININGDAYS);
-	VERIFY(m_graphs.Add(new CStartedCompletedTasksGraph()) == BCT_STARTEDCOMPLETEDTASKS);
+	VERIFY(m_graphs.Add(new CStartedEndedTasksGraph()) == BCT_STARTEDENDEDTASKS);
+	VERIFY(m_graphs.Add(new CEstimatedSpentDaysGraph()) == BCT_ESTIMATEDSPENTDAYS);
 	//m_graphs.Add(new ());
 
 	//FileMisc::EnableLogging(TRUE);
@@ -153,19 +154,16 @@ void CBurndownChart::RebuildXScale()
 	// calc new scale
 	m_nScale = CalculateRequiredXScale();
 
-	// Get new start and end dates
-	COleDateTime dtStart = m_dtExtents.GetStart();
-	COleDateTime dtEnd = m_dtExtents.GetEndInclusive();
-
 	// build ticks
+	int nNumDays = m_calculator.GetTotalDays();
+	COleDateTime dtTick = m_calculator.GetStartDate();
+
 	CDateHelper dh;
-	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
-	COleDateTime dtTick = dtStart;
 	CString sTick;
 	
 	for (int nDay = 0; nDay <= nNumDays; )
 	{
-		sTick = CDateHelper::FormatDate(dtTick);
+		sTick = dh.FormatDate(dtTick);
 		SetXScaleLabel(nDay, sTick);
 
 		// next Tick date
