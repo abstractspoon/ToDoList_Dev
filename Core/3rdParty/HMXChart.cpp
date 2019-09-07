@@ -1072,6 +1072,7 @@ bool CHMXChart::CalcDatas()
 		m_nXMax = max(m_nXMax, nTemp3);
 	}
 	
+	m_nYMin = m_nYMax = 0;
 	GetMinMax(m_nYMin, m_nYMax, false);
 
 	// with this 'strange' function I can set m_nYmin & m_nYMax so that 
@@ -1168,27 +1169,25 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 
 bool CHMXChart::GetMinMax(double& nMin, double& nMax, bool bDataOnly) const
 {
-	// Get the min and max of all our datasets
-	int f = 0;
-
-	while((f < HMX_MAX_DATASET) && !m_datasets[f].GetMinMax(nMin, nMax, bDataOnly))
-		f++;
-
-	if (f == HMX_MAX_DATASET)
-		return false;
-
 	double nTemp1, nTemp2;
+	int nNumSets = 0;
 	
-	for(; f<HMX_MAX_DATASET; f++) 
+	for(int f = 0; f<HMX_MAX_DATASET; f++) 
 	{
 		if (m_datasets[f].GetMinMax(nTemp1, nTemp2, bDataOnly)) 
 		{
 			nMin = min(nMin, nTemp1);
 			nMax = max(nMax, nTemp2);
+
+			nNumSets++;
+		}
+		else
+		{
+			break;
 		}
 	}
 
-	return true;
+	return (nNumSets > 0);
 }
 
 //
