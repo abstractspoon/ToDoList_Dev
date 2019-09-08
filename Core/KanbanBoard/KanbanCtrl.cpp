@@ -3146,16 +3146,32 @@ LRESULT CKanbanCtrl::OnColumnToggleTaskDone(WPARAM /*wp*/, LPARAM lp)
 	ASSERT(lp);
 
 	DWORD dwTaskID = lp;
-	const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+	KANBANITEM* pKI = m_data.GetItem(dwTaskID);
 
 	if (pKI)
 	{
-		LRESULT lr = GetParent()->SendMessage(WM_KBC_EDITTASKDONE, dwTaskID, !pKI->IsDone(FALSE));
+		BOOL bSetDone = !pKI->IsDone(FALSE);
+		BOOL bMod = GetParent()->SendMessage(WM_KBC_EDITTASKDONE, dwTaskID, bSetDone);
 
-		if (lr && m_data.HasItem(dwTaskID))
-			PostMessage(WM_KCM_SELECTTASK, 0, dwTaskID);
+		if (bMod)
+		{
+			// If the app hasn't already updated this for us we must do it ourselves
+			if (pKI->IsDone(FALSE) != bSetDone)
+			{
+				if (bSetDone)
+					pKI->dtDone = COleDateTime::GetCurrentTime();
+				else
+					CDateHelper::ClearDate(pKI->dtDone);
 
-		return lr;
+				pKI->bDone = bSetDone;
+				m_pSelectedColumn->Invalidate(FALSE);
+			}
+
+			if (m_data.HasItem(dwTaskID))
+				PostMessage(WM_KCM_SELECTTASK, 0, dwTaskID);
+		}
+
+		return bMod;
 	}
 
 	// else

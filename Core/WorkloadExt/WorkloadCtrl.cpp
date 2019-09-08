@@ -1936,11 +1936,23 @@ BOOL CWorkloadCtrl::OnItemCheckChange(HTREEITEM hti)
 	if (!m_bReadOnly)
 	{
 		DWORD dwTaskID = GetTaskID(hti);
-		const WORKLOADITEM* pWI = m_data.GetItem(dwTaskID);
+		WORKLOADITEM* pWI = m_data.GetItem(dwTaskID);
 		ASSERT(pWI);
 
 		if (pWI)
-			CWnd::GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), !pWI->bDone);
+		{
+			BOOL bSetDone = !pWI->IsDone(FALSE);
+
+			if (CWnd::GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), bSetDone))
+			{
+				// If the app hasn't already updated this for us we must do it ourselves
+				if (pWI->IsDone(FALSE) != bSetDone)
+				{
+					pWI->bDone = bSetDone;
+					m_tree.Invalidate(FALSE);
+				}
+			}
+		}
 	}
 
 	return TRUE; // always

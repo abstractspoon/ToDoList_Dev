@@ -525,7 +525,7 @@ COLORREF WORKLOADITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (HasColor())
 	{
-		if (bColorIsBkgnd && !bSelected && !bDone && !bGoodAsDone)
+		if (bColorIsBkgnd && !bSelected && !IsDone(TRUE))
 			return GraphicsMisc::GetBestTextColor(color);
 		else
 			return color;
@@ -539,7 +539,7 @@ COLORREF WORKLOADITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (!bSelected && HasColor())
 	{
-		if (bColorIsBkgnd && !bDone && !bGoodAsDone)
+		if (bColorIsBkgnd && !IsDone(TRUE))
 			return color;
 	}
 	
@@ -615,7 +615,7 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 		if (pWI->bParent)
 			continue;
 
-		if (!pWI->HasValidDates() || pWI->IsDone())
+		if (!pWI->HasValidDates() || pWI->IsDone(TRUE))
 			continue;
 
 		double dTaskDuration = pWI->dtRange.GetWeekdayCount();

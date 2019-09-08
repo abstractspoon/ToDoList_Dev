@@ -129,6 +129,15 @@ namespace MindMapUIExtension
             return m_IsDone; 
         }
 
+		public Boolean SetDone(bool done = true)
+		{
+			if (m_IsDone == done)
+				return false;
+
+			m_IsDone = done;
+			return true;
+		}
+
 		public bool ProcessTaskUpdate(Task task)
 		{
 			if (task.GetID() != m_TaskID)
@@ -1079,9 +1088,23 @@ namespace MindMapUIExtension
             {
                 if (HitTestCheckbox(node, e.Location))
                 {
-                    if (EditTaskDone != null)
-                        EditTaskDone(this, UniqueID(SelectedNode), !taskItem.IsDone(false));
-                }
+					if (EditTaskDone != null)
+					{
+						bool setDone = !taskItem.IsDone(false);
+
+						if (EditTaskDone(this, UniqueID(SelectedNode), setDone))
+						{
+							// If the app hasn't already updated this for us we must do it ourselves
+							if (taskItem.IsDone(false) != setDone)
+							{
+								taskItem.SetDone(setDone);
+
+								RefreshItemFont(node, false);
+								RedrawNode(node);
+							}
+						}
+					}
+				}
                 else if (HitTestIcon(node, e.Location))
                 {
                     // Performing icon editing from a 'MouseUp' or 'MouseClick' event 

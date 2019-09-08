@@ -489,7 +489,20 @@ namespace WordCloudUIExtension
 			if (CheckboxRect(hit.Item.Bounds).Contains(e.Location))
 			{
 				if (EditTaskDone != null)
-					EditTaskDone(this, item.Id, !item.IsDone(false));
+				{
+					bool setDone = !item.IsDone(false);
+
+					if (EditTaskDone(this, item.Id, setDone))
+					{
+						// If the app hasn't already updated this for us we must do it ourselves
+						if (item.IsDone(false) != setDone)
+						{
+							item.SetDone(setDone);
+							RedrawItems(hit.Item.Index, hit.Item.Index, false);
+						}
+					}
+
+				}
 			}
 			else if (IconRect(hit.Item.Bounds).Contains(e.Location))
 			{

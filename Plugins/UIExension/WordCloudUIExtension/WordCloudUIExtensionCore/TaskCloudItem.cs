@@ -89,6 +89,20 @@ namespace WordCloudUIExtension
             // else
             return (DoneDate != String.Empty);
         }
+
+        public Boolean SetDone(Boolean done)
+        {
+			if (done == IsDone(false))
+				return false;
+
+            // else
+			if (done)
+				DoneDate = DateTime.Now.ToShortDateString();
+			else
+				DoneDate = String.Empty;
+
+            return true;
+        }
         
 		private List<string> m_Words;
 		private Task.Attribute m_WordAttribute;

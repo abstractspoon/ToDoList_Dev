@@ -138,7 +138,20 @@ struct WORKLOADITEM
 	WORKLOADITEM& operator=(const WORKLOADITEM& wi);
 	BOOL operator==(const WORKLOADITEM& wi) const;
 	
-public:
+	BOOL HasStartDate() const { return dtRange.HasStart(); }
+	BOOL HasDueDate() const { return dtRange.HasEnd(); }
+	BOOL HasValidDates() const { return dtRange.IsValid(); }
+	BOOL IsDone(BOOL bIncGoodAs) const { return (bDone || (bIncGoodAs && bGoodAsDone)); }
+
+	void UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL bPreferTimeEstimate, BOOL bProportionally);
+	void ClearAllocations() { mapAllocatedDays.RemoveAll(); }
+
+	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
+	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
+	BOOL HasColor() const;
+
+	int GetNames(const CStringArray& aAllNames, CStringArray& aNames) const;
+
 	CString sTitle;
 	COleDateTimeRange dtRange; 
 	COLORREF color;
@@ -149,25 +162,10 @@ public:
 	double dTimeEst; // weekdays
 	CMapDayAllocations mapAllocatedDays;
 	
-public:
 	BOOL bDone;
 	bool bParent; // 'bool' to match ITaskList
 	BOOL bLocked, bHasIcon;
 	BOOL bGoodAsDone, bSomeSubtaskDone;
-
-	BOOL HasStartDate() const { return dtRange.HasStart(); }
-	BOOL HasDueDate() const { return dtRange.HasEnd(); }
-	BOOL HasValidDates() const { return dtRange.IsValid(); }
-	BOOL IsDone() const { return (bDone || bGoodAsDone); }
-
-	void UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL bPreferTimeEstimate, BOOL bProportionally);
-	void ClearAllocations() { mapAllocatedDays.RemoveAll(); }
-
-	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
-	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
-	BOOL HasColor() const;
-
-	int GetNames(const CStringArray& aAllNames, CStringArray& aNames) const;
 
 };
 

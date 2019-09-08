@@ -2185,11 +2185,27 @@ BOOL CGanttCtrl::OnItemCheckChange(HTREEITEM hti)
 		return FALSE;
 
 	DWORD dwTaskID = GetTaskID(hti);
-	const GANTTITEM* pGI = m_data.GetItem(dwTaskID);
+	GANTTITEM* pGI = m_data.GetItem(dwTaskID);
 	ASSERT(pGI);
 
 	if (pGI)
-		CWnd::GetParent()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), !pGI->IsDone(FALSE));
+	{
+		BOOL bSetDone = !pGI->IsDone(FALSE);
+
+		if (CWnd::GetParent()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), bSetDone))
+		{
+			// If the app hasn't already updated this for us we must do it ourselves
+			if (pGI->IsDone(FALSE) != bSetDone)
+			{
+				if (bSetDone)
+					pGI->dtDone = COleDateTime::GetCurrentTime();
+				else
+					CDateHelper::ClearDate(pGI->dtDone);
+
+				m_tree.Invalidate(FALSE);
+			}
+		}
+	}
 
 	return TRUE; // always
 }
