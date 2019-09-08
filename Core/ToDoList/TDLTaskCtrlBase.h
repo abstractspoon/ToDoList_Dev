@@ -119,7 +119,7 @@ public:
 	COLORREF GetSelectedTaskColor() const; // -1 on no item selected
 	CString GetSelectedTaskIcon() const;
 	CString GetSelectedTaskComments() const;
-	const CBinaryData& GetSelectedTaskCustomComments(CString& sCommentsTypeID) const;
+	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const;
 	CString GetSelectedTaskTitle() const;
 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const;
 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const;

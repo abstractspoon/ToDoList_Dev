@@ -239,8 +239,8 @@ TODOITEM* CToDoCtrlData::NewTask(const CTaskFile& tasks, HTASKITEM hTask, const 
 		pTDI->nPercentDone = max(0, min(99, pTDI->nPercentDone));
 	
 	// set comments type if not set
-	if (pTDI->sCommentsTypeID.IsEmpty()) 
-		pTDI->sCommentsTypeID = m_cfDefault;
+	if (pTDI->cfComments.IsEmpty()) 
+		pTDI->cfComments = m_cfDefault;
 
 	return pTDI;
 }
@@ -470,15 +470,15 @@ CString CToDoCtrlData::GetTaskComments(DWORD dwTaskID) const
 	return pTDI->sComments;
 }
 
-const CBinaryData& CToDoCtrlData::GetTaskCustomComments(DWORD dwTaskID, CString& sCommentsTypeID) const
+const CBinaryData& CToDoCtrlData::GetTaskCustomComments(DWORD dwTaskID, CONTENTFORMAT& cfComments) const
 {
 	static CBinaryData content;
-	sCommentsTypeID.Empty();
+	cfComments.Empty();
 
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, content);
 	
-	sCommentsTypeID = pTDI->sCommentsTypeID;
+	cfComments = pTDI->cfComments;
 	return pTDI->customComments;
 }
 
@@ -1236,7 +1236,7 @@ TDC_SET CToDoCtrlData::CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, 
 			
 			case TDCA_COMMENTS:		COPYATTRIB(sComments); 
 									COPYATTRIB(customComments); 
-									COPYATTRIB(sCommentsTypeID); break;
+									COPYATTRIB(cfComments); break;
 			
 			case TDCA_FILEREF:		COPYATTRIBARR(aFileLinks); break;
 			case TDCA_ALLOCTO:		COPYATTRIBARR(aAllocTo); break;
@@ -1787,16 +1787,16 @@ TDC_SET CToDoCtrlData::SetTaskComments(DWORD dwTaskID, const CString& sComments,
 	return SET_NOCHANGE;
 }
 
-TDC_SET CToDoCtrlData::SetTaskCommentsType(DWORD dwTaskID, const CString& sCommentsTypeID)
+TDC_SET CToDoCtrlData::SetTaskCommentsType(DWORD dwTaskID, const CONTENTFORMAT& cfComments)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
 	// test for actual change
-	if (pTDI->sCommentsTypeID.CompareNoCase(sCommentsTypeID) == 0)
+	if (pTDI->cfComments.CompareNoCase(cfComments) == 0)
 		return SET_NOCHANGE;
 
-	TDC_SET nRes = DoEditTaskAttribute(dwTaskID, pTDI, TDCA_COMMENTS, pTDI->sCommentsTypeID, sCommentsTypeID);
+	TDC_SET nRes = DoEditTaskAttribute(dwTaskID, pTDI, TDCA_COMMENTS, pTDI->cfComments, cfComments);
 
 	if (nRes == SET_CHANGE)
 		pTDI->customComments.Empty();

@@ -247,7 +247,7 @@ TODOITEM& TODOITEM::operator=(const TODOITEM& tdi)
 	sTitle = tdi.sTitle;
 	sComments = tdi.sComments;
 	customComments = tdi.customComments;
-	sCommentsTypeID = tdi.sCommentsTypeID;
+	cfComments = tdi.cfComments;
 	color = tdi.color; 
 	sAllocBy = tdi.sAllocBy;
 	sStatus = tdi.sStatus;
@@ -309,7 +309,7 @@ BOOL TODOITEM::operator==(const TODOITEM& tdi)
 			(sTitle = tdi.sTitle) &&
 			(sComments == tdi.sComments) &&
 			(customComments == tdi.customComments) &&
-			(sCommentsTypeID == tdi.sCommentsTypeID) &&
+			(cfComments == tdi.cfComments) &&
 			(sAllocBy == tdi.sAllocBy) &&
 			(sStatus == tdi.sStatus) &&
 			(sCreatedBy == tdi.sCreatedBy) &&

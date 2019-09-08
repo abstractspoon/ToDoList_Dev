@@ -105,7 +105,7 @@ public:
 	BOOL TaskHasDate(DWORD dwTaskID, TDC_DATE nDate) const;
 	COLORREF GetTaskColor(DWORD dwTaskID) const; // -1 on no item selected
 	CString GetTaskComments(DWORD dwTaskID) const;
-	const CBinaryData& GetTaskCustomComments(DWORD dwTaskID, CString& sCommentsTypeID) const;
+	const CBinaryData& GetTaskCustomComments(DWORD dwTaskID, CONTENTFORMAT& cfComments) const;
 	int GetTaskPercent(DWORD dwTaskID, BOOL bCheckIfDone) const;
 	BOOL GetTaskTimeEstimate(DWORD dwTaskID, TDCTIMEPERIOD& timeEst) const;
 	BOOL GetTaskTimeSpent(DWORD dwTaskID, TDCTIMEPERIOD& timeSpent) const;
@@ -176,7 +176,7 @@ public:
 	TDC_SET SetTaskColor(DWORD dwTaskID, COLORREF color);
 	TDC_SET SetTaskIcon(DWORD dwTaskID, const CString& sIcon);
 	TDC_SET SetTaskComments(DWORD dwTaskID, const CString& sComments, const CBinaryData& customComments = _T(""));
-	TDC_SET SetTaskCommentsType(DWORD dwTaskID, const CString& sCommentsTypeID);
+	TDC_SET SetTaskCommentsType(DWORD dwTaskID, const CONTENTFORMAT& cfComments);
 	TDC_SET SetTaskPercent(DWORD dwTaskID, int nPercent);
 	TDC_SET SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst);
 	TDC_SET SetTaskTimeSpent(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst);

@@ -49,7 +49,7 @@ void CTDCAnonymizeTasklist::Anonymize(CTaskFile& tasks, HTASKITEM hTask, CMapStr
 		tasks.SetTaskComments(hTask, Misc::Shuffle(tdi.sComments));
 
 		if (!tdi.customComments.IsEmpty())
-			tasks.SetTaskCustomComments(hTask, CBinaryData(_T("__")), tdi.sCommentsTypeID); // Too hard
+			tasks.SetTaskCustomComments(hTask, CBinaryData(_T("__")), tdi.cfComments); // Too hard
 		
 		Anonymize(tdi.aAllocTo,		*mapTLD.GetAddMapping(_T("ALLOCTO")));
 		Anonymize(tdi.aCategories,	*mapTLD.GetAddMapping(_T("CATEGORY")));

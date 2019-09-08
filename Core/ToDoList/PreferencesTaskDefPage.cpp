@@ -323,7 +323,7 @@ void CPreferencesTaskDefPage::GetTaskAttributes(TODOITEM& tdiDefault) const
 	Misc::Split(m_sDefAllocTo, tdiDefault.aAllocTo);
 	Misc::Split(m_sDefTags, tdiDefault.aTags);
 
-	tdiDefault.sCommentsTypeID = m_cfDefault;
+	tdiDefault.cfComments = m_cfDefault;
 	tdiDefault.sComments = m_sDefTextComments;
 	tdiDefault.customComments = m_defCustomComments;
 }

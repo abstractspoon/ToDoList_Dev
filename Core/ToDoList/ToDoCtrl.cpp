@@ -1636,9 +1636,9 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	}
 
 	// comments
-	CString sCommentsType;
-	GetSelectedTaskCustomComments(sCommentsType);
-	BOOL bEditComments = (m_mgrContent.FindContent(sCommentsType) != -1);
+	CONTENTFORMAT cfComments;
+	GetSelectedTaskCustomComments(cfComments);
+	BOOL bEditComments = (m_mgrContent.FindContent(cfComments) != -1);
 	
 	BOOL bCommentsVis = IsCommentsVisible();
 	RT_CTRLSTATE nCommentsState = RTCS_ENABLED, nComboState = RTCS_ENABLED;
@@ -1760,7 +1760,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		if (bIncComments)
 		{
 			m_sTextComments = GetSelectedTaskComments();
-			m_customComments = GetSelectedTaskCustomComments(sCommentsType);
+			m_customComments = GetSelectedTaskCustomComments(cfComments);
 		}
 		
 		CStringArray aMatched, aMixed;
@@ -1872,8 +1872,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		// will be empty which will put the comments type combo in an
 		// indeterminate state which is the desired effect since this requires
 		// the user to reset the type before they can edit
-		if (m_ctrlComments.SetSelectedFormat(sCommentsType))
-			m_cfComments = sCommentsType;
+		if (m_ctrlComments.SetSelectedFormat(cfComments))
+			m_cfComments = cfComments;
 		else
 			m_cfComments.Empty();
 		
@@ -3755,10 +3755,10 @@ void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID
 		m_data.FixupTaskLocalDependentsIDs(dwNewTaskID, dwPrevTaskID);
 
 		// Restore previous comments format
-		CString sCommentsTypeID;
-		const CBinaryData& customComments = m_data.GetTaskCustomComments(dwPrevTaskID, sCommentsTypeID);
+		CONTENTFORMAT cfComments;
+		const CBinaryData& customComments = m_data.GetTaskCustomComments(dwPrevTaskID, cfComments);
 
-		m_data.SetTaskCommentsType(dwNewTaskID, sCommentsTypeID);
+		m_data.SetTaskCommentsType(dwNewTaskID, cfComments);
 	}
 
 	// optionally clear the comments
@@ -10965,7 +10965,7 @@ int CToDoCtrl::GetSelectedTaskCustomAttributeData(CTDCCustomAttributeDataMap& ma
 void CToDoCtrl::SetDefaultTaskAttributes(const TODOITEM& tdi)
 {
 	m_tdiDefault = tdi;
-	m_cfDefault = m_tdiDefault.sCommentsTypeID;
+	m_cfDefault = m_tdiDefault.cfComments;
 
 	m_data.SetDefaultCommentsFormat(m_cfDefault);
 	m_data.SetDefaultTimeUnits(tdi.timeEstimate.nUnits, tdi.timeSpent.nUnits);

@@ -3946,7 +3946,7 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		{
 			m_comments.ConvertContentToHtml(pTDI->customComments, 
 				sHtml, 
-				pTDI->sCommentsTypeID, 
+				pTDI->cfComments, 
 				tasks.GetHtmlCharSet(), 
 				tasks.GetHtmlImageFolder());
 		}
@@ -4191,16 +4191,16 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		{
 			// Even if it's a text format we still need to write out the comments format
 			// unless there were no comments or the comment type is the same as the default
-			if (CONTENTFORMAT(pTDI->sCommentsTypeID).FormatIsText())
+			if (CONTENTFORMAT(pTDI->cfComments).FormatIsText())
 			{
-				if (!pTDI->sComments.IsEmpty() || (pTDI->sCommentsTypeID != m_data.m_cfDefault))
-					tasks.SetTaskCustomComments(hTask, _T(""), pTDI->sCommentsTypeID);
+				if (!pTDI->sComments.IsEmpty() || (pTDI->cfComments != m_data.m_cfDefault))
+					tasks.SetTaskCustomComments(hTask, _T(""), pTDI->cfComments);
 			}
 			// else we save the custom comments either if there are any comments or if the
 			// comments type is different from the default
-			else if (!pTDI->customComments.IsEmpty() || (pTDI->sCommentsTypeID != m_data.m_cfDefault))
+			else if (!pTDI->customComments.IsEmpty() || (pTDI->cfComments != m_data.m_cfDefault))
 			{
-				tasks.SetTaskCustomComments(hTask, pTDI->customComments, pTDI->sCommentsTypeID);
+				tasks.SetTaskCustomComments(hTask, pTDI->customComments, pTDI->cfComments);
 			}
 		}
 

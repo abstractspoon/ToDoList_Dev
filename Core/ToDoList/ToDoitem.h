@@ -19,6 +19,7 @@
 #include "..\shared\timehelper.h"
 
 #include "..\interfaces\ITasklist.h"
+#include "..\interfaces\ContentCtrl.h"
 
 #include <afxtempl.h>
 
@@ -159,7 +160,6 @@ public:
 	// Attributes
 	CString sTitle;
 	CString sComments;
-	CString sCommentsTypeID;
 	CString sAllocBy;
 	CString sStatus;
 	CString sCreatedBy;
@@ -186,6 +186,7 @@ public:
 	
 	TDCCOST cost;
 	TDCTIMEPERIOD timeEstimate, timeSpent;
+	CONTENTFORMAT cfComments;
 	
 	BOOL bFlagged;
 	BOOL bLocked;

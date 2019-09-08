@@ -5733,13 +5733,13 @@ CString CTDLTaskCtrlBase::GetSelectedTaskComments() const
 	return EMPTY_STR;
 }
 
-const CBinaryData& CTDLTaskCtrlBase::GetSelectedTaskCustomComments(CString& sCommentsTypeID) const
+const CBinaryData& CTDLTaskCtrlBase::GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const
 {
 	if (GetSelectedCount() == 1)
-		return m_data.GetTaskCustomComments(GetSelectedTaskID(), sCommentsTypeID);
+		return m_data.GetTaskCustomComments(GetSelectedTaskID(), cfComments);
 	
 	// else
-	sCommentsTypeID.Empty();
+	cfComments.Empty();
     POSITION pos = GetFirstSelectedTaskPos();
 	
     while (pos)
@@ -5751,13 +5751,13 @@ const CBinaryData& CTDLTaskCtrlBase::GetSelectedTaskCustomComments(CString& sCom
 		
 		if (pTDI)
 		{
-			if (sCommentsTypeID.IsEmpty())
+			if (cfComments.IsEmpty())
 			{
-				sCommentsTypeID = pTDI->sCommentsTypeID;
+				cfComments = pTDI->cfComments;
 			}
-			else if (sCommentsTypeID != pTDI->sCommentsTypeID)
+			else if (cfComments != pTDI->cfComments)
 			{
-				sCommentsTypeID.Empty();
+				cfComments.Empty();
 				break;
 			}
 		}

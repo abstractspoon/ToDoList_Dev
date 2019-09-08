@@ -1689,7 +1689,7 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 		if (!tdi.sComments.IsEmpty())
 			SetTaskString(hTask, TDL_TASKCOMMENTS, tdi.sComments, XIT_ELEMENT);
 
-		SetTaskCustomComments(hTask, tdi.customComments, tdi.sCommentsTypeID);
+		SetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments);
 
 		if (!tdi.sAllocBy.IsEmpty())
 			SetTaskString(hTask, TDL_TASKALLOCBY, tdi.sAllocBy);
@@ -1852,7 +1852,7 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		if (bOverwrite)
 		{
 			GETATTRIB(TDL_TASKCOMMENTS,			tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS));
-			GETATTRIB(TDL_TASKCOMMENTSTYPE,		GetTaskCustomComments(hTask, tdi.customComments, tdi.sCommentsTypeID));
+			GETATTRIB(TDL_TASKCOMMENTSTYPE,		GetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments));
 		}
 		else // merge
 		{
@@ -1861,12 +1861,12 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 			// Don't overwrite actual text comments with empty default custom comments
 			if (!tdi.sComments.IsEmpty() && !TaskHasAttribute(hTask, TDL_TASKCUSTOMCOMMENTS))
 			{
-				tdi.sCommentsTypeID.Empty();
+				tdi.cfComments.Empty();
 				tdi.customComments.Empty();
 			}
 			else
 			{
-				GETATTRIB(TDL_TASKCOMMENTSTYPE,	GetTaskCustomComments(hTask, tdi.customComments, tdi.sCommentsTypeID));
+				GETATTRIB(TDL_TASKCOMMENTSTYPE,	GetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments));
 			}
 		}
 

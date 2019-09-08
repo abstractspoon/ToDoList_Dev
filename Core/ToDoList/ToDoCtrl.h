@@ -227,7 +227,7 @@ public:
 	COLORREF GetSelectedTaskColor() const { return m_taskTree.GetSelectedTaskColor(); }
 	CString GetSelectedTaskIcon() const { return m_taskTree.GetSelectedTaskIcon(); }
 	CString GetSelectedTaskComments() const { return m_taskTree.GetSelectedTaskComments(); }
-	const CBinaryData& GetSelectedTaskCustomComments(CString& sCommentsTypeID) const { return m_taskTree.GetSelectedTaskCustomComments(sCommentsTypeID); }
+	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const { return m_taskTree.GetSelectedTaskCustomComments(cfComments); }
 	CString GetSelectedTaskTitle() const { return m_taskTree.GetSelectedTaskTitle(); }
 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const { return m_taskTree.GetSelectedTaskTimeEstimate(timeEst); }
 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const { return m_taskTree.GetSelectedTaskTimeSpent(timeSpent); }
