@@ -42,7 +42,7 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	VERIFY(m_graphs.Add(new CRemainingDaysGraph()) == BCT_REMAININGDAYS);
 	VERIFY(m_graphs.Add(new CStartedEndedTasksGraph()) == BCT_STARTEDENDEDTASKS);
 	VERIFY(m_graphs.Add(new CEstimatedSpentDaysGraph()) == BCT_ESTIMATEDSPENTDAYS);
-	VERIFY(m_graphs.Add(new CEstimatedSpentCostGraph()) == BCT_ESTIMATEDSPENTCOST);
+	//VERIFY(m_graphs.Add(new CEstimatedSpentCostGraph()) == BCT_ESTIMATEDSPENTCOST);
 	//m_graphs.Add(new ());
 
 	//FileMisc::EnableLogging(TRUE);
