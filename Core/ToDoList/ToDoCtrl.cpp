@@ -1732,8 +1732,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		hti = GetUpdateControlsItem();
 	
 	BOOL bReadOnly = (IsReadOnly() || !m_taskTree.SelectionHasUnlocked());
-	CString sCommentsType(m_cfDefault);
 	int nSelCount = GetSelectedCount();
+	CONTENTFORMAT cfComments;
 	
 	if (hti)
 	{
@@ -1859,6 +1859,10 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_eDependency.EnableButton(ID_DEPENDS_LINK, FALSE);
 
 		m_mapCustomCtrlData.RemoveAll();
+
+		// Keep whatever the current comments contents type is
+		if (bIncComments)
+			m_ctrlComments.GetSelectedFormat(cfComments);
 	}
 
 	UpdateDateTimeControls(hti != NULL);
