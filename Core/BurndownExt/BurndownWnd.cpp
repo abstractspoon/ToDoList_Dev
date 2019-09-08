@@ -5,7 +5,6 @@
 #include "resource.h"
 #include "BurndownExt.h"
 #include "BurndownWnd.h"
-#include "BurndownStatic.h"
 
 #include "..\shared\mapex.h"
 #include "..\shared\misc.h"

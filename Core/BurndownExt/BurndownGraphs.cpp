@@ -5,7 +5,6 @@
 #include "resource.h"
 #include "BurndownGraphs.h"
 #include "BurndownChart.h"
-#include "BurndownStatic.h"
 
 #include "..\shared\datehelper.h"
 #include "..\shared\holdredraw.h"

@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "BurndownChart.h"
-#include "BurndownStatic.h"
 #include "BurndownGraphs.h"
 
 #include "..\shared\datehelper.h"
