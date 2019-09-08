@@ -603,6 +603,15 @@ namespace MindMapUIExtension
 					RefreshNodeLabel(id, false);
 			}
 
+			if (tasks.IsAttributeAvailable(Task.Attribute.DoneDate))
+			{
+				foreach (var id in changedTaskIds)
+				{
+					var node = FindNode(id);
+					RefreshItemFont(node, false);
+				}
+			}
+
 			RecalculatePositions();
 		}
 
