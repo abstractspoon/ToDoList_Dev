@@ -1845,8 +1845,8 @@ namespace MindMapUIExtension
 								// Place halfway between
 								Rectangle prevRect = GetItemDrawRect(prevItem.ItemBounds);
 
-								insertionMark.Y = ((insertionMark.Top + prevRect.Bottom - InsertionMarkerHeight) / 2);
 								insertionMark.X = Math.Min(insertionMark.X, prevRect.X);
+								insertionMark.Y = ((insertionMark.Top + prevRect.Bottom - InsertionMarkerHeight) / 2);
 								insertionMark.Width = Math.Max(insertionMark.Width, prevRect.Width);
 							}
 							else
@@ -1922,7 +1922,7 @@ namespace MindMapUIExtension
 
                     graphics.FillPolygon(Brushes.Black, rightEnd);
 
-                    insertionMark = Rectangle.Inflate(insertionMark, 0, -2);
+                    insertionMark = Rectangle.Inflate(insertionMark, 0, -(insertionMark.Height - 2) / 2);
                     graphics.FillRectangle(Brushes.Black, insertionMark);
 
                     graphics.SmoothingMode = prevMode;
