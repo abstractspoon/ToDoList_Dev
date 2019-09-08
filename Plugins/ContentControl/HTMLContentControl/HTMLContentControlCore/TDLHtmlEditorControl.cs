@@ -35,11 +35,11 @@ namespace HTMLContentControl
 		[DllImport("User32.dll")]
 		static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
 
-		const int WM_CHAR = 0x0102;
-		const int WM_KEYDOWN = 0x0100;
+		const int WM_CHAR		= 0x0102;
+		const int WM_KEYDOWN	= 0x0100;
 		const int WM_SYSKEYDOWN = 0x0104;
 
-		const int VK_RETURN = 0x0D;
+		const int VK_RETURN		= 0x0D;
 
 		// ---------------------------------------------------------------
 

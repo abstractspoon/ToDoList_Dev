@@ -154,16 +154,16 @@ void CTDLCommentsCtrl::SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCom
 	switch (nCommentsState)
 	{
 		case RTCS_ENABLED:
-			::EnableWindow(m_ctrlComments, TRUE);
+			m_ctrlComments.EnableWindow(TRUE);
 			m_ctrlComments.SetReadOnly(FALSE);
 			break;
 
 		case RTCS_DISABLED:
-			::EnableWindow(m_ctrlComments, FALSE);
+			m_ctrlComments.EnableWindow(FALSE);
 			break;
 
 		case RTCS_READONLY:
-			::EnableWindow(m_ctrlComments, TRUE);
+			m_ctrlComments.EnableWindow(TRUE);
 			m_ctrlComments.SetReadOnly(TRUE);
 			break;
 	}

@@ -231,6 +231,26 @@ BOOL CContentCtrl::SetReadOnly(BOOL bReadOnly)
 	return FALSE;
 }
 
+BOOL CContentCtrl::EnableWindow(BOOL bEnable)
+{
+	if (m_pContentCtrl)
+	{
+		::EnableWindow(GetSafeHwnd(), bEnable);
+
+		// C# plugins do not seem to receive enable
+		// notifications so we hack it ourselves for now
+		MSG msg = { 0 };
+		msg.message = WM_ENABLE;
+		msg.wParam = bEnable;
+
+		m_pContentCtrl->ProcessMessage(&msg);
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 void CContentCtrl::MoveWindow(const CRect& rect, BOOL bRepaint)
 {
 	::MoveWindow(GetSafeHwnd(), rect.left, rect.top, rect.Width(), rect.Height(), bRepaint);

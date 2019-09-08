@@ -19,9 +19,13 @@ namespace HTMLContentControl
         private Translator m_Trans;
         private String m_TypeID;
 
-        // --------------------------------------------------------------------------------------
+		// --------------------------------------------------------------------------------------
 
-        private const string FontName = "Tahoma";
+		const int WM_ENABLE = 0x000A;
+
+		// --------------------------------------------------------------------------------------
+
+		private const string FontName = "Tahoma";
 
         // --------------------------------------------------------------------------------------
 
@@ -69,7 +73,14 @@ namespace HTMLContentControl
 
         public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
-            return m_HtmlEditControl.ProcessMessage(hwnd, message, wParam, lParam, time, xPos, yPos);
+			switch (message)
+			{
+				case WM_ENABLE:
+					m_HtmlEditControl.Enabled = (wParam != 0);
+					break;
+			}
+
+			return m_HtmlEditControl.ProcessMessage(hwnd, message, wParam, lParam, time, xPos, yPos);
         }
 
         public bool Undo()
@@ -130,13 +141,6 @@ namespace HTMLContentControl
             base.OnGotFocus(e);
 
             m_HtmlEditControl.Focus();
-        }
-
-        protected override void OnHandleCreated(EventArgs e)
-        {
-            base.OnHandleCreated(e);
- 
-            //HtmlEditControl.SetDocumentText(@"", @"C:\", true);
         }
 
         protected override void OnResize(System.EventArgs e)

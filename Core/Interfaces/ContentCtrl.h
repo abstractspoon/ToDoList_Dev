@@ -47,6 +47,7 @@ public:
 	BOOL IsFormat(const CONTENTFORMAT& cf) const;
 	CONTENTFORMAT GetContentFormat() const;
 
+	BOOL EnableWindow(BOOL bEnable);
 	BOOL SetReadOnly(BOOL bReadOnly);
 	void MoveWindow(const CRect& rect, BOOL bRepaint);
 
