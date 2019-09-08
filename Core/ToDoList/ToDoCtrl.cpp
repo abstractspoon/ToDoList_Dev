@@ -3610,6 +3610,11 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 		// update their state
 		CTDCAttributeMap mapAttribIDs;
 
+		// if some tasks have recurred or some tasks were completed
+		// then we also need to report that the done date has changed
+		if (bSomeDone || bSomeRecurred)
+			GetAttributesAffectedByMod(TDCA_DONEDATE, mapAttribIDs);
+
 		if (bSomeRecurred)
 		{
 			COleDateTime dtStart(GetSelectedTaskDate(TDCD_START));
@@ -3620,9 +3625,14 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 
 			m_cbTimeStart.SetOleTime(dtStart.m_dt);
 			m_cbTimeDue.SetOleTime(dtDue.m_dt);
+		}
 
-			mapAttribIDs.Add(TDCA_STARTDATE);
-			mapAttribIDs.Add(TDCA_DUEDATE);
+		// if some were completed and the status also changed
+		// we may also need to update the UI
+		if (bSomeDone && !m_sCompletionStatus.IsEmpty())
+		{
+			m_cbStatus.AddUniqueItem(m_sCompletionStatus);
+			UpdateDataEx(this, IDC_STATUS, m_cbStatus, FALSE);
 		}
 		
 		// If some of the tasks were recurring and need to be created
@@ -3631,21 +3641,6 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 		{
 			ASSERT(bSomeDone);
 			PostMessage(WM_TDC_RECREATERECURRINGTASK, 0, m_aRecreateTaskIDs.GetSize());
-		}
-
-		// if some tasks have recurred or some tasks were completed
-		// then we also need to report that the done date has changed
-		if (bSomeDone || bSomeRecurred)
-			mapAttribIDs.Add(TDCA_DONEDATE);
-
-		// if some were completed and the status also changed
-		// we may also need to update the UI
-		if (bSomeDone && !m_sCompletionStatus.IsEmpty())
-		{
-			m_cbStatus.AddUniqueItem(m_sCompletionStatus);
-			UpdateDataEx(this, IDC_STATUS, m_cbStatus, FALSE);
-
-			mapAttribIDs.Add(TDCA_STATUS);
 		}
 
 		SetModified(mapAttribIDs, aModTaskIDs, TRUE);
@@ -6980,6 +6975,12 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 			mapAttribIDs.Add(TDCA_STARTDATE);
 		}
 
+		if (m_taskTree.SelectionHasRecurring())
+		{
+			mapAttribIDs.Add(TDCA_DUEDATE);
+			mapAttribIDs.Add(TDCA_STARTDATE);
+		}
+		
 		if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) &&
 			HasStyle(TDCS_INCLUDEDONEINAVERAGECALC))
 		{
@@ -9450,7 +9451,7 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 }
 
 BOOL CToDoCtrl::AddTreeItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, const TDCGETTASKS& filter, 
-											BOOL bAllParents, BOOL bWantSubtasks) const
+												BOOL bAllParents, BOOL bWantSubtasks) const
 {
 	// add parents first, recursively if necessarily
 	HTREEITEM htiParent = m_taskTree.GetParentItem(hti);

@@ -4517,6 +4517,7 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 		case TDCA_EXTERNALID:
 		case TDCA_RECURRENCE:
 		case TDCA_FILEREF:
+		case TDCA_SUBTASKDONE:
 			AccumulateRecalcColumn(nColID, aColIDs);
 			break;
 
@@ -4736,7 +4737,7 @@ BOOL CTDLTaskCtrlBase::ModsNeedResort(const CTDCAttributeMap& mapAttribIDs) cons
 {
 	if (!HasStyle(TDCS_RESORTONMODIFY))
 		return FALSE;
-
+	
 	return AttribsMatchSort(mapAttribIDs);
 }
 
@@ -5519,6 +5520,21 @@ BOOL CTDLTaskCtrlBase::SelectionHasDependents() const
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 		
 		if (m_data.TaskHasDependents(dwTaskID))
+			return TRUE;
+	}
+	
+	return FALSE;
+}
+
+BOOL CTDLTaskCtrlBase::SelectionHasRecurring() const
+{
+	POSITION pos = GetFirstSelectedTaskPos();
+	
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+		
+		if (m_data.IsTaskRecurring(dwTaskID))
 			return TRUE;
 	}
 	

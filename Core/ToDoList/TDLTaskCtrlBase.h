@@ -162,6 +162,7 @@ public:
 	BOOL SelectionHasSameParent() const;
 	BOOL SelectionHasNonReferences() const;
 	BOOL SelectionHasDependents() const;
+	BOOL SelectionHasRecurring() const;
 	BOOL SelectionHasSubtasks() const; // == SelectionHasParents
 	BOOL SelectionHasIcons() const;
 	BOOL SelectionHasUnlocked() const;
