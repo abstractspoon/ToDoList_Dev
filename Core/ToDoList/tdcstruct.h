@@ -82,7 +82,7 @@ public:
 
 	CTDCStyleMap(const CTDCStyleMap& mapStyles) 
 	{
-		Misc::CopyT(mapStyles, *this);
+		Misc::CopyT<TDC_STYLE, BOOL>(mapStyles, *this);
 	}
 
 	virtual ~CTDCStyleMap() 
