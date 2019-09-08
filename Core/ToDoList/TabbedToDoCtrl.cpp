@@ -3636,8 +3636,13 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 		// if this update has come about as a consequence
 		// of this extension window modifying the specified
 		// attribute, then we assume that it won't want the update
-		if (AttributeMatchesExtensionMod(nAttrib))
-			return FALSE;
+		// We exclude toggling completion because that can end
+		// up also complteting children
+		if (m_nExtModifyingAttrib != TDCA_DONEDATE)
+		{
+			if (AttributeMatchesExtensionMod(nAttrib))
+				return FALSE;
+		}
 	}
 
 	// if it's 'all' attributes then assume the answer is always 'yes'
