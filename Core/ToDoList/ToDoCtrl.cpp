@@ -6907,6 +6907,7 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 		UpdateControls(FALSE);
 }
 
+/*
 void CToDoCtrl::GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const
 {
 	POSITION pos = mapModAttribIDs.GetStartPosition();
@@ -6914,6 +6915,7 @@ void CToDoCtrl::GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttrib
 	while (pos)
 		GetAttributesAffectedByMod(mapModAttribIDs.GetNext(pos), mapAffectedAttribIDs);
 }
+*/
 
 void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttribIDs) const
 {
