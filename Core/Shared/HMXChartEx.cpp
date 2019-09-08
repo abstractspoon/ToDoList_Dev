@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "HMXChartEx.h"
 #include "GraphicsMisc.h"
+#include "DialogHelper.h"
 #include "Mapex.h"
 
 #ifdef _DEBUG
@@ -17,6 +18,7 @@ static char THIS_FILE[] = __FILE__;
 const CString EMPTY_STR;
 
 const int HILITEBOXSIZE = GraphicsMisc::ScaleByDPIFactor(3);
+const int TOOLTIPOFFSET = GraphicsMisc::ScaleByDPIFactor(20);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -95,7 +97,7 @@ BEGIN_MESSAGE_MAP(CHMXChartEx, CHMXChart)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_WM_MOUSEMOVE()
-	ON_WM_MOUSELEAVE()
+	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
 	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
@@ -238,11 +240,8 @@ BOOL CHMXChartEx::HighlightDataPoints(int nIndex)
 		CRect rData(ptData, CSize(1, 1));
 		rData.InflateRect(HILITEBOXSIZE, HILITEBOXSIZE);
 
-		pDC->MoveTo(rData.left, rData.bottom);
-		pDC->LineTo(rData.left, rData.top);
-		pDC->LineTo(rData.right, rData.top);
-		pDC->LineTo(rData.right, rData.bottom);
-		pDC->LineTo(rData.left, rData.bottom);
+		pDC->SelectStockObject(NULL_BRUSH);
+		pDC->Ellipse(rData);
 	}
 
 	if (pDC)
@@ -263,9 +262,14 @@ int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		if (!sTooltip.IsEmpty())
 		{
 			if (const_cast<CHMXChartEx*>(this)->HighlightDataPoints(nHit))
+			{
 				m_nLastTooltipHit = nHit;
+				//CDialogHelper::TrackMouseLeave(*this);
+			}
 			else
+			{
 				ASSERT(0);
+			}
 
 			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
 		}
@@ -285,12 +289,12 @@ BOOL CHMXChartEx::AdjustTooltipRect(CRect& rScreen)
 	ASSERT(m_nLastTooltipHit != -1);
 
 	// Offset to the right and place close to the relevant data point
-	CPoint ptAveData;
+	//CPoint ptAveData;
 
-	if (GetAveragePointXY(m_nLastTooltipHit, ptAveData))
+	//if (GetAveragePointXY(m_nLastTooltipHit, ptAveData))
 	{
-		ClientToScreen(&ptAveData);
-		rScreen.OffsetRect(16, ptAveData.y - rScreen.CenterPoint().y);
+		//ClientToScreen(&ptAveData);
+		rScreen.OffsetRect(TOOLTIPOFFSET, 0/*ptAveData.y - rScreen.CenterPoint().y*/);
 
 		return TRUE;
 	}
@@ -347,9 +351,11 @@ void CHMXChartEx::OnMouseMove(UINT nFlags, CPoint point)
 		HideLastHighlightedPoint();
 }
 
-void CHMXChartEx::OnMouseLeave()
+LRESULT CHMXChartEx::OnMouseLeave(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	HideLastHighlightedPoint();
+
+	return 0L;
 }
 
 void CHMXChartEx::DoPaint(CDC& dc, BOOL bPaintBkgnd)
