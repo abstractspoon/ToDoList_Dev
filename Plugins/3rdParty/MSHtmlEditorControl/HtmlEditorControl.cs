@@ -242,6 +242,7 @@ namespace MSDN.Html.Editor
         private const string CONTENTTYPE_PARSE_SUBTYPE = @"${subType}";
         private const string CONTENTTYPE_PARSE_CHARSET = @"${charSet}";
 
+		System.Windows.Forms.Timer m_ToolbarRedrawTimer = null;
         #endregion
 
         # region Initialization Code
@@ -381,6 +382,14 @@ namespace MSDN.Html.Editor
             this.contextDocumentWordwrap.Checked = true;
 			this.toolstripEnableEditing.Checked = !ReadOnly;
 
+			m_ToolbarRedrawTimer = new System.Windows.Forms.Timer();
+			m_ToolbarRedrawTimer.Interval = 100;
+			m_ToolbarRedrawTimer.Tick += delegate
+			{
+				m_ToolbarRedrawTimer.Enabled = false;
+				ToolBar.Invalidate(true);
+			};
+			
 			SetBrowserPanelSize();
 
 			InitialiseDocument();
@@ -1000,6 +1009,7 @@ namespace MSDN.Html.Editor
                 this.toolstripEditor.Visible = _toolbarVisible;
                 this.contextDocumentToolbar.Checked = value;
                 SetBrowserPanelSize();
+				UpdateEnabledState();
             }
 
         } //ToolbarVisible
@@ -2104,38 +2114,43 @@ namespace MSDN.Html.Editor
 
 		protected void UpdateEnabledState()
 		{
+			if (ToolbarVisible)
+			{
+				this.toolstripTextCut.Enabled = IsEditable;
+				this.toolstripTextCopy.Enabled = IsEditable;
+				this.toolstripTextPaste.Enabled = IsEditable;
+				this.toolstripEditUndo.Enabled = IsEditable;
+				this.toolstripEditRedo.Enabled = IsEditable;
+				this.toolstripFormatBold.Enabled = IsEditable;
+				this.toolstripFormatUnderline.Enabled = IsEditable;
+				this.toolstripFormatItalic.Enabled = IsEditable;
+				this.toolstripFontDialog.Enabled = IsEditable;
+				this.toolstripFontNormal.Enabled = IsEditable;
+				this.toolstripTextColor.Enabled = IsEditable;
+				this.toolstripFontIncrease.Enabled = IsEditable;
+				this.toolstripFontDecrease.Enabled = IsEditable;
+				this.toolstripJustifyLeft.Enabled = IsEditable;
+				this.toolstripJustifyCenter.Enabled = IsEditable;
+				this.toolstripJustifyRight.Enabled = IsEditable;
+				this.toolstripFontIndent.Enabled = IsEditable;
+				this.toolstripFontOutdent.Enabled = IsEditable;
+				this.toolstripListOrdered.Enabled = IsEditable;
+				this.toolstripListUnordered.Enabled = IsEditable;
+				this.toolstripInsertLine.Enabled = IsEditable;
+				this.toolstripInsertTable.Enabled = IsEditable;
+				this.toolstripInsertImage.Enabled = IsEditable;
+				this.toolstripInsertLink.Enabled = IsEditable;
+				this.toolstripFindReplace.Enabled = IsEditable;
 
-			this.toolstripTextCut.Enabled = IsEditable;
-            this.toolstripTextCopy.Enabled = IsEditable;
-            this.toolstripTextPaste.Enabled = IsEditable;
-            this.toolstripEditUndo.Enabled = IsEditable;
-            this.toolstripEditRedo.Enabled = IsEditable;
-            this.toolstripFormatBold.Enabled = IsEditable;
-			this.toolstripFormatUnderline.Enabled = IsEditable;
-            this.toolstripFormatItalic.Enabled = IsEditable;
-            this.toolstripFontDialog.Enabled = IsEditable;
-            this.toolstripFontNormal.Enabled = IsEditable;
-            this.toolstripTextColor.Enabled = IsEditable;
-            this.toolstripFontIncrease.Enabled = IsEditable;
-            this.toolstripFontDecrease.Enabled = IsEditable;
-            this.toolstripJustifyLeft.Enabled = IsEditable;
-            this.toolstripJustifyCenter.Enabled = IsEditable;
-            this.toolstripJustifyRight.Enabled = IsEditable;
-            this.toolstripFontIndent.Enabled = IsEditable;
-            this.toolstripFontOutdent.Enabled = IsEditable;
-            this.toolstripListOrdered.Enabled = IsEditable;
-            this.toolstripListUnordered.Enabled = IsEditable;
-            this.toolstripInsertLine.Enabled = IsEditable;
-            this.toolstripInsertTable.Enabled = IsEditable;
-            this.toolstripInsertImage.Enabled = IsEditable;
-            this.toolstripInsertLink.Enabled = IsEditable;
-            this.toolstripFindReplace.Enabled = IsEditable;
+				this.toolstripEnableEditing.Enabled = !_readOnly;
+				this.toolstripEnableEditing.Checked = IsEditable;
 
-            this.toolstripEnableEditing.Enabled = !_readOnly;
-			this.toolstripEnableEditing.Checked = IsEditable;
+				this.toolstripDocumentEditHTML.Enabled = IsEditable;
+				this.toolstripDocumentPrint.Enabled = true; // always
 
-			this.toolstripDocumentEditHTML.Enabled = IsEditable;
-			this.toolstripDocumentPrint.Enabled = true; // always
+				if (!m_ToolbarRedrawTimer.Enabled)
+					m_ToolbarRedrawTimer.Enabled = true;
+			}
 
 			this.WebBrowser.Document.BackColor = (IsEditable ? SystemColors.Window : SystemColors.ControlLight);
 		}
