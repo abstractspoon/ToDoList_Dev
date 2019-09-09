@@ -224,6 +224,7 @@ CToDoListWnd::~CToDoListWnd()
 
 	// cleanup temp files
 	// Note: Due task notifications are removed by CToDoCtrlMgr
+	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdl.export"), _T("txt")), TRUE);
 	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdl.print"), _T("html")), TRUE);
 	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdl.import"), _T("txt")), TRUE);
 	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdl.view"), _T("bmp")), TRUE);
@@ -8876,11 +8877,37 @@ void CToDoListWnd::HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CS
 		CMessageBox::AfxShow(CEnString(nMessageID, sImportPath), (MB_OK | nIcon));
 }
 
-void CToDoListWnd::HandleExportTasklistError(IIMPORTEXPORT_RESULT nErr)
+void CToDoListWnd::HandleExportTasklistResult(IIMPORTEXPORT_RESULT nRes, const CString& sExportPath, BOOL bToClipboard, BOOL bPreview)
 {
+	// Post export operation
+	switch (nRes)
+	{
+	case IIER_SOMEFAILED:
+	case IIER_SUCCESS:
+		if (bToClipboard)
+		{
+			CString sText;
+			VERIFY(FileMisc::LoadFile(sExportPath, sText));
+
+			// Hack to get ourselves in a static function
+			CWnd* pWnd = AfxGetMainWnd();
+
+			CClipboard(*pWnd).SetText(sText);
+		}
+		else if (bPreview)
+		{
+			// Hack to get ourselves in a static function
+			CWnd* pWnd = AfxGetMainWnd();
+
+			FileMisc::Run(*pWnd, sExportPath);
+		}
+		break;
+	}
+
+	// Error message
 	UINT nIcon = 0, nMessageID = 0;
 
-	switch (nErr)
+	switch (nRes)
 	{
 	case IIER_CANCELLED:
 	case IIER_SUCCESS:
@@ -9494,6 +9521,75 @@ void CToDoListWnd::OnUpdateToolsCheckin(CCmdUI* pCmdUI)
 	pCmdUI->Enable(m_mgrToDoCtrls.CanCheckIn(GetSelToDoCtrl()));
 }
 
+BOOL CToDoListWnd::CanExportToFilePaths(const CStringArray& aExportPaths) const
+{
+	// NEVER allow a tasklist to get overwritten
+	int nPath = aExportPaths.GetSize();
+
+	while (nPath--)
+	{
+		if (m_mgrToDoCtrls.FindToDoCtrl(aExportPaths[nPath]) != -1)
+		{
+			CMessageBox::AfxShow(IDS_ERROR_EXPORT_OVERWRITETASKLIST, MB_ICONERROR | MB_OK);
+			return FALSE;
+		}
+	}
+
+	// else check for file existence
+	CStringArray aExistPaths;
+	nPath = aExportPaths.GetSize();
+
+	while (nPath--)
+	{
+		if (FileMisc::FileExists(aExportPaths[nPath]))
+			aExistPaths.InsertAt(0, aExportPaths[nPath]);
+	}
+
+	if (aExistPaths.GetSize() == 0)
+		return TRUE;
+
+	// rest
+	return (IDOK == CMessageBox::AfxShow(IDS_CONFIRM_EXPORT_OVERWRITE, Misc::FormatArray(aExistPaths, _T("\n\n")), MB_YESNO | MB_ICONQUESTION));
+}
+
+BOOL CToDoListWnd::WantOverwriteExportFiles(const CTDLExportDlg& dlg) const
+{
+	if (dlg.GetExportToClipboard())
+		return TRUE;
+
+	CString sExportPath = dlg.GetExportPath();
+	CStringArray aExportPaths;
+
+	// When exporting a single file
+	int nTDCCount = GetTDCCount();
+
+	if ((nTDCCount == 1) || !dlg.GetExportAllTasklists() || dlg.GetExportOneFile())
+	{
+		aExportPaths.Add(sExportPath);
+	}
+	else // all open tasklists
+	{
+		int nExporter = m_mgrImportExport.FindExporterByType(dlg.GetFormatTypeID());
+		UINT nMsgFlags = (MB_OKCANCEL | MB_ICONWARNING);
+
+		CString sFilePath, sExt = m_mgrImportExport.GetExporterFileExtension(nExporter, TRUE);
+
+		for (int nTDC = 0; nTDC < nTDCCount; nTDC++)
+		{
+			CString sPath = m_mgrToDoCtrls.GetFilePath(nTDC);
+			CString sFName;
+
+			FileMisc::SplitPath(sPath, NULL, NULL, &sFName);
+			FileMisc::MakePath(sFilePath, NULL, sExportPath, sFName, sExt);
+
+			aExportPaths.Add(sFilePath);
+		}
+	}
+	ASSERT(aExportPaths.GetSize());
+
+	return CanExportToFilePaths(aExportPaths);
+}
+
 void CToDoListWnd::OnExport() 
 {
 	int nTDCCount = GetTDCCount(), nSelTDC = GetSelToDoCtrl();
@@ -9514,7 +9610,7 @@ void CToDoListWnd::OnExport()
 	// keep showing the dialog until the user selects a non-existing 
 	// filename OR they confirm that they want to overwrite the file(s)
 	CString sExportPath;
-	BOOL bOverWrite = FALSE;
+	BOOL bOverWrite = FALSE, bExportToClipboard = FALSE;
 	int nExporter = -1;
 
 	while (!bOverWrite)
@@ -9522,48 +9618,19 @@ void CToDoListWnd::OnExport()
 		if (dialog.DoModal() != IDOK)
 			return;
 
-		sExportPath = dialog.GetExportPath();
+		bOverWrite = WantOverwriteExportFiles(dialog);
 
-		// Never allow the tasklist to get overwritten
-		if (FileMisc::IsSamePath(sExportPath, sTasklistPath))
+		if (bOverWrite)
 		{
-			CMessageBox::AfxShow(IDS_ERROR_EXPORT_OVERWRITETASKLIST, MB_ICONERROR | MB_OK);
-			continue;
-		}
+			nExporter = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
+			ASSERT(nExporter != -1);
 
-		nExporter = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
+			bExportToClipboard = dialog.GetExportToClipboard();
 
-		UINT nMsgFlags = (MB_OKCANCEL | MB_ICONWARNING);
-
-		// interested in overwriting single files
-		if ((nTDCCount == 1) || !dialog.GetExportAllTasklists() || dialog.GetExportOneFile())
-		{
-			if (FileMisc::FileExists(sExportPath))
-				bOverWrite = (IDOK == CMessageBox::AfxShow(IDS_CONFIRM_EXPORT_OVERWRITE, sExportPath, nMsgFlags));
+			if (bExportToClipboard)
+				sExportPath = FileMisc::GetTempFilePath(_T("tdl.export"), _T("txt"));
 			else
-				bOverWrite = TRUE;
-		}
-		else // check all open tasklists
-		{
-			CString sFilePath, sExt = m_mgrImportExport.GetExporterFileExtension(nExporter, TRUE);
-			CStringArray aExistPaths;
-		
-			for (int nCtrl = 0; nCtrl < nTDCCount; nCtrl++)
-			{
-				CString sPath = m_mgrToDoCtrls.GetFilePath(nCtrl);
-				CString sFName;
-						
-				FileMisc::SplitPath(sPath, NULL, NULL, &sFName);
-				FileMisc::MakePath(sFilePath, NULL, sExportPath, sFName, sExt);
-
-				if (FileMisc::FileExists(sFilePath))
-					aExistPaths.Add(sFilePath);
-			}
-
-			if (aExistPaths.GetSize())
-				bOverWrite = (IDOK == CMessageBox::AfxShow(IDS_CONFIRM_EXPORT_OVERWRITE, Misc::FormatArray(aExistPaths, _T("\n\n")), nMsgFlags));
-			else
-				bOverWrite = TRUE;
+				sExportPath = dialog.GetExportPath();
 		}
 	}
 
@@ -9575,15 +9642,16 @@ void CToDoListWnd::OnExport()
 	BOOL bHtmlComments = (m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("htm")) ||
 						  m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("html")));
 
+	// The only OR active tasklist -----------------------------------------------------
 	if ((nTDCCount == 1) || !dialog.GetExportAllTasklists())
 	{
-		// set the html image folder to be the output path with
-		// an different extension
+		// set the html image folder to be the output path with an different extension
 		CString sImgFolder;
 		
 		if (bHtmlComments)
 		{
 			sImgFolder = sExportPath;
+
 			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
 			FileMisc::DeleteFolderContents(sImgFolder, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
 		}
@@ -9601,21 +9669,12 @@ void CToDoListWnd::OnExport()
 		// save intermediate tasklist to file as required
 		LogIntermediateTaskList(tasks, tdc.GetFilePath());
 
+		// Do the export
 		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sExportPath, nExporter, FALSE);
 
-		switch (nRes)
-		{
-		case IIER_SOMEFAILED:
-		case IIER_SUCCESS:
-			if (userPrefs.GetPreviewExport())
-				FileMisc::Run(*this, sExportPath);
-			break;
-		}
-
-		HandleExportTasklistError(nRes);
+		HandleExportTasklistResult(nRes, sExportPath, bExportToClipboard, userPrefs.GetPreviewExport());
 	} 
-	// multiple tasklists
-	else if (dialog.GetExportOneFile())
+	else if (dialog.GetExportOneFile())	// Multiple tasklists to one file --------------------------
 	{
 		CMultiTaskFile taskFiles;
 		
@@ -9634,8 +9693,7 @@ void CToDoListWnd::OnExport()
 				CTaskFile& tasks = taskFiles.GetTaskFile(nCtrl);
 				tasks.Reset();
 				
-				// set the html image folder to be the output path with
-				// an different extension
+				// set the html image folder to be the output path with an different extension
 				CString sImgFolder;
 				
 				if (bHtmlComments)
@@ -9658,21 +9716,15 @@ void CToDoListWnd::OnExport()
 		
 		Resize();
 
+		// Do the export
 		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskLists(&taskFiles, sExportPath, nExporter, FALSE);
 
-		switch (nRes)
-		{
-		case IIER_SOMEFAILED:
-		case IIER_SUCCESS:
-			if (userPrefs.GetPreviewExport())
-				FileMisc::Run(*this, sExportPath);
-			break;
-		}
-
-		HandleExportTasklistError(nRes);
+		HandleExportTasklistResult(nRes, sExportPath, bExportToClipboard, userPrefs.GetPreviewExport());
 	}
-	else // separate files
+	else // More than one separate files ----------------------------------------------------------
 	{
+		ASSERT(!bExportToClipboard);
+
 		CString sExt = m_mgrImportExport.GetExporterFileExtension(nExporter, TRUE);
 		
 		for (int nCtrl = 0; nCtrl < nTDCCount; nCtrl++)
@@ -9723,8 +9775,7 @@ void CToDoListWnd::OnExport()
 					}
 				}
 				
-				// set the html image folder to be the output path with
-				// an different extension
+				// set the html image folder to be the output path with an different extension
 				CString sImgFolder;
 				
 				if (bHtmlComments)
@@ -9742,7 +9793,11 @@ void CToDoListWnd::OnExport()
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks, tdc.GetFilePath());
 
-				m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nExporter, FALSE);
+				// Do the export
+				IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nExporter, FALSE);
+
+				// Show error messages but that's all
+				HandleExportTasklistResult(nRes, _T(""), FALSE, FALSE);
 			}
 			
 			tdc.UnlockWindowUpdate();

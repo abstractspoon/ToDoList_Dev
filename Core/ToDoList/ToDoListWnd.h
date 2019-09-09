@@ -61,6 +61,7 @@ const UINT WM_TDL_RESTORE			= ::RegisterWindowMessage(_T("WM_TDL_RESTORE"));
 /////////////////////////////////////////////////////////////////////////////
 
 class CTDLPrintDialog;
+class CTDLExportDlg;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -647,6 +648,8 @@ protected:
 	BOOL ValidateTaskLinkFilePath(CString& sPath) const;
 	BOOL WantCheckRemoteFiles(int nCtrl, int nInterval, int& nElapsed) const;
 	BOOL WantCheckReloadFiles(RELOAD_OPTION nOption) const;
+	BOOL WantOverwriteExportFiles(const CTDLExportDlg& dlg) const;
+	BOOL CanExportToFilePaths(const CStringArray& aExportPaths) const;
 
 	BOOL HandleReservedShortcut(DWORD dwShortcut);
 	BOOL SendShortcutCommand(UINT nCmdID);
@@ -749,7 +752,7 @@ protected:
 
 	static UINT MapNewTaskPos(PUIP_NEWTASKPOS nPos, BOOL bSubtask);
 	static void HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);
-	static void HandleExportTasklistError(IIMPORTEXPORT_RESULT nErr);
+	static void HandleExportTasklistResult(IIMPORTEXPORT_RESULT nRes, const CString& sExportPath, BOOL bToClipboard, BOOL bPreview);
 	static void HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist);
 	static BOOL HandleSaveTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist); // Note the 'reference'
 

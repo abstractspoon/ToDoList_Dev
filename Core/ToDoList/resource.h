@@ -827,6 +827,8 @@
 #define IDC_STYLE_TASKVIEW              1532
 #define IDC_SIMPLE_ICON                 1533
 #define IDC_CUSTOMATTRIB_INFO           1534
+#define IDC_TOPATH                      1535
+#define IDC_TOCLIPBOARD                 1536
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2339,7 +2341,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        314
 #define _APS_NEXT_COMMAND_VALUE         34663
-#define _APS_NEXT_CONTROL_VALUE         1535
+#define _APS_NEXT_CONTROL_VALUE         1537
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif
