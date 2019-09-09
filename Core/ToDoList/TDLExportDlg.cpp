@@ -175,7 +175,7 @@ BOOL CTDLExportDlg::OnInitDialog()
 	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
 	
 	m_eExportPath.SetFilter(m_mgrImportExport.GetExporterFileFilter(nFormat));
-	m_eExportPath.EnableStyle(FES_FOLDERS, (m_nExportOption == ALLTASKLISTS && !m_bExportOneFile));
+	m_eExportPath.EnableStyle(FES_FOLDERS, ((m_nExportOption == ALLTASKLISTS) && !m_bExportOneFile));
 	m_eExportPath.EnableWindow(m_mgrImportExport.ExporterHasFileExtension(nFormat));
 
 	EnableOK();
@@ -187,12 +187,12 @@ BOOL CTDLExportDlg::OnInitDialog()
 void CTDLExportDlg::OnSelchangeTasklistoptions() 
 {
 	// save previous export option
-	int nExportOption = m_nExportOption;
+	int nPrevExportOption = m_nExportOption;
 
 	UpdateData();
 
 	// save off current export path depending on our previous option
-	if (nExportOption == ALLTASKLISTS)
+	if (nPrevExportOption == ALLTASKLISTS)
 	{
 		if (m_bExportOneFile)
 			m_sMultiFilePath = m_sExportPath;

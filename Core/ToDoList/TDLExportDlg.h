@@ -42,11 +42,11 @@ protected:
 	enum { IDD = IDD_EXPORT_DIALOG };
 	CImportExportComboBox m_cbFormat;
 	CFileEdit	m_eExportPath;
-	int		m_nExportOption;
-	CString	m_sExportPath;
-	BOOL	m_bExportOneFile;
+	BOOL		m_nExportOption;
+	CString		m_sExportPath;
+	BOOL		m_bExportOneFile;
 	CEnString	m_sPathLabel;
-	int		m_bExportToClipboard;
+	BOOL		m_bExportToClipboard;
 	//}}AFX_DATA
 	CTaskSelectionDlg m_dlgTaskSel;
 	BOOL m_bSingleTaskList; 
