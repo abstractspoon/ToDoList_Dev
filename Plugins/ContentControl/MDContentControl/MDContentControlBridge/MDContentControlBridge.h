@@ -60,6 +60,7 @@ public:
 
    bool FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord);
 
+   void Enable(bool bEnable);
    void SetReadOnly(bool bReadOnly);
    HWND GetHwnd() const;
 

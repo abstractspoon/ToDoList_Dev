@@ -202,6 +202,11 @@ void CTDLSimpleTextContentCtrl::SetReadOnly(bool bReadOnly)
 	SetBackgroundColor(!bReadOnly, GetSysColor(COLOR_3DFACE));
 }
 
+void CTDLSimpleTextContentCtrl::Enable(bool bEnable)
+{
+	EnableWindow(bEnable ? TRUE : FALSE);
+}
+
 HWND CTDLSimpleTextContentCtrl::GetHwnd() const 
 { 
 	return GetSafeHwnd(); 

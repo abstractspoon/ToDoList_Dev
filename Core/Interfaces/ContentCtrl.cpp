@@ -235,16 +235,7 @@ BOOL CContentCtrl::EnableWindow(BOOL bEnable)
 {
 	if (m_pContentCtrl)
 	{
-		::EnableWindow(GetSafeHwnd(), bEnable);
-
-		// C# plugins do not seem to receive enable
-		// notifications so we hack it ourselves for now
-		MSG msg = { 0 };
-		msg.message = WM_ENABLE;
-		msg.wParam = bEnable;
-
-		m_pContentCtrl->ProcessMessage(&msg);
-
+		m_pContentCtrl->Enable(bEnable != FALSE);
 		return TRUE;
 	}
 

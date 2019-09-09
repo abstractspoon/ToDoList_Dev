@@ -37,6 +37,7 @@ public:
 	bool SetTextContent(LPCTSTR szContent, bool bResetSelection);
 	bool InsertTextContent(LPCWSTR szContent, bool bAtEnd);
 	void SetReadOnly(bool bReadOnly);
+	void Enable(bool bEnable);
 	HWND GetHwnd() const;
 	LPCTSTR GetTypeID() const { return RTF_TYPEID; }
 	bool ProcessMessage(MSG* pMsg);

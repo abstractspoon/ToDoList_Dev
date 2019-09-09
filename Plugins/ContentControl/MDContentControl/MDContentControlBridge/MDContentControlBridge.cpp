@@ -207,6 +207,11 @@ void CMDContentControlBridge::SetReadOnly(bool bReadOnly)
 
 }
 
+void CMDContentControlBridge::Enable(bool bEnable)
+{
+	m_wnd->Enabled = bEnable;
+}
+
 HWND CMDContentControlBridge::GetHwnd() const
 {
 	return static_cast<HWND>(m_wnd->Handle.ToPointer());

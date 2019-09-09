@@ -356,7 +356,14 @@ void CRTFContentControl::SetReadOnly(bool bReadOnly)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	CRulerRichEditCtrl::SetReadOnly((BOOL)bReadOnly);
+	CRulerRichEditCtrl::SetReadOnly(bReadOnly ? TRUE : FALSE);
+}
+
+void CRTFContentControl::Enable(bool bEnable)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	EnableWindow(bEnable ? TRUE : FALSE);
 }
 
 bool CRTFContentControl::FindReplaceAll(LPCTSTR szFind, LPCTSTR szReplace, bool bCaseSensitive, bool bWholeWord)

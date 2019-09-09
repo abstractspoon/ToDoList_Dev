@@ -73,13 +73,6 @@ namespace HTMLContentControl
 
         public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
-			switch (message)
-			{
-				case WM_ENABLE:
-					m_HtmlEditControl.Enabled = (wParam != 0);
-					break;
-			}
-
 			return m_HtmlEditControl.ProcessMessage(hwnd, message, wParam, lParam, time, xPos, yPos);
         }
 
@@ -112,7 +105,6 @@ namespace HTMLContentControl
 
         public void SavePreferences(Preferences prefs, String key)
         {
-			prefs.WriteProfileBool(key, "EditEnabled", m_HtmlEditControl.EditEnabled);
 			prefs.WriteProfileString(key, "LastBrowsedFileFolder", m_HtmlEditControl.LastBrowsedFileFolder);
 			prefs.WriteProfileString(key, "LastBrowsedImageFolder", m_HtmlEditControl.LastBrowsedImageFolder);
 
@@ -125,7 +117,6 @@ namespace HTMLContentControl
             if (!appOnly)
             {
 				// private settings
-				m_HtmlEditControl.EditEnabled = prefs.GetProfileBool(key, "EditEnabled", true);
 				m_HtmlEditControl.LastBrowsedFileFolder = prefs.GetProfileString(key, "LastBrowsedFileFolder", @"C:\");
 				m_HtmlEditControl.LastBrowsedImageFolder = prefs.GetProfileString(key, "LastBrowsedImageFolder", @"C:\");
 

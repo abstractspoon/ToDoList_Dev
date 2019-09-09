@@ -172,6 +172,7 @@ public:
 
 	virtual bool FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord) = 0;
 
+	virtual void Enable(bool bEnable) = 0;
 	virtual void SetReadOnly(bool bReadOnly) = 0;
 	virtual HWND GetHwnd() const = 0;
 

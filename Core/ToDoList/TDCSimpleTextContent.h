@@ -62,6 +62,7 @@ public:
 	bool SetTextContent(LPCTSTR szContent, bool bResetSelection);
 	bool InsertTextContent(LPCWSTR szContent, bool bAtEnd);
 	void SetReadOnly(bool bReadOnly);
+	void Enable(bool bEnable);
 	HWND GetHwnd() const;
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
