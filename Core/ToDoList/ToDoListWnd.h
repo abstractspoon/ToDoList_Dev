@@ -159,9 +159,11 @@ protected:
 	BOOL m_bSaveUIVisInTaskList;
 	BOOL m_bReshowTimeTrackerOnEnable;
 	BOOL m_bSettingAttribDefs;
-	BOOL m_bPromptLanguageChangeRestartOnActivate;
 	BOOL m_bAllowForcedCheckOut;
-	BOOL m_bIgnoreNextResize;
+	BOOL m_bIgnoreNextResize;	
+	
+	BOOL m_bPromptLanguageChangeRestartOnActivate;
+	BOOL m_bPromptRegionalSettingsRestartOnActivate;
 	
 	// Generated message map functions
 	//{{AFX_MSG(CToDoListWnd)
