@@ -325,10 +325,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClCompile Include="TDCMergeTasklist.cpp" />
     <ClCompile Include="TDCOutlookImportHelper.cpp" />
     <ClCompile Include="TdcRecurrence.cpp" />
-    <ClCompile Include="tdcreminder.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="tdcreminder.cpp" />
     <ClCompile Include="TDCSearchParamHelper.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -627,7 +624,6 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TaskListDropTarget.h" />
     <ClInclude Include="TaskListExporterBase.h" />
     <ClInclude Include="TaskListHtmlExporter.h" />
-    <ClInclude Include="..\Shared\TaskListStorageMgr.h" />
     <ClInclude Include="TaskListOutlookImporter.h" />
     <ClInclude Include="TaskListTdlExporter.h" />
     <ClInclude Include="TaskListTdlImporter.h" />
