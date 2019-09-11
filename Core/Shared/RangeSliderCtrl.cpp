@@ -128,11 +128,11 @@ void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 	case RSDR_LEFT:
 		if (m_Left > m_Min)
 		{
-			if (!CThemed::AreControlsThemed() && (m_crParentBkgnd == CLR_NONE))
-				CRangeSlider::DrawRegion(dc, nRegion, rRegion);
-
 			CRect rTrack(rRegion);
 			RegionToTrack(rTrack);
+
+			if (!CThemed::AreControlsThemed() && (m_crParentBkgnd == CLR_NONE))
+				CRangeSlider::DrawRegion(dc, nRegion, rTrack);
 
 			DrawTicks(dc, rTrack, m_Min, m_Left);
 		}
@@ -141,11 +141,11 @@ void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& r
 	case RSDR_RIGHT:
 		if (m_Right < m_Max)
 		{
-			if (!CThemed::AreControlsThemed() && (m_crParentBkgnd == CLR_NONE))
-				CRangeSlider::DrawRegion(dc, nRegion, rRegion);
-
 			CRect rTrack(rRegion);
 			RegionToTrack(rTrack);
+
+			if (!CThemed::AreControlsThemed() && (m_crParentBkgnd == CLR_NONE))
+				CRangeSlider::DrawRegion(dc, nRegion, rTrack);
 
 			DrawTicks(dc, rTrack, m_Right, m_Max);
 		}
