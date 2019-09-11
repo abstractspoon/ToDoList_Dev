@@ -25,8 +25,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CExportDlg dialog
 
-enum { ACTIVETASKLIST, ALLTASKLISTS };
-
 CTDLExportDlg::CTDLExportDlg(const CTDCImportExportMgr& mgr, 
 							BOOL bSingleTaskList, 
 							FTC_VIEW nView, 
@@ -58,9 +56,9 @@ CTDLExportDlg::CTDLExportDlg(const CTDCImportExportMgr& mgr,
 	m_sMultiFilePath = prefs.GetProfileString(m_sPrefsKey, _T("LastMultiFilePath"));
 
 	if (m_bSingleTaskList)
-		m_nExportOption = ACTIVETASKLIST;
+		m_bExportAllTasklists = FALSE;
 	else
-		m_nExportOption = prefs.GetProfileInt(m_sPrefsKey, _T("ExportOption"), ACTIVETASKLIST);
+		m_bExportAllTasklists = prefs.GetProfileInt(m_sPrefsKey, _T("ExportOption"), FALSE);
 
 	// backwards compat
 	if (m_sFormatTypeID.IsEmpty())
@@ -105,12 +103,12 @@ CTDLExportDlg::CTDLExportDlg(const CTDCImportExportMgr& mgr,
 	ReplaceExtension(m_sFilePath, m_sFormatTypeID);
 
 	// prepare initial export path
-	if (m_bSingleTaskList || (m_nExportOption == ACTIVETASKLIST)) 
+	if (m_bSingleTaskList || !m_bExportAllTasklists) 
 	{
 		m_sExportPath = m_sFilePath; // default
 		m_sPathLabel.LoadString(IDS_ED_FILEPATH);
 	}
-	else if ((m_nExportOption == ALLTASKLISTS) && m_bExportOneFile)
+	else if (m_bExportAllTasklists && m_bExportOneFile)
 	{
 		m_sExportPath = m_sMultiFilePath; // default
 		m_sPathLabel.LoadString(IDS_ED_FILEPATH);
@@ -129,7 +127,7 @@ void CTDLExportDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CExportDlg)
 	DDX_Control(pDX, IDC_FORMATOPTIONS, m_cbFormat);
 	DDX_Control(pDX, IDC_EXPORTPATH, m_eExportPath);
-	DDX_CBIndex(pDX, IDC_TASKLISTOPTIONS, m_nExportOption);
+	DDX_CBIndex(pDX, IDC_TASKLISTOPTIONS, m_bExportAllTasklists);
 	DDX_Text(pDX, IDC_EXPORTPATH, m_sExportPath);
 	DDX_Check(pDX, IDC_EXPORTONEFILE, m_bExportOneFile);
 	DDX_Text(pDX, IDC_TOPATH, m_sPathLabel);
@@ -169,13 +167,13 @@ BOOL CTDLExportDlg::OnInitDialog()
 	
 	// set initial control states
 	GetDlgItem(IDC_TASKLISTOPTIONS)->EnableWindow(!m_bSingleTaskList);
-	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && (m_nExportOption == ALLTASKLISTS) && !m_bExportToClipboard);
+	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
 	GetDlgItem(IDC_EXPORTPATH)->EnableWindow(!m_bExportToClipboard);
 
 	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
 	
 	m_eExportPath.SetFilter(m_mgrImportExport.GetExporterFileFilter(nFormat));
-	m_eExportPath.EnableStyle(FES_FOLDERS, ((m_nExportOption == ALLTASKLISTS) && !m_bExportOneFile));
+	m_eExportPath.EnableStyle(FES_FOLDERS, (m_bExportAllTasklists && !m_bExportOneFile));
 	m_eExportPath.EnableWindow(m_mgrImportExport.ExporterHasFileExtension(nFormat));
 
 	EnableOK();
@@ -187,12 +185,12 @@ BOOL CTDLExportDlg::OnInitDialog()
 void CTDLExportDlg::OnSelchangeTasklistoptions() 
 {
 	// save previous export option
-	int nPrevExportOption = m_nExportOption;
+	BOOL bPrevExportAll = m_bExportAllTasklists;
 
 	UpdateData();
 
 	// save off current export path depending on our previous option
-	if (nPrevExportOption == ALLTASKLISTS)
+	if (bPrevExportAll)
 	{
 		if (m_bExportOneFile)
 			m_sMultiFilePath = m_sExportPath;
@@ -204,12 +202,12 @@ void CTDLExportDlg::OnSelchangeTasklistoptions()
 		m_sFilePath = m_sExportPath;
 	}
 
-	BOOL bFolder = ((m_nExportOption == ALLTASKLISTS) && !m_bExportOneFile && !m_bExportToClipboard);
+	BOOL bFolder = (m_bExportAllTasklists && !m_bExportOneFile && !m_bExportToClipboard);
 	
 	m_eExportPath.EnableStyle(FES_FOLDERS, bFolder);
 	m_sPathLabel.LoadString(bFolder ? IDS_ED_FOLDER : IDS_ED_FILEPATH);
 	
-	if (m_nExportOption == ALLTASKLISTS)
+	if (m_bExportAllTasklists)
 	{
 		if (m_bExportOneFile)
 		{
@@ -225,7 +223,7 @@ void CTDLExportDlg::OnSelchangeTasklistoptions()
 		ReplaceExtension(m_sExportPath, m_sFormatTypeID);
 	}
 
-	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && (m_nExportOption == ALLTASKLISTS) && !m_bExportToClipboard);
+	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
 
 	UpdateData(FALSE);
 }
@@ -245,7 +243,7 @@ void CTDLExportDlg::OnSelchangeFormatoptions()
 		// check file extension is correct
 		m_eExportPath.SetFilter(m_mgrImportExport.GetExporterFileFilter(nFormat));
 
-		if ((m_nExportOption == ACTIVETASKLIST) || m_bExportOneFile)
+		if (!m_bExportAllTasklists || m_bExportOneFile)
 		{
 			if (m_sExportPath.IsEmpty())
 			{
@@ -302,7 +300,7 @@ void CTDLExportDlg::OnOK()
 
 			CString sMessage;
 			
-			if (m_nExportOption == ALLTASKLISTS)
+			if (m_bExportAllTasklists)
 				sMessage.Format(IDS_ED_CONFIRMEXPORTPATHMULTI, sPath);
 			else
 				sMessage.Format(IDS_ED_CONFIRMEXPORTPATH, sPath);
@@ -321,7 +319,7 @@ void CTDLExportDlg::OnOK()
 		}
 
 		// make sure the output folder is valid
-		BOOL bBadFolder = ((m_nExportOption == ALLTASKLISTS) && !m_bExportOneFile) ? 
+		BOOL bBadFolder = (m_bExportAllTasklists && !m_bExportOneFile) ? 
 							!FileMisc::CreateFolder(m_sExportPath) : 
 							!FileMisc::CreateFolderFromFilePath(m_sExportPath);
 
@@ -352,7 +350,7 @@ void CTDLExportDlg::OnOK()
 	// make sure extension is right
 	if (bExporterHasFileExt)
 	{
-		if ((m_nExportOption == ACTIVETASKLIST) || m_bExportOneFile)
+		if (!m_bExportAllTasklists || m_bExportOneFile)
 			ReplaceExtension(m_sExportPath, m_sFormatTypeID);
 	}
 
@@ -364,18 +362,13 @@ void CTDLExportDlg::OnOK()
 
 	if (!m_bSingleTaskList)
 	{
-		prefs.WriteProfileInt(m_sPrefsKey, _T("ExportOption"), m_nExportOption);
+		prefs.WriteProfileInt(m_sPrefsKey, _T("ExportOption"), m_bExportAllTasklists);
 		prefs.WriteProfileString(m_sPrefsKey, _T("LastMultiFilePath"), m_sMultiFilePath);
 		prefs.WriteProfileString(m_sPrefsKey, _T("LastFolder"), m_sFolderPath);
 	}
 }
 
-BOOL CTDLExportDlg::GetExportAllTasklists() const
-{
-	return (!m_bSingleTaskList && (m_nExportOption == ALLTASKLISTS));
-}
-
-void CTDLExportDlg::OnExportonefile() 
+void CTDLExportDlg::OnExportonefile()
 {
 	// save previous flag state
 	BOOL bPrevExportOneFile = m_bExportOneFile;
@@ -385,32 +378,30 @@ void CTDLExportDlg::OnExportonefile()
 	// save off current export path depending
 	// on our previous state
 	if (bPrevExportOneFile)
+	{
 		m_sMultiFilePath = m_sExportPath;
-	
-	else if (m_nExportOption == ALLTASKLISTS)
+	}
+	else if (m_bExportAllTasklists)
+	{
 		m_sFolderPath = m_sExportPath;
+	}
 	else
+	{
 		m_sFilePath = m_sExportPath;
+	}
 
 	// set export path
-	BOOL bFolder = ((m_nExportOption == ALLTASKLISTS) && !m_bExportOneFile && !m_bExportToClipboard);
+	BOOL bFolder = (m_bExportAllTasklists && !m_bExportOneFile && !m_bExportToClipboard);
 
 	m_eExportPath.EnableStyle(FES_FOLDERS, bFolder);
 	m_sPathLabel.LoadString(bFolder ? IDS_ED_FOLDER : IDS_ED_FILEPATH);
 
-	if (m_nExportOption == ALLTASKLISTS)
-	{
-		if (m_bExportOneFile)
-			m_sExportPath = m_sMultiFilePath;
-		else
-			m_sExportPath = m_sFolderPath;
-	}
+	if (m_bExportAllTasklists)
+		m_sExportPath = (m_bExportOneFile ? m_sMultiFilePath : m_sFolderPath);
 	else
-	{
 		m_sExportPath = m_sFilePath;
-	}
 
-	if ((m_nExportOption == ACTIVETASKLIST) || m_bExportOneFile)
+	if (!m_bExportAllTasklists || m_bExportOneFile)
 		ReplaceExtension(m_sExportPath, m_sFormatTypeID);
 
 	UpdateData(FALSE);
@@ -421,7 +412,7 @@ void CTDLExportDlg::OnExportToClipboardOrPath()
 	UpdateData();
 
 	GetDlgItem(IDC_EXPORTPATH)->EnableWindow(!m_bExportToClipboard);
-	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && (m_nExportOption == ALLTASKLISTS) && !m_bExportToClipboard);
+	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
 }
 
 void CTDLExportDlg::EnableOK()
@@ -443,7 +434,7 @@ void CTDLExportDlg::OnChangeExportpath()
 	UpdateData();
 	EnableOK();
 
-	if (m_nExportOption == ACTIVETASKLIST || m_bExportOneFile)
+	if (!m_bExportAllTasklists || m_bExportOneFile)
 		m_sFilePath = m_sExportPath;
 	else
 		m_sFolderPath = m_sExportPath;

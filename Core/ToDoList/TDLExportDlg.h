@@ -28,9 +28,9 @@ public:
 				BOOL bVisibleColumnsOnly, LPCTSTR szFilePath, LPCTSTR szFolderPath, 
 				const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);
 
-	BOOL GetExportAllTasklists() const;
 	CString GetFormatTypeID() const { return m_sFormatTypeID; }
-	CString GetExportPath() const; // can be folder or path
+	CString GetExportPath() const; // can be folder or file
+	BOOL GetExportAllTasklists() const { return (!m_bSingleTaskList && m_bExportAllTasklists); }
 	BOOL GetExportOneFile() const { return (m_bSingleTaskList || m_bExportOneFile || m_bExportToClipboard); }
 	BOOL GetExportToClipboard() const { return m_bExportToClipboard; }
 
@@ -42,11 +42,11 @@ protected:
 	enum { IDD = IDD_EXPORT_DIALOG };
 	CImportExportComboBox m_cbFormat;
 	CFileEdit	m_eExportPath;
-	BOOL		m_nExportOption;
-	CString		m_sExportPath;
+	BOOL		m_bExportAllTasklists;
 	BOOL		m_bExportOneFile;
-	CEnString	m_sPathLabel;
 	BOOL		m_bExportToClipboard;
+	CString		m_sExportPath;
+	CEnString	m_sPathLabel;
 	//}}AFX_DATA
 	CTaskSelectionDlg m_dlgTaskSel;
 	BOOL m_bSingleTaskList; 
@@ -64,7 +64,6 @@ protected:
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CExportDlg)
 	virtual BOOL OnInitDialog();
@@ -77,7 +76,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	void EnableOK();
-
 	void ReplaceExtension(CString& sPathName, LPCTSTR szFormatTypeID);
 };
 

@@ -727,7 +727,6 @@
     <ClInclude Include="ImageProcessors.h" />
     <ClInclude Include="InputListCtrl.h" />
     <ClInclude Include="LightBox.h" />
-    <ClInclude Include="LimitSingleInstance.h" />
     <ClInclude Include="Localizer.h" />
     <ClInclude Include="mapex.h" />
     <ClInclude Include="MASKEDIT.H" />
@@ -770,7 +769,6 @@
     <ClInclude Include="RemoteFileDialog.h" />
     <ClInclude Include="RichEditHelper.h" />
     <ClInclude Include="RichEditNcBorder.h" />
-    <ClInclude Include="RichEditSpellCheck.h" />
     <ClInclude Include="RoundCorner.h" />
     <ClInclude Include="Rtf2HtmlConverter.h" />
     <ClInclude Include="RTLStyleMgr.h" />

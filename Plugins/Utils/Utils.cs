@@ -358,6 +358,12 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				System.Diagnostics.Process.Start(FormatPaypalUrl());
 			}
 
+			protected override void OnPaint(PaintEventArgs e)
+			{
+				// Always draw ourselves to handle disability
+				TextRenderer.DrawText(e.Graphics, Text, Font, ClientRectangle, ForeColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+			}
+
 			public new int Height
 			{
 				get

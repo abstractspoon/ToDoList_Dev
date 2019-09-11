@@ -142,9 +142,6 @@
     <ClCompile Include="TDLColumnSelectionDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tdcreminder.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="TDLContentMgr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -415,6 +412,9 @@
     <ClCompile Include="TDCCustomAttributeUIHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tdcreminder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FilteredToDoCtrl.h">
@@ -499,9 +499,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TaskListHtmlExporter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shared\TaskListStorageMgr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TaskListTdlExporter.h">
