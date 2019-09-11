@@ -166,7 +166,7 @@ BOOL CRangeSliderCtrl::IsHot(BUTTON_ID nBtn) const
 
 void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton, const CString& sText)
 {
-	VERIFY(m_hotTrack.UpdateRect(nBtn, rButton));
+	VERIFY(!m_hotTrack.IsInitialized() || m_hotTrack.UpdateRect(nBtn, rButton));
 
 	BOOL bPressed = IsPressed(nBtn);
 	BOOL bHot = IsHot(nBtn);
