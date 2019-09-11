@@ -436,7 +436,7 @@ BEGIN
     IDS_COL_TOTAL           "Total"
     IDS_TOTALSDATERANGE     "Current Period: %s"
     IDS_PERIODDURATION      "Current Period: %d weekdays"
-    IDS_ACTIVEDATERANGE     "Cu&rrent Period Range (%s)"
+    IDS_ACTIVEDATERANGE     "Cu&rrent Period (%s)"
     IDS_ATTRIB_TIMEEST      "Time Estimate"
     IDS_COL_WEEKDAYS        "Weekdays"
 END
