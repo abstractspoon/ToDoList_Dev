@@ -257,6 +257,9 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	m_ctrlWorkload.SetOption(WLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
 	m_ctrlWorkload.SetOption(WLCF_SHOWTREECHECKBOXES, (pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE)));
 
+	// Get allocation color from app prefs
+	m_ctrlWorkload.SetAllocationColor(CLR_NONE); // TODO
+
 	// get alternate line color from app prefs
 	COLORREF crAlt = CLR_NONE;
 
