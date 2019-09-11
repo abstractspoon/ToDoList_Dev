@@ -130,8 +130,8 @@ void CWorkloadChart::EnableOverload(BOOL bEnable, double dOverloadValue, COLORRE
 	}
 	else
 	{
-		m_dUnderloadValue = 0.0;
-		m_crUnderload = CLR_NONE;
+		m_dOverloadValue = 0.0;
+		m_crOverload = CLR_NONE;
 	}
 
 	if (GetSafeHwnd())
