@@ -4500,7 +4500,7 @@ BEGIN
     IDS_ED_NOMAKEEXPORTPATH "The output path '%s' could not be created.\n\nPlease specify an alternative location."
     IDS_ED_NOMAKEEXPORTPATH_TITLE "Unable to Create Path"
     IDS_ED_FOLDER           "Folder"
-    IDS_ED_FILEPATH         "File Path"
+    IDS_ED_FILEPATH         "File"
     IDS_PREF_GEN            "General"
     IDS_PREF_MULTIUSER      "Multiple Users"
 END
