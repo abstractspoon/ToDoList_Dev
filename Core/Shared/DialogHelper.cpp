@@ -12,6 +12,7 @@
 #include "runtimedlg.h"
 #include "enstring.h"
 #include "AcceleratorString.h"
+#include "themed.h"
 
 #include <afxpriv.h>
 #include <afxtempl.h>
@@ -1859,6 +1860,10 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 	// adding the height of the rect to allow
 	// for the checkbox or radiobutton
 	int nExtent = pDCRef->GetTextExtent(sText).cx;
+
+	// Classic theme calculations are a bit short (?!)
+	if (!CThemed::AreControlsThemed())
+		nExtent += 5;
 
 	if (bRightAligned)
 		rText.left = (rText.right - nExtent - rText.Height());
