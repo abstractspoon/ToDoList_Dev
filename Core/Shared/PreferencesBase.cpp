@@ -51,6 +51,7 @@ BEGIN_MESSAGE_MAP(CPreferencesPageBase, CPropertyPage)
 	ON_WM_CTLCOLOR()
 	ON_WM_ERASEBKGND()
 	ON_WM_SHOWWINDOW()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 ///////////////////////////////////////////////////////////////////
@@ -65,6 +66,13 @@ BOOL CPreferencesPageBase::OnInitDialog()
 		SetBackgroundColor(GetSysColor(COLOR_WINDOW));
 
 	return TRUE;
+}
+
+void CPreferencesPageBase::OnDestroy()
+{
+	m_bFirstShow = TRUE;
+
+	CPropertyPage::OnDestroy();
 }
 
 CWnd* CPreferencesPageBase::GetDlgItem(UINT nID) const
