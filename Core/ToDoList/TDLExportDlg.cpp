@@ -172,6 +172,7 @@ BOOL CTDLExportDlg::OnInitDialog()
 
 	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
 	
+	m_eExportPath.SetDefaultSaveAsFileExtension(m_mgrImportExport.GetExporterFileExtension(nFormat, FALSE));
 	m_eExportPath.SetFilter(m_mgrImportExport.GetExporterFileFilter(nFormat));
 	m_eExportPath.EnableStyle(FES_FOLDERS, (m_bExportAllTasklists && !m_bExportOneFile));
 	m_eExportPath.EnableWindow(m_mgrImportExport.ExporterHasFileExtension(nFormat));

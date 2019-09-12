@@ -409,16 +409,29 @@ void CFileEdit::OnBtnClick(UINT nID)
 			else // file
 			{
 				BOOL bOpenFileDlg = !HasStyle(FES_SAVEAS);
-				DWORD dwFlags = bOpenFileDlg ? EOFN_DEFAULTOPEN : EOFN_DEFAULTSAVE;
+				DWORD dwFlags = 0;
+				CString sFileExt;
+				
+				if (bOpenFileDlg)
+				{
+					bOpenFileDlg = TRUE;
+					dwFlags = EOFN_DEFAULTOPEN;
 
-				if (!bOpenFileDlg && HasStyle(FES_NOPROMPTOVERWRITE))
-					dwFlags &= ~OFN_OVERWRITEPROMPT;
+					// if file not exists revert to current folder
+					if (FileMisc::FileExists(sFilename))
+						sFilename.Empty();
+				}
+				else // open
+				{
+					dwFlags = EOFN_DEFAULTSAVE;
 
-				// if file not exists revert to current folder
-				if (bOpenFileDlg && !FileMisc::FileExists(sFilename))
-					sFilename.Empty();
+					if (HasStyle(FES_NOPROMPTOVERWRITE))
+						dwFlags &= ~OFN_OVERWRITEPROMPT;
 
-				CEnFileDialog dialog(bOpenFileDlg, GetBrowseTitle(FALSE), NULL, sFilename, dwFlags, m_sFilter);
+					sFileExt = m_sSaveAsFileExt;
+				}
+				
+				CEnFileDialog dialog(bOpenFileDlg, GetBrowseTitle(FALSE), sFileExt, sFilename, dwFlags, m_sFilter);
 
 				// custom attributes
 				if (sFilename.IsEmpty())

@@ -59,6 +59,7 @@ public:
 	inline BOOL HasStyle(int nStyle) const { return (m_nStyle & nStyle); }
 
 	void SetFilter(LPCTSTR szFilter) { m_sFilter = szFilter; }
+	void SetDefaultSaveAsFileExtension(LPCTSTR szExt) { m_sSaveAsFileExt = szExt; }
 	void SetCurrentFolder(LPCTSTR szFolder);
 	CString GetCurrentFolder() const { return m_sCurFolder; }
 	void SetBrowseTitle(LPCTSTR szTitle) { m_sBrowseTitle = szTitle; }
@@ -74,7 +75,7 @@ public:
 protected:
 	BOOL m_bTipNeeded;
 	CSysImageList m_ilSys;
-	CString m_sFilter;
+	CString m_sFilter, m_sSaveAsFileExt;
 	int m_nStyle;
 	CString m_sCurFolder;
 	CString m_sBrowseTitle;
