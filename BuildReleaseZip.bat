@@ -57,7 +57,7 @@ REM Handle dlls explicitly to maintain control over plugins
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MySpellCheck.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\WorkloadExt.dll
 
-REM .Net Plugins are obfuscated first
+REM Some .Net Plugins are obfuscated first
 %PATHOBFUSCAR% %REPO%\ObfuscatePlugins.xml
 
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\PluginHelpers.dll
@@ -69,15 +69,16 @@ REM .Net Plugins are obfuscated first
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\WordCloudUIExtensionCore.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\WordCloudUIExtensionBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Gma.CodeCloud.Controls.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLContentControlBridge.dll"
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLContentControlCore.dll"
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll"
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLReportExporterBridge.dll"
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLReportExporterCore.dll"
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll"
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll"
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\WebBrowserEx.dll"
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\RichEditExtensions.dll"
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLContentControlBridge.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLContentControlCore.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLReportExporterBridge.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLReportExporterCore.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\WebBrowserEx.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\RichEditExtensions.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\ToolStripToolTip.dll
 
 REM Copy latest Resources
 del %OUTDIR%\Resources\ /Q /S
