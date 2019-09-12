@@ -72,7 +72,8 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-	
+	afx_msg void OnDestroy();
+
 	DECLARE_MESSAGE_MAP()
 
 protected:
