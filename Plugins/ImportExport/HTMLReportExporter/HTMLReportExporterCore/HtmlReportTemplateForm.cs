@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Web.UI;
 using System.Runtime.InteropServices;
+using System.Windows.Forms.VisualStyles;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -72,6 +73,7 @@ namespace HTMLReportExporter
 
 			InitializeComponent();
 			DoHighDPIFixups();
+            SetTabsToolbarBackColor();
 
 			// Build list custom attribute IDs for later use
 			if (tasks.HasCustomAttributes())
@@ -97,6 +99,24 @@ namespace HTMLReportExporter
 			if ((prevSize.Width > 0) && (prevSize.Height > 0))
 				this.Size = prevSize;
 		}
+
+        private void SetTabsToolbarBackColor()
+        {
+            if (VisualStyleRenderer.IsSupported)
+            {
+                this.htmlReportHeaderControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
+                this.htmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
+                this.htmlReportTasksControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
+                this.htmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
+            }
+            else
+            {
+                this.htmlReportHeaderControl.ToolbarBackColor = System.Drawing.SystemColors.ButtonFace;
+                this.htmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ButtonFace;
+                this.htmlReportTasksControl.ToolbarBackColor = System.Drawing.SystemColors.ButtonFace;
+                this.htmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ButtonFace;
+            }
+        }
 
 		private void DoHighDPIFixups()
 		{

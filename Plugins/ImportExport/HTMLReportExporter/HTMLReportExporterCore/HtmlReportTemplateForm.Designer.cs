@@ -574,7 +574,6 @@
 			this.htmlReportHeaderControl.Name = "htmlReportHeaderControl";
 			this.htmlReportHeaderControl.Size = new System.Drawing.Size(386, 350);
 			this.htmlReportHeaderControl.TabIndex = 26;
-			this.htmlReportHeaderControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
 			this.htmlReportHeaderControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// htmlReportTitleControl
@@ -596,7 +595,6 @@
 			this.htmlReportTitleControl.Name = "htmlReportTitleControl";
 			this.htmlReportTitleControl.Size = new System.Drawing.Size(386, 350);
 			this.htmlReportTitleControl.TabIndex = 26;
-			this.htmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
 			this.htmlReportTitleControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// tableHeaderRowCombobox
@@ -630,7 +628,6 @@
 			this.htmlReportTasksControl.Name = "htmlReportTasksControl";
 			this.htmlReportTasksControl.Size = new System.Drawing.Size(386, 400);
 			this.htmlReportTasksControl.TabIndex = 26;
-			this.htmlReportTasksControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
 			this.htmlReportTasksControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// htmlReportFooterControl
@@ -652,7 +649,6 @@
 			this.htmlReportFooterControl.Name = "htmlReportFooterControl";
 			this.htmlReportFooterControl.Size = new System.Drawing.Size(386, 350);
 			this.htmlReportFooterControl.TabIndex = 26;
-			this.htmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
 			this.htmlReportFooterControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
 			// 
 			// HtmlReportTemplateForm
