@@ -220,14 +220,14 @@ BEGIN
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP,16,201,316,10
     CONTROL         "The task's 'Due' date",IDC_USEDUEFORSTART,"Button",
                     BS_AUTORADIOBUTTON,16,216,316,10
-    CONTROL         "The earlier of the task's 'Due' date and 'Today'.",
+    CONTROL         "The earlier of the task's 'Due' date and 'Today'",
                     IDC_USEDUEORTODAYFORSTART,"Button",BS_AUTORADIOBUTTON,16,
                     231,316,10
     GROUPBOX        "Calculate missing 'Due' dates as: ",IDC_STATIC,7,255,
                     334,46
     CONTROL         "The task's 'Start' date",IDC_USESTARTFORDUE,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,16,269,316,10
-    CONTROL         "The later of the task's 'Start' date and 'Today'.",
+    CONTROL         "The later of the task's 'Start' date and 'Today'",
                     IDC_USESTARTORTODAYFORDUE,"Button",BS_AUTORADIOBUTTON,16,
                     284,316,10
     CONTROL         "Treat overdue tasks as being due 'Today'",

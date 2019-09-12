@@ -214,10 +214,10 @@ BEGIN
     CONTROL         "Display collapsed parent tasks as 'Rollups'",
                     IDC_DISPLAYPARENTSASROLLUPS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,17,353,323,10
-    CONTROL         "Calculate &missing 'start' dates as being the earlier of the task's due date and 'today'.",
+    CONTROL         "Calculate &missing 'Start' dates as being the earlier of the task's 'Due' date and 'Today'",
                     IDC_CALCULATEMISSINGSTARTDATE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,368,333,10
-    CONTROL         "Calc&ulate missing 'due' dates as being the later of the task's start date and 'today'.",
+    CONTROL         "Calc&ulate missing 'Due' dates as being the later of the task's 'Start' date and 'Today'",
                     IDC_CALCULATEMISSINGDUEDATE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,383,333,10
 END
