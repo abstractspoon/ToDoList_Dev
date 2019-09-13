@@ -432,7 +432,7 @@ BEGIN
     IDS_ATTRIB_ALLOCTO      "Allocated To"
     IDS_ATTRIB_PERCENTDONE  "Percent Complete"
     IDS_ATTRIB_TASKID       "Task ID"
-    IDS_NEW_ALLOCATION      "<new allocation>"
+    IDS_NEW_ALLOCATION      "<New Allocation>"
     IDS_COL_TOTAL           "Total"
     IDS_TOTALSDATERANGE     "Current Period: %s"
     IDS_PERIODDURATION      "Current Period: %d weekdays"
