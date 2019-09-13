@@ -4918,15 +4918,30 @@ int CGanttCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCO
 			break;
 
 		case GTLCC_STARTDATE:
-			nCompare = CDateHelper::Compare(pGI1->dtRange.GetStart(), pGI2->dtRange.GetStart(), DHC_COMPARETIME);
+			{
+				COleDateTime dtStart1, dtStart2, dtUnused;
+
+				GetTaskStartEndDates(*pGI1, dtStart1, dtUnused);
+				GetTaskStartEndDates(*pGI2, dtStart2, dtUnused);
+
+				nCompare = CDateHelper::Compare(dtStart1, dtStart2, DHC_COMPARETIME);
+			}
 			break;
 
 		case GTLCC_DUEDATE:
-			nCompare = CDateHelper::Compare(pGI1->dtRange.GetEnd(), pGI2->dtRange.GetEnd(), DHC_COMPARETIME | DHC_NOTIMEISENDOFDAY);
+			{
+				COleDateTime dtDue1, dtDue2, dtUnused;
+
+				GetTaskStartEndDates(*pGI1, dtUnused, dtDue1);
+				GetTaskStartEndDates(*pGI2, dtUnused, dtDue2);
+
+
+				nCompare = CDateHelper::Compare(dtDue1, dtDue2, (DHC_COMPARETIME | DHC_NOTIMEISENDOFDAY));
+			}
 			break;
 
 		case GTLCC_DONEDATE:
-			nCompare = CDateHelper::Compare(pGI1->dtDone, pGI2->dtDone, DHC_COMPARETIME | DHC_NOTIMEISENDOFDAY);
+			nCompare = CDateHelper::Compare(pGI1->dtDone, pGI2->dtDone, (DHC_COMPARETIME | DHC_NOTIMEISENDOFDAY));
 			break;
 
 		case GTLCC_ALLOCTO:
