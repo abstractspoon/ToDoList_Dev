@@ -62,6 +62,7 @@ public:
 																		// set bar size (range 1-10)
 																		// unused if area
 	virtual bool		ClearData();
+	virtual bool		HasData() const;
 
 	virtual bool		SetMarker( HMX_DATASET_MARKER nMarker );		// set marker type (see #define section) unused if style is bar or area
 	virtual HMX_DATASET_MARKER GetMarker() const;						// get marker

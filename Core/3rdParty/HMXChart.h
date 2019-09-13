@@ -129,6 +129,7 @@ public:
 	virtual bool		ClearData( int nDatasetIndex);
 	virtual void		ClearData();
 	CSize				GetDataArea() const { return m_rectData.Size(); }
+	bool				HasData() const { return m_datasets[0].HasData(); }
 
 	virtual bool		SetDatasetMin(int nDatasetIndex, double dMin);
 	virtual bool		SetDatasetMax(int nDatasetIndex, double dMax);

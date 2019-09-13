@@ -43,6 +43,11 @@ bool CHMXDataset::ClearData()
 	return true;
 }
 
+bool CHMXDataset::HasData() const
+{
+	return (m_data.GetSize() > 0);
+}
+
 bool CHMXDataset::AddData(double nData)
 {
 	m_data.Add(nData);
