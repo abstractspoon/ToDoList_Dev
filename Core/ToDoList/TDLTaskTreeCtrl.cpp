@@ -848,6 +848,15 @@ BOOL CTDLTaskTreeCtrl::PreTranslateMessage(MSG* pMsg)
 					pTT->SendMessage(TTM_POP); 
 			}
 		}
+
+	default:
+		if ((pMsg->hwnd == m_tcTasks) && CToolTipCtrlEx::IsMouseDown(pMsg->message))
+		{
+			CWnd* pTT = m_tcTasks.GetToolTips();
+				
+			if (pTT)
+				pTT->SendMessage(TTM_POP); 
+		}
 		break;
 	}
 	
