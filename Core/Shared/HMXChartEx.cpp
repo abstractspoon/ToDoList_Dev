@@ -252,7 +252,7 @@ BOOL CHMXChartEx::HighlightDataPoints(int nIndex)
 
 int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	const_cast<CHMXChartEx*>(this)->HideLastHighlightedPoint(); // always
+	// Don't remove and redraw the same point if it hasn't changed
 	int nHit = HitTest(point);
 
 	if (nHit != -1)
@@ -261,21 +261,27 @@ int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 		if (!sTooltip.IsEmpty())
 		{
-			if (const_cast<CHMXChartEx*>(this)->HighlightDataPoints(nHit))
+			if (nHit != m_nLastTooltipHit)
 			{
-				m_nLastTooltipHit = nHit;
-				//CDialogHelper::TrackMouseLeave(*this);
-			}
-			else
-			{
-				ASSERT(0);
+				const_cast<CHMXChartEx*>(this)->HideLastHighlightedPoint();
+
+				if (const_cast<CHMXChartEx*>(this)->HighlightDataPoints(nHit))
+				{
+					m_nLastTooltipHit = nHit;
+					//CDialogHelper::TrackMouseLeave(*this);
+				}
+				else
+				{
+					ASSERT(0);
+				}
 			}
 
 			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, MAKELONG(point.x, point.y), m_rectData);
 		}
 	}
 
-	// else
+	const_cast<CHMXChartEx*>(this)->HideLastHighlightedPoint();
+
 	return CHMXChart::OnToolHitTest(point, pTI);
 }
 
