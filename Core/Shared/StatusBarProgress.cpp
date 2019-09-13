@@ -7,6 +7,7 @@
 #include "winclasses.h"
 #include "wclassdefines.h"
 #include "graphicsmisc.h"
+#include "themed.h"
 
 #include "..\3rdparty\progressthread.h"
 
@@ -46,9 +47,12 @@ BOOL CStatusBarProgress::BeginProgress(HWND hwndStatusBar, const CString& sPromp
 	m_nSBPane = nPane;
 
 	int nLenPrompt = GraphicsMisc::GetTextWidth(sPrompt, *pSB) + 10;
-	
 	CRect rProgress;
-	pSB->GetClientRect(rProgress);
+
+	if (!CThemed::AreControlsThemed())
+		pSB->GetItemRect(0, rProgress);
+	else
+		pSB->GetClientRect(rProgress);
 
 	rProgress.DeflateRect(0, 0, 0, GraphicsMisc::ScaleByDPIFactor(2));
 	rProgress.left = nLenPrompt;
