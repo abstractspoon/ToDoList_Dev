@@ -728,7 +728,7 @@ void CTDLTransEditDlg::OnOptionsSortUntranslatedAtTop()
 
 void CTDLTransEditDlg::OnToolsCleanUp()
 {
-	CFileOpenDialog dialog(_T("Select Multiple Translations"), _T(".csv"), m_sLastBrowsePath, EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT, _T("Translations (*.csv)|*.csv||"));
+	CFileOpenDialog dialog(_T("Select Translations"), _T(".csv"), m_sLastBrowsePath, EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT, _T("Translations (*.csv)|*.csv||"));
 
 	const UINT BUFSIZE = (MAX_PATH * 50);
 	static TCHAR FILEBUF[BUFSIZE] = { 0 };
@@ -760,7 +760,7 @@ void CTDLTransEditDlg::OnToolsCleanUp()
 
 void CTDLTransEditDlg::OnToolsExportUntranslated() 
 {
-	CFileOpenDialog dialog(_T("Select Multiple Translations"), _T(".csv"), m_sLastBrowsePath, EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT, _T("Translations (*.csv)|*.csv||"));
+	CFileOpenDialog dialog(_T("Select Translations"), _T(".csv"), m_sLastBrowsePath, EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT, _T("Translations (*.csv)|*.csv||"));
 
 	const UINT BUFSIZE = (MAX_PATH * 50);
 	static TCHAR FILEBUF[BUFSIZE] = { 0 };
