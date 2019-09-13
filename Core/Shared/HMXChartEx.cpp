@@ -286,22 +286,22 @@ CString CHMXChartEx::GetTooltip(int nHit) const
 
 BOOL CHMXChartEx::AdjustTooltipRect(CRect& rScreen)
 {
-	ASSERT(m_nLastTooltipHit != -1);
-
-	// Offset to the right and place close to the relevant data point
-	//CPoint ptAveData;
-
-	//if (GetAveragePointXY(m_nLastTooltipHit, ptAveData))
+	if (m_nLastTooltipHit != -1)
 	{
-		//ClientToScreen(&ptAveData);
-		rScreen.OffsetRect(TOOLTIPOFFSET, 0/*ptAveData.y - rScreen.CenterPoint().y*/);
+		// Offset to the right and place close to the relevant data point
+		//CPoint ptAveData;
 
-		return TRUE;
+		//if (GetAveragePointXY(m_nLastTooltipHit, ptAveData))
+		{
+			//ClientToScreen(&ptAveData);
+			rScreen.OffsetRect(TOOLTIPOFFSET, 0/*ptAveData.y - rScreen.CenterPoint().y*/);
+
+			return TRUE;
+		}
 	}
 
 	// else
 	return FALSE;
-
 }
 
 BOOL CHMXChartEx::GetAveragePointXY(int nIndex, CPoint& point) const
