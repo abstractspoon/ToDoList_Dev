@@ -201,7 +201,7 @@ bool CWorkloadChart::DrawGrid( CDC& dc)
 	if (!CHMXChartEx::DrawGrid(dc))
 		return false;
 
-	if (HasOverload() || HasUnderload())
+	if ((HasOverload() || HasUnderload()) && HasData())
 	{
 		// Draw Over/underload cutoffs
 		CGdiPlusGraphics graphics(dc);
@@ -211,8 +211,11 @@ bool CWorkloadChart::DrawGrid( CDC& dc)
 			CRect rOverload(m_rectData);
 			rOverload.bottom -= (int)(rOverload.Height() * (m_dOverloadValue / m_nYMax));
 
-			CGdiPlusBrush brush(m_crOverload, 50);
-			CGdiPlus::FillRect(graphics, brush, rOverload);
+			if (rOverload.bottom >= m_rectData.bottom)
+			{
+				CGdiPlusBrush brush(m_crOverload, 50);
+				CGdiPlus::FillRect(graphics, brush, rOverload);
+			}
 		}
 
 		if (HasUnderload())
@@ -220,8 +223,11 @@ bool CWorkloadChart::DrawGrid( CDC& dc)
 			CRect rUnderload(m_rectData);
 			rUnderload.top = (rUnderload.bottom - (int)(rUnderload.Height() * (m_dUnderloadValue / m_nYMax)));
 
-			CGdiPlusBrush brush(m_crUnderload, 50);
-			CGdiPlus::FillRect(graphics, brush, rUnderload);
+			if (rUnderload.top <= m_rectData.top)
+			{
+				CGdiPlusBrush brush(m_crUnderload, 50);
+				CGdiPlus::FillRect(graphics, brush, rUnderload);
+			}
 		}
 	}
 
