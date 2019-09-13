@@ -1111,7 +1111,7 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				break;
 
 			case WLCF_SHOWTREECHECKBOXES:
-				m_tree.EnableCheckboxes(bSet);
+				m_tree.EnableCheckboxes(IDB_CHECKBOXES, bSet);
 				break;
 
 			case WLCF_PREFERTIMEESTFORCALCS:
