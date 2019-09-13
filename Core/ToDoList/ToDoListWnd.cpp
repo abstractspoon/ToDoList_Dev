@@ -9549,7 +9549,7 @@ BOOL CToDoListWnd::CanExportToFilePaths(const CStringArray& aExportPaths) const
 		return TRUE;
 
 	// rest
-	return (IDOK == CMessageBox::AfxShow(IDS_CONFIRM_EXPORT_OVERWRITE, Misc::FormatArray(aExistPaths, _T("\n\n")), MB_YESNO | MB_ICONQUESTION));
+	return (IDYES == CMessageBox::AfxShow(IDS_CONFIRM_EXPORT_OVERWRITE, Misc::FormatArray(aExistPaths, _T("\n\n")), MB_YESNO | MB_ICONQUESTION));
 }
 
 BOOL CToDoListWnd::WantOverwriteExportFiles(const CTDLExportDlg& dlg) const
