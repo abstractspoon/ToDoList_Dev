@@ -8,11 +8,15 @@
 // tdcenum.h : header file
 //
 
+/////////////////////////////////////////////////////////////////////////////
+
 #include "..\Interfaces\IEnums.h"
 
 #include <afxtempl.h>
 
+/////////////////////////////////////////////////////////////////////////////
 // WM_COPYDATA options
+
 enum TDL_COPYDATA
 {
 	TDLCD_PROCESSSTARTUP,	// cbData = sizeof(CTDCStartupOptions)
@@ -20,7 +24,9 @@ enum TDL_COPYDATA
 	TDLCD_LANGFILECHANGE,	// cbData = sizeof(TCHAR[])
 };
 
+/////////////////////////////////////////////////////////////////////////////
 // CToDoListWnd creation flags
+
 enum
 {
 	TLD_FORCEVISIBLE		= 0x0001,
@@ -36,6 +42,8 @@ enum
     TLD_LOG_MODULES			= 0x0400,
 	TLD_ALLOWFORCEDCHECKOUT	= 0x0800,
 };
+
+/////////////////////////////////////////////////////////////////////////////
 
 enum MISC_MENU
 { 
@@ -60,6 +68,21 @@ enum APP_MENU
 	AM_WINDOW, 
 	AM_HELP, 
 	AM_DEBUG 
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// Print styles
+
+enum TDLPD_STYLE
+{
+	TDLPDS_NONE = -1,
+
+	TDLPDS_STYLESHEET,
+	TDLPDS_WRAP,
+	TDLPDS_TABLE,
+	TDLPDS_PARA,
+	TDLPDS_IMAGE,
+	TDLPDS_OTHEREXPORTER,
 };
 
 /////////////////////////////////////////////////////////////////////////////

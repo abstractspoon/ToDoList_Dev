@@ -18,20 +18,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum TDLPD_STYLE
-{
-	TDLPDS_NONE = -1,
-
-	TDLPDS_STYLESHEET,
-	TDLPDS_WRAP,
-	TDLPDS_TABLE,
-	TDLPDS_PARA,
-	TDLPDS_IMAGE,
-	TDLPDS_OTHEREXPORTER,
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 class CTDLPrintStylePage : public CPropertyPage
 {
 // Construction

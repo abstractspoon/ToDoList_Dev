@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "TasklistHtmlExporter.h"
 #include "tdlrecurringtaskedit.h"
-#include "TDLPrintDialog.h"
 
 #include "..\shared\xmlfile.h"
 #include "..\shared\filemisc.h"
@@ -105,7 +104,7 @@ bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDe
 	}
 	
 	STRIKETHRUDONE = pPrefs->GetProfileInt(szKey, _T("StrikethroughDone"), TRUE);
-	EXPORTSTYLE = _ttoi(pTasks->GetMetaData(TDL_EXPORTSTYLE));
+	EXPORTSTYLE = ValidateExportStyle(_ttoi(pTasks->GetMetaData(TDL_EXPORTSTYLE)));
 
 	INDENT.Empty();
 
@@ -159,6 +158,20 @@ bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDe
 
 
 	return true;
+}
+
+TDLPD_STYLE CTaskListHtmlExporter::ValidateExportStyle(int nStyle)
+{
+	switch (nStyle)
+	{
+	case TDLPDS_WRAP:
+	case TDLPDS_TABLE:
+	case TDLPDS_PARA:
+		return (TDLPD_STYLE)nStyle;
+	}
+
+	// all else
+	return TDLPDS_WRAP;
 }
 
 IIMPORTEXPORT_RESULT CTaskListHtmlExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
