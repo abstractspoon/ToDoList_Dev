@@ -50,11 +50,16 @@ BOOL CStatusBarProgress::BeginProgress(HWND hwndStatusBar, const CString& sPromp
 	CRect rProgress;
 
 	if (!CThemed::AreControlsThemed())
+	{
 		pSB->GetItemRect(0, rProgress);
+		rProgress.OffsetRect(0, 1);
+	}
 	else
+	{
 		pSB->GetClientRect(rProgress);
+		rProgress.top += GraphicsMisc::ScaleByDPIFactor(2);
+	}
 
-	rProgress.DeflateRect(0, 0, 0, GraphicsMisc::ScaleByDPIFactor(2));
 	rProgress.left = nLenPrompt;
 	rProgress.right = (nLenPrompt + GraphicsMisc::ScaleByDPIFactor(150));
 
