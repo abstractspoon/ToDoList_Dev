@@ -1577,9 +1577,10 @@ int CTreeListCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 	CFont* pOldFont = pDC->SelectObject(m_tree.Fonts().GetFont());
 	int nTextWidth = CalcTreeColumnTextWidth(nCol, pDC);
 
+	int nColWidth = CalcTreeColumnWidth(nCol, pDC, nTextWidth);
 	pDC->SelectObject(pOldFont);
 
-	return CalcTreeColumnWidth(nCol, pDC, nTextWidth);
+	return nColWidth;
 }
 
 int CTreeListCtrl::CalcTreeTitleColumnWidth(CDC* pDC, BOOL bMaximum) const

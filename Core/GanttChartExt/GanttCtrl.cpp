@@ -4505,7 +4505,7 @@ int CGanttCtrl::CalcTreeColumnTextWidth(int nCol, CDC* pDC) const
 	case GTLCC_DONEDATE: 
 		{
 			COleDateTime date(2015, 12, 31, 23, 59, 59);
-			return GraphicsMisc::GetAverageMaxStringWidth(FormatDate(date), pDC);
+			return pDC->GetTextExtent(FormatDate(date)).cx;
 		}
 		break;
 		
