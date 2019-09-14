@@ -177,7 +177,7 @@ BOOL CTreeSelectionHelper::SetItems(HTREEITEM htiFrom, HTREEITEM htiTo, TSH_SELE
 	if (!htiFrom || !htiTo)
 		return FALSE;
 
-	int nDirection = m_tch.FindItem(htiTo, htiFrom);
+	int nDirection = m_tch.CompareItemPositions(htiTo, htiFrom);
 
 	// if (htiFrom != htiTo) and nDirection is zero then htiTo could not be found
 	if (htiFrom != htiTo && !nDirection)

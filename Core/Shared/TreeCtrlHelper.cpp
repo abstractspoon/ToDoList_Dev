@@ -1005,7 +1005,7 @@ HTREEITEM CTreeCtrlHelper::GetPrevVisibleItem(HTREEITEM hti, BOOL bAllowChildren
 	return htiPrev;
 }
 
-int CTreeCtrlHelper::FindItem(HTREEITEM htiFind, HTREEITEM htiStart)
+int CTreeCtrlHelper::CompareItemPositions(HTREEITEM htiFind, HTREEITEM htiStart)
 {
 	// try same first
 	if (htiFind == htiStart)

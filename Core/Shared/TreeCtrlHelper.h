@@ -229,6 +229,7 @@ public:
 	HTREEITEM GetPrevVisibleItem(HTREEITEM hti, BOOL bAllowChildren = TRUE) const;
 
 	HTREEITEM FindFirstParent() const;
+	int CompareItemPositions(HTREEITEM htiFind, HTREEITEM htiStart); // return -1 for above, 1 for below, 0 if same
 
 	HTREEITEM GetNextItem(HTREEITEM hti, BOOL bAllowChildren = TRUE) const; // next item as-if all items were expanded
 	HTREEITEM GetPrevItem(HTREEITEM hti, BOOL bAllowChildren = TRUE) const; // prev item as-if all items were expanded
