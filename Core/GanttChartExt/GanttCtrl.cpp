@@ -6261,16 +6261,6 @@ BOOL CGanttCtrl::SaveToImage(CBitmap& bmImage)
 	if (m_tree.GetCount() == 0)
 		return FALSE;
 
-	// Resize tree header width to suit title text width
-	int nPrevWidth = m_treeHeader.GetItemWidth(0);
-	BOOL bTracked = m_treeHeader.IsItemTracked(0);
-
-	CClientDC dc(&m_tree);
-	int nColWidth = CalcTreeColumnWidth(0, &dc);
-
-	m_treeHeader.SetItemWidth(0, nColWidth);
-	Resize();
-
 	// Calculate the date range in scroll units
 	// allowing a month's buffer at each end if there is space
 	COleDateTime dtFrom = CDateHelper::GetStartOfMonth(ActiveDateRange().GetStart());
@@ -6294,15 +6284,7 @@ BOOL CGanttCtrl::SaveToImage(CBitmap& bmImage)
 	if (nTo == nFrom)
 		nTo = -1;
 	
-	BOOL bRes = CTreeListCtrl::SaveToImage(bmImage, nFrom, nTo);
-	
-	// Restore title column width
-	m_treeHeader.SetItemWidth(0, nPrevWidth);
-	m_treeHeader.SetItemTracked(0, bTracked);
-
-	Resize();
-	
-	return bRes;
+	return CTreeListCtrl::SaveToImage(bmImage, nFrom, nTo);
 }
 
 void CGanttCtrl::RefreshItemBoldState(HTREEITEM htiFrom, BOOL bAndChildren)
