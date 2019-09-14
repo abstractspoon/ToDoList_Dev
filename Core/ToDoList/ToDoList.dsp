@@ -887,6 +887,10 @@ SOURCE=.\TDCSimpleTextContent.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\tdcsort.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDCSourceControl.h
 # End Source File
 # Begin Source File
