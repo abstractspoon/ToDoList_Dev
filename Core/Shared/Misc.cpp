@@ -1285,7 +1285,7 @@ BOOL Misc::AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSens
 	if (sItem.IsEmpty())
 		return FALSE;
 
-	int nFind = Find(sItem, aTo, bCaseSensitive, FALSE);
+	int nFind = Find(sItem, aTo, bCaseSensitive, TRUE);
 
 	if (nFind == -1) // doesn't already exist
 	{
