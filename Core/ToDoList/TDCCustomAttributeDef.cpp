@@ -64,7 +64,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::operator==(const TDCCUSTOMATTRIBUTEDEFINITION
 			(nColID == attribDef.nColID) &&
 			(nAttribID == attribDef.nAttribID) &&
 			(bEnabled == attribDef.bEnabled) &&
-			Misc::MatchAll(aDefaultListData, attribDef.aDefaultListData));
+			Misc::MatchAll(aDefaultListData, attribDef.aDefaultListData, TRUE, TRUE));
 }
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::GetColumnTitle() const
