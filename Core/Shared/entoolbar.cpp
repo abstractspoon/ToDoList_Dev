@@ -414,7 +414,7 @@ void CEnToolBar::DrawBkgnd(CDC* pDC, BOOL bClient)
 		rect.OffsetRect(-rect.TopLeft());
 	}
 
-	if (HasBkgndColor())
+	if (m_crFrom != CLR_NONE)
 	{
 		if (m_crTo == m_crFrom)
 		{

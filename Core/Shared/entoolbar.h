@@ -82,7 +82,6 @@ protected:
 	
 	// pseudo message handler
 	void DrawBkgnd(CDC* pDC, BOOL bClient);
-	BOOL HasBkgndColor() const { return m_crFrom != CLR_NONE; }
 	COLORREF GetHotColor() const;
 	
 	void SetImageSize(int cx, int cy);
