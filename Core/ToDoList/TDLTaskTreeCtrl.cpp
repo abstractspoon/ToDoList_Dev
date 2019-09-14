@@ -834,30 +834,26 @@ BOOL CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 
 BOOL CTDLTaskTreeCtrl::PreTranslateMessage(MSG* pMsg)
 {
+	BOOL bHideTooltip = FALSE;
+
 	switch (pMsg->message)
 	{
 	case WM_NCMOUSEMOVE:
-		// make sure tree tooltips go away
 		if (HasStyle(TDCS_SHOWINFOTIPS))
-		{
-			if ((pMsg->hwnd != m_tcTasks) || (pMsg->wParam != HTCLIENT))
-			{
-				CWnd* pTT = m_tcTasks.GetToolTips();
-				
-				if (pTT)
-					pTT->SendMessage(TTM_POP); 
-			}
-		}
+			bHideTooltip = ((pMsg->hwnd != m_tcTasks) || (pMsg->wParam != HTCLIENT));
+		break;
 
 	default:
-		if ((pMsg->hwnd == m_tcTasks) && CToolTipCtrlEx::IsMouseDown(pMsg->message))
-		{
-			CWnd* pTT = m_tcTasks.GetToolTips();
-				
-			if (pTT)
-				pTT->SendMessage(TTM_POP); 
-		}
+		bHideTooltip = ((pMsg->hwnd == m_tcTasks) && CToolTipCtrlEx::IsMouseDown(pMsg->message));
 		break;
+	}
+
+	if (bHideTooltip)
+	{
+		CToolTipCtrl* pTT = m_tcTasks.GetToolTips();
+
+		if (pTT)
+			pTT->Pop();
 	}
 	
 	return CTDLTaskCtrlBase::PreTranslateMessage(pMsg);
