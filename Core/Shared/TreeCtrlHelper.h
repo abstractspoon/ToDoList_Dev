@@ -233,12 +233,6 @@ public:
 	HTREEITEM GetNextItem(HTREEITEM hti, BOOL bAllowChildren = TRUE) const; // next item as-if all items were expanded
 	HTREEITEM GetPrevItem(HTREEITEM hti, BOOL bAllowChildren = TRUE) const; // prev item as-if all items were expanded
 
-	int FindItem(HTREEITEM htiFind, HTREEITEM htiStart); // return -1 for above, 1 for below, 0 if same
-
-	HTREEITEM FindDeepestItem(int& nDepth, BOOL bExpandedOnly = FALSE) const;
-	HTREEITEM FindDeepestItem(BOOL bExpandedOnly = FALSE) const;
-	HTREEITEM FindWidestItem(int& nWidth, BOOL bExpandedOnly = FALSE, CDC* pDC = NULL) const;
-	HTREEITEM FindWidestItem(BOOL bExpandedOnly = FALSE, CDC* pDC = NULL) const;
 
 	HTREEITEM MoveTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 
 						BOOL bUsesTextCallback = FALSE, BOOL bUsesImageCallback = FALSE);
@@ -251,8 +245,6 @@ protected:
 
 protected:
 	void AddVisibleItemToIndex(HTREEITEM hti) const;
-	HTREEITEM FindDeepestItem(HTREEITEM htiParent, int& nDepth, BOOL bExpandedOnly) const;
-	HTREEITEM FindWidestItem(HTREEITEM htiParent, int& nWidth, BOOL bExpandedOnly, CDC* pDC) const;
 
 	TCH_WHERE GetMoveTarget(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, HTREEITEM& htiTarget) const;
 	HTREEITEM CopyTree(HTREEITEM hDest, HTREEITEM hSrc, TCH_WHERE nWhere, BOOL bUsesTextCallback = FALSE, BOOL bUsesImageCallback = FALSE);
