@@ -2876,112 +2876,89 @@ DWORD CWorkloadCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	return dwNextID;
 }
 
-BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
+BOOL CWorkloadCtrl::DoSaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider)
 {
-	if (m_tree.GetCount() == 0)
-		return FALSE;
-
-	CClientDC dc(&m_tree);
-
-	BOOL bTracked = m_treeHeader.IsItemTracked(0);
-
-	// Resize tree width to suit title text width
-	int nPrevTitleWidth = m_treeHeader.GetItemWidth(0);
-	int nPrevTreeWidth = m_treeHeader.CalcTotalItemWidth();
-
-	int nReqTitleWidth = CalcTreeColumnWidth(0, &dc);
-	int nReqTreeWidth = (nReqTitleWidth + (nPrevTreeWidth - nPrevTitleWidth));
-
-	m_treeHeader.SetItemWidth(0, nReqTitleWidth);
-	Resize();
-
-	CAutoFlag af(m_bSavingToImage, TRUE);
 	CEnBitmap bmBase;
 
-	BOOL bRes = CTreeListCtrl::SaveToImage(bmBase);
+	if (!CTreeListCtrl::DoSaveToImage(bmBase, nFrom, nTo, crDivider))
+		return FALSE;
 
-	if (bRes)
+	// Add totals and graph
+	CEnBitmap bmLabels, bmTotals, bmChart;
+
+	if (!CCopyListCtrlContents(m_lcTotalsLabels).DoCopy(bmLabels))
+		return FALSE;
+
+	// Manually resize the totals full width because it doesn't scroll
+	int nReqWidth = m_listHeader.CalcTotalItemWidth();
+
+	CRect rTotals = CDialogHelper::GetChildRect(&m_lcColumnTotals), rTemp(rTotals);
+	rTemp.right = rTemp.left + nReqWidth;
+	rTemp.bottom += 2; // else the bottom border is not always drawn
+
+	m_lcColumnTotals.MoveWindow(rTemp);
+
+	if (!CCopyListCtrlContents(m_lcColumnTotals).DoCopy(bmTotals))
+		return FALSE;
+
+	m_lcColumnTotals.MoveWindow(rTotals);
+
+	if (!m_barChart.SaveToImage(bmChart))
+		return FALSE;
+
+	// Join them all the bits together
+	CClientDC dc(&m_tree);
+	CDC dcImage, dcParts;
+
+	if (dcImage.CreateCompatibleDC(&dc) && dcParts.CreateCompatibleDC(&dc))
 	{
-		// Add totals and graph
-		CEnBitmap bmLabels, bmTotals, bmChart;
+		CSize sizeBase = bmBase.GetSize();
+		CSize sizeLabels = bmLabels.GetSize();
+		CSize sizeTotals = bmTotals.GetSize();
+		CSize sizeChart = bmChart.GetSize();
 
-		if (!CCopyListCtrlContents(m_lcTotalsLabels).DoCopy(bmLabels))
-			return FALSE;
+		CSize sizeImage;
 
-		// Manually resize the totals full width because it doesn't scroll
-		int nReqWidth = m_listHeader.CalcTotalItemWidth();
+		sizeImage.cx = (sizeBase.cx + sizeChart.cx);
+		sizeImage.cy = max((sizeBase.cy + sizeTotals.cy), sizeChart.cy);
 
-		CRect rTotals = CDialogHelper::GetChildRect(&m_lcColumnTotals), rTemp(rTotals);
-		rTemp.right = rTemp.left + nReqWidth;
-		rTemp.bottom += 2; // else the bottom border is not always drawn
-
-		m_lcColumnTotals.MoveWindow(rTemp);
-		
-		if (!CCopyListCtrlContents(m_lcColumnTotals).DoCopy(bmTotals))
-			return FALSE;
-
-		m_lcColumnTotals.MoveWindow(rTotals);
-
-		if (!m_barChart.SaveToImage(bmChart))
-			return FALSE;
-
-		// Join them all the bits together
-		CDC dcImage, dcParts;
-
-		if (dcImage.CreateCompatibleDC(&dc) && dcParts.CreateCompatibleDC(&dc))
+		if (bmImage.CreateCompatibleBitmap(&dc, sizeImage.cx, sizeImage.cy))
 		{
-			CSize sizeBase = bmBase.GetSize();
-			CSize sizeLabels = bmLabels.GetSize();
-			CSize sizeTotals = bmTotals.GetSize();
-			CSize sizeChart = bmChart.GetSize();
+			CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
+			dcImage.FillSolidRect(0, 0, sizeImage.cx, sizeImage.cy, GetSysColor(COLOR_WINDOW));
 
-			CSize sizeImage;
+			// Base-class
+			CBitmap* pOldPart = dcParts.SelectObject(&bmBase);
+			dcImage.BitBlt(0, 0, sizeBase.cx, sizeBase.cy, &dcParts, 0, 0, SRCCOPY);
 
-			sizeImage.cx = (sizeBase.cx + sizeChart.cx);
-			sizeImage.cy = max((sizeBase.cy + sizeTotals.cy), sizeChart.cy);
+			// Totals labels
+			dcParts.SelectObject(bmLabels);
+			dcImage.BitBlt(0, sizeBase.cy, sizeLabels.cx, sizeLabels.cy, &dcParts, 0, 0, SRCCOPY);
 
-			if (bmImage.CreateCompatibleBitmap(&dc, sizeImage.cx, sizeImage.cy))
-			{
-				CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
-				dcImage.FillSolidRect(0, 0, sizeImage.cx, sizeImage.cy, GetSysColor(COLOR_WINDOW));
+			// Column Totals
+			dcParts.SelectObject(bmTotals);
+			dcImage.BitBlt(sizeLabels.cx + 2, sizeBase.cy, sizeTotals.cx, sizeTotals.cy, &dcParts, 0, 0, SRCCOPY);
 
-				// Base-class
-				CBitmap* pOldPart = dcParts.SelectObject(&bmBase);
-				dcImage.BitBlt(0, 0, sizeBase.cx, sizeBase.cy, &dcParts, 0, 0, SRCCOPY);
+			// Draw vertical divider between labels and totals
+			CRect rDivider(0, sizeBase.cy, (sizeLabels.cx + 1), (sizeBase.cy + sizeTotals.cy));
+			DrawItemDivider(&dcImage, rDivider, TRUE, FALSE);
 
-				// Totals labels
-				dcParts.SelectObject(bmLabels);
-				dcImage.BitBlt(0, sizeBase.cy, sizeLabels.cx, sizeLabels.cy, &dcParts, 0, 0, SRCCOPY);
+			// Draw vertical divider at end of totals
+			rDivider.right = sizeBase.cx;
+			DrawItemDivider(&dcImage, rDivider, TRUE, FALSE);
 
-				// Column Totals
-				dcParts.SelectObject(bmTotals);
-				dcImage.BitBlt(sizeLabels.cx + 2, sizeBase.cy, sizeTotals.cx, sizeTotals.cy, &dcParts, 0, 0, SRCCOPY);
+			// Bar chart
+			dcParts.SelectObject(bmChart);
+			dcImage.BitBlt(sizeBase.cx, 0, sizeChart.cx, sizeChart.cy, &dcParts, 0, 0, SRCCOPY);
 
-				// Draw vertical divider between labels and totals
-				CRect rDivider(0, sizeBase.cy, (sizeLabels.cx + 1), (sizeBase.cy + sizeTotals.cy));
-				DrawItemDivider(&dcImage, rDivider, TRUE, FALSE);
-
-				// Draw vertical divider at end of totals
-				rDivider.right = sizeBase.cx;
-				DrawItemDivider(&dcImage, rDivider, TRUE, FALSE);
-
-				// Bar chart
-				dcParts.SelectObject(bmChart);
-				dcImage.BitBlt(sizeBase.cx, 0, sizeChart.cx, sizeChart.cy, &dcParts, 0, 0, SRCCOPY);
-
-				dcParts.SelectObject(pOldPart);
-				dcImage.SelectObject(pOldImage);
-			}
+			dcParts.SelectObject(pOldPart);
+			dcImage.SelectObject(pOldImage);
 		}
+
+		return TRUE;
 	}
 	
-	// Restore title column width
-	m_treeHeader.SetItemWidth(0, nPrevTitleWidth);
-	m_treeHeader.SetItemTracked(0, bTracked);
-
-	Resize();
-	
-	return bRes;
+	return FALSE;
 }
 
 void CWorkloadCtrl::RefreshItemBoldState(HTREEITEM htiFrom, BOOL bAndChildren)

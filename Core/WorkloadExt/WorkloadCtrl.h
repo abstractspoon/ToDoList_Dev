@@ -34,7 +34,6 @@ public:
 	CWorkloadCtrl();
 	virtual ~CWorkloadCtrl();
 
-	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
 	void SetReadOnly(BOOL bReadOnly);
 
@@ -141,6 +140,7 @@ protected:
 	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
 	int CalcSplitPosToFitListColumns(int nTotalWidth) const;
 	void DeleteItem(HTREEITEM hti);
+	BOOL DoSaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider);
 	
 	// Non-virtual members
 	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack = CLR_NONE);

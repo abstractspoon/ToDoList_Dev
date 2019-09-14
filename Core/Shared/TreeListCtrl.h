@@ -168,6 +168,9 @@ public:
 	void GetTreeTrackedColumns(CIntArray& aTracked) const;
 	void SetTreeColumnVisibility(const CDWordArray& aColumnVis);
 
+	BOOL SaveToImage(CBitmap& bmImage, COLORREF crDivider = CLR_NONE);
+	BOOL SaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider = CLR_NONE);
+
 protected:
 	CTreeListTreeCtrl m_tree;
 	CListCtrl m_list;
@@ -248,6 +251,7 @@ protected:
 	virtual int CalcTreeColumnTextWidth(int /*nCol*/, CDC* /*pDC*/) const { return 0; }
 	virtual void InitItemHeights();
 	virtual int CalcSplitPosToFitListColumns(int nAvailWidth) const;
+	virtual BOOL DoSaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider);
 
 	enum UPDATETITLEWIDTHACTION 
 	{ 

@@ -1629,6 +1629,48 @@ int CTreeListCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC, int nMaxItemTextWidth
 	return max(nTitleWidth, nColWidth);
 }
 
+BOOL CTreeListCtrl::SaveToImage(CBitmap& bmImage, COLORREF crDivider)
+{
+	return SaveToImage(bmImage, 0, -1, crDivider);
+}
+
+BOOL CTreeListCtrl::SaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider)
+{
+	if (m_tree.GetCount() == 0)
+		return FALSE;
+
+	CAutoFlag af(m_bSavingToImage, TRUE);
+
+	// Resize tree header width to suit title text width
+	int nPrevWidth = m_treeHeader.GetItemWidth(0);
+	int nPrevSplitPos = GetSplitPos();
+	BOOL bTracked = m_treeHeader.IsItemTracked(0);
+
+	CClientDC dc(&m_tree);
+	int nColWidth = CalcTreeColumnWidth(0, &dc);
+
+	m_treeHeader.SetItemWidth(0, nColWidth);
+	SetSplitPos(m_treeHeader.CalcTotalItemWidth());
+	Resize();
+
+	// Allows derived classes to be involved
+	BOOL bRes = DoSaveToImage(bmImage, nFrom, nTo, crDivider);
+
+	// Restore title column width
+	m_treeHeader.SetItemWidth(0, nPrevWidth);
+	m_treeHeader.SetItemTracked(0, bTracked);
+	SetSplitPos(nPrevSplitPos);
+
+	Resize();
+
+	return bRes;
+}
+
+BOOL CTreeListCtrl::DoSaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider)
+{
+	return CTreeListSyncer::SaveToImage(bmImage, nFrom, nTo, crDivider);
+}
+
 int CTreeListCtrl::Compare(const CString& sText1, const CString& sText2)
 {
 	BOOL bEmpty1 = sText1.IsEmpty();
