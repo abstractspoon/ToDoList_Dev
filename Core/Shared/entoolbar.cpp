@@ -365,7 +365,14 @@ LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
 
 COLORREF CEnToolBar::GetHotColor() const
 {
-	return ((m_crHot != CLR_NONE) ? m_crHot : ((m_crFrom != CLR_NONE) ? m_crFrom : GetSysColor(COLOR_3DFACE)));
+	if (m_crHot != CLR_NONE) 
+		return m_crHot;
+	
+	if (m_crFrom != CLR_NONE)
+		return m_crFrom;
+	
+	// else
+	return GetSysColor(COLOR_3DFACE);
 }
 
 void CEnToolBar::DrawButtonBackground(CDC* pDC, const CRect& rBtn, COLORREF crFill)
