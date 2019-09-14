@@ -104,7 +104,7 @@ BOOL CXPTabCtrl::GetSpinButtonCtrlRect(CRect& rSpin) const
 {
 	const CSpinButtonCtrl* pSpin = GetSpinButtonCtrl();
 
-	if (pSpin == NULL)
+	if ((pSpin == NULL) || !pSpin->IsWindowVisible())
 		return FALSE;
 
 	CRect rClient;
