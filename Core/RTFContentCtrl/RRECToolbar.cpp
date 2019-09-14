@@ -428,7 +428,7 @@ void CRRECToolBar::OnColorDropDown(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-LRESULT CRRECToolBar::OnItemPostPaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
+LRESULT CRRECToolBar::OnButtonPostPaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
 {
 	UINT nBtnID = lpNMCustomDraw->nmcd.dwItemSpec;
 

@@ -292,7 +292,7 @@ void CEnToolBar::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
     switch ( lpNMCustomDraw->nmcd.dwDrawStage )
     {
     case CDDS_PREPAINT:
- 		DrawBkgnd(CDC::FromHandle(lpNMCustomDraw->nmcd.hdc), TRUE);
+ 		DrawToolbarBackground(CDC::FromHandle(lpNMCustomDraw->nmcd.hdc), TRUE);
 
 		if (IsWindowEnabled())
 			*pResult = CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT;
@@ -309,11 +309,11 @@ void CEnToolBar::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
        break;
        
     case CDDS_ITEMPREPAINT:
-       *pResult = OnItemPrePaint(lpNMCustomDraw) | CDRF_NOTIFYPOSTPAINT;
+       *pResult = OnButtonPrePaint(lpNMCustomDraw) | CDRF_NOTIFYPOSTPAINT;
        break;
 
     case CDDS_ITEMPOSTPAINT:
-       *pResult = OnItemPostPaint(lpNMCustomDraw);
+       *pResult = OnButtonPostPaint(lpNMCustomDraw);
        break;
 
     default:
@@ -321,7 +321,7 @@ void CEnToolBar::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
     }
 }
 
-LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
+LRESULT CEnToolBar::OnButtonPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
 {
 	UINT& nState = lpNMCustomDraw->nmcd.uItemState;
 
@@ -341,16 +341,16 @@ LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
 	// Note: Only offset pressed buttons
 	if (nState & CDIS_SELECTED)
 	{
-		crFill = GraphicsMisc::Darker(GetHotColor(), 0.1, FALSE);
+		crFill = GraphicsMisc::Darker(GetButtonHotColor(), 0.1, FALSE);
 	}
 	else if (nState & CDIS_HOT)
 	{
-		crFill = GetHotColor();
+		crFill = GetButtonHotColor();
 		nFlags |= TBCDRF_NOOFFSET;
 	}
 	else if (nState & CDIS_CHECKED)
 	{
-		crFill = GraphicsMisc::Darker(GetHotColor(), 0.1, FALSE);
+		crFill = GraphicsMisc::Darker(GetButtonHotColor(), 0.1, FALSE);
 		nFlags |= TBCDRF_NOOFFSET;
 	}
 	else
@@ -363,7 +363,7 @@ LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
 	return nFlags;
 }
 
-COLORREF CEnToolBar::GetHotColor() const
+COLORREF CEnToolBar::GetButtonHotColor() const
 {
 	if (m_crHot != CLR_NONE) 
 		return m_crHot;
@@ -384,7 +384,7 @@ void CEnToolBar::DrawButtonBackground(CDC* pDC, const CRect& rBtn, COLORREF crFi
 	GraphicsMisc::DrawRect(pDC, rBtn, crFill, crBorder, nRadius);
 }
 
-LRESULT CEnToolBar::OnItemPostPaint(LPNMTBCUSTOMDRAW /*lpNMCustomDraw*/) 
+LRESULT CEnToolBar::OnButtonPostPaint(LPNMTBCUSTOMDRAW /*lpNMCustomDraw*/) 
 { 
 	return CDRF_DODEFAULT; 
 }
@@ -393,13 +393,13 @@ void CEnToolBar::OnNcPaint()
 {
 	CDC* pDC = GetWindowDC();
 
-	DrawBkgnd(pDC, FALSE);
+	DrawToolbarBackground(pDC, FALSE);
 	ReleaseDC(pDC);
 
 	Default();
 }
 
-void CEnToolBar::DrawBkgnd(CDC* pDC, BOOL bClient)
+void CEnToolBar::DrawToolbarBackground(CDC* pDC, BOOL bClient)
 {
 	// get client rect always
 	CRect rect;

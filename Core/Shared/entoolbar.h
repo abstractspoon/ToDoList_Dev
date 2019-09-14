@@ -77,12 +77,12 @@ protected:
 	afx_msg void OnNcPaint();
 	DECLARE_MESSAGE_MAP()
 		
-	virtual LRESULT OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw);
-	virtual LRESULT OnItemPostPaint(LPNMTBCUSTOMDRAW lpNMCustomDraw);
+	virtual LRESULT OnButtonPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw);
+	virtual LRESULT OnButtonPostPaint(LPNMTBCUSTOMDRAW lpNMCustomDraw);
 	
 	// pseudo message handler
-	void DrawBkgnd(CDC* pDC, BOOL bClient);
-	COLORREF GetHotColor() const;
+	void DrawToolbarBackground(CDC* pDC, BOOL bClient);
+	COLORREF GetButtonHotColor() const;
 	
 	void SetImageSize(int cx, int cy);
 	BOOL SetImage(CEnBitmapEx* pBitmap, COLORREF crMask);

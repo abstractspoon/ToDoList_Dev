@@ -66,7 +66,7 @@ protected:
 	afx_msg void OnColorDropDown(NMHDR* pNMHDR, LRESULT* pResult);
 DECLARE_MESSAGE_MAP()
 
-	LRESULT OnItemPostPaint(LPNMTBCUSTOMDRAW lpNMCustomDraw);
+	LRESULT OnButtonPostPaint(LPNMTBCUSTOMDRAW lpNMCustomDraw);
 
 private:
 
