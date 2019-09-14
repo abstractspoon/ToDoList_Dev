@@ -321,10 +321,17 @@ void CEnToolBar::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
     }
 }
 
-LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw) 
-{ 
-	int nBtnID = lpNMCustomDraw->nmcd.dwItemSpec;
-	const CToolBarCtrl& tbc = GetToolBarCtrl();
+LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
+{
+	UINT& nState = lpNMCustomDraw->nmcd.uItemState;
+
+	if (nState & CDIS_DISABLED)
+	{
+		// If the button is pressed or checked then the icon
+		// is not shown disabled so we forcibly clear any other flags 
+		nState = CDIS_DISABLED;
+		return CDRF_DODEFAULT;
+	}
 
 	CDC* pDC = CDC::FromHandle(lpNMCustomDraw->nmcd.hdc);
 
@@ -332,22 +339,23 @@ LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
 	LRESULT nFlags = (TBCDRF_NOBACKGROUND | TBCDRF_NOEDGES);
 
 	// Note: Only offset pressed buttons
-	if (tbc.IsButtonPressed(nBtnID))
+	if (nState & CDIS_SELECTED)
 	{
 		crFill = GraphicsMisc::Darker(GetHotColor(), 0.1, FALSE);
 	}
-	else if (CommandToIndex(nBtnID) == tbc.GetHotItem())
+	else if (nState & CDIS_HOT)
 	{
 		crFill = GetHotColor();
 		nFlags |= TBCDRF_NOOFFSET;
 	}
-	else if (tbc.IsButtonChecked(nBtnID))
+	else if (nState & CDIS_CHECKED)
 	{
 		crFill = GraphicsMisc::Darker(GetHotColor(), 0.1, FALSE);
 		nFlags |= TBCDRF_NOOFFSET;
 	}
 	else
 	{
+		// all else
 		return CDRF_DODEFAULT;
 	}
 
