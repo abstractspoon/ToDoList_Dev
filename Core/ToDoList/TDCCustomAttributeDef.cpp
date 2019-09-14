@@ -56,7 +56,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::operator==(const TDCCUSTOMATTRIBUTEDEFINITION
 {
 	// NOTE: we ignore auto data which is temporary
 	return ((dwAttribType == attribDef.dwAttribType) &&
-		(sUniqueID.CompareNoCase(attribDef.sUniqueID) == 0) &&
+			(sUniqueID.CompareNoCase(attribDef.sUniqueID) == 0) &&
 			(sColumnTitle == attribDef.sColumnTitle) &&
 			(sLabel == attribDef.sLabel) &&
 			(nTextAlignment == attribDef.nTextAlignment) &&
