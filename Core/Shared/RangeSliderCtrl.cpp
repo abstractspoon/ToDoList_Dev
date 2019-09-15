@@ -235,7 +235,7 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 				if (IsWindowEnabled())
 				{
 					CThemed th(this, _T("PROGRESS"));
-					th.DrawBackground(&dc, (m_bHorizontal ? PP_CHUNK : PP_CHUNKVERT), 0, rTrack);
+					th.DrawBackground(&dc, (m_bHorizontal ? PP_FILL : PP_FILLVERT), 0, rTrack);
 
 					// Don't display hotness if at full range
 					if (bHot)
