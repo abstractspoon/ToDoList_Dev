@@ -316,7 +316,11 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				m_TypeId = typeId;
 				m_Trans = trans;
 				m_DollarPrice = dollarPrice;
-				m_LicenseType = RhinoLicensing.GetLicense(typeId);
+
+				if (m_DollarPrice < 0)
+					m_LicenseType = LicenseType.Free;
+				else
+					m_LicenseType = RhinoLicensing.GetLicense(typeId);
 
 				InitializeComponent();
 			}
@@ -370,8 +374,8 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				{
 					switch (m_LicenseType)
 					{
-						case RhinoLicensing.LicenseType.Free:
-							return 0;
+						//case RhinoLicensing.LicenseType.Free:
+						//	return 0;
 
 						//case RhinoLicensing.LicenseType.Trial:
 						//	return 0;
@@ -379,11 +383,11 @@ namespace Abstractspoon.Tdl.PluginHelpers
 						case RhinoLicensing.LicenseType.Paid:
 							return 0;
 
-							//case RhinoLicensing.LicenseType.Supporter:
-							//	return 0;
+						//case RhinoLicensing.LicenseType.Supporter:
+						//	return 0;
 
-							//case RhinoLicensing.LicenseType.Contributor:
-							//	return 0;
+						//case RhinoLicensing.LicenseType.Contributor:
+						//	return 0;
 					}
 
 					return PluginHelpers.DPIScaling.Scale(20);
@@ -396,8 +400,8 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				{
 					switch (m_LicenseType)
 					{
-						//case RhinoLicensing.LicenseType.Free:
-						//	break;
+						case RhinoLicensing.LicenseType.Free:
+							return m_Trans.Translate("Free License");
 
 						case RhinoLicensing.LicenseType.Trial:
 							if (m_DollarPrice > 0)
@@ -429,12 +433,8 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				switch (m_LicenseType)
 				{
 					case RhinoLicensing.LicenseType.Free:
-						break;
-
-					case RhinoLicensing.LicenseType.Trial:
-						BackColor = Color.DarkRed;
-						ForeColor = Color.White;
-                        PressedColor = Color.LightPink;
+						BackColor = ColorUtil.DrawingColor.AdjustLighting(m_themeBkColor, -0.05f, false);
+                        PressedColor = Color.DimGray;
 						break;
 
 					case RhinoLicensing.LicenseType.Paid:
@@ -449,7 +449,15 @@ namespace Abstractspoon.Tdl.PluginHelpers
 						BackColor = ColorUtil.DrawingColor.AdjustLighting(m_themeBkColor, -0.05f, false);
                         PressedColor = Color.DimGray;
 						break;
+
+					default:
+					case RhinoLicensing.LicenseType.Trial:
+						BackColor = Color.DarkRed;
+                        PressedColor = Color.LightPink;
+						break;
 				}
+
+				ForeColor = ColorUtil.DrawingColor.GetBestTextColor(BackColor);
 
 				if (m_buyBtn != null)
 				{

@@ -26,9 +26,6 @@ namespace WordCloudUIExtension
 
 	public class WordCloudUIExtensionCore : Panel, IUIExtension
 	{
-        private const int LabelTop = 2;
-		private const int ComboTop = 20;
-        private const int LabelHeight = (ComboTop - LabelTop);
         private const int ComboHeight = 16;
 		private const int ComboWidth = 200;
 		private const int ComboSpacing = 6;
@@ -42,11 +39,13 @@ namespace WordCloudUIExtension
 		private IntPtr m_HwndParent;
         private Task.Attribute m_Attrib;
 		private Translator m_Trans;
+		private String m_TypeId;
 
 		private bool m_Splitting;
 		private Color m_SplitterColor;
 		private int m_InitialSplitPos;
 		private int m_SplitterWidth;
+		private int m_BannerHeight;
 
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
@@ -65,8 +64,9 @@ namespace WordCloudUIExtension
 
         // -------------------------------------------------------------
 
-		public WordCloudUIExtensionCore(IntPtr hwndParent, Translator trans)
+		public WordCloudUIExtensionCore(String typeId, IntPtr hwndParent, Translator trans)
 		{
+			m_TypeId = typeId;
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
 			m_Attrib = Task.Attribute.Title;
@@ -80,9 +80,21 @@ namespace WordCloudUIExtension
             m_SplitterWidth = DPIScaling.Scale(6);
 
 			InitializeComponent();
+		}
 
-			RhinoLicensing.LicenseType licType = RhinoLicensing.GetLicense("3BDEF4EA-7B02-41E1-BE65-3E03025E1FFE");
+		private int LabelTop
+		{
+			get { return (m_BannerHeight + DPIScaling.Scale(2)); }
+		}
 
+		private int ComboTop
+		{
+			get { return (m_BannerHeight + DPIScaling.Scale(20));; }
+		}
+
+		private int LabelHeight
+		{
+			get { return (ComboTop - LabelTop); }
 		}
 
 		// IUIExtension ------------------------------------------------------------------
@@ -373,6 +385,8 @@ namespace WordCloudUIExtension
 
 			m_AttributeLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 			m_ColorsLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+
+			RhinoLicensing.SetUITheme(this, theme);
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -481,6 +495,8 @@ namespace WordCloudUIExtension
 		{
 			this.BackColor = Color.White;
 			m_Items = new Dictionary<UInt32, CloudTaskItem>();
+
+			m_BannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, -1);
 
 			CreateWordCloud();
 			CreateTaskMatchesListView();

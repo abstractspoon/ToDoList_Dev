@@ -104,9 +104,9 @@ BOOL CDayViewUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<String^> helpID = gcnew String(DAYVIEW_GUID);
+	msclr::auto_gcroot<String^> typeID = gcnew String(DAYVIEW_GUID);
 
-	m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore(static_cast<IntPtr>(hwndParent), trans.get(), helpID.get());
+	m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore(typeID.get(), static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 

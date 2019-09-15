@@ -17,13 +17,11 @@ namespace DayViewUIExtension
 		private TDLDayView m_DayView = null;
 		private Translator m_Trans = null;
 		private UIExtension.TaskIcon m_TaskIcons = null;
-        private String m_HelpID = "";
+		private String m_TypeId;
 		private WorkingWeek m_WorkWeek = null;
 
 		// --------------------------------------------------------------------------------------
 
-		private const int LabelTop = 2;
-		private const int ComboTop = 2;
 		private const string FontName = "Tahoma";
 
 		private bool m_SettingMonthYear = false;
@@ -41,14 +39,15 @@ namespace DayViewUIExtension
 		private Label m_SelectedTaskDatesLabel;
 
 		private Font m_ControlsFont;
+		private int m_BannerHeight;
 
 		// --------------------------------------------------------------------------------------
 
-		public DayViewUIExtensionCore(IntPtr hwndParent, Translator trans, String helpID)
+		public DayViewUIExtensionCore(String typeID, IntPtr hwndParent, Translator trans)
 		{
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
-            m_HelpID = helpID;
+            m_TypeId = typeID;
 
 			InitializeComponent();
 		}
@@ -90,7 +89,17 @@ namespace DayViewUIExtension
 			// all else
 			return false;
 		}
-	   
+
+		private int LabelTop
+		{
+			get { return (m_BannerHeight + DPIScaling.Scale(2)); }
+		}
+
+		private int ComboTop
+		{
+			get { return LabelTop; }
+		}
+
 		public bool WantSortUpdate(Task.Attribute attrib)
 		{
 			return false;
@@ -145,6 +154,8 @@ namespace DayViewUIExtension
 			m_TBRenderer.SetUITheme(theme);
 
             BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+
+			RhinoLicensing.SetUITheme(this, theme);
 		}
 		
 		public void SetTaskFont(String faceName, int pointSize)
@@ -264,6 +275,8 @@ namespace DayViewUIExtension
 			m_PrefsDlg = new DayViewPreferencesDlg(m_Trans, m_ControlsFont);
 			m_WorkWeek = new WorkingWeek();
 
+			m_BannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, -1);
+
 			CreateMonthYearCombos();
 			CreateToolbar();
 			CreateWeekLabel();
@@ -300,7 +313,7 @@ namespace DayViewUIExtension
 			m_WeekLabel = new DayViewWeekLabel(m_Trans);
 
 			m_WeekLabel.Font = new Font(FontName, 14);
-            m_WeekLabel.Location = new Point(m_Toolbar.Right, DPIScaling.Scale(LabelTop));
+            m_WeekLabel.Location = new Point(m_Toolbar.Right, LabelTop);
             m_WeekLabel.Height = m_Toolbar.Height;
 			m_WeekLabel.TextAlign = ContentAlignment.TopLeft;
 			m_WeekLabel.AutoSize = true;
@@ -417,7 +430,7 @@ namespace DayViewUIExtension
 		{
             UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
 
-            notify.NotifyDoHelp(m_HelpID);
+            notify.NotifyDoHelp(m_TypeId);
 		}
 
 		private void CreateMonthYearCombos()
@@ -425,7 +438,7 @@ namespace DayViewUIExtension
 			m_MonthCombo = new DayViewMonthComboBox();
 
 			m_MonthCombo.Font = m_ControlsFont;
-            m_MonthCombo.Location = DPIScaling.Scale(new Point(0, ComboTop));
+            m_MonthCombo.Location = new Point(DPIScaling.Scale(0), ComboTop);
             m_MonthCombo.Size = DPIScaling.Scale(new Size(100, 16));
 			
 			m_MonthCombo.SelectedMonth = DateTime.Now.Month;
@@ -436,7 +449,7 @@ namespace DayViewUIExtension
 			m_YearCombo = new DayViewYearComboBox();
 
 			m_YearCombo.Font = m_ControlsFont;
-            m_YearCombo.Location = DPIScaling.Scale(new Point(105, ComboTop));
+            m_YearCombo.Location = new Point(DPIScaling.Scale(105), ComboTop);
             m_YearCombo.Size = DPIScaling.Scale(new Size(100, 16));
 
 			m_YearCombo.SelectedYear = DateTime.Now.Year;
