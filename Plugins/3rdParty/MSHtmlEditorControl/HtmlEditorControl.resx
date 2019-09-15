@@ -474,7 +474,7 @@
     <value>toolstripDocumentEditHTML</value>
   </data>
   <data name="toolstripDocumentEditHTML.ToolTipText" xml:space="preserve">
-    <value>Edit HTML</value>
+    <value>Edit Html</value>
   </data>
   <data name="toolstripDocumentSave.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
@@ -723,7 +723,7 @@
     <value>183, 22</value>
   </data>
   <data name="contextDocumentEditHTML.Text" xml:space="preserve">
-    <value>Edit HTML</value>
+    <value>Edit Html</value>
   </data>
   <data name="contextEdit.Size" type="System.Drawing.Size, System.Drawing">
     <value>127, 22</value>

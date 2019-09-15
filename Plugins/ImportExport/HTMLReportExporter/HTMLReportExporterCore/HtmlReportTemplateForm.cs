@@ -628,6 +628,14 @@ namespace HTMLReportExporter
 			dialog.EnableImageWidth = false;
 			dialog.StartPosition = FormStartPosition.CenterParent;
 
+			dialog.Icon = HTMLReportExporter.Properties.Resources.HTMLReporter;
+			dialog.ShowIcon = true;
+
+			m_Trans.Translate(dialog, dialog.Tooltip);
+
+			dialog.BrowseTitle = m_Trans.Translate(dialog.BrowseTitle);
+			dialog.BrowseFilter = m_Trans.Translate(dialog.BrowseFilter);
+
 			if (dialog.ShowDialog() == DialogResult.OK)
 			{
 				m_Template.BackImage = dialog.ImageLink;

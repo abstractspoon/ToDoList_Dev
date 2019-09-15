@@ -22,7 +22,9 @@ namespace Abstractspoon
 				Translator(ITransText* pTransText);
 
 				String^ Translate(String^ sText);
+
 				void Translate(Windows::Forms::Form^ window);
+				void Translate(Windows::Forms::Form^ window, Windows::Forms::ToolTip^ tooltip);
 				void Translate(Windows::Forms::ComboBox^ combo);
 				void Translate(Windows::Forms::Control::ControlCollection^ items);
 				void Translate(Windows::Forms::ToolStripItemCollection^ items);

@@ -17,7 +17,7 @@ namespace MSDN.Html.Editor
 	/// </summary>
 	public partial class EnterImageForm : Form
 	{
-		private static string ImageFilter = "Image files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif;";
+		private static string ImageFilter = "Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||";
 
 
 		/// <summary>
@@ -36,8 +36,24 @@ namespace MSDN.Html.Editor
 			// ensure default value set for target
 			this.listAlign.SelectedIndex = (int)ImageAlignOption.Default;
 
-		} //EnterHrefForm
+			BrowseTitle = "Select Image File";
+			BrowseFilter = ImageFilter;
+		} 
 
+		public ToolTip Tooltip
+		{
+			get { return this.toolTip1; }
+		}
+
+		public String BrowseTitle
+		{
+			get; set;
+		}
+
+		public String BrowseFilter
+		{
+			get; set;
+		}
 
 		/// <summary>
 		/// Property for the text to display
@@ -161,13 +177,13 @@ namespace MSDN.Html.Editor
 			var dlg = new OpenFileDialog
 			{
 				InitialDirectory = LastBrowsedFolder,
-				Title = "Select Image File",
+				Title = BrowseTitle,
 
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
 				CheckPathExists = true,
 
-				Filter = ImageFilter,
+				Filter = BrowseFilter,
 				FilterIndex = 0,
 				RestoreDirectory = true,
 

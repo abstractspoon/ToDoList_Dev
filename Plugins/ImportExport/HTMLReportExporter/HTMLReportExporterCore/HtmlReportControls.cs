@@ -418,7 +418,7 @@ namespace HTMLReportExporter
 			this.toolstripBackColor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
 			this.toolstripBackColor.Name = "toolstripBackColor";
 			this.toolstripBackColor.Tag = "BackColor";
-			this.toolstripBackColor.ToolTipText = "Set Background Color";
+			this.toolstripBackColor.ToolTipText = "Set Background Colour";
 			this.toolstripBackColor.Click += new System.EventHandler(OnBackColorClick);
 
 			var assembly = Assembly.GetExecutingAssembly();
@@ -435,7 +435,7 @@ namespace HTMLReportExporter
 			this.toolstripClearBackColor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
 			this.toolstripClearBackColor.Name = "toolstripClearBackColor";
 			this.toolstripClearBackColor.Tag = "ClearBackColor";
-			this.toolstripClearBackColor.ToolTipText = "Clear Background Color";
+			this.toolstripClearBackColor.ToolTipText = "Clear Background Colour";
 			this.toolstripClearBackColor.Click += new System.EventHandler(OnClearBackColorClick);
 
 			var image2 = new Bitmap(assembly.GetManifestResourceStream("HTMLReportExporter.Resources.ToolbarBackColorClear.bmp"));

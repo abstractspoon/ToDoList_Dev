@@ -36,13 +36,30 @@ namespace MSDN.Html.Editor
             // ensure default value set for target
             this.listTargets.SelectedIndex = 0;
 
+			BrowseTitle = "Select File";
+			BrowseFilter = "All Files (*.*)|*.*||";
+
         } //EnterHrefForm
 
+		public ToolTip Tooltip
+		{
+			get { return this.toolTip1; }
+		}
 
-        /// <summary>
-        /// Property for the text to display
-        /// </summary>
-        public string HrefText
+		public String BrowseTitle
+		{
+			get; set;
+		}
+
+		public String BrowseFilter
+		{
+			get; set;
+		}
+
+		/// <summary>
+		/// Property for the text to display
+		/// </summary>
+		public string HrefText
         {
             get
             {
@@ -106,13 +123,13 @@ namespace MSDN.Html.Editor
 			var dlg = new OpenFileDialog
 			{
 				InitialDirectory = LastBrowsedFolder,
-				Title = "Select File",
+				Title = BrowseTitle,
 
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
 				CheckPathExists = true,
 
-				Filter = "All files (*.*)|*.*",
+				Filter = BrowseFilter,
 				FilterIndex = 0,
 				RestoreDirectory = true,
 

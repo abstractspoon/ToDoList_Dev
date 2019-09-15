@@ -125,9 +125,7 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 {
 	HtmlEditorControl::PreShowDialog(dialog);
 
-	// Operations that change dialog size
 	FormsUtil::SetFont(dialog, m_ControlsFont);
-	m_Trans->Translate(dialog);
 
 	// Add icon for identification
 	dialog->Icon = icon;
@@ -140,6 +138,11 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 
 		urlDialog->EnforceHrefTarget(NavigateActionOption::Default);
 		urlDialog->LastBrowsedFolder = LastBrowsedFileFolder;
+	
+		m_Trans->Translate(urlDialog, urlDialog->Tooltip);
+
+		urlDialog->BrowseTitle = m_Trans->Translate(urlDialog->BrowseTitle);
+		urlDialog->BrowseFilter = m_Trans->Translate(urlDialog->BrowseFilter);
 	}
 	else if (ISTYPE(dialog, EnterImageForm))
 	{
@@ -147,15 +150,25 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 
 		imageDialog->LastBrowsedFolder = LastBrowsedImageFolder;
 		FormsUtil::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional")), false);
+
+		m_Trans->Translate(imageDialog, imageDialog->Tooltip);
+
+		imageDialog->BrowseTitle = m_Trans->Translate(imageDialog->BrowseTitle);
+		imageDialog->BrowseFilter = m_Trans->Translate(imageDialog->BrowseFilter);
 	}
 	else if (ISTYPE(dialog, EditHtmlForm))
 	{
 		auto htmlDialog = ASTYPE(dialog, EditHtmlForm);
 
 		htmlDialog->FontName = gcnew String("Lucida Console");
+		m_Trans->Translate(dialog);
 
 		if ((m_SizeEditHtmlForm.Width > 0) && (m_SizeEditHtmlForm.Height > 0))
 			htmlDialog->Size = m_SizeEditHtmlForm;
+	}
+	else // all others
+	{
+		m_Trans->Translate(dialog);
 	}
 
 	Win32::ActivateApp(Handle);
