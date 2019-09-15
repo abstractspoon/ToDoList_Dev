@@ -2419,7 +2419,9 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 				// if this extension is active and wants a 
 				// color update we want to start progress
 				CTDCAttributeMap mapWantedAttribs;
-				BOOL bWantTaskUpdate = GetExtensionViewWantedChanges(nExt, m_mapAttribsAffectedByPrefs, mapWantedAttribs);
+
+				BOOL bWantTaskUpdate = (!m_mapAttribsAffectedByPrefs.IsEmpty() &&
+										GetExtensionViewWantedChanges(nExt, m_mapAttribsAffectedByPrefs, mapWantedAttribs));
 
 				if (bWantTaskUpdate && (nExtView == nCurView))
 					BeginExtensionProgress(pVData);
