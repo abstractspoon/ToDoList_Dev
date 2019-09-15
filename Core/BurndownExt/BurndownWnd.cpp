@@ -224,6 +224,9 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 		if (dEnd > dStart)
 			VERIFY(m_dtPrevActiveRange.Set(dStart, dEnd));
+
+		// TODO
+		m_graph.SetTodayColour(255);
 	}
 
 	// application preferences

@@ -20,6 +20,8 @@ public:
 	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const = 0;
 
+	int HitTest(const CStatsItemCalculator& calculator, const COleDateTime& date) const;
+
 protected:
 	CGraphBase();
 

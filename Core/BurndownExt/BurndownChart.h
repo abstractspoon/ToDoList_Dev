@@ -19,6 +19,7 @@ public:
 
 	CString GetGraphTitle(BURNDOWN_CHARTTYPE nType) const;
 	BOOL SetActiveGraph(BURNDOWN_CHARTTYPE nType);
+	void SetTodayColour(COLORREF color);
 	BOOL SaveToImage(CBitmap& bmImage);
 
 	void RebuildGraph(const COleDateTimeRange& dtExtents);
@@ -29,6 +30,7 @@ protected:
 
 	COleDateTimeRange m_dtExtents;
 	CStatsItemCalculator m_calculator;
+	COLORREF m_crToday;
 
 	BURNDOWN_CHARTTYPE m_nChartType;
 	BURNDOWN_CHARTSCALE m_nScale;
@@ -47,5 +49,7 @@ protected:
 	// virtual overrides
 	CString GetTooltip(int nHit) const;
 	int HitTest(const CPoint& ptClient) const;
+	void DoPaint(CDC& dc, BOOL bPaintBkgnd);
+
 };
 

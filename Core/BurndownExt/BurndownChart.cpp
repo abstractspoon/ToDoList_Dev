@@ -269,3 +269,36 @@ int CBurndownChart::HitTest(const CPoint& ptClient) const
 
 	return CHMXChartEx::HitTest(ptClient);
 }
+
+void CBurndownChart::SetTodayColour(COLORREF color)
+{
+	if (color != m_crToday)
+	{
+		m_crToday = color;
+
+		if (GetSafeHwnd() && IsWindowVisible())
+			Invalidate();
+	}
+}
+
+void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
+{
+	CHMXChartEx::DoPaint(dc, bPaintBkgnd);
+
+	if (m_crToday != CLR_NONE)
+	{
+		// Find the data point corresponding to today
+		COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
+		int nPos = m_graphs[m_nChartType]->HitTest(m_calculator, dtToday);
+
+		if (nPos != -1)
+		{
+			CPoint ptPos;
+
+			if (GetPointXY(0, nPos, ptPos))
+			{
+				GraphicsMisc::DrawVertLine(&dc, m_rectData.bottom, m_rectData.top, ptPos.x, m_crToday);
+			}
+		}
+	}
+}
