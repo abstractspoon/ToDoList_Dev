@@ -6602,10 +6602,16 @@ BOOL CTDLTaskCtrlBase::SaveToImage(CBitmap& bmImage)
 
 	CLockUpdates lock(GetSafeHwnd());
 
-	return CTreeListSyncer::SaveToImage(bmImage, m_crGridLine);
+	// Allow derived classes to get involved
+	return DoSaveToImage(bmImage, m_crGridLine);
 }
 
 BOOL CTDLTaskCtrlBase::CanSaveToImage() const
 {
 	return (GetTaskCount() > 0);
+}
+
+BOOL CTDLTaskCtrlBase::DoSaveToImage(CBitmap& bmImage, COLORREF crDivider)
+{
+	return CTreeListSyncer::SaveToImage(bmImage, crDivider);
 }

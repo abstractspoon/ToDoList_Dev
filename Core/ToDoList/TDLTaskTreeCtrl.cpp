@@ -2715,3 +2715,28 @@ void CTDLTaskTreeCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 
 	CTDLTaskCtrlBase::SetModified(mapAttribIDs, bAllowResort);
 }
+
+BOOL CTDLTaskTreeCtrl::DoSaveToImage(CBitmap& bmImage, COLORREF crDivider)
+{
+	// Position the splitter to match the widest item
+	int nPrevSplitPos = -1;
+	
+	if (!HasHScrollBar(m_tcTasks))
+	{
+		nPrevSplitPos = GetSplitPos();
+
+		int nSplitPos = CalcMaxVisibleTreeItemWidth(m_tcTasks);
+		SetSplitPos(nSplitPos);
+		RefreshSize();
+	}
+	
+	BOOL bRes = CTDLTaskCtrlBase::DoSaveToImage(bmImage, crDivider);
+
+	if (nPrevSplitPos != -1)
+	{
+		SetSplitPos(nPrevSplitPos);
+		RefreshSize();
+	}
+
+	return bRes;
+}

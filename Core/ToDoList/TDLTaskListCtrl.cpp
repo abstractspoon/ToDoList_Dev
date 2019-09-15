@@ -1533,20 +1533,15 @@ GM_ITEMSTATE CTDLTaskListCtrl::GetColumnItemState(int nItem) const
 	return GetListItemState(nItem);
 }
 
-BOOL CTDLTaskListCtrl::SaveToImage(CBitmap& bmImage)
+BOOL CTDLTaskListCtrl::DoSaveToImage(CBitmap& bmImage, COLORREF crDivider)
 {
-	if (!CanSaveToImage())
-		return FALSE;
-
-	CLockUpdates lock(GetSafeHwnd());
-
 	// Resize the title column to the actual width of the title text
 	int nColWidth = m_lcTasks.GetColumnWidth(0);
 
 	int nReqWidth = CalcRequiredTitleColumnWidthForImage();
 	m_lcTasks.SetColumnWidth(0, nReqWidth);
 
-	BOOL bRes = CTDLTaskCtrlBase::SaveToImage(bmImage);
+	BOOL bRes = CTDLTaskCtrlBase::DoSaveToImage(bmImage, crDivider);
 
 	// Restore title column width
 	m_lcTasks.SetColumnWidth(0, nColWidth);

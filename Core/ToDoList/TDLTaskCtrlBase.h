@@ -358,6 +358,7 @@ protected:
 	virtual void DeselectAll() = 0;
 	virtual DWORD GetHelpID() const = 0;
 	virtual BOOL IsColumnShowing(TDC_COLUMN nColID) const;
+	virtual BOOL DoSaveToImage(CBitmap& bmImage, COLORREF crDivider);
 
 	DWORD HitTestColumnsTask(const CPoint& ptScreen) const;
 	BOOL IsColumnLineOdd(int nItem) const;

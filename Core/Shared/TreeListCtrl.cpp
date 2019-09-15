@@ -1659,8 +1659,8 @@ BOOL CTreeListCtrl::SaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF c
 	// Restore title column width
 	m_treeHeader.SetItemWidth(0, nPrevWidth);
 	m_treeHeader.SetItemTracked(0, bTracked);
-	SetSplitPos(nPrevSplitPos);
 
+	SetSplitPos(nPrevSplitPos);
 	Resize();
 
 	return bRes;
