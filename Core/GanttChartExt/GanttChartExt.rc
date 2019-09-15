@@ -70,7 +70,7 @@ END
 IDD_GANTTTREE_DIALOG DIALOGEX 0, 0, 594, 274
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,151,8
     COMBOBOX        IDC_DISPLAY,0,13,152,118,CBS_DROPDOWNLIST | 
@@ -190,14 +190,14 @@ BEGIN
                     BS_RIGHT
     CONTROL         "'&Weekend' colour",IDC_WEEKENDCOLOR,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,205,137,10
-    PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,202,52,13,BS_RIGHT
+    PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,203,52,13,BS_RIGHT
     CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,220,137,10
-    PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,178,216,52,13,BS_RIGHT
+    PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,178,218,52,13,BS_RIGHT
     CONTROL         "'Bar' colour for tasks having no colour",
                     IDC_DEFAULTCOLOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    234,167,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,178,231,52,13,BS_RIGHT
+                    235,167,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,178,234,52,13,BS_RIGHT
     GROUPBOX        "Parent Tasks",IDC_STATIC,7,250,333,63
     CONTROL         "Us&e default colours",IDC_DEFAULTPARENTCOLORS,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,16,264,320,10
