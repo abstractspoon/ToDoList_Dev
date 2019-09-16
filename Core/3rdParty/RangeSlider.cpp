@@ -300,14 +300,14 @@ void CRangeSlider::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton, con
 
 	// Make appearance 3D
 	if (IsPressed(nBtn)) 
-		dc.Draw3dRect(rButton, ::GetSysColor(COLOR_BTNSHADOW), ::GetSysColor(COLOR_BTNHIGHLIGHT));
+		dc.DrawFrameControl((LPRECT)&rButton, DFC_BUTTON, DFCS_BUTTONPUSH | DFCS_PUSHED);
 	else
-		dc.Draw3dRect(rButton, ::GetSysColor(COLOR_BTNHIGHLIGHT), ::GetSysColor(COLOR_BTNSHADOW));
+		dc.DrawFrameControl((LPRECT)&rButton, DFC_BUTTON, DFCS_BUTTONPUSH);
 
 	if (!sText.IsEmpty())
 	{
 		dc.SetBkMode(TRANSPARENT);
-		dc.DrawText(sText, (LPRECT)(LPCRECT)rButton, DT_CENTER | DT_VCENTER);
+		dc.DrawText(sText, (LPRECT)&rButton, DT_CENTER | DT_VCENTER);
 	}
 }
 
