@@ -25,6 +25,8 @@ public:
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const;
 	void Activate(BOOL bActivate);
+	void EnableTracking(BOOL bTracking = TRUE);
+	BOOL IsTracking() const;
 
 	const TOOLINFO& GetLastHitToolInfo() const;
 

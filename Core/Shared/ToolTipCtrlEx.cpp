@@ -30,7 +30,10 @@ IMPLEMENT_DYNAMIC(CToolTipCtrlEx, CToolTipCtrl)
 
 /////////////////////////////////////////////////////////////////////////////
 
-CToolTipCtrlEx::CToolTipCtrlEx() : m_bUsingRelayEvent(-1), m_nLastHit(-1)
+CToolTipCtrlEx::CToolTipCtrlEx() 
+	: 
+	m_bUsingRelayEvent(-1), 
+	m_nLastHit(-1)
 {
 	InitToolInfo(m_tiLast, FALSE);
 }
@@ -45,6 +48,21 @@ BEGIN_MESSAGE_MAP(CToolTipCtrlEx, CToolTipCtrl)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
+
+void CToolTipCtrlEx::EnableTracking(BOOL bTracking)
+{
+	ASSERT(m_bUsingRelayEvent <= 0);
+
+	if (bTracking)
+		m_nFlags |= WF_TRACKINGTOOLTIPS;
+	else
+		m_nFlags &= ~WF_TRACKINGTOOLTIPS;
+}
+
+BOOL CToolTipCtrlEx::IsTracking() const
+{
+	return (m_nFlags & WF_TRACKINGTOOLTIPS);
+}
 
 void CToolTipCtrlEx::RelayEvent(LPMSG lpMsg)
 {
@@ -130,26 +148,26 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 
 //				ti.uFlags &= ~(TTF_NOTBUTTON|TTF_ALWAYSTIP);
 
-// 				if (m_nFlags & WF_TRACKINGTOOLTIPS)
-// 					ti.uFlags |= TTF_TRACK;
+ 				if (IsTracking())
+ 					ti.uFlags |= TTF_TRACK | TTF_ABSOLUTE;
 
 				VERIFY(SendMessage(TTM_ADDTOOL, 0, (LPARAM)&ti));
 
-				if ((tiHit.uFlags & TTF_ALWAYSTIP) || IsTopParentActive(pOwner))
+				if ((ti.uFlags & TTF_ALWAYSTIP) || IsTopParentActive(pOwner))
 				{
 					// allow the tooltip to popup when it should
 					Activate(TRUE);
 					//TRACE(_T("CToolTipCtrlEx::Activate(TRUE, \"%s\")\n"), tiHit.lpszText);
 
-// 					if (m_nFlags & WF_TRACKINGTOOLTIPS)
-// 						SendMessage(TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
+ 					if (IsTracking())
+ 						SendMessage(TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
 
 					// bring the tooltip window above other popup windows
 					SetWindowPos(&CWnd::wndTop, 0, 0, 0, 0,
 									SWP_NOACTIVATE|SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 				}
 
-				m_tiLast = ti;
+				m_tiLast = tiHit;
 				m_nLastHit = nHit;
 			}
 			else
@@ -161,18 +179,10 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 		}
 		else // m_nLastHit == nHit
 		{
-			if (m_nFlags & WF_TRACKINGTOOLTIPS)
+			if (IsTracking())
 			{
-				POINT pt = { 0 };
-				::GetCursorPos(&pt);
-
-				SendMessage(TTM_TRACKPOSITION, 0, MAKELPARAM(pt.x, pt.y));
-			}
-			else
-			{
-				// relay mouse events through the tooltip
-// 				if (nHit != -1)
-// 					CToolTipCtrl::RelayEvent(pMsg);
+				SendMessage(TTM_SETTOOLINFO, 0, (LPARAM)&tiHit);
+				SendMessage(TTM_TRACKPOSITION, 0, MAKELPARAM(pMsg->pt.x, pMsg->pt.y));
 			}
 		}
 
@@ -191,11 +201,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 		if (pWnd != this)
 			return;
 		
-		BOOL bKeys = (message >= WM_KEYFIRST && message <= WM_KEYLAST) ||
-					(message >= WM_SYSKEYFIRST && message <= WM_SYSKEYLAST);
-
-		if (!(m_nFlags & WF_TRACKINGTOOLTIPS) && 
-			(IsKeypress(message) || IsMouseDown(message)))
+		if (!IsTracking() && (IsKeypress(message) || IsMouseDown(message)))
 		{
 			Activate(FALSE);
 		}
