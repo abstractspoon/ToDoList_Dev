@@ -2407,51 +2407,44 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 		while (nExt--)
 		{
 			FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
-			IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
 			
-			if (pExtWnd)
+			IUIExtensionWindow* pExtWnd = NULL;
+			VIEWDATA* pVData = NULL;
+
+			if (!GetExtensionWnd(nExtView, pExtWnd, pVData))
+				continue;
+
+			// notify all extensions of prefs change
+			pExtWnd->LoadPreferences(prefs, sKey, true);
+
+			// Check if the extension needs a task update as a
+			// consequence of any preferences changes
+			CTDCAttributeMap mapWantedAttribs;
+
+			BOOL bWantTaskUpdate = (!m_mapAttribsAffectedByPrefs.IsEmpty() &&
+									GetExtensionViewWantedChanges(nExt, m_mapAttribsAffectedByPrefs, mapWantedAttribs));
+
+			if (bWantTaskUpdate)
 			{
-				VIEWDATA* pVData = GetViewData(nExtView);
-
-				if (!pVData)
-					continue;
-
-				// if this extension is active and wants a 
-				// color update we want to start progress
-				CTDCAttributeMap mapWantedAttribs;
-
-				BOOL bWantTaskUpdate = (!m_mapAttribsAffectedByPrefs.IsEmpty() &&
-										GetExtensionViewWantedChanges(nExt, m_mapAttribsAffectedByPrefs, mapWantedAttribs));
-
-				if (bWantTaskUpdate && (nExtView == nCurView))
+				if (nExtView == nCurView)
+				{
 					BeginExtensionProgress(pVData);
 
-				// notify all extensions of prefs change
-				pExtWnd->LoadPreferences(prefs, sKey, true);
+					CTaskFile tasks;
+					CWaitCursor cursor;
 
-				// Update task colours on the active view if necessary
-				if (bWantTaskUpdate)
-				{
-					if (nExtView == nCurView)
+					if (GetAllTasksForExtensionViewUpdate(mapWantedAttribs, tasks))
 					{
-						CTaskFile tasks;
-						CWaitCursor cursor;
-						
-						if (GetAllTasksForExtensionViewUpdate(mapWantedAttribs, tasks))
-						{
-							pVData->bNeedFullTaskUpdate = FALSE;
-							UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
-						}
+						pVData->bNeedFullTaskUpdate = FALSE;
+						UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
 					}
-					else // mark for update
-					{
-						pVData->bNeedFullTaskUpdate = TRUE;
-					}
-				}
 
-				// cleanup progress
-				if (bWantTaskUpdate && nExtView == nCurView)
 					EndExtensionProgress();
+				}
+				else
+				{
+					pVData->bNeedFullTaskUpdate = TRUE;
+				}
 			}
 		}
 	}
