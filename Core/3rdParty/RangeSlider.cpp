@@ -276,7 +276,7 @@ void CRangeSlider::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegi
 		DrawButton(dc, 
 					BUTTON_MIDDLE,
 					rRegion, 
-					_T(""));
+					_T("..."));
 		break;
 
 	case RSDR_RIGHTBUTTON: // RSDR_BOTTOMBUTTON
@@ -299,7 +299,7 @@ void CRangeSlider::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton, con
 	dc.FillSolidRect(rButton, ::GetSysColor(COLOR_BTNFACE));
 
 	// Make appearance 3D
-	if (IsPressed(nBtn)) 
+	if (IsPressed(nBtn))
 		dc.DrawFrameControl((LPRECT)&rButton, DFC_BUTTON, DFCS_BUTTONPUSH | DFCS_PUSHED);
 	else
 		dc.DrawFrameControl((LPRECT)&rButton, DFC_BUTTON, DFCS_BUTTONPUSH);
@@ -307,7 +307,18 @@ void CRangeSlider::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton, con
 	if (!sText.IsEmpty())
 	{
 		dc.SetBkMode(TRANSPARENT);
-		dc.DrawText(sText, (LPRECT)&rButton, DT_CENTER | DT_VCENTER);
+
+		if (IsPressed(nBtn))
+		{
+			CRect rText(rButton);
+			rText.OffsetRect(1, 1);
+
+			dc.DrawText(sText, (LPRECT)&rText, DT_CENTER | DT_VCENTER);
+		}
+		else
+		{
+			dc.DrawText(sText, (LPRECT)&rButton, DT_CENTER | DT_VCENTER);
+		}
 	}
 }
 
