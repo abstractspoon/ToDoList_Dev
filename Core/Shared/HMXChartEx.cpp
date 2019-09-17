@@ -214,8 +214,9 @@ bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
 
 BOOL CHMXChartEx::HighlightDataPoints(int nIndex)
 {
-	// Draw inverted boxes around data point(s)
+	// Draw inverted circles around data point(s)
 	CDC* pDC = NULL;
+	CPen* pOldPen = NULL;
 
 	// Prevent drawing over the same X,Y more than once
 	CDWordSet mapPoints;
@@ -236,6 +237,11 @@ BOOL CHMXChartEx::HighlightDataPoints(int nIndex)
 		{
 			pDC = GetDC();
 			pDC->SetROP2(R2_NOT);
+
+			if (!m_penHighlight.GetSafeHandle())
+				m_penHighlight.CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
+
+			pOldPen = pDC->SelectObject(&m_penHighlight);
 		}
 
 		CRect rData(ptData, CSize(1, 1));
@@ -246,8 +252,11 @@ BOOL CHMXChartEx::HighlightDataPoints(int nIndex)
 	}
 
 	if (pDC)
+	{
+		pDC->SelectObject(pOldPen);
 		ReleaseDC(pDC);
-
+	}
+	
 	return (pDC != NULL);
 }
 

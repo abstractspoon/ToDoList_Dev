@@ -36,6 +36,7 @@ public:
 
 protected:
 	CToolTipCtrlEx m_tooltip;
+	CPen m_penHighlight;
 
 	mutable int m_nLastTooltipHit;
 
