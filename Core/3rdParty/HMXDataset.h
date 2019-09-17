@@ -70,6 +70,7 @@ public:
 	virtual bool		AddData( double nData );						// set data adding new point
 	virtual bool		SetData( int nIndex, double nData );			// set data at specified index
 	virtual bool		GetData( int nCount, double &nSample ) const;	// get data
+	virtual void		SetDatasetSize(int nSize);						// set dataset size (how many points in dataset?)
 	virtual int			GetDatasetSize() const;							// get dataset size (how many points in dataset?)
 
 	virtual bool		GetMinMax( double& nMin, double& nMax, bool bDataOnly ) const;	// get min & max

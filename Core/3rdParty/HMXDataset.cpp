@@ -57,7 +57,7 @@ bool CHMXDataset::AddData(double nData)
 
 bool CHMXDataset::SetData(int nIndex, double nData)
 {
-	if (nIndex < 0 || nIndex > GetDatasetSize())
+	if (nIndex < 0 || nIndex >= m_data.GetSize())
 		return false;
 	
 	m_data.SetAt(nIndex, nData);
@@ -71,14 +71,17 @@ int CHMXDataset::GetDatasetSize() const
 	return m_data.GetSize();
 }
 
-bool CHMXDataset::GetData(int nCount, double &nSample) const
+void CHMXDataset::SetDatasetSize(int nSize)
 {
-	int nDatasetSize = GetDatasetSize();
-	
-	if (nCount < 0 || nCount >= nDatasetSize)
+	m_data.SetSize(nSize);
+}
+
+bool CHMXDataset::GetData(int nIndex, double &nSample) const
+{
+	if (nIndex < 0 || nIndex >= m_data.GetSize())
 		return false;
 	
-	nSample = m_data.GetAt(nCount);
+	nSample = m_data.GetAt(nIndex);
 	
 	return true;
 }
@@ -130,7 +133,7 @@ bool CHMXDataset::GetMinMax(double& nMin, double& nMax, bool bDataOnly) const
 	// following lines help me to solve some problems with invalid values
 	double dMin = HMX_DATASET_VALUE_INVALID, dMax = -HMX_DATASET_VALUE_INVALID;
 
-	if (GetDatasetSize() > 0) 
+	if (m_data.GetSize() > 0) 
 	{
 		double temp = 0;
 		GetData(0, temp);
@@ -140,7 +143,7 @@ bool CHMXDataset::GetMinMax(double& nMin, double& nMax, bool bDataOnly) const
 			dMin = dMax = temp;
 		}
 
-		for (int f=1; f<GetDatasetSize(); f++)
+		for (int f=1; f<m_data.GetSize(); f++)
 		{
 			GetData(f, temp);
 

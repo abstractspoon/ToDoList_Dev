@@ -67,19 +67,19 @@ void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, C
 
 	if (nNumDays)
 	{
-		COleDateTime dtStart = calculator.GetStartDate();
+		datasets[0].SetDatasetSize(nNumDays + 1);
+
+		COleDateTime dtStart = calculator.GetStartDate(), date(dtStart);
 		int nItemFrom = 0;
+		int nNumNotDone = 0;
 
-		for (int nDay = 0; nDay <= nNumDays; nDay++)
+		for (int nDay = 0; nDay <= nNumDays; nDay++, date.m_dt++)
 		{
-			COleDateTime date(dtStart.m_dt + nDay);
-
-			int nNumNotDone = 0;
-
-			if (date > dtStart)
+			// First value is always zero
+			if (nDay > 0)
 				nNumNotDone = calculator.GetIncompleteTaskCount(date, nItemFrom, nItemFrom);
 
-			datasets[0].AddData(nNumNotDone);
+			datasets[0].SetData(nDay, nNumNotDone);
 		}
 
 		// Set the maximum Y value to be something 'nice'
@@ -136,25 +136,31 @@ void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHM
 	
 	if (nNumDays > 0)
 	{
-		COleDateTime dtStart = calculator.GetStartDate();
+		datasets[REMAINING_ESTIMATE].SetDatasetSize(nNumDays + 1);
+		datasets[REMAINING_SPENT].SetDatasetSize(nNumDays + 1);
+
+		COleDateTime dtStart = calculator.GetStartDate(), date(dtStart);
 		double dTotalEst = calculator.GetDaysEstimated();
 
-		for (int nDay = 0; nDay <= nNumDays; nDay++)
+		for (int nDay = 0; nDay <= nNumDays; nDay++, date.m_dt++)
 		{
 			// Time Estimate
-			double dEst = ((nDay * dTotalEst) / nNumDays);
-
-			// last value is always zero
 			if (nDay == nNumDays)
-				datasets[REMAINING_ESTIMATE].AddData(0.0);
+			{
+				// last value is always zero
+				datasets[REMAINING_ESTIMATE].SetData(nDay, 0.0);
+			}
 			else
-				datasets[REMAINING_ESTIMATE].AddData(dTotalEst - dEst);
+			{
+				double dEst = ((nDay * dTotalEst) / nNumDays);
+
+				datasets[REMAINING_ESTIMATE].SetData(nDay, dTotalEst - dEst);
+			}
 		
 			// Time Spent
-			COleDateTime date(dtStart.m_dt + nDay);
 			double dSpent = calculator.GetDaysSpent(date);
 		
-			datasets[REMAINING_SPENT].AddData(dTotalEst - dSpent);
+			datasets[REMAINING_SPENT].SetData(nDay, dTotalEst - dSpent);
 		}
 	
 		// Set the maximum Y value to be something 'nice'
@@ -209,18 +215,20 @@ void CStartedEndedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator,
 
 	if (nNumDays > 0)
 	{
-		COleDateTime dtStart = calculator.GetStartDate();
+		datasets[STARTED_TASKS].SetDatasetSize(nNumDays + 1);
+		datasets[ENDED_TASKS].SetDatasetSize(nNumDays + 1);
 
-		for (int nDay = 0; nDay <= nNumDays; nDay++)
+		COleDateTime dtStart = calculator.GetStartDate(), date(dtStart);
+		int nNumStarted = 0, nNumDone = 0;
+
+		for (int nDay = 0; nDay <= nNumDays; nDay++, date.m_dt++)
 		{
-			COleDateTime date(dtStart.m_dt + nDay);
-			int nNumStarted = 0, nNumDone = 0;
-
-			if (date > dtStart)
+			// First value is always zero
+			if (nDay > 0)
 				calculator.GetStartedEndedTasks(date, nNumStarted, nNumDone);
 
-			datasets[STARTED_TASKS].AddData(nNumStarted);
-			datasets[ENDED_TASKS].AddData(nNumDone);
+			datasets[STARTED_TASKS].SetData(nDay, nNumStarted);
+			datasets[ENDED_TASKS].SetData(nDay, nNumDone);
 		}
 
 		// Set the maximum Y value to be something 'nice'
@@ -278,18 +286,20 @@ void CEstimatedSpentDaysGraph::BuildGraph(const CStatsItemCalculator& calculator
 
 	if (nNumDays > 0)
 	{
-		COleDateTime dtStart = calculator.GetStartDate();
+		datasets[ESTIMATED_DAYS].SetDatasetSize(nNumDays + 1);
+		datasets[SPENT_DAYS].SetDatasetSize(nNumDays + 1);
 
-		for (int nDay = 0; nDay <= nNumDays; nDay++)
+		COleDateTime dtStart = calculator.GetStartDate(), date(dtStart);
+		double dDaysEst = 0.0, dDaysSpent = 0;
+
+		for (int nDay = 0; nDay <= nNumDays; nDay++, date.m_dt++)
 		{
-			COleDateTime date(dtStart.m_dt + nDay);
-			double dDaysEst = 0.0, dDaysSpent = 0;
-
-			if (date > dtStart)
+			// First value is always zero
+			if (nDay > 0)
 				calculator.GetDaysEstimatedSpent(date, dDaysEst, dDaysSpent);
 
-			datasets[ESTIMATED_DAYS].AddData(dDaysEst);
-			datasets[SPENT_DAYS].AddData(dDaysSpent);
+			datasets[ESTIMATED_DAYS].SetData(nDay, dDaysEst);
+			datasets[SPENT_DAYS].SetData(nDay, dDaysSpent);
 		}
 
 		// Set the maximum Y value to be something 'nice'
@@ -352,18 +362,20 @@ void CEstimatedSpentCostGraph::BuildGraph(const CStatsItemCalculator& calculator
 
 	if (nNumDays > 0)
 	{
-		COleDateTime dtStart = calculator.GetStartDate();
+		datasets[ESTIMATED_COST].SetDatasetSize(nNumDays + 1);
+		datasets[SPENT_COST].SetDatasetSize(nNumDays + 1);
 
-		for (int nDay = 0; nDay <= nNumDays; nDay++)
+		COleDateTime dtStart = calculator.GetStartDate(), date(dtStart);
+		double dCostEst = 0.0, dCostSpent = 0;
+
+		for (int nDay = 0; nDay <= nNumDays; nDay++, date.m_dt++)
 		{
-			COleDateTime date(dtStart.m_dt + nDay);
-			double dCostEst = 0.0, dCostSpent = 0;
-
-			if (date > dtStart)
+			// First value is always zero
+			if (nDay > 0)
 				calculator.GetCostEstimatedSpent(date, dCostEst, dCostSpent);
 
-			datasets[ESTIMATED_COST].AddData(dCostEst);
-			datasets[SPENT_COST].AddData(dCostSpent);
+			datasets[ESTIMATED_COST].SetData(nDay, dCostEst);
+			datasets[SPENT_COST].SetData(nDay, dCostSpent);
 		}
 
 		// Set the maximum Y value to be something 'nice'
