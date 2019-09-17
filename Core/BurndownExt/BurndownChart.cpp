@@ -10,7 +10,8 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
 #include "..\shared\graphicsmisc.h"
-//#include "..\shared\filemisc.h"
+#include "..\shared\filemisc.h"
+#include "..\shared\ScopedTimer.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -239,8 +240,13 @@ void CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	
 	if (!m_data.IsEmpty())
 		RebuildXScale();
+
+	{
+		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
+
+		m_graphs[m_nChartType]->BuildGraph(m_calculator, m_datasets);
+	}
 	
-	m_graphs[m_nChartType]->BuildGraph(m_calculator, m_datasets);
 
 	CalcDatas();
 }
