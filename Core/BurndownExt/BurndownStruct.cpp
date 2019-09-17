@@ -529,7 +529,7 @@ BOOL CStatsItemCalculator::GetStartedEndedTasks(const COleDateTime& date, int &n
 
 	// Sanity check
 	if (date < m_dtStartExtents)
-		return 0;
+		return FALSE;
 	
 	int nNumItems = m_data.GetSize();
 	
@@ -560,7 +560,7 @@ BOOL CStatsItemCalculator::GetDaysEstimatedSpent(const COleDateTime& date, doubl
 
 	// Sanity check
 	if (date < m_dtStartExtents)
-		return 0;
+		return FALSE;
 	
 	int nNumItems = m_data.GetSize();
 	
@@ -587,7 +587,7 @@ BOOL CStatsItemCalculator::GetCostEstimatedSpent(const COleDateTime& date, doubl
 
 	// Sanity check
 	if (date < m_dtStartExtents)
-		return 0;
+		return FALSE;
 	
 	int nNumItems = m_data.GetSize();
 	COleDateTime dtEndExtents = m_dtEndExtents;
