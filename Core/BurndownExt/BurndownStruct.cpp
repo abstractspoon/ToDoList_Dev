@@ -411,10 +411,10 @@ int CStatsItemArray::CompareDates(const COleDateTime& date1, const COleDateTime&
 	if (!bDate1 && !bDate2)
 		return 0;
 
-	if (date1 < date2)
+	if (date1.m_dt < date2.m_dt)
 		return -1;
 
-	if (date1 > date2)
+	if (date1.m_dt > date2.m_dt)
 		return 1;
 
 	return 0;
@@ -466,8 +466,8 @@ BOOL CStatsItemCalculator::SetDateRange(const COleDateTimeRange& dtExtents)
 		return FALSE;
 	}
 
-	m_dtStartExtents = dtExtents.GetStart();
-	m_dtEndExtents = dtExtents.GetEndInclusive();
+	m_dStartExtents = dtExtents.GetStart();
+	m_dEndExtents = dtExtents.GetEndInclusive();
 
 	m_nTotalDays = m_nTotalWeekdays = 0;
 
@@ -477,7 +477,7 @@ BOOL CStatsItemCalculator::SetDateRange(const COleDateTimeRange& dtExtents)
 int CStatsItemCalculator::GetTotalDays() const
 {
 	if (m_nTotalDays == 0)
-		m_nTotalDays = (int)(m_dtEndExtents.m_dt - m_dtStartExtents.m_dt);
+		m_nTotalDays = (int)(m_dEndExtents - m_dStartExtents);
 
 	return m_nTotalDays;
 }
@@ -485,15 +485,17 @@ int CStatsItemCalculator::GetTotalDays() const
 int CStatsItemCalculator::GetTotalWeekdays() const
 {
 	if (m_nTotalWeekdays == 0)
-		m_nTotalWeekdays = (int)CWorkingWeek().CalculateDurationInDays(m_dtStartExtents, m_dtEndExtents);
+		m_nTotalWeekdays = (int)CWorkingWeek().CalculateDurationInDays(m_dStartExtents, m_dEndExtents);
 
 	return m_nTotalWeekdays;
 }
 
 int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const
 {
+	nNextItemFrom = 0;
+
 	// Sanity check
-	if (date < m_dtStartExtents)
+	if (date.m_dt < m_dStartExtents)
 		return 0;
 	
 	int nNumItems = m_data.GetSize();
@@ -503,15 +505,15 @@ int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int n
 	{
 		const STATSITEM* pSI = m_data[nItem];
 
-		if (pSI->dtStart < m_dtStartExtents)
+		if (pSI->dtStart.m_dt < m_dStartExtents)
 			continue;
 
-		if ((pSI->dtStart > date) || (pSI->dtStart > m_dtEndExtents))
+		if ((pSI->dtStart.m_dt > date.m_dt) || (pSI->dtStart.m_dt > m_dEndExtents))
 			break;
 
 		nNumStarted++;
 
-		if (pSI->IsDone() && (pSI->dtDone < date))
+		if (pSI->IsDone() && (pSI->dtDone.m_dt < date.m_dt))
 			nNumDone++;
 
 		// Optimisation: If we ever hit zero then we only need 
@@ -528,7 +530,7 @@ BOOL CStatsItemCalculator::GetStartedEndedTasks(const COleDateTime& date, int &n
 	nNumStarted = nNumDone = 0;
 
 	// Sanity check
-	if (date < m_dtStartExtents)
+	if (date.m_dt < m_dStartExtents)
 		return FALSE;
 	
 	int nNumItems = m_data.GetSize();
@@ -537,15 +539,15 @@ BOOL CStatsItemCalculator::GetStartedEndedTasks(const COleDateTime& date, int &n
 	{
 		const STATSITEM* pSI = m_data[nItem];
 
-		if (pSI->dtStart < m_dtStartExtents)
+		if (pSI->dtStart.m_dt < m_dStartExtents)
 			continue;
 		
-		if ((pSI->dtStart > date) || (pSI->dtStart > m_dtEndExtents))
+		if ((pSI->dtStart.m_dt > date.m_dt) || (pSI->dtStart.m_dt > m_dEndExtents))
 			break;
 		
 		nNumStarted++;
 
-		if (pSI->IsDone() && (pSI->dtDone < date))
+		if (pSI->IsDone() && (pSI->dtDone.m_dt < date.m_dt))
 			nNumDone++;
 	}
 
@@ -559,7 +561,7 @@ BOOL CStatsItemCalculator::GetDaysEstimatedSpent(const COleDateTime& date, doubl
 	dEstDays = dSpentDays = 0;
 
 	// Sanity check
-	if (date < m_dtStartExtents)
+	if (date.m_dt < m_dStartExtents)
 		return FALSE;
 	
 	int nNumItems = m_data.GetSize();
@@ -568,10 +570,10 @@ BOOL CStatsItemCalculator::GetDaysEstimatedSpent(const COleDateTime& date, doubl
 	{
 		const STATSITEM* pSI = m_data[nItem];
 
-		if (pSI->dtStart < m_dtStartExtents)
+		if (pSI->dtStart.m_dt < m_dStartExtents)
 			continue;
 		
-		if ((pSI->dtStart > date) || (pSI->dtStart > m_dtEndExtents))
+		if ((pSI->dtStart.m_dt > date.m_dt) || (pSI->dtStart.m_dt > m_dEndExtents))
 			break;
 		
 		dEstDays += GetAttribValue(*pSI, DAYS, ESTIMATE, date);
@@ -586,20 +588,20 @@ BOOL CStatsItemCalculator::GetCostEstimatedSpent(const COleDateTime& date, doubl
 	dEstCost = dSpentCost = 0;
 
 	// Sanity check
-	if (date < m_dtStartExtents)
+	if (date.m_dt < m_dStartExtents)
 		return FALSE;
 	
 	int nNumItems = m_data.GetSize();
-	COleDateTime dtEndExtents = m_dtEndExtents;
+	COleDateTime dtEndExtents = m_dEndExtents;
 	
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
 		const STATSITEM* pSI = m_data[nItem];
 
-		if (pSI->dtStart < m_dtStartExtents)
+		if (pSI->dtStart.m_dt < m_dStartExtents)
 			continue;
 		
-		if ((pSI->dtStart > date) || (pSI->dtStart > dtEndExtents))
+		if ((pSI->dtStart.m_dt > date.m_dt) || (pSI->dtStart.m_dt > dtEndExtents))
 			break;
 		
 		dEstCost += GetAttribValue(*pSI, COST, ESTIMATE, date);
@@ -611,11 +613,13 @@ BOOL CStatsItemCalculator::GetCostEstimatedSpent(const COleDateTime& date, doubl
 
 double CStatsItemCalculator::GetIntersectionProportion(const STATSITEM& si, BOOL bWeekdays) const
 {
+	ASSERT(m_dEndExtents > m_dStartExtents);
+
 	// Optimised as much as possible
 	if (!CDateHelper::IsDateSet(si.dtStart))
 		return 0.0;
 
-	if (si.dtStart >= m_dtEndExtents)
+	if (si.dtStart.m_dt >= m_dEndExtents)
 		return 0.0;
 
 	COleDateTime dtEnd = si.GetEndDate();
@@ -623,24 +627,24 @@ double CStatsItemCalculator::GetIntersectionProportion(const STATSITEM& si, BOOL
 	if (!CDateHelper::IsDateSet(dtEnd))
 		return 0.0;
 
-	if (dtEnd <= m_dtStartExtents)
+	if (dtEnd.m_dt <= m_dStartExtents)
 		return 0.0;
 
-	COleDateTime dtStart = si.dtStart;
-
-	if ((dtStart >= m_dtStartExtents) && (dtEnd <= m_dtEndExtents))
+	if ((si.dtStart.m_dt >= m_dStartExtents) && (dtEnd.m_dt <= m_dEndExtents))
 		return 1.0;
 
 	double dTotalDays = (bWeekdays ? 
-						 CWorkingWeek().CalculateDurationInDays(dtStart, dtEnd) :
-						 (dtEnd.m_dt - dtStart.m_dt));
+						 CWorkingWeek().CalculateDurationInDays(si.dtStart, dtEnd) :
+						 (dtEnd.m_dt - si.dtStart.m_dt));
 
 	if (dTotalDays == 0.0)
 		return 0.0;
 
 	// Get intersection
-	CDateHelper::Max(dtStart, m_dtStartExtents);
-	CDateHelper::Min(dtEnd, m_dtEndExtents);
+	COleDateTime dtStart = si.dtStart;
+
+	CDateHelper::Max(dtStart, m_dStartExtents);
+	CDateHelper::Min(dtEnd, m_dEndExtents);
 
 	double dPartDays = (bWeekdays ? 
 						CWorkingWeek().CalculateDurationInDays(dtStart, dtEnd) :
@@ -711,10 +715,10 @@ double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nTyp
 	{
 		const STATSITEM* pSI = m_data[nItem];
 
-		if (pSI->GetEndDate() < m_dtStartExtents)
+		if (pSI->GetEndDate().m_dt < m_dStartExtents)
 			continue;
 
-		if (pSI->dtStart > m_dtEndExtents)
+		if (pSI->dtStart.m_dt > m_dEndExtents)
 			break;
 
 		dTotal += GetAttribValue(*pSI, nAttrib, nType);
@@ -734,10 +738,10 @@ double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nTyp
 	{
 		const STATSITEM* pSI = m_data[nItem];
 
-		if (!pSI->GetEndDate(dtItemEnd) || (dtItemEnd < m_dtStartExtents))
+		if (!pSI->GetEndDate(dtItemEnd) || (dtItemEnd.m_dt < m_dStartExtents))
 			continue;
 
-		if (pSI->dtStart > m_dtEndExtents)
+		if (pSI->dtStart.m_dt > m_dEndExtents)
 			break;
 
 		dTotal += GetAttribValue(*pSI, nAttrib, nType, date);
@@ -822,16 +826,16 @@ double CStatsItemCalculator::CalcProportionOfValue(const STATSITEM& si, double d
 
 	if (si.IsDone())
 	{
-		if (date >= si.dtDone)
+		if (date.m_dt >= si.dtDone.m_dt)
 		{
 			dProportion = 1.0;
 		}
-		else if (bHasStart && (date > si.dtStart))
+		else if (bHasStart && (date.m_dt > si.dtStart.m_dt))
 		{
 			dProportion = (date.m_dt - si.dtStart.m_dt) / (si.dtDone.m_dt - si.dtStart.m_dt);
 		}
 	}
-	else if (bHasStart && (date > si.dtStart))
+	else if (bHasStart && (date.m_dt > si.dtStart.m_dt))
 	{
 		COleDateTime dtNow(COleDateTime::GetCurrentTime());
 		dProportion = (date.m_dt - si.dtStart.m_dt) / (dtNow.m_dt - si.dtStart.m_dt);

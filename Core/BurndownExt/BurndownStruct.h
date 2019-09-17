@@ -104,8 +104,8 @@ public:
 
 	BOOL SetDateRange(const COleDateTimeRange& dtExtents);
 
-	COleDateTime GetStartDate() const { return m_dtStartExtents; }
-	COleDateTime GetEndDate() const { return m_dtEndExtents; }
+	double GetStartDate() const { return m_dStartExtents; }
+	double GetEndDate() const { return m_dEndExtents; }
 	
 	// Totals
 	double GetDaysEstimated() const;
@@ -130,7 +130,7 @@ public:
 protected:
 	const CStatsItemArray& m_data;
 
-	COleDateTime m_dtStartExtents, m_dtEndExtents;
+	double m_dStartExtents, m_dEndExtents;
 
 	mutable int m_nTotalDays, m_nTotalWeekdays;
 

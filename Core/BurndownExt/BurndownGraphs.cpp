@@ -34,11 +34,11 @@ CGraphBase::~CGraphBase()
 
 int CGraphBase::HitTest(const CStatsItemCalculator& calculator, const COleDateTime& date) const
 {
-	if ((date < calculator.GetStartDate()) || (date >= calculator.GetEndDate()))
+	if ((date.m_dt < calculator.GetStartDate()) || (date.m_dt >= calculator.GetEndDate()))
 		return -1;
 
 	// else
-	return (int)(date.m_dt - calculator.GetStartDate().m_dt);
+	return (int)(date.m_dt - calculator.GetStartDate());
 }
 
 void CGraphBase::SetDatasetColor(CHMXDataset datasets[HMX_MAX_DATASET], int nDataset, COLORREF crBase)
@@ -104,7 +104,7 @@ CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator
 
 	if (datasets[0].GetData(nHit, dNumTasks))
 	{
-		double dDate = (calculator.GetStartDate().m_dt + nHit);
+		double dDate = (calculator.GetStartDate() + nHit);
 		sTooltip.Format(CEnString(IDS_TOOLTIP_INCOMPLETE), CDateHelper::FormatDate(dDate), (int)dNumTasks);
 	}
 
@@ -178,7 +178,7 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 {
 	ASSERT(nHit != -1);
 
-	double dDate = (calculator.GetStartDate().m_dt + nHit), dNumEst, dNumSpent;
+	double dDate = (calculator.GetStartDate() + nHit), dNumEst, dNumSpent;
 	CString sTooltip;
 
 	if (datasets[REMAINING_SPENT].GetData(nHit, dNumSpent) &&
@@ -249,7 +249,7 @@ CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculat
 {
 	ASSERT(nHit != -1);
 
-	double dDate = (calculator.GetStartDate().m_dt + nHit), dNumStarted, nNumDone;
+	double dDate = (calculator.GetStartDate() + nHit), dNumStarted, nNumDone;
 	CString sTooltip;
 
 	if (datasets[STARTED_TASKS].GetData(nHit, dNumStarted) &&
@@ -324,7 +324,7 @@ CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calcula
 {
 	ASSERT(nHit != -1);
 
-	double dDate = (calculator.GetStartDate().m_dt + nHit), dDaysEst, dDaysSpent;
+	double dDate = (calculator.GetStartDate() + nHit), dDaysEst, dDaysSpent;
 	CString sTooltip;
 
 	if (datasets[ESTIMATED_DAYS].GetData(nHit, dDaysEst) &&
@@ -400,7 +400,7 @@ CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calcula
 {
 	ASSERT(nHit != -1);
 
-	double dDate = (calculator.GetStartDate().m_dt + nHit), dCostEst, dCostSpent;
+	double dDate = (calculator.GetStartDate() + nHit), dCostEst, dCostSpent;
 	CString sTooltip;
 
 	if (datasets[ESTIMATED_COST].GetData(nHit, dCostEst) &&
