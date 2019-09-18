@@ -732,21 +732,19 @@ void CBurndownWnd::UpdateRangeSliderStep()
 	// Set the tick spacing to match the current scale
 	int nStep = 1;
 
-/*
-	switch (m_graph.GetCurrentScale())
-	{
-	case BCS_DAY:
-	case BCS_WEEK:
-	case BCS_MONTH:		break;
-
-	case BCS_2MONTH:	nStep = 2;	break;
-	case BCS_QUARTER:	nStep = 3;	break;
-	case BCS_HALFYEAR:	nStep = 6;	break;
-	case BCS_YEAR:		nStep = 12;	break;
-
-	default:			ASSERT(0);	break;
-	}
-*/
+// 	switch (m_graph.GetCurrentScale())
+// 	{
+// 	case BCS_DAY:
+// 	case BCS_WEEK:
+// 	case BCS_MONTH:		break;
+// 
+// 	case BCS_2MONTH:	nStep = 2;	break;
+// 	case BCS_QUARTER:	nStep = 3;	break;
+// 	case BCS_HALFYEAR:	nStep = 6;	break;
+// 	case BCS_YEAR:		nStep = 12;	break;
+// 
+// 	default:			ASSERT(0);	break;
+// 	}
 
 	m_sliderDateRange.SetStep(nStep);
 }
