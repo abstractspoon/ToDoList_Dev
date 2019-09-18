@@ -23,6 +23,7 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 
 	void RebuildGraph(const COleDateTimeRange& dtExtents);
+	BURNDOWN_CHARTSCALE GetCurrentScale() const { return m_nScale; }
 
 protected:
 	const CStatsItemArray& m_data;
