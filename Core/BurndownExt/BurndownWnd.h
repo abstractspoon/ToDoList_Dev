@@ -125,6 +125,7 @@ protected:
 	void RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility);
 	void UpdateRangeSlider(const COleDateTimeRange& dtActiveRange);
 	void UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange);
+	void UpdateRangeSliderStep();
 	BOOL GetSliderDateRange(COleDateTimeRange& dtActiveRange) const;
 
 };
