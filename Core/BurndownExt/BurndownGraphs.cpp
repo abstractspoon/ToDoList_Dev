@@ -145,23 +145,18 @@ void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHM
 		for (int nDay = 0; nDay <= nNumDays; nDay++, date.m_dt++)
 		{
 			// Time Estimate
-			if (nDay == nNumDays)
-			{
-				// last value is always zero
-				datasets[REMAINING_ESTIMATE].SetData(nDay, 0.0);
-			}
-			else
-			{
-				double dEst = ((nDay * dTotalEst) / nNumDays);
+			double dEst = ((nDay * dTotalEst) / nNumDays);
 
-				datasets[REMAINING_ESTIMATE].SetData(nDay, dTotalEst - dEst);
-			}
+			datasets[REMAINING_ESTIMATE].SetData(nDay, dTotalEst - dEst);
 		
 			// Time Spent
 			double dSpent = calculator.GetDaysSpent(date);
 		
 			datasets[REMAINING_SPENT].SetData(nDay, dTotalEst - dSpent);
 		}
+
+		// Ensure last Time Estimate value is always zero
+		datasets[REMAINING_ESTIMATE].SetData(nNumDays, 0.0);
 	
 		// Set the maximum Y value to be something 'nice'
 		if (dTotalEst > 0)
