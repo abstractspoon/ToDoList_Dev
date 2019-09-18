@@ -774,7 +774,10 @@ void CRangeSlider::NormalizeVisualMinMax(void)
 double CRangeSlider::NormalizeByStep(double value) const
 {
 	if (m_Step > 0.0)
+	{
 		value = ((int)((value / m_Step) + 0.5) * m_Step);
+		value = max(min(value, m_Max), m_Min);
+	}
 
 	return value;
 }
