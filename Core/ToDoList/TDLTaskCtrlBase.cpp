@@ -6603,7 +6603,11 @@ BOOL CTDLTaskCtrlBase::SaveToImage(CBitmap& bmImage)
 	CLockUpdates lock(GetSafeHwnd());
 
 	// Allow derived classes to get involved
-	return DoSaveToImage(bmImage, m_crGridLine);
+	BOOL bRes = DoSaveToImage(bmImage, m_crGridLine);
+
+	ResyncScrollPos(Tasks(), m_lcColumns);
+
+	return bRes;
 }
 
 BOOL CTDLTaskCtrlBase::CanSaveToImage() const
