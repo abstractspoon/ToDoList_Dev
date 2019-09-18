@@ -214,12 +214,7 @@ void CBurndownChart::OnSize(UINT nType, int cx, int cy)
 {
 	CHMXChartEx::OnSize(nType, cx, cy);
 	
-	int nOldScale = m_nScale;
 	RebuildXScale();
-		
-	// handle scale change
-	if (m_nScale != nOldScale)
-		RebuildGraph(m_dtExtents);
 }
 
 void CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
