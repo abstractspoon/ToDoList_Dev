@@ -57,7 +57,7 @@ BOOL CStatusBarProgress::BeginProgress(HWND hwndStatusBar, const CString& sPromp
 	else
 	{
 		pSB->GetClientRect(rProgress);
-		rProgress.top += GraphicsMisc::ScaleByDPIFactor(2);
+		rProgress.bottom -= GraphicsMisc::ScaleByDPIFactor(2);
 	}
 
 	rProgress.left = nLenPrompt;
