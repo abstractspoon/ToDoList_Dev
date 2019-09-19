@@ -1229,7 +1229,6 @@ bool CHMXChart::AddData(int nDatasetIndex, double nData)
 		return false;
 
 	return m_datasets[nDatasetIndex].AddData(nData);
-
 }
 
 bool CHMXChart::ClearData( int nDatasetIndex)
@@ -1237,14 +1236,29 @@ bool CHMXChart::ClearData( int nDatasetIndex)
 	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
-	return m_datasets[nDatasetIndex].ClearData();
-
+	m_datasets[nDatasetIndex].ClearData();
+	return true;
 }
 
 void CHMXChart::ClearData()
 {
 	for (int f=0; f<HMX_MAX_DATASET; f++) 
 		ClearData(f);
+}
+
+bool CHMXChart::ResetDataset(int nDatasetIndex)
+{
+	if (!IsValidDatasetIndex(nDatasetIndex))
+		return false;
+
+	m_datasets[nDatasetIndex].Reset();
+	return true;
+}
+
+void CHMXChart::ResetDatasets()
+{
+	for (int f=0; f<HMX_MAX_DATASET; f++) 
+		ResetDataset(f);
 }
 
 bool CHMXChart::CopyDataset(int nDatasetSrc, int nDatasetDest)

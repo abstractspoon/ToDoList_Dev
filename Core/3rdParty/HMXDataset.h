@@ -60,10 +60,10 @@ public:
 	virtual COLORREF	GetFillColor() const;							// get data color
 
 	virtual int			GetSize() const;								// get size
-	virtual bool		SetSize( int nSize );							// set pen size (in pixel)
-																		// set bar size (range 1-10)
-																		// unused if area
-	virtual bool		ClearData();
+	virtual bool		SetSize( int nSize );							// set pen size (pixels) OR bar size (1-10)	OR unused if area
+
+	virtual void		Reset();										// clears data and attributes
+	virtual void		ClearData();									// clears data only
 	virtual bool		HasData() const;
 
 	virtual bool		SetMarker( HMX_DATASET_MARKER nMarker );		// set marker type (see #define section) unused if style is bar or area

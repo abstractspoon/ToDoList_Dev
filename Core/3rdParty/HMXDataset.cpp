@@ -18,7 +18,19 @@ static char THIS_FILE[]=__FILE__;
 
 CHMXDataset::CHMXDataset()
 {
-	m_nSize  = 2;
+	Reset();
+}
+
+CHMXDataset::~CHMXDataset()
+{
+
+}
+
+void CHMXDataset::Reset()
+{
+	m_data.RemoveAll();
+
+	m_nSize = 2;
 	m_nStyle = HMX_DATASET_STYLE_LINE;
 	m_crLine = RGB(0, 0, 0);
 	m_crFill = CLR_NONE;
@@ -26,11 +38,6 @@ CHMXDataset::CHMXDataset()
 
 	m_bSetMinTo = m_bSetMaxTo = false;
 	m_dSetMinTo = m_dSetMaxTo = -1;
-}
-
-CHMXDataset::~CHMXDataset()
-{
-
 }
 
 void CHMXDataset::Copy(const CHMXDataset& other)
@@ -49,14 +56,12 @@ void CHMXDataset::Copy(const CHMXDataset& other)
 	m_dSetMaxTo = other.m_dSetMaxTo;
 }
 
-bool CHMXDataset::ClearData()
+void CHMXDataset::ClearData()
 {
 	m_data.RemoveAll();
 
 	m_bSetMinTo = m_bSetMaxTo = false;
 	m_dSetMinTo = m_dSetMaxTo = -1;
-
-	return true;
 }
 
 bool CHMXDataset::HasData() const
