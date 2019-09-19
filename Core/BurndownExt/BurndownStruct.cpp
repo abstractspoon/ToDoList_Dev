@@ -467,7 +467,7 @@ BOOL CStatsItemCalculator::SetDateRange(const COleDateTimeRange& dtExtents)
 	}
 
 	m_dStartExtents = dtExtents.GetStart();
-	m_dEndExtents = dtExtents.GetEndInclusive();
+	m_dEndExtents = CDateHelper::GetEndOfMonth(dtExtents.GetEndInclusive());
 
 	m_nTotalDays = m_nTotalWeekdays = 0;
 
