@@ -104,8 +104,10 @@
     <PostBuildEvent>
       <Command>mkdir ..\ToDoList
 mkdir ..\ToDoList\unicode_Release
-mkdir ..\..\Plugins\release
 copy unicode_release\transtext.dll ..\todolist\unicode_release /y
+
+mkdir ..\..\Plugins
+mkdir ..\..\Plugins\release
 copy unicode_release\transtext.dll ..\..\Plugins\release /y
 </Command>
     </PostBuildEvent>
@@ -160,8 +162,10 @@ copy unicode_release\transtext.dll ..\..\Plugins\release /y
     <PostBuildEvent>
       <Command>mkdir ..\ToDoList
 mkdir ..\ToDoList\unicode_debug
-mkdir ..\..\Plugins\debug
 copy unicode_debug\transtext.dll ..\todolist\unicode_debug /y
+
+mkdir ..\..\Plugins
+mkdir ..\..\Plugins\debug
 copy unicode_debug\transtext.dll ..\..\Plugins\debug /y
 copy unicode_debug\transtext.pdb ..\..\Plugins\debug /y
 
