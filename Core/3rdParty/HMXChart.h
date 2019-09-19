@@ -213,6 +213,11 @@ protected:
 	BOOL CreateXAxisFont(BOOL bTitle, CFont& font) const;
 	BOOL CreateYAxisFont(BOOL bTitle, CFont& font) const;
 
+	inline BOOL IsValidDatasetIndex(int nDatasetIndex) const
+	{
+		return ((nDatasetIndex >= 0) && (nDatasetIndex < HMX_MAX_DATASET));
+	}
+
 	BOOL GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double nBarWidth = -1) const;
 	BOOL GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, double nBarWidth = -1) const;
 };

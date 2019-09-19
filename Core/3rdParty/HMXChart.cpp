@@ -737,7 +737,7 @@ BOOL CHMXChart::GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int
 
 bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	CHMXDataset& ds = m_datasets[nDatasetIndex];
@@ -893,7 +893,7 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 
 COLORREF CHMXChart::GetLineColor(int nDatasetIndex, double dValue) const
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return CLR_NONE;
 
 	return m_datasets[nDatasetIndex].GetLineColor();
@@ -901,7 +901,7 @@ COLORREF CHMXChart::GetLineColor(int nDatasetIndex, double dValue) const
 
 COLORREF CHMXChart::GetFillColor(int nDatasetIndex, double dValue) const
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return CLR_NONE;
 
 	return m_datasets[nDatasetIndex].GetFillColor();
@@ -1225,7 +1225,7 @@ bool CHMXChart::Redraw()
 //
 bool CHMXChart::AddData(int nDatasetIndex, double nData)
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	return m_datasets[nDatasetIndex].AddData(nData);
@@ -1234,7 +1234,7 @@ bool CHMXChart::AddData(int nDatasetIndex, double nData)
 
 bool CHMXChart::ClearData( int nDatasetIndex)
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	return m_datasets[nDatasetIndex].ClearData();
@@ -1263,11 +1263,10 @@ void CHMXChart::ClearData()
 //
 bool CHMXChart::SetData(int nDatasetIndex, int nIndex, double nData)
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	return m_datasets[nDatasetIndex].SetData(nIndex, nData);
-
 }
 
 //
@@ -1286,7 +1285,7 @@ bool CHMXChart::SetData(int nDatasetIndex, int nIndex, double nData)
 //
 bool CHMXChart::GetData(int nDatasetIndex, int nIndex, double& nData) const
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	return m_datasets[nDatasetIndex].GetData(nIndex,nData);
@@ -1307,7 +1306,7 @@ bool CHMXChart::GetData(int nDatasetIndex, int nIndex, double& nData) const
 //
 bool CHMXChart::SetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE nStyle)
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	return m_datasets[nDatasetIndex].SetStyle(nStyle);
@@ -1327,7 +1326,7 @@ bool CHMXChart::SetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE nStyle)
 //
 bool CHMXChart::GetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE& nStyle) const
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	nStyle = m_datasets[nDatasetIndex].GetStyle();
@@ -1349,7 +1348,7 @@ bool CHMXChart::GetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE& nStyle) co
 //
 bool CHMXChart::SetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER nMarker)
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	return m_datasets[nDatasetIndex].SetMarker(nMarker);
@@ -1357,7 +1356,7 @@ bool CHMXChart::SetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER nMarker)
 
 bool CHMXChart::SetDatasetMin(int nDatasetIndex, double dMin)
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	m_datasets[nDatasetIndex].SetMin(dMin);
@@ -1366,7 +1365,7 @@ bool CHMXChart::SetDatasetMin(int nDatasetIndex, double dMin)
 
 bool CHMXChart::SetDatasetMax(int nDatasetIndex, double dMax)
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	m_datasets[nDatasetIndex].SetMax(dMax);
@@ -1387,7 +1386,7 @@ bool CHMXChart::SetDatasetMax(int nDatasetIndex, double dMax)
 //
 bool CHMXChart::GetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER& nMarker) const
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	nMarker = m_datasets[nDatasetIndex].GetMarker();
@@ -1409,7 +1408,7 @@ bool CHMXChart::GetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER& nMarker)
 //
 bool CHMXChart::SetDatasetSizeFactor(int nDatasetIndex, int nSize)
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	return m_datasets[nDatasetIndex].SetSize(nSize);
@@ -1429,7 +1428,7 @@ bool CHMXChart::SetDatasetSizeFactor(int nDatasetIndex, int nSize)
 //
 bool CHMXChart::GetDatasetLineThickness(int nDatasetIndex, int& nSize) const
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	nSize = m_datasets[nDatasetIndex].GetSize();
@@ -1451,7 +1450,7 @@ bool CHMXChart::GetDatasetLineThickness(int nDatasetIndex, int& nSize) const
 //
 bool CHMXChart::SetDatasetLineColor(int nDatasetIndex, COLORREF clr)
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	return m_datasets[nDatasetIndex].SetLineColor(clr);
@@ -1459,7 +1458,7 @@ bool CHMXChart::SetDatasetLineColor(int nDatasetIndex, COLORREF clr)
 
 bool CHMXChart::SetDatasetFillColor(int nDatasetIndex, COLORREF clr)
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 	
 	return m_datasets[nDatasetIndex].SetFillColor(clr);
@@ -1479,7 +1478,7 @@ bool CHMXChart::SetDatasetFillColor(int nDatasetIndex, COLORREF clr)
 //
 bool CHMXChart::GetDatasetLineColor(int nDatasetIndex, COLORREF& clr) const
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	clr = m_datasets[nDatasetIndex].GetLineColor();
@@ -1489,7 +1488,7 @@ bool CHMXChart::GetDatasetLineColor(int nDatasetIndex, COLORREF& clr) const
 
 bool CHMXChart::GetDatasetFillColor(int nDatasetIndex, COLORREF& clr) const
 {
-	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 	
 	clr = m_datasets[nDatasetIndex].GetFillColor();
