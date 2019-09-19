@@ -5,6 +5,7 @@
 #define IDR_BURNDOWN                    1000
 #define IDR_STATISTICS                  1000
 #define IDC_DISPLAY                     1015
+#define IDC_TRENDLINES                  1016
 #define IDS_BURNDOWN_TITLE              6001
 #define IDS_TIME_AXIS                   6002
 #define IDS_TASK_AXIS                   6003
@@ -35,6 +36,9 @@
 #define IDS_DISPLAY_STARTEDENDED        57690
 #define IDS_DISPLAY_ESTIMATEDSPENTDAYS  57691
 #define IDS_DISPLAY_ESTIMATEDSPENTCOST  57692
+#define IDS_TREND_BESTFIT               57693
+#define IDS_TREND_7DAYAVERAGE           57694
+#define IDS_TREND_30DAYAVERAGE          57695
 
 // Next default values for new objects
 // 

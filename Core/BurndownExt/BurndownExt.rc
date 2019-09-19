@@ -133,18 +133,22 @@ STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Dis&play",IDC_STATIC,0,2,159,8
+    LTEXT           "Dis&play",IDC_STATIC,0,2,120,8
     COMBOBOX        IDC_DISPLAY,0,13,121,118,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_FRAME,"Static",SS_GRAYFRAME,0,28,314,253
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,126,12,122,13
+                    WS_VISIBLE,259,12,74,13
     CONTROL         "",IDC_GRAPH,"Button",BS_OWNERDRAW | WS_TABSTOP,8,38,298,
                     234
-    LTEXT           "Acti&ve Date Range",IDC_ACTIVEDATERANGE_LABEL,255,2,167,
+    LTEXT           "Acti&ve Date Range",IDC_ACTIVEDATERANGE_LABEL,340,2,112,
                     8
-    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,254,
+    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,339,
                     12,112,13
+    LTEXT           "Trend Lines",IDC_STATIC,126,2,120,8
+    COMBOBOX        IDC_TRENDLINES,126,13,121,118,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
+                    WS_VSCROLL | WS_TABSTOP
 END
 
 
@@ -204,6 +208,9 @@ BEGIN
     IDS_DISPLAY_STARTEDENDED "Started/Completed Tasks"
     IDS_DISPLAY_ESTIMATEDSPENTDAYS "Estimated/Spent Days"
     IDS_DISPLAY_ESTIMATEDSPENTCOST "Estimated/Spent Cost"
+    IDS_TREND_BESTFIT       "Linear Regression (Best fit line)"
+    IDS_TREND_7DAYAVERAGE   "Simple Moving Average (7 day)"
+    IDS_TREND_30DAYAVERAGE  "Simple Moving Average (30 day)"
 END
 
 #endif    // English (Australia) resources

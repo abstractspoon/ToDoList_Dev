@@ -19,7 +19,7 @@ public:
 	virtual CString GetTitle() const  = 0;
 	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const = 0;
-	virtual BOOL EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]) = 0;
+	virtual BOOL EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]) = 0;
 
 	int HitTest(const CStatsItemCalculator& calculator, const COleDateTime& date) const;
 
@@ -44,7 +44,7 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
+	BOOL EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
+	BOOL EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	enum
@@ -73,7 +73,7 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
+	BOOL EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	enum
@@ -91,7 +91,7 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
+	BOOL EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	enum
@@ -109,7 +109,7 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
+	BOOL EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	enum

@@ -123,7 +123,7 @@ CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator
 	return sTooltip;
 }
 
-BOOL CIncompleteTasksGraph::EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CIncompleteTasksGraph::EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;
@@ -203,7 +203,7 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 	return sTooltip;
 }
 
-BOOL CRemainingDaysGraph::EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CRemainingDaysGraph::EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;
@@ -280,7 +280,7 @@ CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculat
 	return sTooltip;
 }
 
-BOOL CStartedEndedTasksGraph::EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CStartedEndedTasksGraph::EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;
@@ -362,7 +362,7 @@ CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 }
 
-BOOL CEstimatedSpentDaysGraph::EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CEstimatedSpentDaysGraph::EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;
@@ -444,7 +444,7 @@ CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 }
 
-BOOL CEstimatedSpentCostGraph::EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CEstimatedSpentCostGraph::EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;

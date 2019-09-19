@@ -37,7 +37,8 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_data(data),
 	m_nScale(BCS_DAY),
 	m_nChartType(BCT_INCOMPLETETASKS),
-	m_calculator(data)
+	m_calculator(data),
+	m_dwEnabledTrends(0)
 {
 	VERIFY(m_graphs.Add(new CIncompleteTasksGraph()) == BCT_INCOMPLETETASKS);
 	VERIFY(m_graphs.Add(new CRemainingDaysGraph()) == BCT_REMAININGDAYS);
@@ -69,14 +70,14 @@ END_MESSAGE_MAP()
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart message handlers
 
-BOOL CBurndownChart::IsValidType(BURNDOWN_GRAPHTYPE nType) const
+BOOL CBurndownChart::IsValidGraph(BURNDOWN_GRAPHTYPE nType) const
 {
 	return ((nType >= 0) && (nType < BCT_NUMGRAPHS) && (nType < m_graphs.GetSize()));
 }
 
 CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPHTYPE nType) const
 {
-	if (!IsValidType(nType))
+	if (!IsValidGraph(nType))
 	{
 		ASSERT(0);
 		return _T("");
@@ -88,7 +89,7 @@ CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPHTYPE nType) const
 
 BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPHTYPE nType)
 {
-	if (!IsValidType(nType))
+	if (!IsValidGraph(nType))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -103,6 +104,13 @@ BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPHTYPE nType)
 	}
 
 	return FALSE;
+}
+
+void CBurndownChart::EnableTrends(DWORD dwTrends)
+{
+	m_graphs[m_nChartType]->EnableTrends(dwTrends, m_datasets);
+
+	m_dwEnabledTrends = dwTrends;
 }
 
 BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)

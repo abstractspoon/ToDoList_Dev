@@ -30,10 +30,11 @@ enum BURNDOWN_GRAPHSCALE
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum GB_TRENDLINES
+enum BURNDOWN_TRENDLINES
 {
-	GBTL_BEST_FIT = 0x01,
-	GBTL_MOVING_AVERAGE = 0x02,
+	BTL_BEST_FIT				= 0x01,
+	BTL_7DAY_MOVING_AVERAGE		= 0x02,
+	BTL_30DAY_MOVING_AVERAGE	= 0x04,
 };
 
 /////////////////////////////////////////////////////////////////////////////

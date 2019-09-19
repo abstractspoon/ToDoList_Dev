@@ -16,6 +16,7 @@
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\Shared\RangeSliderCtrl.h"
+#include "..\Shared\CheckComboBox.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\ITaskList.h"
@@ -80,9 +81,12 @@ protected:
 	CBurndownChart m_graph;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
-	CComboBox m_cbDisplay;
 	CRangeSliderCtrl m_sliderDateRange;
 
+	CComboBox m_cbGraphs;
+	CCheckComboBox m_cbTrends;
+	
+	DWORD m_dwEnabledTrends;
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;
 	BURNDOWN_GRAPHTYPE m_nGraphType;
@@ -112,6 +116,7 @@ protected:
 	afx_msg void OnSelchangeDisplay();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnNcDestroy();
+	afx_msg void OnTrendsChanged();
 
 	afx_msg LRESULT OnRebuildGraph(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnActiveDateRangeChange(WPARAM wp, LPARAM lp);
@@ -127,6 +132,7 @@ protected:
 	void UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange);
 	void UpdateRangeSliderStep();
 	BOOL GetSliderDateRange(COleDateTimeRange& dtActiveRange) const;
+	void BuildCombos();
 
 };
 
