@@ -23,6 +23,9 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 
 	void RebuildGraph(const COleDateTimeRange& dtExtents);
+	BURNDOWN_CHARTSCALE GetCurrentScale() const { return m_nScale; }
+
+	static BURNDOWN_CHARTSCALE CalculateRequiredScale(int nAvailWidth, int nNumDays);
 
 protected:
 	const CStatsItemArray& m_data;
@@ -43,7 +46,6 @@ protected:
 
 protected:
 	void RebuildXScale();
-	BURNDOWN_CHARTSCALE CalculateRequiredXScale() const;
 	BOOL IsValidType(BURNDOWN_CHARTTYPE nType) const;
 
 	// virtual overrides

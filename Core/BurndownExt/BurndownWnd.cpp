@@ -626,6 +626,9 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 		rSlider.right = (cx - 10);
 
 		m_sliderDateRange.MoveWindow(rSlider);
+
+		CAutoFlag af(m_bUpdatingSlider, TRUE);
+		UpdateRangeSliderStep();
 	}
 }
 
@@ -642,8 +645,7 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 
 	if (bSortData)
 		m_data.Sort();
-
-
+	
 	if (bUpdateExtents)
 		m_data.GetDataExtents(m_dtDataRange);
 
@@ -663,10 +665,10 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 		m_dtPrevActiveRange.Reset(); // always
 	}
 
+	m_graph.RebuildGraph(dtActiveRange);
+
 	UpdateRangeSlider(dtActiveRange);
 	UpdateActiveRangeLabel(dtActiveRange);
-
-	m_graph.RebuildGraph(dtActiveRange);
 }
 
 void CBurndownWnd::OnSelchangeDisplay()
@@ -725,6 +727,28 @@ LRESULT CBurndownWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0L;
 }
 
+void CBurndownWnd::UpdateRangeSliderStep()
+{
+	// Set the tick spacing to match the current scale
+	int nStep = 1;
+
+// 	switch (m_graph.GetCurrentScale())
+// 	{
+// 	case BCS_DAY:
+// 	case BCS_WEEK:
+// 	case BCS_MONTH:		break;
+// 
+// 	case BCS_2MONTH:	nStep = 2;	break;
+// 	case BCS_QUARTER:	nStep = 3;	break;
+// 	case BCS_HALFYEAR:	nStep = 6;	break;
+// 	case BCS_YEAR:		nStep = 12;	break;
+// 
+// 	default:			ASSERT(0);	break;
+// 	}
+
+	m_sliderDateRange.SetStep(nStep);
+}
+
 void CBurndownWnd::UpdateRangeSlider(const COleDateTimeRange& dtActiveRange)
 {
 	CAutoFlag af(m_bUpdatingSlider, TRUE);
@@ -736,7 +760,7 @@ void CBurndownWnd::UpdateRangeSlider(const COleDateTimeRange& dtActiveRange)
 		nDataEnd = max(nDataEnd, nDataStart + 1);
 
 		m_sliderDateRange.SetMinMax(nDataStart, nDataEnd);
-
+		
 		int nActiveStart = CDateHelper::GetDateInMonths(dtActiveRange.GetStart());
 		int nActiveEnd = CDateHelper::GetDateInMonths(dtActiveRange.GetEnd());
 		nActiveEnd = max(nActiveEnd, nActiveStart + 1);
@@ -746,8 +770,6 @@ void CBurndownWnd::UpdateRangeSlider(const COleDateTimeRange& dtActiveRange)
 
 		m_sliderDateRange.SetRange(nActiveStart, nActiveEnd);
 		m_sliderDateRange.EnableWindow(TRUE);
-
-
 	}
 	else
 	{
@@ -755,7 +777,7 @@ void CBurndownWnd::UpdateRangeSlider(const COleDateTimeRange& dtActiveRange)
 		m_sliderDateRange.EnableWindow(FALSE);
 	}
 
-	m_sliderDateRange.SetStep(1); // 1 month
+	UpdateRangeSliderStep();
 }
 
 void CBurndownWnd::UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange)

@@ -1641,11 +1641,13 @@ BOOL CTreeListCtrl::SaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF c
 
 	CAutoFlag af(m_bSavingToImage, TRUE);
 
-	// Resize tree header width to suit title text width
+	// Cache current state
 	int nPrevWidth = m_treeHeader.GetItemWidth(0);
 	int nPrevSplitPos = GetSplitPos();
 	BOOL bTracked = m_treeHeader.IsItemTracked(0);
+	HTREEITEM htiFirst = m_tree.GetFirstVisibleItem();
 
+	// Resize tree header width to suit title text width
 	CClientDC dc(&m_tree);
 	int nColWidth = CalcTreeColumnWidth(0, &dc);
 
@@ -1656,9 +1658,10 @@ BOOL CTreeListCtrl::SaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF c
 	// Allows derived classes to be involved
 	BOOL bRes = DoSaveToImage(bmImage, nFrom, nTo, crDivider);
 
-	// Restore title column width
+	// Restore state
 	m_treeHeader.SetItemWidth(0, nPrevWidth);
 	m_treeHeader.SetItemTracked(0, bTracked);
+	m_tree.SelectSetFirstVisible(htiFirst);
 
 	SetSplitPos(nPrevSplitPos);
 	Resize();

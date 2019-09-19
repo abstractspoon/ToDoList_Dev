@@ -129,16 +129,12 @@ BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
 	return (bmImage.GetSafeHandle() != NULL);
 }
 
-BURNDOWN_CHARTSCALE CBurndownChart::CalculateRequiredXScale() const
+BURNDOWN_CHARTSCALE CBurndownChart::CalculateRequiredScale(int nAvailWidth, int nNumDays)
 {
-	// calculate new x scale
-	int nDataWidth = GetDataArea().cx;
-	int nNumDays = m_dtExtents.GetDayCount();
-
 	// work thru the available scales until we find a suitable one
 	for (int nScale = 0; nScale < NUM_SCALES; nScale++)
 	{
-		int nSpacing = MulDiv(SCALES[nScale], nDataWidth, nNumDays);
+		int nSpacing = MulDiv(SCALES[nScale], nAvailWidth, nNumDays);
 
 		if (nSpacing > MIN_XSCALE_SPACING)
 			return SCALES[nScale];
@@ -152,11 +148,11 @@ void CBurndownChart::RebuildXScale()
 	ClearXScaleLabels();
 	SetXLabelStep(1); // Because we often have an uneven label spacing
 
-	// calc new scale
-	m_nScale = CalculateRequiredXScale();
+	// Refresh scale
+	int nNumDays = m_calculator.GetTotalDays();
+	m_nScale = CalculateRequiredScale(m_rectData.Width(), nNumDays);
 
 	// build ticks
-	int nNumDays = m_calculator.GetTotalDays();
 	COleDateTime dtTick = m_calculator.GetStartDate();
 
 	CDateHelper dh;
@@ -214,12 +210,7 @@ void CBurndownChart::OnSize(UINT nType, int cx, int cy)
 {
 	CHMXChartEx::OnSize(nType, cx, cy);
 	
-	int nOldScale = m_nScale;
 	RebuildXScale();
-		
-	// handle scale change
-	if (m_nScale != nOldScale)
-		RebuildGraph(m_dtExtents);
 }
 
 void CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)

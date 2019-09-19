@@ -269,10 +269,12 @@ void CRangeSliderCtrl::DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, dou
 {
 	if ((m_nSliderDrawStyles & TBS_NOTICKS) == 0)
 	{
-		int nNumTick = Misc::Round((dTo - dFrom) / m_Step);
-		double dTickSpacing = ((double)rTrack.Width() / nNumTick);
+		double dNumTick = ((dTo - dFrom) / m_Step);
+		double dTickSpacing = (rTrack.Width() / dNumTick);
 
 		// Skip first and last ticks
+		int nNumTick = Misc::Round(dNumTick);
+
 		for (int nTick = 1; nTick < nNumTick; nTick++)
 		{
 			int nTickPos = (rTrack.left + (int)(nTick * dTickSpacing));

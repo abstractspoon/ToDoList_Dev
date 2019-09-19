@@ -201,7 +201,6 @@ int GanttStatic::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONT
 		break;
 	}
 
-	// Add 1 for a buffer
 	return nNumCols;
 }
 
