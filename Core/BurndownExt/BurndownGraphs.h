@@ -19,20 +19,25 @@ public:
 	virtual CString GetTitle() const  = 0;
 	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const = 0;
-	virtual BOOL EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]) = 0;
+	virtual BOOL EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET]) = 0;
 
 	int HitTest(const CStatsItemCalculator& calculator, const COleDateTime& date) const;
 
 protected:
-	DWORD m_dwTrendAnalyses;
+	DWORD m_dwTrends;
 
 protected:
 	CGraphBase();
+
+	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], DWORD dwTrends, int nDatasetSrc, int& nDatasetDest);
 
 	static BOOL CalculateBestFitLine(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
 	static BOOL CalculateMovingAverage(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest, int nWindowSize);
 
 	static void SetDatasetColor(CHMXDataset datasets[HMX_MAX_DATASET], int nDataset, COLORREF crBase);
+
+	static BOOL	CopyDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
+	static BOOL	MoveDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
 
 };
 
@@ -44,7 +49,7 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
+	BOOL EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET]);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -55,7 +60,7 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
+	BOOL EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	enum
@@ -73,7 +78,7 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
+	BOOL EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	enum
@@ -91,7 +96,7 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
+	BOOL EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	enum
@@ -109,7 +114,7 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET]);
+	BOOL EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	enum

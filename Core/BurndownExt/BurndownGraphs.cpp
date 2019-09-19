@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "BurndownGraphs.h"
 #include "BurndownChart.h"
+#include "BurndownStatic.h"
 
 #include "..\shared\datehelper.h"
 #include "..\shared\holdredraw.h"
@@ -24,7 +25,7 @@ const int		LINE_THICKNESS	= 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
-CGraphBase::CGraphBase() : m_dwTrendAnalyses(0)
+CGraphBase::CGraphBase() : m_dwTrends(0)
 {
 }
 
@@ -57,6 +58,77 @@ BOOL CGraphBase::CalculateMovingAverage(CHMXDataset datasets[HMX_MAX_DATASET], i
 {
 	// TODO
 	return FALSE;
+}
+
+BOOL CGraphBase::CopyDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest)
+{
+	if ((nDatasetSrc < 0) || (nDatasetSrc >= HMX_MAX_DATASET) ||
+		(nDatasetDest < 0) || (nDatasetDest >= HMX_MAX_DATASET))
+	{
+		return FALSE;
+	}
+
+	datasets[nDatasetDest].Copy(datasets[nDatasetSrc]);
+	return TRUE;
+}
+
+BOOL CGraphBase::MoveDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest)
+{
+	if (!CopyDataset(datasets, nDatasetSrc, nDatasetDest))
+		return FALSE;
+
+	datasets[nDatasetSrc].Reset();
+	return TRUE;
+}
+
+BOOL CGraphBase::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], DWORD dwTrends, int nDatasetSrc, int& nDatasetDest)
+{
+	// Sanity check
+	if (nDatasetDest <= nDatasetSrc)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	int nStartDatasetDest = nDatasetDest;
+	BOOL bSuccess = TRUE;
+
+	for (int nTrend = 0; ((nTrend < NUM_TRENDS) && bSuccess); nTrend++)
+	{
+		if (dwTrends & TRENDS[nTrend].dwTrend)
+		{
+			switch (TRENDS[nTrend].dwTrend)
+			{
+			case BTL_BEST_FIT:
+				bSuccess &= CalculateBestFitLine(datasets, nDatasetSrc, nDatasetDest++);
+				break;
+
+			case BTL_7DAY_MOVING_AVERAGE:
+				bSuccess &= CalculateMovingAverage(datasets, nDatasetSrc, nDatasetDest++, 7);
+				break;
+
+			case BTL_30DAY_MOVING_AVERAGE:
+				bSuccess &= CalculateMovingAverage(datasets, nDatasetSrc, nDatasetDest++, 30);
+				break;
+
+			default:
+				ASSERT(0);
+				break;
+			}
+		}
+	}
+
+	// If any failed, reset all
+	if (!bSuccess)
+		nDatasetDest = nStartDatasetDest;
+
+	// Reset any unused datasets
+	for (int nUnused = nDatasetDest; nUnused < (nStartDatasetDest + NUM_TRENDS); nUnused++)
+	{
+		datasets[nUnused].Reset();
+	}
+
+	return bSuccess;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -123,10 +195,23 @@ CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator
 	return sTooltip;
 }
 
-BOOL CIncompleteTasksGraph::EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CIncompleteTasksGraph::EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET])
 {
-	// TODO
-	return FALSE;
+	if (dwTrends == m_dwTrends)
+		return TRUE;
+
+	int nTrendDataset = 1;
+
+	if (CalculateTrendLines(datasets, dwTrends, 0, nTrendDataset))
+	{
+		m_dwTrends = dwTrends;
+	}
+	else
+	{
+		m_dwTrends = 0;
+	}
+		
+	return (m_dwTrends == dwTrends);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +288,7 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 	return sTooltip;
 }
 
-BOOL CRemainingDaysGraph::EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CRemainingDaysGraph::EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;
@@ -280,7 +365,7 @@ CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculat
 	return sTooltip;
 }
 
-BOOL CStartedEndedTasksGraph::EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CStartedEndedTasksGraph::EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;
@@ -362,7 +447,7 @@ CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 }
 
-BOOL CEstimatedSpentDaysGraph::EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CEstimatedSpentDaysGraph::EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;
@@ -444,7 +529,7 @@ CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 }
 
-BOOL CEstimatedSpentCostGraph::EnableTrends(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CEstimatedSpentCostGraph::EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;

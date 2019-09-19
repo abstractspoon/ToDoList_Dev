@@ -198,6 +198,7 @@ copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
     <ClInclude Include="BurndownChart.h" />
     <ClInclude Include="BurndownEnum.h" />
     <ClInclude Include="BurndownGraphs.h" />
+    <ClInclude Include="BurndownStatic.h" />
     <ClInclude Include="BurndownStruct.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="BurndownExt.h" />

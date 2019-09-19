@@ -81,5 +81,8 @@
     <ClInclude Include="BurndownEnum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BurndownStatic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "BurndownExt.h"
 #include "BurndownWnd.h"
+#include "BurndownStatic.h"
 
 #include "..\shared\mapex.h"
 #include "..\shared\misc.h"
@@ -210,9 +211,8 @@ void CBurndownWnd::BuildCombos()
 
 	ASSERT(m_cbTrends.GetCount() == 0);
 
-	CDialogHelper::AddString(m_cbTrends, IDS_TREND_BESTFIT, BTL_BEST_FIT);
-	CDialogHelper::AddString(m_cbTrends, IDS_TREND_7DAYAVERAGE, BTL_7DAY_MOVING_AVERAGE);
-	CDialogHelper::AddString(m_cbTrends, IDS_TREND_30DAYAVERAGE, BTL_30DAY_MOVING_AVERAGE);
+	for (int nTrend = 0; nTrend < NUM_TRENDS; nTrend++)
+		CDialogHelper::AddString(m_cbTrends, TRENDS[nTrend].nTitleStrID, TRENDS[nTrend].dwTrend);
 }
 
 void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const 
