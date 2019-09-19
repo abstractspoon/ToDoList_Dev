@@ -29,7 +29,7 @@ protected:
 protected:
 	CGraphBase();
 
-	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], DWORD dwTrends, int nDatasetSrc, int& nDatasetDest);
+	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], DWORD dwTrends, int nDatasetSrc, int& nDatasetDest) const;
 
 	static BOOL CalculateBestFitLine(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
 	static BOOL CalculateMovingAverage(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest, int nWindowSize);

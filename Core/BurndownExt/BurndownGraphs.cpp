@@ -56,8 +56,43 @@ BOOL CGraphBase::CalculateBestFitLine(CHMXDataset datasets[HMX_MAX_DATASET], int
 
 BOOL CGraphBase::CalculateMovingAverage(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest, int nWindowSize)
 {
-	// TODO
-	return FALSE;
+	int nNumData = datasets[nDatasetSrc].GetDatasetSize();
+
+	if (nNumData < nWindowSize)
+		return FALSE;
+
+	datasets[nDatasetDest].SetDatasetSize(nNumData);
+
+	// The first value is the first data value
+	double dValue = 0, dPrevAverage = 0, dPrevWindowStart = 0;
+
+	datasets[nDatasetSrc].GetData(0, dValue);
+	datasets[nDatasetDest].SetData(0, dValue);
+	
+	// The first 'nWindow' values are simple accumulated averages
+	int nData;
+
+	for (nData = 1; nData < nWindowSize; nData++)
+	{
+		datasets[nDatasetDest].GetData((nData - 1), dPrevAverage);
+		datasets[nDatasetSrc].GetData(nData, dValue);
+
+		dValue = (((dPrevAverage * nData) + dValue) / (nData + 1));
+		datasets[nDatasetDest].SetData(nData, dValue);
+	}
+
+	// All the rest require the rolling 
+	for (nData = nWindowSize; nData < nNumData; nData++)
+	{
+		datasets[nDatasetDest].GetData((nData - 1), dPrevAverage);
+		datasets[nDatasetSrc].GetData(nData - nWindowSize, dPrevWindowStart);
+		datasets[nDatasetSrc].GetData(nData, dValue);
+
+		dValue = (((dPrevAverage * nWindowSize) - dPrevWindowStart + dValue) / nWindowSize);
+		datasets[nDatasetDest].SetData(nData, dValue);
+	}
+	
+	return TRUE;
 }
 
 BOOL CGraphBase::CopyDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest)
@@ -81,7 +116,7 @@ BOOL CGraphBase::MoveDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDataset
 	return TRUE;
 }
 
-BOOL CGraphBase::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], DWORD dwTrends, int nDatasetSrc, int& nDatasetDest)
+BOOL CGraphBase::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], DWORD dwTrends, int nDatasetSrc, int& nDatasetDest) const
 {
 	// Sanity check
 	if (nDatasetDest <= nDatasetSrc)
@@ -176,6 +211,9 @@ void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, C
 			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
 			datasets[0].SetMax(dMax);
 		}
+
+		int nTrendDataset = 1;
+		CalculateTrendLines(datasets, m_dwTrends, 0, nTrendDataset);
 	}
 }
 
