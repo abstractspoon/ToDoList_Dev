@@ -42,7 +42,7 @@ public:
 	void CheckAll(CCB_CHECKSTATE nCheck = CCBC_CHECKED);
 	int GetCheckedCount(CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
 	BOOL IsAnyChecked(CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
-	int GetCheckStates(CArray<CCB_CHECKSTATE, CCB_CHECKSTATE> aStates) const;
+	int GetCheckStates(CArray<CCB_CHECKSTATE, CCB_CHECKSTATE>& aStates) const;
 
 	virtual int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
 	virtual BOOL SetChecked(const CStringArray& aItems);

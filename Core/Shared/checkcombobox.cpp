@@ -204,7 +204,7 @@ BOOL CCheckComboBox::IsAnyChecked(CCB_CHECKSTATE nCheck) const
 	return FALSE;
 }
 
-int CCheckComboBox::GetCheckStates(CArray<CCB_CHECKSTATE, CCB_CHECKSTATE> aStates) const
+int CCheckComboBox::GetCheckStates(CArray<CCB_CHECKSTATE, CCB_CHECKSTATE>& aStates) const
 {
 	int nItem = GetCount();
 	aStates.SetSize(nItem);
