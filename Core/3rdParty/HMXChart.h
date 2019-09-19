@@ -17,7 +17,7 @@
 //
 
 #ifdef _DEBUG
-	#define HMX_MAX_DATASET	6
+	#define HMX_MAX_DATASET	16
 #else
 	#define HMX_MAX_DATASET	64
 #endif	// _DEBUG
