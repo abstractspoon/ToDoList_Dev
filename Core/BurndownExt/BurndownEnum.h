@@ -3,7 +3,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum BURNDOWN_CHARTTYPE
+enum BURNDOWN_GRAPHTYPE
 {
 	BCT_INCOMPLETETASKS,
 	BCT_REMAININGDAYS,
@@ -15,15 +15,25 @@ enum BURNDOWN_CHARTTYPE
 	BCT_NUMGRAPHS // always last
 };
 
-enum BURNDOWN_CHARTSCALE
+/////////////////////////////////////////////////////////////////////////////
+
+enum BURNDOWN_GRAPHSCALE
 {
-	BCS_DAY			= 1,
-	BCS_WEEK		= 7,
-	BCS_MONTH		= 30,
-	BCS_2MONTH		= 60,
-	BCS_QUARTER		= 90,
-	BCS_HALFYEAR	= 180,
-	BCS_YEAR		= 365,
+	BCS_DAY,
+	BCS_WEEK,
+	BCS_MONTH,
+	BCS_2MONTH,
+	BCS_QUARTER,
+	BCS_HALFYEAR,
+	BCS_YEAR,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+enum GB_TRENDLINES
+{
+	GBTL_BEST_FIT = 0x01,
+	GBTL_MOVING_AVERAGE = 0x02,
 };
 
 /////////////////////////////////////////////////////////////////////////////

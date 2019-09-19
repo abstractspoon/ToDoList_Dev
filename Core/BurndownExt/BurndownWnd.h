@@ -84,8 +84,8 @@ protected:
 	CRangeSliderCtrl m_sliderDateRange;
 
 	DWORD m_dwUpdateGraphOnShow;
-	BURNDOWN_CHARTTYPE m_nChartType;
 	BOOL m_bUpdatingSlider;
+	BURNDOWN_GRAPHTYPE m_nGraphType;
 
 protected:
 // Overrides

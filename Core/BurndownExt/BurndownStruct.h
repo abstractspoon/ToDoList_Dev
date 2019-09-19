@@ -20,7 +20,7 @@
 struct DISPLAYITEM
 {
 	UINT nYAxisID;
-	BURNDOWN_CHARTTYPE nDisplay;
+	BURNDOWN_GRAPHTYPE nDisplay;
 };
 
 /////////////////////////////////////////////////////////////////////////////

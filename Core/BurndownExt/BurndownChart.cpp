@@ -17,7 +17,7 @@
 
 const int MIN_XSCALE_SPACING = 50; // pixels
 
-static BURNDOWN_CHARTSCALE SCALES[] = 
+static BURNDOWN_GRAPHSCALE SCALES[] = 
 {
 	BCS_DAY,		
 	BCS_WEEK,	
@@ -69,12 +69,12 @@ END_MESSAGE_MAP()
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart message handlers
 
-BOOL CBurndownChart::IsValidType(BURNDOWN_CHARTTYPE nType) const
+BOOL CBurndownChart::IsValidType(BURNDOWN_GRAPHTYPE nType) const
 {
 	return ((nType >= 0) && (nType < BCT_NUMGRAPHS) && (nType < m_graphs.GetSize()));
 }
 
-CString CBurndownChart::GetGraphTitle(BURNDOWN_CHARTTYPE nType) const
+CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPHTYPE nType) const
 {
 	if (!IsValidType(nType))
 	{
@@ -86,7 +86,7 @@ CString CBurndownChart::GetGraphTitle(BURNDOWN_CHARTTYPE nType) const
 	return m_graphs[nType]->GetTitle();
 }
 
-BOOL CBurndownChart::SetActiveGraph(BURNDOWN_CHARTTYPE nType)
+BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPHTYPE nType)
 {
 	if (!IsValidType(nType))
 	{
@@ -129,7 +129,7 @@ BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
 	return (bmImage.GetSafeHandle() != NULL);
 }
 
-BURNDOWN_CHARTSCALE CBurndownChart::CalculateRequiredScale(int nAvailWidth, int nNumDays)
+BURNDOWN_GRAPHSCALE CBurndownChart::CalculateRequiredScale(int nAvailWidth, int nNumDays)
 {
 	// work thru the available scales until we find a suitable one
 	for (int nScale = 0; nScale < NUM_SCALES; nScale++)

@@ -78,7 +78,7 @@
     <ClInclude Include="BurndownGraphs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BurndownStatic.h">
+    <ClInclude Include="BurndownEnum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

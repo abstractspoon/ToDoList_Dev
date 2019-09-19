@@ -58,7 +58,7 @@ enum // m_dwUpdateGraphOnShow
 CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_STATISTICS_DLG, pParent),
-	m_nChartType(BCT_REMAININGDAYS),
+	m_nGraphType(BCT_REMAININGDAYS),
 	m_dwUpdateGraphOnShow(0),
 	m_dtDataRange(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
 	m_graph(m_data),
@@ -81,11 +81,11 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CBurndownWnd)
 	DDX_Control(pDX, IDC_FRAME, m_stFrame);
-	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplay);
+	DDX_Control(pDX, IDC_DISPLAY, m_cbGraphs);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
 
-	CDialogHelper::DDX_CBData(pDX, m_cbDisplay, m_nChartType, BCT_REMAININGDAYS);
+	CDialogHelper::DDX_CBData(pDX, m_cbGraphs, m_nGraphType, BCT_REMAININGDAYS);
 }
 
 
@@ -170,7 +170,7 @@ BOOL CBurndownWnd::OnInitDialog()
 
 	// Init combo
 	for (int nGraph = 0; nGraph < BCT_NUMGRAPHS; nGraph++)
-		CDialogHelper::AddString(m_cbDisplay, m_graph.GetGraphTitle((BURNDOWN_CHARTTYPE)nGraph), nGraph);
+		CDialogHelper::AddString(m_cbGraphs, m_graph.GetGraphTitle((BURNDOWN_GRAPHTYPE)nGraph), nGraph);
 
 	RebuildGraph(FALSE, FALSE, FALSE);
 
@@ -184,7 +184,7 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	
 	//CString sKey(szKey);
 
-	pPrefs->WriteProfileInt(szKey, _T("GraphType"), m_nChartType);
+	pPrefs->WriteProfileInt(szKey, _T("GraphType"), m_nGraphType);
 
 	// Active date range
 	pPrefs->DeleteProfileSection(_T("ActiveRange"));
@@ -212,13 +212,13 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	if (!bAppOnly)
 	{
 		//CString sKey(szKey);
-		m_nChartType = (BURNDOWN_CHARTTYPE)pPrefs->GetProfileInt(szKey, _T("GraphType"), BCT_INCOMPLETETASKS);
+		m_nGraphType = (BURNDOWN_GRAPHTYPE)pPrefs->GetProfileInt(szKey, _T("GraphType"), BCT_INCOMPLETETASKS);
 
-		if (m_nChartType >= BCT_NUMGRAPHS)
-			m_nChartType = BCT_INCOMPLETETASKS;
+		if (m_nGraphType >= BCT_NUMGRAPHS)
+			m_nGraphType = BCT_INCOMPLETETASKS;
 
-		CDialogHelper::SelectItemByData(m_cbDisplay, m_nChartType);
-		m_graph.SetActiveGraph(m_nChartType);
+		CDialogHelper::SelectItemByData(m_cbGraphs, m_nGraphType);
+		m_graph.SetActiveGraph(m_nGraphType);
 
 		// Active range
 		m_dtPrevActiveRange.Reset();
@@ -679,7 +679,7 @@ void CBurndownWnd::OnSelchangeDisplay()
 {
 	UpdateData();
 
-	m_graph.SetActiveGraph(m_nChartType);
+	m_graph.SetActiveGraph(m_nGraphType);
 }
 
 void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
