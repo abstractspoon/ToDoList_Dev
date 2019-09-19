@@ -49,6 +49,8 @@ public:
 	CHMXDataset();
 	virtual ~CHMXDataset();
 
+	void Copy(const CHMXDataset& other);
+
 	virtual bool		SetStyle( HMX_DATASET_STYLE nStyle );			// set data style
 	virtual HMX_DATASET_STYLE GetStyle() const;							// get data style
 

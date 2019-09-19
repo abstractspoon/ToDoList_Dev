@@ -33,6 +33,22 @@ CHMXDataset::~CHMXDataset()
 
 }
 
+void CHMXDataset::Copy(const CHMXDataset& other)
+{
+	m_data.Copy(other.m_data);
+
+	m_nSize = other.m_nSize;
+	m_nStyle = other.m_nStyle;
+	m_crLine = other.m_crLine;
+	m_crFill = other.m_crFill;
+	m_nMarker = other.m_nMarker;
+
+	m_bSetMinTo = other.m_bSetMinTo;
+	m_bSetMaxTo = other.m_bSetMaxTo;
+	m_dSetMinTo = other.m_dSetMinTo;
+	m_dSetMaxTo = other.m_dSetMaxTo;
+}
+
 bool CHMXDataset::ClearData()
 {
 	m_data.RemoveAll();

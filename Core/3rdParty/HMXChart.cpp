@@ -1247,6 +1247,24 @@ void CHMXChart::ClearData()
 		ClearData(f);
 }
 
+bool CHMXChart::CopyDataset(int nDatasetFrom, int nDatasetTo)
+{
+	if (!IsValidDatasetIndex(nDatasetFrom) || !IsValidDatasetIndex(nDatasetTo))
+		return false;
+
+	m_datasets[nDatasetTo].Copy(m_datasets[nDatasetFrom]);
+
+	return true;
+}
+
+bool CHMXChart::MoveDataset(int nDatasetFrom, int nDatasetTo)
+{
+	if (!CopyDataset(nDatasetFrom, nDatasetTo))
+		return false;
+
+	return ClearData(nDatasetFrom);
+}
+
 //
 //	SetData
 //	Modify a data into the dataset
