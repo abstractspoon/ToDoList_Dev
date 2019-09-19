@@ -135,8 +135,8 @@ public:
 	virtual bool		SetDatasetMax(int nDatasetIndex, double dMax);
 	virtual bool		GetMinMax(double& nMin, double& nMax, bool bDataOnly) const;	// get min & max
 
-	virtual bool		CopyDataset(int nDatasetFrom, int nDatasetTo);
-	virtual bool		MoveDataset(int nDatasetFrom, int nDatasetTo);
+	virtual bool		CopyDataset(int nDatasetSrc, int nDatasetDest);
+	virtual bool		MoveDataset(int nDatasetSrc, int nDatasetDest);
 
 	// useful global functions
 	virtual bool		CalcDatas();

@@ -1247,22 +1247,22 @@ void CHMXChart::ClearData()
 		ClearData(f);
 }
 
-bool CHMXChart::CopyDataset(int nDatasetFrom, int nDatasetTo)
+bool CHMXChart::CopyDataset(int nDatasetSrc, int nDatasetDest)
 {
-	if (!IsValidDatasetIndex(nDatasetFrom) || !IsValidDatasetIndex(nDatasetTo))
+	if (!IsValidDatasetIndex(nDatasetSrc) || !IsValidDatasetIndex(nDatasetDest))
 		return false;
 
-	m_datasets[nDatasetTo].Copy(m_datasets[nDatasetFrom]);
+	m_datasets[nDatasetDest].Copy(m_datasets[nDatasetSrc]);
 
 	return true;
 }
 
-bool CHMXChart::MoveDataset(int nDatasetFrom, int nDatasetTo)
+bool CHMXChart::MoveDataset(int nDatasetSrc, int nDatasetDest)
 {
-	if (!CopyDataset(nDatasetFrom, nDatasetTo))
+	if (!CopyDataset(nDatasetSrc, nDatasetDest))
 		return false;
 
-	return ClearData(nDatasetFrom);
+	return ResetDataset(nDatasetSrc);
 }
 
 //
