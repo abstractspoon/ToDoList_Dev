@@ -24,7 +24,7 @@ const int		LINE_THICKNESS	= 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
-CGraphBase::CGraphBase()
+CGraphBase::CGraphBase() : m_dwTrendAnalyses(0)
 {
 }
 
@@ -45,6 +45,18 @@ void CGraphBase::SetDatasetColor(CHMXDataset datasets[HMX_MAX_DATASET], int nDat
 {
 	datasets[nDataset].SetLineColor(GraphicsMisc::Darker(crBase, 0.05, FALSE));
 	datasets[nDataset].SetFillColor(GraphicsMisc::Lighter(crBase, 0.25, FALSE));
+}
+
+BOOL CGraphBase::CalculateBestFitLine(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest)
+{
+	// TODO
+	return FALSE;
+}
+
+BOOL CGraphBase::CalculateMovingAverage(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest, int nWindowSize)
+{
+	// TODO
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -109,6 +121,12 @@ CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator
 	}
 
 	return sTooltip;
+}
+
+BOOL CIncompleteTasksGraph::EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+{
+	// TODO
+	return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -185,6 +203,12 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 	return sTooltip;
 }
 
+BOOL CRemainingDaysGraph::EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+{
+	// TODO
+	return FALSE;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////
 
 CString CStartedEndedTasksGraph::GetTitle() const
@@ -254,6 +278,12 @@ CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculat
 	}
 
 	return sTooltip;
+}
+
+BOOL CStartedEndedTasksGraph::EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+{
+	// TODO
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -332,6 +362,12 @@ CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 }
 
+BOOL CEstimatedSpentDaysGraph::EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+{
+	// TODO
+	return FALSE;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 CString CEstimatedSpentCostGraph::GetTitle() const
@@ -406,6 +442,12 @@ CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 	return sTooltip;
 
+}
+
+BOOL CEstimatedSpentCostGraph::EnableTrendLines(DWORD dwItems, CHMXDataset datasets[HMX_MAX_DATASET])
+{
+	// TODO
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
