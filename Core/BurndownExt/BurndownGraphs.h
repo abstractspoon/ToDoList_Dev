@@ -19,8 +19,8 @@ public:
 	virtual CString GetTitle() const  = 0;
 	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const = 0;
-	virtual BOOL ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET]) = 0;
 
+	BOOL ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET]);
 	int HitTest(const CStatsItemCalculator& calculator, const COleDateTime& date) const;
 
 protected:
@@ -29,16 +29,17 @@ protected:
 protected:
 	CGraphBase();
 
-	BOOL CalculateTrendLine(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend, int nDatasetSrc, int nDatasetDest) const;
-
-	static BOOL CalculateBestFitLine(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
-	static BOOL CalculateMovingAverage(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest, int nWindowSize);
-
+	virtual BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const = 0;
+	
+	static BOOL CalculateTrendLine(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend, int nDatasetSrc, int nDatasetDest);
 	static void SetDatasetColor(CHMXDataset datasets[HMX_MAX_DATASET], int nDataset, COLORREF crBase);
 
-	static BOOL	CopyDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
-	static BOOL	MoveDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
+// 	static BOOL	CopyDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
+// 	static BOOL	MoveDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
 
+private:
+	static BOOL CalculateBestFitLine(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
+	static BOOL CalculateMovingAverage(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest, int nWindowSize);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -49,7 +50,9 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET]);
+
+protected:
+	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -60,7 +63,6 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	enum
@@ -68,6 +70,9 @@ protected:
 		REMAINING_ESTIMATE,
 		REMAINING_SPENT
 	};
+
+protected:
+	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -78,7 +83,6 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	enum
@@ -86,6 +90,9 @@ protected:
 		STARTED_TASKS,
 		ENDED_TASKS
 	};
+
+protected:
+	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -96,7 +103,6 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	enum
@@ -104,6 +110,9 @@ protected:
 		ESTIMATED_DAYS,
 		SPENT_DAYS,
 	};
+
+protected:
+	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -114,7 +123,6 @@ public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	BOOL ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	enum
@@ -122,6 +130,9 @@ protected:
 		ESTIMATED_COST,
 		SPENT_COST,
 	};
+
+protected:
+	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

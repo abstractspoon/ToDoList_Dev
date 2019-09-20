@@ -111,10 +111,9 @@ BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPHTYPE nType)
 void CBurndownChart::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend)
 {
 	if (m_graphs[m_nChartType]->ShowTrendLine(nTrend, m_datasets))
-	{
 		m_nTrendLine = nTrend;
-		Invalidate();
-	}
+
+	Invalidate();
 }
 
 BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
@@ -248,6 +247,7 @@ void CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
 
 		m_graphs[m_nChartType]->BuildGraph(m_calculator, m_datasets);
+		m_graphs[m_nChartType]->ShowTrendLine(m_nTrendLine, m_datasets);
 	}
 	
 

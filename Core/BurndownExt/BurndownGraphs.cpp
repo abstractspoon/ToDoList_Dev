@@ -95,6 +95,7 @@ BOOL CGraphBase::CalculateMovingAverage(CHMXDataset datasets[HMX_MAX_DATASET], i
 	return TRUE;
 }
 
+/*
 BOOL CGraphBase::CopyDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest)
 {
 	if ((nDatasetSrc < 0) || (nDatasetSrc >= HMX_MAX_DATASET) ||
@@ -115,8 +116,22 @@ BOOL CGraphBase::MoveDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDataset
 	datasets[nDatasetSrc].Reset();
 	return TRUE;
 }
+*/
 
-BOOL CGraphBase::CalculateTrendLine(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend, int nDatasetSrc, int nDatasetDest) const
+BOOL CGraphBase::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
+{
+	if (nTrend == m_nTrend)
+		return TRUE;
+
+	if (CalculateTrendLines(datasets, nTrend))
+		m_nTrend = nTrend;
+	else
+		m_nTrend = BTL_NONE;
+
+	return (m_nTrend == nTrend);
+}
+
+BOOL CGraphBase::CalculateTrendLine(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend, int nDatasetSrc, int nDatasetDest)
 {
 	// Sanity check
 	if (nDatasetDest <= nDatasetSrc)
@@ -210,7 +225,7 @@ void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, C
 		}
 	}
 
-	CalculateTrendLine(datasets, m_nTrend, 0, 1);
+	CalculateTrendLines(datasets, m_nTrend);
 }
 
 CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -229,21 +244,9 @@ CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator
 	return sTooltip;
 }
 
-BOOL CIncompleteTasksGraph::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CIncompleteTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
-	if (nTrend == m_nTrend)
-		return TRUE;
-
-	if (CalculateTrendLine(datasets, nTrend, 0, 1))
-	{
-		m_nTrend = nTrend;
-	}
-	else
-	{
-		m_nTrend = BTL_NONE;
-	}
-		
-	return (m_nTrend == nTrend);
+	return CalculateTrendLine(datasets, nTrend, 0, 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -320,7 +323,7 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 	return sTooltip;
 }
 
-BOOL CRemainingDaysGraph::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CRemainingDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
 	// TODO
 	return FALSE;
@@ -379,6 +382,8 @@ void CStartedEndedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator,
 			datasets[ENDED_TASKS].SetMax(dMax);
 		}
 	}
+
+	CalculateTrendLines(datasets, m_nTrend);
 }
 
 CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -397,10 +402,18 @@ CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculat
 	return sTooltip;
 }
 
-BOOL CStartedEndedTasksGraph::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CStartedEndedTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
-	// TODO
-	return FALSE;
+	if (!CalculateTrendLine(datasets, nTrend, STARTED_TASKS, STARTED_TASKS + 2))
+	{
+		datasets[ENDED_TASKS + 2].Reset();
+		return FALSE;
+	}
+
+	if (!CalculateTrendLine(datasets, nTrend, ENDED_TASKS, ENDED_TASKS + 2))
+		return FALSE;
+
+	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -479,7 +492,7 @@ CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 }
 
-BOOL CEstimatedSpentDaysGraph::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CEstimatedSpentDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
 	// TODO
 	return FALSE;
@@ -561,7 +574,7 @@ CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 }
 
-BOOL CEstimatedSpentCostGraph::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CEstimatedSpentCostGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
 	// TODO
 	return FALSE;
