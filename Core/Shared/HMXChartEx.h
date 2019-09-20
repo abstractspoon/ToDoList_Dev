@@ -33,10 +33,11 @@ public:
 
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	void FilterToolTipMessage(MSG* pMsg);
+	void SetTooltipOffset(int x, int y) { m_ptTooltipOffset.SetPoint(x, y); }
 
 protected:
 	CToolTipCtrlEx m_tooltip;
-	CPen m_penHighlight;
+	CPoint m_ptTooltipOffset;
 
 	mutable int m_nLastTooltipHit;
 
@@ -64,9 +65,9 @@ protected:
 protected:
 	BOOL InitTooltip(BOOL bMultiline);
 	int GetYSubTicks(double dInterval) const;
-	BOOL GetAveragePointXY(int nIndex, CPoint& point) const;
+	//BOOL GetAveragePointXY(int nIndex, CPoint& point) const;
 
-	BOOL HighlightDataPoints(int nIndex);
+	BOOL HighlightDataPoint(int nIndex);
 	void HideLastHighlightedPoint();
 };
 

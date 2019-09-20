@@ -16,6 +16,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const CString EMPTY_STR;
+const CPoint  NULL_POINT(0, 0);
 
 const int HILITEBOXSIZE = GraphicsMisc::ScaleByDPIFactor(3);
 const int TOOLTIPOFFSET = GraphicsMisc::ScaleByDPIFactor(20);
@@ -212,52 +213,25 @@ bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
 	return CHMXChart::DrawHorzGridLines(dc);
 }
 
-BOOL CHMXChartEx::HighlightDataPoints(int nIndex)
+BOOL CHMXChartEx::HighlightDataPoint(int nIndex)
 {
-	// Draw inverted circles around data point(s)
-	CDC* pDC = NULL;
-	CPen* pOldPen = NULL;
+	CPoint ptData;
 
-	// Prevent drawing over the same X,Y more than once
-	CDWordSet mapPoints;
+	if (!GetPointXY(0, nIndex, ptData))
+		return FALSE;
 
-	for (int nDataset = 0; nDataset < HMX_MAX_DATASET; nDataset++)
-	{
-		CPoint ptData;
+	CDC* pDC = GetDC();
 
-		if (!GetPointXY(nDataset, nIndex, ptData))
-			break;
+	pDC->SetROP2(R2_NOT);
+	pDC->SelectStockObject(NULL_BRUSH);
+	pDC->SelectStockObject(BLACK_PEN);
 
-		if (mapPoints.Has(MAKELONG(ptData.x, ptData.y)))
-			continue;
+	pDC->MoveTo(ptData.x, m_rectData.top);
+	pDC->LineTo(ptData.x, m_rectData.bottom);
 
-		mapPoints.Add(MAKELONG(ptData.x, ptData.y));
-
-		if (pDC == NULL)
-		{
-			pDC = GetDC();
-			pDC->SetROP2(R2_NOT);
-
-			if (!m_penHighlight.GetSafeHandle())
-				m_penHighlight.CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
-
-			pOldPen = pDC->SelectObject(&m_penHighlight);
-		}
-
-		CRect rData(ptData, CSize(1, 1));
-		rData.InflateRect(HILITEBOXSIZE, HILITEBOXSIZE);
-
-		pDC->SelectStockObject(NULL_BRUSH);
-		pDC->Ellipse(rData);
-	}
-
-	if (pDC)
-	{
-		pDC->SelectObject(pOldPen);
-		ReleaseDC(pDC);
-	}
+	ReleaseDC(pDC);
 	
-	return (pDC != NULL);
+	return TRUE;
 }
 
 int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
@@ -275,7 +249,7 @@ int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			{
 				const_cast<CHMXChartEx*>(this)->HideLastHighlightedPoint();
 
-				if (const_cast<CHMXChartEx*>(this)->HighlightDataPoints(nHit))
+				if (const_cast<CHMXChartEx*>(this)->HighlightDataPoint(nHit))
 				{
 					m_nLastTooltipHit = nHit;
 					//CDialogHelper::TrackMouseLeave(*this);
@@ -303,24 +277,17 @@ CString CHMXChartEx::GetTooltip(int nHit) const
 
 BOOL CHMXChartEx::AdjustTooltipRect(CRect& rScreen)
 {
-	if (m_nLastTooltipHit != -1)
+	if ((m_nLastTooltipHit != -1) && (m_ptTooltipOffset != NULL_POINT))
 	{
-		// Offset to the right and place close to the relevant data point
-		//CPoint ptAveData;
-
-		//if (GetAveragePointXY(m_nLastTooltipHit, ptAveData))
-		{
-			//ClientToScreen(&ptAveData);
-			rScreen.OffsetRect(TOOLTIPOFFSET, 0/*ptAveData.y - rScreen.CenterPoint().y*/);
-
-			return TRUE;
-		}
+		rScreen.OffsetRect(m_ptTooltipOffset);
+		return TRUE;
 	}
 
 	// else
 	return FALSE;
 }
 
+/*
 BOOL CHMXChartEx::GetAveragePointXY(int nIndex, CPoint& point) const
 {
 	int nNumSets = 0;
@@ -345,6 +312,7 @@ BOOL CHMXChartEx::GetAveragePointXY(int nIndex, CPoint& point) const
 
 	return TRUE;
 }
+*/
 
 int CHMXChartEx::HitTest(const CPoint& ptClient) const
 {
@@ -386,7 +354,7 @@ void CHMXChartEx::HideLastHighlightedPoint()
 {
 	if (m_nLastTooltipHit != -1)
 	{
-		HighlightDataPoints(m_nLastTooltipHit);
+		HighlightDataPoint(m_nLastTooltipHit);
 		m_nLastTooltipHit = -1;
 	}
 }

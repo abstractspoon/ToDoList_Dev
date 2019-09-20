@@ -48,6 +48,8 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	//m_graphs.Add(new ());
 
 	//FileMisc::EnableLogging(TRUE);
+
+	SetTooltipOffset(16, 0);
 }
 
 CBurndownChart::~CBurndownChart()
