@@ -102,6 +102,22 @@ void RGBX::AdjustLighting(double dFactor, bool bRGB)
 	}
 }
 
+COLORREF RGBX::Complement(COLORREF color, bool bRGB)
+{
+	if (bRGB)
+		return RGB((255 - GetRValue(color)), (255 - GetGValue(color)), (255 - GetBValue(color)));
+
+	// else
+	HLSX hls(color);
+
+	hls.fHue += 180.0f;
+
+	if (hls.fHue > 360.0f)
+		hls.fHue -= 360.0f;
+
+	return hls;
+}
+
 COLORREF RGBX::HLS2RGB(const HLSX& hls, RGBX& rgb)
 {
 	if (!hls.fSaturation)
