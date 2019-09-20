@@ -295,7 +295,7 @@ void CStatsItemArray::RemoveAll()
 
 void CStatsItemArray::RemoveAt(int nIndex, int nCount)
 {
-	ASSERT(nIndex >= 0 && nIndex < GetSize());
+	ASSERT((nIndex >= 0) && ((nIndex + nCount) <= GetSize()));
 	ASSERT(nCount > 0);
 
 	nIndex += nCount;
