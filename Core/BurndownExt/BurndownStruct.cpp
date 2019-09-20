@@ -27,9 +27,9 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-STATSITEM::STATSITEM() 
+STATSITEM::STATSITEM(DWORD dwID)
 	: 
-	dwTaskID(0), 
+	dwTaskID(dwID), 
 	dTimeEst(0.0), 
 	nTimeEstUnits(TDCU_DAYS),
 	dTimeSpent(0.0),
@@ -240,17 +240,18 @@ CStatsItemArray::~CStatsItemArray()
 
 STATSITEM* CStatsItemArray::AddItem(DWORD dwTaskID)
 {
-	if (HasItem(dwTaskID))
+	STATSITEM* pSI = GetItem(dwTaskID);
+
+	if (pSI)
 	{
 		ASSERT(0);
 		return NULL;
 	}
 
-	STATSITEM* pSI = new STATSITEM();
-	pSI->dwTaskID = dwTaskID;
-
+	pSI = new STATSITEM(dwTaskID);
 	Add(pSI);
-	m_setTaskIDs.Add(dwTaskID);
+
+	m_mapTasks[dwTaskID] = pSI;
 
 	return pSI;
 }
@@ -260,39 +261,12 @@ STATSITEM* CStatsItemArray::operator[](int nIndex) const
 	return CArray<STATSITEM*, STATSITEM*>::operator[](nIndex);
 }
 
-BOOL CStatsItemArray::HasItem(DWORD dwTaskID) const
-{
-	return m_setTaskIDs.Has(dwTaskID);
-}
-
-int CStatsItemArray::FindItem(DWORD dwTaskID) const
-{
-	if (!HasItem(dwTaskID))
-		return -1;
-
-	int nIndex = GetSize();
-
-	while (nIndex--)
-	{
-		const STATSITEM* pSI = GetAt(nIndex);
-
-		if (pSI->dwTaskID == dwTaskID)
-			return nIndex;
-	}
-
-	// not found
-	ASSERT(0);
-	return -1;
-}
-
 STATSITEM* CStatsItemArray::GetItem(DWORD dwTaskID) const
 {
-	int nFind = FindItem(dwTaskID);
+	STATSITEM* pSI = NULL;
+	m_mapTasks.Lookup(dwTaskID, pSI);
 
-	if (nFind == -1)
-		return NULL;
-
-	return GetAt(nFind);
+	return pSI;
 }
 
 int CStatsItemArray::GetSize() const
@@ -316,7 +290,7 @@ void CStatsItemArray::RemoveAll()
 	}
 
 	CArray<STATSITEM*, STATSITEM*>::RemoveAll();
-	m_setTaskIDs.RemoveAll();
+	m_mapTasks.RemoveAll();
 }
 
 void CStatsItemArray::RemoveAt(int nIndex, int nCount)
@@ -330,7 +304,7 @@ void CStatsItemArray::RemoveAt(int nIndex, int nCount)
 	{
 		STATSITEM* pSI = GetAt(nIndex);
 
-		m_setTaskIDs.RemoveKey(pSI->dwTaskID);
+		m_mapTasks.RemoveKey(pSI->dwTaskID);
 		delete pSI;
 
 		CArray<STATSITEM*, STATSITEM*>::RemoveAt(nIndex);
@@ -366,7 +340,7 @@ BOOL CStatsItemArray::IsSorted() const
 		{
 			// Stop if the preceding task has no start date
 			// OR the preceding task has a later date
-			if (!CDateHelper::IsDateSet(dtPrev) || (pSI->dtStart < dtPrev))
+			if (!CDateHelper::IsDateSet(dtPrev) || (pSI->dtStart.m_dt < dtPrev.m_dt))
 			{
 				return FALSE;
 			}

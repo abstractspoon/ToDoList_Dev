@@ -27,7 +27,7 @@ struct TRENDLINE
 
 struct STATSITEM 
 { 
-	STATSITEM();
+	STATSITEM(DWORD dwTaskID = 0);
 	virtual ~STATSITEM();
 
 	void Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
@@ -71,7 +71,6 @@ public:
 
 	STATSITEM* AddItem(DWORD dwTaskID);
 	STATSITEM* GetItem(DWORD dwTaskID) const;
-	BOOL HasItem(DWORD dwTaskID) const;
 	BOOL IsEmpty() const;
 	int GetSize() const;
 
@@ -79,16 +78,15 @@ public:
 	void RemoveAt(int nIndex, int nCount = 1);
 
 	void Sort();
-	BOOL IsSorted() const;
 
 	STATSITEM* operator[](int nIndex) const;
 	void GetDataExtents(COleDateTimeRange& dtExtents) const;
 
 protected:
-	CDWordSet m_setTaskIDs;
+	CMap<DWORD, DWORD, STATSITEM*, STATSITEM*&> m_mapTasks;
 	
 protected:
-	int FindItem(DWORD dwTaskID) const;
+	BOOL IsSorted() const;
 
 	static int CompareItems(const void* pV1, const void* pV2);
 	static int CompareDates(const COleDateTime& date1, const COleDateTime& date2);
