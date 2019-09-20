@@ -775,7 +775,7 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 			CGdiPlusGraphics graphics(dc);
 			CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize());
 
-			VERIFY(CGdiPlus::DrawPolygon(graphics, pen, points.GetData(), points.GetSize()));
+			VERIFY(CGdiPlus::DrawLines(graphics, pen, points.GetData(), points.GetSize()));
 			
 			HMX_DATASET_MARKER nMarker = ds.GetMarker();
 
