@@ -21,7 +21,8 @@ const COLORREF	COLOR_BLUE		= RGB(0,     0, 244);
 const COLORREF	COLOR_PINK		= RGB(234,  28,  74); 
 const COLORREF	COLOR_ORANGE	= RGB(255,  91,  21);
 
-const int		LINE_THICKNESS	= 1;
+const int		GRAPH_LINE_THICKNESS = 1;
+const int		TREND_LINE_THICKNESS = 2;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -170,7 +171,7 @@ BOOL CGraphBase::CalculateTrendLine(CHMXDataset datasets[HMX_MAX_DATASET], BURND
 
 	if (bSuccess)
 	{
-		datasets[nDatasetDest].SetSize(1);
+		datasets[nDatasetDest].SetSize(TREND_LINE_THICKNESS);
 		datasets[nDatasetDest].SetStyle(HMX_DATASET_STYLE_LINE_DOTTED); 
 		datasets[nDatasetDest].SetLineColor(0);
 	}
@@ -190,7 +191,7 @@ void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, C
 	SetDatasetColor(datasets, 0, COLOR_GREEN);
 
 	datasets[0].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[0].SetSize(LINE_THICKNESS);
+	datasets[0].SetSize(GRAPH_LINE_THICKNESS);
 	datasets[0].SetMin(0.0);
 
 	// build the graph
@@ -262,11 +263,11 @@ void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHM
 	SetDatasetColor(datasets, REMAINING_SPENT, COLOR_YELLOW);
 
 	datasets[REMAINING_ESTIMATE].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[REMAINING_ESTIMATE].SetSize(LINE_THICKNESS);
+	datasets[REMAINING_ESTIMATE].SetSize(GRAPH_LINE_THICKNESS);
 	datasets[REMAINING_ESTIMATE].SetMin(0.0);
 	
 	datasets[REMAINING_SPENT].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[REMAINING_SPENT].SetSize(LINE_THICKNESS);
+	datasets[REMAINING_SPENT].SetSize(GRAPH_LINE_THICKNESS);
 	datasets[REMAINING_SPENT].SetMin(0.0);
 	
 	// build the graph
@@ -342,11 +343,11 @@ void CStartedEndedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator,
 	SetDatasetColor(datasets, ENDED_TASKS, COLOR_RED);
 
 	datasets[STARTED_TASKS].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[STARTED_TASKS].SetSize(LINE_THICKNESS);
+	datasets[STARTED_TASKS].SetSize(GRAPH_LINE_THICKNESS);
 	datasets[STARTED_TASKS].SetMin(0.0);
 
 	datasets[ENDED_TASKS].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[ENDED_TASKS].SetSize(LINE_THICKNESS);
+	datasets[ENDED_TASKS].SetSize(GRAPH_LINE_THICKNESS);
 	datasets[ENDED_TASKS].SetMin(0.0);
 
 	// build the graph
@@ -429,11 +430,11 @@ void CEstimatedSpentDaysGraph::BuildGraph(const CStatsItemCalculator& calculator
 	SetDatasetColor(datasets, SPENT_DAYS, COLOR_GREEN);
 
 	datasets[ESTIMATED_DAYS].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[ESTIMATED_DAYS].SetSize(LINE_THICKNESS);
+	datasets[ESTIMATED_DAYS].SetSize(GRAPH_LINE_THICKNESS);
 	datasets[ESTIMATED_DAYS].SetMin(0.0);
 
 	datasets[SPENT_DAYS].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[SPENT_DAYS].SetSize(LINE_THICKNESS);
+	datasets[SPENT_DAYS].SetSize(GRAPH_LINE_THICKNESS);
 	datasets[SPENT_DAYS].SetMin(0.0);
 
 	// build the graph
@@ -511,11 +512,11 @@ void CEstimatedSpentCostGraph::BuildGraph(const CStatsItemCalculator& calculator
 	SetDatasetColor(datasets, SPENT_COST, COLOR_GREEN);
 
 	datasets[ESTIMATED_COST].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[ESTIMATED_COST].SetSize(LINE_THICKNESS);
+	datasets[ESTIMATED_COST].SetSize(GRAPH_LINE_THICKNESS);
 	datasets[ESTIMATED_COST].SetMin(0.0);
 
 	datasets[SPENT_COST].SetStyle(HMX_DATASET_STYLE_AREALINE);
-	datasets[SPENT_COST].SetSize(LINE_THICKNESS);
+	datasets[SPENT_COST].SetSize(GRAPH_LINE_THICKNESS);
 	datasets[SPENT_COST].SetMin(0.0);
 
 	// build the graph
