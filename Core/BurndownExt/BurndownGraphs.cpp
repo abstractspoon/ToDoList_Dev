@@ -171,8 +171,8 @@ BOOL CGraphBase::CalculateTrendLine(CHMXDataset datasets[HMX_MAX_DATASET], BURND
 	if (bSuccess)
 	{
 		datasets[nDatasetDest].SetSize(1);
-		datasets[nDatasetDest].SetStyle(HMX_DATASET_STYLE_LINE);
-		datasets[nDatasetDest].SetLineColor(255);
+		datasets[nDatasetDest].SetStyle(HMX_DATASET_STYLE_LINE_DOTTED); 
+		datasets[nDatasetDest].SetLineColor(0);
 	}
 
 	return bSuccess;

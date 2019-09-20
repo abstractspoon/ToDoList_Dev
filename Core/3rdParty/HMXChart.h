@@ -222,6 +222,8 @@ protected:
 
 	BOOL GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double nBarWidth = -1) const;
 	BOOL GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, double nBarWidth = -1) const;
+
+	static gdix_PenStyle GetPenStyle(HMX_DATASET_STYLE nLineStyle);
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -669,15 +669,11 @@ bool CHMXChart::DrawYScale(CDC & dc)
 //
 bool CHMXChart::DrawDatasets(CDC& dc)
 {
-	int f = HMX_MAX_DATASET;
-	
-	// Draw dataset from last to first so I can show 
-	// first dataset in foreground, below the second dataset and so on
-	while (f--)
+	for (int f = 0; f < HMX_MAX_DATASET; f++)
 	{
 		DrawDataset(dc, f, 128);
 	}
-
+	
 	return true;
 }
 
@@ -736,6 +732,20 @@ BOOL CHMXChart::GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int
 	return TRUE;
 }
 
+gdix_PenStyle CHMXChart::GetPenStyle(HMX_DATASET_STYLE nLineStyle)
+{
+	switch (nLineStyle)
+	{
+	case HMX_DATASET_STYLE_LINE:		return gdix_PenStyleSolid;
+	case HMX_DATASET_STYLE_LINE_DASHED:	return gdix_PenStyleDash;
+	case HMX_DATASET_STYLE_LINE_DOTTED: return gdix_PenStyleDot;
+	}
+
+	// all else
+	ASSERT(0);
+	return gdix_PenStyleSolid;
+}
+
 bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
@@ -765,6 +775,8 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 	switch (ds.GetStyle())
 	{
 	case HMX_DATASET_STYLE_LINE:
+	case HMX_DATASET_STYLE_LINE_DASHED:
+	case HMX_DATASET_STYLE_LINE_DOTTED:
 		{
 			CArray<gdix_PointF, gdix_PointF&> points;
 			int nPoints = GetPoints(ds, points, FALSE);
@@ -773,7 +785,7 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 				return false;
 
 			CGdiPlusGraphics graphics(dc);
-			CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize());
+			CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize(), GetPenStyle(ds.GetStyle()));
 
 			VERIFY(CGdiPlus::DrawLines(graphics, pen, points.GetData(), points.GetSize()));
 			

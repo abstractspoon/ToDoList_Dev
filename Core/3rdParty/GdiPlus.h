@@ -129,6 +129,16 @@ enum gdix_FillMode
 	gdix_FillModeAlternate = 0
 };
 
+enum gdix_PenStyle
+{
+	gdix_PenStyleSolid = 0,
+	gdix_PenStyleDash,
+	gdix_PenStyleDot,
+	gdix_PenStyleDashDot,
+	gdix_PenStyleDashDotDot,
+	//gdix_PenStyleCustom
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define gdix_StringFormatFlagsNoWrap   0x00001000
@@ -178,11 +188,13 @@ protected:
 class CGdiPlusPen
 {
 public:
-	CGdiPlusPen(COLORREF color, int nWidth);
+	CGdiPlusPen(COLORREF color, int nWidth, gdix_PenStyle nStyle = gdix_PenStyleSolid);
 	virtual ~CGdiPlusPen();
 
 	operator gdix_Pen*() { return m_pen; }
+
 	BOOL IsValid() const { return (m_pen != NULL); }
+	BOOL SetStyle(gdix_PenStyle nStyle);
 
 protected:
 	gdix_Pen* m_pen;
@@ -266,6 +278,7 @@ public:
 
 	static BOOL CreatePen(gdix_ARGB color, gdix_Real width, gdix_Pen** pen);
 	static BOOL DeletePen(gdix_Pen* pen);
+	static BOOL SetPenStyle(gdix_Pen* pen, gdix_PenStyle style);
 	
 	static BOOL CreateBrush(gdix_ARGB color, gdix_Brush** brush);
 	static BOOL DeleteBrush(gdix_Brush* brush);

@@ -45,9 +45,17 @@ CGdiPlusGraphics::~CGdiPlusGraphics()
 
 //////////////////////////////////////////////////////////////////////
 
-CGdiPlusPen::CGdiPlusPen(COLORREF color, int nWidth) : m_pen(NULL)
+CGdiPlusPen::CGdiPlusPen(COLORREF color, int nWidth, gdix_PenStyle nStyle) : m_pen(NULL)
 {
 	VERIFY(CGdiPlus::CreatePen(CGdiPlus::MakeARGB(color), (float)nWidth, &m_pen));
+
+	if (nStyle != gdix_PenStyleSolid)
+		VERIFY(SetStyle(nStyle));
+}
+
+BOOL CGdiPlusPen::SetStyle(gdix_PenStyle nStyle)
+{
+	return CGdiPlus::SetPenStyle(m_pen, nStyle);
 }
 
 CGdiPlusPen::~CGdiPlusPen()
@@ -194,6 +202,7 @@ typedef gdix_Status (STDAPICALLTYPE *PFNCREATEPEN1)(gdix_ARGB,gdix_Real,gdix_Uni
 typedef gdix_Status (STDAPICALLTYPE *PFNDELETEPEN)(gdix_Pen*);
 typedef gdix_Status (STDAPICALLTYPE *PFNSETPENWIDTH)(gdix_Pen*,gdix_Real);
 typedef gdix_Status (STDAPICALLTYPE *PFNSETPENCOLOR)(gdix_Pen*,gdix_ARGB);
+typedef gdix_Status (STDAPICALLTYPE *PFNSETPENSTYLE)(gdix_Pen*,gdix_PenStyle);
 
 // Brush management 
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATESOLIDFILL)(gdix_ARGB,gdix_SolidFill**);
@@ -407,6 +416,16 @@ BOOL CGdiPlus::DeletePen(gdix_Pen* pen)
 	GETPROCADDRESS(PFNDELETEPEN, "GdipDeletePen");
 
 	return (pFN(pen) == gdix_Ok);
+}
+
+BOOL CGdiPlus::SetPenStyle(gdix_Pen* pen, gdix_PenStyle style)
+{
+	if (!pen)
+		return FALSE;
+
+	GETPROCADDRESS(PFNSETPENSTYLE, "GdipSetPenDashStyle");
+
+	return (pFN(pen, style) == gdix_Ok);
 }
 
 BOOL CGdiPlus::CreateBrush(gdix_ARGB color, gdix_Brush** brush)
