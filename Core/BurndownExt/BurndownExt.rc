@@ -145,10 +145,9 @@ BEGIN
                     8
     CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,339,
                     12,112,13
-    LTEXT           "Trend Lines",IDC_STATIC,126,2,120,8
+    LTEXT           "Trend Line",IDC_STATIC,126,2,120,8
     COMBOBOX        IDC_TRENDLINES,126,13,121,118,CBS_DROPDOWNLIST | 
-                    CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
-                    WS_VSCROLL | WS_TABSTOP
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
 END
 
 
@@ -209,8 +208,13 @@ BEGIN
     IDS_DISPLAY_ESTIMATEDSPENTDAYS "Estimated/Spent Days"
     IDS_DISPLAY_ESTIMATEDSPENTCOST "Estimated/Spent Cost"
     IDS_TREND_BESTFIT       "Linear Regression (Best fit line)"
-    IDS_TREND_7DAYAVERAGE   "Simple Moving Average (7 day)"
-    IDS_TREND_30DAYAVERAGE  "Simple Moving Average (30 day)"
+    IDS_TREND_7DAYAVERAGE   "Simple Rolling Average (7 day)"
+    IDS_TREND_30DAYAVERAGE  "Simple Rolling Average (30 day)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_TREND_NONE          "<none>"
 END
 
 #endif    // English (Australia) resources

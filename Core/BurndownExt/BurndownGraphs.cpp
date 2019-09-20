@@ -25,7 +25,7 @@ const int		LINE_THICKNESS	= 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
-CGraphBase::CGraphBase() : m_dwTrends(0)
+CGraphBase::CGraphBase() : m_nTrend(BTL_NONE)
 {
 }
 
@@ -116,7 +116,7 @@ BOOL CGraphBase::MoveDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDataset
 	return TRUE;
 }
 
-BOOL CGraphBase::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], DWORD dwTrends, int nDatasetSrc, int& nDatasetDest) const
+BOOL CGraphBase::CalculateTrendLine(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend, int nDatasetSrc, int nDatasetDest) const
 {
 	// Sanity check
 	if (nDatasetDest <= nDatasetSrc)
@@ -125,43 +125,33 @@ BOOL CGraphBase::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], DWOR
 		return FALSE;
 	}
 
-	int nStartDatasetDest = nDatasetDest;
-	BOOL bSuccess = TRUE;
+	BOOL bSuccess = FALSE;
 
-	for (int nTrend = 0; ((nTrend < NUM_TRENDS) && bSuccess); nTrend++)
+	switch (nTrend)
 	{
-		if (dwTrends & TRENDS[nTrend].dwTrend)
-		{
-			switch (TRENDS[nTrend].dwTrend)
-			{
-			case BTL_BEST_FIT:
-				bSuccess &= CalculateBestFitLine(datasets, nDatasetSrc, nDatasetDest++);
-				break;
+	case BTL_NONE:
+		bSuccess = TRUE;
+		break;
 
-			case BTL_7DAY_MOVING_AVERAGE:
-				bSuccess &= CalculateMovingAverage(datasets, nDatasetSrc, nDatasetDest++, 7);
-				break;
+	case BTL_BEST_FIT:
+		bSuccess = CalculateBestFitLine(datasets, nDatasetSrc, nDatasetDest);
+		break;
 
-			case BTL_30DAY_MOVING_AVERAGE:
-				bSuccess &= CalculateMovingAverage(datasets, nDatasetSrc, nDatasetDest++, 30);
-				break;
+	case BTL_7DAY_ROLLING_AVERAGE:
+		bSuccess = CalculateMovingAverage(datasets, nDatasetSrc, nDatasetDest, 7);
+		break;
 
-			default:
-				ASSERT(0);
-				break;
-			}
-		}
+	case BTL_30DAY_ROLLING_AVERAGE:
+		bSuccess = CalculateMovingAverage(datasets, nDatasetSrc, nDatasetDest, 30);
+		break;
+
+	default:
+		ASSERT(0);
+		break;
 	}
 
-	// If any failed, reset all
-	if (!bSuccess)
-		nDatasetDest = nStartDatasetDest;
-
-	// Reset any unused datasets
-	for (int nUnused = nDatasetDest; nUnused < (nStartDatasetDest + NUM_TRENDS); nUnused++)
-	{
-		datasets[nUnused].Reset();
-	}
+	if ((nTrend == BTL_NONE) || !bSuccess)
+		datasets[nDatasetDest].Reset();
 
 	return bSuccess;
 }
@@ -211,10 +201,9 @@ void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, C
 			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
 			datasets[0].SetMax(dMax);
 		}
-
-		int nTrendDataset = 1;
-		CalculateTrendLines(datasets, m_dwTrends, 0, nTrendDataset);
 	}
+
+	CalculateTrendLine(datasets, m_nTrend, 0, 1);
 }
 
 CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -233,23 +222,21 @@ CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator
 	return sTooltip;
 }
 
-BOOL CIncompleteTasksGraph::EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CIncompleteTasksGraph::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
 {
-	if (dwTrends == m_dwTrends)
+	if (nTrend == m_nTrend)
 		return TRUE;
 
-	int nTrendDataset = 1;
-
-	if (CalculateTrendLines(datasets, dwTrends, 0, nTrendDataset))
+	if (CalculateTrendLine(datasets, nTrend, 0, 1))
 	{
-		m_dwTrends = dwTrends;
+		m_nTrend = nTrend;
 	}
 	else
 	{
-		m_dwTrends = 0;
+		m_nTrend = BTL_NONE;
 	}
 		
-	return (m_dwTrends == dwTrends);
+	return (m_nTrend == nTrend);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -326,7 +313,7 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 	return sTooltip;
 }
 
-BOOL CRemainingDaysGraph::EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CRemainingDaysGraph::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;
@@ -403,7 +390,7 @@ CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculat
 	return sTooltip;
 }
 
-BOOL CStartedEndedTasksGraph::EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CStartedEndedTasksGraph::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;
@@ -485,7 +472,7 @@ CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 }
 
-BOOL CEstimatedSpentDaysGraph::EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CEstimatedSpentDaysGraph::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;
@@ -567,7 +554,7 @@ CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 }
 
-BOOL CEstimatedSpentCostGraph::EnableTrends(DWORD dwTrends, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CEstimatedSpentCostGraph::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// TODO
 	return FALSE;

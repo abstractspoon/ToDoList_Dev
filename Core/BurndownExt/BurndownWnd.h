@@ -16,7 +16,6 @@
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\Shared\RangeSliderCtrl.h"
-#include "..\Shared\CheckComboBox.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\ITaskList.h"
@@ -82,14 +81,12 @@ protected:
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CRangeSliderCtrl m_sliderDateRange;
-
-	CComboBox m_cbGraphs;
-	CCheckComboBox m_cbTrends;
+	CComboBox m_cbGraphs, m_cbTrends;
 	
-	DWORD m_dwEnabledTrends;
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;
 	BURNDOWN_GRAPHTYPE m_nGraphType;
+	BURNDOWN_TRENDTYPE m_nTrendLine;
 
 protected:
 // Overrides

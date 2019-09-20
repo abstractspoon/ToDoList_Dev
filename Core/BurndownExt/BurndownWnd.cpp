@@ -61,7 +61,7 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	CDialog(IDD_STATISTICS_DLG, pParent),
 	m_nGraphType(BCT_REMAININGDAYS),
 	m_dwUpdateGraphOnShow(0),
-	m_dwEnabledTrends(0),
+	m_nTrendLine(BTL_NONE),
 	m_dtDataRange(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
 	m_graph(m_data),
 	m_bUpdatingSlider(FALSE),
@@ -89,29 +89,8 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
 
 	CDialogHelper::DDX_CBData(pDX, m_cbGraphs, m_nGraphType, BCT_REMAININGDAYS);
+	CDialogHelper::DDX_CBData(pDX, m_cbTrends, m_nTrendLine, BTL_NONE);
 
-	if (pDX->m_bSaveAndValidate)
-	{
-		m_dwEnabledTrends = 0;
-
-		int nItem = m_cbTrends.GetCount();
-
-		while (nItem--)
-		{
-			if (m_cbTrends.GetCheck(nItem) == CCBC_CHECKED)
-				m_dwEnabledTrends |= m_cbTrends.GetItemData(nItem);
-		}
-	}
-	else
-	{
-		int nItem = m_cbTrends.GetCount();
-
-		while (nItem--)
-		{
-			BOOL bChecked = (m_dwEnabledTrends & m_cbTrends.GetItemData(nItem));
-			m_cbTrends.SetCheck(nItem, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
-		}
-	}
 }
 
 
@@ -212,7 +191,7 @@ void CBurndownWnd::BuildCombos()
 	ASSERT(m_cbTrends.GetCount() == 0);
 
 	for (int nTrend = 0; nTrend < NUM_TRENDS; nTrend++)
-		CDialogHelper::AddString(m_cbTrends, TRENDS[nTrend].nTitleStrID, TRENDS[nTrend].dwTrend);
+		CDialogHelper::AddString(m_cbTrends, TRENDS[nTrend].nTitleStrID, TRENDS[nTrend].nTrend);
 }
 
 void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const 
@@ -222,7 +201,7 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	//CString sKey(szKey);
 
 	pPrefs->WriteProfileInt(szKey, _T("GraphType"), m_nGraphType);
-	pPrefs->WriteProfileInt(szKey, _T("EnabledTrends"), m_dwEnabledTrends);
+	pPrefs->WriteProfileInt(szKey, _T("TrendLine"), m_nTrendLine);
 
 	// Active date range
 	pPrefs->DeleteProfileSection(_T("ActiveRange"));
@@ -251,13 +230,16 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	{
 		//CString sKey(szKey);
 		m_nGraphType = (BURNDOWN_GRAPHTYPE)pPrefs->GetProfileInt(szKey, _T("GraphType"), BCT_INCOMPLETETASKS);
-		m_dwEnabledTrends = (DWORD)pPrefs->GetProfileInt(szKey, _T("EnabledTrends"), 0);
+		m_nTrendLine = (BURNDOWN_TRENDTYPE)pPrefs->GetProfileInt(szKey, _T("TrendLine"), BTL_NONE);
 
 		if (m_nGraphType >= BCT_NUMGRAPHS)
 			m_nGraphType = BCT_INCOMPLETETASKS;
 
+		if (m_nTrendLine >= NUM_TRENDS)
+			m_nTrendLine = BTL_NONE;
+
 		m_graph.SetActiveGraph(m_nGraphType);
-		m_graph.EnableTrends(m_dwEnabledTrends);
+		m_graph.ShowTrendLine(m_nTrendLine);
 
 		// Active range
 		m_dtPrevActiveRange.Reset();
@@ -855,10 +837,10 @@ void CBurndownWnd::UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange
 
 void CBurndownWnd::OnTrendsChanged()
 {
-	DWORD dwPrevTrends = m_dwEnabledTrends;
+	BURNDOWN_TRENDTYPE nPrevTrend = m_nTrendLine;
 
 	UpdateData();
 
-	if (m_dwEnabledTrends != dwPrevTrends)
-		m_graph.EnableTrends(m_dwEnabledTrends);
+	if (m_nTrendLine != nPrevTrend)
+		m_graph.ShowTrendLine(m_nTrendLine);
 }

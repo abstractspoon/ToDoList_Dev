@@ -38,7 +38,7 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_nScale(BCS_DAY),
 	m_nChartType(BCT_INCOMPLETETASKS),
 	m_calculator(data),
-	m_dwEnabledTrends(0)
+	m_nTrendLine(BTL_NONE)
 {
 	VERIFY(m_graphs.Add(new CIncompleteTasksGraph()) == BCT_INCOMPLETETASKS);
 	VERIFY(m_graphs.Add(new CRemainingDaysGraph()) == BCT_REMAININGDAYS);
@@ -106,11 +106,13 @@ BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPHTYPE nType)
 	return FALSE;
 }
 
-void CBurndownChart::EnableTrends(DWORD dwTrends)
+void CBurndownChart::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend)
 {
-	m_graphs[m_nChartType]->EnableTrends(dwTrends, m_datasets);
-
-	m_dwEnabledTrends = dwTrends;
+	if (m_graphs[m_nChartType]->ShowTrendLine(nTrend, m_datasets))
+	{
+		m_nTrendLine = nTrend;
+		Invalidate();
+	}
 }
 
 BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)

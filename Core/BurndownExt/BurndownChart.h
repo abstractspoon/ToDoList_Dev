@@ -22,7 +22,7 @@ public:
 	void SetTodayColour(COLORREF color);
 	BOOL SaveToImage(CBitmap& bmImage);
 
-	void EnableTrends(DWORD dwTrends);
+	void ShowTrendLine(BURNDOWN_TRENDTYPE nTrend);
 	void RebuildGraph(const COleDateTimeRange& dtExtents);
 	BURNDOWN_GRAPHSCALE GetCurrentScale() const { return m_nScale; }
 
@@ -35,8 +35,8 @@ protected:
 	COleDateTimeRange m_dtExtents;
 	CStatsItemCalculator m_calculator;
 	COLORREF m_crToday;
-	DWORD m_dwEnabledTrends;
 
+	BURNDOWN_TRENDTYPE m_nTrendLine;
 	BURNDOWN_GRAPHTYPE m_nChartType;
 	BURNDOWN_GRAPHSCALE m_nScale;
 

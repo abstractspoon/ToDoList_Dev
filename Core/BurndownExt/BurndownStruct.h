@@ -20,7 +20,7 @@
 struct TRENDLINE
 {
 	UINT nTitleStrID;
-	DWORD dwTrend;
+	BURNDOWN_TRENDTYPE nTrend;
 };
 
 /////////////////////////////////////////////////////////////////////////////

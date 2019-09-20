@@ -19,22 +19,23 @@ enum BURNDOWN_GRAPHTYPE
 
 enum BURNDOWN_GRAPHSCALE
 {
-	BCS_DAY,
-	BCS_WEEK,
-	BCS_MONTH,
-	BCS_2MONTH,
-	BCS_QUARTER,
-	BCS_HALFYEAR,
-	BCS_YEAR,
+	BCS_DAY			= 1,
+	BCS_WEEK		= 7,
+	BCS_MONTH		= 30,
+	BCS_2MONTH		= 60,
+	BCS_QUARTER		= 91,
+	BCS_HALFYEAR	= 182,
+	BCS_YEAR		= 365,
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum BURNDOWN_TRENDLINES
+enum BURNDOWN_TRENDTYPE
 {
-	BTL_BEST_FIT				= 0x01,
-	BTL_7DAY_MOVING_AVERAGE		= 0x02,
-	BTL_30DAY_MOVING_AVERAGE	= 0x04,
+	BTL_NONE = -1,
+	BTL_BEST_FIT,
+	BTL_7DAY_ROLLING_AVERAGE,
+	BTL_30DAY_ROLLING_AVERAGE,
 };
 
 /////////////////////////////////////////////////////////////////////////////
