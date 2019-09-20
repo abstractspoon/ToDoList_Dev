@@ -51,8 +51,40 @@ void CGraphBase::SetDatasetColor(CHMXDataset datasets[HMX_MAX_DATASET], int nDat
 
 BOOL CGraphBase::CalculateBestFitLine(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest)
 {
-	// TODO
-	return FALSE;
+	int nNumData = datasets[nDatasetSrc].GetDatasetSize();
+
+	if (nNumData < 2)
+		return FALSE;
+
+	double dSumX = 0, dSumXSquared = 0, dSumY = 0, dSumXY = 0;
+	int nData;
+
+	for (nData = 0; nData < nNumData; nData++)
+	{
+		double dXValue = nData, dYValue;
+		VERIFY(datasets[nDatasetSrc].GetData(nData, dYValue));
+
+		dSumX			+= dXValue;
+		dSumY			+= dYValue;
+		dSumXSquared	+= (dXValue * dXValue);
+		dSumXY			+= (dXValue * dYValue);
+	}
+	
+	double dSlope = ((nNumData * dSumXY) - (dSumX * dSumY)) / ((nNumData * dSumXSquared) - (dSumX * dSumX));
+	double dIntercept = ((dSumXSquared * dSumY) - (dSumX * dSumXY)) / ((dSumXSquared * nNumData) - (dSumX * dSumX));
+
+	// Calculate the data points
+	datasets[nDatasetDest].SetDatasetSize(nNumData);
+
+	for (nData = 0; nData < nNumData; nData++)
+	{
+		double dLine = ((dSlope * nData) + dIntercept);
+		dLine = max(dLine, 0.0);
+
+		datasets[nDatasetDest].SetData(nData, dLine);
+	}
+
+	return TRUE;
 }
 
 BOOL CGraphBase::CalculateMovingAverage(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest, int nWindowSize)
