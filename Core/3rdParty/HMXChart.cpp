@@ -403,13 +403,14 @@ bool CHMXChart::DrawVertGridLines(CDC & dc)
 	CPen* pPenOld = dc.SelectObject(&m_penGrid);
 
 	int nCount = min(m_strarrScaleXLabel.GetSize(), m_nXMax);
+	CPoint ptLine;
 
 	for(int f=0; f < nCount; f += m_nXLabelStep)
 	{
-		if (!m_strarrScaleXLabel[f].IsEmpty())
+		if (!m_strarrScaleXLabel[f].IsEmpty() && GetPointXY(0, f, ptLine))
 		{
-			dc.MoveTo(m_rectData.left + (int)(nX*(f+0.5)), m_rectData.top);
-			dc.LineTo(m_rectData.left + (int)(nX*(f+0.5)), m_rectData.bottom + 8);
+			dc.MoveTo(ptLine.x, m_rectData.top);
+			dc.LineTo(ptLine.x, m_rectData.bottom + 8);
 		}
 	}
 

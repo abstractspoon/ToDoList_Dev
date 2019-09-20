@@ -153,6 +153,13 @@ BOOL CGraphBase::CalculateTrendLine(CHMXDataset datasets[HMX_MAX_DATASET], BURND
 	if ((nTrend == BTL_NONE) || !bSuccess)
 		datasets[nDatasetDest].Reset();
 
+	if (bSuccess)
+	{
+		datasets[nDatasetDest].SetSize(1);
+		datasets[nDatasetDest].SetStyle(HMX_DATASET_STYLE_LINE);
+		datasets[nDatasetDest].SetLineColor(255);
+	}
+
 	return bSuccess;
 }
 
