@@ -33,6 +33,9 @@
     <ClCompile Include="BurndownGraphs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BurndownCalculator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="BurndownExt.def">
@@ -82,6 +85,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BurndownStatic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BurndownCalculator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
