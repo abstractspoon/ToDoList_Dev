@@ -328,8 +328,8 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 
 BOOL CRemainingDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
-	// TODO
-	return FALSE;
+	// No need to calculate trend of remaining estimate because it's already a straight line
+	return CalculateTrendLine(nTrend, datasets[REMAINING_SPENT], datasets[REMAINING_SPENT + 1]);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -497,7 +497,15 @@ CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 BOOL CEstimatedSpentDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
-	// TODO
+	if (CalculateTrendLine(nTrend, datasets[ESTIMATED_DAYS], datasets[ESTIMATED_DAYS + 2]) &&
+		CalculateTrendLine(nTrend, datasets[SPENT_DAYS], datasets[SPENT_DAYS + 2]))
+	{
+		return TRUE;
+	}
+
+	datasets[ESTIMATED_DAYS + 2].Reset();
+	datasets[SPENT_DAYS + 2].Reset();
+
 	return FALSE;
 }
 
@@ -579,7 +587,15 @@ CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 BOOL CEstimatedSpentCostGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
-	// TODO
+	if (CalculateTrendLine(nTrend, datasets[ESTIMATED_COST], datasets[ESTIMATED_COST + 2]) &&
+		CalculateTrendLine(nTrend, datasets[SPENT_COST], datasets[SPENT_COST + 2]))
+	{
+		return TRUE;
+	}
+
+	datasets[ESTIMATED_COST + 2].Reset();
+	datasets[SPENT_COST + 2].Reset();
+
 	return FALSE;
 }
 
