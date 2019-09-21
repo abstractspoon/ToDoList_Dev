@@ -31,15 +31,12 @@ protected:
 
 	virtual BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const = 0;
 	
-	static BOOL CalculateTrendLine(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend, int nDatasetSrc, int nDatasetDest);
-	static void SetDatasetColor(CHMXDataset datasets[HMX_MAX_DATASET], int nDataset, COLORREF crBase);
-
-// 	static BOOL	CopyDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
-// 	static BOOL	MoveDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
+	static BOOL CalculateTrendLine(BURNDOWN_TRENDTYPE nTrend, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest);
+	static void SetDatasetColor(CHMXDataset& dataset, COLORREF crBase);
 
 private:
-	static BOOL CalculateBestFitLine(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest);
-	static BOOL CalculateMovingAverage(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest, int nWindowSize);
+	static BOOL CalculateBestFitLine(const CHMXDataset& datasetSrc, CHMXDataset& datasetDest);
+	static BOOL CalculateMovingAverage(int nWindowSize, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest);
 };
 
 /////////////////////////////////////////////////////////////////////////////
