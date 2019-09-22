@@ -77,9 +77,6 @@
     <ClInclude Include="..\3rdParty\myspell\mythes.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Shared\SpellChecker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="StdAfx.h">
       <Filter>Header Files</Filter>
     </ClInclude>

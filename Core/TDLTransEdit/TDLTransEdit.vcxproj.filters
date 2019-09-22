@@ -72,6 +72,5 @@
     <CustomBuild Include="res\TDLTransEdit.rc2">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="ReadMe.txt" />
   </ItemGroup>
 </Project>

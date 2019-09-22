@@ -96,9 +96,6 @@
     <CustomBuild Include="res\help_button.ico">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="res\icon1.ico">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="res\toolbar.bmp">
       <Filter>Resource Files</Filter>
     </CustomBuild>
