@@ -20,7 +20,8 @@ static char THIS_FILE[] = __FILE__;
 
 CStatsItemCalculator::CStatsItemCalculator(const CStatsItemArray& data)
 	:
-	m_data(data)
+	m_data(data),
+	m_nTotalWeekdays(0)
 {
 }
 
@@ -39,18 +40,14 @@ BOOL CStatsItemCalculator::SetDateRange(const COleDateTimeRange& dtExtents)
 
 	m_dStartExtents = dtExtents.GetStart();
 	m_dEndExtents = CDateHelper::GetEndOfMonth(dtExtents.GetEndInclusive());
-
-	m_nTotalDays = m_nTotalWeekdays = 0;
+	m_nTotalWeekdays = 0;
 
 	return TRUE;
 }
 
 int CStatsItemCalculator::GetTotalDays() const
 {
-	if (m_nTotalDays == 0)
-		m_nTotalDays = (int)(m_dEndExtents - m_dStartExtents);
-
-	return m_nTotalDays;
+	return (int)(m_dEndExtents - m_dStartExtents);
 }
 
 int CStatsItemCalculator::GetTotalWeekdays() const
@@ -277,7 +274,7 @@ double CStatsItemCalculator::GetCostSpent(const COleDateTime& date) const
 
 // ----------------------------------------------------
 
-double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nType) const
+double CStatsItemCalculator::GetTotalAttribValue(TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType) const
 {
 	double dTotal = 0;
 	int nNumItems = m_data.GetSize();
@@ -298,7 +295,7 @@ double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nTyp
 	return dTotal;
 }
 
-double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nType, const COleDateTime& date) const
+double CStatsItemCalculator::GetTotalAttribValue(TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType, const COleDateTime& date) const
 {
 	double dTotal = 0;
 	int nNumItems = m_data.GetSize();
@@ -321,7 +318,7 @@ double CStatsItemCalculator::GetTotalAttribValue(ATTRIB nAttrib, ATTRIBTYPE nTyp
 	return dTotal;
 }
 
-double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib, ATTRIBTYPE nType) const
+double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType) const
 {
 	double dValue = 0.0;
 
@@ -380,7 +377,7 @@ double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib,
 	return (dValue * dProportion);
 }
 
-double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, ATTRIB nAttrib, ATTRIBTYPE nType, const COleDateTime& date) const
+double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType, const COleDateTime& date) const
 {
 	double dValue = GetAttribValue(si, nAttrib, nType);
 
@@ -453,3 +450,50 @@ TH_UNITS CStatsItemCalculator::MapUnitsToTHUnits(TDC_UNITS nUnits)
 	return THU_NULL;
 }
 
+int CStatsItemCalculator::GetAttribFrequencies(FREQUENCY_ATTRIB nAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const
+{
+	mapFrequencies.RemoveAll();
+	int nNumItems = m_data.GetSize();
+
+	COleDateTime dtItemEnd;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const STATSITEM* pSI = m_data[nItem];
+
+		switch (nAttrib)
+		{
+		case CATEGORY:	AppendFrequencyAttribs(pSI->aCategory,		mapFrequencies); break;
+		case ALLOCTO:	AppendFrequencyAttribs(pSI->aAllocatedTo,	mapFrequencies); break;
+		case TAGS:		AppendFrequencyAttribs(pSI->aTags,			mapFrequencies); break;
+
+		case STATUS:	AppendFrequencyAttrib(pSI->sStatus,		mapFrequencies); break;
+		case ALLOCBY:	AppendFrequencyAttrib(pSI->sAllocatedBy,	mapFrequencies); break;
+		case PRIORITY:	AppendFrequencyAttrib(pSI->sPriority,		mapFrequencies); break;
+		case RISK:		AppendFrequencyAttrib(pSI->sRisk,			mapFrequencies); break;
+		case VERSION:	AppendFrequencyAttrib(pSI->sVersion,		mapFrequencies); break;
+		}
+	}
+
+	return mapFrequencies.GetSize();
+}
+
+void CStatsItemCalculator::AppendFrequencyAttrib(const CString& sAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const
+{
+	mapFrequencies[sAttrib]++;
+}
+
+void CStatsItemCalculator::AppendFrequencyAttribs(const CStringArray& aAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const
+{
+	int nAttrib = aAttrib.GetSize();
+
+	if (nAttrib == 0)
+	{
+		mapFrequencies[_T("")]++;
+	}
+	else
+	{
+		while (nAttrib--)
+			mapFrequencies[aAttrib[nAttrib]]++;
+	}
+}

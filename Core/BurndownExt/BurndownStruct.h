@@ -48,6 +48,16 @@ struct STATSITEM
 	BOOL bCostIsRate;
 	DWORD dwTaskID;
 
+	CStringArray aCategory;
+	CStringArray aAllocatedTo;
+	CStringArray aTags;
+
+	CString sStatus;
+	CString sAllocatedBy;
+	CString sPriority;
+	CString sRisk;
+	CString sVersion;
+
 protected:
 	void ValidateStartDate();
 
