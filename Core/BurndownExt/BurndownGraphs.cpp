@@ -175,7 +175,7 @@ BOOL CGraphBase::CalculateTrendLine(BURNDOWN_TRENDTYPE nTrend, const CHMXDataset
 	{
 		datasetDest.SetSize(TREND_LINE_THICKNESS);
 		datasetDest.SetStyle(HMX_DATASET_STYLE_LINE_DOTTED); 
-		datasetDest.SetLineColor(GraphicsMisc::Darker(datasetSrc.GetLineColor(), 0.1, FALSE));
+		datasetDest.SetLineColor(GraphicsMisc::Darker(datasetSrc.GetLineColor(), 0.2, FALSE));
 	}
 
 	return bSuccess;
