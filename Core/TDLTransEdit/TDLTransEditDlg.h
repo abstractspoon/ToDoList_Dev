@@ -83,6 +83,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnOptionsSortUntranslatedAtTop();
 	afx_msg void OnToolsExportUntranslated();
+	afx_msg void OnToolsImportTranslated();
 	DECLARE_MESSAGE_MAP()
 
 protected:

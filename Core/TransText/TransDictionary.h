@@ -112,6 +112,7 @@ public:
 	BOOL Translate(CString& sText, HMENU hMenu, BOOL bValidateAccelerator = TRUE);
 
 	BOOL ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut);
+	int ModifyItems(const CStringArray& aTextIn, const CStringArray& aTextOut);
 
 	TD_CLEANUP CleanupDictionary(const CTransDictionary& tdMaster, CTransDictionary& tdRemoved);
 	int GetUntranslatedItems(CStringArray& aItems, BOOL bSorted) const;

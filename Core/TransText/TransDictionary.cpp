@@ -1354,6 +1354,26 @@ BOOL CTransDictionary::ModifyItem(const CString& sTextIn, const CString& sClassI
 	return FALSE;
 }
 
+int CTransDictionary::ModifyItems(const CStringArray& aTextIn, const CStringArray& aTextOut)
+{
+	if (aTextIn.GetSize() != aTextOut.GetSize())
+		return -1;
+
+	int nNumModified = 0;
+
+	for (int nItem = 0; nItem < aTextIn.GetSize(); nItem++)
+	{
+		CString sTemp(aTextIn[nItem]);
+		DICTITEM* pDI = GetDictItem(sTemp, FALSE);
+
+		if (pDI && pDI->ModifyItem(pDI->GetClassID(), aTextOut[nItem]))
+			nNumModified++;
+	}
+
+	return nNumModified;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 

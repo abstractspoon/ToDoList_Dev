@@ -60,6 +60,7 @@ BEGIN_MESSAGE_MAP(CTDLTransEditDlg, CDialog)
 	//{{AFX_MSG_MAP(CTDLTransEditDlg)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_TOOLS_EXPORTUNTRANSLATED, OnToolsExportUntranslated)
+	ON_COMMAND(ID_TOOLS_IMPORTTRANSLATED, OnToolsImportTranslated)
 	ON_COMMAND(ID_OPTIONS_SHOWTOOLTIPS, OnOptionsShowTooltips)
 	ON_COMMAND(ID_TOOLS_CLEANUP, OnToolsCleanUp)
 	ON_COMMAND(ID_FILE_OPEN_TRANSLATION, OnFileOpenTranslation)
@@ -105,6 +106,8 @@ BOOL CTDLTransEditDlg::OnInitDialog()
 		m_mgrShortcuts.AddShortcut(ID_FILE_OPEN_TRANSLATION, 'O', HOTKEYF_CONTROL);
 		m_mgrShortcuts.AddShortcut(ID_FILE_SAVE_TRANSLATION, 'S', HOTKEYF_CONTROL);
 		m_mgrShortcuts.AddShortcut(ID_TOOLS_CLEANUP, 'U', HOTKEYF_CONTROL);
+		m_mgrShortcuts.AddShortcut(ID_TOOLS_EXPORTUNTRANSLATED, 'E', HOTKEYF_CONTROL);
+		m_mgrShortcuts.AddShortcut(ID_TOOLS_IMPORTTRANSLATED, 'I', HOTKEYF_CONTROL);
 		m_mgrShortcuts.AddShortcut(ID_FILE_CLOSE, VK_F4, HOTKEYF_ALT);
 	}
 	
@@ -787,13 +790,113 @@ void CTDLTransEditDlg::OnToolsExportUntranslated()
 
 			if (dict.LoadDictionary(sTranslation, FALSE) && dict.GetUntranslatedItems(aUntranslated, TRUE))
 			{
-				CString sUntransFilePath(sTranslation);
+				// Remove any items which are format strings or contain embedded tabs, newlines, etc
+				// because these trip-up online translators
+				int nItem = aUntranslated.GetSize();
 
-				FileMisc::ReplaceExtension(sUntransFilePath, _T(".txt"));
-				FileMisc::AddToFileName(sUntransFilePath, _T(".untranslated"));
+				while (nItem--)
+				{
+					if (aUntranslated[nItem].FindOneOf(_T("{\\%*|/-")) != -1)
+						aUntranslated.RemoveAt(nItem);
+				}
 
-				FileMisc::SaveFile(sUntransFilePath, Misc::FormatArray(aUntranslated, '\n'), SFEF_UTF8);
+				if (aUntranslated.GetSize())
+				{
+					CString sUntransFilePath(sTranslation);
+
+					FileMisc::ReplaceExtension(sUntransFilePath, _T(".txt"));
+					FileMisc::AddToFileName(sUntransFilePath, _T(".untranslated"));
+
+					FileMisc::SaveFile(sUntransFilePath, Misc::FormatArray(aUntranslated, '\n'), SFEF_UTF8);
+				}
 			}
+		}
+	}
+}
+
+void CTDLTransEditDlg::OnToolsImportTranslated() 
+{
+	CFileOpenDialog dialog(_T("Select Translations"), _T(".translated.txt"), m_sLastBrowsePath, EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT, _T("Translated Text (*.translated.txt)|*.translated.txt||"));
+
+	const UINT BUFSIZE = (MAX_PATH * 50);
+	static TCHAR FILEBUF[BUFSIZE] = { 0 };
+
+	dialog.m_ofn.lpstrFile = FILEBUF;
+	dialog.m_ofn.nMaxFile = BUFSIZE;
+
+	if (dialog.DoModal() == IDOK)
+	{
+		CWaitCursor cursor;
+		CStringArray aFilePaths;
+
+		int nFile = dialog.GetPathNames(aFilePaths);
+		CStringArray aFailed;
+
+		while (nFile--)
+		{
+			const CString& sTranslated = aFilePaths[nFile];
+
+			if (sTranslated.Find(_T("YourLanguage")) != -1)
+				continue;
+
+			// There must be a corresponding Language file
+			CString sDictionary = sTranslated;
+			sDictionary.Replace(_T(".translated.txt"), _T(".csv"));
+
+			if (!FileMisc::FileExists(sDictionary))
+			{
+				aFailed.Add(FileMisc::GetFileNameFromPath(sDictionary));
+				continue;
+			}
+			
+			// There must be a corresponding ".untranslated.txt" file
+			CString sUntranslated = sTranslated;
+			sUntranslated.Replace(_T(".translated.txt"), _T(".untranslated.txt"));
+
+			if (!FileMisc::FileExists(sUntranslated))
+			{
+				aFailed.Add(FileMisc::GetFileNameFromPath(sDictionary));
+				continue;
+			}
+
+			// Translated file date must be later than untranslated
+			if (FileMisc::GetFileLastModified(sTranslated) <= FileMisc::GetFileLastModified(sUntranslated))
+			{
+				aFailed.Add(FileMisc::GetFileNameFromPath(sDictionary));
+				continue;
+			}
+			
+			// Untranslated file date must be later than dictionary
+			if (FileMisc::GetFileLastModified(sUntranslated) <= FileMisc::GetFileLastModified(sDictionary))
+			{
+				aFailed.Add(FileMisc::GetFileNameFromPath(sDictionary));
+				continue;
+			}
+
+			// Text files must have same number of lines
+			CStringArray aUntranslated, aTranslated;
+
+			if (FileMisc::LoadFile(sTranslated, aTranslated) != FileMisc::LoadFile(sUntranslated, aUntranslated))
+			{
+				aFailed.Add(FileMisc::GetFileNameFromPath(sDictionary));
+				continue;
+			}
+			
+			CTransDictionary dict;
+
+			if (dict.LoadDictionary(sDictionary, FALSE))
+			{
+				if (dict.ModifyItems(aUntranslated, aTranslated))
+					dict.SaveDictionary();
+			}
+		}
+
+		if (aFailed.GetSize())
+		{
+			CString sMessage;
+			sMessage.Format(_T("The following translation files could not be updated: \n\n%s"), Misc::FormatArray(aFailed, '\n'));
+
+			MessageBox(sMessage, _T("Update Failed"), MB_OK | MB_ICONEXCLAMATION);
 		}
 	}
 }

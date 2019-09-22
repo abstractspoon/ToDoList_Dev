@@ -213,6 +213,7 @@ BEGIN
         MENUITEM "&Clean Up...",                ID_TOOLS_CLEANUPMULTIPLE
         MENUITEM SEPARATOR
         MENUITEM "Export Untranslated Text...", ID_TOOLS_EXPORTUNTRANSLATED
+        MENUITEM "Import Translated Text...",   ID_TOOLS_IMPORTTRANSLATED
     END
 END
 
