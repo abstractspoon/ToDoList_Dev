@@ -43,15 +43,15 @@ int CGraphBase::HitTest(const CStatsItemCalculator& calculator, const COleDateTi
 	return (int)(date.m_dt - calculator.GetStartDate());
 }
 
-void CGraphBase::SetDatasetColor(CHMXDataset datasets[HMX_MAX_DATASET], int nDataset, COLORREF crBase)
+void CGraphBase::SetDatasetColor(CHMXDataset& dataset, COLORREF crBase)
 {
-	datasets[nDataset].SetLineColor(GraphicsMisc::Darker(crBase, 0.05, FALSE));
-	datasets[nDataset].SetFillColor(GraphicsMisc::Lighter(crBase, 0.25, FALSE));
+	dataset.SetLineColor(GraphicsMisc::Darker(crBase, 0.05, FALSE));
+	dataset.SetFillColor(GraphicsMisc::Lighter(crBase, 0.25, FALSE));
 }
 
-BOOL CGraphBase::CalculateBestFitLine(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest)
+BOOL CGraphBase::CalculateBestFitLine(const CHMXDataset& datasetSrc, CHMXDataset& datasetDest)
 {
-	int nNumData = datasets[nDatasetSrc].GetDatasetSize();
+	int nNumData = datasetSrc.GetDatasetSize();
 
 	if (nNumData < 2)
 		return FALSE;
@@ -62,7 +62,7 @@ BOOL CGraphBase::CalculateBestFitLine(CHMXDataset datasets[HMX_MAX_DATASET], int
 	for (nData = 0; nData < nNumData; nData++)
 	{
 		double dXValue = nData, dYValue;
-		VERIFY(datasets[nDatasetSrc].GetData(nData, dYValue));
+		VERIFY(datasetSrc.GetData(nData, dYValue));
 
 		dSumX			+= dXValue;
 		dSumY			+= dYValue;
@@ -74,82 +74,59 @@ BOOL CGraphBase::CalculateBestFitLine(CHMXDataset datasets[HMX_MAX_DATASET], int
 	double dIntercept = ((dSumXSquared * dSumY) - (dSumX * dSumXY)) / ((dSumXSquared * nNumData) - (dSumX * dSumX));
 
 	// Calculate the data points
-	datasets[nDatasetDest].SetDatasetSize(nNumData);
+	datasetDest.SetDatasetSize(nNumData);
 
 	for (nData = 0; nData < nNumData; nData++)
 	{
 		double dLine = ((dSlope * nData) + dIntercept);
 		dLine = max(dLine, 0.0);
 
-		datasets[nDatasetDest].SetData(nData, dLine);
+		datasetDest.SetData(nData, dLine);
 	}
 
 	return TRUE;
 }
 
-BOOL CGraphBase::CalculateMovingAverage(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest, int nWindowSize)
+BOOL CGraphBase::CalculateMovingAverage(int nWindowSize, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest)
 {
-	int nNumData = datasets[nDatasetSrc].GetDatasetSize();
+	int nNumData = datasetSrc.GetDatasetSize();
 
 	if (nNumData < nWindowSize)
 		return FALSE;
 
-	datasets[nDatasetDest].SetDatasetSize(nNumData);
+	datasetDest.SetDatasetSize(nNumData);
 
 	// The first value is the first data value
 	double dValue = 0, dPrevAverage = 0, dPrevWindowStart = 0;
 
-	datasets[nDatasetSrc].GetData(0, dValue);
-	datasets[nDatasetDest].SetData(0, dValue);
+	datasetSrc.GetData(0, dValue);
+	datasetDest.SetData(0, dValue);
 	
 	// The first 'nWindow' values are simple accumulated averages
 	int nData;
 
 	for (nData = 1; nData < nWindowSize; nData++)
 	{
-		datasets[nDatasetDest].GetData((nData - 1), dPrevAverage);
-		datasets[nDatasetSrc].GetData(nData, dValue);
+		datasetDest.GetData((nData - 1), dPrevAverage);
+		datasetSrc.GetData(nData, dValue);
 
 		dValue = (((dPrevAverage * nData) + dValue) / (nData + 1));
-		datasets[nDatasetDest].SetData(nData, dValue);
+		datasetDest.SetData(nData, dValue);
 	}
 
 	// All the rest require the rolling 
 	for (nData = nWindowSize; nData < nNumData; nData++)
 	{
-		datasets[nDatasetDest].GetData((nData - 1), dPrevAverage);
-		datasets[nDatasetSrc].GetData(nData - nWindowSize, dPrevWindowStart);
-		datasets[nDatasetSrc].GetData(nData, dValue);
+		datasetDest.GetData((nData - 1), dPrevAverage);
+		datasetSrc.GetData(nData - nWindowSize, dPrevWindowStart);
+		datasetSrc.GetData(nData, dValue);
 
 		dValue = (((dPrevAverage * nWindowSize) - dPrevWindowStart + dValue) / nWindowSize);
-		datasets[nDatasetDest].SetData(nData, dValue);
+		datasetDest.SetData(nData, dValue);
 	}
 	
 	return TRUE;
 }
-
-/*
-BOOL CGraphBase::CopyDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest)
-{
-	if ((nDatasetSrc < 0) || (nDatasetSrc >= HMX_MAX_DATASET) ||
-		(nDatasetDest < 0) || (nDatasetDest >= HMX_MAX_DATASET))
-	{
-		return FALSE;
-	}
-
-	datasets[nDatasetDest].Copy(datasets[nDatasetSrc]);
-	return TRUE;
-}
-
-BOOL CGraphBase::MoveDataset(CHMXDataset datasets[HMX_MAX_DATASET], int nDatasetSrc, int nDatasetDest)
-{
-	if (!CopyDataset(datasets, nDatasetSrc, nDatasetDest))
-		return FALSE;
-
-	datasets[nDatasetSrc].Reset();
-	return TRUE;
-}
-*/
 
 BOOL CGraphBase::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
 {
@@ -164,15 +141,8 @@ BOOL CGraphBase::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend, CHMXDataset datasets[H
 	return (m_nTrend == nTrend);
 }
 
-BOOL CGraphBase::CalculateTrendLine(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend, int nDatasetSrc, int nDatasetDest)
+BOOL CGraphBase::CalculateTrendLine(BURNDOWN_TRENDTYPE nTrend, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest)
 {
-	// Sanity check
-	if (nDatasetDest <= nDatasetSrc)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
 	BOOL bSuccess = FALSE;
 
 	switch (nTrend)
@@ -182,15 +152,15 @@ BOOL CGraphBase::CalculateTrendLine(CHMXDataset datasets[HMX_MAX_DATASET], BURND
 		break;
 
 	case BTL_BEST_FIT:
-		bSuccess = CalculateBestFitLine(datasets, nDatasetSrc, nDatasetDest);
+		bSuccess = CalculateBestFitLine(datasetSrc, datasetDest);
 		break;
 
 	case BTL_7DAY_ROLLING_AVERAGE:
-		bSuccess = CalculateMovingAverage(datasets, nDatasetSrc, nDatasetDest, 7);
+		bSuccess = CalculateMovingAverage(7, datasetSrc, datasetDest);
 		break;
 
 	case BTL_30DAY_ROLLING_AVERAGE:
-		bSuccess = CalculateMovingAverage(datasets, nDatasetSrc, nDatasetDest, 30);
+		bSuccess = CalculateMovingAverage(30, datasetSrc, datasetDest);
 		break;
 
 	default:
@@ -199,13 +169,13 @@ BOOL CGraphBase::CalculateTrendLine(CHMXDataset datasets[HMX_MAX_DATASET], BURND
 	}
 
 	if ((nTrend == BTL_NONE) || !bSuccess)
-		datasets[nDatasetDest].Reset();
+		datasetDest.Reset();
 
 	if (bSuccess)
 	{
-		datasets[nDatasetDest].SetSize(TREND_LINE_THICKNESS);
-		datasets[nDatasetDest].SetStyle(HMX_DATASET_STYLE_LINE_DOTTED); 
-		datasets[nDatasetDest].SetLineColor(0);
+		datasetDest.SetSize(TREND_LINE_THICKNESS);
+		datasetDest.SetStyle(HMX_DATASET_STYLE_LINE_DOTTED); 
+		datasetDest.SetLineColor(GraphicsMisc::Darker(datasetSrc.GetLineColor(), 0.2, FALSE));
 	}
 
 	return bSuccess;
@@ -220,7 +190,7 @@ CString CIncompleteTasksGraph::GetTitle() const
 
 void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	SetDatasetColor(datasets, 0, COLOR_GREEN);
+	SetDatasetColor(datasets[0], COLOR_GREEN);
 
 	datasets[0].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[0].SetSize(GRAPH_LINE_THICKNESS);
@@ -279,7 +249,7 @@ CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator
 
 BOOL CIncompleteTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
-	return CalculateTrendLine(datasets, nTrend, 0, 1);
+	return CalculateTrendLine(nTrend, datasets[0], datasets[1]);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -291,8 +261,8 @@ CString CRemainingDaysGraph::GetTitle() const
 
 void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	SetDatasetColor(datasets, REMAINING_ESTIMATE, COLOR_BLUE);
-	SetDatasetColor(datasets, REMAINING_SPENT, COLOR_YELLOW);
+	SetDatasetColor(datasets[REMAINING_ESTIMATE], COLOR_BLUE);
+	SetDatasetColor(datasets[REMAINING_SPENT], COLOR_YELLOW);
 
 	datasets[REMAINING_ESTIMATE].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[REMAINING_ESTIMATE].SetSize(GRAPH_LINE_THICKNESS);
@@ -358,8 +328,8 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 
 BOOL CRemainingDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
-	// TODO
-	return FALSE;
+	// No need to calculate trend of remaining estimate because it's already a straight line
+	return CalculateTrendLine(nTrend, datasets[REMAINING_SPENT], datasets[REMAINING_SPENT + 1]);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -371,8 +341,8 @@ CString CStartedEndedTasksGraph::GetTitle() const
 
 void CStartedEndedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	SetDatasetColor(datasets, STARTED_TASKS, COLOR_GREEN);
-	SetDatasetColor(datasets, ENDED_TASKS, COLOR_RED);
+	SetDatasetColor(datasets[STARTED_TASKS], COLOR_GREEN);
+	SetDatasetColor(datasets[ENDED_TASKS], COLOR_RED);
 
 	datasets[STARTED_TASKS].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[STARTED_TASKS].SetSize(GRAPH_LINE_THICKNESS);
@@ -437,16 +407,16 @@ CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculat
 
 BOOL CStartedEndedTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
-	if (!CalculateTrendLine(datasets, nTrend, STARTED_TASKS, STARTED_TASKS + 2))
+	if (CalculateTrendLine(nTrend, datasets[STARTED_TASKS], datasets[STARTED_TASKS + 2]) &&
+		CalculateTrendLine(nTrend, datasets[ENDED_TASKS], datasets[ENDED_TASKS + 2]))
 	{
-		datasets[ENDED_TASKS + 2].Reset();
-		return FALSE;
+		return TRUE;
 	}
 
-	if (!CalculateTrendLine(datasets, nTrend, ENDED_TASKS, ENDED_TASKS + 2))
-		return FALSE;
+	datasets[STARTED_TASKS + 2].Reset();
+	datasets[ENDED_TASKS + 2].Reset();
 
-	return TRUE;
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -458,8 +428,8 @@ CString CEstimatedSpentDaysGraph::GetTitle() const
 
 void CEstimatedSpentDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	SetDatasetColor(datasets, ESTIMATED_DAYS, COLOR_PINK);
-	SetDatasetColor(datasets, SPENT_DAYS, COLOR_GREEN);
+	SetDatasetColor(datasets[ESTIMATED_DAYS], COLOR_PINK);
+	SetDatasetColor(datasets[SPENT_DAYS], COLOR_GREEN);
 
 	datasets[ESTIMATED_DAYS].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[ESTIMATED_DAYS].SetSize(GRAPH_LINE_THICKNESS);
@@ -506,6 +476,7 @@ void CEstimatedSpentDaysGraph::BuildGraph(const CStatsItemCalculator& calculator
 		}
 	}
 
+	CalculateTrendLines(datasets, m_nTrend);
 }
 
 CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -522,12 +493,19 @@ CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calcula
 	}
 
 	return sTooltip;
-
 }
 
 BOOL CEstimatedSpentDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
-	// TODO
+	if (CalculateTrendLine(nTrend, datasets[ESTIMATED_DAYS], datasets[ESTIMATED_DAYS + 2]) &&
+		CalculateTrendLine(nTrend, datasets[SPENT_DAYS], datasets[SPENT_DAYS + 2]))
+	{
+		return TRUE;
+	}
+
+	datasets[ESTIMATED_DAYS + 2].Reset();
+	datasets[SPENT_DAYS + 2].Reset();
+
 	return FALSE;
 }
 
@@ -540,8 +518,8 @@ CString CEstimatedSpentCostGraph::GetTitle() const
 
 void CEstimatedSpentCostGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	SetDatasetColor(datasets, ESTIMATED_COST, COLOR_PINK);
-	SetDatasetColor(datasets, SPENT_COST, COLOR_GREEN);
+	SetDatasetColor(datasets[ESTIMATED_COST], COLOR_PINK);
+	SetDatasetColor(datasets[SPENT_COST], COLOR_GREEN);
 
 	datasets[ESTIMATED_COST].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[ESTIMATED_COST].SetSize(GRAPH_LINE_THICKNESS);
@@ -588,6 +566,7 @@ void CEstimatedSpentCostGraph::BuildGraph(const CStatsItemCalculator& calculator
 		}
 	}
 
+	CalculateTrendLines(datasets, m_nTrend);
 }
 
 CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -604,12 +583,19 @@ CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calcula
 	}
 
 	return sTooltip;
-
 }
 
 BOOL CEstimatedSpentCostGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TRENDTYPE nTrend) const
 {
-	// TODO
+	if (CalculateTrendLine(nTrend, datasets[ESTIMATED_COST], datasets[ESTIMATED_COST + 2]) &&
+		CalculateTrendLine(nTrend, datasets[SPENT_COST], datasets[SPENT_COST + 2]))
+	{
+		return TRUE;
+	}
+
+	datasets[ESTIMATED_COST + 2].Reset();
+	datasets[SPENT_COST + 2].Reset();
+
 	return FALSE;
 }
 

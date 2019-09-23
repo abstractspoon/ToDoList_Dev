@@ -131,7 +131,7 @@ END
 IDD_STATISTICS_DLG DIALOGEX 0, 0, 477, 281
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Dis&play",IDC_STATIC,0,2,120,8
     COMBOBOX        IDC_DISPLAY,0,13,121,118,CBS_DROPDOWNLIST | CBS_SORT | 
@@ -207,7 +207,7 @@ BEGIN
     IDS_DISPLAY_STARTEDENDED "Started/Completed Tasks"
     IDS_DISPLAY_ESTIMATEDSPENTDAYS "Estimated/Spent Days"
     IDS_DISPLAY_ESTIMATEDSPENTCOST "Estimated/Spent Cost"
-    IDS_TREND_BESTFIT       "Linear Regression (Best fit line)"
+    IDS_TREND_BESTFIT       "Linear Regression (Line of best fit)"
     IDS_TREND_7DAYAVERAGE   "Simple Rolling Average (7 day)"
     IDS_TREND_30DAYAVERAGE  "Simple Rolling Average (30 day)"
 END

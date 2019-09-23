@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BurndownStruct.h"
+#include "BurndownCalculator.h"
 
 #include "..\Shared\HMXChartEx.h"
 

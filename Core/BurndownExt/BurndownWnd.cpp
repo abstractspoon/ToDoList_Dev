@@ -230,7 +230,7 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	{
 		//CString sKey(szKey);
 		m_nGraphType = (BURNDOWN_GRAPHTYPE)pPrefs->GetProfileInt(szKey, _T("GraphType"), BCT_INCOMPLETETASKS);
-		m_nTrendLine = (BURNDOWN_TRENDTYPE)pPrefs->GetProfileInt(szKey, _T("TrendLine"), BTL_NONE);
+		m_nTrendLine = (BURNDOWN_TRENDTYPE)pPrefs->GetProfileInt(szKey, _T("TrendLine"), BTL_BEST_FIT);
 
 		if (m_nGraphType >= BCT_NUMGRAPHS)
 			m_nGraphType = BCT_INCOMPLETETASKS;
@@ -363,6 +363,13 @@ bool CBurndownWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 	case TDCA_TIMEEST:
 	case TDCA_TIMESPENT:
 	case TDCA_COST:
+	case TDCA_ALLOCBY:
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+	case TDCA_TAGS:
+	case TDCA_VERSION:
 		return true;
 	}
 

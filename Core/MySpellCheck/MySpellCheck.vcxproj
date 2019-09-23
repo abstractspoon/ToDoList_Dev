@@ -206,7 +206,6 @@ copy unicode_debug\myspellcheck.dll ..\todolist\unicode_debug /y
     <ClInclude Include="..\3rdParty\myspell\htypes.hxx" />
     <ClInclude Include="..\3rdParty\myspell\myspell.hxx" />
     <ClInclude Include="..\3rdParty\myspell\mythes.hxx" />
-    <ClInclude Include="..\Shared\SpellChecker.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="..\3rdParty\myspell\suggestmgr.hxx" />
   </ItemGroup>
@@ -216,6 +215,7 @@ copy unicode_debug\myspellcheck.dll ..\todolist\unicode_debug /y
   <ItemGroup>
     <ProjectReference Include="..\Interfaces\Interfaces.vcxproj">
       <Project>{a234e4e0-47de-4d77-bdba-ee17c021c95d}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

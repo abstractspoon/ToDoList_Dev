@@ -170,7 +170,6 @@ copy unicode_release\TDLTransEdit.exe ..\todolist\unicode_release /y</Command>
     <CustomBuild Include="res\TDLTransEdit.rc2">
       <FileType>RC</FileType>
     </CustomBuild>
-    <CustomBuild Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="res\TDLTransEdit.exe.manifest" />
