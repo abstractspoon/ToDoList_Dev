@@ -177,6 +177,7 @@ protected:
 	CAttributeFrequencyGraph();
 
 	void BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET], COLORREF crColor) const;
+	CString GetTooltip(const CHMXDataset& dataset, int nHit) const;
 
 };
 

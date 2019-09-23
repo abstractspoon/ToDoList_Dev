@@ -19,6 +19,7 @@
 #define IDS_TOOLTIP_INCOMPLETE          6007
 #define IDS_TOOLTIP_REMAINING           6008
 #define IDS_TOOLTIP_ESTIMATEDSPENT      6009
+#define IDS_TOOLTIP_ATTRIBFREQUENCY     6010
 #define IDR_TOOLBAR                     16006
 #define IDC_TB_PLACEHOLDER              16024
 #define IDC_ACTIVEDATERANGE_LABEL       16028
@@ -40,6 +41,7 @@
 #define IDS_TREND_7DAYAVERAGE           57694
 #define IDS_TREND_30DAYAVERAGE          57695
 #define IDS_TREND_NONE                  57696
+#define IDS_NONE                        57696
 
 // Next default values for new objects
 // 

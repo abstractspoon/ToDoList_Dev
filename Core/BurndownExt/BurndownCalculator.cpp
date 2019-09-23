@@ -489,12 +489,12 @@ void CStatsItemCalculator::AppendFrequencyAttribs(const CStringArray& aAttrib, C
 
 	if (nAttrib == 0)
 	{
-		mapFrequencies[_T("")]++;
+		AppendFrequencyAttrib(_T(""), mapFrequencies);
 	}
 	else
 	{
 		while (nAttrib--)
-			mapFrequencies[aAttrib[nAttrib]]++;
+			AppendFrequencyAttrib(aAttrib[nAttrib], mapFrequencies);
 	}
 }
 

@@ -198,6 +198,7 @@ BEGIN
     IDS_TOOLTIP_INCOMPLETE  "%s\n%d Tasks"
     IDS_TOOLTIP_REMAINING   "%s\n%d Estimated\n%d Actual"
     IDS_TOOLTIP_ESTIMATEDSPENT "%s\n%d Estimated\n%d Spent"
+    IDS_TOOLTIP_ATTRIBFREQUENCY "%s\n%d Tasks"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -214,7 +215,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TREND_NONE          "<none>"
+    IDS_NONE                "<none>"
 END
 
 #endif    // English (Australia) resources

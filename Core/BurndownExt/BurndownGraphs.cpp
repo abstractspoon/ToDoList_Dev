@@ -727,7 +727,7 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 			datasets[0].SetData(nItem, fi.nCount);
 
 			if (fi.sLabel.IsEmpty())
-				m_aAttribValues.Add(_T("<none>"));
+				m_aAttribValues.Add(CEnString(IDS_NONE));
 			else
 				m_aAttribValues.Add(fi.sLabel);
 
@@ -740,7 +740,23 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 			double dMax = HMXUtils::CalcMaxYAxisValue(nMaxFreq, 10);
 			datasets[0].SetMax(dMax);
 		}
+
+		
 	}
+}
+
+CString CAttributeFrequencyGraph::GetTooltip(const CHMXDataset& dataset, int nHit) const
+{
+	CString sTooltip;
+	double dCount = 0.0;
+	
+	if (dataset.GetData(nHit, dCount))
+	{
+		ASSERT(m_aAttribValues.GetSize() > nHit);
+		sTooltip.Format(CEnString(IDS_TOOLTIP_ATTRIBFREQUENCY), m_aAttribValues[nHit], (int)dCount);
+	}
+
+	return sTooltip;
 }
 
 // ---------------------------------------------------------------------------
@@ -753,15 +769,16 @@ CString CCategoryFrequencyGraph::GetTitle() const
 void CCategoryFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
-	calculator.GetCategoryFrequencies(aFrequencies);
+	int nItem = calculator.GetCategoryFrequencies(aFrequencies);
+
+// 	// Replace spaces in labels with newlines
+// 	while (nItem--)
+// 		aFrequencies[nItem].sLabel.Replace(' ', '\n');
 
 	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets, COLOR_PINK);
 }
 
-CString CCategoryFrequencyGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+CString CCategoryFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
-	// TODO
-	return _T("");
+	return CAttributeFrequencyGraph::GetTooltip(datasets[0], nHit);
 }
-
-

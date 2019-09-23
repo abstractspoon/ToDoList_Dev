@@ -849,8 +849,12 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 					
 					rBar.top    = m_rectData.bottom - (int)(nTemp);
 					rBar.bottom = m_rectData.bottom - (int)(nTemp1);
+
+					// Ensure something is visible
+					if (rBar.Height() == 0)
+						rBar.top--;
 				} 
-				else 
+				else if (nSample < 0.0)
 				{
 					// bar is negative
 					nZeroLine = m_nYMax < 0 ? m_nYMax : 0;
@@ -858,6 +862,10 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 					
 					rBar.top    = m_rectData.bottom - (int)(nTemp1);
 					rBar.bottom = m_rectData.bottom - (int)(nTemp);
+
+					// Ensure something is visible
+					if (rBar.Height() == 0)
+						rBar.bottom++;
 				}
 
 				int nBarPos = m_rectData.left + (int)(dSpacing*(f + 0.5));
