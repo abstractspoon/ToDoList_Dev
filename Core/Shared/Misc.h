@@ -295,7 +295,7 @@ namespace Misc
 		return TRUE;
 	}
 	
-	typedef int (*SORTPROC)(const void* pStr1, const void* pStr2);
+	typedef int (*SORTPROC)(const void* pV1, const void* pV2);
 
 	void SortArray(CStringArray& array, SORTPROC pSortProc = NULL);
 	void SortArray(CDWordArray& array, SORTPROC pSortProc = NULL);
