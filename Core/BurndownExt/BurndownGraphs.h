@@ -176,7 +176,7 @@ protected:
 protected:
 	CAttributeFrequencyGraph();
 
-	void BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	void BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET], COLORREF crColor) const;
 
 };
 
@@ -185,9 +185,6 @@ protected:
 class CCategoryFrequencyGraph : public CAttributeFrequencyGraph
 {
 public:
-	CCategoryFrequencyGraph();
-	virtual ~CCategoryFrequencyGraph();
-
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;

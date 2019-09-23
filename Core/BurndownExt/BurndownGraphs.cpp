@@ -703,45 +703,47 @@ void CAttributeFrequencyGraph::RebuildXScale(const CStatsItemCalculator& /*calcu
 	aLabels.Copy(m_aAttribValues);
 }
 
-void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET], COLORREF crColor) const
 {
 	// Save off attrib values for building horizontal labels
 	m_aAttribValues.RemoveAll();
 
 	int nNumAttrib = aFrequencies.GetSize();
+	int nMaxFreq = 0;
 
 	if (nNumAttrib)
 	{
-		SetDatasetColor(datasets[0], COLOR_PINK);
+		SetDatasetColor(datasets[0], crColor);
 
 		datasets[0].SetStyle(HMX_DATASET_STYLE_VBAR);
-		datasets[0].SetSize(5);
+		datasets[0].SetSize(5); // 50% of spacing
 		datasets[0].SetMin(0.0);
 		datasets[0].SetDatasetSize(nNumAttrib);
 
 		for (int nItem = 0; nItem < nNumAttrib; nItem++)
 		{
-			datasets[0].SetData(nItem, aFrequencies[nItem].nCount);
+			const FREQUENCYITEM& fi = aFrequencies[nItem];
 
-			if (aFrequencies[nItem].sLabel.IsEmpty())
+			datasets[0].SetData(nItem, fi.nCount);
+
+			if (fi.sLabel.IsEmpty())
 				m_aAttribValues.Add(_T("<none>"));
 			else
-				m_aAttribValues.Add(aFrequencies[nItem].sLabel);
+				m_aAttribValues.Add(fi.sLabel);
+
+			nMaxFreq = max(nMaxFreq, fi.nCount);
+		}
+
+		// Set the maximum Y value to be something 'nice'
+		if (nMaxFreq)
+		{
+			double dMax = HMXUtils::CalcMaxYAxisValue(nMaxFreq, 10);
+			datasets[0].SetMax(dMax);
 		}
 	}
 }
 
 // ---------------------------------------------------------------------------
-
-CCategoryFrequencyGraph::CCategoryFrequencyGraph()
-{
-
-}
-
-CCategoryFrequencyGraph::~CCategoryFrequencyGraph()
-{
-
-}
 
 CString CCategoryFrequencyGraph::GetTitle() const
 {
@@ -753,7 +755,7 @@ void CCategoryFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator,
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetCategoryFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
+	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets, COLOR_PINK);
 }
 
 CString CCategoryFrequencyGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
