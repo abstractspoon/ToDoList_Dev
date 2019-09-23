@@ -85,8 +85,8 @@ protected:
 	
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;
-	BURNDOWN_GRAPHTYPE m_nGraphType;
-	BURNDOWN_TRENDTYPE m_nTrendLine;
+	BURNDOWN_GRAPH m_nGraphType;
+	BURNDOWN_TREND m_nTrendLine;
 
 protected:
 // Overrides

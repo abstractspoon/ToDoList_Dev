@@ -45,6 +45,8 @@ void STATSITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 	dTimeEst = pTasks->GetTaskTimeEstimate(hTask, nTimeEstUnits, false);
 	dTimeSpent = pTasks->GetTaskTimeSpent(hTask, nTimeSpentUnits, false);
 	dCost = GetCost(pTasks, hTask, bCostIsRate);
+
+	aCategory.Add(pTasks->GetTaskCategory(hTask, 0));
 }
 
 void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)

@@ -467,7 +467,7 @@ int CStatsItemCalculator::GetAttribFrequencies(FREQUENCY_ATTRIB nAttrib, CMap<CS
 		case ALLOCTO:	AppendFrequencyAttribs(pSI->aAllocatedTo,	mapFrequencies); break;
 		case TAGS:		AppendFrequencyAttribs(pSI->aTags,			mapFrequencies); break;
 
-		case STATUS:	AppendFrequencyAttrib(pSI->sStatus,		mapFrequencies); break;
+		case STATUS:	AppendFrequencyAttrib(pSI->sStatus,			mapFrequencies); break;
 		case ALLOCBY:	AppendFrequencyAttrib(pSI->sAllocatedBy,	mapFrequencies); break;
 		case PRIORITY:	AppendFrequencyAttrib(pSI->sPriority,		mapFrequencies); break;
 		case RISK:		AppendFrequencyAttrib(pSI->sRisk,			mapFrequencies); break;
@@ -496,4 +496,100 @@ void CStatsItemCalculator::AppendFrequencyAttribs(const CStringArray& aAttrib, C
 		while (nAttrib--)
 			mapFrequencies[aAttrib[nAttrib]]++;
 	}
+}
+
+int CStatsItemCalculator::GetCategoryFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
+{
+	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
+	GetAttribFrequencies(CATEGORY, mapFrequencies);
+
+	return AsSortedArray(mapFrequencies, aFrequencies);
+}
+
+int CStatsItemCalculator::GetStatusFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
+{
+	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
+	GetAttribFrequencies(STATUS, mapFrequencies);
+
+	return AsSortedArray(mapFrequencies, aFrequencies);
+}
+
+int CStatsItemCalculator::GetAllocatedToFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
+{
+	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
+	GetAttribFrequencies(ALLOCTO, mapFrequencies);
+
+	return AsSortedArray(mapFrequencies, aFrequencies);
+}
+
+int CStatsItemCalculator::GetAllocatedByFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
+{
+	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
+	GetAttribFrequencies(ALLOCBY, mapFrequencies);
+
+	return AsSortedArray(mapFrequencies, aFrequencies);
+}
+
+int CStatsItemCalculator::GetPriorityFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
+{
+	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
+	GetAttribFrequencies(PRIORITY, mapFrequencies);
+
+	return AsSortedArray(mapFrequencies, aFrequencies);
+}
+
+int CStatsItemCalculator::GetRiskFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
+{
+	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
+	GetAttribFrequencies(RISK, mapFrequencies);
+
+	return AsSortedArray(mapFrequencies, aFrequencies);
+}
+
+int CStatsItemCalculator::GetTagFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
+{
+	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
+	GetAttribFrequencies(TAGS, mapFrequencies);
+
+	return AsSortedArray(mapFrequencies, aFrequencies);
+}
+
+int CStatsItemCalculator::GetVersionFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
+{
+	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
+	GetAttribFrequencies(VERSION, mapFrequencies);
+
+	return AsSortedArray(mapFrequencies, aFrequencies);
+}
+
+int CStatsItemCalculator::AsSortedArray(const CMap<CString, LPCTSTR, int, int&>& mapFrequencies, CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies)
+{
+	CString sLabel;
+	int nCount, nItem = 0;
+
+	aFrequencies.SetSize(mapFrequencies.GetCount());
+	POSITION pos = mapFrequencies.GetStartPosition();
+
+	while (pos)
+	{
+		mapFrequencies.GetNextAssoc(pos, sLabel, nCount);
+
+		aFrequencies[nItem].sLabel = sLabel;
+		aFrequencies[nItem].nCount = nCount;
+
+		nItem++;
+	}
+
+	if (nItem > 1)
+		Misc::SortArrayT(aFrequencies, CompareFrequencyItems);
+
+	return nItem;
+}
+
+int CStatsItemCalculator::CompareFrequencyItems(const void* pV1, const void* pV2)
+{
+	const FREQUENCYITEM* pFI1 = (const FREQUENCYITEM*)pV1;
+	const FREQUENCYITEM* pFI2 = (const FREQUENCYITEM*)pV2;
+
+	return Misc::NaturalCompare(pFI1->sLabel, pFI2->sLabel);
 }

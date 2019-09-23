@@ -59,7 +59,7 @@ enum // m_dwUpdateGraphOnShow
 CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_STATISTICS_DLG, pParent),
-	m_nGraphType(BCT_REMAININGDAYS),
+	m_nGraphType(BCT_TIMESERIES_REMAININGDAYS),
 	m_dwUpdateGraphOnShow(0),
 	m_nTrendLine(BTL_NONE),
 	m_dtDataRange(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
@@ -88,7 +88,7 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TRENDLINES, m_cbTrends);
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
 
-	CDialogHelper::DDX_CBData(pDX, m_cbGraphs, m_nGraphType, BCT_REMAININGDAYS);
+	CDialogHelper::DDX_CBData(pDX, m_cbGraphs, m_nGraphType, BCT_TIMESERIES_REMAININGDAYS);
 	CDialogHelper::DDX_CBData(pDX, m_cbTrends, m_nTrendLine, BTL_NONE);
 
 }
@@ -186,7 +186,7 @@ void CBurndownWnd::BuildCombos()
 	ASSERT(m_cbGraphs.GetCount() == 0);
 
 	for (int nGraph = 0; nGraph < BCT_NUMGRAPHS; nGraph++)
-		CDialogHelper::AddString(m_cbGraphs, m_graph.GetGraphTitle((BURNDOWN_GRAPHTYPE)nGraph), nGraph);
+		CDialogHelper::AddString(m_cbGraphs, m_graph.GetGraphTitle((BURNDOWN_GRAPH)nGraph), nGraph);
 
 	ASSERT(m_cbTrends.GetCount() == 0);
 
@@ -229,11 +229,11 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	if (!bAppOnly)
 	{
 		//CString sKey(szKey);
-		m_nGraphType = (BURNDOWN_GRAPHTYPE)pPrefs->GetProfileInt(szKey, _T("GraphType"), BCT_INCOMPLETETASKS);
-		m_nTrendLine = (BURNDOWN_TRENDTYPE)pPrefs->GetProfileInt(szKey, _T("TrendLine"), BTL_BEST_FIT);
+		m_nGraphType = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("GraphType"), BCT_TIMESERIES_INCOMPLETETASKS);
+		m_nTrendLine = (BURNDOWN_TREND)pPrefs->GetProfileInt(szKey, _T("TrendLine"), BTL_BEST_FIT);
 
 		if (m_nGraphType >= BCT_NUMGRAPHS)
-			m_nGraphType = BCT_INCOMPLETETASKS;
+			m_nGraphType = BCT_TIMESERIES_INCOMPLETETASKS;
 
 		if (m_nTrendLine >= NUM_TRENDS)
 			m_nTrendLine = BTL_NONE;
@@ -844,7 +844,7 @@ void CBurndownWnd::UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange
 
 void CBurndownWnd::OnTrendsChanged()
 {
-	BURNDOWN_TRENDTYPE nPrevTrend = m_nTrendLine;
+	BURNDOWN_TREND nPrevTrend = m_nTrendLine;
 
 	UpdateData();
 

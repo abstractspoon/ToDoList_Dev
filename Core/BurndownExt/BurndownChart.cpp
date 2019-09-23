@@ -13,38 +13,22 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\ScopedTimer.h"
 
-/////////////////////////////////////////////////////////////////////////////
-
-const int MIN_XSCALE_SPACING = 50; // pixels
-
-static BURNDOWN_GRAPHSCALE SCALES[] = 
-{
-	BCS_DAY,		
-	BCS_WEEK,	
-	BCS_MONTH,	
-	BCS_2MONTH,	
-	BCS_QUARTER,	
-	BCS_HALFYEAR,
-	BCS_YEAR,	
-};
-static int NUM_SCALES = sizeof(SCALES) / sizeof(int);
-
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
 
 CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	: 
 	m_data(data),
-	m_nScale(BCS_DAY),
-	m_nChartType(BCT_INCOMPLETETASKS),
+	m_nActiveGraph(BCT_TIMESERIES_INCOMPLETETASKS),
 	m_calculator(data),
 	m_nTrendLine(BTL_NONE)
 {
-	VERIFY(m_graphs.Add(new CIncompleteTasksGraph()) == BCT_INCOMPLETETASKS);
-	VERIFY(m_graphs.Add(new CRemainingDaysGraph()) == BCT_REMAININGDAYS);
-	VERIFY(m_graphs.Add(new CStartedEndedTasksGraph()) == BCT_STARTEDENDEDTASKS);
-	VERIFY(m_graphs.Add(new CEstimatedSpentDaysGraph()) == BCT_ESTIMATEDSPENTDAYS);
+	VERIFY(m_graphs.Add(new CIncompleteTasksGraph()) == BCT_TIMESERIES_INCOMPLETETASKS);
+	VERIFY(m_graphs.Add(new CRemainingDaysGraph()) == BCT_TIMESERIES_REMAININGDAYS);
+	VERIFY(m_graphs.Add(new CStartedEndedTasksGraph()) == BCT_TIMESERIES_STARTEDENDEDTASKS);
+	VERIFY(m_graphs.Add(new CEstimatedSpentDaysGraph()) == BCT_TIMESERIES_ESTIMATEDSPENTDAYS);
 	//VERIFY(m_graphs.Add(new CEstimatedSpentCostGraph()) == BCT_ESTIMATEDSPENTCOST);
+	VERIFY(m_graphs.Add(new CCategoryFrequencyGraph()) == BCT_FREQUENCY_CATEGORY);
 	//m_graphs.Add(new ());
 
 	//FileMisc::EnableLogging(TRUE);
@@ -72,12 +56,17 @@ END_MESSAGE_MAP()
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart message handlers
 
-BOOL CBurndownChart::IsValidGraph(BURNDOWN_GRAPHTYPE nType) const
+BOOL CBurndownChart::IsValidGraph(BURNDOWN_GRAPH nType) const
 {
 	return ((nType >= 0) && (nType < BCT_NUMGRAPHS) && (nType < m_graphs.GetSize()));
 }
 
-CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPHTYPE nType) const
+BURNDOWN_GRAPHTYPE CBurndownChart::GetActiveGraphType() const
+{
+	return m_graphs[m_nActiveGraph]->GetType();
+}
+
+CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPH nType) const
 {
 	if (!IsValidGraph(nType))
 	{
@@ -89,17 +78,17 @@ CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPHTYPE nType) const
 	return m_graphs[nType]->GetTitle();
 }
 
-BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPHTYPE nType)
+BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 {
-	if (!IsValidGraph(nType))
+	if (!IsValidGraph(nGraph))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	if (nType != m_nChartType)
+	if (nGraph != m_nActiveGraph)
 	{
-		m_nChartType = nType;
+		m_nActiveGraph = nGraph;
 		RebuildGraph(m_dtExtents);
 
 		return TRUE;
@@ -108,12 +97,23 @@ BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPHTYPE nType)
 	return FALSE;
 }
 
-void CBurndownChart::ShowTrendLine(BURNDOWN_TRENDTYPE nTrend)
+void CBurndownChart::ShowTrendLine(BURNDOWN_TREND nTrend)
 {
-	if (m_graphs[m_nChartType]->ShowTrendLine(nTrend, m_datasets))
-		m_nTrendLine = nTrend;
+	m_nTrendLine = nTrend;
 
-	Invalidate();
+	UpdateGraphTrendLine();
+}
+
+void CBurndownChart::UpdateGraphTrendLine()
+{
+	if (GetActiveGraphType() == BCT_TIMESERIES)
+	{
+		CTimeSeriesGraph* pTSGraph = dynamic_cast<CTimeSeriesGraph*>(m_graphs[m_nActiveGraph]);
+		ASSERT(pTSGraph);
+
+		VERIFY(pTSGraph->ShowTrendLine(m_nTrendLine, m_datasets));
+		Invalidate();
+	}
 }
 
 BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
@@ -140,81 +140,14 @@ BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
 	return (bmImage.GetSafeHandle() != NULL);
 }
 
-BURNDOWN_GRAPHSCALE CBurndownChart::CalculateRequiredScale(int nAvailWidth, int nNumDays)
-{
-	// work thru the available scales until we find a suitable one
-	for (int nScale = 0; nScale < NUM_SCALES; nScale++)
-	{
-		int nSpacing = MulDiv(SCALES[nScale], nAvailWidth, nNumDays);
-
-		if (nSpacing > MIN_XSCALE_SPACING)
-			return SCALES[nScale];
-	}
-
-	return BCS_YEAR;
-}
-
 void CBurndownChart::RebuildXScale()
 {
 	ClearXScaleLabels();
-	SetXLabelStep(1); // Because we often have an uneven label spacing
 
-	// Refresh scale
-	int nNumDays = m_calculator.GetTotalDays();
-	m_nScale = CalculateRequiredScale(m_rectData.Width(), nNumDays);
+	int nLabelStep = 1;
+	m_graphs[m_nActiveGraph]->RebuildXScale(m_calculator, m_rectData.Width(), m_strarrScaleXLabel, nLabelStep);
 
-	// build ticks
-	COleDateTime dtTick = m_calculator.GetStartDate();
-
-	CDateHelper dh;
-	CString sTick;
-	
-	for (int nDay = 0; nDay <= nNumDays; )
-	{
-		sTick = dh.FormatDate(dtTick);
-		SetXScaleLabel(nDay, sTick);
-
-		// next Tick date
-		COleDateTime dtNextTick(dtTick);
-
-		switch (m_nScale)
-		{
-		case BCS_DAY:
-			dtNextTick.m_dt += 1.0;
-			break;
-			
-		case BCS_WEEK:
-			dh.OffsetDate(dtNextTick, 1, DHU_WEEKS);
-			break;
-			
-		case BCS_MONTH:
-			dh.OffsetDate(dtNextTick, 1, DHU_MONTHS);
-			break;
-			
-		case BCS_2MONTH:
-			dh.OffsetDate(dtNextTick, 2, DHU_MONTHS);
-			break;
-			
-		case BCS_QUARTER:
-			dh.OffsetDate(dtNextTick, 3, DHU_MONTHS);
-			break;
-			
-		case BCS_HALFYEAR:
-			dh.OffsetDate(dtNextTick, 6, DHU_MONTHS);
-			break;
-			
-		case BCS_YEAR:
-			dh.OffsetDate(dtNextTick, 1, DHU_YEARS);
-			break;
-			
-		default:
-			ASSERT(0);
-		}
-
-		nDay += (int)(dtNextTick.m_dt - dtTick.m_dt);
-
-		dtTick = dtNextTick;
-	}
+	SetXLabelStep(nLabelStep);
 }
 
 void CBurndownChart::OnSize(UINT nType, int cx, int cy) 
@@ -238,7 +171,7 @@ void CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	CHoldRedraw hr(*this);
 	
 	ClearData();
-	SetYText(m_graphs[m_nChartType]->GetTitle());
+	SetYText(m_graphs[m_nActiveGraph]->GetTitle());
 	
 	if (!m_data.IsEmpty())
 		RebuildXScale();
@@ -246,10 +179,9 @@ void CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	{
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
 
-		m_graphs[m_nChartType]->BuildGraph(m_calculator, m_datasets);
-		m_graphs[m_nChartType]->ShowTrendLine(m_nTrendLine, m_datasets);
+		m_graphs[m_nActiveGraph]->BuildGraph(m_calculator, m_datasets);
+		UpdateGraphTrendLine();
 	}
-	
 
 	CalcDatas();
 }
@@ -268,7 +200,7 @@ CString CBurndownChart::GetTooltip(int nHit) const
 {
 	ASSERT(nHit != -1);
 
-	return m_graphs[m_nChartType]->GetTooltip(m_calculator, m_datasets, nHit);
+	return m_graphs[m_nActiveGraph]->GetTooltip(m_calculator, m_datasets, nHit);
 }
 
 int CBurndownChart::HitTest(const CPoint& ptClient) const
@@ -298,7 +230,7 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 	{
 		// Find the data point corresponding to today
 		COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
-		int nPos = m_graphs[m_nChartType]->HitTest(m_calculator, dtToday);
+		int nPos = m_graphs[m_nActiveGraph]->HitTest(m_calculator, dtToday);
 
 		if (nPos != -1)
 		{

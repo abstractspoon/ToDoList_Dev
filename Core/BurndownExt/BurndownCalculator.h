@@ -5,6 +5,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "BurndownStruct.h"
+
 #include "..\Shared\TimeHelper.h"
 
 #include "..\Interfaces\ITaskList.h"
@@ -53,14 +55,14 @@ public:
 
 	// Frequency Distributions ---------------------------------------
 
-	int GetCategoryFrequencies(CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
-	int GetStatusFrequencies(CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
-	int GetAllocatedToFrequencies(CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
-	int GetAllocatedByFrequencies(CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
-	int GetPriorityFrequencies(CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
-	int GetRiskFrequencies(CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
-	int GetTagFrequencies(CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
-	int GetVersionFrequencies(CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
+	int GetCategoryFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
+	int GetStatusFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
+	int GetAllocatedToFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
+	int GetAllocatedByFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
+	int GetPriorityFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
+	int GetRiskFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
+	int GetTagFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
+	int GetVersionFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
 
 protected:
 	const CStatsItemArray& m_data;
@@ -90,6 +92,9 @@ protected:
 
 	static double GetTimeInDays(double dTime, TDC_UNITS nUnits);
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
+	
+	static int AsSortedArray(const CMap<CString, LPCTSTR, int, int&>& mapFrequencies, CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies);
+	static int CompareFrequencyItems(const void* pV1, const void* pV2);
 };
 
 #endif // !defined(AFX_BURNDOWNCALCULATOR_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_)

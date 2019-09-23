@@ -23,4 +23,18 @@ static const int NUM_TRENDS = sizeof(TRENDS) / sizeof(TRENDLINE);
 
 /////////////////////////////////////////////////////////////////////////////
 
+static BURNDOWN_GRAPHSCALE SCALES[] =
+{
+	BCS_DAY,
+	BCS_WEEK,
+	BCS_MONTH,
+	BCS_2MONTH,
+	BCS_QUARTER,
+	BCS_HALFYEAR,
+	BCS_YEAR,
+};
+static int NUM_SCALES = sizeof(SCALES) / sizeof(int);
+
+/////////////////////////////////////////////////////////////////////////////
+
 #endif // !defined(AFX_BURNDOWNSTATIC_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_)

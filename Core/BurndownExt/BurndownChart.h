@@ -18,16 +18,14 @@ public:
 	CBurndownChart(const CStatsItemArray& data);
 	virtual ~CBurndownChart();
 
-	CString GetGraphTitle(BURNDOWN_GRAPHTYPE nType) const;
-	BOOL SetActiveGraph(BURNDOWN_GRAPHTYPE nType);
+	CString GetGraphTitle(BURNDOWN_GRAPH nType) const;
+	BURNDOWN_GRAPHTYPE GetActiveGraphType() const;
+	BOOL SetActiveGraph(BURNDOWN_GRAPH nType);
 	void SetTodayColour(COLORREF color);
 	BOOL SaveToImage(CBitmap& bmImage);
 
-	void ShowTrendLine(BURNDOWN_TRENDTYPE nTrend);
+	void ShowTrendLine(BURNDOWN_TREND nTrend);
 	void RebuildGraph(const COleDateTimeRange& dtExtents);
-	BURNDOWN_GRAPHSCALE GetCurrentScale() const { return m_nScale; }
-
-	static BURNDOWN_GRAPHSCALE CalculateRequiredScale(int nAvailWidth, int nNumDays);
 
 protected:
 	const CStatsItemArray& m_data;
@@ -37,9 +35,8 @@ protected:
 	CStatsItemCalculator m_calculator;
 	COLORREF m_crToday;
 
-	BURNDOWN_TRENDTYPE m_nTrendLine;
-	BURNDOWN_GRAPHTYPE m_nChartType;
-	BURNDOWN_GRAPHSCALE m_nScale;
+	BURNDOWN_TREND m_nTrendLine;
+	BURNDOWN_GRAPH m_nActiveGraph;
 
 protected:
 	void OnSize(UINT nType, int cx, int cy);
@@ -49,7 +46,8 @@ protected:
 
 protected:
 	void RebuildXScale();
-	BOOL IsValidGraph(BURNDOWN_GRAPHTYPE nType) const;
+	BOOL IsValidGraph(BURNDOWN_GRAPH nType) const;
+	void UpdateGraphTrendLine();
 
 	// virtual overrides
 	CString GetTooltip(int nHit) const;

@@ -5,11 +5,28 @@
 
 enum BURNDOWN_GRAPHTYPE
 {
-	BCT_INCOMPLETETASKS,
-	BCT_REMAININGDAYS,
-	BCT_STARTEDENDEDTASKS,
-	BCT_ESTIMATEDSPENTDAYS,
-	//BCT_ESTIMATEDSPENTCOST,
+	BCT_TIMESERIES,
+	BCT_FREQUENCY,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+enum BURNDOWN_GRAPH
+{
+	BCT_TIMESERIES_INCOMPLETETASKS,
+	BCT_TIMESERIES_REMAININGDAYS,
+	BCT_TIMESERIES_STARTEDENDEDTASKS,
+	BCT_TIMESERIES_ESTIMATEDSPENTDAYS,
+	//BCT_TIMESERIES_ESTIMATEDSPENTCOST,
+
+	BCT_FREQUENCY_CATEGORY,
+	//BCT_FREQUENCY_STATUS, 
+	//BCT_FREQUENCY_ALLOCTO, 
+	//BCT_FREQUENCY_ALLOCBY, 
+	//BCT_FREQUENCY_PRIORITY, 
+	//BCT_FREQUENCY_RISK, 
+	//BCT_FREQUENCY_TAGS, 
+	//BCT_FREQUENCY_VERSION,
 	// new graphs here
 
 	BCT_NUMGRAPHS // always last
@@ -30,13 +47,17 @@ enum BURNDOWN_GRAPHSCALE
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum BURNDOWN_TRENDTYPE
+enum BURNDOWN_TREND
 {
 	BTL_NONE = -1,
 	BTL_BEST_FIT,
 	BTL_7DAY_ROLLING_AVERAGE,
 	BTL_30DAY_ROLLING_AVERAGE,
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+const int MIN_XSCALE_SPACING = 50; // pixels
 
 /////////////////////////////////////////////////////////////////////////////
 
