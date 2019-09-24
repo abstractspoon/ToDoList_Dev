@@ -46,7 +46,16 @@ void STATSITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 	dTimeSpent = pTasks->GetTaskTimeSpent(hTask, nTimeSpentUnits, false);
 	dCost = GetCost(pTasks, hTask, bCostIsRate);
 
-	aCategory.Add(pTasks->GetTaskCategory(hTask, 0));
+	Misc::Split(pTasks->GetTaskAttribute(hTask, TDCA_CATEGORY, false, true), aCategory);
+	Misc::Split(pTasks->GetTaskAttribute(hTask, TDCA_ALLOCTO, false, true), aAllocatedTo);
+	Misc::Split(pTasks->GetTaskAttribute(hTask, TDCA_TAGS, false, true), aTags);
+
+	sStatus = pTasks->GetTaskStatus(hTask);
+	sAllocatedBy = pTasks->GetTaskAllocatedBy(hTask);
+	sVersion = pTasks->GetTaskVersion(hTask);
+
+	sPriority = pTasks->GetTaskAttribute(hTask, TDCA_PRIORITY, false, true);
+	sRisk = pTasks->GetTaskAttribute(hTask, TDCA_RISK, false, true);
 }
 
 void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
@@ -75,6 +84,31 @@ void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 
 	if (pTasks->IsAttributeAvailable(TDCA_COST))
 		dCost = GetCost(pTasks, hTask, bCostIsRate);
+
+	if (pTasks->IsAttributeAvailable(TDCA_CATEGORY))
+		Misc::Split(pTasks->GetTaskAttribute(hTask, TDCA_CATEGORY, false, true), aCategory);
+
+
+	if (pTasks->IsAttributeAvailable(TDCA_STATUS))
+		sStatus = pTasks->GetTaskStatus(hTask);
+
+	if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
+		Misc::Split(pTasks->GetTaskAttribute(hTask, TDCA_ALLOCTO, false, true), aAllocatedTo);
+
+	if (pTasks->IsAttributeAvailable(TDCA_ALLOCBY))
+		sAllocatedBy = pTasks->GetTaskAllocatedBy(hTask);
+
+	if (pTasks->IsAttributeAvailable(TDCA_VERSION))
+		sVersion = pTasks->GetTaskVersion(hTask);
+
+	if (pTasks->IsAttributeAvailable(TDCA_TAGS))
+		Misc::Split(pTasks->GetTaskAttribute(hTask, TDCA_TAGS, false, true), aTags);
+
+	if (pTasks->IsAttributeAvailable(TDCA_PRIORITY))
+		sPriority = pTasks->GetTaskAttribute(hTask, TDCA_PRIORITY, false, true);
+
+	if (pTasks->IsAttributeAvailable(TDCA_RISK))
+		sRisk = pTasks->GetTaskAttribute(hTask, TDCA_RISK, false, true);
 }
 
 void STATSITEM::ValidateStartDate()
