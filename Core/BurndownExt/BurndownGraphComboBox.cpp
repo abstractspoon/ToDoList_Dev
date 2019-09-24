@@ -117,27 +117,26 @@ BOOL CBurndownGraphComboBox::OnSelEndOK()
 
 void CBurndownGraphComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	if (!GetDroppedState())
+	// Step over container items
+	int nSel = GetCurSel();
+
+	if ((nChar == VK_UP) && ItemIsContainer(nSel - 1))
 	{
-		// Step over container items
-		int nSel = GetCurSel();
+		nSel -= 2;
+	}
+	else if ((nChar == VK_DOWN) && ItemIsContainer(nSel + 1))
+	{
+		nSel += 2;
+	}
 
-		if ((nChar == VK_UP) && ItemIsContainer(nSel - 1))
-		{
-			nSel -= 2;
-		}
-		else if ((nChar == VK_DOWN) && ItemIsContainer(nSel + 1))
-		{
-			nSel += 2;
-		}
+	if (nSel != GetCurSel())
+	{
+		SetCurSel(nSel);
 
-		if (nSel != GetCurSel())
-		{
-			SetCurSel(nSel);
-			GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELENDOK), (LPARAM)GetSafeHwnd());
+		int nMsgID = (GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
+		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
 
-			return; // eat
-		}
+		return; // eat
 	}
 
 	COwnerdrawComboBoxBase::OnKeyDown(nChar, nRepCnt, nFlags);
