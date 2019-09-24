@@ -44,6 +44,14 @@
 #define IDS_NONE                        57696
 #define IDS_FREQUENCYDIST               57697
 #define IDS_TIMESERIES                  57698
+#define IDS_FREQUENCY_CATEGORY          57699
+#define IDS_FREQUENCY_STATUS            57700
+#define IDS_FREQUENCY_ALLOCBY           57701
+#define IDS_FREQUENCY_ALLOCTO           57702
+#define IDS_FREQUENCY_VERSION           57703
+#define IDS_FREQUENCY_TAGS              57704
+#define IDS_FREQUENCY_PRIORITY          57705
+#define IDS_FREQUENCY_RISK              57706
 
 // Next default values for new objects
 // 

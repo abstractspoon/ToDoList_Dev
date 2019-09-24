@@ -763,13 +763,13 @@ CString CAttributeFrequencyGraph::GetTooltip(const CHMXDataset& dataset, int nHi
 
 CString CCategoryFrequencyGraph::GetTitle() const
 {
-	return _T("Category Frequency");
+	return CEnString(IDS_FREQUENCY_CATEGORY);
 }
 
 void CCategoryFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
-	int nItem = calculator.GetCategoryFrequencies(aFrequencies);
+	/*int nItem = */calculator.GetCategoryFrequencies(aFrequencies);
 
 // 	// Replace spaces in labels with newlines
 // 	while (nItem--)

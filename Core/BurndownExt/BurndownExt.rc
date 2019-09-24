@@ -219,6 +219,14 @@ BEGIN
     IDS_NONE                "<none>"
     IDS_FREQUENCYDIST       "Frequency Distributions"
     IDS_TIMESERIES          "Time Series"
+    IDS_FREQUENCY_CATEGORY  "Category Frequency"
+    IDS_FREQUENCY_STATUS    "Status Frequency"
+    IDS_FREQUENCY_ALLOCBY   "Allocated By Frequency"
+    IDS_FREQUENCY_ALLOCTO   "Allocated To Frequency"
+    IDS_FREQUENCY_VERSION   "Version Frequency"
+    IDS_FREQUENCY_TAGS      "Tag Frequency"
+    IDS_FREQUENCY_PRIORITY  "Priority Frequency"
+    IDS_FREQUENCY_RISK      "Risk Frequency"
 END
 
 #endif    // English (Australia) resources
