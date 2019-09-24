@@ -165,10 +165,10 @@ public:
 
 	virtual CString GetTitle() const = 0;
 	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
-	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const = 0;
 
 	BURNDOWN_GRAPHTYPE GetType() const { return BCT_FREQUENCY; }
 	void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const;
+	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
 
 protected:
 	mutable CStringArray m_aAttribValues;
@@ -177,7 +177,6 @@ protected:
 	CAttributeFrequencyGraph();
 
 	void BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET], COLORREF crColor) const;
-	CString GetTooltip(const CHMXDataset& dataset, int nHit) const;
 
 };
 
@@ -188,12 +187,80 @@ class CCategoryFrequencyGraph : public CAttributeFrequencyGraph
 public:
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
-	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
 
 };
 
 // ---------------------------------------------------------------------------
 
+class CStatusFrequencyGraph : public CAttributeFrequencyGraph
+{
+public:
+	CString GetTitle() const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+
+};
+
+// ---------------------------------------------------------------------------
+
+class CAllocatedToFrequencyGraph : public CAttributeFrequencyGraph
+{
+public:
+	CString GetTitle() const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+
+};
+
+// ---------------------------------------------------------------------------
+
+class CAllocatedByFrequencyGraph : public CAttributeFrequencyGraph
+{
+public:
+	CString GetTitle() const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+
+};
+
+// ---------------------------------------------------------------------------
+
+class CVersionFrequencyGraph : public CAttributeFrequencyGraph
+{
+public:
+	CString GetTitle() const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+
+};
+
+// ---------------------------------------------------------------------------
+
+class CTagFrequencyGraph : public CAttributeFrequencyGraph
+{
+public:
+	CString GetTitle() const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+
+};
+
+// ---------------------------------------------------------------------------
+
+class CPriorityFrequencyGraph : public CAttributeFrequencyGraph
+{
+public:
+	CString GetTitle() const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+
+};
+
+// ---------------------------------------------------------------------------
+
+class CRiskFrequencyGraph : public CAttributeFrequencyGraph
+{
+public:
+	CString GetTitle() const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+
+};
+
+// ---------------------------------------------------------------------------
 
 
 /////////////////////////////////////////////////////////////////////////////

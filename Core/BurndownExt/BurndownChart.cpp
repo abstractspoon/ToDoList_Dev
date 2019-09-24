@@ -35,6 +35,13 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	//m_mapGraphs[BCT_ESTIMATEDSPENTCOST]			= new CEstimatedSpentCostGraph();
 
 	m_mapGraphs[BCT_FREQUENCY_CATEGORY]				= new CCategoryFrequencyGraph();
+	m_mapGraphs[BCT_FREQUENCY_STATUS]				= new CStatusFrequencyGraph();
+	m_mapGraphs[BCT_FREQUENCY_ALLOCTO]				= new CAllocatedToFrequencyGraph();
+	m_mapGraphs[BCT_FREQUENCY_ALLOCBY]				= new CAllocatedByFrequencyGraph();
+	m_mapGraphs[BCT_FREQUENCY_VERSION]				= new CVersionFrequencyGraph();
+	m_mapGraphs[BCT_FREQUENCY_TAGS]					= new CTagFrequencyGraph();
+	m_mapGraphs[BCT_FREQUENCY_PRIORITY]				= new CPriorityFrequencyGraph();
+	m_mapGraphs[BCT_FREQUENCY_RISK]					= new CRiskFrequencyGraph();
 
 	//FileMisc::EnableLogging(TRUE);
 
