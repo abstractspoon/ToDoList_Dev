@@ -15,6 +15,21 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+struct GRAPHTYPE
+{
+	BURNDOWN_GRAPHTYPE nType;
+	UINT nLabelID;
+};
+
+const GRAPHTYPE GRAPHTYPES[] = 
+{
+	{ BCT_TIMESERIES, IDS_TIMESERIES },
+	{ BCT_FREQUENCY,  IDS_FREQUENCYDIST },
+};
+const int NUM_GRAPHTYPES = (sizeof(GRAPHTYPES) / sizeof(GRAPHTYPES[0]));
+
+/////////////////////////////////////////////////////////////////////////////
 // CBurndownGraphComboBox
 
 CBurndownGraphComboBox::CBurndownGraphComboBox()
@@ -43,27 +58,18 @@ void CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 	// We build the combo in a specific order
 	ASSERT(!(GetStyle() & CBS_SORT));
 
-	int nGraph;
-
-	// First 'Time Series'
-	CDialogHelper::AddString(*this, IDS_TIMESERIES, BCT_TIMESERIES);
-	
-	for (nGraph = 0; nGraph < BCT_NUMGRAPHS; nGraph++)
+	for (int nType = 0; nType < NUM_GRAPHTYPES; nType++)
 	{
-		if (chart.GetGraphType((BURNDOWN_GRAPH)nGraph) == BCT_TIMESERIES)
-		{
-			CDialogHelper::AddString(*this, chart.GetGraphTitle((BURNDOWN_GRAPH)nGraph), nGraph);
-		}
-	}
+		const GRAPHTYPE& gt = GRAPHTYPES[nType];
 
-	// Then 'Frequency Distributions'
-	CDialogHelper::AddString(*this, IDS_FREQUENCYDIST, BCT_FREQUENCY);
-	
-	for (nGraph = 0; nGraph < BCT_NUMGRAPHS; nGraph++)
-	{
-		if (chart.GetGraphType((BURNDOWN_GRAPH)nGraph) == BCT_FREQUENCY)
+		CDialogHelper::AddString(*this, gt.nLabelID, gt.nType);
+
+		for (int nGraph = 0; nGraph < BCT_NUMGRAPHS; nGraph++)
 		{
-			CDialogHelper::AddString(*this, chart.GetGraphTitle((BURNDOWN_GRAPH)nGraph), nGraph);
+			if (chart.GetGraphType((BURNDOWN_GRAPH)nGraph) == gt.nType)
+			{
+				CDialogHelper::AddString(*this, chart.GetGraphTitle((BURNDOWN_GRAPH)nGraph), nGraph);
+			}
 		}
 	}
 }
