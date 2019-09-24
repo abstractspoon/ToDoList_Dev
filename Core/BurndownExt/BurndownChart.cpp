@@ -14,6 +14,11 @@
 #include "..\shared\ScopedTimer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#define GET_GRAPH(e) pGraph = GetGraph(e); if (pGraph == NULL) return
+#define GET_GRAPH_RET(e, ret) pGraph = GetGraph(e); if (pGraph == NULL) return ret
+
+////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
 
 CBurndownChart::CBurndownChart(const CStatsItemArray& data)
@@ -23,13 +28,13 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_calculator(data),
 	m_nTrendLine(BTL_NONE)
 {
-	VERIFY(m_graphs.Add(new CIncompleteTasksGraph()) == BCT_TIMESERIES_INCOMPLETETASKS);
-	VERIFY(m_graphs.Add(new CRemainingDaysGraph()) == BCT_TIMESERIES_REMAININGDAYS);
-	VERIFY(m_graphs.Add(new CStartedEndedTasksGraph()) == BCT_TIMESERIES_STARTEDENDEDTASKS);
-	VERIFY(m_graphs.Add(new CEstimatedSpentDaysGraph()) == BCT_TIMESERIES_ESTIMATEDSPENTDAYS);
-	//VERIFY(m_graphs.Add(new CEstimatedSpentCostGraph()) == BCT_ESTIMATEDSPENTCOST);
-	VERIFY(m_graphs.Add(new CCategoryFrequencyGraph()) == BCT_FREQUENCY_CATEGORY);
-	//m_graphs.Add(new ());
+	m_mapGraphs[BCT_TIMESERIES_INCOMPLETETASKS]		= new CIncompleteTasksGraph();
+	m_mapGraphs[BCT_TIMESERIES_REMAININGDAYS]		= new CRemainingDaysGraph();
+	m_mapGraphs[BCT_TIMESERIES_STARTEDENDEDTASKS]	= new CStartedEndedTasksGraph();
+	m_mapGraphs[BCT_TIMESERIES_ESTIMATEDSPENTDAYS]	= new CEstimatedSpentDaysGraph();
+	//m_mapGraphs[BCT_ESTIMATEDSPENTCOST]			= new CEstimatedSpentCostGraph();
+
+	m_mapGraphs[BCT_FREQUENCY_CATEGORY]				= new CCategoryFrequencyGraph();
 
 	//FileMisc::EnableLogging(TRUE);
 
@@ -38,12 +43,15 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 
 CBurndownChart::~CBurndownChart()
 {
-	int nGraph = m_graphs.GetSize();
+	POSITION pos = m_mapGraphs.GetStartPosition();
 
-	while (nGraph--)
+	while (pos)
 	{
-		delete m_graphs[nGraph];
-		m_graphs.RemoveAt(nGraph);
+		BURNDOWN_GRAPH nGraph;
+		CGraphBase* pGraph;
+
+		m_mapGraphs.GetNextAssoc(pos, nGraph, pGraph);
+		delete pGraph;
 	}
 }
 
@@ -56,26 +64,38 @@ END_MESSAGE_MAP()
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart message handlers
 
-BOOL CBurndownChart::IsValidGraph(BURNDOWN_GRAPH nType) const
+BOOL CBurndownChart::IsValidGraph(BURNDOWN_GRAPH nGraph) const
 {
-	return ((nType >= 0) && (nType < BCT_NUMGRAPHS) && (nType < m_graphs.GetSize()));
+	return (GetGraphType(nGraph) != BCT_UNKNOWNTYPE);
 }
 
 BURNDOWN_GRAPHTYPE CBurndownChart::GetActiveGraphType() const
 {
-	return m_graphs[m_nActiveGraph]->GetType();
+	return GetGraphType(m_nActiveGraph);
 }
 
-CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPH nType) const
+CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPH nGraph) const
 {
-	if (!IsValidGraph(nType))
-	{
-		ASSERT(0);
-		return _T("");
-	}
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH_RET(nGraph, _T(""));
 
-	// else
-	return m_graphs[nType]->GetTitle();
+	return pGraph->GetTitle();
+}
+
+BURNDOWN_GRAPHTYPE CBurndownChart::GetGraphType(BURNDOWN_GRAPH nGraph) const
+{
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH_RET(nGraph, BCT_UNKNOWNTYPE);
+
+	return pGraph->GetType();
+}
+
+CGraphBase* CBurndownChart::GetGraph(BURNDOWN_GRAPH nGraph) const
+{
+	CGraphBase* pGraph = NULL;
+	m_mapGraphs.Lookup(nGraph, pGraph);
+
+	return pGraph;
 }
 
 BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
@@ -108,7 +128,10 @@ void CBurndownChart::UpdateGraphTrendLine()
 {
 	if (GetActiveGraphType() == BCT_TIMESERIES)
 	{
-		CTimeSeriesGraph* pTSGraph = dynamic_cast<CTimeSeriesGraph*>(m_graphs[m_nActiveGraph]);
+		CGraphBase* pGraph = NULL;
+		GET_GRAPH(m_nActiveGraph);
+
+		CTimeSeriesGraph* pTSGraph = dynamic_cast<CTimeSeriesGraph*>(pGraph);
 		ASSERT(pTSGraph);
 
 		VERIFY(pTSGraph->ShowTrendLine(m_nTrendLine, m_datasets));
@@ -142,10 +165,13 @@ BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
 
 void CBurndownChart::RebuildXScale()
 {
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH(m_nActiveGraph);
+
 	ClearXScaleLabels();
 
 	int nLabelStep = 1;
-	m_graphs[m_nActiveGraph]->RebuildXScale(m_calculator, m_rectData.Width(), m_strarrScaleXLabel, nLabelStep);
+	pGraph->RebuildXScale(m_calculator, m_rectData.Width(), m_strarrScaleXLabel, nLabelStep);
 
 	SetXLabelStep(nLabelStep);
 }
@@ -157,21 +183,24 @@ void CBurndownChart::OnSize(UINT nType, int cx, int cy)
 	RebuildXScale();
 }
 
-void CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
+BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 {
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH_RET(m_nActiveGraph, FALSE);
+
 	if (!m_dtExtents.Set(dtExtents))
 	{
 		ASSERT(0);
-		return;
+		return FALSE;
 	}
-
+	
 	m_calculator.SetDateRange(m_dtExtents);
 
 	CWaitCursor cursor;
 	CHoldRedraw hr(*this);
 	
 	ClearData();
-	SetYText(m_graphs[m_nActiveGraph]->GetTitle());
+	SetYText(pGraph->GetTitle());
 	
 	if (!m_data.IsEmpty())
 		RebuildXScale();
@@ -179,11 +208,13 @@ void CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	{
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
 
-		m_graphs[m_nActiveGraph]->BuildGraph(m_calculator, m_datasets);
+		pGraph->BuildGraph(m_calculator, m_datasets);
 		UpdateGraphTrendLine();
 	}
 
 	CalcDatas();
+
+	return TRUE;
 }
 
 void CBurndownChart::PreSubclassWindow()
@@ -200,7 +231,10 @@ CString CBurndownChart::GetTooltip(int nHit) const
 {
 	ASSERT(nHit != -1);
 
-	return m_graphs[m_nActiveGraph]->GetTooltip(m_calculator, m_datasets, nHit);
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH_RET(m_nActiveGraph, _T(""));
+
+	return pGraph->GetTooltip(m_calculator, m_datasets, nHit);
 }
 
 int CBurndownChart::HitTest(const CPoint& ptClient) const
@@ -228,9 +262,12 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 
 	if (m_crToday != CLR_NONE)
 	{
+		CGraphBase* pGraph = NULL;
+		GET_GRAPH(m_nActiveGraph);
+
 		// Find the data point corresponding to today
 		COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
-		int nPos = m_graphs[m_nActiveGraph]->HitTest(m_calculator, dtToday);
+		int nPos = pGraph->HitTest(m_calculator, dtToday);
 
 		if (nPos != -1)
 		{

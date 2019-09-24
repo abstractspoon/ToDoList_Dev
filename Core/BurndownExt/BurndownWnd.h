@@ -11,6 +11,7 @@
 
 #include "BurndownChart.h"
 #include "BurndownStruct.h"
+#include "BurndownGraphComboBox.h"
 
 #include "..\Shared\mapex.h"
 #include "..\Shared\entoolbar.h"
@@ -81,7 +82,8 @@ protected:
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CRangeSliderCtrl m_sliderDateRange;
-	CComboBox m_cbGraphs, m_cbTrends;
+	CBurndownGraphComboBox m_cbGraphs;
+	CComboBox m_cbTrends;
 	
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;

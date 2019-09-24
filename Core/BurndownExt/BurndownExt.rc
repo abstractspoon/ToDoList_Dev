@@ -131,11 +131,12 @@ END
 IDD_STATISTICS_DLG DIALOGEX 0, 0, 477, 281
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Dis&play",IDC_STATIC,0,2,120,8
-    COMBOBOX        IDC_DISPLAY,0,13,121,118,CBS_DROPDOWNLIST | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_DISPLAY,0,13,121,118,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
     CONTROL         "",IDC_FRAME,"Static",SS_GRAYFRAME,0,28,314,253
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,259,12,74,13
@@ -216,6 +217,8 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_NONE                "<none>"
+    IDS_FREQUENCYDIST       "Frequency Distributions"
+    IDS_TIMESERIES          "Time Series"
 END
 
 #endif    // English (Australia) resources

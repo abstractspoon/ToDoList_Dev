@@ -101,8 +101,8 @@ BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
-	ON_CBN_SELCHANGE(IDC_DISPLAY, OnSelchangeDisplay)
-	ON_CBN_SELCHANGE(IDC_TRENDLINES, OnTrendsChanged)
+	ON_CBN_SELENDOK(IDC_DISPLAY, OnSelchangeDisplay)
+	ON_CBN_SELENDOK(IDC_TRENDLINES, OnTrendsChanged)
 	ON_WM_SHOWWINDOW()
 	ON_WM_ERASEBKGND()
 	ON_WM_NCDESTROY()
@@ -185,8 +185,7 @@ void CBurndownWnd::BuildCombos()
 {
 	ASSERT(m_cbGraphs.GetCount() == 0);
 
-	for (int nGraph = 0; nGraph < BCT_NUMGRAPHS; nGraph++)
-		CDialogHelper::AddString(m_cbGraphs, m_graph.GetGraphTitle((BURNDOWN_GRAPH)nGraph), nGraph);
+	m_cbGraphs.Initialise(m_graph);
 
 	ASSERT(m_cbTrends.GetCount() == 0);
 

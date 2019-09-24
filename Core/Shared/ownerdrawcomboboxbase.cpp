@@ -86,11 +86,18 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		GetWindowText(sText);
 	}
 
+	// Determine whether this is a list item by comparing
+	// its rect to the combo client
+	CRect rCombo;
+	GetClientRect(rCombo);
+
+	BOOL bListItem = (rItem.bottom > rCombo.bottom);
+
 	// virtual call
 	DrawItemText(dc, rItem, nItem, 
 				lpDrawItemStruct->itemState,
 				lpDrawItemStruct->itemData, 
-				sText, (nItem != CB_ERR), crText);
+				sText, bListItem, crText);
 
 	// Restore the DC state before focus rect
 	dc.RestoreDC(nDC);

@@ -18,18 +18,19 @@ public:
 	CBurndownChart(const CStatsItemArray& data);
 	virtual ~CBurndownChart();
 
-	CString GetGraphTitle(BURNDOWN_GRAPH nType) const;
+	CString GetGraphTitle(BURNDOWN_GRAPH nGraph) const;
+	BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph) const;
 	BURNDOWN_GRAPHTYPE GetActiveGraphType() const;
-	BOOL SetActiveGraph(BURNDOWN_GRAPH nType);
+
+	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
 	void SetTodayColour(COLORREF color);
 	BOOL SaveToImage(CBitmap& bmImage);
-
 	void ShowTrendLine(BURNDOWN_TREND nTrend);
-	void RebuildGraph(const COleDateTimeRange& dtExtents);
+	BOOL RebuildGraph(const COleDateTimeRange& dtExtents);
 
 protected:
 	const CStatsItemArray& m_data;
-	CArray<CGraphBase*, CGraphBase*> m_graphs;
+	CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CGraphBase*, CGraphBase*&> m_mapGraphs;
 
 	COleDateTimeRange m_dtExtents;
 	CStatsItemCalculator m_calculator;
@@ -48,6 +49,7 @@ protected:
 	void RebuildXScale();
 	BOOL IsValidGraph(BURNDOWN_GRAPH nType) const;
 	void UpdateGraphTrendLine();
+	CGraphBase* GetGraph(BURNDOWN_GRAPH nGraph) const;
 
 	// virtual overrides
 	CString GetTooltip(int nHit) const;
