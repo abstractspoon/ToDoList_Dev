@@ -222,7 +222,7 @@ namespace DayViewUIExtension
                             StartDate = item.StartDate;
                             SelectedAppointment = item;
 
-                            ScrollToTop();
+                            //ScrollToTop();
                         }
                     }
                     else if (IsItemWithinRange(item, StartDate, EndDate))
