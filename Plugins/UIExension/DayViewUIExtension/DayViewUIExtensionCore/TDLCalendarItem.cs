@@ -145,7 +145,7 @@ namespace DayViewUIExtension
 
 		public bool IsSingleDay
 		{
-			get { return (StartDate.Date == EndDate.Date); }
+			get { return !IsLongAppt(); }
 		}
 
 		public override bool IsLongAppt()

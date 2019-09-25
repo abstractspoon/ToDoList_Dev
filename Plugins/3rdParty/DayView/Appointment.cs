@@ -223,9 +223,18 @@ namespace Calendar
 
         public virtual bool IsLongAppt()
         {
-            return (startDate.Date != endDate.Date);
+            return IsLongAppt(startDate, endDate);
         }
 
-        internal int conflictCount;
+		static public bool IsLongAppt(DateTime start, DateTime end)
+		{
+			// special case: end date is midnight on start date -> NOT long appt
+			if (end == start.Date.AddDays(1))
+				return false;
+			
+			return (start.Date != end.Date);
+		}
+
+		internal int conflictCount;
     }
 }

@@ -364,7 +364,7 @@ namespace DayViewUIExtension
 
             if (HideTasksSpanningDays)
             {
-                if (item.StartDate.Date != item.EndDate.Date)
+                if (item.IsLongAppt())
                     return false;
             }
 

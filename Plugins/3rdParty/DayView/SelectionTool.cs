@@ -249,7 +249,7 @@ namespace Calendar
             if (endDate.Date == startDate.Date)
                 return true;
 
-            if ((endDate.Date == startDate.Date.AddDays(1)) && (endDate == endDate.Date))
+            if (endDate == startDate.Date.AddDays(1)) // midnight
                 return true;
 
             // all else
