@@ -162,6 +162,14 @@ BOOL COleDateTimeRange::IsValid() const
 			(GetEndInclusive() >= m_dtStart));
 }
 
+BOOL COleDateTimeRange::IsValid(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive)
+{
+	return (CDateHelper::IsDateSet(dtStart) &&
+			CDateHelper::IsDateSet(dtEnd) &&
+			(GetEndInclusive(dtEnd, bInclusive) >= dtStart));
+
+}
+
 BOOL COleDateTimeRange::IsNull() const
 {
 	return (!CDateHelper::IsDateSet(m_dtStart) && !CDateHelper::IsDateSet(m_dtEnd));
@@ -407,6 +415,11 @@ double COleDateTimeRange::CalcProportion(const COleDateTime& date) const
 		return 1.0;
 
 	return ((date.m_dt - m_dtStart.m_dt) / (dtEnd.m_dt - m_dtStart.m_dt));
+}
+
+BOOL COleDateTimeRange::IsSameDay() const
+{
+	return CDateHelper::IsSameDay(m_dtStart, GetEndInclusive());
 }
 
 //////////////////////////////////////////////////////////////////////

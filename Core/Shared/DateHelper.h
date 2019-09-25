@@ -58,6 +58,8 @@ public:
 	BOOL IsValid() const;
 	BOOL HasStart() const;
 	BOOL HasEnd() const;
+	BOOL IsSameDay() const;
+
 	COleDateTime GetStart() const;
 	COleDateTime GetEnd() const;
 
@@ -76,6 +78,8 @@ public:
 
 	// returns 'end of day' if bInclusive is TRUE and date has no time
 	static COleDateTime GetEndInclusive(const COleDateTime& date, BOOL bInclusive);
+
+	static BOOL IsValid(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive = TRUE);
 
 public:
 	COleDateTime m_dtStart, m_dtEnd;

@@ -2165,7 +2165,7 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 	}
 	else if (pTDI->HasDue())
 	{
-		if (pTDI->dateDue < pTDI->dateStart)
+		if (!COleDateTimeRange::IsValid(pTDI->dateStart, pTDI->dateDue))
 		{
 			ASSERT(0);
 			return SET_FAILED;
@@ -2428,15 +2428,6 @@ BOOL CToDoCtrlData::CalcMissingDueDateFromStart(TODOITEM* pTDI) const
 	return TRUE;
 }
 
-int CToDoCtrlData::IsValidDateRange(const COleDateTime& dateStart, const COleDateTime& dateDue)
-{
-	if (CDateHelper::DateHasTime(dateDue))
-		return (dateStart <= dateDue);
-
-	// else
-	return (dateStart < CDateHelper::GetEndOfDay(dateDue));
-}
-
 TDC_SET CToDoCtrlData::RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate)
 {
 	if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
@@ -2456,7 +2447,7 @@ TDC_SET CToDoCtrlData::RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TD
 				if (pTDI->HasStart() && pTDI->HasDue()) // both exist
 				{
 					// End date must be greater then start date
-					if (!IsValidDateRange(pTDI->dateStart, pTDI->dateDue))
+					if (!COleDateTimeRange::IsValid(pTDI->dateStart, pTDI->dateDue))
 					{
 						ASSERT(0);
 						break;
@@ -3590,7 +3581,7 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	}
 
 	// End date must be greater then start date
-	if (!IsValidDateRange(dateStart, dateDue))
+	if (!COleDateTimeRange::IsValid(dateStart, dateDue))
 	{
 		ASSERT(0);
 		return 0.0;
@@ -3620,8 +3611,21 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 
 	case TDCU_MINS:
 	case TDCU_HOURS:
+		// if start and due fall on the same day keep it simple
+		if (CDateHelper::IsSameDay(dateStart, dateDue))
+		{
+			// handle 'whole' of due date
+			if (IsEndOfDay(dateDue))
+				dDuration += 1.0;
+
+			CTwentyFourSevenWeek week;
+			dDuration = CTimeHelper(week).GetTime(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
+
+			break;
+		}
+		// else fall thru to handle as weekdays
+
 	case TDCU_WEEKDAYS:
-		// Work in weekdays
 		{
 			CWorkingWeek week;
 

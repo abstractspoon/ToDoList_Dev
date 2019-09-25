@@ -199,6 +199,33 @@ double CWorkingDay::GetLunchLengthInHours() const
 	return (m_dEndOfLunchInHours - m_dStartOfLunchInHours);
 }
 
+BOOL CWorkingDay::Contains(const COleDateTime& date) const
+{
+	double dTime = GetTimeOfDayInHours(date);
+
+	return ((dTime >= m_dStartOfDayInHours) && (dTime <= GetEndOfDayInHours()));
+}
+
+BOOL CWorkingDay::Contains(const COleDateTime& dtStart, const COleDateTime& dtEnd) const
+{
+	if (!CDateHelper::IsSameDay(dtStart, dtEnd))
+		return FALSE;
+
+	return (Contains(dtStart) && Contains(dtEnd));
+}
+
+BOOL CWorkingDay::Contains(const COleDateTimeRange& dtRange) const
+{
+	return Contains(dtRange.GetStart(), dtRange.GetEndInclusive());
+}
+
+BOOL CWorkingDay::IsDuringLunch(const COleDateTime& date) const
+{
+	double dTime = GetTimeOfDayInHours(date);
+
+	return ((dTime > m_dStartOfLunchInHours) && (dTime < m_dEndOfLunchInHours));
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 CWeekend::CWeekend() : m_dwDays(0), m_nLength(0)

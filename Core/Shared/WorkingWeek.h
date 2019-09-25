@@ -15,6 +15,10 @@
 
 //////////////////////////////////////////////////////////////////////
 
+class COleDateTimeRange;
+
+//////////////////////////////////////////////////////////////////////
+
 class CWorkingDay
 {
 public:
@@ -55,6 +59,11 @@ public:
 	double GetLengthInHours(bool bIncludingLunch = false) const;
 	double GetLunchLengthInHours() const;
 
+	BOOL Contains(const COleDateTime& date) const;
+	BOOL Contains(const COleDateTime& dtStart, const COleDateTime& dtEnd) const;
+	BOOL Contains(const COleDateTimeRange& dtRange) const;
+	BOOL IsDuringLunch(const COleDateTime& date) const;
+	
 	static double GetTimeOfDayInHours(const COleDateTime& date);
 	
 protected:

@@ -327,7 +327,6 @@ protected:
 	static double CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits);
 	static COleDateTime AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits);
 	static BOOL IsEndOfDay(const COleDateTime& date);
-	static BOOL IsValidDateRange(const COleDateTime& dateStart, const COleDateTime& dateDue);
 	static int GetNextValue(int nValue, int nIncrement);
 
 };
