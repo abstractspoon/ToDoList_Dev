@@ -57,6 +57,7 @@ enum BURNDOWN_TREND
 	BTL_BEST_FIT,
 	BTL_7DAY_ROLLING_AVERAGE,
 	BTL_30DAY_ROLLING_AVERAGE,
+	BTL_90DAY_ROLLING_AVERAGE,
 };
 
 /////////////////////////////////////////////////////////////////////////////

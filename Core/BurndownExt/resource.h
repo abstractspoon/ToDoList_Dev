@@ -52,6 +52,7 @@
 #define IDS_FREQUENCY_TAGS              57704
 #define IDS_FREQUENCY_PRIORITY          57705
 #define IDS_FREQUENCY_RISK              57706
+#define IDS_TREND_90DAYAVERAGE          57707
 
 // Next default values for new objects
 // 

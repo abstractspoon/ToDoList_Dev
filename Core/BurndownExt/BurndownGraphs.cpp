@@ -249,6 +249,10 @@ BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_TREND nTrend, const CHMXDatas
 		bSuccess = CalculateMovingAverage(30, datasetSrc, datasetDest);
 		break;
 
+	case BTL_90DAY_ROLLING_AVERAGE:
+		bSuccess = CalculateMovingAverage(90, datasetSrc, datasetDest);
+		break;
+
 	default:
 		ASSERT(0);
 		break;

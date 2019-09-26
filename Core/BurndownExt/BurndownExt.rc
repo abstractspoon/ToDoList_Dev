@@ -227,6 +227,7 @@ BEGIN
     IDS_FREQUENCY_TAGS      "Tag Frequency"
     IDS_FREQUENCY_PRIORITY  "Priority Frequency"
     IDS_FREQUENCY_RISK      "Risk Frequency"
+    IDS_TREND_90DAYAVERAGE  "90 Day Rolling Average"
 END
 
 #endif    // English (Australia) resources
