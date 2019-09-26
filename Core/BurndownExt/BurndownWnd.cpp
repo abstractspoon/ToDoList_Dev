@@ -17,6 +17,7 @@
 #include "..\shared\enstring.h"
 #include "..\shared\WorkingWeek.h"
 #include "..\shared\AutoFlag.h"
+#include "..\Shared\Localizer.h"
 
 #include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\GdiPlus.h"
@@ -191,6 +192,8 @@ void CBurndownWnd::BuildCombos()
 
 	for (int nTrend = 0; nTrend < NUM_TRENDS; nTrend++)
 		CDialogHelper::AddString(m_cbTrends, TRENDS[nTrend].nTitleStrID, TRENDS[nTrend].nTrend);
+
+	CLocalizer::EnableTranslation(m_cbTrends, FALSE);
 }
 
 void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const 

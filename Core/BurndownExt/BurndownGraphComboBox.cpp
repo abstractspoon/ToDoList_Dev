@@ -8,6 +8,7 @@
 
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\Misc.h"
+#include "..\Shared\Localizer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -104,6 +105,8 @@ void CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 			CDialogHelper::AddString(*this, st.sLabel, st.nType);
 		}
 	}
+
+	CLocalizer::EnableTranslation(GetSafeHwnd(), FALSE);
 }
 
 void CBurndownGraphComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
