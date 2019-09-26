@@ -119,7 +119,14 @@ namespace DayViewUIExtension
             return hours;
         }
 
-        public bool TimeEstimateMatchesOriginalLength(WorkingWeek workWeek)
+		protected override void OnEndDateChanged()
+		{
+			// Prevent end date being set to exactly midnight
+			if (EndDate == EndDate.Date)
+				EndDate = EndDate.AddSeconds(-1);
+		}
+
+		public bool TimeEstimateMatchesOriginalLength(WorkingWeek workWeek)
         {
             return (TimeEstimate == LengthAsTimeEstimate(workWeek, true));
         }

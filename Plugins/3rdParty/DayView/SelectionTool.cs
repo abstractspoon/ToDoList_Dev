@@ -337,6 +337,8 @@ namespace Calendar
                 if (Complete != null)
                     Complete(this, EventArgs.Empty);
             }
+
+			m_dayView.Invalidate();
 			m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, true));
 
             m_mode = Mode.None;
