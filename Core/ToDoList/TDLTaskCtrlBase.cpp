@@ -2717,12 +2717,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				// draw priority number over the top
 				if (bHasPriority && !HasStyle(TDCS_HIDEPRIORITYNUMBER))
 				{
-					COLORREF color = GetPriorityColor(nPriority);
-					
-					// pick best colour for text
-					BYTE nLum = RGBX(color).Luminance();
-					COLORREF crTemp = ((nLum < 128) ? RGB(255, 255, 255) : 0);
-					
+					COLORREF crTemp = GraphicsMisc::GetBestTextColor(GetPriorityColor(nPriority));
 					DrawColumnText(pDC, sTaskColText, rSubItem, pCol->nTextAlignment, crTemp);
 				}
 			}
@@ -3696,7 +3691,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 		break;
 
 	case TDCC_PRIORITY:
-		if (!bDrawing)
+		if (!bDrawing || !HasStyle(TDCS_HIDEPRIORITYNUMBER))
 			return m_formatter.GetTaskPriority(pTDI, pTDS);
 		break;
 
