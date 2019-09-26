@@ -373,10 +373,25 @@ namespace Calendar
 					{
 						if (appt == value)
 						{
-							selectedAppointment = appt;
-
                             // Initialise selection tool
+							selectedAppointment = appt;
                             ActiveTool = selectionTool;
+
+							// Ensure at least part of the task is in view
+							int startHour = (vscroll.Value / (slotsPerHour * slotHeight));
+							int endHour = (startHour + (vscroll.LargeChange / (slotsPerHour * slotHeight)));
+
+							if (appt.StartDate.Hour > endHour)
+							{
+								vscroll.Value = ((appt.EndDate.Hour - 1) * slotsPerHour * slotHeight);
+								Invalidate();
+							}
+							else if (appt.EndDate.Hour < startHour)
+							{
+								vscroll.Value = ((appt.StartDate.Hour + 1) * slotsPerHour * slotHeight);
+								Invalidate();
+							}
+
 							break;
 						}
 					}
