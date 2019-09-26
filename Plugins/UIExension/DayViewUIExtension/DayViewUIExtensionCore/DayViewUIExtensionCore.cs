@@ -637,6 +637,7 @@ namespace DayViewUIExtension
 						if (notify.NotifyMod(Task.Attribute.OffsetTask, item.StartDate))
 						{
 							item.UpdateOriginalDates();
+							m_DayView.FixupSelection(true, false);
 						}
 						else
 						{
