@@ -209,9 +209,9 @@ BEGIN
     IDS_DISPLAY_STARTEDENDED "Started/Completed Tasks"
     IDS_DISPLAY_ESTIMATEDSPENTDAYS "Estimated/Spent Days"
     IDS_DISPLAY_ESTIMATEDSPENTCOST "Estimated/Spent Cost"
-    IDS_TREND_BESTFIT       "Linear Regression (Line of best fit)"
-    IDS_TREND_7DAYAVERAGE   "Simple Rolling Average (7 day)"
-    IDS_TREND_30DAYAVERAGE  "Simple Rolling Average (30 day)"
+    IDS_TREND_BESTFIT       "Line of Best Fit"
+    IDS_TREND_7DAYAVERAGE   "7 Day Rolling Average"
+    IDS_TREND_30DAYAVERAGE  "30 Day Rolling Average"
 END
 
 STRINGTABLE DISCARDABLE 
