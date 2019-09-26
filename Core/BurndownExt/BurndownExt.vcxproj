@@ -172,6 +172,7 @@ copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
     <ClCompile Include="BurndownGraphComboBox.cpp" />
     <ClCompile Include="BurndownGraphs.cpp" />
     <ClCompile Include="BurndownStruct.cpp" />
+    <ClCompile Include="BurndownTrendComboBox.cpp" />
     <ClCompile Include="BurndownWnd.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -204,6 +205,7 @@ copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
     <ClInclude Include="BurndownGraphs.h" />
     <ClInclude Include="BurndownStatic.h" />
     <ClInclude Include="BurndownStruct.h" />
+    <ClInclude Include="BurndownTrendComboBox.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="BurndownExt.h" />
     <ClInclude Include="BurndownWnd.h" />

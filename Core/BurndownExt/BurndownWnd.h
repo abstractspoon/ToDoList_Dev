@@ -12,6 +12,7 @@
 #include "BurndownChart.h"
 #include "BurndownStruct.h"
 #include "BurndownGraphComboBox.h"
+#include "BurndownTrendComboBox.h"
 
 #include "..\Shared\mapex.h"
 #include "..\Shared\entoolbar.h"
@@ -83,7 +84,7 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CRangeSliderCtrl m_sliderDateRange;
 	CBurndownGraphComboBox m_cbGraphs;
-	CComboBox m_cbTrends;
+	CBurndownTrendComboBox m_cbTrends;
 	
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;
@@ -131,7 +132,6 @@ protected:
 	void UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange);
 	void UpdateRangeSliderStep();
 	BOOL GetSliderDateRange(COleDateTimeRange& dtActiveRange) const;
-	void BuildCombos();
 
 };
 

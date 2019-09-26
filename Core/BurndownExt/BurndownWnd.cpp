@@ -175,25 +175,14 @@ BOOL CBurndownWnd::OnInitDialog()
 
 	VERIFY(m_graph.SubclassDlgItem(IDC_GRAPH, this));
 
-	BuildCombos();
+	// Combos
+	VERIFY(m_cbGraphs.Initialise(m_graph));
+	VERIFY(m_cbTrends.Initialise());
+
 	RebuildGraph(FALSE, FALSE, FALSE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CBurndownWnd::BuildCombos()
-{
-	ASSERT(m_cbGraphs.GetCount() == 0);
-
-	m_cbGraphs.Initialise(m_graph);
-
-	ASSERT(m_cbTrends.GetCount() == 0);
-
-	for (int nTrend = 0; nTrend < NUM_TRENDS; nTrend++)
-		CDialogHelper::AddString(m_cbTrends, TRENDS[nTrend].nTitleStrID, TRENDS[nTrend].nTrend);
-
-	CLocalizer::EnableTranslation(m_cbTrends, FALSE);
 }
 
 void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const 

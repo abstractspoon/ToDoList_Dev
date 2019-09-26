@@ -132,6 +132,10 @@ SOURCE=.\BurndownStruct.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\BurndownTrendComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\BurndownWnd.cpp
 # End Source File
 # Begin Source File
@@ -167,6 +171,10 @@ SOURCE=.\BurndownGraphs.h
 # Begin Source File
 
 SOURCE=.\BurndownStruct.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\BurndownTrendComboBox.h
 # End Source File
 # Begin Source File
 

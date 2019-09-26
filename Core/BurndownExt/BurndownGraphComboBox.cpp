@@ -35,7 +35,7 @@ const int NUM_GRAPHTYPES = (sizeof(GRAPHTYPES) / sizeof(GRAPHTYPES[0]));
 
 struct SORTITEM
 {
-	BURNDOWN_GRAPH nType;
+	BURNDOWN_GRAPH nGraph;
 	CString sLabel;
 };
 
@@ -70,10 +70,21 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownGraphComboBox message handlers
 
-void CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
+BOOL CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 {
+	// Once only
+	if (GetCount())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	// We build the combo in a specific order
-	ASSERT(!(GetStyle() & CBS_SORT));
+	if (GetStyle() & CBS_SORT)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	for (int nType = 0; nType < NUM_GRAPHTYPES; nType++)
 	{
@@ -90,8 +101,8 @@ void CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 		{
 			if (chart.GetGraphType((BURNDOWN_GRAPH)nGraph) == gt.nType)
 			{
-				st.nType = (BURNDOWN_GRAPH)nGraph;
-				st.sLabel = chart.GetGraphTitle(st.nType);
+				st.nGraph = (BURNDOWN_GRAPH)nGraph;
+				st.sLabel = chart.GetGraphTitle(st.nGraph);
 
 				aGraphs.Add(st);
 			}
@@ -102,11 +113,15 @@ void CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 		for (int nItem = 0; nItem < aGraphs.GetSize(); nItem++)
 		{
 			const SORTITEM& st = aGraphs[nItem];
-			CDialogHelper::AddString(*this, st.sLabel, st.nType);
+			CDialogHelper::AddString(*this, st.sLabel, st.nGraph);
 		}
 	}
 
+	CDialogHelper::RefreshMaxDropWidth(*this);
+
 	CLocalizer::EnableTranslation(GetSafeHwnd(), FALSE);
+
+	return TRUE;
 }
 
 void CBurndownGraphComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,

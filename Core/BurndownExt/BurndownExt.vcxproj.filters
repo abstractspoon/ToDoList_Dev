@@ -39,6 +39,9 @@
     <ClCompile Include="BurndownGraphComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BurndownTrendComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="BurndownExt.def">
@@ -94,6 +97,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BurndownGraphComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BurndownTrendComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

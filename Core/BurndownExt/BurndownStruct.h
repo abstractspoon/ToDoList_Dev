@@ -19,7 +19,7 @@
 
 struct TRENDLINE
 {
-	UINT nTitleStrID;
+	UINT nLabelID;
 	BURNDOWN_TREND nTrend;
 };
 

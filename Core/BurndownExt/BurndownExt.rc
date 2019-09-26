@@ -148,7 +148,7 @@ BEGIN
                     12,112,13
     LTEXT           "Trend Line",IDC_STATIC,126,2,120,8
     COMBOBOX        IDC_TRENDLINES,126,13,121,118,CBS_DROPDOWNLIST | 
-                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+                    WS_VSCROLL | WS_TABSTOP
 END
 
 

@@ -23,7 +23,7 @@ public:
 	CBurndownGraphComboBox();
 	virtual ~CBurndownGraphComboBox();
 
-	void Initialise(const CBurndownChart& chart);
+	BOOL Initialise(const CBurndownChart& chart);
 
 protected:
 // Overrides
