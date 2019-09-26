@@ -23,7 +23,8 @@ CRangeSliderCtrl::CRangeSliderCtrl(UINT nThumbStyle)
 	m_crParentBkgnd(CLR_NONE), 
 	m_nSliderDrawStyles(nThumbStyle),
 	m_dMinRangeWidth(0.0),
-	m_dMaxRangeWidth(-1.0)
+	m_dMaxRangeWidth(-1.0),
+	m_nMinTickSpacing(3)
 {
 }
 
@@ -63,6 +64,22 @@ BOOL CRangeSliderCtrl::SetMinMaxRangeWidths(double dMinWidth, double dMaxWidth)
 
 	m_dMinRangeWidth = dMinWidth;
 	m_dMaxRangeWidth = dMaxWidth;
+
+	return TRUE;
+}
+
+BOOL CRangeSliderCtrl::SetMinTickSpacing(int nPixels)
+{
+	if (nPixels < 3 || nPixels > 100)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_nMinTickSpacing = nPixels;
+
+	if (GetSafeHwnd())
+		Invalidate();
 
 	return TRUE;
 }
@@ -274,13 +291,19 @@ void CRangeSliderCtrl::DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, dou
 
 		// Skip first and last ticks
 		int nNumTick = Misc::Round(dNumTick);
+		int nLastTickPos = rTrack.left;
 
 		for (int nTick = 1; nTick < nNumTick; nTick++)
 		{
 			int nTickPos = (rTrack.left + (int)(nTick * dTickSpacing));
-			CRect rTick(nTickPos, rTrack.bottom, (nTickPos + 1), rTrack.bottom + 4);
 
-			dc.FillSolidRect(rTick, GetSysColor(COLOR_3DSHADOW));
+			if ((nTickPos - nLastTickPos) > m_nMinTickSpacing)
+			{
+				CRect rTick(nTickPos, rTrack.bottom, (nTickPos + 1), rTrack.bottom + 4);
+				dc.FillSolidRect(rTick, GetSysColor(COLOR_3DSHADOW));
+
+				nLastTickPos = nTickPos;
+			}
 		}
 	}
 }

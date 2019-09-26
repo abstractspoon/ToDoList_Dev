@@ -23,12 +23,14 @@ public:
 	void SetParentBackgroundColor(COLORREF crBkgnd);
 	BOOL SetMinMaxRangeWidths(double dMinWidth = 0, double dMaxWidth = -1);
 	BOOL HasSelectedRange() const;
+	BOOL SetMinTickSpacing(int nPixels); // affects tick visibility only
 
 protected:
 	CHotTracker m_hotTrack;
 	COLORREF m_crParentBkgnd;
 	UINT m_nSliderDrawStyles;
 	double m_dMinRangeWidth, m_dMaxRangeWidth;
+	int m_nMinTickSpacing;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
