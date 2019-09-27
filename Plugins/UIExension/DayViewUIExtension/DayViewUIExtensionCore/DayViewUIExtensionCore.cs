@@ -56,6 +56,10 @@ namespace DayViewUIExtension
 		{
 			bool selected = m_DayView.SelectTask(dwTaskID);
 
+			m_WeekLabel.StartDate = m_DayView.StartDate;
+			m_MonthCombo.SelectedMonth = m_DayView.StartDate.Month;
+			m_YearCombo.SelectedYear = m_DayView.StartDate.Year;
+
 			UpdatedSelectedTaskDatesText();
 
 			return selected;
@@ -171,6 +175,8 @@ namespace DayViewUIExtension
 		public void SavePreferences(Preferences prefs, String key)
 		{
             m_PrefsDlg.SavePreferences(prefs, key);
+
+			prefs.WriteProfileInt(key, "DaysToShow", m_DayView.DaysToShow);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -191,6 +197,11 @@ namespace DayViewUIExtension
                 // private settings
                 m_PrefsDlg.LoadPreferences(prefs, key);
 				UpdateDayViewPreferences();
+
+				m_DayView.DaysToShow = prefs.GetProfileInt(key, "DaysToShow", 7);
+				m_WeekLabel.NumDays = m_DayView.DaysToShow;
+
+				UpdateToolbarButtonStates();
             }
 			else
 			{
@@ -303,9 +314,11 @@ namespace DayViewUIExtension
 			m_DayView.MouseDown += new MouseEventHandler(OnDayViewMouseClick);
 
 			m_DayView.StartDate = DateTime.Now;
-            m_DayView.SetFont(FontName, 8);
+			m_WeekLabel.StartDate = m_DayView.StartDate;
+			m_DayView.SetFont(FontName, 8);
 
 			Controls.Add(m_DayView);
+
 		}
 
 		private void CreateWeekLabel()
@@ -340,6 +353,7 @@ namespace DayViewUIExtension
 			var images = new Bitmap(assembly.GetManifestResourceStream("DayViewUIExtension.toolbar_std.bmp"));
             
             m_TBImageList = new ImageList();
+			m_TBImageList.ColorDepth = ColorDepth.Depth32Bit;
             m_TBImageList.ImageSize = new System.Drawing.Size(16, 16);
             m_TBImageList.TransparentColor = Color.Magenta;
             m_TBImageList.Images.AddStrip(images);
@@ -363,17 +377,25 @@ namespace DayViewUIExtension
 			btn1.ToolTipText = m_Trans.Translate("Go to Today");
 			m_Toolbar.Items.Add(btn1);
 
+			var sep1 = new ToolStripSeparator();
+			m_Toolbar.Items.Add(sep1);
+
 			var btn2 = new ToolStripButton();
+			btn2.Name = "ShowDayView";
 			btn2.ImageIndex = 1;
 			btn2.Click += new EventHandler(OnShowDayView);
 			btn2.ToolTipText = m_Trans.Translate("Day View");
 			m_Toolbar.Items.Add(btn2);
 
 			var btn3 = new ToolStripButton();
+			btn3.Name = "ShowWeekView";
 			btn3.ImageIndex = 2;
 			btn3.Click += new EventHandler(OnShowWeekView);
 			btn3.ToolTipText = m_Trans.Translate("Week View");
 			m_Toolbar.Items.Add(btn3);
+
+			var sep2 = new ToolStripSeparator();
+			m_Toolbar.Items.Add(sep2);
 
 			var btn4 = new ToolStripButton();
 			btn4.ImageIndex = 3;
@@ -400,11 +422,23 @@ namespace DayViewUIExtension
 		private void OnShowDayView(object sender, EventArgs e)
 		{
 			m_DayView.ShowDayView();
+			m_WeekLabel.NumDays = 1;
+
+			UpdateToolbarButtonStates();
 		}
 
 		private void OnShowWeekView(object sender, EventArgs e)
 		{
 			m_DayView.ShowWeekView();
+			m_WeekLabel.NumDays = 7;
+
+			UpdateToolbarButtonStates();
+		}
+
+		private void UpdateToolbarButtonStates()
+		{
+			(m_Toolbar.Items["ShowDayView"] as ToolStripButton).Checked = (m_DayView.DaysToShow == 1);
+			(m_Toolbar.Items["ShowWeekView"] as ToolStripButton).Checked = (m_DayView.DaysToShow != 1);
 		}
 
 		private void OnPreferences(object sender, EventArgs e)
@@ -616,11 +650,11 @@ namespace DayViewUIExtension
 
 				m_MonthCombo.SelectedMonth = args.StartDate.Month;
 				m_YearCombo.SelectedYear = args.StartDate.Year;
+
 				UpdatedSelectedTaskDatesPosition();
 
 				m_SettingMonthYear = false;
 			}
-
 		}
 
 		private void OnMonthYearSelChanged(object sender, EventArgs args)
@@ -630,6 +664,8 @@ namespace DayViewUIExtension
 				m_SettingDayViewStartDate = true;
 
 				m_DayView.StartDate = new DateTime(m_YearCombo.SelectedYear, m_MonthCombo.SelectedMonth, 1);
+				m_WeekLabel.StartDate = m_DayView.StartDate;
+
 				UpdatedSelectedTaskDatesPosition();
 
 				m_SettingDayViewStartDate = false;

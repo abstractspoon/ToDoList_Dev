@@ -288,13 +288,20 @@ namespace Calendar
             }
             set
             {
-                // Move start date to start of week
-				DateTime firstDayOfWeek = FirstDayOfWeekUtility.GetFirstDayOfWeek(value);
-
-				if (startDate != firstDayOfWeek)
+				if (DaysToShow == 1)
 				{
-					startDate = firstDayOfWeek;
-					OnStartDateChanged();
+					startDate = value.Date;
+				}
+				else
+				{
+					// Move start date to start of week
+					DateTime firstDayOfWeek = FirstDayOfWeekUtility.GetFirstDayOfWeek(value);
+
+					if (startDate != firstDayOfWeek)
+					{
+						startDate = firstDayOfWeek;
+						OnStartDateChanged();
+					}
 				}
             }
         }
@@ -708,11 +715,11 @@ namespace Calendar
         {
             if (e.NewValue > e.OldValue)
             {
-                StartDate = StartDate.AddDays(7);
+                StartDate = StartDate.AddDays(daysToShow);
             }
             else if (e.NewValue < e.OldValue)
             {
-                StartDate = StartDate.AddDays(-7);
+                StartDate = StartDate.AddDays(-daysToShow);
             }
 
 			AdjustScrollbar();
@@ -1818,7 +1825,7 @@ namespace Calendar
 
         protected void RefreshHScrollSize()
         {
-            hscroll.Width = hourLabelWidth;
+            hscroll.Width = (hourLabelWidth + hourLabelIndent);
             hscroll.Height = dayHeadersHeight;
         }
 
