@@ -866,7 +866,7 @@ namespace Calendar
 
 			if (ModifierKeys.Equals(Keys.None))
 			{
-				ScrollMe(e.Delta < 0);
+				MouseWheelScroll(e.Delta < 0);
 			}
         }
 
@@ -1027,7 +1027,7 @@ namespace Calendar
             this.Invalidate();
         }
 
-        public void ScrollMe(bool down)
+        public void MouseWheelScroll(bool down)
         {
             if (this.AllowScroll)
             {
