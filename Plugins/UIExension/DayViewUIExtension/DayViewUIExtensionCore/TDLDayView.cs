@@ -275,6 +275,19 @@ namespace DayViewUIExtension
 			}
         }
 
+		public void ShowDayView()
+		{
+			// TODO 
+			// make sure the day for the selected task is visible
+
+			DaysToShow = 1;
+		}
+
+		public void ShowWeekView()
+		{
+			DaysToShow = 7;
+		}
+
 		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
 		{
 			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));

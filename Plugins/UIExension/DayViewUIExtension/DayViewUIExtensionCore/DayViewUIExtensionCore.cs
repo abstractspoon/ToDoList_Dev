@@ -365,15 +365,27 @@ namespace DayViewUIExtension
 
 			var btn2 = new ToolStripButton();
 			btn2.ImageIndex = 1;
-			btn2.Click += new EventHandler(OnPreferences);
-			btn2.ToolTipText = m_Trans.Translate("Preferences");
+			btn2.Click += new EventHandler(OnShowDayView);
+			btn2.ToolTipText = m_Trans.Translate("Day View");
 			m_Toolbar.Items.Add(btn2);
 
 			var btn3 = new ToolStripButton();
 			btn3.ImageIndex = 2;
-			btn3.Click += new EventHandler(OnHelp);
-			btn3.ToolTipText = m_Trans.Translate("Online Help");
+			btn3.Click += new EventHandler(OnShowWeekView);
+			btn3.ToolTipText = m_Trans.Translate("Week View");
 			m_Toolbar.Items.Add(btn3);
+
+			var btn4 = new ToolStripButton();
+			btn4.ImageIndex = 3;
+			btn4.Click += new EventHandler(OnPreferences);
+			btn4.ToolTipText = m_Trans.Translate("Preferences");
+			m_Toolbar.Items.Add(btn4);
+
+			var btn5 = new ToolStripButton();
+			btn5.ImageIndex = 4;
+			btn5.Click += new EventHandler(OnHelp);
+			btn5.ToolTipText = m_Trans.Translate("Online Help");
+			m_Toolbar.Items.Add(btn5);
 
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
@@ -383,6 +395,16 @@ namespace DayViewUIExtension
 		private void OnGoToToday(object sender, EventArgs e)
 		{
             m_DayView.GoToToday();
+		}
+
+		private void OnShowDayView(object sender, EventArgs e)
+		{
+			m_DayView.ShowDayView();
+		}
+
+		private void OnShowWeekView(object sender, EventArgs e)
+		{
+			m_DayView.ShowWeekView();
 		}
 
 		private void OnPreferences(object sender, EventArgs e)
