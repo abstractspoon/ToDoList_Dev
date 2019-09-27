@@ -259,6 +259,20 @@ namespace DayViewUIExtension
         public void GoToToday()
         {
             StartDate = DateTime.Now;
+
+			// And scroll to first task
+			var appointments = GetMatchingAppointments(StartDate, EndDate);
+
+			if (appointments != null)
+			{
+				appointments.Sort((a, b) => (int)(a.StartDate.Ticks - b.StartDate.Ticks));
+
+				foreach (var appt in appointments)
+				{
+					if (EnsureVisible(appt, false))
+						break;
+				}
+			}
         }
 
 		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
@@ -528,18 +542,23 @@ namespace DayViewUIExtension
 
 		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
 		{
-			var appts =	new System.Collections.Generic.List<Calendar.Appointment>();
+			args.Appointments = GetMatchingAppointments(args.StartDate, args.EndDate);
+		}
+
+		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end)
+		{
+			var appts = new System.Collections.Generic.List<Calendar.Appointment>();
 
 			foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> item in m_Items)
 			{
-				if (IsItemWithinRange(item.Value, args.StartDate, args.EndDate))
+				if (IsItemWithinRange(item.Value, start, end))
 					appts.Add(item.Value);
 			}
 
-			args.Appointments = appts;
+			return appts;
 		}
 
-        private void OnSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
+		private void OnSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
         {
             if (args.Appointment != null)
 			{

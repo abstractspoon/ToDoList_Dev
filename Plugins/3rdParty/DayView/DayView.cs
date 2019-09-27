@@ -378,20 +378,7 @@ namespace Calendar
                             ActiveTool = selectionTool;
 
 							// Ensure at least part of the task is in view
-							int startHour = (vscroll.Value / (slotsPerHour * slotHeight));
-							int endHour = (startHour + (vscroll.LargeChange / (slotsPerHour * slotHeight)));
-
-							if (appt.StartDate.Hour > endHour)
-							{
-								vscroll.Value = ((appt.EndDate.Hour - 1) * slotsPerHour * slotHeight);
-								Invalidate();
-							}
-							else if (appt.EndDate.Hour < startHour)
-							{
-								vscroll.Value = ((appt.StartDate.Hour + 1) * slotsPerHour * slotHeight);
-								Invalidate();
-							}
-
+							EnsureVisible(appt, true);
 							break;
 						}
 					}
@@ -401,7 +388,47 @@ namespace Calendar
 			}
         }
 
-        public UInt32 SelectedAppointmentId
+		public bool EnsureVisible(Appointment appt, bool partialOK)
+		{
+			if (appt == null)
+				return false;
+
+			if (appt.StartDate == DateTime.MinValue)
+				return false;
+
+			StartDate = appt.StartDate;
+
+			// Ensure at least part of the task is in view
+			int startHour = (vscroll.Value / (slotsPerHour * slotHeight));
+			int endHour = (startHour + (vscroll.LargeChange / (slotsPerHour * slotHeight)));
+
+			if (partialOK)
+			{
+				if (appt.StartDate.Hour > endHour)
+				{
+					ScrollToHour(appt.EndDate.Hour - 1);
+				}
+				else if (appt.EndDate.Hour < startHour)
+				{
+					ScrollToHour(appt.StartDate.Hour + 1);
+				}
+			}
+			else
+			{
+				if (appt.StartDate.Hour < startHour)
+				{
+					ScrollToHour(appt.StartDate.Hour + 1);
+				}
+				else if (appt.EndDate.Hour > endHour)
+				{
+					ScrollToHour(appt.EndDate.Hour - endHour + 1);
+				}
+			}
+			
+			return true;
+		}
+
+		public UInt32 SelectedAppointmentId
         {
             get { return ((selectedAppointment == null) ? 0 : selectedAppointment.Id); }
         }
@@ -1026,8 +1053,18 @@ namespace Calendar
             this.vscroll.Value = this.vscroll.Minimum;
             this.Invalidate();
         }
+		public bool ScrollToHour(int hour) // 0-23
+		{
+			if (hour < 0 || hour > 23)
+				return false;
 
-        public void MouseWheelScroll(bool down)
+			vscroll.Value = (hour * slotsPerHour * slotHeight);
+			Invalidate();
+
+			return true;
+		}
+
+		public void MouseWheelScroll(bool down)
         {
             if (this.AllowScroll)
             {
