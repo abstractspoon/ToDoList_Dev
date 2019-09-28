@@ -20,7 +20,7 @@
 
 CMLOImporter::CMLOImporter()
 {
-	m_icon.LoadIcon(IDI_MYLIFEORGANISED);
+	m_icon.Load(IDI_MYLIFEORGANISED);
 }
 
 CMLOImporter::~CMLOImporter()

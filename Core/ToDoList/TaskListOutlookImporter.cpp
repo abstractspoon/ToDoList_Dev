@@ -22,7 +22,7 @@ static char THIS_FILE[]=__FILE__;
 
 CTaskListOutlookImporter::CTaskListOutlookImporter()
 {
-	m_icon.LoadIcon(IDI_OUTLOOK);
+	m_icon.Load(IDI_OUTLOOK);
 }
 
 CTaskListOutlookImporter::~CTaskListOutlookImporter()

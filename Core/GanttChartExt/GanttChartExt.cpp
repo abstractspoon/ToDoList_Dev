@@ -89,7 +89,7 @@ BOOL CGanttChartExtApp::InitInstance()
 	// Set this before anything else
 	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELP_BUTTON));
 	
-	m_icon.LoadIcon(IDR_GANTTCHART);
+	m_icon.Load(IDR_GANTTCHART);
 
 	return CWinApp::InitInstance();
 }

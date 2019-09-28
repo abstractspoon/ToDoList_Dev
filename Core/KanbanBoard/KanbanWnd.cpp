@@ -50,7 +50,7 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
 {
-	m_icon.LoadIcon(IDR_KANBAN);
+	m_icon.Load(IDR_KANBAN);
 }
 
 CKanbanWnd::~CKanbanWnd()

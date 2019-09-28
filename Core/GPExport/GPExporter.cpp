@@ -32,7 +32,7 @@ const UINT ONEDAY = 24 * 60 * 60;
 
 CGPExporter::CGPExporter()
 {
-	m_icon.LoadIcon(IDI_GANTTPROJECT);
+	m_icon.Load(IDI_GANTTPROJECT);
 }
 
 CGPExporter::~CGPExporter() 

@@ -25,7 +25,7 @@ static char THIS_FILE[]=__FILE__;
 
 CMLOExporter::CMLOExporter()
 {
-	m_icon.LoadIcon(IDI_MYLIFEORGANISED);
+	m_icon.Load(IDI_MYLIFEORGANISED);
 }
 
 CMLOExporter::~CMLOExporter() 

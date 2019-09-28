@@ -58,7 +58,7 @@ CWorkloadWnd::CWorkloadWnd(CWnd* pParent /*=NULL*/)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
 {
-	m_icon.LoadIcon(IDR_WORKLOAD);
+	m_icon.Load(IDR_WORKLOAD);
 	m_dtPeriod.m_bInclusive = TRUE;
 }
 

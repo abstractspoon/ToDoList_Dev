@@ -48,7 +48,7 @@ static char THIS_FILE[]=__FILE__;
 
 CFMindExporter::CFMindExporter()
 {
-	m_icon.LoadIcon(IDI_FREEMIND);
+	m_icon.Load(IDI_FREEMIND);
 }
 
 CFMindExporter::~CFMindExporter()

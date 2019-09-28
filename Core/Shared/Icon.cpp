@@ -8,7 +8,7 @@ CIcon::CIcon(HICON hIcon) : m_hIcon(hIcon)
 
 CIcon::CIcon(UINT nIDIcon, int nSize) : m_hIcon(NULL)
 {
-	LoadIcon(nIDIcon, nSize);
+	Load(nIDIcon, nSize);
 }
 
 CIcon::~CIcon()
@@ -37,7 +37,7 @@ BOOL CIcon::SetIcon(HICON hIcon, BOOL bDeletePrev)
 	return TRUE;
 }
 
-BOOL CIcon::LoadIcon(UINT nIDIcon, int nSize)
+BOOL CIcon::Load(UINT nIDIcon, int nSize)
 {
 	HICON hIcon = (HICON)::LoadImage(AfxGetResourceHandle(), MAKEINTRESOURCE(nIDIcon), 
 									IMAGE_ICON, nSize, nSize, LR_LOADMAP3DCOLORS);

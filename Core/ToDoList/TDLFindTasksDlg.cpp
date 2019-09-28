@@ -146,7 +146,7 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 
 	BuildOptionCombo();
 
-	m_icon.LoadIcon(IDI_FIND_DIALOG_STD);
+	m_icon.Load(IDI_FIND_DIALOG_STD);
 	SetIcon(m_icon, FALSE);
 
 	m_mgrPrompts.SetComboEditPrompt(m_cbSearches, IDS_FT_SAVESEARCHPROMPT);

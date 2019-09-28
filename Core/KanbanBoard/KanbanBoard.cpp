@@ -96,7 +96,7 @@ BOOL CKanbanExtApp::InitInstance()
 	// Set this before anything else
 	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELP_BUTTON));
 
-	m_icon.LoadIcon(IDR_KANBAN);
+	m_icon.Load(IDR_KANBAN);
 
 	if (m_pszAppName)
 		free((void*)m_pszAppName);

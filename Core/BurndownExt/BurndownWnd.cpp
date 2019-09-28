@@ -70,7 +70,7 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
-	m_icon.LoadIcon(IDR_STATISTICS);
+	m_icon.Load(IDR_STATISTICS);
 	m_sliderDateRange.SetMinMaxRangeWidths(1.0); // min range = 1 month
 }
 

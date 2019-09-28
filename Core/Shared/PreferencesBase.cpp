@@ -494,7 +494,7 @@ BOOL CPreferencesDlgBase::OnInitDialog()
 	// Replace icon
 	if (m_nDlgIconID)
 	{
-		m_icon.LoadIcon(m_nDlgIconID);
+		m_icon.Load(m_nDlgIconID);
 
 		SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)(HICON)m_icon);
 	}

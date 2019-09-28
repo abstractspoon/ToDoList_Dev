@@ -53,7 +53,7 @@ CCalendarWnd::CCalendarWnd()
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
 {
-	m_icon.LoadIcon(IDR_CALENDAR);
+	m_icon.Load(IDR_CALENDAR);
 }
 
 CCalendarWnd::~CCalendarWnd()

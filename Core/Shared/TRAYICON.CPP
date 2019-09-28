@@ -113,7 +113,7 @@ BOOL CTrayIcon::Create(CWnd* pParentWnd, UINT uID, UINT uIDIcon, LPCTSTR sTip)
 	if (!CWnd::Create(NULL, _T("TrayIcon"), WS_CHILD, CRect(0,0,0,0), pParentWnd, uID))
 		return FALSE;
 
-	m_icon.LoadIcon(uIDIcon);
+	m_icon.Load(uIDIcon);
 	m_bIconOwner = TRUE;
 	m_sTip = sTip;
 

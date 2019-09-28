@@ -88,7 +88,7 @@ BOOL CBurndownExtApp::InitInstance()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	m_icon.LoadIcon(IDR_STATISTICS);
+	m_icon.Load(IDR_STATISTICS);
 	
 	return CWinApp::InitInstance();
 }

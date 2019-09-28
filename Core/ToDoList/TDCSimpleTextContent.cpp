@@ -37,7 +37,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTDCSimpleTextContent::CTDCSimpleTextContent()
 {
-	m_icon.LoadIcon(IDI_SIMPLETEXT);
+	m_icon.Load(IDI_SIMPLETEXT);
 }
 
 CTDCSimpleTextContent::~CTDCSimpleTextContent()

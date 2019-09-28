@@ -88,7 +88,7 @@ BOOL CCalendarExtApp::InitInstance()
 	// Set this before anything else
 	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELP_BUTTON));
 	
-	m_icon.LoadIcon(IDR_CALENDAR);
+	m_icon.Load(IDR_CALENDAR);
 	
 	return CWinApp::InitInstance();
 }

@@ -114,7 +114,7 @@ CiCalEventArray::~CiCalEventArray()
 
 CiCalImporter::CiCalImporter()
 {
-	m_icon.LoadIcon(IDI_ICALENDAR);
+	m_icon.Load(IDI_ICALENDAR);
 }
 
 CiCalImporter::~CiCalImporter()

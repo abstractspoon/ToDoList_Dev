@@ -180,10 +180,10 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 	// add tree and list as tabbed views
 	CIcon icon;
 	
-	if (icon.LoadIcon(IDI_TASKTREE_STD))
+	if (icon.Load(IDI_TASKTREE_STD))
 		m_tabViews.AttachView(m_taskTree.GetSafeHwnd(), FTCV_TASKTREE, CEnString(IDS_TASKTREE), icon, NULL);
 
-	if (icon.LoadIcon(IDI_LISTVIEW_STD))
+	if (icon.Load(IDI_LISTVIEW_STD))
 		m_tabViews.AttachView(m_taskList, FTCV_TASKLIST, CEnString(IDS_LISTVIEW), icon, NewViewData());
 
 	for (int nExt = 0; nExt < m_mgrUIExt.GetNumUIExtensions(); nExt++)

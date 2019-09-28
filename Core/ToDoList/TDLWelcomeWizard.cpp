@@ -333,7 +333,7 @@ LRESULT CTDLWelcomePage3::OnGetFileIcon(WPARAM wParam, LPARAM /*lParam*/)
 	UNUSED(wParam);
 
 	if (!m_icon.IsValid()) 
-		m_icon.LoadIcon(IDR_MAINFRAME_STD);
+		m_icon.Load(IDR_MAINFRAME_STD);
 
 	return (LRESULT)(HICON)m_icon;
 }

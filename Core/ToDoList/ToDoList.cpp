@@ -203,8 +203,8 @@ BOOL CToDoListApp::InitInstance()
 	// Set up file edit icons because these will be needed by
 	// welcome wizard and main app
 	CIcon iconBrowse, iconGo;
-	iconBrowse.LoadIcon(IDI_FILEEDIT_BROWSE);
-	iconGo.LoadIcon(IDI_FILEEDIT_GO);
+	iconBrowse.Load(IDI_FILEEDIT_BROWSE);
+	iconGo.Load(IDI_FILEEDIT_GO);
 	
 	if (iconBrowse.IsValid() && iconGo.IsValid())
 		CFileEdit::SetDefaultButtonImages(iconBrowse.Detach(), iconGo.Detach());

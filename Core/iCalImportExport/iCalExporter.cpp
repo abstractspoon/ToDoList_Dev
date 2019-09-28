@@ -30,7 +30,7 @@ static char THIS_FILE[]=__FILE__;
 
 CiCalExporter::CiCalExporter() : EXPORTASTODO(TRUE), NODUEDATEISTODAYORSTART(FALSE)
 {
-	m_icon.LoadIcon(IDI_ICALENDAR);
+	m_icon.Load(IDI_ICALENDAR);
 }
 
 CiCalExporter::~CiCalExporter()

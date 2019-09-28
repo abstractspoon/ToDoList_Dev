@@ -64,7 +64,7 @@ CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
 {
-	m_icon.LoadIcon(IDR_GANTTCHART);
+	m_icon.Load(IDR_GANTTCHART);
 }
 
 CGanttChartWnd::~CGanttChartWnd()

@@ -167,7 +167,7 @@ BOOL CFtpTasklistStorageApp::InitInstance()
 	// Set this before anything else
 //	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELP_BUTTON));
 
-	m_icon.LoadIcon(IDR_FTPSTORAGE);
+	m_icon.Load(IDR_FTPSTORAGE);
 
 	if (m_pszAppName)
 		free((void*)m_pszAppName);
