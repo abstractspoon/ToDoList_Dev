@@ -82,6 +82,7 @@ BEGIN_MESSAGE_MAP(CEnEdit, CMaskEdit)
 	ON_MESSAGE(EM_SETREADONLY, OnSetReadOnly)
 	ON_WM_STYLECHANGED()
 	ON_WM_NCPAINT()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -384,11 +385,22 @@ void CEnEdit::OnSize(UINT nType, int cx, int cy)
 {
 	CMaskEdit::OnSize(nType, cx, cy);
 
+	if (m_bParentIsCombo == -1) // first time init
+		m_bParentIsCombo = CWinClasses::IsClass(*GetParent(), WC_COMBOBOX);
+
 	// The only reliable place to initialise tooltips
 	InitializeTooltips();
 		
 	// update tool rects
 	RecalcBtnHotRects();
+}
+
+void CEnEdit::OnDestroy()
+{
+	CMaskEdit::OnDestroy();
+
+	m_tooltip.DestroyWindow();
+	m_hotTrack.Reset();
 }
 
 BOOL CEnEdit::InitializeTooltips()
@@ -477,9 +489,6 @@ void CEnEdit::OnNcPaint()
 
 void CEnEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 {
-	if (m_bParentIsCombo == -1) // first time init
-		m_bParentIsCombo = CWinClasses::IsClass(*GetParent(), WC_COMBOBOX);
-
 	// Flicker free painting
 	CDC dcTemp;
 	
