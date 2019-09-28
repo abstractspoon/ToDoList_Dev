@@ -590,6 +590,20 @@ void CTDLFindTaskExpressionListCtrl::PrepareEdit(int nRow, int /*nCol*/)
 	}
 }
 
+BOOL CTDLFindTaskExpressionListCtrl::HasRule(TDC_ATTRIBUTE nAttrib) const
+{
+	int nRule = m_aSearchParams.GetSize();
+
+	while (nRule--)
+	{
+		if (m_aSearchParams.GetAt(nRule).AttributeIs(nAttrib))
+			return TRUE;
+	}
+
+	// not found
+	return FALSE;
+}
+
 BOOL CTDLFindTaskExpressionListCtrl::AddRule()
 {
 	SEARCHPARAM rule(TDCA_TASKNAMEORCOMMENTS, FOP_INCLUDES);

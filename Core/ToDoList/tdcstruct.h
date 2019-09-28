@@ -1268,24 +1268,7 @@ protected:
 	mutable FIND_ATTRIBTYPE nType;
 };
 
-class CSearchParamArray : public CArray<SEARCHPARAM, SEARCHPARAM&>
-{
-public:
-	BOOL HasAttributeRule(TDC_ATTRIBUTE nAttrib) const
-	{
-		int nRule = GetSize();
-
-		while (nRule--)
-		{
-			if (GetAt(nRule).AttributeIs(nAttrib))
-				return TRUE;
-		}
-
-		// not found
-		return FALSE;
-	}
-
-};
+typedef CArray<SEARCHPARAM, SEARCHPARAM&> CSearchParamArray;
 
 // ------------------------------------------------------------------------
 
@@ -1345,32 +1328,29 @@ struct SEARCHPARAMS
 
 	BOOL HasAttribute(TDC_ATTRIBUTE attrib) const
 	{
-		int nRule = aRules.GetSize();
+		InitAttributeMap();
 
-		while (nRule--)
+		switch (attrib)
 		{
-			if (aRules[nRule].attrib == attrib)
-				return TRUE;
+		case TDCA_TASKNAME:
+		case TDCA_COMMENTS:
+			return (mapAttrib.Has(attrib) || 
+					mapAttrib.Has(TDCA_TASKNAMEORCOMMENTS) ||
+					mapAttrib.Has(TDCA_ANYTEXTATTRIBUTE));
 
-			// special cases
-			if (aRules[nRule].attrib == TDCA_TASKNAMEORCOMMENTS &&
-				(attrib == TDCA_TASKNAME || attrib == TDCA_COMMENTS))
-			{
-				return TRUE;
-			}
-			else if (aRules[nRule].attrib == TDCA_ANYTEXTATTRIBUTE &&
-				(attrib == TDCA_TASKNAME || attrib == TDCA_COMMENTS ||
-				 attrib == TDCA_STATUS || attrib == TDCA_CATEGORY ||
-				 attrib == TDCA_ALLOCBY || attrib == TDCA_ALLOCTO ||
-				 attrib == TDCA_VERSION || attrib == TDCA_TAGS ||
-				 attrib == TDCA_EXTERNALID))
-			{
-				return TRUE;
-			}
+		case TDCA_STATUS:
+		case TDCA_CATEGORY:
+		case TDCA_ALLOCBY:
+		case TDCA_ALLOCTO:
+		case TDCA_VERSION:
+		case TDCA_TAGS:
+		case TDCA_EXTERNALID:
+			return (mapAttrib.Has(attrib) ||
+					mapAttrib.Has(TDCA_ANYTEXTATTRIBUTE));
 		}
 
-		// else
-		return FALSE;
+		// all else
+		return mapAttrib.Has(attrib);
 	}
 
 	BOOL GetRuleCount() const
@@ -1386,6 +1366,21 @@ struct SEARCHPARAMS
 	BOOL bWantAllSubtasks;
 	BOOL bIgnoreFilteredOut;
 	BOOL bCaseSensitive;
+
+protected:
+	mutable CTDCAttributeMap mapAttrib;
+
+protected:
+	void InitAttributeMap() const
+	{
+		if (mapAttrib.GetCount() == 0)
+		{
+			int nRule = aRules.GetSize();
+
+			while (nRule--)
+				mapAttrib.Add(aRules[nRule].attrib);
+		}
+	}
 };
 
 struct SEARCHRESULT

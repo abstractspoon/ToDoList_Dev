@@ -35,7 +35,6 @@ public:
 	void SetSearchParams(const SEARCHPARAM& param);
 	void SetSearchParams(const CSearchParamArray& params);
 	int GetSearchParams(CSearchParamArray& params) const;
-	const CSearchParamArray& GetSearchParams() const { return m_aSearchParams; }
 
 	void ClearSearch();
 
@@ -47,6 +46,7 @@ public:
 	BOOL DeleteSelectedRule();
 	BOOL CanDeleteSelectedRule() const { return CanDeleteSelectedCell(); }
 	BOOL HasRules() const { return m_aSearchParams.GetSize(); }
+	BOOL HasRule(TDC_ATTRIBUTE nAttrib) const;
 
 	void MoveSelectedRuleUp();
 	BOOL CanMoveSelectedRuleUp() const;

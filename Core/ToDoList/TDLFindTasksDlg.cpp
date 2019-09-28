@@ -537,8 +537,7 @@ void CTDLFindTasksDlg::AddResult(const SEARCHRESULT& result, const CFilteredToDo
 		// Unless the current rule set includes TDCA_DONEDATE
 		if (result.HasFlag(RF_DONE) || result.HasFlag(RF_GOODASDONE))
 		{
-			if (!m_lcFindSetup.GetSearchParams().HasAttributeRule(TDCA_DONEDATE) &&
-				!IncludeOptionIsChecked(FI_COMPLETED))
+			if (!m_lcFindSetup.HasRule(TDCA_DONEDATE) && !IncludeOptionIsChecked(FI_COMPLETED))
 			{
 				return;
 			}

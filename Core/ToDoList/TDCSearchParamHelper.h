@@ -10,15 +10,12 @@
 #endif // _MSC_VER > 1000
 
 #include "tdcenum.h"
+#include "tdcstruct.h"
 
 // predecs
 class CPreferences;
 class CTDCCustomAttribDefinitionArray;
 class CTDCCustomAttributeDataMap;
-class CSearchParamArray;
-
-struct SEARCHPARAM;
-
 
 class CTDCSearchParamHelper  
 {
