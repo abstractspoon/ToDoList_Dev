@@ -13,8 +13,7 @@ CIcon::CIcon(UINT nIDIcon, int nSize) : m_hIcon(NULL)
 
 CIcon::~CIcon()
 {
-	if (m_hIcon)
-		::DestroyIcon(m_hIcon);
+	Destroy();
 }
 
 BOOL CIcon::IsValid() const 
@@ -43,6 +42,15 @@ BOOL CIcon::Load(UINT nIDIcon, int nSize)
 									IMAGE_ICON, nSize, nSize, LR_LOADMAP3DCOLORS);
 
 	return SetIcon(hIcon);
+}
+
+void CIcon::Destroy()
+{
+	if (m_hIcon)
+	{
+		::DestroyIcon(m_hIcon);
+		m_hIcon = NULL;
+	}
 }
 
 BOOL CIcon::Attach(HICON hIcon)
