@@ -182,10 +182,13 @@ CString CTDCLongestItemMap::GetLongestValue(TDC_COLUMN nColID) const
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CToDoCtrlFind::CToDoCtrlFind(const CTreeCtrlHelper& tch, const CToDoCtrlData& data) :
+CToDoCtrlFind::CToDoCtrlFind(const CTreeCtrlHelper& tch, 
+							 const CToDoCtrlData& data, 
+							 const CTDCReminderHelper& reminders) 
+	:
 	m_tch(tch), 
 	m_data(data),
-	m_matcher(data),
+	m_matcher(data, reminders),
 	m_calculator(data),
 	m_formatter(data)
 {

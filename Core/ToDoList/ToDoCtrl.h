@@ -514,6 +514,7 @@ protected:
 	CTDCTimeTracking m_timeTracking;
 	CTDCSourceControl m_sourceControl;
 	CTDCFindReplace m_findReplace;
+	CTDCReminderHelper m_reminders;
 
 	CStringArray m_aFileRefs;
 	CString m_sTextComments;

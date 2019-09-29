@@ -198,7 +198,6 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_eTaskName(PEC_AUTODESTROY),
 	m_hFontComments(NULL),
 	m_hFontTree(NULL),
-	m_matcher(m_data),
 	m_mgrContent(mgr),
 	m_nCommentsPos(TDCUIL_RIGHT),
 	m_nCommentsSize(DEFCOMMENTSIZE),
@@ -218,7 +217,9 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_exporter(m_data, m_taskTree, m_mgrContent),
 #pragma warning (disable: 4355)
 	m_sourceControl(*this),
-	m_findReplace(*this)
+	m_findReplace(*this),
+	m_reminders(*this),
+	m_matcher(m_data, m_reminders)
 #pragma warning (default: 4355)
 {
 	SetBordersDLU(0);
@@ -11784,7 +11785,7 @@ LRESULT CToDoCtrl::OnTDCGetTaskReminder(WPARAM wp, LPARAM lp)
 	UNREFERENCED_PARAMETER(lp);
 	ASSERT(wp && ((HWND)lp == m_taskTree.GetSafeHwnd()));
 
-	return GetParent()->SendMessage(WM_TDCM_GETTASKREMINDER, wp, (LPARAM)this);
+	return (LRESULT)m_reminders.GetTaskReminder(wp);
 }
 
 void CToDoCtrl::SetUITheme(const CUIThemeFile& theme)

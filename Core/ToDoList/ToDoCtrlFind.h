@@ -60,7 +60,7 @@ class CToDoCtrlFind
 	friend struct LONGESTITEM;
 
 public:
-	CToDoCtrlFind(const CTreeCtrlHelper& tch, const CToDoCtrlData& data);
+	CToDoCtrlFind(const CTreeCtrlHelper& tch, const CToDoCtrlData& data, const CTDCReminderHelper& reminders);
 	virtual ~CToDoCtrlFind();
 	
 	DWORD GetTaskID(HTREEITEM hti) const;

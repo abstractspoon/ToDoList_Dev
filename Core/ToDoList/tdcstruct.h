@@ -944,6 +944,7 @@ struct SEARCHPARAM
 		case TDCA_LOCK:
 		case TDCA_RECENTMODIFIED:
 		case TDCA_DEPENDENCY: 
+		case TDCA_REMINDER:
 			return FT_BOOL;
 
 		case TDCA_STARTDATE:

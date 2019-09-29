@@ -202,6 +202,7 @@ namespace TDC
 		case TDCA_PERCENT:			return TDCC_PERCENT;
 		case TDCA_PRIORITY:			return TDCC_PRIORITY;
 		case TDCA_RECURRENCE:		return TDCC_RECURRENCE;
+		case TDCA_REMINDER:			return TDCC_REMINDER;
 		case TDCA_RISK:				return TDCC_RISK;
 		case TDCA_STARTDATE:		return TDCC_STARTDATE;
 		case TDCA_STARTTIME:		return TDCC_STARTTIME;
@@ -277,6 +278,7 @@ namespace TDC
 		case TDCA_ICON:
 		case TDCA_LOCK:
 		case TDCA_COMMENTSSIZE:
+		case TDCA_REMINDER:
 			break;
 		}
 		
@@ -354,6 +356,7 @@ namespace TDC
 		case TDCC_POSITION:		return TDCA_POSITION;
 		case TDCC_PRIORITY:		return TDCA_PRIORITY;
 		case TDCC_RECURRENCE:	return TDCA_RECURRENCE;
+		case TDCC_REMINDER:		return TDCA_REMINDER;
 		case TDCC_RISK:			return TDCA_RISK;
 		case TDCC_STARTDATE:	return TDCA_STARTDATE;
 		case TDCC_STARTTIME:	return TDCA_STARTTIME;

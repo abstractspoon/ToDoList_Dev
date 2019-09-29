@@ -87,7 +87,7 @@ enum TDC_ATTRIBUTE
 	// pseudo attribute for printing
 	TDCA_NOTES_DEP,					// deprecated
 
-	// pseudo attributes for Find Tasks dialog
+	// pseudo attribute for Find Tasks dialog
 	TDCA_PATH,
 
 	TDCA_SUBTASKDONE,
@@ -103,6 +103,9 @@ enum TDC_ATTRIBUTE
 	// pseudo attributes for SetModified
 	TDCA_POSITION_SAMEPARENT,
 	TDCA_POSITION_DIFFERENTPARENT,
+
+	// pseudo attribute for Find Tasks dialog
+	TDCA_REMINDER,
 
 	// ADD NEW ATTRIBUTES HERE!
 	

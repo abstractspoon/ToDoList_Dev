@@ -7,8 +7,6 @@
 
 // tdcmsg.h : header file
 //
-static LPCTSTR TDL_PROTOCOL = _T("tdl://");
-static LPCTSTR TDL_EXTENSION = _T(".tdl");
 
 // notification messages
 const UINT WM_TDCN_MODIFY					= ::RegisterWindowMessage(_T("WM_TDCN_MODIFY"));				// lParam = TDCNOTIFYMOD*
@@ -29,7 +27,7 @@ const UINT WM_TDCN_SOURCECONTROLSAVE		= ::RegisterWindowMessage(_T("WM_TDCN_SOUR
 const UINT WM_TDCM_GETCLIPBOARD				= ::RegisterWindowMessage(_T("WM_TDCM_GETCLIPBOARD"));			// lParam == match hwnd
 const UINT WM_TDCM_HASCLIPBOARD				= ::RegisterWindowMessage(_T("WM_TDCM_HASCLIPBOARD"));			// lParam == match hwnd
 const UINT WM_TDCM_ISTASKDONE				= ::RegisterWindowMessage(_T("WM_TDCM_ISTASKDONE"));			// format as WM_TDCM_SELECTTASK
-const UINT WM_TDCM_GETTASKREMINDER			= ::RegisterWindowMessage(_T("WM_TDCM_TASKHASREMINDER"));		// wParam = TaskID, lParam = TDC* 
+const UINT WM_TDCM_GETTASKREMINDER			= ::RegisterWindowMessage(_T("WM_TDCM_TASKHASREMINDER"));		// wParam = TaskID, lParam = tdc HWND 
 const UINT WM_TDCM_GETLINKTOOLTIP			= ::RegisterWindowMessage(_T("WM_TDCM_GETLINKTOOLTIP"));		// wParam = url, lParam = TOOLTIPTEXT*
 const UINT WM_TDCM_SELECTTASK				= ::RegisterWindowMessage(_T("WM_TDCM_SELECTTASK"));			// wParam = taskID, lParam = taskfile path
 const UINT WM_TDCM_FAILEDLINK				= ::RegisterWindowMessage(_T("WM_TDCM_FAILEDLINK"));			// wParam = hwnd, lParam = url

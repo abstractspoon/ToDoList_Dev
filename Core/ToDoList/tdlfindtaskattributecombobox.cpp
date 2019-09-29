@@ -172,6 +172,9 @@ void CTDLFindTaskAttributeComboBox::BuildCombo()
 		}
 	}
 
+	// Misc others
+	CDialogHelper::AddString(*this, IDS_TDLBC_REMINDER, EncodeItemData(TDCA_REMINDER));
+
 	// recalc combo drop width
 	CDialogHelper::RefreshMaxDropWidth(*this);
 }
@@ -185,6 +188,10 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule)
 	{
 	case TDCA_PATH:
 		sName.LoadString(IDS_TDC_COLUMN_PATH);
+		break;
+
+	case TDCA_REMINDER:
+		sName.LoadString(IDS_TDLBC_REMINDER);
 		break;
 
 	default:

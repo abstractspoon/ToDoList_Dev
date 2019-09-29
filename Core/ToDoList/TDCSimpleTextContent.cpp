@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "TDCSimpleTextContent.h"
 #include "tdcmsg.h"
+#include "tdcstatic.h"
 #include "resource.h"
 
 #include "..\shared\toolbarhelper.h"

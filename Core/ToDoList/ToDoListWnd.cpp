@@ -12360,7 +12360,16 @@ void CToDoListWnd::OnUpdateEditSettaskicon(CCmdUI* pCmdUI)
 
 LRESULT CToDoListWnd::OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam)
 {
-	int nRem = m_reminders.FindReminder(wParam, (CFilteredToDoCtrl*)lParam, FALSE);
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)lParam);
+
+	if (nTDC == -1)
+	{
+		ASSERT(0);
+		return -1;
+	}
+
+	const CFilteredToDoCtrl& tdc = m_mgrToDoCtrls.GetToDoCtrl(nTDC);
+	int nRem = m_reminders.FindReminder(wParam, &tdc, FALSE);
 
 	if (nRem == -1)
 		return 0;

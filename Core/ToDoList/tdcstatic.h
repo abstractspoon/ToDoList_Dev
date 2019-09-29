@@ -16,6 +16,11 @@
 
 /////////////////////////////////////////////////////////////////////////////////////
 
+static const LPCTSTR TDL_PROTOCOL	= _T("tdl://");
+static const LPCTSTR TDL_EXTENSION	= _T(".tdl");
+
+/////////////////////////////////////////////////////////////////////////////////////
+
 struct SHORTCUT
 {
 	DWORD dwShortcut;
@@ -24,10 +29,6 @@ struct SHORTCUT
 
 static const SHORTCUT MISC_SHORTCUTS[] = 
 {
-// 	{ MAKELONG('B', HOTKEYF_ALT | HOTKEYF_EXT), IDS_SETFOCUS2TASKLIST },
-// 
-// 	{ 0, 0 },	
-
 	{ MAKELONG(VK_UP, HOTKEYF_SHIFT | HOTKEYF_EXT), IDS_TASKLISTEXTENDEDSELECTION },
 	{ MAKELONG(VK_DOWN, HOTKEYF_SHIFT | HOTKEYF_EXT), IDS_TASKLISTEXTENDEDSELECTION },
 	{ MAKELONG(VK_PRIOR, HOTKEYF_SHIFT | HOTKEYF_EXT), IDS_TASKLISTEXTENDEDSELECTION },

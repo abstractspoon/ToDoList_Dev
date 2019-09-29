@@ -2402,7 +2402,7 @@ BOOL CTDLTaskCtrlBase::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 BOOL CTDLTaskCtrlBase::TaskHasReminder(DWORD dwTaskID) const
 {
-	return (GetTaskReminder(dwTaskID) != 0);
+	return (GetTaskReminder(dwTaskID) > 0);
 }
 
 BOOL CTDLTaskCtrlBase::GetTaskReminder(DWORD dwTaskID, COleDateTime& dtRem) const
@@ -2422,7 +2422,7 @@ BOOL CTDLTaskCtrlBase::GetTaskReminder(DWORD dwTaskID, COleDateTime& dtRem) cons
 
 time_t CTDLTaskCtrlBase::GetTaskReminder(DWORD dwTaskID) const
 {
-	return CWnd::GetParent()->SendMessage(WM_TDCM_GETTASKREMINDER, dwTaskID, (LPARAM)CWnd::GetSafeHwnd());
+	return CTDCReminderHelper(*this).GetTaskReminder(dwTaskID);
 }
 
 void CTDLTaskCtrlBase::DrawGridlines(CDC* pDC, const CRect& rect, BOOL bSelected, BOOL bHorz, BOOL bVert)

@@ -12,6 +12,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "tdcenum.h"
+#include "tdcmsg.h"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -54,6 +55,33 @@ struct TDCREMINDER
 
 typedef CMap<DWORD, DWORD, TDCREMINDER, TDCREMINDER&> CTDCReminderMap;
 typedef CArray<TDCREMINDER, TDCREMINDER&> CTDCReminderArray;
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+class CTDCReminderHelper
+{
+public:
+	CTDCReminderHelper(const CWnd& wndCaller) : m_wndCaller(wndCaller)
+	{
+	}
+
+	BOOL TaskHasReminder(DWORD dwTaskID) const
+	{
+		return (GetTaskReminder(dwTaskID) > 0);
+	}
+
+	time_t GetTaskReminder(DWORD dwTaskID) const
+	{
+		ASSERT(::IsWindow(m_wndCaller));
+
+		return (time_t)::SendMessage(::GetParent(m_wndCaller), WM_TDCM_GETTASKREMINDER, dwTaskID, (LPARAM)m_wndCaller.GetSafeHwnd());
+	}
+
+protected:
+	const CWnd& m_wndCaller;
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 
 #endif // !defined(AFX_TDCREMINDER_H__F4A7DE31_EB74_490F_8092_E8D50953FBDA__INCLUDED_)

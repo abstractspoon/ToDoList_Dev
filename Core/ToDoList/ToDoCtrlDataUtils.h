@@ -9,7 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "tdcstruct.h"
+#include "tdcreminder.h"
 
 #include <afxtempl.h>
 
@@ -177,7 +177,7 @@ protected:
 class CTDCTaskMatcher
 {
 public:
-	CTDCTaskMatcher(const CToDoCtrlData& data);
+	CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders);
 
 	int FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, CResultArray& aResults) const;
 	int FindTasks(const SEARCHPARAMS& query, CResultArray& aResults) const;
@@ -194,6 +194,8 @@ public:
 
 protected:
 	const CToDoCtrlData& m_data;
+	const CTDCReminderHelper& m_reminders;
+
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
 

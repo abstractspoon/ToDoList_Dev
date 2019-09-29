@@ -157,6 +157,7 @@ protected:
 	CToDoCtrlFind m_find;
 	CTreeSelectionHelper m_tsh;
 	CTreeCtrlHelper m_tch;
+	CTDCReminderHelper m_reminders;
 	CHTIMap m_mapHTItems;
 
 	HTREEITEM m_htiLastHandledLBtnDown;

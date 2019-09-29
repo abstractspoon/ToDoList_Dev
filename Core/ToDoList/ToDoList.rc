@@ -5703,6 +5703,8 @@ BEGIN
     IDS_TASKLIST_COPYCOLUMNVALUES "Copy All Values from '%s' Column"
     IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES 
                             "Copy Selected Values from '%s' Column"
+    IDS_HASREMINDER         "Reminder"
+    IDS_NOREMINDER          "No Reminder"
 END
 
 #endif    // English (Australia) resources

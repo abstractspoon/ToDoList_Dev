@@ -66,11 +66,12 @@ static const double  DBL_NULL = (double)0xFFFFFFFFFFFFFFFF;
 
 //////////////////////////////////////////////////////////////////////
 
-CTDCTaskMatcher::CTDCTaskMatcher(const CToDoCtrlData& data) 
+CTDCTaskMatcher::CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders)
 	: 
 	m_data(data),
 	m_calculator(data),
-	m_formatter(data)
+	m_formatter(data),
+	m_reminders(reminders)
 {
 
 }
@@ -300,7 +301,23 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		case TDCA_ALLOCBY:
 			bMatch = ValueMatchesAsArray(pTDI->sAllocBy, rule, resTask, bCaseSensitive);
 			break;
-			
+
+		case TDCA_REMINDER:
+			if (rule.OperatorIs(FOP_NOT_SET) && bIsDone)
+			{
+				bMatch = TRUE;
+				resTask.aMatched.Add(CEnString(IDS_TDC_COLUMN_DONEDATE));
+			}
+			else
+			{
+				BOOL bHasReminder = m_reminders.TaskHasReminder(pTDS->GetTaskID());
+				bMatch = (rule.OperatorIs(FOP_SET) ? bHasReminder : !bHasReminder);
+
+				if (bMatch)
+					resTask.aMatched.Add(CEnString(rule.OperatorIs(FOP_SET) ? IDS_HASREMINDER : IDS_NOREMINDER));
+			}
+			break;
+
 		case TDCA_PATH:
 			{
 				CString sPath = m_formatter.GetTaskPath(pTDI, pTDS);

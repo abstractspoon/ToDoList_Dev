@@ -2334,6 +2334,8 @@
 #define IDS_TASKLIST_COPYCOLUMNVALUES   58499
 #define IDS_LASTSTRING                  58500
 #define IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES 58500
+#define IDS_HASREMINDER                 58501
+#define IDS_NOREMINDER                  58502
 
 // Next default values for new objects
 // 
