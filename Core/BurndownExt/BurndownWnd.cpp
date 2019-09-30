@@ -675,13 +675,13 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 		m_data.GetDataExtents(m_dtDataRange);
 
 	// Only restore previous range if it's wholly contained within the data
-	COleDateTimeRange dtActiveRange(m_dtDataRange);
+	COleDateTime dtDataStart = CDateHelper::GetStartOfMonth(m_dtDataRange.GetStart());
+	COleDateTime dtDataEnd = CDateHelper::GetEndOfMonth(m_dtDataRange.GetEnd());
+		
+	COleDateTimeRange dtActiveRange(dtDataStart, dtDataEnd);
 
 	if (m_dtPrevActiveRange.IsValid() && m_dtDataRange.IsValid())
 	{
-		COleDateTime dtDataStart = CDateHelper::GetStartOfMonth(m_dtDataRange.GetStart());
-		COleDateTime dtDataEnd = CDateHelper::GetEndOfMonth(m_dtDataRange.GetEnd());
-		
 		COleDateTimeRange dtDataRange;
 
 		if (dtDataRange.Set(dtDataStart, dtDataEnd) && dtDataRange.Contains(m_dtPrevActiveRange))
