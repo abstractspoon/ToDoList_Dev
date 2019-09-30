@@ -56,9 +56,13 @@ namespace DayViewUIExtension
 		{
 			bool selected = m_DayView.SelectTask(dwTaskID);
 
+			m_SettingMonthYear = true;
+
 			m_WeekLabel.StartDate = m_DayView.StartDate;
 			m_MonthCombo.SelectedMonth = m_DayView.StartDate.Month;
 			m_YearCombo.SelectedYear = m_DayView.StartDate.Year;
+
+			m_SettingMonthYear = false;
 
 			UpdatedSelectedTaskDatesText();
 
@@ -176,7 +180,7 @@ namespace DayViewUIExtension
 		{
             m_PrefsDlg.SavePreferences(prefs, key);
 
-			prefs.WriteProfileInt(key, "DaysToShow", m_DayView.DaysToShow);
+			prefs.WriteProfileBool(key, "WeekView", m_DayView.WeekView);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -198,8 +202,8 @@ namespace DayViewUIExtension
                 m_PrefsDlg.LoadPreferences(prefs, key);
 				UpdateDayViewPreferences();
 
-				m_DayView.DaysToShow = prefs.GetProfileInt(key, "DaysToShow", 7);
-				m_WeekLabel.NumDays = m_DayView.DaysToShow;
+				m_DayView.WeekView = prefs.GetProfileBool(key, "WeekView", true);
+				m_WeekLabel.NumDays = m_DayView.DaysShowing;
 
 				UpdateToolbarButtonStates();
             }
@@ -421,7 +425,7 @@ namespace DayViewUIExtension
 
 		private void OnShowDayView(object sender, EventArgs e)
 		{
-			m_DayView.ShowDayView();
+			m_DayView.WeekView = false;
 			m_WeekLabel.NumDays = 1;
 
 			UpdateToolbarButtonStates();
@@ -429,7 +433,7 @@ namespace DayViewUIExtension
 
 		private void OnShowWeekView(object sender, EventArgs e)
 		{
-			m_DayView.ShowWeekView();
+			m_DayView.WeekView = true;
 			m_WeekLabel.NumDays = 7;
 
 			UpdateToolbarButtonStates();
@@ -437,8 +441,8 @@ namespace DayViewUIExtension
 
 		private void UpdateToolbarButtonStates()
 		{
-			(m_Toolbar.Items["ShowDayView"] as ToolStripButton).Checked = (m_DayView.DaysToShow == 1);
-			(m_Toolbar.Items["ShowWeekView"] as ToolStripButton).Checked = (m_DayView.DaysToShow != 1);
+			(m_Toolbar.Items["ShowDayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 1);
+			(m_Toolbar.Items["ShowWeekView"] as ToolStripButton).Checked = (m_DayView.DaysShowing != 1);
 		}
 
 		private void OnPreferences(object sender, EventArgs e)

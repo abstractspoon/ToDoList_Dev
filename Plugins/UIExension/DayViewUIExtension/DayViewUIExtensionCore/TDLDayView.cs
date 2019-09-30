@@ -62,7 +62,7 @@ namespace DayViewUIExtension
                                      System.Windows.Forms.AnchorStyles.Left |
                                      System.Windows.Forms.AnchorStyles.Right);
             this.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
-            this.DaysToShow = 7;
+            this.WeekView = true;
             this.DrawAllAppBorder = false;
             this.Location = new System.Drawing.Point(0, 0);
             this.MinHalfHourApp = false;
@@ -261,32 +261,23 @@ namespace DayViewUIExtension
             StartDate = DateTime.Now;
 
 			// And scroll to first task
-			var appointments = GetMatchingAppointments(StartDate, EndDate);
+			var appointments = GetMatchingAppointments(StartDate, EndDate, true);
 
 			if (appointments != null)
 			{
-				appointments.Sort((a, b) => (int)(a.StartDate.Ticks - b.StartDate.Ticks));
-
 				foreach (var appt in appointments)
 				{
 					if (EnsureVisible(appt, false))
 						break;
 				}
 			}
+			else
+			{
+				ScrollToTop();
+			}
+
+			Invalidate();
         }
-
-		public void ShowDayView()
-		{
-			// TODO 
-			// make sure the day for the selected task is visible
-
-			DaysToShow = 1;
-		}
-
-		public void ShowWeekView()
-		{
-			DaysToShow = 7;
-		}
 
 		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
 		{
@@ -558,7 +549,7 @@ namespace DayViewUIExtension
 			args.Appointments = GetMatchingAppointments(args.StartDate, args.EndDate);
 		}
 
-		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end)
+		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end, bool sorted = false)
 		{
 			var appts = new System.Collections.Generic.List<Calendar.Appointment>();
 
@@ -567,6 +558,9 @@ namespace DayViewUIExtension
 				if (IsItemWithinRange(item.Value, start, end))
 					appts.Add(item.Value);
 			}
+
+			if (sorted)
+				appts.Sort((a, b) => (int)(a.StartDate.Ticks - b.StartDate.Ticks));
 
 			return appts;
 		}

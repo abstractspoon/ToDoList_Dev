@@ -228,6 +228,37 @@ namespace Calendar
             this.Invalidate();
         }
 
+		public bool WeekView
+		{
+			get { return (daysToShow != 1); }
+
+			set
+			{
+				int numDays = (value ? 7 : 1);
+
+				if (numDays != daysToShow)
+				{
+					daysToShow = numDays; // must come first
+
+					if (value) // week view
+					{
+						// Move to start of week
+						StartDate = startDate;
+					}
+					else // day view
+					{
+						// make sure the day for the selected task is visible
+						if (SelectedAppointment != null)
+							StartDate = SelectedAppointment.StartDate;
+					}
+
+					EnsureVisible(SelectedAppointment, true);
+					OnDaysToShowChanged();
+					AdjustScrollbar();
+				}
+			}
+		}
+
         private bool minHalfHourApp = false;
 
         public bool MinHalfHourApp
@@ -246,16 +277,11 @@ namespace Calendar
         private int daysToShow = 1;
 
         [System.ComponentModel.DefaultValue(1)]
-        public int DaysToShow
+        public int DaysShowing
         {
             get
             {
                 return daysToShow;
-            }
-            set
-            {
-                daysToShow = value;
-                OnDaysToShowChanged();
             }
         }
 
@@ -288,7 +314,7 @@ namespace Calendar
             }
             set
             {
-				if (DaysToShow == 1)
+				if (DaysShowing == 1)
 				{
 					startDate = value.Date;
 				}
