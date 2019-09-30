@@ -33,11 +33,9 @@ public:
 
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	void FilterToolTipMessage(MSG* pMsg);
-	void SetTooltipOffset(int x, int y) { m_ptTooltipOffset.SetPoint(x, y); }
 
 protected:
 	CToolTipCtrlEx m_tooltip;
-	CPoint m_ptTooltipOffset;
 
 	mutable int m_nLastTooltipHit;
 
@@ -51,13 +49,11 @@ protected:
 	virtual CString GetTooltip(int nHit) const;
 	virtual int HitTest(const CPoint& ptClient) const;
 	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd);
-	virtual BOOL AdjustTooltipRect(CRect& rScreen);
 
 	// Generated message map functions
 	//{{AFX_MSG(CHMXChartEx)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
-	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg LRESULT OnMouseLeave(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
@@ -65,7 +61,6 @@ protected:
 protected:
 	BOOL InitTooltip(BOOL bMultiline);
 	int GetYSubTicks(double dInterval) const;
-	//BOOL GetAveragePointXY(int nIndex, CPoint& point) const;
 
 	BOOL HighlightDataPoint(int nIndex);
 	void HideLastHighlightedPoint();

@@ -3,8 +3,9 @@
 
 #include "stdafx.h"
 #include "ToolTipCtrlEx.h"
-
 #include "DialogHelper.h"
+
+#include "..\3rdParty\MemDC.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -45,18 +46,26 @@ CToolTipCtrlEx::~CToolTipCtrlEx()
 /////////////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CToolTipCtrlEx, CToolTipCtrl)
+	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CToolTipCtrlEx::EnableTracking(BOOL bTracking)
+void CToolTipCtrlEx::EnableTracking(BOOL bTracking, int nXOffset, int nYOffset)
 {
 	ASSERT(m_bUsingRelayEvent <= 0);
 
 	if (bTracking)
+	{
 		m_nFlags |= WF_TRACKINGTOOLTIPS;
+
+		m_ptTrackingOffset.x = nXOffset;
+		m_ptTrackingOffset.y = nYOffset;
+	}
 	else
+	{
 		m_nFlags &= ~WF_TRACKINGTOOLTIPS;
+	}
 }
 
 BOOL CToolTipCtrlEx::IsTracking() const
@@ -181,8 +190,11 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 		{
 			if (IsTracking())
 			{
+				CPoint ptTip(pMsg->pt);
+				ptTip.Offset(m_ptTrackingOffset);
+
+				SendMessage(TTM_TRACKPOSITION, 0, MAKELPARAM(ptTip.x, ptTip.y));
 				SendMessage(TTM_SETTOOLINFO, 0, (LPARAM)&tiHit);
-				SendMessage(TTM_TRACKPOSITION, 0, MAKELPARAM(pMsg->pt.x, pMsg->pt.y));
 			}
 		}
 
@@ -342,4 +354,19 @@ BOOL CToolTipCtrlEx::AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const
 	ASSERT(::IsWindow(m_hWnd));  
 	
 	return (BOOL)::SendMessage(m_hWnd, TTM_ADJUSTRECT, bLarger, (LPARAM)lprc); 
+}
+
+void CToolTipCtrlEx::OnPaint()
+{
+	// Prevent flicker
+	CPaintDC dc(this); 
+	CMemDC dcMem(&dc);
+
+// 	CRect rClient;
+// 	GetClientRect(rClient);
+// 
+// 	dcMem.FillSolidRect(rClient, GetSysColor(COLOR_INFOBK));
+
+	// default draw to temp dc
+	DefWindowProc(WM_PRINTCLIENT, (WPARAM)(HDC)dcMem, 0);
 }

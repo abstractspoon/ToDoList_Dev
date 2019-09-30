@@ -25,7 +25,7 @@ public:
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const;
 	void Activate(BOOL bActivate);
-	void EnableTracking(BOOL bTracking = TRUE);
+	void EnableTracking(BOOL bTracking = TRUE, int nXOffset = 0, int nYOffset = 0);
 	BOOL IsTracking() const;
 
 	const TOOLINFO& GetLastHitToolInfo() const;
@@ -39,8 +39,10 @@ protected:
 	BOOL m_bUsingRelayEvent;
 	int m_nLastHit;
 	TOOLINFO m_tiLast;
+	CPoint m_ptTrackingOffset;
 
 protected:
+	afx_msg void OnPaint();
 	DECLARE_MESSAGE_MAP()
 
 	static void InitToolInfo(TOOLINFO& ti, BOOL bInitSize);

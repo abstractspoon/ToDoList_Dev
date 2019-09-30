@@ -31,7 +31,6 @@ CWorkloadChart::CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocatio
 	m_dUnderloadValue(0.0)
 {
 	SetDatasetLineColor(0, COLOR_BLUE);
-	SetTooltipOffset(16, 0);
 }
 
 CWorkloadChart::~CWorkloadChart()

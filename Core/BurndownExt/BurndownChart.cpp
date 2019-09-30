@@ -44,8 +44,6 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_mapGraphs[BCT_FREQUENCY_RISK]					= new CRiskFrequencyGraph();
 
 	//FileMisc::EnableLogging(TRUE);
-
-	SetTooltipOffset(16, 0);
 }
 
 CBurndownChart::~CBurndownChart()

@@ -96,7 +96,6 @@ BEGIN_MESSAGE_MAP(CHMXChartEx, CHMXChart)
 	//{{AFX_MSG_MAP(CHMXChartEx)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
-	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_WM_MOUSEMOVE()
 	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
 	ON_WM_PAINT()
@@ -161,26 +160,12 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 	m_tooltip.SetDelayTime(TTDT_INITIAL, 0);
 	m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
 	m_tooltip.SetDelayTime(TTDT_RESHOW, 0);
-	m_tooltip.EnableTracking();
+	m_tooltip.EnableTracking(TRUE, 16);
 
 	if (bMultiline)
 		m_tooltip.SetMaxTipWidth(1024); // for '\n' support
 
 	return TRUE;
-}
-
-void CHMXChartEx::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	*pResult = 0;
-
-	CRect rTooltip;
-	m_tooltip.GetWindowRect(rTooltip);
-
-	if (AdjustTooltipRect(rTooltip))
-	{
-		m_tooltip.MoveWindow(rTooltip);
-		*pResult = TRUE; // handled
-	}
 }
 
 bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
@@ -274,45 +259,6 @@ CString CHMXChartEx::GetTooltip(int nHit) const
 {
 	return EMPTY_STR;
 }
-
-BOOL CHMXChartEx::AdjustTooltipRect(CRect& rScreen)
-{
-	if ((m_nLastTooltipHit != -1) && (m_ptTooltipOffset != NULL_POINT))
-	{
-		rScreen.OffsetRect(m_ptTooltipOffset);
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
-}
-
-/*
-BOOL CHMXChartEx::GetAveragePointXY(int nIndex, CPoint& point) const
-{
-	int nNumSets = 0;
-	CPoint ptTotal(0, 0);
-
-	for (int nDataset = 0; nDataset < HMX_MAX_DATASET; nDataset++)
-	{
-		CPoint ptTemp;
-
-		if (GetPointXY(nDataset, nIndex, ptTemp))
-		{
-			ptTotal += ptTemp;
-			nNumSets++;
-		}
-	}
-
-	if (nNumSets == 0)
-		return FALSE;
-
-	point.x = (ptTotal.x / nNumSets);
-	point.y = (ptTotal.y / nNumSets);
-
-	return TRUE;
-}
-*/
 
 int CHMXChartEx::HitTest(const CPoint& ptClient) const
 {
