@@ -146,7 +146,7 @@ BEGIN
                     8
     CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,339,
                     12,112,13
-    LTEXT           "Trend Line",IDC_STATIC,126,2,120,8
+    LTEXT           "Trend",IDC_STATIC,126,2,120,8
     COMBOBOX        IDC_TRENDLINES,126,13,121,118,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
 END
