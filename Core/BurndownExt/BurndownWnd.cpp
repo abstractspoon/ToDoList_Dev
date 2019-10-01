@@ -231,6 +231,7 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 		m_graph.SetActiveGraph(m_nGraphType);
 		m_graph.ShowTrendLine(m_nTrendLine);
+		m_cbTrends.EnableWindow(m_graph.GetActiveGraphType() == BCT_TIMESERIES);
 
 		// Active range
 		m_dtPrevActiveRange.Reset();
@@ -701,6 +702,7 @@ void CBurndownWnd::OnSelchangeDisplay()
 	UpdateData();
 
 	m_graph.SetActiveGraph(m_nGraphType);
+	m_cbTrends.EnableWindow(m_graph.GetActiveGraphType() == BCT_TIMESERIES);
 }
 
 void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
