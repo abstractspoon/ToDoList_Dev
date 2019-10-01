@@ -133,6 +133,11 @@ BOOL CToDoListApp::InitInstance()
 
 	if (::LoadLibrary(sVs2010Runtime) == NULL)
 	{
+		CToDoListWnd::EnableLogging();
+
+		FileMisc::LogText(_T("LoadLibrary(%s) failed"), sVs2010Runtime);
+		FileMisc::LogTextRaw(Misc::FormatGetLastError());
+		
 		if (DoMessageBox(MSVCR100_MSG, MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
 			FileMisc::Run(::GetDesktopWindow(), MSVCR100_URL);
 
