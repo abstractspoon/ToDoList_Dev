@@ -358,15 +358,16 @@ BOOL CToolTipCtrlEx::AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const
 
 void CToolTipCtrlEx::OnPaint()
 {
-	// Prevent flicker
-	CPaintDC dc(this); 
-	CMemDC dcMem(&dc);
+	if (IsTracking())
+	{
+		// Prevent flicker
+		CPaintDC dc(this); 
+		CMemDC dcMem(&dc);
 
-// 	CRect rClient;
-// 	GetClientRect(rClient);
-// 
-// 	dcMem.FillSolidRect(rClient, GetSysColor(COLOR_INFOBK));
-
-	// default draw to temp dc
-	DefWindowProc(WM_PRINTCLIENT, (WPARAM)(HDC)dcMem, 0);
+		DefWindowProc(WM_PRINTCLIENT, (WPARAM)(HDC)dcMem, 0);
+	}
+	else
+	{
+		Default();
+	}
 }
