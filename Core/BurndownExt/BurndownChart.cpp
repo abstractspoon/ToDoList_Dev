@@ -206,9 +206,6 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	
 	ClearData();
 	SetYText(pGraph->GetTitle());
-	
-	if (!m_data.IsEmpty())
-		RebuildXScale();
 
 	{
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
@@ -216,6 +213,9 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 		pGraph->BuildGraph(m_calculator, m_datasets);
 		UpdateGraphTrendLine();
 	}
+
+	if (!m_data.IsEmpty())
+		RebuildXScale();
 
 	CalcDatas();
 
