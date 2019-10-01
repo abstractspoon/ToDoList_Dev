@@ -160,7 +160,7 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 	m_tooltip.SetDelayTime(TTDT_INITIAL, 0);
 	m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
 	m_tooltip.SetDelayTime(TTDT_RESHOW, 0);
-	m_tooltip.EnableTracking(TRUE, 16);
+	m_tooltip.EnableTracking(TRUE, 16, 16);
 
 	if (bMultiline)
 		m_tooltip.SetMaxTipWidth(1024); // for '\n' support

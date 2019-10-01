@@ -158,7 +158,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 //				ti.uFlags &= ~(TTF_NOTBUTTON|TTF_ALWAYSTIP);
 
  				if (IsTracking())
- 					ti.uFlags |= TTF_TRACK | TTF_ABSOLUTE;
+ 					ti.uFlags |= TTF_TRACK | TTF_ABSOLUTE | TTF_NOTBUTTON;
 
 				VERIFY(SendMessage(TTM_ADDTOOL, 0, (LPARAM)&ti));
 
@@ -194,7 +194,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 				ptTip.Offset(m_ptTrackingOffset);
 
 				SendMessage(TTM_TRACKPOSITION, 0, MAKELPARAM(ptTip.x, ptTip.y));
-				SendMessage(TTM_SETTOOLINFO, 0, (LPARAM)&tiHit);
+				SendMessage(TTM_UPDATETIPTEXT, 0, (LPARAM)&tiHit);
 			}
 		}
 
