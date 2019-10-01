@@ -535,6 +535,10 @@ int CStatsItemCalculator::GetPriorityFrequencies(CArray<FREQUENCYITEM, FREQUENCY
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
 	GetAttribFrequencies(PRIORITY, mapFrequencies);
 
+	// Fill in any missing values
+	for (int nVal = 0; nVal <= 10; nVal++)
+		mapFrequencies[Misc::Format(nVal)];
+
 	return AsSortedArray(mapFrequencies, aFrequencies);
 }
 
@@ -542,6 +546,10 @@ int CStatsItemCalculator::GetRiskFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM
 {
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
 	GetAttribFrequencies(RISK, mapFrequencies);
+	
+	// Fill in any missing values
+	for (int nVal = 0; nVal <= 10; nVal++)
+		mapFrequencies[Misc::Format(nVal)];
 
 	return AsSortedArray(mapFrequencies, aFrequencies);
 }
