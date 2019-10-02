@@ -140,7 +140,7 @@ public:
 
 	BOOL PointInHeader(const CPoint& ptScreen) const;
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader = TRUE) const;
-	HTREEITEM HitTestItem(const CPoint& ptScreen) const;
+	HTREEITEM HitTestItem(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 
 	void ExpandAll(BOOL bExpand = TRUE);
 	BOOL CanExpandAll() const;

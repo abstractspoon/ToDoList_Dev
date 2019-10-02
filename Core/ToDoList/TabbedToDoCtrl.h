@@ -139,7 +139,6 @@ public:
 	void ResizeAttributeColumnsToFit();
 	BOOL CanResizeAttributeColumnsToFit() const;
 	void RedrawReminders();
-	void SetMaxInfotipCommentsLength(int nLength);
 	void EndTimeTracking(BOOL bAllowConfirm) { CToDoCtrl::EndTimeTracking(bAllowConfirm); }
 	void BeginTimeTracking(DWORD dwTaskID) { CToDoCtrl::BeginTimeTracking(dwTaskID); }
 
@@ -248,6 +247,7 @@ protected:
 	virtual BOOL IsResortAllowed() const;
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
 	virtual void OnTaskIconsChanged();
+	virtual DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 
 	void UpdateSelectedTaskPath();
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);

@@ -464,7 +464,7 @@ bool CGanttChartWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CGanttChartWnd::HitTest(const POINT& ptScreen) const
+IUI_HITTEST CGanttChartWnd::HitTest(POINT ptScreen) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -472,12 +472,19 @@ IUI_HITTEST CGanttChartWnd::HitTest(const POINT& ptScreen) const
 	if (m_ctrlGantt.PointInHeader(ptScreen))
 		return IUI_NOWHERE;//IUI_COLUMNHEADER;
 
-						   // then specific task
-	if (m_ctrlGantt.HitTestTask(ptScreen))
+	// then specific task
+	if (m_ctrlGantt.HitTestTask(ptScreen, false))
 		return IUI_TASK;
 
 	// else 
 	return IUI_NOWHERE;
+}
+
+DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return m_ctrlGantt.HitTestTask(ptScreen, bTitleColumnOnly);
 }
 
 bool CGanttChartWnd::SelectTask(DWORD dwTaskID)

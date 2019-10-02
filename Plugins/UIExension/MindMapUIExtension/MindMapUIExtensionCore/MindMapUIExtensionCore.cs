@@ -103,6 +103,11 @@ namespace MindMapUIExtension
             return UIExtension.HitResult.Tasklist;
         }
 
+        public UInt32 HitTestTask(Int32 xPos, Int32 yPos)
+        {
+			return m_MindMap.HitTest(new Point(xPos, yPos));
+        }
+
         public void SetUITheme(UITheme theme)
         {
             var color = theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);

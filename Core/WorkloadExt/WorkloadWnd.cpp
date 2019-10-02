@@ -384,7 +384,7 @@ bool CWorkloadWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CWorkloadWnd::HitTest(const POINT& ptScreen) const
+IUI_HITTEST CWorkloadWnd::HitTest(POINT ptScreen) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -393,11 +393,18 @@ IUI_HITTEST CWorkloadWnd::HitTest(const POINT& ptScreen) const
 		return IUI_NOWHERE;//IUI_COLUMNHEADER;
 
 	// then specific task
-	if (m_ctrlWorkload.HitTestTask(ptScreen))
+	if (m_ctrlWorkload.HitTestTask(ptScreen, false))
 		return IUI_TASK;
 
 	// else 
 	return IUI_NOWHERE;
+}
+
+DWORD CWorkloadWnd::HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return m_ctrlWorkload.HitTestTask(ptScreen, bTitleColumnOnly);
 }
 
 bool CWorkloadWnd::SelectTask(DWORD dwTaskID)

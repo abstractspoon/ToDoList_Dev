@@ -112,7 +112,8 @@ BOOL CTDLTaskTreeCtrl::CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL 
 							TVS_LINESATROOT | 
 							TVS_HASBUTTONS | 
 //							TVS_EDITLABELS | 
-							TVS_NONEVENHEIGHT),
+							TVS_NONEVENHEIGHT |
+							 TVS_NOTOOLTIPS),
 							rect, 
 							pParentWnd, 
 							IDC_TASKTREE);
@@ -204,7 +205,7 @@ void CTDLTaskTreeCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 	CTDLTaskCtrlBase::OnStylesUpdated(styles, bAllowResort);
 
 	// Our extra handling
-	SetTasksWndStyle(TVS_INFOTIP, styles.IsStyleEnabled(TDCS_SHOWINFOTIPS), FALSE);
+	SetTasksWndStyle(TVS_NOTOOLTIPS, styles.IsStyleEnabled(TDCS_SHOWINFOTIPS), FALSE);
 	SyncColumnSelectionToTasks();
 }
 
@@ -837,21 +838,7 @@ BOOL CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 
 BOOL CTDLTaskTreeCtrl::PreTranslateMessage(MSG* pMsg)
 {
-	BOOL bHideTooltip = FALSE;
-
-	switch (pMsg->message)
-	{
-	case WM_NCMOUSEMOVE:
-		if (HasStyle(TDCS_SHOWINFOTIPS))
-			bHideTooltip = ((pMsg->hwnd != m_tcTasks) || (pMsg->wParam != HTCLIENT));
-		break;
-
-	default:
-		bHideTooltip = ((pMsg->hwnd == m_tcTasks) && CToolTipCtrlEx::IsMouseDown(pMsg->message));
-		break;
-	}
-
-	if (bHideTooltip)
+	if (((pMsg->hwnd == m_tcTasks) && CToolTipCtrlEx::IsMouseDown(pMsg->message)))
 	{
 		CToolTipCtrl* pTT = m_tcTasks.GetToolTips();
 
@@ -1108,20 +1095,20 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 				OnTreeGetDispInfo((NMTVDISPINFO*)pNMHDR);
 				break;
 
-			case TVN_GETINFOTIP:
-				{
-					NMTVGETINFOTIP* pTVGIT = (NMTVGETINFOTIP*)pNMHDR;
-					DWORD dwTaskID = (DWORD)pTVGIT->lParam;
-					
-					if (dwTaskID)
-					{
-						CString sInfoTip(FormatInfoTip(dwTaskID, (pTVGIT->cchTextMax - 1)));
-						lstrcpyn(pTVGIT->pszText, sInfoTip, (pTVGIT->cchTextMax - 1));
-
-						return 0L; // eat
-					}
-				}
-				break;
+// 			case TVN_GETINFOTIP:
+// 				{
+// 					NMTVGETINFOTIP* pTVGIT = (NMTVGETINFOTIP*)pNMHDR;
+// 					DWORD dwTaskID = (DWORD)pTVGIT->lParam;
+// 					
+// 					if (dwTaskID)
+// 					{
+// 						CString sInfoTip(FormatInfoTip(dwTaskID, (pTVGIT->cchTextMax - 1)));
+// 						lstrcpyn(pTVGIT->pszText, sInfoTip, (pTVGIT->cchTextMax - 1));
+// 
+// 						return 0L; // eat
+// 					}
+// 				}
+// 				break;
 				
 			case TVN_KEYDOWN:
 				{
@@ -1224,21 +1211,21 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			break;
 #endif
 
-		case WM_NOTIFY:
-			{
-				LPNMHDR pNMHDR = (LPNMHDR)lp;
-				HWND hwnd = pNMHDR->hwndFrom;
-
-				switch (pNMHDR->code)
-				{
-				case TTN_SHOW:
-					// Set the font to non-bold for info tips
-					if (HasStyle(TDCS_SHOWINFOTIPS))
-						::SendMessage(hwnd, WM_SETFONT, (WPARAM)m_fonts.GetHFont(), TRUE);
-					break;
-				}
-			}
-			break;
+// 		case WM_NOTIFY:
+// 			{
+// 				LPNMHDR pNMHDR = (LPNMHDR)lp;
+// 				HWND hwnd = pNMHDR->hwndFrom;
+// 
+// 				switch (pNMHDR->code)
+// 				{
+// 				case TTN_SHOW:
+// 					// Set the font to non-bold for info tips
+// 					if (HasStyle(TDCS_SHOWINFOTIPS))
+// 						::SendMessage(hwnd, WM_SETFONT, (WPARAM)m_fonts.GetHFont(), TRUE);
+// 					break;
+// 				}
+// 			}
+// 			break;
 
 		case WM_ERASEBKGND:
 			if (m_bMovingItem)

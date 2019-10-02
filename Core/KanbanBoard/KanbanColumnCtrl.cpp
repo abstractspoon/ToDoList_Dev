@@ -1568,8 +1568,12 @@ int CKanbanColumnCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	return CTreeCtrl::OnToolHitTest(point, pTI);
 }
 
-void CKanbanColumnCtrl::OnTooltipShow(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CKanbanColumnCtrl::OnTooltipShow(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	// Only handle our tooltips
+	if (pNMHDR->hwndFrom != m_tooltip)
+		return;
+
 	DWORD dwTaskID = m_tooltip.GetLastHitToolInfo().uId;
 	ASSERT(dwTaskID);
 

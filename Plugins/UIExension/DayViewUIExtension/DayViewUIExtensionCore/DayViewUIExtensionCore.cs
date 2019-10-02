@@ -155,6 +155,11 @@ namespace DayViewUIExtension
 			return m_DayView.HitTest(xScreen, yScreen);
 		}
 
+		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen)
+		{
+			return m_DayView.HitTestTask(xScreen, yScreen);
+		}
+
 		public void SetUITheme(UITheme theme)
 		{
             m_DayView.SetUITheme(theme);

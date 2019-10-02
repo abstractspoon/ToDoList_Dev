@@ -194,8 +194,12 @@ void CTreeListTreeCtrl::FilterToolTipMessage(MSG* pMsg)
 	m_tooltip.FilterToolTipMessage(pMsg);
 }
 
-void CTreeListTreeCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CTreeListTreeCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	// Only handle our tooltips
+	if (pNMHDR->hwndFrom != m_tooltip)
+		return;
+
 	HTREEITEM hti = (HTREEITEM)m_tooltip.GetLastHitToolInfo().uId;
 
 	if (!hti)
@@ -1169,11 +1173,10 @@ BOOL CTreeListCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 
 BOOL CTreeListCtrl::OnListLButtonDown(UINT /*nFlags*/, CPoint point)
 {
-	// don't let the selection to be set to -1
-	CPoint ptScreen(point);
-	m_list.ClientToScreen(&ptScreen);
+	m_list.ClientToScreen(&point);
 
-	if (HitTestItem(ptScreen) == NULL)
+	// don't let the selection to be set to -1
+	if (HitTestItem(point, FALSE) == NULL)
 	{
 		SetFocus();
 		return TRUE; // eat
@@ -1701,11 +1704,11 @@ BOOL CTreeListCtrl::GetListColumnRect(int nCol, CRect& rColumn, BOOL bScrolled) 
 	return FALSE;
 }
 
-HTREEITEM CTreeListCtrl::HitTestItem(const CPoint& ptScreen) const
+HTREEITEM CTreeListCtrl::HitTestItem(const CPoint& ptScreen, BOOL bTitleColumnOnly) const
 {
 	HTREEITEM htiHit = TreeHitTestItem(ptScreen, TRUE);
 
-	if (htiHit)
+	if (htiHit || bTitleColumnOnly)
 		return htiHit;
 
 	// else
@@ -1773,7 +1776,7 @@ int CTreeListCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol)
 
 CString CTreeListCtrl::GetItemLabelTip(CPoint ptScreen) const
 {
-	HTREEITEM htiHit = HitTestItem(ptScreen);
+	HTREEITEM htiHit = HitTestItem(ptScreen, TRUE);
 
 	if (htiHit)
 	{

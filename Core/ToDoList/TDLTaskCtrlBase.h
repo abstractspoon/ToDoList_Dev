@@ -182,16 +182,16 @@ public:
 	int GetTaskIconIndex(DWORD dwTaskID) const;
 	int GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const { return m_formatter.GetTaskPath(dwTaskID, nMaxLen); }
+	DWORD PrepareTaskInfoTip(const CPoint& ptScreen, HWND hwndHit, CString& sInfoTip, int nMaxCommentsLen) const;
+	CString FormatInfoTip(DWORD dwTaskID, int nMaxCommentsLen) const;
 
 	void UpdateSelectedTaskPath();
-	void SetMaxInfotipCommentsLength(int nLength) { m_nMaxInfotipCommentsLength = max(-1, nLength); } // -1 to switch off
-
 	BOOL ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const;
 	static BOOL ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
 
 	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
-	DWORD HitTestTask(const CPoint& ptScreen) const;
+	DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 	int HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COLUMN& nColID, DWORD* pTaskID = NULL, LPRECT pRect = NULL) const;
 	int HitTestFileLinkColumn(const CPoint& ptScreen) const;
 
@@ -275,7 +275,6 @@ protected:
 	TDC_SORTDIR m_nSortDir;
 	TDSORT m_sort;
 	float m_fAveHeaderCharWidth;
-	int m_nMaxInfotipCommentsLength;
 	CString m_sTasklistFolder;
 
 	CTDCTaskComparer m_comparer;
@@ -380,13 +379,12 @@ protected:
 	BOOL IsVisible() const;
 	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize = 16, int nImage = 0, int nCount = 1) const;
 	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0, int nCount = 1) const;
-	void SetTasksWndStyle(DWORD dwStyles, BOOL bSet, BOOL bExStyle);
+ 	void SetTasksWndStyle(DWORD dwStyles, BOOL bSet, BOOL bExStyle);
 
 	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;
 	CString GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, BOOL bDrawing) const;
 	CString FormatTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_DATE nDate) const;
 	CString FormatTaskDate(const COleDateTime& date, TDC_DATE nDate) const;
-	CString FormatInfoTip(DWORD dwTaskID, int nMaxLen) const;
 
 	int CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
 	void RecalcUntrackedColumnWidths(BOOL bCustomOnly);

@@ -415,7 +415,7 @@ public:
 
 	// misc
 	void Spellcheck();
-	void SetMaxInfotipCommentsLength(int nLength) { m_taskTree.SetMaxInfotipCommentsLength(nLength); }
+	void SetMaxInfotipCommentsLength(int nLength) { m_nMaxInfotipCommentsLength = max(-1, nLength); } // -1 to switch off
 	COleDateTime GetLastTaskModified() const { return m_dtLastTaskMod; }
 	void RedrawReminders();
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos, BOOL bResize);
@@ -434,6 +434,7 @@ public:
 	virtual void NotifyEndPreferencesUpdate() { /* do nothing */ }
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
 	virtual TDC_HITTEST HitTest(const CPoint& ptScreen) const;
+	virtual DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 	virtual TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
 
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
@@ -466,6 +467,7 @@ protected:
 	CTDLRiskComboBox m_cbRisk;
 	CTimeComboBox m_cbTimeDue, m_cbTimeStart, m_cbTimeDone;
 	CTimeEdit m_eTimeEstimate, m_eTimeSpent;
+	CToolTipCtrlEx m_infoTip;
 	
 	CTDLTaskTreeCtrl m_taskTree;
 
@@ -495,6 +497,7 @@ protected:
 	TDC_RECURFROMOPTION m_nDefRecurFrom;
 	TDC_RECURREUSEOPTION m_nDefRecurReuse;
 	CDWordArray m_aRecreateTaskIDs;
+	int m_nMaxInfotipCommentsLength;
 
 	const CContentMgr& m_mgrContent;
 
@@ -558,9 +561,11 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CToDoCtrl)
-	public:
+public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	protected:
+	virtual int OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
+
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual BOOL OnInitDialog();

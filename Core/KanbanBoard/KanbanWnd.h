@@ -44,7 +44,8 @@ public:
 	void SetTaskFont(HFONT hFont);
 
 	bool GetLabelEditRect(LPRECT pEdit);
-	IUI_HITTEST HitTest(const POINT& ptScreen) const;
+	IUI_HITTEST HitTest(POINT ptScreen) const;
+	DWORD HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const;
 
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;

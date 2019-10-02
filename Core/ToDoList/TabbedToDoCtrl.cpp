@@ -2191,18 +2191,55 @@ void CTabbedToDoCtrl::RedrawReminders()
 	}
 }
 
-void CTabbedToDoCtrl::SetMaxInfotipCommentsLength(int nLength)
-{
-	CToDoCtrl::SetMaxInfotipCommentsLength(nLength);
-
-	m_taskList.SetMaxInfotipCommentsLength(nLength);
-}
-
 void CTabbedToDoCtrl::SetEditTitleTaskID(DWORD dwTaskID)
 {
 	CToDoCtrl::SetEditTitleTaskID(dwTaskID);
 	
 	m_taskList.SetEditTitleTaskID(dwTaskID);
+}
+
+DWORD CTabbedToDoCtrl::HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const
+{
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		return CToDoCtrl::HitTestTask(ptScreen, bTitleColumnOnly);
+
+	case FTCV_TASKLIST:
+		return m_taskList.HitTestTask(ptScreen, bTitleColumnOnly);
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		{
+			const IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+
+			if (pExtWnd)
+				return pExtWnd->HitTestTask(ptScreen, (bTitleColumnOnly != FALSE));
+		}
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	return 0;
 }
 
 DWORD CTabbedToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)

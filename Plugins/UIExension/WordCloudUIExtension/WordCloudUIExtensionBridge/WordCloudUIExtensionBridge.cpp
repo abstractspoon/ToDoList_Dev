@@ -320,9 +320,14 @@ bool CWordCloudUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-IUI_HITTEST CWordCloudUIExtensionBridgeWindow::HitTest(const POINT& ptScreen) const
+IUI_HITTEST CWordCloudUIExtensionBridgeWindow::HitTest(POINT ptScreen) const
 {
 	return UIExtension::Map(m_wnd->HitTest(ptScreen.x, ptScreen.y));
+}
+
+DWORD CWordCloudUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
+{
+	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y);
 }
 
 void CWordCloudUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)

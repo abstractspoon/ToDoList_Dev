@@ -2803,11 +2803,15 @@ bool CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	return true;
 }
 
-DWORD CWorkloadCtrl::HitTestTask(const CPoint& ptScreen) const
+DWORD CWorkloadCtrl::HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const
 {
-	HTREEITEM hti = HitTestItem(ptScreen);
+	HTREEITEM hti = HitTestItem(ptScreen, bTitleColumnOnly);
 
-	return GetItemData(hti);
+	if (hti)
+		return GetItemData(hti);
+
+	// else
+	return 0;
 }
 
 DWORD CWorkloadCtrl::TreeHitTestTask(const CPoint& ptScreen, BOOL bScreen) const

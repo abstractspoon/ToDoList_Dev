@@ -53,7 +53,7 @@ public:
 	BOOL GetSelectedTaskDependencies(CDWordArray& aDepends) const;
 	BOOL SetSelectedTaskDependencies(const CDWordArray& aDepends);
 
-	DWORD HitTestTask(const CPoint& ptScreen) const;
+	DWORD HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const;
 	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 
 	void ResizeAttributeColumnsToFit(BOOL bForce = FALSE);

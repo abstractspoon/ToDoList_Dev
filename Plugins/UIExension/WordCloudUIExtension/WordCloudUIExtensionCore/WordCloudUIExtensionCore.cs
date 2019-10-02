@@ -378,6 +378,23 @@ namespace WordCloudUIExtension
 			return UIExtension.HitResult.Nowhere;
 		}
 
+		public UInt32 HitTestTask(Int32 xPos, Int32 yPos)
+		{
+			Point ptClient = m_TaskMatchesList.PointToClient(new Point(xPos, yPos));
+			ListViewHitTestInfo lvHit = m_TaskMatchesList.HitTest(ptClient);
+
+			if (lvHit.Item != null)
+			{
+				var task = (lvHit.Item.Tag as CloudTaskItem);
+
+				if (task != null)
+					return task.Id;
+			}
+
+            // else
+			return 0;
+		}
+
 		public void SetUITheme(UITheme theme)
 		{
             this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);

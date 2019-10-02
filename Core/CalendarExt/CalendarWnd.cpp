@@ -479,7 +479,7 @@ bool CCalendarWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CCalendarWnd::HitTest(const POINT& ptScreen) const
+IUI_HITTEST CCalendarWnd::HitTest(POINT ptScreen) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -501,6 +501,16 @@ IUI_HITTEST CCalendarWnd::HitTest(const POINT& ptScreen) const
 	m_BigCalendar.GetClientRect(rCal);
 
 	return (rCal.PtInRect(ptBigCal) ? IUI_TASKLIST : IUI_NOWHERE);
+}
+
+DWORD CCalendarWnd::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	CPoint ptBigCal(ptScreen);
+	m_BigCalendar.ScreenToClient(&ptBigCal);
+
+	return m_BigCalendar.HitTest(ptBigCal);
 }
 
 bool CCalendarWnd::SelectTask(DWORD dwTaskID)

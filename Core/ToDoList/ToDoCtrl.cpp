@@ -208,7 +208,8 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_nFileFormat(TDL_FILEFORMAT_CURRENT),
 	m_nFileVersion(0),
 	m_nMaxState(TDCMS_NORMAL),
-	m_nPriority(-1), 
+	m_nMaxInfotipCommentsLength(-1),
+	m_nPriority(-1),
 	m_treeDragDrop(TSH(), m_taskTree.Tree()),
 	m_visColEdit(visDefault),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
@@ -5528,7 +5529,6 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 
 	case TDCS_NODUEDATEISDUETODAYORSTART:
 	case TDCS_SHOWPATHINHEADER:
-	case TDCS_SHOWINFOTIPS:
 	case TDCS_SHOWCOMMENTSINLIST:
 	case TDCS_SHOWFIRSTCOMMENTLINEINLIST:
 	case TDCS_STRIKETHOUGHDONETASKS:
@@ -5561,6 +5561,25 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 	case TDCS_DONEHAVELOWESTPRIORITY:
 	case TDCS_DONEHAVELOWESTRISK:
 		// handled solely by tree-list
+		break;
+
+	case TDCS_SHOWINFOTIPS:
+		if (bEnable)
+		{
+			if (!m_infoTip.Create(this))
+				return FALSE;
+
+			// else
+			m_infoTip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
+			m_infoTip.SetDelayTime(TTDT_INITIAL, 50);
+			m_infoTip.SetDelayTime(TTDT_AUTOPOP, 10000);
+			m_infoTip.SetMaxTipWidth((UINT)(WORD)-1); // multiline support
+			m_infoTip.EnableTracking(TRUE, 16, 16);
+		}
+		else
+		{
+			m_infoTip.DestroyWindow();
+		}
 		break;
 
 	case TDCS_USEEARLIESTDUEDATE:
@@ -5647,6 +5666,32 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 	}
 	
 	return dwResult;
+}
+
+int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
+{
+	if (HasStyle(TDCS_SHOWINFOTIPS) && m_infoTip.GetSafeHwnd())
+	{
+		CWnd::ClientToScreen(&point);
+
+		DWORD dwTaskID = HitTestTask(point, TRUE);
+
+		if (dwTaskID)
+		{
+			CString sInfoTip = m_taskTree.FormatInfoTip(dwTaskID, m_nMaxInfotipCommentsLength);
+			ASSERT(!sInfoTip.IsEmpty());
+
+			CRect rBounds;
+			CWnd::GetClientRect(rBounds);
+
+			HWND hwndHit = CDialogHelper::GetWindowFromPoint(GetSafeHwnd(), point);
+			ASSERT(hwndHit);
+
+			return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sInfoTip, 1/*dwTaskID*/, rBounds);
+		}
+	}
+
+	return CWnd::OnToolHitTest(point, pTI);
 }
 
 void CToDoCtrl::SetReadonly(BOOL bReadOnly)
@@ -7732,9 +7777,8 @@ BOOL CToDoCtrl::PrepareTaskLinkForPaste(CString& sLink, const CMapID2ID& mapID) 
 
 BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg) 
 {
-	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
-	BOOL bAlt = Misc::IsKeyPressed(VK_MENU);
+	if (m_infoTip.GetSafeHwnd())
+		m_infoTip.FilterToolTipMessage(pMsg);
 
 	if (m_ctrlComments.ProcessMessage(pMsg))
 		return TRUE;
@@ -7745,6 +7789,10 @@ BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg)
 	if (m_taskTree.PreTranslateMessage(pMsg))
 		return TRUE;
 	
+// 	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+// 	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
+// 	BOOL bAlt = Misc::IsKeyPressed(VK_MENU);
+
 	switch (pMsg->message)
 	{
 	case  WM_CHAR:
@@ -7988,6 +8036,11 @@ void CToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 TDC_HITTEST CToDoCtrl::HitTest(const CPoint& ptScreen) const
 {
 	return m_taskTree.HitTest(ptScreen);
+}
+
+DWORD CToDoCtrl::HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const
+{
+	return m_taskTree.HitTestTask(ptScreen, bTitleColumnOnly);
 }
 
 TDC_COLUMN CToDoCtrl::HitTestColumn(const CPoint& ptScreen) const

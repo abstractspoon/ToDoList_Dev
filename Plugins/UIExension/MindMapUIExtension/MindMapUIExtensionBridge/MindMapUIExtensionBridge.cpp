@@ -353,9 +353,14 @@ bool CMindMapUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-IUI_HITTEST CMindMapUIExtensionBridgeWindow::HitTest(const POINT& ptScreen) const
+IUI_HITTEST CMindMapUIExtensionBridgeWindow::HitTest(POINT ptScreen) const
 {
 	return UIExtension::Map(m_wnd->HitTest(ptScreen.x, ptScreen.y));
+}
+
+DWORD CMindMapUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
+{
+	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y);
 }
 
 void CMindMapUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)

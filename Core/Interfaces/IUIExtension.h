@@ -321,7 +321,8 @@ public:
 	virtual bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData = NULL) const = 0;
 
 	virtual bool GetLabelEditRect(LPRECT pEdit) = 0; // screen coordinates
-	virtual IUI_HITTEST HitTest(const POINT& ptScreen) const = 0;
+	virtual IUI_HITTEST HitTest(POINT ptScreen) const = 0;
+	virtual DWORD HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const = 0;
 
 	virtual void SetUITheme(const UITHEME* pTheme) = 0;
 	virtual void SetTaskFont(HFONT hFont) = 0;

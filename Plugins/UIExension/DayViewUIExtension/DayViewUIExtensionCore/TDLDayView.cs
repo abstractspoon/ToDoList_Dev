@@ -297,6 +297,17 @@ namespace DayViewUIExtension
 			return UIExtension.HitResult.Nowhere;
 		}
 
+		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen)
+		{
+			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
+			Calendar.Appointment appointment = GetAppointmentAt(pt.X, pt.Y);
+
+			if (appointment != null)
+				return appointment.Id;
+
+			return 0;
+		}
+
 		public bool GetSelectedItemLabelRect(ref Rectangle rect)
 		{
 			if (GetAppointmentRect(SelectedAppointment, ref rect))

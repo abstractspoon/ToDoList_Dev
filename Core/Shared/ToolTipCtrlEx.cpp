@@ -188,7 +188,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 		}
 		else // m_nLastHit == nHit
 		{
-			if (IsTracking())
+			if (IsTracking() && (nHit != -1))
 			{
 				CPoint ptTip(pMsg->pt);
 				ptTip.Offset(m_ptTrackingOffset);
@@ -261,12 +261,17 @@ int CToolTipCtrlEx::DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti)
 
 int CToolTipCtrlEx::SetToolInfo(TOOLINFO& ti, const CWnd* pWnd, const CString sTooltip, int nID, const CRect& rBounds, UINT nFlags)
 {
-	ASSERT(pWnd);
+	return SetToolInfo(ti, pWnd->GetSafeHwnd(), sTooltip, nID, rBounds, nFlags);
+}
+
+int CToolTipCtrlEx::SetToolInfo(TOOLINFO& ti, HWND hWnd, const CString sTooltip, int nID, const CRect& rBounds, UINT nFlags)
+{
+	ASSERT(::IsWindow(hWnd));
 	ASSERT(!sTooltip.IsEmpty());
 	ASSERT(nID > 0);
 	ASSERT(!rBounds.IsRectEmpty());
 
-	ti.hwnd = pWnd->GetSafeHwnd();
+	ti.hwnd = hWnd;
 	ti.uId = nID;
 	ti.lpszText = _tcsdup(sTooltip); // MFC will free the duplicated string
 	ti.rect = rBounds;

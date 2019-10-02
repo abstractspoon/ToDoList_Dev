@@ -58,7 +58,7 @@ public:
 
 	BOOL CanMoveSelectedTask(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedTask(const IUITASKMOVE& move);
-	DWORD HitTestTask(const CPoint& ptScreen) const;
+	DWORD HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const;
 
 	void ResizeAttributeColumnsToFit(BOOL bForce = FALSE);
 	void AdjustSplitterToFitAttributeColumns();

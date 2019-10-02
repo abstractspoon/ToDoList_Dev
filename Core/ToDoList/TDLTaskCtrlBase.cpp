@@ -164,7 +164,6 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 	m_dwTimeTrackTaskID(0), 
 	m_dwEditTitleTaskID(0),
 	m_dwNextUniqueTaskID(100),
-	m_nMaxInfotipCommentsLength(-1),
 	m_bSortingColumns(FALSE),
 	m_nColorByAttrib(TDCA_NONE),
 	m_bBoundSelecting(FALSE),
@@ -313,7 +312,7 @@ int CTDLTaskCtrlBase::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 		CRect rBounds;
 		CWnd::GetClientRect(rBounds);
 
-		return CToolTipCtrlEx::SetToolInfo(*pTI, &m_lcColumns, sTooltip, nHitTest, rBounds);
+		return CToolTipCtrlEx::SetToolInfo(*pTI, m_lcColumns, sTooltip, nHitTest, rBounds);
 	}
 
 	return CWnd::OnToolHitTest(point, pTI);
@@ -1531,12 +1530,12 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 										flags.WantIncludeTime(sort.nBy));
 }
 
-DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen) const
+DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const
 {
-	DWORD dwTaskID = HitTestColumnsTask(ptScreen);
-
-	if (dwTaskID == 0)
-		dwTaskID = HitTestTasksTask(ptScreen);
+	DWORD dwTaskID = HitTestTasksTask(ptScreen);
+	
+	if (!dwTaskID && !bTitleColumnOnly)
+		dwTaskID = HitTestColumnsTask(ptScreen);
 
 	return dwTaskID;
 }
@@ -6401,7 +6400,24 @@ BOOL CTDLTaskCtrlBase::IsSelectedTaskDue() const
 	return m_calculator.IsTaskOverDue(GetSelectedTaskID());
 }
 
-CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID, int nMaxLen) const
+DWORD CTDLTaskCtrlBase::PrepareTaskInfoTip(const CPoint& ptScreen, HWND hwndHit, CString& sInfoTip, int nMaxCommentsLen) const
+{
+	if (hwndHit == Tasks())
+	{
+		DWORD dwTaskID = HitTestTask(ptScreen, TRUE);
+
+		if (dwTaskID)
+		{
+			sInfoTip = FormatInfoTip(dwTaskID, nMaxCommentsLen);
+			return dwTaskID;
+		}
+	}
+
+	// all else
+	return 0;
+}
+
+CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID, int nMaxCommentsLen) const
 {
 	const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
 	ASSERT(pTDI);
@@ -6418,10 +6434,10 @@ CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID, int nMaxLen) const
 		CString sComments = pTDI->sComments;
 		int nLen = sComments.GetLength();
 		
-		if (nLen && m_nMaxInfotipCommentsLength != 0)
+		if (nLen && nMaxCommentsLen != 0)
 		{
-			if ((m_nMaxInfotipCommentsLength > 0) && (nLen > m_nMaxInfotipCommentsLength))
-				sComments = (sComments.Left(m_nMaxInfotipCommentsLength) + _T("..."));
+			if ((nMaxCommentsLen > 0) && (nLen > nMaxCommentsLen))
+				sComments = (sComments.Left(nMaxCommentsLen) + _T("..."));
 			
 			sItem.Format(_T("\n%s %s"), CEnString(IDS_TDCTIP_COMMENTS), sComments);
 			sTip += sItem;
@@ -6554,10 +6570,6 @@ CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID, int nMaxLen) const
 		}
 	}
 
-	// Truncate to fit with ellipsis
-	if (sTip.GetLength() > nMaxLen)
-		sTip = sTip.Left(nMaxLen - 3) + _T("...");
-	
 	return sTip;
 }
 

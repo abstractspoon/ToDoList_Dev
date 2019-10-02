@@ -2058,7 +2058,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 					}
 					else // centre on the task beneath the mouse
 					{
-						dwScrollID = HitTestTask(::GetMessagePos());
+						dwScrollID = HitTestTask(::GetMessagePos(), true);
 					}
 
 					// For reasons I don't understand, the resource context is
@@ -2255,7 +2255,7 @@ BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 			CPoint ptScreen(point);
 			m_list.ClientToScreen(&ptScreen);
 
-			DWORD dwFromTaskID = HitTestTask(ptScreen);
+			DWORD dwFromTaskID = HitTestTask(ptScreen, false);
 
 			if (dwFromTaskID)
 			{
@@ -5288,17 +5288,14 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	return true;
 }
 
-DWORD CGanttCtrl::HitTestTask(const CPoint& ptScreen) const
+DWORD CGanttCtrl::HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const
 {
-	// try list first
-	GTLC_HITTEST nHit = GTLCHT_NOWHERE;
-	DWORD dwTaskID = ListHitTestTask(ptScreen, TRUE, nHit, FALSE);
+	HTREEITEM htiHit = HitTestItem(ptScreen, bTitleColumnOnly);
 
-	// then tree
-	if (!dwTaskID)
-		dwTaskID = TreeHitTestTask(ptScreen, TRUE);
+	if (htiHit)
+		return GetTaskID(htiHit);
 
-	return dwTaskID;
+	return 0;
 }
 
 DWORD CGanttCtrl::TreeHitTestTask(const CPoint& ptScreen, BOOL bScreen) const

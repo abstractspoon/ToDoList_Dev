@@ -2445,8 +2445,12 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	return CCalendarCtrlEx::OnToolHitTest(point, pTI);
 }
 
-void CTaskCalendarCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	// Only handle our tooltips
+	if (pNMHDR->hwndFrom != m_tooltip)
+		return;
+
 	if (IsDragging())
 		return;
 

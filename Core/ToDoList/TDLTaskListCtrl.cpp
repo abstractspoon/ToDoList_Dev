@@ -148,7 +148,7 @@ void CTDLTaskListCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 	CTDLTaskCtrlBase::OnStylesUpdated(styles, bAllowResort);
 
 	// Our extra handling
-	SetTasksWndStyle(LVS_EX_INFOTIP, styles.IsStyleEnabled(TDCS_SHOWINFOTIPS), TRUE);
+	SetTasksWndStyle(LVS_EX_LABELTIP, !styles.IsStyleEnabled(TDCS_SHOWINFOTIPS), TRUE);
 }
 
 BOOL CTDLTaskListCtrl::BuildColumns()
@@ -476,20 +476,20 @@ LRESULT CTDLTaskListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 				case LVN_GETDISPINFO:
 					return OnListGetDispInfo((NMLVDISPINFO*)pNMHDR);
 
-				case LVN_GETINFOTIP:
-					{
-						NMLVGETINFOTIP* pLVGIT = (NMLVGETINFOTIP*)pNMHDR;
-						DWORD dwTaskID = GetTaskID(pLVGIT->iItem);
-						
-						if (dwTaskID)
-						{
-							CString sInfoTip(FormatInfoTip(dwTaskID, (pLVGIT->cchTextMax - 1)));
-							lstrcpyn(pLVGIT->pszText, sInfoTip, (pLVGIT->cchTextMax - 1));
-
-							return 0L; // eat
-						}
-					}
-					break;
+// 				case LVN_GETINFOTIP:
+// 					{
+// 						NMLVGETINFOTIP* pLVGIT = (NMLVGETINFOTIP*)pNMHDR;
+// 						DWORD dwTaskID = GetTaskID(pLVGIT->iItem);
+// 						
+// 						if (dwTaskID)
+// 						{
+// 							CString sInfoTip(FormatInfoTip(dwTaskID, (pLVGIT->cchTextMax - 1)));
+// 							lstrcpyn(pLVGIT->pszText, sInfoTip, (pLVGIT->cchTextMax - 1));
+// 
+// 							return 0L; // eat
+// 						}
+// 					}
+// 					break;
 				}
 			}
 		}
@@ -912,7 +912,7 @@ BOOL CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 	// key is not pressed. ie. the user is in 
 	// the middle of selecting a new item
 	if (Misc::IsKeyPressed(VK_LBUTTON) &&
-			HitTestTask(GetMessagePos()) &&
+			HitTestTask(GetMessagePos(), false) &&
 			!Misc::IsKeyPressed(VK_CONTROL) &&
 			!GetSelectedCount())
 	{

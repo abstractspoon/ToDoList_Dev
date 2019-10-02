@@ -280,7 +280,12 @@ namespace SampleUIExtension
             return UIExtension.HitResult.Nowhere;
 	    }
 
-        public void SetUITheme(UITheme theme)
+		public UInt32 HitTestTask(Int32 xPos, Int32 yPos, bool titleColumnOnly)
+		{
+			return 0;
+		}
+
+		public void SetUITheme(UITheme theme)
         {
             System.Windows.Media.Color bkColor = theme.GetAppMediaColor(UITheme.AppColor.AppBackDark);
 
