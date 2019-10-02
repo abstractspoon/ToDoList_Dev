@@ -139,7 +139,7 @@ void CBurndownChart::UpdateGraphTrendLine()
 		CTimeSeriesGraph* pTSGraph = dynamic_cast<CTimeSeriesGraph*>(pGraph);
 		ASSERT(pTSGraph);
 
-		VERIFY(pTSGraph->ShowTrendLine(m_nTrendLine, m_datasets));
+		/*VERIFY*/(pTSGraph->ShowTrendLine(m_nTrendLine, m_datasets));
 		Invalidate();
 	}
 }
