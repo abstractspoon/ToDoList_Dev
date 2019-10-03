@@ -93,7 +93,7 @@ public:
 	void RefreshItemLineHeights();
 	void RefreshItemLineHeights(DWORD dwTaskID);
 
-	bool FilterToolTipMessage(MSG* pMsg) { m_tooltip.FilterToolTipMessage(pMsg); return false; }
+	void FilterToolTipMessage(MSG* pMsg);
 
 	const CTreeCtrlHelper& TCH() const { return m_tch; }
 	CTreeCtrlHelper& TCH() { return m_tch; }

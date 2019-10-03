@@ -255,7 +255,9 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	m_ctrlWorkload.SetOption(WLCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
 	m_ctrlWorkload.SetOption(WLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 	m_ctrlWorkload.SetOption(WLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
-	m_ctrlWorkload.SetOption(WLCF_SHOWTREECHECKBOXES, (pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE)));
+
+	m_ctrlWorkload.EnableTreeCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
+	m_ctrlWorkload.EnableTreeLabelTips(!pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
 
 	// Get allocation color from app prefs
 	m_ctrlWorkload.SetAllocationColor(CLR_NONE); // TODO

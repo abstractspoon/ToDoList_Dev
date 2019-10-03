@@ -155,7 +155,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	BuildTaskTreeColumns();
 	BuildListColumns();
 	PopulateTotalsLists();
-	EnableImagePlaceholder();
+	EnableTreeImagePlaceholder();
 
 	return 0;
 }
@@ -1108,10 +1108,6 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 
 			case WLCF_DISPLAYISODATES:
 				CWnd::Invalidate(FALSE);
-				break;
-
-			case WLCF_SHOWTREECHECKBOXES:
-				m_tree.EnableCheckboxes(IDB_CHECKBOXES, bSet);
 				break;
 
 			case WLCF_PREFERTIMEESTFORCALCS:

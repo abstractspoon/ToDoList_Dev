@@ -308,6 +308,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 	Misc::SetFlag(dwOptions, KBCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
 	Misc::SetFlag(dwOptions, KBCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
 	Misc::SetFlag(dwOptions, KBCF_SHOWCOMPLETIONCHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
+	Misc::SetFlag(dwOptions, KBCF_SHOWLABELTIPS, !pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
 
 	m_ctrlKanban.SetOptions(dwOptions);
 	

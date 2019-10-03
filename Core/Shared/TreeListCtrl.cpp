@@ -191,7 +191,20 @@ BOOL CTreeListTreeCtrl::ProcessMessage(MSG* /*pMsg*/)
 
 void CTreeListTreeCtrl::FilterToolTipMessage(MSG* pMsg)
 {
-	m_tooltip.FilterToolTipMessage(pMsg);
+	if (m_tooltip.GetSafeHwnd())
+		m_tooltip.FilterToolTipMessage(pMsg);
+}
+
+void CTreeListTreeCtrl::EnableLabelTips(BOOL bEnable)
+{
+	if (bEnable && !m_tooltip.GetSafeHwnd())
+	{
+		InitTooltip();
+	}
+	else if (!bEnable && m_tooltip.GetSafeHwnd())
+	{
+		m_tooltip.DestroyWindow();
+	}
 }
 
 void CTreeListTreeCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)

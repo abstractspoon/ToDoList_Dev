@@ -145,7 +145,8 @@ int CKanbanColumnCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CTreeCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	
-	VERIFY(InitTooltip());
+	if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS))
+		VERIFY(InitTooltip());
 
 	m_ilFlags.Create(IDB_FLAG, 16, 1, RGB(255, 0, 255));
 	CEnImageList::ScaleByDPIFactor(m_ilFlags);
@@ -317,6 +318,15 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 				RefreshItemLineHeights();
 			else
 				Invalidate(FALSE);
+
+			if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS) && !m_tooltip.GetSafeHwnd())
+			{
+				InitTooltip();
+			}
+			else if (!Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS) && m_tooltip.GetSafeHwnd())
+			{
+				m_tooltip.DestroyWindow();
+			}
 		}
 	}
 }
@@ -1547,6 +1557,12 @@ BOOL CKanbanColumnCtrl::InitTooltip()
 	}
 
 	return TRUE;
+}
+
+void CKanbanColumnCtrl::FilterToolTipMessage(MSG* pMsg)
+{
+	if (m_tooltip.GetSafeHwnd())
+		m_tooltip.FilterToolTipMessage(pMsg);
 }
 
 int CKanbanColumnCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const

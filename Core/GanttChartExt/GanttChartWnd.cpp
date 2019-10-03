@@ -298,7 +298,8 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 	m_ctrlGantt.SetOption(GTLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 	m_ctrlGantt.SetOption(GTLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
 
-	m_ctrlGantt.EnableCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
+	m_ctrlGantt.EnableTreeCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
+	m_ctrlGantt.EnableTreeLabelTips(!pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
 
 	// get alternate line color from app prefs
 	COLORREF crAlt = CLR_NONE;
