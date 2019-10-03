@@ -24,6 +24,9 @@ namespace Abstractspoon
 				static void RemoveClientEdge(IntPtr hWnd);
 				static void AddClientEdge(IntPtr hWnd);
 
+				static bool RemoveStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
+				static bool AddStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
+
 				static HWND GetHwnd(IntPtr hWnd);
 
 				static int GetHScrollPos(IntPtr hWnd);
@@ -38,6 +41,9 @@ namespace Abstractspoon
 				static bool SetEditCue(IntPtr hWnd, String^ sCueText);
 
 				static void ActivateApp(IntPtr hWnd);
+
+			protected:
+				static void DoFrameChange(IntPtr hWnd);
 			};
 
 			public ref class DlgUnits

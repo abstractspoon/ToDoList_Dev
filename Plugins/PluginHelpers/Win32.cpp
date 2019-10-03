@@ -20,57 +20,65 @@ HWND Win32::GetHwnd(IntPtr hWnd)
 void Win32::RemoveClientEdge(IntPtr hWnd)
 {
 	// remove client edge
-	int nExStyle = GetWindowLong(GetHwnd(hWnd), GWL_EXSTYLE);
-
-	if ((nExStyle & WS_EX_CLIENTEDGE) == WS_EX_CLIENTEDGE)
-	{
-		SetWindowLong(GetHwnd(hWnd), GWL_EXSTYLE, (nExStyle & ~WS_EX_CLIENTEDGE));
-		SetWindowPos(GetHwnd(hWnd), NULL, 0, 0, 0, 0,
-			SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
-			SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-	}
+	if (RemoveStyle(hWnd, WS_EX_CLIENTEDGE, true))
+		DoFrameChange(hWnd);
 }
 
 void Win32::AddClientEdge(IntPtr hWnd)
 {
-	// remove client edge
-	int nExStyle = GetWindowLong(GetHwnd(hWnd), GWL_EXSTYLE);
-
-	if ((nExStyle & WS_EX_CLIENTEDGE) == 0)
-	{
-		SetWindowLong(GetHwnd(hWnd), GWL_EXSTYLE, (nExStyle | WS_EX_CLIENTEDGE));
-		SetWindowPos(GetHwnd(hWnd), NULL, 0, 0, 0, 0,
-			SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
-			SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-	}
+	if (AddStyle(hWnd, WS_EX_CLIENTEDGE, true))
+		DoFrameChange(hWnd);
 }
 
 void Win32::RemoveBorder(IntPtr hWnd)
 {
-	// remove client edge
-	int nStyle = GetWindowLong(GetHwnd(hWnd), GWL_STYLE);
-
-	if ((nStyle & WS_BORDER) == WS_BORDER)
-	{
-		SetWindowLong(GetHwnd(hWnd), GWL_STYLE, (nStyle & ~WS_BORDER));
-		SetWindowPos(GetHwnd(hWnd), NULL, 0, 0, 0, 0,
-			SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
-			SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-	}
+	if (RemoveStyle(hWnd, WS_BORDER, false))
+		DoFrameChange(hWnd);
 }
 
 void Win32::AddBorder(IntPtr hWnd)
 {
-	// remove client edge
-	int nStyle = GetWindowLong(GetHwnd(hWnd), GWL_STYLE);
+	if (AddStyle(hWnd, WS_BORDER, false))
+		DoFrameChange(hWnd);
+}
 
-	if ((nStyle & WS_BORDER) == 0)
-	{
-		SetWindowLong(GetHwnd(hWnd), GWL_STYLE, (nStyle | WS_BORDER));
-		SetWindowPos(GetHwnd(hWnd), NULL, 0, 0, 0, 0,
+void Win32::DoFrameChange(IntPtr hWnd)
+{
+	SetWindowPos(GetHwnd(hWnd), NULL, 0, 0, 0, 0,
 			SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
 			SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+}
+
+bool Win32::RemoveStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
+{
+	int nStyleType = (bExStyle ? GWL_EXSTYLE : GWL_STYLE);
+	int nCurStyle = GetWindowLong(GetHwnd(hWnd), nStyleType);
+
+	if ((nCurStyle & nStyle) == nStyle)
+	{
+		nCurStyle &= ~nStyle;
+		SetWindowLong(GetHwnd(hWnd), nStyleType, nCurStyle);
+
+		return true;
 	}
+
+	return false;
+}
+
+bool Win32::AddStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
+{
+	int nStyleType = (bExStyle ? GWL_EXSTYLE : GWL_STYLE);
+	int nCurStyle = GetWindowLong(GetHwnd(hWnd), nStyleType);
+
+	if ((nCurStyle & nStyle) == 0)
+	{
+		nCurStyle |= nStyle;
+		SetWindowLong(GetHwnd(hWnd), nStyleType, nCurStyle);
+
+		return true;
+	}
+
+	return false;
 }
 
 int Win32::GetVScrollPos(IntPtr hWnd)
