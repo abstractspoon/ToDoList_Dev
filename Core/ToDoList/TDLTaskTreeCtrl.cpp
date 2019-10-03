@@ -205,7 +205,9 @@ void CTDLTaskTreeCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 	CTDLTaskCtrlBase::OnStylesUpdated(styles, bAllowResort);
 
 	// Our extra handling
-	SetTasksWndStyle(TVS_NOTOOLTIPS, styles.IsStyleEnabled(TDCS_SHOWINFOTIPS), FALSE);
+	if (styles.HasStyle(TDCS_SHOWINFOTIPS))
+		SetTasksWndStyle(TVS_NOTOOLTIPS, styles.IsStyleEnabled(TDCS_SHOWINFOTIPS), FALSE);
+
 	SyncColumnSelectionToTasks();
 }
 

@@ -4729,27 +4729,10 @@ BEGIN
     IDS_TDC_FIELD_PROJECT   "Pro&ject"
     IDS_TDC_FIELD_RISK      "Ris&k"
     IDS_TDC_FIELD_EXTID     "E&xternal ID"
-    IDS_TDCTIP_TASK         "Task:\t\t"
-    IDS_TDCTIP_PRIORITY     "Priority:\t\t"
-    IDS_TDCTIP_PERCENT      "% Complete:\t"
-    IDS_TDCTIP_TIMEEST      "Time Est:\t"
-    IDS_TDCTIP_STARTDATE    "Start Date:\t"
-    IDS_TDCTIP_DUEDATE      "Due Date:\t"
-    IDS_TDCTIP_DONEDATE     "Completed:\t"
-    IDS_TDCTIP_ALLOCTO      "Allocated To:\t"
-    IDS_TDCTIP_FILEREF      "File Link:\t"
-    IDS_TDCTIP_ALLOCBY      "Allocated By:\t"
-    IDS_TDCTIP_STATUS       "Status:\t"
-    IDS_TDCTIP_CATEGORY     "Category:\t"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TDCTIP_TIMESPENT    "Time Spent:\t"
-    IDS_TDCTIP_COMMENTS     "Comments:\t"
-    IDS_TDCTIP_LASTMOD      "Last Modified:\t"
-    IDS_TDCTIP_RISK         "Risk:\t\t"
-    IDS_TDCTIP_EXTID        "External ID:\t"
     IDS_TDC_CONFIRMDELETESEL 
                             "Are you sure you want to delete the selected tasks?"
     IDS_TDC_CONFIRMDELETEONEWARNSUBTASKS 
@@ -4813,7 +4796,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TDCTIP_DEPENDS      "Dependency:\t"
     IDS_NOENCRYPTIONDLL     "'%s' could not be opened because it is encrypted and you do not have the encryption component installed.\n\nPlease contact AbstractSpoon Software for more information."
     IDS_UNKNOWNENCRYPTION   "'%s' could not be opened because the method of encryption could not be determined."
     IDS_ENCRYPTEDFILE       "The tasklist '%s' has been encrypted.\n\nPlease enter the required password below."
@@ -4849,7 +4831,6 @@ BEGIN
                             "The selected task is dependent on another task that must be completed first.\n\nWould you like to view the dependency?"
     IDS_TDC_SELTASKSHAVEDEPENDENCIES 
                             "One or more selected tasks are dependent on other tasks that must be completed first."
-    IDS_TDCTIP_COST         "Cost:\t\t"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -4920,7 +4901,6 @@ BEGIN
     IDS_TDLBC_VERSION       "Version"
     IDS_TDC_COLUMN_VERSION  "Ver."
     IDS_TDC_FIELD_VERSION   "Ve&rsion"
-    IDS_TDCTIP_VERSION      "Version:\t\t"
     IDS_TDC_RECALCPROMPT    "Would you like to recalculate the task time in the new units?"
     IDS_TDC_RECALCTITLE     "Recalculate Time"
     IDS_INIHASNOTOOLS       "The selected preference file contains no tools.\n\nWould you like to try an alternative preference file?"
@@ -4967,7 +4947,6 @@ BEGIN
     IDS_TDLFILEFILTER       "Tasklist (*.tdl, *.xml)|*.tdl;*.xml||"
     IDS_OUTLOOK_FIELDNAME   "Outlook field..."
     IDS_TDC_COLUMN_TAGS     "Tags"
-    IDS_TDCTIP_TAGS         "Tags:\t\t\t"
     IDS_TDLBC_TAGS          "Tags"
     IDS_FILTER_ANYTAGS      "Any tag can match"
     IDS_TDC_FIELD_TAGS      "Ta&gs"
@@ -5348,7 +5327,7 @@ BEGIN
     IDS_READONLYCHANGE_BALLOONTITLE "Read-only Status Change"
     IDS_TIMESTAMPCHANGE_BALLOONTITLE "File Timestamp Change"
     IDS_BROWSEFOLDER_TITLE  "Select Folder"
-    IDS_TDCTIP_DEPENDENTS   "Dependents:\t"
+    IDS_TDLBC_DEPENDENTS    "Dependents"
     IDS_EXPORTDONEDATE      "(completed: %s)"
     IDS_CAD_ICON            "Icon"
     IDS_IMPORTCUSTATTR_IDCOLLISION 
@@ -5569,7 +5548,6 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_TDLBC_LOCK          "Lock"
-    IDS_TDCTIP_LOCK         "Locked"
     IDS_UNLOCKED            "Unlocked"
     IDS_LOCKED              "Locked"
     IDS_CAD_TIMEPERIOD      "Time Period"
@@ -5705,6 +5683,7 @@ BEGIN
                             "Copy Selected Values from '%s' Column"
     IDS_HASREMINDER         "Reminder"
     IDS_NOREMINDER          "No Reminder"
+    IDS_TDLBC_TASK          "Task"
 END
 
 #endif    // English (Australia) resources

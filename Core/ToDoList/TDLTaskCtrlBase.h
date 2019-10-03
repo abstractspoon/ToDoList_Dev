@@ -181,9 +181,6 @@ public:
 	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1) const;
 	int GetTaskIconIndex(DWORD dwTaskID) const;
 	int GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const { return m_formatter.GetTaskPath(dwTaskID, nMaxLen); }
-	DWORD PrepareTaskInfoTip(const CPoint& ptScreen, HWND hwndHit, CString& sInfoTip, int nMaxCommentsLen) const;
-	CString FormatInfoTip(DWORD dwTaskID, int nMaxCommentsLen) const;
 
 	void UpdateSelectedTaskPath();
 	BOOL ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const;

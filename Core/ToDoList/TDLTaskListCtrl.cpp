@@ -148,7 +148,8 @@ void CTDLTaskListCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 	CTDLTaskCtrlBase::OnStylesUpdated(styles, bAllowResort);
 
 	// Our extra handling
-	SetTasksWndStyle(LVS_EX_LABELTIP, !styles.IsStyleEnabled(TDCS_SHOWINFOTIPS), TRUE);
+	if (styles.HasStyle(TDCS_SHOWINFOTIPS))
+		SetTasksWndStyle(LVS_EX_LABELTIP, !styles.IsStyleEnabled(TDCS_SHOWINFOTIPS), TRUE);
 }
 
 BOOL CTDLTaskListCtrl::BuildColumns()

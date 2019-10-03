@@ -13,7 +13,6 @@
 #define IDS_BMPFILEFILTER               62
 #define IDS_FILTER_LOCKED               63
 #define IDS_TDLBC_LOCK                  64
-#define IDS_TDCTIP_LOCK                 65
 #define IDS_UNLOCKED                    66
 #define IDS_LOCKED                      67
 #define IDS_CAD_TIMEPERIOD              68
@@ -1745,23 +1744,6 @@
 #define IDS_TDC_FIELD_PROJECT           57905
 #define IDS_TDC_FIELD_RISK              57906
 #define IDS_TDC_FIELD_EXTID             57907
-#define IDS_TDCTIP_TASK                 57908
-#define IDS_TDCTIP_PRIORITY             57909
-#define IDS_TDCTIP_PERCENT              57910
-#define IDS_TDCTIP_TIMEEST              57911
-#define IDS_TDCTIP_STARTDATE            57912
-#define IDS_TDCTIP_DUEDATE              57913
-#define IDS_TDCTIP_DONEDATE             57914
-#define IDS_TDCTIP_ALLOCTO              57915
-#define IDS_TDCTIP_FILEREF              57916
-#define IDS_TDCTIP_ALLOCBY              57917
-#define IDS_TDCTIP_STATUS               57918
-#define IDS_TDCTIP_CATEGORY             57919
-#define IDS_TDCTIP_TIMESPENT            57920
-#define IDS_TDCTIP_COMMENTS             57921
-#define IDS_TDCTIP_LASTMOD              57922
-#define IDS_TDCTIP_RISK                 57923
-#define IDS_TDCTIP_EXTID                57924
 #define IDS_TDC_CONFIRMDELETESEL        57925
 #define IDS_TDC_CONFIRMDELETEONEWARNSUBTASKS 57926
 #define IDS_TDC_CONFIRMDELETEMOREWARNSUBTASKS 57927
@@ -1813,8 +1795,6 @@
 #define IDS_TDC_DEPENDSLINK_TIP         57980
 #define IDS_TDC_SELTASKHASDEPENDENCY    57981
 #define IDS_TDC_SELTASKSHAVEDEPENDENCIES 57982
-#define IDS_TDCTIP_COST                 57983
-#define IDS_TDCTIP_DEPENDS              57984
 #define IDS_NOENCRYPTIONDLL             57985
 #define IDS_UNKNOWNENCRYPTION           57986
 #define IDS_ENCRYPTEDFILE               57987
@@ -1851,7 +1831,6 @@
 #define IDS_TDLBC_VERSION               58024
 #define IDS_TDC_COLUMN_VERSION          58025
 #define IDS_TDC_FIELD_VERSION           58026
-#define IDS_TDCTIP_VERSION              58027
 #define IDS_TDC_RECALCPROMPT            58028
 #define IDS_TDC_RECALCTITLE             58029
 #define IDS_INIHASNOTOOLS               58030
@@ -1862,7 +1841,6 @@
 #define IDS_COMMANDLINETASKOPTIONS2     58035
 #define IDS_OUTLOOK_FIELDNAME           58036
 #define IDS_TDC_COLUMN_TAGS             58037
-#define IDS_TDCTIP_TAGS                 58038
 #define IDS_TDLBC_TAGS                  58039
 #define IDS_FILTER_ANYTAGS              58040
 #define IDS_TDC_FIELD_TAGS              58041
@@ -2130,7 +2108,7 @@
 #define IDS_TIMESTAMPCHANGE_BALLOONTITLE 58311
 #define IDS_BROWSEFOLDER_TITLE          58312
 #define IDS_QUERYINSTALLOUTLOOKHANDLER  58313
-#define IDS_TDCTIP_DEPENDENTS           58314
+#define IDS_TDLBC_DEPENDENTS            58314
 #define IDS_EXPORTDONEDATE              58315
 #define IDS_CAD_ICON                    58316
 #define IDS_IMPORTCUSTATTR_IDCOLLISION  58317
@@ -2336,6 +2314,7 @@
 #define IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES 58500
 #define IDS_HASREMINDER                 58501
 #define IDS_NOREMINDER                  58502
+#define IDS_TDLBC_TASK                  58503
 
 // Next default values for new objects
 // 

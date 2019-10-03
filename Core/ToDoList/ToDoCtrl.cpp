@@ -216,6 +216,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_timeTracking(m_data, m_taskTree.TSH()),
 	m_taskTree(m_ilTaskIcons, m_data, m_styles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs),
 	m_exporter(m_data, m_taskTree, m_mgrContent),
+	m_formatter(m_data),
 #pragma warning (disable: 4355)
 	m_sourceControl(*this),
 	m_findReplace(*this),
@@ -5617,7 +5618,6 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		}
 		break;
 
-
 	case TDCS_SHOWPROJECTNAME:
 		// Fix up focus
 		if (!bEnable && (GetFocus() == GetDlgItem(IDC_PROJECTNAME)))
@@ -5678,7 +5678,7 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 
 		if (dwTaskID)
 		{
-			CString sInfoTip = m_taskTree.FormatInfoTip(dwTaskID, m_nMaxInfotipCommentsLength);
+			CString sInfoTip = m_formatter.GetInfoTip(dwTaskID, m_visColEdit.GetVisibleEditFields(), m_nMaxInfotipCommentsLength);
 			ASSERT(!sInfoTip.IsEmpty());
 
 			CRect rBounds;

@@ -165,11 +165,16 @@ public:
 	CString GetTaskTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
 	CString GetTaskTime(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 
+	CString GetInfoTip(DWORD dwTaskID, const CTDCAttributeMap& mapAttrib, int nMaxCommentsLen) const;
+	
 protected:
 	const CToDoCtrlData& m_data;
 	CTDCTaskCalculator m_calculator;
 
 protected:
+	CString FormatDate(const COleDateTime& date) const;
+
+	static int InfoTipSortProc(const void* pV1, const void* pV2);
 };
 
 //////////////////////////////////////////////////////////////////////

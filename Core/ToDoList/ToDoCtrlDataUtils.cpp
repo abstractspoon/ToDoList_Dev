@@ -3148,6 +3148,27 @@ BOOL CTDCTaskCalculator::IsParentTaskDone(const TODOSTRUCTURE* pTDS) const
 	return IsParentTaskDone(pTDSParent);
 }
 
+//////////////////////////////////////////////////////////////////////
+
+struct INFOTIPITEM
+{
+	INFOTIPITEM()
+	{
+		nAttribID = TDCA_NONE;
+	}
+
+	INFOTIPITEM(TDC_ATTRIBUTE nAttrib, UINT nLabelStrID, const CString& sVal)
+	{
+		nAttribID = nAttrib;
+		sLabel = CEnString(nLabelStrID);
+		sValue = sVal;
+	}
+
+	TDC_ATTRIBUTE nAttribID;
+	CString sLabel;
+	CString sValue;
+};
+
 /////////////////////////////////////////////////////////////////////////////////////
 
 CTDCTaskFormatter::CTDCTaskFormatter(const CToDoCtrlData& data) 
@@ -3697,6 +3718,133 @@ CString CTDCTaskFormatter::GetID(DWORD dwTaskID, DWORD dwRefID) const
 		return Misc::Format(dwTaskID);
 
 	return Misc::Format(_T("(%lu) %lu"), dwRefID, dwTaskID);
+}
+
+CString CTDCTaskFormatter::GetInfoTip(DWORD dwTaskID, const CTDCAttributeMap& mapAttrib, int nMaxCommentsLen) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	// Build a sortable array of attributes
+	CArray<INFOTIPITEM, INFOTIPITEM&> aItems;
+
+	// Always add title
+	aItems.Add(INFOTIPITEM(TDCA_TASKNAME, IDS_TDLBC_TASK, pTDI->sTitle));
+
+	// A few attributes require special handling
+	if (mapAttrib.Has(TDCA_COMMENTS) && !pTDI->sComments.IsEmpty())
+	{
+		CString sComments = pTDI->sComments;
+		int nLen = sComments.GetLength();
+
+		if (nMaxCommentsLen != 0)
+		{
+			if ((nMaxCommentsLen > 0) && (nLen > nMaxCommentsLen))
+				sComments = (sComments.Left(nMaxCommentsLen) + _T("..."));
+		}
+
+		aItems.Add(INFOTIPITEM(TDCA_COMMENTS, IDS_TDLBC_COMMENTS, sComments));
+	}
+	
+	// Rest are simple
+#define ADDINFOITEM(a, s, e)						\
+	if (mapAttrib.Has(a))							\
+	{												\
+		CString sVal = e;							\
+		if (!sVal.IsEmpty())						\
+			aItems.Add(INFOTIPITEM(a, s, sVal));	\
+	}
+	
+	ADDINFOITEM(TDCA_STATUS, IDS_TDLBC_STATUS, pTDI->sStatus);
+	ADDINFOITEM(TDCA_CATEGORY, IDS_TDLBC_CATEGORY, GetTaskCategories(pTDI));
+	ADDINFOITEM(TDCA_TAGS, IDS_TDLBC_TAGS, GetTaskTags(pTDI));
+	ADDINFOITEM(TDCA_ALLOCTO, IDS_TDLBC_ALLOCTO, GetTaskAllocTo(pTDI));
+	ADDINFOITEM(TDCA_ALLOCBY, IDS_TDLBC_ALLOCBY, pTDI->sAllocBy);
+	ADDINFOITEM(TDCA_VERSION, IDS_TDLBC_VERSION, pTDI->sVersion);
+	ADDINFOITEM(TDCA_DONEDATE, IDS_TDLBC_DONEDATE, FormatDate(pTDI->dateDone));
+	ADDINFOITEM(TDCA_LASTMODDATE, IDS_TDLBC_LASTMODDATE, FormatDate(pTDI->dateLastMod));
+	ADDINFOITEM(TDCA_PERCENT, IDS_TDLBC_PERCENT, GetTaskPercentDone(pTDI, pTDS));
+	ADDINFOITEM(TDCA_TIMEEST, IDS_TDLBC_TIMEEST, GetTaskTimeEstimate(pTDI, pTDS));
+	ADDINFOITEM(TDCA_TIMESPENT, IDS_TDLBC_TIMESPENT, GetTaskTimeSpent(pTDI, pTDS));
+	ADDINFOITEM(TDCA_COST, IDS_TDLBC_COST, GetTaskCost(pTDI, pTDS));
+	ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDS, Misc::FormatArray(pTDI->aDependencies));
+
+	if (pTDI->nPriority != FM_NOPRIORITY)
+		ADDINFOITEM(TDCA_PRIORITY, IDS_TDLBC_PRIORITY, Misc::Format(pTDI->nPriority));
+
+	if (pTDI->nRisk != FM_NORISK)
+		ADDINFOITEM(TDCA_RISK, IDS_TDLBC_RISK, Misc::Format(pTDI->nRisk));
+
+	if (pTDI->aFileLinks.GetSize())
+		ADDINFOITEM(TDCA_FILEREF, IDS_TDLBC_FILEREF, pTDI->aFileLinks[0]);
+
+	if (!pTDI->IsDone() || !m_data.HasStyle(TDCS_HIDESTARTDUEFORDONETASKS))
+	{
+		ADDINFOITEM(TDCA_STARTDATE, IDS_TDLBC_STARTDATE, FormatDate(pTDI->dateStart));
+		ADDINFOITEM(TDCA_DUEDATE, IDS_TDLBC_DUEDATE, FormatDate(pTDI->dateDue));
+	}
+
+	if (mapAttrib.Has(TDCA_DEPENDENCY))
+	{
+		CDWordArray aDependents;
+
+		if (m_data.GetTaskLocalDependents(dwTaskID, aDependents))
+			ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDENTS, Misc::FormatArray(aDependents));
+	}
+
+	// Sort
+	Misc::SortArrayT(aItems, InfoTipSortProc);
+
+	// Build into a string
+	CString sTip;
+
+	for (int nItem = 0; nItem < aItems.GetSize(); nItem++)
+	{
+		sTip += aItems[nItem].sLabel;
+		sTip += _T(": ");
+		sTip += aItems[nItem].sValue;
+		sTip += _T("\n");
+	}
+
+	return sTip;
+}
+
+int CTDCTaskFormatter::InfoTipSortProc(const void* pV1, const void* pV2)
+{
+	const INFOTIPITEM* pITI1 = (const INFOTIPITEM*)pV1;
+	const INFOTIPITEM* pITI2 = (const INFOTIPITEM*)pV2;
+
+	// Task title always sorts at top
+	if (pITI1->nAttribID == TDCA_TASKNAME)
+		return -1;
+
+	if (pITI2->nAttribID == TDCA_TASKNAME)
+		return 1;
+
+	// Comments always sort at bottom
+	if (pITI1->nAttribID == TDCA_COMMENTS)
+		return 1;
+
+	if (pITI2->nAttribID == TDCA_COMMENTS)
+		return -1;
+
+	// Rest sort by label
+	return Misc::NaturalCompare(pITI1->sLabel, pITI2->sLabel);
+}
+
+CString CTDCTaskFormatter::FormatDate(const COleDateTime& date) const
+{
+	if (!CDateHelper::IsDateSet(date))
+		return EMPTY_STR;
+
+	DWORD dwDateFmt = m_data.HasStyle(TDCS_SHOWDATESINISO) ? DHFD_ISO : 0;
+
+	if (CDateHelper::DateHasTime(date))
+		dwDateFmt |= DHFD_TIME | DHFD_NOSEC;
+
+	return CDateHelper::FormatDate(date, dwDateFmt);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
