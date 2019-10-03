@@ -27,7 +27,7 @@ namespace WordCloudUIExtension
 
 	public class TdlCloudControl : CloudControl
 	{
-		private System.Windows.Forms.ToolTip m_ToolTip;
+		private ToolTip m_ToolTip;
 		private Translator m_Trans;
 		private string m_SelectedWord;
 		private IntPtr m_hWnd;
