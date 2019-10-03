@@ -492,6 +492,9 @@ namespace WordCloudUIExtension
             bool showDoneCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
             m_TaskMatchesList.ShowCompletionCheckboxes = showDoneCheckboxes;
 
+			bool showLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
+			m_TaskMatchesList.ShowLabelTips = showLabelTips;
+
             UpdateBlacklist();
         }
 

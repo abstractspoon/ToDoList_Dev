@@ -23,17 +23,16 @@ namespace WordCloudUIExtension
         public event EditTaskIconEventHandler       EditTaskIcon;
         public event EditTaskCompletionEventHandler EditTaskDone;
 
-        private const int MinTaskMatchesWidth = 100;
-
-        // -------------------------------------------------------------
+		// -------------------------------------------------------------
 
 		private UIExtension.SelectionRect m_SelectionRect;
 		private UIExtension.TaskIcon m_TaskIcons;
 
         private ImageList m_ilItemHeight;
         private Size m_CheckBoxSize = Size.Empty;
+		private ToolTip m_LabelTip;
 
-        private Boolean m_TaskMatchesHaveIcons;
+		private Boolean m_TaskMatchesHaveIcons;
         private Boolean m_ShowParentAsFolder;
         private Boolean m_TaskColorIsBkgnd;
         private Boolean m_ShowCompletionCheckboxes;
@@ -45,9 +44,11 @@ namespace WordCloudUIExtension
 
             m_ilItemHeight = new ImageList();
             m_ilItemHeight.ImageSize = new Size(1, DPIScaling.Scale(17)); // minimum height
+
+			m_LabelTip = new System.Windows.Forms.ToolTip();
 		}
 
-        public Boolean TaskColorIsBackground
+		public Boolean TaskColorIsBackground
         {
             get { return m_TaskColorIsBkgnd; }
             set
@@ -86,7 +87,13 @@ namespace WordCloudUIExtension
             }
         }
 
-        private int TextIconOffset
+		public bool ShowLabelTips
+		{
+			set { m_LabelTip.Active = value; }
+			get { return m_LabelTip.Active; }
+		}
+
+		private int TextIconOffset
         {
             get { return (m_TaskMatchesHaveIcons ? (ImageSize + 2) : 0); }
         }
@@ -101,6 +108,16 @@ namespace WordCloudUIExtension
             get { return DPIScaling.Scale(16); }
         }
 
+		private int MinTaskMatchesWidth
+		{
+			get { return DPIScaling.Scale(100); }
+		}
+
+		private int LabelTipBorder
+		{
+			get { return DPIScaling.Scale(4); }
+		}
+		
 		public bool Initialise(Translator trans)
         {
 			if (this.Columns.Count == 0) // once only
@@ -357,22 +374,30 @@ namespace WordCloudUIExtension
 			Rectangle editRect = new Rectangle(0, 0, 0, 0);
 
 			if (SelectedItems.Count > 0)
-			{
-				editRect = SelectedItems[0].GetBounds(ItemBoundsPortion.Label);
-
-				editRect.Width += (editRect.X - 2);
-				editRect.X = 2;
-
-				// adjust for completion checkbox
-                editRect.X += CheckboxOffset;
-                editRect.Width -= CheckboxOffset;
-
-				// adjust for icon
-        		editRect.X += TextIconOffset;
-				editRect.Width -= TextIconOffset;
-			}
+				editRect = LabelTextRect(SelectedItems[0].GetBounds(ItemBoundsPortion.Label));
 
 			return editRect;
+		}
+
+		public Rectangle LabelTextRect(Rectangle labelRect)
+		{
+			Rectangle textRect = new Rectangle(labelRect.Location, labelRect.Size);
+
+			textRect.Width += (textRect.X - 2);
+			textRect.X = 2;
+
+			// adjust for completion checkbox
+			textRect.X += CheckboxOffset;
+			textRect.Width -= CheckboxOffset;
+
+			// adjust for icon
+			textRect.X += TextIconOffset;
+			textRect.Width -= TextIconOffset;
+
+			// adjust for ID column
+			textRect.Width -= Columns[1].Width;
+
+			return textRect;
 		}
 
 		protected ListViewItem FindItem(UInt32 matchId)
@@ -457,10 +482,42 @@ namespace WordCloudUIExtension
             Cursor = Cursors.Arrow;
         }
 
-        protected override void OnMouseDown(MouseEventArgs e)
+		protected override void OnMouseHover(EventArgs e)
+		{
+			base.OnMouseHover(e);
+
+			// If the current item text is too narrow, show an in-place tooltip
+			if (ShowLabelTips)
+			{
+				var ptClient = PointToClient(MousePosition);
+				var hit = HitTest(ptClient);
+
+				if ((hit != null) && (hit.Item != null))
+				{
+					Rectangle textRect = LabelTextRect(hit.Item.GetBounds(ItemBoundsPortion.Entire));
+
+					if (textRect.Contains(ptClient))
+					{
+						var item = (hit.Item.Tag as CloudTaskItem);
+
+						if ((item != null) && (TextRenderer.MeasureText(item.Title, Font).Width > textRect.Width))
+						{
+							m_LabelTip.Show(item.Title, this, textRect.X - LabelTipBorder, textRect.Y);
+							return;
+						}
+					}
+				}
+
+				m_LabelTip.Hide(this);
+			}
+		}
+
+		protected override void OnMouseDown(MouseEventArgs e)
         {
-            // disable label editing if not on the item text
-            int leftMargin = (CheckboxOffset + TextIconOffset);
+			m_LabelTip.Hide(this);
+
+			// disable label editing if not on the item text
+			int leftMargin = (CheckboxOffset + TextIconOffset);
             int rightMargin = Columns[0].Width;
 
             this.LabelEdit = ((e.Location.X > leftMargin) && (e.Location.X < rightMargin));
@@ -644,7 +701,7 @@ namespace WordCloudUIExtension
             return new Rectangle(labelRect.X, top, m_CheckBoxSize.Width, m_CheckBoxSize.Height);
         }
 
-        private Rectangle IconRect(Rectangle labelRect)
+		private Rectangle IconRect(Rectangle labelRect)
         {
             if (!m_TaskMatchesHaveIcons)
                 return Rectangle.Empty;
