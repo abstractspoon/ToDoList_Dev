@@ -5683,7 +5683,10 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 
 		if (dwTaskID)
 		{
-			CString sInfoTip = m_infoTip.GetFormattedText(dwTaskID, m_visColEdit.GetVisibleEditFields(), m_nMaxInfotipCommentsLength);
+			CTDCAttributeMap mapAttrib;
+			TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttrib);
+
+			CString sInfoTip = m_infoTip.GetFormattedText(dwTaskID, mapAttrib, m_nMaxInfotipCommentsLength);
 			ASSERT(!sInfoTip.IsEmpty());
 
 			CRect rBounds;

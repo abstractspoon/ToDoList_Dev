@@ -44,7 +44,7 @@ protected:
 
 protected:
 	CString FormatDate(const COleDateTime& date) const;
-	int BuildAttributeArray(DWORD dwTaskID, const CTDCAttributeMap& mapAttrib, int nMaxCommentsLen, CTDCInfoTipItemArray& aItems) const;
+	int BuildSortedAttributeArray(DWORD dwTaskID, const CTDCAttributeMap& mapAttrib, int nMaxCommentsLen, CTDCInfoTipItemArray& aItems) const;
 
 	static int InfoTipSortProc(const void* pV1, const void* pV2);
 };

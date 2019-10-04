@@ -61,11 +61,8 @@ CString CTDLInfoTipCtrl::GetFormattedText(DWORD dwTaskID, const CTDCAttributeMap
 	// Build the attribute array
 	CTDCInfoTipItemArray aItems;
 
-	if (!BuildAttributeArray(dwTaskID, mapAttrib, nMaxCommentsLen, aItems))
+	if (!BuildSortedAttributeArray(dwTaskID, mapAttrib, nMaxCommentsLen, aItems))
 		return EMPTY_STR;
-
-	// Alphabetic Sort
-	Misc::SortArrayT(aItems, InfoTipSortProc);
 
 	// Calculate offset to make item values line up
 	CClientDC dc(const_cast<CTDLInfoTipCtrl*>(this));
@@ -117,7 +114,7 @@ CString CTDLInfoTipCtrl::GetFormattedText(DWORD dwTaskID, const CTDCAttributeMap
 	return sTip;
 }
 
-int CTDLInfoTipCtrl::BuildAttributeArray(DWORD dwTaskID, const CTDCAttributeMap& mapAttrib, int nMaxCommentsLen, CTDCInfoTipItemArray& aItems) const
+int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID, const CTDCAttributeMap& mapAttrib, int nMaxCommentsLen, CTDCInfoTipItemArray& aItems) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
@@ -152,25 +149,29 @@ int CTDLInfoTipCtrl::BuildAttributeArray(DWORD dwTaskID, const CTDCAttributeMap&
 			aItems.Add(TDCINFOTIPITEM(a, s, sVal));	\
 	}
 
-	ADDINFOITEM(TDCA_STATUS, IDS_TDLBC_STATUS, pTDI->sStatus);
-	ADDINFOITEM(TDCA_CATEGORY, IDS_TDLBC_CATEGORY, m_formatter.GetTaskCategories(pTDI));
-	ADDINFOITEM(TDCA_TAGS, IDS_TDLBC_TAGS, m_formatter.GetTaskTags(pTDI));
-	ADDINFOITEM(TDCA_ALLOCTO, IDS_TDLBC_ALLOCTO, m_formatter.GetTaskAllocTo(pTDI));
 	ADDINFOITEM(TDCA_ALLOCBY, IDS_TDLBC_ALLOCBY, pTDI->sAllocBy);
-	ADDINFOITEM(TDCA_VERSION, IDS_TDLBC_VERSION, pTDI->sVersion);
+	ADDINFOITEM(TDCA_ALLOCTO, IDS_TDLBC_ALLOCTO, m_formatter.GetTaskAllocTo(pTDI));
+	ADDINFOITEM(TDCA_CATEGORY, IDS_TDLBC_CATEGORY, m_formatter.GetTaskCategories(pTDI));
+	ADDINFOITEM(TDCA_COST, IDS_TDLBC_COST, m_formatter.GetTaskCost(pTDI, pTDS));
+	ADDINFOITEM(TDCA_CREATEDBY, IDS_TDLBC_CREATEDBY, pTDI->sCreatedBy);
+	ADDINFOITEM(TDCA_CREATIONDATE, IDS_TDLBC_CREATEDATE, FormatDate(pTDI->dateCreated));
+	ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDS, Misc::FormatArray(pTDI->aDependencies));
 	ADDINFOITEM(TDCA_DONEDATE, IDS_TDLBC_DONEDATE, FormatDate(pTDI->dateDone));
+	ADDINFOITEM(TDCA_FLAG, IDS_TDLBC_FLAG, CEnString(pTDI->bFlagged ? IDS_FLAGGED : IDS_UNFLAGGED));
+	ADDINFOITEM(TDCA_LASTMODBY, IDS_TDLBC_LASTMODBY, pTDI->sLastModifiedBy);
 	ADDINFOITEM(TDCA_LASTMODDATE, IDS_TDLBC_LASTMODDATE, FormatDate(pTDI->dateLastMod));
+	ADDINFOITEM(TDCA_LOCK, IDS_TDLBC_LOCK, CEnString(pTDI->bLocked ? IDS_LOCKED : IDS_UNLOCKED));
 	ADDINFOITEM(TDCA_PERCENT, IDS_TDLBC_PERCENT, m_formatter.GetTaskPercentDone(pTDI, pTDS));
+	ADDINFOITEM(TDCA_POSITION, IDS_TDLBC_POS, m_formatter.GetTaskPosition(pTDS));
+	ADDINFOITEM(TDCA_PRIORITY, IDS_TDLBC_PRIORITY, m_formatter.GetTaskPriority(pTDI, pTDS));
+	ADDINFOITEM(TDCA_RECURRENCE, IDS_TDLBC_RECURRENCE, m_formatter.GetTaskRecurrence(pTDI));
+	ADDINFOITEM(TDCA_RISK, IDS_TDLBC_RISK, m_formatter.GetTaskRisk(pTDI, pTDS));
+	ADDINFOITEM(TDCA_STATUS, IDS_TDLBC_STATUS, pTDI->sStatus);
+	ADDINFOITEM(TDCA_SUBTASKDONE, IDS_TDLBC_SUBTASKDONE, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
+	ADDINFOITEM(TDCA_TAGS, IDS_TDLBC_TAGS, m_formatter.GetTaskTags(pTDI));
 	ADDINFOITEM(TDCA_TIMEEST, IDS_TDLBC_TIMEEST, m_formatter.GetTaskTimeEstimate(pTDI, pTDS));
 	ADDINFOITEM(TDCA_TIMESPENT, IDS_TDLBC_TIMESPENT, m_formatter.GetTaskTimeSpent(pTDI, pTDS));
-	ADDINFOITEM(TDCA_COST, IDS_TDLBC_COST, m_formatter.GetTaskCost(pTDI, pTDS));
-	ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDS, Misc::FormatArray(pTDI->aDependencies));
-
-	if (pTDI->nPriority != FM_NOPRIORITY)
-		ADDINFOITEM(TDCA_PRIORITY, IDS_TDLBC_PRIORITY, Misc::Format(pTDI->nPriority));
-
-	if (pTDI->nRisk != FM_NORISK)
-		ADDINFOITEM(TDCA_RISK, IDS_TDLBC_RISK, Misc::Format(pTDI->nRisk));
+	ADDINFOITEM(TDCA_VERSION, IDS_TDLBC_VERSION, pTDI->sVersion);
 
 	if (pTDI->aFileLinks.GetSize())
 		ADDINFOITEM(TDCA_FILEREF, IDS_TDLBC_FILEREF, pTDI->aFileLinks[0]);
@@ -188,6 +189,9 @@ int CTDLInfoTipCtrl::BuildAttributeArray(DWORD dwTaskID, const CTDCAttributeMap&
 		if (m_data.GetTaskLocalDependents(dwTaskID, aDependents))
 			ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDENTS, Misc::FormatArray(aDependents));
 	}
+
+	// Alphabetic Sort
+	Misc::SortArrayT(aItems, InfoTipSortProc);
 
 	return aItems.GetSize();
 }
