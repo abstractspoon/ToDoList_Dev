@@ -8,9 +8,14 @@
 //
 
 #include "TDCStruct.h"
-#include "ToDoCtrlDataUtils.h"
 
 #include "..\Shared\ToolTipCtrlEx.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTDCAttributeMap;
+class CToDoCtrlData;
+class CTDCCustomAttribDefinitionArray;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLInfoTipCtrl window
@@ -19,14 +24,14 @@ class CTDLInfoTipCtrl : public CToolTipCtrlEx
 {
 // Construction
 public:
-	CTDLInfoTipCtrl(const CToDoCtrlData& data);
+	CTDLInfoTipCtrl();
 	virtual ~CTDLInfoTipCtrl();
 
-	CString GetFormattedText(DWORD dwTaskID, const CTDCAttributeMap& mapAttrib, int nMaxCommentsLen) const;
-
-protected:
-	const CToDoCtrlData& m_data;
-	CTDCTaskFormatter m_formatter;
+	CString FormatTip(DWORD dwTaskID, 
+					  const CTDCAttributeMap& mapAttrib, 
+					  const CToDoCtrlData& data,
+					  const CTDCCustomAttribDefinitionArray& aCustAttribs, 
+					  int nMaxCommentsLen) const;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -43,8 +48,13 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	CString FormatDate(const COleDateTime& date) const;
-	int BuildSortedAttributeArray(DWORD dwTaskID, const CTDCAttributeMap& mapAttrib, int nMaxCommentsLen, CTDCInfoTipItemArray& aItems) const;
+	CString FormatDate(const COleDateTime& date, const CToDoCtrlData& data) const;
+	int BuildSortedAttributeArray(DWORD dwTaskID, 
+								  const CTDCAttributeMap& mapAttrib, 
+								  const CToDoCtrlData& data,
+								  const CTDCCustomAttribDefinitionArray& aCustAttribs, 
+								  int nMaxCommentsLen, 
+								  CTDCInfoTipItemArray& aItems) const;
 
 	static int InfoTipSortProc(const void* pV1, const void* pV2);
 };

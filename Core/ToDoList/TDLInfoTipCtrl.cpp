@@ -7,6 +7,7 @@
 #include "TDCEnumContainers.h"
 #include "ToDoCtrlDataDefines.h"
 #include "ToDoCtrlData.h"
+#include "ToDoCtrlDataUtils.h"
 
 #include "..\Shared\Misc.h"
 #include "..\Shared\GraphicsMisc.h"
@@ -25,10 +26,7 @@ static const CString EMPTY_STR;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLInfoTipCtrl
 
-CTDLInfoTipCtrl::CTDLInfoTipCtrl(const CToDoCtrlData& data)
-	:
-	m_data(data),
-	m_formatter(data)
+CTDLInfoTipCtrl::CTDLInfoTipCtrl()
 {
 }
 
@@ -56,12 +54,16 @@ int CTDLInfoTipCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-CString CTDLInfoTipCtrl::GetFormattedText(DWORD dwTaskID, const CTDCAttributeMap& mapAttrib, int nMaxCommentsLen) const
+CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
+								   const CTDCAttributeMap& mapAttrib,
+								   const CToDoCtrlData& data,
+								   const CTDCCustomAttribDefinitionArray& aCustAttribs,
+								   int nMaxCommentsLen) const
 {
 	// Build the attribute array
 	CTDCInfoTipItemArray aItems;
 
-	if (!BuildSortedAttributeArray(dwTaskID, mapAttrib, nMaxCommentsLen, aItems))
+	if (!BuildSortedAttributeArray(dwTaskID, mapAttrib, data, aCustAttribs, nMaxCommentsLen, aItems))
 		return EMPTY_STR;
 
 	// Calculate offset to make item values line up
@@ -114,13 +116,20 @@ CString CTDLInfoTipCtrl::GetFormattedText(DWORD dwTaskID, const CTDCAttributeMap
 	return sTip;
 }
 
-int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID, const CTDCAttributeMap& mapAttrib, int nMaxCommentsLen, CTDCInfoTipItemArray& aItems) const
+int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID, 
+											   const CTDCAttributeMap& mapAttrib,
+											   const CToDoCtrlData& data,
+											   const CTDCCustomAttribDefinitionArray& aCustAttribs,
+											   int nMaxCommentsLen,
+											   CTDCInfoTipItemArray& aItems) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 
-	if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
+	if (!data.GetTrueTask(dwTaskID, pTDI, pTDS))
 		return 0;
+
+	CTDCTaskFormatter formatter(data);
 	
 	// Always add title
 	aItems.Add(TDCINFOTIPITEM(TDCA_TASKNAME, IDS_TDLBC_TASK, pTDI->sTitle));
@@ -150,45 +159,48 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID, const CTDCAttribu
 	}
 
 	ADDINFOITEM(TDCA_ALLOCBY, IDS_TDLBC_ALLOCBY, pTDI->sAllocBy);
-	ADDINFOITEM(TDCA_ALLOCTO, IDS_TDLBC_ALLOCTO, m_formatter.GetTaskAllocTo(pTDI));
-	ADDINFOITEM(TDCA_CATEGORY, IDS_TDLBC_CATEGORY, m_formatter.GetTaskCategories(pTDI));
-	ADDINFOITEM(TDCA_COST, IDS_TDLBC_COST, m_formatter.GetTaskCost(pTDI, pTDS));
+	ADDINFOITEM(TDCA_ALLOCTO, IDS_TDLBC_ALLOCTO, formatter.GetTaskAllocTo(pTDI));
+	ADDINFOITEM(TDCA_CATEGORY, IDS_TDLBC_CATEGORY, formatter.GetTaskCategories(pTDI));
+	ADDINFOITEM(TDCA_COST, IDS_TDLBC_COST, formatter.GetTaskCost(pTDI, pTDS));
 	ADDINFOITEM(TDCA_CREATEDBY, IDS_TDLBC_CREATEDBY, pTDI->sCreatedBy);
-	ADDINFOITEM(TDCA_CREATIONDATE, IDS_TDLBC_CREATEDATE, FormatDate(pTDI->dateCreated));
+	ADDINFOITEM(TDCA_CREATIONDATE, IDS_TDLBC_CREATEDATE, FormatDate(pTDI->dateCreated, data));
 	ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDS, Misc::FormatArray(pTDI->aDependencies));
-	ADDINFOITEM(TDCA_DONEDATE, IDS_TDLBC_DONEDATE, FormatDate(pTDI->dateDone));
-	ADDINFOITEM(TDCA_FLAG, IDS_TDLBC_FLAG, CEnString(pTDI->bFlagged ? IDS_FLAGGED : IDS_UNFLAGGED));
+	ADDINFOITEM(TDCA_DONEDATE, IDS_TDLBC_DONEDATE, FormatDate(pTDI->dateDone, data));
+	ADDINFOITEM(TDCA_FLAG, IDS_TDLBC_FLAG, CEnString(pTDI->bFlagged ? IDS_YES : 0));
 	ADDINFOITEM(TDCA_LASTMODBY, IDS_TDLBC_LASTMODBY, pTDI->sLastModifiedBy);
-	ADDINFOITEM(TDCA_LASTMODDATE, IDS_TDLBC_LASTMODDATE, FormatDate(pTDI->dateLastMod));
-	ADDINFOITEM(TDCA_LOCK, IDS_TDLBC_LOCK, CEnString(pTDI->bLocked ? IDS_LOCKED : IDS_UNLOCKED));
-	ADDINFOITEM(TDCA_PERCENT, IDS_TDLBC_PERCENT, m_formatter.GetTaskPercentDone(pTDI, pTDS));
-	ADDINFOITEM(TDCA_POSITION, IDS_TDLBC_POS, m_formatter.GetTaskPosition(pTDS));
-	ADDINFOITEM(TDCA_PRIORITY, IDS_TDLBC_PRIORITY, m_formatter.GetTaskPriority(pTDI, pTDS));
-	ADDINFOITEM(TDCA_RECURRENCE, IDS_TDLBC_RECURRENCE, m_formatter.GetTaskRecurrence(pTDI));
-	ADDINFOITEM(TDCA_RISK, IDS_TDLBC_RISK, m_formatter.GetTaskRisk(pTDI, pTDS));
+	ADDINFOITEM(TDCA_LASTMODDATE, IDS_TDLBC_LASTMODDATE, FormatDate(pTDI->dateLastMod, data));
+	ADDINFOITEM(TDCA_LOCK, IDS_TDLBC_LOCK, CEnString(pTDI->bLocked ? IDS_YES : 0));
+	ADDINFOITEM(TDCA_PERCENT, IDS_TDLBC_PERCENT, formatter.GetTaskPercentDone(pTDI, pTDS));
+	ADDINFOITEM(TDCA_POSITION, IDS_TDLBC_POS, formatter.GetTaskPosition(pTDS));
+	ADDINFOITEM(TDCA_PRIORITY, IDS_TDLBC_PRIORITY, formatter.GetTaskPriority(pTDI, pTDS));
+	ADDINFOITEM(TDCA_RECURRENCE, IDS_TDLBC_RECURRENCE, formatter.GetTaskRecurrence(pTDI));
+	ADDINFOITEM(TDCA_RISK, IDS_TDLBC_RISK, formatter.GetTaskRisk(pTDI, pTDS));
 	ADDINFOITEM(TDCA_STATUS, IDS_TDLBC_STATUS, pTDI->sStatus);
-	ADDINFOITEM(TDCA_SUBTASKDONE, IDS_TDLBC_SUBTASKDONE, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
-	ADDINFOITEM(TDCA_TAGS, IDS_TDLBC_TAGS, m_formatter.GetTaskTags(pTDI));
-	ADDINFOITEM(TDCA_TIMEEST, IDS_TDLBC_TIMEEST, m_formatter.GetTaskTimeEstimate(pTDI, pTDS));
-	ADDINFOITEM(TDCA_TIMESPENT, IDS_TDLBC_TIMESPENT, m_formatter.GetTaskTimeSpent(pTDI, pTDS));
+	ADDINFOITEM(TDCA_SUBTASKDONE, IDS_TDLBC_SUBTASKDONE, formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
+	ADDINFOITEM(TDCA_TAGS, IDS_TDLBC_TAGS, formatter.GetTaskTags(pTDI));
+	ADDINFOITEM(TDCA_TIMEEST, IDS_TDLBC_TIMEEST, formatter.GetTaskTimeEstimate(pTDI, pTDS));
+	ADDINFOITEM(TDCA_TIMESPENT, IDS_TDLBC_TIMESPENT, formatter.GetTaskTimeSpent(pTDI, pTDS));
 	ADDINFOITEM(TDCA_VERSION, IDS_TDLBC_VERSION, pTDI->sVersion);
 
 	if (pTDI->aFileLinks.GetSize())
 		ADDINFOITEM(TDCA_FILEREF, IDS_TDLBC_FILEREF, pTDI->aFileLinks[0]);
 
-	if (!pTDI->IsDone() || !m_data.HasStyle(TDCS_HIDESTARTDUEFORDONETASKS))
+	if (!pTDI->IsDone() || !data.HasStyle(TDCS_HIDESTARTDUEFORDONETASKS))
 	{
-		ADDINFOITEM(TDCA_STARTDATE, IDS_TDLBC_STARTDATE, FormatDate(pTDI->dateStart));
-		ADDINFOITEM(TDCA_DUEDATE, IDS_TDLBC_DUEDATE, FormatDate(pTDI->dateDue));
+		ADDINFOITEM(TDCA_STARTDATE, IDS_TDLBC_STARTDATE, FormatDate(pTDI->dateStart, data));
+		ADDINFOITEM(TDCA_DUEDATE, IDS_TDLBC_DUEDATE, FormatDate(pTDI->dateDue, data));
 	}
 
 	if (mapAttrib.Has(TDCA_DEPENDENCY))
 	{
 		CDWordArray aDependents;
 
-		if (m_data.GetTaskLocalDependents(dwTaskID, aDependents))
+		if (data.GetTaskLocalDependents(dwTaskID, aDependents))
 			ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDENTS, Misc::FormatArray(aDependents));
 	}
+
+	// Custom attributes
+	// TODO
 
 	// Alphabetic Sort
 	Misc::SortArrayT(aItems, InfoTipSortProc);
@@ -219,12 +231,12 @@ int CTDLInfoTipCtrl::InfoTipSortProc(const void* pV1, const void* pV2)
 	return Misc::NaturalCompare(pITI1->sLabel, pITI2->sLabel);
 }
 
-CString CTDLInfoTipCtrl::FormatDate(const COleDateTime& date) const
+CString CTDLInfoTipCtrl::FormatDate(const COleDateTime& date, const CToDoCtrlData& data) const
 {
 	if (!CDateHelper::IsDateSet(date))
 		return EMPTY_STR;
 
-	DWORD dwDateFmt = m_data.HasStyle(TDCS_SHOWDATESINISO) ? DHFD_ISO : 0;
+	DWORD dwDateFmt = data.HasStyle(TDCS_SHOWDATESINISO) ? DHFD_ISO : 0;
 
 	if (CDateHelper::DateHasTime(date))
 		dwDateFmt |= DHFD_TIME | DHFD_NOSEC;
