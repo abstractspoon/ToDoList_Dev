@@ -684,6 +684,9 @@ BOOL CToDoCtrl::SetTreeFont(HFONT hFont)
 	{
 		m_hFontTree = hFont;
 
+		if (m_infoTip.GetSafeHwnd())
+			m_infoTip.SetFont(CFont::FromHandle(hFont));
+
 		if (m_taskTree.GetSafeHwnd())
 			return m_taskTree.SetFont(hFont);
 	}
@@ -5576,6 +5579,7 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 			m_infoTip.SetDelayTime(TTDT_AUTOPOP, 10000);
 			m_infoTip.SetMaxTipWidth((UINT)(WORD)-1); // multiline support
 			m_infoTip.EnableTracking(TRUE, 16, 16);
+			m_infoTip.SetFont(CFont::FromHandle(m_hFontTree));
 		}
 		else
 		{
