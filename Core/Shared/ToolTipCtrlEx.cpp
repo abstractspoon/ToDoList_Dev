@@ -166,8 +166,12 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 				{
 					// allow the tooltip to popup when it should
 					Activate(TRUE);
-					//TRACE(_T("CToolTipCtrlEx::Activate(TRUE, \"%s\")\n"), tiHit.lpszText);
-
+#ifdef _DEBUG
+					//if (tiHit.lpszText != LPSTR_TEXTCALLBACK)
+					//	TRACE(_T("CToolTipCtrlEx::Activate(TRUE, \"%s\")\n"), tiHit.lpszText);
+					//else
+					//	TRACE(_T("CToolTipCtrlEx::Activate(TRUE, -callback-)\n"), tiHit.lpszText);
+#endif
  					if (IsTracking())
  						SendMessage(TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
 
