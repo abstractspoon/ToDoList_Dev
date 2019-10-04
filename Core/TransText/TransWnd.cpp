@@ -663,17 +663,21 @@ LRESULT CTransTooltips::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 	case TTM_UPDATETIPTEXT:
 		{
 			TOOLINFO* pTI = (TOOLINFO*)lp;
-			CString sText(pTI->lpszText);
-			
-			if (!sText.IsEmpty() && TranslateText(sText))
+
+			if (pTI->lpszText != LPSTR_TEXTCALLBACK)
 			{
-				TCHAR* szOrgText = pTI->lpszText;
-				pTI->lpszText = (LPTSTR)(LPCTSTR)sText;
+				CString sText(pTI->lpszText);
+			
+				if (!sText.IsEmpty() && TranslateText(sText))
+				{
+					TCHAR* szOrgText = pTI->lpszText;
+					pTI->lpszText = (LPTSTR)(LPCTSTR)sText;
 				
-				LRESULT lr = CTransWnd::WindowProc(hRealWnd, msg, wp, lp);
+					LRESULT lr = CTransWnd::WindowProc(hRealWnd, msg, wp, lp);
 				
-				pTI->lpszText = szOrgText;
-				return lr;
+					pTI->lpszText = szOrgText;
+					return lr;
+				}
 			}
 		}
 		break;

@@ -454,6 +454,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="TDLImportOutlookObjectSetupListCtrl.cpp" />
+    <ClCompile Include="TDLInfoTipCtrl.cpp" />
     <ClCompile Include="TDLKeyboardShortcutDisplayDlg.cpp" />
     <ClCompile Include="TDLLanguageComboBox.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -695,6 +696,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLImportOutlookDlg.h" />
     <ClInclude Include="TDLImportOutlookObjectsDlg.h" />
     <ClInclude Include="TDLImportOutlookObjectSetupListCtrl.h" />
+    <ClInclude Include="TDLInfoTipCtrl.h" />
     <ClInclude Include="TDLKeyboardShortcutDisplayDlg.h" />
     <ClInclude Include="TDLLanguageComboBox.h" />
     <ClInclude Include="TDLLanguageDlg.h" />

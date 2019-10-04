@@ -479,6 +479,10 @@ SOURCE=.\TDLImportOutlookObjectSetupListCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDLInfoTipCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLKeyboardShortcutDisplayDlg.cpp
 # End Source File
 # Begin Source File
@@ -1072,6 +1076,10 @@ SOURCE=.\TDLImportOutlookObjectsDlg.h
 # Begin Source File
 
 SOURCE=.\TDLImportOutlookObjectSetupListCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLInfoTipCtrl.h
 # End Source File
 # Begin Source File
 

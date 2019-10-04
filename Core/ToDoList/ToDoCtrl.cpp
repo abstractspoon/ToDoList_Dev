@@ -217,6 +217,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_taskTree(m_ilTaskIcons, m_data, m_styles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs),
 	m_exporter(m_data, m_taskTree, m_mgrContent),
 	m_formatter(m_data),
+	m_infoTip(m_data),
 #pragma warning (disable: 4355)
 	m_sourceControl(*this),
 	m_findReplace(*this),
@@ -5682,7 +5683,7 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 
 		if (dwTaskID)
 		{
-			CString sInfoTip = m_formatter.GetInfoTip(dwTaskID, m_visColEdit.GetVisibleEditFields(), m_nMaxInfotipCommentsLength);
+			CString sInfoTip = m_infoTip.GetFormattedText(dwTaskID, m_visColEdit.GetVisibleEditFields(), m_nMaxInfotipCommentsLength);
 			ASSERT(!sInfoTip.IsEmpty());
 
 			CRect rBounds;

@@ -30,6 +30,30 @@
 
 class CFilteredToDoCtrl;
 
+//////////////////////////////////////////////////////////////////////
+
+struct TDCINFOTIPITEM
+{
+	TDCINFOTIPITEM() : nAttribID(TDCA_NONE), nLabelWidth(0)
+	{
+	}
+
+	TDCINFOTIPITEM(TDC_ATTRIBUTE nAttrib, UINT nLabelStrID, const CString& sVal)
+	{
+		nAttribID = nAttrib;
+		sLabel = CEnString(nLabelStrID) + _T(":\t");
+		sValue = sVal;
+		nLabelWidth = 0;
+	}
+
+	TDC_ATTRIBUTE nAttribID;
+	CString sLabel;
+	CString sValue;
+	int nLabelWidth;
+};
+
+typedef CArray<TDCINFOTIPITEM, TDCINFOTIPITEM&> CTDCInfoTipItemArray;
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 class CTDCColorMap : protected CMap<CString, LPCTSTR, COLORREF, COLORREF&>

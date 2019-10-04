@@ -24,6 +24,7 @@
 #include "tdcSourceControl.h"
 #include "tdcFindReplace.h"
 #include "tdcdialoghelper.h"
+#include "tdlinfotipctrl.h"
 
 #include "..\shared\runtimedlg.h"
 #include "..\shared\orderedtreectrl.h"
@@ -467,7 +468,7 @@ protected:
 	CTDLRiskComboBox m_cbRisk;
 	CTimeComboBox m_cbTimeDue, m_cbTimeStart, m_cbTimeDone;
 	CTimeEdit m_eTimeEstimate, m_eTimeSpent;
-	CToolTipCtrlEx m_infoTip;
+	CTDLInfoTipCtrl m_infoTip;
 	
 	CTDLTaskTreeCtrl m_taskTree;
 

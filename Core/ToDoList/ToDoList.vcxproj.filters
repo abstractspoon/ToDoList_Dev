@@ -415,6 +415,9 @@
     <ClCompile Include="tdcreminder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDLInfoTipCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FilteredToDoCtrl.h">
@@ -859,6 +862,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCCustomAttributeUIHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLInfoTipCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
