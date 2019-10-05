@@ -623,7 +623,7 @@ BOOL TODOITEM::IsRecentlyModified(const COleDateTime& date)
 
 COleDateTimeSpan TODOITEM::GetRemainingDueTime() const
 {
-	return GetRemainingDueTime(dateDue);
+	return GetRemainingTime(dateDue);
 }
 
 COleDateTime TODOITEM::GetDate(TDC_DATE nDate) const
@@ -676,7 +676,7 @@ BOOL TODOITEM::HasCustomAttributeValue(const CString& sAttribID) const
 	return !GetCustomAttributeValue(sAttribID, unused);
 }
 
-COleDateTimeSpan TODOITEM::GetRemainingDueTime(const COleDateTime& date)
+COleDateTimeSpan TODOITEM::GetRemainingTime(const COleDateTime& date)
 {
 	COleDateTimeSpan dtsRemaining = date - COleDateTime::GetCurrentTime();
 	

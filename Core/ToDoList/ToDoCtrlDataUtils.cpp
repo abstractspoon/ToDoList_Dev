@@ -2382,7 +2382,7 @@ double CTDCTaskCalculator::GetTaskRemainingTime(const TODOITEM* pTDI, const TODO
 
 		if (CDateHelper::IsDateSet(date))
 		{
-			dRemain = TODOITEM::GetRemainingDueTime(date);
+			dRemain = TODOITEM::GetRemainingTime(date);
 			nUnits = TDCU_DAYS;
 		}
 	}

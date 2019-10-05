@@ -148,7 +148,7 @@ public:
 
 	float GetCommentsSizeInKB() const;
 	
-	static COleDateTimeSpan GetRemainingDueTime(const COleDateTime& date); // in days
+	static COleDateTimeSpan GetRemainingTime(const COleDateTime& date); // in days
 	static BOOL HasTime(const COleDateTime& date);
 	static BOOL ParseTaskLink(const CString& sLink, DWORD& dwTaskID, CString& sFile);
 	static CString FormatTaskDependency(DWORD dwTaskID, const CString& sFile = _T(""));
