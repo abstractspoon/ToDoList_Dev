@@ -5280,7 +5280,11 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 				break;
 
 			case TDCCA_FILELINK:
-				return (attribDef.aDefaultListData.GetSize() * 18);
+				{
+					int nNumFiles = m_find.GetLargestCustomFileLinkCount(attribDef, bVisibleTasksOnly);
+					return ((nNumFiles *(COL_ICON_SIZE + COL_ICON_SPACING)) - COL_ICON_SPACING);
+				}
+				break;
 
 			default:
 				{

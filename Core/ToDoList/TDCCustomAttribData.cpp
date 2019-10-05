@@ -12,6 +12,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+const TCHAR NEWLINE = '\n';
+
+/////////////////////////////////////////////////////////////////////////////
+
 TDCCADATA::TDCCADATA(const CString& sValue, TCHAR cSep) 
 { 
 	Set(sValue, cSep); 
@@ -198,13 +202,30 @@ int TDCCADATA::AsArray(const CString& sValue, CStringArray& aValues)
 	}
 	
 	// else
-	return Misc::Split(sValue, aValues, '\n', TRUE); 
+	return Misc::Split(sValue, aValues, NEWLINE, TRUE);
 }
 
 int TDCCADATA::GetArraySize() const
 {
-	CStringArray aUnused;
-	return AsArray(aUnused);
+	int nLen = sData.GetLength();
+
+	if (nLen < 2)
+		return nLen;
+
+	// Just count the new line characters
+	int nPos = sData.Find(NEWLINE), nSize = 0;
+
+	while (nPos != -1)
+	{
+		nSize++;
+		nPos = sData.Find(NEWLINE, (nPos + 1));
+	}
+
+	// If we don't end in a newline then add trailing item
+	if (Misc::Last(sData) != NEWLINE)
+		nSize++;
+
+	return nSize;
 }
 
 BOOL TDCCADATA::IsTimePeriod() const
@@ -317,20 +338,20 @@ void TDCCADATA::Set(const CStringArray& aValues, CString& sValue)
 {
 	// Special case: 1 empty value
 	if ((aValues.GetSize() == 1) && aValues[0].IsEmpty())
-		sValue = '\n';
+		sValue = NEWLINE;
 	else
-		sValue = Misc::FormatArray(aValues, '\n'); 
+		sValue = Misc::FormatArray(aValues, NEWLINE);
 }
 
 CString TDCCADATA::FormatAsArray(TCHAR cSep) const
 {
-	if (cSep == '\n')
+	if (cSep == NEWLINE)
 		return sData;
 	
 	CString sArray(sData);
 	
 	if (cSep != 0)
-		sArray.Replace('\n', cSep);
+		sArray.Replace(NEWLINE, cSep);
 	else
 		sArray.Replace(_T("\n"), Misc::GetListSeparator());
 	

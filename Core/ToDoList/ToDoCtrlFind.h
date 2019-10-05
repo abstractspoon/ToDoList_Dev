@@ -88,6 +88,7 @@ public:
 
 	DWORD GetLargestReferenceID(BOOL bVisibleOnly) const;
 	int GetLargestFileLinkCount(BOOL bVisibleOnly) const;
+	int GetLargestCustomFileLinkCount(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
 
 	BOOL FindVisibleTaskWithDueTime() const;
 	BOOL FindVisibleTaskWithStartTime() const;
@@ -138,6 +139,7 @@ protected:
 	DWORD GetLargestReferenceID(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	float GetLargestCommentsSizeInKB(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	int GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
+	int GetLargestCustomFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
 	BOOL GetLongestCalculatedValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CString& sLongest) const;
 
 	BOOL WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const;

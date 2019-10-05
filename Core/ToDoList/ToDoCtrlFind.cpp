@@ -558,6 +558,46 @@ int CToDoCtrlFind::GetLargestFileLinkCount(BOOL bVisibleOnly) const
 	return GetLargestFileLinkCount(NULL, NULL, bVisibleOnly);
 }
 
+int CToDoCtrlFind::GetLargestCustomFileLinkCount(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const
+{
+	return GetLargestCustomFileLinkCount(NULL, NULL, attribDef, bVisibleOnly);
+}
+
+int CToDoCtrlFind::GetLargestCustomFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const
+{
+	ASSERT(attribDef.GetDataType() == TDCCA_FILELINK);
+
+	if (!CheckGetTask(hti, pTDI, TRUE))
+		return 0;
+
+	int nLargest = 0;
+
+	if (pTDI)
+	{
+		TDCCADATA data;
+
+		if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
+			nLargest = data.GetArraySize();
+	}
+	
+	if (WantSearchChildren(hti, bVisibleOnly))
+	{
+		// check children
+		HTREEITEM htiChild = m_tch.TreeCtrl().GetChildItem(hti);
+
+		while (htiChild)
+		{
+			int nChildLargest = GetLargestCustomFileLinkCount(htiChild, NULL, attribDef, bVisibleOnly);
+			nLargest = max(nLargest, nChildLargest);
+
+			// next
+			htiChild = m_tch.TreeCtrl().GetNextItem(htiChild, TVGN_NEXT);
+		}
+	}
+
+	return nLargest;
+}
+
 CString CToDoCtrlFind::GetLongerString(const CString& str1, const CString& str2)
 {
 	return ((str1.GetLength() > str2.GetLength()) ? str1 : str2);
