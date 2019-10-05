@@ -201,6 +201,12 @@ int TDCCADATA::AsArray(const CString& sValue, CStringArray& aValues)
 	return Misc::Split(sValue, aValues, '\n', TRUE); 
 }
 
+int TDCCADATA::GetArraySize() const
+{
+	CStringArray aUnused;
+	return AsArray(aUnused);
+}
+
 BOOL TDCCADATA::IsTimePeriod() const
 {
 	return (IsEmpty() || (GetTimeUnits() != TDCU_NULL));

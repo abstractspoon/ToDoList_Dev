@@ -206,13 +206,13 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 	case TDCCA_INTEGER:
 	case TDCCA_TIMEPERIOD:
 		return ((dwFeature == TDCCAF_ACCUMULATE) ||
-			(dwFeature == TDCCAF_MAXIMIZE) ||
+				(dwFeature == TDCCAF_MAXIMIZE) ||
 				(dwFeature == TDCCAF_MINIMIZE) ||
 				(dwFeature == TDCCAF_HIDEZERO));
 
 	case TDCCA_DATE:
 		return ((dwFeature == TDCCAF_MAXIMIZE) ||
-			(dwFeature == TDCCAF_MINIMIZE) ||
+				(dwFeature == TDCCAF_MINIMIZE) ||
 				(dwFeature == TDCCAF_SHOWTIME));
 
 	case TDCCA_STRING:
@@ -223,7 +223,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 
 	case TDCCA_FRACTION:
 		return ((dwFeature == TDCCAF_DISPLAYASPERCENT) ||
-			(dwFeature == TDCCAF_MAXIMIZE) ||
+				(dwFeature == TDCCAF_MAXIMIZE) ||
 				(dwFeature == TDCCAF_MINIMIZE) ||
 				(dwFeature == TDCCAF_HIDEZERO));
 
@@ -238,15 +238,15 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsCalculation() const
 {
 	return SupportsFeature(TDCCAF_ACCUMULATE) ||
-		SupportsFeature(TDCCAF_MAXIMIZE) ||
-		SupportsFeature(TDCCAF_MINIMIZE);
+			SupportsFeature(TDCCAF_MAXIMIZE) ||
+			SupportsFeature(TDCCAF_MINIMIZE);
 }
 
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::IsCalculated() const
 {
 	return HasFeature(TDCCAF_ACCUMULATE) ||
-		HasFeature(TDCCAF_MAXIMIZE) ||
-		HasFeature(TDCCAF_MINIMIZE);
+			HasFeature(TDCCAF_MAXIMIZE) ||
+			HasFeature(TDCCAF_MINIMIZE);
 }
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::GetNextListItem(const CString& sItem, BOOL bNext) const

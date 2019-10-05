@@ -143,7 +143,8 @@ public:
 	CString GetTaskStatus(DWORD dwTaskID, const CString& sCompletionStatus) const;
 	CString GetTaskRecentlyModified(DWORD dwTaskID) const;
 	CString GetTaskRecurrence(DWORD dwTaskID) const;
-	
+	CString GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
+
 	CString GetTaskAllocTo(const TODOITEM* pTDI) const;
 	CString GetTaskCategories(const TODOITEM* pTDI) const;
 	CString GetTaskTags(const TODOITEM* pTDI) const;
@@ -161,6 +162,7 @@ public:
 	CString GetTaskStatus(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const CString& sCompletionStatus) const;
 	CString GetTaskRecentlyModified(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskRecurrence(const TODOITEM* pTDI) const;
+	CString GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
 
 	CString GetTaskTime(DWORD dwTaskID, TDC_COLUMN nColID) const;
 	CString GetTaskTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
@@ -169,7 +171,6 @@ public:
 protected:
 	const CToDoCtrlData& m_data;
 	CTDCTaskCalculator m_calculator;
-
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -158,6 +158,7 @@ BOOL CTDCLongestItemMap::IsSupportedColumn(const TDCCUSTOMATTRIBUTEDEFINITION& a
 	case TDCCA_DATE:
 	case TDCCA_BOOL:
 	case TDCCA_ICON:
+	case TDCCA_FILELINK:
 		return FALSE;
 	}
 
@@ -707,6 +708,7 @@ CString CToDoCtrlFind::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attri
 			case TDCCA_BOOL:
 			case TDCCA_ICON:
 			case TDCCA_DATE:
+			case TDCCA_FILELINK:
 				// sanity check
 				ASSERT(0);
 				return EMPTY_STR;

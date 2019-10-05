@@ -1695,6 +1695,9 @@ CTDCTaskCalculator::CTDCTaskCalculator(const CToDoCtrlData& data)
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
 {
+	if (!attribDef.bEnabled)
+		return FALSE;
+
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 
@@ -1705,6 +1708,8 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUS
 
 BOOL CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits)
 {
+	ASSERT(attribDef.bEnabled);
+
 	switch (attribDef.GetDataType())
 	{
 	case TDCCA_TIMEPERIOD:
@@ -3672,6 +3677,101 @@ CString CTDCTaskFormatter::GetID(DWORD dwTaskID, DWORD dwRefID) const
 		return Misc::Format(dwTaskID);
 
 	return Misc::Format(_T("(%lu) %lu"), dwRefID, dwTaskID);
+}
+
+CString CTDCTaskFormatter::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const
+{
+	if (!attribDef.bEnabled)
+		return EMPTY_STR;
+
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	return GetTaskCustomAttributeData(pTDI, pTDS, attribDef);
+}
+
+CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const
+{
+	if (!attribDef.bEnabled)
+		return EMPTY_STR;
+
+	TDCCADATA data;
+	
+	if (!pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
+		return EMPTY_STR;
+
+	DWORD dwDataType = attribDef.GetDataType();
+
+	switch (dwDataType)
+	{
+	case TDCCA_TIMEPERIOD:
+		{
+			double dValue = 0.0;
+			TDC_UNITS nUnits = data.GetTimeUnits();
+
+			if (!m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
+				return EMPTY_STR;
+
+			return GetTaskTime(dValue, nUnits, TRUE);
+		}
+		break;
+
+	case TDCCA_ICON:
+		return EMPTY_STR;
+
+	case TDCCA_BOOL:
+		return CEnString(IDS_YES);
+
+	case TDCCA_FILELINK:
+		{
+			CStringArray aItems;
+
+			if (!data.AsArray(aItems))
+				return EMPTY_STR;
+
+			return aItems[0];
+		}
+		break;
+
+	case TDCCA_DATE:
+		{
+			double dDate = 0.0;
+
+			if (!m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dDate))
+				return EMPTY_STR;
+
+			return TDCCADATA(dDate).FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO), attribDef.HasFeature(TDCCAF_SHOWTIME));
+		}
+		break;
+
+	case TDCCA_DOUBLE:
+	case TDCCA_INTEGER:
+	case TDCCA_FRACTION:
+		{
+			double dValue = 0.0;
+
+			if (!m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue))
+				return EMPTY_STR;
+
+			if ((dValue == 0.0) && attribDef.HasFeature(TDCCAF_HIDEZERO))
+				return EMPTY_STR;
+
+			return attribDef.FormatNumber(dValue);
+		}
+		break;
+
+
+	default:
+		if (!pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
+			return EMPTY_STR;
+		break;
+	}
+
+	// All the rest
+	return attribDef.FormatData(data, FALSE);
+
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

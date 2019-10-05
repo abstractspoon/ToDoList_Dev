@@ -7,7 +7,7 @@
 // TDLInfoTipCtrl.h : header file
 //
 
-#include "TDCStruct.h"
+#include "ToDoCtrlDataUtils.h"
 
 #include "..\Shared\ToolTipCtrlEx.h"
 
@@ -24,14 +24,19 @@ class CTDLInfoTipCtrl : public CToolTipCtrlEx
 {
 // Construction
 public:
-	CTDLInfoTipCtrl();
+	CTDLInfoTipCtrl(const CToDoCtrlData& data, const CTDCCustomAttribDefinitionArray& aCustAttribs);
 	virtual ~CTDLInfoTipCtrl();
 
 	CString FormatTip(DWORD dwTaskID, 
 					  const CTDCAttributeMap& mapAttrib, 
-					  const CToDoCtrlData& data,
-					  const CTDCCustomAttribDefinitionArray& aCustAttribs, 
 					  int nMaxCommentsLen) const;
+
+protected:
+	const CToDoCtrlData& m_data;
+	const CTDCCustomAttribDefinitionArray& m_aCustAttribs;
+
+	CTDCTaskFormatter m_formatter;
+	CTDCTaskCalculator m_calculator;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -48,11 +53,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	CString FormatDate(const COleDateTime& date, const CToDoCtrlData& data) const;
+	CString FormatCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
+	CString FormatDate(const COleDateTime& date) const;
+
 	int BuildSortedAttributeArray(DWORD dwTaskID, 
 								  const CTDCAttributeMap& mapAttrib, 
-								  const CToDoCtrlData& data,
-								  const CTDCCustomAttribDefinitionArray& aCustAttribs, 
 								  int nMaxCommentsLen, 
 								  CTDCInfoTipItemArray& aItems) const;
 

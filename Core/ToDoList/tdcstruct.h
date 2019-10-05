@@ -34,22 +34,34 @@ class CFilteredToDoCtrl;
 
 struct TDCINFOTIPITEM
 {
-	TDCINFOTIPITEM() : nAttribID(TDCA_NONE), nLabelWidth(0)
+	TDCINFOTIPITEM() // for CArray
 	{
+		Init(TDCA_NONE, _T(""), _T(""));
+	}
+
+	TDCINFOTIPITEM(TDC_ATTRIBUTE nAttrib, CString sLab, const CString& sVal)
+	{
+		Init(nAttrib, sLab, sVal);
 	}
 
 	TDCINFOTIPITEM(TDC_ATTRIBUTE nAttrib, UINT nLabelStrID, const CString& sVal)
 	{
-		nAttribID = nAttrib;
-		sLabel = CEnString(nLabelStrID) + _T(":\t");
-		sValue = sVal;
-		nLabelWidth = 0;
+		Init(nAttrib, CEnString(nLabelStrID), sVal);
 	}
 
 	TDC_ATTRIBUTE nAttribID;
 	CString sLabel;
 	CString sValue;
 	int nLabelWidth;
+
+protected:
+	void Init(TDC_ATTRIBUTE nAttrib, CString sLab, const CString& sVal)
+	{
+		nAttribID = nAttrib;
+		sLabel = sLab;
+		sValue = sVal;
+		nLabelWidth = 0;
+	}
 };
 
 typedef CArray<TDCINFOTIPITEM, TDCINFOTIPITEM&> CTDCInfoTipItemArray;

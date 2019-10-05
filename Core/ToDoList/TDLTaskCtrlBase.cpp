@@ -3123,31 +3123,6 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		}
 		break;
 		
-	case TDCCA_DOUBLE:
-	case TDCCA_INTEGER:
-	case TDCCA_FRACTION:
-		{
-			double dValue = 0.0;
-			m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue);
-			
-			if ((dValue != 0.0) || !attribDef.HasFeature(TDCCAF_HIDEZERO))
-				DrawColumnText(pDC, attribDef.FormatNumber(dValue), rCol, attribDef.nTextAlignment, crText);
-		}
-		break;
-
-	case TDCCA_TIMEPERIOD:
-		{
-			double dValue = 0.0;
-			TDC_UNITS nUnits = data.GetTimeUnits();
-
-			if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
-			{
-				CString sText = m_formatter.GetTaskTime(dValue, nUnits, TRUE);
-				DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
-			}
-		}
-		break;
-
 	case TDCCA_ICON:
 		if (!data.IsEmpty() && (rCol.Width() > CalcRequiredIconColumnWidth(1)))
 		{
@@ -3236,8 +3211,10 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		break;
 
 	default:
-		if (!data.IsEmpty())
-			DrawColumnText(pDC, attribDef.FormatData(data, HasStyle(TDCS_SHOWDATESINISO)), rCol, attribDef.nTextAlignment, crText);
+		{
+			CString sData = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, attribDef);
+			DrawColumnText(pDC, sData, rCol, attribDef.nTextAlignment, crText);
+		}
 		break;
 	}
 

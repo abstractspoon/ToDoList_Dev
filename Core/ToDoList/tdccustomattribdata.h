@@ -56,6 +56,7 @@ struct TDCCADATA
 	BOOL IsTimePeriod() const;
 	
 	TDC_UNITS GetTimeUnits() const;
+	int GetArraySize() const;
 
 	void Set(double dValue);
 	void Set(int nValue);
