@@ -3102,7 +3102,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 	
-	if (!m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef))
+	if (!m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef) || !attribDef.bEnabled)
 		return TRUE;
 
 	TDCCADATA data;
@@ -4076,9 +4076,16 @@ BOOL CTDLTaskCtrlBase::OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
 	{
 		// Prevent changing the first hidden column
 		if (pHDN->iItem == 0)
+		{
 			pHDN->pitem->cxy = 0;
+		}
 		else
-			nMinWidth = MIN_COL_WIDTH;
+		{
+			TDC_COLUMN nColID = GetColumnID(pHDN->iItem);
+
+			if (IsColumnShowing(nColID))
+				nMinWidth = MIN_COL_WIDTH;
+		}
 	}
 	else if (pHDN->hdr.hwndFrom == m_hwndPrimaryHeader)
 	{
