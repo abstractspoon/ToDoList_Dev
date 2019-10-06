@@ -54,7 +54,8 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnLBSelChange();
 	afx_msg BOOL OnSelEndOK();
-	
+	afx_msg LRESULT OnGetTextLen(WPARAM wParam, LPARAM lParam);
+
 	DECLARE_MESSAGE_MAP()
 	
 	// pseudo handlers

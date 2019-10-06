@@ -31,10 +31,12 @@ CEnCheckComboBox::~CEnCheckComboBox()
 IMPLEMENT_DYNAMIC(CEnCheckComboBox, CCheckComboBox)
 
 BEGIN_MESSAGE_MAP(CEnCheckComboBox, CCheckComboBox)
-//{{AFX_MSG_MAP(CEnCheckComboBox)
-//}}AFX_MSG_MAP
-ON_CONTROL(LBN_SELCHANGE, 1000, OnLBSelChange)
-ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
+	//{{AFX_MSG_MAP(CEnCheckComboBox)
+	//}}AFX_MSG_MAP
+	ON_CONTROL(LBN_SELCHANGE, 1000, OnLBSelChange)
+	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
+	ON_MESSAGE(WM_GETTEXTLENGTH, OnGetTextLen)
+
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -223,6 +225,7 @@ BOOL CEnCheckComboBox::GetCheck(int nIndex) const
 	// else
 	return ((nIndex != CB_ERR) && (CComboBox::GetCurSel() == nIndex));
 }
+
 
 int CEnCheckComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) const
 {
@@ -477,6 +480,14 @@ BOOL CEnCheckComboBox::OnSelEndOK()
 	// else
 	m_bEditChange = TRUE;
 	return FALSE; // Route to parent
+}
+
+LRESULT CEnCheckComboBox::OnGetTextLen(WPARAM wParam, LPARAM lParam)
+{
+	if (m_bMultiSel)
+		return CCheckComboBox::OnGetTextLen(wParam, lParam);
+
+	return CAutoComboBox::Default();
 }
 
 void CEnCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
