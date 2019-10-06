@@ -558,14 +558,14 @@ int CToDoCtrlFind::GetLargestFileLinkCount(BOOL bVisibleOnly) const
 	return GetLargestFileLinkCount(NULL, NULL, bVisibleOnly);
 }
 
-int CToDoCtrlFind::GetLargestCustomFileLinkCount(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const
+int CToDoCtrlFind::GetLargestCustomAttributeArraySize(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const
 {
-	return GetLargestCustomFileLinkCount(NULL, NULL, attribDef, bVisibleOnly);
+	return GetLargestCustomAttributeArraySize(NULL, NULL, attribDef, bVisibleOnly);
 }
 
-int CToDoCtrlFind::GetLargestCustomFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const
+int CToDoCtrlFind::GetLargestCustomAttributeArraySize(HTREEITEM hti, const TODOITEM* pTDI, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const
 {
-	ASSERT(attribDef.GetDataType() == TDCCA_FILELINK);
+	ASSERT(attribDef.GetListType() != TDCCA_NOTALIST);
 
 	if (!CheckGetTask(hti, pTDI, TRUE))
 		return 0;
@@ -587,7 +587,7 @@ int CToDoCtrlFind::GetLargestCustomFileLinkCount(HTREEITEM hti, const TODOITEM* 
 
 		while (htiChild)
 		{
-			int nChildLargest = GetLargestCustomFileLinkCount(htiChild, NULL, attribDef, bVisibleOnly);
+			int nChildLargest = GetLargestCustomAttributeArraySize(htiChild, NULL, attribDef, bVisibleOnly);
 			nLargest = max(nLargest, nChildLargest);
 
 			// next

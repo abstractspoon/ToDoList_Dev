@@ -7,6 +7,7 @@
 #include "tdccustomattribdata.h"
 
 #include "..\Shared\Misc.h"
+#include "..\Shared\GraphicsMisc.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -333,13 +334,16 @@ int TDCCUSTOMATTRIBUTEDEFINITION::CalcLongestListItem(CDC* pDC) const
 
 		case TDCCA_ICON:
 			{
-				nItemLen = 20; // for the icon
+				nItemLen = GraphicsMisc::ScaleByDPIFactor(16); // for the icon
 
 				// check for trailing text
 				CString sDummy, sName;
 
 				if (DecodeImageTag(sItem, sDummy, sName) && !sName.IsEmpty())
+				{
+					nItemLen += GraphicsMisc::ScaleByDPIFactor(2); // offset
 					nItemLen += pDC->GetTextExtent(sName).cx;
+				}
 			}
 			break;
 

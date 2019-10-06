@@ -3124,7 +3124,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		break;
 		
 	case TDCCA_ICON:
-		if (!data.IsEmpty() && (rCol.Width() > CalcRequiredIconColumnWidth(1)))
+		if (!data.IsEmpty() && (rCol.Width() >= CalcRequiredIconColumnWidth(1)))
 		{
 			CStringArray aImages;
 			int nNumImage = data.AsArray(aImages);
@@ -5256,18 +5256,14 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 						return attribDef.CalcLongestListItem(pDC);
 
 					case TDCCA_FIXEDMULTILIST:
-						return ((attribDef.aDefaultListData.GetSize() * (COL_ICON_SIZE + COL_ICON_SPACING)) - COL_ICON_SPACING);
+						{
+							int nNumIcons = m_find.GetLargestCustomAttributeArraySize(attribDef, bVisibleTasksOnly);
+							return ((nNumIcons * (COL_ICON_SIZE + COL_ICON_SPACING)) - COL_ICON_SPACING);
+						}
 					}
 				}
 				// else single icon, no text: use MINCOLWIDTH
-				return 0;
-
-			case TDCCA_BOOL:
-				if (attribDef.sColumnTitle.GetLength() == 1)
-					return GraphicsMisc::GetTextWidth(pDC, attribDef.sColumnTitle);
-
-				// else
-				return pDC->GetTextExtent(_T("+")).cx;
+				return COL_ICON_SIZE;
 
 			case TDCCA_FRACTION:
 			case TDCCA_DOUBLE:
@@ -5279,12 +5275,9 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 				}
 				break;
 
+			case TDCCA_BOOL:
 			case TDCCA_FILELINK:
-				{
-					int nNumFiles = m_find.GetLargestCustomFileLinkCount(attribDef, bVisibleTasksOnly);
-					return ((nNumFiles *(COL_ICON_SIZE + COL_ICON_SPACING)) - COL_ICON_SPACING);
-				}
-				break;
+				return COL_ICON_SIZE;
 
 			default:
 				{
