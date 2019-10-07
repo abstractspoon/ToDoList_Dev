@@ -5065,40 +5065,59 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 		if (!pTDI || pTDI->IsDone())
 			continue;
 		
-		// calculate how much time to allocate to each
-		BOOL bHasDueTime = pTDI->HasDueTime();
-		double dSubTime = 0, dSubEst = (pTDI->timeEstimate.dAmount / nNumSubtasks);
+		// Calculate how to apportion time to subtasks
+		BOOL bWantInheritTimeEst = m_data.WantUpdateInheritedAttibute(TDCA_TIMEEST);
+		BOOL bWantInheritStartDate = m_data.WantUpdateInheritedAttibute(TDCA_STARTDATE);
+		BOOL bWantInheritDueDate = m_data.WantUpdateInheritedAttibute(TDCA_DUEDATE);
 		
-		if (pTDI->HasStart() && bHasDueTime && (pTDI->dateDue > pTDI->dateStart))
-			dSubTime = ((pTDI->dateDue - pTDI->dateStart) / nNumSubtasks);
+		double dSubDuration = 0;
+		
+		if (!bWantInheritStartDate && !bWantInheritDueDate)
+		{
+			if (pTDI->HasStart() && (pTDI->dateDue > pTDI->dateStart))
+				dSubDuration = ((pTDI->dateDue - pTDI->dateStart) / nNumSubtasks);
+		}
 
 		DWORD dwPrevSiblingID = 0;
 		
 		for (int nSubtask = 0; nSubtask < nNumSubtasks; nSubtask++)
 		{
-			TODOITEM* pTDISub = m_data.NewTask(*pTDI); // copy parent
+			TODOITEM* pTDISub = m_data.NewTask(*pTDI); // copy parent by default
 			
-			// allocate time slice and dates
-			pTDISub->timeEstimate.dAmount = dSubEst;
+			// Allocate time estimate if not inherited
+			if (!bWantInheritTimeEst)
+				pTDISub->timeEstimate.dAmount = (pTDI->timeEstimate.dAmount / nNumSubtasks);
 			
-			if (dSubTime)
-			{
-				pTDISub->dateStart += (nSubtask * dSubTime);
-				pTDISub->dateDue = pTDISub->dateStart + COleDateTime(dSubTime);
-
-				// clear due time if parent didn't have any
-				if (!bHasDueTime)
-					pTDISub->dateDue = CDateHelper::GetDateOnly(pTDISub->dateDue);
-			}
-			else if (nSubtask) // not the first
-			{
-				pTDISub->ClearStart();
-				pTDISub->ClearDue();
-			}
-
-			// clear time spent from all but first task
-			if (nSubtask)
+			// Allocate all time spent to first task (clear the rest)
+			if (nSubtask > 0)
 				pTDISub->timeSpent.dAmount = 0;
+
+			// Allocate duration if not inherited
+			if (!bWantInheritStartDate && !bWantInheritDueDate)
+			{
+				if (dSubDuration)
+				{
+					pTDISub->dateStart += (nSubtask * dSubDuration);
+					pTDISub->dateDue = pTDISub->dateStart + COleDateTime(dSubDuration);
+
+					// clear due time if parent didn't have any
+					if (!pTDI->HasDueTime())
+						pTDISub->dateDue = CDateHelper::GetDateOnly(pTDISub->dateDue);
+				}
+				else if (nSubtask) // not the first
+				{
+					pTDISub->ClearStart();
+					pTDISub->ClearDue();
+				}
+			}
+			else
+			{
+				if (!bWantInheritStartDate)
+					pTDISub->ClearStart();
+
+				if (!bWantInheritDueDate)
+					pTDISub->ClearDue();
+			}
 
 			// map it
 			DWORD dwChildID = m_dwNextUniqueID++;
@@ -5112,8 +5131,10 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 			aNewTaskIDs.Add(dwChildID);
 		}
 
-		// clear parent time spent/est
-		m_data.ClearTaskAttribute(dwTaskID, TDCA_TIMEEST);
+		// clear parent time est if not inherited
+		if (!bWantInheritTimeEst)
+			m_data.ClearTaskAttribute(dwTaskID, TDCA_TIMEEST);
+
 		m_data.ClearTaskAttribute(dwTaskID, TDCA_TIMESPENT);
 
 		// show new subtasks
