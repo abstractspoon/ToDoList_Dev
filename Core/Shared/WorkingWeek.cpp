@@ -377,7 +377,7 @@ BOOL CWorkingWeek::Initialise(DWORD dwWeekendDays, double dWorkingLengthInHours)
 BOOL CWorkingWeek::Initialise(DWORD dwWeekendDays, double dWorkingLengthInHours, double dStartOfDayInHours, double dStartOfLunchInHours, double dEndOfLunchInHours)
 {
 	// prevent partial initialisation
-	if (!CWorkingDay::IsValid(dStartOfDayInHours, dWorkingLengthInHours, dStartOfLunchInHours, dEndOfLunchInHours))
+	if (!CWorkingDay::IsValid(dWorkingLengthInHours, dStartOfDayInHours, dStartOfLunchInHours, dEndOfLunchInHours))
 		return FALSE;
 
 	if (!CWeekend::IsValid(dwWeekendDays))
