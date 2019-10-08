@@ -1003,6 +1003,11 @@ CString CDialogHelper::GetSelectedItem(const CComboBox& combo)
 	return GetItem(combo, combo.GetCurSel());
 }
 
+CString CDialogHelper::GetEditText(const CComboBox& combo)
+{
+	return GetCtrlText(combo.GetDlgItem(1001), FALSE);
+}
+
 CString CDialogHelper::GetItem(const CComboBox& combo, int nItem)
 {
 	CString sItem;

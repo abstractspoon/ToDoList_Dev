@@ -23,6 +23,10 @@ static char THIS_FILE[] = __FILE__;
 #define NO_SOUND _T("None")
 
 /////////////////////////////////////////////////////////////////////////////
+
+const UINT WM_PTP_ENABLEDISABLE = (WM_APP + 1);
+
+/////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskPage property page
 
 IMPLEMENT_DYNCREATE(CPreferencesTaskPage, CPreferencesPageBase)
@@ -93,10 +97,14 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_LOGTIME, OnLogtime)
 	ON_BN_CLICKED(IDC_NOTIFYTIMETRACKING, OnNotifyTimeTracking)
 	ON_BN_CLICKED(IDC_HASLUNCHBREAK, OnHasLunchBreak)
-	ON_CBN_EDITUPDATE(IDC_HOURSINONEDAY, OnEditChangeHoursInDay)
-	ON_CBN_SELENDOK(IDC_HOURSINONEDAY, OnSelChangeHoursInDay)
+	ON_CBN_EDITUPDATE(IDC_HOURSINONEDAY, OnChangeHoursInDay)
+	ON_CBN_EDITCHANGE(IDC_HOURSINONEDAY, OnChangeHoursInDay)
+	ON_CBN_SELENDOK(IDC_HOURSINONEDAY, OnChangeHoursInDay)
+	ON_CBN_SELCHANGE(IDC_HOURSINONEDAY, OnChangeHoursInDay)
+	ON_CBN_KILLFOCUS(IDC_HOURSINONEDAY, OnKillFocusHoursInDay)
 	//}}AFX_MSG_MAP
 	ON_CONTROL(CLBN_CHKCHANGE, IDC_WEEKENDS, OnChangeWeekends)
+	ON_MESSAGE(WM_PTP_ENABLEDISABLE, OnEnableDisableCtrls)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -130,13 +138,13 @@ void CPreferencesTaskPage::EnableDisableControls()
 	GetDlgItem(IDC_PLAYSOUND)->EnableWindow(m_bTrackReminder);
 	GetDlgItem(IDC_ENDTRACKINGONREMINDER)->EnableWindow(m_bTrackReminder);
 
-	double dHoursInDay = GetHoursInOneDay();
-	BOOL bWholeDay = (dHoursInDay >= 24);
+	BOOL bWholeDay = (m_sHoursInDay.IsEmpty() || (GetHoursInDay() == 24));
 
 	GetDlgItem(IDC_STARTOFDAY)->EnableWindow(!bWholeDay);
 	GetDlgItem(IDC_HASLUNCHBREAK)->EnableWindow(!bWholeDay);
 	GetDlgItem(IDC_STARTOFLUNCH)->EnableWindow(!bWholeDay && m_bHasLunchBreak);
 	GetDlgItem(IDC_ENDOFLUNCH)->EnableWindow(!bWholeDay && m_bHasLunchBreak);
+	GetDlgItem(IDC_DAYSINONEWEEK)->EnableWindow(FALSE); // always
 }
 
 void CPreferencesTaskPage::OnOK()
@@ -150,7 +158,7 @@ void CPreferencesTaskPage::CheckSetWorkingWeek()
 	ValidateWorkingWeek();
 
 	VERIFY(CWorkingWeek::Initialise(m_dwWeekends,
-									GetHoursInOneDay(),
+									GetHoursInDay(),
 									m_dStartOfWorkdayInHours,
 									m_dStartOfLunchInHours,
 									m_bHasLunchBreak ? m_dEndOfLunchInHours : m_dStartOfLunchInHours));
@@ -158,7 +166,7 @@ void CPreferencesTaskPage::CheckSetWorkingWeek()
 
 void CPreferencesTaskPage::ValidateWorkingWeek()
 {
-	double dHoursInDay = GetHoursInOneDay();
+	double dHoursInDay = GetHoursInDay();
 
 	m_sHoursInDay = Misc::Format(dHoursInDay, 2);
 	m_bHasLunchBreak = (dHoursInDay < 24);
@@ -172,7 +180,7 @@ void CPreferencesTaskPage::ValidateWorkingWeek()
 		UpdateData(FALSE);
 }
 
-double CPreferencesTaskPage::GetHoursInOneDay() const
+double CPreferencesTaskPage::GetHoursInDay() const
 {
 	double dHours = Misc::Atof(m_sHoursInDay);
 
@@ -262,20 +270,15 @@ void CPreferencesTaskPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) 
 	pPrefs->WriteProfileInt(szKey, _T("ShowTimeTracker"), m_bShowTimeTracker);
 	pPrefs->WriteProfileInt(szKey, _T("EndTrackingOnReminder"), m_bEndTrackingOnReminder);
 	pPrefs->WriteProfileInt(szKey, _T("HasLunchBreak"), m_bHasLunchBreak);
+	pPrefs->WriteProfileInt(szKey, _T("DaysInWeek"), m_nDaysInWeek); // just for display purposes
+	pPrefs->WriteProfileInt(szKey, _T("Weekends"), m_dwWeekends);
 	
 	pPrefs->WriteProfileDouble(szKey, _T("EndOfLunchInHours"), m_dEndOfLunchInHours);
 	pPrefs->WriteProfileDouble(szKey, _T("StartOfLunchInHours"), m_dStartOfLunchInHours);
 	pPrefs->WriteProfileDouble(szKey, _T("StartOfWorkdayInHours"), m_dStartOfWorkdayInHours);
 
+	pPrefs->WriteProfileString(szKey, _T("HoursInDay"), Misc::Format(GetHoursInDay(), 2));
 	pPrefs->WriteProfileString(_T("Reminders"), _T("SoundFile"), m_sTrackReminderSoundFile.IsEmpty() ? NO_SOUND : m_sTrackReminderSoundFile);
-
-	// validate time periods before writing
-	CString sHoursInDay;
-	sHoursInDay.Format(_T("%.2f"), GetHoursInOneDay());
-	pPrefs->WriteProfileString(szKey, _T("HoursInDay"), sHoursInDay);
-
-	pPrefs->WriteProfileInt(szKey, _T("DaysInWeek"), m_nDaysInWeek); // just for display purposes
-	pPrefs->WriteProfileInt(szKey, _T("Weekends"), m_dwWeekends);
 
 //	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
@@ -297,14 +300,30 @@ void CPreferencesTaskPage::OnHasLunchBreak()
 	GetDlgItem(IDC_ENDOFLUNCH)->EnableWindow(m_bHasLunchBreak);
 }
 
-void CPreferencesTaskPage::OnEditChangeHoursInDay() 
+void CPreferencesTaskPage::OnChangeHoursInDay() 
 {
-	UpdateData();
-	EnableDisableControls();
+	PostMessage(WM_PTP_ENABLEDISABLE);
 }
 
-void CPreferencesTaskPage::OnSelChangeHoursInDay()
+void CPreferencesTaskPage::OnKillFocusHoursInDay()
+{
+	CString sHours = Misc::Format(GetHoursInDay(), 2);
+	Misc::TrimTrailingDecimalZeros(sHours);
+
+	if (sHours != m_sHoursInDay)
+	{
+		m_sHoursInDay = sHours;
+
+		UpdateDataEx(this, IDC_HOURSINONEDAY, m_sHoursInDay, FALSE);
+		EnableDisableControls();
+	}
+}
+
+LRESULT CPreferencesTaskPage::OnEnableDisableCtrls(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	UpdateData();
 	EnableDisableControls();
+
+	return 0L;
 }
+
