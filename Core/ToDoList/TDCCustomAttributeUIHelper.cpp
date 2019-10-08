@@ -275,7 +275,8 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(const TDCCUSTOMATTRIBUTED
 					{
 					case TDCCA_FIXEDLIST:
 					case TDCCA_AUTOLIST:
-						pCB->InsertString(0, _T(""));
+						if (!attribDef.HasFeature(TDCCAF_EXCLUDEBLANKITEM))
+							pCB->InsertString(0, _T(""));
 						break;
 					}
 				}

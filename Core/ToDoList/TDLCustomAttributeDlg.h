@@ -71,19 +71,18 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLCustomAttributeDlg)
-	public:
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+protected:
 	//}}AFX_VIRTUAL
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void OnOK();
+	virtual BOOL OnInitDialog();
 
 // Implementation
 protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CTDLCustomAttributeDlg)
-	virtual BOOL OnInitDialog();
 	afx_msg void OnItemchangedAttriblist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeDatatype();
 	afx_msg void OnSelchangeAlignment();

@@ -192,6 +192,9 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 	case TDCCAF_FILTER:
 		return IsList();
 
+	case TDCCAF_EXCLUDEBLANKITEM:
+		return (IsList() && !IsMultiList());
+
 	default:
 		// calculations not supported on multi-list types
 		if (IsMultiList())

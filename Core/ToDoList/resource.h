@@ -2315,6 +2315,7 @@
 #define IDS_HASREMINDER                 58501
 #define IDS_NOREMINDER                  58502
 #define IDS_TDLBC_TASK                  58503
+#define IDS_CUSTOM_FEATURE_NOBLANK      58504
 
 // Next default values for new objects
 // 
@@ -2322,7 +2323,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        314
 #define _APS_NEXT_COMMAND_VALUE         34663
-#define _APS_NEXT_CONTROL_VALUE         1537
+#define _APS_NEXT_CONTROL_VALUE         1538
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

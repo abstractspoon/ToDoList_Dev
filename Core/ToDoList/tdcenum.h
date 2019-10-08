@@ -875,6 +875,7 @@ enum // custom attribute features
 	TDCCAF_FILTER				= 0x0040, 
 	TDCCAF_INHERITPARENTCHANGES	= 0x0080, 
 	TDCCAF_DISPLAYASPERCENT		= 0x0100, // Numbers only
+	TDCCAF_EXCLUDEBLANKITEM		= 0x0200, // Non-multi lists only
 };
 
 /////////////////////////////////////////////////////////////////////////////
