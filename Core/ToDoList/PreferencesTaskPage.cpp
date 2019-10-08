@@ -93,6 +93,8 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_LOGTIME, OnLogtime)
 	ON_BN_CLICKED(IDC_NOTIFYTIMETRACKING, OnNotifyTimeTracking)
 	ON_BN_CLICKED(IDC_HASLUNCHBREAK, OnHasLunchBreak)
+	ON_CBN_EDITUPDATE(IDC_HOURSINONEDAY, OnEditChangeHoursInDay)
+	ON_CBN_SELENDOK(IDC_HOURSINONEDAY, OnSelChangeHoursInDay)
 	//}}AFX_MSG_MAP
 	ON_CONTROL(CLBN_CHKCHANGE, IDC_WEEKENDS, OnChangeWeekends)
 END_MESSAGE_MAP()
@@ -114,17 +116,27 @@ void CPreferencesTaskPage::OnFirstShow()
 
 	AddGroupLine(IDC_TRACKGROUP); 
 	AddGroupLine(IDC_TIMEGROUP); 
+	
+	CDialogHelper::RefreshMaxColumnWidth(m_lbWeekends);
 
+	EnableDisableControls();
+	UpdateData(FALSE);
+}
+
+void CPreferencesTaskPage::EnableDisableControls()
+{
 	GetDlgItem(IDC_LOGTASKSEPARATELY)->EnableWindow(m_bLogTime);
 	GetDlgItem(IDC_NOTIFYTIMETRACKINGFREQUENCY)->EnableWindow(m_bTrackReminder);
 	GetDlgItem(IDC_PLAYSOUND)->EnableWindow(m_bTrackReminder);
 	GetDlgItem(IDC_ENDTRACKINGONREMINDER)->EnableWindow(m_bTrackReminder);
-	GetDlgItem(IDC_STARTOFLUNCH)->EnableWindow(m_bHasLunchBreak);
-	GetDlgItem(IDC_ENDOFLUNCH)->EnableWindow(m_bHasLunchBreak);
 
-	CDialogHelper::RefreshMaxColumnWidth(m_lbWeekends);
+	double dHoursInDay = GetHoursInOneDay();
+	BOOL bWholeDay = (dHoursInDay >= 24);
 
-	UpdateData(FALSE);
+	GetDlgItem(IDC_STARTOFDAY)->EnableWindow(!bWholeDay);
+	GetDlgItem(IDC_HASLUNCHBREAK)->EnableWindow(!bWholeDay);
+	GetDlgItem(IDC_STARTOFLUNCH)->EnableWindow(!bWholeDay && m_bHasLunchBreak);
+	GetDlgItem(IDC_ENDOFLUNCH)->EnableWindow(!bWholeDay && m_bHasLunchBreak);
 }
 
 void CPreferencesTaskPage::OnOK()
@@ -135,19 +147,29 @@ void CPreferencesTaskPage::OnOK()
 
 void CPreferencesTaskPage::CheckSetWorkingWeek()
 {
+	ValidateWorkingWeek();
+
+	VERIFY(CWorkingWeek::Initialise(m_dwWeekends,
+									GetHoursInOneDay(),
+									m_dStartOfWorkdayInHours,
+									m_dStartOfLunchInHours,
+									m_bHasLunchBreak ? m_dEndOfLunchInHours : m_dStartOfLunchInHours));
+}
+
+void CPreferencesTaskPage::ValidateWorkingWeek()
+{
 	double dHoursInDay = GetHoursInOneDay();
+
 	m_sHoursInDay = Misc::Format(dHoursInDay, 2);
+	m_bHasLunchBreak = (dHoursInDay < 24);
 
 	m_dStartOfWorkdayInHours = min(m_dStartOfWorkdayInHours, (24 - dHoursInDay));
 	m_dStartOfLunchInHours = max(m_dStartOfWorkdayInHours, m_dStartOfLunchInHours);
 	m_dEndOfLunchInHours = min(m_dEndOfLunchInHours, (m_dStartOfWorkdayInHours + dHoursInDay));
 	m_dEndOfLunchInHours = max(m_dEndOfLunchInHours, m_dStartOfLunchInHours);
 
-	VERIFY(CWorkingWeek::Initialise(m_dwWeekends,
-									dHoursInDay,
-									m_dStartOfWorkdayInHours,
-									m_dStartOfLunchInHours,
-									m_dEndOfLunchInHours));
+	if (GetSafeHwnd())
+		UpdateData(FALSE);
 }
 
 double CPreferencesTaskPage::GetHoursInOneDay() const
@@ -180,8 +202,6 @@ void CPreferencesTaskPage::OnChangeWeekends()
 void CPreferencesTaskPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// load settings
-	m_nDaysInWeek = pPrefs->GetProfileInt(szKey, _T("DaysInWeek"), 5);
-	m_sHoursInDay = pPrefs->GetProfileString(szKey, _T("HoursInDay"), _T("8.00"));
 	m_bLogTime = pPrefs->GetProfileInt(szKey, _T("LogTime"), TRUE);
 	m_bLogTasksSeparately = pPrefs->GetProfileInt(szKey, _T("LogTasksSeparately"), FALSE);
 	m_bExclusiveTimeTracking = pPrefs->GetProfileInt(szKey, _T("ExclusiveTimeTracking"), TRUE);
@@ -195,6 +215,9 @@ void CPreferencesTaskPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR s
 	m_nTrackReminderFrequency = pPrefs->GetProfileInt(szKey, _T("TrackReminderFrequency"), 5);
 	m_bShowTimeTracker = pPrefs->GetProfileInt(szKey, _T("ShowTimeTracker"), TRUE);
 	m_bEndTrackingOnReminder = pPrefs->GetProfileInt(szKey, _T("EndTrackingOnReminder"), FALSE);
+
+	m_nDaysInWeek = pPrefs->GetProfileInt(szKey, _T("DaysInWeek"), 5);
+	m_sHoursInDay = pPrefs->GetProfileString(szKey, _T("HoursInDay"), _T("8.00"));
 	m_bHasLunchBreak = pPrefs->GetProfileInt(szKey, _T("HasLunchBreak"), TRUE);
 	
 	m_dEndOfLunchInHours = pPrefs->GetProfileDouble(szKey, _T("EndOfLunchInHours"), 14.0);
@@ -272,4 +295,16 @@ void CPreferencesTaskPage::OnHasLunchBreak()
 
 	GetDlgItem(IDC_STARTOFLUNCH)->EnableWindow(m_bHasLunchBreak);
 	GetDlgItem(IDC_ENDOFLUNCH)->EnableWindow(m_bHasLunchBreak);
+}
+
+void CPreferencesTaskPage::OnEditChangeHoursInDay() 
+{
+	UpdateData();
+	EnableDisableControls();
+}
+
+void CPreferencesTaskPage::OnSelChangeHoursInDay()
+{
+	UpdateData();
+	EnableDisableControls();
 }

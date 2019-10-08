@@ -100,6 +100,8 @@ protected:
 	afx_msg void OnChangeWeekends();
 	afx_msg void OnNotifyTimeTracking();
 	afx_msg void OnHasLunchBreak();
+	afx_msg void OnEditChangeHoursInDay();
+	afx_msg void OnSelChangeHoursInDay();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -109,6 +111,8 @@ protected:
 	double GetHoursInOneDay() const;
 
 	void CheckSetWorkingWeek();
+	void EnableDisableControls();
+	void ValidateWorkingWeek(); 
 };
 
 //{{AFX_INSERT_LOCATION}}
