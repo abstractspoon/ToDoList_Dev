@@ -111,9 +111,7 @@ BOOL CTDLTaskTreeCtrl::CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL 
 							TVS_HASLINES | 
 							TVS_LINESATROOT | 
 							TVS_HASBUTTONS | 
-//							TVS_EDITLABELS | 
-							TVS_NONEVENHEIGHT |
-							 TVS_NOTOOLTIPS),
+							TVS_NONEVENHEIGHT),
 							rect, 
 							pParentWnd, 
 							IDC_TASKTREE);
@@ -845,7 +843,7 @@ BOOL CTDLTaskTreeCtrl::PreTranslateMessage(MSG* pMsg)
 		CToolTipCtrl* pTT = m_tcTasks.GetToolTips();
 
 		if (pTT)
-			pTT->Pop();
+			pTT->PostMessage(TTM_POP);
 	}
 	
 	return CTDLTaskCtrlBase::PreTranslateMessage(pMsg);
@@ -1097,21 +1095,6 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 				OnTreeGetDispInfo((NMTVDISPINFO*)pNMHDR);
 				break;
 
-// 			case TVN_GETINFOTIP:
-// 				{
-// 					NMTVGETINFOTIP* pTVGIT = (NMTVGETINFOTIP*)pNMHDR;
-// 					DWORD dwTaskID = (DWORD)pTVGIT->lParam;
-// 					
-// 					if (dwTaskID)
-// 					{
-// 						CString sInfoTip(FormatInfoTip(dwTaskID, (pTVGIT->cchTextMax - 1)));
-// 						lstrcpyn(pTVGIT->pszText, sInfoTip, (pTVGIT->cchTextMax - 1));
-// 
-// 						return 0L; // eat
-// 					}
-// 				}
-// 				break;
-				
 			case TVN_KEYDOWN:
 				{
 					// all we do is get a copy of the key pressed for reference
@@ -1212,23 +1195,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		case WM_PAINT:
 			break;
 #endif
-
-// 		case WM_NOTIFY:
-// 			{
-// 				LPNMHDR pNMHDR = (LPNMHDR)lp;
-// 				HWND hwnd = pNMHDR->hwndFrom;
-// 
-// 				switch (pNMHDR->code)
-// 				{
-// 				case TTN_SHOW:
-// 					// Set the font to non-bold for info tips
-// 					if (HasStyle(TDCS_SHOWINFOTIPS))
-// 						::SendMessage(hwnd, WM_SETFONT, (WPARAM)m_fonts.GetHFont(), TRUE);
-// 					break;
-// 				}
-// 			}
-// 			break;
-
 		case WM_ERASEBKGND:
 			if (m_bMovingItem)
 				return TRUE;
