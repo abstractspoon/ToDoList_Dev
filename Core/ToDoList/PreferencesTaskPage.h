@@ -100,15 +100,16 @@ protected:
 	afx_msg void OnChangeWeekends();
 	afx_msg void OnNotifyTimeTracking();
 	afx_msg void OnHasLunchBreak();
-	afx_msg void OnEditChangeHoursInDay();
-	afx_msg void OnSelChangeHoursInDay();
+	afx_msg void OnChangeHoursInDay();
+	afx_msg void OnKillFocusHoursInDay();
 	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+	afx_msg LRESULT OnEnableDisableCtrls(WPARAM wp, LPARAM lp);
+DECLARE_MESSAGE_MAP()
 
 protected:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
-	double GetHoursInOneDay() const;
+	double GetHoursInDay() const;
 
 	void CheckSetWorkingWeek();
 	void EnableDisableControls();

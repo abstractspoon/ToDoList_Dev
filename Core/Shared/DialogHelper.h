@@ -174,6 +174,7 @@ public:
 	static int GetSelectedItemAsValue(const CComboBox& combo);
 	static CString GetSelectedItem(const CComboBox& combo);
 	static CString GetItem(const CComboBox& combo, int nItem);
+	static CString GetEditText(const CComboBox& combo);
 
 	static BOOL IsDroppedComboBox(HWND hCtrl);
 	static int FindItemByValue(const CComboBox& combo, int nValue);
