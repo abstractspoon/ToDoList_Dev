@@ -5036,12 +5036,9 @@ BOOL CToDoCtrl::CanSplitSelectedTask() const
 
 BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 {
-	if (!CanSplitSelectedTask() || (nNumSubtasks < 2))
+	if ((nNumSubtasks < 2) || !CanSplitSelectedTask())
 		return FALSE;
 	
-	if (!GetSelectedCount() || m_taskTree.SelectionHasReferences())
-		return FALSE;
-
 	Flush();
 	
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_ADD);
