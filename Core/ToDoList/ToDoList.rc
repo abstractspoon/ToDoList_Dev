@@ -5684,7 +5684,7 @@ BEGIN
     IDS_HASREMINDER         "Reminder"
     IDS_NOREMINDER          "No Reminder"
     IDS_TDLBC_TASK          "Task"
-    IDS_CUSTOM_FEATURE_NOBLANK "Exclude blank item"
+    IDS_CUSTOM_FEATURE_NOBLANK "Exclude blank list item"
 END
 
 #endif    // English (Australia) resources

@@ -28,17 +28,17 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 #pragma managed(pop)
 #endif
 
-extern "C" RTF2HTMLBRIDGE_API int fnRtf2Html(LPCTSTR rtfFile,
-                                          LPCTSTR htmlFile,
-										  LPCTSTR a1,
-										  LPCTSTR a2,
-										  LPCTSTR a3,
-										  LPCTSTR a4,
-										  LPCTSTR a5,
-										  LPCTSTR a6,
-										  LPCTSTR a7,
-										  LPCTSTR a8,
-										  LPCTSTR a9)
+extern "C" RTF2HTMLBRIDGE_API int fnRtf2Html(LPCWSTR rtfFile,
+                                          LPCWSTR htmlFile,
+										  LPCWSTR a1,
+										  LPCWSTR a2,
+										  LPCWSTR a3,
+										  LPCWSTR a4,
+										  LPCWSTR a5,
+										  LPCWSTR a6,
+										  LPCWSTR a7,
+										  LPCWSTR a8,
+										  LPCWSTR a9)
 {
 	System::String^ _rtfFile = gcnew System::String(rtfFile);
 	System::String^ _htmlFile = gcnew System::String(htmlFile);

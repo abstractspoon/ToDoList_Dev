@@ -23,6 +23,5 @@ using System.Security.Permissions;
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
 [assembly: ComVisible( false )]
-[assembly: SecurityPermission( SecurityAction.RequestMinimum, Assertion = true )]
 [assembly: CLSCompliant( true )]
 // -- EOF -------------------------------------------------------------------
