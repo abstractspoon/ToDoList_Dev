@@ -11700,35 +11700,22 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 	if (m_ctrlComments.HasFocus())
 		return bUndo ? m_ctrlComments.Undo() : m_ctrlComments.Redo();
 
-	// else handle if we're editing a tree label or if the focus is on the 
-	// project name, category or alloc to fields
+	// We pass the undo request to the focused edit if:
+	// 1. Tree label editing
+	// OR
+	// 2. Project description editing
+	// OR
+	// 3. There is something to be undone
 	CWnd* pFocus = GetFocus();
 
-	if (pFocus)
+	if (pFocus && CWinClasses::IsClass(*pFocus, WC_EDIT))
 	{
-		UINT nFocusID = pFocus ? pFocus->GetDlgCtrlID() : 0;
+		CEdit* pEdit = (CEdit*)pFocus;
 
-		if (IsTaskLabelEditing() || nFocusID == IDC_PROJECTNAME)
+		if (pEdit->CanUndo() || IsTaskLabelEditing() || (pEdit->GetDlgCtrlID() == IDC_PROJECTNAME))
 		{
-			CEdit* pEdit = (CEdit*)pFocus;
-			
-			// try to undo and prevent further processing 
 			pEdit->Undo();
 			return FALSE; 
-		}
-		else if (m_cbCategory.IsChild(pFocus) || 
-				m_cbAllocTo.IsChild(pFocus) || 
-				m_cbTags.IsChild(pFocus))
-		{
-			CEdit* pEdit = (CEdit*)pFocus;
-
-			// only process and prevent further processing if the 
-			// edit has something to undo
-			if (pEdit->CanUndo())
-			{
-				pEdit->Undo();
-				return FALSE; // combo edit takes precedence
-			}
 		}
 	}
 
