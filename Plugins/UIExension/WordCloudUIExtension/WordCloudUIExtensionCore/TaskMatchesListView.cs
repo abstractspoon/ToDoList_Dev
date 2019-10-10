@@ -45,7 +45,27 @@ namespace WordCloudUIExtension
             m_ilItemHeight = new ImageList();
             m_ilItemHeight.ImageSize = new Size(1, DPIScaling.Scale(17)); // minimum height
 
+			// The only way to control the font of a tooltip
+			// is to make it owner-draw!
 			m_LabelTip = new System.Windows.Forms.ToolTip();
+			m_LabelTip.OwnerDraw = true;
+			m_LabelTip.Draw += new DrawToolTipEventHandler(OnDrawLabelTip);
+			m_LabelTip.Popup += new PopupEventHandler(OnShowLabelTip);
+		}
+
+		protected void OnShowLabelTip(object sender, PopupEventArgs e)
+		{
+			e.ToolTipSize = TextRenderer.MeasureText(m_LabelTip.GetToolTip(this), this.Font);
+		}
+
+		protected void OnDrawLabelTip(object sender, DrawToolTipEventArgs e)
+		{
+			using (e.Graphics)
+			{
+				e.Graphics.FillRectangle(SystemBrushes.Window, e.Bounds);
+				e.Graphics.DrawString(e.ToolTipText, this.Font, SystemBrushes.InfoText, e.Bounds);
+				e.DrawBorder();
+			}
 		}
 
 		public Boolean TaskColorIsBackground
@@ -481,6 +501,13 @@ namespace WordCloudUIExtension
             // all else
             Cursor = Cursors.Arrow;
         }
+
+		protected override void OnMouseLeave(EventArgs e)
+		{
+			base.OnMouseLeave(e);
+
+			m_LabelTip.Hide(this);
+		}
 
 		protected override void OnMouseHover(EventArgs e)
 		{

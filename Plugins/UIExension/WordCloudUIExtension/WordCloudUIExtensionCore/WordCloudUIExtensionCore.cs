@@ -409,6 +409,8 @@ namespace WordCloudUIExtension
 		public void SetTaskFont(String faceName, int pointSize)
 		{
 			m_WordCloud.SetFont(faceName, pointSize);
+
+			m_TaskMatchesList.Font = new Font(faceName, pointSize);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
