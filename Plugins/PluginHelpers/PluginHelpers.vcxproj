@@ -71,7 +71,7 @@ copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\
 copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 
-copy $(SolutionDir)packages\Microsoft.VisualStudio.OLE.Interop.7.10.6071\lib\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 
 </Command>
     </PostBuildEvent>
@@ -103,7 +103,7 @@ copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\
 copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 
-copy $(SolutionDir)packages\Microsoft.VisualStudio.OLE.Interop.7.10.6071\lib\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
