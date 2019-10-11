@@ -22,36 +22,35 @@
 #include "ToDoCtrlDataDefines.h"
 #include "TDCDialogHelper.h"
 
-#include "..\shared\holdredraw.h"
-#include "..\shared\osversion.h"
+#include "..\shared\autoflag.h"
+#include "..\shared\clipboard.h"
+#include "..\shared\datehelper.h"
 #include "..\shared\deferWndMove.h"
 #include "..\shared\dlgunits.h"
-#include "..\shared\themed.h"
-#include "..\shared\datehelper.h"
 #include "..\shared\driveinfo.h"
-#include "..\shared\toolbarhelper.h"
-#include "..\shared\passworddialog.h"
-#include "..\shared\winclasses.h"
-#include "..\shared\wclassdefines.h"
-#include "..\shared\enfiledialog.h"
-#include "..\shared\misc.h"
-#include "..\shared\webmisc.h"
-#include "..\shared\graphicsmisc.h"
-#include "..\shared\enstring.h"
-#include "..\shared\stringres.h"
-#include "..\shared\treectrlhelper.h"
-#include "..\shared\filemisc.h"
-#include "..\Interfaces\Preferences.h"
-#include "..\shared\autoflag.h"
 #include "..\shared\enbitmap.h"
+#include "..\shared\enfiledialog.h"
 #include "..\shared\enmenu.h"
-#include "..\shared\msoutlookhelper.h"
-#include "..\shared\savefocus.h"
+#include "..\shared\enstring.h"
+#include "..\shared\filemisc.h"
+#include "..\shared\graphicsmisc.h"
+#include "..\shared\holdredraw.h"
 #include "..\shared\localizer.h"
-#include "..\shared\clipboard.h"
 #include "..\shared\mapex.h"
 #include "..\shared\messagebox.h"
+#include "..\shared\misc.h"
+#include "..\shared\msoutlookhelper.h"
+#include "..\shared\osversion.h"
+#include "..\shared\passworddialog.h"
+#include "..\shared\savefocus.h"
 #include "..\shared\ScopedTimer.h"
+#include "..\shared\stringres.h"
+#include "..\shared\themed.h"
+#include "..\shared\toolbarhelper.h"
+#include "..\shared\treectrlhelper.h"
+#include "..\shared\wclassdefines.h"
+#include "..\shared\webmisc.h"
+#include "..\shared\winclasses.h"
 
 #include "..\3rdparty\msoutl.h"
 #include "..\3rdparty\shellicons.h"
@@ -59,6 +58,7 @@
 #include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\gdiplus.h"
 
+#include "..\Interfaces\Preferences.h"
 #include "..\interfaces\spellcheckdlg.h"
 #include "..\interfaces\IContentControl.h"
 #include "..\Interfaces\TasklistSchemaDef.h"
@@ -6985,24 +6985,14 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 		UpdateControls(FALSE);
 }
 
-/*
-void CToDoCtrl::GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const
-{
-	POSITION pos = mapModAttribIDs.GetStartPosition();
-
-	while (pos)
-		GetAttributesAffectedByMod(mapModAttribIDs.GetNext(pos), mapAffectedAttribIDs);
-}
-*/
-
 void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttribIDs) const
 {
+	mapAttribIDs.Add(nAttrib);
+
 	// Check for attribute dependencies
 	switch (nAttrib)
 	{
 	case TDCA_DEPENDENCY:
-		mapAttribIDs.Add(nAttrib);
-
 		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
@@ -7011,8 +7001,6 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 		break;
 
 	case TDCA_DUEDATE:
-		mapAttribIDs.Add(nAttrib);
-
 		// If this extension view wants due or start dates and dependents may
 		// have changed then we send all tasks with dates
 		if (m_taskTree.SelectionHasDependents() &&
@@ -7035,8 +7023,6 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 		break;
 
 	case TDCA_STARTDATE:
-		mapAttribIDs.Add(nAttrib);
-
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
@@ -7045,7 +7031,6 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 		break;
 
 	case TDCA_DONEDATE:
-		mapAttribIDs.Add(nAttrib);
 		mapAttribIDs.Add(TDCA_SUBTASKDONE);
 
 		if (m_taskTree.SelectionHasDependents() &&
@@ -7086,7 +7071,10 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 		break;
 
 	case TDCA_CUSTOMATTRIBDEFS:
+		// Special case: We replace the definition 
+		// attribute with the value attribute
 		mapAttribIDs.Add(TDCA_CUSTOMATTRIB);
+		mapAttribIDs.Remove(TDCA_CUSTOMATTRIBDEFS);
 		break;
 
 	case TDCA_TIMEEST:
@@ -7099,10 +7087,6 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
 		}
-		break;
-
-	default: // all else
-		mapAttribIDs.Add(nAttrib);
 		break;
 	}
 
@@ -11667,28 +11651,17 @@ BOOL CToDoCtrl::CanUndoLastAction(BOOL bUndo) const
 { 
 	// handle comments field
 	if (m_ctrlComments.HasFocus())
-	{
 		return (m_nCommentsState != CS_CLEAN);
-	}
-	else if (bUndo)
+
+	// Handle edit fields as below
+	CWnd* pFocus = GetFocus();
+
+	if (pFocus && CWinClasses::IsClass(*pFocus, WC_EDIT))
 	{
-		// handle simple edit fields
-		CWnd* pFocus = GetFocus();
-
-		if (pFocus)
-		{
-			CEdit* pEdit = NULL;
-			UINT nFocusID = pFocus ? pFocus->GetDlgCtrlID() : 0;
-
-			if (IsTaskLabelEditing() || nFocusID == IDC_PROJECTNAME ||
-				m_cbCategory.IsChild(pFocus) || m_cbAllocTo.IsChild(pFocus) || m_cbTags.IsChild(pFocus))
-			{
-				pEdit = (CEdit*)pFocus;
-			}
-
-			if (pEdit)
-				return pEdit->CanUndo();
-		}
+		CEdit* pEdit = (CEdit*)pFocus;
+		
+		if (pEdit->CanUndo() || IsTaskLabelEditing() || (pEdit->GetDlgCtrlID() == IDC_PROJECTNAME))
+			return TRUE;
 	}
 
 	return m_data.CanUndoLastAction(bUndo); 
@@ -11760,7 +11733,11 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 			// update current selection
 			UpdateControls();
 
- 			SetModified(TDCA_UNDO, aTaskIDs);
+			// If the operation just un/redone was an edit then we treat it as such
+			if (nUndoType == TDCUAT_EDIT)
+ 				SetModified(TDCA_ALL, aTaskIDs);
+			else
+				SetModified(TDCA_UNDO, aTaskIDs);
 
 			return TRUE;
 		}

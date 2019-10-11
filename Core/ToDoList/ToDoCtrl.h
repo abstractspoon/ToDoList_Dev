@@ -906,7 +906,6 @@ protected:
 	BOOL ModCausesColorChange(TDC_ATTRIBUTE nModType) const;
 	BOOL ModsCauseColorChange(const CTDCAttributeMap& attribIDs) const;
 	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttribIDs) const;
-	void GetAttributesAffectedByMods(const CTDCAttributeMap& mapModAttribIDs, CTDCAttributeMap& mapAffectedAttribIDs) const;
 	
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
 	void BuildTasksForSave(CTaskFile& tasks) const;

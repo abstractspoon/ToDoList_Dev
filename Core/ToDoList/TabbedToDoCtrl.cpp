@@ -1710,8 +1710,7 @@ BOOL CTabbedToDoCtrl::ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const CO
 	CDWordArray aModTaskIDs;
 	aModTaskIDs.Add(dwTaskID);
 
-	CToDoCtrl::SetModified(TDCA_STARTDATE, aModTaskIDs); 
-	CToDoCtrl::SetModified(TDCA_DUEDATE, aModTaskIDs); 
+	CToDoCtrl::SetModified(TDCA_OFFSETTASK, aModTaskIDs);
 
 	UpdateControls(FALSE); // don't update comments
 
@@ -3029,26 +3028,26 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	case FTCV_UNSET:
 		if (bNewTaskTitleEdit)
 		{
-			UpdateListView(TDCA_NEWTASK, dwModTaskID, FALSE);
-			UpdateExtensionViews(TDCA_NEWTASK, dwModTaskID);
+			UpdateListView(TDCA_NEWTASK, aModTaskIDs, FALSE);
+			UpdateExtensionViews(TDCA_NEWTASK, aModTaskIDs);
 		}
 		else if (!bNewSingleTask)
 		{
-			UpdateListView(mapAttribIDs, dwModTaskID, FALSE);
-			UpdateExtensionViews(mapAttribIDs, dwModTaskID);
+			UpdateListView(mapAttribIDs, aModTaskIDs, FALSE);
+			UpdateExtensionViews(mapAttribIDs, aModTaskIDs);
 		}
 		break;
 
 	case FTCV_TASKLIST:
-		UpdateListView(mapAttribIDs, dwModTaskID, bAllowResort);
+		UpdateListView(mapAttribIDs, aModTaskIDs, bAllowResort);
 
 		if (bNewTaskTitleEdit)
 		{
-			UpdateExtensionViews(TDCA_NEWTASK, dwModTaskID);
+			UpdateExtensionViews(TDCA_NEWTASK, aModTaskIDs);
 		}
 		else if (!bNewSingleTask)
 		{
-			UpdateExtensionViews(mapAttribIDs, dwModTaskID);
+			UpdateExtensionViews(mapAttribIDs, aModTaskIDs);
 		}
 		else
 		{
@@ -3073,15 +3072,15 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		UpdateExtensionViews(mapAttribIDs, dwModTaskID);
+		UpdateExtensionViews(mapAttribIDs, aModTaskIDs);
 
 		if (bNewTaskTitleEdit)
 		{
-			UpdateListView(TDCA_NEWTASK, dwModTaskID, FALSE);
+			UpdateListView(TDCA_NEWTASK, aModTaskIDs, FALSE);
 		}
 		else if (!bNewSingleTask)
 		{
-			UpdateListView(mapAttribIDs, dwModTaskID, FALSE);
+			UpdateListView(mapAttribIDs, aModTaskIDs, FALSE);
 		}
 		else
 		{
@@ -3094,7 +3093,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	UpdateSortStates(mapAttribIDs, bAllowResort);
 }
 
-void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID, BOOL bAllowResort)
+void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
 {
 	// Don't do anything if we are not active and we are waiting
 	// for a full task update
@@ -3120,14 +3119,15 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD
 	{
 		m_taskList.RemoveDeletedItems();
 	}
-	else if (mapAttribIDs.Has(TDCA_NEWTASK) && dwTaskID)
+	else if (mapAttribIDs.Has(TDCA_NEWTASK) && aModTaskIDs.GetSize())
 	{
 		int nSel = m_taskList.GetSelectedItem();
 
 		if (nSel != -1)
 			nSel++;
 
-		m_taskList.InsertItem(dwTaskID, nSel);
+		ASSERT(aModTaskIDs[0]);
+		m_taskList.InsertItem(aModTaskIDs[0], nSel);
 	}
 	else if (mapAttribIDs.Has(TDCA_NEWTASK) ||
 			 mapAttribIDs.Has(TDCA_UNDO) ||
@@ -3218,7 +3218,7 @@ int CTabbedToDoCtrl::GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapA
 	return mapAttribIDs.GetCount();
 }
 
-void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID)
+void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs)
 {
 	if (!HasAnyExtensionViews() || mapAttribIDs.Has(TDCA_NONE))
 		return;
@@ -3227,9 +3227,8 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 
 	if (mapAttribIDs.Has(TDCA_NEWTASK))
 	{
-		// Special case: if dwTaskID is set then it's a single task
-		// so we treat it like an edit
-		if (dwTaskID)
+		// If only a single task was created then treat it like an edit
+		if (aModTaskIDs.GetSize() == 1)
 			UpdateExtensionViewsSelection(mapAttribIDs);
 		else
 			UpdateExtensionViewsTasks(mapAttribIDs);

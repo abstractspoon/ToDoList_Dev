@@ -4499,6 +4499,11 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 			AccumulateRecalcColumn(nColID, aColIDs);
 			break;
 
+		case TDCA_OFFSETTASK:
+			AccumulateRecalcColumn(TDCC_STARTDATE, aColIDs);
+			AccumulateRecalcColumn(TDCC_DUEDATE, aColIDs);
+			break;
+
 		case TDCA_TIMEEST:
 			bRedrawCols |= !AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
 
@@ -4582,6 +4587,7 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 		case TDCA_ARCHIVE:
 		case TDCA_UNDO:
 		case TDCA_NEWTASK:
+		case TDCA_ALL:
 			aColIDs.Copy(m_mapVisibleCols);
 			break;
 
@@ -4800,6 +4806,10 @@ BOOL CTDLTaskCtrlBase::ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy
 				return TRUE;
 		}
 		break;
+
+	case TDCA_OFFSETTASK:
+		return (ModNeedsResort(TDCA_STARTDATE, nSortBy) ||
+				ModNeedsResort(TDCA_DUEDATE, nSortBy)); // RECURSIVE calls
 
 	case TDCA_DONEDATE:
 		{

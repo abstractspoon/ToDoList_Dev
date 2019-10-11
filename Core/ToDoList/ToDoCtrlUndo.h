@@ -104,15 +104,18 @@ struct TDCUNDOACTION
 
 	int GetTaskIDs(CDWordArray& aIDs) const
 	{
+		CDWordSet mapIDs; // Unique items only
 		aIDs.RemoveAll();
-
-		// get around constness
-		TDCUNDOACTION* pThis = const_cast<TDCUNDOACTION*>(this);
 
 		for (int nElm = 0; nElm < aElements.GetSize(); nElm++)
 		{
-			const TDCUNDOELEMENT& elm = pThis->aElements.ElementAt(nElm);
-			aIDs.Add(elm.dwTaskID);
+			const TDCUNDOELEMENT& elm = aElements.GetData()[nElm];
+
+			if (!mapIDs.Has(elm.dwTaskID))
+			{
+				aIDs.Add(elm.dwTaskID);
+				mapIDs.Add(elm.dwTaskID);
+			}
 		}
 
 		return aIDs.GetSize();

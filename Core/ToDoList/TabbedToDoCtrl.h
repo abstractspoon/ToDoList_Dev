@@ -258,7 +258,7 @@ protected:
 	BOOL IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const;
 	BOOL HasCalculatedAttributes(const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const;
-	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID, BOOL bAllowResort);
+	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 
 	void SyncActiveViewSelectionToTree();
@@ -303,7 +303,7 @@ protected:
 	BOOL ViewSupportsNewTask(FTC_VIEW nView) const;
 	BOOL ViewHasTaskSelection(FTC_VIEW nView) const;
 
-	void UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs, DWORD dwTaskID = 0);
+	void UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs);
 	BOOL ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd);
 	BOOL ExtensionCanDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd) const;
 	BOOL ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA& data);
