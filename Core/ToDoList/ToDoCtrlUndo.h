@@ -20,47 +20,13 @@
 struct TDCUNDOELEMENT
 {
 	TDCUNDOELEMENT(TDC_UNDOELMOP op = TDCUEO_EDIT, DWORD taskID = 0, DWORD parentID = 0, 
-					DWORD prevSiblingID = 0, WORD flags = 0, const TODOITEM* pTDI = NULL) : 
-					nOp(op), 
-					dwTaskID(taskID), 
-					dwParentID(parentID), 
-					dwPrevSiblingID(prevSiblingID),
-					wFlags(flags)
-	{
-		if (pTDI)
-			tdi = *pTDI;
-	}
+					DWORD prevSiblingID = 0, WORD flags = 0, const TODOITEM* pTDI = NULL);
+	TDCUNDOELEMENT(const TDCUNDOELEMENT& elm);
 
-	TDCUNDOELEMENT(const TDCUNDOELEMENT& elm) 
-	{
-		*this = elm;
-	}
+	const TDCUNDOELEMENT& operator=(const TDCUNDOELEMENT& elm);
 
-	const TDCUNDOELEMENT& operator=(const TDCUNDOELEMENT& elm) 
-	{ 
-		nOp = elm.nOp;
-		dwTaskID = elm.dwTaskID;
-		dwParentID = elm.dwParentID;
-		dwPrevSiblingID = elm.dwPrevSiblingID;
-		tdi = elm.tdi;
-		wFlags = elm.wFlags;
-
-		return *this; 
-	}
-
-	BOOL operator==(const TDCUNDOELEMENT& elm) const
-	{ 
-		return (nOp == elm.nOp && 
-				dwTaskID == elm.dwTaskID &&
-				dwParentID == elm.dwParentID &&
-				dwPrevSiblingID == elm.dwPrevSiblingID &&
-				wFlags == elm.wFlags);
-	}
-
-	BOOL operator!=(const TDCUNDOELEMENT& elm) const
-	{
-		return !(*this == elm);
-	}
+	BOOL operator==(const TDCUNDOELEMENT& elm) const;
+	BOOL operator!=(const TDCUNDOELEMENT& elm) const;
 
 	TDC_UNDOELMOP nOp;
 	DWORD dwTaskID;
@@ -79,47 +45,13 @@ typedef CArray<TDCUNDOELEMENT, TDCUNDOELEMENT&> CArrayUndoElements;
 
 struct TDCUNDOACTION
 {
-	TDCUNDOACTION(TDC_UNDOACTIONTYPE type = TDCUAT_NONE) : nType(type) 
-	{
-	}
+	TDCUNDOACTION(TDC_UNDOACTIONTYPE type = TDCUAT_NONE);
+	TDCUNDOACTION(const TDCUNDOACTION& action);
 	
-	TDCUNDOACTION(const TDCUNDOACTION& action) 
-	{
-		*this = action;
-	}
+	const TDCUNDOACTION& operator=(const TDCUNDOACTION& action) ;
+	BOOL operator==(const TDCUNDOACTION& action) const;
 
-	const TDCUNDOACTION& operator=(const TDCUNDOACTION& action) 
-	{ 
-		nType = action.nType;
-		aElements.Copy(action.aElements);
-
-		return *this; 
-	}
-
-	BOOL operator==(const TDCUNDOACTION& action) const
-	{ 
-		return (nType == action.nType && 
-				Misc::MatchAllT(aElements, action.aElements, FALSE));
-	}
-
-	int GetTaskIDs(CDWordArray& aIDs) const
-	{
-		CDWordSet mapIDs; // Unique items only
-		aIDs.RemoveAll();
-
-		for (int nElm = 0; nElm < aElements.GetSize(); nElm++)
-		{
-			const TDCUNDOELEMENT& elm = aElements.GetData()[nElm];
-
-			if (!mapIDs.Has(elm.dwTaskID))
-			{
-				aIDs.Add(elm.dwTaskID);
-				mapIDs.Add(elm.dwTaskID);
-			}
-		}
-
-		return aIDs.GetSize();
-	}
+	int GetTaskIDs(CDWordArray& aIDs) const;
 
 	TDC_UNDOACTIONTYPE nType;
 	CArrayUndoElements aElements;

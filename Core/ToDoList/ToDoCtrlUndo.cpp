@@ -12,6 +12,96 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+TDCUNDOELEMENT::TDCUNDOELEMENT(TDC_UNDOELMOP op, DWORD taskID, DWORD parentID,
+							   DWORD prevSiblingID, WORD flags, const TODOITEM* pTDI) 
+	:
+	nOp(op),
+	dwTaskID(taskID),
+	dwParentID(parentID),
+	dwPrevSiblingID(prevSiblingID),
+	wFlags(flags)
+{
+	if (pTDI)
+		tdi = *pTDI;
+}
+
+TDCUNDOELEMENT::TDCUNDOELEMENT(const TDCUNDOELEMENT& elm)
+{
+	*this = elm;
+}
+
+const TDCUNDOELEMENT& TDCUNDOELEMENT::operator=(const TDCUNDOELEMENT& elm)
+{
+	nOp = elm.nOp;
+	dwTaskID = elm.dwTaskID;
+	dwParentID = elm.dwParentID;
+	dwPrevSiblingID = elm.dwPrevSiblingID;
+	tdi = elm.tdi;
+	wFlags = elm.wFlags;
+
+	return *this;
+}
+
+BOOL TDCUNDOELEMENT::operator==(const TDCUNDOELEMENT& elm) const
+{
+	return (nOp == elm.nOp &&
+			dwTaskID == elm.dwTaskID &&
+			dwParentID == elm.dwParentID &&
+			dwPrevSiblingID == elm.dwPrevSiblingID &&
+			wFlags == elm.wFlags);
+}
+
+BOOL TDCUNDOELEMENT::operator!=(const TDCUNDOELEMENT& elm) const
+{
+	return !(*this == elm);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+TDCUNDOACTION::TDCUNDOACTION(TDC_UNDOACTIONTYPE type) : nType(type)
+{
+}
+
+TDCUNDOACTION::TDCUNDOACTION(const TDCUNDOACTION& action)
+{
+	*this = action;
+}
+
+const TDCUNDOACTION& TDCUNDOACTION::operator=(const TDCUNDOACTION& action)
+{
+	nType = action.nType;
+	aElements.Copy(action.aElements);
+
+	return *this;
+}
+
+BOOL TDCUNDOACTION::operator==(const TDCUNDOACTION& action) const
+{
+	return (nType == action.nType &&
+			Misc::MatchAllT(aElements, action.aElements, FALSE));
+}
+
+int TDCUNDOACTION::GetTaskIDs(CDWordArray& aIDs) const
+{
+	CDWordSet mapIDs; // Unique items only
+	aIDs.RemoveAll();
+
+	for (int nElm = 0; nElm < aElements.GetSize(); nElm++)
+	{
+		const TDCUNDOELEMENT& elm = aElements.GetData()[nElm];
+
+		if (!mapIDs.Has(elm.dwTaskID))
+		{
+			aIDs.Add(elm.dwTaskID);
+			mapIDs.Add(elm.dwTaskID);
+		}
+	}
+
+	return aIDs.GetSize();
+}
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
