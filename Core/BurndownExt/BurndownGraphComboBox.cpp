@@ -108,7 +108,7 @@ BOOL CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 			}
 		}
 
-		Misc::SortArrayT(aGraphs, SortProc);
+		Misc::SortArrayT<SORTITEM>(aGraphs, SortProc);
 
 		for (int nItem = 0; nItem < aGraphs.GetSize(); nItem++)
 		{

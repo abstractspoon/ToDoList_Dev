@@ -834,7 +834,10 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 			{
 				ds.GetData(f, nSample);
 
-				if(nSample == HMX_DATASET_VALUE_INVALID)
+				if (nSample == HMX_DATASET_VALUE_INVALID)
+					break;
+
+				if (nSample == 0.0)
 					continue;
 
 				nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
@@ -854,7 +857,7 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 					if (rBar.Height() == 0)
 						rBar.top--;
 				} 
-				else if (nSample < 0.0)
+				else // if (nSample < 0.0)
 				{
 					// bar is negative
 					nZeroLine = m_nYMax < 0 ? m_nYMax : 0;

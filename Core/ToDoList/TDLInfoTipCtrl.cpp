@@ -108,7 +108,7 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 	// Build the final string
 	CString sTip;
 
-	for (int nItem = 0; nItem < aItems.GetSize(); nItem++)
+	for (nItem = 0; nItem < aItems.GetSize(); nItem++)
 	{
 		sTip += aItems[nItem].sLabel;
 		sTip += aItems[nItem].sValue;
@@ -213,7 +213,7 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	}
 
 	// Alphabetic Sort
-	Misc::SortArrayT(aItems, InfoTipSortProc);
+	Misc::SortArrayT<TDCINFOTIPITEM>(aItems, InfoTipSortProc);
 
 	return aItems.GetSize();
 }

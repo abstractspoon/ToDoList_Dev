@@ -5072,10 +5072,18 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 		if (!bWantInheritStartDate && !bWantInheritDueDate)
 		{
 			if (pTDI->HasStart() && (pTDI->dateDue > pTDI->dateStart))
-				dSubDuration = ((pTDI->dateDue - pTDI->dateStart) / nNumSubtasks);
+			{
+				double dDuration = (pTDI->dateDue.m_dt - pTDI->dateStart.m_dt);
+
+				if (!CDateHelper::DateHasTime(pTDI->dateDue))
+					dDuration++;
+
+				dSubDuration = (dDuration / nNumSubtasks);
+			}
 		}
 
 		DWORD dwPrevSiblingID = 0;
+		HTREEITEM htiPrevSibling = NULL;
 		
 		for (int nSubtask = 0; nSubtask < nNumSubtasks; nSubtask++)
 		{
@@ -5097,9 +5105,15 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 					pTDISub->dateStart += (nSubtask * dSubDuration);
 					pTDISub->dateDue = pTDISub->dateStart + COleDateTime(dSubDuration);
 
-					// clear due time if parent didn't have any
-					if (!pTDI->HasDueTime())
+					if (!CDateHelper::DateHasTime(pTDISub->dateDue))
+					{
+						pTDISub->dateDue.m_dt--;
+					}
+					else if (!pTDI->HasDueTime())
+					{
+						// clear due time if parent didn't have any
 						pTDISub->dateDue = CDateHelper::GetDateOnly(pTDISub->dateDue);
+					}
 				}
 				else if (nSubtask) // not the first
 				{
@@ -5121,8 +5135,8 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 			m_data.AddTask(dwChildID, pTDISub, dwTaskID, dwPrevSiblingID);
 			
 			// create tree item
-			HTREEITEM htiSub = m_taskTree.InsertItem(dwChildID, hti, NULL);
-			ASSERT(htiSub);
+			htiPrevSibling = m_taskTree.InsertItem(dwChildID, hti, htiPrevSibling);
+			ASSERT(htiPrevSibling);
 			
 			dwPrevSiblingID = dwChildID;
 			aNewTaskIDs.Add(dwChildID);

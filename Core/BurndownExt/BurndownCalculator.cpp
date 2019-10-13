@@ -475,7 +475,7 @@ int CStatsItemCalculator::GetAttribFrequencies(FREQUENCY_ATTRIB nAttrib, CMap<CS
 		}
 	}
 
-	return mapFrequencies.GetSize();
+	return mapFrequencies.GetCount();
 }
 
 void CStatsItemCalculator::AppendFrequencyAttrib(const CString& sAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const
@@ -589,7 +589,7 @@ int CStatsItemCalculator::AsSortedArray(const CMap<CString, LPCTSTR, int, int&>&
 	}
 
 	if (nItem > 1)
-		Misc::SortArrayT(aFrequencies, CompareFrequencyItems);
+		Misc::SortArrayT<FREQUENCYITEM>(aFrequencies, CompareFrequencyItems);
 
 	return nItem;
 }

@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 1
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W4 /Gm /GX /Zi /Od /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /D "NO_DIAGRAM_TEMPLATE" /D "NO_XML_TEMPLATE" /FR /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W4 /Gm /GX /Zi /Od /D "_DEBUG" /D "_AFXDLL" /D "NO_DIAGRAM_TEMPLATE" /D "NO_XML_TEMPLATE" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_UNICODE" /D "UNICODE" /D "PNG_SUPPORT" /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MDd /W4 /Gm /GR /GX /Zi /Od /D "_DEBUG" /D "_AFXDLL" /D "NO_DIAGRAM_TEMPLATE" /D "NO_XML_TEMPLATE" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_UNICODE" /D "UNICODE" /D "PNG_SUPPORT" /Yu"stdafx.h" /FD /GZ /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -76,7 +76,7 @@ PostBuild_Cmds=mkdir ..\..\Plugins	mkdir ..\..\Plugins\Debug	copy unicode_debug\
 # PROP Ignore_Export_Lib 1
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W4 /GX /Zi /O1 /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "NO_DIAGRAM_TEMPLATE" /D "NO_XML_TEMPLATE" /D "USE_TRANSTEXT" /D "_AFXDLL" /FR /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MD /W4 /GX /Zi /O1 /D "USE_TRANSTEXT" /D "NDEBUG" /D "_AFXDLL" /D "NO_DIAGRAM_TEMPLATE" /D "NO_XML_TEMPLATE" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_UNICODE" /D "UNICODE" /D "PNG_SUPPORT" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MD /W4 /GR /GX /Zi /O1 /D "USE_TRANSTEXT" /D "NDEBUG" /D "_AFXDLL" /D "NO_DIAGRAM_TEMPLATE" /D "NO_XML_TEMPLATE" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_UNICODE" /D "UNICODE" /D "PNG_SUPPORT" /Yu"stdafx.h" /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32

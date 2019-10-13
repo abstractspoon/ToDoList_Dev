@@ -81,7 +81,7 @@ BOOL CBurndownTrendComboBox::Initialise()
 		aTrends.Add(st);
 	}
 
-	Misc::SortArrayT(aTrends, SortProc);
+	Misc::SortArrayT<SORTITEM>(aTrends, SortProc);
 
 	for (int nItem = 0; nItem < aTrends.GetSize(); nItem++)
 	{
