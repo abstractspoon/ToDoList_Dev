@@ -224,6 +224,7 @@
     <ResourceCompile Include="ConvertRTFToHTML.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\ToDoList\res\fileedit_browse.ico" />
     <None Include="res\ConvertRTFToHTML.rc2" />
   </ItemGroup>
   <ItemGroup>

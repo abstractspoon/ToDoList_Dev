@@ -143,6 +143,11 @@ void CConvertRTFToHTMLDlg::OnOK()
 
 	POSITION pos = data.GetFirstTaskPosition();
 	CRtfHtmlConverter rtfHtml;
+	CWaitCursor cursor;
+
+	// Create an image folder using the output path
+	CString sImageFolder(m_sOutputTasklist);
+	FileMisc::RemoveExtension(sImageFolder);
 
 	while (pos)
 	{
@@ -180,13 +185,11 @@ void CConvertRTFToHTMLDlg::OnOK()
 
 			if (nLength)
 			{
-				// Because using Word can cause problems for some people
-				// we allow them to explictly avoid it
 				rtfHtml.SetAllowUseOfMSWord(TRUE);
 
 				CString sHtml;
 
-				if (rtfHtml.ConvertRtfToHtml((const char*)pContent, tasks.GetHtmlCharSet(), sHtml, L""))
+				if (rtfHtml.ConvertRtfToHtml((const char*)pContent, tasks.GetHtmlCharSet(), sHtml, sImageFolder))
 				{
 					HTASKITEM hTask = tasks.FindTask(dwTaskID);
 					ASSERT(hTask);
@@ -200,13 +203,19 @@ void CConvertRTFToHTMLDlg::OnOK()
 		}
 	}
 
-	if (!tasks.Save(m_sOutputTasklist, SFEF_UTF16))
+	if (tasks.Save(m_sOutputTasklist, SFEF_UTF16))
+	{
+		AfxMessageBox(L"Tasklist was successfully converted");
+	}
+	else
 	{
 		AfxMessageBox(L"Failed to save converted tasklist");
 	}
 
+#ifdef _DEBUG
 	CString sTDLPath = FileMisc::GetModuleFolder();
 	sTDLPath += L"\\..\\..\\ToDoList\\Unicode_Debug\\ToDoList.exe";
 
 	ShellExecute(*this, NULL, sTDLPath, m_sOutputTasklist, NULL, SW_SHOWNORMAL);
+#endif
 }

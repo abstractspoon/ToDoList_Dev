@@ -114,6 +114,9 @@
     <None Include="res\ConvertRTFToHTML.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\ToDoList\res\fileedit_browse.ico">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\ConvertRTFToHTML.ico">

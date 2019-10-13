@@ -49,6 +49,8 @@ BOOL CConvertRTFToHTMLApp::InitInstance()
 	CWinApp::InitInstance();
 
 
+	CFileEdit::SetDefaultButtonImages(LoadIcon(IDI_FILEEDIT), NULL);
+
 	AfxEnableControlContainer();
 
 	// Create the shell manager, in case the dialog contains
