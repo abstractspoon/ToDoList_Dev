@@ -9,8 +9,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared", "..\Shared\Shared.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Interfaces", "..\Interfaces\Interfaces.vcxproj", "{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RTFContentCtrl", "..\RTFContentCtrl\RTFContentCtrl.vcxproj", "{6690E3DF-E9BF-4CDD-8019-5A331A566011}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -117,22 +115,6 @@ Global
 		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Release|x64.ActiveCfg = Unicode Release|Win32
 		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Release|x86.ActiveCfg = Unicode Release|Win32
 		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Release|x86.Build.0 = Unicode Release|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Debug|Win32.Build.0 = Unicode Debug|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Debug|x64.ActiveCfg = Unicode Release|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Debug|x86.ActiveCfg = Unicode Release|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Release|Win32.ActiveCfg = Unicode Release|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Release|Win32.Build.0 = Unicode Release|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Release|x64.ActiveCfg = Unicode Release|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Release|x86.ActiveCfg = Unicode Release|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Unicode Debug|x64.ActiveCfg = Unicode Debug|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Unicode Debug|x86.ActiveCfg = Unicode Debug|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Unicode Release|x64.ActiveCfg = Unicode Release|Win32
-		{6690E3DF-E9BF-4CDD-8019-5A331A566011}.Unicode Release|x86.ActiveCfg = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
