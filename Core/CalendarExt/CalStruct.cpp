@@ -116,8 +116,6 @@ void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 			dtStart = GetDate(tDate);
 		else
 			CDateHelper::ClearDate(dtStart);
-
-		ReformatName();
 	}
 	
 	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
@@ -252,6 +250,12 @@ BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD
 
 	// and Parent
 	bIsParent = pTasks->IsTaskParent(hTask);
+
+	if (pTasks->IsAttributeAvailable(TDCA_TASKNAME) || 
+		pTasks->IsAttributeAvailable(TDCA_STARTDATE))
+	{
+		ReformatName();
+	}
 	
 	return !(*this == tciOrg);
 }
