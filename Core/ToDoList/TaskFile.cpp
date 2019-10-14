@@ -1848,26 +1848,11 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		GETATTRIB(TDL_TASKDEPENDENCY,			GetTaskDependencies(hTask, tdi.aDependencies));
 		GETATTRIB(TDL_TASKFILEREFPATH,			GetTaskFileLinks(hTask, tdi.aFileLinks));
 
-		// Comments
-		if (bOverwrite)
+		// Don't overwrite existing comments if merging
+		if (bOverwrite || (tdi.sComments.IsEmpty() && tdi.customComments.IsEmpty()))
 		{
 			GETATTRIB(TDL_TASKCOMMENTS,			tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS));
 			GETATTRIB(TDL_TASKCOMMENTSTYPE,		GetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments));
-		}
-		else // merge
-		{
-			GETATTRIB(TDL_TASKCOMMENTS,			tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS));
-
-			// Don't overwrite actual text comments with empty default custom comments
-			if (!tdi.sComments.IsEmpty() && !TaskHasAttribute(hTask, TDL_TASKCUSTOMCOMMENTS))
-			{
-				tdi.cfComments.Empty();
-				tdi.customComments.Empty();
-			}
-			else
-			{
-				GETATTRIB(TDL_TASKCOMMENTSTYPE,	GetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments));
-			}
 		}
 
 		// custom data
