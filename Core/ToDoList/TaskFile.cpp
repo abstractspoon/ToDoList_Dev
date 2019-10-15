@@ -1856,20 +1856,30 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		else // merge
 		{
 			// To replace what we already have, the 'other' task must have 
-			// the full set of text comments, custom comments and comments type
+			// the full set of text comments, comments type and custom comments 
+			// OR
+			// it must have text comments, comments type and the comments type
+			// must of 'text' type
 			CString sOtherTextComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
 
 			CONTENTFORMAT cfOtherComments;
 			CBinaryData otherCustomComments;
 			GetTaskCustomComments(hTask, otherCustomComments, cfOtherComments);
 
-			if (!sOtherTextComments.IsEmpty() && 
-				!otherCustomComments.IsEmpty() && 
-				!cfOtherComments.IsEmpty())
+			if (!sOtherTextComments.IsEmpty() && !cfOtherComments.IsEmpty())
 			{
-				tdi.sComments = sOtherTextComments;
-				tdi.cfComments = cfOtherComments;
-				tdi.customComments = otherCustomComments;
+				if (!otherCustomComments.IsEmpty())
+				{
+					tdi.sComments = sOtherTextComments;
+					tdi.cfComments = cfOtherComments;
+					tdi.customComments = otherCustomComments;
+				}
+				else if (cfOtherComments.FormatIsText())
+				{
+					tdi.sComments = sOtherTextComments;
+					tdi.cfComments = cfOtherComments;
+					tdi.customComments.Empty();
+				}
 			}
 		}
 
