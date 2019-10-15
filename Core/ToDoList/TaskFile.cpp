@@ -1848,11 +1848,29 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		GETATTRIB(TDL_TASKDEPENDENCY,			GetTaskDependencies(hTask, tdi.aDependencies));
 		GETATTRIB(TDL_TASKFILEREFPATH,			GetTaskFileLinks(hTask, tdi.aFileLinks));
 
-		// Don't overwrite existing comments if merging
-		if (bOverwrite || (tdi.sComments.IsEmpty() && tdi.customComments.IsEmpty()))
+		if (bOverwrite)
 		{
-			GETATTRIB(TDL_TASKCOMMENTS,			tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS));
-			GETATTRIB(TDL_TASKCOMMENTSTYPE,		GetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments));
+			tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
+			GetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments);
+		}
+		else // merge
+		{
+			// To replace what we already have, the 'other' task must have 
+			// the full set of text comments, custom comments and comments type
+			CString sOtherTextComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
+
+			CONTENTFORMAT cfOtherComments;
+			CBinaryData otherCustomComments;
+			GetTaskCustomComments(hTask, otherCustomComments, cfOtherComments);
+
+			if (!sOtherTextComments.IsEmpty() && 
+				!otherCustomComments.IsEmpty() && 
+				!cfOtherComments.IsEmpty())
+			{
+				tdi.sComments = sOtherTextComments;
+				tdi.cfComments = cfOtherComments;
+				tdi.customComments = otherCustomComments;
+			}
 		}
 
 		// custom data
