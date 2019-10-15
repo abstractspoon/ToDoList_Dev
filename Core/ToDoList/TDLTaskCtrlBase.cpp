@@ -4458,20 +4458,26 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 			break;
 
 		case TDCA_DONEDATE:
-			AccumulateRecalcColumn(TDCC_DONEDATE, aColIDs);
-			AccumulateRecalcColumn(TDCC_DUEDATE, aColIDs);
-			AccumulateRecalcColumn(TDCC_DONE, aColIDs);
+			{
+				bRedrawTasks = (HasStyle(TDCS_ALLOWTREEITEMCHECKBOX) && !IsColumnShowing(TDCC_DONE));
 
-			if (HasStyle(TDCS_USEPERCENTDONEINTIMEEST))
-				AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
+				AccumulateRecalcColumn(TDCC_DONEDATE, aColIDs);
+				AccumulateRecalcColumn(TDCC_DUEDATE, aColIDs);
+				AccumulateRecalcColumn(TDCC_DONE, aColIDs);
 
-			if (!m_sCompletionStatus.IsEmpty())
-				AccumulateRecalcColumn(TDCC_STATUS, aColIDs);
+				if (HasStyle(TDCS_USEPERCENTDONEINTIMEEST))
+					AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
+
+				if (!m_sCompletionStatus.IsEmpty())
+					AccumulateRecalcColumn(TDCC_STATUS, aColIDs);
+			}
 			break;
 
 		case TDCA_DUEDATE:
-			if (!AccumulateRecalcColumn(TDCC_DUEDATE, aColIDs))
-				bRedrawCols = IsColumnShowing(TDCC_PRIORITY);
+			{
+				if (!AccumulateRecalcColumn(TDCC_DUEDATE, aColIDs))
+					bRedrawCols = IsColumnShowing(TDCC_PRIORITY);
+			}
 			break;
 
 		case TDCA_PRIORITY:
@@ -4505,23 +4511,27 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 			break;
 
 		case TDCA_TIMEEST:
-			bRedrawCols |= !AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
+			{
+				bRedrawCols |= !AccumulateRecalcColumn(TDCC_TIMEEST, aColIDs);
 
-			if (HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
-				bRedrawCols |= !AccumulateRecalcColumn(TDCC_REMAINING, aColIDs);
+				if (HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
+					bRedrawCols |= !AccumulateRecalcColumn(TDCC_REMAINING, aColIDs);
 
-			if (bRedrawCols)
-				bRedrawCols = HasStyle(TDCS_AUTOCALCPERCENTDONE);
+				if (bRedrawCols)
+					bRedrawCols = HasStyle(TDCS_AUTOCALCPERCENTDONE);
+			}
 			break;
 
 		case TDCA_TIMESPENT:
-			bRedrawCols |= !AccumulateRecalcColumn(TDCC_TIMESPENT, aColIDs);
+			{
+				bRedrawCols |= !AccumulateRecalcColumn(TDCC_TIMESPENT, aColIDs);
 
-			if (HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
-				bRedrawCols |= !AccumulateRecalcColumn(TDCC_REMAINING, aColIDs);
+				if (HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
+					bRedrawCols |= !AccumulateRecalcColumn(TDCC_REMAINING, aColIDs);
 
-			if (bRedrawCols)
-				bRedrawCols = HasStyle(TDCS_AUTOCALCPERCENTDONE);
+				if (bRedrawCols)
+					bRedrawCols = HasStyle(TDCS_AUTOCALCPERCENTDONE);
+			}
 			break;
 
 		case TDCA_DEPENDENCY:
@@ -4529,15 +4539,19 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 		case TDCA_FLAG:
 		case TDCA_LOCK:
 		case TDCA_PERCENT:
-			if (!bRedrawTasks)
-				bRedrawCols = IsColumnShowing(nColID);
+			{
+				if (!bRedrawTasks)
+					bRedrawCols = IsColumnShowing(nColID);
+			}
 			break;
 
 		case TDCA_ICON:
-			if (IsColumnShowing(TDCC_ICON))
-				bRedrawCols = TRUE;
-			else
-				bRedrawTasks = TRUE;
+			{
+				if (IsColumnShowing(TDCC_ICON))
+					bRedrawCols = TRUE;
+				else
+					bRedrawTasks = TRUE;
+			}
 			break;
 
 		case TDCA_TASKNAME:
