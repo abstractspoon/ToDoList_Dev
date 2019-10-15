@@ -127,43 +127,48 @@ CToDoListApp theApp;
 
 BOOL CToDoListApp::InitInstance()
 {
-	// .NET plugins require VS2010 redistributable to be installed
-	CString sVs2010Runtime;
-	VERIFY(FileMisc::GetSpecialFilePath(CSIDL_SYSTEM, MSVCR100_DLL, sVs2010Runtime));
-
-	if (::LoadLibrary(sVs2010Runtime) == NULL)
-	{
-		CToDoListWnd::EnableLogging();
-
-		FileMisc::LogText(_T("LoadLibrary(%s) failed"), sVs2010Runtime);
-		FileMisc::LogTextRaw(Misc::FormatGetLastError());
-		
-		if (DoMessageBox(MSVCR100_MSG, MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
-			FileMisc::Run(::GetDesktopWindow(), MSVCR100_URL);
-
-		// Always quit
-		return FALSE;
-	}
-
-/*
-	HANDLE hFile = CreateFile(sVs2010Runtime, // file to open
-					   GENERIC_READ,          // open for reading
-					   FILE_SHARE_READ,       // share for reading
-					   NULL,                  // default security
-					   OPEN_EXISTING,         // existing file only
-					   FILE_ATTRIBUTE_NORMAL, // normal file
-					   NULL);                 // no attr. template
-
-	TCHAR szFinal[MAX_PATH + 1];
-	GetFinalPathNameByHandle(hFile, szFinal, MAX_PATH, VOLUME_NAME_DOS);
-*/
-
 	// Set this before anything else
 	CWinHelpButton::SetDefaultIcon(GraphicsMisc::LoadIcon(IDI_HELPBUTTON));
 
 	// Process commandline switches
 	CEnCommandLineInfo cmdInfo(_T(".tdl;.xml"));
 	ParseCommandLine(cmdInfo);
+
+	// .NET plugins require VS2010 redistributable to be installed
+	// Note: Sometimes LoadLibrary fails even though the runtime
+	//       has been installed so we allow the check to be disabled
+	if (!cmdInfo.HasOption(SWITCH_NOMSVCR100CHECK))
+	{
+		CString sVs2010Runtime;
+		VERIFY(FileMisc::GetSpecialFilePath(CSIDL_SYSTEM, MSVCR100_DLL, sVs2010Runtime));
+
+		if (::LoadLibrary(sVs2010Runtime) == NULL)
+		{
+			CToDoListWnd::EnableLogging();
+
+			FileMisc::LogText(_T("LoadLibrary(%s) failed"), sVs2010Runtime);
+			FileMisc::LogTextRaw(Misc::FormatGetLastError());
+
+			if (DoMessageBox(MSVCR100_MSG, MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
+				FileMisc::Run(::GetDesktopWindow(), MSVCR100_URL);
+
+			// Always quit
+			return FALSE;
+		}
+
+/*
+   	HANDLE hFile = CreateFile(sVs2010Runtime, // file to open
+   					   GENERIC_READ,          // open for reading
+   					   FILE_SHARE_READ,       // share for reading
+   					   NULL,                  // default security
+   					   OPEN_EXISTING,         // existing file only
+   					   FILE_ATTRIBUTE_NORMAL, // normal file
+   					   NULL);                 // no attr. template
+   
+   	TCHAR szFinal[MAX_PATH + 1];
+   	GetFinalPathNameByHandle(hFile, szFinal, MAX_PATH, VOLUME_NAME_DOS);
+*/
+	}
 
 	// see if the user wants to uninstall
 	if (cmdInfo.HasOption(SWITCH_UNINSTALL))
