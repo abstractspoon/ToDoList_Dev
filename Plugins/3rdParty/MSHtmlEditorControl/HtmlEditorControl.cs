@@ -2584,15 +2584,11 @@ namespace MSDN.Html.Editor
 
 						if (!String.IsNullOrEmpty(newHrefText) && IsValidHref(hrefLink))
 						{
-							// If the user has changed the Href text, we paste
-							// it over the current selection and then reselect it
-							if (!hrefText.Equals(newHrefText))
-							{
-								SelectedText = newHrefText;
+							// Paste the new text over the current selection and reselect it
+							SelectedText = newHrefText;
 
-								range = GetTextRange();
-								range.moveStart("character", -newHrefText.Length);
-							}
+							range = GetTextRange();
+							range.moveStart("character", -newHrefText.Length);
 
 							// insert or update the current link
 							if (anchor == null)
