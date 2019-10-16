@@ -226,6 +226,7 @@
   <ItemGroup>
     <None Include="..\ToDoList\res\fileedit_browse.ico" />
     <None Include="res\ConvertRTFToHTML.rc2" />
+    <None Include="res\fileedit_browse.ico" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\ConvertRTFToHTML.ico" />
