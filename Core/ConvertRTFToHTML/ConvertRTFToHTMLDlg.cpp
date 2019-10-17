@@ -12,6 +12,8 @@
 
 #include "..\Shared\FileMisc.h"
 #include "..\shared\Rtf2HtmlConverter.h"
+#include "..\Shared\WebMisc.h"
+#include "..\Shared\XmlCharMap.h"
 
 #include "..\3rdparty\compression.h"
 
@@ -162,7 +164,7 @@ void CConvertRTFToHTMLDlg::OnOK()
 			// we may have to decompress it first
 			unsigned char* pDecompressed = NULL;
 
-			if (!rtfHtml.IsRTF((const char*)pTDI->customComments.Get()))
+			if (nLength && !rtfHtml.IsRTF((const char*)pTDI->customComments.Get()))
 			{
 				int nLenDecompressed = 0;
 
@@ -194,6 +196,8 @@ void CConvertRTFToHTMLDlg::OnOK()
 					HTASKITEM hTask = tasks.FindTask(dwTaskID);
 					ASSERT(hTask);
 
+					PostProcessHtml(sHtml);
+
 					tasks.SetTaskCustomComments(hTask, CBinaryData(sHtml), HTML_GUID);
 				}
 			}
@@ -218,4 +222,59 @@ void CConvertRTFToHTMLDlg::OnOK()
 
 	ShellExecute(*this, NULL, sTDLPath, m_sOutputTasklist, NULL, SW_SHOWNORMAL);
 #endif
+}
+
+BOOL CConvertRTFToHTMLDlg::PostProcessHtml(CString& sHtml) const
+{
+	BOOL bChanged = FALSE;
+
+	// 1. Create real links for URIs
+/*
+	int nHtmlLen = sHtml.GetLength();
+	int nStart = sHtml.Find('>');
+
+	while (nStart != -1)
+	{
+		int nEnd = sHtml.Find('<', (nStart + 1));
+
+		if (nEnd == -1)
+			break;
+
+		int nLen = (nEnd - nStart);
+
+		if (nLen > 1)
+		{
+			CString sContent(sHtml.Mid(nStart + 1, (nLen - 1)));
+			CXmlCharMap::ConvertFromRep(sContent);
+
+			TRACE(L"CConvertRTFToHTMLDlg::PostProcessHtml(%d->%d, %s)\n", nStart, nEnd, sContent);
+
+			CUrlArray aUrls;
+			int nUrl = m_parser.ParseText(sContent, aUrls);
+
+			// Work in reverse to avoid messing up url positions
+			while (nUrl--)
+			{
+				const URLITEM& url = aUrls[nUrl];
+
+				CString sLink;
+				sLink.Format(L"<A HREF=%s>%s</A>", url.sUrl, url.sUrl);
+
+				sContent = sContent.Left(url.cr.cpMin) + sLink + sContent.Mid(url.cr.cpMax);
+			}
+
+			if (aUrls.GetSize())
+			{
+				sHtml = sHtml.Left(nStart) + sContent + sHtml.Mid(nEnd);
+				nEnd = nStart + sContent.GetLength();
+
+				bChanged = TRUE;
+			}
+		}
+
+		nStart = sHtml.Find('>', (nEnd + 1));
+	}
+*/
+	
+	return bChanged;
 }
