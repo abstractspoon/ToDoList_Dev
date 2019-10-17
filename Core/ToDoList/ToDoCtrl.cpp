@@ -5707,7 +5707,14 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 
 int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 {
-	if (HasStyle(TDCS_SHOWINFOTIPS) && m_infoTip.GetSafeHwnd())
+	// Don't yet know why but updating the info tip text while
+	// multiple selecting causes the mouse-down message to get
+	// mislaid/eaten and the multiple-selection fails so if the
+	// ctrl or shift keys are down we don't return a tooltip
+	if (HasStyle(TDCS_SHOWINFOTIPS) && 
+		m_infoTip.GetSafeHwnd() && 
+		!Misc::IsKeyPressed(VK_CONTROL) &&
+		!Misc::IsKeyPressed(VK_SHIFT))
 	{
 		CWnd::ClientToScreen(&point);
 
@@ -7815,10 +7822,6 @@ BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg)
 	if (m_taskTree.PreTranslateMessage(pMsg))
 		return TRUE;
 	
-// 	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-// 	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
-// 	BOOL bAlt = Misc::IsKeyPressed(VK_MENU);
-
 	switch (pMsg->message)
 	{
 	case  WM_CHAR:
