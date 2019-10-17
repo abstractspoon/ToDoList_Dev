@@ -317,9 +317,7 @@ namespace HTMLContentControl
 
 		override protected bool IsValidHref(string href)
 		{
-			Uri unused;
-
-			if (Uri.TryCreate(href, UriKind.Absolute, out unused))
+			if (Uri.IsWellFormedUriString(href, UriKind.Absolute))
 				return true;
 
 			return IsOutlookLink(href);
