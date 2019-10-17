@@ -58,6 +58,7 @@ public:
 	CPoint GetContextMenuPos() { return m_ptContextMenu; }
 	int AddProtocol(LPCTSTR szProtocol, BOOL bWantNotify = TRUE);
 	void ParseAndFormatText(BOOL bForceReformat = FALSE);
+	int ParseText(LPCTSTR szText, CUrlArray& aUrls) const;
 	CString GetContextUrl(BOOL bAsFile = FALSE) const;
 	void Paste(BOOL bAppendSourceUrl);
 	BOOL PasteSimpleText(BOOL bAppendSourceUrl);

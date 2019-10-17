@@ -228,82 +228,85 @@ namespace HTMLContentControl
 			{
 				case WM_KEYDOWN:
 				case WM_SYSKEYDOWN:
-					// Handle <enter> manually because the default handling
-					// appears to fail when we are hosted in a win32 modal dialog
-					if (wParam == VK_RETURN)
 					{
-						IntPtr hwndFind = FindWindowEx(WebBrowser.Handle, IntPtr.Zero, "Shell Embedding", "");
-						hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Shell DocObject View", "");
-						hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Internet Explorer_Server", "");
-
-						if (hwndFind != null)
-							SendMessage(hwndFind, WM_CHAR, VK_RETURN, 0);
-
-						return true;
-					}
-					else if (Control.ModifierKeys != Keys.None)
-					{
-						// Handle keyboard shortcuts
 						Keys keyPress = (Keys)wParam;
 
-						if (keyPress == Keys.ControlKey)
-							return false;
-
-						var modifiers = Control.ModifierKeys;
-
-						if ((modifiers & Keys.Control) == Keys.Control)
-							keyPress |= Keys.Control;
-
-						if ((modifiers & Keys.Shift) == Keys.Shift)
-							keyPress |= Keys.Shift;
-
-						if ((modifiers & Keys.Alt) == Keys.Alt)
-							keyPress |= Keys.Alt;
-
-						if (CommandHandling.ProcessMenuShortcut(keyPress, ContextMenu.Items))
-							return true;
-
-						// Pick up any stragglers
-						switch (keyPress)
+						if (keyPress == Keys.Return)
 						{
+							// Handle <enter> manually because the default handling
+							// appears to fail when we are hosted in a win32 modal dialog
+							IntPtr hwndFind = FindWindowEx(WebBrowser.Handle, IntPtr.Zero, "Shell Embedding", "");
+							hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Shell DocObject View", "");
+							hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Internet Explorer_Server", "");
 
-							case Keys.Tab:
-								SelectedHtml = "&emsp;";
+							if (hwndFind != null)
+								SendMessage(hwndFind, WM_CHAR, VK_RETURN, 0);
+
+							return true;
+						}
+						else if (keyPress == Keys.ControlKey)
+						{
+							return false;
+						}
+						else if ((keyPress == Keys.Delete) || 
+								 (keyPress == Keys.Tab) ||
+								 (Control.ModifierKeys != Keys.None))
+						{
+							var modifiers = Control.ModifierKeys;
+
+							if ((modifiers & Keys.Control) == Keys.Control)
+								keyPress |= Keys.Control;
+
+							if ((modifiers & Keys.Shift) == Keys.Shift)
+								keyPress |= Keys.Shift;
+
+							if ((modifiers & Keys.Alt) == Keys.Alt)
+								keyPress |= Keys.Alt;
+
+							if (CommandHandling.ProcessMenuShortcut(keyPress, ContextMenu.Items))
 								return true;
 
-							case Keys.Left | Keys.Control:
-								{
-									var range = GetTextRange();
+							// Pick up any stragglers
+							switch (keyPress)
+							{
+								case Keys.Tab:
+									SelectedHtml = "&emsp;";
+									return true;
 
-									if (range != null)
+								case Keys.Left | Keys.Control:
 									{
-										range.move("word", -1);
-										range.collapse();
-										range.select();
+										var range = GetTextRange();
+
+										if (range != null)
+										{
+											range.move("word", -1);
+											range.collapse();
+											range.select();
+										}
 									}
-								}
-								return true;
+									return true;
 
-							case Keys.Right | Keys.Control:
-								{
-									var range = GetTextRange();
-
-									if (range != null)
+								case Keys.Right | Keys.Control:
 									{
-										range.move("word", 1);
-										range.collapse();
-										range.select();
+										var range = GetTextRange();
+
+										if (range != null)
+										{
+											range.move("word", 1);
+											range.collapse();
+											range.select();
+										}
 									}
-								}
-								return true;
+									return true;
 
-							case Keys.Oemcomma | Keys.Control:
-								FormatFontDecrease();
-								return true;
+								case Keys.Oemcomma | Keys.Control:
+									FormatFontDecrease();
+									return true;
 
-							case Keys.OemPeriod | Keys.Control:
-								FormatFontIncrease();
-								return true;
+								case Keys.OemPeriod | Keys.Control:
+									FormatFontIncrease();
+									return true;
+							}
 						}
 					}
 					break;
@@ -314,9 +317,7 @@ namespace HTMLContentControl
 
 		override protected bool IsValidHref(string href)
 		{
-			Uri unused;
-
-			if (Uri.TryCreate(href, UriKind.Absolute, out unused))
+			if (Uri.IsWellFormedUriString(href, UriKind.Absolute))
 				return true;
 
 			return IsOutlookLink(href);

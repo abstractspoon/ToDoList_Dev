@@ -1834,7 +1834,7 @@ HTREEITEM CTDLTaskTreeCtrl::MoveSelectionRaw(HTREEITEM htiDestParent, HTREEITEM 
 	m_tcTasks.Expand(htiDestParent, TVE_EXPAND);
 	ExpandList(htiDestParent);
 
-	// get selected tasks ordered, and without duplicate subtasks
+	// Get selected tasks ordered, and without duplicate subtasks
 	CHTIList selection;
 	TSH().CopySelection(selection, TRUE, TRUE);
 
@@ -2338,10 +2338,10 @@ BOOL CTDLTaskTreeCtrl::GetInsertLocation(TDC_MOVETASK nDirection, HTREEITEM& hti
 {
 	htiDest = htiDestAfter = NULL;
 	
-	// Get an ordered copy of the selection to ensure we get 
-	// the correct upper/lowermost items
+	// Get selected tasks ordered, and without duplicate subtasks
+	// to ensure we get the correct upper/lowermost items
 	CHTIList selection;
-	TSH().CopySelection(selection, FALSE, TRUE);
+	TSH().CopySelection(selection, TRUE, TRUE);
 
 	HTREEITEM htiTopSel = selection.GetHead();
 	HTREEITEM htiBotSel = selection.GetTail();

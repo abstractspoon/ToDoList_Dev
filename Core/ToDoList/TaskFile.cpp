@@ -1848,25 +1848,38 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		GETATTRIB(TDL_TASKDEPENDENCY,			GetTaskDependencies(hTask, tdi.aDependencies));
 		GETATTRIB(TDL_TASKFILEREFPATH,			GetTaskFileLinks(hTask, tdi.aFileLinks));
 
-		// Comments
 		if (bOverwrite)
 		{
-			GETATTRIB(TDL_TASKCOMMENTS,			tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS));
-			GETATTRIB(TDL_TASKCOMMENTSTYPE,		GetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments));
+			tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
+			GetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments);
 		}
 		else // merge
 		{
-			GETATTRIB(TDL_TASKCOMMENTS,			tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS));
+			// To replace what we already have, the 'other' task must have 
+			// the full set of text comments, comments type and custom comments 
+			// OR
+			// it must have text comments, comments type and the comments type
+			// must of 'text' type
+			CString sOtherTextComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
 
-			// Don't overwrite actual text comments with empty default custom comments
-			if (!tdi.sComments.IsEmpty() && !TaskHasAttribute(hTask, TDL_TASKCUSTOMCOMMENTS))
+			CONTENTFORMAT cfOtherComments;
+			CBinaryData otherCustomComments;
+			GetTaskCustomComments(hTask, otherCustomComments, cfOtherComments);
+
+			if (!sOtherTextComments.IsEmpty() && !cfOtherComments.IsEmpty())
 			{
-				tdi.cfComments.Empty();
-				tdi.customComments.Empty();
-			}
-			else
-			{
-				GETATTRIB(TDL_TASKCOMMENTSTYPE,	GetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments));
+				if (!otherCustomComments.IsEmpty())
+				{
+					tdi.sComments = sOtherTextComments;
+					tdi.cfComments = cfOtherComments;
+					tdi.customComments = otherCustomComments;
+				}
+				else if (cfOtherComments.FormatIsText())
+				{
+					tdi.sComments = sOtherTextComments;
+					tdi.cfComments = cfOtherComments;
+					tdi.customComments.Empty();
+				}
 			}
 		}
 

@@ -56,6 +56,12 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+#ifndef LOAD_IGNORE_CODE_AUTHZ_LEVEL
+#	define LOAD_IGNORE_CODE_AUTHZ_LEVEL 0x00000010
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+
 CLimitSingleInstance g_SingleInstanceObj(_T("{3A4EFC98-9BA9-473D-A3CF-6B0FE644470D}")); 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -131,7 +137,7 @@ BOOL CToDoListApp::InitInstance()
 	CString sVs2010Runtime;
 	VERIFY(FileMisc::GetSpecialFilePath(CSIDL_SYSTEM, MSVCR100_DLL, sVs2010Runtime));
 
-	if (::LoadLibrary(sVs2010Runtime) == NULL)
+	if (::LoadLibraryEx(sVs2010Runtime, NULL, LOAD_IGNORE_CODE_AUTHZ_LEVEL) == NULL)
 	{
 		CToDoListWnd::EnableLogging();
 

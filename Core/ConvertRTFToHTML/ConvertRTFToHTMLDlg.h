@@ -6,6 +6,7 @@
 #include "afxwin.h"
 
 #include "..\shared\FileEdit.h"
+#include "..\shared\urlricheditctrl.h"
 
 // CConvertRTFToHTMLDlg dialog
 class CConvertRTFToHTMLDlg : public CDialogEx
@@ -21,11 +22,14 @@ public:
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
+	virtual void OnOK();
 
 
 // Implementation
 protected:
 	HICON m_hIcon;
+	CUrlRichEditCtrl m_parser;
+	CString m_sCurrentTask;
 
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
@@ -37,6 +41,8 @@ public:
 	CFileEdit m_eOutputTasklist;
 	CString m_sInputTasklist;
 	CString m_sOutputTasklist;
-	virtual void OnOK();
-	CString m_sCurrentTask;
+
+protected:
+	BOOL PostProcessHtml(CString& sHtml) const;
+
 };

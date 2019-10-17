@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "ToolTipCtrlEx.h"
 #include "DialogHelper.h"
+#include "themed.h"
 
 #include "..\3rdParty\MemDC.h"
 
@@ -367,7 +368,7 @@ BOOL CToolTipCtrlEx::AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const
 
 void CToolTipCtrlEx::OnPaint()
 {
-	if (IsTracking())
+	if (IsTracking() && CThemed::AreControlsThemed())
 	{
 		// Prevent flicker
 		CPaintDC dc(this); 
