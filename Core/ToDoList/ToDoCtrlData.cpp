@@ -2980,13 +2980,10 @@ BOOL CToDoCtrlData::FixupParentCompletion(DWORD dwParentID, BOOL bClearStatus)
 
 BOOL CToDoCtrlData::MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID, DWORD dwDestPrevSiblingID)
 {
-	if (aTaskIDs.GetSize() == 0) 
+	switch (aTaskIDs.GetSize())
 	{
-		return FALSE;
-	}
-	else if (aTaskIDs.GetSize() == 1)
-	{
-		return MoveTask(aTaskIDs[0], dwDestParentID, dwDestPrevSiblingID);
+		case 0: return FALSE;
+		case 1: return MoveTask(aTaskIDs[0], dwDestParentID, dwDestPrevSiblingID);
 	}
 	
 	// copy the structure because we're going to be changing it and we need 
