@@ -275,6 +275,10 @@ public:
 	void DeleteAll() { CleanUp(); }
 	
 	int MoveSubTask(int nPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
+
+#ifdef _DEBUG
+	void Trace(const CString& sIndent) const;
+#endif
 	
 protected:
 	DWORD m_dwID;

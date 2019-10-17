@@ -7878,8 +7878,11 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	DWORD dwDestParentID = 0, dwDestPrevSiblingID = 0;
 	VERIFY(m_taskTree.GetInsertLocation(nDirection, dwDestParentID, dwDestPrevSiblingID));
 
+	// Get selected tasks without duplicate subtasks
+	// because the subtasks will be moved with their parents
 	CDWordArray aSelTaskIDs;
-	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs);
+	DWORD dwUnused;
+	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, dwUnused, TRUE);
 
 	if (!m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
 		return FALSE;

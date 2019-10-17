@@ -1163,6 +1163,25 @@ int TODOSTRUCTURE::MoveSubTask(int nPos, TODOSTRUCTURE* pTDSDestParent, int nDes
 	return nDestPos;
 }
 
+#ifdef _DEBUG
+void TODOSTRUCTURE::Trace(const CString& sIndent) const
+{
+	if (sIndent.IsEmpty())
+		TRACE(_T("TODOSTRUCTURE::Trace(start)\n"));
+
+	TRACE(_T("%s+--Task(%ld)\n"), sIndent, GetTaskID());
+
+	// Children
+	for (int nSub = 0; nSub < m_aSubTasks.GetSize(); nSub++)
+	{
+		m_aSubTasks[nSub]->Trace(sIndent + _T("    ")); // RECURSIVE CALL
+	}
+	
+	if (sIndent.IsEmpty())
+		TRACE(_T("TODOSTRUCTURE::Trace(end)\n"));
+}
+#endif
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 CToDoCtrlDataStructure::CToDoCtrlDataStructure(const CToDoCtrlDataStructure& tds)
