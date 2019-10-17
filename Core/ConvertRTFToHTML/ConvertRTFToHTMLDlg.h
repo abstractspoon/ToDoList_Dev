@@ -38,4 +38,5 @@ public:
 	CString m_sInputTasklist;
 	CString m_sOutputTasklist;
 	virtual void OnOK();
+	CString m_sCurrentTask;
 };

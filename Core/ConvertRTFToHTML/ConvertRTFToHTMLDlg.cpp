@@ -34,12 +34,12 @@ CConvertRTFToHTMLDlg::CConvertRTFToHTMLDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_CONVERTRTFTOHTML_DIALOG, pParent)
 	, m_eInputTasklist(FES_COMBOSTYLEBTN, FILTER_TASKLISTS)
 	, m_eOutputTasklist(FES_COMBOSTYLEBTN | FES_SAVEAS, FILTER_TASKLISTS)
+	, m_sCurrentTask(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
 	m_sInputTasklist = AfxGetApp()->GetProfileString(L"Preferences", L"InputTasklist");
 	m_sOutputTasklist = AfxGetApp()->GetProfileString(L"Preferences", L"OutputTasklist");
-
 }
 
 void CConvertRTFToHTMLDlg::DoDataExchange(CDataExchange* pDX)
@@ -49,6 +49,7 @@ void CConvertRTFToHTMLDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_OUTPUTTASKLIST, m_eOutputTasklist);
 	DDX_Text(pDX, IDC_INPUTTASKLIST, m_sInputTasklist);
 	DDX_Text(pDX, IDC_OUTPUTTASKLIST, m_sOutputTasklist);
+	DDX_Text(pDX, IDC_CURRENTTASK, m_sCurrentTask);
 }
 
 BEGIN_MESSAGE_MAP(CConvertRTFToHTMLDlg, CDialogEx)
@@ -109,7 +110,7 @@ HCURSOR CConvertRTFToHTMLDlg::OnQueryDragIcon()
 
 void CConvertRTFToHTMLDlg::OnOK()
 {
-	CDialogEx::OnOK();
+	UpdateData();
 
 	AfxGetApp()->WriteProfileString(L"Preferences", L"InputTasklist", m_sInputTasklist);
 	AfxGetApp()->WriteProfileString(L"Preferences", L"OutputTasklist", m_sOutputTasklist);
@@ -156,6 +157,9 @@ void CConvertRTFToHTMLDlg::OnOK()
 
 		if (pTDI->cfComments.CompareNoCase(RTF_TYPEID) == 0)
 		{
+			m_sCurrentTask.Format(L"\"%s\"", pTDI->sTitle);
+			UpdateData(FALSE);
+
 			const unsigned char* pContent = pTDI->customComments.Get();
 			int nLength = pTDI->customComments.GetLength();
 
@@ -218,4 +222,6 @@ void CConvertRTFToHTMLDlg::OnOK()
 
 	ShellExecute(*this, NULL, sTDLPath, m_sOutputTasklist, NULL, SW_SHOWNORMAL);
 #endif
+
+	CDialogEx::OnOK();
 }
