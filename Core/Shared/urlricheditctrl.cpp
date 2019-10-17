@@ -382,25 +382,11 @@ BOOL CUrlRichEditCtrl::IsFileProtocol(int nProtocol) const
 	return ((nProtocol == m_nFileProtocol) || (nProtocol == m_nFileProtocol2));
 }
 
-void CUrlRichEditCtrl::ParseAndFormatText(BOOL bForceReformat)
+int CUrlRichEditCtrl::ParseText(LPCTSTR szText, CUrlArray& aUrls) const
 {
-	if (IsAutoUrlDetectionEnabled())
-		return;
+	aUrls.RemoveAll();
 
-	KillTimer(TIMER_REPARSE);
-	AF_NOREENTRANT // prevent reentrancy
-		
-	// parse the control content
-	CString sText;
-	GetWindowText(sText);
-	
-	// richedit2 uses '\r\n' whereas richedit uses just '\n'
-	if (!CWinClasses::IsClass(*this, WC_RICHEDIT))
-		sText.Replace(_T("\r\n"), _T("\n"));
-	
-	// parse the text into an array of URLPOS
-	CUrlArray aUrls;
-	LPCTSTR szPos = sText;
+	LPCTSTR szPos = szText;
 	BOOL bPrevCharWasDelim = TRUE;
 	
 	while (*szPos) 
@@ -441,7 +427,7 @@ void CUrlRichEditCtrl::ParseAndFormatText(BOOL bForceReformat)
 		LPCTSTR szUrlStart = szPos;
 		
 		// check for braces (<...>)
-		int nUrlStart = (szPos - (LPCTSTR)sText);
+		int nUrlStart = (szPos - szText);
 		BOOL bBraced = ((nUrlStart > 0) && (szPos[-1] == '<'));
 		
 		VERIFY(FindEndOfUrl(szPos, nUrlLen, bBraced, IsFileProtocol(nProt)));
@@ -460,6 +446,29 @@ void CUrlRichEditCtrl::ParseAndFormatText(BOOL bForceReformat)
 
 		bPrevCharWasDelim = TRUE;
 	}
+
+	return aUrls.GetSize();
+}
+
+void CUrlRichEditCtrl::ParseAndFormatText(BOOL bForceReformat)
+{
+	if (IsAutoUrlDetectionEnabled())
+		return;
+
+	KillTimer(TIMER_REPARSE);
+	AF_NOREENTRANT // prevent reentrancy
+		
+	// parse the control content
+	CString sText;
+	GetWindowText(sText);
+	
+	// richedit2 uses '\r\n' whereas richedit uses just '\n'
+	if (!CWinClasses::IsClass(*this, WC_RICHEDIT))
+		sText.Replace(_T("\r\n"), _T("\n"));
+	
+	// parse the text into an array of URLPOS
+	CUrlArray aUrls;
+	ParseText(sText, aUrls);
 	
 	// compare aUrls with m_aUrls to see if anything has changed
 	BOOL bReformat = !sText.IsEmpty() && (bForceReformat || !UrlsMatch(aUrls));
