@@ -234,53 +234,43 @@ BOOL CConvertRTFToHTMLDlg::PostProcessHtml(CString& sHtml) const
 {
 	BOOL bChanged = FALSE;
 
+	FileMisc::SaveFile(L"raw.html", sHtml, SFEF_UTF16);
+
 	// 1. Create real links for URIs
-/*
-	int nHtmlLen = sHtml.GetLength();
-	int nStart = sHtml.Find('>');
+	CString sLowerHtml = Misc::ToLower(sHtml);
 
-	while (nStart != -1)
+	const CString SPANSTART = L"<span";
+	const CString SPANEND = L"</span>";
+
+	int nStartStart = sLowerHtml.Find(SPANSTART);
+
+	while (nStartStart != -1)
 	{
-		int nEnd = sHtml.Find('<', (nStart + 1));
+		int nEndStart = sLowerHtml.Find('>', nStartStart + SPANSTART.GetLength());
 
-		if (nEnd == -1)
+		if (nEndStart == -1)
 			break;
 
-		int nLen = (nEnd - nStart);
+		int nStartEnd = sLowerHtml.Find(SPANEND, nEndStart);
 
-		if (nLen > 1)
+		if (nStartEnd == -1)
+			break;
+
+		int nEndEnd = (nStartEnd + SPANEND.GetLength());
+		CString sContent = sHtml.Mid(nEndStart + 1, (nStartEnd - (nEndStart + 1)));
+
+		if (WebMisc::IsURL(sContent))
 		{
-			CString sContent(sHtml.Mid(nStart + 1, (nLen - 1)));
-			CXmlCharMap::ConvertFromRep(sContent);
+			// Remove the span around the link text
+			sHtml = sHtml.Left(nStartStart) + sContent + sHtml.Mid(nEndEnd);
+			sLowerHtml = sLowerHtml.Left(nStartStart) + sContent + sLowerHtml.Mid(nEndEnd);
 
-			TRACE(L"CConvertRTFToHTMLDlg::PostProcessHtml(%d->%d, %s)\n", nStart, nEnd, sContent);
-
-			CUrlArray aUrls;
-			int nUrl = m_parser.ParseText(sContent, aUrls);
-
-			// Work in reverse to avoid messing up url positions
-			while (nUrl--)
-			{
-				const URLITEM& url = aUrls[nUrl];
-
-				CString sLink;
-				sLink.Format(L"<A HREF=%s>%s</A>", url.sUrl, url.sUrl);
-
-				sContent = sContent.Left(url.cr.cpMin) + sLink + sContent.Mid(url.cr.cpMax);
-			}
-
-			if (aUrls.GetSize())
-			{
-				sHtml = sHtml.Left(nStart) + sContent + sHtml.Mid(nEnd);
-				nEnd = nStart + sContent.GetLength();
-
-				bChanged = TRUE;
-			}
+			// Adjust end to compensate
+			nEndEnd = (nStartStart + sContent.GetLength());
 		}
 
-		nStart = sHtml.Find('>', (nEnd + 1));
+		nStartStart = sLowerHtml.Find(SPANSTART, (nEndStart + 1));
 	}
-*/
 	
 	return bChanged;
 }
