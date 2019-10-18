@@ -44,5 +44,8 @@ public:
 
 protected:
 	BOOL PostProcessHtml(CString& sHtml) const;
+	BOOL FixupLinks(CString& sHtml) const;
+	BOOL FixupColors(CString& sHtml) const;
+	BOOL FixupLists(CString& sHtml) const;
 
 };

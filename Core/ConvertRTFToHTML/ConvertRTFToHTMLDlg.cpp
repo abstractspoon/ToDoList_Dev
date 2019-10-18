@@ -232,11 +232,26 @@ void CConvertRTFToHTMLDlg::OnOK()
 
 BOOL CConvertRTFToHTMLDlg::PostProcessHtml(CString& sHtml) const
 {
+	FileMisc::SaveFile(FileMisc::GetTempFilePath(L"before", L"html"), sHtml, SFEF_UTF16);
+
 	BOOL bChanged = FALSE;
 
-	FileMisc::SaveFile(L"raw.html", sHtml, SFEF_UTF16);
+	bChanged |= FixupLinks(sHtml);
+	bChanged |= FixupColors(sHtml);
+	bChanged |= FixupLists(sHtml);
 
-	// 1. Create real links for URIs
+	FileMisc::SaveFile(FileMisc::GetTempFilePath(L"after", L"html"), sHtml, SFEF_UTF16);
+
+	return bChanged;
+}
+
+BOOL CConvertRTFToHTMLDlg::FixupLinks(CString& sHtml) const
+{
+	BOOL bChanged = FALSE;
+
+	// 1. MSWord converts href links correctly but then wraps
+	// the link text in a span which breaks the link in the UI
+	// so we remove any span that encompasses a valid URI
 	CString sLowerHtml = Misc::ToLower(sHtml);
 
 	const CString SPANSTART = L"<span";
@@ -267,10 +282,56 @@ BOOL CConvertRTFToHTMLDlg::PostProcessHtml(CString& sHtml) const
 
 			// Adjust end to compensate
 			nEndEnd = (nStartStart + sContent.GetLength());
+
+			bChanged = TRUE;
 		}
 
 		nStartStart = sLowerHtml.Find(SPANSTART, (nEndStart + 1));
 	}
+
+	// 2. MSWord converts links without a protocol (eg. www.abstractspoon.com) 
+	// into file-links pointing to the user's temp folder. However, we know
+	// that links should be the same as the links text, so if the link text
+	// has no protocol we give it one
+	CStringArray aLinks, aLinksText;
+
+	int nLink = WebMisc::ExtractHtmlLinks(sHtml, aLinks, aLinksText);
+
+	while (nLink--)
+	{
+		const CString& sLinkText = aLinksText[nLink];
+
+		if (WebMisc::IsURL(sLinkText) && (sLinkText.Find(':') == -1))
+		{
+			const CString& sLink = aLinks[nLink];
+			CString sFilePath;
+
+			if (WebMisc::DecodeFileURI(sLink, sFilePath) && FileMisc::IsTempFilePath(sFilePath))
+			{
+				VERIFY(sHtml.Replace(sLink, (L"https://" + sLinkText)) == 1);
+
+				bChanged = TRUE;
+			}
+		}
+	}
 	
+	return bChanged;
+}
+
+BOOL CConvertRTFToHTMLDlg::FixupColors(CString& sHtml) const
+{
+	BOOL bChanged = FALSE;
+
+	// TODO
+
+	return bChanged;
+}
+
+BOOL CConvertRTFToHTMLDlg::FixupLists(CString& sHtml) const
+{
+	BOOL bChanged = FALSE;
+
+	// TODO
+
 	return bChanged;
 }
