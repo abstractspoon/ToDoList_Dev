@@ -606,6 +606,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="UrlParser.cpp" />
     <ClCompile Include="urlricheditctrl.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -809,6 +810,7 @@
     <ClInclude Include="TreeListSyncer.h" />
     <ClInclude Include="TreeSelectionHelper.h" />
     <ClInclude Include="Unzipper.h" />
+    <ClInclude Include="UrlParser.h" />
     <ClInclude Include="urlricheditctrl.h" />
     <ClInclude Include="VersionInfo.h" />
     <ClInclude Include="wclassdefines.h" />

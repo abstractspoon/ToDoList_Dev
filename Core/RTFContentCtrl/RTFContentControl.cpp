@@ -770,17 +770,10 @@ void CRTFContentControl::OnUpdateEditDelete(CCmdUI* pCmdUI)
 
 void CRTFContentControl::OnEditFileBrowse() 
 {
-	//int nUrl = m_rtf.GetContextUrl();
-	CString sFile = m_rtf.GetContextUrl();
+	CString sFile = m_rtf.GetContextUrl(TRUE);
 	
-//	if (nUrl != -1)
-	if (!sFile.IsEmpty())
-	{
-		//sFile = m_rtf.GetUrl(nUrl, TRUE);
-
-		if (!FileMisc::FileExists(sFile))
-			sFile.Empty();
-	}
+	if (!sFile.IsEmpty() && !FileMisc::FileExists(sFile))
+		sFile.Empty();
 				
 	CFileOpenDialog dialog(IDS_BROWSE_TITLE, NULL, sFile, (EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT));
 	
@@ -840,10 +833,10 @@ void CRTFContentControl::OnUpdateEditHorzRule(CCmdUI* pCmdUI)
 
 void CRTFContentControl::OnEditOpenUrl() 
 {
-// 	int nUrl = m_rtf.GetContextUrl();
-// 
-// 	if (nUrl != -1)
-// 		m_rtf.GoToUrl(nUrl);
+	CString sUrl = m_rtf.GetContextUrl(TRUE);
+
+	if (!sUrl.IsEmpty())
+		m_rtf.GoToUrl(sUrl);
 }
 
 void CRTFContentControl::OnEditCopyUrl() 
@@ -864,7 +857,7 @@ void CRTFContentControl::OnUpdateEditOpenCopyUrl(CCmdUI* pCmdUI)
 			CString sText, sMenu;
 			pCmdUI->m_pMenu->GetMenuString(pCmdUI->m_nID, sMenu, MF_BYCOMMAND);
 			
-			sUrl = m_rtf.GetUrlAsFile(sUrl);
+			sUrl = CUrlParser::GetUrlAsFile(sUrl);
 
 			// restrict url length to 250 pixels
 			CClientDC dc(this);

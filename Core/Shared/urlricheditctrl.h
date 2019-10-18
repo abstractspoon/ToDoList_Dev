@@ -9,6 +9,7 @@
 
 #include "richeditbasectrl.h"
 #include "richeditncborder.h"
+#include "UrlParser.h"
 
 #include <afxtempl.h>
 
@@ -16,26 +17,6 @@
 
 const UINT WM_UREN_CUSTOMURL  = ::RegisterWindowMessage(_T("WM_UREN_CUSTOMURL"));  // lParam == full url
 const UINT WM_UREN_FAILEDURL  = ::RegisterWindowMessage(_T("WM_UREN_FAILEDURL"));  // lParam == full url
-
-/////////////////////////////////////////////////////////////////////////////
-
-struct URLITEM
-{
-	CHARRANGE cr;
-	CString sUrl;
-};
-typedef CArray<URLITEM, URLITEM&> CUrlArray;
-
-/////////////////////////////////////////////////////////////////////////////
-
-struct PROTOCOL
-{
-	PROTOCOL(LPCTSTR szProtocol = NULL, BOOL bNotify = FALSE) : sProtocol(szProtocol), bWantNotify(bNotify) {}
-
-	CString sProtocol;
-	BOOL bWantNotify;
-};
-typedef CArray<PROTOCOL, PROTOCOL&> CProtocolArray;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -58,18 +39,14 @@ public:
 	CPoint GetContextMenuPos() { return m_ptContextMenu; }
 	int AddProtocol(LPCTSTR szProtocol, BOOL bWantNotify = TRUE);
 	void ParseAndFormatText(BOOL bForceReformat = FALSE);
-	int ParseText(LPCTSTR szText, CUrlArray& aUrls) const;
 	CString GetContextUrl(BOOL bAsFile = FALSE) const;
 	void Paste(BOOL bAppendSourceUrl);
 	BOOL PasteSimpleText(BOOL bAppendSourceUrl);
-	BOOL MatchesProtocol(LPCTSTR szText) const;
-
-	static CString GetUrlAsFile(const CString& sUrl);
 
 	// Attributes
 protected:
 	CUrlArray m_aUrls;
-	CProtocolArray m_aProtocols;
+	CUrlParser m_parser;
 	CRichEditNcBorder m_ncBorder;
 
 	CPoint m_ptContextMenu;
@@ -77,7 +54,6 @@ protected:
 	CString m_sLinkInstruction;
 	CHARRANGE m_crDropSel;
 	LPDATAOBJECT m_lpDragObject;
-	int m_nFileProtocol, m_nFileProtocol2;
 	URE_LINKHANDLING m_nLinkHandling;
 
 	// Overrides
@@ -126,25 +102,16 @@ protected:
 protected:
 	CString FindUrl(const CPoint& point) const;
 	CString FindUrl(int nPos) const;
-	BOOL UrlsMatch(const CUrlArray& aUrls) const; 
 	void TrackDragCursor();
-	int MatchProtocol(LPCTSTR szText) const;
 	BOOL AppendSourceUrls(LPCTSTR szUrl);
-	BOOL IsFileProtocol(int nProtocol) const;
 	BOOL GetUrlTooltip(const CString& sUrl, CString& sTooltip) const;
-	int GetProtocols(CStringArray& aProtocols) const;
 	BOOL EnableAutoUrlDetection();
 	void Initialise();
 	BOOL FindStartOfUrl(LPCTSTR szText, int nTextLen, LPCTSTR& szPos) const;
 	BOOL WantFollowLink(BOOL bCtrl, BOOL bShift) const;
 	BOOL SelectionContainsMessagePos() const;
 	BOOL SelectionContainsPos(const CPoint& ptClient) const;
-
-	static BOOL FindEndOfUrl(LPCTSTR& szPos, int& nUrlLen, BOOL bBraced, BOOL bFile);
-	static BOOL IsBaseDelim(LPCTSTR szText);
-	static void InsertInOrder(URLITEM& urli, CUrlArray& aUrls);
-	static CString CreateFileLink(LPCTSTR szFile);
-	static void AppendURLsToLinkText(CString& sLinkText, const CString& sURLs);
+	BOOL UrlsMatch(const CUrlArray& aUrls) const;
 
 };
 

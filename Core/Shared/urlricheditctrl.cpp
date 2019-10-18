@@ -36,29 +36,8 @@ const UINT PAUSE = 1000; // 1 second
 CUrlRichEditCtrl::CUrlRichEditCtrl(URE_LINKHANDLING nLinkHandling, UINT nIDInstructionMsg)
 	: 
 	m_nLinkHandling(nLinkHandling),
-	m_lpDragObject(NULL),
-	m_nFileProtocol(-1), 
-	m_nFileProtocol2(-1)
+	m_lpDragObject(NULL)
 {
-	AddProtocol(_T("www."), FALSE);
-	AddProtocol(_T("http://"), FALSE);
-	AddProtocol(_T("https://"), FALSE);
-	AddProtocol(_T("ftp://"), FALSE);
-	AddProtocol(_T("outlook:"), FALSE);
-	AddProtocol(_T("mailto:"), FALSE);
-	AddProtocol(_T("Notes://"), FALSE);
-	AddProtocol(_T("evernote://"), FALSE);
-	AddProtocol(_T("onenote:"), FALSE);
-	AddProtocol(_T("excel:"), FALSE);
-	AddProtocol(_T("winword:"), FALSE);
-	AddProtocol(_T("thunderlink://"), FALSE);
-	AddProtocol(_T("wiki:"), FALSE);
-
-	// Note: The correct file URI protocol has an extra trailing slash
-	// but we use the incorrect one to pick up badly formatted URIs
-	m_nFileProtocol = AddProtocol(_T("file:///"), FALSE);
-	m_nFileProtocol2 = AddProtocol(_T("file://"), FALSE);
-
 	if (nIDInstructionMsg)
 		m_sLinkInstruction = CEnString(nIDInstructionMsg);
 }
@@ -93,81 +72,18 @@ END_MESSAGE_MAP()
 
 int CUrlRichEditCtrl::AddProtocol(LPCTSTR szProtocol, BOOL bWantNotify)
 {
-	int nExist = MatchProtocol(szProtocol);
-	
-	if (nExist == -1)
-	{
-		PROTOCOL prot(szProtocol, bWantNotify);
-		return m_aProtocols.Add(prot);
-	}
-
-	if (GetSafeHwnd())
-		EnableAutoUrlDetection();
-	
-	return nExist;
+	return m_parser.AddProtocol(szProtocol, bWantNotify);
 }
 
 BOOL CUrlRichEditCtrl::EnableAutoUrlDetection()
 {
-	if (!m_aProtocols.GetSize())
+	if (!m_parser.HasProtocols())
 		return CRichEditBaseCtrl::EnableAutoUrlDetection();
 
 	CStringArray aProtocols;
-	VERIFY(GetProtocols(aProtocols));
+	VERIFY(m_parser.GetProtocols(aProtocols));
 
 	return CRichEditBaseCtrl::EnableAutoUrlDetection(aProtocols);
-}
-
-int CUrlRichEditCtrl::MatchProtocol(LPCTSTR szText) const
-{
-	if (szText[0] == '<')
-		szText++;
-	
-	int nNumProt = m_aProtocols.GetSize();
-	
-	for (int nProt = 0; nProt < nNumProt; nProt++)
-	{
-		const PROTOCOL& prot = m_aProtocols[nProt];
-		
-		if (_tcsnicmp(szText, prot.sProtocol, prot.sProtocol.GetLength()) == 0)
-			return nProt;
-	}
-	
-	return -1;
-}
-
-BOOL CUrlRichEditCtrl::MatchesProtocol(LPCTSTR szText) const
-{
-	return (MatchProtocol(szText) != -1);
-}
-
-CString CUrlRichEditCtrl::GetUrlAsFile(const CString& sUrl)
-{
-	if (WebMisc::IsFileURI(sUrl))
-	{
-		CString sFilePath;
-		
-		if (WebMisc::DecodeFileURI(sUrl, sFilePath))
-		{
-			FileMisc::ExpandPathEnvironmentVariables(sFilePath);
-			return sFilePath;
-		}
-	}
-	
-	// else
-	return sUrl;
-}
-
-int CUrlRichEditCtrl::GetProtocols(CStringArray& aProtocols) const
-{
-	aProtocols.RemoveAll();
-
-	int nNumProt = m_aProtocols.GetSize();
-	
-	for (int nProt = 0; nProt < nNumProt; nProt++)
-		aProtocols.Add(m_aProtocols[nProt].sProtocol);
-
-	return aProtocols.GetSize();
 }
 
 BOOL CUrlRichEditCtrl::OnChangeText() 
@@ -290,7 +206,7 @@ BOOL CUrlRichEditCtrl::FindStartOfUrl(LPCTSTR szText, int nTextLen, LPCTSTR& szP
 
 	while (szPos > szText)
 	{
-		if (IsBaseDelim(szPos - 1))
+		if (CUrlParser::IsBaseDelim(szPos - 1))
 		{
 			if (szPos[-1] == '<')
 				szPos--;
@@ -301,158 +217,7 @@ BOOL CUrlRichEditCtrl::FindStartOfUrl(LPCTSTR szText, int nTextLen, LPCTSTR& szP
 		szPos--;
 	}
 
-	return (MatchProtocol(szPos) != -1);
-}
-
-BOOL CUrlRichEditCtrl::FindEndOfUrl(LPCTSTR& szPos, int& nUrlLen, BOOL bBraced, BOOL bFile)
-{
-	LPCTSTR szUrlStart = szPos;
-	nUrlLen = 0;
-
-	if (bBraced)
-	{
-		while (*szPos && *szPos != '>')
-		{
-			szPos++;
-			nUrlLen++;
-		}
-	}
-	else
-	{
-		while (!IsBaseDelim(szPos))
-		{
-			szPos++;
-			nUrlLen++;
-		}
-
-		// make sure the url does not end in a punctuation mark
-		// But don't decrement nPos because that represents
-		// where we will restart processing
-		if (bFile)
-		{
-			// Less stringent requirements
-			static CString FILEPUNCTUATION(_T(".,;:&*~?\\\"'"));
-						
-			while (FILEPUNCTUATION.Find(szUrlStart[nUrlLen - 1]) != -1)
-				nUrlLen--;
-		}
-		else // web
-		{
-			// More stringent requirements
-			static CString WEBPUNCTUATION(_T(".,;:(){}[]<>&*~?\\\"'"));
-						
-			while (WEBPUNCTUATION.Find(szUrlStart[nUrlLen - 1]) != -1)
-				nUrlLen--;
-		}
-	}
-
-	return (nUrlLen > 0);
-}
-
-BOOL CUrlRichEditCtrl::IsBaseDelim(LPCTSTR szText)
-{
-	if (Misc::IsEmpty(szText))
-		return TRUE; // end of string
-
-	static LPCTSTR BASEDELIMS[] = 
-	{ 
-		_T(" "), 
-		_T("\n"),
-		_T("\t"),
-		_T(", "),
-		_T(". "),
-		_T("<"),
-	};
-	const int NUM_DEMIM = sizeof(BASEDELIMS) / sizeof(LPCTSTR);
-
-	for (int nDelim = 0; nDelim < NUM_DEMIM; nDelim++)
-	{
-		LPCTSTR szDelim = BASEDELIMS[nDelim];
-		
-		if (szDelim[0] == *szText)
-		{
-			// test char after ch if 2 char delim
-			if ((szDelim[1] == 0) || (szDelim[1] == *(szText + 1)))
-				return TRUE;
-		}
-	}
-	
-	return FALSE;
-}
-
-BOOL CUrlRichEditCtrl::IsFileProtocol(int nProtocol) const
-{
-	ASSERT((nProtocol >= 0) && (nProtocol < m_aProtocols.GetSize()));
-
-	return ((nProtocol == m_nFileProtocol) || (nProtocol == m_nFileProtocol2));
-}
-
-int CUrlRichEditCtrl::ParseText(LPCTSTR szText, CUrlArray& aUrls) const
-{
-	aUrls.RemoveAll();
-
-	LPCTSTR szPos = szText;
-	BOOL bPrevCharWasDelim = TRUE;
-	
-	while (*szPos) 
-	{
-		// if the previous item was not a delimiter then there's no
-		// point checking for a protocol match so we just update the
-		// value of bPrevDelim for the current char
-		BOOL bStartDelim(IsBaseDelim(szPos));
-
-		if (!bPrevCharWasDelim)
-		{
-			bPrevCharWasDelim = bStartDelim;
-			szPos++;
-			continue;
-		}
-		// if the current char is a delim then this can't be the start
-		// of a url either
-		else if (bStartDelim)
-		{
-			bPrevCharWasDelim = TRUE;
-			szPos++;
-			continue;
-		}
-		
-		// now check for a protocol
-		int nProt = MatchProtocol(szPos);
-		
-		// if no match then increment pos and go to next char
-		if (nProt == -1)
-		{
-			bPrevCharWasDelim = FALSE;
-			szPos++;
-			continue;
-		}
-		
-		// find the end of the url (URLDELIMS)
-		int nUrlLen = 0;
-		LPCTSTR szUrlStart = szPos;
-		
-		// check for braces (<...>)
-		int nUrlStart = (szPos - szText);
-		BOOL bBraced = ((nUrlStart > 0) && (szPos[-1] == '<'));
-		
-		VERIFY(FindEndOfUrl(szPos, nUrlLen, bBraced, IsFileProtocol(nProt)));
-		
-		// Only save if the link is more than just the protocol
-		if (nUrlLen > m_aProtocols[nProt].sProtocol.GetLength())
-		{
-			URLITEM urli;
-
-			urli.cr.cpMin = nUrlStart;
-			urli.cr.cpMax = (nUrlStart + nUrlLen);
-			urli.sUrl = CString(szUrlStart, nUrlLen);
-			
-			InsertInOrder(urli, aUrls);
-		}
-
-		bPrevCharWasDelim = TRUE;
-	}
-
-	return aUrls.GetSize();
+	return (m_parser.MatchProtocol(szPos) != -1);
 }
 
 void CUrlRichEditCtrl::ParseAndFormatText(BOOL bForceReformat)
@@ -473,7 +238,7 @@ void CUrlRichEditCtrl::ParseAndFormatText(BOOL bForceReformat)
 	
 	// parse the text into an array of URLPOS
 	CUrlArray aUrls;
-	ParseText(sText, aUrls);
+	m_parser.ParseText(sText, aUrls);
 	
 	// compare aUrls with m_aUrls to see if anything has changed
 	BOOL bReformat = !sText.IsEmpty() && (bForceReformat || !UrlsMatch(aUrls));
@@ -572,29 +337,11 @@ BOOL CUrlRichEditCtrl::UrlsMatch(const CUrlArray& aUrls) const
 	return TRUE;
 }
 
-void CUrlRichEditCtrl::InsertInOrder(URLITEM& urli, CUrlArray& aUrls)
-{
-	// work backwards looking for first item that comes before us
-	int nUrl = aUrls.GetSize();
-
-	while (nUrl--)
-	{
-		if (aUrls[nUrl].cr.cpMin < urli.cr.cpMin)
-		{
-			aUrls.InsertAt(nUrl + 1, urli);
-			return;
-		}
-	}
-
-	// else insert at start
-	aUrls.InsertAt(0, urli);
-}
-
 BOOL CUrlRichEditCtrl::GoToUrl(const CString& sUrl) const
 {
-	int nProtocol = MatchProtocol(sUrl);
+	int nProtocol = m_parser.MatchProtocol(sUrl);
 		
-	if ((nProtocol != -1) && !m_aProtocols[nProtocol].bWantNotify)
+	if ((nProtocol != -1) && m_parser.ProtocolWantsNotification(nProtocol))
 	{
 		// Handle Outlook manually because under Windows 10 ShellExecute 
 		// will succeed even if Outlook is not installed
@@ -605,7 +352,7 @@ BOOL CUrlRichEditCtrl::GoToUrl(const CString& sUrl) const
 		}
 		else if (WebMisc::IsFileURI(sUrl))
 		{
-			if (FileMisc::Run(*this, GetUrlAsFile(sUrl)) >= SE_ERR_SUCCESS)
+			if (FileMisc::Run(*this, CUrlParser::GetUrlAsFile(sUrl)) >= SE_ERR_SUCCESS)
 			{
 				return TRUE;
 			}
@@ -624,16 +371,6 @@ BOOL CUrlRichEditCtrl::GoToUrl(const CString& sUrl) const
 	SendNotifyCustomUrl(sUrl);
 	return TRUE;
 }
-
-/*
-BOOL CUrlRichEditCtrl::CopyUrlToClipboard(int nUrl) const
-{
-	if (nUrl < 0 || nUrl >= m_aUrls.GetSize())
-		return FALSE;
-	
-	return CClipboard(*this).SetText(GetUrl(nUrl, TRUE));
-}
-*/
 
 LRESULT CUrlRichEditCtrl::SendNotifyCustomUrl(LPCTSTR szUrl) const
 {
@@ -855,25 +592,10 @@ HRESULT CUrlRichEditCtrl::GetContextMenu(WORD /*seltype*/, LPOLEOBJECT /*lpoleob
 CString CUrlRichEditCtrl::GetContextUrl(BOOL bAsFile) const
 {
 	if (bAsFile)
-		return GetUrlAsFile(m_sContextUrl);
+		return CUrlParser::GetUrlAsFile(m_sContextUrl);
 	
 	// else
 	return m_sContextUrl;
-}
-
-CString CUrlRichEditCtrl::CreateFileLink(LPCTSTR szFile)
-{
-	ASSERT(FileMisc::IsPath(szFile));
-	CString sLink;
-		
-	if (WebMisc::FormatFileURI(szFile, sLink, FALSE))
-	{
-		// if the path contains spaces then brace it
-		if (sLink.Find(' ') != -1)
-			sLink = "<" + sLink + ">";
-	}
-	
-	return sLink;
 }
 
 void CUrlRichEditCtrl::Paste(BOOL bAppendSourceUrl)
@@ -943,28 +665,13 @@ BOOL CUrlRichEditCtrl::AppendSourceUrls(LPCTSTR szUrls)
 	return TRUE;
 }
 
-void CUrlRichEditCtrl::AppendURLsToLinkText(CString& sLinkText, const CString& sURLs)
-{
-	CStringArray aLinks, aLinkText;
-	int nLink = WebMisc::ExtractHtmlLinks(sURLs, aLinks, aLinkText);
-
-	// replace link text with text + url
-	while (nLink--)
-	{
-		CString sLinkAndText;
-		sLinkAndText.Format(_T("%s ( %s )"), aLinkText[nLink], aLinks[nLink]);
-
-		sLinkText.Replace(aLinkText[nLink], sLinkAndText);
-	}
-}
-
 void CUrlRichEditCtrl::PathReplaceSel(LPCTSTR lpszPath, BOOL bFile)
 {
 	CString sPath(lpszPath);
 	sPath.TrimLeft();
 
 	if (bFile || FileMisc::IsPath(lpszPath))
-		sPath = CreateFileLink(lpszPath);
+		sPath = CUrlParser::CreateFileLink(lpszPath);
 	
 	// add space fore and aft depending on selection
 	CHARRANGE crSel, crSelOrg;
@@ -1231,11 +938,11 @@ CString CUrlRichEditCtrl::FindUrl(int nPos) const
 				{
 					int nUrlLen = 0;
 					BOOL bBraced = (szStart[0] == '<');
-					BOOL bFile = IsFileProtocol(MatchProtocol(szStart));
+					BOOL bFile = m_parser.IsFileProtocol(szStart);
 
 					LPCTSTR szEnd = szStart;
 
-					if (FindEndOfUrl(szEnd, nUrlLen, bBraced, bFile))
+					if (CUrlParser::FindEndOfUrl(szEnd, nUrlLen, bBraced, bFile))
 					{
 						if (bBraced)
 						{

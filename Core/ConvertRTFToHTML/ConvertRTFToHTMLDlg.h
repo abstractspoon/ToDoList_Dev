@@ -28,7 +28,7 @@ public:
 // Implementation
 protected:
 	HICON m_hIcon;
-	CUrlRichEditCtrl m_parser;
+	CUrlParser m_parser;
 	CString m_sCurrentTask;
 
 	// Generated message map functions

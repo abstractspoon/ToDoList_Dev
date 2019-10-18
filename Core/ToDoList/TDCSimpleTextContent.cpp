@@ -570,7 +570,7 @@ void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID)
 	case ID_COMMENTS_FILEBROWSE:
 		if (CanEdit())
 		{
-			CString sFile = GetUrlAsFile(m_sContextUrl);
+			CString sFile = CUrlParser::GetUrlAsFile(m_sContextUrl);
 						
 			CFileOpenDialog dialog(IDS_BROWSEFILE_TITLE, NULL, sFile, (EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT));
 			
@@ -678,7 +678,7 @@ void CTDLSimpleTextContentCtrl::OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI)
 			CEnString sUrl(m_sContextUrl);
 
 			if (WebMisc::IsFileURI(sUrl))
-				sUrl = GetUrlAsFile(m_sContextUrl);
+				sUrl = CUrlParser::GetUrlAsFile(m_sContextUrl);
 
 			CClientDC dc(this);
 			sUrl.FormatDC(&dc, 250, ES_PATH);
