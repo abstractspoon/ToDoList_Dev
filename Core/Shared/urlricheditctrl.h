@@ -62,6 +62,7 @@ public:
 	CString GetContextUrl(BOOL bAsFile = FALSE) const;
 	void Paste(BOOL bAppendSourceUrl);
 	BOOL PasteSimpleText(BOOL bAppendSourceUrl);
+	BOOL MatchesProtocol(LPCTSTR szText) const;
 
 	static CString GetUrlAsFile(const CString& sUrl);
 

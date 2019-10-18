@@ -136,6 +136,11 @@ int CUrlRichEditCtrl::MatchProtocol(LPCTSTR szText) const
 	return -1;
 }
 
+BOOL CUrlRichEditCtrl::MatchesProtocol(LPCTSTR szText) const
+{
+	return (MatchProtocol(szText) != -1);
+}
+
 CString CUrlRichEditCtrl::GetUrlAsFile(const CString& sUrl)
 {
 	if (WebMisc::IsFileURI(sUrl))

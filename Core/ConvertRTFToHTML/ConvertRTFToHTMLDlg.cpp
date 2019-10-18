@@ -71,6 +71,8 @@ BOOL CConvertRTFToHTMLDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
+	m_parser.AddProtocol(L"tdl://", FALSE);
+
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -274,7 +276,7 @@ BOOL CConvertRTFToHTMLDlg::FixupLinks(CString& sHtml) const
 		int nEndEnd = (nStartEnd + SPANEND.GetLength());
 		CString sContent = sHtml.Mid(nEndStart + 1, (nStartEnd - (nEndStart + 1)));
 
-		if (WebMisc::IsURL(sContent))
+		if (m_parser.MatchesProtocol(sContent))
 		{
 			// Remove the span around the link text
 			sHtml = sHtml.Left(nStartStart) + sContent + sHtml.Mid(nEndEnd);
