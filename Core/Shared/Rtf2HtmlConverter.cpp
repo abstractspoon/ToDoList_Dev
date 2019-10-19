@@ -442,7 +442,10 @@ BOOL CRtfHtmlConverter::ConvertRtfToHtmlWithIntenso(LPCTSTR szRtfFile, LPCTSTR s
 			if (fnRtf2Html)
 			{
 				// arguments
-				CString sCharSet = _T("/CS:") + CString(szCharSet);
+				CString sCharSet;
+				
+				if (!Misc::IsEmpty(szCharSet))
+					sCharSet.Format(_T("/CS:%s"), szCharSet);
 	
 				CString sImageDir;
 				sImageDir.Format(_T("/ID:%s"), szUniqueDir);

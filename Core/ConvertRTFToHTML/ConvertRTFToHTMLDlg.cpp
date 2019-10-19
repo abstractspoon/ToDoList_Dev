@@ -14,6 +14,7 @@
 #include "..\shared\Rtf2HtmlConverter.h"
 #include "..\Shared\WebMisc.h"
 #include "..\Shared\XmlCharMap.h"
+#include "..\Shared\MSWordHelper.h"
 
 #include "..\3rdparty\compression.h"
 
@@ -37,11 +38,20 @@ CConvertRTFToHTMLDlg::CConvertRTFToHTMLDlg(CWnd* pParent /*=NULL*/)
 	, m_eInputTasklist(FES_COMBOSTYLEBTN, FILTER_TASKLISTS)
 	, m_eOutputTasklist(FES_COMBOSTYLEBTN | FES_SAVEAS, FILTER_TASKLISTS)
 	, m_sCurrentTask(_T(""))
+	, m_bUseMSWordForConversion(FALSE)
+	, m_bOpenConvertedTasklist(FALSE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
 	m_sInputTasklist = AfxGetApp()->GetProfileString(L"Preferences", L"InputTasklist");
 	m_sOutputTasklist = AfxGetApp()->GetProfileString(L"Preferences", L"OutputTasklist");
+
+	if (CMSWordHelper::IsWordInstalled())
+		m_bUseMSWordForConversion = AfxGetApp()->GetProfileInt(L"Preferences", L"UseMSWord", CMSWordHelper::IsWordInstalled());
+	else
+		m_bUseMSWordForConversion = FALSE;
+
+	m_bOpenConvertedTasklist = AfxGetApp()->GetProfileInt(L"Preferences", L"OpenConverted", FALSE);
 }
 
 void CConvertRTFToHTMLDlg::DoDataExchange(CDataExchange* pDX)
@@ -52,6 +62,8 @@ void CConvertRTFToHTMLDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_INPUTTASKLIST, m_sInputTasklist);
 	DDX_Text(pDX, IDC_OUTPUTTASKLIST, m_sOutputTasklist);
 	DDX_Text(pDX, IDC_CURRENTTASK, m_sCurrentTask);
+	DDX_Check(pDX, IDC_USEMSWORD, m_bUseMSWordForConversion);
+	DDX_Check(pDX, IDC_OPENAFTER, m_bOpenConvertedTasklist);
 }
 
 BEGIN_MESSAGE_MAP(CConvertRTFToHTMLDlg, CDialogEx)
@@ -72,6 +84,8 @@ BOOL CConvertRTFToHTMLDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	m_parser.AddProtocol(L"tdl://", FALSE);
+
+	GetDlgItem(IDC_USEMSWORD)->EnableWindow(CMSWordHelper::IsWordInstalled());
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -118,6 +132,8 @@ void CConvertRTFToHTMLDlg::OnOK()
 
 	AfxGetApp()->WriteProfileString(L"Preferences", L"InputTasklist", m_sInputTasklist);
 	AfxGetApp()->WriteProfileString(L"Preferences", L"OutputTasklist", m_sOutputTasklist);
+	AfxGetApp()->WriteProfileInt(L"Preferences", L"UseMSWord", m_bUseMSWordForConversion);
+	AfxGetApp()->WriteProfileInt(L"Preferences", L"OpenConverted", m_bOpenConvertedTasklist);
 
 	if (FileMisc::IsSamePath(m_sInputTasklist, m_sOutputTasklist))
 	{
@@ -126,9 +142,9 @@ void CConvertRTFToHTMLDlg::OnOK()
 	}
 
 	// Do the conversion
-	CTaskFile tasks;
+	CTaskFile tasksIn;
 
-	if (!tasks.Load(m_sInputTasklist))
+	if (!tasksIn.Load(m_sInputTasklist))
 	{
 		AfxMessageBox(L"Failed to open input tasklist");
 		return;
@@ -136,11 +152,11 @@ void CConvertRTFToHTMLDlg::OnOK()
 
 	CTDCStyleMap styles;
 	CTDCCustomAttribDefinitionArray aCustomAttribDefs;
-	tasks.GetCustomAttributeDefs(aCustomAttribDefs);
+	tasksIn.GetCustomAttributeDefs(aCustomAttribDefs);
 
 	CToDoCtrlData data(styles, aCustomAttribDefs);
 
-	if (!data.BuildDataModel(tasks))
+	if (!data.BuildDataModel(tasksIn))
 	{
 		AfxMessageBox(L"Failed to load tasks from tasklist");
 		return;
@@ -154,18 +170,21 @@ void CConvertRTFToHTMLDlg::OnOK()
 	CString sImageFolder(m_sOutputTasklist);
 	FileMisc::RemoveExtension(sImageFolder);
 
+	CTaskFile tasksOut(tasksIn);
+
 	while (pos)
 	{
 		const TODOITEM* pTDI = NULL;
 		DWORD dwTaskID = data.GetNextTask(pos, pTDI);
 
+		m_sCurrentTask.Format(L"\"%s\"", pTDI->sTitle);
+		UpdateData(FALSE);
+
 		if (pTDI->cfComments.CompareNoCase(RTF_TYPEID) == 0)
 		{
-			m_sCurrentTask.Format(L"\"%s\"", pTDI->sTitle);
-			UpdateData(FALSE);
-
-			const unsigned char* pContent = pTDI->customComments.Get();
-			int nLength = pTDI->customComments.GetLength();
+			CBinaryData content(pTDI->customComments);
+			const unsigned char* pContent = content.Get();
+			int nLength = content.GetLength();
 
 			// we may have to decompress it first
 			unsigned char* pDecompressed = NULL;
@@ -193,18 +212,18 @@ void CConvertRTFToHTMLDlg::OnOK()
 
 			if (nLength)
 			{
-				rtfHtml.SetAllowUseOfMSWord(TRUE);
+				rtfHtml.SetAllowUseOfMSWord(m_bUseMSWordForConversion);
 
 				CString sHtml;
 
-				if (rtfHtml.ConvertRtfToHtml((const char*)pContent, tasks.GetHtmlCharSet(), sHtml, sImageFolder))
+				if (rtfHtml.ConvertRtfToHtml((const char*)pContent, tasksOut.GetHtmlCharSet(), sHtml, sImageFolder))
 				{
-					HTASKITEM hTask = tasks.FindTask(dwTaskID);
+					HTASKITEM hTask = tasksOut.FindTask(dwTaskID);
 					ASSERT(hTask);
 
 					PostProcessHtml(sHtml);
 
-					tasks.SetTaskCustomComments(hTask, CBinaryData(sHtml), HTML_GUID);
+					tasksOut.SetTaskCustomComments(hTask, CBinaryData(sHtml), HTML_GUID);
 				}
 			}
 
@@ -213,7 +232,7 @@ void CConvertRTFToHTMLDlg::OnOK()
 		}
 	}
 
-	if (tasks.Save(m_sOutputTasklist, SFEF_UTF16))
+	if (tasksOut.Save(m_sOutputTasklist, SFEF_UTF16))
 	{
 		AfxMessageBox(L"Tasklist was successfully converted");
 	}
@@ -222,12 +241,17 @@ void CConvertRTFToHTMLDlg::OnOK()
 		AfxMessageBox(L"Failed to save converted tasklist");
 	}
 
+	if (m_bOpenConvertedTasklist)
+	{
 #ifdef _DEBUG
-	CString sTDLPath = FileMisc::GetModuleFolder();
-	sTDLPath += L"\\..\\..\\ToDoList\\Unicode_Debug\\ToDoList.exe";
+		CString sTDLPath = FileMisc::GetModuleFolder();
+		sTDLPath += L"\\..\\..\\ToDoList\\Unicode_Debug\\ToDoList.exe";
 
-	ShellExecute(*this, NULL, sTDLPath, m_sOutputTasklist, NULL, SW_SHOWNORMAL);
+		ShellExecute(*this, NULL, sTDLPath, m_sOutputTasklist, NULL, SW_SHOWNORMAL);
+#else
+		ShellExecute(*this, NULL, m_sOutputTasklist, NULL, NULL, SW_SHOWNORMAL);
 #endif
+	}
 
 	CDialogEx::OnOK();
 }
@@ -251,71 +275,92 @@ BOOL CConvertRTFToHTMLDlg::FixupLinks(CString& sHtml) const
 {
 	BOOL bChanged = FALSE;
 
-	// 1. MSWord converts href links correctly but then wraps
-	// the link text in a span which breaks the link in the UI
-	// so we remove any span that encompasses a valid URI
-	CString sLowerHtml = Misc::ToLower(sHtml);
-
-	const CString SPANSTART = L"<span";
-	const CString SPANEND = L"</span>";
-
-	int nStartStart = sLowerHtml.Find(SPANSTART);
-
-	while (nStartStart != -1)
+	if (m_bUseMSWordForConversion)
 	{
-		int nEndStart = sLowerHtml.Find('>', nStartStart + SPANSTART.GetLength());
+		// 1. MSWord converts href links correctly but then wraps
+		// the link text in a span which breaks the link in the UI
+		// so we remove any span that encompasses a valid URI
+		CString sLowerHtml = Misc::ToLower(sHtml);
 
-		if (nEndStart == -1)
-			break;
+		const CString SPANSTART = L"<span";
+		const CString SPANEND = L"</span>";
 
-		int nStartEnd = sLowerHtml.Find(SPANEND, nEndStart);
+		int nStartStart = sLowerHtml.Find(SPANSTART);
 
-		if (nStartEnd == -1)
-			break;
-
-		int nEndEnd = (nStartEnd + SPANEND.GetLength());
-		CString sContent = sHtml.Mid(nEndStart + 1, (nStartEnd - (nEndStart + 1)));
-
-		if (m_parser.MatchesProtocol(sContent))
+		while (nStartStart != -1)
 		{
-			// Remove the span around the link text
-			sHtml = sHtml.Left(nStartStart) + sContent + sHtml.Mid(nEndEnd);
-			sLowerHtml = sLowerHtml.Left(nStartStart) + sContent + sLowerHtml.Mid(nEndEnd);
+			int nEndStart = sLowerHtml.Find('>', nStartStart + SPANSTART.GetLength());
 
-			// Adjust end to compensate
-			nEndEnd = (nStartStart + sContent.GetLength());
+			if (nEndStart == -1)
+				break;
 
-			bChanged = TRUE;
-		}
+			int nStartEnd = sLowerHtml.Find(SPANEND, nEndStart);
 
-		nStartStart = sLowerHtml.Find(SPANSTART, (nEndStart + 1));
-	}
+			if (nStartEnd == -1)
+				break;
 
-	// 2. MSWord converts links without a protocol (eg. www.abstractspoon.com) 
-	// into file-links pointing to the user's temp folder. However, we know
-	// that links should be the same as the links text, so if the link text
-	// has no protocol we give it one
-	CStringArray aLinks, aLinksText;
+			int nEndEnd = (nStartEnd + SPANEND.GetLength());
+			CString sContent = sHtml.Mid(nEndStart + 1, (nStartEnd - (nEndStart + 1)));
 
-	int nLink = WebMisc::ExtractHtmlLinks(sHtml, aLinks, aLinksText);
-
-	while (nLink--)
-	{
-		const CString& sLinkText = aLinksText[nLink];
-
-		if (WebMisc::IsURL(sLinkText) && (sLinkText.Find(':') == -1))
-		{
-			const CString& sLink = aLinks[nLink];
-			CString sFilePath;
-
-			if (WebMisc::DecodeFileURI(sLink, sFilePath) && FileMisc::IsTempFilePath(sFilePath))
+			if (m_parser.MatchesProtocol(sContent))
 			{
-				VERIFY(sHtml.Replace(sLink, (L"https://" + sLinkText)) == 1);
+				// Remove the span around the link text
+				sHtml = sHtml.Left(nStartStart) + sContent + sHtml.Mid(nEndEnd);
+				sLowerHtml = sLowerHtml.Left(nStartStart) + sContent + sLowerHtml.Mid(nEndEnd);
+
+				// Adjust end to compensate
+				nEndEnd = (nStartStart + sContent.GetLength());
 
 				bChanged = TRUE;
 			}
+
+			nStartStart = sLowerHtml.Find(SPANSTART, (nEndStart + 1));
+		}
+
+		// 2. MSWord converts links without a protocol (eg. www.abstractspoon.com) 
+		// into file-links pointing to the user's temp folder. However, we know
+		// that links should be the same as the links text, so if the link text
+		// has no protocol we give it one
+		CStringArray aLinks, aLinksText;
+
+		int nLink = WebMisc::ExtractHtmlLinks(sHtml, aLinks, aLinksText);
+
+		while (nLink--)
+		{
+			const CString& sLinkText = aLinksText[nLink];
+
+			if (WebMisc::IsURL(sLinkText) && (sLinkText.Find(':') == -1))
+			{
+				const CString& sLink = aLinks[nLink];
+				CString sFilePath;
+
+				if (WebMisc::DecodeFileURI(sLink, sFilePath) && FileMisc::IsTempFilePath(sFilePath))
+				{
+					VERIFY(sHtml.Replace(sLink, (L"https://" + sLinkText)) == 1);
+
+					bChanged = TRUE;
+				}
+			}
 		}
 	}
+	else
+	{
+		CUrlArray aUrls;
+		int nUrl = m_parser.ParseText(sHtml, aUrls);
+
+		while (nUrl--)
+		{
+			const URLITEM& url = aUrls[nUrl];
+
+			CString sHref;
+			sHref.Format(L"<A HREF='%s'>%s</A>", url.sUrl, url.sUrl);
+
+			sHtml = sHtml.Left(url.cr.cpMin) + sHref + sHtml.Mid(url.cr.cpMax);
+
+			bChanged = TRUE;
+		}
+	}
+
 	
 	return bChanged;
 }

@@ -48,4 +48,6 @@ protected:
 	BOOL FixupColors(CString& sHtml) const;
 	BOOL FixupLists(CString& sHtml) const;
 
+	BOOL m_bUseMSWordForConversion;
+	BOOL m_bOpenConvertedTasklist;
 };
