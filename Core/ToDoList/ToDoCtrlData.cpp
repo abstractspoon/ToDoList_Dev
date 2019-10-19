@@ -2882,8 +2882,76 @@ BOOL CToDoCtrlData::CanUndoLastAction(BOOL bUndo) const
 	return bUndo ? m_undo.CanUndo() : m_undo.CanRedo();
 }
 
+BOOL CToDoCtrlData::IsValidMoveDestination(DWORD dwTaskID, DWORD dwDestParentID) const
+{
+	// Sanity checks
+	if (!dwTaskID || (dwDestParentID && !HasTask(dwDestParentID)))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Parent can always be the root
+	if (!dwDestParentID)
+		return TRUE;
+
+	// Parent can't be the task being moved
+	if (dwDestParentID == dwTaskID)
+		return FALSE;
+
+	// Parent can't be a child of the task being moved
+	const TODOSTRUCTURE* pTDSDestParent = LocateTask(dwDestParentID);
+	ASSERT(pTDSDestParent);
+
+	return (pTDSDestParent && !pTDSDestParent->HasParent(dwTaskID, FALSE));
+}
+
+BOOL CToDoCtrlData::IsValidMoveDestination(const CDWordArray& aTaskIDs, DWORD dwDestParentID) const
+{
+	// Sanity checks
+	if (!aTaskIDs.GetSize() || (dwDestParentID && !HasTask(dwDestParentID)))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Parent can always be the root
+	if (!dwDestParentID)
+		return TRUE;
+
+	const TODOSTRUCTURE* pTDSDestParent = LocateTask(dwDestParentID);
+	ASSERT(pTDSDestParent);
+
+	if (pTDSDestParent)
+	{
+		int nID = aTaskIDs.GetSize();
+
+		while (nID--)
+		{
+			DWORD dwTaskID = aTaskIDs[nID];
+
+			// Parent can't be one of the tasks being moved
+			if (dwDestParentID == dwTaskID)
+				return FALSE;
+
+			// Or a child of one of the tasks being moved
+			if (pTDSDestParent->HasParent(dwTaskID, FALSE))
+				return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
 BOOL CToDoCtrlData::MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestPrevSiblingID)
 {
+	// Sanity check
+	if (!IsValidMoveDestination(dwTaskID, dwDestParentID))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	// get source location
 	TODOSTRUCTURE* pTDSSrcParent = NULL;
 	int nSrcPos = 0;
@@ -2918,6 +2986,7 @@ BOOL CToDoCtrlData::MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestP
 	return (MoveTask(pTDSSrcParent, nSrcPos, dwSrcPrevSiblingID, pTDSDestParent, nDestPos) != -1);
 }
 
+// Internal: Assume that move destination has already been validated
 int CToDoCtrlData::MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwSrcPrevSiblingID,
 							TODOSTRUCTURE* pTDSDestParent, int nDestPos)
 {
@@ -2986,6 +3055,13 @@ BOOL CToDoCtrlData::MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID,
 		case 1: return MoveTask(aTaskIDs[0], dwDestParentID, dwDestPrevSiblingID);
 	}
 	
+	// Sanity check
+	if (!IsValidMoveDestination(aTaskIDs, dwDestParentID))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	// copy the structure because we're going to be changing it and we need 
 	// to be able to lookup the original previous sibling IDs for undo info
 	CToDoCtrlDataStructure tdsCopy(m_struct);
