@@ -1732,7 +1732,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		return;
 
 #ifdef _DEBUG
-	DWORD dwTick = GetTickCount();
+	//DWORD dwTick = GetTickCount();
 #endif
 
 	if (!hti)
@@ -1976,7 +1976,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 	if (!m_taskTree.GetSafeHwnd())
 		return;
 	
-	if (!GetSelectedItem())
+	if (!CanEditSelectedTask(nAttrib))
 		return;
 	
 	// special case to circumvent CSaveFocus else it can mess up IME input
@@ -7174,9 +7174,7 @@ BOOL CToDoCtrl::ModsCauseColorChange(const CTDCAttributeMap& mapAttrib) const
 
 LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-//	if (!m_ctrlComments.IsSettingContent())
-		UpdateTask(TDCA_COMMENTS);
-
+	UpdateTask(TDCA_COMMENTS);
 	return 0L;
 }
 
@@ -8155,11 +8153,7 @@ void CToDoCtrl::OnSelChangeCategory()
 
 void CToDoCtrl::OnSelChangeFileRefPath()
 {
-	// Special case: When we are read-only we still allow the user 
-	// to change the selection of the file reference combo but
-	// without modifying the underlying task
-	if (CanEditSelectedTask(TDCA_FILEREF))
-		UpdateTask(TDCA_FILEREF);
+	UpdateTask(TDCA_FILEREF);
 }
 
 void CToDoCtrl::OnCancelChangeFileRefPath()

@@ -270,7 +270,6 @@ public:
 	double CalcSelectedTaskTimeSpent(TDC_UNITS nUnits = TDCU_HOURS) const { return m_taskTree.CalcSelectedTaskTimeSpent(nUnits); }
 	double CalcSelectedTaskCost() const { return m_taskTree.CalcSelectedTaskCost(); }
 
-	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
 	BOOL CanSetSelectedTaskPercentDoneToToday() const;
 
 	BOOL SetSelectedTaskColor(COLORREF color);
@@ -389,6 +388,7 @@ public:
 	virtual void SetFocusToComments();
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
+	virtual BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
 
 	BOOL SelectedTasksHaveChildren() const { return m_taskTree.SelectionHasSubtasks(); }
 	BOOL SelectedTasksHaveIcons() const { return m_taskTree.SelectionHasIcons(); }
