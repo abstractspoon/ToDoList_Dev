@@ -7094,8 +7094,8 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 	case TDCA_CUSTOMATTRIBDEFS:
 		// Special case: We replace the definition 
 		// attribute with the value attribute
-		mapAttribIDs.Add(TDCA_CUSTOMATTRIB);
 		mapAttribIDs.Remove(TDCA_CUSTOMATTRIBDEFS);
+		mapAttribIDs.Add(TDCA_CUSTOMATTRIB);
 		break;
 
 	case TDCA_TIMEEST:
