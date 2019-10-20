@@ -6,6 +6,7 @@
 #include "ownerdrawcomboboxbase.h"
 #include "graphicsmisc.h"
 #include "winclasses.h"
+#include "wclassdefines.h"
 #include "dialoghelper.h"
 
 #ifdef _DEBUG
@@ -86,12 +87,16 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		GetWindowText(sText);
 	}
 
-	// Determine whether this is a list item by comparing
-	// its rect to the combo client
-	CRect rCombo;
-	GetClientRect(rCombo);
+	// Determine whether this is a list item
+	HWND hwndDC = ::WindowFromDC(lpDrawItemStruct->hDC);
+	BOOL bListItem = FALSE;
+	
+	if (hwndDC)
+		bListItem = CWinClasses::IsClass(hwndDC, WC_COMBOLBOX);
+	else
+		bListItem = (dc.GetWindowOrg().y == -1);
 
-	BOOL bListItem = (rItem.bottom > rCombo.bottom);
+	TRACE(_T("COwnerdrawComboBoxBase::DrawItem(%s, hwnd=%s, list = %d)\n"), sText, CWinClasses::GetClass(hwndDC), bListItem);
 
 	// virtual call
 	DrawItemText(dc, rItem, nItem, 
