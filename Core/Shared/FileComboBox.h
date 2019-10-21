@@ -56,6 +56,7 @@ protected:
 
 	// pseudo message handler
 	LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
+	LRESULT OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 
 protected:
 	void ResizeEdit();

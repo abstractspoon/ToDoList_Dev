@@ -322,10 +322,10 @@ BOOL CFileComboBox::DeleteLBItem(int nItem)
 
 LRESULT CFileComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 {
-	// handle 'escape' to cancel deletions
 	switch (msg)
 	{
 	case WM_CHAR:
+		// handle 'escape' to cancel deletions
 		if (wp == VK_ESCAPE)
 		{
 			m_bEditChange = FALSE;
@@ -338,6 +338,35 @@ LRESULT CFileComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 
 	// default handling
 	return CAutoComboBox::OnEditboxMessage(msg, wp, lp);
+}
+
+LRESULT CFileComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
+{
+	// handle 'escape' to cancel deletions
+	switch (msg)
+	{
+	case WM_LBUTTONUP:
+		// Handle mouse selection changes when edit is readonly
+		if (m_bReadOnly && GetDroppedState())
+		{
+			int nSel = m_scList.SendMessage(LB_ITEMFROMPOINT, 0, lp);
+
+			SendMessage(CB_SHOWDROPDOWN, FALSE);
+
+			if (nSel != LB_ERR)
+			{
+				CString sItem;
+				GetLBText(nSel, sItem);
+
+				m_fileEdit.SetWindowText(sItem);
+			}
+
+			return 0L; // we handled it
+		}
+	}
+
+	// default handling
+	return CAutoComboBox::OnListboxMessage(msg, wp, lp);
 }
 
 void CFileComboBox::SetReadOnly(BOOL bReadOnly)
