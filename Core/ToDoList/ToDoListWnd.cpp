@@ -3002,7 +3002,7 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 		GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), (nVPos + 1), m_theme.crAppLinesLight);
 	}	
 	
-	// bevel below filter-bar and filter-bar edges
+	// filter-bar edges
 	CRect rFilter;
 
 	if (GetFilterBarRect(rFilter))
@@ -3011,9 +3011,6 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 
 		if (crBkgnd != CLR_NONE)
 			pDC->FillSolidRect(rFilter, crBkgnd);
-
-		GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), rFilter.bottom, m_theme.crAppLinesDark);
-		GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), (rFilter.bottom + 1), m_theme.crAppLinesLight);
 	}
 
 	// bevel above the statusbar if themed

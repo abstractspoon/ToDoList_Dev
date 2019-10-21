@@ -1038,6 +1038,15 @@ void CTDLFilterBar::OnPaint()
 	// Fill remaining background
 	if (m_crUIBack != CLR_NONE)
 	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		GraphicsMisc::DrawHorzLine(&dc, 0, rClient.Width(), rClient.bottom - 2, m_theme.crAppLinesDark);
+		GraphicsMisc::DrawHorzLine(&dc, 0, rClient.Width(), (rClient.bottom - 1), m_theme.crAppLinesLight);
+
+		rClient.top = rClient.bottom - 2;
+		dc.ExcludeClipRect(rClient);
+
 		int nCtrl = NUMFILTERCTRLS;
 
 		while (nCtrl--)
