@@ -327,7 +327,9 @@ void CEnEdit::OnNcLButtonDown(UINT nHitTest, CPoint point)
 			}
 		}
 		else
+		{
 			SetFocus();
+		}
 	}
 }
 
@@ -1019,7 +1021,7 @@ LRESULT CEnEdit::OnSetReadOnly(WPARAM wp, LPARAM /*lp*/)
 	LRESULT lr = Default();
 
 	OnSetReadOnly((BOOL)wp);
-	SendMessage(WM_NCPAINT);
+	PostMessage(WM_KILLFOCUS); // most effective way to redraw the buttons
 
 	return lr;
 }
@@ -1028,7 +1030,7 @@ void CEnEdit::OnEnable(BOOL bEnable)
 {
 	CEdit::OnEnable(bEnable);
 	
-	SendMessage(WM_NCPAINT);	
+	PostMessage(WM_KILLFOCUS); // most effective way to redraw the buttons
 }
 
 void CEnEdit::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct)
@@ -1039,7 +1041,7 @@ void CEnEdit::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct)
 		Default();
 	
 		OnSetReadOnly((lpStyleStruct->styleNew & ES_READONLY));
-		SendMessage(WM_NCPAINT);
+		PostMessage(WM_KILLFOCUS); // most effective way to redraw the buttons
 	}
 }
 
