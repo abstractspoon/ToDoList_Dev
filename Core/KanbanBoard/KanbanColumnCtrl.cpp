@@ -820,9 +820,10 @@ BOOL CKanbanColumnCtrl::GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL b
 	rItem.DeflateRect(1, 1);
 
 	CRect rCheckbox(rItem);
-	VERIFY(GetItemCheckboxRect(rCheckbox));
+	
+	if (GetItemCheckboxRect(rCheckbox))
+		rItem.left = (rCheckbox.right + CHECKBOX_PADDING);
 
-	rItem.left = (rCheckbox.right + CHECKBOX_PADDING);
 	rItem.left += (IMAGE_SIZE + IMAGE_PADDING);
 
 	if (!pKI)
