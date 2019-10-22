@@ -139,12 +139,12 @@ BEGIN
                     WS_TABSTOP
     CONTROL         "",IDC_FRAME,"Static",SS_GRAYFRAME,0,28,314,253
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,259,12,74,13
+                    WS_VISIBLE,253,12,49,13
     CONTROL         "",IDC_GRAPH,"Button",BS_OWNERDRAW | WS_TABSTOP,8,38,298,
                     234
-    LTEXT           "Acti&ve Date Range",IDC_ACTIVEDATERANGE_LABEL,340,2,112,
+    LTEXT           "Acti&ve Date Range",IDC_ACTIVEDATERANGE_LABEL,310,2,167,
                     8
-    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,339,
+    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,309,
                     12,112,13
     LTEXT           "Trend",IDC_STATIC,126,2,120,8
     COMBOBOX        IDC_TRENDLINES,126,13,121,118,CBS_DROPDOWNLIST | 
@@ -183,6 +183,8 @@ IDR_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
 
 IDR_TOOLBAR TOOLBAR DISCARDABLE  16, 15
 BEGIN
+    BUTTON      ID_BURNDOWN_PREF
+    SEPARATOR
     BUTTON      ID_HELP
 END
 
@@ -228,6 +230,11 @@ BEGIN
     IDS_FREQUENCY_PRIORITY  "Priority Frequency"
     IDS_FREQUENCY_RISK      "Risk Frequency"
     IDS_TREND_90DAYAVERAGE  "90 Day Rolling Average"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_BURNDOWN_PREF        "\nGraphs Preferences"
 END
 
 #endif    // English (Australia) resources

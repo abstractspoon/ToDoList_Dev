@@ -30,6 +30,7 @@
 #define IDB_TOOLBAR_STD                 17002
 #define IDC_FRAME                       17003
 #define IDC_DIVIDER                     17004
+#define ID_BURNDOWN_PREF                32771
 #define IDS_ACTIVEDATERANGE             57688
 #define IDS_TOOLTIP_STARTEDCOMPLETED    57689
 #define IDS_TOOLTIP_STARTEDENDED        57689
@@ -59,7 +60,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        17003
-#define _APS_NEXT_COMMAND_VALUE         32771
+#define _APS_NEXT_COMMAND_VALUE         32772
 #define _APS_NEXT_CONTROL_VALUE         17007
 #define _APS_NEXT_SYMED_VALUE           17000
 #endif
