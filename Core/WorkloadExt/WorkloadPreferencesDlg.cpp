@@ -19,8 +19,9 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const COLORREF DEF_UNDERLOAD_COLOR = RGB(122, 204, 0);
-const COLORREF DEF_OVERLOAD_COLOR  = RGB(204, 0, 0);
+const COLORREF DEF_UNDERLOAD_COLOR	= RGB(122, 204, 0);
+const COLORREF DEF_OVERLOAD_COLOR	= RGB(204, 0, 0);
+const COLORREF DEF_OVERLAP_COLOR	= RGB(255, 0, 0);
 
 /////////////////////////////////////////////////////////////////////////////
 // CWorkloadPreferencesPage dialog
@@ -44,16 +45,19 @@ void CWorkloadPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_ENABLEUNDERLOAD, m_bEnableUnderload);
 	DDX_Check(pDX, IDC_RECALCALLOCATIONS, m_bRecalcAllocations);
 	DDX_Radio(pDX, IDC_RECALCEQUALLY, m_bRecalcProportionally);
+	DDX_Check(pDX, IDC_ENABLEOVERLAPCOLOR, m_bEnableOverlapColor);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_COLUMNVISIBILITY, m_lbColumnVisibility);
 	DDX_Control(pDX, IDC_SETOVERLOADCOLOR, m_btnOverloadColor);
 	DDX_Control(pDX, IDC_SETUNDERLOADCOLOR, m_btnUnderloadColor);
+	DDX_Control(pDX, IDC_SETOVERLAPCOLOR, m_btnOverlapColor);
 
 	DDX_CBValue(pDX, IDC_OVERLOADFROMPERCENT, m_nOverloadFromPercent, 80);
 	DDX_CBValue(pDX, IDC_UNDERLOADTOPERCENT, m_nUnderloadToPercent, 50);
 
 	m_btnOverloadColor.DDX(pDX, m_crOverload);
 	m_btnUnderloadColor.DDX(pDX, m_crUnderload);
+	m_btnOverlapColor.DDX(pDX, m_crOverlap);
 }
 
 
@@ -62,6 +66,7 @@ BEGIN_MESSAGE_MAP(CWorkloadPreferencesPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_ENABLEOVERLOAD, OnEnableOverload)
 	ON_BN_CLICKED(IDC_ENABLEUNDERLOAD, OnEnableUnderload)
 	ON_BN_CLICKED(IDC_RECALCALLOCATIONS, OnSetRecalcAllocations)
+	ON_BN_CLICKED(IDC_ENABLEOVERLAPCOLOR, OnEnableOverlapColor)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -135,6 +140,8 @@ void CWorkloadPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("UnderloadPercentTo"), m_nUnderloadToPercent);
 	pPrefs->WriteProfileInt(szKey, _T("OverloadColor"), m_crOverload);
 	pPrefs->WriteProfileInt(szKey, _T("UnderloadColor"), m_crUnderload);
+	pPrefs->WriteProfileInt(szKey, _T("EnableOverlapColor"), m_bEnableOverlapColor);
+	pPrefs->WriteProfileInt(szKey, _T("OverlapColor"), m_crOverlap);
 }
 
 void CWorkloadPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
@@ -160,6 +167,8 @@ void CWorkloadPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_nUnderloadToPercent = pPrefs->GetProfileInt(szKey, _T("UnderloadPercentTo"), 50);
 	m_crOverload = (COLORREF)pPrefs->GetProfileInt(szKey, _T("OverloadColor"), DEF_OVERLOAD_COLOR);
 	m_crUnderload = (COLORREF)pPrefs->GetProfileInt(szKey, _T("UnderloadColor"), DEF_UNDERLOAD_COLOR);
+	m_bEnableOverlapColor = pPrefs->GetProfileInt(szKey, _T("EnableOverlapColor"), TRUE);
+	m_crOverlap = (COLORREF)pPrefs->GetProfileInt(szKey, _T("OverlapColor"), DEF_OVERLAP_COLOR);
 }
 
 void CWorkloadPreferencesPage::OnOK()
@@ -212,6 +221,14 @@ void CWorkloadPreferencesPage::EnableDisableControls()
 	
 	GetDlgItem(IDC_SETUNDERLOADCOLOR)->EnableWindow(m_bEnableUnderload);
 	GetDlgItem(IDC_UNDERLOADTOPERCENT)->EnableWindow(m_bEnableUnderload);
+
+	GetDlgItem(IDC_SETOVERLAPCOLOR)->EnableWindow(m_bEnableOverlapColor);
+}
+
+void CWorkloadPreferencesPage::OnEnableOverlapColor()
+{
+	UpdateData();
+	EnableDisableControls();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -249,4 +266,3 @@ void CWorkloadPreferencesDlg::DoHelp()
 	if (m_pParentWnd)
 		m_pParentWnd->SendMessage(WM_WLC_PREFSHELP);
 }
-

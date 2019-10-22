@@ -804,6 +804,8 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 	bEnable = m_dlgPrefs.GetUnderload(nPercent, color);
 	m_ctrlWorkload.EnableUnderload(bEnable, nPercent, color);
 
+	m_ctrlWorkload.SetOverlapColor(m_dlgPrefs.GetOverlapColor());
+
 	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGALLOCATIONS, m_dlgPrefs.GetAutoCalculateMissingAllocations());
 	m_ctrlWorkload.SetOption(WLCF_PREFERTIMEESTFORCALCS, m_dlgPrefs.GetPreferTimeEstimateForCalcs());
 	m_ctrlWorkload.SetOption(WLCF_RECALCALLOCATIONS, m_dlgPrefs.GetRecalculateAllocations());

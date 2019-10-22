@@ -26,6 +26,7 @@ public:
 
 	BOOL GetOverload(int& nFromPercent, COLORREF& color) const;
 	BOOL GetUnderload(int& nToPercent, COLORREF& color) const;
+	COLORREF GetOverlapColor() const { return (m_bEnableOverlapColor ? m_crOverlap : CLR_NONE); }
 
 	BOOL GetPreferTimeEstimateForCalcs() const { return m_bPreferTimeEstimateInCalcs; }
 	BOOL GetAutoCalculateMissingAllocations() const { return m_bAutoCalcAllocations || m_bRecalcAllocations; }
@@ -44,13 +45,15 @@ protected:
 	BOOL	m_bEnableUnderload;
 	BOOL	m_bRecalcAllocations;
 	int		m_bRecalcProportionally;
+	BOOL	m_bEnableOverlapColor;
 	//}}AFX_DATA
 	int		m_nOverloadFromPercent;
 	int		m_nUnderloadToPercent;
-	COLORREF m_crOverload, m_crUnderload;
+	COLORREF m_crOverload, m_crUnderload, m_crOverlap;
 
 	CColorButton m_btnOverloadColor;
 	CColorButton m_btnUnderloadColor;
+	CColorButton m_btnOverlapColor;
 	CCheckListBoxEx m_lbColumnVisibility;
 	CDWordArray m_aColumnVis;
 
@@ -70,6 +73,7 @@ protected:
 	afx_msg void OnEnableOverload();
 	afx_msg void OnEnableUnderload();
 	afx_msg void OnSetRecalcAllocations();
+	afx_msg void OnEnableOverlapColor();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -90,6 +94,7 @@ public:
 	
 	BOOL GetOverload(int& nFromPercent, COLORREF& color) const { return m_page.GetOverload(nFromPercent, color); }
 	BOOL GetUnderload(int& nToPercent, COLORREF& color) const { return m_page.GetUnderload(nToPercent, color); }
+	COLORREF GetOverlapColor() const { return m_page.GetOverlapColor(); }
 
 	BOOL GetAutoCalculateMissingAllocations() const { return m_page.GetAutoCalculateMissingAllocations(); }
 	BOOL GetPreferTimeEstimateForCalcs() const { return m_page.GetPreferTimeEstimateForCalcs(); }
