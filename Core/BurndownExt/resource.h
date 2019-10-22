@@ -20,7 +20,10 @@
 #define IDS_TOOLTIP_REMAINING           6008
 #define IDS_TOOLTIP_ESTIMATEDSPENT      6009
 #define IDS_TOOLTIP_ATTRIBFREQUENCY     6010
+#define IDD_PREFERENCES_DIALOG          16002
+#define IDD_PREFERENCES_PAGE            16003
 #define IDR_TOOLBAR                     16006
+#define IDC_PPHOST                      16019
 #define IDC_TB_PLACEHOLDER              16024
 #define IDC_ACTIVEDATERANGE_LABEL       16028
 #define IDC_ACTIVEDATERANGE             16034
@@ -29,6 +32,8 @@
 #define IDC_GRAPH                       17002
 #define IDB_TOOLBAR_STD                 17002
 #define IDC_FRAME                       17003
+#define IDI_ICON1                       17003
+#define IDI_HELP_BUTTON                 17003
 #define IDC_DIVIDER                     17004
 #define ID_BURNDOWN_PREF                32771
 #define IDS_ACTIVEDATERANGE             57688
@@ -59,7 +64,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        17003
+#define _APS_NEXT_RESOURCE_VALUE        17004
 #define _APS_NEXT_COMMAND_VALUE         32772
 #define _APS_NEXT_CONTROL_VALUE         17007
 #define _APS_NEXT_SYMED_VALUE           17000

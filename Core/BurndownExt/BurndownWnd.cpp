@@ -66,7 +66,10 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	m_dtDataRange(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
 	m_graph(m_data),
 	m_bUpdatingSlider(FALSE),
-	m_sliderDateRange(TBS_BOTTOM)
+	m_sliderDateRange(TBS_BOTTOM),
+#pragma warning(disable:4355)
+	m_dlgPrefs(this)
+#pragma warning(default:4355)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
@@ -101,6 +104,7 @@ BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
+	ON_COMMAND(ID_BURNDOWN_PREF, OnPreferences)
 	ON_WM_HELPINFO()
 	ON_CBN_SELENDOK(IDC_DISPLAY, OnSelchangeDisplay)
 	ON_CBN_SELENDOK(IDC_TRENDLINES, OnTrendsChanged)
@@ -131,6 +135,14 @@ BOOL CBurndownWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;
+}
+
+void CBurndownWnd::OnPreferences()
+{
+	if (m_dlgPrefs.DoModal() == IDOK)
+	{
+		// TODO
+	}
 }
 
 BOOL CBurndownWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd, UINT nID)

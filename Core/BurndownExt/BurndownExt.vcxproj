@@ -171,6 +171,7 @@ copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
     </ClCompile>
     <ClCompile Include="BurndownGraphComboBox.cpp" />
     <ClCompile Include="BurndownGraphs.cpp" />
+    <ClCompile Include="BurndownPreferencesDlg.cpp" />
     <ClCompile Include="BurndownStruct.cpp" />
     <ClCompile Include="BurndownTrendComboBox.cpp" />
     <ClCompile Include="BurndownWnd.cpp">
@@ -186,6 +187,7 @@ copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
   </ItemGroup>
   <ItemGroup>
     <None Include="BurndownExt.def" />
+    <None Include="res\help_button.ico" />
     <None Include="res\icon1.ico" />
     <None Include="res\BurndownExt.rc2" />
     <None Include="res\toolbar.bmp" />
@@ -203,6 +205,7 @@ copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
     <ClInclude Include="BurndownEnum.h" />
     <ClInclude Include="BurndownGraphComboBox.h" />
     <ClInclude Include="BurndownGraphs.h" />
+    <ClInclude Include="BurndownPreferencesDlg.h" />
     <ClInclude Include="BurndownStatic.h" />
     <ClInclude Include="BurndownStruct.h" />
     <ClInclude Include="BurndownTrendComboBox.h" />
