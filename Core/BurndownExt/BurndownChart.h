@@ -21,6 +21,7 @@ public:
 	CString GetGraphTitle(BURNDOWN_GRAPH nGraph) const;
 	BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph) const;
 	BURNDOWN_GRAPHTYPE GetActiveGraphType() const;
+	BOOL IsValidGraph(BURNDOWN_GRAPH nType) const;
 
 	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
 	void SetTodayColour(COLORREF color);
@@ -47,7 +48,6 @@ protected:
 
 protected:
 	void RebuildXScale();
-	BOOL IsValidGraph(BURNDOWN_GRAPH nType) const;
 	void UpdateGraphTrendLine();
 	CGraphBase* GetGraph(BURNDOWN_GRAPH nGraph) const;
 

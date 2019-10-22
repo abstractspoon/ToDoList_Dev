@@ -219,12 +219,12 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	// burn down specific options
 	if (!bAppOnly)
 	{
-		//CString sKey(szKey);
 		m_nGraphType = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("GraphType"), BCT_TIMESERIES_INCOMPLETETASKS);
-		m_nTrendLine = (BURNDOWN_TREND)pPrefs->GetProfileInt(szKey, _T("TrendLine"), BTL_BEST_FIT);
-
-		if (m_nGraphType >= BCT_NUMGRAPHS)
+		
+		if (!m_graph.IsValidGraph(m_nGraphType))
 			m_nGraphType = BCT_TIMESERIES_INCOMPLETETASKS;
+
+		m_nTrendLine = (BURNDOWN_TREND)pPrefs->GetProfileInt(szKey, _T("TrendLine"), BTL_BEST_FIT);
 
 		if (m_nTrendLine >= NUM_TRENDS)
 			m_nTrendLine = BTL_NONE;
