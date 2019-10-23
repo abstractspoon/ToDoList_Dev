@@ -819,7 +819,7 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChange
 	if (m_bAutoFitSplitter)
 		AdjustSplitterToFitAttributeColumns();
 	else
-		RefreshSize();
+		RefreshSize(); // resync horizontal scrollbars
 }
 
 void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
@@ -889,7 +889,7 @@ void CTDLTaskCtrlBase::OnCustomAttributeChange()
 	if (m_bAutoFitSplitter)
 		AdjustSplitterToFitAttributeColumns();
 	else
-		RefreshSize();
+		RefreshSize(); // resync horizontal scrollbars
 }
 
 BOOL CTDLTaskCtrlBase::IsColumnShowing(TDC_COLUMN nColID) const
@@ -1258,7 +1258,6 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 {
-
 	// Get a list of all the visible column attributes
 	CTDCColumnIDMap mapCols;
 
@@ -1293,6 +1292,8 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 
 	CHoldRedraw hr(m_lcColumns);
 	CClientDC dc(&m_lcColumns);
+
+	int nPrevTotalWidth = m_hdrColumns.CalcTotalItemWidth();
 
 	VERIFY(m_ilFileRef.Initialize());
 
@@ -1360,6 +1361,10 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 
 	// cleanup
 	dc.SelectObject(pOldFont);
+
+	// Resync horizontal scrollbars
+	if (m_hdrColumns.CalcTotalItemWidth() != nPrevTotalWidth)
+		RefreshSize();
 }
 
 void CTDLTaskCtrlBase::SaveState(CPreferences& prefs, const CString& sKey) const
