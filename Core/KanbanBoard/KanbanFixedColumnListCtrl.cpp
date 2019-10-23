@@ -53,6 +53,22 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanFixedColumnListCtrl message handlers
 
+COLORREF CKanbanFixedColumnListCtrl::GetItemColor(int nRow) const
+{
+	ASSERT(GetSafeHwnd());
+
+	// Zero == CLR_NONE
+	return (GetItemData(nRow) - 1);
+}
+
+void CKanbanFixedColumnListCtrl::SetItemColor(int nRow, COLORREF color)
+{
+	ASSERT(GetSafeHwnd());
+
+	// Zero == CLR_NONE
+	SetItemData(nRow, (color + 1));
+}
+
 BOOL CKanbanFixedColumnListCtrl::SetColumnDefinitions(const CKanbanColumnArray& aColumnDefs)
 {
 	if (!GetSafeHwnd())
@@ -72,11 +88,10 @@ BOOL CKanbanFixedColumnListCtrl::SetColumnDefinitions(const CKanbanColumnArray& 
 		int nItem = InsertItem(nDef, colDef.sTitle);
 		
 		SetItemText(nItem, KFCL_VALUECOL, Misc::FormatArray(colDef.aAttribValues));
+		SetItemColor(nItem, colDef.crBackground);
 		
 // 		if (colDef.nMaxTaskCount > 0)
 // 			SetItemText(nItem, KFCL_MAXNUMCOL, Misc::Format(colDef.nMaxTaskCount));
-
-		SetItemData(nItem, colDef.crBackground);
 	}
 
 	return TRUE;
@@ -93,9 +108,9 @@ int CKanbanFixedColumnListCtrl::GetColumnDefinitions(CKanbanColumnArray& aColumn
 		KANBANCOLUMN colDef;
 		
 		colDef.sTitle = GetItemText(nDef, KFCL_TITLECOL);
+		colDef.crBackground = GetItemColor(nDef);
 // 		colDef.nMaxTaskCount = _ttoi(GetItemText(nDef, KFCL_MAXNUMCOL));
-		colDef.crBackground = GetItemData(nDef);
-		
+
 		CString sValues(GetItemText(nDef, KFCL_VALUECOL));
 
 		if (sValues.IsEmpty())
@@ -163,7 +178,7 @@ void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	case KFCL_COLORCOL:
 		ASSERT(!Misc::IsHighContrastActive());
 		{
-			CColorDialog dialog(GetItemData(nItem));
+			CColorDialog dialog(GetItemColor(nItem));
 
 			if (dialog.DoModal() == IDOK)
 			{
@@ -172,7 +187,7 @@ void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 				if (color == GetSysColor(COLOR_WINDOW))
 					color = CLR_NONE;
 
-				SetItemData(nItem, color);
+				SetItemColor(nItem, color);
 			}
 		}
 		break;
@@ -228,7 +243,7 @@ void CKanbanFixedColumnListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 	{
 		ASSERT (!Misc::IsHighContrastActive());
 
-		COLORREF color = GetItemData(nRow);
+		COLORREF color = GetItemColor(nRow);
 
 		if (color != CLR_NONE)
 		{
@@ -270,7 +285,7 @@ BOOL CKanbanFixedColumnListCtrl::MoveSelectedColumnRow(BOOL bUp)
 	CString sTitle = GetItemText(nRow, 0);
 	CString sValue = GetItemText(nRow, 1);
 	CString sMaxTasks = GetItemText(nRow, 2);
-	COLORREF crBack = (COLORREF)GetItemData(nRow);
+	COLORREF crBack = GetItemColor(nRow);
 
 	DeleteItem(nRow);
 
@@ -279,7 +294,7 @@ BOOL CKanbanFixedColumnListCtrl::MoveSelectedColumnRow(BOOL bUp)
 	nRow = InsertItem(nNewRow, sTitle);
 	SetItemText(nRow, 1, sValue);
 	SetItemText(nRow, 2, sMaxTasks);
-	SetItemData(nRow, crBack);
+	SetItemColor(nRow, crBack);
 
 	SetCurSel(nRow);
 

@@ -59,6 +59,8 @@ protected:
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
 	void PrepareEdit(int nRow, int nCol);
+	COLORREF GetItemColor(int nRow) const;
+	void SetItemColor(int nRow, COLORREF color);
 
 };
 
