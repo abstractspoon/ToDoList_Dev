@@ -226,6 +226,7 @@ namespace GraphicsMisc
 	BOOL GetTotalAvailableScreenSpace(CRect& rScreen);
 	BOOL GetPrimaryMonitorScreenSpace(CRect& rScreen);
 	BOOL GetMonitorAvailableScreenSpace(HMONITOR hMon, CRect& rScreen);
+	int GetScreenBitDepth();
 
 	DPI_AWARENESS_CONTEXT SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT nContext);
 	

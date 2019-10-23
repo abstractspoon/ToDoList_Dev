@@ -1021,7 +1021,7 @@ LRESULT CEnEdit::OnSetReadOnly(WPARAM wp, LPARAM /*lp*/)
 	LRESULT lr = Default();
 
 	OnSetReadOnly((BOOL)wp);
-	PostMessage(WM_KILLFOCUS); // most effective way to redraw the buttons
+	ForceRedraw();
 
 	return lr;
 }
@@ -1030,7 +1030,15 @@ void CEnEdit::OnEnable(BOOL bEnable)
 {
 	CEdit::OnEnable(bEnable);
 	
-	PostMessage(WM_KILLFOCUS); // most effective way to redraw the buttons
+	ForceRedraw();
+}
+
+void CEnEdit::ForceRedraw()
+{
+	RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
+
+	if (m_bParentIsCombo)
+		GetParent()->Invalidate(TRUE);
 }
 
 void CEnEdit::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct)
@@ -1041,7 +1049,7 @@ void CEnEdit::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct)
 		Default();
 	
 		OnSetReadOnly((lpStyleStruct->styleNew & ES_READONLY));
-		PostMessage(WM_KILLFOCUS); // most effective way to redraw the buttons
+		ForceRedraw();
 	}
 }
 

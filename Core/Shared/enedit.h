@@ -131,8 +131,8 @@ protected:
 	afx_msg UINT OnNcHitTest(CPoint point);
 #endif
 	afx_msg void OnEnable(BOOL bEnable);
-	afx_msg LRESULT OnSetReadOnly(WPARAM /*wp*/, LPARAM /*lp*/);
-	afx_msg LRESULT OnHotChange(WPARAM /*wp*/, LPARAM /*lp*/);
+	afx_msg LRESULT OnSetReadOnly(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnHotChange(WPARAM wp, LPARAM lp);
 	afx_msg void OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct);
 	afx_msg void OnNcPaint();
 	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
@@ -148,6 +148,7 @@ protected:
 	BOOL InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth, 
 						LPCTSTR szFont, BOOL bSymbolFont);
 	void RedrawButtonByIndex(int nBtn);
+	void ForceRedraw();
 
 	virtual BOOL InitializeTooltips();
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;

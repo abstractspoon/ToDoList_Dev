@@ -1815,25 +1815,21 @@ BOOL GraphicsMisc::InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UI
 
 int GraphicsMisc::GetSystemDPI()
 {
-	static int nDPI = 0;
-	
-	if (nDPI == 0)
-	{
-		HDC	hdc = ::GetDC(NULL);
-		
-		nDPI = GetDeviceCaps(hdc, LOGPIXELSX);
-		
-		::ReleaseDC(NULL, hdc);
-	}
-	
-	return nDPI;
+	return PixelsPerInch();
 }
 
 double GraphicsMisc::GetDPIScaleFactor()
 {
-	static double dScale = ((double)GetSystemDPI() / DEFAULT_DPI);
-	
-	return dScale;
+	return ((double)GetSystemDPI() / DEFAULT_DPI);
+}
+
+int GraphicsMisc::GetScreenBitDepth()
+{
+	HDC hDC = ::GetDC(NULL);
+	int nBits = GetDeviceCaps(hDC, BITSPIXEL);
+	::ReleaseDC(NULL, hDC);
+
+	return nBits;
 }
 
 BOOL GraphicsMisc::WantDPIScaling()
