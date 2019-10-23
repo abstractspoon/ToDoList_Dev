@@ -818,6 +818,8 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChange
 
 	if (m_bAutoFitSplitter)
 		AdjustSplitterToFitAttributeColumns();
+	else
+		RefreshSize();
 }
 
 void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
@@ -883,6 +885,11 @@ void CTDLTaskCtrlBase::OnCustomAttributeChange()
 
 	UpdateAttributePaneVisibility();
 	RecalcUntrackedColumnWidths(TRUE); // Only custom columns
+
+	if (m_bAutoFitSplitter)
+		AdjustSplitterToFitAttributeColumns();
+	else
+		RefreshSize();
 }
 
 BOOL CTDLTaskCtrlBase::IsColumnShowing(TDC_COLUMN nColID) const
