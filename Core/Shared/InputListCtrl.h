@@ -134,7 +134,6 @@ protected:
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg long OnEditEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg long OnEditCancel(WPARAM wParam, LPARAM lParam);
-	afx_msg long OnShowPopupMenu(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	DECLARE_MESSAGE_MAP()
 		
