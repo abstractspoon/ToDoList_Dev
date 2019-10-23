@@ -754,7 +754,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 			CString sCustValue(pTasks->GetTaskCustomAttributeData(hTask, sCustID, true));
 
 			CStringArray aCustValues;
-			Misc::Split(sCustValue, aCustValues, '+');
+			Misc::Split(sCustValue, aCustValues);
 
 			pKI->SetTrackedAttributeValues(sCustID, aCustValues);
 
@@ -889,7 +889,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 
 					if (!sValue.IsEmpty())
 					{
-						if (Misc::Split(sValue, aValues, '+') > 1)
+						if (Misc::Split(sValue, aValues) > 1)
 							def.bMultiValue = TRUE;
 					}
 
