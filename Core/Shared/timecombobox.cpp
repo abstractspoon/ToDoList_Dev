@@ -138,7 +138,8 @@ double CTimeComboBox::GetOleTime() const
 	double dTime = (Get24HourTime() / 24.0);
 
 	// Round to nearest minute
-	dTime += (ONE_MINUTE / 2);
+	if ((dTime > 0.0) && (dTime < 1.0))
+		dTime += (ONE_MINUTE / 2);
 
 	return dTime;
 }
