@@ -1296,7 +1296,8 @@ void CKanbanColumnCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 
 BOOL CKanbanColumnCtrl::HandleLButtonClick(CPoint point, BOOL bDblClk)
 {
-	m_tooltip.Pop();
+	if (m_tooltip.GetSafeHwnd())
+		m_tooltip.Pop();
 
 	// Ignore clicks not hitting an item
 	HTREEITEM hti = HitTest(point);
