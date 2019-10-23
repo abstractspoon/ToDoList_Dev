@@ -3697,9 +3697,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 		return EMPTY_STR;
 
 	TDCCADATA data;
-	
-	if (!pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
-		return EMPTY_STR;
+	BOOL bHasData = pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
 
 	DWORD dwDataType = attribDef.GetDataType();
 
@@ -3718,12 +3716,13 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 		break;
 
 	case TDCCA_ICON:
-		return EMPTY_STR;
+		return EMPTY_STR; // always
 
 	case TDCCA_BOOL:
-		return CEnString(IDS_YES);
+		return (bHasData ? CEnString(IDS_YES) : EMPTY_STR);
 
 	case TDCCA_FILELINK:
+		if (bHasData)
 		{
 			CStringArray aItems;
 
@@ -3760,18 +3759,10 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			return attribDef.FormatNumber(dValue);
 		}
 		break;
-
-
-	default:
-		if (!pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
-			return EMPTY_STR;
-		break;
 	}
 
 	// All the rest
-	return attribDef.FormatData(data, FALSE);
-
-
+	return (bHasData ? attribDef.FormatData(data, FALSE) : EMPTY_STR);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
