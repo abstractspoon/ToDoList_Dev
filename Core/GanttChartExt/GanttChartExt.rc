@@ -185,14 +185,14 @@ BEGIN
                     WS_TABSTOP
     LTEXT           "Colours",IDC_COLORSGROUP,7,174,333,8
     CONTROL         "'&Non-working hours' colour",IDC_NONWORKINGHOURSCOLOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,190,137,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,190,167,10
     PUSHBUTTON      "S&et...   ",IDC_SETNONWORKINGHOURSCOLOR,178,187,52,13,
                     BS_RIGHT
     CONTROL         "'&Weekend' colour",IDC_WEEKENDCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,205,137,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,205,167,10
     PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,203,52,13,BS_RIGHT
     CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,220,137,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,220,167,10
     PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,178,218,52,13,BS_RIGHT
     CONTROL         "'Bar' colour for tasks having no colour",
                     IDC_DEFAULTCOLOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
