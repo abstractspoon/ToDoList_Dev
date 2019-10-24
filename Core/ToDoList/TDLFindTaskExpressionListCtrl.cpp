@@ -1419,6 +1419,7 @@ LRESULT CTDLFindTaskExpressionListCtrl::OnEEBtnClick(WPARAM /*wp*/, LPARAM lp)
 				case ID_RELATIVEDATE_ENDNEXTYEAR:	sRelDate = _T("Y+1"); break;
 				case ID_RELATIVEDATE_ENDLASTYEAR:	sRelDate = _T("Y-1"); break;
 
+				case 0: // lost focus == cancel
 				case IDCANCEL:
 					break;
 
