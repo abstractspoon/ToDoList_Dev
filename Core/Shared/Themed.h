@@ -93,7 +93,7 @@ public:
 	static BOOL IsAppThemed();
 	static BOOL IsWindowsThemed();
 	
-	static BOOL DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nType, UINT nState, LPCRECT prClip = NULL);
+	static BOOL DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nType, UINT nState, LPCRECT prClip = NULL, BOOL bDrawParentBkgnd = TRUE);
 	static BOOL DrawEdge(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nType, UINT nState, UINT nEdge, UINT nFlags);
 	static BOOL SetWindowTheme(const CWnd* pWnd, LPCTSTR szAppName);
 	static BOOL EnableDialogTexture(const CWnd* pWnd, DWORD dwFlags);

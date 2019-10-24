@@ -778,7 +778,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			break;
 					
 		case ILCT_BROWSE:
-			CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwDisabled));
+			CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwDisabled), NULL, FALSE);
 
 			if (dwDisabled)
 				pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
