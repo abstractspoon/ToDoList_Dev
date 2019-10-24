@@ -68,7 +68,7 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	m_bUpdatingSlider(FALSE),
 	m_sliderDateRange(TBS_BOTTOM),
 #pragma warning(disable:4355)
-	m_dlgPrefs(this)
+	m_dlgPrefs(m_graph, this)
 #pragma warning(default:4355)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)

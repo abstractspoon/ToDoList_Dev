@@ -20,14 +20,18 @@ public:
 
 	CString GetGraphTitle(BURNDOWN_GRAPH nGraph) const;
 	BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph) const;
-	BURNDOWN_GRAPHTYPE GetActiveGraphType() const;
-	BOOL IsValidGraph(BURNDOWN_GRAPH nType) const;
+	BOOL IsValidGraph(BURNDOWN_GRAPH nGraph) const;
+	int GetRequiredColorCount(BURNDOWN_GRAPH nGraph) const;
+	int GetMaxRequiredColorCount() const;
 
+	BURNDOWN_GRAPHTYPE GetActiveGraphType() const;
 	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
 	void SetTodayColour(COLORREF color);
 	BOOL SaveToImage(CBitmap& bmImage);
 	void ShowTrendLine(BURNDOWN_TREND nTrend);
 	BOOL RebuildGraph(const COleDateTimeRange& dtExtents);
+
+	int BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs) const;
 
 protected:
 	const CStatsItemArray& m_data;

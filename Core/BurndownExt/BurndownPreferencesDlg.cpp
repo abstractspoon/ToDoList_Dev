@@ -4,10 +4,14 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "BurndownPreferencesDlg.h"
+#include "BurndownChart.h"
+#include "BurndownStatic.h"
 
 #include "..\shared\dialoghelper.h"
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
+
+#include "..\Interfaces\ipreferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -22,10 +26,13 @@ const COLORREF DEF_TODAY_COLOR	= RGB(255, 0, 0);
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownPreferencesPage dialog
 
-CBurndownPreferencesPage::CBurndownPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
-	: CPreferencesPageBase(IDD_PREFERENCES_PAGE)
+CBurndownPreferencesPage::CBurndownPreferencesPage(const CBurndownChart& chart, CWnd* /*pParent*/ /*=NULL*/)
+	: 
+	CPreferencesPageBase(IDD_PREFERENCES_PAGE),
+	m_chart(chart)
 {
 	//{{AFX_DATA_INIT(CBurndownPreferencesPage)
+	m_bEnableTodayColor = FALSE;
 	//}}AFX_DATA_INIT
 }
 
@@ -34,12 +41,18 @@ void CBurndownPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CBurndownPreferencesPage)
+	DDX_Control(pDX, IDC_GRAPHCOLORS, m_lcGraphColors);
+	DDX_Control(pDX, IDC_SETTODAYCOLOR, m_btnTodayColor);
+	DDX_Check(pDX, IDC_TODAYCOLOR, m_bEnableTodayColor);
 	//}}AFX_DATA_MAP
+
+	m_btnTodayColor.DDX(pDX, m_crTodayColor);
 }
 
 
 BEGIN_MESSAGE_MAP(CBurndownPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CBurndownPreferencesPage)
+	ON_BN_CLICKED(IDC_TODAYCOLOR, OnEnableTodayColor)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -49,6 +62,8 @@ END_MESSAGE_MAP()
 BOOL CBurndownPreferencesPage::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
+
+	VERIFY(m_lcGraphColors.Initialize(m_chart));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -73,9 +88,10 @@ void CBurndownPreferencesPage::OnOK()
 
 const UINT IDC_HELPBUTTON = 1001;
 
-CBurndownPreferencesDlg::CBurndownPreferencesDlg(CWnd* pParent /*=NULL*/)
+CBurndownPreferencesDlg::CBurndownPreferencesDlg(const CBurndownChart& chart, CWnd* pParent /*=NULL*/)
 	: 
-	CPreferencesDlgBase(IDD_PREFERENCES_DIALOG, IDC_PPHOST, IDR_BURNDOWN, IDI_HELP_BUTTON, pParent)
+	CPreferencesDlgBase(IDD_PREFERENCES_DIALOG, IDC_PPHOST, IDR_BURNDOWN, IDI_HELP_BUTTON, pParent),
+	m_page(chart)
 {
 	//{{AFX_DATA_INIT(CBurndownPreferencesDlg)
 	//}}AFX_DATA_INIT
@@ -102,4 +118,10 @@ void CBurndownPreferencesDlg::DoHelp()
 	
 	if (m_pParentWnd)
 		m_pParentWnd->SendMessage(WM_BDC_PREFSHELP);
+}
+
+void CBurndownPreferencesPage::OnEnableTodayColor() 
+{
+	// TODO: Add your control notification handler code here
+	
 }

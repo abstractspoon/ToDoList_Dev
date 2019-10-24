@@ -7,15 +7,21 @@
 // WorkloadPreferencesDlg.h : header file
 //
 
+#include "BurndownGraphColorListCtrl.h"
+
 #include "..\Shared\preferencesbase.h"
 #include "..\Shared\colorbutton.h"
-
-#include "..\Interfaces\ipreferences.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
 // WPARAM = , LPARAM = 
 const UINT WM_BDC_PREFSHELP = ::RegisterWindowMessage(_T("WM_BDC_PREFSHELP"));
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CBurndownChart;
+
+class IPreferences;
 
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownPreferencesPage dialog
@@ -24,7 +30,7 @@ class CBurndownPreferencesPage : public CPreferencesPageBase
 {
 // Construction
 public:
-	CBurndownPreferencesPage(CWnd* pParent = NULL);
+	CBurndownPreferencesPage(const CBurndownChart& chart, CWnd* pParent = NULL);
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
@@ -32,7 +38,15 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CBurndownPreferencesPage)
+	enum { IDD = IDD_PREFERENCES_PAGE };
 	//}}AFX_DATA
+	CBurndownGraphColorListCtrl	m_lcGraphColors;
+	CColorButton m_btnTodayColor;
+
+	BOOL	m_bEnableTodayColor;
+	COLORREF m_crTodayColor;
+
+	const CBurndownChart& m_chart;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -47,6 +61,7 @@ protected:
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CBurndownPreferencesPage)
+	afx_msg void OnEnableTodayColor();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -61,7 +76,7 @@ class CBurndownPreferencesDlg : public CPreferencesDlgBase
 {
 // Construction
 public:
-	CBurndownPreferencesDlg(CWnd* pParent);
+	CBurndownPreferencesDlg(const CBurndownChart& chart, CWnd* pParent);
 
 protected:
 // Dialog Data

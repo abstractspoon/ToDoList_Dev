@@ -36,6 +36,8 @@ enum BURNDOWN_GRAPH
 	BCT_NUMGRAPHS
 };
 
+typedef CArray<BURNDOWN_GRAPH, BURNDOWN_GRAPH&> CGraphArray;
+
 /////////////////////////////////////////////////////////////////////////////
 
 enum BURNDOWN_GRAPHSCALE

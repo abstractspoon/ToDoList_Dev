@@ -5,6 +5,7 @@
 #include "Resource.h"
 #include "BurndownGraphComboBox.h"
 #include "BurndownChart.h"
+#include "BurndownStatic.h"
 
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\Misc.h"
@@ -15,37 +16,6 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-
-/////////////////////////////////////////////////////////////////////////////
-
-struct GRAPHTYPE
-{
-	BURNDOWN_GRAPHTYPE nType;
-	UINT nLabelID;
-};
-
-const GRAPHTYPE GRAPHTYPES[] = 
-{
-	{ BCT_TIMESERIES, IDS_TIMESERIES },
-	{ BCT_FREQUENCY,  IDS_FREQUENCYDIST },
-};
-const int NUM_GRAPHTYPES = (sizeof(GRAPHTYPES) / sizeof(GRAPHTYPES[0]));
-
-/////////////////////////////////////////////////////////////////////////////
-
-struct SORTITEM
-{
-	BURNDOWN_GRAPH nGraph;
-	CString sLabel;
-};
-
-static int SortProc(const void* pV1, const void* pV2)
-{
-	const SORTITEM* pSI1 = (const SORTITEM*)pV1;
-	const SORTITEM* pSI2 = (const SORTITEM*)pV2;
-
-	return Misc::NaturalCompare(pSI1->sLabel, pSI2->sLabel);
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownGraphComboBox
@@ -94,26 +64,13 @@ BOOL CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 
 		// For each type, sort all the related graphs by name
 		// before adding to combo
-		CArray<SORTITEM, SORTITEM&> aGraphs;
-		SORTITEM st;
-
-		for (int nGraph = 0; nGraph < BCT_NUMGRAPHS; nGraph++)
-		{
-			if (chart.GetGraphType((BURNDOWN_GRAPH)nGraph) == gt.nType)
-			{
-				st.nGraph = (BURNDOWN_GRAPH)nGraph;
-				st.sLabel = chart.GetGraphTitle(st.nGraph);
-
-				aGraphs.Add(st);
-			}
-		}
-
-		Misc::SortArrayT<SORTITEM>(aGraphs, SortProc);
+		CGraphArray aGraphs;
+		VERIFY(chart.BuildSortedGraphList(gt.nType, aGraphs));
 
 		for (int nItem = 0; nItem < aGraphs.GetSize(); nItem++)
 		{
-			const SORTITEM& st = aGraphs[nItem];
-			CDialogHelper::AddString(*this, st.sLabel, st.nGraph);
+			BURNDOWN_GRAPH nGraph = aGraphs[nItem];
+			CDialogHelper::AddString(*this, chart.GetGraphTitle(nGraph), nGraph);
 		}
 	}
 

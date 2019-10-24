@@ -11,6 +11,16 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+static const GRAPHTYPE GRAPHTYPES[] = 
+{
+	{ IDS_TIMESERIES, BCT_TIMESERIES },
+	{ IDS_FREQUENCYDIST, BCT_FREQUENCY  },
+};
+
+static const int NUM_GRAPHTYPES = (sizeof(GRAPHTYPES) / sizeof(GRAPHTYPES[0]));
+
+/////////////////////////////////////////////////////////////////////////////
+
 static const TRENDLINE TRENDS[] = 
 {
 	{ IDS_NONE,					BTL_NONE	},

@@ -124,6 +124,10 @@ SOURCE=.\BurndownExt.rc
 # End Source File
 # Begin Source File
 
+SOURCE=.\BurndownGraphColorListCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\BurndownGraphComboBox.cpp
 # End Source File
 # Begin Source File
@@ -167,6 +171,10 @@ SOURCE=.\BurndownEnum.h
 # Begin Source File
 
 SOURCE=.\BurndownExt.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\BurndownGraphColorListCtrl.h
 # End Source File
 # Begin Source File
 

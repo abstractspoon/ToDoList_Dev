@@ -6,6 +6,7 @@
 #define IDR_STATISTICS                  1000
 #define IDC_DISPLAY                     1015
 #define IDC_TRENDLINES                  1016
+#define IDC_SETTODAYCOLOR               1073
 #define IDS_BURNDOWN_TITLE              6001
 #define IDS_TIME_AXIS                   6002
 #define IDS_TASK_AXIS                   6003
@@ -22,6 +23,7 @@
 #define IDS_TOOLTIP_ATTRIBFREQUENCY     6010
 #define IDD_PREFERENCES_DIALOG          16002
 #define IDD_PREFERENCES_PAGE            16003
+#define IDC_TODAYCOLOR                  16005
 #define IDR_TOOLBAR                     16006
 #define IDC_PPHOST                      16019
 #define IDC_TB_PLACEHOLDER              16024
@@ -35,6 +37,7 @@
 #define IDI_ICON1                       17003
 #define IDI_HELP_BUTTON                 17003
 #define IDC_DIVIDER                     17004
+#define IDC_GRAPHCOLORS                 17007
 #define ID_BURNDOWN_PREF                32771
 #define IDS_ACTIVEDATERANGE             57688
 #define IDS_TOOLTIP_STARTEDCOMPLETED    57689
@@ -66,7 +69,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        17004
 #define _APS_NEXT_COMMAND_VALUE         32772
-#define _APS_NEXT_CONTROL_VALUE         17007
+#define _APS_NEXT_CONTROL_VALUE         17008
 #define _APS_NEXT_SYMED_VALUE           17000
 #endif
 #endif

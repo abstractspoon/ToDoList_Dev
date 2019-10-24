@@ -11,12 +11,29 @@
 #include "..\shared\enstring.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\misc.h"
 #include "..\shared\ScopedTimer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #define GET_GRAPH(e) pGraph = GetGraph(e); if (pGraph == NULL) return
 #define GET_GRAPH_RET(e, ret) pGraph = GetGraph(e); if (pGraph == NULL) return ret
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct SORTITEM
+{
+	BURNDOWN_GRAPH nGraph;
+	CString sLabel;
+};
+
+static int SortProc(const void* pV1, const void* pV2)
+{
+	const SORTITEM* pSI1 = (const SORTITEM*)pV1;
+	const SORTITEM* pSI2 = (const SORTITEM*)pV2;
+
+	return Misc::NaturalCompare(pSI1->sLabel, pSI2->sLabel);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
@@ -103,6 +120,31 @@ CGraphBase* CBurndownChart::GetGraph(BURNDOWN_GRAPH nGraph) const
 	return pGraph;
 }
 
+int CBurndownChart::GetRequiredColorCount(BURNDOWN_GRAPH nGraph) const
+{
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH_RET(nGraph, 0);
+
+	return pGraph->GetRequiredColorCount();
+}
+
+int CBurndownChart::GetMaxRequiredColorCount() const
+{
+	int nMaxColors = 0;
+	POSITION pos = m_mapGraphs.GetStartPosition();
+
+	while (pos)
+	{
+		BURNDOWN_GRAPH nGraph;
+		CGraphBase* pGraph;
+
+		m_mapGraphs.GetNextAssoc(pos, nGraph, pGraph);
+		nMaxColors = max(nMaxColors, pGraph->GetRequiredColorCount());
+	}
+
+	return nMaxColors;
+}
+
 BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 {
 	if (!IsValidGraph(nGraph))
@@ -120,6 +162,33 @@ BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 	}
 
 	return FALSE;
+}
+
+int CBurndownChart::BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs) const
+{
+	CArray<SORTITEM, SORTITEM&> aSort;
+	SORTITEM st;
+
+	for (int nGraph = 0; nGraph < BCT_NUMGRAPHS; nGraph++)
+	{
+		if (GetGraphType((BURNDOWN_GRAPH)nGraph) == nType)
+		{
+			st.nGraph = (BURNDOWN_GRAPH)nGraph;
+			st.sLabel = GetGraphTitle(st.nGraph);
+
+			aSort.Add(st);
+		}
+	}
+
+	Misc::SortArrayT<SORTITEM>(aSort, SortProc);
+
+	int nItem = aSort.GetSize();
+	aGraphs.SetSize(nItem);
+
+	while (nItem--)
+		aGraphs[nItem] = aSort[nItem].nGraph;
+	
+	return aGraphs.GetSize();
 }
 
 void CBurndownChart::ShowTrendLine(BURNDOWN_TREND nTrend)
