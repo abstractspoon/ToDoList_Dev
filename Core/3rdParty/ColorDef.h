@@ -44,9 +44,12 @@ public:
 	RGBX(const RGBX& color);
 	RGBX(const COLORREF& color);
 
-	inline const RGBX& operator=(const RGBX& rgb) { btRed = rgb.btRed; btBlue = rgb.btBlue; btGreen = rgb.btGreen; btUnused = 0; return *this; }
+	inline RGBX& operator=(const RGBX& rgb) { btRed = rgb.btRed; btBlue = rgb.btBlue; btGreen = rgb.btGreen; btUnused = 0; return *this; }
+	inline RGBX& operator=(const HLSX& hls) { HLS2RGB(hls, *this); return *this; }
+
 	inline BOOL operator==(const RGBX& rgb) const { return (btRed == rgb.btRed && btGreen == rgb.btGreen && btBlue == rgb.btBlue); }
 	inline operator COLORREF() const { return RGB(btRed, btGreen, btBlue); }
+
 	inline BYTE Luminance() const { return (BYTE)(((int)btBlue + (int)btGreen * 6 + (int)btRed * 3) / 10); }
 	inline RGBX Gray() const { BYTE btGray = Luminance(); return RGBX(btGray, btGray, btGray); }
 	inline void MakeGray() { btRed = btGreen = btBlue = (BYTE)Luminance(); }

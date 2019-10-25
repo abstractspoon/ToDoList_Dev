@@ -92,13 +92,10 @@ void RGBX::AdjustLighting(double dFactor, bool bRGB)
 	}
 	else // HLS
 	{
-		HLSX hls;
-		RGB2HLS(*this, hls);
+		HLSX hls(*this);
+		hls.fLuminosity += (float)((1.0f - hls.fLuminosity) * dFactor);
 		
-		hls.fLuminosity = (float)(hls.fLuminosity + dFactor);
-		hls.fLuminosity = max(0.0f, min(1.0f, hls.fLuminosity));
-		
-		HLS2RGB(hls, *this);
+		*this = hls;
 	}
 }
 
