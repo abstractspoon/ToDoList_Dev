@@ -31,6 +31,7 @@ public:
 	BOOL RebuildGraph(const COleDateTimeRange& dtExtents);
 
 	int BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs) const;
+	void SetGraphColors(const CGraphColorMap& mapColors);
 
 protected:
 	const CStatsItemArray& m_data;
@@ -39,6 +40,7 @@ protected:
 	COleDateTimeRange m_dtExtents;
 	CStatsItemCalculator m_calculator;
 	COLORREF m_crToday;
+	CGraphColorMap m_mapGraphColors;
 
 	BURNDOWN_TREND m_nTrendLine;
 	BURNDOWN_GRAPH m_nActiveGraph;

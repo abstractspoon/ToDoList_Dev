@@ -16,15 +16,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const COLORREF	COLOR_GREEN = RGB(122, 204, 0);
-const COLORREF	COLOR_RED = RGB(204, 0, 0);
-const COLORREF	COLOR_YELLOW = RGB(204, 164, 0);
-const COLORREF	COLOR_BLUE = RGB(0, 0, 244);
-const COLORREF	COLOR_PINK = RGB(234, 28, 74);
-const COLORREF	COLOR_ORANGE = RGB(255, 91, 21);
-
-////////////////////////////////////////////////////////////////////////////////
-
 #define GET_GRAPH(e) pGraph = GetGraph(e); if (pGraph == NULL) return
 #define GET_GRAPH_RET(e, ret) pGraph = GetGraph(e); if (pGraph == NULL) return ret
 
@@ -183,6 +174,17 @@ int CBurndownChart::BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& 
 	return aGraphs.GetSize();
 }
 
+void CBurndownChart::SetGraphColors(const CGraphColorMap& mapColors)
+{
+	m_mapGraphColors.Copy(mapColors);
+
+	// Update the active graph
+	CColorArray aColors;
+	VERIFY(mapColors.Lookup(m_nActiveGraph, aColors) && aColors.GetSize());
+
+	CGraphBase::SetDatasetColors(m_datasets, aColors);
+}
+
 void CBurndownChart::ShowTrendLine(BURNDOWN_TREND nTrend)
 {
 	m_nTrendLine = nTrend;
@@ -271,9 +273,9 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	{
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
 
-		CDWordArray aColors;
-		aColors.Add(COLOR_GREEN);
-		aColors.Add(COLOR_ORANGE);
+		CColorArray aColors;
+		VERIFY(m_mapGraphColors.Lookup(m_nActiveGraph, aColors) && 
+				(aColors.GetSize() == pGraph->GetRequiredColorCount()));
 
 		pGraph->BuildGraph(m_calculator, aColors, m_datasets);
 		UpdateGraphTrendLine();

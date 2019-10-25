@@ -36,7 +36,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownGraphColorListCtrl message handlers
 
-BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
+BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart, const CGraphColorMap& mapColors)
 {
 	ASSERT(GetStyle() & LVS_OWNERDRAWFIXED);
 	ASSERT((GetStyle() & (LVS_SORTASCENDING | LVS_SORTDESCENDING)) == 0);
@@ -73,13 +73,12 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 
 			while (GetColumnCount() <= nNumColors)
 				AddCol(_T("Colour"), GraphicsMisc::ScaleByDPIFactor(60), ILCT_BROWSE);
-
-			// And populate
-			// TODO
 		}
 	}
 
 	ResizeStretchyColumns();
+
+	m_mapColors.Copy(mapColors);
 
 	return (GetItemCount() > 0);
 }

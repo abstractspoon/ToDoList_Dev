@@ -17,6 +17,22 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+// Because both the number of graphs and the number of colors
+// is relatively small we accept the overhead of copying
+class CColorArray : public CDWordArray
+{
+public:
+	CColorArray& operator=(CColorArray& other);
+};
+
+class CGraphColorMap : public CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CColorArray, CColorArray&>
+{
+public:
+	void Copy(const CGraphColorMap& other);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 struct TRENDLINE
 {
 	UINT nLabelID;

@@ -14,6 +14,30 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+CColorArray& CColorArray::operator=(CColorArray& other)
+{
+	Copy(other);
+	return *this;
+}
+
+void CGraphColorMap::Copy(const CGraphColorMap& other)
+{
+	RemoveAll();
+
+	POSITION pos = other.GetStartPosition();
+
+	while (pos)
+	{
+		CColorArray aColors;
+		BURNDOWN_GRAPH nGraph;
+
+		other.GetNextAssoc(pos, nGraph, aColors);
+		SetAt(nGraph, aColors);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 STATSITEM::STATSITEM(DWORD dwID)
 	: 
 	dwTaskID(dwID), 

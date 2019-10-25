@@ -23,6 +23,13 @@ static char THIS_FILE[] = __FILE__;
 
 const COLORREF DEF_TODAY_COLOR	= RGB(255, 0, 0);
 
+const COLORREF COLOR_GREEN		= RGB(122, 204, 0);
+const COLORREF COLOR_RED		= RGB(204, 0, 0);
+const COLORREF COLOR_YELLOW		= RGB(204, 164, 0);
+const COLORREF COLOR_BLUE		= RGB(0, 0, 244);
+const COLORREF COLOR_PINK		= RGB(234, 28, 74);
+const COLORREF COLOR_ORANGE		= RGB(255, 91, 21);
+
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownPreferencesPage dialog
 
@@ -34,6 +41,9 @@ CBurndownPreferencesPage::CBurndownPreferencesPage(const CBurndownChart& chart, 
 	//{{AFX_DATA_INIT(CBurndownPreferencesPage)
 	m_bEnableTodayColor = FALSE;
 	//}}AFX_DATA_INIT
+
+	
+
 }
 
 void CBurndownPreferencesPage::DoDataExchange(CDataExchange* pDX)
@@ -46,7 +56,7 @@ void CBurndownPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_TODAYCOLOR, m_bEnableTodayColor);
 	//}}AFX_DATA_MAP
 
-	m_btnTodayColor.DDX(pDX, m_crTodayColor);
+	m_btnTodayColor.DDX(pDX, m_crToday);
 }
 
 
@@ -63,7 +73,7 @@ BOOL CBurndownPreferencesPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
-	VERIFY(m_lcGraphColors.Initialize(m_chart));
+	VERIFY(m_lcGraphColors.Initialize(m_chart, m_mapGraphColors));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -71,10 +81,18 @@ BOOL CBurndownPreferencesPage::OnInitDialog()
 
 void CBurndownPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
+	pPrefs->WriteProfileInt(szKey, _T("TodayColor"), (int)m_crToday);
+
+	// Graph colours
+	// TODO
 }
 
 void CBurndownPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
 {
+	m_crToday = (COLORREF)pPrefs->GetProfileInt(szKey, _T("TodayColor"), DEF_TODAY_COLOR);
+
+	// Graph colours
+	// TODO
 }
 
 void CBurndownPreferencesPage::OnOK()

@@ -7,6 +7,8 @@
 // BurndownGraphColorListCtrl.h : header file
 //
 
+#include "BurndownStruct.h"
+
 #include "..\Shared\InputListCtrl.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -23,16 +25,18 @@ public:
 	CBurndownGraphColorListCtrl();
 	virtual ~CBurndownGraphColorListCtrl();
 
-	BOOL Initialize(const CBurndownChart& chart);
+	BOOL Initialize(const CBurndownChart& chart, const CGraphColorMap& mapColors);
+	void GetGraphColors(CGraphColorMap& mapColors) const { mapColors.Copy(m_mapColors); }
 
 protected:
-// Overrides
+	CGraphColorMap m_mapColors;
+
+protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CBurndownGraphColorListCtrl)
 	//}}AFX_VIRTUAL
 
 	// Generated message map functions
-protected:
 	//{{AFX_MSG(CBurndownGraphColorListCtrl)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
