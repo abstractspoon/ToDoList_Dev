@@ -32,7 +32,10 @@ class CGraphColorMap : public CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CColorArray, 
 public:
 	void Copy(const CGraphColorMap& other);
 
-	int GetColorCount(BURNDOWN_GRAPH) const;
+	int GetColorCount(BURNDOWN_GRAPH nGraph) const;
+	
+	COLORREF GetColor(BURNDOWN_GRAPH nGraph, int nIndex) const;
+	BOOL SetColor(BURNDOWN_GRAPH nGraph, int nIndex, COLORREF color);
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -46,6 +46,11 @@ protected:
 protected:
 	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rButton) const;
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
+// 	virtual BOOL IsEditing() const;
+// 	virtual BOOL CanEditSelectedCell() const;
+// 	virtual void InitState();
+	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
 };
 

@@ -41,6 +41,8 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart, const 
 	ASSERT(GetStyle() & LVS_OWNERDRAWFIXED);
 	ASSERT((GetStyle() & (LVS_SORTASCENDING | LVS_SORTDESCENDING)) == 0);
 
+	m_mapColors.Copy(mapColors);
+
 	AutoAdd(FALSE, FALSE);
 	ShowGrid(TRUE, TRUE);
 	SetFirstColumnStretchy(TRUE);
@@ -78,8 +80,6 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart, const 
 
 	ResizeStretchyColumns();
 
-	m_mapColors.Copy(mapColors);
-
 	return (GetItemCount() > 0);
 }
 
@@ -102,4 +102,55 @@ COLORREF CBurndownGraphColorListCtrl::GetItemBackColor(int nItem, int nCol, BOOL
 		return GetSysColor(COLOR_3DLIGHT);
 
 	return CInputListCtrl::GetItemBackColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
+}
+
+void CBurndownGraphColorListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick*/)
+{
+	// graph title not editable
+	if (nCol == 0)
+		return;
+
+	// header row not editable
+	int dwItemData = GetItemData(nItem);
+
+	if ((dwItemData == BCT_FREQUENCY) || (dwItemData == BCT_TIMESERIES))
+		return;
+
+	BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)dwItemData;
+
+	CColorDialog dialog(m_mapColors.GetColor(nGraph, (nCol - 1)));
+
+	if (dialog.DoModal() == IDOK)
+		m_mapColors.SetColor(nGraph, (nCol - 1), dialog.GetColor());
+}
+
+void CBurndownGraphColorListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
+											  const CRect& rText, const CString& sText,
+											  COLORREF crText, UINT nDrawTextFlags)
+{
+	if (nCol > 0)
+	{
+		// header row not editable
+		int dwItemData = GetItemData(nRow);
+
+		if ((dwItemData == BCT_FREQUENCY) || (dwItemData == BCT_TIMESERIES))
+			return;
+
+		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)dwItemData;
+
+		if (m_mapColors.GetColorCount(nGraph) < nCol)
+			return;
+
+		COLORREF color = m_mapColors.GetColor(nGraph, (nCol - 1));
+		ASSERT(color != CLR_NONE);
+
+		CRect rColor(rText);
+		rColor.DeflateRect(1, 3, 4, 3);
+
+		GraphicsMisc::DrawRect(pDC, rColor, color, GraphicsMisc::Darker(color, 0.4));
+	}
+	else
+	{
+		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
+	}
 }

@@ -60,13 +60,35 @@ int CGraphColorMap::GetColorCount(BURNDOWN_GRAPH nGraph) const
 {
 	const CPair* pPair = PLookup(nGraph);
 
-	if (!pPair)
+	return (pPair ? pPair->value.GetSize() : 0);
+}
+
+COLORREF CGraphColorMap::GetColor(BURNDOWN_GRAPH nGraph, int nIndex) const
+{
+	const CPair* pPair = PLookup(nGraph);
+
+	if (pPair && (pPair->value.GetSize() > nIndex))
+		return pPair->value[nIndex];
+
+	ASSERT(0);
+	return CLR_NONE;
+}
+
+BOOL CGraphColorMap::SetColor(BURNDOWN_GRAPH nGraph, int nIndex, COLORREF color)
+{
+	if (color == CLR_NONE)
+		return FALSE;
+
+	CPair* pPair = PLookup(nGraph);
+
+	if (pPair && (pPair->value.GetSize() > nIndex))
 	{
-		ASSERT(0);
-		return 0;
+		pPair->value[nIndex] = color;
+		return TRUE;
 	}
 
-	return pPair->value.GetSize();
+	ASSERT(0);
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
