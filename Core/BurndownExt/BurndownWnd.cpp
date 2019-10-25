@@ -254,8 +254,10 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		if (dEnd > dStart)
 			VERIFY(m_dtPrevActiveRange.Set(dStart, dEnd));
 
-		// TODO
-		m_graph.SetTodayColour(255);
+		m_dlgPrefs.LoadPreferences(pPrefs, szKey);
+
+		m_graph.SetTodayColour(m_dlgPrefs.GetTodayColor());
+		m_graph.SetGraphColors(m_dlgPrefs.GetGraphColors());
 
 		UpdateData(FALSE);
 	}

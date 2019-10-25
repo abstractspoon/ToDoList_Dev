@@ -36,7 +36,7 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
 	COLORREF GetTodayColor() { return (m_bEnableTodayColor ? m_crToday : CLR_NONE); }
-	void GetGraphColors(CGraphColorMap& mapColors) const { mapColors.Copy(m_mapGraphColors); }
+	const CGraphColorMap& GetGraphColors() const { return m_lcGraphColors.GetGraphColors(); }
 
 protected:
 // Dialog Data
@@ -46,11 +46,8 @@ protected:
 	CBurndownGraphColorListCtrl	m_lcGraphColors;
 	CColorButton m_btnTodayColor;
 
-	BOOL	m_bEnableTodayColor;
+	BOOL m_bEnableTodayColor;
 	COLORREF m_crToday;
-	CGraphColorMap m_mapGraphColors;
-
-	const CBurndownChart& m_chart;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -81,7 +78,7 @@ public:
 	CBurndownPreferencesDlg(const CBurndownChart& chart, CWnd* pParent);
 
 	COLORREF GetTodayColor() { return m_page.GetTodayColor(); }
-	void GetGraphColors(CGraphColorMap& mapColors) const { m_page.GetGraphColors(mapColors); }
+	const CGraphColorMap& GetGraphColors() const { return m_page.GetGraphColors(); }
 
 protected:
 // Dialog Data

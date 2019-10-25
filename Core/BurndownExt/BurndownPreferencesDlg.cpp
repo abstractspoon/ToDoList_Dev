@@ -36,14 +36,11 @@ const COLORREF COLOR_ORANGE		= RGB(255, 91, 21);
 CBurndownPreferencesPage::CBurndownPreferencesPage(const CBurndownChart& chart, CWnd* /*pParent*/ /*=NULL*/)
 	: 
 	CPreferencesPageBase(IDD_PREFERENCES_PAGE),
-	m_chart(chart)
+	m_lcGraphColors(chart)
 {
 	//{{AFX_DATA_INIT(CBurndownPreferencesPage)
 	m_bEnableTodayColor = FALSE;
 	//}}AFX_DATA_INIT
-
-	chart.GetDefaultGraphColors(m_mapGraphColors);
-
 }
 
 void CBurndownPreferencesPage::DoDataExchange(CDataExchange* pDX)
@@ -73,7 +70,7 @@ BOOL CBurndownPreferencesPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
-	VERIFY(m_lcGraphColors.Initialize(m_chart, m_mapGraphColors));
+	VERIFY(m_lcGraphColors.Initialize());
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

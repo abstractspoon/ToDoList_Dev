@@ -18,8 +18,11 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownGraphColorListCtrl
 
-CBurndownGraphColorListCtrl::CBurndownGraphColorListCtrl()
+CBurndownGraphColorListCtrl::CBurndownGraphColorListCtrl(const CBurndownChart& chart)
+	:
+	m_chart(chart)
 {
+	chart.GetGraphColors(m_mapColors);
 }
 
 CBurndownGraphColorListCtrl::~CBurndownGraphColorListCtrl()
@@ -36,12 +39,12 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownGraphColorListCtrl message handlers
 
-BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart, const CGraphColorMap& mapColors)
+BOOL CBurndownGraphColorListCtrl::Initialize()
 {
 	ASSERT(GetStyle() & LVS_OWNERDRAWFIXED);
 	ASSERT((GetStyle() & (LVS_SORTASCENDING | LVS_SORTDESCENDING)) == 0);
 
-	m_mapColors.Copy(mapColors);
+	m_chart.GetGraphColors(m_mapColors);
 
 	AutoAdd(FALSE, FALSE);
 	ShowGrid(TRUE, TRUE);
@@ -61,17 +64,17 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart, const 
 		// For each type, sort all the related graphs by name
 		// before adding to list
 		CGraphArray aGraphs;
-		VERIFY(chart.BuildSortedGraphList(gt.nType, aGraphs));
+		VERIFY(m_chart.BuildSortedGraphList(gt.nType, aGraphs));
 
 		for (int nItem = 0; nItem < aGraphs.GetSize(); nItem++)
 		{
 			BURNDOWN_GRAPH nGraph = aGraphs[nItem];
 
-			nRow = AddRow(chart.GetGraphTitle(nGraph));
+			nRow = AddRow(m_chart.GetGraphTitle(nGraph));
 			SetItemData(nRow, nGraph);
 
 			// build colour columns as we go
-			int nNumColors = mapColors.GetColorCount(nGraph);
+			int nNumColors = m_mapColors.GetColorCount(nGraph);
 
 			while (GetColumnCount() <= nNumColors)
 				AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(60), ILCT_BROWSE);
