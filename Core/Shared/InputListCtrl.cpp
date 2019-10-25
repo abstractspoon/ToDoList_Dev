@@ -750,19 +750,20 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 	if (!GetButtonRect(nRow, nCol, rButton))
 		return FALSE;
 
-	DWORD dwDisabled = (IsButtonEnabled(nRow, nCol) ? 0 : DFCS_INACTIVE);
+	BOOL bEnabled = IsButtonEnabled(nRow, nCol);
+	DWORD dwState = (bEnabled ? 0 : DFCS_INACTIVE);
 
 	switch (nType)
 	{
 		case ILCT_DROPLIST:
-			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwDisabled));
+			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwState));
 			break;
 					
 		case ILCT_POPUPMENU:
 			{
-				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwDisabled));
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
 
-				if (dwDisabled)
+				if (!bEnabled)
 					pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
 
 				UINT nFlags = DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_CENTER;
@@ -771,13 +772,13 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			break;
 
 		case ILCT_DATE:
-			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwDisabled));
+			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwState));
 			break;
 					
 		case ILCT_BROWSE:
-			CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwDisabled), NULL, FALSE);
+			CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState), NULL, FALSE);
 
-			if (dwDisabled)
+			if (!bEnabled)
 				pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
 
 			pDC->DrawText("...", rButton, DT_CENTER | DT_VCENTER);
@@ -785,16 +786,15 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			
 		case ILCT_CHECK:
 			{
-				CWnd* pWnd;
+				CWnd* pWnd = this;
 				
-				if (COSVersion() >= OSV_VISTA) 
+				if (COSVersion() >= OSV_VISTA)
 					pWnd = GetHeaderCtrl();
-				else 
-					pWnd = this;
 
-				UINT nStyle = (DFCS_BUTTONCHECK | (bHasText ? DFCS_CHECKED : 0) | dwDisabled);
+				if (bHasText)
+					dwState |= DFCS_CHECKED;
 
-				CThemed::DrawFrameControl(pWnd, pDC, rButton, DFC_BUTTON, nStyle);
+				CThemed::DrawFrameControl(pWnd, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONCHECK | dwState));
 			}
 			break;
 
