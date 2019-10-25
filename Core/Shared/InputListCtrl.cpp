@@ -755,7 +755,6 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 	switch (nType)
 	{
 		case ILCT_DROPLIST:
-			rButton.bottom--;
 			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwDisabled));
 			break;
 					
@@ -772,7 +771,6 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			break;
 
 		case ILCT_DATE:
-			rButton.DeflateRect(0, 1, 1, 2);
 			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwDisabled));
 			break;
 					
@@ -822,6 +820,8 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	switch (nType)
 	{
 		case ILCT_DROPLIST:
+		case ILCT_BROWSE:
+		case ILCT_DATE:
 			rButton.left = (rButton.right - BTN_WIDTH);
 			break;
 
@@ -831,11 +831,6 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 			rButton.top--;
 			break;
 
-		case ILCT_BROWSE:
-		case ILCT_DATE:
-			rButton.left = (rButton.right - BTN_WIDTH - 1);
-			break;
-					
 		case ILCT_CHECK:
 			rButton.left += ((rButton.Width() - BTN_WIDTH) / 2);
 			rButton.right = (rButton.left + BTN_WIDTH);
