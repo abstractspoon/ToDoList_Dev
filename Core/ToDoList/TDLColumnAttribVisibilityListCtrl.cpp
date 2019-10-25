@@ -282,18 +282,6 @@ void CTDLColumnAttribVisibilityListCtrl::EditCell(int nItem, int nCol, BOOL bBtn
 	}
 }
 
-COLORREF CTDLColumnAttribVisibilityListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
-{
-	if (!bSelected)
-	{
-		if (!IsWindowEnabled() || !IsButtonEnabled(nItem, nCol))
-			return GetSysColor(COLOR_3DLIGHT);
-	}
-	
-	// else
-	return CInputListCtrl::GetItemBackColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
-}
-
 BOOL CTDLColumnAttribVisibilityListCtrl::IsButtonEnabled(int nRow, int nCol) const 
 { 
 	if (!CInputListCtrl::IsButtonEnabled(nRow, nCol))

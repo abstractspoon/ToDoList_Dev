@@ -103,14 +103,14 @@ BOOL CBurndownGraphColorListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButt
 	return CInputListCtrl::GetButtonRect(nRow, nCol, rButton);
 }
 
-COLORREF CBurndownGraphColorListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
+COLORREF CBurndownGraphColorListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
 	int dwItemData = GetItemData(nItem);
 
 	if ((dwItemData == BCT_FREQUENCY) || (dwItemData == BCT_TIMESERIES))
-		return GetSysColor(COLOR_3DLIGHT);
+		return GetSysColor(COLOR_3DDKSHADOW);
 
-	return CInputListCtrl::GetItemBackColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
+	return CInputListCtrl::GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
 }
 
 void CBurndownGraphColorListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick*/)
