@@ -40,9 +40,7 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 {
 	ASSERT(GetStyle() & LVS_OWNERDRAWFIXED);
 	ASSERT((GetStyle() & (LVS_SORTASCENDING | LVS_SORTDESCENDING)) == 0);
-
-	if (!m_mapColors.GetCount())
-		chart.GetDefaultGraphColors(m_mapColors);
+	ASSERT(m_mapColors.GetCount());
 
 	AutoAdd(FALSE, FALSE);
 	ShowGrid(TRUE, TRUE);
@@ -76,11 +74,15 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 
 			while (GetColumnCount() <= nNumColors)
 				AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(60), ILCT_BROWSE);
+
+			// Set selection to the currently active graph
+			if (chart.GetActiveGraph() == nGraph)
+				SetCurSel(nRow, 1);
 		}
 	}
 
 	ResizeStretchyColumns();
-
+	
 	return (GetItemCount() > 0);
 }
 
@@ -92,15 +94,19 @@ void CBurndownGraphColorListCtrl::SetGraphColors(const CGraphColorMap& mapColors
 		Invalidate();
 }
 
-BOOL CBurndownGraphColorListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
+BOOL CBurndownGraphColorListCtrl::CanEditCell(int nRow, int nCol) const
 {
+	// graph title not editable
+	if (nCol == 0)
+		return FALSE;
+
+	// header row not editable
 	int dwItemData = GetItemData(nRow);
 
 	if ((dwItemData == BCT_FREQUENCY) || (dwItemData == BCT_TIMESERIES))
 		return FALSE;
 
-	//int nNumColors = 
-	return CInputListCtrl::GetButtonRect(nRow, nCol, rButton);
+	return (nCol <= m_mapColors.GetColorCount((BURNDOWN_GRAPH)dwItemData));
 }
 
 COLORREF CBurndownGraphColorListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
@@ -116,18 +122,16 @@ COLORREF CBurndownGraphColorListCtrl::GetItemTextColor(int nItem, int nCol, BOOL
 void CBurndownGraphColorListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick*/)
 {
 	// graph title not editable
-	if (nCol == 0)
-		return;
+	ASSERT (nCol > 0);
 
 	// header row not editable
 	int dwItemData = GetItemData(nItem);
 
-	if ((dwItemData == BCT_FREQUENCY) || (dwItemData == BCT_TIMESERIES))
-		return;
+	ASSERT((dwItemData != BCT_FREQUENCY) && (dwItemData != BCT_TIMESERIES));
 
 	BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)dwItemData;
 
-	CColorDialog dialog(m_mapColors.GetColor(nGraph, (nCol - 1)));
+	CColorDialog dialog(m_mapColors.GetColor(nGraph, (nCol - 1)), CC_FULLOPEN | CC_RGBINIT);
 
 	if (dialog.DoModal() == IDOK)
 		m_mapColors.SetColor(nGraph, (nCol - 1), dialog.GetColor());

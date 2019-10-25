@@ -81,7 +81,7 @@ protected:
 	COleDateTimeRange m_dtDataRange, m_dtPrevActiveRange;
 
 	CStatic	m_stFrame;
-	CBurndownChart m_graph;
+	CBurndownChart m_chart;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CRangeSliderCtrl m_sliderDateRange;

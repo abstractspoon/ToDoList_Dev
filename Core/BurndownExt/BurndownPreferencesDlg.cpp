@@ -70,14 +70,19 @@ BOOL CBurndownPreferencesPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
+	GetDlgItem(IDC_SETTODAYCOLOR)->EnableWindow(m_bEnableTodayColor);
+
 	VERIFY(m_lcGraphColors.Initialize(m_chart));
 
-	return TRUE;  // return TRUE unless you set the focus to a control
+	m_lcGraphColors.SetFocus();
+	
+	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CBurndownPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
+	pPrefs->WriteProfileInt(szKey, _T("EnableTodayColor"), m_bEnableTodayColor);
 	pPrefs->WriteProfileInt(szKey, _T("TodayColor"), (int)m_crToday);
 
 	// Graph colours
@@ -97,6 +102,7 @@ void CBurndownPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 void CBurndownPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
 {
+	m_bEnableTodayColor = pPrefs->GetProfileInt(szKey, _T("EnableTodayColor"), TRUE);
 	m_crToday = (COLORREF)pPrefs->GetProfileInt(szKey, _T("TodayColor"), DEF_TODAY_COLOR);
 
 	// Graph colours
@@ -132,7 +138,8 @@ void CBurndownPreferencesPage::OnOK()
 
 void CBurndownPreferencesPage::OnEnableTodayColor() 
 {
-	// TODO: Add your control notification handler code here
+	UpdateData();
+	GetDlgItem(IDC_SETTODAYCOLOR)->EnableWindow(m_bEnableTodayColor);
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -24,7 +24,7 @@ public:
 	virtual void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const = 0;
 	virtual int GetDefaultColors(CColorArray& aColors) const = 0;
 
-	static void SetDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET], const CColorArray& aColors);
+	void SetDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET], const CColorArray& aColors) const;
 
 protected:
 	CGraphBase();

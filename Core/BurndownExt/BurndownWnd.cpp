@@ -64,11 +64,11 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	m_dwUpdateGraphOnShow(0),
 	m_nTrendLine(BTL_NONE),
 	m_dtDataRange(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
-	m_graph(m_data),
+	m_chart(m_data),
 	m_bUpdatingSlider(FALSE),
 	m_sliderDateRange(TBS_BOTTOM),
 #pragma warning(disable:4355)
-	m_dlgPrefs(m_graph, this)
+	m_dlgPrefs(m_chart, this)
 #pragma warning(default:4355)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
@@ -141,7 +141,8 @@ void CBurndownWnd::OnPreferences()
 {
 	if (m_dlgPrefs.DoModal() == IDOK)
 	{
-		// TODO
+		m_chart.SetTodayColour(m_dlgPrefs.GetTodayColor());
+		m_chart.SetGraphColors(m_dlgPrefs.GetGraphColors());
 	}
 }
 
@@ -185,10 +186,10 @@ BOOL CBurndownWnd::OnInitDialog()
 	ScreenToClient(rFrame);
 	rFrame.DeflateRect(1, 1);
 
-	VERIFY(m_graph.SubclassDlgItem(IDC_GRAPH, this));
+	VERIFY(m_chart.SubclassDlgItem(IDC_GRAPH, this));
 
 	// Combos
-	VERIFY(m_cbGraphs.Initialise(m_graph));
+	VERIFY(m_cbGraphs.Initialise(m_chart));
 	VERIFY(m_cbTrends.Initialise());
 
 	RebuildGraph(FALSE, FALSE, FALSE);
@@ -235,7 +236,7 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	{
 		m_nGraphType = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("GraphType"), BCT_TIMESERIES_INCOMPLETETASKS);
 		
-		if (!m_graph.IsValidGraph(m_nGraphType))
+		if (!m_chart.IsValidGraph(m_nGraphType))
 			m_nGraphType = BCT_TIMESERIES_INCOMPLETETASKS;
 
 		m_nTrendLine = (BURNDOWN_TREND)pPrefs->GetProfileInt(szKey, _T("TrendLine"), BTL_BEST_FIT);
@@ -243,9 +244,9 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		if (m_nTrendLine >= NUM_TRENDS)
 			m_nTrendLine = BTL_NONE;
 
-		m_graph.SetActiveGraph(m_nGraphType);
-		m_graph.ShowTrendLine(m_nTrendLine);
-		m_cbTrends.EnableWindow(m_graph.GetActiveGraphType() == BCT_TIMESERIES);
+		m_chart.SetActiveGraph(m_nGraphType);
+		m_chart.ShowTrendLine(m_nTrendLine);
+		m_cbTrends.EnableWindow(m_chart.GetActiveGraphType() == BCT_TIMESERIES);
 
 		// Active range
 		m_dtPrevActiveRange.Reset();
@@ -258,8 +259,8 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 		m_dlgPrefs.LoadPreferences(pPrefs, szKey);
 
-		m_graph.SetTodayColour(m_dlgPrefs.GetTodayColor());
-		m_graph.SetGraphColors(m_dlgPrefs.GetGraphColors());
+		m_chart.SetTodayColour(m_dlgPrefs.GetTodayColor());
+		m_chart.SetGraphColors(m_dlgPrefs.GetGraphColors());
 
 		UpdateData(FALSE);
 	}
@@ -297,7 +298,7 @@ void CBurndownWnd::SetTaskFont(HFONT hFont)
 	CString sFontName;
 	int nFontSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFontName);
 
-	m_graph.SetFont(sFontName, nFontSize);
+	m_chart.SetFont(sFontName, nFontSize);
 }
 
 bool CBurndownWnd::ProcessMessage(MSG* /*pMsg*/) 
@@ -317,7 +318,7 @@ void CBurndownWnd::FilterToolTipMessage(MSG* pMsg)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	m_graph.FilterToolTipMessage(pMsg);
+	m_chart.FilterToolTipMessage(pMsg);
 }
 
 bool CBurndownWnd::GetLabelEditRect(LPRECT /*pEdit*/)
@@ -442,7 +443,7 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 	}
 
 	// we must have been initialized already
-	ASSERT(m_graph.GetSafeHwnd());
+	ASSERT(m_chart.GetSafeHwnd());
 
 	switch (nUpdate)
 	{
@@ -552,7 +553,7 @@ bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		{
 			CBitmap bmImage;
 
-			if (m_graph.SaveToImage(bmImage))
+			if (m_chart.SaveToImage(bmImage))
 			{
 				CString sPngPath(pData->szFilePath);
 				FileMisc::ReplaceExtension(sPngPath, _T(".png"));
@@ -622,7 +623,7 @@ bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 
 BOOL CBurndownWnd::OnEraseBkgnd(CDC* pDC) 
 {
-	CDialogHelper::ExcludeChild(&m_graph, pDC);
+	CDialogHelper::ExcludeChild(&m_chart, pDC);
 
 	// then our background
 	if (m_brBack.GetSafeHandle())
@@ -668,7 +669,7 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 		m_stFrame.MoveWindow(rFrame);
 
 		rFrame.DeflateRect(1, 1);
-		m_graph.MoveWindow(rFrame);
+		m_chart.MoveWindow(rFrame);
 
 		// selected task dates takes available space
 		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
@@ -683,7 +684,7 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 
 void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility)
 {
-	if (bCheckVisibility && !m_graph.IsWindowVisible())
+	if (bCheckVisibility && !m_chart.IsWindowVisible())
 	{
 		m_dwUpdateGraphOnShow = REBUILD_GRAPH;
 		m_dwUpdateGraphOnShow |= (bSortData ? RESORT_DATA : 0);
@@ -714,7 +715,7 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 		m_dtPrevActiveRange.Reset(); // always
 	}
 
-	m_graph.RebuildGraph(dtActiveRange);
+	m_chart.RebuildGraph(dtActiveRange);
 
 	UpdateRangeSlider(dtActiveRange);
 	UpdateActiveRangeLabel(dtActiveRange);
@@ -724,8 +725,8 @@ void CBurndownWnd::OnSelchangeDisplay()
 {
 	UpdateData();
 
-	m_graph.SetActiveGraph(m_nGraphType);
-	m_cbTrends.EnableWindow(m_graph.GetActiveGraphType() == BCT_TIMESERIES);
+	m_chart.SetActiveGraph(m_nGraphType);
+	m_cbTrends.EnableWindow(m_chart.GetActiveGraphType() == BCT_TIMESERIES);
 }
 
 void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
@@ -770,7 +771,7 @@ LRESULT CBurndownWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
 		if (GetSliderDateRange(dtActiveRange))
 		{
 			UpdateActiveRangeLabel(dtActiveRange);
-			m_graph.RebuildGraph(dtActiveRange);
+			m_chart.RebuildGraph(dtActiveRange);
 		}
 	}
 
@@ -865,5 +866,5 @@ void CBurndownWnd::OnTrendsChanged()
 	UpdateData();
 
 	if (m_nTrendLine != nPrevTrend)
-		m_graph.ShowTrendLine(m_nTrendLine);
+		m_chart.ShowTrendLine(m_nTrendLine);
 }

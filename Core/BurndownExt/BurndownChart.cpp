@@ -173,10 +173,14 @@ void CBurndownChart::SetGraphColors(const CGraphColorMap& mapColors)
 	m_mapGraphColors.Copy(mapColors);
 
 	// Update the active graph
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH(m_nActiveGraph);
+
 	CColorArray aColors;
 	VERIFY(mapColors.Lookup(m_nActiveGraph, aColors) && aColors.GetSize());
 
-	CGraphBase::SetDatasetColors(m_datasets, aColors);
+	pGraph->SetDatasetColors(m_datasets, aColors);
+	Invalidate();
 }
 
 void CBurndownChart::GetDefaultGraphColors(CGraphColorMap& mapColors) const

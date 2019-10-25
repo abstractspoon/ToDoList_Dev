@@ -24,6 +24,7 @@ public:
 
 	BURNDOWN_GRAPHTYPE GetActiveGraphType() const;
 	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
+	BURNDOWN_GRAPH GetActiveGraph() const { return m_nActiveGraph; }
 	void SetTodayColour(COLORREF color);
 	BOOL SaveToImage(CBitmap& bmImage);
 	void ShowTrendLine(BURNDOWN_TREND nTrend);

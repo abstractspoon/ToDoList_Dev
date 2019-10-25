@@ -178,7 +178,7 @@ void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	case KFCL_COLORCOL:
 		ASSERT(!Misc::IsHighContrastActive());
 		{
-			CColorDialog dialog(GetItemColor(nItem));
+			CColorDialog dialog(GetItemColor(nItem), CC_FULLOPEN | CC_RGBINIT);
 
 			if (dialog.DoModal() == IDOK)
 			{

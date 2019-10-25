@@ -34,7 +34,7 @@ CGraphBase::~CGraphBase()
 {
 }
 
-void CGraphBase::SetDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET], const CColorArray& aColors)
+void CGraphBase::SetDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET], const CColorArray& aColors) const
 {
 	int nColor = aColors.GetSize();
 
