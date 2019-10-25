@@ -49,7 +49,9 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 	AddCol(_T("")); // Graph titles
 	DisableColumnEditing(0, TRUE);
 
-	// Populate items, 
+	// Populate items
+	int nSelRow = -1;
+
 	for (int nType = 0; nType < NUM_GRAPHTYPES; nType++)
 	{
 		const GRAPHTYPE& gt = GRAPHTYPES[nType];
@@ -77,11 +79,17 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 
 			// Set selection to the currently active graph
 			if (chart.GetActiveGraph() == nGraph)
-				SetCurSel(nRow, 1);
+				nSelRow = nRow;
 		}
 	}
 
 	ResizeStretchyColumns();
+
+	if (nSelRow != -1)
+	{
+		SetCurSel(nSelRow, 1);
+		ScrollCellIntoView(nSelRow, 1);
+	}
 	
 	return (GetItemCount() > 0);
 }
