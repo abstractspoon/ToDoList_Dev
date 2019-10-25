@@ -819,8 +819,11 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	// tweaks
 	switch (nType)
 	{
-		case ILCT_DROPLIST:
 		case ILCT_BROWSE:
+			rButton.left = (rButton.right - BTN_WIDTH - 1);
+			break;
+
+		case ILCT_DROPLIST:
 		case ILCT_DATE:
 			rButton.left = (rButton.right - BTN_WIDTH);
 			break;
