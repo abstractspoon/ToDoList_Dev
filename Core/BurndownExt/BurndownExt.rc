@@ -167,8 +167,8 @@ BEGIN
                     LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | 
                     WS_TABSTOP,7,39,266,142
     CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,9,131,10
-    PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,147,7,52,13,BS_RIGHT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,8,114,10
+    PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,125,7,52,13,BS_RIGHT
     LTEXT           "&Graph content colours",IDC_STATIC,7,27,223,8
 END
 
