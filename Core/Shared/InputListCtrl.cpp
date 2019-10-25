@@ -612,20 +612,19 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			{
 				if (m_bHorzGrid)
 					rBack.bottom--;
-				
-				// draw vert grid if required
-				if (m_bVertGrid)
-				{ 
-					// if we're not tight up against the client edge then draw the vertical 
-					if (rCell.right < rClient.right)
-					{
-						GraphicsMisc::DrawVertLine(pDC, rCell.bottom, rCell.top, (rCell.right - 1), GetSysColor(COLOR_3DSHADOW));
-						rBack.right--;
-					}
-				}
 
 				COLORREF crBack = GetItemBackColor(nItem, nCol, (bSel && !IsEditing()), FALSE, bListFocused);
 				pDC->FillSolidRect(rBack, crBack);
+			}
+
+			if (m_bVertGrid && (bHasBtn || !(bSel && IsSelectionThemed(FALSE))))
+			{
+				// if we're not tight up against the client edge then draw the vertical 
+				if (rCell.right < rClient.right)
+				{
+					GraphicsMisc::DrawVertLine(pDC, rCell.bottom, rCell.top, (rCell.right - 1), GetSysColor(COLOR_3DSHADOW));
+					rBack.right--;
+				}
 			}
 
 			// get item text

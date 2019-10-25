@@ -27,7 +27,7 @@ CBurndownGraphColorListCtrl::~CBurndownGraphColorListCtrl()
 }
 
 
-BEGIN_MESSAGE_MAP(CBurndownGraphColorListCtrl, CListCtrl)
+BEGIN_MESSAGE_MAP(CBurndownGraphColorListCtrl, CInputListCtrl)
 	//{{AFX_MSG_MAP(CBurndownGraphColorListCtrl)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP

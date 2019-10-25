@@ -83,6 +83,11 @@ void CBurndownPreferencesPage::OnOK()
 	CPreferencesPageBase::OnOK();
 }
 
+void CBurndownPreferencesPage::OnEnableTodayColor() 
+{
+	// TODO: Add your control notification handler code here
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownPreferencesDlg dialog
 
@@ -118,10 +123,4 @@ void CBurndownPreferencesDlg::DoHelp()
 	
 	if (m_pParentWnd)
 		m_pParentWnd->SendMessage(WM_BDC_PREFSHELP);
-}
-
-void CBurndownPreferencesPage::OnEnableTodayColor() 
-{
-	// TODO: Add your control notification handler code here
-	
 }
