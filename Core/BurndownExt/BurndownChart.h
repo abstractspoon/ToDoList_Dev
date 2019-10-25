@@ -21,7 +21,6 @@ public:
 	CString GetGraphTitle(BURNDOWN_GRAPH nGraph) const;
 	BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph) const;
 	BOOL IsValidGraph(BURNDOWN_GRAPH nGraph) const;
-	int GetRequiredColorCount(BURNDOWN_GRAPH nGraph) const;
 
 	BURNDOWN_GRAPHTYPE GetActiveGraphType() const;
 	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
@@ -31,7 +30,9 @@ public:
 	BOOL RebuildGraph(const COleDateTimeRange& dtExtents);
 
 	int BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs) const;
+
 	void SetGraphColors(const CGraphColorMap& mapColors);
+	void GetDefaultGraphColors(CGraphColorMap& mapColors) const;
 
 protected:
 	const CStatsItemArray& m_data;

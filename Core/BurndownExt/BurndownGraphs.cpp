@@ -14,6 +14,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+const COLORREF	COLOR_GREEN		= RGB(122, 204,   0); 
+const COLORREF	COLOR_RED		= RGB(204,   0,   0); 
+const COLORREF	COLOR_YELLOW	= RGB(204, 164,   0); 
+const COLORREF	COLOR_BLUE		= RGB(0,     0, 244); 
+const COLORREF	COLOR_PINK		= RGB(234,  28,  74); 
+const COLORREF	COLOR_ORANGE	= RGB(255,  91,  21);
+
 const int		GRAPH_LINE_THICKNESS = 1;
 const int		TREND_LINE_THICKNESS = 2;
 
@@ -270,6 +277,11 @@ CString CIncompleteTasksGraph::GetTitle() const
 	return CEnString(IDS_DISPLAY_INCOMPLETE);
 }
 
+int CIncompleteTasksGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_GREEN);
+}
+
 void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	SetDatasetColors(datasets, aColors);
@@ -339,6 +351,11 @@ BOOL CIncompleteTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DAT
 CString CRemainingDaysGraph::GetTitle() const
 {
 	return CEnString(IDS_DISPLAY_REMAINING);
+}
+
+int CRemainingDaysGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_BLUE, COLOR_YELLOW);
 }
 
 void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const
@@ -418,6 +435,11 @@ BOOL CRemainingDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATAS
 CString CStartedEndedTasksGraph::GetTitle() const
 {
 	return CEnString(IDS_DISPLAY_STARTEDENDED);
+}
+
+int CStartedEndedTasksGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_RED, COLOR_GREEN);
 }
 
 void CStartedEndedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const
@@ -504,6 +526,11 @@ BOOL CStartedEndedTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_D
 CString CEstimatedSpentDaysGraph::GetTitle() const
 {
 	return CEnString(IDS_DISPLAY_ESTIMATEDSPENTDAYS);
+}
+
+int CEstimatedSpentDaysGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_PINK, COLOR_GREEN);
 }
 
 void CEstimatedSpentDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const
@@ -593,6 +620,11 @@ BOOL CEstimatedSpentDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_
 CString CEstimatedSpentCostGraph::GetTitle() const
 {
 	return CEnString(IDS_DISPLAY_ESTIMATEDSPENTCOST);
+}
+
+int CEstimatedSpentCostGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_YELLOW, COLOR_PINK);
 }
 
 void CEstimatedSpentCostGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const
@@ -756,6 +788,11 @@ CString CCategoryFrequencyGraph::GetTitle() const
 	return CEnString(IDS_FREQUENCY_CATEGORY);
 }
 
+int CCategoryFrequencyGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_BLUE);
+}
+
 void CCategoryFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
@@ -769,6 +806,11 @@ void CCategoryFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator,
 CString CStatusFrequencyGraph::GetTitle() const
 {
 	return CEnString(IDS_FREQUENCY_STATUS);
+}
+
+int CStatusFrequencyGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_GREEN);
 }
 
 void CStatusFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const
@@ -786,6 +828,11 @@ CString CAllocatedToFrequencyGraph::GetTitle() const
 	return CEnString(IDS_FREQUENCY_ALLOCTO);
 }
 
+int CAllocatedToFrequencyGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_PINK);
+}
+
 void CAllocatedToFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
@@ -799,6 +846,11 @@ void CAllocatedToFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculat
 CString CAllocatedByFrequencyGraph::GetTitle() const
 {
 	return CEnString(IDS_FREQUENCY_ALLOCBY);
+}
+
+int CAllocatedByFrequencyGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_RED);
 }
 
 void CAllocatedByFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const
@@ -816,6 +868,11 @@ CString CVersionFrequencyGraph::GetTitle() const
 	return CEnString(IDS_FREQUENCY_VERSION);
 }
 
+int CVersionFrequencyGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_YELLOW);
+}
+
 void CVersionFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
@@ -829,6 +886,11 @@ void CVersionFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, 
 CString CTagFrequencyGraph::GetTitle() const
 {
 	return CEnString(IDS_FREQUENCY_TAGS);
+}
+
+int CTagFrequencyGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_ORANGE);
 }
 
 void CTagFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const
@@ -846,6 +908,11 @@ CString CPriorityFrequencyGraph::GetTitle() const
 	return CEnString(IDS_FREQUENCY_PRIORITY);
 }
 
+int CPriorityFrequencyGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_BLUE);
+}
+
 void CPriorityFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
@@ -859,6 +926,11 @@ void CPriorityFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator,
 CString CRiskFrequencyGraph::GetTitle() const
 {
 	return CEnString(IDS_FREQUENCY_RISK);
+}
+
+int CRiskFrequencyGraph::GetDefaultColors(CColorArray& aColors) const
+{
+	return aColors.Set(COLOR_GREEN);
 }
 
 void CRiskFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const

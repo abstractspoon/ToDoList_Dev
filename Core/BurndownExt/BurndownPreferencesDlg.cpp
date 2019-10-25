@@ -42,7 +42,7 @@ CBurndownPreferencesPage::CBurndownPreferencesPage(const CBurndownChart& chart, 
 	m_bEnableTodayColor = FALSE;
 	//}}AFX_DATA_INIT
 
-	
+	chart.GetDefaultGraphColors(m_mapGraphColors);
 
 }
 

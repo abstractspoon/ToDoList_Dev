@@ -61,6 +61,8 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_mapGraphs[BCT_FREQUENCY_RISK]					= new CRiskFrequencyGraph();
 
 	//FileMisc::EnableLogging(TRUE);
+
+	GetDefaultGraphColors(m_mapGraphColors);
 }
 
 CBurndownChart::~CBurndownChart()
@@ -120,14 +122,6 @@ CGraphBase* CBurndownChart::GetGraph(BURNDOWN_GRAPH nGraph) const
 	return pGraph;
 }
 
-int CBurndownChart::GetRequiredColorCount(BURNDOWN_GRAPH nGraph) const
-{
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(nGraph, 0);
-
-	return pGraph->GetRequiredColorCount();
-}
-
 BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 {
 	if (!IsValidGraph(nGraph))
@@ -183,6 +177,25 @@ void CBurndownChart::SetGraphColors(const CGraphColorMap& mapColors)
 	VERIFY(mapColors.Lookup(m_nActiveGraph, aColors) && aColors.GetSize());
 
 	CGraphBase::SetDatasetColors(m_datasets, aColors);
+}
+
+void CBurndownChart::GetDefaultGraphColors(CGraphColorMap& mapColors) const
+{
+	mapColors.RemoveAll();
+	POSITION pos = m_mapGraphs.GetStartPosition();
+
+	while (pos)
+	{
+		BURNDOWN_GRAPH nGraph;
+		CGraphBase* pGraph;
+
+		m_mapGraphs.GetNextAssoc(pos, nGraph, pGraph);
+
+		CColorArray aColors;
+		VERIFY(pGraph->GetDefaultColors(aColors));
+
+		mapColors[nGraph] = aColors;
+	}
 }
 
 void CBurndownChart::ShowTrendLine(BURNDOWN_TREND nTrend)
@@ -274,8 +287,7 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
 
 		CColorArray aColors;
-		VERIFY(m_mapGraphColors.Lookup(m_nActiveGraph, aColors) && 
-				(aColors.GetSize() == pGraph->GetRequiredColorCount()));
+		VERIFY(m_mapGraphColors.Lookup(m_nActiveGraph, aColors) && aColors.GetSize());
 
 		pGraph->BuildGraph(m_calculator, aColors, m_datasets);
 		UpdateGraphTrendLine();

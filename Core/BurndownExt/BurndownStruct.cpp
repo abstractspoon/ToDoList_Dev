@@ -20,6 +20,26 @@ CColorArray& CColorArray::operator=(CColorArray& other)
 	return *this;
 }
 
+int CColorArray::Set(COLORREF color1, COLORREF color2, COLORREF color3)
+{
+	ASSERT(color1 != CLR_NONE);
+
+	RemoveAll();
+	Add(color1); // always
+
+	if (color2 != CLR_NONE)
+	{
+		Add(color2);
+
+		if (color3 != CLR_NONE)
+			Add(color3);
+	}
+
+	return GetSize();
+}
+
+// --------------------------------------------------------------------------
+
 void CGraphColorMap::Copy(const CGraphColorMap& other)
 {
 	RemoveAll();
@@ -34,6 +54,19 @@ void CGraphColorMap::Copy(const CGraphColorMap& other)
 		other.GetNextAssoc(pos, nGraph, aColors);
 		SetAt(nGraph, aColors);
 	}
+}
+
+int CGraphColorMap::GetColorCount(BURNDOWN_GRAPH nGraph) const
+{
+	const CPair* pPair = PLookup(nGraph);
+
+	if (!pPair)
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	return pPair->value.GetSize();
 }
 
 /////////////////////////////////////////////////////////////////////////////
