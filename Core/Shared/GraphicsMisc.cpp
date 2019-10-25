@@ -768,6 +768,34 @@ COLORREF GraphicsMisc::Darker(COLORREF color, double dAmount, BOOL bRGB)
 	return rgbx;
 }
 
+void GraphicsMisc::CalculateBoxColors(COLORREF crBase, BOOL bEnabled, COLORREF& crFill, COLORREF& crBorder)
+{
+	if (crBase == CLR_NONE)
+	{
+		crFill = CLR_NONE;
+		crBorder = GetSysColor(bEnabled ? COLOR_3DDKSHADOW : COLOR_3DSHADOW);
+	}
+	else
+	{
+		if (!bEnabled)
+		{
+			// Make colour lighter and grayer
+			HLSX hlx(crBase); 
+
+			hlx.fSaturation *= 0.35f;
+			hlx.fLuminosity += (1 - hlx.fLuminosity) * 0.25f;
+
+			crFill = hlx;
+		}
+		else
+		{
+			crFill = crBase;
+		}
+
+		crBorder = GraphicsMisc::Darker(crFill, 0.5);
+	}
+}
+
 COLORREF GraphicsMisc::Blend(COLORREF color1, COLORREF color2, double dAmount)
 {
 	if (color1 == CLR_NONE || color2 == CLR_NONE)

@@ -232,9 +232,9 @@ void CColorBrewerComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 
 	for (int nCol = 0; nCol < nNumColors; nCol++)
 	{
-		COLORREF crFill = palette[nCol];
-		COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.3);
-
+		COLORREF crFill, crBorder;
+		GraphicsMisc::CalculateBoxColors(palette[nCol], IsWindowEnabled(), crFill, crBorder);
+		
 		GraphicsMisc::DrawRect(&dc, rColor, crFill, crBorder);
 		rColor.OffsetRect(rColor.Width() + 2, 0);
 	}

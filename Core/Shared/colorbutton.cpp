@@ -6,6 +6,8 @@
 #include "encolordialog.h"
 #include "graphicsmisc.h"
 
+#include "..\3rdParty\ColorDef.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -50,18 +52,9 @@ void CColorButton::DDX(CDataExchange* pDX, COLORREF& value)
 void CColorButton::DoExtraPaint(CDC* pDC, const CRect& rExtra)
 {
 	int nCornerRadius = m_bRoundRect ? (rExtra.Width() / 4) : 0;
-	COLORREF crFill = CLR_NONE, crBorder = GetSysColor(COLOR_3DDKSHADOW);
 
-	if (!IsWindowEnabled())
-	{
-		crFill = GetSysColor(COLOR_3DFACE);
-		crBorder = GetSysColor(COLOR_3DSHADOW);
-	}
-	else if (m_color != CLR_NONE)
-	{
-		crFill = m_color;
-		crBorder = GraphicsMisc::Darker(crFill, 0.5);
-	}
+	COLORREF crFill, crBorder;
+	GraphicsMisc::CalculateBoxColors(m_color, IsWindowEnabled(), crFill, crBorder);
 
 	GraphicsMisc::DrawRect(pDC, rExtra, crFill, crBorder, nCornerRadius);
 }

@@ -200,6 +200,7 @@ namespace GraphicsMisc
 	CString GetWebColor(COLORREF color);
 	COLORREF ParseWebColor(const CString& sHexColor);
 	double CalculateColorCloseness(COLORREF crFrom, COLORREF crTo);
+	void CalculateBoxColors(COLORREF crBase, BOOL bEnabled, COLORREF& crFill, COLORREF& crBorder);
 
 	void DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORREF crBorder = CLR_NONE, 
 					int nCornerRadius = 0, DWORD dwEdges = GMDR_ALL);

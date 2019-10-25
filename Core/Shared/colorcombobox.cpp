@@ -58,25 +58,10 @@ void CColorComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nI
 
 	if (bHasColor || Misc::HasFlag(m_dwFlags, CCBS_DRAWNOCOLOR))
 	{
-		COLORREF crFill = CLR_NONE, crBorder = GetSysColor(COLOR_3DDKSHADOW);
-		
-		if (!IsWindowEnabled() || (nItemState & ODS_GRAYED))
-		{
-			if (bHasColor)
-				crFill = GetSysColor(COLOR_3DFACE);
+		COLORREF crFill, crBorder;
+		GraphicsMisc::CalculateBoxColors(dwItemData, IsWindowEnabled(), crFill, crBorder);
 
-			crBorder = GetSysColor(COLOR_3DSHADOW);
-		}
-		else if (dwItemData != CLR_NONE)
-		{
-			crFill = (COLORREF)dwItemData;
-			crBorder = GraphicsMisc::Darker(crFill, 0.5);
-		}
-		
-		int nCornerRadius = 0;
-		
-		if (m_dwFlags & CCBS_ROUNDRECT)
-			nCornerRadius = (rColor.Width() / 4);
+		int nCornerRadius = ((m_dwFlags & CCBS_ROUNDRECT) ? (rColor.Width() / 4) : 0);
 		
 		GraphicsMisc::DrawRect(&dc, rColor, crFill, crBorder, nCornerRadius);
 	}
