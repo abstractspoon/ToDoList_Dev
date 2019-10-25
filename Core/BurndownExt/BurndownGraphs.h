@@ -24,8 +24,6 @@ public:
 	virtual void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const = 0;
 	virtual int GetRequiredColorCount() const = 0;
 
-	int HitTest(const CStatsItemCalculator& calculator, const COleDateTime& date) const;
-
 protected:
 	CGraphBase();
 

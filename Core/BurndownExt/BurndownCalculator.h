@@ -53,6 +53,8 @@ public:
 	BOOL GetDaysEstimatedSpent(const COleDateTime& date, double &dEstDays, double &dSpentDays) const;
 	BOOL GetCostEstimatedSpent(const COleDateTime& date, double &dEstCost, double &dSpentCost) const;
 
+	int HitTest(const COleDateTime& date) const;
+
 	// Frequency Distributions ---------------------------------------
 
 	int GetCategoryFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;

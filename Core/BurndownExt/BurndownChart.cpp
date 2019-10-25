@@ -334,14 +334,14 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 {
 	CHMXChartEx::DoPaint(dc, bPaintBkgnd);
 
-	if (m_crToday != CLR_NONE)
+	if ((m_crToday != CLR_NONE) && (GetActiveGraphType() == BCT_TIMESERIES))
 	{
 		CGraphBase* pGraph = NULL;
 		GET_GRAPH(m_nActiveGraph);
 
 		// Find the data point corresponding to today
 		COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
-		int nPos = pGraph->HitTest(m_calculator, dtToday);
+		int nPos = m_calculator.HitTest(dtToday);
 
 		if (nPos != -1)
 		{

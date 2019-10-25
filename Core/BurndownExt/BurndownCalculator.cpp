@@ -450,6 +450,15 @@ TH_UNITS CStatsItemCalculator::MapUnitsToTHUnits(TDC_UNITS nUnits)
 	return THU_NULL;
 }
 
+int CStatsItemCalculator::HitTest(const COleDateTime& date) const
+{
+	if ((date.m_dt < GetStartDate()) || (date.m_dt >= GetEndDate()))
+		return -1;
+
+	// else
+	return (int)(date.m_dt - GetStartDate());
+}
+
 int CStatsItemCalculator::GetAttribFrequencies(FREQUENCY_ATTRIB nAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const
 {
 	mapFrequencies.RemoveAll();

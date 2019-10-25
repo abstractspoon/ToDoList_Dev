@@ -34,15 +34,6 @@ CGraphBase::~CGraphBase()
 {
 }
 
-int CGraphBase::HitTest(const CStatsItemCalculator& calculator, const COleDateTime& date) const
-{
-	if ((date.m_dt < calculator.GetStartDate()) || (date.m_dt >= calculator.GetEndDate()))
-		return -1;
-
-	// else
-	return (int)(date.m_dt - calculator.GetStartDate());
-}
-
 void CGraphBase::SetDatasetColor(CHMXDataset& dataset, COLORREF crBase)
 {
 	dataset.SetLineColor(GraphicsMisc::Darker(crBase, 0.05, FALSE));
