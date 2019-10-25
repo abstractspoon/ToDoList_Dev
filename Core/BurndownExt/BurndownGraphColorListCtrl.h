@@ -22,16 +22,16 @@ class CBurndownGraphColorListCtrl : public CInputListCtrl
 {
 // Construction
 public:
-	CBurndownGraphColorListCtrl(const CBurndownChart& chart);
+	CBurndownGraphColorListCtrl();
 	virtual ~CBurndownGraphColorListCtrl();
 
-	BOOL Initialize();
+	BOOL Initialize(const CBurndownChart& chart);
+
 	const CGraphColorMap& GetGraphColors() const { return m_mapColors; }
+	void SetGraphColors(const CGraphColorMap& mapColors);
 
 protected:
 	CGraphColorMap m_mapColors;
-
-	const CBurndownChart& m_chart;
 
 protected:
 	// ClassWizard generated virtual function overrides

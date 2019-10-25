@@ -222,6 +222,8 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	{
 		pPrefs->DeleteProfileSection(_T("ActiveRange"));
 	}
+
+	m_dlgPrefs.SavePreferences(pPrefs, szKey);
 }
 
 void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly) 

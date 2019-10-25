@@ -32,7 +32,7 @@ public:
 	int BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs) const;
 
 	void SetGraphColors(const CGraphColorMap& mapColors);
-	void GetGraphColors(CGraphColorMap& mapColors) const { mapColors.Copy(m_mapGraphColors); }
+	void GetDefaultGraphColors(CGraphColorMap& mapColors) const;
 
 protected:
 	const CStatsItemArray& m_data;
@@ -61,7 +61,6 @@ protected:
 	CString GetTooltip(int nHit) const;
 	int HitTest(const CPoint& ptClient) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd);
-	void GetDefaultGraphColors(CGraphColorMap& mapColors) const;
 
 };
 

@@ -36,7 +36,7 @@ const COLORREF COLOR_ORANGE		= RGB(255, 91, 21);
 CBurndownPreferencesPage::CBurndownPreferencesPage(const CBurndownChart& chart, CWnd* /*pParent*/ /*=NULL*/)
 	: 
 	CPreferencesPageBase(IDD_PREFERENCES_PAGE),
-	m_lcGraphColors(chart)
+	m_chart(chart)
 {
 	//{{AFX_DATA_INIT(CBurndownPreferencesPage)
 	m_bEnableTodayColor = FALSE;
@@ -70,7 +70,7 @@ BOOL CBurndownPreferencesPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
-	VERIFY(m_lcGraphColors.Initialize());
+	VERIFY(m_lcGraphColors.Initialize(m_chart));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -81,7 +81,18 @@ void CBurndownPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("TodayColor"), (int)m_crToday);
 
 	// Graph colours
-	// TODO
+	const CGraphColorMap& mapColors = m_lcGraphColors.GetGraphColors();
+
+	BURNDOWN_GRAPH nGraph;
+	CColorArray aColors;
+
+	POSITION pos = mapColors.GetStartPosition();
+
+	while (pos)
+	{
+		mapColors.GetNextAssoc(pos, nGraph, aColors);
+		pPrefs->WriteProfileString(szKey, Misc::MakeKey(_T("Graph%d"), nGraph), Misc::FormatArray(aColors, '|'));
+	}
 }
 
 void CBurndownPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
@@ -89,7 +100,28 @@ void CBurndownPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_crToday = (COLORREF)pPrefs->GetProfileInt(szKey, _T("TodayColor"), DEF_TODAY_COLOR);
 
 	// Graph colours
-	// TODO
+	CGraphColorMap mapColors;
+	m_chart.GetDefaultGraphColors(mapColors);
+
+	BURNDOWN_GRAPH nGraph;
+	CColorArray aColors;
+
+	POSITION pos = mapColors.GetStartPosition();
+
+	while (pos)
+	{
+		mapColors.GetNextAssoc(pos, nGraph, aColors);
+
+		CString sColors = pPrefs->GetProfileString(szKey, Misc::MakeKey(_T("Graph%d"), nGraph));
+
+		if (sColors.IsEmpty())
+			break;
+
+		Misc::Split(sColors, aColors, '|');
+		mapColors[nGraph] = aColors;
+	}
+
+	m_lcGraphColors.SetGraphColors(mapColors);
 }
 
 void CBurndownPreferencesPage::OnOK()

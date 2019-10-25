@@ -49,6 +49,8 @@ protected:
 	BOOL m_bEnableTodayColor;
 	COLORREF m_crToday;
 
+	const CBurndownChart& m_chart;
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CBurndownPreferencesPage)
@@ -79,6 +81,9 @@ public:
 
 	COLORREF GetTodayColor() { return m_page.GetTodayColor(); }
 	const CGraphColorMap& GetGraphColors() const { return m_page.GetGraphColors(); }
+
+	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
+	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
 
 protected:
 // Dialog Data
