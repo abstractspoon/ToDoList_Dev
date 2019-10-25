@@ -22,7 +22,6 @@ public:
 	BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph) const;
 	BOOL IsValidGraph(BURNDOWN_GRAPH nGraph) const;
 	int GetRequiredColorCount(BURNDOWN_GRAPH nGraph) const;
-	int GetMaxRequiredColorCount() const;
 
 	BURNDOWN_GRAPHTYPE GetActiveGraphType() const;
 	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);

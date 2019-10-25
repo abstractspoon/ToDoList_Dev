@@ -41,7 +41,6 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 	ASSERT(GetStyle() & LVS_OWNERDRAWFIXED);
 	ASSERT((GetStyle() & (LVS_SORTASCENDING | LVS_SORTDESCENDING)) == 0);
 
-	// Build columns
 	AutoAdd(FALSE, FALSE);
 	ShowGrid(TRUE, TRUE);
 	SetFirstColumnStretchy(TRUE);
@@ -49,12 +48,7 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 	AddCol("Graph");
 	DisableColumnEditing(0, TRUE);
 
-	int nColor = chart.GetMaxRequiredColorCount();
-
-	while (nColor--)
-		AddCol(_T("Colour"), GraphicsMisc::ScaleByDPIFactor(60), ILCT_BROWSE);
-
-	// Populate items
+	// Populate items, 
 	for (int nType = 0; nType < NUM_GRAPHTYPES; nType++)
 	{
 		const GRAPHTYPE& gt = GRAPHTYPES[nType];
@@ -73,6 +67,15 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 
 			nRow = AddRow(chart.GetGraphTitle(nGraph));
 			SetItemData(nRow, nGraph);
+
+			// build colour columns as we go
+			int nNumColors = chart.GetRequiredColorCount(nGraph);
+
+			while (GetColumnCount() <= nNumColors)
+				AddCol(_T("Colour"), GraphicsMisc::ScaleByDPIFactor(60), ILCT_BROWSE);
+
+			// And populate
+			// TODO
 		}
 	}
 

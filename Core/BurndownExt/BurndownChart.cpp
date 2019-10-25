@@ -137,23 +137,6 @@ int CBurndownChart::GetRequiredColorCount(BURNDOWN_GRAPH nGraph) const
 	return pGraph->GetRequiredColorCount();
 }
 
-int CBurndownChart::GetMaxRequiredColorCount() const
-{
-	int nMaxColors = 0;
-	POSITION pos = m_mapGraphs.GetStartPosition();
-
-	while (pos)
-	{
-		BURNDOWN_GRAPH nGraph;
-		CGraphBase* pGraph;
-
-		m_mapGraphs.GetNextAssoc(pos, nGraph, pGraph);
-		nMaxColors = max(nMaxColors, pGraph->GetRequiredColorCount());
-	}
-
-	return nMaxColors;
-}
-
 BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 {
 	if (!IsValidGraph(nGraph))
