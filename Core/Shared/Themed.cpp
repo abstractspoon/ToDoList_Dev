@@ -224,7 +224,7 @@ BOOL CThemed::EnableDialogTexture(const CWnd* pWnd, DWORD dwFlags)
 	return FALSE;
 }
 
-BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nType, UINT nState, LPCRECT pClip, BOOL bDrawParentBkgnd)
+BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UINT nType, UINT nState, LPCRECT pClip)
 {
 	CThemed th;
 	
@@ -253,10 +253,6 @@ BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UI
 
 			rImage.right = (rImage.left + size.cx);
 			rImage.bottom = (rImage.top + size.cy);
-		}
-		else if (bDrawParentBkgnd)
-		{
-			th.DrawParentBackground(pWnd, pDC, (pClip ? pClip : rect));
 		}
 		
 		th.DrawBackground(pDC, nThPart, nThState, rImage, pClip);

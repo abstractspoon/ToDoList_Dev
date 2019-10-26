@@ -107,13 +107,6 @@ CTDLColumnAttribVisibilityListCtrl::~CTDLColumnAttribVisibilityListCtrl()
 {
 }
 
-
-BEGIN_MESSAGE_MAP(CTDLColumnAttribVisibilityListCtrl, CInputListCtrl)
-	//{{AFX_MSG_MAP(CTDLColumnAttribVisibilityListCtrl)
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLColumnAttribVisibilityListCtrl message handlers
 
@@ -133,26 +126,23 @@ void CTDLColumnAttribVisibilityListCtrl::GetVisibility(TDCCOLEDITFILTERVISIBILIT
 void CTDLColumnAttribVisibilityListCtrl::BuildListCtrl()
 {
 	// build once only
-	if (GetColumnCount() == 0)
+	ASSERT(GetColumnCount() == 0);
+
+	AddCol(CEnString(IDS_COLATTRIBNAME), GraphicsMisc::ScaleByDPIFactor(150));
+
+	AddCol(CEnString(IDS_COLUMNVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100), ILCT_CHECK);
+	AddCol(CEnString(IDS_ATTRIBVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100), ILCT_CHECK);
+	AddCol(CEnString(IDS_FILTERVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100), ILCT_CHECK);
+
+	for (int nItem = 0; nItem < NUM_ITEMS; nItem++)
 	{
-		AddCol(CEnString(IDS_COLATTRIBNAME), GraphicsMisc::ScaleByDPIFactor(150));
+		const TDCCOLATTRIBITEM& caItem = ITEMS[nItem];
 
-		AddCol(CEnString(IDS_COLUMNVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100), ILCT_CHECK);
-		AddCol(CEnString(IDS_ATTRIBVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100), ILCT_CHECK);
-		AddCol(CEnString(IDS_FILTERVISIBILITY), GraphicsMisc::ScaleByDPIFactor(100), ILCT_CHECK);
-
-		for (int nItem = 0; nItem < NUM_ITEMS; nItem++)
-		{
-			const TDCCOLATTRIBITEM& caItem = ITEMS[nItem];
-
-			int nIndex = InsertItem(nItem, CEnString(caItem.nIDName));
-			SetItemData(nIndex, caItem.nCol);
-		}
-
-		ASSERT(GetItemCount() == NUM_ITEMS);
-
-		SetMinItemHeight(16 + 2); // checkbox + padding
+		int nIndex = InsertItem(nItem, CEnString(caItem.nIDName));
+		SetItemData(nIndex, caItem.nCol);
 	}
+
+	ASSERT(GetItemCount() == NUM_ITEMS);
 
 	UpdateVisibility();
 }
@@ -161,24 +151,8 @@ void CTDLColumnAttribVisibilityListCtrl::InitState()
 {
 	CInputListCtrl::InitState();
 	
+	BuildListCtrl();
 	ShowGrid(TRUE, TRUE);
-}
-
-void CTDLColumnAttribVisibilityListCtrl::PreSubclassWindow() 
-{
-	CInputListCtrl::PreSubclassWindow();
-	
-	BuildListCtrl();
-}
-
-int CTDLColumnAttribVisibilityListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CInputListCtrl::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	BuildListCtrl();
-	
-	return 0;
 }
 
 void CTDLColumnAttribVisibilityListCtrl::UpdateVisibility()

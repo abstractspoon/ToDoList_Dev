@@ -64,10 +64,6 @@ int CTDLImportExportAttributeMappingListCtrl::GetColumnMapping(CTDCAttributeMapp
 
 void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow() 
 {
-	// create child controls 
-	// we need combo to be created first
-	CreateControl(m_cbAttributes, ATTRIB_ID);
-
 	CInputListCtrl::PreSubclassWindow();
 
 	// build column combo because that is static
@@ -141,6 +137,10 @@ void CTDLImportExportAttributeMappingListCtrl::InitState()
 {
 	CInputListCtrl::InitState();
 	
+	// create child controls 
+	// we need combo to be created first
+	CreateControl(m_cbAttributes, ATTRIB_ID);
+
 	AutoAdd(FALSE, FALSE);
 	ShowGrid(TRUE, TRUE);
 }
@@ -166,10 +166,6 @@ void CTDLImportExportAttributeMappingListCtrl::BuildListCtrl()
 		}
 	}
 
-	CRect rCombo;
-	m_cbAttributes.GetWindowRect(rCombo);
-	
-	SetMinItemHeight(rCombo.Height());
 	ResizeStretchyColumns();
 
 	if (GetItemCount())

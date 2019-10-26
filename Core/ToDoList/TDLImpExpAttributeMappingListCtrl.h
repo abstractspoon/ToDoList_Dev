@@ -19,6 +19,7 @@ class CTDLImportExportAttributeMappingListCtrl : public CInputListCtrl
 // Construction
 public:
 	CTDLImportExportAttributeMappingListCtrl(BOOL bImporting, BOOL bOneToOneMapping = TRUE);
+	virtual ~CTDLImportExportAttributeMappingListCtrl();
 
 	void SetColumnMapping(const CTDCAttributeMapping& aMapping);
 	int GetColumnMapping(CTDCAttributeMapping& aMapping) const;
@@ -29,19 +30,14 @@ protected:
 	CTDCAttributeMapping m_aMapping;
 	BOOL m_bImporting, m_bOneToOneMapping;
 
-// Overrides
+protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLCsvAttributeSetupListCtrl)
-	protected:
 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
 
-// Implementation
-public:
-	virtual ~CTDLImportExportAttributeMappingListCtrl();
-
-	// Generated message map functions
 protected:
+	// Generated message map functions
 	//{{AFX_MSG(CTDLCsvAttributeSetupListCtrl)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG

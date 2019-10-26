@@ -20,6 +20,7 @@ class CKanbanFixedColumnListCtrl : public CInputListCtrl
 // Construction
 public:
 	CKanbanFixedColumnListCtrl();
+	virtual ~CKanbanFixedColumnListCtrl();
 
 	BOOL SetColumnDefinitions(const CKanbanColumnArray& aColumnDefs);
 	int GetColumnDefinitions(CKanbanColumnArray& aColumnDefs) const;
@@ -31,18 +32,8 @@ public:
 protected:
 	CCheckComboBox m_cbValues;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CKanbanFixedColumnListCtrl)
-	//}}AFX_VIRTUAL
-	void PreSubclassWindow();
-
-// Implementation
-public:
-	virtual ~CKanbanFixedColumnListCtrl();
-
-	// Generated message map functions
 protected:
+	// Generated message map functions
 	//{{AFX_MSG(CKanbanFixedColumnListCtrl)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG

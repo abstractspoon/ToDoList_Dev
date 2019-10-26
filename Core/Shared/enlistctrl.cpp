@@ -1111,26 +1111,6 @@ int CEnListCtrl::FindItemFromData(DWORD dwItemData) const
 	lvfi.lParam = (LPARAM)dwItemData;
 
 	return FindItem(&lvfi, -1);
-
-	/*
-	int nNumItems = GetItemCount();
-	TRACE("\n");
-
-	while (nNumItems--)
-	{
-		DWORD dwID = GetItemData(nNumItems);
-		TRACE ("CEnListCtrl::FindItemFromData(%d)::GetItemData(%d) == %d\n", dwItemData, nNumItems, dwID);
-
-		if (dwID == dwItemData)
-		{
-			TRACE ("Found. Item index = %d\n", nNumItems);
-			return nNumItems;
-		}
-	}
-
-	TRACE ("Found. Item not found");
-	return -1;
-	*/
 }
 
 int CEnListCtrl::FindItemFromLabel(CString sLabel, BOOL bExact, int nFromIndex) const
@@ -1175,15 +1155,10 @@ int CEnListCtrl::CalcItemHeight() const
 {
 	ASSERT(GetSafeHwnd());
 
-	int nBaseHeight = CDlgUnits(this, TRUE).ToPixelsY(9);
+	int nBaseHeight = CDlgUnits(this, TRUE).ToPixelsY(9); // default edit height
 	int nFontHeight = GraphicsMisc::GetFontPixelSize(GetSafeHwnd());
 
-	int nMinHeight = max(nBaseHeight, nFontHeight);
-
-	if (m_nMinItemHeight != -1)
-		nMinHeight = max(m_nMinItemHeight, nMinHeight);
-
-	return nMinHeight;
+	return max(nBaseHeight, max(m_nMinItemHeight, nFontHeight));
 }
 
 void CEnListCtrl::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
@@ -1191,30 +1166,44 @@ void CEnListCtrl::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
     lpMeasureItemStruct->itemHeight = CalcItemHeight(); 
 }
 
-void CEnListCtrl::ForceResize()
+void CEnListCtrl::RefreshItemHeight()
 {
 	if (GetSafeHwnd())
 	{
-// 		CRect rWindow;
-// 		GetWindowRect(rWindow);
-// 		SetWindowPos(NULL, 0, 0, rWindow.Width()-1, rWindow.Height(), SWP_NOMOVE | SWP_NOZORDER);
-		SetWindowPos(NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER); 
+		// I've tried everything I can think of but
+		// this is the only thing that seems to be able
+		// to trigger a WM_MEASUREITEM message
+		CRect rWindow;
+		GetWindowRect(rWindow);
+
+		GetParent()->ScreenToClient(rWindow);
+
+		rWindow.right--;
+		MoveWindow(rWindow);
+
+		rWindow.right++;
+		MoveWindow(rWindow);
 	}
 }
 
 BOOL CEnListCtrl::SetMinItemHeight(int nHeight)
 {
-	ASSERT (nHeight >= 10 && nHeight <= 40); // arbitrary limits
-
-	if (nHeight >= 10 && nHeight <= 40)
+	if (nHeight < 10 || nHeight > 40) // arbitrary limits
 	{
-		m_nMinItemHeight = nHeight;
-		ForceResize();
-
-		return TRUE;
+		ASSERT(0);
+		return FALSE;
 	}
-	// else
-	return FALSE; // invalid size 
+
+	SetMinItemHeight(nHeight, TRUE);
+	return TRUE;
+}
+
+void CEnListCtrl::SetMinItemHeight(int nHeight, BOOL bRefresh)
+{
+	m_nMinItemHeight = max(m_nMinItemHeight, nHeight);
+
+	//if (bRefresh)
+		RefreshItemHeight();
 }
 
 void CEnListCtrl::DeleteAllColumns()

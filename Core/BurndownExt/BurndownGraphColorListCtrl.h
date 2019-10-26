@@ -34,9 +34,6 @@ protected:
 	CGraphColorMap m_mapColors;
 
 protected:
-	DECLARE_MESSAGE_MAP()
-
-protected:
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL CanEditCell(int nRow, int nCol) const;

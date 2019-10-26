@@ -31,6 +31,7 @@ class CTDLFindTaskExpressionListCtrl : public CInputListCtrl
 // Construction
 public:
 	CTDLFindTaskExpressionListCtrl();
+	virtual ~CTDLFindTaskExpressionListCtrl();
 
 	void SetSearchParams(const SEARCHPARAM& param);
 	void SetSearchParams(const CSearchParamArray& params);
@@ -71,23 +72,16 @@ protected:
 	TDCAUTOLISTDATA					m_tldListContents;
 	CTDCImageList					m_ilIcons;
 
-// Operations
-public:
-
 // Overrides
+protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLFindTaskExpressionListCtrl)
-	protected:
 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
-// Implementation
-public:
-	virtual ~CTDLFindTaskExpressionListCtrl();
-
-	// Generated message map functions
 protected:
+	// Generated message map functions
 	//{{AFX_MSG(CTDLFindTaskExpressionListCtrl)
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);

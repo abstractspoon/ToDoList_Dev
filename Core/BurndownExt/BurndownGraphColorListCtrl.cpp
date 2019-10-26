@@ -26,13 +26,6 @@ CBurndownGraphColorListCtrl::~CBurndownGraphColorListCtrl()
 {
 }
 
-
-BEGIN_MESSAGE_MAP(CBurndownGraphColorListCtrl, CInputListCtrl)
-	//{{AFX_MSG_MAP(CBurndownGraphColorListCtrl)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownGraphColorListCtrl message handlers
 
@@ -84,6 +77,7 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 	}
 
 	ResizeStretchyColumns();
+	RefreshItemHeight();
 
 	if (nSelRow != -1)
 	{

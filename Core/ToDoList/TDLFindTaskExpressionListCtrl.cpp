@@ -1198,11 +1198,6 @@ void CTDLFindTaskExpressionListCtrl::BuildListCtrl()
 		}
 	}
 
-	CRect rCombo;
-	m_cbAttributes.GetWindowRect(rCombo);
-	
-	SetMinItemHeight(rCombo.Height());
-
 	ValidateListData();
 	SetCurSel(0);
 }

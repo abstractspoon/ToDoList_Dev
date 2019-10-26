@@ -192,9 +192,10 @@ protected:
 	CColumnData* CreateColumnData(int nCol);
 	const CColumnData* GetColumnData(int nCol) const;
 	CString GetSortText(DWORD dwItemData) const;
-	void ForceResize();
+	void RefreshItemHeight();
 	void ResizeStretchyColumns();
 	CString GetSortString(DWORD dwItemData) const;
+	void SetMinItemHeight(int nHeight, BOOL bRefresh);
 
 	void BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const;
 

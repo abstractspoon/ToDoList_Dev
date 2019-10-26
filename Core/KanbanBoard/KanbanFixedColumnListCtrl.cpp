@@ -124,14 +124,21 @@ int CKanbanFixedColumnListCtrl::GetColumnDefinitions(CKanbanColumnArray& aColumn
 	return nNumDefs;
 }
 
-void CKanbanFixedColumnListCtrl::PreSubclassWindow()
+void CKanbanFixedColumnListCtrl::SetAttributeValues(const CStringArray& aValues)
 {
+	ASSERT(GetSafeHwnd());
+
+	CDialogHelper::SetComboBoxItems(m_cbValues, aValues);
+}
+
+void CKanbanFixedColumnListCtrl::InitState()
+{
+	CInputListCtrl::InitState();
+
 	// create child controls 
 	// we need combo to be created first
 	CreateControl(m_cbValues, IDC_VALUES);
 	CLocalizer::EnableTranslation(m_cbValues, FALSE);
-
-	CInputListCtrl::PreSubclassWindow();
 
 	CRect rClient;
 	GetClientRect(rClient);
@@ -147,23 +154,6 @@ void CKanbanFixedColumnListCtrl::PreSubclassWindow()
 	AutoAdd(TRUE, FALSE);
 	ShowGrid(TRUE, TRUE);
 	EnableHeaderTracking(FALSE);
-	
-	CRect rCombo;
-	m_cbValues.GetWindowRect(rCombo);
-	
-	SetMinItemHeight(rCombo.Height());
-}
-
-void CKanbanFixedColumnListCtrl::SetAttributeValues(const CStringArray& aValues)
-{
-	ASSERT(GetSafeHwnd());
-
-	CDialogHelper::SetComboBoxItems(m_cbValues, aValues);
-}
-
-void CKanbanFixedColumnListCtrl::InitState()
-{
-	CInputListCtrl::InitState();
 }
 
 void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)

@@ -9,6 +9,7 @@
 #include "graphicsmisc.h"
 #include "misc.h"
 #include "enimagelist.h"
+#include "dlgunits.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -40,7 +41,7 @@ static DWORD PROMPT = 0xfefefefe;
 
 CInputListCtrl::CInputListCtrl()
 {
-	InitState();
+	CInputListCtrl::InitState();
 }
 
 CInputListCtrl::~CInputListCtrl()
@@ -756,6 +757,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 	switch (nType)
 	{
 		case ILCT_DROPLIST:
+		case ILCT_DATE:
 			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwState));
 			break;
 					
@@ -771,30 +773,27 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			}
 			break;
 
-		case ILCT_DATE:
-			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwState));
-			break;
-					
 		case ILCT_BROWSE:
-			CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState), NULL, FALSE);
+			{
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
 
-			if (!bEnabled)
-				pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
+				if (!bEnabled)
+					pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
 
-			pDC->DrawText("...", rButton, DT_CENTER | DT_VCENTER);
+				// Make rect sides even for better centering of ellipsis
+				rButton.left += (rButton.Width() % 2);
+				rButton.top += (rButton.Height() % 2);
+
+				pDC->DrawText("...", rButton, DT_CENTER | DT_VCENTER);
+			}
 			break;
 			
 		case ILCT_CHECK:
 			{
-				CWnd* pWnd = this;
-				
-				if (COSVersion() >= OSV_VISTA)
-					pWnd = GetHeaderCtrl();
-
 				if (bHasText)
 					dwState |= DFCS_CHECKED;
 
-				CThemed::DrawFrameControl(pWnd, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONCHECK | dwState));
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONCHECK | dwState));
 			}
 			break;
 
@@ -820,7 +819,14 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	switch (nType)
 	{
 		case ILCT_BROWSE:
-			rButton.left = (rButton.right - BTN_WIDTH - 1);
+			rButton.left = (rButton.right - BTN_WIDTH);
+
+			// Windows 10 (maybe Windows 8/8.1) shrinks buttons
+			// by a pixel all round which looks inconsistent
+			// with all other controls so we experiment with
+			// enlarging the button appropriately
+			if (COSVersion() >= OSV_WIN8)
+				rButton.InflateRect(1, 1);
 			break;
 
 		case ILCT_DROPLIST:
@@ -1158,12 +1164,26 @@ int CInputListCtrl::AddCol(const CString& sColText, int nWidth, IL_COLUMNTYPE nC
 	SetItemText(0, nCol, sColText);
 	SetColumnType(nCol, nColType);
 
+	switch (nColType)
+	{
+	case ILCT_TEXT:
+		SetMinItemHeight(CDlgUnits(this, TRUE).ToPixelsY(10), FALSE); // default edit height
+		break;
+
+	case ILCT_CHECK:
+		SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(18), FALSE);
+		break;
+
+	default:
+		SetMinItemHeight(GetSystemMetrics(SM_CYVTHUMB), FALSE);
+		break;
+	}
+
 	if (m_nCurCol == -1)
 		m_nCurCol = nCol;
 
 	return nCol;
 }
-
 
 void CInputListCtrl::OnSetFocus(CWnd* pOldWnd) 
 {
@@ -1305,13 +1325,11 @@ void CInputListCtrl::PreSubclassWindow()
 {
 	CEnListCtrl::PreSubclassWindow();
 	
-	InitState();
-
 	// make sure we clip out the edit field
 	ModifyStyle(0, WS_CLIPCHILDREN);
 
-	// set the minimum height to be the font height + padding
-	SetMinItemHeight(GraphicsMisc::GetFontPixelSize(*GetEditControl()) + 8);
+	InitState();
+	RefreshItemHeight();
 }
 
 int CInputListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -1320,6 +1338,7 @@ int CInputListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	
 	InitState();
+	RefreshItemHeight();
 	
 	return 0;
 }
@@ -1399,6 +1418,11 @@ void CInputListCtrl::CreateControl(CWnd& ctrl, UINT nID, BOOL bSort)
 
 	ctrl.SetFont(GetFont()); // set font to parents
 	ctrl.ShowWindow(SW_HIDE);
+
+	CRect rWnd;
+	ctrl.GetClientRect(rWnd);
+
+	SetMinItemHeight(rWnd.Height(), FALSE);
 }
 
 CPopupEditCtrl* CInputListCtrl::GetEditControl()

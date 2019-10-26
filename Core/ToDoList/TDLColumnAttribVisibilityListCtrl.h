@@ -19,6 +19,7 @@ class CTDLColumnAttribVisibilityListCtrl : public CInputListCtrl
 // Construction
 public:
 	CTDLColumnAttribVisibilityListCtrl();
+	virtual ~CTDLColumnAttribVisibilityListCtrl();
 
 	void SetVisibility(const TDCCOLEDITFILTERVISIBILITY& vis);
 	void GetVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const;
@@ -29,25 +30,6 @@ public:
 // Attributes
 protected:
 	TDCCOLEDITFILTERVISIBILITY m_vis;
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLColumnAttribVisibilityListCtrl)
-	protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLColumnAttribVisibilityListCtrl();
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLColumnAttribVisibilityListCtrl)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
-	DECLARE_MESSAGE_MAP()
 
 protected:
 	void BuildListCtrl();
