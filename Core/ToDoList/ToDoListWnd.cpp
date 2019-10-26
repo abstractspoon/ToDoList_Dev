@@ -2380,7 +2380,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	const CPreferencesDlg& userPrefs = Prefs();
 	
 	// late initialization
-	//CMouseWheelMgr::Initialize();
+	CMouseWheelMgr::Initialize();
 	CEditShortcutMgr::Initialize();
 	CFocusWatcher::Initialize(this);
 	CComboListboxPositioner::Initialize();
