@@ -211,7 +211,7 @@ bool CWorkloadChart::DrawGrid( CDC& dc)
 			CRect rOverload(m_rectData);
 			rOverload.bottom -= (int)(rOverload.Height() * (m_dOverloadValue / m_nYMax));
 
-			if (rOverload.bottom >= m_rectData.bottom)
+			if (rOverload.bottom <= m_rectData.bottom)
 			{
 				CGdiPlusBrush brush(m_crOverload, 50);
 				CGdiPlus::FillRect(graphics, brush, rOverload);
@@ -223,7 +223,7 @@ bool CWorkloadChart::DrawGrid( CDC& dc)
 			CRect rUnderload(m_rectData);
 			rUnderload.top = (rUnderload.bottom - (int)(rUnderload.Height() * (m_dUnderloadValue / m_nYMax)));
 
-			if (rUnderload.top <= m_rectData.top)
+			if (rUnderload.top >= m_rectData.top)
 			{
 				CGdiPlusBrush brush(m_crUnderload, 50);
 				CGdiPlus::FillRect(graphics, brush, rUnderload);
