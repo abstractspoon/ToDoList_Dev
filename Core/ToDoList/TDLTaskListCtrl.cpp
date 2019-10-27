@@ -149,7 +149,10 @@ void CTDLTaskListCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 
 	// Our extra handling
 	if (styles.HasStyle(TDCS_SHOWINFOTIPS))
-		SetTasksWndStyle(LVS_EX_LABELTIP, !styles.IsStyleEnabled(TDCS_SHOWINFOTIPS), TRUE);
+	{
+		DWORD dwLabelTips = (styles.IsStyleEnabled(TDCS_SHOWINFOTIPS) ? 0 : LVS_EX_LABELTIP);
+		ListView_SetExtendedListViewStyleEx(Tasks(), LVS_EX_LABELTIP, dwLabelTips);
+	}
 }
 
 BOOL CTDLTaskListCtrl::BuildColumns()
