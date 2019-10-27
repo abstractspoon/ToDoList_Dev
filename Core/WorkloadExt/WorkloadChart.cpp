@@ -7,8 +7,8 @@
 #include "WorkloadStruct.h"
 
 #include "..\Shared\EnString.h"
+#include "..\Shared\GraphicsMisc.h"
 
-#include "..\3rdParty\ColorDef.h"
 #include "..\3rdParty\GdiPlus.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -181,7 +181,7 @@ COLORREF CWorkloadChart::GetFillColor(int /*nDatasetIndex*/, double dValue) cons
 	COLORREF crFill = GetValueColor(dValue);
 
 	if (crFill != CLR_NONE)
-		crFill = RGBX::AdjustLighting(crFill, 0.25, FALSE);
+		crFill = GraphicsMisc::Lighter(crFill, 0.25, FALSE);
 
 	return crFill;
 }
@@ -237,7 +237,7 @@ bool CWorkloadChart::DrawGrid( CDC& dc)
 COLORREF CWorkloadChart::GetBkgndColor(double dValue) const
 {
 	if (IsOverloaded(dValue) || IsUnderloaded(dValue))
-		return RGBX::AdjustLighting(GetValueColor(dValue), 0.8, TRUE);
+		return GraphicsMisc::Lighter(GetValueColor(dValue), 0.8, TRUE);
 
 	// else
 	return CLR_NONE;

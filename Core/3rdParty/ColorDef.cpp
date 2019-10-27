@@ -93,7 +93,15 @@ void RGBX::AdjustLighting(double dFactor, bool bRGB)
 	else // HLS
 	{
 		HLSX hls(*this);
-		hls.fLuminosity += (float)((1.0f - hls.fLuminosity) * dFactor);
+
+		if (dFactor > 0.0) // Lighter
+		{
+			hls.fLuminosity = (float)min(1.0, (hls.fLuminosity + ((1.0f - hls.fLuminosity) * dFactor)));
+		}
+		else // < 0.0 - Darker
+		{
+			hls.fLuminosity = (float)max(0.0, (hls.fLuminosity + (hls.fLuminosity * dFactor)));
+		}
 		
 		*this = hls;
 	}
