@@ -677,6 +677,10 @@ SOURCE=.\Unzipper.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\UrlParser.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\urlricheditctrl.cpp
 # End Source File
 # Begin Source File
@@ -1366,6 +1370,10 @@ SOURCE=.\TreeSelectionHelper.h
 # Begin Source File
 
 SOURCE=.\Unzipper.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\UrlParser.h
 # End Source File
 # Begin Source File
 

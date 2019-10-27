@@ -136,6 +136,10 @@ SOURCE=.\BurndownGraphs.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\BurndownPreferencesDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\BurndownStruct.cpp
 # End Source File
 # Begin Source File
@@ -183,6 +187,10 @@ SOURCE=.\BurndownGraphComboBox.h
 # Begin Source File
 
 SOURCE=.\BurndownGraphs.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\BurndownPreferencesDlg.h
 # End Source File
 # Begin Source File
 

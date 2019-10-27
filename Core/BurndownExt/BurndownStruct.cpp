@@ -58,17 +58,19 @@ void CGraphColorMap::Copy(const CGraphColorMap& other)
 
 int CGraphColorMap::GetColorCount(BURNDOWN_GRAPH nGraph) const
 {
-	const CPair* pPair = PLookup(nGraph);
+	UINT nUnused;
+	const CAssoc* pAssoc = GetAssocAt(nGraph, nUnused);
 
-	return (pPair ? pPair->value.GetSize() : 0);
+	return (pAssoc ? pAssoc->value.GetSize() : 0);
 }
 
 COLORREF CGraphColorMap::GetColor(BURNDOWN_GRAPH nGraph, int nIndex) const
 {
-	const CPair* pPair = PLookup(nGraph);
+	UINT nUnused;
+	const CAssoc* pAssoc = GetAssocAt(nGraph, nUnused);
 
-	if (pPair && (pPair->value.GetSize() > nIndex))
-		return pPair->value[nIndex];
+	if (pAssoc && (pAssoc->value.GetSize() > nIndex))
+		return pAssoc->value[nIndex];
 
 	ASSERT(0);
 	return CLR_NONE;
@@ -79,11 +81,12 @@ BOOL CGraphColorMap::SetColor(BURNDOWN_GRAPH nGraph, int nIndex, COLORREF color)
 	if (color == CLR_NONE)
 		return FALSE;
 
-	CPair* pPair = PLookup(nGraph);
+	UINT nUnused;
+	CAssoc* pAssoc = GetAssocAt(nGraph, nUnused);
 
-	if (pPair && (pPair->value.GetSize() > nIndex))
+	if (pAssoc && (pAssoc->value.GetSize() > nIndex))
 	{
-		pPair->value[nIndex] = color;
+		pAssoc->value[nIndex] = color;
 		return TRUE;
 	}
 
