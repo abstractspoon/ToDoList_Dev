@@ -50,7 +50,7 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_bDragging(FALSE),
 	m_ptDragOrigin(0),
 	m_nSnapMode(TCCSM_NEARESTHOUR),
-	m_dwOptions(TCCO_DISPLAYCONTINUOUS),
+	m_dwOptions(TCCO_DISPLAYCONTINUOUS | TCCO_ENABLELABELTIPS),
 	m_bReadOnly(FALSE),
 	m_nCellVScrollPos(0),
 	m_bStrikeThruDone(FALSE),
@@ -160,14 +160,10 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
 
 		RecalcTaskDates();
 
-		if (!HasSameDateDisplayOptions(m_dwOptions, dwPrev))
-		{
-			FixupSelection(TRUE);
-		}
-		else
-		{
-			FixupSelection(FALSE);
-		}
+		BOOL bScrollToTask = !HasSameDateDisplayOptions(m_dwOptions, dwPrev);
+		FixupSelection(bScrollToTask);
+
+		EnableLabelTips(HasOption(TCCO_ENABLELABELTIPS));
 	}
 }
 
@@ -1721,7 +1717,8 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	
 	if (dwSelID)
 	{
-		m_tooltip.Pop();
+		if (m_tooltip.GetSafeHwnd())
+			m_tooltip.Pop();
 
 		SetFocus();
 		SelectTask(dwSelID, FALSE, TRUE);
@@ -2394,15 +2391,32 @@ int CTaskCalendarCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_fonts.Initialise(*this);
 
-	if (m_tooltip.Create(this))
-	{
-		m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
-		m_tooltip.SetFont(&m_DefaultFont);
-		m_tooltip.SetDelayTime(TTDT_INITIAL, 50);
-		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
-	}
+	EnableLabelTips(HasOption(TCCO_ENABLELABELTIPS));
 	
 	return 0;
+}
+
+BOOL CTaskCalendarCtrl::EnableLabelTips(BOOL bEnable)
+{
+	if (bEnable)
+	{
+		if (!m_tooltip.GetSafeHwnd())
+		{
+			if (!m_tooltip.Create(this))
+				return FALSE;
+
+			m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
+			m_tooltip.SetFont(&m_DefaultFont);
+			m_tooltip.SetDelayTime(TTDT_INITIAL, 50);
+			m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
+		}
+	}
+	else if (m_tooltip.GetSafeHwnd()) 
+	{
+		m_tooltip.DestroyWindow();
+	}
+
+	return TRUE;
 }
 
 BOOL CTaskCalendarCtrl::ProcessMessage(MSG* /*pMsg*/) 
@@ -2412,7 +2426,8 @@ BOOL CTaskCalendarCtrl::ProcessMessage(MSG* /*pMsg*/)
 
 void CTaskCalendarCtrl::FilterToolTipMessage(MSG* pMsg) 
 {
-	m_tooltip.FilterToolTipMessage(pMsg);
+	if (m_tooltip.GetSafeHwnd())
+		m_tooltip.FilterToolTipMessage(pMsg);
 }
 
 int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
