@@ -141,20 +141,8 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 		InitToolInfo(tiHit, TRUE);
 
 		int nHit = DoToolHitTest(pOwner, point, tiHit);
-		BOOL bTipChange = (m_nLastHit != nHit);
 
-		if (IsTracking())
-		{
-			// Treat any 'hit' greater than zero as being the same 
-			// so that tracking tips remain visible until the hit 
-			// returns LTE zero
-			if (m_nLastHit <= 0)
-				bTipChange = (nHit > 0);
-			else
-				bTipChange = (nHit <= 0);
-		}
-
-		if (bTipChange)
+		if (m_nLastHit != nHit)
 		{
 			//TRACE(_T("CToolTipCtrlEx::FilterToolTipMessage(%d -> %d)\n"), m_nLastHit, nHit);
 
