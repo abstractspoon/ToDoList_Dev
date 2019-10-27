@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "ToolTipCtrlEx.h"
 #include "DialogHelper.h"
-#include "themed.h"
+#include "OSVersion.h"
 
 #include "..\3rdParty\MemDC.h"
 
@@ -56,7 +56,9 @@ void CToolTipCtrlEx::EnableTracking(BOOL bTracking, int nXOffset, int nYOffset)
 {
 	ASSERT(m_bUsingRelayEvent <= 0);
 
-	if (bTracking)
+	// Temporarily disable tracking tooltips below Windows 8
+	// because they don't resize and paint correctly
+	if (bTracking && (COSVersion() >= OSV_WIN8))
 	{
 		m_nFlags |= WF_TRACKINGTOOLTIPS;
 
@@ -139,8 +141,20 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 		InitToolInfo(tiHit, TRUE);
 
 		int nHit = DoToolHitTest(pOwner, point, tiHit);
-		
-		if (m_nLastHit != nHit)
+		BOOL bTipChange = (m_nLastHit != nHit);
+
+		if (IsTracking())
+		{
+			// Treat any 'hit' greater than zero as being the same 
+			// so that tracking tips remain visible until the hit 
+			// returns LTE zero
+			if (m_nLastHit <= 0)
+				bTipChange = (nHit > 0);
+			else
+				bTipChange = (nHit <= 0);
+		}
+
+		if (bTipChange)
 		{
 			//TRACE(_T("CToolTipCtrlEx::FilterToolTipMessage(%d -> %d)\n"), m_nLastHit, nHit);
 
@@ -368,7 +382,7 @@ BOOL CToolTipCtrlEx::AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const
 
 void CToolTipCtrlEx::OnPaint()
 {
-	if (IsTracking() && CThemed::AreControlsThemed())
+	if (IsTracking() && (COSVersion() >= OSV_WIN8))
 	{
 		// Prevent flicker
 		CPaintDC dc(this); 

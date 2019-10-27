@@ -5609,8 +5609,8 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 			// else
 			m_infoTip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
 			m_infoTip.SetDelayTime(TTDT_INITIAL, 50);
-			m_infoTip.SetDelayTime(TTDT_AUTOPOP, 10000);
-			m_infoTip.SetMaxTipWidth((UINT)(WORD)-1); // multiline support
+			m_infoTip.SetDelayTime(TTDT_AUTOPOP, 100000);
+			m_infoTip.SetMaxTipWidth(SHRT_MAX); // multiline support
 			m_infoTip.EnableTracking(TRUE, 16, 16);
 			m_infoTip.SetFont(CFont::FromHandle(m_hFontTree));
 		}
@@ -5736,7 +5736,7 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 			HWND hwndHit = CDialogHelper::GetWindowFromPoint(GetSafeHwnd(), point);
 			ASSERT(hwndHit);
 
-			return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sInfoTip, 1/*dwTaskID*/, rBounds);
+			return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sInfoTip, dwTaskID, rBounds);
 		}
 	}
 

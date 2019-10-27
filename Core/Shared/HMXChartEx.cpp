@@ -158,12 +158,12 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 	// else
 	m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
 	m_tooltip.SetDelayTime(TTDT_INITIAL, 0);
-	m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
+	m_tooltip.SetDelayTime(TTDT_AUTOPOP, 100000);
 	m_tooltip.SetDelayTime(TTDT_RESHOW, 0);
 	m_tooltip.EnableTracking(TRUE, 16, 16);
 
 	if (bMultiline)
-		m_tooltip.SetMaxTipWidth(1024); // for '\n' support
+		m_tooltip.SetMaxTipWidth(SHRT_MAX); // for '\n' support
 
 	return TRUE;
 }
@@ -245,8 +245,7 @@ int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				}
 			}
 
-			// Use a fixed ID to reuse the same tracking tooltip
-			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, 1, m_rectData);
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, (nHit + 1), m_rectData);
 		}
 	}
 
