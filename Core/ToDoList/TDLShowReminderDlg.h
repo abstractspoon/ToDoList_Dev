@@ -32,6 +32,7 @@ public:
 	BOOL Create(CWnd* pParent, BOOL bVisible = TRUE);
 
 	BOOL AddListReminder(const TDCREMINDER& rem);
+	BOOL UpdateListReminder(const TDCREMINDER& rem);
 	void RemoveListReminder(const TDCREMINDER& rem);
 	void RemoveListReminders(const CFilteredToDoCtrl& tdc);
 	void RemoveAllListReminders();

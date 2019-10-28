@@ -185,7 +185,7 @@ void TDCREMINDER::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	sStickiesID = pPrefs->GetProfileString(szKey, _T("StickiesID"));
 }
 
-BOOL TDCREMINDER::GetReminderDate(COleDateTime& date) const
+BOOL TDCREMINDER::GetReminderDate(COleDateTime& date, BOOL bIncludeSnooze) const
 {
 	date = dtAbsolute;
 	
@@ -211,7 +211,9 @@ BOOL TDCREMINDER::GetReminderDate(COleDateTime& date) const
 	
 	if (CDateHelper::IsDateSet(date))
 	{
-		date += dDaysSnooze;
+		if (bIncludeSnooze)
+			date += dDaysSnooze;
+
 		return TRUE;
 	}
 	

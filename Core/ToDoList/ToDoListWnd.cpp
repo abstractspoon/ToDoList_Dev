@@ -3639,17 +3639,11 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	if (pMod->mapAttrib.Has(TDCA_DONEDATE))
 	{
 		m_dlgTimeTracker.RemoveCompletedTasks(&tdc);
-
-		if (m_reminders.RemoveCompletedTasks(&tdc))
-			tdc.RedrawReminders();
 	}
 
 	if (pMod->mapAttrib.Has(TDCA_DELETE))
 	{
 		m_dlgTimeTracker.RemoveDeletedTasks(&tdc);
-
-		if (m_reminders.RemoveDeletedTasks(&tdc))
-			tdc.RedrawReminders();
 	}
 
 	if (pMod->mapAttrib.Has(TDCA_CUSTOMATTRIBDEFS))
@@ -3664,6 +3658,11 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 			UpdateFindDialogActiveTasklist(&tdc);
 		}
 	}
+
+	if (m_reminders.UpdateModifiedTasks(&tdc, pMod->aTaskIDs, pMod->mapAttrib))
+		tdc.RedrawReminders();
+
+	m_reminders.CheckReminders();
 
 	// Update UI
 	UpdateStatusbar();

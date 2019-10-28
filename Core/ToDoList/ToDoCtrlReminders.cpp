@@ -242,6 +242,85 @@ BOOL CToDoCtrlReminders::GetReminder(int nRem, TDCREMINDER& rem) const
 	return TRUE;
 }
 
+BOOL CToDoCtrlReminders::UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, const CTDCAttributeMap& mapAttrib)
+{
+	if (!pTDC || !aTaskIDs.GetSize() || !mapAttrib.GetCount())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
+	if (mapAttrib.Has(TDCA_DELETE))
+	{
+		ASSERT(mapAttrib.HasOnly(TDCA_DELETE));
+		return RemoveDeletedTasks(pTDC); // removes from list too
+	}
+
+	BOOL bAllAttribModified = (mapAttrib.Has(TDCA_UNDO) || mapAttrib.Has(TDCA_ALL));
+	BOOL bUpdated = FALSE;
+
+	if (mapAttrib.Has(TDCA_DONEDATE) || bAllAttribModified)
+	{
+		bUpdated = RemoveCompletedTasks(pTDC);
+	}
+	else if (!mapAttrib.Has(TDCA_DUEDATE) && !mapAttrib.Has(TDCA_STARTDATE) && !mapAttrib.Has(TDCA_TASKNAME))
+	{
+		return FALSE;
+	}
+
+	// Look for visible relative task reminders 
+	// whose reminder dates are in the future
+	COleDateTime dtNow = COleDateTime::GetCurrentTime();
+
+	CTDCReminderArray aRem;
+	int nRem = GetVisibleReminders(pTDC, aRem);
+
+	while (nRem--)
+	{
+		TDCREMINDER& rem = aRem[nRem];
+
+		if (!rem.bRelative)
+			continue;
+
+		if (!Misc::HasT(rem.dwTaskID, aTaskIDs))
+			continue;
+
+		if (!bAllAttribModified)
+		{
+			if (rem.nRelativeFromWhen == TDCR_STARTDATE)
+			{
+				if (!mapAttrib.Has(TDCA_STARTDATE))
+					continue;
+			}
+			else // due date
+			{
+				if (!mapAttrib.Has(TDCA_DUEDATE))
+					continue;
+			}
+		}
+
+		COleDateTime dtRem;
+
+		// If the reminder date without snooze is in the future,
+		// or the reminder is no longer valid, then clear the 
+		// snooze and remove the reminder from the list
+		if (!rem.GetReminderDate(dtRem, FALSE) || (dtRem > dtNow))
+		{
+			rem.dDaysSnooze = 0.0;
+
+			RemoveListReminder(rem);
+		}
+		else
+		{
+			UpdateListReminder(rem);
+		}
+	}
+
+	CheckReminders();
+
+	return bUpdated;
+}
+
 BOOL CToDoCtrlReminders::RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC)
 {
 	return RemoveTasks(TCR_REMOVEDELETED, pTDC);
@@ -411,12 +490,17 @@ void CToDoCtrlReminders::OnTimer(UINT nIDEvent)
 		return;
 	}
 
-	CheckReminders();
+	DoCheckReminders();
 	
 	CTDLShowReminderDlg::OnTimer(nIDEvent);
 }
 
 void CToDoCtrlReminders::CheckReminders()
+{
+	PostMessage(WM_TIMER, 1);
+}
+
+void CToDoCtrlReminders::DoCheckReminders()
 {
 	// prevent re-entrancy
 	AF_NOREENTRANT
@@ -441,9 +525,10 @@ void CToDoCtrlReminders::CheckReminders()
 			
 			if (rem.GetReminderDate(dateRem) && (dateNow > dateRem))
 			{
-				// Don't delete recurring reminders
 				if (!ShowReminder(rem))
 				{
+					// This means that Stickies is handling the reminder
+					// so we can now delete it, except for recurring tasks
 					if (rem.IsTaskRecurring())
 						rem.bEnabled = FALSE;
 					else
@@ -706,4 +791,18 @@ void CToDoCtrlReminders::OnSysCommand(UINT nID, LPARAM lParam)
 		ActivateNotificationWindow();
 		break;
 	}
+}
+
+int CToDoCtrlReminders::GetVisibleReminders(const CFilteredToDoCtrl* pTDC, CTDCReminderArray& aRem) const
+{
+	ASSERT(pTDC);
+	int nRem = CTDLShowReminderDlg::GetVisibleReminders(aRem);
+
+	while (nRem--)
+	{
+		if (aRem[nRem].pTDC != pTDC)
+			aRem.RemoveAt(nRem);
+	}
+
+	return aRem.GetSize();
 }

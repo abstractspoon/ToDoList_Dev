@@ -7,16 +7,18 @@
 // ToDoCtrlReminders.h : header file
 //
 
-#include <afxtempl.h>
 #include "tdcenum.h"
 #include "tdlshowreminderdlg.h"
 
 #include "..\shared\StickiesWnd.h"
 #include "..\shared\RichEditBaseCtrl.h"
 
+#include <afxtempl.h>
+
 /////////////////////////////////////////////////////////////////////////////
 
 class CFilteredToDoCtrl;
+class CTDCAttributeMap;
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCtrlReminders window
@@ -46,6 +48,8 @@ public:
 	BOOL ToDoCtrlHasReminders(const CString& sFilePath);
 	BOOL RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	BOOL RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
+	BOOL UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, const CTDCAttributeMap& mapAttrib);
+
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
 	BOOL IsEmpty() const { return (GetListReminderCount() == 0); }
 
@@ -94,6 +98,7 @@ protected:
 	BOOL DismissReminder(int nRem);
 	void NotifyReminder(const TDCREMINDER& rem, UINT nMsg);
 	void ActivateNotificationWindow();
+	void DoCheckReminders();
 
 	enum 
 	{
@@ -104,6 +109,7 @@ protected:
 	BOOL RemoveTasks(DWORD dwToRemove, const CFilteredToDoCtrl* pTDC = NULL);
 	BOOL InitialiseRTFFormatter();
 	BOOL BuildRTFContent(const TDCREMINDER& rem, CString& sContent);
+	int GetVisibleReminders(const CFilteredToDoCtrl* pTDC, CTDCReminderArray& aRem) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

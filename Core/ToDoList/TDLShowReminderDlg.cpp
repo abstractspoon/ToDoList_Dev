@@ -218,6 +218,19 @@ BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 	return bNewReminder;
 }
 
+BOOL CTDLShowReminderDlg::UpdateListReminder(const TDCREMINDER& rem)
+{
+	int nItem = FindListReminder(rem);
+
+	if (nItem == -1)
+		return FALSE;
+
+	m_lcReminders.SetItemText(nItem, TASKLIST_COL, rem.GetTaskListName());
+	m_lcReminders.SetItemText(nItem, WHEN_COL, rem.FormatWhenString());
+
+	return FALSE;
+}
+
 void CTDLShowReminderDlg::UpdateTitleText()
 {
 	SetWindowText(CEnString(IDS_TASKREMINDERDLG_TITLE, m_lcReminders.GetItemCount()));
