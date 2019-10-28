@@ -5603,6 +5603,8 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 	case TDCS_SHOWINFOTIPS:
 		if (bEnable)
 		{
+			ASSERT(!m_infoTip.GetSafeHwnd());
+
 			if (!m_infoTip.Create(this))
 				return FALSE;
 
@@ -5614,7 +5616,7 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 			m_infoTip.EnableTracking(TRUE, 16, 16);
 			m_infoTip.SetFont(CFont::FromHandle(m_hFontTree));
 		}
-		else
+		else if (m_infoTip.GetSafeHwnd())
 		{
 			m_infoTip.DestroyWindow();
 		}
