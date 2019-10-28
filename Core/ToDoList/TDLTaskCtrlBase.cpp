@@ -308,12 +308,7 @@ int CTDLTaskCtrlBase::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 	int nHitTest = GetTaskColumnTooltip(point, sTooltip);
 	
 	if ((nHitTest != -1) && !sTooltip.IsEmpty())
-	{
-		CRect rBounds;
-		CWnd::GetClientRect(rBounds);
-
-		return CToolTipCtrlEx::SetToolInfo(*pTI, m_lcColumns, sTooltip, nHitTest, rBounds);
-	}
+		return CToolTipCtrlEx::SetToolInfo(*pTI, m_lcColumns, sTooltip, nHitTest);
 
 	return CWnd::OnToolHitTest(point, pTI);
 }

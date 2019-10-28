@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "ToolTipCtrlEx.h"
-#include "DialogHelper.h"
 #include "OSVersion.h"
 
 #include "..\3rdParty\MemDC.h"
@@ -18,8 +17,8 @@ const UINT WM_NCMOUSELAST = WM_NCMBUTTONDBLCLK;
 
 /////////////////////////////////////////////////////////////////////////////
 
-//const int TOOLINFO_SIZE = 40; // sizeof(AFX_OLDTOOLINFO)
 const int TOOLINFO_SIZE = sizeof(TOOLINFO);
+const int ID_TIMERLEAVE = 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -48,6 +47,7 @@ CToolTipCtrlEx::~CToolTipCtrlEx()
 
 BEGIN_MESSAGE_MAP(CToolTipCtrlEx, CToolTipCtrl)
 	ON_WM_PAINT()
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -169,6 +169,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 				{
 					// allow the tooltip to popup when it should
 					Activate(TRUE);
+
 #ifdef _DEBUG
 					//if (tiHit.lpszText != LPSTR_TEXTCALLBACK)
 					//	TRACE(_T("CToolTipCtrlEx::Activate(TRUE, \"%s\")\n"), tiHit.lpszText);
@@ -266,23 +267,55 @@ int CToolTipCtrlEx::DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti)
 	return pOwner->SendMessage(WM_TTC_TOOLHITTEST, MAKEWPARAM(point.x, point.y), (LPARAM)&ti);
 }
 
-int CToolTipCtrlEx::SetToolInfo(TOOLINFO& ti, const CWnd* pWnd, const CString sTooltip, int nID, const CRect& rBounds, UINT nFlags)
+void CToolTipCtrlEx::OnTimer(UINT_PTR nIDEvent)
 {
-	return SetToolInfo(ti, pWnd->GetSafeHwnd(), sTooltip, nID, rBounds, nFlags);
+	if (nIDEvent == ID_TIMERLEAVE)
+	{
+		if (m_tiLast.hwnd == NULL)
+		{
+			KillTimer(ID_TIMERLEAVE);
+		}
+		else
+		{
+			CRect rTest;
+			::GetWindowRect(m_tiLast.hwnd, rTest);
+
+			if (!rTest.PtInRect(GetCurrentMessage()->pt))
+			{
+				KillTimer(ID_TIMERLEAVE);
+				Activate(FALSE);
+
+				return;
+			}
+		}
+	}
+
+	CToolTipCtrl::OnTimer(nIDEvent);
 }
 
-int CToolTipCtrlEx::SetToolInfo(TOOLINFO& ti, HWND hWnd, const CString sTooltip, int nID, const CRect& rBounds, UINT nFlags)
+int CToolTipCtrlEx::SetToolInfo(TOOLINFO& ti, const CWnd* pWnd, const CString sTooltip, int nID, LPCRECT pBounds, UINT nFlags)
+{
+	return SetToolInfo(ti, pWnd->GetSafeHwnd(), sTooltip, nID, pBounds, nFlags);
+}
+
+int CToolTipCtrlEx::SetToolInfo(TOOLINFO& ti, HWND hWnd, const CString sTooltip, int nID, LPCRECT pBounds, UINT nFlags)
 {
 	ASSERT(::IsWindow(hWnd));
 	ASSERT(!sTooltip.IsEmpty());
 	ASSERT(nID > 0);
-	ASSERT(!rBounds.IsRectEmpty());
+	ASSERT(!pBounds || !IsRectEmpty(pBounds));
+
+	InitToolInfo(ti, TRUE);
 
 	ti.hwnd = hWnd;
 	ti.uId = nID;
-	ti.lpszText = _tcsdup(sTooltip); // MFC will free the duplicated string
-	ti.rect = rBounds;
+	ti.lpszText = _tcsdup(sTooltip); // we will free the duplicated string
 	ti.uFlags = nFlags;
+
+	if (pBounds && !IsRectEmpty(pBounds))
+		ti.rect = *pBounds;
+	else
+		::GetClientRect(hWnd, &ti.rect);
 
 	return nID;
 }
@@ -344,7 +377,8 @@ void CToolTipCtrlEx::Activate(BOOL bActivate)
 	}
 	else
 	{
-		CDialogHelper::TrackMouseLeave(::GetParent(m_hWnd));
+		// Our own implementation of WM_MOUSELEAVE
+		SetTimer(ID_TIMERLEAVE, 500, NULL);
 	}
 }
 

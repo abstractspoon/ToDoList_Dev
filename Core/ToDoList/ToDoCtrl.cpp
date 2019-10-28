@@ -5732,13 +5732,10 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 												   m_nMaxInfotipCommentsLength);
 			ASSERT(!sInfoTip.IsEmpty());
 
-			CRect rBounds;
-			CWnd::GetClientRect(rBounds);
-
 			HWND hwndHit = CDialogHelper::GetWindowFromPoint(GetSafeHwnd(), point);
 			ASSERT(hwndHit);
 
-			return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sInfoTip, dwTaskID, rBounds);
+			return CToolTipCtrlEx::SetToolInfo(*pTI, hwndHit, sInfoTip, dwTaskID);
 		}
 	}
 
