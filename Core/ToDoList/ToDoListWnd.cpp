@@ -3662,8 +3662,6 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	if (m_reminders.UpdateModifiedTasks(&tdc, pMod->aTaskIDs, pMod->mapAttrib))
 		tdc.RedrawReminders();
 
-	m_reminders.CheckReminders();
-
 	// Update UI
 	UpdateStatusbar();
 	UpdateCaption();
