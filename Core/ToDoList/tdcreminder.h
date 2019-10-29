@@ -35,6 +35,7 @@ struct TDCREMINDER
 	BOOL IsTaskDone() const;
 	BOOL TaskExists() const;
 	BOOL GetReminderDate(COleDateTime& date, BOOL bIncludeSnooze = TRUE) const;
+	BOOL Matches(const CFilteredToDoCtrl* pTDC, DWORD dwTaskID) const;
 
 	void Save(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void Load(const IPreferences* pPrefs, LPCTSTR szKey);

@@ -40,6 +40,13 @@ TDCREMINDER::TDCREMINDER()
 {
 }
 
+BOOL TDCREMINDER::Matches(const CFilteredToDoCtrl* pTDCOther, DWORD dwTaskIDOther) const
+{
+	ASSERT(pTDCOther && dwTaskIDOther);
+
+	return ((pTDC == pTDCOther) && (dwTaskID == dwTaskIDOther));
+}
+
 CString TDCREMINDER::GetTaskTitle() const
 {
 	ASSERT(pTDC);
