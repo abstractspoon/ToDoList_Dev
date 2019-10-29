@@ -292,25 +292,18 @@ int CTDLShowReminderDlg::FindListReminder(const TDCREMINDER& rem)
 {
 	ASSERT(m_mapReminders.GetCount() == m_lcReminders.GetItemCount());
 	
-	POSITION pos = m_mapReminders.GetStartPosition();
+	int nItem = m_lcReminders.GetItemCount();
 
-	while (pos)
+	while (nItem--)
 	{
-		DWORD dwRemID = 0;
-		TDCREMINDER reminder;
+		DWORD dwRemID = m_lcReminders.GetItemData(nItem);
+		TDCREMINDER remItem;
 
-		m_mapReminders.GetNextAssoc(pos, dwRemID, reminder);
-
-		if ((reminder.pTDC == rem.pTDC) && (reminder.dwTaskID == rem.dwTaskID))
-		{
-			LVFINDINFO lvfi = { 0 };
-			lvfi.flags = LVFI_PARAM;
-			lvfi.lParam = dwRemID;
-
-			return m_lcReminders.FindItem(&lvfi);
-		}
+		if (m_mapReminders.Lookup(dwRemID, remItem) && remItem.Matches(rem.pTDC, rem.dwTaskID))
+			return nItem;
 	}
 
+	// not found
 	return -1;
 }
 
@@ -353,7 +346,6 @@ void CTDLShowReminderDlg::OnSnoozeAll()
 int CTDLShowReminderDlg::GetVisibleReminders(CTDCReminderArray& aRem) const
 {
 	int nRem = m_lcReminders.GetItemCount();
-
 	aRem.SetSize(nRem);
 
 	while (nRem--)
@@ -365,6 +357,25 @@ int CTDLShowReminderDlg::GetVisibleReminders(CTDCReminderArray& aRem) const
 	}
 
 	return aRem.GetSize();
+}
+
+int CTDLShowReminderDlg::GetVisibleReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const
+{
+	int nNumRem = m_lcReminders.GetItemCount(), nItem = 0;
+	aRem.SetSize(nNumRem); // max possible
+
+	for (int nRem = 0; nRem < nNumRem; nRem++)
+	{
+		DWORD dwRemID = m_lcReminders.GetItemData(nRem);
+		ASSERT(dwRemID);
+
+		if (m_mapReminders.Lookup(dwRemID, aRem[nItem]) && (aRem[nItem].pTDC == &tdc))
+			nItem++;
+	}
+
+	aRem.SetSize(nItem);
+
+	return nItem;
 }
 
 int CTDLShowReminderDlg::GetSelectedReminder(TDCREMINDER& rem) const
@@ -549,6 +560,7 @@ void CTDLShowReminderDlg::OnRepositionControls(int dx, int dy)
 	CDialogHelper::OffsetCtrl(this, IDC_DIVIDER, 0, dy);
 
 	CDialogHelper::OffsetCtrl(this, IDC_SNOOZE, dx, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEALL, dx, dy);
 	CDialogHelper::OffsetCtrl(this, IDC_DISMISS, dx, dy);
 	CDialogHelper::OffsetCtrl(this, IDC_DISMISSANDGOTOTASK, dx, dy);
 
