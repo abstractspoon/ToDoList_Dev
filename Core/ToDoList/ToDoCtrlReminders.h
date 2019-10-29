@@ -46,8 +46,6 @@ public:
 	int FindReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC, BOOL bIncludeDisabled = TRUE) const;
 	BOOL ToDoCtrlHasReminders(const CFilteredToDoCtrl* pTDC);
 	BOOL ToDoCtrlHasReminders(const CString& sFilePath);
-	BOOL RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
-	BOOL RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	BOOL UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, const CTDCAttributeMap& mapAttrib);
 
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
@@ -106,10 +104,10 @@ protected:
 		TCR_REMOVEDONE		= 0x02,
 	};
 
-	BOOL RemoveTasks(DWORD dwToRemove, const CFilteredToDoCtrl* pTDC = NULL);
 	BOOL InitialiseRTFFormatter();
 	BOOL BuildRTFContent(const TDCREMINDER& rem, CString& sContent);
-	int GetVisibleReminders(const CFilteredToDoCtrl* pTDC, CTDCReminderArray& aRem) const;
+	int RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
+	int RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 };
 
 /////////////////////////////////////////////////////////////////////////////

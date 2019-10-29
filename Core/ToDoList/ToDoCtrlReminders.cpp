@@ -250,20 +250,20 @@ BOOL CToDoCtrlReminders::UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, cons
 		return FALSE;
 	}
 	
-	if (mapAttrib.Has(TDCA_DELETE))
-	{
-		ASSERT(mapAttrib.HasOnly(TDCA_DELETE));
-		return RemoveDeletedTasks(pTDC); // removes from list too
-	}
-
 	BOOL bAllAttribModified = (mapAttrib.Has(TDCA_UNDO) || mapAttrib.Has(TDCA_ALL));
 	BOOL bUpdated = FALSE;
 
-	if (mapAttrib.Has(TDCA_DONEDATE) || bAllAttribModified)
+	if (bAllAttribModified || mapAttrib.Has(TDCA_DELETE))
 	{
-		bUpdated = RemoveCompletedTasks(pTDC);
+		bUpdated = RemoveDeletedTasks(pTDC); // removes from list too
 	}
-	else if (!mapAttrib.Has(TDCA_DUEDATE) && !mapAttrib.Has(TDCA_STARTDATE) && !mapAttrib.Has(TDCA_TASKNAME))
+
+	if (bAllAttribModified || mapAttrib.Has(TDCA_DONEDATE))
+	{
+		bUpdated = RemoveCompletedTasks(pTDC); // removes from list too
+	}
+
+	if (!bAllAttribModified && !mapAttrib.Has(TDCA_DUEDATE) && !mapAttrib.Has(TDCA_STARTDATE) && !mapAttrib.Has(TDCA_TASKNAME))
 	{
 		return FALSE;
 	}
@@ -273,7 +273,7 @@ BOOL CToDoCtrlReminders::UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, cons
 	COleDateTime dtNow = COleDateTime::GetCurrentTime();
 
 	CTDCReminderArray aRem;
-	int nRem = GetVisibleReminders(pTDC, aRem);
+	int nRem = GetVisibleReminders(*pTDC, aRem);
 
 	while (nRem--)
 	{
@@ -321,58 +321,61 @@ BOOL CToDoCtrlReminders::UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, cons
 	return bUpdated;
 }
 
-BOOL CToDoCtrlReminders::RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC)
+int CToDoCtrlReminders::RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC)
 {
-	return RemoveTasks(TCR_REMOVEDELETED, pTDC);
-}
-
-BOOL CToDoCtrlReminders::RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC)
-{
-	return RemoveTasks(TCR_REMOVEDONE, pTDC);
-}
-
-BOOL CToDoCtrlReminders::RemoveTasks(DWORD dwToRemove, const CFilteredToDoCtrl* pTDC)
-{
-	if (!dwToRemove || !pTDC)
+	if (!pTDC)
 	{
 		ASSERT(0);
-		return FALSE;
+		return 0;
 	}
 
-	int nNumRem = m_aReminders.GetSize(), nRem(nNumRem);
+	int nRem = m_aReminders.GetSize(), nNumRemoved = 0;
 
 	while (nRem--)
 	{
 		TDCREMINDER& rem = m_aReminders[nRem];
 
-		if (pTDC == rem.pTDC)
+		if ((pTDC == rem.pTDC) && !rem.TaskExists())
 		{
-			BOOL bRemove = FALSE;
-			
-			if ((dwToRemove & TCR_REMOVEDELETED) && !rem.TaskExists())
-			{
-				bRemove = TRUE;
-			}
-			else if ((dwToRemove & TCR_REMOVEDONE) && rem.IsTaskDone())
-			{
-				// Don't remove recurring task reminders just disable them
-				if (rem.IsTaskRecurring())
-				{
-					rem.bEnabled = FALSE;
-					TRACE(_T("CToDoCtrlReminders::RemoveTasks(Disabling recurring reminder '%s', %d)\n"), rem.GetTaskTitle(), rem.dwTaskID);
-				}
-				else
-				{
-					bRemove = TRUE;
-				}
-			}
-
-			if (bRemove)
-				DeleteReminder(nRem);
+			DeleteReminder(nRem);
+			nNumRemoved++;
 		}
 	}
 
-	return (m_aReminders.GetSize() != nNumRem);
+	return nNumRemoved;
+}
+
+int CToDoCtrlReminders::RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC)
+{
+	if (!pTDC)
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	int nRem = m_aReminders.GetSize(), nNumRemoved = 0;
+
+	while (nRem--)
+	{
+		TDCREMINDER& rem = m_aReminders[nRem];
+
+		if ((pTDC == rem.pTDC) && rem.IsTaskDone())
+		{
+			// Don't remove recurring task reminders just disable them
+			if (rem.IsTaskRecurring())
+			{
+				rem.bEnabled = FALSE;
+				TRACE(_T("CToDoCtrlReminders::RemoveTasks(Disabling recurring reminder '%s', %d)\n"), rem.GetTaskTitle(), rem.dwTaskID);
+			}
+			else
+			{
+				DeleteReminder(nRem);
+				nNumRemoved++;
+			}
+		}
+	}
+
+	return nNumRemoved;
 }
 
 int CToDoCtrlReminders::FindReminder(const TDCREMINDER& rem, BOOL bIncludeDisabled) const
@@ -791,18 +794,4 @@ void CToDoCtrlReminders::OnSysCommand(UINT nID, LPARAM lParam)
 		ActivateNotificationWindow();
 		break;
 	}
-}
-
-int CToDoCtrlReminders::GetVisibleReminders(const CFilteredToDoCtrl* pTDC, CTDCReminderArray& aRem) const
-{
-	ASSERT(pTDC);
-	int nRem = CTDLShowReminderDlg::GetVisibleReminders(aRem);
-
-	while (nRem--)
-	{
-		if (aRem[nRem].pTDC != pTDC)
-			aRem.RemoveAt(nRem);
-	}
-
-	return aRem.GetSize();
 }
