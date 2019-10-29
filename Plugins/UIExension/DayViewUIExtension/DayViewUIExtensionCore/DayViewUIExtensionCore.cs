@@ -430,16 +430,22 @@ namespace DayViewUIExtension
 
 		private void OnShowDayView(object sender, EventArgs e)
 		{
-			m_DayView.WeekView = false;
-			m_WeekLabel.NumDays = 1;
-
-			UpdateToolbarButtonStates();
+			if (m_DayView.WeekView)
+				ToggleWeekView();
 		}
 
 		private void OnShowWeekView(object sender, EventArgs e)
 		{
-			m_DayView.WeekView = true;
-			m_WeekLabel.NumDays = 7;
+			if (!m_DayView.WeekView)
+				ToggleWeekView();
+		}
+
+		private void ToggleWeekView()
+		{
+			m_DayView.WeekView = !m_DayView.WeekView;
+			m_DayView.HScrollTooltipText = m_Trans.Translate(m_DayView.HScrollTooltipText);
+
+			m_WeekLabel.NumDays = m_DayView.DaysShowing;
 
 			UpdateToolbarButtonStates();
 		}

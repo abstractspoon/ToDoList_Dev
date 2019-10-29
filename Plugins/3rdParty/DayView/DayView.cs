@@ -116,7 +116,6 @@ namespace Calendar
             this.Controls.Add(editbox);
 
             tooltip = new ToolTip();
-            tooltip.SetToolTip(hscroll, "Change Week");
 
             drawTool = new DrawTool();
             drawTool.DayView = this;
@@ -136,7 +135,13 @@ namespace Calendar
 
         #region Properties
 
-        private AppHeightDrawMode appHeightMode = AppHeightDrawMode.TrueHeightAll;
+		public String HScrollTooltipText
+		{
+			get { return tooltip.GetToolTip(hscroll); }
+			set { tooltip.SetToolTip(hscroll, value); }
+		}
+
+		private AppHeightDrawMode appHeightMode = AppHeightDrawMode.TrueHeightAll;
 
         public AppHeightDrawMode AppHeightMode
         {
@@ -242,11 +247,15 @@ namespace Calendar
 
 					if (value) // week view
 					{
+						tooltip.SetToolTip(hscroll, "Change Week");
+
 						// Move to start of week
 						StartDate = startDate;
 					}
 					else // day view
 					{
+						tooltip.SetToolTip(hscroll, "Change Day");
+
 						// make sure the day for the selected task is visible
 						if (SelectedAppointment != null)
 							StartDate = SelectedAppointment.StartDate;
