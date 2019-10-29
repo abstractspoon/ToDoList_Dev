@@ -429,32 +429,35 @@ namespace Calendar
 			if (appt.StartDate == DateTime.MinValue)
 				return false;
 
-			StartDate = appt.StartDate;
-
-			// Ensure at least part of the task is in view
-			int startHour = (vscroll.Value / (slotsPerHour * slotHeight));
-			int endHour = (startHour + (vscroll.LargeChange / (slotsPerHour * slotHeight)));
-
-			if (partialOK)
+			if (!appt.IsLongAppt())
 			{
-				if (appt.StartDate.Hour > endHour)
+				StartDate = appt.StartDate;
+
+				// Ensure at least part of the task is in view
+				int startHour = (vscroll.Value / (slotsPerHour * slotHeight));
+				int endHour = (startHour + (vscroll.LargeChange / (slotsPerHour * slotHeight)));
+
+				if (partialOK)
 				{
-					ScrollToHour(appt.EndDate.Hour - 1);
+					if (appt.StartDate.Hour > endHour)
+					{
+						ScrollToHour(appt.EndDate.Hour - 1);
+					}
+					else if (appt.EndDate.Hour < startHour)
+					{
+						ScrollToHour(appt.StartDate.Hour + 1);
+					}
 				}
-				else if (appt.EndDate.Hour < startHour)
+				else
 				{
-					ScrollToHour(appt.StartDate.Hour + 1);
-				}
-			}
-			else
-			{
-				if (appt.StartDate.Hour < startHour)
-				{
-					ScrollToHour(appt.StartDate.Hour + 1);
-				}
-				else if (appt.EndDate.Hour > endHour)
-				{
-					ScrollToHour(appt.EndDate.Hour - endHour + 1);
+					if (appt.StartDate.Hour < startHour)
+					{
+						ScrollToHour(appt.StartDate.Hour + 1);
+					}
+					else if (appt.EndDate.Hour > endHour)
+					{
+						ScrollToHour(appt.EndDate.Hour - endHour + 1);
+					}
 				}
 			}
 			
