@@ -964,14 +964,14 @@ int Misc::Split(const CString& sText, CDWordArray& aValues, LPCTSTR szSep, BOOL 
 	return nNumValues;
 }
 
-int Misc::Split(const CString& sText, CStringArray& aValues, TCHAR cDelim, BOOL bAllowEmpty)
+int Misc::Split(const CString& sText, CStringArray& aValues, TCHAR cDelim, BOOL bAllowEmpty, BOOL bPreserveQuotes)
 {
 	TCHAR szSep[2] = { cDelim, 0 };
 
-	return Split(sText, aValues, szSep, bAllowEmpty);
+	return Split(sText, aValues, szSep, bAllowEmpty, bPreserveQuotes);
 }
 
-int Misc::Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep, BOOL bAllowEmpty)
+int Misc::Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep, BOOL bAllowEmpty, BOOL bPreserveQuotes)
 {
 	aValues.RemoveAll();
 	
@@ -998,7 +998,7 @@ int Misc::Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep, BOOL
 			if (bInQuotes)
 				sWord += sSep;
 			else
-				bAddWord = TRUE;
+				bAddWord = (nPos > 0);
 
 			nPos += nSepLen - 1; // minus 1 because the loop also increments
 		}
@@ -1008,8 +1008,15 @@ int Misc::Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep, BOOL
 			bInQuotes = !bInQuotes;
 
 			// Workaround to handle Quoted empty string as last word
-			if (!bInQuotes && bAllowEmpty && sWord.IsEmpty())
-				sWord = ' ';
+			if (!bPreserveQuotes)
+			{
+				if (!bInQuotes && bAllowEmpty && sWord.IsEmpty())
+					sWord = ' ';
+			}
+			else
+			{
+				sWord += chr;
+			}
 		}
 		else // everything else
 		{

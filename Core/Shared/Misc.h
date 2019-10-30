@@ -241,8 +241,8 @@ namespace Misc
 
 	int Split(const CString& sText, CDWordArray& aValues, LPCTSTR szSep = _T(""), BOOL bAllowEmpty = FALSE);
 	int Split(const CString& sText, CDWordArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE);
-	int Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep = _T(""), BOOL bAllowEmpty = FALSE);
- 	int Split(const CString& sText, CStringArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE);
+	int Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep = _T(""), BOOL bAllowEmpty = FALSE, BOOL bPreserveQuotes = FALSE);
+ 	int Split(const CString& sText, CStringArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE, BOOL bPreserveQuotes = FALSE);
  	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim = TRUE);
 	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim = TRUE);
 
