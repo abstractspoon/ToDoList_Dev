@@ -67,7 +67,7 @@ public:
 	BOOL HasTasklistArgument() const;
 	BOOL IsUserInputRequired() const;
 
-	static BOOL PrepareToolPath(CString& sToolPath);
+	static BOOL PrepareToolPath(CString& sToolPath, BOOL bToDoListOnly);
 	static CString GetPlaceHolder(CLA_TYPE nType);
 
 protected:

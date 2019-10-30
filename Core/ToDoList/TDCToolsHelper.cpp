@@ -139,12 +139,7 @@ BOOL CTDCToolsHelper::CheckToDoListVersionCompatibility(const CString& sToolPath
 CString CTDCToolsHelper::GetToolPath(const USERTOOL& tool)
 {
 	CString sToolPath = tool.sToolPath;
-	
-	if (!sToolPath.IsEmpty() && !::PathIsURL(sToolPath))
-	{
-		if (!CTDCToolsCmdlineParser::PrepareToolPath(sToolPath))
-			FileMisc::MakeFullPath(sToolPath, FileMisc::GetAppFolder());
-	}
+	CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, FALSE);
 
 	return sToolPath;
 }

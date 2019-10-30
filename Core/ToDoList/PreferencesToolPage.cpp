@@ -458,6 +458,7 @@ void CPreferencesToolPage::RebuildListCtrlImages()
 		
 		lvi.mask = LVIF_IMAGE;
 		lvi.iItem = nTool;
+		lvi.iImage = -1;
 		
 		CString sIconPath = m_lcTools.GetItemText(nTool, 3);
 
@@ -465,10 +466,8 @@ void CPreferencesToolPage::RebuildListCtrlImages()
 		{
 			CString sToolPath = m_lcTools.GetItemText(nTool, 1);
 
-			if (!CTDCToolsCmdlineParser::PrepareToolPath(sToolPath))
-				FileMisc::MakeFullPath(sToolPath, FileMisc::GetAppFolder());
-
-			lvi.iImage = m_ilSys.GetFileImageIndex(sToolPath);	
+			if (CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, FALSE))
+				lvi.iImage = m_ilSys.GetFileImageIndex(sToolPath);	
 		}
 		else
 		{
@@ -758,7 +757,7 @@ LRESULT CPreferencesToolPage::OnGetFileIcon(WPARAM wParam, LPARAM lParam)
 		{
 			CString sToolPath((LPCTSTR)lParam);
 			
-			if (CTDCToolsCmdlineParser::PrepareToolPath(sToolPath))
+			if (CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, TRUE))
 			{
 				static HICON hIcon = m_ilSys.ExtractFileIcon(sToolPath);
 				return (LRESULT)hIcon;

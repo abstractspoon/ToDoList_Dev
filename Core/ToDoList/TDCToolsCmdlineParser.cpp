@@ -414,7 +414,17 @@ CLA_TYPE CTDCToolsCmdlineParser::GetType(LPCTSTR szVarType) const
 	return nType;
 }
 
-BOOL CTDCToolsCmdlineParser::PrepareToolPath(CString& sToolPath)
+BOOL CTDCToolsCmdlineParser::PrepareToolPath(CString& sToolPath, BOOL bToDoListOnly)
 {
-	return sToolPath.Replace(_T("$(todolist)"), FileMisc::GetAppFilePath());
+	if (sToolPath.IsEmpty() || ::PathIsURL(sToolPath))
+		return FALSE;
+
+	if (sToolPath.Replace(_T("$(todolist)"), FileMisc::GetAppFilePath()))
+		return TRUE;
+
+	if (bToDoListOnly)
+		return FALSE;
+
+ 	FileMisc::MakeFullPath(sToolPath, FileMisc::GetAppFolder());
+ 	return FileMisc::FileExists(sToolPath);
 }
