@@ -43,7 +43,7 @@ protected:
 
 	CArray<TUINPUTITEM, TUINPUTITEM&> m_aInputItems;
 	CMapStringToString m_mapResults; // mapped by name
-	CRect m_rWindowOrg, m_rClientOrg;
+	CRect m_rWindowOrg;
 	UINT m_nDividerID, m_nHelpBtnID;
 	CWinHelpButton m_btnHelp;
 	BOOL m_bISODates;

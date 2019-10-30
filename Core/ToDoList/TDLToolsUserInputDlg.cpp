@@ -36,7 +36,6 @@ CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CCLArgArray& aArgs, BOOL bISO
 	: 
 	CRuntimeDlg(),
 	m_rWindowOrg(0, 0, 0, 0),
-	m_rClientOrg(0, 0, 0, 0),
 	m_nDividerID(0),
 	m_nHelpBtnID(0),
 	m_bISODates(bISODates),
@@ -337,9 +336,8 @@ void CTDLToolsUserInputDlg::SetInitialPos(LPCRECT pRect, DWORD dwStyle)
 {
 	CRuntimeDlg::SetInitialPos(pRect, dwStyle);
 
-	// Save off original window and client rects
+	// Save off original window
 	GetWindowRect(m_rWindowOrg);
-	GetClientRect(m_rClientOrg);
 }
 
 BOOL CTDLToolsUserInputDlg::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
