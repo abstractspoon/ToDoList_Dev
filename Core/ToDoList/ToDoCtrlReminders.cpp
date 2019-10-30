@@ -244,9 +244,15 @@ BOOL CToDoCtrlReminders::GetReminder(int nRem, TDCREMINDER& rem) const
 
 BOOL CToDoCtrlReminders::UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, const CTDCAttributeMap& mapAttrib)
 {
-	if (!pTDC || !aTaskIDs.GetSize() || !mapAttrib.GetCount())
+	// Sanity check
+	if (!pTDC || !mapAttrib.GetCount())
 	{
 		ASSERT(0);
+		return FALSE;
+	}
+
+	if (!aTaskIDs.GetSize())
+	{
 		return FALSE;
 	}
 	
