@@ -6,6 +6,7 @@
 #include "tdlToolsUserInputDlg.h"
 #include "tdcCustomattributeDef.h"
 #include "tdcStruct.h"
+#include "tdcSwitch.h"
 
 #include "..\shared\fileedit.h"
 #include "..\shared\filemisc.h"
@@ -31,6 +32,24 @@ const UINT LABEL_Y	= 7; // just the start pos
 const UINT SPACING	= 7; 
 const UINT BTN_CX	= 50;
 const UINT BTN_CY	= 14;
+
+/////////////////////////////////////////////////////////////////////////////
+
+// Needed by CArray
+CTDLToolsUserInputDlg::TUINPUTITEM& CTDLToolsUserInputDlg::TUINPUTITEM::operator=(const CTDLToolsUserInputDlg::TUINPUTITEM& tuii)
+{
+	nCtrlID = tuii.nCtrlID;
+	sLabel = tuii.sLabel;
+	sName = tuii.sName;
+	sDefValue = tuii.sDefValue;
+	aListValues.Copy(tuii.aListValues);
+	nType = tuii.nType;
+	nStyle = tuii.nStyle;
+	sizeDLU = tuii.sizeDLU;
+	pCtrl = tuii.pCtrl; 
+
+	return *this;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CToolsUserInputDlg dialog
@@ -80,7 +99,7 @@ CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CCLArgArray& aArgs, const TDC
 				break;
 
 			case CLAT_USERTEXT:
-				if (ArgumentHasListData(arg))
+				if (GetArgumentListData(arg, tuii.aListValues))
 				{
 					tuii.pCtrl = new CComboBox;
 					tuii.nStyle = CBS_DROPDOWN | CBS_SORT | WS_TABSTOP;
@@ -102,6 +121,9 @@ CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CCLArgArray& aArgs, const TDC
 				tuii.sizeDLU.cx = 70;
 				tuii.sizeDLU.cy = 13;
 				break;
+
+			default:
+				ASSERT(0);
 		}
 
 		if (tuii.pCtrl)
@@ -270,6 +292,19 @@ BOOL CTDLToolsUserInputDlg::OnInitDialog()
 				}
 			}
 			break;
+
+		case CLAT_USERTEXT:
+			if (tuii.pCtrl->IsKindOf(RUNTIME_CLASS(CComboBox)))
+			{
+				ASSERT(tuii.aListValues.GetSize());
+
+				CComboBox* pCombo = (CComboBox*)tuii.pCtrl;
+				SetComboBoxItems(*pCombo, tuii.aListValues);
+
+				if (!tuii.sDefValue.IsEmpty())
+					pCombo->SelectString(-1, tuii.sDefValue);
+			}
+			break;
 		}
 	}
 
@@ -361,49 +396,59 @@ BOOL CTDLToolsUserInputDlg::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 	return TRUE;
 }
 
-BOOL CTDLToolsUserInputDlg::ArgumentHasListData(const CMDLINEARG& arg) const
+int CTDLToolsUserInputDlg::GetArgumentListData(const CMDLINEARG& arg, CStringArray& aItems) const
 {
 	if (arg.sRelatedSwitch.IsEmpty())
-		return FALSE;
+		return 0;
 
 	CString sSwitch(arg.sRelatedSwitch), sValue;
 	
-	if (Misc::Split(sSwitch, sValue, ' ') && (sSwitch == _T("ca")))
+	if (Misc::Split(sSwitch, sValue, ' ') && (sSwitch == SWITCH_TASKCUSTOMATTRIB))
 	{
 		// It's a custom attribute
 		int nCustAttrib = m_aCustAttribDefs.Find(sValue);
 
 		if (nCustAttrib == -1)
-			return FALSE;
+			return 0;
 
 		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustAttribDefs[nCustAttrib];
 
 		if (!attribDef.IsList())
-			return FALSE;
+			return 0;
 
-		return (attribDef.aAutoListData.GetSize() || attribDef.aDefaultListData.GetSize());
+		// else
+		aItems.Copy(attribDef.aAutoListData);
+		Misc::AddUniqueItems(attribDef.aDefaultListData, aItems);
 	}
-	else if (sValue.IsEmpty())
+	else // built-in attribute
 	{
-		if (sSwitch == _T("ab"))
-			return !m_tdlListData.aAllocBy.IsEmpty();
+		ASSERT(sValue.IsEmpty());
 
-		if (sSwitch == _T("at"))
-			return !m_tdlListData.aAllocTo.IsEmpty();
-
-		if (sSwitch == _T("c"))
-			return !m_tdlListData.aCategory.IsEmpty();
-
-		if (sSwitch == _T("s"))
-			return !m_tdlListData.aStatus.IsEmpty();
-
-		if (sSwitch == _T("tg"))
-			return !m_tdlListData.aTags.IsEmpty();
-
-		if (sSwitch == _T("tv"))
-			return !m_tdlListData.aVersion.IsEmpty();
+		if (sSwitch == SWITCH_TASKALLOCBY)
+		{
+			aItems.Copy(m_tdlListData.aAllocBy);
+		}
+		else if (sSwitch == SWITCH_TASKALLOCTO)
+		{
+			aItems.Copy(m_tdlListData.aAllocTo);
+		}
+		else if (sSwitch == SWITCH_TASKCATEGORY)
+		{
+			aItems.Copy(m_tdlListData.aCategory);
+		}
+		else if (sSwitch == SWITCH_TASKSTATUS)
+		{
+			aItems.Copy(m_tdlListData.aStatus);
+		}
+		else if (sSwitch == SWITCH_TASKTAGS)
+		{
+			aItems.Copy(m_tdlListData.aTags);
+		}
+		else if (sSwitch == SWITCH_TASKVERSION)
+		{
+			aItems.Copy(m_tdlListData.aVersion);
+		}
 	}
 
-	// all else
-	return FALSE;
+	return aItems.GetSize();
 }

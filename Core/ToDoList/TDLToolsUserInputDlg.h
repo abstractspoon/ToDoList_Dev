@@ -37,10 +37,14 @@ public:
 protected:
 	struct TUINPUTITEM
 	{
+		// Needed by CArray
+		TUINPUTITEM& operator=(const TUINPUTITEM& tuii);
+
 		UINT nCtrlID;
 		CString sLabel; // this will be a simple static text item
 		CString sName;
 		CString sDefValue;
+		CStringArray aListValues;
 		CLA_TYPE nType;
 		UINT nStyle;
 		CSize sizeDLU;
@@ -79,7 +83,7 @@ protected:
 
 protected:
 	void SetInitialPos(LPCRECT pRect, DWORD dwStyle);
-	BOOL ArgumentHasListData(const CMDLINEARG& arg) const;
+	int GetArgumentListData(const CMDLINEARG& arg, CStringArray& aItems) const;
 };
 
 //{{AFX_INSERT_LOCATION}}
