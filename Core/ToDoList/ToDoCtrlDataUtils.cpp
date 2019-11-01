@@ -1194,7 +1194,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCU
 }
 
 int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSortBy, BOOL bAscending, 
-									BOOL bSortDueTodayHigh, BOOL bIncTime) const
+									BOOL bCheckDueToday, BOOL bIncTime) const
 {
 	// sanity check
 	if (!dwTask1ID  || !dwTask2ID || (dwTask1ID == dwTask2ID))
@@ -1302,18 +1302,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 
 		case TDCC_DONEDATE:
 			{
-				bDone1 = CheckGetIsTaskDone(bDone1, pTDI1, pTDS1);
-				bDone2 = CheckGetIsTaskDone(bDone2, pTDI2, pTDS2);
-
-				COleDateTime date1(pTDI1->dateDone);
-				COleDateTime date2(pTDI2->dateDone);
-
-				// sort tasks 'good as done' between done and not-done
-				if (bDone1 && !CDateHelper::IsDateSet(date1))
-					date1 = 0.1;
-
-				if (bDone2 && !CDateHelper::IsDateSet(date2))
-					date2 = 0.1;
+				COleDateTime date1 = CalcTaskDoneDate(bDone1, pTDI1, pTDS1);
+				COleDateTime date2 = CalcTaskDoneDate(bDone2, pTDI2, pTDS2);
 
 				nCompare = Compare(date1, date2, bIncTime, TDCD_DONE);
 			}
@@ -1321,20 +1311,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 
 		case TDCC_DUEDATE:
 			{
-				bDone1 = CheckGetIsTaskDone(bDone1, pTDI1, pTDS1);
-				bDone2 = CheckGetIsTaskDone(bDone2, pTDI2, pTDS2);
-
-				COleDateTime date1, date2;
-
-				if (bDone1 && !bHideDone)
-					date1 = pTDI1->dateDue;
-				else
-					date1 = m_calculator.GetTaskDueDate(pTDI1, pTDS1);
-
-				if (bDone2 && !bHideDone)
-					date2 = pTDI2->dateDue;
-				else
-					date2 = m_calculator.GetTaskDueDate(pTDI2, pTDS2);
+				COleDateTime date1 = CalcTaskDueDate(bDone1, pTDI1, pTDS1);
+				COleDateTime date2 = CalcTaskDueDate(bDone2, pTDI2, pTDS2);
 
 				nCompare = Compare(date1, date2, bIncTime, TDCD_DUE);
 			}
@@ -1359,20 +1337,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 
 		case TDCC_STARTDATE:
 			{
-				bDone1 = CheckGetIsTaskDone(bDone1, pTDI1, pTDS1);
-				bDone2 = CheckGetIsTaskDone(bDone2, pTDI2, pTDS2);
-
-				COleDateTime date1, date2;
-
-				if (bDone1 && !bHideDone)
-					date1 = pTDI1->dateStart;
-				else
-					date1 = m_calculator.GetTaskStartDate(pTDI1, pTDS1);
-
-				if (bDone2 && !bHideDone)
-					date2 = pTDI2->dateStart;
-				else
-					date2 = m_calculator.GetTaskStartDate(pTDI2, pTDS2);
+				COleDateTime date1 = CalcTaskStartDate(bDone1, pTDI1, pTDS1);
+				COleDateTime date2 = CalcTaskStartDate(bDone2, pTDI2, pTDS2);
 
 				nCompare = Compare(date1, date2, bIncTime, TDCD_START);
 			}
@@ -1380,53 +1346,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 
 		case TDCC_PRIORITY:
 			{
-				// done items have even less than zero priority!
-				// and due items have greater than the highest priority
-				int nPriority1 = pTDI1->nPriority; // default
-				int nPriority2 = pTDI2->nPriority; // default
-
-				BOOL bUseHighestPriority = m_data.HasStyle(TDCS_USEHIGHESTPRIORITY);
-				BOOL bDoneHaveLowestPriority = m_data.HasStyle(TDCS_DONEHAVELOWESTPRIORITY);
-				BOOL bDueHaveHighestPriority = m_data.HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY);
-
-				bDone1 = CheckGetIsTaskDone(bDone1, pTDI1, pTDS1);
-				bDone2 = CheckGetIsTaskDone(bDone2, pTDI2, pTDS2);
-
-				// item1
-				if (bDone1 && bDoneHaveLowestPriority)
-				{
-					nPriority1 = -1;
-				}
-				else if (bDueHaveHighestPriority && m_calculator.IsTaskOverDue(pTDI1, pTDS1))
-				{
-					nPriority1 = pTDI1->nPriority + 22; // 'overdue' sort higher than 'due today'
-				}
-				else if (bDueHaveHighestPriority && bSortDueTodayHigh && m_calculator.IsTaskDueToday(pTDI1, pTDS1))
-				{
-					nPriority1 = pTDI1->nPriority + 11;
-				}
-				else if (bUseHighestPriority)
-				{
-					nPriority1 = m_calculator.GetTaskHighestPriority(pTDI1, pTDS1);
-				}
-
-				// item2
-				if (bDone2 && bDoneHaveLowestPriority)
-				{
-					nPriority2 = -1;
-				}
-				else if (bDueHaveHighestPriority && m_calculator.IsTaskOverDue(pTDI2, pTDS2))
-				{
-					nPriority2 = pTDI2->nPriority + 22; // 'overdue' sort higher than 'due today'
-				}
-				else if (bDueHaveHighestPriority && bSortDueTodayHigh && m_calculator.IsTaskDueToday(pTDI2, pTDS2))
-				{
-					nPriority2 = pTDI2->nPriority + 11;
-				}
-				else if (bUseHighestPriority)
-				{
-					nPriority2 = m_calculator.GetTaskHighestPriority(pTDI2, pTDS2);
-				}
+				int nPriority1 = CalcTaskPriority(bCheckDueToday, bDone1, pTDI1, pTDS1);
+				int nPriority2 = CalcTaskPriority(bCheckDueToday, bDone2, pTDI2, pTDS2);
 
 				nCompare = Compare(nPriority1, nPriority2);
 			}
@@ -1434,36 +1355,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 
 		case TDCC_RISK:
 			{
-				// done items have even less than zero priority!
-				// and due items have greater than the highest priority
-				int nRisk1 = pTDI1->nRisk; // default
-				int nRisk2 = pTDI2->nRisk; // default
-
-				BOOL bUseHighestRisk = m_data.HasStyle(TDCS_USEHIGHESTRISK);
-				BOOL bDoneHaveLowestRisk = m_data.HasStyle(TDCS_DONEHAVELOWESTRISK);
-
-				bDone1 = CheckGetIsTaskDone(bDone1, pTDI1, pTDS1);
-				bDone2 = CheckGetIsTaskDone(bDone2, pTDI2, pTDS2);
-
-				// item1
-				if (bDone1 && bDoneHaveLowestRisk)
-				{
-					nRisk1 = -1;
-				}
-				else if (bUseHighestRisk)
-				{
-					nRisk1 = m_calculator.GetTaskHighestRisk(pTDI1, pTDS1);
-				}
-
-				// item2
-				if (bDone2 && bDoneHaveLowestRisk)
-				{
-					nRisk2 = -1;
-				}
-				else if (bUseHighestRisk)
-				{
-					nRisk2 = m_calculator.GetTaskHighestRisk(pTDI2, pTDS2);
-				}
+				int nRisk1 = CalcTaskRisk(bDone1, pTDI1, pTDS1);
+				int nRisk2 = CalcTaskRisk(bDone2, pTDI2, pTDS2);
 
 				nCompare = Compare(nRisk1, nRisk2);
 			}
@@ -1523,12 +1416,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 			break;
 
 		case TDCC_ICON:
-			{
-				CString sIcon1 = pTDI1->sIcon; 
-				CString sIcon2 = pTDI2->sIcon; 
-
-				nCompare = Compare(sIcon1, sIcon2);
-			}
+			nCompare = Compare(pTDI1->sIcon, pTDI2->sIcon);
 			break;
 
 		case TDCC_PARENTID:
@@ -1627,6 +1515,87 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 	}
 
 	return bAscending ? nCompare : -nCompare;
+}
+
+COleDateTime CTDCTaskComparer::CalcTaskDueDate(BOOL bDone, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	BOOL bHideDone = m_data.HasStyle(TDCS_HIDESTARTDUEFORDONETASKS);
+
+	bDone = CheckGetIsTaskDone(bDone, pTDI, pTDS);
+
+	if (bDone && !bHideDone)
+		return pTDI->dateDue;
+	
+	// else
+	return m_calculator.GetTaskDueDate(pTDI, pTDS);
+}
+
+COleDateTime CTDCTaskComparer::CalcTaskStartDate(BOOL bDone, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	BOOL bHideDone = m_data.HasStyle(TDCS_HIDESTARTDUEFORDONETASKS);
+
+	bDone = CheckGetIsTaskDone(bDone, pTDI, pTDS);
+
+	if (bDone && !bHideDone)
+		return pTDI->dateStart;
+
+	// else
+	return m_calculator.GetTaskStartDate(pTDI, pTDS);
+}
+
+COleDateTime CTDCTaskComparer::CalcTaskDoneDate(BOOL bDone, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	bDone = CheckGetIsTaskDone(bDone, pTDI, pTDS);
+
+	// sort tasks 'good as done' between done and not-done
+	if (bDone && !CDateHelper::IsDateSet(pTDI->dateDone))
+		return 0.1;
+
+	return pTDI->dateDone;
+}
+
+int CTDCTaskComparer::CalcTaskPriority(BOOL bCheckDueToday, BOOL bDone, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	BOOL bUseHighestPriority = m_data.HasStyle(TDCS_USEHIGHESTPRIORITY);
+	BOOL bDoneHaveLowestPriority = m_data.HasStyle(TDCS_DONEHAVELOWESTPRIORITY);
+	BOOL bDueHaveHighestPriority = m_data.HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY);
+
+	bDone = CheckGetIsTaskDone(bDone, pTDI, pTDS);
+
+	// done items have even less than zero priority!
+	// and due items have greater than the highest priority
+	if (bDone && bDoneHaveLowestPriority)
+		return -1;
+
+	if (bDueHaveHighestPriority && m_calculator.IsTaskOverDue(pTDI, pTDS))
+		return (pTDI->nPriority + 22); // 'overdue' sort higher than 'due today'
+
+	if (bDueHaveHighestPriority && bCheckDueToday && m_calculator.IsTaskDueToday(pTDI, pTDS))
+		return (pTDI->nPriority + 11);
+
+	if (bUseHighestPriority)
+		return m_calculator.GetTaskHighestPriority(pTDI, pTDS);
+
+	// else 
+	return pTDI->nPriority;
+}
+
+int CTDCTaskComparer::CalcTaskRisk(BOOL bDone, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	BOOL bUseHighestRisk = m_data.HasStyle(TDCS_USEHIGHESTRISK);
+	BOOL bDoneHaveLowestRisk = m_data.HasStyle(TDCS_DONEHAVELOWESTRISK);
+
+	bDone = CheckGetIsTaskDone(bDone, pTDI, pTDS);
+
+	// done items have even less than zero priority!
+	// and due items have greater than the highest priority
+	if (bDone && bDoneHaveLowestRisk)
+		return -1;
+
+	if (bUseHighestRisk)
+		return m_calculator.GetTaskHighestRisk(pTDI, pTDS);
+
+	return pTDI->nRisk;
 }
 
 BOOL CTDCTaskComparer::CheckGetIsTaskDone(BOOL bDone, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
