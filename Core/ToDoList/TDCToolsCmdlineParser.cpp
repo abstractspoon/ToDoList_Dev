@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "TDCToolsCmdlineParser.h"
+#include "TDCStartupOptions.h"
 
 #include "..\shared\datehelper.h"
 #include "..\shared\misc.h"
@@ -308,6 +309,7 @@ BOOL CTDCToolsCmdlineParser::HasArgument(CLA_TYPE nType) const
 void CTDCToolsCmdlineParser::ParseCmdLine()
 {
 	CString sCmdLine(m_sCmdLine); // preserve original
+	CStringArray aAttribSwitches;
 
 	int nDollar = sCmdLine.Find('$');
 
@@ -358,15 +360,37 @@ void CTDCToolsCmdlineParser::ParseCmdLine()
 					if (sName.IsEmpty() || (GetType(sName) != CLAT_NONE))
 					{
 						ASSERT(0);
+						continue;
 					}
-					else
-					{
-						cla.sName = Misc::ToLower(sName);
-						cla.sLabel = sLabel;
-						cla.sDefValue = sDefValue;
 
-						m_aArgs.Add(cla);
+					cla.sName = Misc::ToLower(sName);
+					cla.sLabel = sLabel;
+					cla.sDefValue = sDefValue;
+
+					// If this is a user type then look for a preceding 
+					// attribute switch for which we might display a list of values
+					if (IsUserInputType(cla.nType))
+					{
+						if (aAttribSwitches.IsEmpty())
+							Misc::Split(sCmdLine, aAttribSwitches, '-', FALSE, TRUE);
+
+						int nSwitch = aAttribSwitches.GetSize();
+
+						while (nSwitch--)
+						{
+							CString sAttribSwitch(aAttribSwitches[nSwitch]);
+
+							if (sAttribSwitch.Find(sVarArgs) != -1)
+							{
+								CString sUnused;
+								
+								if (Misc::Split(sAttribSwitch, sUnused, '$'))
+									cla.sRelatedSwitch = sAttribSwitch.Trim();
+							}
+						}
 					}
+					
+					m_aArgs.Add(cla);
 				}
 				break;
 

@@ -42,7 +42,8 @@ struct CMDLINEARG
 	CString sLabel;
 	CString sDefValue;
 
-	CString sPlaceHolder; // for when we want to replace it
+	CString sRelatedSwitch;
+	CString sPlaceHolder; // The text to be replaced
 };
 
 typedef CArray<CMDLINEARG, CMDLINEARG&> CCLArgArray;
