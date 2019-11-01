@@ -6615,7 +6615,7 @@ BOOL CToDoCtrl::RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_
 			SEARCHPARAMS params;
 			params.aRules.Add(SEARCHPARAM(TDCA_FLAG, FOP_SET));
 
-			bRemove = !m_matcher.FindTasks(pTDI, pTDS, params, aResults);
+			bRemove = !m_matcher.FindTasks(pTDI, pTDS, params, aResults, FALSE);
 		}
 		else
 			bRemove = TRUE;
@@ -9700,7 +9700,7 @@ BOOL CToDoCtrl::MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD
 		CDWordArray aTaskIDs;
 
 		// Task name must be unique else treat it as a new task
-		if (m_matcher.FindTasks(TDCA_TASKNAME, FOP_EQUALS, tasks.GetTaskTitle(hTask), aTaskIDs) == 1)
+		if (m_matcher.FindTasks(TDCA_TASKNAME, FOP_EQUALS, tasks.GetTaskTitle(hTask), aTaskIDs, FALSE) == 1)
 			dwTaskID = aTaskIDs[0];
 	}
 
@@ -10345,7 +10345,7 @@ TDC_FILE CToDoCtrl::CheckOut(CString& sCheckedOutTo, BOOL bForce)
 
 int CToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const
 {
-	return TCF().FindTasks(params, aResults);
+	return TCF().FindTasks(params, aResults, HasDueTodayColor());
 }
 
 BOOL CToDoCtrl::HasOverdueTasks() const
@@ -10373,6 +10373,12 @@ BOOL CToDoCtrl::SelectTask(const CString& sPart, TDC_SELECTTASK nSelect)
 BOOL CToDoCtrl::SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL /*bFindReplace*/)
 {
+	if (!SEARCHPARAM::GetAttribType(nAttrib, FALSE) == FT_STRING)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	SEARCHPARAM rule(nAttrib, FOP_INCLUDES, sPart);
 	rule.SetMatchWholeWord(bWholeWord);
 
@@ -10416,7 +10422,7 @@ BOOL CToDoCtrl::SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATT
 		return FALSE;
 
 	SEARCHRESULT result;
-	HTREEITEM htiMatch = TCF().FindNextTask(htiStart, params, result, bForwards);
+	HTREEITEM htiMatch = TCF().FindNextTask(htiStart, params, result, bForwards, FALSE);
 
 	if (!htiMatch)
 		return FALSE;
@@ -11420,7 +11426,7 @@ void CToDoCtrl::SearchAndExpand(const SEARCHPARAMS& params, BOOL bExpand)
 {
 	// perform the search
 	CResultArray aResults;
-	int nNumRes = TCF().FindTasks(params, aResults);
+	int nNumRes = FindTasks(params, aResults);
 	
 	// do the expansion
 	for (int nRes = 0; nRes < nNumRes; nRes++)

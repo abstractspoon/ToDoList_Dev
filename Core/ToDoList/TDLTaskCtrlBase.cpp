@@ -2204,7 +2204,7 @@ BOOL CTDLTaskCtrlBase::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 	BOOL bChange = CheckUpdateDueBrushColor(crDue, m_crDue, m_brDue);
 	bChange |= CheckUpdateDueBrushColor(crDueToday, m_crDueToday, m_brDueToday);
 
-	if (bChange)		
+	if (bChange)
 	{
 		if (GetSafeHwnd())
 		{

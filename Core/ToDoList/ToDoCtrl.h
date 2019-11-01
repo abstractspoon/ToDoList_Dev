@@ -163,6 +163,7 @@ public:
 	COLORREF GetPriorityColor(int nPriority) const { return m_taskTree.GetPriorityColor(nPriority); }
 	void GetStartedTaskColors(COLORREF& crStarted, COLORREF& crStartedToday) { m_taskTree.GetStartedTaskColors(crStarted, crStartedToday); }
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) { m_taskTree.GetDueTaskColors(crDue, crDueToday); }
+	BOOL HasDueTodayColor() const { return m_taskTree.HasDueTodayColor(); }
 
 	void SetUITheme(const CUIThemeFile& theme);
 	void ResizeAttributeColumnsToFit();

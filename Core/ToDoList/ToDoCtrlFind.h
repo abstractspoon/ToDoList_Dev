@@ -96,9 +96,9 @@ public:
 	BOOL FindVisibleTaskWithTime(TDC_DATE nDate) const;
 
 	// Finds tasks only in the tree
-	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
-	HTREEITEM FindFirstTask(const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards = TRUE) const;
-	HTREEITEM FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards = TRUE) const;
+	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults, BOOL bCheckDueToday) const;
+	HTREEITEM FindFirstTask(const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards, BOOL bCheckDueToday) const;
+	HTREEITEM FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards, BOOL bCheckDueToday) const;
 
 	// For debugging
 	//void WalkTree(BOOL bVisibleOnly) const;
@@ -112,7 +112,7 @@ protected:
 	CTDCTaskFormatter m_formatter;
 
 protected:
-	void FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResultArray& aResults) const;
+	void FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResultArray& aResults, BOOL bCheckDueToday) const;
 
 	BOOL FindVisibleTaskWithDueTime(HTREEITEM hti) const;
 	BOOL FindVisibleTaskWithStartTime(HTREEITEM hti) const;

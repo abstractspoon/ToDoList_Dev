@@ -608,7 +608,7 @@ int CFilteredToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResu
 		return CTabbedToDoCtrl::FindTasks(params, aResults);
 	
 	// else all tasks
-	return m_matcher.FindTasks(params, aResults);
+	return m_matcher.FindTasks(params, aResults, HasDueTodayColor());
 }
 
 BOOL CFilteredToDoCtrl::HasAdvancedFilter() const 
@@ -817,7 +817,7 @@ BOOL CFilteredToDoCtrl::WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 		}
 		else // rest of attributes
 		{
-			bWantTask = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, result);
+			bWantTask = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, result, HasDueTodayColor());
 		}
 
 		if (bWantTask && pTDS->HasSubTasks())
@@ -987,7 +987,7 @@ void CFilteredToDoCtrl::RebuildList(const SEARCHPARAMS& filter)
 
 		// do the find
 		CResultArray aResults;
-		m_matcher.FindTasks(filter, aResults);
+		m_matcher.FindTasks(filter, aResults, HasDueTodayColor());
 
 		// add tasks to list
 		for (int nRes = 0; nRes < aResults.GetSize(); nRes++)
@@ -1062,7 +1062,7 @@ void CFilteredToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 				const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
 
 				if (pTDS)
-					bAdd = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, result);
+					bAdd = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, result, FALSE);
 			}
 		}
 
@@ -1116,6 +1116,22 @@ DWORD CFilteredToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 	}
 
 	return CTabbedToDoCtrl::SetStyle(nStyle, bEnable);
+}
+
+void CFilteredToDoCtrl::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
+{
+	// See if we need to refilter
+	BOOL bHadDueToday = m_taskTree.HasDueTodayColor();
+
+	CTabbedToDoCtrl::SetDueTaskColors(crDue, crDueToday);
+
+	if (bHadDueToday != m_taskTree.HasDueTodayColor())
+	{
+		// Because the 'Due Today' colour effectively alters 
+		// a task's priority we can treat it as a priority edit
+		if (m_filter.ModNeedsRefilter(TDCA_PRIORITY, m_aCustomAttribDefs))
+			RefreshFilter();
+	}
 }
 
 BOOL CFilteredToDoCtrl::SplitSelectedTask(int nNumSubtasks)
@@ -1299,7 +1315,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 
 		// This will handle custom and 'normal' filters
 		m_filter.BuildFilterQuery(params, m_aCustomAttribDefs);
-		bNeedRefilter = !m_matcher.TaskMatches(dwModTaskID, params, result);
+		bNeedRefilter = !m_matcher.TaskMatches(dwModTaskID, params, result, FALSE);
 		
 		// extra handling for 'Find Tasks' filters 
 		if (bNeedRefilter && HasAdvancedFilter())
@@ -1484,7 +1500,7 @@ BOOL CFilteredToDoCtrl::FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const S
 			SEARCHRESULT result;
 
 			// This will handle custom and 'normal' filters
-			if (m_matcher.TaskMatches(dwTaskID, params, result))
+			if (m_matcher.TaskMatches(dwTaskID, params, result, FALSE))
 				return TRUE;
 		}
 	}

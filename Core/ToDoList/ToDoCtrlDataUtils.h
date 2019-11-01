@@ -180,16 +180,16 @@ class CTDCTaskMatcher
 public:
 	CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders);
 
-	int FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, CResultArray& aResults) const;
-	int FindTasks(const SEARCHPARAMS& query, CResultArray& aResults) const;
-	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, CResultArray& aResults) const;
+	int FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, CResultArray& aResults, BOOL bCheckDueToday) const;
+	int FindTasks(const SEARCHPARAMS& query, CResultArray& aResults, BOOL bCheckDueToday) const;
+	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, CResultArray& aResults, BOOL bCheckDueToday) const;
 
-	int FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, CDWordArray& aTaskIDs) const;
-	int FindTasks(const SEARCHPARAMS& query, CDWordArray& aTaskIDs) const;
-	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, CDWordArray& aTaskIDs) const;
+	int FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, CDWordArray& aTaskIDs, BOOL bCheckDueToday) const;
+	int FindTasks(const SEARCHPARAMS& query, CDWordArray& aTaskIDs, BOOL bCheckDueToday) const;
+	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, CDWordArray& aTaskIDs, BOOL bCheckDueToday) const;
 
-	BOOL TaskMatches(DWORD dwTaskID, const SEARCHPARAMS& query, SEARCHRESULT& result) const;
-	BOOL TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, SEARCHRESULT& result) const;
+	BOOL TaskMatches(DWORD dwTaskID, const SEARCHPARAMS& query, SEARCHRESULT& result, BOOL bCheckDueToday) const;
+	BOOL TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, SEARCHRESULT& result, BOOL bCheckDueToday) const;
 
 	static int Convert(const CResultArray& aResults, CDWordArray& aTaskIDs);
 
@@ -201,7 +201,7 @@ protected:
 	CTDCTaskFormatter m_formatter;
 
 protected:
-	BOOL AnyTaskParentMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, SEARCHRESULT& result) const;
+	BOOL AnyTaskParentMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, SEARCHRESULT& result, BOOL bCheckDueToday) const;
 
 	BOOL ValueMatches(const COleDateTime& date, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bIncludeTime, TDC_DATE nDate) const;
 	BOOL ValueMatches(double dValue, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
@@ -226,7 +226,7 @@ class CTDCTaskComparer
 public:
 	CTDCTaskComparer(const CToDoCtrlData& data);
 
-	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSortBy, BOOL bAscending, BOOL bSortDueTodayHigh, BOOL bIncTime = FALSE) const;
+	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSortBy, BOOL bAscending, BOOL bCheckDueToday, BOOL bIncTime = FALSE) const;
 	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bAscending) const;
 
 protected:
