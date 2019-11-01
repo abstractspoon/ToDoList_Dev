@@ -60,17 +60,17 @@ CTDCToolsHelper::~CTDCToolsHelper()
 	
 }
 
-BOOL CTDCToolsHelper::RunTool(const USERTOOL& tool, const USERTOOLARGS& args)
+BOOL CTDCToolsHelper::RunTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 {
-	return RunTestTool(tool, args, FALSE);
+	return RunTestTool(tool, args, aCustAttribDefs, FALSE);
 }
 
-BOOL CTDCToolsHelper::TestTool(const USERTOOL& tool, const USERTOOLARGS& args)
+BOOL CTDCToolsHelper::TestTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 {
-	return RunTestTool(tool, args, TRUE);
+	return RunTestTool(tool, args, aCustAttribDefs, TRUE);
 }
 
-BOOL CTDCToolsHelper::RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, BOOL bTest)
+BOOL CTDCToolsHelper::RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bTest)
 {
 	CString sToolPath(GetToolPath(tool));
 
@@ -90,7 +90,7 @@ BOOL CTDCToolsHelper::RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args
 	CString sCmdline;
 	BOOL bEscapeSpaces = (WebMisc::IsBrowser(sToolPath) || WebMisc::IsURL(tool.sCmdline));
 	
-	if (!PrepareCmdline(tool, args, bEscapeSpaces, sCmdline))
+	if (!PrepareCmdline(tool, args, aCustAttribDefs, bEscapeSpaces, sCmdline))
 	{
 		return FALSE; // user cancelled dialog
 	}
@@ -183,7 +183,8 @@ HICON CTDCToolsHelper::GetToolIcon(CSysImageList& sil, const USERTOOL& tool)
 	return hIcon;
 }
 
-BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, BOOL bEscapeSpaces, CString& sCmdline)
+BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
+									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bEscapeSpaces, CString& sCmdline)
 {
 	// do necessary substitutions
 	CTDCToolsCmdlineParser tcp(tool.sCmdline);
@@ -245,7 +246,7 @@ BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& a
 		CCLArgArray aArgs;
 		int nArg = tcp.GetUserArguments(aArgs);
 
-		CTDLToolsUserInputDlg dialog(aArgs, m_bISODates);
+		CTDLToolsUserInputDlg dialog(aArgs, args.tdlListData, aCustAttribDefs, m_bISODates);
 		
 		if (dialog.DoModal(tool.sToolName) != IDOK)
 			return FALSE;

@@ -11,6 +11,7 @@
 
 #include "TDCToolsCmdlineParser.h"
 #include "TDCcustomattribdata.h"
+#include "TDCStruct.h"
 
 #include "..\shared\menuiconmgr.h"
 
@@ -40,6 +41,9 @@ struct USERTOOLARGS
 	CString sTaskPath;
 
 	CTDCCustomAttributeDataMap mapTaskCustData;
+
+	// For generating combo content
+	TDCAUTOLISTDATA tdlListData;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -60,8 +64,8 @@ public:
 	CTDCToolsHelper(BOOL bTDLEnabled, BOOL bISODates, UINT nStart, int nSize = 16);
 	virtual ~CTDCToolsHelper();
 	
-	BOOL RunTool(const USERTOOL& tool, const USERTOOLARGS& args);
-	BOOL TestTool(const USERTOOL& tool, const USERTOOLARGS& args);
+	BOOL RunTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+	BOOL TestTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 	void AppendToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter);
 	void RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter);
 
@@ -73,12 +77,12 @@ protected:
 	BOOL m_bTDLEnabled, m_bISODates;
 	
 protected:
-	BOOL PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
+	BOOL PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, 
 						BOOL bEscapeSpaces, CString& sCmdline);
    	LPCTSTR GetFileFilter();
 	LPCTSTR GetDefaultFileExt();
 	BOOL CheckToDoListVersionCompatibility(const CString& sToolPath) const;
-	BOOL RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, BOOL bTest);
+	BOOL RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bTest);
 
 	static CString GetToolPath(const USERTOOL& tool);
 	static BOOL GetToolPaths(const USERTOOL& tool, CString& sToolPath, CString& sIconPath);

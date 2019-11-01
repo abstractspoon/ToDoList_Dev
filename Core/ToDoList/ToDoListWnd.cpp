@@ -7085,7 +7085,7 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 		USERTOOLARGS args;
 		PopulateToolArgs(args);
 
-		th.RunTool(ut, args);
+		th.RunTool(ut, args, GetToDoCtrl().GetCustomAttributeDefs());
 	}
 }
 
@@ -9065,6 +9065,7 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 		args.sTaskAllocTo = Misc::FormatArray(aAllocTo, _T("|"));
 
 	tdc.GetSelectedTaskCustomAttributeData(args.mapTaskCustData, TRUE);
+	tdc.GetAutoListData(args.tdlListData);
 }
 
 LRESULT CToDoListWnd::OnPreferencesTestTool(WPARAM /*wp*/, LPARAM lp)
@@ -9074,6 +9075,7 @@ LRESULT CToDoListWnd::OnPreferencesTestTool(WPARAM /*wp*/, LPARAM lp)
 	if (pTool)
 	{
 		const CPreferencesDlg& prefs = Prefs();
+		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 		CTDCToolsHelper th(prefs.GetEnableTDLExtension(),
 						   prefs.GetDisplayDatesInISO(),
@@ -9082,7 +9084,7 @@ LRESULT CToDoListWnd::OnPreferencesTestTool(WPARAM /*wp*/, LPARAM lp)
 		USERTOOLARGS args;
 		PopulateToolArgs(args);
 
-		th.TestTool(*pTool, args);
+		th.TestTool(*pTool, args, tdc.GetCustomAttributeDefs());
 	}
 	
 	return 0;

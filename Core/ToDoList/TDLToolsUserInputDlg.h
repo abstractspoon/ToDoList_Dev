@@ -16,13 +16,19 @@
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CTDCCustomAttribDefinitionArray;
+
+struct TDCAUTOLISTDATA;
+
+/////////////////////////////////////////////////////////////////////////////
 // CToolsUserInputDlg dialog
 
 class CTDLToolsUserInputDlg : public CRuntimeDlg
 {
 // Construction
 public:
-	CTDLToolsUserInputDlg(const CCLArgArray& aArgs, BOOL bISODates);
+	CTDLToolsUserInputDlg(const CCLArgArray& aArgs, const TDCAUTOLISTDATA& tdlListData, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bISODates);
 	virtual ~CTDLToolsUserInputDlg();
 
 	int DoModal(LPCTSTR szTitle);
@@ -47,6 +53,9 @@ protected:
 	UINT m_nDividerID, m_nHelpBtnID;
 	CWinHelpButton m_btnHelp;
 	BOOL m_bISODates;
+
+	const TDCAUTOLISTDATA& m_tdlListData;
+	const CTDCCustomAttribDefinitionArray& m_aCustAttribDefs;
 
 protected:
 // Overrides

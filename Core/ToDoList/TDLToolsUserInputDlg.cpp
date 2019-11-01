@@ -32,9 +32,11 @@ const UINT BTN_CY	= 14;
 /////////////////////////////////////////////////////////////////////////////
 // CToolsUserInputDlg dialog
 
-CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CCLArgArray& aArgs, BOOL bISODates)
+CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CCLArgArray& aArgs, const TDCAUTOLISTDATA& tdlListData, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bISODates)
 	: 
 	CRuntimeDlg(),
+	m_tdlListData(tdlListData),
+	m_aCustAttribDefs(aCustAttribDefs),
 	m_rWindowOrg(0, 0, 0, 0),
 	m_nDividerID(0),
 	m_nHelpBtnID(0),
@@ -47,20 +49,19 @@ CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CCLArgArray& aArgs, BOOL bISO
 	
 	CPreferences prefs;
 
-	if (nArgCount)
+	for (int nArg = 0; nArg < nArgCount; nArg++)
 	{
-		for (int nArg = 0; nArg < nArgCount; nArg++)
+		const CMDLINEARG& arg = aArgs[nArg];
+
+		// we fill in specifics as we go along
+		TUINPUTITEM tuii;
+
+		tuii.pCtrl = NULL;
+		tuii.sName = arg.sName;
+		tuii.sName.MakeLower();
+
+		switch (arg.nType)
 		{
-			TUINPUTITEM tuii; // we fill in specifics as we go along
-
-			tuii.pCtrl = NULL;
-			tuii.sName = aArgs[nArg].sName;
-			tuii.sName.MakeLower();
-
-			CLA_TYPE nType = aArgs[nArg].nType;
-	
-			switch (nType)
-			{
 			case CLAT_USERFILE:
 				tuii.pCtrl = new CFileEdit;
 				tuii.nStyle = ES_AUTOHSCROLL | ES_LEFT | WS_TABSTOP;
@@ -88,31 +89,31 @@ CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CCLArgArray& aArgs, BOOL bISO
 				tuii.sizeDLU.cx = 70;
 				tuii.sizeDLU.cy = 13;
 				break;
-			}
-			
-			if (tuii.pCtrl)
+		}
+
+		if (tuii.pCtrl)
+		{
+			if (!tuii.sName.IsEmpty())
 			{
-				if (!tuii.sName.IsEmpty())
-				{
-					tuii.nType = aArgs[nArg].nType;
-					tuii.nCtrlID = nCtrlID++;
-					tuii.sLabel = aArgs[nArg].sLabel;
+				tuii.nType = arg.nType;
+				tuii.nCtrlID = nCtrlID++;
+				tuii.sLabel = arg.sLabel;
 
-					tuii.sDefValue = aArgs[nArg].sDefValue;
+				tuii.sDefValue = arg.sDefValue;
 
-					// if sDefValue is empty see if we previously saved a value for this control 
-					if (tuii.sDefValue.IsEmpty())
-						tuii.sDefValue = prefs.GetProfileString(_T("Tools\\UserInput"), tuii.sLabel);
+				// if sDefValue is empty see if we previously saved a value for this control 
+				if (tuii.sDefValue.IsEmpty())
+					tuii.sDefValue = prefs.GetProfileString(_T("Tools\\UserInput"), tuii.sLabel);
 
-					m_aInputItems.Add(tuii);
-				}
-				else
-				{
-					delete tuii.pCtrl;
-				}
+				m_aInputItems.Add(tuii);
+			}
+			else
+			{
+				delete tuii.pCtrl;
 			}
 		}
 	}
+
 	m_nDividerID = nCtrlID++;
 	m_nHelpBtnID = nCtrlID++;
 
