@@ -30,6 +30,7 @@ const COLORREF ALTERNATELINECOLOR	= RGB(235, 235, 255);
 const COLORREF GRIDLINECOLOR		= RGB(192, 192, 192);
 const COLORREF TASKDONECOLOR		= RGB(128, 128, 128);
 const COLORREF TASKDUECOLOR			= RGB(255, 0, 0);
+const COLORREF TASKDUETODAYCOLOR	= RGB(255, 128, 0);
 const COLORREF TASKSTARTCOLOR		= RGB(0, 255, 0);
 const COLORREF FILTEREDCOLOR		= RGB(200, 200, 200);
 const COLORREF FLAGGEDCOLOR			= RGB(128, 64, 0);
@@ -948,7 +949,7 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	m_crStart = pPrefs->GetProfileInt(sColorKey, _T("TaskStart"), TASKSTARTCOLOR);
 	m_crStartToday = pPrefs->GetProfileInt(sColorKey, _T("TaskStartToday"), TASKSTARTCOLOR);
 	m_crDue = pPrefs->GetProfileInt(sColorKey, _T("TaskDue"), TASKDUECOLOR);
-	m_crDueToday = pPrefs->GetProfileInt(sColorKey, _T("TaskDueToday"), TASKDUECOLOR);
+	m_crDueToday = pPrefs->GetProfileInt(sColorKey, _T("TaskDueToday"), TASKDUETODAYCOLOR);
 	m_crAltLine = pPrefs->GetProfileInt(sColorKey, _T("AlternateLines"), ALTERNATELINECOLOR);
 	m_crFlagged = pPrefs->GetProfileInt(sColorKey, _T("Flagged"), FLAGGEDCOLOR);
 	m_crReference = pPrefs->GetProfileInt(sColorKey, _T("Reference"), REFERENCECOLOR);
