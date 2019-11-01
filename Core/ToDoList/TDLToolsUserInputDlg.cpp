@@ -4,11 +4,14 @@
 #include "stdafx.h"
 #include "tdcenum.h"
 #include "tdlToolsUserInputDlg.h"
+#include "tdcCustomattributeDef.h"
+#include "tdcStruct.h"
 
 #include "..\shared\fileedit.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\datetimectrlex.h"
 #include "..\shared\datehelper.h"
+#include "..\shared\misc.h"
 
 #include "..\Interfaces\preferences.h"
 
@@ -77,10 +80,20 @@ CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CCLArgArray& aArgs, const TDC
 				break;
 
 			case CLAT_USERTEXT:
-				tuii.pCtrl = new CEdit;
-				tuii.nStyle = ES_AUTOHSCROLL | ES_LEFT | WS_TABSTOP;
-				tuii.sizeDLU.cx = 130;
-				tuii.sizeDLU.cy = 13;
+				if (ArgumentHasListData(arg))
+				{
+					tuii.pCtrl = new CComboBox;
+					tuii.nStyle = CBS_DROPDOWN | CBS_SORT | WS_TABSTOP;
+					tuii.sizeDLU.cx = 130;
+					tuii.sizeDLU.cy = 13;
+				}
+				else
+				{
+					tuii.pCtrl = new CEdit;
+					tuii.nStyle = ES_AUTOHSCROLL | ES_LEFT | WS_TABSTOP;
+					tuii.sizeDLU.cx = 130;
+					tuii.sizeDLU.cy = 13;
+				}
 				break;
 
 			case CLAT_USERDATE:
@@ -234,6 +247,7 @@ BOOL CTDLToolsUserInputDlg::OnInitDialog()
 	CRuntimeDlg::OnInitDialog();
 
 	// userdate default values need a bit more work
+	// as do usertext implemented as comboboxes
 	int nCtrl = m_aInputItems.GetSize();
 
 	while (nCtrl--)
@@ -345,4 +359,51 @@ BOOL CTDLToolsUserInputDlg::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	AfxGetApp()->WinHelp(m_btnHelp.GetHelpID());
 	return TRUE;
+}
+
+BOOL CTDLToolsUserInputDlg::ArgumentHasListData(const CMDLINEARG& arg) const
+{
+	if (arg.sRelatedSwitch.IsEmpty())
+		return FALSE;
+
+	CString sSwitch(arg.sRelatedSwitch), sValue;
+	
+	if (Misc::Split(sSwitch, sValue, ' ') && (sSwitch == _T("ca")))
+	{
+		// It's a custom attribute
+		int nCustAttrib = m_aCustAttribDefs.Find(sValue);
+
+		if (nCustAttrib == -1)
+			return FALSE;
+
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustAttribDefs[nCustAttrib];
+
+		if (!attribDef.IsList())
+			return FALSE;
+
+		return (attribDef.aAutoListData.GetSize() || attribDef.aDefaultListData.GetSize());
+	}
+	else if (sValue.IsEmpty())
+	{
+		if (sSwitch == _T("ab"))
+			return !m_tdlListData.aAllocBy.IsEmpty();
+
+		if (sSwitch == _T("at"))
+			return !m_tdlListData.aAllocTo.IsEmpty();
+
+		if (sSwitch == _T("c"))
+			return !m_tdlListData.aCategory.IsEmpty();
+
+		if (sSwitch == _T("s"))
+			return !m_tdlListData.aStatus.IsEmpty();
+
+		if (sSwitch == _T("tg"))
+			return !m_tdlListData.aTags.IsEmpty();
+
+		if (sSwitch == _T("tv"))
+			return !m_tdlListData.aVersion.IsEmpty();
+	}
+
+	// all else
+	return FALSE;
 }

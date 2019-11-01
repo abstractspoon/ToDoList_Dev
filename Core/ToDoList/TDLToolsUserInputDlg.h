@@ -79,6 +79,7 @@ protected:
 
 protected:
 	void SetInitialPos(LPCRECT pRect, DWORD dwStyle);
+	BOOL ArgumentHasListData(const CMDLINEARG& arg) const;
 };
 
 //{{AFX_INSERT_LOCATION}}
