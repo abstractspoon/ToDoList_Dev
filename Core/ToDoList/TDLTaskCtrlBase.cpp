@@ -2201,8 +2201,10 @@ BOOL CTDLTaskCtrlBase::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 {
 	BOOL bResort = (IsSortingBy(TDCC_PRIORITY) && HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && (HasColor(crDueToday) != HasColor(m_crDueToday)));
 
-	if (CheckUpdateDueBrushColor(crDue, m_crDue, m_brDue) || 
-		CheckUpdateDueBrushColor(crDueToday, m_crDueToday, m_brDueToday))
+	BOOL bChange = CheckUpdateDueBrushColor(crDue, m_crDue, m_brDue);
+	bChange |= CheckUpdateDueBrushColor(crDueToday, m_crDueToday, m_brDueToday);
+
+	if (bChange)		
 	{
 		if (GetSafeHwnd())
 		{
