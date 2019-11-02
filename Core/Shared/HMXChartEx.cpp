@@ -6,6 +6,7 @@
 #include "GraphicsMisc.h"
 #include "DialogHelper.h"
 #include "Mapex.h"
+#include "Themed.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -198,27 +199,6 @@ bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
 	return CHMXChart::DrawHorzGridLines(dc);
 }
 
-BOOL CHMXChartEx::HighlightDataPoint(int nIndex)
-{
-	CPoint ptData;
-
-	if (!GetPointXY(0, nIndex, ptData))
-		return FALSE;
-
-	CDC* pDC = GetDC();
-
-	pDC->SetROP2(R2_NOT);
-	pDC->SelectStockObject(NULL_BRUSH);
-	pDC->SelectStockObject(BLACK_PEN);
-
-	pDC->MoveTo(ptData.x, m_rectData.top);
-	pDC->LineTo(ptData.x, m_rectData.bottom);
-
-	ReleaseDC(pDC);
-	
-	return TRUE;
-}
-
 int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	// Don't remove and redraw the same point if it hasn't changed
@@ -237,7 +217,6 @@ int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				if (const_cast<CHMXChartEx*>(this)->HighlightDataPoint(nHit))
 				{
 					m_nLastTooltipHit = nHit;
-					//CDialogHelper::TrackMouseLeave(*this);
 				}
 				else
 				{
@@ -293,6 +272,32 @@ void CHMXChartEx::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 	m_nLastTooltipHit = -1;
 
 	CHMXChart::DoPaint(dc, bPaintBkgnd);
+}
+
+BOOL CHMXChartEx::HighlightDataPoint(int nIndex)
+{
+	// Disable highlighting under Classic theme because the overlapping
+	// tooltips cause drawing artifacts
+	if (CThemed::AreControlsThemed())
+	{
+		CPoint ptData;
+
+		if (!GetPointXY(0, nIndex, ptData))
+			return FALSE;
+
+		CDC* pDC = GetDC();
+
+		pDC->SetROP2(R2_NOT);
+		pDC->SelectStockObject(NULL_BRUSH);
+		pDC->SelectStockObject(BLACK_PEN);
+
+		pDC->MoveTo(ptData.x, m_rectData.top);
+		pDC->LineTo(ptData.x, m_rectData.bottom);
+
+		ReleaseDC(pDC);
+	}
+	
+	return TRUE;
 }
 
 void CHMXChartEx::HideLastHighlightedPoint()
