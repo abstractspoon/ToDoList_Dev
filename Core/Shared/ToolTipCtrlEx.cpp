@@ -404,7 +404,7 @@ BOOL CToolTipCtrlEx::AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const
 
 void CToolTipCtrlEx::OnPaint()
 {
-	if (IsTracking() && (COSVersion() >= OSV_WIN8))
+	if (IsTracking())
 	{
 		// Prevent flicker
 		CPaintDC dc(this); 
