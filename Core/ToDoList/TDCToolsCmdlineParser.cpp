@@ -9,6 +9,7 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\webmisc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -17,10 +18,12 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CMap<CString, LPCTSTR, CLA_TYPE, CLA_TYPE&> CTDCToolsCmdlineParser::s_mapTypes;
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
 
 CTDCToolsCmdlineParser::CTDCToolsCmdlineParser(LPCTSTR szCmdLine)
 {
@@ -371,7 +374,7 @@ void CTDCToolsCmdlineParser::ParseCmdLine()
 					// attribute switch for which we might display a list of values
 					if (IsUserInputType(cla.nType))
 					{
-						if (aAttribSwitches.IsEmpty())
+						if (!aAttribSwitches.GetSize())
 							Misc::Split(sCmdLine, aAttribSwitches, '-', FALSE, TRUE);
 
 						int nSwitch = aAttribSwitches.GetSize();
@@ -385,7 +388,7 @@ void CTDCToolsCmdlineParser::ParseCmdLine()
 								CString sUnused;
 								
 								if (Misc::Split(sAttribSwitch, sUnused, '$'))
-									cla.sRelatedSwitch = sAttribSwitch.Trim();
+									cla.sRelatedSwitch = Misc::Trim(sAttribSwitch);
 							}
 						}
 					}
@@ -440,7 +443,7 @@ CLA_TYPE CTDCToolsCmdlineParser::GetType(LPCTSTR szVarType) const
 
 BOOL CTDCToolsCmdlineParser::PrepareToolPath(CString& sToolPath, BOOL bToDoListOnly)
 {
-	if (sToolPath.IsEmpty() || ::PathIsURL(sToolPath))
+	if (sToolPath.IsEmpty() || WebMisc::IsURL(sToolPath))
 		return FALSE;
 
 	if (sToolPath.Replace(_T("$(todolist)"), FileMisc::GetAppFilePath()))
