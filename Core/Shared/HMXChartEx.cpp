@@ -7,6 +7,7 @@
 #include "DialogHelper.h"
 #include "Mapex.h"
 #include "Themed.h"
+#include "OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -276,9 +277,9 @@ void CHMXChartEx::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 
 BOOL CHMXChartEx::HighlightDataPoint(int nIndex)
 {
-	// Disable highlighting under Classic theme because the overlapping
-	// tooltips cause drawing artifacts
-	if (CThemed::AreControlsThemed())
+	// Disable highlighting under Classic theme and XP because 
+	// the overlapping tooltips cause drawing artifacts
+	if (CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA))
 	{
 		CPoint ptData;
 
