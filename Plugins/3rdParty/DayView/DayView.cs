@@ -78,6 +78,8 @@ namespace Calendar
 
         public DayView()
         {
+            StartDate = DateTime.Now;
+
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 			SetStyle(ControlStyles.UserPaint, true);
 			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
