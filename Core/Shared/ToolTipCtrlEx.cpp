@@ -15,6 +15,12 @@ const UINT WM_SYSKEYLAST = WM_SYSDEADCHAR;
 const UINT WM_NCMOUSEFIRST = WM_NCMOUSEMOVE;
 const UINT WM_NCMOUSELAST = WM_NCMBUTTONDBLCLK;
 
+//////////////////////////////////////////////////////////////////////
+
+#ifndef WM_NCMOUSELEAVE
+#	define WM_NCMOUSELEAVE 0x000002A2
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 
 const int TOOLINFO_SIZE = sizeof(TOOLINFO);
