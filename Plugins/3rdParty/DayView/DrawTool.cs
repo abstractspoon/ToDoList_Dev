@@ -9,7 +9,7 @@ namespace Calendar
 {
     public class DrawTool : ITool
     {
-        DateTime m_SelectionStart;
+        Tuple<DateTime, DateTime> m_SelectionStart = null;
         bool m_SelectionStarted;
 
         public void Reset()
@@ -26,20 +26,20 @@ namespace Calendar
             {
                 if (m_SelectionStarted)
                 {
-                    DateTime m_Time = m_DayView.GetDateTimeAt(e.X, e.Y);
-                    m_Time = m_Time.AddMinutes(60 / m_DayView.SlotsPerHour);
+                    DateTime time = m_DayView.GetDateTimeAt(e.X, e.Y);
 
-                    if (m_Time < m_SelectionStart)
+                    if (time < m_SelectionStart.Item1)
                     {
-                        m_DayView.SelectionStart = m_Time;
-                        m_DayView.SelectionEnd = m_SelectionStart;
+                        m_DayView.SelectionStart = time;
+                        m_DayView.SelectionEnd = m_SelectionStart.Item2;
                     }
                     else
                     {
-                        m_DayView.SelectionEnd = m_Time;
-                    }
+						m_DayView.SelectionStart = m_SelectionStart.Item1;
+						m_DayView.SelectionEnd = time.AddMinutes(60 / m_DayView.SlotsPerHour);
+					}
 
-                    m_DayView.Invalidate();
+					m_DayView.Invalidate();
                 }
             }
         }
@@ -68,10 +68,12 @@ namespace Calendar
 
             if (e.Button == MouseButtons.Left)
             {
-                m_SelectionStart = m_DayView.GetDateTimeAt(e.X, e.Y);
+                DateTime time = m_DayView.GetDateTimeAt(e.X, e.Y);
 
-                m_DayView.SelectionStart = m_SelectionStart;
-                m_DayView.SelectionEnd = m_SelectionStart.AddMinutes(60 / m_DayView.SlotsPerHour);
+				m_SelectionStart = new Tuple<DateTime, DateTime>(time, time.AddMinutes(60 / m_DayView.SlotsPerHour));
+
+                m_DayView.SelectionStart = m_SelectionStart.Item1;
+                m_DayView.SelectionEnd = m_SelectionStart.Item2;
 
                 m_SelectionStarted = true;
 

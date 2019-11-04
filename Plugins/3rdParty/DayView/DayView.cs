@@ -419,6 +419,7 @@ namespace Calendar
 						{
                             // Initialise selection tool
 							selectedAppointment = appt;
+							selection = SelectionType.Appointment;
                             ActiveTool = selectionTool;
 
 							// Ensure at least part of the task is in view
@@ -1265,9 +1266,6 @@ namespace Calendar
             int minsPerSlot = (60 / slotsPerHour);
             int lastSlotMins = ((24 * 60) - minsPerSlot);
 
-            if (minutes > (lastSlotMins + (minsPerSlot / 2)))
-                return new TimeSpan(1, 0, 0, 0);
-
             // nearest slot
             minutes = ((int)numSlots * minsPerSlot);
 
@@ -1411,6 +1409,11 @@ namespace Calendar
             int endY;
 
             startY = (start.Hour * slotHeight * slotsPerHour) + ((start.Minute * slotHeight) / (60 / slotsPerHour));
+
+			// Special case: end time is 'end of day'
+			if (end == start.Date.AddDays(1))
+				end = end.AddSeconds(-1);
+
             endY = (end.Hour * slotHeight * slotsPerHour) + ((end.Minute * slotHeight) / (60 / slotsPerHour));
 
             rect.Y = startY - vscroll.Value + this.HeaderHeight;
@@ -1648,7 +1651,9 @@ namespace Calendar
                                 Rectangle gripRect = GetHourRangeRectangle(appointment.StartDate, appointment.EndDate, appRect);
                                 gripRect.Width = appointmentGripWidth;
 
-                                DrawAppointment(e.Graphics, appRect, appointment, appointment == selectedAppointment, gripRect);
+								bool isSelected = ((activeTool != drawTool) && (appointment == selectedAppointment));
+
+                                DrawAppointment(e.Graphics, appRect, appointment, isSelected, gripRect);
 
                                 e.Graphics.ResetClip();
 
