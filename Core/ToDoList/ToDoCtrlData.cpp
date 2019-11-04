@@ -2191,17 +2191,34 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 	
 	// Calculate duration
 	double dDuration = 0.0;
+	TDC_UNITS nUnits = pTDI->timeEstimate.nUnits;
 	
 	if (pTDI->HasDue())
-		dDuration = CalcDuration(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits);
+	{
+		if (CDateHelper::IsSameDay(pTDI->dateStart, pTDI->dateDue))
+		{
+			dDuration = (pTDI->dateDue.m_dt - pTDI->dateStart.m_dt);
+
+			if (IsEndOfDay(pTDI->dateDue))
+				dDuration += 1.0;
+
+			nUnits = TDCU_DAYS;
+		}
+		else
+		{
+			dDuration = CalcDuration(pTDI->dateStart, pTDI->dateDue, nUnits);
+		}
+	}
 	else
+	{
 		dDuration = pTDI->timeEstimate.dAmount;
+	}
 	
 	ASSERT(dDuration > 0.0);
 	
 	// recalc due date
 	COleDateTime dtStart(dtNewStart);
-	COleDateTime dtNewDue = AddDuration(dtStart, dDuration, pTDI->timeEstimate.nUnits);
+	COleDateTime dtNewDue = AddDuration(dtStart, dDuration, nUnits);
 
 	// FALSE -> don't recalc time estimate until due date is set
 	TDC_SET nRes = SetTaskDate(dwTaskID, pTDI, TDCD_START, dtStart, FALSE);
