@@ -2193,27 +2193,12 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
 	// Sanity checks
-	if (!pTDI->HasStart())
+	if (!COleDateTimeRange::IsValid(pTDI->dateStart, pTDI->dateDue))
 	{
 		ASSERT(0);
 		return SET_FAILED;
 	}
-	else if (pTDI->HasDue())
-	{
-		if (!COleDateTimeRange::IsValid(pTDI->dateStart, pTDI->dateDue))
-		{
-			ASSERT(0);
-			return SET_FAILED;
-		}
-	}
-	else if (pTDI->timeEstimate.dAmount <= 0.0)
-	{
-		ASSERT(0);
-		return SET_FAILED;
-	}
-	
-	// check for no change
-	if (dtNewStart == pTDI->dateStart)
+	else if (dtNewStart == pTDI->dateStart)
 	{
 		ASSERT(0);
 		return SET_NOCHANGE;
@@ -2222,38 +2207,13 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 	// Ignore tasks with dependencies where their dates 
 	// are automatically calculated
 	if (pTDI->aDependencies.GetSize() && HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+	{
 		return SET_NOCHANGE;
-	
-	// Calculate duration
-	double dDuration = 0.0;
-	TDC_UNITS nUnits = pTDI->timeEstimate.nUnits;
-	
-	if (pTDI->HasDue())
-	{
-		if (CDateHelper::IsSameDay(pTDI->dateStart, pTDI->dateDue))
-		{
-			dDuration = (pTDI->dateDue.m_dt - pTDI->dateStart.m_dt);
-
-			if (IsEndOfDay(pTDI->dateDue))
-				dDuration += 1.0;
-
-			nUnits = TDCU_DAYS;
-		}
-		else
-		{
-			dDuration = CalcDuration(pTDI->dateStart, pTDI->dateDue, nUnits);
-		}
 	}
-	else
-	{
-		dDuration = pTDI->timeEstimate.dAmount;
-	}
-	
-	ASSERT(dDuration > 0.0);
 	
 	// recalc due date
 	COleDateTime dtStart(dtNewStart);
-	COleDateTime dtNewDue = AddDuration(dtStart, dDuration, nUnits);
+	COleDateTime dtNewDue = CalculateNewDueDate(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits, dtStart);
 
 	// FALSE -> don't recalc time estimate until due date is set
 	TDC_SET nRes = SetTaskDate(dwTaskID, pTDI, TDCD_START, dtStart, FALSE);
@@ -2263,6 +2223,18 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 		SetTaskDate(dwTaskID, pTDI, TDCD_DUE, dtNewDue);
 
 	return nRes;
+}
+
+COleDateTime CToDoCtrlData::CalculateNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart) const
+{
+	// Tasks falling wholly within  a single day get special treatment
+	if (CDateHelper::IsSameDay(dtCurStart, dtCurDue))
+		nUnits = TDCU_DAYS;
+
+	double dDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
+	ASSERT(dDuration > 0.0);
+	
+	return AddDuration(dtNewStart, dDuration, nUnits);
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date, BOOL bAndSubtasks)
@@ -3523,9 +3495,7 @@ UINT CToDoCtrlData::SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDate
 
 	if (pTDI->HasDue() && pTDI->HasStart())
 	{
-		double dDuration = CalcDuration(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits);
-
-		COleDateTime dtNewDue = AddDuration(dtStart, dDuration, pTDI->timeEstimate.nUnits);
+		COleDateTime dtNewDue = CalculateNewDueDate(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits, dtStart);
 
 		if (dtNewDue != pTDI->dateDue)
 		{
@@ -3736,19 +3706,8 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 
 	case TDCU_MINS:
 	case TDCU_HOURS:
-		// if start and due fall on the same day keep it simple
-		if (CDateHelper::IsSameDay(dateStart, dateDue))
-		{
-			// handle 'whole' of due date
-			if (IsEndOfDay(dateDue))
-				dDuration += 1.0;
-
-			CTwentyFourSevenWeek week;
-			dDuration = CTimeHelper(week).GetTime(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
-
-			break;
-		}
-		// else fall thru to handle as weekdays
+		ASSERT(!CDateHelper::IsSameDay(dateStart, dateDue));
+		// fall thru
 
 	case TDCU_WEEKDAYS:
 		{

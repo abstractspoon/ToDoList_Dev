@@ -267,6 +267,7 @@ protected:
 	TDC_SET SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate, const COleDateTime& date, BOOL bRecalcTimeEstimate = TRUE);
 	BOOL CalcMissingStartDateFromDue(TODOITEM* pTDI) const;
 	BOOL CalcMissingDueDateFromStart(TODOITEM* pTDI) const;
+	COleDateTime CalculateNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart) const;
 
 	BOOL AddUndoElement(TDC_UNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID = 0, 
 						DWORD dwPrevSiblingID = 0, WORD wFlags = 0);
