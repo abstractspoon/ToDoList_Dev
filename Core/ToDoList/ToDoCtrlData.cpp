@@ -2107,9 +2107,44 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 	return SET_NOCHANGE;
 }
 
+BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits)
+{
+	if (nAmount == 0)
+		return FALSE;
+
+	if (!HasTask(dwTaskID))
+		return FALSE;
+
+	switch (nDate)
+	{
+	case TDCD_START:
+	case TDCD_STARTDATE:
+	case TDCD_STARTTIME:	
+	case TDCD_DUE:
+	case TDCD_DUEDATE:
+	case TDCD_DUETIME:	
+	case TDCD_DONE:
+	case TDCD_DONEDATE:
+	case TDCD_DONETIME:
+		break;
+
+	default:
+		// All the rest
+		return FALSE;
+	}
+
+	return (TDC::MapUnitsToDHUnits(nUnits) != DHU_NULL);
+}
+
 TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
 										BOOL bAndSubtasks, BOOL bFitToRecurringScheme)
 {
+	if (!CanOffsetTaskDate(dwTaskID, nDate, nAmount, nUnits))
+	{
+		ASSERT(0);
+		return SET_FAILED;
+	}
+
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
