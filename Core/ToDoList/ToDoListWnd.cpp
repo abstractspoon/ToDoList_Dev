@@ -6227,7 +6227,14 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 		// shrink slightly so that edit controls do not merge with window border
 		rTaskList.DeflateRect(nInset, nInset, nInset, nInset);
 
-		dwm.MoveWindow(&GetToDoCtrl(), rTaskList);
+		// Redraw the tasklist manually if its height has changed
+		CFilteredToDoCtrl& tdc = GetToDoCtrl();
+		BOOL bManualRedraw = (rTaskList.Height() != CDialogHelper::GetChildHeight(&tdc));
+
+		dwm.MoveWindow(&tdc, rTaskList, !bManualRedraw);
+
+		if (bManualRedraw)
+			tdc.Invalidate();
 
 #ifdef _DEBUG
 		CRect rect;
@@ -6236,7 +6243,6 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 		if (rect != rTaskList)
 			ASSERT(0);
 #endif
-
 	}
 }
 
