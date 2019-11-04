@@ -42,7 +42,7 @@ CWorkingDay::CWorkingDay(double dWorkingLengthInHours)
 	}
 }
 
-CWorkingDay::CWorkingDay(double dStartOfDayInHours, double dWorkingLengthInHours, double dStartOfLunchInHours, double dEndOfLunchInHours)
+CWorkingDay::CWorkingDay(double dWorkingLengthInHours, double dStartOfDayInHours, double dStartOfLunchInHours, double dEndOfLunchInHours)
 	:
 	m_dStartOfDayInHours(0),
 	m_dStartOfLunchInHours(0),
@@ -51,7 +51,7 @@ CWorkingDay::CWorkingDay(double dStartOfDayInHours, double dWorkingLengthInHours
 {
 	*this = s_WorkDay;
 
-	if (IsValid(dStartOfDayInHours, dWorkingLengthInHours, dStartOfLunchInHours, dEndOfLunchInHours))
+	if (IsValid(dWorkingLengthInHours, dStartOfDayInHours, dStartOfLunchInHours, dEndOfLunchInHours))
 	{
 		m_dStartOfDayInHours = dStartOfDayInHours;
 		m_dStartOfLunchInHours = dStartOfLunchInHours;
@@ -96,10 +96,10 @@ BOOL CWorkingDay::Initialise(double dWorkingLengthInHours,
 				dStartOfLunchInHours, 
 				dEndOfLunchInHours))
 	{
+		s_WorkDay.m_dWorkingLengthInHours = dWorkingLengthInHours;
 		s_WorkDay.m_dStartOfDayInHours = dStartOfDayInHours;
 		s_WorkDay.m_dStartOfLunchInHours = dStartOfLunchInHours;
 		s_WorkDay.m_dEndOfLunchInHours = dEndOfLunchInHours;
-		s_WorkDay.m_dWorkingLengthInHours = dWorkingLengthInHours;
 
 		return TRUE;
 	}
@@ -346,9 +346,9 @@ CWorkingWeek::CWorkingWeek()
 	m_Weekend = s_Weekend;
 }
 
-CWorkingWeek::CWorkingWeek(DWORD dwWeekendDays, double dStartOfDayInHours, double dWorkingLengthInHours, double dStartOfLunchInHours, double dEndOfLunchInHours)
+CWorkingWeek::CWorkingWeek(DWORD dwWeekendDays, double dWorkingLengthInHours, double dStartOfDayInHours, double dStartOfLunchInHours, double dEndOfLunchInHours)
 	:
-	m_WorkDay(dStartOfDayInHours, dWorkingLengthInHours, dStartOfLunchInHours, dEndOfLunchInHours),
+	m_WorkDay(dWorkingLengthInHours, dStartOfDayInHours, dStartOfLunchInHours, dEndOfLunchInHours),
 	m_Weekend(dwWeekendDays)
 {
 }

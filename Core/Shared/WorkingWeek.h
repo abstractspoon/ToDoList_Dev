@@ -160,8 +160,8 @@ public:
 	CTwentyFourSevenWeek() 
 		: 
 		CWorkingWeek(0,			// no weekend  
-					 0,			// 12 am
 					 24,		// 24 hours
+					 0,			// 12 am
 					 12, 12)	// no lunch
 	{
 	}
