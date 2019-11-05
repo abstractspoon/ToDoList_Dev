@@ -110,8 +110,14 @@ namespace HTMLReportExporter
 			WriteMetadata(html);
 
 			html.RenderBeginTag(HtmlTextWriterTag.Title);
+#if DEBUG
+            if (m_Template.FilePath.Contains("index.rbt"))
+                html.Write("ToDoList - Free Open-Source Task Management Software with Gantt Chart, Mindmap, Kanban Board and Calendar Views");
+            else
+                html.Write(m_Tasklist.GetReportTitle());
+#else
 			html.Write(m_Tasklist.GetReportTitle());
-
+#endif
 			html.RenderEndTag(); // Title
 			html.WriteLine();
 
@@ -178,6 +184,17 @@ namespace HTMLReportExporter
 			html.RenderBeginTag(HtmlTextWriterTag.Meta);
 			html.RenderEndTag(); // Meta
 			html.WriteLine();
+
+#if DEBUG
+            if (m_Template.FilePath.Contains("index.rbt"))
+            {
+                html.AddAttribute("name", "description");
+                html.AddAttribute("content", "ToDoList - Free Open-Source Task Management Software with Gantt Chart, Mindmap, Kanban Board and Calendar Views");
+			    html.RenderBeginTag(HtmlTextWriterTag.Meta);
+			    html.RenderEndTag(); // Meta
+			    html.WriteLine();
+            }
+#endif
 		}
 
 		private void WriteBody(HtmlTextWriter html)
