@@ -128,9 +128,13 @@ public:
 						   double dStartOfLunchInHours,		// eg. 12
 						   double dEndOfLunchInHours);		// eg. 13
 
-	double CalculateDurationInHours(const COleDateTime& dtFrom, const COleDateTime& dtTo);
-	double CalculateDurationInDays(const COleDateTime& dtFrom, const COleDateTime& dtTo);
-	double CalculateDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo);
+	double CalculateDurationInHours(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
+	double CalculateDurationInDays(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
+	double CalculateDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
+
+	COleDateTime AddDurationInHours(const COleDateTime& dtFrom, double dHours) const;
+	COleDateTime AddDurationInDays(const COleDateTime& dtFrom, double dDays) const;
+	COleDateTime AddDurationInWeeks(const COleDateTime& dtFrom, double dWeeks) const;
 
 	BOOL MakeWeekday(COleDateTime& date, BOOL bForwards = TRUE, BOOL bTruncateTime = TRUE) const;
 	COleDateTime ToWeekday(const COleDateTime& date, BOOL bForwards = TRUE) const;

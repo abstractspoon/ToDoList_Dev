@@ -389,22 +389,22 @@ BOOL CWorkingWeek::Initialise(DWORD dwWeekendDays, double dWorkingLengthInHours,
 	return TRUE;
 }
 
-double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const COleDateTime& dtTo)
+double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const COleDateTime& dtTo) const
 {
 	int nDaysDuration = (int)((int)dtTo.m_dt - (int)dtFrom.m_dt);
 
 	if (nDaysDuration < 0)
 		return 0;
 
-	double fromTimeOfDay = m_WorkDay.GetTimeOfDayInHours(dtFrom);
-	double toTimeOfDay = m_WorkDay.GetTimeOfDayInHours(dtTo);
+	double dFromTimeOfDay = m_WorkDay.GetTimeOfDayInHours(dtFrom);
+	double dToTimeOfDay = m_WorkDay.GetTimeOfDayInHours(dtTo);
 	double dHoursDuration = 0;
 
 	if (nDaysDuration == 0)
 	{
 		// from and to are same day
 		if (!Weekend().IsWeekend(dtFrom))
-			dHoursDuration = m_WorkDay.CalculateDurationInHours(fromTimeOfDay, toTimeOfDay);
+			dHoursDuration = m_WorkDay.CalculateDurationInHours(dFromTimeOfDay, dToTimeOfDay);
 	}
 	else
 	{
@@ -425,16 +425,16 @@ double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const 
 
 		// part days
 		if (!Weekend().IsWeekend(dtFrom))
-			dHoursDuration += m_WorkDay.CalculateDurationInHours(fromTimeOfDay, m_WorkDay.GetEndOfDayInHours());
+			dHoursDuration += m_WorkDay.CalculateDurationInHours(dFromTimeOfDay, m_WorkDay.GetEndOfDayInHours());
 
 		if (!Weekend().IsWeekend(dtTo))
-			dHoursDuration += m_WorkDay.CalculateDurationInHours(m_WorkDay.GetStartOfDayInHours(), toTimeOfDay);
+			dHoursDuration += m_WorkDay.CalculateDurationInHours(m_WorkDay.GetStartOfDayInHours(), dToTimeOfDay);
 	}
 
 	return dHoursDuration;
 }
 
-double CWorkingWeek::CalculateDurationInDays(const COleDateTime& dtFrom, const COleDateTime& dtTo)
+double CWorkingWeek::CalculateDurationInDays(const COleDateTime& dtFrom, const COleDateTime& dtTo) const
 {
 	double dDayLen = m_WorkDay.GetLengthInHours();
 
@@ -444,15 +444,117 @@ double CWorkingWeek::CalculateDurationInDays(const COleDateTime& dtFrom, const C
 	return (CalculateDurationInHours(dtFrom, dtTo) / dDayLen);
 }
 
-double CWorkingWeek::CalculateDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo)
+double CWorkingWeek::CalculateDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo) const
 {
 	int nNumWeekdays = (7 - Weekend().GetLengthInDays());
 
 	if (nNumWeekdays == 0)
 		return 0.0;
 
-	// else
 	return (CalculateDurationInDays(dtFrom, dtTo) / nNumWeekdays);
+}
+
+
+COleDateTime CWorkingWeek::AddDurationInHours(const COleDateTime& dtFrom, double dHours) const
+{
+	COleDateTime dtTo(dtFrom);
+
+	if (dHours > 0)
+	{
+		MakeWeekday(dtTo, TRUE); // truncates time if it was a weekend
+
+		// Partial first day
+		if (CDateHelper::DateHasTime(dtTo))
+		{
+			double dHoursFirstDay = m_WorkDay.GetEndOfDayInHours() - m_WorkDay.GetTimeOfDayInHours(dtTo);
+
+			if (dHoursFirstDay < 0) // past end of working day
+			{
+				dtTo = CDateHelper::GetStartOfNextDay(dtTo);
+			}
+			else if (dHours < dHoursFirstDay)
+			{
+				dtTo.m_dt += (dHours / 24.0);
+				dHours = 0.0;
+			}
+			else // (dHours >= dHoursFirstDay)
+			{
+				dtTo = CDateHelper::GetStartOfNextDay(dtTo);
+				dHours -= dHoursFirstDay;
+			}
+		}
+		
+		while (dHours > 0)
+		{
+			dtTo.m_dt++;
+
+			if (!m_Weekend.IsWeekend(dtTo))
+				dHours -= m_WorkDay.GetLengthInHours(false);
+		}
+
+		// Overrun
+		if (dHours < 0)
+			dtTo = CDateHelper::MakeDate(dtTo, ((m_WorkDay.GetEndOfDayInHours() + dHours) / 24.0));
+	}
+	else if (dHours < 0)
+	{
+		MakeWeekday(dtTo, FALSE);
+
+		// Partial first day
+		if (CDateHelper::DateHasTime(dtTo))
+		{
+			double dHoursFirstDay = m_WorkDay.GetTimeOfDayInHours(dtTo) - m_WorkDay.GetStartOfDayInHours();
+
+			if (dHoursFirstDay < 0) // before start of working day
+			{
+				dtTo = (CDateHelper::GetDateOnly(dtTo).m_dt - 1.0);
+			}
+			else if (dHours < dHoursFirstDay)
+			{
+				dtTo.m_dt -= (dHours / 24.0);
+				dHours = 0.0;
+			}
+			else // (dHours >= dHoursFirstDay)
+			{
+				dtTo = (CDateHelper::GetDateOnly(dtTo).m_dt - 1.0);
+				dHours += dHoursFirstDay;
+			}
+		}
+		
+		while (dHours < 0)
+		{
+			dtTo.m_dt--;
+
+			if (!m_Weekend.IsWeekend(dtTo))
+				dHours += m_WorkDay.GetLengthInHours(false);
+		}
+
+		// Overrun
+		if (dHours > 0)
+			dtTo = CDateHelper::MakeDate(dtTo, ((m_WorkDay.GetStartOfDayInHours() + dHours) / 24.0));
+	}
+
+	return dtFrom;
+}
+
+COleDateTime CWorkingWeek::AddDurationInDays(const COleDateTime& dtFrom, double dDays) const
+{
+	double dDayLen = m_WorkDay.GetLengthInHours();
+
+	if (dDayLen == 0.0)
+		return dtFrom;
+
+	return AddDurationInHours(dtFrom, (dDays * dDayLen));
+}
+
+COleDateTime CWorkingWeek::AddDurationInWeeks(const COleDateTime& dtFrom, double dWeeks) const
+{
+	int nNumWeekdays = (7 - Weekend().GetLengthInDays());
+
+	if (nNumWeekdays == 0)
+		return dtFrom;
+
+	return AddDurationInDays(dtFrom, (dWeeks * nNumWeekdays));
 }
 
 BOOL CWorkingWeek::HasWeekend() const

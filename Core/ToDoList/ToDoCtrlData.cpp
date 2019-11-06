@@ -2213,7 +2213,7 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 	
 	// recalc due date
 	COleDateTime dtStart(dtNewStart);
-	COleDateTime dtNewDue = CalculateNewDueDate(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits, dtStart);
+	COleDateTime dtNewDue = CalcNewDueDate(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits, dtStart);
 
 	// FALSE -> don't recalc time estimate until due date is set
 	TDC_SET nRes = SetTaskDate(dwTaskID, pTDI, TDCD_START, dtStart, FALSE);
@@ -2225,14 +2225,29 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 	return nRes;
 }
 
-COleDateTime CToDoCtrlData::CalculateNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart) const
+COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart) const
 {
-	// Tasks falling wholly within  a single day get special treatment
-	if (CDateHelper::IsSameDay(dtCurStart, dtCurDue))
-		nUnits = TDCU_DAYS;
-
-	double dDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
+	// Tasks whose time estimate is in hours or mins and whose current and new dates 
+	// fall wholly within a single day are kept simple
+	double dDuration = CalcDuration(dtCurStart, dtCurDue, TDCU_DAYS);
 	ASSERT(dDuration > 0.0);
+
+	COleDateTime dtNewDue = AddDuration(dtNewStart, dDuration, TDCU_DAYS);
+	
+// 	switch (nUnits)
+// 	{
+// 		case TDCU_MINS:
+// 		case TDCU_HOURS:
+// 		case TDCU_DAYS:
+			if (CDateHelper::IsSameDay(dtCurStart, dtCurDue) && CDateHelper::IsSameDay(dtNewStart, dtNewDue))
+			{
+				return dtNewDue;
+			}
+// 			break;
+// 	}
+
+	// All else
+	dDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
 	
 	return AddDuration(dtNewStart, dDuration, nUnits);
 }
@@ -3495,7 +3510,7 @@ UINT CToDoCtrlData::SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDate
 
 	if (pTDI->HasDue() && pTDI->HasStart())
 	{
-		COleDateTime dtNewDue = CalculateNewDueDate(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits, dtStart);
+		COleDateTime dtNewDue = CalcNewDueDate(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits, dtStart);
 
 		if (dtNewDue != pTDI->dateDue)
 		{
@@ -3549,6 +3564,13 @@ UINT CToDoCtrlData::UpdateTaskLocalDependencyDates(DWORD dwTaskID, TDC_DATE nDat
 	return ADJUSTED_NONE;
 }
 
+COleDateTime CToDoCtrlData::CheckGetEndOfDay(const COleDateTime& date)
+{
+	ASSERT(CDateHelper::IsDateSet(date));
+
+	return (IsEndOfDay(date) ? CDateHelper::GetEndOfDay(date) : date);
+}
+
 BOOL CToDoCtrlData::IsEndOfDay(const COleDateTime& date)
 {
 	ASSERT(CDateHelper::IsDateSet(date));
@@ -3564,7 +3586,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 		return dateStart;
 	}
 
-	COleDateTime dateDue(dateStart);
+	COleDateTime dateEnd(dateStart);
 	
 	switch (nUnits)
 	{
@@ -3582,7 +3604,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 				nUnits = TDCU_DAYS;
 			}
 
-			dateDue.m_dt += dDuration;
+			dateEnd.m_dt += dDuration;
 		}
 		break;
 
@@ -3609,28 +3631,28 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 				double dDaysLeft = fabs(dDuration);
 				int nDir = (bForward ? 1 : -1);
 
-				dateDue = dateStart;
+				dateEnd = dateStart;
 
 				while (dDaysLeft > 0.0)
 				{
 					dDaysLeft--;
-					dateDue.m_dt += nDir;
+					dateEnd.m_dt += nDir;
 
 					// adjust for partial day overrun
 					if (dDaysLeft < 0.0)
-						dateDue.m_dt += (nDir * dDaysLeft);
+						dateEnd.m_dt += (nDir * dDaysLeft);
 
 					// step over weekends
-					if ((dDaysLeft > 0.0) || CDateHelper::DateHasTime(dateDue))
+					if ((dDaysLeft > 0.0) || CDateHelper::DateHasTime(dateEnd))
 					{
 						// FALSE -> Don't truncate time
-						week.MakeWeekday(dateDue, bForward, FALSE);
+						week.MakeWeekday(dateEnd, bForward, FALSE);
 					}
 				}
 			}
 			else
 			{
-				dateDue.m_dt += dDuration;
+				dateEnd.m_dt += dDuration;
 			}
 		}
 		break;
@@ -3639,13 +3661,14 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 	// If date falls on the beginning of a day, move to end of previous day
 	if (dDuration > 0.0)
 	{
-		if (!CDateHelper::DateHasTime(dateDue))
-			dateDue.m_dt--;
+		if (!CDateHelper::DateHasTime(dateEnd))
+			dateEnd.m_dt--;
 	}
 	else
-	{
+	{ 
+		// End date comes before start date, so 'dateStart' is logically the end date
 		if (!CDateHelper::DateHasTime(dateStart))
-			dateDue.m_dt++;
+			dateEnd.m_dt++;
 	}
 	
 	// sanity check
@@ -3655,15 +3678,15 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 		double dCheck = 0.0;
 		
 		if (dDuration > 0.0)
-			dCheck = CalcDuration(dateStart, dateDue, nUnits);
+			dCheck = CalcDuration(dateStart, dateEnd, nUnits);
 		else
-			dCheck = -CalcDuration(dateDue, dateStart, nUnits);
+			dCheck = -CalcDuration(dateEnd, dateStart, nUnits);
 
 		ASSERT(fabs(dCheck - dDuration) < 1e-3);
 	}
 #endif
 
-	return dateDue;
+	return dateEnd;
 }
 
 double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits)
@@ -3705,60 +3728,20 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 		break;
 
 	case TDCU_MINS:
+		{
+			dDuration = (CWorkingWeek().CalculateDurationInHours(dateStart, CheckGetEndOfDay(dateDue)) * 60);
+		}
+		break;
+
 	case TDCU_HOURS:
-		ASSERT(!CDateHelper::IsSameDay(dateStart, dateDue));
-		// fall thru
+		{
+			dDuration = CWorkingWeek().CalculateDurationInHours(dateStart, CheckGetEndOfDay(dateDue));
+		}
+		break;
 
 	case TDCU_WEEKDAYS:
 		{
-			CWorkingWeek week;
-
-			if (week.HasWeekend())
-			{
-				// process each whole or part day  
-				double dDayStart(dateStart);
-
-				if (!CDateHelper::IsSameDay(dateStart, dateDue))
-					dDuration = 0.0;
-
-				while (dDayStart < dateDue)
-				{
-					// determine the end of 'this' day
-					double dDayEnd = (CDateHelper::GetDateOnly(dDayStart).m_dt + 1.0);
-
-					if (!week.Weekend().IsWeekend(dDayStart))
-					{
-						dDuration += (min(dDayEnd, dateDue) - dDayStart); // in days
-					}
-
-					// next day
-					dDayStart = dDayEnd;
-				}
-
-				// handle 'whole' of due date
-				if (!week.Weekend().IsWeekend(dateDue) && IsEndOfDay(dateDue))
-					dDuration += 1.0;
-			}
-			else if (IsEndOfDay(dateDue))
-			{
-				dDuration += 1.0;
-			}
-
-#ifdef _DEBUG
-/*
-			COleDateTime dtEnd(dateDue);
-
-			if (IsEndOfDay(dtEnd))
-				dtEnd.m_dt += 1.0;
-
-			double dTestDays = week.CalculateDurationInDays(dateStart, dtEnd);
-			ASSERT(dTestDays == dDuration);
-*/
-#endif
-
-			// Convert to hours or minutes
-			if (nUnits != TDCU_WEEKDAYS)
-				dDuration = CTimeHelper(week).GetTime(dDuration, THU_WEEKDAYS, TDC::MapUnitsToTHUnits(nUnits));
+			dDuration = CWorkingWeek().CalculateDurationInDays(dateStart, CheckGetEndOfDay(dateDue));
 		}
 		break;
 
