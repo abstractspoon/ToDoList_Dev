@@ -73,12 +73,12 @@ BOOL TDCTIMEPERIOD::SetTHUnits(TH_UNITS nTHUnits, BOOL bRecalc)
 
 double TDCTIMEPERIOD::GetTime(TH_UNITS nToUnits) const
 {
-	return CTimeHelper().GetTime(dAmount, TDC::MapUnitsToTHUnits(nUnits), nToUnits);
+	return CTimeHelper().Convert(dAmount, TDC::MapUnitsToTHUnits(nUnits), nToUnits);
 }
 
 double TDCTIMEPERIOD::GetTime(TH_UNITS nToUnits, const CTimeHelper& th) const
 {
-	return th.GetTime(dAmount, TDC::MapUnitsToTHUnits(nUnits), nToUnits);
+	return th.Convert(dAmount, TDC::MapUnitsToTHUnits(nUnits), nToUnits);
 }
 
 BOOL TDCTIMEPERIOD::SetUnits(TDC_UNITS nNewUnits, BOOL bRecalc)
@@ -93,7 +93,7 @@ BOOL TDCTIMEPERIOD::SetUnits(TDC_UNITS nNewUnits, BOOL bRecalc)
 		return FALSE;
 
 	if (bRecalc && (dAmount != 0.0))
-		dAmount = CTimeHelper().GetTime(dAmount, GetTHUnits(), TDC::MapUnitsToTHUnits(nNewUnits));
+		dAmount = CTimeHelper().Convert(dAmount, GetTHUnits(), TDC::MapUnitsToTHUnits(nNewUnits));
 
 	nUnits = nNewUnits;
 	return TRUE;
@@ -110,7 +110,7 @@ BOOL TDCTIMEPERIOD::AddTime(double dTime, TDC_UNITS nTimeUnits)
 	if (dTime == 0.0)
 		return FALSE;
 	
-	dAmount += CTimeHelper().GetTime(dTime, TDC::MapUnitsToTHUnits(nTimeUnits), GetTHUnits());
+	dAmount += CTimeHelper().Convert(dTime, TDC::MapUnitsToTHUnits(nTimeUnits), GetTHUnits());
 	return TRUE;
 }
 

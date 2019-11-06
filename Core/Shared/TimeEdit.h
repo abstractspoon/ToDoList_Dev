@@ -25,8 +25,8 @@ public:
 	CTimeEdit(TH_UNITS nUnits = THU_HOURS, int nMaxDecPlaces = 9);
 	virtual ~CTimeEdit();
 
-	double GetTime() const;
-	double GetTime(TH_UNITS nUnits) const;
+	double Convert() const;
+	double Convert(TH_UNITS nUnits) const;
 
 	void SetTime(double dTime);
 	void SetTime(double dTime, TH_UNITS nUnits);

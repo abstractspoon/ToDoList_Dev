@@ -195,7 +195,7 @@ void CTimeEdit::PreSubclassWindow()
 	CEnEdit::PreSubclassWindow();
 
 	UpdateButtonText(m_nUnits);
-	SetTime(GetTime());
+	SetTime(Convert());
 }
 
 void CTimeEdit::UpdateButtonText(TH_UNITS nUnits)
@@ -217,7 +217,7 @@ void CTimeEdit::UpdateButtonText(TH_UNITS nUnits)
 	}
 }
 
-double CTimeEdit::GetTime() const
+double CTimeEdit::Convert() const
 {
 	CString sTime;
 	GetWindowText(sTime);
@@ -234,7 +234,7 @@ void CTimeEdit::SetTime(double dTime)
 
 void CTimeEdit::SetTime(double dTime, TH_UNITS nUnits)
 {
-	if (dTime != GetTime())
+	if (dTime != Convert())
 		SetTime(dTime);
 
 	SetUnits(nUnits);
@@ -255,7 +255,7 @@ void CTimeEdit::SetMaxDecimalPlaces(int nMaxDecPlaces)
 	{
 		m_nMaxDecPlaces = nMaxDecPlaces;
 
-		SetTime(GetTime());
+		SetTime(Convert());
 	}
 }
 
@@ -331,19 +331,19 @@ void CTimeEdit::OnBtnClick(UINT nID)
 	}
 }
 
-double CTimeEdit::GetTime(TH_UNITS nUnits) const
+double CTimeEdit::Convert(TH_UNITS nUnits) const
 {
-	return CTimeHelper().GetTime(GetTime(), m_nUnits, nUnits);
+	return CTimeHelper().Convert(Convert(), m_nUnits, nUnits);
 }
 
 CString CTimeEdit::FormatTime(BOOL bUnits) const
 {
-	return CTimeHelper().FormatTime(GetTime(), (bUnits ? m_nUnits : THU_NULL), m_nMaxDecPlaces);
+	return CTimeHelper().FormatTime(Convert(), (bUnits ? m_nUnits : THU_NULL), m_nMaxDecPlaces);
 }
 
 CString CTimeEdit::FormatTimeHMS() const
 {
-	return CTimeHelper().FormatTimeHMS(GetTime(), GetUnits(), TRUE); 
+	return CTimeHelper().FormatTimeHMS(Convert(), GetUnits(), TRUE); 
 }
 
 void CTimeEdit::OnSetReadOnly(BOOL bReadOnly)

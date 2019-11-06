@@ -70,7 +70,7 @@ BOOL CTimeHelper::IsValidUnit(TH_UNITS nUnits)
 	return FALSE;
 }
 
-double CTimeHelper::GetTime(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits) const
+double CTimeHelper::Convert(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits) const
 {
 	// sanity check
 	if (!IsValidUnit(nFromUnits) || !IsValidUnit(nToUnits))
@@ -181,7 +181,7 @@ int CTimeHelper::Compare(double dTime1, TH_UNITS nUnits1, double dTime2, TH_UNIT
 {
 	// Compare equivalent times
 	if (nUnits2 != nUnits1)
-		dTime2 = GetTime(dTime2, nUnits2, nUnits1);
+		dTime2 = Convert(dTime2, nUnits2, nUnits1);
 
 	return ((dTime1 > dTime2) ? 1 : ((dTime1 < dTime2) ? -1 : 0));
 }
@@ -388,7 +388,7 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFl
 		dTime = -dTime;
 
 	// convert the time to minutes 
-	double dMins = GetTime(dTime, nUnitsFrom, THU_MINS);
+	double dMins = Convert(dTime, nUnitsFrom, THU_MINS);
 	
 	// and all the others up to years
 	double dHours = (dMins / MINS2HOURS);

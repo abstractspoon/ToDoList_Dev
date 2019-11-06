@@ -139,7 +139,7 @@ bool CMLOExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask
 	if (dTimeEst > 0.0)
 	{
 		TH_UNITS nTHUnits = MapUnitsToTHUnits(nUnits);
-		pXIDestItem->AddItem(_T("EstimateMax"), CTimeHelper().GetTime(dTimeEst, nTHUnits, THU_DAYS));
+		pXIDestItem->AddItem(_T("EstimateMax"), CTimeHelper().Convert(dTimeEst, nTHUnits, THU_DAYS));
 	}
 	
 	// comments

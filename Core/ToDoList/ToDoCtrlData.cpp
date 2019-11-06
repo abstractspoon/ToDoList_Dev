@@ -3600,7 +3600,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 			{
 				CTwentyFourSevenWeek week;
 
-				dDuration = CTimeHelper(week).GetTime(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_DAYS);
+				dDuration = CTimeHelper(week).Convert(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_DAYS);
 				nUnits = TDCU_DAYS;
 			}
 
@@ -3722,7 +3722,7 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 			if (nUnits != TDCU_DAYS)
 			{
 				CTwentyFourSevenWeek week;
-				dDuration = CTimeHelper(week).GetTime(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
+				dDuration = CTimeHelper(week).Convert(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
 			}
 		}
 		break;

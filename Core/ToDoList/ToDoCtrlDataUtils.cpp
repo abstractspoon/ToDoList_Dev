@@ -1022,7 +1022,7 @@ BOOL CTDCTaskMatcher::ValueMatches(double dValue, const SEARCHPARAM& rule, SEARC
 	if (bTime)
 	{
 		TH_UNITS nTHUints = TDC::MapUnitsToTHUnits(rule.GetTimeUnits());
-		dSearchVal = CTimeHelper().GetTime(dSearchVal, nTHUints, THU_HOURS);
+		dSearchVal = CTimeHelper().Convert(dSearchVal, nTHUints, THU_HOURS);
 	}
 	
 	switch (rule.GetOperator())
@@ -1339,7 +1339,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 
 				if ((nUnits1 != nUnits2) && (dRemain1 != 0.0) && (dRemain2 != 0.0))
 				{
-					dRemain2 = CTimeHelper().GetTime(dRemain2, 
+					dRemain2 = CTimeHelper().Convert(dRemain2, 
 													TDC::MapUnitsToTHUnits(nUnits2), 
 													TDC::MapUnitsToTHUnits(nUnits1));
 				}
@@ -2346,8 +2346,8 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 	// Estimate is calculated internally in hours so we need to convert it to nUnits
 	CTimeHelper th;
 
-	dEstimate = th.GetTime(dEstimate, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
-	dWeightedEstimate = th.GetTime(dWeightedEstimate, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
+	dEstimate = th.Convert(dEstimate, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
+	dWeightedEstimate = th.Convert(dWeightedEstimate, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
 
 	return dEstimate;
 }
@@ -2436,7 +2436,7 @@ double CTDCTaskCalculator::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRU
 	}
 
 	// convert it back from hours to nUnits
-	return CTimeHelper().GetTime(dSpent, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
+	return CTimeHelper().Convert(dSpent, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
 }
 
 BOOL CTDCTaskCalculator::IsTaskStarted(DWORD dwTaskID, BOOL bToday) const

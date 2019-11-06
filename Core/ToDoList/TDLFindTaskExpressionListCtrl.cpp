@@ -1362,7 +1362,7 @@ void CTDLFindTaskExpressionListCtrl::OnTimeChange()
 	int nRow = GetCurSel();
 	SEARCHPARAM& rule = m_aSearchParams[nRow];
 
-	rule.SetValue(m_eTime.GetTime());
+	rule.SetValue(m_eTime.Convert());
 	rule.SetTimeUnits(TDC::MapTHUnitsToUnits(m_eTime.GetUnits()));
 
 	UpdateValueColumnText(nRow);

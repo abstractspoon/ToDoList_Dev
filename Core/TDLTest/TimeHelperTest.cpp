@@ -48,24 +48,24 @@ void CTimeHelperTest::TestGetTime()
 
 		// -----------------------------------------------------------------------
 
-		ExpectEQ(th.GetTime(1.0, THU_DAYS,		THU_HOURS), HOURSINDAY);
-		ExpectEQ(th.GetTime(1.0, THU_WEEKDAYS,	THU_HOURS), HOURSINDAY);
-		ExpectEQ(th.GetTime(1.0, THU_WEEKS,		THU_WEEKDAYS), DAYSINWEEK);
-		ExpectEQ(th.GetTime(1.0, THU_WEEKS,		THU_DAYS), 7.0);
+		ExpectEQ(th.Convert(1.0, THU_DAYS,		THU_HOURS), HOURSINDAY);
+		ExpectEQ(th.Convert(1.0, THU_WEEKDAYS,	THU_HOURS), HOURSINDAY);
+		ExpectEQ(th.Convert(1.0, THU_WEEKS,		THU_WEEKDAYS), DAYSINWEEK);
+		ExpectEQ(th.Convert(1.0, THU_WEEKS,		THU_DAYS), 7.0);
 
 		// -----------------------------------------------------------------------
 
-		ExpectEQ(th.GetTime(1.0, THU_HOURS,		THU_MINS), 60.0);
-		ExpectEQ(th.GetTime(1.0, THU_DAYS,		THU_MINS), (60.0 * HOURSINDAY));
-		ExpectEQ(th.GetTime(1.0, THU_WEEKDAYS,	THU_MINS), (60.0 * HOURSINDAY));
-		ExpectEQ(th.GetTime(1.0, THU_WEEKS,		THU_MINS), (60.0 * HOURSINDAY * DAYSINWEEK));
+		ExpectEQ(th.Convert(1.0, THU_HOURS,		THU_MINS), 60.0);
+		ExpectEQ(th.Convert(1.0, THU_DAYS,		THU_MINS), (60.0 * HOURSINDAY));
+		ExpectEQ(th.Convert(1.0, THU_WEEKDAYS,	THU_MINS), (60.0 * HOURSINDAY));
+		ExpectEQ(th.Convert(1.0, THU_WEEKS,		THU_MINS), (60.0 * HOURSINDAY * DAYSINWEEK));
 
 		// -----------------------------------------------------------------------
 
-		ExpectEQ(th.GetTime(1.0, THU_MINS,		THU_HOURS)	, (1 / 60.0));
-		ExpectEQ(th.GetTime(1.0, THU_MINS,		THU_DAYS)	, (1 / (60.0 * HOURSINDAY)));
-		ExpectEQ(th.GetTime(1.0, THU_MINS,		THU_WEEKDAYS), (1 / (60.0 * HOURSINDAY)));
-		ExpectEQ(th.GetTime(1.0, THU_MINS,		THU_WEEKS)	, (1 / (60.0 * HOURSINDAY * DAYSINWEEK)));
+		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_HOURS)	, (1 / 60.0));
+		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_DAYS)	, (1 / (60.0 * HOURSINDAY)));
+		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_WEEKDAYS), (1 / (60.0 * HOURSINDAY)));
+		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_WEEKS)	, (1 / (60.0 * HOURSINDAY * DAYSINWEEK)));
 	}
 		
 	// -----------------------------------------------------------------------
@@ -79,24 +79,24 @@ void CTimeHelperTest::TestGetTime()
 
 		// -----------------------------------------------------------------------
 
-		ExpectEQ(th.GetTime(1.0, THU_DAYS,		THU_HOURS),		HOURSINDAY);
-		ExpectEQ(th.GetTime(1.0, THU_WEEKDAYS,	THU_HOURS),		HOURSINDAY);
-		ExpectEQ(th.GetTime(1.0, THU_WEEKS,		THU_WEEKDAYS),	DAYSINWEEK);
-		ExpectEQ(th.GetTime(1.0, THU_WEEKS,		THU_DAYS),		DAYSINWEEK);
+		ExpectEQ(th.Convert(1.0, THU_DAYS,		THU_HOURS),		HOURSINDAY);
+		ExpectEQ(th.Convert(1.0, THU_WEEKDAYS,	THU_HOURS),		HOURSINDAY);
+		ExpectEQ(th.Convert(1.0, THU_WEEKS,		THU_WEEKDAYS),	DAYSINWEEK);
+		ExpectEQ(th.Convert(1.0, THU_WEEKS,		THU_DAYS),		DAYSINWEEK);
 
 		// -----------------------------------------------------------------------
 
-		ExpectEQ(th.GetTime(1.0, THU_HOURS,		THU_MINS),		60.0);
-		ExpectEQ(th.GetTime(1.0, THU_DAYS,		THU_MINS),		(60.0 * HOURSINDAY));
-		ExpectEQ(th.GetTime(1.0, THU_WEEKDAYS,	THU_MINS),		(60.0 * HOURSINDAY));
-		ExpectEQ(th.GetTime(1.0, THU_WEEKS,		THU_MINS),		(60.0 * HOURSINDAY * DAYSINWEEK));
+		ExpectEQ(th.Convert(1.0, THU_HOURS,		THU_MINS),		60.0);
+		ExpectEQ(th.Convert(1.0, THU_DAYS,		THU_MINS),		(60.0 * HOURSINDAY));
+		ExpectEQ(th.Convert(1.0, THU_WEEKDAYS,	THU_MINS),		(60.0 * HOURSINDAY));
+		ExpectEQ(th.Convert(1.0, THU_WEEKS,		THU_MINS),		(60.0 * HOURSINDAY * DAYSINWEEK));
 
 		// -----------------------------------------------------------------------
 
-		ExpectEQ(th.GetTime(1.0, THU_MINS,		THU_HOURS),		(1 / 60.0));
-		ExpectEQ(th.GetTime(1.0, THU_MINS,		THU_DAYS),		(1 / (60.0 * HOURSINDAY)));
-		ExpectEQ(th.GetTime(1.0, THU_MINS,		THU_WEEKDAYS),	(1 / (60.0 * HOURSINDAY)));
-		ExpectEQ(th.GetTime(1.0, THU_MINS,		THU_WEEKS),		(1 / (60.0 * HOURSINDAY * DAYSINWEEK)));
+		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_HOURS),		(1 / 60.0));
+		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_DAYS),		(1 / (60.0 * HOURSINDAY)));
+		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_WEEKDAYS),	(1 / (60.0 * HOURSINDAY)));
+		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_WEEKS),		(1 / (60.0 * HOURSINDAY * DAYSINWEEK)));
 	}
 		
 	// -----------------------------------------------------------------------
@@ -110,24 +110,24 @@ void CTimeHelperTest::TestGetTime()
 
 		// -----------------------------------------------------------------------
 
-		ExpectEQ(th.GetTime(1.0, THU_DAYS,		THU_HOURS),		HOURSINDAY);
-		ExpectEQ(th.GetTime(1.0, THU_WEEKDAYS,	THU_HOURS),		HOURSINDAY);
-		ExpectEQ(th.GetTime(1.0, THU_WEEKS,		THU_WEEKDAYS),	DAYSINWEEK);
-		ExpectEQ(th.GetTime(1.0, THU_WEEKS,		THU_DAYS),		7.0);
+		ExpectEQ(th.Convert(1.0, THU_DAYS,		THU_HOURS),		HOURSINDAY);
+		ExpectEQ(th.Convert(1.0, THU_WEEKDAYS,	THU_HOURS),		HOURSINDAY);
+		ExpectEQ(th.Convert(1.0, THU_WEEKS,		THU_WEEKDAYS),	DAYSINWEEK);
+		ExpectEQ(th.Convert(1.0, THU_WEEKS,		THU_DAYS),		7.0);
 
 		// -----------------------------------------------------------------------
 
-		ExpectEQ(th.GetTime(1.0, THU_HOURS,		THU_MINS),		60.0);
-		ExpectEQ(th.GetTime(1.0, THU_DAYS,		THU_MINS),		(60.0 * HOURSINDAY));
-		ExpectEQ(th.GetTime(1.0, THU_WEEKDAYS,	THU_MINS),		(60.0 * HOURSINDAY));
-		ExpectEQ(th.GetTime(1.0, THU_WEEKS,		THU_MINS),		(60.0 * HOURSINDAY * DAYSINWEEK));
+		ExpectEQ(th.Convert(1.0, THU_HOURS,		THU_MINS),		60.0);
+		ExpectEQ(th.Convert(1.0, THU_DAYS,		THU_MINS),		(60.0 * HOURSINDAY));
+		ExpectEQ(th.Convert(1.0, THU_WEEKDAYS,	THU_MINS),		(60.0 * HOURSINDAY));
+		ExpectEQ(th.Convert(1.0, THU_WEEKS,		THU_MINS),		(60.0 * HOURSINDAY * DAYSINWEEK));
 
 		// -----------------------------------------------------------------------
 
-		ExpectEQ(th.GetTime(1.0, THU_MINS,		THU_HOURS)	,	(1 / 60.0));
-		ExpectEQ(th.GetTime(1.0, THU_MINS,		THU_DAYS)	,	(1 / (60.0 * HOURSINDAY)));
-		ExpectEQ(th.GetTime(1.0, THU_MINS,		THU_WEEKDAYS),	(1 / (60.0 * HOURSINDAY)));
-		ExpectEQ(th.GetTime(1.0, THU_MINS,		THU_WEEKS)	,	(1 / (60.0 * HOURSINDAY * DAYSINWEEK)));
+		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_HOURS)	,	(1 / 60.0));
+		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_DAYS)	,	(1 / (60.0 * HOURSINDAY)));
+		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_WEEKDAYS),	(1 / (60.0 * HOURSINDAY)));
+		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_WEEKS)	,	(1 / (60.0 * HOURSINDAY * DAYSINWEEK)));
 	}
 		
 	// -----------------------------------------------------------------------

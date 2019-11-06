@@ -48,7 +48,7 @@ public:
 	CTimeHelper(); // uses statically defined hours and days
 	CTimeHelper(const CWorkingWeek& week);
 	
-	double GetTime(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits) const;
+	double Convert(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits) const;
 	CString FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFlags = HMS_DECIMALPLACES) const;
 	CString FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces) const;
 	CString FormatTime(double dTime, int nDecPlaces) const;

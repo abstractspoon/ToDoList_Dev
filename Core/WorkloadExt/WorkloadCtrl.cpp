@@ -543,7 +543,7 @@ double CWorkloadCtrl::GetTaskTimeEstimate(const ITASKLISTBASE* pTasks, HTASKITEM
 		return 0.0;
 	}
 
-	return CTimeHelper().GetTime(dTimeEst, nTHUnits, THU_WEEKDAYS);
+	return CTimeHelper().Convert(dTimeEst, nTHUnits, THU_WEEKDAYS);
 }
 
 BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)

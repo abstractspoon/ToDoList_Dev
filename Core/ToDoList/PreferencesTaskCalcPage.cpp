@@ -222,7 +222,7 @@ COleDateTimeSpan CPreferencesTaskCalcPage::GetRecentlyModifiedPeriod() const
 {
 	CTwentyFourSevenWeek week;
 
-	return CTimeHelper(week).GetTime(m_recentModTime.dAmount, m_recentModTime.GetTHUnits(), THU_DAYS);
+	return CTimeHelper(week).Convert(m_recentModTime.dAmount, m_recentModTime.GetTHUnits(), THU_DAYS);
 }
 
 void CPreferencesTaskCalcPage::OnSetStatusOnDone() 

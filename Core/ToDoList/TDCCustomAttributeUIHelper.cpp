@@ -913,7 +913,7 @@ BOOL CTDCCustomAttributeUIHelper::GetControlData(const CWnd* pParent, const CUST
 		case TDCCA_TIMEPERIOD:
 			{
 				TH_UNITS nUnits = ((CTimeEdit*)pCtrl)->GetUnits();
-				double dTime = ((CTimeEdit*)pCtrl)->GetTime();
+				double dTime = ((CTimeEdit*)pCtrl)->Convert();
 
 				data.Set(TDCTIMEPERIOD(dTime, nUnits));
 			}

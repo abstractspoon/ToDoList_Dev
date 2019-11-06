@@ -428,7 +428,7 @@ double CStatsItemCalculator::GetTimeInDays(double dTime, TDC_UNITS nUnits)
 
 	// all the rest
 	TH_UNITS nTHUnits = MapUnitsToTHUnits(nUnits);
-	return CTimeHelper().GetTime(dTime, nTHUnits, THU_DAYS);
+	return CTimeHelper().Convert(dTime, nTHUnits, THU_DAYS);
 }
 
 TH_UNITS CStatsItemCalculator::MapUnitsToTHUnits(TDC_UNITS nUnits)
