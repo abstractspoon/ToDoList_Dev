@@ -2227,24 +2227,14 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 
 COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart) const
 {
-	// Tasks whose time estimate is in hours or mins and whose current and new dates 
-	// fall wholly within a single day are kept simple
+	// Tasks whose current and new dates fall wholly within a single day are kept simple
 	double dDuration = CalcDuration(dtCurStart, dtCurDue, TDCU_DAYS);
 	ASSERT(dDuration > 0.0);
 
 	COleDateTime dtNewDue = AddDuration(dtNewStart, dDuration, TDCU_DAYS);
 	
-// 	switch (nUnits)
-// 	{
-// 		case TDCU_MINS:
-// 		case TDCU_HOURS:
-// 		case TDCU_DAYS:
-			if (CDateHelper::IsSameDay(dtCurStart, dtCurDue) && CDateHelper::IsSameDay(dtNewStart, dtNewDue))
-			{
-				return dtNewDue;
-			}
-// 			break;
-// 	}
+	if (CDateHelper::IsSameDay(dtCurStart, dtCurDue) && CDateHelper::IsSameDay(dtNewStart, dtNewDue))
+		return dtNewDue;
 
 	// All else
 	dDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
@@ -3609,51 +3599,20 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 		break;
 
 	case TDCU_MINS:
+		{
+			dateEnd = CWorkingWeek().AddDurationInHours(dateStart, (dDuration / 60));
+		}
+		break;
+
 	case TDCU_HOURS:
+		{
+			dateEnd = CWorkingWeek().AddDurationInHours(dateStart, dDuration);
+		}
+		break;
+
 	case TDCU_WEEKDAYS:
 		{
-			// work in weekdays
-			CWorkingWeek week;
-
-			if (nUnits != TDCU_WEEKDAYS)
-			{
-				dDuration = CTimeHelper(week).GetTime(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_WEEKDAYS);
-				nUnits = TDCU_WEEKDAYS;
-			}
-
-			if (week.HasWeekend())
-			{
-				// Adjust start date if it falls on a weekend
-				BOOL bForward = (dDuration > 0.0);
-				week.MakeWeekday(dateStart, bForward);
-
-				// Adjust one day at a time
-				double dDaysLeft = fabs(dDuration);
-				int nDir = (bForward ? 1 : -1);
-
-				dateEnd = dateStart;
-
-				while (dDaysLeft > 0.0)
-				{
-					dDaysLeft--;
-					dateEnd.m_dt += nDir;
-
-					// adjust for partial day overrun
-					if (dDaysLeft < 0.0)
-						dateEnd.m_dt += (nDir * dDaysLeft);
-
-					// step over weekends
-					if ((dDaysLeft > 0.0) || CDateHelper::DateHasTime(dateEnd))
-					{
-						// FALSE -> Don't truncate time
-						week.MakeWeekday(dateEnd, bForward, FALSE);
-					}
-				}
-			}
-			else
-			{
-				dateEnd.m_dt += dDuration;
-			}
+			dateEnd = CWorkingWeek().AddDurationInDays(dateStart, dDuration);
 		}
 		break;
 	}
