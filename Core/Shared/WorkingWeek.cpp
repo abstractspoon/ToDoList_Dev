@@ -66,6 +66,19 @@ CWorkingDay::CWorkingDay(const CWorkingDay& workDay)
 	*this = workDay;
 }
 
+BOOL CWorkingDay::operator==(const CWorkingDay& other) const
+{
+	// A twenty-four hour day has no start of day or lunch break
+	if ((m_dWorkingLengthInHours == 24.0) && (other.m_dWorkingLengthInHours == 24.0))
+		return TRUE;
+
+	// else check all attributes
+	return ((m_dWorkingLengthInHours == other.m_dWorkingLengthInHours) &&
+			(m_dStartOfDayInHours == other.m_dStartOfDayInHours) &&
+			(m_dStartOfLunchInHours == other.m_dStartOfDayInHours) &&
+			(m_dEndOfLunchInHours == other.m_dEndOfLunchInHours));
+}
+
 BOOL CWorkingDay::IsValid(double dWorkingLengthInHours,
 						  double dStartOfDayInHours,
 						  double dStartOfLunchInHours,
@@ -250,6 +263,11 @@ CWeekend::CWeekend(const CWeekend& weekend)
 	*this = weekend;
 }
 
+BOOL CWeekend::operator==(const CWeekend& other) const
+{
+	return (m_dwDays == other.m_dwDays);
+}
+
 BOOL CWeekend::Initialise(DWORD dwWeekendDays)
 {
 	if (!IsValid(dwWeekendDays))
@@ -365,6 +383,12 @@ CWorkingWeek::CWorkingWeek(const CWorkingWeek& week)
 {
 	// Week must already be valid
 	*this = week;
+}
+
+BOOL CWorkingWeek::operator==(const CWorkingWeek& other)
+{
+	return ((m_Weekend == other.m_Weekend) && 
+			(m_WorkDay == other.m_WorkDay));
 }
 
 // static 

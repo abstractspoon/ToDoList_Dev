@@ -33,6 +33,8 @@ public:
 
 	CWorkingDay(const CWorkingDay& workDay);
 
+	BOOL operator==(const CWorkingDay& other) const;
+
 	static BOOL Initialise(double dWorkingLengthInHours,
 						   double dStartOfDayInHours,		
 						   double dStartOfLunchInHours,
@@ -83,6 +85,8 @@ public:
 	CWeekend(DWORD dwDays); // eg. WD_SATURDAY | WD_SUNDAY
 	CWeekend(const CWeekend& weekend);
 
+	BOOL operator==(const CWeekend& other) const;
+
 	static BOOL Initialise(DWORD dwDays);
 	static BOOL IsValid(DWORD dwDays);
 
@@ -118,6 +122,8 @@ public:
 				 double dEndOfLunchInHours);	// eg. 13
 
 	CWorkingWeek(const CWorkingWeek& week);
+
+	BOOL operator==(const CWorkingWeek& other) const;
 
 	static BOOL Initialise(DWORD dwWeekendDays,				// eg. (DHW_SATURDAY | DHW_SUNDAY),
 						   double dWorkingLengthInHours);	// eg. 8
