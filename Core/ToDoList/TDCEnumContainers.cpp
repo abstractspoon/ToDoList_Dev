@@ -63,6 +63,9 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib) const
 	if (pos == NULL)
 		return TRUE;
 
+	if (Has(nAttrib))
+		return TRUE;
+
 	// All the rest
 	BOOL bCanAdd = FALSE;
 
