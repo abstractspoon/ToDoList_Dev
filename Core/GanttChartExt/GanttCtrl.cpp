@@ -2650,7 +2650,8 @@ BOOL CGanttCtrl::IsVerticalDivider(DIV_TYPE nType)
 
 void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected)
 {
-	ASSERT(nType != DIV_NONE);
+	if (nType == DIV_NONE)
+		return;
 
 	BOOL bVert = IsVerticalDivider(nType);
 

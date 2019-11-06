@@ -961,7 +961,16 @@ void CGanttChartWnd::OnSelchangeSnapMode()
 
 LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM /*wp*/, LPARAM lp)
 {
-	CDialogHelper::SelectItemByData(m_cbDisplayOptions, (GTLC_MONTH_DISPLAY)lp);
+	GTLC_MONTH_DISPLAY nDisplay = (GTLC_MONTH_DISPLAY)lp;
+	CDialogHelper::SelectItemByData(m_cbDisplayOptions, nDisplay);
+
+	BuildSnapCombo();
+
+	GTLC_SNAPMODE nSnap = GTLCSM_FREE;
+	VERIFY(m_mapDisplaySnapModes.Lookup(nDisplay, nSnap));
+
+	m_ctrlGantt.SetSnapMode(nSnap);
+	CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
 
 	return 0L;
 }
