@@ -2228,10 +2228,10 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart) const
 {
 	// Tasks whose current and new dates fall wholly within a single day are kept simple
-	double dDuration = CalcDuration(dtCurStart, dtCurDue, TDCU_DAYS);
-	ASSERT(dDuration > 0.0);
+	double dDaysDuration = CalcDuration(dtCurStart, dtCurDue, TDCU_DAYS);
+	ASSERT(dDaysDuration > 0.0);
 
-	COleDateTime dtNewDue = AddDuration(dtNewStart, dDuration, TDCU_DAYS);
+	COleDateTime dtNewDue = AddDuration(dtNewStart, dDaysDuration, TDCU_DAYS);
 	
 	if (CDateHelper::IsSameDay(dtCurStart, dtCurDue) && CDateHelper::IsSameDay(dtNewStart, dtNewDue))
 		return dtNewDue;
@@ -2243,10 +2243,11 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	if (fabs(dCurDuration - dNewDuration) < (1.0 / 24 / 60 / 60))
 		return dtNewDue;
 	
-	// We actually need to calculate it 'properly'
-	dDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
+	// Update start date if it falls on a weekend
+	CWorkingWeek().MakeWeekday(dtNewStart, (dDaysDuration > 0));
 	
-	return AddDuration(dtNewStart, dDuration, nUnits);
+	// We actually need to calculate it 'properly'
+	return AddDuration(dtNewStart, dCurDuration, nUnits);
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date, BOOL bAndSubtasks)
@@ -3594,6 +3595,19 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 			}
 
 			dateEnd.m_dt += dDuration;
+
+			// If date falls on the beginning of a day, move to end of previous day
+			if (dDuration > 0.0)
+			{
+				if (!CDateHelper::DateHasTime(dateEnd))
+					dateEnd.m_dt--;
+			}
+			else
+			{
+				// End date comes before start date, so 'dateStart' is logically the end date
+				if (!CDateHelper::DateHasTime(dateStart))
+					dateEnd.m_dt++;
+			}
 		}
 		break;
 
@@ -3605,21 +3619,21 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 			// Note: 
 			CWorkingWeek week;
 			dateEnd = week.AddDuration(dateStart, dDuration, TDC::MapUnitsToWWUnits(nUnits));
+
+			// If date falls on the beginning of a day, move to end of previous day
+			if (dDuration > 0.0)
+			{
+				if (week.WorkDay().IsEndOfDay(dateEnd))
+					dateEnd = CDateHelper::GetDateOnly(dateEnd);
+			}
+			else
+			{
+				// End date comes before start date, so 'dateStart' is logically the end date
+				if (week.WorkDay().IsEndOfDay(dateStart))
+					dateEnd = (CDateHelper::GetDateOnly(dateEnd).m_dt + 1.0);
+			}
 		}
 		break;
-	}
-
-	// If date falls on the beginning of a day, move to end of previous day
-	if (dDuration > 0.0)
-	{
-		if (!CDateHelper::DateHasTime(dateEnd))
-			dateEnd.m_dt--;
-	}
-	else
-	{
-		// End date comes before start date, so 'dateStart' is logically the end date
-		if (!CDateHelper::DateHasTime(dateStart))
-			dateEnd.m_dt++;
 	}
 
 	// sanity check
@@ -3654,22 +3668,26 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	}
 
 	// Handle due date 'end of day'
-	COleDateTime dateEnd = (dateDue);
+	COleDateTime dateEnd(dateDue);
 
 	if (IsEndOfDay(dateEnd))
 		dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
 	
-	double dDuration = (dateEnd.m_dt - dateStart.m_dt); // in days
-
 	switch (nUnits)
 	{
 	case TDCU_DAYS:
 	case TDCU_MONTHS:
 	case TDCU_YEARS:
-		if (nUnits != TDCU_DAYS)
 		{
-			CTwentyFourSevenWeek week;
-			dDuration = CTimeHelper(week).Convert(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
+			double dDuration = (dateEnd.m_dt - dateStart.m_dt); // in days
+
+			if (nUnits != TDCU_DAYS)
+			{
+				CTwentyFourSevenWeek week;
+				dDuration = CTimeHelper(week).Convert(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
+			}
+
+			return dDuration;
 		}
 		break;
 
@@ -3679,16 +3697,15 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	case TDCU_WEEKS:
 		{
 			CWorkingWeek week;
-			dDuration = week.CalculateDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
+			double dDuration = week.CalculateDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
+
+			return dDuration;
 		}
 		break;
-
-	default:
-		ASSERT(0);
-		return 0.0;
 	}
 
-	return dDuration;
+	ASSERT(0);
+	return 0.0;
 }
 
 void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate)

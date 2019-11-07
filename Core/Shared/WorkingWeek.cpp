@@ -195,6 +195,116 @@ double CWorkingDay::CalculateDurationInHours(double fromHour, double toHour) con
 	return max(dDuration, 0.0);
 }
 
+// NOTE: Caller's responsibility to check for weekends
+void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
+{
+#ifdef _DEBUG
+	COleDateTime dtOrg(date);
+	double dOrgHours(dHours);
+#endif
+
+	do // easy to break out of
+	{
+		if (dHours > 0)
+		{
+			if (date < GetStartOfDay(date))
+				date = GetStartOfDay(date);
+
+			// Hours before lunch
+			double dStartHour = GetTimeOfDayInHours(date);
+			double dHoursBeforeLunch = (GetStartOfLunchInHours() - dStartHour);
+
+			if (dHoursBeforeLunch > 0)
+			{
+				if (dHours <= dHoursBeforeLunch)
+				{
+					date.m_dt += (dHours / 24.0);
+					dHours = 0.0;
+
+					break; // done
+				}
+
+				// else
+				date = GetEndOfLunch(date);
+				dHours -= dHoursBeforeLunch;
+
+				dStartHour = GetEndOfLunchInHours();
+			}
+
+			// Hours after lunch
+			double dHoursAfterLunch = (GetEndOfDayInHours() - dStartHour);
+
+			if (dHoursAfterLunch > 0)
+			{
+				if (dHours <= dHoursAfterLunch)
+				{
+					date.m_dt += (dHours / 24.0);
+					dHours = 0.0;
+
+					break; // done
+				}
+
+				// else
+				date = GetEndOfDay(date);
+				dHours -= dHoursAfterLunch;
+			}
+		}
+		else if (dHours < 0)
+		{
+			if (date > GetEndOfDay(date))
+				date = GetEndOfDay(date);
+
+			double dStartHour = GetTimeOfDayInHours(date);
+
+			// Hours after lunch
+			double dHoursAfterLunch = (dStartHour - GetEndOfLunchInHours());
+
+			if (dHoursAfterLunch > 0)
+			{
+				if (fabs(dHours) <= dHoursAfterLunch)
+				{
+					date.m_dt += (dHours / 24.0);
+					dHours = 0.0;
+
+					break; // done
+				}
+
+				// else
+				date = GetStartOfLunch(date);
+				dHours -= dHoursAfterLunch;
+
+				dStartHour = GetStartOfLunchInHours();
+			}
+
+			// Hours before lunch
+			double dHoursBeforeLunch = (dStartHour - GetStartOfDayInHours());
+
+			if (dHoursBeforeLunch > 0)
+			{
+				if (fabs(dHours) <= dHoursBeforeLunch)
+				{
+					date.m_dt += (dHours / 24.0);
+					dHours = 0.0;
+
+					break; // done
+				}
+
+				// else
+				date = GetStartOfDay(date);
+				dHours -= dHoursBeforeLunch;
+			}
+		}
+	} 
+	while (false);
+
+#ifdef _DEBUG
+	ASSERT(CDateHelper::IsSameDay(date, dtOrg));
+
+	double dCheckHours = CalculateDurationInHours(GetTimeOfDayInHours(dtOrg), GetTimeOfDayInHours(date));
+	ASSERT(fabs(dCheckHours - (dOrgHours - dHours)) < 0.001);
+#endif
+}
+
 double CWorkingDay::GetTimeOfDayInHours(const COleDateTime& date)
 {
 	return (CDateHelper::GetTimeOnly(date).m_dt * 24);
@@ -239,6 +349,16 @@ BOOL CWorkingDay::IsDuringLunch(const COleDateTime& date) const
 	double dTime = GetTimeOfDayInHours(date);
 
 	return ((dTime > m_dStartOfLunchInHours) && (dTime < m_dEndOfLunchInHours));
+}
+
+BOOL CWorkingDay::IsEndOfDay(const COleDateTime& date) const
+{
+	return (GetTimeOfDayInHours(date) >= GetEndOfDayInHours());
+}
+
+BOOL CWorkingDay::IsStartOfDay(const COleDateTime& date) const
+{
+	return (GetTimeOfDayInHours(date) <= GetStartOfDayInHours());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -417,44 +537,36 @@ BOOL CWorkingWeek::Initialise(DWORD dwWeekendDays, double dWorkingLengthInHours,
 
 double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const COleDateTime& dtTo) const
 {
-	int nDaysDuration = (int)((int)dtTo.m_dt - (int)dtFrom.m_dt);
+	double dFromTime = m_WorkDay.GetTimeOfDayInHours(dtFrom);
+	double dToTime = m_WorkDay.GetTimeOfDayInHours(dtTo);
 
-	if (nDaysDuration < 0)
-		return 0;
+	double dHoursDuration = 0.0; 
 
-	double dFromTimeOfDay = m_WorkDay.GetTimeOfDayInHours(dtFrom);
-	double dToTimeOfDay = m_WorkDay.GetTimeOfDayInHours(dtTo);
-	double dHoursDuration = 0;
-
-	if (nDaysDuration == 0)
+	if (CDateHelper::IsSameDay(dtFrom, dtTo))
 	{
-		// from and to are same day
 		if (!m_Weekend.IsWeekend(dtFrom))
-			dHoursDuration = m_WorkDay.CalculateDurationInHours(dFromTimeOfDay, dToTimeOfDay);
+			dHoursDuration = m_WorkDay.CalculateDurationInHours(dFromTime, dToTime);
 	}
 	else
 	{
-		if (nDaysDuration > 1)
+		// First day
+		if (!m_Weekend.IsWeekend(dtFrom))
+			dHoursDuration = m_WorkDay.CalculateDurationInHours(dFromTime, m_WorkDay.GetEndOfDayInHours());
+
+		// whole days
+		double dStart = CDateHelper::GetDateOnly(dtFrom).m_dt + 1;
+		double dEnd = CDateHelper::GetDateOnly(dtTo).m_dt;
+
+		while (dStart < dEnd)
 		{
-			// count whole days
-			double dFrom = CDateHelper::GetDateOnly(dtFrom).m_dt + 1;
-			double dTo = CDateHelper::GetDateOnly(dtTo).m_dt - 1;
+			if (!m_Weekend.IsWeekend(dStart))
+				dHoursDuration += m_WorkDay.GetLengthInHours();
 
-			while (dFrom < dTo)
-			{
-				if (!m_Weekend.IsWeekend(dFrom))
-					dHoursDuration += m_WorkDay.GetLengthInHours();
-
-				dFrom++;
-			}
+			dStart++;
 		}
 
-		// part days
-		if (!m_Weekend.IsWeekend(dtFrom))
-			dHoursDuration += m_WorkDay.CalculateDurationInHours(dFromTimeOfDay, m_WorkDay.GetEndOfDayInHours());
-
-		if (!m_Weekend.IsWeekend(dtTo))
-			dHoursDuration += m_WorkDay.CalculateDurationInHours(m_WorkDay.GetStartOfDayInHours(), dToTimeOfDay);
+		// Last day
+		dHoursDuration += m_WorkDay.CalculateDurationInHours(m_WorkDay.GetStartOfDayInHours(), dToTime);
 	}
 
 	return dHoursDuration;
@@ -511,100 +623,6 @@ COleDateTime CWorkingWeek::AddDuration(const COleDateTime& dtFrom, double dAmoun
 
 	ASSERT(0);
 	return dtFrom;
-}
-
-// NOTE: Caller's responsibility to check for weekends
-void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
-{
-	if (dHours > 0)
-	{
-		if (date < GetStartOfDay(date))
-			date = GetStartOfDay(date);
-
-		// Hours before lunch
-		double dStartHour = GetTimeOfDayInHours(date);
-		double dHoursBeforeLunch = (GetStartOfLunchInHours() - dStartHour);
-
-		if (dHoursBeforeLunch > 0)
-		{
-			if (dHours <= dHoursBeforeLunch)
-			{
-				date.m_dt += (dHours / 24.0);
-				dHours = 0.0;
-
-				return;
-			}
-
-			// else
-			date = GetEndOfLunch(date);
-			dHours -= dHoursBeforeLunch;
-
-			dStartHour = GetEndOfLunchInHours();
-		}
-
-		// Hours after lunch
-		double dHoursAfterLunch = (GetEndOfDayInHours() - dStartHour);
-
-		if (dHoursAfterLunch > 0)
-		{
-			if (dHours <= dHoursAfterLunch)
-			{
-				date.m_dt += (dHours / 24.0);
-				dHours = 0.0;
-
-				return;
-			}
-
-			// else
-			date = GetEndOfDay(date);
-			dHours -= dHoursAfterLunch;
-		}
-	}
-	else if (dHours < 0)
-	{
-		if (date > GetEndOfDay(date))
-			date = GetEndOfDay(date);
-
-		double dStartHour = GetTimeOfDayInHours(date);
-
-		// Hours after lunch
-		double dHoursAfterLunch = (dStartHour - GetEndOfLunchInHours());
-
-		if (dHoursAfterLunch > 0)
-		{
-			if (fabs(dHours) <= dHoursAfterLunch)
-			{
-				date.m_dt += (dHours / 24.0);
-				dHours = 0.0;
-
-				return;
-			}
-
-			// else
-			date = GetStartOfLunch(date);
-			dHours -= dHoursAfterLunch;
-
-			dStartHour = GetStartOfLunchInHours();
-		}
-
-		// Hours before lunch
-		double dHoursBeforeLunch = (dStartHour - GetStartOfDayInHours());
-
-		if (dHoursBeforeLunch > 0)
-		{
-			if (fabs(dHours) <= dHoursBeforeLunch)
-			{
-				date.m_dt += (dHours / 24.0);
-				dHours = 0.0;
-
-				return;
-			}
-
-			// else
-			date = GetStartOfDay(date);
-			dHours -= dHoursBeforeLunch;
-		}
-	}
 }
 
 COleDateTime CWorkingWeek::AddDurationInHours(const COleDateTime& dtFrom, double dHours) const

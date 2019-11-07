@@ -537,6 +537,7 @@ namespace TDC
 		case TDCU_MINS:		return WWD_MINS;
 		case TDCU_HOURS:	return WWD_HOURS;
 		case TDCU_DAYS:		return WWD_DAYS;
+		case TDCU_WEEKDAYS:	return WWD_DAYS;
 		case TDCU_WEEKS:	return WWD_WEEKS;
 		}
 
