@@ -2236,7 +2236,14 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	if (CDateHelper::IsSameDay(dtCurStart, dtCurDue) && CDateHelper::IsSameDay(dtNewStart, dtNewDue))
 		return dtNewDue;
 
-	// All else
+	// Likewise if the equivalent time estimate has not changed
+	double dCurDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
+	double dNewDuration = CalcDuration(dtNewStart, dtNewDue, nUnits);
+
+	if (fabs(dCurDuration - dNewDuration) < (1.0 / 24 / 60 / 60))
+		return dtNewDue;
+	
+	// We actually need to calculate it 'properly'
 	dDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
 	
 	return AddDuration(dtNewStart, dDuration, nUnits);
@@ -3554,13 +3561,6 @@ UINT CToDoCtrlData::UpdateTaskLocalDependencyDates(DWORD dwTaskID, TDC_DATE nDat
 	return ADJUSTED_NONE;
 }
 
-COleDateTime CToDoCtrlData::CheckGetEndOfDay(const COleDateTime& date)
-{
-	ASSERT(CDateHelper::IsDateSet(date));
-
-	return (IsEndOfDay(date) ? CDateHelper::GetEndOfDay(date) : date);
-}
-
 BOOL CToDoCtrlData::IsEndOfDay(const COleDateTime& date)
 {
 	ASSERT(CDateHelper::IsDateSet(date));
@@ -3581,7 +3581,6 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 	switch (nUnits)
 	{
 	case TDCU_DAYS:
-	case TDCU_WEEKS:
 	case TDCU_MONTHS:
 	case TDCU_YEARS:
 		{
@@ -3599,20 +3598,13 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 		break;
 
 	case TDCU_MINS:
-		{
-			dateEnd = CWorkingWeek().AddDurationInHours(dateStart, (dDuration / 60));
-		}
-		break;
-
 	case TDCU_HOURS:
-		{
-			dateEnd = CWorkingWeek().AddDurationInHours(dateStart, dDuration);
-		}
-		break;
-
 	case TDCU_WEEKDAYS:
+	case TDCU_WEEKS:
 		{
-			dateEnd = CWorkingWeek().AddDurationInDays(dateStart, dDuration);
+			// Note: 
+			CWorkingWeek week;
+			dateEnd = week.AddDuration(dateStart, dDuration, TDC::MapUnitsToWWUnits(nUnits));
 		}
 		break;
 	}
@@ -3624,27 +3616,24 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 			dateEnd.m_dt--;
 	}
 	else
-	{ 
+	{
 		// End date comes before start date, so 'dateStart' is logically the end date
 		if (!CDateHelper::DateHasTime(dateStart))
 			dateEnd.m_dt++;
 	}
-	
+
 	// sanity check
 #ifdef _DEBUG
-	if (nUnits != TDCU_WEEKDAYS)
-	{
-		double dCheck = 0.0;
-		
-		if (dDuration > 0.0)
-			dCheck = CalcDuration(dateStart, dateEnd, nUnits);
-		else
-			dCheck = -CalcDuration(dateEnd, dateStart, nUnits);
+	double dCheck = 0.0;
 
-		ASSERT(fabs(dCheck - dDuration) < 1e-3);
-	}
+	if (dDuration > 0.0)
+		dCheck = CalcDuration(dateStart, dateEnd, nUnits);
+	else
+		dCheck = -CalcDuration(dateEnd, dateStart, nUnits);
+
+	ASSERT(fabs(dCheck - dDuration) < 1e-3);
 #endif
-
+	
 	return dateEnd;
 }
 
@@ -3664,43 +3653,33 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 		return 0.0;
 	}
 
-	double dDuration = (dateDue.m_dt - dateStart.m_dt); // in days
+	// Handle due date 'end of day'
+	COleDateTime dateEnd = (dateDue);
+
+	if (IsEndOfDay(dateEnd))
+		dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
+	
+	double dDuration = (dateEnd.m_dt - dateStart.m_dt); // in days
 
 	switch (nUnits)
 	{
 	case TDCU_DAYS:
-	case TDCU_WEEKS:
 	case TDCU_MONTHS:
 	case TDCU_YEARS:
-		// Work in days
+		if (nUnits != TDCU_DAYS)
 		{
-			// handle 'whole' of due date
-			if (IsEndOfDay(dateDue))
-				dDuration += 1.0;
-
-			if (nUnits != TDCU_DAYS)
-			{
-				CTwentyFourSevenWeek week;
-				dDuration = CTimeHelper(week).Convert(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
-			}
+			CTwentyFourSevenWeek week;
+			dDuration = CTimeHelper(week).Convert(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
 		}
 		break;
 
 	case TDCU_MINS:
-		{
-			dDuration = (CWorkingWeek().CalculateDurationInHours(dateStart, CheckGetEndOfDay(dateDue)) * 60);
-		}
-		break;
-
 	case TDCU_HOURS:
-		{
-			dDuration = CWorkingWeek().CalculateDurationInHours(dateStart, CheckGetEndOfDay(dateDue));
-		}
-		break;
-
 	case TDCU_WEEKDAYS:
+	case TDCU_WEEKS:
 		{
-			dDuration = CWorkingWeek().CalculateDurationInDays(dateStart, CheckGetEndOfDay(dateDue));
+			CWorkingWeek week;
+			dDuration = week.CalculateDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
 		}
 		break;
 

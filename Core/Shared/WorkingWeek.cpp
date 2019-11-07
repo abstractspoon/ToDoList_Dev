@@ -7,6 +7,8 @@
 #include "TimeHelper.h"
 #include "WorkingWeek.h"
 
+#include <math.h>
+
 /////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
@@ -385,7 +387,7 @@ CWorkingWeek::CWorkingWeek(const CWorkingWeek& week)
 	*this = week;
 }
 
-BOOL CWorkingWeek::operator==(const CWorkingWeek& other)
+BOOL CWorkingWeek::operator==(const CWorkingWeek& other) const
 {
 	return ((m_Weekend == other.m_Weekend) && 
 			(m_WorkDay == other.m_WorkDay));
@@ -427,7 +429,7 @@ double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const 
 	if (nDaysDuration == 0)
 	{
 		// from and to are same day
-		if (!Weekend().IsWeekend(dtFrom))
+		if (!m_Weekend.IsWeekend(dtFrom))
 			dHoursDuration = m_WorkDay.CalculateDurationInHours(dFromTimeOfDay, dToTimeOfDay);
 	}
 	else
@@ -440,7 +442,7 @@ double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const 
 
 			while (dFrom < dTo)
 			{
-				if (!Weekend().IsWeekend(dFrom))
+				if (!m_Weekend.IsWeekend(dFrom))
 					dHoursDuration += m_WorkDay.GetLengthInHours();
 
 				dFrom++;
@@ -448,14 +450,19 @@ double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const 
 		}
 
 		// part days
-		if (!Weekend().IsWeekend(dtFrom))
+		if (!m_Weekend.IsWeekend(dtFrom))
 			dHoursDuration += m_WorkDay.CalculateDurationInHours(dFromTimeOfDay, m_WorkDay.GetEndOfDayInHours());
 
-		if (!Weekend().IsWeekend(dtTo))
+		if (!m_Weekend.IsWeekend(dtTo))
 			dHoursDuration += m_WorkDay.CalculateDurationInHours(m_WorkDay.GetStartOfDayInHours(), dToTimeOfDay);
 	}
 
 	return dHoursDuration;
+}
+
+double CWorkingWeek::CalculateDurationInMinutes(const COleDateTime& dtFrom, const COleDateTime& dtTo) const
+{
+	return (CalculateDurationInHours(dtFrom, dtTo) * 60.0);
 }
 
 double CWorkingWeek::CalculateDurationInDays(const COleDateTime& dtFrom, const COleDateTime& dtTo) const
@@ -470,7 +477,7 @@ double CWorkingWeek::CalculateDurationInDays(const COleDateTime& dtFrom, const C
 
 double CWorkingWeek::CalculateDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo) const
 {
-	int nNumWeekdays = (7 - Weekend().GetLengthInDays());
+	int nNumWeekdays = (7 - m_Weekend.GetLengthInDays());
 
 	if (nNumWeekdays == 0)
 		return 0.0;
@@ -478,6 +485,127 @@ double CWorkingWeek::CalculateDurationInWeeks(const COleDateTime& dtFrom, const 
 	return (CalculateDurationInDays(dtFrom, dtTo) / nNumWeekdays);
 }
 
+double CWorkingWeek::CalculateDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, WW_UNITS nUnits) const
+{
+	switch (nUnits)
+	{
+		case WWD_MINS:	return CalculateDurationInMinutes(dtFrom, dtTo);
+		case WWD_HOURS:	return CalculateDurationInHours(dtFrom, dtTo);
+		case WWD_DAYS:	return CalculateDurationInDays(dtFrom, dtTo);
+		case WWD_WEEKS: return CalculateDurationInWeeks(dtFrom, dtTo);
+	}
+
+	ASSERT(0);
+	return 0.0;
+}
+
+COleDateTime CWorkingWeek::AddDuration(const COleDateTime& dtFrom, double dAmount, WW_UNITS nUnits) const
+{
+	switch (nUnits)
+	{
+		case WWD_MINS:	return AddDurationInMinutes(dtFrom, dAmount);
+		case WWD_HOURS:	return AddDurationInHours(dtFrom, dAmount);
+		case WWD_DAYS:	return AddDurationInDays(dtFrom, dAmount);
+		case WWD_WEEKS: return AddDurationInWeeks(dtFrom, dAmount);
+	}
+
+	ASSERT(0);
+	return dtFrom;
+}
+
+// NOTE: Caller's responsibility to check for weekends
+void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
+{
+	if (dHours > 0)
+	{
+		if (date < GetStartOfDay(date))
+			date = GetStartOfDay(date);
+
+		// Hours before lunch
+		double dStartHour = GetTimeOfDayInHours(date);
+		double dHoursBeforeLunch = (GetStartOfLunchInHours() - dStartHour);
+
+		if (dHoursBeforeLunch > 0)
+		{
+			if (dHours <= dHoursBeforeLunch)
+			{
+				date.m_dt += (dHours / 24.0);
+				dHours = 0.0;
+
+				return;
+			}
+
+			// else
+			date = GetEndOfLunch(date);
+			dHours -= dHoursBeforeLunch;
+
+			dStartHour = GetEndOfLunchInHours();
+		}
+
+		// Hours after lunch
+		double dHoursAfterLunch = (GetEndOfDayInHours() - dStartHour);
+
+		if (dHoursAfterLunch > 0)
+		{
+			if (dHours <= dHoursAfterLunch)
+			{
+				date.m_dt += (dHours / 24.0);
+				dHours = 0.0;
+
+				return;
+			}
+
+			// else
+			date = GetEndOfDay(date);
+			dHours -= dHoursAfterLunch;
+		}
+	}
+	else if (dHours < 0)
+	{
+		if (date > GetEndOfDay(date))
+			date = GetEndOfDay(date);
+
+		double dStartHour = GetTimeOfDayInHours(date);
+
+		// Hours after lunch
+		double dHoursAfterLunch = (dStartHour - GetEndOfLunchInHours());
+
+		if (dHoursAfterLunch > 0)
+		{
+			if (fabs(dHours) <= dHoursAfterLunch)
+			{
+				date.m_dt += (dHours / 24.0);
+				dHours = 0.0;
+
+				return;
+			}
+
+			// else
+			date = GetStartOfLunch(date);
+			dHours -= dHoursAfterLunch;
+
+			dStartHour = GetStartOfLunchInHours();
+		}
+
+		// Hours before lunch
+		double dHoursBeforeLunch = (dStartHour - GetStartOfDayInHours());
+
+		if (dHoursBeforeLunch > 0)
+		{
+			if (fabs(dHours) <= dHoursBeforeLunch)
+			{
+				date.m_dt += (dHours / 24.0);
+				dHours = 0.0;
+
+				return;
+			}
+
+			// else
+			date = GetStartOfDay(date);
+			dHours -= dHoursBeforeLunch;
+		}
+	}
+}
 
 COleDateTime CWorkingWeek::AddDurationInHours(const COleDateTime& dtFrom, double dHours) const
 {
@@ -485,80 +613,87 @@ COleDateTime CWorkingWeek::AddDurationInHours(const COleDateTime& dtFrom, double
 
 	if (dHours > 0)
 	{
-		MakeWeekday(dtTo, TRUE); // truncates time if it was a weekend
-
-		// Partial first day
-		if (CDateHelper::DateHasTime(dtTo))
+		do 
 		{
-			double dHoursFirstDay = m_WorkDay.GetEndOfDayInHours() - m_WorkDay.GetTimeOfDayInHours(dtTo);
+			MakeWeekday(dtTo, TRUE); // truncates time if it was a weekend
 
-			if (dHoursFirstDay < 0) // past end of working day
+			// First day
+			m_WorkDay.AddDurationInHours(dtTo, dHours);
+
+			if (dHours == 0.0)
+				break;
+
+			// Move to start of next day
+			dtTo = m_WorkDay.GetStartOfDay(dtTo.m_dt + 1.0);
+
+			// Jump over weekends leaving time of day as-is
+			MakeWeekday(dtTo, TRUE, FALSE);
+
+			// Subsequent whole days
+			ASSERT(dtTo == m_WorkDay.GetStartOfDay(dtTo));
+
+			while (dHours > m_WorkDay.GetLengthInHours(false))
 			{
-				dtTo = CDateHelper::GetStartOfNextDay(dtTo);
+				dtTo.m_dt++;
+
+				if (!m_Weekend.IsWeekend(dtTo))
+					dHours -= m_WorkDay.GetLengthInHours(false);
 			}
-			else if (dHours < dHoursFirstDay)
-			{
-				dtTo.m_dt += (dHours / 24.0);
-				dHours = 0.0;
-			}
-			else // (dHours >= dHoursFirstDay)
-			{
-				dtTo = CDateHelper::GetStartOfNextDay(dtTo);
-				dHours -= dHoursFirstDay;
-			}
+
+			ASSERT(dtTo == m_WorkDay.GetStartOfDay(dtTo));
+
+			// Whatever is left
+			m_WorkDay.AddDurationInHours(dtTo, dHours);
+
+			ASSERT(dHours == 0.0);
 		}
-		
-		while (dHours > 0)
-		{
-			dtTo.m_dt++;
-
-			if (!m_Weekend.IsWeekend(dtTo))
-				dHours -= m_WorkDay.GetLengthInHours(false);
-		}
-
-		// Overrun
-		if (dHours < 0)
-			dtTo = CDateHelper::MakeDate(dtTo, ((m_WorkDay.GetEndOfDayInHours() + dHours) / 24.0));
+		while (false);
 	}
 	else if (dHours < 0)
 	{
-		MakeWeekday(dtTo, FALSE);
-
-		// Partial first day
-		if (CDateHelper::DateHasTime(dtTo))
+		do 
 		{
-			double dHoursFirstDay = m_WorkDay.GetTimeOfDayInHours(dtTo) - m_WorkDay.GetStartOfDayInHours();
+			MakeWeekday(dtTo, FALSE); // truncates time if it was a weekend
 
-			if (dHoursFirstDay < 0) // before start of working day
+			// First day
+			m_WorkDay.AddDurationInHours(dtTo, dHours);
+
+			if (dHours == 0.0)
+				break;
+
+			// Move to end of previous day
+			dtTo = m_WorkDay.GetEndOfDay(dtTo.m_dt - 1.0);
+
+			// Jump over weekends leaving time of day as-is
+			MakeWeekday(dtTo, FALSE, FALSE);
+
+			// Subsequent whole days
+			ASSERT(dtTo == m_WorkDay.GetEndOfDay(dtTo));
+
+			while (fabs(dHours) > m_WorkDay.GetLengthInHours(false))
 			{
-				dtTo = (CDateHelper::GetDateOnly(dtTo).m_dt - 1.0);
+				dtTo.m_dt--;
+
+				if (!m_Weekend.IsWeekend(dtTo))
+					dHours += m_WorkDay.GetLengthInHours(false);
 			}
-			else if (dHours < dHoursFirstDay)
-			{
-				dtTo.m_dt -= (dHours / 24.0);
-				dHours = 0.0;
-			}
-			else // (dHours >= dHoursFirstDay)
-			{
-				dtTo = (CDateHelper::GetDateOnly(dtTo).m_dt - 1.0);
-				dHours += dHoursFirstDay;
-			}
+
+			ASSERT(dtTo == m_WorkDay.GetEndOfDay(dtTo));
+
+			// Whatever is left
+			m_WorkDay.AddDurationInHours(dtTo, dHours);
+
+			ASSERT(dHours == 0.0);
 		}
-		
-		while (dHours < 0)
-		{
-			dtTo.m_dt--;
-
-			if (!m_Weekend.IsWeekend(dtTo))
-				dHours += m_WorkDay.GetLengthInHours(false);
-		}
-
-		// Overrun
-		if (dHours > 0)
-			dtTo = CDateHelper::MakeDate(dtTo, ((m_WorkDay.GetStartOfDayInHours() + dHours) / 24.0));
+		while (false);
 	}
 
-	return dtFrom;
+	return dtTo;
+}
+
+COleDateTime CWorkingWeek::AddDurationInMinutes(const COleDateTime& dtFrom, double dMins) const
+{
+	return AddDurationInHours(dtFrom, (dMins / 60.0));
 }
 
 COleDateTime CWorkingWeek::AddDurationInDays(const COleDateTime& dtFrom, double dDays) const
@@ -573,7 +708,7 @@ COleDateTime CWorkingWeek::AddDurationInDays(const COleDateTime& dtFrom, double 
 
 COleDateTime CWorkingWeek::AddDurationInWeeks(const COleDateTime& dtFrom, double dWeeks) const
 {
-	int nNumWeekdays = (7 - Weekend().GetLengthInDays());
+	int nNumWeekdays = (7 - m_Weekend.GetLengthInDays());
 
 	if (nNumWeekdays == 0)
 		return dtFrom;
@@ -583,12 +718,12 @@ COleDateTime CWorkingWeek::AddDurationInWeeks(const COleDateTime& dtFrom, double
 
 BOOL CWorkingWeek::HasWeekend() const
 {
-	return (Weekend().GetDays() != 0);
+	return (m_Weekend.GetDays() != 0);
 }
 
 int CWorkingWeek::GetLengthInDays() const
 {
-	return (7 - Weekend().GetLengthInDays());
+	return (7 - m_Weekend.GetLengthInDays());
 }
 
 double CWorkingWeek::GetLengthInHours(bool bIncludingLunch) const
@@ -608,7 +743,7 @@ double CWorkingWeek::GetLengthInHoursAsRatio(bool bIncludingLunch) const
 
 DWORD CWorkingWeek::GetWorkingDays() const
 {
-	return (DHW_EVERYDAY & ~Weekend().GetDays());
+	return (DHW_EVERYDAY & ~m_Weekend.GetDays());
 }
 
 COleDateTime CWorkingWeek::ToWeekday(const COleDateTime& date, BOOL bForwards) const
@@ -632,12 +767,12 @@ BOOL CWorkingWeek::MakeWeekday(COleDateTime& date, BOOL bForwards, BOOL bTruncat
 		return FALSE;
 	}
 
-	if (Weekend().IsWeekend(date))
+	if (m_Weekend.IsWeekend(date))
 	{
 		if (bTruncateTime)
 			date = CDateHelper::GetDateOnly(date);
 
-		while (Weekend().IsWeekend(date))
+		while (m_Weekend.IsWeekend(date))
 		{
 			if (bForwards)
 				date.m_dt++;

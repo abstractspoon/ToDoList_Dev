@@ -57,6 +57,10 @@ public:
 	COleDateTime GetEndOfLunch(const COleDateTime& date) const;
 	COleDateTime GetMiddleOfDay(const COleDateTime& date) const;
 
+	// Adds/Subtracts as much time as possible in the 'current' day
+	// and modifies 'dHours' appropriately
+	void AddDurationInHours(COleDateTime& date, double& dHours) const;
+
 	double CalculateDurationInHours(double fromHour, double toHour) const;
 	double GetLengthInHours(bool bIncludingLunch = false) const;
 	double GetLunchLengthInHours() const;
@@ -107,6 +111,15 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
+enum WW_UNITS
+{
+	WWD_NULL = -1, // error
+	WWD_MINS,
+	WWD_HOURS,
+	WWD_DAYS,
+	WWD_WEEKS,
+};
+
 class CWorkingWeek
 {
 public:
@@ -134,13 +147,17 @@ public:
 						   double dStartOfLunchInHours,		// eg. 12
 						   double dEndOfLunchInHours);		// eg. 13
 
+	double CalculateDurationInMinutes(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
 	double CalculateDurationInHours(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
 	double CalculateDurationInDays(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
 	double CalculateDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
+	double CalculateDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, WW_UNITS nUnits) const;
 
+	COleDateTime AddDurationInMinutes(const COleDateTime& dtFrom, double dMins) const;
 	COleDateTime AddDurationInHours(const COleDateTime& dtFrom, double dHours) const;
 	COleDateTime AddDurationInDays(const COleDateTime& dtFrom, double dDays) const;
 	COleDateTime AddDurationInWeeks(const COleDateTime& dtFrom, double dWeeks) const;
+	COleDateTime AddDuration(const COleDateTime& dtFrom, double dAmount, WW_UNITS nUnits) const;
 
 	BOOL MakeWeekday(COleDateTime& date, BOOL bForwards = TRUE, BOOL bTruncateTime = TRUE) const;
 	COleDateTime ToWeekday(const COleDateTime& date, BOOL bForwards = TRUE) const;

@@ -529,6 +529,21 @@ namespace TDC
 		ASSERT(0);
 		return DHU_NULL;
 	}
+	
+	static WW_UNITS MapUnitsToWWUnits(TDC_UNITS nUnits)
+	{
+		switch (nUnits)
+		{
+		case TDCU_MINS:		return WWD_MINS;
+		case TDCU_HOURS:	return WWD_HOURS;
+		case TDCU_DAYS:		return WWD_DAYS;
+		case TDCU_WEEKS:	return WWD_WEEKS;
+		}
+
+		// all else
+		ASSERT(0);
+		return WWD_NULL;
+	}
 
 	static TDC_ATTRIBUTE MapDateToAttribute(TDC_DATE nDate)
 	{
