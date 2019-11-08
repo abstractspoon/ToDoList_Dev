@@ -2498,9 +2498,7 @@ TDC_SET CToDoCtrlData::RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TD
 					}
 
 					TDCTIMEPERIOD time = pTDI->timeEstimate;
-
 					time.dAmount = CalcDuration(pTDI->dateStart, pTDI->dateDue, time.nUnits);
-					ASSERT(time.dAmount > 0.0);
 
 					return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEEST, pTDI->timeEstimate, time);
 				}
