@@ -119,7 +119,13 @@ namespace DayViewUIExtension
             if (m_DayView.SelectionStart < m_DayView.SelectionEnd)
 			{
                 task.SetStartDate(m_DayView.SelectionStart);
-                task.SetDueDate(m_DayView.SelectionEnd);
+
+                DateTime endDate = m_DayView.SelectionEnd;
+
+                if (CalendarItem.IsStartOfDay(endDate))
+                    endDate = endDate.AddSeconds(-1);
+
+                task.SetDueDate(endDate);
             }
 
 			return true;
