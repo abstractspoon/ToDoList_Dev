@@ -1700,7 +1700,7 @@ void CGanttCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = TRUE; // cancel our edit
 
-	if (m_bReadOnly)
+	if (m_bReadOnly || IsDependencyEditing())
 		return;
 
 	CPoint point(GetMessagePos());
@@ -5291,10 +5291,13 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 
 DWORD CGanttCtrl::HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const
 {
-	HTREEITEM htiHit = HitTestItem(ptScreen, bTitleColumnOnly);
+	if (!IsDependencyEditing())
+	{
+		HTREEITEM htiHit = HitTestItem(ptScreen, bTitleColumnOnly);
 
-	if (htiHit)
-		return GetTaskID(htiHit);
+		if (htiHit)
+			return GetTaskID(htiHit);
+	}
 
 	return 0;
 }
