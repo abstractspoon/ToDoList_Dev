@@ -566,7 +566,8 @@ double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const 
 		}
 
 		// Last day
-		dHoursDuration += m_WorkDay.CalculateDurationInHours(m_WorkDay.GetStartOfDayInHours(), dToTime);
+		if (!m_Weekend.IsWeekend(dStart))
+			dHoursDuration += m_WorkDay.CalculateDurationInHours(m_WorkDay.GetStartOfDayInHours(), dToTime);
 	}
 
 	return dHoursDuration;
