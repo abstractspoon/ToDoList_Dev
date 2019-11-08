@@ -2217,7 +2217,7 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 
 	// FALSE -> don't recalc time estimate until due date is set
 	TDC_SET nRes = SetTaskDate(dwTaskID, pTDI, TDCD_START, dtStart, FALSE);
-	ASSERT(nRes == SET_CHANGE);
+	ASSERT(nRes != SET_FAILED);
 
 	if (nRes == SET_CHANGE)
 		SetTaskDate(dwTaskID, pTDI, TDCD_DUE, dtNewDue);
