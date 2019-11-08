@@ -33,6 +33,7 @@ const int TDC_MAXPRIORITYORISK = 10;
 
 struct TDCTIMEPERIOD
 {
+	// Note: Different units
 	TDCTIMEPERIOD(double dAmount = 0.0, TDC_UNITS nUnits = TDCU_HOURS);
 	TDCTIMEPERIOD(double dAmount, TH_UNITS nUnits);
 	
