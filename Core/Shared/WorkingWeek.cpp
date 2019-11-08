@@ -627,6 +627,11 @@ COleDateTime CWorkingWeek::AddDuration(const COleDateTime& dtFrom, double dAmoun
 
 COleDateTime CWorkingWeek::AddDurationInHours(const COleDateTime& dtFrom, double dHours) const
 {
+#ifdef _DEBUG
+	COleDateTime dtOrgFrom(dtFrom);
+	double dOrgHours(dHours);
+#endif
+
 	COleDateTime dtTo(dtFrom);
 
 	if (dHours > 0)
@@ -705,6 +710,11 @@ COleDateTime CWorkingWeek::AddDurationInHours(const COleDateTime& dtFrom, double
 		}
 		while (false);
 	}
+
+#ifdef _DEBUG
+	double dCheckHours = CalculateDurationInHours(dtOrgFrom, dtTo);
+	ASSERT(fabs(dCheckHours - (dOrgHours - dHours)) < 0.001);
+#endif
 
 	return dtTo;
 }
