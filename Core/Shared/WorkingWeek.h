@@ -155,11 +155,12 @@ public:
 	double CalculateDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
 	double CalculateDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, WW_UNITS nUnits) const;
 
-	COleDateTime AddDurationInMinutes(const COleDateTime& dtFrom, double dMins) const;
-	COleDateTime AddDurationInHours(const COleDateTime& dtFrom, double dHours) const;
-	COleDateTime AddDurationInDays(const COleDateTime& dtFrom, double dDays) const;
-	COleDateTime AddDurationInWeeks(const COleDateTime& dtFrom, double dWeeks) const;
-	COleDateTime AddDuration(const COleDateTime& dtFrom, double dAmount, WW_UNITS nUnits) const;
+	// dtFrom will be modified if it falls on a weekend
+	COleDateTime AddDurationInMinutes(COleDateTime& dtFrom, double dMins) const;
+	COleDateTime AddDurationInHours(COleDateTime& dtFrom, double dHours) const;
+	COleDateTime AddDurationInDays(COleDateTime& dtFrom, double dDays) const;
+	COleDateTime AddDurationInWeeks(COleDateTime& dtFrom, double dWeeks) const;
+	COleDateTime AddDuration(COleDateTime& dtFrom, double dAmount, WW_UNITS nUnits) const;
 
 	BOOL MakeWeekday(COleDateTime& date, BOOL bForwards = TRUE, BOOL bTruncateTime = TRUE) const;
 	COleDateTime ToWeekday(const COleDateTime& date, BOOL bForwards = TRUE) const;

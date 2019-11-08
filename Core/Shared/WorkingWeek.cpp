@@ -611,7 +611,7 @@ double CWorkingWeek::CalculateDuration(const COleDateTime& dtFrom, const COleDat
 	return 0.0;
 }
 
-COleDateTime CWorkingWeek::AddDuration(const COleDateTime& dtFrom, double dAmount, WW_UNITS nUnits) const
+COleDateTime CWorkingWeek::AddDuration(COleDateTime& dtFrom, double dAmount, WW_UNITS nUnits) const
 {
 	switch (nUnits)
 	{
@@ -625,12 +625,22 @@ COleDateTime CWorkingWeek::AddDuration(const COleDateTime& dtFrom, double dAmoun
 	return dtFrom;
 }
 
-COleDateTime CWorkingWeek::AddDurationInHours(const COleDateTime& dtFrom, double dHours) const
+COleDateTime CWorkingWeek::AddDurationInHours(COleDateTime& dtFrom, double dHours) const
 {
+	// Sanity checks
+	if ((dHours == 0.0) || !CDateHelper::IsDateSet(dtFrom))
+	{
+		ASSERT(0);
+		return dtFrom;
+	}
+
 #ifdef _DEBUG
 	COleDateTime dtOrgFrom(dtFrom);
 	double dOrgHours(dHours);
 #endif
+
+	// Make sure from date is valid
+	MakeWeekday(dtFrom, (dHours > 0.0), TRUE); // truncates time if it was a weekend
 
 	COleDateTime dtTo(dtFrom);
 
@@ -638,8 +648,6 @@ COleDateTime CWorkingWeek::AddDurationInHours(const COleDateTime& dtFrom, double
 	{
 		do 
 		{
-			MakeWeekday(dtTo, TRUE); // truncates time if it was a weekend
-
 			// First day
 			m_WorkDay.AddDurationInHours(dtTo, dHours);
 
@@ -672,12 +680,10 @@ COleDateTime CWorkingWeek::AddDurationInHours(const COleDateTime& dtFrom, double
 		}
 		while (false);
 	}
-	else if (dHours < 0)
+	else // if (dHours < 0)
 	{
 		do 
 		{
-			MakeWeekday(dtTo, FALSE); // truncates time if it was a weekend
-
 			// First day
 			m_WorkDay.AddDurationInHours(dtTo, dHours);
 
@@ -719,12 +725,12 @@ COleDateTime CWorkingWeek::AddDurationInHours(const COleDateTime& dtFrom, double
 	return dtTo;
 }
 
-COleDateTime CWorkingWeek::AddDurationInMinutes(const COleDateTime& dtFrom, double dMins) const
+COleDateTime CWorkingWeek::AddDurationInMinutes(COleDateTime& dtFrom, double dMins) const
 {
 	return AddDurationInHours(dtFrom, (dMins / 60.0));
 }
 
-COleDateTime CWorkingWeek::AddDurationInDays(const COleDateTime& dtFrom, double dDays) const
+COleDateTime CWorkingWeek::AddDurationInDays(COleDateTime& dtFrom, double dDays) const
 {
 	double dDayLen = m_WorkDay.GetLengthInHours();
 
@@ -734,7 +740,7 @@ COleDateTime CWorkingWeek::AddDurationInDays(const COleDateTime& dtFrom, double 
 	return AddDurationInHours(dtFrom, (dDays * dDayLen));
 }
 
-COleDateTime CWorkingWeek::AddDurationInWeeks(const COleDateTime& dtFrom, double dWeeks) const
+COleDateTime CWorkingWeek::AddDurationInWeeks(COleDateTime& dtFrom, double dWeeks) const
 {
 	int nNumWeekdays = (7 - m_Weekend.GetLengthInDays());
 
