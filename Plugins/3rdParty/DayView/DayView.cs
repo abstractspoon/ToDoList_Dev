@@ -46,9 +46,6 @@ namespace Calendar
         private DrawTool drawTool;
         private SelectionTool selectionTool;
 
-        private DateTime workStart;
-        private DateTime workEnd;
-
         #endregion
 
         #region Constants
@@ -127,8 +124,6 @@ namespace Calendar
             selectionTool.Complete += new EventHandler(selectionTool_Complete);
 
             activeTool = drawTool;
-
-            UpdateWorkingHours();
 
             this.Renderer = new Office12Renderer();
         }
@@ -527,66 +522,73 @@ namespace Calendar
             }
         }
 
-        private int workingHourStart = 8;
+        public class HourMin : Tuple<int, int>
+        {
+            public HourMin(int hour, int min = 0) : base(hour, min)
+            {
+            }
+        };
 
-        [System.ComponentModel.DefaultValue(8)]
-        public int WorkingHourStart
+        private HourMin workStart = new HourMin(8, 30); // 8.30 AM
+
+        public HourMin WorkStart
         {
             get
             {
-                return workingHourStart;
+                return workStart;
             }
             set
             {
-                workingHourStart = value;
-                UpdateWorkingHours();
+                workStart = value;
+                Invalidate();
             }
         }
 
-        private int workingMinuteStart = 30;
+        private HourMin workEnd = new HourMin(18, 30); // 6.30 PM
 
-        [System.ComponentModel.DefaultValue(30)]
-        public int WorkingMinuteStart
+        public HourMin WorkEnd
         {
             get
             {
-                return workingMinuteStart;
+                return workEnd;
             }
             set
             {
-                workingMinuteStart = value;
-                UpdateWorkingHours();
+                workEnd = value;
+                Invalidate();
             }
         }
 
-        private int workingHourEnd = 18;
+        private HourMin lunchStart = new HourMin(12, 0); // Midday
 
-        [System.ComponentModel.DefaultValue(18)]
-        public int WorkingHourEnd
+        public HourMin LunchStart
         {
             get
             {
-                return workingHourEnd;
+                return lunchStart;
             }
             set
             {
-                workingHourEnd = value;
-                UpdateWorkingHours();
+                lunchStart = value;
+                Invalidate();
             }
         }
 
-        private int workingMinuteEnd = 30;
+        private HourMin lunchEnd = new HourMin(12, 0); // Midday
 
-        [System.ComponentModel.DefaultValue(30)]
-        public int WorkingMinuteEnd
+        public HourMin LunchEnd
         {
-            get { return workingMinuteEnd; }
+            get
+            {
+                return lunchEnd;
+            }
             set
             {
-                workingMinuteEnd = value;
-                UpdateWorkingHours();
+                lunchEnd = value;
+                Invalidate();
             }
         }
+
 
         private int slotsPerHour = 4;
 
@@ -622,18 +624,6 @@ namespace Calendar
 
 			return false;
 		}
-
-		private void UpdateWorkingHours()
-        {
-            workStart = new DateTime(1, 1, 1, workingHourStart, workingMinuteStart, 0);
-
-            if (workingHourEnd >= 24)
-                workEnd = new DateTime(1, 1, 2, 0, 0, 0);
-            else
-                workEnd = new DateTime(1, 1, 1, workingHourEnd, workingMinuteEnd, 0);
-
-            Invalidate();
-        }
 
         bool selectedAppointmentIsNew;
 
@@ -1401,6 +1391,14 @@ namespace Calendar
             }
         }
 
+        private Rectangle GetHourRangeRectangle(HourMin start, HourMin end, Rectangle baseRectangle)
+        {
+            var dateStart = new DateTime(1, 1, 1, start.Item1, start.Item2, 0);
+            var dateEnd = (end.Item1 >= 24) ? new DateTime(1, 1, 2, 0, 0, 0) : new DateTime(1, 1, 1, end.Item1, end.Item2, 0);
+
+            return GetHourRangeRectangle(dateStart, dateEnd, baseRectangle);
+        }
+
         private Rectangle GetHourRangeRectangle(DateTime start, DateTime end, Rectangle baseRectangle)
         {
             Rectangle rect = baseRectangle;
@@ -1422,20 +1420,28 @@ namespace Calendar
             return rect;
         }
 
+        private void DrawWorkHours(PaintEventArgs e, HourMin start, HourMin end, Rectangle rect)
+        {
+            Rectangle hoursRect = GetHourRangeRectangle(start, end, rect);
+
+            if (hoursRect.Y < this.HeaderHeight)
+            {
+                hoursRect.Height -= this.HeaderHeight - hoursRect.Y;
+                hoursRect.Y = this.HeaderHeight;
+            }
+
+            renderer.DrawHourRange(e.Graphics, hoursRect, false, false);
+        }
+
         private void DrawDay(PaintEventArgs e, Rectangle rect, DateTime time)
         {
             renderer.DrawDayBackground(e.Graphics, rect);
 
-            Rectangle workingHoursRectangle = GetHourRangeRectangle(workStart, workEnd, rect);
-
-            if (workingHoursRectangle.Y < this.HeaderHeight)
-            {
-                workingHoursRectangle.Height -= this.HeaderHeight - workingHoursRectangle.Y;
-                workingHoursRectangle.Y = this.HeaderHeight;
-            }
-
             if (!weekendDays.Contains(time.DayOfWeek))
-                renderer.DrawHourRange(e.Graphics, workingHoursRectangle, false, false);
+            {
+                DrawWorkHours(e, workStart, lunchStart, rect);
+                DrawWorkHours(e, lunchEnd, workEnd, rect);
+            }
 
             if ((selection == SelectionType.DateRange) && (time.Day == selectionStart.Day))
             {

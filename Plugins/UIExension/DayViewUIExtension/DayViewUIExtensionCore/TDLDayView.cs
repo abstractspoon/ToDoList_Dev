@@ -74,10 +74,6 @@ namespace DayViewUIExtension
             this.SlotsPerHour = 4;
             this.TabIndex = 0;
             this.Text = "m_dayView";
-            this.WorkingHourEnd = 19;
-            this.WorkingHourStart = 9;
-            this.WorkingMinuteEnd = 0;
-            this.WorkingMinuteStart = 0;
             this.ReadOnly = false;
 
 			this.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnResolveAppointments);
