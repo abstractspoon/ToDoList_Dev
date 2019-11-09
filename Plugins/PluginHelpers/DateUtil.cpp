@@ -94,7 +94,7 @@ double WorkingDay::CalculateDurationInHours(double fromHour, double toHour)
 	double dDuration = (toHour - fromHour);
 
 	if (fromHour < m_StartOfLunchInHours && toHour > m_EndOfLunchInHours)
-		dDuration -= LunchBreakInHours();
+		dDuration -= LunchLengthInHours();
 
 	return Math::Max(dDuration, 0.0);
 }
@@ -107,13 +107,13 @@ double WorkingDay::GetTimeOfDayInHours(DateTime^ date)
 double WorkingDay::DayLengthInHours(bool includingLunch)
 {
 	if (includingLunch)
-		return (m_WorkingLengthInHours + LunchBreakInHours());
+		return (m_WorkingLengthInHours + LunchLengthInHours());
 
 	// else
 	return m_WorkingLengthInHours;
 }
 
-double WorkingDay::LunchBreakInHours()
+double WorkingDay::LunchLengthInHours()
 {
 	return (m_EndOfLunchInHours - m_StartOfLunchInHours);
 }

@@ -32,7 +32,7 @@ namespace Abstractspoon
 
 				double CalculateDurationInHours(double fromHour, double toHour);
 				double DayLengthInHours(bool includingLunch);
-				double LunchBreakInHours();
+				double LunchLengthInHours();
 
 				void Load(Preferences^ prefs);
 
