@@ -522,73 +522,84 @@ namespace Calendar
             }
         }
 
-        public class HourMin : Tuple<int, int>
+        public class HourMin
         {
-            public HourMin(int hour, int min = 0) : base(hour, min)
+            public HourMin(int hour, int min)
             {
+                Set(hour, min);
             }
+
+            public HourMin(double hours)
+            {
+                Set(hours);
+            }
+
+            public int Hour
+            {
+                get;
+                private set;
+            }
+
+            public int Min
+            {
+                get;
+                private set;
+            }
+            
+            public bool Set(double hours)
+            {
+                return Set((int)hours, (int)Math.Round((hours - (int)hours) * 60));
+            }
+
+            public bool Set(int hour, int min)
+            {
+                if ((hour < 0) || (hour > 24))
+                    return false;
+
+                if ((min < 0) || (min > 59))
+                    return false;
+
+                if ((hour == 24) && (min != 0))
+                    return false;
+
+                Hour = hour;
+                Min = min;
+
+                return true;
+            }
+
         };
 
-        private HourMin workStart = new HourMin(8, 30); // 8.30 AM
+        private HourMin workStart   = new HourMin(8, 30);  // 8.30 AM
+        private HourMin workEnd     = new HourMin(18, 30); // 6.30 PM
+        private HourMin lunchStart  = new HourMin(12, 0);  // Midday
+        private HourMin lunchEnd    = new HourMin(12, 0);  // Midday
 
         public HourMin WorkStart
         {
-            get
-            {
-                return workStart;
-            }
-            set
-            {
-                workStart = value;
-                Invalidate();
-            }
+            get { return workStart; }
+            set { workStart = value; Invalidate(); }
         }
 
-        private HourMin workEnd = new HourMin(18, 30); // 6.30 PM
 
         public HourMin WorkEnd
         {
-            get
-            {
-                return workEnd;
-            }
-            set
-            {
-                workEnd = value;
-                Invalidate();
-            }
+            get { return workEnd; }
+            set { workEnd = value; Invalidate(); }
         }
 
-        private HourMin lunchStart = new HourMin(12, 0); // Midday
 
         public HourMin LunchStart
         {
-            get
-            {
-                return lunchStart;
-            }
-            set
-            {
-                lunchStart = value;
-                Invalidate();
-            }
+            get { return lunchStart; }
+            set { lunchStart = value; Invalidate(); }
         }
-
-        private HourMin lunchEnd = new HourMin(12, 0); // Midday
 
         public HourMin LunchEnd
         {
-            get
-            {
-                return lunchEnd;
-            }
-            set
-            {
-                lunchEnd = value;
-                Invalidate();
-            }
+            get { return lunchEnd; }
+            set { lunchEnd = value; Invalidate(); }
         }
-
 
         private int slotsPerHour = 4;
 
@@ -1393,8 +1404,8 @@ namespace Calendar
 
         private Rectangle GetHourRangeRectangle(HourMin start, HourMin end, Rectangle baseRectangle)
         {
-            var dateStart = new DateTime(1, 1, 1, start.Item1, start.Item2, 0);
-            var dateEnd = (end.Item1 >= 24) ? new DateTime(1, 1, 2, 0, 0, 0) : new DateTime(1, 1, 1, end.Item1, end.Item2, 0);
+            var dateStart = new DateTime(1, 1, 1, start.Hour, start.Min, 0);
+            var dateEnd = (end.Hour >= 24) ? new DateTime(1, 1, 2, 0, 0, 0) : new DateTime(1, 1, 1, end.Hour, end.Min, 0);
 
             return GetHourRangeRectangle(dateStart, dateEnd, baseRectangle);
         }

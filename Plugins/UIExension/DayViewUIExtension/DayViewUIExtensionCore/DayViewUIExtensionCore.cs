@@ -488,18 +488,13 @@ namespace DayViewUIExtension
 			m_DayView.Invalidate();
 		}
 
-        static Calendar.DayView.HourMin HoursToHourMin(double hours)
-        {
-            return new Calendar.DayView.HourMin((int)hours, (int)((hours - (int)hours) * 60));
-        }
-
 		private void UpdateWorkingHourDisplay()
 		{
-			m_DayView.WorkStart = HoursToHourMin(m_WorkWeek.WorkDay().StartOfDayInHours());
-			m_DayView.WorkEnd = HoursToHourMin(m_WorkWeek.WorkDay().EndOfDayInHours());
+            m_DayView.WorkStart.Set(m_WorkWeek.WorkDay().StartOfDayInHours());
+            m_DayView.WorkEnd.Set(m_WorkWeek.WorkDay().EndOfDayInHours());
 
-			m_DayView.LunchStart = HoursToHourMin(m_WorkWeek.WorkDay().StartOfLunchInHours());
-			m_DayView.LunchEnd = HoursToHourMin(m_WorkWeek.WorkDay().EndOfLunchInHours());
+            m_DayView.LunchStart.Set(m_WorkWeek.WorkDay().StartOfLunchInHours());
+            m_DayView.LunchEnd.Set(m_WorkWeek.WorkDay().EndOfLunchInHours());
 		}
 
 		private void OnHelp(object sender, EventArgs e)
