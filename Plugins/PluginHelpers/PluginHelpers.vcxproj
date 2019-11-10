@@ -64,13 +64,14 @@
     <PostBuildEvent>
       <Command>mkdir "$(SolutionDir)$(ConfigurationName)"
 copy $(SolutionDir)3rdParty\HtmlAgilityPack\HtmlAgilityPack.dll "$(SolutionDir)$(ConfigurationName)\"
+copy $(SolutionDir)3rdParty\Microsoft\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)$(ConfigurationName)\"
 
 mkdir "$(SolutionDir)..\Core\ToDoList"
 mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
-copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 
+copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 
 </Command>
@@ -96,19 +97,19 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <PostBuildEvent>
       <Command>mkdir "$(SolutionDir)$(ConfigurationName)"
 copy $(SolutionDir)3rdParty\HtmlAgilityPack\HtmlAgilityPack.dll "$(SolutionDir)$(ConfigurationName)\"
+copy $(SolutionDir)3rdParty\Microsoft\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)$(ConfigurationName)\"
 
 mkdir "$(SolutionDir)..\Core\ToDoList"
 mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
-copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 
+copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
