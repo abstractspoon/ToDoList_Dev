@@ -169,7 +169,9 @@ void CPreferencesTaskPage::ValidateWorkingWeek()
 	double dHoursInDay = GetHoursInDay();
 
 	m_sHoursInDay = Misc::Format(dHoursInDay, 2);
-	m_bHasLunchBreak = (dHoursInDay < 24);
+
+	if (dHoursInDay == 24)
+		m_bHasLunchBreak = FALSE;
 
 	m_dStartOfWorkdayInHours = min(m_dStartOfWorkdayInHours, (24 - dHoursInDay));
 	m_dStartOfLunchInHours = max(m_dStartOfWorkdayInHours, m_dStartOfLunchInHours);
