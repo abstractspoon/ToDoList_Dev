@@ -2882,35 +2882,33 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 
 				if (bDrawHours)
 				{
-					CRect rHour(rDay);
 					double dHourWidth = (rMonth.Width() / (nNumDays * 24.0));
-
-					int nStartHour = -1, nEndHour = -1;
 
 					if (bDrawNonWorkingHours)
 					{
 						CWorkingDay wd;
 
-						nStartHour = (int)wd.GetStartOfDayInHours();
-						nEndHour = (int)(wd.GetEndOfDayInHours() + 0.5);
+						// Morning
+						DrawNonWorkingHours(pDC, rMonth, nDay, 0.0, wd.GetStartOfDayInHours(), dDayWidth, dHourWidth);
 
-						if (m_crGridLine != CLR_NONE)
-							rHour.bottom--;
+						// Lunch
+						DrawNonWorkingHours(pDC, rMonth, nDay, wd.GetStartOfLunchInHours(), wd.GetEndOfLunchInHours(), dDayWidth, dHourWidth);
+
+						// Afternoon
+						DrawNonWorkingHours(pDC, rMonth, nDay, wd.GetEndOfDayInHours(), 24.0, dDayWidth, dHourWidth);
 					}
 					
 					// draw all but the first and last hours dividers
-					for (int nHour = 1; nHour <= 24; nHour++)
+					CRect rHour(rDay);
+
+					if (m_crGridLine != CLR_NONE)
+						rHour.bottom--;
+
+					for (int nHour = 1; nHour < 24; nHour++)
 					{
 						rHour.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * nHour)));
 
-						if (bDrawNonWorkingHours)
-						{
-							if ((nHour < (nStartHour + 1)) || (nHour > nEndHour))
-								pDC->FillSolidRect(rHour, m_crNonWorkingHoursColor);
-						}
-
-						if (nHour != 24)
-							DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected);
+						DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected);
 						
 						rHour.left = rHour.right;
 					}
@@ -2928,6 +2926,22 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 	}
 
 	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bToday);
+}
+
+void CGanttCtrl::DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, double dFromHour, double dToHour, double dDayWidth, double dHourWidth)
+{
+	if (dToHour > dFromHour)
+	{
+		CRect rNonWorking(rMonth);
+
+		if (m_crGridLine != CLR_NONE)
+			rNonWorking.bottom--;
+
+		rNonWorking.left = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * dFromHour)));
+		rNonWorking.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * dToHour)));
+
+		pDC->FillSolidRect(rNonWorking, m_crNonWorkingHoursColor);
+	}
 }
 
 void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSelected)
