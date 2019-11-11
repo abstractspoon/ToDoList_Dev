@@ -139,7 +139,7 @@ namespace MSDN.Html.Editor
 
 			try
 			{
-				base.Set(table.bgColor, table.borderColor);
+				base.Set((object)table.bgColor, (object)table.borderColor);
 
 				// have a table so extract the properties
 				mshtml.IHTMLTableCaption caption = table.caption;
@@ -380,7 +380,7 @@ namespace MSDN.Html.Editor
 
 			try
 			{
-				base.Set(row.bgColor, row.borderColor);
+				base.Set((object)row.bgColor, (object)row.borderColor);
 
 				if (row.align != null)
 					this.HorzAlignment = (HorizontalAlignOption)Utils.TryParseEnum(typeof(HorizontalAlignOption), row.align, HorizontalAlignOption.Default);
@@ -464,7 +464,7 @@ namespace MSDN.Html.Editor
 
 			try
 			{
-				base.Set(cell.bgColor, cell.borderColor);
+				base.Set((object)cell.bgColor, (object)cell.borderColor);
 
 				if (cell.align != null)
 					this.HorzAlignment = (HorizontalAlignOption)Utils.TryParseEnum(typeof(HorizontalAlignOption), cell.align, HorizontalAlignOption.Default);

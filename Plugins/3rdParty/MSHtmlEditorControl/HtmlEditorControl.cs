@@ -3668,7 +3668,7 @@ namespace MSDN.Html.Editor
         /// </summary>
         private mshtmlTable GetSelectedTable()
         {
-			var table = GetSelectedTableElement(typeof(mshtml.HTMLTableClass));
+			var table = GetSelectedTableElement(typeof(mshtml.HTMLTable));
 
 			if (table == null)
 				return null;
@@ -3679,7 +3679,7 @@ namespace MSDN.Html.Editor
 
         private mshtmlTableRow GetSelectedTableRow()
         {
-			var row = GetSelectedTableElement(typeof(mshtml.HTMLTableRowClass));
+			var row = GetSelectedTableElement(typeof(mshtml.HTMLTableRow));
 
 			if (row == null)
 				return null;
@@ -3690,7 +3690,7 @@ namespace MSDN.Html.Editor
 
         private mshtmlTableCell GetSelectedTableCell()
         {
-			var cell = GetSelectedTableElement(typeof(mshtml.HTMLTableCellClass));
+			var cell = GetSelectedTableElement(typeof(mshtml.HTMLTableCell));
 
 			if (cell == null)
 				return null;
