@@ -2316,6 +2316,7 @@
 #define IDS_NOREMINDER                  58502
 #define IDS_TDLBC_TASK                  58503
 #define IDS_CUSTOM_FEATURE_NOBLANK      58504
+#define IDS_CUSTOM_TIMEATTRIB           58505
 
 // Next default values for new objects
 // 
