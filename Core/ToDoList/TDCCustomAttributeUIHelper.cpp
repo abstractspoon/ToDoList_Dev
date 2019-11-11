@@ -330,7 +330,7 @@ CString CTDCCustomAttributeUIHelper::GetControlLabel(const TDCCUSTOMATTRIBUTEDEF
 			return _T("");
 			
 		case TDCCA_DATE:
-			// Add custom atrib name afterwards
+			// Add custom attrib name afterwards
 			return CEnString(IDS_CUSTOM_TIMEATTRIB, GetControlLabel(attribDef, FALSE));
 		}
 	}
