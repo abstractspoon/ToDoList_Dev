@@ -794,10 +794,11 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				if (nProgressMsg == 0)
 					BeginExtensionProgress(pVData);
 
+				// Note: we want to update even if we have no tasks
 				CTaskFile tasks;
 
-				if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks))
-					UpdateExtensionView(pExtWnd, tasks, IUI_ALL);
+				GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks);
+				UpdateExtensionView(pExtWnd, tasks, IUI_ALL);
 			}
 
 			if (pVData->bNeedFontUpdate)
