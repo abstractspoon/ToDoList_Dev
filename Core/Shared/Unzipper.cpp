@@ -19,7 +19,7 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 #if _MSC_VER >= 1400
-#	define zsplitpath(path, drive, folder, fname, ext) _tsplitpath_s(path, drive, _MAX_DRIVE, folder, _MAX_DIR, fname, _MAX_FNAME, ext, _MAX_EXT)
+#	define zsplitpath(path, drive, folder, fname, ext) _tsplitpath_s(path, drive, (drive ? _MAX_DRIVE : 0), folder, (folder ? _MAX_DIR : 0), fname, (fname ? _MAX_FNAME : 0), ext, (ext ? _MAX_EXT : 0))
 #	define zmakepath(path, drive, folder, fname, ext) _tmakepath_s(path, _MAX_PATH, drive, folder, fname, ext)
 #else
 #	define zsplitpath(path, drive, folder, fname, ext) _tsplitpath(path, drive, folder, fname, ext)
