@@ -73,6 +73,7 @@ public:
 	CTDLWebUpdateProgressDlg(const CPoint& ptPos);
 
 	void SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus);
+	TDL_WEBUPDATE_PROGRESS GetProgressStatus() const { return m_nStatus; }
 	
 	BOOL IsCancelled() const;
 

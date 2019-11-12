@@ -74,7 +74,7 @@ protected:
 	void CleanupTemporaries();
 	BOOL CheckUpdateCancelled();
 	TDL_WEBUPDATE_RESULT LogError(const CString& sAppFolder) const;
-	void RestoreBackup();
+	void RestoreBackup(TDL_WEBUPDATE_PROGRESS nCancelled);
 };
 
 #endif // !defined(AFX_TDLWEBUPDATER_H__B88C8F13_1903_43B9_A9CC_BAF526C661E9__INCLUDED_)

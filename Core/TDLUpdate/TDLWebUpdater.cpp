@@ -56,7 +56,7 @@ TDL_WEBUPDATE_RESULT CTDLWebUpdater::DoUpdate(const CString& sAppFolder, const C
 		if (SetAppFolder(sAppFolder) && InitialiseTemporaries())
 		{
 			if (!DoProgressDialog(sPrevCmdLine))
-				RestoreBackup();
+				RestoreBackup(m_dlgProgress.GetProgressStatus());
 			
 			m_dlgProgress.DestroyWindow();
 			
@@ -64,7 +64,9 @@ TDL_WEBUPDATE_RESULT CTDLWebUpdater::DoUpdate(const CString& sAppFolder, const C
 		}
 	}
 	else
+	{
 		m_nResUpdate = TDLWUR_ERR_CONNECTED;
+	}
 	
 	return LogError(sAppFolder);
 }
@@ -366,7 +368,7 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bDownloa
 		CUnzipper unzip;
 		
 		FileMisc::LogText(_T("The unzip component was successfully initialised."));
-		
+
 		if (!unzip.OpenZip(m_sDownloadFile))
 		{
 			m_nResUpdate = TDLWUR_ERR_OPENZIP;
@@ -474,35 +476,77 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bDownloa
 	return TRUE;
 }
 
-void CTDLWebUpdater::RestoreBackup()
+void CTDLWebUpdater::RestoreBackup(TDL_WEBUPDATE_PROGRESS nCancelled)
 {
-	// error handling
-	if (m_nResUpdate != TDLWUR_SUCCESS)
+	// Sanity check
+	if ((m_nResUpdate == TDLWUR_SUCCESS) || (nCancelled == TDLWP_COMPLETE))
 	{
-		// restore the backup if we got that far
-		if (FileMisc::FolderExists(m_sBackupFolder))
+		ASSERT(0);
+		return;
+	}
+
+	// log the existing error because we may overwrite it
+	LogError(m_sAppFolder);
+
+	FileMisc::LogText(_T("Initialising application restore from '%s'."), m_sBackupFolder);
+
+	// restore the backup if we got that far
+	BOOL bRestoreBackup = FALSE;
+
+	switch (nCancelled)
+	{
+		case TDLWP_DOWNLOAD:
+			FileMisc::LogText(_T("Cancelled during download - backup not yet created."));
+			break;
+
+		case TDLWP_UNZIP:
+			FileMisc::LogText(_T("Cancelled during unzipping - backup not yet created."));
+			break;
+
+		case TDLWP_BACKUP:
+			FileMisc::LogText(_T("Cancelled during backup - backup not yet created."));
+			break;
+
+		case TDLWP_COPY:
+			FileMisc::LogText(_T("Cancelled during copying - backup needs restoring."));
+			bRestoreBackup = TRUE;
+			break;
+
+		case TDLWP_CLEANUP:
+			FileMisc::LogText(_T("Cancelled during cleanup - backup needs restoring."));
+			bRestoreBackup = TRUE;
+			break;
+
+		default:
+			ASSERT(0);
+			return;
+	}
+
+	if (bRestoreBackup)
+	{
+		if (!FileMisc::FolderExists(m_sBackupFolder))
 		{
-			FileMisc::DeleteFolderContents(m_sAppFolder, FMDF_HIDDENREADONLY, _T("*.exe;*.dll"));
-
-			if (!FileMisc::CopyFolder(m_sBackupFolder, m_sAppFolder, (FMDF_SUBFOLDERS | FMDF_HIDDENREADONLY)))
-			{
-				// log the existing error because we overwrite it
-				LogError(m_sAppFolder);
-
-				m_nResUpdate = TDLWUR_ERR_RESTOREBACKUP;
-			}
-			// and restart previous install
-			else if (FileMisc::Run(NULL, m_sAppPath) < SE_ERR_SUCCESS)
-			{
-				// log the existing error because we overwrite it
-				LogError(m_sAppFolder);
-
-				m_nResUpdate = TDLWUR_ERR_RUNRESTORE;
-			}
-			else
-			{
-				FileMisc::LogText(_T("The application '%s' was successfully restored."), m_sAppPath);
-			}
+			FileMisc::LogText(_T("Backup folder '%s' does not exist."), m_sBackupFolder);
+			m_nResUpdate = TDLWUR_ERR_RESTOREBACKUP;
 		}
+		else if (!FileMisc::DeleteFolderContents(m_sAppFolder, FMDF_HIDDENREADONLY, _T("*.exe;*.dll")))
+		{
+			FileMisc::LogText(_T("Unable to delete contents of folder '%s'."), m_sAppFolder);
+			m_nResUpdate = TDLWUR_ERR_RESTOREBACKUP;
+		}
+		else if (!FileMisc::CopyFolder(m_sBackupFolder, m_sAppFolder, (FMDF_SUBFOLDERS | FMDF_HIDDENREADONLY)))
+		{
+			FileMisc::LogText(_T("Unable to copy contents of backup folder '%s' to '%s'."), m_sBackupFolder, m_sAppFolder);
+			m_nResUpdate = TDLWUR_ERR_RESTOREBACKUP;
+		}
+		else
+		{
+			FileMisc::LogText(_T("The application '%s' was successfully restored from '%s'."), m_sAppPath, m_sBackupFolder);
+		}
+	}
+
+	if (FileMisc::Run(NULL, m_sAppPath) < SE_ERR_SUCCESS)
+	{
+		m_nResUpdate = TDLWUR_ERR_RUNRESTORE;
 	}
 }
