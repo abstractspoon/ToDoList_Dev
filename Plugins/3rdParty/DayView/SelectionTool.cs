@@ -31,6 +31,11 @@ namespace Calendar
             return (m_mode != Mode.None);
 		}
 
+		public Mode GetResizing()
+		{
+			return m_mode;
+		}
+
 		public Boolean IsResizingLongAppt()
 		{
 			switch (m_mode)
@@ -67,7 +72,7 @@ namespace Calendar
 
 			if ((appointment != null) && !appointment.Locked)
 			{
-				Mode mode = GetMode(e, appointment);
+				Mode mode = GetMode(e.Location, appointment);
 
 				switch (mode)
 				{
@@ -256,16 +261,13 @@ namespace Calendar
             return false;
         }
 
-        private Mode GetMode(System.Windows.Forms.MouseEventArgs e)
+        public Mode GetMode(System.Drawing.Point mousePos)
         {
-            return GetMode(e, m_dayView.SelectedAppointment);
+            return GetMode(mousePos, m_dayView.SelectedAppointment);
         }
 
-        private Mode GetMode(System.Windows.Forms.MouseEventArgs e, Appointment appointment)
+        public Mode GetMode(System.Drawing.Point mousePos, Appointment appointment)
         {
-			if (m_mode != Mode.None)
-				return m_mode;
-			
             DayView.AppointmentView view = null;
             Boolean gotview = false;
 
@@ -297,24 +299,24 @@ namespace Calendar
                 rightRect.X += rightRect.Width - 5;
                 rightRect.Width = 5;
 
-                if (m_dayView.GetFullDayApptsRectangle().Contains(e.Location))
+                if (m_dayView.GetFullDayApptsRectangle().Contains(mousePos))
 				{
-					if (rightRect.Contains(e.Location))
+					if (rightRect.Contains(mousePos))
 					{
 						return Mode.ResizeRight;
 					}
-					else if (leftRect.Contains(e.Location))
+					else if (leftRect.Contains(mousePos))
 					{
 						return Mode.ResizeLeft;
 					}
 				}
 				else
 				{
-					if (topRect.Contains(e.Location))
+					if (topRect.Contains(mousePos))
 					{
 						return Mode.ResizeTop;
 					}
-					else if (bottomRect.Contains(e.Location))
+					else if (bottomRect.Contains(mousePos))
 					{
 						return Mode.ResizeBottom;
 					}
@@ -359,7 +361,7 @@ namespace Calendar
             if (m_dayView.CurrentlyEditing)
                 m_dayView.FinishEditing(false);
 
-            m_mode = GetMode(e);
+            m_mode = GetMode(e.Location);
 
             if (m_mode != Mode.None)
             {

@@ -69,7 +69,8 @@ namespace DayViewUIExtension
         public Boolean HasIcon { get; set; }
         public Boolean IsDone { get; set; }
         public Boolean IsLocked { get; set; }
-        public double TimeEstimate { get; set; }
+		public Boolean HasDependencies { get; set; }
+		public double TimeEstimate { get; set; }
         public Task.TimeUnits TimeEstUnits { get; set; }
 
         // This is a hack because the underlying DayView does
@@ -185,6 +186,7 @@ namespace DayViewUIExtension
 				TaskTextColor = task.GetTextDrawingColor();
 				DrawBorder = true;
 				IsLocked = task.IsLocked(true);
+				HasDependencies = (task.GetDependency().Count > 0);
 
 				Task.TimeUnits units = Task.TimeUnits.Unknown;
 				TimeEstimate = task.GetTimeEstimate(ref units, false);
@@ -242,6 +244,9 @@ namespace DayViewUIExtension
 
 				if (task.IsAttributeAvailable(Task.Attribute.Icon))
 					HasIcon = task.HasIcon();
+
+				if (task.IsAttributeAvailable(Task.Attribute.Dependency))
+					HasDependencies = (task.GetDependency().Count > 0);
 
 				TaskTextColor = task.GetTextDrawingColor();
 				IsLocked = task.IsLocked(true);

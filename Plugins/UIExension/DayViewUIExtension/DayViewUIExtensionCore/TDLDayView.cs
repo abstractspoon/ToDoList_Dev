@@ -608,51 +608,50 @@ namespace DayViewUIExtension
             Update();
         }
 
-		protected override void OnMouseMove(MouseEventArgs e)
-        {
-            var selTool = ActiveTool as Calendar.SelectionTool;
+		protected override void OnMouseDown(MouseEventArgs e)
+		{
+			// eat this if our task is not editable
+			Calendar.Appointment appointment = GetAppointmentAt(e.Location.X, e.Location.Y);
 
-            if (selTool == null)
-                selTool = new Calendar.SelectionTool();
+			if ((appointment != null) && !IsAppointmentEditable(appointment, e.Location))
+			{
+				SelectedAppointment = appointment;
+				return;
+			}
 
-            if (selTool.IsResizing())
-            {
-                if (ReadOnly)
-                    return;
-            }
-            else // Extra-over cursor handling
-            {
-                Calendar.Appointment appointment = GetAppointmentAt(e.Location.X, e.Location.Y);
-                Cursor = Cursors.Default;
+			// else
+			base.OnMouseDown(e);
+		}
 
-                if (!ReadOnly && (appointment != null))
-                {
-                    selTool.DayView = this;
-                    selTool.UpdateCursor(e, appointment);
+		private Calendar.SelectionTool.Mode GetMode(Calendar.Appointment appointment, Point mousePos)
+		{
+			if (ReadOnly || (appointment == null))
+				return Calendar.SelectionTool.Mode.None;
 
-                    var taskItem = (appointment as CalendarItem);
+            var selTool = new Calendar.SelectionTool();
+			selTool.DayView = this;
 
-                    if (taskItem != null)
-                    {
-                        Cursor temp = null;
+			return selTool.GetMode(mousePos, appointment);
+		}
+		
+		private bool IsAppointmentEditable(Calendar.Appointment appointment, Point mousePos)
+		{
+			var taskItem = (appointment as CalendarItem);
 
-                        if (taskItem.IsLocked)
-                        {
-                            temp = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
-                        }
-                        else if (taskItem.IconRect.Contains(e.Location))
-                        {
-                            temp = UIExtension.HandCursor();
-                        }
+			if ((taskItem == null) || taskItem.IsLocked)
+				return false;
 
-                        if (temp != null)
-                            Cursor = temp;
-                    }
-                }
-            }
+			// Disable start date editing for tasks with dependencies
+			switch (GetMode(appointment, mousePos))
+			{
+				case Calendar.SelectionTool.Mode.ResizeLeft:
+				case Calendar.SelectionTool.Mode.ResizeTop:
+				case Calendar.SelectionTool.Mode.Move:
+					return !taskItem.HasDependencies;
+			}
 
-            base.OnMouseMove(e);
-        }
+			return true;
+		}
 
 		public new int SlotsPerHour
 		{

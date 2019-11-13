@@ -91,6 +91,7 @@ namespace DayViewUIExtension
 				case Task.Attribute.AllocatedTo:
 				case Task.Attribute.Icon:
                 case Task.Attribute.TimeEstimate:
+				case Task.Attribute.Dependency:
 					return true;
 			}
 
