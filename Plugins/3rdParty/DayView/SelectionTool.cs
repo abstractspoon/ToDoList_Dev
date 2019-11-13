@@ -200,16 +200,32 @@ namespace Calendar
                         break;
 
                     case Mode.ResizeBottom:
-                        if (!ptInLongAptRect && (dateAtCursor > selection.StartDate))
+                        if (!ptInLongAptRect)
                         {
-                            if (SameDay(selection.EndDate, dateAtCursor.Date))
-                            {
-                                selection.EndDate = dateAtCursor;
+							// Note: the current algorithm tends to 'floor' the time
+							// which makes selecting all the way to midnight tricky.
+							// We solve it by adding half the slot height to the 
+							// mouse position
+							dateAtCursor = m_dayView.GetDateTimeAt(e.X, e.Y + m_dayView.SlotHeight, longAppt);
 
-                                m_dayView.Invalidate();
-                                m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
-                            }
-                        }
+							if (dateAtCursor == dateAtCursor.Date)
+								dateAtCursor = dateAtCursor.AddDays(1).AddSeconds(-1);
+
+							if (dateAtCursor > selection.StartDate)
+							{
+								if (SameDay(selection.EndDate, dateAtCursor.Date))
+								{
+									selection.EndDate = dateAtCursor;
+
+									m_dayView.Invalidate();
+									m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
+								}
+								else
+								{
+									int a = 6;
+								}
+							}
+						}
                         break;
 
                     case Mode.ResizeTop:
