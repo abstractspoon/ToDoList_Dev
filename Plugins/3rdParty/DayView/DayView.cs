@@ -128,10 +128,15 @@ namespace Calendar
             this.Renderer = new Office12Renderer();
         }
 
-        #endregion
+		#endregion
 
-        #region Properties
+		#region Properties
 
+		public Boolean IsResizing()
+		{
+			return ((activeTool == selectionTool) && (selectionTool.IsResizing()));
+		}
+		
 		public String HScrollTooltipText
 		{
 			get { return tooltip.GetToolTip(hscroll); }

@@ -361,6 +361,10 @@ namespace DayViewUIExtension
 
 		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
 		{
+			// Always show a task if it is currently being dragged
+			if (IsResizing() && (item == SelectedAppointment))
+				return true;
+
             if (HideParentTasks && item.IsParent)
                 return false;
 
