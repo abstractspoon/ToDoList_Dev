@@ -653,6 +653,62 @@ namespace DayViewUIExtension
 			return true;
 		}
 
+		protected override void OnMouseMove(MouseEventArgs e)
+        {
+			if (!IsResizing())
+			{
+				// We do all cursor handling so that we can show 
+				// resize cursors even when item is not selected
+				Calendar.Appointment appointment = GetAppointmentAt(e.Location.X, e.Location.Y);
+
+				if (appointment != null)
+				{
+					Cursor cursor = null;
+
+					if (IsAppointmentEditable(appointment, e.Location))
+					{
+						if ((appointment as CalendarItem).IconRect.Contains(e.Location))
+						{
+							cursor = UIExtension.HandCursor();
+						}
+						else
+						{
+							switch (GetMode(appointment, e.Location))
+							{
+								case Calendar.SelectionTool.Mode.ResizeBottom:
+								case Calendar.SelectionTool.Mode.ResizeTop:
+									cursor = Cursors.SizeNS;
+									break;
+
+								case Calendar.SelectionTool.Mode.ResizeLeft:
+								case Calendar.SelectionTool.Mode.ResizeRight:
+									cursor = Cursors.SizeWE;
+									break;
+
+								case Calendar.SelectionTool.Mode.Move:
+								default:
+									cursor = Cursors.Default;
+									break;
+							}
+						}
+					}
+					else
+					{
+						cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+					}
+
+					if (cursor != null)
+					{
+						Cursor = cursor;
+						return;
+					}
+				}
+			}
+
+			// default handling
+			base.OnMouseMove(e);
+		}
+
 		public new int SlotsPerHour
 		{
 			get
