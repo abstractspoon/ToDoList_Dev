@@ -1490,7 +1490,7 @@ void CToDoCtrl::ShowHideControls()
 void CToDoCtrl::EnableDisableCustomControl(const CUSTOMATTRIBCTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly)
 {
 	// Main control first
-	EnableDisableControl(ctrl, dwTaskID, bEnable, bReadOnly, FALSE, FALSE);
+	EnableDisableControl(ctrl, dwTaskID, bEnable, bReadOnly, FALSE);
 
 	// Buddy
 	CTRLITEM buddy;
@@ -1530,11 +1530,11 @@ void CToDoCtrl::EnableDisableCustomControl(const CUSTOMATTRIBCTRLITEM& ctrl, DWO
 			}
 		}
 		
-		EnableDisableControl(buddy, dwTaskID, bEnable, bReadOnly, FALSE, FALSE);
+		EnableDisableControl(buddy, dwTaskID, bEnable, bReadOnly, FALSE);
 	}
 }
 
-void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly, BOOL bIsParent, BOOL bEditTime)
+void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly, BOOL bIsParent)
 {
 	CWnd* pCtrl = GetDlgItem(ctrl.nCtrlID);
 	CWnd* pLabel = GetDlgItem(ctrl.nLabelID);
@@ -1584,13 +1584,20 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 		break;
 		
 	case IDC_TIMEEST:
-		if (!bEditTime && bEnable)
-			nCtrlState = RTCS_READONLY;
+		if (bEnable)
+		{
+			BOOL bEditTime = (!bIsParent || HasStyle(TDCS_ALLOWPARENTTIMETRACKING));
+
+			if (!bEditTime)
+				nCtrlState = RTCS_READONLY;
+		}
 		break;
 		
 	case IDC_TIMESPENT:
 		if (bEnable)
 		{
+			BOOL bEditTime = (!bIsParent || HasStyle(TDCS_ALLOWPARENTTIMETRACKING));
+
 			if (!bEditTime || (dwTaskID && m_timeTracking.IsTrackingTask(dwTaskID)))
 				nCtrlState = RTCS_READONLY;
 		}
@@ -1605,7 +1612,7 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 		if ((nCtrlState == RTCS_ENABLED) && !SelectedTaskHasDate(TDCD_START))
 			nCtrlState = RTCS_READONLY;
 		break;
-		
+
 	case IDC_DONETIME:
 		if ((nCtrlState == RTCS_ENABLED) && !SelectedTaskHasDate(TDCD_DONE))
 			nCtrlState = RTCS_READONLY;
@@ -1625,14 +1632,13 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	BOOL bIsParent = TSH().ItemsAreAllParents();
 	BOOL bReadOnly = IsReadOnly();
 	BOOL bReadOnlyCtrls = (bReadOnly || !m_taskTree.SelectionHasUnlocked());
-	BOOL bEditTime = (!bIsParent || HasStyle(TDCS_ALLOWPARENTTIMETRACKING));
 
 	// now enable/disable appropriate controls
 	int nCtrl;
 	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
 	{
 		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
-		EnableDisableControl(ctrl, dwTaskID, bEnable, bReadOnlyCtrls, bIsParent, bEditTime);
+		EnableDisableControl(ctrl, dwTaskID, bEnable, bReadOnlyCtrls, bIsParent);
 	}
 
 	// and custom controls
