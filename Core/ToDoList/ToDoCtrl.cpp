@@ -1608,8 +1608,13 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 			nCtrlState = RTCS_READONLY;
 		break;
 		
+	case IDC_STARTDATE:
+		if ((nCtrlState == RTCS_ENABLED) && !CanEditSelectedTask(TDCA_STARTDATE))
+			nCtrlState = RTCS_READONLY;
+		break;
+		
 	case IDC_STARTTIME:
-		if ((nCtrlState == RTCS_ENABLED) && !SelectedTaskHasDate(TDCD_START))
+		if ((nCtrlState == RTCS_ENABLED) && !CanEditSelectedTask(TDCA_STARTTIME))
 			nCtrlState = RTCS_READONLY;
 		break;
 
@@ -12116,8 +12121,6 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_PRIORITY:		
 	case TDCA_RECURRENCE:	
 	case TDCA_RISK:			
-	case TDCA_STARTDATE:	
-	case TDCA_STARTTIME:	
 	case TDCA_STATUS:		
 	case TDCA_TAGS:			
 	case TDCA_TASKNAME:		
@@ -12127,13 +12130,32 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_VERSION:		
 		return SelectedTaskIsUnlocked(dwTaskID);
 
+	case TDCA_STARTDATE:
+	case TDCA_STARTTIME:
+		if (!SelectedTaskIsUnlocked(dwTaskID))
+		{
+			return FALSE;
+		}
+		else if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && m_taskTree.SelectionHasDependencies())
+		{
+			// Ignore tasks with dependencies where their dates 
+			// are automatically calculated
+			return FALSE;
+		}
+		else if ((nAttrib == TDCA_STARTTIME) && !SelectedTaskHasDate(TDCD_START))
+		{
+			// Ignore tasks without a start date set
+			return FALSE;
+		}
+		return TRUE;
+
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
 	case TDCA_PROJECTNAME:
 	case TDCA_UNDO:
 	case TDCA_CUSTOMATTRIBDEFS:
 	case TDCA_DELETE:
-	case TDCA_POSITION: // move
+	case TDCA_POSITION:
 	case TDCA_ENCRYPT:
 		return TRUE;
 
