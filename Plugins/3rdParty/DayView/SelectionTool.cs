@@ -26,14 +26,14 @@ namespace Calendar
 
         private Mode m_mode = Mode.None;
 
-		public Boolean IsResizing()
+		public Boolean IsResizing
 		{
-            return (m_mode != Mode.None);
+			get { return (m_mode != Mode.None); }
 		}
 
-		public Mode GetResizing()
+		public Mode ResizingMode
 		{
-			return m_mode;
+			get { return m_mode; }
 		}
 
 		public Boolean IsResizingLongAppt()
@@ -59,7 +59,8 @@ namespace Calendar
 
         public void Reset()
         {
-            m_length = TimeSpan.Zero;
+			m_mode = Mode.None;
+			m_length = TimeSpan.Zero;
             m_delta = TimeSpan.Zero;
         }
 
@@ -220,10 +221,6 @@ namespace Calendar
 									m_dayView.Invalidate();
 									m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
 								}
-								else
-								{
-									int a = 6;
-								}
 							}
 						}
                         break;
@@ -284,6 +281,9 @@ namespace Calendar
 
         public Mode GetMode(System.Drawing.Point mousePos, Appointment appointment)
         {
+			if (m_mode != Mode.None)
+				return m_mode;
+
             DayView.AppointmentView view = null;
             Boolean gotview = false;
 

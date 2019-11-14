@@ -197,11 +197,9 @@ namespace DayViewUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
-			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
-			m_DayView.TaskColorIsBackground = taskColorIsBkgnd;
-
-			bool showParentsAsFolder = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
-			m_DayView.ShowParentsAsFolder = showParentsAsFolder;
+			m_DayView.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
+			m_DayView.ShowParentsAsFolder = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
+			m_DayView.AutoCalculateDependencyDates = prefs.GetProfileBool("Preferences", "AutoAdjustDependents", false);
 
 			m_AllowModifyTimeEstimate = !prefs.GetProfileBool("Preferences", "SyncTimeEstAndDates", false);
 

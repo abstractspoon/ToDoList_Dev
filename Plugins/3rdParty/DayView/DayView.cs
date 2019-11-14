@@ -132,11 +132,17 @@ namespace Calendar
 
 		#region Properties
 
-		public Boolean IsResizing()
+		public Boolean IsResizingAppointment()
 		{
-			return ((activeTool == selectionTool) && (selectionTool.IsResizing()));
+			return ((activeTool == selectionTool) && selectionTool.IsResizing);
 		}
-		
+
+		public void CancelAppointmentResizing()
+		{
+			if (activeTool == selectionTool)
+				selectionTool.Reset();
+		}
+
 		public String HScrollTooltipText
 		{
 			get { return tooltip.GetToolTip(hscroll); }

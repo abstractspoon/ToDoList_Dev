@@ -118,6 +118,11 @@ namespace DayViewUIExtension
             }
         }
 
+		public Boolean AutoCalculateDependencyDates
+		{
+			get; set;
+		}
+
 		public Boolean DisplayTasksContinuous
 		{
 			get { return m_DisplayTasksContinuous; }
@@ -362,7 +367,7 @@ namespace DayViewUIExtension
 		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
 		{
 			// Always show a task if it is currently being dragged
-			if (IsResizing() && (item == SelectedAppointment))
+			if (IsResizingAppointment() && (item == SelectedAppointment))
 				return true;
 
             if (HideParentTasks && item.IsParent)
@@ -610,17 +615,20 @@ namespace DayViewUIExtension
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
-			// eat this if our task is not editable
-			Calendar.Appointment appointment = GetAppointmentAt(e.Location.X, e.Location.Y);
-
-			if ((appointment != null) && !IsAppointmentEditable(appointment, e.Location))
-			{
-				SelectedAppointment = appointment;
-				return;
-			}
-
-			// else
+			// let the base class initiate resizing if it wants
 			base.OnMouseDown(e);
+
+			// Cancel resizing if our task is not editable
+			if (IsResizingAppointment())
+			{
+				var taskItem = SelectedAppointment as CalendarItem;
+				var mode = GetMode(taskItem, e.Location);
+
+				if (!CanResizeTask(taskItem, mode))
+				{
+					CancelAppointmentResizing();
+				}
+			}
 		}
 
 		private Calendar.SelectionTool.Mode GetMode(Calendar.Appointment appointment, Point mousePos)
@@ -628,85 +636,84 @@ namespace DayViewUIExtension
 			if (ReadOnly || (appointment == null))
 				return Calendar.SelectionTool.Mode.None;
 
-            var selTool = new Calendar.SelectionTool();
-			selTool.DayView = this;
+			var selTool = (ActiveTool as Calendar.SelectionTool);
+
+			if (selTool == null)
+			{
+				selTool = new Calendar.SelectionTool();
+				selTool.DayView = this;
+			}
 
 			return selTool.GetMode(mousePos, appointment);
 		}
 		
-		private bool IsAppointmentEditable(Calendar.Appointment appointment, Point mousePos)
+		private bool CanResizeTask(CalendarItem taskItem, Calendar.SelectionTool.Mode mode)
 		{
-			var taskItem = (appointment as CalendarItem);
-
-			if ((taskItem == null) || taskItem.IsLocked)
-				return false;
-
-			// Disable start date editing for tasks with dependencies
-			switch (GetMode(appointment, mousePos))
+			switch (mode)
 			{
-				case Calendar.SelectionTool.Mode.ResizeLeft:
+				// Disable start date editing for tasks with dependencies that are auto-calculated
 				case Calendar.SelectionTool.Mode.ResizeTop:
+				case Calendar.SelectionTool.Mode.ResizeLeft:
 				case Calendar.SelectionTool.Mode.Move:
-					return !taskItem.HasDependencies;
+					return (!taskItem.HasDependencies || !AutoCalculateDependencyDates);
+
+				case Calendar.SelectionTool.Mode.ResizeBottom:
+				case Calendar.SelectionTool.Mode.ResizeRight:
+					return true;
 			}
 
-			return true;
+			// catch all
+			return false;
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)
         {
-			if (!IsResizing())
+			// default handling
+			base.OnMouseMove(e);
+
+			Cursor = GetCursor(e);
+		}
+
+		private Cursor GetCursor(MouseEventArgs e)
+        {
+			if (IsResizingAppointment())
+				return Cursor;
+
+			// Note: base class only shows 'resize' cursors for the currently
+			// selected item but we want them for all tasks
+			var taskItem = (GetAppointmentAt(e.Location.X, e.Location.Y) as CalendarItem);
+
+			if ((taskItem != null) && !ReadOnly)
 			{
-				// We do all cursor handling so that we can show 
-				// resize cursors even when item is not selected
-				Calendar.Appointment appointment = GetAppointmentAt(e.Location.X, e.Location.Y);
+				if (taskItem.IsLocked)
+					return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
-				if (appointment != null)
+				if (taskItem.IconRect.Contains(e.Location))
+					return UIExtension.HandCursor();
+
+				var mode = GetMode(taskItem, e.Location);
+
+				if (!CanResizeTask(taskItem, mode))
+					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
+
+				switch (mode)
 				{
-					Cursor cursor = null;
+					case Calendar.SelectionTool.Mode.ResizeBottom:
+					case Calendar.SelectionTool.Mode.ResizeTop:
+						return Cursors.SizeNS;
 
-					if (IsAppointmentEditable(appointment, e.Location))
-					{
-						if ((appointment as CalendarItem).IconRect.Contains(e.Location))
-						{
-							cursor = UIExtension.HandCursor();
-						}
-						else
-						{
-							switch (GetMode(appointment, e.Location))
-							{
-								case Calendar.SelectionTool.Mode.ResizeBottom:
-								case Calendar.SelectionTool.Mode.ResizeTop:
-									cursor = Cursors.SizeNS;
-									break;
+					case Calendar.SelectionTool.Mode.ResizeLeft:
+					case Calendar.SelectionTool.Mode.ResizeRight:
+						return Cursors.SizeWE;
 
-								case Calendar.SelectionTool.Mode.ResizeLeft:
-								case Calendar.SelectionTool.Mode.ResizeRight:
-									cursor = Cursors.SizeWE;
-									break;
-
-								case Calendar.SelectionTool.Mode.Move:
-								default:
-									cursor = Cursors.Default;
-									break;
-							}
-						}
-					}
-					else
-					{
-						cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
-					}
-
-					if (cursor != null)
-					{
-						Cursor = cursor;
-						return;
-					}
+					case Calendar.SelectionTool.Mode.Move:
+						// default cursor below
+						break;
 				}
 			}
 
-			// default handling
-			base.OnMouseMove(e);
+			// All else
+			return Cursors.Default;
 		}
 
 		public new int SlotsPerHour
