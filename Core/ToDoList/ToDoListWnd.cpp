@@ -113,9 +113,17 @@ const UINT ONE_MINUTE = 10000;
 const UINT ONE_MINUTE = 60000;
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
 const LPCTSTR SETTINGS_KEY	= _T("Settings");
 const LPCTSTR PREF_KEY		= _T("Preferences");
 const LPCTSTR ENDL			= _T("\n");
+
+/////////////////////////////////////////////////////////////////////////////
+
+const CString TEMP_CLIPBOARD_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.clipboard"), _T(""));
+const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print"), _T("html"));
+const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"), _T("bmp"));
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -224,11 +232,9 @@ CToDoListWnd::~CToDoListWnd()
 
 	// cleanup temp files
 	// Note: Due task notifications are removed by CToDoCtrlMgr
-	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdl.export"), _T("txt")), TRUE);
-	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdl.print"), _T("html")), TRUE);
-	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdl.import"), _T("txt")), TRUE);
-	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdl.view"), _T("bmp")), TRUE);
-	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdt")), TRUE);
+	FileMisc::DeleteFile(TEMP_CLIPBOARD_FILEPATH, TRUE);
+	FileMisc::DeleteFile(TEMP_PRINT_FILEPATH, TRUE);
+	FileMisc::DeleteFile(TEMP_TASKVIEW_FILEPATH, TRUE);
 }
 
 BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
@@ -6309,7 +6315,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	DOPROGRESS(bPreview ? IDS_PPREVIEWPROGRESS : IDS_PRINTPROGRESS);
 	
 	// always use the same file
-	CString sTempFile = FileMisc::GetTempFilePath(_T("tdl.print"), _T("html"));
+	CString sTempFile = TEMP_PRINT_FILEPATH;
 
 	if (!CreateTempPrintFile(dialog, sTempFile))
 	{
@@ -6345,7 +6351,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 	{
 	case TDLPDS_IMAGE:
 		{
-			CString sTempImg = FileMisc::GetTempFilePath(_T("tdl.view"), _T("bmp"));
+			CString sTempImg = TEMP_TASKVIEW_FILEPATH;
 
 			if (tdc.SaveTaskViewToImage(sTempImg))
 			{
@@ -8703,7 +8709,7 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 
 	if (bFromClipboard)
 	{
-		sImportPath = FileMisc::GetTempFilePath(_T("tdl.import"), _T("txt"));
+		sImportPath = TEMP_CLIPBOARD_FILEPATH;
 		VERIFY(FileMisc::SaveFile(sImportPath, sImportFrom, SFEF_UTF16));
 	}
 	else 
@@ -9630,7 +9636,7 @@ void CToDoListWnd::OnExport()
 			bExportToClipboard = dialog.GetExportToClipboard();
 
 			if (bExportToClipboard)
-				sExportPath = FileMisc::GetTempFilePath(_T("tdl.export"), _T("txt"));
+				sExportPath = TEMP_CLIPBOARD_FILEPATH;
 			else
 				sExportPath = dialog.GetExportPath();
 		}
