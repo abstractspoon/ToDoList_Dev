@@ -165,17 +165,16 @@ BOOL CTDLExportDlg::OnInitDialog()
 
     VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
 	
-	// set initial control states
-	GetDlgItem(IDC_TASKLISTOPTIONS)->EnableWindow(!m_bSingleTaskList);
-	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
-	GetDlgItem(IDC_EXPORTPATH)->EnableWindow(!m_bExportToClipboard);
-
 	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
-	
+
 	m_eExportPath.SetDefaultSaveAsFileExtension(m_mgrImportExport.GetExporterFileExtension(nFormat, FALSE));
 	m_eExportPath.SetFilter(m_mgrImportExport.GetExporterFileFilter(nFormat));
 	m_eExportPath.EnableStyle(FES_FOLDERS, (m_bExportAllTasklists && !m_bExportOneFile));
-	m_eExportPath.EnableWindow(m_mgrImportExport.ExporterHasFileExtension(nFormat));
+
+	// set initial control states
+	GetDlgItem(IDC_TASKLISTOPTIONS)->EnableWindow(!m_bSingleTaskList);
+	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
+	GetDlgItem(IDC_EXPORTPATH)->EnableWindow(m_mgrImportExport.ExporterHasFileExtension(nFormat) && !m_bExportToClipboard);
 
 	EnableOK();
 	
@@ -412,7 +411,9 @@ void CTDLExportDlg::OnExportToClipboardOrPath()
 {
 	UpdateData();
 
-	GetDlgItem(IDC_EXPORTPATH)->EnableWindow(!m_bExportToClipboard);
+	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+
+	GetDlgItem(IDC_EXPORTPATH)->EnableWindow(m_mgrImportExport.ExporterHasFileExtension(nFormat) && !m_bExportToClipboard);
 	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
 }
 
