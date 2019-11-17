@@ -3358,7 +3358,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 			CTaskFile tasks;
 
 			if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks) ||
-				(mapAttribIDs.Has(TDCA_DELETE) && (GetTaskCount() == 0)))
+				(!GetTaskCount() && (mapAttribIDs.Has(TDCA_DELETE) || mapAttribIDs.Has(TDCA_UNDO))))
 			{
 				CWaitCursor cursor;
 				BeginExtensionProgress(pVData);
