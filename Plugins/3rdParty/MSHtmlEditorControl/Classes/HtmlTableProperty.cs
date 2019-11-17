@@ -127,12 +127,12 @@ namespace MSDN.Html.Editor
             }
         }
 
-		public HtmlTableProperty(mshtml.IHTMLTable table, bool htmlDefaults) : this(htmlDefaults)
+		public HtmlTableProperty(MSHTML.IHTMLTable table, bool htmlDefaults) : this(htmlDefaults)
 		{
 			Set(table);
 		}
 
-		public bool Set(mshtml.IHTMLTable table)
+		public bool Set(MSHTML.IHTMLTable table)
 		{
 			if (table == null)
 				return false;
@@ -142,11 +142,11 @@ namespace MSDN.Html.Editor
 				base.Set((object)table.bgColor, (object)table.borderColor);
 
 				// have a table so extract the properties
-				mshtml.IHTMLTableCaption caption = table.caption;
+				MSHTML.IHTMLTableCaption caption = table.caption;
 				// if have a caption persist the values
 				if (caption != null)
 				{
-					this.CaptionText = ((mshtml.IHTMLElement)table.caption).innerText;
+					this.CaptionText = ((MSHTML.IHTMLElement)table.caption).innerText;
 
 					if (caption.align != null)
 						this.CaptionAlignment = (HorizontalAlignOption)Utils.TryParseEnum(typeof(HorizontalAlignOption), caption.align, HorizontalAlignOption.Default);
@@ -167,7 +167,7 @@ namespace MSDN.Html.Editor
 				if (cols == 0 && rows > 0)
 				{
 					// cols value not set to get the maxiumn number of cells in the rows
-					foreach (mshtml.IHTMLTableRow tableRow in table.rows)
+					foreach (MSHTML.IHTMLTableRow tableRow in table.rows)
 					{
 						cols = Math.Max(cols, (int)tableRow.cells.length);
 					}
@@ -212,7 +212,7 @@ namespace MSDN.Html.Editor
 			return true;
 		}
 
-		public bool Get(ref mshtml.IHTMLTable table, bool tableCreated)
+		public bool Get(ref MSHTML.IHTMLTable table, bool tableCreated)
 		{
 			if (table == null)
 				return false;
@@ -240,7 +240,7 @@ namespace MSDN.Html.Editor
 
 			// define the given table caption and alignment
 			string caption = this.CaptionText;
-			mshtml.IHTMLTableCaption tableCaption = table.caption;
+			MSHTML.IHTMLTableCaption tableCaption = table.caption;
 
 			if (caption != null && caption != string.Empty)
 			{
@@ -248,7 +248,7 @@ namespace MSDN.Html.Editor
 				if (tableCaption == null)
 					tableCaption = table.createCaption();
 
-				((mshtml.IHTMLElement)tableCaption).innerText = caption;
+				((MSHTML.IHTMLElement)tableCaption).innerText = caption;
 
 				if (this.CaptionAlignment != HorizontalAlignOption.Default)
 					tableCaption.align = this.CaptionAlignment.ToString().ToLower();
@@ -262,7 +262,7 @@ namespace MSDN.Html.Editor
 				if (tableCaption != null)
 				{
 					// prior to deleting the caption the contents must be cleared
-					((mshtml.IHTMLElement)tableCaption).innerText = null;
+					((MSHTML.IHTMLElement)tableCaption).innerText = null;
 					table.deleteCaption();
 				}
 			}
@@ -286,10 +286,10 @@ namespace MSDN.Html.Editor
 				// the section below works but not as efficiently
 				numberCols = Math.Max((int)this.TableColumns, 1);
 				// insert the appropriate number of rows
-				mshtml.IHTMLTableRow tableRow;
+				MSHTML.IHTMLTableRow tableRow;
 				for (int idxRow = 0; idxRow < numberRows; idxRow++)
 				{
-					tableRow = (mshtml.IHTMLTableRow)table.insertRow(-1);
+					tableRow = (MSHTML.IHTMLTableRow)table.insertRow(-1);
 					// add the new columns to the end of each row
 					for (int idxCol = 0; idxCol < numberCols; idxCol++)
 					{
@@ -318,8 +318,8 @@ namespace MSDN.Html.Editor
 				}
 				// have the rows constructed
 				// now ensure the columns are correctly defined for each row
-				mshtml.IHTMLElementCollection rows = table.rows;
-				foreach (mshtml.IHTMLTableRow tableRow in rows)
+				MSHTML.IHTMLElementCollection rows = table.rows;
+				foreach (MSHTML.IHTMLTableRow tableRow in rows)
 				{
 					numberCols = Math.Max((int)this.TableColumns, 1) - (int)tableRow.cells.length;
 					if (numberCols > 0)
@@ -367,12 +367,12 @@ namespace MSDN.Html.Editor
             VertAlignment = VerticalAlignOption.Default;
         }
 
-		public HtmlTableRowProperty(mshtml.IHTMLTableRow row) : this()
+		public HtmlTableRowProperty(MSHTML.IHTMLTableRow row) : this()
 		{
 			Set(row);
 		}
 
-		public bool Set(mshtml.IHTMLTableRow row)
+		public bool Set(MSHTML.IHTMLTableRow row)
 		{
 			// if user has selected a table extract those properties
 			if (row == null)
@@ -400,7 +400,7 @@ namespace MSDN.Html.Editor
 			return true;
 		}
 
-		public bool Get(ref mshtml.IHTMLTableRow row)
+		public bool Get(ref MSHTML.IHTMLTableRow row)
 		{
 			if (row == null)
 				return false;
@@ -451,12 +451,12 @@ namespace MSDN.Html.Editor
 			NoWrap = false;
 		}
 
-		public HtmlTableCellProperty(mshtml.IHTMLTableCell cell) : this()
+		public HtmlTableCellProperty(MSHTML.IHTMLTableCell cell) : this()
 		{
 			Set(cell);
 		}
 
-		public bool Set(mshtml.IHTMLTableCell cell)
+		public bool Set(MSHTML.IHTMLTableCell cell)
 		{
 			// if user has selected a table extract those properties
 			if (cell == null)
@@ -485,7 +485,7 @@ namespace MSDN.Html.Editor
 			return true;
 		}
 
-		public bool Get(ref mshtml.IHTMLTableCell cell)
+		public bool Get(ref MSHTML.IHTMLTableCell cell)
 		{
 			if (cell == null)
 				return false;
