@@ -46,9 +46,6 @@
       <HintPath>..\..\..\3rdParty\HtmlAgilityPack\HtmlAgilityPack.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.mshtml, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
     <Reference Include="MSDN.HtmlEditorControl">
       <HintPath>..\..\..\3rdParty\MSHtmlEditorControl\bin\Debug\MSDN.HtmlEditorControl.dll</HintPath>
     </Reference>
@@ -128,6 +125,17 @@
     <EmbeddedResource Include="Resources\ToolbarImageClear.bmp" />
     <EmbeddedResource Include="Resources\ToolbarBackColorClear.bmp" />
     <EmbeddedResource Include="Resources\ToolbarFileSaveAs.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="MSHTML">
+      <Guid>{3050F1C5-98B5-11CF-BB82-00AA00BDCE0B}</Guid>
+      <VersionMajor>4</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
