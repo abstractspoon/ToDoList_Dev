@@ -29,10 +29,12 @@ public:
 	BOOL CanMoveSelectedButtonUp() const;
 	BOOL CanMoveSelectedButtonDown() const;
 	BOOL CanDeleteSelectedButton() const;
+	BOOL CanDuplicateSelectedButton() const;
 
 	BOOL MoveSelectedButtonUp();
 	BOOL MoveSelectedButtonDown();
 	BOOL DeleteSelectedButton();
+	BOOL DuplicateSelectedButton();
 
 // Operations
 public:
