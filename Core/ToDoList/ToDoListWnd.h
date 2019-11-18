@@ -625,6 +625,7 @@ protected:
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependent = FALSE) const;
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 	BOOL CanImportPasteFromClipboard() const;
+	BOOL CanImportDropText(const CString& sText) const;
 
 	BOOL ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL bStartup);
 	void MinimizeToTray();

@@ -5771,9 +5771,12 @@ BOOL CToDoListWnd::CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const
 
 BOOL CToDoListWnd::CanImportPasteFromClipboard() const
 {
-	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	return (!GetToDoCtrl().IsReadOnly() && CTaskClipboard::IsEmpty() && Misc::ClipboardHasText());
+}
 
-	return (!tdc.IsReadOnly() && CTaskClipboard::IsEmpty() && Misc::ClipboardHasText());
+BOOL CToDoListWnd::CanImportDropText(const CString& sText) const
+{
+	return (!GetToDoCtrl().IsReadOnly() && !sText.IsEmpty());
 }
 
 BOOL CToDoListWnd::DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere)
@@ -5791,7 +5794,7 @@ BOOL CToDoListWnd::DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere)
 
 BOOL CToDoListWnd::DoImportFromDropText(const CString& sDropText, TDLID_IMPORTTO nWhere)
 {
-	if (sDropText.IsEmpty())
+	if (!CanImportDropText(sDropText))
 	{
 		ASSERT(0);
 		return FALSE;
