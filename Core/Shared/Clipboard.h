@@ -83,9 +83,12 @@ public:
 	BOOL IsOpen() const { return m_bOpen; }
 	operator HWND() const { return m_hWnd; }
 	
-	CString GetText(UINT nFormat = 0) const;
-	BOOL GetText(CString& sText, UINT nFormat = 0) const;
-	BOOL SetText(const CString& sText, UINT nFormat = 0) const;
+	CString GetText() const;
+	CString GetText(UINT nFormat) const;
+	BOOL GetText(CString& sText) const;
+	BOOL GetText(CString& sText, UINT nFormat) const;
+	BOOL SetText(const CString& sText) const;
+	BOOL SetText(const CString& sText, UINT nFormat) const;
 
 	BOOL SetData(UINT uFormat, HANDLE hMem) const;
 	BOOL SetData(const CBitmap& bm) const;
@@ -101,9 +104,18 @@ public:
 	static CString GetFormatName(UINT nFormat);
 	static CString& PackageHTMLFragment(CString& sContent, const CString& sSourceUrl = _T(""));
 	static CString& UnpackageHTMLFragment(CString& sContent, CString& sSourceUrl);
+
 	static int GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs);
 	static int GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs, CStringArray& aFormatNames);
-	static CString GetText(LPDATAOBJECT lpDataOb, UINT nFormat = 0);
+	static CString GetText(LPDATAOBJECT lpDataOb);
+	static CString GetText(LPDATAOBJECT lpDataOb, UINT nFormat);
+	static BOOL HasText(LPDATAOBJECT lpDataOb);
+
+	static int GetAvailableFormats(COleDataObject* pObject, CDWordArray& aFormatIDs);
+	static int GetAvailableFormats(COleDataObject* pObject, CDWordArray& aFormatIDs, CStringArray& aFormatNames);
+	static CString GetText(COleDataObject* pObject);
+	static CString GetText(COleDataObject* pObject, UINT nFormat);
+	static BOOL HasText(COleDataObject* pObject);
 
 protected:
 	HWND m_hWnd;
@@ -112,7 +124,6 @@ protected:
 protected:
 	BOOL Open(HWND hWnd, BOOL bClear);
 
-	static UINT GetFormat(UINT nFormat);
 	static void FormatAndReplace(int nVal, int nWidth, const CString& sKey, CString& sOutput);
 };
 

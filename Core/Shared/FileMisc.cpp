@@ -2583,6 +2583,8 @@ CString FileMisc::GetLongPathName(LPCTSTR szShortPath)
 
 int FileMisc::GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles)
 {
+	ASSERT(pObject);
+
 	int nRet = 0;
 	aFiles.RemoveAll();
 

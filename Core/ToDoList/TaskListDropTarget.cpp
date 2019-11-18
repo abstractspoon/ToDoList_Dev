@@ -73,33 +73,16 @@ CString TLDT_DATA::GetFile(int nFile) const
 
 BOOL TLDT_DATA::HasText() const
 {
-	return HasText(pObject);
+	return (pObject && CClipboard::HasText(pObject));
 }
 
 CString TLDT_DATA::GetText() const
 {
-	return GetText(pObject);
-}
-
-BOOL TLDT_DATA::HasText(COleDataObject* pObject)
-{
-	return (pObject && pObject->IsDataAvailable(CB_TEXTFORMAT));
-}
-
-CString TLDT_DATA::GetText(COleDataObject* pObject)
-{
-	if (!HasText(pObject))
-		return _T("");
-
-	HGLOBAL hGlobal = pObject->GetGlobalData(CB_TEXTFORMAT);
-
-	if (!hGlobal)
-		return _T("");
-
-	CString sText((LPCTSTR)GlobalLock(hGlobal));
-	::GlobalUnlock(hGlobal);
-
-	return sText;
+	if (pObject)
+		return CClipboard::GetText(pObject);
+	
+	// else
+	return _T(""); 
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -338,7 +321,7 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 			return (bFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
 		}
 	}
-	else if ((nHitTest != TLDTHT_NONE) && drop.GetFileCount())
+	else if ((nHitTest != TLDTHT_NONE) && drop.GetFileCount() || drop.HasText())
 	{
 		switch (nHitTest)
 		{
@@ -368,13 +351,15 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 
 int CTaskListDropTarget::GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles, BOOL& bFromText)
 {
+	ASSERT(pObject);
+
 	aFiles.RemoveAll();
 	bFromText = FALSE;
 
-	if (!FileMisc::GetDropFilePaths(pObject, aFiles) && TLDT_DATA::HasText(pObject))
+	if (!FileMisc::GetDropFilePaths(pObject, aFiles) && CClipboard::HasText(pObject))
 	{
 		// look for files and URLs in text
-		CString sText = TLDT_DATA::GetText(pObject);
+		CString sText = CClipboard::GetText(pObject);
 
 		if (FileMisc::IsPath(sText) || WebMisc::IsURL(sText))
 		{
@@ -417,6 +402,10 @@ BOOL CTaskListDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT
 			m_pOwner->SendMessage(WM_TLDT_DROP, (WPARAM)&data, (LPARAM)pWnd);
 
 			data.pFilePaths = NULL;
+		}
+		else if (CClipboard::HasText(pObject))
+		{
+			m_pOwner->SendMessage(WM_TLDT_DROP, (WPARAM)&data, (LPARAM)pWnd);
 		}
 	}
 	

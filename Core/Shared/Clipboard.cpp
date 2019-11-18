@@ -166,6 +166,11 @@ BOOL CClipboard::SetData(const CBitmap& bm) const
 	return SetData(CF_BITMAP, (HANDLE)bm.GetSafeHandle());
 }
 
+BOOL CClipboard::HasText()
+{
+	return HasFormat(CB_TEXTFORMAT);
+}
+
 BOOL CClipboard::HasFormat(UINT nFormat)
 {
 	return (::IsClipboardFormatAvailable(nFormat));
@@ -177,11 +182,6 @@ CString CClipboard::GetFormatName(UINT nFormat)
 	::GetClipboardFormatName(nFormat, szName, 127);
 
 	return szName;
-}
-
-BOOL CClipboard::HasText()
-{
-	return HasFormat(CB_TEXTFORMAT);
 }
 
 CString& CClipboard::PackageHTMLFragment(CString& sContent, const CString& sSourceUrl)
@@ -277,12 +277,9 @@ void CClipboard::FormatAndReplace(int nVal, int nWidth, const CString& sKey, CSt
 	sOutput.Replace(sKey, sVal);
 }
 
-UINT CClipboard::GetFormat(UINT nFormat)
+CString CClipboard::GetText() const
 {
-	if (nFormat == 0)
-		nFormat = CB_TEXTFORMAT;
-
-	return nFormat;
+	return GetText(CB_TEXTFORMAT);
 }
 
 CString CClipboard::GetText(UINT nFormat) const
@@ -293,15 +290,20 @@ CString CClipboard::GetText(UINT nFormat) const
 	return sText;
 }
 
+BOOL CClipboard::GetText(CString& sText) const
+{
+	return GetText(sText, CB_TEXTFORMAT);
+}
+
 BOOL CClipboard::GetText(CString& sText, UINT nFormat) const
 {
-	ASSERT(m_bOpen);
-	
-	if (!m_bOpen)
+	// sanity checks
+	if (!m_bOpen || !nFormat)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
-	nFormat = GetFormat(nFormat);
-	
 	try
 	{
 		HANDLE hData = ::GetClipboardData(nFormat);
@@ -317,16 +319,20 @@ BOOL CClipboard::GetText(CString& sText, UINT nFormat) const
 	return !sText.IsEmpty();
 }
 
+BOOL CClipboard::SetText(const CString& sText) const
+{
+	return SetText(sText, CB_TEXTFORMAT);
+}
+
 BOOL CClipboard::SetText(const CString& sText, UINT nFormat) const
 {
 	// sanity checks
-	ASSERT(m_bOpen && m_hWnd);
-	
-	if (!m_bOpen || (m_hWnd == NULL))
+	if (!m_bOpen || (m_hWnd == NULL) || !nFormat)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
-	nFormat = GetFormat(nFormat);
-	
 	HGLOBAL hglbCopy = NULL; 
 	BOOL bResult = FALSE;
 	
@@ -414,18 +420,26 @@ BOOL CClipboard::GetHTMLSourceLink(CString& sLink, BOOL bIgnoreAboutBlank) const
 	return TRUE;
 }
 
+BOOL CClipboard::HasText(LPDATAOBJECT lpDataOb)
+{
+	if (!lpDataOb)
+		return FALSE;
+
+	COleDataObject dataobj;
+	dataobj.Attach(lpDataOb, FALSE);
+
+	return HasText(&dataobj);
+}
+
 int CClipboard::GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs)
 {
+	if (!lpDataOb)
+		return 0;
+
 	COleDataObject dataobj;
-	FORMATETC formatEtc = { 0 };
-
     dataobj.Attach(lpDataOb, FALSE);
-	dataobj.BeginEnumFormats();
 
-	while (dataobj.GetNextFormat(&formatEtc))
-		aFormatIDs.Add(formatEtc.cfFormat);
-
-	return aFormatIDs.GetSize();
+	return GetAvailableFormats(&dataobj, aFormatIDs);
 }
 
 int CClipboard::GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs, CStringArray& aFormatNames)
@@ -438,19 +452,71 @@ int CClipboard::GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatI
 	return nNumFmt;
 }
 
+CString CClipboard::GetText(LPDATAOBJECT lpDataOb)
+{
+	return GetText(lpDataOb, CB_TEXTFORMAT);
+}
+
 CString CClipboard::GetText(LPDATAOBJECT lpDataOb, UINT nFormat)
 {
-	CString sText;
-	COleDataObject dataobj;
-    dataobj.Attach(lpDataOb, FALSE);
+	if (!lpDataOb)
+		return _T("");
 
-	HGLOBAL hGlobal = dataobj.GetGlobalData((CLIPFORMAT)nFormat);
+	COleDataObject dataobj;
+	dataobj.Attach(lpDataOb, FALSE);
+
+	return GetText(&dataobj, nFormat);
+}
+
+BOOL CClipboard::HasText(COleDataObject* pObject)
+{
+	if (!pObject || !pObject->m_lpDataObject)
+		return FALSE;
+
+	return pObject->IsDataAvailable(CB_TEXTFORMAT);
+}
+
+int CClipboard::GetAvailableFormats(COleDataObject* pObject, CDWordArray& aFormatIDs)
+{
+	if (!pObject)
+		return 0;
+
+	FORMATETC formatEtc = { 0 };
+	pObject->BeginEnumFormats();
+
+	while (pObject->GetNextFormat(&formatEtc))
+		aFormatIDs.Add(formatEtc.cfFormat);
+
+	return aFormatIDs.GetSize();
+}
+
+int CClipboard::GetAvailableFormats(COleDataObject* pObject, CDWordArray& aFormatIDs, CStringArray& aFormatNames)
+{
+	int nNumFmt = GetAvailableFormats(pObject, aFormatIDs);
+
+	for (int nFmt = 0; nFmt < nNumFmt; nFmt++)
+		aFormatNames.Add(GetFormatName(aFormatIDs[nFmt]));
+
+	return nNumFmt;
+}
+
+CString CClipboard::GetText(COleDataObject* pObject)
+{
+	return GetText(pObject, CB_TEXTFORMAT);
+}
+
+CString CClipboard::GetText(COleDataObject* pObject, UINT nFormat)
+{
+	if (!pObject || !pObject->m_lpDataObject)
+		return _T("");
+
+	HGLOBAL hGlobal = pObject->GetGlobalData((CLIPFORMAT)nFormat);
+
+	if (!hGlobal)
+		return _T("");
 	
-	if (hGlobal)
-	{
-		sText = (LPCTSTR)GlobalLock(hGlobal);
-		::GlobalUnlock(hGlobal);
-	}
+	CString sText = (LPCTSTR)GlobalLock(hGlobal);
+	::GlobalUnlock(hGlobal);
 
 	return sText;
 }

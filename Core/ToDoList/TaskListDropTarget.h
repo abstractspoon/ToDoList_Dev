@@ -31,9 +31,6 @@ struct TLDT_DATA
 	BOOL HasText() const;
 	CString GetText() const;
 
-	static CString GetText(COleDataObject* pObject);
-	static BOOL HasText(COleDataObject* pObject);
-
 	DWORD dwTaskID;
 	COleDataObject* pObject;
 	CStringArray* pFilePaths;

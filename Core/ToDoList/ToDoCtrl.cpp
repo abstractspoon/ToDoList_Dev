@@ -10016,14 +10016,14 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 		}
 		else if (pData->GetFileCount())
 		{
-			if (!CanEditSelectedTask(TDCA_PASTE))
+			if (IsReadOnly())
 				return FALSE;
 
 			return GetParent()->SendMessage(WM_TDCM_CANIMPORTDROPFILES, (WPARAM)GetSafeHwnd(), (LPARAM)pData->pFilePaths);
 		}
 		else if (pData->HasText())
 		{
-			return CanEditSelectedTask(TDCA_PASTE);
+			return !IsReadOnly();
 		}
 	}
 	else if (pTarget == &m_cbFileRef)

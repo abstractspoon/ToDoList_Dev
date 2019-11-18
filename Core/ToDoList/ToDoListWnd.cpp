@@ -8687,23 +8687,8 @@ LRESULT CToDoListWnd::OnToDoCtrlImportDropText(WPARAM wp, LPARAM lp)
 		CString sText((LPCTSTR)lp);
 		ASSERT(!sText.IsEmpty());
 
-		// TODO
-/*
-		for (int nFile = 0; nFile < nNumFiles; nFile++)
-		{
-			CTDLImportDialog dialog(m_mgrImportExport, FALSE);
-			CString sFilePath = pFiles->GetAt(nFile);
-
-			if (dialog.DoModal(sFilePath) == IDOK)
-			{
-				// check file can be opened
-				TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
-				int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
-
-				ImportTasks(FALSE, sFilePath, nImporter, nImportTo);
-			}
-		}
-*/
+		CClipboard(*this).SetText(sText);
+		DoImportPasteFromClipboard(TDIT_ADDTOBOTTOMOFTASKLIST);
 	}
 	
 	return 0L;
@@ -8833,6 +8818,10 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 
 					case TDIT_ADDBELOWSELECTEDTASK:
 						nWhere = TDC_INSERTAFTERSELTASK;
+						break;
+
+					case TDIT_ADDTOBOTTOMOFTASKLIST:
+						nWhere = TDC_INSERTATBOTTOM;
 						break;
 
 					case TDIT_CREATENEWTASKLIST:
