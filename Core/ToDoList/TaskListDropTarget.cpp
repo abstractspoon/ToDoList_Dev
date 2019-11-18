@@ -71,6 +71,37 @@ CString TLDT_DATA::GetFile(int nFile) const
 	return _T(""); 
 }
 
+BOOL TLDT_DATA::HasText() const
+{
+	return HasText(pObject);
+}
+
+CString TLDT_DATA::GetText() const
+{
+	return GetText(pObject);
+}
+
+BOOL TLDT_DATA::HasText(COleDataObject* pObject)
+{
+	return (pObject && pObject->IsDataAvailable(CB_TEXTFORMAT));
+}
+
+CString TLDT_DATA::GetText(COleDataObject* pObject)
+{
+	if (!HasText(pObject))
+		return _T("");
+
+	HGLOBAL hGlobal = pObject->GetGlobalData(CB_TEXTFORMAT);
+
+	if (!hGlobal)
+		return _T("");
+
+	CString sText((LPCTSTR)GlobalLock(hGlobal));
+	::GlobalUnlock(hGlobal);
+
+	return sText;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -340,21 +371,15 @@ int CTaskListDropTarget::GetDropFilePaths(COleDataObject* pObject, CStringArray&
 	aFiles.RemoveAll();
 	bFromText = FALSE;
 
-	if (!FileMisc::GetDropFilePaths(pObject, aFiles) && pObject->IsDataAvailable(CB_TEXTFORMAT))
+	if (!FileMisc::GetDropFilePaths(pObject, aFiles) && TLDT_DATA::HasText(pObject))
 	{
 		// look for files and URLs in text
-		HGLOBAL hGlobal = pObject->GetGlobalData(CB_TEXTFORMAT);
+		CString sText = TLDT_DATA::GetText(pObject);
 
-		if (hGlobal)
+		if (FileMisc::IsPath(sText) || WebMisc::IsURL(sText))
 		{
-			CString sText((LPCTSTR)GlobalLock(hGlobal));
-			::GlobalUnlock(hGlobal);
-
-			if (FileMisc::IsPath(sText) || WebMisc::IsURL(sText))
-			{
-				aFiles.Add(sText);
-				bFromText = TRUE;
-			}
+			aFiles.Add(sText);
+			bFromText = TRUE;
 		}
 	}
 

@@ -28,6 +28,11 @@ struct TLDT_DATA
 	CString GetFirstFile() const;
 	int GetFileCount() const;
 	CString GetFile(int nFile) const;
+	BOOL HasText() const;
+	CString GetText() const;
+
+	static CString GetText(COleDataObject* pObject);
+	static BOOL HasText(COleDataObject* pObject);
 
 	DWORD dwTaskID;
 	COleDataObject* pObject;

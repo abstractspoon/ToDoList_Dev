@@ -469,6 +469,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnToDoCtrlGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTDROPFILES, OnToDoCtrlImportDropFiles)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CANIMPORTDROPFILES, OnToDoCtrlCanImportDropFiles)
+	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTDROPTEXT, OnToDoCtrlImportDropText)
 	ON_REGISTERED_MESSAGE(WM_TDCN_CLICKREMINDERCOL, OnToDoCtrlNotifyClickReminderCol)
 	ON_REGISTERED_MESSAGE(WM_TDCN_LISTCHANGE, OnToDoCtrlNotifyListChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_MODIFY, OnToDoCtrlNotifyMod)
@@ -8673,6 +8674,39 @@ LRESULT CToDoListWnd::OnToDoCtrlCanImportDropFiles(WPARAM wp, LPARAM lp)
 	}
 	
 	return FALSE;
+}
+
+LRESULT CToDoListWnd::OnToDoCtrlImportDropText(WPARAM wp, LPARAM lp)
+{
+	ASSERT(lp);
+	ASSERT((HWND)wp == GetToDoCtrl().GetSafeHwnd());
+	UNREFERENCED_PARAMETER(wp);
+
+	if (lp)
+	{
+		CString sText((LPCTSTR)lp);
+		ASSERT(!sText.IsEmpty());
+
+		// TODO
+/*
+		for (int nFile = 0; nFile < nNumFiles; nFile++)
+		{
+			CTDLImportDialog dialog(m_mgrImportExport, FALSE);
+			CString sFilePath = pFiles->GetAt(nFile);
+
+			if (dialog.DoModal(sFilePath) == IDOK)
+			{
+				// check file can be opened
+				TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
+				int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
+
+				ImportTasks(FALSE, sFilePath, nImporter, nImportTo);
+			}
+		}
+*/
+	}
+	
+	return 0L;
 }
 
 void CToDoListWnd::OnImportTasklist() 

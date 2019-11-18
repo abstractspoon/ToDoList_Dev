@@ -34,6 +34,7 @@ const UINT WM_TDCM_FAILEDLINK				= ::RegisterWindowMessage(_T("WM_TDCM_FAILEDLIN
 const UINT WM_TDCM_LENGTHYOPERATION			= ::RegisterWindowMessage(_T("WM_TDCM_LENGTHYOPERATION"));		// wParam = start/stop, lParam = text to display
 const UINT WM_TDCM_IMPORTDROPFILES			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORTDROPFILES"));		// wParam = hwnd, lParam = CStringArray*
 const UINT WM_TDCM_CANIMPORTDROPFILES		= ::RegisterWindowMessage(_T("WM_TDCM_CANIMPORTDROPFILES"));	// wParam = hwnd, lParam = CStringArray*
+const UINT WM_TDCM_IMPORTDROPTEXT			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORTDROPTEXT"));		// wParam = hwnd, lParam = LPCTSTR
 
 // CTDLFilterBar
 const UINT WM_FBN_FILTERCHNG				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHNG")); 

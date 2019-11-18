@@ -10021,6 +10021,10 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 
 			return GetParent()->SendMessage(WM_TDCM_CANIMPORTDROPFILES, (WPARAM)GetSafeHwnd(), (LPARAM)pData->pFilePaths);
 		}
+		else if (pData->HasText())
+		{
+			return CanEditSelectedTask(TDCA_PASTE);
+		}
 	}
 	else if (pTarget == &m_cbFileRef)
 	{
@@ -10088,6 +10092,12 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 			{
 				SetSelectedTaskFileRefs(aFiles, TRUE, FALSE);
 			}
+		}
+		else if (pData->HasText())
+		{
+			CString sText = pData->GetText();
+
+			return GetParent()->SendMessage(WM_TDCM_IMPORTDROPTEXT, (WPARAM)GetSafeHwnd(), (LPARAM)(LPCTSTR)sText);
 		}
 		else
 		{
