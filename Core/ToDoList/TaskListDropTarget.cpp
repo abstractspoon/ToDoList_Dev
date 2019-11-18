@@ -361,7 +361,7 @@ int CTaskListDropTarget::GetDropFilePaths(COleDataObject* pObject, CStringArray&
 		// look for files and URLs in text
 		CString sText = CClipboard::GetText(pObject);
 
-		if (FileMisc::IsPath(sText) || WebMisc::IsURL(sText))
+		if (FileMisc::IsPath(sText) || (WebMisc::IsURL(sText) && (sText.FindOneOf(_T("\t\r\n")) == -1)))
 		{
 			aFiles.Add(sText);
 			bFromText = TRUE;
