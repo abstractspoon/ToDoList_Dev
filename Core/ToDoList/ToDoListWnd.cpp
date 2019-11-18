@@ -27,7 +27,7 @@
 #include "tdcstatic.h"
 #include "tdlcustomattributedlg.h"
 #include "tdlwelcomewizard.h"
-#include "tdlpastefromclipboarddlg.h"
+#include "tdlImportFromTextdlg.h"
 #include "tdlanalyseloggedtimedlg.h"
 #include "TDCTaskTimeLogAnalysis.h"
 #include "TDLAboutDlg.h"
@@ -5786,14 +5786,31 @@ BOOL CToDoListWnd::DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere)
 
 	CTDLPasteFromClipboardDlg dialog(m_mgrImportExport);
 
+	return DoImportFromText(dialog, nWhere);
+}
+
+BOOL CToDoListWnd::DoImportFromDropText(const CString& sDropText, TDLID_IMPORTTO nWhere)
+{
+	if (sDropText.IsEmpty())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	CTDLImportFromDropTextDlg dialog(sDropText, m_mgrImportExport);
+
+	return DoImportFromText(dialog, nWhere);
+}
+
+BOOL CToDoListWnd::DoImportFromText(CTDLImportFromTextBaseDlg& dialog, TDLID_IMPORTTO nWhere)
+{
 	if (dialog.DoModal() != IDOK)
 		return FALSE;
 
-	BOOL bFromClipboard = TRUE;
 	int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
-	CString sImportFrom = dialog.GetClipboardText();
+	CString sImportFrom = dialog.GetText();
 
-	return ImportTasks(bFromClipboard, sImportFrom, nImporter, nWhere);
+	return ImportTasks(TRUE, sImportFrom, nImporter, nWhere);
 }
 
 void CToDoListWnd::OnEditCopyastext() 
@@ -8687,8 +8704,7 @@ LRESULT CToDoListWnd::OnToDoCtrlImportDropText(WPARAM wp, LPARAM lp)
 		CString sText((LPCTSTR)lp);
 		ASSERT(!sText.IsEmpty());
 
-		CClipboard(*this).SetText(sText);
-		DoImportPasteFromClipboard(TDIT_ADDTOBOTTOMOFTASKLIST);
+		DoImportFromDropText(sText, TDIT_ADDTOBOTTOMOFTASKLIST);
 	}
 	
 	return 0L;
@@ -8721,12 +8737,12 @@ void CToDoListWnd::OnImportTasklist()
 	}
 }
 
-BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
+BOOL CToDoListWnd::ImportTasks(BOOL bFromText, const CString& sImportFrom,
 								int nImporter, TDLID_IMPORTTO nImportTo) 
 {
 	CString sImportPath;
 
-	if (bFromClipboard)
+	if (bFromText)
 	{
 		sImportPath = TEMP_CLIPBOARD_FILEPATH;
 		VERIFY(FileMisc::SaveFile(sImportPath, sImportFrom, SFEF_UTF16));
@@ -8841,7 +8857,7 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 		}
 	}
 
-	HandleImportTasklistError(nRes, sImportPath, bFromClipboard, bSomeSuceeded);
+	HandleImportTasklistError(nRes, sImportPath, bFromText, bSomeSuceeded);
 
 	return bSomeSuceeded;
 }

@@ -1,9 +1,9 @@
-// TDLPasteFromClipboardDlg.cpp : implementation file
+// TDLImportFromTextDlg.cpp : implementation file
 //
 
 #include "stdafx.h"
 #include "resource.h"
-#include "TDLPasteFromClipboardDlg.h"
+#include "TDLImportFromTextDlg.h"
 #include "TDCImportExportMgr.h"
 
 #include "../shared/dialoghelper.h"
@@ -23,10 +23,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPasteFromClipboardDlg dialog
 
-
-CTDLPasteFromClipboardDlg::CTDLPasteFromClipboardDlg(const CTDCImportExportMgr& mgr, CWnd* pParent /*=NULL*/)
+CTDLImportFromTextBaseDlg::CTDLImportFromTextBaseDlg(UINT nDlgTemplateID, LPCTSTR szPrefsKey, const CTDCImportExportMgr& mgr, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(IDD_PASTEIMPORT_DIALOG, _T("PasteImporting"), pParent),
+	CTDLDialog(nDlgTemplateID, szPrefsKey, pParent),
 	m_cbFormat(mgr, TRUE, TRUE)
 {
 	//{{AFX_DATA_INIT(CTDLPasteFromClipboardDlg)
@@ -49,13 +48,13 @@ CTDLPasteFromClipboardDlg::CTDLPasteFromClipboardDlg(const CTDCImportExportMgr& 
 }
 
 
-void CTDLPasteFromClipboardDlg::DoDataExchange(CDataExchange* pDX)
+void CTDLImportFromTextBaseDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CTDLPasteFromClipboardDlg)
 	DDX_Control(pDX, IDC_FORMAT, m_cbFormat);
-	DDX_Text(pDX, IDC_CLIPBOARDTEXT, m_sClipboardText);
+	DDX_Text(pDX, IDC_TEXT, m_sText);
 	//}}AFX_DATA_MAP
 
 	if (pDX->m_bSaveAndValidate)
@@ -65,39 +64,55 @@ void CTDLPasteFromClipboardDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLPasteFromClipboardDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLPasteFromClipboardDlg)
-	ON_BN_CLICKED(IDC_REFRESH, OnRefresh)
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPasteFromClipboardDlg message handlers
 
-void CTDLPasteFromClipboardDlg::OnOK() 
+void CTDLImportFromTextBaseDlg::OnOK() 
 {
 	CTDLDialog::OnOK();
 	
 	CPreferences().WriteProfileString(m_sPrefsKey, _T("ImportTypeID"), m_sFormatTypeID);
 }
 
-BOOL CTDLPasteFromClipboardDlg::OnInitDialog() 
+BOOL CTDLImportFromTextBaseDlg::OnInitDialog() 
 {
 	CTDLDialog::OnInitDialog();
 	
 	// Set clipboard text font to be mono-spaced
 	if (GraphicsMisc::CreateFont(m_fontMonospace, _T("Lucida Console")))
-		GetDlgItem(IDC_CLIPBOARDTEXT)->SetFont(&m_fontMonospace, FALSE);
-
-	// update clipboard text
-	OnRefresh();
+		GetDlgItem(IDC_TEXT)->SetFont(&m_fontMonospace, FALSE);
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+///////////////////////////////////////////////////////////////////////////
+
+CTDLPasteFromClipboardDlg::CTDLPasteFromClipboardDlg(const CTDCImportExportMgr& mgr, CWnd* pParent)
+	:
+	CTDLImportFromTextBaseDlg(IDD_PASTEIMPORT_DIALOG, _T("PasteImporting"), mgr, pParent)
+{
+	m_sText = Misc::GetClipboardText();
+}
+
+BEGIN_MESSAGE_MAP(CTDLPasteFromClipboardDlg, CTDLDialog)
+	//{{AFX_MSG_MAP(CTDLPasteFromClipboardDlg)
+	ON_BN_CLICKED(IDC_REFRESH, OnRefresh)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
 void CTDLPasteFromClipboardDlg::OnRefresh() 
 {
-	m_sClipboardText = Misc::GetClipboardText();
+	m_sText = Misc::GetClipboardText();
 	UpdateData(FALSE);
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+CTDLImportFromDropTextDlg::CTDLImportFromDropTextDlg(const CString& sDropText, const CTDCImportExportMgr& mgr, CWnd* pParent)
+	:
+	CTDLImportFromTextBaseDlg(IDD_DROPIMPORT_DIALOG, _T("DropImporting"), mgr, pParent)
+{
+	m_sText = sDropText;
+
 }

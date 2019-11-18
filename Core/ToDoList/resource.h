@@ -829,6 +829,7 @@
 #define IDC_CUSTOMATTRIB_INFO           1534
 #define IDC_TOPATH                      1535
 #define IDC_TOCLIPBOARD                 1536
+#define IDC_TEXT                        1538
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -839,6 +840,7 @@
 #define IDC_CHOOSEFOLDER                2003
 #define IDI_TASK                        2003
 #define IDD_PRINT_TASKSEL_PAGE          2003
+#define IDD_DROPIMPORT_DIALOG           2004
 #define IDC_CURFOLDER                   2005
 #define IDI_CONTACT                     2005
 #define IDC_HIDEUNFLAGGEDEMAIL          2006
@@ -2325,7 +2327,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        314
 #define _APS_NEXT_COMMAND_VALUE         34663
-#define _APS_NEXT_CONTROL_VALUE         1538
+#define _APS_NEXT_CONTROL_VALUE         1539
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

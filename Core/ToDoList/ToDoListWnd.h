@@ -62,6 +62,7 @@ const UINT WM_TDL_RESTORE			= ::RegisterWindowMessage(_T("WM_TDL_RESTORE"));
 
 class CTDLPrintDialog;
 class CTDLExportDlg;
+class CTDLImportFromTextBaseDlg;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -737,6 +738,8 @@ protected:
 	BOOL DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartup);
 	void DoInsertDateAndTime(BOOL bDate, BOOL bTime);
 	BOOL DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere);
+	BOOL DoImportFromDropText(const CString& sDropText, TDLID_IMPORTTO nWhere);
+	BOOL DoImportFromText(CTDLImportFromTextBaseDlg& dialog, TDLID_IMPORTTO nWhere);
 	TDC_FILE DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int nIndex, CTaskFile& tasks, LPCTSTR szFilePath = NULL, BOOL bFlush = TRUE);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
 	void DoMoveTask(TDC_MOVETASK nDirection);
@@ -745,7 +748,7 @@ protected:
 	TDCEXPORTTASKLIST* PrepareNewExportAfterSave(int nTDC, const CTaskFile& tasks);
 
 	void UpdateTimeTrackerTasks(const CFilteredToDoCtrl& tdc, BOOL bAllTasks);
-	BOOL ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
+	BOOL ImportTasks(BOOL bFromText, const CString& sImportFrom,
 					int nImporter, TDLID_IMPORTTO nImportTo);
 	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath);
 	UINT GetNewTaskCmdID() const;

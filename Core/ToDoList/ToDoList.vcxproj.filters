@@ -214,9 +214,6 @@
     <ClCompile Include="TDLOleMessageFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDLPasteFromClipboardDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TDLPrefMigrationDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -416,6 +413,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TDLInfoTipCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLImportFromTextDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -663,9 +663,6 @@
     <ClInclude Include="TDLOleMessageFilter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TDLPasteFromClipboardDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TDLPrefMigrationDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -865,6 +862,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDLInfoTipCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLImportFromTextDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
