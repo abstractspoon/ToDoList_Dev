@@ -18,8 +18,6 @@ class CTDCImportExportMgr;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPasteFromClipboardDlg dialog
 
-class CImportExportMgr;
-
 class CTDLPasteFromClipboardDlg : public CTDLDialog
 {
 // Construction
