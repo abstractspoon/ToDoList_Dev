@@ -57,6 +57,7 @@ protected:
 	afx_msg void OnMoveButtonUp();
 	afx_msg void OnMoveButtonDown();
 	afx_msg void OnDeleteButton();
+	afx_msg void OnDuplicateButton();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnListSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 

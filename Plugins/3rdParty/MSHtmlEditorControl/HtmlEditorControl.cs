@@ -15,36 +15,36 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 
-using mshtmlDocument = mshtml.HTMLDocument;
-using mshtmlBody = mshtml.HTMLBody;
-using mshtmlStyleSheet = mshtml.IHTMLStyleSheet;
-using mshtmlStyleElement = mshtml.IHTMLStyleElement;
-using mshtmlStyle = mshtml.IHTMLStyle;
-using mshtmlDomNode = mshtml.IHTMLDOMNode;
-using mshtmlDomTextNode = mshtml.IHTMLDOMTextNode;
-using mshtmlTextRange = mshtml.IHTMLTxtRange;
-using mshtmlSelection = mshtml.IHTMLSelectionObject;
-using mshtmlControlRange = mshtml.IHTMLControlRange;
+using mshtmlDocument = MSHTML.HTMLDocument;
+using mshtmlBody = MSHTML.HTMLBody;
+using mshtmlStyleSheet = MSHTML.IHTMLStyleSheet;
+using mshtmlStyleElement = MSHTML.IHTMLStyleElement;
+using mshtmlStyle = MSHTML.IHTMLStyle;
+using mshtmlDomNode = MSHTML.IHTMLDOMNode;
+using mshtmlDomTextNode = MSHTML.IHTMLDOMTextNode;
+using mshtmlTextRange = MSHTML.IHTMLTxtRange;
+using mshtmlSelection = MSHTML.IHTMLSelectionObject;
+using mshtmlControlRange = MSHTML.IHTMLControlRange;
 
-using mshtmlElement = mshtml.IHTMLElement;
-using mshtmlElement2 = mshtml.IHTMLElement2;
-using mshtmlElementCollection = mshtml.IHTMLElementCollection;
-using mshtmlControlElement = mshtml.IHTMLControlElement;
-using mshtmlAnchorElement = mshtml.IHTMLAnchorElement;
-using mshtmlImageElement = mshtml.IHTMLImgElement;
-using mshtmlFontElement= mshtml.IHTMLFontElement;
-using mshtmlLineElement = mshtml.IHTMLHRElement;
-using mshtmlSpanElement = mshtml.IHTMLSpanFlow;
-using mshtmlScriptElement = mshtml.IHTMLScriptElement;
+using mshtmlElement = MSHTML.IHTMLElement;
+using mshtmlElement2 = MSHTML.IHTMLElement2;
+using mshtmlElementCollection = MSHTML.IHTMLElementCollection;
+using mshtmlControlElement = MSHTML.IHTMLControlElement;
+using mshtmlAnchorElement = MSHTML.IHTMLAnchorElement;
+using mshtmlImageElement = MSHTML.IHTMLImgElement;
+using mshtmlFontElement= MSHTML.IHTMLFontElement;
+using mshtmlLineElement = MSHTML.IHTMLHRElement;
+using mshtmlSpanElement = MSHTML.IHTMLSpanFlow;
+using mshtmlScriptElement = MSHTML.IHTMLScriptElement;
 
-using mshtmlTable = mshtml.IHTMLTable;
-using mshtmlTableCaption = mshtml.IHTMLTableCaption;
-using mshtmlTableRow = mshtml.IHTMLTableRow;
-using mshtmlTableCell = mshtml.IHTMLTableCell;
-using mshtmlTableRowMetrics = mshtml.IHTMLTableRowMetrics;
-using mshtmlTableColumn = mshtml.IHTMLTableCol;
+using mshtmlTable = MSHTML.IHTMLTable;
+using mshtmlTableCaption = MSHTML.IHTMLTableCaption;
+using mshtmlTableRow = MSHTML.IHTMLTableRow;
+using mshtmlTableCell = MSHTML.IHTMLTableCell;
+using mshtmlTableRowMetrics = MSHTML.IHTMLTableRowMetrics;
+using mshtmlTableColumn = MSHTML.IHTMLTableCol;
 
-using mshtmlEventObject = mshtml.IHTMLEventObj;
+using mshtmlEventObject = MSHTML.IHTMLEventObj;
 
 using Pavonis.COM;
 using Pavonis.COM.IOleCommandTarget;
@@ -494,7 +494,7 @@ namespace MSDN.Html.Editor
 			{
 				if (value >= 0)
 				{
-					mshtml.IHTMLDocument2 doc = (document as mshtml.IHTMLDocument2);
+					MSHTML.IHTMLDocument2 doc = (document as MSHTML.IHTMLDocument2);
 
 					// The first parameter is the url, the second is the index of the added style sheet.
 					mshtmlStyleSheet ss = doc.createStyleSheet("", 0);
@@ -511,7 +511,7 @@ namespace MSDN.Html.Editor
 			{
 				if (value >= 0)
 				{
-					mshtml.IHTMLDocument2 doc = (document as mshtml.IHTMLDocument2);
+					MSHTML.IHTMLDocument2 doc = (document as MSHTML.IHTMLDocument2);
 
 					// The first parameter is the url, the second is the index of the added style sheet.
 					mshtmlStyleSheet ss = doc.createStyleSheet("", 0);
@@ -3668,7 +3668,7 @@ namespace MSDN.Html.Editor
         /// </summary>
         private mshtmlTable GetSelectedTable()
         {
-			var table = GetSelectedTableElement(typeof(mshtml.HTMLTable));
+			var table = GetSelectedTableElement(typeof(MSHTML.HTMLTable));
 
 			if (table == null)
 				return null;
@@ -3679,7 +3679,7 @@ namespace MSDN.Html.Editor
 
         private mshtmlTableRow GetSelectedTableRow()
         {
-			var row = GetSelectedTableElement(typeof(mshtml.HTMLTableRow));
+			var row = GetSelectedTableElement(typeof(MSHTML.HTMLTableRow));
 
 			if (row == null)
 				return null;
@@ -3690,7 +3690,7 @@ namespace MSDN.Html.Editor
 
         private mshtmlTableCell GetSelectedTableCell()
         {
-			var cell = GetSelectedTableElement(typeof(mshtml.HTMLTableCell));
+			var cell = GetSelectedTableElement(typeof(MSHTML.HTMLTableCell));
 
 			if (cell == null)
 				return null;
@@ -3890,7 +3890,7 @@ namespace MSDN.Html.Editor
 
 		public bool EnableAtomicSelection(bool enable = true)
 		{
-			mshtml.IHTMLDocument2 doc = (document as mshtml.IHTMLDocument2);
+			MSHTML.IHTMLDocument2 doc = (document as MSHTML.IHTMLDocument2);
 
 			try
 			{

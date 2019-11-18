@@ -13,7 +13,7 @@ namespace HTMLReportExporter
 		private const String PlaceHolderRegex = @"(?<=\$\()(.*?)(?=\))";
 		private const String AtomicAttribute = "ATOMICSELECTION";
 
-		public static bool IsPlaceholder(mshtml.IHTMLElement element, bool atomic = false)
+		public static bool IsPlaceholder(MSHTML.IHTMLElement element, bool atomic = false)
 		{
 			if (element == null)
 				return false;
@@ -34,7 +34,7 @@ namespace HTMLReportExporter
 			if (element == null)
 				return false;
 
-			return IsPlaceholder((element.DomElement as mshtml.IHTMLElement), atomic);
+			return IsPlaceholder((element.DomElement as MSHTML.IHTMLElement), atomic);
 		}
 
 		public static bool IsPlaceholder(string innerText)
@@ -43,7 +43,7 @@ namespace HTMLReportExporter
 			return ParsePlaceholder(innerText, out unused);
 		}
 
-		public static bool IsPlaceholder(mshtml.IHTMLTxtRange rng, bool atomic = false)
+		public static bool IsPlaceholder(MSHTML.IHTMLTxtRange rng, bool atomic = false)
 		{
 			if (rng == null)
 				return false;
@@ -69,7 +69,7 @@ namespace HTMLReportExporter
 			return ParsePlaceholder(element.InnerText, out placeholderText);
 		}
 
-		public static bool ParsePlaceholder(mshtml.IHTMLTxtRange rng, out string placeholderText, bool atomic = false)
+		public static bool ParsePlaceholder(MSHTML.IHTMLTxtRange rng, out string placeholderText, bool atomic = false)
 		{
 			placeholderText = String.Empty;
 
@@ -114,7 +114,7 @@ namespace HTMLReportExporter
 			return true;
 		}
 
-		public static bool ParsePlaceholder(mshtml.IHTMLTxtRange rng, out string placeholderText, out int level, bool atomic = false)
+		public static bool ParsePlaceholder(MSHTML.IHTMLTxtRange rng, out string placeholderText, out int level, bool atomic = false)
 		{
 			placeholderText = string.Empty;
 			level = -1;

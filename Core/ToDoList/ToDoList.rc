@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,2,998,1
+ FILEVERSION 7,2,998,2
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 2, 998, 1\0"
+            VALUE "FileVersion", "7, 2, 998, 2\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-19\0"
             VALUE "LegalTrademarks", "\0"
@@ -1819,7 +1819,8 @@ BEGIN
                     LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,7,321,224
     PUSHBUTTON      "Move &Up",IDC_MOVEUP,337,7,50,14
     PUSHBUTTON      "Move &Down",IDC_MOVEDOWN,337,26,50,14
-    PUSHBUTTON      "Delete",IDC_DELETE,337,52,50,14
+    PUSHBUTTON      "D&uplicate",IDC_DUPLICATE,337,52,50,14
+    PUSHBUTTON      "D&elete",IDC_DELETE,337,71,50,14
 END
 
 IDD_ABOUT_DIALOG DIALOG DISCARDABLE  0, 0, 332, 238

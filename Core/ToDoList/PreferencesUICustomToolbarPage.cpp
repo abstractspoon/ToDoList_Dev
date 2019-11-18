@@ -45,6 +45,7 @@ BEGIN_MESSAGE_MAP(CPreferencesUICustomToolbarPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_MOVEDOWN, OnMoveButtonDown)
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_DELETE, OnDeleteButton)
+	ON_BN_CLICKED(IDC_DUPLICATE, OnDuplicateButton)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_BUTTONLIST, OnListSelChange)
 
@@ -135,6 +136,7 @@ void CPreferencesUICustomToolbarPage::OnSize(UINT nType, int cx, int cy)
 		OffsetCtrl(this, IDC_MOVEDOWN, nXOffset, 0);
 		OffsetCtrl(this, IDC_MOVEUP, nXOffset, 0);
 		OffsetCtrl(this, IDC_DELETE, nXOffset, 0);
+		OffsetCtrl(this, IDC_DUPLICATE, nXOffset, 0);
 
 		ResizeChild(&m_ilcButtons, nXOffset, nYOffset);
 	}
@@ -175,6 +177,12 @@ void CPreferencesUICustomToolbarPage::OnMoveButtonDown()
 void CPreferencesUICustomToolbarPage::OnDeleteButton() 
 {
 	if (m_ilcButtons.DeleteSelectedButton())
+		EnableDisableButtons();
+}
+
+void CPreferencesUICustomToolbarPage::OnDuplicateButton() 
+{
+	if (m_ilcButtons.DuplicateSelectedButton())
 		EnableDisableButtons();
 }
 

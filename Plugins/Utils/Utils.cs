@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.Windows.Forms.VisualStyles;
 
 using System.IO;
 using System.Reflection;
@@ -242,7 +243,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				banner = new Banner(typeId, trans, dollarPrice);
 
 				banner.Location = new Point(0, 0);
-				banner.Size = new Size(parent.ClientSize.Width, banner.Height);
+				banner.Size = new Size(parent.ClientSize.Width, banner.BaseHeight);
 
 				parent.Controls.Add(banner);
 			}
@@ -328,14 +329,16 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			public void SetUITheme(UITheme theme)
 			{
 				m_themeBkColor = theme.GetAppDrawingColor(UITheme.AppColor.StatusBarDark);
+
 				RefreshColors();
+                FixupBorder();
 			}
 
 			private void InitializeComponent()
 			{
 				Text = LicenseString;
 				Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-				TextAlign = ContentAlignment.MiddleLeft;
+				TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
 				if ((m_LicenseType != RhinoLicensing.LicenseType.Free) &&
 					(m_LicenseType != RhinoLicensing.LicenseType.Paid) &&
@@ -345,7 +348,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 					m_buyBtn.Text = String.Format("{0} (USD{1})", m_Trans.Translate("Buy"), m_DollarPrice);
 					m_buyBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 					m_buyBtn.Height = Height;
-					m_buyBtn.TextAlign = ContentAlignment.MiddleRight;
+					m_buyBtn.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 					m_buyBtn.LinkClicked += new LinkLabelLinkClickedEventHandler(OnBuyLicense);
 
 					this.Controls.Add(m_buyBtn);
@@ -355,6 +358,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				}
 
 				RefreshColors();
+                FixupBorder();
 			}
 
 			private void OnBuyLicense(object sender, LinkLabelLinkClickedEventArgs e)
@@ -368,31 +372,29 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				TextRenderer.DrawText(e.Graphics, Text, Font, ClientRectangle, ForeColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 			}
 
-			public new int Height
+			public int Height
 			{
 				get
 				{
-					switch (m_LicenseType)
-					{
-						//case RhinoLicensing.LicenseType.Free:
-						//	return 0;
+                    int height = BaseHeight;
 
-						//case RhinoLicensing.LicenseType.Trial:
-						//	return 0;
+                    if ((height > 0) && (BorderStyle != BorderStyle.None))
+                        height += 2;
 
-						case RhinoLicensing.LicenseType.Paid:
-							return 0;
-
-						//case RhinoLicensing.LicenseType.Supporter:
-						//	return 0;
-
-						//case RhinoLicensing.LicenseType.Contributor:
-						//	return 0;
-					}
-
-					return PluginHelpers.DPIScaling.Scale(20);
+                    return height;
 				}
 			}
+
+            public int BaseHeight
+            {
+                get
+                {
+                    if (m_LicenseType == RhinoLicensing.LicenseType.Paid)
+                        return 0;
+
+                    return PluginHelpers.DPIScaling.Scale(20);
+                }
+            }
 
 			private String LicenseString
 			{
@@ -472,6 +474,39 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			{
 				return String.Format(PAYPAL_URL, m_TypeId, RhinoLicensing.EncodeUserID(), m_DollarPrice);
 			}
+
+            // --------------------------------------------------------
+
+            private const int WM_THEMECHANGED = 0x031A;
+
+			[DllImport("user32.dll", CharSet = CharSet.Auto)]
+			private static extern IntPtr SetCursor(IntPtr hCursor);
+
+			protected override void WndProc(ref Message m)
+			{
+                if (m.Msg == WM_THEMECHANGED)
+                    FixupBorder();
+
+				base.WndProc(ref m);
+			}
+
+            private void FixupBorder()
+            {
+                if (VisualStyleRenderer.IsSupported)
+                {
+                    // Add border if (nearly) gray
+                    float saturation = m_themeBkColor.GetSaturation();
+                    
+                    if (saturation < 0.2f)
+                        BorderStyle = BorderStyle.FixedSingle;
+                    else
+                        BorderStyle = BorderStyle.None;
+                }
+                else // Classic theme
+                {
+                    BorderStyle = BorderStyle.Fixed3D;
+                }
+            }
 		}
 	}
 

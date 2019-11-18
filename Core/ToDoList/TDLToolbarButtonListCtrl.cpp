@@ -287,6 +287,11 @@ BOOL CTDLToolbarButtonListCtrl::CanDeleteSelectedButton() const
 	return CanDeleteCell(GetCurSel(), 0);
 }
 
+BOOL CTDLToolbarButtonListCtrl::CanDuplicateSelectedButton() const
+{
+	return !IsPrompt(GetCurSel());
+}
+
 BOOL CTDLToolbarButtonListCtrl::MoveSelectedButtonUp()
 {
 	return MoveButton(GetCurSel(), -1);
@@ -299,10 +304,10 @@ BOOL CTDLToolbarButtonListCtrl::MoveSelectedButtonDown()
 
 BOOL CTDLToolbarButtonListCtrl::DeleteSelectedButton()
 {
-	int nRow = GetCurSel();
-
 	if (CanDeleteSelectedButton())
 	{
+		int nRow = GetCurSel();
+		
 		m_aButtons.RemoveAt(nRow);
 		DeleteItem(nRow);
 
@@ -311,5 +316,27 @@ BOOL CTDLToolbarButtonListCtrl::DeleteSelectedButton()
 		return TRUE;
 	}
 
+	return FALSE;
+}
+
+BOOL CTDLToolbarButtonListCtrl::DuplicateSelectedButton()
+{
+	if (CanDuplicateSelectedButton())
+	{
+		int nRow = GetCurSel();
+		
+		TOOLBARBUTTON tb = m_aButtons[nRow]; // copy
+		m_aButtons.InsertAt(nRow + 1, tb);
+
+		int nDupeRow = InsertRow(GetItemText(nRow, MENUID_COL), nRow + 1);
+
+		SetItemData(nDupeRow, tb.nMenuID);
+		SetItemText(nDupeRow, IMAGE_COL, tb.sImageID);
+		
+		SetCurSel(nDupeRow);
+		
+		return TRUE;
+	}
+	
 	return FALSE;
 }

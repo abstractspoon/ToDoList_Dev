@@ -808,6 +808,7 @@
 #define IDC_DELETE                      1517
 #define IDC_SHOWFULLPATHINSTICKY        1518
 #define IDC_SCHEMEPRIORITYCOLORS        1518
+#define IDC_DUPLICATE                   1518
 #define IDC_RELOADICONS                 1519
 #define IDC_COMMENTLABEL                1520
 #define IDC_TDLEXTENSIONHANDLER         1521

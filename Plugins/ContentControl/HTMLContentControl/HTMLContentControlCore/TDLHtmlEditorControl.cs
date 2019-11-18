@@ -454,7 +454,7 @@ namespace HTMLContentControl
 			else
 				element.InsertAdjacentElement(HtmlElementInsertionOrientation.AfterEnd, newElm);
 
-			rng.moveToElementText(newElm.DomElement as mshtml.IHTMLElement);
+			rng.moveToElementText(newElm.DomElement as MSHTML.IHTMLElement);
 			rng.select();
 
 			bool success = false;
