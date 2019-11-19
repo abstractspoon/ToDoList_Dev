@@ -27,13 +27,16 @@ class CTDLImportDialog : public CTDLDialog
 public:
 	CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent = NULL);   // standard constructor
 
-	int DoModal(LPCTSTR szFilePath = NULL);
+	BOOL SetImportTo(TDLID_IMPORTTO nImportTo);
+	BOOL SetFilePath(LPCTSTR szFilePath);
+	void SetUseClipboard();
+	BOOL SetUseText(LPCTSTR szText);
 
 	CString GetFormatTypeID() const;
 	TDLID_IMPORTTO GetImportTo() const;
-	BOOL GetImportFromClipboard() const;
+	BOOL GetImportFromText() const;
 	CString GetImportFilePath() const;
-	CString GetImportClipboardText() const;
+	CString GetImportText() const;
 
 protected:
 // Dialog Data
@@ -41,11 +44,11 @@ protected:
 	enum { IDD = IDD_IMPORT_DIALOG };
 	CFileEdit	m_eFilePath;
 	CImportExportComboBox m_cbFormat;
-	int		m_bFromClipboard;
+	int		m_bFromText;
 	CString	m_sFromFilePath;
 	int		m_nImportTo;
 	CString	m_sFormatTypeID;
-	CString	m_sClipboardText;
+	CString	m_sFromText;
 	int		m_bMatchByTaskID;
 	//}}AFX_DATA
 
@@ -53,6 +56,7 @@ protected:
 	BOOL m_bReadonlyTasklist;
 	CFont m_fontMonospace;
 	BOOL m_bFileOnly;
+	BOOL m_bTextIsClipboard;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -79,8 +83,8 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-	BOOL CurImporterHasFilter() const;
-	CString GetCurImporterFilter() const;
+	BOOL IsCurrentImporterFileBased() const;
+	CString GetCurrentImporterFilter() const;
 	void EnableOK();
 };
 

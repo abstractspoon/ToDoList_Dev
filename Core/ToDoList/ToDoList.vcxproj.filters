@@ -415,9 +415,6 @@
     <ClCompile Include="TDLInfoTipCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDLImportFromTextDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FilteredToDoCtrl.h">
@@ -862,9 +859,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDLInfoTipCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TDLImportFromTextDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

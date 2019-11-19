@@ -27,7 +27,6 @@
 #include "tdcstatic.h"
 #include "tdlcustomattributedlg.h"
 #include "tdlwelcomewizard.h"
-#include "tdlImportFromTextdlg.h"
 #include "tdlanalyseloggedtimedlg.h"
 #include "TDCTaskTimeLogAnalysis.h"
 #include "TDLAboutDlg.h"
@@ -5787,9 +5786,18 @@ BOOL CToDoListWnd::DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere)
 		return FALSE;
 	}
 
-	CTDLPasteFromClipboardDlg dialog(m_mgrImportExport);
+	CTDLImportDialog dialog(m_mgrImportExport, GetToDoCtrl().IsReadOnly());
 
-	return DoImportFromText(dialog, nWhere);
+	dialog.SetUseClipboard();
+	dialog.SetImportTo(nWhere);
+
+	if (dialog.DoModal() != IDOK)
+		return FALSE;
+
+	TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
+	int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
+
+	return ImportTasks(TRUE, dialog.GetImportText(), nImporter, nImportTo);
 }
 
 BOOL CToDoListWnd::DoImportFromDropText(const CString& sDropText, TDLID_IMPORTTO nWhere)
@@ -5800,20 +5808,18 @@ BOOL CToDoListWnd::DoImportFromDropText(const CString& sDropText, TDLID_IMPORTTO
 		return FALSE;
 	}
 
-	CTDLImportFromDropTextDlg dialog(sDropText, m_mgrImportExport);
+	CTDLImportDialog dialog(m_mgrImportExport, GetToDoCtrl().IsReadOnly());
+	
+	dialog.SetUseText(sDropText);
+	dialog.SetImportTo(nWhere);
 
-	return DoImportFromText(dialog, nWhere);
-}
-
-BOOL CToDoListWnd::DoImportFromText(CTDLImportFromTextBaseDlg& dialog, TDLID_IMPORTTO nWhere)
-{
 	if (dialog.DoModal() != IDOK)
 		return FALSE;
 
+	TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
 	int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
-	CString sImportFrom = dialog.GetText();
 
-	return ImportTasks(TRUE, sImportFrom, nImporter, nWhere);
+	return ImportTasks(TRUE, dialog.GetImportText(), nImporter, nImportTo);
 }
 
 void CToDoListWnd::OnEditCopyastext() 
@@ -8656,15 +8662,15 @@ LRESULT CToDoListWnd::OnToDoCtrlImportDropFiles(WPARAM wp, LPARAM lp)
 		for (int nFile = 0; nFile < nNumFiles; nFile++)
 		{
 			CTDLImportDialog dialog(m_mgrImportExport, FALSE);
-			CString sFilePath = pFiles->GetAt(nFile);
+			dialog.SetFilePath(pFiles->GetAt(nFile));
 
-			if (dialog.DoModal(sFilePath) == IDOK)
+			if (dialog.DoModal() == IDOK)
 			{
 				// check file can be opened
 				TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
 				int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
 
-				ImportTasks(FALSE, sFilePath, nImporter, nImportTo);
+				ImportTasks(FALSE, dialog.GetImportFilePath(), nImporter, nImportTo);
 			}
 		}
 	}
@@ -8726,12 +8732,12 @@ void CToDoListWnd::OnImportTasklist()
 			// check file can be opened
 			TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
 			int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
-			BOOL bFromClipboard = dialog.GetImportFromClipboard();
-			CString sImportFrom = (bFromClipboard ? dialog.GetImportClipboardText() : 
-													dialog.GetImportFilePath());
+
+			BOOL bFromText = dialog.GetImportFromText();
+			CString sImportFrom = (bFromText ? dialog.GetImportText() : dialog.GetImportFilePath());
 
 			// Reshow dialog on error
-			bShowDlg = !ImportTasks(bFromClipboard, sImportFrom, nImporter, nImportTo);
+			bShowDlg = !ImportTasks(bFromText, sImportFrom, nImporter, nImportTo);
 		}
 		else
 		{

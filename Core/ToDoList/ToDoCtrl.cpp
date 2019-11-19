@@ -10010,7 +10010,11 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 
 	if (pTarget == &m_taskTree.Tree())
 	{
-		if (pData->dwTaskID)
+		if (pData->bImportTasks)
+		{
+			return !IsReadOnly();
+		}
+		else if (pData->dwTaskID)
 		{
 			return CanEditSelectedTask(TDCA_FILEREF);
 		}
@@ -10069,11 +10073,11 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 	// specific handling
 	if (pTarget == &m_taskTree.Tree())
 	{
+		if (pData->dwTaskID)
+			SelectTask(pData->dwTaskID, FALSE);
+			
 		if (aFiles.GetSize())
 		{
-			if (pData->dwTaskID)
-				SelectTask(pData->dwTaskID, FALSE);
-			
 			if (pData->bImportTasks)
 			{
 				switch (CreateTasksFromOutlookObjects(pData))

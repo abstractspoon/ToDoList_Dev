@@ -740,7 +740,6 @@ protected:
 	void DoInsertDateAndTime(BOOL bDate, BOOL bTime);
 	BOOL DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere);
 	BOOL DoImportFromDropText(const CString& sDropText, TDLID_IMPORTTO nWhere);
-	BOOL DoImportFromText(CTDLImportFromTextBaseDlg& dialog, TDLID_IMPORTTO nWhere);
 	TDC_FILE DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int nIndex, CTaskFile& tasks, LPCTSTR szFilePath = NULL, BOOL bFlush = TRUE);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
 	void DoMoveTask(TDC_MOVETASK nDirection);

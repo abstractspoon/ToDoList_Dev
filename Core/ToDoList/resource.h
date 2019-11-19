@@ -173,7 +173,7 @@
 #define IDC_PRINTTITLE                  1007
 #define IDC_CHARSET                     1007
 #define IDC_MONTHDAY                    1007
-#define IDC_FROMFILEPATH                1007
+#define IDC_INPUTFILE                1007
 #define IDC_SAMPLETASKLIST              1007
 #define IDC_COLWIDTHS                   1007
 #define IDC_UITHEMEFILE                 1007
@@ -184,7 +184,7 @@
 #define IDC_DEFAULTLISTDATA             1007
 #define IDC_SAVEEXPORTSTYLESHEET        1008
 #define IDC_MONTHLIST                   1008
-#define IDC_FROMCLIPBOARDTEXT           1008
+#define IDC_INPUTTEXT           1008
 #define IDC_DAYMONTHS                   1008
 #define IDC_YEARMONTHDAY                1009
 #define IDC_ABSOLUTEDATE                1009
@@ -304,7 +304,7 @@
 #define IDC_COPYSHORTCUTS               1056
 #define IDC_CLEARALLCOLS                1056
 #define IDC_WEEKLY                      1056
-#define IDC_FROMCLIPBOARD               1056
+#define IDC_FROMTEXT               1056
 #define IDC_NOSHARE                     1056
 #define IDC_HIDEATTRIB                  1056
 #define IDC_REMAININGTIMEISSPENT        1056

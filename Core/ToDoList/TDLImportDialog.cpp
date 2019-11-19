@@ -41,17 +41,19 @@ enum IMPORTTO
 // CTDLImportDialog dialog
 
 CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent /*=NULL*/)
-	: CTDLDialog(CTDLImportDialog::IDD, _T("Importing"), pParent),
-	  m_mgrImportExport(mgr),
-	  m_cbFormat(mgr, TRUE),
-	  m_bFileOnly(FALSE),
-	  m_bReadonlyTasklist(bReadonlyTasklist)
+	: 
+	CTDLDialog(CTDLImportDialog::IDD, _T("Importing"), pParent),
+	m_mgrImportExport(mgr),
+	m_cbFormat(mgr, TRUE),
+	m_bFileOnly(FALSE),
+	m_bReadonlyTasklist(bReadonlyTasklist),
+	m_bTextIsClipboard(TRUE)
 {
 	//{{AFX_DATA_INIT(CTDLImportDialog)
 	//}}AFX_DATA_INIT
 	CPreferences prefs;
 
-	m_bFromClipboard = prefs.GetProfileInt(m_sPrefsKey, _T("ImportOption"), FALSE);
+	m_bFromText = prefs.GetProfileInt(m_sPrefsKey, _T("ImportOption"), FALSE);
 	m_sFromFilePath = prefs.GetProfileString(m_sPrefsKey, _T("ImportFilePath"));
 	m_bMatchByTaskID = FALSE; // always
 
@@ -64,7 +66,8 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 
 		if (nFormat != -1)
 			m_sFormatTypeID = mgr.GetImporterTypeID(nFormat);
-		else
+
+		if (m_sFormatTypeID.IsEmpty())
 			m_sFormatTypeID = mgr.GetTypeID(TDCET_CSV);
 	}
 
@@ -79,10 +82,10 @@ void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLImportDialog)
-	DDX_Control(pDX, IDC_FROMFILEPATH, m_eFilePath);
+	DDX_Control(pDX, IDC_INPUTFILE, m_eFilePath);
 	DDX_Control(pDX, IDC_FORMATOPTIONS, m_cbFormat);
-	DDX_Radio(pDX, IDC_FROMFILE, m_bFromClipboard);
-	DDX_Text(pDX, IDC_FROMFILEPATH, m_sFromFilePath);
+	DDX_Radio(pDX, IDC_FROMFILE, m_bFromText);
+	DDX_Text(pDX, IDC_INPUTFILE, m_sFromFilePath);
 	DDX_Radio(pDX, IDC_CREATETASK, m_nImportTo);
 	DDX_Radio(pDX, IDC_MERGEBYTITLE, m_bMatchByTaskID);
 	//}}AFX_DATA_MAP
@@ -96,10 +99,10 @@ void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLImportDialog, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLImportDialog)
-	ON_BN_CLICKED(IDC_FROMCLIPBOARD, OnChangeImportFrom)
+	ON_BN_CLICKED(IDC_FROMTEXT, OnChangeImportFrom)
 	ON_CBN_SELCHANGE(IDC_FORMATOPTIONS, OnSelchangeFormatoptions)
-	ON_EN_CHANGE(IDC_FROMCLIPBOARDTEXT, OnChangeClipboardtext)
-	ON_EN_CHANGE(IDC_FROMFILEPATH, OnChangeFilepath)
+	ON_EN_CHANGE(IDC_INPUTTEXT, OnChangeClipboardtext)
+	ON_EN_CHANGE(IDC_INPUTFILE, OnChangeFilepath)
 	ON_BN_CLICKED(IDC_REFRESHCLIPBOARD, OnRefreshclipboard)
 	ON_BN_CLICKED(IDC_FROMFILE, OnChangeImportFrom)
 	ON_BN_CLICKED(IDC_MERGETOACTIVETASKLIST, OnChangeMergeTo)
@@ -112,31 +115,85 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportDialog message handlers
 
-int CTDLImportDialog::DoModal(LPCTSTR szFilePath)
+BOOL CTDLImportDialog::SetImportTo(TDLID_IMPORTTO nImportTo)
 {
-	if (!Misc::IsEmpty(szFilePath))
+	switch (nImportTo)
 	{
-		m_sFromFilePath = szFilePath;
-		m_bFileOnly = TRUE;
+		case TDIT_CREATENEWTASKLIST:
+			m_nImportTo = NEWTASKLIST;
+			break;
 
-		int nFormat = m_mgrImportExport.FindImporterByPath(szFilePath);
+		case TDIT_ADDTOTOPOFTASKLIST:
+			m_nImportTo = TOPOFTASKLIST;
+			break;
 
-		if (nFormat == -1)
-			return IDCANCEL;
+		case TDIT_ADDTOSELECTEDTASK:
+			m_nImportTo = SELECTEDTASK;
+			break;
 
-		// else
-		m_sFormatTypeID = m_mgrImportExport.GetImporterTypeID(nFormat);
+		case TDIT_MERGETOTASKLISTBYID:
+			m_nImportTo = MERGE;
+			m_bMatchByTaskID = TRUE;
+			break;
 
-		m_bFromClipboard = FALSE;
-		m_sClipboardText.Empty();
-		m_cbFormat.SetFileBasedOnly(TRUE);
+		case TDIT_MERGETOTASKLISTBYTITLE:
+			m_nImportTo = MERGE;
+			m_bMatchByTaskID = FALSE;
+			break;
+
+		default:
+			ASSERT(0);
+			return FALSE;
 	}
-	else
-	{
-		m_bFileOnly = FALSE;
-	}
 
-	return CTDLDialog::DoModal();
+	return TRUE;
+}
+
+
+BOOL CTDLImportDialog::SetFilePath(LPCTSTR szFilePath)
+{
+	if (Misc::IsEmpty(szFilePath))
+		return FALSE;
+
+	m_sFromFilePath = szFilePath;
+	m_bFileOnly = TRUE;
+
+	int nFormat = m_mgrImportExport.FindImporterByPath(szFilePath);
+
+	if (nFormat == -1)
+		return FALSE;
+
+	// else
+	m_sFormatTypeID = m_mgrImportExport.GetImporterTypeID(nFormat);
+
+	m_bFromText = FALSE;
+	m_sFromText.Empty();
+	m_cbFormat.SetFileBasedOnly(TRUE, FileMisc::GetExtension(szFilePath));
+
+	return TRUE;
+}
+
+void CTDLImportDialog::SetUseClipboard()
+{
+	m_bFileOnly = FALSE;
+	m_sFromText = CClipboard().GetText();
+	m_bTextIsClipboard = TRUE;
+	m_bFromText = TRUE;
+	m_sFromFilePath.Empty();
+}
+
+BOOL CTDLImportDialog::SetUseText(LPCTSTR szText)
+{
+	if (Misc::IsEmpty(szText))
+		return FALSE;
+
+	m_bFileOnly = FALSE;
+	m_sFromText = szText;
+	m_bTextIsClipboard = FALSE;
+	m_bFromText = TRUE;
+	m_sFromFilePath.Empty();
+
+	return TRUE;
 }
 
 void CTDLImportDialog::OnChangeImportFrom() 
@@ -145,11 +202,11 @@ void CTDLImportDialog::OnChangeImportFrom()
 
 	UpdateData();
 
-	BOOL bHasFilter = CurImporterHasFilter();
+	BOOL bHasFilter = IsCurrentImporterFileBased();
 	
-	GetDlgItem(IDC_FROMFILEPATH)->EnableWindow(!m_bFromClipboard && bHasFilter);
-	GetDlgItem(IDC_FROMCLIPBOARDTEXT)->EnableWindow(m_bFromClipboard && bHasFilter);
-	GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromClipboard && bHasFilter);
+	GetDlgItem(IDC_INPUTFILE)->EnableWindow(!m_bFromText && bHasFilter);
+	GetDlgItem(IDC_INPUTTEXT)->EnableWindow(m_bFromText && bHasFilter);
+	GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromText && bHasFilter);
 
 	EnableOK();
 }
@@ -158,40 +215,49 @@ BOOL CTDLImportDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	ASSERT(!m_bFileOnly || !m_bFromClipboard);
+	ASSERT(!m_bFileOnly || !m_bFromText);
 
-	BOOL bHasFilter = CurImporterHasFilter();
+	BOOL bHasFilter = IsCurrentImporterFileBased();
 	ASSERT(!m_bFileOnly || bHasFilter);
 
-	m_eFilePath.SetFilter(GetCurImporterFilter());
+	m_eFilePath.SetFilter(GetCurrentImporterFilter());
+
+	GetDlgItem(IDC_FORMATOPTIONS)->EnableWindow(TRUE);
+	GetDlgItem(IDC_FORMATOPTIONS)->SetFocus();
 
 	if (m_bFileOnly)
 	{
-		GetDlgItem(IDC_FORMATOPTIONS)->EnableWindow(FALSE);
 		GetDlgItem(IDC_FROMFILE)->EnableWindow(TRUE);
-		GetDlgItem(IDC_FROMFILEPATH)->EnableWindow(FALSE);
-		GetDlgItem(IDC_FROMCLIPBOARD)->EnableWindow(FALSE);
-		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->EnableWindow(FALSE);
+		GetDlgItem(IDC_INPUTFILE)->EnableWindow(FALSE);
+		GetDlgItem(IDC_FROMTEXT)->EnableWindow(FALSE);
+		GetDlgItem(IDC_INPUTTEXT)->EnableWindow(FALSE);
 		GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
 
 		GetDlgItem(IDC_CREATENEWTASKLIST)->SetFocus();
 	}
 	else
 	{
-		GetDlgItem(IDC_FORMATOPTIONS)->EnableWindow(TRUE);
 		GetDlgItem(IDC_FROMFILE)->EnableWindow(bHasFilter);
-		GetDlgItem(IDC_FROMFILEPATH)->EnableWindow(!m_bFromClipboard && bHasFilter);
-		GetDlgItem(IDC_FROMCLIPBOARD)->EnableWindow(bHasFilter);
-		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->EnableWindow(m_bFromClipboard && bHasFilter);
-		GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromClipboard && bHasFilter);
+		GetDlgItem(IDC_INPUTFILE)->EnableWindow(!m_bFromText && bHasFilter);
+		GetDlgItem(IDC_FROMTEXT)->EnableWindow(bHasFilter);
+		GetDlgItem(IDC_INPUTTEXT)->EnableWindow(m_bFromText && bHasFilter);
 
-		// Set clipboard text font to be mono-spaced
+		if (m_bTextIsClipboard)
+		{
+			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromText && bHasFilter);
+
+			OnRefreshclipboard();
+		}
+		else
+		{
+			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
+			GetDlgItem(IDC_REFRESHCLIPBOARD)->ShowWindow(SW_HIDE);
+			GetDlgItem(IDC_FROMTEXT)->SetWindowText(_T("&Text:"));
+		}
+
+		// Set text font to be mono-spaced
 		if (GraphicsMisc::CreateFont(m_fontMonospace, _T("Lucida Console")))
-			GetDlgItem(IDC_FROMCLIPBOARDTEXT)->SetFont(&m_fontMonospace, FALSE);
-	
-		OnRefreshclipboard();
-
-		GetDlgItem(IDC_FORMATOPTIONS)->SetFocus();
+			GetDlgItem(IDC_INPUTTEXT)->SetFont(&m_fontMonospace, FALSE);
 	}
 
 	if (m_bReadonlyTasklist)
@@ -210,14 +276,14 @@ BOOL CTDLImportDialog::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-BOOL CTDLImportDialog::CurImporterHasFilter() const
+BOOL CTDLImportDialog::IsCurrentImporterFileBased() const
 {
 	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
 
 	return m_mgrImportExport.ImporterHasFileExtension(nFormat);
 }
 
-CString CTDLImportDialog::GetCurImporterFilter() const
+CString CTDLImportDialog::GetCurrentImporterFilter() const
 {
 	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
 
@@ -230,14 +296,14 @@ void CTDLImportDialog::OnOK()
 	
 	CPreferences prefs;
 	
-	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportOption"), m_bFromClipboard);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportOption"), m_bFromText);
 	prefs.WriteProfileString(m_sPrefsKey, _T("ImportFilePath"), m_sFromFilePath);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportToWhere"), m_nImportTo);
 	prefs.WriteProfileString(m_sPrefsKey, _T("ImporterTypeID"), m_sFormatTypeID);
 
 	// retrieve clipboard text
-	if (CurImporterHasFilter())
-		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->GetWindowText(m_sClipboardText);
+	if (IsCurrentImporterFileBased())
+		GetDlgItem(IDC_INPUTTEXT)->GetWindowText(m_sFromText);
 }
 
 CString CTDLImportDialog::GetFormatTypeID() const
@@ -249,28 +315,28 @@ TDLID_IMPORTTO CTDLImportDialog::GetImportTo() const
 {
 	switch (m_nImportTo)
 	{
-	case 0: return TDIT_CREATENEWTASKLIST;
-	case 1: return TDIT_ADDTOTOPOFTASKLIST;
-	case 2: return TDIT_ADDTOSELECTEDTASK;
-	case 3: return (m_bMatchByTaskID ? TDIT_MERGETOTASKLISTBYID : TDIT_MERGETOTASKLISTBYTITLE);
+	case NEWTASKLIST:	return TDIT_CREATENEWTASKLIST;
+	case TOPOFTASKLIST: return TDIT_ADDTOTOPOFTASKLIST;
+	case SELECTEDTASK:	return TDIT_ADDTOSELECTEDTASK;
+	case MERGE:			return (m_bMatchByTaskID ? TDIT_MERGETOTASKLISTBYID : TDIT_MERGETOTASKLISTBYTITLE);
 	}
 
 	return (TDLID_IMPORTTO)-1;
 }
 
-BOOL CTDLImportDialog::GetImportFromClipboard() const
+BOOL CTDLImportDialog::GetImportFromText() const
 {
-	return (m_bFromClipboard);
+	return (m_bFromText);
 }
 
 CString CTDLImportDialog::GetImportFilePath() const
 {
-	return (m_bFromClipboard || !CurImporterHasFilter()) ? _T("") : m_sFromFilePath;
+	return (m_bFromText || !IsCurrentImporterFileBased()) ? _T("") : m_sFromFilePath;
 }
 
-CString CTDLImportDialog::GetImportClipboardText() const
+CString CTDLImportDialog::GetImportText() const
 {
-	return (m_bFromClipboard && CurImporterHasFilter()) ? m_sClipboardText : _T("");
+	return (m_bFromText && IsCurrentImporterFileBased()) ? m_sFromText : _T("");
 }
 
 void CTDLImportDialog::OnSelchangeFormatoptions() 
@@ -282,25 +348,25 @@ void CTDLImportDialog::OnSelchangeFormatoptions()
 	
 	// change the filter on the CFileEdit and clear the filepath
 	// and clear/restore clipboard text depending
-	BOOL bHasFilter = CurImporterHasFilter();
+	BOOL bHasFilter = IsCurrentImporterFileBased();
 
-	m_eFilePath.SetFilter(GetCurImporterFilter());
+	m_eFilePath.SetFilter(GetCurrentImporterFilter());
 	m_eFilePath.EnableWindow(bHasFilter);
 	
 	GetDlgItem(IDC_FROMFILE)->EnableWindow(bHasFilter);
-	GetDlgItem(IDC_FROMFILEPATH)->EnableWindow(!m_bFromClipboard && bHasFilter);
-	GetDlgItem(IDC_FROMCLIPBOARD)->EnableWindow(bHasFilter);
-	GetDlgItem(IDC_FROMCLIPBOARDTEXT)->EnableWindow(m_bFromClipboard && bHasFilter);
-	GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromClipboard && bHasFilter);
+	GetDlgItem(IDC_INPUTFILE)->EnableWindow(!m_bFromText && bHasFilter);
+	GetDlgItem(IDC_FROMTEXT)->EnableWindow(bHasFilter);
+	GetDlgItem(IDC_INPUTTEXT)->EnableWindow(m_bFromText && bHasFilter);
+	GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromText && bHasFilter);
 
 	if (bHadFilter && !bHasFilter)
 	{
-		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->GetWindowText(m_sClipboardText); // update
-		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->SetWindowText(_T("")); // clear field
+		GetDlgItem(IDC_INPUTTEXT)->GetWindowText(m_sFromText); // update
+		GetDlgItem(IDC_INPUTTEXT)->SetWindowText(_T("")); // clear field
 	}
 	else if (!bHadFilter && bHasFilter)
 	{
-		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->SetWindowText(m_sClipboardText); // restore field
+		GetDlgItem(IDC_INPUTTEXT)->SetWindowText(m_sFromText); // restore field
 	}
 	
 	m_sFromFilePath.Empty();
@@ -311,13 +377,13 @@ void CTDLImportDialog::OnSelchangeFormatoptions()
 
 void CTDLImportDialog::EnableOK()
 {
-	if (!CurImporterHasFilter())
+	if (!IsCurrentImporterFileBased())
 	{
 		GetDlgItem(IDOK)->EnableWindow(TRUE);
 	}
-	else if (GetImportFromClipboard())
+	else if (GetImportFromText())
 	{
-		GetDlgItem(IDOK)->EnableWindow(!m_sClipboardText.IsEmpty());
+		GetDlgItem(IDOK)->EnableWindow(!m_sFromText.IsEmpty());
 	}
 	else // import from file
 	{
@@ -329,7 +395,7 @@ void CTDLImportDialog::EnableOK()
 
 void CTDLImportDialog::OnChangeClipboardtext() 
 {
-	GetDlgItem(IDC_FROMCLIPBOARDTEXT)->GetWindowText(m_sClipboardText); // update
+	GetDlgItem(IDC_INPUTTEXT)->GetWindowText(m_sFromText); // update
 	EnableOK();
 }
 
@@ -343,18 +409,18 @@ void CTDLImportDialog::OnRefreshclipboard()
 {
 	if (!m_bFileOnly)
 	{
-		m_sClipboardText = CClipboard().GetText();
+		m_sFromText = CClipboard().GetText();
 
 		// Edit control wants CRLF not just LF
-		if (m_sClipboardText.Find(CRLF) == -1)
-			m_sClipboardText.Replace(_T("\n"), CRLF);
+		if (m_sFromText.Find(CRLF) == -1)
+			m_sFromText.Replace(_T("\n"), CRLF);
 
 		// Add blank line at start in case the chosen importer
 		// treats the first line as a header line
-		m_sClipboardText = (CRLF + m_sClipboardText);
+		m_sFromText = (CRLF + m_sFromText);
 
-		if (CurImporterHasFilter())
-			GetDlgItem(IDC_FROMCLIPBOARDTEXT)->SetWindowText(m_sClipboardText);
+		if (IsCurrentImporterFileBased())
+			GetDlgItem(IDC_INPUTTEXT)->SetWindowText(m_sFromText);
 	}
 }
 
@@ -363,8 +429,8 @@ void CTDLImportDialog::OnRepositionControls(int dx, int dy)
 	CTDLDialog::OnRepositionControls(dx, dx);
 	
 	CDialogHelper::ResizeCtrl(this, IDC_FROMBORDER, dx, dy);
-	CDialogHelper::ResizeCtrl(this, IDC_FROMCLIPBOARDTEXT, dx, dy);
-	CDialogHelper::ResizeCtrl(this, IDC_FROMFILEPATH, dx, 0);
+	CDialogHelper::ResizeCtrl(this, IDC_INPUTTEXT, dx, dy);
+	CDialogHelper::ResizeCtrl(this, IDC_INPUTFILE, dx, 0);
 	CDialogHelper::OffsetCtrl(this, IDC_REFRESHCLIPBOARD, dx, dy);
 
 	CDialogHelper::OffsetCtrl(this, IDC_TOBORDER, dx, 0);
