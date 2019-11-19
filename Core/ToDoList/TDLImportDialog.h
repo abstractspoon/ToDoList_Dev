@@ -42,6 +42,7 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLImportDialog)
 	enum { IDD = IDD_IMPORT_DIALOG };
+	CComboBox	m_cbTasklistPos;
 	CFileEdit	m_eFilePath;
 	CImportExportComboBox m_cbFormat;
 	int		m_bFromText;
@@ -51,6 +52,7 @@ protected:
 	CString	m_sFromText;
 	int		m_bMatchByTaskID;
 	//}}AFX_DATA
+	int		m_nActiveTasklistPos;
 
 	const CImportExportMgr& m_mgrImportExport;
 	BOOL m_bReadonlyTasklist;

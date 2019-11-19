@@ -1131,11 +1131,8 @@ BEGIN
     GROUPBOX        "Import To",IDC_TOBORDER,244,28,204,176
     CONTROL         "&New tasklist",IDC_CREATENEWTASKLIST,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,250,42,190,10
-    CONTROL         "&Top of active tasklist",IDC_ADDTOACTIVETASKLIST,"Button",
+    CONTROL         "&Active tasklist",IDC_ADDTOACTIVETASKLIST,"Button",
                     BS_AUTORADIOBUTTON,250,56,190,10
-    CONTROL         "&Selected task in active tasklist",
-                    IDC_ADDTOSELECTEDTASK,"Button",BS_AUTORADIOBUTTON,250,70,
-                    190,10
     CONTROL         "",IDC_TODIVIDER,"Static",SS_ETCHEDHORZ,250,86,190,1
     CONTROL         "&Merge into active tasklist",IDC_MERGETOACTIVETASKLIST,
                     "Button",BS_AUTORADIOBUTTON,250,93,190,10
@@ -1147,6 +1144,8 @@ BEGIN
                     IDC_MERGEBYTASKIDWARNING,270,135,170,54
     DEFPUSHBUTTON   "&Import",IDOK,341,213,50,14,WS_GROUP
     PUSHBUTTON      "Cancel",IDCANCEL,398,213,50,14
+    COMBOBOX        IDC_ACTIVETASKLISTPOSITION,262,68,176,115,
+                    CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_FINDTASKS_DIALOG DIALOG DISCARDABLE  0, 0, 373, 286
@@ -5661,6 +5660,7 @@ BEGIN
     IDS_TDLBC_TASK          "Task"
     IDS_CUSTOM_FEATURE_NOBLANK "Exclude blank list item"
     IDS_CUSTOM_TIMEATTRIB   "Time (%s)"
+    IDS_IMPORTFROMTEXT      "&Text:"
 END
 
 #endif    // English (Australia) resources

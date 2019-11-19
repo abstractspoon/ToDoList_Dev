@@ -173,7 +173,7 @@
 #define IDC_PRINTTITLE                  1007
 #define IDC_CHARSET                     1007
 #define IDC_MONTHDAY                    1007
-#define IDC_INPUTFILE                1007
+#define IDC_INPUTFILE                   1007
 #define IDC_SAMPLETASKLIST              1007
 #define IDC_COLWIDTHS                   1007
 #define IDC_UITHEMEFILE                 1007
@@ -184,7 +184,7 @@
 #define IDC_DEFAULTLISTDATA             1007
 #define IDC_SAVEEXPORTSTYLESHEET        1008
 #define IDC_MONTHLIST                   1008
-#define IDC_INPUTTEXT           1008
+#define IDC_INPUTTEXT                   1008
 #define IDC_DAYMONTHS                   1008
 #define IDC_YEARMONTHDAY                1009
 #define IDC_ABSOLUTEDATE                1009
@@ -304,7 +304,7 @@
 #define IDC_COPYSHORTCUTS               1056
 #define IDC_CLEARALLCOLS                1056
 #define IDC_WEEKLY                      1056
-#define IDC_FROMTEXT               1056
+#define IDC_FROMTEXT                    1056
 #define IDC_NOSHARE                     1056
 #define IDC_HIDEATTRIB                  1056
 #define IDC_REMAININGTIMEISSPENT        1056
@@ -830,6 +830,7 @@
 #define IDC_TOPATH                      1535
 #define IDC_TOCLIPBOARD                 1536
 #define IDC_TEXT                        1538
+#define IDC_ACTIVETASKLISTPOSITION      1539
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2320,6 +2321,7 @@
 #define IDS_TDLBC_TASK                  58503
 #define IDS_CUSTOM_FEATURE_NOBLANK      58504
 #define IDS_CUSTOM_TIMEATTRIB           58505
+#define IDS_IMPORTFROMTEXT              58506
 
 // Next default values for new objects
 // 
@@ -2327,7 +2329,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        314
 #define _APS_NEXT_COMMAND_VALUE         34663
-#define _APS_NEXT_CONTROL_VALUE         1539
+#define _APS_NEXT_CONTROL_VALUE         1540
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

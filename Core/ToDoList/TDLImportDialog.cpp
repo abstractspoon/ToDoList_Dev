@@ -28,13 +28,21 @@ const LPCTSTR CRLF = _T("\r\n");
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum IMPORTTO 
+enum IMPORTTO
 {
 	// Match order of radio buttons
 	NEWTASKLIST,
-	TOPOFTASKLIST,
+	ACTIVETASKLIST,
+	MERGETASKLIST,
+};
+
+enum TASKLISTPOS
+{
+	// Order not relevant
+	TOPOFTASKLIST = 1,
 	SELECTEDTASK,
-	MERGE,
+	BELOWSELECTEDTASK,
+	BOTTOMOFTASKLIST,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -74,29 +82,33 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 	if (m_bReadonlyTasklist)
 		m_nImportTo = NEWTASKLIST;
 	else
-		m_nImportTo = prefs.GetProfileInt(m_sPrefsKey, _T("ImportToWhere"), SELECTEDTASK);
+		m_nImportTo = prefs.GetProfileEnum(m_sPrefsKey, _T("ImportToWhere"), ACTIVETASKLIST);
+
+	m_nActiveTasklistPos = prefs.GetProfileInt(m_sPrefsKey, _T("TasklistPos"), SELECTEDTASK);
 }
 
 
 void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
+
 	//{{AFX_DATA_MAP(CTDLImportDialog)
+	DDX_Control(pDX, IDC_ACTIVETASKLISTPOSITION, m_cbTasklistPos);
 	DDX_Control(pDX, IDC_INPUTFILE, m_eFilePath);
 	DDX_Control(pDX, IDC_FORMATOPTIONS, m_cbFormat);
 	DDX_Radio(pDX, IDC_FROMFILE, m_bFromText);
 	DDX_Text(pDX, IDC_INPUTFILE, m_sFromFilePath);
-	DDX_Text(pDX, IDC_INPUTTEXT, m_sFromText);
 	DDX_Radio(pDX, IDC_CREATETASK, m_nImportTo);
+	DDX_Text(pDX, IDC_INPUTTEXT, m_sFromText);
 	DDX_Radio(pDX, IDC_MERGEBYTITLE, m_bMatchByTaskID);
 	//}}AFX_DATA_MAP
+	DDX_CBData(pDX, m_cbTasklistPos, m_nActiveTasklistPos, (int)SELECTEDTASK);
 
 	if (pDX->m_bSaveAndValidate)
 		m_sFormatTypeID = m_cbFormat.GetSelectedTypeID();
 	else
 		m_cbFormat.SetSelectedTypeID(m_sFormatTypeID);
 }
-
 
 BEGIN_MESSAGE_MAP(CTDLImportDialog, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLImportDialog)
@@ -125,20 +137,32 @@ BOOL CTDLImportDialog::SetImportTo(TDLID_IMPORTTO nImportTo)
 			break;
 
 		case TDIT_ADDTOTOPOFTASKLIST:
-			m_nImportTo = TOPOFTASKLIST;
+			m_nImportTo = ACTIVETASKLIST;
+			m_nActiveTasklistPos = TOPOFTASKLIST;
 			break;
 
 		case TDIT_ADDTOSELECTEDTASK:
-			m_nImportTo = SELECTEDTASK;
+			m_nImportTo = ACTIVETASKLIST;
+			m_nActiveTasklistPos = SELECTEDTASK;
+			break;
+
+		case TDIT_ADDBELOWSELECTEDTASK:
+			m_nImportTo = ACTIVETASKLIST;
+			m_nActiveTasklistPos = BELOWSELECTEDTASK;
+			break;
+
+		case TDIT_ADDTOBOTTOMOFTASKLIST:
+			m_nImportTo = ACTIVETASKLIST;
+			m_nActiveTasklistPos = BOTTOMOFTASKLIST;
 			break;
 
 		case TDIT_MERGETOTASKLISTBYID:
-			m_nImportTo = MERGE;
+			m_nImportTo = MERGETASKLIST;
 			m_bMatchByTaskID = TRUE;
 			break;
 
 		case TDIT_MERGETOTASKLISTBYTITLE:
-			m_nImportTo = MERGE;
+			m_nImportTo = MERGETASKLIST;
 			m_bMatchByTaskID = FALSE;
 			break;
 
@@ -149,7 +173,6 @@ BOOL CTDLImportDialog::SetImportTo(TDLID_IMPORTTO nImportTo)
 
 	return TRUE;
 }
-
 
 BOOL CTDLImportDialog::SetFilePath(LPCTSTR szFilePath)
 {
@@ -214,6 +237,13 @@ BOOL CTDLImportDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
+	// Build active tasklist pos
+	AddString(m_cbTasklistPos, _T("Top of tasklist"), TOPOFTASKLIST);
+	AddString(m_cbTasklistPos, _T("Selected task"), SELECTEDTASK);
+	AddString(m_cbTasklistPos, _T("Below selected task"), BELOWSELECTEDTASK);
+	AddString(m_cbTasklistPos, _T("Bottom of tasklist"), BOTTOMOFTASKLIST);
+	SelectItemByData(m_cbTasklistPos, m_nActiveTasklistPos);
+
 	BOOL bHasFilter = IsCurrentImporterFileBased();
 	ASSERT((m_nImportMode != TDCIM_FILEONLY) || bHasFilter);
 
@@ -224,32 +254,55 @@ BOOL CTDLImportDialog::OnInitDialog()
 
 	switch (m_nImportMode)
 	{
-	case TDCIM_FILEONLY:
-		GetDlgItem(IDC_FROMFILE)->EnableWindow(TRUE);
-		GetDlgItem(IDC_INPUTFILE)->EnableWindow(FALSE);
-		GetDlgItem(IDC_FROMTEXT)->EnableWindow(FALSE);
-		GetDlgItem(IDC_INPUTTEXT)->EnableWindow(FALSE);
-		GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
+	case TDCIM_ALL:
+		{
+			GetDlgItem(IDC_FROMFILE)->EnableWindow(bHasFilter);
+			GetDlgItem(IDC_INPUTFILE)->EnableWindow(!m_bFromText && bHasFilter);
+			GetDlgItem(IDC_FROMTEXT)->EnableWindow(bHasFilter);
+			GetDlgItem(IDC_INPUTTEXT)->EnableWindow(m_bFromText && bHasFilter);
+			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromText && bHasFilter);
+		}
+		break;
 
-		GetDlgItem(IDC_CREATENEWTASKLIST)->SetFocus();
+	case TDCIM_FILEONLY:
+		{
+			ASSERT(!m_bFromText);
+			
+			GetDlgItem(IDC_FROMFILE)->EnableWindow(TRUE);
+			GetDlgItem(IDC_INPUTFILE)->EnableWindow(FALSE);
+			GetDlgItem(IDC_FROMTEXT)->EnableWindow(FALSE);
+			GetDlgItem(IDC_INPUTTEXT)->EnableWindow(FALSE);
+			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
+
+			GetDlgItem(IDC_CREATENEWTASKLIST)->SetFocus();
+
+		}
 		break;
 
 	case TDCIM_CLIPBOARDONLY:
-		GetDlgItem(IDC_FROMFILE)->EnableWindow(bHasFilter);
-		GetDlgItem(IDC_INPUTFILE)->EnableWindow(!m_bFromText && bHasFilter);
-		GetDlgItem(IDC_FROMTEXT)->EnableWindow(bHasFilter);
-		GetDlgItem(IDC_INPUTTEXT)->EnableWindow(m_bFromText && bHasFilter);
-		GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromText && bHasFilter);
+		{
+			ASSERT(m_bFromText);
+
+			GetDlgItem(IDC_FROMFILE)->EnableWindow(FALSE);
+			GetDlgItem(IDC_INPUTFILE)->EnableWindow(FALSE);
+			GetDlgItem(IDC_FROMTEXT)->EnableWindow(TRUE);
+			GetDlgItem(IDC_INPUTTEXT)->EnableWindow(TRUE);
+			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(TRUE);
+		}
 		break;
 
 	case TDCIM_TEXTONLY:
-		GetDlgItem(IDC_FROMFILE)->EnableWindow(bHasFilter);
-		GetDlgItem(IDC_INPUTFILE)->EnableWindow(!m_bFromText && bHasFilter);
-		GetDlgItem(IDC_FROMTEXT)->EnableWindow(bHasFilter);
-		GetDlgItem(IDC_INPUTTEXT)->EnableWindow(m_bFromText && bHasFilter);
-		GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
-		GetDlgItem(IDC_REFRESHCLIPBOARD)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_FROMTEXT)->SetWindowText(_T("&Text:"));
+		{
+			ASSERT(m_bFromText);
+
+			GetDlgItem(IDC_FROMFILE)->EnableWindow(FALSE);
+			GetDlgItem(IDC_INPUTFILE)->EnableWindow(FALSE);
+			GetDlgItem(IDC_FROMTEXT)->EnableWindow(TRUE);
+			GetDlgItem(IDC_INPUTTEXT)->EnableWindow(TRUE);
+			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
+			GetDlgItem(IDC_REFRESHCLIPBOARD)->ShowWindow(SW_HIDE);
+			GetDlgItem(IDC_FROMTEXT)->SetWindowText(CEnString(IDS_IMPORTFROMTEXT));
+		}
 		break;
 	}
 
@@ -266,9 +319,9 @@ BOOL CTDLImportDialog::OnInitDialog()
 		GetDlgItem(IDC_TOSELECTEDTASK)->EnableWindow(FALSE);
 	}
 	
-	GetDlgItem(IDC_MERGEBYTITLE)->EnableWindow(m_nImportTo == MERGE);
-	GetDlgItem(IDC_MERGEBYTASKID)->EnableWindow(m_nImportTo == MERGE);
-	GetDlgItem(IDC_MERGEBYTASKIDWARNING)->EnableWindow(m_nImportTo == MERGE);
+	GetDlgItem(IDC_MERGEBYTITLE)->EnableWindow(m_nImportTo == MERGETASKLIST);
+	GetDlgItem(IDC_MERGEBYTASKID)->EnableWindow(m_nImportTo == MERGETASKLIST);
+	GetDlgItem(IDC_MERGEBYTASKIDWARNING)->EnableWindow(m_nImportTo == MERGETASKLIST);
 
 	EnableOK();
 	
@@ -293,7 +346,7 @@ CString CTDLImportDialog::GetCurrentImporterFilter() const
 void CTDLImportDialog::OnOK()
 {
 	CTDLDialog::OnOK();
-	
+
 	CPreferences prefs;
 	
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportOption"), m_bFromText);
@@ -301,7 +354,7 @@ void CTDLImportDialog::OnOK()
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportToWhere"), m_nImportTo);
 	prefs.WriteProfileString(m_sPrefsKey, _T("ImporterTypeID"), m_sFormatTypeID);
 
-	// retrieve clipboard text
+	// retrieve input text
 	if (IsCurrentImporterFileBased())
 		GetDlgItem(IDC_INPUTTEXT)->GetWindowText(m_sFromText);
 }
@@ -315,12 +368,32 @@ TDLID_IMPORTTO CTDLImportDialog::GetImportTo() const
 {
 	switch (m_nImportTo)
 	{
-	case NEWTASKLIST:	return TDIT_CREATENEWTASKLIST;
-	case TOPOFTASKLIST: return TDIT_ADDTOTOPOFTASKLIST;
-	case SELECTEDTASK:	return TDIT_ADDTOSELECTEDTASK;
-	case MERGE:			return (m_bMatchByTaskID ? TDIT_MERGETOTASKLISTBYID : TDIT_MERGETOTASKLISTBYTITLE);
+	case NEWTASKLIST:	
+		return TDIT_CREATENEWTASKLIST;
+
+	case ACTIVETASKLIST: 
+		switch (m_nActiveTasklistPos)
+		{
+			case TOPOFTASKLIST:
+				return TDIT_ADDTOTOPOFTASKLIST;
+
+			case SELECTEDTASK:
+				return TDIT_ADDTOSELECTEDTASK;
+
+			case BELOWSELECTEDTASK:
+				return TDIT_ADDBELOWSELECTEDTASK;
+
+			case BOTTOMOFTASKLIST:
+				return TDIT_ADDTOBOTTOMOFTASKLIST;
+				ASSERT(0);
+		}
+		break;
+
+	case MERGETASKLIST:			
+		return (m_bMatchByTaskID ? TDIT_MERGETOTASKLISTBYID : TDIT_MERGETOTASKLISTBYTITLE);
 	}
 
+	ASSERT(0);
 	return (TDLID_IMPORTTO)-1;
 }
 
@@ -460,7 +533,7 @@ void CTDLImportDialog::OnChangeMergeTo()
 {
 	UpdateData();
 
-	GetDlgItem(IDC_MERGEBYTITLE)->EnableWindow(m_nImportTo == MERGE);
-	GetDlgItem(IDC_MERGEBYTASKID)->EnableWindow(m_nImportTo == MERGE);
-	GetDlgItem(IDC_MERGEBYTASKIDWARNING)->EnableWindow(m_nImportTo == MERGE);
+	GetDlgItem(IDC_MERGEBYTITLE)->EnableWindow(m_nImportTo == MERGETASKLIST);
+	GetDlgItem(IDC_MERGEBYTASKID)->EnableWindow(m_nImportTo == MERGETASKLIST);
+	GetDlgItem(IDC_MERGEBYTASKIDWARNING)->EnableWindow(m_nImportTo == MERGETASKLIST);
 }
