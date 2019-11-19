@@ -5661,6 +5661,10 @@ BEGIN
     IDS_CUSTOM_FEATURE_NOBLANK "Exclude blank list item"
     IDS_CUSTOM_TIMEATTRIB   "Time (%s)"
     IDS_IMPORTFROMTEXT      "&Text:"
+    IDS_IMPORTTOTOPOFTASKLIST "Top of tasklist"
+    IDS_IMPORTTOSELTASK     "Selected task"
+    IDS_IMPORTTOBELOWSELTASK "Below selected task"
+    IDS_IMPORTTOBOTTOMOFTASKLIST "Bottom of tasklist"
 END
 
 #endif    // English (Australia) resources

@@ -2322,6 +2322,10 @@
 #define IDS_CUSTOM_FEATURE_NOBLANK      58504
 #define IDS_CUSTOM_TIMEATTRIB           58505
 #define IDS_IMPORTFROMTEXT              58506
+#define IDS_IMPORTTOTOPOFTASKLIST       58507
+#define IDS_IMPORTTOSELTASK             58508
+#define IDS_IMPORTTOBELOWSELTASK        58509
+#define IDS_IMPORTTOBOTTOMOFTASKLIST    58510
 
 // Next default values for new objects
 // 

@@ -238,10 +238,11 @@ BOOL CTDLImportDialog::OnInitDialog()
 	CTDLDialog::OnInitDialog();
 
 	// Build active tasklist pos
-	AddString(m_cbTasklistPos, _T("Top of tasklist"), TOPOFTASKLIST);
-	AddString(m_cbTasklistPos, _T("Selected task"), SELECTEDTASK);
-	AddString(m_cbTasklistPos, _T("Below selected task"), BELOWSELECTEDTASK);
-	AddString(m_cbTasklistPos, _T("Bottom of tasklist"), BOTTOMOFTASKLIST);
+	AddString(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
+	AddString(m_cbTasklistPos, IDS_IMPORTTOSELTASK, SELECTEDTASK);
+	AddString(m_cbTasklistPos, IDS_IMPORTTOBELOWSELTASK, BELOWSELECTEDTASK);
+	AddString(m_cbTasklistPos, IDS_IMPORTTOBOTTOMOFTASKLIST, BOTTOMOFTASKLIST);
+
 	SelectItemByData(m_cbTasklistPos, m_nActiveTasklistPos);
 
 	BOOL bHasFilter = IsCurrentImporterFileBased();
