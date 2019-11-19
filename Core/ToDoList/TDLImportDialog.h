@@ -55,8 +55,16 @@ protected:
 	const CImportExportMgr& m_mgrImportExport;
 	BOOL m_bReadonlyTasklist;
 	CFont m_fontMonospace;
-	BOOL m_bFileOnly;
-	BOOL m_bTextIsClipboard;
+
+	enum IMPORT_MODE
+	{
+		TDCIM_ALL,
+		TDCIM_FILEONLY,
+		TDCIM_CLIPBOARDONLY,
+		TDCIM_TEXTONLY,
+	};
+
+	IMPORT_MODE m_nImportMode;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -86,6 +94,7 @@ protected:
 	BOOL IsCurrentImporterFileBased() const;
 	CString GetCurrentImporterFilter() const;
 	void EnableOK();
+	void UpdateTextField();
 };
 
 //{{AFX_INSERT_LOCATION}}

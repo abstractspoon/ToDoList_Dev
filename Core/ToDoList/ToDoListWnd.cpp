@@ -8713,7 +8713,7 @@ LRESULT CToDoListWnd::OnToDoCtrlImportDropText(WPARAM wp, LPARAM lp)
 		CString sText((LPCTSTR)lp);
 		ASSERT(!sText.IsEmpty());
 
-		DoImportFromDropText(sText, TDIT_ADDTOBOTTOMOFTASKLIST);
+		DoImportFromDropText(sText, TDIT_ADDTOTOPOFTASKLIST);
 	}
 	
 	return 0L;

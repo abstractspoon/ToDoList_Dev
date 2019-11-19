@@ -45,9 +45,9 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 	CTDLDialog(CTDLImportDialog::IDD, _T("Importing"), pParent),
 	m_mgrImportExport(mgr),
 	m_cbFormat(mgr, TRUE),
-	m_bFileOnly(FALSE),
+	m_nImportMode(TDCIM_ALL),
 	m_bReadonlyTasklist(bReadonlyTasklist),
-	m_bTextIsClipboard(TRUE)
+	m_sFromText(CClipboard().GetText())
 {
 	//{{AFX_DATA_INIT(CTDLImportDialog)
 	//}}AFX_DATA_INIT
@@ -68,7 +68,7 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 			m_sFormatTypeID = mgr.GetImporterTypeID(nFormat);
 
 		if (m_sFormatTypeID.IsEmpty())
-			m_sFormatTypeID = mgr.GetTypeID(TDCET_CSV);
+			m_sFormatTypeID = mgr.GetTypeID(TDCIT_CSV);
 	}
 
 	if (m_bReadonlyTasklist)
@@ -86,6 +86,7 @@ void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_FORMATOPTIONS, m_cbFormat);
 	DDX_Radio(pDX, IDC_FROMFILE, m_bFromText);
 	DDX_Text(pDX, IDC_INPUTFILE, m_sFromFilePath);
+	DDX_Text(pDX, IDC_INPUTTEXT, m_sFromText);
 	DDX_Radio(pDX, IDC_CREATETASK, m_nImportTo);
 	DDX_Radio(pDX, IDC_MERGEBYTITLE, m_bMatchByTaskID);
 	//}}AFX_DATA_MAP
@@ -156,7 +157,7 @@ BOOL CTDLImportDialog::SetFilePath(LPCTSTR szFilePath)
 		return FALSE;
 
 	m_sFromFilePath = szFilePath;
-	m_bFileOnly = TRUE;
+	m_nImportMode = TDCIM_FILEONLY;
 
 	int nFormat = m_mgrImportExport.FindImporterByPath(szFilePath);
 
@@ -175,9 +176,8 @@ BOOL CTDLImportDialog::SetFilePath(LPCTSTR szFilePath)
 
 void CTDLImportDialog::SetUseClipboard()
 {
-	m_bFileOnly = FALSE;
+	m_nImportMode = TDCIM_CLIPBOARDONLY;
 	m_sFromText = CClipboard().GetText();
-	m_bTextIsClipboard = TRUE;
 	m_bFromText = TRUE;
 	m_sFromFilePath.Empty();
 }
@@ -187,9 +187,8 @@ BOOL CTDLImportDialog::SetUseText(LPCTSTR szText)
 	if (Misc::IsEmpty(szText))
 		return FALSE;
 
-	m_bFileOnly = FALSE;
+	m_nImportMode = TDCIM_TEXTONLY;
 	m_sFromText = szText;
-	m_bTextIsClipboard = FALSE;
 	m_bFromText = TRUE;
 	m_sFromFilePath.Empty();
 
@@ -198,7 +197,7 @@ BOOL CTDLImportDialog::SetUseText(LPCTSTR szText)
 
 void CTDLImportDialog::OnChangeImportFrom() 
 {
-	ASSERT(!m_bFileOnly);
+	ASSERT(m_nImportMode == TDCIM_ALL);
 
 	UpdateData();
 
@@ -215,18 +214,17 @@ BOOL CTDLImportDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	ASSERT(!m_bFileOnly || !m_bFromText);
-
 	BOOL bHasFilter = IsCurrentImporterFileBased();
-	ASSERT(!m_bFileOnly || bHasFilter);
+	ASSERT((m_nImportMode != TDCIM_FILEONLY) || bHasFilter);
 
 	m_eFilePath.SetFilter(GetCurrentImporterFilter());
 
 	GetDlgItem(IDC_FORMATOPTIONS)->EnableWindow(TRUE);
 	GetDlgItem(IDC_FORMATOPTIONS)->SetFocus();
 
-	if (m_bFileOnly)
+	switch (m_nImportMode)
 	{
+	case TDCIM_FILEONLY:
 		GetDlgItem(IDC_FROMFILE)->EnableWindow(TRUE);
 		GetDlgItem(IDC_INPUTFILE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_FROMTEXT)->EnableWindow(FALSE);
@@ -234,31 +232,33 @@ BOOL CTDLImportDialog::OnInitDialog()
 		GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
 
 		GetDlgItem(IDC_CREATENEWTASKLIST)->SetFocus();
-	}
-	else
-	{
+		break;
+
+	case TDCIM_CLIPBOARDONLY:
 		GetDlgItem(IDC_FROMFILE)->EnableWindow(bHasFilter);
 		GetDlgItem(IDC_INPUTFILE)->EnableWindow(!m_bFromText && bHasFilter);
 		GetDlgItem(IDC_FROMTEXT)->EnableWindow(bHasFilter);
 		GetDlgItem(IDC_INPUTTEXT)->EnableWindow(m_bFromText && bHasFilter);
+		GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromText && bHasFilter);
+		break;
 
-		if (m_bTextIsClipboard)
-		{
-			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromText && bHasFilter);
-
-			OnRefreshclipboard();
-		}
-		else
-		{
-			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
-			GetDlgItem(IDC_REFRESHCLIPBOARD)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_FROMTEXT)->SetWindowText(_T("&Text:"));
-		}
-
-		// Set text font to be mono-spaced
-		if (GraphicsMisc::CreateFont(m_fontMonospace, _T("Lucida Console")))
-			GetDlgItem(IDC_INPUTTEXT)->SetFont(&m_fontMonospace, FALSE);
+	case TDCIM_TEXTONLY:
+		GetDlgItem(IDC_FROMFILE)->EnableWindow(bHasFilter);
+		GetDlgItem(IDC_INPUTFILE)->EnableWindow(!m_bFromText && bHasFilter);
+		GetDlgItem(IDC_FROMTEXT)->EnableWindow(bHasFilter);
+		GetDlgItem(IDC_INPUTTEXT)->EnableWindow(m_bFromText && bHasFilter);
+		GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
+		GetDlgItem(IDC_REFRESHCLIPBOARD)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_FROMTEXT)->SetWindowText(_T("&Text:"));
+		break;
 	}
+
+	// Set text font to be mono-spaced
+	if (GraphicsMisc::CreateFont(m_fontMonospace, _T("Lucida Console")))
+		GetDlgItem(IDC_INPUTTEXT)->SetFont(&m_fontMonospace, FALSE);
+
+	if (m_nImportMode != TDCIM_FILEONLY)
+		UpdateTextField();
 
 	if (m_bReadonlyTasklist)
 	{
@@ -407,10 +407,17 @@ void CTDLImportDialog::OnChangeFilepath()
 
 void CTDLImportDialog::OnRefreshclipboard() 
 {
-	if (!m_bFileOnly)
+	if ((m_nImportMode == TDCIM_ALL )|| (m_nImportMode == TDCIM_CLIPBOARDONLY))
 	{
 		m_sFromText = CClipboard().GetText();
+		UpdateTextField();
+	}
+}
 
+void CTDLImportDialog::UpdateTextField()
+{
+	if ((m_nImportMode == TDCIM_ALL ) || (m_nImportMode != TDCIM_FILEONLY))
+	{
 		// Edit control wants CRLF not just LF
 		if (m_sFromText.Find(CRLF) == -1)
 			m_sFromText.Replace(_T("\n"), CRLF);
