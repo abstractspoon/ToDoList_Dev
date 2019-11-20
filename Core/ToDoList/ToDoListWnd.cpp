@@ -8668,7 +8668,7 @@ LRESULT CToDoListWnd::OnToDoCtrlImportFromDrop(WPARAM wp, LPARAM lp)
 			TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
 			int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
 
-			ImportTasks(TRUE, dialog.GetImportFilePath(), nImporter, nImportTo);
+			ImportTasks(TRUE, dialog.GetImportText(), nImporter, nImportTo);
 		}
 	}
 	

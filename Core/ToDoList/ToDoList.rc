@@ -5665,6 +5665,13 @@ BEGIN
     IDS_IMPORTTOSELTASK     "Subtask of selected task"
     IDS_IMPORTTOBELOWSELTASK "After selected task"
     IDS_IMPORTTOBOTTOMOFTASKLIST "Bottom of tasklist"
+    IDS_IMPORTDIALOGTITLE_CLIPBOARD "Import Tasks from Windows Clipboard"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_IMPORTDIALOGTITLE_TEXT "Import Tasks from Text"
+    IDS_IMPORTDIALOGTITLE_FILE "Import Tasks from File"
 END
 
 #endif    // English (Australia) resources

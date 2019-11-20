@@ -311,20 +311,18 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 	return DROPEFFECT_NONE;
 }
 
-DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bFromText)
+DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bFilesFromText)
 {
-	// CF_HDROP does not support DROPEFFECT_LINK when the source is text
-	DROPEFFECT deResult = DROPEFFECT_NONE;
-
+	// Note: CF_HDROP does not support DROPEFFECT_LINK when the source is text
 	if (CMSOutlookHelper::IsOutlookObject(drop.pObject))
 	{
 		switch (nHitTest)
 		{
 		case TLDTHT_TASKVIEW:
-			return ((drop.dwTaskID && !drop.bImportTasks && !bFromText) ? DROPEFFECT_LINK : DROPEFFECT_COPY);
+			return ((drop.dwTaskID && !drop.bImportTasks && !bFilesFromText) ? DROPEFFECT_LINK : DROPEFFECT_COPY);
 
 		case TLDTHT_FILEEDIT:
-			return (bFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
+			return (bFilesFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
 		}
 	}
 	else if ((nHitTest != TLDTHT_NONE) && (drop.HasFiles() || drop.HasText()))
@@ -332,10 +330,10 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 		switch (nHitTest)
 		{
 		case TLDTHT_TASKVIEW:
-			return ((drop.dwTaskID && !drop.bImportTasks && !bFromText) ? DROPEFFECT_LINK : DROPEFFECT_COPY);
+			return ((drop.dwTaskID && !drop.bImportTasks && !bFilesFromText && !drop.HasText()) ? DROPEFFECT_LINK : DROPEFFECT_COPY);
 
 		case TLDTHT_FILEEDIT:
-			return (bFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
+			return (bFilesFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
 
 		case TLDTHT_CAPTION:
 			{

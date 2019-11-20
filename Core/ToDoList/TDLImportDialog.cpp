@@ -25,6 +25,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const LPCTSTR CRLF = _T("\r\n");
+const LPCTSTR LF = _T("\n");
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -274,9 +275,9 @@ BOOL CTDLImportDialog::OnInitDialog()
 			GetDlgItem(IDC_FROMTEXT)->EnableWindow(FALSE);
 			GetDlgItem(IDC_INPUTTEXT)->EnableWindow(FALSE);
 			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
-
 			GetDlgItem(IDC_CREATENEWTASKLIST)->SetFocus();
 
+			SetWindowText(CEnString(IDS_IMPORTDIALOGTITLE_FILE));
 		}
 		break;
 
@@ -289,6 +290,8 @@ BOOL CTDLImportDialog::OnInitDialog()
 			GetDlgItem(IDC_FROMTEXT)->EnableWindow(TRUE);
 			GetDlgItem(IDC_INPUTTEXT)->EnableWindow(TRUE);
 			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(TRUE);
+
+			SetWindowText(CEnString(IDS_IMPORTDIALOGTITLE_CLIPBOARD));
 		}
 		break;
 
@@ -303,6 +306,8 @@ BOOL CTDLImportDialog::OnInitDialog()
 			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
 			GetDlgItem(IDC_REFRESHCLIPBOARD)->ShowWindow(SW_HIDE);
 			GetDlgItem(IDC_FROMTEXT)->SetWindowText(CEnString(IDS_IMPORTFROMTEXT));
+
+			SetWindowText(CEnString(IDS_IMPORTDIALOGTITLE_TEXT));
 		}
 		break;
 	}
@@ -494,7 +499,7 @@ void CTDLImportDialog::UpdateTextField()
 	{
 		// Edit control wants CRLF not just LF
 		if (m_sFromText.Find(CRLF) == -1)
-			m_sFromText.Replace(_T("\n"), CRLF);
+			m_sFromText.Replace(LF, CRLF);
 
 		// Add blank line at start in case the chosen importer
 		// treats the first line as a header line
