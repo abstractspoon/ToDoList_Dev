@@ -238,6 +238,8 @@ BOOL CTDLImportDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
+	ASSERT(m_cbFormat.GetCount());
+
 	// Build active tasklist pos
 	AddString(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
 	AddString(m_cbTasklistPos, IDS_IMPORTTOSELTASK, SELECTEDTASK);

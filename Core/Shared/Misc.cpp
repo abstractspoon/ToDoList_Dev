@@ -1185,28 +1185,22 @@ int Misc::Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive, B
 			if (sArrItem.IsEmpty())
 				return nItem;
 		}
-		else
+		else if (bWholeWord)
 		{
-			// Attempt a shortcut
-			if (bWholeWord)
+			if (bCaseSensitive)
 			{
-				if (bCaseSensitive)
-				{
-					if (sArrItem.Compare(szItem) == 0)
-						return nItem;
-				}
-				else
-				{
-					if (sArrItem.CompareNoCase(szItem) == 0)
-						return nItem;
-				}
+				if (sArrItem.Compare(szItem) == 0)
+					return nItem;
 			}
-
-			// Long way round
-			if (Find(szItem, sArrItem, bCaseSensitive, bWholeWord) != -1)
+			else
 			{
-				return nItem;
+				if (sArrItem.CompareNoCase(szItem) == 0)
+					return nItem;
 			}
+		}
+		else if (Find(szItem, sArrItem, bCaseSensitive, bWholeWord) != -1)
+		{
+			return nItem;
 		}
 	}
 
