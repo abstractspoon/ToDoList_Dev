@@ -89,7 +89,7 @@ protected:
 	afx_msg void OnChangeClipboardtext();
 	afx_msg void OnChangeFilepath();
 	afx_msg void OnRefreshclipboard();
-	afx_msg void OnChangeMergeTo();
+	afx_msg void OnChangeImportTo();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -97,6 +97,8 @@ protected:
 	CString GetCurrentImporterFilter() const;
 	void EnableOK();
 	void UpdateTextField();
+	BOOL IsMode(IMPORT_MODE nMode) const { return (m_nImportMode == nMode); }
+	void EnableDisableControls();
 };
 
 //{{AFX_INSERT_LOCATION}}

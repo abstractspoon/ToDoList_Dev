@@ -119,10 +119,10 @@ BEGIN_MESSAGE_MAP(CTDLImportDialog, CTDLDialog)
 	ON_EN_CHANGE(IDC_INPUTFILE, OnChangeFilepath)
 	ON_BN_CLICKED(IDC_REFRESHCLIPBOARD, OnRefreshclipboard)
 	ON_BN_CLICKED(IDC_FROMFILE, OnChangeImportFrom)
-	ON_BN_CLICKED(IDC_MERGETOACTIVETASKLIST, OnChangeMergeTo)
-	ON_BN_CLICKED(IDC_ADDTOACTIVETASKLIST, OnChangeMergeTo)
-	ON_BN_CLICKED(IDC_ADDTOSELECTEDTASK, OnChangeMergeTo)
-	ON_BN_CLICKED(IDC_CREATENEWTASKLIST, OnChangeMergeTo)
+	ON_BN_CLICKED(IDC_MERGETOACTIVETASKLIST, OnChangeImportTo)
+	ON_BN_CLICKED(IDC_ADDTOACTIVETASKLIST, OnChangeImportTo)
+	ON_BN_CLICKED(IDC_ADDTOSELECTEDTASK, OnChangeImportTo)
+	ON_BN_CLICKED(IDC_CREATENEWTASKLIST, OnChangeImportTo)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -224,14 +224,7 @@ void CTDLImportDialog::OnChangeImportFrom()
 	ASSERT(m_nImportMode == TDCIM_ALL);
 
 	UpdateData();
-
-	BOOL bHasFilter = IsCurrentImporterFileBased();
-	
-	GetDlgItem(IDC_INPUTFILE)->EnableWindow(!m_bFromText && bHasFilter);
-	GetDlgItem(IDC_INPUTTEXT)->EnableWindow(m_bFromText && bHasFilter);
-	GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromText && bHasFilter);
-
-	EnableOK();
+	EnableDisableControls();
 }
 
 BOOL CTDLImportDialog::OnInitDialog() 
@@ -248,13 +241,51 @@ BOOL CTDLImportDialog::OnInitDialog()
 
 	SelectItemByData(m_cbTasklistPos, m_nActiveTasklistPos);
 
+	m_eFilePath.SetFilter(GetCurrentImporterFilter());
+
 	BOOL bHasFilter = IsCurrentImporterFileBased();
 	ASSERT((m_nImportMode != TDCIM_FILEONLY) || bHasFilter);
 
-	m_eFilePath.SetFilter(GetCurrentImporterFilter());
+	switch (m_nImportMode)
+	{
+	case TDCIM_ALL:
+		break;
 
+	case TDCIM_FILEONLY:
+		ASSERT(!m_bFromText);
+		SetWindowText(CEnString(IDS_IMPORTDIALOGTITLE_FILE));
+		break;
+
+	case TDCIM_CLIPBOARDONLY:
+		ASSERT(m_bFromText);
+		SetWindowText(CEnString(IDS_IMPORTDIALOGTITLE_CLIPBOARD));
+		break;
+
+	case TDCIM_TEXTONLY:
+		ASSERT(m_bFromText);
+		SetWindowText(CEnString(IDS_IMPORTDIALOGTITLE_TEXT));
+		break;
+	}
+	
+	// Set text font to be mono-spaced
+	if (GraphicsMisc::CreateFont(m_fontMonospace, _T("Lucida Console")))
+		GetDlgItem(IDC_INPUTTEXT)->SetFont(&m_fontMonospace, FALSE);
+
+	if (m_nImportMode != TDCIM_FILEONLY)
+		UpdateTextField();
+
+	EnableDisableControls();
+	
+	return FALSE;  // return TRUE unless you set the focus to a control
+	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CTDLImportDialog::EnableDisableControls()
+{
 	GetDlgItem(IDC_FORMATOPTIONS)->EnableWindow(TRUE);
-	GetDlgItem(IDC_FORMATOPTIONS)->SetFocus();
+
+	BOOL bHasFilter = IsCurrentImporterFileBased();
+	ASSERT((m_nImportMode != TDCIM_FILEONLY) || bHasFilter);
 
 	switch (m_nImportMode)
 	{
@@ -271,15 +302,12 @@ BOOL CTDLImportDialog::OnInitDialog()
 	case TDCIM_FILEONLY:
 		{
 			ASSERT(!m_bFromText);
-			
+
 			GetDlgItem(IDC_FROMFILE)->EnableWindow(TRUE);
 			GetDlgItem(IDC_INPUTFILE)->EnableWindow(FALSE);
 			GetDlgItem(IDC_FROMTEXT)->EnableWindow(FALSE);
 			GetDlgItem(IDC_INPUTTEXT)->EnableWindow(FALSE);
 			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
-			GetDlgItem(IDC_CREATENEWTASKLIST)->SetFocus();
-
-			SetWindowText(CEnString(IDS_IMPORTDIALOGTITLE_FILE));
 		}
 		break;
 
@@ -292,8 +320,6 @@ BOOL CTDLImportDialog::OnInitDialog()
 			GetDlgItem(IDC_FROMTEXT)->EnableWindow(TRUE);
 			GetDlgItem(IDC_INPUTTEXT)->EnableWindow(TRUE);
 			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(TRUE);
-
-			SetWindowText(CEnString(IDS_IMPORTDIALOGTITLE_CLIPBOARD));
 		}
 		break;
 
@@ -308,33 +334,19 @@ BOOL CTDLImportDialog::OnInitDialog()
 			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
 			GetDlgItem(IDC_REFRESHCLIPBOARD)->ShowWindow(SW_HIDE);
 			GetDlgItem(IDC_FROMTEXT)->SetWindowText(CEnString(IDS_IMPORTFROMTEXT));
-
-			SetWindowText(CEnString(IDS_IMPORTDIALOGTITLE_TEXT));
 		}
 		break;
 	}
 
-	// Set text font to be mono-spaced
-	if (GraphicsMisc::CreateFont(m_fontMonospace, _T("Lucida Console")))
-		GetDlgItem(IDC_INPUTTEXT)->SetFont(&m_fontMonospace, FALSE);
+	GetDlgItem(IDC_MERGETOACTIVETASKLIST)->EnableWindow(!m_bReadonlyTasklist);
+	GetDlgItem(IDC_MERGEBYTITLE)->EnableWindow(!m_bReadonlyTasklist && (m_nImportTo == MERGETASKLIST));
+	GetDlgItem(IDC_MERGEBYTASKID)->EnableWindow(!m_bReadonlyTasklist && (m_nImportTo == MERGETASKLIST));
+	GetDlgItem(IDC_MERGEBYTASKIDWARNING)->EnableWindow(!m_bReadonlyTasklist && (m_nImportTo == MERGETASKLIST));
 
-	if (m_nImportMode != TDCIM_FILEONLY)
-		UpdateTextField();
-
-	if (m_bReadonlyTasklist)
-	{
-		GetDlgItem(IDC_TOACTIVETASLIST)->EnableWindow(FALSE);
-		GetDlgItem(IDC_TOSELECTEDTASK)->EnableWindow(FALSE);
-	}
-	
-	GetDlgItem(IDC_MERGEBYTITLE)->EnableWindow(m_nImportTo == MERGETASKLIST);
-	GetDlgItem(IDC_MERGEBYTASKID)->EnableWindow(m_nImportTo == MERGETASKLIST);
-	GetDlgItem(IDC_MERGEBYTASKIDWARNING)->EnableWindow(m_nImportTo == MERGETASKLIST);
+	GetDlgItem(IDC_TOACTIVETASLIST)->EnableWindow(!m_bReadonlyTasklist);
+	GetDlgItem(IDC_ACTIVETASKLISTPOSITION)->EnableWindow(!m_bReadonlyTasklist && (m_nImportTo == ACTIVETASKLIST));
 
 	EnableOK();
-	
-	return FALSE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 BOOL CTDLImportDialog::IsCurrentImporterFileBased() const
@@ -425,20 +437,13 @@ void CTDLImportDialog::OnSelchangeFormatoptions()
 	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
 	BOOL bHadFilter = m_mgrImportExport.ImporterHasFileExtension(nFormat);
 
-	UpdateData(TRUE);
+	UpdateData();
 	
 	// change the filter on the CFileEdit and clear the filepath
 	// and clear/restore clipboard text depending
-	BOOL bHasFilter = IsCurrentImporterFileBased();
-
 	m_eFilePath.SetFilter(GetCurrentImporterFilter());
-	m_eFilePath.EnableWindow(bHasFilter);
-	
-	GetDlgItem(IDC_FROMFILE)->EnableWindow(bHasFilter);
-	GetDlgItem(IDC_INPUTFILE)->EnableWindow(!m_bFromText && bHasFilter);
-	GetDlgItem(IDC_FROMTEXT)->EnableWindow(bHasFilter);
-	GetDlgItem(IDC_INPUTTEXT)->EnableWindow(m_bFromText && bHasFilter);
-	GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromText && bHasFilter);
+
+	BOOL bHasFilter = IsCurrentImporterFileBased();
 
 	if (bHadFilter && !bHasFilter)
 	{
@@ -450,10 +455,9 @@ void CTDLImportDialog::OnSelchangeFormatoptions()
 		GetDlgItem(IDC_INPUTTEXT)->SetWindowText(m_sFromText); // restore field
 	}
 	
-	m_sFromFilePath.Empty();
-	UpdateData(FALSE);
+	GetDlgItem(IDC_INPUTFILE)->SetWindowText(_T("")); // clear field
 
-	EnableOK();
+	EnableDisableControls();
 }
 
 void CTDLImportDialog::EnableOK()
@@ -537,11 +541,8 @@ void CTDLImportDialog::OnRepositionControls(int dx, int dy)
 	CDialogHelper::OffsetCtrl(this, IDCANCEL, dx, dy);
 }
 
-void CTDLImportDialog::OnChangeMergeTo() 
+void CTDLImportDialog::OnChangeImportTo() 
 {
 	UpdateData();
-
-	GetDlgItem(IDC_MERGEBYTITLE)->EnableWindow(m_nImportTo == MERGETASKLIST);
-	GetDlgItem(IDC_MERGEBYTASKID)->EnableWindow(m_nImportTo == MERGETASKLIST);
-	GetDlgItem(IDC_MERGEBYTASKIDWARNING)->EnableWindow(m_nImportTo == MERGETASKLIST);
+	EnableDisableControls();
 }
