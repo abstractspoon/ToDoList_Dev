@@ -32,9 +32,8 @@ const UINT WM_TDCM_GETLINKTOOLTIP			= ::RegisterWindowMessage(_T("WM_TDCM_GETLIN
 const UINT WM_TDCM_SELECTTASK				= ::RegisterWindowMessage(_T("WM_TDCM_SELECTTASK"));			// wParam = taskID, lParam = taskfile path
 const UINT WM_TDCM_FAILEDLINK				= ::RegisterWindowMessage(_T("WM_TDCM_FAILEDLINK"));			// wParam = hwnd, lParam = url
 const UINT WM_TDCM_LENGTHYOPERATION			= ::RegisterWindowMessage(_T("WM_TDCM_LENGTHYOPERATION"));		// wParam = start/stop, lParam = text to display
-const UINT WM_TDCM_IMPORTDROPFILES			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORTDROPFILES"));		// wParam = hwnd, lParam = CStringArray*
-const UINT WM_TDCM_CANIMPORTDROPFILES		= ::RegisterWindowMessage(_T("WM_TDCM_CANIMPORTDROPFILES"));	// wParam = hwnd, lParam = CStringArray*
-const UINT WM_TDCM_IMPORTDROPTEXT			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORTDROPTEXT"));		// wParam = hwnd, lParam = LPCTSTR
+const UINT WM_TDCM_IMPORTFROMDROP			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORTFROMDROP"));		// wParam = hwnd, lParam = TDCDROPIMPORT*
+const UINT WM_TDCM_CANIMPORTFROMDROP		= ::RegisterWindowMessage(_T("WM_TDCM_CANIMPORTFROMDROP"));		// wParam = hwnd, lParam = TDCDROPIMPORT*
 
 // CTDLFilterBar
 const UINT WM_FBN_FILTERCHNG				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHNG")); 

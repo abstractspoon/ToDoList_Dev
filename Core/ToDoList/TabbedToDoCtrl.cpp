@@ -5958,22 +5958,12 @@ int CTabbedToDoCtrl::GetListItem(HTREEITEM hti) const
 
 LRESULT CTabbedToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 {
-	if (IsReadOnly())
-		return 0L;
-
-	TLDT_DATA* pData = (TLDT_DATA*)wParam;
-	CWnd* pTarget = (CWnd*)lParam;
-
-	if (InListView())
+	if (InListView() && !IsReadOnly())
 	{
-		if (pData->dwTaskID > 0)
-		{
-			return !m_data.IsTaskLocked(pData->dwTaskID);
-		}
-		else if (pData->GetFileCount())
-		{
-			return GetParent()->SendMessage(WM_TDCM_CANIMPORTDROPFILES, (WPARAM)GetSafeHwnd(), (LPARAM)pData->pFilePaths);
-		}
+		CWnd* pTarget = (CWnd*)lParam;
+
+		if (pTarget == &m_taskList.List())
+			lParam = (LPARAM)&m_taskTree.Tree();
 	}
 
 	// all else
@@ -5998,9 +5988,8 @@ LRESULT CTabbedToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 
 
  	case FTCV_TASKLIST:
+		if (pTarget == &m_taskList.List())
 		{
-			ASSERT(pTarget == &m_taskList.List());
-
  			if (pData->dwTaskID > 0)
 			{
 				int nItem = m_taskList.FindTaskItem(pData->dwTaskID);
@@ -6009,8 +5998,10 @@ LRESULT CTabbedToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
  				m_taskList.SelectItem(nItem);
 			}
 
-			CToDoCtrl::OnDropObject(wParam, (LPARAM)&m_taskTree.Tree());
+			lParam = (LPARAM)&m_taskTree.Tree();
 		}
+
+		CToDoCtrl::OnDropObject(wParam, lParam);
 		break;
 
 	case FTCV_UIEXTENSION1:

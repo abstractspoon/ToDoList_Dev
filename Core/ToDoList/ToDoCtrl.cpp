@@ -10003,32 +10003,37 @@ void CToDoCtrl::MakeFullPaths(CStringArray& aFilePaths) const
 
 LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 {
-	ASSERT(wParam && lParam);
+	if (!wParam || !lParam || IsReadOnly())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	TLDT_DATA* pData = (TLDT_DATA*)wParam;
 	CWnd* pTarget = (CWnd*)lParam;
 
 	if (pTarget == &m_taskTree.Tree())
 	{
-		if (pData->bImportTasks)
+		if (pData->HasFiles())
 		{
-			return !IsReadOnly();
-		}
-		else if (pData->dwTaskID)
-		{
-			return CanEditSelectedTask(TDCA_FILEREF);
-		}
-		else if (pData->GetFileCount())
-		{
-			if (IsReadOnly())
-				return FALSE;
+			if (pData->dwTaskID && !pData->bImportTasks)
+				return CanEditSelectedTask(TDCA_FILEREF);
 
-			return GetParent()->SendMessage(WM_TDCM_CANIMPORTDROPFILES, (WPARAM)GetSafeHwnd(), (LPARAM)pData->pFilePaths);
+			// Check with parent
+			TDCDROPIMPORT data(pData->dwTaskID, *pData->pFilePaths);
+			return GetParent()->SendMessage(WM_TDCM_CANIMPORTFROMDROP, (WPARAM)GetSafeHwnd(), (LPARAM)&data);
 		}
-		else if (pData->HasText())
+
+		if (pData->HasText())
 		{
-			return !IsReadOnly();
+			// Check with parent
+			TDCDROPIMPORT data(pData->dwTaskID, pData->GetText());
+			return GetParent()->SendMessage(WM_TDCM_CANIMPORTFROMDROP, (WPARAM)GetSafeHwnd(), (LPARAM)&data);
 		}
+
+		// else
+		ASSERT(0);
+		return FALSE;
 	}
 	else if (pTarget == &m_cbFileRef)
 	{
@@ -10074,8 +10079,8 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 	if (pTarget == &m_taskTree.Tree())
 	{
 		if (pData->dwTaskID)
-			SelectTask(pData->dwTaskID, FALSE);
-			
+			SelectTask(pData->dwTaskID);
+
 		if (aFiles.GetSize())
 		{
 			if (pData->bImportTasks)
@@ -10086,7 +10091,10 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 					return 0L;
 
 				case 0:  // failed => not an outlook object
-					return GetParent()->SendMessage(WM_TDCM_IMPORTDROPFILES, (WPARAM)GetSafeHwnd(), (LPARAM)&aFiles);
+					{
+						TDCDROPIMPORT data(pData->dwTaskID, aFiles);
+						return GetParent()->SendMessage(WM_TDCM_IMPORTFROMDROP, (WPARAM)GetSafeHwnd(), (LPARAM)&data);
+					}
 
 				default:
 					break; // all good
@@ -10099,9 +10107,8 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 		}
 		else if (pData->HasText())
 		{
-			CString sText = pData->GetText();
-
-			return GetParent()->SendMessage(WM_TDCM_IMPORTDROPTEXT, (WPARAM)GetSafeHwnd(), (LPARAM)(LPCTSTR)sText);
+			TDCDROPIMPORT data(pData->dwTaskID, pData->GetText());
+			return GetParent()->SendMessage(WM_TDCM_IMPORTFROMDROP, (WPARAM)GetSafeHwnd(), (LPARAM)&data);
 		}
 		else
 		{
@@ -11315,7 +11322,7 @@ void CToDoCtrl::IncrementTrackedTime(BOOL bEnding)
 						(m_dTrackedTimeElapsedHours / TICKS2HOURS) / 1000);
 
 			m_timeTracking.ResetReminderIsDue();
-			GetParent()->SendMessage(WM_TDCN_TIMETRACKREMINDER, dwTaskID, (LPARAM)this);
+			GetParent()->SendMessage(WM_TDCN_TIMETRACKREMINDER, (WPARAM)GetSafeHwnd(), dwTaskID);
 		}
 	}
 }

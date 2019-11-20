@@ -466,9 +466,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnToDoCtrlIsTaskDone)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnToDoCtrlSelectTask)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnToDoCtrlGetLinkTooltip)
-	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTDROPFILES, OnToDoCtrlImportDropFiles)
-	ON_REGISTERED_MESSAGE(WM_TDCM_CANIMPORTDROPFILES, OnToDoCtrlCanImportDropFiles)
-	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTDROPTEXT, OnToDoCtrlImportDropText)
+	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTFROMDROP, OnToDoCtrlImportFromDrop)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CANIMPORTFROMDROP, OnToDoCtrlCanImportFromDrop)
 	ON_REGISTERED_MESSAGE(WM_TDCN_CLICKREMINDERCOL, OnToDoCtrlNotifyClickReminderCol)
 	ON_REGISTERED_MESSAGE(WM_TDCN_LISTCHANGE, OnToDoCtrlNotifyListChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_MODIFY, OnToDoCtrlNotifyMod)
@@ -5800,28 +5799,6 @@ BOOL CToDoListWnd::DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere)
 	return ImportTasks(TRUE, dialog.GetImportText(), nImporter, nImportTo);
 }
 
-BOOL CToDoListWnd::DoImportFromDropText(const CString& sDropText, TDLID_IMPORTTO nWhere)
-{
-	if (!CanImportDropText(sDropText))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	CTDLImportDialog dialog(m_mgrImportExport, GetToDoCtrl().IsReadOnly());
-	
-	dialog.SetUseText(sDropText);
-	dialog.SetImportTo(nWhere);
-
-	if (dialog.DoModal() != IDOK)
-		return FALSE;
-
-	TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
-	int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
-
-	return ImportTasks(TRUE, dialog.GetImportText(), nImporter, nImportTo);
-}
-
 void CToDoListWnd::OnEditCopyastext() 
 {
 	CopySelectedTasksToClipboard(TDCTC_ASTEXT);
@@ -8648,21 +8625,25 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 	return FALSE;
 }
 
-LRESULT CToDoListWnd::OnToDoCtrlImportDropFiles(WPARAM wp, LPARAM lp)
+LRESULT CToDoListWnd::OnToDoCtrlImportFromDrop(WPARAM wp, LPARAM lp)
 {
-	ASSERT(lp);
-	ASSERT((HWND)wp == GetToDoCtrl().GetSafeHwnd());
-	UNREFERENCED_PARAMETER(wp);
-
-	if (lp)
+	if (!OnToDoCtrlCanImportFromDrop(wp, lp))
 	{
-		const CStringArray* pFiles = (const CStringArray*)lp;
-		int nNumFiles = pFiles->GetSize();
+		ASSERT(0);
+		return FALSE;
+	}
+
+	const TDCDROPIMPORT* pData = (const TDCDROPIMPORT*)lp;
+	int nNumFiles = pData->aFiles.GetSize();
+
+	if (nNumFiles)
+	{
+		CTDLImportDialog dialog(m_mgrImportExport, FALSE);
+		dialog.SetImportTo(pData->dwTaskID ? TDIT_ADDTOSELECTEDTASK : TDIT_ADDTOBOTTOMOFTASKLIST);
 
 		for (int nFile = 0; nFile < nNumFiles; nFile++)
 		{
-			CTDLImportDialog dialog(m_mgrImportExport, FALSE);
-			dialog.SetFilePath(pFiles->GetAt(nFile));
+			dialog.SetUseFile(pData->aFiles[nFile]);
 
 			if (dialog.DoModal() == IDOK)
 			{
@@ -8674,49 +8655,49 @@ LRESULT CToDoListWnd::OnToDoCtrlImportDropFiles(WPARAM wp, LPARAM lp)
 			}
 		}
 	}
-	
-	return 0L;
-}
-
-LRESULT CToDoListWnd::OnToDoCtrlCanImportDropFiles(WPARAM wp, LPARAM lp)
-{
-	ASSERT(lp);
-	ASSERT((HWND)wp == GetToDoCtrl().GetSafeHwnd());
-	UNREFERENCED_PARAMETER(wp);
-
-	if (lp)
+	else if (!pData->sText.IsEmpty())
 	{
-		// Look for the first importable file
-		const CStringArray* pFiles = (const CStringArray*)lp;
-		int nNumFiles = pFiles->GetSize();
+		CTDLImportDialog dialog(m_mgrImportExport, FALSE);
 
-		for (int nFile = 0; nFile < nNumFiles; nFile++)
+		dialog.SetUseText(pData->sText);
+		dialog.SetImportTo(pData->dwTaskID ? TDIT_ADDTOSELECTEDTASK : TDIT_ADDTOBOTTOMOFTASKLIST);
+
+		if (dialog.DoModal() == IDOK)
 		{
-			CString sFilePath = pFiles->GetAt(nFile);
+			// check file can be opened
+			TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
+			int nImporter = m_mgrImportExport.FindImporterByType(dialog.GetFormatTypeID());
 
-			if (m_mgrImportExport.FindImporterByPath(sFilePath) != -1)
-				return TRUE;
+			ImportTasks(TRUE, dialog.GetImportFilePath(), nImporter, nImportTo);
 		}
 	}
 	
-	return FALSE;
+	return 0L;
 }
 
-LRESULT CToDoListWnd::OnToDoCtrlImportDropText(WPARAM wp, LPARAM lp)
+LRESULT CToDoListWnd::OnToDoCtrlCanImportFromDrop(WPARAM wp, LPARAM lp)
 {
-	ASSERT(lp);
-	ASSERT((HWND)wp == GetToDoCtrl().GetSafeHwnd());
-	UNREFERENCED_PARAMETER(wp);
-
-	if (lp)
+	if (!lp || (HWND(wp) != GetToDoCtrl().GetSafeHwnd()))
 	{
-		CString sText((LPCTSTR)lp);
-		ASSERT(!sText.IsEmpty());
-
-		DoImportFromDropText(sText, TDIT_ADDTOBOTTOMOFTASKLIST);
+		ASSERT(0);
+		return FALSE;
 	}
-	
-	return 0L;
+
+	const TDCDROPIMPORT* pData = (const TDCDROPIMPORT*)lp;
+	int nNumFiles = pData->aFiles.GetSize();
+
+	if (nNumFiles)
+	{
+		for (int nFile = 0; nFile < nNumFiles; nFile++)
+		{
+			if (m_mgrImportExport.FindImporterByPath(pData->aFiles[nFile]) != -1)
+				return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	return !pData->sText.IsEmpty();
 }
 
 void CToDoListWnd::OnImportTasklist() 

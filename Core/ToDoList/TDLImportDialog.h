@@ -28,7 +28,7 @@ public:
 	CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent = NULL);   // standard constructor
 
 	BOOL SetImportTo(TDLID_IMPORTTO nImportTo);
-	BOOL SetFilePath(LPCTSTR szFilePath);
+	BOOL SetUseFile(LPCTSTR szFilePath);
 	void SetUseClipboard();
 	BOOL SetUseText(LPCTSTR szText);
 

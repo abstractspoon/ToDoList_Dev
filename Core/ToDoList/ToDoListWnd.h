@@ -389,9 +389,9 @@ protected:
 	afx_msg LRESULT OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlFailedLink(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnToDoCtrlImportDropFiles(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnToDoCtrlImportFromDrop(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlImportDropText(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnToDoCtrlCanImportDropFiles(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnToDoCtrlCanImportFromDrop(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifyListChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
@@ -739,7 +739,6 @@ protected:
 	BOOL DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartup);
 	void DoInsertDateAndTime(BOOL bDate, BOOL bTime);
 	BOOL DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere);
-	BOOL DoImportFromDropText(const CString& sDropText, TDLID_IMPORTTO nWhere);
 	TDC_FILE DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int nIndex, CTaskFile& tasks, LPCTSTR szFilePath = NULL, BOOL bFlush = TRUE);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
 	void DoMoveTask(TDC_MOVETASK nDirection);

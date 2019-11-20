@@ -32,6 +32,24 @@ class CFilteredToDoCtrl;
 
 //////////////////////////////////////////////////////////////////////
 
+struct TDCDROPIMPORT
+{
+	TDCDROPIMPORT(DWORD dwID, const CStringArray& sDropFiles) : dwTaskID(dwID)
+	{
+		aFiles.Copy(sDropFiles);
+	}
+
+	TDCDROPIMPORT(DWORD dwID, const CString& sDropText) : dwTaskID(dwID), sText(sDropText)
+	{
+	}
+
+	DWORD dwTaskID;
+	CStringArray aFiles;
+	CString sText;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 struct TDCINFOTIPITEM
 {
 	TDCINFOTIPITEM() // for CArray

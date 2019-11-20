@@ -174,7 +174,7 @@ BOOL CTDLImportDialog::SetImportTo(TDLID_IMPORTTO nImportTo)
 	return TRUE;
 }
 
-BOOL CTDLImportDialog::SetFilePath(LPCTSTR szFilePath)
+BOOL CTDLImportDialog::SetUseFile(LPCTSTR szFilePath)
 {
 	if (Misc::IsEmpty(szFilePath))
 		return FALSE;
@@ -517,7 +517,7 @@ void CTDLImportDialog::OnRepositionControls(int dx, int dy)
 	CDialogHelper::OffsetCtrl(this, IDC_TOBORDER, dx, 0);
 	CDialogHelper::ResizeCtrl(this, IDC_TOBORDER, 0, dy);
 	CDialogHelper::OffsetCtrl(this, IDC_ADDTOACTIVETASKLIST, dx, 0);
-	CDialogHelper::OffsetCtrl(this, IDC_ADDTOSELECTEDTASK, dx, 0);
+	CDialogHelper::OffsetCtrl(this, IDC_ACTIVETASKLISTPOSITION, dx, 0);
 	CDialogHelper::OffsetCtrl(this, IDC_CREATENEWTASKLIST, dx, 0);
 
 	CDialogHelper::OffsetCtrl(this, IDC_TODIVIDER, dx, 0);

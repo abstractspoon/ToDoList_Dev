@@ -1171,6 +1171,7 @@ int Misc::Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive, B
 	if (szItem == NULL)
 		return -1;
 
+	BOOL bItemIsEmpty = IsEmpty(szItem);
 	int nSize = array.GetSize();
 
 	for (int nItem = 0; nItem < nSize; nItem++)
@@ -1179,27 +1180,33 @@ int Misc::Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive, B
 		const CString& sArrItem = GetItem(array, nItem);
 
 		// special case: empty item
-		if (IsEmpty(szItem))
+		if (bItemIsEmpty)
 		{
 			if (sArrItem.IsEmpty())
 				return nItem;
 		}
-		else if (bWholeWord)
+		else
 		{
-			if (bCaseSensitive)
+			// Attempt a shortcut
+			if (bWholeWord)
 			{
-				if (sArrItem.Compare(szItem) == 0)
-					return nItem;
+				if (bCaseSensitive)
+				{
+					if (sArrItem.Compare(szItem) == 0)
+						return nItem;
+				}
+				else
+				{
+					if (sArrItem.CompareNoCase(szItem) == 0)
+						return nItem;
+				}
 			}
-			else
+
+			// Long way round
+			if (Find(szItem, sArrItem, bCaseSensitive, bWholeWord) != -1)
 			{
-				if (sArrItem.CompareNoCase(szItem) == 0)
-					return nItem;
+				return nItem;
 			}
-		}
-		else if (Find(szItem, sArrItem, bCaseSensitive, FALSE) != -1)
-		{
-			return nItem;
 		}
 	}
 

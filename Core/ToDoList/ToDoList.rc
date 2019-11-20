@@ -5663,7 +5663,7 @@ BEGIN
     IDS_IMPORTFROMTEXT      "&Text:"
     IDS_IMPORTTOTOPOFTASKLIST "Top of tasklist"
     IDS_IMPORTTOSELTASK     "Subtask of selected task"
-    IDS_IMPORTTOBELOWSELTASK "Below selected task"
+    IDS_IMPORTTOBELOWSELTASK "After selected task"
     IDS_IMPORTTOBOTTOMOFTASKLIST "Bottom of tasklist"
 END
 

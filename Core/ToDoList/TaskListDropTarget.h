@@ -27,6 +27,7 @@ struct TLDT_DATA
 
 	CString GetFirstFile() const;
 	int GetFileCount() const;
+	BOOL HasFiles() const;
 	CString GetFile(int nFile) const;
 	BOOL HasText() const;
 	CString GetText() const;
