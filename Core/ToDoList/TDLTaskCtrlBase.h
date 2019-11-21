@@ -166,7 +166,7 @@ public:
 	BOOL SelectionHasSubtasks() const; // == SelectionHasParents
 	BOOL SelectionHasIcons() const;
 	BOOL SelectionHasUnlocked() const;
-	BOOL SelectionHasLocked() const;
+	BOOL SelectionHasLocked(BOOL bIgnoreReferences = FALSE) const;
 	BOOL SelectionAreAllDone() const;
 	BOOL CanSplitSelectedTask() const;
 

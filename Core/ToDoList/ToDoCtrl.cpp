@@ -7263,8 +7263,10 @@ LRESULT CToDoCtrl::OnTreeDragAbort(WPARAM /*wParam*/, LPARAM /*lParam*/)
 
 LRESULT CToDoCtrl::OnTreeDragEnter(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	// Allow locked tasks to start dragging so we can 
-	// give feedback later that they can't be moved
+	// Prevent dragging of locked tasks except references
+	if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
+		return FALSE;
+
 	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 }
 
@@ -7279,30 +7281,25 @@ LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 
 	if (nRes != DD_DROPEFFECT_NONE)
 	{
-		// Prevent dragging of locked tasks
-		if (m_taskTree.SelectionHasLocked(FALSE))
-		{
-			nRes = DD_DROPEFFECT_NONE;
-		}
-		else 
-		{
-			const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
+		// Prevent dragging of locked tasks except references
+		ASSERT(!m_taskTree.SelectionHasLocked(FALSE, TRUE));
 
-			// handle WM_DD_DRAGOVER for creating task shortcuts
-			// only interested in left button drags with ctrl+shift pressed
-			if (pDDI->bLeftDrag)
+		const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
+
+		// handle WM_DD_DRAGOVER for creating task shortcuts
+		// only interested in left button drags with ctrl+shift pressed
+		if (pDDI->bLeftDrag)
+		{
+			HTREEITEM htiOver = m_taskTree.HitTestItem(pDDI->pt);
+			DWORD dwOverTaskID = GetTaskID(htiOver);
+
+			if (m_data.IsTaskReference(dwOverTaskID) && m_taskTree.SelectionHasNonReferences())
 			{
-				HTREEITEM htiOver = m_taskTree.HitTestItem(pDDI->pt);
-				DWORD dwOverTaskID = GetTaskID(htiOver);
-
-				if (m_data.IsTaskReference(dwOverTaskID) && m_taskTree.SelectionHasNonReferences())
-				{
-					nRes = DD_DROPEFFECT_LINK;
-				}
-				else if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT)) 
-				{
-					nRes = DD_DROPEFFECT_LINK;
-				}
+				nRes = DD_DROPEFFECT_LINK;
+			}
+			else if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT)) 
+			{
+				nRes = DD_DROPEFFECT_LINK;
 			}
 		}
 	}
@@ -7316,9 +7313,8 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 	
 	if (bDropped)
 	{
-		// Prevent dragging of locked tasks
-		if (m_taskTree.SelectionHasLocked(FALSE))
-			return FALSE;
+		// Prevent dragging of locked tasks except references
+		ASSERT(!m_taskTree.SelectionHasLocked(FALSE, TRUE));
 
 		const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
 		HTREEITEM htiDrop, htiAfter;

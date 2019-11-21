@@ -5470,13 +5470,16 @@ BOOL CTDLTaskCtrlBase::SelectionHasUnlocked() const
 	return FALSE;
 }
 
-BOOL CTDLTaskCtrlBase::SelectionHasLocked() const
+BOOL CTDLTaskCtrlBase::SelectionHasLocked(BOOL bIgnoreReferences) const
 {
 	POSITION pos = GetFirstSelectedTaskPos();
 	
 	while (pos)
 	{
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+		if (bIgnoreReferences && m_data.IsTaskReference(dwTaskID))
+			continue;
 
 		if (m_calculator.IsTaskLocked(dwTaskID))
 			return TRUE;
