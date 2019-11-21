@@ -5723,7 +5723,8 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 	// mislaid/eaten and the multiple-selection fails so if the
 	// ctrl or shift keys are down we don't return a tooltip
 	if (HasStyle(TDCS_SHOWINFOTIPS) && 
-		m_infoTip.GetSafeHwnd() && 
+		m_infoTip.GetSafeHwnd() &&
+		(m_nMaxState != TDCMS_MAXCOMMENTS) && 
 		!Misc::IsKeyPressed(VK_CONTROL) &&
 		!Misc::IsKeyPressed(VK_SHIFT))
 	{
@@ -5735,6 +5736,9 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 		{
 			CTDCAttributeMap mapAttrib;
 			TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttrib);
+
+			if (m_nMaxState == TDCMS_NORMAL)
+				mapAttrib.Add(TDCA_COMMENTS);
 
 			CString sInfoTip = m_infoTip.FormatTip(dwTaskID, 
 												   mapAttrib, 
