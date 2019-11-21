@@ -3828,7 +3828,7 @@ BEGIN
                                                 ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
 
         MENUITEM SEPARATOR
-        MENUITEM "Paste as a Subtask",          ID_EDIT_PASTESUB
+        MENUITEM "Paste as Subtask",            ID_EDIT_PASTESUB
         MENUITEM "Paste after",                 ID_EDIT_PASTEAFTER
         MENUITEM "Paste as &Reference",         ID_EDIT_PASTEASREF
         MENUITEM SEPARATOR
