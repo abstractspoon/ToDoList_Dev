@@ -90,6 +90,9 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 	}
 
 	// Now add tabs to each label until they all have the same length as the maximum
+	dc.DrawText(_T("\t"), rItem, DT_EXPANDTABS | DT_CALCRECT);
+	int nTabWidth = rItem.Width();
+
 	nItem = aItems.GetSize();
 
 	while (nItem--)
@@ -99,9 +102,7 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 		while (iti.nLabelWidth < nMaxWidth)
 		{
 			iti.sLabel += '\t';
-			dc.DrawText(iti.sLabel, rItem, DT_EXPANDTABS | DT_CALCRECT);
-
-			iti.nLabelWidth = rItem.Width();
+			iti.nLabelWidth += nTabWidth;
 		}
 	}
 	
