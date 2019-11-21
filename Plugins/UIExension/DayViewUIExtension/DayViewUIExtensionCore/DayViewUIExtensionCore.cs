@@ -54,7 +54,7 @@ namespace DayViewUIExtension
 		
 		public bool SelectTask(UInt32 dwTaskID)
 		{
-            if (m_DayView.SelectedAppointmentId == dwTaskID)
+            if (m_DayView.GetSelectedTaskID() == dwTaskID)
                 return true;
 
 			bool selected = m_DayView.SelectTask(dwTaskID);
