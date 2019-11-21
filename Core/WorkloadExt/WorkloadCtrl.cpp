@@ -1435,7 +1435,7 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			case ID_TOTALTASKSPERPERSON:
 			case ID_PERCENTLOADPERPERSON:
 				{
-					pDC->FillSolidRect(rFullWidth, GetRowColor(nItem + 1));
+					pDC->FillSolidRect(rFullWidth, GetSysColor(COLOR_WINDOW)/*GetRowColor(nItem + 1)*/);
 					
 					if (m_bSavingToImage || ((nItem + 1) != ID_LASTTOTAL))
 						DrawItemDivider(pDC, rFullWidth, FALSE, FALSE);
