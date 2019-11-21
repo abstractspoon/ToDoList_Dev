@@ -883,11 +883,11 @@ TCHAR Misc::Last(LPCTSTR szText)
 	return szText[LastIndex(szText)];
 }
 
-BOOL Misc::TrimFirstIf(TCHAR cText, CString& sText)
+BOOL Misc::TrimFirstIf(TCHAR cTest, CString& sText)
 {
-	if (cText && (First(sText) == cText))
+	if (cTest && (First(sText) == cTest))
 	{
-		sText.TrimLeft(cText);
+		sText.TrimLeft(cTest);
 		return TRUE;
 	}
 
@@ -895,11 +895,11 @@ BOOL Misc::TrimFirstIf(TCHAR cText, CString& sText)
 	return FALSE;
 }
 
-BOOL Misc::TrimLastIf(TCHAR cText, CString& sText)
+BOOL Misc::TrimLastIf(TCHAR cTest, CString& sText)
 {
-	if (cText && (Last(sText) == cText))
+	if (cTest && (Last(sText) == cTest))
 	{
-		sText.TrimRight(cText);
+		sText.TrimRight(cTest);
 		return TRUE;
 	}
 
