@@ -117,7 +117,7 @@ BOOL TDCSTARTUPATTRIB::IsOffset(LPCTSTR szValue)
 	return (szValue && ((szValue[0] == '+') || (szValue[0] == '-')));
 }
 
-BOOL TDCSTARTUPATTRIB::GetTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const
+BOOL TDCSTARTUPATTRIB::GetTimePeriod(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const
 {
 	if (!bSet)
 		return FALSE;
@@ -177,6 +177,39 @@ BOOL TDCSTARTUPATTRIB::GetDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset)
 
 	nUnits = TDC::MapDHUnitsToUnits(nDHUnits);
 	return TRUE;
+}
+
+BOOL TDCSTARTUPATTRIB::Get24HourTime(double& dValue, BOOL& bOffset) const
+{
+	if (!bSet)
+		return FALSE;
+
+	// We support offsets in days, hours and minutes only
+	TDC_UNITS nUnits;
+
+	if (GetTimePeriod(dValue, nUnits, bOffset) && bOffset)
+	{
+		switch (nUnits)
+		{
+		case TDCU_MINS:
+			dValue /= (24 * 60);
+			return TRUE;
+
+		case TDCU_HOURS:
+			dValue /= 24;
+			return TRUE;
+
+		case TDCU_DAYS:
+			return TRUE;
+		}
+
+		ASSERT(0);
+		bOffset = FALSE;
+		return FALSE;
+	}
+
+	// else
+	return GetValue(dValue, bOffset); 
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -574,7 +607,7 @@ void CTDCStartupOptions::ParseTime(const CEnCommandLineInfo& cmdInfo,
 	{
 		if (TDCSTARTUPATTRIB::IsOffset(sValue))
 		{
-			dTime.SetValue(sValue); // in hours
+			dTime.SetValue(sValue);
 		}
 		else if (sValue.IsEmpty())
 		{
@@ -586,7 +619,7 @@ void CTDCStartupOptions::ParseTime(const CEnCommandLineInfo& cmdInfo,
 			COleDateTime dtTime;
 
 			if (dtTime.ParseDateTime(sValue, VAR_TIMEVALUEONLY))
-				dTime.SetValue(Misc::Format(dtTime.m_dt));
+				dTime.SetValue(Misc::Format(dtTime.m_dt)); // fraction of a day
 		}
 	}
 }

@@ -34,7 +34,8 @@ public:
 	void ClearValue();
 	int GetValues(CStringArray& aItems, BOOL& bAppend) const;
 
-	BOOL GetTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const;
+	BOOL Get24HourTime(double& dValue, BOOL& bOffset) const;
+	BOOL GetTimePeriod(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const;
 	BOOL GetDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const;
 	BOOL IsOffset() const { return IsOffset(szValue); }
 	
@@ -92,11 +93,11 @@ public:
 	BOOL GetDependency(CString& sValue) const { return m_sDepends.GetValue(sValue); }
 
 	BOOL GetStartDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtStartDate.GetDate(dValue, nUnits, bOffset); } 
-	BOOL GetStartTime(double& dValue, BOOL& bOffset) const { return m_dStartTime.GetValue(dValue, bOffset); } 
+	BOOL GetStartTime(double& dValue, BOOL& bOffset) const { return m_dStartTime.Get24HourTime(dValue, bOffset); } 
 	BOOL GetDueDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtDueDate.GetDate(dValue, nUnits, bOffset); } 
-	BOOL GetDueTime(double& dValue, BOOL& bOffset) const { return m_dDueTime.GetValue(dValue, bOffset); }
+	BOOL GetDueTime(double& dValue, BOOL& bOffset) const { return m_dDueTime.Get24HourTime(dValue, bOffset); }
 	BOOL GetDoneDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtDoneDate.GetDate(dValue, nUnits, bOffset); } 
-	BOOL GetDoneTime(double& dValue, BOOL& bOffset) const { return m_dDoneTime.GetValue(dValue, bOffset); } 
+	BOOL GetDoneTime(double& dValue, BOOL& bOffset) const { return m_dDoneTime.Get24HourTime(dValue, bOffset); } 
 	BOOL GetCreationDate(COleDateTime& dtValue) const;
 
 	BOOL GetPercentDone(int& nValue, BOOL& bOffset) const { return m_nPercentDone.GetValue(nValue, bOffset); }
@@ -104,8 +105,8 @@ public:
 	BOOL GetRisk(int& nValue, BOOL& bOffset) const;
 
 	BOOL GetCost(double& dValue, BOOL& bOffset) const { return m_dCost.GetValue(dValue, bOffset); }
-	BOOL GetTimeEst(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dTimeEst.GetTime(dValue, nUnits, bOffset); } 
-	BOOL GetTimeSpent(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dTimeSpent.GetTime(dValue, nUnits, bOffset); } 
+	BOOL GetTimeEst(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dTimeEst.GetTimePeriod(dValue, nUnits, bOffset); } 
+	BOOL GetTimeSpent(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dTimeSpent.GetTimePeriod(dValue, nUnits, bOffset); } 
 
 	int GetDependencies(CStringArray& aDepends, BOOL& bAppend) const { return m_sDepends.GetValues(aDepends, bAppend); }
 	int GetCategories(CStringArray& aCats, BOOL& bAppend) const { return m_sCategory.GetValues(aCats, bAppend); }
