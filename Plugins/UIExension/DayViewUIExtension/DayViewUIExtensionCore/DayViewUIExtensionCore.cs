@@ -54,6 +54,9 @@ namespace DayViewUIExtension
 		
 		public bool SelectTask(UInt32 dwTaskID)
 		{
+            if (m_DayView.SelectedAppointmentId == dwTaskID)
+                return true;
+
 			bool selected = m_DayView.SelectTask(dwTaskID);
 
 			m_SettingMonthYear = true;
