@@ -4100,27 +4100,20 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	TDC_SET nRes = SET_NOCHANGE;
 	CDWordArray aModTaskIDs;
 	
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
-		HTREEITEM hti = TSH().GetNextItem(pos);
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
 		// ignore parent tasks
-		if (!m_taskTree.ItemHasChildren(hti) || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-		{
-			DWORD dwTaskID = GetTaskID(hti);
-			TDC_SET nItemRes = m_data.SetTaskTimeEstimate(dwTaskID, timeEst);
-			
-			if (nItemRes == SET_CHANGE)
-			{
-				nRes = SET_CHANGE;
-				aModTaskIDs.Add(dwTaskID);
-			}
-		}
+		if (m_data.IsTaskParent(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+			continue;
+
+		if (m_data.SetTaskTimeEstimate(dwTaskID, timeEst) == SET_CHANGE)
+			aModTaskIDs.Add(dwTaskID);
 	}
 	
 	if (aModTaskIDs.GetSize())
@@ -4180,27 +4173,20 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	TDC_SET nRes = SET_NOCHANGE;
 	CDWordArray aModTaskIDs;
 	
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
-		HTREEITEM hti = TSH().GetNextItem(pos);
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
 		// ignore parent tasks
-		if (!m_taskTree.ItemHasChildren(hti) || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-		{
-			DWORD dwTaskID = GetTaskID(hti);
-			TDC_SET nItemRes = m_data.SetTaskTimeSpent(dwTaskID, timeSpent);
-			
-			if (nItemRes == SET_CHANGE)
-			{
-				nRes = SET_CHANGE;
-				aModTaskIDs.Add(dwTaskID);
-			}
-		}
+		if (m_data.IsTaskParent(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+			continue;
+
+		if (m_data.SetTaskTimeSpent(dwTaskID, timeSpent) == SET_CHANGE)
+			aModTaskIDs.Add(dwTaskID);
 	}
 	
 	if (aModTaskIDs.GetSize())
@@ -4234,7 +4220,6 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	TDC_SET nRes = SET_NOCHANGE;
 	CDWordArray aModTaskIDs;
 	
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
@@ -4244,16 +4229,16 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
 		// ignore parent tasks
-		if (!m_data.TaskHasSubtasks(dwTaskID) || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-		{
-			TDCTIMEPERIOD timeEst;
-			m_data.GetTaskTimeEstimate(dwTaskID, timeEst);
+		if (m_data.IsTaskParent(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+			continue;
 
-			if (timeEst.SetUnits(nUnits, bRecalcTime))
-			{
-				if (!HandleModResult(dwTaskID, m_data.SetTaskTimeEstimate(dwTaskID, timeEst), aModTaskIDs))
-					return FALSE;
-			}
+		TDCTIMEPERIOD timeEst;
+		m_data.GetTaskTimeEstimate(dwTaskID, timeEst);
+
+		if (timeEst.SetUnits(nUnits, bRecalcTime))
+		{
+			if (!HandleModResult(dwTaskID, m_data.SetTaskTimeEstimate(dwTaskID, timeEst), aModTaskIDs))
+				return FALSE;
 		}
 	}
 	
@@ -4301,17 +4286,17 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 
 	Flush();
 	
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-		
-	CDWordArray aModTaskIDs;
 	POSITION pos = TSH().GetFirstItemPos();
+	CDWordArray aModTaskIDs;
 	
+	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
 		// ignore parent tasks
-		if (m_data.TaskHasSubtasks(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+		if (m_data.IsTaskParent(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 			continue;
 
 		TDCTIMEPERIOD timeSpent;
@@ -12146,10 +12131,21 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_TAGS:			
 	case TDCA_TASKNAME:		
 	case TDCA_TASKNAMEORCOMMENTS:		
-	case TDCA_TIMEEST:		
-	case TDCA_TIMESPENT:	
 	case TDCA_VERSION:		
 		return SelectedTaskIsUnlocked(dwTaskID);
+
+	case TDCA_TIMEEST:
+	case TDCA_TIMESPENT:
+		if (!SelectedTaskIsUnlocked(dwTaskID))
+		{
+			return FALSE;
+		}
+		else if (dwTaskID)
+		{
+			if (!HasStyle(TDCS_ALLOWPARENTTIMETRACKING) && m_data.IsTaskParent(dwTaskID))
+				return FALSE;
+		}
+		return TRUE;
 
 	case TDCA_STARTDATE:
 	case TDCA_STARTTIME:
