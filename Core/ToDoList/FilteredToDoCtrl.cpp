@@ -1209,9 +1209,9 @@ void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const 
 		
 		if (!SelectTasks(aModTaskIDs, FALSE))
 			RestoreTreeSelection(cache);
-	}
 
-	SyncActiveViewSelectionToTree();
+		SyncActiveViewSelectionToTree();
+	}
 }
 
 void CFilteredToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)

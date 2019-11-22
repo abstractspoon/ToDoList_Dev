@@ -3356,9 +3356,14 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 			IUI_UPDATETYPE nUpdate = TDC::MapAttributesToIUIUpdateType(mapAttribIDs);
 
 			CTaskFile tasks;
+			BOOL bUpdateView = GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks);
 
-			if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks) ||
-				(!GetTaskCount() && (mapAttribIDs.Has(TDCA_DELETE) || mapAttribIDs.Has(TDCA_UNDO))))
+			// Special case: we've just deleted the last task or
+			// just undone the first new task
+			if (!bUpdateView)
+				bUpdateView = (!m_taskTree.Tree().GetCount() && (mapAttribIDs.Has(TDCA_DELETE) || mapAttribIDs.Has(TDCA_UNDO)));
+
+			if (bUpdateView)
 			{
 				CWaitCursor cursor;
 				BeginExtensionProgress(pVData);
@@ -3367,7 +3372,18 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 				pVData->bNeedFullTaskUpdate = FALSE;
 				UpdateExtensionView(pExtWnd, tasks, nUpdate);
 
-				SyncExtensionSelectionToTree(nView);
+				// The only reason we DON't resync the selection is if we've just deleted
+				// a task, resulting in no selection, but we know that another task selection
+				// is pending because there are still tasks in the tree
+				if (mapAttribIDs.Has(TDCA_DELETE) && !GetSelectedTaskID() && m_taskTree.Tree().GetCount())
+				{
+					// do nothing
+				}
+				else
+				{
+					SyncExtensionSelectionToTree(nView);
+				}
+
 				EndExtensionProgress();
 			}
 		}
