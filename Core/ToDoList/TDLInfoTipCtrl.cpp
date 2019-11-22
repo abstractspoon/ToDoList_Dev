@@ -73,8 +73,12 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 	CClientDC dc(const_cast<CTDLInfoTipCtrl*>(this));
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, GetSafeHwnd());
 
-	// Calculate the pixel width of the longest label plus a tab
-	int nMaxWidth = 0;
+	// 1. Normalise the labels by adding a tab 
+	// 2. Keep track of the widest label
+	// 3. Keep track of the longest value string exclusing comments
+	int nMaxLabelWidth = 0;
+	int nMaxValueLen = 0;
+
 	int nItem = aItems.GetSize();
 	CRect rItem(0, 0, 10000, 100);
 
@@ -86,10 +90,14 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 		dc.DrawText(iti.sLabel, rItem, DT_EXPANDTABS | DT_CALCRECT);
 		
 		iti.nLabelWidth = rItem.Width();
-		nMaxWidth = max(nMaxWidth, iti.nLabelWidth);
+		nMaxLabelWidth = max(nMaxLabelWidth, iti.nLabelWidth);
+
+		if (iti.nAttribID != TDCA_COMMENTS)
+			nMaxValueLen = max(nMaxValueLen, iti.sValue.GetLength());
 	}
 
-	// Now add tabs to each label until they all have the same length as the maximum
+	// Now add tabs to each label until they all have the same length 
+	// as the maximum
 	dc.DrawText(_T("\t"), rItem, DT_EXPANDTABS | DT_CALCRECT);
 	int nTabWidth = rItem.Width();
 
@@ -99,7 +107,7 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 	{
 		TDCINFOTIPITEM& iti = aItems[nItem];
 
-		while (iti.nLabelWidth < nMaxWidth)
+		while (iti.nLabelWidth < nMaxLabelWidth)
 		{
 			iti.sLabel += '\t';
 			iti.nLabelWidth += nTabWidth;
@@ -111,8 +119,39 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 
 	for (nItem = 0; nItem < aItems.GetSize(); nItem++)
 	{
-		sTip += aItems[nItem].sLabel;
-		sTip += aItems[nItem].sValue;
+		TDCINFOTIPITEM& iti = aItems[nItem];
+
+		// Multi-line or long comments are special case
+		const int COMMENTS_MINLINELEN = 75;
+		const int COMMENTS_MAXLINELEN = max(COMMENTS_MINLINELEN, (nMaxValueLen + 10));
+
+		if ((iti.nAttribID == TDCA_COMMENTS) && ((iti.sValue.Find('\n') != -1) || (iti.sValue.GetLength() > COMMENTS_MAXLINELEN)))
+		{
+			CStringArray aComments;
+
+			int nNumLines = Misc::SplitIntoLines(iti.sValue, aComments, COMMENTS_MAXLINELEN);
+			nNumLines -= Misc::RemoveEmptyItems(aComments);
+
+			if (nNumLines > 1)
+			{
+				for (int nLine = 0; nLine < nNumLines; nLine++)
+				{
+					sTip += _T("\n");
+
+					if (nLine == 0)
+						sTip += iti.sLabel;
+					else
+						sTip += CString('\t', (nMaxLabelWidth / nTabWidth));
+
+					sTip += aComments[nLine];
+				}
+				continue;
+			}
+		}
+
+		// all the rest
+		sTip += iti.sLabel;
+		sTip += iti.sValue;
 		sTip += _T("\n");
 	}
 

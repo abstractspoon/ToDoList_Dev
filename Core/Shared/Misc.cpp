@@ -677,7 +677,7 @@ int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSe
 		if (bWholeWord)
 		{
 			// Test prior and next chars for delimiters
-			const CString DELIMS("()-\\/{}[]:;,. ?\"'\n\r\t");
+			static const CString DELIMS("()-\\/{}[]:;,. ?\"'\n\r\t");
 			TCHAR cPrevChar = ' ', cNextChar = ' ';
 
 			// prev
@@ -1051,6 +1051,60 @@ int Misc::Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep, BOOL
 	}
 
 	return aValues.GetSize();
+}
+
+int Misc::SplitIntoLines(const CString& sText, CStringArray& aLines, int nMaxLength)
+{
+	int nNumLines = Split(sText, aLines, '\n');
+
+	if ((nNumLines == 0) || (nMaxLength <= 0) && (nMaxLength != -1))
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	if (nMaxLength != -1)
+	{
+		// Extra over processing
+		int nLine = nNumLines;
+
+		while (nLine--)
+		{
+			CString& sLine = aLines[nLine];
+
+			if (sLine.GetLength() > nMaxLength)
+			{
+				static const CString DELIMS("()-\\/{}[]:;,. ?\"'\n\r\t");
+
+				CStringArray aSubLines;
+
+				while (sLine.GetLength() > nMaxLength)
+				{
+					// Work backwards looking for a word break
+					int nLineLength = nMaxLength;
+
+					while (nLineLength && (DELIMS.Find(sLine[nLineLength - 1]) == -1))
+						nLineLength--;
+
+					if (nLineLength == 0)
+						nLineLength = nMaxLength;
+
+					aSubLines.Add(sLine.Left(nLineLength));
+					sLine = sLine.Mid(nLineLength);
+				}
+				
+				// Add whatever's left over
+				if (!sLine.IsEmpty())
+					aSubLines.Add(sLine);
+
+				// Replace the existing string with the sub strings
+				aLines.RemoveAt(nLine);
+				aLines.InsertAt(nLine, &aSubLines);
+			}
+		}
+	}
+
+	return aLines.GetSize();
 }
 
 BOOL Misc::MatchAll(const CStringArray& array1, const CStringArray& array2, BOOL bOrderSensitive, BOOL bCaseSensitive)

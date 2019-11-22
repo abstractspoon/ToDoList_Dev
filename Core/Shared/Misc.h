@@ -246,6 +246,8 @@ namespace Misc
  	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim = TRUE);
 	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim = TRUE);
 
+	int SplitIntoLines(const CString& sText, CStringArray& aValues, int nMaxLength = -1);
+
 	template <class T, class S> 
 	int FindT(const S& toFind, const T& array)
 	{
