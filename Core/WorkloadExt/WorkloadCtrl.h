@@ -50,7 +50,7 @@ public:
 	int GetTaskCount() const { return (int)m_tree.GetCount(); }
 
 	BOOL GetSelectedTask(WORKLOADITEM& wi) const;
-	BOOL SetSelectedTask(const WORKLOADITEM& wi);
+	BOOL SetSelectedTaskAllocations(const WORKLOADITEM& wi);
 	const CStringArray& GetAllocatedToList() const { return m_aAllocTo; }
 
 	BOOL SetCurrentPeriod(const COleDateTimeRange& dtPeriod);

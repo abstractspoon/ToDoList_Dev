@@ -214,7 +214,7 @@ BOOL CWorkloadCtrl::GetSelectedTask(WORKLOADITEM& wi) const
 	return TRUE;
 }
 
-BOOL CWorkloadCtrl::SetSelectedTask(const WORKLOADITEM& wi)
+BOOL CWorkloadCtrl::SetSelectedTaskAllocations(const WORKLOADITEM& wi)
 {
 	DWORD dwTaskID = GetSelectedTaskID();
 	WORKLOADITEM* pWI = NULL;
@@ -1115,8 +1115,11 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 			case WLCF_CALCMISSINGALLOCATIONS:
 			case WLCF_RECALCALLOCATIONS:
 			case WLCF_RECALCPROPORTIONALLY:
-			case WLCF_ALLOWPARENTALLOCATIONS:
 				RefreshCalculatedAllocations();
+				break;
+
+			case WLCF_ALLOWPARENTALLOCATIONS:
+				RecalcAllocationTotals();
 				break;
 			}
 

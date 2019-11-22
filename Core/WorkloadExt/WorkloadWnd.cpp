@@ -904,7 +904,7 @@ void CWorkloadWnd::EditSelectedWorkloadAllocations(LPCTSTR szAllocTo)
 			{
 				if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, nNumMods, (LPARAM)&mod[0]))
 				{
-					m_ctrlWorkload.SetSelectedTask(wiNew);
+					m_ctrlWorkload.SetSelectedTaskAllocations(wiNew);
 				}
 			}
 		}
