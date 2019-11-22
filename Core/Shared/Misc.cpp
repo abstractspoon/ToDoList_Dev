@@ -1078,7 +1078,7 @@ int Misc::SplitIntoLines(const CString& sText, CStringArray& aLines, int nMaxLen
 
 				CStringArray aSubLines;
 
-				while (sLine.GetLength() > nMaxLength)
+				do
 				{
 					// Work backwards looking for a word break
 					int nLineLength = nMaxLength;
@@ -1092,6 +1092,7 @@ int Misc::SplitIntoLines(const CString& sText, CStringArray& aLines, int nMaxLen
 					aSubLines.Add(sLine.Left(nLineLength));
 					sLine = sLine.Mid(nLineLength);
 				}
+				while (sLine.GetLength() > nMaxLength);
 				
 				// Add whatever's left over
 				if (!sLine.IsEmpty())
