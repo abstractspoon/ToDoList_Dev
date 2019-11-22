@@ -372,7 +372,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				TextRenderer.DrawText(e.Graphics, Text, Font, ClientRectangle, ForeColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 			}
 
-			public int Height
+			public new int Height
 			{
 				get
 				{
