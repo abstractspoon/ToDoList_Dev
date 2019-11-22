@@ -468,18 +468,31 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-		public Boolean TaskColorIsBackground
+		public Boolean StrikeThruDoneTasks
 		{
-			get { return m_Renderer.TaskColorIsBackground; }
+			get { return m_Renderer.StrikeThruDoneTasks; }
 			set
 			{
-				if (m_Renderer.TaskColorIsBackground != value)
+                if (m_Renderer.StrikeThruDoneTasks != value)
 				{
-					m_Renderer.TaskColorIsBackground = value;
+                    m_Renderer.StrikeThruDoneTasks = value;
 					Invalidate();
 				}
 			}
 		}
+
+        public Boolean TaskColorIsBackground
+        {
+            get { return m_Renderer.TaskColorIsBackground; }
+            set
+            {
+                if (m_Renderer.TaskColorIsBackground != value)
+                {
+                    m_Renderer.TaskColorIsBackground = value;
+                    Invalidate();
+                }
+            }
+        }
 
 		public Boolean ShowParentsAsFolder
 		{

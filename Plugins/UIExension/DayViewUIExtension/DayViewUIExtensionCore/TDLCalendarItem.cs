@@ -68,6 +68,8 @@ namespace DayViewUIExtension
 		public Boolean IsParent { get; set; }
         public Boolean HasIcon { get; set; }
         public Boolean IsDone { get; set; }
+        public Boolean IsGoodAsDone { get; set; }
+        public Boolean IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
         public Boolean IsLocked { get; set; }
 		public Boolean HasDependencies { get; set; }
 		public double TimeEstimate { get; set; }
@@ -193,7 +195,8 @@ namespace DayViewUIExtension
 				TimeEstUnits = units;
 
 				StartDate = task.GetStartDate(false);
-				IsDone = (task.IsDone() || task.IsGoodAsDone());
+				IsDone = task.IsDone();
+                IsGoodAsDone = task.IsGoodAsDone();
 
 				m_PrevDueDate = CheckGetEndOfDay(task.GetDueDate(false));
 				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
@@ -214,7 +217,9 @@ namespace DayViewUIExtension
 				if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
 				{
 					bool wasDone = IsDone;
-					IsDone = (task.IsDone() || task.IsGoodAsDone());
+
+				    IsDone = task.IsDone();
+                    IsGoodAsDone = task.IsGoodAsDone();
 
 					if (IsDone)
 					{

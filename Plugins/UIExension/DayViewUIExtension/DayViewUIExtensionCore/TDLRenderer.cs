@@ -21,8 +21,6 @@ namespace DayViewUIExtension
 		private UIExtension.TaskIcon m_TaskIcons;
 		private IntPtr m_hWnd;
 		private Font m_BaseFont;
-		private bool m_ShowParentsAsFolder;
-		private bool m_TaskColorIsBkgnd;
 
 		// ------------------------------------------------------------------------
 
@@ -45,20 +43,15 @@ namespace DayViewUIExtension
 
 			m_TaskIcons = taskIcons;
 			m_hWnd = hWnd;
-			m_ShowParentsAsFolder = false;
+
+			ShowParentsAsFolder = false;
+            TaskColorIsBackground = false;
+            StrikeThruDoneTasks = true;
         }
 
-		public bool ShowParentsAsFolder
-		{
-			get { return m_ShowParentsAsFolder; }
-			set { m_ShowParentsAsFolder = value; }
-		}
-
-		public bool TaskColorIsBackground
-		{
-			get { return m_TaskColorIsBkgnd; }
-			set { m_TaskColorIsBkgnd = value; }
-		}
+		public bool ShowParentsAsFolder { get; set; }
+		public bool TaskColorIsBackground { get; set; }
+        public bool StrikeThruDoneTasks { get; set; }
 
 		public UITheme Theme
         {
@@ -290,7 +283,7 @@ namespace DayViewUIExtension
 		{
 			return ((m_TaskIcons != null) &&
 					(taskItem != null) &&
-					(taskItem.HasIcon || (m_ShowParentsAsFolder && taskItem.IsParent)));
+					(taskItem.HasIcon || (ShowParentsAsFolder && taskItem.IsParent)));
 		}
 
         public override void DrawAppointment(System.Drawing.Graphics g, System.Drawing.Rectangle rect, Calendar.Appointment appointment, bool isSelected, System.Drawing.Rectangle gripRect)
@@ -326,7 +319,7 @@ namespace DayViewUIExtension
 					{
 						textColor = DrawingColor.SetLuminance(taskItem.TaskTextColor, 0.3f);
 					}
-					else if (m_TaskColorIsBkgnd && !taskItem.IsDone)
+					else if (TaskColorIsBackground && !taskItem.IsDoneOrGoodAsDone)
 					{
 						textColor = DrawingColor.GetBestTextColor(taskItem.TaskTextColor);
 						borderColor = DrawingColor.AdjustLighting(taskItem.TaskTextColor, -0.5f, true);
@@ -426,8 +419,20 @@ namespace DayViewUIExtension
 
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
-					using (SolidBrush brush = new SolidBrush(textColor))
-						g.DrawString(appointment.Title, this.BaseFont, brush, rect, format);
+                    using (SolidBrush brush = new SolidBrush(textColor))
+                    {
+                        if (taskItem.IsDone && StrikeThruDoneTasks)
+                        {
+                            using (Font font = new Font(this.BaseFont, FontStyle.Strikeout))
+                            {
+                                g.DrawString(appointment.Title, font, brush, rect, format);
+                            }
+                        }
+                        else
+                        {
+                            g.DrawString(appointment.Title, this.BaseFont, brush, rect, format);
+                        }
+                    }
 
                     g.TextRenderingHint = TextRenderingHint.SystemDefault;
                 }
