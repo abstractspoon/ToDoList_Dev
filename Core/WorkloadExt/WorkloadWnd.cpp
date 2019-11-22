@@ -255,6 +255,7 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	m_ctrlWorkload.SetOption(WLCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
 	m_ctrlWorkload.SetOption(WLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 	m_ctrlWorkload.SetOption(WLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
+	m_ctrlWorkload.SetOption(WLCF_ALLOWPARENTALLOCATIONS, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowParentTimeTracking"), TRUE));
 
 	m_ctrlWorkload.EnableTreeCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
 	m_ctrlWorkload.EnableTreeLabelTips(!pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
@@ -937,7 +938,7 @@ void CWorkloadWnd::OnUpdateWorkloadEditAllocations(CCmdUI* pCmdUI)
 
 BOOL CWorkloadWnd::CanEditSelectedTaskAllocations(DWORD dwTaskID) const
 {
-	if (m_bReadOnly)
+	if (m_bReadOnly || !m_ctrlWorkload.GetSafeHwnd())
 		return FALSE;
 
 	if (dwTaskID && (dwTaskID != m_ctrlWorkload.GetSelectedTaskID()))
@@ -949,7 +950,13 @@ BOOL CWorkloadWnd::CanEditSelectedTaskAllocations(DWORD dwTaskID) const
 	// else
 	WORKLOADITEM wi;
 
-	return (m_ctrlWorkload.GetSafeHwnd() && m_ctrlWorkload.GetSelectedTask(wi) && !wi.bParent);
+	if (!m_ctrlWorkload.GetSelectedTask(wi))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
+	return (!wi.bParent || m_ctrlWorkload.HasOption(WLCF_ALLOWPARENTALLOCATIONS));
 }
 
 void CWorkloadWnd::OnChangePeriodBegin(NMHDR* /*pNMHDR*/, LRESULT* pResult) 

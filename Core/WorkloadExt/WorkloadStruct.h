@@ -143,7 +143,7 @@ struct WORKLOADITEM
 	BOOL HasValidDates() const { return dtRange.IsValid(); }
 	BOOL IsDone(BOOL bIncGoodAs) const { return (bDone || (bIncGoodAs && bGoodAsDone)); }
 
-	void UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL bPreferTimeEstimate, BOOL bProportionally);
+	void UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL bPreferTimeEstimate, BOOL bProportionally, BOOL bAllowParentAllocations);
 	void ClearAllocations() { mapAllocatedDays.RemoveAll(); }
 
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
@@ -185,7 +185,7 @@ public:
 
 	void CalculateTotals(const COleDateTimeRange& dtPeriod,
 						CMapAllocationTotals& mapTotalDays, 
-						CMapAllocationTotals& mapTotalTasks) const;
+						CMapAllocationTotals& mapTotalTasks, BOOL bAllowParentAllocations) const;
 
 	void RecalculateOverlaps();
 	BOOL CalcDateRange(COleDateTimeRange& dtRange) const;

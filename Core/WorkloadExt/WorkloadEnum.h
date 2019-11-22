@@ -34,6 +34,7 @@ enum // options
 	WLCF_PREFERTIMEESTFORCALCS		= 0x0080,
 	WLCF_RECALCALLOCATIONS			= 0x0100,
 	WLCF_RECALCPROPORTIONALLY		= 0x0200,
+	WLCF_ALLOWPARENTALLOCATIONS		= 0x0400,
 };
 
 /////////////////////////////////////////////////////////////////////////////

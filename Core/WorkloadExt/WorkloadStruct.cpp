@@ -552,9 +552,10 @@ BOOL WORKLOADITEM::HasColor() const
 	return ((color != CLR_NONE) && (color != GetSysColor(COLOR_WINDOWTEXT)));
 }
 
-void WORKLOADITEM::UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL bPreferTimeEstimate, BOOL bProportionally)
+void WORKLOADITEM::UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL bPreferTimeEstimate, 
+												BOOL bProportionally, BOOL bAllowParentAllocations)
 {
-	if (bParent)
+	if (bParent && !bAllowParentAllocations)
 	{
 		ClearAllocations();
 	}
@@ -596,7 +597,8 @@ void CWorkloadItemMap::RemoveAll()
 
 void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 									   CMapAllocationTotals& mapTotalDays, 
-									   CMapAllocationTotals& mapTotalTasks) const
+									   CMapAllocationTotals& mapTotalTasks, 
+									   BOOL bAllowParentAllocations) const
 {
 	mapTotalDays.RemoveAll();
 	mapTotalTasks.RemoveAll();
@@ -612,7 +614,7 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 		ASSERT(pWI);
 
 		// Weed out unwanted tasks
-		if (pWI->bParent)
+		if (pWI->bParent && !bAllowParentAllocations)
 			continue;
 
 		if (!pWI->HasValidDates() || pWI->IsDone(TRUE))

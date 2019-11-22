@@ -488,7 +488,7 @@ void CWorkloadCtrl::PreFixVScrollSyncBug()
 
 void CWorkloadCtrl::RecalcAllocationTotals()
 {
-	m_data.CalculateTotals(m_dtPeriod, m_mapTotalDays, m_mapTotalTasks);
+	m_data.CalculateTotals(m_dtPeriod, m_mapTotalDays, m_mapTotalTasks, HasOption(WLCF_ALLOWPARENTALLOCATIONS));
 
 	// Individual loading
 	m_mapPercentLoad.RemoveAll();
@@ -791,7 +791,8 @@ void CWorkloadCtrl::UpdateAllocationCalculations(WORKLOADITEM& wi) const
 	
 	wi.UpdateAllocationCalculations(!HasOption(WLCF_RECALCALLOCATIONS),
 									  HasOption(WLCF_PREFERTIMEESTFORCALCS),
-									  HasOption(WLCF_RECALCPROPORTIONALLY));
+									  HasOption(WLCF_RECALCPROPORTIONALLY),
+									  HasOption(WLCF_ALLOWPARENTALLOCATIONS));
 }
 
 void CWorkloadCtrl::BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
@@ -1114,6 +1115,7 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 			case WLCF_CALCMISSINGALLOCATIONS:
 			case WLCF_RECALCALLOCATIONS:
 			case WLCF_RECALCPROPORTIONALLY:
+			case WLCF_ALLOWPARENTALLOCATIONS:
 				RefreshCalculatedAllocations();
 				break;
 			}
@@ -1831,7 +1833,7 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 						const WORKLOADITEM* pWI = NULL;
 						GET_WI_RET(GetTaskID(nHit), pWI, FALSE);
 
-						bCanEdit = !pWI->bParent;
+						bCanEdit = (!pWI->bParent || HasOption(WLCF_ALLOWPARENTALLOCATIONS));
 					}
 
 					if (!bCanEdit)
@@ -1956,7 +1958,7 @@ BOOL CWorkloadCtrl::OnItemCheckChange(HTREEITEM hti)
 
 BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT nFlags, CPoint point)
 {
-	if (CTreeListCtrl::OnListLButtonDblClk(nFlags, point))
+	if (!HasOption(WLCF_ALLOWPARENTALLOCATIONS) && CTreeListCtrl::OnListLButtonDblClk(nFlags, point))
 		return TRUE;
 
 	// else
@@ -2094,7 +2096,8 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNI
 			break;
 
 		case WLCC_TIMEEST:
-			sItem = FormatTimeSpan(wi.dTimeEst, 1);
+			if (!wi.bParent || HasOption(WLCF_ALLOWPARENTALLOCATIONS))
+				sItem = FormatTimeSpan(wi.dTimeEst, 1);
 			break;
 
 		case WLCC_DURATION:
@@ -2320,33 +2323,37 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 		m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
 		
 		DrawItemDivider(pDC, rColumn, TRUE, bSelected);
-		rColumn.right--;
-		rColumn.bottom--;
 
-		COLORREF crBack = CLR_NONE;
-		CString sDays = GetListItemColumnText(wi, nCol, 2, bSelected, crBack);
-		
-		if (!sDays.IsEmpty())
+		if (!wi.bParent || HasOption(WLCF_ALLOWPARENTALLOCATIONS))
 		{
-			if (crBack != CLR_NONE)
+			rColumn.right--;
+			rColumn.bottom--;
+
+			COLORREF crBack = CLR_NONE;
+			CString sDays = GetListItemColumnText(wi, nCol, 2, bSelected, crBack);
+		
+			if (!sDays.IsEmpty())
 			{
-				if (bSelected)
+				if (crBack != CLR_NONE)
 				{
-					GraphicsMisc::DrawRect(pDC, rColumn, CLR_NONE, crBack);
+					if (bSelected)
+					{
+						GraphicsMisc::DrawRect(pDC, rColumn, CLR_NONE, crBack);
+					}
+					else
+					{
+						pDC->FillSolidRect(rColumn, crBack);
+						pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
+					}
 				}
 				else
 				{
-					pDC->FillSolidRect(rColumn, crBack);
-					pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
+					pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 				}
-			}
-			else
-			{
-				pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
-			}
 
-			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
-			pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
+				rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
+				pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
+			}
 		}
 	}
 }
