@@ -1074,7 +1074,7 @@ int Misc::SplitIntoLines(const CString& sText, CStringArray& aLines, int nMaxLen
 
 			if (sLine.GetLength() > nMaxLength)
 			{
-				static const CString DELIMS("()-\\/{}[]:;,. ?\"'\n\r\t");
+				static const CString DELIMS(")-\\/}]:;,. ?\"'\r\t");
 
 				CStringArray aSubLines;
 
