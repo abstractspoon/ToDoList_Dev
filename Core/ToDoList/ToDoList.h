@@ -65,6 +65,7 @@ protected:
 	afx_msg void OnDebugTaskDialogError();
 	afx_msg void OnDebugTestStableReleaseDownload();
 	afx_msg void OnDebugTestPreReleaseDownload();
+	afx_msg void OnDebugShowEmbeddedUrl();
 #endif
 	afx_msg void OnHelpCheckForUpdates();
 	afx_msg void OnHelpRecordBugReport();

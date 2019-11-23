@@ -31,6 +31,7 @@
 #include "..\shared\winhelpbutton.h"
 #include "..\shared\messagebox.h"
 #include "..\shared\ScopedTimer.h"
+#include "..\shared\BrowserDlg.h"
 
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
@@ -106,6 +107,7 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_DEBUGSHOWLANGDLG, OnDebugShowLanguageDlg)
 	ON_COMMAND(ID_DEBUGTESTSTABLEDOWNLOAD, OnDebugTestStableReleaseDownload)
 	ON_COMMAND(ID_DEBUGTESTPREDOWNLOAD, OnDebugTestPreReleaseDownload)
+	ON_COMMAND(ID_DEBUGSHOWEMBEDDEDURL, OnDebugShowEmbeddedUrl)
 #endif
 
 	ON_COMMAND(ID_TOOLS_CHECKFORUPDATES, OnHelpCheckForUpdates)
@@ -1814,6 +1816,20 @@ void CToDoListApp::OnDebugTestStableReleaseDownload()
 void CToDoListApp::OnDebugTestPreReleaseDownload() 
 {
 	RunUpdater(TRUE, TRUE);
+}
+
+void CToDoListApp::OnDebugShowEmbeddedUrl() 
+{
+	CFileOpenDialog dialog(_T("Select Web Page"), 
+						   NULL,
+						   NULL,
+						   EOFN_DEFAULTOPEN,
+						   _T("Web Pages|*.html"));
+	
+	if (dialog.DoModal() == IDOK)
+	{
+		CBrowserDlg().DoModal(NULL, dialog.GetPathName());
+	}
 }
 
 #endif // DEBUG FUNCTIONS

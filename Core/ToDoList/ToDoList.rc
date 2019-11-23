@@ -3603,6 +3603,8 @@ BEGIN
 
             MENUITEM "&Error",                      ID_DEBUGTASKDIALOG_ERROR
         END
+        MENUITEM SEPARATOR
+        MENUITEM "Show File URL in IE",         ID_DEBUGSHOWEMBEDDEDURL
     END
 END
 
