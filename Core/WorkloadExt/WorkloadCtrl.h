@@ -176,7 +176,6 @@ protected:
 	int GetLargestVisibleDuration(HTREEITEM hti) const;
 	double GetLargestVisibleTimeEstimate(HTREEITEM hti) const;
 	CString GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNID nColID) const;
-	CString GetListItemColumnText(const WORKLOADITEM& wi, int nCol, int nDecimals, BOOL bSelected, COLORREF& crBack) const;
 	CString GetListItemColumnTotal(const CMapAllocationTotals& mapAlloc, int nCol, int nDecimals) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;
@@ -187,6 +186,10 @@ protected:
 	void RefreshCalculatedAllocations();
 	void UpdateAllocationCalculations(WORKLOADITEM& wi) const;
 	HIMAGELIST GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const;
+
+	double GetAllocationListItemColumnDays(const WORKLOADITEM& wi, int nCol, COLORREF& crBack) const;
+	double CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, int nItem, int nCol, COLORREF& crBack) const;
+	double CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, HTREEITEM hti, int nCol, COLORREF& crBack) const;
 
  	COLORREF GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter = FALSE) const;
 	COLORREF GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bAlternate) const;

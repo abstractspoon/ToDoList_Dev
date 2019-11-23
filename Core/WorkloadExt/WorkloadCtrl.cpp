@@ -2251,41 +2251,73 @@ BOOL CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 	return TRUE;
 }
 
-CString CWorkloadCtrl::GetListItemColumnText(const WORKLOADITEM& wi, int nCol, int nDecimals, BOOL bSelected, COLORREF& crBack) const
+double CWorkloadCtrl::CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, int nItem, int nCol, COLORREF& crBack) const
+{
+	if (!wi.bParent)
+		return GetAllocationListItemColumnDays(wi, nCol, crBack);
+
+	return CalcAllocationListItemColumnDays(wi, GetTreeItem(nItem), nCol, crBack);
+}
+
+double CWorkloadCtrl::CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, HTREEITEM hti, int nCol, COLORREF& crBack) const
+{
+	double dDays = GetAllocationListItemColumnDays(wi, nCol, crBack);
+
+	// Add child totals if this is a parent
+	HTREEITEM htiChild = m_tree.GetChildItem(hti);
+
+	while (htiChild)
+	{
+		const WORKLOADITEM* pWIChild = GetWorkloadItem(m_tree.GetItemData(htiChild));
+		ASSERT(pWIChild);
+
+		if (pWIChild)
+		{
+			COLORREF crChild = CLR_NONE;
+			dDays += CalcAllocationListItemColumnDays(*pWIChild, htiChild, nCol, crChild);
+
+			// Highlight overlapping children on parent if parent is not expanded
+			if ((crChild != CLR_NONE) && !m_tree.TCH().IsItemExpanded(hti))
+				crBack = crChild;
+
+			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
+		}
+	}
+
+	return dDays;
+}
+
+double CWorkloadCtrl::GetAllocationListItemColumnDays(const WORKLOADITEM& wi, int nCol, COLORREF& crBack) const
 {
 	crBack = CLR_NONE;
 
+	if (wi.bParent && !HasOption(WLCF_ALLOWPARENTALLOCATIONS))
+		return 0.0;
+
+	// else
 	switch (GetListColumnType(nCol))
 	{
 	case WLCT_TOTAL:
-		return wi.mapAllocatedDays.FormatTotalDays(nDecimals);
-		
+		return wi.mapAllocatedDays.GetTotalDays();
+
 	case WLCT_VALUE:
 		{
 			int nAllocTo = (nCol - 1);
 			ASSERT(nAllocTo < m_aAllocTo.GetSize());
-			
+
 			CString sAllocTo = m_aAllocTo[nAllocTo];
-			CString sDays = wi.mapAllocatedDays.FormatDays(sAllocTo, nDecimals);
+			double dDays = wi.mapAllocatedDays.GetDays(sAllocTo);
 
-			if (!sDays.IsEmpty())
-			{
-				if ((m_crOverlap != CLR_NONE) && wi.mapAllocatedDays.IsOverlapping(sAllocTo))
-				{
-					crBack = m_crOverlap;
-				}
-				else if (!bSelected && (m_crAllocation != CLR_NONE))
-				{
-					crBack = m_crAllocation;
-				}
-			}
+			if (dDays && HasColor(m_crOverlap) && wi.mapAllocatedDays.IsOverlapping(sAllocTo))
+				crBack = m_crOverlap;
 
-			return sDays;
+			return dDays;
 		}
 		break;
 	}
 
-	return _T("");
+	// all else
+	return 0.0;
 }
 
 CString CWorkloadCtrl::GetListItemColumnTotal(const CMapAllocationTotals& mapTotals, int nCol, int nDecimals) const
@@ -2321,36 +2353,34 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 		
 		DrawItemDivider(pDC, rColumn, TRUE, bSelected);
 
-		if (!wi.bParent || HasOption(WLCF_ALLOWPARENTALLOCATIONS))
+		COLORREF crBack = CLR_NONE;
+		double dDays = CalcAllocationListItemColumnDays(wi, nItem, nCol, crBack);
+		
+		if (dDays > 0.0)
 		{
 			rColumn.right--;
 			rColumn.bottom--;
 
-			COLORREF crBack = CLR_NONE;
-			CString sDays = GetListItemColumnText(wi, nCol, 2, bSelected, crBack);
-		
-			if (!sDays.IsEmpty())
+			if (crBack != CLR_NONE)
 			{
-				if (crBack != CLR_NONE)
+				if (bSelected)
 				{
-					if (bSelected)
-					{
-						GraphicsMisc::DrawRect(pDC, rColumn, CLR_NONE, crBack);
-					}
-					else
-					{
-						pDC->FillSolidRect(rColumn, crBack);
-						pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
-					}
+					GraphicsMisc::DrawRect(pDC, rColumn, CLR_NONE, crBack);
 				}
 				else
 				{
-					pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+					pDC->FillSolidRect(rColumn, crBack);
+					pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
 				}
-
-				rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
-				pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
 			}
+			else
+			{
+				pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+			}
+
+			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
+
+			pDC->DrawText(Misc::Format(dDays, 2), (LPRECT)(LPCRECT)rColumn, DT_CENTER);
 		}
 	}
 }
