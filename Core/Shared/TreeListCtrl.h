@@ -314,6 +314,7 @@ protected:
 	CTreeCtrlHelper& TCH() { return m_tree.TCH(); }
 	const CTreeCtrlHelper& TCH() const { return m_tree.TCH(); }
 
+	static BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
 	static int Compare(const CString& sText1, const CString& sText2);
 	static BOOL WantTitleWidthUpdate(int nOldWidth, int nNewWidth, UPDATETITLEWIDTHACTION nAction);
