@@ -83,6 +83,7 @@ public:
 	CTDCTrackTasklistArray();
 	virtual ~CTDCTrackTasklistArray();
 
+	BOOL IsEmpty() const { return !GetNumTasklists(); }
 	int GetNumTasklists() const;
 	BOOL UpdateTracking(const CFilteredToDoCtrl* pTDC);
 	BOOL UpdateTracking(TRACKTASKLIST* pTTL);
@@ -204,6 +205,7 @@ protected:
 	BOOL RebuildTasklistCombo();
 	COLORREF GetBkgndColor() const;
 	BOOL IsTrackingSelectedTasklistAndTask() const;
+	BOOL IsTrackingSelectedTasklistAndTask(CString& sTaskTitle) const;
 	BOOL IsSelectedTask(DWORD dwTaskID) const;
 	int QuickFindNextTaskComboItem(int nFrom, BOOL bForward) const;
 	BOOL QuickFindNextTaskComboItem(int nFrom, int nTo, int nIncrement, int& nNext) const;
@@ -215,5 +217,6 @@ protected:
 	int CalcAvailableRows(int nHeight) const;
 	void CalcMinMaxSizes();
 	BOOL HasOption(DWORD dwOption) const;
+	void RefreshTitleText();
 
 };

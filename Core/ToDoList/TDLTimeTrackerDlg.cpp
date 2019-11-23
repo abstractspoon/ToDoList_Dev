@@ -781,10 +781,12 @@ BOOL CTDLTimeTrackerDlg::RebuildTasklistCombo()
 	while (nTasklist--)
 	{
 		const TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(nTasklist);
-		ASSERT(pTTL);
 
 		if (!pTTL)
+		{
+			ASSERT(0);
 			return FALSE;
+		}
 
 		CEnString sTitle;
 		
@@ -919,6 +921,8 @@ BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 		UpdateTaskTime(pTDC);
 	}
 	
+	RefreshTitleText();
+
 	return TRUE;
 }
 
@@ -929,10 +933,27 @@ BOOL CTDLTimeTrackerDlg::IsSelectedTask(DWORD dwTaskID) const
 
 BOOL CTDLTimeTrackerDlg::IsTrackingSelectedTasklistAndTask() const
 {
+	CString sUnused;
+	return IsTrackingSelectedTasklistAndTask(sUnused);
+}
+
+BOOL CTDLTimeTrackerDlg::IsTrackingSelectedTasklistAndTask(CString& sTaskTitle) const
+{
 	const TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(GetSelectedTasklist());
-	ASSERT(pTTL);
-	
-	return pTTL->IsTracking(GetSelectedTaskID());
+
+	if (!pTTL)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	DWORD dwSelID = GetSelectedTaskID();
+
+	if (!pTTL->IsTracking(dwSelID))
+		return FALSE;
+
+	sTaskTitle = pTTL->pTDC->GetTaskTitle(dwSelID);
+	return TRUE;
 }
 
 void CTDLTimeTrackerDlg::UpdatePlayButton(BOOL bCheckVisibility)
@@ -991,7 +1012,7 @@ void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC)
 	}
 		
 	if (m_bCollapsed)
-		SetWindowText(m_sTaskTimes);
+		RefreshTitleText();
 
 	UpdateData(FALSE);
 
@@ -1007,7 +1028,12 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 	ASSERT(m_cbTasklists.GetCurSel() != CB_ERR);
 	
 	const TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(GetSelectedTasklist());
-	ASSERT(pTTL);
+
+	if (!pTTL)
+	{
+		ASSERT(0);
+		return;
+	}
 	
 	DWORD dwSelTaskID = GetSelectedTaskID();
 
@@ -1023,6 +1049,7 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 	}
 
 	UpdateTracking(pTTL->pTDC);
+	RefreshTitleText();
 
 	// redraw text colour
 	GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE);
@@ -1093,7 +1120,12 @@ void CTDLTimeTrackerDlg::OnSelchangeTasklist()
 
 	// Select the tasklist
 	const TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
-	ASSERT(pTTL);
+
+	if (!pTTL)
+	{
+		ASSERT(0);
+		return;
+	}
 	
 	// Build task combo and select the tracked task if any
 	RebuildTaskCombo();
@@ -1103,12 +1135,14 @@ void CTDLTimeTrackerDlg::OnSelchangeTasklist()
 	
 	UpdatePlayButton();
 	UpdateTaskTime(pTDC);
+	RefreshTitleText();
 }
 
 void CTDLTimeTrackerDlg::OnSelchangeTask()
 {
 	UpdatePlayButton();
 	UpdateTaskTime(GetSelectedTasklist());
+	RefreshTitleText();
 }
 
 BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
@@ -1391,11 +1425,6 @@ void CTDLTimeTrackerDlg::Resize(int cx, int cy)
 		int nXOffset = (rNewBtn.right - rCurBtn.right);
 		int nYOffset = (rNewBtn.bottom - rCurBtn.bottom);
 
-		OffsetCtrl(this, IDC_TASKS, 0, nYOffset);
-		ResizeCtrl(this, IDC_TASKS, nXOffset, 0);
-		OffsetCtrl(this, IDC_TASKS_LABEL, 0, nYOffset);
-		ResizeCtrl(this, IDC_TASKS_LABEL, nXOffset, 0);
-
 		OffsetCtrl(this, IDC_TASKTIME, 0, nYOffset);
 		ResizeCtrl(this, IDC_TASKTIME, nXOffset, 0);
 		OffsetCtrl(this, IDC_TASKTIME_LABEL, 0, nYOffset);
@@ -1407,6 +1436,7 @@ void CTDLTimeTrackerDlg::Resize(int cx, int cy)
 		ResizeCtrl(this, IDC_ELAPSEDTIME_LABEL, nXOffset, 0);
 
 		// Then the rest if there is space
+		BOOL bShowTasks = (nRows > 2);
 		BOOL bShowTasklists = ((nRows == 5) || ((nRows == 4) && (m_aTasklists.GetNumTasklists() > 1)));
 		BOOL bShowQuickFind = ((nRows == 5) || ((nRows == 4) && !bShowTasklists));
 
@@ -1414,6 +1444,13 @@ void CTDLTimeTrackerDlg::Resize(int cx, int cy)
 		ShowCtrl(this, IDC_QUICKFIND, bShowQuickFind);
 		ShowCtrl(this, IDC_TASKLISTS, bShowTasklists);
 		ShowCtrl(this, IDC_TASKLISTS_LABEL, bShowTasklists);
+		ShowCtrl(this, IDC_TASKS, bShowTasks);
+		ShowCtrl(this, IDC_TASKS_LABEL, bShowTasks);
+
+		OffsetCtrl(this, IDC_TASKS, 0, nYOffset);
+		ResizeCtrl(this, IDC_TASKS, nXOffset, 0);
+		OffsetCtrl(this, IDC_TASKS_LABEL, 0, nYOffset);
+		ResizeCtrl(this, IDC_TASKS_LABEL, nXOffset, 0);
 
 		OffsetCtrl(this, IDC_TASKLISTS, 0, nYOffset);
 		ResizeCtrl(this, IDC_TASKLISTS, nXOffset, 0);
@@ -1422,6 +1459,7 @@ void CTDLTimeTrackerDlg::Resize(int cx, int cy)
 		ResizeCtrl(this, IDC_QUICKFIND, nXOffset, 0);
 		
 		Invalidate();
+		RefreshTitleText();
 	}
 }
 
@@ -1442,7 +1480,7 @@ void CTDLTimeTrackerDlg::CalcMinMaxSizes()
 		m_sizeMax.cy = rWindow.Height();
 		m_sizeMin.cx = rWindow.Width();
 
-		CRect rClient, rLabel = GetCtrlRect(this, IDC_TASKS_LABEL);
+		CRect rClient, rLabel = GetCtrlRect(this, IDC_TASKTIME_LABEL);
 		GetClientRect(rClient);
 
 		CDlgUnits dlu(this);
@@ -1471,19 +1509,44 @@ void CTDLTimeTrackerDlg::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
 			
 			rWindow.bottom -= rClient.Height();
 			rWindow.right = (rWindow.left + m_sizeMin.cx);
-
-			SetWindowText(m_sTaskTimes);
 		}
 		else
 		{
 			rWindow.right = (rWindow.left + m_sizeLast.cx);
 			rWindow.bottom = (rWindow.top + m_sizeLast.cy);
-
-			SetWindowText(m_sOrgTitle);
-
 		}
 		
 		MoveWindow(rWindow);
+	}
+}
+
+void CTDLTimeTrackerDlg::RefreshTitleText()
+{
+	if (m_bCollapsed)
+	{
+		SetWindowText(m_sTaskTimes);
+	}
+	else
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		// work out how many rows we can display
+		int nRows = CalcAvailableRows(rClient.Height());
+
+		if (nRows < 3)
+		{
+			CString sTaskTitle;
+
+			if (IsTrackingSelectedTasklistAndTask(sTaskTitle))
+			{
+				SetWindowText(Misc::Format(_T("%s - %s"), sTaskTitle, m_sOrgTitle));
+				return;
+			}
+		}
+
+		// else
+		SetWindowText(m_sOrgTitle);
 	}
 }
 
