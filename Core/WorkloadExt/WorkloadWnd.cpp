@@ -240,7 +240,15 @@ void CWorkloadWnd::InitWorkingWeek(const IPreferences* pPrefs)
 {
 	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
 
-	CWeekend::Initialise(dwWeekends);
+	double dHoursInDay = pPrefs->GetProfileDouble(_T("Preferences"), _T("HoursInDay"), 8.0);
+	double dStartOfDayInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("StartOfWorkdayInHours"), 9.0);
+	double dStartOfLunchInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("StartOfLunchInHours"), 13.0);
+	double dEndOfLunchInHours = dStartOfLunchInHours;
+
+	if (pPrefs->GetProfileInt(_T("Preferences"), _T("HasLunchBreak"), TRUE))
+		dEndOfLunchInHours = pPrefs->GetProfileDouble(_T("Preferences"), _T("EndOfLunchInHours"), 14.0);
+
+	CWorkingWeek::Initialise(dwWeekends, dHoursInDay, dStartOfDayInHours, dStartOfLunchInHours, dEndOfLunchInHours);
 }
 
 void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly)
