@@ -75,7 +75,6 @@ public:
 
 	BOOL SetBackgroundColor(COLORREF crBkgnd);
 	void SetOverlapColor(COLORREF crOverlap);
-	void SetAllocationColor(COLORREF crAllocation);
 
 	void EnableOverload(BOOL bEnable, double dOverloadValue, COLORREF crOverload);
 	void EnableUnderload(BOOL bEnable, double dUnderloadValue, COLORREF crUnderload);
@@ -95,7 +94,7 @@ protected:
 	CString m_sSortByAllocTo;
 	int m_nSortByAllocToCol;
 	COleDateTimeRange m_dtPeriod, m_dtDataRange;
-	COLORREF m_crAllocation, m_crOverlap;
+	COLORREF m_crOverlap;
 	BOOL m_bReadOnly;
 
 	WORKLOADSORT m_sort;

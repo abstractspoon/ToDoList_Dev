@@ -76,7 +76,6 @@ const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 CWorkloadCtrl::CWorkloadCtrl() 
 	:
 	m_dwOptions(WLCF_SHOWSPLITTERBAR),
-	m_crAllocation(RGB(255, 180, 180)),
 	m_crOverlap(RGB(255, 0, 0)),
 	m_dwMaxTaskID(0),
 	m_mapTotalDays(FALSE),
@@ -1978,11 +1977,6 @@ BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT nFlags, CPoint point)
 void CWorkloadCtrl::SetOverlapColor(COLORREF crOverlap)
 {
 	SetColor(m_crOverlap, crOverlap);
-}
-
-void CWorkloadCtrl::SetAllocationColor(COLORREF crAllocation)
-{
-	SetColor(m_crAllocation, crAllocation);
 }
 
 void CWorkloadCtrl::EnableOverload(BOOL bEnable, double dOverloadValue, COLORREF crOverload)

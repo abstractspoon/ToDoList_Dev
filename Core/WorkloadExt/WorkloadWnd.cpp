@@ -268,9 +268,6 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	m_ctrlWorkload.EnableTreeCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
 	m_ctrlWorkload.EnableTreeLabelTips(!pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
 
-	// Get allocation color from app prefs
-	m_ctrlWorkload.SetAllocationColor(CLR_NONE); // TODO
-
 	// get alternate line color from app prefs
 	COLORREF crAlt = CLR_NONE;
 
