@@ -932,9 +932,6 @@
     <None Include="res\help_button.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\icon1.ico">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="Unicode_Release\Itenso.Rtf.Converter.Html.dll">
       <Filter>Debug</Filter>
     </None>
