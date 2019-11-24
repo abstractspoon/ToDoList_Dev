@@ -1286,17 +1286,20 @@ namespace Calendar
 
         public Appointment GetAppointmentAt(int x, int y)
         {
-            // Look for long appointments first else we might end up selecting
-            // single-day appointments which have been scrolled up beneath
-            foreach (AppointmentView view in longAppointmentViews.Values)
-                if (view.Rectangle.Contains(x, y))
-                    return view.Appointment;
+			if (GetFullDayApptsRectangle().Contains(x, y))
+			{
+				foreach (AppointmentView view in longAppointmentViews.Values)
+					if (view.Rectangle.Contains(x, y))
+						return view.Appointment;
+			}
+			else
+			{
+				foreach (AppointmentView view in appointmentViews.Values)
+					if (view.Rectangle.Contains(x, y))
+						return view.Appointment;
+			}
 
-            foreach (AppointmentView view in appointmentViews.Values)
-                if (view.Rectangle.Contains(x, y))
-                    return view.Appointment;
-
-            return null;
+			return null;
         }
 
         #endregion
