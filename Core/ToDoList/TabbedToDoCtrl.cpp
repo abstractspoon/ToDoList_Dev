@@ -2231,7 +2231,13 @@ DWORD CTabbedToDoCtrl::HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly
 			const IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
 
 			if (pExtWnd)
-				return pExtWnd->HitTestTask(ptScreen, (bTitleColumnOnly != FALSE));
+			{
+				CRect rExtWnd;
+				::GetWindowRect(pExtWnd->GetHwnd(), rExtWnd);
+
+				if (rExtWnd.PtInRect(ptScreen))
+					return pExtWnd->HitTestTask(ptScreen, (bTitleColumnOnly != FALSE));
+			}
 		}
 		break;
 
