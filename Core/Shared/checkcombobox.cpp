@@ -228,7 +228,7 @@ void CCheckComboBox::RecalcText(BOOL bUpdate, BOOL bNotify)
 	{
 		if (bUpdate)
 		{
-			GetDlgItem(1001)->SetWindowText(m_sText);
+			SetDlgItemText(1001, m_sText);
 				
 			// notify parent
 			if (bNotify && sPrevText != m_sText)
@@ -323,7 +323,7 @@ BOOL CCheckComboBox::ParseText(BOOL bAutoAdd)
 		return FALSE;
 
 	CString sEditText;
-	GetDlgItem(1001)->GetWindowText(sEditText);
+	GetDlgItemText(1001, sEditText);
 	
 	// Clear existing checks first but don't update window
 	int nItem = GetCount();
@@ -484,7 +484,7 @@ BOOL CCheckComboBox::OnEditchange()
 
 		// update m_sText manually to point to
 		// whatever has been input
-		GetDlgItem(1001)->GetWindowText(m_sText);
+		GetDlgItemText(1001, m_sText);
 	}
 
 	return CAutoComboBox::OnEditChange();

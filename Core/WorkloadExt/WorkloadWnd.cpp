@@ -1012,7 +1012,7 @@ void CWorkloadWnd::UpdatePeriod()
 		m_sPeriodDuration.Empty();
 
 	m_toolbar.RefreshButtonStates(FALSE);
-	GetDlgItem(IDC_ACTIVEDATERANGE_LABEL)->SetWindowText(CEnString(IDS_ACTIVEDATERANGE, m_dtPeriod.Format()));
+	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, m_dtPeriod.Format()));
 
 	UpdateData(FALSE);
 }

@@ -77,7 +77,7 @@ BOOL CCreateFileLinkDlg::OnInitDialog()
 	if (!m_sRefFile.IsEmpty())
 	{
 		CEnString sText;
-		GetDlgItem(IDC_FILEURL)->GetWindowText(sText);
+		GetDlgItemText(IDC_FILEURL, sText);
 		
 		CString sFile;
 		sFile.Format(_T(".../%s"), FileMisc::GetFileNameFromPath(m_sRefFile));
@@ -91,7 +91,7 @@ BOOL CCreateFileLinkDlg::OnInitDialog()
 		sText.DoNotTranslate();
 		
 		// then set it
-		GetDlgItem(IDC_FILEURL)->SetWindowText(sText);
+		SetDlgItemText(IDC_FILEURL, sText);
 	}
 	
 	return TRUE;  // return TRUE unless you set the focus to a control

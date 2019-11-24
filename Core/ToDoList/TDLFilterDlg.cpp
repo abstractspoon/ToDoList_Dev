@@ -276,7 +276,7 @@ BOOL CTDLFilterDlg::OnInitDialog()
 
 	// title
 	m_mgrPrompts.SetEditPrompt(IDC_TITLEFILTERTEXT, *this, sAny);
-	GetDlgItem(IDC_TITLEFILTERLABEL)->SetWindowText(m_filter.GetTitleFilterLabel());
+	SetDlgItemText(IDC_TITLEFILTERLABEL, m_filter.GetTitleFilterLabel());
 
 	// custom filters
 	m_cbTaskFilter.AddAdvancedFilters(m_aAdvancedFilterNames, m_sAdvancedFilter);

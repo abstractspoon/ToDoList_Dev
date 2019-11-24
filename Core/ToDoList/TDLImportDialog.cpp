@@ -333,7 +333,8 @@ void CTDLImportDialog::EnableDisableControls()
 			GetDlgItem(IDC_INPUTTEXT)->EnableWindow(TRUE);
 			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
 			GetDlgItem(IDC_REFRESHCLIPBOARD)->ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_FROMTEXT)->SetWindowText(CEnString(IDS_IMPORTFROMTEXT));
+
+			SetDlgItemText(IDC_FROMTEXT, CEnString(IDS_IMPORTFROMTEXT));
 		}
 		break;
 	}
@@ -376,7 +377,7 @@ void CTDLImportDialog::OnOK()
 
 	// retrieve input text
 	if (IsCurrentImporterFileBased())
-		GetDlgItem(IDC_INPUTTEXT)->GetWindowText(m_sFromText);
+		GetDlgItemText(IDC_INPUTTEXT, m_sFromText);
 }
 
 CString CTDLImportDialog::GetFormatTypeID() const
@@ -447,15 +448,15 @@ void CTDLImportDialog::OnSelchangeFormatoptions()
 
 	if (bHadFilter && !bHasFilter)
 	{
-		GetDlgItem(IDC_INPUTTEXT)->GetWindowText(m_sFromText); // update
-		GetDlgItem(IDC_INPUTTEXT)->SetWindowText(_T("")); // clear field
+		GetDlgItemText(IDC_INPUTTEXT, m_sFromText); // update
+		SetDlgItemText(IDC_INPUTTEXT, _T("")); // clear field
 	}
 	else if (!bHadFilter && bHasFilter)
 	{
-		GetDlgItem(IDC_INPUTTEXT)->SetWindowText(m_sFromText); // restore field
+		SetDlgItemText(IDC_INPUTTEXT, m_sFromText); // restore field
 	}
 	
-	GetDlgItem(IDC_INPUTFILE)->SetWindowText(_T("")); // clear field
+	SetDlgItemText(IDC_INPUTFILE, _T("")); // clear field
 
 	EnableDisableControls();
 }
@@ -480,7 +481,7 @@ void CTDLImportDialog::EnableOK()
 
 void CTDLImportDialog::OnChangeClipboardtext() 
 {
-	GetDlgItem(IDC_INPUTTEXT)->GetWindowText(m_sFromText); // update
+	GetDlgItemText(IDC_INPUTTEXT, m_sFromText); // update
 	EnableOK();
 }
 
@@ -512,7 +513,7 @@ void CTDLImportDialog::UpdateTextField()
 		m_sFromText = (CRLF + m_sFromText);
 
 		if (IsCurrentImporterFileBased())
-			GetDlgItem(IDC_INPUTTEXT)->SetWindowText(m_sFromText);
+			SetDlgItemText(IDC_INPUTTEXT, m_sFromText);
 	}
 }
 

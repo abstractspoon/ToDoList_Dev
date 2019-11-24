@@ -856,7 +856,7 @@ void CBurndownWnd::UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange
 		}
 	}
 	
-	GetDlgItem(IDC_ACTIVEDATERANGE_LABEL)->SetWindowText(CEnString(IDS_ACTIVEDATERANGE, sRange));
+	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, sRange));
 }
 
 void CBurndownWnd::OnTrendsChanged()

@@ -1095,7 +1095,7 @@ void CGanttChartWnd::UpdateActiveRangeLabel()
 {
 	CString sRange = m_sliderDateRange.FormatRange(!m_ctrlGantt.HasOption(GTLCF_DECADESAREONEBASED));
 
-	GetDlgItem(IDC_ACTIVEDATERANGE_LABEL)->SetWindowText(CEnString(IDS_ACTIVEDATERANGE, sRange));
+	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, sRange));
 }
 
 LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM wp, LPARAM /*lp*/)

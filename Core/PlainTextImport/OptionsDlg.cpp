@@ -81,7 +81,7 @@ BOOL COptionsDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	
 	SetWindowText(m_sTitle);
-	GetDlgItem(IDC_PROJECTINCLUDED)->SetWindowText(m_sProjectLabel);
+	SetDlgItemText(IDC_PROJECTINCLUDED, m_sProjectLabel);
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

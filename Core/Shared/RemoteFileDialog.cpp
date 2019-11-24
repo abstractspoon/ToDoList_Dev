@@ -177,7 +177,7 @@ BOOL CRemoteFileDialog::OnInitDialog()
 		EndDialog(IDCANCEL);
 
 	if (FolderSelect())
-		GetDlgItem(IDC_FILENAMELABEL)->SetWindowText(_T("Remote folder &name:"));
+		SetDlgItemText(IDC_FILENAMELABEL, _T("Remote folder &name:"));
 
 	// set up list image lists
  	if (m_silLarge.Initialize())

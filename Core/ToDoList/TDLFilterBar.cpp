@@ -568,7 +568,7 @@ BOOL CTDLFilterBar::SetTitleFilterOption(FILTER_TITLE nOption)
 	if (m_nTitleFilter != nOption)
 	{
 		m_nTitleFilter = m_filter.nTitleOption = nOption; 
-		GetDlgItem(IDC_TITLEFILTERLABEL)->SetWindowText(m_filter.GetTitleFilterLabel());
+		SetDlgItemText(IDC_TITLEFILTERLABEL, m_filter.GetTitleFilterLabel());
 
 		return TRUE;
 	}
@@ -895,8 +895,8 @@ BOOL CTDLFilterBar::OnInitDialog()
 
 	m_eTitleFilter.ModifyStyle(0, ES_WANTRETURN, 0);
 	m_mgrPrompts.SetEditPrompt(m_eTitleFilter, sAny);
-	GetDlgItem(IDC_TITLEFILTERLABEL)->SetWindowText(m_filter.GetTitleFilterLabel());
 	
+	SetDlgItemText(IDC_TITLEFILTERLABEL, m_filter.GetTitleFilterLabel());
 	EnableToolTips();
 	
 	return TRUE;  // return TRUE unless you set the focus to a control

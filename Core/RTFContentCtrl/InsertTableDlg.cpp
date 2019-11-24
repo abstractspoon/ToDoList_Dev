@@ -45,13 +45,13 @@ void CInsertTableDlg::DoDataExchange(CDataExchange* pDX)
 	{
 		CString sValue;
 
-		GetDlgItem(IDC_NUMCOLS)->GetWindowText(sValue);
+		GetDlgItemText(IDC_NUMCOLS, sValue);
 		m_nNumCols = max(_ttoi(sValue), 1);
 
-		GetDlgItem(IDC_NUMROWS)->GetWindowText(sValue);
+		GetDlgItemText(IDC_NUMROWS, sValue);
 		m_nNumRows = max(_ttoi(sValue), 1);
 
-		GetDlgItem(IDC_COLWIDTH)->GetWindowText(sValue);
+		GetDlgItemText(IDC_COLWIDTH, sValue);
 		m_nColWidth = max(_ttoi(sValue), 1);
 	}
 	else

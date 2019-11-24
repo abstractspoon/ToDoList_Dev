@@ -939,7 +939,12 @@ BOOL CTDLTimeTrackerDlg::IsTrackingSelectedTasklistAndTask() const
 
 BOOL CTDLTimeTrackerDlg::IsTrackingSelectedTasklistAndTask(CString& sTaskTitle) const
 {
-	const TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(GetSelectedTasklist());
+	const CFilteredToDoCtrl* pTDC = GetSelectedTasklist();
+
+	if (!pTDC)
+		return FALSE;
+
+	const TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
 
 	if (!pTTL)
 	{

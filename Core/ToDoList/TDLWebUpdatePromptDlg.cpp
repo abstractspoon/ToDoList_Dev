@@ -126,11 +126,11 @@ BOOL CTDLWebUpdatePromptDlg::OnInitDialog()
 	GetDlgItem(ID_WIZBACK)->ShowWindow(SW_HIDE);
 
 	// rename finish button
-	GetDlgItem(ID_WIZFINISH)->SetWindowText(CEnString(IDS_YES));
+	SetDlgItemText(ID_WIZFINISH, CEnString(IDS_YES));
 	GetDlgItem(ID_WIZFINISH)->SetFocus();
 
 	// rename cancel button
-	GetDlgItem(IDCANCEL)->SetWindowText(CEnString(IDS_NO));
+	SetDlgItemText(IDCANCEL, CEnString(IDS_NO));
 
 	// setup social media toolbar
 	if (m_toolbar.CreateEx(this, (TBSTYLE_FLAT, WS_CHILD | CBRS_TOOLTIPS | WS_VISIBLE)))
