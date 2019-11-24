@@ -129,21 +129,20 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 		{
 			CStringArray aComments;
 
-			int nNumLines = Misc::SplitIntoLines(iti.sValue, aComments, COMMENTS_MAXLINELEN);
+			int nNumLines = Misc::SplitByLength(iti.sValue, aComments, COMMENTS_MAXLINELEN);
 			nNumLines -= Misc::RemoveEmptyItems(aComments);
 
 			if (nNumLines > 1)
 			{
 				for (int nLine = 0; nLine < nNumLines; nLine++)
 				{
-					sTip += _T("\n");
-
 					if (nLine == 0)
 						sTip += iti.sLabel;
 					else
 						sTip += CString('\t', (nMaxLabelWidth / nTabWidth));
 
 					sTip += aComments[nLine];
+					sTip += _T("\n");
 				}
 				continue;
 			}
@@ -178,12 +177,13 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	if (mapAttrib.Has(TDCA_COMMENTS) && !pTDI->sComments.IsEmpty())
 	{
 		CString sComments = pTDI->sComments;
-		int nLen = sComments.GetLength();
 
 		if (nMaxCommentsLen != 0)
 		{
-			if ((nMaxCommentsLen > 0) && (nLen > nMaxCommentsLen))
-				sComments = (sComments.Left(nMaxCommentsLen) + _T("..."));
+			sComments = Misc::Left(pTDI->sComments, nMaxCommentsLen, TRUE);
+
+			if (sComments.GetLength() < pTDI->sComments.GetLength())
+				sComments += _T("...");
 		}
 
 		aItems.Add(TDCINFOTIPITEM(TDCA_COMMENTS, IDS_TDLBC_COMMENTS, sComments));

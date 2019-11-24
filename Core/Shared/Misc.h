@@ -246,7 +246,8 @@ namespace Misc
  	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim = TRUE);
 	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim = TRUE);
 
-	int SplitIntoLines(const CString& sText, CStringArray& aValues, int nMaxLength = -1);
+	int SplitByLength(const CString& sText, CStringArray& aValues, int nMaxLength = -1);
+	CString Left(const CString& sText, int nLength, BOOL bNearestWord);
 
 	template <class T, class S> 
 	int FindT(const S& toFind, const T& array)
@@ -440,6 +441,7 @@ namespace Misc
 	BOOL IsEmpty(LPCSTR szText);
 	BOOL HasEmpty(const CStringArray& aItems);
 
+	int FindNextOneOf(const CString& sSearchForOneOf, const CString& sSearchIn, BOOL bForward, int nStartPos = -1);
 	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
 	int Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = TRUE, int iStart = 0);
 	int Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = TRUE, BOOL bWholeWord = FALSE, int iStart = 0);

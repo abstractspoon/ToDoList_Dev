@@ -1053,7 +1053,7 @@ int Misc::Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep, BOOL
 	return aValues.GetSize();
 }
 
-int Misc::SplitIntoLines(const CString& sText, CStringArray& aLines, int nMaxLength)
+int Misc::SplitByLength(const CString& sText, CStringArray& aLines, int nMaxLength)
 {
 	int nNumLines = Split(sText, aLines, '\n');
 
@@ -1074,23 +1074,15 @@ int Misc::SplitIntoLines(const CString& sText, CStringArray& aLines, int nMaxLen
 
 			if (sLine.GetLength() > nMaxLength)
 			{
-				static const CString DELIMS(")-\\/}]:;,. ?\"'\r\t");
-
 				CStringArray aSubLines;
 
 				do
 				{
-					// Work backwards looking for a word break
-					int nLineLength = nMaxLength;
+					// Find nearest word-break
+					CString sSubLine = Left(sText, nMaxLength, TRUE);
 
-					while (nLineLength && (DELIMS.Find(sLine[nLineLength - 1]) == -1))
-						nLineLength--;
-
-					if (nLineLength == 0)
-						nLineLength = nMaxLength;
-
-					aSubLines.Add(sLine.Left(nLineLength));
-					sLine = sLine.Mid(nLineLength);
+					aSubLines.Add(sSubLine);
+					sLine = sLine.Mid(sSubLine.GetLength());
 				}
 				while (sLine.GetLength() > nMaxLength);
 				
@@ -1106,6 +1098,65 @@ int Misc::SplitIntoLines(const CString& sText, CStringArray& aLines, int nMaxLen
 	}
 
 	return aLines.GetSize();
+}
+
+CString Misc::Left(const CString& sText, int nLength, BOOL bNearestWord)
+{
+	if (bNearestWord && (nLength < sText.GetLength()))
+	{
+		// Look forwards and backwards for word break
+		static CString BACKWARD_DELIMS(_T(")-\\/}]:;,. ?\"'\r\t")); // opening braces
+		static CString FORWARD_DELIMS(_T("(-\\/{[:;,. ?\"'\r\t")); // closing braces
+
+		int nNextLess = FindNextOneOf(BACKWARD_DELIMS, sText, FALSE, nLength);
+		int nNextMore = FindNextOneOf(FORWARD_DELIMS, sText, TRUE, nLength);
+
+		if (nNextMore == -1)
+			nNextMore = sText.GetLength();
+
+		// Use the closest one
+		if ((nLength - nNextLess) < (nNextMore - nLength))
+		{
+			if (nNextLess > 0)
+				nLength = nNextLess;
+			else
+				nLength = nNextMore;
+		}
+		else
+		{
+			nLength = nNextMore;
+		}
+	}
+
+	return sText.Left(nLength);
+}
+
+int Misc::FindNextOneOf(const CString& sSearchForOneOf, const CString& sSearchIn, BOOL bForward, int nStartPos)
+{
+	int nFind = -1;
+
+	if (bForward)
+	{
+		nFind = ((nStartPos == -1) ? 0 : nStartPos);
+		
+		while ((nFind < sSearchIn.GetLength()) && (sSearchForOneOf.Find(sSearchIn[nFind]) == -1))
+			nFind++;
+
+		if (nFind >= sSearchIn.GetLength())
+			nFind = -1;
+	}
+	else // backwards
+	{
+		nFind = ((nStartPos == -1) ? (sSearchIn.GetLength() - 1) : nStartPos);
+		
+		while ((nFind >= 0) && (sSearchForOneOf.Find(sSearchIn[nFind]) == -1))
+			nFind--;
+
+		if (nFind < 0)
+			nFind = -1;
+	}
+
+	return nFind;
 }
 
 BOOL Misc::MatchAll(const CStringArray& array1, const CStringArray& array2, BOOL bOrderSensitive, BOOL bCaseSensitive)
