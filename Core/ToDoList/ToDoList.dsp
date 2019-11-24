@@ -507,10 +507,6 @@ SOURCE=.\TDLOleMessageFilter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLPasteFromClipboardDlg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\TDLPrefMigrationDlg.cpp
 # End Source File
 # Begin Source File
@@ -1104,10 +1100,6 @@ SOURCE=.\TDLOffsetDatesDlg.h
 # Begin Source File
 
 SOURCE=.\TDLOleMessageFilter.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\TDLPasteFromClipboardDlg.h
 # End Source File
 # Begin Source File
 
