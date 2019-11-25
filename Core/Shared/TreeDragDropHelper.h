@@ -59,6 +59,7 @@ protected:
 	HTREEITEM HitTest(CPoint pt, DDWHERE& nWhere) const;
 	HTREEITEM HighlightDropTarget(CPoint point);
 	HTREEITEM HighlightDropTarget(); // get current cursor pos
+	void RecalcDropTarget(CPoint point);
 
 	enum { TIMER_SCROLL, TIMER_EXPAND };
 	void SetTimer(int nTimer, UINT nPeriod);

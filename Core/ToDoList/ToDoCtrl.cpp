@@ -1905,10 +1905,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	// and task header
 	UpdateSelectedTaskPath();
 	
-	// show hide controls
 	EnableDisableControls(hti);
-	
-	m_treeDragDrop.EnableDragDrop(CanEditSelectedTask(TDCA_POSITION));
+	EnableDisableDragDrop();
 
 #ifdef _DEBUG
 //	TRACE(_T("CToDoCtrl::UpdateControls(took %d ms)\n"), (GetTickCount() - dwTick));
@@ -4884,7 +4882,7 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
  				return FALSE;
 		
 			// else
-			return (!m_data.IsTaskReference(GetTaskID(htiParent)));
+			return !m_data.IsTaskReference(GetTaskID(htiParent));
 		}
 		break;
 	}
@@ -7274,21 +7272,35 @@ LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT(!m_taskTree.SelectionHasLocked(FALSE, TRUE));
 
 		const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
-
-		// handle WM_DD_DRAGOVER for creating task shortcuts
-		// only interested in left button drags with ctrl+shift pressed
-		if (pDDI->bLeftDrag)
+		HTREEITEM htiOver, htiAfter;
+		
+		if (!m_treeDragDrop.GetDropTarget(htiOver, htiAfter))
 		{
-			HTREEITEM htiOver = m_taskTree.HitTestItem(pDDI->pt);
-			DWORD dwOverTaskID = GetTaskID(htiOver);
+			nRes = DD_DROPEFFECT_NONE;
+		}
+		else if (!htiAfter)
+		{
+			// Extra processing if over a task
+			DWORD dwTargetID = GetTaskID(htiOver);
+			ASSERT(dwTargetID);
 
-			if (m_data.IsTaskReference(dwOverTaskID) && m_taskTree.SelectionHasNonReferences())
+			// Allow dropping on references to locked tasks
+			if (m_data.IsTaskLocked(dwTargetID) && !m_data.IsTaskReference(dwTargetID))
 			{
-				nRes = DD_DROPEFFECT_LINK;
+				nRes = DD_DROPEFFECT_NONE;
 			}
-			else if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT)) 
+			else if (pDDI->bLeftDrag)
 			{
-				nRes = DD_DROPEFFECT_LINK;
+				// handle WM_DD_DRAGOVER for creating task shortcuts
+				// only interested in left button drags with ctrl+shift pressed
+				if (m_data.IsTaskReference(dwTargetID) && m_taskTree.SelectionHasNonReferences())
+				{
+					nRes = DD_DROPEFFECT_LINK;
+				}
+				else if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT)) 
+				{
+					nRes = DD_DROPEFFECT_LINK;
+				}
 			}
 		}
 	}
@@ -7306,51 +7318,50 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT(!m_taskTree.SelectionHasLocked(FALSE, TRUE));
 
 		const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
-		HTREEITEM htiDrop, htiAfter;
+		HTREEITEM htiDropOn, htiDropAfter;
 		
-		if (!m_treeDragDrop.GetDropTarget(htiDrop, htiAfter))
-			return 0;
+		if (!m_treeDragDrop.GetDropTarget(htiDropOn, htiDropAfter))
+			return FALSE;
 
-		DWORD dwTargetID = GetTaskID(htiDrop);
+		DWORD dwTargetID = GetTaskID(htiDropOn);
 		BOOL bTargetIsRef = m_data.IsTaskReference(dwTargetID);
 
-		// make target ID point to 'true' task
-		if (bTargetIsRef)
-			dwTargetID = m_data.GetTrueTaskID(dwTargetID);
+		if (m_data.IsTaskLocked(dwTargetID) && !bTargetIsRef)
+			return FALSE;
 
-		m_taskTree.RedrawColumns();
+		m_taskTree.RedrawColumns(); // ?
 
 		// if htiAfter is NULL then we are dropping 'on' an item
 		// so we need to decide where
 		TDC_DROPOPERATION nDrop = TDC_DROPNONE;
-		BOOL bDropOn = (htiAfter == NULL);
+		BOOL bDropOn = (htiDropAfter == NULL);
 
 		if (bDropOn)
 		{
 			if (m_bDragDropSubtasksAtTop)
-				htiAfter = TVI_FIRST;
+				htiDropAfter = TVI_FIRST;
 			else
-				htiAfter = m_taskTree.TCH().GetLastChildItem(htiDrop);
+				htiDropAfter = m_taskTree.TCH().GetLastChildItem(htiDropOn);
 		}
 
 		if (pDDI->bLeftDrag) 
 		{
-			// Only allow non-refs to be dropped on references
-			// as references
+			// Only allow non-refs to be dropped ON references AS references
 			if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
 			{
 				nDrop = TDC_DROPREFERENCE;
 			}
-			else
+			else if (Misc::ModKeysArePressed(MKS_NONE))
 			{
-				if (Misc::ModKeysArePressed(MKS_NONE))
-					nDrop = TDC_DROPMOVE;
-
-				if (Misc::ModKeysArePressed(MKS_CTRL))
-					nDrop = TDC_DROPCOPY;
-
-				if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT))
-					nDrop = TDC_DROPREFERENCE;
+				nDrop = TDC_DROPMOVE;
+			}
+			else if (Misc::ModKeysArePressed(MKS_CTRL))
+			{
+				nDrop = TDC_DROPCOPY;
+			}
+			else if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT))
+			{
+				nDrop = TDC_DROPREFERENCE;
 			}
 		}
 		else // right drag
@@ -7359,8 +7370,8 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 			if (menu.LoadMenu(IDR_TREEDRAGDROP, *this, TRUE))
 			{
-				if (htiDrop && htiDrop != TVI_ROOT)
-					m_taskTree.SelectDropTarget(htiDrop);
+				if (htiDropOn && htiDropOn != TVI_ROOT)
+					m_taskTree.SelectDropTarget(htiDropOn);
 
 				// disable task ref, dependency and file links
 				// if dropping in-between tasks
@@ -7454,7 +7465,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 		if (nDrop != TDC_DROPNONE)
 		{
-			VERIFY(DropSelectedTasks(nDrop, htiDrop, htiAfter));
+			VERIFY(DropSelectedTasks(nDrop, htiDropOn, htiDropAfter));
 		}
 	}
 
@@ -8671,7 +8682,7 @@ LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 		break;
 	}
 
-	m_treeDragDrop.EnableDragDrop(CanEditSelectedTask(TDCA_POSITION) && GetSelectedCount());
+	EnableDisableDragDrop();
 
 	return 0L;
 }
@@ -9170,8 +9181,7 @@ void CToDoCtrl::SelectItem(HTREEITEM hti)
 			UpdateControls(); // disable controls
 		
 		UpdateSelectedTaskPath();
-		
-		m_treeDragDrop.EnableDragDrop(!IsReadOnly());
+		EnableDisableDragDrop();
 
 		// notify parent
 		GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
@@ -9188,8 +9198,20 @@ void CToDoCtrl::SelectAll()
 		UpdateControls();
 	}
 	
-	// disable dragdrop
-	m_treeDragDrop.EnableDragDrop(FALSE);
+	EnableDisableDragDrop();
+}
+
+void CToDoCtrl::EnableDisableDragDrop()
+{
+	BOOL bEnabled = !IsReadOnly();
+
+	if (bEnabled)
+	{
+		// Allow dragging of refeerences to locked tasks
+		bEnabled = m_taskTree.SelectionHasUnlocked(TRUE);
+	}
+
+	m_treeDragDrop.EnableDragDrop(bEnabled);
 }
 
 BOOL CToDoCtrl::GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const

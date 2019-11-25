@@ -1900,7 +1900,7 @@ BOOL CTDLTaskTreeCtrl::CanMoveSelection(TDC_MOVETASK nDirection) const
 	if (IsReadOnly() || SelectionHasLocked(FALSE))
 		return FALSE;
 	
-	// get selected tasks without duplicate subtasks
+	// Get selected tasks without duplicate subtasks
 	CHTIList selection;
 	TSH().CopySelection(selection, TRUE);
 	
@@ -1921,9 +1921,9 @@ BOOL CTDLTaskTreeCtrl::CanMoveSelection(TDC_MOVETASK nDirection) const
 	return TRUE;
 }
 
-BOOL CTDLTaskTreeCtrl::SelectionHasLocked(BOOL bCheckChildren, BOOL bIgnoreReferences) const
+BOOL CTDLTaskTreeCtrl::SelectionHasLocked(BOOL bCheckChildren, BOOL bTreatRefsAsUnlocked) const
 {
-	BOOL bLocked = CTDLTaskCtrlBase::SelectionHasLocked(bIgnoreReferences);
+	BOOL bLocked = CTDLTaskCtrlBase::SelectionHasLocked(bTreatRefsAsUnlocked);
 
 	if (bLocked || !bCheckChildren)
 		return bLocked;
@@ -1935,14 +1935,14 @@ BOOL CTDLTaskTreeCtrl::SelectionHasLocked(BOOL bCheckChildren, BOOL bIgnoreRefer
 	{
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		if (TaskHasLockedSubtasks(dwTaskID, bIgnoreReferences))
+		if (TaskHasLockedSubtasks(dwTaskID, bTreatRefsAsUnlocked))
 			return TRUE;
 	}
 
 	return FALSE; // All subtasks were unlocked
 }
 
-BOOL CTDLTaskTreeCtrl::TaskHasLockedSubtasks(DWORD dwTaskID, BOOL bIgnoreReferences) const
+BOOL CTDLTaskTreeCtrl::TaskHasLockedSubtasks(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const
 {
 	const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
 
@@ -1950,7 +1950,7 @@ BOOL CTDLTaskTreeCtrl::TaskHasLockedSubtasks(DWORD dwTaskID, BOOL bIgnoreReferen
 	{
 		DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
 
-		if (bIgnoreReferences && m_data.IsTaskReference(dwTaskID))
+		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwTaskID))
 		{
 			// References can only contain other references
 			// so no need to check children
@@ -1958,7 +1958,7 @@ BOOL CTDLTaskTreeCtrl::TaskHasLockedSubtasks(DWORD dwTaskID, BOOL bIgnoreReferen
 		}
 		
 		// Check this task and its children
-		if (m_data.IsTaskLocked(dwSubtaskID) || TaskHasLockedSubtasks(dwSubtaskID, bIgnoreReferences))
+		if (m_data.IsTaskLocked(dwSubtaskID) || TaskHasLockedSubtasks(dwSubtaskID, bTreatRefsAsUnlocked))
 			return TRUE;
 	}
 
