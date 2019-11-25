@@ -411,53 +411,6 @@ namespace TDC
 		return mapAttrib.GetCount();
 	}
 
-	static TDC_OFFSET MapUnitsToDateOffset(int nUnits)
-	{
-		switch (nUnits)
-		{
-		case TDCU_DAYS:		return TDCO_DAYS;
-		case TDCU_WEEKS:	return TDCO_WEEKS;
-		case TDCU_WEEKDAYS: return TDCO_WEEKDAYS;
-		case TDCU_MONTHS:	return TDCO_MONTHS;
-		case TDCU_YEARS:	return TDCO_YEARS;
-		}
-
-		ASSERT(0);
-		return TDCO_NULL;
-	}
-
-	static TDC_UNITS MapDateOffsetToUnits(TDC_OFFSET nOffset)
-	{
-		switch (nOffset)
-		{
-		case TDCO_DAYS:		return TDCU_DAYS;
-		case TDCO_WEEKS:	return TDCU_WEEKS;
-		case TDCO_WEEKDAYS: return TDCU_WEEKDAYS;
-		case TDCO_MONTHS:	return TDCU_MONTHS;
-		case TDCO_YEARS:	return TDCU_YEARS;
-		}
-		
-		// all else
-		ASSERT(0);
-		return TDCU_NULL;
-	}
-
-	static DH_UNITS MapDateOffsetToDHUnits(TDC_OFFSET nOffset)
-	{
-		switch (nOffset)
-		{
-		case TDCO_DAYS:		return DHU_DAYS;
-		case TDCO_WEEKS:	return DHU_WEEKS;
-		case TDCO_WEEKDAYS: return DHU_WEEKDAYS;
-		case TDCO_MONTHS:	return DHU_MONTHS;
-		case TDCO_YEARS:	return DHU_YEARS;
-		}
-
-		// all else
-		ASSERT(0);
-		return DHU_NULL;
-	}
-
 	static TDC_UNITS MapTHUnitsToUnits(TH_UNITS nUnits)
 	{
 		switch (nUnits)

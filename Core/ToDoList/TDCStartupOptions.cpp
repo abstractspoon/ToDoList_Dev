@@ -154,18 +154,21 @@ BOOL TDCSTARTUPATTRIB::GetDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset)
 		return FALSE;
 	
 	DH_UNITS nDHUnits = DHU_NULL;
+	int nOffset = 0; // We only support integer offsets
 
-	if (IsOffset(szValue) && CDateHelper::DecodeOffset(szValue, dValue, nDHUnits, TRUE))
+	if (IsOffset(szValue) && CDateHelper::DecodeOffset(szValue, nOffset, nDHUnits, TRUE))
 	{
+		dValue = nOffset;
 		bOffset = TRUE;
 	}
-	else if (CDateHelper::DecodeOffset(szValue, dValue, nDHUnits, FALSE)) // Decode as plain number
+	else if (CDateHelper::DecodeOffset(szValue, nOffset, nDHUnits, FALSE)) // Decode as plain number
 	{
+		dValue = _ttof(szValue);
 		bOffset = FALSE;
 	}
 	else if (Misc::IsEmpty(szValue))
 	{
-		dValue = 0;
+		dValue = 0.0;
 		nDHUnits = DHU_DAYS;
 		bOffset = FALSE;
 	}
@@ -179,27 +182,18 @@ BOOL TDCSTARTUPATTRIB::GetDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset)
 	return TRUE;
 }
 
-BOOL TDCSTARTUPATTRIB::Get24HourTime(double& dValue, BOOL& bOffset) const
+BOOL TDCSTARTUPATTRIB::GetTimeOfDay(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const
 {
 	if (!bSet)
 		return FALSE;
 
-	// We support offsets in days, hours and minutes only
-	TDC_UNITS nUnits;
-
+	// We support offsets in hours and minutes only
 	if (GetTimePeriod(dValue, nUnits, bOffset) && bOffset)
 	{
 		switch (nUnits)
 		{
 		case TDCU_MINS:
-			dValue /= (24 * 60);
-			return TRUE;
-
 		case TDCU_HOURS:
-			dValue /= 24;
-			return TRUE;
-
-		case TDCU_DAYS:
 			return TRUE;
 		}
 
@@ -209,6 +203,7 @@ BOOL TDCSTARTUPATTRIB::Get24HourTime(double& dValue, BOOL& bOffset) const
 	}
 
 	// else
+	nUnits = TDCU_DAYS;
 	return GetValue(dValue, bOffset); 
 }
 

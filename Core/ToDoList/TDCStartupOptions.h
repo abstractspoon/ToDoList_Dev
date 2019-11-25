@@ -34,7 +34,7 @@ public:
 	void ClearValue();
 	int GetValues(CStringArray& aItems, BOOL& bAppend) const;
 
-	BOOL Get24HourTime(double& dValue, BOOL& bOffset) const;
+	BOOL GetTimeOfDay(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const;
 	BOOL GetTimePeriod(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const;
 	BOOL GetDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const;
 	BOOL IsOffset() const { return IsOffset(szValue); }
@@ -93,11 +93,11 @@ public:
 	BOOL GetDependency(CString& sValue) const { return m_sDepends.GetValue(sValue); }
 
 	BOOL GetStartDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtStartDate.GetDate(dValue, nUnits, bOffset); } 
-	BOOL GetStartTime(double& dValue, BOOL& bOffset) const { return m_dStartTime.Get24HourTime(dValue, bOffset); } 
+	BOOL GetStartTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dStartTime.GetTimeOfDay(dValue, nUnits, bOffset); } 
 	BOOL GetDueDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtDueDate.GetDate(dValue, nUnits, bOffset); } 
-	BOOL GetDueTime(double& dValue, BOOL& bOffset) const { return m_dDueTime.Get24HourTime(dValue, bOffset); }
+	BOOL GetDueTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dDueTime.GetTimeOfDay(dValue, nUnits, bOffset); }
 	BOOL GetDoneDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtDoneDate.GetDate(dValue, nUnits, bOffset); } 
-	BOOL GetDoneTime(double& dValue, BOOL& bOffset) const { return m_dDoneTime.Get24HourTime(dValue, bOffset); } 
+	BOOL GetDoneTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dDoneTime.GetTimeOfDay(dValue, nUnits, bOffset); } 
 	BOOL GetCreationDate(COleDateTime& dtValue) const;
 
 	BOOL GetPercentDone(int& nValue, BOOL& bOffset) const { return m_nPercentDone.GetValue(nValue, bOffset); }

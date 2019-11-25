@@ -5471,73 +5471,67 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 		if (startup.GetStartDate(dItem, nUnits, bOffset))
 		{
+			ASSERT(bOffset || (nUnits == DHU_DAYS));
+
 			if (bOffset)
-			{
-				TDC_OFFSET nOffset = TDC::MapUnitsToDateOffset(nUnits);
-				tdc.OffsetSelectedTaskDate(TDCD_START, (int)dItem, nOffset, FALSE);
-			}
+				tdc.OffsetSelectedTaskDate(TDCD_START, (int)dItem, nUnits, FALSE);
 			else
-			{
-				ASSERT(nUnits == DHU_DAYS);
 				tdc.SetSelectedTaskDate(TDCD_START, dItem);
-			}
 		}
 			
 		// time overrides if present
-		if (startup.GetStartTime(dItem, bOffset))
+		if (startup.GetStartTime(dItem, nUnits, bOffset))
 		{
-			if (bOffset)
-				dItem += tdc.GetSelectedTaskDate(TDCD_STARTTIME);
+			ASSERT(bOffset || (nUnits == DHU_DAYS));
 
-			tdc.SetSelectedTaskDate(TDCD_STARTTIME, dItem);
+			if (bOffset)
+				tdc.OffsetSelectedTaskDate(TDCD_STARTTIME, (int)dItem, nUnits, FALSE);
+			else
+				tdc.SetSelectedTaskDate(TDCD_STARTTIME, dItem);
 		}
 
 		// due date and time
 		if (startup.GetDueDate(dItem, nUnits, bOffset))
 		{
+			ASSERT(bOffset || (nUnits == DHU_DAYS));
+
 			if (bOffset)
-			{
-				TDC_OFFSET nOffset = TDC::MapUnitsToDateOffset(nUnits);
-				tdc.OffsetSelectedTaskDate(TDCD_DUE, (int)dItem, nOffset, FALSE);
-			}
+				tdc.OffsetSelectedTaskDate(TDCD_DUE, (int)dItem, nUnits, FALSE);
 			else
-			{
-				ASSERT(nUnits == DHU_DAYS);
 				tdc.SetSelectedTaskDate(TDCD_DUE, dItem);
-			}
 		}
 
 		// time overrides if present
-		if (startup.GetDueTime(dItem, bOffset))
+		if (startup.GetDueTime(dItem, nUnits, bOffset))
 		{
-			if (bOffset)
-				dItem += tdc.GetSelectedTaskDate(TDCD_DUETIME);
+			ASSERT(bOffset || (nUnits == DHU_DAYS));
 
-			tdc.SetSelectedTaskDate(TDCD_DUETIME, dItem);
+			if (bOffset)
+				tdc.OffsetSelectedTaskDate(TDCD_DUETIME, (int)dItem, nUnits, FALSE);
+			else
+				tdc.SetSelectedTaskDate(TDCD_DUETIME, dItem);
 		}
 
 		// done date and time
 		if (startup.GetDoneDate(dItem, nUnits, bOffset))
 		{
+			ASSERT(bOffset || (nUnits == DHU_DAYS));
+
 			if (bOffset)
-			{
-				TDC_OFFSET nOffset = TDC::MapUnitsToDateOffset(nUnits);
-				tdc.OffsetSelectedTaskDate(TDCD_DONE, (int)dItem, nOffset, FALSE);
-			}
+				tdc.OffsetSelectedTaskDate(TDCD_DONE, (int)dItem, nUnits, FALSE);
 			else
-			{
-				ASSERT(nUnits == DHU_DAYS);
 				tdc.SetSelectedTaskDate(TDCD_DONE, dItem);
-			}
 		}
 			
 		// time overrides if present
-		if (startup.GetDoneTime(dItem, bOffset))
+		if (startup.GetDoneTime(dItem, nUnits, bOffset))
 		{
-			if (bOffset)
-				dItem += tdc.GetSelectedTaskDate(TDCD_DONETIME);
+			ASSERT(bOffset || (nUnits == DHU_DAYS));
 
-			tdc.SetSelectedTaskDate(TDCD_DONETIME, dItem);
+			if (bOffset)
+				tdc.OffsetSelectedTaskDate(TDCD_DONETIME, (int)dItem, nUnits, FALSE);
+			else
+				tdc.SetSelectedTaskDate(TDCD_DONETIME, dItem);
 		}
 
 		// Custom attribute
@@ -11337,11 +11331,13 @@ void CToDoListWnd::OnEditOffsetDates()
 	
 	if (dialog.DoModal() == IDOK)
 	{
-		TDC_OFFSET nUnits;
+		TDC_UNITS nUnits = TDCU_NULL;
 		int nAmount = dialog.GetOffsetAmount(nUnits);
 		
 		if (!nAmount)
 			return;
+
+		ASSERT(nUnits != TDCU_NULL);
 		
 		DWORD dwWhat = dialog.GetOffsetWhat();
 		BOOL bSubtasks = dialog.GetOffsetSubtasks();
@@ -11369,15 +11365,15 @@ void CToDoListWnd::OnEditOffsetDates()
 
 void CToDoListWnd::OnEditOffsetDatesForwards(UINT nCmdID)
 {
-	TDC_OFFSET nUnits = TDCO_NULL;
+	TDC_UNITS nUnits = TDCU_NULL;
 
 	switch (nCmdID)
 	{
-	case ID_OFFSETDATES_FORWARDSBY_ONEDAY:		nUnits = TDCO_DAYS;		break;
-	case ID_OFFSETDATES_FORWARDSBY_ONEWEEKDAY:	nUnits = TDCO_WEEKDAYS; break;
-	case ID_OFFSETDATES_FORWARDSBY_ONEWEEK:		nUnits = TDCO_WEEKS;	break;
-	case ID_OFFSETDATES_FORWARDSBY_ONEMONTH:	nUnits = TDCO_MONTHS;	break;
-	case ID_OFFSETDATES_FORWARDSBY_ONEYEAR:		nUnits = TDCO_YEARS;	break;
+	case ID_OFFSETDATES_FORWARDSBY_ONEDAY:		nUnits = TDCU_DAYS;		break;
+	case ID_OFFSETDATES_FORWARDSBY_ONEWEEKDAY:	nUnits = TDCU_WEEKDAYS; break;
+	case ID_OFFSETDATES_FORWARDSBY_ONEWEEK:		nUnits = TDCU_WEEKS;	break;
+	case ID_OFFSETDATES_FORWARDSBY_ONEMONTH:	nUnits = TDCU_MONTHS;	break;
+	case ID_OFFSETDATES_FORWARDSBY_ONEYEAR:		nUnits = TDCU_YEARS;	break;
 
 	default:
 		ASSERT(0);
@@ -11389,15 +11385,15 @@ void CToDoListWnd::OnEditOffsetDatesForwards(UINT nCmdID)
 
 void CToDoListWnd::OnEditOffsetDatesBackwards(UINT nCmdID)
 {
-	TDC_OFFSET nUnits = TDCO_NULL;
+	TDC_UNITS nUnits = TDCU_NULL;
 
 	switch (nCmdID)
 	{
-	case ID_OFFSETDATES_BACKWARDSBY_ONEDAY:		nUnits = TDCO_DAYS;		break;
-	case ID_OFFSETDATES_BACKWARDSBY_ONEWEEKDAY:	nUnits = TDCO_WEEKDAYS; break;
-	case ID_OFFSETDATES_BACKWARDSBY_ONEWEEK:	nUnits = TDCO_WEEKS;	break;
-	case ID_OFFSETDATES_BACKWARDSBY_ONEMONTH:	nUnits = TDCO_MONTHS;	break;
-	case ID_OFFSETDATES_BACKWARDSBY_ONEYEAR:	nUnits = TDCO_YEARS;	break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEDAY:		nUnits = TDCU_DAYS;		break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEWEEKDAY:	nUnits = TDCU_WEEKDAYS; break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEWEEK:	nUnits = TDCU_WEEKS;	break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEMONTH:	nUnits = TDCU_MONTHS;	break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEYEAR:	nUnits = TDCU_YEARS;	break;
 
 	default:
 		ASSERT(0);

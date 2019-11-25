@@ -132,7 +132,7 @@ public:
 	static BOOL DecodeDate(const CString& sDate, time64_t& date, BOOL bAndTime);
 	static BOOL DecodeISODate(const CString& sDate, COleDateTime& date, BOOL bAndTime);
 
-	static BOOL DecodeOffset(LPCTSTR szDate, double& dAmount, DH_UNITS& nUnits, BOOL bMustHaveSign = TRUE);
+	static BOOL DecodeOffset(LPCTSTR szDate, int& nAmount, DH_UNITS& nUnits, BOOL bMustHaveSign = TRUE);
 	static BOOL IsValidRelativeDate(LPCTSTR szDate, BOOL bMustHaveSign = TRUE);
 
 	static OLE_DAYOFWEEK GetDayOfWeek(const COleDateTime& date);
@@ -229,7 +229,7 @@ protected:
 	static BOOL DecodeLocalShortDate(const CString& sDate, COleDateTime& date);
 	static BOOL GetTimeT(time64_t date, time_t& timeT);
 	static BOOL IsValidUnit(TCHAR nUnits);
-	static BOOL DecodeOffsetEx(LPCTSTR szDate, double& dAmount, DH_UNITS& nUnits, DH_UNITS nDefUnits, BOOL bMustHaveSign);
+	static BOOL DecodeOffsetEx(LPCTSTR szDate, int& nAmount, DH_UNITS& nUnits, DH_UNITS nDefUnits, BOOL bMustHaveSign);
 	static COleDateTime GetNearestDayPart(const COleDateTime& date, int nNumParts, BOOL bEnd);
 };
 

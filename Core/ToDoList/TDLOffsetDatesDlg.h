@@ -29,7 +29,7 @@ public:
 	CTDLOffsetDatesDlg(CWnd* pParent = NULL);   // standard constructor
 
 	DWORD GetOffsetWhat() const;
-	int GetOffsetAmount(TDC_OFFSET& nUnits) const;
+	int GetOffsetAmount(TDC_UNITS& nUnits) const;
 	BOOL GetOffsetSubtasks() const { return m_bOffsetSubtasks; }
 	BOOL GetOffsetFromToday() const { return m_bOffsetFromToday; }
 

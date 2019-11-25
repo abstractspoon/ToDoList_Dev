@@ -4467,6 +4467,7 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 			break;
 
 		case TDCA_DONEDATE:
+		case TDCA_DONETIME:
 			{
 				bRedrawTasks |= (HasStyle(TDCS_STRIKETHOUGHDONETASKS) ||
 								(HasStyle(TDCS_ALLOWTREEITEMCHECKBOX) && !IsColumnShowing(TDCC_DONE)));
@@ -4484,6 +4485,7 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 			break;
 
 		case TDCA_DUEDATE:
+		case TDCA_DUETIME:
 			{
 				if (!AccumulateRecalcColumn(TDCC_DUEDATE, aColIDs))
 					bRedrawCols = IsColumnShowing(TDCC_PRIORITY);
@@ -4508,6 +4510,7 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 		case TDCA_TAGS:
 		case TDCA_COST:
 		case TDCA_STARTDATE:
+		case TDCA_STARTTIME:
 		case TDCA_EXTERNALID:
 		case TDCA_RECURRENCE:
 		case TDCA_FILEREF:

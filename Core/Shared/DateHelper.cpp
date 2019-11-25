@@ -606,7 +606,7 @@ BOOL CDateHelper::DecodeDate(const CString& sDate, double& date, BOOL bAndTime)
 
 	if (DecodeDate(sDate, dt, bAndTime))
 	{
-		date = dt;
+		date = dt.m_dt;
 		return TRUE;
 	}
 
@@ -630,13 +630,13 @@ BOOL CDateHelper::IsValidUnit(TCHAR nUnits)
 }
 
 // external
-BOOL CDateHelper::DecodeOffset(LPCTSTR szDate, double& dAmount, DH_UNITS& nUnits, BOOL bMustHaveSign)
+BOOL CDateHelper::DecodeOffset(LPCTSTR szDate, int& nAmount, DH_UNITS& nUnits, BOOL bMustHaveSign)
 {
-	return DecodeOffsetEx(szDate, dAmount, nUnits, DHU_DAYS, bMustHaveSign);
+	return DecodeOffsetEx(szDate, nAmount, nUnits, DHU_DAYS, bMustHaveSign);
 }
 
 // internal
-BOOL CDateHelper::DecodeOffsetEx(LPCTSTR szDate, double& dAmount, 
+BOOL CDateHelper::DecodeOffsetEx(LPCTSTR szDate, int& nAmount, 
 								DH_UNITS& nUnits, DH_UNITS nDefUnits, BOOL bMustHaveSign)
 {
 	// sanity checks
@@ -678,8 +678,8 @@ BOOL CDateHelper::DecodeOffsetEx(LPCTSTR szDate, double& dAmount,
 	else
 		nUnits = nDefUnits;
 
-	// Rest is number (note: ttof ignores any trailing letters)
-	dAmount = (nSign * _ttof(sDate));
+	// Rest is number (note: ttoi ignores any trailing letters)
+	nAmount = (nSign * _ttoi(sDate));
 	return TRUE;
 }
 
@@ -723,13 +723,13 @@ BOOL CDateHelper::DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bM
 		date = GetDate(DHD_TODAY); // default
 
 	// The rest should be a relative date offset
-	double dAmount = 0.0;
+	int nAmount = 0;
 
 	if (!sDate.IsEmpty())
 	{
 		DH_UNITS nUnits = DHU_NULL;
 
-		if (!DecodeOffsetEx(sDate, dAmount, nUnits, DHU_NULL, bMustHaveSign))
+		if (!DecodeOffsetEx(sDate, nAmount, nUnits, DHU_NULL, bMustHaveSign))
 			return FALSE;
 
 		// Handle missing units
@@ -741,7 +741,7 @@ BOOL CDateHelper::DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bM
 				nUnits = DHU_DAYS; // default
 		}
 
-		if ((dAmount != 0.0) && !OffsetDate(date, (int)dAmount, nUnits))
+		if (nAmount && !OffsetDate(date, nAmount, nUnits))
 			return FALSE;
 	}
 

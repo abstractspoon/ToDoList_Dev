@@ -3131,7 +3131,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	return TRUE;
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET nOffset, BOOL bAndSubtasks)
+BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks)
 {
 	TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
 
@@ -3148,7 +3148,6 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 	TSH().CopySelection(htiSel, bAndSubtasks);
 
 	CDWordArray aModTaskIDs;
-	TDC_UNITS nUnits = TDC::MapDateOffsetToUnits(nOffset);
 	POSITION pos = htiSel.GetHeadPosition();
 	
 	// Keep track of what we've processed to avoid offsetting
@@ -3173,19 +3172,16 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 		switch (nDate)
 		{
 		case TDCD_CREATE:	
-			SetModified(TDCA_CREATIONDATE, aModTaskIDs); 
-			break;
-
 		case TDCD_START:	
-			SetModified(TDCA_STARTDATE, aModTaskIDs); 
-			break;
-
 		case TDCD_DUE:		
-			SetModified(TDCA_DUEDATE, aModTaskIDs); 
-			break;
-
-		case TDCD_DONE:		
-			SetModified(TDCA_DONEDATE, aModTaskIDs); 
+		case TDCD_DONE:
+		case TDCD_STARTDATE:
+		case TDCD_DUEDATE:
+		case TDCD_DONEDATE:
+		case TDCD_STARTTIME:
+		case TDCD_DUETIME:
+		case TDCD_DONETIME:
+			SetModified(nAttribID, aModTaskIDs);
 			break;
 
 		default:
@@ -3211,7 +3207,7 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskStartAndDueDates() const
 	return TRUE;
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_OFFSET nOffset, BOOL bAndSubtasks)
+BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks)
 {
 	if (!CanEditSelectedTask(TDCA_STARTDATE))
 		return FALSE;
@@ -3226,7 +3222,6 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_OFFSET nOffs
 	TSH().CopySelection(htiSel, bAndSubtasks);
 
 	CDWordArray aModTaskIDs;
-	TDC_UNITS nTDCUnits = TDC::MapDateOffsetToUnits(nOffset);
 	POSITION pos = htiSel.GetHeadPosition();
 
 	// Keep track of what we've processed to avoid offsetting
@@ -3237,7 +3232,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_OFFSET nOffs
 	{
 		DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(pos));
 
-		if (!HandleModResult(dwTaskID, OffsetTaskStartAndDueDates(dwTaskID, nAmount, nTDCUnits, bAndSubtasks, mapProcessed), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, OffsetTaskStartAndDueDates(dwTaskID, nAmount, nUnits, bAndSubtasks, mapProcessed), aModTaskIDs))
 			return FALSE;
 	}
 	

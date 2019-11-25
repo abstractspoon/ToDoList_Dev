@@ -16,6 +16,17 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+enum // OFFSET
+{
+	WEEKDAYS,
+	DAYS,
+	WEEKS,
+	MONTHS,
+	YEARS,
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // COffsetDatesDlg dialog
 
 CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent /*=NULL*/)
@@ -34,7 +45,7 @@ CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent /*=NULL*/)
 	m_nOffsetBy = prefs.GetProfileInt(m_sPrefsKey, _T("Amount"), 1);
 	m_bOffsetSubtasks = prefs.GetProfileInt(m_sPrefsKey, _T("Subtasks"), TRUE);
 	m_bOffsetFromToday = prefs.GetProfileInt(m_sPrefsKey, _T("FromToday"), FALSE);
-	m_nOffsetByUnits = prefs.GetProfileInt(m_sPrefsKey, _T("AmountPeriod"), TDCO_WEEKDAYS);
+	m_nOffsetByUnits = prefs.GetProfileInt(m_sPrefsKey, _T("AmountPeriod"), WEEKDAYS);
 }
 
 
@@ -79,9 +90,34 @@ DWORD CTDLOffsetDatesDlg::GetOffsetWhat() const
 	return dwWhat;
 }
 
-int CTDLOffsetDatesDlg::GetOffsetAmount(TDC_OFFSET& nUnits) const
+int CTDLOffsetDatesDlg::GetOffsetAmount(TDC_UNITS& nUnits) const
 {
-	nUnits = (TDC_OFFSET)m_nOffsetByUnits;
+	switch (m_nOffsetByUnits)
+	{
+	case WEEKDAYS:
+		nUnits = TDCU_WEEKDAYS;
+		break;
+
+	case DAYS:
+		nUnits = TDCU_DAYS;
+		break;
+
+	case WEEKS:
+		nUnits = TDCU_WEEKS;
+		break;
+
+	case MONTHS:
+		nUnits = TDCU_MONTHS;
+		break;
+
+	case YEARS:
+		nUnits = TDCU_YEARS;
+		break;
+		
+	default:
+		ASSERT(0);
+		nUnits = TDCU_NULL;
+	}
 
 	return (m_bForward ? m_nOffsetBy : -m_nOffsetBy);
 }
