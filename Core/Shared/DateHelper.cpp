@@ -1552,11 +1552,12 @@ int CDateHelper::GetDaysInMonth(const COleDateTime& date)
 
 int CDateHelper::GetDaysInMonth(int nMonth, int nYear)
 {
-	// data check
-	ASSERT(nMonth >= 1 && nMonth <= 12);
-
+	// Sanity check
 	if (nMonth < 1 || nMonth> 12)
+	{
+		ASSERT(0);
 		return 0;
+	}
 
 	switch (nMonth)
 	{
@@ -1590,18 +1591,34 @@ BOOL CDateHelper::IsToday(const COleDateTime& date)
 
 BOOL CDateHelper::IsSameDay(const COleDateTime& date1, const COleDateTime& date2)
 {
-	ASSERT(IsDateSet(date1) && IsDateSet(date2));
+	if (!IsDateSet(date1) || !IsDateSet(date2))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	return (GetDateOnly(date1) == GetDateOnly(date2));
 }
 
 BOOL CDateHelper::IsLeapYear(const COleDateTime& date)
 {
+	if (!IsDateSet(date))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	return IsLeapYear(date.GetYear());
 }
 
 BOOL CDateHelper::IsEndOfDay(const COleDateTime& date)
 {
+	if (!IsDateSet(date))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	double dTime = GetTimeOnly(date).m_dt;
 
 	// Handle rounding
@@ -1610,6 +1627,8 @@ BOOL CDateHelper::IsEndOfDay(const COleDateTime& date)
 
 BOOL CDateHelper::IsLeapYear(int nYear)
 {
+	ASSERT(nYear);
+
 	return ((nYear % 4 == 0) && ((nYear % 100 != 0) || (nYear % 400 == 0)));
 }
 
