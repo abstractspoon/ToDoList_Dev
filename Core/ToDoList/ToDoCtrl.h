@@ -276,34 +276,31 @@ public:
 	BOOL SetSelectedTaskColor(COLORREF color);
 	BOOL ClearSelectedTaskColor() { return SetSelectedTaskColor(CLR_NONE); }
 	BOOL SetSelectedTaskTitle(const CString& sTitle);
-	BOOL SetSelectedTaskPercentDone(int nPercent);
 	BOOL SetSelectedTaskPercentDoneToToday();
-	BOOL SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst);
-	BOOL SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent);
 	BOOL SetSelectedTaskAllocBy(const CString& sAllocBy);
 	BOOL SetSelectedTaskStatus(const CString& sStatus);
-	BOOL SetSelectedTaskAllocTo(const CStringArray& aAllocTo);
-	BOOL SetSelectedTaskCategories(const CStringArray& aCats);
-	BOOL SetSelectedTaskDependencies(const CStringArray& aDepends);
-	BOOL SetSelectedTaskTags(const CStringArray& aTags);
-	BOOL SetSelectedTaskFileRefs(const CStringArray& aFilePaths);
-	BOOL AppendSelectedTaskAllocTo(const CStringArray& aAllocTo);
-	BOOL AppendSelectedTaskCategories(const CStringArray& aCats);
-	BOOL AppendSelectedTaskDependencies(const CStringArray& aDepends);
-	BOOL AppendSelectedTaskTags(const CStringArray& aTags);
-	BOOL AppendSelectedTaskFileRefs(const CStringArray& aFilePaths);
-	BOOL SetSelectedTaskPriority(int nPriority); // 0-10 (10 is highest)
-	BOOL SetSelectedTaskRisk(int nRisk); // 0-10 (10 is highest)
 	BOOL SetSelectedTaskExternalID(const CString& sID);
 	BOOL SetSelectedTaskFlag(BOOL bFlagged);
 	BOOL SetSelectedTaskLock(BOOL bLocked);
-	BOOL SetSelectedTaskCost(const TDCCOST& cost);
 	BOOL SetSelectedTaskVersion(const CString& sVersion);
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments = _T(""));
 	BOOL SetSelectedTaskIcon(const CString& sIcon); 
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date);
 	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data);
 	BOOL SetSelectedTaskMetaData(const CString& sKey, const CString& sMetaData);
+
+	BOOL SetSelectedTaskAllocTo(const CStringArray& aAllocTo, BOOL bAppend = FALSE);
+	BOOL SetSelectedTaskCategories(const CStringArray& aCats, BOOL bAppend = FALSE);
+	BOOL SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL bAppend = FALSE);
+	BOOL SetSelectedTaskTags(const CStringArray& aTags, BOOL bAppend = FALSE);
+	BOOL SetSelectedTaskFileRefs(const CStringArray& aFilePaths, BOOL bAppend = FALSE);
+
+	BOOL SetSelectedTaskPercentDone(int nPercent, BOOL bOffset = FALSE);
+	BOOL SetSelectedTaskPriority(int nPriority, BOOL bOffset = FALSE);
+	BOOL SetSelectedTaskRisk(int nRisk, BOOL bOffset = FALSE);
+	BOOL SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL bOffset = FALSE);
+	BOOL SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bOffset = FALSE);
+	BOOL SetSelectedTaskCost(const TDCCOST& cost, BOOL bOffset = FALSE);
 
 	BOOL CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
 	BOOL CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID);
@@ -787,7 +784,7 @@ protected:
 	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, CDWordSet& mapProcessed);
 	HTREEITEM InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEdit, DWORD dwDependency);
 	int GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
-	BOOL SetSelectedTaskPercentDone(int nPercent, const COleDateTime& date);
+	BOOL SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COleDateTime& date);
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 
 	void SaveGlobals(CTaskFile& tasks) const;

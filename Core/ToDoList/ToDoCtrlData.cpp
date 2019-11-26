@@ -1334,23 +1334,23 @@ TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib,
 		break;
 		
 	case TDCA_ALLOCTO:		
-		nRes = SetTaskAllocTo(dwTaskID, CStringArray(), FALSE);
+		nRes = SetTaskAllocTo(dwTaskID, CStringArray());
 		break;
 
 	case TDCA_CATEGORY:		
-		nRes = SetTaskCategories(dwTaskID, CStringArray(), FALSE);
+		nRes = SetTaskCategories(dwTaskID, CStringArray());
 		break;
 
 	case TDCA_TAGS:			
-		nRes = SetTaskTags(dwTaskID, CStringArray(), FALSE);
+		nRes = SetTaskTags(dwTaskID, CStringArray());
 		break;
 
 	case TDCA_DEPENDENCY:	
-		nRes = SetTaskDependencies(dwTaskID, CStringArray(), FALSE);
+		nRes = SetTaskDependencies(dwTaskID, CStringArray());
 		break;
 
 	case TDCA_FILEREF:		
-		nRes = SetTaskFileRefs(dwTaskID, CStringArray(), FALSE);
+		nRes = SetTaskFileRefs(dwTaskID, CStringArray());
 		break;
 		
 	case TDCA_ALLOCBY:		
@@ -1943,24 +1943,45 @@ TDC_SET CToDoCtrlData::SetTaskRecurrence(DWORD dwTaskID, const TDCRECURRENCE& tr
 	return SET_NOCHANGE;
 }
 
-TDC_SET CToDoCtrlData::SetTaskPriority(DWORD dwTaskID, int nPriority)
+BOOL CToDoCtrlData::CanEditPriorityRisk(int nValue, int nNoValue, BOOL bOffset)
 {
-	if (!(nPriority == FM_NOPRIORITY || (nPriority >= 0 && nPriority <= 10)))
-		return SET_FAILED;
+	if (bOffset)
+		return ((nValue >= -10) && (nValue <= 10));
 
+	// else
+	return (nValue == nNoValue || (nValue >= 0 && nValue <= 10));
+}
+
+TDC_SET CToDoCtrlData::SetTaskPriority(DWORD dwTaskID, int nPriority, BOOL bOffset)
+{
+	if (!CanEditPriorityRisk(nPriority, FM_NOPRIORITY, bOffset))
+		return SET_FAILED;
+	
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
+
+	if (bOffset && (pTDI->nPriority != FM_NOPRIORITY))
+	{
+		nPriority += pTDI->nPriority;
+		nPriority = max(0, min(10, nPriority));
+	}
 	
 	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_PRIORITY, pTDI->nPriority, nPriority);
 }
 
-TDC_SET CToDoCtrlData::SetTaskRisk(DWORD dwTaskID, int nRisk)
+TDC_SET CToDoCtrlData::SetTaskRisk(DWORD dwTaskID, int nRisk, BOOL bOffset)
 {
-	if (!(nRisk == FM_NORISK || (nRisk >= 0 && nRisk <= 10)))
+	if (!CanEditPriorityRisk(nRisk, FM_NORISK, bOffset))
 		return SET_FAILED;
-
+	
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
+
+	if (bOffset && (pTDI->nRisk != FM_NOPRIORITY))
+	{
+		nRisk += pTDI->nRisk;
+		nRisk = max(0, min(10, nRisk));
+	}
 
 	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_RISK, pTDI->nRisk, nRisk);
 }
@@ -2123,35 +2144,59 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	case TDCD_DUEDATE:
 	case TDCD_DONE:
 	case TDCD_DONEDATE:
-		return (TDC::MapUnitsToDHUnits(nUnits) != DHU_NULL);
-		
-	case TDCD_STARTTIME:	
-	case TDCD_DUETIME:	
+		{
+			// This fails on hours and minutes
+			if (TDC::MapUnitsToDHUnits(nUnits) == DHU_NULL)
+				return FALSE;
+		}
+		break;
+
+	case TDCD_STARTTIME:
+		{
+			if ((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS))
+				return FALSE;
+
+			nDate = TDCD_START;
+		}
+		break;
+
+	case TDCD_DUETIME:
+		{
+			if ((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS))
+				return FALSE;
+
+			nDate = TDCD_DUE;
+		}
+		break;
+
 	case TDCD_DONETIME:
-		return ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
+		{
+			if ((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS))
+				return FALSE;
+
+			nDate = TDCD_DONE;
+		}
+		break;
+
+	default: // All the rest
+		return FALSE;
 	}
 
-	// All the rest
-	return FALSE;
+	return CDateHelper::IsDateSet(GetTaskDate(dwTaskID, nDate));
 }
 
 TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
 										BOOL bAndSubtasks, BOOL bFitToRecurringScheme)
 {
-	if (!CanOffsetTaskDate(dwTaskID, nDate, nAmount, nUnits))
-	{
-		ASSERT(0);
-		return SET_FAILED;
-	}
-
-	TODOITEM* pTDI = NULL;
-	EDIT_GET_TDI(dwTaskID, pTDI);
-
-	COleDateTime date = pTDI->GetDate(nDate);
 	TDC_SET nRes = SET_NOCHANGE;
-	
-	if (CDateHelper::IsDateSet(date))
+
+	if (CanOffsetTaskDate(dwTaskID, nDate, nAmount, nUnits))
 	{
+		TODOITEM* pTDI = NULL;
+		EDIT_GET_TDI(dwTaskID, pTDI);
+
+		COleDateTime date = pTDI->GetDate(nDate);
+
 		if ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS))
 		{
 			// Modify time only
@@ -2162,11 +2207,11 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 			case THU_HOURS:
 				date.m_dt += (nAmount / 24.0);
 				break;
-				
+
 			case THU_MINS:
 				date.m_dt += (nAmount / (24.0 * 60));
 				break;
-				
+
 			default:
 				ASSERT(0);
 			}
@@ -2303,31 +2348,28 @@ TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const
 	}
 	
 	return nRes;
-
 }
 
-TDC_SET CToDoCtrlData::SetTaskPercent(DWORD dwTaskID, int nPercent)
+TDC_SET CToDoCtrlData::SetTaskPercent(DWORD dwTaskID, int nPercent, BOOL bOffset)
 {
-	if (nPercent < 0 || nPercent > 100)
+	if (!bOffset && (nPercent < 0 || nPercent > 100))
 		return SET_FAILED;
 	
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_PERCENT, pTDI->nPercentDone, nPercent);
-}
+	BOOL bDone = pTDI->IsDone();
 
-TDC_SET CToDoCtrlData::IncrementTaskPercentDone(DWORD dwTaskID, int nAmount, BOOL& bDoneChange)
-{
-	BOOL bDone = IsTaskDone(dwTaskID);
-	bDoneChange = FALSE;
+	if (bOffset)
+	{
+		int nAmount = nPercent;
+		nPercent += pTDI->nPercentDone;
 
-	int nPercent = GetTaskPercent(dwTaskID, TRUE);
+		nPercent = GetNextValue(nPercent, nAmount);
+		nPercent = max(0, min(nPercent, 100));
+	}
 
-	nPercent = GetNextValue(nPercent, nAmount);
-	nPercent = max(0, min(nPercent, 100));
-
-	TDC_SET nRes = SetTaskPercent(dwTaskID, nPercent);
+	TDC_SET nRes = EditTaskAttributeT(dwTaskID, pTDI, TDCA_PERCENT, pTDI->nPercentDone, nPercent);
 
 	if (nRes == SET_CHANGE)
 	{
@@ -2335,12 +2377,10 @@ TDC_SET CToDoCtrlData::IncrementTaskPercentDone(DWORD dwTaskID, int nAmount, BOO
 		if (bDone && (nPercent < 100))
 		{
 			SetTaskDate(dwTaskID, TDCD_DONE, 0.0);
-			bDoneChange = TRUE;
 		}
 		else if (!bDone && (nPercent >= 100))
 		{
 			SetTaskDate(dwTaskID, TDCD_DONE, COleDateTime::GetCurrentTime());
-			bDoneChange = TRUE;
 		}
 	}
 
@@ -2375,41 +2415,7 @@ int CToDoCtrlData::GetNextValue(int nValue, int nIncrement)
 	return (nValue + nIncrement);
 }
 
-TDC_SET CToDoCtrlData::IncrementTaskPriority(DWORD dwTaskID, int nAmount)
-{
-	int nPriority = GetTaskPriority(dwTaskID);
-
-	ASSERT((nPriority == FM_NOPRIORITY) || ((nPriority >= 0) && (nPriority <= 10)));
-	
-	// Exclude '<none>'
-	if (nPriority == FM_NOPRIORITY)
-		return SET_NOCHANGE;
-	
-	nPriority += nAmount;
-	nPriority = max(0, nPriority);
-	nPriority = min(10, nPriority);
-
-	return SetTaskPriority(dwTaskID, nPriority);
-}
-
-TDC_SET CToDoCtrlData::IncrementTaskRisk(DWORD dwTaskID, int nAmount)
-{
-	int nRisk = GetTaskRisk(dwTaskID);
-
-	ASSERT((nRisk == FM_NORISK) || ((nRisk >= 0) && (nRisk <= 10)));
-	
-	// Exclude '<none>'
-	if (nRisk == FM_NORISK)
-		return SET_NOCHANGE;
-	
-	nRisk += nAmount;
-	nRisk = max(0, nRisk);
-	nRisk = min(10, nRisk);
-
-	return SetTaskPriority(dwTaskID, nRisk);
-}
-
-TDC_SET CToDoCtrlData::SetTaskCost(DWORD dwTaskID, const TDCCOST& cost)
+TDC_SET CToDoCtrlData::SetTaskCost(DWORD dwTaskID, const TDCCOST& cost, BOOL bOffset)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
@@ -2421,7 +2427,11 @@ TDC_SET CToDoCtrlData::SetTaskCost(DWORD dwTaskID, const TDCCOST& cost)
 	SaveEditUndo(dwTaskID, pTDI, TDCA_COST);
 
 	// make the change
-	pTDI->cost = cost;
+	if (bOffset)
+		pTDI->cost.AddCost(cost);
+	else
+		pTDI->cost = cost;
+
 	pTDI->SetModified();
 
 	// update subtasks
@@ -2430,27 +2440,32 @@ TDC_SET CToDoCtrlData::SetTaskCost(DWORD dwTaskID, const TDCCOST& cost)
 	return SET_CHANGE;
 }
 
-TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst)
+TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst, BOOL bOffset)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
 	TDCTIMEPERIOD orgEst = pTDI->timeEstimate;
-	TDC_SET nRes = EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEEST, pTDI->timeEstimate, timeEst);
+	TDCTIMEPERIOD newEst(bOffset ? pTDI->timeEstimate : timeEst);
+	
+	if (bOffset)
+		newEst.AddTime(timeEst);
+
+	TDC_SET nRes = EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEEST, pTDI->timeEstimate, newEst);
 
 	if ((nRes == SET_CHANGE) && HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 	{
 		// recalc due date but only if the duration 'really' changed
 		// and the task has either a due date or a start date
-		BOOL bTimeChange = ((orgEst.dAmount != timeEst.dAmount) || 
-							((timeEst.dAmount != 0.0) && (orgEst.nUnits != timeEst.nUnits)));
+		BOOL bTimeChange = ((orgEst.dAmount != newEst.dAmount) ||
+							((newEst.dAmount != 0.0) && (orgEst.nUnits != newEst.nUnits)));
 		
 		if (bTimeChange && (pTDI->HasStart() || pTDI->HasDue()))
 		{
 			// Make sure the task has a start date
 			CalcMissingStartDateFromDue(pTDI);
 
-			COleDateTime dtNewDue = AddDuration(pTDI->dateStart, timeEst.dAmount, timeEst.nUnits, FALSE); // Don't modify start date
+			COleDateTime dtNewDue = AddDuration(pTDI->dateStart, newEst.dAmount, newEst.nUnits, FALSE); // Don't modify start date
 
 			// FALSE = don't recalc time estimate
 			SetTaskDate(dwTaskID, pTDI, TDCD_DUE, dtNewDue, FALSE); 
@@ -2460,12 +2475,17 @@ TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& 
 	return nRes;
 }
 
-TDC_SET CToDoCtrlData::SetTaskTimeSpent(DWORD dwTaskID, const TDCTIMEPERIOD& timeSpent)
+TDC_SET CToDoCtrlData::SetTaskTimeSpent(DWORD dwTaskID, const TDCTIMEPERIOD& timeSpent, BOOL bOffset)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMESPENT, pTDI->timeSpent, timeSpent);
+	TDCTIMEPERIOD newSpent(bOffset ? pTDI->timeSpent : timeSpent);
+
+	if (bOffset)
+		newSpent.AddTime(timeSpent);
+	
+	return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMESPENT, pTDI->timeSpent, newSpent);
 }
 
 BOOL CToDoCtrlData::CalcMissingStartDateFromDue(TODOITEM* pTDI) const
@@ -3685,14 +3705,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 
 double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits)
 {
-	// Sanity checks
-	if (!CDateHelper::IsDateSet(dateStart) || !CDateHelper::IsDateSet(dateDue))
-	{
-		ASSERT(0);
-		return 0.0;
-	}
-
-	// End date must be greater then start date
+	// Sanity check
 	if (!COleDateTimeRange::IsValid(dateStart, dateDue))
 	{
 		ASSERT(0);
@@ -3904,9 +3917,9 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 	case TDCA_ICON:			return SetTaskIcon(dwTaskID, data.AsString());
 
 	case TDCA_COLOR:		return SetTaskColor(dwTaskID, data.AsInteger());
-	case TDCA_PRIORITY:		return SetTaskPriority(dwTaskID, data.AsInteger());
-	case TDCA_RISK:			return SetTaskRisk(dwTaskID, data.AsInteger());
-	case TDCA_PERCENT:		return SetTaskPercent(dwTaskID, data.AsInteger());
+	case TDCA_PRIORITY:		return SetTaskPriority(dwTaskID, data.AsInteger(), FALSE);
+	case TDCA_RISK:			return SetTaskRisk(dwTaskID, data.AsInteger(), FALSE);
+	case TDCA_PERCENT:		return SetTaskPercent(dwTaskID, data.AsInteger(), FALSE);
 	case TDCA_FLAG:			return SetTaskFlag(dwTaskID, data.AsBool());
 	case TDCA_LOCK:			return SetTaskLock(dwTaskID, data.AsBool());
 
@@ -3942,7 +3955,7 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 			TDCTIMEPERIOD time;
 			
 			if (data.AsTimePeriod(time))
-				return SetTaskTimeEstimate(dwTaskID, time);
+				return SetTaskTimeEstimate(dwTaskID, time, FALSE);
 		}
 		break;
 
@@ -3951,7 +3964,7 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 			TDCTIMEPERIOD time;
 
 			if (data.AsTimePeriod(time))
-				return SetTaskTimeSpent(dwTaskID, time);
+				return SetTaskTimeSpent(dwTaskID, time, FALSE);
 		}
 		break;
 
@@ -3960,7 +3973,7 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 			TDCCOST cost;
 			
 			if (data.AsCost(cost))
-				return SetTaskCost(dwTaskID, cost);
+				return SetTaskCost(dwTaskID, cost, FALSE);
 		}
 		break;
 	}

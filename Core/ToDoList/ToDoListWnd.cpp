@@ -5352,119 +5352,43 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		BOOL bOffset = FALSE;
 
 		if (startup.GetPriority(nItem, bOffset))
-		{
-			if (bOffset)
-				nItem += tdc.GetSelectedTaskPriority();
-
-			tdc.SetSelectedTaskPriority(nItem);
-		}
+			tdc.SetSelectedTaskPriority(nItem, bOffset);
 
 		if (startup.GetRisk(nItem, bOffset))
-		{
-			if (bOffset)
-				nItem += tdc.GetSelectedTaskRisk();
-
-			tdc.SetSelectedTaskRisk(nItem);
-		}
+			tdc.SetSelectedTaskRisk(nItem, bOffset);
 
 		if (startup.GetPercentDone(nItem, bOffset))
-		{
-			if (bOffset)
-				nItem += tdc.GetSelectedTaskPercent();
-
-			tdc.SetSelectedTaskPercentDone(nItem);
-		}
+			tdc.SetSelectedTaskPercentDone(nItem, bOffset);
 
 		if (startup.GetCost(dItem, bOffset))
-		{
-			TDCCOST cost;
-			
-			if (tdc.GetSelectedTaskCost(cost))
-			{
-				if (bOffset)
-					cost.dAmount += dItem;
-				else
-					cost.dAmount = dItem;
-
-				tdc.SetSelectedTaskCost(cost);
-			}
-		}
+			tdc.SetSelectedTaskCost(TDCCOST(dItem), bOffset);
 
 		// Times
 		TDCTIMEPERIOD time;
 
 		if (startup.GetTimeEst(time.dAmount, time.nUnits, bOffset))
-		{
-			TDCTIMEPERIOD timeEst;
-			
-			if (tdc.GetSelectedTaskTimeEstimate(timeEst) && (timeEst.dAmount != 0.0))
-			{
-				time.SetUnits(timeEst.nUnits, TRUE);
-				
-				if (bOffset)
-					time.dAmount += timeEst.dAmount;
-			}
-
-			tdc.SetSelectedTaskTimeEstimate(time);
-		}
+			tdc.SetSelectedTaskTimeEstimate(time, bOffset);
 
 		if (startup.GetTimeSpent(time.dAmount, time.nUnits, bOffset))
-		{
-			TDCTIMEPERIOD timeSpent;
-
-			if (tdc.GetSelectedTaskTimeSpent(timeSpent) && (timeSpent.dAmount != 0.0))
-			{
-				time.SetUnits(timeSpent.nUnits, TRUE);
-
-				if (bOffset)
-					time.dAmount += timeSpent.dAmount;
-			}
-
-			tdc.SetSelectedTaskTimeSpent(time); 
-		}
+			tdc.SetSelectedTaskTimeSpent(time, bOffset); 
 
 		// Multi-string items
 		BOOL bAppend = FALSE;
 
 		if (startup.GetAllocTo(aItems, bAppend) != -1)
-		{
-			if (bAppend)
-				tdc.AppendSelectedTaskAllocTo(aItems);
-			else
-				tdc.SetSelectedTaskAllocTo(aItems);
-		}
+			tdc.SetSelectedTaskAllocTo(aItems, bAppend);
 		
 		if (startup.GetCategories(aItems, bAppend) != -1)
-		{
-			if (bAppend)
-				tdc.AppendSelectedTaskCategories(aItems);
-			else
-				tdc.SetSelectedTaskCategories(aItems);
-		}
+			tdc.SetSelectedTaskCategories(aItems, bAppend);
 		
 		if (startup.GetDependencies(aItems, bAppend) != -1)
-		{
-			if (bAppend)
-				tdc.AppendSelectedTaskDependencies(aItems);
-			else
-				tdc.SetSelectedTaskDependencies(aItems);
-		}
+			tdc.SetSelectedTaskDependencies(aItems, bAppend);
 		
 		if (startup.GetTags(aItems, bAppend) != -1)
-		{
-			if (bAppend)
-				tdc.AppendSelectedTaskTags(aItems);
-			else
-				tdc.SetSelectedTaskTags(aItems);
-		}
+			tdc.SetSelectedTaskTags(aItems, bAppend);
 		
 		if (startup.GetFileRefs(aItems, bAppend) != -1)
-		{
-			if (bAppend)
-				tdc.AppendSelectedTaskFileRefs(aItems);
-			else
-				tdc.SetSelectedTaskFileRefs(aItems);
-		}
+			tdc.SetSelectedTaskFileRefs(aItems, bAppend);
 		
 		// start date and time
 		TDC_UNITS nUnits;
@@ -8973,9 +8897,9 @@ void CToDoListWnd::OnSetPriority(UINT nCmdID)
 	if (!tdc.IsReadOnly() && tdc.HasSelection())
 	{
 		if (nCmdID == ID_EDIT_SETPRIORITYNONE) 
-			tdc.SetSelectedTaskPriority(-2);
+			tdc.SetSelectedTaskPriority(-2, FALSE);
 		else
-			tdc.SetSelectedTaskPriority(nCmdID - ID_EDIT_SETPRIORITY0);
+			tdc.SetSelectedTaskPriority((nCmdID - ID_EDIT_SETPRIORITY0), FALSE);
 	}
 }
 
@@ -8985,7 +8909,7 @@ void CToDoListWnd::OnUpdateSetPriority(CCmdUI* pCmdUI)
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_PRIORITY));
 	
-	int nPriority = pCmdUI->m_nID - ID_EDIT_SETPRIORITY0;
+	int nPriority = (pCmdUI->m_nID - ID_EDIT_SETPRIORITY0);
 	
 	if (pCmdUI->m_nID == ID_EDIT_SETPRIORITYNONE)
 		nPriority = -2;
@@ -9010,7 +8934,7 @@ void CToDoListWnd::OnEditAddFileLink()
 		CStringArray aFiles;
 		
 		if (dialog.GetPathNames(aFiles))
-			tdc.AppendSelectedTaskFileRefs(aFiles);
+			tdc.SetSelectedTaskFileRefs(aFiles, TRUE); // append
 	}
 }
 

@@ -178,15 +178,9 @@ public:
 	TDC_SET SetTaskIcon(DWORD dwTaskID, const CString& sIcon);
 	TDC_SET SetTaskComments(DWORD dwTaskID, const CString& sComments, const CBinaryData& customComments = _T(""));
 	TDC_SET SetTaskCommentsType(DWORD dwTaskID, const CONTENTFORMAT& cfComments);
-	TDC_SET SetTaskPercent(DWORD dwTaskID, int nPercent);
-	TDC_SET SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst);
-	TDC_SET SetTaskTimeSpent(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst);
-	TDC_SET SetTaskCost(DWORD dwTaskID, const TDCCOST& cost);
 	TDC_SET SetTaskAllocBy(DWORD dwTaskID, const CString& sAllocBy);
 	TDC_SET SetTaskStatus(DWORD dwTaskID, const CString& sStatus);
 	TDC_SET SetTaskExternalID(DWORD dwTaskID, const CString& sID);
-	TDC_SET SetTaskPriority(DWORD dwTaskID, int nPriority); // 0-10 (10 is highest)
-	TDC_SET SetTaskRisk(DWORD dwTaskID, int nRisk); // 0-10 (10 is highest)
 	TDC_SET SetTaskTitle(DWORD dwTaskID, const CString& sTitle);
 	TDC_SET SetTaskFlag(DWORD dwTaskID, BOOL bFlagged);
 	TDC_SET SetTaskLock(DWORD dwTaskID, BOOL bLocked);
@@ -195,21 +189,24 @@ public:
 	TDC_SET SetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, const TDCCADATA& data);
 	TDC_SET SetTaskMetaData(DWORD dwTaskID, const CString& sKey, const CString& sMetaData);
 	
-	TDC_SET SetTaskAllocTo(DWORD dwTaskID, const CStringArray& aAllocTo, BOOL bAppend);
-	TDC_SET SetTaskCategories(DWORD dwTaskID, const CStringArray& aCategories, BOOL bAppend);
-	TDC_SET SetTaskTags(DWORD dwTaskID, const CStringArray& aTags, BOOL bAppend);
-	TDC_SET SetTaskDependencies(DWORD dwTaskID, const CStringArray& aDepends, BOOL bAppend);
-	TDC_SET SetTaskFileRefs(DWORD dwTaskID, const CStringArray& aFileRefs, BOOL bAppend);
-	TDC_SET SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend);
+	TDC_SET SetTaskPercent(DWORD dwTaskID, int nPercent, BOOL bOffset = FALSE);
+	TDC_SET SetTaskPriority(DWORD dwTaskID, int nPriority, BOOL bOffset = FALSE); // 0-10 (10 is highest)
+	TDC_SET SetTaskRisk(DWORD dwTaskID, int nRisk, BOOL bOffset = FALSE); // 0-10 (10 is highest)
+	TDC_SET SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst, BOOL bOffset = FALSE);
+	TDC_SET SetTaskTimeSpent(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst, BOOL bOffset = FALSE);
+	TDC_SET SetTaskCost(DWORD dwTaskID, const TDCCOST& cost, BOOL bOffset = FALSE);
+	
+	TDC_SET SetTaskAllocTo(DWORD dwTaskID, const CStringArray& aAllocTo, BOOL bAppend = FALSE);
+	TDC_SET SetTaskCategories(DWORD dwTaskID, const CStringArray& aCategories, BOOL bAppend = FALSE);
+	TDC_SET SetTaskTags(DWORD dwTaskID, const CStringArray& aTags, BOOL bAppend = FALSE);
+	TDC_SET SetTaskDependencies(DWORD dwTaskID, const CStringArray& aDepends, BOOL bAppend = FALSE);
+	TDC_SET SetTaskFileRefs(DWORD dwTaskID, const CStringArray& aFileRefs, BOOL bAppend = FALSE);
+	TDC_SET SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend = FALSE);
 
 	TDC_SET ClearTaskColor(DWORD dwTaskID) { SetTaskColor(dwTaskID, CLR_NONE); }
 	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFitToRecurringScheme);
 	TDC_SET InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date, BOOL bAndSubtasks);
 	TDC_SET MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
-
-	TDC_SET IncrementTaskPercentDone(DWORD dwTaskID, int nAmount, BOOL& bDoneChange);
-	TDC_SET IncrementTaskPriority(DWORD dwTaskID, int nAmount);
-	TDC_SET IncrementTaskRisk(DWORD dwTaskID, int nAmount);
 
 	TDC_SET ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bAndChildren = FALSE);
 	TDC_SET ClearTaskCustomAttribute(DWORD dwTaskID, const CString& sAttribID, BOOL bAndChildren = FALSE);
@@ -332,6 +329,7 @@ protected:
 	static COleDateTime CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart);
 	static BOOL IsEndOfDay(const COleDateTime& date);
 	static int GetNextValue(int nValue, int nIncrement);
+	static BOOL CanEditPriorityRisk(int nValue, int nNoValue, BOOL bOffset);
 
 };
 
