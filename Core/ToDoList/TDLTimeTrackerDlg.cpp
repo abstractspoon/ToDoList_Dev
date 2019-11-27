@@ -680,9 +680,11 @@ BOOL CTDLTimeTrackerDlg::UpdateTasks(const CFilteredToDoCtrl* pTDC, const CTaskF
 	}
 
 	UpdateTasklistName(pTDC);
+
+	BOOL bChanges = pTTL->UpdateTasks(tasks);
+	bChanges |= pTTL->RemoveTasks(TTL_REMOVEDELETED);
 	
-	if (IsSelectedTasklist(pTDC) && 
-		((tasks.GetTaskCount() && pTTL->UpdateTasks(tasks)) || pTTL->RemoveTasks(TTL_REMOVEDELETED)))
+	if (bChanges && IsSelectedTasklist(pTDC))
 	{
 		RebuildTaskCombo();
 	}
