@@ -15,6 +15,8 @@ public:
 	CEnCommandLineInfo(const CString& szFileExts = _T(""));
 	virtual ~CEnCommandLineInfo();
 
+	void Reset();
+
 	BOOL HasOption(LPCTSTR szFlag) const; 
 	BOOL GetOptions(LPCTSTR szFlag, CStringArray& aParams) const; 
 	BOOL GetOption(LPCTSTR szFlag, CString& sParam) const; 
@@ -27,6 +29,7 @@ public:
 	BOOL SetOption(LPCTSTR szFlag, DWORD dwParam, BOOL bFailIfExists = TRUE); 
 
 	CString GetCommandLine(TCHAR cDelim = '-') const;
+	int SetCommandLine(LPCTSTR szCmdLine, int nFirstArg = 0);
 
 	static CString FormatSwitch(LPCTSTR szSwitch, LPCTSTR szValue = NULL, TCHAR cDelim = '-');
 	static CString FormatSwitch(TCHAR cSwitch, LPCTSTR szValue = NULL, TCHAR cDelim = '-');

@@ -69,7 +69,11 @@ public:
 	void AppendToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter);
 	void RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter);
 
-	static HICON GetToolIcon(CSysImageList& sil, const USERTOOL& ut);
+	BOOL PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
+						const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CString& sCmdline, BOOL bEscapeSpaces = -1);
+
+	static HICON GetToolIcon(CSysImageList& sil, const USERTOOL& tool);
+	static CString GetToolPath(const USERTOOL& tool);
 	
 protected:
 	UINT m_nStartID;
@@ -77,14 +81,11 @@ protected:
 	BOOL m_bTDLEnabled, m_bISODates;
 	
 protected:
-	BOOL PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, 
-						BOOL bEscapeSpaces, CString& sCmdline);
    	LPCTSTR GetFileFilter();
 	LPCTSTR GetDefaultFileExt();
 	BOOL CheckToDoListVersionCompatibility(const CString& sToolPath) const;
 	BOOL RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bTest);
 
-	static CString GetToolPath(const USERTOOL& tool);
 	static BOOL GetToolPaths(const USERTOOL& tool, CString& sToolPath, CString& sIconPath);
 
 	static BOOL ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, CLA_TYPE nType, 

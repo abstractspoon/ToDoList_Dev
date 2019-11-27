@@ -88,9 +88,8 @@ BOOL CTDCToolsHelper::RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args
 	}
 	
 	CString sCmdline;
-	BOOL bEscapeSpaces = (WebMisc::IsBrowser(sToolPath) || WebMisc::IsURL(tool.sCmdline));
 	
-	if (!PrepareCmdline(tool, args, aCustAttribDefs, bEscapeSpaces, sCmdline))
+	if (!PrepareCmdline(tool, args, aCustAttribDefs, sCmdline))
 	{
 		return FALSE; // user cancelled dialog
 	}
@@ -184,8 +183,14 @@ HICON CTDCToolsHelper::GetToolIcon(CSysImageList& sil, const USERTOOL& tool)
 }
 
 BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
-									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bEscapeSpaces, CString& sCmdline)
+									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CString& sCmdline, BOOL bEscapeSpaces)
 {
+	if (bEscapeSpaces == -1)
+	{
+		CString sToolPath(GetToolPath(tool));
+		bEscapeSpaces = (WebMisc::IsBrowser(sToolPath) || WebMisc::IsURL(tool.sCmdline));
+	}
+
 	// do necessary substitutions
 	CTDCToolsCmdlineParser tcp(tool.sCmdline);
 	CString sTasklist(args.sTasklist);

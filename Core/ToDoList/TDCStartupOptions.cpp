@@ -234,6 +234,19 @@ CTDCStartupOptions::CTDCStartupOptions(const CTDCStartupOptions& startup)
 
 CTDCStartupOptions::CTDCStartupOptions(const CEnCommandLineInfo& cmdInfo)
 {
+	SetCmdInfo(cmdInfo);
+}
+
+CTDCStartupOptions::CTDCStartupOptions(const CString& sCmdInfo, int nFirstArg)
+{
+	CEnCommandLineInfo cmdInfo;
+
+	if (cmdInfo.SetCommandLine(sCmdInfo, nFirstArg))
+		SetCmdInfo(cmdInfo);
+}
+
+void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
+{
 	Reset();
 
 	// insert default path at front

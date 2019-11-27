@@ -6960,10 +6960,10 @@ void CToDoListWnd::OnNeedTooltipText(NMHDR* pNMHDR, LRESULT* pResult)
 
 	if ((pNMHDR->idFrom >= ID_TOOLS_USERTOOL1) && (pNMHDR->idFrom <= ID_TOOLS_USERTOOL50))
 	{
-		USERTOOL ut;
+		USERTOOL tool;
 
-		if (Prefs().GetUserTool(pNMHDR->idFrom - ID_TOOLS_USERTOOL1, ut))
-			sTipText = ut.sToolName;
+		if (Prefs().GetUserTool(pNMHDR->idFrom - ID_TOOLS_USERTOOL1, tool))
+			sTipText = tool.sToolName;
 	}
 	else if ((pNMHDR->idFrom >= 0) && (pNMHDR->idFrom < (UINT)m_mgrToDoCtrls.GetCount()))
 	{
@@ -6984,26 +6984,23 @@ void CToDoListWnd::OnUpdateUserTool(CCmdUI* pCmdUI)
 {
 	if (m_bShowingMainToolbar && (pCmdUI->m_pMenu == NULL)) 
 	{
-		int nTool = pCmdUI->m_nID - ID_TOOLS_USERTOOL1;
+		int nTool = (pCmdUI->m_nID - ID_TOOLS_USERTOOL1);
 		ASSERT (nTool >= 0 && nTool < MAX_NUM_TOOLS);
 
-		USERTOOL ut;
-		
-		if (Prefs().GetUserTool(nTool, ut))
-			pCmdUI->Enable(TRUE);
+		USERTOOL tool;
+		pCmdUI->Enable(Prefs().GetUserTool(nTool, tool));
 	}
 }
 
 void CToDoListWnd::OnUserTool(UINT nCmdID) 
 {
-	int nTool = nCmdID - ID_TOOLS_USERTOOL1;
-	USERTOOL ut;
-	
+	int nTool = (nCmdID - ID_TOOLS_USERTOOL1);
 	ASSERT (nTool >= 0 && nTool < MAX_NUM_TOOLS);
 
 	const CPreferencesDlg& prefs = Prefs();
+	USERTOOL tool;
 	
-	if (prefs.GetUserTool(nTool, ut))
+	if (prefs.GetUserTool(nTool, tool))
 	{
 		// Save all tasklists before executing the user tool
 		if (prefs.GetAutoSaveOnRunTools())
@@ -7019,7 +7016,22 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 		USERTOOLARGS args;
 		PopulateToolArgs(args);
 
-		th.RunTool(ut, args, GetToDoCtrl().GetCustomAttributeDefs());
+		// If the tool points to 'us' we try to avoid running another instance
+		if (FileMisc::IsSamePath(FileMisc::GetAppFilePath(), th.GetToolPath(tool)))
+		{
+			CString sCmdLine;
+			
+			if (th.PrepareCmdline(tool, args, GetToDoCtrl().GetCustomAttributeDefs(), sCmdLine))
+			{
+				CTDCStartupOptions startup(sCmdLine, 0);
+
+				if (ProcessStartupOptions(startup, FALSE))
+					return;
+			}
+		}
+
+		// Fallback
+		th.RunTool(tool, args, GetToDoCtrl().GetCustomAttributeDefs());
 	}
 }
 

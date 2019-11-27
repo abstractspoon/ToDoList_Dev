@@ -23,7 +23,7 @@ CEnCommandLineInfo::CEnCommandLineInfo(const CString& sFileExts)
 	m_nLastParameter = -1;	
 	
 	if (!sFileExts.IsEmpty())
-			Misc::Split(sFileExts, m_aFileExt, ';');
+		Misc::Split(sFileExts, m_aFileExt, ';');
 }
 
 CEnCommandLineInfo::~CEnCommandLineInfo()
@@ -183,6 +183,55 @@ void CEnCommandLineInfo::DeleteOption(LPCTSTR szFlag)
 	sFlag.MakeUpper();
 
 	m_mapCommandLine.RemoveKey(sFlag);
+}
+
+int CEnCommandLineInfo::SetCommandLine(LPCTSTR szCmdLine, int nFirstArg)
+{
+	Reset();
+
+	CStringArray aArgV;
+	int nArgC = Misc::Split(szCmdLine, aArgV, ' ');
+
+	// Copied from CWinApp::ParseCommandline()
+	for (int i = nFirstArg; i < nArgC; i++)
+	{
+		LPCTSTR pszParam = aArgV[i];
+		BOOL bFlag = FALSE;
+		BOOL bLast = ((i + 1) == nArgC);
+
+		if (pszParam[0] == '-' || pszParam[0] == '/')
+		{
+			// remove flag specifier
+			bFlag = TRUE;
+			++pszParam;
+		}
+
+		ParseParam(pszParam, bFlag, bLast);
+	}
+
+	return m_mapCommandLine.GetCount();
+}
+
+void CEnCommandLineInfo::Reset()
+{
+	m_mapCommandLine.RemoveAll();
+	m_aFileExt.RemoveAll();
+	m_sCurFlag.Empty();
+	m_nLastParameter = -1;
+
+	// base class
+	m_bShowSplash = FALSE;
+	m_bRunEmbedded = FALSE;
+	m_bRunAutomated = FALSE;
+	m_bRegisterPerUser = FALSE;
+	m_nShellCommand = CCommandLineInfo::FileNew;
+
+	m_strFileName.Empty();
+	m_strPrinterName.Empty();
+	m_strDriverName.Empty();
+	m_strPortName.Empty();
+	m_strRestartIdentifier.Empty();
+
 }
 
 CString CEnCommandLineInfo::GetCommandLine(TCHAR cDelim) const
