@@ -3462,7 +3462,7 @@ BOOL CToDoCtrlData::IsTaskParent(DWORD dwTaskID) const
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDS(dwTaskID, pTDS, FALSE);
 	
-	return !pTDS->HasSubTasks();
+	return pTDS->HasSubTasks();
 }
 
 BOOL CToDoCtrlData::CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDependencyID, 
