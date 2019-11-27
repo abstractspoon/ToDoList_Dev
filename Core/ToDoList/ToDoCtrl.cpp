@@ -1824,7 +1824,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 		m_eTimeSpent.CheckButton(ID_TIME_TRACK, bIsTrackingTask);
 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, bCanTimeTrack);
-		m_eTimeSpent.EnableButton(ID_ADD_TIME, !bIsTrackingTask);
+		m_eTimeSpent.EnableButton(ID_ADD_TIME, (bCanTimeTrack && !bIsTrackingTask));
 
 		// dependency link button
 		m_eDependency.EnableButton(ID_DEPENDS_LINK, bEnable && !m_sDepends.IsEmpty());
