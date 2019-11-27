@@ -1998,14 +1998,14 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 	if (!pTDI)
 		EDIT_GET_TDI(dwTaskID, pTDI);
 
-	COleDateTime dtDate(date);
-	BOOL bDateIsSet = CDateHelper::IsDateSet(dtDate);
-	
 	// Convert 'end of day' to whole days
-	if (bDateIsSet && IsEndOfDay(dtDate))
+	COleDateTime dtDate(date);
+
+	if (CDateHelper::IsEndOfDay(dtDate, FALSE))
 		dtDate = CDateHelper::GetDateOnly(dtDate);
 	
 	const COleDateTime dtCur = pTDI->GetDate(nDate);
+	BOOL bDateIsSet = CDateHelper::IsDateSet(dtDate);
 	
 	if (dtCur != dtDate)
 	{
@@ -3493,7 +3493,7 @@ BOOL CToDoCtrlData::CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDepen
 				dtNewStart = pTDIDepends->dateDone;
 
 			// if we're on a day/night boundary move to next day
-			if (IsEndOfDay(dtNewStart))
+			if (CDateHelper::IsEndOfDay(dtNewStart, TRUE))
 				dtNewStart += 1.0;
 		}
 		break;
@@ -3508,7 +3508,7 @@ BOOL CToDoCtrlData::CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDepen
 			dtNewStart = pTDIDepends->dateDue;
 
 			// if we're on a day/night boundary move to next day
-			if (IsEndOfDay(dtNewStart))
+			if (CDateHelper::IsEndOfDay(dtNewStart, TRUE))
 				dtNewStart += 1.0;
 		}
 		break;
@@ -3604,13 +3604,6 @@ UINT CToDoCtrlData::UpdateTaskLocalDependencyDates(DWORD dwTaskID, TDC_DATE nDat
 		return SetNewTaskDependencyStartDate(dwTaskID, dtNewStart);
 
 	return ADJUSTED_NONE;
-}
-
-BOOL CToDoCtrlData::IsEndOfDay(const COleDateTime& date)
-{
-	ASSERT(CDateHelper::IsDateSet(date));
-	
-	return (!CDateHelper::DateHasTime(date) || CDateHelper::IsEndOfDay(date));
 }
 
 COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits, BOOL bAllowUpdateStart)
@@ -3715,7 +3708,7 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	// Handle due date 'end of day'
 	COleDateTime dateEnd(dateDue);
 
-	if (IsEndOfDay(dateEnd))
+	if (CDateHelper::IsEndOfDay(dateEnd, TRUE))
 		dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
 	
 	switch (nUnits)

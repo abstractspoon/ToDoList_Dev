@@ -122,7 +122,7 @@ BOOL COleDateTimeRange::Set(const COleDateTime& dtStart, const COleDateTime& dtE
 
 	m_dtStart = dtStart;
 	m_dtEnd = dtEnd;
-	m_bInclusive = (bInclusive || CDateHelper::IsEndOfDay(dtEnd));
+	m_bInclusive = (bInclusive || CDateHelper::IsEndOfDay(dtEnd, FALSE));
 
 	return IsValid();
 }
@@ -275,7 +275,7 @@ BOOL COleDateTimeRange::Add(const COleDateTime& date, BOOL bInclusive)
 
 	m_bInclusive |= bInclusive;
 			
-	if (m_bInclusive && CDateHelper::IsEndOfDay(m_dtEnd))
+	if (m_bInclusive && CDateHelper::IsEndOfDay(m_dtEnd, FALSE))
 		m_dtEnd = CDateHelper::GetDateOnly(m_dtEnd);
 
 	// Result must logically be valid
@@ -1611,7 +1611,7 @@ BOOL CDateHelper::IsLeapYear(const COleDateTime& date)
 	return IsLeapYear(date.GetYear());
 }
 
-BOOL CDateHelper::IsEndOfDay(const COleDateTime& date)
+BOOL CDateHelper::IsEndOfDay(const COleDateTime& date, BOOL bNoTimeIsEndOfDay)
 {
 	if (!IsDateSet(date))
 	{
@@ -1620,6 +1620,9 @@ BOOL CDateHelper::IsEndOfDay(const COleDateTime& date)
 	}
 
 	double dTime = GetTimeOnly(date).m_dt;
+
+	if ((dTime == 0.0) && bNoTimeIsEndOfDay)
+		return TRUE;
 
 	// Handle rounding
 	return (fabs(dTime - END_OF_DAY) < ONE_SECOND);
