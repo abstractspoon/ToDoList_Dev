@@ -647,15 +647,18 @@ BOOL CTDLTimeTrackerDlg::AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskF
 	else
 		sTitle = pTDC->GetFriendlyProjectName();
 
-	if (AddString(m_cbTasklists, sTitle, (DWORD)pTDC) == CB_ERR)
+	int nTDC = AddString(m_cbTasklists, sTitle, (DWORD)pTDC);
+	
+	if (nTDC == CB_ERR)
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 	
-	if (m_cbTasklists.GetCount() == 1) // first
+	// Select first non-delay-loaded tasklist
+	if ((m_cbTasklists.GetCurSel() == CB_ERR) && !pTDC->IsDelayLoaded())
 	{
-		m_cbTasklists.SetCurSel(0);
+		m_cbTasklists.SetCurSel(nTDC);
 		
 		UpdatePlayButton();
 		RebuildTaskCombo();
