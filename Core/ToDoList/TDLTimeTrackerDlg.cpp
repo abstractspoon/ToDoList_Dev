@@ -845,9 +845,7 @@ void CTDLTimeTrackerDlg::RebuildTaskCombo()
 		}
 	
 		RefreshMaxDropWidth(m_cbTasks);
-
-		if (CB_ERR == SelectItemByData(m_cbTasks, dwSelID))
-			m_cbTasks.SetCurSel(0);
+		SelectItemByData(m_cbTasks, dwSelID);
 	}
 }
 
