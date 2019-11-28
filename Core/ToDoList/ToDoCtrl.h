@@ -336,7 +336,7 @@ public:
 	void ResetTimeTrackingElapsedMinutes();
 
 	void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
-	void SetDefaultTaskAttributes(const TODOITEM& tdi);
+	void SetDefaultTaskAttributeValues(const TODOITEM& tdi);
 
 	// sort functions
 	virtual void Sort(TDC_COLUMN nBy, BOOL bAllowToggle = TRUE) { m_taskTree.Sort(nBy, bAllowToggle); }
@@ -912,7 +912,8 @@ protected:
 	BOOL SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty);
 	void OnAutoComboListChange(TDC_ATTRIBUTE nAttribID, CAutoComboBox& combo, CStringArray& aItems);
 	void UpdateAutoListData(TDC_ATTRIBUTE nAttrib = TDCA_ALL);
-	
+	void UpdateDefaultTaskCustomAttributeValues();
+
 	static BOOL HandleModResult(DWORD dwTaskID, TDC_SET nRes, CDWordArray& aModTaskIDs);
 	static void SetDefaultListContent(CAutoComboBox& combo, const CStringArray& aNewDefs, const CStringArray& aOldDefs, BOOL bAddEmpty = FALSE);
 	static int AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems);

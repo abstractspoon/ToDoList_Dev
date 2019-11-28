@@ -5794,7 +5794,9 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib, FALSE))
 	{
 		m_aCustomAttribDefs.Copy(aAttrib);
+
 		RebuildCustomAttributeUI();
+		UpdateDefaultTaskCustomAttributeValues();
 
 		// update interface
 		SetModified(TDCA_CUSTOMATTRIBDEFS);
@@ -11040,7 +11042,7 @@ int CToDoCtrl::GetSelectedTaskCustomAttributeData(CTDCCustomAttributeDataMap& ma
 	return mapData.GetCount();
 }
 
-void CToDoCtrl::SetDefaultTaskAttributes(const TODOITEM& tdi)
+void CToDoCtrl::SetDefaultTaskAttributeValues(const TODOITEM& tdi)
 {
 	m_tdiDefault = tdi;
 	m_cfDefault = m_tdiDefault.cfComments;
@@ -11053,6 +11055,32 @@ void CToDoCtrl::SetDefaultTaskAttributes(const TODOITEM& tdi)
 	// set default task creation date to zero so that new tasks
 	// always get the current date
 	CDateHelper::ClearDate(m_tdiDefault.dateCreated);
+
+	UpdateDefaultTaskCustomAttributeValues();
+}
+
+void CToDoCtrl::UpdateDefaultTaskCustomAttributeValues()
+{
+	CTDCCustomAttributeDataMap dataDef;
+	int nCust = m_aCustomAttribDefs.GetSize();
+
+	while (nCust--)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
+
+		// The only default custom attribute value we currently support
+		// is single selection lists with default data but without a 'blank' item
+		// ie. A blank default item is not appropriate
+		if (attribDef.bEnabled && 
+			!attribDef.IsMultiList() && 
+			attribDef.aDefaultListData.GetSize() && 
+			attribDef.HasFeature(TDCCAF_EXCLUDEBLANKITEM))
+		{
+			dataDef.SetAt(attribDef.sUniqueID, attribDef.aDefaultListData[0]);
+		}
+	}
+
+	m_tdiDefault.SetCustomAttributeValues(dataDef);
 }
 
 LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
