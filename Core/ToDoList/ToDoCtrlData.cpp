@@ -195,11 +195,6 @@ BOOL CToDoCtrlData::AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, 
 	return TRUE;
 }
 
-TODOITEM* CToDoCtrlData::NewTask() const
-{
-	return new TODOITEM();
-}
-
 TODOITEM* CToDoCtrlData::NewTask(const TODOITEM& tdiRef, DWORD dwParentTaskID) const
 {
 	TODOITEM* pTDI = new TODOITEM(tdiRef);
@@ -218,7 +213,7 @@ TODOITEM* CToDoCtrlData::NewTask(const CTaskFile& tasks, HTASKITEM hTask, const 
 	if (!hTask)
 		return NULL;
 
-	TODOITEM* pTDI = (pTDIRef ? NewTask(*pTDIRef) : NewTask());
+	TODOITEM* pTDI = (pTDIRef ? NewTask(*pTDIRef) : (new TODOITEM()));
 
 	if (!pTDI)
 	{

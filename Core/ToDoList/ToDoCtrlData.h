@@ -55,7 +55,6 @@ public:
 	
 	inline int GetTaskCount() const { return m_items.GetCount(); }
 	
-	TODOITEM* NewTask() const;
 	TODOITEM* NewTask(const TODOITEM& tdiRef, DWORD dwParentTaskID = 0) const;
 	TODOITEM* NewTask(const CTaskFile& tasks, HTASKITEM hTask, const TODOITEM* pTDIRef = NULL) const;
 
