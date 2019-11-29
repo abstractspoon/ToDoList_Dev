@@ -2033,7 +2033,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	pExport->sStylesheet = userPrefs.GetSaveExportStylesheet();
 	BOOL bTransform = GetStylesheetPath(tdc, pExport->sStylesheet);
 
-	if (bFiltered || bHtmlComments || userPrefs.GetSaveExport() || !userPrefs.GetExportAllAttributes())
+	if (bFiltered || bHtmlComments || bTransform || !userPrefs.GetExportAllAttributes())
 	{
 		TSD_TASKS nWhatTasks = bFiltered ? TSDT_FILTERED : TSDT_ALL;
 		TDCGETTASKS filter;
