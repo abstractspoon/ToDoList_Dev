@@ -1595,6 +1595,18 @@ BOOL CDateHelper::IsSameDay(const COleDateTime& date1, const COleDateTime& date2
 	return (GetDateOnly(date1) == GetDateOnly(date2));
 }
 
+BOOL CDateHelper::IsSameWeek(const COleDateTime& date1, const COleDateTime& date2)
+{
+	ASSERT(IsDateSet(date1) && IsDateSet(date2));
+
+	return (GetWeekofYear(date1) == GetWeekofYear(date2));
+}
+
+BOOL CDateHelper::IsThisWeek(const COleDateTime& date)
+{
+	return IsSameWeek(date, COleDateTime::GetCurrentTime());
+}
+
 BOOL CDateHelper::IsLeapYear(const COleDateTime& date)
 {
 	return IsLeapYear(date.GetYear());
