@@ -2028,24 +2028,24 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	// So if user either wants 'Filtered Tasks' or 'Html Comments' or
 	// only 'Visible Columns' we need to grab the tasks again.
 	BOOL bFiltered = (userPrefs.GetSaveExportFilteredOnly() && tdc.HasAnyFilter());
-	BOOL bHtmlComments = (m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("htm")) ||
-							m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("html")));
+	BOOL bHtmlComments = ExporterWantsHTMLComments(nExporter);
 
 	pExport->sStylesheet = userPrefs.GetSaveExportStylesheet();
 	BOOL bTransform = GetStylesheetPath(tdc, pExport->sStylesheet);
 
-	if (bFiltered || userPrefs.GetSaveExport() || !userPrefs.GetExportAllAttributes())
+	if (bFiltered || bHtmlComments || userPrefs.GetSaveExport() || !userPrefs.GetExportAllAttributes())
 	{
 		TSD_TASKS nWhatTasks = bFiltered ? TSDT_FILTERED : TSDT_ALL;
 		TDCGETTASKS filter;
 
-		if (!userPrefs.GetExportAllAttributes())
+		if (userPrefs.GetExportAllAttributes())
 		{
-			// visible attributes
+			filter.mapAttribs.Add(TDCA_ALL);
+		}
+		else // visible attributes
+		{
 			filter.mapAttribs.Copy(tdc.GetVisibleEditFields());
-
-			// add comments always
-			filter.mapAttribs.Add(TDCA_COMMENTS);
+			filter.mapAttribs.Add(TDCA_COMMENTS); // always
 		}
 
 		// set the html image folder to be the output path with
@@ -2064,8 +2064,14 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	{
 		pExport->tasks.CopyFrom(tasks);
 	}
-
+	
 	return pExport;
+}
+
+BOOL CToDoListWnd::ExporterWantsHTMLComments(int nExporter) const
+{
+	return (m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("htm")) ||
+			m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("html")));
 }
 
 BOOL CToDoListWnd::WantTDLExtensionSupport(BOOL bForLoading) const
@@ -6266,6 +6272,8 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 
 BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath)
 {
+	CWaitCursor cursor;
+
 	TDLPD_STYLE nStyle = dlg.GetExportStyle();
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
@@ -6275,6 +6283,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 		{
 			CString sTempImg = TEMP_TASKVIEW_FILEPATH;
 
+			// export
 			if (tdc.SaveTaskViewToImage(sTempImg))
 			{
 				// Make a simple web page container
@@ -6323,7 +6332,6 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks, tdc.GetFilePath());
 
 			// export
-			CWaitCursor cursor;
 			return tasks.TransformToFile(sStylesheet, sFilePath);
 		}
 		break;
@@ -6342,7 +6350,6 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks, tdc.GetFilePath());
 
 			// export
-			CWaitCursor cursor;
 			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, sExporterTypeID, FALSE) == IIER_SUCCESS);
 		}
 		break;
@@ -6362,7 +6369,6 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks, tdc.GetFilePath());
 
 			// export
-			CWaitCursor cursor;
 			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, TDCET_HTML) == IIER_SUCCESS);
 		}
 		break;
@@ -9606,8 +9612,7 @@ void CToDoListWnd::OnExport()
 	// export
 	DOPROGRESS(IDS_EXPORTPROGRESS);
 	
-	BOOL bHtmlComments = (m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("htm")) ||
-						  m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("html")));
+	BOOL bHtmlComments = ExporterWantsHTMLComments(nExporter);
 
 	// The only OR active tasklist -----------------------------------------------------
 	if ((nTDCCount == 1) || !dialog.GetExportAllTasklists())
@@ -9794,8 +9799,11 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 
 	if (bHtmlComments)
 	{
-		if (filter.mapAttribs.Has(TDCA_COMMENTS))
+		if (filter.WantAttribute(TDCA_COMMENTS))
+		{
+			ASSERT(!filter.mapAttribs.IsEmpty());
 			filter.mapAttribs.Add(TDCA_HTMLCOMMENTS);
+		}
 
 		tasks.SetHtmlImageFolder(szHtmlImageDir);
 
@@ -9865,14 +9873,8 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 	}
 		
 	TDCGETTASKS filter(nFilter);
-
-	// attributes to export
 	taskSel.GetSelectedAttributes(tdc, filter.mapAttribs);
-
-	// special case
-	if (bHtmlComments)
-		filter.mapAttribs.Add(TDCA_HTMLCOMMENTS);
-
+	
 	TSD_TASKS nWhatTasks = taskSel.GetWantWhatTasks();
 
 	if (nWhatTasks == TSDT_SELECTED)

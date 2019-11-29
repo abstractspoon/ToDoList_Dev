@@ -653,6 +653,7 @@ protected:
 	BOOL WantCheckReloadFiles(RELOAD_OPTION nOption) const;
 	BOOL WantOverwriteExportFiles(const CTDLExportDlg& dlg) const;
 	BOOL CanExportToFilePaths(const CStringArray& aExportPaths) const;
+	BOOL ExporterWantsHTMLComments(int nExporter) const;
 
 	BOOL HandleReservedShortcut(DWORD dwShortcut);
 	BOOL SendShortcutCommand(UINT nCmdID);
