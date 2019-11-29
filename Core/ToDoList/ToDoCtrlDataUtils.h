@@ -168,6 +168,9 @@ public:
 	CString GetTaskTimePeriod(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
 	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 
+	CString GetDateOnly(const COleDateTime& date, BOOL bWantYear) const;
+	CString GetTimeOnly(const COleDateTime& date, TDC_DATE nDate) const;
+
 protected:
 	const CToDoCtrlData& m_data;
 	CTDCTaskCalculator m_calculator;

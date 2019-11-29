@@ -374,10 +374,10 @@ protected:
 	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0, int nCount = 1) const;
  	void SetTasksWndStyle(DWORD dwStyles, BOOL bSet, BOOL bExStyle);
 
-	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;
 	CString GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, BOOL bDrawing) const;
 	CString FormatTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_DATE nDate) const;
-	CString FormatTaskDate(const COleDateTime& date, TDC_DATE nDate) const;
+	CString FormatDate(const COleDateTime& date, TDC_DATE nDate) const;
+	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;
 
 	int CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
 	void RecalcUntrackedColumnWidths(BOOL bCustomOnly);

@@ -3236,43 +3236,23 @@ int CTDLTaskCtrlBase::CalcRequiredIconColumnWidth(int nNumImage)
 }
 
 BOOL CTDLTaskCtrlBase::FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime) const
-{	
-	sDate.Empty();
-	sTime.Empty();
-	sDow.Empty();
-	
-	if (CDateHelper::IsDateSet(date))
-	{
-		DWORD dwFmt = 0;
-		
-		if (HasStyle(TDCS_SHOWWEEKDAYINDATES))
-			dwFmt |= DHFD_DOW;
-		
-		if (HasStyle(TDCS_SHOWDATESINISO))
-			dwFmt |= DHFD_ISO;
-		
-		BOOL bWantDrawTime = WantDrawColumnTime(nDate, bCustomWantsTime);
+{
+	sDate = m_formatter.GetDateOnly(date, TRUE);
 
-		if (bWantDrawTime && CDateHelper::DateHasTime(date))
-			dwFmt |= DHFD_TIME | DHFD_NOSEC;
-		
-		if (CDateHelper::FormatDate(date, dwFmt, sDate, sTime, sDow))
-		{
-			// Substitute 'calculated' time if none supplied
-			if (bWantDrawTime && sTime.IsEmpty())
-			{
-				int nHour = ((nDate == TDCD_DUE) ? 23 : 0);
-				int nMin = ((nDate == TDCD_DUE) ? 59 : 0);
+	if (sDate.IsEmpty())
+		return FALSE;
 
-				sTime = CTimeHelper::FormatClockTime(nHour, nMin, 0, FALSE, HasStyle(TDCS_SHOWDATESINISO));
-			}
+	if (WantDrawColumnTime(nDate, bCustomWantsTime))
+		sTime = m_formatter.GetTimeOnly(date, nDate);
+	else
+		sTime.Empty();
 
-			return TRUE;
-		}
-	}
-	
-	// else
-	return FALSE;
+	if (HasStyle(TDCS_SHOWWEEKDAYINDATES))
+		sDow = CDateHelper::GetDayOfWeekName(CDateHelper::GetDayOfWeek(date), TRUE);
+	else
+		sDow.Empty();
+
+	return TRUE;
 }
 
 void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, 
@@ -3323,7 +3303,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 		// Check for day of week
 		if (!sDow.IsEmpty())
 		{
-			int nMaxDOW = CDateHelper::CalcLongestDayOfWeekName(pDC, TRUE);
+			int nMaxDOW = CDateHelper::CalcMaxDayOfWeekNameLength(pDC, TRUE);
 
 			if ((nReqWidth + nSpace + nMaxDOW) < rect.Width())
 			{
@@ -3559,11 +3539,11 @@ CString CTDLTaskCtrlBase::FormatTaskDate(const TODOITEM* pTDI, const TODOSTRUCTU
 
 	switch (nDate)
 	{
-	case TDCD_CREATE:	return FormatTaskDate(pTDI->GetDate(nDate), nDate);
-	case TDCD_DONE:		return FormatTaskDate(pTDI->GetDate(nDate), nDate);
-	case TDCD_START:	return FormatTaskDate(m_calculator.GetTaskStartDate(pTDI, pTDS), nDate);
-	case TDCD_DUE:		return FormatTaskDate(m_calculator.GetTaskDueDate(pTDI, pTDS), nDate);
-	case TDCD_LASTMOD:	return FormatTaskDate(m_calculator.GetTaskLastModifiedDate(pTDI, pTDS), nDate);
+	case TDCD_CREATE:	return FormatDate(pTDI->GetDate(nDate), nDate);
+	case TDCD_DONE:		return FormatDate(pTDI->GetDate(nDate), nDate);
+	case TDCD_START:	return FormatDate(m_calculator.GetTaskStartDate(pTDI, pTDS), nDate);
+	case TDCD_DUE:		return FormatDate(m_calculator.GetTaskDueDate(pTDI, pTDS), nDate);
+	case TDCD_LASTMOD:	return FormatDate(m_calculator.GetTaskLastModifiedDate(pTDI, pTDS), nDate);
 
 	default:
 		ASSERT(0);
@@ -3573,7 +3553,7 @@ CString CTDLTaskCtrlBase::FormatTaskDate(const TODOITEM* pTDI, const TODOSTRUCTU
 	return EMPTY_STR;
 }
 
-CString CTDLTaskCtrlBase::FormatTaskDate(const COleDateTime& date, TDC_DATE nDate) const
+CString CTDLTaskCtrlBase::FormatDate(const COleDateTime& date, TDC_DATE nDate) const
 {
 	switch (nDate)
 	{
@@ -3666,7 +3646,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 
 			// Reminder must be set and start/due date must be set
 			if ((tRem != 0) && (tRem != -1))
-				return FormatTaskDate(COleDateTime(tRem), TDCD_REMINDER);
+				return FormatDate(COleDateTime(tRem), TDCD_REMINDER);
 		}
 		break;
 
@@ -4991,7 +4971,7 @@ int CTDLTaskCtrlBase::CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustom
 	COleDateTime dateMax(2000, 12, 31, 23, 59, 0);
 	CString sDateMax, sTimeMax, sDow;
 
-	FormatDate(dateMax, nDate, sDateMax, sTimeMax, sDow, bCustomWantsTime);
+	VERIFY(FormatDate(dateMax, nDate, sDateMax, sTimeMax, sDow, bCustomWantsTime));
 
 	// Always want date
 	int nSpace = pDC->GetTextExtent(_T(" ")).cx;

@@ -3247,6 +3247,46 @@ CString CTDCTaskFormatter::GetTaskTimeRemaining(DWORD dwTaskID) const
 	return GetTaskTimeRemaining(pTDI, pTDS);
 }
 
+CString CTDCTaskFormatter::GetDateOnly(const COleDateTime& date, BOOL bWantYear) const
+{
+	if (!CDateHelper::IsDateSet(date))
+		return EMPTY_STR;
+
+	CString sDate;
+	DWORD dwFmt = 0; // No time
+
+	if (m_data.HasStyle(TDCS_SHOWDATESINISO))
+		dwFmt |= DHFD_ISO;
+
+	if (!bWantYear)
+		dwFmt |= DHFD_NOYEAR;
+
+	return CDateHelper::FormatDate(date, dwFmt);
+}
+
+CString CTDCTaskFormatter::GetTimeOnly(const COleDateTime& date, TDC_DATE nDate) const
+{
+	SYSTEMTIME st;
+
+	if (!date.GetAsSystemTime(st))
+		return EMPTY_STR;
+
+	BOOL bISO = m_data.HasStyle(TDCS_SHOWDATESINISO);
+	CString sTime = CTimeHelper::FormatClockTime(st.wHour, st.wMinute, 0, FALSE, bISO);
+
+	// Substitute 'calculated' time if none supplied
+	if (sTime.IsEmpty())
+	{
+		int nHour = ((nDate == TDCD_DUE) ? 23 : 0);
+		int nMin = ((nDate == TDCD_DUE) ? 59 : 0);
+
+		sTime = CTimeHelper::FormatClockTime(nHour, nMin, 0, FALSE, bISO);
+	}
+
+	ASSERT(!sTime.IsEmpty());
+	return sTime;
+}
+
 CString CTDCTaskFormatter::GetTaskPercentDone(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
