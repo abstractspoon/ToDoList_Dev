@@ -155,12 +155,12 @@ LPCTSTR CTDCImportExportMgr::GetTypeID(TDC_EXPORT_TASKLIST nFormat)
 
 BOOL CTDCImportExportMgr::IsFormat(LPCTSTR szTypeID, TDC_IMPORT_TASKLIST nFormat)
 {
-	return CString(szTypeID).CompareNoCase(GetTypeID(nFormat));
+	return (CString(szTypeID).CompareNoCase(GetTypeID(nFormat)) == 0);
 }
 
 BOOL CTDCImportExportMgr::IsFormat(LPCTSTR szTypeID, TDC_EXPORT_TASKLIST nFormat)
 {
-	return CString(szTypeID).CompareNoCase(GetTypeID(nFormat));
+	return (CString(szTypeID).CompareNoCase(GetTypeID(nFormat)) == 0);
 }
 
 IIMPORTEXPORT_RESULT CTDCImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
