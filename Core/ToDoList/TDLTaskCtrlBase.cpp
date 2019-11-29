@@ -2842,7 +2842,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 
 							if (CDateHelper::IsDateSet(dtRem))
 							{
-								DrawColumnDate(pDC, dtRem, TDCD_CUSTOM, rSubItem, crText);
+								DrawColumnDate(pDC, dtRem, TDCD_REMINDER, rSubItem, crText);
 							}
 						}
 						else
@@ -5035,7 +5035,7 @@ BOOL CTDLTaskCtrlBase::WantDrawColumnTime(TDC_DATE nDate, BOOL bCustomWantsTime)
 		return IsColumnShowing(TDCC_DONETIME);
 		
 	case TDCD_CUSTOM:
-		return (bCustomWantsTime || HasStyle(TDCS_SHOWREMINDERSASDATEANDTIME));
+		return bCustomWantsTime;
 		
 	case TDCD_LASTMOD:
 	case TDCD_REMINDER:
@@ -5102,7 +5102,7 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly
 		
 	case TDCC_REMINDER:
 		if (HasStyle(TDCS_SHOWREMINDERSASDATEANDTIME))
-			nColWidth = CalcMaxDateColWidth(TDCD_CUSTOM, pDC); // no time component
+			nColWidth = CalcMaxDateColWidth(TDCD_REMINDER, pDC);
 		// else use MINCOLWIDTH
 		break; 
 		
