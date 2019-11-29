@@ -741,7 +741,7 @@ CString CToDoCtrlFind::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attri
 					TDCTIMEPERIOD time;
 
 					if (data.AsTimePeriod(time))
-						sLongest = m_formatter.GetTaskTime(time.dAmount, time.nUnits, TRUE);
+						sLongest = m_formatter.GetTimePeriod(time.dAmount, time.nUnits, TRUE);
 				}
 				break;
 
@@ -804,7 +804,7 @@ CString CToDoCtrlFind::GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const
 	CString sLongest;
 
 	if (hti && pTDI && pTDS)
-		sLongest = m_formatter.GetTaskTime(pTDI, pTDS, nColID);
+		sLongest = m_formatter.GetTaskTimePeriod(pTDI, pTDS, nColID);
 
 	if (WantSearchChildren(hti, bVisibleOnly))
 	{

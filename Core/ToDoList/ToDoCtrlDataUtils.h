@@ -164,10 +164,10 @@ public:
 	CString GetTaskRecurrence(const TODOITEM* pTDI) const;
 	CString GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
 
-	CString GetTaskTime(DWORD dwTaskID, TDC_COLUMN nColID) const;
-	CString GetTaskTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
-	CString GetTaskTime(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
-	
+	CString GetTaskTimePeriod(DWORD dwTaskID, TDC_COLUMN nColID) const;
+	CString GetTaskTimePeriod(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
+	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
+
 protected:
 	const CToDoCtrlData& m_data;
 	CTDCTaskCalculator m_calculator;

@@ -3230,12 +3230,12 @@ CString CTDCTaskFormatter::GetTaskSubtaskCompletion(DWORD dwTaskID) const
 
 CString CTDCTaskFormatter::GetTaskTimeEstimate(DWORD dwTaskID) const
 {
-	return GetTaskTime(dwTaskID, TDCC_TIMEEST);
+	return GetTaskTimePeriod(dwTaskID, TDCC_TIMEEST);
 }
 
 CString CTDCTaskFormatter::GetTaskTimeSpent(DWORD dwTaskID) const
 {
-	return GetTaskTime(dwTaskID, TDCC_TIMESPENT);
+	return GetTaskTimePeriod(dwTaskID, TDCC_TIMESPENT);
 }
 
 CString CTDCTaskFormatter::GetTaskTimeRemaining(DWORD dwTaskID) const
@@ -3452,23 +3452,23 @@ CString CTDCTaskFormatter::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE
 	return EMPTY_STR;
 }
 
-CString CTDCTaskFormatter::GetTaskTime(DWORD dwTaskID, TDC_COLUMN nColID) const
+CString CTDCTaskFormatter::GetTaskTimePeriod(DWORD dwTaskID, TDC_COLUMN nColID) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
 
-	return GetTaskTime(pTDI, pTDS, nColID);
+	return GetTaskTimePeriod(pTDI, pTDS, nColID);
 }
 
 CString CTDCTaskFormatter::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
-	return GetTaskTime(pTDI, pTDS, TDCC_TIMEEST);
+	return GetTaskTimePeriod(pTDI, pTDS, TDCC_TIMEEST);
 }
 
 CString CTDCTaskFormatter::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
-	return GetTaskTime(pTDI, pTDS, TDCC_TIMESPENT);
+	return GetTaskTimePeriod(pTDI, pTDS, TDCC_TIMESPENT);
 }
 
 CString CTDCTaskFormatter::GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
@@ -3525,7 +3525,7 @@ CString CTDCTaskFormatter::GetTaskTimeRemaining(const TODOITEM* pTDI, const TODO
 	return EMPTY_STR;
 }
 
-CString CTDCTaskFormatter::GetTaskTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const
+CString CTDCTaskFormatter::GetTaskTimePeriod(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const
 {
 	if (pTDI && pTDS)
 	{
@@ -3543,7 +3543,7 @@ CString CTDCTaskFormatter::GetTaskTime(const TODOITEM* pTDI, const TODOSTRUCTURE
 
 				dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, nUnits);
 			}
-			return GetTaskTime(dTime, nUnits, FALSE);
+			return GetTimePeriod(dTime, nUnits, FALSE);
 
 		case TDCC_TIMESPENT:
 			{
@@ -3554,7 +3554,7 @@ CString CTDCTaskFormatter::GetTaskTime(const TODOITEM* pTDI, const TODOSTRUCTURE
 
 				dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, nUnits);
 			}
-			return GetTaskTime(dTime, nUnits, TRUE);
+			return GetTimePeriod(dTime, nUnits, TRUE);
 
 		case TDCC_REMAINING:
 			return GetTaskTimeRemaining(pTDI, pTDS);
@@ -3565,7 +3565,7 @@ CString CTDCTaskFormatter::GetTaskTime(const TODOITEM* pTDI, const TODOSTRUCTURE
 	return EMPTY_STR;
 }
 
-CString CTDCTaskFormatter::GetTaskTime(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const
+CString CTDCTaskFormatter::GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const
 {
 	if ((dTime == 0.0) && m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
 		return EMPTY_STR;
@@ -3693,7 +3693,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			if (!m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
 				return EMPTY_STR;
 
-			return GetTaskTime(dValue, nUnits, TRUE);
+			return GetTimePeriod(dValue, nUnits, TRUE);
 		}
 		break;
 

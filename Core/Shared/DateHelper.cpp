@@ -1523,7 +1523,7 @@ CString CDateHelper::GetDayOfWeekName(OLE_DAYOFWEEK nWeekday, BOOL bShort)
 	return sWeekday;
 }
 
-int CDateHelper::CalcLongestDayOfWeekName(CDC* pDC, BOOL bShort)
+int CDateHelper::CalcMaxDayOfWeekNameLength(CDC* pDC, BOOL bShort)
 {
 	int nLongestWDWidth = 0;
 		

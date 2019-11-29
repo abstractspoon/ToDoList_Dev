@@ -534,7 +534,7 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 	int nWidth = (rc.Width() / CALENDAR_NUM_COLUMNS);
 	
 	CFont* pOldFont = pDC->SelectObject(&m_DefaultFont);
-	BOOL bShort = (CDateHelper::CalcLongestDayOfWeekName(pDC) > nWidth);
+	BOOL bShort = (CDateHelper::CalcMaxDayOfWeekNameLength(pDC) > nWidth);
 	CRect rCol(rc);
 	
 	for(int i = 0 ; i < CALENDAR_NUM_COLUMNS; i++)

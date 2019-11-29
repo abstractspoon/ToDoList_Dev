@@ -165,7 +165,7 @@ public:
 	static CString GetMonthName(int nMonth, BOOL bShort = FALSE); // 1-12, jan-nov
 	static void GetDayOfWeekNames(BOOL bShort, CStringArray& aNames); // sun-sat
 	static void GetMonthNames(BOOL bShort, CStringArray& aMonths); // jan-dec
-	static int CalcLongestDayOfWeekName(CDC* pDC, BOOL bShort = FALSE);
+	static int CalcMaxDayOfWeekNameLength(CDC* pDC, BOOL bShort = FALSE);
 
 	static BOOL IsLeapYear(const COleDateTime& date = COleDateTime::GetCurrentTime());
 	static BOOL IsLeapYear(int nYear);
