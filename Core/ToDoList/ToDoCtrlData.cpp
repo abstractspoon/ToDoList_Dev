@@ -1995,12 +1995,12 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 
 	// Convert 'end of day' to whole days
 	COleDateTime dtDate(date);
+	BOOL bDateIsSet = CDateHelper::IsDateSet(dtDate);
 
-	if (CDateHelper::IsEndOfDay(dtDate, FALSE))
+	if (bDateIsSet && CDateHelper::IsEndOfDay(dtDate, FALSE))
 		dtDate = CDateHelper::GetDateOnly(dtDate);
 	
 	const COleDateTime dtCur = pTDI->GetDate(nDate);
-	BOOL bDateIsSet = CDateHelper::IsDateSet(dtDate);
 	
 	if (dtCur != dtDate)
 	{
