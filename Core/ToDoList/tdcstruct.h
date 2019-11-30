@@ -50,6 +50,72 @@ struct TDCDROPIMPORT
 
 //////////////////////////////////////////////////////////////////////
 
+struct TDCDATETIMEWIDTHS
+{
+	TDCDATETIMEWIDTHS() : bIsoFormat(FALSE)
+	{
+		ResetWidths();
+	}
+
+	void SetIsoFormat(BOOL bIso)
+	{
+		if ((bIso && bIsoFormat) || (!bIso && !bIsoFormat))
+			return;
+
+		bIsoFormat = bIso;
+
+		ResetWidths();
+	}
+
+	void ResetWidths()
+	{
+		nMaxDateWidth = nMinDateWidth = nMaxTimeWidth = nMaxDowNameWidth = -1;
+	}
+
+	void Initialise(CDC* pDC)
+	{
+		if (nMaxDateWidth != -1)
+		{
+			// Sanity check
+			ASSERT(nMaxDateWidth > 0);
+			ASSERT(nMinDateWidth > 0);
+			ASSERT(nMaxTimeWidth > 0);
+			ASSERT(nMaxDowNameWidth > 0);
+
+			return;
+		}
+
+		// Sanity check
+		ASSERT(nMinDateWidth == -1);
+		ASSERT(nMaxTimeWidth == -1);
+		ASSERT(nMaxDowNameWidth == -1);
+		
+		COleDateTime dtMax(2000, 12, 31, 0, 0, 0);
+		DWORD dwDateFmt = (bIsoFormat ? DHFD_ISO : 0);
+
+		CString sMaxDate = CDateHelper::FormatDate(dtMax, dwDateFmt);
+		nMaxDateWidth = pDC->GetTextExtent(sMaxDate).cx;
+
+		CString sMinDate = CDateHelper::FormatDate(dtMax, (dwDateFmt | DHFD_NOYEAR));
+		nMinDateWidth = pDC->GetTextExtent(sMinDate).cx;
+
+		CString sMaxTime = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, bIsoFormat);
+		nMaxTimeWidth = pDC->GetTextExtent(sMaxTime).cx;
+
+		nMaxDowNameWidth = CDateHelper::CalcMaxDayOfWeekNameLength(pDC, TRUE);
+	}
+
+	int nMaxDateWidth;
+	int nMinDateWidth;		// No 'year'
+	int nMaxTimeWidth;		// No 'seconds'
+	int nMaxDowNameWidth;	// Short format
+
+protected:
+	BOOL bIsoFormat;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 struct TDCINFOTIPITEM
 {
 	TDCINFOTIPITEM() // for CArray

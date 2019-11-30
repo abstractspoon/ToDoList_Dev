@@ -269,6 +269,7 @@ protected:
 	TDSORT m_sort;
 	float m_fAveHeaderCharWidth;
 	CString m_sTasklistFolder;
+	TDCDATETIMEWIDTHS m_dateTimeWidths;
 
 	CTDCTaskComparer m_comparer;
 	CTDCTaskCalculator m_calculator;

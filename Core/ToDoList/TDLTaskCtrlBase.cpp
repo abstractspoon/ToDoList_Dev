@@ -549,7 +549,6 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 		switch (nStyle)
 		{
 		case TDCS_NODUEDATEISDUETODAYORSTART:
-		case TDCS_SHOWDATESINISO:
 		case TDCS_USEEARLIESTDUEDATE:
 		case TDCS_USELATESTDUEDATE:
 		case TDCS_USEEARLIESTSTARTDATE:
@@ -562,6 +561,11 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 		case TDCS_CALCREMAININGTIMEBYSPENT:
 		case TDCS_CALCREMAININGTIMEBYPERCENT:
 		case TDCS_COLORTEXTBYATTRIBUTE:
+			bInvalidateAll = TRUE;
+			break;
+
+		case TDCS_SHOWDATESINISO:
+			m_dateTimeWidths.SetIsoFormat(bEnable);
 			bInvalidateAll = TRUE;
 			break;
 
@@ -1762,6 +1766,7 @@ BOOL CTDLTaskCtrlBase::SetFont(HFONT hFont)
 		::SendMessage(Tasks(), WM_SETFONT, (WPARAM)hFont, TRUE);
 
 		RecalcUntrackedColumnWidths();
+		m_dateTimeWidths.ResetWidths();
 	}
 	
 	return bChange;
@@ -3255,65 +3260,154 @@ BOOL CTDLTaskCtrlBase::FormatDate(const COleDateTime& date, TDC_DATE nDate, CStr
 	return TRUE;
 }
 
-void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, 
-										COLORREF crText, BOOL bCalculated, BOOL bCustomWantsTime, int nAlign)
+void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect,
+									  COLORREF crText, BOOL bCalculated, BOOL bCustomWantsTime, int nAlign)
 {
 	CString sDate, sTime, sDow;
 
 	if (!FormatDate(date, nDate, sDate, sTime, sDow, bCustomWantsTime))
 		return; // nothing to do
-	
-	// Work out how much space we need
-	COleDateTime dateMax(2000, 12, 31, 23, 59, 0);
-	
-	CString sDateMax, sTimeMax, sDummy;
-	FormatDate(dateMax, nDate, sDateMax, sTimeMax, sDummy, bCustomWantsTime);
-	
-	// Always want date
-	int nMaxDate = pDC->GetTextExtent(sDateMax).cx, nReqWidth = nMaxDate;
 
-	// If there's too little space even for the date then 
-	// switch to left alignment so that the month and day are visible
-	BOOL bWantDrawTime = FALSE, bWantDrawDOW = FALSE;
-	int nMaxTime = 0;
-	int nDateAlign = DT_RIGHT;
+	BOOL bHasTime = !sTime.IsEmpty();
+	BOOL bHasDow = !sDow.IsEmpty();
+	BOOL bTimeIsReal = CDateHelper::DateHasTime(date);
 
-	if (nReqWidth > rect.Width())
+  	ASSERT((nDate != TDCD_REMINDER) || HasStyle(TDCS_SHOWREMINDERSASDATEANDTIME));
+	ASSERT((nDate != TDCD_REMINDER) || bHasTime);
+
+	// Because the column width can be changed by the user we need
+	// a strategy for deciding what to cull as the width reduces
+	// +--------+-----------------------+-----------------------+
+	// |   DoW  |        Date           |        Time           |
+	// +--------+-----------------------+-----------------------+
+
+	m_dateTimeWidths.Initialise(pDC);
+
+	int nSpace = pDC->GetTextExtent(_T(" ")).cx;
+
+	int nMaxDateWidth = (m_dateTimeWidths.nMaxDateWidth + nSpace);
+	int nMinDateWidth = (m_dateTimeWidths.nMinDateWidth + nSpace);
+	int nMaxTimeWidth = (bHasTime ? (m_dateTimeWidths.nMaxTimeWidth + nSpace) : 0);
+	int nMaxDayWidth = (bHasDow ? (m_dateTimeWidths.nMaxDowNameWidth + nSpace) : 0);
+
+	// Work out what we can draw
+	BOOL bDrawDate = FALSE;
+	BOOL bDrawTime = FALSE;
+	BOOL bDrawDow = FALSE;
+
+	const int nAvailWidth = (rect.Width() - LV_COLPADDING);
+	int nReqWidth = 0;
+
+	do // easy exit
 	{
-		nDateAlign = DT_LEFT;
-	}
-	else
-	{
-		int nSpace = pDC->GetTextExtent(_T(" ")).cx;
-		nMaxDate += nSpace;
+		// Enough room for everything 
+		nReqWidth = (nMaxDayWidth + nMaxDateWidth + nMaxTimeWidth);
 
-		// Check for time
-		if (!sTime.IsEmpty())
+		if (nAvailWidth >= nReqWidth)
 		{
-			nMaxTime = pDC->GetTextExtent(sTimeMax).cx;
+			bDrawDow = bHasDow;
+			bDrawDate = TRUE;
+			bDrawTime = bHasTime;
 
-			if ((nReqWidth + nSpace + nMaxTime) < rect.Width())
-			{	
-				nMaxTime += nSpace;
-				nReqWidth += nMaxTime;
-				bWantDrawTime = TRUE;
-			}
+			break;
 		}
-	
-		// Check for day of week
-		if (!sDow.IsEmpty())
+
+		// Sacrifice wide date for narrow date
+		nReqWidth = (nMaxDayWidth + nMinDateWidth + nMaxTimeWidth);
+
+		if (nAvailWidth >= nReqWidth)
 		{
-			int nMaxDOW = CDateHelper::CalcMaxDayOfWeekNameLength(pDC, TRUE);
+			bDrawDow = bHasDow;
+			bDrawDate = TRUE;
+			bDrawTime = bHasTime;
 
-			if ((nReqWidth + nSpace + nMaxDOW) < rect.Width())
-			{
-				nMaxDOW += nSpace;
-				nReqWidth += nMaxDOW;
-				bWantDrawDOW = TRUE;
-			}
+			nMaxDateWidth = nMinDateWidth;
+			sDate = m_formatter.GetDateOnly(date, FALSE);
+
+			break;
 		}
+
+		// Sacrifice time component if it's not 'real'
+		nReqWidth = (nMaxDayWidth + nMinDateWidth);
+
+		if (bHasDow && !bTimeIsReal && (nAvailWidth >= nReqWidth))
+		{
+			bDrawDow = TRUE;
+			bDrawDate = TRUE;
+			bDrawTime = FALSE;
+
+			nMaxDateWidth = nMinDateWidth;
+			sDate = m_formatter.GetDateOnly(date, FALSE);
+
+			break;
+		}
+
+		// Sacrifice the date if it falls within the next 6 days
+		COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
+		BOOL bNext6Days = ((date >= dtToday) && ((date.m_dt - dtToday.m_dt) < 7));
+
+		nReqWidth = (nMaxDayWidth + nMaxTimeWidth);
+
+		if (bHasDow && bNext6Days && (nAvailWidth >= nReqWidth))
+		{
+			bDrawDow = TRUE;
+			bDrawDate = FALSE;
+			bDrawTime = bHasTime;
+
+			break;
+		}
+
+		// Sacrifice day of week
+		nReqWidth = (nMinDateWidth + nMaxTimeWidth);
+
+		if (nAvailWidth >= nReqWidth)
+		{
+			bDrawDow = FALSE;
+			bDrawTime = bHasTime;
+			bDrawDate = TRUE;
+
+			nMaxDateWidth = nMinDateWidth;
+			sDate = m_formatter.GetDateOnly(date, FALSE);
+
+			break;
+		}
+
+		// Sacrifice date and day of week if date is today and time is 'real'
+		if (bTimeIsReal && CDateHelper::IsToday(date))
+		{
+			bDrawDow = FALSE;
+			bDrawTime = TRUE;
+			bDrawDate = FALSE;
+
+			nReqWidth = nMaxTimeWidth;
+			break;
+		}
+
+		// Sacrifice date and time if date is within the next 6 days
+		if (bHasDow && bNext6Days)
+		{
+			bDrawDow = TRUE;
+			bDrawTime = FALSE;
+			bDrawDate = FALSE;
+
+			nReqWidth = nMaxDayWidth;
+			break;
+		}
+
+		// else display narrow date
+		bDrawDow = FALSE;
+		bDrawTime = FALSE;
+		bDrawDate = TRUE;
+
+		nMaxDateWidth = nMinDateWidth;
+		sDate = m_formatter.GetDateOnly(date, FALSE);
+
+		nReqWidth = nMinDateWidth;
 	}
-	
+	while (false); // always end
+
+	ASSERT((nReqWidth > 0) && (bDrawDow || bDrawDate || bDrawTime));
+
 	// Draw calculated dates in a lighter colour
 	if (bCalculated && !Misc::IsHighContrastActive())
 	{
@@ -3328,6 +3422,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 	switch (nAlign)
 	{
 	case DT_LEFT:
+		ASSERT(nDate == TDCD_CUSTOM);
 		rDraw.right = min(rDraw.right, (rDraw.left + nReqWidth));
 		break;
 
@@ -3335,43 +3430,47 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 		break;
 
 	case DT_CENTER:
+		ASSERT(nDate == TDCD_CUSTOM);
 		rDraw.right = min(rDraw.right, (rDraw.CenterPoint().x + (nReqWidth / 2)));
 		break;
 	}
 
 	// draw time first
-	if (bWantDrawTime)
+	if (bDrawTime)
 	{
+		ASSERT(!sTime.IsEmpty());
+
 		// if NO time component, render 'default' start and due time 
 		// in a lighter colour to indicate it wasn't user-set
 		COLORREF crTime(crText);
-		
-		if (!CDateHelper::DateHasTime(date))
+
+		if (!bTimeIsReal && !bCalculated && !Misc::IsHighContrastActive())
 		{
 			// Note: If we've already calculated it above we need not again
-			if (!bCalculated && !Misc::IsHighContrastActive())
-			{
-				if (!HasColor(crTime))
-					crTime = pDC->GetTextColor();
+			if (!HasColor(crTime))
+				crTime = pDC->GetTextColor();
 
-				crTime = GraphicsMisc::Lighter(crTime, 0.5);
-			}
+			crTime = GraphicsMisc::Lighter(crTime, 0.5);
 		}
-		
+
 		// draw and adjust rect
-		if (!sTime.IsEmpty())
-		{
-			DrawColumnText(pDC, sTime, rDraw, TA_RIGHT, crTime);
-			rDraw.right -= nMaxTime;
-		}
+		DrawColumnText(pDC, sTime, rDraw, DT_RIGHT, crTime);
+		rDraw.right -= nMaxTimeWidth;
+	}
+
+	if (bDrawDate)
+	{
+		DrawColumnText(pDC, sDate, rDraw, DT_RIGHT, crText);
+		rDraw.right -= nMaxDateWidth;
 	}
 	
-	DrawColumnText(pDC, sDate, rDraw, nDateAlign, crText);
-	rDraw.right -= nMaxDate;
-	
-	// then dow
-	if (bWantDrawDOW)
-		DrawColumnText(pDC, sDow, rDraw, TA_RIGHT, crText);
+	// Finally day of week
+	if (bDrawDow)
+	{
+		ASSERT(!sDow.IsEmpty());
+
+		DrawColumnText(pDC, sDow, rDraw, DT_RIGHT, crText);
+	}
 }
 
 void CTDLTaskCtrlBase::DrawColumnText(CDC* pDC, const CString& sText, const CRect& rect, int nAlign, 
