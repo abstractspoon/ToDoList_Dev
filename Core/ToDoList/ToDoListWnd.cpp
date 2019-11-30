@@ -6233,12 +6233,19 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 
 		// Redraw the tasklist manually if its height has changed
 		CFilteredToDoCtrl& tdc = GetToDoCtrl();
-		BOOL bManualRedraw = (rTaskList.Height() != CDialogHelper::GetChildHeight(&tdc));
+		BOOL bHeightChange = (rTaskList.Height() != CDialogHelper::GetChildHeight(&tdc));
 
-		dwm.MoveWindow(&tdc, rTaskList, !bManualRedraw);
+		dwm.MoveWindow(&tdc, rTaskList, !bHeightChange);
 
-		if (bManualRedraw)
+		if (bHeightChange)
+		{
+			Invalidate();
+
 			tdc.Invalidate();
+
+			if (nFilterHeight)
+				m_filterBar.Invalidate();
+		}
 
 #ifdef _DEBUG
 		CRect rect;
