@@ -1599,6 +1599,9 @@ BOOL CDateHelper::IsSameWeek(const COleDateTime& date1, const COleDateTime& date
 {
 	ASSERT(IsDateSet(date1) && IsDateSet(date2));
 
+	if (!IsSameMonth(date1, date2))
+		return FALSE;
+
 	return (GetWeekofYear(date1) == GetWeekofYear(date2));
 }
 
@@ -2046,7 +2049,7 @@ COleDateTime CDateHelper::GetNearestQuarter(const COleDateTime& date, BOOL bEnd)
 
 int CDateHelper::GetDateInMonths(int nMonth, int nYear)
 {
-	ASSERT(nYear > 0 && nMonth > 0 && nMonth <= 12);
+	ASSERT((nYear > 0) && (nMonth > 0) && (nMonth <= 12));
 
 	return ((nYear * 12) + (nMonth - 1));
 }
@@ -2064,6 +2067,8 @@ COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
 
 int CDateHelper::GetDateInMonths(const COleDateTime& date)
 {
+	ASSERT(IsDateSet(date));
+
 	return GetDateInMonths(date.GetMonth(), date.GetYear());
 }
 
