@@ -221,7 +221,6 @@ public:
 	BOOL SetAttributeColors(TDC_ATTRIBUTE nAttrib, const CTDCColorMap& colors);
 	TDC_ATTRIBUTE GetColorByAttribute() const  { return m_nColorByAttrib; }
 	BOOL SetStartedTaskColors(COLORREF crStarted, COLORREF crStartedToday);
-	void GetStartedTaskColors(COLORREF& crStarted, COLORREF& crStartedToday) { crStarted = m_crStarted; crStartedToday = m_crStartedToday; }
 	BOOL SetDueTaskColors(COLORREF crDue, COLORREF crDueToday);
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) const { crDue = m_crDue; crDueToday = m_crDueToday; }
 	BOOL HasDueTodayColor() const { return (m_crDueToday != CLR_NONE); }
@@ -366,7 +365,6 @@ protected:
 	TDC_COLUMN GetColumnID(int nCol) const; // zero is always 'tasks'
 	int GetColumnIndex(TDC_COLUMN nColID) const;
 	CFont* GetTaskFont(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bColumns = TRUE);
-	BOOL HasThemedState(GM_ITEMSTATE nState) const;
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
 	const CEnHeaderCtrl& GetColumnHeaderCtrl(TDC_COLUMN nColID) const;
 	BOOL IsVisible() const;

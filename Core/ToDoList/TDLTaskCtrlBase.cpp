@@ -2545,11 +2545,6 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	return CDRF_DODEFAULT;
 }
 
-BOOL CTDLTaskCtrlBase::HasThemedState(GM_ITEMSTATE nState) const
-{ 
-	return ((nState != GMIS_NONE) && CThemed::AreControlsThemed()); 
-}
-
 void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const CRect& rLabel, GM_ITEMSTATE nState, COLORREF crBack)
 {
 	ASSERT(!m_bSavingToImage || (nState == GMIS_NONE));
@@ -3567,7 +3562,6 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 			if (rItem.Width() > MIN_COL_WIDTH)
 			{
 				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
-				CFont* pFont = NULL;
 
 				// draw sort direction
 				int nCol = (int)pNMCD->dwItemSpec;
