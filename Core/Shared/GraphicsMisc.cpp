@@ -1269,6 +1269,9 @@ COLORREF GraphicsMisc::GetExplorerItemTextColor(COLORREF crBase, GM_ITEMSTATE nS
 
 BOOL GraphicsMisc::DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags, LPCRECT prClip)
 {
+	if (hwnd == NULL)
+		hwnd = ::WindowFromDC(*pDC);
+
 	if ((nState == GMIS_NONE) || (hwnd == NULL))
 		return FALSE;
 
@@ -1509,9 +1512,8 @@ UINT GraphicsMisc::GetRTLDrawTextFlags(HWND hwnd)
 
 UINT GraphicsMisc::GetRTLDrawTextFlags(CDC* pDC)
 {
-
-	if (pDC && pDC->GetWindow())
-		return GetRTLDrawTextFlags(pDC->GetWindow()->GetSafeHwnd());
+	if (pDC)
+		return GetRTLDrawTextFlags(::WindowFromDC(*pDC));
 
 	// else
 	ASSERT(0);
