@@ -3513,10 +3513,7 @@ void CTDLTaskCtrlBase::DrawColumnText(CDC* pDC, const CString& sText, const CRec
 	
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->DrawText(sText, nTextLen, rText, nFlags);
-	
-	// cleanup
-	if (HasColor(crOld))
-		pDC->SetTextColor(crOld);
+	pDC->SetTextColor(crOld);
 }
 
 LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
