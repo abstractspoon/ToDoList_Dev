@@ -3342,13 +3342,12 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 			break;
 		}
 
-		// Sacrifice the date if it falls within the next 6 days
-		COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
-		BOOL bNext6Days = ((date >= dtToday) && ((date.m_dt - dtToday.m_dt) < 7));
+		// Sacrifice the date if it falls within 7 days
+		BOOL bWithin7Days = IsDateWithin7DaysOfToday(date, nDate);
 
 		nReqWidth = (nMaxDayWidth + nMaxTimeWidth);
 
-		if (bHasDow && bNext6Days && (nAvailWidth >= nReqWidth))
+		if (bHasDow && bWithin7Days && (nAvailWidth >= nReqWidth))
 		{
 			bDrawDow = TRUE;
 			bDrawDate = FALSE;
@@ -3383,8 +3382,8 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 			break;
 		}
 
-		// Sacrifice date and time if date is within the next 6 days
-		if (bHasDow && bNext6Days)
+		// Sacrifice date and time if date is within 7 days
+		if (bHasDow && bWithin7Days)
 		{
 			bDrawDow = TRUE;
 			bDrawTime = FALSE;
@@ -3471,6 +3470,33 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 
 		DrawColumnText(pDC, sDow, rDraw, DT_RIGHT, crText);
 	}
+}
+
+BOOL CTDLTaskCtrlBase::IsDateWithin7DaysOfToday(const COleDateTime& date, TDC_DATE nDate)
+{
+	ASSERT(CDateHelper::IsDateSet(date));
+
+	COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
+
+	switch (nDate)
+	{
+	case TDCD_CREATE:
+	case TDCD_DONE:
+	case TDCD_LASTMOD:
+		// Previous 6 days
+		dtToday.m_dt++;
+		return ((date < dtToday) && ((dtToday.m_dt - date.m_dt) < 7));
+
+	case TDCD_START:
+	case TDCD_DUE:
+	case TDCD_REMINDER:
+	case TDCD_CUSTOM:
+		// Next 6 days
+		return ((date >= dtToday) && ((date.m_dt - dtToday.m_dt) < 7));
+	}
+
+	ASSERT(0);
+	return FALSE;
 }
 
 void CTDLTaskCtrlBase::DrawColumnText(CDC* pDC, const CString& sText, const CRect& rect, int nAlign, 

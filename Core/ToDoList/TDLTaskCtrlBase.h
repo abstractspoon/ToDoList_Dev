@@ -481,6 +481,7 @@ protected:
 	static const TDCCOLUMN* GetColumn(TDC_COLUMN nColID);
 	static BOOL InvalidateSelection(CListCtrl& lc, BOOL bUpdate = FALSE);
 	static BOOL InvalidateItem(CListCtrl& lc, int nItem, BOOL bUpdate = FALSE);
+	static BOOL IsDateWithin7DaysOfToday(const COleDateTime& date, TDC_DATE nDate);
 	static BOOL PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords);
 	static int GetUniqueToolTipID(DWORD dwTaskID, TDC_COLUMN nColID, int nIndex = 0);
 	static int CalcRequiredIconColumnWidth(int nNumImage);
