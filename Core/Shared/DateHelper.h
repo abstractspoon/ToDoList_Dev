@@ -174,6 +174,8 @@ public:
 	static BOOL IsSameDay(const COleDateTime& date1, const COleDateTime& date2);
 	static BOOL IsSameWeek(const COleDateTime& date1, const COleDateTime& date2);
 	static BOOL IsThisWeek(const COleDateTime& date);
+	static BOOL IsSameMonth(const COleDateTime& date1, const COleDateTime& date2);
+	static BOOL IsSameYear(const COleDateTime& date1, const COleDateTime& date2);
 
 	static void SplitDate(const COleDateTime& date, double& dDateOnly, double& dTimeOnly);
 	static COleDateTime MakeDate(const COleDateTime& dtDateOnly, const COleDateTime& dtTimeOnly);

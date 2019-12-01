@@ -1607,6 +1607,16 @@ BOOL CDateHelper::IsThisWeek(const COleDateTime& date)
 	return IsSameWeek(date, COleDateTime::GetCurrentTime());
 }
 
+BOOL CDateHelper::IsSameMonth(const COleDateTime& date1, const COleDateTime& date2)
+{
+	return (GetDateInMonths(date1) == GetDateInMonths(date2));
+}
+
+BOOL CDateHelper::IsSameYear(const COleDateTime& date1, const COleDateTime& date2)
+{
+	return (date1.GetYear() == date2.GetYear());
+}
+
 BOOL CDateHelper::IsLeapYear(const COleDateTime& date)
 {
 	return IsLeapYear(date.GetYear());
