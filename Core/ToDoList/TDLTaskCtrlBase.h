@@ -262,7 +262,6 @@ protected:
 	CString m_sTasksWndPrompt;
 	DWORD m_dwEditTitleTaskID;
 	DWORD m_dwNextUniqueTaskID;
-	DWORD m_dwOptions;
 	DWORD m_dwTimeTrackTaskID;
 	TDC_COLUMN m_nSortColID;
 	TDC_SORTDIR m_nSortDir;
