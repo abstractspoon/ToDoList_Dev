@@ -993,19 +993,20 @@ void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC)
 	if (!IsWindowVisible() || !IsSelectedTasklist(pTDC))
 		return;
 
-	DWORD dwSelTaskID = GetSelectedTaskID();
+	BOOL bTrackingSelTask = IsTrackingSelectedTasklistAndTask();
 
+	if (bTrackingSelTask)
+		m_sElapsedTime = pTDC->FormatTimeTrackingElapsedTime();
+	else
+		m_sElapsedTime.Empty();
+
+	DWORD dwSelTaskID = GetSelectedTaskID();
 	CTimeHelper th;
 	TDCTIMEPERIOD timeEst, timeSpent;
-	
-	m_sTaskTimes.Empty();
-	m_sElapsedTime.Empty();
 	
 	if (dwSelTaskID)
 		pTDC->GetTaskTimes(dwSelTaskID, timeEst, timeSpent);
 
-	m_sElapsedTime = pTDC->FormatTimeTrackingElapsedTime();
-	
 	if (HasOption(TTDO_FORMATTIMESASHMS))
 	{
 		m_sTaskTimes.Format(_T("%s : %s"),
@@ -1024,7 +1025,7 @@ void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC)
 
 	UpdateData(FALSE);
 
-	if (IsTrackingSelectedTasklistAndTask())
+	if (bTrackingSelTask)
 	{
 		GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE);
 		GetDlgItem(IDC_ELAPSEDTIME)->Invalidate(FALSE);
@@ -1530,9 +1531,12 @@ void CTDLTimeTrackerDlg::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
 
 void CTDLTimeTrackerDlg::RefreshTitleText()
 {
-	if (m_bCollapsed)
+	if (m_bCollapsed && !m_sTaskTimes.IsEmpty())
 	{
-		SetWindowText(m_sTaskTimes);
+		if (!m_sElapsedTime.IsEmpty())
+			SetWindowText(Misc::Format(_T("%s (%s)"), m_sElapsedTime, m_sTaskTimes));
+		else
+			SetWindowText(m_sTaskTimes);
 	}
 	else
 	{
