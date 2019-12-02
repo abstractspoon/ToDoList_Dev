@@ -243,12 +243,12 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				banner = new Banner(typeId, trans, dollarPrice);
 
 				banner.Location = new Point(0, 0);
-				banner.Size = new Size(parent.ClientSize.Width, banner.BaseHeight);
+				banner.Size = new Size(parent.ClientSize.Width, banner.Height);
 
 				parent.Controls.Add(banner);
 			}
 
-			return banner.Height;
+			return banner.Size.Height;
 		}
 
 		public static void SetUITheme(Control bannerParent, UITheme theme)
@@ -372,27 +372,14 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				TextRenderer.DrawText(e.Graphics, Text, Font, ClientRectangle, ForeColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 			}
 
-			public new int Height
-			{
-				get
-				{
-                    int height = BaseHeight;
-
-                    if ((height > 0) && (BorderStyle != BorderStyle.None))
-                        height += 2;
-
-                    return height;
-				}
-			}
-
-            public int BaseHeight
+            public new int Height
             {
                 get
                 {
                     if (m_LicenseType == RhinoLicensing.LicenseType.Paid)
                         return 0;
 
-                    return PluginHelpers.DPIScaling.Scale(20);
+                    return PluginHelpers.DPIScaling.Scale(22); // Allows for border on Classic theme
                 }
             }
 

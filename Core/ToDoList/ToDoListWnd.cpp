@@ -2029,24 +2029,24 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	// So if user either wants 'Filtered Tasks' or 'Html Comments' or
 	// only 'Visible Columns' we need to grab the tasks again.
 	BOOL bFiltered = (userPrefs.GetSaveExportFilteredOnly() && tdc.HasAnyFilter());
-	BOOL bHtmlComments = (m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("htm")) ||
-							m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("html")));
 
 	pExport->sStylesheet = userPrefs.GetSaveExportStylesheet();
 	BOOL bTransform = GetStylesheetPath(tdc, pExport->sStylesheet);
+	BOOL bHtmlComments = (bTransform || ExporterWantsHTMLComments(nExporter));
 
-	if (bFiltered || userPrefs.GetSaveExport() || !userPrefs.GetExportAllAttributes())
+	if (bFiltered || bHtmlComments || !userPrefs.GetExportAllAttributes())
 	{
 		TSD_TASKS nWhatTasks = bFiltered ? TSDT_FILTERED : TSDT_ALL;
 		TDCGETTASKS filter;
 
-		if (!userPrefs.GetExportAllAttributes())
+		if (userPrefs.GetExportAllAttributes())
 		{
-			// visible attributes
+			filter.mapAttribs.Add(TDCA_ALL);
+		}
+		else // visible attributes
+		{
 			filter.mapAttribs.Copy(tdc.GetVisibleEditFields());
-
-			// add comments always
-			filter.mapAttribs.Add(TDCA_COMMENTS);
+			filter.mapAttribs.Add(TDCA_COMMENTS); // always
 		}
 
 		// set the html image folder to be the output path with
@@ -2065,8 +2065,14 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	{
 		pExport->tasks.CopyFrom(tasks);
 	}
-
+	
 	return pExport;
+}
+
+BOOL CToDoListWnd::ExporterWantsHTMLComments(int nExporter) const
+{
+	return (m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("htm")) ||
+			m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("html")));
 }
 
 BOOL CToDoListWnd::WantTDLExtensionSupport(BOOL bForLoading) const
@@ -5353,119 +5359,43 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		BOOL bOffset = FALSE;
 
 		if (startup.GetPriority(nItem, bOffset))
-		{
-			if (bOffset)
-				nItem += tdc.GetSelectedTaskPriority();
-
-			tdc.SetSelectedTaskPriority(nItem);
-		}
+			tdc.SetSelectedTaskPriority(nItem, bOffset);
 
 		if (startup.GetRisk(nItem, bOffset))
-		{
-			if (bOffset)
-				nItem += tdc.GetSelectedTaskRisk();
-
-			tdc.SetSelectedTaskRisk(nItem);
-		}
+			tdc.SetSelectedTaskRisk(nItem, bOffset);
 
 		if (startup.GetPercentDone(nItem, bOffset))
-		{
-			if (bOffset)
-				nItem += tdc.GetSelectedTaskPercent();
-
-			tdc.SetSelectedTaskPercentDone(nItem);
-		}
+			tdc.SetSelectedTaskPercentDone(nItem, bOffset);
 
 		if (startup.GetCost(dItem, bOffset))
-		{
-			TDCCOST cost;
-			
-			if (tdc.GetSelectedTaskCost(cost))
-			{
-				if (bOffset)
-					cost.dAmount += dItem;
-				else
-					cost.dAmount = dItem;
-
-				tdc.SetSelectedTaskCost(cost);
-			}
-		}
+			tdc.SetSelectedTaskCost(TDCCOST(dItem), bOffset);
 
 		// Times
 		TDCTIMEPERIOD time;
 
 		if (startup.GetTimeEst(time.dAmount, time.nUnits, bOffset))
-		{
-			TDCTIMEPERIOD timeEst;
-			
-			if (tdc.GetSelectedTaskTimeEstimate(timeEst) && (timeEst.dAmount != 0.0))
-			{
-				time.SetUnits(timeEst.nUnits, TRUE);
-				
-				if (bOffset)
-					time.dAmount += timeEst.dAmount;
-			}
-
-			tdc.SetSelectedTaskTimeEstimate(time);
-		}
+			tdc.SetSelectedTaskTimeEstimate(time, bOffset);
 
 		if (startup.GetTimeSpent(time.dAmount, time.nUnits, bOffset))
-		{
-			TDCTIMEPERIOD timeSpent;
-
-			if (tdc.GetSelectedTaskTimeSpent(timeSpent) && (timeSpent.dAmount != 0.0))
-			{
-				time.SetUnits(timeSpent.nUnits, TRUE);
-
-				if (bOffset)
-					time.dAmount += timeSpent.dAmount;
-			}
-
-			tdc.SetSelectedTaskTimeSpent(time); 
-		}
+			tdc.SetSelectedTaskTimeSpent(time, bOffset); 
 
 		// Multi-string items
 		BOOL bAppend = FALSE;
 
 		if (startup.GetAllocTo(aItems, bAppend) != -1)
-		{
-			if (bAppend)
-				tdc.AppendSelectedTaskAllocTo(aItems);
-			else
-				tdc.SetSelectedTaskAllocTo(aItems);
-		}
+			tdc.SetSelectedTaskAllocTo(aItems, bAppend);
 		
 		if (startup.GetCategories(aItems, bAppend) != -1)
-		{
-			if (bAppend)
-				tdc.AppendSelectedTaskCategories(aItems);
-			else
-				tdc.SetSelectedTaskCategories(aItems);
-		}
+			tdc.SetSelectedTaskCategories(aItems, bAppend);
 		
 		if (startup.GetDependencies(aItems, bAppend) != -1)
-		{
-			if (bAppend)
-				tdc.AppendSelectedTaskDependencies(aItems);
-			else
-				tdc.SetSelectedTaskDependencies(aItems);
-		}
+			tdc.SetSelectedTaskDependencies(aItems, bAppend);
 		
 		if (startup.GetTags(aItems, bAppend) != -1)
-		{
-			if (bAppend)
-				tdc.AppendSelectedTaskTags(aItems);
-			else
-				tdc.SetSelectedTaskTags(aItems);
-		}
+			tdc.SetSelectedTaskTags(aItems, bAppend);
 		
 		if (startup.GetFileRefs(aItems, bAppend) != -1)
-		{
-			if (bAppend)
-				tdc.AppendSelectedTaskFileRefs(aItems);
-			else
-				tdc.SetSelectedTaskFileRefs(aItems);
-		}
+			tdc.SetSelectedTaskFileRefs(aItems, bAppend);
 		
 		// start date and time
 		TDC_UNITS nUnits;
@@ -6350,6 +6280,8 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 
 BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath)
 {
+	CWaitCursor cursor;
+
 	TDLPD_STYLE nStyle = dlg.GetExportStyle();
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
@@ -6359,6 +6291,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 		{
 			CString sTempImg = TEMP_TASKVIEW_FILEPATH;
 
+			// export
 			if (tdc.SaveTaskViewToImage(sTempImg))
 			{
 				// Make a simple web page container
@@ -6407,7 +6340,6 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks, tdc.GetFilePath());
 
 			// export
-			CWaitCursor cursor;
 			return tasks.TransformToFile(sStylesheet, sFilePath);
 		}
 		break;
@@ -6426,7 +6358,6 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks, tdc.GetFilePath());
 
 			// export
-			CWaitCursor cursor;
 			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, sExporterTypeID, FALSE) == IIER_SUCCESS);
 		}
 		break;
@@ -6446,7 +6377,6 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks, tdc.GetFilePath());
 
 			// export
-			CWaitCursor cursor;
 			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, TDCET_HTML) == IIER_SUCCESS);
 		}
 		break;
@@ -7044,10 +6974,10 @@ void CToDoListWnd::OnNeedTooltipText(NMHDR* pNMHDR, LRESULT* pResult)
 
 	if ((pNMHDR->idFrom >= ID_TOOLS_USERTOOL1) && (pNMHDR->idFrom <= ID_TOOLS_USERTOOL50))
 	{
-		USERTOOL ut;
+		USERTOOL tool;
 
-		if (Prefs().GetUserTool(pNMHDR->idFrom - ID_TOOLS_USERTOOL1, ut))
-			sTipText = ut.sToolName;
+		if (Prefs().GetUserTool(pNMHDR->idFrom - ID_TOOLS_USERTOOL1, tool))
+			sTipText = tool.sToolName;
 	}
 	else if ((pNMHDR->idFrom >= 0) && (pNMHDR->idFrom < (UINT)m_mgrToDoCtrls.GetCount()))
 	{
@@ -7068,26 +6998,23 @@ void CToDoListWnd::OnUpdateUserTool(CCmdUI* pCmdUI)
 {
 	if (m_bShowingMainToolbar && (pCmdUI->m_pMenu == NULL)) 
 	{
-		int nTool = pCmdUI->m_nID - ID_TOOLS_USERTOOL1;
+		int nTool = (pCmdUI->m_nID - ID_TOOLS_USERTOOL1);
 		ASSERT (nTool >= 0 && nTool < MAX_NUM_TOOLS);
 
-		USERTOOL ut;
-		
-		if (Prefs().GetUserTool(nTool, ut))
-			pCmdUI->Enable(TRUE);
+		USERTOOL tool;
+		pCmdUI->Enable(Prefs().GetUserTool(nTool, tool));
 	}
 }
 
 void CToDoListWnd::OnUserTool(UINT nCmdID) 
 {
-	int nTool = nCmdID - ID_TOOLS_USERTOOL1;
-	USERTOOL ut;
-	
+	int nTool = (nCmdID - ID_TOOLS_USERTOOL1);
 	ASSERT (nTool >= 0 && nTool < MAX_NUM_TOOLS);
 
 	const CPreferencesDlg& prefs = Prefs();
+	USERTOOL tool;
 	
-	if (prefs.GetUserTool(nTool, ut))
+	if (prefs.GetUserTool(nTool, tool))
 	{
 		// Save all tasklists before executing the user tool
 		if (prefs.GetAutoSaveOnRunTools())
@@ -7103,7 +7030,22 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 		USERTOOLARGS args;
 		PopulateToolArgs(args);
 
-		th.RunTool(ut, args, GetToDoCtrl().GetCustomAttributeDefs());
+		// If the tool points to 'us' we try to avoid running another instance
+		if (FileMisc::IsSamePath(FileMisc::GetAppFilePath(), th.GetToolPath(tool)))
+		{
+			CString sCmdLine;
+			
+			if (th.PrepareCmdline(tool, args, GetToDoCtrl().GetCustomAttributeDefs(), sCmdLine))
+			{
+				CTDCStartupOptions startup(sCmdLine, 0);
+
+				if (ProcessStartupOptions(startup, FALSE))
+					return;
+			}
+		}
+
+		// Fallback
+		th.RunTool(tool, args, GetToDoCtrl().GetCustomAttributeDefs());
 	}
 }
 
@@ -8981,9 +8923,9 @@ void CToDoListWnd::OnSetPriority(UINT nCmdID)
 	if (!tdc.IsReadOnly() && tdc.HasSelection())
 	{
 		if (nCmdID == ID_EDIT_SETPRIORITYNONE) 
-			tdc.SetSelectedTaskPriority(-2);
+			tdc.SetSelectedTaskPriority(-2, FALSE);
 		else
-			tdc.SetSelectedTaskPriority(nCmdID - ID_EDIT_SETPRIORITY0);
+			tdc.SetSelectedTaskPriority((nCmdID - ID_EDIT_SETPRIORITY0), FALSE);
 	}
 }
 
@@ -8993,7 +8935,7 @@ void CToDoListWnd::OnUpdateSetPriority(CCmdUI* pCmdUI)
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_PRIORITY));
 	
-	int nPriority = pCmdUI->m_nID - ID_EDIT_SETPRIORITY0;
+	int nPriority = (pCmdUI->m_nID - ID_EDIT_SETPRIORITY0);
 	
 	if (pCmdUI->m_nID == ID_EDIT_SETPRIORITYNONE)
 		nPriority = -2;
@@ -9018,7 +8960,7 @@ void CToDoListWnd::OnEditAddFileLink()
 		CStringArray aFiles;
 		
 		if (dialog.GetPathNames(aFiles))
-			tdc.AppendSelectedTaskFileRefs(aFiles);
+			tdc.SetSelectedTaskFileRefs(aFiles, TRUE); // append
 	}
 }
 
@@ -9678,8 +9620,7 @@ void CToDoListWnd::OnExport()
 	// export
 	DOPROGRESS(IDS_EXPORTPROGRESS);
 	
-	BOOL bHtmlComments = (m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("htm")) ||
-						  m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("html")));
+	BOOL bHtmlComments = ExporterWantsHTMLComments(nExporter);
 
 	// The only OR active tasklist -----------------------------------------------------
 	if ((nTDCCount == 1) || !dialog.GetExportAllTasklists())
@@ -9703,7 +9644,7 @@ void CToDoListWnd::OnExport()
 		GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 
 		// add report details
-		tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC));
+		tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC), CDateHelper::GetDate(DHD_TODAY));
 		
 		// save intermediate tasklist to file as required
 		LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -9744,7 +9685,7 @@ void CToDoListWnd::OnExport()
 				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 				
 				// add report details
-				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl));
+				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), CDateHelper::GetDate(DHD_TODAY));
 
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -9827,7 +9768,7 @@ void CToDoListWnd::OnExport()
 				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 				
 				// add report details
-				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl));
+				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), CDateHelper::GetDate(DHD_TODAY));
 
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -9866,8 +9807,11 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 
 	if (bHtmlComments)
 	{
-		if (filter.mapAttribs.Has(TDCA_COMMENTS))
+		if (filter.WantAttribute(TDCA_COMMENTS))
+		{
+			ASSERT(!filter.mapAttribs.IsEmpty());
 			filter.mapAttribs.Add(TDCA_HTMLCOMMENTS);
+		}
 
 		tasks.SetHtmlImageFolder(szHtmlImageDir);
 
@@ -9937,14 +9881,8 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 	}
 		
 	TDCGETTASKS filter(nFilter);
-
-	// attributes to export
 	taskSel.GetSelectedAttributes(tdc, filter.mapAttribs);
-
-	// special case
-	if (bHtmlComments)
-		filter.mapAttribs.Add(TDCA_HTMLCOMMENTS);
-
+	
 	TSD_TASKS nWhatTasks = taskSel.GetWantWhatTasks();
 
 	if (nWhatTasks == TSDT_SELECTED)

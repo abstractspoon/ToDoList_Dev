@@ -55,8 +55,7 @@ BOOL TDCTIMEPERIOD::operator!=(const TDCTIMEPERIOD& other) const
 
 TDCTIMEPERIOD& TDCTIMEPERIOD::operator=(const TDCTIMEPERIOD& other)
 {
-	dAmount = other.dAmount;
-	nUnits = other.nUnits;
+	SetTime(other.dAmount, other.nUnits);
 
 	return *this;
 }
@@ -101,22 +100,28 @@ BOOL TDCTIMEPERIOD::SetUnits(TDC_UNITS nNewUnits, BOOL bRecalc)
 
 BOOL TDCTIMEPERIOD::AddTime(double dTime, TDC_UNITS nTimeUnits)
 {
-	if (!IsValidUnits(nTimeUnits) || !IsValidUnits(nUnits))
+	if (!IsValidUnits(nTimeUnits) || !IsValidUnits(nUnits) || (dTime == 0.0))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	if (dTime == 0.0)
-		return FALSE;
-	
-	dAmount += CTimeHelper().Convert(dTime, TDC::MapUnitsToTHUnits(nTimeUnits), GetTHUnits());
+	if (nTimeUnits == nUnits)
+		dAmount += dTime;
+	else
+		dAmount += CTimeHelper().Convert(dTime, TDC::MapUnitsToTHUnits(nTimeUnits), GetTHUnits());
+
 	return TRUE;
+}
+
+BOOL TDCTIMEPERIOD::AddTime(const TDCTIMEPERIOD& time)
+{
+	return AddTime(time.dAmount, time.nUnits);
 }
 
 BOOL TDCTIMEPERIOD::SetTime(double dTime, TDC_UNITS nTimeUnits)
 {
-	if (!IsValidUnits(nTimeUnits))
+	if (!IsValidUnits(nTimeUnits) || (dTime < 0.0))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -207,6 +212,38 @@ BOOL TDCCOST::Parse(LPCTSTR szCost)
 	}
 
 	return TRUE;
+}
+
+BOOL TDCCOST::SetCost(double dCost, BOOL bCostIsRate)
+{
+	if (dCost < 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	dAmount = dCost;
+	bIsRate = bCostIsRate;
+
+	return TRUE;
+}
+
+BOOL TDCCOST::AddCost(double dCost, BOOL bCostIsRate)
+{
+	if ((bIsRate && !bCostIsRate) || (!bIsRate && bCostIsRate))
+		return FALSE;
+
+	return AddCost(dCost);
+}
+
+BOOL TDCCOST::AddCost(double dCost)
+{
+	return SetCost((dAmount + dCost), bIsRate);
+}
+
+BOOL TDCCOST::AddCost(const TDCCOST& cost)
+{
+	return AddCost(cost.dAmount, cost.bIsRate);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

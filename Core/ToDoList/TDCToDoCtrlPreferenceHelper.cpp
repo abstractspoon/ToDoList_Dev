@@ -21,7 +21,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(CFilteredToDoCtrl& tdc, const 
 	UpdateToDoCtrl(tdc, prefs, fontMain, fontTree, fontComments);
 	
 	// App-controlled settings
-	tdc.SetDefaultTaskAttributes(tdiDefault);
+	tdc.SetDefaultTaskAttributeValues(tdiDefault);
 }
 
 void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, 

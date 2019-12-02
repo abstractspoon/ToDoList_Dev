@@ -755,7 +755,7 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 	else
 	{
 		// Handle those tasks having no (ie. Default) times
-		if (CDateHelper::IsDateSet(dtTask) && m_data.IsEndOfDay(dtTask))
+		if (CDateHelper::IsDateSet(dtTask) && !CDateHelper::DateHasTime(dtTask))
 		{
 			switch (nDate)
 			{

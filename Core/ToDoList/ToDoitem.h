@@ -51,8 +51,9 @@ struct TDCTIMEPERIOD
 	BOOL SetTHUnits(TH_UNITS nTHUnits, BOOL bRecalc);
 	BOOL SetUnits(TDC_UNITS nNewUnits, BOOL bRecalc);
 
-	BOOL SetTime(double dAmount, TDC_UNITS nUnits);
-	BOOL AddTime(double dAmount, TDC_UNITS nUnits);
+	BOOL SetTime(double dTime, TDC_UNITS nUnits);
+	BOOL AddTime(double dTime, TDC_UNITS nUnits);
+	BOOL AddTime(const TDCTIMEPERIOD& time);
 
 	double dAmount;
 	TDC_UNITS nUnits;
@@ -72,6 +73,11 @@ struct TDCCOST
 
 	CString Format(int nDecimals = -1) const;
 	BOOL Parse(LPCTSTR szCost);
+
+	BOOL SetCost(double dCost, BOOL bCostIsRate);
+	BOOL AddCost(double dCost, BOOL bCostIsRate);
+	BOOL AddCost(const TDCCOST& cost);
+	BOOL AddCost(double dCost);
 
 	static CString Format(double dAmount, BOOL bIsRate, int nDecimals = -1);
 

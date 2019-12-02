@@ -55,6 +55,7 @@ public:
 	CTDCStartupOptions();
 	CTDCStartupOptions(const CTDCStartupOptions& startup);
 	CTDCStartupOptions(const CEnCommandLineInfo& cmdInfo);
+	CTDCStartupOptions(const CString& sCmdInfo, int nStartArg = 0);
 
 	CTDCStartupOptions& operator=(const CTDCStartupOptions& startup);
 	BOOL operator==(const CTDCStartupOptions& startup) const;
@@ -138,6 +139,8 @@ protected:
 	BOOL m_bSaveIntermediateAll;
 
 protected:
+	void SetCmdInfo(const CEnCommandLineInfo& cmdInfo);
+
 	static BOOL ExtractAttribute(const CEnCommandLineInfo& cmdInfo, LPCTSTR szSwitch, LPTSTR szAttrib, int nLenAttrib = ATTRIBLEN);
 	static BOOL ExtractAttribute(const CEnCommandLineInfo& cmdInfo, LPCTSTR szSwitch, TDCSTARTUPATTRIB& attrib);
 	static void ParseDate(const CEnCommandLineInfo& cmdInfo, LPCTSTR szSwitch, TDCSTARTUPATTRIB& dtDate);

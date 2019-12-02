@@ -170,7 +170,7 @@ public:
 	static BOOL IsLeapYear(const COleDateTime& date = COleDateTime::GetCurrentTime());
 	static BOOL IsLeapYear(int nYear);
 	static BOOL IsToday(const COleDateTime& date);
-	static BOOL IsEndOfDay(const COleDateTime& date);
+	static BOOL IsEndOfDay(const COleDateTime& date, BOOL bNoTimeIsEndOfDay);
 	static BOOL IsSameDay(const COleDateTime& date1, const COleDateTime& date2);
 	static BOOL IsSameWeek(const COleDateTime& date1, const COleDateTime& date2);
 	static BOOL IsThisWeek(const COleDateTime& date);
