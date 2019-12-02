@@ -9636,7 +9636,7 @@ void CToDoListWnd::OnExport()
 		GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 
 		// add report details
-		tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC));
+		tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC), CDateHelper::GetDate(DHD_TODAY));
 		
 		// save intermediate tasklist to file as required
 		LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -9677,7 +9677,7 @@ void CToDoListWnd::OnExport()
 				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 				
 				// add report details
-				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl));
+				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), CDateHelper::GetDate(DHD_TODAY));
 
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -9760,7 +9760,7 @@ void CToDoListWnd::OnExport()
 				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 				
 				// add report details
-				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl));
+				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), CDateHelper::GetDate(DHD_TODAY));
 
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks, tdc.GetFilePath());
