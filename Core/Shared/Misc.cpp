@@ -998,7 +998,7 @@ int Misc::Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep, BOOL
 			if (bInQuotes)
 				sWord += sSep;
 			else
-				bAddWord = (nPos > 0);
+				bAddWord = ((nPos > 0) || bAllowEmpty);
 
 			nPos += nSepLen - 1; // minus 1 because the loop also increments
 		}
