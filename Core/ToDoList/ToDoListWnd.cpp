@@ -10563,14 +10563,14 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 		return TDCF_SUCCESS;
 
 	TDC_FILE nSaveAll = TDCF_SUCCESS;
+
 	BOOL bClosingWindows = Misc::HasFlag(dwFlags, TDLS_CLOSINGWINDOWS);
+	BOOL bIncUnsaved = Misc::HasFlag(dwFlags, TDLS_INCLUDEUNSAVED);
+	BOOL bClosingTasklists = Misc::HasFlag(dwFlags, TDLS_CLOSINGTASKLISTS);
 
 	// scoped to end status bar progress before calling UpdateStatusbar
 	{
 		DOPROGRESS(IDS_SAVINGPROGRESS);
-
-		BOOL bIncUnsaved = Misc::HasFlag(dwFlags, TDLS_INCLUDEUNSAVED);
-		BOOL bClosingTasklists = Misc::HasFlag(dwFlags, TDLS_CLOSINGTASKLISTS);
 
 		int nCtrl = GetTDCCount();
 
@@ -10578,14 +10578,21 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 		{
 			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
 
-			// bypass unsaved unless closing Windows or tasklists
-			if (!bClosingWindows && 
-				!bClosingTasklists &&
-				!bIncUnsaved &&
-				!m_mgrToDoCtrls.UsesStorage(nCtrl) && 
-				!tdc.HasFilePath())
+			// bypass unsaved or 'busy' tasklists unless 
+			// closing Windows or tasklists
+			if (!bClosingWindows && !bClosingTasklists)
 			{
-				continue;
+				if (tdc.IsTaskLabelEditing())
+				{
+					TRACE(_T("Tasklist not auto-saved because it is 'busy'\n"));
+					continue;
+				}
+
+				if (!bIncUnsaved && !m_mgrToDoCtrls.UsesStorage(nCtrl) && !tdc.HasFilePath())
+				{
+					TRACE(_T("Tasklist not auto-saved because it is 'unsaved'\n"));
+					continue;
+				}
 			}
 			
 			TDC_FILE nSave = ConfirmSaveTaskList(nCtrl, dwFlags);
