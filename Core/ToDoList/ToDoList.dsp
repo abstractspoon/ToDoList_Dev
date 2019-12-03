@@ -575,6 +575,10 @@ SOURCE=.\TDLTasklistImportDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDLTasklistSaveAsDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLTasklistStorageMgr.cpp
 # End Source File
 # Begin Source File
@@ -1168,6 +1172,10 @@ SOURCE=.\TDLTaskListCtrl.h
 # Begin Source File
 
 SOURCE=.\TDLTasklistImportDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLTasklistSaveAsDlg.h
 # End Source File
 # Begin Source File
 

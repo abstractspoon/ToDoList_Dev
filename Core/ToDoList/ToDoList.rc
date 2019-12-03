@@ -2088,6 +2088,19 @@ BEGIN
                     369,156
 END
 
+IDD_TASKLISTSAVEAS_DIALOG DIALOG DISCARDABLE  0, 0, 236, 90
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Save Tasklist As"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "New project name:",IDC_STATIC,7,7,222,8
+    EDITTEXT        IDC_NEWPROJNAME,7,17,222,14,ES_AUTOHSCROLL
+    LTEXT           "New file path:",IDC_STATIC,7,39,44,8
+    EDITTEXT        IDC_NEWFILEPATH,7,49,222,14,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,123,69,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,179,69,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -4375,6 +4388,14 @@ BEGIN
         RIGHTMARGIN, 363
         TOPMARGIN, 7
         BOTTOMMARGIN, 152
+    END
+
+    IDD_TASKLISTSAVEAS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 229
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 83
     END
 END
 #endif    // APSTUDIO_INVOKED
