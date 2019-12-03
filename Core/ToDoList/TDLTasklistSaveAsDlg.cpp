@@ -33,7 +33,7 @@ CTDLTasklistSaveAsDlg::CTDLTasklistSaveAsDlg(LPCTSTR szFilePath,
 
 void CTDLTasklistSaveAsDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CTDLDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLTasklistSaveAsDlg)
 	DDX_Control(pDX, IDC_NEWFILEPATH, m_eFilePath);
 	DDX_Text(pDX, IDC_NEWFILEPATH, m_sFilePath);
@@ -42,7 +42,7 @@ void CTDLTasklistSaveAsDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLTasklistSaveAsDlg, CDialog)
+BEGIN_MESSAGE_MAP(CTDLTasklistSaveAsDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLTasklistSaveAsDlg)
 		// NOTE: the ClassWizard will add message map macros here
 	//}}AFX_MSG_MAP
