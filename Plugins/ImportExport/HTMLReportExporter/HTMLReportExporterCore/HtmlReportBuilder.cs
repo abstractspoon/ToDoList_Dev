@@ -201,8 +201,8 @@ namespace HTMLReportExporter
 		{
 			html.RenderBeginTag(HtmlTextWriterTag.Body);
 
-			Header.WriteBodyDiv(html);
-			Footer.WriteBodyDiv(html);
+			Header.WriteBodyDiv(m_Tasklist, html);
+			Footer.WriteBodyDiv(m_Tasklist, html);
 
 			html.AddAttribute("width", "100%");
 			html.RenderBeginTag(HtmlTextWriterTag.Table);
@@ -306,15 +306,17 @@ namespace HTMLReportExporter
 				return true;
 			}
 
-			public bool WriteBodyDiv(HtmlTextWriter html)
+			public bool WriteBodyDiv(TaskList tasks, HtmlTextWriter html)
 			{
 				if (!Enabled || (PixelHeight <= 0))
 					return false;
 
 				html.AddAttribute("class", "page-header");
+
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.Write(Text);
+				html.Write(HtmlReportUtils.SubstituteReportDetails(tasks, Text));
 				html.RenderEndTag(); // Div
+
 				html.WriteLine();
 
 				return true;
@@ -341,6 +343,8 @@ namespace HTMLReportExporter
 				return true;
 			}
 		}
+
+		// --------------------------------------------------------------------------
 
 		public class FooterTemplateReporter : HeaderFooterTemplateReporter
 		{
@@ -370,15 +374,17 @@ namespace HTMLReportExporter
 				return true;
 			}
 
-			public bool WriteBodyDiv(HtmlTextWriter html)
+			public bool WriteBodyDiv(TaskList tasks, HtmlTextWriter html)
 			{
 				if (!Enabled || (PixelHeight <= 0))
 					return false;
 
 				html.AddAttribute("class", "page-footer");
+
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.Write(Text);
+				html.Write(HtmlReportUtils.SubstituteReportDetails(tasks, Text));
 				html.RenderEndTag(); // Div
+
 				html.WriteLine();
 
 				return true;
@@ -433,16 +439,11 @@ namespace HTMLReportExporter
 					html.AddAttribute("class", "title-page");
 
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
-
-				var title = Text.Replace("$(reportTitle)", tasks.GetReportTitle());
-				title = title.Replace("$(reportDate)", tasks.GetReportDate());
-				html.Write(title);
-
+				html.Write(HtmlReportUtils.SubstituteReportDetails(tasks, Text));
 				html.RenderEndTag(); // Div
 
 				return true;
 			}
-
 		}
 
 		public class TaskTemplateReporter : TaskTemplate

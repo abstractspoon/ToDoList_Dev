@@ -170,5 +170,14 @@ namespace HTMLReportExporter
 
 			return attribs;
 		}
+
+		// ----------------------------------------------------
+
+		public static String SubstituteReportDetails(TaskList tasks, String content)
+		{
+			return content.Replace("$(reportTitle)", tasks.GetReportTitle())
+						  .Replace("$(reportDate)", tasks.GetReportDate());
+		}
+
 	}
 }
