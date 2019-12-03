@@ -20,7 +20,7 @@ CTDLTasklistSaveAsDlg::CTDLTasklistSaveAsDlg(LPCTSTR szFilePath,
 											 LPCTSTR szFileFilter,
 											 LPCTSTR szDefaultFileExt, CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(CTDLTasklistSaveAsDlg::IDD, pParent),
+	CTDLDialog(IDD_TASKLISTSAVEAS_DIALOG, _T("SaveAs"), pParent),
 	m_sFilePath(szFilePath),
 	m_sProjectName(szProjectName)
 {

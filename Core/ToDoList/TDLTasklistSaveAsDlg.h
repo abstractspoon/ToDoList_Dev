@@ -7,12 +7,14 @@
 // TDLTasklistSaveAsDlg.h : header file
 //
 
+#include "TDLDialog.h"
+
 #include "..\Shared\fileedit.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTasklistSaveAsDlg dialog
 
-class CTDLTasklistSaveAsDlg : public CDialog
+class CTDLTasklistSaveAsDlg : public CTDLDialog
 {
 // Construction
 public:
@@ -27,7 +29,6 @@ public:
 
 // Dialog Data
 	//{{AFX_DATA(CTDLTasklistSaveAsDlg)
-	enum { IDD = IDD_TASKLISTSAVEAS_DIALOG };
 	CString	m_sFilePath;
 	CString	m_sProjectName;
 	//}}AFX_DATA
