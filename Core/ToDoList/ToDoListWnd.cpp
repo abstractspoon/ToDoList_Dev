@@ -3322,10 +3322,7 @@ void CToDoListWnd::MinimizeToTray()
 	CPreferences().WriteProfileInt(_T("Pos"), _T("Maximized"), IsZoomed());
 	
 	if (Prefs().GetAutoSaveOnSwitchApp())
-	{
-		// save all
 		SaveAll(TDLS_AUTOSAVE);
-	}
 	
 	// hide main window
 	Gui::MinToTray(*this); // courtesy of floyd
@@ -10565,7 +10562,6 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 	TDC_FILE nSaveAll = TDCF_SUCCESS;
 
 	BOOL bClosingWindows = Misc::HasFlag(dwFlags, TDLS_CLOSINGWINDOWS);
-	BOOL bIncUnsaved = Misc::HasFlag(dwFlags, TDLS_INCLUDEUNSAVED);
 	BOOL bClosingTasklists = Misc::HasFlag(dwFlags, TDLS_CLOSINGTASKLISTS);
 
 	// scoped to end status bar progress before calling UpdateStatusbar
@@ -10582,13 +10578,17 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 			// closing Windows or tasklists
 			if (!bClosingWindows && !bClosingTasklists)
 			{
-				if (tdc.IsTaskLabelEditing())
+				BOOL bWantFlush = !Misc::HasFlag(dwFlags, TDLS_NOFLUSH);
+
+				if (!bWantFlush && tdc.IsTaskLabelEditing())
 				{
 					TRACE(_T("Tasklist not auto-saved because it is 'busy'\n"));
 					continue;
 				}
 
-				if (!bIncUnsaved && !m_mgrToDoCtrls.UsesStorage(nCtrl) && !tdc.HasFilePath())
+				BOOL bWantUnsaved = Misc::HasFlag(dwFlags, TDLS_INCLUDEUNSAVED);
+
+				if (!bWantUnsaved && !m_mgrToDoCtrls.UsesStorage(nCtrl) && !tdc.HasFilePath())
 				{
 					TRACE(_T("Tasklist not auto-saved because it is 'unsaved'\n"));
 					continue;
