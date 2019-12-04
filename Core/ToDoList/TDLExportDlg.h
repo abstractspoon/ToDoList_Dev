@@ -11,6 +11,7 @@
 #include "TDLDialog.h"
 
 #include "..\shared\fileedit.h"
+#include "..\shared\historycombobox.h"
 
 #include "..\Interfaces\importexportmgr.h"
 #include "..\Interfaces\ImportExportComboBox.h"
@@ -24,9 +25,18 @@ class CTDLExportDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLExportDlg(const CTDCImportExportMgr& mgr, BOOL bSingleTaskList, FTC_VIEW nView, 
-				BOOL bVisibleColumnsOnly, LPCTSTR szFilePath, LPCTSTR szFolderPath, 
-				const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);
+	CTDLExportDlg(LPCTSTR szTitle, 
+				  const CTDCImportExportMgr& mgr, 
+				  BOOL bSingleTaskList, 
+				  FTC_VIEW nView,
+				  BOOL bVisibleColumnsOnly, 
+				  LPCTSTR szFilePath, 
+				  LPCTSTR szFolderPath, 
+				  const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+				  CWnd* pParent = NULL);
+
+	CString GetExportTitle() const { return m_sExportTitle; }
+	COleDateTime GetExportDate() const;
 
 	CString GetFormatTypeID() const { return m_sFormatTypeID; }
 	CString GetExportPath() const; // can be folder or file
@@ -40,6 +50,7 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CExportDlg)
 	enum { IDD = IDD_EXPORT_DIALOG };
+	CHistoryComboBox	m_cbTitle;
 	CImportExportComboBox m_cbFormat;
 	CFileEdit	m_eExportPath;
 	BOOL		m_bExportAllTasklists;
@@ -47,10 +58,12 @@ protected:
 	BOOL		m_bExportToClipboard;
 	CString		m_sExportPath;
 	CEnString	m_sPathLabel;
+	CString	m_sExportTitle;
+	BOOL	m_bExportDate;
 	//}}AFX_DATA
 	CTaskSelectionDlg m_dlgTaskSel;
 	BOOL m_bSingleTaskList; 
-	CString m_sFolderPath, m_sFilePath, m_sOrgFilePath, m_sOrgFolderPath, m_sMultiFilePath;
+	CString m_sFolderPath, m_sFilePath, m_sOrgFilePath, m_sOrgFolderPath, m_sMultiFilePath, m_sSingleFileTitle;
 	const CImportExportMgr& m_mgrImportExport;
 	CString m_sFormatTypeID;
 

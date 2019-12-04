@@ -9605,8 +9605,9 @@ void CToDoListWnd::OnExport()
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	const CString sTasklistPath = m_mgrToDoCtrls.GetFilePath(nSelTDC, FALSE);
 
-	CTDLExportDlg dialog(m_mgrImportExport, 
-						nTDCCount == 1, 
+	CTDLExportDlg dialog(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC),
+						m_mgrImportExport, 
+						(nTDCCount == 1), 
 						GetToDoCtrl().GetTaskView(),
 						userPrefs.GetExportVisibleColsOnly(), 
 						sTasklistPath, 
@@ -9646,7 +9647,7 @@ void CToDoListWnd::OnExport()
 	DOPROGRESS(IDS_EXPORTPROGRESS);
 	
 	BOOL bHtmlComments = ExporterWantsHTMLComments(nExporter);
-
+	
 	// The only OR active tasklist -----------------------------------------------------
 	if ((nTDCCount == 1) || !dialog.GetExportAllTasklists())
 	{
@@ -9669,7 +9670,7 @@ void CToDoListWnd::OnExport()
 		GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 
 		// add report details
-		tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC), CDateHelper::GetDate(DHD_TODAY));
+		tasks.SetReportDetails(dialog.GetExportTitle(), dialog.GetExportDate());
 		
 		// save intermediate tasklist to file as required
 		LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -9710,7 +9711,7 @@ void CToDoListWnd::OnExport()
 				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 				
 				// add report details
-				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), CDateHelper::GetDate(DHD_TODAY));
+				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), dialog.GetExportDate());
 
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -9793,7 +9794,7 @@ void CToDoListWnd::OnExport()
 				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 				
 				// add report details
-				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), CDateHelper::GetDate(DHD_TODAY));
+				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), dialog.GetExportDate());
 
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks, tdc.GetFilePath());

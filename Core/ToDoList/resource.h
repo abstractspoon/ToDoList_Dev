@@ -227,6 +227,7 @@
 #define IDC_EXPORTFILTERED              1026
 #define IDC_INCLUDEUSERINCHECKOUT       1026
 #define IDC_INCLUDEPARENTTASK           1026
+#define IDC_EXPORTDATE                  1026
 #define IDC_ALWAYSONTOP                 1027
 #define IDC_USEEARLIESTDUEDATE          1027
 #define IDC_USESTYLESHEETFORSAVE        1027
@@ -832,6 +833,7 @@
 #define IDC_TOCLIPBOARD                 1536
 #define IDC_TEXT                        1538
 #define IDC_ACTIVETASKLISTPOSITION      1539
+#define IDC_EXPORTTITLE                 1540
 #define IDC_NEWPROJNAME                 1540
 #define IDC_NEWFILEPATH                 1541
 #define IDC_TASKLIST                    2000
@@ -2333,6 +2335,7 @@
 #define IDS_IMPORTDIALOGTITLE_CLIPBOARD 58511
 #define IDS_IMPORTDIALOGTITLE_TEXT      58512
 #define IDS_IMPORTDIALOGTITLE_FILE      58513
+#define IDS_EXPORTTITLE_MULTIPLEFILES   58514
 
 // Next default values for new objects
 // 
