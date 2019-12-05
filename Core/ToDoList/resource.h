@@ -161,6 +161,7 @@
 #define IDB_OUTLOOKTYPES                309
 #define IDR_FINDTASKS                   310
 #define IDI_SEARCH_PREFS                313
+#define IDD_TASKLISTSAVEAS_DIALOG       314
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -226,6 +227,7 @@
 #define IDC_EXPORTFILTERED              1026
 #define IDC_INCLUDEUSERINCHECKOUT       1026
 #define IDC_INCLUDEPARENTTASK           1026
+#define IDC_EXPORTDATE                  1026
 #define IDC_ALWAYSONTOP                 1027
 #define IDC_USEEARLIESTDUEDATE          1027
 #define IDC_USESTYLESHEETFORSAVE        1027
@@ -831,6 +833,9 @@
 #define IDC_TOCLIPBOARD                 1536
 #define IDC_TEXT                        1538
 #define IDC_ACTIVETASKLISTPOSITION      1539
+#define IDC_EXPORTTITLE                 1540
+#define IDC_NEWPROJNAME                 1540
+#define IDC_NEWFILEPATH                 1541
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2330,14 +2335,15 @@
 #define IDS_IMPORTDIALOGTITLE_CLIPBOARD 58511
 #define IDS_IMPORTDIALOGTITLE_TEXT      58512
 #define IDS_IMPORTDIALOGTITLE_FILE      58513
+#define IDS_EXPORTTITLE_MULTIPLEFILES   58514
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        314
+#define _APS_NEXT_RESOURCE_VALUE        315
 #define _APS_NEXT_COMMAND_VALUE         34664
-#define _APS_NEXT_CONTROL_VALUE         1540
+#define _APS_NEXT_CONTROL_VALUE         1541
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

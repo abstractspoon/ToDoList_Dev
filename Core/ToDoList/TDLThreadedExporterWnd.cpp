@@ -172,17 +172,25 @@ UINT CTDLThreadedExporterWnd::ExportThreadProc(LPVOID pParam)
 	TEWEXPORTWRAP* pExportWrap = (TEWEXPORTWRAP*)pParam;
 
 	TDCEXPORTTASKLIST* pExport = pExportWrap->pExport;
-	ASSERT(pExport && pExport->IsValid());
-	
-	// save intermediate tasklist to file as required
-	if (!pExport->sSaveIntermediatePath.IsEmpty())
-		pExport->tasks.Save(pExport->sSaveIntermediatePath, SFEF_UTF16);
-	
 	BOOL bSuccess = FALSE;
-	
-	if (FileMisc::FileExists(pExport->sStylesheet)) // bTransform
+
+	if (!pExport || !pExport->IsValid())
+	{
+		bSuccess = FALSE;
+		FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Bad inputs) failed\n"));
+	}
+	else if (!pExport->sSaveIntermediatePath.IsEmpty() && 
+			!pExport->tasks.Save(pExport->sSaveIntermediatePath, SFEF_UTF16))
+	{
+		bSuccess = FALSE;
+		FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Intermediate save) failed\n"));
+	}
+	else if (FileMisc::FileExists(pExport->sStylesheet)) // bTransform
 	{
 		bSuccess = pExport->tasks.TransformToFile(pExport->sStylesheet, pExport->sExportPath);
+
+		if (!bSuccess)
+			FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Transform) failed\n"));
 	}
 	else if (pExport->nPurpose == TDCTEP_DUETASKNOTIFY)
 	{
@@ -196,6 +204,8 @@ UINT CTDLThreadedExporterWnd::ExportThreadProc(LPVOID pParam)
 																		pExport->nExporter, 
 																		TRUE, 
 																		&prefsWrap));
+		if (!bSuccess)
+			FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Due tasks) failed\n"));
 	}
 	else
 	{
@@ -203,13 +213,17 @@ UINT CTDLThreadedExporterWnd::ExportThreadProc(LPVOID pParam)
 																		pExport->sExportPath, 
 																		pExport->nExporter, 
 																		TRUE));
+		if (!bSuccess)
+			FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Export) failed\n"));
 	}
 
 	// notify ourselves
 	::PostMessage(pExportWrap->hwndTempNotify, WM_TDLTE_EXPORTTHREADFINISHED, bSuccess, (LPARAM)pExportWrap);
+	
+	if (bSuccess)
+		FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc() succeeded\n"));
 
 	return bSuccess;
-
 }
 
 LRESULT CTDLThreadedExporterWnd::OnExportThreadFinished(WPARAM wp, LPARAM lp)

@@ -523,6 +523,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="TDLTasklistSaveAsDlg.cpp" />
     <ClCompile Include="TDLTasklistStorageMgr.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -716,6 +717,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLTaskIconDlg.h" />
     <ClInclude Include="TDLTaskListCtrl.h" />
     <ClInclude Include="TDLTasklistImportDlg.h" />
+    <ClInclude Include="TDLTasklistSaveAsDlg.h" />
     <ClInclude Include="TDLTasklistStorageMgr.h" />
     <ClInclude Include="TDLTaskTreeCtrl.h" />
     <ClInclude Include="TDLTaskViewListBox.h" />

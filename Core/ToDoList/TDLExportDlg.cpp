@@ -25,7 +25,8 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CExportDlg dialog
 
-CTDLExportDlg::CTDLExportDlg(const CTDCImportExportMgr& mgr, 
+CTDLExportDlg::CTDLExportDlg(LPCTSTR szTitle, 
+							 const CTDCImportExportMgr& mgr,
 							BOOL bSingleTaskList, 
 							FTC_VIEW nView, 
 							BOOL bVisibleColumnsOnly, 
@@ -35,6 +36,7 @@ CTDLExportDlg::CTDLExportDlg(const CTDCImportExportMgr& mgr,
 							CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_EXPORT_DIALOG, _T("Exporting"), pParent), 
+	m_sExportTitle(szTitle),
 	m_mgrImportExport(mgr),
 	m_bSingleTaskList(bSingleTaskList), 
 	m_sFilePath(szFilePath), m_sOrgFilePath(szFilePath),
@@ -46,9 +48,14 @@ CTDLExportDlg::CTDLExportDlg(const CTDCImportExportMgr& mgr,
 	//{{AFX_DATA_INIT(CExportDlg)
 	//}}AFX_DATA_INIT
 
+	// retrieve previous user input
 	CPreferences prefs;
 
-	// retrieve previous user input
+	m_bExportDate = prefs.GetProfileInt(m_sPrefsKey, _T("WantDate"), TRUE);
+
+	// share same title history as print dialog
+	m_cbTitle.Load(prefs, _T("Print"));
+
 	m_bExportOneFile = prefs.GetProfileInt(m_sPrefsKey, _T("ExportOneFile"), FALSE);
 	m_bExportToClipboard = prefs.GetProfileInt(m_sPrefsKey, _T("ExportToClipboard"), FALSE);
 
@@ -125,13 +132,16 @@ void CTDLExportDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CExportDlg)
+	DDX_Control(pDX, IDC_EXPORTTITLE, m_cbTitle);
 	DDX_Control(pDX, IDC_FORMATOPTIONS, m_cbFormat);
 	DDX_Control(pDX, IDC_EXPORTPATH, m_eExportPath);
 	DDX_CBIndex(pDX, IDC_TASKLISTOPTIONS, m_bExportAllTasklists);
-	DDX_Text(pDX, IDC_EXPORTPATH, m_sExportPath);
 	DDX_Check(pDX, IDC_EXPORTONEFILE, m_bExportOneFile);
-	DDX_Text(pDX, IDC_TOPATH, m_sPathLabel);
 	DDX_Radio(pDX, IDC_TOPATH, m_bExportToClipboard);
+	DDX_Text(pDX, IDC_EXPORTPATH, m_sExportPath);
+	DDX_Text(pDX, IDC_TOPATH, m_sPathLabel);
+	DDX_CBString(pDX, IDC_EXPORTTITLE, m_sExportTitle);
+	DDX_Check(pDX, IDC_EXPORTDATE, m_bExportDate);
 	//}}AFX_DATA_MAP
 
 	if (pDX->m_bSaveAndValidate)
@@ -175,6 +185,7 @@ BOOL CTDLExportDlg::OnInitDialog()
 	GetDlgItem(IDC_TASKLISTOPTIONS)->EnableWindow(!m_bSingleTaskList);
 	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
 	GetDlgItem(IDC_EXPORTPATH)->EnableWindow(m_mgrImportExport.ExporterHasFileExtension(nFormat) && !m_bExportToClipboard);
+	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(m_bSingleTaskList || !m_bExportAllTasklists);
 
 	EnableOK();
 	
@@ -216,14 +227,21 @@ void CTDLExportDlg::OnSelchangeTasklistoptions()
 		}
 		else
 			m_sExportPath = m_sFolderPath;
+
+		m_sSingleFileTitle = m_sExportTitle;
+		m_sExportTitle = CEnString(IDS_EXPORTTITLE_MULTIPLEFILES);
+
 	}
 	else
 	{
 		m_sExportPath = m_sFilePath;
 		ReplaceExtension(m_sExportPath, m_sFormatTypeID);
+
+		m_sExportTitle = m_sSingleFileTitle;
 	}
 
 	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
+	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(m_bSingleTaskList || !m_bExportAllTasklists);
 
 	UpdateData(FALSE);
 }
@@ -356,6 +374,11 @@ void CTDLExportDlg::OnOK()
 
 	CPreferences prefs;
 
+	prefs.WriteProfileInt(m_sPrefsKey, _T("WantDate"), m_bExportDate);
+
+	// share same title history as print dialog
+	m_cbTitle.Save(prefs, _T("Print"));
+
 	prefs.WriteProfileString(m_sPrefsKey, _T("ExporterTypeID"), m_sFormatTypeID);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ExportOneFile"), m_bExportOneFile);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ExportToClipboard"), m_bExportToClipboard);
@@ -366,6 +389,15 @@ void CTDLExportDlg::OnOK()
 		prefs.WriteProfileString(m_sPrefsKey, _T("LastMultiFilePath"), m_sMultiFilePath);
 		prefs.WriteProfileString(m_sPrefsKey, _T("LastFolder"), m_sFolderPath);
 	}
+}
+
+COleDateTime CTDLExportDlg::GetExportDate() const
+{
+	if (m_bExportDate)
+		return CDateHelper::GetDate(DHD_TODAY);
+
+	// else
+	return CDateHelper::NullDate();
 }
 
 void CTDLExportDlg::OnExportonefile()

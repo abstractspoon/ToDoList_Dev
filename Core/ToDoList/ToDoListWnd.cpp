@@ -35,6 +35,7 @@
 #include "TaskClipboard.h"
 #include "TDLGoToTaskDlg.h"
 #include "TDLCleanupIniPreferencesDlg.h"
+#include "TDLTasklistSaveAsDlg.h"
 
 #include "..\shared\aboutdlg.h"
 #include "..\shared\holdredraw.h"
@@ -3321,10 +3322,7 @@ void CToDoListWnd::MinimizeToTray()
 	CPreferences().WriteProfileInt(_T("Pos"), _T("Maximized"), IsZoomed());
 	
 	if (Prefs().GetAutoSaveOnSwitchApp())
-	{
-		// save all
 		SaveAll(TDLS_AUTOSAVE);
-	}
 	
 	// hide main window
 	Gui::MinToTray(*this); // courtesy of floyd
@@ -3765,36 +3763,63 @@ void CToDoListWnd::UpdateTooltip()
 void CToDoListWnd::OnSaveas() 
 {
 	int nSel = GetSelToDoCtrl();
-	CFilteredToDoCtrl& tdc = GetToDoCtrl(nSel);
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	// use tab text as hint to userTransformToFile
-	CString sFilePath = m_mgrToDoCtrls.GetFilePath(nSel, FALSE);
-	CPreferences prefs;
-
-	// display the dialog
-	FileMisc::ReplaceExtension(sFilePath, GetDefaultFileExt(FALSE));
-
-	CFileSaveDialog dialog(IDS_SAVETASKLISTAS_TITLE,
-							GetDefaultFileExt(FALSE), 
-							sFilePath, 
-							EOFN_DEFAULTSAVE,
-							GetFileFilter(FALSE), 
-							this);
-	
-	// always use .tdl for initializing the file dialog
-	dialog.m_ofn.nFilterIndex = 1;
-	
-	int nRes = dialog.DoModal(prefs);
-	
-	if (nRes == IDOK)
+	if (!tdc.HasFilePath())
 	{
- 		if (SaveTaskList(nSel, dialog.GetPathName()) == TDCF_SUCCESS)
+		SaveTaskList(nSel);
+		return;
+	}
+	
+	CString sCurFilePath = m_mgrToDoCtrls.GetFilePath(nSel, FALSE);
+	CString sCurProjName = tdc.GetProjectName(), sNewProjName(sCurProjName);
+
+	CString sNewFilePath(sCurFilePath);
+	FileMisc::ReplaceExtension(sNewFilePath, GetDefaultFileExt(FALSE));
+	
+	if (!sCurProjName.IsEmpty())
+	{
+		CTDLTasklistSaveAsDlg dialog(sNewFilePath, 
+									 sCurProjName,
+									 GetFileFilter(FALSE),
+									 GetDefaultFileExt(FALSE));
+
+		if (IDOK != dialog.DoModal())
+			return;
+
+		sNewFilePath = dialog.GetFilePath();
+		sNewProjName = dialog.GetProjectName();
+	}
+	else
+	{
+		CFileSaveDialog dialog(IDS_SAVETASKLISTAS_TITLE,
+							   GetDefaultFileExt(FALSE),
+							   sNewFilePath,
+							   EOFN_DEFAULTSAVE,
+							   GetFileFilter(FALSE),
+							   this);
+	
+		// always use .tdl for initializing the file dialog
+		dialog.m_ofn.nFilterIndex = 1;
+	
+		if (IDOK != dialog.DoModal(CPreferences()))
+			return;
+
+		sNewFilePath = dialog.GetPathName();
+	}
+
+	if (!FileMisc::IsSamePath(sCurFilePath, sNewFilePath))
+	{
+		tdc.SetProjectName(sNewProjName);
+
+ 		if (SaveTaskList(nSel, sNewFilePath) == TDCF_SUCCESS)
 		{
 			m_mgrToDoCtrls.ClearStorageDetails(nSel);
 			tdc.SetAlternatePreferencesKey(_T(""));
 		}
 		else
 		{
+			tdc.SetProjectName(sCurProjName);
 			UpdateStatusbar();
 		}
 	}
@@ -9580,8 +9605,9 @@ void CToDoListWnd::OnExport()
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	const CString sTasklistPath = m_mgrToDoCtrls.GetFilePath(nSelTDC, FALSE);
 
-	CTDLExportDlg dialog(m_mgrImportExport, 
-						nTDCCount == 1, 
+	CTDLExportDlg dialog(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC),
+						m_mgrImportExport, 
+						(nTDCCount == 1), 
 						GetToDoCtrl().GetTaskView(),
 						userPrefs.GetExportVisibleColsOnly(), 
 						sTasklistPath, 
@@ -9621,7 +9647,7 @@ void CToDoListWnd::OnExport()
 	DOPROGRESS(IDS_EXPORTPROGRESS);
 	
 	BOOL bHtmlComments = ExporterWantsHTMLComments(nExporter);
-
+	
 	// The only OR active tasklist -----------------------------------------------------
 	if ((nTDCCount == 1) || !dialog.GetExportAllTasklists())
 	{
@@ -9644,7 +9670,7 @@ void CToDoListWnd::OnExport()
 		GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 
 		// add report details
-		tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC), CDateHelper::GetDate(DHD_TODAY));
+		tasks.SetReportDetails(dialog.GetExportTitle(), dialog.GetExportDate());
 		
 		// save intermediate tasklist to file as required
 		LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -9685,7 +9711,7 @@ void CToDoListWnd::OnExport()
 				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 				
 				// add report details
-				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), CDateHelper::GetDate(DHD_TODAY));
+				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), dialog.GetExportDate());
 
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -9768,7 +9794,7 @@ void CToDoListWnd::OnExport()
 				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 				
 				// add report details
-				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), CDateHelper::GetDate(DHD_TODAY));
+				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), dialog.GetExportDate());
 
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -10535,14 +10561,13 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 		return TDCF_SUCCESS;
 
 	TDC_FILE nSaveAll = TDCF_SUCCESS;
+
 	BOOL bClosingWindows = Misc::HasFlag(dwFlags, TDLS_CLOSINGWINDOWS);
+	BOOL bClosingTasklists = Misc::HasFlag(dwFlags, TDLS_CLOSINGTASKLISTS);
 
 	// scoped to end status bar progress before calling UpdateStatusbar
 	{
 		DOPROGRESS(IDS_SAVINGPROGRESS);
-
-		BOOL bIncUnsaved = Misc::HasFlag(dwFlags, TDLS_INCLUDEUNSAVED);
-		BOOL bClosingTasklists = Misc::HasFlag(dwFlags, TDLS_CLOSINGTASKLISTS);
 
 		int nCtrl = GetTDCCount();
 
@@ -10550,14 +10575,25 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 		{
 			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
 
-			// bypass unsaved unless closing Windows or tasklists
-			if (!bClosingWindows && 
-				!bClosingTasklists &&
-				!bIncUnsaved &&
-				!m_mgrToDoCtrls.UsesStorage(nCtrl) && 
-				!tdc.HasFilePath())
+			// bypass unsaved or 'busy' tasklists unless 
+			// closing Windows or tasklists
+			if (!bClosingWindows && !bClosingTasklists)
 			{
-				continue;
+				BOOL bWantFlush = !Misc::HasFlag(dwFlags, TDLS_NOFLUSH);
+
+				if (!bWantFlush && tdc.IsTaskLabelEditing())
+				{
+					TRACE(_T("Tasklist not auto-saved because it is 'busy'\n"));
+					continue;
+				}
+
+				BOOL bWantUnsaved = Misc::HasFlag(dwFlags, TDLS_INCLUDEUNSAVED);
+
+				if (!bWantUnsaved && !m_mgrToDoCtrls.UsesStorage(nCtrl) && !tdc.HasFilePath())
+				{
+					TRACE(_T("Tasklist not auto-saved because it is 'unsaved'\n"));
+					continue;
+				}
 			}
 			
 			TDC_FILE nSave = ConfirmSaveTaskList(nCtrl, dwFlags);

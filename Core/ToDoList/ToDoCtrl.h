@@ -115,6 +115,7 @@ public:
 	BOOL HasFilePath() const { return !m_sLastSavePath.IsEmpty(); }
 	void ClearFilePath() { m_sLastSavePath.Empty(); }
 	CString GetProjectName() const { return m_sProjectName; }
+	BOOL HasProjectName() const { return !m_sProjectName.IsEmpty(); }
 	void SetProjectName(const CString& sProjectName);
 	CString GetFriendlyProjectName(int nUntitledIndex = -1) const;
 	void SetFilePath(const CString& sPath);
