@@ -305,7 +305,7 @@ protected:
 
 	virtual MSXML2::IXMLDOMNodePtr InsertNode(CXmlNodeWrapper* pNode, int nNode, const CXmlItem* pXItem) const;
 	
-	static void FixInputString(CString& sXml, const CString& sRootItem);
+	static void FixInputString(CString& sXml, const CString& sRootItem = _T(""));
 	static void Trace(const CXmlItem* pItem, const CString& sIndent, BOOL bNamesOnly);
 };
 
