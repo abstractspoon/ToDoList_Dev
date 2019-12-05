@@ -8,6 +8,7 @@
 #include "enstring.h"
 #include "misc.h"
 #include "passworddialog.h"
+//#include "filemisc.h"
 
 #include "..\Interfaces\iencryption.h"
 
@@ -203,16 +204,29 @@ BOOL CXmlFileEx::Decrypt(LPCWSTR szPassword)
 				{
 					CXmlDocumentWrapper doc;
 					
-					// reparse decrypted xml
-					if (doc.LoadXML(sFile))
+					if (!doc.LoadXML(sFile))
 					{
-						CXmlNodeWrapper node(doc.AsNode());
-						
-						return ParseItem(m_xiRoot, &node);
+						// try removing any bad chars
+						FixInputString(sFile);
+
+						// then try again
+						if (!doc.LoadXML(sFile))
+						{
+							m_nFileError = XFL_BADMSXML;
+							return FALSE;
+						}
 					}
+
+					// reparse decrypted xml
+					CXmlNodeWrapper node(doc.AsNode());
+						
+					return ParseItem(m_xiRoot, &node);
 				}
 				catch (...)
 				{
+// 					if (FileMisc::IsLoggingEnabled())
+// 						FileMisc::SaveFile(_T("decrypted.problem.txt"), sFile, SFEF_UTF16);
+
 					m_nFileError = XFL_BADMSXML;
 				}
 				
