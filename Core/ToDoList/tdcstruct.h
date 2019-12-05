@@ -485,15 +485,15 @@ struct TDCGETTASKS
 
 	BOOL WantAttribute(TDC_ATTRIBUTE nAttrib) const
 	{
-		// Must be explicitly specified due to its cost
-		if (nAttrib == TDCA_HTMLCOMMENTS)
-			return (!mapAttribs.Has(TDCA_NONE) && mapAttribs.Has(TDCA_HTMLCOMMENTS));
-
-		if ((mapAttribs.GetCount() == 0) || mapAttribs.Has(TDCA_ALL))
-			return TRUE;
-
 		if (mapAttribs.Has(TDCA_NONE))
 			return FALSE;
+
+		// Html comments cannot be implicitly specified because of its cost
+		if (nAttrib != TDCA_HTMLCOMMENTS)
+		{
+			if ((mapAttribs.GetCount() == 0) || mapAttribs.Has(TDCA_ALL))
+				return TRUE;
+		}
 
 		return mapAttribs.Has(nAttrib);
 	}

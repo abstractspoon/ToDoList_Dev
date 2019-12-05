@@ -4292,7 +4292,7 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 			tasks.SetTaskSubtaskCompletion(hTask, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
 
 		// custom comments
-		if (filter.WantAttribute(TDCA_COMMENTS) && !(bHtmlComments || bTextComments))
+		if (filter.WantAttribute(TDCA_COMMENTS) && !bHtmlComments)
 		{
 			// Even if it's a text format we still need to write out the comments format
 			// unless there were no comments or the comment type is the same as the default
