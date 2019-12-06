@@ -206,7 +206,7 @@ namespace GraphicsMisc
 					int nCornerRadius = 0, DWORD dwEdges = GMDR_ALL);
 	BOOL FillItemRect(CDC* pDC, CRect& rItem, COLORREF color, HWND hwnd); // will update rItem
 	BOOL FillItemRect(CDC* pDC, LPCRECT prcItem, COLORREF color, HWND hwnd);
-	BOOL CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz, BOOL bCentreVert);
+	BOOL CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
 	CPoint CentrePoint(LPCRECT prcRect);
 
 	BOOL DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags = GMIB_NONE, LPCRECT prClip = NULL); 

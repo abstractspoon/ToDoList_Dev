@@ -1196,15 +1196,17 @@ CPoint GraphicsMisc::CentrePoint(LPCRECT prcRect)
 BOOL GraphicsMisc::CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz, BOOL bCentreVert)
 {
 	if (!bCentreHorz && !bCentreVert)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	if (bCentreHorz)
 	{
 		int nOffset = (CentrePoint(prcOther).x - CentrePoint(pRect).x);
 		::OffsetRect(pRect, nOffset, 0);
 	}
-
-	
+		
 	if (bCentreVert)
 	{
 		int nOffset = (CentrePoint(prcOther).y - CentrePoint(pRect).y);
@@ -1537,6 +1539,9 @@ COLORREF GraphicsMisc::ParseWebColor(const CString& sHexColor)
 	COLORREF color = CLR_NONE;
 	WORD wRed = 0, wBlue = 0, wGreen = 0;
 
+#pragma warning(push)
+#pragma warning(disable:4996)
+
 	switch (sHexColor.GetLength())
 	{
 	case 7:
@@ -1549,6 +1554,8 @@ COLORREF GraphicsMisc::ParseWebColor(const CString& sHexColor)
 			color = RGB(wRed, wGreen, wBlue);
 		break;
 	}
+
+#pragma warning(pop)
 
 	return color;
 }
