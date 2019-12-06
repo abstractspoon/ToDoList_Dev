@@ -4756,6 +4756,8 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 
 LRESULT CToDoListWnd::OnExportThreadFinished(WPARAM wp, LPARAM lp)
 {
+	FileMisc::LogTextRaw(_T("CToDoListWnd::OnExportThreadFinished(Received parent-notification)"));
+
 	TDCEXPORTTASKLIST* pExport = (TDCEXPORTTASKLIST*)lp;
 	ASSERT(pExport && pExport->IsValid());
 
@@ -4789,6 +4791,8 @@ LRESULT CToDoListWnd::OnExportThreadFinished(WPARAM wp, LPARAM lp)
 
 	// cleanup
 	delete pExport;
+
+	FileMisc::LogTextRaw(_T("CToDoListWnd::OnExportThreadFinished(Deleted allocated memory)\n"));
 
 	return 0L;
 }

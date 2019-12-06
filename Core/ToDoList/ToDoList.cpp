@@ -625,8 +625,12 @@ void CToDoListApp::ParseCommandLine(CEnCommandLineInfo& cmdInfo)
 	CWinApp::ParseCommandLine(cmdInfo); // default
 
 	// turn on logging if requested
-    if (cmdInfo.HasOption(SWITCH_LOGGING))
+	if (cmdInfo.HasOption(SWITCH_LOGGING))
+	{
+		cmdInfo.DeleteOption(SWITCH_LOGGING);
+
 		CToDoListWnd::EnableLogging();
+	}
 
 	// validate ini path if present
     if (cmdInfo.HasOption(SWITCH_INIFILE))

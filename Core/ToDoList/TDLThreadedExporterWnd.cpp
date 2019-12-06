@@ -169,6 +169,8 @@ BOOL CTDLThreadedExporterWnd::ExportTasks(TDCEXPORTTASKLIST* pExport)
 
 UINT CTDLThreadedExporterWnd::ExportThreadProc(LPVOID pParam)
 {
+	FileMisc::LogTextRaw(_T("\nCTDLThreadedExporterWnd::ExportThreadProc(begin)"));
+
 	TEWEXPORTWRAP* pExportWrap = (TEWEXPORTWRAP*)pParam;
 
 	TDCEXPORTTASKLIST* pExport = pExportWrap->pExport;
@@ -205,7 +207,7 @@ UINT CTDLThreadedExporterWnd::ExportThreadProc(LPVOID pParam)
 																		TRUE, 
 																		&prefsWrap));
 		if (!bSuccess)
-			FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Due tasks) failed\n"));
+			FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Due tasks) failed"));
 	}
 	else
 	{
@@ -214,20 +216,23 @@ UINT CTDLThreadedExporterWnd::ExportThreadProc(LPVOID pParam)
 																		pExport->nExporter, 
 																		TRUE));
 		if (!bSuccess)
-			FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Export) failed\n"));
+			FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Export) failed"));
 	}
 
 	// notify ourselves
-	::PostMessage(pExportWrap->hwndTempNotify, WM_TDLTE_EXPORTTHREADFINISHED, bSuccess, (LPARAM)pExportWrap);
-	
-	if (bSuccess)
-		FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc() succeeded\n"));
+	FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Posting self-notification)"));
 
+	::PostMessage(pExportWrap->hwndTempNotify, WM_TDLTE_EXPORTTHREADFINISHED, bSuccess, (LPARAM)pExportWrap);
+
+	FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(end)"));
+	
 	return bSuccess;
 }
 
 LRESULT CTDLThreadedExporterWnd::OnExportThreadFinished(WPARAM wp, LPARAM lp)
 {
+	FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Received self-notification)"));
+
 	m_nNumThreads--;
 	ASSERT(m_nNumThreads >= 0);
 
@@ -235,12 +240,16 @@ LRESULT CTDLThreadedExporterWnd::OnExportThreadFinished(WPARAM wp, LPARAM lp)
 	
 	TDCEXPORTTASKLIST* pExport = pExportWrap->pExport;
 	ASSERT(pExport && pExport->IsValid());
-
-	// Notify parent
-	::PostMessage(pExport->hWndNotify, WM_TDLTE_EXPORTTHREADFINISHED, wp, (LPARAM)pExport);
 	
 	// cleanup
 	delete pExportWrap;
+
+	FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Deleted wrapper memory)"));
+
+	// Notify parent
+	FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Posting parent-notification)"));
+
+	::PostMessage(pExport->hWndNotify, WM_TDLTE_EXPORTTHREADFINISHED, wp, (LPARAM)pExport);
 	
 	return 0L;
 }
