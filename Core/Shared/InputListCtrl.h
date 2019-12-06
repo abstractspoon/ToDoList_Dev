@@ -100,6 +100,8 @@ protected:
 private:
 	BOOL m_bBaseClassEdit; // for our use ONLY
 
+	CHotTracker m_hotTrack;
+
 // Operations
 public:
 
@@ -132,9 +134,16 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
-	afx_msg long OnEditEnd(WPARAM wParam, LPARAM lParam);
-	afx_msg long OnEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg LRESULT OnEditEnd(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnEditCancel(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnHotChange(WPARAM wp, LPARAM lp);
+
+#if _MSC_VER >= 1400
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+#else
+	afx_msg void OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+#endif
 	DECLARE_MESSAGE_MAP()
 		
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
@@ -148,7 +157,7 @@ protected:
 	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell);
 	virtual void PrepareControl(CWnd& /*ctrl*/, int /*nRow*/, int /*nCol*/) {}
 	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rButton) const;
-	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText); 
+	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText, BOOL bSelected); 
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual void InitState();
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
@@ -164,6 +173,13 @@ protected:
 	int InsertRow(CString sRowText, int nItem, int nImage = -1);
 	BOOL CanDeleteCell(int nRow, int nCol) const;
 	void NotifyParentEditCell(const CString& sText, int nRow = -1, int nCol = -1) const;
+	BOOL HasNonTextColumns() const;
+	DWORD GetButtonState(int nRow, int nCol, BOOL bSelected) const;
+
+private:
+	void RecalcHotButtonRects();
+	BOOL IsButtonHot(int nRow, int nCol) const;
+	void InvalidateHotButton(int nBtn);
 };
 
 /////////////////////////////////////////////////////////////////////////////

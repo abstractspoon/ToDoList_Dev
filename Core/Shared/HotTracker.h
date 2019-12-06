@@ -32,6 +32,7 @@ public:
 	BOOL GetRect(int nRect, CRect& rect) const;
 	BOOL IsRectHot(int nRect) const;
 	int HitTestRect(CPoint ptScreen) const;
+	void DeleteAllRects() { m_aRects.RemoveAll(); m_nHotRect = -1; }
 
 protected:
 	CArray<CRect, CRect&> m_aRects;

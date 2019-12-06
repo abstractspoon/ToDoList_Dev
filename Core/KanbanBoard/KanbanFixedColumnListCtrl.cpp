@@ -85,7 +85,7 @@ BOOL CKanbanFixedColumnListCtrl::SetColumnDefinitions(const CKanbanColumnArray& 
 	{
 		const KANBANCOLUMN& colDef = aColumnDefs.GetData()[nDef];
 		
-		int nItem = InsertItem(nDef, colDef.sTitle);
+		int nItem = InsertRow(colDef.sTitle, nDef);
 		
 		SetItemText(nItem, KFCL_VALUECOL, Misc::FormatArray(colDef.aAttribValues));
 		SetItemColor(nItem, colDef.crBackground);

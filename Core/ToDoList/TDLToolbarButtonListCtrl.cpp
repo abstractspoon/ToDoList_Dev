@@ -82,6 +82,8 @@ UINT CTDLToolbarButtonListCtrl::GetLastButtonID() const
 
 void CTDLToolbarButtonListCtrl::InitState()
 {
+	CInputListCtrl::InitState();
+
 	OverrideSelectionTheming(TRUE, TRUE);
 	ShowGrid(TRUE, TRUE);
 
@@ -217,7 +219,14 @@ void CTDLToolbarButtonListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 		int nImage = m_ilImages.GetImageIndex(sText);
 				
 		if (nImage != -1)
-			m_ilImages.Draw(pDC, nImage, rText.TopLeft(), ILD_TRANSPARENT);
+		{
+			CRect rImage(rText);
+			rImage.bottom = (rImage.top + m_ilImages.GetImageSize());
+
+			GraphicsMisc::CentreRect(rImage, rText);
+
+			m_ilImages.Draw(pDC, nImage, rImage.TopLeft(), ILD_TRANSPARENT);
+		}
 			
 		return;
 	}

@@ -138,7 +138,7 @@ void CTDLColumnAttribVisibilityListCtrl::BuildListCtrl()
 	{
 		const TDCCOLATTRIBITEM& caItem = ITEMS[nItem];
 
-		int nIndex = InsertItem(nItem, CEnString(caItem.nIDName));
+		int nIndex = InsertRow(CEnString(caItem.nIDName), nItem);
 		SetItemData(nIndex, caItem.nCol);
 	}
 
@@ -150,7 +150,7 @@ void CTDLColumnAttribVisibilityListCtrl::BuildListCtrl()
 void CTDLColumnAttribVisibilityListCtrl::InitState()
 {
 	CInputListCtrl::InitState();
-	
+
 	BuildListCtrl();
 	ShowGrid(TRUE, TRUE);
 }

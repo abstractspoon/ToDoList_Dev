@@ -62,8 +62,10 @@ BEGIN_MESSAGE_MAP(CInputListCtrl, CEnListCtrl)
 	ON_WM_SIZE()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
+	ON_WM_MOUSEWHEEL()
 	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnEditEnd)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnEditCancel)
+	ON_REGISTERED_MESSAGE(WM_HTHOTCHANGE, OnHotChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -85,6 +87,9 @@ void CInputListCtrl::InitState()
 	m_bBaseClassEdit = FALSE;
 	m_nCurCol = -1;
 	m_nLastEditCol = m_nLastEditRow = -1;
+
+	if (GetSafeHwnd() && CThemed::AreControlsThemed())
+		m_hotTrack.Initialize(this, FALSE);
 }
 
 const CColumnData2* CInputListCtrl::GetColumnData(int nCol) const
@@ -255,7 +260,7 @@ void CInputListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	}
 }
 
-long CInputListCtrl::OnEditEnd(WPARAM wParam, LPARAM lParam)
+LRESULT CInputListCtrl::OnEditEnd(WPARAM wParam, LPARAM lParam)
 {
 	int nResult;
 	BOOL bReturnSelected = (BOOL)lParam;
@@ -302,7 +307,7 @@ BOOL CInputListCtrl::IsDuplicateCol(CString sCol, int nColToIgnore) const
 	return FALSE;
 }
 
-long CInputListCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
+LRESULT CInputListCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 {
 	BOOL bEscapeSelected = (BOOL)lParam;
 
@@ -711,7 +716,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			DrawCellText(pDC, nItem, nCol, rText, sText, crText, nFlags);
 		
 			if (bHasBtn)
-				DrawButton(pDC, nItem, nCol, rButton, !sText.IsEmpty());
+				DrawButton(pDC, nItem, nCol, rButton, !sText.IsEmpty(), bSel);
 
 			// next column
 			nCol++;
@@ -741,7 +746,23 @@ IL_COLUMNTYPE CInputListCtrl::GetCellType(int /*nRow*/, int nCol) const
 	return GetColumnType(nCol);
 }
 
-BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText)
+DWORD CInputListCtrl::GetButtonState(int nRow, int nCol, BOOL bSelected) const
+{
+	DWORD dwState = 0;
+	
+	if (!IsButtonEnabled(nRow, nCol))
+	{
+		dwState = DFCS_INACTIVE;
+	}
+	else if (bSelected || IsButtonHot(nRow, nCol))
+	{
+		dwState = DFCS_HOT;
+	}
+
+	return dwState;
+}
+
+BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText, BOOL bSelected)
 {
 	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
 
@@ -751,8 +772,8 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 	if (!GetButtonRect(nRow, nCol, rButton))
 		return FALSE;
 
-	BOOL bEnabled = IsButtonEnabled(nRow, nCol);
-	DWORD dwState = (bEnabled ? 0 : DFCS_INACTIVE);
+	DWORD dwState = GetButtonState(nRow, nCol, bSelected);
+	BOOL bEnabled = (dwState | DFCS_INACTIVE);
 
 	switch (nType)
 	{
@@ -1141,10 +1162,26 @@ int CInputListCtrl::InsertRow(CString sRowText, int nRow, int nImage)
 		nRow--; // add before prompt
 
 	if (nImage != -1)
-		return InsertItem(nRow, sRowText, nImage);
+		nRow = InsertItem(nRow, sRowText, nImage);
+	else
+		nRow = InsertItem(nRow, sRowText);
 
-	// else
-	return InsertItem(nRow, sRowText);
+	RecalcHotButtonRects();
+
+	return nRow;
+}
+
+BOOL CInputListCtrl::HasNonTextColumns() const
+{
+	int nCol = GetColumnCount();
+
+	while (nCol--)
+	{
+		if (GetColumnType(nCol) != ILCT_TEXT)
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 int CInputListCtrl::AddRow(const CString& sRowText, int nImage)
@@ -1207,6 +1244,8 @@ void CInputListCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	OnCancelEdit();
 
 	CEnListCtrl::OnHScroll(nSBCode, nPos, pScrollBar);
+
+	RecalcHotButtonRects();
 }
 
 void CInputListCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
@@ -1215,6 +1254,25 @@ void CInputListCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	OnCancelEdit();
 
 	CEnListCtrl::OnVScroll(nSBCode, nPos, pScrollBar);
+
+	RecalcHotButtonRects();
+}
+
+#if _MSC_VER >= 1400
+BOOL CInputListCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+#else
+void CInputListCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+#endif
+{
+	OnCancelEdit();
+
+	LRESULT lr = Default();
+
+	RecalcHotButtonRects();
+	
+#if _MSC_VER >= 1400
+	return lr;
+#endif
 }
 
 void CInputListCtrl::OnSize(UINT nType, int cx, int cy)
@@ -1223,6 +1281,8 @@ void CInputListCtrl::OnSize(UINT nType, int cx, int cy)
 	OnCancelEdit();
 
 	CEnListCtrl::OnSize(nType, cx, cy);
+
+	RecalcHotButtonRects();
 }
 
 CRect CInputListCtrl::ScrollCellIntoView(int nRow, int nCol)
@@ -1592,6 +1652,7 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 	m_nEditCol = m_nEditItem = -1;
 
 	// reset redrawing
+	RecalcHotButtonRects();
 	SetRedraw(TRUE);
 	Invalidate(FALSE);
 	UpdateWindow();
@@ -1789,4 +1850,66 @@ BOOL CInputListCtrl::PreTranslateMessage(MSG* pMsg)
 	
 	// all else
 	return CEnListCtrl::PreTranslateMessage(pMsg);
+}
+
+void CInputListCtrl::RecalcHotButtonRects()
+{
+	m_hotTrack.DeleteAllRects();
+
+	if (m_hotTrack.IsInitialized() && HasNonTextColumns())
+	{
+		int nNumRows = GetItemCount();
+		int nNumCols = GetColumnCount();
+
+		for (int nRow = 0; nRow < nNumRows; nRow++)
+		{
+			for (int nCol = 0; nCol < nNumCols; nCol++)
+			{
+				// Add rects even for cells without buttons
+				// so that the button index can always be 
+				// dereferenced into row and column
+				CRect rBtn(0, 0, 0, 0);
+				GetCellRect(nRow, nCol, rBtn);
+
+				m_hotTrack.AddRect(rBtn);
+			}
+		}
+	}
+}
+
+BOOL CInputListCtrl::IsButtonHot(int nRow, int nCol) const
+{
+	CRect rButton;
+
+	if (!GetButtonRect(nRow, nCol, rButton))
+		return FALSE;
+
+	int nButton = ((nRow * GetColumnCount()) + nCol);
+
+	return m_hotTrack.IsRectHot(nButton);
+}
+
+LRESULT CInputListCtrl::OnHotChange(WPARAM wParam, LPARAM lParam)
+{
+	InvalidateHotButton(wParam);
+	InvalidateHotButton(lParam);
+
+	return 0L;
+}
+
+void CInputListCtrl::InvalidateHotButton(int nBtn)
+{
+	if (nBtn != -1)
+	{
+		int nNumCols = GetColumnCount();
+		int nRow = (nBtn / nNumCols);
+		int nCol = (nBtn % nNumCols);
+
+		ASSERT(nRow < GetItemCount());
+
+		CRect rBtn;
+
+		if (GetButtonRect(nRow, nCol, rBtn) && !rBtn.IsRectEmpty())
+			InvalidateRect(rBtn, FALSE);
+	}
 }

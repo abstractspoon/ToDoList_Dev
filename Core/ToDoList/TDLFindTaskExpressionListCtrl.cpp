@@ -673,7 +673,7 @@ int CTDLFindTaskExpressionListCtrl::InsertRule(int nRow, const SEARCHPARAM& rule
 	m_aSearchParams.InsertAt(nRow, SEARCHPARAM(rule));
 
 	CString sItem = m_cbAttributes.GetAttributeName(rule);
-	int nNew = InsertItem(nRow, sItem);
+	int nNew = InsertRow(sItem, nRow);
 
 	SetItemText(nNew, OPERATOR_COL, GetOpName(rule.GetOperator()));
 
@@ -1181,7 +1181,7 @@ void CTDLFindTaskExpressionListCtrl::BuildListCtrl()
 
 		// attrib
 		CString sAttrib = m_cbAttributes.GetAttributeName(rule);
-		int nItem = InsertItem(nParam, sAttrib);
+		int nItem = InsertRow(sAttrib, nParam);
 
 		// operator
 		CString sOp = GetOpName(rule.GetOperator());
@@ -1434,13 +1434,13 @@ LRESULT CTDLFindTaskExpressionListCtrl::OnEEBtnClick(WPARAM /*wp*/, LPARAM lp)
 
 void CTDLFindTaskExpressionListCtrl::OnSize(UINT nType, int cx, int cy) 
 {
-	CInputListCtrl::OnSize(nType, cx, cy);
-	
-	// resize columns by proportion
+	// resize columns by proportion before calling base class
 	SetColumnWidth(ATTRIB_COL, (int)(cx * COL_PROPORTIONS[ATTRIB_COL]));
 	SetColumnWidth(OPERATOR_COL, (int)(cx * COL_PROPORTIONS[OPERATOR_COL]));
 	SetColumnWidth(VALUE_COL, (int)(cx * COL_PROPORTIONS[VALUE_COL]));
 	SetColumnWidth(ANDOR_COL, (int)(cx * COL_PROPORTIONS[ANDOR_COL]));
+
+	CInputListCtrl::OnSize(nType, cx, cy);
 }
 
 void CTDLFindTaskExpressionListCtrl::OnCancelEdit()

@@ -159,7 +159,7 @@ void CTDLImportExportAttributeMappingListCtrl::BuildListCtrl()
 			CString sFrom(m_bImporting ? col.sColumnName : sAttribName);
 			CString sTo(m_bImporting ? sAttribName : col.sColumnName);
 
-			int nItem = InsertItem(GetItemCount(), sFrom);
+			int nItem = AddRow(sFrom);
 
 			SetItemText(nItem, IMPORT_COLUMNID, sTo);
 			SetItemData(nItem, col.nTDCAttrib);

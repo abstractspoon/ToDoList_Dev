@@ -35,6 +35,7 @@ BOOL CHotTracker::Initialize(CWnd* pWnd, BOOL bIncNonClient)
 		return TRUE;
 	}
 
+	ASSERT(0);
 	return FALSE;
 }
 
@@ -86,12 +87,28 @@ int CHotTracker::HitTestRect(CPoint ptScreen) const
 
 	if (nRect)
 	{
+		// Clip tracking to our window 
+		CRect rClip;
+
+		if (m_bIncNonClient)
+		{
+			GetWindowRect(rClip);
+			ScreenToClient(rClip);
+		}
+		else
+		{
+			GetClientRect(rClip);
+		}
+
 		ScreenToClient(&ptScreen);
 
-		while (nRect--)
+		if (rClip.PtInRect(ptScreen))
 		{
-			if (m_aRects[nRect].PtInRect(ptScreen))
-				return nRect;
+			while (nRect--)
+			{
+				if (m_aRects[nRect].PtInRect(ptScreen))
+					return nRect;
+			}
 		}
 	}
 
