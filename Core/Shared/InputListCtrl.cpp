@@ -773,7 +773,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 		return FALSE;
 
 	DWORD dwState = GetButtonState(nRow, nCol, bSelected);
-	BOOL bEnabled = (dwState | DFCS_INACTIVE);
+	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
 
 	switch (nType)
 	{
