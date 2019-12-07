@@ -202,6 +202,13 @@ BOOL CServerDlg::OnInitDialog()
 	OnChangeProxy();
 	OnChangeServer();
 	OnAnonLogin();
+
+	// If the server and usernames are not empty set the focus to the password field
+	if (!m_sServer.IsEmpty() && !m_sUsername.IsEmpty() && !GetAnonymousLogin())
+	{
+		GetDlgItem(IDC_SD_PASSWORD)->SetFocus();
+		return FALSE;
+	}
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

@@ -297,6 +297,8 @@ void CRuntimeDlg::SetInitialPos(LPCRECT pRect, DWORD dwStyle)
 	{
 		MoveWindow(pRect);
 	}
+
+	UpdateWindow();
 }
 
 void CRuntimeDlg::SavePosition()
@@ -626,17 +628,33 @@ BOOL CRuntimeDlg::CreateControl(CWnd* pWnd, LPCTSTR szCaption, DWORD dwStyle, DW
 BOOL CRuntimeDlg::CreateControl(const RTCONTROL& rtc)
 {
 	if (rtc.m_pWnd)
-		return CreateControl(rtc.m_pWnd, rtc.m_sCaption, rtc.m_dwStyle, rtc.m_dwExStyle, 
-		rtc.m_rect.left, rtc.m_rect.top, rtc.m_rect.Width(), rtc.m_rect.Height(), 
-		rtc.m_nID, rtc.m_bDLU, rtc.m_nIconID);
+		return CreateControl(rtc.m_pWnd, 
+							 rtc.m_sCaption, 
+							 rtc.m_dwStyle, 
+							 rtc.m_dwExStyle, 
+							 rtc.m_rect.left, 
+							 rtc.m_rect.top, 
+							 rtc.m_rect.Width(), 
+							 rtc.m_rect.Height(), 
+							 rtc.m_nID, 
+							 rtc.m_bDLU, 
+							 rtc.m_nIconID);
 	
-	else if (!rtc.m_sClass.IsEmpty())
-		return (NULL != CreateControl(rtc.m_sClass, rtc.m_sCaption, rtc.m_dwStyle, rtc.m_dwExStyle, 
-		rtc.m_rect.left, rtc.m_rect.top, rtc.m_rect.Width(), rtc.m_rect.Height(), 
-		rtc.m_nID, rtc.m_bDLU, rtc.m_nIconID));
+	if (!rtc.m_sClass.IsEmpty())
+		return (CreateControl(rtc.m_sClass, 
+							  rtc.m_sCaption, 
+							  rtc.m_dwStyle, 
+							  rtc.m_dwExStyle, 
+							  rtc.m_rect.left, 
+							  rtc.m_rect.top, 
+							  rtc.m_rect.Width(), 
+							  rtc.m_rect.Height(), 
+							  rtc.m_nID, 
+							  rtc.m_bDLU, 
+							  rtc.m_nIconID) != NULL);
 	
-	else
-		return FALSE;
+	// else
+	return FALSE;
 }
 
 void CRuntimeDlg::CreateControls()

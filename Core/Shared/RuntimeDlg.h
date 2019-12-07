@@ -139,16 +139,13 @@ protected:
 
 	BOOL CreateControl(const RTCONTROL& ctrl);
 	void CreateControls();
-	BOOL AddRCControl(const CString& sRCCtrl);
 	CSize GetCtrlSize(UINT nCtrlID) const { return GetCtrlRect(nCtrlID).Size(); }
 	CPoint GetCtrlPos(UINT nCtrlID) const { return GetCtrlRect(nCtrlID).TopLeft(); }
 	CRect GetCtrlRect(UINT nCtrlID) const;
 	CRect OffsetCtrl(UINT nCtrlID, int x = 0, int y = 0);
 	CRect ResizeCtrl(UINT nCtrlID, int cx = 0, int cy = 0);
 	CRect MoveCtrl(UINT nCtrlID, int x, int y);
-	void EnableControls(UINT uCtrlIDFrom, UINT nCtrlIDTo, BOOL bEnable = TRUE);
 	void ShowCtrls(UINT nCtrlIDFrom, UINT nCtrlIDTo, BOOL bShow = TRUE);
-	void ShowControl(UINT nCtrlID, BOOL bShow = TRUE);
 	void ExcludeCtrls(CDC* pDC, UINT nCtrlIDFrom, UINT nCtrlIDTo, BOOL bIgnoreCorners = FALSE);
 
 	void SavePosition();
