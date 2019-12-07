@@ -223,15 +223,17 @@ void CEnCommandLineInfo::Reset()
 	m_bShowSplash = FALSE;
 	m_bRunEmbedded = FALSE;
 	m_bRunAutomated = FALSE;
-	m_bRegisterPerUser = FALSE;
 	m_nShellCommand = CCommandLineInfo::FileNew;
 
 	m_strFileName.Empty();
 	m_strPrinterName.Empty();
 	m_strDriverName.Empty();
 	m_strPortName.Empty();
-	m_strRestartIdentifier.Empty();
 
+#if _MSC_VER >= 1400
+	m_bRegisterPerUser = FALSE;
+	m_strRestartIdentifier.Empty();
+#endif
 }
 
 CString CEnCommandLineInfo::GetCommandLine(TCHAR cDelim) const
