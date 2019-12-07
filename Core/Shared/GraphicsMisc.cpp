@@ -1947,3 +1947,10 @@ int GraphicsMisc::ScaleByDPIFactor(int nValue)
 	return ::MulDiv(nValue, GetSystemDPI(), DEFAULT_DPI);
 }
 
+COLORREF GraphicsMisc::GetSolidColor(HBRUSH hBrush)
+{
+	LOGBRUSH lb = { 0 };
+	VERIFY(::GetObject(hBrush, sizeof(lb), &lb));
+
+	return lb.lbColor;
+}

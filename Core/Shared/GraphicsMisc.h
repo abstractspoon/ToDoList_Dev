@@ -211,6 +211,7 @@ namespace GraphicsMisc
 
 	BOOL DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags = GMIB_NONE, LPCRECT prClip = NULL); 
 	COLORREF GetExplorerItemTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags);
+	COLORREF GetSolidColor(HBRUSH hBrush);
 	
 	BOOL ForceIconicRepresentation(HWND hWnd, BOOL bForce = TRUE);
 	BOOL EnableAeroPeek(HWND hWnd, BOOL bEnable = TRUE);
