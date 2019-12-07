@@ -8,6 +8,7 @@
 #include "filemisc.h"
 #include "webmisc.h"
 #include "misc.h"
+#include "graphicsmisc.h"
 #include "enstring.h"
 #include "enbitmap.h"
 #include "clipboard.h"
@@ -29,6 +30,7 @@ CString CFileEdit::s_sBrowseBtnTip;
 CString CFileEdit::s_sGoBtnTip;
 CString CFileEdit::s_sBrowseFilesTitle;
 CString CFileEdit::s_sBrowseFoldersTitle;
+
 HICON CFileEdit::s_hBrowseImage = NULL;
 HICON CFileEdit::s_hGoImage = NULL;
 
@@ -216,18 +218,9 @@ void CFileEdit::OnPaint()
 			else
 			{
 				// fill bkgnd
-				HBRUSH hBkgnd = NULL;
-				
-// 				if (!IsWindowEnabled() || (GetStyle() & ES_READONLY))
-// 					hBkgnd = GetSysColorBrush(COLOR_3DFACE);
-// 				else
-					hBkgnd = (HBRUSH)GetParent()->SendMessage(WM_CTLCOLOREDIT, (WPARAM)(HDC)dc, (LPARAM)(HWND)GetSafeHwnd());
-				
-				if (!hBkgnd || hBkgnd == GetStockObject(NULL_BRUSH))
-					hBkgnd = ::GetSysColorBrush(COLOR_WINDOW);
-				
-				::FillRect(dc, rClient, hBkgnd);
-				
+				dc.FillSolidRect(rClient, GetBackgroundColor(&dc));
+
+				// file path
 				rClient.DeflateRect(4, 1, 1, 1);
 				
 				dc.SetBkMode(TRANSPARENT);
@@ -256,22 +249,12 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	CEnEdit::NcPaint(pDC, rWindow);
 
 	// Background color
-	HBRUSH hBkgnd = NULL;
-	
-// 	if (!IsWindowEnabled() || (GetStyle() & ES_READONLY))
-// 		hBkgnd = GetSysColorBrush(COLOR_3DFACE);
-// 	else
-		hBkgnd = (HBRUSH)GetParent()->SendMessage(WM_CTLCOLOREDIT, (WPARAM)pDC->GetSafeHdc(), (LPARAM)(HWND)GetSafeHwnd());
-	
-	if (!hBkgnd || hBkgnd == GetStockObject(NULL_BRUSH))
-		hBkgnd = ::GetSysColorBrush(COLOR_WINDOW);
-	
-	// file icon
 	CRect rIcon = GetIconRect();
 	rIcon.OffsetRect(-rWindow.TopLeft());
+
+	pDC->FillSolidRect(rIcon, GetBackgroundColor(pDC));
 	
-	pDC->FillRect(rIcon, CBrush::FromHandle(hBkgnd));
-	
+	// file icon
 	CString sFilePath;
 	GetWindowText(sFilePath);
 
@@ -288,6 +271,22 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	}
 	
 	DrawFileIcon(pDC, sFilePath, rIcon);
+}
+
+COLORREF CFileEdit::GetBackgroundColor(CDC* pDC) const
+{
+	UINT nMsgID = WM_CTLCOLOREDIT;
+
+	if (!IsWindowEnabled() || (GetStyle() & ES_READONLY))
+		nMsgID = WM_CTLCOLORSTATIC;
+
+	HBRUSH hBkgnd = (HBRUSH)::SendMessage(::GetParent(GetSafeHwnd()), nMsgID, (WPARAM)pDC->GetSafeHdc(), (LPARAM)(HWND)GetSafeHwnd());
+
+	if (!hBkgnd || hBkgnd == GetStockObject(NULL_BRUSH))
+		return ::GetSysColor(COLOR_WINDOW);
+
+	// else
+	return GraphicsMisc::GetSolidColor(hBkgnd);
 }
 
 void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon)
@@ -549,7 +548,14 @@ void CFileEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp
 	CEnEdit::OnNcCalcSize(bCalcValidRects, lpncsp);
 
 	if (bCalcValidRects)
-		lpncsp->rgrc[0].left += (m_ilSys.GetImageSize() + 4);
+	{
+		lpncsp->rgrc[0].left += m_ilSys.GetImageSize();
+
+		if (m_bParentIsCombo)
+			lpncsp->rgrc[0].left += 3;
+		else
+			lpncsp->rgrc[0].left += 1;
+	}
 }
 
 void CFileEdit::OnKillFocus(CWnd* pNewWnd) 
