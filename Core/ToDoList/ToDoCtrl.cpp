@@ -101,6 +101,7 @@ const int MINNONCOMMENTHEIGHT	= GraphicsMisc::ScaleByDPIFactor(250); // what's a
 const int MINNONCOMMENTWIDTH	= GraphicsMisc::ScaleByDPIFactor(350); // what's to the left of the comment section
 const int COMBODROPHEIGHT		= GraphicsMisc::ScaleByDPIFactor(200);
 const int MINSTACKEDCOMMENTSIZE = GraphicsMisc::ScaleByDPIFactor(60);
+const int INFOTIPOFFSET			= GraphicsMisc::ScaleByDPIFactor(16);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -5562,7 +5563,7 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 			m_infoTip.SetDelayTime(TTDT_INITIAL, 50);
 			m_infoTip.SetDelayTime(TTDT_AUTOPOP, 100000);
 			m_infoTip.SetMaxTipWidth(SHRT_MAX); // multiline support
-			m_infoTip.EnableTracking(TRUE, 16, 16);
+			m_infoTip.EnableTracking(TRUE, INFOTIPOFFSET, INFOTIPOFFSET);
 			m_infoTip.SetFont(CFont::FromHandle(m_hFontTree));
 		}
 		else if (m_infoTip.GetSafeHwnd())
