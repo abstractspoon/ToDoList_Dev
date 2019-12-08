@@ -348,10 +348,8 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 	
 	ClearCopiedItem();
 	
-	TDCGETTASKS filter;
 	CTaskFile tasks;
-
-	PrepareTaskfileForTasks(tasks, filter);
+	PrepareTaskfileForTasks(tasks, TDCGETTASKS());
 	
 	// get selected tasks ordered, removing duplicate subtasks
 	CHTIList selection;
@@ -363,10 +361,10 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 	while (pos)
 	{
 		HTREEITEM hti = selection.GetNext(pos);
-		DWORD dwTaskID = GetTrueTaskID(hti);
+		DWORD dwTaskID = GetTaskID(hti);
 
 		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-		const TODOITEM* pTDI = GetTask(dwTaskID);
+		const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
 
 		if (!pTDS || !pTDI)
 			return FALSE;
@@ -377,7 +375,7 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 		
 		if (!hTask)
 			return FALSE;
-		
+
 		m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, TDCGT_ALL);
 
 		// and subtasks
@@ -386,6 +384,7 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 	
 	// extra processing to identify the originally selected tasks
 	// in case the user wants to paste as references
+	// Note: references can always be pasted 'as references'
 	pos = TSH().GetFirstItemPos();
 	
 	while (pos)
@@ -393,13 +392,10 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 		DWORD dwSelID = TSH().GetNextItemData(pos);
 		ASSERT(dwSelID);
 
-		if (!m_data.IsTaskReference(dwSelID))
-		{
-			HTASKITEM hSelTask = tasks.FindTask(dwSelID);
-			ASSERT(hSelTask);
+		HTASKITEM hSelTask = tasks.FindTask(dwSelID);
+		ASSERT(hSelTask);
 
-			tasks.SetTaskMetaData(hSelTask, _T("selected"), _T("1"));
-		}
+		tasks.SetTaskMetaData(hSelTask, _T("selected"), _T("1"));
 	}
 	
 	// and their titles (including child dupes)
