@@ -3429,17 +3429,12 @@ void CToDoListWnd::OnUpdateEditTimeTrackTask(CCmdUI* pCmdUI)
 
 LRESULT CToDoListWnd::OnToDoCtrlNotifyTimeTrack(WPARAM wp, LPARAM lp)
 {
-	BOOL bTrack = lp;
+	DWORD dwTrackID = lp;
 	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wp);
 
-	if (bTrack)
+	if (dwTrackID)
 	{
-		const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
-		DWORD dwTaskID = tdc.GetTimeTrackTaskID(FALSE);
-
-		ASSERT((tdc.GetSelectedCount() == 1) && (dwTaskID == tdc.GetSelectedTaskID()));
-
-		StartTimeTrackingTask(nTDC, dwTaskID, FROM_TASKLIST);
+		StartTimeTrackingTask(nTDC, dwTrackID, FROM_TASKLIST);
 	}
 	else
 	{

@@ -8873,7 +8873,7 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 
 	// notify parent
 	if (bNotify)
-		GetParent()->SendMessage(WM_TDCN_TIMETRACK, (WPARAM)GetSafeHwnd(), TRUE);
+		GetParent()->SendMessage(WM_TDCN_TIMETRACK, (WPARAM)GetSafeHwnd(), dwTaskID);
 
 	return TRUE;
 }
@@ -8931,7 +8931,7 @@ void CToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 
 	// notify parent
 	if (bNotify)
-		GetParent()->SendMessage(WM_TDCN_TIMETRACK, (WPARAM)GetSafeHwnd(), FALSE);
+		GetParent()->SendMessage(WM_TDCN_TIMETRACK, (WPARAM)GetSafeHwnd(), 0);
 }
 
 BOOL CToDoCtrl::DoAddTimeToLogFile()
