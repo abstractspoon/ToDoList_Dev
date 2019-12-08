@@ -7214,6 +7214,11 @@ LRESULT CToDoCtrl::OnTreeDragEnter(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
 		return FALSE;
 
+	// Prevent dragging of subtasks of locked tasks 
+	// except if the parent is a reference
+	if (m_taskTree.SelectionHasLockedParent(TRUE))
+		return FALSE;
+
 	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 }
 
@@ -7226,42 +7231,42 @@ LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 {
 	UINT nRes = m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 
-	if (nRes != DD_DROPEFFECT_NONE)
-	{
-		// Prevent dragging of locked tasks except references
-		ASSERT(!m_taskTree.SelectionHasLocked(FALSE, TRUE));
+	if (nRes == DD_DROPEFFECT_NONE)
+		return nRes;
 
-		const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
-		HTREEITEM htiOver, htiAfter;
+	// Prevent dragging of locked tasks except references
+	ASSERT(!m_taskTree.SelectionHasLocked(FALSE, TRUE));
+
+	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
+	HTREEITEM htiOver, htiAfter;
 		
-		if (!m_treeDragDrop.GetDropTarget(htiOver, htiAfter))
-		{
-			nRes = DD_DROPEFFECT_NONE;
-		}
-		else if (!htiAfter)
-		{
-			// Extra processing if over a task
-			DWORD dwTargetID = GetTaskID(htiOver);
-			ASSERT(dwTargetID);
+	if (!m_treeDragDrop.GetDropTarget(htiOver, htiAfter))
+	{
+		return DD_DROPEFFECT_NONE;
+	}
 
-			// Allow dropping on references to locked tasks
-			if (m_data.IsTaskLocked(dwTargetID) && !m_data.IsTaskReference(dwTargetID))
-			{
-				nRes = DD_DROPEFFECT_NONE;
-			}
-			else if (pDDI->bLeftDrag)
-			{
-				// handle WM_DD_DRAGOVER for creating task shortcuts
-				// only interested in left button drags with ctrl+shift pressed
-				if (m_data.IsTaskReference(dwTargetID) && m_taskTree.SelectionHasNonReferences())
-				{
-					nRes = DD_DROPEFFECT_LINK;
-				}
-				else if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT)) 
-				{
-					nRes = DD_DROPEFFECT_LINK;
-				}
-			}
+	// Target must be unlocked or a reference
+	DWORD dwTargetID = GetTaskID(htiOver);
+	
+	if (dwTargetID && m_data.IsTaskLocked(dwTargetID) && !m_data.IsTaskReference(dwTargetID))
+	{
+		return DD_DROPEFFECT_NONE;
+	}
+
+	// handle WM_DD_DRAGOVER for creating task shortcuts
+	// only interested in left button drags with ctrl+shift pressed
+	if (pDDI->bLeftDrag)
+	{
+		// If target is a reference then dragged tasks can only be dropped as references
+		if (m_data.IsTaskReference(dwTargetID) && m_taskTree.SelectionHasNonReferences())
+		{
+			return DD_DROPEFFECT_LINK;
+		}
+
+		// Allow forced references like Windows Explorer
+		if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT))
+		{
+			return DD_DROPEFFECT_LINK;
 		}
 	}
 

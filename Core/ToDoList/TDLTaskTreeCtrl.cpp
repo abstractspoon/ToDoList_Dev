@@ -1897,7 +1897,7 @@ HTREEITEM CTDLTaskTreeCtrl::MoveItemRaw(HTREEITEM hti, HTREEITEM htiDestParent, 
 
 BOOL CTDLTaskTreeCtrl::CanMoveSelection(TDC_MOVETASK nDirection) const
 {
-	if (IsReadOnly() || SelectionHasLocked(FALSE))
+	if (IsReadOnly() || SelectionHasLocked(FALSE, TRUE))
 		return FALSE;
 	
 	// Get selected tasks without duplicate subtasks
@@ -1984,6 +1984,25 @@ BOOL CTDLTaskTreeCtrl::CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const
 {
 	if (!hti)
 		return FALSE;
+
+	// Can't move a real locked task
+	DWORD dwTaskID = GetTaskID(hti);
+	BOOL bTaskIsRef = m_data.IsTaskReference(dwTaskID);
+
+	if (!bTaskIsRef && m_calculator.IsTaskLocked(dwTaskID))
+		return FALSE;
+
+	// Can't move a subtask of a real locked task
+	HTREEITEM htiParent = m_tcTasks.GetParentItem(hti);
+	BOOL bParentIsRoot = (!htiParent || (htiParent == TVI_ROOT));
+
+	if (!bParentIsRoot)
+	{
+		DWORD dwParentID = GetTaskID(htiParent);
+
+		if (!m_data.IsTaskReference(dwParentID) && m_calculator.IsTaskLocked(dwParentID))
+			return FALSE;
+	}
 	
 	switch (nDirection)
 	{
@@ -1994,18 +2013,26 @@ BOOL CTDLTaskTreeCtrl::CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const
 		return (m_tcTasks.GetNextItem(hti, TVGN_PREVIOUS) != NULL);
 		
 	case TDCM_LEFT:
-		{
-			// must have a parent which will become its sibling
-			// and not the root
-			HTREEITEM htiParent = m_tcTasks.GetParentItem(hti);
-
-			return (htiParent && htiParent != TVI_ROOT);
-		}
-		break;
+		return !bParentIsRoot;
 		
 	case TDCM_RIGHT:
-		// must have a prior sibling (which will become the parent)
-		return CanMoveItem(hti, TDCM_UP);
+		{
+			// must have a prior sibling (which will become the parent)
+			// which is not locked unless both the task and sibling are references
+			HTREEITEM htiSibling = m_tcTasks.GetNextItem(hti, TVGN_PREVIOUS);
+
+			if (!htiSibling)
+				return FALSE;
+
+			DWORD dwSiblingID = GetTaskID(htiSibling);
+
+			if (m_data.IsTaskReference(dwSiblingID))
+				return bTaskIsRef;
+
+			// else sibling is 'real' so must be unlocked
+			return !m_data.IsTaskLocked(dwSiblingID);
+		}
+		break;
 	}
 	
 	return FALSE;

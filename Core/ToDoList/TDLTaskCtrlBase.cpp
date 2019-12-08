@@ -5580,11 +5580,34 @@ BOOL CTDLTaskCtrlBase::SelectionHasLocked(BOOL bTreatRefsAsUnlocked) const
 	{
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		if (!bTreatRefsAsUnlocked || !m_data.IsTaskReference(dwTaskID))
-		{
-			if (m_calculator.IsTaskLocked(dwTaskID))
-				return TRUE;
-		}
+		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwTaskID))
+			continue;
+
+		if (m_calculator.IsTaskLocked(dwTaskID))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTDLTaskCtrlBase::SelectionHasLockedParent(BOOL bTreatRefsAsUnlocked) const
+{
+	POSITION pos = GetFirstSelectedTaskPos();
+
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+		DWORD dwParentID = m_data.GetTaskParentID(dwTaskID);
+
+		// Root is always unlocked
+		if (!dwParentID)
+			continue;
+
+		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwParentID))
+			continue;
+
+		if (m_calculator.IsTaskLocked(dwParentID))
+			return TRUE;
 	}
 
 	return FALSE;
