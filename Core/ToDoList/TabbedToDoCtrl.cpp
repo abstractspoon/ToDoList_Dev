@@ -4128,7 +4128,6 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = 0;
 }
 
-
 LRESULT CTabbedToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 {
 // 	if (InListView())
