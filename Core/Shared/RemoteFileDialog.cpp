@@ -24,7 +24,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define IDC_GRIPPER		                1002
 #define IDC_CURRENTFOLDER               1003
 #define IDC_FILELIST                    1004
 #define IDC_FILENAME                    1005
@@ -90,7 +89,6 @@ CRemoteFileDialog::CRemoteFileDialog(CFtpConnection* pConnection, LPCTSTR szServ
 	//}}AFX_DATA_INIT
 	SetBordersDLU(3);
 
-	AddRCControl(_T("SCROLLBAR"), _T(""), _T(""), SBS_RIGHTALIGN, 0,270,160,8,16, IDC_GRIPPER);
     AddRCControl(_T("LTEXT"), _T(""), _T("Current Folder:"), 0, 0,0,7,70,8,IDC_CURFOLDERLABEL);
     AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_AUTOHSCROLL | ES_READONLY, 0,74,4,198,13,IDC_CURRENTFOLDER);
     AddRCControl(_T("LTEXT"), _T(""), _T("Files of &type:"), 0, 0,0,164,70,8,IDC_FILETYPESLABEL);
@@ -209,6 +207,7 @@ BOOL CRemoteFileDialog::OnInitDialog()
 	SetForegroundWindow();
 
 	m_eFilename.SetFocus();
+	m_sbGrip.Initialize(this);
 
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -272,9 +271,6 @@ void CRemoteFileDialog::PostCreate()
 	// restore last view
 	int nView = m_pPrefs->GetProfileInt(m_sPrefKey, _T("LastView"), LVS_LIST);
 	OnChangeView(VIEWIDS[nView]);
-
-	// init resize icon
-	GetDlgItem(IDC_GRIPPER)->ModifyStyle(0, SBS_SIZEGRIP | SBS_SIZEBOXTOPLEFTALIGN);
 
 	// and fill the file list
 	SetCurrentFolder(m_sCurFolder);
@@ -775,10 +771,6 @@ void CRemoteFileDialog::OnSize(UINT nType, int cx, int cy)
 
 	dwm.OffsetCtrl(this, IDOK, nXOffset, nYOffset);
 	dwm.OffsetCtrl(this, IDCANCEL, nXOffset, nYOffset);
-
-	CRect rGrip = OffsetCtrl(IDC_GRIPPER);
-	rGrip.OffsetRect(cx - rGrip.right, cy - rGrip.bottom);
-	dwm.MoveWindow(GetDlgItem(IDC_GRIPPER), rGrip);
 }
 
 void CRemoteFileDialog::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI) 

@@ -9,6 +9,7 @@
 
 #include "fileedit.h"
 #include "runtimedlg.h"
+#include "sizegrip.h"
 
 #include <afxinet.h>
 #include <afxtempl.h>
@@ -78,6 +79,7 @@ protected:
 	CFRArray m_aFiles;
 	DWORD m_dwOptions;
 	BOOL m_bFilling;
+	CSizeGrip m_sbGrip;
 	
 	IPreferences* m_pPrefs;
 	CString m_sPrefKey;
