@@ -39,8 +39,8 @@ const UINT WM_TDCM_CANIMPORTFROMDROP		= ::RegisterWindowMessage(_T("WM_TDCM_CANI
 const UINT WM_FBN_FILTERCHNG				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHNG")); 
 
 // CToDoCtrlReminders
-const UINT WM_TDCN_DISMISSREMINDER			= ::RegisterWindowMessage(_T("WM_TDCN_DISMISSREMINDER"));		// wParam = TaskID, lParam = TDC* 
-const UINT WM_TDCN_SNOOZEREMINDER			= ::RegisterWindowMessage(_T("WM_TDCN_SNOOZEREMINDER"));		// wParam = TaskID, lParam = TDC* 
+const UINT WM_TDCN_DISMISSREMINDER			= ::RegisterWindowMessage(_T("WM_TDCN_DISMISSREMINDER"));		// wParam = hwnd, lParam = TaskID
+const UINT WM_TDCN_SNOOZEREMINDER			= ::RegisterWindowMessage(_T("WM_TDCN_SNOOZEREMINDER"));		// wParam = hwnd, lParam = TaskID
 
 // CTDLFindTasksDlg
 const UINT WM_FTD_FIND						= ::RegisterWindowMessage(_T("WM_FTD_FIND"));

@@ -230,7 +230,7 @@ void CToDoCtrlReminders::NotifyReminder(const TDCREMINDER& rem, UINT nMsg)
 {
 	ASSERT(m_pWndNotify);
 
-	m_pWndNotify->SendMessage(nMsg, (WPARAM)rem.dwTaskID, (LPARAM)rem.pTDC);
+	m_pWndNotify->SendMessage(nMsg, (WPARAM)rem.pTDC->GetSafeHwnd(), (LPARAM)rem.dwTaskID);
 }
 
 BOOL CToDoCtrlReminders::GetReminder(int nRem, TDCREMINDER& rem) const

@@ -481,8 +481,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDL_REFRESHPREFS, OnToDoListRefreshPrefs)
 	ON_REGISTERED_MESSAGE(WM_TDL_RESTORE, OnToDoListRestore)
 	ON_REGISTERED_MESSAGE(WM_TDL_SHOWWINDOW, OnToDoListShowWindow)
-	ON_REGISTERED_MESSAGE(WM_TDCN_DISMISSREMINDER, OnModifyReminder)
-	ON_REGISTERED_MESSAGE(WM_TDCN_SNOOZEREMINDER, OnModifyReminder)
+	ON_REGISTERED_MESSAGE(WM_TDCN_DISMISSREMINDER, OnNotifyReminderModified)
+	ON_REGISTERED_MESSAGE(WM_TDCN_SNOOZEREMINDER, OnNotifyReminderModified)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropFile)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_STARTTRACKING, OnTimeTrackerStartTracking)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_STOPTRACKING, OnTimeTrackerStopTracking)
@@ -12755,13 +12755,16 @@ void CToDoListWnd::OnUpdateViewResizeColsToFit(CCmdUI* pCmdUI)
 	pCmdUI->Enable(GetToDoCtrl().CanResizeAttributeColumnsToFit());
 }
 
-LRESULT CToDoListWnd::OnModifyReminder(WPARAM /*wp*/, LPARAM lp)
+LRESULT CToDoListWnd::OnNotifyReminderModified(WPARAM wp, LPARAM lp)
 {
-	CFilteredToDoCtrl* pTDC = (CFilteredToDoCtrl*)lp;
-	ASSERT(pTDC);
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wp);
+	ASSERT(nTDC != -1);
 
-	if (pTDC && (*pTDC == GetToDoCtrl()) && IsWindowVisible() && !IsIconic())
-		pTDC->RedrawReminders();
+	ASSERT(lp);
+	UNREFERENCED_PARAMETER(lp);
+
+	if ((nTDC != -1) && (nTDC == GetSelToDoCtrl()) && IsWindowVisible() && !IsIconic())
+		GetToDoCtrl().RedrawReminders();
 
 	return 0L;
 }
