@@ -51,11 +51,22 @@ namespace WordCloudUIExtension
 			m_LabelTip.OwnerDraw = true;
 			m_LabelTip.Draw += new DrawToolTipEventHandler(OnDrawLabelTip);
 			m_LabelTip.Popup += new PopupEventHandler(OnShowLabelTip);
+
+			// Hack to get tooltip handle
+			var h = m_LabelTip.GetType().GetProperty("Handle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			var handle = (IntPtr)h.GetValue(m_LabelTip, null);
+
+			const int WS_EX_TRANSPARENT = 0x00000020;
+
+			Win32.AddStyle(handle, WS_EX_TRANSPARENT, true);
 		}
 
 		protected void OnShowLabelTip(object sender, PopupEventArgs e)
 		{
-			e.ToolTipSize = TextRenderer.MeasureText(m_LabelTip.GetToolTip(this), this.Font);
+			Size textSize = TextRenderer.MeasureText(m_LabelTip.GetToolTip(this), this.Font);
+			int borders = (TopItem.Bounds.Height - textSize.Height);
+			
+			e.ToolTipSize = new Size(textSize.Width + borders, TopItem.Bounds.Height);
 		}
 
 		protected void OnDrawLabelTip(object sender, DrawToolTipEventArgs e)
@@ -63,8 +74,15 @@ namespace WordCloudUIExtension
 			using (e.Graphics)
 			{
 				e.Graphics.FillRectangle(SystemBrushes.Window, e.Bounds);
-				e.Graphics.DrawString(e.ToolTipText, this.Font, SystemBrushes.InfoText, e.Bounds);
 				e.DrawBorder();
+
+				StringFormat format = new StringFormat();
+
+				format.Alignment = StringAlignment.Center;
+				format.LineAlignment = StringAlignment.Center;
+				format.FormatFlags = StringFormatFlags.NoWrap;
+
+				e.Graphics.DrawString(e.ToolTipText, this.Font, SystemBrushes.InfoText, e.Bounds, format);
 			}
 		}
 
