@@ -11866,10 +11866,10 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 
 LRESULT CToDoCtrl::OnTDCGetTaskReminder(WPARAM wp, LPARAM lp)
 {
-	UNREFERENCED_PARAMETER(lp);
-	ASSERT(wp && ((HWND)lp == m_taskTree.GetSafeHwnd()));
+	UNREFERENCED_PARAMETER(wp);
+	ASSERT(lp && ((HWND)wp == m_taskTree.GetSafeHwnd()));
 
-	return (LRESULT)m_reminders.GetTaskReminder(wp);
+	return (LRESULT)m_reminders.GetTaskReminder(lp);
 }
 
 void CToDoCtrl::SetUITheme(const CUIThemeFile& theme)

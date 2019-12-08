@@ -75,7 +75,7 @@ public:
 	{
 		ASSERT(::IsWindow(m_wndCaller));
 
-		return (time_t)::SendMessage(::GetParent(m_wndCaller), WM_TDCM_GETTASKREMINDER, dwTaskID, (LPARAM)m_wndCaller.GetSafeHwnd());
+		return (time_t)::SendMessage(::GetParent(m_wndCaller), WM_TDCM_GETTASKREMINDER, (WPARAM)m_wndCaller.GetSafeHwnd(), dwTaskID);
 	}
 
 protected:
