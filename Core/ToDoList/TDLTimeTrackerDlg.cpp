@@ -104,13 +104,15 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const C
 
 	BOOL bChange = FALSE;
 	BOOL bDone = FALSE;
+	BOOL bReference = FALSE;
 	CString sTaskPath;
 
 	if (hTask)
 	{
 		bDone = tasks.IsTaskDone(hTask);
+		bReference = tasks.IsTaskReference(hTask);
 
-		if (!bDone)
+		if (!bDone && !bReference)
 		{
 			DWORD dwTaskID = tasks.GetTaskID(hTask);
 			ASSERT(dwTaskID);
@@ -152,7 +154,7 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const C
 	}
 	
 	// children
-	if (!bDone)
+	if (!bDone && !bReference)
 	{
 		HTASKITEM hSubtask = tasks.GetFirstTask(hTask);
 	
