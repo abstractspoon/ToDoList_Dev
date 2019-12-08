@@ -3729,7 +3729,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 	case TDCC_SUBTASKDONE:	return m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
 	case TDCC_COMMENTSSIZE:	return m_formatter.GetTaskCommentSize(pTDI);
 
-	case TDCC_ID:			return m_formatter.GetID(pTDS->GetTaskID(), dwTaskID);
+	case TDCC_ID:			return m_formatter.GetID(dwTaskID, pTDS->GetTaskID());
 	case TDCC_PARENTID:		return m_formatter.GetID(pTDS->GetParentTaskID());
 
 		// items having no text
