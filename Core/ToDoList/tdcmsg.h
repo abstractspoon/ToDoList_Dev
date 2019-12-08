@@ -54,10 +54,10 @@ const UINT WM_FTD_DELETESEARCH				= ::RegisterWindowMessage(_T("WM_FTD_DELETESEA
 const UINT WM_FTD_GETLISTITEMS				= ::RegisterWindowMessage(_T("WM_FTD_GETLISTITEMS"));			// wParam = <TDC_ATTRIBUTE>, lParam = CStringArray*
 
 // CTDCTimeTrackerDlg
-const UINT WM_TDLTTN_STARTTRACKING			= ::RegisterWindowMessage(_T("WM_TDLTTN_STARTTRACKING"));		// wParam = taskID, lParam = CFilteredToDoCtrl*
-const UINT WM_TDLTTN_STOPTRACKING			= ::RegisterWindowMessage(_T("WM_TDLTTN_STOPTRACKING"));		// wParam = taskID, lParam = CFilteredToDoCtrl*
-const UINT WM_TDLTTN_RESETELAPSEDTIME		= ::RegisterWindowMessage(_T("WM_TDLTTN_RESETELAPSEDTIME"));	// wParam = taskID, lParam = CFilteredToDoCtrl*
-const UINT WM_TDLTTN_LOADDELAYEDTASKLIST	= ::RegisterWindowMessage(_T("WM_TDLTTN_LOADDELAYEDTASKLIST")); // lParam = CFilteredToDoCtrl*
+const UINT WM_TDLTTN_STARTTRACKING			= ::RegisterWindowMessage(_T("WM_TDLTTN_STARTTRACKING"));		// wParam = hwnd, lParam = TaskID
+const UINT WM_TDLTTN_STOPTRACKING			= ::RegisterWindowMessage(_T("WM_TDLTTN_STOPTRACKING"));		// wParam = hwnd
+const UINT WM_TDLTTN_RESETELAPSEDTIME		= ::RegisterWindowMessage(_T("WM_TDLTTN_RESETELAPSEDTIME"));	// wParam = hwnd
+const UINT WM_TDLTTN_LOADDELAYEDTASKLIST	= ::RegisterWindowMessage(_T("WM_TDLTTN_LOADDELAYEDTASKLIST")); // wParam = hwnd
 
 // CTDLThreadedExporterWnd
 const UINT WM_TDLTE_EXPORTTHREADFINISHED	= ::RegisterWindowMessage(_T("WM_TDLTE_EXPORTTHREADFINISHED")); // wParam = success, lParam = TDCDUETASKNOTIFY*

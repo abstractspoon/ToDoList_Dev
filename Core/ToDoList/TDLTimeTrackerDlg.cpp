@@ -1051,12 +1051,12 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 	if (pTTL->dwTrackedTaskID == dwSelTaskID)
 	{
 		// notify parent to STOP tracking
-		m_pWndNotify->SendMessage(WM_TDLTTN_STOPTRACKING, 0, (LPARAM)pTTL->pTDC);
+		SendNotifyMessage(WM_TDLTTN_STOPTRACKING, pTTL->pTDC, 0);
 	}
 	else
 	{
 		// notify parent to START tracking
-		m_pWndNotify->SendMessage(WM_TDLTTN_STARTTRACKING, dwSelTaskID, (LPARAM)pTTL->pTDC);
+		SendNotifyMessage(WM_TDLTTN_STARTTRACKING, pTTL->pTDC, dwSelTaskID);
 	}
 
 	UpdateTracking(pTTL->pTDC);
@@ -1065,6 +1065,13 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 	// redraw text colour
 	GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE);
 	GetDlgItem(IDC_ELAPSEDTIME)->Invalidate(FALSE);
+}
+
+LRESULT CTDLTimeTrackerDlg::SendNotifyMessage(UINT message, const CFilteredToDoCtrl* pTDC, DWORD dwTaskID) const
+{
+	ASSERT(pTDC && pTDC->GetSafeHwnd());
+
+	return m_pWndNotify->SendMessage(message, (WPARAM)pTDC->GetSafeHwnd(), dwTaskID);
 }
 
 HBRUSH CTDLTimeTrackerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
@@ -1123,7 +1130,7 @@ void CTDLTimeTrackerDlg::OnSelchangeTasklist()
 	{
 		int nSel = m_cbTasklists.GetCurSel();
 
-		if (m_pWndNotify->SendMessage(WM_TDLTTN_LOADDELAYEDTASKLIST, 0, (LPARAM)pTDC) == FALSE)
+		if (SendNotifyMessage(WM_TDLTTN_LOADDELAYEDTASKLIST, pTDC, 0) == FALSE)
 			return;
 
 		UpdateTasklistName(pTDC);
@@ -1624,7 +1631,7 @@ LRESULT CTDLTimeTrackerDlg::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 			{
 				const CFilteredToDoCtrl* pTDC = GetSelectedTasklist();
 
-				m_pWndNotify->SendMessage(WM_TDLTTN_RESETELAPSEDTIME, 0, (LPARAM)pTDC);
+				SendNotifyMessage(WM_TDLTTN_RESETELAPSEDTIME, pTDC, 0);
 				UpdateTaskTime(pTDC);
 			}
 			break;

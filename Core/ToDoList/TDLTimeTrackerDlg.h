@@ -218,5 +218,6 @@ protected:
 	void CalcMinMaxSizes();
 	BOOL HasOption(DWORD dwOption) const;
 	void RefreshTitleText();
+	LRESULT SendNotifyMessage(UINT message, const CFilteredToDoCtrl* pTDC, DWORD dwTaskID) const;
 
 };

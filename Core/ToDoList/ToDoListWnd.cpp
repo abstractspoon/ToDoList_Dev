@@ -3447,6 +3447,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyTimeTrack(WPARAM wp, LPARAM lp)
 void CToDoListWnd::StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC nFrom)
 {
 	ASSERT(nTDC != -1);
+	ASSERT(dwTaskID);
 
 	// Handle time tracking on every OTHER tasklist first
 	BOOL bExclusive = Prefs().GetExclusiveTimeTracking();
@@ -3527,40 +3528,40 @@ void CToDoListWnd::StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom)
 
 LRESULT CToDoListWnd::OnTimeTrackerStartTracking(WPARAM wParam, LPARAM lParam)
 {
-	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((CFilteredToDoCtrl*)lParam);
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
 	ASSERT(nTDC != -1);
 	
-	DWORD dwTaskID = wParam;
-	ASSERT(wParam);
+	DWORD dwTaskID = lParam;
+	ASSERT(dwTaskID);
 
 	StartTimeTrackingTask(nTDC, dwTaskID, FROM_TRACKER);
 
 	return 0L;
 }
 
-LRESULT CToDoListWnd::OnTimeTrackerStopTracking(WPARAM /*wParam*/, LPARAM lParam)
+LRESULT CToDoListWnd::OnTimeTrackerStopTracking(WPARAM wParam, LPARAM /*lParam*/)
 {
-	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((const CFilteredToDoCtrl*)lParam);
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
 	ASSERT(nTDC != -1);
-	
+
 	StopTimeTrackingTask(nTDC, FROM_TRACKER);
 	
 	return 0L;
 }
 
-LRESULT CToDoListWnd::OnTimeTrackerResetElapsedTime(WPARAM /*wParam*/, LPARAM lParam)
+LRESULT CToDoListWnd::OnTimeTrackerResetElapsedTime(WPARAM wParam, LPARAM /*lParam*/)
 {
-	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((const CFilteredToDoCtrl*)lParam);
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
 	ASSERT(nTDC != -1);
-	
+
 	GetToDoCtrl(nTDC).ResetTimeTrackingElapsedMinutes();
 	
 	return 0L;
 }
 
-LRESULT CToDoListWnd::OnTimeTrackerLoadDelayedTasklist(WPARAM /*wParam*/, LPARAM lParam)
+LRESULT CToDoListWnd::OnTimeTrackerLoadDelayedTasklist(WPARAM wParam, LPARAM /*lParam*/)
 {
-	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((const CFilteredToDoCtrl*)lParam);
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
 	ASSERT(nTDC != -1);
 
 	return VerifyTaskListOpen(nTDC, FALSE);
