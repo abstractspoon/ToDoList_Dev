@@ -154,7 +154,8 @@ protected:
 			
 	BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 	BOOL OnDragDropItem(const TLCITEMMOVE& move);
-	UINT OnDragOverItem(UINT nCursor);
+	BOOL OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag);
+	UINT OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor);
 	BOOL OnItemCheckChange(HTREEITEM hti);
 
 	BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);

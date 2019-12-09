@@ -98,6 +98,8 @@ struct GANTTITEM
 	
 	BOOL IsDone(BOOL bIncGoodAs) const;
 	BOOL IsMilestone(const CString& sMilestoneTag) const;
+	BOOL IsLocked(BOOL bTreatRefsAsUnlocked) const;
+	BOOL IsReference() const;
 
 	BOOL HasStartDate() const;
 	BOOL HasDueDate() const;
@@ -138,7 +140,8 @@ public:
 	BOOL HasItem(DWORD dwKey) const;
 	GANTTITEM* GetItem(DWORD dwKey) const;
 	BOOL RestoreItem(const GANTTITEM& giPrev);
-	BOOL ItemIsLocked(DWORD dwTaskID) const;
+	BOOL ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
+	BOOL ItemIsReference(DWORD dwTaskID) const;
 
 	BOOL ItemHasDependecies(DWORD dwTaskID) const;
 	BOOL IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) const;

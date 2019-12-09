@@ -238,8 +238,9 @@ protected:
 	virtual BOOL OnListLButtonUp(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
 	virtual BOOL OnListMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
 
-	virtual UINT OnDragOverItem(UINT nCursor) { return nCursor; }
+	virtual UINT OnDragOverItem(const TLCITEMMOVE& /*move*/, UINT nCursor) { return nCursor; }
 	virtual BOOL OnDragDropItem(const TLCITEMMOVE& /*move*/) { return FALSE; }
+	virtual BOOL OnDragBeginItem(const TLCITEMMOVE& /*move*/, BOOL bLeftDrag) { return bLeftDrag; }
 	virtual void OnResize(int cx, int cy);
 	virtual BOOL OnItemCheckChange(HTREEITEM /*hti*/) { return FALSE; }
 

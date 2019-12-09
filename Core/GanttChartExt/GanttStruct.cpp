@@ -302,18 +302,14 @@ BOOL GANTTITEM::IsDone(BOOL bIncGoodAs) const
 	return (bIncGoodAs && bGoodAsDone);
 }
 
-BOOL CGanttItemMap::ItemIsLocked(DWORD dwTaskID) const
+BOOL GANTTITEM::IsLocked(BOOL bTreatRefsAsUnlocked) const
 {
-	const GANTTITEM* pGI = GetItem(dwTaskID);
-	
-	return (pGI && pGI->bLocked);
+	return (bLocked && (!bTreatRefsAsUnlocked || !IsReference()));
 }
 
-BOOL CGanttItemMap::ItemHasDependecies(DWORD dwTaskID) const
+BOOL GANTTITEM::IsReference() const
 {
-	const GANTTITEM* pGI = GetItem(dwTaskID);
-	
-	return (pGI && pGI->aDependIDs.GetSize());
+	return (dwRefID || dwOrgRefID);
 }
 
 BOOL GANTTITEM::HasStartDate() const
@@ -537,6 +533,27 @@ BOOL GANTTITEM::IsMilestone(const CString& sMilestoneTag) const
 CGanttItemMap::~CGanttItemMap()
 {
 	RemoveAll();
+}
+
+BOOL CGanttItemMap::ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const
+{
+	const GANTTITEM* pGI = GetItem(dwTaskID);
+
+	return (pGI && pGI->IsLocked(bTreatRefsAsUnlocked));
+}
+
+BOOL CGanttItemMap::ItemIsReference(DWORD dwTaskID) const
+{
+	const GANTTITEM* pGI = GetItem(dwTaskID);
+
+	return (pGI && pGI->IsReference());
+}
+
+BOOL CGanttItemMap::ItemHasDependecies(DWORD dwTaskID) const
+{
+	const GANTTITEM* pGI = GetItem(dwTaskID);
+
+	return (pGI && pGI->aDependIDs.GetSize());
 }
 
 void CGanttItemMap::RemoveAll()

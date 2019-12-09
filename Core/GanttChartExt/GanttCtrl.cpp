@@ -1773,21 +1773,48 @@ BOOL CGanttCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	return TRUE;
 }
 
-UINT CGanttCtrl::OnDragOverItem(UINT nCursor)
+UINT CGanttCtrl::OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor)
 {
 	// We currently DON'T support 'linking'
 	if (nCursor == DD_DROPEFFECT_LINK)
-		nCursor = DD_DROPEFFECT_NONE;
+		return DD_DROPEFFECT_NONE;
+
+	if (nCursor != DD_DROPEFFECT_NONE)
+	{
+		// Prevent dropping on locked tasks unless references
+		DWORD dwTargetID = GetTaskID(move.htiDestParent);
+
+		if (m_data.ItemIsLocked(dwTargetID, TRUE))
+			return DD_DROPEFFECT_NONE;
+
+		// If the target is a reference, the source must be a reference
+		DWORD dwSelTaskID = GetTaskID(move.htiSel);
+
+		if (m_data.ItemIsReference(dwTargetID) && !m_data.ItemIsReference(dwSelTaskID))
+			return DD_DROPEFFECT_NONE;
+	}
 
 	return nCursor;
 }
 
 BOOL CGanttCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 {
+	// Prevent dropping on locked tasks unless references
+	DWORD dwTargetID = GetTaskID(move.htiDestParent);
+
+	if (dwTargetID && m_data.ItemIsLocked(dwTargetID, TRUE))
+		return FALSE;
+
+	// If the target is a reference, the source must be a reference
+	DWORD dwSelTaskID = GetTaskID(move.htiSel);
+
+	if (m_data.ItemIsReference(dwTargetID) && !m_data.ItemIsReference(dwSelTaskID))
+		return FALSE;
+
 	// Notify parent of move
 	IUITASKMOVE taskMove = { 0 };
 
-	taskMove.dwSelectedTaskID = GetTaskID(move.htiSel);
+	taskMove.dwSelectedTaskID = dwSelTaskID;
 	taskMove.dwParentID = GetTaskID(move.htiDestParent);
 	taskMove.dwAfterSiblingID = GetTaskID(move.htiDestAfterSibling);
 	taskMove.bCopy = (move.bCopy != FALSE);
@@ -1800,6 +1827,37 @@ BOOL CGanttCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 	}
 
 	return TRUE; // prevent base class handling
+}
+
+BOOL CGanttCtrl::OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag)
+{
+	if (!CTreeListCtrl::OnDragBeginItem(move, bLeftDrag))
+		return FALSE;
+
+	// No restriction on copying
+	if (Misc::ModKeysArePressed(MKS_CTRL))
+		return TRUE;
+
+	// Prevent dragging of locked tasks
+	DWORD dwTaskID = GetTaskID(move.htiSel);
+	ASSERT(dwTaskID);
+
+	if (m_data.ItemIsLocked(dwTaskID, TRUE))
+		return FALSE;
+
+	// Prevent dragging of subtasks of locked tasks
+	HTREEITEM htiParent = m_tree.GetParentItem(move.htiSel);
+
+	if (!htiParent || (htiParent == TVI_ROOT))
+		return TRUE;
+
+	DWORD dwParentID = GetTaskID(htiParent);
+	ASSERT(dwTaskID);
+
+	if (m_data.ItemIsLocked(dwParentID, TRUE))
+		return FALSE;
+
+	return TRUE;
 }
 
 void CGanttCtrl::ClearDependencyPickLine(CDC* pDC)
@@ -1919,7 +1977,7 @@ BOOL CGanttCtrl::SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const
 		{
 			if (!CanDragTask(dwTaskID, nDrag))
 			{
-				if (m_data.ItemIsLocked(dwTaskID))
+				if (m_data.ItemIsLocked(dwTaskID, FALSE))
 					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 
 				// else
@@ -2017,7 +2075,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 				if (htiHit)
 				{
-					if (m_data.ItemIsLocked(m_tree.GetItemData(htiHit)))
+					if (m_data.ItemIsLocked(GetTaskID(htiHit), TRUE))
 						return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 
 					if (nFlags & TVHT_ONITEMICON)
@@ -2127,7 +2185,7 @@ BOOL CGanttCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 			
 			if (dwFromTaskID)
 			{
-				if (m_data.ItemIsLocked(dwFromTaskID))
+				if (m_data.ItemIsLocked(dwFromTaskID, FALSE))
 				{
 					MessageBeep(MB_ICONEXCLAMATION);
 				}
@@ -2259,7 +2317,7 @@ BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 
 			if (dwFromTaskID)
 			{
-				if (m_data.ItemIsLocked(dwFromTaskID))
+				if (m_data.ItemIsLocked(dwFromTaskID, FALSE))
 				{
 					MessageBeep(MB_ICONEXCLAMATION);
 				}
@@ -2279,7 +2337,7 @@ BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 			
 			if (dwFromTaskID && dwCurToTaskID)
 			{
-				if (m_data.ItemIsLocked(dwFromTaskID))
+				if (m_data.ItemIsLocked(dwFromTaskID, FALSE))
 				{
 					MessageBeep(MB_ICONEXCLAMATION);
 				}
@@ -5504,7 +5562,7 @@ BOOL CGanttCtrl::ValidateDragPoint(CPoint& ptDrag) const
 
 BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 {
-	if (m_data.ItemIsLocked(dwTaskID))
+	if (m_data.ItemIsLocked(dwTaskID, FALSE))
 		return FALSE;
 
 	// else

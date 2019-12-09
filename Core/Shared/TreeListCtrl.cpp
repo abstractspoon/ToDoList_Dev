@@ -767,13 +767,21 @@ void CTreeListCtrl::OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	UpdateColumnWidths((pNMTV->action == TVE_EXPAND) ? UTWA_EXPAND : UTWA_COLLAPSE);
 }
 
-LRESULT CTreeListCtrl::OnTreeDragEnter(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CTreeListCtrl::OnTreeDragEnter(WPARAM /*wp*/, LPARAM lp)
 {
 	// Make sure the selection helper is synchronised
 	// with the tree's current selection
 	m_tshDragDrop.ClearHistory();
 	m_tshDragDrop.RemoveAll(TRUE, FALSE);
 	m_tshDragDrop.AddItem(m_tree.GetSelectedItem(), FALSE);
+
+	// Notify derived class
+	// Note: Right-click dragging not supported by default
+	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lp;
+	TLCITEMMOVE move = { GetSelectedItem(), 0 };
+
+	if (!OnDragBeginItem(move, pDDI->bLeftDrag))
+		return FALSE;
 	
 	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
 }
@@ -785,7 +793,20 @@ LRESULT CTreeListCtrl::OnTreePreDragMove(WPARAM /*wp*/, LPARAM /*lp*/)
 
 LRESULT CTreeListCtrl::OnTreeDragOver(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
+	UINT nCursor = m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
+
+	if (nCursor != DD_DROPEFFECT_NONE)
+	{
+		TLCITEMMOVE move = { GetSelectedItem(), 0 };
+
+		if (m_treeDragDrop.GetDropTarget(move.htiDestParent, move.htiDestAfterSibling))
+		{
+			// Notify derived class
+			nCursor = OnDragOverItem(move, nCursor);
+		}
+	}
+
+	return nCursor;
 }
 
 LRESULT CTreeListCtrl::OnTreeDragDrop(WPARAM /*wp*/, LPARAM /*lp*/)
