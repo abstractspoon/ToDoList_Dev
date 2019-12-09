@@ -12191,12 +12191,21 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 		}
 		return TRUE;
 
+	case TDCA_DELETE:
+		// Can't delete locked tasks unless they are references
+		// Can't delete subtasks if immediate parent is locked
+		if (m_taskTree.SelectionHasLocked(FALSE, TRUE) || 
+			m_taskTree.SelectionHasLockedParent(TRUE))
+		{
+			return FALSE;
+		}
+		return TRUE;
+
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
 	case TDCA_PROJECTNAME:
 	case TDCA_UNDO:
 	case TDCA_CUSTOMATTRIBDEFS:
-	case TDCA_DELETE:
 	case TDCA_POSITION:
 	case TDCA_ENCRYPT:
 		return TRUE;
