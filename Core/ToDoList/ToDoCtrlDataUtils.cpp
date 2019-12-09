@@ -4296,7 +4296,7 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		{
 			// Even if it's a text format we still need to write out the comments format
 			// unless there were no comments or the comment type is the same as the default
-			if (CONTENTFORMAT(pTDI->cfComments).FormatIsText())
+			if (pTDI->cfComments.FormatIsText())
 			{
 				if (!pTDI->sComments.IsEmpty() || (pTDI->cfComments != m_data.m_cfDefault))
 					tasks.SetTaskCustomComments(hTask, _T(""), pTDI->cfComments);
