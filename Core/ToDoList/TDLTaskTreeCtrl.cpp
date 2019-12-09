@@ -863,14 +863,17 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 
 			if (!bDblClk)
 			{
-				// if the button was over the checkbox toggle the done state
-				if (nHitFlags & TVHT_ONITEMSTATEICON)
+				if (!SelectionHasLocked(FALSE))
 				{
-					nEditCol = TDCC_DONE;
-				}
-				else if (nHitFlags & TVHT_ONITEMICON)
-				{
-					nEditCol = TDCC_ICON;
+					// if the button was over the checkbox toggle the done state
+					if (nHitFlags & TVHT_ONITEMSTATEICON)
+					{
+						nEditCol = TDCC_DONE;
+					}
+					else if (nHitFlags & TVHT_ONITEMICON)
+					{
+						nEditCol = TDCC_ICON;
+					}
 				}
 			}
 			else // double click
