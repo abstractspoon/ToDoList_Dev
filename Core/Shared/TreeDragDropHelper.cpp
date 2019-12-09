@@ -138,6 +138,7 @@ BOOL CTreeDragDropHelper::Initialize(CWnd* pOwner, BOOL bEnabled, BOOL bAllowNcD
 	return FALSE;
 }
 
+/*
 BOOL CTreeDragDropHelper::AddTargetWnd(CWnd* pWnd)
 {
 	ASSERT(pWnd->GetSafeHwnd());
@@ -151,6 +152,7 @@ BOOL CTreeDragDropHelper::AddTargetWnd(CWnd* pWnd)
 	// else
 	return FALSE;
 }
+*/
 
 BOOL CTreeDragDropHelper::GetDropTarget(HTREEITEM& htiDrop, HTREEITEM& htiAfter)
 {

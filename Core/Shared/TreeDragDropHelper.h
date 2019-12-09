@@ -29,7 +29,7 @@ public:
 	void EnableDragDrop(BOOL bEnable) { m_bEnabled = bEnable; }
 	UINT ProcessMessage(const MSG* pMsg);
 
-	BOOL AddTargetWnd(CWnd* pWnd);
+	//BOOL AddTargetWnd(CWnd* pWnd);
 	
 	BOOL GetDropTarget(HTREEITEM& htiDrop, HTREEITEM& htiAfter);
 	BOOL IsDragging() { return m_ddMgr.IsDragging(); }
