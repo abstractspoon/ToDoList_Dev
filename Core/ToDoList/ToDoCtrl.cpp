@@ -7389,8 +7389,9 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 					pSubMenu->EnableMenuItem(ID_TDD_SETFILELINK, nDisabled);
 					pSubMenu->EnableMenuItem(ID_TDD_REFTASK, nDisabled);
 				}
-				// if the target is a reference disable copying and moving
-				else if (bTargetIsRef) 
+				// if the target is a reference and the selection contains
+				// non-references then disable copying and moving
+				else if (bTargetIsRef && m_taskTree.SelectionHasNonReferences()) 
 				{
 					pSubMenu->EnableMenuItem(ID_TDD_COPYTASK, nDisabled);
 					pSubMenu->EnableMenuItem(ID_TDD_MOVETASK, nDisabled);
@@ -7402,6 +7403,8 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 						pSubMenu->EnableMenuItem(ID_TDD_ADDTASKDEPENDENCY, nDisabled);
 					}
 				}
+
+				// Display the menu, returning the selected command
 				CPoint ptCursor(pDDI->pt);
 				::ClientToScreen(pDDI->hwndTarget, &ptCursor);
 
