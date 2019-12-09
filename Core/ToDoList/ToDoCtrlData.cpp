@@ -2654,7 +2654,7 @@ TDC_SET CToDoCtrlData::SetTaskTags(DWORD dwTaskID, const CStringArray& aTags, BO
 
 TDC_SET CToDoCtrlData::SetTaskDependencies(DWORD dwTaskID, const CStringArray& aDepends, BOOL bAppend)
 {
-	// weed out 'unknown' tasks and parent tasks
+	// weed out 'unknown' tasks, dependencies on self and parent tasks
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDS(dwTaskID, pTDS, SET_FAILED);
 
@@ -2670,6 +2670,10 @@ TDC_SET CToDoCtrlData::SetTaskDependencies(DWORD dwTaskID, const CStringArray& a
 		if (dwDepends)
 		{
 			if (!HasTask(dwDepends)) // check for existence
+			{
+				aWeeded.RemoveAt(nDepends);
+			}
+			else if (dwDepends == dwTaskID || IsReferenceToTask(dwDepends, dwTaskID))
 			{
 				aWeeded.RemoveAt(nDepends);
 			}
