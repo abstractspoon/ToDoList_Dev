@@ -154,11 +154,19 @@ BOOL CTreeDragDropHelper::AddTargetWnd(CWnd* pWnd)
 }
 */
 
-BOOL CTreeDragDropHelper::GetDropTarget(HTREEITEM& htiDrop, HTREEITEM& htiAfter)
+BOOL CTreeDragDropHelper::GetDropTarget(HTREEITEM& htiDrop, HTREEITEM& htiAfter, BOOL bDropSubtasksAtTop)
 {
-	htiDrop = m_htiDropTarget ? m_htiDropTarget : TVI_ROOT;
+	htiDrop = (m_htiDropTarget ? m_htiDropTarget : TVI_ROOT);
 	htiAfter = m_htiDropAfter;
 
+	if (htiDrop && !htiAfter)
+	{
+		if (bDropSubtasksAtTop)
+			htiAfter = TVI_FIRST;
+		else
+			htiAfter = m_selection.TCH().GetLastChildItem(htiDrop);
+	}
+	
 	return (htiDrop || htiAfter);
 }
 
@@ -420,7 +428,7 @@ void CTreeDragDropHelper::RecalcDropTarget(CPoint point)
 		{
 		case DD_ON:
 			m_htiDropTarget = m_dropPos.htiDrop;
-			m_htiDropAfter = NULL; // indicates this is a drop ON
+			m_htiDropAfter = NULL;
 			break;
 
 		case DD_ABOVE:

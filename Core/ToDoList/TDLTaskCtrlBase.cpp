@@ -5693,6 +5693,27 @@ BOOL CTDLTaskCtrlBase::SelectionHasReferences() const
 	return FALSE;
 }
 
+BOOL CTDLTaskCtrlBase::SelectionHasTask(DWORD dwTaskID, BOOL bIncludeRefs) const
+{
+	BOOL bSelected = IsTaskSelected(dwTaskID);
+
+	if (bSelected || !bIncludeRefs)
+		return bSelected;
+
+	POSITION pos = GetFirstSelectedTaskPos();
+	dwTaskID = m_data.GetTrueTaskID(dwTaskID);
+
+	while (pos)
+	{
+		DWORD dwSelTaskID = GetNextSelectedTaskID(pos);
+
+		if (m_data.GetTrueTaskID(dwSelTaskID) == dwTaskID)
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
 BOOL CTDLTaskCtrlBase::SelectionHasSameParent() const
 {
 	switch (GetSelectedCount())

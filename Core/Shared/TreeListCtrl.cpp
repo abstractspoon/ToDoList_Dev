@@ -799,7 +799,7 @@ LRESULT CTreeListCtrl::OnTreeDragOver(WPARAM /*wp*/, LPARAM /*lp*/)
 	{
 		TLCITEMMOVE move = { GetSelectedItem(), 0 };
 
-		if (m_treeDragDrop.GetDropTarget(move.htiDestParent, move.htiDestAfterSibling))
+		if (m_treeDragDrop.GetDropTarget(move.htiDestParent, move.htiDestAfterSibling, FALSE))
 		{
 			// Notify derived class
 			nCursor = OnDragOverItem(move, nCursor);
@@ -815,7 +815,7 @@ LRESULT CTreeListCtrl::OnTreeDragDrop(WPARAM /*wp*/, LPARAM /*lp*/)
 	{
 		TLCITEMMOVE move = { GetSelectedItem(), 0 };
 		
-		if (m_treeDragDrop.GetDropTarget(move.htiDestParent, move.htiDestAfterSibling))
+		if (m_treeDragDrop.GetDropTarget(move.htiDestParent, move.htiDestAfterSibling, FALSE))
 		{
 			// Notify derived class
 			if (!OnDragDropItem(move))

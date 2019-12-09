@@ -831,7 +831,6 @@ protected:
 	HTREEITEM PasteTaskToTree(const CTaskFile& tasks, HTASKITEM hTask, HTREEITEM htiParent, HTREEITEM htiAfter, TDC_RESETIDS nResetID, BOOL bAndSubtasks);
 	BOOL PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDest, HTREEITEM htiDestAfter, TDC_RESETIDS nResetID, BOOL bSelectAll);
 	BOOL MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bMergeByID, CDWordArray& aNewTaskIDs);
-	BOOL CheckRestoreBackupFile(const CString& sFilePath);
 
 	void SaveSplitPos(CPreferences& prefs) const;
 	void LoadSplitPos(const CPreferences& prefs);
@@ -857,6 +856,7 @@ protected:
 	void MakeRelativePaths(CStringArray& aFilePaths) const;
 	void MakeFullPaths(CStringArray& aFilePaths) const;
 	CString GetLastSaveFolder() const;
+	BOOL CheckRestoreBackupFile(const CString& sFilePath);
 
 	void HandleUnsavedComments();
 	BOOL UndoLastActionItems(const CArrayUndoElements& aElms);
@@ -878,7 +878,9 @@ protected:
 	BOOL RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);
 	BOOL ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks); // helper to avoid code dupe
 	void PrepareTaskfileForTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const;
+
 	BOOL DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarget, HTREEITEM htiDropAfter);
+	BOOL CanDropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarget) const;
 
 	void SearchAndExpand(const SEARCHPARAMS& params, BOOL bExpand);
 	void AppendTaskFileHeader(CTaskFile& tasks) const;

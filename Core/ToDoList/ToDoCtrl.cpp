@@ -5196,7 +5196,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	
 	// set next selection
 	if (dwNextID)
-		SelectTask(dwNextID);
+		SelectTask(dwNextID, FALSE);
 	else
 		UpdateControls(FALSE); // don't update comments
 
@@ -7264,21 +7264,21 @@ LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
 	HTREEITEM htiOver, htiAfter;
 		
-	if (!m_treeDragDrop.GetDropTarget(htiOver, htiAfter))
-	{
-		return DD_DROPEFFECT_NONE;
-	}
-
-	// Target must be unlocked or a reference
-	DWORD dwTargetID = GetTaskID(htiOver);
-	
-	if (dwTargetID && m_data.IsTaskLocked(dwTargetID) && !m_data.IsTaskReference(dwTargetID))
+	if (!m_treeDragDrop.GetDropTarget(htiOver, htiAfter, m_bDragDropSubtasksAtTop))
 	{
 		return DD_DROPEFFECT_NONE;
 	}
 
 	if (pDDI->bLeftDrag)
 	{
+		// Target must be unlocked or a reference
+		DWORD dwTargetID = GetTaskID(htiOver);
+	
+		if (dwTargetID && m_data.IsTaskLocked(dwTargetID) && !m_data.IsTaskReference(dwTargetID))
+		{
+			return DD_DROPEFFECT_NONE;
+		}
+
 		// If target is a reference then dragged tasks can only be dropped as references
 		if (m_data.IsTaskReference(dwTargetID) && m_taskTree.SelectionHasNonReferences())
 		{
@@ -7312,45 +7312,27 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 		const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
 		HTREEITEM htiDropOn, htiDropAfter;
 		
-		if (!m_treeDragDrop.GetDropTarget(htiDropOn, htiDropAfter))
+		if (!m_treeDragDrop.GetDropTarget(htiDropOn, htiDropAfter, m_bDragDropSubtasksAtTop))
 			return FALSE;
 
-		// Prevent dropping on locked tasks unless references
+		//m_taskTree.RedrawColumns(); // ?
+
+		TDC_DROPOPERATION nDrop = TDC_DROPNONE;
+		
 		DWORD dwTargetID = GetTaskID(htiDropOn);
 		BOOL bTargetIsRef = m_data.IsTaskReference(dwTargetID);
-
-		if (m_data.IsTaskLocked(dwTargetID) && !bTargetIsRef)
-			return FALSE;
-
-		m_taskTree.RedrawColumns(); // ?
-
-		// if htiAfter is NULL then we are dropping 'on' an item
-		// so we need to decide where
-		TDC_DROPOPERATION nDrop = TDC_DROPNONE;
-		BOOL bDropOn = (htiDropAfter == NULL);
-
-		if (bDropOn)
-		{
-			if (m_bDragDropSubtasksAtTop)
-				htiDropAfter = TVI_FIRST;
-			else
-				htiDropAfter = TCH().GetLastChildItem(htiDropOn);
-		}
 
 		if (pDDI->bLeftDrag) 
 		{
 			// Only allow non-refs to be dropped ON references AS references
+
 			if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
 			{
 				nDrop = TDC_DROPREFERENCE;
 			}
 			else if (Misc::ModKeysArePressed(MKS_NONE))
 			{
-				// Prevent dragging of locked tasks except references unless copying
-				if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
-					nDrop = TDC_DROPNONE;
-				else
-					nDrop = TDC_DROPMOVE;
+				nDrop = TDC_DROPMOVE;
 			}
 			else if (Misc::ModKeysArePressed(MKS_CTRL))
 			{
@@ -7367,41 +7349,37 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 			if (menu.LoadMenu(IDR_TREEDRAGDROP, *this, TRUE))
 			{
-				if (htiDropOn && (htiDropOn != TVI_ROOT))
+				if (m_treeDragDrop.IsDropOn() && dwTargetID)
 					m_taskTree.SelectDropTarget(htiDropOn);
-
-				// disable moving of locked tasks except references
-				// disable moving of subtasks with locked parents
+				
+				// Menu items are enabled by default so we just need
+				// to disable as required
 				CMenu* pSubMenu = menu.GetSubMenu(0);
 				UINT nDisabled = (MF_BYCOMMAND | MF_GRAYED);
 
-				if (m_taskTree.SelectionHasLocked(FALSE, TRUE) ||
-					m_taskTree.SelectionHasLockedParent(TRUE))
-				{
-					pSubMenu->EnableMenuItem(ID_TDD_MOVETASK, nDisabled);
-				}
+				if (!CanDropSelectedTasks(TDC_DROPCOPY, htiDropOn))
+					pSubMenu->EnableMenuItem(ID_TDD_COPYTASK, nDisabled);
 
-				// disable task ref, dependency and file links if dropping in-between tasks
-				if (!bDropOn)
+				if (!CanDropSelectedTasks(TDC_DROPMOVE, htiDropOn))
+					pSubMenu->EnableMenuItem(ID_TDD_MOVETASK, nDisabled);
+
+				if (!CanDropSelectedTasks(TDC_DROPREFERENCE, htiDropOn))
+					pSubMenu->EnableMenuItem(ID_TDD_REFTASK, nDisabled);
+
+				// disable dependency and file links if dropping in-between tasks
+				// or dropping on locked tasks
+				BOOL bTargetIsLocked = m_calculator.IsTaskLocked(dwTargetID);
+				
+				if (bTargetIsLocked || !m_treeDragDrop.IsDropOn())
 				{
 					pSubMenu->EnableMenuItem(ID_TDD_SETTASKDEPENDENCY, nDisabled);
 					pSubMenu->EnableMenuItem(ID_TDD_ADDTASKDEPENDENCY, nDisabled);
 					pSubMenu->EnableMenuItem(ID_TDD_SETFILELINK, nDisabled);
-					pSubMenu->EnableMenuItem(ID_TDD_REFTASK, nDisabled);
 				}
-				// if the target is a reference and the selection contains
-				// non-references then disable copying and moving
-				else if (bTargetIsRef && m_taskTree.SelectionHasNonReferences()) 
+				else if (m_taskTree.SelectionHasTask(dwTargetID, TRUE)) // prevent dependency on self
 				{
-					pSubMenu->EnableMenuItem(ID_TDD_COPYTASK, nDisabled);
-					pSubMenu->EnableMenuItem(ID_TDD_MOVETASK, nDisabled);
-
-					// cannot create dependency to self
-					if (TSH().HasItem(dwTargetID))
-					{
-						pSubMenu->EnableMenuItem(ID_TDD_SETTASKDEPENDENCY, nDisabled);
-						pSubMenu->EnableMenuItem(ID_TDD_ADDTASKDEPENDENCY, nDisabled);
-					}
+					pSubMenu->EnableMenuItem(ID_TDD_SETTASKDEPENDENCY, nDisabled);
+					pSubMenu->EnableMenuItem(ID_TDD_ADDTASKDEPENDENCY, nDisabled);
 				}
 
 				// Display the menu, returning the selected command
@@ -7430,7 +7408,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 					{
 						IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-						// replace task dependencies with this one
+						// replace/append task dependencies with this one
 						CStringArray aDepends;
 						aDepends.Add(TODOITEM::FormatTaskDependency(GetSelectedTaskID()));
 
@@ -7469,17 +7447,69 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 			}
 		}
 
-		if (nDrop != TDC_DROPNONE)
-		{
-			VERIFY(DropSelectedTasks(nDrop, htiDropOn, htiDropAfter));
-		}
+		bDropped = DropSelectedTasks(nDrop, htiDropOn, htiDropAfter);
 	}
 
 	return bDropped;
 }
 
+BOOL CToDoCtrl::CanDropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarget) const
+{
+	// Allow dropping on locked tasks only if it's a reference
+	DWORD dwTargetID = GetTaskID(htiDropTarget);
+	BOOL bTargetIsRef = m_data.IsTaskReference(dwTargetID);
+
+	if (m_data.IsTaskLocked(dwTargetID) && !bTargetIsRef)
+		return FALSE;
+
+	switch (nDrop)
+	{
+	case TDC_DROPCOPY:
+		// Can't copy non-references on to a reference
+		if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
+		{
+			return FALSE;
+		}
+		return TRUE;
+
+	case TDC_DROPREFERENCE:
+		return TRUE;
+
+	case TDC_DROPMOVE:
+		// Can't move locked tasks which are not references
+		if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
+		{
+			return FALSE;
+		}
+		// Can't move subtasks of a locked task which is not a reference
+		else if (m_taskTree.SelectionHasLockedParent(TRUE))
+		{
+			return FALSE;
+		}
+		// Can't move non-references on to a reference
+		else if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
+		{
+			return FALSE;
+		}
+		return TRUE;
+
+	case TDC_DROPNONE:
+		return FALSE;
+	}
+
+	// all else
+	ASSERT(0);
+	return FALSE;
+}
+
 BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarget, HTREEITEM htiDropAfter)
 {
+	if (!CanDropSelectedTasks(nDrop, htiDropTarget))
+	{
+		ASSERT(nDrop == TDC_DROPNONE);
+		return FALSE;
+	}
+
 	CLockUpdates lu(*this);
 
 	switch (nDrop)
