@@ -1907,7 +1907,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	UpdateSelectedTaskPath();
 	
 	EnableDisableControls(hti);
-	EnableDisableDragDrop();
 
 #ifdef _DEBUG
 //	TRACE(_T("CToDoCtrl::UpdateControls(took %d ms)\n"), (GetTickCount() - dwTick));
@@ -5627,6 +5626,9 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		break;
 
 	case TDCS_READONLY:
+		m_treeDragDrop.EnableDragDrop(!bEnable);
+		break;
+
 	case TDCS_CONFIRMDELETE:
 	case TDCS_CHECKOUTONLOAD:
 	case TDCS_SYNCTIMEESTIMATESANDDATES:
@@ -7208,18 +7210,41 @@ LRESULT CToDoCtrl::OnTreeDragAbort(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 }
 
-LRESULT CToDoCtrl::OnTreeDragEnter(WPARAM /*wParam*/, LPARAM /*lParam*/)
+LRESULT CToDoCtrl::OnTreeDragEnter(WPARAM /*wParam*/, LPARAM lParam)
 {
-	// Prevent dragging of locked tasks except references
-	if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
-		return FALSE;
+	ASSERT(!IsReadOnly());
 
-	// Prevent dragging of subtasks of locked tasks 
-	// except if the parent is a reference
-	if (m_taskTree.SelectionHasLockedParent(TRUE))
-		return FALSE;
+	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
 
-	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
+	if (pDDI->bLeftDrag)
+	{
+		// Prevent left-dragging of locked tasks except references
+		// unless we are copying or linking
+		if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
+		{
+			if (Misc::ModKeysArePressed(MKS_CTRL) ||
+				Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) ||
+				Misc::ModKeysArePressed(MKS_ALT))
+			{
+				// allowable
+			}
+			else
+			{
+				return FALSE;
+			}
+		}
+
+		// Prevent dragging of subtasks of locked tasks 
+		// except if the parent is a reference
+		if (m_taskTree.SelectionHasLockedParent(TRUE))
+			return FALSE;
+	}
+	else
+	{
+		// right-click always okay
+	}
+
+ 	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 }
 
 LRESULT CToDoCtrl::OnTreeDragPreMove(WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -7229,13 +7254,12 @@ LRESULT CToDoCtrl::OnTreeDragPreMove(WPARAM /*wParam*/, LPARAM /*lParam*/)
 
 LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 {
+	ASSERT(!IsReadOnly());
+
 	UINT nRes = m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 
 	if (nRes == DD_DROPEFFECT_NONE)
 		return nRes;
-
-	// Prevent dragging of locked tasks except references
-	ASSERT(!m_taskTree.SelectionHasLocked(FALSE, TRUE));
 
 	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
 	HTREEITEM htiOver, htiAfter;
@@ -7253,8 +7277,6 @@ LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 		return DD_DROPEFFECT_NONE;
 	}
 
-	// handle WM_DD_DRAGOVER for creating task shortcuts
-	// only interested in left button drags with ctrl+shift pressed
 	if (pDDI->bLeftDrag)
 	{
 		// If target is a reference then dragged tasks can only be dropped as references
@@ -7268,6 +7290,12 @@ LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 		{
 			return DD_DROPEFFECT_LINK;
 		}
+
+		// Prevent dragging of locked tasks except references unless copying
+		if ((nRes == DD_DROPEFFECT_MOVE) && m_taskTree.SelectionHasLocked(FALSE, TRUE))
+		{
+			return DD_DROPEFFECT_NONE;
+		}
 	}
 
 	return nRes;
@@ -7275,19 +7303,19 @@ LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 
 LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 {
+	ASSERT(!IsReadOnly());
+
 	BOOL bDropped = m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 	
 	if (bDropped)
 	{
-		// Prevent dragging of locked tasks except references
-		ASSERT(!m_taskTree.SelectionHasLocked(FALSE, TRUE));
-
 		const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
 		HTREEITEM htiDropOn, htiDropAfter;
 		
 		if (!m_treeDragDrop.GetDropTarget(htiDropOn, htiDropAfter))
 			return FALSE;
 
+		// Prevent dropping on locked tasks unless references
 		DWORD dwTargetID = GetTaskID(htiDropOn);
 		BOOL bTargetIsRef = m_data.IsTaskReference(dwTargetID);
 
@@ -7306,7 +7334,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 			if (m_bDragDropSubtasksAtTop)
 				htiDropAfter = TVI_FIRST;
 			else
-				htiDropAfter = m_taskTree.TCH().GetLastChildItem(htiDropOn);
+				htiDropAfter = TCH().GetLastChildItem(htiDropOn);
 		}
 
 		if (pDDI->bLeftDrag) 
@@ -7318,7 +7346,11 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 			}
 			else if (Misc::ModKeysArePressed(MKS_NONE))
 			{
-				nDrop = TDC_DROPMOVE;
+				// Prevent dragging of locked tasks except references unless copying
+				if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
+					nDrop = TDC_DROPNONE;
+				else
+					nDrop = TDC_DROPMOVE;
 			}
 			else if (Misc::ModKeysArePressed(MKS_CTRL))
 			{
@@ -7335,14 +7367,21 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 			if (menu.LoadMenu(IDR_TREEDRAGDROP, *this, TRUE))
 			{
-				if (htiDropOn && htiDropOn != TVI_ROOT)
+				if (htiDropOn && (htiDropOn != TVI_ROOT))
 					m_taskTree.SelectDropTarget(htiDropOn);
 
-				// disable task ref, dependency and file links
-				// if dropping in-between tasks
+				// disable moving of locked tasks except references
+				// disable moving of subtasks with locked parents
 				CMenu* pSubMenu = menu.GetSubMenu(0);
 				UINT nDisabled = (MF_BYCOMMAND | MF_GRAYED);
 
+				if (m_taskTree.SelectionHasLocked(FALSE, TRUE) ||
+					m_taskTree.SelectionHasLockedParent(TRUE))
+				{
+					pSubMenu->EnableMenuItem(ID_TDD_MOVETASK, nDisabled);
+				}
+
+				// disable task ref, dependency and file links if dropping in-between tasks
 				if (!bDropOn)
 				{
 					pSubMenu->EnableMenuItem(ID_TDD_SETTASKDEPENDENCY, nDisabled);
@@ -7363,7 +7402,6 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 						pSubMenu->EnableMenuItem(ID_TDD_ADDTASKDEPENDENCY, nDisabled);
 					}
 				}
-
 				CPoint ptCursor(pDDI->pt);
 				::ClientToScreen(pDDI->hwndTarget, &ptCursor);
 
@@ -8647,8 +8685,6 @@ LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 		break;
 	}
 
-	EnableDisableDragDrop();
-
 	return 0L;
 }
 
@@ -9141,7 +9177,6 @@ void CToDoCtrl::SelectItem(HTREEITEM hti)
 			UpdateControls(); // disable controls
 		
 		UpdateSelectedTaskPath();
-		EnableDisableDragDrop();
 
 		// notify parent
 		GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
@@ -9157,21 +9192,6 @@ void CToDoCtrl::SelectAll()
 		// load newly selected item
 		UpdateControls();
 	}
-	
-	EnableDisableDragDrop();
-}
-
-void CToDoCtrl::EnableDisableDragDrop()
-{
-	BOOL bEnabled = !IsReadOnly();
-
-	if (bEnabled)
-	{
-		// Allow dragging of refeerences to locked tasks
-		bEnabled = m_taskTree.SelectionHasUnlocked(TRUE);
-	}
-
-	m_treeDragDrop.EnableDragDrop(bEnabled);
 }
 
 BOOL CToDoCtrl::GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const
