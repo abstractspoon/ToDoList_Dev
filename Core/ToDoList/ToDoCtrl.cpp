@@ -1637,7 +1637,7 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	BOOL bEnable = (hti && !bMaximized);
 	BOOL bIsParent = TSH().ItemsAreAllParents();
 	BOOL bReadOnly = IsReadOnly();
-	BOOL bReadOnlyCtrls = (bReadOnly || !m_taskTree.SelectionHasUnlocked());
+	BOOL bReadOnlyCtrls = (bReadOnly || m_taskTree.SelectionHasLocked(FALSE));
 
 	// now enable/disable appropriate controls
 	int nCtrl;
@@ -12124,9 +12124,9 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 BOOL CToDoCtrl::SelectedTaskIsUnlocked(DWORD dwTaskID) const
 {
 	if (dwTaskID)
-		return (m_taskTree.IsTaskSelected(dwTaskID) && !m_data.IsTaskLocked(dwTaskID));
+		return (m_taskTree.IsTaskSelected(dwTaskID) && !m_calculator.IsTaskLocked(dwTaskID));
 
-	return m_taskTree.SelectionHasUnlocked();
+	return !m_taskTree.SelectionHasLocked(FALSE);
 }
 
 BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const 
