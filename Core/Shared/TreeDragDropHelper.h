@@ -32,8 +32,8 @@ public:
 	//BOOL AddTargetWnd(CWnd* pWnd);
 	
 	BOOL IsDropOn() const { return (m_dropPos.nWhere == DD_ON); }
-	BOOL GetDropTarget(HTREEITEM& htiDrop, HTREEITEM& htiAfter, BOOL bDropSubtasksAtTop);
-	BOOL IsDragging() { return m_ddMgr.IsDragging(); }
+	BOOL GetDropTarget(HTREEITEM& htiDrop, HTREEITEM& htiAfter, BOOL bDropSubtasksAtTop) const;
+	BOOL IsDragging() const { return m_ddMgr.IsDragging(); }
 	void CancelDrag() { m_ddMgr.CancelDrag(); }
 
 protected:

@@ -154,7 +154,7 @@ BOOL CTreeDragDropHelper::AddTargetWnd(CWnd* pWnd)
 }
 */
 
-BOOL CTreeDragDropHelper::GetDropTarget(HTREEITEM& htiDrop, HTREEITEM& htiAfter, BOOL bDropSubtasksAtTop)
+BOOL CTreeDragDropHelper::GetDropTarget(HTREEITEM& htiDrop, HTREEITEM& htiAfter, BOOL bDropSubtasksAtTop) const
 {
 	htiDrop = (m_htiDropTarget ? m_htiDropTarget : TVI_ROOT);
 	htiAfter = m_htiDropAfter;
