@@ -1840,7 +1840,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 		HTREEITEM htiDropTarget = m_taskTree.GetItem(pMove->dwParentID);
 		HTREEITEM htiDropAfter = m_taskTree.GetItem(pMove->dwAfterSiblingID);
 
-		TDC_DROPOPERATION nDrop = (pMove->bCopy ? TDC_DROPCOPY : TDC_DROPMOVE);
+		DD_DROPEFFECT nDrop = (pMove->bCopy ? DD_DROPEFFECT_COPY : DD_DROPEFFECT_MOVE);
 		bSuccess = DropSelectedTasks(nDrop, htiDropTarget, htiDropAfter);
 
 		if (bSuccess)

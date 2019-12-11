@@ -302,7 +302,7 @@ UINT CTreeDragDropHelper::OnDragOver(const DRAGDROPINFO* pDDI)
 	{
 		if (pDDI->bLeftDrag)
 		{
-			BOOL bCopy = Misc::IsKeyPressed(VK_CONTROL);
+			BOOL bCopy = Misc::ModKeysArePressed(MKS_CTRL);
 			return bCopy ? DD_DROPEFFECT_COPY : DD_DROPEFFECT_MOVE;
 		}
 

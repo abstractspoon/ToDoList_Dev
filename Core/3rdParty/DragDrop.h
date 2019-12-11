@@ -18,7 +18,7 @@ const UINT WM_DD_DRAGDROP  = RegisterWindowMessage(_T("WM_DD_DRAGDROP"));
 const UINT WM_DD_DRAGABORT = RegisterWindowMessage(_T("WM_DD_DRAGABORT"));
 
 // return values for WM_DD_DRAGOVER
-enum
+enum DD_DROPEFFECT
 {
 	DD_DROPEFFECT_NONE = 0,
 	DD_DROPEFFECT_MOVE,

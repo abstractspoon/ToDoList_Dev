@@ -7317,7 +7317,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 		//m_taskTree.RedrawColumns(); // ?
 
-		TDC_DROPOPERATION nDrop = TDC_DROPNONE;
+		DD_DROPEFFECT nDrop = DD_DROPEFFECT_NONE;
 		
 		DWORD dwTargetID = GetTaskID(htiDropOn);
 		BOOL bTargetIsRef = m_data.IsTaskReference(dwTargetID);
@@ -7328,19 +7328,19 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 			if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
 			{
-				nDrop = TDC_DROPREFERENCE;
+				nDrop = DD_DROPEFFECT_LINK;
 			}
 			else if (Misc::ModKeysArePressed(MKS_NONE))
 			{
-				nDrop = TDC_DROPMOVE;
+				nDrop = DD_DROPEFFECT_MOVE;
 			}
 			else if (Misc::ModKeysArePressed(MKS_CTRL))
 			{
-				nDrop = TDC_DROPCOPY;
+				nDrop = DD_DROPEFFECT_COPY;
 			}
 			else if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT))
 			{
-				nDrop = TDC_DROPREFERENCE;
+				nDrop = DD_DROPEFFECT_LINK;
 			}
 		}
 		else // right drag
@@ -7357,13 +7357,13 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 				CMenu* pSubMenu = menu.GetSubMenu(0);
 				UINT nDisabled = (MF_BYCOMMAND | MF_GRAYED);
 
-				if (!CanDropSelectedTasks(TDC_DROPCOPY, htiDropOn))
+				if (!CanDropSelectedTasks(DD_DROPEFFECT_COPY, htiDropOn))
 					pSubMenu->EnableMenuItem(ID_TDD_COPYTASK, nDisabled);
 
-				if (!CanDropSelectedTasks(TDC_DROPMOVE, htiDropOn))
+				if (!CanDropSelectedTasks(DD_DROPEFFECT_MOVE, htiDropOn))
 					pSubMenu->EnableMenuItem(ID_TDD_MOVETASK, nDisabled);
 
-				if (!CanDropSelectedTasks(TDC_DROPREFERENCE, htiDropOn))
+				if (!CanDropSelectedTasks(DD_DROPEFFECT_LINK, htiDropOn))
 					pSubMenu->EnableMenuItem(ID_TDD_REFTASK, nDisabled);
 
 				// disable dependency and file links if dropping in-between tasks
@@ -7392,15 +7392,15 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 				switch (nCmdID)
 				{
 				case ID_TDD_REFTASK: 
-					nDrop = TDC_DROPREFERENCE;
+					nDrop = DD_DROPEFFECT_LINK;
 					break;
 
 				case ID_TDD_COPYTASK:
-					nDrop = TDC_DROPCOPY;
+					nDrop = DD_DROPEFFECT_COPY;
 					break;
 
 				case ID_TDD_MOVETASK:
-					nDrop = TDC_DROPMOVE;
+					nDrop = DD_DROPEFFECT_MOVE;
 					break;
 
 				case ID_TDD_SETTASKDEPENDENCY:
@@ -7453,7 +7453,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 	return bDropped;
 }
 
-BOOL CToDoCtrl::CanDropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarget) const
+BOOL CToDoCtrl::CanDropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget) const
 {
 	// Allow dropping on locked tasks only if it's a reference
 	DWORD dwTargetID = GetTaskID(htiDropTarget);
@@ -7464,7 +7464,7 @@ BOOL CToDoCtrl::CanDropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropT
 
 	switch (nDrop)
 	{
-	case TDC_DROPCOPY:
+	case DD_DROPEFFECT_COPY:
 		// Can't copy non-references on to a reference
 		if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
 		{
@@ -7472,10 +7472,10 @@ BOOL CToDoCtrl::CanDropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropT
 		}
 		return TRUE;
 
-	case TDC_DROPREFERENCE:
+	case DD_DROPEFFECT_LINK:
 		return TRUE;
 
-	case TDC_DROPMOVE:
+	case DD_DROPEFFECT_MOVE:
 		// Can't move locked tasks which are not references
 		if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
 		{
@@ -7493,7 +7493,7 @@ BOOL CToDoCtrl::CanDropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropT
 		}
 		return TRUE;
 
-	case TDC_DROPNONE:
+	case DD_DROPEFFECT_NONE:
 		return FALSE;
 	}
 
@@ -7502,11 +7502,11 @@ BOOL CToDoCtrl::CanDropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropT
 	return FALSE;
 }
 
-BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarget, HTREEITEM htiDropAfter)
+BOOL CToDoCtrl::DropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget, HTREEITEM htiDropAfter)
 {
 	if (!CanDropSelectedTasks(nDrop, htiDropTarget))
 	{
-		ASSERT(nDrop == TDC_DROPNONE);
+		ASSERT(nDrop == DD_DROPEFFECT_NONE);
 		return FALSE;
 	}
 
@@ -7514,8 +7514,8 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 
 	switch (nDrop)
 	{
-	case TDC_DROPCOPY:
-	case TDC_DROPREFERENCE:
+	case DD_DROPEFFECT_COPY:
+	case DD_DROPEFFECT_LINK:
 		{
 			// copy selection as xml
 			CTaskFile tasks;
@@ -7523,7 +7523,9 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 
 			// if pasting references then we don't want all subtasks just 
 			// the ones actually selected
-			if (nDrop == TDC_DROPREFERENCE)
+			BOOL bDropRefs = (nDrop == DD_DROPEFFECT_LINK);
+
+			if (bDropRefs)
 				filter.dwFlags = TDCGSTF_NOTSUBTASKS;
 
 			if (GetSelectedTasks(tasks, filter))
@@ -7532,7 +7534,7 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 				HOLD_REDRAW(*this, m_taskTree);
 
 				// fix up the dependencies of the copied tasks
-				if (nDrop == TDC_DROPREFERENCE)
+				if (bDropRefs)
 					PrepareTaskIDsForPasteAsRef(tasks);
 				else
 					PrepareTasksForPaste(tasks, TDCR_YES, TRUE);
@@ -7548,7 +7550,7 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 		}
 		break;
 
-	case TDC_DROPMOVE:
+	case DD_DROPEFFECT_MOVE:
 		{
 			IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 			HOLD_REDRAW(*this, m_taskTree);
@@ -7579,7 +7581,7 @@ BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarg
 		}
 		break;
 
-	case TDC_DROPNONE:
+	case DD_DROPEFFECT_NONE:
 	default:
 		ASSERT(0);
 		return FALSE;
