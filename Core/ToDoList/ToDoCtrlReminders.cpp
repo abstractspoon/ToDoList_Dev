@@ -600,7 +600,7 @@ BOOL CToDoCtrlReminders::BuildRTFContent(const TDCREMINDER& rem, CString& sConte
 	
 	// Inject a task link inside the brackets after the tak title
 	m_rtfFormatter.SetCaretPos(nTitleLen + 1);
-	m_rtfFormatter.SetSelectedWebLink(rem.pTDC->FormatTaskLink(rem.dwTaskID, TRUE), CEnString(IDS_STICKIES_LINK));
+	m_rtfFormatter.SetSelectedWebLink(rem.pTDC->FormatTaskLink(rem.dwTaskID, TRUE, TRUE), CEnString(IDS_STICKIES_LINK));
 
 	sContent = CString((LPCSTR)(LPCTSTR)m_rtfFormatter.GetRTF());
 

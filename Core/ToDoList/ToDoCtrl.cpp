@@ -471,20 +471,15 @@ BOOL CToDoCtrl::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sF
 	return CTDLTaskCtrlBase::ParseTaskLink(sLink, bURL, sFolder, dwTaskID, sFile);
 }
 
-CString CToDoCtrl::FormatTaskLink(DWORD dwTaskID, BOOL bFull) const
+CString CToDoCtrl::FormatTaskLink(DWORD dwTaskID, BOOL bFull, BOOL bURL) const
 {
-	CString sDepends = FormatTaskDependency(dwTaskID, bFull);
-
-	if (!sDepends.IsEmpty())
+	if (!dwTaskID || (bFull && !HasFilePath()))
 	{
-		CString sTaskLink = (TDL_PROTOCOL + sDepends);
-		sTaskLink.Replace(_T(" "), _T("%20"));
-		sTaskLink.Replace('\\', '/');
-		
-		return sTaskLink;
+		ASSERT(0);
+		return _T("");
 	}
-
-	return _T("");
+	
+	return TODOITEM::FormatTaskLink(dwTaskID, (bFull ? m_sLastSavePath : _T("")), bURL);
 }
 
 CString CToDoCtrl::FormatTaskDependency(DWORD dwTaskID, BOOL bFull) const
@@ -495,14 +490,7 @@ CString CToDoCtrl::FormatTaskDependency(DWORD dwTaskID, BOOL bFull) const
 		return _T("");
 	}
 	
-	CString sTaskDepends;
-	
-	if (bFull)
-		sTaskDepends.Format(_T("%s?%lu"), m_sLastSavePath, dwTaskID);
-	else
-		sTaskDepends.Format(_T("%lu"), dwTaskID);
-	
-	return sTaskDepends;
+	return TODOITEM::FormatTaskDependency(dwTaskID, (bFull ? m_sLastSavePath : _T("")));
 }
 
 BOOL CToDoCtrl::IsReservedShortcut(DWORD dwShortcut)
@@ -3238,7 +3226,7 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 	if (mapProcessed.Has(dwTaskID))
 		return SET_NOCHANGE;
 
-	if (m_data.IsTaskLocked(dwTaskID))
+	if (m_calculator.IsTaskLocked(dwTaskID))
 		return SET_FAILED;
 
 	const TODOITEM* pTDI = GetTask(dwTaskID);
@@ -7214,37 +7202,21 @@ LRESULT CToDoCtrl::OnTreeDragEnter(WPARAM /*wParam*/, LPARAM lParam)
 {
 	ASSERT(!IsReadOnly());
 
+	if (!m_treeDragDrop.ProcessMessage(GetCurrentMessage()))
+		return FALSE;
+
+	HTREEITEM htiOver, htiAfter;
+		
+	if (!m_treeDragDrop.GetDropTarget(htiOver, htiAfter, m_bDragDropSubtasksAtTop))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
+	DD_DROPEFFECT nDrop = GetSelectedTasksDropEffect(htiOver, pDDI->bLeftDrag);
 
-	if (pDDI->bLeftDrag)
-	{
-		// Prevent left-dragging of locked tasks except references
-		// unless we are copying or linking
-		if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
-		{
-			if (Misc::ModKeysArePressed(MKS_CTRL) ||
-				Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) ||
-				Misc::ModKeysArePressed(MKS_ALT))
-			{
-				// allowable
-			}
-			else
-			{
-				return FALSE;
-			}
-		}
-
-		// Prevent dragging of subtasks of locked tasks 
-		// except if the parent is a reference
-		if (m_taskTree.SelectionHasLockedParent(TRUE))
-			return FALSE;
-	}
-	else
-	{
-		// right-click always okay
-	}
-
- 	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
+	return (nDrop != DD_DROPEFFECT_NONE);
 }
 
 LRESULT CToDoCtrl::OnTreeDragPreMove(WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -7256,142 +7228,139 @@ LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 {
 	ASSERT(!IsReadOnly());
 
-	UINT nRes = m_treeDragDrop.ProcessMessage(GetCurrentMessage());
+	if (m_treeDragDrop.ProcessMessage(GetCurrentMessage()) == DD_DROPEFFECT_NONE)
+		return DD_DROPEFFECT_NONE;
 
-	if (nRes == DD_DROPEFFECT_NONE)
-		return nRes;
-
-	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
 	HTREEITEM htiOver, htiAfter;
 		
 	if (!m_treeDragDrop.GetDropTarget(htiOver, htiAfter, m_bDragDropSubtasksAtTop))
+		return DD_DROPEFFECT_NONE;
+
+	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
+
+	return GetSelectedTasksDropEffect(htiOver, pDDI->bLeftDrag);
+}
+
+DD_DROPEFFECT CToDoCtrl::GetSelectedTasksDropEffect(HTREEITEM htiDropTarget, BOOL bLeftDrag) const
+{
+	ASSERT(!IsReadOnly());
+
+	// Target must be unlocked or a reference
+	DWORD dwTargetID = GetTaskID(htiDropTarget);
+	BOOL bTargetIsRef = m_data.IsTaskReference(dwTargetID);
+
+	if (dwTargetID && m_calculator.IsTaskLocked(dwTargetID) && !bTargetIsRef)
 	{
 		return DD_DROPEFFECT_NONE;
 	}
 
-	if (pDDI->bLeftDrag)
+	if (bLeftDrag)
 	{
-		// Target must be unlocked or a reference
-		DWORD dwTargetID = GetTaskID(htiOver);
-	
-		if (dwTargetID && m_data.IsTaskLocked(dwTargetID) && !m_data.IsTaskReference(dwTargetID))
-		{
-			return DD_DROPEFFECT_NONE;
-		}
-
 		// If target is a reference then dragged tasks can only be dropped as references
-		if (m_data.IsTaskReference(dwTargetID) && m_taskTree.SelectionHasNonReferences())
+		if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
 		{
 			return DD_DROPEFFECT_LINK;
 		}
 
-		// Allow forced references like Windows Explorer
+		if (Misc::ModKeysArePressed(MKS_CTRL))
+		{
+			return DD_DROPEFFECT_COPY;
+		}
+
+		// References
 		if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT))
 		{
 			return DD_DROPEFFECT_LINK;
 		}
 
-		// Prevent dragging of locked tasks except references unless copying
-		if ((nRes == DD_DROPEFFECT_MOVE) && m_taskTree.SelectionHasLocked(FALSE, TRUE))
+		// Prevent moving tasks except references
+		if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
 		{
 			return DD_DROPEFFECT_NONE;
 		}
 	}
+	else
+	{
+		// Anything is allowed because we handle it when dropping
+	}
 
-	return nRes;
+	return DD_DROPEFFECT_MOVE;
 }
 
 LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 {
 	ASSERT(!IsReadOnly());
 
-	BOOL bDropped = m_treeDragDrop.ProcessMessage(GetCurrentMessage());
-	
-	if (bDropped)
+	if (!m_treeDragDrop.ProcessMessage(GetCurrentMessage()))
+		return FALSE;
+
+	HTREEITEM htiDropOn, htiDropAfter;
+		
+	if (!m_treeDragDrop.GetDropTarget(htiDropOn, htiDropAfter, m_bDragDropSubtasksAtTop))
+		return FALSE;
+
+	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
+	DD_DROPEFFECT nDrop = GetSelectedTasksDropEffect(htiDropOn, pDDI->bLeftDrag);
+
+	if (nDrop == DD_DROPEFFECT_NONE)
+		return FALSE;
+			
+	// Handle right-click drop context menu
+	DWORD dwTargetID = GetTaskID(htiDropOn);
+
+	if (!pDDI->bLeftDrag)
 	{
-		const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
-		HTREEITEM htiDropOn, htiDropAfter;
-		
-		if (!m_treeDragDrop.GetDropTarget(htiDropOn, htiDropAfter, m_bDragDropSubtasksAtTop))
-			return FALSE;
+		ASSERT(nDrop == DD_DROPEFFECT_MOVE);
 
-		//m_taskTree.RedrawColumns(); // ?
+		CEnMenu menu;
 
-		DD_DROPEFFECT nDrop = DD_DROPEFFECT_NONE;
-		
-		DWORD dwTargetID = GetTaskID(htiDropOn);
-		BOOL bTargetIsRef = m_data.IsTaskReference(dwTargetID);
-
-		if (pDDI->bLeftDrag) 
+		if (menu.LoadMenu(IDR_TREEDRAGDROP, *this, TRUE))
 		{
-			// Only allow non-refs to be dropped ON references AS references
+			if (m_treeDragDrop.IsDropOn() && dwTargetID)
+				m_taskTree.SelectDropTarget(htiDropOn);
 
-			if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
+			// Menu items are enabled by default so we just need
+			// to disable as required
+			CMenu* pSubMenu = menu.GetSubMenu(0);
+			UINT nDisabled = (MF_BYCOMMAND | MF_GRAYED);
+
+			if (!CanDropSelectedTasks(DD_DROPEFFECT_COPY, htiDropOn))
+				pSubMenu->EnableMenuItem(ID_TDD_COPYTASK, nDisabled);
+
+			if (!CanDropSelectedTasks(DD_DROPEFFECT_MOVE, htiDropOn))
+				pSubMenu->EnableMenuItem(ID_TDD_MOVETASK, nDisabled);
+
+			if (!CanDropSelectedTasks(DD_DROPEFFECT_LINK, htiDropOn))
+				pSubMenu->EnableMenuItem(ID_TDD_REFTASK, nDisabled);
+
+			// disable dependency and file links if dropping in-between tasks
+			// or dropping on locked tasks
+			BOOL bTargetIsLocked = m_calculator.IsTaskLocked(dwTargetID);
+
+			if (bTargetIsLocked || !m_treeDragDrop.IsDropOn())
 			{
-				nDrop = DD_DROPEFFECT_LINK;
+				pSubMenu->EnableMenuItem(ID_TDD_SETTASKDEPENDENCY, nDisabled);
+				pSubMenu->EnableMenuItem(ID_TDD_ADDTASKDEPENDENCY, nDisabled);
+				pSubMenu->EnableMenuItem(ID_TDD_ADDFILELINK, nDisabled);
 			}
-			else if (Misc::ModKeysArePressed(MKS_NONE))
+			else if (m_taskTree.SelectionHasTask(dwTargetID, TRUE)) // prevent dependency on self
 			{
-				nDrop = DD_DROPEFFECT_MOVE;
+				pSubMenu->EnableMenuItem(ID_TDD_SETTASKDEPENDENCY, nDisabled);
+				pSubMenu->EnableMenuItem(ID_TDD_ADDTASKDEPENDENCY, nDisabled);
 			}
-			else if (Misc::ModKeysArePressed(MKS_CTRL))
+
+			// Display the menu, returning the selected command
+			CPoint ptCursor(pDDI->pt);
+			::ClientToScreen(pDDI->hwndTarget, &ptCursor);
+
+			UINT nCmdID = ::TrackPopupMenu(*pSubMenu, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON,
+										   ptCursor.x, ptCursor.y, 0, *this, NULL);
+
+			nDrop = DD_DROPEFFECT_NONE;
+
+			switch (nCmdID)
 			{
-				nDrop = DD_DROPEFFECT_COPY;
-			}
-			else if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT))
-			{
-				nDrop = DD_DROPEFFECT_LINK;
-			}
-		}
-		else // right drag
-		{
-			CEnMenu menu;
-
-			if (menu.LoadMenu(IDR_TREEDRAGDROP, *this, TRUE))
-			{
-				if (m_treeDragDrop.IsDropOn() && dwTargetID)
-					m_taskTree.SelectDropTarget(htiDropOn);
-				
-				// Menu items are enabled by default so we just need
-				// to disable as required
-				CMenu* pSubMenu = menu.GetSubMenu(0);
-				UINT nDisabled = (MF_BYCOMMAND | MF_GRAYED);
-
-				if (!CanDropSelectedTasks(DD_DROPEFFECT_COPY, htiDropOn))
-					pSubMenu->EnableMenuItem(ID_TDD_COPYTASK, nDisabled);
-
-				if (!CanDropSelectedTasks(DD_DROPEFFECT_MOVE, htiDropOn))
-					pSubMenu->EnableMenuItem(ID_TDD_MOVETASK, nDisabled);
-
-				if (!CanDropSelectedTasks(DD_DROPEFFECT_LINK, htiDropOn))
-					pSubMenu->EnableMenuItem(ID_TDD_REFTASK, nDisabled);
-
-				// disable dependency and file links if dropping in-between tasks
-				// or dropping on locked tasks
-				BOOL bTargetIsLocked = m_calculator.IsTaskLocked(dwTargetID);
-				
-				if (bTargetIsLocked || !m_treeDragDrop.IsDropOn())
-				{
-					pSubMenu->EnableMenuItem(ID_TDD_SETTASKDEPENDENCY, nDisabled);
-					pSubMenu->EnableMenuItem(ID_TDD_ADDTASKDEPENDENCY, nDisabled);
-					pSubMenu->EnableMenuItem(ID_TDD_SETFILELINK, nDisabled);
-				}
-				else if (m_taskTree.SelectionHasTask(dwTargetID, TRUE)) // prevent dependency on self
-				{
-					pSubMenu->EnableMenuItem(ID_TDD_SETTASKDEPENDENCY, nDisabled);
-					pSubMenu->EnableMenuItem(ID_TDD_ADDTASKDEPENDENCY, nDisabled);
-				}
-
-				// Display the menu, returning the selected command
-				CPoint ptCursor(pDDI->pt);
-				::ClientToScreen(pDDI->hwndTarget, &ptCursor);
-
-				UINT nCmdID = ::TrackPopupMenu(*pSubMenu, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON, 
-					ptCursor.x, ptCursor.y, 0, *this, NULL);
-
-				switch (nCmdID)
-				{
-				case ID_TDD_REFTASK: 
+				case ID_TDD_REFTASK:
 					nDrop = DD_DROPEFFECT_LINK;
 					break;
 
@@ -7408,9 +7377,14 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 					{
 						IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-						// replace/append task dependencies with this one
+						CDWordArray aTaskIDs;
+						int nTask = GetSelectedTaskIDs(aTaskIDs, TRUE);
+
 						CStringArray aDepends;
-						aDepends.Add(TODOITEM::FormatTaskDependency(GetSelectedTaskID()));
+						aDepends.SetSize(nTask);
+
+						while (nTask--)
+							aDepends[nTask] = TODOITEM::FormatTaskDependency(aTaskIDs[nTask]);
 
 						CDWordArray aModTaskIDs;
 						aModTaskIDs.Add(dwTargetID);
@@ -7420,15 +7394,18 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 					}
 					break;
 
-				case ID_TDD_SETFILELINK:
+				case ID_TDD_ADDFILELINK:
 					{
 						IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-						CString sTaskRef;
-						sTaskRef.Format(_T("tdl://%lu"), GetSelectedTaskID());
+						CDWordArray aTaskIDs;
+						int nTask = GetSelectedTaskIDs(aTaskIDs, TRUE);
 
 						CStringArray aFileRefs;
-						aFileRefs.Add(sTaskRef);
+						aFileRefs.SetSize(nTask);
+
+						while (nTask--)
+							aFileRefs[nTask] = TODOITEM::FormatTaskLink(aTaskIDs[nTask]);
 
 						CDWordArray aModTaskIDs;
 						aModTaskIDs.Add(dwTargetID);
@@ -7440,17 +7417,14 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 				default:
 					break;
-				}
-
-				m_taskTree.SelectDropTarget(NULL);
-				m_taskTree.RedrawColumns();
 			}
-		}
 
-		bDropped = DropSelectedTasks(nDrop, htiDropOn, htiDropAfter);
+			m_taskTree.SelectDropTarget(NULL);
+			m_taskTree.RedrawColumns();
+		}
 	}
 
-	return bDropped;
+	return DropSelectedTasks(nDrop, htiDropOn, htiDropAfter);
 }
 
 BOOL CToDoCtrl::CanDropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget) const
@@ -7459,42 +7433,42 @@ BOOL CToDoCtrl::CanDropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarge
 	DWORD dwTargetID = GetTaskID(htiDropTarget);
 	BOOL bTargetIsRef = m_data.IsTaskReference(dwTargetID);
 
-	if (m_data.IsTaskLocked(dwTargetID) && !bTargetIsRef)
+	if (m_calculator.IsTaskLocked(dwTargetID) && !bTargetIsRef)
 		return FALSE;
 
 	switch (nDrop)
 	{
-	case DD_DROPEFFECT_COPY:
-		// Can't copy non-references on to a reference
-		if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
-		{
-			return FALSE;
-		}
-		return TRUE;
+		case DD_DROPEFFECT_COPY:
+			// Can't copy non-references on to a reference
+			if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
+			{
+				return FALSE;
+			}
+			return TRUE;
 
-	case DD_DROPEFFECT_LINK:
-		return TRUE;
+		case DD_DROPEFFECT_LINK:
+			return TRUE;
 
-	case DD_DROPEFFECT_MOVE:
-		// Can't move locked tasks which are not references
-		if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
-		{
-			return FALSE;
-		}
-		// Can't move subtasks of a locked task which is not a reference
-		else if (m_taskTree.SelectionHasLockedParent(TRUE))
-		{
-			return FALSE;
-		}
-		// Can't move non-references on to a reference
-		else if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
-		{
-			return FALSE;
-		}
-		return TRUE;
+		case DD_DROPEFFECT_MOVE:
+			// Can't move locked tasks which are not references
+			if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
+			{
+				return FALSE;
+			}
+			// Can't move subtasks of a locked task which is not a reference
+			else if (m_taskTree.SelectionHasLockedParent(TRUE))
+			{
+				return FALSE;
+			}
+			// Can't move non-references on to a reference
+			else if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
+			{
+				return FALSE;
+			}
+			return TRUE;
 
-	case DD_DROPEFFECT_NONE:
-		return FALSE;
+		case DD_DROPEFFECT_NONE:
+			return FALSE;
 	}
 
 	// all else
@@ -7506,7 +7480,6 @@ BOOL CToDoCtrl::DropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget, 
 {
 	if (!CanDropSelectedTasks(nDrop, htiDropTarget))
 	{
-		ASSERT(nDrop == DD_DROPEFFECT_NONE);
 		return FALSE;
 	}
 

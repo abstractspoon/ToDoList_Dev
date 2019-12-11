@@ -159,6 +159,7 @@ public:
 	static BOOL HasTime(const COleDateTime& date);
 	static BOOL ParseTaskLink(const CString& sLink, DWORD& dwTaskID, CString& sFile);
 	static CString FormatTaskDependency(DWORD dwTaskID, const CString& sFile = _T(""));
+	static CString FormatTaskLink(DWORD dwTaskID, const CString& sFile = _T(""), BOOL bUrl = FALSE);
 	static void SetRecentlyModifiedPeriod(double dDays);
 	static void SetModifierName(const CString sModifier);
 	static BOOL IsRecentlyModified(const COleDateTime& date);

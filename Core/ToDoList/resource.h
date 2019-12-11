@@ -1198,8 +1198,7 @@
 #define ID_EDIT_INSERTDATE              34215
 #define ID_TDD_COPYTASK                 34217
 #define ID_TDD_ADDTASKDEPENDENCY        34218
-#define ID_TDD_TASKREFERENCE            34219
-#define ID_TDD_SETFILELINK              34219
+#define ID_TDD_ADDFILELINK              34219
 #define ID_NEXTTASK                     34220
 #define ID_PREVTASK                     34221
 #define ID_FIND_ADDRULE                 34227

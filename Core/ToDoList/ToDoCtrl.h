@@ -420,7 +420,7 @@ public:
 	void SetCompletionStatus(const CString& sStatus);
 
 	BOOL ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const;
-	CString FormatTaskLink(DWORD dwTaskID, BOOL bFull) const;
+	CString FormatTaskLink(DWORD dwTaskID, BOOL bFull, BOOL bURL) const;
 	CString FormatTaskDependency(DWORD dwTaskID, BOOL bFull) const;
 
 	static BOOL ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
@@ -881,6 +881,7 @@ protected:
 
 	BOOL DropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget, HTREEITEM htiDropAfter);
 	BOOL CanDropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget) const;
+	DD_DROPEFFECT GetSelectedTasksDropEffect(HTREEITEM htiDropTarget, BOOL bLeftDrag) const;
 
 	void SearchAndExpand(const SEARCHPARAMS& params, BOOL bExpand);
 	void AppendTaskFileHeader(CTaskFile& tasks) const;

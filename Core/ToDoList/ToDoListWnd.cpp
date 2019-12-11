@@ -5782,7 +5782,7 @@ void CToDoListWnd::CopySelectedTasksToClipboard(TDC_TASKS2CLIPBOARD nAsFormat)
 		break;
 		
 	case TDCTC_ASLINK:
-		sTasks = tdc.FormatTaskLink(tdc.GetSelectedTaskID(), FALSE);
+		sTasks = tdc.FormatTaskLink(tdc.GetSelectedTaskID(), FALSE, TRUE);
 		break;
 		
 	case TDCTC_ASDEPENDS:
@@ -5790,7 +5790,7 @@ void CToDoListWnd::CopySelectedTasksToClipboard(TDC_TASKS2CLIPBOARD nAsFormat)
 		break;
 		
 	case TDCTC_ASLINKFULL:
-		sTasks = tdc.FormatTaskLink(tdc.GetSelectedTaskID(), TRUE);
+		sTasks = tdc.FormatTaskLink(tdc.GetSelectedTaskID(), TRUE, TRUE);
 		break;
 		
 	case TDCTC_ASDEPENDSFULL:

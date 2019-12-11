@@ -458,6 +458,19 @@ CString Misc::FormatArray(const CDWordArray& array, LPCTSTR szSep)
 	return sText;
 }
 
+int Misc::FormatArray(const CDWordArray& aSrc, LPCTSTR lpszFormat, CStringArray& aDest)
+{
+	ASSERT(AfxIsValidString(lpszFormat));
+
+	int nSrc = aSrc.GetSize();
+	aDest.SetSize(nSrc);
+
+	while (nSrc--)
+		aDest[nSrc] = Format(lpszFormat, aSrc[nSrc]);
+
+	return aDest.GetSize();
+}
+
 #ifdef _DEBUG
 void Misc::Trace(const CStringArray& array)
 {

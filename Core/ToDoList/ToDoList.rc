@@ -4032,7 +4032,7 @@ BEGIN
         MENUITEM "&Set Task Dependency",        ID_TDD_SETTASKDEPENDENCY
         MENUITEM "&Add Task Dependency",        ID_TDD_ADDTASKDEPENDENCY
         MENUITEM SEPARATOR
-        MENUITEM "Create Task &File Link",      ID_TDD_SETFILELINK
+        MENUITEM "Create Task &File Link",      ID_TDD_ADDFILELINK
         MENUITEM SEPARATOR
         MENUITEM "Cancel\tEsc",                 IDCANCEL
     END
