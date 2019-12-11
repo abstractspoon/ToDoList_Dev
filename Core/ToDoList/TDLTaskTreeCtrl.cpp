@@ -2265,7 +2265,7 @@ BOOL CTDLTaskTreeCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
 		HTREEITEM hti = GetItem(aTrueTaskIDs[nTask]);
 
 		if (hti)
-			bSel |= TSH().SetItem(hti, TSHS_SELECT, FALSE);
+			bSel |= TSH().SetItem(hti, TSHS_SELECT, TRUE);
 	}
 	
 	if (bSel || !aTrueTaskIDs.GetSize())
