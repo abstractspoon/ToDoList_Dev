@@ -768,17 +768,14 @@ CString TODOITEM::FormatTaskDependency(DWORD dwTaskID, const CString& sFile)
 	return sLink;
 }
 
-CString TODOITEM::FormatTaskLink(DWORD dwTaskID, const CString& sFile, BOOL bURL)
+CString TODOITEM::FormatTaskLink(DWORD dwTaskID, const CString& sFile)
 {
 	CString sLink = FormatTaskDependency(dwTaskID, sFile);
 
 	if (!sLink.IsEmpty())
 	{
-		if (bURL)
-		{
-			sLink.Replace(_T(" "), _T("%20"));
-			sLink.Replace('\\', '/');
-		}
+		sLink.Replace(_T(" "), _T("%20"));
+		sLink.Replace('\\', '/');
 
 		sLink = (_T("tdl://") + sLink);
 	}

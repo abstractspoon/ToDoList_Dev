@@ -471,7 +471,7 @@ BOOL CToDoCtrl::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sF
 	return CTDLTaskCtrlBase::ParseTaskLink(sLink, bURL, sFolder, dwTaskID, sFile);
 }
 
-CString CToDoCtrl::FormatTaskLink(DWORD dwTaskID, BOOL bFull, BOOL bURL) const
+CString CToDoCtrl::FormatTaskLink(DWORD dwTaskID, BOOL bFull) const
 {
 	if (!dwTaskID || (bFull && !HasFilePath()))
 	{
@@ -479,7 +479,7 @@ CString CToDoCtrl::FormatTaskLink(DWORD dwTaskID, BOOL bFull, BOOL bURL) const
 		return _T("");
 	}
 	
-	return TODOITEM::FormatTaskLink(dwTaskID, (bFull ? m_sLastSavePath : _T("")), bURL);
+	return TODOITEM::FormatTaskLink(dwTaskID, (bFull ? m_sLastSavePath : _T("")));
 }
 
 CString CToDoCtrl::FormatTaskDependency(DWORD dwTaskID, BOOL bFull) const

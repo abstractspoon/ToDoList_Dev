@@ -420,7 +420,7 @@ public:
 	void SetCompletionStatus(const CString& sStatus);
 
 	BOOL ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const;
-	CString FormatTaskLink(DWORD dwTaskID, BOOL bFull, BOOL bURL) const;
+	CString FormatTaskLink(DWORD dwTaskID, BOOL bFull) const;
 	CString FormatTaskDependency(DWORD dwTaskID, BOOL bFull) const;
 
 	static BOOL ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
