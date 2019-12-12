@@ -57,8 +57,11 @@ void CToDoCtrlTaskLinkTest::TestFormatTaskLink()
 
 	m_tdc.SetFilePath(_T("C:\\Users\\Daniel Godson\\AppData\\Local\\A Tasklist.tdl"));
 
+#ifndef _DEBUG
+	// These assert so we only run them in release
 	ExpectEQ(m_tdc.FormatTaskLink(0, FALSE), _T("")); // Must provide task ID
 	ExpectEQ(m_tdc.FormatTaskLink(0, TRUE), _T("")); // Must provide task ID
+#endif
 
 	ExpectEQ(m_tdc.FormatTaskLink(10, FALSE), _T("tdl://10"));
 	ExpectEQ(m_tdc.FormatTaskLink(10, TRUE), _T("tdl://C:/Users/Daniel%20Godson/AppData/Local/A%20Tasklist.tdl?10"));
@@ -67,7 +70,10 @@ void CToDoCtrlTaskLinkTest::TestFormatTaskLink()
 
 	m_tdc.SetFilePath(_T(""));
 
+#ifndef _DEBUG
+	// These assert so we only run them in release
 	ExpectEQ(m_tdc.FormatTaskLink(10, TRUE), _T("")); // Must have been saved for 'full' task link
+#endif
 
 	//  ---------------------------------------
 
@@ -82,8 +88,11 @@ void CToDoCtrlTaskLinkTest::TestFormatTaskDependency()
 
 	m_tdc.SetFilePath(_T("C:\\Users\\Daniel Godson\\AppData\\Local\\A Tasklist.tdl"));
 
+#ifndef _DEBUG
+	// These assert so we only run them in release
 	ExpectEQ(m_tdc.FormatTaskDependency(0, FALSE), _T("")); // Must provide task ID
 	ExpectEQ(m_tdc.FormatTaskDependency(0, TRUE), _T("")); // Must provide task ID
+#endif
 
 	ExpectEQ(m_tdc.FormatTaskDependency(10, FALSE), _T("10"));
 	ExpectEQ(m_tdc.FormatTaskDependency(10, TRUE), _T("C:\\Users\\Daniel Godson\\AppData\\Local\\A Tasklist.tdl?10"));
@@ -92,7 +101,9 @@ void CToDoCtrlTaskLinkTest::TestFormatTaskDependency()
 
 	m_tdc.SetFilePath(_T(""));
 
+#ifndef _DEBUG
 	ExpectEQ(m_tdc.FormatTaskDependency(10, TRUE), _T("")); // Must have been saved for 'full' task link
+#endif
 
 	//  ---------------------------------------
 
