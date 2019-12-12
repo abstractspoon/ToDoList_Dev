@@ -25,7 +25,7 @@ CToDoCtrlDataTest::~CToDoCtrlDataTest()
 
 }
 
-void CToDoCtrlDataTest::Run()
+TESTRESULT CToDoCtrlDataTest::Run()
 {
-	
+	return TESTRESULT();
 }

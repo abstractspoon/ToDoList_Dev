@@ -119,7 +119,7 @@ class CTDLTestSelfTest : public CTDLTestBase
 public:
 	CTDLTestSelfTest() : CTDLTestBase() {}
 
-	void Run()
+	TESTRESULT Run()
 	{
 		BeginTest(_T("CTDLTestBase::SelfTest"));
 
@@ -266,6 +266,8 @@ public:
 		// -------------------------------------------------
 
 		EndTest();
+
+		return m_resTest;
 	}
 
 };
@@ -281,7 +283,8 @@ CTDLTestBase::CTDLTestBase(const CTestUtils& utils) : m_utils(utils)
 
 CTDLTestBase::~CTDLTestBase()
 {
-
+	if (m_resTotal != m_resTest)
+		m_resTotal.ReportResults();
 }
 
 BOOL CTDLTestBase::BeginTest(LPCTSTR szTest) 
@@ -298,7 +301,8 @@ BOOL CTDLTestBase::BeginTest(LPCTSTR szTest)
 		return FALSE;
 
 	m_sCurrentTest = szTest;
-	m_nTestError = m_nTestSuccess = m_nCurTest = 0;
+	m_resTest.Clear();
+	m_nCurTest = 0;
 
 	_tprintf(_T("\nTest '%s' started --------\n\n"), szTest);
 
@@ -312,22 +316,13 @@ BOOL CTDLTestBase::EndTest()
 	if (m_sCurrentTest.IsEmpty())
 		return FALSE;
 
-	if (GetTestCount(FALSE))
-	{
-		if (GetErrorCount(FALSE))
-			_tprintf(_T("\n  %2d/%2d tests FAILED\n"), GetErrorCount(FALSE), GetTestCount(FALSE));
-
-		if (GetSuccessCount(FALSE))
-			_tprintf(_T("\n  %2d/%2d tests SUCCEEDED\n"), GetSuccessCount(FALSE), GetTestCount(FALSE));
-	}
-	else
-	{
-		_tprintf(_T("  No tests were run\n")); 
-	}
+	m_resTest.ReportResults();
+	m_resTotal += m_resTest;
 	
 	_tprintf(_T("\nTest '%s' ended ----------\n"), m_sCurrentTest);
 	
 	m_sCurrentTest.Empty();
+
 	return TRUE;
 }
 
@@ -731,9 +726,7 @@ BOOL CTDLTestBase::SelfTest()
 {
 	CTDLTestSelfTest test;
 	
-	test.Run();
-
-	return !test.GetErrorCount(TRUE);
+	return (test.Run().nNumError == 0);
 }
 
 // -------------------------------------------------------------------------------------------------------

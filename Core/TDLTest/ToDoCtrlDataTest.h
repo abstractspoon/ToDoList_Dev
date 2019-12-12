@@ -17,7 +17,7 @@ public:
 	CToDoCtrlDataTest(const CTestUtils& utils);
 	virtual ~CToDoCtrlDataTest();
 	
-	void Run();
+	TESTRESULT Run();
 
 };
 

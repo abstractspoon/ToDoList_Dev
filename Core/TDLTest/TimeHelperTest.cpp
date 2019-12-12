@@ -28,9 +28,13 @@ CTimeHelperTest::~CTimeHelperTest()
 
 }
 
-void CTimeHelperTest::Run()
+TESTRESULT CTimeHelperTest::Run()
 {
+	ClearTotals();
+
 	TestGetTime();
+
+	return GetTotals();
 }
 
 void CTimeHelperTest::TestGetTime()

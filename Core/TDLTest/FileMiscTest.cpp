@@ -28,9 +28,13 @@ CFileMiscTest::~CFileMiscTest()
 {
 }
 
-void CFileMiscTest::Run()
+TESTRESULT CFileMiscTest::Run()
 {
+	ClearTotals();
+
 	TestGetVirtualStorePath();
+
+	return GetTotals();
 }
 
 void CFileMiscTest::TestGetVirtualStorePath()

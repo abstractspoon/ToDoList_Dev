@@ -47,6 +47,58 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
+struct TESTRESULT
+{
+	TESTRESULT() 
+	{ 
+		Clear(); 
+	}
+
+	void Clear() 
+	{ 
+		nNumSuccess = nNumError = 0; 
+	}
+
+	int GetTotal() const 
+	{ 
+		return (nNumError + nNumSuccess); 
+	}
+
+	TESTRESULT& operator+=(const TESTRESULT& other)
+	{
+		nNumError += other.nNumError;
+		nNumSuccess += other.nNumSuccess;
+
+		return *this;
+	}
+
+	BOOL operator!=(const TESTRESULT& other)
+	{
+		return ((nNumError != other.nNumError) || (nNumSuccess != other.nNumSuccess));
+	}
+
+	void ReportResults() const
+	{
+		if (!GetTotal())
+		{
+			_tprintf(_T("  No tests were run\n"));
+		}
+		else
+		{
+			if (nNumError)
+				_tprintf(_T("\n  %2d/%2d tests FAILED\n"), nNumError, GetTotal());
+
+			if (nNumSuccess)
+				_tprintf(_T("\n  %2d/%2d tests SUCCEEDED\n"), nNumSuccess, GetTotal());
+		}
+	}
+
+	UINT nNumError;
+	UINT nNumSuccess;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CTDLTestBase
 {
 	friend class CTDLTestSelfTest;
@@ -54,7 +106,7 @@ class CTDLTestBase
 public:
 	virtual ~CTDLTestBase();
 	
-	virtual void Run() = 0; // derived must override
+	virtual TESTRESULT Run() = 0; // derived must override
 
 	static BOOL SelfTest();
 	
@@ -63,10 +115,6 @@ protected:
 
 	BOOL BeginTest(LPCTSTR szTest);
 	BOOL EndTest();
-
-	UINT GetSuccessCount(BOOL bTotal) const { return (bTotal ? m_nTotalSuccess : m_nTestSuccess); }
-	UINT GetErrorCount(BOOL bTotal) const { return (bTotal ? m_nTotalError : m_nTestError); }
-	UINT GetTestCount(BOOL bTotal) const { return (bTotal ? (m_nTotalError + m_nTotalSuccess) : (m_nTestError + m_nTestSuccess)); }
 
 	BOOL ExpectTrue(bool b) const;
 	BOOL ExpectTrue(BOOL b) const;
@@ -133,13 +181,18 @@ protected:
 	BOOL ExpectNE(const CDWordArray& a1, const CDWordArray& a2, BOOL bOrderSensitive = FALSE) const;
 	
 	BOOL ExpectFileContentsNE(const CString& sFile1, const CString& sFile2) const;
+
+	void ClearTotals() { m_resTotal.Clear(); }
+	TESTRESULT GetTotals() const { return m_resTotal; }
 	
 protected:
 	const CTestUtils m_utils;
 
 private:
-	mutable UINT m_nTestError, m_nTestSuccess, m_nCurTest;
-	UINT m_nTotalError, m_nTotalSuccess;
+	mutable TESTRESULT m_resTest;
+	TESTRESULT m_resTotal;
+
+	mutable UINT m_nCurTest;
 	CString m_sCurrentTest;
 
 private:
@@ -200,9 +253,9 @@ private:
 		}
 
 		if (bSuccess)
-			m_nTestSuccess++;
+			m_resTest.nNumSuccess++;
 		else
-			m_nTestError++;
+			m_resTest.nNumError++;
 		
 		return OutputExpectResult(t1, szFmt1, t2, szFmt2, nOp, bSuccess, szTrail);
 	}

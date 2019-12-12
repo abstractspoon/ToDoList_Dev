@@ -17,7 +17,7 @@ public:
 	CTDCRECURRENCETest(const CTestUtils& utils);
 	virtual ~CTDCRECURRENCETest();
 	
-	void Run();
+	TESTRESULT Run();
 
 protected:
 	void TestSetRegularity();

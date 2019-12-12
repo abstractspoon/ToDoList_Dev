@@ -26,7 +26,7 @@ CTaskFileTest::~CTaskFileTest()
 
 }
 
-void CTaskFileTest::Run()
+TESTRESULT CTaskFileTest::Run()
 {
-
+	return TESTRESULT();
 }

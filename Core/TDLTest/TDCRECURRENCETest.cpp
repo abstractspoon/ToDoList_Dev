@@ -6,8 +6,6 @@
 #include "TDLTest.h"
 #include "TDCRECURRENCETest.h"
 
-#include "..\interfaces\ITasklist.h"
-
 #include "..\todolist\tdcrecurrence.h"
 
 #include "..\shared\datehelper.h"
@@ -32,9 +30,13 @@ CTDCRECURRENCETest::~CTDCRECURRENCETest()
 
 }
 
-void CTDCRECURRENCETest::Run()
+TESTRESULT CTDCRECURRENCETest::Run()
 {
+	ClearTotals();
+
 	TestSetRegularity();
+
+	return GetTotals();
 }
 
 void CTDCRECURRENCETest::TestSetRegularity()

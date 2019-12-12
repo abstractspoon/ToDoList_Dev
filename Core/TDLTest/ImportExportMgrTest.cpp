@@ -26,7 +26,7 @@ CImportExportMgrTest::~CImportExportMgrTest()
 
 }
 
-void CImportExportMgrTest::Run()
+TESTRESULT CImportExportMgrTest::Run()
 {
-	
+	return TESTRESULT();
 }

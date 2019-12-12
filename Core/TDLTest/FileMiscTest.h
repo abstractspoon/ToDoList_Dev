@@ -17,7 +17,7 @@ public:
 	CFileMiscTest(const CTestUtils& utils);
 	virtual ~CFileMiscTest();
 	
-	void Run();
+	TESTRESULT Run();
 
 protected:
 	void TestGetVirtualStorePath();

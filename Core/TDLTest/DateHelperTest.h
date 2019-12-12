@@ -17,7 +17,7 @@ public:
 	CDateHelperTest(const CTestUtils& utils);
 	virtual ~CDateHelperTest();
 
-	void Run();
+	TESTRESULT Run();
 
 protected:
 	void TestRelativeDateDecoding();

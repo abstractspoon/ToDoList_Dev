@@ -17,7 +17,7 @@ public:
 	CImportExportMgrTest(const CTestUtils& utils);
 	virtual ~CImportExportMgrTest();
 
-	void Run();
+	TESTRESULT Run();
 
 };
 

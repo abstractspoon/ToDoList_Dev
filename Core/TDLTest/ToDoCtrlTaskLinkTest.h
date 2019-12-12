@@ -19,7 +19,7 @@ public:
 	CToDoCtrlTaskLinkTest(const CTestUtils& utils);
 	virtual ~CToDoCtrlTaskLinkTest();
 
-	void Run();
+	TESTRESULT Run();
 
 protected:
 	CToDoCtrl m_tdc;

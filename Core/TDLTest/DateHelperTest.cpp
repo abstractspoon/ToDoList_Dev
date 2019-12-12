@@ -28,9 +28,13 @@ CDateHelperTest::~CDateHelperTest()
 
 }
 
-void CDateHelperTest::Run()
+TESTRESULT CDateHelperTest::Run()
 {
+	ClearTotals();
+
 	TestRelativeDateDecoding();
+
+	return GetTotals();
 }
 
 void CDateHelperTest::TestRelativeDateDecoding()

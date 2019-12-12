@@ -17,7 +17,7 @@ public:
 	CTimeHelperTest(const CTestUtils& utils);
 	virtual ~CTimeHelperTest();
 
-	void Run();
+	TESTRESULT Run();
 
 protected:
 	void TestGetTime();

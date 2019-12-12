@@ -17,7 +17,7 @@ public:
 	CTaskFileTest(const CTestUtils& utils);
 	virtual ~CTaskFileTest();
 
-	void Run();
+	TESTRESULT Run();
 
 };
 
