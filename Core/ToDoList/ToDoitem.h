@@ -157,9 +157,9 @@ public:
 	
 	static COleDateTimeSpan GetRemainingTime(const COleDateTime& date); // in days
 	static BOOL HasTime(const COleDateTime& date);
-	static BOOL ParseTaskLink(const CString& sLink, DWORD& dwTaskID, CString& sFile);
-	static CString FormatTaskDependency(DWORD dwTaskID, const CString& sFile = _T(""));
-	static CString FormatTaskLink(DWORD dwTaskID, const CString& sFile = _T(""));
+	static BOOL IsTaskLink(const CString& sLink, BOOL bURL);
+	static BOOL ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
+	static CString FormatTaskLink(DWORD dwTaskID, BOOL bURL, const CString& sFile = _T(""));
 	static void SetRecentlyModifiedPeriod(double dDays);
 	static void SetModifierName(const CString sModifier);
 	static BOOL IsRecentlyModified(const COleDateTime& date);

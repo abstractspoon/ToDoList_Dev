@@ -3011,7 +3011,7 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 				// first check for a tdl://
 				CString sFileRef = aFileLinks[nFile];
 				
-				if (sFileRef.Find(TDL_PROTOCOL) != -1)
+				if (TODOITEM::IsTaskLink(sFileRef, TRUE))
 				{
 					// draw our app icon 
 					if (m_imageIcons.HasIcon(APP_ICON) || 
@@ -3023,7 +3023,7 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 				else
 				{
 					// get the associated image, failing if necessary
-					sFileRef.Remove('\"'); // remove quotes
+					sFileRef.Remove('\"'); // remove double-quotes
 					FileMisc::MakeFullPath(sFileRef, m_sTasklistFolder);
 					
 					if (m_imageIcons.HasIcon(sFileRef) || 
@@ -5474,7 +5474,7 @@ BOOL CTDLTaskCtrlBase::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sI
 		CString sFile;
 		DWORD dwDependID;
 		
-		VERIFY(ParseTaskLink(aDepends[nDepends], FALSE, dwDependID, sFile));
+		VERIFY(TODOITEM::ParseTaskLink(aDepends[nDepends], FALSE, m_sTasklistFolder, dwDependID, sFile));
 		
 		// see if dependent is one of 'our' tasks
 		if (dwDependID && sFile.IsEmpty())
@@ -5796,40 +5796,6 @@ BOOL CTDLTaskCtrlBase::SelectionHasSubtasks() const
 	}
 	
 	return FALSE;
-}
-
-BOOL CTDLTaskCtrlBase::ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const
-{
-	return ParseTaskLink(sLink, bURL, m_sTasklistFolder, dwTaskID, sFile);
-}
-
-// Static
-BOOL CTDLTaskCtrlBase::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile)
-{
-	CString sCleaned(sLink);
-	
-	// strip off protocol (if not done)
-	int nProtocol = sCleaned.Find(TDL_PROTOCOL);
-	
-	if (nProtocol != -1)
-	{
-		sCleaned = sCleaned.Mid(nProtocol + lstrlen(TDL_PROTOCOL));
-	}
-	else if (bURL)
-	{
-		return FALSE;
-	}
-	
-	// cleanup
-	sCleaned.Replace(_T("%20"), _T(" "));
-	sCleaned.Replace(_T("/"), _T("\\"));
-
-	// Make full path only if it looks like a path
-	if (!sFolder.IsEmpty() && ((sCleaned.Find('?') != -1) || !Misc::IsNumber(sCleaned)))
-		FileMisc::MakeFullPath(sCleaned, sFolder);
-	
-	// parse the url
-	return TODOITEM::ParseTaskLink(sCleaned, dwTaskID, sFile);
 }
 
 void CTDLTaskCtrlBase::EnableExtendedSelection(BOOL bCtrl, BOOL bShift)

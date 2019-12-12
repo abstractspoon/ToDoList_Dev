@@ -419,10 +419,9 @@ public:
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos, BOOL bResize);
 	void SetCompletionStatus(const CString& sStatus);
 
-	BOOL ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const;
 	CString FormatTaskLink(DWORD dwTaskID, BOOL bFull) const;
 	CString FormatTaskDependency(DWORD dwTaskID, BOOL bFull) const;
-
+	BOOL ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const;
 	static BOOL ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
 	
 	void SetAlternatePreferencesKey(const CString& sKey) { m_sAltPrefsKey = sKey; }
@@ -919,7 +918,6 @@ protected:
 	static void SetDefaultListContent(CAutoComboBox& combo, const CStringArray& aNewDefs, const CStringArray& aOldDefs, BOOL bAddEmpty = FALSE);
 	static int AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems);
 	static BOOL XMLHeaderIsUnicode(LPCTSTR szXmlHeader);
-	static BOOL IsTaskLinkURL(const CString& sLink);
 	static TDC_FILE SaveTaskfile(CTaskFile& tasks, const CString& sSavePath);
 	static TDC_FILE MapTaskfileError(int nFileErr);
 

@@ -86,6 +86,7 @@ public:
 	void RecalcUntrackedColumnWidths();
 	void RecalcAllColumnWidths();
 	void EnableRecalcColumns(BOOL bEnable = TRUE);
+	void UpdateSelectedTaskPath();
 	
  	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTrueTask(dwTaskID); }
  	inline UINT GetTaskCount() const { return m_data.GetTaskCount(); }
@@ -178,11 +179,7 @@ public:
 	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1) const;
 	int GetTaskIconIndex(DWORD dwTaskID) const;
 	int GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-
-	void UpdateSelectedTaskPath();
-	BOOL ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const;
-	static BOOL ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
-
+	
 	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
 	DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;

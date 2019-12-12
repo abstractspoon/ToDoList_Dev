@@ -5,9 +5,11 @@
 #include "stdafx.h"
 #include "ToDoitem.h"
 #include "tdcmapping.h"
+#include "tdcstatic.h"
 
 #include "..\shared\DateHelper.h"
 #include "..\shared\misc.h"
+#include "..\shared\filemisc.h"
 
 #include <math.h>
 
@@ -723,9 +725,23 @@ COleDateTimeSpan TODOITEM::GetRemainingTime(const COleDateTime& date)
 	return dtsRemaining;
 }
 
-BOOL TODOITEM::ParseTaskLink(const CString& sLink, DWORD& dwTaskID, CString& sFile)
+BOOL TODOITEM::IsTaskLink(const CString& sLink, BOOL bURL)
 {
-	sFile = sLink;
+	if (bURL)
+		return (sLink.Find(TDL_PROTOCOL) == 0);
+
+	// else
+	return ((sLink.Find('?') != -1) || Misc::IsNumber(sLink));
+}
+
+BOOL TODOITEM::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile)
+{
+	CString sCleaned(sLink);
+
+	// strip off protocol
+	if (!Misc::RemovePrefix(sCleaned, TDL_PROTOCOL) && bURL)
+		return FALSE;
+
 	dwTaskID = 0;
 
 	CString sTaskID;
@@ -735,44 +751,47 @@ BOOL TODOITEM::ParseTaskLink(const CString& sLink, DWORD& dwTaskID, CString& sFi
 		dwTaskID = _ttoi(sTaskID);
 
 		// remove trailing back slash appended by Macro Express Pro
-		sFile.TrimRight(_T("\\"));
+		sFile.TrimRight('\\').TrimRight('/');
 	}
-	else if (!sLink.IsEmpty())
+	else if (Misc::IsNumber(sLink))
 	{
-		if (isdigit(sLink[0])) // number
-		{
-			dwTaskID = _ttoi(sLink);
-			sFile.Empty();
-		}
+		dwTaskID = _ttoi(sLink);
+		sFile.Empty();
 	}
+	else
+	{
+		sFile = sCleaned;
+	}
+
+	// sFile
+	sCleaned.Replace(_T("%20"), _T(" "));
+	sCleaned.Replace(_T("/"), _T("\\"));
+
+	// Make full path
+	if (!sFile.IsEmpty() && !sFolder.IsEmpty())
+		FileMisc::MakeFullPath(sFile, sFolder);
 
 	return (dwTaskID || !sFile.IsEmpty());
 }
 
-CString TODOITEM::FormatTaskDependency(DWORD dwTaskID, const CString& sFile)
+CString TODOITEM::FormatTaskLink(DWORD dwTaskID, BOOL bURL, const CString& sFile)
 {
 	CString sLink;
+	BOOL bHasFile = !sFile.IsEmpty();
 	
-	if (sFile.IsEmpty() && dwTaskID > 0)
+	if (!bHasFile && (dwTaskID > 0))
 	{
 		sLink.Format(_T("%lu"), dwTaskID);
 	}
-	else if (!sFile.IsEmpty())
+	else if (bHasFile)
 	{
 		if (dwTaskID > 0)
 			sLink.Format(_T("%s?%lu"), sFile, dwTaskID);
 		else
 			sLink = sFile;
 	}
-	
-	return sLink;
-}
 
-CString TODOITEM::FormatTaskLink(DWORD dwTaskID, const CString& sFile)
-{
-	CString sLink = FormatTaskDependency(dwTaskID, sFile);
-
-	if (!sLink.IsEmpty())
+	if (bURL && !sLink.IsEmpty())
 	{
 		sLink.Replace(_T(" "), _T("%20"));
 		sLink.Replace('\\', '/');
