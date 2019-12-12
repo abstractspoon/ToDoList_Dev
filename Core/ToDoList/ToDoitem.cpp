@@ -736,14 +736,13 @@ BOOL TODOITEM::IsTaskLink(const CString& sLink, BOOL bURL)
 
 BOOL TODOITEM::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile)
 {
-	CString sCleaned(sLink);
+	sFile = sLink;
 
 	// strip off protocol
-	if (!Misc::RemovePrefix(sCleaned, TDL_PROTOCOL) && bURL)
+	if (!Misc::RemovePrefix(sFile, TDL_PROTOCOL) && bURL)
 		return FALSE;
 
 	dwTaskID = 0;
-
 	CString sTaskID;
 
 	if (Misc::Split(sFile, sTaskID, '?'))
@@ -753,19 +752,15 @@ BOOL TODOITEM::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFo
 		// remove trailing back slash appended by Macro Express Pro
 		sFile.TrimRight('\\').TrimRight('/');
 	}
-	else if (Misc::IsNumber(sLink))
+	else if (Misc::IsNumber(sFile))
 	{
-		dwTaskID = _ttoi(sLink);
+		dwTaskID = _ttoi(sFile);
 		sFile.Empty();
-	}
-	else
-	{
-		sFile = sCleaned;
 	}
 
 	// sFile
-	sCleaned.Replace(_T("%20"), _T(" "));
-	sCleaned.Replace(_T("/"), _T("\\"));
+	sFile.Replace(_T("%20"), _T(" "));
+	sFile.Replace(_T("/"), _T("\\"));
 
 	// Make full path
 	if (!sFile.IsEmpty() && !sFolder.IsEmpty())
