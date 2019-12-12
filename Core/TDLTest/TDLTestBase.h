@@ -99,6 +99,8 @@ protected:
 	
 	BOOL ExpectEQ(const CString& s1, const CString& s2, BOOL bCaseSensitive = TRUE) const;
 	BOOL ExpectEQ(LPCTSTR sz1, LPCTSTR sz2, BOOL bCaseSensitive = TRUE) const;
+	BOOL ExpectEQ(const CString& s1, LPCTSTR sz2, BOOL bCaseSensitive = TRUE) const;
+	BOOL ExpectEQ(LPCTSTR sz1, const CString& s2, BOOL bCaseSensitive = TRUE) const;
 
 	BOOL ExpectEQ(const CStringArray& a1, const CStringArray& a2, BOOL bOrderSensitive = FALSE, BOOL bCaseSensitive = TRUE) const;
 	BOOL ExpectEQ(const CDWordArray& a1, const CDWordArray& a2, BOOL bOrderSensitive = FALSE) const;
@@ -124,6 +126,8 @@ protected:
 	
 	BOOL ExpectNE(const CString& s1, const CString& s2, BOOL bCaseSensitive = TRUE) const;
 	BOOL ExpectNE(LPCTSTR sz1, LPCTSTR sz2, BOOL bCaseSensitive = TRUE) const;
+	BOOL ExpectNE(const CString& s1, LPCTSTR sz2, BOOL bCaseSensitive = TRUE) const;
+	BOOL ExpectNE(LPCTSTR sz1, const CString& s2, BOOL bCaseSensitive = TRUE) const;
 	
 	BOOL ExpectNE(const CStringArray& a1, const CStringArray& a2, BOOL bOrderSensitive = FALSE, BOOL bCaseSensitive = TRUE) const;
 	BOOL ExpectNE(const CDWordArray& a1, const CDWordArray& a2, BOOL bOrderSensitive = FALSE) const;

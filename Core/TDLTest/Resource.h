@@ -1,8 +1,12 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
+// Microsoft Developer Studio generated include file.
 // Used by TDLTest.rc
 //
 #define IDS_HELLO                       1
+#define IDI_TIME_TRACK                  286
+#define IDI_DEPENDS_LINK                289
+#define IDI_NULL                        290
+#define IDI_ADD_LOGGED_TIME             308
 
 // Next default values for new objects
 // 

@@ -5,6 +5,7 @@
 #include "TDLTest.h"
 
 #include "ToDoCtrlDataTest.h"
+#include "ToDoCtrlTaskLinkTest.h"
 #include "TaskFileTest.h"
 #include "ImportExportMgrTest.h"
 #include "TDCRecurrenceTest.h"
@@ -66,6 +67,8 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 void DoTests(const CTestUtils& utils)
 {
 	CToDoCtrlDataTest(utils).Run();
+
+	CToDoCtrlTaskLinkTest(utils).Run();
 
 	CTaskFileTest(utils).Run();
 

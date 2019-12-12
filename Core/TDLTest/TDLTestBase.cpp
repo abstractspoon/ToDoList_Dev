@@ -569,6 +569,30 @@ BOOL CTDLTestBase::ExpectNE(LPCTSTR sz1, LPCTSTR sz2, BOOL bCaseSensitive) const
 
 // -------------------------------------------------------------------------------------------------------
 
+BOOL CTDLTestBase::ExpectEQ(const CString& s1, LPCTSTR sz2, BOOL bCaseSensitive) const
+{
+	return ExpectEQ((LPCTSTR)s1, sz2, bCaseSensitive);
+}
+
+BOOL CTDLTestBase::ExpectNE(const CString& s1, LPCTSTR sz2, BOOL bCaseSensitive) const
+{
+	return ExpectNE((LPCTSTR)s1, sz2, bCaseSensitive);
+}
+
+// -------------------------------------------------------------------------------------------------------
+
+BOOL CTDLTestBase::ExpectEQ(LPCTSTR sz1, const CString& s2, BOOL bCaseSensitive) const
+{
+	return ExpectCompare(sz1, _T("%s"), (LPCTSTR)s2, _T("%s"), bCaseSensitive, OP_EQ);
+}
+
+BOOL CTDLTestBase::ExpectNE(LPCTSTR sz1, const CString& s2, BOOL bCaseSensitive) const
+{
+	return ExpectCompare(sz1, _T("%s"), (LPCTSTR)s2, _T("%s"), bCaseSensitive, OP_NE);
+}
+
+// -------------------------------------------------------------------------------------------------------
+
 BOOL CTDLTestBase::ExpectEQ(const CStringArray& a1, const CStringArray& a2, BOOL bOrderSensitive, BOOL bCaseSensitive) const
 {
 	return ExpectCompare(a1, a2, bOrderSensitive, bCaseSensitive, OP_EQ);
