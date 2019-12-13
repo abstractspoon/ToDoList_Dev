@@ -438,8 +438,8 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreeDragPreMove)
 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileEditDisplayFile)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileEditWantIcon)
-	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnEditCancel)
-	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnEditEnd)
+	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnLabelEditCancel)
+	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnLabelEditEnd)
 	ON_REGISTERED_MESSAGE(WM_TDL_APPLYADDLOGGEDTIME, OnApplyAddLoggedTime)
 	ON_REGISTERED_MESSAGE(WM_TEN_UNITSCHANGE, OnTimeUnitsChange)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropObject)
@@ -5307,7 +5307,7 @@ BOOL CToDoCtrl::IsTaskLabelEditing() const
 	return (CanEditSelectedTask(TDCA_TASKNAME) && (m_dwEditTitleTaskID != 0));
 }
 
-LRESULT CToDoCtrl::OnEditEnd(WPARAM /*wParam*/, LPARAM lParam)
+LRESULT CToDoCtrl::OnLabelEditEnd(WPARAM /*wParam*/, LPARAM lParam)
 {
 	ASSERT(m_dwEditTitleTaskID);
 
@@ -5375,7 +5375,7 @@ void CToDoCtrl::SetEditTitleTaskID(DWORD dwTaskID)
 	m_taskTree.SetEditTitleTaskID(dwTaskID);
 }
 
-LRESULT CToDoCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
+LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 {
 	if (GetSelectedCount() == 0) // user clicked into space
 	{

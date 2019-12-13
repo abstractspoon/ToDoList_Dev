@@ -661,8 +661,8 @@ protected:
 	afx_msg LRESULT OnFixupPostDropSelection(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnRefreshPercentSpinVisibility(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnChangeColour(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnEditEnd(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnEditCancel(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnLabelEditEnd(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnLabelEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
