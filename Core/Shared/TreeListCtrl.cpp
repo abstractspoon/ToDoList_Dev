@@ -1136,6 +1136,7 @@ void CTreeListCtrl::SetDropHighlight(HTREEITEM hti, int nItem)
 	m_nPrevDropHilitedItem = nItem;
 }
 
+
 BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 {
 	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
@@ -1887,6 +1888,25 @@ void CTreeListCtrl::RedrawList(BOOL bErase)
 {
 	m_list.InvalidateRect(NULL, bErase);
 	m_list.UpdateWindow();
+}
+
+void CTreeListCtrl::InvalidateList(int nFrom, int nTo, BOOL bErase)
+{
+	CRect rFrom, rTo;
+
+	if (nFrom == -1)
+		nFrom = 0;
+
+	if (nTo == -1)
+		nTo = (m_list.GetItemCount() - 1);
+
+	m_list.GetItemRect(nFrom, rFrom, LVIR_BOUNDS);
+	m_list.GetItemRect(nTo, rFrom, LVIR_BOUNDS);
+
+	CRect rBounds;
+	rBounds.UnionRect(rFrom, rTo);
+
+	m_list.InvalidateRect(rBounds, bErase);
 }
 
 void CTreeListCtrl::RedrawTree(BOOL bErase)

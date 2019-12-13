@@ -271,6 +271,7 @@ protected:
 	void DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BOOL bSelected, COLORREF crDiv = CLR_NONE) const;
 
 	void RedrawList(BOOL bErase = FALSE);
+	void InvalidateList(int nFrom, int nTo, BOOL bErase = FALSE);
 	void RedrawTree(BOOL bErase = FALSE);
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HTREEITEM hti);

@@ -1920,6 +1920,7 @@ BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 			return FALSE;
 
 		// calc new 'To' point to see if anything has actually changed
+
 		GTLC_HITTEST nHit = GTLCHT_NOWHERE;
 		DWORD dwToTaskID = ListHitTestTask(ptClient, FALSE, nHit, TRUE);
 		CPoint ptTo;
@@ -1934,7 +1935,7 @@ BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 			ptTo = ::GetMessagePos();
 			m_list.ScreenToClient(&ptTo);
 			
-			depend.SetTo(m_ptLastDependPick);
+			depend.SetTo(ptTo);
 		}
 
 		if (ptTo != m_ptLastDependPick)
@@ -2024,16 +2025,28 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 		switch (msg)
 		{
 		case WM_SETCURSOR:
-			if (!m_bReadOnly && !IsDependencyEditing())
+			if (!m_bReadOnly)
 			{
 				CPoint ptCursor(GetMessagePos());
-				GTLC_HITTEST nHit = GTLCHT_NOWHERE;
 
-				DWORD dwHitID = ListHitTestTask(ptCursor, TRUE, nHit, TRUE);
-				ASSERT((nHit == GTLCHT_NOWHERE) || (dwHitID != 0));
+				if (IsDependencyEditing())
+				{
+					m_list.ScreenToClient(&ptCursor);
+					int nHit = m_list.HitTest(ptCursor);
 
-				if (SetListTaskCursor(dwHitID, nHit))
-					return TRUE;
+					if ((nHit != -1) && m_data.ItemIsLocked(GetTaskID(nHit), TRUE))
+						return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				}
+				else
+				{
+					GTLC_HITTEST nHit = GTLCHT_NOWHERE;
+
+					DWORD dwHitID = ListHitTestTask(ptCursor, TRUE, nHit, TRUE);
+					ASSERT((nHit == GTLCHT_NOWHERE) || (dwHitID != 0));
+
+					if (SetListTaskCursor(dwHitID, nHit))
+						return TRUE;
+				}
 			}
 			break;
 
@@ -2174,9 +2187,6 @@ BOOL CGanttCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint point)
 
 BOOL CGanttCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 {
-	if (CTreeListCtrl::OnTreeLButtonDown(nFlags, point))
-		return TRUE;
-
 	if (!m_bReadOnly)
 	{
 		if (IsPickingDependencyFromTask())
@@ -2213,8 +2223,7 @@ BOOL CGanttCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 		}
 	}
 
-	// not handled
-	return FALSE;
+	return CTreeListCtrl::OnTreeLButtonDown(nFlags, point);
 }
 
 BOOL CGanttCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
@@ -2277,21 +2286,31 @@ BOOL CGanttCtrl::OnListMouseMove(UINT /*nFlags*/, CPoint point)
 			if (IsPickingDependencyFromTask() || IsPickingDependencyToTask())
 			{
 				HTREEITEM htiHot = NULL;
-				int nHotItem = m_list.HitTest(point);
+				int nHotItem = m_list.HitTest(point), nPrevHotItem = m_nPrevDropHilitedItem;
 				
 				if (nHotItem != -1)
 					htiHot = GetTreeItem(nHotItem);
-				
-				if (DrawDependencyPickLine(point))
-				{
-					nHotItem = -1; // doesn't play well with the pick line
-					
-					// track when the cursor leaves the list ctrl
-					TRACKMOUSEEVENT tme = { sizeof(tme), TME_LEAVE, m_list, 0 };
-					TrackMouseEvent(&tme);
-				}
-				
+
 				SetDropHighlight(htiHot, nHotItem);
+
+				if (IsPickingDependencyToTask())
+				{
+					// Drop-highlighting does not play well with the 
+					// dependency line drawing so we brute force it
+					if ((nPrevHotItem != -1) || (nHotItem != -1))
+					{
+						InvalidateList(nPrevHotItem, nHotItem);
+						RedrawList();
+						ResetDependencyPickLinePos();
+					}
+
+					if (DrawDependencyPickLine(point))
+					{
+						// track when the cursor leaves the list ctrl
+						TRACKMOUSEEVENT tme = { sizeof(tme), TME_LEAVE, m_list, 0 };
+						TrackMouseEvent(&tme);
+					}
+				}
 			}
 		}
 		else if (UpdateDragging(point))
@@ -2310,13 +2329,12 @@ BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 	{
 		if (IsPickingDependencyFromTask())
 		{
-			CPoint ptScreen(point);
-			m_list.ClientToScreen(&ptScreen);
+			int nHit = m_list.HitTest(point);
 
-			DWORD dwFromTaskID = HitTestTask(ptScreen, false);
-
-			if (dwFromTaskID)
+			if (nHit != -1)
 			{
+				DWORD dwFromTaskID = GetTaskID(nHit);
+
 				if (m_data.ItemIsLocked(dwFromTaskID, FALSE))
 				{
 					MessageBeep(MB_ICONEXCLAMATION);
@@ -2330,7 +2348,7 @@ BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 
 			return TRUE; // eat
 		}
-		else if (IsPickingFromDependency())
+		else if (IsPickingFromDependency()) // to edit
 		{
 			DWORD dwCurToTaskID = 0;
 			DWORD dwFromTaskID = ListDependsHitTest(point, dwCurToTaskID);
@@ -2343,13 +2361,8 @@ BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 				}
 				else if (m_pDependEdit->SetFromDependency(dwFromTaskID, dwCurToTaskID))
 				{
-					// initialise last drag pos
 					ResetDependencyPickLinePos();
-					
-					// redraw to hide the dependency being edited
-					RedrawList(FALSE);
-
-					// Then redraw dependency
+					RedrawList();
 					DrawDependencyPickLine(point);
 				}
 			}
@@ -2358,14 +2371,16 @@ BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 		}
 		else if (IsPickingDependencyToTask())
 		{
-			GTLC_HITTEST nHit = GTLCHT_NOWHERE;
-			DWORD dwToTaskID = ListHitTestTask(point, FALSE, nHit, TRUE);
-			
-			if (dwToTaskID && (nHit != GTLCHT_NOWHERE))
+			int nHit = m_list.HitTest(point);
+
+			if (nHit != -1)
 			{
-				m_pDependEdit->SetToTask(dwToTaskID);
+				DWORD dwToTaskID = GetTaskID(nHit);
+
+				if (dwToTaskID != m_pDependEdit->GetFromTask())
+					m_pDependEdit->SetToTask(dwToTaskID);
 			}
-			
+
 			return TRUE; // eat
 		}
 		else if (StartDragging(point))
@@ -5363,13 +5378,10 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 
 DWORD CGanttCtrl::HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const
 {
-	if (!IsDependencyEditing())
-	{
-		HTREEITEM htiHit = HitTestItem(ptScreen, bTitleColumnOnly);
+	HTREEITEM htiHit = HitTestItem(ptScreen, bTitleColumnOnly);
 
-		if (htiHit)
-			return GetTaskID(htiHit);
-	}
+	if (htiHit)
+		return GetTaskID(htiHit);
 
 	return 0;
 }
