@@ -172,7 +172,8 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 	m_formatter(data),
 	m_bAutoFitSplitter(TRUE),
 	m_imageIcons(16, 16),
-	m_bEnableRecalcColumns(TRUE)
+	m_bEnableRecalcColumns(TRUE),
+	m_bReadOnly(FALSE)
 {
 	// build one time column map
 	if (s_mapColumns.IsEmpty())

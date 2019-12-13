@@ -915,6 +915,7 @@ BOOL CTDLTaskTreeCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	if ((pWnd == &m_tcTasks) && !IsReadOnly())
 	{
 		UINT nHitFlags = 0;
+
 		CPoint ptClient(::GetMessagePos());
 		m_tcTasks.ScreenToClient(&ptClient);
 
@@ -1412,7 +1413,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						
 						bSelChange = TRUE;
 					}
-					else if (!::DragDetect(hRealWnd, pt))
+					else if (m_bReadOnly || !::DragDetect(hRealWnd, pt))
 					{
 						// if this is not the beginning of a drag then toggle selection
 						TSH().SetItem(htiHit, TSHS_TOGGLE);
@@ -1452,16 +1453,19 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					}
 					else if (nHitFlags & TVHT_ONITEMICON)
 					{
-						// Allow drag-drop to take precedence over icon-editing
-						if (::DragDetect(m_tcTasks, CPoint(lp)))
+						if (!m_bReadOnly && !SelectionHasLocked(FALSE, TRUE))
 						{
-							TRACE(_T("CTDLTaskTreeCtrl::ScWindowProc(WM_LBUTTONDOWN) -> Begin drag\n"));
-						}
-						else
-						{
-							// save item handle so we don't re-handle in LButtonUp handler
-							m_htiLastHandledLBtnDown = htiHit;
-							bColClick = TRUE;
+							// Allow drag-drop to take precedence over icon-editing
+							if (::DragDetect(m_tcTasks, CPoint(lp)))
+							{
+								TRACE(_T("CTDLTaskTreeCtrl::ScWindowProc(WM_LBUTTONDOWN) -> Begin drag\n"));
+							}
+							else
+							{
+								// save item handle so we don't re-handle in LButtonUp handler
+								m_htiLastHandledLBtnDown = htiHit;
+								bColClick = TRUE;
+							}
 						}
 					}
 					else
@@ -1492,7 +1496,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				if (!bCtrl && !bShift)
 				{
 					UINT nHitFlags = 0;
-					HTREEITEM htiHit = HitTestItem(CPoint(lp), &nHitFlags);
+					CPoint ptCursor(lp);
+					HTREEITEM htiHit = HitTestItem(ptCursor, &nHitFlags);
 					
 					// don't reprocess items already handled in the button down handler
 					if ((nHitFlags & (TVHT_ONITEMBUTTON | TVHT_ONITEMICON | TVHT_ONITEMSTATEICON)) || 
@@ -1506,7 +1511,11 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						int nSelCount = TSH().GetCount();
 						ASSERT (nSelCount);
 						
-						if ((nHitFlags & TVHT_ONITEMLABEL) && (nSelCount == 1) && (htiLastHandledLBtnDown == NULL))
+						if (!m_bReadOnly &&
+							!SelectionHasLocked(FALSE, FALSE) && 
+							(nHitFlags & TVHT_ONITEMLABEL) && 
+							(nSelCount == 1) && 
+							(htiLastHandledLBtnDown == NULL))
 						{
 							BeginLabelEditTimer();
 						}

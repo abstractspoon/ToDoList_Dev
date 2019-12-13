@@ -2028,20 +2028,18 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 			if (!m_bReadOnly)
 			{
 				CPoint ptCursor(GetMessagePos());
+	
+				m_list.ScreenToClient(&ptCursor);
+				int nHit = m_list.HitTest(ptCursor);
 
-				if (IsDependencyEditing())
-				{
-					m_list.ScreenToClient(&ptCursor);
-					int nHit = m_list.HitTest(ptCursor);
+				if ((nHit != -1) && m_data.ItemIsLocked(GetTaskID(nHit), TRUE))
+					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 
-					if ((nHit != -1) && m_data.ItemIsLocked(GetTaskID(nHit), TRUE))
-						return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
-				}
-				else
+				if (!IsDependencyEditing())
 				{
 					GTLC_HITTEST nHit = GTLCHT_NOWHERE;
 
-					DWORD dwHitID = ListHitTestTask(ptCursor, TRUE, nHit, TRUE);
+					DWORD dwHitID = ListHitTestTask(ptCursor, FALSE, nHit, TRUE);
 					ASSERT((nHit == GTLCHT_NOWHERE) || (dwHitID != 0));
 
 					if (SetListTaskCursor(dwHitID, nHit))
