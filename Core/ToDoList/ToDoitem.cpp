@@ -750,7 +750,8 @@ BOOL TODOITEM::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFo
 		dwTaskID = _ttoi(sTaskID);
 
 		// remove trailing back slash appended by Macro Express Pro
-		sFile.TrimRight('\\').TrimRight('/');
+		sFile.TrimRight('\\');
+		sFile.TrimRight('/');
 	}
 	else if (Misc::IsNumber(sFile))
 	{
