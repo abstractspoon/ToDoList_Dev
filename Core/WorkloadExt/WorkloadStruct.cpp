@@ -570,6 +570,41 @@ void WORKLOADITEM::UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL b
 	}
 }
 
+BOOL WORKLOADITEM::HasStartDate() const
+{
+	return dtRange.HasStart();
+}
+
+BOOL WORKLOADITEM::HasDueDate() const
+{
+	return dtRange.HasEnd();
+}
+
+BOOL WORKLOADITEM::HasValidDates() const
+{
+	return dtRange.IsValid();
+}
+
+BOOL WORKLOADITEM::IsDone(BOOL bIncGoodAs) const
+{
+	return (bDone || (bIncGoodAs && bGoodAsDone));
+}
+
+BOOL WORKLOADITEM::IsLocked(BOOL bTreatRefsAsUnlocked) const
+{
+	return (bLocked && (!bTreatRefsAsUnlocked || !IsReference()));
+}
+
+BOOL WORKLOADITEM::IsReference() const
+{
+	return (dwRefID || dwOrgRefID);
+}
+
+void WORKLOADITEM::ClearAllocations()
+{
+	mapAllocatedDays.RemoveAll();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 CWorkloadItemMap::~CWorkloadItemMap()
@@ -645,11 +680,18 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 	}
 }
 
-BOOL CWorkloadItemMap::ItemIsLocked(DWORD dwTaskID) const
+BOOL CWorkloadItemMap::ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const
 {
 	const WORKLOADITEM* pWI = GetItem(dwTaskID);
 	
-	return (pWI && pWI->bLocked);
+	return (pWI && pWI->IsLocked(bTreatRefsAsUnlocked));
+}
+
+BOOL CWorkloadItemMap::ItemIsReference(DWORD dwTaskID) const
+{
+	const WORKLOADITEM* pWI = GetItem(dwTaskID);
+
+	return (pWI && pWI->IsReference());
 }
 
 BOOL CWorkloadItemMap::RemoveKey(DWORD dwKey)

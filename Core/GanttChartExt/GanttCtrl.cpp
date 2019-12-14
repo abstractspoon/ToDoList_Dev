@@ -1777,9 +1777,10 @@ UINT CGanttCtrl::OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor)
 {
 	// We currently DON'T support 'linking'
 	if (nCursor == DD_DROPEFFECT_LINK)
-		return DD_DROPEFFECT_NONE;
-
-	if (nCursor != DD_DROPEFFECT_NONE)
+	{
+		nCursor = DD_DROPEFFECT_NONE;
+	}
+	else if (nCursor != DD_DROPEFFECT_NONE)
 	{
 		// Prevent dropping on locked tasks unless references
 		DWORD dwTargetID = GetTaskID(move.htiDestParent);

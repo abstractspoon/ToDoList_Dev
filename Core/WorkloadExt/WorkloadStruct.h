@@ -138,13 +138,16 @@ struct WORKLOADITEM
 	WORKLOADITEM& operator=(const WORKLOADITEM& wi);
 	BOOL operator==(const WORKLOADITEM& wi) const;
 	
-	BOOL HasStartDate() const { return dtRange.HasStart(); }
-	BOOL HasDueDate() const { return dtRange.HasEnd(); }
-	BOOL HasValidDates() const { return dtRange.IsValid(); }
-	BOOL IsDone(BOOL bIncGoodAs) const { return (bDone || (bIncGoodAs && bGoodAsDone)); }
+	BOOL HasStartDate() const;
+	BOOL HasDueDate() const;
+	BOOL HasValidDates() const;
+
+	BOOL IsDone(BOOL bIncGoodAs) const;
+	BOOL IsLocked(BOOL bTreatRefsAsUnlocked) const;
+	BOOL IsReference() const;
 
 	void UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL bPreferTimeEstimate, BOOL bProportionally, BOOL bAllowParentAllocations);
-	void ClearAllocations() { mapAllocatedDays.RemoveAll(); }
+	void ClearAllocations();
 
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
@@ -181,7 +184,8 @@ public:
 	BOOL HasItem(DWORD dwKey) const;
 	WORKLOADITEM* GetItem(DWORD dwKey) const;
 	WORKLOADITEM* GetNextItem(POSITION& pos) const;
-	BOOL ItemIsLocked(DWORD dwTaskID) const;
+	BOOL ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
+	BOOL ItemIsReference(DWORD dwTaskID) const;
 
 	void CalculateTotals(const COleDateTimeRange& dtPeriod,
 						CMapAllocationTotals& mapTotalDays, 

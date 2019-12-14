@@ -1764,17 +1764,76 @@ BOOL CWorkloadCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 	return FALSE;
 }
 
-UINT CWorkloadCtrl::OnDragOverItem(UINT nCursor)
+BOOL CWorkloadCtrl::OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag)
+{
+	if (!CTreeListCtrl::OnDragBeginItem(move, bLeftDrag))
+		return FALSE;
+
+	// No restriction on copying
+	if (Misc::ModKeysArePressed(MKS_CTRL))
+		return TRUE;
+
+	// Prevent dragging of locked tasks
+	DWORD dwTaskID = GetTaskID(move.htiSel);
+	ASSERT(dwTaskID);
+
+	if (m_data.ItemIsLocked(dwTaskID, TRUE))
+		return FALSE;
+
+	// Prevent dragging of subtasks of locked tasks
+	HTREEITEM htiParent = m_tree.GetParentItem(move.htiSel);
+
+	if (!htiParent || (htiParent == TVI_ROOT))
+		return TRUE;
+
+	DWORD dwParentID = GetTaskID(htiParent);
+	ASSERT(dwTaskID);
+
+	if (m_data.ItemIsLocked(dwParentID, TRUE))
+		return FALSE;
+
+	return TRUE;
+}
+
+UINT CWorkloadCtrl::OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor)
 {
 	// We currently DON'T support 'linking'
 	if (nCursor == DD_DROPEFFECT_LINK)
+	{
 		nCursor = DD_DROPEFFECT_NONE;
-	
+	}
+	else if (nCursor != DD_DROPEFFECT_NONE)
+	{
+		// Prevent dropping on locked tasks unless references
+		DWORD dwTargetID = GetTaskID(move.htiDestParent);
+
+		if (m_data.ItemIsLocked(dwTargetID, TRUE))
+			return DD_DROPEFFECT_NONE;
+
+		// If the target is a reference, the source must be a reference
+		DWORD dwSelTaskID = GetTaskID(move.htiSel);
+
+		if (m_data.ItemIsReference(dwTargetID) && !m_data.ItemIsReference(dwSelTaskID))
+			return DD_DROPEFFECT_NONE;
+	}
+
 	return nCursor;
 }
 
 BOOL CWorkloadCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 {
+	// Prevent dropping on locked tasks unless references
+	DWORD dwTargetID = GetTaskID(move.htiDestParent);
+
+	if (dwTargetID && m_data.ItemIsLocked(dwTargetID, TRUE))
+		return FALSE;
+
+	// If the target is a reference, the source must be a reference
+	DWORD dwSelTaskID = GetTaskID(move.htiSel);
+
+	if (m_data.ItemIsReference(dwTargetID) && !m_data.ItemIsReference(dwSelTaskID))
+		return FALSE;
+
 	// Notify parent of move
 	IUITASKMOVE taskMove = { 0 };
 			
@@ -1828,18 +1887,25 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 				if (nHit != -1)
 				{
-					BOOL bCanEdit = (GetListColumnType(nCol) == WLCT_VALUE);
-
-					if (bCanEdit)
+					if (m_data.ItemIsLocked(GetTaskID(nHit), TRUE))
 					{
-						const WORKLOADITEM* pWI = NULL;
-						GET_WI_RET(GetTaskID(nHit), pWI, FALSE);
-
-						bCanEdit = (!pWI->bParent || HasOption(WLCF_ALLOWPARENTALLOCATIONS));
+						return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 					}
+					else
+					{
+						BOOL bCanEdit = (GetListColumnType(nCol) == WLCT_VALUE);
 
-					if (!bCanEdit)
-						return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+						if (bCanEdit)
+						{
+							const WORKLOADITEM* pWI = NULL;
+							GET_WI_RET(GetTaskID(nHit), pWI, FALSE);
+
+							bCanEdit = (!pWI->bParent || HasOption(WLCF_ALLOWPARENTALLOCATIONS));
+						}
+
+						if (!bCanEdit)
+							return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+					}
 				}
 			}
 			break;
@@ -1860,7 +1926,7 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 				if (htiHit)
 				{
-					if (m_data.ItemIsLocked(m_tree.GetItemData(htiHit)))
+					if (m_data.ItemIsLocked(m_tree.GetItemData(htiHit), TRUE))
 						return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 
 					if (nFlags & TVHT_ONITEMICON)

@@ -126,8 +126,9 @@ protected:
 	LRESULT OnTotalsLabelsListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 			
 	void OnNotifySplitterChange(int nSplitPos);
+	BOOL OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag);
 	BOOL OnDragDropItem(const TLCITEMMOVE& move);
-	UINT OnDragOverItem(UINT nCursor);
+	UINT OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor);
 
 	BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);
 	BOOL OnItemCheckChange(HTREEITEM hti);
