@@ -192,14 +192,11 @@ void CKanbanColumnCtrl::RefreshBkgndColor()
 {
 	COLORREF crBack = GetSysColor(COLOR_WINDOW);
 
-	if (!Misc::IsHighContrastActive())
-	{
-		if (m_columnDef.crBackground != CLR_NONE)
-			crBack = m_columnDef.crBackground;
+	if (m_columnDef.crBackground != CLR_NONE)
+		crBack = m_columnDef.crBackground;
 
-		if (m_bDropTarget)
-			crBack = GraphicsMisc::Darker(crBack, 0.1);
-	}
+	if (m_bDropTarget)
+		crBack = GraphicsMisc::Darker(crBack, 0.1);
 
 	TreeView_SetBkColor(*this, crBack);
 }
