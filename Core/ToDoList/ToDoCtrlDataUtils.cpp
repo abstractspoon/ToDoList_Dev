@@ -4022,18 +4022,19 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 	BOOL bHtmlComments = filter.WantAttribute(TDCA_HTMLCOMMENTS);
 	BOOL bTransform = filter.HasFlag(TDCGTF_TRANSFORM);
 
-	// attributes
-	tasks.SetTaskReferenceID(hTask, pTDI->dwTaskRefID);
-
 	if (pTDS->HasSubTasks())
 		tasks.SetTaskIsParent(hTask);
 
-	// if task is a reference we use a bit of sleight of hand
-	// and write the 'true' task's title but nothing else
+	// For references, export the 'real' task's attributes
 	if (pTDI->dwTaskRefID)
 	{
-		tasks.SetTaskTitle(hTask, m_data.GetTaskTitle(pTDI->dwTaskRefID));
-		return TRUE;
+		const TODOITEM* pTDIReal = NULL;
+		const TODOSTRUCTURE* pTDSReal = NULL;
+
+		DWORD dwTrueID = pTDI->dwTaskRefID;
+		GET_TDI_TDS(dwTrueID, pTDIReal, pTDSReal, FALSE);
+
+		return ExportTaskAttributes(pTDIReal, pTDSReal, tasks, hTask, filter); // RECURSIVE CALL
 	}
 	
 	// else
