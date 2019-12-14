@@ -517,6 +517,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 			sTextColor = pTasks->IsTaskDone(hTask) ? COMMENTS_DONECOLOR : _T("#606060");
 			sBackColor.Empty();
 			bStrikeThru = FALSE;
+			bBlockQuote = (EXPORTSTYLE != TDLPDS_TABLE);
 		}
 		break;
 	}
