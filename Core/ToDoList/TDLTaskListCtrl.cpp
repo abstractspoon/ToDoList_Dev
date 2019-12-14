@@ -951,19 +951,19 @@ BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 		if (nItem != -1)
 		{
 			ASSERT(IsListItemSelected(m_lcTasks, nItem)); 
+
 			DWORD dwTaskID = GetColumnItemTaskID(nItem);
-			
+			TDC_COLUMN nClickCol = TDCC_NONE;
+
 			if (!bDblClk)
 			{
 				if (!IsColumnShowing(TDCC_DONE) && HasHitTestFlag(nFlags, LVHT_ONITEMSTATEICON))
 				{
-					NotifyParentOfColumnEditClick(TDCC_DONE, dwTaskID);
-					return TRUE;
+					nClickCol = TDCC_DONE;
 				}
 				else if (!IsColumnShowing(TDCC_ICON) && HasHitTestFlag(nFlags, LVHT_ONITEMICON))
 				{
-					NotifyParentOfColumnEditClick(TDCC_ICON, dwTaskID);
-					return TRUE;
+					nClickCol = TDCC_ICON;
 				}
 			}
 			else
@@ -977,9 +977,16 @@ BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 
 				if (rItem.PtInRect(pt))
 				{
-					NotifyParentOfColumnEditClick(TDCC_CLIENT, dwTaskID);
-					// don't return TRUE otherwise the label edit stops working
+					nClickCol = TDCC_CLIENT;
 				}
+			}
+
+			if ((nClickCol != TDCC_NONE) && !SelectionHasLocked(FALSE))
+			{
+				// forward the click
+				NotifyParentOfColumnEditClick(nClickCol, dwTaskID);
+
+				return TRUE;
 			}
 		}
 	}

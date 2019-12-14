@@ -859,21 +859,17 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 		if (htiHit && !(nHitFlags & TVHT_ONITEMBUTTON))
 		{
 			DWORD dwTaskID = GetTaskID(htiHit);
-			TDC_COLUMN nEditCol = TDCC_NONE;
+			TDC_COLUMN nClickCol = TDCC_NONE;
 
 			if (!bDblClk)
 			{
-				if (!SelectionHasLocked(FALSE))
+				if (nHitFlags & TVHT_ONITEMSTATEICON)
 				{
-					// if the button was over the checkbox toggle the done state
-					if (nHitFlags & TVHT_ONITEMSTATEICON)
-					{
-						nEditCol = TDCC_DONE;
-					}
-					else if (nHitFlags & TVHT_ONITEMICON)
-					{
-						nEditCol = TDCC_ICON;
-					}
+					nClickCol = TDCC_DONE;
+				}
+				else if (nHitFlags & TVHT_ONITEMICON)
+				{
+					nClickCol = TDCC_ICON;
 				}
 			}
 			else // double click
@@ -887,19 +883,18 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 
 					return TRUE;
 				}
-				else
-				{
-					nEditCol = TDCC_CLIENT;
-				}
+
+				// else
+				nClickCol = TDCC_CLIENT;
 			}
 
-			if (nEditCol != TDCC_NONE)
+			if ((nClickCol != TDCC_NONE) && !SelectionHasLocked(FALSE))
 			{
 				// make sure attribute pane is synced
 				SyncColumnSelectionToTasks();
 
 				// forward the click
-				NotifyParentOfColumnEditClick(nEditCol, dwTaskID);
+				NotifyParentOfColumnEditClick(nClickCol, dwTaskID);
 
 				return TRUE;
 			}
