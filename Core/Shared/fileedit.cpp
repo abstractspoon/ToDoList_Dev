@@ -218,7 +218,7 @@ void CFileEdit::OnPaint()
 			else
 			{
 				// fill bkgnd
-				dc.FillSolidRect(rClient, GetBackgroundColor(&dc));
+				::FillRect(dc, rClient, GetBackgroundBrush(&dc));
 
 				// file path
 				rClient.DeflateRect(4, 1, 1, 1);
@@ -252,7 +252,7 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	CRect rIcon = GetIconRect();
 	rIcon.OffsetRect(-rWindow.TopLeft());
 
-	pDC->FillSolidRect(rIcon, GetBackgroundColor(pDC));
+	::FillRect(*pDC, rIcon, GetBackgroundBrush(pDC));
 	
 	// file icon
 	CString sFilePath;
@@ -273,7 +273,7 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	DrawFileIcon(pDC, sFilePath, rIcon);
 }
 
-COLORREF CFileEdit::GetBackgroundColor(CDC* pDC) const
+HBRUSH CFileEdit::GetBackgroundBrush(CDC* pDC) const
 {
 	UINT nMsgID = WM_CTLCOLOREDIT;
 
@@ -282,11 +282,10 @@ COLORREF CFileEdit::GetBackgroundColor(CDC* pDC) const
 
 	HBRUSH hBkgnd = (HBRUSH)::SendMessage(::GetParent(GetSafeHwnd()), nMsgID, (WPARAM)pDC->GetSafeHdc(), (LPARAM)(HWND)GetSafeHwnd());
 
-	if (!hBkgnd || hBkgnd == GetStockObject(NULL_BRUSH))
-		return ::GetSysColor(COLOR_WINDOW);
+	if (!hBkgnd)
+		hBkgnd = ::GetSysColorBrush(COLOR_WINDOW);
 
-	// else
-	return GraphicsMisc::GetSolidColor(hBkgnd);
+	return hBkgnd;
 }
 
 void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon)

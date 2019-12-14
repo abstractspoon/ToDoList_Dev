@@ -122,7 +122,7 @@ protected:
 	void DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon);
 	CString GetBrowseTitle(BOOL bFolder) const;
 	void ClearImageIcon();
-	COLORREF GetBackgroundColor(CDC* pDC) const;
+	HBRUSH GetBackgroundBrush(CDC* pDC) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
