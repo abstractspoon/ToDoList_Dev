@@ -1007,17 +1007,10 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 	VERIFY(GetSelectedTasks(tasks, FTCV_TASKTREE, filter));
 
 	// Globals
-	if (!mapAttrib.IsEmpty())
-	{
-		AddGlobalsToTaskFile(tasks, mapAttrib);
-	}
+	if (mapAttrib.IsEmpty())
+		AddGlobalsToTaskFile(tasks, TDCA_ALL);
 	else
-	{
-		TDCAUTOLISTDATA tld;
-		
-		if (GetAutoListData(tld))
-			tasks.SetAutoListData(tld);
-	}
+		AddGlobalsToTaskFile(tasks, mapAttrib);
 
 	return tasks.GetTaskCount();
 }
@@ -3631,6 +3624,9 @@ int CTabbedToDoCtrl::GetGlobals(TDC_ATTRIBUTE nAttrib, TDCAUTOLISTDATA& tld) con
 {
 	switch (nAttrib)
 	{
+	case TDCA_ALL:		
+		return GetAutoListData(tld);
+
 	case TDCA_ALLOCTO:	return m_cbAllocTo.GetItems(tld.aAllocTo);
 	case TDCA_ALLOCBY:	return m_cbAllocBy.GetItems(tld.aAllocBy);
 	case TDCA_CATEGORY:	return m_cbCategory.GetItems(tld.aCategory);
