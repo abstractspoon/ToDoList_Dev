@@ -216,21 +216,10 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 		if ((tiHit.lpszText != LPSTR_TEXTCALLBACK) && (tiHit.hinst == 0))
 			free(tiHit.lpszText);
 	}
-	else if (m_nFlags & (WF_TOOLTIPS|WF_TRACKINGTOOLTIPS))
+	else if (!IsTracking() && (IsKeypress(message) || IsMouseDown(message)))
 	{
-		// make sure that tooltips are not already being handled
-		CWnd* pWnd = CWnd::FromHandle(pMsg->hwnd);
-
-		while (pWnd != NULL && pWnd != this && !(pWnd->m_nFlags & (WF_TOOLTIPS|WF_TRACKINGTOOLTIPS)))
-			pWnd = pWnd->GetParent();
-
-		if (pWnd != this)
-			return;
-		
-		if (!IsTracking() && (IsKeypress(message) || IsMouseDown(message)))
-		{
-			Activate(FALSE);
-		}
+		Pop();
+		//Activate(FALSE);
 	}
 }
 

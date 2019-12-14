@@ -628,18 +628,18 @@ int GraphicsMisc::GetTextWidth(const CString& sText, HWND hWndRef, HFONT hFontRe
 	return GetTextWidth(sText, *pRefWnd, CFont::FromHandle(hFontRef));
 }
 
-int GraphicsMisc::GetTextHeight(const CString& sText, HWND hWndRef, int nWidth, HFONT hFontRef)
+CSize GraphicsMisc::GetTextSize(const CString& sText, HWND hWndRef, int nWidth, HFONT hFontRef)
 {
 	CWnd* pRefWnd = CWnd::FromHandle(hWndRef);
 
 	if (!pRefWnd)
-		return -1;
+		return CSize(-1, -1);
 
 	// else
-	return GetTextHeight(sText, *pRefWnd, nWidth, CFont::FromHandle(hFontRef));
+	return GetTextSize(sText, *pRefWnd, nWidth, CFont::FromHandle(hFontRef));
 }
 
-int GraphicsMisc::GetTextHeight(const CString& sText, CWnd& wndRef, int nWidth, CFont* pRefFont)
+CSize GraphicsMisc::GetTextSize(const CString& sText, CWnd& wndRef, int nWidth, CFont* pRefFont)
 {
 	CClientDC dc(&wndRef);
 	ASSERT_VALID(&dc);
@@ -654,7 +654,7 @@ int GraphicsMisc::GetTextHeight(const CString& sText, CWnd& wndRef, int nWidth, 
 
 	dc.SelectObject(pOldFont);
 
-	return rText.Height();
+	return CSize(rText.Width(), rText.Height());
 }
 
 int GraphicsMisc::GetTextWidth(CDC* pDC, const CString& sText)

@@ -139,6 +139,8 @@ public:
 	BOOL HasItem(DWORD dwTaskID) const;
 	BOOL IsLocked(DWORD dwTaskID) const;
 
+	CString GetItemTitle(DWORD dwTaskID) const;
+
 	KANBANITEM* GetItem(DWORD dwTaskID) const;
 	KANBANITEM* NewItem(DWORD dwTaskID, const CString& sTitle);
 

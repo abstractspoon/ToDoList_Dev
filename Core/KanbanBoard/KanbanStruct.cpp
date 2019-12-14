@@ -683,6 +683,14 @@ KANBANITEM* CKanbanItemMap::GetItem(DWORD dwTaskID) const
 	return pKI;
 }
 
+CString CKanbanItemMap::GetItemTitle(DWORD dwTaskID) const
+{
+	const KANBANITEM* pKI = GetItem(dwTaskID);
+	ASSERT(pKI);
+
+	return (pKI ? pKI->sTitle : _T(""));
+}
+
 BOOL CKanbanItemMap::HasItem(DWORD dwTaskID) const
 {
 	return (GetItem(dwTaskID) != NULL);

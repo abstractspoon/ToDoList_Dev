@@ -360,7 +360,7 @@ HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki, BOOL bSelect)
 	}
 
 	hti = CTreeCtrl::InsertItem(TVIF_TEXT | TVIF_PARAM,
-								ki.sTitle,
+								LPSTR_TEXTCALLBACK,
 								0,
 								0,
 								0,
@@ -874,16 +874,21 @@ BOOL CKanbanColumnCtrl::GetItemTooltipRect(HTREEITEM hti, CRect& rTip, const KAN
 
 	int nWidth = rTip.Width();
 	int nAvailHeight = CalcItemTitleTextHeight();
-	int nTextHeight = GraphicsMisc::GetTextHeight(pKI->sTitle, GetSafeHwnd(), nWidth, hFont);
+	
+	CSize sizeText = GraphicsMisc::GetTextSize(pKI->sTitle, GetSafeHwnd(), nWidth, hFont);
 
-	if (nTextHeight <= nAvailHeight)
+	if ((sizeText.cx <= nWidth) && (sizeText.cy <= nAvailHeight))
 		return FALSE;
 
-	while (nTextHeight > nAvailHeight)
+	int nIncrement = (nWidth / 2);
+
+	while ((sizeText.cx > nWidth) || (sizeText.cy > nAvailHeight))
 	{
-		rTip.right += (nWidth / 2);
-		nTextHeight = GraphicsMisc::GetTextHeight(pKI->sTitle, GetSafeHwnd(), rTip.Width(), hFont);
+		nWidth += nIncrement;
+		sizeText = GraphicsMisc::GetTextSize(pKI->sTitle, GetSafeHwnd(), nWidth, hFont);
 	}
+
+	rTip.right = (rTip.left + sizeText.cx);
 
 	m_tooltip.AdjustRect(rTip, TRUE);
 	ClientToScreen(&rTip);
@@ -1296,9 +1301,6 @@ void CKanbanColumnCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 
 BOOL CKanbanColumnCtrl::HandleLButtonClick(CPoint point, BOOL bDblClk)
 {
-	if (m_tooltip.GetSafeHwnd())
-		m_tooltip.Pop();
-
 	// Ignore clicks not hitting an item
 	HTREEITEM hti = HitTest(point);
 
@@ -1579,7 +1581,10 @@ int CKanbanColumnCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		{
 			GetItemRect(hti, rTip, NULL);
 
-			return CToolTipCtrlEx::SetToolInfo(*pTI, this, GetItemText(hti), GetTaskID(hti), rTip);
+			DWORD dwTaskID = GetTaskID(hti);
+
+
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, m_data.GetItemTitle(dwTaskID), dwTaskID, rTip);
 		}
 	}
 
