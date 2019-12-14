@@ -9880,16 +9880,10 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 				bMatch = Misc::Contains(filter.sAllocTo, pTDI->aAllocTo, FALSE, TRUE);
 		}
 		
-		// if we don't match, we remove the item
 		if (bMatch)
 		{
-			const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-
-			if (!pTDS)
-			{
-				ASSERT(0);
-				return FALSE;
-			}
+			const TODOSTRUCTURE* pTDS;
+			GET_DATA_TDS(m_data, dwTaskID, pTDS, FALSE);
 
 			m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, filter);
 		}
