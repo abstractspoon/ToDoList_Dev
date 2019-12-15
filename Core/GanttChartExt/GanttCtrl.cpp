@@ -844,33 +844,9 @@ void CGanttCtrl::UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	}
 }
 
-GANTTITEM* CGanttCtrl::GetGanttItem(DWORD dwTaskID, BOOL bCopyRefID) const
+GANTTITEM* CGanttCtrl::GetGanttItem(DWORD dwTaskID) const
 {
-	GANTTITEM* pGI = m_data.GetItem(dwTaskID);
-	ASSERT(pGI);
-	
-	if (pGI)
-	{
-		// For references we use the 'real' task but with the 
-		// original reference reference ID copied over
-		DWORD dwRefID = pGI->dwRefID;
-		
-		if (dwRefID && (dwRefID != dwTaskID) && m_data.Lookup(dwRefID, pGI))
-		{
-			// copy over the reference id so that the caller can still detect it
-			if (bCopyRefID)
-			{
-				ASSERT((pGI->dwRefID == 0) || (pGI->dwRefID == dwRefID));
-				pGI->dwOrgRefID = dwRefID;
-			}
-		}
-		else
-		{
-			pGI->dwOrgRefID = 0;
-		}
-	}
-	
-	return pGI;
+	return m_data.GetItem(dwTaskID, TRUE);
 }
 
 BOOL CGanttCtrl::RestoreGanttItem(const GANTTITEM& giPrev)
@@ -2033,7 +2009,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				m_list.ScreenToClient(&ptCursor);
 				int nHit = m_list.HitTest(ptCursor);
 
-				if ((nHit != -1) && m_data.ItemIsLocked(GetTaskID(nHit), TRUE))
+				if ((nHit != -1) && m_data.ItemIsLocked(GetTaskID(nHit), FALSE))
 					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 
 				if (!IsDependencyEditing())
@@ -2251,7 +2227,7 @@ BOOL CGanttCtrl::OnItemCheckChange(HTREEITEM hti)
 		return FALSE;
 
 	DWORD dwTaskID = GetTaskID(hti);
-	GANTTITEM* pGI = m_data.GetItem(dwTaskID);
+	GANTTITEM* pGI = GetGanttItem(dwTaskID);
 	ASSERT(pGI);
 
 	if (pGI)
@@ -2471,7 +2447,10 @@ CString CGanttCtrl::GetTreeItemColumnText(const GANTTITEM& gi, GTLC_COLUMN nCol)
 			break;
 
 		case GTLCC_TASKID:
-			sItem.Format(_T("%ld"), gi.dwTaskID);
+			if (gi.dwOrgRefID)
+				sItem.Format(_T("%ld"), gi.dwOrgRefID);
+			else
+				sItem.Format(_T("%ld"), gi.dwTaskID);
 			break;
 			
 		case GTLCC_STARTDATE:

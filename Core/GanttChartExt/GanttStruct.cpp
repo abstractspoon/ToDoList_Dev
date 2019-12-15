@@ -302,16 +302,6 @@ BOOL GANTTITEM::IsDone(BOOL bIncGoodAs) const
 	return (bIncGoodAs && bGoodAsDone);
 }
 
-BOOL GANTTITEM::IsLocked(BOOL bTreatRefsAsUnlocked) const
-{
-	return (bLocked && (!bTreatRefsAsUnlocked || !IsReference()));
-}
-
-BOOL GANTTITEM::IsReference() const
-{
-	return (dwRefID || dwOrgRefID);
-}
-
 BOOL GANTTITEM::HasStartDate() const
 {
 	return dtRange.HasStart();
@@ -537,21 +527,21 @@ CGanttItemMap::~CGanttItemMap()
 
 BOOL CGanttItemMap::ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const
 {
-	const GANTTITEM* pGI = GetItem(dwTaskID);
+	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE);
 
-	return (pGI && pGI->IsLocked(bTreatRefsAsUnlocked));
+	return (pGI && pGI->bLocked && (!bTreatRefsAsUnlocked || !pGI->dwOrgRefID));
 }
 
 BOOL CGanttItemMap::ItemIsReference(DWORD dwTaskID) const
 {
-	const GANTTITEM* pGI = GetItem(dwTaskID);
+	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE); 
 
-	return (pGI && pGI->IsReference());
+	return (pGI && pGI->dwOrgRefID);
 }
 
 BOOL CGanttItemMap::ItemHasDependecies(DWORD dwTaskID) const
 {
-	const GANTTITEM* pGI = GetItem(dwTaskID);
+	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE);
 
 	return (pGI && pGI->aDependIDs.GetSize());
 }
@@ -574,38 +564,60 @@ void CGanttItemMap::RemoveAll()
 	CMap<DWORD, DWORD, GANTTITEM*, GANTTITEM*&>::RemoveAll();
 }
 
-BOOL CGanttItemMap::RemoveKey(DWORD dwKey)
+BOOL CGanttItemMap::DeleteItem(DWORD dwTaskID)
 {
 	GANTTITEM* pGI = NULL;
 	
-	if (Lookup(dwKey, pGI))
+	if (Lookup(dwTaskID, pGI))
 	{
 		delete pGI;
-		return CMap<DWORD, DWORD, GANTTITEM*, GANTTITEM*&>::RemoveKey(dwKey);
+		return CMap<DWORD, DWORD, GANTTITEM*, GANTTITEM*&>::RemoveKey(dwTaskID);
 	}
 	
 	// else
 	return FALSE;
 }
 
-BOOL CGanttItemMap::HasItem(DWORD dwKey) const
+BOOL CGanttItemMap::HasItem(DWORD dwTaskID) const
 {
-	if (dwKey == 0)
+	if (dwTaskID == 0)
 		return FALSE;
 
-	return (GetItem(dwKey) != NULL);
+	GANTTITEM* pGIUnused = NULL;
+	
+	return Lookup(dwTaskID, pGIUnused);
 }
 
-GANTTITEM* CGanttItemMap::GetItem(DWORD dwKey) const
+GANTTITEM* CGanttItemMap::GetItem(DWORD dwTaskID, BOOL bResolveReferences) const
 {
-	if (dwKey == 0)
+	if (dwTaskID == 0)
 		return NULL;
 
 	GANTTITEM* pGI = NULL;
-	
-	if (Lookup(dwKey, pGI))
+
+	if (Lookup(dwTaskID, pGI))
 		ASSERT(pGI);
-	
+
+	// Resolves references
+	pGI->dwOrgRefID = 0;
+
+	if (pGI && pGI->dwRefID && bResolveReferences)
+	{
+		ASSERT(pGI->dwOrgRefID == 0);
+		ASSERT(pGI->dwRefID != dwTaskID);
+
+		DWORD dwRefID = pGI->dwRefID;
+
+		if ((dwRefID != dwTaskID) && Lookup(dwRefID, pGI))
+		{
+			// copy over the reference id so that the caller can still detect it
+			ASSERT(pGI->dwRefID == 0);
+
+			pGI->dwOrgRefID = dwTaskID;
+			pGI->dwRefID = 0;
+		}
+	}
+
 	return pGI;
 }
 
@@ -636,7 +648,7 @@ BOOL CGanttItemMap::IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) cons
 			return TRUE;
 
 		// else check dependents of dwDependID
-		const GANTTITEM* pGIDepends = GetItem(dwDependID);
+		const GANTTITEM* pGIDepends = GetItem(dwDependID, FALSE);
 		ASSERT(pGIDepends);
 
 		if (pGIDepends && IsItemDependentOn(*pGIDepends, dwOtherID)) // RECURSIVE CALL
@@ -661,7 +673,7 @@ COleDateTime CGanttItemMap::CalcMaxDependencyDate(const GANTTITEM& gi) const
 
 		if (HasItem(dwDependID))
 		{
-			const GANTTITEM* pGIDepends = GetItem(dwDependID);
+			const GANTTITEM* pGIDepends = GetItem(dwDependID, FALSE);
 			ASSERT(pGIDepends);
 
 			if (pGIDepends)

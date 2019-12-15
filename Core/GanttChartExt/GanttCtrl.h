@@ -258,7 +258,7 @@ protected:
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
 	HIMAGELIST GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const;
 
-	GANTTITEM* GetGanttItem(DWORD dwTaskID, BOOL bCopyRefID = TRUE) const;
+	GANTTITEM* GetGanttItem(DWORD dwTaskID) const;
 	BOOL RestoreGanttItem(const GANTTITEM& giPrev);
 
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;

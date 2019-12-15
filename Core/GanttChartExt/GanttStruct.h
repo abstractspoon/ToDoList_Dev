@@ -98,8 +98,6 @@ struct GANTTITEM
 	
 	BOOL IsDone(BOOL bIncGoodAs) const;
 	BOOL IsMilestone(const CString& sMilestoneTag) const;
-	BOOL IsLocked(BOOL bTreatRefsAsUnlocked) const;
-	BOOL IsReference() const;
 
 	BOOL HasStartDate() const;
 	BOOL HasDueDate() const;
@@ -136,9 +134,9 @@ public:
 	virtual ~CGanttItemMap();
 
 	void RemoveAll();
-	BOOL RemoveKey(DWORD dwKey);
-	BOOL HasItem(DWORD dwKey) const;
-	GANTTITEM* GetItem(DWORD dwKey) const;
+	BOOL DeleteItem(DWORD dwTaskID);
+	BOOL HasItem(DWORD dwTaskID) const;
+	GANTTITEM* GetItem(DWORD dwTaskID, BOOL bResolveReferences) const;
 	BOOL RestoreItem(const GANTTITEM& giPrev);
 	BOOL ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	BOOL ItemIsReference(DWORD dwTaskID) const;
