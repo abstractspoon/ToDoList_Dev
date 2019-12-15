@@ -7275,8 +7275,14 @@ DD_DROPEFFECT CToDoCtrl::GetSelectedTasksDropEffect(HTREEITEM htiDropTarget, BOO
 			return DD_DROPEFFECT_LINK;
 		}
 
-		// Prevent moving tasks except references
+		// Prevent moving locked tasks unless references
 		if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
+		{
+			return DD_DROPEFFECT_NONE;
+		}
+
+		// Prevent moving subtasks of locked parent unless parent is reference
+		if (m_taskTree.SelectionHasLockedParent(TRUE))
 		{
 			return DD_DROPEFFECT_NONE;
 		}
