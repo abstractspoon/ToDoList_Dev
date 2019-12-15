@@ -845,7 +845,7 @@ BOOL CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 		return FALSE;
 	
 	// we're NOT interested in keyboard changes
-	// because keyboard gets handled in OnKeyUpWorkload
+	// because keyboard gets handled in WM_KEYUP
 	if (pNMTV->action == TVC_BYKEYBOARD)
 		return FALSE;
 
@@ -1057,15 +1057,29 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		{
 			LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 
-			NMTVKEYDOWN tvkd = { 0 };
+			switch (wp)
+			{
+			case VK_UP:
+			case VK_DOWN:
+			case VK_PRIOR:
+			case VK_NEXT:
+				CWnd::GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)GetSelectedItem());
+				break;
 
-			tvkd.hdr.hwndFrom = hRealWnd;
-			tvkd.hdr.idFrom = ::GetDlgCtrlID(hRealWnd);
-			tvkd.hdr.code = TVN_KEYUP;
-			tvkd.wVKey = LOWORD(wp);
-			tvkd.flags = lp;
+			default:
+				{
+					NMTVKEYDOWN tvkd = { 0 };
 
-			CWnd::SendMessage(WM_NOTIFY, ::GetDlgCtrlID(hRealWnd), (LPARAM)&tvkd);
+					tvkd.hdr.hwndFrom = hRealWnd;
+					tvkd.hdr.idFrom = ::GetDlgCtrlID(hRealWnd);
+					tvkd.hdr.code = TVN_KEYUP;
+					tvkd.wVKey = LOWORD(wp);
+					tvkd.flags = lp;
+
+					lr = CWnd::SendMessage(WM_NOTIFY, ::GetDlgCtrlID(hRealWnd), (LPARAM)&tvkd);
+				}
+				break;
+			}
 			return lr;
 		}
 		
