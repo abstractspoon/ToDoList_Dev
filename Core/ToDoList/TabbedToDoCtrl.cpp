@@ -4667,6 +4667,8 @@ BOOL CTabbedToDoCtrl::CanMoveSelectedTask(TDC_MOVETASK nDirection) const
 		return CToDoCtrl::CanMoveSelectedTask(nDirection);
 
 	case FTCV_TASKLIST:
+		// We don't allow any moving/dragging in the list view 
+		// because is not clear where the task might end up
 		return FALSE;
 
 	case FTCV_UIEXTENSION1:
@@ -4737,6 +4739,12 @@ BOOL CTabbedToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
+			if (!IsSelectedTaskMoveEnabled(TDCM_NONDRAG))
+			{
+				ASSERT(0);
+				return FALSE;
+			}
+
 			CScopedLogTimer log(_T("CTabbedToDoCtrl::MoveSelectedTask"));
 			log.LogStart();
 
