@@ -1904,7 +1904,7 @@ HTREEITEM CTDLTaskTreeCtrl::MoveItemRaw(HTREEITEM hti, HTREEITEM htiDestParent, 
 
 BOOL CTDLTaskTreeCtrl::CanMoveSelection(TDC_MOVETASK nDirection) const
 {
-	if (IsReadOnly() || SelectionHasLocked(FALSE, TRUE))
+	if (!IsSelectedTaskMoveEnabled(TDCM_NONDRAG))
 		return FALSE;
 	
 	// Get selected tasks without duplicate subtasks
@@ -1925,6 +1925,49 @@ BOOL CTDLTaskTreeCtrl::CanMoveSelection(TDC_MOVETASK nDirection) const
 			return FALSE;
 	}
 	
+	return TRUE;
+}
+
+BOOL CTDLTaskTreeCtrl::IsSelectedTaskMoveEnabled(TDC_MOVEMETHOD nMethod) const
+{
+	if (IsReadOnly())
+		return FALSE;
+
+	switch (nMethod)
+	{
+	case TDCM_LEFTDRAG:
+		{
+			// Copying
+			if (Misc::ModKeysArePressed(MKS_CTRL))
+				return TRUE;
+
+			// References
+			if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT))
+				return TRUE;
+		}
+		// fall through
+
+	case TDCM_NONDRAG:
+		{
+			// Prevent moving locked tasks unless references
+			if (SelectionHasLocked(FALSE, TRUE))
+				return FALSE;
+
+			// Prevent moving subtasks of locked parent unless parent is reference
+			if (SelectionHasLockedParent(TRUE))
+				return FALSE;
+		}
+		break;
+
+	case TDCM_RIGHTDRAG:
+		// Resolved at time of drop
+		break;
+
+	default:
+		ASSERT(0);
+		return FALSE;
+	}
+
 	return TRUE;
 }
 

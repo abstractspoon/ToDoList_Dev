@@ -4686,6 +4686,9 @@ BOOL CTabbedToDoCtrl::CanMoveSelectedTask(TDC_MOVETASK nDirection) const
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
+			if (!IsSelectedTaskMoveEnabled(TDCM_NONDRAG))
+				return FALSE;
+
 			DWORD dwSelTaskID = ((m_taskTree.GetSelectedCount() == 1) ? GetSelectedTaskID() : 0);
 			DWORD dwDestParentID = 0, dwDestPrevSiblingID = 0;
 

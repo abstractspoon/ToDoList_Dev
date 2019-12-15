@@ -114,6 +114,8 @@ public:
 	BOOL CanMoveSelection(TDC_MOVETASK nDirection) const;
 	HTREEITEM MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
 	BOOL MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, BOOL bEnsureVisible = TRUE);
+
+	BOOL IsSelectedTaskMoveEnabled(TDC_MOVEMETHOD nMethod) const;
 	
 	inline HTREEITEM GetSelectedItem() const { return TSH().GetFirstItem(); }
 	inline HTREEITEM GetTreeSelectedItem() const { return m_tcTasks.GetSelectedItem(); }

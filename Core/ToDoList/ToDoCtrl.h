@@ -877,7 +877,8 @@ protected:
 	BOOL RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);
 	BOOL ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks); // helper to avoid code dupe
 	void PrepareTaskfileForTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const;
-
+	
+	BOOL IsSelectedTaskMoveEnabled(TDC_MOVEMETHOD nMethod) const { return m_taskTree.IsSelectedTaskMoveEnabled(nMethod); }
 	BOOL DropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget, HTREEITEM htiDropAfter);
 	BOOL CanDropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget) const;
 	DD_DROPEFFECT GetSelectedTasksDropEffect(HTREEITEM htiDropTarget, BOOL bLeftDrag) const;

@@ -7207,18 +7207,9 @@ LRESULT CToDoCtrl::OnTreeDragEnter(WPARAM /*wParam*/, LPARAM lParam)
 	if (!m_treeDragDrop.ProcessMessage(GetCurrentMessage()))
 		return FALSE;
 
-	HTREEITEM htiOver, htiAfter;
-		
-	if (!m_treeDragDrop.GetDropTarget(htiOver, htiAfter, m_bDragDropSubtasksAtTop))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
 	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
-	DD_DROPEFFECT nDrop = GetSelectedTasksDropEffect(htiOver, pDDI->bLeftDrag);
 
-	return (nDrop != DD_DROPEFFECT_NONE);
+	return IsSelectedTaskMoveEnabled(pDDI->bLeftDrag ? TDCM_LEFTDRAG : TDCM_RIGHTDRAG);
 }
 
 LRESULT CToDoCtrl::OnTreeDragPreMove(WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -7256,6 +7247,12 @@ DD_DROPEFFECT CToDoCtrl::GetSelectedTasksDropEffect(HTREEITEM htiDropTarget, BOO
 		return DD_DROPEFFECT_NONE;
 	}
 
+	if (!IsSelectedTaskMoveEnabled(bLeftDrag ? TDCM_LEFTDRAG : TDCM_RIGHTDRAG))
+	{
+		return DD_DROPEFFECT_NONE;
+	}
+
+	// Extra handling
 	if (bLeftDrag)
 	{
 		// If target is a reference then dragged tasks can only be dropped as references
@@ -7274,22 +7271,6 @@ DD_DROPEFFECT CToDoCtrl::GetSelectedTasksDropEffect(HTREEITEM htiDropTarget, BOO
 		{
 			return DD_DROPEFFECT_LINK;
 		}
-
-		// Prevent moving locked tasks unless references
-		if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
-		{
-			return DD_DROPEFFECT_NONE;
-		}
-
-		// Prevent moving subtasks of locked parent unless parent is reference
-		if (m_taskTree.SelectionHasLockedParent(TRUE))
-		{
-			return DD_DROPEFFECT_NONE;
-		}
-	}
-	else
-	{
-		// Anything is allowed because we handle it when dropping
 	}
 
 	return DD_DROPEFFECT_MOVE;
