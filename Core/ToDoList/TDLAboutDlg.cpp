@@ -76,7 +76,7 @@ CTDLAboutDlg::CTDLAboutDlg(const CString& sAppTitle, CWnd* pParent /*=NULL*/)
 	CDialog(IDD_ABOUT_DIALOG, pParent), 
 	m_sAppTitle(sAppTitle),
 	m_eAppFile(FES_NOBROWSE | FES_GOBUTTON),
-	m_ePrefsFile(FES_NOBROWSE | FES_GOBUTTON)
+	m_ePrefsFile(FES_NOBROWSE | (CPreferences::UsesIni() ? FES_GOBUTTON : 0))
 {
 	//{{AFX_DATA_INIT(CTDLAboutDlg)
 	//}}AFX_DATA_INIT
@@ -87,9 +87,6 @@ CTDLAboutDlg::CTDLAboutDlg(const CString& sAppTitle, CWnd* pParent /*=NULL*/)
 	CLocalizer::IgnoreString(m_sAppTitle);
 	CLocalizer::IgnoreString(m_sLicense);
 	CLocalizer::IgnoreString(ABOUTCONTRIBUTION);
-
-	if (!CPreferences::UsesIni())
-		m_ePrefsFile.EnableStyle(FES_GOBUTTON, FALSE);
 }
 
 void CTDLAboutDlg::DoDataExchange(CDataExchange* pDX)
@@ -114,6 +111,7 @@ BEGIN_MESSAGE_MAP(CTDLAboutDlg, CDialog)
 	//}}AFX_MSG_MAP
 	ON_WM_HELPINFO()
 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileEditDisplayFile)
+	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileEditGetFileIcon)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -148,8 +146,8 @@ BOOL CTDLAboutDlg::OnInitDialog()
 	}
 	
 	// dummy imagelist to increase row height
-	if (m_il.Create(1, 16, ILC_COLOR, 1, 1))
-		m_lcContributors.SetImageList(&m_il, LVSIL_SMALL);
+	if (m_ilSize.Create(1, 16, ILC_COLOR, 1, 1))
+		m_lcContributors.SetImageList(&m_ilSize, LVSIL_SMALL);
 	
 	//	ListView_SetExtendedListViewStyleEx(m_lcOptions, LVS_EX_GRIDLINES, LVS_EX_GRIDLINES);
 	ListView_SetExtendedListViewStyleEx(m_lcContributors, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
@@ -216,4 +214,31 @@ LRESULT CTDLAboutDlg::OnFileEditDisplayFile(WPARAM /*wp*/, LPARAM lp)
 	FileMisc::SelectFileInExplorer((LPCTSTR)lp);
 
 	return 1L;
+}
+
+LRESULT CTDLAboutDlg::OnFileEditGetFileIcon(WPARAM wp, LPARAM lp)
+{
+	if ((int)wp == m_ePrefsFile.GetDlgCtrlID())
+	{
+		CString sFilePath((LPCTSTR)lp);
+
+		if (sFilePath.Find(_T("HKEY_")) == 0)
+		{
+			if (!m_iconReg.IsValid())
+				m_iconReg.Attach(m_ePrefsFile.GetFileIcon(GetRegEditPath()));
+
+			return (LRESULT)(HICON)m_iconReg;
+		}
+	}
+
+	// all else
+	return 0L;
+}
+
+CString CTDLAboutDlg::GetRegEditPath()
+{
+	CString sRegEditPath;
+	VERIFY(FileMisc::GetSpecialFilePath(CSIDL_SYSTEM, _T("Regedit.exe"), sRegEditPath));
+
+	return sRegEditPath;
 }

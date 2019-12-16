@@ -13,9 +13,9 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT WM_FE_GETFILEICON = ::RegisterWindowMessage(_T("WM_FE_GETFILEICON")); // lParam == <filepath>
-const UINT WM_FE_DISPLAYFILE = ::RegisterWindowMessage(_T("WM_FE_DISPLAYFILE")); // lParam == <filepath>
-const UINT WM_FEN_BROWSECHANGE = ::RegisterWindowMessage(_T("WM_FEN_BROWSEFILE")); // lParam == <filepath>
+const UINT WM_FE_GETFILEICON = ::RegisterWindowMessage(_T("WM_FE_GETFILEICON")); // wParam == GetDlgCtrlID, lParam == <filepath>
+const UINT WM_FE_DISPLAYFILE = ::RegisterWindowMessage(_T("WM_FE_DISPLAYFILE")); // wParam == GetDlgCtrlID, lParam == <filepath>
+const UINT WM_FEN_BROWSECHANGE = ::RegisterWindowMessage(_T("WM_FEN_BROWSEFILE")); // wParam == GetDlgCtrlID, lParam == <filepath>
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -63,6 +63,8 @@ public:
 	void SetCurrentFolder(LPCTSTR szFolder);
 	CString GetCurrentFolder() const { return m_sCurFolder; }
 	void SetBrowseTitle(LPCTSTR szTitle) { m_sBrowseTitle = szTitle; }
+
+	HICON GetFileIcon(LPCTSTR szPath) { return m_ilSys.ExtractFileIcon(szPath); }
 
 	static void SetDefaultButtonTips(LPCTSTR szBrowse, LPCTSTR szGo);
 	static void SetDefaultBrowseTitles(LPCTSTR szBrowseFiles, LPCTSTR szBrowseFolders);

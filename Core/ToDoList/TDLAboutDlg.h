@@ -10,6 +10,7 @@
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\Shared\fileEdit.h"
+#include "..\Shared\Icon.h"
 
 #include "..\3rdparty\xhtmlstatic.h"
 
@@ -35,9 +36,10 @@ protected:
 	CString			m_sPrefsFilePath;
 	CEnToolBar		m_toolbar;
 	CToolbarHelper	m_tbHelper;
-	CImageList		m_il;
+	CImageList		m_ilSize;
 	CFont			m_fontAppTitle;
 	CFileEdit		m_eAppFile, m_ePrefsFile;
+	CIcon			m_iconReg;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -55,8 +57,12 @@ protected:
 	//}}AFX_MSG
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnFileEditGetFileIcon(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	static CString GetRegEditPath();
 };
 
 //{{AFX_INSERT_LOCATION}}
