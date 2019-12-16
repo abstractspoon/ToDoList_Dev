@@ -133,6 +133,13 @@ END_MESSAGE_MAP()
 
 void CFileEdit::EnableStyle(int nStyle, BOOL bEnable)
 {
+	// Buttons can only be shown/hidden via the constructor
+	if (nStyle & (FES_NOBROWSE | FES_GOBUTTON))
+	{
+		ASSERT(0);
+		return;
+	}
+
 	if (bEnable)
 		m_nStyle |= nStyle;
 	else
