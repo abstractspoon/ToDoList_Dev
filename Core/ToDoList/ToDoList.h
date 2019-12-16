@@ -51,7 +51,7 @@ protected:
 
 	//{{AFX_MSG(CToDoListApp)
 	//}}AFX_MSG
-	afx_msg void OnHelpGoogleGroup();
+	afx_msg void OnHelpForum();
 	afx_msg void OnHelpLicense();
 	afx_msg void OnHelpCommandline();
 	afx_msg void OnHelpDonate();
@@ -70,7 +70,6 @@ protected:
 	afx_msg void OnHelpCheckForUpdates();
 	afx_msg void OnHelpRecordBugReport();
 	afx_msg void OnHelpWiki();
-	afx_msg void OnHelpFacebook();
 	afx_msg void OnImportPrefs();
 	afx_msg void OnUpdateImportPrefs(CCmdUI* pCmdUI);
 	afx_msg void OnExportPrefs();

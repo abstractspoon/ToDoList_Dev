@@ -2779,8 +2779,7 @@ END
 IDR_SOCIAL_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
 BEGIN
     BUTTON      ID_HELP_WIKI
-    BUTTON      ID_HELP_GOOGLEGROUP
-    BUTTON      ID_HELP_FACEBOOK
+    BUTTON      ID_HELP_FORUM
 END
 
 IDR_TIMETRACKER_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
@@ -3578,7 +3577,7 @@ BEGIN
     POPUP "&Help"
     BEGIN
         MENUITEM "&Online Help",                ID_HELP_WIKI
-        MENUITEM "&Feedback and Support",       ID_HELP_GOOGLEGROUP
+        MENUITEM "&Feedback and Support",       ID_HELP_FORUM
         MENUITEM SEPARATOR
         MENUITEM "&Record Bug Report...",       ID_HELP_RECORDBUGREPORT
         MENUITEM SEPARATOR
@@ -5477,12 +5476,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_HELP_FACEBOOK        "\nFacebook"
-    ID_HELP_GOOGLEGROUP     "\nFeedback and Support"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
+    ID_HELP_FORUM			"\nFeedback and Support"
     ID_FIND_HELP            "\nOnline Help"
     ID_ONTOP                "\nAlways on top"
     ID_TIMETRACKER_ONTOP    "\nAlways on Top"
