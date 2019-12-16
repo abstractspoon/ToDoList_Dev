@@ -143,8 +143,6 @@ struct WORKLOADITEM
 	BOOL HasValidDates() const;
 
 	BOOL IsDone(BOOL bIncGoodAs) const;
-	BOOL IsLocked(BOOL bTreatRefsAsUnlocked) const;
-	BOOL IsReference() const;
 
 	void UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL bPreferTimeEstimate, BOOL bProportionally, BOOL bAllowParentAllocations);
 	void ClearAllocations();
@@ -180,9 +178,9 @@ public:
 	virtual ~CWorkloadItemMap();
 
 	void RemoveAll();
-	BOOL RemoveKey(DWORD dwKey);
+	BOOL RemoveItem(DWORD dwKey);
 	BOOL HasItem(DWORD dwKey) const;
-	WORKLOADITEM* GetItem(DWORD dwKey) const;
+	WORKLOADITEM* GetItem(DWORD dwKey, BOOL bResolveReferences) const;
 	WORKLOADITEM* GetNextItem(POSITION& pos) const;
 	BOOL ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	BOOL ItemIsReference(DWORD dwTaskID) const;

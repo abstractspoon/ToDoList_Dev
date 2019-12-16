@@ -164,7 +164,7 @@ protected:
 	void ResyncTotalsPositions();
 	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
 
-	WORKLOADITEM* GetWorkloadItem(DWORD dwTaskID, BOOL bCopyRefID = TRUE) const;
+	WORKLOADITEM* GetWorkloadItem(DWORD dwTaskID) const;
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
 	BOOL SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards);
 

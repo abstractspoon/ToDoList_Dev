@@ -222,6 +222,7 @@ BOOL CWorkloadCtrl::SetSelectedTaskAllocations(const WORKLOADITEM& wi)
 
 	*pWI = wi;
 
+	m_list.Invalidate(FALSE);
 	RecalcAllocationTotals();
 
 	return TRUE;
@@ -886,33 +887,9 @@ void CWorkloadCtrl::UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKITEM hT
 	}
 }
 
-WORKLOADITEM* CWorkloadCtrl::GetWorkloadItem(DWORD dwTaskID, BOOL bCopyRefID) const
+WORKLOADITEM* CWorkloadCtrl::GetWorkloadItem(DWORD dwTaskID) const
 {
-	WORKLOADITEM* pWI = m_data.GetItem(dwTaskID);
-	ASSERT(pWI);
-	
-	if (pWI)
-	{
-		// For references we use the 'real' task but with the 
-		// original reference reference ID copied over
-		DWORD dwRefID = pWI->dwRefID;
-		
-		if (dwRefID && (dwRefID != dwTaskID) && m_data.Lookup(dwRefID, pWI))
-		{
-			// copy over the reference id so that the caller can still detect it
-			if (bCopyRefID)
-			{
-				ASSERT((pWI->dwRefID == 0) || (pWI->dwRefID == dwRefID));
-				pWI->dwOrgRefID = dwRefID;
-			}
-		}
-		else
-		{
-			pWI->dwOrgRefID = 0;
-		}
-	}
-	
-	return pWI;
+	return m_data.GetItem(dwTaskID, TRUE);
 }
 
 void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
@@ -2002,7 +1979,7 @@ BOOL CWorkloadCtrl::OnItemCheckChange(HTREEITEM hti)
 	if (!m_bReadOnly)
 	{
 		DWORD dwTaskID = GetTaskID(hti);
-		WORKLOADITEM* pWI = m_data.GetItem(dwTaskID);
+		WORKLOADITEM* pWI = GetWorkloadItem(dwTaskID);
 		ASSERT(pWI);
 
 		if (pWI)
@@ -2337,7 +2314,8 @@ double CWorkloadCtrl::CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, H
 		const WORKLOADITEM* pWIChild = GetWorkloadItem(m_tree.GetItemData(htiChild));
 		ASSERT(pWIChild);
 
-		if (pWIChild)
+		// exclude references
+		if (pWIChild && !pWIChild->dwOrgRefID)
 		{
 			COLORREF crChild = CLR_NONE;
 			dDays += CalcAllocationListItemColumnDays(*pWIChild, htiChild, nCol, crChild);
@@ -2345,9 +2323,9 @@ double CWorkloadCtrl::CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, H
 			// Highlight overlapping children on parent if parent is not expanded
 			if ((crChild != CLR_NONE) && !m_tree.TCH().IsItemExpanded(hti))
 				crBack = crChild;
-
-			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 		}
+
+		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 	}
 
 	return dDays;
@@ -2560,7 +2538,7 @@ void CWorkloadCtrl::DeleteItem(HTREEITEM hti)
 	ASSERT(dwTaskID);
 
 	VERIFY(m_tree.DeleteItem(hti));
-	VERIFY(m_data.RemoveKey(dwTaskID));
+	VERIFY(m_data.RemoveItem(dwTaskID));
 }
 
 WLC_COLUMNID CWorkloadCtrl::GetTreeColumnID(int nCol) const

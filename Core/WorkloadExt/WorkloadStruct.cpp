@@ -590,16 +590,6 @@ BOOL WORKLOADITEM::IsDone(BOOL bIncGoodAs) const
 	return (bDone || (bIncGoodAs && bGoodAsDone));
 }
 
-BOOL WORKLOADITEM::IsLocked(BOOL bTreatRefsAsUnlocked) const
-{
-	return (bLocked && (!bTreatRefsAsUnlocked || !IsReference()));
-}
-
-BOOL WORKLOADITEM::IsReference() const
-{
-	return (dwRefID || dwOrgRefID);
-}
-
 void WORKLOADITEM::ClearAllocations()
 {
 	mapAllocatedDays.RemoveAll();
@@ -682,60 +672,85 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 
 BOOL CWorkloadItemMap::ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const
 {
-	const WORKLOADITEM* pWI = GetItem(dwTaskID);
-	
-	return (pWI && pWI->IsLocked(bTreatRefsAsUnlocked));
+	const WORKLOADITEM* pWI = GetItem(dwTaskID, TRUE);
+
+	return (pWI && pWI->bLocked && (!bTreatRefsAsUnlocked || !pWI->dwOrgRefID));
 }
 
 BOOL CWorkloadItemMap::ItemIsReference(DWORD dwTaskID) const
 {
-	const WORKLOADITEM* pWI = GetItem(dwTaskID);
+	const WORKLOADITEM* pWI = GetItem(dwTaskID, TRUE);
 
-	return (pWI && pWI->IsReference());
+	return (pWI && pWI->dwOrgRefID);
 }
 
-BOOL CWorkloadItemMap::RemoveKey(DWORD dwKey)
+BOOL CWorkloadItemMap::RemoveItem(DWORD dwTaskID)
 {
 	WORKLOADITEM* pWI = NULL;
 	
-	if (Lookup(dwKey, pWI))
+	if (Lookup(dwTaskID, pWI))
 	{
 		delete pWI;
-		return CMap<DWORD, DWORD, WORKLOADITEM*, WORKLOADITEM*&>::RemoveKey(dwKey);
+		return CMap<DWORD, DWORD, WORKLOADITEM*, WORKLOADITEM*&>::RemoveKey(dwTaskID);
 	}
 	
 	// else
 	return FALSE;
 }
 
-BOOL CWorkloadItemMap::HasItem(DWORD dwKey) const
+BOOL CWorkloadItemMap::HasItem(DWORD dwTaskID) const
 {
-	if (dwKey == 0)
+	if (dwTaskID == 0)
 		return FALSE;
 
-	return (GetItem(dwKey) != NULL);
+	WORKLOADITEM* pWIUnused = NULL;
+
+	return Lookup(dwTaskID, pWIUnused);
 }
 
-WORKLOADITEM* CWorkloadItemMap::GetItem(DWORD dwKey) const
+WORKLOADITEM* CWorkloadItemMap::GetItem(DWORD dwTaskID, BOOL bResolveReferences) const
 {
-	if (dwKey == 0)
+	if (dwTaskID == 0)
 		return NULL;
 
 	WORKLOADITEM* pWI = NULL;
-	
-	if (Lookup(dwKey, pWI))
+
+	if (!Lookup(dwTaskID, pWI) || !pWI)
+	{
 		ASSERT(pWI);
-	
+		return NULL;
+	}
+
+	// Resolves references
+	pWI->dwOrgRefID = 0;
+
+	if (pWI && pWI->dwRefID && bResolveReferences)
+	{
+		ASSERT(pWI->dwOrgRefID == 0);
+		ASSERT(pWI->dwRefID != dwTaskID);
+
+		DWORD dwRefID = pWI->dwRefID;
+
+		if ((dwRefID != dwTaskID) && Lookup(dwRefID, pWI))
+		{
+			// copy over the reference id so that the caller can still detect it
+			ASSERT(pWI->dwRefID == 0);
+
+			pWI->dwOrgRefID = dwTaskID;
+			pWI->dwRefID = 0;
+		}
+	}
+
 	return pWI;
 }
 
 WORKLOADITEM* CWorkloadItemMap::GetNextItem(POSITION& pos) const
 {
 	WORKLOADITEM* pWI = NULL;
-	DWORD dwKey = 0;
+	DWORD dwTaskID = 0;
 
-	GetNextAssoc(pos, dwKey, pWI);
-	ASSERT(dwKey && pWI);
+	GetNextAssoc(pos, dwTaskID, pWI);
+	ASSERT(dwTaskID && pWI);
 
 	return pWI;
 }

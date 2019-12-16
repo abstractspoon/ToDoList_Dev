@@ -899,7 +899,7 @@ void CGanttCtrl::RecalcDateRange()
 }
 
 void CGanttCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
-										HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd)
+								HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd)
 {
 	if (hTask == NULL)
 		return;

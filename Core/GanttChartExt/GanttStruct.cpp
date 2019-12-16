@@ -595,8 +595,11 @@ GANTTITEM* CGanttItemMap::GetItem(DWORD dwTaskID, BOOL bResolveReferences) const
 
 	GANTTITEM* pGI = NULL;
 
-	if (Lookup(dwTaskID, pGI))
+	if (!Lookup(dwTaskID, pGI) || !pGI)
+	{
 		ASSERT(pGI);
+		return NULL;
+	}
 
 	// Resolves references
 	pGI->dwOrgRefID = 0;
