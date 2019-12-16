@@ -8554,7 +8554,8 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 			DestroyWindow();
 #endif
 
-		hold.Save();
+		if (hold.UsesIni())
+			hold.Save();
 
 		// cleanup the shutdown reason created in OnQueryEndSession.
 		// This allows Windows to forcibly close the app hence no need

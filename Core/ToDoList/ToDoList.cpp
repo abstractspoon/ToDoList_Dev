@@ -1025,7 +1025,8 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		prefs.WriteProfileInt(_T("Preferences"), _T("ShowEditMenuAsColumns"), wizard.GetHideAttributes());
 
 		// Save this config
-		prefs.Save();
+		if (prefs.UsesIni())
+			prefs.Save();
 		
 		// set up initial file
 		CString sSample = wizard.GetSampleFilePath();
