@@ -123,7 +123,7 @@ const LPCTSTR ENDL			= _T("\n");
 
 const CString TEMP_CLIPBOARD_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.clipboard"), _T(""));
 const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print"), _T("html"));
-const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"), _T("bmp"));
+const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"), _T("png"));
 
 /////////////////////////////////////////////////////////////////////////////
 
