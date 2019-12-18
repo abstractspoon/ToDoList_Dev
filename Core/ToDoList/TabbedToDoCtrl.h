@@ -79,7 +79,7 @@ public:
 	void SetTaskView(FTC_VIEW nView);
 	void SetNextTaskView();
 	FTC_VIEW GetTaskView() const { return m_tabViews.GetActiveView(); }
-	CString GetTaskViewName() const { return m_tabViews.GetViewName(GetTaskView()); }
+	CString GetTaskViewName() const;
 	void ShowListViewTab(BOOL bVisible = TRUE);
 	BOOL IsListViewTabShowing() const;
 	void SaveAllTaskViewPreferences();
@@ -89,7 +89,7 @@ public:
 	static void SetDefaultTaskViews(const CStringArray& aTypeIDs);
 	
 	BOOL SetTreeFont(HFONT hFont); // caller responsible for deleting
-	BOOL SaveTaskViewToImage(CString& sFilePath);
+	BOOL SaveTaskViewToImage(const CString& sFilePath);
 	BOOL CanSaveTaskViewToImage() const;
 
 	TDC_HITTEST HitTest(const CPoint& ptScreen) const;

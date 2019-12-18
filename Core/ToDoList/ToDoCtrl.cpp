@@ -12603,26 +12603,12 @@ BOOL CToDoCtrl::CanCopyAttributeData(const TDCCUSTOMATTRIBUTEDEFINITION& attribD
 	return FALSE;
 }
 
-BOOL CToDoCtrl::SaveTaskViewToImage(CString& sFilePath) 
+BOOL CToDoCtrl::SaveTaskViewToImage(const CString& sFilePath) 
 { 
 	CBitmap bmImage;
 
 	if (m_taskTree.SaveToImage(bmImage))
-	{
-		CString sPngPath(sFilePath);
-		FileMisc::ReplaceExtension(sPngPath, _T(".png"));
-
-		if (CGdiPlusBitmap(bmImage).SaveAsPNG(sPngPath))
-		{
-			sFilePath = sPngPath;
-			return TRUE;
-		}
-
-		// Fallback
-		CDibData dib;
-
-		return (dib.CreateDIB(bmImage) && dib.SaveDIB(sFilePath));
-	}
+		return (CGdiPlusBitmap(bmImage).SaveAsFile(sFilePath) != FALSE);
 
 	// else
 	return FALSE;

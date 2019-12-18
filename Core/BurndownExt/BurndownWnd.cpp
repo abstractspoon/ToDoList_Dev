@@ -554,22 +554,7 @@ bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 			CBitmap bmImage;
 
 			if (m_chart.SaveToImage(bmImage))
-			{
-				CString sPngPath(pData->szFilePath);
-				FileMisc::ReplaceExtension(sPngPath, _T(".png"));
-				
-				if (CGdiPlusBitmap(bmImage).SaveAsPNG(sPngPath))
-				{
-					lstrcpyn(pData->szFilePath, sPngPath, MAX_PATH);
-					return true;
-				}
-				
-				// Fallback
-				CDibData dib;
-
-				if (dib.CreateDIB(bmImage) && dib.SaveDIB(pData->szFilePath))
-					return true;
-			}
+				return (CGdiPlusBitmap(bmImage).SaveAsFile(pData->szFilePath) != FALSE);
 		}
 		break;
 

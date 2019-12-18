@@ -162,9 +162,9 @@ CGdiPlusBitmap::CGdiPlusBitmap(HBITMAP hbitmap) : m_bitmap(NULL)
 	CGdiPlus::CreateBitmapFromHBITMAP(hbitmap, NULL, &m_bitmap);
 }
 
-BOOL CGdiPlusBitmap::SaveAsPNG(const WCHAR* filename)
+BOOL CGdiPlusBitmap::SaveAsFile(const WCHAR* filename)
 {
-	return CGdiPlus::SaveBitmapAsPNG(m_bitmap, filename);
+	return CGdiPlus::SaveBitmapToFile(m_bitmap, filename);
 }
 
 CGdiPlusBitmap::~CGdiPlusBitmap()
@@ -377,19 +377,35 @@ BOOL CGdiPlus::CreateBitmapFromHBITMAP(HBITMAP hbitmap, HPALETTE hPal, gdix_Bitm
 	return (pFN(hbitmap, hPal, bitmap) == gdix_Ok);
 }
 
-BOOL CGdiPlus::SaveBitmapAsPNG(gdix_Bitmap* bitmap, const WCHAR* filename)
+BOOL CGdiPlus::SaveBitmapToFile(gdix_Bitmap* bitmap, const WCHAR* filename)
 {
 	if (!bitmap)
 		return FALSE;
 
-	CLSID clsidPNG = { 0 };
+	// Use the file extension to determine the required encoder
+	CString sExt;
 
-	if (!GetEncoderClsid(L"image/png", &clsidPNG))
+#if _MSC_VER >= 1400
+	_wsplitpath_s(filename, NULL, 0, NULL, 0, NULL, 0, sExt.GetBuffer(_MAX_EXT + 1), _MAX_EXT);
+#else
+	_wsplitpath(szPath, NULL, NULL, NULL, sExt.GetBuffer(_MAX_EXT + 1));
+#endif
+	sExt.ReleaseBuffer();
+
+	if (sExt.IsEmpty())
+		return FALSE;
+
+	if (sExt[0] == '.')
+		sExt = sExt.Mid(1);
+	
+	CLSID clsidEncoder = { 0 };
+
+	if (!GetEncoderClsid((L"image/" + sExt), &clsidEncoder))
 		return FALSE;
 
 	GETPROCADDRESS(PFNSAVEIMAGETOFILE, "GdipSaveImageToFile");
 	
-	return (pFN((gdix_Image*)bitmap, filename, &clsidPNG, NULL) == gdix_Ok);
+	return (pFN((gdix_Image*)bitmap, filename, &clsidEncoder, NULL) == gdix_Ok);
 }
 
 BOOL CGdiPlus::DeleteBitmap(gdix_Bitmap* bitmap)

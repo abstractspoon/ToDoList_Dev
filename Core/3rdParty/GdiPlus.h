@@ -229,7 +229,7 @@ public:
 	gdix_Image* AsImage() { return (gdix_Image*)m_bitmap; }
 
 	BOOL IsValid() const { return (m_bitmap != NULL); }
-	BOOL SaveAsPNG(const WCHAR* filename);
+	BOOL SaveAsFile(const WCHAR* filename);
 
 protected:
 	gdix_Bitmap* m_bitmap;
@@ -274,7 +274,7 @@ public:
 	static BOOL CreateBitmapFromHBITMAP(HBITMAP hbitmap, HPALETTE hPal, gdix_Bitmap **bitmap);
 	static BOOL CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background);
 	static BOOL DeleteBitmap(gdix_Bitmap* bitmap);
-	static BOOL SaveBitmapAsPNG(gdix_Bitmap* bitmap, const WCHAR* filename);
+	static BOOL SaveBitmapToFile(gdix_Bitmap* bitmap, const WCHAR* filename);
 
 	static BOOL CreatePen(gdix_ARGB color, gdix_Real width, gdix_Pen** pen);
 	static BOOL DeletePen(gdix_Pen* pen);

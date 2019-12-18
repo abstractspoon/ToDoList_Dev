@@ -1122,6 +1122,16 @@ void CTabbedToDoCtrl::SetNextTaskView()
 		UpdateControls();
 }
 
+CString CTabbedToDoCtrl::GetTaskViewName() const
+{
+	FTC_VIEW nView = GetTaskView();
+
+	if (nView == FTCV_UNSET)
+		nView = FTCV_TASKTREE;
+	
+	return m_tabViews.GetViewName(nView);
+}
+
 LRESULT CTabbedToDoCtrl::OnUIExtSelectTask(WPARAM wParam, LPARAM lParam)
 {
 	if (!m_bUpdatingExtensions)
@@ -6421,7 +6431,7 @@ LRESULT CTabbedToDoCtrl::OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-BOOL CTabbedToDoCtrl::SaveTaskViewToImage(CString& sFilePath)
+BOOL CTabbedToDoCtrl::SaveTaskViewToImage(const CString& sFilePath)
 {
 	if (!CanSaveTaskViewToImage())
 		return FALSE;
@@ -6439,21 +6449,7 @@ BOOL CTabbedToDoCtrl::SaveTaskViewToImage(CString& sFilePath)
 			CBitmap bmImage;
 
 			if (m_taskList.SaveToImage(bmImage))
-			{
-				CString sPngPath(sFilePath);
-				FileMisc::ReplaceExtension(sPngPath, _T(".png"));
-				
-				if (CGdiPlusBitmap(bmImage).SaveAsPNG(sPngPath))
-				{
-					sFilePath = sPngPath;
-					return TRUE;
-				}
-
-				// Fallback
-				CDibData dib;
-
-				return (dib.CreateDIB(bmImage) && dib.SaveDIB(sFilePath));
-			}
+				return (CGdiPlusBitmap(bmImage).SaveAsFile(sFilePath) != FALSE);
 		}
 		break;
 		
@@ -6473,16 +6469,7 @@ BOOL CTabbedToDoCtrl::SaveTaskViewToImage(CString& sFilePath)
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		{
-			CUIExtensionAppCmdData data(sFilePath);
-
-			if (ExtensionDoAppCommand(nView, IUI_SAVETOIMAGE, data))
-			{
-				sFilePath = data.szFilePath;
-				return TRUE;
-			}
-		}
-		break;
+		return ExtensionDoAppCommand(nView, IUI_SAVETOIMAGE, CUIExtensionAppCmdData(sFilePath));
 		
 	default:
 		ASSERT(0);
