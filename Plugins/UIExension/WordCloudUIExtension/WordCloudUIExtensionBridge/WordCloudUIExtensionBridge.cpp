@@ -239,16 +239,9 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 
 			if (image != nullptr)
 			{
-				// Always save as png
 				msclr::auto_gcroot<String^> sImagePath = gcnew String(pData->szFilePath);
-				sImagePath = System::IO::Path::ChangeExtension(sImagePath.get(), ".png");
 
-				image->Save(sImagePath.get(), System::Drawing::Imaging::ImageFormat::Png);
-
-				MarshalledString temp(sImagePath.get());
-				lstrcpyn(pData->szFilePath, temp, MAX_PATH);
-
-				return true;
+				return UIExtension::SaveImageToFile(image, sImagePath.get());
 			}
 		}
 	}

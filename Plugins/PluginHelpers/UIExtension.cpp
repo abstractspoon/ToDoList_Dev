@@ -558,3 +558,45 @@ Windows::Forms::Cursor^ UIExtension::HandCursor()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool UIExtension::SaveImageToFile(Drawing::Bitmap^ image, String^ filepath)
+{
+	if (image == nullptr)
+		return false;
+
+	String^ ext = System::IO::Path::GetExtension(filepath)->ToLowerInvariant();
+
+	try
+	{
+		if (ext == L".png")
+		{
+			image->Save(filepath, System::Drawing::Imaging::ImageFormat::Png);
+		}
+		else if (ext == L".bmp")
+		{
+			image->Save(filepath, System::Drawing::Imaging::ImageFormat::Bmp);
+		}
+		else if (ext == L".tif")
+		{
+			image->Save(filepath, System::Drawing::Imaging::ImageFormat::Tiff);
+		}
+		else if ((ext == L".jpg") || (ext == L".jpeg"))
+		{
+			image->Save(filepath, System::Drawing::Imaging::ImageFormat::Jpeg);
+		}
+		else if (ext == L".gif")
+		{
+			image->Save(filepath, System::Drawing::Imaging::ImageFormat::Gif);
+		}
+		else
+		{
+			return false;
+		}
+	}
+	catch (...)
+	{
+		return false;
+	}
+
+	return true;
+}

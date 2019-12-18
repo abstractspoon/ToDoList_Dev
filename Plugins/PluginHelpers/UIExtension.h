@@ -88,6 +88,8 @@ namespace Abstractspoon
 				static Windows::Forms::Cursor^ AppCursor(AppCursorType cursor);
 				static Windows::Forms::Cursor^ HandCursor();
 
+				static bool SaveImageToFile(Drawing::Bitmap^ image, String^ filepath);
+
 				ref class ParentNotify
 				{
 				public:
