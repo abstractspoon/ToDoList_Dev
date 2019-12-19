@@ -321,7 +321,7 @@ BOOL WebMisc::RegisterProtocol(LPCTSTR szProtocol, LPCTSTR szAppName, LPCTSTR sz
 BOOL WebMisc::UnregisterProtocol(LPCTSTR szProtocol)
 {
 	if (CRegKey2::KeyExists(HKEY_CLASSES_ROOT, szProtocol))
-		return (CRegKey2::DeleteKey(HKEY_CLASSES_ROOT, _T("tdl")) == ERROR_SUCCESS);
+		return (CRegKey2::DeleteKey(HKEY_CLASSES_ROOT, szProtocol) == ERROR_SUCCESS);
 
 	// else not there
 	return TRUE;
