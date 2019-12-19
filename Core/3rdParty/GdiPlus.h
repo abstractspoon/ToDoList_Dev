@@ -320,6 +320,7 @@ protected:
 	static BOOL Initialize(); // initialize on demand
 	static void Free();
 
+	static BOOL GetImageMimeType(const WCHAR* filename, CString& sMimeType);
 	static BOOL GetImageEncoders(UINT numEncoders, UINT sizeEncoderArray, IMAGECODECINFO* pEncoders);
 	static BOOL GetImageEncodersSize(UINT* numEncoders, UINT* sizeEncoderArray);
 	static BOOL GetEncoderClsid(const WCHAR* szFormat, CLSID* pClsid);

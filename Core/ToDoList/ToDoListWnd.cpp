@@ -2305,6 +2305,8 @@ void CToDoListWnd::SaveSettings()
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowStatusBar"), m_bShowStatusBar);
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowTasklistBar"), m_bShowTasklistBar);
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowTreeListBar"), m_bShowTreeListBar);
+	
+	prefs.WriteProfileString(SETTINGS_KEY, _T("TaskViewImageExt"), m_sTaskViewImageExt);
 
 	if (m_findDlg.GetSafeHwnd())
 		prefs.WriteProfileInt(SETTINGS_KEY, _T("FindTasksVisible"), m_bFindShowing && m_findDlg.IsWindowVisible());
@@ -2599,6 +2601,8 @@ void CToDoListWnd::LoadSettings()
 	
 	m_bShowStatusBar = prefs.GetProfileInt(SETTINGS_KEY, _T("ShowStatusBar"), m_bShowStatusBar);
 	m_statusBar.ShowWindow(m_bShowStatusBar ? SW_SHOW : SW_HIDE);
+	
+	m_sTaskViewImageExt = prefs.GetProfileString(SETTINGS_KEY, _T("TaskViewImageExt"), _T("png"));
 
 	// toolbars
 	m_bShowingMainToolbar = prefs.GetProfileInt(SETTINGS_KEY, _T("ToolbarOption"), TRUE);
@@ -12822,13 +12826,14 @@ void CToDoListWnd::OnViewSaveToImage()
 
 	sFilePath += '.';
 	sFilePath += tdc.GetTaskViewName();
-	sFilePath += _T(".bmp");
+	sFilePath += '.';
+	sFilePath += m_sTaskViewImageExt;
 
 	CFileSaveDialog dialog(IDS_SAVETASKVIEWTOIMAGE_TITLE,
-							_T("bmp"), 
+							m_sTaskViewImageExt, 
 							sFilePath, 
 							EOFN_DEFAULTSAVE,
-							CEnString(IDS_BMPFILEFILTER), 
+							CEnString(IDS_TASKVIEWIMAGEFILTER), 
 							this);
 
 	if (dialog.DoModal(prefs) == IDCANCEL)
@@ -12836,6 +12841,7 @@ void CToDoListWnd::OnViewSaveToImage()
 	
 	// else
 	sFilePath = dialog.GetPathName();
+	m_sTaskViewImageExt = FileMisc::GetExtension(sFilePath, FALSE);
 
 	DOPROGRESS(IDS_SAVETOIMAGEPROGRESS);
 	

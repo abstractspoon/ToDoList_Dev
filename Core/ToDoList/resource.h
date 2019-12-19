@@ -11,6 +11,7 @@
 #define IDS_TDLBC_CREATETIME            60
 #define IDS_3RDPARTYSTORAGE             61
 #define IDS_BMPFILEFILTER               62
+#define IDS_TASKVIEWIMAGEFILTER         62
 #define IDS_FILTER_LOCKED               63
 #define IDS_TDLBC_LOCK                  64
 #define IDS_UNLOCKED                    66
@@ -1373,7 +1374,7 @@
 #define ID_DEBUGTASKDIALOG_ERROR        34534
 #define ID_HELP_RECORDBUGREPORT         34535
 #define ID_VIEW_RESIZECOLSTOFIT         34536
-#define ID_HELP_FORUM					34539
+#define ID_HELP_FORUM                   34539
 #define ID_FIND_HELP                    34546
 #define ID_VIEW_SHOWTIMETRACKER         34547
 #define ID_TRAYICON_SHOWTIMETRACKER     34548

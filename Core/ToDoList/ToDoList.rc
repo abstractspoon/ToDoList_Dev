@@ -5003,7 +5003,7 @@ BEGIN
     IDS_CAD_INSERTSYMBOL    "Symbols..."
     IDS_TDLBC_CREATETIME    "Creation Time"
     IDS_3RDPARTYSTORAGE     "3rd Party Storage"
-    IDS_BMPFILEFILTER       "Bitmap Image (*.bmp)|*.bmp||"
+    IDS_TASKVIEWIMAGEFILTER "Bitmap Images (*.bmp)|*.bmp|GIF Images (*.gif)|*.gif|JPEG Images (*.jpg, *.jpeg)|*.jpg;*.jpeg|PNG Images (*.png)|*.png|TIFF Images (*.tif)|*.tif||"
     IDS_FILTER_LOCKED       "Locked Tasks"
 END
 
@@ -5476,7 +5476,11 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_HELP_FORUM			"\nFeedback and Support"
+    ID_HELP_FORUM           "\nFeedback and Support"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     ID_FIND_HELP            "\nOnline Help"
     ID_ONTOP                "\nAlways on top"
     ID_TIMETRACKER_ONTOP    "\nAlways on Top"

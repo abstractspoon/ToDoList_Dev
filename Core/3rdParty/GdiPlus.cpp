@@ -32,6 +32,26 @@ struct IMAGECODECINFO
 
 //////////////////////////////////////////////////////////////////////
 
+struct IMAGEMIMETYPE
+{
+	LPCWSTR szExt;
+	LPCWSTR szMimeType;
+};
+
+static IMAGEMIMETYPE IMAGEMIMETYPES[] = 
+{
+	{ L"gif", L"gif" },
+	{ L"jpg", L"jpeg" },
+	{ L"jpeg", L"jpeg" },
+	{ L"tif", L"tiff" },
+	{ L"tiff", L"tiff" },
+	{ L"bmp", L"bmp" },
+	{ L"png", L"png" },
+};
+const int NUM_IMAGEMIMETYPES = (sizeof(IMAGEMIMETYPES) / sizeof(IMAGEMIMETYPE));
+
+//////////////////////////////////////////////////////////////////////
+
 CGdiPlusGraphics::CGdiPlusGraphics(HDC hDC, gdix_SmoothingMode smoothing) : m_graphics(NULL)
 {
 	VERIFY(CGdiPlus::CreateGraphics(hDC, &m_graphics));
@@ -377,12 +397,8 @@ BOOL CGdiPlus::CreateBitmapFromHBITMAP(HBITMAP hbitmap, HPALETTE hPal, gdix_Bitm
 	return (pFN(hbitmap, hPal, bitmap) == gdix_Ok);
 }
 
-BOOL CGdiPlus::SaveBitmapToFile(gdix_Bitmap* bitmap, const WCHAR* filename)
+BOOL CGdiPlus::GetImageMimeType(const WCHAR* filename, CString& sMimeType)
 {
-	if (!bitmap)
-		return FALSE;
-
-	// Use the file extension to determine the required encoder
 	CString sExt;
 
 #if _MSC_VER >= 1400
@@ -397,10 +413,35 @@ BOOL CGdiPlus::SaveBitmapToFile(gdix_Bitmap* bitmap, const WCHAR* filename)
 
 	if (sExt[0] == '.')
 		sExt = sExt.Mid(1);
-	
+
+	int nType = NUM_IMAGEMIMETYPES;
+
+	while (nType--)
+	{
+		if (sExt.CompareNoCase(IMAGEMIMETYPES[nType].szExt) == 0)
+		{
+			sMimeType.Format(L"image/%s", IMAGEMIMETYPES[nType].szMimeType);
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+BOOL CGdiPlus::SaveBitmapToFile(gdix_Bitmap* bitmap, const WCHAR* filename)
+{
+	if (!bitmap)
+		return FALSE;
+
+	// Use the file extension to determine the required encoder
+	CString sMimeType;
+
+	if (!GetImageMimeType(filename, sMimeType))
+		return FALSE;
+
 	CLSID clsidEncoder = { 0 };
 
-	if (!GetEncoderClsid((L"image/" + sExt), &clsidEncoder))
+	if (!GetEncoderClsid(sMimeType, &clsidEncoder))
 		return FALSE;
 
 	GETPROCADDRESS(PFNSAVEIMAGETOFILE, "GdipSaveImageToFile");
