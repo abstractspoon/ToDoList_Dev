@@ -77,6 +77,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
+IDR_MAINFRAME_STD       ICON    DISCARDABLE     "RES\\app_std.ico"
 IDI_TIME_TRACK          ICON    DISCARDABLE     "res\\clock.ico"
 IDI_NULL                ICON    DISCARDABLE     "res\\null.ico"
 IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "res\\plus.ico"
