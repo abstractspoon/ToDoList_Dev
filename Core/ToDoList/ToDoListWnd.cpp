@@ -4082,7 +4082,7 @@ void CToDoListWnd::OnDebugShowReminderDlg()
 	rem.dwTaskID = tdc.GetSelectedTaskID();
 	rem.pTDC = &tdc;
 	rem.bRelative = FALSE;
-	rem.dtAbsolute = COleDateTime::GetCurrentTime();
+	rem.dtAbsolute = CDateHelper::GetDate(DHD_TODAY);
 	rem.bEnabled = TRUE;
 	
 	m_reminders.SetReminder(rem, TRUE);

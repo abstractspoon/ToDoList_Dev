@@ -15,6 +15,7 @@
 
 #include "..\Shared\DateTimeCtrlEx.h"
 #include "..\Shared\timecombobox.h"
+#include "..\Shared\Icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -60,6 +61,7 @@ protected:
 	CTimeComboBox m_cbSnoozeTime;
 	COleDateTime m_dtSnoozeUntil;
 	CListCtrl m_lcReminders;
+	CIcon m_icon;
 
 	CTDCReminderMap m_mapReminders;
 

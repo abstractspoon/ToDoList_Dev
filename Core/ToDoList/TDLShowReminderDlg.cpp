@@ -139,6 +139,9 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
+	if (m_icon.Load(IDR_MAINFRAME_STD))
+		SetIcon(m_icon, FALSE);
+
 	CDlgUnits dlu(this);
 	m_cbSnoozeTime.SetItemHeight(-1, dlu.ToPixelsY(10));
 
