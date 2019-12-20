@@ -404,7 +404,7 @@ BOOL CGdiPlus::GetImageMimeType(const WCHAR* filename, CString& sMimeType)
 #if _MSC_VER >= 1400
 	_wsplitpath_s(filename, NULL, 0, NULL, 0, NULL, 0, sExt.GetBuffer(_MAX_EXT + 1), _MAX_EXT);
 #else
-	_wsplitpath(szPath, NULL, NULL, NULL, sExt.GetBuffer(_MAX_EXT + 1));
+	_wsplitpath(filename, NULL, NULL, NULL, sExt.GetBuffer(_MAX_EXT + 1));
 #endif
 	sExt.ReleaseBuffer();
 

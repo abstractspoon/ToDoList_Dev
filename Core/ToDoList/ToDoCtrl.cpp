@@ -7230,50 +7230,9 @@ LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 		return DD_DROPEFFECT_NONE;
 
 	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
+	DWORD dwTargetID = GetTaskID(htiOver);
 
-	return GetSelectedTasksDropEffect(htiOver, pDDI->bLeftDrag);
-}
-
-DD_DROPEFFECT CToDoCtrl::GetSelectedTasksDropEffect(HTREEITEM htiDropTarget, BOOL bLeftDrag) const
-{
-	ASSERT(!IsReadOnly());
-
-	// Target must be unlocked or a reference
-	DWORD dwTargetID = GetTaskID(htiDropTarget);
-	BOOL bTargetIsRef = m_data.IsTaskReference(dwTargetID);
-
-	if (dwTargetID && m_calculator.IsTaskLocked(dwTargetID) && !bTargetIsRef)
-	{
-		return DD_DROPEFFECT_NONE;
-	}
-
-	if (!IsSelectedTaskMoveEnabled(bLeftDrag ? TDCM_LEFTDRAG : TDCM_RIGHTDRAG))
-	{
-		return DD_DROPEFFECT_NONE;
-	}
-
-	// Extra handling
-	if (bLeftDrag)
-	{
-		// If target is a reference then dragged tasks can only be dropped as references
-		if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
-		{
-			return DD_DROPEFFECT_LINK;
-		}
-
-		if (Misc::ModKeysArePressed(MKS_CTRL))
-		{
-			return DD_DROPEFFECT_COPY;
-		}
-
-		// References
-		if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT))
-		{
-			return DD_DROPEFFECT_LINK;
-		}
-	}
-
-	return DD_DROPEFFECT_MOVE;
+	return GetSelectedTasksDropEffect(dwTargetID, pDDI->bLeftDrag);
 }
 
 LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
@@ -7289,14 +7248,14 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 		return FALSE;
 
 	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
-	DD_DROPEFFECT nDrop = GetSelectedTasksDropEffect(htiDropOn, pDDI->bLeftDrag);
+	DWORD dwTargetID = GetTaskID(htiDropOn);
+
+	DD_DROPEFFECT nDrop = GetSelectedTasksDropEffect(dwTargetID, pDDI->bLeftDrag);
 
 	if (nDrop == DD_DROPEFFECT_NONE)
 		return FALSE;
 			
 	// Handle right-click drop context menu
-	DWORD dwTargetID = GetTaskID(htiDropOn);
-
 	if (!pDDI->bLeftDrag)
 	{
 		ASSERT(nDrop == DD_DROPEFFECT_MOVE);
@@ -7418,43 +7377,21 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 BOOL CToDoCtrl::CanDropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget) const
 {
-	// Allow dropping on locked tasks only if it's a reference
 	DWORD dwTargetID = GetTaskID(htiDropTarget);
-	BOOL bTargetIsRef = m_data.IsTaskReference(dwTargetID);
 
-	if (m_calculator.IsTaskLocked(dwTargetID) && !bTargetIsRef)
+	if (!IsValidSelectedTaskMoveTarget(dwTargetID, nDrop))
 		return FALSE;
 
 	switch (nDrop)
 	{
 		case DD_DROPEFFECT_COPY:
-			// Can't copy non-references on to a reference
-			if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
-			{
-				return FALSE;
-			}
 			return TRUE;
 
 		case DD_DROPEFFECT_LINK:
 			return TRUE;
 
 		case DD_DROPEFFECT_MOVE:
-			// Can't move locked tasks which are not references
-			if (m_taskTree.SelectionHasLocked(FALSE, TRUE))
-			{
-				return FALSE;
-			}
-			// Can't move subtasks of a locked task which is not a reference
-			else if (m_taskTree.SelectionHasLockedParent(TRUE))
-			{
-				return FALSE;
-			}
-			// Can't move non-references on to a reference
-			else if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
-			{
-				return FALSE;
-			}
-			return TRUE;
+			return m_taskTree.IsSelectedTaskMoveEnabled(TDCM_NONDRAG);
 
 		case DD_DROPEFFECT_NONE:
 			return FALSE;
@@ -7876,7 +7813,6 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	Flush(); // end any editing action
 	SetFocusToTasks(); // else datetime controls get their focus screwed
 
-	// move the tasks
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 
 	DWORD dwDestParentID = 0, dwDestPrevSiblingID = 0;
@@ -7888,14 +7824,22 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	DWORD dwUnused;
 	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, dwUnused, TRUE);
 
-	if (!m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
-		return FALSE;
-
 	// Move the associated tree items
 	CLockUpdates lu(*this);
 	HOLD_REDRAW(*this, m_taskTree);
 
-	m_taskTree.MoveSelection(nDirection);
+	if (!m_taskTree.MoveSelection(nDirection))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// move the tasks
+	if (!m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	// refresh parent states if moving to the right (adding subtasks)
 	if (nDirection == TDCM_RIGHT)
