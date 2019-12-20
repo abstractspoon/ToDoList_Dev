@@ -878,10 +878,11 @@ protected:
 	BOOL ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks); // helper to avoid code dupe
 	void PrepareTaskfileForTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const;
 	
+	BOOL IsValidSelectedTaskMoveTarget(DWORD dwTargetID, DD_DROPEFFECT nDrop) const { return m_taskTree.IsValidSelectedTaskMoveTarget(dwTargetID, nDrop); }
+	DD_DROPEFFECT GetSelectedTasksDropEffect(DWORD dwTargetID, BOOL bLeftDrag) const { return m_taskTree.GetSelectedTaskDropEffect(dwTargetID, bLeftDrag); }
 	BOOL IsSelectedTaskMoveEnabled(TDC_MOVEMETHOD nMethod) const { return m_taskTree.IsSelectedTaskMoveEnabled(nMethod); }
 	BOOL DropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget, HTREEITEM htiDropAfter);
 	BOOL CanDropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget) const;
-	DD_DROPEFFECT GetSelectedTasksDropEffect(HTREEITEM htiDropTarget, BOOL bLeftDrag) const;
 
 	void SearchAndExpand(const SEARCHPARAMS& params, BOOL bExpand);
 	void AppendTaskFileHeader(CTaskFile& tasks) const;

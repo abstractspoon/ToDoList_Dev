@@ -4706,10 +4706,14 @@ BOOL CTabbedToDoCtrl::CanMoveSelectedTask(TDC_MOVETASK nDirection) const
 
 			if (!GetExtensionInsertLocation(nView, nDirection, dwDestParentID, dwDestPrevSiblingID))
 				return FALSE;
-
+			
 			CUIExtensionAppCmdData data(dwSelTaskID, dwDestParentID, dwDestPrevSiblingID);
+			
+			if (!ExtensionCanDoAppCommand(nView, IUI_MOVETASK, data))
+				return FALSE;
 
-			return ExtensionCanDoAppCommand(nView, IUI_MOVETASK, data);
+			// Target check
+			return IsValidSelectedTaskMoveTarget(dwDestParentID, DD_DROPEFFECT_MOVE);
 		}
 		break;
 	}
@@ -4778,27 +4782,35 @@ BOOL CTabbedToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 				CDWordArray aSelTaskIDs;
 				m_taskTree.GetSelectedTaskIDs(aSelTaskIDs);
 
-				if (m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
+				// Update the tree first because it relies on the current
+				// data structure to validate the move
+				HTREEITEM htiDestParent = m_taskTree.GetItem(dwDestParentID);
+				HTREEITEM htiDestPrevSibling = m_taskTree.GetItem(dwDestPrevSiblingID);
+				
+				if (!m_taskTree.MoveSelection(htiDestParent, htiDestPrevSibling))
 				{
-					// Update the tree
-					HTREEITEM htiDestParent = m_taskTree.GetItem(dwDestParentID);
-					HTREEITEM htiDestPrevSibling = m_taskTree.GetItem(dwDestPrevSiblingID);
-
-					m_taskTree.MoveSelection(htiDestParent, htiDestPrevSibling);
-
-					log.LogTimeElapsed(_T("m_taskTree.MoveSelection"));
-
-					// Enable the move to be saved
-					if (nDirection == TDCM_DOWN || nDirection == TDCM_UP)
-						CToDoCtrl::SetModified(TDCA_POSITION_SAMEPARENT, aSelTaskIDs);
-					else
-						CToDoCtrl::SetModified(TDCA_POSITION_DIFFERENTPARENT, aSelTaskIDs);
-
-					// Mark _other_ extensions as requiring full update
-					SetExtensionsNeedTaskUpdate(TRUE, nView);
-
-					return TRUE;
+					ASSERT(0);
+					return FALSE;
 				}
+				
+				log.LogTimeElapsed(_T("m_taskTree.MoveSelection"));
+				
+				if (!m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
+				{
+					ASSERT(0);
+					return FALSE;
+				}
+
+				// Enable the move to be saved
+				if (nDirection == TDCM_DOWN || nDirection == TDCM_UP)
+					CToDoCtrl::SetModified(TDCA_POSITION_SAMEPARENT, aSelTaskIDs);
+				else
+					CToDoCtrl::SetModified(TDCA_POSITION_DIFFERENTPARENT, aSelTaskIDs);
+
+				// Mark _other_ extensions as requiring full update
+				SetExtensionsNeedTaskUpdate(TRUE, nView);
+
+				return TRUE;
 			}
 		}
 		break;

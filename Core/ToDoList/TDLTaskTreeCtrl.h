@@ -37,6 +37,8 @@ class CToDoCtrlData;
 class CToDoCtrlFind;
 class CPreferences;
 
+enum DD_DROPEFFECT;
+
 /////////////////////////////////////////////////////////////////////////////
 
 class CTDLTaskTreeCtrl : public CTDLTaskCtrlBase  
@@ -116,7 +118,9 @@ public:
 	BOOL MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, BOOL bEnsureVisible = TRUE);
 
 	BOOL IsSelectedTaskMoveEnabled(TDC_MOVEMETHOD nMethod) const;
-	
+	BOOL IsValidSelectedTaskMoveTarget(DWORD dwTaskID, DD_DROPEFFECT nDrop) const;
+	DD_DROPEFFECT GetSelectedTaskDropEffect(DWORD dwTaskID, BOOL bLeftDrag) const;
+
 	inline HTREEITEM GetSelectedItem() const { return TSH().GetFirstItem(); }
 	inline HTREEITEM GetTreeSelectedItem() const { return m_tcTasks.GetSelectedItem(); }
 	inline int GetItemCount() const { return m_tcTasks.GetCount(); }

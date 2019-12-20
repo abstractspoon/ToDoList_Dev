@@ -1971,6 +1971,62 @@ BOOL CTDLTaskTreeCtrl::IsSelectedTaskMoveEnabled(TDC_MOVEMETHOD nMethod) const
 	return TRUE;
 }
 
+BOOL CTDLTaskTreeCtrl::IsValidSelectedTaskMoveTarget(DWORD dwTargetID, DD_DROPEFFECT nDrop) const
+{
+	// Root is always valid
+	if (dwTargetID == 0)
+		return TRUE;
+	
+	if (m_data.IsTaskReference(dwTargetID))
+	{
+		// Dropping anything on references 'as references' is okay
+		if (nDrop == DD_DROPEFFECT_LINK)
+			return TRUE;
+
+		// Dropping only references on references is okay
+		if (!SelectionHasNonReferences())
+			return TRUE;
+
+		// else trying to drop non-references on references
+		return FALSE;
+	}
+	
+	// else target must be a real unlocked task
+	return !m_calculator.IsTaskLocked(dwTargetID);
+}
+
+DD_DROPEFFECT CTDLTaskTreeCtrl::GetSelectedTaskDropEffect(DWORD dwTargetID, BOOL bLeftDrag) const
+{
+	ASSERT(!IsReadOnly());
+	
+	if (!IsSelectedTaskMoveEnabled(bLeftDrag ? TDCM_LEFTDRAG : TDCM_RIGHTDRAG))
+		return DD_DROPEFFECT_NONE;
+	
+	DD_DROPEFFECT nEffect = DD_DROPEFFECT_MOVE; // default
+	
+	if (bLeftDrag)
+	{
+		// References can only accept references
+		if (m_data.IsTaskReference(dwTargetID) && SelectionHasNonReferences())
+		{
+			nEffect = DD_DROPEFFECT_LINK;
+		}
+		else if (Misc::ModKeysArePressed(MKS_CTRL))
+		{
+			nEffect = DD_DROPEFFECT_COPY;
+		}
+		else if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT))
+		{
+			nEffect = DD_DROPEFFECT_LINK;
+		}
+	}
+	
+	if (!IsValidSelectedTaskMoveTarget(dwTargetID, nEffect))
+		nEffect = DD_DROPEFFECT_NONE;
+	
+	return nEffect;
+}
+
 BOOL CTDLTaskTreeCtrl::SelectionHasLocked(BOOL bCheckChildren, BOOL bTreatRefsAsUnlocked) const
 {
 	BOOL bLocked = CTDLTaskCtrlBase::SelectionHasLocked(bTreatRefsAsUnlocked);
@@ -2063,24 +2119,43 @@ BOOL CTDLTaskTreeCtrl::CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const
 		return (m_tcTasks.GetNextItem(hti, TVGN_PREVIOUS) != NULL);
 		
 	case TDCM_LEFT:
-		return !bParentIsRoot;
+		{
+			// If our current parent is root then we've no place left to go
+			if (bParentIsRoot)
+				return FALSE;
+
+			// Our parent's parent becomes our parent
+			HTREEITEM htiNewParent = m_tcTasks.GetParentItem(htiParent);
+
+			// Root is always unlocked
+			if (!htiNewParent || (htiNewParent == TVI_ROOT))
+				return TRUE;
+
+			// Cannot be locked or must be a reference if we are a reference
+			DWORD dwNewParentID = GetTaskID(htiNewParent);
+
+			if (m_data.IsTaskReference(dwNewParentID))
+				return bTaskIsRef;
+
+			return !m_data.IsTaskLocked(dwNewParentID);
+		}
+		break;
 		
 	case TDCM_RIGHT:
 		{
 			// must have a prior sibling (which will become the parent)
 			// which is not locked unless both the task and sibling are references
-			HTREEITEM htiSibling = m_tcTasks.GetNextItem(hti, TVGN_PREVIOUS);
+			HTREEITEM htiNewParent = m_tcTasks.GetNextItem(hti, TVGN_PREVIOUS);
 
-			if (!htiSibling)
+			if (!htiNewParent)
 				return FALSE;
 
-			DWORD dwSiblingID = GetTaskID(htiSibling);
+			DWORD dwNewParentID = GetTaskID(htiNewParent);
 
-			if (m_data.IsTaskReference(dwSiblingID))
+			if (m_data.IsTaskReference(dwNewParentID))
 				return bTaskIsRef;
 
-			// else sibling is 'real' so must be unlocked
-			return !m_data.IsTaskLocked(dwSiblingID);
+			return !m_data.IsTaskLocked(dwNewParentID);
 		}
 		break;
 	}
