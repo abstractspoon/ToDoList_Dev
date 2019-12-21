@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <CommCtrl.h>
+#include <WinDef.h>
 
 #include "PluginHelpers.h"
 #include "TaskList.h"
@@ -199,6 +200,18 @@ namespace Abstractspoon
 					HWND m_hwndParent;
 					HIMAGELIST m_hilTaskImages;
 					int m_iImage;
+				};
+
+				ref class ShortcutOverlay
+				{
+				public:
+					ShortcutOverlay(bool bLargeIcon);
+
+					bool Draw(Drawing::Graphics^ dc, Int32 x, Int32 y);
+
+				private:
+					HICON m_hIcon;
+					bool m_bLargeIcon;
 				};
 
 				ref class SelectionRect

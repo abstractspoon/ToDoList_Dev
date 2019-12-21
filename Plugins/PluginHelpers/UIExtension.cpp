@@ -5,10 +5,13 @@
 #include "pluginhelpers.h"
 #include "UIExtension.h"
 #include "Win32.h"
+#include "DPIScaling.h"
 
 #include <Interfaces\UITheme.h>
 #include <Interfaces\IUIExtension.h>
 #include <Interfaces\ITasklist.h>
+
+#include <ShellAPI.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -452,6 +455,40 @@ bool UIExtension::TaskIcon::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y)
 		return false;
 
 	bool bRes = (ImageList_Draw(m_hilTaskImages, m_iImage, hDC, x, y, ILD_TRANSPARENT) != FALSE);
+
+	dc->ReleaseHdc();
+
+	return bRes;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+UIExtension::ShortcutOverlay::ShortcutOverlay(bool bLargeIcon) : m_bLargeIcon(bLargeIcon), m_hIcon(NULL)
+{
+
+}
+
+bool UIExtension::ShortcutOverlay::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y)
+{
+	HDC hDC = static_cast<HDC>(dc->GetHdc().ToPointer());
+
+	if (hDC == NULL)
+		return false;
+
+	if (m_hIcon == NULL)
+	{
+		HICON hIcon;
+
+		if (m_bLargeIcon)
+			::ExtractIconEx(L"SHELL32.DLL", 29, &hIcon, NULL, 1);
+		else
+			::ExtractIconEx(L"SHELL32.DLL", 29, NULL, &hIcon, 1);
+
+		m_hIcon = hIcon;
+	}
+
+	int nSize = DPIScaling::Scale(m_bLargeIcon ? 32 : 16);
+	bool bRes = (::DrawIconEx(hDC, x, y, m_hIcon, nSize, nSize, 0, NULL, DI_NORMAL) != FALSE);
 
 	dc->ReleaseHdc();
 

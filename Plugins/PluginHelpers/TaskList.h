@@ -87,6 +87,7 @@ namespace Abstractspoon
 					LastModifiedBy,
 					Path,
 					HtmlComments,
+					ReferenceId,
 
 					// new values here ONLY
 
@@ -123,6 +124,7 @@ namespace Abstractspoon
 
 				UInt32 GetID();
 				UInt32 GetParentID();
+				UInt32 GetReferenceID();
 				UInt32 GetColor();
 				UInt32 GetPosition();
 				

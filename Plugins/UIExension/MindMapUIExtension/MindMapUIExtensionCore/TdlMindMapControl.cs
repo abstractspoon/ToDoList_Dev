@@ -29,6 +29,7 @@ namespace MindMapUIExtension
         private Boolean m_IsGoodAsDone;
         private Boolean m_SomeSubtasksDone;
 		private Boolean m_IsLocked;
+		private Boolean m_IsReference;
 
 		// -----------------------------------------------------------------
 
@@ -45,6 +46,7 @@ namespace MindMapUIExtension
             m_IsGoodAsDone = false;
             m_SomeSubtasksDone = false;
 			m_IsLocked = false;
+			m_IsReference = false;
 		}
 
 		public MindMapTaskItem(Task task)
@@ -60,8 +62,9 @@ namespace MindMapUIExtension
             m_IsGoodAsDone = task.IsGoodAsDone();
             m_SomeSubtasksDone = task.HasSomeSubtasksDone();
 			m_IsLocked = task.IsLocked(true);
+			m_IsReference = (task.GetReferenceID() != 0);
 		}
-        
+
 		public void FixupParentID(MindMapTaskItem parent)
 		{
             m_ParentID = parent.ID;
@@ -118,6 +121,7 @@ namespace MindMapUIExtension
 		public Boolean IsFlagged { get { return m_IsFlagged; } }
 		public Boolean IsParent { get { return m_IsParent; } }
 		public Boolean IsLocked { get { return m_IsLocked; } }
+		public Boolean IsReference { get { return m_IsReference; } }
         public Boolean IsTask { get { return (m_TaskID != 0); } }
         public Boolean HasSomeSubtasksDone { get { return m_SomeSubtasksDone; } }
 
@@ -164,6 +168,7 @@ namespace MindMapUIExtension
 			m_IsParent = task.IsParent();
 			m_IsLocked = task.IsLocked(true);
             m_IsGoodAsDone = task.IsGoodAsDone();
+			m_IsReference = (task.GetReferenceID() != 0);
 
 			return true;
 		}
@@ -196,6 +201,7 @@ namespace MindMapUIExtension
 		private Timer m_EditTimer;
         private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
         private Size m_CheckboxSize;
+		private UIExtension.ShortcutOverlay m_Shortcut;
 
 		// -------------------------------------------------------------------------
 
@@ -206,6 +212,7 @@ namespace MindMapUIExtension
 
 			m_SelectionRect = new UIExtension.SelectionRect();
 			m_Items = new Dictionary<UInt32, MindMapTaskItem>();
+			m_Shortcut = new UIExtension.ShortcutOverlay(true);
 
 			m_TaskColorIsBkgnd = false;
 			m_IgnoreMouseClick = false;
@@ -928,6 +935,10 @@ namespace MindMapUIExtension
 			var format = DefaultLabelFormat(nodePos, isSelected);
 
             graphics.DrawString(label, nodeFont, textColor, rect, format);
+
+			// Draw Windows shortcut icon if task is a reference
+			if (taskItem.IsReference)
+				m_Shortcut.Draw(graphics, rect.X, rect.Bottom - 32);
 		}
 
         CheckBoxState GetItemCheckboxState(MindMapTaskItem taskItem)
