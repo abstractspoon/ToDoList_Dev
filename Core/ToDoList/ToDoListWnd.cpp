@@ -2693,12 +2693,17 @@ void CToDoListWnd::EnableTDLExtension(BOOL bEnable, BOOL bStartup)
 		CString sAppPath(FileMisc::GetAppFilePath());
 
 		// If we are a pre-release version then don't overwrite
-		// an existing registration
+		// an existing registration unless it's also pre-release
 		BOOL bPreRelease = CTDCWebUpdateScript::IsPreRelease(FileMisc::GetAppVersion());
 		BOOL bExistingReg = filereg.IsRegisteredApp(_T("tdl"), sAppPath, TRUE);
 
 		if (bPreRelease && bExistingReg)
-			return;
+		{
+			CString sRegPath = filereg.GetRegisteredAppPath(_T("tdl"));
+
+			if (!CTDCWebUpdateScript::IsPreRelease(FileMisc::GetModuleVersion(sRegPath)))
+				return;
+		}
 
 		// Try to register app
 		if (!filereg.RegisterFileType(_T("Tasklist"), 0))
