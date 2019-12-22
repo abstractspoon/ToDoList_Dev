@@ -204,13 +204,12 @@ namespace Abstractspoon
 				ref class ShortcutOverlay
 				{
 				public:
-					ShortcutOverlay(bool bLargeIcon);
+					ShortcutOverlay();
 
 					bool Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy);
 
 				private:
 					HICON m_hIcon;
-					bool m_bLargeIcon;
 				};
 
 				ref class SelectionRect

@@ -1956,12 +1956,13 @@ COLORREF GraphicsMisc::GetSolidColor(HBRUSH hBrush)
 	return lb.lbColor;
 }
 
-BOOL GraphicsMisc::DrawShortcutOverlay(CDC* pDC, LPCRECT pRect, BOOL bLarge)
+BOOL GraphicsMisc::DrawShortcutOverlay(CDC* pDC, LPCRECT pRect)
 {
-	int nSize = ScaleByDPIFactor(bLarge ? 32 : 16);
+	// Always use large icon for distinctiveness
+	int nSize = ScaleByDPIFactor(32);
 	CPoint ptPos(pRect->left, (pRect->bottom - nSize));
 
-	ShellIcons::DrawIcon(pDC, ShellIcons::SI_SHORTCUT, ptPos, (bLarge != FALSE));
+	ShellIcons::DrawIcon(pDC, ShellIcons::SI_SHORTCUT, ptPos, true);
 
 	return FALSE;
 }

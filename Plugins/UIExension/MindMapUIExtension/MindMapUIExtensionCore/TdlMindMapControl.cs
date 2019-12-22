@@ -212,7 +212,7 @@ namespace MindMapUIExtension
 
 			m_SelectionRect = new UIExtension.SelectionRect();
 			m_Items = new Dictionary<UInt32, MindMapTaskItem>();
-			m_Shortcut = new UIExtension.ShortcutOverlay(true);
+			m_Shortcut = new UIExtension.ShortcutOverlay();
 
 			m_TaskColorIsBkgnd = false;
 			m_IgnoreMouseClick = false;

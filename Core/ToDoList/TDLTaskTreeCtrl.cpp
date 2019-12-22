@@ -610,8 +610,11 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 					pDC->SelectObject(pOldFont);
 
 					// draw shortcut for references
-	 				if (dwTaskID != dwTrueID)
+					if (dwTaskID != dwTrueID)
+					{
+						rItem.left -= TITLE_BORDER_OFFSET;
 						GraphicsMisc::DrawShortcutOverlay(pDC, rItem);
+					}
 	 							
 					// draw trailing comment text
 					DrawCommentsText(pDC, pTVCD->nmcd.rc, rItem, pTDI, pTDS);

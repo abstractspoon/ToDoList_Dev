@@ -463,7 +463,7 @@ bool UIExtension::TaskIcon::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-UIExtension::ShortcutOverlay::ShortcutOverlay(bool bLargeIcon) : m_bLargeIcon(bLargeIcon), m_hIcon(NULL)
+UIExtension::ShortcutOverlay::ShortcutOverlay() : m_hIcon(NULL)
 {
 
 }
@@ -477,18 +477,16 @@ bool UIExtension::ShortcutOverlay::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y,
 
 	if (m_hIcon == NULL)
 	{
-		HICON hIcon;
+		HICON hIcon = NULL;
 
-		if (m_bLargeIcon)
-			::ExtractIconEx(L"SHELL32.DLL", 29, &hIcon, NULL, 1);
-		else
-			::ExtractIconEx(L"SHELL32.DLL", 29, NULL, &hIcon, 1);
+		// Get Large icon for distinctiveness
+		if (!::ExtractIconEx(L"SHELL32.DLL", 29, &hIcon, NULL, 1) || (hIcon == NULL))
+			return false;
 
 		m_hIcon = hIcon;
 	}
 
-	int nSize = DPIScaling::Scale(m_bLargeIcon ? 32 : 16);
-
+	int nSize = DPIScaling::Scale(32); // Large icon
 	bool bRes = (::DrawIconEx(hDC, x, (y + cy - nSize), m_hIcon, nSize, nSize, 0, NULL, DI_NORMAL) != FALSE);
 
 	dc->ReleaseHdc();

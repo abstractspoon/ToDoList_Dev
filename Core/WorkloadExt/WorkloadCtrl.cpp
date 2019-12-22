@@ -2217,10 +2217,12 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 
 	if (!sItem.IsEmpty())
 	{
+		CRect rText(rItem);
+
 		if (bTitleCol)
-			rItem.DeflateRect(2, 2, 1, 0);
+			rText.DeflateRect(2, 2, 1, 0);
 		else
-			rItem.DeflateRect(LV_COLPADDING, 2, LV_COLPADDING, 0);
+			rText.DeflateRect(LV_COLPADDING, 2, LV_COLPADDING, 0);
 
 		// text color and alignment
 		BOOL bLighter = FALSE; 
@@ -2243,7 +2245,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 			{
 				// Right-align if the column width can show the entire date
 				// else keep left align to ensure day and month remain visible
-				if (rItem.Width() >= pDC->GetTextExtent(sItem).cx)
+				if (rText.Width() >= pDC->GetTextExtent(sItem).cx)
 					nFlags |= DT_RIGHT;
 			}
 			break;
@@ -2258,7 +2260,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, wi, nColID));
 		
 		pDC->SetBkMode(TRANSPARENT);
-		pDC->DrawText(sItem, rItem, nFlags);
+		pDC->DrawText(sItem, rText, nFlags);
 		pDC->SetTextColor(crOldColor);
 		pDC->SelectObject(hFontOld);
 	}
