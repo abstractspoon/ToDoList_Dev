@@ -243,9 +243,10 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	{
 		return FALSE;
 	}
-	
+
 	// extended styles
 	ListView_SetExtendedListViewStyleEx(m_lcColumns, LVS_EX_HEADERDRAGDROP, LVS_EX_HEADERDRAGDROP);
+	ListView_SetImageList(m_lcColumns, m_ilTaskIcons, LVSIL_SMALL);
 	
 	// subclass the tree and list
 	if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
@@ -839,11 +840,18 @@ void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
 
 void CTDLTaskCtrlBase::OnImageListChange()
 {
-	SetTasksImageList(m_ilTaskIcons, FALSE, !IsColumnShowing(TDCC_ICON));
-	SetTasksImageList(m_ilCheckboxes, TRUE, (!IsColumnShowing(TDCC_DONE) && HasStyle(TDCS_ALLOWTREEITEMCHECKBOX)));
+	if (Tasks())
+	{
+		// Always force the task icon imagelist on the columns to ensure
+		// the item height don't changes when hiding label icons on the Tasks
+		ListView_SetImageList(m_lcColumns, m_ilTaskIcons, LVSIL_SMALL);
 
-	if (IsVisible())
-		::InvalidateRect(Tasks(), NULL, FALSE);
+		SetTasksImageList(m_ilTaskIcons, FALSE, !IsColumnShowing(TDCC_ICON));
+		SetTasksImageList(m_ilCheckboxes, TRUE, (!IsColumnShowing(TDCC_DONE) && HasStyle(TDCS_ALLOWTREEITEMCHECKBOX)));
+
+		if (IsVisible())
+			::InvalidateRect(Tasks(), NULL, FALSE);
+	}
 }
 
 BOOL CTDLTaskCtrlBase::IsVisible() const

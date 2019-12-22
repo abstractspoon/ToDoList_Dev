@@ -136,6 +136,13 @@ BOOL CTDLTaskListCtrl::CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL 
 void CTDLTaskListCtrl::SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn) 
 {
 	ListView_SetImageList(m_lcTasks, (bOn ? hil : NULL), (bState ? LVSIL_STATE : LVSIL_SMALL));
+
+	// Hack to resize the listview if hiding the task imagelist 
+	if (!bState && !bOn)
+	{
+		m_lcTasks.ModifyStyle(LVS_REPORT, LVS_SMALLICON);
+		m_lcTasks.ModifyStyle(LVS_SMALLICON, LVS_REPORT);
+	}
 }
 
 BOOL CTDLTaskListCtrl::IsListItemSelected(HWND hwnd, int nItem) const

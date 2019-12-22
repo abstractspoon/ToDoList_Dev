@@ -363,11 +363,8 @@ BOOL CThemed::BuildImageList(CImageList& il, int nPart, const int nStates[], int
 	if (!nNumStates)
 		return FALSE;
 	
-	CSize size;
-	GetSize(nPart, 1, size);
-
-	// little cheat for check boxes
-	const UINT BORDER = (nPart == BP_CHECKBOX) ? 1 : 0;
+	CSize sizePart;
+	GetSize(nPart, 1, sizePart);
 
 	// create a bitmap containing the required images
 	HWND hWnd = m_hWnd ? m_hWnd : GetDesktopWindow();
@@ -378,15 +375,25 @@ BOOL CThemed::BuildImageList(CImageList& il, int nPart, const int nStates[], int
 	{
 		CBitmap bitmap;
 
-		int nImWidth = max(16, (size.cx + 2 * BORDER));
-		int nImHeight = max(16, (size.cy + 2 * BORDER));
+		int nImWidth = sizePart.cx;
+		int nImHeight = sizePart.cy;
 		
+		// little dodge for check boxes - minimum unscaled height = 16
+		if (nPart == BP_CHECKBOX)
+		{
+			ASSERT(nImWidth == nImHeight);
+
+			double dScale = (dc.GetDeviceCaps(LOGPIXELSY) / 96.0);
+			nImWidth = nImHeight = max((int)(16 * dScale), nImWidth);
+		}
+	
 		if (bitmap.CreateCompatibleBitmap(&dc, nImWidth * nNumStates, nImHeight))
 		{
 			CGdiObject* pOld = dcBack.SelectObject(&bitmap);
 			dcBack.FillSolidRect(0, 0, nImWidth * nNumStates, nImHeight, crMask);
-			
-			CRect rState(BORDER, BORDER, size.cx + BORDER, size.cy + BORDER);
+
+			const UINT BORDER = ((nImWidth - sizePart.cx) / 2);
+			CRect rState(BORDER, BORDER, sizePart.cx + BORDER, sizePart.cy + BORDER);
 
 			for (int nState = 0; nState < nNumStates; nState++)
 			{

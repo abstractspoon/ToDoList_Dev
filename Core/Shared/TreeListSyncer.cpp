@@ -749,7 +749,7 @@ int CTreeListSyncer::GetItemHeight(HWND hwnd)
 	}
 	
 	// else
-	return 16;
+	return GraphicsMisc::ScaleByDPIFactor(16);
 }
 
 void CTreeListSyncer::InvalidateTreeItem(HWND hwnd, HTREEITEM hti)
