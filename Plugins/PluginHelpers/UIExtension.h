@@ -3,7 +3,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <CommCtrl.h>
-#include <WinDef.h>
 
 #include "PluginHelpers.h"
 #include "TaskList.h"
@@ -207,7 +206,7 @@ namespace Abstractspoon
 				public:
 					ShortcutOverlay(bool bLargeIcon);
 
-					bool Draw(Drawing::Graphics^ dc, Int32 x, Int32 y);
+					bool Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy);
 
 				private:
 					HICON m_hIcon;

@@ -286,10 +286,7 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 					// references
 					if ((nSubItem == COL_TASKTITLE) && (pLVCD->nmcd.rc.top > 0) && pRes->IsReference())
-					{
-						CPoint ptIcon(pLVCD->nmcd.rc.left, pLVCD->nmcd.rc.bottom - 32);
-						ShellIcons::DrawIcon(pDC, ShellIcons::SI_SHORTCUT, ptIcon, true);
-					}
+						GraphicsMisc::DrawShortcutOverlay(pDC, &pLVCD->nmcd.rc);
 				}
 			}
 

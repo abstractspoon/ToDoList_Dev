@@ -11,6 +11,7 @@
 #include "icon.h"
 
 #include "..\3rdparty\colordef.h"
+#include "..\3rdparty\ShellIcons.h"
 
 #include <windef.h>
 #include <afxpriv.h>
@@ -1953,4 +1954,14 @@ COLORREF GraphicsMisc::GetSolidColor(HBRUSH hBrush)
 	VERIFY(::GetObject(hBrush, sizeof(lb), &lb));
 
 	return lb.lbColor;
+}
+
+BOOL GraphicsMisc::DrawShortcutOverlay(CDC* pDC, LPCRECT pRect, BOOL bLarge)
+{
+	int nSize = ScaleByDPIFactor(bLarge ? 32 : 16);
+	CPoint ptPos(pRect->left, (pRect->bottom - nSize));
+
+	ShellIcons::DrawIcon(pDC, ShellIcons::SI_SHORTCUT, ptPos, (bLarge != FALSE));
+
+	return FALSE;
 }

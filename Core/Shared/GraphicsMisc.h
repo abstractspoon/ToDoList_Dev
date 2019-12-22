@@ -238,6 +238,7 @@ namespace GraphicsMisc
 
 	BOOL FlashWindowEx(HWND hWnd, DWORD dwFlags, UINT  uCount, DWORD dwTimeout);
 	BOOL InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UINT nFallbackBmpID, COLORREF crBkgnd);
+	BOOL DrawShortcutOverlay(CDC* pDC, LPCRECT pRect, BOOL bLarge = TRUE);
 
 };
 

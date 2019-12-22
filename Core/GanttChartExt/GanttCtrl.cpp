@@ -2586,12 +2586,7 @@ void CGanttCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTT
 
 	// special case: drawing shortcut icon for reference tasks
 	if (bTitleCol && gi.dwOrgRefID)
-	{
-		GetTreeItemRect(hti, nCol, rItem, TRUE);
-		CPoint ptIcon(rItem.left, rItem.bottom - 32);
-
-		ShellIcons::DrawIcon(pDC, ShellIcons::SI_SHORTCUT, ptIcon, true);
-	}
+		GraphicsMisc::DrawShortcutOverlay(pDC, rItem);
 }
 
 CGanttCtrl::DIV_TYPE CGanttCtrl::GetVerticalDivider(int nMonth, int nYear) const

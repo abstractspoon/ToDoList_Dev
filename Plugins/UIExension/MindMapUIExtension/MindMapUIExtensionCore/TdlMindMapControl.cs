@@ -938,7 +938,7 @@ namespace MindMapUIExtension
 
 			// Draw Windows shortcut icon if task is a reference
 			if (taskItem.IsReference)
-				m_Shortcut.Draw(graphics, rect.X, rect.Bottom - 32);
+				m_Shortcut.Draw(graphics, rect.X, rect.Y, rect.Width, rect.Height);
 		}
 
         CheckBoxState GetItemCheckboxState(MindMapTaskItem taskItem)

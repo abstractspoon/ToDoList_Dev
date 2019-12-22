@@ -468,7 +468,7 @@ UIExtension::ShortcutOverlay::ShortcutOverlay(bool bLargeIcon) : m_bLargeIcon(bL
 
 }
 
-bool UIExtension::ShortcutOverlay::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y)
+bool UIExtension::ShortcutOverlay::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy)
 {
 	HDC hDC = static_cast<HDC>(dc->GetHdc().ToPointer());
 
@@ -488,7 +488,8 @@ bool UIExtension::ShortcutOverlay::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y)
 	}
 
 	int nSize = DPIScaling::Scale(m_bLargeIcon ? 32 : 16);
-	bool bRes = (::DrawIconEx(hDC, x, y, m_hIcon, nSize, nSize, 0, NULL, DI_NORMAL) != FALSE);
+
+	bool bRes = (::DrawIconEx(hDC, x, (y + cy - nSize), m_hIcon, nSize, nSize, 0, NULL, DI_NORMAL) != FALSE);
 
 	dc->ReleaseHdc();
 

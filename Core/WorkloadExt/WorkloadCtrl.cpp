@@ -2265,12 +2265,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 
 	// special case: drawing shortcut icon for reference tasks
 	if (bTitleCol && wi.dwOrgRefID)
-	{
-		GetTreeItemRect(hti, nCol, rItem, TRUE);
-		CPoint ptIcon(rItem.left, rItem.bottom - 32);
-
-		ShellIcons::DrawIcon(pDC, ShellIcons::SI_SHORTCUT, ptIcon, true);
-	}
+		GraphicsMisc::DrawShortcutOverlay(pDC, rItem);
 }
 
 HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_COLUMNID nCol)
