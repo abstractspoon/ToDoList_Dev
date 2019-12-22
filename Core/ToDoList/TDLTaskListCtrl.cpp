@@ -35,7 +35,7 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 const int LV_COLPADDING			= 3;
-const int TITLE_PADDING			= 2;
+const int TITLE_BORDER_OFFSET	= 2;
 
 const int CLIENTCOLWIDTH		= GraphicsMisc::ScaleByDPIFactor(1000);
 const UINT TIMER_EDITLABEL		= 42; // List ctrl's internal timer ID for label edits
@@ -316,7 +316,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				DrawTasksRowBackground(pDC, rRow, rItem, nState, crBack);
 				
 				// draw text
-				rItem.left += TITLE_PADDING;
+				rItem.left += TITLE_BORDER_OFFSET;
 				DrawColumnText(pDC, pTDI->sTitle, rItem, DT_LEFT, crText, TRUE);
 #ifdef _DEBUG
 				//GraphicsMisc::DrawRect(pDC, rItem, CLR_NONE, 255);

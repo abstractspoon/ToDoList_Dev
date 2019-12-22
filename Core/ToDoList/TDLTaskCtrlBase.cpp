@@ -232,17 +232,13 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Tasks Header ---------------------------------------------------------------------
 	if (!m_hdrTasks.Create((dwStyle | HDS_BUTTONS), rect, this, IDC_TASKTREEHEADER))
-	{
 		return FALSE;
-	}
 
 	// Column List ---------------------------------------------------------------------
 	rect.OffsetRect(rect.Width(), 0);
 
 	if (!m_lcColumns.Create((dwStyle | WS_TABSTOP),	rect, this, IDC_TASKTREECOLUMNS))
-	{
 		return FALSE;
-	}
 
 	// extended styles
 	ListView_SetExtendedListViewStyleEx(m_lcColumns, LVS_EX_HEADERDRAGDROP, LVS_EX_HEADERDRAGDROP);
@@ -252,23 +248,18 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
 	{
 		if (!Sync(Tasks(), m_lcColumns, TLSL_RIGHTDATA_IS_LEFTITEM, m_hdrTasks))
-		{
 			return FALSE;
-		}
 	}
 	else // left side
 	{
 		if (!Sync(m_lcColumns, Tasks(), TLSL_LEFTDATA_IS_RIGHTITEM, m_hdrTasks))
-		{
 			return FALSE;
-		}
 	}
 		
 	// Column Header ---------------------------------------------------------------------
 	if (!m_hdrColumns.SubclassWindow(ListView_GetHeader(m_lcColumns)))
-	{
 		return FALSE;
-	}
+
 	m_hdrColumns.EnableToolTips();
 	
 	// set header font and calc char width
@@ -279,8 +270,9 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_fAveHeaderCharWidth = GraphicsMisc::GetAverageCharWidth(&dc, pFont);
 
 	// Add some padding to the right of the checkbox for tree/list
+	// so that the checkboxes, icons and labels have consistent positioning
 	if (IsTreeList())
-		VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255, CRect(0, 0, 4, 0)));
+		VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255, CRect(0, 0, 3, 0)));
 	else
 		VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255));
 

@@ -43,7 +43,7 @@ const UINT TIMER_EDITLABEL		= 101;
 const COLORREF COMMENTSCOLOR	= RGB(98, 98, 98);
 const COLORREF ALTCOMMENTSCOLOR = RGB(164, 164, 164);
 
-const int TITLE_PADDING			= 2;
+const int TITLE_BORDER_OFFSET	= 3;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -594,12 +594,12 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 					GetItemTitleRect(hti, TDCTR_LABEL, rItem, pDC, pTDI->sTitle);
 
 					if (bSelected)
-						rItem.left -= TITLE_PADDING;
+						rItem.left -= TITLE_BORDER_OFFSET;
 
 					DrawTasksRowBackground(pDC, pTVCD->nmcd.rc, rItem, nState, crBack);
 
 					if (bSelected)
-						rItem.left += TITLE_PADDING;
+						rItem.left += TITLE_BORDER_OFFSET;
 
 					// draw text
 					DrawColumnText(pDC, pTDI->sTitle, rItem, DT_LEFT, crText, TRUE);
@@ -1718,7 +1718,7 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_TITLERECT nArea, CRec
 		if (GetItemTitleRect(hti, TDCTR_LABEL, rect)) // recursive call
 		{
 			rect.top--;
-			rect.left -= TITLE_PADDING;
+			rect.left -= TITLE_BORDER_OFFSET;
 			
 			// return in screen coords
 			m_tcTasks.ClientToScreen(rect);
