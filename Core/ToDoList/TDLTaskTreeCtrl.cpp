@@ -2700,6 +2700,9 @@ int CTDLTaskTreeCtrl::SaveTreeExpandedState(CPreferences& prefs, const CString& 
 void CTDLTaskTreeCtrl::SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn)
 {
 	TreeView_SetImageList(m_tcTasks, (bOn ? hil : NULL), (bState ? TVSIL_STATE : TVSIL_NORMAL));
+
+	if (!bState && !bOn)
+		RecalcItemHeights();
 }
 
 double CTDLTaskTreeCtrl::CalcSelectedTaskTimeEstimate(TDC_UNITS nUnits) const

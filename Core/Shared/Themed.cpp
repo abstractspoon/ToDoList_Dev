@@ -353,7 +353,7 @@ BOOL CThemed::GetTextExtent(CDC* pDC, int nPart, int nState, const CString& sTex
 	return GetThemeTextExtent(pDC ? *pDC : (HDC)NULL, nPart, nState, WSTR(sText), sText.GetLength(), dwTextFlags, prBounding, rExtent);
 }
 
-BOOL CThemed::BuildImageList(CImageList& il, int nPart, const int nStates[], int nNumStates, COLORREF crMask)
+BOOL CThemed::BuildImageList(CImageList& il, int nPart, const int nStates[], int nNumStates, COLORREF crMask, LPCRECT prPadding)
 {
 	ASSERT (!il.GetSafeHandle());
 	
@@ -373,27 +373,39 @@ BOOL CThemed::BuildImageList(CImageList& il, int nPart, const int nStates[], int
 	
 	if (dcBack.CreateCompatibleDC(&dc))
 	{
-		CBitmap bitmap;
+		CRect rPadding(0, 0, 0, 0);
 
-		int nImWidth = sizePart.cx;
-		int nImHeight = sizePart.cy;
+		if (prPadding)
+			rPadding.CopyRect(prPadding);
 		
-		// little dodge for check boxes - minimum unscaled height = 16
+		// Pad check boxes to a minimum unscaled size of 16
 		if (nPart == BP_CHECKBOX)
 		{
-			ASSERT(nImWidth == nImHeight);
+			ASSERT(sizePart.cx == sizePart.cy);
 
 			double dScale = (dc.GetDeviceCaps(LOGPIXELSY) / 96.0);
-			nImWidth = nImHeight = max((int)(16 * dScale), nImWidth);
+			int nPadding = ((int)(16 * dScale) - sizePart.cx);
+
+			if (nPadding > 0)
+			{
+				rPadding.left += (nPadding / 2);
+				rPadding.right += (nPadding - (nPadding / 2));
+				rPadding.top += (nPadding / 2);
+				rPadding.bottom += (nPadding - (nPadding / 2));
+			}
 		}
-	
+
+		int nImWidth = sizePart.cx + (rPadding.left + rPadding.right);
+		int nImHeight = sizePart.cy + (rPadding.top + rPadding.bottom);
+
+		CBitmap bitmap;
+
 		if (bitmap.CreateCompatibleBitmap(&dc, nImWidth * nNumStates, nImHeight))
 		{
 			CGdiObject* pOld = dcBack.SelectObject(&bitmap);
 			dcBack.FillSolidRect(0, 0, nImWidth * nNumStates, nImHeight, crMask);
 
-			const UINT BORDER = ((nImWidth - sizePart.cx) / 2);
-			CRect rState(BORDER, BORDER, sizePart.cx + BORDER, sizePart.cy + BORDER);
+			CRect rState(rPadding.TopLeft(), sizePart);
 
 			for (int nState = 0; nState < nNumStates; nState++)
 			{

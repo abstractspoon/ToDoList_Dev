@@ -1818,7 +1818,7 @@ BOOL GraphicsMisc::FlashWindowEx(HWND hWnd, DWORD dwFlags, UINT uCount, DWORD dw
 	return FALSE;
 }
 
-BOOL GraphicsMisc::InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UINT nFallbackBmpID, COLORREF crBkgnd)
+BOOL GraphicsMisc::InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UINT nFallbackBmpID, COLORREF crBkgnd, LPCRECT prPadding)
 {
 	if (ilCheckboxes.GetSafeHandle())
 		return TRUE;
@@ -1830,7 +1830,7 @@ BOOL GraphicsMisc::InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UI
 
 	if (th.Open(hWnd, _T("BUTTON")) && th.AreControlsThemed())
 	{
-		th.BuildImageList(ilCheckboxes, BP_CHECKBOX, nStates, nNumStates);
+		th.BuildImageList(ilCheckboxes, BP_CHECKBOX, nStates, nNumStates, crBkgnd, prPadding);
 	}
 
 	// unthemed + fallback

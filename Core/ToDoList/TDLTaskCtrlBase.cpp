@@ -278,7 +278,11 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CClientDC dc(&m_hdrTasks);
 	m_fAveHeaderCharWidth = GraphicsMisc::GetAverageCharWidth(&dc, pFont);
 
-	VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255));
+	// Add some padding to the right of the checkbox for tree/list
+	if (IsTreeList())
+		VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255, CRect(0, 0, 4, 0)));
+	else
+		VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255));
 
 	BuildColumns();
 	OnColumnVisibilityChange(CTDCColumnIDMap());

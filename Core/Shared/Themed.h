@@ -116,7 +116,7 @@ public:
 	
 	BOOL GetSize(int nPart, int nState, CSize& size, BOOL bMin = FALSE);
 	BOOL GetTextExtent(CDC* pDC, int nPart, int nState, const CString& sText, DWORD dwTextFlags, CRect& rExtent, LPCRECT prBounding = NULL);
-	BOOL BuildImageList(CImageList& il, int nPart, const int nStates[], int nNumStates, COLORREF crMask = 255);
+	BOOL BuildImageList(CImageList& il, int nPart, const int nStates[], int nNumStates, COLORREF crMask = 255, LPCRECT prPadding = NULL);
 
 	BOOL GetThemeColor(int nPart, int nState, int nProp, COLORREF& color);
 	BOOL GetThemeBackgroundContentRect(CDC* pDC, int nPart,	int nState, const CRect& rBounding, CRect& rContent);
