@@ -73,7 +73,7 @@ BOOL ShellIcons::DrawIcon(CDC* pDC, SHELLICON nIndex, const CPoint& ptTopLeft, b
 	{
 		// Scale image by DPI
 		double dScale = (pDC->GetDeviceCaps(LOGPIXELSY) / 96.0);
-		int nSize = ((bLarge ? 32 : 16) * dScale);
+		int nSize = (int)((bLarge ? 32 : 16) * dScale);
 
 		if (DrawIconEx(*pDC, ptTopLeft.x, ptTopLeft.y, hIcon, nSize, nSize, 0, NULL, DI_NORMAL))
 		{
