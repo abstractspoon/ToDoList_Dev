@@ -192,6 +192,9 @@ protected:
 	BOOL IsColumnShowing(TDC_COLUMN nColID) const;
 	void NotifyParentSelChange(SELCHANGE_ACTION nAction = SC_UNKNOWN);
 	BOOL DoSaveToImage(CBitmap& bmImage, COLORREF crDivider);
+	BOOL GetItemTitleRect(const NMCUSTOMDRAW& nmcd, TDC_LABELRECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
+	GM_ITEMSTATE GetTaskState(const NMCUSTOMDRAW& nmcd) const;
+	BOOL IsAlternateLine(const NMCUSTOMDRAW& nmcd) const;
 
 protected:
 	// pseudo-message handlers
@@ -208,9 +211,9 @@ protected:
 	inline HWND TasksHeader() const { return m_hdrTasks; }
 	
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader) const;
-	BOOL GetItemTitleRect(HTREEITEM hti, TDC_TITLERECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
+	BOOL GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
 
-	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
+	BOOL IsAlternateTreeItemLine(HTREEITEM hti) const;
 	BOOL BuildColumns();
 	void Release();
 	BOOL CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL bVisible);

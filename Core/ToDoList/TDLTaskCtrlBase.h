@@ -349,9 +349,12 @@ protected:
 	virtual DWORD GetHelpID() const = 0;
 	virtual BOOL IsColumnShowing(TDC_COLUMN nColID) const;
 	virtual BOOL DoSaveToImage(CBitmap& bmImage, COLORREF crDivider);
+	virtual BOOL GetItemTitleRect(const NMCUSTOMDRAW& nmcd, TDC_LABELRECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const = 0;
+	virtual GM_ITEMSTATE GetTaskState(const NMCUSTOMDRAW& nmcd) const = 0;
+	virtual BOOL IsAlternateLine(const NMCUSTOMDRAW& nmcd) const = 0;
 
 	DWORD HitTestColumnsTask(const CPoint& ptScreen) const;
-	BOOL IsColumnLineOdd(int nItem) const;
+	BOOL IsAlternateColumnLine(int nItem) const;
 	void SetColor(COLORREF& color, COLORREF crNew);
 	BOOL HasStyle(TDC_STYLE nStyle) const { return m_styles.IsStyleEnabled(nStyle); }
 	BOOL IsShowingColumnsOnRight() const;
@@ -458,6 +461,7 @@ protected:
 	void DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS);
 	BOOL DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, 
 							  CDC* pDC, const CRect& rSubItem, COLORREF crText);
+	BOOL DrawTaskTitleLabel(const NMCUSTOMDRAW& nmcd, const CRect& rRow);
 
 	enum TTCB_CHECK { TTCNC_UNCHECKED, TTCBC_CHECKED, TTCBC_MIXED };
 	void DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_CHECK nCheck);

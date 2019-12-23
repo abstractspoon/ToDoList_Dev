@@ -43,7 +43,7 @@ const UINT TIMER_EDITLABEL		= 101;
 const COLORREF COMMENTSCOLOR	= RGB(98, 98, 98);
 const COLORREF ALTCOMMENTSCOLOR = RGB(164, 164, 164);
 
-const int TITLE_BORDER_OFFSET	= 3;
+const int TITLE_BORDER_OFFSET	= 2;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -386,9 +386,9 @@ BOOL CTDLTaskTreeCtrl::IsColumnShowing(TDC_COLUMN nColID) const
 	return CTDLTaskCtrlBase::IsColumnShowing(nColID);
 }
 
-BOOL CTDLTaskTreeCtrl::IsTreeItemLineOdd(HTREEITEM hti) const
+BOOL CTDLTaskTreeCtrl::IsAlternateTreeItemLine(HTREEITEM hti) const
 {
-	return IsColumnLineOdd(GetListItem(hti));
+	return IsAlternateColumnLine(GetListItem(hti));
 }
 
 int CTDLTaskTreeCtrl::GetListItem(HTREEITEM hti) const
@@ -537,8 +537,7 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 		
 	case CDDS_ITEMPREPAINT:
 		{
-			BOOL bAlternate = (!IsTreeItemLineOdd(hti) && HasColor(m_crAltLine));
-			COLORREF crBack = (bAlternate ? m_crAltLine : GetSysColor(COLOR_WINDOW));
+			COLORREF crBack = (IsAlternateLine(pTVCD->nmcd) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 
 			if (HasStyle(TDCS_TASKCOLORISBACKGROUND))
 			{
@@ -560,11 +559,14 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 		
 	case CDDS_ITEMPOSTPAINT:
 		{
+			DrawTaskTitleLabel(pTVCD->nmcd, pTVCD->nmcd.rc);
+
+/*
 			// check row is visible
-			CRect rItem(pTVCD->nmcd.rc), rClient;
+			CRect rRow(), rClient;
 			m_tcTasks.GetClientRect(rClient);
 			
-			if ((rItem.bottom > 0) && (rItem.top < rClient.bottom))
+			if ((rRow.bottom > 0) && (rRow.top < rClient.bottom))
 			{
 				const TODOITEM* pTDI = NULL;
 				const TODOSTRUCTURE* pTDS = NULL;
@@ -591,35 +593,29 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 					}
 					
 					// draw label background only
-					GetItemTitleRect(hti, TDCTR_LABEL, rItem, pDC, pTDI->sTitle);
+					CRect rBkgnd;
 
-					if (bSelected)
-						rItem.left -= TITLE_BORDER_OFFSET;
-
-					DrawTasksRowBackground(pDC, pTVCD->nmcd.rc, rItem, nState, crBack);
-
-					if (bSelected)
-						rItem.left += TITLE_BORDER_OFFSET;
+					GetItemTitleRect(hti, TDCTR_BKGND, rBkgnd, pDC, pTDI->sTitle);
+					DrawTasksRowBackground(pDC, rRow, rBkgnd, nState, crBack);
 
 					// draw text
-					DrawColumnText(pDC, pTDI->sTitle, rItem, DT_LEFT, crText, TRUE);
-#ifdef _DEBUG
-					//GraphicsMisc::DrawRect(pDC, rItem, CLR_NONE, 255);
-#endif
+					CRect rText;
+
+					GetItemTitleRect(hti, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
+					DrawColumnText(pDC, pTDI->sTitle, rText, DT_LEFT, crText, TRUE);
+
 					// cleanup
 					pDC->SelectObject(pOldFont);
 
 					// draw shortcut for references
 					if (dwTaskID != dwTrueID)
-					{
-						rItem.left -= TITLE_BORDER_OFFSET;
-						GraphicsMisc::DrawShortcutOverlay(pDC, rItem);
-					}
+						GraphicsMisc::DrawShortcutOverlay(pDC, rBkgnd);
 	 							
 					// draw trailing comment text
-					DrawCommentsText(pDC, pTVCD->nmcd.rc, rItem, pTDI, pTDS);
+					DrawCommentsText(pDC, rRow, rText, pTDI, pTDS);
 				}
 			}
+*/
 		}
 		return CDRF_SKIPDEFAULT; // always
 	}
@@ -638,6 +634,16 @@ BOOL CTDLTaskTreeCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 	}
 	
 	return FALSE;
+}
+
+BOOL CTDLTaskTreeCtrl::IsAlternateLine(const NMCUSTOMDRAW& nmcd) const
+{
+	return IsAlternateTreeItemLine((HTREEITEM)nmcd.dwItemSpec);
+}
+
+GM_ITEMSTATE CTDLTaskTreeCtrl::GetTaskState(const NMCUSTOMDRAW& nmcd) const
+{
+	return GetTreeItemState((HTREEITEM)nmcd.dwItemSpec);
 }
 
 GM_ITEMSTATE CTDLTaskTreeCtrl::GetTreeItemState(HTREEITEM hti) const
@@ -1694,7 +1700,12 @@ DWORD CTDLTaskTreeCtrl::GetColumnItemTaskID(int nItem) const
 	return GetTaskID((HTREEITEM)m_lcColumns.GetItemData(nItem));
 }
 
-BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_TITLERECT nArea, CRect& rect, CDC* pDC, LPCTSTR szTitle) const
+BOOL CTDLTaskTreeCtrl::GetItemTitleRect(const NMCUSTOMDRAW& nmcd, TDC_LABELRECT nArea, CRect& rect, CDC* pDC, LPCTSTR szTitle) const
+{
+	return GetItemTitleRect((HTREEITEM)nmcd.dwItemSpec, nArea, rect, pDC, szTitle);
+}
+
+BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRect& rect, CDC* pDC, LPCTSTR szTitle) const
 {
 	ASSERT(hti);
 
@@ -1704,7 +1715,7 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_TITLERECT nArea, CRec
 
 	switch (nArea)
 	{
-	case TDCTR_LABEL:
+	case TDCTR_TEXT:
 		if (pDC && szTitle)
 		{
 			rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx);
@@ -1717,16 +1728,24 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_TITLERECT nArea, CRec
 		}
 		return TRUE;
 
+	case TDCTR_BKGND:
+		if (GetItemTitleRect(hti, TDCTR_TEXT, rect)) // recursive call
+		{
+			rect.left -= TITLE_BORDER_OFFSET;
+			return TRUE;
+		}
+		break;
+
 	case TDCTR_EDIT:
-		if (GetItemTitleRect(hti, TDCTR_LABEL, rect)) // recursive call
+		if (GetItemTitleRect(hti, TDCTR_BKGND, rect)) // recursive call
 		{
 			rect.top--;
-			rect.left -= TITLE_BORDER_OFFSET;
 			
 			// return in screen coords
 			m_tcTasks.ClientToScreen(rect);
 			return TRUE;
 		}
+		break;
 	}
 	
 	ASSERT(0);

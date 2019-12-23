@@ -1782,9 +1782,9 @@ HFONT CTDLTaskCtrlBase::GetFont() const
 	return (HFONT)::SendMessage(m_lcColumns, WM_GETFONT, 0, 0);
 }
 
-BOOL CTDLTaskCtrlBase::IsColumnLineOdd(int nItem) const
+BOOL CTDLTaskCtrlBase::IsAlternateColumnLine(int nItem) const
 {
-	return ((nItem % 2) == 1);
+	return (HasColor(m_crAltLine) && ((nItem % 2) == 0));
 }
 
 BOOL CTDLTaskCtrlBase::IsSorting() const
@@ -2488,7 +2488,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 
 					// draw gridlines and row colour full width of list
-					BOOL bAlternate = (HasColor(m_crAltLine) && !IsColumnLineOdd(nItem));
+					BOOL bAlternate = IsAlternateColumnLine(nItem);
 					COLORREF crRowBack = (bAlternate ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 					
 					CRect rItem;
@@ -2588,7 +2588,60 @@ void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const
 	}
 }
 
-void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
+BOOL CTDLTaskCtrlBase::DrawTaskTitleLabel(const NMCUSTOMDRAW& nmcd, const CRect& rRow)
+{
+	// Check row is visible
+	CRect rClient;
+	::GetClientRect(Tasks(), rClient);
+
+	if ((rRow.bottom < 0) || (rRow.top >= rClient.bottom))
+		return FALSE;
+
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+
+	DWORD dwTaskID(nmcd.lItemlParam), dwTrueID(dwTaskID);
+
+	if (!m_data.GetTrueTask(dwTrueID, pTDI, pTDS))
+		return FALSE;
+
+	CDC* pDC = CDC::FromHandle(nmcd.hdc);
+	GM_ITEMSTATE nState = GetTaskState(nmcd);
+
+	// Draw background again but this time allowing for the task's 
+	// selection status, and making sure we don't overdraw any icons
+	// already drawn by Windows in the pre-paint
+	COLORREF crBack, crText;
+	VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE)));
+
+	if (!HasColor(crBack))
+		crBack = (IsAlternateLine(nmcd) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
+
+	// Set font before getting text length
+	CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
+
+	CRect rBkgnd;
+	GetItemTitleRect(nmcd, TDCTR_BKGND, rBkgnd, pDC, pTDI->sTitle);
+	DrawTasksRowBackground(pDC, rRow, rBkgnd, nState, crBack);
+
+	// draw text
+	CRect rText;
+	GetItemTitleRect(nmcd, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
+	DrawColumnText(pDC, pTDI->sTitle, rText, DT_LEFT, crText, TRUE);
+
+	pDC->SelectObject(pOldFont);
+
+	// draw shortcut for references
+	if (dwTaskID != dwTrueID)
+		GraphicsMisc::DrawShortcutOverlay(pDC, rBkgnd);
+
+	// render comment text
+	DrawCommentsText(pDC, rRow, rText, pTDI, pTDS);
+
+	return TRUE;
+}
+
+void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
 										  COLORREF crText, BOOL bSelected)
 {
 	DWORD dwTrueID = pTDS->GetTaskID();

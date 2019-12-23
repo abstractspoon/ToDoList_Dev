@@ -256,9 +256,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			// interested in the bit to left of the task title where the
 			// completion checkbox and task icon will be drawn by Windows
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-			BOOL bAlternate = (!IsColumnLineOdd(nItem) && HasColor(m_crAltLine));
-
-			COLORREF crBack = (bAlternate ? m_crAltLine : GetSysColor(COLOR_WINDOW));
+			COLORREF crBack = (IsAlternateLine(pLVCD->nmcd) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 
 			if (HasStyle(TDCS_TASKCOLORISBACKGROUND))
 			{
@@ -281,54 +279,59 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 	case CDDS_ITEMPOSTPAINT:
 		{
-			const TODOITEM* pTDI = NULL;
-			const TODOSTRUCTURE* pTDS = NULL;
-			
-			DWORD dwTaskID = GetTaskID(nItem), dwTrueID(dwTaskID);
-			
-			if (m_data.GetTrueTask(dwTrueID, pTDI, pTDS))
+			CRect rRow;
+			m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
+
+			DrawTaskTitleLabel(pLVCD->nmcd, rRow);
+
+			/*
 			{
-				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-				CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
-	
-				// Draw background again but this time allowing for the task's 
-				// selection status, and making sure we don't overdraw any icons
-				// already drawn by Windows in the pre-paint
-				GM_ITEMSTATE nState = GetListItemState(nItem);
-				
-				CRect rRow;
-				m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
-		
-				CRect rItem;
-				GetItemTitleRect(nItem, TDCTR_LABEL, rItem, pDC, pTDI->sTitle);
-				
-				COLORREF crBack, crText;
-				VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE)));
+				const TODOITEM* pTDI = NULL;
+				const TODOSTRUCTURE* pTDS = NULL;
 
-				if (!HasColor(crBack))
+				DWORD dwTaskID = GetTaskID(nItem), dwTrueID(dwTaskID);
+
+				if (m_data.GetTrueTask(dwTrueID, pTDI, pTDS))
 				{
-					if (!IsColumnLineOdd(nItem) && HasColor(m_crAltLine))
-						crBack = m_crAltLine;
-					else
-						crBack = GetSysColor(COLOR_WINDOW);
+					CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+					// Draw background again but this time allowing for the task's 
+					// selection status, and making sure we don't overdraw any icons
+					// already drawn by Windows in the pre-paint
+					GM_ITEMSTATE nState = GetListItemState(nItem);
+
+					CRect rRow;
+					m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
+
+					COLORREF crBack, crText;
+					VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE)));
+
+					if (!HasColor(crBack))
+					{
+						if (IsAlternateColumnLine(nItem))
+							crBack = m_crAltLine;
+						else
+							crBack = GetSysColor(COLOR_WINDOW);
+					}
+
+					CRect rBkgnd;
+					GetItemTitleRect(nItem, TDCTR_BKGND, rBkgnd, pDC, pTDI->sTitle);
+					DrawTasksRowBackground(pDC, rRow, rBkgnd, nState, crBack);
+
+					// draw text
+					CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
+
+					CRect rText;
+					GetItemTitleRect(nItem, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
+					DrawColumnText(pDC, pTDI->sTitle, rText, DT_LEFT, crText, TRUE);
+
+					pDC->SelectObject(pOldFont);
+
+					// render comment text
+					DrawCommentsText(pDC, rRow, rText, pTDI, pTDS);
 				}
-				
-				DrawTasksRowBackground(pDC, rRow, rItem, nState, crBack);
-				
-				// draw text
-				rItem.left += TITLE_BORDER_OFFSET;
-				DrawColumnText(pDC, pTDI->sTitle, rItem, DT_LEFT, crText, TRUE);
-#ifdef _DEBUG
-				//GraphicsMisc::DrawRect(pDC, rItem, CLR_NONE, 255);
-#endif
-				// cleanup
-				pDC->SelectObject(pOldFont);
-
-				// render comment text
-				DrawCommentsText(pDC, rRow, rItem, pTDI, pTDS);
 			}
-
-			// restore default back colour
+			*/
+			// restore default back colour set in CDDS_ITEMPREPAINT
 			ListView_SetBkColor(m_lcTasks, GetSysColor(COLOR_WINDOW));
 
 			return CDRF_SKIPDEFAULT; // always
@@ -882,7 +885,7 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					
 					CRect rLabel;
 					
-					if (GetItemTitleRect(nItem, TDCTR_LABEL, rLabel, &dc, pTDI->sTitle))
+					if (GetItemTitleRect(nItem, TDCTR_TEXT, rLabel, &dc, pTDI->sTitle))
 					{
 						// Add a bit ie. 'near enough is good enough'
 						rLabel.right += 10;
@@ -1043,7 +1046,12 @@ void CTDLTaskListCtrl::GetWindowRect(CRect& rWindow, BOOL bWithHeader) const
 	}
 }
 
-BOOL CTDLTaskListCtrl::GetItemTitleRect(int nItem, TDC_TITLERECT nArea, CRect& rect, CDC* pDC, LPCTSTR szTitle) const
+BOOL CTDLTaskListCtrl::GetItemTitleRect(const NMCUSTOMDRAW& nmcd, TDC_LABELRECT nArea, CRect& rect, CDC* pDC, LPCTSTR szTitle) const
+{
+	return GetItemTitleRect((int)nmcd.dwItemSpec, nArea, rect, pDC, szTitle);
+}
+
+BOOL CTDLTaskListCtrl::GetItemTitleRect(int nItem, TDC_LABELRECT nArea, CRect& rect, CDC* pDC, LPCTSTR szTitle) const
 {
 	// basic title rect
 	const_cast<CListCtrl*>(&m_lcTasks)->GetItemRect(nItem, rect, LVIR_LABEL);
@@ -1051,7 +1059,7 @@ BOOL CTDLTaskListCtrl::GetItemTitleRect(int nItem, TDC_TITLERECT nArea, CRect& r
 	
 	switch (nArea)
 	{
-	case TDCTR_LABEL:
+	case TDCTR_BKGND:
 		if (pDC && szTitle)
 		{
 			rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx);
@@ -1064,8 +1072,16 @@ BOOL CTDLTaskListCtrl::GetItemTitleRect(int nItem, TDC_TITLERECT nArea, CRect& r
 		}
 		return TRUE;
 		
+	case TDCTR_TEXT:
+		if (GetItemTitleRect(nItem, TDCTR_BKGND, rect, pDC, szTitle)) // recursive call
+		{
+			rect.left += TITLE_BORDER_OFFSET;
+			return TRUE;
+		}
+		break;
+		
 	case TDCTR_EDIT:
-		if (GetItemTitleRect(nItem, TDCTR_LABEL, rect)) // recursive call
+		if (GetItemTitleRect(nItem, TDCTR_BKGND, rect)) // recursive call
 		{
 			rect.top--;
 			
@@ -1087,13 +1103,13 @@ BOOL CTDLTaskListCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 	
 	// initialize to first item
 	if (pos)
-		VERIFY(GetItemTitleRect(m_lcTasks.GetNextSelectedItem(pos), TDCTR_LABEL, rSelection));
+		VERIFY(GetItemTitleRect(m_lcTasks.GetNextSelectedItem(pos), TDCTR_TEXT, rSelection));
 	
 	// rest of selection
 	while (pos)
 	{
 		CRect rItem;
-		VERIFY(GetItemTitleRect(m_lcTasks.GetNextSelectedItem(pos), TDCTR_LABEL, rItem));
+		VERIFY(GetItemTitleRect(m_lcTasks.GetNextSelectedItem(pos), TDCTR_TEXT, rItem));
 		
 		rSelection |= rItem;
 	}
@@ -1521,6 +1537,16 @@ int CTDLTaskListCtrl::GetFocusedListItem() const
 int CTDLTaskListCtrl::FindTaskItem(DWORD dwTaskID) const
 {
 	return CTreeListSyncer::FindListItem(m_lcTasks, dwTaskID);
+}
+
+BOOL CTDLTaskListCtrl::IsAlternateLine(const NMCUSTOMDRAW& nmcd) const
+{
+	return IsAlternateColumnLine((int)nmcd.dwItemSpec);
+}
+
+GM_ITEMSTATE CTDLTaskListCtrl::GetTaskState(const NMCUSTOMDRAW& nmcd) const
+{
+	return GetListItemState((int)nmcd.dwItemSpec);
 }
 
 GM_ITEMSTATE CTDLTaskListCtrl::GetListItemState(int nItem) const

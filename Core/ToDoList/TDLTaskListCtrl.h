@@ -130,6 +130,10 @@ protected:
 	DWORD GetHelpID() const;
 	BOOL DoSaveToImage(CBitmap& bmImage, COLORREF crDivider);
 
+	BOOL GetItemTitleRect(const NMCUSTOMDRAW& nmcd, TDC_LABELRECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
+	GM_ITEMSTATE GetTaskState(const NMCUSTOMDRAW& nmcd) const;
+	BOOL IsAlternateLine(const NMCUSTOMDRAW& nmcd) const;
+
 protected:
 	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
 	BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate);
@@ -140,7 +144,7 @@ protected:
 	BOOL NeedDrawTaskSelection() { return (HasFocus() && (GetFocus() != &m_lcTasks)); }
 	void SetSelectedTasks(const CDWordArray& aTaskIDs, DWORD dwFocusedTaskID);
 	BOOL HandleClientColumnClick(const CPoint& pt, BOOL bDblClk);
-	BOOL GetItemTitleRect(int nItem, TDC_TITLERECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
+	BOOL GetItemTitleRect(int nItem, TDC_LABELRECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
 	int CalcRequiredTitleColumnWidthForImage();
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
