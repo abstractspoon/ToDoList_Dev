@@ -537,85 +537,13 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 		
 	case CDDS_ITEMPREPAINT:
 		{
-			COLORREF crBack = (IsAlternateLine(pTVCD->nmcd) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
-
-			if (HasStyle(TDCS_TASKCOLORISBACKGROUND))
-			{
-				GetTaskTextColors(dwTaskID, pTVCD->clrText, pTVCD->clrTextBk);
-
-				if (pTVCD->clrTextBk != CLR_NONE)
-					crBack = pTVCD->clrTextBk;
-			}
-
-			CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
-			GraphicsMisc::FillItemRect(pDC, &pTVCD->nmcd.rc, crBack, m_tcTasks);
-
-			// hide text because we will draw it later
-			pTVCD->clrTextBk = pTVCD->clrText = crBack;
-
-			return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
+			OnPrePaintTaskTitle(pTVCD->nmcd, TRUE, pTVCD->clrText, pTVCD->clrTextBk);
 		}
-		break;
+		return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
 		
 	case CDDS_ITEMPOSTPAINT:
 		{
-			DrawTaskTitleLabel(pTVCD->nmcd, pTVCD->nmcd.rc);
-
-/*
-			// check row is visible
-			CRect rRow(), rClient;
-			m_tcTasks.GetClientRect(rClient);
-			
-			if ((rRow.bottom > 0) && (rRow.top < rClient.bottom))
-			{
-				const TODOITEM* pTDI = NULL;
-				const TODOSTRUCTURE* pTDS = NULL;
-				
-				DWORD dwTrueID(dwTaskID);
-				
-				if (m_data.GetTrueTask(dwTrueID, pTDI, pTDS))
-				{
-					CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
-					CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
-
-					GM_ITEMSTATE nState = GetTreeItemState(hti);
-					BOOL bSelected = (nState != GMIS_NONE);
-
-					COLORREF crText, crBack;
-					GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), bSelected);
-				
-					if (!HasColor(crBack))
-					{
-						if (!IsTreeItemLineOdd(hti) && HasColor(m_crAltLine))
-							crBack = m_crAltLine;
-						else
-							crBack = GetSysColor(COLOR_WINDOW);
-					}
-					
-					// draw label background only
-					CRect rBkgnd;
-
-					GetItemTitleRect(hti, TDCTR_BKGND, rBkgnd, pDC, pTDI->sTitle);
-					DrawTasksRowBackground(pDC, rRow, rBkgnd, nState, crBack);
-
-					// draw text
-					CRect rText;
-
-					GetItemTitleRect(hti, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
-					DrawColumnText(pDC, pTDI->sTitle, rText, DT_LEFT, crText, TRUE);
-
-					// cleanup
-					pDC->SelectObject(pOldFont);
-
-					// draw shortcut for references
-					if (dwTaskID != dwTrueID)
-						GraphicsMisc::DrawShortcutOverlay(pDC, rBkgnd);
-	 							
-					// draw trailing comment text
-					DrawCommentsText(pDC, rRow, rText, pTDI, pTDS);
-				}
-			}
-*/
+ 			OnPostPaintTaskTitle(pTVCD->nmcd, pTVCD->nmcd.rc);
 		}
 		return CDRF_SKIPDEFAULT; // always
 	}
@@ -636,12 +564,12 @@ BOOL CTDLTaskTreeCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 	return FALSE;
 }
 
-BOOL CTDLTaskTreeCtrl::IsAlternateLine(const NMCUSTOMDRAW& nmcd) const
+BOOL CTDLTaskTreeCtrl::IsAlternateTitleLine(const NMCUSTOMDRAW& nmcd) const
 {
 	return IsAlternateTreeItemLine((HTREEITEM)nmcd.dwItemSpec);
 }
 
-GM_ITEMSTATE CTDLTaskTreeCtrl::GetTaskState(const NMCUSTOMDRAW& nmcd) const
+GM_ITEMSTATE CTDLTaskTreeCtrl::GetItemTitleState(const NMCUSTOMDRAW& nmcd) const
 {
 	return GetTreeItemState((HTREEITEM)nmcd.dwItemSpec);
 }
@@ -1710,7 +1638,7 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 	ASSERT(hti);
 
 	// basic title rect
-	m_tcTasks.GetItemRect(hti, rect, TRUE); // label only
+	m_tcTasks.GetItemRect(hti, rect, TRUE);
 	int nHdrWidth = m_hdrTasks.GetItemWidth(0);
 
 	switch (nArea)

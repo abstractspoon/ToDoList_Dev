@@ -2588,57 +2588,76 @@ void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const
 	}
 }
 
-BOOL CTDLTaskCtrlBase::DrawTaskTitleLabel(const NMCUSTOMDRAW& nmcd, const CRect& rRow)
+void CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd)
+{
+	// Fill the item background with the 'unselected' colour.
+	// Although we fill fill the entire row, we are really only
+	// interested in the bit to left of the task title where the
+	// completion checkbox and task icon will be drawn by Windows
+	CDC* pDC = CDC::FromHandle(nmcd.hdc);
+	COLORREF crRowBack = (IsAlternateTitleLine(nmcd) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
+
+	if (HasStyle(TDCS_TASKCOLORISBACKGROUND))
+	{
+		if (!GetTaskTextColors(nmcd.lItemlParam, crText, crBkgnd))
+			return;
+
+		if (crBkgnd != CLR_NONE)
+			crRowBack = crBkgnd;
+	}
+	crBkgnd = crText = crRowBack;
+
+	if (bFillRow)
+		GraphicsMisc::FillItemRect(pDC, &nmcd.rc, crRowBack, Tasks());
+}
+
+void CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rRow)
 {
 	// Check row is visible
 	CRect rClient;
 	::GetClientRect(Tasks(), rClient);
 
-	if ((rRow.bottom < 0) || (rRow.top >= rClient.bottom))
-		return FALSE;
+	if ((rRow.bottom > 0) && (rRow.top <= rClient.bottom))
+	{
+		const TODOITEM* pTDI = NULL;
+		const TODOSTRUCTURE* pTDS = NULL;
 
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
+		DWORD dwTaskID(nmcd.lItemlParam), dwTrueID(dwTaskID);
 
-	DWORD dwTaskID(nmcd.lItemlParam), dwTrueID(dwTaskID);
+		if (m_data.GetTrueTask(dwTrueID, pTDI, pTDS))
+		{
+			CDC* pDC = CDC::FromHandle(nmcd.hdc);
+			GM_ITEMSTATE nState = GetItemTitleState(nmcd);
 
-	if (!m_data.GetTrueTask(dwTrueID, pTDI, pTDS))
-		return FALSE;
+			COLORREF crText = 0, crBack = GetSysColor(COLOR_WINDOW);
+			VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE)));
 
-	CDC* pDC = CDC::FromHandle(nmcd.hdc);
-	GM_ITEMSTATE nState = GetTaskState(nmcd);
+			if (!HasColor(crBack))
+				crBack = (IsAlternateTitleLine(nmcd) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 
-	// Draw background again but this time allowing for the task's 
-	// selection status, and making sure we don't overdraw any icons
-	// already drawn by Windows in the pre-paint
-	COLORREF crBack, crText;
-	VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE)));
+			// Set font before getting text length
+			CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
 
-	if (!HasColor(crBack))
-		crBack = (IsAlternateLine(nmcd) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
+			// draw label background only
+			CRect rBkgnd;
+			GetItemTitleRect(nmcd, TDCTR_BKGND, rBkgnd, pDC, pTDI->sTitle);
+			DrawTasksRowBackground(pDC, rRow, rBkgnd, nState, crBack);
 
-	// Set font before getting text length
-	CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
+			// draw text
+			CRect rText;
+			GetItemTitleRect(nmcd, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
+			DrawColumnText(pDC, pTDI->sTitle, rText, DT_LEFT, crText, TRUE);
 
-	CRect rBkgnd;
-	GetItemTitleRect(nmcd, TDCTR_BKGND, rBkgnd, pDC, pTDI->sTitle);
-	DrawTasksRowBackground(pDC, rRow, rBkgnd, nState, crBack);
+			pDC->SelectObject(pOldFont);
 
-	// draw text
-	CRect rText;
-	GetItemTitleRect(nmcd, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
-	DrawColumnText(pDC, pTDI->sTitle, rText, DT_LEFT, crText, TRUE);
+			// draw shortcut for references
+			if (dwTaskID != dwTrueID)
+				GraphicsMisc::DrawShortcutOverlay(pDC, rBkgnd);
 
-	pDC->SelectObject(pOldFont);
-
-	// draw shortcut for references
-	if (dwTaskID != dwTrueID)
-		GraphicsMisc::DrawShortcutOverlay(pDC, rBkgnd);
-
-	// render comment text
-	DrawCommentsText(pDC, rRow, rText, pTDI, pTDS);
-
-	return TRUE;
+			// render comment text
+			DrawCommentsText(pDC, rRow, rText, pTDI, pTDS);
+		}
+	}
 }
 
 void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,

@@ -251,92 +251,25 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 								
 	case CDDS_ITEMPREPAINT:
 		{
-			// Fill the item background with the 'unselected' colour.
-			// Although we fill fill the entire row, we are really only
-			// interested in the bit to left of the task title where the
-			// completion checkbox and task icon will be drawn by Windows
-			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-			COLORREF crBack = (IsAlternateLine(pLVCD->nmcd) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
+			BOOL bFillRow = !OsIsXP();
+			OnPrePaintTaskTitle(pLVCD->nmcd, bFillRow, pLVCD->clrText, pLVCD->clrTextBk);
 
-			if (HasStyle(TDCS_TASKCOLORISBACKGROUND))
-			{
-				GetTaskTextColors(dwTaskID, pLVCD->clrText, pLVCD->clrTextBk);
-
-				if (pLVCD->clrTextBk != CLR_NONE)
-					crBack = pLVCD->clrTextBk;
-			}
-			pLVCD->clrTextBk = pLVCD->clrText = crBack;
-
- 			if (!OsIsXP())
-			{
-				GraphicsMisc::FillItemRect(pDC, &pLVCD->nmcd.rc, crBack, m_lcTasks);
-				ListView_SetBkColor(m_lcTasks, crBack);
-			}
-		
-			return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
+			if (bFillRow)
+ 				ListView_SetBkColor(m_lcTasks, pLVCD->clrTextBk);
 		}
-		break;
+		return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
 
 	case CDDS_ITEMPOSTPAINT:
 		{
 			CRect rRow;
 			m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
 
-			DrawTaskTitleLabel(pLVCD->nmcd, rRow);
-
-			/*
-			{
-				const TODOITEM* pTDI = NULL;
-				const TODOSTRUCTURE* pTDS = NULL;
-
-				DWORD dwTaskID = GetTaskID(nItem), dwTrueID(dwTaskID);
-
-				if (m_data.GetTrueTask(dwTrueID, pTDI, pTDS))
-				{
-					CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-					// Draw background again but this time allowing for the task's 
-					// selection status, and making sure we don't overdraw any icons
-					// already drawn by Windows in the pre-paint
-					GM_ITEMSTATE nState = GetListItemState(nItem);
-
-					CRect rRow;
-					m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
-
-					COLORREF crBack, crText;
-					VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE)));
-
-					if (!HasColor(crBack))
-					{
-						if (IsAlternateColumnLine(nItem))
-							crBack = m_crAltLine;
-						else
-							crBack = GetSysColor(COLOR_WINDOW);
-					}
-
-					CRect rBkgnd;
-					GetItemTitleRect(nItem, TDCTR_BKGND, rBkgnd, pDC, pTDI->sTitle);
-					DrawTasksRowBackground(pDC, rRow, rBkgnd, nState, crBack);
-
-					// draw text
-					CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
-
-					CRect rText;
-					GetItemTitleRect(nItem, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
-					DrawColumnText(pDC, pTDI->sTitle, rText, DT_LEFT, crText, TRUE);
-
-					pDC->SelectObject(pOldFont);
-
-					// render comment text
-					DrawCommentsText(pDC, rRow, rText, pTDI, pTDS);
-				}
-			}
-			*/
+			OnPostPaintTaskTitle(pLVCD->nmcd, rRow/*pLVCD->nmcd.rc*/);
+			
 			// restore default back colour set in CDDS_ITEMPREPAINT
 			ListView_SetBkColor(m_lcTasks, GetSysColor(COLOR_WINDOW));
-
-			return CDRF_SKIPDEFAULT; // always
 		}
-		break;
+		return CDRF_SKIPDEFAULT; // always
 	}
 	
 	return CDRF_DODEFAULT;
@@ -1539,12 +1472,12 @@ int CTDLTaskListCtrl::FindTaskItem(DWORD dwTaskID) const
 	return CTreeListSyncer::FindListItem(m_lcTasks, dwTaskID);
 }
 
-BOOL CTDLTaskListCtrl::IsAlternateLine(const NMCUSTOMDRAW& nmcd) const
+BOOL CTDLTaskListCtrl::IsAlternateTitleLine(const NMCUSTOMDRAW& nmcd) const
 {
 	return IsAlternateColumnLine((int)nmcd.dwItemSpec);
 }
 
-GM_ITEMSTATE CTDLTaskListCtrl::GetTaskState(const NMCUSTOMDRAW& nmcd) const
+GM_ITEMSTATE CTDLTaskListCtrl::GetItemTitleState(const NMCUSTOMDRAW& nmcd) const
 {
 	return GetListItemState((int)nmcd.dwItemSpec);
 }

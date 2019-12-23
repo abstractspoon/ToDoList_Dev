@@ -131,8 +131,8 @@ protected:
 	BOOL DoSaveToImage(CBitmap& bmImage, COLORREF crDivider);
 
 	BOOL GetItemTitleRect(const NMCUSTOMDRAW& nmcd, TDC_LABELRECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
-	GM_ITEMSTATE GetTaskState(const NMCUSTOMDRAW& nmcd) const;
-	BOOL IsAlternateLine(const NMCUSTOMDRAW& nmcd) const;
+	GM_ITEMSTATE GetItemTitleState(const NMCUSTOMDRAW& nmcd) const;
+	BOOL IsAlternateTitleLine(const NMCUSTOMDRAW& nmcd) const;
 
 protected:
 	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
