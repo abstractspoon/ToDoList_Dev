@@ -2374,11 +2374,8 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			if (m_hwndPrimaryHeader)
 				::SendMessage(m_hwndPrimaryHeader, WM_SETFONT, wp, lp);
 			
-			// resync item heights
 			RecalcItemHeights();
-
-			// Delay the resize until after the list has updated its header
-			PostResize(FALSE);
+			PostResize();
 		}
 		break;
 
@@ -2388,7 +2385,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		if (hRealWnd == PrimaryWnd())
 		{
 			RecalcItemHeights();
-			RefreshSize();
+			PostResize();
 		}
 		break;
 

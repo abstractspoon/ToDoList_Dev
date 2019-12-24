@@ -146,12 +146,10 @@ protected:
 	BOOL HandleClientColumnClick(const CPoint& pt, BOOL bDblClk);
 	BOOL GetItemTitleRect(int nItem, TDC_LABELRECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
 	int CalcRequiredTitleColumnWidthForImage();
+	GM_ITEMSTATE GetListItemState(int nItem) const;
+	LPCTSTR GetDebugName() const { return _T("ListView"); }
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
-
-	GM_ITEMSTATE GetListItemState(int nItem) const;
-
-	LPCTSTR GetDebugName() const { return _T("ListView"); }
 
 };
 

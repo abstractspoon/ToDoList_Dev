@@ -237,13 +237,13 @@ protected:
 
 	GM_ITEMSTATE GetTreeItemState(HTREEITEM hti) const;
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;
+	LPCTSTR GetDebugName() const { return _T("TaskTree"); }
 
 #ifdef _DEBUG
 	void Trace(HTREEITEM hti, int nLevel);
 	void Trace(LPCTSTR szComment, HTREEITEM hti);
 #endif
 
-	LPCTSTR GetDebugName() const { return _T("TaskTree"); }
 
 };
 
