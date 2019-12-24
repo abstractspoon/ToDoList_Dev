@@ -2613,10 +2613,10 @@ void CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillR
 		GraphicsMisc::FillItemRect(pDC, &nmcd.rc, crRowBack, Tasks());
 }
 
-void CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rRow)
+void CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd)
 {
 	// Check row is visible
-	CRect rClient;
+	CRect rClient, rRow(nmcd.rc);
 	::GetClientRect(Tasks(), rClient);
 
 	if ((rRow.bottom > 0) && (rRow.top <= rClient.bottom))

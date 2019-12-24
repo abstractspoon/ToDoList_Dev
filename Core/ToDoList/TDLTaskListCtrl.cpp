@@ -261,10 +261,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 	case CDDS_ITEMPOSTPAINT:
 		{
-			CRect rRow;
-			m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
-
-			OnPostPaintTaskTitle(pLVCD->nmcd, rRow/*pLVCD->nmcd.rc*/);
+			OnPostPaintTaskTitle(pLVCD->nmcd);
 			
 			// restore default back colour set in CDDS_ITEMPREPAINT
 			ListView_SetBkColor(m_lcTasks, GetSysColor(COLOR_WINDOW));

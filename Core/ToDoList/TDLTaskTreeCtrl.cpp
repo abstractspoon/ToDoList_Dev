@@ -543,7 +543,7 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 		
 	case CDDS_ITEMPOSTPAINT:
 		{
- 			OnPostPaintTaskTitle(pTVCD->nmcd, pTVCD->nmcd.rc);
+ 			OnPostPaintTaskTitle(pTVCD->nmcd);
 		}
 		return CDRF_SKIPDEFAULT; // always
 	}
