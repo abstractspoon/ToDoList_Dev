@@ -3639,7 +3639,7 @@ namespace MSDN.Html.Editor
 		/// Method to determine if the current selection is a table
 		/// If found will return the table element
 		/// </summary>
-		private mshtmlElement GetSelectedTableElement(Type elementType)
+		private mshtmlElement GetSelectedTableElement(String typeName)
         {
             mshtmlTextRange range = GetTextRange();
 
@@ -3653,7 +3653,9 @@ namespace MSDN.Html.Editor
 
 			while (element != null)
 			{
-				if (elementType == element.GetType())
+				var elementType = element.GetType();
+
+				if (typeName.Equals(elementType.FullName))
 					return element;
 
 				element = element.parentElement;
@@ -3668,7 +3670,7 @@ namespace MSDN.Html.Editor
         /// </summary>
         private mshtmlTable GetSelectedTable()
         {
-			var table = GetSelectedTableElement(typeof(MSHTML.HTMLTable));
+			var table = GetSelectedTableElement("mshtml.HTMLTableClass");
 
 			if (table == null)
 				return null;
@@ -3679,7 +3681,7 @@ namespace MSDN.Html.Editor
 
         private mshtmlTableRow GetSelectedTableRow()
         {
-			var row = GetSelectedTableElement(typeof(MSHTML.HTMLTableRow));
+			var row = GetSelectedTableElement("mshtml.HTMLTableRowClass");
 
 			if (row == null)
 				return null;
@@ -3690,7 +3692,7 @@ namespace MSDN.Html.Editor
 
         private mshtmlTableCell GetSelectedTableCell()
         {
-			var cell = GetSelectedTableElement(typeof(MSHTML.HTMLTableCell));
+			var cell = GetSelectedTableElement("mshtml.HTMLTableCellClass");
 
 			if (cell == null)
 				return null;
