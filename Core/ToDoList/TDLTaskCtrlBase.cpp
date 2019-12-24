@@ -6618,14 +6618,26 @@ BOOL CTDLTaskCtrlBase::PreTranslateMessage(MSG* pMsg)
 	case WM_KEYDOWN:
 		// Do our custom column resizing because Windows own
 		// does not understand how we do things!
-		if ((IsLeft(pMsg->hwnd) || IsRight(pMsg->hwnd)) &&
-			(pMsg->wParam == VK_ADD) && 
-			Misc::ModKeysArePressed(MKS_CTRL))
+		switch (pMsg->wParam)
 		{
-			RecalcAllColumnWidths();
-			return TRUE;
+		case VK_ADD:
+			if ((IsLeft(pMsg->hwnd) || IsRight(pMsg->hwnd)) && Misc::ModKeysArePressed(MKS_CTRL))
+			{
+				RecalcAllColumnWidths();
+				return TRUE;
+			}
+			break;
+
+		case VK_ESCAPE:
+			if (IsSplitting())
+			{
+				VERIFY(::ReleaseCapture());
+				ASSERT(IsSplitting() == FALSE);
+
+				return TRUE;
+			}
+			break;
 		}
-		break;
 	}
 	
 	// all else

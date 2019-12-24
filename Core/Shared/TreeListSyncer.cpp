@@ -861,7 +861,7 @@ HWND CTreeListSyncer::GetTree() const
 	if (IsTree(Left()))
 		return Left();
 
-	else if (IsTree(Right()))
+	if (IsTree(Right()))
 		return Right();
 
 	ASSERT(0);
@@ -907,6 +907,7 @@ int CTreeListSyncer::GetListItem(HWND hwndList, HWND hwndTree, HTREEITEM hti) co
 
 			return FindListItem(hwndList, dwTreeData);
 		}
+		break;
 		
 		// the item data of the left item is the right item
 	case TLSL_LEFTDATA_IS_RIGHTITEM:
@@ -1492,14 +1493,18 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		break;
 
 	case WM_CAPTURECHANGED:
-		m_bSplitting = FALSE; // always
+		if (m_bSplitting)
+		{
+			m_bSplitting = FALSE;
+			PostResize();
+		}
 		break;
 		
 	case WM_LBUTTONUP:
 		if (m_bSplitting)
 		{
-			::ReleaseCapture();
-			m_bSplitting = FALSE;
+			VERIFY(::ReleaseCapture());
+			ASSERT(m_bSplitting == FALSE);
 		}
 		break;
 		
