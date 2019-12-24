@@ -289,6 +289,9 @@ void CTDLTaskListCtrl::OnNotifySplitterChange(int nSplitPos)
 	if (nSplitPos > CLIENTCOLWIDTH)
 	{
 		m_lcTasks.SetColumnWidth(0, (nSplitPos + 4));
+
+		if (IsSplitting())
+			PostResize();
 	}
 	else if (m_lcTasks.GetColumnWidth(0) > CLIENTCOLWIDTH)
 	{
