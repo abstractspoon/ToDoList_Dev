@@ -447,6 +447,7 @@ namespace HTMLReportExporter
 				{
 					// Report an error
 					html.WriteLine(m_Trans.Translate("Only top-level task attributes are allowable in the Title section."));
+					html.Write(Text);
 
 					return true;
 				}
@@ -454,13 +455,13 @@ namespace HTMLReportExporter
 				return false;
 			}
 
-
-		public bool WriteStyles(HtmlTextWriter html)
+			public bool WriteStyles(HtmlTextWriter html)
 			{
-				if (!Enabled || !SeparatePage)
+				if (!Enabled)
 					return false;
 
-				html.WriteLine(".title-page { page-break-after: always; border-bottom: 2px dotted; width: 100%; margin-bottom:20px }");
+				if (SeparatePage)
+					html.WriteLine(".title-page { page-break-after: always; border-bottom: 2px dotted; width: 100%; margin-bottom:20px }");
 
 				return true;
 			}
@@ -471,7 +472,7 @@ namespace HTMLReportExporter
 					return false;
 #if DEBUG
 				// Sanity check
-				if (!ContainsTaskAttributes(tasks))
+				if (ContainsTaskAttributes(tasks))
 					return false;
 #endif
 				if (SeparatePage)
