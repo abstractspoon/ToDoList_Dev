@@ -683,7 +683,7 @@ namespace HTMLReportExporter
 
 		bool GetPlaceholderLabel(string basePlaceholder, out string label)
 		{
-			foreach (var attrib in TaskTemplate.Attributes)
+			foreach (var attrib in TaskAttribute.Attributes)
 			{
 				if (basePlaceholder.Equals(attrib.BasePlaceholder))
 				{
@@ -777,7 +777,7 @@ namespace HTMLReportExporter
 		{
 			base.InitialiseToolbarAttributeMenu();
 
-			foreach (var attrib in TaskTemplate.Attributes)
+			foreach (var attrib in TaskAttribute.Attributes)
 			{
 				var menuItem = new ToolStripMenuItem();
 
@@ -791,7 +791,7 @@ namespace HTMLReportExporter
 			ToolStripAttributeMenu.Text = "Task Attributes";
 		}
 
-		public void SetCustomAttributes(Dictionary<String, String> customAttributes)
+		public void SetCustomAttributes(HtmlReportUtils.CustomAttributes customAttributes)
 		{
 			foreach (var attrib in customAttributes)
 			{

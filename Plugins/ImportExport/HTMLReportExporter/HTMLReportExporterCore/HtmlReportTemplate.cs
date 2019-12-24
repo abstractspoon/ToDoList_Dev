@@ -270,70 +270,10 @@ namespace HTMLReportExporter
 
 	}
 
-	//////////////////////////////////////////////////////////////////////////////
+	// -----------------------------------------------------------
 
 	public class TaskTemplate : TemplateItem
 	{
-		public struct TaskAttribute
-		{
-			public TaskAttribute(Task.Attribute id, String label, String basePlaceholder) : this()
-			{
-				Id = id;
-				Label = label;
-				BasePlaceholder = basePlaceholder;
-			}
-
-			public Task.Attribute Id { get; private set; }
-			public String Label { get; private set; }
-			public String BasePlaceholder { get; private set; }
-
-			public String FormatPlaceholder(int depth = -1)
-			{
-				return HtmlReportUtils.FormatPlaceholder(BasePlaceholder, depth);
-			}
-
-			public String FormatPlaceholderText(int depth = -1)
-			{
-				return HtmlReportUtils.FormatPlaceholderText(BasePlaceholder, depth);
-			}
-		}
-
-		// -----------------------------------------------------------
-
-		public static TaskAttribute[] Attributes =
-		{
-			new TaskAttribute(Task.Attribute.AllocatedBy,       "Allocated By",             "allocBy" ),
-			new TaskAttribute(Task.Attribute.AllocatedTo,       "Allocated To",             "allocTo" ),
-			new TaskAttribute(Task.Attribute.Category,          "Category",                 "cat" ),
-			new TaskAttribute(Task.Attribute.Cost,              "Cost",                     "cost" ),
-			new TaskAttribute(Task.Attribute.CreatedBy,         "Created By",               "createBy" ),
-			new TaskAttribute(Task.Attribute.CreationDate,      "Creation Date",            "createDate" ),
-			new TaskAttribute(Task.Attribute.Dependency,        "Dependency",               "depends" ),
-			new TaskAttribute(Task.Attribute.DoneDate,          "Completion Date",          "doneDate" ),
-			new TaskAttribute(Task.Attribute.DueDate,           "Due Date",                 "dueDate" ),
-			new TaskAttribute(Task.Attribute.ExternalId,        "External ID",              "extId" ),
-			new TaskAttribute(Task.Attribute.FileReference,     "File Link",                "filelink" ),
-			new TaskAttribute(Task.Attribute.Flag,              "Flag",                     "flag" ),
-			new TaskAttribute(Task.Attribute.HtmlComments,      "Comments",                 "comments" ),
-			new TaskAttribute(Task.Attribute.Id,                "Task ID",                  "id" ),
-			new TaskAttribute(Task.Attribute.LastModifiedBy,    "Last Modified By",         "modBy" ),
-			new TaskAttribute(Task.Attribute.LastModifiedDate,  "Last Modified Date",       "modDate" ),
-			new TaskAttribute(Task.Attribute.ParentId,          "Parent Task ID",           "pid" ),
-			new TaskAttribute(Task.Attribute.Path,              "Path",                     "path" ),
-			new TaskAttribute(Task.Attribute.Percent,           "Percent Done",             "percent" ),
-			new TaskAttribute(Task.Attribute.Position,          "Position",                 "pos" ),
-			new TaskAttribute(Task.Attribute.Priority,          "Priority",                 "priority" ),
-			new TaskAttribute(Task.Attribute.Recurrence,        "Recurrence",               "recurs" ),
-			new TaskAttribute(Task.Attribute.Risk,              "Risk",                     "risk" ),
-			new TaskAttribute(Task.Attribute.StartDate,         "Start Date",               "startDate" ),
-			new TaskAttribute(Task.Attribute.Status,            "Status",                   "status" ),
-			new TaskAttribute(Task.Attribute.SubtaskDone,       "Subtask Completion",       "subtaskDone" ),
-			new TaskAttribute(Task.Attribute.Tags,              "Tags",                     "tag" ),
-			new TaskAttribute(Task.Attribute.TimeEstimate,      "Time Estimate",            "est" ),
-			new TaskAttribute(Task.Attribute.TimeSpent,         "Time Spent",               "spent" ),
-			new TaskAttribute(Task.Attribute.Title,             "Title",                    "title" ),
-			new TaskAttribute(Task.Attribute.Version,           "Version",                  "ver" ),
-		};
 
 		// -----------------------------------------------------------
 
@@ -345,7 +285,7 @@ namespace HTMLReportExporter
 			public String TaskHtml { get; private set; }
 			public String EndHtml { get; private set; }
 
-			private Dictionary<String, String> CustomAttributes;
+			private HtmlReportUtils.CustomAttributes CustomAttributes;
 
 			private const String ColorPlaceholder = "$(textColor)";
 			
@@ -368,7 +308,7 @@ namespace HTMLReportExporter
 
 			// ------------------------------------------------------
 
-			public Layout(String text, TableHeaderRowType type, Dictionary<String, String> customAttributes)
+			public Layout(String text, TableHeaderRowType type, HtmlReportUtils.CustomAttributes customAttributes)
 			{
 				Initialise(text, type, customAttributes);
 			}
@@ -383,7 +323,7 @@ namespace HTMLReportExporter
 				EndHtml = String.Empty;
 			}
 
-			private void Initialise(string text, TableHeaderRowType tableHeaderType, Dictionary<String, String> customAttributes)
+			private void Initialise(string text, TableHeaderRowType tableHeaderType, HtmlReportUtils.CustomAttributes customAttributes)
 			{
 				Clear();
 
@@ -593,7 +533,7 @@ namespace HTMLReportExporter
 
 				if (!String.IsNullOrWhiteSpace(header))
 				{
-					foreach (var attrib in Attributes)
+					foreach (var attrib in TaskAttribute.Attributes)
 					{
 						// Clear all placeholder except the 'root' one
 						for (int d = 0; d <= 9; d++)
@@ -623,7 +563,7 @@ namespace HTMLReportExporter
 				if (!String.IsNullOrWhiteSpace(row))
 				{
 					// Default attributes
-					foreach (var attrib in Attributes)
+					foreach (var attrib in TaskAttribute.Attributes)
 					{
 						var attribVal = task.GetAttributeValue(attrib.Id, true, true);
 
@@ -652,38 +592,7 @@ namespace HTMLReportExporter
 
 			static String ReplacePlaceholder(String row, String attribVal, String defaultPlaceholderText, int depth, bool isLeafTask)
 			{
-				// Replace only the placeholder at the level specified
-				String placeHolder = HtmlReportUtils.FormatPlaceholder(defaultPlaceholderText, depth);
-				int placeHolderDepth = depth;
-
-				// Note: Leaf-task formatting take precedence over every level EXCEPT THE FIRST
-				if (isLeafTask && (depth != 1))
-				{
-					String leafPlaceHolder = HtmlReportUtils.FormatPlaceholder(defaultPlaceholderText, 0);
-
-					if (row.IndexOf(leafPlaceHolder) != -1)
-					{
-						placeHolder = leafPlaceHolder;
-						placeHolderDepth = 0;
-					}
-				}
-				
-				if (row.IndexOf(placeHolder) == -1)
-				{
-					// We didn't find it so use the default placeholder
-					placeHolderDepth = -1;
-					placeHolder = HtmlReportUtils.FormatPlaceholder(defaultPlaceholderText);
-				}
-
-				for (int d = -1; d <= 9; d++)
-				{
-					if (d == placeHolderDepth)
-						row = row.Replace(placeHolder, attribVal);
-					else
-						row = row.Replace(HtmlReportUtils.FormatPlaceholder(defaultPlaceholderText, d), String.Empty);
-				}
-
-				return row;
+				return HtmlReportUtils.ReplaceTaskAttributePlaceholder(row, attribVal, defaultPlaceholderText, depth, isLeafTask);
 			}
 		}
 
@@ -695,14 +604,19 @@ namespace HTMLReportExporter
 		{
 		}
 
-		public Layout GetLayout(Dictionary<String, String> customAttributes)
+		public Layout GetLayout(HtmlReportUtils.CustomAttributes custAttribs)
 		{
-			return new Layout(Text, TableHeaderRow, customAttributes);
+			return new Layout(Text, TableHeaderRow, custAttribs);
 		}
 
 		public Layout.StyleType LayoutStyle
 		{
-			get { return new Layout(Text, TableHeaderRow, new Dictionary<String, String>()).Style; }
+			get
+			{
+				var temp = new HtmlReportUtils.CustomAttributes();
+
+				return new Layout(Text, TableHeaderRow, temp).Style;
+			}
 		}
 
 		override public void Read(XDocument doc)

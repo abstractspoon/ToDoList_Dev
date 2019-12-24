@@ -15,7 +15,7 @@ namespace HTMLReportExporter
 	{
 		private TaskList m_Tasklist = null;
 		private HtmlReportTemplate m_Template = null;
-
+		
 		private String m_BodyFontStyle = "";
 		private bool m_StrikeThruDone = true;
 
@@ -43,42 +43,14 @@ namespace HTMLReportExporter
 			m_Template = template;
 
 			m_StrikeThruDone = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
-			m_BodyFontStyle = FormatBodyFontStyle(prefs);
+			m_BodyFontStyle = HtmlReportUtils.FormatBodyFontStyle(prefs);
 
 			Header = new HeaderTemplateReporter(template.Header, template.BackColor);
-			Title = new TitleTemplateReporter(template.Title);
+			Title = new TitleTemplateReporter(trans, template.Title);
 			Footer = new FooterTemplateReporter(template.Footer, template.BackColor);
 
 			var custAttribs = HtmlReportUtils.GetCustomAttributes(tasks);
-			Tasks = new TaskTemplateReporter(trans, template.Task, FormatTaskBaseIndent(prefs), preview);
-		}
-
-		private static String FormatBodyFontStyle(Preferences prefs)
-		{
-			var defFontName = prefs.GetProfileString("Preferences", "HTMLFont", "Verdana");
-			var defHtmlSize = prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
-
-			var defPointSize = MSDN.Html.Editor.HtmlFontConversion.PointsFromHtml(defHtmlSize);
-
-			return String.Format("body {{ font-family: {0}; font-size: {1}pt; }}", defFontName, defPointSize);
-		}
-
-		private static String FormatTaskBaseIndent(Preferences prefs)
-		{
-			const String Tab = "&emsp;";
-			const String Space = "&nbsp;";
-
-			if (!prefs.GetProfileBool("Preferences", "UseSpaceIndents", true))
-				return Tab;
-
-			// else
-			String indent = Space;
-			int nSpace = prefs.GetProfileInt("Preferences", "TextIndent", 2);
-
-			while (--nSpace > 0)
-				indent = (indent + Space);
-
-			return indent;
+			Tasks = new TaskTemplateReporter(trans, template.Task, HtmlReportUtils.FormatTaskBaseIndent(prefs), preview);
 		}
 
 		public bool BuildReport(HtmlTextWriter html)
@@ -219,9 +191,38 @@ namespace HTMLReportExporter
 
 			html.AddAttribute("class", "page");
 			html.RenderBeginTag(HtmlTextWriterTag.Div);
-			
-			Title.WriteTableContent(m_Tasklist, html);
-			Tasks.WriteTableContent(m_Tasklist, html);
+
+			if (!Title.CheckReportInvalidTaskAttributes(m_Tasklist, html))
+			{
+				if (Title.ContainsTaskAttributes(m_Tasklist))
+				{
+					Task task = m_Tasklist.GetFirstTask();
+
+					while (task.IsValid())
+					{
+						Title.WriteTableContent(m_Tasklist, task, html);
+
+						// subtasks of this task
+						Task subtask = task.GetFirstSubtask();
+
+						while (subtask.IsValid())
+						{
+							Tasks.WriteTableContent(m_Tasklist, subtask, html, 2);
+
+							// next sibling
+							subtask = subtask.GetNextTask();
+						}
+
+						// next sibling
+						task = task.GetNextTask();
+					}
+				}
+				else
+				{
+					Title.WriteTableContent(m_Tasklist, html);
+					Tasks.WriteTableContent(m_Tasklist, html);
+				}
+			}
 
 			html.RenderEndTag(); // Div
 
@@ -415,12 +416,46 @@ namespace HTMLReportExporter
 
 		public class TitleTemplateReporter : TitleTemplate
 		{
-			public TitleTemplateReporter(TitleTemplate title)
+			private Translator m_Trans;
+
+			public TitleTemplateReporter(Translator trans, TitleTemplate title)
 			{
+				m_Trans = trans;
+
 				Copy(title);
 			}
 
-			public bool WriteStyles(HtmlTextWriter html)
+			public bool ContainsTaskAttributes(TaskList tasks)
+			{
+				return HtmlReportUtils.ContentContainsTaskAttributePlaceholders(Text, tasks);
+			}
+
+			private bool ContainsNonTopLevelTaskAttributes(TaskList tasks)
+			{
+				for (int depth = 2; depth < 10; depth++)
+				{
+					if (HtmlReportUtils.ContentContainsTaskAttributePlaceholders(Text, tasks, depth))
+						return true;
+				}
+
+				return HtmlReportUtils.ContentContainsTaskAttributePlaceholders(Text, tasks, 0); // leaf tasks
+			}
+
+			public bool CheckReportInvalidTaskAttributes(TaskList tasks, HtmlTextWriter html)
+			{
+				if (ContainsNonTopLevelTaskAttributes(tasks))
+				{
+					// Report an error
+					html.WriteLine(m_Trans.Translate("Only top-level task attributes are allowable in the Title section."));
+
+					return true;
+				}
+
+				return false;
+			}
+
+
+		public bool WriteStyles(HtmlTextWriter html)
 			{
 				if (!Enabled || !SeparatePage)
 					return false;
@@ -434,12 +469,41 @@ namespace HTMLReportExporter
 			{
 				if (!Enabled)
 					return false;
-
+#if DEBUG
+				// Sanity check
+				if (!ContainsTaskAttributes(tasks))
+					return false;
+#endif
 				if (SeparatePage)
 					html.AddAttribute("class", "title-page");
 
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
 				html.Write(HtmlReportUtils.SubstituteReportDetails(tasks, Text));
+				html.RenderEndTag(); // Div
+
+				return true;
+			}
+
+			public bool WriteTableContent(TaskList tasks, Task task, HtmlTextWriter html)
+			{
+				if (!Enabled)
+					return false;
+#if DEBUG
+				// Sanity check
+				if (!ContainsTaskAttributes(tasks))
+					return false;
+#endif
+				if (SeparatePage)
+					html.AddAttribute("class", "title-page");
+
+				String content = HtmlReportUtils.SubstituteReportDetails(tasks, Text);
+				var custAttribs = HtmlReportUtils.GetCustomAttributes(tasks);
+
+				content = HtmlReportUtils.ReplaceTaskAttributePlaceholders(content, custAttribs, task, 1, false);
+				content = HtmlReportUtils.ReplaceTaskAttributePlaceholders(content, custAttribs, task, -1, false);
+
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
+				html.Write(content);
 				html.RenderEndTag(); // Div
 
 				return true;
@@ -503,8 +567,41 @@ namespace HTMLReportExporter
 
 				return true;
 			}
-			
-			public void WriteTask(Task task, Layout layout, int depth, bool andSiblings, HtmlTextWriter html)
+
+			public bool WriteTableContent(TaskList tasks, Task task, HtmlTextWriter html, int depth)
+			{
+				if (task == null)
+					return false;
+
+				if (m_Preview)
+					m_PreviewTaskCount = 0;
+
+				var custAttribs = HtmlReportUtils.GetCustomAttributes(tasks);
+				var layout = m_Template.GetLayout(custAttribs);
+
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
+				html.WriteLine(layout.StartHtml);
+
+				WriteTask(task, 
+						  layout, 
+						  depth,
+						  true,		// export siblings
+						  html);
+				
+				html.WriteLine(layout.EndHtml);
+				html.RenderEndTag(); // Div
+
+				if (m_Preview && (m_PreviewTaskCount >= MaxNumPreviewTasks) && (tasks.GetTaskCount() > m_PreviewTaskCount))
+				{
+					html.RenderBeginTag(HtmlTextWriterTag.P);
+					html.WriteLine(m_Trans.Translate("(more tasks not shown...)"));
+					html.RenderEndTag(); // P
+				}
+
+				return true;
+			}
+
+			private void WriteTask(Task task, Layout layout, int depth, bool andSiblings, HtmlTextWriter html)
 			{
 				if ((task == null) || !task.IsValid())
 					return;
@@ -514,7 +611,7 @@ namespace HTMLReportExporter
 					var text = layout.FormatRow(task, depth);
 
 					// Handle indent
-					text = text.Replace("$(indent)", FormatTaskDepthIndent(depth));
+					text = text.Replace("$(indent)", HtmlReportUtils.FormatDepthIndent(m_BaseIndent, depth));
 
 					html.WriteLine(text);
 				}
@@ -543,17 +640,6 @@ namespace HTMLReportExporter
 						task = task.GetNextTask();
 					}
 				}
-			}
-			
-			private String FormatTaskDepthIndent(int depth)
-			{
-				String depthIndent = "";
-
-				// No indent for top-level(1) tasks
-				while (--depth > 0)
-					depthIndent = (depthIndent + m_BaseIndent);
-
-				return depthIndent;
 			}
 
 		}

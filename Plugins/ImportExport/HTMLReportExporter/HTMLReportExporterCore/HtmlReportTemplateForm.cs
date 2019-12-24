@@ -31,7 +31,7 @@ namespace HTMLReportExporter
 		private String m_TemplateFilePath = "";
 		private bool m_FirstPreview = true;
 		private bool m_EditedSinceLastSave = false;
-		private Dictionary<String, String> m_CustomAttributes = null;
+		private HtmlReportUtils.CustomAttributes m_CustomAttributes = null;
 
 		const String PreviewPageName = "HtmlReporterPreview.html";
 
@@ -57,7 +57,7 @@ namespace HTMLReportExporter
 
 			m_Template = new HtmlReportTemplate();
 			m_PrevTemplate = new HtmlReportTemplate();
-			m_CustomAttributes = new Dictionary<String, String>();
+			m_CustomAttributes = new HtmlReportUtils.CustomAttributes();
 
 			m_EditedSinceLastSave = false;
 			m_TemplateFilePath = prefs.GetProfileString(key, "LastOpenTemplate", "");
@@ -79,7 +79,7 @@ namespace HTMLReportExporter
 			if (tasks.HasCustomAttributes())
 			{
 				var numAttrib = tasks.GetCustomAttributeCount();
-				var attribs = new Dictionary<String, String>();
+				var custAttribs = new HtmlReportUtils.CustomAttributes();
 
 				for (var attrib = 0; attrib < numAttrib; attrib++)
 				{

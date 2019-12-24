@@ -7,6 +7,68 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLReportExporter
 {
+
+	public struct TaskAttribute
+	{
+		public TaskAttribute(Task.Attribute id, String label, String basePlaceholder) : this()
+		{
+			Id = id;
+			Label = label;
+			BasePlaceholder = basePlaceholder;
+		}
+
+		public Task.Attribute Id { get; private set; }
+		public String Label { get; private set; }
+		public String BasePlaceholder { get; private set; }
+
+		public String FormatPlaceholder(int depth = -1)
+		{
+			return HtmlReportUtils.FormatPlaceholder(BasePlaceholder, depth);
+		}
+
+		public String FormatPlaceholderText(int depth = -1)
+		{
+			return HtmlReportUtils.FormatPlaceholderText(BasePlaceholder, depth);
+		}
+
+		public static TaskAttribute[] Attributes =
+		{
+			new TaskAttribute(Task.Attribute.AllocatedBy,       "Allocated By",             "allocBy" ),
+			new TaskAttribute(Task.Attribute.AllocatedTo,       "Allocated To",             "allocTo" ),
+			new TaskAttribute(Task.Attribute.Category,          "Category",                 "cat" ),
+			new TaskAttribute(Task.Attribute.Cost,              "Cost",                     "cost" ),
+			new TaskAttribute(Task.Attribute.CreatedBy,         "Created By",               "createBy" ),
+			new TaskAttribute(Task.Attribute.CreationDate,      "Creation Date",            "createDate" ),
+			new TaskAttribute(Task.Attribute.Dependency,        "Dependency",               "depends" ),
+			new TaskAttribute(Task.Attribute.DoneDate,          "Completion Date",          "doneDate" ),
+			new TaskAttribute(Task.Attribute.DueDate,           "Due Date",                 "dueDate" ),
+			new TaskAttribute(Task.Attribute.ExternalId,        "External ID",              "extId" ),
+			new TaskAttribute(Task.Attribute.FileReference,     "File Link",                "filelink" ),
+			new TaskAttribute(Task.Attribute.Flag,              "Flag",                     "flag" ),
+			new TaskAttribute(Task.Attribute.HtmlComments,      "Comments",                 "comments" ),
+			new TaskAttribute(Task.Attribute.Id,                "Task ID",                  "id" ),
+			new TaskAttribute(Task.Attribute.LastModifiedBy,    "Last Modified By",         "modBy" ),
+			new TaskAttribute(Task.Attribute.LastModifiedDate,  "Last Modified Date",       "modDate" ),
+			new TaskAttribute(Task.Attribute.ParentId,          "Parent Task ID",           "pid" ),
+			new TaskAttribute(Task.Attribute.Path,              "Path",                     "path" ),
+			new TaskAttribute(Task.Attribute.Percent,           "Percent Done",             "percent" ),
+			new TaskAttribute(Task.Attribute.Position,          "Position",                 "pos" ),
+			new TaskAttribute(Task.Attribute.Priority,          "Priority",                 "priority" ),
+			new TaskAttribute(Task.Attribute.Recurrence,        "Recurrence",               "recurs" ),
+			new TaskAttribute(Task.Attribute.Risk,              "Risk",                     "risk" ),
+			new TaskAttribute(Task.Attribute.StartDate,         "Start Date",               "startDate" ),
+			new TaskAttribute(Task.Attribute.Status,            "Status",                   "status" ),
+			new TaskAttribute(Task.Attribute.SubtaskDone,       "Subtask Completion",       "subtaskDone" ),
+			new TaskAttribute(Task.Attribute.Tags,              "Tags",                     "tag" ),
+			new TaskAttribute(Task.Attribute.TimeEstimate,      "Time Estimate",            "est" ),
+			new TaskAttribute(Task.Attribute.TimeSpent,         "Time Spent",               "spent" ),
+			new TaskAttribute(Task.Attribute.Title,             "Title",                    "title" ),
+			new TaskAttribute(Task.Attribute.Version,           "Version",                  "ver" ),
+		};
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+
 	public class HtmlReportUtils
 	{
 		private const String PlaceHolderTag = "SPAN";
@@ -153,9 +215,13 @@ namespace HTMLReportExporter
 
 		// ----------------------------------------------------
 
-		public static Dictionary<String, String> GetCustomAttributes(TaskList tasks)
+		public class CustomAttributes : Dictionary<String, String>
 		{
-			var attribs = new Dictionary<String, String>();
+		}
+
+		public static CustomAttributes GetCustomAttributes(TaskList tasks)
+		{
+			var attribs = new CustomAttributes();
 
 			if (tasks.HasCustomAttributes())
 			{
@@ -177,6 +243,143 @@ namespace HTMLReportExporter
 		{
 			return content.Replace("$(reportTitle)", tasks.GetReportTitle())
 						  .Replace("$(reportDate)", tasks.GetReportDate());
+		}
+
+		public static bool ContentContainsTaskAttributePlaceholders(String content, TaskList tasks)
+		{
+			for (int depth = -1; depth < 10; depth++)
+			{
+				if (ContentContainsTaskAttributePlaceholders(content, tasks, depth))
+					return true;
+			}
+
+			return false;
+		}
+
+		public static bool ContentContainsTaskAttributePlaceholders(String content, TaskList tasks, int depth)
+		{
+			// Default attributes
+			foreach (var attrib in TaskAttribute.Attributes)
+			{
+				if (content.IndexOf(attrib.FormatPlaceholder(depth)) != -1)
+					return true;
+			}
+
+			// Custom attributes
+			var customAttribs = GetCustomAttributes(tasks);
+
+			foreach (var attrib in customAttribs)
+			{
+				if (content.IndexOf(FormatPlaceholder(attrib.Key, depth)) != -1)
+					return true;
+			}
+
+			return false;
+		}
+
+		public static String ReplaceTaskAttributePlaceholder(String content, String attribVal, String defaultPlaceholderText, int depth, bool isLeafTask)
+		{
+			// Replace only the placeholder at the level specified
+			String placeHolder = FormatPlaceholder(defaultPlaceholderText, depth);
+			int placeHolderDepth = depth;
+
+			// Note: Leaf-task formatting take precedence over every level EXCEPT THE FIRST
+			if (isLeafTask && (depth != 1))
+			{
+				String leafPlaceHolder = FormatPlaceholder(defaultPlaceholderText, 0);
+
+				if (content.IndexOf(leafPlaceHolder) != -1)
+				{
+					placeHolder = leafPlaceHolder;
+					placeHolderDepth = 0;
+				}
+			}
+
+			if (content.IndexOf(placeHolder) == -1)
+			{
+				// We didn't find it so use the default placeholder
+				placeHolderDepth = -1;
+				placeHolder = FormatPlaceholder(defaultPlaceholderText);
+			}
+
+			for (int d = -1; d <= 9; d++)
+			{
+				if (d == placeHolderDepth)
+					content = content.Replace(placeHolder, attribVal);
+				else
+					content = content.Replace(FormatPlaceholder(defaultPlaceholderText, d), String.Empty);
+			}
+
+			return content;
+		}
+
+		public static String FormatDepthIndent(String baseIndent, int depth)
+		{
+			String depthIndent = "";
+
+			// No indent for top-level(1) tasks
+			while (--depth > 0)
+				depthIndent += baseIndent;
+
+			return depthIndent;
+		}
+
+		public static String FormatBodyFontStyle(Preferences prefs)
+		{
+			var defFontName = prefs.GetProfileString("Preferences", "HTMLFont", "Verdana");
+			var defHtmlSize = prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
+
+			var defPointSize = MSDN.Html.Editor.HtmlFontConversion.PointsFromHtml(defHtmlSize);
+
+			return String.Format("body {{ font-family: {0}; font-size: {1}pt; }}", defFontName, defPointSize);
+		}
+
+		public static String FormatTaskBaseIndent(Preferences prefs)
+		{
+			const String Tab = "&emsp;";
+			const String Space = "&nbsp;";
+
+			if (!prefs.GetProfileBool("Preferences", "UseSpaceIndents", true))
+				return Tab;
+
+			// else
+			String indent = Space;
+			int nSpace = prefs.GetProfileInt("Preferences", "TextIndent", 2);
+
+			while (--nSpace > 0)
+				indent = (indent + Space);
+
+			return indent;
+		}
+
+		static public String ReplaceTaskAttributePlaceholders(String content, CustomAttributes custAttribs, Task task, int depth, bool isLeafTask)
+		{
+			if (!String.IsNullOrWhiteSpace(content))
+			{
+				// Default attributes
+				foreach (var attrib in TaskAttribute.Attributes)
+				{
+					var attribVal = task.GetAttributeValue(attrib.Id, true, true);
+
+					// Special case
+					if ((attrib.Id == Task.Attribute.HtmlComments) && String.IsNullOrWhiteSpace(attribVal))
+					{
+						attribVal = task.GetComments().Trim().Replace("\n", "<br>");
+					}
+
+					content = ReplaceTaskAttributePlaceholder(content, attribVal, attrib.BasePlaceholder, depth, isLeafTask);
+				}
+
+				// Custom attributes
+				foreach (var attrib in custAttribs)
+				{
+					var attribVal = task.GetCustomAttributeValue(attrib.Key, true);
+
+					content = ReplaceTaskAttributePlaceholder(content, attribVal, attrib.Key, depth, isLeafTask);
+				}
+			}
+
+			return content;
 		}
 
 	}
