@@ -119,6 +119,7 @@ namespace HTMLReportExporter
 			}
 			
 			html.WriteLine("table { border-collapse: collapse; }");
+			html.WriteLine(".top-level-task { page-break-after: always; border-bottom: 2px dotted; width: 100%; margin-bottom:20px }");
 			html.WriteLine(".page {	page-break-after: always; }");
 			html.WriteLine("p {	margin: 0; }");
 #if DEBUG
@@ -133,7 +134,8 @@ namespace HTMLReportExporter
 			html.WriteLine("@page { margin: 0; }");
 			html.WriteLine("@media print ");
 			html.WriteLine("{ "); // open
-			html.WriteLine(".title-page { border-bottom: none; } ");
+			html.WriteLine(".title-page { border: none; } ");
+			html.WriteLine(".top-level-task { border: none; } ");
 			html.WriteLine("thead { display: table-header-group; } ");
 			html.WriteLine("tfoot { display: table-footer-group; } ");
 			html.WriteLine("tr { page-break-inside: avoid !important; margin: 4px 0 4px 0; } ");
@@ -200,6 +202,9 @@ namespace HTMLReportExporter
 
 					while (task.IsValid())
 					{
+						html.AddAttribute("class", "top-level-task"); // new page
+						html.RenderBeginTag(HtmlTextWriterTag.Div);
+
 						Title.WriteTableContent(m_Tasklist, task, html);
 
 						// subtasks of this task
@@ -212,6 +217,8 @@ namespace HTMLReportExporter
 							// next sibling
 							subtask = subtask.GetNextTask();
 						}
+
+						html.RenderEndTag(); // Div
 
 						// next sibling
 						task = task.GetNextTask();
