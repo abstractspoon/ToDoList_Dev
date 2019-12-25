@@ -121,7 +121,7 @@ namespace HTMLReportExporter
 			}
 			
 			html.WriteLine("table { border-collapse: collapse; }");
-			html.WriteLine(".top-level-task { page-break-after: always; border-bottom: 2px dotted; width: 100%; margin-bottom:20px }");
+			html.WriteLine(".top-level-task { page-break-after: always; border-bottom: 2px dashed; width: 100%; margin-top:20px }");
 			html.WriteLine(".page {	page-break-after: always; }");
 			html.WriteLine("p {	margin: 0; }");
 #if DEBUG
@@ -183,57 +183,46 @@ namespace HTMLReportExporter
 			html.AddAttribute("width", "100%");
 			html.RenderBeginTag(HtmlTextWriterTag.Table);
 
-			Header.WriteTableContent(html);
-			Footer.WriteTableContent(html);
+			Header.WriteHeaderContent(html);
+			Footer.WriteFooterContent(html);
 
 			// Actual body fits inside one row/column
 			html.RenderBeginTag(HtmlTextWriterTag.Tbody);
 			html.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-			html.AddAttribute("style", String.Format("padding-left:{0}px; padding-right:{1}px;", ContentPadding, ContentPadding));
+			html.AddStyleAttribute(HtmlTextWriterStyle.PaddingLeft, String.Format("{0}px", ContentPadding));
+			html.AddStyleAttribute(HtmlTextWriterStyle.PaddingRight, String.Format("{0}px", ContentPadding));
 			html.RenderBeginTag(HtmlTextWriterTag.Td);
 
-			html.AddAttribute("class", "page");
-			html.RenderBeginTag(HtmlTextWriterTag.Div);
-
-			if (!Title.CheckReportInvalidTaskAttributes(m_Tasklist, html))
+			if (!Title.CheckReportInvalidTaskAttributes(m_Tasklist, html) &&
+				 Title.ContainsTaskAttributes(m_Tasklist))
 			{
-				if (Title.ContainsTaskAttributes(m_Tasklist))
+				Task task = m_Tasklist.GetFirstTask();
+
+				while (task.IsValid())
 				{
-					Task task = m_Tasklist.GetFirstTask();
+					html.AddAttribute("class", "top-level-task"); // new page
+					html.RenderBeginTag(HtmlTextWriterTag.Div);
 
-					while (task.IsValid())
-					{
-						html.AddAttribute("class", "top-level-task"); // new page
-						html.RenderBeginTag(HtmlTextWriterTag.Div);
+					Title.WriteTitleContent(m_Tasklist, task, html);
+					Tasks.WriteSubtaskContent(m_Tasklist, task, html);
 
-						Title.WriteTableContent(m_Tasklist, task, html);
+					html.RenderEndTag(); // Div
 
-						// subtasks of this task
-						Task subtask = task.GetFirstSubtask();
-
-						while (subtask.IsValid())
-						{
-							Tasks.WriteTableContent(m_Tasklist, subtask, html, 2);
-
-							// next sibling
-							subtask = subtask.GetNextTask();
-						}
-
-						html.RenderEndTag(); // Div
-
-						// next sibling
-						task = task.GetNextTask();
-					}
-				}
-				else
-				{
-					Title.WriteTableContent(m_Tasklist, html);
-					Tasks.WriteTableContent(m_Tasklist, html);
+					// next sibling
+					task = task.GetNextTask();
 				}
 			}
+			else
+			{
+				html.AddAttribute("class", "page");
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
 
-			html.RenderEndTag(); // Div
+				Title.WriteTitleContent(m_Tasklist, html);
+				Tasks.WriteTaskContent(m_Tasklist, html);
+
+				html.RenderEndTag(); // Div
+			}
 
 			html.RenderEndTag(); // Td
 			html.RenderEndTag(); // Tr
@@ -332,7 +321,7 @@ namespace HTMLReportExporter
 				return true;
 			}
 
-			public bool WriteTableContent(HtmlTextWriter html)
+			public bool WriteHeaderContent(HtmlTextWriter html)
 			{
 				if (!Enabled || (PixelHeight <= 0))
 					return false;
@@ -400,7 +389,7 @@ namespace HTMLReportExporter
 				return true;
 			}
 
-			public bool WriteTableContent(HtmlTextWriter html)
+			public bool WriteFooterContent(HtmlTextWriter html)
 			{
 				if (!Enabled || (PixelHeight <= 0))
 					return false;
@@ -455,8 +444,15 @@ namespace HTMLReportExporter
 				if (ContainsNonTopLevelTaskAttributes(tasks))
 				{
 					// Report an error
-					html.WriteLine(m_Trans.Translate("Only top-level task attributes are allowable in the Title section."));
-					html.Write(Text);
+					var message = m_Trans.Translate("Only top-level task attributes are allowable in the Title section.");
+
+					html.AddStyleAttribute(HtmlTextWriterStyle.Color, "red");
+					html.AddStyleAttribute(HtmlTextWriterStyle.BorderStyle, "solid");
+					html.RenderBeginTag(HtmlTextWriterTag.P);
+					html.WriteLine("** {0} **", message);
+					html.RenderEndTag(); // P
+
+					//html.Write(Text);
 
 					return true;
 				}
@@ -475,7 +471,7 @@ namespace HTMLReportExporter
 				return true;
 			}
 
-			public bool WriteTableContent(TaskList tasks, HtmlTextWriter html)
+			public bool WriteTitleContent(TaskList tasks, HtmlTextWriter html)
 			{
 				if (!Enabled)
 					return false;
@@ -494,7 +490,7 @@ namespace HTMLReportExporter
 				return true;
 			}
 
-			public bool WriteTableContent(TaskList tasks, Task task, HtmlTextWriter html)
+			public bool WriteTitleContent(TaskList tasks, Task task, HtmlTextWriter html)
 			{
 				if (!Enabled)
 					return false;
@@ -542,46 +538,54 @@ namespace HTMLReportExporter
 				m_BaseIndent = baseIndent;
 			}
 
-			public bool WriteTableContent(TaskList tasks, HtmlTextWriter html)
+			public bool WriteTaskContent(TaskList tasks, HtmlTextWriter html)
 			{
 				// Top-level tasks
 				var task = tasks.GetFirstTask();
 
-				if (task == null)
+				var layout = PreWriteContent(tasks, task, html);
+
+				if (layout == null)
 					return false;
-
-				if (m_Preview)
-					m_PreviewTaskCount = 0;
-
-				var custAttribs = HtmlReportUtils.GetCustomAttributes(tasks);
-				var layout = m_Template.GetLayout(custAttribs);
-
-				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.WriteLine(layout.StartHtml);
 
 				WriteTask(task, 
 						  layout, 
 						  1,		// level '0' is used for leaf tasks
 						  true,		// export siblings
 						  html);
-				
-				html.WriteLine(layout.EndHtml);
-				html.RenderEndTag(); // Div
 
-				if (m_Preview && (m_PreviewTaskCount >= MaxNumPreviewTasks) && (tasks.GetTaskCount() > m_PreviewTaskCount))
-				{
-					html.RenderBeginTag(HtmlTextWriterTag.P);
-					html.WriteLine(m_Trans.Translate("(more tasks not shown...)"));
-					html.RenderEndTag(); // P
-				}
-
-				return true;
+				return PostWriteContent(tasks, layout, html);
 			}
 
-			public bool WriteTableContent(TaskList tasks, Task task, HtmlTextWriter html, int depth)
+			public bool WriteSubtaskContent(TaskList tasks, Task task, HtmlTextWriter html)
 			{
-				if (task == null)
+				var layout = PreWriteContent(tasks, task, html);
+
+				if (layout == null)
 					return false;
+
+				// subtasks of this task
+				Task subtask = task.GetFirstSubtask();
+
+				while (subtask.IsValid())
+				{
+					WriteTask(subtask, 
+							  layout, 
+							  2,
+							  true,		// export siblings
+							  html);
+
+					// next subtask
+					subtask = subtask.GetNextTask();
+				}
+
+				return PostWriteContent(tasks, layout, html);
+			}
+
+			private Layout PreWriteContent(TaskList tasks, Task task, HtmlTextWriter html)
+			{
+				if ((task == null) || !task.IsValid())
+					return null;
 
 				if (m_Preview)
 					m_PreviewTaskCount = 0;
@@ -592,12 +596,14 @@ namespace HTMLReportExporter
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
 				html.WriteLine(layout.StartHtml);
 
-				WriteTask(task, 
-						  layout, 
-						  depth,
-						  true,		// export siblings
-						  html);
-				
+				return layout;
+			}
+
+			private bool PostWriteContent(TaskList tasks, Layout layout, HtmlTextWriter html)
+			{
+				if (layout == null)
+					return false; 
+
 				html.WriteLine(layout.EndHtml);
 				html.RenderEndTag(); // Div
 
