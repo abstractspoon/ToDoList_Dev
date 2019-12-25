@@ -50,7 +50,9 @@ namespace HTMLReportExporter
 			Footer = new FooterTemplateReporter(template.Footer, template.BackColor);
 
 			var custAttribs = HtmlReportUtils.GetCustomAttributes(tasks);
-			Tasks = new TaskTemplateReporter(trans, template.Task, HtmlReportUtils.FormatTaskBaseIndent(prefs), preview);
+			var baseIndent = HtmlReportUtils.FormatTaskBaseIndent(prefs);
+
+			Tasks = new TaskTemplateReporter(trans, template.Task, baseIndent, preview);
 		}
 
 		public bool BuildReport(HtmlTextWriter html)
