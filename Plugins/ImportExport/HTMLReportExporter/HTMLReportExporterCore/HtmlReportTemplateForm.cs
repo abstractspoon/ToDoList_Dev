@@ -32,6 +32,7 @@ namespace HTMLReportExporter
 		private bool m_FirstPreview = true;
 		private bool m_EditedSinceLastSave = false;
 		private HtmlReportUtils.CustomAttributes m_CustomAttributes = null;
+		private int m_BannerHeight = 0;
 
 		const String PreviewPageName = "HtmlReporterPreview.html";
 
@@ -150,11 +151,11 @@ namespace HTMLReportExporter
 
 		protected override void OnLoad(EventArgs e)
 		{
-			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, 0/*20*/);
+			m_BannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, 0/*20*/);
 
-			this.Height = (this.Height + bannerHeight);
-			this.Content.Location = new Point(0, bannerHeight);
-			this.Content.Height = (this.Content.Height - bannerHeight);
+			this.Height = (this.Height + m_BannerHeight);
+			this.Content.Location = new Point(0, m_BannerHeight);
+			this.Content.Height = (this.Content.Height - m_BannerHeight);
 
 			var defFontName = m_Prefs.GetProfileString("Preferences", "HTMLFont", "Verdana");
 			var defFontSize = m_Prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
@@ -411,20 +412,15 @@ namespace HTMLReportExporter
 			// Always
 			m_Prefs.WriteProfileString(m_PrefsKey, "LastOpenTemplate", m_TemplateFilePath);
 
+			// The size of the 'Edit Html' form
 			m_Prefs.WriteProfileInt(m_PrefsKey, "HtmlFormWidth", HtmlEditorControlEx.SizeEditHtmlForm.Width);
 			m_Prefs.WriteProfileInt(m_PrefsKey, "HtmlFormHeight", HtmlEditorControlEx.SizeEditHtmlForm.Height);
 
-			// Save the unmaximised size
-			if (WindowState == FormWindowState.Maximized)
-			{
-				m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormWidth", RestoreBounds.Width);
-				m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormHeight", RestoreBounds.Height);
-			}
-			else
-			{
-				m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormWidth", Size.Width);
-				m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormHeight", Size.Height);
-			}
+			// The unmaximised size of this form
+			Size formSize = ((WindowState == FormWindowState.Maximized) ? RestoreBounds.Size : Size);
+
+			m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormWidth", formSize.Width);
+			m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormHeight", formSize.Height - m_BannerHeight);
 
 			return result;
 		}
