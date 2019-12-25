@@ -30,7 +30,7 @@ namespace HTMLReportExporter
 
 		// -------------------------------------------------------------
 
-		static String DocType = @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD XHTML 1.0 Transitional//EN"" ""http://www.w3.org/TR/html4/loose.dtd"">";
+		static String DocType = @"<!DOCTYPE html>";
 
 		//static String CommentsDoneColor = @"#808080";
 		//static String Endl = @"\n";
@@ -121,7 +121,7 @@ namespace HTMLReportExporter
 			}
 			
 			html.WriteLine("table { border-collapse: collapse; }");
-			html.WriteLine(".top-level-task { page-break-after: always; border-bottom: 2px dashed; width: 100%; margin-top:20px }");
+			html.WriteLine(".top-level-task { page-break-after: always; border-bottom: 2px dashed; width: 100%; margin-bottom:20px }");
 			html.WriteLine(".page {	page-break-after: always; }");
 			html.WriteLine("p {	margin: 0; }");
 #if DEBUG
@@ -186,13 +186,7 @@ namespace HTMLReportExporter
 			Header.WriteHeaderContent(html);
 			Footer.WriteFooterContent(html);
 
-			// Actual body fits inside one row/column
 			html.RenderBeginTag(HtmlTextWriterTag.Tbody);
-			html.RenderBeginTag(HtmlTextWriterTag.Tr);
-
-			html.AddStyleAttribute(HtmlTextWriterStyle.PaddingLeft, String.Format("{0}px", ContentPadding));
-			html.AddStyleAttribute(HtmlTextWriterStyle.PaddingRight, String.Format("{0}px", ContentPadding));
-			html.RenderBeginTag(HtmlTextWriterTag.Td);
 
 			if (!Title.CheckReportInvalidTaskAttributes(m_Tasklist, html) &&
 				 Title.ContainsTaskAttributes(m_Tasklist))
@@ -201,13 +195,13 @@ namespace HTMLReportExporter
 
 				while (task.IsValid())
 				{
-					html.AddAttribute("class", "top-level-task"); // new page
-					html.RenderBeginTag(HtmlTextWriterTag.Div);
-
+					// Create a new row (page) for each top-level task
+					BeginContentRow(html, true);
+					
 					Title.WriteTitleContent(m_Tasklist, task, html);
 					Tasks.WriteSubtaskContent(m_Tasklist, task, html);
 
-					html.RenderEndTag(); // Div
+					EndContentRow(html);
 
 					// next sibling
 					task = task.GetNextTask();
@@ -215,22 +209,37 @@ namespace HTMLReportExporter
 			}
 			else
 			{
-				html.AddAttribute("class", "page");
-				html.RenderBeginTag(HtmlTextWriterTag.Div);
+				// All tasks sit inside one row
+				BeginContentRow(html, false);
 
 				Title.WriteTitleContent(m_Tasklist, html);
 				Tasks.WriteTaskContent(m_Tasklist, html);
 
-				html.RenderEndTag(); // Div
+				EndContentRow(html);
 			}
 
-			html.RenderEndTag(); // Td
-			html.RenderEndTag(); // Tr
 			html.RenderEndTag(); // Tbody
-
 			html.RenderEndTag(); // Table
 			html.RenderEndTag(); // Body
 			html.WriteLine();
+		}
+
+		static private void BeginContentRow(HtmlTextWriter html, bool topLevelTask)
+		{
+			if (topLevelTask)
+				html.AddAttribute("class", "top-level-task"); // new page
+
+			html.RenderBeginTag(HtmlTextWriterTag.Tr);
+
+			html.AddStyleAttribute(HtmlTextWriterStyle.PaddingLeft, String.Format("{0}px", ContentPadding));
+			html.AddStyleAttribute(HtmlTextWriterStyle.PaddingRight, String.Format("{0}px", ContentPadding));
+			html.RenderBeginTag(HtmlTextWriterTag.Td);
+		}
+
+		static private void EndContentRow(HtmlTextWriter html)
+		{
+			html.RenderEndTag(); // Td
+			html.RenderEndTag(); // Tr
 		}
 
 		// --------------------------------------------------------------------------
@@ -466,7 +475,7 @@ namespace HTMLReportExporter
 					return false;
 
 				if (SeparatePage)
-					html.WriteLine(".title-page { page-break-after: always; border-bottom: 2px dotted; width: 100%; margin-bottom:20px }");
+					html.WriteLine(".title-page { page-break-after: always; border-bottom: 2px dotted; width: 100%; margin-bottom:20px; }");
 
 				return true;
 			}
