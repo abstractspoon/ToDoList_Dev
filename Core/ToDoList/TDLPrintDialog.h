@@ -155,8 +155,9 @@ protected:
 	CString	m_sTitle;
 	BOOL	m_bDate;
 	BOOL	m_bPrintPreview;
-	CHistoryComboBox m_cbTitle;
+	int		m_nPrevActiveTab;
 	
+	CHistoryComboBox m_cbTitle;
 	CTDLPrintStylePage m_pageStyle;
 	CTDLPrintTaskSelectionPage m_pageTaskSel;
 	CTabbedPropertyPageHost m_ppHost;

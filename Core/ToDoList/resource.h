@@ -2335,6 +2335,8 @@
 #define IDS_IMPORTDIALOGTITLE_TEXT      58512
 #define IDS_IMPORTDIALOGTITLE_FILE      58513
 #define IDS_EXPORTTITLE_MULTIPLEFILES   58514
+#define IDS_PRINTDLG_LAYOUT             58515
+#define IDS_PRINTDLG_TASKSEL            58516
 
 // Next default values for new objects
 // 

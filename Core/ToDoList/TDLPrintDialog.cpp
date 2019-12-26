@@ -49,17 +49,19 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle,
 	m_bPrintPreview(bPreview), 
 	m_pageStyle(szStylesheet, mgrImpExp, m_sPrefsKey, bSupportsExportToImage),
 	m_pageTaskSel(aAttribDefs, m_sPrefsKey, nView),
-	m_sTitle(szTitle)
+	m_sTitle(szTitle),
+	m_nPrevActiveTab(0)
 {
 	//{{AFX_DATA_INIT(CTDLPrintDialog)
 	//}}AFX_DATA_INIT
 	CPreferences prefs;
 
+	m_nPrevActiveTab = prefs.GetProfileInt(m_sPrefsKey, _T("PrevActiveTab"), 0);
 	m_bDate = prefs.GetProfileInt(m_sPrefsKey, _T("WantDate"), TRUE);
 	m_cbTitle.Load(prefs, m_sPrefsKey);
 
-	m_ppHost.AddPage(&m_pageStyle, _T("Layout"));
-	m_ppHost.AddPage(&m_pageTaskSel, _T("Task Selection"));
+	m_ppHost.AddPage(&m_pageStyle, CEnString(IDS_PRINTDLG_LAYOUT));
+	m_ppHost.AddPage(&m_pageTaskSel, CEnString(IDS_PRINTDLG_TASKSEL));
 }
 
 void CTDLPrintDialog::DoDataExchange(CDataExchange* pDX)
@@ -92,6 +94,7 @@ void CTDLPrintDialog::OnOK()
 
 	m_cbTitle.Save(prefs, m_sPrefsKey);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("WantDate"), m_bDate);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("PrevActiveTab"), m_ppHost.GetActiveIndex());
 }
 
 BOOL CTDLPrintDialog::OnInitDialog() 
@@ -104,7 +107,7 @@ BOOL CTDLPrintDialog::OnInitDialog()
 		SetWindowText(CEnString(IDS_PRINTDLG_PRINT_TITLE));
 
 	m_ppHost.Create(IDC_PAGEHOST, this);
-	m_ppHost.SetActivePage(0);
+	m_ppHost.SetActivePage(m_nPrevActiveTab);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

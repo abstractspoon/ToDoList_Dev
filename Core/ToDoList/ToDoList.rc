@@ -5699,6 +5699,8 @@ BEGIN
     IDS_IMPORTDIALOGTITLE_TEXT "Import Tasks from Text"
     IDS_IMPORTDIALOGTITLE_FILE "Import Tasks from File"
     IDS_EXPORTTITLE_MULTIPLEFILES "<multiple tasklists>"
+    IDS_PRINTDLG_LAYOUT     "Layout"
+    IDS_PRINTDLG_TASKSEL    "Task Selection"
 END
 
 #endif    // English (Australia) resources
