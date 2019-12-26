@@ -277,26 +277,38 @@ void CHMXChartEx::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 
 BOOL CHMXChartEx::HighlightDataPoint(int nIndex)
 {
-	// Disable highlighting under Classic theme and XP because 
-	// the overlapping tooltips cause drawing artifacts
-	if (CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA))
+	// Because the overlapping tooltips can cause drawing artifacts 
+	// below Windows 8 we selectively disable them:
+	if (COSVersion() < OSV_WIN8)
 	{
-		CPoint ptData;
+		// 1. Windows XP
+		if (COSVersion() < OSV_VISTA)
+			return TRUE;
 
-		if (!GetPointXY(0, nIndex, ptData))
-			return FALSE;
+		// 2. Classic theme (Windows 7 and Vista)
+		if (!CThemed::AreControlsThemed())
+			return TRUE;
 
-		CDC* pDC = GetDC();
-
-		pDC->SetROP2(R2_NOT);
-		pDC->SelectStockObject(NULL_BRUSH);
-		pDC->SelectStockObject(BLACK_PEN);
-
-		pDC->MoveTo(ptData.x, m_rectData.top);
-		pDC->LineTo(ptData.x, m_rectData.bottom);
-
-		ReleaseDC(pDC);
+		// 3. Disabled Desktop Composition (Windows 7 and Vista)
+		if (!GraphicsMisc::DwmIsCompositionEnabled())
+			return TRUE;
 	}
+	
+	CPoint ptData;
+
+	if (!GetPointXY(0, nIndex, ptData))
+		return FALSE;
+
+	CDC* pDC = GetDC();
+
+	pDC->SetROP2(R2_NOT);
+	pDC->SelectStockObject(NULL_BRUSH);
+	pDC->SelectStockObject(BLACK_PEN);
+
+	pDC->MoveTo(ptData.x, m_rectData.top);
+	pDC->LineTo(ptData.x, m_rectData.bottom);
+
+	ReleaseDC(pDC);
 	
 	return TRUE;
 }

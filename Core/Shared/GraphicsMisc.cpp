@@ -975,6 +975,27 @@ BOOL GraphicsMisc::DwmGetWindowAttribute(HWND hWnd, DWORD dwAttrib, PVOID pData,
 	return FALSE;
 }
 
+BOOL GraphicsMisc::DwmIsCompositionEnabled()
+{
+	HMODULE hMod = ::LoadLibrary(_T("Dwmapi.dll"));
+
+	if (hMod)
+	{
+		typedef HRESULT (WINAPI *PFNDWMISCOMPOSITIONENABLED)(BOOL*);
+		PFNDWMISCOMPOSITIONENABLED pFn = (PFNDWMISCOMPOSITIONENABLED)::GetProcAddress(hMod, "DwmIsCompositionEnabled");
+
+		if (pFn)
+		{
+			BOOL bEnabled = FALSE;
+			HRESULT hr = pFn(&bEnabled);
+
+			return (SUCCEEDED(hr) && bEnabled);
+		}
+	}
+
+	return FALSE;
+}
+
 BOOL GraphicsMisc::ChangeWindowMessageFilter(UINT nMessage, BOOL bOn)
 {
 #ifndef MSGFLT_ADD
