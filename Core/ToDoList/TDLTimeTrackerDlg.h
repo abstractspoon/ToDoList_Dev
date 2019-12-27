@@ -36,7 +36,7 @@ struct TRACKITEM
 
 	BOOL operator==(const TRACKITEM& ti) const;
 	BOOL operator!=(const TRACKITEM& ti) const;
-	CString GetTaskTitle(BOOL bWantPath) const;
+	CString FormatTaskTitle(BOOL bWantPath) const;
 	
 	CString sTaskTitle;
 	CString sTaskPath;
@@ -205,7 +205,8 @@ protected:
 	BOOL RebuildTasklistCombo();
 	COLORREF GetBkgndColor() const;
 	BOOL IsTrackingSelectedTasklistAndTask() const;
-	BOOL IsTrackingSelectedTasklistAndTask(CString& sTaskTitle) const;
+	CString GetSelectedTaskTitle() const;
+	CString GetSelectedTasklistName() const;
 	BOOL IsSelectedTask(DWORD dwTaskID) const;
 	int QuickFindNextTaskComboItem(int nFrom, BOOL bForward) const;
 	BOOL QuickFindNextTaskComboItem(int nFrom, int nTo, int nIncrement, int& nNext) const;
@@ -217,7 +218,8 @@ protected:
 	int CalcAvailableRows(int nHeight) const;
 	void CalcMinMaxSizes();
 	BOOL HasOption(DWORD dwOption) const;
-	void RefreshTitleText();
+	void RefreshCaptionText();
 	LRESULT SendNotifyMessage(UINT message, const CFilteredToDoCtrl* pTDC, DWORD dwTaskID) const;
+	void UpdateTaskTime(const CFilteredToDoCtrl* pTDC, BOOL bCheckVisibility);
 
 };

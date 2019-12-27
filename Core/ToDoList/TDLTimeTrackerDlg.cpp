@@ -47,7 +47,7 @@ BOOL TRACKITEM::operator!=(const TRACKITEM& ti) const
 	return !(*this == ti);
 }
 
-CString TRACKITEM::GetTaskTitle(BOOL bWantPath) const
+CString TRACKITEM::FormatTaskTitle(BOOL bWantPath) const
 {
 	CString sTemp;
 
@@ -843,7 +843,7 @@ void CTDLTimeTrackerDlg::RebuildTaskCombo()
 			if (!bWantParents && ti.bParent)
 				continue;
 
-			VERIFY(AddString(m_cbTasks, ti.GetTaskTitle(bWantPath), ti.dwTaskID) != CB_ERR);
+			VERIFY(AddString(m_cbTasks, ti.FormatTaskTitle(bWantPath), ti.dwTaskID) != CB_ERR);
 		}
 	
 		RefreshMaxDropWidth(m_cbTasks);
@@ -926,7 +926,7 @@ BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 		UpdateTaskTime(pTDC);
 	}
 	
-	RefreshTitleText();
+	RefreshCaptionText();
 
 	return TRUE;
 }
@@ -937,12 +937,6 @@ BOOL CTDLTimeTrackerDlg::IsSelectedTask(DWORD dwTaskID) const
 }
 
 BOOL CTDLTimeTrackerDlg::IsTrackingSelectedTasklistAndTask() const
-{
-	CString sUnused;
-	return IsTrackingSelectedTasklistAndTask(sUnused);
-}
-
-BOOL CTDLTimeTrackerDlg::IsTrackingSelectedTasklistAndTask(CString& sTaskTitle) const
 {
 	const CFilteredToDoCtrl* pTDC = GetSelectedTasklist();
 
@@ -957,13 +951,22 @@ BOOL CTDLTimeTrackerDlg::IsTrackingSelectedTasklistAndTask(CString& sTaskTitle) 
 		return FALSE;
 	}
 
+	return pTTL->IsTracking(GetSelectedTaskID());
+}
+
+CString CTDLTimeTrackerDlg::GetSelectedTaskTitle() const
+{
+	const CFilteredToDoCtrl* pTDC = GetSelectedTasklist();
 	DWORD dwSelID = GetSelectedTaskID();
 
-	if (!pTTL->IsTracking(dwSelID))
-		return FALSE;
+	return ((pTDC && dwSelID) ? pTDC->GetTaskTitle(dwSelID) : _T(""));
+}
 
-	sTaskTitle = pTTL->pTDC->GetTaskTitle(dwSelID);
-	return TRUE;
+CString CTDLTimeTrackerDlg::GetSelectedTasklistName() const
+{
+	const CFilteredToDoCtrl* pTDC = GetSelectedTasklist();
+
+	return (pTDC ? pTDC->GetFriendlyProjectName() : _T(""));
 }
 
 void CTDLTimeTrackerDlg::UpdatePlayButton(BOOL bCheckVisibility)
@@ -990,9 +993,16 @@ void CTDLTimeTrackerDlg::UpdatePlayButton(BOOL bCheckVisibility)
 	m_btnStart.EnableWindow(bEnable);
 }
 
+// External version
 void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC)
 {
-	if (!IsWindowVisible() || !IsSelectedTasklist(pTDC))
+	UpdateTaskTime(pTDC, TRUE);
+}
+
+// Internal version
+void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC, BOOL bCheckVisibility)
+{
+	if ((bCheckVisibility && !IsWindowVisible()) || !IsSelectedTasklist(pTDC))
 		return;
 
 	BOOL bTrackingSelTask = IsTrackingSelectedTasklistAndTask();
@@ -1023,7 +1033,7 @@ void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC)
 	}
 		
 	if (m_bCollapsed)
-		RefreshTitleText();
+		RefreshCaptionText();
 
 	UpdateData(FALSE);
 
@@ -1060,7 +1070,7 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 	}
 
 	UpdateTracking(pTTL->pTDC);
-	RefreshTitleText();
+	RefreshCaptionText();
 
 	// redraw text colour
 	GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE);
@@ -1153,14 +1163,14 @@ void CTDLTimeTrackerDlg::OnSelchangeTasklist()
 	
 	UpdatePlayButton();
 	UpdateTaskTime(pTDC);
-	RefreshTitleText();
+	RefreshCaptionText();
 }
 
 void CTDLTimeTrackerDlg::OnSelchangeTask()
 {
 	UpdatePlayButton();
 	UpdateTaskTime(GetSelectedTasklist());
-	RefreshTitleText();
+	RefreshCaptionText();
 }
 
 BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
@@ -1309,7 +1319,8 @@ void CTDLTimeTrackerDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 		}
 
 		UpdatePlayButton(FALSE);
-		UpdateTaskTime(GetSelectedTasklist());
+		UpdateTaskTime(GetSelectedTasklist(), FALSE); // ignore visible state
+		RefreshCaptionText();
 	}
 }
 
@@ -1456,10 +1467,10 @@ void CTDLTimeTrackerDlg::Resize(int cx, int cy)
 		// Then the rest if there is space
 		BOOL bShowTasks = (nRows > 2);
 		BOOL bShowTasklists = ((nRows == 5) || ((nRows == 4) && (m_aTasklists.GetNumTasklists() > 1)));
-		BOOL bShowQuickFind = ((nRows == 5) || ((nRows == 4) && !bShowTasklists));
+		BOOL bShowToolbar = ((nRows == 5) || ((nRows == 4) && !bShowTasklists));
 
-		ShowCtrl(&m_toolbar, bShowQuickFind);
-		ShowCtrl(this, IDC_QUICKFIND, bShowQuickFind);
+		ShowCtrl(&m_toolbar, bShowToolbar);
+		ShowCtrl(this, IDC_QUICKFIND, bShowToolbar);
 		ShowCtrl(this, IDC_TASKLISTS, bShowTasklists);
 		ShowCtrl(this, IDC_TASKLISTS_LABEL, bShowTasklists);
 		ShowCtrl(this, IDC_TASKS, bShowTasks);
@@ -1477,7 +1488,7 @@ void CTDLTimeTrackerDlg::Resize(int cx, int cy)
 		ResizeCtrl(this, IDC_QUICKFIND, nXOffset, 0);
 		
 		Invalidate();
-		RefreshTitleText();
+		RefreshCaptionText();
 	}
 }
 
@@ -1538,37 +1549,46 @@ void CTDLTimeTrackerDlg::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
 	}
 }
 
-void CTDLTimeTrackerDlg::RefreshTitleText()
+void CTDLTimeTrackerDlg::RefreshCaptionText()
 {
+	CString sTaskTitle = GetSelectedTaskTitle(), sCaption;
+
 	if (m_bCollapsed && !m_sTaskTimes.IsEmpty())
 	{
+		ASSERT(!sTaskTitle.IsEmpty());
+
 		if (!m_sElapsedTime.IsEmpty())
-			SetWindowText(Misc::Format(_T("%s (%s)"), m_sElapsedTime, m_sTaskTimes));
+		{
+			sCaption.Format(_T("%s (%s) - %s"), m_sElapsedTime, m_sTaskTimes, sTaskTitle);
+		}
 		else
-			SetWindowText(m_sTaskTimes);
+		{
+			sCaption.Format(_T("%s - %s"), m_sTaskTimes, sTaskTitle);
+		}
 	}
 	else
 	{
+		// work out how many rows we can display
 		CRect rClient;
 		GetClientRect(rClient);
 
-		// work out how many rows we can display
 		int nRows = CalcAvailableRows(rClient.Height());
 
-		if (nRows < 3)
+		if (nRows < 3) // task combo hidden
 		{
-			CString sTaskTitle;
-
-			if (IsTrackingSelectedTasklistAndTask(sTaskTitle))
-			{
-				SetWindowText(Misc::Format(_T("%s - %s"), sTaskTitle, m_sOrgTitle));
-				return;
-			}
+			sCaption.Format(_T("%s - %s"), sTaskTitle, m_sOrgTitle);
 		}
-
-		// else
-		SetWindowText(m_sOrgTitle);
+		else if ((nRows == 3) || ((nRows == 4) && (m_aTasklists.GetNumTasklists() == 1))) // tasklist combo hidden
+		{
+			sCaption.Format(_T("%s - %s"), GetSelectedTasklistName(), m_sOrgTitle);
+		}
+		else
+		{
+			sCaption = m_sOrgTitle;
+		}
 	}
+
+	SetWindowText(sCaption);
 }
 
 void CTDLTimeTrackerDlg::OnToggleTopMost()
