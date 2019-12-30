@@ -72,9 +72,9 @@ LPCTSTR APPREGKEY			= _T("Software\\AbstractSpoon\\ToDoList");
 LPCTSTR UNINSTALLREGKEY		= _T("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\AbstractSpoon_ToDoList");
 LPCTSTR APPDATAINI			= _T("Abstractspoon\\ToDoList\\ToDoList.ini");
 
-LPCTSTR WIKI_URL			= _T("http://www.abstractspoon.com/wiki/doku.php?id="); 
+LPCTSTR WIKI_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id="); 
 LPCTSTR FORUM_URL			= _T("https://www.abstractspoon.com/phpBB/"); 
-LPCTSTR LICENSE_URL			= _T("http://www.abstractspoon.com/wiki/doku.php?id=free-open-source-software"); 
+LPCTSTR LICENSE_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id=free-open-source-software"); 
 LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=abstractspoon2%40optusnet%2ecom%2eau&item_name=Software"); 
 
 LPCTSTR MSVCR100_DLL		= _T("MSVCR100.dll"); 
