@@ -139,7 +139,6 @@ public:
 	
 	void ExpandAll(BOOL bExpand = TRUE);
 	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
-	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
 	int GetExpandedTasks(CDWordArray& aExpanded) const;
 	void SetExpandedTasks(const CDWordArray& aExpanded);
 
@@ -206,6 +205,7 @@ protected:
 	void CollapseList(HTREEITEM hti);
 	void ExpandList(HTREEITEM hti = NULL);
 	DWORD GetHelpID() const;
+	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand) const;
 
 	inline HWND Tasks() const { return m_tcTasks; }
 	inline HWND TasksHeader() const { return m_hdrTasks; }
