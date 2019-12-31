@@ -753,7 +753,10 @@ BOOL CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	}
 	m_wKeyPress = 0; // always
 
-	SyncColumnSelectionToTasks();
+	// Only propagate this if we're not already in the 
+	// middle of a resync
+	if (CanResync())
+		SyncColumnSelectionToTasks();
 
 	if (hti)
 	{
