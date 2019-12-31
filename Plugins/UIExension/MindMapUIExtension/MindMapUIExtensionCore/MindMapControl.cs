@@ -1108,8 +1108,10 @@ namespace MindMapUIExtension
 				return false;
 
 			// Try to mimic TreeView navigation as far as possible
+			// The one significant exception being to not collapse 
+			// a task when using the left and right keys 
+			// ie. leave the tree expanded as the user navigates
 			TreeNode selNode = SelectedNode;
-			MindMapItem rootItem = RootItem;
 			MindMapItem selItem = SelectedItem;
 
 			switch (key)
@@ -1172,9 +1174,9 @@ namespace MindMapUIExtension
 					}
 					else if (IsRightOfRoot(selNode))
 					{
-                        if (selNode.IsExpanded)
-                            selNode.Collapse(); // same as tree-view
-                        else
+//                         if (selNode.IsExpanded)
+//                             selNode.Collapse(); // same as tree-view
+//                         else
     						selNode = selNode.Parent;
 					}
 					break;
@@ -1186,9 +1188,9 @@ namespace MindMapUIExtension
 					}
 					else if (IsleftOfRoot(selNode))
 					{
-                        if (selNode.IsExpanded)
-                            selNode.Collapse(); // same as tree-view
-                        else
+//                         if (selNode.IsExpanded)
+//                             selNode.Collapse(); // same as tree-view
+//                         else
     						selNode = selNode.Parent;
 					}
 					else if (IsRightOfRoot(selNode))
