@@ -767,6 +767,27 @@ namespace MindMapUIExtension
 			if (HandleCursorKey(e.KeyCode))
 				return;
 
+			// Handle '*' and '-' on the numpad for expanding 
+			// and collapsing items - native tree control behaviour
+			switch (e.KeyCode)
+			{
+				case Keys.Multiply:
+					if ((SelectedNode != null) && !IsRoot(SelectedNode))
+					{
+						SelectedNode.ExpandAll();
+						return;
+					}
+					break;
+
+				case Keys.Subtract:
+					if ((SelectedNode != null) && !IsRoot(SelectedNode))
+					{
+						SelectedNode.Collapse();
+						return;
+					}
+					break;
+			}
+
 			// else
 			base.OnKeyDown(e);
 		}
