@@ -196,7 +196,6 @@ protected:
 	static int FindListItem(HWND hwnd, DWORD dwItemData);
 	static BOOL IsTreeFullRowSelect(HWND hwnd);
 	static BOOL IsListFullRowSelect(HWND hwnd);
-	static BOOL TreeHasExpandedItem(HWND hwnd, HTREEITEM hti);
 	static BOOL IsTreeItemExpanded(HWND hwnd, HTREEITEM hti);
 	static BOOL IsTreeItemVisible(HWND hwnd, HTREEITEM hti);
 	static BOOL TreeItemHasState(HWND hwnd, HTREEITEM hti, UINT nStateMask);
