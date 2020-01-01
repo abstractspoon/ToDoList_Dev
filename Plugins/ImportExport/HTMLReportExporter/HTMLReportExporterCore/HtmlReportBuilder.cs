@@ -188,8 +188,7 @@ namespace HTMLReportExporter
 
 			html.RenderBeginTag(HtmlTextWriterTag.Tbody);
 
-			if (!Title.CheckReportInvalidTaskAttributes(m_Tasklist, html) &&
-				 Title.ContainsTaskAttributes(m_Tasklist))
+			if (Title.ContainsTaskAttributes(m_Tasklist))
 			{
 				Task task = m_Tasklist.GetFirstTask();
 
@@ -434,7 +433,9 @@ namespace HTMLReportExporter
 
 			public bool ContainsTaskAttributes(TaskList tasks)
 			{
-				return HtmlReportUtils.ContentContainsTaskAttributePlaceholders(Text, tasks);
+				// Must only contain '$(title)' or '$(title.1)'
+				return (HtmlReportUtils.ContentContainsTaskAttributePlaceholders(Text, tasks) &&
+					   !ContainsNonTopLevelTaskAttributes(tasks));
 			}
 
 			private bool ContainsNonTopLevelTaskAttributes(TaskList tasks)
@@ -484,6 +485,21 @@ namespace HTMLReportExporter
 			{
 				if (!Enabled)
 					return false;
+
+				if (ContainsNonTopLevelTaskAttributes(tasks))
+				{
+					// Report an error
+					html.AddStyleAttribute(HtmlTextWriterStyle.Color, "red");
+					html.AddStyleAttribute(HtmlTextWriterStyle.BorderStyle, "solid");
+					html.RenderBeginTag(HtmlTextWriterTag.P);
+
+					var message = m_Trans.Translate("Only top-level task attributes are allowed in the Title section.");
+					html.WriteLine("** {0} **", message);
+
+					html.RenderEndTag(); // P
+
+					return true;
+				}
 #if DEBUG
 				// Sanity check
 				if (ContainsTaskAttributes(tasks))
