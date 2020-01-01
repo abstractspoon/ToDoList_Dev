@@ -72,6 +72,7 @@
 			this.tableHeaderRowCombobox = new HTMLReportExporter.TableHeaderRowOptionCombobox();
 			this.htmlReportTasksControl = new HTMLReportExporter.HtmlReportTaskFormatControl();
 			this.htmlReportFooterControl = new HTMLReportExporter.HtmlReportFooterControl();
+			this.toolStripFileHistory = new System.Windows.Forms.ToolStripComboBox();
 			this.Content.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
 			this.splitContainer.Panel1.SuspendLayout();
@@ -156,6 +157,7 @@
 			this.Toolbar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripNewReport,
             this.toolStripOpenReport,
+            this.toolStripFileHistory,
             this.toolStripSaveReport,
             this.toolStripSaveAsReport,
             this.toolStripSeparator,
@@ -171,6 +173,7 @@
 			this.Toolbar.Name = "Toolbar";
 			this.Toolbar.Padding = new System.Windows.Forms.Padding(0);
 			this.Toolbar.Size = new System.Drawing.Size(258, 25);
+			this.Toolbar.Size = new System.Drawing.Size(381, 25);
 			this.Toolbar.TabIndex = 1;
 			this.Toolbar.Text = "toolStrip1";
 			// 
@@ -608,6 +611,7 @@
 			this.tableHeaderRowCombobox.Visible = false;
 			// 
 			// htmlReportTasksControl
+			// toolStripFileHistory
 			// 
 			this.htmlReportTasksControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
@@ -648,6 +652,13 @@
 			this.htmlReportFooterControl.Size = new System.Drawing.Size(386, 350);
 			this.htmlReportFooterControl.TabIndex = 26;
 			this.htmlReportFooterControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
+			this.toolStripFileHistory.AutoSize = false;
+			this.toolStripFileHistory.DropDownHeight = 200;
+			this.toolStripFileHistory.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.toolStripFileHistory.IntegralHeight = false;
+			this.toolStripFileHistory.MaxDropDownItems = 16;
+			this.toolStripFileHistory.Name = "toolStripFileHistory";
+			this.toolStripFileHistory.Size = new System.Drawing.Size(121, 23);
 			// 
 			// HtmlReportTemplateForm
 			// 
@@ -730,5 +741,6 @@
 		private System.Windows.Forms.CheckBox footerEnabledCheckbox;
 		private HtmlReportFooterControl htmlReportFooterControl;
 		private System.Windows.Forms.Button previewDefaultBrowser;
+		private System.Windows.Forms.ToolStripComboBox toolStripFileHistory;
 	}
 }
