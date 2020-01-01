@@ -611,7 +611,6 @@
 			this.tableHeaderRowCombobox.Visible = false;
 			// 
 			// htmlReportTasksControl
-			// toolStripFileHistory
 			// 
 			this.htmlReportTasksControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
@@ -652,13 +651,16 @@
 			this.htmlReportFooterControl.Size = new System.Drawing.Size(386, 350);
 			this.htmlReportFooterControl.TabIndex = 26;
 			this.htmlReportFooterControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
+
+			// toolStripFileHistory
 			this.toolStripFileHistory.AutoSize = false;
 			this.toolStripFileHistory.DropDownHeight = 200;
+			this.toolStripFileHistory.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.toolStripFileHistory.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.toolStripFileHistory.IntegralHeight = false;
 			this.toolStripFileHistory.MaxDropDownItems = 16;
 			this.toolStripFileHistory.Name = "toolStripFileHistory";
-			this.toolStripFileHistory.Size = new System.Drawing.Size(121, 23);
+			this.toolStripFileHistory.Size = new System.Drawing.Size(150, 22);
 			// 
 			// HtmlReportTemplateForm
 			// 
