@@ -170,7 +170,7 @@
 			this.Toolbar.Margin = new System.Windows.Forms.Padding(0, 0, 0, 20);
 			this.Toolbar.Name = "Toolbar";
 			this.Toolbar.Padding = new System.Windows.Forms.Padding(0);
-			this.Toolbar.Size = new System.Drawing.Size(198, 25);
+			this.Toolbar.Size = new System.Drawing.Size(258, 25);
 			this.Toolbar.TabIndex = 1;
 			this.Toolbar.Text = "toolStrip1";
 			// 
@@ -219,7 +219,6 @@
 			// 
 			this.toolStripSeparator.Name = "toolStripSeparator";
 			this.toolStripSeparator.Size = new System.Drawing.Size(6, 25);
-			this.toolStripSeparator.Visible = false;
 			// 
 			// toolStripInsertImage
 			// 
@@ -283,7 +282,6 @@
 			this.toolStripHelp.Name = "toolStripHelp";
 			this.toolStripHelp.Size = new System.Drawing.Size(23, 22);
 			this.toolStripHelp.Text = "He&lp";
-			this.toolStripHelp.Visible = false;
 			this.toolStripHelp.Click += new System.EventHandler(this.OnHelp);
 			// 
 			// tabControl
