@@ -23,6 +23,11 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+const UINT WM_NOTIFY_TASKLISTOPTIONCHANGED = (WM_APP + 1);
+const UINT WM_NOTIFY_ONEFILEOPTIONCHANGED = (WM_APP + 2);
+
+/////////////////////////////////////////////////////////////////////////////
 // CExportDlg dialog
 
 CTDLExportDlg::CTDLExportDlg(LPCTSTR szTitle,
@@ -75,6 +80,8 @@ void CTDLExportDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTDLExportDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CExportDlg)
 	//}}AFX_MSG_MAP
+	ON_MESSAGE(WM_NOTIFY_TASKLISTOPTIONCHANGED, OnTasklistOptionChanged)
+	ON_MESSAGE(WM_NOTIFY_ONEFILEOPTIONCHANGED, OnOneFileOptionChanged)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -87,14 +94,64 @@ BOOL CTDLExportDlg::OnInitDialog()
 	m_ppHost.Create(IDC_PAGEHOST, this);
 	m_ppHost.SetActivePage(m_nPrevActiveTab);
 
+	m_ppHost.ForwardMessage(WM_NOTIFY_TASKLISTOPTIONCHANGED);
+	m_ppHost.ForwardMessage(WM_NOTIFY_ONEFILEOPTIONCHANGED);
+
+	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(GetExportOneFile());
 	EnableOK();
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+LRESULT CTDLExportDlg::OnTasklistOptionChanged(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	if (m_pageTo.GetExportAllTasklists())
+	{
+		if (!m_pageTo.GetExportOneFile())
+		{
+			m_sSingleFileTitle = m_sExportTitle;
+			m_sExportTitle = CEnString(IDS_EXPORTTITLE_MULTIPLEFILES);
+		}
+	}
+	else
+	{
+		m_sExportTitle = m_sSingleFileTitle;
+	}
+	
+	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(GetExportOneFile());
+	UpdateData(FALSE);
+
+	return 0L;
+}
+
+
+LRESULT CTDLExportDlg::OnOneFileOptionChanged(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	if (m_pageTo.GetExportAllTasklists())
+	{
+		if (!m_pageTo.GetExportOneFile())
+		{
+			m_sSingleFileTitle = m_sExportTitle;
+			m_sExportTitle = CEnString(IDS_EXPORTTITLE_MULTIPLEFILES);
+		}
+		else
+		{
+			m_sExportTitle = m_sSingleFileTitle;
+		}
+	}
+	
+	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(GetExportOneFile());
+	UpdateData(FALSE);
+
+	return 0L;
+}
+
+
 void CTDLExportDlg::OnOK()
 {
+	m_ppHost.OnOK();
+	
 	CString sFormatID = GetFormatTypeID();
 	CString sExportPath = GetExportPath();
 	BOOL bExportAllTasklists = GetExportAllTasklists();
@@ -161,7 +218,6 @@ void CTDLExportDlg::OnOK()
 	}
 
 	CTDLDialog::OnOK();
-	m_ppHost.OnOK();
 
 	// save settings
 	CPreferences prefs;
@@ -237,11 +293,11 @@ BOOL CTDLExportTaskSelectionPage::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 
 	VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
-	m_dlgTaskSel.EnableWindow(m_nExportStyle != TDLPDS_IMAGE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
+
 void CTDLExportTaskSelectionPage::OnOK()
 {
 	CPropertyPage::OnOK();
@@ -398,8 +454,6 @@ BOOL CTDLExportToPage::OnInitDialog()
 	GetDlgItem(IDC_TASKLISTOPTIONS)->EnableWindow(!m_bSingleTaskList);
 	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
 	GetDlgItem(IDC_EXPORTPATH)->EnableWindow(m_mgrImportExport.ExporterHasFileExtension(nFormat) && !m_bExportToClipboard);
-//	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(m_bSingleTaskList || !m_bExportAllTasklists);
-
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -439,23 +493,18 @@ void CTDLExportToPage::OnSelchangeTasklistoptions()
 		}
 		else
 			m_sExportPath = m_sFolderPath;
-
-// 		m_sSingleFileTitle = m_sExportTitle;
-// 		m_sExportTitle = CEnString(IDS_EXPORTTITLE_MULTIPLEFILES);
-
 	}
 	else
 	{
 		m_sExportPath = m_sFilePath;
 		ReplaceExtension(m_sExportPath, m_sFormatTypeID);
-
-// 		m_sExportTitle = m_sSingleFileTitle;
 	}
 
 	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
-//	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(m_bSingleTaskList || !m_bExportAllTasklists);
-
 	UpdateData(FALSE);
+
+	// Notify parent
+	GetParent()->SendMessage(WM_NOTIFY_TASKLISTOPTIONCHANGED);
 }
 
 void CTDLExportToPage::OnSelchangeFormatoptions() 
@@ -512,46 +561,12 @@ void CTDLExportToPage::ReplaceExtension(CString& sPathName, LPCTSTR szFormatType
 
 void CTDLExportToPage::OnOK()
 {
-	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
-	BOOL bExporterHasFileExt = m_mgrImportExport.ExporterHasFileExtension(nFormat);
-
-	if (bExporterHasFileExt)
-	{
-		Misc::Trim(m_sExportPath);
-
-		// if the export path is relative we build a path based
-		// on the exe path and check with the user
-		if (::PathIsRelative(m_sExportPath))
-		{
-			CString sPath = FileMisc::GetAppFilePath(), sDrive, sFolder;
-
-			FileMisc::SplitPath(sPath, &sDrive, &sFolder);
-			FileMisc::MakePath(sPath, sDrive, sFolder, m_sExportPath);
-
-			CString sMessage;
-			
-			if (m_bExportAllTasklists)
-				sMessage.Format(IDS_ED_CONFIRMEXPORTPATHMULTI, sPath);
-			else
-				sMessage.Format(IDS_ED_CONFIRMEXPORTPATH, sPath);
-							
-			UINT nRet = MessageBox(sMessage, CEnString(IDS_ED_CONFIRMEXPORTPATH_TITLE), MB_YESNO);
-
-			if (nRet == IDNO)
-			{
-				// re-display dialog
-				m_eExportPath.SetSel(0, -1);
-				m_eExportPath.SetFocus();
-				return;
-			}
-			else
-				m_sExportPath = sPath;
-		}
-	}
-
 	CPropertyPage::OnOK();
 
 	// make sure extension is right
+	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+	BOOL bExporterHasFileExt = m_mgrImportExport.ExporterHasFileExtension(nFormat);
+	
 	if (bExporterHasFileExt)
 	{
 		if (!m_bExportAllTasklists || m_bExportOneFile)
@@ -609,6 +624,9 @@ void CTDLExportToPage::OnExportonefile()
 		ReplaceExtension(m_sExportPath, m_sFormatTypeID);
 
 	UpdateData(FALSE);
+	
+	// Notify parent
+	GetParent()->SendMessage(WM_NOTIFY_ONEFILEOPTIONCHANGED);
 }
 
 void CTDLExportToPage::OnExportToClipboardOrPath()

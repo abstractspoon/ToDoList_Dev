@@ -30,7 +30,7 @@ public:
 	CString GetFormatTypeID() const { return m_sFormatTypeID; }
 	CString GetExportPath() const; // can be folder or file
 	BOOL GetExportAllTasklists() const { return (!m_bSingleTaskList && m_bExportAllTasklists); }
-	BOOL GetExportOneFile() const { return (m_bSingleTaskList || m_bExportOneFile || m_bExportToClipboard); }
+	BOOL GetExportOneFile() const { return (m_bSingleTaskList || m_bExportOneFile || m_bExportToClipboard || !m_bExportAllTasklists); }
 	BOOL GetExportToClipboard() const { return m_bExportToClipboard; }
 
 protected:
@@ -48,7 +48,7 @@ protected:
 	//}}AFX_DATA
 
 	BOOL m_bSingleTaskList; 
-	CString m_sFolderPath, m_sFilePath, m_sOrgFilePath, m_sOrgFolderPath, m_sMultiFilePath, m_sSingleFileTitle;
+	CString m_sFolderPath, m_sFilePath, m_sOrgFilePath, m_sOrgFolderPath, m_sMultiFilePath;
 	CString m_sFormatTypeID;
 	CString m_sPrefsKey;
 
@@ -101,7 +101,6 @@ protected:
 	//}}AFX_DATA
 
 	CTaskSelectionDlg m_dlgTaskSel;
-	TDLPD_STYLE	m_nExportStyle;
 
 	// Overrides
 protected:
@@ -159,6 +158,7 @@ protected:
 	BOOL	m_bExportDate;
 	//}}AFX_DATA
 	int		m_nPrevActiveTab;
+	CString m_sSingleFileTitle;
 
 	CTDLExportToPage m_pageTo;
 	CTDLExportTaskSelectionPage m_pageTaskSel;
@@ -172,13 +172,16 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual void OnOK();
+	virtual BOOL OnInitDialog();
 
 // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CExportDlg)
-	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
+	afx_msg LRESULT OnTasklistOptionChanged(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnOneFileOptionChanged(WPARAM wp, LPARAM lp);
+
 	DECLARE_MESSAGE_MAP()
 
 	void EnableOK();
