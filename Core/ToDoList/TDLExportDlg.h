@@ -17,7 +17,7 @@
 #include "..\Interfaces\importexportmgr.h"
 #include "..\Interfaces\ImportExportComboBox.h"
 
-class CTDLExportToPage : public CPropertyPage
+class CTDLExportToPage : public CCmdNotifyPropertyPage
 {
 	// Construction
 public:
@@ -67,11 +67,11 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CExportDlg)
 	virtual BOOL OnInitDialog();
-	afx_msg void OnSelchangeTasklistoptions();
 	afx_msg void OnSelchangeFormatoptions();
+	afx_msg void OnSelchangeTasklistoptions();
 	afx_msg void OnExportonefile();
-	afx_msg void OnExportToClipboardOrPath();
 	afx_msg void OnChangeExportpath();
+	afx_msg void OnExportToClipboardOrPath();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -81,7 +81,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CTDLExportTaskSelectionPage dialog
 
-class CTDLExportTaskSelectionPage : public CPropertyPage
+class CTDLExportTaskSelectionPage : public CCmdNotifyPropertyPage
 {
 	// Construction
 public:
@@ -153,13 +153,13 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CExportDlg)
 	enum { IDD = IDD_EXPORT_DIALOG };
-	CHistoryComboBox	m_cbTitle;
+	//}}AFX_DATA
 	CString	m_sExportTitle;
 	BOOL	m_bExportDate;
-	//}}AFX_DATA
 	int		m_nPrevActiveTab;
 	CString m_sSingleFileTitle;
 
+	CHistoryComboBox m_cbTitle;
 	CTDLExportToPage m_pageTo;
 	CTDLExportTaskSelectionPage m_pageTaskSel;
 	CTabbedPropertyPageHost m_ppHost;
@@ -179,12 +179,16 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CExportDlg)
 	//}}AFX_MSG
-	afx_msg LRESULT OnTasklistOptionChanged(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnOneFileOptionChanged(WPARAM wp, LPARAM lp);
+	afx_msg void OnSelchangeTasklistoptions();
+	afx_msg void OnExportonefile();
+	afx_msg void OnChangeExportpath();
+	afx_msg void OnExportToClipboardOrPath();
 
 	DECLARE_MESSAGE_MAP()
 
 	void EnableOK();
+	void UpdateTitle();
+
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -23,11 +23,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-const UINT WM_NOTIFY_TASKLISTOPTIONCHANGED = (WM_APP + 1);
-const UINT WM_NOTIFY_ONEFILEOPTIONCHANGED = (WM_APP + 2);
-
-/////////////////////////////////////////////////////////////////////////////
 // CExportDlg dialog
 
 CTDLExportDlg::CTDLExportDlg(LPCTSTR szTitle,
@@ -76,12 +71,14 @@ void CTDLExportDlg::DoDataExchange(CDataExchange* pDX)
 
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLExportDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CExportDlg)
 	//}}AFX_MSG_MAP
-	ON_MESSAGE(WM_NOTIFY_TASKLISTOPTIONCHANGED, OnTasklistOptionChanged)
-	ON_MESSAGE(WM_NOTIFY_ONEFILEOPTIONCHANGED, OnOneFileOptionChanged)
+	ON_CBN_SELCHANGE(IDC_TASKLISTOPTIONS, OnSelchangeTasklistoptions)
+	ON_BN_CLICKED(IDC_EXPORTONEFILE, OnExportonefile)
+	ON_EN_CHANGE(IDC_EXPORTPATH, OnChangeExportpath)
+	ON_BN_CLICKED(IDC_TOPATH, OnExportToClipboardOrPath)
+	ON_BN_CLICKED(IDC_TOCLIPBOARD, OnExportToClipboardOrPath)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -94,59 +91,53 @@ BOOL CTDLExportDlg::OnInitDialog()
 	m_ppHost.Create(IDC_PAGEHOST, this);
 	m_ppHost.SetActivePage(m_nPrevActiveTab);
 
-	m_ppHost.ForwardMessage(WM_NOTIFY_TASKLISTOPTIONCHANGED);
-	m_ppHost.ForwardMessage(WM_NOTIFY_ONEFILEOPTIONCHANGED);
-
-	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(GetExportOneFile());
+	UpdateTitle();
 	EnableOK();
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-LRESULT CTDLExportDlg::OnTasklistOptionChanged(WPARAM /*wp*/, LPARAM /*lp*/)
+void CTDLExportDlg::OnChangeExportpath()
 {
-	if (m_pageTo.GetExportAllTasklists())
+	EnableOK();
+}
+
+void CTDLExportDlg::OnSelchangeTasklistoptions()
+{
+	UpdateTitle();
+}
+
+void CTDLExportDlg::OnExportonefile()
+{
+	UpdateTitle();
+}
+
+void CTDLExportDlg::OnExportToClipboardOrPath()
+{
+	UpdateTitle();
+}
+
+void CTDLExportDlg::UpdateTitle()
+{
+	BOOL bWantMultiFileTitle = (m_pageTo.GetExportAllTasklists() &&
+								!m_pageTo.GetExportOneFile());
+
+	static CEnString MULTI_FILE_TITLE(IDS_EXPORTTITLE_MULTIPLEFILES);
+
+	if (bWantMultiFileTitle && (m_sExportTitle != MULTI_FILE_TITLE))
 	{
-		if (!m_pageTo.GetExportOneFile())
-		{
-			m_sSingleFileTitle = m_sExportTitle;
-			m_sExportTitle = CEnString(IDS_EXPORTTITLE_MULTIPLEFILES);
-		}
+		m_sSingleFileTitle = m_sExportTitle;
+		m_sExportTitle = MULTI_FILE_TITLE;
 	}
-	else
+	else if (!bWantMultiFileTitle && !m_sSingleFileTitle.IsEmpty())
 	{
 		m_sExportTitle = m_sSingleFileTitle;
 	}
-	
+
+	GetDlgItemText(IDC_EXPORTTITLE, m_sExportTitle);
 	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(GetExportOneFile());
-	UpdateData(FALSE);
-
-	return 0L;
 }
-
-
-LRESULT CTDLExportDlg::OnOneFileOptionChanged(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	if (m_pageTo.GetExportAllTasklists())
-	{
-		if (!m_pageTo.GetExportOneFile())
-		{
-			m_sSingleFileTitle = m_sExportTitle;
-			m_sExportTitle = CEnString(IDS_EXPORTTITLE_MULTIPLEFILES);
-		}
-		else
-		{
-			m_sExportTitle = m_sSingleFileTitle;
-		}
-	}
-	
-	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(GetExportOneFile());
-	UpdateData(FALSE);
-
-	return 0L;
-}
-
 
 void CTDLExportDlg::OnOK()
 {
@@ -258,7 +249,7 @@ COleDateTime CTDLExportDlg::GetExportDate() const
 CTDLExportTaskSelectionPage::CTDLExportTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs,
 													   LPCTSTR szRegKey, FTC_VIEW nView, BOOL bVisibleColumnsOnly)
 	:
-	CPropertyPage(CTDLExportTaskSelectionPage::IDD),
+	CCmdNotifyPropertyPage(CTDLExportTaskSelectionPage::IDD),
 	m_dlgTaskSel(aAttribDefs, szRegKey, nView, bVisibleColumnsOnly)
 {
 	//{{AFX_DATA_INIT(CTDLExportTaskSelectionPage)
@@ -272,14 +263,14 @@ CTDLExportTaskSelectionPage::~CTDLExportTaskSelectionPage()
 
 void CTDLExportTaskSelectionPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+	CCmdNotifyPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLExportTaskSelectionPage)
 	// NOTE: the ClassWizard will add DDX and DDV calls here
 	//}}AFX_DATA_MAP
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLExportTaskSelectionPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(CTDLExportTaskSelectionPage, CCmdNotifyPropertyPage)
 	//{{AFX_MSG_MAP(CTDLExportTaskSelectionPage)
 	// NOTE: the ClassWizard will add message map macros here
 	//}}AFX_MSG_MAP
@@ -290,7 +281,7 @@ END_MESSAGE_MAP()
 
 BOOL CTDLExportTaskSelectionPage::OnInitDialog()
 {
-	CPropertyPage::OnInitDialog();
+	CCmdNotifyPropertyPage::OnInitDialog();
 
 	VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
 
@@ -300,7 +291,7 @@ BOOL CTDLExportTaskSelectionPage::OnInitDialog()
 
 void CTDLExportTaskSelectionPage::OnOK()
 {
-	CPropertyPage::OnOK();
+	CCmdNotifyPropertyPage::OnOK();
 
 	m_dlgTaskSel.OnOK();
 }
@@ -314,7 +305,7 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 								   LPCTSTR szFolderPath,
 								   LPCTSTR szPrefsKey)
 	: 
-	CPropertyPage(CTDLExportToPage::IDD), 
+	CCmdNotifyPropertyPage(CTDLExportToPage::IDD), 
 	m_mgrImportExport(mgr),
 	m_bSingleTaskList(bSingleTaskList), 
 	m_sFilePath(szFilePath), m_sOrgFilePath(szFilePath),
@@ -403,7 +394,7 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 
 void CTDLExportToPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+	CCmdNotifyPropertyPage::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CExportDlg)
 	DDX_Control(pDX, IDC_FORMATOPTIONS, m_cbFormat);
@@ -426,10 +417,10 @@ void CTDLExportToPage::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLExportToPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(CTDLExportToPage, CCmdNotifyPropertyPage)
 	//{{AFX_MSG_MAP(CExportDlg)
-	ON_CBN_SELCHANGE(IDC_TASKLISTOPTIONS, OnSelchangeTasklistoptions)
 	ON_CBN_SELCHANGE(IDC_FORMATOPTIONS, OnSelchangeFormatoptions)
+	ON_CBN_SELCHANGE(IDC_TASKLISTOPTIONS, OnSelchangeTasklistoptions)
 	ON_BN_CLICKED(IDC_EXPORTONEFILE, OnExportonefile)
 	ON_EN_CHANGE(IDC_EXPORTPATH, OnChangeExportpath)
 	ON_BN_CLICKED(IDC_TOPATH, OnExportToClipboardOrPath)
@@ -442,7 +433,7 @@ END_MESSAGE_MAP()
 
 BOOL CTDLExportToPage::OnInitDialog() 
 {
-	CPropertyPage::OnInitDialog();
+	CCmdNotifyPropertyPage::OnInitDialog();
 
 	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
 
@@ -502,9 +493,6 @@ void CTDLExportToPage::OnSelchangeTasklistoptions()
 
 	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
 	UpdateData(FALSE);
-
-	// Notify parent
-	GetParent()->SendMessage(WM_NOTIFY_TASKLISTOPTIONCHANGED);
 }
 
 void CTDLExportToPage::OnSelchangeFormatoptions() 
@@ -549,29 +537,26 @@ void CTDLExportToPage::OnSelchangeFormatoptions()
 
 void CTDLExportToPage::ReplaceExtension(CString& sPathName, LPCTSTR szFormatTypeID)
 {
-	int nFormat = m_mgrImportExport.FindExporterByType(szFormatTypeID);
+	if (!sPathName.IsEmpty())
+	{
+		int nFormat = m_mgrImportExport.FindExporterByType(szFormatTypeID);
 
-	if (!m_mgrImportExport.ExporterHasFileExtension(nFormat))
-		return;
+		if (!m_mgrImportExport.ExporterHasFileExtension(nFormat))
+			return;
 	
-	CString sExt = m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE);
+		CString sExt = m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE);
 
-	FileMisc::ReplaceExtension(sPathName, sExt);
+		FileMisc::ReplaceExtension(sPathName, sExt);
+	}
 }
 
 void CTDLExportToPage::OnOK()
 {
-	CPropertyPage::OnOK();
+	CCmdNotifyPropertyPage::OnOK();
 
 	// make sure extension is right
-	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
-	BOOL bExporterHasFileExt = m_mgrImportExport.ExporterHasFileExtension(nFormat);
-	
-	if (bExporterHasFileExt)
-	{
-		if (!m_bExportAllTasklists || m_bExportOneFile)
-			ReplaceExtension(m_sExportPath, m_sFormatTypeID);
-	}
+	if (!m_bExportAllTasklists || m_bExportOneFile)
+		ReplaceExtension(m_sExportPath, m_sFormatTypeID);
 
 	CPreferences prefs;
 
@@ -624,9 +609,6 @@ void CTDLExportToPage::OnExportonefile()
 		ReplaceExtension(m_sExportPath, m_sFormatTypeID);
 
 	UpdateData(FALSE);
-	
-	// Notify parent
-	GetParent()->SendMessage(WM_NOTIFY_ONEFILEOPTIONCHANGED);
 }
 
 void CTDLExportToPage::OnExportToClipboardOrPath()
