@@ -767,6 +767,27 @@ namespace MindMapUIExtension
 			if (HandleCursorKey(e.KeyCode))
 				return;
 
+			// Handle '*' and '-' on the numpad for expanding 
+			// and collapsing items - native tree control behaviour
+			switch (e.KeyCode)
+			{
+				case Keys.Multiply:
+					if ((SelectedNode != null) && !IsRoot(SelectedNode))
+					{
+						SelectedNode.ExpandAll();
+						return;
+					}
+					break;
+
+				case Keys.Subtract:
+					if ((SelectedNode != null) && !IsRoot(SelectedNode))
+					{
+						SelectedNode.Collapse();
+						return;
+					}
+					break;
+			}
+
 			// else
 			base.OnKeyDown(e);
 		}
@@ -1108,8 +1129,10 @@ namespace MindMapUIExtension
 				return false;
 
 			// Try to mimic TreeView navigation as far as possible
+			// The one significant exception being to not collapse 
+			// a task when using the left and right keys 
+			// ie. leave the tree expanded as the user navigates
 			TreeNode selNode = SelectedNode;
-			MindMapItem rootItem = RootItem;
 			MindMapItem selItem = SelectedItem;
 
 			switch (key)
@@ -1172,9 +1195,9 @@ namespace MindMapUIExtension
 					}
 					else if (IsRightOfRoot(selNode))
 					{
-                        if (selNode.IsExpanded)
-                            selNode.Collapse(); // same as tree-view
-                        else
+//                         if (selNode.IsExpanded)
+//                             selNode.Collapse(); // same as tree-view
+//                         else
     						selNode = selNode.Parent;
 					}
 					break;
@@ -1186,9 +1209,9 @@ namespace MindMapUIExtension
 					}
 					else if (IsleftOfRoot(selNode))
 					{
-                        if (selNode.IsExpanded)
-                            selNode.Collapse(); // same as tree-view
-                        else
+//                         if (selNode.IsExpanded)
+//                             selNode.Collapse(); // same as tree-view
+//                         else
     						selNode = selNode.Parent;
 					}
 					else if (IsRightOfRoot(selNode))

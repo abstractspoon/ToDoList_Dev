@@ -12,14 +12,117 @@
 
 #include "..\shared\fileedit.h"
 #include "..\shared\historycombobox.h"
+#include "..\shared\tabbedpropertypagehost.h"
 
 #include "..\Interfaces\importexportmgr.h"
 #include "..\Interfaces\ImportExportComboBox.h"
 
+class CTDLExportToPage : public CCmdNotifyPropertyPage
+{
+	// Construction
+public:
+	CTDLExportToPage(const CTDCImportExportMgr& mgr,
+					 BOOL bSingleTaskList,
+					 LPCTSTR szFilePath,
+					 LPCTSTR szFolderPath,
+					 LPCTSTR szPrefsKey);
+
+	CString GetFormatTypeID() const { return m_sFormatTypeID; }
+	CString GetExportPath() const; // can be folder or file
+	BOOL GetExportAllTasklists() const { return (!m_bSingleTaskList && m_bExportAllTasklists); }
+	BOOL GetExportOneFile() const { return (m_bSingleTaskList || m_bExportOneFile || m_bExportToClipboard || !m_bExportAllTasklists); }
+	BOOL GetExportToClipboard() const { return m_bExportToClipboard; }
+
+protected:
+	// Dialog Data
+	//{{AFX_DATA(CExportDlg)
+	enum { IDD = IDD_EXPORT_TO_PAGE };
+
+	CImportExportComboBox m_cbFormat;
+	CFileEdit	m_eExportPath;
+	BOOL		m_bExportAllTasklists;
+	BOOL		m_bExportOneFile;
+	BOOL		m_bExportToClipboard;
+	CString		m_sExportPath;
+	CEnString	m_sPathLabel;
+	//}}AFX_DATA
+
+	BOOL m_bSingleTaskList; 
+	CString m_sFolderPath, m_sFilePath, m_sOrgFilePath, m_sOrgFolderPath, m_sMultiFilePath;
+	CString m_sFormatTypeID;
+	CString m_sPrefsKey;
+
+	const CImportExportMgr& m_mgrImportExport;
+
+	// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CExportDlg)
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+														//}}AFX_VIRTUAL
+	virtual void OnOK();
+
+	// Implementation
+protected:
+	// Generated message map functions
+	//{{AFX_MSG(CExportDlg)
+	virtual BOOL OnInitDialog();
+	afx_msg void OnSelchangeFormatoptions();
+	afx_msg void OnSelchangeTasklistoptions();
+	afx_msg void OnExportonefile();
+	afx_msg void OnChangeExportpath();
+	afx_msg void OnExportToClipboardOrPath();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+	void ReplaceExtension(CString& sPathName, LPCTSTR szFormatTypeID);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// CTDLExportTaskSelectionPage dialog
+
+class CTDLExportTaskSelectionPage : public CCmdNotifyPropertyPage
+{
+	// Construction
+public:
+	CTDLExportTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+							    LPCTSTR szRegKey, 
+								FTC_VIEW nView, 
+								BOOL bVisibleColumnsOnly);
+	~CTDLExportTaskSelectionPage();
+
+	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
+
+protected:
+	// Dialog Data
+	//{{AFX_DATA(CTDLExportTaskSelectionPage)
+	enum { IDD = IDD_EXPORT_TASKSEL_PAGE };
+	// NOTE: the ClassWizard will add data members here
+	//}}AFX_DATA
+
+	CTaskSelectionDlg m_dlgTaskSel;
+
+	// Overrides
+protected:
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CTDLExportTaskSelectionPage)
+	virtual void OnOK();
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	//}}AFX_VIRTUAL
+
+	// Generated message map functions
+	//{{AFX_MSG(CTDLExportTaskSelectionPage)
+	// NOTE: the ClassWizard will add member functions here
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+	// Implementation
+protected:
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // CExportDlg dialog
-
-enum { ED_HTMLFMT, ED_TEXTFMT };
 
 class CTDLExportDlg : public CTDLDialog
 {
@@ -38,34 +141,29 @@ public:
 	CString GetExportTitle() const { return m_sExportTitle; }
 	COleDateTime GetExportDate() const;
 
-	CString GetFormatTypeID() const { return m_sFormatTypeID; }
-	CString GetExportPath() const; // can be folder or file
-	BOOL GetExportAllTasklists() const { return (!m_bSingleTaskList && m_bExportAllTasklists); }
-	BOOL GetExportOneFile() const { return (m_bSingleTaskList || m_bExportOneFile || m_bExportToClipboard); }
-	BOOL GetExportToClipboard() const { return m_bExportToClipboard; }
+	CString GetFormatTypeID() const { return m_pageTo.GetFormatTypeID(); }
+	CString GetExportPath() const { return m_pageTo.GetExportPath(); }
+	BOOL GetExportAllTasklists() const { return m_pageTo.GetExportAllTasklists(); }
+	BOOL GetExportOneFile() const { return m_pageTo.GetExportOneFile(); }
+	BOOL GetExportToClipboard() const { return m_pageTo.GetExportToClipboard(); }
 
-	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
+	const CTaskSelectionDlg& GetTaskSelection() const { return m_pageTaskSel.GetTaskSelection(); }
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CExportDlg)
 	enum { IDD = IDD_EXPORT_DIALOG };
-	CHistoryComboBox	m_cbTitle;
-	CImportExportComboBox m_cbFormat;
-	CFileEdit	m_eExportPath;
-	BOOL		m_bExportAllTasklists;
-	BOOL		m_bExportOneFile;
-	BOOL		m_bExportToClipboard;
-	CString		m_sExportPath;
-	CEnString	m_sPathLabel;
+	//}}AFX_DATA
 	CString	m_sExportTitle;
 	BOOL	m_bExportDate;
-	//}}AFX_DATA
-	CTaskSelectionDlg m_dlgTaskSel;
-	BOOL m_bSingleTaskList; 
-	CString m_sFolderPath, m_sFilePath, m_sOrgFilePath, m_sOrgFolderPath, m_sMultiFilePath, m_sSingleFileTitle;
+	int		m_nPrevActiveTab;
+	CString m_sSingleFileTitle;
+
+	CHistoryComboBox m_cbTitle;
+	CTDLExportToPage m_pageTo;
+	CTDLExportTaskSelectionPage m_pageTaskSel;
+	CTabbedPropertyPageHost m_ppHost;
 	const CImportExportMgr& m_mgrImportExport;
-	CString m_sFormatTypeID;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -74,22 +172,23 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual void OnOK();
+	virtual BOOL OnInitDialog();
 
 // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CExportDlg)
-	virtual BOOL OnInitDialog();
-	afx_msg void OnSelchangeTasklistoptions();
-	afx_msg void OnSelchangeFormatoptions();
-	afx_msg void OnExportonefile();
-	afx_msg void OnExportToClipboardOrPath();
-	afx_msg void OnChangeExportpath();
 	//}}AFX_MSG
+	afx_msg void OnSelchangeTasklistoptions();
+	afx_msg void OnExportonefile();
+	afx_msg void OnChangeExportpath();
+	afx_msg void OnExportToClipboardOrPath();
+
 	DECLARE_MESSAGE_MAP()
 
 	void EnableOK();
-	void ReplaceExtension(CString& sPathName, LPCTSTR szFormatTypeID);
+	void UpdateTitle();
+
 };
 
 //{{AFX_INSERT_LOCATION}}

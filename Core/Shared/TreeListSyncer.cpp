@@ -2057,24 +2057,6 @@ BOOL CTreeListSyncer::IsTreeItemVisible(HWND hwnd, HTREEITEM hti)
 	return IsTreeItemVisible(hwnd, htiParent);
 }
 
-BOOL CTreeListSyncer::TreeHasExpandedItem(HWND hwnd, HTREEITEM hti)
-{
-	ASSERT(IsTree(hwnd));
-
-	hti = TreeView_GetChild(hwnd, hti);
-
-	while (hti)
-	{
-		if (IsTreeItemExpanded(hwnd, hti))
-			return TRUE;
-
-		hti = TreeView_GetNextItem(hwnd, hti, TVGN_NEXT);
-	}
-
-	// else
-	return FALSE;
-}
-
 BOOL CTreeListSyncer::TreeItemHasState(HWND hwnd, HTREEITEM hti, UINT nStateMask)
 {
 	ASSERT(IsTree(hwnd));

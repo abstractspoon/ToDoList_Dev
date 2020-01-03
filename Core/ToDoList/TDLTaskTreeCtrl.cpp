@@ -753,7 +753,10 @@ BOOL CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	}
 	m_wKeyPress = 0; // always
 
-	SyncColumnSelectionToTasks();
+	// Only propagate this if we're not already in the 
+	// middle of a resync
+	if (CanResync())
+		SyncColumnSelectionToTasks();
 
 	if (hti)
 	{
@@ -1263,6 +1266,24 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 							bSelChange = TRUE;
 						}
 						break;
+
+					case VK_MULTIPLY:
+						// Eat this if the selected item(s) is already fully expanded
+						if (!bCtrl && !bShift)
+						{
+							if (TSH().IsSelectionExpanded(TRUE))
+								return 0L;
+						}
+						break;
+
+					case VK_SUBTRACT:
+						// Eat this if the selected item(s) is already collapsed
+						if (!bCtrl && !bShift)
+						{
+							if (!TSH().IsSelectionExpanded())
+								return 0L;
+						}
+						break;
 					}
 				}
 				
@@ -1576,6 +1597,17 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					ExpandItem(hti, !TCH().IsItemExpanded(hti));
 					return 0L; // eat it
 				}
+			}
+			break;
+
+		case WM_KEYDOWN:
+			switch (wp)
+			{
+				case VK_MULTIPLY:
+				case VK_SUBTRACT:
+					// Forward on to tree for handling
+					m_tcTasks.PostMessage(msg, wp, lp);
+					return 0L; // eat it
 			}
 			break;
 		}

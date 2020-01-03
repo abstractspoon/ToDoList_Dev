@@ -72,6 +72,7 @@
 			this.tableHeaderRowCombobox = new HTMLReportExporter.TableHeaderRowOptionCombobox();
 			this.htmlReportTasksControl = new HTMLReportExporter.HtmlReportTaskFormatControl();
 			this.htmlReportFooterControl = new HTMLReportExporter.HtmlReportFooterControl();
+			this.toolStripFileHistory = new System.Windows.Forms.ToolStripComboBox();
 			this.Content.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
 			this.splitContainer.Panel1.SuspendLayout();
@@ -156,6 +157,7 @@
 			this.Toolbar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripNewReport,
             this.toolStripOpenReport,
+            this.toolStripFileHistory,
             this.toolStripSaveReport,
             this.toolStripSaveAsReport,
             this.toolStripSeparator,
@@ -170,7 +172,8 @@
 			this.Toolbar.Margin = new System.Windows.Forms.Padding(0, 0, 0, 20);
 			this.Toolbar.Name = "Toolbar";
 			this.Toolbar.Padding = new System.Windows.Forms.Padding(0);
-			this.Toolbar.Size = new System.Drawing.Size(198, 25);
+			this.Toolbar.Size = new System.Drawing.Size(258, 25);
+			this.Toolbar.Size = new System.Drawing.Size(381, 25);
 			this.Toolbar.TabIndex = 1;
 			this.Toolbar.Text = "toolStrip1";
 			// 
@@ -219,7 +222,6 @@
 			// 
 			this.toolStripSeparator.Name = "toolStripSeparator";
 			this.toolStripSeparator.Size = new System.Drawing.Size(6, 25);
-			this.toolStripSeparator.Visible = false;
 			// 
 			// toolStripInsertImage
 			// 
@@ -283,7 +285,6 @@
 			this.toolStripHelp.Name = "toolStripHelp";
 			this.toolStripHelp.Size = new System.Drawing.Size(23, 22);
 			this.toolStripHelp.Text = "He&lp";
-			this.toolStripHelp.Visible = false;
 			this.toolStripHelp.Click += new System.EventHandler(this.OnHelp);
 			// 
 			// tabControl
@@ -650,6 +651,16 @@
 			this.htmlReportFooterControl.Size = new System.Drawing.Size(386, 350);
 			this.htmlReportFooterControl.TabIndex = 26;
 			this.htmlReportFooterControl.ToolbarDock = System.Windows.Forms.DockStyle.Top;
+
+			// toolStripFileHistory
+			this.toolStripFileHistory.AutoSize = false;
+			this.toolStripFileHistory.DropDownHeight = 200;
+			this.toolStripFileHistory.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.toolStripFileHistory.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.toolStripFileHistory.IntegralHeight = false;
+			this.toolStripFileHistory.MaxDropDownItems = 16;
+			this.toolStripFileHistory.Name = "toolStripFileHistory";
+			this.toolStripFileHistory.Size = new System.Drawing.Size(150, 22);
 			// 
 			// HtmlReportTemplateForm
 			// 
@@ -732,5 +743,6 @@
 		private System.Windows.Forms.CheckBox footerEnabledCheckbox;
 		private HtmlReportFooterControl htmlReportFooterControl;
 		private System.Windows.Forms.Button previewDefaultBrowser;
+		private System.Windows.Forms.ToolStripComboBox toolStripFileHistory;
 	}
 }

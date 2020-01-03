@@ -848,8 +848,10 @@
 #define IDI_TASK                        2003
 #define IDD_PRINT_TASKSEL_PAGE          2003
 #define IDD_DROPIMPORT_DIALOG           2004
+#define IDD_EXPORT_TASKSEL_PAGE         2004
 #define IDC_CURFOLDER                   2005
 #define IDI_CONTACT                     2005
+#define IDD_EXPORT_TO_PAGE              2005
 #define IDC_HIDEUNFLAGGEDEMAIL          2006
 #define IDI_FOLDER                      2006
 #define IDI_JOURNAL                     2007
@@ -2337,12 +2339,14 @@
 #define IDS_EXPORTTITLE_MULTIPLEFILES   58514
 #define IDS_PRINTDLG_LAYOUT             58515
 #define IDS_PRINTDLG_TASKSEL            58516
+#define IDS_EXPORTDLG_EXPORT            58517
+#define IDS_EXPORTDLG_TASKSEL           58518
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        315
+#define _APS_NEXT_RESOURCE_VALUE        316
 #define _APS_NEXT_COMMAND_VALUE         34664
 #define _APS_NEXT_CONTROL_VALUE         1541
 #define _APS_NEXT_SYMED_VALUE           108
