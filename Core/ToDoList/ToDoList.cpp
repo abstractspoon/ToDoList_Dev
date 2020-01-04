@@ -131,6 +131,18 @@ CToDoListApp theApp;
 
 BOOL CToDoListApp::HandleSimpleQueries(const CEnCommandLineInfo& cmdInfo)
 {
+	// Is the exe version required
+	if (cmdInfo.HasOption(SWITCH_VERSION))
+	{
+		CString sVerFile = cmdInfo.GetOption(SWITCH_VERSION);
+
+		if (sVerFile.IsEmpty())
+			sVerFile = _T("ver.txt");
+
+		FileMisc::SaveFile(sVerFile, FileMisc::GetAppVersion(), SFEF_UTF8WITHOUTBOM);
+		return TRUE;
+	}
+
 	// see if the user wants to uninstall
 	if (cmdInfo.HasOption(SWITCH_UNINSTALL))
 	{
@@ -159,7 +171,7 @@ BOOL CToDoListApp::HandleSimpleQueries(const CEnCommandLineInfo& cmdInfo)
 	return FALSE;
 }
 
-BOOL CToDoListApp::HasVs1010Redistributable()
+BOOL CToDoListApp::HasVS2010Redistributable()
 {
 	CString sVs2010Runtime;
 	VERIFY(FileMisc::GetSpecialFilePath(CSIDL_SYSTEM, MSVCR100_DLL, sVs2010Runtime));
@@ -198,7 +210,7 @@ BOOL CToDoListApp::HasVs1010Redistributable()
 BOOL CToDoListApp::InitInstance()
 {
 	// .NET plugins require VS2010 redistributable to be installed
-	if (!HasVs1010Redistributable())
+	if (!HasVS2010Redistributable())
 		return FALSE;
 
 	// Set this before anything else

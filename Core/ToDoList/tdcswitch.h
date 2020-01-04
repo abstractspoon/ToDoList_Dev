@@ -63,6 +63,7 @@ const LPCTSTR SWITCH_HELP2					= _T("h");
 const LPCTSTR SWITCH_HELP3					= _T("help");
 const LPCTSTR SWITCH_UNINSTALL				= _T("uninstall");
 const LPCTSTR SWITCH_UPGRADED				= _T("up");
+const LPCTSTR SWITCH_VERSION				= _T("ver");
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // For TDLUnistall and TDLUpdate
