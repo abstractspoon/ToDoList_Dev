@@ -84,14 +84,15 @@ protected:
 	BOOL InitTranslation(BOOL bFirstTime, BOOL bQuiet);
 	void UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer);
 	void ParseCommandLine(CEnCommandLineInfo& cmdInfo);
-	void RunUninstaller();
-	void RunUpdater(BOOL bPreRelease, BOOL bTestDownload = FALSE);
-	BOOL ProcessStartupOptions(CTDCStartupOptions& startup, const CEnCommandLineInfo& cmdInfo);
-	
+	void RunUninstaller() const;
+	void RunUpdater(BOOL bPreRelease, BOOL bTestDownload = FALSE) const;
+	BOOL ProcessStartupOptions(CTDCStartupOptions& startup, const CEnCommandLineInfo& cmdInfo) const;
+	BOOL HandleSimpleQueries(const CEnCommandLineInfo& cmdInfo);
+
 	TDL_WEBUPDATE_CHECK CheckForUpdates(BOOL bManual);
 
 	DWORD RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, UINT nIDSmartScreenErrorMsg, 
-						BOOL bPreRelease = FALSE, BOOL bTestDownload = FALSE);
+						BOOL bPreRelease = FALSE, BOOL bTestDownload = FALSE) const;
 
 	// our own local version
 	CString AfxGetAppName();
@@ -109,6 +110,7 @@ protected:
 	static BOOL SendStartupOptions(HWND hwnd, const CTDCStartupOptions& startup, TDL_COPYDATA nMsg);
 	static BOOL WaitForInstanceToClose(DWORD dwProcessID);
 	static BOOL CommandRequiresUI(UINT nCmdID);
+	static BOOL HasVs1010Redistributable();
 
 	static CString GetResourcePath(LPCTSTR szSubFolder = NULL, LPCTSTR szFile = NULL);
 	static CString GetHelperAppPath(const CString& sAppName, BOOL bTestDownload = FALSE);

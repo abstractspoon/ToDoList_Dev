@@ -79,8 +79,6 @@ LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&bus
 
 LPCTSTR MSVCR100_DLL		= _T("MSVCR100.dll"); 
 LPCTSTR MSVCR100_URL		= _T("https://www.microsoft.com/en-hk/download/details.aspx?id=8328"); 
-LPCTSTR MSVCR100_MSG		= _T("System File Required|ToDoList requires the 'Microsoft Visual C++ 2010 SP1 Redistributable Package' ")
-								_T("to be installed.\n\nClick 'OK' to visit the appropriate download page or 'Cancel' to quit.");
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListApp
@@ -131,9 +129,38 @@ CToDoListApp theApp;
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListApp initialization
 
-BOOL CToDoListApp::InitInstance()
+BOOL CToDoListApp::HandleSimpleQueries(const CEnCommandLineInfo& cmdInfo)
 {
-	// .NET plugins require VS2010 redistributable to be installed
+	// see if the user wants to uninstall
+	if (cmdInfo.HasOption(SWITCH_UNINSTALL))
+	{
+		// we don't have the uninstaller run directly by the OS
+		// to prevent the APPID appearing in plain text
+		RunUninstaller();
+		return TRUE;
+	}
+
+	// see if the user just wants to see the commandline options
+	if (cmdInfo.HasOption(SWITCH_HELP1) || 
+		cmdInfo.HasOption(SWITCH_HELP2) || 
+		cmdInfo.HasOption(SWITCH_HELP3))
+	{
+		OnHelpCommandline();
+		return TRUE;
+	}
+
+	// Randomising doesn't need preferences
+	if (cmdInfo.HasOption(SWITCH_RANDOMISE))
+	{
+		CTDCAnonymizeTasklist::Anonymize(cmdInfo.GetOption(SWITCH_RANDOMISE));
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CToDoListApp::HasVs1010Redistributable()
+{
 	CString sVs2010Runtime;
 	VERIFY(FileMisc::GetSpecialFilePath(CSIDL_SYSTEM, MSVCR100_DLL, sVs2010Runtime));
 
@@ -144,7 +171,7 @@ BOOL CToDoListApp::InitInstance()
 		FileMisc::LogText(_T("LoadLibrary(%s) failed"), sVs2010Runtime);
 		FileMisc::LogTextRaw(Misc::FormatGetLastError());
 		
-		if (DoMessageBox(MSVCR100_MSG, MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
+		if (AfxMessageBox(CEnString(IDS_MSVCR100_MSG), MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
 			FileMisc::Run(::GetDesktopWindow(), MSVCR100_URL);
 
 		// Always quit
@@ -164,6 +191,16 @@ BOOL CToDoListApp::InitInstance()
 	GetFinalPathNameByHandle(hFile, szFinal, MAX_PATH, VOLUME_NAME_DOS);
 */
 
+	// All good
+	return TRUE;
+}
+
+BOOL CToDoListApp::InitInstance()
+{
+	// .NET plugins require VS2010 redistributable to be installed
+	if (!HasVs1010Redistributable())
+		return FALSE;
+
 	// Set this before anything else
 	CWinHelpButton::SetDefaultIcon(GraphicsMisc::LoadIcon(IDI_HELPBUTTON));
 
@@ -171,23 +208,8 @@ BOOL CToDoListApp::InitInstance()
 	CEnCommandLineInfo cmdInfo(_T(".tdl;.xml"));
 	ParseCommandLine(cmdInfo);
 
-	// see if the user wants to uninstall
-	if (cmdInfo.HasOption(SWITCH_UNINSTALL))
-	{
-		// we don't have the uninstaller run directly by the OS
-		// to prevent the APPID appearing in plain text
-		RunUninstaller();
-		return FALSE;// quit app
-	}
-
-	// see if the user just wants to see the commandline options
-	if (cmdInfo.HasOption(SWITCH_HELP1) || 
-		cmdInfo.HasOption(SWITCH_HELP2) || 
-		cmdInfo.HasOption(SWITCH_HELP3))
-	{
-		OnHelpCommandline();
-		return FALSE; // quit app
-	}
+	if (HandleSimpleQueries(cmdInfo))
+		return FALSE; // quit
 
 	// If this is a restart, wait until the previous instance has closed
 	if (cmdInfo.HasOption(SWITCH_RESTART))
@@ -217,13 +239,6 @@ BOOL CToDoListApp::InitInstance()
 	if (!CXmlDocumentWrapper::IsVersion3orGreater())
 	{
 		AfxMessageBox(CEnString(IDS_BADMSXML));
-		return FALSE; // quit app
-	}
-
-	// Randomising doesn't need preferences
-	if (cmdInfo.HasOption(SWITCH_RANDOMISE))
-	{
-		CTDCAnonymizeTasklist::Anonymize(cmdInfo.GetOption(SWITCH_RANDOMISE));
 		return FALSE; // quit app
 	}
 
@@ -269,7 +284,7 @@ BOOL CToDoListApp::InitInstance()
 	return FALSE; // quit app
 }
 
-BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnCommandLineInfo& cmdInfo)
+BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnCommandLineInfo& cmdInfo) const
 {
 	// See if another instance can better handle this than us
 	TDCFINDWND find;
@@ -1406,7 +1421,7 @@ void CToDoListApp::OnHelpUninstall()
 	}
 }
 
-DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, UINT nIDSmartScreenErrorMsg, BOOL bPreRelease, BOOL bTestDownload)
+DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, UINT nIDSmartScreenErrorMsg, BOOL bPreRelease, BOOL bTestDownload) const
 {
 	CEnCommandLineInfo params;
 
@@ -1537,7 +1552,7 @@ CString CToDoListApp::GetHelperAppPath(const CString& sAppName, BOOL bTestDownlo
 	return sAppPath;
 }
 
-void CToDoListApp::RunUninstaller()
+void CToDoListApp::RunUninstaller() const
 {
 	CString sAppPath = GetHelperAppPath(_T("TDLUninstall"));
 
@@ -1552,7 +1567,7 @@ void CToDoListApp::RunUninstaller()
 	FileMisc::DeleteFolder(sAppFolder, FMDF_SUBFOLDERS | FMDF_HIDDENREADONLY | FMDF_ALLOWDELETEONREBOOT);
 }
 
-void CToDoListApp::RunUpdater(BOOL bPreRelease, BOOL bTestDownload)
+void CToDoListApp::RunUpdater(BOOL bPreRelease, BOOL bTestDownload) const
 {
 	CString sAppPath = GetHelperAppPath(_T("TDLUpdate"));
 

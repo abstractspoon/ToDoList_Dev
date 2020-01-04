@@ -2341,6 +2341,7 @@
 #define IDS_PRINTDLG_TASKSEL            58516
 #define IDS_EXPORTDLG_EXPORT            58517
 #define IDS_EXPORTDLG_TASKSEL           58518
+#define IDS_MSVCR100_MSG                58519
 
 // Next default values for new objects
 // 
