@@ -14,14 +14,16 @@ REM - Build Core App
 cd %REPO%\Core
 "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" 
 
-REM - Copy ToDoList.pdb to symbols folder
+REM - Copy ToDoList.pdb/.map to versioned symbols folder
 %REPO%\Core\ToDoList\Unicode_Release\ToDoList.exe -ver
 SET /P TDLVER=< .\ver.txt
 DEL .\ver.txt
 
 MKDIR %REPO%\..\ToDoList_Symbols
 MKDIR %REPO%\..\ToDoList_Symbols\%TDLVER%
+
 COPY /Y /B %REPO%\Core\ToDoList\Unicode_Release\ToDoList.pdb %REPO%\..\ToDoList_Symbols\%TDLVER%\
+COPY /Y /B %REPO%\Core\ToDoList\Unicode_Release\ToDoList.map %REPO%\..\ToDoList_Symbols\%TDLVER%\
 
 REM - Build Plugins
 cd %REPO%\Plugins
