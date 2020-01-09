@@ -3440,13 +3440,20 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyTimeTrack(WPARAM wp, LPARAM lp)
 	DWORD dwTrackID = lp;
 	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wp);
 
-	if (dwTrackID)
+	if (nTDC == -1)
 	{
-		StartTimeTrackingTask(nTDC, dwTrackID, FROM_TASKLIST);
+		ASSERT(0);
 	}
-	else
+	else 
 	{
-		StopTimeTrackingTask(nTDC, FROM_TASKLIST);
+		if (dwTrackID)
+		{
+			StartTimeTrackingTask(nTDC, dwTrackID, FROM_TASKLIST);
+		}
+		else
+		{
+			StopTimeTrackingTask(nTDC, FROM_TASKLIST);
+		}
 	}
 
 	return 0L;
@@ -3536,13 +3543,13 @@ void CToDoListWnd::StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom)
 
 LRESULT CToDoListWnd::OnTimeTrackerStartTracking(WPARAM wParam, LPARAM lParam)
 {
-	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
-	ASSERT(nTDC != -1);
-	
 	DWORD dwTaskID = lParam;
-	ASSERT(dwTaskID);
-
-	StartTimeTrackingTask(nTDC, dwTaskID, FROM_TRACKER);
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
+	
+	if (!dwTaskID || (nTDC == -1))
+		ASSERT(0);
+	else
+		StartTimeTrackingTask(nTDC, dwTaskID, FROM_TRACKER);
 
 	return 0L;
 }
@@ -3550,9 +3557,11 @@ LRESULT CToDoListWnd::OnTimeTrackerStartTracking(WPARAM wParam, LPARAM lParam)
 LRESULT CToDoListWnd::OnTimeTrackerStopTracking(WPARAM wParam, LPARAM /*lParam*/)
 {
 	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
-	ASSERT(nTDC != -1);
 
-	StopTimeTrackingTask(nTDC, FROM_TRACKER);
+	if (nTDC == -1)
+		ASSERT(0);
+	else
+		StopTimeTrackingTask(nTDC, FROM_TRACKER);
 	
 	return 0L;
 }
@@ -3560,9 +3569,11 @@ LRESULT CToDoListWnd::OnTimeTrackerStopTracking(WPARAM wParam, LPARAM /*lParam*/
 LRESULT CToDoListWnd::OnTimeTrackerResetElapsedTime(WPARAM wParam, LPARAM /*lParam*/)
 {
 	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
-	ASSERT(nTDC != -1);
 
-	GetToDoCtrl(nTDC).ResetTimeTrackingElapsedMinutes();
+	if (nTDC == -1)
+		ASSERT(0);
+	else
+		GetToDoCtrl(nTDC).ResetTimeTrackingElapsedMinutes();
 	
 	return 0L;
 }
@@ -3570,9 +3581,13 @@ LRESULT CToDoListWnd::OnTimeTrackerResetElapsedTime(WPARAM wParam, LPARAM /*lPar
 LRESULT CToDoListWnd::OnTimeTrackerLoadDelayedTasklist(WPARAM wParam, LPARAM /*lParam*/)
 {
 	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
-	ASSERT(nTDC != -1);
+	
+	if (nTDC != -1)
+		return VerifyTaskListOpen(nTDC, FALSE);
 
-	return VerifyTaskListOpen(nTDC, FALSE);
+	// else
+	ASSERT(0);
+	return 0L;
 }
 
 LRESULT CToDoListWnd::OnToDoCtrlNotifyRecreateRecurringTask(WPARAM wp, LPARAM lp)
@@ -6627,20 +6642,22 @@ void CToDoListWnd::UpdateWindowIcons()
 
 LPARAM CToDoListWnd::OnToDoCtrlNotifyTimeTrackReminder(WPARAM wParam, LPARAM lParam)
 {
-	DWORD dwTaskID = wParam;
-	const CFilteredToDoCtrl* pTDC = (const CFilteredToDoCtrl*)lParam;
+	DWORD dwTrackID = lParam;
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
 
-	if (!dwTaskID || !pTDC)
+	if (!dwTrackID || (nTDC == -1))
 	{
 		ASSERT(0);
 		return 0L;
 	}
 
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
+
 	CEnString sMessage;
 	sMessage.Format(IDS_TIMETRACKREMINDER, 
 					Prefs().GetTrackReminderFrequency(),
-					pTDC->GetFriendlyProjectName(),
-					pTDC->GetTaskTitle(dwTaskID));
+					tdc.GetFriendlyProjectName(),
+					tdc.GetTaskTitle(dwTrackID));
 
 	m_trayIcon.ShowBalloon(sMessage, CEnString(IDS_TIMETRACKREMINDER_BALLOONTITLE), NIIF_INFO);
 
@@ -6653,12 +6670,7 @@ LPARAM CToDoListWnd::OnToDoCtrlNotifyTimeTrackReminder(WPARAM wParam, LPARAM lPa
 
 	// And optionally end tracking
 	if (prefs.GetEndTrackingOnReminder())
-	{
-		int nTDC = m_mgrToDoCtrls.FindToDoCtrl(pTDC);
-		ASSERT(nTDC != -1);
-
 		StopTimeTrackingTask(nTDC, FROM_APP);
-	}
 
 	return TRUE;
 }
@@ -8201,6 +8213,8 @@ BOOL CToDoListWnd::SelectToDoCtrl(LPCTSTR szFilePath, BOOL bCheckPassword, int n
 		return TRUE;
 	}
 	
+	// else
+	ASSERT(0);
 	return FALSE;
 }
 
@@ -10225,7 +10239,12 @@ LRESULT CToDoListWnd::OnFindSelectResult(WPARAM /*wp*/, LPARAM lp)
 	ASSERT (pResult->dwTaskID); 
 	
 	int nCtrl = m_mgrToDoCtrls.FindToDoCtrl(pResult->pTDC);
-	ASSERT(nCtrl != -1);
+
+	if (nCtrl == -1)
+	{
+		ASSERT(0);
+		return 0L;
+	}
 	
 	if (m_tabCtrl.GetCurSel() != nCtrl)
 	{
@@ -10249,7 +10268,6 @@ LRESULT CToDoListWnd::OnFindSelectResult(WPARAM /*wp*/, LPARAM lp)
 
 BOOL CToDoListWnd::SelectTask(CFilteredToDoCtrl& tdc, DWORD dwTaskID)
 {
-	
 	if (tdc.GetSelectedTaskID() == dwTaskID)
 		return TRUE;
 
@@ -12395,11 +12413,14 @@ void CToDoListWnd::OnUpdateEditSettaskicon(CCmdUI* pCmdUI)
 
 LRESULT CToDoListWnd::OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam)
 {
-	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
-	ASSERT(nTDC != -1);
-
 	DWORD dwTaskID = lParam;
-	ASSERT(dwTaskID);
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
+
+	if (!dwTaskID || (nTDC == -1))
+	{
+		ASSERT(0);
+		return 0L;
+	}
 
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 	int nRem = m_reminders.FindReminder(dwTaskID, &tdc, FALSE);
