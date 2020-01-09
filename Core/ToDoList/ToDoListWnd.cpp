@@ -8207,15 +8207,11 @@ BOOL CToDoListWnd::SelectToDoCtrl(LPCTSTR szFilePath, BOOL bCheckPassword, int n
 {
 	int nCtrl = m_mgrToDoCtrls.FindToDoCtrl(szFilePath);
 	
-	if (nCtrl != -1)
-	{
-		SelectToDoCtrl(nCtrl, bCheckPassword, nNotifyDueTasksBy);
-		return TRUE;
-	}
-	
-	// else
-	ASSERT(0);
-	return FALSE;
+	if (nCtrl == -1)
+		return FALSE;
+
+	VERIFY(SelectToDoCtrl(nCtrl, bCheckPassword, nNotifyDueTasksBy));
+	return TRUE;
 }
 
 int CToDoListWnd::GetSelToDoCtrl() const 
