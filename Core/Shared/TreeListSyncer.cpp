@@ -1686,9 +1686,14 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 BOOL CTreeListSyncer::OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
 {
+	HWND hwndList = ::GetParent(pHDN->hdr.hwndFrom);
+	int nColWidth = ListView_GetColumnWidth(hwndList, pHDN->iItem);
+
+	if (pHDN->pitem->cxy == nColWidth)
+		return FALSE;
+	
 	pHDN->pitem->cxy = max(pHDN->pitem->cxy, nMinWidth);
 
-	HWND hwndList = ::GetParent(pHDN->hdr.hwndFrom);
 	::InvalidateRect(hwndList, NULL, TRUE);
 
 	return TRUE;
