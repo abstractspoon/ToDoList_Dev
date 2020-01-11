@@ -880,28 +880,29 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			{
 				LPNMHDR pNMHDR = (LPNMHDR)lp;
 				HWND hwnd = pNMHDR->hwndFrom;
-				
-				// let base class have its turn first
-				LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 
-				switch (pNMHDR->code)
+				if (hwnd == m_listHeader)
 				{
-				case NM_RCLICK:
-					if (hwnd == m_listHeader)
+					// Header column resizing is a special case because
+					// we want to avoid the default handling
+					if (pNMHDR->code == HDN_DIVIDERDBLCLICK)
+						return OnHeaderDblClkDivider((NMHEADER*)pNMHDR);
+
+					// else let base class have its turn first
+					LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+
+					switch (pNMHDR->code)
+					{
+					case NM_RCLICK:
 						::SendMessage(GetHwnd(), WM_CONTEXTMENU, (WPARAM)hwnd, (LPARAM)::GetMessagePos());
-					break;
+						break;
 
-				case HDN_ITEMCLICK:
-					if (hwnd == m_listHeader)
+					case HDN_ITEMCLICK:
 						OnListHeaderClick((NMHEADER*)pNMHDR);
-					break;
-
-				case HDN_DIVIDERDBLCLICK:
-					if (hwnd == m_listHeader)
-						lr = OnHeaderDblClkDivider((NMHEADER*)pNMHDR);
-					break;
+						break;
+					}
+					return lr;
 				}
-				return lr;
 			}
 			break;
 			
