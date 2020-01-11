@@ -1974,7 +1974,7 @@ void CWorkloadCtrl::OnListHeaderClick(NMHEADER* pHDN)
 	}
 }
 
-BOOL CWorkloadCtrl::OnItemCheckChange(HTREEITEM hti)
+BOOL CWorkloadCtrl::OnTreeCheckChange(HTREEITEM hti)
 {
 	if (!m_bReadOnly)
 	{
