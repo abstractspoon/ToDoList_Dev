@@ -63,6 +63,8 @@ public:
 
 	void SetRowCount(int nRows);
 	int GetRowCount() const { return m_nRowCount; }
+	BOOL GetRowRect(int nRow, CRect& rRow) const;
+	BOOL RedrawRow(int nRow, BOOL bErase, BOOL bUpdate);
 
 	BOOL SetItemWidth(int nItem, int nWidth);
 	int GetItemWidth(int nItem) const;

@@ -73,6 +73,43 @@ void CEnHeaderCtrl::SetRowCount(int nRows)
 		SetWindowPos(NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER); 
 }
 
+BOOL CEnHeaderCtrl::GetRowRect(int nRow, CRect& rRow) const
+{
+	if (nRow >= m_nRowCount)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	GetClientRect(rRow);
+
+	if (m_nRowCount > 1)
+	{
+		int nTotalHeight = rRow.Height();
+
+		rRow.bottom = (rRow.top + MulDiv(nTotalHeight, (nRow + 1), m_nRowCount));
+		rRow.top = (rRow.top + MulDiv(nTotalHeight, nRow, m_nRowCount));
+	}
+
+	return TRUE;
+}
+
+BOOL CEnHeaderCtrl::RedrawRow(int nRow, BOOL bErase, BOOL bUpdate)
+{
+	CRect rRow;
+
+	if (!GetRowRect(nRow, rRow))
+		return FALSE;
+
+	InvalidateRect(rRow, bErase);
+
+	if (bUpdate)
+		UpdateWindow();
+
+	return TRUE;
+}
+
+
 LRESULT CEnHeaderCtrl::OnLayout(WPARAM wp, LPARAM lp)
 {
 	// default processing

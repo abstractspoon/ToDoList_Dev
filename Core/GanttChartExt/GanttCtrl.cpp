@@ -2046,6 +2046,19 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				return FALSE; // eat
 			}
 			break;
+
+		case WM_HSCROLL:
+			// If we're dragging the 'thumb' and we're double height 
+			// then ensure the top row of our header gets redrawn
+			if ((LOWORD(wp) == SB_THUMBTRACK) && (m_listHeader.GetRowCount() == 2))
+			{
+				LRESULT lr = CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
+
+				m_listHeader.RedrawRow(0, FALSE, TRUE);
+
+				return lr;
+			}
+			break;
 		}
 	}
 	else if (hRealWnd == m_tree)
@@ -3303,7 +3316,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 			// draw range header
 			rRange.bottom = rYear.top;
-			DrawListHeaderRect(pDC, rRange, m_listHeader.GetItemText(nCol), pThemed);
+			DrawListHeaderRect(pDC, rRange, m_listHeader.GetItemText(nCol), pThemed, TRUE);
 
 			// draw year elements
 			int nNumYears = ((m_nMonthDisplay == GTLC_DISPLAY_DECADES) ? 10 : 25);
@@ -3336,7 +3349,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 			// draw month header
 			rMonth.bottom = rWeek.top;
-			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed);
+			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, TRUE);
 
 			// draw week elements
 			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
@@ -3431,7 +3444,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 			// draw month header
 			rMonth.bottom = rDay.top;
-			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed);
+			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, TRUE);
 
 			// draw day elements
 			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
@@ -3483,7 +3496,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 	pDC->RestoreDC(nSaveDC);
 }
 
-void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme)
+void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme, BOOL bEnsureVisible)
 {
 	if (!pTheme)
 	{
@@ -3498,11 +3511,57 @@ void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString&
 	// text
 	if (!sItem.IsEmpty())
 	{
+		// Special case: We're a 2-row header and the upper text 
+		// wants always to be visible regardless of scroll pos
+		int nHorzHAlign = DT_CENTER;
+		CRect rAvail(rItem);
+
+		if (bEnsureVisible)
+		{
+			int nHorzPos = m_list.GetScrollPos(SB_HORZ);
+
+			// Get the draw rect in list coords
+			rAvail.OffsetRect(-nHorzPos, 0);
+
+			// Calc the default position of the text
+			int nTextWidth = pDC->GetTextExtent(sItem).cx;
+
+			CRect rText(0, 0, nTextWidth, rItem.Height());
+			GraphicsMisc::CentreRect(rText, rAvail, TRUE, FALSE);
+
+			CRect rHeader;
+			m_listHeader.GetClientRect(rHeader);
+
+			rHeader.OffsetRect(-nHorzPos, 0);
+
+			// If it's clipped then make it left-aligned or right-aligned
+			// depending on which end is clipped
+			if (rText.left < 0)
+			{
+				rAvail.left = HD_COLPADDING;
+				nHorzHAlign = DT_LEFT;
+			}
+			else if (rText.right > rHeader.right)
+			{
+				rAvail.right = (rHeader.right - HD_COLPADDING);
+				
+				if (HasVScrollBar())
+					rAvail.right -= GetSystemMetrics(SM_CXVSCROLL);
+
+				nHorzHAlign = DT_RIGHT;
+			}
+			
+			if (rAvail.Width() < nTextWidth)
+				return;
+
+			rAvail.OffsetRect(nHorzPos, 0);
+		}
+
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
-		const UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_CENTER | GraphicsMisc::GetRTLDrawTextFlags(m_listHeader));
-		pDC->DrawText(sItem, (LPRECT)(LPCRECT)rItem, nFlags);
+		const UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | nHorzHAlign | GraphicsMisc::GetRTLDrawTextFlags(m_listHeader));
+		pDC->DrawText(sItem, (LPRECT)(LPCRECT)rAvail, nFlags);
 	}
 }
 
