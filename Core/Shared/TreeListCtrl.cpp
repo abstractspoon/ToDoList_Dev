@@ -1174,7 +1174,7 @@ BOOL CTreeListCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 	if (hti && (nFlags & TVHT_ONITEMSTATEICON))
 	{
 		// Derived class gets first refusal
-		if (!OnItemCheckChange(hti))
+		if (!OnTreeCheckChange(hti))
 			CWnd::GetParent()->SendMessage(WM_TLC_ITEMCHECKCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)hti);
 		
 		return TRUE; // eat

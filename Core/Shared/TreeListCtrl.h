@@ -233,7 +233,9 @@ protected:
 	virtual BOOL OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
 	virtual BOOL OnHeaderDblClkDivider(NMHEADER* pHDN);
 
+	virtual BOOL OnTreeCheckChange(HTREEITEM /*hti*/) { return FALSE; }
 	virtual void OnListHeaderClick(NMHEADER* /*HDN*/) {}
+
 	virtual BOOL OnTreeMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
 	virtual BOOL OnListLButtonUp(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
 	virtual BOOL OnListMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
@@ -242,7 +244,6 @@ protected:
 	virtual BOOL OnDragDropItem(const TLCITEMMOVE& /*move*/) { return FALSE; }
 	virtual BOOL OnDragBeginItem(const TLCITEMMOVE& /*move*/, BOOL bLeftDrag) { return bLeftDrag; }
 	virtual void OnResize(int cx, int cy);
-	virtual BOOL OnItemCheckChange(HTREEITEM /*hti*/) { return FALSE; }
 
 	virtual GM_ITEMSTATE GetItemState(int nItem) const;
 	virtual GM_ITEMSTATE GetItemState(HTREEITEM hti) const;

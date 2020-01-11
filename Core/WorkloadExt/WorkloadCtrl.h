@@ -131,7 +131,7 @@ protected:
 	UINT OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor);
 
 	BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);
-	BOOL OnItemCheckChange(HTREEITEM hti);
+	BOOL OnTreeCheckChange(HTREEITEM hti);
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	void OnListHeaderClick(NMHEADER* HDN);
 	void OnResize(int cx, int cy);

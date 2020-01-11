@@ -156,7 +156,7 @@ protected:
 	BOOL OnDragDropItem(const TLCITEMMOVE& move);
 	BOOL OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag);
 	UINT OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor);
-	BOOL OnItemCheckChange(HTREEITEM hti);
+	BOOL OnTreeCheckChange(HTREEITEM hti);
 
 	BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);
 	BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);

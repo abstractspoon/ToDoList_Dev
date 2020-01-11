@@ -2221,7 +2221,7 @@ BOOL CGanttCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 	return FALSE;
 }
 
-BOOL CGanttCtrl::OnItemCheckChange(HTREEITEM hti)
+BOOL CGanttCtrl::OnTreeCheckChange(HTREEITEM hti)
 {
 	if (m_bReadOnly)
 		return FALSE;
