@@ -102,7 +102,7 @@ struct TDCDATETIMEWIDTHS
 		CString sMaxTime = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, bIsoFormat);
 		nMaxTimeWidth = pDC->GetTextExtent(sMaxTime).cx;
 
-		nMaxDowNameWidth = CDateHelper::CalcMaxDayOfWeekNameLength(pDC, TRUE);
+		nMaxDowNameWidth = CDateHelper::GetMaxDayOfWeekNameWidth(pDC, TRUE);
 	}
 
 	int nMaxDateWidth;

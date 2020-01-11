@@ -5181,7 +5181,7 @@ int CTDLTaskCtrlBase::CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustom
 	if (!sDow.IsEmpty())
 	{
 		nWidth += nSpace;
-		nWidth += CDateHelper::CalcMaxDayOfWeekNameLength(pDC, TRUE);
+		nWidth += CDateHelper::GetMaxDayOfWeekNameWidth(pDC, TRUE);
 	}
 
 	return nWidth;

@@ -65,7 +65,7 @@ void CCalendarCtrlEx::DrawHeader(CDC* pDC)
 
 	CFont* pOldFont = pDC->SelectObject(&m_DefaultFont);
 	int nWidth = rc.Width()/CALENDAR_NUM_COLUMNS;
-	bool bShort = (CDateHelper::CalcMaxDayOfWeekNameLength(pDC) > nWidth);
+	bool bShort = (CDateHelper::GetMaxDayOfWeekNameWidth(pDC) > nWidth);
 
 	for(i=0 ; i<CALENDAR_NUM_COLUMNS; i++)
 	{
