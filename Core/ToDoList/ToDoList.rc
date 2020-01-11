@@ -5603,7 +5603,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_UDTPREFS_COPY        "\nMake Copy of Tool"
+    ID_UDTPREFS_COPY        "\nDuplicate Tool"
     ID_UDTPREFS_DELETE      "\nDelete Tool"
 END
 
