@@ -4946,7 +4946,10 @@ void CGanttCtrl::CalcMinMonthWidths()
 				nMinMonthWidth = GetMinMonthWidth(nPrev);
 				nMinMonthWidth = (int)(nMinMonthWidth * DAY_WEEK_MULTIPLIER);
 
-				int nWidth = dcClient.GetTextExtent(_T(" 31/12 ")).cx;
+				COleDateTime dtDay(2000, 12, 31, 0, 0, 0);
+				CString sText = FormatDate(dtDay, DHFD_NOYEAR);
+				
+				int nWidth = dcClient.GetTextExtent(sText).cx;
 				nMinMonthWidth = max((nWidth * 31), nMinMonthWidth);
 			}
 			break;
