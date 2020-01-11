@@ -3119,10 +3119,17 @@ void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rI
 	COLORREF crFill, crBorder;
 	GetGanttBarColors(gi, crBorder, crFill);
 
+	HGDIOBJ hFontOld = NULL;
+
+	if (HasOption(GTLCF_STRIKETHRUDONETASKS) && gi.IsDone(FALSE))
+		hFontOld = pDC->SelectObject(m_tree.Fonts().GetHFont(FALSE, FALSE, FALSE, TRUE));
+	
 	pDC->SetBkMode((crRow == CLR_NONE) ? TRANSPARENT : OPAQUE);
 	pDC->SetTextColor(crBorder);
 	pDC->SetBkColor(crRow);
 	pDC->DrawText(sTrailing, rText, (DT_LEFT | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_list)));
+
+	pDC->SelectObject(hFontOld);
 }
 
 void CGanttCtrl::DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, const CRect& rColumn, BOOL bSelected)
