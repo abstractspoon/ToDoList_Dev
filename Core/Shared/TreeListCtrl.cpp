@@ -1807,7 +1807,7 @@ int CTreeListCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol)
 		m_list.ScreenToClient(&(lvht.pt));
 
 	CRect rClient;
-	CWnd::GetClientRect(rClient);
+	m_list.GetClientRect(rClient);
 
 	if (!rClient.PtInRect(lvht.pt))
 		return -1;
