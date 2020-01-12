@@ -1078,7 +1078,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 
 void CGanttChartWnd::UpdateActiveRangeLabel()
 {
-	CString sRange = m_sliderDateRange.FormatRange(!m_ctrlGantt.HasOption(GTLCF_DECADESAREONEBASED));
+	CString sRange = m_sliderDateRange.FormatRange(!m_dlgPrefs.GetDecadesAreOneBased());
 
 	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, sRange));
 }
@@ -1164,6 +1164,7 @@ void CGanttChartWnd::BuildSnapCombo()
 void CGanttChartWnd::BuildDisplayCombo()
 {
 	GTLC_MONTH_DISPLAY nCurDisplay = m_ctrlGantt.GetMonthDisplay();
+	BOOL bOneBasedDecades = m_dlgPrefs.GetDecadesAreOneBased();
 
 	m_cbDisplayOptions.ResetContent();
 
@@ -1182,7 +1183,22 @@ void CGanttChartWnd::BuildDisplayCombo()
 		}
 
 		// else
-		CDialogHelper::AddString(m_cbDisplayOptions, mode.nStringID, mode.nDisplay);
+		CEnString sItemText(mode.nStringID);
+
+		// Handle one-based decades
+		if (bOneBasedDecades)
+		{
+			if (mode.nDisplay == GTLC_DISPLAY_DECADES)
+			{
+				sItemText.Replace(_T("2000-2009"), _T("2001-2010"));
+			}
+			else if (mode.nDisplay == GTLC_DISPLAY_QUARTERCENTURIES)
+			{
+				sItemText.Replace(_T("2000-2024"), _T("2001-2025"));
+			}
+		}
+
+		CDialogHelper::AddString(m_cbDisplayOptions, sItemText, mode.nDisplay);
 	}
 	
 	CDialogHelper::RefreshMaxDropWidth(m_cbDisplayOptions);
@@ -1208,6 +1224,13 @@ void CGanttChartWnd::OnGanttPreferences()
 	
 	if (m_dlgPrefs.DoModal() == IDOK)
 	{
+		// Update UI if 'one-based decades' has changed
+		if (m_ctrlGantt.HasOption(GTLCF_DECADESAREONEBASED) != m_dlgPrefs.GetDecadesAreOneBased())
+		{
+			BuildDisplayCombo();
+			UpdateActiveRangeLabel();
+		}
+
 		// update gantt control
 		UpdateGanttCtrlPreferences();
 		

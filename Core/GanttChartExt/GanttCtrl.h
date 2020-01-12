@@ -78,7 +78,7 @@ public:
 	void ScrollToTask(DWORD dwTaskID);
 
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
-	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
+	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) ? TRUE : FALSE); }
 
 	void SetTodayColor(COLORREF crToday);
 	void SetWeekendColor(COLORREF crWeekend);
