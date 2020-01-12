@@ -3349,7 +3349,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 			// draw month header
 			rMonth.bottom = rWeek.top;
-			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, TRUE);
+			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed);
 
 			// draw week elements
 			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
@@ -3474,7 +3474,10 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 					else if (m_nMonthDisplay == GTLC_DISPLAY_DAYS_LONG)
 					{
 						COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
-						sHeader = FormatDate(dtDay, DHFD_NOYEAR);
+						OLE_DAYOFWEEK nDOW = CDateHelper::GetDayOfWeek(dtDay);
+
+						//sHeader = FormatDate(dtDay, DHFD_NOYEAR);
+						sHeader.Format(_T("%s/%d"), CDateHelper::GetDayOfWeekName(nDOW, TRUE), nDay);
 					}
 					else
 					{
@@ -3514,54 +3517,61 @@ void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString&
 		// Special case: We're a 2-row header and the upper text 
 		// wants always to be visible regardless of scroll pos
 		int nHorzHAlign = DT_CENTER;
-		CRect rAvail(rItem);
+		CRect rDraw(rItem);
 
 		if (bEnsureVisible)
 		{
 			int nHorzPos = m_list.GetScrollPos(SB_HORZ);
 
 			// Get the draw rect in list coords
-			rAvail.OffsetRect(-nHorzPos, 0);
+			rDraw.OffsetRect(-nHorzPos, 0);
+
+			CRect rHeader;
+			m_list.GetClientRect(rHeader);
+
+			rDraw.left = max(rDraw.left, 0);
+			rDraw.right = min(rDraw.right, rHeader.right);
 
 			// Calc the default position of the text
 			int nTextWidth = pDC->GetTextExtent(sItem).cx;
 
+/*
 			CRect rText(0, 0, nTextWidth, rItem.Height());
-			GraphicsMisc::CentreRect(rText, rAvail, TRUE, FALSE);
+			GraphicsMisc::CentreRect(rText, rDraw, TRUE, FALSE);
 
+			// Use the list's client rect to get the available 
+			// header rect, excluding any vertical scrollbar
 			CRect rHeader;
-			m_listHeader.GetClientRect(rHeader);
+			m_list.GetClientRect(rHeader);
 
-			rHeader.OffsetRect(-nHorzPos, 0);
+			rHeader.top = rItem.top;
+			rHeader.bottom = rItem.bottom;
 
 			// If it's clipped then make it left-aligned or right-aligned
 			// depending on which end is clipped
 			if (rText.left < 0)
 			{
-				rAvail.left = HD_COLPADDING;
+				rDraw.left = HD_COLPADDING;
 				nHorzHAlign = DT_LEFT;
 			}
 			else if (rText.right > rHeader.right)
 			{
-				rAvail.right = (rHeader.right - HD_COLPADDING);
-				
-				if (HasVScrollBar())
-					rAvail.right -= GetSystemMetrics(SM_CXVSCROLL);
-
+				rDraw.right = (rHeader.right - HD_COLPADDING);
 				nHorzHAlign = DT_RIGHT;
 			}
+*/
 			
-			if (rAvail.Width() < nTextWidth)
+			if (rDraw.Width() < nTextWidth)
 				return;
 
-			rAvail.OffsetRect(nHorzPos, 0);
+			rDraw.OffsetRect(nHorzPos, 0);
 		}
 
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
 		const UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | nHorzHAlign | GraphicsMisc::GetRTLDrawTextFlags(m_listHeader));
-		pDC->DrawText(sItem, (LPRECT)(LPCRECT)rAvail, nFlags);
+		pDC->DrawText(sItem, (LPRECT)(LPCRECT)rDraw, nFlags);
 	}
 }
 
@@ -4850,7 +4860,7 @@ int CGanttCtrl::GetMinMonthWidth(GTLC_MONTH_DISPLAY nDisplay) const
 
 void CGanttCtrl::CalcMinMonthWidths()
 {
-	CClientDC dcClient(&m_treeHeader);
+	CClientDC dcClient(&m_list);
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dcClient, m_list);
 
 	for (int nMode = 0; nMode < NUM_DISPLAYMODES; nMode++)
@@ -4946,10 +4956,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 				nMinMonthWidth = GetMinMonthWidth(nPrev);
 				nMinMonthWidth = (int)(nMinMonthWidth * DAY_WEEK_MULTIPLIER);
 
-				COleDateTime dtDay(2000, 12, 31, 0, 0, 0);
-				CString sText = FormatDate(dtDay, DHFD_NOYEAR);
-				
-				int nWidth = dcClient.GetTextExtent(sText).cx;
+				int nWidth = (dcClient.GetTextExtent(_T("/31")).cx + CDateHelper::GetMaxDayOfWeekNameWidth(&dcClient, TRUE));
 				nMinMonthWidth = max((nWidth * 31), nMinMonthWidth);
 			}
 			break;
@@ -6439,13 +6446,8 @@ void CGanttCtrl::RefreshItemBoldState(HTREEITEM htiFrom, BOOL bAndChildren)
 
 BOOL CGanttCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 {
-	if (!hFont || !m_tree.GetSafeHwnd() || !m_list.GetSafeHwnd())
-	{
-		ASSERT(0);
+	if (!CTreeListCtrl::SetFont(hFont, bRedraw))
 		return FALSE;
-	}
-	
-	m_tree.SetFont(CFont::FromHandle(hFont), bRedraw);
 
 	CalcMinMonthWidths();
 	SetMonthDisplay(m_nMonthDisplay);
