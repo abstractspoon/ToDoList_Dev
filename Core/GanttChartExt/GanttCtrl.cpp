@@ -4926,8 +4926,8 @@ void CGanttCtrl::CalcMinMonthWidths()
 				{
 					CString sText = FormatListColumnHeaderText(nDisplay, nMonth, 2013);
 					
-					int nWidth = dcClient.GetTextExtent(sText).cx;
-					nMinTextWidth = max(nWidth, nMinTextWidth);
+					int nTextWidth = dcClient.GetTextExtent(sText).cx;
+					nMinTextWidth = max(nTextWidth, nMinTextWidth);
 				}
 				
 				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING);
@@ -4956,8 +4956,8 @@ void CGanttCtrl::CalcMinMonthWidths()
 				nMinMonthWidth = GetMinMonthWidth(nPrev);
 				nMinMonthWidth = (int)(nMinMonthWidth * DAY_WEEK_MULTIPLIER);
 
-				int nWidth = (dcClient.GetTextExtent(_T("/31")).cx + CDateHelper::GetMaxDayOfWeekNameWidth(&dcClient, TRUE));
-				nMinMonthWidth = max((nWidth * 31), nMinMonthWidth);
+				int nTextWidth = (dcClient.GetTextExtent(_T("/31")).cx + CDateHelper::GetMaxDayOfWeekNameWidth(&dcClient, TRUE));
+				nMinMonthWidth = max((nTextWidth * 31), nMinMonthWidth);
 			}
 			break;
 			
