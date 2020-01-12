@@ -35,26 +35,26 @@ struct GANTTDATERANGE : protected COleDateTimeRange
 	void Add(const GANTTITEM& gi);
 	void Add(const COleDateTime& dtStart, const COleDateTime& dtEnd);
 
-	COleDateTime GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
-	COleDateTime GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
+	COleDateTime GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const;
+	COleDateTime GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const;
 
 	COleDateTime GetStart() const;
 	COleDateTime GetEnd() const;
 
-	int GetStartYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
-	int GetEndYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
+	int GetStartYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const;
+	int GetEndYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const;
 
-	int GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const;
+	int GetNumMonths(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const;
 
 	void Set(const GANTTDATERANGE& dtOther);
 	void Set(const COleDateTimeRange& dtOther);
 	void SetStart(const COleDateTime& date);
 	void SetEnd(const COleDateTime& date);
 
-	void Set(const GANTTDATERANGE& dtOther, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE);
-	void Set(const COleDateTimeRange& dtOther, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE);
-	void SetStart(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE);
-	void SetEnd(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE);
+	void Set(const GANTTDATERANGE& dtOther, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades);
+	void Set(const COleDateTimeRange& dtOther, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades);
+	void SetStart(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades);
+	void SetEnd(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades);
 
 	BOOL HasStart() const;
 	BOOL HasEnd() const;

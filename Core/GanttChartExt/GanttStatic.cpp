@@ -157,10 +157,9 @@ BOOL GanttStatic::GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, CO
 	return TRUE;
 }
 
-int GanttStatic::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay)
+int GanttStatic::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
 {
-	// Note: Doesn't matter when decades start
-	int nNumMonths = dtRange.GetNumMonths(nDisplay);
+	int nNumMonths = dtRange.GetNumMonths(nDisplay, bZeroBasedDecades);
 	int nNumCols = 0;
 
 	switch (nDisplay)

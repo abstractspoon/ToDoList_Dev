@@ -1108,7 +1108,7 @@ int CGanttCtrl::GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const
 
 int CGanttCtrl::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return ActiveDateRange().GetNumMonths(nDisplay);
+	return ActiveDateRange().GetNumMonths(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
 }
 
 void CGanttCtrl::SetOption(DWORD dwOption, BOOL bSet)
@@ -1271,7 +1271,7 @@ int CGanttCtrl::GetRequiredListColumnCount() const
 
 int CGanttCtrl::GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	int nNumCols = GetRequiredColumnCount(ActiveDateRange(), nDisplay);
+	int nNumCols = GetRequiredColumnCount(ActiveDateRange(), nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
 	
 	// Add a buffer column to accommodate trailing text except
 	// where an active date range has been set else we'll always

@@ -782,13 +782,12 @@ int GANTTDATERANGE::GetEndYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecad
 	return min(nYear, MAX_YEAR);
 }
 
-int GANTTDATERANGE::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const
+int GANTTDATERANGE::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
 {
 	if (!IsValid())
 		return 0;
 
-	// Note: Doesn't matter when decades start
-	COleDateTime dtStart(GetStart(nDisplay)), dtEnd(GetEnd(nDisplay));
+	COleDateTime dtStart(GetStart(nDisplay, bZeroBasedDecades)), dtEnd(GetEnd(nDisplay, bZeroBasedDecades));
 
 	int nNumMonths = CDateHelper::CalcMonthsFromTo(dtStart, dtEnd, TRUE);
 	ASSERT(nNumMonths > 0);

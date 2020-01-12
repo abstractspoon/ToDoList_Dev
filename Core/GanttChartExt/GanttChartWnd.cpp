@@ -224,7 +224,7 @@ void CGanttChartWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	// Active date range
 	GANTTDATERANGE dtRange;
 
-	if (m_sliderDateRange.GetSelectedRange(dtRange))
+	if (m_sliderDateRange.GetSelectedRange(dtRange, !m_dlgPrefs.GetDecadesAreOneBased()))
 	{
 		pPrefs->WriteProfileDouble(_T("ActiveRange"), _T("Start"), dtRange.GetStart().m_dt);
 		pPrefs->WriteProfileDouble(_T("ActiveRange"), _T("End"), dtRange.GetEnd().m_dt);
@@ -530,12 +530,12 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	GTLC_MONTH_DISPLAY nDisplay = m_ctrlGantt.GetMonthDisplay();
 
 	m_sliderDateRange.SetMonthDisplay(nDisplay);
-	m_sliderDateRange.SetMaxRange(dtDataRange);
+	m_sliderDateRange.SetMaxRange(dtDataRange, !m_dlgPrefs.GetDecadesAreOneBased());
 	m_sliderDateRange.EnableWindow(TRUE);
 
 	if (m_dtPrevActiveRange.IsValid())
 	{
-		if (m_sliderDateRange.SetSelectedRange(m_dtPrevActiveRange))
+		if (m_sliderDateRange.SetSelectedRange(m_dtPrevActiveRange, !m_dlgPrefs.GetDecadesAreOneBased()))
 			m_ctrlGantt.SetActiveDateRange(m_dtPrevActiveRange);
 
 		m_dtPrevActiveRange.Reset();
@@ -905,7 +905,7 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 		if (m_ctrlGantt.GetDataDateRange(dtRange))
 		{
 			m_sliderDateRange.SetMonthDisplay(nDisplay);
-			m_sliderDateRange.SetMaxRange(dtRange);
+			m_sliderDateRange.SetMaxRange(dtRange, !m_dlgPrefs.GetDecadesAreOneBased());
 			m_sliderDateRange.EnableWindow(TRUE);
 
 			UpdateActiveRangeLabel();
@@ -1229,6 +1229,11 @@ void CGanttChartWnd::OnGanttPreferences()
 		{
 			BuildDisplayCombo();
 			UpdateActiveRangeLabel();
+
+			GANTTDATERANGE dtRange;
+
+			if (m_sliderDateRange.GetSelectedRange(dtRange, !m_dlgPrefs.GetDecadesAreOneBased()))
+				m_ctrlGantt.SetActiveDateRange(dtRange);
 		}
 
 		// update gantt control
@@ -1398,7 +1403,7 @@ LRESULT CGanttChartWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	GANTTDATERANGE dtSel;
 
-	if (m_sliderDateRange.GetSelectedRange(dtSel))
+	if (m_sliderDateRange.GetSelectedRange(dtSel, !m_dlgPrefs.GetDecadesAreOneBased()))
 		m_ctrlGantt.SetActiveDateRange(dtSel);
 	else
 		m_ctrlGantt.ClearActiveDateRange();
