@@ -1180,8 +1180,8 @@ CString CGanttCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int 
 		{
 			COleDateTime date(nYear, nMonth, 1, 0, 0, 0);
 
-			int nStartYear = CDateHelper::GetNearestQuarterCentury(date, FALSE, bZeroBasedDecades).GetYear();
-			int nEndYear = CDateHelper::GetNearestQuarterCentury(date, TRUE, bZeroBasedDecades).GetYear();
+			int nStartYear = CDateHelper::GetStartOfQuarterCentury(date, bZeroBasedDecades).GetYear();
+			int nEndYear = (nStartYear + 24);
 
 			sDate.Format(_T("%d-%d"), nStartYear, nEndYear);
 		}
@@ -1191,8 +1191,8 @@ CString CGanttCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int 
 		{
 			COleDateTime date(nYear, nMonth, 1, 0, 0, 0);
 
-			int nStartYear = CDateHelper::GetNearestDecade(date, FALSE, bZeroBasedDecades).GetYear();
-			int nEndYear = CDateHelper::GetNearestDecade(date, TRUE, bZeroBasedDecades).GetYear();
+			int nStartYear = CDateHelper::GetStartOfDecade(date, bZeroBasedDecades).GetYear();
+			int nEndYear = (nStartYear + 9);
 
 			sDate.Format(_T("%d-%d"), nStartYear, nEndYear);
 		}

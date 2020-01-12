@@ -649,11 +649,17 @@ BOOL CEnHeaderCtrl::SetItem(int nItem, int nWidth, LPCTSTR szText, DWORD dwData)
 	ASSERT (nItem >= 0 && nItem < GetItemCount());
 	HD_ITEM hdi = { 0 };
 
-	hdi.mask = HDI_WIDTH | HDI_LPARAM | HDI_TEXT;
-	hdi.cxy = nWidth;
+	hdi.mask = HDI_LPARAM | HDI_TEXT;
 	hdi.pszText = (LPTSTR)szText;
 	hdi.lParam = dwData;
 
+	// Set Item will fail if width does not change
+	if (nWidth != GetItemWidth(nItem))
+	{
+		hdi.mask |= HDI_WIDTH;
+		hdi.cxy = nWidth;
+	}
+	
 	return SetItem(nItem, &hdi);
 }
 
