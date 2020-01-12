@@ -4685,13 +4685,22 @@ void CGanttCtrl::UpdateListColumnsWidthAndText(int nWidth)
 			CString sTitle = FormatListColumnHeaderText(m_nMonthDisplay, nMonth, nYear);
 			DWORD dwData = MAKELONG(nMonth, nYear);
 
+			int nColWidth = nWidth;
+			BOOL bTracked = FALSE;
+			
 			if (bUsePrevWidth)
-				nWidth = m_aPrevColWidths[nCol];
+			{
+				bTracked = m_aPrevTrackedCols[nCol];
 
-			m_listHeader.SetItem(nCol, nWidth, sTitle, dwData);
+				if (bTracked)
+					nColWidth = m_aPrevColWidths[nCol];
+			}
+
+			m_listHeader.SetItem(nCol, nColWidth, sTitle, dwData);
+			m_listHeader.SetItemTracked(nCol, bTracked);
 			m_listHeader.EnableItemTracking(nCol, TRUE);
 
-			nTotalReqdWidth += nWidth;
+			nTotalReqdWidth += nColWidth;
 		}
 
 		// Next column
