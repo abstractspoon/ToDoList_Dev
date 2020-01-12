@@ -1088,27 +1088,27 @@ BOOL CGanttCtrl::SetActiveDateRange(const GANTTDATERANGE& dtRange)
 
 COleDateTime CGanttCtrl::GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return ActiveDateRange().GetStart(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
+	return ActiveDateRange().GetStart(nDisplay, HasOption(GTLCF_DECADESAREZEROBASED));
 }
 
 COleDateTime CGanttCtrl::GetEndDate(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return ActiveDateRange().GetEnd(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
+	return ActiveDateRange().GetEnd(nDisplay, HasOption(GTLCF_DECADESAREZEROBASED));
 }
 
 int CGanttCtrl::GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return ActiveDateRange().GetStartYear(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
+	return ActiveDateRange().GetStartYear(nDisplay, HasOption(GTLCF_DECADESAREZEROBASED));
 }
 
 int CGanttCtrl::GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return ActiveDateRange().GetEndYear(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
+	return ActiveDateRange().GetEndYear(nDisplay, HasOption(GTLCF_DECADESAREZEROBASED));
 }
 
 int CGanttCtrl::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return ActiveDateRange().GetNumMonths(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
+	return ActiveDateRange().GetNumMonths(nDisplay, HasOption(GTLCF_DECADESAREZEROBASED));
 }
 
 void CGanttCtrl::SetOption(DWORD dwOption, BOOL bSet)
@@ -1137,7 +1137,7 @@ void CGanttCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				InvalidateAll(FALSE);
 				break;
 
-			case GTLCF_DECADESAREONEBASED:
+			case GTLCF_DECADESAREZEROBASED:
 				if ((m_nMonthDisplay == GTLC_DISPLAY_QUARTERCENTURIES) || 
 					(m_nMonthDisplay == GTLC_DISPLAY_DECADES))
 				{
@@ -1169,7 +1169,7 @@ CString CGanttCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int 
 	if (nMonth == 0)
 		return _T("");
 
-	BOOL bZeroBasedDecades = !HasOption(GTLCF_DECADESAREONEBASED);
+	BOOL bZeroBasedDecades = HasOption(GTLCF_DECADESAREZEROBASED);
 	BOOL bISODates = HasOption(GTLCF_DISPLAYISODATES);
 
 	CString sDate;
@@ -1271,7 +1271,7 @@ int CGanttCtrl::GetRequiredListColumnCount() const
 
 int CGanttCtrl::GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	int nNumCols = GetRequiredColumnCount(ActiveDateRange(), nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
+	int nNumCols = GetRequiredColumnCount(ActiveDateRange(), nDisplay, HasOption(GTLCF_DECADESAREZEROBASED));
 	
 	// Add a buffer column to accommodate trailing text except
 	// where an active date range has been set else we'll always
@@ -5286,7 +5286,7 @@ BOOL CGanttCtrl::GetScrollPosFromDate(const COleDateTime& date, int& nPos) const
 				{
 					// Column == 25 years
 					nDaysInCol = (int)(DAYS_IN_YEAR * 25);
-					int nStartYear = CDateHelper::GetStartOfQuarterCentury(date, !HasOption(GTLCF_DECADESAREONEBASED)).GetYear();
+					int nStartYear = CDateHelper::GetStartOfQuarterCentury(date, HasOption(GTLCF_DECADESAREZEROBASED)).GetYear();
 					dDayInCol = (int)(((nYear - nStartYear) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
 				}
 				break;
@@ -5295,7 +5295,7 @@ BOOL CGanttCtrl::GetScrollPosFromDate(const COleDateTime& date, int& nPos) const
 				{
 					// Column == 10 years
 					nDaysInCol = (int)(DAYS_IN_YEAR * 10);
-					int nStartYear = CDateHelper::GetStartOfDecade(date, !HasOption(GTLCF_DECADESAREONEBASED)).GetYear();
+					int nStartYear = CDateHelper::GetStartOfDecade(date, HasOption(GTLCF_DECADESAREZEROBASED)).GetYear();
 					dDayInCol = (int)(((nYear - nStartYear) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
 				}
 				break;

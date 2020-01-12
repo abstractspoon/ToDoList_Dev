@@ -36,7 +36,7 @@ public:
 	COLORREF GetDefaultColor() const;
 	CString GetMilestoneTag() const;
 	BOOL GetDisplayProgressInBar() const { return m_bDisplayProgressInBar; }
-	BOOL GetDecadesAreOneBased() const { return m_bDecadesAreOneBased; }
+	BOOL GetDecadesAreZeroBased() const { return !m_bDecadesAreOneBased; }
 	BOOL GetDisplayParentsAsRollups() const { return m_bDisplayParentsAsRollups; }
 	void GetColumnVisibility(CDWordArray& aColumnVis) const;
 
@@ -124,7 +124,7 @@ public:
 	COLORREF GetDefaultColor() const { return m_page.GetDefaultColor(); }
 	CString GetMilestoneTag() const { return m_page.GetMilestoneTag(); }
 	BOOL GetDisplayProgressInBar() const { return m_page.GetDisplayProgressInBar(); }
-	BOOL GetDecadesAreOneBased() const { return m_page.GetDecadesAreOneBased(); }
+	BOOL GetDecadesAreZeroBased() const { return m_page.GetDecadesAreZeroBased(); }
 	BOOL GetDisplayParentsAsRollups() const { return m_page.GetDisplayParentsAsRollups(); }
 	void GetColumnVisibility(CDWordArray& aColumnVis) const { m_page.GetColumnVisibility(aColumnVis); }
 
