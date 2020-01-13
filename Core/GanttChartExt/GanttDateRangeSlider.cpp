@@ -54,7 +54,7 @@ BOOL CGanttDateRangeSlider::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 	return TRUE;
 }
 
-BOOL CGanttDateRangeSlider::SetMaxRange(const GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades)
+BOOL CGanttDateRangeSlider::SetDataRange(const GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades)
 {
 	if (m_nMonthDisplay == GTLC_DISPLAY_NONE)
 	{
@@ -69,7 +69,7 @@ BOOL CGanttDateRangeSlider::SetMaxRange(const GANTTDATERANGE& dtRange, BOOL bZer
 	}
 
 	// Work out whether we need to reset the active range
-	BOOL bSetMaxRange = !m_dtMaxRange.IsValid();
+	BOOL bSetMaxRange = !m_dtDataRange.IsValid();
 
 	if (!bSetMaxRange)
 		bSetMaxRange = ((m_Left == m_Min) && (m_Right == m_Max));
@@ -83,17 +83,17 @@ BOOL CGanttDateRangeSlider::SetMaxRange(const GANTTDATERANGE& dtRange, BOOL bZer
 	if (bSetMaxRange)
 		SetRange(0.0, nNumCols);
 	
-	m_dtMaxRange = dtRange;
+	m_dtDataRange = dtRange;
 
 	return TRUE;
 }
 
 BOOL CGanttDateRangeSlider::GetMaxRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const
 {
-	int nNumCols = GanttStatic::GetRequiredColumnCount(m_dtMaxRange, m_nMonthDisplay, bZeroBasedDecades) + 1;
+	int nNumCols = GanttStatic::GetRequiredColumnCount(m_dtDataRange, m_nMonthDisplay, bZeroBasedDecades) + 1;
 	int nMonthsPerCol = GanttStatic::GetNumMonthsPerColumn(m_nMonthDisplay);
 
-	COleDateTime dtStart(m_dtMaxRange.GetStart(m_nMonthDisplay, bZeroBasedDecades));
+	COleDateTime dtStart(m_dtDataRange.GetStart(m_nMonthDisplay, bZeroBasedDecades));
 
 	COleDateTime dtEnd(dtStart);
 	CDateHelper::IncrementMonth(dtEnd, (nNumCols - 1) * nMonthsPerCol);
@@ -125,7 +125,7 @@ BOOL CGanttDateRangeSlider::HasSelectedRange() const
 		return FALSE;
 	}
 
-	return (m_dtMaxRange.IsValid() && CRangeSliderCtrl::HasSelectedRange());
+	return (m_dtDataRange.IsValid() && CRangeSliderCtrl::HasSelectedRange());
 }
 
 BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const
@@ -144,10 +144,10 @@ BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange, BOOL bZero
 	
 	int nMonthsPerCol = GanttStatic::GetNumMonthsPerColumn(m_nMonthDisplay);
 
-	COleDateTime dtStart(m_dtMaxRange.GetStart());
+	COleDateTime dtStart(m_dtDataRange.GetStart());
 	CDateHelper::IncrementMonth(dtStart, nStartCol * nMonthsPerCol);
 
-	COleDateTime dtEnd(m_dtMaxRange.GetStart());
+	COleDateTime dtEnd(m_dtDataRange.GetStart());
 	CDateHelper::IncrementMonth(dtEnd, nEndCol * nMonthsPerCol);
 
 	dtRange.SetStart(dtStart, m_nMonthDisplay, bZeroBasedDecades);

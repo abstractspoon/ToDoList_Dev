@@ -25,7 +25,7 @@ public:
 	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay);
 
 	BOOL GetMaxRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const;
-	BOOL SetMaxRange(const GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades);
+	BOOL SetDataRange(const GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades);
 
 	BOOL HasSelectedRange() const;
 	BOOL GetSelectedRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const;
@@ -35,7 +35,7 @@ public:
 
 protected:
 	GTLC_MONTH_DISPLAY m_nMonthDisplay;
-	GANTTDATERANGE m_dtMaxRange;
+	GANTTDATERANGE m_dtDataRange;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
