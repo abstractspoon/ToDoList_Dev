@@ -56,6 +56,7 @@ namespace GanttStatic
 	int FindDisplay(GTLC_MONTH_DISPLAY nDisplay);
 	int CompareDisplays(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DISPLAY nDisplay2);
 	BOOL IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay);
+	BOOL IsSameDisplayGroup(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DISPLAY nDisplay2);
 
 	/////////////////////////////////////////////////////////////////////////////
 

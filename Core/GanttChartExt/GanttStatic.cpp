@@ -19,7 +19,7 @@ int GanttStatic::FindDisplay(GTLC_MONTH_DISPLAY nDisplay)
 			return nMode;
 	}
 	
-	return FALSE;
+	return -1;
 }
 
 GTLC_MONTH_DISPLAY GanttStatic::GetPreviousDisplay(GTLC_MONTH_DISPLAY nDisplay)
@@ -74,6 +74,55 @@ int GanttStatic::CompareDisplays(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DISPLA
 BOOL GanttStatic::IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
 	return (FindDisplay(nDisplay) != -1);
+}
+
+BOOL GanttStatic::IsSameDisplayGroup(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DISPLAY nDisplay2)
+{
+	switch (nDisplay1)
+	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		return (nDisplay2 == GTLC_DISPLAY_QUARTERCENTURIES);
+
+	case GTLC_DISPLAY_DECADES:
+		return (nDisplay2 == GTLC_DISPLAY_DECADES);
+
+	case GTLC_DISPLAY_YEARS:
+		return (nDisplay2 == GTLC_DISPLAY_YEARS);
+
+	case GTLC_DISPLAY_QUARTERS_SHORT:
+	case GTLC_DISPLAY_QUARTERS_MID:
+	case GTLC_DISPLAY_QUARTERS_LONG:
+		return (nDisplay2 == GTLC_DISPLAY_QUARTERS_SHORT) ||
+			(nDisplay2 == GTLC_DISPLAY_QUARTERS_MID) ||
+			(nDisplay2 == GTLC_DISPLAY_QUARTERS_LONG);
+
+	case GTLC_DISPLAY_MONTHS_SHORT:
+	case GTLC_DISPLAY_MONTHS_MID:
+	case GTLC_DISPLAY_MONTHS_LONG:
+		return (nDisplay2 == GTLC_DISPLAY_MONTHS_SHORT) ||
+			(nDisplay2 == GTLC_DISPLAY_MONTHS_MID) ||
+			(nDisplay2 == GTLC_DISPLAY_MONTHS_LONG);
+
+	case GTLC_DISPLAY_WEEKS_SHORT:
+	case GTLC_DISPLAY_WEEKS_MID:
+	case GTLC_DISPLAY_WEEKS_LONG:
+		return (nDisplay2 == GTLC_DISPLAY_WEEKS_SHORT) ||
+			(nDisplay2 == GTLC_DISPLAY_WEEKS_MID) ||
+			(nDisplay2 == GTLC_DISPLAY_WEEKS_LONG);
+
+	case GTLC_DISPLAY_DAYS_SHORT:
+	case GTLC_DISPLAY_DAYS_MID:
+	case GTLC_DISPLAY_DAYS_LONG:
+		return (nDisplay2 == GTLC_DISPLAY_DAYS_SHORT) ||
+			(nDisplay2 == GTLC_DISPLAY_DAYS_MID) ||
+			(nDisplay2 == GTLC_DISPLAY_DAYS_LONG);
+
+	case GTLC_DISPLAY_HOURS:
+		return (nDisplay2 == GTLC_DISPLAY_HOURS);
+	}
+
+	ASSERT(0);
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
