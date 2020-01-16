@@ -239,9 +239,11 @@ CTDCStartupOptions::CTDCStartupOptions(const CEnCommandLineInfo& cmdInfo)
 
 CTDCStartupOptions::CTDCStartupOptions(const CString& sCmdInfo, int nFirstArg)
 {
+	Reset();
+
 	CEnCommandLineInfo cmdInfo;
 
-	if (cmdInfo.SetCommandLine(sCmdInfo, nFirstArg))
+	if (cmdInfo.SetCommandLine(sCmdInfo, nFirstArg) || !cmdInfo.m_strFileName.IsEmpty())
 		SetCmdInfo(cmdInfo);
 }
 

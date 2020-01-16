@@ -190,19 +190,6 @@ BOOL CToDoListApp::HasVS2010Redistributable()
 		return FALSE;
 	}
 
-/*
-	HANDLE hFile = CreateFile(sVs2010Runtime, // file to open
-					   GENERIC_READ,          // open for reading
-					   FILE_SHARE_READ,       // share for reading
-					   NULL,                  // default security
-					   OPEN_EXISTING,         // existing file only
-					   FILE_ATTRIBUTE_NORMAL, // normal file
-					   NULL);                 // no attr. template
-
-	TCHAR szFinal[MAX_PATH + 1];
-	GetFinalPathNameByHandle(hFile, szFinal, MAX_PATH, VOLUME_NAME_DOS);
-*/
-
 	// All good
 	return TRUE;
 }
@@ -239,7 +226,7 @@ BOOL CToDoListApp::InitInstance()
 
 		// else strip off the restart switch and continue
 		cmdInfo.DeleteOption(SWITCH_RESTART);
-
+		
 		// and turn on logging to capture the first run
 		CToDoListWnd::EnableLogging();
 	}
@@ -300,7 +287,7 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 {
 	// See if another instance can better handle this than us
 	TDCFINDWND find;
-	int nNumWnds = FindToDoListWnds(find);
+	int nNumWnds = CToDoListWnd::FindToDoListWnds(find);
 
 	// If another instance is just starting up or closing down
 	// ie. has no window handle or is blocking we hang around 
@@ -316,7 +303,7 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 			if (!g_SingleInstanceObj.IsAnotherInstanceRunning(TRUE))
 				break; // we're now the only instance
 
-			nNumWnds = FindToDoListWnds(find);
+			nNumWnds = CToDoListWnd::FindToDoListWnds(find);
 		}
 	}
 
@@ -327,21 +314,19 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 	if (!nNumWnds)
 		return FALSE;
 
-	// Under multi-instance, having a non-empty commandline without
-	// a file path or task link is always treated as an error
-	BOOL bMultiInstance = CPreferences().GetProfileInt(_T("Preferences"), _T("MultiInstance"), FALSE);
+	// If more than one instance is open (ie. more than one possible target), 
+	// then a non-empty commandline without a file path or task link is treated as an error
 	BOOL bHasFilePath = startup.HasFilePath();
 	BOOL bTaskLink = startup.HasFlag(TLD_TASKLINK);
 
-	if (bMultiInstance && !bHasFilePath && !bTaskLink && !startup.IsEmpty(TRUE))
+	if ((nNumWnds > 1) && !bHasFilePath && !bTaskLink && !startup.IsEmpty(TRUE))
 	{
 		AfxMessageBox(CEnString(IDS_MULTIINSTANCENOFILEPATH), (MB_OK | MB_ICONERROR));
 		return TRUE; // handled
 	}
 
-	// if there IS a tasklist on the commandline and
-	// we are NOT importing it, see if any other instance 
-	// already has it loaded 
+	// if there IS a tasklist on the commandline and we are NOT importing it, 
+	// see if any other instance already has it loaded 
 	HWND hwndOtherInst = NULL;
 
 	if (bHasFilePath && !startup.HasFlag(TLD_IMPORTFILE))
@@ -370,6 +355,7 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 
 	// if no other instance had it open and _we_ are single instance
 	// we then see if any of the instances is willing to handle it
+	BOOL bMultiInstance = CPreferences().GetProfileInt(_T("Preferences"), _T("MultiInstance"), FALSE);
 	BOOL bTasklistOpened = FALSE;
 
 	if ((hwndOtherInst == NULL) && !bMultiInstance)
@@ -1599,7 +1585,7 @@ void CToDoListApp::RunUpdater(BOOL bPreRelease, BOOL bTestDownload) const
 BOOL CToDoListApp::CloseAllToDoListWnds()
 {
 	TDCFINDWND find(NULL, TRUE);
-	int nNumWnds = FindToDoListWnds(find);
+	int nNumWnds = CToDoListWnd::FindToDoListWnds(find);
 	
 	for (int nWnd = 0; nWnd < nNumWnds; nWnd++)
 	{
@@ -1615,67 +1601,7 @@ BOOL CToDoListApp::CloseAllToDoListWnds()
 
 	// check for user cancellation by seeing 
 	// if any windows are still open
-	return (FindToDoListWnds(find) == 0);
-}
-
-int CToDoListApp::FindToDoListWnds(TDCFINDWND& find)
-{
-	ASSERT(find.hWndIgnore == NULL || ::IsWindow(find.hWndIgnore));
-
-	find.aResults.RemoveAll();
-	EnumWindows(FindOtherInstance, (LPARAM)&find);
-
-	return find.aResults.GetSize();
-}
-
-BOOL CALLBACK CToDoListApp::FindOtherInstance(HWND hWnd, LPARAM lParam)
-{
-	static CString COPYRIGHT(MAKEINTRESOURCE(IDS_COPYRIGHT));
-
-	CString sCaption;
-	CWnd::FromHandle(hWnd)->GetWindowText(sCaption);
-
-	if (Misc::RemoveSuffix(sCaption, COPYRIGHT))
-	{
-		TDCFINDWND* pFind = (TDCFINDWND*)lParam;
-		ASSERT(pFind);
-
-		// check window to ignore
-		if ((pFind->hWndIgnore == NULL) || (pFind->hWndIgnore == hWnd))
-		{
-			// check if it's closing
-			DWORD bClosing = FALSE;
-			BOOL bSendSucceeded = ::SendMessageTimeout(hWnd, 
-														WM_TDL_ISCLOSING, 
-														0, 
-														0, 
-														SMTO_ABORTIFHUNG | SMTO_BLOCK, 
-														1000, 
-														&bClosing);
-
-			if (bSendSucceeded && (pFind->bIncClosing || !bClosing))
-			{
-				if (pFind->dwProcessID)
-				{
-					DWORD dwOtherProcID = 0;
-					GetWindowThreadProcessId(hWnd, &dwOtherProcID);
-					ASSERT(dwOtherProcID);
-
-					if (dwOtherProcID == pFind->dwProcessID)
-					{
-						pFind->aResults.Add(hWnd);
-						return FALSE; // we can stop now
-					}
-				}
-				else
-				{
-					pFind->aResults.Add(hWnd);
-				}
-			}			
-		}
-	}
-
-	return TRUE; // keep going to the end
+	return (CToDoListWnd::FindToDoListWnds(find) == 0);
 }
 
 BOOL CToDoListApp::WaitForInstanceToClose(DWORD dwProcID)

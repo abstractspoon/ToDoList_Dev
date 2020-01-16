@@ -5198,6 +5198,32 @@ void CToDoListWnd::RefreshPauseTimeTracking()
 	}
 }
 
+BOOL CToDoListWnd::HasTaskFile(const CTDCStartupOptions& startup) const
+{
+	CStringArray aFiles;
+
+	// we only support finding a single filename
+	if (startup.GetFilePaths(aFiles) == 1)
+	{
+		CString sFile(aFiles[0]);
+
+		if (startup.HasFlag(TLD_TASKLINK))
+		{
+			CString sPath;
+			DWORD dwTaskID = 0;
+
+			if (!CFilteredToDoCtrl::ParseTaskLink(sFile, FALSE, _T(""), dwTaskID, sPath))
+				return FALSE;
+
+			sFile = sPath;
+		}
+
+		return (m_mgrToDoCtrls.FindToDoCtrl(sFile) != -1);
+	}
+
+	return FALSE;
+}
+
 BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL bStartup)
 {
 	// 1. check if we can handle a task link
@@ -5546,7 +5572,11 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
 {
-	BOOL bRes = FALSE;
+	if (!pCopyDataStruct->lpData)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	switch (pCopyDataStruct->dwData)
 	{
@@ -5558,30 +5588,7 @@ BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
 		else
 		{
 			const CTDCStartupOptions* pStartup = (CTDCStartupOptions*)(pCopyDataStruct->lpData);
-			
-			if (pStartup)
-			{
-				CStringArray aFiles;
-				
-				// we only support finding a single filename
-				if (pStartup->GetFilePaths(aFiles) == 1)
-				{
-					CString sFile(aFiles[0]);
-
-					if (pStartup->HasFlag(TLD_TASKLINK))
-					{
-						CString sPath;
-						DWORD dwTaskID = 0;
-
-						if (!CFilteredToDoCtrl::ParseTaskLink(sFile, FALSE, _T(""), dwTaskID, sPath))
-							return FALSE;
-
-						sFile = sPath;
-					}
-
-					bRes = (m_mgrToDoCtrls.FindToDoCtrl(sFile) != -1);
-				}
-			}
+			return HasTaskFile(*pStartup);
 		}
 		break;
 
@@ -5593,9 +5600,7 @@ BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
 		else
 		{
 			const CTDCStartupOptions* pStartup = (CTDCStartupOptions*)(pCopyDataStruct->lpData);
-
-			if (pStartup)
-				bRes = ProcessStartupOptions(*pStartup, FALSE);
+			return ProcessStartupOptions(*pStartup, FALSE);
 		}
 		break;
 
@@ -5610,13 +5615,13 @@ BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
 			else if (CLocalizer::GetDictionaryPath().CompareNoCase(szLangFile) == 0)
 			{
 				m_bPromptLanguageChangeRestartOnActivate = TRUE;
+				return TRUE;
 			}
 		}
 		break;
-
 	}
 
-	return bRes; 
+	return FALSE; 
 }
 
 BOOL CToDoListWnd::ImportFile(LPCTSTR szFilePath, BOOL bSilent)
@@ -7082,14 +7087,19 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 			
 			if (th.PrepareCmdline(tool, args, GetToDoCtrl().GetCustomAttributeDefs(), sCmdLine))
 			{
-				CTDCStartupOptions startup(sCmdLine, 0);
+				CTDCStartupOptions startup(sCmdLine);
 
-				if (ProcessStartupOptions(startup, FALSE))
+				// We can handle it if there is no file path (apply to active tasklist)
+				// OR We have the tasklist (delay) loaded
+				if (!startup.HasFilePath() || HasTaskFile(startup))
+				{
+					VERIFY(ProcessStartupOptions(startup, FALSE));
 					return;
+				}
 			}
 		}
 
-		// Fallback
+		// All else
 		th.RunTool(tool, args, GetToDoCtrl().GetCustomAttributeDefs());
 	}
 }
@@ -13159,3 +13169,64 @@ void CToDoListWnd::OnUpdateEditSetPercentToToday(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(GetToDoCtrl().CanSetSelectedTaskPercentDoneToToday());	
 }
+
+int CToDoListWnd::FindToDoListWnds(TDCFINDWND& find)
+{
+	ASSERT(find.hWndIgnore == NULL || ::IsWindow(find.hWndIgnore));
+
+	find.aResults.RemoveAll();
+	EnumWindows(FindOtherInstance, (LPARAM)&find);
+
+	return find.aResults.GetSize();
+}
+
+BOOL CALLBACK CToDoListWnd::FindOtherInstance(HWND hWnd, LPARAM lParam)
+{
+	static CString COPYRIGHT(MAKEINTRESOURCE(IDS_COPYRIGHT));
+
+	CString sCaption;
+	CWnd::FromHandle(hWnd)->GetWindowText(sCaption);
+
+	if (Misc::RemoveSuffix(sCaption, COPYRIGHT))
+	{
+		TDCFINDWND* pFind = (TDCFINDWND*)lParam;
+		ASSERT(pFind);
+
+		// check window to ignore
+		if ((pFind->hWndIgnore == NULL) || (pFind->hWndIgnore == hWnd))
+		{
+			// check if it's closing
+			DWORD bClosing = FALSE;
+			BOOL bSendSucceeded = ::SendMessageTimeout(hWnd,
+													   WM_TDL_ISCLOSING,
+													   0,
+													   0,
+													   SMTO_ABORTIFHUNG | SMTO_BLOCK,
+													   1000,
+													   &bClosing);
+
+			if (bSendSucceeded && (pFind->bIncClosing || !bClosing))
+			{
+				if (pFind->dwProcessID)
+				{
+					DWORD dwOtherProcID = 0;
+					GetWindowThreadProcessId(hWnd, &dwOtherProcID);
+					ASSERT(dwOtherProcID);
+
+					if (dwOtherProcID == pFind->dwProcessID)
+					{
+						pFind->aResults.Add(hWnd);
+						return FALSE; // we can stop now
+					}
+				}
+				else
+				{
+					pFind->aResults.Add(hWnd);
+				}
+			}
+		}
+	}
+
+	return TRUE; // keep going to the end
+}
+

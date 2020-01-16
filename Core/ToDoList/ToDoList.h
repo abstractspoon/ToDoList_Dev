@@ -98,7 +98,6 @@ protected:
 	CString AfxGetAppName();
 
 	static BOOL CloseAllToDoListWnds();
-	static int FindToDoListWnds(TDCFINDWND& find);
 	static BOOL ValidateFilePath(CString& sFilePath, const CString& sExt = _T(""));
 	static BOOL ValidateTasklistPath(CString& sPath);
 	static BOOL ValidateIniPath(CString& sIniPath, BOOL bCheckExists);
@@ -106,7 +105,6 @@ protected:
 	static void CleanupAppFolder(LPCTSTR szPrevVer);
 	static void FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer);
 
-	static BOOL CALLBACK FindOtherInstance(HWND hwnd, LPARAM lParam);
 	static BOOL SendStartupOptions(HWND hwnd, const CTDCStartupOptions& startup, TDL_COPYDATA nMsg);
 	static BOOL WaitForInstanceToClose(DWORD dwProcessID);
 	static BOOL CommandRequiresUI(UINT nCmdID);

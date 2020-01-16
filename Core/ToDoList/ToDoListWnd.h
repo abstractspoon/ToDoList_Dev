@@ -78,7 +78,8 @@ public:
 	static BOOL EnableLogging(BOOL bEnable = TRUE);
 	static CString GetVersion(BOOL bExtended = TRUE);
 	static CString GetTitle(BOOL bExtended = TRUE);
-	
+	static int FindToDoListWnds(TDCFINDWND& find);
+
 protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CToDoListWnd)
@@ -629,6 +630,7 @@ protected:
 	BOOL CanImportDropText(const CString& sText) const;
 
 	BOOL ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL bStartup);
+	BOOL HasTaskFile(const CTDCStartupOptions& startup) const;
 	void MinimizeToTray();
 	void Show(BOOL bAllowToggle);
 	void RefreshPauseTimeTracking();
@@ -754,6 +756,7 @@ protected:
 	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath);
 	UINT GetNewTaskCmdID() const;
 	UINT GetNewSubtaskCmdID() const;
+	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
 
 	static UINT MapNewTaskPos(PUIP_NEWTASKPOS nPos, BOOL bSubtask);
 	static void HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);
@@ -770,8 +773,8 @@ protected:
 	static CString GetIntermediateTaskListPath(LPCTSTR szRefPath);
 	static void ProcessProtocolRegistrationFailure(BOOL bStartup, BOOL bExistingReg, UINT nMsgID, LPCTSTR szCheckPrefKey);
 	static BOOL GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet);
+	static BOOL CALLBACK FindOtherInstance(HWND hwnd, LPARAM lParam);
 
-	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -5532,7 +5532,7 @@ BEGIN
                             "The clipboard text does not have a recognised format."
     IDS_ONLINEHELP          "Online Help"
     IDS_MULTIINSTANCENOFILEPATH 
-                            "Unable to process Startup Options|When more than one instance of ToDoList is running you must specify a filepath as well."
+                            "Unable to process Startup Options|When more than one instance of ToDoList is running you must specify a tasklist path as well."
     IDS_RESTARTTOUPDATESETTINGS 
                             "Regional Settings Change|The user interface will be updated next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
     IDS_OUTLOOK_IMPORTDLG   "Import Tasks from Outlook"
