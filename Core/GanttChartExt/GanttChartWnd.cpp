@@ -224,7 +224,7 @@ void CGanttChartWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	// Active date range
 	GANTTDATERANGE dtRange;
 
-	if (m_sliderDateRange.GetSelectedRange(dtRange, m_dlgPrefs.GetDecadesAreZeroBased()))
+	if (m_sliderDateRange.GetSelectedRange(dtRange))
 	{
 		pPrefs->WriteProfileDouble(_T("ActiveRange"), _T("Start"), dtRange.GetStart().m_dt);
 		pPrefs->WriteProfileDouble(_T("ActiveRange"), _T("End"), dtRange.GetEnd().m_dt);
@@ -528,15 +528,14 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	}
 
 	GTLC_MONTH_DISPLAY nDisplay = m_ctrlGantt.GetMonthDisplay();
-	BOOL bZeroBasedDecades = m_dlgPrefs.GetDecadesAreZeroBased();
 
-	m_sliderDateRange.SetMonthDisplay(nDisplay, bZeroBasedDecades);
-	m_sliderDateRange.SetDataRange(dtDataRange, bZeroBasedDecades);
+	m_sliderDateRange.SetMonthDisplay(nDisplay);
+	m_sliderDateRange.SetDataRange(dtDataRange);
 	m_sliderDateRange.EnableWindow(TRUE);
 
 	if (m_dtPrevActiveRange.IsValid())
 	{
-		if (m_sliderDateRange.SetSelectedRange(m_dtPrevActiveRange, bZeroBasedDecades))
+		if (m_sliderDateRange.SetSelectedRange(m_dtPrevActiveRange))
 			m_ctrlGantt.SetActiveDateRange(m_dtPrevActiveRange);
 
 		m_dtPrevActiveRange.Reset();
@@ -893,7 +892,7 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 	GANTTDATERANGE dtActive;
 
 	if (m_sliderDateRange.IsValid())
-		m_sliderDateRange.GetSelectedRange(dtActive, m_dlgPrefs.GetDecadesAreZeroBased());
+		m_sliderDateRange.GetSelectedRange(dtActive);
 
 	GTLC_MONTH_DISPLAY nPrevDisplay = m_ctrlGantt.GetMonthDisplay();
 
@@ -919,8 +918,8 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 		
 		if (m_ctrlGantt.GetDataDateRange(dtRange))
 		{
-			m_sliderDateRange.SetMonthDisplay(nDisplay, m_dlgPrefs.GetDecadesAreZeroBased());
-			m_sliderDateRange.SetDataRange(dtRange, m_dlgPrefs.GetDecadesAreZeroBased());
+			m_sliderDateRange.SetMonthDisplay(nDisplay);
+			m_sliderDateRange.SetDataRange(dtRange);
 			m_sliderDateRange.EnableWindow(TRUE);
 
 			// Restore previous active selection
@@ -942,7 +941,7 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 				if (dtActive.IsValid())
 				{
 					m_ctrlGantt.SetActiveDateRange(dtActive);
-					m_sliderDateRange.SetSelectedRange(dtActive, m_dlgPrefs.GetDecadesAreZeroBased());
+					m_sliderDateRange.SetSelectedRange(dtActive);
 				}
 			}
 
@@ -1030,6 +1029,8 @@ void CGanttChartWnd::OnSetFocus(CWnd* /*pOldWnd*/)
 
 void CGanttChartWnd::UpdateGanttCtrlPreferences()
 {
+	m_sliderDateRange.SetDecadesAreZeroBased(m_dlgPrefs.GetDecadesAreZeroBased());
+
 	m_ctrlGantt.SetOption(GTLCF_DISPLAYTRAILINGTASKTITLE, m_dlgPrefs.GetDisplayTrailingTaskTitle());
 	m_ctrlGantt.SetOption(GTLCF_DISPLAYTRAILINGALLOCTO, m_dlgPrefs.GetDisplayTrailingAllocTo());
 	m_ctrlGantt.SetOption(GTLCF_AUTOSCROLLTOTASK, m_dlgPrefs.GetAutoScrollSelection());
@@ -1118,7 +1119,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 
 void CGanttChartWnd::UpdateActiveRangeLabel()
 {
-	CString sRange = m_sliderDateRange.FormatRange(m_dlgPrefs.GetDecadesAreZeroBased());
+	CString sRange = m_sliderDateRange.FormatRange();
 
 	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, sRange));
 }
@@ -1264,23 +1265,23 @@ void CGanttChartWnd::OnGanttPreferences()
 	
 	if (m_dlgPrefs.DoModal() == IDOK)
 	{
-		// Update UI if 'one-based decades' has changed
-		BOOL bZeroBasedDecades = m_dlgPrefs.GetDecadesAreZeroBased();
+		// Update UI if 'zero-based decades' has changed
+		BOOL bDecadeChange = (m_dlgPrefs.GetDecadesAreZeroBased() != m_ctrlGantt.HasOption(GTLCF_DECADESAREZEROBASED));
 
-		if (m_ctrlGantt.HasOption(GTLCF_DECADESAREZEROBASED) != bZeroBasedDecades)
+		// update gantt control
+		UpdateGanttCtrlPreferences();
+		
+		if (bDecadeChange)
 		{
 			BuildDisplayCombo();
 			UpdateActiveRangeLabel();
 
 			GANTTDATERANGE dtRange;
 
-			if (m_sliderDateRange.GetSelectedRange(dtRange, bZeroBasedDecades))
+			if (m_sliderDateRange.GetSelectedRange(dtRange))
 				m_ctrlGantt.SetActiveDateRange(dtRange);
 		}
 
-		// update gantt control
-		UpdateGanttCtrlPreferences();
-		
 		// and set focus back to it
 		m_ctrlGantt.SetFocus();
 	}
@@ -1445,7 +1446,7 @@ LRESULT CGanttChartWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	GANTTDATERANGE dtSel;
 
-	if (m_sliderDateRange.GetSelectedRange(dtSel, m_dlgPrefs.GetDecadesAreZeroBased()))
+	if (m_sliderDateRange.GetSelectedRange(dtSel))
 		m_ctrlGantt.SetActiveDateRange(dtSel);
 	else
 		m_ctrlGantt.ClearActiveDateRange();

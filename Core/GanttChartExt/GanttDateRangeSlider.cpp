@@ -17,7 +17,8 @@ static char THIS_FILE[] = __FILE__;
 CGanttDateRangeSlider::CGanttDateRangeSlider() 
 	: 
 	CRangeSliderCtrl(TBS_BOTTOM),
-	m_nMonthDisplay(GTLC_DISPLAY_NONE)
+	m_nMonthDisplay(GTLC_DISPLAY_NONE),
+	m_bZeroBasedDecades(TRUE)
 {
 }
 
@@ -35,14 +36,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CGanttDateRangeSlider message handlers
 
-BOOL CGanttDateRangeSlider::Initialise(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
-{
-	ASSERT(m_nMonthDisplay == GTLC_DISPLAY_NONE);
-
-	return SetMonthDisplay(nDisplay, bZeroBasedDecades);
-}
-
-BOOL CGanttDateRangeSlider::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
+BOOL CGanttDateRangeSlider::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
 	if (nDisplay == GTLC_DISPLAY_NONE)
 	{
@@ -54,7 +48,7 @@ BOOL CGanttDateRangeSlider::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, BOOL bZ
 	return TRUE;
 }
 
-BOOL CGanttDateRangeSlider::SetDataRange(const GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades)
+BOOL CGanttDateRangeSlider::SetDataRange(const GANTTDATERANGE& dtRange)
 {
 	if (m_nMonthDisplay == GTLC_DISPLAY_NONE)
 	{
@@ -74,7 +68,7 @@ BOOL CGanttDateRangeSlider::SetDataRange(const GANTTDATERANGE& dtRange, BOOL bZe
 	if (!bSetMaxRange)
 		bSetMaxRange = ((m_Left == m_Min) && (m_Right == m_Max));
 
-	int nNumCols = GanttStatic::GetRequiredColumnCount(dtRange, m_nMonthDisplay, bZeroBasedDecades) + 1;
+	int nNumCols = GanttStatic::GetRequiredColumnCount(dtRange, m_nMonthDisplay, m_bZeroBasedDecades) + 1;
 	ASSERT(nNumCols);
 
 	SetMinMax(0.0, nNumCols);
@@ -88,24 +82,24 @@ BOOL CGanttDateRangeSlider::SetDataRange(const GANTTDATERANGE& dtRange, BOOL bZe
 	return TRUE;
 }
 
-BOOL CGanttDateRangeSlider::GetMaxRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const
+BOOL CGanttDateRangeSlider::GetMaxRange(GANTTDATERANGE& dtRange) const
 {
 	dtRange = m_dtDataRange;
 
-	return GanttStatic::GetMaxDateRange(dtRange, m_nMonthDisplay, bZeroBasedDecades);
+	return GanttStatic::GetMaxDateRange(dtRange, m_nMonthDisplay, m_bZeroBasedDecades);
 }
 
-CString CGanttDateRangeSlider::FormatRange(BOOL bZeroBasedDecades, TCHAR cDelim) const
+CString CGanttDateRangeSlider::FormatRange(TCHAR cDelim) const
 {
 	GANTTDATERANGE dtRange;
 
-	if (!GetSelectedRange(dtRange, bZeroBasedDecades))
-		VERIFY(GetMaxRange(dtRange, bZeroBasedDecades));
+	if (!GetSelectedRange(dtRange))
+		VERIFY(GetMaxRange(dtRange));
 
-	dtRange.SetStart(dtRange.GetStart(m_nMonthDisplay, bZeroBasedDecades));
-	dtRange.SetEnd(dtRange.GetEnd(m_nMonthDisplay, bZeroBasedDecades));
+	dtRange.SetStart(dtRange.GetStart(m_nMonthDisplay, m_bZeroBasedDecades));
+	dtRange.SetEnd(dtRange.GetEnd(m_nMonthDisplay, m_bZeroBasedDecades));
 
-	return dtRange.Format(GTLC_DISPLAY_MONTHS_MID, bZeroBasedDecades, FALSE, cDelim);
+	return dtRange.Format(GTLC_DISPLAY_MONTHS_MID, m_bZeroBasedDecades, FALSE, cDelim);
 }
 
 BOOL CGanttDateRangeSlider::HasSelectedRange() const
@@ -139,7 +133,7 @@ BOOL CGanttDateRangeSlider::IsValid() const
 	return TRUE;
 }
 
-BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const
+BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange) const
 {
 	if (!HasSelectedRange())
 		return FALSE;
@@ -161,17 +155,17 @@ BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange, BOOL bZero
 	COleDateTime dtEnd(m_dtDataRange.GetStart());
 	CDateHelper::IncrementMonth(dtEnd, nEndCol * nMonthsPerCol);
 
-	dtRange.SetStart(dtStart, m_nMonthDisplay, bZeroBasedDecades);
-	dtRange.SetEnd(dtEnd, m_nMonthDisplay, bZeroBasedDecades);
+	dtRange.SetStart(dtStart, m_nMonthDisplay, m_bZeroBasedDecades);
+	dtRange.SetEnd(dtEnd, m_nMonthDisplay, m_bZeroBasedDecades);
 
 	return TRUE;
 }
 
-BOOL CGanttDateRangeSlider::SetSelectedRange(const GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades)
+BOOL CGanttDateRangeSlider::SetSelectedRange(const GANTTDATERANGE& dtRange)
 {
 	GANTTDATERANGE dtMax;
 
-	if (!GetMaxRange(dtMax, bZeroBasedDecades))
+	if (!GetMaxRange(dtMax))
 	{
 		ASSERT(0);
 		return FALSE;

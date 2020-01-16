@@ -21,25 +21,25 @@ class CGanttDateRangeSlider : public CRangeSliderCtrl
 public:
 	CGanttDateRangeSlider();
 
-	BOOL Initialise(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades);
 	BOOL IsValid() const;
 
-	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades);
+	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay);
 	GTLC_MONTH_DISPLAY GetMonthDisplay() const { return m_nMonthDisplay; }
 
-	BOOL GetMaxRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const;
-	BOOL SetDataRange(const GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades);
+	BOOL SetDataRange(const GANTTDATERANGE& dtRange);
+	void SetDecadesAreZeroBased(BOOL bZeroBased) { m_bZeroBasedDecades = bZeroBased; }
 
 	BOOL HasSelectedRange() const;
-	BOOL GetSelectedRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const;
-	BOOL SetSelectedRange(const GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades);
+	BOOL GetSelectedRange(GANTTDATERANGE& dtRange) const;
+	BOOL SetSelectedRange(const GANTTDATERANGE& dtRange);
 	void ClearSelectedRange();
 
-	CString FormatRange(BOOL bZeroBasedDecades, TCHAR cDelim = '-') const;
+	CString FormatRange(TCHAR cDelim = '-') const;
 
 protected:
 	GTLC_MONTH_DISPLAY m_nMonthDisplay;
 	GANTTDATERANGE m_dtDataRange;
+	BOOL m_bZeroBasedDecades;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -60,6 +60,7 @@ protected:
 
 protected:
 	virtual BOOL IsValidMove(double left, double right) const { return (right > left); }
+	BOOL GetMaxRange(GANTTDATERANGE& dtRange) const;
 
 };
 
