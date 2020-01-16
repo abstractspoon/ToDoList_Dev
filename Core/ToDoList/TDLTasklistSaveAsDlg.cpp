@@ -22,7 +22,8 @@ CTDLTasklistSaveAsDlg::CTDLTasklistSaveAsDlg(LPCTSTR szFilePath,
 	: 
 	CTDLDialog(IDD_TASKLISTSAVEAS_DIALOG, _T("SaveAs"), pParent),
 	m_sFilePath(szFilePath),
-	m_sProjectName(szProjectName)
+	m_sProjectName(szProjectName),
+	m_eFilePath(FES_COMBOSTYLEBTN | FES_SAVEAS)
 {
 	//{{AFX_DATA_INIT(CTDLTasklistSaveAsDlg)
 	//}}AFX_DATA_INIT
