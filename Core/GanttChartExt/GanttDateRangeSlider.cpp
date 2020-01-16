@@ -35,14 +35,14 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CGanttDateRangeSlider message handlers
 
-BOOL CGanttDateRangeSlider::Initialise(GTLC_MONTH_DISPLAY nDisplay)
+BOOL CGanttDateRangeSlider::Initialise(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
 {
 	ASSERT(m_nMonthDisplay == GTLC_DISPLAY_NONE);
 
-	return SetMonthDisplay(nDisplay);
+	return SetMonthDisplay(nDisplay, bZeroBasedDecades);
 }
 
-BOOL CGanttDateRangeSlider::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
+BOOL CGanttDateRangeSlider::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
 {
 	if (nDisplay == GTLC_DISPLAY_NONE)
 	{
@@ -90,18 +90,9 @@ BOOL CGanttDateRangeSlider::SetDataRange(const GANTTDATERANGE& dtRange, BOOL bZe
 
 BOOL CGanttDateRangeSlider::GetMaxRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const
 {
-	int nNumCols = GanttStatic::GetRequiredColumnCount(m_dtDataRange, m_nMonthDisplay, bZeroBasedDecades) + 1;
-	int nMonthsPerCol = GanttStatic::GetNumMonthsPerColumn(m_nMonthDisplay);
+	dtRange = m_dtDataRange;
 
-	COleDateTime dtStart(m_dtDataRange.GetStart(m_nMonthDisplay, bZeroBasedDecades));
-
-	COleDateTime dtEnd(dtStart);
-	CDateHelper::IncrementMonth(dtEnd, (nNumCols - 1) * nMonthsPerCol);
-
-	dtRange.SetStart(dtStart);
-	dtRange.SetEnd(dtEnd, m_nMonthDisplay, bZeroBasedDecades);
-
-	return dtRange.IsValid();
+	return GanttStatic::GetMaxDateRange(dtRange, m_nMonthDisplay, bZeroBasedDecades);
 }
 
 CString CGanttDateRangeSlider::FormatRange(BOOL bZeroBasedDecades, TCHAR cDelim) const
@@ -126,6 +117,26 @@ BOOL CGanttDateRangeSlider::HasSelectedRange() const
 	}
 
 	return (m_dtDataRange.IsValid() && CRangeSliderCtrl::HasSelectedRange());
+}
+
+BOOL CGanttDateRangeSlider::IsValid() const
+{
+	if (!GanttStatic::IsValidDisplay(m_nMonthDisplay))
+		return FALSE;
+
+	if (!m_dtDataRange.IsValid())
+		return FALSE;
+
+	if (GetMax() == GetMin())
+		return FALSE;
+
+	if (GetLeft() == GetRight())
+		return FALSE;
+
+	if (GetSafeHwnd() && !IsWindowEnabled())
+		return FALSE;
+
+	return TRUE;
 }
 
 BOOL CGanttDateRangeSlider::GetSelectedRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const
@@ -180,4 +191,9 @@ BOOL CGanttDateRangeSlider::SetSelectedRange(const GANTTDATERANGE& dtRange, BOOL
 	SetRange((nNumMonthsStart / nMonthsPerCol), nNumMonthsEnd / nMonthsPerCol);
 
 	return TRUE;
+}
+
+void CGanttDateRangeSlider::ClearSelectedRange()
+{
+	SetRange(m_Min, m_Max);
 }

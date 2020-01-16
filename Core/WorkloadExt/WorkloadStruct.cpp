@@ -786,7 +786,7 @@ void CWorkloadItemMap::RecalculateOverlaps()
 					if (pWIOther->dtRange.m_dtStart > pWI->dtRange.m_dtEnd)
 						break;
 
-					if (pWI->dtRange.IntersectsWith(pWIOther->dtRange))
+					if (pWI->dtRange.HasIntersection(pWIOther->dtRange))
 						pWI->mapAllocatedDays.AppendOverlaps(pWIOther->mapAllocatedDays);
 				}				
 			}

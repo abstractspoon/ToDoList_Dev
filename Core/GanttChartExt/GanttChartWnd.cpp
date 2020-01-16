@@ -528,14 +528,15 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	}
 
 	GTLC_MONTH_DISPLAY nDisplay = m_ctrlGantt.GetMonthDisplay();
+	BOOL bZeroBasedDecades = m_dlgPrefs.GetDecadesAreZeroBased();
 
-	m_sliderDateRange.SetMonthDisplay(nDisplay);
-	m_sliderDateRange.SetDataRange(dtDataRange, m_dlgPrefs.GetDecadesAreZeroBased());
+	m_sliderDateRange.SetMonthDisplay(nDisplay, bZeroBasedDecades);
+	m_sliderDateRange.SetDataRange(dtDataRange, bZeroBasedDecades);
 	m_sliderDateRange.EnableWindow(TRUE);
 
 	if (m_dtPrevActiveRange.IsValid())
 	{
-		if (m_sliderDateRange.SetSelectedRange(m_dtPrevActiveRange, m_dlgPrefs.GetDecadesAreZeroBased()))
+		if (m_sliderDateRange.SetSelectedRange(m_dtPrevActiveRange, bZeroBasedDecades))
 			m_ctrlGantt.SetActiveDateRange(m_dtPrevActiveRange);
 
 		m_dtPrevActiveRange.Reset();
@@ -888,6 +889,19 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
 	m_ctrlGantt.ValidateMonthDisplay(nDisplay);
 
+	// Cache and clear previous range selection
+	GANTTDATERANGE dtActive;
+
+	if (m_sliderDateRange.IsValid())
+		m_sliderDateRange.GetSelectedRange(dtActive, m_dlgPrefs.GetDecadesAreZeroBased());
+
+	GTLC_MONTH_DISPLAY nPrevDisplay = m_ctrlGantt.GetMonthDisplay();
+
+	CHoldRedraw hr(*this);
+
+	m_ctrlGantt.ClearActiveDateRange();
+	m_sliderDateRange.ClearSelectedRange();
+
 	if (m_ctrlGantt.SetMonthDisplay(nDisplay))
 	{
 		CDialogHelper::SelectItemByData(m_cbDisplayOptions, nDisplay);
@@ -900,13 +914,37 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 		m_ctrlGantt.SetSnapMode(nSnap);
 		CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
 
+		// Resync range slider
 		GANTTDATERANGE dtRange;
 		
 		if (m_ctrlGantt.GetDataDateRange(dtRange))
 		{
-			m_sliderDateRange.SetMonthDisplay(nDisplay);
+			m_sliderDateRange.SetMonthDisplay(nDisplay, m_dlgPrefs.GetDecadesAreZeroBased());
 			m_sliderDateRange.SetDataRange(dtRange, m_dlgPrefs.GetDecadesAreZeroBased());
 			m_sliderDateRange.EnableWindow(TRUE);
+
+			// Restore previous active selection
+			if (dtActive.IsValid())
+			{
+				// We only need to fixup the active selection if the primary 
+				// display group is changing else the column count is unchanged 
+				// so the previous selection is okay by default
+				if (!GanttStatic::IsSameDisplayGroup(nPrevDisplay, nDisplay))
+				{
+					GANTTDATERANGE dtMaxRange;
+
+					if (m_ctrlGantt.GetMaxDateRange(dtMaxRange) && dtActive.IntersectWith(dtMaxRange))
+						dtActive.Set(dtActive, nDisplay, m_dlgPrefs.GetDecadesAreZeroBased());
+					else
+						dtActive.Reset();
+				}
+
+				if (dtActive.IsValid())
+				{
+					m_ctrlGantt.SetActiveDateRange(dtActive);
+					m_sliderDateRange.SetSelectedRange(dtActive, m_dlgPrefs.GetDecadesAreZeroBased());
+				}
+			}
 
 			UpdateActiveRangeLabel();
 		}
@@ -914,6 +952,8 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 		{
 			m_sliderDateRange.EnableWindow(FALSE);
 		}
+
+		m_ctrlGantt.Invalidate(FALSE); // because of the CHoldRedraw
 
 		return TRUE;
 	}

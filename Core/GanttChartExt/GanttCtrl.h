@@ -103,6 +103,7 @@ public:
 	BOOL SetActiveDateRange(const GANTTDATERANGE& dtRange);
 	BOOL GetActiveDateRange(GANTTDATERANGE& dtRange) const;
 	BOOL GetDataDateRange(GANTTDATERANGE& dtRange) const;
+	BOOL GetMaxDateRange(GANTTDATERANGE& dtRange) const;
 
 	static BOOL WantEditUpdate(TDC_ATTRIBUTE nAttrib);
 	static BOOL WantSortUpdate(TDC_ATTRIBUTE nAttrib);

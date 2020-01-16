@@ -194,7 +194,7 @@ BOOL COleDateTimeRange::Contains(const COleDateTimeRange& dtOther) const
 	return (Contains(dtOther.GetStart()) && Contains(dtOther.GetEndInclusive()));
 }
 
-BOOL COleDateTimeRange::IntersectsWith(const COleDateTimeRange& dtOther) const
+BOOL COleDateTimeRange::HasIntersection(const COleDateTimeRange& dtOther) const
 {
 	if (!IsValid() || !dtOther.IsValid())
 		return FALSE;
@@ -210,13 +210,18 @@ BOOL COleDateTimeRange::IntersectsWith(const COleDateTimeRange& dtOther) const
 
 BOOL COleDateTimeRange::GetIntersection(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2)
 {
-	if (!dtOther1.IntersectsWith(dtOther2))
+	if (!dtOther1.HasIntersection(dtOther2))
 		return FALSE;
 
 	COleDateTime dtStart = max(dtOther1.m_dtStart, dtOther2.m_dtStart);
 	COleDateTime dtEnd = min(dtOther1.GetEndInclusive(), dtOther2.GetEndInclusive());
 
 	return Set(dtStart, dtEnd, (dtOther1.m_bInclusive || dtOther2.m_bInclusive));
+}
+
+BOOL COleDateTimeRange::IntersectWith(const COleDateTimeRange& dtOther)
+{
+	return GetIntersection(*this, dtOther);
 }
 
 BOOL COleDateTimeRange::Add(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2)

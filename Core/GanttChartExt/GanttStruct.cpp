@@ -849,6 +849,15 @@ BOOL GANTTDATERANGE::Contains(const GANTTDATERANGE& dtRange) const
 	return TRUE;
 }
 
+BOOL GANTTDATERANGE::IntersectWith(const GANTTDATERANGE& dtRange)
+{
+	if (!COleDateTimeRange::IntersectWith(dtRange))
+		return FALSE;
+
+	m_bInclusive = FALSE; // always
+	return TRUE;
+}
+
 BOOL GANTTDATERANGE::operator==(const GANTTDATERANGE& dtOther) const
 {
 	return operator==((const COleDateTimeRange&)dtOther);

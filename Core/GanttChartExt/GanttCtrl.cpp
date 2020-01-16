@@ -1041,6 +1041,13 @@ BOOL CGanttCtrl::GetDataDateRange(GANTTDATERANGE& dtRange) const
 	return dtRange.IsValid();
 }
 
+BOOL CGanttCtrl::GetMaxDateRange(GANTTDATERANGE& dtRange) const
+{
+	dtRange = m_dtDataRange;
+
+	return GanttStatic::GetMaxDateRange(dtRange, m_nMonthDisplay, HasOption(GTLCF_DECADESAREZEROBASED));
+}
+
 const GANTTDATERANGE& CGanttCtrl::ActiveDateRange() const
 {
 	if (m_dtActiveRange.IsValid())

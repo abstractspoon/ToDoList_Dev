@@ -131,8 +131,9 @@ public:
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
-
 	void SetFocus();
+	void Invalidate(BOOL bErase = TRUE) { CWnd::Invalidate(bErase); }
+
 	void EnableTreeCheckboxes(UINT nUnthemedBitmapID, BOOL bEnable = TRUE) { m_tree.EnableCheckboxes(nUnthemedBitmapID, bEnable); }
 	void EnableTreeImagePlaceholder(BOOL bEnable = TRUE) { m_tree.EnableImagePlaceholder(bEnable); }
 	void EnableTreeLabelTips(BOOL bEnable = TRUE) { m_tree.EnableLabelTips(bEnable); }

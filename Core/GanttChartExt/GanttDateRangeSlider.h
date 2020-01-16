@@ -21,8 +21,11 @@ class CGanttDateRangeSlider : public CRangeSliderCtrl
 public:
 	CGanttDateRangeSlider();
 
-	BOOL Initialise(GTLC_MONTH_DISPLAY nDisplay);
-	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay);
+	BOOL Initialise(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades);
+	BOOL IsValid() const;
+
+	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades);
+	GTLC_MONTH_DISPLAY GetMonthDisplay() const { return m_nMonthDisplay; }
 
 	BOOL GetMaxRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const;
 	BOOL SetDataRange(const GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades);
@@ -30,6 +33,7 @@ public:
 	BOOL HasSelectedRange() const;
 	BOOL GetSelectedRange(GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades) const;
 	BOOL SetSelectedRange(const GANTTDATERANGE& dtRange, BOOL bZeroBasedDecades);
+	void ClearSelectedRange();
 
 	CString FormatRange(BOOL bZeroBasedDecades, TCHAR cDelim = '-') const;
 

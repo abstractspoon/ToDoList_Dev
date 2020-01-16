@@ -322,3 +322,18 @@ COleDateTime GanttStatic::GetRangeEnd(const COleDateTime& date, GTLC_MONTH_DISPL
 	return date;
 }
 
+BOOL GanttStatic::GetMaxDateRange(GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
+{
+	int nNumCols = GetRequiredColumnCount(dtRange, nDisplay, bZeroBasedDecades) + 1;
+	int nMonthsPerCol = GetNumMonthsPerColumn(nDisplay);
+
+	COleDateTime dtStart(dtRange.GetStart(nDisplay, bZeroBasedDecades));
+
+	COleDateTime dtEnd(dtStart);
+	CDateHelper::IncrementMonth(dtEnd, (nNumCols - 1) * nMonthsPerCol);
+
+	dtRange.SetStart(dtStart);
+	dtRange.SetEnd(dtEnd, nDisplay, bZeroBasedDecades);
+
+	return dtRange.IsValid();
+}

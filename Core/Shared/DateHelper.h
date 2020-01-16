@@ -46,8 +46,9 @@ public:
 
 	BOOL Contains(const COleDateTime& date, BOOL bInclusive = TRUE) const;
 	BOOL Contains(const COleDateTimeRange& dtOther) const;
-	BOOL IntersectsWith(const COleDateTimeRange& dtOther) const;
+	BOOL HasIntersection(const COleDateTimeRange& dtOther) const;
 	BOOL GetIntersection(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
+	BOOL IntersectWith(const COleDateTimeRange& dtOther);
 
 	BOOL Add(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
 	BOOL Add(const COleDateTimeRange& dtOther, const COleDateTime& date, BOOL bInclusive = TRUE);
