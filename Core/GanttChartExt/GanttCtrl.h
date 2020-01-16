@@ -104,6 +104,7 @@ public:
 	BOOL GetActiveDateRange(GANTTDATERANGE& dtRange) const;
 	BOOL GetDataDateRange(GANTTDATERANGE& dtRange) const;
 	BOOL GetMaxDateRange(GANTTDATERANGE& dtRange) const;
+	BOOL HasDateRange() const { return m_dtDataRange.IsValid(); }
 
 	static BOOL WantEditUpdate(TDC_ATTRIBUTE nAttrib);
 	static BOOL WantSortUpdate(TDC_ATTRIBUTE nAttrib);

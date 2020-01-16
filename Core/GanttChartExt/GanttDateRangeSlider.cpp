@@ -45,6 +45,11 @@ BOOL CGanttDateRangeSlider::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 	}
 
 	m_nMonthDisplay = nDisplay;
+
+	// Update column count
+	if (m_dtDataRange.IsValid())
+		SetDataRange(m_dtDataRange);
+
 	return TRUE;
 }
 

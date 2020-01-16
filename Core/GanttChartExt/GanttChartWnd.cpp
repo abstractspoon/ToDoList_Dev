@@ -914,12 +914,9 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 		CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
 
 		// Resync range slider
-		GANTTDATERANGE dtRange;
-		
-		if (m_ctrlGantt.GetDataDateRange(dtRange))
+		if (m_ctrlGantt.HasDateRange())
 		{
 			m_sliderDateRange.SetMonthDisplay(nDisplay);
-			m_sliderDateRange.SetDataRange(dtRange);
 			m_sliderDateRange.EnableWindow(TRUE);
 
 			// Restore previous active selection
@@ -983,11 +980,15 @@ void CGanttChartWnd::OnSelchangeSnapMode()
 	m_ctrlGantt.SetSnapMode(nSnap);
 }
 
-LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM /*wp*/, LPARAM lp)
+LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
 {
+	ASSERT((GTLC_MONTH_DISPLAY)wp != (GTLC_MONTH_DISPLAY)lp);
+
+	// Update display combo selection
 	GTLC_MONTH_DISPLAY nDisplay = (GTLC_MONTH_DISPLAY)lp;
 	CDialogHelper::SelectItemByData(m_cbDisplayOptions, nDisplay);
 
+	// Rebuild snap combo
 	BuildSnapCombo();
 
 	GTLC_SNAPMODE nSnap = GTLCSM_FREE;
@@ -995,6 +996,39 @@ LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM /*wp*/, LPARAM lp)
 
 	m_ctrlGantt.SetSnapMode(nSnap);
 	CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
+
+	// Update slider active range
+	GANTTDATERANGE dtActive;
+
+	if (m_sliderDateRange.IsValid())
+		m_sliderDateRange.GetSelectedRange(dtActive);
+
+	GTLC_MONTH_DISPLAY nPrevDisplay = m_sliderDateRange.GetMonthDisplay();
+	m_sliderDateRange.SetMonthDisplay(nDisplay);
+
+	if (dtActive.IsValid())
+	{
+		// We only need to fixup the active selection if the primary 
+		// display group is changing else the column count is unchanged 
+		// so the previous selection is okay by default
+		if (!GanttStatic::IsSameDisplayGroup(nPrevDisplay, nDisplay))
+		{
+			GANTTDATERANGE dtMaxRange;
+
+			if (m_ctrlGantt.GetMaxDateRange(dtMaxRange) && dtActive.IntersectWith(dtMaxRange))
+				dtActive.Set(dtActive, nDisplay, m_dlgPrefs.GetDecadesAreZeroBased());
+			else
+				dtActive.Reset();
+		}
+
+		if (dtActive.IsValid())
+		{
+			m_ctrlGantt.SetActiveDateRange(dtActive);
+			m_sliderDateRange.SetSelectedRange(dtActive);
+		}
+	}
+
+	UpdateActiveRangeLabel();
 
 	return 0L;
 }
