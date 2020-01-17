@@ -5400,6 +5400,9 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		int nItem;
 		double dItem;
 		
+		if (startup.GetTaskTitle(sItem))
+			tdc.SetSelectedTaskTitle(sItem, TRUE);
+		
 		if (startup.GetTaskComments(sItem))
 		{
 			// If it's a file, we first turn it into a URI

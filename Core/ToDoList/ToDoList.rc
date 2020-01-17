@@ -5062,6 +5062,7 @@ BEGIN
     IDS_CMDLINE_TASKVERSION "-tv <version>\tSets the 'Version' for the currently selected task"
     ID_EDIT_UNDO            "\nUndo"
     ID_EDIT_REDO            "\nRedo"
+    IDS_CMDLINE_TASKTITLE   "-tt <title>\tSets the 'Title' for the currently selected task"
 END
 
 STRINGTABLE DISCARDABLE 

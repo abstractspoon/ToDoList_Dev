@@ -329,6 +329,7 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 	}
 
 	// other task attribs
+	ExtractAttribute(cmdInfo, SWITCH_TASKTITLE, m_sTaskTitle);	
 	ExtractAttribute(cmdInfo, SWITCH_TASKEXTID, m_sTaskExternalID);	
 	ExtractAttribute(cmdInfo, SWITCH_TASKCATEGORY, m_sTaskCategory);	
 	ExtractAttribute(cmdInfo, SWITCH_TASKSTATUS, m_sTaskStatus);	
@@ -342,6 +343,7 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 	ExtractAttribute(cmdInfo, SWITCH_TASKRISK, m_nTaskRisk);
 
 	// % completion
+	// WHY IS THIS NOT HANDLED AS ABOVE?
 	if (cmdInfo.GetOption(SWITCH_TASKPERCENT, sValue))
 		m_nTaskPercentDone.SetValue(sValue);	
 
@@ -442,7 +444,9 @@ CTDCStartupOptions& CTDCStartupOptions::operator=(const CTDCStartupOptions& star
 	lstrcpy(m_szFilePaths, startup.m_szFilePaths); 
 
 	m_sCmdIDs = startup.m_sCmdIDs;
+
 	m_sNewTaskTitle = startup.m_sNewTaskTitle; 
+	m_sTaskTitle = startup.m_sTaskTitle;
 	m_sTaskComments = startup.m_sTaskComments; 
 	m_sTaskExternalID = startup.m_sTaskExternalID; 
 	m_sTaskVersion = startup.m_sTaskVersion;
@@ -488,6 +492,7 @@ BOOL CTDCStartupOptions::operator==(const CTDCStartupOptions& startup) const
 		(_tcscmp(m_szFilePaths, startup.m_szFilePaths) == 0) &&
 
 		(m_sNewTaskTitle == startup.m_sNewTaskTitle) &&
+		(m_sTaskTitle == startup.m_sTaskTitle) &&
 		(m_sTaskComments == startup.m_sTaskComments) &&
 		(m_sTaskExternalID == startup.m_sTaskExternalID) &&
 		(m_sTaskVersion == startup.m_sTaskVersion) &&
@@ -528,7 +533,7 @@ BOOL CTDCStartupOptions::operator==(const CTDCStartupOptions& startup) const
 
 BOOL CTDCStartupOptions::IsEmpty(BOOL bIgnoreFlags) const
 {
-	CTDCStartupOptions empty;
+	static CTDCStartupOptions empty;
 
 	if (bIgnoreFlags)
 		empty.m_dwFlags = m_dwFlags;
@@ -638,7 +643,10 @@ void CTDCStartupOptions::Reset()
 { 
 	m_szFilePaths[0] = 0; 
 
+	m_sCmdIDs.ClearValue();
+
 	m_sNewTaskTitle.ClearValue();
+	m_sTaskTitle.ClearValue();
 	m_sTaskComments.ClearValue();
 	m_sTaskExternalID.ClearValue();
 	m_sTaskVersion.ClearValue();
@@ -650,7 +658,6 @@ void CTDCStartupOptions::Reset()
 	m_sTaskFileRef.ClearValue();
 	m_sTaskDepends.ClearValue();
 	m_sCustomAttrib.ClearValue();
-	m_sCmdIDs.ClearValue();
 
 	m_dtTaskCreateDate.ClearValue();
 	m_dtTaskStartDate.ClearValue();

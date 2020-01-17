@@ -2744,13 +2744,15 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 	return TRUE;
 }
 
-BOOL CToDoCtrl::SetSelectedTaskTitle(const CString& sTitle)
+BOOL CToDoCtrl::SetSelectedTaskTitle(const CString& sTitle, BOOL bAllowMultiple)
 {
-	if (!CanEditSelectedTask(TDCA_TASKNAME) || (GetSelectedCount() != 1))
+	if (sTitle.IsEmpty()) // sanity check
 		return FALSE;
 
-	// Prevent empty task titles
-	if (sTitle.IsEmpty())
+	if (!CanEditSelectedTask(TDCA_TASKNAME))
+		return FALSE;
+
+	if (!bAllowMultiple && (GetSelectedCount() > 1))
 		return FALSE;
 
 	Flush();
@@ -2758,18 +2760,20 @@ BOOL CToDoCtrl::SetSelectedTaskTitle(const CString& sTitle)
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 		
 	CDWordArray aModTaskIDs;
-	DWORD dwTaskID = GetSelectedTaskID();
+	POSITION pos = TSH().GetFirstItemPos();
 
-	if (!HandleModResult(dwTaskID, m_data.SetTaskTitle(dwTaskID, sTitle), aModTaskIDs))
-		return FALSE;
-	
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+
+		if (!HandleModResult(dwTaskID, m_data.SetTaskTitle(dwTaskID, sTitle), aModTaskIDs))
+			return FALSE;
+	}
+
 	if (aModTaskIDs.GetSize())
 	{
 		m_taskTree.Tree().SetItemText(GetSelectedItem(), sTitle);
 		m_taskTree.InvalidateSelection();
-
-		CDWordArray aModTaskIDs;
-		aModTaskIDs.Add(dwTaskID);
 
 		SetModified(TDCA_TASKNAME, aModTaskIDs);
 	}
@@ -10961,7 +10965,7 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute()
 		switch (nAttrib)
 		{
 		case TDCA_TASKNAME:
-			if (SetSelectedTaskTitle(sSelAttrib))
+			if (SetSelectedTaskTitle(sSelAttrib, FALSE))
 				return TRUE;
 			break;
 

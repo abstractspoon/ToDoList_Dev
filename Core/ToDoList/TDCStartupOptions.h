@@ -80,6 +80,7 @@ public:
 
 	BOOL HasNewTaskTitle() const { return !m_sNewTaskTitle.IsEmpty(); }
 	BOOL GetNewTaskTitle(CString& sValue) const { return (!m_sNewTaskTitle.IsEmpty() && m_sNewTaskTitle.GetValue(sValue)); }
+	BOOL GetTaskTitle(CString& sValue) const { return (!m_sTaskTitle.IsEmpty() && m_sTaskTitle.GetValue(sValue)); }
 	BOOL GetTaskComments(CString& sValue) const { return m_sTaskComments.GetValue(sValue); }
 	BOOL GetTaskExternalID(CString& sValue) const { return m_sTaskExternalID.GetValue(sValue); }
 	BOOL GetTaskVersion(CString& sValue) const { return m_sTaskVersion.GetValue(sValue); }
@@ -123,7 +124,9 @@ protected:
 	DWORD m_dwParentID; // parent task for new subtask
 	DWORD m_dwSiblingID; // sibling task for new subtask
 
-	TDCSTARTUPATTRIB m_sNewTaskTitle, m_sTaskComments, m_sCmdIDs;
+	TDCSTARTUPATTRIB m_sCmdIDs;
+
+	TDCSTARTUPATTRIB m_sNewTaskTitle, m_sTaskTitle, m_sTaskComments;
 	TDCSTARTUPATTRIB m_sTaskVersion, m_sTaskExternalID, m_sTaskAllocBy, m_sTaskStatus;
 	TDCSTARTUPATTRIB m_sTaskAllocTo, m_sTaskCategory, m_sTaskTags, m_sTaskDepends, m_sTaskFileRef;
 	TDCSTARTUPATTRIB m_sCustomAttrib;

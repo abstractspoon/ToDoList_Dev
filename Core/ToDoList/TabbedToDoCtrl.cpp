@@ -1389,7 +1389,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskTitle(dwTaskID, mod.szValue));
 			else
-				bChange = SetSelectedTaskTitle(mod.szValue);
+				bChange = SetSelectedTaskTitle(mod.szValue, TRUE);
 		}
 		break;
 

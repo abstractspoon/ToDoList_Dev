@@ -31,6 +31,7 @@ const LPCTSTR SWITCH_SELECTTASKID			= _T("tid");
 const LPCTSTR SWITCH_PARENTID				= _T("pid");
 const LPCTSTR SWITCH_SIBLINGID				= _T("bid");
 
+const LPCTSTR SWITCH_TASKTITLE				= _T("tt");
 const LPCTSTR SWITCH_TASKCOMMENTS			= _T("cm");
 const LPCTSTR SWITCH_TASKEXTID				= _T("xid");
 const LPCTSTR SWITCH_TASKCATEGORY			= _T("c");

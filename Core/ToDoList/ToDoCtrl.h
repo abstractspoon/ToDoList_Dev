@@ -274,7 +274,7 @@ public:
 
 	BOOL SetSelectedTaskColor(COLORREF color);
 	BOOL ClearSelectedTaskColor() { return SetSelectedTaskColor(CLR_NONE); }
-	BOOL SetSelectedTaskTitle(const CString& sTitle);
+	BOOL SetSelectedTaskTitle(const CString& sTitle, BOOL bAllowMultiple);
 	BOOL SetSelectedTaskPercentDoneToToday();
 	BOOL SetSelectedTaskAllocBy(const CString& sAllocBy);
 	BOOL SetSelectedTaskStatus(const CString& sStatus);
