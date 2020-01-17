@@ -397,7 +397,7 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 		// 4. A command requiring UI executed
 		BOOL bShow = (startup.IsEmpty(TRUE) || bTaskLink ||
 					(startup.HasFilePath() && bTasklistOpened) ||
-					(startup.HasFlag(TLD_NEWTASK) && !startup.HasNewTaskName()));
+					(startup.HasFlag(TLD_NEWTASK) && !startup.HasNewTaskTitle()));
 
 		if (!bShow && startup.HasCommandID())
 		{

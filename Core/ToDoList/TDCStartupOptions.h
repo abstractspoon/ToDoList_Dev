@@ -75,47 +75,47 @@ public:
 	int GetCommandIDs(CUIntArray& aCmdIDs) const;
 	BOOL HasCommandID() const { return !m_sCmdIDs.IsEmpty(); }
 
-	BOOL GetCopyAttribute(TDC_ATTRIBUTE& nFromAttrib, TDC_ATTRIBUTE& nToAttrib) const;
-	BOOL GetCopyAttribute(TDC_ATTRIBUTE& nFromAttrib, CString& sToCustomAttrib) const;
-	BOOL GetCopyAttribute(CString& sFromCustomAttrib, TDC_ATTRIBUTE& nToAttrib) const;
-	BOOL GetCopyAttribute(CString& sFromCustomAttrib, CString& sToCustomAttrib) const;
-
 	BOOL HasFilePath() const { return (lstrlen(m_szFilePaths) > 0); }
 	int GetFilePaths(CStringArray& aFiles) const;
 
-	BOOL HasNewTaskName() const { return !m_sNewTask.IsEmpty(); }
-	BOOL GetNewTaskName(CString& sValue) const { return (!m_sNewTask.IsEmpty() && m_sNewTask.GetValue(sValue)); }
-	BOOL GetComments(CString& sValue) const { return m_sComments.GetValue(sValue); }
-	BOOL GetExternalID(CString& sValue) const { return m_sExternalID.GetValue(sValue); }
-	BOOL GetVersion(CString& sValue) const { return m_sVersion.GetValue(sValue); }
-	BOOL GetAllocBy(CString& sValue) const { return m_sAllocBy.GetValue(sValue); }
-	BOOL GetStatus(CString& sValue) const { return m_sStatus.GetValue(sValue); }
-	BOOL GetFileRef(CString& sValue) const { return m_sFileRef.GetValue(sValue); }
-	BOOL GetDependency(CString& sValue) const { return m_sDepends.GetValue(sValue); }
+	BOOL HasNewTaskTitle() const { return !m_sNewTaskTitle.IsEmpty(); }
+	BOOL GetNewTaskTitle(CString& sValue) const { return (!m_sNewTaskTitle.IsEmpty() && m_sNewTaskTitle.GetValue(sValue)); }
+	BOOL GetTaskComments(CString& sValue) const { return m_sTaskComments.GetValue(sValue); }
+	BOOL GetTaskExternalID(CString& sValue) const { return m_sTaskExternalID.GetValue(sValue); }
+	BOOL GetTaskVersion(CString& sValue) const { return m_sTaskVersion.GetValue(sValue); }
+	BOOL GetTaskAllocBy(CString& sValue) const { return m_sTaskAllocBy.GetValue(sValue); }
+	BOOL GetTaskStatus(CString& sValue) const { return m_sTaskStatus.GetValue(sValue); }
+	BOOL GetTaskFileRef(CString& sValue) const { return m_sTaskFileRef.GetValue(sValue); }
+	BOOL GetTaskDependency(CString& sValue) const { return m_sTaskDepends.GetValue(sValue); }
 
-	BOOL GetStartDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtStartDate.GetDate(dValue, nUnits, bOffset); } 
-	BOOL GetStartTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dStartTime.GetTimeOfDay(dValue, nUnits, bOffset); } 
-	BOOL GetDueDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtDueDate.GetDate(dValue, nUnits, bOffset); } 
-	BOOL GetDueTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dDueTime.GetTimeOfDay(dValue, nUnits, bOffset); }
-	BOOL GetDoneDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtDoneDate.GetDate(dValue, nUnits, bOffset); } 
-	BOOL GetDoneTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dDoneTime.GetTimeOfDay(dValue, nUnits, bOffset); } 
-	BOOL GetCreationDate(COleDateTime& dtValue) const;
+	BOOL GetTaskStartDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtTaskStartDate.GetDate(dValue, nUnits, bOffset); } 
+	BOOL GetTaskStartTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dTaskStartTime.GetTimeOfDay(dValue, nUnits, bOffset); } 
+	BOOL GetTaskDueDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtTaskDueDate.GetDate(dValue, nUnits, bOffset); } 
+	BOOL GetTaskDueTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dTaskDueTime.GetTimeOfDay(dValue, nUnits, bOffset); }
+	BOOL GetTaskDoneDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtTaskDoneDate.GetDate(dValue, nUnits, bOffset); } 
+	BOOL GetTaskDoneTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dTaskDoneTime.GetTimeOfDay(dValue, nUnits, bOffset); } 
+	BOOL GetTaskCreationDate(COleDateTime& dtValue) const;
 
-	BOOL GetPercentDone(int& nValue, BOOL& bOffset) const { return m_nPercentDone.GetValue(nValue, bOffset); }
-	BOOL GetPriority(int& nValue, BOOL& bOffset) const;
-	BOOL GetRisk(int& nValue, BOOL& bOffset) const;
+	BOOL GetTaskPercentDone(int& nValue, BOOL& bOffset) const { return m_nTaskPercentDone.GetValue(nValue, bOffset); }
+	BOOL GetTaskPriority(int& nValue, BOOL& bOffset) const;
+	BOOL GetTaskRisk(int& nValue, BOOL& bOffset) const;
 
-	BOOL GetCost(double& dValue, BOOL& bOffset) const { return m_dCost.GetValue(dValue, bOffset); }
-	BOOL GetTimeEst(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dTimeEst.GetTimePeriod(dValue, nUnits, bOffset); } 
-	BOOL GetTimeSpent(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dTimeSpent.GetTimePeriod(dValue, nUnits, bOffset); } 
+	BOOL GetTaskCost(double& dValue, BOOL& bOffset) const { return m_dTaskCost.GetValue(dValue, bOffset); }
+	BOOL GetTaskTimeEst(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dTaskTimeEst.GetTimePeriod(dValue, nUnits, bOffset); } 
+	BOOL GetTaskTimeSpent(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dTaskTimeSpent.GetTimePeriod(dValue, nUnits, bOffset); } 
 
-	int GetDependencies(CStringArray& aDepends, BOOL& bAppend) const { return m_sDepends.GetValues(aDepends, bAppend); }
-	int GetCategories(CStringArray& aCats, BOOL& bAppend) const { return m_sCategory.GetValues(aCats, bAppend); }
-	int GetAllocTo(CStringArray& aAllocTo, BOOL& bAppend) const { return m_sAllocTo.GetValues(aAllocTo, bAppend); }
-	int GetTags(CStringArray& aTags, BOOL& bAppend) const { return m_sTags.GetValues(aTags, bAppend); }
-	int GetFileRefs(CStringArray& aFiles, BOOL& bAppend) const { return m_sFileRef.GetValues(aFiles, bAppend); }
+	int GetTaskDependencies(CStringArray& aDepends, BOOL& bAppend) const { return m_sTaskDepends.GetValues(aDepends, bAppend); }
+	int GetTaskCategories(CStringArray& aCats, BOOL& bAppend) const { return m_sTaskCategory.GetValues(aCats, bAppend); }
+	int GetTaskAllocTo(CStringArray& aAllocTo, BOOL& bAppend) const { return m_sTaskAllocTo.GetValues(aAllocTo, bAppend); }
+	int GetTaskTags(CStringArray& aTags, BOOL& bAppend) const { return m_sTaskTags.GetValues(aTags, bAppend); }
+	int GetTaskFileRefs(CStringArray& aFiles, BOOL& bAppend) const { return m_sTaskFileRef.GetValues(aFiles, bAppend); }
 
-	BOOL GetCustomAttribute(CString& sCustomID, CString& sValue) const;
+	BOOL GetTaskCustomAttribute(CString& sCustomID, CString& sValue) const;
+
+	BOOL GetCopyTaskAttribute(TDC_ATTRIBUTE& nFromAttrib, TDC_ATTRIBUTE& nToAttrib) const;
+	BOOL GetCopyTaskAttribute(TDC_ATTRIBUTE& nFromAttrib, CString& sToCustomAttrib) const;
+	BOOL GetCopyTaskAttribute(CString& sFromCustomAttrib, TDC_ATTRIBUTE& nToAttrib) const;
+	BOOL GetCopyTaskAttribute(CString& sFromCustomAttrib, CString& sToCustomAttrib) const;
 	
 protected:
 	TCHAR m_szFilePaths[FILEPATHSLEN + 1]; // tasklists to load/import
@@ -123,17 +123,17 @@ protected:
 	DWORD m_dwParentID; // parent task for new subtask
 	DWORD m_dwSiblingID; // sibling task for new subtask
 
-	TDCSTARTUPATTRIB m_sNewTask, m_sComments, m_sCmdIDs;
-	TDCSTARTUPATTRIB m_sVersion, m_sExternalID, m_sAllocBy, m_sStatus;
-	TDCSTARTUPATTRIB m_sAllocTo, m_sCategory, m_sTags, m_sDepends, m_sFileRef;
+	TDCSTARTUPATTRIB m_sNewTaskTitle, m_sTaskComments, m_sCmdIDs;
+	TDCSTARTUPATTRIB m_sTaskVersion, m_sTaskExternalID, m_sTaskAllocBy, m_sTaskStatus;
+	TDCSTARTUPATTRIB m_sTaskAllocTo, m_sTaskCategory, m_sTaskTags, m_sTaskDepends, m_sTaskFileRef;
 	TDCSTARTUPATTRIB m_sCustomAttrib;
 
-	TDCSTARTUPATTRIB m_nPriority, m_nRisk, m_nPercentDone;
-	TDCSTARTUPATTRIB m_dtCreateDate, m_dtStartDate, m_dtDueDate, m_dtDoneDate;
-	TDCSTARTUPATTRIB m_dStartTime, m_dDueTime, m_dDoneTime;
-	TDCSTARTUPATTRIB m_dTimeEst, m_dTimeSpent, m_dCost;
+	TDCSTARTUPATTRIB m_nTaskPriority, m_nTaskRisk, m_nTaskPercentDone;
+	TDCSTARTUPATTRIB m_dtTaskCreateDate, m_dtTaskStartDate, m_dtTaskDueDate, m_dtTaskDoneDate;
+	TDCSTARTUPATTRIB m_dTaskStartTime, m_dTaskDueTime, m_dTaskDoneTime;
+	TDCSTARTUPATTRIB m_dTaskTimeEst, m_dTaskTimeSpent, m_dTaskCost;
 	
-	TDCSTARTUPATTRIB m_sCopyFrom, m_sCopyTo;
+	TDCSTARTUPATTRIB m_sCopyFromTaskAttrib, m_sCopyToTaskAttrib;
 
 	DWORD m_dwFlags;
 	BOOL m_bSaveIntermediateAll;

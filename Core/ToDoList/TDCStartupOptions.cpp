@@ -268,7 +268,7 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 	COleDateTime date;
 
 	// new task
-	if (ExtractAttribute(cmdInfo, SWITCH_NEWTASK, m_sNewTask))
+	if (ExtractAttribute(cmdInfo, SWITCH_NEWTASK, m_sNewTaskTitle))
 	{
 		m_dwFlags |= TLD_NEWTASK;
 
@@ -283,12 +283,12 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 		}
 
 		// creation date for new tasks only
-		ParseDate(cmdInfo, SWITCH_TASKCREATEDATE, m_dtCreateDate);
+		ParseDate(cmdInfo, SWITCH_TASKCREATEDATE, m_dtTaskCreateDate);
 
 		// We don't support date offsets
-		if (m_dtCreateDate.IsOffset())
+		if (m_dtTaskCreateDate.IsOffset())
 		{
-			m_dtCreateDate.ClearValue();
+			m_dtTaskCreateDate.ClearValue();
 		}
 		else
 		{
@@ -304,12 +304,12 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 			{
 				double dDateTime = 0.0;
 
-				if (m_dtCreateDate.GetValue(dDateTime, bOffset))
+				if (m_dtTaskCreateDate.GetValue(dDateTime, bOffset))
 					dDateTime = CDateHelper::GetDateOnly(dDateTime).m_dt;
 				else
 					dDateTime = CDateHelper::GetDate(DHD_TODAY);
 
-				m_dtCreateDate.SetValue(Misc::Format(dDateTime + dTime));
+				m_dtTaskCreateDate.SetValue(Misc::Format(dDateTime + dTime));
 			}
 		}
 	}
@@ -329,47 +329,47 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 	}
 
 	// other task attribs
-	ExtractAttribute(cmdInfo, SWITCH_TASKEXTID, m_sExternalID);	
-	ExtractAttribute(cmdInfo, SWITCH_TASKCATEGORY, m_sCategory);	
-	ExtractAttribute(cmdInfo, SWITCH_TASKSTATUS, m_sStatus);	
-	ExtractAttribute(cmdInfo, SWITCH_TASKALLOCBY, m_sAllocBy);	
-	ExtractAttribute(cmdInfo, SWITCH_TASKALLOCTO, m_sAllocTo);	
-	ExtractAttribute(cmdInfo, SWITCH_TASKVERSION, m_sVersion);	
-	ExtractAttribute(cmdInfo, SWITCH_TASKTAGS, m_sTags);	
-	ExtractAttribute(cmdInfo, SWITCH_TASKDEPENDENCY, m_sDepends);	
-	ExtractAttribute(cmdInfo, SWITCH_TASKFILEREF, m_sFileRef);	
-	ExtractAttribute(cmdInfo, SWITCH_TASKPRIORITY, m_nPriority);
-	ExtractAttribute(cmdInfo, SWITCH_TASKRISK, m_nRisk);
+	ExtractAttribute(cmdInfo, SWITCH_TASKEXTID, m_sTaskExternalID);	
+	ExtractAttribute(cmdInfo, SWITCH_TASKCATEGORY, m_sTaskCategory);	
+	ExtractAttribute(cmdInfo, SWITCH_TASKSTATUS, m_sTaskStatus);	
+	ExtractAttribute(cmdInfo, SWITCH_TASKALLOCBY, m_sTaskAllocBy);	
+	ExtractAttribute(cmdInfo, SWITCH_TASKALLOCTO, m_sTaskAllocTo);	
+	ExtractAttribute(cmdInfo, SWITCH_TASKVERSION, m_sTaskVersion);	
+	ExtractAttribute(cmdInfo, SWITCH_TASKTAGS, m_sTaskTags);	
+	ExtractAttribute(cmdInfo, SWITCH_TASKDEPENDENCY, m_sTaskDepends);	
+	ExtractAttribute(cmdInfo, SWITCH_TASKFILEREF, m_sTaskFileRef);	
+	ExtractAttribute(cmdInfo, SWITCH_TASKPRIORITY, m_nTaskPriority);
+	ExtractAttribute(cmdInfo, SWITCH_TASKRISK, m_nTaskRisk);
 
 	// % completion
 	if (cmdInfo.GetOption(SWITCH_TASKPERCENT, sValue))
-		m_nPercentDone.SetValue(sValue);	
+		m_nTaskPercentDone.SetValue(sValue);	
 
 	// dates
-	ParseDate(cmdInfo, SWITCH_TASKSTARTDATE, m_dtStartDate);
-	ParseTime(cmdInfo, SWITCH_TASKSTARTTIME, m_dStartTime);
+	ParseDate(cmdInfo, SWITCH_TASKSTARTDATE, m_dtTaskStartDate);
+	ParseTime(cmdInfo, SWITCH_TASKSTARTTIME, m_dTaskStartTime);
 
-	ParseDate(cmdInfo, SWITCH_TASKDUEDATE, m_dtDueDate);
-	ParseTime(cmdInfo, SWITCH_TASKDUETIME, m_dDueTime);
+	ParseDate(cmdInfo, SWITCH_TASKDUEDATE, m_dtTaskDueDate);
+	ParseTime(cmdInfo, SWITCH_TASKDUETIME, m_dTaskDueTime);
 
-	ParseDate(cmdInfo, SWITCH_TASKDONEDATE, m_dtDoneDate);
-	ParseTime(cmdInfo, SWITCH_TASKDONETIME, m_dDoneTime);
+	ParseDate(cmdInfo, SWITCH_TASKDONEDATE, m_dtTaskDoneDate);
+	ParseTime(cmdInfo, SWITCH_TASKDONETIME, m_dTaskDoneTime);
 
 	// times and cost
 	if (cmdInfo.GetOption(SWITCH_TASKCOST, sValue))
-		m_dCost.SetValue(sValue);	
+		m_dTaskCost.SetValue(sValue);	
 
 	if (cmdInfo.GetOption(SWITCH_TASKTIMEEST, sValue))
-		m_dTimeEst.SetValue(sValue);	
+		m_dTaskTimeEst.SetValue(sValue);	
 
 	if (cmdInfo.GetOption(SWITCH_TASKTIMESPENT, sValue))
-		m_dTimeSpent.SetValue(sValue);	
+		m_dTaskTimeSpent.SetValue(sValue);	
 
 	// comments replace [\][n] with [\n]
 	if (cmdInfo.GetOption(SWITCH_TASKCOMMENTS, sValue))
 	{
 		sValue.Replace(_T("\\n"), _T("\n"));
-		m_sComments.SetValue(sValue);
+		m_sTaskComments.SetValue(sValue);
 	}
 
 	// Custom attribute
@@ -381,8 +381,8 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 	// Copying task attributes
 	if (cmdInfo.GetOptions(SWITCH_TASKCOPYATTRIB, aValues) && (aValues.GetSize() == 2))
 	{
-		m_sCopyFrom.SetValue(aValues[0]);
-		m_sCopyTo.SetValue(aValues[1]);
+		m_sCopyFromTaskAttrib.SetValue(aValues[0]);
+		m_sCopyToTaskAttrib.SetValue(aValues[1]);
 	}
 
 	// App-level flags
@@ -442,32 +442,32 @@ CTDCStartupOptions& CTDCStartupOptions::operator=(const CTDCStartupOptions& star
 	lstrcpy(m_szFilePaths, startup.m_szFilePaths); 
 
 	m_sCmdIDs = startup.m_sCmdIDs;
-	m_sNewTask = startup.m_sNewTask; 
-	m_sComments = startup.m_sComments; 
-	m_sExternalID = startup.m_sExternalID; 
-	m_sVersion = startup.m_sVersion;
-	m_sAllocTo = startup.m_sAllocTo; 
-	m_sAllocBy = startup.m_sAllocBy; 
-	m_sCategory = startup.m_sCategory; 
-	m_sTags = startup.m_sTags; 
-	m_sStatus = startup.m_sStatus; 
-	m_sDepends = startup.m_sDepends; 
-	m_sFileRef = startup.m_sFileRef; 
+	m_sNewTaskTitle = startup.m_sNewTaskTitle; 
+	m_sTaskComments = startup.m_sTaskComments; 
+	m_sTaskExternalID = startup.m_sTaskExternalID; 
+	m_sTaskVersion = startup.m_sTaskVersion;
+	m_sTaskAllocTo = startup.m_sTaskAllocTo; 
+	m_sTaskAllocBy = startup.m_sTaskAllocBy; 
+	m_sTaskCategory = startup.m_sTaskCategory; 
+	m_sTaskTags = startup.m_sTaskTags; 
+	m_sTaskStatus = startup.m_sTaskStatus; 
+	m_sTaskDepends = startup.m_sTaskDepends; 
+	m_sTaskFileRef = startup.m_sTaskFileRef; 
 	m_sCustomAttrib = startup.m_sCustomAttrib; 
 
-	m_dtCreateDate = startup.m_dtCreateDate;
-	m_dtStartDate = startup.m_dtStartDate;
-	m_dtDueDate = startup.m_dtDueDate;
-	m_dtDoneDate = startup.m_dtDoneDate;
-	m_dStartTime = startup.m_dStartTime;
-	m_dDueTime = startup.m_dDueTime;
-	m_dDoneTime = startup.m_dDoneTime;
-	m_nPriority = startup.m_nPriority; 
-	m_nRisk = startup.m_nRisk; 
-	m_dCost = startup.m_dCost;
-	m_dTimeEst = startup.m_dTimeEst;
-	m_dTimeSpent = startup.m_dTimeSpent;
-	m_nPercentDone = startup.m_nPercentDone;
+	m_dtTaskCreateDate = startup.m_dtTaskCreateDate;
+	m_dtTaskStartDate = startup.m_dtTaskStartDate;
+	m_dtTaskDueDate = startup.m_dtTaskDueDate;
+	m_dtTaskDoneDate = startup.m_dtTaskDoneDate;
+	m_dTaskStartTime = startup.m_dTaskStartTime;
+	m_dTaskDueTime = startup.m_dTaskDueTime;
+	m_dTaskDoneTime = startup.m_dTaskDoneTime;
+	m_nTaskPriority = startup.m_nTaskPriority; 
+	m_nTaskRisk = startup.m_nTaskRisk; 
+	m_dTaskCost = startup.m_dTaskCost;
+	m_dTaskTimeEst = startup.m_dTaskTimeEst;
+	m_dTaskTimeSpent = startup.m_dTaskTimeSpent;
+	m_nTaskPercentDone = startup.m_nTaskPercentDone;
 
 	m_dwIDSel = startup.m_dwIDSel;
 	m_dwParentID = startup.m_dwParentID; 
@@ -475,8 +475,8 @@ CTDCStartupOptions& CTDCStartupOptions::operator=(const CTDCStartupOptions& star
 	m_dwFlags = startup.m_dwFlags;
 	m_bSaveIntermediateAll = startup.m_bSaveIntermediateAll;
 
-	m_sCopyFrom = startup.m_sCopyFrom;
-	m_sCopyTo = startup.m_sCopyTo;
+	m_sCopyFromTaskAttrib = startup.m_sCopyFromTaskAttrib;
+	m_sCopyToTaskAttrib = startup.m_sCopyToTaskAttrib;
 
 	return *this;
 }
@@ -487,32 +487,32 @@ BOOL CTDCStartupOptions::operator==(const CTDCStartupOptions& startup) const
 		(
 		(_tcscmp(m_szFilePaths, startup.m_szFilePaths) == 0) &&
 
-		(m_sNewTask == startup.m_sNewTask) &&
-		(m_sComments == startup.m_sComments) &&
-		(m_sExternalID == startup.m_sExternalID) &&
-		(m_sVersion == startup.m_sVersion) &&
-		(m_sAllocTo == startup.m_sAllocTo) &&
-		(m_sAllocBy == startup.m_sAllocBy) &&
-		(m_sCategory == startup.m_sCategory) &&
-		(m_sTags == startup.m_sTags) &&
-		(m_sStatus == startup.m_sStatus) &&
-		(m_sDepends == startup.m_sDepends) &&
-		(m_sFileRef == startup.m_sFileRef) &&
+		(m_sNewTaskTitle == startup.m_sNewTaskTitle) &&
+		(m_sTaskComments == startup.m_sTaskComments) &&
+		(m_sTaskExternalID == startup.m_sTaskExternalID) &&
+		(m_sTaskVersion == startup.m_sTaskVersion) &&
+		(m_sTaskAllocTo == startup.m_sTaskAllocTo) &&
+		(m_sTaskAllocBy == startup.m_sTaskAllocBy) &&
+		(m_sTaskCategory == startup.m_sTaskCategory) &&
+		(m_sTaskTags == startup.m_sTaskTags) &&
+		(m_sTaskStatus == startup.m_sTaskStatus) &&
+		(m_sTaskDepends == startup.m_sTaskDepends) &&
+		(m_sTaskFileRef == startup.m_sTaskFileRef) &&
 		(m_sCustomAttrib == startup.m_sCustomAttrib) &&
 
-		(m_dtCreateDate == startup.m_dtCreateDate) &&
-		(m_dtStartDate == startup.m_dtStartDate) &&
-		(m_dtDueDate == startup.m_dtDueDate) &&
-		(m_dtDoneDate == startup.m_dtDoneDate) &&
-		(m_dStartTime == startup.m_dStartTime) &&
-		(m_dDueTime == startup.m_dDueTime) &&
-		(m_dDoneTime == startup.m_dDoneTime) &&
-		(m_nPriority == startup.m_nPriority) &&
-		(m_nRisk == startup.m_nRisk) &&
-		(m_dCost == startup.m_dCost) &&
-		(m_dTimeEst == startup.m_dTimeEst) &&
-		(m_dTimeSpent == startup.m_dTimeSpent) &&
-		(m_nPercentDone == startup.m_nPercentDone) &&
+		(m_dtTaskCreateDate == startup.m_dtTaskCreateDate) &&
+		(m_dtTaskStartDate == startup.m_dtTaskStartDate) &&
+		(m_dtTaskDueDate == startup.m_dtTaskDueDate) &&
+		(m_dtTaskDoneDate == startup.m_dtTaskDoneDate) &&
+		(m_dTaskStartTime == startup.m_dTaskStartTime) &&
+		(m_dTaskDueTime == startup.m_dTaskDueTime) &&
+		(m_dTaskDoneTime == startup.m_dTaskDoneTime) &&
+		(m_nTaskPriority == startup.m_nTaskPriority) &&
+		(m_nTaskRisk == startup.m_nTaskRisk) &&
+		(m_dTaskCost == startup.m_dTaskCost) &&
+		(m_dTaskTimeEst == startup.m_dTaskTimeEst) &&
+		(m_dTaskTimeSpent == startup.m_dTaskTimeSpent) &&
+		(m_nTaskPercentDone == startup.m_nTaskPercentDone) &&
 
 		(m_dwIDSel == startup.m_dwIDSel) &&
 		(m_dwParentID == startup.m_dwParentID) &&
@@ -521,8 +521,8 @@ BOOL CTDCStartupOptions::operator==(const CTDCStartupOptions& startup) const
 		(m_bSaveIntermediateAll == startup.m_bSaveIntermediateAll) &&
 		(m_sCmdIDs == startup.m_sCmdIDs) &&
 
-		(m_sCopyFrom == startup.m_sCopyFrom) && 
-		(m_sCopyTo == startup.m_sCopyTo)
+		(m_sCopyFromTaskAttrib == startup.m_sCopyFromTaskAttrib) && 
+		(m_sCopyToTaskAttrib == startup.m_sCopyToTaskAttrib)
 		);
 }
 
@@ -638,34 +638,34 @@ void CTDCStartupOptions::Reset()
 { 
 	m_szFilePaths[0] = 0; 
 
-	m_sNewTask.ClearValue();
-	m_sComments.ClearValue();
-	m_sExternalID.ClearValue();
-	m_sVersion.ClearValue();
-	m_sAllocTo.ClearValue();
-	m_sAllocBy.ClearValue();
-	m_sCategory.ClearValue();
-	m_sStatus.ClearValue();
-	m_sTags.ClearValue(); 
-	m_sFileRef.ClearValue();
-	m_sDepends.ClearValue();
+	m_sNewTaskTitle.ClearValue();
+	m_sTaskComments.ClearValue();
+	m_sTaskExternalID.ClearValue();
+	m_sTaskVersion.ClearValue();
+	m_sTaskAllocTo.ClearValue();
+	m_sTaskAllocBy.ClearValue();
+	m_sTaskCategory.ClearValue();
+	m_sTaskStatus.ClearValue();
+	m_sTaskTags.ClearValue(); 
+	m_sTaskFileRef.ClearValue();
+	m_sTaskDepends.ClearValue();
 	m_sCustomAttrib.ClearValue();
 	m_sCmdIDs.ClearValue();
 
-	m_dtCreateDate.ClearValue();
-	m_dtStartDate.ClearValue();
-	m_dtDueDate.ClearValue();
-	m_dtDoneDate.ClearValue();
-	m_dStartTime.ClearValue();
-	m_dDueTime.ClearValue();
-	m_dDoneTime.ClearValue();
-	m_dTimeEst.ClearValue();
-	m_dTimeSpent.ClearValue();
-	m_dCost.ClearValue();
+	m_dtTaskCreateDate.ClearValue();
+	m_dtTaskStartDate.ClearValue();
+	m_dtTaskDueDate.ClearValue();
+	m_dtTaskDoneDate.ClearValue();
+	m_dTaskStartTime.ClearValue();
+	m_dTaskDueTime.ClearValue();
+	m_dTaskDoneTime.ClearValue();
+	m_dTaskTimeEst.ClearValue();
+	m_dTaskTimeSpent.ClearValue();
+	m_dTaskCost.ClearValue();
 
-	m_nPercentDone.ClearValue();
-	m_nPriority.ClearValue();
-	m_nRisk.ClearValue(); 
+	m_nTaskPercentDone.ClearValue();
+	m_nTaskPriority.ClearValue();
+	m_nTaskRisk.ClearValue(); 
 
 	m_dwIDSel = 0;
 	m_dwParentID = 0; 
@@ -673,17 +673,17 @@ void CTDCStartupOptions::Reset()
 	m_dwFlags = TLD_PASSWORDPROMPTING;
 	m_bSaveIntermediateAll = FALSE;
 
-	m_sCopyFrom.ClearValue();
-	m_sCopyTo.ClearValue();
+	m_sCopyFromTaskAttrib.ClearValue();
+	m_sCopyToTaskAttrib.ClearValue();
 }
 
-BOOL CTDCStartupOptions::GetCreationDate(COleDateTime& dtValue) const
+BOOL CTDCStartupOptions::GetTaskCreationDate(COleDateTime& dtValue) const
 {
 	BOOL bOffset = FALSE;
 	double dValue = 0.0;
 	TDC_UNITS nUnits = TDCU_NULL;
 	
-	if (m_dtCreateDate.GetDate(dValue, nUnits, bOffset) && !bOffset)
+	if (m_dtTaskCreateDate.GetDate(dValue, nUnits, bOffset) && !bOffset)
 	{
 		dtValue = COleDateTime(dValue);
 		return TRUE;
@@ -693,10 +693,10 @@ BOOL CTDCStartupOptions::GetCreationDate(COleDateTime& dtValue) const
 	return FALSE;
 }
 
-BOOL CTDCStartupOptions::GetPriority(int& nValue, BOOL& bOffset) const 
+BOOL CTDCStartupOptions::GetTaskPriority(int& nValue, BOOL& bOffset) const 
 { 
 	// handle 'n' for none
-	if (m_nPriority == _T("n"))
+	if (m_nTaskPriority == _T("n"))
 	{
 		nValue = -2;
 		bOffset = FALSE;
@@ -705,13 +705,13 @@ BOOL CTDCStartupOptions::GetPriority(int& nValue, BOOL& bOffset) const
 	}
 
 	// else
-	return m_nPriority.GetValue(nValue, bOffset); 
+	return m_nTaskPriority.GetValue(nValue, bOffset); 
 }
 
-BOOL CTDCStartupOptions::GetRisk(int& nValue, BOOL& bOffset) const 
+BOOL CTDCStartupOptions::GetTaskRisk(int& nValue, BOOL& bOffset) const 
 { 
 	// handle 'n' for none
-	if (m_nRisk == _T("n"))
+	if (m_nTaskRisk == _T("n"))
 	{
 		nValue = -2;
 		bOffset = FALSE;
@@ -719,10 +719,10 @@ BOOL CTDCStartupOptions::GetRisk(int& nValue, BOOL& bOffset) const
 		return TRUE;
 	}
 
-	return m_nRisk.GetValue(nValue, bOffset); 
+	return m_nTaskRisk.GetValue(nValue, bOffset); 
 }
 
-BOOL CTDCStartupOptions::GetCustomAttribute(CString& sCustomID, CString& sValue) const
+BOOL CTDCStartupOptions::GetTaskCustomAttribute(CString& sCustomID, CString& sValue) const
 {
 	if (!m_sCustomAttrib.IsEmpty())
 	{
@@ -761,14 +761,14 @@ int CTDCStartupOptions::GetCommandIDs(CUIntArray& aCmdIDs) const
 	return aCmdIDs.GetSize();
 }
 
-BOOL CTDCStartupOptions::GetCopyAttribute(TDC_ATTRIBUTE& nFromAttrib, TDC_ATTRIBUTE& nToAttrib) const
+BOOL CTDCStartupOptions::GetCopyTaskAttribute(TDC_ATTRIBUTE& nFromAttrib, TDC_ATTRIBUTE& nToAttrib) const
 {
-	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFrom.GetValue());
+	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFromTaskAttrib.GetValue());
 
 	if (nFrom == TDCA_NONE)
 		return FALSE;
 
-	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyTo.GetValue());
+	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyToTaskAttrib.GetValue());
 
 	if (nTo == TDCA_NONE)
 		return FALSE;
@@ -780,62 +780,62 @@ BOOL CTDCStartupOptions::GetCopyAttribute(TDC_ATTRIBUTE& nFromAttrib, TDC_ATTRIB
 	return TRUE;
 }
 
-BOOL CTDCStartupOptions::GetCopyAttribute(TDC_ATTRIBUTE& nFromAttrib, CString& sToCustomAttrib) const
+BOOL CTDCStartupOptions::GetCopyTaskAttribute(TDC_ATTRIBUTE& nFromAttrib, CString& sToCustomAttrib) const
 {
-	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFrom.GetValue());
+	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFromTaskAttrib.GetValue());
 
 	if (nFrom == TDCA_NONE)
 		return FALSE;
 
-	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyTo.GetValue());
+	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyToTaskAttrib.GetValue());
 
 	if (nTo != TDCA_NONE)
 		return FALSE;
 
 	// else
 	nFromAttrib = nFrom;
-	sToCustomAttrib = m_sCopyTo.GetValue();
+	sToCustomAttrib = m_sCopyToTaskAttrib.GetValue();
 
 	return TRUE;
 }
 
-BOOL CTDCStartupOptions::GetCopyAttribute(CString& sFromCustomAttrib, TDC_ATTRIBUTE& nToAttrib) const
+BOOL CTDCStartupOptions::GetCopyTaskAttribute(CString& sFromCustomAttrib, TDC_ATTRIBUTE& nToAttrib) const
 {
-	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFrom.GetValue());
+	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFromTaskAttrib.GetValue());
 
 	if (nFrom != TDCA_NONE)
 		return FALSE;
 
-	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyTo.GetValue());
+	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyToTaskAttrib.GetValue());
 
 	if (nTo == TDCA_NONE)
 		return FALSE;
 
 	// else
-	sFromCustomAttrib = m_sCopyFrom.GetValue();
+	sFromCustomAttrib = m_sCopyFromTaskAttrib.GetValue();
 	nToAttrib = nTo;
 
 	return TRUE;
 }
 
-BOOL CTDCStartupOptions::GetCopyAttribute(CString& sFromCustomAttrib, CString& sToCustomAttrib) const
+BOOL CTDCStartupOptions::GetCopyTaskAttribute(CString& sFromCustomAttrib, CString& sToCustomAttrib) const
 {
-	if (m_sCopyFrom.IsEmpty() || m_sCopyTo.IsEmpty())
+	if (m_sCopyFromTaskAttrib.IsEmpty() || m_sCopyToTaskAttrib.IsEmpty())
 		return FALSE;
 
-	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFrom.GetValue());
+	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFromTaskAttrib.GetValue());
 
 	if (nFrom != TDCA_NONE)
 		return FALSE;
 
-	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyTo.GetValue());
+	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyToTaskAttrib.GetValue());
 
 	if (nTo != TDCA_NONE)
 		return FALSE;
 
 	// else
-	sFromCustomAttrib = m_sCopyFrom.GetValue();
-	sToCustomAttrib = m_sCopyTo.GetValue();
+	sFromCustomAttrib = m_sCopyFromTaskAttrib.GetValue();
+	sToCustomAttrib = m_sCopyToTaskAttrib.GetValue();
 
 	return TRUE;
 }

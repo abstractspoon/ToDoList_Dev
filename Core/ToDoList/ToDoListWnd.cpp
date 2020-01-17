@@ -5351,7 +5351,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		BOOL bEditTask = FALSE;
 		
 		// we edit the task name if no name was supplied
-		if (!startup.GetNewTaskName(sNewTask))
+		if (!startup.GetNewTaskTitle(sNewTask))
 		{
 			sNewTask.LoadString(IDS_TASK);
 			bEditTask = TRUE;
@@ -5375,7 +5375,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		// creation date
 		COleDateTime date;
 
-		if (startup.GetCreationDate(date))
+		if (startup.GetTaskCreationDate(date))
 			tdc.SetSelectedTaskDate(TDCD_CREATE, date);
 		
 		// edit task title?
@@ -5400,7 +5400,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		int nItem;
 		double dItem;
 		
-		if (startup.GetComments(sItem))
+		if (startup.GetTaskComments(sItem))
 		{
 			// If it's a file, we first turn it into a URI
 			WebMisc::FormatFileURI(sItem, sItem);
@@ -5417,64 +5417,64 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 			tdc.SetSelectedTaskComments(sItem);
 		}
 
-		if (startup.GetExternalID(sItem))
+		if (startup.GetTaskExternalID(sItem))
 			tdc.SetSelectedTaskExternalID(sItem);
 		
-		if (startup.GetVersion(sItem))
+		if (startup.GetTaskVersion(sItem))
 			tdc.SetSelectedTaskVersion(sItem);
 		
-		if (startup.GetAllocBy(sItem))
+		if (startup.GetTaskAllocBy(sItem))
 			tdc.SetSelectedTaskAllocBy(sItem);
 		
-		if (startup.GetStatus(sItem))
+		if (startup.GetTaskStatus(sItem))
 			tdc.SetSelectedTaskStatus(sItem);
 		
 		// Numeric items
 		BOOL bOffset = FALSE;
 
-		if (startup.GetPriority(nItem, bOffset))
+		if (startup.GetTaskPriority(nItem, bOffset))
 			tdc.SetSelectedTaskPriority(nItem, bOffset);
 
-		if (startup.GetRisk(nItem, bOffset))
+		if (startup.GetTaskRisk(nItem, bOffset))
 			tdc.SetSelectedTaskRisk(nItem, bOffset);
 
-		if (startup.GetPercentDone(nItem, bOffset))
+		if (startup.GetTaskPercentDone(nItem, bOffset))
 			tdc.SetSelectedTaskPercentDone(nItem, bOffset);
 
-		if (startup.GetCost(dItem, bOffset))
+		if (startup.GetTaskCost(dItem, bOffset))
 			tdc.SetSelectedTaskCost(TDCCOST(dItem), bOffset);
 
 		// Times
 		TDCTIMEPERIOD time;
 
-		if (startup.GetTimeEst(time.dAmount, time.nUnits, bOffset))
+		if (startup.GetTaskTimeEst(time.dAmount, time.nUnits, bOffset))
 			tdc.SetSelectedTaskTimeEstimate(time, bOffset);
 
-		if (startup.GetTimeSpent(time.dAmount, time.nUnits, bOffset))
+		if (startup.GetTaskTimeSpent(time.dAmount, time.nUnits, bOffset))
 			tdc.SetSelectedTaskTimeSpent(time, bOffset); 
 
 		// Multi-string items
 		BOOL bAppend = FALSE;
 
-		if (startup.GetAllocTo(aItems, bAppend) != -1)
+		if (startup.GetTaskAllocTo(aItems, bAppend) != -1)
 			tdc.SetSelectedTaskAllocTo(aItems, bAppend);
 		
-		if (startup.GetCategories(aItems, bAppend) != -1)
+		if (startup.GetTaskCategories(aItems, bAppend) != -1)
 			tdc.SetSelectedTaskCategories(aItems, bAppend);
 		
-		if (startup.GetDependencies(aItems, bAppend) != -1)
+		if (startup.GetTaskDependencies(aItems, bAppend) != -1)
 			tdc.SetSelectedTaskDependencies(aItems, bAppend);
 		
-		if (startup.GetTags(aItems, bAppend) != -1)
+		if (startup.GetTaskTags(aItems, bAppend) != -1)
 			tdc.SetSelectedTaskTags(aItems, bAppend);
 		
-		if (startup.GetFileRefs(aItems, bAppend) != -1)
+		if (startup.GetTaskFileRefs(aItems, bAppend) != -1)
 			tdc.SetSelectedTaskFileRefs(aItems, bAppend);
 		
 		// start date and time
 		TDC_UNITS nUnits;
 
-		if (startup.GetStartDate(dItem, nUnits, bOffset))
+		if (startup.GetTaskStartDate(dItem, nUnits, bOffset))
 		{
 			ASSERT(bOffset || (nUnits == DHU_DAYS));
 
@@ -5485,7 +5485,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 			
 		// time overrides if present
-		if (startup.GetStartTime(dItem, nUnits, bOffset))
+		if (startup.GetTaskStartTime(dItem, nUnits, bOffset))
 		{
 			ASSERT(bOffset || (nUnits == DHU_DAYS));
 
@@ -5496,7 +5496,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 
 		// due date and time
-		if (startup.GetDueDate(dItem, nUnits, bOffset))
+		if (startup.GetTaskDueDate(dItem, nUnits, bOffset))
 		{
 			ASSERT(bOffset || (nUnits == DHU_DAYS));
 
@@ -5507,7 +5507,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 
 		// time overrides if present
-		if (startup.GetDueTime(dItem, nUnits, bOffset))
+		if (startup.GetTaskDueTime(dItem, nUnits, bOffset))
 		{
 			ASSERT(bOffset || (nUnits == DHU_DAYS));
 
@@ -5518,7 +5518,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 
 		// done date and time
-		if (startup.GetDoneDate(dItem, nUnits, bOffset))
+		if (startup.GetTaskDoneDate(dItem, nUnits, bOffset))
 		{
 			ASSERT(bOffset || (nUnits == DHU_DAYS));
 
@@ -5529,7 +5529,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 			
 		// time overrides if present
-		if (startup.GetDoneTime(dItem, nUnits, bOffset))
+		if (startup.GetTaskDoneTime(dItem, nUnits, bOffset))
 		{
 			ASSERT(bOffset || (nUnits == DHU_DAYS));
 
@@ -5542,26 +5542,26 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		// Custom attribute
 		CString sAttribID;
 
-		if (startup.GetCustomAttribute(sAttribID, sItem))
+		if (startup.GetTaskCustomAttribute(sAttribID, sItem))
 			tdc.SetSelectedTaskCustomAttributeData(sAttribID, sItem);
 
 		// Copying attributes
 		CString sFrom, sTo;
 		TDC_ATTRIBUTE nFrom, nTo;
 
-		if (startup.GetCopyAttribute(nFrom, nTo))
+		if (startup.GetCopyTaskAttribute(nFrom, nTo))
 		{
 			tdc.CopySelectedTaskAttributeData(nFrom, nTo);
 		}
-		else if (startup.GetCopyAttribute(nFrom, sTo))
+		else if (startup.GetCopyTaskAttribute(nFrom, sTo))
 		{
 			tdc.CopySelectedTaskAttributeData(nFrom, sTo);
 		}
-		else if (startup.GetCopyAttribute(sFrom, nTo))
+		else if (startup.GetCopyTaskAttribute(sFrom, nTo))
 		{
 			tdc.CopySelectedTaskAttributeData(sFrom, nTo);
 		}
-		else if (startup.GetCopyAttribute(sFrom, sTo))
+		else if (startup.GetCopyTaskAttribute(sFrom, sTo))
 		{
 			tdc.CopySelectedTaskAttributeData(sFrom, sTo);
 		}
