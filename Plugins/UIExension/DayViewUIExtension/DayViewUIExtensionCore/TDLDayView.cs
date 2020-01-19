@@ -707,6 +707,9 @@ namespace DayViewUIExtension
 			// default handling
 			base.OnMouseMove(e);
 
+			if (ShowLabelTips && (GetAppointmentAt(e.Location.X, e.Location.Y) == null))
+				m_LabelTip.Hide(this);
+
 			Cursor = GetCursor(e);
 		}
 
