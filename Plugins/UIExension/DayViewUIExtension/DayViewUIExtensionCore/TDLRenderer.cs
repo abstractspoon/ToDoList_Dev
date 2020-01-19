@@ -408,15 +408,16 @@ namespace DayViewUIExtension
 							rect.Width -= (gripRect.Width + 4);
 						}
 					}
-					
+
 					// draw appointment text
-                    rect.Y += 3;
+					rect.Y += 3;
 
 					if (longAppt)
 						rect.Height = m_BaseFont.Height;
 					else
 						rect.Height -= 3;
 
+					taskItem.TextRect = rect;
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
                     using (SolidBrush brush = new SolidBrush(textColor))

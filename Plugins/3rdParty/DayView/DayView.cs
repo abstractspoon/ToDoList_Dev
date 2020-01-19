@@ -931,15 +931,20 @@ namespace Calendar
             base.OnMouseDown(e);
         }
 
-        protected override void OnMouseMove(MouseEventArgs e)
+        protected override void OnMouseHover(EventArgs e)
         {
-            if (activeTool != null)
-                activeTool.MouseMove(e);
-
-            base.OnMouseMove(e);
+            base.OnMouseHover(e);
         }
 
-        protected override void OnMouseUp(MouseEventArgs e)
+		protected override void OnMouseMove(MouseEventArgs e)
+		{
+			if (activeTool != null)
+				activeTool.MouseMove(e);
+
+			base.OnMouseMove(e);
+		}
+
+		protected override void OnMouseUp(MouseEventArgs e)
         {
             if (activeTool != null)
                 activeTool.MouseUp(e);

@@ -78,8 +78,9 @@ namespace DayViewUIExtension
         // This is a hack because the underlying DayView does
         // not allow overriding the AppointmentView class
         public Rectangle IconRect { get; set; }
+		public Rectangle TextRect { get; set; }
 
-        public override TimeSpan Length
+		public override TimeSpan Length
         {
             get
             {

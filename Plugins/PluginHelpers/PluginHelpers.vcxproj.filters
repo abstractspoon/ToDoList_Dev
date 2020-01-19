@@ -78,6 +78,9 @@
     <ClInclude Include="OutlookUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LabelTip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -138,6 +141,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OutlookUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LabelTip.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

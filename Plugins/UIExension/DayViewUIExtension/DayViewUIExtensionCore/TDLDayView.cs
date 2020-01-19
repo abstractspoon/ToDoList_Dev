@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Text;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
+using System.Diagnostics;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -27,10 +24,16 @@ namespace DayViewUIExtension
 
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
         private TDLRenderer m_Renderer;
+		private LabelTip m_LabelTip;
+
+		private int LabelTipBorder
+		{
+			get { return DPIScaling.Scale(4); }
+		}
 
 		// ----------------------------------------------------------------
-    
-        public Boolean ReadOnly { get; set; }
+
+		public Boolean ReadOnly { get; set; }
 
         public TDLDayView(UIExtension.TaskIcon taskIcons, int minSlotHeight)
         {
@@ -80,9 +83,16 @@ namespace DayViewUIExtension
             this.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnSelectionChanged);
             this.WeekChange += new Calendar.WeekChangeEventHandler(OnWeekChanged);
 
-        }
+			this.m_LabelTip = new LabelTip(this);
+		}
 
-        public bool IsTaskWithinRange(UInt32 dwTaskID)
+		public bool ShowLabelTips
+		{
+			set { m_LabelTip.Active = value; }
+			get { return m_LabelTip.Active; }
+		}
+
+		public bool IsTaskWithinRange(UInt32 dwTaskID)
         {
 			CalendarItem item;
 
@@ -309,18 +319,17 @@ namespace DayViewUIExtension
 			return 0;
 		}
 
-		public bool GetSelectedItemLabelRect(ref Rectangle rect)
+		public bool GetItemLabelRect(Calendar.Appointment appointment, ref Rectangle rect)
 		{
-			if (GetAppointmentRect(SelectedAppointment, ref rect))
+			if (GetAppointmentRect(appointment, ref rect))
 			{
-				CalendarItem selItem = (SelectedAppointment as CalendarItem);
+				CalendarItem item = (appointment as CalendarItem);
+				bool hasIcon = m_Renderer.TaskHasIcon(item);
 
-				bool hasIcon = m_Renderer.TaskHasIcon(selItem);
-
-				if (SelectedAppointment.IsLongAppt())
+				if (appointment.IsLongAppt())
 				{
 					// Gripper
-					if (SelectedAppointment.StartDate >= StartDate)
+					if (appointment.StartDate >= StartDate)
 						rect.X += 8;
 					else
 						rect.X -= 3;
@@ -348,12 +357,16 @@ namespace DayViewUIExtension
 
 					rect.Height = (GetFontHeight() + 4); // 4 = border
 				}
-				
+
 				return true;
 			}
 
-			// else
 			return false;
+		}
+
+		public bool GetSelectedItemLabelRect(ref Rectangle rect)
+		{
+			return GetItemLabelRect(SelectedAppointment, ref rect);
 		}
 
 		public bool IsItemDisplayable(CalendarItem item)
@@ -510,6 +523,7 @@ namespace DayViewUIExtension
         public void SetFont(String fontName, int fontSize)
         {
             m_Renderer.SetFont(fontName, fontSize);
+			m_LabelTip.SetFont(m_Renderer.BaseFont);
 
             LongAppointmentHeight = Math.Max(m_Renderer.BaseFont.Height + 4, 17);
         }
@@ -626,8 +640,17 @@ namespace DayViewUIExtension
             Update();
         }
 
+		protected override void OnMouseLeave(EventArgs e)
+		{
+			m_LabelTip.Hide(this);
+
+			base.OnMouseLeave(e);
+		}
+
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
+			m_LabelTip.Hide(this);
+
 			// let the base class initiate resizing if it wants
 			base.OnMouseDown(e);
 
@@ -685,6 +708,38 @@ namespace DayViewUIExtension
 			base.OnMouseMove(e);
 
 			Cursor = GetCursor(e);
+		}
+
+		protected override void OnMouseHover(EventArgs e)
+        {
+			// default handling
+			base.OnMouseHover(e);
+
+			// If the current item text is too narrow, show an in-place tooltip
+			if (ShowLabelTips)
+			{
+				var pt = PointToClient(MousePosition);
+				Calendar.Appointment appointment = GetAppointmentAt(pt.X, pt.Y);
+
+				if (appointment != null)
+				{
+					var taskItem = appointment as CalendarItem;
+
+					if ((taskItem != null) && taskItem.TextRect.Contains(pt))
+					{
+						if (TextRenderer.MeasureText(taskItem.Title, Font).Width > taskItem.TextRect.Width)
+						{
+							m_LabelTip.Show(taskItem.Title, this, taskItem.TextRect.X - LabelTipBorder, taskItem.TextRect.Y);
+							return;
+						}
+					}
+				}
+			}
+
+			// else
+			Debug.WriteLine("Hiding tooltip");
+
+			m_LabelTip.Hide(this);
 		}
 
 		private Cursor GetCursor(MouseEventArgs e)

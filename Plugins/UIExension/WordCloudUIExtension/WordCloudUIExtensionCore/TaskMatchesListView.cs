@@ -11,124 +11,92 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace WordCloudUIExtension
 {
-    public delegate Boolean EditTaskLabelEventHandler(object sender, UInt32 taskId);
-    public delegate Boolean EditTaskIconEventHandler(object sender, UInt32 taskId);
-    public delegate Boolean EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
+	public delegate Boolean EditTaskLabelEventHandler(object sender, UInt32 taskId);
+	public delegate Boolean EditTaskIconEventHandler(object sender, UInt32 taskId);
+	public delegate Boolean EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
 
-    [System.ComponentModel.DesignerCategory("")]
+	[System.ComponentModel.DesignerCategory("")]
 
-    class TaskMatchesListView : ListView
-    {
-        public event EditTaskLabelEventHandler      EditTaskLabel;
-        public event EditTaskIconEventHandler       EditTaskIcon;
-        public event EditTaskCompletionEventHandler EditTaskDone;
+	class TaskMatchesListView : ListView
+	{
+		public event EditTaskLabelEventHandler EditTaskLabel;
+		public event EditTaskIconEventHandler EditTaskIcon;
+		public event EditTaskCompletionEventHandler EditTaskDone;
 
 		// -------------------------------------------------------------
 
 		private UIExtension.SelectionRect m_SelectionRect;
 		private UIExtension.TaskIcon m_TaskIcons;
 
-        private ImageList m_ilItemHeight;
-        private Size m_CheckBoxSize = Size.Empty;
-		private ToolTip m_LabelTip;
+		private ImageList m_ilItemHeight;
+		private Size m_CheckBoxSize = Size.Empty;
+		private LabelTip m_LabelTip;
 
 		private Boolean m_TaskMatchesHaveIcons;
-        private Boolean m_ShowParentAsFolder;
-        private Boolean m_TaskColorIsBkgnd;
-        private Boolean m_ShowCompletionCheckboxes;
+		private Boolean m_ShowParentAsFolder;
+		private Boolean m_TaskColorIsBkgnd;
+		private Boolean m_ShowCompletionCheckboxes;
 
 		public TaskMatchesListView(IntPtr hwndParent)
 		{
 			m_SelectionRect = new UIExtension.SelectionRect();
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 
-            m_ilItemHeight = new ImageList();
-            m_ilItemHeight.ImageSize = new Size(1, DPIScaling.Scale(17)); // minimum height
+			m_ilItemHeight = new ImageList();
+			m_ilItemHeight.ImageSize = new Size(1, DPIScaling.Scale(17)); // minimum height
 
-			// The only way to control the font of a tooltip
-			// is to make it owner-draw!
-			m_LabelTip = new System.Windows.Forms.ToolTip();
-			m_LabelTip.OwnerDraw = true;
-			m_LabelTip.Draw += new DrawToolTipEventHandler(OnDrawLabelTip);
-			m_LabelTip.Popup += new PopupEventHandler(OnShowLabelTip);
-
-			// Hack to get tooltip handle
-			var h = m_LabelTip.GetType().GetProperty("Handle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-			var handle = (IntPtr)h.GetValue(m_LabelTip, null);
-
-			const int WS_EX_TRANSPARENT = 0x00000020;
-
-			Win32.AddStyle(handle, WS_EX_TRANSPARENT, true);
-		}
-
-		protected void OnShowLabelTip(object sender, PopupEventArgs e)
-		{
-			Size textSize = TextRenderer.MeasureText(m_LabelTip.GetToolTip(this), this.Font);
-			int borders = (TopItem.Bounds.Height - textSize.Height);
-			
-			e.ToolTipSize = new Size(textSize.Width + borders, TopItem.Bounds.Height);
-		}
-
-		protected void OnDrawLabelTip(object sender, DrawToolTipEventArgs e)
-		{
-			using (e.Graphics)
-			{
-				e.Graphics.FillRectangle(SystemBrushes.Window, e.Bounds);
-				e.DrawBorder();
-
-				StringFormat format = new StringFormat();
-
-				format.Alignment = StringAlignment.Center;
-				format.LineAlignment = StringAlignment.Center;
-				format.FormatFlags = StringFormatFlags.NoWrap;
-
-				e.Graphics.DrawString(e.ToolTipText, this.Font, SystemBrushes.InfoText, e.Bounds, format);
-			}
+			m_LabelTip = new LabelTip(this);
 		}
 
 		public Boolean TaskColorIsBackground
-        {
-            get { return m_TaskColorIsBkgnd; }
-            set
-            {
-                if (m_TaskColorIsBkgnd != value)
-                {
-                    m_TaskColorIsBkgnd = value;
-                    Invalidate();
-                }
-            }
-        }
+		{
+			get { return m_TaskColorIsBkgnd; }
+			set
+			{
+				if (m_TaskColorIsBkgnd != value)
+				{
+					m_TaskColorIsBkgnd = value;
+					Invalidate();
+				}
+			}
+		}
 
-        public Boolean ShowParentsAsFolders
-        {
-            get { return m_ShowParentAsFolder; }
-            set
-            {
-                if (m_ShowParentAsFolder != value)
-                {
-                    m_ShowParentAsFolder = value;
-                    Invalidate();
-                }
-            }
-        }
+		public Boolean ShowParentsAsFolders
+		{
+			get { return m_ShowParentAsFolder; }
+			set
+			{
+				if (m_ShowParentAsFolder != value)
+				{
+					m_ShowParentAsFolder = value;
+					Invalidate();
+				}
+			}
+		}
 
-        public Boolean ShowCompletionCheckboxes
-        {
-            get { return m_ShowCompletionCheckboxes; }
-            set
-            {
-                if (m_ShowCompletionCheckboxes != value)
-                {
-                    m_ShowCompletionCheckboxes = value;
-                    Invalidate();
-                }
-            }
-        }
+		public Boolean ShowCompletionCheckboxes
+		{
+			get { return m_ShowCompletionCheckboxes; }
+			set
+			{
+				if (m_ShowCompletionCheckboxes != value)
+				{
+					m_ShowCompletionCheckboxes = value;
+					Invalidate();
+				}
+			}
+		}
 
 		public bool ShowLabelTips
 		{
 			set { m_LabelTip.Active = value; }
 			get { return m_LabelTip.Active; }
+		}
+
+		public new Font Font
+		{
+			set { base.Font = value; m_LabelTip.SetFont(value); }
+			get { return base.Font; }
 		}
 
 		private int TextIconOffset

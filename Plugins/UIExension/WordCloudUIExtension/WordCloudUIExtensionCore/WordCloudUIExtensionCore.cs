@@ -485,17 +485,10 @@ namespace WordCloudUIExtension
             m_LangIgnoreFilePath = Path.Combine(appPath, "Resources\\Translations", language);
             m_LangIgnoreFilePath = Path.ChangeExtension(m_LangIgnoreFilePath, "WordCloud.Ignore.txt");
 
-			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
-            m_TaskMatchesList.TaskColorIsBackground = taskColorIsBkgnd;
-
-            bool showParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
-            m_TaskMatchesList.ShowParentsAsFolders = showParentsAsFolders;
-
-            bool showDoneCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
-            m_TaskMatchesList.ShowCompletionCheckboxes = showDoneCheckboxes;
-
-			bool showLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
-			m_TaskMatchesList.ShowLabelTips = showLabelTips;
+            m_TaskMatchesList.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
+            m_TaskMatchesList.ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
+            m_TaskMatchesList.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
+			m_TaskMatchesList.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
 
             UpdateBlacklist();
         }
