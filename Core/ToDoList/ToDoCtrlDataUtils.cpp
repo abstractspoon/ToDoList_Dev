@@ -3271,17 +3271,18 @@ CString CTDCTaskFormatter::GetTimeOnly(const COleDateTime& date, TDC_DATE nDate)
 	if (!date.GetAsSystemTime(st))
 		return EMPTY_STR;
 
-	BOOL bISO = m_data.HasStyle(TDCS_SHOWDATESINISO);
-	CString sTime = CTimeHelper::FormatClockTime(st.wHour, st.wMinute, 0, FALSE, bISO);
+	int nHour = st.wHour;
+	int nMin = st.wMinute;
 
 	// Substitute 'calculated' time if none supplied
-	if (sTime.IsEmpty())
+	if (!CDateHelper::DateHasTime(date))
 	{
-		int nHour = ((nDate == TDCD_DUE) ? 23 : 0);
-		int nMin = ((nDate == TDCD_DUE) ? 59 : 0);
-
-		sTime = CTimeHelper::FormatClockTime(nHour, nMin, 0, FALSE, bISO);
+		nHour = ((nDate == TDCD_DUE) ? 23 : 0);
+		nMin = ((nDate == TDCD_DUE) ? 59 : 0);
 	}
+
+	BOOL bISO = m_data.HasStyle(TDCS_SHOWDATESINISO);
+	CString sTime = CTimeHelper::FormatClockTime(nHour, nMin, 0, FALSE, bISO);
 
 	ASSERT(!sTime.IsEmpty());
 	return sTime;
