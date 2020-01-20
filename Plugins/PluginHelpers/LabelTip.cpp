@@ -17,8 +17,8 @@ LabelTip::LabelTip(Control^ owner) : m_Owner(owner), m_Font(owner->Font)
 {
 	OwnerDraw = true;
 
-	Draw += gcnew DrawToolTipEventHandler(OnDrawLabelTip);
-	Popup += gcnew PopupEventHandler(OnShowLabelTip);
+	this->Draw += gcnew DrawToolTipEventHandler(OnDrawLabelTip);
+	this->Popup += gcnew PopupEventHandler(OnShowLabelTip);
 
 	// Hack to get tooltip handle
 	auto h = GetType()->GetProperty("Handle", System::Reflection::BindingFlags::NonPublic | System::Reflection::BindingFlags::Instance);
@@ -51,7 +51,10 @@ void LabelTip::OnDrawLabelTip(Object^ sender, DrawToolTipEventArgs^ args)
 	format->LineAlignment = StringAlignment::Center;
 	format->FormatFlags = StringFormatFlags::NoWrap;
 
-	RectangleF^ rect = gcnew RectangleF(args->Bounds.Left, args->Bounds.Left, args->Bounds.Width, args->Bounds.Height);
+	RectangleF^ rect = gcnew RectangleF((float)args->Bounds.Left, 
+										(float)args->Bounds.Top, 
+										(float)args->Bounds.Width, 
+										(float)args->Bounds.Height);
 
 	args->Graphics->DrawString(args->ToolTipText, labelTip->m_Font, SystemBrushes::InfoText, *rect, format);
 }
