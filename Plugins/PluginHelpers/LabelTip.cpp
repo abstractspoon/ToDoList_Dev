@@ -20,10 +20,7 @@ static Point OUTSIDE(-10000, -10000);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-LabelTip::LabelTip(ILabelTipHandler^ owner) 
-	: 
-	m_Handler(owner), 
-	m_Font(owner->GetFont())
+LabelTip::LabelTip(ILabelTipHandler^ owner) : m_Handler(owner)
 {
 	OwnerDraw = true;
 
@@ -57,8 +54,8 @@ void LabelTip::OnShowLabelTip(Object^ sender, PopupEventArgs^ args)
 {
 	LabelTip^ labelTip = ASTYPE(sender, LabelTip);
 
-	Size textSize = TextRenderer::MeasureText(labelTip->GetToolTip(labelTip->m_Handler->GetOwner()), labelTip->m_Font);
-	int borders = 0;// (labelTip->m_TipRect.Height - textSize.Height);
+	Size textSize = TextRenderer::MeasureText(labelTip->GetToolTip(labelTip->m_Handler->GetOwner()), labelTip->m_Handler->GetFont());
+	int borders = (args->ToolTipSize.Height - textSize.Height);
 
 	args->ToolTipSize = Size(textSize.Width + borders, labelTip->m_TipRect.Height);
 }
@@ -81,7 +78,7 @@ void LabelTip::OnDrawLabelTip(Object^ sender, DrawToolTipEventArgs^ args)
 										(float)args->Bounds.Width, 
 										(float)args->Bounds.Height);
 
-	args->Graphics->DrawString(args->ToolTipText, labelTip->m_Font, SystemBrushes::InfoText, *rect, format);
+	args->Graphics->DrawString(args->ToolTipText, labelTip->m_Handler->GetFont(), SystemBrushes::InfoText, *rect, format);
 }
 
 void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
@@ -147,8 +144,7 @@ void LabelTip::OnHoverTick(Object^ sender, EventArgs^ args)
 	// Ignore if a tooltip is still visible
 	if (IsShowing())
 		return;
-
-
+	
 	Point pos = Control::MousePosition;
 	int nOffset = max(abs(m_HoverStartScreenPos.X - pos.X), abs(m_HoverStartScreenPos.Y - pos.Y));
 

@@ -31,7 +31,6 @@ namespace Abstractspoon
 
 			protected:
 				ILabelTipHandler^ m_Handler;
-				Drawing::Font^ m_Font;
 
 				Windows::Forms::Timer^ m_HoverTimer;
 				Drawing::Point m_HoverStartScreenPos;
