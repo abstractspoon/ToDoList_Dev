@@ -9,7 +9,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace DayViewUIExtension
 {
 
-	public class TDLDayView : Calendar.DayView
+	public class TDLDayView : Calendar.DayView, ILabelTipHandler
     {
         private UInt32 m_SelectedTaskID = 0;
 		private UInt32 m_VisibleSelectedTaskID = 0;
@@ -47,9 +47,48 @@ namespace DayViewUIExtension
             m_Renderer = new TDLRenderer(Handle, taskIcons);
 			m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
 			m_UserMinSlotHeight = minSlotHeight;
+            m_LabelTip = new LabelTip(this);
 
-			InitializeComponent();
+            InitializeComponent();
             RefreshHScrollSize();
+        }
+
+        // ILabelTipHandler implementation
+        public Font GetFont()
+        {
+            return m_Renderer.BaseFont;
+        }
+
+        public Control GetOwner()
+        {
+            return this;
+        }
+
+        public UInt32 HitTest(Point ptScreen, ref String tipText, ref Rectangle tipItemRect)
+        {
+            var pt = PointToClient(ptScreen);
+            Calendar.Appointment appointment = GetAppointmentAt(pt.X, pt.Y);
+
+            if (appointment == null)
+                return 0;
+
+            var taskItem = appointment as CalendarItem;
+
+            if ((taskItem == null) || !taskItem.TextRect.Contains(pt))
+                return 0;
+
+            tipText = taskItem.Title;
+            tipItemRect = taskItem.TextRect;
+
+            return taskItem.Id;
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m_LabelTip!= null)
+                m_LabelTip.ProcessMessage(m);
+
+            base.WndProc(ref m);
         }
 
         protected void InitializeComponent()
@@ -83,7 +122,6 @@ namespace DayViewUIExtension
             this.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnSelectionChanged);
             this.WeekChange += new Calendar.WeekChangeEventHandler(OnWeekChanged);
 
-			this.m_LabelTip = new LabelTip(this);
 		}
 
 		public bool ShowLabelTips
@@ -523,7 +561,6 @@ namespace DayViewUIExtension
         public void SetFont(String fontName, int fontSize)
         {
             m_Renderer.SetFont(fontName, fontSize);
-			m_LabelTip.SetFont(m_Renderer.BaseFont);
 
             LongAppointmentHeight = Math.Max(m_Renderer.BaseFont.Height + 4, 17);
         }
@@ -640,17 +677,15 @@ namespace DayViewUIExtension
             Update();
         }
 
-		protected override void OnMouseLeave(EventArgs e)
-		{
-			m_LabelTip.Hide(this);
-
-			base.OnMouseLeave(e);
-		}
+// 		protected override void OnMouseLeave(EventArgs e)
+// 		{
+// 			m_LabelTip.Hide(this);
+// 
+// 			base.OnMouseLeave(e);
+// 		}
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
-			m_LabelTip.Hide(this);
-
 			// let the base class initiate resizing if it wants
 			base.OnMouseDown(e);
 
@@ -707,11 +742,12 @@ namespace DayViewUIExtension
 			// default handling
 			base.OnMouseMove(e);
 
-			if (ShowLabelTips && (GetAppointmentAt(e.Location.X, e.Location.Y) == null))
-				m_LabelTip.Hide(this);
+// 			if (ShowLabelTips && (GetAppointmentAt(e.Location.X, e.Location.Y) == null))
+// 				m_LabelTip.Hide(this);
 
 			Cursor = GetCursor(e);
 		}
+/*
 
 		protected override void OnMouseHover(EventArgs e)
         {
@@ -744,6 +780,7 @@ namespace DayViewUIExtension
 
 			m_LabelTip.Hide(this);
 		}
+*/
 
 		private Cursor GetCursor(MouseEventArgs e)
         {

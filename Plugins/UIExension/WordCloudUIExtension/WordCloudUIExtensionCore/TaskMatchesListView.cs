@@ -17,7 +17,7 @@ namespace WordCloudUIExtension
 
 	[System.ComponentModel.DesignerCategory("")]
 
-	class TaskMatchesListView : ListView
+	class TaskMatchesListView : ListView, ILabelTipHandler
 	{
 		public event EditTaskLabelEventHandler EditTaskLabel;
 		public event EditTaskIconEventHandler EditTaskIcon;
@@ -48,7 +48,44 @@ namespace WordCloudUIExtension
 			m_LabelTip = new LabelTip(this);
 		}
 
-		public Boolean TaskColorIsBackground
+        // ILabelTipHandler implementation
+        public Font GetFont()
+        {
+            return Font;
+        }
+
+        public Control GetOwner()
+        {
+            return this;
+        }
+
+        public UInt32 HitTest(Point ptScreen, ref String tipText, ref Rectangle tipItemRect)
+        {
+            var pt = PointToClient(ptScreen);
+            var hit = HitTest(pt);
+
+            if ((hit == null) || (hit.Item == null))
+                return 0;
+
+            // Only interested in first (label) column
+            var labelRect = LabelTextRect(hit.Item.GetBounds(ItemBoundsPortion.Entire));
+
+            if (!labelRect.Contains(pt))
+                return 0;
+
+            // else
+            var item = (hit.Item.Tag as CloudTaskItem);
+
+            if (item == null)
+                return 0;
+
+            tipText = item.Title;
+            tipItemRect = labelRect;
+
+            return item.Id;
+        }
+
+        public Boolean TaskColorIsBackground
 		{
 			get { return m_TaskColorIsBkgnd; }
 			set
@@ -91,12 +128,6 @@ namespace WordCloudUIExtension
 		{
 			set { m_LabelTip.Active = value; }
 			get { return m_LabelTip.Active; }
-		}
-
-		public new Font Font
-		{
-			set { base.Font = value; m_LabelTip.SetFont(value); }
-			get { return base.Font; }
 		}
 
 		private int TextIconOffset
@@ -422,6 +453,9 @@ namespace WordCloudUIExtension
 
 		protected override void WndProc(ref Message m)
 		{
+            if (m_LabelTip != null)
+                m_LabelTip.ProcessMessage(m);
+
 			// Suppress mouse clicks OUTSIDE of the items area
 			const int WM_LBUTTONDOWN   = 0x0201;
 			const int WM_LBUTTONUP     = 0x0202;
@@ -488,13 +522,14 @@ namespace WordCloudUIExtension
             Cursor = Cursors.Arrow;
         }
 
-		protected override void OnMouseLeave(EventArgs e)
-		{
-			base.OnMouseLeave(e);
+// 		protected override void OnMouseLeave(EventArgs e)
+// 		{
+// 			base.OnMouseLeave(e);
+// 
+// 			m_LabelTip.Hide(this);
+// 		}
 
-			m_LabelTip.Hide(this);
-		}
-
+/*
 		protected override void OnMouseHover(EventArgs e)
 		{
 			base.OnMouseHover(e);
@@ -524,10 +559,11 @@ namespace WordCloudUIExtension
 				m_LabelTip.Hide(this);
 			}
 		}
+*/
 
 		protected override void OnMouseDown(MouseEventArgs e)
         {
-			m_LabelTip.Hide(this);
+// 			m_LabelTip.Hide(this);
 
 			// disable label editing if not on the item text
 			int leftMargin = (CheckboxOffset + TextIconOffset);

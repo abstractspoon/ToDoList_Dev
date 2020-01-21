@@ -105,6 +105,28 @@ int Win32::GetSystemDPI()
 	return nDPI;
 }
 
+int Win32::GetMouseHoverRectSize()
+{
+	int nSize = 0;
+
+	if (::SystemParametersInfo(SPI_GETMOUSEHOVERWIDTH, 0, &nSize, 0))
+		return nSize;
+
+	// else
+	return 2;
+}
+
+int Win32::GetMouseHoverDelay()
+{
+	int nDelay = 0;
+
+	if (::SystemParametersInfo(SPI_GETMOUSEHOVERTIME, 0, &nDelay, 0))
+		return nDelay;
+
+	// else
+	return 500;
+}
+
 String^ Win32::GetFaceName(HFONT hFont)
 {
 	if (!hFont)
