@@ -341,35 +341,36 @@ BOOL CUrlRichEditCtrl::GoToUrl(const CString& sUrl) const
 {
 	int nProtocol = m_parser.MatchProtocol(sUrl);
 		
-	if ((nProtocol != -1) && m_parser.ProtocolWantsNotification(nProtocol))
+	// If it's an unknown protocol OR our parent wants to handle it
+	// just forward it on
+	if ((nProtocol == -1) || m_parser.ProtocolWantsNotification(nProtocol))
 	{
-		// Handle Outlook manually because under Windows 10 ShellExecute 
-		// will succeed even if Outlook is not installed
-		if (CMSOutlookHelper::IsOutlookUrl(sUrl))
-		{
-			if (CMSOutlookHelper::HandleUrl(*this, sUrl))
-				return TRUE;
-		}
-		else if (WebMisc::IsFileURI(sUrl))
-		{
-			if (FileMisc::Run(*this, CUrlParser::GetUrlAsFile(sUrl)) >= SE_ERR_SUCCESS)
-			{
-				return TRUE;
-			}
-		}
-		else if (FileMisc::Run(*this, sUrl) >= SE_ERR_SUCCESS)
+		SendNotifyCustomUrl(sUrl);
+		return TRUE;
+	}
+
+	// Handle Outlook manually because under Windows 10 ShellExecute 
+	// will succeed even if Outlook is not installed
+	if (CMSOutlookHelper::IsOutlookUrl(sUrl))
+	{
+		if (CMSOutlookHelper::HandleUrl(*this, sUrl))
+			return TRUE;
+	}
+	else if (WebMisc::IsFileURI(sUrl))
+	{
+		if (FileMisc::Run(*this, CUrlParser::GetUrlAsFile(sUrl)) >= SE_ERR_SUCCESS)
 		{
 			return TRUE;
 		}
-
-		// All else forward to parent
-		SendNotifyFailedUrl(sUrl);
-		return FALSE;
+	}
+	else if (FileMisc::Run(*this, sUrl) >= SE_ERR_SUCCESS)
+	{
+		return TRUE;
 	}
 
-	// else
-	SendNotifyCustomUrl(sUrl);
-	return TRUE;
+	// All else forward to parent as failures
+	SendNotifyFailedUrl(sUrl);
+	return FALSE;
 }
 
 LRESULT CUrlRichEditCtrl::SendNotifyCustomUrl(LPCTSTR szUrl) const
