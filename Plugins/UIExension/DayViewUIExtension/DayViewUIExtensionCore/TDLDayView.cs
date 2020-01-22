@@ -78,7 +78,10 @@ namespace DayViewUIExtension
                 return 0;
 
             tipText = taskItem.Title;
-            tipItemRect = taskItem.TextRect;
+            GetItemLabelRect(appointment, ref tipItemRect);
+
+            tipItemRect.Height -= 1;
+            tipItemRect.X -= 1;
 
             return taskItem.Id;
         }
@@ -677,13 +680,6 @@ namespace DayViewUIExtension
             Update();
         }
 
-// 		protected override void OnMouseLeave(EventArgs e)
-// 		{
-// 			m_LabelTip.Hide(this);
-// 
-// 			base.OnMouseLeave(e);
-// 		}
-
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			// let the base class initiate resizing if it wants
@@ -742,45 +738,8 @@ namespace DayViewUIExtension
 			// default handling
 			base.OnMouseMove(e);
 
-// 			if (ShowLabelTips && (GetAppointmentAt(e.Location.X, e.Location.Y) == null))
-// 				m_LabelTip.Hide(this);
-
 			Cursor = GetCursor(e);
 		}
-/*
-
-		protected override void OnMouseHover(EventArgs e)
-        {
-			// default handling
-			base.OnMouseHover(e);
-
-			// If the current item text is too narrow, show an in-place tooltip
-			if (ShowLabelTips)
-			{
-				var pt = PointToClient(MousePosition);
-				Calendar.Appointment appointment = GetAppointmentAt(pt.X, pt.Y);
-
-				if (appointment != null)
-				{
-					var taskItem = appointment as CalendarItem;
-
-					if ((taskItem != null) && taskItem.TextRect.Contains(pt))
-					{
-						if (TextRenderer.MeasureText(taskItem.Title, Font).Width > taskItem.TextRect.Width)
-						{
-							m_LabelTip.Show(taskItem.Title, this, taskItem.TextRect.X - LabelTipBorder, taskItem.TextRect.Y);
-							return;
-						}
-					}
-				}
-			}
-
-			// else
-			Debug.WriteLine("Hiding tooltip");
-
-			m_LabelTip.Hide(this);
-		}
-*/
 
 		private Cursor GetCursor(MouseEventArgs e)
         {

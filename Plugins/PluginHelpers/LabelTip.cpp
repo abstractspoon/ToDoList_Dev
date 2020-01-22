@@ -3,6 +3,7 @@
 #include "Win32.h"
 #include "PluginHelpers.h"
 #include "LabelTip.h"
+#include "DPIScaling.h"
 
 #include <math.h>
 #include <CommCtrl.h>
@@ -55,7 +56,7 @@ void LabelTip::OnShowLabelTip(Object^ sender, PopupEventArgs^ args)
 	LabelTip^ labelTip = ASTYPE(sender, LabelTip);
 
 	Size textSize = TextRenderer::MeasureText(labelTip->GetToolTip(labelTip->m_Handler->GetOwner()), labelTip->m_Handler->GetFont());
-	int borders = (args->ToolTipSize.Height - textSize.Height);
+	int borders = DPIScaling::Scale(3);// (args->ToolTipSize.Height - textSize.Height);
 
 	args->ToolTipSize = Size(textSize.Width + borders, labelTip->m_TipRect.Height);
 }
@@ -64,21 +65,11 @@ void LabelTip::OnDrawLabelTip(Object^ sender, DrawToolTipEventArgs^ args)
 {
 	LabelTip^ labelTip = ASTYPE(sender, LabelTip);
 
+	// Don't use 'Info/InfoText' colours because these always return XP colours
 	args->Graphics->FillRectangle(SystemBrushes::Window, args->Bounds);
 	args->DrawBorder();
 
-	StringFormat^ format = gcnew StringFormat();
-
-	format->Alignment = StringAlignment::Center;
-	format->LineAlignment = StringAlignment::Center;
-	format->FormatFlags = StringFormatFlags::NoWrap;
-
-	RectangleF^ rect = gcnew RectangleF((float)args->Bounds.Left, 
-										(float)args->Bounds.Top, 
-										(float)args->Bounds.Width, 
-										(float)args->Bounds.Height);
-
-	args->Graphics->DrawString(args->ToolTipText, labelTip->m_Handler->GetFont(), SystemBrushes::InfoText, *rect, format);
+	TextRenderer::DrawText(args->Graphics, args->ToolTipText, labelTip->m_Handler->GetFont(), args->Bounds, SystemColors::WindowText, TextFormatFlags::Left | TextFormatFlags::VerticalCenter);
 }
 
 void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)

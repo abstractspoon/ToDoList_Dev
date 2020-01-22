@@ -82,6 +82,9 @@ namespace WordCloudUIExtension
             tipText = item.Title;
             tipItemRect = labelRect;
 
+            tipItemRect.Height -= 1;
+            tipItemRect.X -= 1;
+
             return item.Id;
         }
 
@@ -522,49 +525,8 @@ namespace WordCloudUIExtension
             Cursor = Cursors.Arrow;
         }
 
-// 		protected override void OnMouseLeave(EventArgs e)
-// 		{
-// 			base.OnMouseLeave(e);
-// 
-// 			m_LabelTip.Hide(this);
-// 		}
-
-/*
-		protected override void OnMouseHover(EventArgs e)
-		{
-			base.OnMouseHover(e);
-
-			// If the current item text is too narrow, show an in-place tooltip
-			if (ShowLabelTips)
-			{
-				var ptClient = PointToClient(MousePosition);
-				var hit = HitTest(ptClient);
-
-				if ((hit != null) && (hit.Item != null))
-				{
-					Rectangle textRect = LabelTextRect(hit.Item.GetBounds(ItemBoundsPortion.Entire));
-
-					if (textRect.Contains(ptClient))
-					{
-						var item = (hit.Item.Tag as CloudTaskItem);
-
-						if ((item != null) && (TextRenderer.MeasureText(item.Title, Font).Width > textRect.Width))
-						{
-							m_LabelTip.Show(item.Title, this, textRect.X - LabelTipBorder, textRect.Y);
-							return;
-						}
-					}
-				}
-
-				m_LabelTip.Hide(this);
-			}
-		}
-*/
-
 		protected override void OnMouseDown(MouseEventArgs e)
         {
-// 			m_LabelTip.Hide(this);
-
 			// disable label editing if not on the item text
 			int leftMargin = (CheckboxOffset + TextIconOffset);
             int rightMargin = Columns[0].Width;
