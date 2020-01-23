@@ -114,7 +114,7 @@ void Translator::Translate(Control::ControlCollection^ items)
 		auto ctrl = items[nItem];
 
 		// Special cases
-		if (ISTYPE(ctrl, WebBrowser) ||
+		if (ISTYPE(ctrl, Windows::Forms::WebBrowser) ||
 			ISTYPE(ctrl, TextBox) ||
 			ISTYPE(ctrl, RichTextBox))
 		{

@@ -13,17 +13,17 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define CFSTR_RENPRIVATEMESSAGES  L"RenPrivateMessages" 
-#define CFSTR_RENPRIVATESRCFOLDER L"RenPrivateSourceFolder"
-#define CFSTR_FILEDESCRIPTORW     L"FileGroupDescriptorW"
-#define CFSTR_FILECONTENTS        L"FileContents"
+#define CF_RENPRIVATEMESSAGES_STR  L"RenPrivateMessages" 
+#define CF_RENPRIVATESRCFOLDER_STR L"RenPrivateSourceFolder"
+#define CF_FILEDESCRIPTORW_STR     L"FileGroupDescriptorW"
+#define CF_FILECONTENTS_STR        L"FileContents"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-static const CLIPFORMAT CF_RENPRIVATEMESSAGES = (CLIPFORMAT)::RegisterClipboardFormat(CFSTR_RENPRIVATEMESSAGES);
-static const CLIPFORMAT CF_RENPRIVATESRCFOLDER = (CLIPFORMAT)::RegisterClipboardFormat(CFSTR_RENPRIVATESRCFOLDER);
-static const CLIPFORMAT CF_FILECONTENTS = (CLIPFORMAT)::RegisterClipboardFormat(CFSTR_FILECONTENTS);
-static const CLIPFORMAT CF_FILEDESCRIPTOR = (CLIPFORMAT)::RegisterClipboardFormat(CFSTR_FILEDESCRIPTORW);
+static const CLIPFORMAT CF_RENPRIVATEMESSAGES	= (CLIPFORMAT)::RegisterClipboardFormat(CF_RENPRIVATEMESSAGES_STR);
+static const CLIPFORMAT CF_RENPRIVATESRCFOLDER	= (CLIPFORMAT)::RegisterClipboardFormat(CF_RENPRIVATESRCFOLDER_STR);
+static const CLIPFORMAT CF_FILECONTENTS			= (CLIPFORMAT)::RegisterClipboardFormat(CF_FILECONTENTS_STR);
+static const CLIPFORMAT CF_FILEDESCRIPTOR		= (CLIPFORMAT)::RegisterClipboardFormat(CF_FILEDESCRIPTORW_STR);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
