@@ -25,6 +25,9 @@ MKDIR %REPO%\..\ToDoList_Symbols\%TDLVER%
 COPY /Y /B %REPO%\Core\ToDoList\Unicode_Release\ToDoList.pdb %REPO%\..\ToDoList_Symbols\%TDLVER%\
 COPY /Y /B %REPO%\Core\ToDoList\Unicode_Release\ToDoList.map %REPO%\..\ToDoList_Symbols\%TDLVER%\
 
+REM - Rebuild ToDoList_Core\3rdParty and ToDoList_Core\Shared in VS2010 for linking into PluginsHelpers
+"C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" .\ToDoList_Core_Shared.sln /Rebuild "Release"
+
 REM - Build Plugins
 cd %REPO%\Plugins
 
