@@ -20,13 +20,23 @@ UrlItem::UrlItem(int nStart, int nEnd, String^ sUrl)
 	Url = sUrl;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+UrlParser::UrlParser() : m_parser(new CUrlParser)
+{
+	m_parser->AddProtocol(L"tdl://");
+}
+
+UrlParser::~UrlParser()
+{
+	delete m_parser;
+}
+
+
 List<UrlItem^>^ UrlParser::ParseText(String^ sText)
 {
-	CUrlParser parser;
-	parser.AddProtocol(L"tdl://");
-
- 	CUrlArray aUrls;
-	int nNumUrls = parser.ParseText(MS(sText), aUrls);
+	CUrlArray aUrls;
+	int nNumUrls = m_parser->ParseText(MS(sText), aUrls);
 
 	// Always returns a list
 	System::Collections::Generic::List<UrlItem^>^ items = gcnew System::Collections::Generic::List<UrlItem^>();
@@ -41,6 +51,11 @@ List<UrlItem^>^ UrlParser::ParseText(String^ sText)
 	}
 
 	return items;
+}
+
+bool UrlParser::HasProtocol(String^ sUrl)
+{
+	return (m_parser->MatchProtocol(MS(sUrl)) != -1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

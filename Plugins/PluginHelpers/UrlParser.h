@@ -7,6 +7,10 @@ using namespace System::Collections::Generic;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+class CUrlParser;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 namespace Abstractspoon
 {
 	namespace Tdl
@@ -25,7 +29,14 @@ namespace Abstractspoon
 			public ref class UrlParser
 			{
 			public:
-				static List<UrlItem^>^ ParseText(String^ sText);
+				UrlParser();
+				virtual ~UrlParser();
+
+				List<UrlItem^>^ ParseText(String^ sText);
+				bool HasProtocol(String^ sUrl);
+
+			protected:
+				CUrlParser* m_parser;
 			};
 
 		}

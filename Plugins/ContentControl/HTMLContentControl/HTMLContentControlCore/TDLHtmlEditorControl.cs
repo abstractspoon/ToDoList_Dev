@@ -198,7 +198,8 @@ namespace HTMLContentControl
 				// this method is only called when there is no 
 				// corresponding native content so we take the 
 				// opportunity to convert text urls to HTML urls
-				var textUrls = UrlParser.ParseText(content);
+				var urlParser = new UrlParser();
+				var textUrls = urlParser.ParseText(content);
 
 				if (textUrls.Count > 0)
 				{
@@ -219,8 +220,15 @@ namespace HTMLContentControl
 						{
 							int end = (start + textUrl.Url.Length);
 
+							// Urls with no protocol, prefix with 'http://'
+							String target = textUrl.Url;
+
+							if (!urlParser.HasProtocol(target))
+								target = ("http://" + target);
+
+							String htmlUrl = String.Format("<A HREF=\"{0}\">{1}</A>", target, textUrl.Url);
+
 							// replace only that bit with the HTML version
-							String htmlUrl = String.Format("<A HREF=\"{0}\">{1}</A>", textUrl.Url, textUrl.Url);
 							content = (content.Substring(0, start) + htmlUrl + content.Substring(end));
 
 							// update pos
