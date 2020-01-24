@@ -6,8 +6,6 @@
 #include "CommCtrl.h"
 #include "PluginHelpers.h"
 
-//#include "..\..\Core\Shared\UrlParser.h"
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
@@ -16,11 +14,6 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 HWND Win32::GetHwnd(IntPtr hWnd)
 {
-// 	CUrlArray aUrls;
-// 
-// 	CUrlParser().ParseText(L"some text http://bob.com more text", aUrls);
-
-
 	return static_cast<HWND>(hWnd.ToPointer());
 }
 
