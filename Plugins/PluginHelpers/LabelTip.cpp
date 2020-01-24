@@ -5,6 +5,9 @@
 #include "LabelTip.h"
 #include "DPIScaling.h"
 
+#include "..\..\Core\Shared\OSVersion.h"
+#include "..\..\Core\Shared\Themed.h"
+
 #include <math.h>
 #include <CommCtrl.h>
 
@@ -65,11 +68,28 @@ void LabelTip::OnDrawLabelTip(Object^ sender, DrawToolTipEventArgs^ args)
 {
 	LabelTip^ labelTip = ASTYPE(sender, LabelTip);
 
-	// Don't use 'Info/InfoText' colours because these always return XP colours
-	args->Graphics->FillRectangle(SystemBrushes::Window, args->Bounds);
+	// We can't just use Winforms own 'Info/InfoText' colours (which simply wrap GetSysColor)
+	// because these always return XP colours so we need a OS-specific solution
+	Color^ textColor = SystemColors::InfoText;
+	Brush^ backBrush = SystemBrushes::Info;
+
+	if (COSVersion() >= OSV_VISTA)
+	{
+		CThemed th(::GetDesktopWindow(), L"Tooltip");
+		COLORREF crText;
+
+		if (th.GetThemeColor(TTP_STANDARD, 0, TMT_TEXTCOLOR, crText))
+			textColor = Color::FromArgb(GetRValue(crText), GetGValue(crText), GetBValue(crText));
+		else
+			textColor = SystemColors::ControlDarkDark;
+
+		backBrush = SystemBrushes::Window;
+	}
+
+	args->Graphics->FillRectangle(backBrush, args->Bounds);
 	args->DrawBorder();
 
-	TextRenderer::DrawText(args->Graphics, args->ToolTipText, labelTip->m_Handler->GetFont(), args->Bounds, SystemColors::WindowText, TextFormatFlags::Left | TextFormatFlags::VerticalCenter);
+	TextRenderer::DrawText(args->Graphics, args->ToolTipText, labelTip->m_Handler->GetFont(), args->Bounds, *textColor, TextFormatFlags::Left | TextFormatFlags::VerticalCenter);
 }
 
 void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
