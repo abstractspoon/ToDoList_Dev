@@ -53,9 +53,4 @@ List<UrlItem^>^ UrlParser::ParseText(String^ sText)
 	return items;
 }
 
-bool UrlParser::HasProtocol(String^ sUrl)
-{
-	return (m_parser->MatchProtocol(MS(sUrl)) != -1);
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////

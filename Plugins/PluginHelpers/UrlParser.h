@@ -33,7 +33,6 @@ namespace Abstractspoon
 				virtual ~UrlParser();
 
 				List<UrlItem^>^ ParseText(String^ sText);
-				bool HasProtocol(String^ sUrl);
 
 			protected:
 				CUrlParser* m_parser;

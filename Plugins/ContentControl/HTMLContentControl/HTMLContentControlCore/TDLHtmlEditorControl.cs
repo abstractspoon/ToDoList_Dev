@@ -223,7 +223,7 @@ namespace HTMLContentControl
 							// Urls with no protocol, prefix with 'http://'
 							String target = textUrl.Url;
 
-							if (!urlParser.HasProtocol(target))
+							if (!IsValidHref(target))
 								target = ("http://" + target);
 
 							String htmlUrl = String.Format("<A HREF=\"{0}\">{1}</A>", target, textUrl.Url);
