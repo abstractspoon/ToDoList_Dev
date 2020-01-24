@@ -221,11 +221,21 @@ namespace HTMLContentControl
 						{
 							int end = (start + textUrl.Url.Length);
 
-							// Urls with no protocol, prefix with 'http://'
+							// Fixup 'bad' urls
 							String target = textUrl.Url;
 
 							if (!IsValidHref(target))
-								target = ("http://" + target);
+							{
+								if (urlParser.IsFileProtocol(target))
+								{
+									if (target.IndexOf("file:///") == -1)
+										target = target.Replace("file://", "file:///");
+								}
+								else
+								{
+									target = ("https://" + target);
+								}
+							}
 
 							String htmlUrl = String.Format("<A HREF=\"{0}\">{1}</A>", target, textUrl.Url);
 

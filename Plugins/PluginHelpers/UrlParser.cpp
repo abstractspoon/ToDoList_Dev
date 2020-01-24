@@ -53,4 +53,9 @@ List<UrlItem^>^ UrlParser::ParseText(String^ sText)
 	return items;
 }
 
+bool UrlParser::IsFileProtocol(String^ sUrl)
+{
+	return (m_parser->IsFileProtocol(MS(sUrl)) != FALSE);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
