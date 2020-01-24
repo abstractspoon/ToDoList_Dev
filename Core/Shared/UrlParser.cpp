@@ -172,6 +172,7 @@ BOOL CUrlParser::IsBaseDelim(LPCTSTR szText)
 	{ 
 		_T(" "), 
 		_T("\n"),
+		_T("\r"),
 		_T("\t"),
 		_T(", "),
 		_T(". "),

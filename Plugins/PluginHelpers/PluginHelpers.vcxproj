@@ -138,6 +138,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="TreeCtrl.h" />
     <ClInclude Include="UIExtension.h" />
     <ClInclude Include="UITheme.h" />
+    <ClInclude Include="UrlParser.h" />
     <ClInclude Include="Win32.h" />
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +164,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClCompile Include="TreeCtrl.cpp" />
     <ClCompile Include="UIExtension.cpp" />
     <ClCompile Include="UITheme.cpp" />
+    <ClCompile Include="UrlParser.cpp" />
     <ClCompile Include="Win32.cpp" />
   </ItemGroup>
   <ItemGroup>

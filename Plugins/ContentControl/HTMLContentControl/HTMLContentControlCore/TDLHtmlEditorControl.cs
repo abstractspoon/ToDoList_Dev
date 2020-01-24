@@ -193,8 +193,46 @@ namespace HTMLContentControl
 
             try
             {
-                InnerText = content;
-                m_PrevTextChange = InnerHtml;
+				InnerText = content;
+
+				// this method is only called when there is no 
+				// corresponding native content so we take the 
+				// opportunity to convert text urls to HTML urls
+				var textUrls = UrlParser.ParseText(content);
+
+				if (textUrls.Count > 0)
+				{
+					// grab the text as HTML
+					content = InnerHtml;
+
+					// Because we're using the HTML the character ranges
+					// of each URL are now invalid so we'll need to replace
+					// each URL by moving forward one URL at a time
+					int currentPos = 0;
+
+					foreach (var textUrl in textUrls)
+					{
+						// Find the first location of this url in what's left unprocessed
+						int start = content.IndexOf(textUrl.Url, currentPos);
+
+						if (start != -1)
+						{
+							int end = (start + textUrl.Url.Length);
+
+							// replace only that bit with the HTML version
+							String htmlUrl = String.Format("<A HREF=\"{0}\">{1}</A>", textUrl.Url, textUrl.Url);
+							content = (content.Substring(0, start) + htmlUrl + content.Substring(end));
+
+							// update pos
+							currentPos = (start + htmlUrl.Length);
+						}
+					}
+
+					// Copy back to HTML
+					InnerHtml = content;
+				}
+
+				m_PrevTextChange = InnerHtml;
             }
             // catch (Exception exception)
             // {
