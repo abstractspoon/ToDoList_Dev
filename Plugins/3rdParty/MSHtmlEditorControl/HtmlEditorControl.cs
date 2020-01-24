@@ -555,6 +555,23 @@ namespace MSDN.Html.Editor
 				SelectWord(document.selection.createRange() as mshtmlTextRange);
 		}
 
+		public void ClearSelection()
+		{
+			if (document.selection != null)
+				document.selection.clear();
+		}
+
+		public void SelectElement(HtmlElement element)
+		{
+			if (document.selection != null)
+			{
+				var htmlTxtRange = document.selection.createRange() as mshtmlTextRange;
+				var iHtml = element.DomElement as mshtmlElement;
+				htmlTxtRange.moveToElementText(iHtml);
+				htmlTxtRange.select();
+			}
+		}
+
 		protected mshtmlTextRange SelectAtPoint(Point pos)
 		{
 			if (document.selection != null)

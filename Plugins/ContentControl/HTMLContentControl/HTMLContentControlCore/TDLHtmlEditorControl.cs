@@ -46,7 +46,7 @@ namespace HTMLContentControl
 		private Timer m_TextChangeTimer;
         private String m_PrevTextChange = "";
 		private Boolean m_SettingContent = false;
-		private String m_CurrentHRef = "";
+		private HtmlElement m_CurrentHRef = null;
 
 		private TDLDropTarget m_DragDrop;
 
@@ -120,6 +120,7 @@ namespace HTMLContentControl
 			// Handle link clicking
 			this.WebBrowser.Document.MouseDown += new HtmlElementEventHandler(OnDocumentMouseDown);
 			this.WebBrowser.Document.MouseUp += new HtmlElementEventHandler(OnDocumentMouseUp);
+			this.WebBrowser.Document.MouseMove += new HtmlElementEventHandler(OnDocumentMouseMove);
 
 			base.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnBaseNavigateLink);
 		}
@@ -417,6 +418,8 @@ namespace HTMLContentControl
 
 		private void OnDocumentMouseDown(object sender, HtmlElementEventArgs e)
 		{
+			m_CurrentHRef = null;
+
 			if (!IsEditable || e.CtrlKeyPressed)
 			{
 				// We handle links ourselves because the web browser 
@@ -427,30 +430,54 @@ namespace HTMLContentControl
 				if (element == null)
 					return;
 
-				m_CurrentHRef = element.GetAttribute("href");
+				m_CurrentHRef = element;
+
+				// If the control key is down, the browser is going to 
+				// want to select all the text by default but this is
+				// confusing for the user so we just clear the selection
+				if (IsEditable && e.CtrlKeyPressed)
+				{
+					SelectElement(m_CurrentHRef);
+				}
 			}
+		}
+
+		private void OnDocumentMouseMove(object sender, HtmlElementEventArgs e)
+		{
+			// See above
+			if ((m_CurrentHRef != null) && (IsEditable && e.CtrlKeyPressed))
+				SelectElement(m_CurrentHRef);
 		}
 
 		private void OnDocumentMouseUp(object sender, HtmlElementEventArgs e)
 		{
-			if ((!IsEditable || e.CtrlKeyPressed) && !String.IsNullOrWhiteSpace(m_CurrentHRef))
+			if (m_CurrentHRef != null)
 			{
-				var href = new StringBuilder(m_CurrentHRef).ToString();
-				m_CurrentHRef = "";
+				var element = m_CurrentHRef; // for selecting after
 
-				// Verify that the mouse hasn't moved
-				var element = this.WebBrowser.Document.GetElementFromPoint(e.ClientMousePosition);
+				String url = m_CurrentHRef.GetAttribute("href");
+				m_CurrentHRef = null;
 
-				if (element == null)
-					return;
-
-				if (!href.Equals(element.GetAttribute("href")))
-					return;
-
-				if (HtmlNavigation != null)
+				if (!String.IsNullOrWhiteSpace(url))
 				{
-					HtmlNavigation(this, new MSDN.Html.Editor.HtmlNavigationEventArgs(href));
+					// Verify that the mouse hasn't moved
+					var mouseElm = this.WebBrowser.Document.GetElementFromPoint(e.ClientMousePosition);
+
+					if (mouseElm == null)
+						return;
+
+					if (!url.Equals(mouseElm.GetAttribute("href")))
+						return;
+
+					if (HtmlNavigation != null)
+					{
+						HtmlNavigation(this, new MSDN.Html.Editor.HtmlNavigationEventArgs(url));
+					}
 				}
+
+				// See above
+				if (IsEditable && e.CtrlKeyPressed)
+					SelectElement(element);
 			}
 		}
 
