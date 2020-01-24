@@ -980,7 +980,7 @@ void CGanttChartWnd::OnSelchangeSnapMode()
 	m_ctrlGantt.SetSnapMode(nSnap);
 }
 
-LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
+LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT((GTLC_MONTH_DISPLAY)wp != (GTLC_MONTH_DISPLAY)lp);
 
