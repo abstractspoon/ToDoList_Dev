@@ -10,8 +10,11 @@ if NOT EXIST %REPO%\Plugins exit
 
 ECHO ON
 
-REM - Build Core App
+REM - Always rebuild Core App shared code in VC6 because it may have been previously compiled for VS2010 below
 cd %REPO%\Core
+"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core_Shared.dsw /MAKE "ALL - Win32 Unicode Release" /REBUILD
+
+REM - Build rest of core app in VC6
 "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" 
 
 REM - Copy ToDoList.pdb/.map to versioned symbols folder
