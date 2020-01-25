@@ -10,6 +10,9 @@ if NOT EXIST %REPO%\Plugins exit
 
 ECHO ON
 
+REM - Make sure caller has updated ToDoList version number
+pause
+
 REM - Always rebuild Core App shared code in VC6 because it may have been previously compiled for VS2010 below
 cd %REPO%\Core
 "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core_Shared.dsw /MAKE "ALL - Win32 Unicode Release" /REBUILD
@@ -43,7 +46,7 @@ REM - Rebuild PluginHelpers by itself because everything else is dependent on it
 REM - Build rest of plugins
 "C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" .\ToDoList_Plugins.sln /Build "Release"
 
-REM Allow caller to cancel building Zip
+REM - Allow caller to cancel building Zip
 pause
 
 CALL %REPO%\BuildReleaseZip.bat
