@@ -5,8 +5,8 @@
 #include "LabelTip.h"
 #include "DPIScaling.h"
 
-#include "..\..\Core\Shared\OSVersion.h"
-#include "..\..\Core\Shared\Themed.h"
+#include <Shared\OSVersion.h>
+#include <Shared\Themed.h>
 
 #include <math.h>
 #include <CommCtrl.h>

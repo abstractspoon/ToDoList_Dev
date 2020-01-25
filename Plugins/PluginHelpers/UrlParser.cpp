@@ -5,7 +5,7 @@
 #include "UrlParser.h"
 #include "PluginHelpers.h"
 
-#include "..\..\Core\Shared\UrlParser.h"
+#include <Shared\UrlParser.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
