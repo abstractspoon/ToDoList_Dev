@@ -163,6 +163,8 @@
 #define IDR_FINDTASKS                   310
 #define IDI_SEARCH_PREFS                313
 #define IDD_TASKLISTSAVEAS_DIALOG       314
+#define IDI_WIN10_TRAY                  316
+#define IDI_WIN10_TRAY_TIMETRACK        317
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -2348,7 +2350,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        316
+#define _APS_NEXT_RESOURCE_VALUE        318
 #define _APS_NEXT_COMMAND_VALUE         34664
 #define _APS_NEXT_CONTROL_VALUE         1541
 #define _APS_NEXT_SYMED_VALUE           108

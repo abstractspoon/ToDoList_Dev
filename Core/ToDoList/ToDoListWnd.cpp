@@ -1290,7 +1290,9 @@ BOOL CToDoListWnd::InitTrayIcon()
 {
 	// we always create the trayicon (for simplicity) but we only
 	// show it if required
-	if (!m_trayIcon.Create(this, IDC_TRAYICON, IDR_MAINFRAME_STD, CEnString(IDS_COPYRIGHT)))
+	UINT nTrayIconID = ((COSVersion() >= OSV_WIN8) ? IDI_WIN10_TRAY : IDR_MAINFRAME_STD);
+
+	if (!m_trayIcon.Create(this, IDC_TRAYICON, nTrayIconID, CEnString(IDS_COPYRIGHT)))
 		return FALSE;
 
 	if (Prefs().GetUseSysTray())
@@ -6644,8 +6646,22 @@ void CToDoListWnd::UpdateWindowIcons()
 	else
 		VERIFY(m_icons.ModifyIcon(nIDIcon));
 
-	m_trayIcon.SetIcon(m_icons.GetSmallIcon(), FALSE);
 	m_dlgTimeTracker.SetWindowIcons(m_icons.GetBigIcon(), m_icons.GetSmallIcon());
+
+	UpdateTrayIcon();
+}
+
+void CToDoListWnd::UpdateTrayIcon()
+{
+	BOOL bTimeTracking = IsActivelyTimeTracking();
+	UINT nIDIcon = 0;
+
+	if (COSVersion() >= OSV_WIN8)
+		nIDIcon = (bTimeTracking ? IDI_WIN10_TRAY_TIMETRACK : IDI_WIN10_TRAY);
+	else
+		nIDIcon = (bTimeTracking ? IDI_TIMETRACK_STD : IDR_MAINFRAME_STD);
+
+	m_trayIcon.SetIcon(nIDIcon);
 }
 
 LPARAM CToDoListWnd::OnToDoCtrlNotifyTimeTrackReminder(WPARAM wParam, LPARAM lParam)
@@ -12839,7 +12855,7 @@ void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 	{
 		// Icons themselves will already have been updated
 		// so we just need to handle dependencies
-		m_trayIcon.SetIcon(m_icons.GetSmallIcon(), FALSE);
+		UpdateTrayIcon();
 		m_dlgTimeTracker.SetWindowIcons(m_icons.GetBigIcon(), m_icons.GetSmallIcon());
 	}
 		

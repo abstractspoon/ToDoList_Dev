@@ -1299,6 +1299,10 @@ SOURCE=.\res\app_timetrack.ico
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\app_timetrack_win10.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\app_toolbar.bmp
 # End Source File
 # Begin Source File
@@ -1308,6 +1312,10 @@ SOURCE=.\res\app_toolbar_metro.bmp
 # Begin Source File
 
 SOURCE=.\res\app_toolbar_std.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\app_tray_win10.ico
 # End Source File
 # Begin Source File
 

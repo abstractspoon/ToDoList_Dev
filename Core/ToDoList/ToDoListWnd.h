@@ -723,6 +723,7 @@ protected:
 	void UpdateMenuIconMgrSourceControlStatus();
 	void UpdateTimeTrackerPreferences();
 	void UpdateWindowIcons();
+	void UpdateTrayIcon();
 
 	void UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pCtrl);
 	void CheckUpdateActiveToDoCtrlPreferences();

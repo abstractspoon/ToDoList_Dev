@@ -1067,6 +1067,12 @@
     <None Include="res\search_prefs.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\app_timetrack_win10.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\app_tray_win10.ico">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

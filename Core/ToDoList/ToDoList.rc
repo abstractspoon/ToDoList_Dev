@@ -2687,6 +2687,8 @@ IDI_STYLE_IMAGE         ICON    DISCARDABLE     "res\\style_image.ico"
 IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "res\\plus.ico"
 IDI_RESET_ELAPSED       ICON    DISCARDABLE     "res\\reset_elapsed.ico"
 IDI_SEARCH_PREFS        ICON    DISCARDABLE     "res\\search_prefs.ico"
+IDI_WIN10_TRAY          ICON    DISCARDABLE     "res\\app_tray_win10.ico"
+IDI_WIN10_TRAY_TIMETRACK ICON    DISCARDABLE     "res\\app_timetrack_win10.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
