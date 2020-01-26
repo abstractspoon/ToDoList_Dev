@@ -139,7 +139,7 @@
 #define IDI_FILEEDIT_GO                 283
 #define IDI_FILEEDIT_BROWSE             284
 #define IDB_COLUMN_SYMBOLS              285
-#define IDI_TIME_TRACK                  286
+#define IDI_TIMETRACK                   286
 #define IDI_UPDATE_FILTER               287
 #define IDI_CUST_ATTRIB_ICONS           288
 #define IDI_DEPENDS_LINK                289
@@ -163,8 +163,8 @@
 #define IDR_FINDTASKS                   310
 #define IDI_SEARCH_PREFS                313
 #define IDD_TASKLISTSAVEAS_DIALOG       314
-#define IDI_WIN10_TRAY                  316
-#define IDI_WIN10_TRAY_TIMETRACK        317
+#define IDI_TRAY                        316
+#define IDI_TRAY_TIMETRACK              317
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004

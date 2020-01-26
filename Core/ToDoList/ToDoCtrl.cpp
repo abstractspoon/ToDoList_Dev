@@ -243,7 +243,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_eCost.SetMask(_T("@-.0123456789"), ME_LOCALIZEDECIMAL);
 	
 	// add 'clock' button to 'time spent'
-	m_iconTrackTime.Load(IDI_TIME_TRACK);
+	m_iconTrackTime.Load(IDI_TIMETRACK);
 	m_eTimeSpent.InsertButton(1, ID_TIME_TRACK, m_iconTrackTime, CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
 
 	// add 'Plus' button to 'time spent'

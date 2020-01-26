@@ -129,7 +129,7 @@ IDR_MANIFEST            24      DISCARDABLE     "res\\tdlupdate.exe.manifest"
 // Bitmap
 //
 
-IDB_WIZ_HEADER          BITMAP  DISCARDABLE     "res\\wiz_header.bmp"
+IDB_WIZ_HEADER          BITMAP  DISCARDABLE     "res\\TDLUpdate_wiz_header.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

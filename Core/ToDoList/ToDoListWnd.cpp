@@ -1290,7 +1290,7 @@ BOOL CToDoListWnd::InitTrayIcon()
 {
 	// we always create the trayicon (for simplicity) but we only
 	// show it if required
-	UINT nTrayIconID = ((COSVersion() >= OSV_WIN8) ? IDI_WIN10_TRAY : IDR_MAINFRAME_STD);
+	UINT nTrayIconID = ((COSVersion() >= OSV_WIN8) ? IDI_TRAY : IDR_MAINFRAME_STD);
 
 	if (!m_trayIcon.Create(this, IDC_TRAYICON, nTrayIconID, CEnString(IDS_COPYRIGHT)))
 		return FALSE;
@@ -6656,8 +6656,8 @@ void CToDoListWnd::UpdateTrayIcon()
 	BOOL bTimeTracking = IsActivelyTimeTracking();
 	UINT nIDIcon = 0;
 
-	if (COSVersion() >= OSV_WIN8)
-		nIDIcon = (bTimeTracking ? IDI_WIN10_TRAY_TIMETRACK : IDI_WIN10_TRAY);
+	if (COSVersion() > OSV_VISTA)
+		nIDIcon = (bTimeTracking ? IDI_TRAY_TIMETRACK : IDI_TRAY);
 	else
 		nIDIcon = (bTimeTracking ? IDI_TIMETRACK_STD : IDR_MAINFRAME_STD);
 

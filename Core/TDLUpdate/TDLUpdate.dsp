@@ -171,7 +171,7 @@ SOURCE=.\res\TDLUpdate.rc2
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\wiz_header.bmp
+SOURCE=.\res\TDLUpdate_wiz_header.bmp
 # End Source File
 # End Group
 # Begin Group "Libs"
