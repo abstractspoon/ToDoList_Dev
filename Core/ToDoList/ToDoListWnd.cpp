@@ -6656,9 +6656,10 @@ void CToDoListWnd::UpdateTrayIcon()
 	BOOL bTimeTracking = IsActivelyTimeTracking();
 	UINT nIDIcon = 0;
 
-	if (COSVersion() >= OSV_WIN8)
-		nIDIcon = (bTimeTracking ? IDI_TRAY_TIMETRACK : IDI_TRAY);
-	else
+	// Disable new tray icons until the end result is better
+// 	if (COSVersion() >= OSV_WIN8)
+// 		nIDIcon = (bTimeTracking ? IDI_TRAY_TIMETRACK : IDI_TRAY);
+// 	else
 		nIDIcon = (bTimeTracking ? IDI_TIMETRACK_STD : IDR_MAINFRAME_STD);
 
 	m_trayIcon.SetIcon(nIDIcon);
