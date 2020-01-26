@@ -1311,11 +1311,23 @@ SOURCE=.\res\app_toolbar_std.bmp
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\app_tray.ico
+SOURCE=.\res\app_tray_dark.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\app_tray_timetrack.ico
+SOURCE=.\res\app_tray_light.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\app_tray_timetrack_light.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\app_tray_track_dark.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\app_tray_track_light.ico
 # End Source File
 # Begin Source File
 

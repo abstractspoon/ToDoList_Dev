@@ -1288,13 +1288,12 @@ void CToDoListWnd::UpdateTimeTrackerPreferences()
 
 BOOL CToDoListWnd::InitTrayIcon()
 {
-	// we always create the trayicon (for simplicity) but we only
-	// show it if required
-	UINT nTrayIconID = ((COSVersion() >= OSV_WIN8) ? IDI_TRAY : IDR_MAINFRAME_STD);
-
-	if (!m_trayIcon.Create(this, IDC_TRAYICON, nTrayIconID, CEnString(IDS_COPYRIGHT)))
+	if (!m_trayIcon.Create(this, IDC_TRAYICON, IDR_MAINFRAME_STD, CEnString(IDS_COPYRIGHT)))
 		return FALSE;
 
+	UpdateTrayIcon();
+
+	// we always create the tray icon (for simplicity) but only show it if required
 	if (Prefs().GetUseSysTray())
 		m_trayIcon.ShowTrayIcon();
 
@@ -6656,11 +6655,24 @@ void CToDoListWnd::UpdateTrayIcon()
 	BOOL bTimeTracking = IsActivelyTimeTracking();
 	UINT nIDIcon = 0;
 
-	// Disable new tray icons until the end result is better
-// 	if (COSVersion() >= OSV_WIN8)
-// 		nIDIcon = (bTimeTracking ? IDI_TRAY_TIMETRACK : IDI_TRAY);
-// 	else
+	if (COSVersion() >= OSV_WIN8)
+	{
+		DWORD dwTaskbarUsesLightTheme = FALSE;
+
+		CRegKey2 reg;
+
+		if (reg.Open(HKEY_CURRENT_USER, _T("Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"), TRUE) == ERROR_SUCCESS)
+			reg.Read(_T("SystemUsesLightTheme"), dwTaskbarUsesLightTheme);
+
+		if (dwTaskbarUsesLightTheme)
+			nIDIcon = (bTimeTracking ? IDI_TRAY_TIMETRACK_DARK : IDI_TRAY_DARK);
+		else
+			nIDIcon = (bTimeTracking ? IDI_TRAY_TIMETRACK_LIGHT : IDI_TRAY_LIGHT);
+	}
+	else
+	{
 		nIDIcon = (bTimeTracking ? IDI_TIMETRACK_STD : IDR_MAINFRAME_STD);
+	}
 
 	m_trayIcon.SetIcon(nIDIcon);
 }
@@ -12858,6 +12870,12 @@ void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 		// so we just need to handle dependencies
 		UpdateTrayIcon();
 		m_dlgTimeTracker.SetWindowIcons(m_icons.GetBigIcon(), m_icons.GetSmallIcon());
+	}
+		
+	else if (StrCmp(lpszSection, _T("ImmersiveColorSet")) == 0)
+	{
+		// Windows 10 theme has changed from "light" to "dark" or vice versa
+		UpdateTrayIcon();
 	}
 		
 	CFrameWnd::OnSettingChange(uFlags, lpszSection);

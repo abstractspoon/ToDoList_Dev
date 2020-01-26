@@ -163,8 +163,8 @@
 #define IDR_FINDTASKS                   310
 #define IDI_SEARCH_PREFS                313
 #define IDD_TASKLISTSAVEAS_DIALOG       314
-#define IDI_TRAY                        316
-#define IDI_TRAY_TIMETRACK              317
+#define IDI_TRAY_LIGHT                  316
+#define IDI_TRAY_TIMETRACK_LIGHT        317
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -849,8 +849,10 @@
 #define IDC_CHOOSEFOLDER                2003
 #define IDI_TASK                        2003
 #define IDD_PRINT_TASKSEL_PAGE          2003
+#define IDI_TRAY_TIMETRACK_DARK         2003
 #define IDD_DROPIMPORT_DIALOG           2004
 #define IDD_EXPORT_TASKSEL_PAGE         2004
+#define IDI_TRAY_DARK                   2004
 #define IDC_CURFOLDER                   2005
 #define IDI_CONTACT                     2005
 #define IDD_EXPORT_TO_PAGE              2005

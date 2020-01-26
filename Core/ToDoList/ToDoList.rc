@@ -2687,8 +2687,10 @@ IDI_STYLE_IMAGE         ICON    DISCARDABLE     "res\\style_image.ico"
 IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "res\\plus.ico"
 IDI_RESET_ELAPSED       ICON    DISCARDABLE     "res\\reset_elapsed.ico"
 IDI_SEARCH_PREFS        ICON    DISCARDABLE     "res\\search_prefs.ico"
-IDI_TRAY                ICON    DISCARDABLE     "res\\app_tray.ico"
-IDI_TRAY_TIMETRACK      ICON    DISCARDABLE     "res\\app_tray_timetrack.ico"
+IDI_TRAY_LIGHT          ICON    DISCARDABLE     "res\\app_tray_light.ico"
+IDI_TRAY_TIMETRACK_LIGHT ICON    DISCARDABLE     "res\\app_tray_timetrack_light.ico"
+IDI_TRAY_TIMETRACK_DARK ICON    DISCARDABLE     "res\\app_tray_timetrack_dark.ico"
+IDI_TRAY_DARK           ICON    DISCARDABLE     "res\\app_tray_dark.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
