@@ -49,7 +49,7 @@ BEGIN
             VALUE "FileDescription", "ToDoList\0"
             VALUE "FileVersion", "7, 2, 998, 8\0"
             VALUE "InternalName", "ToDoList\0"
-            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-19\0"
+            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-20\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "ToDoList.exe\0"
             VALUE "PrivateBuild", "\0"
@@ -1819,7 +1819,7 @@ BEGIN
     LTEXT           "License:",IDC_STATIC,7,161,27,8
     EDITTEXT        IDC_TITLE,34,7,173,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
                     WS_BORDER
-    LTEXT           "(c) Abstractspoon 2003-19",IDC_STATIC,213,7,87,8
+    LTEXT           "(c) Abstractspoon 2003-20",IDC_STATIC,213,7,87,8
 END
 
 IDD_SHOWREMINDER_DIALOG DIALOG DISCARDABLE  0, 0, 337, 231

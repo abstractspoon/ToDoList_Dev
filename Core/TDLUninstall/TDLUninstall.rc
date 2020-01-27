@@ -49,7 +49,7 @@ BEGIN
             VALUE "FileDescription", "TDLUninstall\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
             VALUE "InternalName", "TDLUninstall\0"
-            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2015-19\0"
+            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2015-20\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "TDLUninstall.exe\0"
             VALUE "PrivateBuild", "\0"

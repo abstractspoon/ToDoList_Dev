@@ -49,7 +49,7 @@ BEGIN
             VALUE "FileDescription", "TDLUpdate\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
             VALUE "InternalName", "TDLUpdate\0"
-            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2015-19\0"
+            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2015-20\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "TDLUpdate.exe\0"
             VALUE "PrivateBuild", "\0"
