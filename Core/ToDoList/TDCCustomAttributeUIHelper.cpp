@@ -814,17 +814,21 @@ void CTDCCustomAttributeUIHelper::UpdateControls(const CWnd* pParent, const CTDC
 												const CTDCCustomAttributeDataMap& mapData)
 {
 	int nCtrl = aControls.GetSize();
-	TDCCADATA data;
 
 	while (nCtrl--)
-	{
-		const CUSTOMATTRIBCTRLITEM& ctrl = aControls.GetData()[nCtrl];
+		UpdateControl(pParent, aControls.GetData()[nCtrl], aAttribDefs, mapData);
+}
+
+void CTDCCustomAttributeUIHelper::UpdateControl(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
+												const CTDCCustomAttribDefinitionArray& aAttribDefs,
+												const CTDCCustomAttributeDataMap& mapData)
+{
+	TDCCADATA data;
 		
-		if (mapData.Lookup(ctrl.sAttribID, data))
-			UpdateControl(pParent, ctrl, aAttribDefs, data);
-		else
-			ClearControl(pParent, ctrl, aAttribDefs);
-	}
+	if (mapData.Lookup(ctrl.sAttribID, data))
+		UpdateControl(pParent, ctrl, aAttribDefs, data);
+	else
+		ClearControl(pParent, ctrl, aAttribDefs);
 }
 
 void CTDCCustomAttributeUIHelper::ClearControls(const CWnd* pParent, const CTDCCustomControlArray& aControls,

@@ -3623,29 +3623,11 @@ void CTabbedToDoCtrl::AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttribute
 	while (pos)
 	{
 		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
-		GetGlobals(nAttrib, tld);
+		GetAutoListData(tld, nAttrib);
 	}
 	
 	if (tld.GetSize())
 		tasks.SetAutoListData(tld);
-}
-
-int CTabbedToDoCtrl::GetGlobals(TDC_ATTRIBUTE nAttrib, TDCAUTOLISTDATA& tld) const
-{
-	switch (nAttrib)
-	{
-	case TDCA_ALL:		
-		return GetAutoListData(tld);
-
-	case TDCA_ALLOCTO:	return m_cbAllocTo.GetItems(tld.aAllocTo);
-	case TDCA_ALLOCBY:	return m_cbAllocBy.GetItems(tld.aAllocBy);
-	case TDCA_CATEGORY:	return m_cbCategory.GetItems(tld.aCategory);
-	case TDCA_STATUS:	return m_cbStatus.GetItems(tld.aStatus);
-	case TDCA_TAGS:		return m_cbTags.GetItems(tld.aTags);
-	case TDCA_VERSION:	return m_cbVersion.GetItems(tld.aVersion);
-	}
-
-	return 0;
 }
 
 BOOL CTabbedToDoCtrl::ExtensionViewWantsChanges(int nExt, const CTDCAttributeMap& mapAttrib) const

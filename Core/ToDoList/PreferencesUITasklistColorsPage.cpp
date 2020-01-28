@@ -1118,7 +1118,7 @@ void CPreferencesUITasklistColorsPage::OnPopulateattriblist()
 
 void CPreferencesUITasklistColorsPage::SetDefaultListData(const TDCAUTOLISTDATA& defaultListData)
 {
-	m_defaultListData.Copy(defaultListData);
+	m_defaultListData.Copy(defaultListData, TDCA_ALL);
 }
 
 void CPreferencesUITasklistColorsPage::OnSelchangeAttributetocolorby() 

@@ -1058,10 +1058,10 @@ BOOL CToDoCtrlMgr::AreToDoCtrlsSorted() const
 	return TRUE;
 }
 
-void CToDoCtrlMgr::GetAutoListData(TDCAUTOLISTDATA& tldActive, TDCAUTOLISTDATA& tldAll) const
+void CToDoCtrlMgr::GetAutoListData(TDCAUTOLISTDATA& tldActive, TDCAUTOLISTDATA& tldAll, TDC_ATTRIBUTE nAttribID) const
 {
-	tldActive.RemoveAll();
-	tldAll.RemoveAll();
+	tldActive.RemoveAll(nAttribID);
+	tldAll.RemoveAll(nAttribID);
 
 	int nActive = GetSelToDoCtrl(), nTDC = GetCount();
 
@@ -1071,15 +1071,15 @@ void CToDoCtrlMgr::GetAutoListData(TDCAUTOLISTDATA& tldActive, TDCAUTOLISTDATA& 
 
 		if (nTDC == nActive)
 		{
-			tdc.GetAutoListData(tldActive);
-			tldAll.AppendUnique(tldActive);
+			tdc.GetAutoListData(tldActive, nAttribID);
+			tldAll.AppendUnique(tldActive, nAttribID);
 		}
 		else
 		{
 			TDCAUTOLISTDATA tld;
 
-			tdc.GetAutoListData(tld);
-			tldAll.AppendUnique(tld);
+			tdc.GetAutoListData(tld, nAttribID);
+			tldAll.AppendUnique(tld, nAttribID);
 		}
 	}
 }

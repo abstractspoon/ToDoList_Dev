@@ -168,7 +168,7 @@ public:
 	void ResizeAttributeColumnsToFit();
 
 	// these return the full list of items in each droplist
-	int GetAutoListData(TDCAUTOLISTDATA& tld) const;
+	int GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) const;
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tld);
 	BOOL SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bReadOnly = TRUE);
 

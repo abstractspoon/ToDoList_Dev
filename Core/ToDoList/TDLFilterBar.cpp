@@ -506,61 +506,90 @@ void CTDLFilterBar::ShowDefaultFilters(BOOL bShow)
 	m_cbTaskFilter.ShowDefaultFilters(bShow); 
 }
 
-void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc)
+void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID)
 {
 	if (tdc.IsDelayLoaded())
 		return;
 
-	CHoldRedraw hr(GetSafeHwnd(), NCR_PAINT | NCR_ERASEBKGND);
-
-	m_bWantHideParents = tdc.HasStyle(TDCS_ALWAYSHIDELISTPARENTS);
-	m_nView = tdc.GetTaskView();
-	
-	// column visibility
-	SetVisibleFilters(tdc.GetVisibleFilterFields(), FALSE);
-
-	// get filter
-	if (tdc.GetFilter(m_filter) == FS_ADVANCED)
+	if (nAttribID == TDCA_ALL)
 	{
-		m_sAdvancedFilter = tdc.GetAdvancedFilterName();
+		CHoldRedraw hr(GetSafeHwnd(), NCR_PAINT | NCR_ERASEBKGND);
 
-		m_mapCustomFlags[m_sAdvancedFilter] = tdc.GetAdvancedFilterFlags();
+		m_bWantHideParents = tdc.HasStyle(TDCS_ALWAYSHIDELISTPARENTS);
+		m_nView = tdc.GetTaskView();
+	
+		// column visibility
+		SetVisibleFilters(tdc.GetVisibleFilterFields(), FALSE);
+
+		// get filter
+		if (tdc.GetFilter(m_filter) == FS_ADVANCED)
+		{
+			m_sAdvancedFilter = tdc.GetAdvancedFilterName();
+
+			m_mapCustomFlags[m_sAdvancedFilter] = tdc.GetAdvancedFilterFlags();
+		}
+		else
+		{
+			m_filter.nTitleOption = m_nTitleFilter;
+
+			m_sAdvancedFilter.Empty();
+		}
+	
+		// auto droplist filters
+		UpdateAutoDropListData(tdc, nAttribID);
+
+		// priority (Note: risk never needs updating)
+		if (m_cbPriorityFilter.GetCount() == 0)
+		{
+			ASSERT(0);
+			m_cbPriorityFilter.SetColors(m_aPriorityColors);
+			m_cbPriorityFilter.InsertColor(0, CLR_NONE, CEnString(IDS_TDC_ANY)); // add a blank item
+		}
+
+		// Custom attributes
+		UpdateCustomControls(tdc, nAttribID);
+		
+		// update UI
+		RefreshUIBkgndBrush();
+
+		UpdateData(FALSE);
+		UpdateWindow();
+
+		// disable controls if a custom filter.
+		// just do a repos because this also handles enabled state
+		ReposControls();
 	}
 	else
 	{
-		m_filter.nTitleOption = m_nTitleFilter;
-
-		m_sAdvancedFilter.Empty();
+		UpdateAutoDropListData(tdc, nAttribID);
+		UpdateCustomControls(tdc, nAttribID);
 	}
-	
-	// auto droplist filters
+}
+
+void CTDLFilterBar::UpdateAutoDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID)
+{
 	TDCAUTOLISTDATA tld;
-	tdc.GetAutoListData(tld);
+	tdc.GetAutoListData(tld, nAttribID);
 
-	m_cbAllocToFilter.SetStrings(tld.aAllocTo);
-	m_cbAllocByFilter.SetStrings(tld.aAllocBy);
-	m_cbCategoryFilter.SetStrings(tld.aCategory);
-	m_cbStatusFilter.SetStrings(tld.aStatus);
-	m_cbVersionFilter.SetStrings(tld.aVersion);
-	m_cbTagFilter.SetStrings(tld.aTags);
-	
-	// priority
-	// risk never needs changing
-	m_cbPriorityFilter.SetColors(m_aPriorityColors);
-	m_cbPriorityFilter.InsertColor(0, CLR_NONE, CEnString(IDS_TDC_ANY)); // add a blank item
+	BOOL bAllAttrib = (nAttribID == TDCA_ALL);
 
-	// Custom attributes
-	UpdateCustomControls(tdc);
-		
-	// update UI
-	RefreshUIBkgndBrush();
+	if (bAllAttrib || (nAttribID == TDCA_ALLOCTO))
+		m_cbAllocToFilter.SetStrings(tld.aAllocTo);
 
-	UpdateData(FALSE);
-	UpdateWindow();
+	if (bAllAttrib || (nAttribID == TDCA_ALLOCBY))
+		m_cbAllocByFilter.SetStrings(tld.aAllocBy);
 
-	// disable controls if a custom filter.
-	// just do a repos because this also handles enabled state
-	ReposControls();
+	if (bAllAttrib || (nAttribID == TDCA_CATEGORY))
+		m_cbCategoryFilter.SetStrings(tld.aCategory);
+
+	if (bAllAttrib || (nAttribID == TDCA_STATUS))
+		m_cbStatusFilter.SetStrings(tld.aStatus);
+
+	if (bAllAttrib || (nAttribID == TDCA_VERSION))
+		m_cbVersionFilter.SetStrings(tld.aVersion);
+
+	if (bAllAttrib || (nAttribID == TDCA_TAGS))
+		m_cbTagFilter.SetStrings(tld.aTags);
 }
 
 BOOL CTDLFilterBar::SetTitleFilterOption(FILTER_TITLE nOption) 
@@ -576,27 +605,42 @@ BOOL CTDLFilterBar::SetTitleFilterOption(FILTER_TITLE nOption)
 	return FALSE; // no change
 }
 
-void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc)
+void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID)
 {
-	CTDCCustomAttribDefinitionArray aNewAttribDefs;
-	tdc.GetCustomAttributeDefs(aNewAttribDefs);
-
-	if (CTDCCustomAttributeUIHelper::NeedRebuildFilterControls(m_aCustomAttribDefs, 
-																aNewAttribDefs,
-																m_aCustomControls))
+	if (nAttribID == TDCA_ALL)
 	{
-		CTDCCustomAttributeUIHelper::RebuildFilterControls(aNewAttribDefs,
-														 tdc.GetTaskIconImageList(), 
-														 this, 
-														 IDC_OPTIONFILTERCOMBO, 
-														 m_bMultiSelection,
-														 m_aCustomControls);
+		CTDCCustomAttribDefinitionArray aNewAttribDefs;
+		tdc.GetCustomAttributeDefs(aNewAttribDefs);
+
+		if (CTDCCustomAttributeUIHelper::NeedRebuildFilterControls(m_aCustomAttribDefs, 
+																	aNewAttribDefs,
+																	m_aCustomControls))
+		{
+			CTDCCustomAttributeUIHelper::RebuildFilterControls(aNewAttribDefs,
+															 tdc.GetTaskIconImageList(), 
+															 this, 
+															 IDC_OPTIONFILTERCOMBO, 
+															 m_bMultiSelection,
+															 m_aCustomControls);
+		}
+
+		// Update data
+		CTDCCustomAttributeUIHelper::UpdateControls(this, m_aCustomControls, aNewAttribDefs, m_filter.mapCustomAttrib);
+
+		m_aCustomAttribDefs.Copy(aNewAttribDefs);
 	}
+	else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+	{
+		int nCtrl = m_aCustomControls.Find(nAttribID);
 
-	// Update data
-	CTDCCustomAttributeUIHelper::UpdateControls(this, m_aCustomControls, aNewAttribDefs, m_filter.mapCustomAttrib);
-
-	m_aCustomAttribDefs.Copy(aNewAttribDefs);
+		if (nCtrl != -1)
+		{
+			CTDCCustomAttributeUIHelper::UpdateControl(this, 
+														m_aCustomControls[nCtrl],
+														tdc.GetCustomAttributeDefs(), 
+														m_filter.mapCustomAttrib);
+		}
+	}
 }
 
 void CTDLFilterBar::SetFilterLabelAlignment(BOOL bLeft)
@@ -620,17 +664,20 @@ void CTDLFilterBar::SetFilterLabelAlignment(BOOL bLeft)
 
 void CTDLFilterBar::SetPriorityColors(const CDWordArray& aColors)
 {
-	m_aPriorityColors.Copy(aColors);
-
-	if (m_cbPriorityFilter.GetSafeHwnd())
+	if (!Misc::MatchAll(aColors, m_aPriorityColors, TRUE))
 	{
-		// save and restore current selection
-		int nSel = m_cbPriorityFilter.GetCurSel();
+		m_aPriorityColors.Copy(aColors);
 
-		m_cbPriorityFilter.SetColors(aColors);
-		m_cbPriorityFilter.InsertColor(0, CLR_NONE, CString((LPCTSTR)IDS_TDC_ANY)); // add a blank item
+		if (m_cbPriorityFilter.GetSafeHwnd())
+		{
+			// save and restore current selection
+			int nSel = m_cbPriorityFilter.GetCurSel();
 
-		m_cbPriorityFilter.SetCurSel(nSel);
+			m_cbPriorityFilter.SetColors(aColors);
+			m_cbPriorityFilter.InsertColor(0, CLR_NONE, CString((LPCTSTR)IDS_TDC_ANY)); // add a blank item
+
+			m_cbPriorityFilter.SetCurSel(nSel);
+		}
 	}
 }
 

@@ -512,16 +512,16 @@ void CTDLFindTasksDlg::SetCustomAttributes(const CTDCCustomAttribDefinitionArray
 		m_lcFindSetup.SetCustomAttributes(aActiveTasklistAttribDefs);
 }
 
-void CTDLFindTasksDlg::SetAttributeListData(const TDCAUTOLISTDATA& tldActive, const TDCAUTOLISTDATA& tldAll)
+void CTDLFindTasksDlg::SetAttributeListData(const TDCAUTOLISTDATA& tldActive, const TDCAUTOLISTDATA& tldAll, TDC_ATTRIBUTE nAttribID)
 {
-	m_tldActive.Copy(tldActive);
-	m_tldAll.Copy(tldAll);
+	m_tldActive.Copy(tldActive, nAttribID);
+	m_tldAll.Copy(tldAll, nAttribID);
 
 	// update list ctrl
 	if (m_bAllTasklists)
-		m_lcFindSetup.SetAttributeListData(tldAll);
+		m_lcFindSetup.SetAttributeListData(tldAll, nAttribID);
 	else
-		m_lcFindSetup.SetAttributeListData(tldActive);
+		m_lcFindSetup.SetAttributeListData(tldActive, nAttribID);
 }
 
 void CTDLFindTasksDlg::SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons)
@@ -1558,12 +1558,12 @@ void CTDLFindTasksDlg::OnSelchangeTasklistoptions()
 	if (m_bAllTasklists)
 	{
 		m_lcFindSetup.SetCustomAttributes(m_aAllTDCAttribDefs);
-		m_lcFindSetup.SetAttributeListData(m_tldAll);
+		m_lcFindSetup.SetAttributeListData(m_tldAll, TDCA_ALL);
 	}
 	else
 	{
 		m_lcFindSetup.SetCustomAttributes(m_aActiveTDCAttribDefs);
-		m_lcFindSetup.SetAttributeListData(m_tldActive);
+		m_lcFindSetup.SetAttributeListData(m_tldActive, TDCA_ALL);
 	}
 }
 

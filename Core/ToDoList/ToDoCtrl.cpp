@@ -2405,9 +2405,9 @@ BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 	return TRUE;
 }
 
-int CToDoCtrl::GetAutoListData(TDCAUTOLISTDATA& tld) const
+int CToDoCtrl::GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) const
 {
-	return tld.Copy(m_tldAll);
+	return tld.Copy(m_tldAll, nAttribID);
 }
 
 void CToDoCtrl::UpdateAutoListData(TDC_ATTRIBUTE nAttrib)
@@ -2448,7 +2448,7 @@ void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 	SetDefaultListContent(m_cbAllocBy,	tld.aAllocBy,	m_tldDefault.aAllocBy, TRUE);
 
 	// save
-	m_tldDefault.Copy(tld);
+	m_tldDefault.Copy(tld, TDCA_ALL);
 	UpdateAutoListData();
 	
 	// restore selection
@@ -6071,8 +6071,8 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 void CToDoCtrl::SaveGlobals(CTaskFile& tasks) const
 {
 	// Remove default items before saving
-	TDCAUTOLISTDATA tld(m_tldAll);
-	tld.RemoveItems(m_tldDefault);
+	TDCAUTOLISTDATA tld(m_tldAll, TDCA_ALL);
+	tld.RemoveItems(m_tldDefault, TDCA_ALL);
 
 	tasks.SetAutoListData(tld);
 }
@@ -8056,13 +8056,17 @@ LRESULT CToDoCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 	default:
 		if (CTDCCustomAttributeUIHelper::IsCustomEditControl(nCtrlID))
 		{
-			GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, TDCA_CUSTOMATTRIB);
+			int nCtrl = m_aCustomControls.Find(nCtrlID);
+
+			if (nCtrl != -1)
+			{
+				GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, m_aCustomControls[nCtrl].nAttrib);
+				break;
+			}
 		}
-		else
-		{
-			ASSERT(0);
-			return 0L;
-		}
+		// all else
+		ASSERT(0);
+		return 0L;
 	}
 
 	// mark ourselves as modified because we now save the lists to the taskfile

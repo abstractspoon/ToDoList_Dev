@@ -40,7 +40,7 @@ public:
 	void ClearSearch();
 
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
-	void SetAttributeListData(const TDCAUTOLISTDATA& tld);
+	void SetAttributeListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
 
 	BOOL AddRule();

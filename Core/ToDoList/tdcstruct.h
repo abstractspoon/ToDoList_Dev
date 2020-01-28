@@ -291,31 +291,43 @@ struct TDCFINDWND
 struct TDCAUTOLISTDATA
 {
 	TDCAUTOLISTDATA() {}
-	TDCAUTOLISTDATA(const TDCAUTOLISTDATA& other) 
+	TDCAUTOLISTDATA(const TDCAUTOLISTDATA& other, TDC_ATTRIBUTE nAttribID) 
 	{
-		Copy(other);
+		Copy(other, nAttribID);
 	}
 
-	int Copy(const TDCAUTOLISTDATA& other)
+	int Copy(const TDCAUTOLISTDATA& other, TDC_ATTRIBUTE nAttribID)
 	{
-		return Copy(other, *this, FALSE);
+		return Copy(other, *this, FALSE, nAttribID);
 	}
 
-	int AppendUnique(const TDCAUTOLISTDATA& other)
+	int AppendUnique(const TDCAUTOLISTDATA& other, TDC_ATTRIBUTE nAttribID)
 	{
-		return Copy(other, *this, TRUE);
+		return Copy(other, *this, TRUE, nAttribID);
 	}
 
-	int RemoveItems(const TDCAUTOLISTDATA& other)
+	int RemoveItems(const TDCAUTOLISTDATA& other, TDC_ATTRIBUTE nAttribID)
 	{
 		int nNumRemoved = 0;
+		BOOL bAll = (nAttribID == TDCA_ALL);
 
-		nNumRemoved += Misc::RemoveItems(other.aCategory, aCategory);
-		nNumRemoved += Misc::RemoveItems(other.aStatus, aStatus);
-		nNumRemoved += Misc::RemoveItems(other.aAllocTo, aAllocTo);
-		nNumRemoved += Misc::RemoveItems(other.aAllocBy, aAllocBy);
-		nNumRemoved += Misc::RemoveItems(other.aTags, aTags);
-		nNumRemoved += Misc::RemoveItems(other.aVersion, aVersion);
+		if (bAll || (nAttribID == TDCA_CATEGORY))
+			nNumRemoved += Misc::RemoveItems(other.aCategory, aCategory);
+
+		if (bAll || (nAttribID == TDCA_STATUS))
+			nNumRemoved += Misc::RemoveItems(other.aStatus, aStatus);
+
+		if (bAll || (nAttribID == TDCA_ALLOCTO))
+			nNumRemoved += Misc::RemoveItems(other.aAllocTo, aAllocTo);
+
+		if (bAll || (nAttribID == TDCA_ALLOCBY))
+			nNumRemoved += Misc::RemoveItems(other.aAllocBy, aAllocBy);
+
+		if (bAll || (nAttribID == TDCA_TAGS))
+			nNumRemoved += Misc::RemoveItems(other.aTags, aTags);
+
+		if (bAll || (nAttribID == TDCA_VERSION))
+			nNumRemoved += Misc::RemoveItems(other.aVersion, aVersion);
 
 		return nNumRemoved;
 	}
@@ -330,29 +342,54 @@ struct TDCAUTOLISTDATA
 				aVersion.GetSize());
 	}
 
-	void RemoveAll()
+	void RemoveAll(TDC_ATTRIBUTE nAttribID)
 	{
-		aCategory.RemoveAll();
-		aStatus.RemoveAll();
-		aAllocTo.RemoveAll();
-		aAllocBy.RemoveAll();
-		aTags.RemoveAll();
-		aVersion.RemoveAll();
+		BOOL bAll = (nAttribID == TDCA_ALL);
+
+		if (bAll || (nAttribID == TDCA_CATEGORY))
+			aCategory.RemoveAll();
+
+		if (bAll || (nAttribID == TDCA_STATUS))
+			aStatus.RemoveAll();
+
+		if (bAll || (nAttribID == TDCA_ALLOCTO))
+			aAllocTo.RemoveAll();
+
+		if (bAll || (nAttribID == TDCA_ALLOCBY))
+			aAllocBy.RemoveAll();
+
+		if (bAll || (nAttribID == TDCA_TAGS))
+			aTags.RemoveAll();
+
+		if (bAll || (nAttribID == TDCA_VERSION))
+			aVersion.RemoveAll();
 	}
 
 	CStringArray aCategory, aStatus, aAllocTo, aAllocBy, aTags, aVersion;
 
 protected:
-	int Copy(const TDCAUTOLISTDATA& from, TDCAUTOLISTDATA& to, BOOL bAppend)
+	int Copy(const TDCAUTOLISTDATA& from, TDCAUTOLISTDATA& to, BOOL bAppend, TDC_ATTRIBUTE nAttribID)
 	{
 		int nNumCopied = 0;
+		BOOL bAll = (nAttribID == TDCA_ALL);
 
-		nNumCopied += CopyItems(from.aCategory, to.aCategory, bAppend);
-		nNumCopied += CopyItems(from.aStatus, to.aStatus, bAppend);
-		nNumCopied += CopyItems(from.aAllocTo, to.aAllocTo, bAppend);
-		nNumCopied += CopyItems(from.aAllocBy, to.aAllocBy, bAppend);
-		nNumCopied += CopyItems(from.aTags, to.aTags, bAppend);
-		nNumCopied += CopyItems(from.aVersion, to.aVersion, bAppend);
+		if (bAll || (nAttribID == TDCA_CATEGORY))
+			nNumCopied += CopyItems(from.aCategory, to.aCategory, bAppend);
+
+		if (bAll || (nAttribID == TDCA_STATUS))
+			nNumCopied += CopyItems(from.aStatus, to.aStatus, bAppend);
+
+		if (bAll || (nAttribID == TDCA_ALLOCTO))
+			nNumCopied += CopyItems(from.aAllocTo, to.aAllocTo, bAppend);
+
+		if (bAll || (nAttribID == TDCA_ALLOCBY))
+			nNumCopied += CopyItems(from.aAllocBy, to.aAllocBy, bAppend);
+
+		if (bAll || (nAttribID == TDCA_TAGS))
+			nNumCopied += CopyItems(from.aTags, to.aTags, bAppend);
+
+		if (bAll || (nAttribID == TDCA_VERSION))
+			nNumCopied += CopyItems(from.aVersion, to.aVersion, bAppend);
 
 		return nNumCopied;
 	}
@@ -753,6 +790,36 @@ public:
 		}
 	}
 
+	int Find(UINT nCtrlID, BOOL bIncludeLabels = FALSE) const
+	{
+		int nCtrl = GetSize();
+
+		while (nCtrl--)
+		{
+			if (GetAt(nCtrl).nCtrlID == nCtrlID)
+				return nCtrl;
+
+			if (bIncludeLabels && (GetAt(nCtrl).nLabelID == nCtrlID))
+				return nCtrl;
+		}
+
+		// not found
+		return -1;
+	}
+
+	int Find(TDC_ATTRIBUTE nAttribID) const
+	{
+		int nCtrl = GetSize();
+
+		while (nCtrl--)
+		{
+			if (GetAt(nCtrl).nAttrib == nAttribID)
+				return nCtrl;
+		}
+
+		// not found
+		return -1;
+	}
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////

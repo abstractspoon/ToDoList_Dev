@@ -1235,7 +1235,7 @@ BOOL CToDoListWnd::InitFilterbar()
 	m_filterBar.ShowDefaultFilters(Prefs().GetShowDefaultFilters());
 	m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
 
-	RefreshFilterBarAdvancedFilters();
+	RefreshFilterBarAdvancedFilterNames();
 
 	return TRUE;
 }
@@ -3370,7 +3370,9 @@ void CToDoListWnd::OnTrayiconClose()
 LRESULT CToDoListWnd::OnToDoCtrlNotifyListChange(WPARAM /*wp*/, LPARAM lp)
 {
 	// decide whether the filter controls need updating
-	switch (lp)
+	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)lp;
+
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCTO:
 	case TDCA_ALLOCBY:
@@ -3378,10 +3380,20 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyListChange(WPARAM /*wp*/, LPARAM lp)
 	case TDCA_CATEGORY:
 	case TDCA_VERSION:
 	case TDCA_TAGS:
-		RefreshFilterBarControls();
-		RefreshFindTasksListData();
+		break;
+
+	default:
+		if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			// Invalid attribute
+			ASSERT(0);
+			return 0L;
+		}
 		break;
 	}
+
+	RefreshFilterBarControls(nAttribID);
+	RefreshFindTasksListData(nAttribID);
 	
 	return 0L;
 }
@@ -3393,7 +3405,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyViewChange(WPARAM wp, LPARAM lp)
 		if (lp != (LPARAM)wp)
 		{
 			CFocusWatcher::UpdateFocus();
-			RefreshFilterBarControls();
+			RefreshFilterBarControls(TDCA_ALL);
 		}
 		else
 		{
@@ -4904,7 +4916,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 
 	// Pass in the selected tasklist's list data
 	TDCAUTOLISTDATA autoListData;
-	GetToDoCtrl().GetAutoListData(autoListData);
+	GetToDoCtrl().GetAutoListData(autoListData, TDCA_ALL);
 	m_pPrefs->SetAutoListData(autoListData);
 
 	// And all the custom attributes definitionsa
@@ -5039,7 +5051,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 		UpdateTimeTrackerPreferences();
 
 		// then refresh filter bar for any new default cats, statuses, etc
-		RefreshFilterBarControls();
+		RefreshFilterBarControls(TDCA_ALL);
 
 		// Custom toolbar
 		CToolbarButtonArray aOldButtons, aNewButtons;
@@ -5718,7 +5730,7 @@ void CToDoListWnd::OnEditPaste(TDC_PASTE nPasteWhere, TDLID_IMPORTTO nImportWher
 		DoImportPasteFromClipboard(nImportWhere);
 	}
 
-	RefreshFilterBarControls(FALSE);
+	RefreshFilterBarControls(TDCA_ALL, FALSE);
 	UpdateTimeTrackerTasks(tdc, FALSE);
 }
 
@@ -7902,7 +7914,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		UpdateToDoCtrlPreferences(&tdcShow);
 
 		// update the filter selection
- 		RefreshFilterBarControls();
+ 		RefreshFilterBarControls(TDCA_ALL);
  		
 		// update status bar
 		UpdateStatusbar();
@@ -7949,7 +7961,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 		// update find dialog with this ToDoCtrl's custom attributes
 		UpdateFindDialogActiveTasklist(&tdcShow);
-		RefreshFindTasksListData();
+		RefreshFindTasksListData(TDCA_ALL);
 
 		// leave focus setting till last else the 'old' tasklist flashes
 		tdcShow.SetFocusToTasks();
@@ -8044,42 +8056,73 @@ void CToDoListWnd::UpdateMenuIconMgrSourceControlStatus()
 	}
 }
 
-void CToDoListWnd::RefreshFilterBarControls(BOOL bClearCheckboxHistory)
+void CToDoListWnd::RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory)
 {
 	if (m_bShowFilterBar)
 	{
-		RefreshFilterBarAdvancedFilters();
-
-		m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
-		m_filterBar.RefreshFilterControls(GetToDoCtrl());
-
-		if (bClearCheckboxHistory)
-			m_filterBar.ClearCheckboxHistory();
-				
-		// Determine if a resize if required
-		CRect rFilter, rClient;
-
-		GetFilterBarRect(rFilter);
-		GetClientRect(rClient);
-
-		int nReqHeight = m_filterBar.CalcHeight(rClient.Width());
-
-		if (rFilter.Height() != nReqHeight)
+		if (nAttribID == TDCA_ALL)
 		{
-			Resize();
+			RefreshFilterBarAdvancedFilterNames();
 
-			rFilter.bottom = (rFilter.top + nReqHeight);
-			InvalidateRect(rFilter, TRUE);
+			m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
+			m_filterBar.RefreshFilterControls(GetToDoCtrl(), nAttribID);
+
+			if (bClearCheckboxHistory)
+				m_filterBar.ClearCheckboxHistory();
+				
+			// Determine if a resize if required
+			CRect rFilter, rClient;
+
+			GetFilterBarRect(rFilter);
+			GetClientRect(rClient);
+
+			int nReqHeight = m_filterBar.CalcHeight(rClient.Width());
+
+			// GetFilterBarRect() adds 1 pixel to the top
+			if (rFilter.Height() != (nReqHeight + 1))
+			{
+				Resize();
+
+				rFilter.bottom = (rFilter.top + nReqHeight);
+				InvalidateRect(rFilter, TRUE);
+			}
+		}
+		else
+		{
+			m_filterBar.RefreshFilterControls(GetToDoCtrl(), nAttribID);
 		}
 	}
 }
 
-void CToDoListWnd::RefreshFindTasksListData()
+void CToDoListWnd::RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID)
 {
 	TDCAUTOLISTDATA tldActive, tldAll;
 
-	m_mgrToDoCtrls.GetAutoListData(tldActive, tldAll);
-	m_findDlg.SetAttributeListData(tldActive, tldAll);
+	m_mgrToDoCtrls.GetAutoListData(tldActive, tldAll, nAttribID);
+	m_findDlg.SetAttributeListData(tldActive, tldAll, nAttribID);
+}
+
+void CToDoListWnd::RefreshFilterBarAdvancedFilterNames()
+{
+	CStringArray aFilters;
+
+	m_findDlg.GetSavedSearches(aFilters);
+
+	// check for unnamed filter
+	if (m_findDlg.GetSafeHwnd())
+	{
+		CEnString sUnNamed(IDS_UNNAMEDFILTER);
+
+		if (m_findDlg.GetActiveSearch().IsEmpty() && !Misc::Contains(sUnNamed, aFilters, FALSE, TRUE))
+			aFilters.Add(sUnNamed);
+	}
+
+	m_filterBar.AddAdvancedFilters(aFilters);
+
+	CRect rFilter;
+
+	if (GetFilterBarRect(rFilter))
+		InvalidateRect(rFilter, TRUE);
 }
 
 TDC_FILE CToDoListWnd::ConfirmSaveTaskList(int nIndex, DWORD dwFlags)
@@ -8388,8 +8431,8 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 		UpdateMenuIconMgrSourceControlStatus();
 		UpdateCwd();
 		
-		RefreshFilterBarControls();
-		RefreshFindTasksListData();
+		RefreshFilterBarControls(TDCA_ALL);
+		RefreshFindTasksListData(TDCA_ALL);
 		RefreshPauseTimeTracking();
 
 		DoDueTaskNotification(GetSelToDoCtrl(), nNotifyDueTasksBy);
@@ -9147,7 +9190,7 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 		args.sTaskAllocTo = Misc::FormatArray(aAllocTo, _T("|"));
 
 	tdc.GetSelectedTaskCustomAttributeData(args.mapTaskCustData, TRUE);
-	tdc.GetAutoListData(args.tdlListData);
+	tdc.GetAutoListData(args.tdlListData, TDCA_ALL);
 }
 
 LRESULT CToDoListWnd::OnPreferencesTestTool(WPARAM /*wp*/, LPARAM lp)
@@ -10315,7 +10358,7 @@ BOOL CToDoListWnd::SelectTask(CFilteredToDoCtrl& tdc, DWORD dwTaskID)
 		return FALSE;
 
 	if (bWasFiltered && !tdc.HasAnyFilter())
-		RefreshFilterBarControls();
+		RefreshFilterBarControls(TDCA_ALL);
 
 	return TRUE;
 }
@@ -10359,7 +10402,7 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	tdc.SetAdvancedFilter(filter);
 	
-	RefreshFilterBarControls();
+	RefreshFilterBarControls(TDCA_ALL);
 
 	tdc.SetFocusToTasks();
 
@@ -10368,7 +10411,7 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 
 LRESULT CToDoListWnd::OnFindAddSearch(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	RefreshFilterBarAdvancedFilters();
+	RefreshFilterBarAdvancedFilterNames();
 	return 0;
 }
 
@@ -10392,31 +10435,8 @@ LRESULT CToDoListWnd::OnFindSaveSearch(WPARAM /*wp*/, LPARAM lp)
 
 LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	RefreshFilterBarAdvancedFilters();
+	RefreshFilterBarAdvancedFilterNames();
 	return 0;
-}
-
-void CToDoListWnd::RefreshFilterBarAdvancedFilters()
-{
-	CStringArray aFilters;
-	
-	m_findDlg.GetSavedSearches(aFilters);
-
-	// check for unnamed filter
-	if (m_findDlg.GetSafeHwnd())
-	{
-		CEnString sUnNamed(IDS_UNNAMEDFILTER);
-
-		if (m_findDlg.GetActiveSearch().IsEmpty() && !Misc::Contains(sUnNamed, aFilters, FALSE, TRUE))
-			aFilters.Add(sUnNamed);
-	}
-
-	m_filterBar.AddAdvancedFilters(aFilters);
-
-	CRect rFilter;
-
-	if (GetFilterBarRect(rFilter))
-		InvalidateRect(rFilter, TRUE);
 }
 
 //------------------------------------------------------------------------
@@ -11169,7 +11189,7 @@ void CToDoListWnd::OnViewShowfilterbar()
 	m_bShowFilterBar = !m_bShowFilterBar;
 
 	if (m_bShowFilterBar)
-		RefreshFilterBarControls();
+		RefreshFilterBarControls(TDCA_ALL);
 
 	m_filterBar.ShowWindow(m_bShowFilterBar ? SW_SHOW : SW_HIDE);
 
@@ -11191,7 +11211,7 @@ void CToDoListWnd::OnViewClearfilter()
 	{
 		tdc.ClearFilter();
 	
-		RefreshFilterBarControls(TRUE); // clear checkbox history
+		RefreshFilterBarControls(TDCA_ALL, TRUE); // clear checkbox history
 		UpdateStatusbar();
 	}
 }
@@ -11209,7 +11229,7 @@ void CToDoListWnd::OnViewTogglefilter()
 	
 	tdc.ToggleFilter();
 
-	RefreshFilterBarControls();
+	RefreshFilterBarControls(TDCA_ALL);
 	UpdateStatusbar();
 }
 
@@ -11251,7 +11271,7 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 		tdc.SetFilter(filter);
 	}
 
-	RefreshFilterBarControls();
+	RefreshFilterBarControls(TDCA_ALL);
 	UpdateStatusbar();
 }
 
@@ -12717,7 +12737,7 @@ void CToDoListWnd::OnTasklistCustomColumns()
 
 			if (tdc.SetCustomAttributeDefs(aAttrib))
 			{
-				RefreshFilterBarControls();
+				RefreshFilterBarControls(TDCA_ALL);
 				UpdateFindDialogActiveTasklist();
 			}
 		}

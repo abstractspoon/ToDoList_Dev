@@ -51,7 +51,7 @@ public:
 	void RemoveAdvancedFilters();
 	void ShowDefaultFilters(BOOL bShow);
 
-	void RefreshFilterControls(const CFilteredToDoCtrl& tdc);
+	void RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
 	void SetFilterLabelAlignment(BOOL bLeft);
 	void SetPriorityColors(const CDWordArray& aColors);
 	int CalcHeight(int nWidth);
@@ -132,7 +132,6 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
 	afx_msg void OnSelchangeFilter(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnSelchangeDateFilter();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnToolTipNotify( UINT id, NMHDR* pNMHDR, LRESULT* pResult );	
 	afx_msg LRESULT OnEEBtnClick(WPARAM wp, LPARAM lp);
@@ -145,7 +144,8 @@ protected:
 	void SetVisibleFilters(const CTDCAttributeMap& mapFilters, BOOL bRepos);
 	void RefreshUIBkgndBrush();
 	int GetControls(CTDCControlArray& aControls) const;
-	void UpdateCustomControls(const CFilteredToDoCtrl& tdc);
+	void UpdateCustomControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
+	void UpdateAutoDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
 
 };
 

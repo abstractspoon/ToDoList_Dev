@@ -349,7 +349,6 @@ protected:
 	BOOL AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
 	BOOL AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hParentTask, const TDCGETTASKS& filter) const;
 	void AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttributeMap& mapAttribIDs) const;
-	int GetGlobals(TDC_ATTRIBUTE nAttrib, TDCAUTOLISTDATA& tld) const;
 
 	virtual VIEWDATA* NewViewData() { return new VIEWDATA(); }
 

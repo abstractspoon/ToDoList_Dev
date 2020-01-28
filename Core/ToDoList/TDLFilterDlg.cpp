@@ -65,7 +65,7 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	}
 
 	// auto-droplists
-	tdc.GetAutoListData(m_tldListData);
+	tdc.GetAutoListData(m_tldListData, TDCA_ALL);
 
 	m_aPriorityColors.Copy(aPriorityColors);
 	m_nView = tdc.GetTaskView();

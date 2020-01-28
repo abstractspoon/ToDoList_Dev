@@ -79,6 +79,11 @@ public:
 							   const CTDCCustomAttribDefinitionArray& aAttribDefs,
 							   const CTDCCustomAttributeDataMap& mapData);
 
+	static void UpdateControl(const CWnd* pParent, 
+								const CUSTOMATTRIBCTRLITEM& ctrl,
+								const CTDCCustomAttribDefinitionArray& aAttribDefs,
+								const CTDCCustomAttributeDataMap& mapData);
+
 	static void ClearControls(const CWnd* pParent, const CTDCCustomControlArray& aControls,
 							  const CTDCCustomAttribDefinitionArray& aAttribDefs);
 

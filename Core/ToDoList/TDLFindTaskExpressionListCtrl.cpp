@@ -152,9 +152,9 @@ void CTDLFindTaskExpressionListCtrl::SetCustomAttributes(const CTDCCustomAttribD
 	m_cbAttributes.SetCustomAttributes(m_aAttribDefs);
 }
 
-void CTDLFindTaskExpressionListCtrl::SetAttributeListData(const TDCAUTOLISTDATA& tld)
+void CTDLFindTaskExpressionListCtrl::SetAttributeListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID)
 {
-	m_tldListContents.Copy(tld);
+	m_tldListContents.Copy(tld, nAttribID);
 }
 
 void CTDLFindTaskExpressionListCtrl::SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons)

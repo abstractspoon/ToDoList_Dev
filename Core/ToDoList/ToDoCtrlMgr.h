@@ -117,7 +117,7 @@ public:
 	BOOL CanMoveToDoCtrl(int nIndex, int nNumPlaces) const;
 
 	int SortToDoCtrlsByName();
-	void GetAutoListData(TDCAUTOLISTDATA& tldActive, TDCAUTOLISTDATA& tldAll) const;
+	void GetAutoListData(TDCAUTOLISTDATA& tldActive, TDCAUTOLISTDATA& tldAll, TDC_ATTRIBUTE nAttribID) const;
 
 	CString UpdateTabItemText(int nIndex);
 	CString GetTabItemText(int nIndex) const;

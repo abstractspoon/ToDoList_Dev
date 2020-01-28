@@ -647,7 +647,6 @@ protected:
 	void CopySelectedTasksToClipboard(TDC_TASKS2CLIPBOARD nAsFormat);
 	void SetUITheme(const CString& sThemeFile);
 	void ProcessQuickFindTextChange(BOOL bComboSelChange);
-	void RefreshFindTasksListData();
 	void CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID);
 	BOOL GetFirstTaskReminder(const CFilteredToDoCtrl& tdc, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const;
 	BOOL GetAutoArchiveOptions(TDC_ARCHIVE& nRemove, BOOL& bRemoveFlagged) const;
@@ -673,8 +672,9 @@ protected:
 	void StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC nFrom);
 	void StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom);
 
-	void RefreshFilterBarControls(BOOL bClearCheckboxHistory = FALSE);
-	void RefreshFilterBarAdvancedFilters();
+	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory = FALSE);
+	void RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID);
+	void RefreshFilterBarAdvancedFilterNames();
 
 	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
 	BOOL CalcToDoCtrlRect(CRect& rect, int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
