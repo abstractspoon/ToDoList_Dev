@@ -754,11 +754,13 @@ unicode_release\TDLTest.exe
     <None Include="res\app_extra_std.bmp" />
     <None Include="res\app_std.ico" />
     <None Include="res\app_timetrack.ico" />
-    <None Include="res\app_timetrack_win10.ico" />
     <None Include="res\app_toolbar.bmp" />
     <None Include="res\app_toolbar_metro.bmp" />
     <None Include="res\app_toolbar_std.bmp" />
-    <None Include="res\app_tray_win10.ico" />
+    <None Include="res\app_tray_dark.ico" />
+    <None Include="res\app_tray_light.ico" />
+    <None Include="res\app_tray_timetrack_dark.ico" />
+    <None Include="res\app_tray_timetrack_light.ico" />
     <None Include="res\bitmap1.bmp" />
     <None Include="res\clock.ico" />
     <None Include="res\column_header.bmp" />

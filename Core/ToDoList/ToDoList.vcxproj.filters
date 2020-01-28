@@ -1067,10 +1067,16 @@
     <None Include="res\search_prefs.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\app_timetrack_win10.ico">
+    <None Include="res\app_tray_light.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\app_tray_win10.ico">
+    <None Include="res\app_tray_timetrack_light.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\app_tray_timetrack_dark.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\app_tray_dark.ico">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
