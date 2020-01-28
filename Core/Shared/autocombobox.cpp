@@ -69,9 +69,9 @@ void CAutoComboBox::ModifyFlags(DWORD dwRemove, DWORD dwAdd)
 
 int CAutoComboBox::SetStrings(const CStringArray& aItems) 
 { 
-	CComboBox::SetRedraw(FALSE);
+	CHoldRedraw hr(*this);
+
 	ResetContent(); 
-	CComboBox::SetRedraw(TRUE);
 
 	return AddUniqueItems(aItems); 
 }
