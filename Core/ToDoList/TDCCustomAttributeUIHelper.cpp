@@ -80,13 +80,13 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(const TDCCUSTOMATTRIBUTED
 			break;
 
 		case TDCCA_INTEGER:
-			pControl = new CMaskEdit(_T("0123456789"));
+			pControl = new CMaskEdit(_T("-0123456789"));
 			szClass = WC_EDIT;
 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
 			break;
 
 		case TDCCA_DOUBLE:
-			pControl = new CMaskEdit(_T(".0123456789"), ME_LOCALIZEDECIMAL);
+			pControl = new CMaskEdit(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
 			szClass = WC_EDIT;
 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
 			break;
@@ -157,11 +157,11 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(const TDCCUSTOMATTRIBUTED
 				switch (dwDataType)
 				{
 				case TDCCA_INTEGER:
-					((CAutoComboBox*)pControl)->SetEditMask(_T("0123456789"));
+					((CAutoComboBox*)pControl)->SetEditMask(_T("-0123456789"));
 					break;
 				
 				case TDCCA_DOUBLE:
-					((CAutoComboBox*)pControl)->SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
+					((CAutoComboBox*)pControl)->SetEditMask(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
 					break;
 				}
 			}
@@ -195,11 +195,11 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(const TDCCUSTOMATTRIBUTED
 				switch (dwDataType)
 				{
 				case TDCCA_INTEGER:
-					((CAutoComboBox*)pControl)->SetEditMask(_T("0123456789"));
+					((CAutoComboBox*)pControl)->SetEditMask(_T("-0123456789"));
 					break;
 				
 				case TDCCA_DOUBLE:
-					((CAutoComboBox*)pControl)->SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
+					((CAutoComboBox*)pControl)->SetEditMask(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
 					break;
 				}
 			}
