@@ -107,7 +107,6 @@ namespace DayViewUIExtension
                                      System.Windows.Forms.AnchorStyles.Left |
                                      System.Windows.Forms.AnchorStyles.Right);
             this.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
-            this.WeekView = true;
             this.DrawAllAppBorder = false;
             this.Location = new System.Drawing.Point(0, 0);
             this.MinHalfHourApp = false;

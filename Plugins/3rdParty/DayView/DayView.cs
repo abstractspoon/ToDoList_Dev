@@ -241,41 +241,6 @@ namespace Calendar
             this.Invalidate();
         }
 
-		public bool WeekView
-		{
-			get { return (daysToShow != 1); }
-
-			set
-			{
-				int numDays = (value ? 7 : 1);
-
-				if (numDays != daysToShow)
-				{
-					daysToShow = numDays; // must come first
-
-					if (value) // week view
-					{
-						tooltip.SetToolTip(hscroll, "Change Week");
-
-						// Move to start of week
-						StartDate = startDate;
-					}
-					else // day view
-					{
-						tooltip.SetToolTip(hscroll, "Change Day");
-
-						// make sure the day for the selected task is visible
-						if (SelectedAppointment != null)
-							StartDate = SelectedAppointment.StartDate;
-					}
-
-					EnsureVisible(SelectedAppointment, true);
-					OnDaysToShowChanged();
-					AdjustScrollbar();
-				}
-			}
-		}
-
         private bool minHalfHourApp = false;
 
         public bool MinHalfHourApp
@@ -291,14 +256,46 @@ namespace Calendar
             }
         }
 
-        private int daysToShow = 1;
+        private int daysToShow = 7;
 
-        [System.ComponentModel.DefaultValue(1)]
+        [System.ComponentModel.DefaultValue(7)]
         public int DaysShowing
         {
             get
             {
                 return daysToShow;
+            }
+
+            set
+            {
+                if ((value > 0) && (value <= 28) && (value != daysToShow))
+                {
+                    daysToShow = value; // must come first
+
+                    if (daysToShow == 7)
+                    {
+                        tooltip.SetToolTip(hscroll, "Change Week");
+
+                        // Move to start of week
+                        StartDate = startDate;
+                    }
+                    else if (daysToShow == 1) // day view
+                    {
+                        tooltip.SetToolTip(hscroll, "Change Day");
+
+                        // make sure the day for the selected task is visible
+                        if (SelectedAppointment != null)
+                            StartDate = SelectedAppointment.StartDate;
+                    }
+                    else
+                    {
+                        tooltip.SetToolTip(hscroll, "Change");
+                    }
+
+                    EnsureVisible(SelectedAppointment, true);
+                    OnDaysToShowChanged();
+                    AdjustScrollbar();
+                }
             }
         }
 
@@ -331,13 +328,10 @@ namespace Calendar
             }
             set
             {
-				if (DaysShowing == 1)
+				// Move start date to start of week if the number
+                // of days showing is a multiple of 7
+                if ((DaysShowing % 7) == 0)
 				{
-					startDate = value.Date;
-				}
-				else
-				{
-					// Move start date to start of week
 					DateTime firstDayOfWeek = FirstDayOfWeekUtility.GetFirstDayOfWeek(value);
 
 					if (startDate != firstDayOfWeek)
@@ -345,6 +339,10 @@ namespace Calendar
 						startDate = firstDayOfWeek;
 						OnStartDateChanged();
 					}
+				}
+				else
+				{
+					startDate = value.Date;
 				}
             }
         }
