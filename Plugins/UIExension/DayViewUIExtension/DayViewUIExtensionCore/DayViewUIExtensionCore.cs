@@ -195,7 +195,7 @@ namespace DayViewUIExtension
 		{
             m_PrefsDlg.SavePreferences(prefs, key);
 
-			prefs.WriteProfileBool(key, "WeekView", m_DayView.WeekView);
+			prefs.WriteProfileInt(key, "DaysShowing", m_DayView.DaysShowing);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -217,7 +217,7 @@ namespace DayViewUIExtension
                 m_PrefsDlg.LoadPreferences(prefs, key);
 				UpdateDayViewPreferences();
 
-				m_DayView.WeekView = prefs.GetProfileBool(key, "WeekView", true);
+				m_DayView.DaysShowing = prefs.GetProfileInt(key, "DaysShowing", 7);
 				m_WeekLabel.NumDays = m_DayView.DaysShowing;
 
 				UpdateToolbarButtonStates();
@@ -400,33 +400,40 @@ namespace DayViewUIExtension
 			m_Toolbar.Items.Add(sep1);
 
 			var btn2 = new ToolStripButton();
-			btn2.Name = "ShowDayView";
+			btn2.Name = "Show1DayView";
 			btn2.ImageIndex = 1;
-			btn2.Click += new EventHandler(OnShowDayView);
-			btn2.ToolTipText = m_Trans.Translate("Day View");
+			btn2.Click += new EventHandler(OnShow1DayView);
+			btn2.ToolTipText = m_Trans.Translate("1 Day View");
 			m_Toolbar.Items.Add(btn2);
 
 			var btn3 = new ToolStripButton();
-			btn3.Name = "ShowWeekView";
+			btn3.Name = "Show3DayView";
 			btn3.ImageIndex = 2;
-			btn3.Click += new EventHandler(OnShowWeekView);
-			btn3.ToolTipText = m_Trans.Translate("Week View");
+			btn3.Click += new EventHandler(OnShow3DayView);
+			btn3.ToolTipText = m_Trans.Translate("3 Day View");
 			m_Toolbar.Items.Add(btn3);
+
+			var btn4 = new ToolStripButton();
+			btn4.Name = "Show7DayView";
+			btn4.ImageIndex = 3;
+			btn4.Click += new EventHandler(OnShow7DayView);
+			btn4.ToolTipText = m_Trans.Translate("7 day View");
+			m_Toolbar.Items.Add(btn4);
 
 			var sep2 = new ToolStripSeparator();
 			m_Toolbar.Items.Add(sep2);
 
-			var btn4 = new ToolStripButton();
-			btn4.ImageIndex = 3;
-			btn4.Click += new EventHandler(OnPreferences);
-			btn4.ToolTipText = m_Trans.Translate("Preferences");
-			m_Toolbar.Items.Add(btn4);
-
 			var btn5 = new ToolStripButton();
 			btn5.ImageIndex = 4;
-			btn5.Click += new EventHandler(OnHelp);
-			btn5.ToolTipText = m_Trans.Translate("Online Help");
+			btn5.Click += new EventHandler(OnPreferences);
+			btn5.ToolTipText = m_Trans.Translate("Preferences");
 			m_Toolbar.Items.Add(btn5);
+
+			var btn6 = new ToolStripButton();
+			btn6.ImageIndex = 5;
+			btn6.Click += new EventHandler(OnHelp);
+			btn6.ToolTipText = m_Trans.Translate("Online Help");
+			m_Toolbar.Items.Add(btn6);
 
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
@@ -438,35 +445,43 @@ namespace DayViewUIExtension
             m_DayView.GoToToday();
 		}
 
-		private void OnShowDayView(object sender, EventArgs e)
+		private void OnShow1DayView(object sender, EventArgs e)
 		{
-			if (m_DayView.WeekView)
-				ToggleWeekView();
+			if (m_DayView.DaysShowing != 1)
+				SetDaysShowing(1);
 		}
 
-		private void OnShowWeekView(object sender, EventArgs e)
+		private void OnShow3DayView(object sender, EventArgs e)
 		{
-			if (!m_DayView.WeekView)
-				ToggleWeekView();
+			if (m_DayView.DaysShowing != 3)
+				SetDaysShowing(3);
 		}
 
-		private void ToggleWeekView()
-		{
-			m_DayView.WeekView = !m_DayView.WeekView;
-			m_DayView.HScrollTooltipText = m_Trans.Translate(m_DayView.HScrollTooltipText);
+        private void OnShow7DayView(object sender, EventArgs e)
+        {
+            if (m_DayView.DaysShowing != 7)
+                SetDaysShowing(7);
+        }
 
-			m_WeekLabel.NumDays = m_DayView.DaysShowing;
+        private void SetDaysShowing(int numDays)
+		{
+			m_DayView.DaysShowing = numDays;
+            m_WeekLabel.NumDays = numDays;
+
+            String tooltip = String.Format("Next/Previous {0} days", numDays);
+			m_DayView.HScrollTooltipText = m_Trans.Translate(tooltip);
 
 			UpdateToolbarButtonStates();
 		}
 
 		private void UpdateToolbarButtonStates()
 		{
-			(m_Toolbar.Items["ShowDayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 1);
-			(m_Toolbar.Items["ShowWeekView"] as ToolStripButton).Checked = (m_DayView.DaysShowing != 1);
-		}
+			(m_Toolbar.Items["Show1DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 1);
+			(m_Toolbar.Items["Show3DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 3);
+            (m_Toolbar.Items["Show7DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 7);
+        }
 
-		private void OnPreferences(object sender, EventArgs e)
+        private void OnPreferences(object sender, EventArgs e)
 		{
 			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
 
