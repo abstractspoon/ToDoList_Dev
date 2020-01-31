@@ -89,7 +89,8 @@ void LabelTip::OnDrawLabelTip(Object^ sender, DrawToolTipEventArgs^ args)
 	args->Graphics->FillRectangle(backBrush, args->Bounds);
 	args->DrawBorder();
 
-	TextRenderer::DrawText(args->Graphics, args->ToolTipText, labelTip->m_Handler->GetFont(), args->Bounds, *textColor, TextFormatFlags::Left | TextFormatFlags::VerticalCenter);
+	TextRenderer::DrawText(args->Graphics, args->ToolTipText, labelTip->m_Handler->GetFont(), args->Bounds, *textColor, 
+							TextFormatFlags::Left | TextFormatFlags::VerticalCenter | TextFormatFlags::WordBreak);
 }
 
 void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
@@ -169,7 +170,7 @@ void LabelTip::OnHoverTick(Object^ sender, EventArgs^ args)
 	Drawing::Rectangle tipItemRect;
 	String^ tipText = nullptr;
 
-	UInt32 nHit = m_Handler->HitTest(pos, tipText, tipItemRect);
+	UInt32 nHit = m_Handler->ToolHitTest(pos, tipText, tipItemRect);
 
 	if (nHit == 0)
 	{

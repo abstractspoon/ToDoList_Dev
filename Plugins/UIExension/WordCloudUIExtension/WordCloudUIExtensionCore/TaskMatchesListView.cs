@@ -59,7 +59,7 @@ namespace WordCloudUIExtension
             return this;
         }
 
-        public UInt32 HitTest(Point ptScreen, ref String tipText, ref Rectangle tipItemRect)
+        public UInt32 ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle tipItemRect)
         {
             var pt = PointToClient(ptScreen);
             var hit = HitTest(pt);

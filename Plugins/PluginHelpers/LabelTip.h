@@ -17,7 +17,7 @@ namespace Abstractspoon
 				Drawing::Font^ GetFont();
 				Windows::Forms::Control^ GetOwner();
 
-				UInt32 HitTest(Drawing::Point ptScreen, String^% tipText, Drawing::Rectangle% tipRect);
+				UInt32 ToolHitTest(Drawing::Point ptScreen, String^% tipText, Drawing::Rectangle% tipRect);
 			};
 
 			// -----------------------------------------------------------------
