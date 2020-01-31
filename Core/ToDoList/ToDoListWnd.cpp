@@ -4848,7 +4848,6 @@ CString CToDoListWnd::GetVersion(BOOL bExtended)
 	{
 		sVersion = sExtVersion = FileMisc::GetAppVersion();
 
-		// Tidy up pre-release version numbers
 		CDWordArray aVer;
 		
 		if (FileMisc::SplitVersionNumber(sVersion, aVer) == 4)
@@ -4856,6 +4855,7 @@ CString CToDoListWnd::GetVersion(BOOL bExtended)
 			UINT nExtendedStr = IDS_GEN_RELEASE;
 			CString sShortStr;
 
+			// Pre-release version semantics
 			switch (aVer[2])
 			{
 			case DEV_PREVIEW_VER:
@@ -4880,7 +4880,24 @@ CString CToDoListWnd::GetVersion(BOOL bExtended)
 			}
 			
 			if (!sShortStr.IsEmpty())
-				sVersion.Format(_T("%d.%d.%s%d"), aVer[0], (aVer[1] + 1), sShortStr, aVer[3]);
+			{
+				const int LAST_MINOR_VER = 999;
+
+				int nMajorVer = aVer[0];
+				int nMinorVer = aVer[1];
+
+				if (nMinorVer == LAST_MINOR_VER)
+				{
+					nMajorVer++;
+					nMinorVer = 0;
+				}
+				else
+				{
+					nMinorVer++;
+				}
+
+				sVersion.Format(_T("%d.%d.%s%d"), nMajorVer, nMinorVer, sShortStr, aVer[3]);
+			}
 
 			sExtVersion.Format(_T("%s (%s)"), sVersion, CEnString(nExtendedStr));
 		}
