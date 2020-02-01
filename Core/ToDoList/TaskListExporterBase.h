@@ -31,7 +31,7 @@ protected: // this is a base class only
 
 protected:
 	// Pseudo-const overridable variables
-	BOOL ROUNDTIMEFRACTIONS, MULTIFILE;
+	BOOL ROUNDTIMEFRACTIONS, MULTIFILE, PARENTTITLECOMMENTSNLY;
 	CTDCAttributeArray ARRATTRIBUTES;
 	CString ENDL, LISTSEPARATOR;
 
@@ -74,6 +74,7 @@ private:
 	CString FormatFileReferenceList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sAttribLabel) const;
 
 	void BuildAttribList(const ITASKLISTBASE* pTasks);
+	BOOL WantAttribute(TDC_ATTRIBUTE attrib, const ITASKLISTBASE* pTasks, HTASKITEM hTask) const;
 	
 };
 

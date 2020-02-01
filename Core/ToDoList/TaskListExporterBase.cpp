@@ -75,6 +75,7 @@ CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR> CTaskListExporterBase::ATTR
 CTaskListExporterBase::CTaskListExporterBase() 
 	: 
 	ROUNDTIMEFRACTIONS(TRUE),
+	PARENTTITLECOMMENTSNLY(FALSE),
 	ENDL(_T("\r\n")),
 	MULTIFILE(FALSE),
 	LISTSEPARATOR(_T("+"))
@@ -102,6 +103,7 @@ bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*sz
 									   IPreferences* pPrefs, LPCTSTR /*szKey*/)
 {
 	ROUNDTIMEFRACTIONS = pPrefs->GetProfileInt(_T("Preferences"), _T("RoundTimeFractions"), FALSE);
+	PARENTTITLECOMMENTSNLY = pPrefs->GetProfileInt(_T("Preferences"), _T("ExportParentTitleCommentsOnly"), FALSE);
 
 	BuildAttribList(pTasks);
 
@@ -259,10 +261,16 @@ CString CTaskListExporterBase::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM
 		// make sure these are in the order we want
 		for (int nAtt = 0; nAtt < ARRATTRIBUTES.GetSize(); nAtt++)
 		{
-			TDC_ATTRIBUTE attrib = ARRATTRIBUTES[nAtt];
-			CString sLabel = GetAttribLabel(attrib);
+			TDC_ATTRIBUTE nAttribID = ARRATTRIBUTES[nAtt];
 
-			sTask += FormatAttribute(pTasks, hTask, nDepth, attrib,	sLabel);
+			if (!WantAttribute(nAttribID, pTasks, hTask))
+			{
+				sTask += FormatAttribute(pTasks, hTask, nDepth, TDCA_NONE, _T(""));
+			}
+			else
+			{
+				sTask += FormatAttribute(pTasks, hTask, nDepth, nAttribID, GetAttribLabel(nAttribID));
+			}
 		}
 
 		// notes section
@@ -278,109 +286,109 @@ CString CTaskListExporterBase::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM
 CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int /*nDepth*/,
 											   TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const
 {
-	ASSERT(WantAttribute(nAttrib));
+	ASSERT ((nAttrib == TDCA_NONE) || WantAttribute(nAttrib, pTasks, hTask));
 
 	CString sItem;
 
 	switch (nAttrib)
 	{
-	case TDCA_ALLOCBY: 
+	case TDCA_ALLOCBY:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKALLOCBY);
 		break;
-		
+
 	case TDCA_ALLOCTO:
 		sItem = FormatAllocToList(pTasks, hTask, sAttribLabel);
 		break;
-		
+
 	case TDCA_CATEGORY:
 		sItem = FormatCategoryList(pTasks, hTask, sAttribLabel);
 		break;
-		
+
 	case TDCA_COLOR:
 		break;
-		
+
 	case TDCA_COMMENTS:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKCOMMENTS);
 		break;
 
-	case TDCA_COST:			
+	case TDCA_COST:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKCALCCOST, TDL_TASKCOST);
 		break;
-		
+
 	case TDCA_CREATIONDATE:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKCREATIONDATESTRING);
 		break;
-		
+
 	case TDCA_CREATEDBY:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKCREATEDBY);
 		break;
-		
+
 	case TDCA_CUSTOMATTRIB:
 		sItem = FormatCustomAttributes(pTasks, hTask);
 		break;
-		
-	case TDCA_DEPENDENCY:	
+
+	case TDCA_DEPENDENCY:
 		sItem = FormatDependencyList(pTasks, hTask, sAttribLabel);
 		break;
-		
+
 	case TDCA_DONEDATE:
 	case TDCA_DONETIME:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKDONEDATESTRING);
 		break;
-		
+
 	case TDCA_DUEDATE:
 	case TDCA_DUETIME:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKCALCDUEDATESTRING, TDL_TASKDUEDATESTRING);
 		break;
-		
-	case TDCA_EXTERNALID:	
+
+	case TDCA_EXTERNALID:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKEXTERNALID);
 		break;
-		
+
 	case TDCA_FILEREF:
 		sItem = FormatFileReferenceList(pTasks, hTask, sAttribLabel);
 		break;
-		
+
 	case TDCA_FLAG:
 		sItem = (pTasks->IsTaskFlagged(hTask, true) ? sAttribLabel : _T(""));
 		sItem = FormatAttribute(TDCA_FLAG, _T(""), sItem);
 		break;
-		
+
 	case TDCA_HTMLCOMMENTS:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKHTMLCOMMENTS);
 		break;
 
 	case TDCA_ICON:
 		break;
-		
+
 	case TDCA_ID:
-		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKID); 
+		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKID);
 		break;
-		
+
 	case TDCA_LASTMODDATE:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKLASTMODSTRING);
 		break;
-		
+
 	case TDCA_LASTMODBY:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKLASTMODBY);
 		break;
 
 	case TDCA_PARENTID:
-		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKPARENTID); 
+		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKPARENTID);
 		break;
-		
+
 	case TDCA_PATH:
-		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKPATH); 
+		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKPATH);
 		break;
-		
+
 	case TDCA_PERCENT:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKCALCCOMPLETION, TDL_TASKPERCENTDONE);
 		break;
-		
+
 	case TDCA_POSITION:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKPOSSTRING);
 		break;
-		
+
 	case TDCA_PRIORITY:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKHIGHESTPRIORITY, TDL_TASKPRIORITY);
 		break;
@@ -388,50 +396,50 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	case TDCA_PROJECTNAME:
 		sItem = FormatAttribute(pTasks, NULL, nAttrib, sAttribLabel, TDL_PROJECTNAME, TDL_FILENAME);
 		break;
-		
-	case TDCA_RISK:			
+
+	case TDCA_RISK:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKHIGHESTRISK, TDL_TASKRISK);
 		break;
-		
-	case TDCA_RECURRENCE:	
+
+	case TDCA_RECURRENCE:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKRECURRENCE);
 		break;
-		
+
 	case TDCA_STARTDATE:
 	case TDCA_STARTTIME:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKCALCSTARTDATESTRING, TDL_TASKSTARTDATESTRING);
 		break;
-		
+
 	case TDCA_STATUS:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKSTATUS);
 		break;
-		
+
 	case TDCA_SUBTASKDONE:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKSUBTASKDONE);
 		break;
-		
+
 	case TDCA_TAGS:
 		sItem = FormatTagList(pTasks, hTask, sAttribLabel);
 		break;
-		
+
 	case TDCA_TASKNAME:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKTITLE);
 		break;
-		
+
 	case TDCA_TIMEEST:
 		// handle explicitly to localise decimal point
-		if (WantAttribute(TDCA_TIMEEST))
+		if (WantAttribute(TDCA_TIMEEST, pTasks, hTask))
 		{
 			TDC_UNITS nUnits;
 			double dTime = pTasks->GetTaskTimeEstimate(hTask, nUnits, TRUE);
-			
+
 			sItem = FormatAttribute(nAttrib, sAttribLabel, FormatTime(dTime, nUnits));
 		}
 		break;
-		
+
 	case TDCA_TIMESPENT:
 		// handle explicitly to localise decimal point
-		if (WantAttribute(TDCA_TIMESPENT))
+		if (WantAttribute(TDCA_TIMESPENT, pTasks, hTask))
 		{
 			TDC_UNITS nUnits;
 			double dTime = pTasks->GetTaskTimeSpent(hTask, nUnits, TRUE);
@@ -439,9 +447,13 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 			sItem = FormatAttribute(nAttrib, sAttribLabel, FormatTime(dTime, nUnits));
 		}
 		break;
-		
-	case TDCA_VERSION:		
+
+	case TDCA_VERSION:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKVERSION);
+		break;
+
+	case TDCA_NONE:
+		// valid for unwanted attributes
 		break;
 	}
 
@@ -460,7 +472,7 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 {
 	CString sAttribText;
 
-	if (WantAttribute(nAttrib))
+	if (WantAttribute(nAttrib, pTasks, hTask))
 	{
 		CString sAttribVal;
 
@@ -623,6 +635,30 @@ void CTaskListExporterBase::BuildAttribList(const ITASKLISTBASE* pTasks)
 BOOL CTaskListExporterBase::WantAttribute(TDC_ATTRIBUTE nAttrib) const
 {
 	return (Misc::FindT(nAttrib, ARRATTRIBUTES) != -1);
+}
+
+BOOL CTaskListExporterBase::WantAttribute(TDC_ATTRIBUTE nAttrib, const ITASKLISTBASE* pTasks, HTASKITEM hTask) const
+{
+	if (!WantAttribute(nAttrib))
+		return FALSE;
+
+	if (PARENTTITLECOMMENTSNLY && pTasks->IsTaskParent(hTask))
+	{
+		switch (nAttrib)
+		{
+		case TDCA_POSITION:
+		case TDCA_TASKNAME:
+		case TDCA_ID:
+		case TDCA_PARENTID:
+		case TDCA_COMMENTS:
+			break;
+
+		default:
+			return FALSE;
+		}
+	}
+
+	return TRUE;
 }
 
 CString CTaskListExporterBase::GetAttribLabel(TDC_ATTRIBUTE nAttrib)
