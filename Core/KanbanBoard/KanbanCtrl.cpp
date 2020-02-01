@@ -120,6 +120,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_HEADER, OnHeaderCustomDraw)
+	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_HEADER, OnHeaderDividerDoubleClick)
 	ON_NOTIFY(HDN_ITEMCHANGING, IDC_HEADER, OnHeaderItemChanging)
 	ON_NOTIFY(TVN_BEGINDRAG, IDC_COLUMNCTRL, OnBeginDragColumnItem)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_COLUMNCTRL, OnColumnItemSelChange)
@@ -1760,10 +1761,11 @@ void CKanbanCtrl::RebuildColumnHeader()
 
 		m_header.SetItemText(nVis, sFormat);
 		m_header.SetItemData(nVis, (DWORD)pCol);
-		nVis++;
 
 		// Allow tracking on all but the last column
-		m_header.EnableItemTracking(nCol, (nCol != (nNumColumns - 1)));
+		m_header.EnableItemTracking(nVis, (nVis < (nNumVisColumns - 1)));
+
+		nVis++;
 	}
 }
 
@@ -2278,7 +2280,7 @@ void CKanbanCtrl::ResizeHeader(CDeferWndMove& dwm, CRect& rAvail)
 			m_header.SetItemWidth(nCol, nNewWidth);
 			nColStart += nNewWidth;
 		}
-		else
+		else // last column
 		{
 			int nNewWidth = (rNewHeader.Width() - nColStart);
 			m_header.SetItemWidth(nCol, nNewWidth + 1); // +1 hides the divider
@@ -2694,6 +2696,22 @@ void CKanbanCtrl::OnColumnEditLabel(NMHDR* pNMHDR, LRESULT* pResult)
 	ASSERT(pNMTV->item.lParam);
 
 	GetParent()->SendMessage(WM_KBC_EDITTASKTITLE, pNMTV->item.lParam);
+}
+
+void CKanbanCtrl::OnHeaderDividerDoubleClick(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
+
+	// resize just the adjacent columns
+	int nCol = ((NMHEADER*)pNMHDR)->iItem, nNumCols = m_header.GetItemCount();
+
+	if (nCol < (nNumCols - 2))
+	{
+		int nTotalWidth = (m_header.GetItemWidth(nCol) + m_header.GetItemWidth(nCol + 1));
+
+		m_header.SetItemWidth(nCol, (nTotalWidth / 2));
+		m_header.SetItemWidth(nCol + 1, (nTotalWidth - (nTotalWidth / 2)));
+	}
 }
 
 void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
