@@ -59,7 +59,7 @@ namespace WordCloudUIExtension
             return this;
         }
 
-        public UInt32 ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle tipItemRect)
+        public UInt32 ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine)
         {
             var pt = PointToClient(ptScreen);
             var hit = HitTest(pt);
@@ -73,17 +73,18 @@ namespace WordCloudUIExtension
             if (!labelRect.Contains(pt))
                 return 0;
 
-            // else
             var item = (hit.Item.Tag as CloudTaskItem);
 
             if (item == null)
                 return 0;
 
-            tipText = item.Title;
-            tipItemRect = labelRect;
+			// Check if there's enough room already
+			if (m_LabelTip.CalcTipHeight(item.Title, labelRect.Width) <= labelRect.Height)
+				return 0;
 
-            tipItemRect.Height -= 1;
-            tipItemRect.X -= 1;
+			tipText = item.Title;
+            toolRect = labelRect;
+			multiLine = false; // always
 
             return item.Id;
         }

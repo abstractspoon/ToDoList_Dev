@@ -64,8 +64,11 @@ namespace DayViewUIExtension
             return this;
         }
 
-        public UInt32 ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle tipItemRect)
+        public UInt32 ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine)
         {
+			if (IsResizingAppointment())
+				return 0;
+
             var pt = PointToClient(ptScreen);
             Calendar.Appointment appointment = GetAppointmentAt(pt.X, pt.Y);
 
@@ -77,11 +80,40 @@ namespace DayViewUIExtension
             if ((taskItem == null) || !taskItem.TextRect.Contains(pt))
                 return 0;
 
-            tipText = taskItem.Title;
-            GetItemLabelRect(appointment, ref tipItemRect);
+			toolRect = taskItem.TextRect;
+			toolRect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
 
-            tipItemRect.Height -= 1;
-            tipItemRect.X -= 1;
+			if (appointment.IsLongAppt())
+			{
+				// single line tooltips
+				if (m_LabelTip.CalcTipHeight(taskItem.Title, toolRect.Width) < toolRect.Height)
+					return 0;
+
+				multiLine = false; // always
+			}
+			else
+			{
+				var availRect = GetTrueRectangle();
+
+				if (taskItem.TextRect.Top < availRect.Top)
+				{
+					// If the top of the text rectangle is hidden we always 
+					// need a label tip so we just clip to the avail space
+					toolRect.Intersect(availRect);
+				}
+				else
+				{
+					// Determine if text will fit in what's visible of the task
+					toolRect.Intersect(availRect);
+
+					if (m_LabelTip.CalcTipHeight(taskItem.Title, toolRect.Width) < toolRect.Height)
+						return 0;
+				}
+
+				multiLine = true; // always
+			}
+
+			tipText = taskItem.Title;
 
             return taskItem.Id;
         }

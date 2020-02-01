@@ -17,7 +17,7 @@ namespace Abstractspoon
 				Drawing::Font^ GetFont();
 				Windows::Forms::Control^ GetOwner();
 
-				UInt32 ToolHitTest(Drawing::Point ptScreen, String^% tipText, Drawing::Rectangle% tipRect);
+				UInt32 ToolHitTest(Drawing::Point ptScreen, String^% tipText, Drawing::Rectangle% toolRect, bool% multiLine);
 			};
 
 			// -----------------------------------------------------------------
@@ -28,6 +28,7 @@ namespace Abstractspoon
 				LabelTip(ILabelTipHandler^ handler);
 
 				void ProcessMessage(Windows::Forms::Message^ msg);
+				int CalcTipHeight(String^ tipText, int availWidth);
 
 			protected:
 				ILabelTipHandler^ m_Handler;
@@ -35,8 +36,9 @@ namespace Abstractspoon
 				Windows::Forms::Timer^ m_HoverTimer;
 				Drawing::Point m_HoverStartScreenPos;
 
-				Drawing::Rectangle m_TipRect;
-				UInt32 m_TipItem;
+				Drawing::Rectangle m_HitRect;
+				UInt32 m_TipId;
+				bool m_Multiline;
 
 			protected:
 				static void OnShowLabelTip(Object^ sender, Windows::Forms::PopupEventArgs^ args);
@@ -47,6 +49,9 @@ namespace Abstractspoon
 				IntPtr GetHandle();
 				bool IsShowing();
 				void HideTooltip();
+
+				Windows::Forms::TextFormatFlags TipFormatFlags();
+				Drawing::Size CalcFinalTipSize(Drawing::Size defaultSize);
 			};
 		}
 	}

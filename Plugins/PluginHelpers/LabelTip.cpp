@@ -7,6 +7,7 @@
 
 #include <Shared\OSVersion.h>
 #include <Shared\Themed.h>
+#include <Shared\GraphicsMisc.h>
 
 #include <math.h>
 #include <CommCtrl.h>
@@ -21,6 +22,8 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 static Point OUTSIDE(-10000, -10000);
+
+static int BORDERS = 4;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -58,10 +61,55 @@ void LabelTip::OnShowLabelTip(Object^ sender, PopupEventArgs^ args)
 {
 	LabelTip^ labelTip = ASTYPE(sender, LabelTip);
 
-	Size textSize = TextRenderer::MeasureText(labelTip->GetToolTip(labelTip->m_Handler->GetOwner()), labelTip->m_Handler->GetFont());
-	int borders = DPIScaling::Scale(3);// (args->ToolTipSize.Height - textSize.Height);
+	if (labelTip != nullptr)
+		args->ToolTipSize = labelTip->CalcFinalTipSize(args->ToolTipSize);
+}
 
-	args->ToolTipSize = Size(textSize.Width + borders, labelTip->m_TipRect.Height);
+Drawing::Size LabelTip::CalcFinalTipSize(Drawing::Size defaultSize)
+{
+	auto tipText = GetToolTip(m_Handler->GetOwner());
+	auto tipFont = m_Handler->GetFont();
+
+	auto textSize = m_HitRect.Size;
+
+	if (m_Multiline)
+	{
+		textSize = TextRenderer::MeasureText(tipText, tipFont, textSize, TextFormatFlags::WordBreak);
+
+		int nWidth = m_HitRect.Width;
+		int nIncrement = (nWidth / 2);
+
+		while ((textSize.Height + BORDERS) > m_HitRect.Height)
+		{
+			textSize.Width += nIncrement;
+			textSize = TextRenderer::MeasureText(tipText, tipFont, textSize, TextFormatFlags::WordBreak);
+		}
+	}
+	else 
+	{
+		// single line
+		textSize = TextRenderer::MeasureText(tipText, tipFont);
+	}
+
+	return (textSize + Size(BORDERS, BORDERS));
+}
+
+int LabelTip::CalcTipHeight(String^ tipText, int availWidth)
+{
+	auto tipFont = m_Handler->GetFont();
+	int textHeight = TextRenderer::MeasureText(tipText, tipFont, Size(availWidth, 0), TextFormatFlags::WordBreak).Height;
+
+	return (textHeight + BORDERS);
+}
+
+TextFormatFlags LabelTip::TipFormatFlags()
+{
+	auto flags = (TextFormatFlags::Left | TextFormatFlags::VerticalCenter);
+
+	if (m_Multiline)
+		flags = (flags | TextFormatFlags::WordBreak);
+
+	return flags;
 }
 
 void LabelTip::OnDrawLabelTip(Object^ sender, DrawToolTipEventArgs^ args)
@@ -89,8 +137,8 @@ void LabelTip::OnDrawLabelTip(Object^ sender, DrawToolTipEventArgs^ args)
 	args->Graphics->FillRectangle(backBrush, args->Bounds);
 	args->DrawBorder();
 
-	TextRenderer::DrawText(args->Graphics, args->ToolTipText, labelTip->m_Handler->GetFont(), args->Bounds, *textColor, 
-							TextFormatFlags::Left | TextFormatFlags::VerticalCenter | TextFormatFlags::WordBreak);
+	TextRenderer::DrawText(args->Graphics, args->ToolTipText, labelTip->m_Handler->GetFont(), 
+						   args->Bounds, *textColor, labelTip->TipFormatFlags());
 }
 
 void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
@@ -106,11 +154,11 @@ void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
 
 			// If the mouse has moved off the current item hide the tooltip
 			// else leave it alone
-			if (IsShowing() && (m_TipItem > 0))
+			if (IsShowing() && (m_TipId > 0))
 			{
 				Point ptClient = m_Handler->GetOwner()->PointToClient(pos);
 
-				if (!m_TipRect.Contains(ptClient))
+				if (!m_HitRect.Contains(ptClient))
 					HideTooltip();
 				else
 					return;
@@ -132,6 +180,7 @@ void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
 	case WM_MBUTTONDOWN:
 	case WM_RBUTTONDOWN:
 	case WM_MOUSELEAVE:
+	case WM_MOUSEWHEEL:
 		HideTooltip();
 		break;
 	}
@@ -143,8 +192,9 @@ void LabelTip::HideTooltip()
 
 	m_HoverStartScreenPos = OUTSIDE;
 	m_HoverTimer->Stop();
-	m_TipItem = 0;
-	m_TipRect = Rectangle::Empty;
+	m_TipId = 0;
+	m_HitRect = Rectangle::Empty;
+	m_Multiline = false;
 }
 
 void LabelTip::OnHoverTick(Object^ sender, EventArgs^ args)
@@ -167,10 +217,11 @@ void LabelTip::OnHoverTick(Object^ sender, EventArgs^ args)
 	}
 
 	// else
-	Drawing::Rectangle tipItemRect;
+	Drawing::Rectangle hitRect;
 	String^ tipText = nullptr;
+	bool multiline = false;
 
-	UInt32 nHit = m_Handler->ToolHitTest(pos, tipText, tipItemRect);
+	UInt32 nHit = m_Handler->ToolHitTest(pos, tipText, hitRect, multiline);
 
 	if (nHit == 0)
 	{
@@ -179,19 +230,24 @@ void LabelTip::OnHoverTick(Object^ sender, EventArgs^ args)
 		return;
 	}
 
-	if (TextRenderer::MeasureText(tipText, m_Handler->GetFont()).Width < tipItemRect.Width)
-	{
-		return;
-	}
-	
-	if (nHit != m_TipItem)
+	if (nHit != m_TipId)
 	{
 		m_HoverStartScreenPos = pos;
 		Hide(m_Handler->GetOwner());
 	}
 	
-	m_TipRect = tipItemRect;
-	m_TipItem = nHit;
+	m_HitRect = hitRect;
+	m_TipId = nHit;
+	m_Multiline = multiline;
 
-	Show(tipText, m_Handler->GetOwner(), tipItemRect.Location);
+	// Minimum height is single line
+	if (m_Multiline)
+	{
+		auto singleLineTextSize = TextRenderer::MeasureText(tipText, m_Handler->GetFont());
+
+		if (hitRect.Height < (singleLineTextSize.Height + 4))
+			m_Multiline = false;
+	}
+
+	Show(tipText, m_Handler->GetOwner(), hitRect.Location);
 }

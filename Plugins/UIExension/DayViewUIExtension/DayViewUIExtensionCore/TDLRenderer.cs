@@ -58,6 +58,8 @@ namespace DayViewUIExtension
             set { m_theme = value; }
         }
 
+		public int TextPadding { get { return 2; } }
+
         protected override void Dispose(bool mainThread)
         {
             base.Dispose(mainThread);
@@ -363,23 +365,23 @@ namespace DayViewUIExtension
 						if (taskItem.IsLongAppt())
 						{
 							int yCentre = ((rect.Top + rect.Bottom + 1) / 2);
-                            rectIcon = new Rectangle((rect.Left + 2), (yCentre - (imageSize / 2)), imageSize, imageSize);
+                            rectIcon = new Rectangle((rect.Left + TextPadding), (yCentre - (imageSize / 2)), imageSize, imageSize);
 						}
 						else
 						{
-                            rectIcon = new Rectangle(rect.Left + 2, rect.Top + 2, imageSize, imageSize);
+                            rectIcon = new Rectangle(rect.Left + TextPadding, rect.Top + TextPadding, imageSize, imageSize);
 						}
 
                         if (Rectangle.Round(g.VisibleClipBounds).Contains(rectIcon) && m_TaskIcons.Get(taskItem.Id))
                         {
 							if (longAppt)
 							{
-								rectIcon.X = (gripRect.Right + 2);
+								rectIcon.X = (gripRect.Right + TextPadding);
 							}
 							else
 							{
-                                gripRect.Y += (imageSize + 2);
-                                gripRect.Height -= (imageSize + 2);
+                                gripRect.Y += (imageSize + TextPadding);
+                                gripRect.Height -= (imageSize + TextPadding);
 							}
 
 							m_TaskIcons.Draw(g, rectIcon.X, rectIcon.Y);
@@ -405,7 +407,7 @@ namespace DayViewUIExtension
 						if (!hasIcon)
 						{
 							rect.X = gripRect.Right;
-							rect.Width -= (gripRect.Width + 4);
+							rect.Width -= (gripRect.Width + (TextPadding * 2));
 						}
 					}
 
