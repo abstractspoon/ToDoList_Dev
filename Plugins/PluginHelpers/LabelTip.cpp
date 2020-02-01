@@ -16,6 +16,7 @@
 
 using namespace System::Drawing;
 using namespace System::Windows::Forms;
+using namespace System::Diagnostics;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
@@ -34,11 +35,14 @@ LabelTip::LabelTip(ILabelTipHandler^ owner) : m_Handler(owner)
 	this->Draw += gcnew DrawToolTipEventHandler(OnDrawLabelTip);
 	this->Popup += gcnew PopupEventHandler(OnShowLabelTip);
 
+	this->AutoPopDelay = 10000;
+	this->InitialDelay = 50;
+
 	// Stops the tooltip disappearing because the mouse is over it
 	Win32::AddStyle(GetHandle(), WS_EX_TRANSPARENT, true);
 
 	m_HoverTimer = gcnew Timer();
-	m_HoverTimer->Interval = 100;// Win32::GetMouseHoverDelay();
+	m_HoverTimer->Interval = 10;// Win32::GetMouseHoverDelay();
 
 	m_HoverTimer->Tick += gcnew EventHandler(this, &LabelTip::OnHoverTick);
 	HideTooltip(); // initialises everything
@@ -152,26 +156,51 @@ void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
 		{
 			Point pos = Control::MousePosition;
 
-			// If the mouse has moved off the current item hide the tooltip
-			// else leave it alone
-			if (IsShowing() && (m_TipId > 0))
-			{
-				Point ptClient = m_Handler->GetOwner()->PointToClient(pos);
+			Drawing::Rectangle hitRect;
+			String^ tipText = nullptr;
+			bool multiline = false;
 
-				if (!m_HitRect.Contains(ptClient))
-					HideTooltip();
-				else
-					return;
+			UInt32 tipId = m_Handler->ToolHitTest(pos, tipText, hitRect, multiline);
+
+			if (tipId == 0)
+			{
+				// If the mouse is no longer over an item
+				// hide the tooltip
+				HideTooltip();
+				return;
 			}
 
-			// If the mouse has moved far enough away from when the timer 
-			// started we update the start pos and restart the timer
-			int nOffset = max(abs(m_HoverStartScreenPos.X - pos.X), abs(m_HoverStartScreenPos.Y - pos.Y));
-
-			if (nOffset > Win32::GetMouseHoverRectSize())
+			if (tipId != m_TipId)
 			{
-				m_HoverStartScreenPos = pos;
-				m_HoverTimer->Start();
+				bool visible = IsShowing();
+
+				// If the mouse has moved onto a new item
+				// and hide the tooltip 
+				HideTooltip();
+				
+				// If the tooltip was also visible then 
+				// immediately show the new tip
+				if (visible)
+				{
+					m_HoverStartScreenPos = pos;
+
+					CheckShowTip();
+					return;
+				}
+			}
+
+			// Still over the same item.
+			// If a tooltip is not currently visible and we moved far
+			// enough away from when the timer started restart the timer
+			if (!IsShowing())
+			{
+				int nOffset = max(abs(m_HoverStartScreenPos.X - pos.X), abs(m_HoverStartScreenPos.Y - pos.Y));
+
+				if (nOffset > Win32::GetMouseHoverRectSize())
+				{
+					m_HoverStartScreenPos = pos;
+					m_HoverTimer->Start();
+				}
 			}
 		}
 		break;
@@ -207,6 +236,11 @@ void LabelTip::OnHoverTick(Object^ sender, EventArgs^ args)
 	if (IsShowing())
 		return;
 	
+	CheckShowTip();
+}
+
+void LabelTip::CheckShowTip()
+{
 	Point pos = Control::MousePosition;
 	int nOffset = max(abs(m_HoverStartScreenPos.X - pos.X), abs(m_HoverStartScreenPos.Y - pos.Y));
 

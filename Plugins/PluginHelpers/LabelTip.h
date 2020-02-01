@@ -52,6 +52,7 @@ namespace Abstractspoon
 
 				Windows::Forms::TextFormatFlags TipFormatFlags();
 				Drawing::Size CalcFinalTipSize(Drawing::Size defaultSize);
+				void CheckShowTip();
 			};
 		}
 	}

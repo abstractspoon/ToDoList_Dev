@@ -83,10 +83,12 @@ namespace WordCloudUIExtension
 				return 0;
 
 			tipText = item.Title;
-            toolRect = labelRect;
 			multiLine = false; // always
 
-            return item.Id;
+			toolRect = labelRect;
+			toolRect.Offset(-1, -1);
+
+			return item.Id;
         }
 
         public Boolean TaskColorIsBackground

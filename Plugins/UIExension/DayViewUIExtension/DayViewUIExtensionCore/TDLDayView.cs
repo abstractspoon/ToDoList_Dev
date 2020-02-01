@@ -86,7 +86,7 @@ namespace DayViewUIExtension
 			if (appointment.IsLongAppt())
 			{
 				// single line tooltips
-				if (m_LabelTip.CalcTipHeight(taskItem.Title, toolRect.Width) < toolRect.Height)
+				if (m_LabelTip.CalcTipHeight(taskItem.Title, toolRect.Width) <= toolRect.Height)
 					return 0;
 
 				multiLine = false; // always
