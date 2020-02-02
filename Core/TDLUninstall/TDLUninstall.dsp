@@ -140,10 +140,6 @@ SOURCE=.\res\TDLUninstall.ico
 
 SOURCE=.\res\TDLUninstall.rc2
 # End Source File
-# Begin Source File
-
-SOURCE=.\res\TDLUninstall_wiz_header.bmp
-# End Source File
 # End Group
 # Begin Source File
 

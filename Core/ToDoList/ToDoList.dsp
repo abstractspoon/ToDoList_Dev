@@ -1327,14 +1327,6 @@ SOURCE=.\res\app_tray_timetrack_light.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\app_tray_track_dark.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\app_tray_track_light.ico
-# End Source File
-# Begin Source File
-
 SOURCE=.\res\clock.ico
 # End Source File
 # Begin Source File
