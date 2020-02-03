@@ -302,7 +302,9 @@ namespace DayViewUIExtension
                     {
                         if (item.StartDate != DateTime.MinValue)
                         {
-                            StartDate = item.StartDate;
+                            if (!IsItemWithinRange(item, StartDate, EndDate))
+                                StartDate = item.StartDate;
+
                             SelectedAppointment = item;
                         }
                     }
