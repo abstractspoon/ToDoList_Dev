@@ -274,14 +274,14 @@ namespace Calendar
 
                     if (daysToShow == 7)
                     {
-                        tooltip.SetToolTip(hscroll, "Change Week");
+                        HScrollTooltipText = "Change Week";
 
                         // Move to start of week
                         StartDate = startDate;
                     }
                     else if (daysToShow == 1) // day view
                     {
-                        tooltip.SetToolTip(hscroll, "Change Day");
+                        HScrollTooltipText = "Change Day";
 
                         // make sure the day for the selected task is visible
                         if (SelectedAppointment != null)
@@ -289,7 +289,7 @@ namespace Calendar
                     }
                     else
                     {
-                        tooltip.SetToolTip(hscroll, "Change");
+                        HScrollTooltipText = "Change";
                     }
 
                     EnsureVisible(SelectedAppointment, true);

@@ -217,10 +217,7 @@ namespace DayViewUIExtension
                 m_PrefsDlg.LoadPreferences(prefs, key);
 				UpdateDayViewPreferences();
 
-				m_DayView.DaysShowing = prefs.GetProfileInt(key, "DaysShowing", 7);
-				m_WeekLabel.NumDays = m_DayView.DaysShowing;
-
-				UpdateToolbarButtonStates();
+				SetDaysShowing(prefs.GetProfileInt(key, "DaysShowing", 7));
             }
 			else
 			{
