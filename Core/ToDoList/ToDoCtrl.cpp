@@ -1221,8 +1221,6 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 		}
 		break;
 		
-		// fall thru for 
-		
 	case IDC_ALLOCTO:
 	case IDC_ALLOCBY:
 	case IDC_STATUS:
