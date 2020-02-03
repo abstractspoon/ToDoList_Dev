@@ -3062,13 +3062,14 @@ void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSe
 
 		COLORREF crRow = CLR_NONE;//(bSelected ? CLR_NONE : GetRowColor(nItem));
 
-		if (htiRollUp)
-			DrawListItemRollupText(pDC, htiRollUp, rItem, rClip, crRow);
-		else
+// 		if (htiRollUp)
+// 			DrawListItemRollupText(pDC, htiRollUp, rItem, rClip, crRow);
+// 		else
 			DrawListItemText(pDC, gi, rItem, rClip, crRow);
 	}
 }
 
+/*
 void CGanttCtrl::DrawListItemRollupText(CDC* pDC, HTREEITEM htiParent, const CRect& rItem, const CRect& rClip, COLORREF crRow)
 {
 	HTREEITEM htiChild = m_tree.GetChildItem(htiParent);
@@ -3092,6 +3093,7 @@ void CGanttCtrl::DrawListItemRollupText(CDC* pDC, HTREEITEM htiParent, const CRe
 		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 	}
 }
+*/
 
 void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rItem, const CRect& rClip, COLORREF crRow)
 {
