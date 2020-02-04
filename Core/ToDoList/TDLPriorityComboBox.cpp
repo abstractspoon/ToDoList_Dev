@@ -138,11 +138,11 @@ BOOL CTDLPriorityComboBox::SetColors(const CDWordArray& aColors)
 
 		if (GetSafeHwnd())
 		{
-			// save and restore current selection
-			int nSel = GetCurSel();
+			// Update the colours in-place
+			int nNumItems = GetCount();
 
-			BuildCombo();
-			SetCurSel(nSel);
+			for (int nItem = (nNumItems - 11), nColor = 0; nItem < nNumItems; nItem++, nColor++)
+				SetColor(nItem, aColors[nColor]);
 		}
 	}
 
