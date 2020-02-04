@@ -16,7 +16,7 @@ class CTDLRiskComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
-	CTDLRiskComboBox();
+	CTDLRiskComboBox(BOOL bIncludeAny);
 
 	int GetSelectedRisk() const; // -2 -> 10
 	void SetSelectedRisk(int nRisk); // -2 -> 10
@@ -32,6 +32,7 @@ protected:
 	//}}AFX_VIRTUAL
 
 protected:
+	BOOL m_bIncludeAny;
 
 	// Implementation
 public:

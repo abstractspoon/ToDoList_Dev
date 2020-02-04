@@ -32,6 +32,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const UINT WM_PTDP_INITCOMMENTS = (WM_APP + 1);
+const UINT COMMENTS_COMBOLENDLU = 122;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -46,8 +47,10 @@ CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CTDLContentMgr* pMgrConte
 	: 
 	CPreferencesPageBase(CPreferencesTaskDefPage::IDD),
 	m_pMgrContent(pMgrContent), 
-	m_ctrlComments(NULL, 122, pMgrContent),
+	m_ctrlComments(NULL, COMMENTS_COMBOLENDLU, pMgrContent),
 	m_cbDefReminder(TDLRPC_SHOWNONE | TDLRPC_SHOWZERO),
+	m_cbDefPriority(FALSE),
+	m_cbDefRisk(FALSE),
 	m_nDefReminderLeadin(TDLRPC_NOREMINDER)
 {
 	//{{AFX_DATA_INIT(CPreferencesTaskDefPage)

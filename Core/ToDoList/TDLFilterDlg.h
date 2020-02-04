@@ -60,7 +60,6 @@ protected:
 	TDCFILTER m_filter;
 	FILTER_TITLE m_nTitleFilter;
 	TDCAUTOLISTDATA m_tldListData;
-	CDWordArray m_aPriorityColors;
 	FTC_VIEW m_nView;
 	CString m_sAdvancedFilter;
 	DWORD m_dwCustomFlags;

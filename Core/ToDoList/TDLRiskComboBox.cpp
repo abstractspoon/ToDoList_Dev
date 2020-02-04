@@ -7,6 +7,7 @@
 #include "tdcenum.h"
 
 #include "..\shared\holdredraw.h"
+#include "..\shared\EnString.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -32,7 +33,7 @@ const int TDC_NUMSCALES = sizeof(IDS_TDC_SCALE) / sizeof(UINT);
 /////////////////////////////////////////////////////////////////////////////
 // CTDLRiskComboBox
 
-CTDLRiskComboBox::CTDLRiskComboBox()
+CTDLRiskComboBox::CTDLRiskComboBox(BOOL bIncludeAny) : m_bIncludeAny(bIncludeAny)
 {
 }
 
@@ -69,15 +70,22 @@ void CTDLRiskComboBox::PreSubclassWindow()
 
 int CTDLRiskComboBox::GetSelectedRisk() const
 {
-	int nRisk = GetCurSel();
+	int nSel = GetCurSel(), nRisk = nSel;
 
-	if (nRisk == 0)
+	switch (nSel)
 	{
-		nRisk = FM_NORISK;
-	}
-	else if (nRisk > 0)
-	{
-		nRisk--; // to take account of <none>
+	case 0:
+		nRisk = (m_bIncludeAny ? FM_ANYRISK : FM_NORISK);
+		break;
+
+	case 1:
+		nRisk = (m_bIncludeAny ? FM_NORISK : (nSel - 1));
+		break;
+
+	default:
+		if (nSel != CB_ERR)
+			nRisk = (m_bIncludeAny ? (nSel - 2) : (nSel - 1));
+		break;
 	}
 
 	return nRisk;
@@ -85,20 +93,26 @@ int CTDLRiskComboBox::GetSelectedRisk() const
 
 void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> 10
 {
-   if (nRisk == FM_NORISK)
-   {
-	   nRisk = 0;
-   }
-   else if (nRisk >= 0 && nRisk <= 10)
-   {
-	   nRisk++; // to take account of <none>
-   }
-   else
-   {
-	   nRisk = CB_ERR;
-   }
+	int nSel = CB_ERR;
 
-   SetCurSel(nRisk);
+	switch (nRisk)
+	{
+	case FM_ANYRISK:
+		if (m_bIncludeAny)
+			nSel = 0;
+		break;
+
+	case FM_NORISK:
+		nSel = (m_bIncludeAny ? 1 : 0);
+		break;
+
+	default:
+		if (nRisk >= 0 && nRisk <= 10)
+			nSel = (m_bIncludeAny ? (nRisk + 2) : (nRisk + 1));
+		break;
+	}
+
+	SetCurSel(nSel);
 }
 
 void CTDLRiskComboBox::BuildCombo()
@@ -109,13 +123,16 @@ void CTDLRiskComboBox::BuildCombo()
 	int nSel = GetCurSel(); // so we can restore it
 	ResetContent();
 	
-	// first item is 'None' 
-	AddString(CString((LPCTSTR)IDS_TDC_NONE));
+	// first items are 'Any' and 'None'
+	if (m_bIncludeAny)
+		AddString(CEnString(IDS_TDC_ANY));
+	
+	AddString(CEnString(IDS_TDC_NONE));
 	
 	for (int nLevel = 0; nLevel <= 10; nLevel++)
 	{
 		CString sRisk;
-		sRisk.Format(_T("%d (%s)"), nLevel, CString((LPCTSTR)IDS_TDC_SCALE[nLevel]));
+		sRisk.Format(_T("%d (%s)"), nLevel, CEnString(IDS_TDC_SCALE[nLevel]));
 		AddString(sRisk);
 	}
 	
@@ -125,17 +142,7 @@ void CTDLRiskComboBox::BuildCombo()
 void CTDLRiskComboBox::DDX(CDataExchange* pDX, int& nRisk)
 {
 	if (pDX->m_bSaveAndValidate)
-	{
-		nRisk = GetCurSel();
-
-		if (nRisk == 0) // NONE
-			nRisk = FM_NORISK;
-		else
-			nRisk--;
-	}
+		nRisk = GetSelectedRisk();
 	else
-	{
-		int nTemp = (nRisk == FM_NORISK) ? 0 : nRisk + 1;
-		SetCurSel(nTemp);
-	}
+		SetSelectedRisk(nRisk);
 }

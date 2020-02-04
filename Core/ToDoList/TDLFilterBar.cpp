@@ -63,19 +63,22 @@ const int NUMFILTERCTRLS = sizeof(FILTERCTRLS) / sizeof(CTRLITEM);
 // CFilterBar dialog
 
 CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
-	: CDialog(IDD_FILTER_BAR, pParent), 
-	  m_cbCategoryFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
-	  m_cbAllocToFilter(TRUE, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
-	  m_cbAllocByFilter(TRUE, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
-	  m_cbStatusFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
-	  m_cbVersionFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
-	  m_cbTagFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
-	  m_nView(FTCV_UNSET),
-	  m_crUIBack(CLR_NONE),
-	  m_eStartNextNDays(TRUE, _T("-0123456789")),
-	  m_eDueNextNDays(TRUE, _T("-0123456789")),
-	  m_bMultiSelection(TRUE),
-	  m_nTitleFilter(FT_FILTERONTITLEONLY)
+	: 
+	CDialog(IDD_FILTER_BAR, pParent), 
+	m_cbCategoryFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
+	m_cbAllocToFilter(TRUE, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
+	m_cbAllocByFilter(TRUE, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
+	m_cbStatusFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
+	m_cbVersionFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
+	m_cbTagFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
+	m_cbPriorityFilter(TRUE),
+	m_cbRiskFilter(TRUE),
+	m_nView(FTCV_UNSET),
+	m_crUIBack(CLR_NONE),
+	m_eStartNextNDays(TRUE, _T("-0123456789")),
+	m_eDueNextNDays(TRUE, _T("-0123456789")),
+	m_bMultiSelection(TRUE),
+	m_nTitleFilter(FT_FILTERONTITLEONLY)
 {
 	//{{AFX_DATA_INIT(CFilterBar)
 	//}}AFX_DATA_INIT
@@ -119,6 +122,9 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_DUENEXTNDAYS, m_filter.nDueNextNDays);
 	DDX_DateTimeCtrl(pDX, IDC_USERSTARTDATE, m_filter.dtUserStart);
 	DDX_DateTimeCtrl(pDX, IDC_USERDUEDATE, m_filter.dtUserDue);
+
+	m_cbPriorityFilter.DDX(pDX, m_filter.nPriority);
+	m_cbRiskFilter.DDX(pDX, m_filter.nRisk);
 	
 	// special handling
 	if (pDX->m_bSaveAndValidate)
@@ -127,39 +133,6 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 		m_filter.nShow = m_cbTaskFilter.GetSelectedFilter(m_sAdvancedFilter);
 		m_filter.nStartBy = m_cbStartFilter.GetSelectedFilter();
 		m_filter.nDueBy = m_cbDueFilter.GetSelectedFilter();
-
-		// priority
-		int nIndex;
-		DDX_CBIndex(pDX, IDC_PRIORITYFILTERCOMBO, nIndex);
-
-		if (nIndex == 0) // any
-		{
-			m_filter.nPriority = FM_ANYPRIORITY;
-		}
-		else if (nIndex == 1) // none
-		{
-			m_filter.nPriority = FM_NOPRIORITY;
-		}
-		else
-		{
-			m_filter.nPriority = nIndex - 2;
-		}
-
-		// risk
-		DDX_CBIndex(pDX, IDC_RISKFILTERCOMBO, nIndex);
-
-		if (nIndex == 0) // any
-		{
-			m_filter.nRisk = FM_ANYRISK;
-		}
-		else if (nIndex == 1) // none
-		{
-			m_filter.nRisk = FM_NORISK;
-		}
-		else
-		{
-			m_filter.nRisk = nIndex - 2;
-		}
 
 		// check combos
 		m_cbCategoryFilter.GetChecked(m_filter.aCategories);
@@ -189,40 +162,6 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 		m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
 		m_cbDueFilter.SelectFilter(m_filter.nDueBy);
 		m_cbDueFilter.SetNextNDays(m_filter.nDueNextNDays);
-
-		// priority
-		int nIndex;
-		
-		if (m_filter.nPriority == FM_ANYPRIORITY)
-		{
-			nIndex = 0;
-		}
-		else if (m_filter.nPriority == FM_NOPRIORITY)
-		{
-			nIndex = 1;
-		}
-		else
-		{
-			nIndex = m_filter.nPriority + 2;
-		}
-
-		DDX_CBIndex(pDX, IDC_PRIORITYFILTERCOMBO, nIndex);
-
-		// risk
-		if (m_filter.nRisk == FM_ANYRISK)
-		{
-			nIndex = 0;
-		}
-		else if (m_filter.nRisk == FM_NORISK)
-		{
-			nIndex = 1;
-		}
-		else
-		{
-			nIndex = m_filter.nRisk + 2;
-		}
-
-		DDX_CBIndex(pDX, IDC_RISKFILTERCOMBO, nIndex);
 
 		// check combos
 		m_cbCategoryFilter.SetChecked(m_filter.aCategories);
@@ -538,10 +477,6 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTR
 		// auto droplist filters
 		UpdateAutoDropListData(tdc, nAttribID);
 
-		// priority (Note: risk never needs updating)
-		m_cbPriorityFilter.SetColors(m_aPriorityColors);
-		m_cbPriorityFilter.InsertColor(0, CLR_NONE, CEnString(IDS_TDC_ANY)); // add a blank item
-
 		// Custom attributes
 		UpdateCustomControls(tdc, nAttribID);
 		
@@ -660,21 +595,7 @@ void CTDLFilterBar::SetFilterLabelAlignment(BOOL bLeft)
 
 void CTDLFilterBar::SetPriorityColors(const CDWordArray& aColors)
 {
-	if (!Misc::MatchAll(aColors, m_aPriorityColors, TRUE))
-	{
-		m_aPriorityColors.Copy(aColors);
-
-		if (m_cbPriorityFilter.GetSafeHwnd())
-		{
-			// save and restore current selection
-			int nSel = m_cbPriorityFilter.GetCurSel();
-
-			m_cbPriorityFilter.SetColors(aColors);
-			m_cbPriorityFilter.InsertColor(0, CLR_NONE, CString((LPCTSTR)IDS_TDC_ANY)); // add a blank item
-
-			m_cbPriorityFilter.SetCurSel(nSel);
-		}
-	}
+	m_cbPriorityFilter.SetColors(aColors);
 }
 
 void CTDLFilterBar::OnSize(UINT nType, int cx, int cy) 
@@ -932,12 +853,8 @@ BOOL CTDLFilterBar::OnInitDialog()
 	CLocalizer::EnableTranslation(m_cbVersionFilter, FALSE);
 	CLocalizer::EnableTranslation(m_cbTagFilter, FALSE);
 	
-	// one-time init for risk filter combo
-	CEnString sAny(IDS_TDC_ANY);
-	m_cbRiskFilter.InsertString(0, sAny); // add a blank item
-
 	m_eTitleFilter.ModifyStyle(0, ES_WANTRETURN, 0);
-	m_mgrPrompts.SetEditPrompt(m_eTitleFilter, sAny);
+	m_mgrPrompts.SetEditPrompt(m_eTitleFilter, CEnString(IDS_TDC_ANY));
 	
 	SetDlgItemText(IDC_TITLEFILTERLABEL, m_filter.GetTitleFilterLabel());
 	EnableToolTips();

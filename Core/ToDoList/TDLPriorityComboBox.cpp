@@ -7,6 +7,7 @@
 #include "tdcenum.h"
 
 #include "..\shared\holdredraw.h"
+#include "..\shared\EnString.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -32,7 +33,7 @@ const int TDC_NUMSCALES = sizeof(IDS_TDC_SCALE) / sizeof(UINT);
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPriorityComboBox
 
-CTDLPriorityComboBox::CTDLPriorityComboBox() //: m_bReverse(FALSE)
+CTDLPriorityComboBox::CTDLPriorityComboBox(BOOL bIncludeAny) : m_bIncludeAny(bIncludeAny)
 {
 }
 
@@ -81,15 +82,22 @@ int CTDLPriorityComboBox::IncrementPriority(int nAmount)
 
 int CTDLPriorityComboBox::GetSelectedPriority() const
 {
-	int nPriority = GetCurSel();
+	int nSel = GetCurSel(), nPriority = nSel;
 
-	if (nPriority == 0)
+	switch (nSel)
 	{
-		nPriority = FM_NOPRIORITY;
-	}
-	else if (nPriority > 0)
-	{
-		nPriority--; // to take account of <none>
+	case 0:
+		nPriority = (m_bIncludeAny ? FM_ANYPRIORITY : FM_NOPRIORITY);
+		break;
+
+	case 1:
+		nPriority = (m_bIncludeAny ? FM_NOPRIORITY : (nSel - 1));
+		break;
+
+	default:
+		if (nSel != CB_ERR)
+			nPriority = (m_bIncludeAny ? (nSel - 2) : (nSel - 1));
+		break;
 	}
 
 	return nPriority;
@@ -97,48 +105,50 @@ int CTDLPriorityComboBox::GetSelectedPriority() const
 
 void CTDLPriorityComboBox::SetSelectedPriority(int nPriority) // -2 -> 10
 {
-	if (nPriority == FM_NOPRIORITY)
+	int nSel = CB_ERR;
+
+	switch (nPriority)
 	{
-		nPriority = 0;
-	}
-	else if (nPriority >= 0 && nPriority <= 10)
-	{
-		nPriority++; // to take account of <none>
-	}
-	else
-	{
-		nPriority = CB_ERR;
+	case FM_ANYPRIORITY:
+		if (m_bIncludeAny)
+			nSel = 0;
+		break;
+
+	case FM_NOPRIORITY:
+		nSel = (m_bIncludeAny ? 1 : 0);
+		break;
+
+	default:
+		if (nPriority >= 0 && nPriority <= 10)
+			nSel = (m_bIncludeAny ? (nPriority + 2) : (nPriority + 1));
+		break;
 	}
 
-	SetCurSel(nPriority);
+	SetCurSel(nSel);
 }
 
 BOOL CTDLPriorityComboBox::SetColors(const CDWordArray& aColors)
 {
 	if (aColors.GetSize() < 11)
 		return FALSE;
-	
-	m_aColors.Copy(aColors);
-	
-	if (GetSafeHwnd())
-		BuildCombo();
-	
+
+	if (!Misc::MatchAll(aColors, m_aColors, TRUE))
+	{
+		m_aColors.Copy(aColors);
+
+		if (GetSafeHwnd())
+		{
+			// save and restore current selection
+			int nSel = GetCurSel();
+
+			BuildCombo();
+			SetCurSel(nSel);
+		}
+	}
+
 	return TRUE;
 }
 
-// not currently used
-/*
-void CTDLPriorityComboBox::SetReverseOrder(BOOL bReverse)
-{
-	if (m_bReverse != bReverse)
-	{
-		m_bReverse = bReverse;
-		
-		if (GetSafeHwnd())
-			BuildCombo();
-	}
-}
-*/
 void CTDLPriorityComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
@@ -152,13 +162,16 @@ void CTDLPriorityComboBox::BuildCombo()
 	
 	BOOL bHasColors = m_aColors.GetSize();
 
-	// first item is 'None' and never has a colour
-	AddColor(CLR_NONE, CString((LPCTSTR)IDS_TDC_NONE));
+	// first item are 'Any' and  'None' which never have a colour
+	if (m_bIncludeAny)
+		AddColor(CLR_NONE, CEnString(IDS_TDC_ANY));
+	
+	AddColor(CLR_NONE, CEnString(IDS_TDC_NONE));
 	
 	for (int nLevel = 0; nLevel <= 10; nLevel++)
 	{
 		COLORREF color = bHasColors ? m_aColors[nLevel] : -1;
-		int nPriority = /*m_bReverse ? 11 - nLevel :*/ nLevel;
+		int nPriority = nLevel;
 		
 		CString sPriority;
 		sPriority.Format(_T("%d (%s)"), nPriority, CString((LPCTSTR)IDS_TDC_SCALE[nLevel]));
@@ -188,17 +201,7 @@ void CTDLPriorityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 void CTDLPriorityComboBox::DDX(CDataExchange* pDX, int& nPriority)
 {
 	if (pDX->m_bSaveAndValidate)
-	{
-		nPriority = GetCurSel();
-
-		if (nPriority == 0) // NONE
-			nPriority = FM_NOPRIORITY;
-		else
-			nPriority--;
-	}
+		nPriority = GetSelectedPriority();
 	else
-	{
-		int nTemp = (nPriority == FM_NOPRIORITY) ? 0 : nPriority + 1;
-		SetCurSel(nTemp);
-	}
+		SetSelectedPriority(nPriority);
 }

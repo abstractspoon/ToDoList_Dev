@@ -86,7 +86,6 @@ protected:
 	CTDCCustomControlArray m_aCustomControls;
 		
 	CMap<CString, LPCTSTR, DWORD, DWORD&> m_mapCustomFlags;
-	CDWordArray m_aPriorityColors;
 	CTDCAttributeMap m_mapVisibility;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 

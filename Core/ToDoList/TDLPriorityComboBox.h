@@ -16,12 +16,9 @@ class CTDLPriorityComboBox : public CColorComboBox
 {
 // Construction
 public:
-	CTDLPriorityComboBox();
+	CTDLPriorityComboBox(BOOL bIncludeAny);
 	
-	BOOL SetColors(const CDWordArray& aColors); // must have 11 elements
-
-	// not currently used
-//	void SetReverseOrder(BOOL bReverse = TRUE);
+	BOOL SetColors(const CDWordArray& aColors); // must have 11 elements (0-10)
 
 	int IncrementPriority(int nAmount);
 	int GetSelectedPriority() const; // -2 -> 10
@@ -38,8 +35,8 @@ protected:
 	//}}AFX_VIRTUAL
 
 protected:
-//	BOOL m_bReverse;
 	CDWordArray m_aColors;
+	BOOL m_bIncludeAny;
 
 // Implementation
 public:
