@@ -539,12 +539,8 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTR
 		UpdateAutoDropListData(tdc, nAttribID);
 
 		// priority (Note: risk never needs updating)
-		if (m_cbPriorityFilter.GetCount() == 0)
-		{
-			ASSERT(0);
-			m_cbPriorityFilter.SetColors(m_aPriorityColors);
-			m_cbPriorityFilter.InsertColor(0, CLR_NONE, CEnString(IDS_TDC_ANY)); // add a blank item
-		}
+		m_cbPriorityFilter.SetColors(m_aPriorityColors);
+		m_cbPriorityFilter.InsertColor(0, CLR_NONE, CEnString(IDS_TDC_ANY)); // add a blank item
 
 		// Custom attributes
 		UpdateCustomControls(tdc, nAttribID);
