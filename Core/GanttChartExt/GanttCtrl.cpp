@@ -3060,12 +3060,12 @@ void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSe
 		CRect rItem;
 		VERIFY(m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS));
 
-		COLORREF crRow = CLR_NONE;//(bSelected ? CLR_NONE : GetRowColor(nItem));
+//		COLORREF crRow = CLR_NONE;//(bSelected ? CLR_NONE : GetRowColor(nItem));
 
 // 		if (htiRollUp)
 // 			DrawListItemRollupText(pDC, htiRollUp, rItem, rClip, crRow);
 // 		else
-			DrawListItemText(pDC, gi, rItem, rClip, crRow);
+			DrawListItemText(pDC, gi, rItem, rClip/*, crRow*/);
 	}
 }
 
@@ -3095,7 +3095,7 @@ void CGanttCtrl::DrawListItemRollupText(CDC* pDC, HTREEITEM htiParent, const CRe
 }
 */
 
-void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rItem, const CRect& rClip, COLORREF crRow)
+void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rItem, const CRect& rClip/*, COLORREF crRow*/)
 {
 	BOOL bDrawTitle = HasOption(GTLCF_DISPLAYTRAILINGTASKTITLE);
 	BOOL bDrawAllocTo = (HasOption(GTLCF_DISPLAYTRAILINGALLOCTO) && !gi.sAllocTo.IsEmpty());
@@ -3146,9 +3146,9 @@ void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rI
 	if (HasOption(GTLCF_STRIKETHRUDONETASKS) && gi.IsDone(FALSE))
 		hFontOld = pDC->SelectObject(m_tree.Fonts().GetHFont(FALSE, FALSE, FALSE, TRUE));
 	
-	pDC->SetBkMode((crRow == CLR_NONE) ? TRANSPARENT : OPAQUE);
+	pDC->SetBkMode(/*(crRow == CLR_NONE) ?*/ TRANSPARENT /*: OPAQUE*/);
 	pDC->SetTextColor(crBorder);
-	pDC->SetBkColor(crRow);
+	//pDC->SetBkColor(crRow);
 	pDC->DrawText(sTrailing, rText, (DT_LEFT | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_list)));
 
 	pDC->SelectObject(hFontOld);
