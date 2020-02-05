@@ -52,6 +52,7 @@ struct TDCCADATA
 	BOOL AsTimePeriod(TDCTIMEPERIOD& time) const;
 	BOOL AsCost(TDCCOST& cost) const;
 	
+	BOOL IsArray() const; // more than one item
 	BOOL IsFraction() const;
 	BOOL IsTimePeriod() const;
 	

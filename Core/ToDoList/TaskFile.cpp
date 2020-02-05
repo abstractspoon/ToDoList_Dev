@@ -2146,7 +2146,11 @@ BOOL CTaskFile::SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCu
 
 	if (dwAttribType & TDCCA_LISTMASK)
 	{
-		pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsArray());
+		if (dwAttribType & (TDCCA_AUTOMULTILIST | TDCCA_FIXEDMULTILIST))
+		{
+			if (data.IsArray())
+				pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsArray());
+		}
 	}
 	else
 	{

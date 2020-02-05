@@ -205,6 +205,11 @@ int TDCCADATA::AsArray(const CString& sValue, CStringArray& aValues)
 	return Misc::Split(sValue, aValues, NEWLINE, TRUE);
 }
 
+BOOL TDCCADATA::IsArray() const
+{
+	return (sData.Find(NEWLINE) > 0);
+}
+
 int TDCCADATA::GetArraySize() const
 {
 	int nLen = sData.GetLength();
