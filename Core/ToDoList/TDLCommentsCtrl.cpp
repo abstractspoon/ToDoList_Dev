@@ -200,6 +200,8 @@ HBRUSH CTDLCommentsCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 	if (m_bShowingLabel && (nCtlColor == CTLCOLOR_STATIC))
 	{
+		pDC->SetTextColor(m_theme.crAppText);
+
 		if (m_brBack.GetSafeHandle())
 		{
 			pDC->SetBkMode(TRANSPARENT);
