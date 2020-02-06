@@ -895,7 +895,7 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 		if (bNeedRefilter)
 		{
 			// don't refilter on Time Estimate/Spent, Cost or Comments, or 
-			// similar custom attributes  because the user typically hasn't 
+			// similar custom attributes because the user typically hasn't 
 			// finished editing when this notification is first received
 			switch (nModType)
 			{
@@ -931,6 +931,9 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 	{
 		switch (nModType)
 		{
+		case TDCA_ALL:
+			return TRUE; // More detailed check done later
+
 		case TDCA_TASKNAME:		
 			bNeedRefilter = !m_filter.sTitle.IsEmpty(); 
 			break;

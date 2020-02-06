@@ -1287,8 +1287,6 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 	}
 	else if (aModTaskIDs.GetSize() == 1)
 	{
-		// finally, if this was a simple task edit we can just test to 
-		// see if the modified task still matches the filter.
 		DWORD dwModTaskID = aModTaskIDs[0];
 
 		// VERY SPECIAL CASE
@@ -1306,12 +1304,18 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 			// else fall thru
 		}
 
+		// Finally, if this was a simple task edit we can just test to 
+		// see if the modified task still matches the filter.
+		// Note: This check handles both 'advanced' and 'normal' filters
 		SEARCHPARAMS params;
 		SEARCHRESULT result;
 
-		// This will handle custom and 'normal' filters
 		m_filter.BuildFilterQuery(params, m_aCustomAttribDefs);
-		bNeedRefilter = !m_matcher.TaskMatches(dwModTaskID, params, result, FALSE);
+
+		BOOL bMatchesFilter = m_matcher.TaskMatches(dwModTaskID, params, result, FALSE);
+		BOOL bTreeHasItem = (m_taskTree.GetItem(dwModTaskID) != NULL);
+
+		bNeedRefilter = ((bMatchesFilter && !bTreeHasItem) || (!bMatchesFilter && bTreeHasItem));
 		
 		// extra handling for 'Find Tasks' filters 
 		if (bNeedRefilter && HasAdvancedFilter())
