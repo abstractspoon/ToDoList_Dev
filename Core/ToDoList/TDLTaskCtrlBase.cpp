@@ -1648,40 +1648,28 @@ TDC_HITTEST CTDLTaskCtrlBase::HitTest(const CPoint& ptScreen) const
 	{
 		return TDCHT_COLUMNHEADER;
 	}
-	else if (PtInClientRect(ptScreen, Tasks(), TRUE)) // tasks
+	else if (PtInClientRect(ptScreen, Tasks(), TRUE))
 	{
 		// see if we hit a task
 		if (HitTestTasksTask(ptScreen))
 		{
 			return TDCHT_TASK;
 		}
-		else
+		else if (PtInClientRect(ptScreen, Tasks(), TRUE))
 		{
-			CPoint ptClient(ptScreen);
-			::ScreenToClient(Tasks(), &ptClient);
-
-			if (PtInClientRect(ptClient, Tasks(), FALSE))
-			{
-				return TDCHT_TASKLIST;
-			}
+			return TDCHT_TASKLIST;
 		}
 	}
-	else if (PtInClientRect(ptScreen, m_lcColumns, TRUE)) // columns
+	else if (PtInClientRect(ptScreen, m_lcColumns, TRUE))
 	{
 		// see if we hit a task
 		if (HitTestColumnsTask(ptScreen))
 		{
 			return TDCHT_TASK;
 		}
-		else
+		else if (PtInClientRect(ptScreen, m_lcColumns, TRUE))
 		{
-			CPoint ptClient(ptScreen);
-			m_lcColumns.ScreenToClient(&ptClient);
-
-			if (PtInClientRect(ptClient, m_lcColumns, FALSE))
-			{
-				return TDCHT_TASKLIST;
-			}
+			return TDCHT_TASKLIST;
 		}
 	}
 	
