@@ -1790,8 +1790,17 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 		if (bEditTime)
 		{
-			GetSelectedTaskTimeEstimate(m_timeEstimate);
-			GetSelectedTaskTimeSpent(m_timeSpent);
+			if (!GetSelectedTaskTimeEstimate(m_timeEstimate))
+			{
+				ASSERT(nSelCount > 1);
+				m_timeEstimate.dAmount = 0.0;
+			}
+
+			if (!GetSelectedTaskTimeSpent(m_timeSpent))
+			{
+				ASSERT(nSelCount > 1);
+				m_timeSpent.dAmount = 0.0;
+			}
 		}
 		else
 		{

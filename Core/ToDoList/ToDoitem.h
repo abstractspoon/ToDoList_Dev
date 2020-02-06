@@ -50,6 +50,7 @@ struct TDCTIMEPERIOD
 
 	BOOL SetTHUnits(TH_UNITS nTHUnits, BOOL bRecalc);
 	BOOL SetUnits(TDC_UNITS nNewUnits, BOOL bRecalc);
+	BOOL HasValidUnits() const;
 
 	BOOL SetTime(double dTime, TDC_UNITS nUnits);
 	BOOL AddTime(double dTime, TDC_UNITS nUnits);
