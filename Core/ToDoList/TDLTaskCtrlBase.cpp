@@ -1736,11 +1736,13 @@ TDC_COLUMN CTDLTaskCtrlBase::HitTestColumn(const CPoint& ptScreen) const
 BOOL CTDLTaskCtrlBase::PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords)
 {
 	CRect rect;
+	::GetClientRect(hWnd, rect);
 	
 	if (bScreenCoords)
-		::GetWindowRect(hWnd, rect);
-	else
-		::GetClientRect(hWnd, rect);
+	{
+		::ClientToScreen(hWnd, &rect.TopLeft());
+		::ClientToScreen(hWnd, &rect.BottomRight());
+	}
 	
 	return rect.PtInRect(point);
 }
