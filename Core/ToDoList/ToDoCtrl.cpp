@@ -1790,17 +1790,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 		if (bEditTime)
 		{
-			if (!GetSelectedTaskTimeEstimate(m_timeEstimate))
-			{
-				ASSERT(nSelCount > 1);
-				m_timeEstimate.dAmount = 0.0;
-			}
-
-			if (!GetSelectedTaskTimeSpent(m_timeSpent))
-			{
-				ASSERT(nSelCount > 1);
-				m_timeSpent.dAmount = 0.0;
-			}
+			GetSelectedTaskTimeEstimate(m_timeEstimate);
+			GetSelectedTaskTimeSpent(m_timeSpent);
 		}
 		else
 		{
@@ -3102,12 +3093,12 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 		{
 			UpdateControls(FALSE); // don't update comments
 		}
-		else if (bUpdateTimeEst && (GetSelectedCount() == 1))
+		else if (bUpdateTimeEst)
 		{
 			TDCTIMEPERIOD time;
-			VERIFY(GetSelectedTaskTimeEstimate(time));
 
-			CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, time, FALSE, DECIMALS);
+			if (GetSelectedTaskTimeEstimate(time))
+				CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, time, FALSE, DECIMALS);
 		}
 	}
 	
@@ -3978,9 +3969,8 @@ BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost, BOOL bOffset)
 	if (aModTaskIDs.GetSize())
 	{
 		TDCCOST costSel;
-		GetSelectedTaskCost(costSel);
-
-		if (m_cost != costSel)
+		
+		if (GetSelectedTaskCost(costSel) && (m_cost != costSel))
 		{
 			m_cost = costSel;
 			CTDCDialogHelper().UpdateDataEx(this, IDC_COST, m_cost, FALSE, DECIMALS);
@@ -4086,25 +4076,19 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 	
 	if (aModTaskIDs.GetSize())
 	{
-		// Update the time estimate field unless we're offsetting multiple tasks
-		BOOL bMultipleTasks = (GetSelectedCount() > 1);
+		// Update the time estimate field
+		TDCTIMEPERIOD time;
 
-		if (!bOffset || !bMultipleTasks)
+		if (GetSelectedTaskTimeEstimate(time) && (m_timeEstimate != time))
 		{
-			TDCTIMEPERIOD time;
-			GetSelectedTaskTimeEstimate(time);
-
-			if (m_timeEstimate != time)
-			{
-				// note: setting the time field changes m_timeEstimate.nUnits
-				// so we have to do them separately
-				m_timeEstimate = time;
-				CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE, DECIMALS);
-			}
+			// note: setting the time field changes m_timeEstimate.nUnits
+			// so we have to do them separately
+			m_timeEstimate = time;
+			CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE, DECIMALS);
 		}
 
 		// Recalc other attributes if only one item selected
-		if (!bMultipleTasks)
+		if (GetSelectedCount() == 1)
 		{
 			// update % complete?
 			if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -4178,25 +4162,19 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bO
 	
 	if (aModTaskIDs.GetSize())
 	{
-		// Update the time spent field unless we're offsetting multiple tasks
-		BOOL bMultipleTasks = (GetSelectedCount() > 1);
+		// Update the time spent field
+		TDCTIMEPERIOD time;
 
-		if (!bOffset || !bMultipleTasks)
+		if (GetSelectedTaskTimeSpent(time) && (m_timeSpent != time))
 		{
-			TDCTIMEPERIOD time;
-			GetSelectedTaskTimeSpent(time);
-						
-			if (m_timeSpent != time)
-			{
-				// note: setting the time field changes m_timeSpent.nUnits
-				// so we have to do them separately
-				m_timeSpent = time;
-				CTDCDialogHelper().UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE, DECIMALS);
-			}
+			// note: setting the time field changes m_timeSpent.nUnits
+			// so we have to do them separately
+			m_timeSpent = time;
+			CTDCDialogHelper().UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE, DECIMALS);
 		}
 		
 		// update % complete?
-		if (HasStyle(TDCS_AUTOCALCPERCENTDONE) && !bMultipleTasks)
+		if (HasStyle(TDCS_AUTOCALCPERCENTDONE) && (GetSelectedCount() == 1))
 		{
 			m_nPercentDone = m_calculator.GetTaskPercentDone(GetSelectedTaskID());		
 			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
@@ -4251,7 +4229,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 		{
 			if (bRecalcTime)
 			{
-				GetSelectedTaskTimeEstimate(m_timeEstimate);
+				VERIFY(GetSelectedTaskTimeEstimate(m_timeEstimate));
 				CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE, DECIMALS);
 			}
 			// update % complete?
@@ -4319,7 +4297,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 		{
 			if (bRecalcTime)
 			{
-				GetSelectedTaskTimeSpent(m_timeSpent);
+				VERIFY(GetSelectedTaskTimeSpent(m_timeSpent));
 				CTDCDialogHelper().UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE, DECIMALS);
 			}
 			// update % complete?
@@ -11991,7 +11969,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 		{
 			// preserve existing units
 			TDCTIMEPERIOD time;
-			GetSelectedTaskTimeEstimate(time); 
+			VERIFY(GetSelectedTaskTimeEstimate(time)); 
 
 			time.dAmount = 0.0;
 			return SetSelectedTaskTimeEstimate(time);
@@ -12001,7 +11979,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 		{
 			// preserve existing units
 			TDCTIMEPERIOD time;
-			GetSelectedTaskTimeSpent(time);
+			VERIFY(GetSelectedTaskTimeSpent(time));
 
 			time.dAmount = 0.0;
 			return SetSelectedTaskTimeSpent(time);
@@ -12011,7 +11989,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 		{ 
 			// preserve 'IsRate'
 			TDCCOST cost;
-			GetSelectedTaskCost(cost);
+			VERIFY(GetSelectedTaskCost(cost));
 
 			cost.dAmount = 0.0;
 			return SetSelectedTaskCost(cost);
