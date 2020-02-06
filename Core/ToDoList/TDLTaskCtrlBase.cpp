@@ -940,73 +940,76 @@ BOOL CTDLTaskCtrlBase::CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelected
 {
 	switch (nColID)
 	{
-		case TDCC_PRIORITY:
-		case TDCC_PERCENT:
-		case TDCC_TIMEEST:
-		case TDCC_TIMESPENT:
-		case TDCC_STARTDATE:
-		case TDCC_DUEDATE:
-		case TDCC_DONEDATE:
-		case TDCC_ALLOCTO:
-		case TDCC_ALLOCBY:
-		case TDCC_STATUS:
-		case TDCC_CATEGORY:
-		case TDCC_FILEREF:
-		case TDCC_POSITION:
-		case TDCC_ID:
-		case TDCC_CREATIONDATE:
-		case TDCC_CREATEDBY:
-		case TDCC_LASTMODDATE:
-		case TDCC_RISK:
-		case TDCC_EXTERNALID:
-		case TDCC_COST:
-		case TDCC_DEPENDENCY:
-		case TDCC_RECURRENCE:
-		case TDCC_VERSION:
-		case TDCC_REMAINING:
-		case TDCC_REMINDER:
-		case TDCC_PARENTID:
-		case TDCC_PATH:
-		case TDCC_TAGS:
-		case TDCC_SUBTASKDONE:
-		case TDCC_STARTTIME:
-		case TDCC_DUETIME:
-		case TDCC_DONETIME:
-		case TDCC_CREATIONTIME:
-		case TDCC_LASTMODBY:
-		case TDCC_COMMENTSSIZE:
-		case TDCC_CLIENT: 
-			break;
+	case TDCC_NONE:
+		return FALSE;
 
-		case TDCC_ICON:
-		case TDCC_RECENTEDIT:
-		case TDCC_LOCK:
-		case TDCC_COLOR:
-		case TDCC_DONE:
-		case TDCC_TRACKTIME:
-		case TDCC_FLAG:
-			return FALSE;
+	case TDCC_PRIORITY:
+	case TDCC_PERCENT:
+	case TDCC_TIMEEST:
+	case TDCC_TIMESPENT:
+	case TDCC_STARTDATE:
+	case TDCC_DUEDATE:
+	case TDCC_DONEDATE:
+	case TDCC_ALLOCTO:
+	case TDCC_ALLOCBY:
+	case TDCC_STATUS:
+	case TDCC_CATEGORY:
+	case TDCC_FILEREF:
+	case TDCC_POSITION:
+	case TDCC_ID:
+	case TDCC_CREATIONDATE:
+	case TDCC_CREATEDBY:
+	case TDCC_LASTMODDATE:
+	case TDCC_RISK:
+	case TDCC_EXTERNALID:
+	case TDCC_COST:
+	case TDCC_DEPENDENCY:
+	case TDCC_RECURRENCE:
+	case TDCC_VERSION:
+	case TDCC_REMAINING:
+	case TDCC_REMINDER:
+	case TDCC_PARENTID:
+	case TDCC_PATH:
+	case TDCC_TAGS:
+	case TDCC_SUBTASKDONE:
+	case TDCC_STARTTIME:
+	case TDCC_DUETIME:
+	case TDCC_DONETIME:
+	case TDCC_CREATIONTIME:
+	case TDCC_LASTMODBY:
+	case TDCC_COMMENTSSIZE:
+	case TDCC_CLIENT:
+		break;
 
-		default:
-			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+	case TDCC_ICON:
+	case TDCC_RECENTEDIT:
+	case TDCC_LOCK:
+	case TDCC_COLOR:
+	case TDCC_DONE:
+	case TDCC_TRACKTIME:
+	case TDCC_FLAG:
+		return FALSE;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+		{
+			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+			VERIFY(m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef));
+
+			switch (attribDef.GetAttributeType())
 			{
-				TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-				VERIFY(m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef));
-
-				switch (attribDef.GetAttributeType())
-				{
-				case TDCCA_BOOL:
-				case TDCCA_ICON:
-					return FALSE;
-				}
-			}
-			else
-			{
-				// Missed values
-				ASSERT(0);
+			case TDCCA_BOOL:
+			case TDCCA_ICON:
 				return FALSE;
 			}
-			break;
+		}
+		else
+		{
+			// Missed values
+			ASSERT(0);
+			return FALSE;
+		}
+		break;
 	}
 
 	return (bSelectedTasksOnly ? HasSelection() : m_lcColumns.GetItemCount());
