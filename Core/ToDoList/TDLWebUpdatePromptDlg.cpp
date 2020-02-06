@@ -44,8 +44,8 @@ CTDLWebUpdatePromptDlg::CTDLWebUpdatePromptDlg(LPCTSTR szExeVer, const CStringAr
 	m_psh.dwFlags &= ~(PSH_HASHELP);
 	
 	m_psh.hInstance = AfxGetInstanceHandle(); 
-	m_psh.pszIcon = MAKEINTRESOURCE(IDR_MAINFRAME);
-	m_psh.pszbmHeader = MAKEINTRESOURCE(IDB_WIZ_HEADER);
+	m_psh.pszIcon = MAKEINTRESOURCE(IDI_TDLUPDATE);
+	m_psh.pszbmHeader = MAKEINTRESOURCE(IDB_TDLUPDATE_WIZ_HEADER);
 
 	SetWizardMode();
 }
