@@ -792,6 +792,9 @@ void CTDLTaskCtrlBase::OnUndoRedo(BOOL /*bUndo*/)
 {
 	// resync scroll pos
 	PostResync(m_lcColumns, FALSE);
+
+	// resync scrollbars
+	PostResize(); 
 }
 
 void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChanges)
