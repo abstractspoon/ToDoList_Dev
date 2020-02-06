@@ -6154,7 +6154,10 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const
 		m_data.GetTaskTimeEstimate(dwTaskID, time);
 
 		if (time != timeEst)
+		{
+			timeEst.dAmount = 0.0;
 			return FALSE;
+		}
 	}
 	
 	return TRUE;
@@ -6179,7 +6182,10 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const
 		m_data.GetTaskTimeSpent(dwTaskID, time);
 
 		if (time != timeSpent)
+		{
+			timeSpent.dAmount = 0.0;
 			return FALSE;
+		}
 	}
 
 	return TRUE;
@@ -6282,7 +6288,10 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCost(TDCCOST& cost) const
 				VERIFY(m_data.GetTaskCost(dwTaskID, taskCost));
 
 				if (cost != taskCost)
+				{
+					cost.dAmount = 0;
 					return FALSE;
+				}
 			}
 
 			return TRUE;
