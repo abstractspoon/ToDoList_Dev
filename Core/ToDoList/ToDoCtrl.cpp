@@ -4077,19 +4077,25 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 	
 	if (aModTaskIDs.GetSize())
 	{
-		TDCTIMEPERIOD time;
-		GetSelectedTaskTimeEstimate(time);
+		// Update the time estimate field unless we're offsetting multiple tasks
+		BOOL bMultipleTasks = (GetSelectedCount() > 1);
 
-		if (m_timeEstimate != time)
+		if (!bOffset || !bMultipleTasks)
 		{
-			// note: setting the time field changes m_timeEstimate.nUnits
-			// so we have to do them separately
-			m_timeEstimate = time;
-			CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE, DECIMALS);
+			TDCTIMEPERIOD time;
+			GetSelectedTaskTimeEstimate(time);
+
+			if (m_timeEstimate != time)
+			{
+				// note: setting the time field changes m_timeEstimate.nUnits
+				// so we have to do them separately
+				m_timeEstimate = time;
+				CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE, DECIMALS);
+			}
 		}
 
 		// Recalc other attributes if only one item selected
-		if (GetSelectedCount() == 1)
+		if (!bMultipleTasks)
 		{
 			// update % complete?
 			if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -4163,16 +4169,25 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bO
 	
 	if (aModTaskIDs.GetSize())
 	{
-		if (m_timeSpent != timeSpent)
+		// Update the time spent field unless we're offsetting multiple tasks
+		BOOL bMultipleTasks = (GetSelectedCount() > 1);
+
+		if (!bOffset || !bMultipleTasks)
 		{
-			// note: setting the time field changes m_timeSpent.nUnits
-			// so we have to do them separately
-			m_timeSpent = timeSpent;
-			CTDCDialogHelper().UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE, DECIMALS);
+			TDCTIMEPERIOD time;
+			GetSelectedTaskTimeSpent(time);
+						
+			if (m_timeSpent != time)
+			{
+				// note: setting the time field changes m_timeSpent.nUnits
+				// so we have to do them separately
+				m_timeSpent = time;
+				CTDCDialogHelper().UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE, DECIMALS);
+			}
 		}
 		
 		// update % complete?
-		if (HasStyle(TDCS_AUTOCALCPERCENTDONE) && GetSelectedCount() == 1)
+		if (HasStyle(TDCS_AUTOCALCPERCENTDONE) && !bMultipleTasks)
 		{
 			m_nPercentDone = m_calculator.GetTaskPercentDone(GetSelectedTaskID());		
 			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
