@@ -95,3 +95,8 @@ BOOL CBurndownTrendComboBox::Initialise()
 
 	return TRUE;
 }
+
+void CBurndownTrendComboBox::DDX(CDataExchange* pDX, BURNDOWN_TREND& nTrend)
+{
+	CDialogHelper::DDX_CBData(pDX, *this, nTrend, BTL_NONE);
+}

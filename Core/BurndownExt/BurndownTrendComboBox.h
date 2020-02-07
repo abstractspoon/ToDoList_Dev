@@ -7,6 +7,8 @@
 // BurndownTrendComboBox.h : header file
 //
 
+#include "BurndownEnum.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownTrendComboBox window
 
@@ -18,6 +20,7 @@ public:
 	virtual ~CBurndownTrendComboBox();
 
 	BOOL Initialise();
+	void DDX(CDataExchange* pDX, BURNDOWN_TREND& nTrend);
 
 protected:
 // Overrides

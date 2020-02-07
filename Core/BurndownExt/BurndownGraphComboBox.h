@@ -7,6 +7,8 @@
 // BurndownGraphComboBox.h : header file
 //
 
+#include "BurndownEnum.h"
+
 #include "..\Shared\ownerdrawcomboboxbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -24,6 +26,7 @@ public:
 	virtual ~CBurndownGraphComboBox();
 
 	BOOL Initialise(const CBurndownChart& chart);
+	void DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph);
 
 protected:
 // Overrides

@@ -81,6 +81,33 @@ BOOL CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 	return TRUE;
 }
 
+void CBurndownGraphComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph)
+{
+	if (pDX->m_bSaveAndValidate)
+	{
+		int nSel = GetCurSel();
+
+		if ((nSel == -1) || ItemIsContainer(nSel))
+		{
+			ASSERT(0);
+			nGraph = BCT_UNKNOWNGRAPH;
+		}
+		else
+		{
+			nGraph = (BURNDOWN_GRAPH)GetItemData(nSel);
+		}
+	}
+	else
+	{
+		int nFind = CDialogHelper::FindItemByData(*this, nGraph);
+
+		if (ItemIsContainer(nFind))
+			ASSERT(0);
+		else
+			SetCurSel(nFind);
+	}
+}
+
 void CBurndownGraphComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
 											COLORREF& crText, COLORREF& crBack) const
 {
