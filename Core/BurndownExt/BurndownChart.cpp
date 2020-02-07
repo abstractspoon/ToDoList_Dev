@@ -204,9 +204,12 @@ void CBurndownChart::GetDefaultGraphColors(CGraphColorMap& mapColors) const
 
 void CBurndownChart::ShowTrendLine(BURNDOWN_TREND nTrend)
 {
-	m_nTrendLine = nTrend;
+	if (nTrend != m_nTrendLine)
+	{
+		m_nTrendLine = nTrend;
 
-	UpdateGraphTrendLine();
+		UpdateGraphTrendLine();
+	}
 }
 
 void CBurndownChart::UpdateGraphTrendLine()

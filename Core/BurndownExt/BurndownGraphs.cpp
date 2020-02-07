@@ -215,9 +215,6 @@ BURNDOWN_GRAPHSCALE CTimeSeriesGraph::CalculateRequiredScale(int nAvailWidth, in
 
 BOOL CTimeSeriesGraph::ShowTrendLine(BURNDOWN_TREND nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
 {
-	if (nTrend == m_nTrend)
-		return TRUE;
-
 	if (CalculateTrendLines(datasets, nTrend))
 		m_nTrend = nTrend;
 	else
