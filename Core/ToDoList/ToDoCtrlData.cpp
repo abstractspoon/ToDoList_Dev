@@ -1277,6 +1277,8 @@ TDC_SET CToDoCtrlData::SetTaskAttributes(DWORD dwTaskID, const TODOITEM& tdi)
 
 	if (*pTDI != tdi)
 	{
+		SaveEditUndo(dwTaskID, pTDI, TDCA_ALL);
+
 		*pTDI = tdi;
 		return SET_CHANGE;
 	}
