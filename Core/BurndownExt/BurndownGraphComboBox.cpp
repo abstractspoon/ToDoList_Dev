@@ -88,17 +88,8 @@ void CBurndownGraphComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwI
 
 	if (ItemDataIsContainer(dwItemData))
 	{
-		BOOL bItemSelected = (nItemState & ODS_SELECTED);
-
-		if (bItemSelected)
-		{
-			crBack = GetSysColor(COLOR_3DDKSHADOW);
-			crText = GetSysColor(COLOR_3DHIGHLIGHT);
-		}
-		else
-		{
-			crText = GetSysColor(COLOR_3DDKSHADOW);
-		}
+		crBack = GetSysColor(COLOR_3DLIGHT);
+		crText = GetSysColor(COLOR_WINDOWTEXT);
 	}
 }
 
@@ -116,43 +107,90 @@ void CBurndownGraphComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem,
 	COwnerdrawComboBoxBase::DrawItemText(dc, rItem, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
 
+BOOL CBurndownGraphComboBox::CanDrawFocusRect(int /*nItem*/, DWORD dwItemData) const
+{
+	return !ItemDataIsContainer(dwItemData);
+}
+
 BOOL CBurndownGraphComboBox::OnSelEndOK()
 {
 	// Prevent focus moving to a container item
-	DWORD dwItemData = CDialogHelper::GetSelectedItemData(*this);
+	int nSel = GetCurSel();
 
-	if (ItemDataIsContainer(dwItemData))
-		CDialogHelper::SelectItemByData(*this, (dwItemData + 1));
+	if (ItemIsContainer(nSel))
+		SetCurSel(nSel + 1);
 
 	return FALSE;// continue routing
 }
 
-
 void CBurndownGraphComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// Step over container items
-	int nSel = GetCurSel();
+	int nNewSel = CB_ERR;
 
-	if ((nChar == VK_UP) && ItemIsContainer(nSel - 1))
+	switch (nChar)
 	{
-		nSel -= 2;
-	}
-	else if ((nChar == VK_DOWN) && ItemIsContainer(nSel + 1))
-	{
-		nSel += 2;
+	case VK_UP:
+		nNewSel = (GetCurSel() - 1);
+		nNewSel = max(0, nNewSel);
+		break;
+
+	case VK_PRIOR:
+		nNewSel = (GetCurSel() - (GetMinVisible() - 1));
+		nNewSel = max(0, nNewSel);
+		break;
+
+	case VK_DOWN:
+		nNewSel = (GetCurSel() + 1);
+		nNewSel = min((GetCount() - 1), nNewSel);
+		break;
+
+	case VK_NEXT:
+		nNewSel = (GetCurSel() + (GetMinVisible() - 1));
+		nNewSel = min((GetCount() - 1), nNewSel);
+		break;
+
+	case VK_HOME:
+		nNewSel = 0;
+		break;
+
+	case VK_END:
+		nNewSel = (GetCount() - 1);
+		break;
 	}
 
-	if (nSel != GetCurSel())
+	if ((nNewSel == CB_ERR) || !ItemIsContainer(nNewSel))
 	{
-		SetCurSel(nSel);
+		COwnerdrawComboBoxBase::OnKeyDown(nChar, nRepCnt, nFlags);
+		return;
+	}
+
+	int nCurSel = GetCurSel();
+
+	if (nNewSel > nCurSel)
+	{
+		// Step over container item unless it's the last
+		if ((nNewSel + 1) < GetCount())
+			nNewSel++;
+		else
+			nNewSel--; // move back one place
+	}
+	else 
+	{
+		// Step over container item unless it's the first
+		if ((nNewSel - 1) > 0)
+			nNewSel--;
+		else
+			nNewSel++; // move forward one place
+	}
+
+	if (nNewSel != nCurSel)
+	{
+		SetCurSel(nNewSel);
 
 		int nMsgID = (GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
 		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
-
-		return; // eat
 	}
-
-	COwnerdrawComboBoxBase::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 BOOL CBurndownGraphComboBox::ItemIsContainer(int nItem) const

@@ -46,6 +46,7 @@ protected:
 					   COLORREF& crText, COLORREF& crBack) const;
 	void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 					  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+	BOOL CanDrawFocusRect(int nItem, DWORD dwItemData) const;
 
 	BOOL ItemIsContainer(int nItem) const;
 	

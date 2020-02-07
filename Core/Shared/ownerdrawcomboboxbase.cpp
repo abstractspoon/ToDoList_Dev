@@ -108,19 +108,29 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	dc.RestoreDC(nDC);
 
 	// draw focus rect last of all
-	rItem = lpDrawItemStruct->rcItem;
-
-	if (lpDrawItemStruct->itemAction & ODA_FOCUS)
+	if (WantDrawFocusRect(lpDrawItemStruct))
 	{
-		dc.DrawFocusRect(rItem);
-	}
-	else if (lpDrawItemStruct->itemAction & ODA_DRAWENTIRE)
-	{
-		if (lpDrawItemStruct->itemState & ODS_FOCUS)
-			dc.DrawFocusRect(rItem);
+		dc.DrawFocusRect(&lpDrawItemStruct->rcItem);
 	}
 
 	dc.Detach();
+}
+
+BOOL COwnerdrawComboBoxBase::WantDrawFocusRect(LPDRAWITEMSTRUCT lpDrawItemStruct) const
+{
+	if (!CanDrawFocusRect((int)lpDrawItemStruct->itemID, lpDrawItemStruct->itemData))
+		return FALSE;
+
+	if (lpDrawItemStruct->itemAction & ODA_FOCUS)
+		return TRUE;
+
+	if ((lpDrawItemStruct->itemAction & ODA_DRAWENTIRE) && 
+		(lpDrawItemStruct->itemState & ODS_FOCUS))
+	{
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 void COwnerdrawComboBoxBase::DrawItemText(CDC& dc, const CRect& rect, int /*nItem*/, UINT /*nItemState*/,
