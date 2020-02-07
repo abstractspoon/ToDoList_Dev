@@ -534,13 +534,6 @@ LRESULT CCheckComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 					}
 				}
 				break;
-
-// 			case VK_ESCAPE:
-// 				{
-// 					m_bEditChange = FALSE;
-// 					ShowDropDown(FALSE);
-// 				}
-// 				break;
 			}
 		}
 		break;
