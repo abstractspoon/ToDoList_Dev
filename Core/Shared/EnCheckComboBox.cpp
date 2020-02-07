@@ -36,11 +36,20 @@ BEGIN_MESSAGE_MAP(CEnCheckComboBox, CCheckComboBox)
 	ON_CONTROL(LBN_SELCHANGE, 1000, OnLBSelChange)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 	ON_MESSAGE(WM_GETTEXTLENGTH, OnGetTextLen)
+	ON_WM_KEYDOWN()
 
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnCheckComboBox message handlers
+
+void CEnCheckComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
+{
+	if (m_bMultiSel)
+		CCheckComboBox::OnKeyDown(nChar, nRepCnt, nFlags);
+	else
+		CAutoComboBox::OnKeyDown(nChar, nRepCnt, nFlags);
+}
 
 BOOL CEnCheckComboBox::EnableMultiSelection(BOOL bEnable)
 {

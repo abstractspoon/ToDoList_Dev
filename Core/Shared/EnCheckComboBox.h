@@ -55,6 +55,7 @@ protected:
 	afx_msg void OnLBSelChange();
 	afx_msg BOOL OnSelEndOK();
 	afx_msg LRESULT OnGetTextLen(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	DECLARE_MESSAGE_MAP()
 	
