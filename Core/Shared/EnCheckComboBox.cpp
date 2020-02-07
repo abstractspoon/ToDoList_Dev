@@ -88,6 +88,7 @@ BOOL CEnCheckComboBox::EnableMultiSelection(BOOL bEnable)
 		}
 		
 		Invalidate();
+		InitItemHeight();
 	}
 	
 	return TRUE;
