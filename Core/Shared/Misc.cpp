@@ -1020,15 +1020,14 @@ int Misc::Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep, BOOL
 			// flip bInQuotes
 			bInQuotes = !bInQuotes;
 
-			// Workaround to handle Quoted empty string as last word
-			if (!bPreserveQuotes)
+			if (bPreserveQuotes)
+			{
+				sWord += chr;
+			}
+			else // Workaround to handle Quoted empty string as last word
 			{
 				if (!bInQuotes && bAllowEmpty && sWord.IsEmpty())
 					sWord = ' ';
-			}
-			else
-			{
-				sWord += chr;
 			}
 		}
 		else // everything else
@@ -2474,33 +2473,41 @@ int Misc::GetKeys(const CMapStringToString& map, CStringArray& aKeys)
 
 //////////////////////////////////////////////////////////////
 
-void Misc::MakeQuoted(CString& sText)
+void Misc::MakeQuoted(CString& sText, TCHAR cEscapeEmbeddedQuotesWith)
 {
 	if (!IsQuoted(sText))
 	{
 		// Escape all contained quotes
-		sText.Replace(DBL_QUOTE, _T("\\\""));
+		if (cEscapeEmbeddedQuotesWith)
+		{
+			TCHAR szEscapedQuote[] = { cEscapeEmbeddedQuotesWith, '\"', 0 };
+			sText.Replace(DBL_QUOTE, szEscapedQuote);
+		}
 		
 		// wrap with quotes
 		sText = DBL_QUOTE + sText + DBL_QUOTE;
 	}
 }
 
-void Misc::MakeUnquoted(CString& sText)
+void Misc::MakeUnquoted(CString& sText, TCHAR cUnescapeEmbeddedQuotesWith)
 {
 	if (IsQuoted(sText))
 	{
 		sText = sText.Mid(1, (sText.GetLength() - 2));
 		
 		// Un-escape all contained quotes
-		sText.Replace(_T("\\\""), DBL_QUOTE);
+		if (cUnescapeEmbeddedQuotesWith)
+		{
+			TCHAR szEscapedQuote[] = { cUnescapeEmbeddedQuotesWith, '\"', 0 };
+			sText.Replace(szEscapedQuote, DBL_QUOTE);
+		}
 	}
 }
 
-CString Misc::GetQuoted(LPCTSTR szText)
+CString Misc::GetQuoted(LPCTSTR szText, TCHAR cEscapeEmbeddedQuotesWith)
 {
 	CString sText(szText);
-	MakeQuoted(sText);
+	MakeQuoted(sText, cEscapeEmbeddedQuotesWith);
 	
 	return sText;
 }

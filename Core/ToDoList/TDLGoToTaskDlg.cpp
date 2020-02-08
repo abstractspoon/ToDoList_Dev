@@ -158,7 +158,7 @@ DWORD CTDLGoToTaskDlg::FindTask(const CString& sText, CString& sTitle) const
 	CResultArray aResults;
 	SEARCHPARAMS params;
 
-	params.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_INCLUDES, Misc::GetQuoted(sText)));
+	params.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_INCLUDES, Misc::GetQuoted(sText, '\"')));
 	params.bIgnoreFilteredOut = FALSE;
 
 	if (m_tdc.FindTasks(params, aResults))
