@@ -70,7 +70,7 @@ public:
 	void RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter);
 
 	BOOL PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
-						const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CString& sCmdline, BOOL bEscapeSpaces = -1);
+						const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CString& sCmdline);
 
 	static HICON GetToolIcon(CSysImageList& sil, const USERTOOL& tool);
 	static CString GetToolPath(const USERTOOL& tool);
@@ -89,10 +89,10 @@ protected:
 	static BOOL GetToolPaths(const USERTOOL& tool, CString& sToolPath, CString& sIconPath);
 
 	static BOOL ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, CLA_TYPE nType, 
-									const CString& sValue, BOOL bEscapeSpaces);
+									const CString& sValue, BOOL bWebTool);
 	static BOOL ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, const CString& sName, 
-									const CString& sValue, BOOL bEscapeSpaces);
-
+									const CString& sValue, BOOL bWebTool);
+	static CString EscapeCharacters(const CString& sValue, BOOL bWebTool);
 };
 
 #endif // !defined(AFX_TOOLSHELPER_H__6BAD432D_0189_46A9_95ED_EF869CFC6CE1__INCLUDED_)
