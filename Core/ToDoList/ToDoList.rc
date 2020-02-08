@@ -1773,7 +1773,7 @@ END
 
 IDD_WEBUPDATE_PROMPT_PAGE DIALOG DISCARDABLE  0, 0, 276, 107
 STYLE WS_CHILD | WS_CAPTION
-CAPTION "ToDoList Web Update"
+CAPTION "ToDoList Web Update (c) AbstractSpoon"
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&What's New:",IDC_LABEL,0,0,42,8

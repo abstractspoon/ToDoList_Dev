@@ -1463,6 +1463,10 @@ SOURCE=.\res\task_tree_std.ico
 # End Source File
 # Begin Source File
 
+SOURCE=..\TDLUpdate\res\TDLUpdate.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\timetrac.bmp
 # End Source File
 # Begin Source File
