@@ -106,6 +106,12 @@ BOOL CEnCheckComboBox::EnableMultiSelection(BOOL bEnable)
 	return TRUE;
 }
 
+void CEnCheckComboBox::ClearMultiSelectionHistory()
+{
+	if (m_bMultiSel && IsAnyChecked())
+		CheckAll(CCBC_UNCHECKED, FALSE);
+}
+
 int CEnCheckComboBox::SetStrings(const CStringArray& aItems)
 {
 	// Save and restore check states
