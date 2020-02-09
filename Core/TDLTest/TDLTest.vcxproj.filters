@@ -37,388 +37,37 @@
     <ClCompile Include="ToDoCtrlTaskLinkTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\ToDoCtrl.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\ToDoListWnd.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLTaskTreeCtrl.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLTaskCtrlBase.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLTimeTrackerDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\ToDoCtrlData.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\FilteredToDoCtrl.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesUITasklistColorsPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\ToDoCtrlFind.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCFilter.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\ToDoCtrlDataUtils.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TabbedToDoCtrl.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLTaskListCtrl.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\ToDoitem.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLRecurringTaskEdit.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLKeyboardShortcutDisplayDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLWelcomeWizard.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLCustomAttributeDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TaskFile.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLCustomAttribFeatureComboBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCMainMenu.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesShortcutsPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLCommentsCtrl.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLTaskIconDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesTaskDefPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\ToDoList\TDLContentMgr.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLFindTasksDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLAnalyseLoggedTimeDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\ToDoCtrlMgr.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesMultiUserPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TaskListHtmlExporter.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\tdlfindresultslistctrl.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\tdcreminder.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\ToDoCtrlReminders.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TaskSelectionDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TaskListTxtExporter.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TaskListTdlExporter.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TaskListExporterBase.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TaskListCsvImporter.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TaskListCsvExporter.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLTransformDialog.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLToolsUserInputDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLThreadedExporterWnd.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLThemeComboBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLTasklistImportDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLTaskViewListBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLShowReminderDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLSetReminderDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLSendTasksDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLPrintDialog.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLOffsetDatesDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLImportOutlookObjectsDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLImportDialog.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLFilterDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLExportDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLDialog.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLColumnSelectionDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLCleanupIniPreferencesDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLAddLoggedTimeDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLAboutDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCToolsHelper.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCSimpleTextContent.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCSearchParamHelper.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCMergeTasklist.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCImportExportMgr.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCEnumContainers.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesToolPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesTaskDef2Page.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesFilePage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\MultiTaskFile.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLToolbarButtonListCtrl.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesUIVisibilityPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesUITasklistPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesUIPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesUICustomToolbarPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesTaskPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesTaskCalcPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesGenPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesFile2Page.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\PreferencesExportPage.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLCsvImportExportDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLFilterBar.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCOutlookImportHelper.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLFindTaskExpressionListCtrl.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLRegularityComboBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCToDoCtrlPreferenceHelper.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLViewTabControl.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLWebUpdatePromptDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\tdliconcombobox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\tdlfindtaskattributecombobox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCImageList.cpp">
+    <ClCompile Include="..\ToDoList\ToDoCtrl.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
     <ClCompile Include="..\ToDoList\TaskListDropTarget.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\ToDoCtrlUndo.cpp">
+    <ClCompile Include="..\ToDoList\ToDoCtrlData.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLImpExpAttributeMappingListCtrl.cpp">
+    <ClCompile Include="..\ToDoList\ToDoCtrlDataUtils.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLAttribListBox.cpp">
+    <ClCompile Include="..\ToDoList\TDCImageList.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLColumnAttribVisibilityListCtrl.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLCmdlineOptionsDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLMultiSortDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLLanguageDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLPrefMigrationDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCCustomAttribData.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLGoToTaskDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCWebUpdateScript.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCTimeTracking.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCStartupOptions.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLFilterOptionComboBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLCustomToolbar.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLLanguageComboBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLImportOutlookDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLFileEncodingComboBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TaskListTdlImporter.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TaskListOutlookImporter.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TaskClipboard.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLTasklistStorageMgr.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLStylesheetParamConfigDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLRiskComboBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLReuseRecurringTaskDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLReminderPeriodComboBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLQuickFindComboBox.cpp">
+    <ClCompile Include="..\ToDoList\TDLInfoTipCtrl.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
     <ClCompile Include="..\ToDoList\TDLPriorityComboBox.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLOleMessageFilter.cpp">
+    <ClCompile Include="..\ToDoList\TDLRecurringTaskEdit.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLImportOutlookObjectSetupListCtrl.cpp">
+    <ClCompile Include="..\ToDoList\TDLRiskComboBox.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLFilterDateComboBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLFilterComboBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLColumnListBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCToolsCmdlineParser.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCAnonymizeTasklist.cpp">
+    <ClCompile Include="..\ToDoList\TDLTaskTreeCtrl.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
     <ClCompile Include="..\Interfaces\ContentCtrl.cpp">
@@ -430,34 +79,25 @@
     <ClCompile Include="..\Interfaces\ContentTypeCombobox.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Interfaces\ImportExportComboBox.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Interfaces\ImportExportMgr.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Interfaces\ImportExportUIHelper.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Interfaces\Preferences.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Interfaces\RichEditSpellCheck.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Interfaces\SpellCheckDlg.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Interfaces\TasklistStorageMgr.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Interfaces\UIExtensionHelper.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Interfaces\UIExtensionMgr.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\Interfaces\UIThemeFile.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\ToDoCtrlUndo.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\ToDoitem.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TaskClipboard.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TaskFile.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLTaskCtrlBase.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCCustomAttribData.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
     <ClCompile Include="..\ToDoList\TDCCustomAttributeDef.cpp">
@@ -466,25 +106,70 @@
     <ClCompile Include="..\ToDoList\TDCCustomAttributeUIHelper.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCDialogHelper.cpp">
-      <Filter>ToDoList Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCFindReplace.cpp">
+    <ClCompile Include="..\Interfaces\SpellCheckDlg.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
     <ClCompile Include="..\ToDoList\TDCSourceControl.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCTimeTracking.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\ToDoCtrlFind.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCFindReplace.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLCommentsCtrl.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLAddLoggedTimeDlg.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCDialogHelper.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCEnumContainers.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\ToDoList\TDCTaskTimeLog.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCTaskTimeLogAnalysis.cpp">
+    <ClCompile Include="..\ToDoList\TDLTaskIconDlg.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLInfoTipCtrl.cpp">
+    <ClCompile Include="..\Interfaces\Preferences.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLTasklistSaveAsDlg.cpp">
+    <ClCompile Include="..\ToDoList\TDCOutlookImportHelper.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLDialog.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCMergeTasklist.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\tdliconcombobox.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLImportOutlookObjectsDlg.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLImportOutlookObjectSetupListCtrl.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Interfaces\RichEditSpellCheck.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCSimpleTextContent.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLImpExpAttributeMappingListCtrl.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLReuseRecurringTaskDlg.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -527,6 +212,9 @@
     </ClInclude>
     <ClInclude Include="ToDoCtrlTaskLinkTest.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\tdcstruct.h">
+      <Filter>ToDoList Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
