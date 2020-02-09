@@ -51,6 +51,7 @@ public:
 
 	static int EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, CWnd* pParent, BOOL bEnable = TRUE);
 	static void ClearFilterCheckboxHistory(const CTDCCustomControlArray& aControls, CWnd* pParent);
+	static void ClearFilterCheckboxHistory(const CUSTOMATTRIBCTRLITEM& ctrl, CWnd* pParent);
 
 	static BOOL FlushEditControl(CWnd* pCtrl, CWnd* pParent,
 								 const CTDCCustomControlArray& aControls);

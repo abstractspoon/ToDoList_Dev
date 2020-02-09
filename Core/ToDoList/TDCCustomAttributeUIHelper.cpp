@@ -1228,16 +1228,16 @@ void CTDCCustomAttributeUIHelper::ClearFilterCheckboxHistory(const CTDCCustomCon
 	int nCtrl = aControls.GetSize();
 	
 	while (nCtrl--)
+		ClearFilterCheckboxHistory(aControls[nCtrl], pParent);
+}
+
+void CTDCCustomAttributeUIHelper::ClearFilterCheckboxHistory(const CUSTOMATTRIBCTRLITEM& ctrl, CWnd* pParent)
+{
+	CWnd* pCtrl = pParent->GetDlgItem(ctrl.nCtrlID);
+
+	if (pCtrl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)))
 	{
-		const CUSTOMATTRIBCTRLITEM& ctrl = aControls[nCtrl];
-		CWnd* pCtrl = pParent->GetDlgItem(ctrl.nCtrlID);
-
-		if (pCtrl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)))
-		{
-			CEnCheckComboBox* pCombo = (CEnCheckComboBox*)pCtrl;
-
-			pCombo->CheckAll(CCBC_UNCHECKED);
-		}
+		((CEnCheckComboBox*)pCtrl)->ClearMultiSelectionHistory();
 	}
 }
 
