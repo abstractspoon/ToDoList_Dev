@@ -27,35 +27,24 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "\r\n"
     "\0"
 END
 
 #endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// String Table
-//
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_HELLO               "Hello from MFC!"
-END
 
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
@@ -77,11 +66,11 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME_STD       ICON    DISCARDABLE     "RES\\app_std.ico"
-IDI_TIME_TRACK          ICON    DISCARDABLE     "res\\clock.ico"
-IDI_NULL                ICON    DISCARDABLE     "res\\null.ico"
-IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "res\\plus.ico"
-IDI_DEPENDS_LINK        ICON    DISCARDABLE     "res\\depend_link.ico"
+IDR_MAINFRAME_STD       ICON    DISCARDABLE     "..\\ToDoList\\RES\\app_std.ico"
+IDI_TIME_TRACK          ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
+IDI_NULL                ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
+IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
+IDI_DEPENDS_LINK        ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 
