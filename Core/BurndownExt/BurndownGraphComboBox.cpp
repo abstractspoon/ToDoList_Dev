@@ -18,6 +18,12 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+#ifndef CB_GETMINVISIBLE
+#	define CB_GETMINVISIBLE 0x1702	
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
 // CBurndownGraphComboBox
 
 CBurndownGraphComboBox::CBurndownGraphComboBox()
@@ -152,6 +158,8 @@ BOOL CBurndownGraphComboBox::OnSelEndOK()
 
 void CBurndownGraphComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+
+
 	// Step over container items
 	int nNewSel = CB_ERR;
 
@@ -218,6 +226,16 @@ void CBurndownGraphComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		int nMsgID = (GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
 		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
 	}
+}
+
+int CBurndownGraphComboBox::GetMinVisible() const
+{
+	int nMinVis = ::SendMessage(m_hWnd, CB_GETMINVISIBLE, 0, 0);
+
+	if (nMinVis == 0)
+		return 30;
+
+	return nMinVis;
 }
 
 BOOL CBurndownGraphComboBox::ItemIsContainer(int nItem) const

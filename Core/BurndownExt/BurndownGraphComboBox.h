@@ -52,6 +52,7 @@ protected:
 	BOOL CanDrawFocusRect(int nItem, DWORD dwItemData) const;
 
 	BOOL ItemIsContainer(int nItem) const;
+	int GetMinVisible() const;
 	
 	static BOOL ItemDataIsContainer(DWORD dwItemData);
 };
