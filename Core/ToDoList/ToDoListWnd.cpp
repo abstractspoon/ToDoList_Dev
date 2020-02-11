@@ -7874,6 +7874,11 @@ void CToDoListWnd::OnTabCtrlEndDrag(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CToDoListWnd::OnTabCtrlSelchanging(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
+	///////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
+	FileMisc::LogText(_T("CToDoListWnd::OnTabCtrlSelchanging(start)"));
+	///////////////////////////////////////////////////////////////////////
+
 	// cache the outgoing selection
 	m_nLastSelItem = GetSelToDoCtrl();
 	
@@ -7994,6 +7999,11 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 	UpdateMenuIconMgrSourceControlStatus();
 	RefreshPauseTimeTracking();
+
+	///////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
+	FileMisc::LogText(_T("CToDoListWnd::OnTabCtrlSelchange(end)"));
+	///////////////////////////////////////////////////////////////////////
 	
 	*pResult = 0;
 }
