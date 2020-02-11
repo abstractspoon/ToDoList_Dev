@@ -1866,7 +1866,11 @@ BOOL CToDoListWnd::HandleSaveTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist)
 	
 	if (!sMessage.IsEmpty())
 	{
+		///////////////////////////////////////////////////////////////////////
+		// PERMANENT LOGGING
 		FileMisc::LogText(_T("Saving of the file '%s' failed with the error code: %d"), szTasklist, nErr);
+		///////////////////////////////////////////////////////////////////////
+
 		CMessageBox::AfxShow(IDS_SAVETASKLIST_TITLE, sMessage, MB_OK);
 	}
 	
@@ -2233,7 +2237,11 @@ void CToDoListWnd::HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTaskList)
 	
 	if (!sMessage.IsEmpty())
 	{
+		///////////////////////////////////////////////////////////////////////
+		// PERMANENT LOGGING
 		FileMisc::LogText(_T("Loading of the file '%s' failed with the error code: %d"), szTaskList, nErr);
+		///////////////////////////////////////////////////////////////////////
+
 		CMessageBox::AfxShow(IDS_OPENTASKLIST_TITLE, sMessage, MB_OK);
 	}
 }
@@ -4788,7 +4796,10 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 
 LRESULT CToDoListWnd::OnExportThreadFinished(WPARAM wp, LPARAM lp)
 {
+	///////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
 	FileMisc::LogTextRaw(_T("CToDoListWnd::OnExportThreadFinished(Received parent-notification)"));
+	///////////////////////////////////////////////////////////////////////
 
 	TDCEXPORTTASKLIST* pExport = (TDCEXPORTTASKLIST*)lp;
 	ASSERT(pExport && pExport->IsValid());
@@ -4824,7 +4835,10 @@ LRESULT CToDoListWnd::OnExportThreadFinished(WPARAM wp, LPARAM lp)
 	// cleanup
 	delete pExport;
 
+	///////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
 	FileMisc::LogTextRaw(_T("CToDoListWnd::OnExportThreadFinished(Deleted allocated memory)\n"));
+	///////////////////////////////////////////////////////////////////////
 
 	return 0L;
 }
@@ -12899,7 +12913,10 @@ void CToDoListWnd::OnViewShowTimeTracker()
 
 void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 {
+	///////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
 	FileMisc::LogText(_T("WM_SETTINGCHANGE(%04x, %s)"), uFlags, lpszSection);
+	///////////////////////////////////////////////////////////////////////
 
 	// Prompt to restart app whenever Regional settings change
 	if ((uFlags == 0) && (StrCmp(lpszSection, _T("intl")) == 0))
