@@ -7580,21 +7580,18 @@ void CToDoListWnd::OnUpdateArchiveSelectedCompletedTasks(CCmdUI* pCmdUI)
 void CToDoListWnd::DoMoveTask(TDC_MOVETASK nDirection)
 {
 	// DEBUGGING /////////////////////////////////////////////////////////
-	static DWORD dwLastTick = GetTickCount();
-	DWORD dwTick = GetTickCount();
-
-#ifdef _DEBUG
-	TRACE(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick);
-#else
-	if (FileMisc::IsLoggingEnabled())
-	{
-		FileMisc::LogTextRaw(Misc::Format(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick));
-	}
-#endif
-
-	dwLastTick = GetTickCount();
-
-	CScopedLogTimer log(_T("CToDoCtrl::MoveSelectedTask()"));
+// 	static DWORD dwLastTick = GetTickCount();
+// 	DWORD dwTick = GetTickCount();
+// 
+// #ifdef _DEBUG
+// 	TRACE(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick);
+// #else
+// 	FileMisc::LogTextRaw(Misc::Format(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick));
+// #endif
+// 
+// 	dwLastTick = GetTickCount();
+// 
+// 	CScopedLogTimer log(_T("CToDoCtrl::MoveSelectedTask()"));
 	//////////////////////////////////////////////////////////////////////
 
 	GetToDoCtrl().MoveSelectedTask(nDirection);
