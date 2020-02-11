@@ -30,13 +30,6 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-LPCTSTR SPACE = _T(" ");
-LPCTSTR ENDL = _T("\n");
-LPCTSTR ONEDBLQUOTE = _T("\"");
-LPCTSTR TWODBLQUOTE = _T("\"\"");
-
-////////////////////////////////////////////////////////
-
 CTaskListCsvImporter::CTaskListCsvImporter()
 {
 
@@ -172,15 +165,24 @@ CString CTaskListCsvImporter::GetValue(const CStringArray& aValues, int nCol) co
 
 BOOL CTaskListCsvImporter::ImportTask(ITASKLISTBASE* pTasks, const CString& sLine) const
 {
-	// must have at least one field
 	CStringArray aValues;
-	int nNumVals = Misc::Split(sLine, aValues, DELIM, TRUE);
 
-	ASSERT(nNumVals >= 1);
+	// Preserve ALL quotes when splitting
+	int nNumVals = Misc::Split(sLine, aValues, DELIM, TRUE, TRUE);
 
+	// must have at least one field
 	if (nNumVals < 1)
+	{
+		ASSERT(0);
 		return FALSE; // then we can report this when we've finished importing
+	}
 
+	// Reverse quotes that we escaped in the exporter
+	for (int nVal = 0; nVal < nNumVals; nVal++)
+	{
+		Misc::MakeUnquoted(aValues[nVal], '\"');
+	}
+	
 	// must have a title
 	CString sTitle = GetTaskTitle(aValues);
 	ASSERT(!sTitle.IsEmpty());

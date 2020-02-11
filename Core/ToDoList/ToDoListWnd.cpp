@@ -9263,7 +9263,7 @@ LRESULT CToDoListWnd::OnPreferencesClearMRU(WPARAM /*wp*/, LPARAM /*lp*/)
 
 LRESULT CToDoListWnd::OnPreferencesEditLanguageFile(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	CString sLangFilePath = Misc::GetQuoted(Prefs().GetLanguageFile());
+	CString sLangFilePath = Misc::GetQuoted(Prefs().GetLanguageFile(), '\\');
 
 	return FileMisc::Run(*this, _T("TDLTransEdit.exe"), sLangFilePath, SW_SHOWNORMAL, FileMisc::GetModuleFolder());
 }

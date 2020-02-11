@@ -55,6 +55,7 @@ protected:
 	afx_msg void OnLBSelChange();
 	afx_msg BOOL OnSelEndOK();
 	afx_msg LRESULT OnGetTextLen(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	DECLARE_MESSAGE_MAP()
 	
@@ -72,6 +73,7 @@ protected:
 	BOOL AddEmptyString() { return CCheckComboBox::AddEmptyString(); }
 	void GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
 	CString GetItemText(int nItem, const CString& sHint = _T("")) const;
+	BOOL HasIcon() const { return m_bMultiSel; }
 
 	BOOL HasItemNone() const { return (GetNoneIndex() != CB_ERR); }
 	int GetNoneIndex() const;

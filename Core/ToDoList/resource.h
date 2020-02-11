@@ -161,6 +161,7 @@
 #define IDI_ADD_LOGGED_TIME             308
 #define IDB_OUTLOOKTYPES                309
 #define IDR_FINDTASKS                   310
+#define IDB_TDLUPDATE_WIZ_HEADER        310
 #define IDI_SEARCH_PREFS                313
 #define IDD_TASKLISTSAVEAS_DIALOG       314
 #define IDI_TRAY_LIGHT                  316
@@ -856,6 +857,7 @@
 #define IDC_CURFOLDER                   2005
 #define IDI_CONTACT                     2005
 #define IDD_EXPORT_TO_PAGE              2005
+#define IDI_TDLUPDATE                   2005
 #define IDC_HIDEUNFLAGGEDEMAIL          2006
 #define IDI_FOLDER                      2006
 #define IDI_JOURNAL                     2007

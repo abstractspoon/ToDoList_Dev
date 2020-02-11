@@ -534,13 +534,6 @@ LRESULT CCheckComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 					}
 				}
 				break;
-
-// 			case VK_ESCAPE:
-// 				{
-// 					m_bEditChange = FALSE;
-// 					ShowDropDown(FALSE);
-// 				}
-// 				break;
 			}
 		}
 		break;
@@ -726,10 +719,27 @@ BOOL CCheckComboBox::ModifyChecked(const CStringArray& aItems, CCB_CHECKSTATE nC
 
 void CCheckComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
-	if (nChar == VK_DOWN && !GetDroppedState())
+	switch (nChar)
 	{
-		ShowDropDown();
-		return;
+	case VK_DOWN:
+		if (!GetDroppedState())
+		{
+			ShowDropDown();
+			return; // eat
+		}
+		break;
+
+	case VK_RETURN:
+		// We only need to handle this when there's no edit box
+		if (!m_scEdit.GetHwnd() && GetDroppedState())
+			ShowDropDown(FALSE);
+		break;
+
+	case VK_ESCAPE:
+		// We only need to handle this when there's no edit box
+		if (!m_scEdit.GetHwnd() && GetDroppedState())
+			m_bEditChange = FALSE;
+		break;
 	}
 		
 	CAutoComboBox::OnKeyDown(nChar, nRepCnt, nFlags);

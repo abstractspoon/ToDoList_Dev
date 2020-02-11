@@ -64,10 +64,13 @@ protected:
 	virtual int GetMaxDropWidth() const { return -1; } // no limit
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
+	virtual BOOL CanDrawFocusRect(int /*nItem*/, DWORD /*dwItemData*/) const { return TRUE; }
 
 	void InitItemHeight();
 	BOOL IsType(UINT nComboType) const;
 	void RefreshDropWidth(BOOL bRecalc);
+
+	BOOL WantDrawFocusRect(LPDRAWITEMSTRUCT lpDrawItemStruct) const;
 
 };
 

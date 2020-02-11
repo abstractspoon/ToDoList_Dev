@@ -183,13 +183,10 @@ HICON CTDCToolsHelper::GetToolIcon(CSysImageList& sil, const USERTOOL& tool)
 }
 
 BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
-									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CString& sCmdline, BOOL bEscapeSpaces)
+									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CString& sCmdline)
 {
-	if (bEscapeSpaces == -1)
-	{
-		CString sToolPath(GetToolPath(tool));
-		bEscapeSpaces = (WebMisc::IsBrowser(sToolPath) || WebMisc::IsURL(tool.sCmdline));
-	}
+	CString sToolPath(GetToolPath(tool));
+	BOOL bWebTool = (WebMisc::IsBrowser(sToolPath) || WebMisc::IsURL(tool.sCmdline));
 
 	// do necessary substitutions
 	CTDCToolsCmdlineParser tcp(tool.sCmdline);
@@ -217,21 +214,21 @@ BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& a
 		
 		FileMisc::SplitPath(sTasklist, &sDrive, &sPath, &sFName, &sExt);
 		
-		ReplaceToolArgument(tcp, CLAT_PATHNAME, sTasklist, bEscapeSpaces);
-		ReplaceToolArgument(tcp, CLAT_FOLDER, (sDrive + sPath), bEscapeSpaces);
-		ReplaceToolArgument(tcp, CLAT_FILENAME, (sFName + sExt), bEscapeSpaces);
-		ReplaceToolArgument(tcp, CLAT_FILETITLE, sFName, bEscapeSpaces);
+		ReplaceToolArgument(tcp, CLAT_PATHNAME, sTasklist, bWebTool);
+		ReplaceToolArgument(tcp, CLAT_FOLDER, (sDrive + sPath), bWebTool);
+		ReplaceToolArgument(tcp, CLAT_FILENAME, (sFName + sExt), bWebTool);
+		ReplaceToolArgument(tcp, CLAT_FILETITLE, sFName, bWebTool);
 	}
 	
-	ReplaceToolArgument(tcp, CLAT_TODOLIST, FileMisc::GetAppFilePath(), bEscapeSpaces);
-	ReplaceToolArgument(tcp, CLAT_SELTASKID, args.sTaskIDs, bEscapeSpaces);
-	ReplaceToolArgument(tcp, CLAT_SELTASKTITLE, args.sTaskTitle, bEscapeSpaces);
-	ReplaceToolArgument(tcp, CLAT_SELTASKEXTID, args.sTaskExtID, bEscapeSpaces);
-	ReplaceToolArgument(tcp, CLAT_SELTASKCOMMENTS, args.sTaskComments, bEscapeSpaces);
-	ReplaceToolArgument(tcp, CLAT_SELTASKFILELINK, args.sTaskFileLink, bEscapeSpaces);
-	ReplaceToolArgument(tcp, CLAT_SELTASKALLOCBY, args.sTaskAllocBy, bEscapeSpaces);
-	ReplaceToolArgument(tcp, CLAT_SELTASKALLOCTO, args.sTaskAllocTo, bEscapeSpaces);
-	ReplaceToolArgument(tcp, CLAT_SELTASKPATH, args.sTaskPath, bEscapeSpaces);
+	ReplaceToolArgument(tcp, CLAT_TODOLIST, FileMisc::GetAppFilePath(), bWebTool);
+	ReplaceToolArgument(tcp, CLAT_SELTASKID, args.sTaskIDs, bWebTool);
+	ReplaceToolArgument(tcp, CLAT_SELTASKTITLE, args.sTaskTitle, bWebTool);
+	ReplaceToolArgument(tcp, CLAT_SELTASKEXTID, args.sTaskExtID, bWebTool);
+	ReplaceToolArgument(tcp, CLAT_SELTASKCOMMENTS, args.sTaskComments, bWebTool);
+	ReplaceToolArgument(tcp, CLAT_SELTASKFILELINK, args.sTaskFileLink, bWebTool);
+	ReplaceToolArgument(tcp, CLAT_SELTASKALLOCBY, args.sTaskAllocBy, bWebTool);
+	ReplaceToolArgument(tcp, CLAT_SELTASKALLOCTO, args.sTaskAllocTo, bWebTool);
+	ReplaceToolArgument(tcp, CLAT_SELTASKPATH, args.sTaskPath, bWebTool);
 
 	CCLArgArray aCustomArgs;
 	TDCCADATA data;
@@ -243,7 +240,7 @@ BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& a
 		CString sAttribID(aCustomArgs[nArg].sName);
 		args.mapTaskCustData.Lookup(sAttribID, data);
 
-		ReplaceToolArgument(tcp, aCustomArgs[nArg].sPlaceHolder, data.AsString(), bEscapeSpaces);
+		ReplaceToolArgument(tcp, aCustomArgs[nArg].sPlaceHolder, data.AsString(), bWebTool);
 	}
 	
 	if (tcp.IsUserInputRequired())
@@ -260,7 +257,7 @@ BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& a
 		while (nArg--)
 		{
 			CString sResult(dialog.GetResult(aArgs[nArg].sName));
-			ReplaceToolArgument(tcp, aArgs[nArg].sName, sResult, bEscapeSpaces);
+			ReplaceToolArgument(tcp, aArgs[nArg].sName, sResult, bWebTool);
 		}
 	}
 	
@@ -270,25 +267,33 @@ BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& a
 }
 
 BOOL CTDCToolsHelper::ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, CLA_TYPE nType, 
-										const CString& sValue, BOOL bEscapeSpaces)
+										const CString& sValue, BOOL bWebTool)
 {
-	CString sArgValue(sValue);
-
-	if (bEscapeSpaces)
-		sArgValue.Replace(_T(" "), _T("%20"));
-
-	return tcp.ReplaceArgument(nType, sArgValue);
+	return tcp.ReplaceArgument(nType, EscapeCharacters(sValue, bWebTool));
 }
 
 BOOL CTDCToolsHelper::ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, const CString& sName, 
-										const CString& sValue, BOOL bEscapeSpaces)
+										const CString& sValue, BOOL bWebTool)
 {
-	CString sArgValue(sValue);
-	
-	if (bEscapeSpaces)
-		sArgValue.Replace(_T(" "), _T("%20"));
-	
-	return tcp.ReplaceArgument(sName, sArgValue);
+	return tcp.ReplaceArgument(sName, EscapeCharacters(sValue, bWebTool));
+}
+
+CString CTDCToolsHelper::EscapeCharacters(const CString& sValue, BOOL bWebTool)
+{
+	CString sEscaped(sValue);
+
+	if (bWebTool)
+	{
+		// Escape embedded spaces
+		sEscaped.Replace(_T(" "), _T("%20"));
+	}
+	else
+	{
+		// Double-up embedded quotes
+		sEscaped.Replace(_T("\""), _T("\"\""));
+	}
+
+	return sEscaped;
 }
 
 void CTDCToolsHelper::RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter)

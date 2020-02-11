@@ -36,11 +36,23 @@ BEGIN_MESSAGE_MAP(CEnCheckComboBox, CCheckComboBox)
 	ON_CONTROL(LBN_SELCHANGE, 1000, OnLBSelChange)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 	ON_MESSAGE(WM_GETTEXTLENGTH, OnGetTextLen)
+	ON_WM_KEYDOWN()
 
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnCheckComboBox message handlers
+
+void CEnCheckComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
+{
+	// Bypass base-class opening of droplist if NOT in check-box mode
+	if (!m_bMultiSel && (nChar == VK_DOWN) && !GetDroppedState())
+	{
+		CAutoComboBox::OnKeyDown(nChar, nRepCnt, nFlags);
+	}
+
+	CCheckComboBox::OnKeyDown(nChar, nRepCnt, nFlags);
+}
 
 BOOL CEnCheckComboBox::EnableMultiSelection(BOOL bEnable)
 {
@@ -88,6 +100,7 @@ BOOL CEnCheckComboBox::EnableMultiSelection(BOOL bEnable)
 		}
 		
 		Invalidate();
+		InitItemHeight();
 	}
 	
 	return TRUE;
@@ -387,18 +400,25 @@ BOOL CEnCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArr
 {
 	if (m_bMultiSel)
 	{
+		int nAny = GetAnyIndex();
+		BOOL bAnyIsChecked = GetCheck(nAny);
+
+		// Check for changes
 		CStringArray aCurChecked, aCurMixed;
 		GetChecked(aCurChecked, aCurMixed);
 
 		if (Misc::MatchAll(aChecked, aCurChecked) && 
 			Misc::MatchAll(aMixed, aCurMixed))
 		{
+			// Clear 'any'
+			if (bAnyIsChecked)
+				CCheckComboBox::SetCheck(nAny, CCBC_UNCHECKED, TRUE);
+			
 			return TRUE;
 		}
 
-		int nAny = GetAnyIndex();
-
-		if ((nAny != CB_ERR) && (!aChecked.GetSize() || GetCheck(nAny)))
+		// (Not sure what this is for)
+		if ((nAny != CB_ERR) && (!aChecked.GetSize() || bAnyIsChecked))
 			return (CCheckComboBox::SetCheck(nAny, CCBC_CHECKED, FALSE) != CB_ERR);
 
 		return CCheckComboBox::SetChecked(aChecked, aMixed);

@@ -92,8 +92,8 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TRENDLINES, m_cbTrends);
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
 
-	CDialogHelper::DDX_CBData(pDX, m_cbGraphs, m_nGraphType, BCT_TIMESERIES_REMAININGDAYS);
-	CDialogHelper::DDX_CBData(pDX, m_cbTrends, m_nTrendLine, BTL_NONE);
+	m_cbGraphs.DDX(pDX, m_nGraphType);
+	m_cbTrends.DDX(pDX, m_nTrendLine);
 
 }
 

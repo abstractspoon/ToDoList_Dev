@@ -28,9 +28,6 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-static LPCTSTR ONEDBLQUOTE = _T("\"");
-static LPCTSTR TWODBLQUOTE = _T("\"\"");
-
 CTaskListCsvExporter::CTaskListCsvExporter() : m_bExportingForExcel(FALSE), m_bFirstHeader(TRUE)
 {
 }
@@ -159,29 +156,18 @@ CString CTaskListCsvExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttrib, const CStr
 	return sHeader;
 }
 
-CString CTaskListCsvExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& /*sAttribLabel*/, const CString& sValue) const
+CString CTaskListCsvExporter::FormatAttribute(TDC_ATTRIBUTE /*nAttrib*/, const CString& /*sAttribLabel*/, const CString& sValue) const
 {
 	// Note: We always export values even if they are empty
-
-	// Note: We always quote comments to avoid unnecessary search/replace
-	BOOL bNeedQuoting = (nAttrib == TDCA_COMMENTS);
 	CString sAttrib(sValue);
-	
-	// double up quotes
-	if (sAttrib.Find(ONEDBLQUOTE) != -1)
-	{
-		sAttrib.Replace(ONEDBLQUOTE, TWODBLQUOTE);
-		bNeedQuoting = TRUE;
-	}
-	
-	// look for commas or whatever is the list delimiter
-	if (sAttrib.Find(DELIM) != -1)
-		bNeedQuoting = TRUE;
-	
+
+	// Quote if the value contains embedded quotes or embedded delimiters
+	BOOL bNeedQuoting = ((sAttrib.Find('\"') != -1) || (sAttrib.Find(DELIM) != -1));
+
 	if (bNeedQuoting)
-		sAttrib = ONEDBLQUOTE + sAttrib + ONEDBLQUOTE;
+		Misc::MakeQuoted(sAttrib, '\"'); // double-up embedded quotes
 	
-	// replace carriage returns
+	// Always replace carriage returns
 	sAttrib.Replace('\n', ' ');
 	sAttrib += DELIM;
 

@@ -1848,6 +1848,7 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		GETATTRIB(TDL_TASKDEPENDENCY,			GetTaskDependencies(hTask, tdi.aDependencies));
 		GETATTRIB(TDL_TASKFILEREFPATH,			GetTaskFileLinks(hTask, tdi.aFileLinks));
 
+		// Comments are special
 		if (bOverwrite)
 		{
 			tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS);

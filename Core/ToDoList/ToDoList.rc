@@ -1773,7 +1773,7 @@ END
 
 IDD_WEBUPDATE_PROMPT_PAGE DIALOG DISCARDABLE  0, 0, 276, 107
 STYLE WS_CHILD | WS_CAPTION
-CAPTION "ToDoList Web Update"
+CAPTION "ToDoList Web Update (c) AbstractSpoon"
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&What's New:",IDC_LABEL,0,0,42,8
@@ -2691,6 +2691,7 @@ IDI_TRAY_LIGHT          ICON    DISCARDABLE     "res\\app_tray_light.ico"
 IDI_TRAY_TIMETRACK_LIGHT ICON    DISCARDABLE     "res\\app_tray_timetrack_light.ico"
 IDI_TRAY_TIMETRACK_DARK ICON    DISCARDABLE     "res\\app_tray_timetrack_dark.ico"
 IDI_TRAY_DARK           ICON    DISCARDABLE     "res\\app_tray_dark.ico"
+IDI_TDLUPDATE           ICON    DISCARDABLE     "..\\TDLUpdate\\RES\\TDLUpdate.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2717,6 +2718,7 @@ IDB_TIMETRACK_TOOLBAR_STD BITMAP  MOVEABLE PURE   "res\\timetrack_toolbar_std.bm
 IDB_UDTPREFS_TOOLBAR_STD BITMAP  MOVEABLE PURE   "res\\udtprefs_toolbar_std.bmp"
 IDR_UDTPREFS_TOOLBAR    BITMAP  MOVEABLE PURE   "res\\udtprefs_toolbar.bmp"
 IDB_OUTLOOKTYPES        BITMAP  MOVEABLE PURE   "res\\outlooktypes.bmp"
+IDB_TDLUPDATE_WIZ_HEADER BITMAP  DISCARDABLE     "..\\TDLUpdate\\res\\TDLUpdate_wiz_header.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
