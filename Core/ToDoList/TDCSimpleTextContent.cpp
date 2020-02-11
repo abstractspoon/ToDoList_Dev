@@ -152,6 +152,24 @@ CTDLSimpleTextContentCtrl::~CTDLSimpleTextContentCtrl()
 {
 }
 
+BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
+	//{{AFX_MSG_MAP(CTDLSimpleTextContentCtrl)
+	ON_WM_CONTEXTMENU()
+	ON_WM_SETCURSOR()
+	ON_WM_DESTROY()
+	ON_WM_CREATE()
+	//}}AFX_MSG_MAP
+	ON_WM_HELPINFO()
+	ON_COMMAND_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnCommentsMenuCmd)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnUpdateCommentsMenuCmd)
+	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChangeText)
+	ON_CONTROL_REFLECT_EX(EN_KILLFOCUS, OnKillFocus)
+	ON_MESSAGE(WM_SETWORDWRAP, OnSetWordWrap)
+	ON_NOTIFY_REFLECT_EX(TTN_NEEDTEXT, OnGetTooltip)
+	ON_WM_NCDESTROY()
+
+END_MESSAGE_MAP()
+
 /////////////////////////////////////////////////////////////////////////////
 // IContentCtrl
 
@@ -355,26 +373,6 @@ bool CTDLSimpleTextContentCtrl::FindReplaceAll(LPCTSTR szFind, LPCTSTR szReplace
 {
 	return (CUrlRichEditCtrl::ReplaceAll(szFind, szReplace, bCaseSensitive, bWholeWord) > 0);
 }
-
-/////////////////////////////////////////////////////////////////////////////
-
-BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
-	//{{AFX_MSG_MAP(CTDLSimpleTextContentCtrl)
-	ON_WM_CONTEXTMENU()
-	ON_WM_SETCURSOR()
-	ON_WM_DESTROY()
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
-	ON_WM_HELPINFO()
-	ON_COMMAND_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnCommentsMenuCmd)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnUpdateCommentsMenuCmd)
-	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChangeText)
-	ON_CONTROL_REFLECT_EX(EN_KILLFOCUS, OnKillFocus)
-	ON_MESSAGE(WM_SETWORDWRAP, OnSetWordWrap)
-	ON_NOTIFY_REFLECT_EX(TTN_NEEDTEXT, OnGetTooltip)
-	ON_WM_NCDESTROY()
-
-END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLSimpleTextContentCtrl message handlers
