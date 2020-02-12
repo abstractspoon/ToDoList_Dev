@@ -82,7 +82,6 @@ public:
 
 // Attributes
 protected:
-	BOOL m_bAllowNotify;
 	BOOL m_bWordWrap;
 	CRichEditSpellCheck m_reSpellCheck;
 

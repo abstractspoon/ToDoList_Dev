@@ -136,7 +136,6 @@ const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
 CTDLSimpleTextContentCtrl::CTDLSimpleTextContentCtrl() 
 	: 
 	CUrlRichEditCtrl(CTRLCLICKTOFOLLOW, IDS_CTRLCLICKTOFOLLOWLINK),
-	m_bAllowNotify(TRUE), 
 	m_bWordWrap(TRUE),
 #pragma warning (disable: 4355)
 	m_reSpellCheck(*this)
@@ -399,13 +398,7 @@ BOOL CTDLSimpleTextContentCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pP
 
 void CTDLSimpleTextContentCtrl::SetContentFont(HFONT hFont)
 {
-	// richedit2.0 sends a EN_CHANGE notification if it contains
-	// text when it receives a font change.
-	// to us though this is a bogus change so we prevent a notification
-	// being sent
-	CAutoFlag af(m_bAllowNotify, FALSE);
-
-	CUrlRichEditCtrl::SendMessage(WM_SETFONT, (WPARAM)hFont);
+	SendMessage(WM_SETFONT, (WPARAM)hFont);
 }
 
 BOOL CTDLSimpleTextContentCtrl::OnChangeText() 
@@ -413,12 +406,12 @@ BOOL CTDLSimpleTextContentCtrl::OnChangeText()
 	CUrlRichEditCtrl::OnChangeText();
 
 	// If we don't have the focus and inline spell-checking
-	// is enabled then assume that this is not a 'real' change
-	// and don't pass it on
+	// is enabled then assume that this is probably not a 
+	// user edit so we don't pass it on
 	if ((GetFocus() != this) && IsInlineSpellCheckingEnabled())
 		return TRUE;
 	
-	if (m_bAllowNotify && IsWindowEnabled() && !(GetStyle() & ES_READONLY))
+	if (IsWindowEnabled() && !(GetStyle() & ES_READONLY))
 		GetParent()->SendMessage(WM_ICC_CONTENTCHANGE);
 	
 	return FALSE;
@@ -426,10 +419,9 @@ BOOL CTDLSimpleTextContentCtrl::OnChangeText()
 
 BOOL CTDLSimpleTextContentCtrl::OnKillFocus() 
 {
-	if (m_bAllowNotify)
-		GetParent()->SendMessage(WM_ICC_KILLFOCUS);
+	GetParent()->SendMessage(WM_ICC_KILLFOCUS);
 	
-	return FALSE;
+	return FALSE; // continue routing
 }
 
 void CTDLSimpleTextContentCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
@@ -812,8 +804,6 @@ int CTDLSimpleTextContentCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CUrlRichEditCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
-
-	CAutoFlag af(m_bAllowNotify, FALSE); // else we can get a false edit change
 
 	LimitText(1024 * 1024 * 1024); // one gigabyte
 	EnableToolTips();

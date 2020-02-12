@@ -112,6 +112,7 @@ public:
 	virtual ~CRichEditBaseCtrl();
 
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle = 0);
+	void TemporarilyDisableChangeNotifications();
 
 	BOOL Save(const CString& filename);
 	BOOL Load(const CString& filename);
@@ -200,9 +201,9 @@ public:
 protected:
 	BOOL m_bEnableSelectOnFocus;
 	BOOL m_bInOnFocus;
-	CRect m_rMargins;
 	BOOL m_bAutoRTL;
 
+	CRect m_rMargins;
 	FIND_STATE m_findState;
 	CToolTipCtrlEx m_tooltip;
 	
@@ -276,6 +277,7 @@ protected:
 								BOOL bNext, BOOL bCase,	BOOL bWord);
 	virtual void OnReplaceAll(const CString& sFind, const CString& sReplace,
 								BOOL bCase, BOOL bWord);
+	virtual void Initialise();
 	
 	//{{AFX_MSG(CRichEditBaseCtrl)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -284,8 +286,11 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg LRESULT OnEditSetSelection(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSetFont(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSetText(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnReenableChangeNotifications(WPARAM wParam, LPARAM lParam);
 	
 	DECLARE_MESSAGE_MAP()
 		
@@ -298,7 +303,6 @@ protected:
 	BOOL SameAsSelected(LPCTSTR lpszCompare, BOOL bCase, BOOL bWord);
 	BOOL IsFindDialog(HWND hwnd) const;
 	BOOL InsertSoftReturn();
-	void Initialise();
 
 	BOOL EnableLanguageOptions(DWORD dwOption, BOOL bEnable);
 	BOOL EnableEditStyles(DWORD dwStyles, BOOL bEnable);

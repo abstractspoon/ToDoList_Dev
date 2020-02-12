@@ -54,7 +54,6 @@ BOOL CRTFContentControl::s_bInlineSpellChecking = TRUE;
 CRTFContentControl::CRTFContentControl(CRtfHtmlConverter& rtfHtml) 
 	: 
 	CRulerRichEditCtrl(rtfHtml),
-	m_bAllowNotify(TRUE), 
 	m_reSpellCheck(m_rtf),
 	m_mgrShortcuts(TRUE),
 
@@ -172,7 +171,7 @@ BOOL CRTFContentControl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 
 void CRTFContentControl::OnChangeText() 
 {
-	if (m_bAllowNotify && !m_rtf.IsIMEComposing())
+	if (!m_rtf.IsIMEComposing())
 		GetParent()->SendMessage(WM_ICC_CONTENTCHANGE);
 
 	RE_PASTE nFileLink = m_rtf.GetFileLinkOption();
@@ -184,8 +183,7 @@ void CRTFContentControl::OnChangeText()
 
 void CRTFContentControl::OnKillFocus() 
 {
-	if (m_bAllowNotify)
-		GetParent()->SendMessage(WM_ICC_KILLFOCUS);
+	GetParent()->SendMessage(WM_ICC_KILLFOCUS);
 }
 
 // ICustomControl implementation
@@ -247,7 +245,6 @@ bool CRTFContentControl::SetContent(const unsigned char* pContent, int nLength, 
 	if (nLength && !m_rtf.IsRTF((const char*)pContent))
 		return false;
 
-	CAutoFlag af(m_bAllowNotify, FALSE);
 	CReSaveCaret resc(bResetSelection ? NULL : m_rtf.GetSafeHwnd());
 	CString sContent;
 
@@ -288,7 +285,6 @@ bool CRTFContentControl::SetTextContent(LPCTSTR szContent, bool bResetSelection)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	CAutoFlag af(m_bAllowNotify, TRUE);
 	CReSaveCaret resc(bResetSelection ? NULL : m_rtf.GetSafeHwnd());
 
 	m_rtf.SendMessage(WM_SETTEXT, 0, (LPARAM)szContent);
@@ -334,12 +330,6 @@ void CRTFContentControl::SetUITheme(const UITHEME* pTheme)
 
 void CRTFContentControl::SetContentFont(HFONT hFont)
 {
-	// richedit2.0 sends a EN_CHANGE notification if it contains
-	// text when it receives a font change.
-	// to us though this is a bogus change so we prevent a notification
-	// being sent
-	CAutoFlag af(m_bAllowNotify, FALSE);
-
 	CRulerRichEditCtrl::SetDefaultFont(hFont);
 }
 
@@ -522,12 +512,8 @@ BOOL CRTFContentControl::IsTDLClipboardEmpty() const
 
 int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
-	CAutoFlag af(m_bAllowNotify, FALSE);
-	
 	if (CRulerRichEditCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
-	
-	m_rtf.SetEventMask(m_rtf.GetEventMask() | ENM_CHANGE);
 	
 	m_rtf.LimitText(1024 * 1024 * 1024); // one gigabyte
 	m_rtf.EnableToolTips();
