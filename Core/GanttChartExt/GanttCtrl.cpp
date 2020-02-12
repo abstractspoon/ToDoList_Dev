@@ -6132,10 +6132,8 @@ void CGanttCtrl::GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths)
 
 BOOL CGanttCtrl::SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& aListWidths)
 {
-	if (aTreeWidths.GetSize() != (NUM_TREECOLUMNS + 1))
+	if (!SetTreeColumnWidths(aTreeWidths))
 		return FALSE;
-
-	m_treeHeader.SetItemWidths(aTreeWidths);
 
 	// save list column widths for when we've initialised our columns
 	// remember to include hidden dummy first column
@@ -6163,10 +6161,8 @@ void CGanttCtrl::GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& aListTrac
 
 BOOL CGanttCtrl::SetTrackedColumns(const CIntArray& aTreeTracked, const CIntArray& aListTracked)
 {
-	if (aTreeTracked.GetSize() != (NUM_TREECOLUMNS + 1))
+	if (!SetTrackedTreeColumns(aTreeTracked))
 		return FALSE;
-	
-	m_treeHeader.SetTrackedItems(aTreeTracked); 
 
 	// save list column tracking for when we've initialised our columns
 	// remember to include hidden dummy first column
