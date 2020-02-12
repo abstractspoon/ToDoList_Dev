@@ -60,9 +60,6 @@ public:
 	BOOL MoveSelectedTask(const IUITASKMOVE& move);
 	DWORD HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const;
 
-	void ResizeAttributeColumnsToFit(BOOL bForce = FALSE);
-	void AdjustSplitterToFitAttributeColumns();
-
 	void SetSortByAllocTo(LPCTSTR szAllocTo);
 	void Sort(WLC_COLUMNID nBy, BOOL bAscending);
 	void Sort(const WORKLOADSORTCOLUMNS& multi);

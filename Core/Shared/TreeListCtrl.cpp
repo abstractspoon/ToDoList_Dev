@@ -424,7 +424,7 @@ void CTreeListCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
 	CRect rSplitter;
 	
 	if (GetSplitterRect(rSplitter) && rSplitter.PtInRect(point))
-		AdjustSplitterToFitColumns();
+		AdjustSplitterToFitListColumns();
 }
 
 int CTreeListCtrl::CalcMaxListColumnsWidth() const
@@ -444,7 +444,7 @@ int CTreeListCtrl::CalcSplitPosToFitListColumns(int nAvailWidth) const
 	return (nAvailWidth - nColsWidth - GetSplitBarWidth() - LV_COLPADDING);
 }
 
-void CTreeListCtrl::AdjustSplitterToFitColumns()
+void CTreeListCtrl::AdjustSplitterToFitListColumns()
 {
 	CRect rClient;
 	CWnd::GetClientRect(rClient);
@@ -452,8 +452,23 @@ void CTreeListCtrl::AdjustSplitterToFitColumns()
 	int nNewSplitPos = CalcSplitPosToFitListColumns(rClient.Width());
 	nNewSplitPos = max(MIN_SPLIT_POS, nNewSplitPos);
 	
-	CTreeListSyncer::SetSplitPos(nNewSplitPos);
-	RefreshSize();
+	if (nNewSplitPos != GetSplitPos())
+	{
+		SetSplitPos(nNewSplitPos);
+		RefreshSize();
+	}
+}
+
+void CTreeListCtrl::AdjustSplitterToFitTreeColumns()
+{
+	int nNewSplitPos = m_treeHeader.CalcTotalItemWidth();
+	nNewSplitPos = max(MIN_SPLIT_POS, nNewSplitPos);
+
+	if (nNewSplitPos != GetSplitPos())
+	{
+		SetSplitPos(nNewSplitPos);
+		RefreshSize();
+	}
 }
 
 void CTreeListCtrl::InitItemHeights()
@@ -1422,7 +1437,7 @@ void CTreeListCtrl::CollapseList(HTREEITEM htiFrom)
 	CTreeListSyncer::CollapseList(m_list, m_tree, htiFrom);
 }
 
-void CTreeListCtrl::ResizeColumnsToFit(BOOL bForce)
+void CTreeListCtrl::ResizeListColumnsToFit(BOOL bForce)
 {
 	int nPrevTreeWidth = m_treeHeader.CalcTotalItemWidth(0); // without title
 
@@ -2024,7 +2039,7 @@ BOOL CTreeListCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 	m_list.SetFont(pFont, bRedraw);
 	m_listHeader.SetFont(pFont, bRedraw);
 
-	ResizeColumnsToFit();
+	ResizeListColumnsToFit();
 	return TRUE;
 }
 

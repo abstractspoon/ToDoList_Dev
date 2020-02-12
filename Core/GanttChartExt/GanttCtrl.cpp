@@ -4614,11 +4614,6 @@ GTLC_COLUMN CGanttCtrl::GetTreeColumnID(int nCol) const
 	return (GTLC_COLUMN)m_treeHeader.GetItemData(nCol);
 }
 
-void CGanttCtrl::ResizeAttributeColumnsToFit(BOOL bForce)
-{
-	ResizeColumnsToFit(bForce);
-}
-
 void CGanttCtrl::RecalcListColumnsToFit()
 {
 	// list columns (except first dummy column)
@@ -4626,11 +4621,6 @@ void CGanttCtrl::RecalcListColumnsToFit()
 	
 	for (int nCol = 1; nCol <= nNumCols; nCol++)
 		m_listHeader.SetItemWidth(nCol, GetColumnWidth());
-}
-
-void CGanttCtrl::AdjustSplitterToFitAttributeColumns()
-{
-	AdjustSplitterToFitColumns();
 }
 
 int CGanttCtrl::CalcTreeColumnTextWidth(int nCol, CDC* pDC) const
@@ -6138,9 +6128,14 @@ BOOL CGanttCtrl::SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& 
 	// save list column widths for when we've initialised our columns
 	// remember to include hidden dummy first column
 	if (aListWidths.GetSize() == (GetRequiredListColumnCount() + 1))
+	{
 		m_listHeader.SetItemWidths(aListWidths);
+	}
 	else
+	{
 		m_aPrevColWidths.Copy(aListWidths);
+		SetSplitPos(m_treeHeader.CalcTotalItemWidth());
+	}
 
 	return TRUE;
 }
@@ -6465,7 +6460,7 @@ BOOL CGanttCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 
 	CalcMinMonthWidths();
 	SetMonthDisplay(m_nMonthDisplay);
-	ResizeAttributeColumnsToFit(TRUE);
+	ResizeListColumnsToFit(TRUE);
 
 	return TRUE;
 }

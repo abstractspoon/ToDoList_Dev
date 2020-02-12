@@ -152,8 +152,9 @@ public:
 	virtual void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
 
-	void ResizeColumnsToFit(BOOL bForce = FALSE);
-	void AdjustSplitterToFitColumns();
+	void ResizeListColumnsToFit(BOOL bForce = FALSE);
+	void AdjustSplitterToFitListColumns();
+	void AdjustSplitterToFitTreeColumns();
 
 	BOOL SetAlternateLineColor(COLORREF crAltLine);
 	BOOL SetGridLineColor(COLORREF crGridLine);
