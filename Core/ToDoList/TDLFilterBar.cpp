@@ -125,7 +125,7 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 
 	m_cbPriorityFilter.DDX(pDX, m_filter.nPriority);
 	m_cbRiskFilter.DDX(pDX, m_filter.nRisk);
-	
+
 	// special handling
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -204,24 +204,23 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_CBN_SELENDOK(IDC_PRIORITYFILTERCOMBO, OnSelchangeFilter)
 	ON_CBN_SELENDOK(IDC_RISKFILTERCOMBO, OnSelchangeFilter)
 
-	ON_CBN_SELENDCANCEL(IDC_ALLOCTOFILTERCOMBO, OnSelcancelFilter)
-	ON_CBN_SELENDCANCEL(IDC_TAGFILTERCOMBO, OnSelcancelFilter)
-	ON_CBN_SELENDCANCEL(IDC_VERSIONFILTERCOMBO, OnSelcancelFilter)
-	ON_CBN_SELENDCANCEL(IDC_ALLOCBYFILTERCOMBO, OnSelcancelFilter)
-	ON_CBN_SELENDCANCEL(IDC_STATUSFILTERCOMBO, OnSelcancelFilter)
-	ON_CBN_SELENDCANCEL(IDC_CATEGORYFILTERCOMBO, OnSelcancelFilter)
-	ON_CBN_SELENDCANCEL(IDC_PRIORITYFILTERCOMBO, OnSelcancelFilter)
-	ON_CBN_SELENDCANCEL(IDC_RISKFILTERCOMBO, OnSelcancelFilter)
+	// Cancelling checkbox filters needs extra care
+	ON_CBN_SELENDCANCEL(IDC_ALLOCTOFILTERCOMBO, OnSelcancelAllocToFilter)
+	ON_CBN_SELENDCANCEL(IDC_TAGFILTERCOMBO, OnSelcancelTagFilter)
+	ON_CBN_SELENDCANCEL(IDC_VERSIONFILTERCOMBO, OnSelcancelVersionFilter)
+	ON_CBN_SELENDCANCEL(IDC_ALLOCBYFILTERCOMBO, OnSelcancelAllocByFilter)
+	ON_CBN_SELENDCANCEL(IDC_STATUSFILTERCOMBO, OnSelcancelStatusFilter)
+	ON_CBN_SELENDCANCEL(IDC_CATEGORYFILTERCOMBO, OnSelcancelCategoryFilter)
 
 	ON_CBN_CLOSEUP(IDC_OPTIONFILTERCOMBO, OnCloseUpOptions)
 
-	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERDUEDATE, OnSelchangeFilter)
-	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERSTARTDATE, OnSelchangeFilter)
-	ON_NOTIFY(DTN_CLOSEUP, IDC_USERDUEDATE, OnSelchangeFilter)
-	ON_NOTIFY(DTN_CLOSEUP, IDC_USERSTARTDATE, OnSelchangeFilter)
+	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERDUEDATE, OnSelchangeDateFilter)
+	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERSTARTDATE, OnSelchangeDateFilter)
+	ON_NOTIFY(DTN_CLOSEUP, IDC_USERDUEDATE, OnSelchangeDateFilter)
+	ON_NOTIFY(DTN_CLOSEUP, IDC_USERSTARTDATE, OnSelchangeDateFilter)
 
-	ON_CONTROL_RANGE(CBN_SELCHANGE, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeFilterChange)
-	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeFilterChange)
+	ON_CONTROL_RANGE(CBN_SELCHANGE, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeSelchangeFilter)
+	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeSelcancelFilter)
 
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
@@ -300,13 +299,67 @@ void CTDLFilterBar::OnSelchangeFilter()
 	}
 }
 
-void CTDLFilterBar::OnSelcancelFilter() 
+void CTDLFilterBar::OnSelcancelAllocToFilter()
 {
-	// Restore existing filter
-	UpdateData(FALSE);
+	if (m_bMultiSelection)
+	{
+		// Restore existing filter
+		m_cbAllocToFilter.SetChecked(m_filter.aAllocTo);
+		m_cbAllocToFilter.ClearMultiSelectionHistory();
+	}
 }
 
-void CTDLFilterBar::OnCloseUpOptions() 
+void CTDLFilterBar::OnSelcancelAllocByFilter()
+{
+	if (m_bMultiSelection)
+	{
+		// Restore existing filter
+		m_cbAllocByFilter.SetChecked(m_filter.aAllocBy);
+		m_cbAllocByFilter.ClearMultiSelectionHistory();
+	}
+}
+
+void CTDLFilterBar::OnSelcancelCategoryFilter()
+{
+	if (m_bMultiSelection)
+	{
+		// Restore existing filter
+		m_cbCategoryFilter.SetChecked(m_filter.aCategories);
+		m_cbCategoryFilter.ClearMultiSelectionHistory();
+	}
+}
+
+void CTDLFilterBar::OnSelcancelStatusFilter()
+{
+	if (m_bMultiSelection)
+	{
+		// Restore existing filter
+		m_cbStatusFilter.SetChecked(m_filter.aStatus);
+		m_cbStatusFilter.ClearMultiSelectionHistory();
+	}
+}
+
+void CTDLFilterBar::OnSelcancelTagFilter()
+{
+	if (m_bMultiSelection)
+	{
+		// Restore existing filter
+		m_cbTagFilter.SetChecked(m_filter.aTags);
+		m_cbTagFilter.ClearMultiSelectionHistory();
+	}
+}
+
+void CTDLFilterBar::OnSelcancelVersionFilter()
+{
+	if (m_bMultiSelection)
+	{
+		// Restore existing filter
+		m_cbVersionFilter.SetChecked(m_filter.aVersions);
+		m_cbVersionFilter.ClearMultiSelectionHistory();
+	}
+}
+
+void CTDLFilterBar::OnCloseUpOptions()
 {
 	// only notify parent if there has been a change
 	DWORD dwCurFlags = 0;
@@ -323,7 +376,7 @@ void CTDLFilterBar::OnCloseUpOptions()
 	}
 }
 
-void CTDLFilterBar::OnSelchangeFilter(NMHDR* pNMHDR, LRESULT* pResult)
+void CTDLFilterBar::OnSelchangeDateFilter(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	UpdateData();
 
@@ -1065,7 +1118,7 @@ HBRUSH CTDLFilterBar::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
-void CTDLFilterBar::OnCustomAttributeFilterChange(UINT nCtrlID)
+void CTDLFilterBar::OnCustomAttributeSelchangeFilter(UINT nCtrlID)
 {
 	ASSERT(CTDCCustomAttributeUIHelper::IsCustomFilterControl(nCtrlID));
 
@@ -1075,14 +1128,36 @@ void CTDLFilterBar::OnCustomAttributeFilterChange(UINT nCtrlID)
 	{
 		ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
 
-		TDCCADATA data;
+		TDCCADATA data, dataPrev;
+		m_filter.mapCustomAttrib.Lookup(ctrl.sAttribID, dataPrev);
 		
 		if (CTDCCustomAttributeUIHelper::GetControlData(this, ctrl, m_aCustomAttribDefs, data))
 			m_filter.mapCustomAttrib[ctrl.sAttribID] = data;
 		else
 			m_filter.mapCustomAttrib.RemoveKey(ctrl.sAttribID);
 
-		GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
+		if (data != dataPrev)
+			GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
+	}
+	else
+	{
+		ASSERT(0);
+	}
+}
+
+void CTDLFilterBar::OnCustomAttributeSelcancelFilter(UINT nCtrlID)
+{
+	ASSERT(CTDCCustomAttributeUIHelper::IsCustomFilterControl(nCtrlID));
+
+	CUSTOMATTRIBCTRLITEM ctrl;
+
+	if (CTDCCustomAttributeUIHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
+	{
+		ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
+		
+		// Restore previous state
+		CTDCCustomAttributeUIHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, m_filter.mapCustomAttrib);
+		CTDCCustomAttributeUIHelper::ClearFilterCheckboxHistory(ctrl, this);
 	}
 	else
 	{

@@ -23,6 +23,7 @@ public:
 	
 	BOOL EnableMultiSelection(BOOL bEnable = TRUE);
 	BOOL IsMultiSelectionEnabled() const { return m_bMultiSel; }
+	void ClearMultiSelectionHistory();
 
 	int SetStrings(const CStringArray& aItems);
 

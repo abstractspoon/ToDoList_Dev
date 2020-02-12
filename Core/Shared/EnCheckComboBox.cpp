@@ -106,6 +106,12 @@ BOOL CEnCheckComboBox::EnableMultiSelection(BOOL bEnable)
 	return TRUE;
 }
 
+void CEnCheckComboBox::ClearMultiSelectionHistory()
+{
+	if (m_bMultiSel && IsAnyChecked())
+		CheckAll(CCBC_UNCHECKED, FALSE);
+}
+
 int CEnCheckComboBox::SetStrings(const CStringArray& aItems)
 {
 	// Save and restore check states
@@ -417,9 +423,22 @@ BOOL CEnCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArr
 			return TRUE;
 		}
 
-		// (Not sure what this is for)
-		if ((nAny != CB_ERR) && (!aChecked.GetSize() || bAnyIsChecked))
-			return (CCheckComboBox::SetCheck(nAny, CCBC_CHECKED, FALSE) != CB_ERR);
+		// If we're clearing the selection, and we have the 'Any' item,
+		// we just set the 'Any' item to 'checked' so as not to lose the
+		// existing selection.
+		// Caller can call 'ClearMultiSelectionHistory' as required afterwards.
+		if ((nAny != CB_ERR) && !aChecked.GetSize() && aCurChecked.GetSize())
+		{
+			ASSERT(!bAnyIsChecked);
+
+			if (CCheckComboBox::SetCheck(nAny, CCBC_CHECKED, FALSE) == CB_ERR)
+				return FALSE;
+
+			m_sText.Empty();
+			Invalidate(FALSE);
+
+			return TRUE;
+		}
 
 		return CCheckComboBox::SetChecked(aChecked, aMixed);
 	}

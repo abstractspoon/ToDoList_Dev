@@ -126,15 +126,21 @@ protected:
 	//}}AFX_MSG
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnSelchangeFilter();
-	afx_msg void OnSelcancelFilter();
+	afx_msg void OnSelcancelAllocToFilter();
+	afx_msg void OnSelcancelAllocByFilter();
+	afx_msg void OnSelcancelCategoryFilter();
+	afx_msg void OnSelcancelStatusFilter();
+	afx_msg void OnSelcancelTagFilter();
+	afx_msg void OnSelcancelVersionFilter();
 	afx_msg void OnCloseUpOptions();
 	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
-	afx_msg void OnSelchangeFilter(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnSelchangeDateFilter(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnToolTipNotify( UINT id, NMHDR* pNMHDR, LRESULT* pResult );	
 	afx_msg LRESULT OnEEBtnClick(WPARAM wp, LPARAM lp);
-	afx_msg void OnCustomAttributeFilterChange(UINT nCtrlID);
+	afx_msg void OnCustomAttributeSelchangeFilter(UINT nCtrlID);
+	afx_msg void OnCustomAttributeSelcancelFilter(UINT nCtrlID);
 	DECLARE_MESSAGE_MAP()
 
 protected:
