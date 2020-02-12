@@ -742,11 +742,16 @@ BOOL CTreeListCtrl::OnHeaderDblClkDivider(NMHEADER* pHDN)
 		ASSERT(nCol != -1);
 
 		CClientDC dc(&m_tree);
+		
+		int nPrevWidth = m_treeHeader.GetItemWidth(nCol);
+		int nNewWidth = RecalcTreeColumnWidth(nCol, &dc, TRUE);
 
-		RecalcTreeColumnWidth(nCol, &dc, TRUE);
-		SetSplitPos(m_treeHeader.CalcTotalItemWidth());
-
-		Resize();
+		// Adjust the splitter if there was a change
+		if (nNewWidth != nPrevWidth)
+		{
+			SetSplitPos(m_treeHeader.CalcTotalItemWidth());
+			Resize();
+		}
 
 		return TRUE;
 	}
@@ -1419,8 +1424,17 @@ void CTreeListCtrl::CollapseList(HTREEITEM htiFrom)
 
 void CTreeListCtrl::ResizeColumnsToFit(BOOL bForce)
 {
+	int nPrevTreeWidth = m_treeHeader.CalcTotalItemWidth(0); // without title
+
 	RecalcTreeColumnsToFit(bForce);
 	RecalcListColumnsToFit();
+
+	// Adjust the splitter if there was a change
+	if (m_treeHeader.CalcTotalItemWidth(0) != nPrevTreeWidth)
+	{
+		SetSplitPos(m_treeHeader.CalcTotalItemWidth());
+		Resize();
+	}
 }
 
 void CTreeListCtrl::RecalcTreeColumnsToFit(BOOL bForce)

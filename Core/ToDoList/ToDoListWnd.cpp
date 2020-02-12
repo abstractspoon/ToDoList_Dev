@@ -1866,7 +1866,11 @@ BOOL CToDoListWnd::HandleSaveTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist)
 	
 	if (!sMessage.IsEmpty())
 	{
+		///////////////////////////////////////////////////////////////////////
+		// PERMANENT LOGGING
 		FileMisc::LogText(_T("Saving of the file '%s' failed with the error code: %d"), szTasklist, nErr);
+		///////////////////////////////////////////////////////////////////////
+
 		CMessageBox::AfxShow(IDS_SAVETASKLIST_TITLE, sMessage, MB_OK);
 	}
 	
@@ -2233,7 +2237,11 @@ void CToDoListWnd::HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTaskList)
 	
 	if (!sMessage.IsEmpty())
 	{
+		///////////////////////////////////////////////////////////////////////
+		// PERMANENT LOGGING
 		FileMisc::LogText(_T("Loading of the file '%s' failed with the error code: %d"), szTaskList, nErr);
+		///////////////////////////////////////////////////////////////////////
+
 		CMessageBox::AfxShow(IDS_OPENTASKLIST_TITLE, sMessage, MB_OK);
 	}
 }
@@ -4788,7 +4796,10 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 
 LRESULT CToDoListWnd::OnExportThreadFinished(WPARAM wp, LPARAM lp)
 {
+	///////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
 	FileMisc::LogTextRaw(_T("CToDoListWnd::OnExportThreadFinished(Received parent-notification)"));
+	///////////////////////////////////////////////////////////////////////
 
 	TDCEXPORTTASKLIST* pExport = (TDCEXPORTTASKLIST*)lp;
 	ASSERT(pExport && pExport->IsValid());
@@ -4824,7 +4835,10 @@ LRESULT CToDoListWnd::OnExportThreadFinished(WPARAM wp, LPARAM lp)
 	// cleanup
 	delete pExport;
 
+	///////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
 	FileMisc::LogTextRaw(_T("CToDoListWnd::OnExportThreadFinished(Deleted allocated memory)\n"));
+	///////////////////////////////////////////////////////////////////////
 
 	return 0L;
 }
@@ -7580,21 +7594,18 @@ void CToDoListWnd::OnUpdateArchiveSelectedCompletedTasks(CCmdUI* pCmdUI)
 void CToDoListWnd::DoMoveTask(TDC_MOVETASK nDirection)
 {
 	// DEBUGGING /////////////////////////////////////////////////////////
-	static DWORD dwLastTick = GetTickCount();
-	DWORD dwTick = GetTickCount();
-
-#ifdef _DEBUG
-	TRACE(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick);
-#else
-	if (FileMisc::IsLoggingEnabled())
-	{
-		FileMisc::LogTextRaw(Misc::Format(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick));
-	}
-#endif
-
-	dwLastTick = GetTickCount();
-
-	CScopedLogTimer log(_T("CToDoCtrl::MoveSelectedTask()"));
+// 	static DWORD dwLastTick = GetTickCount();
+// 	DWORD dwTick = GetTickCount();
+// 
+// #ifdef _DEBUG
+// 	TRACE(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick);
+// #else
+// 	FileMisc::LogTextRaw(Misc::Format(_T("Time since last CToDoCtrl::MoveSelectedTask() = %ld ms\n"), dwTick - dwLastTick));
+// #endif
+// 
+// 	dwLastTick = GetTickCount();
+// 
+// 	CScopedLogTimer log(_T("CToDoCtrl::MoveSelectedTask()"));
 	//////////////////////////////////////////////////////////////////////
 
 	GetToDoCtrl().MoveSelectedTask(nDirection);
@@ -7874,6 +7885,11 @@ void CToDoListWnd::OnTabCtrlEndDrag(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CToDoListWnd::OnTabCtrlSelchanging(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
+	///////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
+	FileMisc::LogText(_T("CToDoListWnd::OnTabCtrlSelchanging(start)"));
+	///////////////////////////////////////////////////////////////////////
+
 	// cache the outgoing selection
 	m_nLastSelItem = GetSelToDoCtrl();
 	
@@ -7994,6 +8010,11 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 	UpdateMenuIconMgrSourceControlStatus();
 	RefreshPauseTimeTracking();
+
+	///////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
+	FileMisc::LogText(_T("CToDoListWnd::OnTabCtrlSelchange(end)"));
+	///////////////////////////////////////////////////////////////////////
 	
 	*pResult = 0;
 }
@@ -12892,7 +12913,10 @@ void CToDoListWnd::OnViewShowTimeTracker()
 
 void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 {
+	///////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
 	FileMisc::LogText(_T("WM_SETTINGCHANGE(%04x, %s)"), uFlags, lpszSection);
+	///////////////////////////////////////////////////////////////////////
 
 	// Prompt to restart app whenever Regional settings change
 	if ((uFlags == 0) && (StrCmp(lpszSection, _T("intl")) == 0))

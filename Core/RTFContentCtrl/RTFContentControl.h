@@ -61,7 +61,6 @@ public:
 
 // Attributes
 protected:
-	BOOL m_bAllowNotify;
 	CToolbarHelper m_tbHelper;
 	CRichEditSpellCheck m_reSpellCheck;
 	CMenuIconMgr m_mgrMenuIcons;
