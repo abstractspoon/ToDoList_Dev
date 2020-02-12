@@ -230,7 +230,7 @@ protected:
 	virtual BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 
 	virtual BOOL OnListHeaderBeginTracking(NMHEADER* pHDN);
-	virtual BOOL OnTreeHeaderBeginTracking(NMHEADER* pHDN);
+	virtual BOOL OnPrimaryHeaderBeginTracking(NMHEADER* pHDN);
 	virtual BOOL OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
 	virtual BOOL OnHeaderDblClkDivider(NMHEADER* pHDN);
 

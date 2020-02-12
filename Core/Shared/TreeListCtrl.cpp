@@ -1138,7 +1138,7 @@ BOOL CTreeListCtrl::OnListHeaderBeginTracking(NMHEADER* pHDN)
 	return m_listHeader.IsItemTrackable(pHDN->iItem);
 }
 
-BOOL CTreeListCtrl::OnTreeHeaderBeginTracking(NMHEADER* pHDN)
+BOOL CTreeListCtrl::OnPrimaryHeaderBeginTracking(NMHEADER* pHDN)
 {
 	return m_treeHeader.IsItemTrackable(pHDN->iItem);
 }
