@@ -774,10 +774,12 @@ int CEnHeaderCtrl::GetItemWidths(CIntArray& aWidths) const
 BOOL CEnHeaderCtrl::SetItemWidths(const CIntArray& aWidths)
 {
 	int nItem = GetItemCount();
-	ASSERT(nItem == aWidths.GetSize());
 
 	if (nItem != aWidths.GetSize())
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	while (nItem--)
 	{
@@ -802,10 +804,12 @@ int CEnHeaderCtrl::GetTrackedItems(CIntArray& aTracked) const
 BOOL CEnHeaderCtrl::SetTrackedItems(const CIntArray& aTracked)
 {
 	int nItem = GetItemCount();
-	ASSERT(nItem == aTracked.GetSize());
 	
 	if (nItem != aTracked.GetSize())
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
 	while (nItem--)
 		SetItemTracked(nItem, aTracked[nItem]);
