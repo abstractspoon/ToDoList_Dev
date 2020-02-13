@@ -9850,7 +9850,6 @@ void CToDoListWnd::OnExport()
 			if (VerifyTaskListOpen(nCtrl, FALSE))
 			{
 				CTaskFile& tasks = taskFiles.GetTaskFile(nCtrl);
-				tasks.Reset();
 				
 				// set the html image folder to be the output path with an different extension
 				CString sImgFolder;
