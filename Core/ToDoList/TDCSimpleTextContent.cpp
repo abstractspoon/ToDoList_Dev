@@ -136,7 +136,6 @@ const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
 CTDLSimpleTextContentCtrl::CTDLSimpleTextContentCtrl() 
 	: 
 	CUrlRichEditCtrl(CTRLCLICKTOFOLLOW, IDS_CTRLCLICKTOFOLLOWLINK),
-	m_bAllowNotify(TRUE), 
 	m_bWordWrap(TRUE),
 #pragma warning (disable: 4355)
 	m_reSpellCheck(*this)
@@ -151,6 +150,24 @@ CTDLSimpleTextContentCtrl::CTDLSimpleTextContentCtrl()
 CTDLSimpleTextContentCtrl::~CTDLSimpleTextContentCtrl()
 {
 }
+
+BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
+	//{{AFX_MSG_MAP(CTDLSimpleTextContentCtrl)
+	ON_WM_CONTEXTMENU()
+	ON_WM_SETCURSOR()
+	ON_WM_DESTROY()
+	ON_WM_CREATE()
+	//}}AFX_MSG_MAP
+	ON_WM_HELPINFO()
+	ON_COMMAND_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnCommentsMenuCmd)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnUpdateCommentsMenuCmd)
+	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChangeText)
+	ON_CONTROL_REFLECT_EX(EN_KILLFOCUS, OnKillFocus)
+	ON_MESSAGE(WM_SETWORDWRAP, OnSetWordWrap)
+	ON_NOTIFY_REFLECT_EX(TTN_NEEDTEXT, OnGetTooltip)
+	ON_WM_NCDESTROY()
+
+END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // IContentCtrl
@@ -180,8 +197,6 @@ bool CTDLSimpleTextContentCtrl::SetTextContent(LPCTSTR szContent, bool bResetSel
 bool CTDLSimpleTextContentCtrl::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	CAutoFlag af(m_bAllowNotify, TRUE);
 
 	return (InsertSimpleText(szContent, (bAtEnd ? TRUE : FALSE)) != FALSE);
 }
@@ -359,26 +374,6 @@ bool CTDLSimpleTextContentCtrl::FindReplaceAll(LPCTSTR szFind, LPCTSTR szReplace
 }
 
 /////////////////////////////////////////////////////////////////////////////
-
-BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
-	//{{AFX_MSG_MAP(CTDLSimpleTextContentCtrl)
-	ON_WM_CONTEXTMENU()
-	ON_WM_SETCURSOR()
-	ON_WM_DESTROY()
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
-	ON_WM_HELPINFO()
-	ON_COMMAND_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnCommentsMenuCmd)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnUpdateCommentsMenuCmd)
-	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChangeText)
-	ON_CONTROL_REFLECT_EX(EN_KILLFOCUS, OnKillFocus)
-	ON_MESSAGE(WM_SETWORDWRAP, OnSetWordWrap)
-	ON_NOTIFY_REFLECT_EX(TTN_NEEDTEXT, OnGetTooltip)
-	ON_WM_NCDESTROY()
-
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
 // CTDLSimpleTextContentCtrl message handlers
 
 BOOL CTDLSimpleTextContentCtrl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
@@ -403,13 +398,7 @@ BOOL CTDLSimpleTextContentCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pP
 
 void CTDLSimpleTextContentCtrl::SetContentFont(HFONT hFont)
 {
-	// richedit2.0 sends a EN_CHANGE notification if it contains
-	// text when it receives a font change.
-	// to us though this is a bogus change so we prevent a notification
-	// being sent
-	CAutoFlag af(m_bAllowNotify, FALSE);
-
-	CUrlRichEditCtrl::SendMessage(WM_SETFONT, (WPARAM)hFont);
+	SendMessage(WM_SETFONT, (WPARAM)hFont);
 }
 
 BOOL CTDLSimpleTextContentCtrl::OnChangeText() 
@@ -417,12 +406,12 @@ BOOL CTDLSimpleTextContentCtrl::OnChangeText()
 	CUrlRichEditCtrl::OnChangeText();
 
 	// If we don't have the focus and inline spell-checking
-	// is enabled then assume that this is not a 'real' change
-	// and don't pass it on
+	// is enabled then assume that this is probably not a 
+	// user edit so we don't pass it on
 	if ((GetFocus() != this) && IsInlineSpellCheckingEnabled())
 		return TRUE;
 	
-	if (m_bAllowNotify && IsWindowEnabled() && !(GetStyle() & ES_READONLY))
+	if (IsWindowEnabled() && !(GetStyle() & ES_READONLY))
 		GetParent()->SendMessage(WM_ICC_CONTENTCHANGE);
 	
 	return FALSE;
@@ -430,10 +419,9 @@ BOOL CTDLSimpleTextContentCtrl::OnChangeText()
 
 BOOL CTDLSimpleTextContentCtrl::OnKillFocus() 
 {
-	if (m_bAllowNotify)
-		GetParent()->SendMessage(WM_ICC_KILLFOCUS);
+	GetParent()->SendMessage(WM_ICC_KILLFOCUS);
 	
-	return FALSE;
+	return FALSE; // continue routing
 }
 
 void CTDLSimpleTextContentCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
@@ -816,8 +804,6 @@ int CTDLSimpleTextContentCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CUrlRichEditCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
-
-	CAutoFlag af(m_bAllowNotify, FALSE); // else we can get a false edit change
 
 	LimitText(1024 * 1024 * 1024); // one gigabyte
 	EnableToolTips();

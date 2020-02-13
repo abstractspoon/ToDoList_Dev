@@ -547,6 +547,7 @@ protected:
 	COleDateTime GetEarliestTaskStartDate(HTASKITEM hTask) const;
 	BOOL OffsetTaskDates(HTASKITEM hTask, int nNumDays);
 	BOOL DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
+	CString FormatDate(const COleDateTime& date, BOOL bCalculated) const;
 
 	const CXmlItem* GetCustomAttribDefs(int nIndex = 0) const;
 	const CXmlItem* GetTaskCustomAttribute(HTASKITEM hTask, LPCTSTR szID) const;

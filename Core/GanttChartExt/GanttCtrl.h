@@ -56,9 +56,6 @@ public:
 	DWORD HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const;
 	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 
-	void ResizeAttributeColumnsToFit(BOOL bForce = FALSE);
-	void AdjustSplitterToFitAttributeColumns();
-
 	BOOL ZoomIn(BOOL bIn = TRUE);
 	BOOL ZoomBy(int nAmount);
 

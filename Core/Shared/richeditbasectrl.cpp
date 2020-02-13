@@ -27,6 +27,12 @@ static char THIS_FILE[] = __FILE__;
 
 const CRect DEFMARGINS					= CRect(8, 4, 8, 0);
 
+/////////////////////////////////////////////////////////////////////////////
+
+const UINT WM_REBC_REENABLECHANGENOTIFY = ::RegisterWindowMessage(_T("WM_REBC_REENABLECHANGENOTIFY"));
+
+/////////////////////////////////////////////////////////////////////////////
+
 const LPCSTR  DEFAULTRTF				= "{\\rtf1\\ansi\\deff0\\f0\\fs60}";
 const LPCTSTR RTF_TABLE_HEADER			= _T("{\\rtf1{\\pard{{\\trowd");
 const LPCTSTR RTF_TEXT_INDENT			= _T("\\trgaph%d");
@@ -46,6 +52,8 @@ const LPCTSTR RTF_HORZ_LINE				= _T("{\\rtf1{\\pict\\wmetafile8\\picw26\\pich26\
 											_T("010001000000000001000100000000002800000001000000010000000100010000000000000000")
 											_T("000000000000000000000000000000000000000000ffffff00000000ff040000002701ffff0300")
 											_T("00000000}}");
+
+/////////////////////////////////////////////////////////////////////////////
 
 // The use of whitespace within '{ HYPERLINK \" %s \"}' is ABSOLUTELY ESSENTIAL
 // Reference: https://autohotkey.com/boards/viewtopic.php?t=43427
@@ -80,7 +88,7 @@ struct STREAMINCOOKIE
 
 CRichEditBaseCtrl::CRichEditBaseCtrl(BOOL bAutoRTL) 
 	: 
-	m_bEnableSelectOnFocus(FALSE), 
+	m_bEnableSelectOnFocus(FALSE),
 	m_bInOnFocus(FALSE), 
 	m_rMargins(DEFMARGINS),
 	m_bAutoRTL(bAutoRTL)
@@ -96,15 +104,20 @@ CRichEditBaseCtrl::~CRichEditBaseCtrl()
 
 BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	//{{AFX_MSG_MAP(CRichEditBaseCtrl)
+	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
-	//}}AFX_MSG_MAP
+	ON_WM_SETFOCUS()
+	ON_WM_SIZE()
+
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceMsg)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
+	ON_REGISTERED_MESSAGE(WM_REBC_REENABLECHANGENOTIFY, OnReenableChangeNotifications)
 
-	ON_WM_SETFOCUS()
 	ON_MESSAGE(EM_SETSEL, OnEditSetSelection)
-	ON_WM_SIZE()
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
+	ON_MESSAGE(WM_SETTEXT, OnSetText)
+
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -142,6 +155,23 @@ LRESULT CRichEditBaseCtrl::OnEditSetSelection(WPARAM /*wParam*/, LPARAM /*lParam
 
 	// else
 	return 0L;
+}
+
+LRESULT CRichEditBaseCtrl::OnSetFont(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	// prevent spurious change notifications
+	TemporarilyDisableChangeNotifications();
+
+	return Default();
+}
+
+LRESULT CRichEditBaseCtrl::OnSetText(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	// prevent spurious change notifications occurring as
+	// a result of spell-checking or auto-url detection
+	TemporarilyDisableChangeNotifications();
+
+	return Default();
 }
 
 void CRichEditBaseCtrl::OnDestroy()
@@ -1206,6 +1236,10 @@ int CRichEditBaseCtrl::GetRTFLength() const
 
 void CRichEditBaseCtrl::SetRTF(const CString& rtf)
 {
+	// Don't notify our parent about this since
+	// that's where it came from
+	TemporarilyDisableChangeNotifications();
+
 	CString sRTF = (rtf.IsEmpty() ? DEFAULTRTF : rtf);
 	
 	STREAMINCOOKIE cookie(sRTF);
@@ -1218,6 +1252,10 @@ BOOL CRichEditBaseCtrl::EnableInlineSpellChecking(BOOL bEnable)
 {
 	if (!SupportsInlineSpellChecking())
 		return FALSE;
+
+	// Prevent spell-checking from causing a change notification
+	if (bEnable)
+		TemporarilyDisableChangeNotifications();
 
 	ASSERT(GetSafeHwnd());
 
@@ -1474,4 +1512,21 @@ BOOL CRichEditBaseCtrl::IsEndOfLine(int nCharPos) const
 	int nEndPosOfLine = (nLineStart + nLineLen);
 
 	return (nCharPos == nEndPosOfLine);
+}
+
+void CRichEditBaseCtrl::TemporarilyDisableChangeNotifications()
+{
+	if ((GetEventMask() & ENM_CHANGE) == ENM_CHANGE)
+	{
+		SetEventMask(GetEventMask() & ~ENM_CHANGE);
+		PostMessage(WM_REBC_REENABLECHANGENOTIFY);
+	}
+}
+
+LRESULT CRichEditBaseCtrl::OnReenableChangeNotifications(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	ASSERT((GetEventMask() & ENM_CHANGE) == 0);
+
+	SetEventMask(GetEventMask() | ENM_CHANGE);
+	return 0L;
 }

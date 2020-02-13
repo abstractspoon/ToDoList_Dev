@@ -334,8 +334,7 @@ BOOL CContentCtrl::SetTextContent(LPCTSTR szContent, BOOL bResetSelection)
 
 BOOL CContentCtrl::InsertTextContent(LPCTSTR szContent, BOOL bAtEnd)
 {
-	CAutoFlag af(m_bSettingContent, TRUE);
-
+	// This is a proper edit so we want change notifications
 	if (m_pContentCtrl)
 		return m_pContentCtrl->InsertTextContent(szContent, (bAtEnd != FALSE));
 

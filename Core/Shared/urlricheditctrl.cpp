@@ -52,7 +52,6 @@ BEGIN_MESSAGE_MAP(CUrlRichEditCtrl, CRichEditBaseCtrl)
 	ON_WM_KEYUP()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_SHOWWINDOW()
-	ON_WM_CREATE()
 	ON_WM_CONTEXTMENU()
 	ON_WM_SYSKEYDOWN()
 	ON_WM_TIMER()
@@ -130,7 +129,7 @@ void CUrlRichEditCtrl::Initialise()
 {
 	SetEventMask(GetEventMask() | ENM_CHANGE | ENM_DROPFILES | ENM_DRAGDROPDONE | ENM_LINK);
 	DragAcceptFiles();
-	
+
 	// enable multilevel undo
 	SendMessage(EM_SETTEXTMODE, TM_MULTILEVELUNDO);
 
@@ -140,20 +139,13 @@ void CUrlRichEditCtrl::Initialise()
 	m_ncBorder.Initialize(GetSafeHwnd());
 }
 
-void CUrlRichEditCtrl::PreSubclassWindow() 
-{
-	CRichEditBaseCtrl::PreSubclassWindow();
-
-	Initialise();
-}
-
-LRESULT CUrlRichEditCtrl::OnSetText(WPARAM /*wp*/, LPARAM lp)
+LRESULT CUrlRichEditCtrl::OnSetText(WPARAM wp, LPARAM lp)
 {
 	LRESULT lr = 0;
 
 	if (IsAutoUrlDetectionEnabled())
 	{
-		lr = Default();
+		lr = CRichEditBaseCtrl::OnSetText(wp, lp);
 	}
 	else
 	{
@@ -167,7 +159,8 @@ LRESULT CUrlRichEditCtrl::OnSetText(WPARAM /*wp*/, LPARAM lp)
 		{
 			CRichEditHelper::ClearUndo(GetSafeHwnd());
 			
-			lr = Default();
+			lr = CRichEditBaseCtrl::OnSetText(wp, lp);
+
 			ParseAndFormatText(TRUE);
 		}
 	}
@@ -175,9 +168,9 @@ LRESULT CUrlRichEditCtrl::OnSetText(WPARAM /*wp*/, LPARAM lp)
 	return lr;
 }
 
-LRESULT CUrlRichEditCtrl::OnSetFont(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CUrlRichEditCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 {
-	LRESULT lr = Default();
+	LRESULT lr = CRichEditBaseCtrl::OnSetFont(wp, lp);
 
 	if (!IsAutoUrlDetectionEnabled())
 	{
@@ -774,16 +767,6 @@ void CUrlRichEditCtrl::OnRButtonUp(UINT nHitTest, CPoint point)
 void CUrlRichEditCtrl::OnShowWindow(BOOL bShow, UINT nStatus) 
 {
 	CRichEditBaseCtrl::OnShowWindow(bShow, nStatus);
-}
-
-int CUrlRichEditCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CRichEditBaseCtrl::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	Initialise();
-
-	return 0;
 }
 
 void CUrlRichEditCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point) 

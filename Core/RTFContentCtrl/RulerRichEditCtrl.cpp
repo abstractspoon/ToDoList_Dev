@@ -247,6 +247,10 @@ BOOL CRulerRichEditCtrl::CreateRTFControl(BOOL autohscroll)
 
 	if (m_rtf.Create(style, rtfRect, this, RTF_CONTROL))
 	{
+		// Prevent the following initialisation from 
+		// causing change notifications
+		m_rtf.TemporarilyDisableChangeNotifications();
+
 		// Setting up default tab stops
 		ParaFormat para(PFM_TABSTOPS);
 		BuildTabStops(para);
@@ -260,7 +264,7 @@ BOOL CRulerRichEditCtrl::CreateRTFControl(BOOL autohscroll)
 		SetTabStops((LPLONG) (para.rgxTabs), MAX_TAB_STOPS);
 
 		m_rtf.SendMessage(EM_SETTYPOGRAPHYOPTIONS, TO_ADVANCEDTYPOGRAPHY, TO_ADVANCEDTYPOGRAPHY);
-		m_rtf.SetEventMask(m_rtf.GetEventMask() | ENM_SELCHANGE | ENM_SCROLL | ENM_CHANGE);
+		m_rtf.SetEventMask(m_rtf.GetEventMask() | ENM_SELCHANGE | ENM_SCROLL);
 		m_rtf.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
 
 		result = TRUE;
@@ -408,6 +412,9 @@ void CRulerRichEditCtrl::OnEnSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 void CRulerRichEditCtrl::SetDefaultFont(HFONT hFont)
 {
+	// Prevent this update causing a change notification
+	m_rtf.TemporarilyDisableChangeNotifications();
+
 	// reverse engineer the hFont and use the results
 	// for the rtf defaults
 	CString sFace;

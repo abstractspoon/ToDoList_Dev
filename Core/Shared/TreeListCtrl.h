@@ -152,8 +152,9 @@ public:
 	virtual void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
 
-	void ResizeColumnsToFit(BOOL bForce = FALSE);
-	void AdjustSplitterToFitColumns();
+	void ResizeListColumnsToFit(BOOL bForce = FALSE);
+	void AdjustSplitterToFitListColumns();
+	void AdjustSplitterToFitTreeColumns();
 
 	BOOL SetAlternateLineColor(COLORREF crAltLine);
 	BOOL SetGridLineColor(COLORREF crGridLine);
@@ -230,7 +231,7 @@ protected:
 	virtual BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 
 	virtual BOOL OnListHeaderBeginTracking(NMHEADER* pHDN);
-	virtual BOOL OnTreeHeaderBeginTracking(NMHEADER* pHDN);
+	virtual BOOL OnPrimaryHeaderBeginTracking(NMHEADER* pHDN);
 	virtual BOOL OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth);
 	virtual BOOL OnHeaderDblClkDivider(NMHEADER* pHDN);
 

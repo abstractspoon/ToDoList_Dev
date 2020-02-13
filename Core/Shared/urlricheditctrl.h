@@ -60,7 +60,6 @@ protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CUrlRichEditCtrl)
 protected:
-	virtual void PreSubclassWindow();
 	virtual int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
 	//}}AFX_VIRTUAL
 	virtual LRESULT SendNotifyCustomUrl(LPCTSTR szUrl) const;
@@ -78,7 +77,6 @@ protected:
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnSysKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnTimer(UINT nIDEvent);

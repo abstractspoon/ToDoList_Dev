@@ -186,11 +186,6 @@ void CWorkloadCtrl::UpdateTotalsDateRangeLabel()
 	}
 }
 
-void CWorkloadCtrl::AdjustSplitterToFitAttributeColumns()
-{
-	AdjustSplitterToFitColumns();
-}
-
 int CWorkloadCtrl::CalcSplitPosToFitListColumns(int nTotalWidth) const
 {
 	// Adjust for bar chart
@@ -2546,11 +2541,6 @@ WLC_COLUMNID CWorkloadCtrl::GetTreeColumnID(int nCol) const
 WLC_LISTCOLUMNTYPE CWorkloadCtrl::GetListColumnType(int nCol) const
 {
 	return (WLC_LISTCOLUMNTYPE)m_listHeader.GetItemData(nCol);
-}
-
-void CWorkloadCtrl::ResizeAttributeColumnsToFit(BOOL bForce)
-{
-	ResizeColumnsToFit(bForce);
 }
 
 void CWorkloadCtrl::RecalcListColumnsToFit()
