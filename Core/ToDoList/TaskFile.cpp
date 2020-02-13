@@ -1544,8 +1544,10 @@ BOOL CTaskFile::SetLastModified(const COleDateTime& tLastMod)
 {
 	if (SetItemValue(TDL_LASTMOD, tLastMod))
 	{
-		DWORD dwFmt = (DHFD_TIME | DHFD_NOSEC | (m_bISODates ? DHFD_ISO : 0));
-		return (NULL != SetItemValue(TDL_LASTMODSTRING, CDateHelper::FormatDate(tLastMod, dwFmt)));
+// 		DWORD dwFmt = (DHFD_TIME | DHFD_NOSEC | (m_bISODates ? DHFD_ISO : 0));
+// 		return (NULL != SetItemValue(TDL_LASTMODSTRING, CDateHelper::FormatDate(tLastMod, dwFmt)));
+
+		return (NULL != SetItemValue(TDL_LASTMODSTRING, FormatDate(tLastMod, FALSE)));
 	}
 
 	// else
@@ -4083,6 +4085,16 @@ double CTaskFile::GetTaskTime(HTASKITEM hTask, const CString& sTimeItem) const
 
 ////////////////////////////////////////////////////////////////////
 
+CString CTaskFile::FormatDate(const COleDateTime& date, BOOL bCalculated) const
+{
+	DWORD dwFmt = (m_bISODates ? DHFD_ISO : 0);
+
+	if (!bCalculated && CDateHelper::DateHasTime(date))
+		dwFmt |= DHFD_TIME | DHFD_NOSEC;
+
+	return CDateHelper::FormatDate(date, dwFmt);
+}
+
 BOOL CTaskFile::DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey)
 {
 	CXmlItem* pXITask = NULL;
@@ -4098,12 +4110,16 @@ bool CTaskFile::SetTaskDate(HTASKITEM hTask, const CString& sDateItem, const COl
 	{
 		if (!sDateStringItem.IsEmpty())
 		{
+			return SetTaskString(hTask, sDateStringItem, FormatDate(date, bCalculated));
+
+/*
 			DWORD dwFmt = m_bISODates ? DHFD_ISO : 0;
 			
 			if (!bCalculated && CDateHelper::DateHasTime(date))
 				dwFmt |= DHFD_TIME | DHFD_NOSEC;
 			
 			return SetTaskString(hTask, sDateStringItem, CDateHelper::FormatDate(date, dwFmt));
+*/
 		}
 		
 		return true;
