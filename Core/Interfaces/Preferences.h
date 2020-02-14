@@ -108,7 +108,7 @@ protected:
 	static BOOL s_bLocked;
 	
 protected:
-	BOOL WritePreferenceString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue, BOOL bQuoted);
+	static BOOL WritePreferenceString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue, BOOL bQuoted);
 
 protected:
 	// internal helpers that require pre-locking

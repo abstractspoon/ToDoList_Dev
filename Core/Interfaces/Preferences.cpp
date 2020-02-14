@@ -168,7 +168,14 @@ void CPreferences::Release()
 	LOCKPREFS();
 			
 	if (s_bIni)
+	{
 		Release(s_aIni);
+	}
+	else
+	{
+		// Ini update of app version happens in SaveInternal
+		WritePreferenceString(_T("AppVer"), _T("Version"), FileMisc::GetAppVersion(), FALSE);
+	}
 }
 
 void CPreferences::Release(CIniSectionArray& aSections)
