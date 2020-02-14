@@ -1543,12 +1543,7 @@ void CTaskFile::SetFilePath(LPCTSTR szFilePath)
 BOOL CTaskFile::SetLastModified(const COleDateTime& tLastMod)
 {
 	if (SetItemValue(TDL_LASTMOD, tLastMod))
-	{
-// 		DWORD dwFmt = (DHFD_TIME | DHFD_NOSEC | (m_bISODates ? DHFD_ISO : 0));
-// 		return (NULL != SetItemValue(TDL_LASTMODSTRING, CDateHelper::FormatDate(tLastMod, dwFmt)));
-
 		return (NULL != SetItemValue(TDL_LASTMODSTRING, FormatDate(tLastMod, FALSE)));
-	}
 
 	// else
 	return FALSE;
@@ -4109,18 +4104,7 @@ bool CTaskFile::SetTaskDate(HTASKITEM hTask, const CString& sDateItem, const COl
 	if (SetTaskDouble(hTask, sDateItem, date))
 	{
 		if (!sDateStringItem.IsEmpty())
-		{
 			return SetTaskString(hTask, sDateStringItem, FormatDate(date, bCalculated));
-
-/*
-			DWORD dwFmt = m_bISODates ? DHFD_ISO : 0;
-			
-			if (!bCalculated && CDateHelper::DateHasTime(date))
-				dwFmt |= DHFD_TIME | DHFD_NOSEC;
-			
-			return SetTaskString(hTask, sDateStringItem, CDateHelper::FormatDate(date, dwFmt));
-*/
-		}
 		
 		return true;
 	}
