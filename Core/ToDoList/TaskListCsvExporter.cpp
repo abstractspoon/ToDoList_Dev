@@ -28,7 +28,7 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTaskListCsvExporter::CTaskListCsvExporter() : m_bExportingForExcel(FALSE), m_bFirstHeader(TRUE)
+CTaskListCsvExporter::CTaskListCsvExporter() : m_bExportingForExcel(FALSE), m_bFirstHeader(TRUE), ISODATES(FALSE)
 {
 }
 
@@ -80,6 +80,8 @@ bool CTaskListCsvExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDes
 	// base consts
 	if (!CTaskListExporterBase::InitConsts(pTasks, szDestFilePath, bSilent, pPrefs, szKey))
 		return false;
+
+	ISODATES = pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE);
 	
 	// Add project identifier if exporting multiple files
 	if (MULTIFILE)
@@ -218,9 +220,51 @@ CString CTaskListCsvExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 				sItem = FormatAttribute(nAttrib, sAttribLabel, (sTime + sUnits));
 			}
 			break;
+
+		// The app omits seconds when exporting date-times but 
+		// in case this exported file is re-imported we don't
+		// want to lose the granularity
+		case TDCA_CREATIONDATE:
+			{
+				time64_t timeT = 0;
+			
+				if (pTasks->GetTaskCreationDate64(hTask, timeT))
+					sItem = FormatAttribute(nAttrib, sAttribLabel, FormatDateWithSeconds(timeT));
+			}
+			break;
+
+		case TDCA_LASTMODDATE:
+			{
+				time64_t timeT = 0;
+			
+				if (pTasks->GetTaskLastModified64(hTask, timeT))
+					sItem = FormatAttribute(nAttrib, sAttribLabel, FormatDateWithSeconds(timeT));
+			}
+			break;
+
+		case TDCA_DONEDATE:
+			{
+				time64_t timeT = 0;
+			
+				if (pTasks->GetTaskDoneDate64(hTask, timeT))
+					sItem = FormatAttribute(nAttrib, sAttribLabel, FormatDateWithSeconds(timeT));
+			}
+			break;
 		}
 	}
 
     return sItem;
 }
 
+CString CTaskListCsvExporter::FormatDateWithSeconds(time64_t timeT) const
+{
+	ASSERT(timeT != 0);
+
+	COleDateTime date = CDateHelper::GetDate(timeT);
+	DWORD dwFlags = (ISODATES ? DHFD_ISO : 0);
+	
+	if (CDateHelper::DateHasTime(date))
+		dwFlags |= DHFD_TIME;
+	
+	return CDateHelper::FormatDate(date, dwFlags);
+}

@@ -43,6 +43,7 @@ public:
 
 protected:
 	CString DELIM, INDENT;
+	BOOL ISODATES;
 	CTDCAttributeMapping m_aColumnMapping;
 	BOOL m_bExportingForExcel;
 	
@@ -62,6 +63,7 @@ protected:
 
 protected:
 	void CheckAddIDFields();
+	CString FormatDateWithSeconds(time64_t timeT) const;
 };
 
 #endif // !defined(AFX_TASKLISTCSVEXPORTER_H__7B199F98_746F_49DE_9C1D_3141281996F5__INCLUDED_)
