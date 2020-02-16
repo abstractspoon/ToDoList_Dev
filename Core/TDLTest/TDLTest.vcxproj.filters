@@ -213,9 +213,6 @@
     <ClInclude Include="ToDoCtrlTaskLinkTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ToDoList\tdcstruct.h">
-      <Filter>ToDoList Source</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
