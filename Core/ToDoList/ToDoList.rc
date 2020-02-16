@@ -957,7 +957,7 @@ BEGIN
     LTEXT           "T&itle",IDC_TITLEFILTERLABEL,201,7,14,8,SS_CENTERIMAGE
     EDITTEXT        IDC_TITLEFILTERTEXT,223,7,40,12,ES_AUTOHSCROLL | 
                     ES_WANTRETURN
-    LTEXT           "St&arted by",IDC_STARTFILTERLABEL,11,35,35,8,
+    LTEXT           "St&art Date",IDC_STARTFILTERLABEL,11,35,35,8,
                     SS_CENTERIMAGE
     COMBOBOX        IDC_STARTFILTERCOMBO,61,34,33,118,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
@@ -967,7 +967,7 @@ BEGIN
                     13
     EDITTEXT        IDC_STARTNEXTNDAYS,161,34,40,14,ES_AUTOHSCROLL | 
                     ES_WANTRETURN
-    LTEXT           "&Due by",IDC_DUEFILTERLABEL,217,35,24,8,SS_CENTERIMAGE
+    LTEXT           "&Due Date",IDC_DUEFILTERLABEL,217,35,24,8,SS_CENTERIMAGE
     COMBOBOX        IDC_DUEFILTERCOMBO,267,34,33,118,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
@@ -1939,7 +1939,7 @@ BEGIN
                     WS_TABSTOP
     LTEXT           "T&itle",IDC_TITLEFILTERLABEL,128,7,109,8,SS_CENTERIMAGE
     EDITTEXT        IDC_TITLEFILTERTEXT,128,17,109,12,ES_AUTOHSCROLL
-    LTEXT           "St&arted by",IDC_STARTFILTERLABEL,7,37,109,8,
+    LTEXT           "St&art Date",IDC_STARTFILTERLABEL,7,37,109,8,
                     SS_CENTERIMAGE
     COMBOBOX        IDC_STARTFILTERCOMBO,7,47,109,118,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
@@ -1949,7 +1949,7 @@ BEGIN
     CONTROL         "DateTimePicker1",IDC_USERSTARTDATE,"SysDateTimePick32",
                     DTS_RIGHTALIGN | DTS_APPCANPARSE | WS_TABSTOP,128,47,109,
                     13
-    LTEXT           "&Due by",IDC_DUEFILTERLABEL,7,67,109,8,SS_CENTERIMAGE
+    LTEXT           "&Due Date",IDC_DUEFILTERLABEL,7,67,109,8,SS_CENTERIMAGE
     COMBOBOX        IDC_DUEFILTERCOMBO,7,77,109,118,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
@@ -3491,9 +3491,9 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Show Tasks Due"
         BEGIN
-            MENUITEM "&Today",                      ID_TOOLS_SHOWTASKS_DUETODAY
+            MENUITEM "By &Today",                   ID_TOOLS_SHOWTASKS_DUETODAY
 
-            MENUITEM "T&omorrow",                   ID_TOOLS_SHOWTASKS_DUETOMORROW
+            MENUITEM "By T&omorrow",                ID_TOOLS_SHOWTASKS_DUETOMORROW
 
             MENUITEM SEPARATOR
             MENUITEM "&By the End of This Week",    ID_TOOLS_SHOWTASKS_DUEENDTHISWEEK
@@ -5162,15 +5162,15 @@ BEGIN
     IDS_FILTER_ALL          "All Tasks"
     IDS_FILTER_NOTDONE      "Incomplete Tasks"
     IDS_FILTER_DONE         "Completed Tasks"
-    IDS_FILTER_TODAY        "Today"
-    IDS_FILTER_TOMORROW     "Tomorrow"
-    IDS_FILTER_ENDTHISWEEK  "End of This Week"
-    IDS_FILTER_ENDNEXTWEEK  "End of Next Week"
-    IDS_FILTER_ENDTHISMONTH "End of This Month"
-    IDS_FILTER_ENDNEXTMONTH "End of Next Month"
-    IDS_FILTER_ENDTHISYEAR  "End of This Year"
-    IDS_FILTER_ENDNEXTYEAR  "End of Next Year"
-    IDS_FILTER_NEXTSEVENDAYS "Next 7 Days"
+    IDS_FILTER_TODAY        "By Today"
+    IDS_FILTER_TOMORROW     "By Tomorrow"
+    IDS_FILTER_ENDTHISWEEK  "By the End of This Week"
+    IDS_FILTER_ENDNEXTWEEK  "By the End of Next Week"
+    IDS_FILTER_ENDTHISMONTH "By the End of This Month"
+    IDS_FILTER_ENDNEXTMONTH "By the End of Next Month"
+    IDS_FILTER_ENDTHISYEAR  "By the End of This Year"
+    IDS_FILTER_ENDNEXTYEAR  "By the End of Next Year"
+    IDS_FILTER_NEXTSEVENDAYS "By the Next 7 Days"
     IDS_QUICKTASKFIND       "Quick Task Find"
     IDS_IMPORTFROMCB_NOTASKS 
                             "The clipboard text contained no tasks which could be imported."
@@ -5384,7 +5384,7 @@ BEGIN
     IDS_COMMENTSTYPE        "Comments"
     IDS_FILTER_NODATE       "<no date>"
     IDS_FILTER_ANYDATE      "<any date>"
-    IDS_FILTER_NOW          "Now"
+    IDS_FILTER_NOW          "By Now"
     IDS_IMPORTPREFS_TITLE   "Select Preference File"
     IDS_EXPORTFILEAS_TITLE  "Export Tasklist As"
     IDS_NOCUSTOMDEFSIMPORTED "No custom attributes were imported."
@@ -5494,7 +5494,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_USERTOOL_DATEPROMPT "Date prompt"
     IDS_USERTOOL_FILEPROMPT "File prompt"
-    IDS_FILTER_YESTERDAY    "Yesterday"
+    IDS_FILTER_YESTERDAY    "By Yesterday"
     IDS_TRACKREMINDERPAUSED " (paused)"
     IDS_TIMETRACKREMINDER   "The following task has been tracked for %d minutes:\n\n%s: %s"
     IDS_TIMETRACKREMINDER_BALLOONTITLE "Time Tracking Reminder"
