@@ -207,25 +207,29 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 	switch (dwDataType)
 	{
 	case TDCCA_DOUBLE:
-	case TDCCA_TIMEPERIOD:
 		return ((dwFeature == TDCCAF_ACCUMULATE) ||
 				(dwFeature == TDCCAF_MAXIMIZE) ||
 				(dwFeature == TDCCAF_MINIMIZE) ||
 				(dwFeature == TDCCAF_HIDEZERO) ||
-				(dwFeature == TDCCAF_SINGLEDECIMAL));
+				(dwFeature == TDCCAF_ONEDECIMAL));
 
 	case TDCCA_FRACTION:
 		return ((dwFeature == TDCCAF_DISPLAYASPERCENT) ||
 				(dwFeature == TDCCAF_MAXIMIZE) ||
 				(dwFeature == TDCCAF_MINIMIZE) ||
 				(dwFeature == TDCCAF_HIDEZERO) ||
-				(dwFeature == TDCCAF_SINGLEDECIMAL));
+				(dwFeature == TDCCAF_ONEDECIMAL));
 		
 	case TDCCA_INTEGER:
 		return ((dwFeature == TDCCAF_ACCUMULATE) ||
 				(dwFeature == TDCCAF_MAXIMIZE) ||
 				(dwFeature == TDCCAF_MINIMIZE) ||
 				(dwFeature == TDCCAF_HIDEZERO));
+
+	case TDCCA_TIMEPERIOD:
+		return ((dwFeature == TDCCAF_ACCUMULATE) ||
+				(dwFeature == TDCCAF_MAXIMIZE) ||
+				(dwFeature == TDCCAF_MINIMIZE));
 
 	case TDCCA_DATE:
 		return ((dwFeature == TDCCAF_MAXIMIZE) ||
@@ -498,7 +502,7 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatData(const TDCCADATA& data, BOOL bIS
 
 	case TDCCA_TIMEPERIOD:
 		if (data.IsTimePeriod())
-			return data.FormatAsTimePeriod(HasFeature(TDCCAF_SINGLEDECIMAL) ? 1 : 2);
+			return data.FormatAsTimePeriod();
 		break;
 	}
 
@@ -508,7 +512,7 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatData(const TDCCADATA& data, BOOL bIS
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue) const
 {
-	int nDecimals = (HasFeature(TDCCAF_SINGLEDECIMAL) ? 1 : 2);
+	int nDecimals = 0;
 	LPCTSTR szTrail = NULL;
 
 	switch (GetDataType())
@@ -518,14 +522,19 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue) const
 		{
 			dValue *= 100;
 			szTrail = _T("%");
+			nDecimals = (HasFeature(TDCCAF_ONEDECIMAL) ? 1 : 0);
+		}
+		else
+		{
+			nDecimals = (HasFeature(TDCCAF_ONEDECIMAL) ? 1 : 2);
 		}
 		break;
 
 	case TDCCA_DOUBLE:
+		nDecimals = (HasFeature(TDCCAF_ONEDECIMAL) ? 1 : 2);
 		break;
 
 	case TDCCA_INTEGER:
-		nDecimals = 0;
 		break;
 
 	default:

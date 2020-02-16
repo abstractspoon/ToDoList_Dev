@@ -5741,7 +5741,7 @@ BEGIN
     IDS_EXPORTDLG_EXPORT    "Export"
     IDS_EXPORTDLG_TASKSEL   "Task Selection"
     IDS_MSVCR100_MSG        "System File Required|ToDoList requires the 'Microsoft Visual C++ 2010 SP1 Redistributable Package' to be installed.\n\nClick 'OK' to visit the appropriate download page or 'Cancel' to quit."
-    IDS_CUSTOM_FEATURE_SINGLEDECIMAL "Single decimal place"
+    IDS_CUSTOM_FEATURE_ONEDECIMAL "One decimal place"
 END
 
 #endif    // English (Australia) resources
