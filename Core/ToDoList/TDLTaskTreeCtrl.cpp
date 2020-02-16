@@ -323,6 +323,10 @@ void CTDLTaskTreeCtrl::OnEndRebuild()
 
 	ExpandList();
 	RecalcUntrackedColumnWidths();
+
+	// Resync horizontal scrollbars because 
+	// RecalcUntrackedColumnWidths doesn't always do it
+	PostResize();
 }
 
 BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible()
