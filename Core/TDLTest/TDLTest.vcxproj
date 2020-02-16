@@ -236,7 +236,6 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ToDoList\TdcRecurrence.h" />
-    <ClInclude Include="..\ToDoList\tdcstruct.h" />
     <ClInclude Include="DateHelperTest.h" />
     <ClInclude Include="FileMiscTest.h" />
     <ClInclude Include="ImportExportMgrTest.h" />
