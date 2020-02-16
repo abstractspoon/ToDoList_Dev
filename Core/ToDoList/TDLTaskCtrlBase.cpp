@@ -1376,7 +1376,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 
 	// Resync horizontal scrollbars
 	if (m_hdrColumns.CalcTotalItemWidth() != nPrevTotalWidth)
-		RefreshSize();
+		PostResize();
 }
 
 void CTDLTaskCtrlBase::SaveState(CPreferences& prefs, const CString& sKey) const
