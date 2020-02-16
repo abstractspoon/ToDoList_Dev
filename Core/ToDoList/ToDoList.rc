@@ -651,19 +651,19 @@ BEGIN
     CONTROL         "&Hide 'Start' and 'Due' dates for completed tasks",
                     IDC_HIDESTARTDUEFORDONETASKS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,25,378,10
-    CONTROL         "Hide &zero 'Times' and 'Costs'",IDC_HIDEUNDEFINEDTIMEST,
-                    "Button",BS_AUTOCHECKBOX | BS_TOP | WS_TABSTOP,7,40,378,
-                    10
+    CONTROL         "Hide &zero 'Time Periods' and 'Costs'",
+                    IDC_HIDEUNDEFINEDTIMEST,"Button",BS_AUTOCHECKBOX | 
+                    BS_TOP | WS_TABSTOP,7,40,378,10
     CONTROL         "Display dates and times in I&SO format",
                     IDC_USEISODATEFORMAT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,55,378,10
     CONTROL         "Include the &weekday when displaying dates",
                     IDC_SHOWWEEKDAYINDATES,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,70,378,10
-    CONTROL         "&Round 'Time Estimate/Spent' to whole numbers",
+    CONTROL         "&Round 'Time Periods' to whole numbers",
                     IDC_ROUNDTIMEFRACTIONS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,85,378,10
-    CONTROL         "&Display 'Estimated/Spent' times in HMS format",
+    CONTROL         "&Display 'Time Periods' in HMS format",
                     IDC_USEHMSTIMEFORMAT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,100,378,10
     CONTROL         "&Append the user's 'Created By' name when pasting the 'Date/Time'",
@@ -967,7 +967,8 @@ BEGIN
                     13
     EDITTEXT        IDC_STARTNEXTNDAYS,161,34,40,14,ES_AUTOHSCROLL | 
                     ES_WANTRETURN
-    LTEXT           "&Due Date",IDC_DUEFILTERLABEL,217,35,24,8,SS_CENTERIMAGE
+    LTEXT           "&Due Date",IDC_DUEFILTERLABEL,217,35,24,8,
+                    SS_CENTERIMAGE
     COMBOBOX        IDC_DUEFILTERCOMBO,267,34,33,118,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
