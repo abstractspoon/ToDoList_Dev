@@ -603,6 +603,7 @@ enum FIND_ATTRIBTYPE
 	FT_TIMEPERIOD,
 	FT_DATERELATIVE,
 	FT_ICON,
+	FT_RECURRENCE,
 };
  
 /////////////////////////////////////////////////////////////////////////////

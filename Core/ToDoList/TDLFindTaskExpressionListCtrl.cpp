@@ -350,6 +350,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 			{
 			case FT_DATE:
 			case FT_TIMEPERIOD:
+			case FT_RECURRENCE:
 				ShowControl(*pEdit, nItem, nCol);
 				break;
 
@@ -473,6 +474,9 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 			case FT_NONE:
 				// do nothing.
 				break;
+
+			case FT_RECURRENCE:
+				return ILCT_DROPLIST;
 
 			default:
 				{
@@ -751,58 +755,64 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 
 			m_cbOperators.ResetContent();
 			
-			if (rule.AttributeIs(TDCA_RECURRENCE))
+			FIND_ATTRIBTYPE nType = rule.GetAttribType();
+
+			switch (nType)
 			{
+			case FT_STRING:
+			case FT_ICON:
+				AddOperatorToCombo(FOP_SET);
+				AddOperatorToCombo(FOP_NOT_SET);
 				AddOperatorToCombo(FOP_EQUALS);
 				AddOperatorToCombo(FOP_NOT_EQUALS);
-			}
-			else
-			{
-				FIND_ATTRIBTYPE nType = rule.GetAttribType();
-				
-				switch (nType)
-				{
-				case FT_STRING:
-				case FT_ICON:
-					AddOperatorToCombo(FOP_SET);
-					AddOperatorToCombo(FOP_NOT_SET);
-					AddOperatorToCombo(FOP_EQUALS);
-					AddOperatorToCombo(FOP_NOT_EQUALS);
-					AddOperatorToCombo(FOP_INCLUDES);
-					AddOperatorToCombo(FOP_NOT_INCLUDES);
-					break;
+				AddOperatorToCombo(FOP_INCLUDES);
+				AddOperatorToCombo(FOP_NOT_INCLUDES);
+				break;
 
-				case FT_INTEGER:
-				case FT_DOUBLE:
-				case FT_TIMEPERIOD:
-					AddOperatorToCombo(FOP_SET);
-					AddOperatorToCombo(FOP_NOT_SET);
-					AddOperatorToCombo(FOP_EQUALS);
-					AddOperatorToCombo(FOP_NOT_EQUALS);
-					AddOperatorToCombo(FOP_GREATER);
-					AddOperatorToCombo(FOP_GREATER_OR_EQUAL);
-					AddOperatorToCombo(FOP_LESS);
-					AddOperatorToCombo(FOP_LESS_OR_EQUAL);
-					break;
+			case FT_INTEGER:
+			case FT_DOUBLE:
+			case FT_TIMEPERIOD:
+				AddOperatorToCombo(FOP_SET);
+				AddOperatorToCombo(FOP_NOT_SET);
+				AddOperatorToCombo(FOP_EQUALS);
+				AddOperatorToCombo(FOP_NOT_EQUALS);
+				AddOperatorToCombo(FOP_GREATER);
+				AddOperatorToCombo(FOP_GREATER_OR_EQUAL);
+				AddOperatorToCombo(FOP_LESS);
+				AddOperatorToCombo(FOP_LESS_OR_EQUAL);
+				break;
 
-				case FT_DATE:
-					AddOperatorToCombo(FOP_SET);
-					AddOperatorToCombo(FOP_NOT_SET);
-					// fall thru
-				case FT_DATERELATIVE:
-					AddOperatorToCombo(FOP_EQUALS);
-					AddOperatorToCombo(FOP_NOT_EQUALS);
-					AddOperatorToCombo(FOP_AFTER);
-					AddOperatorToCombo(FOP_ON_OR_AFTER);
-					AddOperatorToCombo(FOP_BEFORE);
-					AddOperatorToCombo(FOP_ON_OR_BEFORE);
-					break;
+			case FT_DATE:
+				AddOperatorToCombo(FOP_SET);
+				AddOperatorToCombo(FOP_NOT_SET);
+				AddOperatorToCombo(FOP_EQUALS);
+				AddOperatorToCombo(FOP_NOT_EQUALS);
+				AddOperatorToCombo(FOP_AFTER);
+				AddOperatorToCombo(FOP_ON_OR_AFTER);
+				AddOperatorToCombo(FOP_BEFORE);
+				AddOperatorToCombo(FOP_ON_OR_BEFORE);
+				break;
 
-				case FT_BOOL:
-					AddOperatorToCombo(FOP_SET);
-					AddOperatorToCombo(FOP_NOT_SET);
-					break;
-				}
+			case FT_DATERELATIVE:
+				AddOperatorToCombo(FOP_EQUALS);
+				AddOperatorToCombo(FOP_NOT_EQUALS);
+				AddOperatorToCombo(FOP_AFTER);
+				AddOperatorToCombo(FOP_ON_OR_AFTER);
+				AddOperatorToCombo(FOP_BEFORE);
+				AddOperatorToCombo(FOP_ON_OR_BEFORE);
+				break;
+
+			case FT_BOOL:
+				AddOperatorToCombo(FOP_SET);
+				AddOperatorToCombo(FOP_NOT_SET);
+				break;
+
+			case FT_RECURRENCE:
+				AddOperatorToCombo(FOP_SET);
+				AddOperatorToCombo(FOP_NOT_SET);
+				AddOperatorToCombo(FOP_EQUALS);
+				AddOperatorToCombo(FOP_NOT_EQUALS);
+				break;
 			}
 	
 			CDialogHelper::SelectItemByData(m_cbOperators, (DWORD)rule.GetOperator());
@@ -1005,12 +1015,11 @@ void CTDLFindTaskExpressionListCtrl::OnValueEditOK(NMHDR* pNMHDR, LRESULT* pResu
 	case FT_DATERELATIVE:
 	case FT_INTEGER:
 	case FT_DOUBLE:
+	case FT_TIMEPERIOD:
 		rule.SetValue(pDispInfo->item.pszText);
 		break;
 		
-	case FT_DATE:
-	case FT_BOOL:
-	case FT_ICON:
+	default:
 		// not handled here
 		ASSERT(0);
 		break;
@@ -1242,34 +1251,31 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 	{
 		try
 		{
-			if (rule.AttributeIs(TDCA_RECURRENCE))
+			switch (rule.GetAttribType())
 			{
+			case FT_INTEGER:
+			case FT_STRING:
+			case FT_DATERELATIVE:
+			case FT_DOUBLE:
+			case FT_ICON:
+				sValue = rule.ValueAsString();
+				break;
+
+			case FT_DATE:
+				sValue = rule.ValueAsDate().Format(VAR_DATEVALUEONLY);
+				break;
+
+			case FT_TIMEPERIOD:
+				sValue = CTimeHelper().FormatTime(rule.ValueAsDouble(), TDC::MapUnitsToTHUnits(rule.GetTimeUnits()), 2);
+				break;
+
+			case FT_BOOL:
+				// handled by operator
+				break;
+
+			case FT_RECURRENCE:
 				sValue = m_cbRecurrence.GetRegularity((TDC_REGULARITY)rule.ValueAsInteger());
-			}
-			else
-			{
-				switch (rule.GetAttribType())
-				{
-				case FT_INTEGER:
-				case FT_STRING:
-				case FT_DATERELATIVE:
-				case FT_DOUBLE:
-				case FT_ICON:
-					sValue = rule.ValueAsString();
-					break;
-					
-				case FT_DATE:
-					sValue = rule.ValueAsDate().Format(VAR_DATEVALUEONLY);
-					break;
-					
-				case FT_TIMEPERIOD:
-					sValue = CTimeHelper().FormatTime(rule.ValueAsDouble(), TDC::MapUnitsToTHUnits(rule.GetTimeUnits()), 2);
-					break;
-					
-				case FT_BOOL:
-					// handled by operator
-					break;
-				}
+				break;
 			}
 		}
 		catch (...)
