@@ -1104,6 +1104,7 @@ struct SEARCHPARAM
 		case TDCA_TAGS: 
 		case TDCA_PATH: 
 		case TDCA_LASTMODBY: 
+		case TDCA_DEPENDENCY: 
 			return FT_STRING;
 
 		case TDCA_ICON: 
@@ -1133,7 +1134,6 @@ struct SEARCHPARAM
 		case TDCA_FLAG:
 		case TDCA_LOCK:
 		case TDCA_RECENTMODIFIED:
-		case TDCA_DEPENDENCY: 
 		case TDCA_REMINDER:
 			return FT_BOOL;
 
