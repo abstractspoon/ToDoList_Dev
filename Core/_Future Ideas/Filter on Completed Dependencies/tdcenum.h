@@ -604,8 +604,8 @@ enum FIND_ATTRIBTYPE
 	FT_TIMEPERIOD,
 	FT_DATERELATIVE,
 	FT_ICON,
-	FT_DEPENDENCY,
-	FT_RECURRENCE
+	FT_RECURRENCE,
+	FT_DEPENDENCY
 };
  
 /////////////////////////////////////////////////////////////////////////////

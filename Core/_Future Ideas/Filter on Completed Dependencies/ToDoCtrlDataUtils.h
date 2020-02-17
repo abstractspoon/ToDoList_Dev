@@ -217,7 +217,6 @@ protected:
 
 	BOOL ArrayMatches(const CStringArray& aItems, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bCaseSensitive) const;
 	BOOL ValueMatchesAsArray(const CString& sText, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bCaseSensitive) const;
-	BOOL DependenciesMatch(const TODOITEM* pTDI, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
 
 	CString FormatResultDate(const COleDateTime& date) const;
 

@@ -510,7 +510,27 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 
 		case TDCA_DEPENDENCY:
-			bMatch = DependenciesMatch(pTDI, rule, resTask);
+         if (rule.GetOperator() == FOP_IS_COMPLETE)
+   		{
+   			bMatch = TRUE;
+   
+   			// look for first incomplete 'local' dependency
+   			CDWordArray aDependIDs;
+   			int nDepend = pTDI->GetLocalDependencies(aDependIDs);
+   			
+   			while (nDepend--)
+   			{
+   				if (!m_data.IsTaskDone(aDependIDs[nDepend]))
+   				{
+   					bMatch = FALSE;
+   					break;
+   				}
+   			}
+   		}
+         else
+         {
+            bMatch = ArrayMatches(pTDI->aDependencies, rule, result, FALSE); // Ignore case
+      	}
 			break;
 
 		case TDCA_RECURRENCE:
@@ -662,53 +682,6 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	}
 	
 	return bMatches;
-}
-
-BOOL CTDCTaskMatcher::DependenciesMatch(const TODOITEM* pTDI, const SEARCHPARAM& rule, SEARCHRESULT& result) const
-{
-	BOOL bMatch = FALSE;
-	BOOL bHasDepends = pTDI->aDependencies.GetSize();
-
-	switch (rule.GetOperator())
-	{
-	case FOP_SET:
-		bMatch = bHasDepends;
-		break;
-
-	case FOP_NOT_SET:
-		bMatch = !bHasDepends;
-		break;
-
-	case FOP_IS_COMPLETE:
-		{
-			bMatch = TRUE;
-
-			// look for first incomplete 'local' dependency
-			CDWordArray aDependIDs;
-			int nDepend = pTDI->GetLocalDependencies(aDependIDs);
-			
-			while (nDepend--)
-			{
-				if (!m_data.IsTaskDone(aDependIDs[nDepend]))
-				{
-					bMatch = FALSE;
-					break;
-				}
-			}
-		}
-		break;
-
-	default:
-		bMatch = ArrayMatches(pTDI->aDependencies, rule, result, FALSE); // Ignore case
-		break;
-	}
-
-	if (bMatch)
-	{
-		// TODO
-	}
-
-	return bMatch;
 }
 
 BOOL CTDCTaskMatcher::ValueMatches(const TDCRECURRENCE& trRecurrence, const SEARCHPARAM& rule, SEARCHRESULT& result) const

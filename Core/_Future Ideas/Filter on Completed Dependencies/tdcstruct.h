@@ -1294,6 +1294,7 @@ struct SEARCHPARAM
 		case FT_STRING:
 		case FT_DATERELATIVE:
 		case FT_ICON:
+		case FT_DEPENDENCY:
 			sValue = val;
 			break;
 			
@@ -1308,7 +1309,6 @@ struct SEARCHPARAM
 			nValue = _ttoi(val);
 			break;
 
-		case FT_DEPENDENCY:
 		case FT_RECURRENCE:
 			break;
 
