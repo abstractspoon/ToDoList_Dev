@@ -364,7 +364,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 
 			case FT_ICON:
 				{
-					BOOL bBrowse = (rule.GetAttribute() == TDCA_ICON);
+					BOOL bBrowse = (rule.GetAttribute() == TDCA_ICON); // else custom attribute
 
 					if (!bBrowse)
 					{
@@ -464,15 +464,9 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				break;
 
 			case FT_TIMEPERIOD:
-				// do nothing.
-				break;
-
 			case FT_BOOL:
-				// do nothing: it's handled by the operator
-				break;
-
 			case FT_NONE:
-				// do nothing.
+				// Nothing or default edit control
 				break;
 
 			case FT_RECURRENCE:
@@ -547,13 +541,19 @@ BOOL CTDLFindTaskExpressionListCtrl::CanEditSelectedCell() const
 
 		if (nCol == VALUE_COL)
 		{
-			// Boolean type is a special case
-			if (rule.GetAttribType() == FT_BOOL)
+			// special cases
+			switch (rule.GetAttribType())
+			{
+			case FT_BOOL:
 				return FALSE;
+			}
 
-			// as is using the set/notset operators
-			if (rule.OperatorIs(FOP_SET) || rule.OperatorIs(FOP_NOT_SET))
+			switch (rule.GetOperator())
+			{
+			case FOP_SET:
+			case FOP_NOT_SET:
 				return FALSE;
+			}
 		}
 	}
 

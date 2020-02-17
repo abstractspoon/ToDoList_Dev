@@ -1052,7 +1052,7 @@ BOOL CTDCTaskMatcher::ValueMatches(double dValue, const SEARCHPARAM& rule, SEARC
 		break;
 		
 	case FOP_SET:
-		bMatch = (dValue > 0.0);
+		bMatch = (dValue != 0.0);
 		break;
 		
 	case FOP_NOT_SET:
@@ -1117,7 +1117,7 @@ BOOL CTDCTaskMatcher::ValueMatches(int nValue, const SEARCHPARAM& rule, SEARCHRE
 		}
 		else
 		{
-			bMatch = (nValue > 0);
+			bMatch = (nValue != 0);
 		}
 		break;
 		
