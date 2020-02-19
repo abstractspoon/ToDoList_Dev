@@ -62,7 +62,6 @@ struct TDCRECURRENCE : public CRecurrence
 	BOOL bPreserveComments;
 
 protected:
-	BOOL ValidateDay(SYSTEMTIME& st) const;
 	static BOOL IsValidRegularity(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
 };
 
