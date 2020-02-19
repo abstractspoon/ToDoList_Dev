@@ -169,6 +169,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClCompile Include="..\ToDoList\TDCImageList.cpp" />
     <ClCompile Include="..\ToDoList\TDCMergeTasklist.cpp" />
     <ClCompile Include="..\ToDoList\TDCOutlookImportHelper.cpp" />
+    <ClCompile Include="..\ToDoList\TDCRecurrence.cpp" />
     <ClCompile Include="..\ToDoList\TDCSimpleTextContent.cpp" />
     <ClCompile Include="..\ToDoList\TDCSourceControl.cpp" />
     <ClCompile Include="..\ToDoList\TDCTaskTimeLog.cpp" />
