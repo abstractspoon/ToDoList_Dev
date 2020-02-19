@@ -19,9 +19,6 @@
     <ClCompile Include="ToDoCtrlDataTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TdcRecurrence.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TDCRECURRENCETest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
