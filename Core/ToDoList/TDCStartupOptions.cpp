@@ -323,12 +323,11 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 	{
 		m_dwFlags |= TLD_IMPORTFILE;
 	}
-	else if (cmdInfo.GetOption(SWITCH_COMMANDID, sValue))
-	{
-		m_sCmdIDs.SetValue(sValue);
-	}
 
-	// other task attribs
+	// Other tasklist attributes
+	ExtractAttribute(cmdInfo, SWITCH_COMMANDID, m_sCmdIDs);
+
+	// Task attributes
 	ExtractAttribute(cmdInfo, SWITCH_TASKTITLE, m_sTaskTitle);	
 	ExtractAttribute(cmdInfo, SWITCH_TASKEXTID, m_sTaskExternalID);	
 	ExtractAttribute(cmdInfo, SWITCH_TASKCATEGORY, m_sTaskCategory);	
@@ -491,6 +490,8 @@ BOOL CTDCStartupOptions::operator==(const CTDCStartupOptions& startup) const
 		(
 		(_tcscmp(m_szFilePaths, startup.m_szFilePaths) == 0) &&
 
+		(m_sCmdIDs == startup.m_sCmdIDs) &&
+
 		(m_sNewTaskTitle == startup.m_sNewTaskTitle) &&
 		(m_sTaskTitle == startup.m_sTaskTitle) &&
 		(m_sTaskComments == startup.m_sTaskComments) &&
@@ -524,7 +525,6 @@ BOOL CTDCStartupOptions::operator==(const CTDCStartupOptions& startup) const
 		(m_dwSiblingID == startup.m_dwSiblingID) &&
 		(m_dwFlags == startup.m_dwFlags) &&
 		(m_bSaveIntermediateAll == startup.m_bSaveIntermediateAll) &&
-		(m_sCmdIDs == startup.m_sCmdIDs) &&
 
 		(m_sCopyFromTaskAttrib == startup.m_sCopyFromTaskAttrib) && 
 		(m_sCopyToTaskAttrib == startup.m_sCopyToTaskAttrib)
