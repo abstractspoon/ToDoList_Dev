@@ -421,6 +421,10 @@ LRESULT CTDLFilterBar::OnEEBtnClick(WPARAM wp, LPARAM /*lp*/)
 	case IDC_DUENEXTNDAYS:
 		m_cbDueFilter.SetNextNDays(m_filter.nDueNextNDays);
 		break;
+
+	default:
+		// TODO - Update custom attribute date filter combos
+		break;
 	}
 
 	return 0L;

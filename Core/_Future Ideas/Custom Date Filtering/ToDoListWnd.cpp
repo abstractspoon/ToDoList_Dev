@@ -11310,6 +11310,8 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 
 	if (bUpdateFilterBar)
 		RefreshFilterBarControls(TDCA_ALL);
+	else
+		Invalidate(TRUE); // redraw edges of filter bar background
 
 	UpdateStatusbar();
 }

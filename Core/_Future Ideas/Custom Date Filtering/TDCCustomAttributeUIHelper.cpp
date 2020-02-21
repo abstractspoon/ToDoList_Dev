@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Resource.h"
 #include "TDCCustomAttributeUIHelper.h"
 #include "TDCstruct.h"
 #include "tdliconcombobox.h"
@@ -25,6 +26,7 @@
 #include "..\shared\FileComboBox.h"
 #include "..\shared\HoldRedraw.h"
 #include "..\shared\WndPrompt.h"
+#include "..\shared\Icon.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -76,9 +78,16 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 					switch (data.AsInteger())
 					{
 					case FD_NEXTNDAYS:
-						pControl = new CEnEdit(TRUE, _T("0123456789"));
-						szClass = WC_EDIT;
-						dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+						{
+							CEnEdit* pEdit = new CEnEdit(TRUE, _T("0123456789"));
+							CIcon iconUpdate(IDI_UPDATE_FILTER, 16);
+
+							pEdit->AddButton(1, iconUpdate, CEnString(IDS_TDC_UPDATEFILTER_TIP));
+
+							pControl = pEdit;
+							szClass = WC_EDIT;
+							dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+						}
 						break;
 
 					case FD_USER:
