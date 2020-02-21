@@ -12076,14 +12076,15 @@ BOOL CToDoListWnd::PreCreateWindow(CREATESTRUCT& cs)
 
 			// Need to preset the icon otherwise the function GetIconWndClass
 			// calling us will overwrite our class.
-			wndcls.hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME);
+			VERIFY(m_iconClass.Load(IDR_MAINFRAME));
+			wndcls.hIcon = m_iconClass;
 
 			// Register our class now and check the outcome
 			if (!::RegisterClass(&wndcls))
 			{
 				ASSERT(0);
 
-				::DestroyIcon(wndcls.hIcon);
+				m_iconClass.Destroy();
 				return FALSE;
 			}
 		}

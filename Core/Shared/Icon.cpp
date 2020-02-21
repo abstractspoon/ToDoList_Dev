@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Icon.h"
+#include "GraphicsMisc.h"
 
 
 CIcon::CIcon(HICON hIcon) : m_hIcon(hIcon)
@@ -30,7 +31,7 @@ BOOL CIcon::SetIcon(HICON hIcon, BOOL bDeletePrev)
 	}
 
 	if (bDeletePrev && (m_hIcon != NULL))
-		::DestroyIcon(m_hIcon);
+		VERIFY(::DestroyIcon(m_hIcon));
 
 	m_hIcon = hIcon;
 	return TRUE;
@@ -38,17 +39,14 @@ BOOL CIcon::SetIcon(HICON hIcon, BOOL bDeletePrev)
 
 BOOL CIcon::Load(UINT nIDIcon, int nSize)
 {
-	HICON hIcon = (HICON)::LoadImage(AfxGetResourceHandle(), MAKEINTRESOURCE(nIDIcon), 
-									IMAGE_ICON, nSize, nSize, LR_LOADMAP3DCOLORS);
-
-	return SetIcon(hIcon);
+	return SetIcon(GraphicsMisc::LoadIcon(nIDIcon, nSize));
 }
 
 void CIcon::Destroy()
 {
 	if (m_hIcon)
 	{
-		::DestroyIcon(m_hIcon);
+		VERIFY(::DestroyIcon(m_hIcon));
 		m_hIcon = NULL;
 	}
 }

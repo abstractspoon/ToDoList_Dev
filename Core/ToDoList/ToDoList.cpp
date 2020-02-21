@@ -200,8 +200,12 @@ BOOL CToDoListApp::InitInstance()
 	if (!HasVS2010Redistributable())
 		return FALSE;
 
-	// Set this before anything else
-	CWinHelpButton::SetDefaultIcon(GraphicsMisc::LoadIcon(IDI_HELPBUTTON));
+	// Set up icons that might be required during startup
+	if (m_iconBrowse.Load(IDI_FILEEDIT_BROWSE) && m_iconGo.Load(IDI_FILEEDIT_GO))
+		CFileEdit::SetDefaultButtonImages(m_iconBrowse, m_iconBrowse);
+	
+	if (m_iconHelp.Load(IDI_HELPBUTTON))
+		CWinHelpButton::SetDefaultIcon(m_iconHelp);
 
 	// Process commandline switches
 	CEnCommandLineInfo cmdInfo(_T(".tdl;.xml"));
@@ -241,15 +245,6 @@ BOOL CToDoListApp::InitInstance()
 		return FALSE; // quit app
 	}
 
-	// Set up file edit icons because these will be needed by
-	// welcome wizard and main app
-	CIcon iconBrowse, iconGo;
-	iconBrowse.Load(IDI_FILEEDIT_BROWSE);
-	iconGo.Load(IDI_FILEEDIT_GO);
-	
-	if (iconBrowse.IsValid() && iconGo.IsValid())
-		CFileEdit::SetDefaultButtonImages(iconBrowse.Detach(), iconGo.Detach());
-	
 	// init prefs 
 	if (!InitPreferences(cmdInfo))
 		return FALSE; // quit app

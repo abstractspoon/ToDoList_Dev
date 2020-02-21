@@ -15,6 +15,7 @@
 #include "tdcenum.h"
 
 #include "..\shared\Localizer.h"
+#include "..\shared\Icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListApp:
@@ -45,6 +46,7 @@ protected:
 
 protected:
 	CString m_sLanguageFile;
+	CIcon m_iconBrowse, m_iconGo, m_iconHelp;
 
 protected:
 // Implementation
