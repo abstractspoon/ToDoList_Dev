@@ -21,6 +21,7 @@ namespace MindMapUIExtension
 		private String m_Title;
 		private UInt32 m_TaskID;
         private UInt32 m_ParentID;
+		private UInt32 m_ReferenceId;
 		private Color m_TextColor;
 		private Boolean m_HasIcon;
 		private Boolean m_IsFlagged;
@@ -29,7 +30,6 @@ namespace MindMapUIExtension
         private Boolean m_IsGoodAsDone;
         private Boolean m_SomeSubtasksDone;
 		private Boolean m_IsLocked;
-		private Boolean m_IsReference;
 
 		// -----------------------------------------------------------------
 
@@ -46,7 +46,7 @@ namespace MindMapUIExtension
             m_IsGoodAsDone = false;
             m_SomeSubtasksDone = false;
 			m_IsLocked = false;
-			m_IsReference = false;
+			m_ReferenceId = 0;
 		}
 
 		public MindMapTaskItem(Task task)
@@ -62,7 +62,7 @@ namespace MindMapUIExtension
             m_IsGoodAsDone = task.IsGoodAsDone();
             m_SomeSubtasksDone = task.HasSomeSubtasksDone();
 			m_IsLocked = task.IsLocked(true);
-			m_IsReference = (task.GetReferenceID() != 0);
+			m_ReferenceId = task.GetReferenceID();
 		}
 
 		public void FixupParentID(MindMapTaskItem parent)
@@ -116,13 +116,14 @@ namespace MindMapUIExtension
 		
 		public UInt32 ID { get { return m_TaskID; } }
         public UInt32 ParentID { get { return m_ParentID; } }
+		public UInt32 ReferenceId { get { return m_ReferenceId; } }
 		public Color TextColor { get { return m_TextColor; } }
 		public Boolean HasIcon { get { return m_HasIcon; } }
 		public Boolean IsFlagged { get { return m_IsFlagged; } }
 		public Boolean IsParent { get { return m_IsParent; } }
 		public Boolean IsLocked { get { return m_IsLocked; } }
-		public Boolean IsReference { get { return m_IsReference; } }
-        public Boolean IsTask { get { return (m_TaskID != 0); } }
+		public Boolean IsReference { get { return (m_ReferenceId != 0); } }
+		public Boolean IsTask { get { return (m_TaskID != 0); } }
         public Boolean HasSomeSubtasksDone { get { return m_SomeSubtasksDone; } }
 
         public Boolean IsDone(bool includeGoodAsDone) 
@@ -168,7 +169,7 @@ namespace MindMapUIExtension
 			m_IsParent = task.IsParent();
 			m_IsLocked = task.IsLocked(true);
             m_IsGoodAsDone = task.IsGoodAsDone();
-			m_IsReference = (task.GetReferenceID() != 0);
+			m_ReferenceId = task.GetReferenceID();
 
 			return true;
 		}
@@ -575,6 +576,11 @@ namespace MindMapUIExtension
 			return (ItemData(node) as MindMapTaskItem);
 		}
 
+		private MindMapTaskItem RealTaskItem(TreeNode node)
+		{
+			return GetRealTaskItem(TaskItem(node));
+		}
+
 		private MindMapTaskItem TaskItem(Object itemData)
 		{
 			if (itemData == null)
@@ -850,27 +856,63 @@ namespace MindMapUIExtension
             }
         }
 
-        protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
+		protected override Font GetNodeFont(TreeNode node)
+		{
+            var taskItem = TaskItem(node);
+
+            if ((taskItem != null) && taskItem.IsReference)
+            {
+				MindMapTaskItem refItem;
+
+				if (m_Items.TryGetValue(taskItem.ReferenceId, out refItem))
+				{
+					if (refItem.ParentID == 0)
+						return m_BoldLabelFont;
+				}
+            }
+
+			// all else
+			return base.GetNodeFont(node);
+		}
+
+		private MindMapTaskItem GetRealTaskItem(MindMapTaskItem taskItem)
+		{
+			if ((taskItem != null) && taskItem.IsReference)
+			{
+				MindMapTaskItem refItem;
+
+				if (m_Items.TryGetValue(taskItem.ReferenceId, out refItem))
+					return refItem;
+			}
+
+			// all else
+			return taskItem;
+		}
+
+		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
 											  NodeDrawState nodeState, NodeDrawPos nodePos,
                                               Font nodeFont, Object itemData)
 		{
             var taskItem = (itemData as MindMapTaskItem);
-            bool isSelected = (nodeState != NodeDrawState.None);
+			var realItem = GetRealTaskItem(taskItem);
 
-            if (taskItem.IsTask) // real task
+            bool isSelected = (nodeState != NodeDrawState.None);
+			Rectangle iconRect = Rectangle.Empty;
+
+            if (taskItem.IsTask) // not root
             {
                 // Checkbox
                 Rectangle checkRect = CalcCheckboxRect(rect);
 
                 if (m_ShowCompletionCheckboxes)
-                    CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetItemCheckboxState(taskItem));
+                    CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetItemCheckboxState(realItem));
 
 			    // Task icon
-                if (TaskHasIcon(taskItem))
+                if (TaskHasIcon(realItem))
                 {
-                    Rectangle iconRect = CalcIconRect(rect);
+                    iconRect = CalcIconRect(rect);
 
-                    if (m_TaskIcons.Get(taskItem.ID))
+                    if (m_TaskIcons.Get(realItem.ID))
                         m_TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
 
                     rect.Width = (rect.Right - iconRect.Right - 2);
@@ -886,7 +928,7 @@ namespace MindMapUIExtension
 			// Text background
             Brush textColor = SystemBrushes.WindowText;
             Brush backColor = null;
-            Color taskColor = taskItem.TextColor;
+            Color taskColor = realItem.TextColor;
 
 			if (!taskColor.IsEmpty)
 			{
@@ -953,11 +995,6 @@ namespace MindMapUIExtension
             return CheckBoxState.UncheckedNormal;
         }
 
-		private Boolean NodeHasIcon(TreeNode node)
-		{
-			return TaskHasIcon(TaskItem(node));
-		}
-
 		private Boolean NodeIsTask(TreeNode node)
         {
             return TaskItem(node).IsTask;
@@ -965,10 +1002,10 @@ namespace MindMapUIExtension
 
 		private Boolean TaskHasIcon(MindMapTaskItem taskItem)
 		{
-			return ((m_TaskIcons != null) &&
-					(taskItem != null) &&
-					taskItem.IsTask &&
-					(taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.IsParent)));
+			if ((m_TaskIcons == null) || (taskItem == null) || !taskItem.IsTask)
+				return false;
+
+			return (taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.IsParent));
 		}
 
 		protected override void DrawNodeConnection(Graphics graphics, Point ptFrom, Point ptTo)
@@ -1047,7 +1084,7 @@ namespace MindMapUIExtension
 		protected override int GetExtraWidth(TreeNode node)
 		{
             int extraWidth = 2;
-            var taskItem = TaskItem(node);
+            var taskItem = RealTaskItem(node);
 
             if (m_ShowCompletionCheckboxes && taskItem.IsTask)
                 extraWidth += m_CheckboxSize.Width;
@@ -1093,7 +1130,7 @@ namespace MindMapUIExtension
 			if (HitTestExpansionButton(node, e.Location))
 				return;
 
-            var taskItem = TaskItem(node);
+            var taskItem = RealTaskItem(node);
 
             if (!ReadOnly && !taskItem.IsLocked)
             {
@@ -1103,7 +1140,7 @@ namespace MindMapUIExtension
 					{
 						bool setDone = !taskItem.IsDone(false);
 
-						if (EditTaskDone(this, UniqueID(SelectedNode), setDone))
+						if (EditTaskDone(this, taskItem.ID, setDone))
 						{
 							// If the app hasn't already updated this for us we must do it ourselves
 							if (taskItem.IsDone(false) != setDone)
@@ -1142,7 +1179,7 @@ namespace MindMapUIExtension
 
 		private bool HitTestIcon(TreeNode node, Point point)
         {
-			var taskItem = TaskItem(node);
+			var taskItem = RealTaskItem(node);
 
 			if (taskItem.IsLocked || !TaskHasIcon(taskItem))
 				return false;
@@ -1213,7 +1250,7 @@ namespace MindMapUIExtension
 
 			if (!ReadOnly && (node != null) && !HitTestExpansionButton(node, e.Location))
 			{
-				var taskItem = TaskItem(node);
+				var taskItem = RealTaskItem(node);
 
 				if (taskItem != null)
                 {

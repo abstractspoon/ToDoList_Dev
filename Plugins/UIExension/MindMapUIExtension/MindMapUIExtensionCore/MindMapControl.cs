@@ -1834,7 +1834,7 @@ namespace MindMapUIExtension
 			graphics.DrawString(label, nodeFont, textColor, rect, format);
 		}
 
-        protected Font GetNodeFont(TreeNode node)
+        virtual protected Font GetNodeFont(TreeNode node)
         {
             if (node.NodeFont != null)
                 return node.NodeFont;
