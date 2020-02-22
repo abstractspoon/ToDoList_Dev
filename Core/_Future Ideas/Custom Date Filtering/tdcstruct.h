@@ -1006,6 +1006,7 @@ struct SEARCHPARAM
 				return (dValue == rule.dValue);
 
 			case FT_INTEGER:
+			case FT_RECURRENCE:
 				return (nValue == rule.nValue);
 
 			case FT_STRING:
@@ -1198,6 +1199,7 @@ struct SEARCHPARAM
 		case TDCA_TAGS: 
 		case TDCA_PATH: 
 		case TDCA_LASTMODBY: 
+		case TDCA_DEPENDENCY: 
 			return FT_STRING;
 
 		case TDCA_ICON: 
@@ -1210,8 +1212,10 @@ struct SEARCHPARAM
 		case TDCA_ID:
 		case TDCA_PARENTID:
 		case TDCA_POSITION:
-		case TDCA_RECURRENCE: 
 			return FT_INTEGER;
+
+		case TDCA_RECURRENCE: 
+			return FT_RECURRENCE;
 
 		case TDCA_TIMEEST:
 		case TDCA_TIMESPENT:
@@ -1225,7 +1229,6 @@ struct SEARCHPARAM
 		case TDCA_FLAG:
 		case TDCA_LOCK:
 		case TDCA_RECENTMODIFIED:
-		case TDCA_DEPENDENCY: 
 		case TDCA_REMINDER:
 			return FT_BOOL;
 
@@ -1393,6 +1396,13 @@ struct SEARCHPARAM
 		case FT_BOOL:
 			nValue = _ttoi(val);
 			break;
+
+		case FT_RECURRENCE:
+			break;
+
+		default:
+			ASSERT(0);
+			break;
 		}
 	}
 
@@ -1418,6 +1428,7 @@ struct SEARCHPARAM
 		{
 		case FT_INTEGER:
 		case FT_BOOL:
+		case FT_RECURRENCE:
 			nValue = val;
 			break;
 
@@ -1506,6 +1517,7 @@ struct SEARCHPARAM
 
 		case FT_INTEGER:
 		case FT_BOOL:
+		case FT_RECURRENCE:
 			return nValue;
 		}
 
