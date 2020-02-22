@@ -2650,7 +2650,13 @@ void CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd)
 
 			// draw shortcut for references
 			if (dwTaskID != dwTrueID)
+			{
+				// Draw over icon if icon column NOT visible
+				if (!IsColumnShowing(TDCC_ICON))
+					rBkgnd.left -= (ICON_SIZE + 2);
+				
 				GraphicsMisc::DrawShortcutOverlay(pDC, rBkgnd);
+			}
 
 			// render comment text
 			DrawCommentsText(pDC, rRow, rText, pTDI, pTDS);

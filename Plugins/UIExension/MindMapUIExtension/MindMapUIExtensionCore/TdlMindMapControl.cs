@@ -980,7 +980,14 @@ namespace MindMapUIExtension
 
 			// Draw Windows shortcut icon if task is a reference
 			if (taskItem.IsReference)
-				m_Shortcut.Draw(graphics, rect.X, rect.Y, rect.Width, rect.Height);
+			{
+				if (iconRect == Rectangle.Empty)
+					iconRect = rect;
+				else
+					iconRect.Y = (rect.Bottom - iconRect.Height); // don't want shortcut icon centred vertically
+
+				m_Shortcut.Draw(graphics, iconRect.X, iconRect.Y, iconRect.Width, iconRect.Height);
+			}
 		}
 
         CheckBoxState GetItemCheckboxState(MindMapTaskItem taskItem)

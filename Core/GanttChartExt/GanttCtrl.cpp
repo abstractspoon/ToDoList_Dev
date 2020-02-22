@@ -1411,6 +1411,8 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
 
 				// Draw icon
+				CRect rIcon(rItem);
+
 				if (pGI->bHasIcon || pGI->bParent)
 				{
 					int iImageIndex = -1;
@@ -1418,10 +1420,6 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 
 					if (hilTask && (iImageIndex != -1))
 					{
-						CRect rItem;
-						m_tree.GetItemRect(hti, rItem, TRUE);
-
-						CRect rIcon(rItem);
 						rIcon.left -= (IMAGE_SIZE + 2);
 						rIcon.bottom = (rIcon.top + IMAGE_SIZE);
 						GraphicsMisc::CentreRect(rIcon, rItem, FALSE, TRUE);
@@ -1435,6 +1433,14 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				
 				// draw gantt item attribute columns
 				DrawTreeItem(pDC, hti, *pGI, bSelected, crBack);
+
+				// Draw shortcut icon for reference tasks
+				if (pGI->dwOrgRefID)
+				{
+					// Don't want the shortcut icon centred vertically
+					rIcon.bottom = rItem.bottom;
+					GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
+				}
 			}			
 	
 			return CDRF_SKIPDEFAULT;
@@ -2605,10 +2611,6 @@ void CGanttCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTT
 		pDC->SetTextColor(crOldColor);
 		pDC->SelectObject(hFontOld);
 	}
-
-	// special case: drawing shortcut icon for reference tasks
-	if (bTitleCol && gi.dwOrgRefID)
-		GraphicsMisc::DrawShortcutOverlay(pDC, rItem);
 }
 
 CGanttCtrl::DIV_TYPE CGanttCtrl::GetVerticalDivider(int nMonth, int nYear) const

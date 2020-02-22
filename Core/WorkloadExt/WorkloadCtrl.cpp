@@ -1238,6 +1238,8 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				DrawItemDivider(pDC, pTVCD->nmcd.rc, FALSE, bSelected);
 
 				// Draw icon
+				CRect rIcon(rItem);
+
 				if (pWI->bHasIcon || pWI->bParent)
 				{
 					int iImageIndex = -1;
@@ -1245,10 +1247,6 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 
 					if (hilTask && (iImageIndex != -1))
 					{
-						CRect rItem;
-						m_tree.GetItemRect(hti, rItem, TRUE);
-
-						CRect rIcon(rItem);
 						rIcon.left -= (IMAGE_SIZE + 2);
 						rIcon.bottom = (rIcon.top + IMAGE_SIZE);
 						GraphicsMisc::CentreRect(rIcon, rItem, FALSE, TRUE);
@@ -1262,8 +1260,15 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				
 				// draw Workload item attribute columns
 				DrawTreeItem(pDC, hti, *pWI, bSelected, crBack);
+
+				// Draw shortcut icon for reference tasks
+				if (pWI->dwOrgRefID)
+				{
+					// Don't want the shortcut icon centred vertically
+					rIcon.bottom = rItem.bottom;
+					GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
+				}
 			}			
-	
 		}
 		return CDRF_SKIPDEFAULT;
 	}
@@ -2259,10 +2264,6 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 		pDC->SetTextColor(crOldColor);
 		pDC->SelectObject(hFontOld);
 	}
-
-	// special case: drawing shortcut icon for reference tasks
-	if (bTitleCol && wi.dwOrgRefID)
-		GraphicsMisc::DrawShortcutOverlay(pDC, rItem);
 }
 
 HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_COLUMNID nCol)

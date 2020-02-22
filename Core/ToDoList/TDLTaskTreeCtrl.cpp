@@ -1409,17 +1409,9 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					{
 						if (!m_bReadOnly && !SelectionHasLocked(FALSE, TRUE))
 						{
-							// Allow drag-drop to take precedence over icon-editing
-// 							if (::DragDetect(m_tcTasks, CPoint(lp)))
-// 							{
-// 								TRACE(_T("CTDLTaskTreeCtrl::ScWindowProc(WM_LBUTTONDOWN) -> Begin drag\n"));
-// 							}
-// 							else
-							{
-								// save item handle so we don't re-handle in LButtonUp handler
-								m_htiLastHandledLBtnDown = htiHit;
-								bColClick = TRUE;
-							}
+							// save item handle so we don't re-handle in LButtonUp handler
+							m_htiLastHandledLBtnDown = htiHit;
+							bColClick = TRUE;
 						}
 					}
 					else
