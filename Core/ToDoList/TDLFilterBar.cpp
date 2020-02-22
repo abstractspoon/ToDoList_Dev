@@ -216,8 +216,6 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERDUEDATE, OnSelchangeDateFilter)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERSTARTDATE, OnSelchangeDateFilter)
-	ON_NOTIFY(DTN_CLOSEUP, IDC_USERDUEDATE, OnSelchangeDateFilter)
-	ON_NOTIFY(DTN_CLOSEUP, IDC_USERSTARTDATE, OnSelchangeDateFilter)
 
 	ON_CONTROL_RANGE(CBN_SELCHANGE, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeSelchangeFilter)
 	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeSelcancelFilter)
@@ -376,25 +374,10 @@ void CTDLFilterBar::OnCloseUpOptions()
 	}
 }
 
-void CTDLFilterBar::OnSelchangeDateFilter(NMHDR* pNMHDR, LRESULT* pResult)
+void CTDLFilterBar::OnSelchangeDateFilter(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	UpdateData();
-
-	switch (pNMHDR->code)
-	{
-	case DTN_CLOSEUP:
-		GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
-		break;
-
-	case DTN_DATETIMECHANGE:
-		// only update on the fly if calendar not visible
-		if (((pNMHDR->idFrom == IDC_USERSTARTDATE) && (m_dtcUserStart.GetMonthCalCtrl() == NULL)) ||
-			((pNMHDR->idFrom == IDC_USERDUEDATE) && (m_dtcUserDue.GetMonthCalCtrl() == NULL)))
-		{
-			GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
-		}
-		break;
-	}
+	GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
 
 	*pResult = 0;
 }
@@ -420,8 +403,9 @@ LRESULT CTDLFilterBar::OnEEBtnClick(WPARAM wp, LPARAM /*lp*/)
 BOOL CTDLFilterBar::PreTranslateMessage(MSG* pMsg)
 {
 	// handle return key in title field
-	if (pMsg->message == WM_KEYDOWN && pMsg->hwnd == m_eTitleFilter &&
-		pMsg->wParam == VK_RETURN)
+	if ((pMsg->message == WM_KEYDOWN) && 
+		(pMsg->hwnd == m_eTitleFilter) &&
+		(pMsg->wParam == VK_RETURN))
 	{
 		OnSelchangeFilter();
 		return TRUE;
@@ -1153,8 +1137,6 @@ void CTDLFilterBar::OnCustomAttributeSelcancelFilter(UINT nCtrlID)
 
 	if (CTDCCustomAttributeUIHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
 	{
-		ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
-		
 		// Restore previous state
 		CTDCCustomAttributeUIHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, m_filter.mapCustomAttrib);
 		CTDCCustomAttributeUIHelper::ClearFilterCheckboxHistory(ctrl, this);

@@ -1338,7 +1338,7 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 		return FALSE;
 
 	if (GetUpdateControlsItem() == NULL)
-		return ((nAttrib == TDCA_NEWTASK) || (nAttrib == TDCA_PASTE));
+		return !CTDCAttributeMap::IsTaskAttribute(nAttrib);
 
 	return TRUE;
 }

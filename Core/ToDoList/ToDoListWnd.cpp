@@ -8107,28 +8107,33 @@ void CToDoListWnd::RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClear
 
 			if (bClearCheckboxHistory)
 				m_filterBar.ClearCheckboxHistory();
-				
-			// Determine if a resize if required
-			CRect rFilter, rClient;
-
-			GetFilterBarRect(rFilter);
-			GetClientRect(rClient);
-
-			int nReqHeight = m_filterBar.CalcHeight(rClient.Width());
-
-			// GetFilterBarRect() adds 1 pixel to the top
-			if (rFilter.Height() != (nReqHeight + 1))
-			{
-				Resize();
-
-				rFilter.bottom = (rFilter.top + nReqHeight);
-				InvalidateRect(rFilter, TRUE);
-			}
 		}
 		else
 		{
 			m_filterBar.RefreshFilterControls(GetToDoCtrl(), nAttribID);
 		}
+
+		CheckResizeFilterBar();
+	}
+}
+
+void CToDoListWnd::CheckResizeFilterBar()
+{
+	// Determine if a resize if required
+	CRect rFilter, rClient;
+
+	GetFilterBarRect(rFilter);
+	GetClientRect(rClient);
+
+	int nReqHeight = m_filterBar.CalcHeight(rClient.Width());
+
+	// GetFilterBarRect() adds 1 pixel to the top
+	if (rFilter.Height() != (nReqHeight + 1))
+	{
+		Resize();
+
+		rFilter.bottom = (rFilter.top + nReqHeight);
+		InvalidateRect(rFilter, TRUE);
 	}
 }
 

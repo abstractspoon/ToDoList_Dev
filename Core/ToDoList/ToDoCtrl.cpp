@@ -12222,16 +12222,6 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const C
 		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
 		SetModified(nAttrib, aModTaskIDs);
 		
-		// update UI
-// 		CUSTOMATTRIBCTRLITEM ctrl;
-// 		
-// 		if (CTDCCustomAttributeUIHelper::GetControl(sToCustomAttribID, m_aCustomControls, ctrl))
-// 		{
-// 			CTDCCustomAttributeUIHelper::UpdateCustomAttributeControl(this, ctrl, m_aCustomAttribDefs, data);
-// 		
-// 			if (ctrl.HasBuddy())
-// 				EnableDisableControls(GetSelectedItem());
-// 		}
 		UpdateControls(FALSE);
 	}
 

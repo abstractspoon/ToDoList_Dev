@@ -399,6 +399,12 @@ BOOL CTDCCustomAttributeDataMap::Lookup(LPCTSTR key, TDCCADATA& rValue) const
 	return CMap<CString, LPCTSTR, TDCCADATA, TDCCADATA&>::Lookup(Misc::ToUpper(key), rValue);
 }
 
+BOOL CTDCCustomAttributeDataMap::HasKey(LPCTSTR key) const
+{
+	TDCCADATA dataUnused;
+	return Lookup(key, dataUnused);
+}
+
 TDCCADATA& CTDCCustomAttributeDataMap::operator[](LPCTSTR key)
 {
 	return CMap<CString, LPCTSTR, TDCCADATA, TDCCADATA&>::operator[](Misc::ToUpper(key));

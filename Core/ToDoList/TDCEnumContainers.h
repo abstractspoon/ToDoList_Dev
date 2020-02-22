@@ -73,10 +73,10 @@ public:
 
 	void Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt);
 
+	static BOOL IsTaskAttribute(TDC_ATTRIBUTE nAttrib);
+
 protected:
 	BOOL CanAdd(TDC_ATTRIBUTE nAttrib) const;
-	
-	static BOOL IsTaskAttribute(TDC_ATTRIBUTE nAttrib);
 };
 
 //////////////////////////////////////////////////////////////////////
