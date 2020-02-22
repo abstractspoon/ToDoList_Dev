@@ -172,6 +172,9 @@
     <ClCompile Include="..\ToDoList\TDCRecurrence.cpp">
       <Filter>ToDoList Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLFilterDateComboBox.cpp">
+      <Filter>ToDoList Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImportExportMgrTest.h">

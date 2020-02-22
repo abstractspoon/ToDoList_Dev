@@ -178,6 +178,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClCompile Include="..\ToDoList\TDLCommentsCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLContentMgr.cpp" />
     <ClCompile Include="..\ToDoList\TDLDialog.cpp" />
+    <ClCompile Include="..\ToDoList\TDLFilterDateComboBox.cpp" />
     <ClCompile Include="..\ToDoList\tdliconcombobox.cpp" />
     <ClCompile Include="..\ToDoList\TDLImpExpAttributeMappingListCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLImportOutlookObjectsDlg.cpp" />
