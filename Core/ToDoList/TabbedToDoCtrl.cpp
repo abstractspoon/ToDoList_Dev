@@ -1761,7 +1761,21 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 			}
 			else
 			{
-				ASSERT(0);
+#ifdef _DEBUG
+				switch (mod.nAttrib)
+				{
+				case TDCA_DONEDATE:
+				case TDCA_ICON:
+				case TDCA_OFFSETTASK:
+					// Don't assert on edits that can be cancelled
+					break;
+
+				default: 
+					// all else
+					ASSERT(0);
+					break;
+				}
+#endif
 				dwResults = 0;
 			}
 
