@@ -539,30 +539,6 @@ BOOL CTDCCustomAttributeUIHelper::NeedRebuildControls(const CTDCCustomAttribDefi
 		// Only compare auto-list data when filtering
 		if (!attribNew.Matches(attribOld, bFilter))
 			return TRUE;
-
-		// Compare attribute data
-		switch (attribOld.GetAttributeType())
-		{
-		case TDCCA_STRING:
-		case TDCCA_INTEGER:
-		case TDCCA_DOUBLE:
-		case TDCCA_FRACTION:
-		case TDCCA_BOOL:
-		case TDCCA_ICON:
-		case TDCCA_FILELINK:
-		case TDCCA_TIMEPERIOD:
-			break;
-
-		case TDCCA_DATE:
-			if (bFilter)
-			{
-				// TODO
-			}
-			break;
-
-		default:
-			ASSERT(0);
-		}
 	}
 
 	return FALSE;
@@ -1030,10 +1006,16 @@ TDCCAUI_UPDATERESULT CTDCCustomAttributeUIHelper::GetControlData(const CWnd* pPa
 							VERIFY(((CDateTimeCtrlEx*)pBuddy)->GetTime(date));
 
 							SetDateFilter(nFilter, date.m_dt, data);
-							bShowBuddy = TRUE;
-
+							
 							if (bCreated)
+							{
+								// Reset combo text
+								((CTDLFilterDateComboBox*)pCtrl)->SetNextNDays(7);
+
 								nRes = TDCCAUIRES_REPOSCTRLS;
+							}
+
+							bShowBuddy = TRUE;
 						}
 					}
 					break;
@@ -1049,11 +1031,23 @@ TDCCAUI_UPDATERESULT CTDCCustomAttributeUIHelper::GetControlData(const CWnd* pPa
 							CString sDays;
 							pBuddy->GetWindowText(sDays);
 
-							SetDateFilter(nFilter, _ttoi(sDays), data);
+							double dDays = ValidateDateFilter(FD_NEXTNDAYS, _ttoi(sDays));
+							SetDateFilter(nFilter, dDays, data);
+
+							if (sDays.IsEmpty())
+								pBuddy->SetWindowText(Misc::Format((int)dDays));
+
+							// Update combo text
+							((CTDLFilterDateComboBox*)pCtrl)->SetNextNDays((int)dDays);
+
 							bShowBuddy = TRUE;
 
 							if (bCreated)
 								nRes = TDCCAUIRES_REPOSCTRLS;
+						}
+						else
+						{
+							ASSERT(0);
 						}
 					}
 					break;
@@ -1226,7 +1220,7 @@ FILTER_DATE CTDCCustomAttributeUIHelper::GetDateFilter(const TDCCADATA& data, do
 	return nFilter;
 }
 
-void CTDCCustomAttributeUIHelper::ValidateDateFilter(FILTER_DATE nFilter, double& dUserVal)
+double CTDCCustomAttributeUIHelper::ValidateDateFilter(FILTER_DATE nFilter, double dUserVal)
 {
 	switch (nFilter)
 	{
@@ -1234,7 +1228,7 @@ void CTDCCustomAttributeUIHelper::ValidateDateFilter(FILTER_DATE nFilter, double
 		if (dUserVal <= 0.0)
 		{
 			//ASSERT(0);
-			dUserVal = 7.0;
+			return 7.0;
 		}
 		break;
 
@@ -1242,20 +1236,21 @@ void CTDCCustomAttributeUIHelper::ValidateDateFilter(FILTER_DATE nFilter, double
 		if (dUserVal == 0.0)
 		{
 			//ASSERT(0);
-			dUserVal = COleDateTime::GetCurrentTime();
+			return COleDateTime::GetCurrentTime().m_dt;
 		}
 		break;
 
 	default:
 		ASSERT(dUserVal == 0.0);
-		dUserVal = 0.0;
-		break;
+		return 0.0;
 	}
+
+	return dUserVal;
 }
 
 void CTDCCustomAttributeUIHelper::SetDateFilter(FILTER_DATE nFilter, double dUserVal, TDCCADATA& data)
 {
-	ValidateDateFilter(nFilter, dUserVal);
+	dUserVal = ValidateDateFilter(nFilter, dUserVal);
 
 	if (dUserVal != 0.0)
 		data.Set(Misc::Format(_T("%d|%f"), nFilter, dUserVal));
@@ -1410,6 +1405,8 @@ void CTDCCustomAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTOMATTRI
 
 					if (pBuddy)
 						pBuddy->SetWindowText(Misc::Format((int)dUserVal));
+
+					((CTDLFilterDateComboBox*)pCtrl)->SetNextNDays((int)dUserVal);
 				}
 				else
 				{

@@ -328,6 +328,8 @@ BOOL CTDCSearchParamHelper::AppendDateFilter(FILTER_DATE nFilter, const COleDate
 BOOL CTDCSearchParamHelper::AppendCustomAttributeDateFilter(const TDCCADATA& data, TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CSearchParamArray& aRules)
 {
 	COleDateTime date, dtUser(CDateHelper::NullDate());
+	int nNextNDays = 0;
+
 	FILTER_DATE nFilter = (FILTER_DATE)data.AsInteger();
 
 	SEARCHPARAM rule;
@@ -336,7 +338,7 @@ BOOL CTDCSearchParamHelper::AppendCustomAttributeDateFilter(const TDCCADATA& dat
 	switch (nFilter)
 	{
 	case FD_ANY:
-		return false;
+		return FALSE;
 
 	case FD_NONE:
 		rule.SetOperator(FOP_NOT_SET);
@@ -349,7 +351,16 @@ BOOL CTDCSearchParamHelper::AppendCustomAttributeDateFilter(const TDCCADATA& dat
 			if (Misc::Split(sFilter, sDate, '|') && !sDate.IsEmpty())
 				dtUser = _ttof(sDate);
 		}
-		// fall thru
+		break;
+
+	case FD_NEXTNDAYS:
+		{
+			CString sFilter(data.AsString()), sNumDays;
+
+			if (Misc::Split(sFilter, sNumDays, '|') && !sNumDays.IsEmpty())
+				nNextNDays = _ttoi(sNumDays);
+		}
+		break;
 
 	case FD_TODAY:
 	case FD_TOMORROW:
@@ -359,19 +370,25 @@ BOOL CTDCSearchParamHelper::AppendCustomAttributeDateFilter(const TDCCADATA& dat
 	case FD_ENDNEXTMONTH:
 	case FD_ENDTHISYEAR:
 	case FD_ENDNEXTYEAR:
-	case FD_NEXTNDAYS:
 	case FD_NOW:
 	case FD_YESTERDAY:
-		if (InitFilterDate(nFilter, dtUser, 7, date))
-		{
-			rule.SetOperator(FOP_ON_OR_BEFORE);
-			rule.SetValue(date);
-		}
 		break;
 
 	default:
 		ASSERT(0);
 		return FALSE;
+	}
+
+	if (rule.OperatorIs(FOP_NONE))
+	{
+		if (!InitFilterDate(nFilter, dtUser, nNextNDays, date))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		rule.SetOperator(FOP_ON_OR_BEFORE);
+		rule.SetValue(date);
 	}
 
 	aRules.Add(rule);

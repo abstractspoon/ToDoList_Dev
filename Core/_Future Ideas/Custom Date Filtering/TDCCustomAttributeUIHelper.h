@@ -149,7 +149,7 @@ protected:
 	static CString GetControlTooltip(const CWnd* pParent, UINT nCtrlID);
 	static FILTER_DATE GetDateFilter(const TDCCADATA& data, double& dUserVal);
 	static void SetDateFilter(FILTER_DATE nFilter, double dUserVal, TDCCADATA& data);
-	static void ValidateDateFilter(FILTER_DATE nFilter, double& dUserVal);
+	static double ValidateDateFilter(FILTER_DATE nFilter, double dUserVal);
 	static CWnd* CheckRecreateDateFilterBuddy(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl, FILTER_DATE nFilter, 
 											  const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL& bCreated);
 	static void SetBuddyVisibility(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const TDCCADATA& data);

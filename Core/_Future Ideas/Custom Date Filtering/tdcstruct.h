@@ -23,6 +23,7 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\encommandlineinfo.h"
 #include "..\shared\enstring.h"
+#include "..\shared\wclassdefines.h"
 
 #include "..\Interfaces\preferences.h"
 
@@ -746,15 +747,25 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 	{
 		nCtrlID = nLabelID = nBuddyCtrlID = nBuddyLabelID = 0;
 		nAttrib = TDCA_NONE;
-		bVisibleBuddy = FALSE;
+		pBuddyClass = NULL;
 	}
 
 	BOOL operator==(const CUSTOMATTRIBCTRLITEM& other) const
 	{
-		return (CTRLITEM::operator==(other) && 
-				(nBuddyLabelID == other.nBuddyLabelID) && 
-				(nBuddyCtrlID == other.nBuddyCtrlID) &&
-				(sAttribID == other.sAttribID));
+		if (!CTRLITEM::operator==(other) || 
+			(nBuddyLabelID != other.nBuddyLabelID) ||
+			(nBuddyCtrlID != other.nBuddyCtrlID) ||
+			(sAttribID != other.sAttribID))
+		{
+			return FALSE;
+		}
+
+		if (!(pBuddyClass && other.pBuddyClass))
+		{
+			return FALSE;
+		}
+
+		return (strcmp(pBuddyClass->m_lpszClassName, other.pBuddyClass->m_lpszClassName) == 0);
 	}
 		
 	BOOL operator!=(const CUSTOMATTRIBCTRLITEM& other) const
@@ -768,13 +779,15 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 
 		if (!pBuddy)
 		{
-			bShow = FALSE;
+			pBuddyClass = NULL;
 			ASSERT(0);
 		}
 		else
 		{
 			pBuddy->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
 			pBuddy->EnableWindow(bShow);
+
+			pBuddyClass = (bShow ? pBuddy->GetRuntimeClass() : NULL);
 
 			CWnd* pLabel = GetBuddyLabel(pParent);
 			ASSERT_VALID(pLabel);
@@ -785,13 +798,11 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 				pLabel->EnableWindow(bShow);
 			}
 		}
-
-		bVisibleBuddy = bShow;
 	}
 
 	BOOL IsShowingBuddy() const
 	{
-		return (HasBuddy() && bVisibleBuddy);
+		return (HasBuddy() && pBuddyClass);
 	}
 
 	BOOL HasBuddy() const
@@ -833,7 +844,7 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 	UINT nBuddyLabelID;
 
 protected:
-	BOOL bVisibleBuddy;
+	CRuntimeClass* pBuddyClass;
 
 	void DeleteBuddy(const CWnd* pParent)
 	{

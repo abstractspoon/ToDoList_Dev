@@ -135,6 +135,8 @@ protected:
 	afx_msg void OnCloseUpOptions();
 	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
+	afx_msg void OnSelchangeDueDateFilter();
+	afx_msg void OnSelchangeStartDateFilter();
 	afx_msg void OnChangeDateFilter(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult );	
@@ -144,6 +146,10 @@ protected:
 	afx_msg void OnCustomAttributeChangeDateFilter(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
 	DECLARE_MESSAGE_MAP()
 
+	// pseudo-handlers
+	void OnCustomAttributeChangeFilter(CUSTOMATTRIBCTRLITEM& ctrl);
+	void OnSelchangeDateFilter(FILTER_DATE nPrevFilter, const CTDLFilterDateComboBox& combo);
+
 protected:
 	int ReposControls(int nWidth = -1, BOOL bCalcOnly = FALSE);
 	BOOL WantShowFilter(TDC_ATTRIBUTE nType) const;
@@ -152,7 +158,6 @@ protected:
 	int GetControls(CTDCControlArray& aControls) const;
 	void UpdateCustomControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
 	void UpdateAutoDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
-	void OnCustomAttributeChangeFilter(CUSTOMATTRIBCTRLITEM& ctrl);
 	void NotifyParentFilterChange();
 };
 
