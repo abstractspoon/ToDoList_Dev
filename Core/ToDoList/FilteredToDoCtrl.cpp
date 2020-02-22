@@ -665,6 +665,7 @@ void CFilteredToDoCtrl::RefreshFilter()
 	switch (nView)
 	{
 	case FTCV_TASKTREE:
+	case FTCV_UNSET:
 		// mark all other views as needing refiltering
 		SetListNeedRefilter(TRUE);
 		SetExtensionsNeedRefilter(TRUE);
@@ -727,8 +728,8 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 	if (m_data.GetTaskCount())
 	{
 		// save and reset current focus to work around a bug
-		CSaveFocus sf;
-		SetFocusToTasks();
+// 		CSaveFocus sf;
+// 		SetFocusToTasks();
 		
 		// grab the selected items for the filtering
 		m_taskTree.GetSelectedTaskIDs(m_aSelectedTaskIDsForFiltering, FALSE);
