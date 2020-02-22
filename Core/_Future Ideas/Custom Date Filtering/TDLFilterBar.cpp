@@ -199,8 +199,8 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_CBN_SELCHANGE(IDC_CATEGORYFILTERCOMBO, OnSelchangeFilter)
 
 	ON_CBN_SELENDOK(IDC_FILTERCOMBO, OnSelchangeFilter)
-	ON_CBN_SELENDOK(IDC_STARTFILTERCOMBO, OnSelchangeFilter)
-	ON_CBN_SELENDOK(IDC_DUEFILTERCOMBO, OnSelchangeFilter)
+	ON_CBN_SELENDOK(IDC_STARTFILTERCOMBO, OnSelchangeStartDateFilter)
+	ON_CBN_SELENDOK(IDC_DUEFILTERCOMBO, OnSelchangeDueDateFilter)
 	ON_CBN_SELENDOK(IDC_PRIORITYFILTERCOMBO, OnSelchangeFilter)
 	ON_CBN_SELENDOK(IDC_RISKFILTERCOMBO, OnSelchangeFilter)
 
@@ -216,8 +216,6 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERDUEDATE, OnChangeDateFilter)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERSTARTDATE, OnChangeDateFilter)
-	ON_NOTIFY(DTN_CLOSEUP, IDC_USERDUEDATE, OnChangeDateFilter)
-	ON_NOTIFY(DTN_CLOSEUP, IDC_USERSTARTDATE, OnChangeDateFilter)
 
 	ON_CONTROL_RANGE(CBN_SELCHANGE, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeSelchangeFilter)
 	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeSelcancelFilter)
@@ -385,56 +383,71 @@ void CTDLFilterBar::OnCloseUpOptions()
 	}
 }
 
-void CTDLFilterBar::OnChangeDateFilter(NMHDR* pNMHDR, LRESULT* pResult)
+void CTDLFilterBar::OnSelchangeDueDateFilter()
 {
+	OnSelchangeDateFilter(m_filter.nDueBy, m_cbDueFilter);
+}
+
+void CTDLFilterBar::OnSelchangeStartDateFilter()
+{
+	OnSelchangeDateFilter(m_filter.nStartBy, m_cbStartFilter);
+}
+
+void CTDLFilterBar::OnSelchangeDateFilter(FILTER_DATE nPrevFilter, const CTDLFilterDateComboBox& combo)
+{
+	FILTER_DATE nFilter = combo.GetSelectedFilter();
+
+	BOOL bWasShowingBuddy = ((nPrevFilter == FD_USER) || (nPrevFilter == FD_NEXTNDAYS));
+	BOOL bShowBuddy = ((nFilter == FD_USER) || (nFilter == FD_NEXTNDAYS));
+
 	UpdateData();
 
-	switch (pNMHDR->code)
-	{
-	case DTN_CLOSEUP:
-		NotifyParentFilterChange();
-		break;
+	if ((bWasShowingBuddy && !bShowBuddy) || (!bWasShowingBuddy || bShowBuddy))
+		ReposControls();
 
-	case DTN_DATETIMECHANGE:
-		// only update on the fly if calendar not visible
-		if (((pNMHDR->idFrom == IDC_USERSTARTDATE) && (m_dtcUserStart.GetMonthCalCtrl() == NULL)) ||
-			((pNMHDR->idFrom == IDC_USERDUEDATE) && (m_dtcUserDue.GetMonthCalCtrl() == NULL)))
-		{
-			NotifyParentFilterChange();
-		}
-		break;
-	}
+	NotifyParentFilterChange();
+}
+
+void CTDLFilterBar::OnChangeDateFilter(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+{
+	NotifyParentFilterChange();
 
 	*pResult = 0;
 }
 
 LRESULT CTDLFilterBar::OnEEBtnClick(WPARAM wp, LPARAM /*lp*/)
 {
-	OnSelchangeFilter();
-	
-	switch (wp)
+	int nCtrl = m_aCustomControls.Find(wp);
+
+	if (nCtrl != -1)
 	{
-	case IDC_STARTNEXTNDAYS:
-		m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
-		break;
-
-	case IDC_DUENEXTNDAYS:
-		m_cbDueFilter.SetNextNDays(m_filter.nDueNextNDays);
-		break;
-
-	default:
-		// TODO - Update custom attribute date filter combos
-		break;
+		OnCustomAttributeChangeFilter(m_aCustomControls[nCtrl]);
 	}
+	else
+	{
+		OnSelchangeFilter();
 
+		switch (wp)
+		{
+		case IDC_STARTNEXTNDAYS:
+			m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
+			break;
+
+		case IDC_DUENEXTNDAYS:
+			m_cbDueFilter.SetNextNDays(m_filter.nDueNextNDays);
+			break;
+		}
+	}
+	
 	return 0L;
 }
 
 BOOL CTDLFilterBar::PreTranslateMessage(MSG* pMsg)
 {
 	// handle return key in title field
-	if (pMsg->message == WM_KEYDOWN && pMsg->hwnd == m_eTitleFilter &&
-		pMsg->wParam == VK_RETURN)
+	if ((pMsg->message == WM_KEYDOWN) && 
+		(pMsg->hwnd == m_eTitleFilter) &&
+		(pMsg->wParam == VK_RETURN))
 	{
 		OnSelchangeFilter();
 		return TRUE;
@@ -1149,7 +1162,7 @@ void CTDLFilterBar::OnCustomAttributeSelchangeFilter(UINT nCtrlID)
 	}
 }
 
-void CTDLFilterBar::OnCustomAttributeChangeDateFilter(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult)
+void CTDLFilterBar::OnCustomAttributeChangeDateFilter(UINT nCtrlID, NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = 0;
 
@@ -1160,16 +1173,6 @@ void CTDLFilterBar::OnCustomAttributeChangeDateFilter(UINT nCtrlID, NMHDR* pNMHD
 		CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
 
 		ASSERT(nCtrlID == ctrl.nBuddyCtrlID);
-
-		// Don't update on the fly if calendar is visible
-		if (pNMHDR->code == DTN_DATETIMECHANGE)
-		{
-			CDateTimeCtrlEx* pBuddy = (CDateTimeCtrlEx*)ctrl.GetBuddy(this);
-			ASSERT_VALID(pBuddy);
-
-			if (!pBuddy || pBuddy->IsCalendarVisible())
-				return;
-		}
 
 		// Common helper
 		OnCustomAttributeChangeFilter(ctrl);

@@ -23,7 +23,6 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\encommandlineinfo.h"
 #include "..\shared\enstring.h"
-#include "..\shared\wclassdefines.h"
 
 #include "..\Interfaces\preferences.h"
 
