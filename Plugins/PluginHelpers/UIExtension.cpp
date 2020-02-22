@@ -11,6 +11,8 @@
 #include <Interfaces\IUIExtension.h>
 #include <Interfaces\ITasklist.h>
 
+#include <Shared\GraphicsMisc.h>
+
 #include <ShellAPI.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -471,25 +473,13 @@ UIExtension::ShortcutOverlay::ShortcutOverlay() : m_hIcon(NULL)
 bool UIExtension::ShortcutOverlay::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy)
 {
 	HDC hDC = static_cast<HDC>(dc->GetHdc().ToPointer());
+	bool bRes = false;
 
-	if (hDC == NULL)
-		return false;
-
-	if (m_hIcon == NULL)
+	if (hDC != NULL)
 	{
-		HICON hIcon = NULL;
-
-		// Get Large icon for distinctiveness
-		if (!::ExtractIconEx(L"SHELL32.DLL", 29, &hIcon, NULL, 1) || (hIcon == NULL))
-			return false;
-
-		m_hIcon = hIcon;
+		bRes = (FALSE != GraphicsMisc::DrawShortcutOverlay(CDC::FromHandle(hDC), CRect(x, y, x + cx, y + cy)));
+		dc->ReleaseHdc();
 	}
-
-	int nSize = DPIScaling::Scale(32); // Large icon
-	bool bRes = (::DrawIconEx(hDC, x, (y + cy - nSize), m_hIcon, nSize, nSize, 0, NULL, DI_NORMAL) != FALSE);
-
-	dc->ReleaseHdc();
 
 	return bRes;
 }
