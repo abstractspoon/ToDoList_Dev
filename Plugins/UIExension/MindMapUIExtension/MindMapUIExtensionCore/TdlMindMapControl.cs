@@ -200,7 +200,6 @@ namespace MindMapUIExtension
 		private Timer m_EditTimer;
         private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
         private Size m_CheckboxSize;
-		private UIExtension.ShortcutOverlay m_Shortcut;
 
 		// -------------------------------------------------------------------------
 
@@ -210,7 +209,6 @@ namespace MindMapUIExtension
 			m_TaskIcons = icons;
 
 			m_Items = new Dictionary<UInt32, MindMapTaskItem>();
-			m_Shortcut = new UIExtension.ShortcutOverlay();
 
 			m_TaskColorIsBkgnd = false;
 			m_IgnoreMouseClick = false;
@@ -980,7 +978,7 @@ namespace MindMapUIExtension
 				else
 					iconRect.Y = (rect.Bottom - iconRect.Height); // don't want shortcut icon centred vertically
 
-				m_Shortcut.Draw(graphics, iconRect.X, iconRect.Y, iconRect.Width, iconRect.Height);
+				UIExtension.ShortcutOverlay.Draw(graphics, iconRect.X, iconRect.Y, iconRect.Width, iconRect.Height);
 			}
 		}
 

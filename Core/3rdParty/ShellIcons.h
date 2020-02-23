@@ -54,6 +54,8 @@ namespace ShellIcons
 		SI_LOGOFF = 44,					///< Start Menu Logoff
 		SI_LOCK = 47,					///< Lock
 		SI_HIBERNATE = 48,				///< Hibernate
+
+		SI_SHORTCUTNEW = 263			///< High res shortcut icon
 	};
 	
 	HICON ExtractIcon(SHELLICON nIndex, bool bLarge = false);

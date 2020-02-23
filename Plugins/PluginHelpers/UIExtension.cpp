@@ -465,11 +465,6 @@ bool UIExtension::TaskIcon::Draw(Graphics^ dc, Int32 x, Int32 y)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-UIExtension::ShortcutOverlay::ShortcutOverlay() : m_hIcon(NULL)
-{
-
-}
-
 bool UIExtension::ShortcutOverlay::Draw(Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy)
 {
 	HDC hDC = static_cast<HDC>(dc->GetHdc().ToPointer());

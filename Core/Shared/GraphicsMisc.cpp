@@ -9,6 +9,7 @@
 #include "themed.h"
 #include "osversion.h"
 #include "icon.h"
+#include "EnImageList.h"
 
 #include "..\3rdparty\colordef.h"
 #include "..\3rdparty\ShellIcons.h"
@@ -1979,11 +1980,38 @@ COLORREF GraphicsMisc::GetSolidColor(HBRUSH hBrush)
 
 BOOL GraphicsMisc::DrawShortcutOverlay(CDC* pDC, LPCRECT pRect)
 {
-	// Always use large icon for distinctiveness
-	int nSize = ScaleByDPIFactor(32);
+	static CEnImageList ilShortcut;
+	int nSize = 0;
+
+	if (!ilShortcut.GetSafeHandle())
+	{
+		// Try first for small version of high-res shortcut
+		UINT nFlags = ILC_MASK;
+		HICON hIcon = ShellIcons::ExtractIcon(ShellIcons::SI_SHORTCUTNEW, false);
+
+		if (hIcon)
+		{
+			nSize = ScaleByDPIFactor(8); 
+			nFlags |= ILC_COLOR24; // opaque
+		}
+		else
+		{
+			// Full size version of low-res shortcut
+			hIcon = ShellIcons::ExtractIcon(ShellIcons::SI_SHORTCUT, true);
+			nSize = 32; // full size
+			nFlags |= ILC_COLOR32; // transparent
+		}
+
+		VERIFY(ilShortcut.Create(nSize, nSize, nFlags, 0, 1));
+		VERIFY(ilShortcut.Add(hIcon) == 0);
+		VERIFY(::DestroyIcon(hIcon));
+	}
+	else
+	{
+		nSize = ilShortcut.GetImageSize();
+	}
+
 	CPoint ptPos(pRect->left, (pRect->bottom - nSize));
 
-	ShellIcons::DrawIcon(pDC, ShellIcons::SI_SHORTCUT, ptPos, true);
-
-	return FALSE;
+	return ilShortcut.Draw(pDC, 0, ptPos, ILD_TRANSPARENT);
 }
