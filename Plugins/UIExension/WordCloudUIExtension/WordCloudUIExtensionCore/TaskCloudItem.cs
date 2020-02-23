@@ -69,11 +69,11 @@ namespace WordCloudUIExtension
             return TextColor;
         }
 
-        public System.Drawing.Color GetBackColor(Boolean isSelected, Boolean taskColorIsBkgnd)
+        public System.Drawing.Color GetBackColor(Boolean taskColorIsBkgnd)
         {
             if (!taskTextColor.IsEmpty)
             {
-                if (!isSelected && taskColorIsBkgnd && !IsDone(true))
+                if (taskColorIsBkgnd && !IsDone(true))
                     return TextColor;
             }
 

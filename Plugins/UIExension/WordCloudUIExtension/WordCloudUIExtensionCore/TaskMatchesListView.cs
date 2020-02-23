@@ -422,7 +422,7 @@ namespace WordCloudUIExtension
 			return editRect;
 		}
 
-		public Rectangle LabelTextRect(Rectangle labelRect)
+		public Rectangle LabelTextRect(Rectangle labelRect, bool includeIdColumn = false)
 		{
 			Rectangle textRect = new Rectangle(labelRect.Location, labelRect.Size);
 
@@ -438,7 +438,8 @@ namespace WordCloudUIExtension
 			textRect.Width -= TextIconOffset;
 
 			// adjust for ID column
-			textRect.Width -= Columns[1].Width;
+			if (!includeIdColumn)
+				textRect.Width -= Columns[1].Width;
 
 			return textRect;
 		}
@@ -628,23 +629,27 @@ namespace WordCloudUIExtension
 			var item = (e.Item.Tag as CloudTaskItem);
 
             var textColor = item.GetTextColor(e.Item.Selected, m_TaskColorIsBkgnd);
-            var backColor = item.GetBackColor(e.Item.Selected, m_TaskColorIsBkgnd);
+            var backColor = item.GetBackColor(m_TaskColorIsBkgnd);
 
 			Brush textBrush = new SolidBrush(textColor);
-            			
+
+			if (m_TaskColorIsBkgnd && !backColor.IsEmpty)
+			{
+				using (Brush backBrush = new SolidBrush(backColor))
+					e.Graphics.FillRectangle(backBrush, e.Bounds);
+			}
+			else if (!e.Item.Selected)
+			{
+				e.DrawBackground();
+			}
+
 			if (e.Item.Selected)
 			{
-                m_SelectionRect.Draw(Handle, e.Graphics, e.Bounds.X, e.Bounds.Y, e.Bounds.Width, e.Bounds.Height);
-            }
-			else if (m_TaskColorIsBkgnd && !backColor.IsEmpty)
-			{
-                using (Brush backBrush = new SolidBrush(backColor))
-                    e.Graphics.FillRectangle(backBrush, e.Bounds);
-            }
-            else
-            {
-                e.DrawBackground();
-            }
+				// Selection rect just around text label
+				Rectangle labelRect = LabelTextRect(e.Bounds, true);
+
+				m_SelectionRect.Draw(Handle, e.Graphics, labelRect.X, labelRect.Y, labelRect.Width, labelRect.Height);
+			}
 
 			// Draw subitems
 			StringFormat stringFormat = new StringFormat();

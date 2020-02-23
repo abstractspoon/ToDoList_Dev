@@ -889,6 +889,20 @@ namespace MindMapUIExtension
 			return taskItem;
 		}
 
+		protected override Color GetNodeBackgroundColor(Object itemData)
+		{
+			if (m_TaskColorIsBkgnd)
+			{
+				var realItem = GetRealTaskItem(itemData as MindMapTaskItem);
+
+				if (!realItem.TextColor.IsEmpty && !realItem.IsDone(true))
+					return realItem.TextColor;
+			}
+
+			// all else
+			return base.GetNodeBackgroundColor(itemData);
+		}
+
 		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
 											  NodeDrawState nodeState, NodeDrawPos nodePos,
                                               Font nodeFont, Object itemData)
@@ -896,7 +910,7 @@ namespace MindMapUIExtension
             var taskItem = (itemData as MindMapTaskItem);
 			var realItem = GetRealTaskItem(taskItem);
 
-            bool isSelected = (nodeState != NodeDrawState.None);
+			bool isSelected = (nodeState != NodeDrawState.None);
 			Rectangle iconRect = Rectangle.Empty;
 
             if (taskItem.IsTask) // not root
@@ -924,25 +938,19 @@ namespace MindMapUIExtension
                     rect.X = checkRect.Right + 2;
                 }
             }
-			
-			// Text background
-            Brush textColor = SystemBrushes.WindowText;
-            Brush backColor = null;
-            Color taskColor = realItem.TextColor;
 
-			if (!taskColor.IsEmpty)
+			// Text Colour
+			Color textColor = SystemColors.WindowText;
+
+			if (!realItem.TextColor.IsEmpty)
 			{
 				if (m_TaskColorIsBkgnd && !isSelected && !taskItem.IsDone(true))
 				{
-					backColor = new SolidBrush(taskColor);
-					textColor = new SolidBrush(DrawingColor.GetBestTextColor(taskColor));
+					textColor = DrawingColor.GetBestTextColor(realItem.TextColor);
 				}
-				else
+				else if (isSelected)
 				{
-					if (nodeState != MindMapControl.NodeDrawState.None)
-						taskColor = DrawingColor.SetLuminance(taskColor, 0.3f);
-
-					textColor = new SolidBrush(taskColor);
+					textColor = DrawingColor.SetLuminance(realItem.TextColor, 0.3f);
 				}
 			}
 
@@ -957,26 +965,15 @@ namespace MindMapUIExtension
 					break;
 
                 case NodeDrawState.None:
-                    {
-                        if (backColor != null)
-                        {
-                            var prevSmoothing = graphics.SmoothingMode;
-                            graphics.SmoothingMode = SmoothingMode.None;
-
-                            graphics.FillRectangle(backColor, rect);
-                            graphics.SmoothingMode = prevSmoothing;
-                        }
-                        
-                        if (DebugMode())
-                            graphics.DrawRectangle(new Pen(Color.Green), rect);
-                    }
+                    if (DebugMode())
+                        graphics.DrawRectangle(new Pen(Color.Green), rect);
                     break;
 			}
 
 			// Text
 			var format = DefaultLabelFormat(nodePos, isSelected);
 
-            graphics.DrawString(label, nodeFont, textColor, rect, format);
+            graphics.DrawString(label, nodeFont, new SolidBrush(textColor), rect, format);
 
 			// Draw Windows shortcut icon if task is a reference
 			if (taskItem.IsReference)
@@ -1090,7 +1087,7 @@ namespace MindMapUIExtension
 
 		protected override int GetExtraWidth(TreeNode node)
 		{
-            int extraWidth = 2;
+            int extraWidth = base.GetExtraWidth(node);
             var taskItem = RealTaskItem(node);
 
             if (m_ShowCompletionCheckboxes && taskItem.IsTask)

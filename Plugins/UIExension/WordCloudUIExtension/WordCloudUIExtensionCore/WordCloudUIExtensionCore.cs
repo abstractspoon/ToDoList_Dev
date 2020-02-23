@@ -217,6 +217,10 @@ namespace WordCloudUIExtension
 			if (!task.IsValid())
 				return false;
 
+			// Ignore reference tasks
+			if (task.GetReferenceID() != 0)
+				return true;
+
 			CloudTaskItem item;
 
 			if (m_Items.TryGetValue(task.GetID(), out item))
